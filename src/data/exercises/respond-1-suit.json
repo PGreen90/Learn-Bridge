@@ -1,0 +1,102 @@
+[
+  {
+    "id": "r1s-1",
+    "scope": "opening-response",
+    "theme": "respond-1-suit",
+    "dealer": "N",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:K74 H:Q862 D:J53 C:K82",
+    "auction": [
+      { "bid": "1H" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["P", "1S", "1NT", "2H"],
+          "answer": "2H",
+          "explanation": "Partnern öppnade 1♥. Du har 9 poäng och fyra hjärter – ett tryggt stöd. Höj till 2♥ (visar 6–9 poäng och stöd)."
+        }
+      }
+    ]
+  },
+  {
+    "id": "r1s-2",
+    "scope": "opening-response",
+    "theme": "respond-1-suit",
+    "dealer": "N",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AQ863 H:74 D:K95 C:J62",
+    "auction": [
+      { "bid": "1H" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["P", "1S", "1NT", "2H"],
+          "answer": "1S",
+          "explanation": "Partnern öppnade 1♥. Du har 10 poäng och en egen 5-korts spaderfärg. Visa den billigt på 1-läget – 1♠."
+        }
+      }
+    ]
+  },
+  {
+    "id": "r1s-3",
+    "scope": "opening-response",
+    "theme": "respond-1-suit",
+    "dealer": "N",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:Q74 H:KJ5 D:J862 C:Q53",
+    "auction": [
+      { "bid": "1S" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["P", "1NT", "2H", "2S"],
+          "answer": "2S",
+          "explanation": "Partnern öppnade 1♠ (lovar 5 spader). Du har 9 poäng och tre spader – det räcker som stöd. Höj till 2♠."
+        }
+      }
+    ]
+  },
+  {
+    "id": "r1s-4",
+    "scope": "opening-response",
+    "theme": "respond-1-suit",
+    "dealer": "N",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AKJ75 H:K83 D:94 C:Q62",
+    "auction": [
+      { "bid": "1D" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["1S", "1NT", "2D", "3NT"],
+          "answer": "1S",
+          "explanation": "Partnern öppnade 1♦. Du har 13 poäng och 5 spader. Börja billigt med 1♠ – ni har gott om utrymme att utforska bästa kontrakt."
+        }
+      }
+    ]
+  },
+  {
+    "id": "r1s-5",
+    "scope": "opening-response",
+    "theme": "respond-1-suit",
+    "dealer": "N",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:KJ74 H:Q962 D:83 C:J75",
+    "auction": [
+      { "bid": "1H" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["P", "1S", "1NT", "2H"],
+          "answer": "2H",
+          "explanation": "Partnern öppnade 1♥ och du har fyra hjärter. När du har stöd i partnerns högfärg är det oftast bättre att visa stödet (2♥) än din egen spaderfärg."
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "poo-1",
+    "scope": "opening",
+    "theme": "pass-or-open",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:KQ973 H:AJ862 D:5 C:42",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1H", "1S", "1NT"],
+          "answer": "1S",
+          "explanation": "Bara 11 poäng, men 5–5 i högfärgerna. Regeln om 20: 11 + 5 + 5 = 21, så du öppnar. Med 5–5 öppnar du den högre färgen – 1♠."
+        }
+      }
+    ]
+  },
+  {
+    "id": "poo-2",
+    "scope": "opening",
+    "theme": "pass-or-open",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AQ72 H:Q54 D:K63 C:972",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1D", "1S"],
+          "answer": "P",
+          "explanation": "11 poäng och jämn 4-3-3-3-fördelning. Regeln om 20: 11 + 4 + 3 = 18, under 20. Handen är för svag och för platt – du passar."
+        }
+      }
+    ]
+  },
+  {
+    "id": "poo-3",
+    "scope": "opening",
+    "theme": "pass-or-open",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:4 H:KQJ852 D:AQ3 C:962",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1H", "2H", "1NT"],
+          "answer": "1H",
+          "explanation": "12 poäng med en stark 6-korts hjärterfärg. Regeln om 20: 12 + 6 + 3 = 21. Handen är för stark för en svag 2-öppning, så öppna 1♥."
+        }
+      }
+    ]
+  },
+  {
+    "id": "poo-4",
+    "scope": "opening",
+    "theme": "pass-or-open",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:KQ962 H:AQ74 D:83 C:65",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1H", "1S", "1NT"],
+          "answer": "1S",
+          "explanation": "11 poäng med 5–4. Regeln om 20: 11 + 5 + 4 = 20 → du öppnar, med din längsta färg: 1♠."
+        }
+      }
+    ]
+  }
+]

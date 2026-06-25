@@ -1,0 +1,74 @@
+[
+  {
+    "id": "o1nt-1",
+    "scope": "opening",
+    "theme": "open-1nt",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AQ5 H:KJ4 D:K872 C:Q63",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1D", "1NT", "2NT"],
+          "answer": "1NT",
+          "explanation": "15 poäng och en jämn hand (ingen kort färg, ingen 5-korts högfärg). Det är precis en 1NT-öppning (15–17)."
+        }
+      }
+    ]
+  },
+  {
+    "id": "o1nt-2",
+    "scope": "opening",
+    "theme": "open-1nt",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:KQ6 H:AQ9 D:KJ5 C:QT42",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1NT", "2NT"],
+          "answer": "1NT",
+          "explanation": "17 poäng, jämnt fördelat. Toppen av 1NT-intervallet (15–17). Öppna 1NT."
+        }
+      }
+    ]
+  },
+  {
+    "id": "o1nt-3",
+    "scope": "opening",
+    "theme": "open-1nt",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:KJ4 H:AQ3 D:Q8652 C:K7",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1D", "1NT", "2NT"],
+          "answer": "1NT",
+          "explanation": "15 poäng och jämn hand. En 5-korts minor gör inget – utan 5-korts högfärg öppnar du ändå 1NT."
+        }
+      }
+    ]
+  },
+  {
+    "id": "o1nt-4",
+    "scope": "opening",
+    "theme": "open-1nt",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:QJ6 H:AK4 D:KJ7 C:Q953",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1NT", "2NT"],
+          "answer": "1NT",
+          "explanation": "16 poäng, jämn 3-3-3-4-hand. Mitt i 1NT-intervallet (15–17). Öppna 1NT."
+        }
+      }
+    ]
+  }
+]

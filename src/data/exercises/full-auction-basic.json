@@ -1,0 +1,60 @@
+[
+  {
+    "id": "fa-1",
+    "scope": "full-auction",
+    "theme": "full-auction-basic",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AQ864 H:K75 D:J83 C:A6",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1D", "1H", "1S", "1NT"],
+          "answer": "1S",
+          "explanation": "14 poäng och 5 spader. Öppna din 5-korts högfärg – 1♠."
+        }
+      },
+      { "bid": "P" },
+      { "bid": "2S" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["P", "3S", "4S"],
+          "answer": "P",
+          "explanation": "Partnern höjde till 2♠ (visar 6–9 poäng). Du har 14 – ett minimum. Tillsammans ca 20–23, för lite för utgång. Passa och spela 2♠."
+        }
+      }
+    ]
+  },
+  {
+    "id": "fa-2",
+    "scope": "full-auction",
+    "theme": "full-auction-basic",
+    "dealer": "N",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:KQ5 H:A864 D:QJ7 C:963",
+    "auction": [
+      { "bid": "1H" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["P", "2H", "3H", "4H"],
+          "answer": "3H",
+          "explanation": "Partnern öppnade 1♥ och du har 12 poäng med fyra hjärter. Det är för bra för en enkel höjning. Hoppa till 3♥ – en inbjudan till utgång (visar ca 10–12 och 4-korts stöd)."
+        }
+      },
+      { "bid": "P" },
+      { "bid": "4H" },
+      { "bid": "P" },
+      {
+        "decision": {
+          "options": ["P", "4NT", "5H"],
+          "answer": "P",
+          "explanation": "Du bjöd in till utgång och partnern accepterade med 4♥. Du har redan visat din styrka – passa och låt partnern spela 4♥."
+        }
+      }
+    ]
+  }
+]

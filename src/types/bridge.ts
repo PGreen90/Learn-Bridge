@@ -1,4 +1,4 @@
-// Grundläggande bridge-typer. Bara FORMEN på datan – ingen logik än.
+// Grundläggande bridge-typer. Bara FORMEN på datan – ingen logik här.
 
 export type Suit = 'spades' | 'hearts' | 'diamonds' | 'clubs'
 
@@ -22,22 +22,52 @@ export interface Deal {
   id: string
   hands: Record<Seat, Hand>
   dealer: Seat
-  vulnerability: 'none' | 'ns' | 'ew' | 'all'
+  vulnerability: Vulnerability
 }
 
-/** En budtränings-fråga: visa en hand, välj rätt bud. */
-export interface BiddingQuestion {
-  id: string
-  /** Handen frågan gäller. */
-  hand: Hand
-  /** Kort beskrivning av situationen, t.ex. "Du sitter som öppnare". */
-  situation: string
-  /** Själva frågan, t.ex. "Vad öppnar du med?" */
-  prompt: string
-  /** Budalternativ att välja mellan, t.ex. ["Pass", "1♣", "1NT"]. */
-  options: string[]
-  /** Index i options som är rätt svar. */
-  answerIndex: number
-  /** Förklaring som visas efter svar. */
+export type Vulnerability = 'none' | 'ns' | 'ew' | 'all'
+
+// ---- Budträning ------------------------------------------------------------
+
+/**
+ * Ett bud skrivet som kort text:
+ *  - "1C" "1D" "1H" "1S" = 1 klöver/ruter/hjärter/spader
+ *  - "1NT" = 1 sang, "P" = pass, "X" = dubbelt, "XX" = redubbelt
+ */
+export type Bid = string
+
+/** De tre lägena användaren kan välja mellan. */
+export type Scope = 'opening' | 'opening-response' | 'full-auction'
+
+/** Ett steg där det är DIN tur: välj bland alternativen, ett är rätt. */
+export interface Decision {
+  options: Bid[]
+  answer: Bid
   explanation: string
+}
+
+/**
+ * Ett steg i budgivningen. Antingen ett färdigt manus-bud (partner/motståndare)
+ * eller ett av dina beslut. Vem som bjuder räknas ut från ordningen + given.
+ */
+export type AuctionStep = { bid: Bid } | { decision: Decision }
+
+/** En övning = en hand + en budgivning där vissa steg är dina. */
+export interface Exercise {
+  id: string
+  scope: Scope
+  theme: string
+  dealer: Seat
+  vulnerability: Vulnerability
+  yourSeat: Seat
+  yourHand: Hand
+  auction: AuctionStep[]
+}
+
+/** Ett tema/lektion som man kan välja i listan. */
+export interface Theme {
+  id: string
+  scope: Scope
+  title: string
+  description: string
 }

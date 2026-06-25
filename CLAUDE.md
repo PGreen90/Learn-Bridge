@@ -72,8 +72,19 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
 
 ## Hur man lägger till innehåll
 - Bridge-typerna bor i `src/types/bridge.ts` – utgå alltid från dem.
-- (kommer) övningsgivar som JSON i `src/data/` – aldrig hårdkodade
-  inne i komponenterna.
+- Övningar ligger som JSON i `src/data/exercises/<tema>.json`, aldrig
+  hårdkodade i komponenterna. Teman listas i `src/data/themes.json`.
+- Inläsning sker i `src/lib/bidding.ts` (registret `EXERCISES_BY_THEME`).
+  Ny temafil måste importeras och läggas till där.
+- Handen skrivs som kort text, t.ex. `"S:AK974 H:K83 D:Q6 C:J52"`.
+  Tian skrivs som `T`. Tom färg: `-`. Parsas av `parseHand`.
+- En övning = `auction`: en lista med steg. Ett steg är antingen ett
+  manus-bud `{ "bid": "1H" }` (partner/motståndare) eller ditt beslut
+  `{ "decision": { "options": [...], "answer": "1S", "explanation": "..." } }`.
+  Vem som bjuder räknas ut från `dealer` + ordningen (medurs N→E→S→W).
+- Bud skrivs som `"1C"/"1D"/"1H"/"1S"/"1NT"`, samt `"P"`, `"X"`, `"XX"`.
+- Lägena (Scope): `opening`, `opening-response`, `full-auction`.
+  Ett tema hör till ett läge via fältet `scope` i themes.json.
 ## Kommandon
 - `npm run dev` – lokal förhandsvisning under utveckling
 - `npm run build` – byggs automatiskt av GitHub Actions, sällan manuellt

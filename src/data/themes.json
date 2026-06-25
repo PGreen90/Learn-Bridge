@@ -1,0 +1,32 @@
+[
+  {
+    "id": "open-1-suit",
+    "scope": "opening",
+    "title": "Öppna 1 i färg",
+    "description": "Välj rätt färg att öppna med."
+  },
+  {
+    "id": "open-1nt",
+    "scope": "opening",
+    "title": "1NT-öppning",
+    "description": "Känn igen den jämna 15–17-handen."
+  },
+  {
+    "id": "pass-or-open",
+    "scope": "opening",
+    "title": "Pass eller öppna?",
+    "description": "Gränsfall – använd regeln om 20."
+  },
+  {
+    "id": "respond-1-suit",
+    "scope": "opening-response",
+    "title": "Svara på öppning i färg",
+    "description": "Partnern öppnade – vad svarar du?"
+  },
+  {
+    "id": "full-auction-basic",
+    "scope": "full-auction",
+    "title": "Enkla budgivningar",
+    "description": "Bjud hela vägen till kontraktet."
+  }
+]

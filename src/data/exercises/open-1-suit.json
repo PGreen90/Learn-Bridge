@@ -1,0 +1,92 @@
+[
+  {
+    "id": "o1s-1",
+    "scope": "opening",
+    "theme": "open-1-suit",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AK974 H:K83 D:Q6 C:J52",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1D", "1H", "1S", "1NT"],
+          "answer": "1S",
+          "explanation": "13 honnörspoäng och en 5-korts spaderfärg. Med en 5-korts högfärg öppnar du den – 1♠."
+        }
+      }
+    ]
+  },
+  {
+    "id": "o1s-2",
+    "scope": "opening",
+    "theme": "open-1-suit",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:K4 H:AQJ85 D:A73 C:962",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1D", "1H", "1S", "1NT"],
+          "answer": "1H",
+          "explanation": "14 poäng och 5 hjärter. Öppna din 5-korts högfärg – 1♥."
+        }
+      }
+    ]
+  },
+  {
+    "id": "o1s-3",
+    "scope": "opening",
+    "theme": "open-1-suit",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:KJ4 H:75 D:AK82 C:Q932",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1D", "1H", "1S", "1NT"],
+          "answer": "1D",
+          "explanation": "13 poäng, ingen 5-korts högfärg. Med fyra ruter och fyra klöver öppnar du den högre minorn – 1♦."
+        }
+      }
+    ]
+  },
+  {
+    "id": "o1s-4",
+    "scope": "opening",
+    "theme": "open-1-suit",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AQ72 H:K54 D:Q83 C:K62",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1C", "1D", "1H", "1S", "1NT"],
+          "answer": "1C",
+          "explanation": "14 poäng, jämn hand. Du har bara 4 spader, och 1♥/1♠ lovar minst 5 kort. Utan 5-korts högfärg och med 3–3 i minor öppnar du 1♣."
+        }
+      }
+    ]
+  },
+  {
+    "id": "o1s-5",
+    "scope": "opening",
+    "theme": "open-1-suit",
+    "dealer": "S",
+    "vulnerability": "none",
+    "yourSeat": "S",
+    "hand": "S:AKQ85 H:AK4 D:A76 C:83",
+    "auction": [
+      {
+        "decision": {
+          "options": ["P", "1S", "2C", "2NT"],
+          "answer": "1S",
+          "explanation": "20 poäng men obalanserat med 5 spader. Det räcker inte för stark 2♣-öppning (22+). Du öppnar 1♠ och visar styrkan med ditt nästa bud."
+        }
+      }
+    ]
+  }
+]
