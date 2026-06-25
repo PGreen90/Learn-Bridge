@@ -1,5 +1,10 @@
 # CLAUDE.md — Bridge-app
 Läs den här filen först varje session.
+
+## Arbetsrutiner (följ varje gång)
+- **Vid sessionsstart:** följ 🟢-checklistan i `docs/arbetsrutiner.md`.
+- **Vid sessionsslut:** följ 🔴-checklistan i `docs/arbetsrutiner.md`.
+
 ## Vad det här är
 Interaktiv webbapp för att lära sig och spela bridge (kortspelet).
 Användaren ska kunna spela olika händer och lära sig olika budsystem.
