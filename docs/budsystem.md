@@ -153,3 +153,7 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
 - **2026-06-25** – Jacoby 2NT-fortsättningen nedskriven (öppnarens återbud,
   renons via 4-läget, svararens cue-bids). Källmaterial (PDF) tas ur repot;
   `*.pdf` ignoreras framåt.
+- **2026-06-25** – Jacoby-valen bekräftade: sidofärg = minst ess/kung (Cohen),
+  3NT = 14–15. **Nästa gång:** splinter-fortsättningen i §4.1 – öppnarens väg
+  mot slutkontrakt efter en splinter (nedvärdera vid slöseri mittemot kortfärg;
+  annars cue-bid / 1430 RKC). Avvaktar ev. referens från ägaren.
