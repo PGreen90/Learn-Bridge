@@ -50,16 +50,30 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
 ## Projektstruktur
 - `index.html` – sidans skal, laddar src/main.tsx
 - `src/main.tsx` – startpunkt, monterar React-appen
-- `src/App.tsx` – just nu startsidan (byts mot riktig app)
+- `src/App.tsx` – router (HashRouter) som kopplar adresser till sidor
 - `src/index.css` – `@import "tailwindcss";` (Tailwind v4)
+- `src/types/bridge.ts` – TypeScript-typer (Card, Hand, Deal, BiddingQuestion)
+- `src/lib/storage.ts` – läs/skriv framsteg i localStorage
+- `src/components/` – återanvändbara byggblock:
+  - `Layout.tsx` (topbar + meny), `Panel.tsx`, `Button.tsx`,
+    `SuitSymbol.tsx`, `HandView.tsx`
+- `src/pages/` – en fil per skärm: `Home`, `BiddingPractice`,
+  `Learn`, `Settings`
 - `vite.config.ts` – base-path + react- och tailwind-plugin
 - `.github/workflows/deploy.yml` – auto-bygge & publicering vid push
 - (kommer) `src/data/*.json` – givar och budsystem som data
-- (kommer) `src/components/*` – UI-delar
+
+## Navigering (router)
+- HashRouter används (adresser med #, t.ex. .../#/budtraning) eftersom
+  det fungerar på GitHub Pages utan serverinställningar. Byt INTE till
+  BrowserRouter utan att lägga till en 404-fallback för Pages.
+- Lägg till ny skärm: skapa `src/pages/Xxx.tsx`, lägg till en
+  `<Route>` i `App.tsx` och en länk i `NAV`-listan i `Layout.tsx`.
 
 ## Hur man lägger till innehåll
-(Fylls i när datastrukturen finns – t.ex. "ny övningsgiv = lägg till
-objekt i src/data/hands.json".)
+- Bridge-typerna bor i `src/types/bridge.ts` – utgå alltid från dem.
+- (kommer) övningsgivar som JSON i `src/data/` – aldrig hårdkodade
+  inne i komponenterna.
 ## Kommandon
 - `npm run dev` – lokal förhandsvisning under utveckling
 - `npm run build` – byggs automatiskt av GitHub Actions, sällan manuellt
