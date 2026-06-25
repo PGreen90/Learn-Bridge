@@ -6,3 +6,6 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .claude/
+
+# Källmaterial (PDF:er) hör inte hemma i kod-repot – för stora/onödiga
+*.pdf

@@ -93,6 +93,40 @@ balanserat. Bjuder svararen därefter en ny färg lovar det 5+ kort och
 **förnekar** stöd i öppnarens färg(er). Annars kan svararen visa preferens i
 öppnarens färger.
 
+#### Jacoby 2NT — fortsättning
+Svararens **2NT** = 4+ trumf, **13+ hp** (varav minst 11 hp i honnör), GF,
+ingen kortfärg. Bra 3-korts stöd (2 av de tre topphonnörerna) godtas.
+
+**Öppnarens återbud** (prioritet: 5-korts sidofärg → kortfärg → 3NT → 4 i
+trumf → 3 i trumf):
+
+*Efter 1♥ (♥ trumf):*
+| Återbud | Betydelse |
+|---|---|
+| 3♣ / 3♦ / 3♠ | kort färg (singleton el. renons) i bjuden färg |
+| 3♥ | 16+ hp, slamintresse, frågar svararen vidare |
+| 3NT | 14–15 hp, balanserad |
+| 4♣ / 4♦ | 5+ kort i färgen |
+| 4♥ | minimum 12–14 hp, balanserad – signoff |
+
+*Efter 1♠ (♠ trumf):*
+| Återbud | Betydelse |
+|---|---|
+| 3♣ / 3♦ / 3♥ | kort färg (singleton el. renons) i bjuden färg |
+| 3♠ | 16+ hp, slamintresse, frågar svararen vidare |
+| 3NT | 14–15 hp, balanserad |
+| 4♣ / 4♦ / 4♥ | 5+ kort i färgen |
+| 4♠ | minimum 12–14 hp, balanserad – signoff |
+
+- **Singleton vs renons:** kortfärgsbudet på 3-läget visar singleton *eller*
+  renons. Renons visas genom att bjuda **4 i samma färg nästa vända**.
+- **Sidofärgskvalitet:** minst en topphonnör (ess eller kung) i den 5-korts
+  sidofärg som visas – annars visa hellre kortfärg.
+- **Svararens fortsättning:** efter ett 3-läges-återbud visar en ny färg (ej
+  trumf) **första-rondskontroll** (ess eller renons) – cue-bid uppåt mot slam.
+- **Passad hand / konkurrens:** tas i senare avsnitt (passad hand: Drury;
+  efter upplysningsdubbling: Jordan 2NT = limithöjning).
+
 ## 5. Återbud (öppnarens andra bud)
 - 1x–1y–**2NT** = 18–19 hp balanserad.
 *(Fylls i.)*
@@ -116,3 +150,6 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
 - **2026-06-25** – Avsnitt 4.1 (Svar på 1♥/1♠) nedskrivet: höjningar, splinter
   (3-läge=singleton, 4-läge=renons), Jacoby 2NT, svagt hoppskift (endast 1♥–2♠),
   semi-forcing 1NT med fortsättningsnot.
+- **2026-06-25** – Jacoby 2NT-fortsättningen nedskriven (öppnarens återbud,
+  renons via 4-läget, svararens cue-bids). Källmaterial (PDF) tas ur repot;
+  `*.pdf` ignoreras framåt.
