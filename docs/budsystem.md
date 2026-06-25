@@ -48,7 +48,50 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
 
 ## 4. Svar & fortsättningar
 ### 4.1 Svar på 1♥ / 1♠
-*(Under arbete – nästa avsnitt vi fyller i.)*
+*(Ohöjd hand, ingen störning. Passad hand/Drury och konkurrens tas senare.)*
+
+**Principer för höjningar och kortfärg:**
+- Hopp till **3-läget** i ny färg = splinter, **singleton** i färgen (4+ stöd, GF).
+- Hopp till **4-läget** i ny färg = splinter, **renons** i färgen (4+ stöd, GF).
+- **Jacoby 2NT** är en separat balanserad GF-höjning (4+ stöd, utan kortfärg)
+  och påverkar inte splinterbuden.
+- **Inbjudande höjning** (4+ stöd, ~10–12 hp) visas via semi-forcing 1NT och
+  sedan hopp till 3 i högfärgen nästa vända.
+- **Svagt hoppskift** finns bara som **1♥–2♠**. Över 1♠ finns inget svagt
+  hoppskift; bjud i stället 1NT (se fortsättningsnoten nedan).
+
+#### Svar på 1♥
+| Svar | Betydelse | Kravnivå | Konvention |
+|---|---|---|---|
+| 1♠ | 4+ ♠, 6+ hp | Krav (1 rond) | naturligt |
+| 1NT | 6–11 hp, ingen 2/1 | Semi-krav | Semi-forcing 1NT ● |
+| 2♣ / 2♦ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
+| 2♥ | 3+ stöd, 6–9 hp | Ej krav | naturligt |
+| 2♠ | 6-korts ♠, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
+| 2NT | 4+ stöd, 13+ hp, balanserad (ingen kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
+| 3♣ | singleton ♣, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 3♦ | singleton ♦, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 3♥ | 4 stöd, svag | Avslut/spärr | Spärrhöjning ● |
+| 3♠ | singleton ♠, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 4♣ / 4♦ | renons ♣ / ♦, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 4♥ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
+
+#### Svar på 1♠
+| Svar | Betydelse | Kravnivå | Konvention |
+|---|---|---|---|
+| 1NT | 6–11 hp, ingen 2/1 | Semi-krav | Semi-forcing 1NT ● |
+| 2♣ / 2♦ / 2♥ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
+| 2♠ | 3+ stöd, 6–9 hp | Ej krav | naturligt |
+| 2NT | 4+ stöd, 13+ hp, balanserad | Utgångskrav, slamintresse | Jacoby 2NT ● |
+| 3♣ / 3♦ / 3♥ | singleton ♣ / ♦ / ♥, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 3♠ | 4 stöd, svag | Avslut/spärr | Spärrhöjning ● |
+| 4♣ / 4♦ / 4♥ | renons ♣ / ♦ / ♥, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 4♠ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
+
+**Fortsättning efter semi-forcing 1NT:** Öppnaren får passa med minimum
+balanserat. Bjuder svararen därefter en ny färg lovar det 5+ kort och
+**förnekar** stöd i öppnarens färg(er). Annars kan svararen visa preferens i
+öppnarens färger.
 
 ## 5. Återbud (öppnarens andra bud)
 - 1x–1y–**2NT** = 18–19 hp balanserad.
@@ -70,3 +113,6 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
 
 ## 9. Ändringslogg
 - **2026-06-25** – Systembok skapad. Öppningsbud + minor-regeln nedskrivna.
+- **2026-06-25** – Avsnitt 4.1 (Svar på 1♥/1♠) nedskrivet: höjningar, splinter
+  (3-läge=singleton, 4-läge=renons), Jacoby 2NT, svagt hoppskift (endast 1♥–2♠),
+  semi-forcing 1NT med fortsättningsnot.
