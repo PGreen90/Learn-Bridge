@@ -258,11 +258,12 @@ lf, eller visar slamintresse via nya färger. Den **svaga höjningen** (1m–3m)
 | 2♣ | frågar efter 4-korts hf | Stayman ● |
 | 2♦ | transfer till ♥ (5+ ♥) | Jacoby-transfer ● |
 | 2♥ | transfer till ♠ (5+ ♠) | Jacoby-transfer ● |
-| 2♠ | minorfråga | Minor Suit Stayman ● *(nästa steg)* |
+| 2♠ | 5-4+ i minorerna, GF/slam, ingen 4-korts hf | Minor Suit Stayman ● |
 | 2NT | 8–9 hp, balanserad, inbjudan, ingen 4-korts hf | naturligt |
-| 3♣ / 3♦ / 3♥ / 3♠ | *(tas i nästa steg)* | — |
+| 3♣ / 3♦ | 6+ färg, GF med slamintresse | naturligt |
+| 3♥ / 3♠ | 6+ färg, GF med slamintresse | naturligt |
 | 3NT | ~10–15 hp, balanserad, till spel | naturligt |
-| 4♦ / 4♥ | Texas-transfer | Texas ● *(nästa steg)* |
+| 4♦ / 4♥ | transfer till ♥ / ♠ (6+, utgång, ej slam) | Texas ● |
 | 4NT | kvantitativ slaminbjudan (~16–17 hp) | naturligt |
 
 #### Stayman (2♣)
@@ -282,6 +283,19 @@ en 4-korts hf. Öppnaren svarar:
 
 **Svag variant:** "garbage/svag Stayman" (svag 3-färgshand kort i ♣, passar
 valfritt svar) är en möjlig tilläggsvariant – **beslut tas senare**.
+
+#### Smolen (efter 1NT–2♣–2♦)
+När öppnaren förnekat 4-korts hf (2♦) visar svararen 5-4 i hf med GF-styrka genom
+att **hoppa till 3 i sin _kortare_ hf**:
+
+| Svararens bud | Betydelse |
+|---|---|
+| 3♥ | 4 ♥ + 5 ♠, GF |
+| 3♠ | 4 ♠ + 5 ♥, GF |
+
+Öppnaren bjuder den 5-korts hf:en på utgångsläget med 3 stöd, annars 3NT (med
+bara dubbel i den långa). Poängen är densamma som vid transfer: den **starka
+handen blir spelförare**.
 
 #### Jacoby-transfer (2♦ / 2♥)
 2♦ = transfer till ♥ (5+ ♥), 2♥ = transfer till ♠ (5+ ♠). Öppnaren **fullföljer**
@@ -304,6 +318,33 @@ och döljs för motståndarna.
 | 4NT | kvantitativ slaminbjudan |
 
 Spader-transfern (2♥→♠) fungerar spegelvänt.
+
+#### Texas-transfer (4♦ / 4♥)
+För en lång hf med **utgångsstyrka men utan slamintresse**:
+
+| Svar | Betydelse |
+|---|---|
+| 4♦ | transfer till ♥ (6+ ♥, utgång) |
+| 4♥ | transfer till ♠ (6+ ♠, utgång) |
+
+Öppnaren fullföljer (4♥ resp. 4♠). Skillnad mot Jacoby: **Texas** = direkt
+utgång utan slamintresse; **Jacoby följt av ett nytt krav-bud** = mildare
+slamintresse (ger öppnaren plats att visa en bra hand).
+
+#### Minor Suit Stayman (2♠)
+2♠ = 5-4+ i minorerna (4-4 endast med starka slamhänder), GF/slamintresse,
+förnekar 4-korts hf. Frågar efter öppnarens 4-korts minor:
+
+| Öppnarens återbud | Betydelse |
+|---|---|
+| 2NT | ingen 4-korts minor; båda hf stoppade |
+| 3♣ | 4+ ♣ (bjuds med 4-4 i minorerna) |
+| 3♦ | 4+ ♦, förnekar 4 ♣ |
+| 3♥ / 3♠ | stopp i färgen (letar 3NT), krav |
+| 3NT | ingen 4-korts minor, maximum, båda hf stoppade |
+| 4♣ / 4♦ | 4+ i minorn, maximum |
+
+Svararen passar med minimum, bjuder naturligt med mer, eller cue-bid mot slam.
 
 ## 5. Återbud (öppnarens andra bud)
 Öppnarens andra bud **beskriver handen** – styrka och form – så att svararen kan
@@ -407,8 +448,9 @@ Stayman, Texas, Splinter, fjärde färg krav, upplysningsdubbling, Michaels,
 Drury, Jacoby 2NT, 1430 RKC Blackwood, Sjöbergs 5NT, Gerber.
 
 Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
-game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman** och
-**Jacoby-transfer** (§4.3) – beslutade 2026-06-26. Källa: bridgebum.com.
+game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
+**Smolen**, **Texas** och **Minor Suit Stayman** (§4.3) – beslutade
+2026-06-26. Källa: bridgebum.com.
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -465,3 +507,8 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   öppnarens 2♦/2♥/2♠) och **Jacoby-transfer** (2♦→♥, 2♥→♠, superaccept,
   svararens fortsättning). Källa: bridgebum.com. **Nästa gång:** Texas, Smolen
   och Minor Suit Stayman (2♠ + 4-läget) i §4.3.
+- **2026-06-26** – §4.3 färdig: **Smolen** (1NT–2♣–2♦–3♥/3♠ = 4-5 i hf),
+  **Texas-transfer** (4♦/4♥, utgång utan slamintresse) och **Minor Suit
+  Stayman** (2♠, 5-4+ minorer) tillagda; översiktens 3- och 4-läges-svar
+  definierade. Källa: bridgebum.com. **Nästa gång:** stark 2♣, svaga tvåor
+  eller §6-konventionerna.
