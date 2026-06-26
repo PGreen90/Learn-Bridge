@@ -60,6 +60,8 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
   högfärgen nästa vända (Bergen kräver exakt 4 trumf).
 - **Jacoby 2NT** = balanserad GF-höjning, 4+ trumf, 13+ hp, ingen kortfärg
   (oförändrad).
+- **Balanserad inbjudan utan stöd** (≈11–12 hp, högst 3-korts trumf) går via
+  semi-forcing 1NT och sedan 2NT nästa vända – direkt 2NT är Jacoby.
 - **Splinter** (4+ stöd + kort färg, ~12+ hp, GF) visas med den **tvetydiga
   splintern**: det lediga 3-läges-budet (**3♠** över 1♥, **3♥** över 1♠).
   Visar singleton *eller* renons; öppnaren frågar med ett relä och svararen
@@ -81,6 +83,7 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
 | 3♥ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
 | 3♠ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
+| 3NT | 13–15 hp, balanserad, exakt 2 ♥, ingen sidofärg | Avslut | naturligt (till spel) |
 | 4♥ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
 
 #### Svar på 1♠
@@ -94,6 +97,7 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
 | 3♥ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
 | 3♠ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
+| 3NT | 13–15 hp, balanserad, exakt 2 ♠, ingen sidofärg | Avslut | naturligt (till spel) |
 | 4♠ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
 
 **Fortsättning efter semi-forcing 1NT:** Öppnaren får passa med minimum
@@ -187,6 +191,62 @@ trumf → 3 i trumf):
 - **Passad hand / konkurrens:** tas i senare avsnitt (passad hand: Drury;
   efter upplysningsdubbling: Jordan 2NT = limithöjning).
 
+### 4.2 Svar på 1♣ / 1♦
+*(Ohöjd hand, ingen störning. Passad hand och konkurrens tas senare.)*
+
+Öppningen lovar 3+ kort (ibland "kort" via minor-regeln) och 12+ hp.
+
+**Principer:**
+- Bjud **4-korts högfärger först** på 1-läget, billigast först (krav 1 rond).
+- **1NT** är naturlig och **inte** krav (6–10 hp), förnekar 4-korts högfärg.
+- **Höjningar är inverterade:** 1m–2m = **stark** (10+ hp, krav, 4+ stöd, ingen
+  4-korts högfärg); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
+  spärrar direkt, den starka hålls låg för att få plats att utforska.
+- Ny färg på 2-läget utan hopp = **2-över-1 GF**. **Hoppskift** i ny färg
+  (t.ex. 1♣–2♥, 1♦–3♣) = **svaga** (6-korts färg, ~6–10 hp), som i högfärg.
+- "Gap-handen" 7–9 hp med stöd men utan högfärg: bjud **1NT** (inverterad
+  höjning kräver 10+).
+
+#### Svar på 1♣
+| Svar | Betydelse | Kravnivå | Konvention |
+|---|---|---|---|
+| 1♦ | 4+ ♦, 6+ hp | Krav (1 rond) | naturligt |
+| 1♥ / 1♠ | 4+ färg, 6+ hp | Krav (1 rond) | naturligt (4-korts upp) |
+| 1NT | 6–10 hp, balanserad, ingen 4-korts högfärg | Ej krav | naturligt |
+| 2♣ | 4+ ♣, 10+ hp, ingen 4-korts högfärg | Krav (1 rond) | Inverterad minor ● |
+| 2♦ | 4+ (oftast 5+) ♦, 12+ hp | Utgångskrav | 2-över-1 GF |
+| 2♥ / 2♠ | 6-korts färg, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
+| 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts högfärg | Inbjudan | naturligt |
+| 3♣ | 5+ ♣, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
+| 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
+
+#### Svar på 1♦
+| Svar | Betydelse | Kravnivå | Konvention |
+|---|---|---|---|
+| 1♥ / 1♠ | 4+ färg, 6+ hp | Krav (1 rond) | naturligt (4-korts upp) |
+| 1NT | 6–10 hp, balanserad, ingen 4-korts högfärg | Ej krav | naturligt |
+| 2♣ | 4+ (oftast 5+) ♣, 12+ hp | Utgångskrav | 2-över-1 GF |
+| 2♦ | 4+ ♦, 10+ hp, ingen 4-korts högfärg | Krav (1 rond) | Inverterad minor ● |
+| 2♥ / 2♠ | 6-korts färg, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
+| 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts högfärg | Inbjudan | naturligt |
+| 3♦ | 5+ ♦, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
+| 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
+
+#### Inverterade minorhöjningar — öppnarens fortsättning
+Efter den **starka höjningen** (1m–2m, krav) söker paret oftast **3NT**.
+Öppnaren beskriver:
+
+| Återbud | Betydelse |
+|---|---|
+| ny färg (2-läget) | **stopp** i färgen, krav – letar 3NT |
+| 2NT | balanserad 12–14 hp, ingen utgångsiver (ej krav) |
+| 3 i minorn | minimum utan stopp att visa (ej krav) |
+| 3NT | balanserad 18–19 hp, till spel |
+
+Svararen fortsätter mot 3NT (visar stopp i objudna färger), drar till utgång i
+minorn, eller visar slamintresse via nya färger. Den **svaga höjningen** (1m–3m)
+är avslutande – öppnaren passar utan extra styrka.
+
 ## 5. Återbud (öppnarens andra bud)
 - 1x–1y–**2NT** = 18–19 hp balanserad.
 *(Fylls i.)*
@@ -197,8 +257,8 @@ Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit
 Stayman, Texas, Splinter, fjärde färg krav, upplysningsdubbling, Michaels,
 Drury, Jacoby 2NT, 1430 RKC Blackwood, Sjöbergs 5NT, Gerber.
 
-Antagna (beskrivna i §4.1): **Bergen-höjningar** (standard), **tvetydig
-splinter** och **Bergen game try** (2NT efter enkel höjning) – beslutade
+Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
+game try** (§4.1), samt **inverterade minorhöjningar** (§4.2) – beslutade
 2026-06-26. Källa: bridgebum.com.
 
 ## 7. Försvarsbud
@@ -232,3 +292,11 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
 - **2026-06-26** – **Bergen game try** tillagd i §4.1: efter enkel höjning
   (1♥–2♥ / 1♠–2♠) bjuder öppnaren konstgjort **2NT** som utgångsförsök och
   svararen beskriver minimum/maximum + form/kortfärg. Källa: bridgebum.com.
+- **2026-06-26** – §4.1 kompletterad på svarssidan: **direkt 3NT** på 1♥/1♠
+  (13–15 hp, balanserad, exakt 2 i högfärgen, till spel) samt not om att
+  **balanserad inbjudan utan stöd** går via semi-forcing 1NT → 2NT (direkt 2NT
+  är Jacoby).
+- **2026-06-26** – §4.2 (svar på 1♣/1♦) nedskrivet: 4-korts högfärger upp, 1NT
+  6–10 ej krav, **inverterade minorhöjningar** (1m–2m stark 10+ krav, 1m–3m svag
+  spärr), 2/1 GF, svaga hoppskift, 2NT 11–12 inbjudan, 3NT 13–15. Öppnarens
+  fortsättning efter stark höjning (stopp-visning → 3NT). Källa: bridgebum.com.
