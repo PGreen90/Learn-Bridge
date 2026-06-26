@@ -346,6 +346,63 @@ förnekar 4-korts hf. Frågar efter öppnarens 4-korts minor:
 
 Svararen passar med minimum, bjuder naturligt med mer, eller cue-bid mot slam.
 
+### 4.4 Svar på 2♣ (stark, konstgjord)
+2♣ lovar **stark balanserad** (22+ hp) eller **stark obalanserad** (~9+ spelstick
+med hf, 10+ med lf – en stick från utgång). Krav. Balanserade ranger: 22–24
+(→ 2NT-rebud) och 28–30 (→ 3NT-rebud); 25–27 öppnar 3NT direkt (se §3).
+
+**Svararens svar (2♦ väntebud):**
+| Svar | Betydelse |
+|---|---|
+| 2♦ | 0–7 hp, konstgjort väntebud (vanligast) |
+| 2♥ / 2♠ | 8+ hp, 5+ färg, positivt GF |
+| 2NT | 8+ hp, balanserad, GF |
+| 3♣ / 3♦ | 8+ hp, 5+ färg, positivt GF |
+
+**Öppnarens återbud efter 2♦:**
+| Återbud | Betydelse | Krav? |
+|---|---|---|
+| 2♥ / 2♠ | 5+ färg, naturlig | krav 1 rond |
+| 2NT | 22–24 hp, balanserad | ej krav |
+| 3♣ / 3♦ | 5+ färg, naturlig | krav 1 rond |
+| 3NT | 28–30 hp, balanserad | ej krav |
+
+- Efter **2NT (22–24)** använder svararen NT-konventionerna (Stayman, transfers
+  m.m.) precis som över 1NT, fast med 22–24 hp mittemot.
+- Efter en **naturlig färgrebud** är utgång påtvingad (utom andra negativa);
+  svararen visar stöd, ny färg (5+) eller NT naturligt.
+
+**Andra negativa:** efter öppnarens kravbud (färgrebud) visar svararens
+**billigaste minor** 0–3 hp (riktig bottenhand). Alla andra bud bekräftar minst
+lite på fötterna och håller utgångskravet.
+
+#### Följdbud — vid träff och vid miss
+
+**Vid träff** (positivt svar – styrka/fit hos svararen): paret är i GF.
+- Hitta gemensam trumf och **värdera slam**. När trumf är överenskommen:
+  **cue-bid** kontroller uppåt (billigaste första-rondskontroll först), därefter
+  **1430 RKC Blackwood** för ess + trumfdam (detaljer i §6).
+- Svararens **enkla stödhöjning** efter sitt positiva svar = slamintresse;
+  **dubbelhöjning direkt till utgång** = minimum utan slamintresse.
+- Balanserat: efter 2NT-rebud (22–24) sätter svararen nivån med NT-stegen
+  (Stayman/transfers, eller kvantitativt mot 6NT med ~10+ hp).
+- *Exempel:* 2♣ – 2♥ (5+ ♥, 8+) – 3♥ (stöd, slamintresse) – cue-bids – 1430 RKC
+  – 6♥.
+
+**Vid miss** (negativt 2♦, ev. andra negativa): öppnaren har jättehanden men
+nästan inget mittemot.
+- Efter 2♦ rebjuder öppnaren: **2NT (22–24)** – svararen passar med 0–2 hp,
+  annars systembud (Stayman/transfer); **färgrebud (krav 1 rond)** – svararen
+  letar utgång.
+- Med en riktig bottenhand visar svararen **andra negativa** (billigaste minor,
+  0–3 hp). Då vet öppnaren att det är tomt mittemot och kan:
+  - **rebjuda egen färg lågt** = ej krav, svararen får passa (delkontrakt när
+    utgång är hopplös),
+  - **bjuda utgång** ändå (t.ex. en solid lång färg som räcker ensam),
+  - **3NT** = balanserad jätte, till spel.
+- *Exempel:* 2♣ – 2♦ (0–7) – 2♠ (krav) – 3♣ (andra negativa, 0–3) – 3♠ (ej krav,
+  svararen kan passa).
+
 ## 5. Återbud (öppnarens andra bud)
 Öppnarens andra bud **beskriver handen** – styrka och form – så att svararen kan
 placera kontraktet. Tre styrkenivåer styr valet:
@@ -449,8 +506,8 @@ Drury, Jacoby 2NT, 1430 RKC Blackwood, Sjöbergs 5NT, Gerber.
 
 Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
 game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
-**Smolen**, **Texas** och **Minor Suit Stayman** (§4.3) – beslutade
-2026-06-26. Källa: bridgebum.com.
+**Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), samt **stark 2♣ med
+2♦ väntebud** (§4.4) – beslutade 2026-06-26. Källa: bridgebum.com.
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -512,3 +569,12 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   Stayman** (2♠, 5-4+ minorer) tillagda; översiktens 3- och 4-läges-svar
   definierade. Källa: bridgebum.com. **Nästa gång:** stark 2♣, svaga tvåor
   eller §6-konventionerna.
+- **2026-06-26** – §4.4 (svar på stark 2♣) nedskrivet med **2♦ väntebud**:
+  positiva svar (8+, 5+ färg), öppnarens återbud (2NT 22–24, 3NT 28–30,
+  naturliga färgrebud krav) och **andra negativa** (billigaste minor 0–3 hp).
+  Källa: bridgebum.com. **Nästa gång:** svaga tvåöppningar (2♦/2♥/2♠) eller
+  §6-konventionerna.
+- **2026-06-26** – §4.4 utbyggd med **följdbud vid träff och miss**: slamletning
+  efter positivt svar (cue-bid → 1430 RKC, enkel höjning = slamintresse) och
+  landning efter negativt/andra negativa (lågt färgrebud = ej krav, möjligt
+  delkontrakt). Med exempel-budgivningar. Källa: bridgebum.com.
