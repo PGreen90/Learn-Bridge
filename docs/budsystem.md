@@ -691,9 +691,51 @@ för högt.
 Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam).
 
 ## 7. Försvarsbud
-*(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
-lägsta), enkelt/dubbelt överbud, hoppinkliv, mot 1NT, mot stark 1♣ (Mathe),
-mot Multi 2♦, mot svaga tvåor, mot spärrar.
+> Budgivning när motståndarna öppnat (inkliv, dubblingar) och i konkurrens efter
+> vår egen öppning. Markeringar och utspel: §8.
+
+### 7.1 Inkliv och svar
+- **Enkelt inkliv** (1-/2-läget): bra **5+ färg**, ~8–16 hp. Färgkvalitet går
+  före poäng.
+- **Hoppinkliv** (t.ex. (1♦)–2♠): **svagt**, 6-korts färg, spärr (som en svag
+  tvåa).
+- **1NT-inkliv:** 15–18 hp, bra stopp i deras färg – **kör samma system som över
+  en 1NT-öppning** (Stayman, transfers m.m., §4.3), fast med 15–18 hp.
+
+**Svar på partnerns enkla inkliv:**
+| Svar | Betydelse |
+|---|---|
+| höjning | stöd, konkurrens/spärr (inte inbjudan i sig) |
+| **cue-bud i deras färg** | limithöjning eller bättre (bra stöd, krav) |
+| ny färg | naturlig, konstruktiv, ej krav |
+| 1NT / 2NT | naturlig, stopp i deras färg, lämplig styrka |
+| fit-jump (hopp i ny färg) | bra stöd + egen sidofärg, inbjudande+ |
+
+### 7.2 Tvåfärgsinkliv (Michaels + ovanlig 2NT)
+Två sätt att visa **5-5** (eller bättre) direkt:
+- **Michaels cue-bud** (cue av deras färg):
+  - cue av deras **minor** (t.ex. (1♣)–2♣) = **båda högfärgerna**.
+  - cue av deras **högfärg** (t.ex. (1♠)–2♠) = **andra högfärgen + en minor**.
+- **Ovanlig 2NT** (hopp till 2NT) = de **två lägsta objudna färgerna**.
+
+**Styrkezoner:** spela "två zoner" – antingen **svag** (spärr-aktig, ~6–11 hp)
+eller **stark** (utgångsvilja), undvik mellanläget. Advancer cue-budar för att
+fråga om zon/styrka.
+
+### 7.3 Dubblingar
+- **Upplysningsdubbling:** dubbling av deras öppning = kort i deras färg, stöd i
+  övriga + öppningsstyrka (eller en stark hand). Partnern bjuder sin bästa färg.
+- **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
+  upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
+  ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Öppnaren svarar som på en upplysningsdubbling.
+- **Responsiv dubbling:** när de bjudit *och höjt* en färg (t.ex.
+  (1♥)–X–(2♥)–X) = vår dubbling är upplysning, oftast de två objudna färgerna.
+- **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
+  3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
+  längdinfo i konkurrens.
+
+*(Forts. följer: §7.4 Lebensohl, §7.5 mot deras 1NT (DONT), §7.6 mot stark 1♣
+(Mathe) / Multi 2♦ / svaga tvåor / spärrar.)*
 
 ## 8. Markeringar & utspel
 *(Senare.)* Lavinthal, UD upp t.o.m. 2 trick, utspel 1-3-5 mot färg och mot NT.
@@ -791,3 +833,9 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   1♥/1♠ i 3:e/4:e hand; 2♣ = limithöjning 3 stöd, 2♦ = 4+ stöd; öppnaren
   rebjuder högfärgen = lätt (signoff), annars riktig öppning. Källa:
   bridgebum.com. **Nästa gång:** Michaels, upplysningsdubbling eller §7.
+- **2026-06-26** – §7 påbörjad (försvar/konkurrens). Beslut: **DONT** mot deras
+  1NT, och vi antar **negativa, responsiva och stöddubblingar** samt
+  **Lebensohl** (utöver kortet). §7.1 inkliv & svar (cue = limithöjning+,
+  1NT-inkliv återanvänder 1NT-systemet), §7.2 tvåfärgsinkliv (Michaels + ovanlig
+  2NT, två zoner), §7.3 dubblingar nedskrivna. **Nästa gång:** §7.4 Lebensohl,
+  §7.5 DONT, §7.6 mot stark 1♣/Multi/svaga tvåor/spärrar.
