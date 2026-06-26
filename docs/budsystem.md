@@ -562,6 +562,38 @@ game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, *
 2♦ väntebud** (§4.4), samt **Ogust** på svaga tvåor (§4.5) – beslutade
 2026-06-26. Källa: bridgebum.com.
 
+### 6.1 1430 RKC Blackwood
+Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
+**nyckelkorten** = de 4 essen + **trumfkungen**.
+
+**Svar (1430-varianten):**
+| Svar | Nyckelkort |
+|---|---|
+| 5♣ | 1 eller 4 |
+| 5♦ | 0 eller 3 |
+| 5♥ | 2 (eller 5) **utan** trumfdam |
+| 5♠ | 2 (eller 5) **med** trumfdam |
+
+- **Trumfdam-fråga:** efter 5♣/5♦-svar frågar billigaste icke-trumf om trumfdam.
+  Svar: återgå till trumf = **ingen** dam; annat färgbud = **dam + kung** i den
+  färgen; 5NT = dam **utan** sidokungar.
+- **5NT = kungfråga** (lovar alla 5 nyckelkort + trumfdam). Svar visar antal
+  kungar: 6♣ = 0, 6♦ = 1, 6♥ = 2, 6♠ = 3.
+- Används efter t.ex. splinter, Jacoby 2NT, 2♣-träff eller cue-bid-sekvenser –
+  när trumf är klar och man vet att inga två kontroller saknas.
+
+### 6.2 Cue-bid (kontrollbud)
+När **trumf är överenskommen i en kravbudgivning** är ett bud i ny färg inte
+naturligt utan visar en **kontroll**:
+- **Första-rondskontroll** (ess eller renons) visas först, **billigaste först**
+  och uppåt.
+- Nästa omgång kan visa **andra-rondskontroll** (kung eller singleton).
+- Att hoppa över en färg förnekar kontroll där – så partnern ser var det läcker.
+
+Cue-bids används för att leta slam **innan** 1430 RKC: när båda visat kontroller
+i sidofärgerna och inget hål syns, frågar 4NT efter nyckelkorten.
+*Exempel:* 1♠–2♣–2♠ (fit) –4♣ (cue ♣-kontroll) –4♦ (cue ♦) –4NT (1430 RKC).
+
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
 lägsta), enkelt/dubbelt överbud, hoppinkliv, mot 1NT, mot stark 1♣ (Mathe),
@@ -638,3 +670,8 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
 - **2026-06-26** – §4.6 (svar på spärröppningar) nedskrivet: ny färg = krav,
   höjning = spärr, 3NT till spel, 4NT = 1430 RKC; öppnarens feature-återbud;
   regel om 2-3-4. **Nästa gång:** §6 slamverktyg (1430 RKC, cue-bid).
+- **2026-06-26** – §6 påbörjad: §6.1 **1430 RKC Blackwood** (5 nyckelkort,
+  4NT-svar 5♣/5♦/5♥/5♠, trumfdam- och kungfråga) och §6.2 **cue-bid /
+  kontrollbud** (först-/andra-rondskontroll, billigaste först, leder in i RKC).
+  Källa: bridgebum.com. **Nästa gång:** Gerber, Sjöbergs 5NT, fjärde färg krav,
+  eller försvarsbud (§7).
