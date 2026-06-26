@@ -778,7 +778,52 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
   (stopp + stick); cue-bud = stoppfråga/stark; färgbud naturliga.
 
 ## 8. Markeringar & utspel
-*(Senare.)* Lavinthal, UD upp t.o.m. 2 trick, utspel 1-3-5 mot färg och mot NT.
+> Försvarsspelets signaler. Vi spelar räkningstunga, lågtvetydiga metoder som
+> passar 2/1:s precisionsfilosofi.
+
+### 8.1 Signaler — omvänd markering (UDCA)
+Vi spelar **omvänd markering** (upside-down) för **både attityd och räkning**,
+de första ~2 sticken i en färg:
+
+- **Attityd** (på utspelsfärg / partnerns färg): **lågt kort = uppmuntrar**
+  (jag gillar färgen), **högt kort = avskräcker**. (Tvärtom mot "standard".)
+- **Räkning:** **lågt-högt = jämnt** antal, **högt-lågt = udda**. (Omvänt.)
+
+Efter att attityd/räkning är visad övergår korten till **färgpreferens**
+(Lavinthal, §8.2).
+
+### 8.2 Kast (avslag) — Lavinthal
+När du inte kan följa färg och **kastar**, visar **första kastet färgpreferens**
+genom kortets storlek (i en färg du inte vill ha):
+- **högt kort = jag vill ha den högre** av de övriga färgerna,
+- **lågt kort = den lägre** färgen.
+
+### 8.3 Utspel
+**Spotkort (3:e/5:e bästa)** – mot både färg och NT:
+- **3:e bästa** från en **jämn** längd (t.ex. 3:e kortet från 4-korts färg),
+- **5:e bästa (lägsta)** från en **udda** längd (5-korts färg).
+
+Det avslöjar längd/räkning direkt för partnern.
+
+**Honnörsutspel (standard – högsta i sekvensen):**
+| Innehav | Spela ut |
+|---|---|
+| A-K-x(+) | **K** |
+| K-D-x(+) | **K** |
+| D-kn-x(+) | **D** |
+| kn-T-x(+) | **kn** |
+| A-K (dubbelton) | **A**, sedan K |
+
+- **Tvetydighet:** K kan vara från A-K *eller* K-D – partnern läser ur
+  budgivning och given. *(Rusinow näst-högsta tar bort detta – noterad som
+  framtida uppgradering när honnörsutspel sitter.)*
+- Mot **NT** spelas samma honnörstoppar; man väljer oftast sin **längsta/bästa**
+  färg och utspelet är 3:e/5:e som ovan.
+
+### 8.4 Vad vi (medvetet) inte spelar
+- **Smith Echo** – nej; vi använder vanlig (omvänd) attityd på utspelsfärgen i
+  sangförsvar.
+- **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
 - **2026-06-25** – Systembok skapad. Öppningsbud + minor-regeln nedskrivna.
@@ -883,3 +928,7 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
   shows" stopp), §7.5 **DONT** mot deras 1NT (X/2♣/2♦/2♥/2♠ + advancer), §7.6
   mot stark 1♣ (Mathe), svaga tvåor (+Lebensohl), Multi 2♦ och spärrar. Källa:
   bridgebum.com. **Nästa gång:** §8 markeringar & utspel.
+- **2026-06-26** – §8 (markeringar & utspel) nedskrivet: **UDCA** (omvänd attityd
+  + räkning, ~2 stick), **Lavinthal**-kast, **3:e/5:e** spotkort-utspel och
+  **standard honnörsutspel** (top of sequence). Rusinow + Smith Echo bortvalda
+  men noterade som möjliga uppgraderingar. Därmed är **§1–§8 ifyllda**.
