@@ -432,6 +432,29 @@ Svararen placerar sedan kontraktet utifrån min/max och färgkvalitet.
 färg (minimum) eller visar en sidofärg. *(Konkurrens och passad hand tas
 senare.)*
 
+### 4.6 Svar på spärröppningar (3-/4-läget)
+Spärren förnekar 12+ hp och tar bort budutrymme – **svararen är kapten** och
+beslutar oftast direkt. Öppningarna står i §3 (3-läget: 7+ färg, svag; 4-läget:
+lång färg, spärr).
+
+| Svar | Betydelse |
+|---|---|
+| Pass | vanligast – ingen utgång |
+| höjning (t.ex. 3♥–4♥) | spärr/avslut, höjer trycket (tvetydig för motståndarna) |
+| ny färg | naturlig, 5+ färg, **krav 1 rond** |
+| 3NT | till spel (stopp i sidofärger, räknar med 9 stick) |
+| 4NT | ess-fråga (1430 RKC) med stor fit-hand |
+
+**Öppnarens återbud efter ny färg (krav):** rebjuda egen färg = minimum/dålig;
+höja svararens färg = stöd; visa en sidohonnör ("feature") = maximum.
+
+**4-läges-spärrar (4♥/4♠):** lite plats kvar – svararen passar, eller bjuder slam
+via 4NT (1430 RKC). En ny färg = kontroll/cue mot slam.
+
+**Regel om 2-3-4 (för öppnaren):** våga gå bet upp till **2** stick i farozon,
+**3** i lika zon, **4** i gynnsam zon (dubblat, vägt mot motståndarnas utgång).
+Styr hur högt man vågar spärra.
+
 ## 5. Återbud (öppnarens andra bud)
 Öppnarens andra bud **beskriver handen** – styrka och form – så att svararen kan
 placera kontraktet. Tre styrkenivåer styr valet:
@@ -612,3 +635,6 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   spärrhöjning, ny färg krav, samt **Ogust** på 2NT-frågan (steg 3♣–3NT,
   min/max 6–8/9–11 + färgkvalitet). Källa: bridgebum.com. **Nästa gång:**
   spärröppningar (3-/4-läget) eller §6-konventioner (1430 RKC, cue-bid).
+- **2026-06-26** – §4.6 (svar på spärröppningar) nedskrivet: ny färg = krav,
+  höjning = spärr, 3NT till spel, 4NT = 1430 RKC; öppnarens feature-återbud;
+  regel om 2-3-4. **Nästa gång:** §6 slamverktyg (1430 RKC, cue-bid).
