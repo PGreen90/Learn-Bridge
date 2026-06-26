@@ -248,9 +248,157 @@ Svararen fortsätter mot 3NT (visar stopp i objudna färger), drar till utgång 
 lf, eller visar slamintresse via nya färger. Den **svaga höjningen** (1m–3m)
 är avslutande – öppnaren passar utan extra styrka.
 
+### 4.3 Svar på 1NT (15–17 hp, balanserad)
+*(Ingen störning. Konkurrens tas senare.)*
+
+#### Översikt
+| Svar | Betydelse | Konvention |
+|---|---|---|
+| Pass | 0–7 hp, ingen utgångschans | naturligt |
+| 2♣ | frågar efter 4-korts hf | Stayman ● |
+| 2♦ | transfer till ♥ (5+ ♥) | Jacoby-transfer ● |
+| 2♥ | transfer till ♠ (5+ ♠) | Jacoby-transfer ● |
+| 2♠ | minorfråga | Minor Suit Stayman ● *(nästa steg)* |
+| 2NT | 8–9 hp, balanserad, inbjudan, ingen 4-korts hf | naturligt |
+| 3♣ / 3♦ / 3♥ / 3♠ | *(tas i nästa steg)* | — |
+| 3NT | ~10–15 hp, balanserad, till spel | naturligt |
+| 4♦ / 4♥ | Texas-transfer | Texas ● *(nästa steg)* |
+| 4NT | kvantitativ slaminbjudan (~16–17 hp) | naturligt |
+
+#### Stayman (2♣)
+2♣ frågar efter 4-korts hf och lovar minst inbjudningsstyrka (≈8+ hp) med minst
+en 4-korts hf. Öppnaren svarar:
+
+| Svar | Betydelse |
+|---|---|
+| 2♦ | ingen 4-korts hf |
+| 2♥ | 4 ♥ (kan ha 4 ♠ också) |
+| 2♠ | 4 ♠, förnekar 4 ♥ |
+
+**Svararens fortsättning (exempel):**
+- höjning av öppnarens hf: till 3 = inbjudan (4 stöd), till 4 = avslut.
+- 2NT = inbjudan utan fit; 3NT = avslut, balanserad.
+- efter 2♦ (ingen hf): 2♥/2♠ = 5-4 i hf, inbjudan; annars NT efter styrka.
+
+**Svag variant:** "garbage/svag Stayman" (svag 3-färgshand kort i ♣, passar
+valfritt svar) är en möjlig tilläggsvariant – **beslut tas senare**.
+
+#### Jacoby-transfer (2♦ / 2♥)
+2♦ = transfer till ♥ (5+ ♥), 2♥ = transfer till ♠ (5+ ♠). Öppnaren **fullföljer**
+genom att bjuda hf:en (2♥ resp. 2♠) – så blir den starka 1NT-handen spelförare
+och döljs för motståndarna.
+
+- **Superaccept:** med 4 stöd och maximum (~17 hp) hoppar öppnaren i stället till
+  3 i hf:en.
+
+**Svararens fortsättning efter fullföljd transfer** (ex. 2♦–2♥):
+| Svar | Betydelse |
+|---|---|
+| Pass | 0–7 hp, 5+ ♥, svag |
+| 2♠ | 5 ♥ + 5 ♠, inbjudan (8–9) |
+| 2NT | 5 ♥, balanserad, inbjudan (8–9) |
+| 3♣ / 3♦ | 5+ ♥ + 4+ i färgen, GF |
+| 3♥ | 6+ ♥, inbjudan |
+| 3NT | 5 ♥, balanserad – öppnaren väljer 3NT eller 4♥ |
+| 4♥ | 6+ ♥, avslut |
+| 4NT | kvantitativ slaminbjudan |
+
+Spader-transfern (2♥→♠) fungerar spegelvänt.
+
 ## 5. Återbud (öppnarens andra bud)
-- 1x–1y–**2NT** = 18–19 hp balanserad.
-*(Fylls i.)*
+Öppnarens andra bud **beskriver handen** – styrka och form – så att svararen kan
+placera kontraktet. Tre styrkenivåer styr valet:
+
+| Nivå | hp | Typiskt återbud |
+|---|---|---|
+| Minimum | 12–15 | enklast möjliga: rebjuda färg, billig ny färg, 1NT |
+| Medium | 16–18 | hoppåterbud, styrkevisning (inbjudan) |
+| Maximum | 19+ | hoppskift (krav), stark NT, utgångskrav |
+
+**Principer:**
+- **Reverse** = att rebjuda en *högre* ny färg på 2-läget än sin första (t.ex.
+  1♦–1♠–2♥). Lovar **extra** (~16+ hp) och längre första färg. Krav 1 rond.
+- **Hoppskift i ny färg** (t.ex. 1♦–1♠–3♣) = 19+ hp, utgångskrav.
+- **1x–1y–2NT** = 18–19 hp balanserad (för svag för 1NT-öppning, för stark för
+  att bara rebjuda 1NT).
+- I en **2/1 GF-budgivning** är paret redan bundet till utgång – öppnaren bjuder
+  då naturligt och i lugn takt (visar form först, sparar styrkebeskedet).
+
+### 5.1 Efter semi-forcing 1NT (1♥–1NT / 1♠–1NT)
+Eftersom 1NT är *semi*-forcing får öppnaren **passa** med minimum balanserad hand
+utan bra återbud. Annars beskriver hon hand och styrka:
+
+*Efter 1♥–1NT:*
+| Återbud | Betydelse |
+|---|---|
+| Pass | minimum balanserad, inget bättre återbud |
+| 2♣ / 2♦ | naturlig ny färg, 3+ (2♣ ibland bara 2–3 vid 4-5-2-2) |
+| 2♥ | 6+ ♥, minimum (12–15 hp) |
+| 2♠ | reverse: 16+ hp, 5-4 i hf (5 ♥, 4 ♠) |
+| 2NT | 18–19 hp, balanserad, inbjuder 3NT |
+| 3♣ / 3♦ | hoppskift, 16+ hp, 5-4+, krav |
+| 3♥ | 6+ ♥, 16–18 hp, inbjudan |
+| 4♥ | 6+ ♥, ~19+ hp, till spel |
+
+*Efter 1♠–1NT:*
+| Återbud | Betydelse |
+|---|---|
+| Pass | minimum balanserad, inget bättre återbud |
+| 2♣ / 2♦ | naturlig ny färg, 3+ |
+| 2♥ | naturlig, 4+ ♥, 12–15 hp (5-4 i färgerna, ej reverse) |
+| 2♠ | 6+ ♠, minimum (12–15 hp) |
+| 2NT | 18–19 hp, balanserad, inbjuder 3NT |
+| 3♣ / 3♦ | hoppskift, 16+ hp, krav |
+| 3♠ | 6+ ♠, 16–18 hp, inbjudan |
+| 4♠ | 6+ ♠, ~19+ hp, till spel |
+
+**Svararens andra bud:** preferens till öppnarens färg (svag), pass på en
+naturlig minorrebid med stöd, eller höjning/NT som visar 11–12 (inbjudan). En
+ny färg av svararen efter 1NT lovar 5+ kort och förnekar stöd (se §4.1-noten).
+
+### 5.2 Efter ett 1-läges färgsvar (1x–1y)
+Svararen har visat 4+ kort och 6+ hp (krav 1 rond). Öppnaren letar främst
+**hf-fit** och beskriver sin styrka. Meny:
+
+**Stöd i svararens färg (4 kort):**
+| Återbud | Betydelse |
+|---|---|
+| höjning (1♣–1♥–2♥) | 4 stöd, minimum 12–15 |
+| hopphöjning (1♣–1♥–3♥) | 4 stöd, 16–18, inbjudan |
+| höjning till utgång (1♣–1♥–4♥) | 4 stöd, ~19+, ojämn/distributionell |
+
+**Egen eller ny färg (ingen 4-korts hf-fit):**
+| Återbud | Betydelse |
+|---|---|
+| ny färg "billigt" (1♣–1♦–1♥, 1♣–1♥–1♠) | 4+ ny färg (4-korts upp), 12+, krav 1 rond |
+| ny lägre färg på 2-läget (1♥–1♠–2♣/2♦) | naturlig 4+ (2♣ ibland 3), 12+, ej krav |
+| rebjuda egen färg (1♥–1♠–2♥) | 6+ kort, minimum 12–15 |
+| hopp i egen färg (1♥–1♠–3♥) | 6+ kort, 16–18, inbjudan |
+
+**Balanserade händer (NT-stegen):**
+| Återbud | Betydelse |
+|---|---|
+| 1NT (1♣–1♥–1NT) | 12–14, balanserad (15–17 hade öppnat 1NT) |
+| 2NT (hopp, 1♣–1♥–2NT) | 18–19, balanserad |
+
+**Extra styrka / krav:**
+| Återbud | Betydelse |
+|---|---|
+| reverse (1♣–1♥–2♦) | 16+ hp, längre första färg, krav 1 rond |
+| hoppskift ny färg (1♦–1♥–3♣) | 19+ hp, utgångskrav |
+
+Öppnaren kan även **splintra** (hopp i ny färg, t.ex. 1♣–1♥–3♠/4♦) för att visa
+4 stöd + kortfärg + extra styrka, på samma sätt som svararen gör i §4.1.
+
+### 5.3 I en 2/1 GF-budgivning
+Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gäller:
+- **Bjud naturligt och lugnt** – öppnaren behöver inte hoppa för att visa styrka.
+- **"Fast arrival":** snabb väg till utgång (direkt 4 i färgen) visar **minimum**;
+  att ta omvägar visar **extra / slamintresse**.
+- **Ny färg** = naturlig form, krav (hela budgivningen är ju redan krav).
+- **2NT** = balanserad utan extra form (~12–15); **rebjuden egen färg** = 6+;
+  **stöd i svararens färg** = fit.
+- **Hopp / splinter** = kortfärg och slamintresse.
 
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
@@ -259,8 +407,8 @@ Stayman, Texas, Splinter, fjärde färg krav, upplysningsdubbling, Michaels,
 Drury, Jacoby 2NT, 1430 RKC Blackwood, Sjöbergs 5NT, Gerber.
 
 Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
-game try** (§4.1), samt **inverterade minorhöjningar** (§4.2) – beslutade
-2026-06-26. Källa: bridgebum.com.
+game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman** och
+**Jacoby-transfer** (§4.3) – beslutade 2026-06-26. Källa: bridgebum.com.
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -304,3 +452,16 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
 - **2026-06-26** – Förkortningar införda i löptext: **hf** = högfärg, **lf** =
   lågfärg (definierade i §2). Konventionsnamn (t.ex. "Inverterad minor", "Minor
   Suit Stayman", "Minor-regeln") behålls oförändrade.
+- **2026-06-26** – §5 påbörjad: allmänna principer (styrkenivåer 12–15/16–18/19+,
+  reverse, hoppskift, 2NT 18–19) och §5.1 öppnarens återbud efter semi-forcing
+  1NT (1♥/1♠), inkl. pass-möjligheten. Källa: bridgebum.com. **Nästa gång:**
+  §5.2 återbud efter 1-läges färgsvar (t.ex. 1♣–1♥) och i 2/1 GF-budgivning.
+- **2026-06-26** – §5 utbyggd: §5.2 öppnarens återbud efter 1-läges färgsvar
+  (stöd/hopphöjning, ny färg, NT-stege 1NT=12–14 / 2NT=18–19, reverse 16+,
+  hoppskift 19+, splinter) och §5.3 principer i 2/1 GF (naturligt/lugnt, fast
+  arrival). Källa: bridgebum.com. **Nästa gång:** 1NT-öppningens svar (Stayman,
+  transfers m.m.) eller §6-konventionerna en i taget.
+- **2026-06-26** – §4.3 (svar på 1NT) påbörjad: översikt + **Stayman** (2♣,
+  öppnarens 2♦/2♥/2♠) och **Jacoby-transfer** (2♦→♥, 2♥→♠, superaccept,
+  svararens fortsättning). Källa: bridgebum.com. **Nästa gång:** Texas, Smolen
+  och Minor Suit Stayman (2♠ + 4-läget) i §4.3.
