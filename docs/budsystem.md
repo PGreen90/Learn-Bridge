@@ -403,6 +403,35 @@ nästan inget mittemot.
 - *Exempel:* 2♣ – 2♦ (0–7) – 2♠ (krav) – 3♣ (andra negativa, 0–3) – 3♠ (ej krav,
   svararen kan passa).
 
+### 4.5 Svar på svaga tvåöppningar (2♦ / 2♥ / 2♠)
+Öppningen visar 6-korts färg och 6–11 hp (svag). Svar:
+
+| Svar | Betydelse | Konvention |
+|---|---|---|
+| Pass | ingen utgångschans | naturligt |
+| höjning (t.ex. 2♥–3♥) | spärrhöjning, höjer trycket (ej inbjudan) | naturligt |
+| ny färg | naturlig, 5+ färg, krav 1 rond | naturligt |
+| 2NT | konstgjord fråga om styrka + färgkvalitet | Ogust ● |
+| 3NT / 4-läget | till spel | naturligt |
+
+**Ogust (2NT-svaret):** öppnaren svarar i steg:
+
+| Öppnarens svar | Styrka | Färgkvalitet |
+|---|---|---|
+| 3♣ | minimum (6–8 hp) | dålig (1 topphonnör) |
+| 3♦ | minimum (6–8 hp) | bra (2 topphonnörer) |
+| 3♥ | maximum (9–11 hp) | dålig (1 topphonnör) |
+| 3♠ | maximum (9–11 hp) | bra (2 topphonnörer) |
+| 3NT | maximum (9–11 hp) | utmärkt (alla 3 topphonnörer) |
+
+Minnesregel: *"Minors are Minimum, 1-2-1-2-3"* (♣/♦ = minimum; antalet
+topphonnörer följer 1-2-1-2-3). Topphonnörer = ess/kung/dam i trumffärgen.
+Svararen placerar sedan kontraktet utifrån min/max och färgkvalitet.
+
+**Ny färg som krav:** efter t.ex. 2♥–2♠ (krav) visar öppnaren stöd, rebjuder sin
+färg (minimum) eller visar en sidofärg. *(Konkurrens och passad hand tas
+senare.)*
+
 ## 5. Återbud (öppnarens andra bud)
 Öppnarens andra bud **beskriver handen** – styrka och form – så att svararen kan
 placera kontraktet. Tre styrkenivåer styr valet:
@@ -506,8 +535,9 @@ Drury, Jacoby 2NT, 1430 RKC Blackwood, Sjöbergs 5NT, Gerber.
 
 Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
 game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
-**Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), samt **stark 2♣ med
-2♦ väntebud** (§4.4) – beslutade 2026-06-26. Källa: bridgebum.com.
+**Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), **stark 2♣ med
+2♦ väntebud** (§4.4), samt **Ogust** på svaga tvåor (§4.5) – beslutade
+2026-06-26. Källa: bridgebum.com.
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -578,3 +608,7 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   efter positivt svar (cue-bid → 1430 RKC, enkel höjning = slamintresse) och
   landning efter negativt/andra negativa (lågt färgrebud = ej krav, möjligt
   delkontrakt). Med exempel-budgivningar. Källa: bridgebum.com.
+- **2026-06-26** – §4.5 (svar på svaga tvåor 2♦/2♥/2♠) nedskrivet: pass,
+  spärrhöjning, ny färg krav, samt **Ogust** på 2NT-frågan (steg 3♣–3NT,
+  min/max 6–8/9–11 + färgkvalitet). Källa: bridgebum.com. **Nästa gång:**
+  spärröppningar (3-/4-läget) eller §6-konventioner (1430 RKC, cue-bid).
