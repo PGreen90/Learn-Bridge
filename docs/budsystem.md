@@ -560,8 +560,8 @@ Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
 game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
 **Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), **stark 2♣ med
 2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
-Blackwood**, **cue-bid**, **Sjöbergs 5NT** och **Gerber** (§6) – beslutade 2026-06-26.
-Källor: bridgebum.com, svenskbridge.se.
+Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber** och **Exclusion Blackwood** (§6) –
+beslutade 2026-06-26. Källor: bridgebum.com, svenskbridge.se.
 
 ### 6.1 1430 RKC Blackwood
 Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
@@ -632,6 +632,25 @@ NT är "trumf" (mot ett färgkontrakt används i stället 1430 RKC).
 
 **När 4♣ INTE är Gerber:** om budet inte är ett hopp, eller inte kommer direkt
 över NT – då är 4♣ naturligt (klöver) eller cue-bid.
+
+### 6.5 Exclusion Blackwood (5-läges-voidwood) — *avancerad/valfri*
+När **trumf är överenskommen** i en slamriktad budgivning är ett **hopp till
+5-läget i en sidofärg** Exclusion: "jag är **renons** i den här färgen – räkna
+nyckelkort men **strunta i esset i renonsfärgen**".
+
+**Svar (1430-steg, esset i renonsfärgen borträknat):**
+| Steg | Nyckelkort |
+|---|---|
+| 1:a steget | 1 eller 4 |
+| 2:a steget | 0 eller 3 |
+| 3:e steget | 2 utan trumfdam |
+| 4:e steget | 2 med trumfdam |
+
+- **Trumfdam-fråga:** billigaste icke-trumf efter svaret (som i 1430 RKC, §6.1).
+- **Avgränsning mot resten av systemet:** endast **hopp till 5-läget i sidofärg**
+  är Exclusion. Tidiga splintrar (§4.1) och Jacoby-4-lägesbud (§4.1) lämnas
+  orörda. Minnesregel: **splinter tidigt, Exclusion sent; cue-bid kryper,
+  Exclusion hoppar.**
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -721,3 +740,8 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   direkt över naturlig NT (svar 4♦/4♥/4♠/4NT), 5♣ = kungfråga; mot färgkontrakt
   används RKC. Källa: bridgebum.com. **Nästa gång:** fjärde färg krav, Drury,
   Michaels eller försvarsbud (§7).
+- **2026-06-26** – §6.5 **Exclusion Blackwood (5-läges-voidwood)** tillagd
+  (avancerad/valfri): hopp till 5-läget i sidofärg efter trumffit = renons,
+  frågar nyckelkort utom renonsfärgens ess (1430-steg). Scopad till 5-läget för
+  att inte störa splinter/Jacoby (regel: splinter tidigt/Exclusion sent, cue
+  kryper/Exclusion hoppar). Källa: bridgebum.com.
