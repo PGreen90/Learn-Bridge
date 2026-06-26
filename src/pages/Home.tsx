@@ -19,7 +19,7 @@ export function Home() {
         <h2 className="text-lg font-semibold mb-2">Så funkar appen</h2>
         <ul className="list-disc list-inside text-slate-600 space-y-1">
           <li><b>Budträning</b> – öva på att hitta rätt bud.</li>
-          <li><b>Lär dig</b> – förklaringar av 2/1-systemet.</li>
+          <li><b>Budsystem</b> – hela 2/1-systemet att läsa, sektion för sektion.</li>
           <li><b>Inställningar</b> – hantera dina sparade framsteg.</li>
         </ul>
       </Panel>

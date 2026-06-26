@@ -3,7 +3,7 @@ import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 import { BiddingPractice } from './pages/BiddingPractice'
 import { BiddingSession } from './pages/BiddingSession'
-import { Learn } from './pages/Learn'
+import { BudSystem } from './pages/BudSystem'
 import { Settings } from './pages/Settings'
 
 // HashRouter används med flit: det fungerar felfritt på GitHub Pages utan
@@ -16,7 +16,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="budtraning" element={<BiddingPractice />} />
           <Route path="budtraning/:themeId" element={<BiddingSession />} />
-          <Route path="lar-dig" element={<Learn />} />
+          <Route path="budsystem" element={<BudSystem />} />
           <Route path="installningar" element={<Settings />} />
         </Route>
       </Routes>

@@ -1,4 +1,4 @@
-# Budsystem — Andersson / Green
+# Budsystem — 2 över 1 (2/1 GF)
 
 > **Systembok och sanningskälla.** Allt innehåll i appen (Lär dig-texter och
 > budträningens övningar) ska härledas härifrån. Ändra systemet här – inte
@@ -6,9 +6,9 @@
 
 ## 1. Översikt
 - **System:** Grundsystem 2 över 1 game force (2/1 GF)
-- **Par:** Fredrik Andersson & Patrik Green
-- **Bas:** 5-korts hf, svaga tvåöppningar (♦/♥/♠), stark 2♣
-- **Källa:** `systemdeklaration2.pdf` (systemkort)
+- **Bas:** Naturlig budgivning med 5-korts hf, 1NT 15–17, svaga tvåöppningar
+  (♦/♥/♠) och stark, konstgjord 2♣. Konventioner: Bergen-höjningar, inverterade
+  minorhöjningar, Stayman/transfers, splinter och slamverktyg (se §4–§8).
 
 ## 2. Markeringsstandard
 Varje bud i en svarssekvens märks med tre saker:
@@ -792,8 +792,8 @@ de första ~2 sticken i en färg:
 Efter att attityd/räkning är visad övergår korten till **färgpreferens**
 (Lavinthal, §8.2).
 
-### 8.2 Kast (avslag) — Lavinthal
-När du inte kan följa färg och **kastar**, visar **första kastet färgpreferens**
+### 8.2 Sak (avslag) — Lavinthal
+När du inte kan följa färg och **sakar**, visar **första saket färgpreferens**
 genom kortets storlek (i en färg du inte vill ha):
 - **högt kort = jag vill ha den högre** av de övriga färgerna,
 - **lågt kort = den lägre** färgen.
@@ -808,17 +808,19 @@ Det avslöjar längd/räkning direkt för partnern.
 **Honnörsutspel (standard – högsta i sekvensen):**
 | Innehav | Spela ut |
 |---|---|
-| A-K-x(+) | **K** |
+| A-K-x(+) | **A** |
 | K-D-x(+) | **K** |
 | D-kn-x(+) | **D** |
 | kn-T-x(+) | **kn** |
 | A-K (dubbelton) | **A**, sedan K |
 
-- **Tvetydighet:** K kan vara från A-K *eller* K-D – partnern läser ur
-  budgivning och given. *(Rusinow näst-högsta tar bort detta – noterad som
-  framtida uppgradering när honnörsutspel sitter.)*
+- **Entydig topp:** esset leds från A-K (top of sequence), så **A = A-K** och
+  **K = K-D** – ingen tvetydighet på toppen.
 - Mot **NT** spelas samma honnörstoppar; man väljer oftast sin **längsta/bästa**
   färg och utspelet är 3:e/5:e som ovan.
+
+> **Notis:** vi leder *top of sequence* – ess från A-K. Rusinow (näst högsta)
+> finns kvar som möjlig framtida variant (se §8.4).
 
 ### 8.4 Vad vi (medvetet) inte spelar
 - **Smith Echo** – nej; vi använder vanlig (omvänd) attityd på utspelsfärgen i
@@ -929,6 +931,13 @@ Det avslöjar längd/räkning direkt för partnern.
   mot stark 1♣ (Mathe), svaga tvåor (+Lebensohl), Multi 2♦ och spärrar. Källa:
   bridgebum.com. **Nästa gång:** §8 markeringar & utspel.
 - **2026-06-26** – §8 (markeringar & utspel) nedskrivet: **UDCA** (omvänd attityd
-  + räkning, ~2 stick), **Lavinthal**-kast, **3:e/5:e** spotkort-utspel och
+  + räkning, ~2 stick), **Lavinthal**-sak, **3:e/5:e** spotkort-utspel och
   **standard honnörsutspel** (top of sequence). Rusinow + Smith Echo bortvalda
   men noterade som möjliga uppgraderingar. Därmed är **§1–§8 ifyllda**.
+- **2026-06-26** – Redaktionellt för webben: §1 rensad (parnamn borttaget, källa
+  dold, Bas utökad) och dokumenttiteln avidentifierad. Termen *kast* →
+  **saka/sak** (ett sak, flera sak; sakar/sakat). Honnörsutspel (§8.3) flaggat
+  för översyn. Budsystem-sidan i appen döljer §9 men loggen behålls i filen.
+- **2026-06-26** – Honnörsutspel rättat (§8.3): **ess** (inte kung) leds från
+  A-K – äkta top of sequence. Gör topputspelen entydiga (A = A-K, K = K-D);
+  tvetydighetsnoten borttagen.

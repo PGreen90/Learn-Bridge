@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 const NAV = [
   { to: '/', label: 'Hem', end: true },
   { to: '/budtraning', label: 'Budträning', end: false },
-  { to: '/lar-dig', label: 'Lär dig', end: false },
+  { to: '/budsystem', label: 'Budsystem', end: false },
   { to: '/installningar', label: 'Inställningar', end: false },
 ]
 
