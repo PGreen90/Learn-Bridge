@@ -50,13 +50,21 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
 ### 4.1 Svar på 1♥ / 1♠
 *(Ohöjd hand, ingen störning. Passad hand/Drury och konkurrens tas senare.)*
 
-**Principer för höjningar och kortfärg:**
-- Hopp till **3-läget** i ny färg = splinter, **singleton** i färgen (4+ stöd, GF).
-- Hopp till **4-läget** i ny färg = splinter, **renons** i färgen (4+ stöd, GF).
-- **Jacoby 2NT** är en separat balanserad GF-höjning (4+ stöd, utan kortfärg)
-  och påverkar inte splinterbuden.
-- **Inbjudande höjning** (4+ stöd, ~10–12 hp) visas via semi-forcing 1NT och
-  sedan hopp till 3 i högfärgen nästa vända.
+**Principer för höjningar (Bergen + splinter):**
+- Med **exakt 4 trumf** och ingen kortfärg används **Bergen-höjningar** på
+  3-läget (standard): **3♣** = 7–10 hp (konstruktiv), **3♦** = 10–12 hp
+  (limit/inbjudan), **3 i högfärgen** = 0–6 hp (spärr). Bygger på lagen om
+  totala stick (9 trumfer → 3-läget).
+- Med **3-korts** stöd: enkel höjning till 2-läget (6–9 hp). En **3-korts
+  limithöjning** (10–12 hp) går via semi-forcing 1NT och sedan hopp till 3 i
+  högfärgen nästa vända (Bergen kräver exakt 4 trumf).
+- **Jacoby 2NT** = balanserad GF-höjning, 4+ trumf, 13+ hp, ingen kortfärg
+  (oförändrad).
+- **Splinter** (4+ stöd + kort färg, ~12+ hp, GF) visas med den **tvetydiga
+  splintern**: det lediga 3-läges-budet (**3♠** över 1♥, **3♥** över 1♠).
+  Visar singleton *eller* renons; öppnaren frågar med ett relä och svararen
+  avslöjar den korta färgen (se nedan). Direkt hopp till 4♣/4♦ i ny färg
+  används inte längre som splinter.
 - **Svagt hoppskift** finns bara som **1♥–2♠**. Över 1♠ finns inget svagt
   hoppskift; bjud i stället 1NT (se fortsättningsnoten nedan).
 
@@ -64,34 +72,86 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
 | Svar | Betydelse | Kravnivå | Konvention |
 |---|---|---|---|
 | 1♠ | 4+ ♠, 6+ hp | Krav (1 rond) | naturligt |
-| 1NT | 6–11 hp, ingen 2/1 | Semi-krav | Semi-forcing 1NT ● |
+| 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts limithöjning) | Semi-krav | Semi-forcing 1NT ● |
 | 2♣ / 2♦ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
-| 2♥ | 3+ stöd, 6–9 hp | Ej krav | naturligt |
+| 2♥ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
 | 2♠ | 6-korts ♠, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
 | 2NT | 4+ stöd, 13+ hp, balanserad (ingen kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
-| 3♣ | singleton ♣, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
-| 3♦ | singleton ♦, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
-| 3♥ | 4 stöd, svag | Avslut/spärr | Spärrhöjning ● |
-| 3♠ | singleton ♠, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
-| 4♣ / 4♦ | renons ♣ / ♦, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 3♣ | 4 trumf, 7–10 hp (konstruktiv) | Inbjudan | Bergen ● |
+| 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
+| 3♥ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
+| 3♠ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
 | 4♥ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
 
 #### Svar på 1♠
 | Svar | Betydelse | Kravnivå | Konvention |
 |---|---|---|---|
-| 1NT | 6–11 hp, ingen 2/1 | Semi-krav | Semi-forcing 1NT ● |
+| 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts limithöjning) | Semi-krav | Semi-forcing 1NT ● |
 | 2♣ / 2♦ / 2♥ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
-| 2♠ | 3+ stöd, 6–9 hp | Ej krav | naturligt |
+| 2♠ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
 | 2NT | 4+ stöd, 13+ hp, balanserad | Utgångskrav, slamintresse | Jacoby 2NT ● |
-| 3♣ / 3♦ / 3♥ | singleton ♣ / ♦ / ♥, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
-| 3♠ | 4 stöd, svag | Avslut/spärr | Spärrhöjning ● |
-| 4♣ / 4♦ / 4♥ | renons ♣ / ♦ / ♥, 4+ stöd | Utgångskrav, slamintresse | Splinter ● |
+| 3♣ | 4 trumf, 7–10 hp (konstruktiv) | Inbjudan | Bergen ● |
+| 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
+| 3♥ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
+| 3♠ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
 | 4♠ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
 
 **Fortsättning efter semi-forcing 1NT:** Öppnaren får passa med minimum
 balanserat. Bjuder svararen därefter en ny färg lovar det 5+ kort och
 **förnekar** stöd i öppnarens färg(er). Annars kan svararen visa preferens i
 öppnarens färger.
+
+#### Enkel höjning (1♥–2♥ / 1♠–2♠) — Bergen game try
+Svararens enkla höjning visar 3 stöd, 6–9 hp. Vill öppnaren göra ett
+**utgångsförsök** bjuder hon **2NT** (konstgjort, krav, ≈ 15–17 hp / 6 förlorare)
+och ber svararen beskriva handen. Detta ersätter hjälpfärgs-försök efter den
+enkla höjningen – det är svararen, inte öppnaren, som beskriver.
+
+| Svararens svar | Betydelse |
+|---|---|
+| 3 i ny färg | singleton/renons i den färgen, minimum (6–7 hp) |
+| 3 i trumf | jämn 4-3-3-3-typ, minimum (6–7 hp) |
+| 3NT | jämn hand, maximum (8–9 hp) |
+| 4 i trumf | maximum (8–9 hp), ojämn (kortfärg men utan plats att visa den) |
+
+Öppnaren placerar sedan kontraktet: pass / 3 i trumf med minimum mittemot dålig
+passning, annars utgång. Singleton/renons mittemot öppnarens svaga färg höjer
+värdet; honnörer mittemot svararens kortfärg är slöseri.
+
+#### Bergen — öppnarens fortsättning
+- Efter **3♣** (7–10): minimum → 3 i högfärgen (svararen passar). Med extra
+  styrka game-try via ny färg på 3-läget; med tillräckligt → utgång direkt.
+- Efter **3♦** (10–12): minimum kan stanna i 3 i högfärgen; annars utgång.
+  Slamintresse → cue-bid.
+- Efter **spärrhöjningen** (3 i högfärgen): pass med < ~18 hp, annars utgång.
+
+#### Tvetydig splinter — relä och slamvärdering
+Svararens splinter visar 4+ trumf, kort färg (singleton el. renons) och ~12+ hp
+(GF). Öppnaren frågar efter den korta färgen med ett relä – eller hoppar direkt
+till utgång i trumf om handen är olämplig för slam (signoff).
+
+*Efter 1♥–3♠:* öppnaren bjuder **3NT (relä)**; svararen visar kort färg:
+
+| Svar | Kort färg |
+|---|---|
+| 4♣ | kort ♣ |
+| 4♦ | kort ♦ |
+| 4♥ | kort ♠ |
+
+*Efter 1♠–3♥:* öppnaren bjuder **3♠ (relä)**; svararen visar kort färg:
+
+| Svar | Kort färg |
+|---|---|
+| 3NT | kort ♣ |
+| 4♣ | kort ♦ |
+| 4♥ | kort ♥ |
+
+**Slamvärdering (nyckeln):** *nedvärdera honnörer mittemot den korta färgen.*
+Kung eller dam mittemot singleton/renons är nästan värdelös ("slöseri"); ess och
+hackor mittemot kort är guld. Är handen ren från slöseri och stark nog →
+**cue-bid** kontroller uppåt (lägsta första-rondskontroll först) och därefter
+**1430 RKC Blackwood**. Är handen full av honnörer mittemot korten → stanna i
+utgång.
 
 #### Jacoby 2NT — fortsättning
 Svararens **2NT** = 4+ trumf, **13+ hp** (varav minst 11 hp i honnör), GF,
@@ -137,6 +197,10 @@ Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit
 Stayman, Texas, Splinter, fjärde färg krav, upplysningsdubbling, Michaels,
 Drury, Jacoby 2NT, 1430 RKC Blackwood, Sjöbergs 5NT, Gerber.
 
+Antagna (beskrivna i §4.1): **Bergen-höjningar** (standard), **tvetydig
+splinter** och **Bergen game try** (2NT efter enkel höjning) – beslutade
+2026-06-26. Källa: bridgebum.com.
+
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
 lägsta), enkelt/dubbelt överbud, hoppinkliv, mot 1NT, mot stark 1♣ (Mathe),
@@ -157,3 +221,14 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   3NT = 14–15. **Nästa gång:** splinter-fortsättningen i §4.1 – öppnarens väg
   mot slutkontrakt efter en splinter (nedvärdera vid slöseri mittemot kortfärg;
   annars cue-bid / 1430 RKC). Avvaktar ev. referens från ägaren.
+- **2026-06-26** – Beslut: **Bergen-höjningar** införda (standard: 3♣ = 7–10,
+  3♦ = 10–12, 3 i högfärgen = spärr) och splintern flyttad till **tvetydig
+  splinter** (3♠ över 1♥ / 3♥ över 1♠; relä visar kort färg). §4.1 omarbetad:
+  höjningsprinciper, båda svarstabellerna samt Bergen- och splinterfortsättning
+  med slamvärdering (nedvärdera honnörer mittemot kort; annars cue-bid / 1430
+  RKC). Källa: bridgebum.com. **Nästa gång:** för in övningar i appen som
+  tränar Bergen + tvetydig splinter (JSON under `src/data/exercises/`), eller
+  fortsätt systemboken med §5 (öppnarens återbud).
+- **2026-06-26** – **Bergen game try** tillagd i §4.1: efter enkel höjning
+  (1♥–2♥ / 1♠–2♠) bjuder öppnaren konstgjort **2NT** som utgångsförsök och
+  svararen beskriver minimum/maximum + form/kortfärg. Källa: bridgebum.com.
