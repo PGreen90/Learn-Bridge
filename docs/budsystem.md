@@ -560,7 +560,7 @@ Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
 game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
 **Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), **stark 2♣ med
 2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
-Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber** och **Exclusion Blackwood** (§6) –
+Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber**, **Exclusion Blackwood** och **fjärde färg krav** (§6) –
 beslutade 2026-06-26. Källor: bridgebum.com, svenskbridge.se.
 
 ### 6.1 1430 RKC Blackwood
@@ -651,6 +651,26 @@ nyckelkort men **strunta i esset i renonsfärgen**".
   är Exclusion. Tidiga splintrar (§4.1) och Jacoby-4-lägesbud (§4.1) lämnas
   orörda. Minnesregel: **splinter tidigt, Exclusion sent; cue-bid kryper,
   Exclusion hoppar.**
+
+### 6.6 Fjärde färg krav (Fourth Suit Forcing)
+När paret har bjudit **tre färger** är ett bud i den **fjärde färgen konstgjort
+och krav** – inte naturligt. Det visar utgångsvärden och ber partnern beskriva
+mer (oftast: har vi stopp för 3NT, eller en gömd fit?).
+
+Vi spelar **fjärde färg = krav till utgång (GF)**. *(Alternativ: krav 1 rond med
+inbjudningsstyrka 10+ – kan ändras senare.)*
+
+*Exempel:* 1♦–1♠–2♣–2♥ (fjärde färg), 1♣–1♥–1♠–2♦ (fjärde färg).
+
+**Partnerns svar (prioritet):**
+1. visa 3-korts stöd för partnerns hf,
+2. rebjuda en färg för extra längd (6-4 / 5-5),
+3. bjuda NT med stopp i fjärde färgen,
+4. (sällan) höja fjärde färgen med 4 kort.
+
+**När fjärde färg INTE gäller:** passad hand, motståndarna stör, alla fyra färger
+bjudna på 1-läget, öppnaren har reverserat, eller svararen redan gjort hoppskift
+/ 2-över-1.
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -745,3 +765,7 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   frågar nyckelkort utom renonsfärgens ess (1430-steg). Scopad till 5-läget för
   att inte störa splinter/Jacoby (regel: splinter tidigt/Exclusion sent, cue
   kryper/Exclusion hoppar). Källa: bridgebum.com.
+- **2026-06-26** – §6.6 **fjärde färg krav** nedskrivet: fjärde färgen =
+  konstgjord, krav till utgång (GF), partnerns svarsprioritet (3-stöd → extra
+  längd → NT med stopp), samt när den är av. Källa: bridgebum.com. **Nästa
+  gång:** Drury, Michaels, upplysningsdubbling eller försvarsbud (§7).
