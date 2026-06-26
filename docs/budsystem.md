@@ -560,7 +560,7 @@ Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
 game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
 **Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), **stark 2♣ med
 2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
-Blackwood**, **cue-bid** och **Sjöbergs 5NT** (§6) – beslutade 2026-06-26.
+Blackwood**, **cue-bid**, **Sjöbergs 5NT** och **Gerber** (§6) – beslutade 2026-06-26.
 Källor: bridgebum.com, svenskbridge.se.
 
 ### 6.1 1430 RKC Blackwood
@@ -608,6 +608,30 @@ Till skillnad från standard visar svararen **vilken** kung – inte hur många:
 
 Poängen: att veta exakt vilken kung partnern har avgör om en sidofärg ger nog
 med stick för storslam (t.ex. K-D mittemot ess).
+
+### 6.4 Gerber (ess-fråga över NT)
+**4♣** är Gerber – ess-fråga – men **endast som hopp direkt över en naturlig
+NT-öppning eller NT-återbud** (1NT, 2NT). Används för balanserade slamhänder där
+NT är "trumf" (mot ett färgkontrakt används i stället 1430 RKC).
+
+**Ess-svar:**
+| Svar | Ess |
+|---|---|
+| 4♦ | 0 eller 4 |
+| 4♥ | 1 |
+| 4♠ | 2 |
+| 4NT | 3 |
+
+**5♣ = kungfråga** (efter ess-svaret):
+| Svar | Kungar |
+|---|---|
+| 5♦ | 0 eller 4 |
+| 5♥ | 1 |
+| 5♠ | 2 |
+| 5NT | 3 |
+
+**När 4♣ INTE är Gerber:** om budet inte är ett hopp, eller inte kommer direkt
+över NT – då är 4♣ naturligt (klöver) eller cue-bid.
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -693,3 +717,7 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
 - **2026-06-26** – §6.3 **Sjöbergs 5NT** vald som kungfråga (svaret visar
   *vilken* kung, inte antal) och ersätter standard-kungfrågan i §6.1 – vi kan
   inte ha båda på 5NT. Källa: svenskbridge.se (RKCB 1430).
+- **2026-06-26** – §6.4 **Gerber** nedskrivet: 4♣ = ess-fråga endast som hopp
+  direkt över naturlig NT (svar 4♦/4♥/4♠/4NT), 5♣ = kungfråga; mot färgkontrakt
+  används RKC. Källa: bridgebum.com. **Nästa gång:** fjärde färg krav, Drury,
+  Michaels eller försvarsbud (§7).
