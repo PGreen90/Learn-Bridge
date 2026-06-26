@@ -559,8 +559,9 @@ Drury, Jacoby 2NT, 1430 RKC Blackwood, Sjöbergs 5NT, Gerber.
 Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
 game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
 **Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), **stark 2♣ med
-2♦ väntebud** (§4.4), samt **Ogust** på svaga tvåor (§4.5) – beslutade
-2026-06-26. Källa: bridgebum.com.
+2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
+Blackwood**, **cue-bid** och **Sjöbergs 5NT** (§6) – beslutade 2026-06-26.
+Källor: bridgebum.com, svenskbridge.se.
 
 ### 6.1 1430 RKC Blackwood
 Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
@@ -577,8 +578,8 @@ Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
 - **Trumfdam-fråga:** efter 5♣/5♦-svar frågar billigaste icke-trumf om trumfdam.
   Svar: återgå till trumf = **ingen** dam; annat färgbud = **dam + kung** i den
   färgen; 5NT = dam **utan** sidokungar.
-- **5NT = kungfråga** (lovar alla 5 nyckelkort + trumfdam). Svar visar antal
-  kungar: 6♣ = 0, 6♦ = 1, 6♥ = 2, 6♠ = 3.
+- **5NT = kungfråga** (lovar alla 5 nyckelkort + trumfdam) – vi spelar
+  **Sjöbergs 5NT**, se §6.3.
 - Används efter t.ex. splinter, Jacoby 2NT, 2♣-träff eller cue-bid-sekvenser –
   när trumf är klar och man vet att inga två kontroller saknas.
 
@@ -593,6 +594,20 @@ naturligt utan visar en **kontroll**:
 Cue-bids används för att leta slam **innan** 1430 RKC: när båda visat kontroller
 i sidofärgerna och inget hål syns, frågar 4NT efter nyckelkorten.
 *Exempel:* 1♠–2♣–2♠ (fit) –4♣ (cue ♣-kontroll) –4♦ (cue ♦) –4NT (1430 RKC).
+
+### 6.3 Sjöbergs 5NT (kungfråga)
+Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
+storslam (lovar att inga nyckelkort saknas och att trumfdamen är under kontroll).
+Till skillnad från standard visar svararen **vilken** kung – inte hur många:
+
+| Svar | Betydelse |
+|---|---|
+| 6 i ny färg | kungen i den färgen (billigaste först) |
+| 6 i trumf | ingen sidokung |
+| 7 i trumf | två eller alla tre användbara kungar |
+
+Poängen: att veta exakt vilken kung partnern har avgör om en sidofärg ger nog
+med stick för storslam (t.ex. K-D mittemot ess).
 
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
@@ -675,3 +690,6 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   kontrollbud** (först-/andra-rondskontroll, billigaste först, leder in i RKC).
   Källa: bridgebum.com. **Nästa gång:** Gerber, Sjöbergs 5NT, fjärde färg krav,
   eller försvarsbud (§7).
+- **2026-06-26** – §6.3 **Sjöbergs 5NT** vald som kungfråga (svaret visar
+  *vilken* kung, inte antal) och ersätter standard-kungfrågan i §6.1 – vi kan
+  inte ha båda på 5NT. Källa: svenskbridge.se (RKCB 1430).
