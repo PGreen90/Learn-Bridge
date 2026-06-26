@@ -7,7 +7,7 @@
 ## 1. Översikt
 - **System:** Grundsystem 2 över 1 game force (2/1 GF)
 - **Par:** Fredrik Andersson & Patrik Green
-- **Bas:** 5-korts högfärger, svaga tvåöppningar (♦/♥/♠), stark 2♣
+- **Bas:** 5-korts hf, svaga tvåöppningar (♦/♥/♠), stark 2♣
 - **Källa:** `systemdeklaration2.pdf` (systemkort)
 
 ## 2. Markeringsstandard
@@ -19,7 +19,8 @@ Varje bud i en svarssekvens märks med tre saker:
 Konventionsbud märks i appen med en alert-markör (●) som visar betydelsen –
 som en alert vid bordet.
 
-Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
+Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force) ·
+**hf** = högfärg (♥/♠) · **lf** = lågfärg (♣/♦).
 
 ## 3. Öppningsbud
 
@@ -27,8 +28,8 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
 |---|---|---|---|
 | **1♣** | 3+ | 12+ hp | Naturlig (se minor-regeln) |
 | **1♦** | 3+ | 12+ hp | Naturlig (se minor-regeln) |
-| **1♥** | 5+ | 12+ hp | 5-korts högfärg |
-| **1♠** | 5+ | 12+ hp | 5-korts högfärg |
+| **1♥** | 5+ | 12+ hp | 5-korts hf |
+| **1♠** | 5+ | 12+ hp | 5-korts hf |
 | **1NT** | — | 15–17 hp | Balanserad. Konv: Stayman, Smolen, Jacoby, Minor Suit Stayman, Texas |
 | **2♣** | — | 22+ hp | Stark, konventionell (krav) |
 | **2♦ / 2♥ / 2♠** | 6 | 6–11 hp | Svaga tvåöppningar |
@@ -53,11 +54,11 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force).
 **Principer för höjningar (Bergen + splinter):**
 - Med **exakt 4 trumf** och ingen kortfärg används **Bergen-höjningar** på
   3-läget (standard): **3♣** = 7–10 hp (konstruktiv), **3♦** = 10–12 hp
-  (limit/inbjudan), **3 i högfärgen** = 0–6 hp (spärr). Bygger på lagen om
+  (limit/inbjudan), **3 i hf** = 0–6 hp (spärr). Bygger på lagen om
   totala stick (9 trumfer → 3-läget).
 - Med **3-korts** stöd: enkel höjning till 2-läget (6–9 hp). En **3-korts
   limithöjning** (10–12 hp) går via semi-forcing 1NT och sedan hopp till 3 i
-  högfärgen nästa vända (Bergen kräver exakt 4 trumf).
+  hf nästa vända (Bergen kräver exakt 4 trumf).
 - **Jacoby 2NT** = balanserad GF-höjning, 4+ trumf, 13+ hp, ingen kortfärg
   (oförändrad).
 - **Balanserad inbjudan utan stöd** (≈11–12 hp, högst 3-korts trumf) går via
@@ -123,11 +124,11 @@ passning, annars utgång. Singleton/renons mittemot öppnarens svaga färg höje
 värdet; honnörer mittemot svararens kortfärg är slöseri.
 
 #### Bergen — öppnarens fortsättning
-- Efter **3♣** (7–10): minimum → 3 i högfärgen (svararen passar). Med extra
+- Efter **3♣** (7–10): minimum → 3 i hf (svararen passar). Med extra
   styrka game-try via ny färg på 3-läget; med tillräckligt → utgång direkt.
-- Efter **3♦** (10–12): minimum kan stanna i 3 i högfärgen; annars utgång.
+- Efter **3♦** (10–12): minimum kan stanna i 3 i hf; annars utgång.
   Slamintresse → cue-bid.
-- Efter **spärrhöjningen** (3 i högfärgen): pass med < ~18 hp, annars utgång.
+- Efter **spärrhöjningen** (3 i hf): pass med < ~18 hp, annars utgång.
 
 #### Tvetydig splinter — relä och slamvärdering
 Svararens splinter visar 4+ trumf, kort färg (singleton el. renons) och ~12+ hp
@@ -197,14 +198,14 @@ trumf → 3 i trumf):
 Öppningen lovar 3+ kort (ibland "kort" via minor-regeln) och 12+ hp.
 
 **Principer:**
-- Bjud **4-korts högfärger först** på 1-läget, billigast först (krav 1 rond).
-- **1NT** är naturlig och **inte** krav (6–10 hp), förnekar 4-korts högfärg.
+- Bjud **4-korts hf först** på 1-läget, billigast först (krav 1 rond).
+- **1NT** är naturlig och **inte** krav (6–10 hp), förnekar 4-korts hf.
 - **Höjningar är inverterade:** 1m–2m = **stark** (10+ hp, krav, 4+ stöd, ingen
-  4-korts högfärg); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
+  4-korts hf); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
   spärrar direkt, den starka hålls låg för att få plats att utforska.
 - Ny färg på 2-läget utan hopp = **2-över-1 GF**. **Hoppskift** i ny färg
-  (t.ex. 1♣–2♥, 1♦–3♣) = **svaga** (6-korts färg, ~6–10 hp), som i högfärg.
-- "Gap-handen" 7–9 hp med stöd men utan högfärg: bjud **1NT** (inverterad
+  (t.ex. 1♣–2♥, 1♦–3♣) = **svaga** (6-korts färg, ~6–10 hp), som i hf.
+- "Gap-handen" 7–9 hp med stöd men utan hf: bjud **1NT** (inverterad
   höjning kräver 10+).
 
 #### Svar på 1♣
@@ -212,11 +213,11 @@ trumf → 3 i trumf):
 |---|---|---|---|
 | 1♦ | 4+ ♦, 6+ hp | Krav (1 rond) | naturligt |
 | 1♥ / 1♠ | 4+ färg, 6+ hp | Krav (1 rond) | naturligt (4-korts upp) |
-| 1NT | 6–10 hp, balanserad, ingen 4-korts högfärg | Ej krav | naturligt |
-| 2♣ | 4+ ♣, 10+ hp, ingen 4-korts högfärg | Krav (1 rond) | Inverterad minor ● |
+| 1NT | 6–10 hp, balanserad, ingen 4-korts hf | Ej krav | naturligt |
+| 2♣ | 4+ ♣, 10+ hp, ingen 4-korts hf | Krav (1 rond) | Inverterad minor ● |
 | 2♦ | 4+ (oftast 5+) ♦, 12+ hp | Utgångskrav | 2-över-1 GF |
 | 2♥ / 2♠ | 6-korts färg, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
-| 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts högfärg | Inbjudan | naturligt |
+| 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♣ | 5+ ♣, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
 | 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
 
@@ -224,11 +225,11 @@ trumf → 3 i trumf):
 | Svar | Betydelse | Kravnivå | Konvention |
 |---|---|---|---|
 | 1♥ / 1♠ | 4+ färg, 6+ hp | Krav (1 rond) | naturligt (4-korts upp) |
-| 1NT | 6–10 hp, balanserad, ingen 4-korts högfärg | Ej krav | naturligt |
+| 1NT | 6–10 hp, balanserad, ingen 4-korts hf | Ej krav | naturligt |
 | 2♣ | 4+ (oftast 5+) ♣, 12+ hp | Utgångskrav | 2-över-1 GF |
-| 2♦ | 4+ ♦, 10+ hp, ingen 4-korts högfärg | Krav (1 rond) | Inverterad minor ● |
+| 2♦ | 4+ ♦, 10+ hp, ingen 4-korts hf | Krav (1 rond) | Inverterad minor ● |
 | 2♥ / 2♠ | 6-korts färg, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
-| 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts högfärg | Inbjudan | naturligt |
+| 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♦ | 5+ ♦, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
 | 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
 
@@ -240,11 +241,11 @@ Efter den **starka höjningen** (1m–2m, krav) söker paret oftast **3NT**.
 |---|---|
 | ny färg (2-läget) | **stopp** i färgen, krav – letar 3NT |
 | 2NT | balanserad 12–14 hp, ingen utgångsiver (ej krav) |
-| 3 i minorn | minimum utan stopp att visa (ej krav) |
+| 3 i lf | minimum utan stopp att visa (ej krav) |
 | 3NT | balanserad 18–19 hp, till spel |
 
 Svararen fortsätter mot 3NT (visar stopp i objudna färger), drar till utgång i
-minorn, eller visar slamintresse via nya färger. Den **svaga höjningen** (1m–3m)
+lf, eller visar slamintresse via nya färger. Den **svaga höjningen** (1m–3m)
 är avslutande – öppnaren passar utan extra styrka.
 
 ## 5. Återbud (öppnarens andra bud)
@@ -300,3 +301,6 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   6–10 ej krav, **inverterade minorhöjningar** (1m–2m stark 10+ krav, 1m–3m svag
   spärr), 2/1 GF, svaga hoppskift, 2NT 11–12 inbjudan, 3NT 13–15. Öppnarens
   fortsättning efter stark höjning (stopp-visning → 3NT). Källa: bridgebum.com.
+- **2026-06-26** – Förkortningar införda i löptext: **hf** = högfärg, **lf** =
+  lågfärg (definierade i §2). Konventionsnamn (t.ex. "Inverterad minor", "Minor
+  Suit Stayman", "Minor-regeln") behålls oförändrade.
