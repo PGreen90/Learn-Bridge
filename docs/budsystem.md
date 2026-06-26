@@ -561,7 +561,9 @@ game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, *
 **Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), **stark 2♣ med
 2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
 Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber**, **Exclusion Blackwood**, **fjärde färg krav** och **Drury**
-(tvåvägs Reverse) (§6) – beslutade 2026-06-26. Källor: bridgebum.com,
+(tvåvägs Reverse) (§6), samt försvar/konkurrens (§7): **DONT** mot 1NT,
+**negativa/responsiva/stöddubblingar**, **Lebensohl**, **Michaels + ovanlig
+2NT** och **Mathe** – beslutade 2026-06-26. Källor: bridgebum.com,
 svenskbridge.se.
 
 ### 6.1 1430 RKC Blackwood
@@ -734,8 +736,46 @@ fråga om zon/styrka.
   3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
   längdinfo i konkurrens.
 
-*(Forts. följer: §7.4 Lebensohl, §7.5 mot deras 1NT (DONT), §7.6 mot stark 1♣
-(Mathe) / Multi 2♦ / svaga tvåor / spärrar.)*
+### 7.4 Lebensohl
+Verktyg för att skilja **svaga** händer från **utgångsvilliga** i två lägen:
+(a) efter partnerns **upplysningsdubbling av en svag tvåa**, och (b) efter att
+motståndaren **stört vårt 1NT-inkliv/öppning** på 2-läget.
+
+**Grundmekanik:**
+- **2NT = relä till 3♣** (puppet). Svararen passar 3♣ eller rättar till sin färg
+  på 3-läget = **svagt** (vill bara spela lågt).
+- **Direkt bud på 3-läget** (utan att gå via 2NT) = **utgångskrav** (starkare).
+- **Cue-bud i deras färg** = Stayman-aktigt / frågar efter högfärg, utgångskrav.
+
+**Stoppregel för 3NT ("slow shows"):** den **långsamma** vägen (2NT → sedan 3NT)
+**visar stopp** i deras färg; **direkt 3NT** förnekar stopp (ber partnern bjuda
+3NT med eget stopp).
+
+### 7.5 Mot motståndarnas 1NT — DONT
+DONT (Disturb Opponents' NoTrump): visa alla en- och tvåfärgshänder på 2-läget
+och kunna stanna lågt.
+
+| Bud | Betydelse |
+|---|---|
+| X | enfärgshand (oftast 6+); relä till 2♣ |
+| 2♣ | ♣ + en högre färg (5-4+) |
+| 2♦ | ♦ + en högre färg (5-4+) |
+| 2♥ | ♥ + ♠ (5-4+) |
+| 2♠ | enbart ♠ (6+), svagare än X följt av 2♠ |
+
+**Advancer:** efter X bjuds 2♣ som pass-eller-rätta; efter ett tvåfärgsbud passar
+man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer tillåtna
+– ännu lättare i återbudsläge (balansering).
+
+### 7.6 Mot konventionella och svaga öppningar
+- **Mot stark 1♣ (Mathe):** X = **båda högfärgerna**, 1NT = **båda minorerna**,
+  färgbud naturliga.
+- **Mot svaga tvåor:** upplysningsdubbling (takeout) + **Lebensohl** (§7.4);
+  2NT-inkliv = 15–18 balanserad med stopp; cue-bud = stark/Michaels-aktig.
+- **Mot Multi 2♦** (svag tvåa i okänd högfärg): X = stark/takeout-aktig hand
+  (~13+); 2NT = 15–18 balanserad; 2♥/2♠ = naturligt inkliv.
+- **Mot spärrar (3-läget+):** upplysningsdubbling (takeout); 3NT = till spel
+  (stopp + stick); cue-bud = stoppfråga/stark; färgbud naturliga.
 
 ## 8. Markeringar & utspel
 *(Senare.)* Lavinthal, UD upp t.o.m. 2 trick, utspel 1-3-5 mot färg och mot NT.
@@ -839,3 +879,7 @@ fråga om zon/styrka.
   1NT-inkliv återanvänder 1NT-systemet), §7.2 tvåfärgsinkliv (Michaels + ovanlig
   2NT, två zoner), §7.3 dubblingar nedskrivna. **Nästa gång:** §7.4 Lebensohl,
   §7.5 DONT, §7.6 mot stark 1♣/Multi/svaga tvåor/spärrar.
+- **2026-06-26** – §7 färdig: §7.4 **Lebensohl** (2NT-relä, direkt = GF, "slow
+  shows" stopp), §7.5 **DONT** mot deras 1NT (X/2♣/2♦/2♥/2♠ + advancer), §7.6
+  mot stark 1♣ (Mathe), svaga tvåor (+Lebensohl), Multi 2♦ och spärrar. Källa:
+  bridgebum.com. **Nästa gång:** §8 markeringar & utspel.
