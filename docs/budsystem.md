@@ -560,8 +560,9 @@ Antagna: **Bergen-höjningar** (standard), **tvetydig splinter** och **Bergen
 game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, **Jacoby-transfer**,
 **Smolen**, **Texas** och **Minor Suit Stayman** (§4.3), **stark 2♣ med
 2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
-Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber**, **Exclusion Blackwood** och **fjärde färg krav** (§6) –
-beslutade 2026-06-26. Källor: bridgebum.com, svenskbridge.se.
+Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber**, **Exclusion Blackwood**, **fjärde färg krav** och **Drury**
+(tvåvägs Reverse) (§6) – beslutade 2026-06-26. Källor: bridgebum.com,
+svenskbridge.se.
 
 ### 6.1 1430 RKC Blackwood
 Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
@@ -672,6 +673,23 @@ inbjudningsstyrka 10+ – kan ändras senare.)*
 bjudna på 1-läget, öppnaren har reverserat, eller svararen redan gjort hoppskift
 / 2-över-1.
 
+### 6.7 Drury (tvåvägs Reverse)
+Gäller när **svararen är passad hand** och partnern öppnar **1♥/1♠ i 3:e/4:e
+hand** (där lätta öppningar är vanliga). Begränsar höjningen så man inte hamnar
+för högt.
+
+| Svar (passad hand) | Betydelse | Konvention |
+|---|---|---|
+| 2♣ | limithöjning (~10–12 hp), exakt **3** trumf | Drury (tvåvägs) ● |
+| 2♦ | limithöjning (~10–12 hp), **4+** trumf | Drury (tvåvägs) ● |
+
+**Öppnarens återbud:**
+- **rebjuda högfärgen** (2♥/2♠) = lätt öppning, **signoff** (svararen passar).
+- **allt annat** (ny färg, utgång) = riktig öppning, accepterar utgång / visar
+  värden.
+
+Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam).
+
 ## 7. Försvarsbud
 *(Senare.)* Finns på kortet: 1NT-inkliv 15–18 (bra stopp), ovanlig 2NT (5-5
 lägsta), enkelt/dubbelt överbud, hoppinkliv, mot 1NT, mot stark 1♣ (Mathe),
@@ -769,3 +787,7 @@ mot Multi 2♦, mot svaga tvåor, mot spärrar.
   konstgjord, krav till utgång (GF), partnerns svarsprioritet (3-stöd → extra
   längd → NT med stopp), samt när den är av. Källa: bridgebum.com. **Nästa
   gång:** Drury, Michaels, upplysningsdubbling eller försvarsbud (§7).
+- **2026-06-26** – §6.7 **Drury (tvåvägs Reverse)** nedskrivet: passad hand över
+  1♥/1♠ i 3:e/4:e hand; 2♣ = limithöjning 3 stöd, 2♦ = 4+ stöd; öppnaren
+  rebjuder högfärgen = lätt (signoff), annars riktig öppning. Källa:
+  bridgebum.com. **Nästa gång:** Michaels, upplysningsdubbling eller §7.
