@@ -1,10 +1,61 @@
 import { describe, expect, it } from 'vitest'
 import type { Suit } from '../../types/bridge'
+import type { Major } from './responses'
 import { parseHand } from '../bidding'
-import { openerRebidAfter1LevelResponse } from './rebids'
+import type { ResponseResult } from './responses'
+import {
+  openerRebidAfter1LevelResponse,
+  openerRebidAfter1NTResponse,
+  openerRebidAfter2over1,
+  openerRebidAfterBergen,
+  openerRebidAfterInvertedMinor,
+  openerRebidAfterJacoby2NT,
+  openerRebidAfterLimitedResponse,
+  openerRebidAfterSemiForcing1NT,
+  openerRebidAfterSimpleRaise,
+  openerRebidAfterSplinter,
+} from './rebids'
 
 function reb(notation: string, opened: Suit, responder: Suit): string {
   return openerRebidAfter1LevelResponse(parseHand(notation), opened, responder).call
+}
+
+function sfnt(notation: string, M: Major): string {
+  return openerRebidAfterSemiForcing1NT(parseHand(notation), M).call
+}
+
+function raise(notation: string, M: Major): string {
+  return openerRebidAfterSimpleRaise(parseHand(notation), M).call
+}
+
+function twoOne(notation: string, opened: Suit, responder: Suit): string {
+  return openerRebidAfter2over1(parseHand(notation), opened, responder).call
+}
+
+function bergen(notation: string, M: Major, rule: string): string {
+  return openerRebidAfterBergen(parseHand(notation), M, rule).call
+}
+
+function splinter(notation: string, M: Major): string {
+  return openerRebidAfterSplinter(parseHand(notation), M).call
+}
+
+function jacoby(notation: string, M: Major): string {
+  return openerRebidAfterJacoby2NT(parseHand(notation), M).call
+}
+
+function invMinor(notation: string, m: Suit, strong: boolean): string {
+  return openerRebidAfterInvertedMinor(parseHand(notation), m, strong).call
+}
+
+function limited(notation: string, rule: string, call: string, opened: Suit): string {
+  const response: ResponseResult = { call, rule, explanation: '' }
+  return openerRebidAfterLimitedResponse(parseHand(notation), response, opened).call
+}
+
+function after1nt(rule: string, call: string, notation: string): string {
+  const response: ResponseResult = { call, rule, explanation: '' }
+  return openerRebidAfter1NTResponse(response, parseHand(notation))?.call ?? 'null'
 }
 
 describe('openerRebidAfter1LevelResponse', () => {
@@ -50,5 +101,171 @@ describe('openerRebidAfter1LevelResponse', () => {
 
   it('höjning av svararens minor (reservfall)', () => {
     expect(reb('S:32 H:K2 D:KJ85 C:AQ854', 'clubs', 'diamonds')).toBe('2D') // 13 hp, 4 stöd
+  })
+})
+
+describe('punkt 1 – återbud efter semi-forcing 1NT', () => {
+  it('rebjuder egen 6-korts färg (minimum)', () => {
+    expect(sfnt('S:3 H:AQ8742 D:K52 C:K42', 'hearts')).toBe('2H') // 12 hp, 6 hjärter
+  })
+
+  it('2NT med 18–19 balanserad', () => {
+    expect(sfnt('S:K3 H:AQ842 D:A32 C:KQ2', 'hearts')).toBe('2NT') // 18 hp, 5332
+  })
+
+  it('pass med 12–14 balanserad minimum', () => {
+    expect(sfnt('S:K3 H:AQ842 D:Q32 C:Q42', 'hearts')).toBe('P') // 13 hp, 5332
+  })
+
+  it('reverse 2♠ med 5-4 i hjärter-spader, 16+', () => {
+    expect(sfnt('S:KQ85 H:AQ842 D:AK C:42', 'hearts')).toBe('2S') // 18 hp, 5-4
+  })
+})
+
+describe('punkt 2 – återbud efter enkel höjning (Bergen game try)', () => {
+  it('pass med minimum', () => {
+    expect(raise('S:KQ742 H:K3 D:Q42 C:Q42', 'spades')).toBe('P') // 12 hp
+  })
+
+  it('2NT game try med 15–17', () => {
+    expect(raise('S:KQ742 H:KQ D:K42 C:Q42', 'spades')).toBe('2NT') // 15 hp
+  })
+
+  it('4♠ direkt med stark hand', () => {
+    expect(raise('S:AKQ74 H:AQ D:KJ2 C:Q42', 'spades')).toBe('4S') // 18+ hp
+  })
+})
+
+describe('punkt 3 – återbud efter 2-över-1 GF', () => {
+  it('rebjuder egen 6-korts färg', () => {
+    expect(twoOne('S:3 H:AKQ742 D:K52 C:Q2', 'hearts', 'clubs')).toBe('2H') // 14 hp
+  })
+
+  it('stöder svararens färg med 4', () => {
+    expect(twoOne('S:K3 H:AQ842 D:32 C:KQ42', 'hearts', 'clubs')).toBe('3C') // 4 stöd
+  })
+
+  it('visar ny 4-korts högfärg', () => {
+    expect(twoOne('S:AQ842 H:KJ85 D:3 C:K42', 'spades', 'diamonds')).toBe('2H') // 4 hjärter
+  })
+})
+
+describe('punkt 4 – återbud efter Bergen-höjningar', () => {
+  it('Bergen konstruktiv, minimum → stannar i 3 i färgen', () => {
+    expect(bergen('S:K3 H:AQ842 D:Q42 C:K42', 'hearts', 'Bergen konstruktiv')).toBe('3H') // 14 hp
+  })
+
+  it('Bergen konstruktiv, stark → utgång', () => {
+    expect(bergen('S:KQ H:AQ842 D:KJ2 C:K42', 'hearts', 'Bergen konstruktiv')).toBe('4H') // 18 hp
+  })
+
+  it('Bergen limit (10–12), 13+ → utgång', () => {
+    expect(bergen('S:K3 H:AQ842 D:Q42 C:Q42', 'hearts', 'Bergen limit')).toBe('4H') // 13 hp
+  })
+
+  it('Bergen spärr, minimum → pass', () => {
+    expect(bergen('S:K3 H:AQ842 D:Q42 C:Q42', 'hearts', 'Bergen spärr')).toBe('P') // 13 hp
+  })
+})
+
+describe('punkt 5 – återbud efter tvetydig splinter', () => {
+  it('slamintresse → relä (3NT över 1♥)', () => {
+    expect(splinter('S:K3 H:AKQ42 D:KJ2 C:Q42', 'hearts')).toBe('3NT') // 18 hp
+  })
+
+  it('relä 3♠ över 1♠', () => {
+    expect(splinter('S:AKQ42 H:K3 D:KJ2 C:Q42', 'spades')).toBe('3S') // 18 hp
+  })
+
+  it('minimum → signoff i utgång', () => {
+    expect(splinter('S:K3 H:AQ842 D:Q42 C:Q42', 'hearts')).toBe('4H') // 13 hp
+  })
+})
+
+describe('punkt 6 – återbud efter Jacoby 2NT', () => {
+  it('visar 5-korts sidofärg', () => {
+    expect(jacoby('S:3 H:AKQ42 D:42 C:AQ842', 'hearts')).toBe('4C') // 5 klöver
+  })
+
+  it('visar kort färg (singleton)', () => {
+    expect(jacoby('S:3 H:AKQ42 D:K942 C:Q42', 'hearts')).toBe('3S') // singel spader
+  })
+
+  it('slamintresse 16+ → 3 i trumf', () => {
+    expect(jacoby('S:K3 H:AKQ42 D:KQ2 C:Q42', 'hearts')).toBe('3H') // 19 hp balanserad
+  })
+
+  it('14 balanserad → 3NT', () => {
+    expect(jacoby('S:K3 H:AK842 D:Q42 C:Q42', 'hearts')).toBe('3NT') // 14 hp
+  })
+
+  it('minimum → signoff 4 i trumf', () => {
+    expect(jacoby('S:K3 H:AK842 D:J42 C:Q42', 'hearts')).toBe('4H') // 13 hp
+  })
+})
+
+describe('punkt 7 – återbud efter inverterade minorhöjningar', () => {
+  it('stark, balanserad 18–19 → 3NT', () => {
+    expect(invMinor('S:K3 H:AQ2 D:KQ842 C:KQ2', 'diamonds', true)).toBe('3NT') // 19 hp
+  })
+
+  it('stark, balanserad 12–14 → 2NT', () => {
+    expect(invMinor('S:K3 H:Q42 D:KQ842 C:Q42', 'diamonds', true)).toBe('2NT') // 12 hp
+  })
+
+  it('stark, obalanserad → stopp-visning i ny färg', () => {
+    expect(invMinor('S:KQ85 H:A2 D:KQ842 C:Q2', 'diamonds', true)).toBe('2S') // 16 hp, 5-4
+  })
+
+  it('svag spärrhöjning, minimum → pass', () => {
+    expect(invMinor('S:K3 H:Q42 D:KQ842 C:Q42', 'diamonds', false)).toBe('P') // 12 hp
+  })
+})
+
+describe('punkt 8 – återbud efter begränsade svar', () => {
+  it('3NT till spel → pass', () => {
+    expect(limited('S:K3 H:AQ842 D:Q42 C:Q42', '3NT till spel', '3NT', 'hearts')).toBe('P')
+  })
+
+  it('2NT-inbjudan, 14+ → 3NT', () => {
+    expect(limited('S:KQ3 H:KJ2 D:Q42 C:AQ42', '2NT inbjudan', '2NT', 'clubs')).toBe('3NT') // 17 hp
+  })
+
+  it('2NT-inbjudan, minimum → pass', () => {
+    expect(limited('S:32 H:Q42 D:Q42 C:AKQ42', '2NT inbjudan', '2NT', 'clubs')).toBe('P') // 13 hp
+  })
+
+  it('svagt hoppskift, minimum → pass', () => {
+    expect(limited('S:K3 H:K42 D:Q842 C:AQ42', 'svagt hoppskift', '2H', 'clubs')).toBe('P') // 14 hp
+  })
+})
+
+describe('punkt 9 – öppnarens fullföljanden efter 1NT-svar', () => {
+  it('Stayman → 2♥ med 4 hjärter', () => {
+    expect(after1nt('Stayman', '2C', 'S:K3 H:KQ85 D:A42 C:KJ42')).toBe('2H')
+  })
+
+  it('Stayman → 2♠ med 4 spader utan 4 hjärter', () => {
+    expect(after1nt('Stayman', '2C', 'S:KQ85 H:K3 D:A42 C:KJ42')).toBe('2S')
+  })
+
+  it('Stayman → 2♦ utan 4-korts högfärg', () => {
+    expect(after1nt('Stayman', '2C', 'S:QJ3 H:K3 D:AQ42 C:KQ42')).toBe('2D')
+  })
+
+  it('fullföljer Jacoby-transfer till hjärter', () => {
+    expect(after1nt('Jacoby-transfer', '2D', 'S:KQ3 H:K3 D:AQ42 C:KQJ2')).toBe('2H')
+  })
+
+  it('superaccept med 4 stöd och maximum', () => {
+    expect(after1nt('Jacoby-transfer', '2D', 'S:Q3 H:KQ85 D:AQ43 C:KJ4')).toBe('3H') // 17 hp, 4 hjärter
+  })
+
+  it('fullföljer Texas till spader', () => {
+    expect(after1nt('Texas', '4H', 'S:KQ3 H:K3 D:AQ42 C:KJ42')).toBe('4S')
+  })
+
+  it('Minor Suit Stayman → 3♣ med 4 klöver', () => {
+    expect(after1nt('Minor Suit Stayman', '2S', 'S:K32 H:KQ3 D:A42 C:KQ42')).toBe('3C')
   })
 })

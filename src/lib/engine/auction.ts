@@ -8,7 +8,7 @@ import { dealRandom } from './deal'
 import { classifyOpening } from './openings'
 import { respondToMajor, respondToMinor, type Major, type ResponseResult } from './responses'
 import { respondTo1NT } from './responses-nt'
-import { openerRebidAfter1LevelResponse } from './rebids'
+import { openerSecondBid } from './rebids'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -120,18 +120,17 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   const response = computeResponse(opening.call, deal.hands[responderSeat])
   turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
 
-  // Öppnarens återbud – bara efter ett 1-läges nytt färgsvar (§5.2).
-  const opened = OPEN_SUIT[opening.call]
-  const respMatch = response.call.match(/^1(D|H|S)$/)
-  const RESP_SUIT: Record<string, Major | 'diamonds'> = { D: 'diamonds', H: 'hearts', S: 'spades' }
-  if (opened !== undefined && respMatch && response.call !== opening.call) {
-    const responderSuit = RESP_SUIT[respMatch[1]]
-    const rebid = openerRebidAfter1LevelResponse(deal.hands[openerSeat], opened, responderSuit)
+  // Svararen passade → utbjudet kontrakt, auktionen är slut.
+  if (response.call === 'P') return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+
+  // Öppnarens återbud (dispatchas på öppning + svar).
+  const rebid = openerSecondBid(opening.call, response, deal.hands[openerSeat])
+  if (rebid) {
     turns.push({ seat: openerSeat, role: 'öppnare', call: rebid.call, rule: rebid.rule, explanation: rebid.explanation, uncertain: rebid.uncertain })
-    return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+    return { openerSeat, responderSeat, openCall: opening.call, turns, open: rebid.call !== 'P' }
   }
 
-  // Övriga svar (höjning, NT, 2/1, transfer …): återbud kommer i ett senare steg.
+  // Inget återbud ännu (svarstyp utan regel): auktionen fortsätter senare.
   return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
 }
 
