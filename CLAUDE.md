@@ -45,12 +45,12 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   gratis/statiskt; människor online = framtid med backend). Kvalitet före tempo.
 - **Budmotor** byggs som modul i `src/lib/engine/` som omsätter systemboken
   (`docs/budsystem.md`) till kod, avsnitt för avsnitt, test-drivet (`npm test`).
-  Status: **M1–M3 klara**. Spela-fliken bygger hela (ostörda) auktioner
-  öppning → svar → öppnarens återbud för de fem öppningarna 1♣/1♦/1♥/1♠/1NT
-  (öppnaren har återbud efter alla svar utom rena pass-out). Hela kartan över
+  Status: **M1–M3 klara + punkt 10–12**. Spela-fliken bygger ostörda auktioner
+  öppning → svar → öppnarens återbud → **svararens andra bud** för de fem
+  öppningarna 1♣/1♦/1♥/1♠/1NT (~40 % av givarna når fyra bud). Hela kartan över
   vad som återstår ligger i **`docs/arbetslista.md`** (punkt 1–32).
-  **Nästa:** svararens andra bud (punkt 10–12), sedan svarsmotorer för
-  2♣/svaga tvåor/spärrar/2NT (13–16), därefter kortspel (DDS-solver + spelläge).
+  **Nästa: punkt 13** – svar på stark 2♣ (§4.4), sedan svaga tvåor/spärrar/2NT
+  (14–16), därefter kortspel (DDS-solver + spelläge).
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).
