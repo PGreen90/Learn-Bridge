@@ -10,6 +10,7 @@ import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
+import { openerRebidAfterOgust, openerRebidAfterNewSuit, suitOfWeakTwo } from './responses-weak2'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
@@ -339,6 +340,24 @@ export function openerRebidAfter1NTResponse(response: ResponseResult, hand: Hand
 /** Öppnarens återbud givet öppningsbud + svararens svar. null = ingen regel än. */
 export function openerSecondBid(openCall: string, response: ResponseResult, hand: Hand): ResponseResult | null {
   if (response.call === 'P') return null
+
+  // §4.5 – svag tvåöppning (2♦/2♥/2♠).
+  const weak = suitOfWeakTwo(openCall)
+  if (weak) {
+    switch (response.rule) {
+      case 'Ogust':
+        return openerRebidAfterOgust(hand, weak)
+      case 'ny färg (krav)': {
+        const ns = suitOfCall(response.call)
+        return ns ? openerRebidAfterNewSuit(hand, weak, ns) : null
+      }
+      case 'spärrhöjning':
+      case '3NT till spel':
+        return { call: 'P', rule: 'rebid: pass', explanation: 'Öppnaren passar (svararens bud är begränsat).' }
+      default:
+        return null
+    }
+  }
 
   // §5.2 – svararen visade ny färg på 1-läget.
   if (response.rule === 'ny färg (1-läget)' && /^1(D|H|S)$/.test(response.call)) {

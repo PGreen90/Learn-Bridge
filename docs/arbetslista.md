@@ -60,4 +60,8 @@
 - ✅ Punkt **13** (svar på stark 2♣: 2♦ väntebud, positiva svar, öppnarens
   2NT/3NT/krav-färg och svararens **andra negativa**) – `responses-2c.ts`.
   Avgränsning: NT-grenen över 2NT (22–24) tas senare (överlappar §4.3).
-- 🔜 Nästa: punkt **14** (svar på svaga tvåöppningar 2♦/2♥/2♠ + Ogust, §4.5)
+- ✅ Punkt **14** (svar på svaga tvåor 2♦/2♥/2♠: spärrhöjning, ny färg krav,
+  **2NT Ogust** + öppnarens stegsvar, svararens placering) – `responses-weak2.ts`.
+  Avgränsning: minorfärgens placering efter Ogust (utgång på 5-läget) är
+  förenklad och flaggad.
+- 🔜 Nästa: punkt **15** (svar på spärröppningar 3-/4-läget, §4.6)

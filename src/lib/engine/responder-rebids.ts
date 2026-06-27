@@ -8,6 +8,7 @@ import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
 import { responderSecondBidAfter2C } from './responses-2c'
+import { responderPlaceAfterOgust, suitOfWeakTwo } from './responses-weak2'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
@@ -71,6 +72,12 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
   // Punkt 13 – svararens andra bud efter stark 2♣ (andra negativa m.m.).
   if (openCall === '2C') {
     return responderSecondBidAfter2C(hand, response, rebid)
+  }
+
+  // Punkt 14 – svararen placerar kontraktet efter Ogust på svag tvåa.
+  const weak = suitOfWeakTwo(openCall)
+  if (weak && response.rule === 'Ogust') {
+    return responderPlaceAfterOgust(hand, weak, rebid)
   }
 
   return null

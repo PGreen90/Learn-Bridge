@@ -960,3 +960,10 @@ Det avslöjar längd/räkning direkt för partnern.
   Inkopplat i auktionsbyggaren (2♣ är nu en svarbar öppning). Avgränsning:
   NT-stegen över öppnarens 2NT (22–24) tas senare (överlappar §4.3). Kod, inte
   systemändring. **Nästa gång:** punkt 14 – svar på svaga tvåöppningar + Ogust (§4.5).
+- **2026-06-27** – Budmotorn: **punkt 14** (svar på svaga tvåor 2♦/2♥/2♠, §4.5) i
+  koden (`responses-weak2.ts`): svararens **spärrhöjning**, **ny färg (krav)**,
+  **2NT Ogust** + öppnarens stegsvar (3♣/3♦/3♥/3♠/3NT enligt min/max + topp-
+  honnörer) och svararens placering av kontraktet. Inkopplat i auktionsbyggaren
+  (2♦/2♥/2♠ är nu svarbara öppningar). Avgränsning: minorfärgens placering efter
+  Ogust (utgång på 5-läget) förenklad och flaggad. Kod, inte systemändring.
+  **Nästa gång:** punkt 15 – svar på spärröppningar 3-/4-läget (§4.6).
