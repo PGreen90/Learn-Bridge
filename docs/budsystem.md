@@ -941,3 +941,11 @@ Det avslöjar längd/räkning direkt för partnern.
 - **2026-06-26** – Honnörsutspel rättat (§8.3): **ess** (inte kung) leds från
   A-K – äkta top of sequence. Gör topputspelen entydiga (A = A-K, K = K-D);
   tvetydighetsnoten borttagen.
+- **2026-06-27** – Budmotorn: **M3 klar**. Svar på 1♣/1♦ (§4.2) och 1NT (§4.3)
+  i koden, samt **öppnarens återbud efter alla svar** (punkt 1–9): semi-forcing
+  1NT (§5.1), Bergen game try + Bergen-fortsättning + splinter-relä + Jacoby 2NT
+  (§4.1), 2-över-1 (§5.3), inverterade minorhöjningar (§4.2) och 1NT-grenens
+  fullföljanden (Stayman/Jacoby/Texas/MSS, §4.3). Spela-fliken bygger nu hela
+  ostörda auktioner. Detta är **kod**, inte systemändringar – systemboken
+  oförändrad. Arbetslista för resten: **`docs/arbetslista.md`** (punkt 1–32).
+  **Nästa gång:** punkt 10 – svararens andra bud efter semi-forcing 1NT.
