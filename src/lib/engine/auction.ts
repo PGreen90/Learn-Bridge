@@ -9,6 +9,7 @@ import { classifyOpening } from './openings'
 import { respondToMajor, respondToMinor, type Major, type ResponseResult } from './responses'
 import { respondTo1NT } from './responses-nt'
 import { openerSecondBid } from './rebids'
+import { responderSecondBid } from './responder-rebids'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -125,12 +126,23 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
 
   // Öppnarens återbud (dispatchas på öppning + svar).
   const rebid = openerSecondBid(opening.call, response, deal.hands[openerSeat])
-  if (rebid) {
-    turns.push({ seat: openerSeat, role: 'öppnare', call: rebid.call, rule: rebid.rule, explanation: rebid.explanation, uncertain: rebid.uncertain })
-    return { openerSeat, responderSeat, openCall: opening.call, turns, open: rebid.call !== 'P' }
+  if (!rebid) {
+    // Inget återbud ännu (svarstyp utan regel): auktionen fortsätter senare.
+    return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+  }
+  turns.push({ seat: openerSeat, role: 'öppnare', call: rebid.call, rule: rebid.rule, explanation: rebid.explanation, uncertain: rebid.uncertain })
+
+  // Öppnaren passade svararens bud → kontraktet är satt.
+  if (rebid.call === 'P') return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+
+  // Svararens andra bud (dispatchas på hela sekvensen).
+  const second = responderSecondBid(opening.call, response, rebid, deal.hands[responderSeat])
+  if (second) {
+    turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
+    return { openerSeat, responderSeat, openCall: opening.call, turns, open: second.call !== 'P' }
   }
 
-  // Inget återbud ännu (svarstyp utan regel): auktionen fortsätter senare.
+  // Svararens andra bud saknar regel än: auktionen fortsätter senare.
   return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
 }
 

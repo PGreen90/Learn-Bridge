@@ -53,5 +53,8 @@
 32. Övningar i JSON som tränar de nya bitarna i budträningen
 
 ## Status
-- ✅ M1 öppningar, M2 svar på 1♥/1♠, M3 svar på 1♣/1♦ + 1NT + §5.2 (1-läges färgsvar)
-- 🔧 Pågår: punkt **1–9** (öppnarens återbud efter övriga svar)
+- ✅ M1 öppningar, M2 svar på 1♥/1♠, M3 svar på 1♣/1♦ + 1NT + §5.2
+- ✅ Punkt **1–9** (öppnarens återbud efter alla svar)
+- ✅ Punkt **10–12** (svararens andra bud: semi-forcing 1NT, Smolen/transfer-
+  fortsättning, fjärde färg krav) – `responder-rebids.ts`
+- 🔜 Nästa: punkt **13** (svar på stark 2♣, §4.4)

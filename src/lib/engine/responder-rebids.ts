@@ -1,0 +1,270 @@
+// Budmotorns femte del: SVARARENS andra bud (turn 4), efter öppnarens återbud.
+// Här beror budet på hela sekvensen, så varje gren har sin egen funktion och en
+// dispatcher (responderSecondBid) väljer rätt. Byggs punkt för punkt enligt
+// docs/arbetslista.md (10–12). Saknas en regel returneras null → auktionen
+// stannar (som tidigare) tills regeln finns.
+
+import type { Hand, Suit } from '../../types/bridge'
+import { hcp, isBalanced, lengths } from './hand'
+import type { Major, ResponseResult } from './responses'
+
+const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
+const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+const RANK: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+const rankOf = (s: Suit) => RANK.indexOf(s)
+
+function suitOfCall(call: string): Suit | null {
+  const m = call.match(/^\d(C|D|H|S)$/)
+  return m ? ({ C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' } as Record<string, Suit>)[m[1]] : null
+}
+
+/** Snyggt bud med färgsymbol ("2D" → "2♦"). */
+function pretty(call: string): string {
+  const m = call.match(/^(\d)(C|D|H|S|NT)$/)
+  if (!m) return call
+  return m[2] === 'NT' ? `${m[1]}NT` : `${m[1]}${SYM[suitOfCall(call)!]}`
+}
+
+/** Lägsta lagliga budet i `suit` ovanför ett färgbud `refCall`. */
+function bidAbove(suit: Suit, refCall: string): string {
+  const refSuit = suitOfCall(refCall)
+  const refLevel = parseInt(refCall[0], 10)
+  const level = refSuit && rankOf(suit) > rankOf(refSuit) ? refLevel : refLevel + 1
+  return `${level}${BID[suit]}`
+}
+
+/** Grov stopp-koll för NT: A, Kx, Qxx eller Jx10x+. */
+function hasStopper(hand: Hand, suit: Suit): boolean {
+  const ranks = hand.filter((c) => c.suit === suit).map((c) => c.rank)
+  const n = ranks.length
+  const has = (r: string) => ranks.includes(r as never)
+  if (has('A')) return true
+  if (has('K') && n >= 2) return true
+  if (has('Q') && n >= 3) return true
+  if (has('J') && has('10') && n >= 4) return true
+  return false
+}
+
+/** Svararens andra bud. null = ingen regel för sekvensen än. */
+export function responderSecondBid(openCall: string, response: ResponseResult, rebid: ResponseResult, hand: Hand): ResponseResult | null {
+  if (rebid.call === 'P') return null
+
+  // Punkt 10 – efter semi-forcing 1NT (1♥/1♠–1NT–…).
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'semi-forcing 1NT') {
+    return responderRebidAfterSemiForcing1NT(hand, openCall === '1H' ? 'hearts' : 'spades', rebid)
+  }
+
+  // Punkt 11 – 1NT-auktioner (Smolen + fortsättning efter transfer/Stayman).
+  if (openCall === '1NT') {
+    return responderRebidIn1NTAuction(response, rebid, hand)
+  }
+
+  // Punkt 12 – färgauktioner efter ett 1-läges färgsvar (fjärde färg krav m.m.).
+  if (['1C', '1D', '1H', '1S'].includes(openCall) && response.rule === 'ny färg (1-läget)') {
+    const opened = suitOfCall(openCall)
+    const responderSuit = suitOfCall(response.call)
+    if (opened && responderSuit) return responderRebidColorAuction(hand, opened, responderSuit, rebid)
+  }
+
+  return null
+}
+
+// === Punkt 10: svararens andra bud efter semi-forcing 1NT, §5.1 =============
+
+export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: ResponseResult): ResponseResult | null {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const bal = isBalanced(hand)
+  const mBid = BID[M]
+  const mSym = SYM[M]
+  const call = rebid.call
+  const rs = suitOfCall(call)
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${p} hp – ${why} → pass.` })
+
+  if (call === 'P') return null
+  if (call === `4${mBid}`) return pass('öppnaren bjöd utgång')
+
+  // Öppnaren rebjöd sin högfärg (6+).
+  if (call === `2${mBid}`) {
+    if (len[M] >= 3 && p >= 10) return { call: `3${mBid}`, rule: 'inbjudan', explanation: `${p} hp, ${len[M]} stöd → 3${mSym} (3-korts limithöjning).` }
+    if (p >= 11) return { call: '2NT', rule: 'inbjudan', explanation: `${p} hp → 2NT (inbjudan).` }
+    return pass('preferens, minimum')
+  }
+  if (call === `3${mBid}`) return p >= 8 ? { call: `4${mBid}`, rule: 'accepterar', explanation: `${p} hp – accepterar → 4${mSym}.` } : pass('minimum')
+
+  // Öppnaren bjöd 2NT (18–19).
+  if (call === '2NT') return p >= 7 ? { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot 18–19 → 3NT.` } : pass('minimum balanserad')
+
+  // Hoppskift (3♣/3♦, GF) – krav: preferens med stöd, annars 3NT.
+  if (rebid.rule === 'rebid: hoppskift') {
+    if (len[M] >= 3) return { call: `3${mBid}`, rule: 'preferens (GF)', explanation: `${p} hp, ${len[M]} stöd → 3${mSym} (preferens, GF).` }
+    return { call: '3NT', rule: 'till spel', explanation: `${p} hp – ingen fit → 3NT.` }
+  }
+  // Reverse (2♠ över 1♥) – krav.
+  if (rebid.rule === 'rebid: reverse') {
+    if (len[M] >= 3) return { call: `3${mBid}`, rule: 'preferens (GF)', explanation: `${p} hp, ${len[M]} stöd → 3${mSym} (preferens, krav).` }
+    return { call: '2NT', rule: 'krav-svar', explanation: `${p} hp – krav efter reverse → 2NT.` }
+  }
+
+  // Naturlig ny färg (2♣/2♦, eller 2♥ över 1♠) – ej krav.
+  if (rs && rs !== M) {
+    if (len[M] >= 3 && p >= 10) return { call: `3${mBid}`, rule: 'inbjudan (limithöjning)', explanation: `${p} hp, ${len[M]} stöd → 3${mSym} (limithöjning).` }
+    if (len[rs] >= 4 && p <= 10) return pass(`stöd i ${NAME[rs]}`)
+    if (p >= 11 && bal) return { call: '2NT', rule: 'inbjudan', explanation: `${p} hp balanserad → 2NT (inbjudan).` }
+    if (len[M] >= 2 && rankOf(M) > rankOf(rs)) return { call: `2${mBid}`, rule: 'preferens', explanation: `${p} hp – preferens → 2${mSym}.` }
+    return pass('inget bättre')
+  }
+
+  return null
+}
+
+// === Punkt 11: svararens andra bud i 1NT-auktioner, §4.3 ====================
+
+export function responderRebidIn1NTAuction(response: ResponseResult, rebid: ResponseResult, hand: Hand): ResponseResult | null {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const sp = len.spades
+  const he = len.hearts
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${p} hp – ${why} → pass.` })
+
+  switch (response.rule) {
+    case 'Stayman': {
+      if (rebid.call === '2D') {
+        // Öppnaren förnekade 4-korts högfärg.
+        if (((sp === 5 && he === 4) || (he === 5 && sp === 4)) && p >= 10) {
+          const call = sp === 5 && he === 4 ? '3H' : '3S' // hoppa i den KORTARE högfärgen
+          return { call, rule: 'Smolen', explanation: `${p} hp, 5-4 i högfärgerna → ${SYM[suitOfCall(call)!]} på 3-läget (Smolen, GF).` }
+        }
+        return p >= 10
+          ? { call: '3NT', rule: 'till spel', explanation: `${p} hp utan fit → 3NT.` }
+          : { call: '2NT', rule: 'inbjudan', explanation: `${p} hp utan fit → 2NT (inbjudan).` }
+      }
+      // Öppnaren visade en högfärg (2♥/2♠).
+      const target = suitOfCall(rebid.call)
+      if (target && len[target] >= 4) {
+        return p >= 10
+          ? { call: `4${BID[target]}`, rule: 'utgång', explanation: `${p} hp + fit → 4${SYM[target]}.` }
+          : { call: `3${BID[target]}`, rule: 'inbjudan', explanation: `${p} hp + fit → 3${SYM[target]} (inbjudan).` }
+      }
+      return p >= 10
+        ? { call: '3NT', rule: 'till spel', explanation: `${p} hp utan fit → 3NT.` }
+        : { call: '2NT', rule: 'inbjudan', explanation: `${p} hp utan fit → 2NT (inbjudan).` }
+    }
+
+    case 'Jacoby-transfer': {
+      const target: Suit = response.call === '2D' ? 'hearts' : 'spades'
+      const tBid = BID[target]
+      const tSym = SYM[target]
+      if (rebid.rule === 'superaccept') return { call: `4${tBid}`, rule: 'utgång', explanation: `${p} hp – accepterar superaccept → 4${tSym}.` }
+      if (len[target] >= 6) {
+        if (p >= 10) return { call: `4${tBid}`, rule: 'utgång', explanation: `${p} hp, 6+ ${NAME[target]} → 4${tSym}.` }
+        if (p >= 8) return { call: `3${tBid}`, rule: 'inbjudan', explanation: `${p} hp, 6+ ${NAME[target]} → 3${tSym} (inbjudan).` }
+        return pass('svag enfärgshand')
+      }
+      // Exakt 5-korts högfärg, balanserad.
+      if (p >= 10) return { call: '3NT', rule: 'till spel', explanation: `${p} hp, 5 ${NAME[target]} → 3NT (öppnaren väljer 3NT/4 i färgen).` }
+      if (p >= 8) return { call: '2NT', rule: 'inbjudan', explanation: `${p} hp, 5 ${NAME[target]} → 2NT (inbjudan).` }
+      return pass('svag, 5-korts högfärg')
+    }
+
+    case 'Texas':
+      return pass('Texas – öppnaren fullföljde i utgång')
+
+    case '2NT inbjudan':
+    case '3NT till spel':
+    case '4NT kvantitativ':
+      return pass('kontraktet är satt')
+
+    default:
+      return null // Minor Suit Stayman-fortsättning m.m. tas senare
+  }
+}
+
+// === Punkt 12: svararens andra bud i färgauktioner (fjärde färg krav), §6.6 ==
+
+export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSuit: Suit, rebid: ResponseResult): ResponseResult | null {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const y = responderSuit
+  const yMaj = y === 'hearts' || y === 'spades'
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${p} hp – ${why} → pass.` })
+  const ntLadder = (): ResponseResult => (p >= 13
+    ? { call: '3NT', rule: 'till spel', explanation: `${p} hp → 3NT.` }
+    : p >= 11
+      ? { call: '2NT', rule: 'inbjudan', explanation: `${p} hp → 2NT (inbjudan).` }
+      : pass('minimum'))
+
+  switch (rebid.rule) {
+    // Öppnaren höjde svararens färg.
+    case 'höjning till utgång':
+      return pass('öppnaren bjöd utgång')
+    case 'hopphöjning (inbjudan)':
+      return p >= 8 ? { call: `4${BID[y]}`, rule: 'accepterar', explanation: `${p} hp – accepterar → 4${SYM[y]}.` } : pass('minimum')
+    case 'enkel höjning':
+      if (yMaj) {
+        if (p >= 13) return { call: `4${BID[y]}`, rule: 'utgång', explanation: `${p} hp → 4${SYM[y]}.` }
+        if (p >= 11) return { call: `3${BID[y]}`, rule: 'inbjudan', explanation: `${p} hp → 3${SYM[y]} (inbjudan).` }
+        return pass('minimum')
+      }
+      return ntLadder()
+    case 'höjning av minor':
+      return ntLadder()
+
+    // Öppnaren visade balanserat eller egen färg.
+    case '2NT (18–19)':
+      return { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot 18–19 → 3NT.` }
+    case '1NT (12–14)':
+      return ntLadder()
+    case 'rebjuden färg':
+      if (len[opened] >= 2 && p <= 10) return pass(`preferens ${NAME[opened]}`)
+      return ntLadder()
+    case 'hopp i egen färg (inbjudan)':
+      return p >= 8 ? { call: '3NT', rule: 'till spel', explanation: `${p} hp – accepterar → 3NT.` } : pass('minimum')
+
+    // Öppnaren visade en NY färg → fjärde färg krav blir aktuellt.
+    case 'ny färg (1-läget)':
+    case 'ny färg (2-läget)':
+    case 'reverse': {
+      const second = suitOfCall(rebid.call)
+      if (second) return fourthSuit(hand, opened, y, second, rebid)
+      return null
+    }
+
+    default:
+      return null // 'oklart' m.m.
+  }
+}
+
+/** Svararens val när tre färger är bjudna: fit, egen färg, fjärde färg (krav) eller preferens. */
+function fourthSuit(hand: Hand, x: Suit, y: Suit, second: Suit, rebid: ResponseResult): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const bal = isBalanced(hand)
+  const fourth = RANK.find((s) => s !== x && s !== y && s !== second)!
+
+  // 1. Fit i öppnarens andra färg.
+  if (len[second] >= 4) {
+    const call = bidAbove(second, rebid.call)
+    return { call, rule: 'höjning', explanation: `${p} hp, ${len[second]} stöd i ${NAME[second]} → ${pretty(call)}.` }
+  }
+  // 2. Egen 6-korts färg.
+  if (len[y] >= 6) {
+    const call = bidAbove(y, rebid.call)
+    return { call, rule: 'rebjuden färg', explanation: `${p} hp med 6+ ${NAME[y]} → ${pretty(call)}.` }
+  }
+  // 3. GF utan naturligt bud → 3NT med stopp, annars fjärde färg krav.
+  if (p >= 12) {
+    if (bal && hasStopper(hand, fourth)) return { call: '3NT', rule: 'till spel', explanation: `${p} hp, stopp i ${NAME[fourth]} → 3NT.` }
+    const call = bidAbove(fourth, rebid.call)
+    return { call, rule: 'fjärde färg krav', explanation: `${p} hp, GF utan naturligt bud → ${pretty(call)} (fjärde färg, krav).` }
+  }
+  // 4. Inbjudan balanserad.
+  if (bal && p >= 11) return { call: '2NT', rule: 'inbjudan', explanation: `${p} hp balanserad → 2NT (inbjudan).` }
+  // 5. Preferens till öppnarens första färg, annars pass.
+  if (len[x] >= 2) {
+    const call = bidAbove(x, rebid.call)
+    return { call, rule: 'preferens', explanation: `${p} hp – preferens → ${pretty(call)}.` }
+  }
+  return { call: 'P', rule: 'svararens pass', explanation: `${p} hp – inget bättre → pass.` }
+}
