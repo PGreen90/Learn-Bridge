@@ -10,8 +10,21 @@ import { SuitSymbol } from '../components/SuitSymbol'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 
-const SEATS: Seat[] = ['N', 'E', 'S', 'W']
 const SUIT_OF: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
+
+/** Liten kompass i mitten av bordet (Nord upp, Väst vänster, Öst höger, Syd ner). */
+function CompassRose() {
+  return (
+    <div className="hidden sm:flex items-center justify-center self-stretch">
+      <div className="relative h-20 w-20 rounded-md border border-slate-300 text-slate-500 text-sm font-semibold">
+        <span className="absolute left-1/2 top-1 -translate-x-1/2">N</span>
+        <span className="absolute left-1 top-1/2 -translate-y-1/2">V</span>
+        <span className="absolute right-1 top-1/2 -translate-y-1/2">Ö</span>
+        <span className="absolute left-1/2 bottom-1 -translate-x-1/2">S</span>
+      </div>
+    </div>
+  )
+}
 
 /** Visar ett bud snyggt: "Pass", "1 NT" eller "1 ♠" (med färgsymbol). */
 function BidTag({ call }: { call: string }) {
@@ -43,6 +56,36 @@ export function Spela() {
     if (found) setDeal(found.deal)
   }
 
+  function seatPanel(seat: Seat) {
+    const hand = deal.hands[seat]
+    const r = classifyOpening(hand)
+    const isOpener = auction?.openerSeat === seat
+    const isResponder = hasResponse && auction?.responderSeat === seat
+    return (
+      <Panel
+        key={seat}
+        className={`!p-4 ${isOpener ? 'ring-2 ring-emerald-500' : isResponder ? 'ring-2 ring-sky-400' : ''}`}
+      >
+        <div className="flex items-baseline justify-between mb-2">
+          <span className="font-semibold">
+            {SEAT_LABEL[seat]}
+            {deal.dealer === seat && <span className="ml-2 text-xs text-slate-500">(giv)</span>}
+            {isOpener && <span className="ml-2 text-xs text-emerald-600">öppnare</span>}
+            {isResponder && <span className="ml-2 text-xs text-sky-600">svarare</span>}
+          </span>
+          <span className="text-lg">
+            <BidTag call={r.call} />
+          </span>
+        </div>
+        <HandView hand={hand} />
+        <p className="mt-2 text-sm text-slate-600">
+          {r.explanation}
+          {r.uncertain && <span className="ml-1 text-amber-600">⚑ osäker – kan vara stark 2♣</span>}
+        </p>
+      </Panel>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <header>
@@ -66,36 +109,20 @@ export function Spela() {
         </Button>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        {SEATS.map((seat) => {
-          const hand = deal.hands[seat]
-          const r = classifyOpening(hand)
-          const isOpener = auction?.openerSeat === seat
-          const isResponder = hasResponse && auction?.responderSeat === seat
-          return (
-            <Panel
-              key={seat}
-              className={`!p-4 ${isOpener ? 'ring-2 ring-emerald-500' : isResponder ? 'ring-2 ring-sky-400' : ''}`}
-            >
-              <div className="flex items-baseline justify-between mb-2">
-                <span className="font-semibold">
-                  {SEAT_LABEL[seat]}
-                  {deal.dealer === seat && <span className="ml-2 text-xs text-slate-500">(giv)</span>}
-                  {isOpener && <span className="ml-2 text-xs text-emerald-600">öppnare</span>}
-                  {isResponder && <span className="ml-2 text-xs text-sky-600">svarare</span>}
-                </span>
-                <span className="text-lg">
-                  <BidTag call={r.call} />
-                </span>
-              </div>
-              <HandView hand={hand} />
-              <p className="mt-2 text-sm text-slate-600">
-                {r.explanation}
-                {r.uncertain && <span className="ml-1 text-amber-600">⚑ osäker – kan vara stark 2♣</span>}
-              </p>
-            </Panel>
-          )
-        })}
+      {/* Händerna placerade som vid ett bridgebord: Nord uppe, Väst vänster,
+          Öst höger, Syd nere. På liten skärm staplas de N → V → Ö → S. */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:items-start">
+        <div className="hidden sm:block" />
+        {seatPanel('N')}
+        <div className="hidden sm:block" />
+
+        {seatPanel('W')}
+        <CompassRose />
+        {seatPanel('E')}
+
+        <div className="hidden sm:block" />
+        {seatPanel('S')}
+        <div className="hidden sm:block" />
       </div>
 
       {auction && hasResponse && (
