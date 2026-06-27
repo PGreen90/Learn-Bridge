@@ -9,6 +9,7 @@
 import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
+import { openerRebidAfter2C } from './responses-2c'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
@@ -354,6 +355,9 @@ export function openerSecondBid(openCall: string, response: ResponseResult, hand
   }
   if (openCall === '1NT') {
     return openerRebidAfter1NTResponse(response, hand)
+  }
+  if (openCall === '2C') {
+    return openerRebidAfter2C(hand, response)
   }
   return null
 }

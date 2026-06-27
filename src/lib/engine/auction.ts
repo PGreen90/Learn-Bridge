@@ -8,6 +8,7 @@ import { dealRandom } from './deal'
 import { classifyOpening } from './openings'
 import { respondToMajor, respondToMinor, type Major, type ResponseResult } from './responses'
 import { respondTo1NT } from './responses-nt'
+import { respondTo2C } from './responses-2c'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 
@@ -62,7 +63,7 @@ export function dealWithMajorOpening(maxTries = 300): { deal: Deal; auction: Maj
 // regel (t.ex. återbud efter en höjning) stannar den och markeras som öppen.
 
 const PARTNER_OF: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
-const RESPONDABLE = new Set(['1C', '1D', '1H', '1S', '1NT'])
+const RESPONDABLE = new Set(['1C', '1D', '1H', '1S', '1NT', '2C'])
 const OPEN_SUIT: Record<string, Major | 'clubs' | 'diamonds'> = {
   '1C': 'clubs', '1D': 'diamonds', '1H': 'hearts', '1S': 'spades',
 }
@@ -87,6 +88,7 @@ export interface BuiltAuction {
 
 /** Räknar ut svararens första bud givet öppningsbudet. */
 function computeResponse(openCall: string, responderHand: Deal['hands'][Seat]): ResponseResult {
+  if (openCall === '2C') return respondTo2C(responderHand)
   if (openCall === '1NT') return respondTo1NT(responderHand)
   const suit = OPEN_SUIT[openCall]
   if (suit === 'hearts' || suit === 'spades') return respondToMajor(responderHand, suit)

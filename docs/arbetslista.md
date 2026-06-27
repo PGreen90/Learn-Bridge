@@ -57,4 +57,7 @@
 - ✅ Punkt **1–9** (öppnarens återbud efter alla svar)
 - ✅ Punkt **10–12** (svararens andra bud: semi-forcing 1NT, Smolen/transfer-
   fortsättning, fjärde färg krav) – `responder-rebids.ts`
-- 🔜 Nästa: punkt **13** (svar på stark 2♣, §4.4)
+- ✅ Punkt **13** (svar på stark 2♣: 2♦ väntebud, positiva svar, öppnarens
+  2NT/3NT/krav-färg och svararens **andra negativa**) – `responses-2c.ts`.
+  Avgränsning: NT-grenen över 2NT (22–24) tas senare (överlappar §4.3).
+- 🔜 Nästa: punkt **14** (svar på svaga tvåöppningar 2♦/2♥/2♠ + Ogust, §4.5)

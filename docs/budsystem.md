@@ -953,3 +953,10 @@ Det avslöjar längd/räkning direkt för partnern.
   Smolen + fortsättning efter fullföljd transfer/Stayman (§4.3), samt fjärde färg
   krav (§6.6). Auktionerna växer nu till fyra bud (~40 % av givarna). Kod, inte
   systemändring. **Nästa gång:** punkt 13 – svar på stark 2♣ (§4.4).
+- **2026-06-27** – Budmotorn: **punkt 13** (svar på stark 2♣, §4.4) i koden
+  (`responses-2c.ts`): svararens **2♦ väntebud** (0–7) + positiva svar (2♥/2♠/
+  3♣/3♦ med 5+ färg, 2NT balanserad), öppnarens återbud (**2NT** 22–24 / **3NT**
+  28–30 / naturlig **krav-färg**) och svararens **andra negativa** (3♣ med 0–3).
+  Inkopplat i auktionsbyggaren (2♣ är nu en svarbar öppning). Avgränsning:
+  NT-stegen över öppnarens 2NT (22–24) tas senare (överlappar §4.3). Kod, inte
+  systemändring. **Nästa gång:** punkt 14 – svar på svaga tvåöppningar + Ogust (§4.5).
