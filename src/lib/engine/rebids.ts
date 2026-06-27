@@ -11,6 +11,7 @@ import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
 import { openerRebidAfterOgust, openerRebidAfterNewSuit, suitOfWeakTwo } from './responses-weak2'
+import { openerRebidAfterPreemptNewSuit, preemptOf } from './responses-preempt'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
@@ -354,6 +355,22 @@ export function openerSecondBid(openCall: string, response: ResponseResult, hand
       case 'spärrhöjning':
       case '3NT till spel':
         return { call: 'P', rule: 'rebid: pass', explanation: 'Öppnaren passar (svararens bud är begränsat).' }
+      default:
+        return null
+    }
+  }
+
+  // §4.6 – spärröppning (3X/4X).
+  const preempt = preemptOf(openCall)
+  if (preempt) {
+    switch (response.rule) {
+      case 'ny färg (krav)': {
+        const ns = suitOfCall(response.call)
+        return ns ? openerRebidAfterPreemptNewSuit(hand, preempt.suit, ns) : null
+      }
+      case 'höjning till utgång':
+      case '3NT till spel':
+        return { call: 'P', rule: 'rebid: pass', explanation: 'Öppnaren passar (kaptenen har placerat kontraktet).' }
       default:
         return null
     }

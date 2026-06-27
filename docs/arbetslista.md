@@ -64,4 +64,7 @@
   **2NT Ogust** + öppnarens stegsvar, svararens placering) – `responses-weak2.ts`.
   Avgränsning: minorfärgens placering efter Ogust (utgång på 5-läget) är
   förenklad och flaggad.
-- 🔜 Nästa: punkt **15** (svar på spärröppningar 3-/4-läget, §4.6)
+- ✅ Punkt **15** (svar på spärröppningar 3-/4-läget: pass, höjning till utgång,
+  ny färg krav, 3NT, samt öppnarens återbud) – `responses-preempt.ts`.
+  Avgränsning: 4NT (1430 RKC) och cue mot slam hör till §6 (punkt 17–18).
+- 🔜 Nästa: punkt **16** (svar på 2NT-öppning + hantera 3NT-öppning)

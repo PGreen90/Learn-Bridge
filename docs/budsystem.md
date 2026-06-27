@@ -967,3 +967,10 @@ Det avslöjar längd/räkning direkt för partnern.
   (2♦/2♥/2♠ är nu svarbara öppningar). Avgränsning: minorfärgens placering efter
   Ogust (utgång på 5-läget) förenklad och flaggad. Kod, inte systemändring.
   **Nästa gång:** punkt 15 – svar på spärröppningar 3-/4-läget (§4.6).
+- **2026-06-27** – Budmotorn: **punkt 15** (svar på spärröppningar 3X/4X, §4.6) i
+  koden (`responses-preempt.ts`): svararen som kapten – pass, **höjning till
+  utgång** (fit), **ny färg (krav)**, **3NT till spel** (stopp i sidofärger), samt
+  öppnarens återbud på krav-ny-färg (stöd/rebjuden färg). Inkopplat i
+  auktionsbyggaren (3C/3D/3H/3S/4C/4D/4H/4S svarbara). Avgränsning: 4NT (1430 RKC)
+  och cue mot slam tas i §6 (punkt 17–18). Kod, inte systemändring.
+  **Nästa gång:** punkt 16 – svar på 2NT-öppning + hantera 3NT-öppning.
