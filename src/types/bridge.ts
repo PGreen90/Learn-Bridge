@@ -23,6 +23,8 @@ export interface Deal {
   hands: Record<Seat, Hand>
   dealer: Seat
   vulnerability: Vulnerability
+  /** Bricknummer 1–16. Avgör (enligt standardschema) giv + zon. */
+  board: number
 }
 
 export type Vulnerability = 'none' | 'ns' | 'ew' | 'all'

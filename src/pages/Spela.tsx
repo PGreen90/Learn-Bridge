@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Deal, Seat, Suit } from '../types/bridge'
+import type { Deal, Seat, Suit, Vulnerability } from '../types/bridge'
 import { SEAT_LABEL } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening } from '../lib/engine/openings'
@@ -12,15 +12,46 @@ import { Button } from '../components/Button'
 
 const SUIT_OF: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 
-/** Liten kompass i mitten av bordet (Nord upp, Väst vänster, Öst höger, Syd ner). */
-function CompassRose() {
+const SEAT_SHORT: Record<Seat, string> = { N: 'N', E: 'Ö', S: 'S', W: 'V' }
+
+/** Är platsen i zon (sårbar) givet givens sårbarhet? */
+function isVulnerable(seat: Seat, v: Vulnerability): boolean {
+  if (v === 'all') return true
+  if (v === 'ns') return seat === 'N' || seat === 'S'
+  if (v === 'ew') return seat === 'E' || seat === 'W'
+  return false
+}
+
+/**
+ * BBO-liknande brickmarkör i mitten av bordet: varje väderstreck rött i zon,
+ * vitt utanför zon. Giv märks med "D". Bricknumret står i mitten.
+ */
+function BoardMarker({ deal }: { deal: Deal }) {
+  function chip(seat: Seat, pos: string) {
+    const vul = isVulnerable(seat, deal.vulnerability)
+    return (
+      <div
+        className={`absolute ${pos} flex h-8 w-8 flex-col items-center justify-center rounded text-xs font-bold leading-none
+          ${vul ? 'bg-red-500 text-white' : 'bg-white text-slate-600 border border-slate-300'}`}
+      >
+        <span>{SEAT_SHORT[seat]}</span>
+        {deal.dealer === seat && (
+          <span className="mt-0.5 text-[8px] font-semibold opacity-80">D</span>
+        )}
+      </div>
+    )
+  }
   return (
     <div className="hidden sm:flex items-center justify-center self-stretch">
-      <div className="relative h-20 w-20 rounded-md border border-slate-300 text-slate-500 text-sm font-semibold">
-        <span className="absolute left-1/2 top-1 -translate-x-1/2">N</span>
-        <span className="absolute left-1 top-1/2 -translate-y-1/2">V</span>
-        <span className="absolute right-1 top-1/2 -translate-y-1/2">Ö</span>
-        <span className="absolute left-1/2 bottom-1 -translate-x-1/2">S</span>
+      <div className="relative h-28 w-28 rounded-md border border-slate-300 bg-slate-50">
+        {chip('N', 'left-1/2 top-1 -translate-x-1/2')}
+        {chip('W', 'left-1 top-1/2 -translate-y-1/2')}
+        {chip('E', 'right-1 top-1/2 -translate-y-1/2')}
+        {chip('S', 'left-1/2 bottom-1 -translate-x-1/2')}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-[9px] uppercase tracking-wide text-slate-400 leading-none">Bricka</span>
+          <span className="text-lg font-bold text-slate-700 leading-tight">{deal.board}</span>
+        </div>
       </div>
     </div>
   )
@@ -64,7 +95,7 @@ export function Spela() {
     return (
       <Panel
         key={seat}
-        className={`!p-4 ${isOpener ? 'ring-2 ring-emerald-500' : isResponder ? 'ring-2 ring-sky-400' : ''}`}
+        className={`!p-4 w-full sm:w-72 ${isOpener ? 'ring-2 ring-emerald-500' : isResponder ? 'ring-2 ring-sky-400' : ''}`}
       >
         <div className="flex items-baseline justify-between mb-2">
           <span className="font-semibold">
@@ -111,18 +142,14 @@ export function Spela() {
 
       {/* Händerna placerade som vid ett bridgebord: Nord uppe, Väst vänster,
           Öst höger, Syd nere. På liten skärm staplas de N → V → Ö → S. */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:items-start">
-        <div className="hidden sm:block" />
-        {seatPanel('N')}
-        <div className="hidden sm:block" />
-
-        {seatPanel('W')}
-        <CompassRose />
-        {seatPanel('E')}
-
-        <div className="hidden sm:block" />
-        {seatPanel('S')}
-        <div className="hidden sm:block" />
+      <div className="space-y-4">
+        <div className="flex justify-center">{seatPanel('N')}</div>
+        <div className="flex flex-wrap items-stretch justify-center gap-4">
+          {seatPanel('W')}
+          <BoardMarker deal={deal} />
+          {seatPanel('E')}
+        </div>
+        <div className="flex justify-center">{seatPanel('S')}</div>
       </div>
 
       {auction && hasResponse && (

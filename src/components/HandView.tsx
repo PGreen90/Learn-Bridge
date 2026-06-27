@@ -13,13 +13,13 @@ function sortRanks(ranks: Rank[]): Rank[] {
 /** Visar en hand grupperad per färg, som man skriver upp en bridge-hand. */
 export function HandView({ hand }: { hand: Hand }) {
   return (
-    <div className="inline-block bg-emerald-50 rounded-xl p-4">
+    <div className="w-full bg-emerald-50 rounded-xl p-3">
       {SUIT_ORDER.map((suit) => {
         const ranks = sortRanks(hand.filter((c) => c.suit === suit).map((c) => c.rank))
         return (
-          <div key={suit} className="flex items-center gap-3 text-xl leading-relaxed">
-            <SuitSymbol suit={suit} className="w-5 text-center" />
-            <span className="font-mono tracking-widest text-slate-800">
+          <div key={suit} className="flex items-center gap-2 text-xl leading-relaxed whitespace-nowrap">
+            <SuitSymbol suit={suit} className="w-5 shrink-0 text-center" />
+            <span className="font-mono tracking-normal text-slate-800">
               {ranks.length ? ranks.join(' ') : '—'}
             </span>
           </div>
