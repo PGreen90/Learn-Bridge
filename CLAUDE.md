@@ -41,6 +41,13 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
 - Budsystem att börja med: **2 över 1 (2/1)**. Endast detta först.
 - Första funktion: **budträning** – visa hand, ägaren väljer bud,
   appen ger facit + förklaring.
+- Nästa stora riktning: **Spela mot datorn** (offline mot bottar först;
+  gratis/statiskt; människor online = framtid med backend). Kvalitet före tempo.
+- **Budmotor** byggs som modul i `src/lib/engine/` som omsätter systemboken
+  (`docs/budsystem.md`) till kod, avsnitt för avsnitt, test-drivet (`npm test`).
+  Status: **M1** (öppningar) och **M2** (svar på 1♥/1♠) klara – fliken **Spela**
+  visar "titta-läge" + "hålfinnare". **Nästa: M3** – svar på 1♣/1♦/1NT +
+  öppnarens återbud (växa till hela auktioner), därefter kortspel.
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).
