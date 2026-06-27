@@ -3,7 +3,7 @@ import type { Deal, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening } from '../lib/engine/openings'
-import { firstMajorOpeningAuction, dealWithMajorOpening } from '../lib/engine/auction'
+import { buildAuction, dealWithAuction } from '../lib/engine/auction'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
 import { HandView } from '../components/HandView'
 import { SuitSymbol } from '../components/SuitSymbol'
@@ -31,14 +31,15 @@ export function Spela() {
   const [openSurvey, setOpenSurvey] = useState<OpeningSurvey | null>(null)
   const [respSurvey, setRespSurvey] = useState<ResponseSurvey | null>(null)
 
-  const auction = firstMajorOpeningAuction(deal)
+  const auction = buildAuction(deal)
+  const hasResponse = (auction?.turns.length ?? 0) >= 2
 
   function newDeal() {
     setDeal(dealRandom())
   }
 
-  function newMajorDeal() {
-    const found = dealWithMajorOpening()
+  function newAuctionDeal() {
+    const found = dealWithAuction()
     if (found) setDeal(found.deal)
   }
 
@@ -47,15 +48,16 @@ export function Spela() {
       <header>
         <h1 className="text-2xl font-bold mb-1">Spela mot datorn</h1>
         <p className="text-slate-600">
-          Titta-läge: öppningar och svar. Motorn delar ut en riktig giv och visar
-          vad varje hand öppnar med – och vid en 1♥/1♠-öppning även partnerns svar
-          – enligt systemboken. Bra för att bekräfta systemet och hitta hål.
+          Titta-läge: hela (ostörda) auktioner. Motorn delar ut en riktig giv och
+          visar vad varje hand öppnar med – och bygger sedan auktionen öppning →
+          svar → öppnarens återbud så långt systemboken räcker. Bra för att
+          bekräfta systemet och hitta hål.
         </p>
       </header>
 
       <div className="flex flex-wrap gap-3">
         <Button onClick={newDeal}>Ny giv →</Button>
-        <Button onClick={newMajorDeal}>Högfärgsöppning + svar →</Button>
+        <Button onClick={newAuctionDeal}>Öppning + auktion →</Button>
         <Button variant="secondary" onClick={() => setOpenSurvey(surveyOpenings(2000))}>
           Hålfinnare: öppningar
         </Button>
@@ -69,7 +71,7 @@ export function Spela() {
           const hand = deal.hands[seat]
           const r = classifyOpening(hand)
           const isOpener = auction?.openerSeat === seat
-          const isResponder = auction?.responderSeat === seat
+          const isResponder = hasResponse && auction?.responderSeat === seat
           return (
             <Panel
               key={seat}
@@ -96,22 +98,33 @@ export function Spela() {
         })}
       </div>
 
-      {auction && (
+      {auction && hasResponse && (
         <Panel>
-          <h2 className="text-lg font-semibold mb-2">Svar på högfärgsöppningen</h2>
-          <p className="mb-3">
-            {SEAT_LABEL[auction.openerSeat]} öppnar <BidTag call={auction.openCall} />. Partner (
-            {SEAT_LABEL[auction.responderSeat]}) svarar <BidTag call={auction.response.call} />.
-          </p>
-          <div className="flex flex-wrap items-start gap-4">
-            <HandView hand={deal.hands[auction.responderSeat]} />
-            <p className="text-sm text-slate-600 max-w-sm">
-              {auction.response.explanation}
-              {auction.response.uncertain && (
-                <span className="ml-1 text-amber-600">⚑ osäker – förenkling i motorn</span>
-              )}
+          <h2 className="text-lg font-semibold mb-2">Auktionen (ostörd – motståndarna passar)</h2>
+          <ol className="space-y-2">
+            {auction.turns.map((turn, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="w-28 shrink-0 text-sm">
+                  <span className="font-semibold">{SEAT_LABEL[turn.seat]}</span>{' '}
+                  <span className="text-slate-500">({turn.role})</span>
+                </span>
+                <span className="w-14 shrink-0 text-lg">
+                  <BidTag call={turn.call} />
+                </span>
+                <span className="text-sm text-slate-600">
+                  {turn.explanation}
+                  {turn.uncertain && (
+                    <span className="ml-1 text-amber-600">⚑ osäker – förenkling i motorn</span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ol>
+          {auction.open && (
+            <p className="mt-3 text-sm text-slate-500">
+              … auktionen fortsätter – motorn har inte regler för nästa bud ännu.
             </p>
-          </div>
+          )}
         </Panel>
       )}
 

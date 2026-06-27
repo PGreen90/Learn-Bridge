@@ -6,6 +6,7 @@ import type { Bid, Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 
 export type Major = 'hearts' | 'spades'
+export type Minor = 'clubs' | 'diamonds'
 
 export interface ResponseResult {
   call: Bid
@@ -89,6 +90,92 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
 
   // ---- Kvar: 12+ utan tydlig fortsättning → flaggas ----
   return { call: '1NT', rule: 'oklart', explanation: `${p} hp – motorn hittar inget tydligt svar (förenkling).`, uncertain: true }
+}
+
+/** Vad svarar man på partnerns 1♣/1♦ (ostörd, ohöjd hand)? Systembok §4.2. */
+export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const support = len[opened]
+  const bal = isBalanced(hand)
+  const m = BID[opened]
+  const msym = opened === 'clubs' ? '♣' : '♦'
+  const otherMinor: Minor = opened === 'clubs' ? 'diamonds' : 'clubs'
+  const oBID = BID[otherMinor]
+  const osym = otherMinor === 'clubs' ? '♣' : '♦'
+
+  // ---- Svag spärrhöjning (inverterad minor, svag): 5+ stöd, 0–6 hp ----
+  if (support >= 5 && p <= 6) {
+    return { call: `3${m}`, rule: 'inverterad minor, svag', explanation: `${p} hp, ${support} stöd → 3${msym} (svag spärrhöjning).` }
+  }
+
+  if (p < 6) return { call: 'P', rule: 'pass', explanation: `${p} hp – för svagt för att svara → pass.` }
+
+  // ---- Svagt hoppskift: 6-korts högfärg, 6–10 hp ----
+  {
+    const major: Major | null = len.spades >= 6 ? 'spades' : len.hearts >= 6 ? 'hearts' : null
+    if (major && p <= 10) {
+      const sym = major === 'spades' ? '♠' : '♥'
+      return { call: `2${BID[major]}`, rule: 'svagt hoppskift', explanation: `${p} hp med 6-korts ${NAME[major]} → 2${sym} (svagt hoppskift).` }
+    }
+  }
+
+  // ---- 4-korts högfärg på 1-läget (längst först, lika → hjärter billigast), 6+ hp ----
+  {
+    const major = pickMajorToBid(len)
+    if (major) {
+      const sym = major === 'spades' ? '♠' : '♥'
+      return { call: `1${BID[major]}`, rule: 'ny färg (1-läget)', explanation: `${p} hp med ${len[major]}-korts ${NAME[major]} → 1${sym} (4-korts högfärg upp, krav 1 rond).` }
+    }
+  }
+
+  // Härefter: ingen biudbar 4-korts högfärg.
+
+  // ---- Stark inverterad höjning: 4+ stöd, 10+ hp (ingen högfärg) ----
+  if (support >= 4 && p >= 10) {
+    if (bal && p >= 13 && p <= 15) {
+      return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad utan högfärg → 3NT (till spel).` }
+    }
+    return { call: `2${m}`, rule: 'inverterad minor', explanation: `${p} hp, ${support} stöd, ingen högfärg → 2${msym} (inverterad minor, krav).` }
+  }
+
+  // ---- 3NT till spel: 13–15 balanserad, ingen högfärg ----
+  if (bal && p >= 13 && p <= 15) {
+    return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad utan högfärg → 3NT (till spel).` }
+  }
+
+  // ---- 2-över-1 GF: 5+ kort i den andra minorn, 12+ hp ----
+  if (len[otherMinor] >= 5 && p >= 12) {
+    return { call: `2${oBID}`, rule: '2-över-1 GF', explanation: `${p} hp med ${len[otherMinor]}-korts ${NAME[otherMinor]} → 2${osym} (2-över-1, GF).` }
+  }
+
+  // ---- 2NT inbjudan: 11–12 balanserad, stopp, ingen högfärg ----
+  if (bal && p >= 11 && p <= 12) {
+    return { call: '2NT', rule: '2NT inbjudan', explanation: `${p} hp balanserad, ingen högfärg → 2NT (inbjudan).` }
+  }
+
+  // ---- Gap-handen: 7–9 hp med stöd men utan högfärg (för svagt för inverterad) → 1NT ----
+  if (support >= 4 && p >= 7 && p <= 9) {
+    return { call: '1NT', rule: 'gap-hand 1NT', explanation: `${p} hp med stöd men utan högfärg (för svagt för inverterad) → 1NT.` }
+  }
+
+  // ---- 1NT naturlig: 6–10 hp, ingen högfärg ----
+  if (p <= 10) {
+    return { call: '1NT', rule: '1NT', explanation: `${p} hp utan högfärg → 1NT (naturligt, ej krav).` }
+  }
+
+  // ---- Kvar: 11+ utan tydlig fortsättning → flaggas ----
+  return { call: '1NT', rule: 'oklart', explanation: `${p} hp – motorn hittar inget tydligt svar (förenkling).`, uncertain: true }
+}
+
+/** Vilken 4-korts högfärg bjuds på 1-läget: längst först, lika längd → hjärter (billigast). */
+function pickMajorToBid(len: Record<Suit, number>): Major | null {
+  const h = len.hearts >= 4
+  const s = len.spades >= 4
+  if (h && s) return len.spades > len.hearts ? 'spades' : 'hearts'
+  if (h) return 'hearts'
+  if (s) return 'spades'
+  return null
 }
 
 /** Längsta biudbara 2/1-färgen (under öppningsfärgen) med minst `min` kort. */

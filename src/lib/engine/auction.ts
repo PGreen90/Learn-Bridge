@@ -6,7 +6,9 @@ import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
 import { classifyOpening } from './openings'
-import { respondToMajor, type Major, type ResponseResult } from './responses'
+import { respondToMajor, respondToMinor, type Major, type ResponseResult } from './responses'
+import { respondTo1NT } from './responses-nt'
+import { openerRebidAfter1LevelResponse } from './rebids'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -49,6 +51,96 @@ export function dealWithMajorOpening(maxTries = 300): { deal: Deal; auction: Maj
     const deal = dealRandom()
     const auction = firstMajorOpeningAuction(deal)
     if (auction) return { deal, auction }
+  }
+  return null
+}
+
+// ---- Allmän auktion: öppning → svar → (öppnarens återbud) ------------------
+// Bygger en hel (men ostörd) auktion för alla öppningar vi kan svara på.
+// Motståndarna passar. Auktionen växer så långt motorn har regler; saknas en
+// regel (t.ex. återbud efter en höjning) stannar den och markeras som öppen.
+
+const PARTNER_OF: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
+const RESPONDABLE = new Set(['1C', '1D', '1H', '1S', '1NT'])
+const OPEN_SUIT: Record<string, Major | 'clubs' | 'diamonds'> = {
+  '1C': 'clubs', '1D': 'diamonds', '1H': 'hearts', '1S': 'spades',
+}
+
+export interface AuctionTurn {
+  seat: Seat
+  role: 'öppnare' | 'svarare'
+  call: string
+  rule: string
+  explanation: string
+  uncertain?: boolean
+}
+
+export interface BuiltAuction {
+  openerSeat: Seat
+  responderSeat: Seat
+  openCall: string
+  turns: AuctionTurn[]
+  /** Sant så länge motorn ännu inte har regler för nästa bud i sekvensen. */
+  open: boolean
+}
+
+/** Räknar ut svararens första bud givet öppningsbudet. */
+function computeResponse(openCall: string, responderHand: Deal['hands'][Seat]): ResponseResult {
+  if (openCall === '1NT') return respondTo1NT(responderHand)
+  const suit = OPEN_SUIT[openCall]
+  if (suit === 'hearts' || suit === 'spades') return respondToMajor(responderHand, suit)
+  return respondToMinor(responderHand, suit)
+}
+
+/** Bygger en ostörd auktion (öppning → svar → ev. återbud) för första öppningen. */
+export function buildAuction(deal: Deal): BuiltAuction | null {
+  let openerSeat: Seat | null = null
+  let opening = null as ReturnType<typeof classifyOpening> | null
+  for (let i = 0; i < 4; i++) {
+    const seat = seatAt(deal.dealer, i)
+    const o = classifyOpening(deal.hands[seat])
+    if (o.call !== 'P') {
+      openerSeat = seat
+      opening = o
+      break
+    }
+  }
+  if (!openerSeat || !opening) return null
+
+  const responderSeat = PARTNER_OF[openerSeat]
+  const turns: AuctionTurn[] = [
+    { seat: openerSeat, role: 'öppnare', call: opening.call, rule: opening.rule, explanation: opening.explanation, uncertain: opening.uncertain },
+  ]
+
+  // Öppningar vi inte har svarsregler för ännu: visa bara öppningen.
+  if (!RESPONDABLE.has(opening.call)) {
+    return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+  }
+
+  const response = computeResponse(opening.call, deal.hands[responderSeat])
+  turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
+
+  // Öppnarens återbud – bara efter ett 1-läges nytt färgsvar (§5.2).
+  const opened = OPEN_SUIT[opening.call]
+  const respMatch = response.call.match(/^1(D|H|S)$/)
+  const RESP_SUIT: Record<string, Major | 'diamonds'> = { D: 'diamonds', H: 'hearts', S: 'spades' }
+  if (opened !== undefined && respMatch && response.call !== opening.call) {
+    const responderSuit = RESP_SUIT[respMatch[1]]
+    const rebid = openerRebidAfter1LevelResponse(deal.hands[openerSeat], opened, responderSuit)
+    turns.push({ seat: openerSeat, role: 'öppnare', call: rebid.call, rule: rebid.rule, explanation: rebid.explanation, uncertain: rebid.uncertain })
+    return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+  }
+
+  // Övriga svar (höjning, NT, 2/1, transfer …): återbud kommer i ett senare steg.
+  return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+}
+
+/** Slumpar givar tills en med en öppning vi kan bygga vidare på dyker upp. */
+export function dealWithAuction(maxTries = 300): { deal: Deal; auction: BuiltAuction } | null {
+  for (let i = 0; i < maxTries; i++) {
+    const deal = dealRandom()
+    const auction = buildAuction(deal)
+    if (auction && auction.turns.length >= 2) return { deal, auction }
   }
   return null
 }
