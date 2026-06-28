@@ -66,5 +66,15 @@
 - ✅ **Steg B – bottar** (`play-bot.ts`): `botCard` tumregler (utspel lågt från
   längsta färg; vinn billigt; annars lågt). 10 tester gröna, inkl. en hel
   bot-mot-bot-utspelning (13 giltiga stick i både trumf och sang).
-- ☐ **Steg C – kontraktval** (`pickContract`).
-- ☐ **Steg D – UI** spelläge (klicka korten, bordsvy, stickräkning, resultat).
+- ✅ **Steg C – kontraktval** (`play-contract.ts`, `pickContract`): starkaste
+  sidan, 8+ högfärgsfit annars sang, nivå efter samlad styrka. 7 tester.
+- ✅ **Steg D – UI** (`src/pages/Play.tsx`, flik **Spela kort** = `#/spela-kort`):
+  bordsvy, klickbara lagliga kort, bottar spelar automatiskt, stick i mitten med
+  vinnarmarkering, löpande stickräkning, satt/bet-resultat, "Ny giv". Verifierad
+  i webbläsaren (utspel, följa färg, ruff, stickräkning – inga konsolfel).
+
+## Återstår (nästa omgångar)
+- Bot-tumreglerna är basala (stjäl t.ex. partnerns stick ibland) – förfinas senare.
+- Minorkontrakt väljs inte (förenkling i `pickContract`).
+- DDS-facit/poängsättning (punkt 28) och markeringar/utspel (punkt 30, §8).
+- Koppla spelläget till en riktig auktion i stället för heuristiskt kontrakt.

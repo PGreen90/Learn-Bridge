@@ -63,8 +63,11 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   utvalda beslut:** öppningströskeln (`openings.ts`, färgöppning vid TP ≥ 12) och
   slamzon (`slam-auction.ts`). **Slamverktygen är inkopplade i en växande auktion**
   för Jacoby 2NT-fit (1430 RKC startar vid slamzon ≥ 33). Spec i `docs/handvardering.md`.
-  **Nästa: kortspelet (punkt 28–30)** – DDS double-dummy-solver (WebAssembly),
-  spelläge (spela ut korten mot bottar) och markeringar/utspel (§8).
+  **Kortspelet (punkt 29) klart:** fliken **Spela kort** (`src/pages/Play.tsx`)
+  spelar ut korten mot bottar – spelmotor `play.ts` (följa färg, trumf,
+  stickvinnare), bottar `play-bot.ts` (tumregler), kontrakt `play-contract.ts`.
+  Du sitter Syd (avslut + motspel). Spec i `docs/kortspel.md`.
+  **Nästa: punkt 28 (DDS-solver för facit) + punkt 30 (markeringar/utspel, §8).**
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).

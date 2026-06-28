@@ -109,5 +109,10 @@
   (startpoäng) ≥ 12** som öppningströskel för färgöppning (Bergens grundregel),
   i stället för rå hp. NT-stegen + starka 2♣ är fortsatt hp-definierade. Bra
   11-hp-händer öppnar, platta D/kn-tunga 12-hp-händer avstår. Se `docs/handvardering.md`.
-- 🔜 Nästa: **kortspelet** (punkt 28–30): DDS double-dummy-solver i WebAssembly
-  + spelläge (spela ut korten mot bottar) + markeringar/utspel (§8).
+- ✅ Punkt **29** (kortspels-läge) – `play.ts` (spelmotor: följa färg, trumf,
+  stickvinnare, räkning), `play-bot.ts` (bott-tumregler), `play-contract.ts`
+  (heuristiskt kontrakt) och fliken **Spela kort** (`src/pages/Play.tsx`): klicka
+  ut korten mot bottar, avslut + motspel, stickräkning, satt/bet. Se `docs/kortspel.md`.
+- 🔜 Nästa i kortspelet: punkt **28** (DDS double-dummy-solver i WebAssembly för
+  facit/poängsättning) och punkt **30** (markeringar & utspel, §8). Förfina även
+  bot-tumreglerna och koppla spelläget till en riktig auktion.
