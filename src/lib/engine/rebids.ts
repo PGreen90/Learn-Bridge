@@ -13,6 +13,7 @@ import { openerRebidAfter2C } from './responses-2c'
 import { openerRebidAfterOgust, openerRebidAfterNewSuit, suitOfWeakTwo } from './responses-weak2'
 import { openerRebidAfterPreemptNewSuit, preemptOf } from './responses-preempt'
 import { openerRebidAfter2NTResponse, openerRebidAfter3NTResponse } from './responses-2nt'
+import { openerRebidAfterDrury } from './responses-drury'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
@@ -421,6 +422,8 @@ function rebidAfterMajorResponse(M: Major, response: ResponseResult, hand: Hand)
       return openerRebidAfterSplinter(hand, M)
     case 'Jacoby 2NT':
       return openerRebidAfterJacoby2NT(hand, M)
+    case 'Drury':
+      return openerRebidAfterDrury(hand, M)
     case 'svagt hoppskift':
     case '3NT till spel':
     case 'spärr till utgång':

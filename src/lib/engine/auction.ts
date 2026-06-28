@@ -12,6 +12,7 @@ import { respondTo2C } from './responses-2c'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { respondToPreempt, preemptOf } from './responses-preempt'
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
+import { respondToMajorPassed } from './responses-drury'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 
@@ -93,7 +94,7 @@ export interface BuiltAuction {
 }
 
 /** Räknar ut svararens första bud givet öppningsbudet. */
-function computeResponse(openCall: string, responderHand: Deal['hands'][Seat]): ResponseResult {
+function computeResponse(openCall: string, responderHand: Deal['hands'][Seat], responderPassed = false): ResponseResult {
   if (openCall === '2C') return respondTo2C(responderHand)
   const weak = suitOfWeakTwo(openCall)
   if (weak) return respondToWeakTwo(responderHand, weak)
@@ -103,19 +104,24 @@ function computeResponse(openCall: string, responderHand: Deal['hands'][Seat]): 
   if (openCall === '2NT') return respondTo2NT(responderHand)
   if (openCall === '3NT') return respondTo3NT(responderHand)
   const suit = OPEN_SUIT[openCall]
-  if (suit === 'hearts' || suit === 'spades') return respondToMajor(responderHand, suit)
+  if (suit === 'hearts' || suit === 'spades') {
+    // Passad hand över 1♥/1♠ → Drury (§6.7).
+    return responderPassed ? respondToMajorPassed(responderHand, suit) : respondToMajor(responderHand, suit)
+  }
   return respondToMinor(responderHand, suit)
 }
 
 /** Bygger en ostörd auktion (öppning → svar → ev. återbud) för första öppningen. */
 export function buildAuction(deal: Deal): BuiltAuction | null {
   let openerSeat: Seat | null = null
+  let openerIndex = -1
   let opening = null as ReturnType<typeof classifyOpening> | null
   for (let i = 0; i < 4; i++) {
     const seat = seatAt(deal.dealer, i)
     const o = classifyOpening(deal.hands[seat])
     if (o.call !== 'P') {
       openerSeat = seat
+      openerIndex = i
       opening = o
       break
     }
@@ -123,6 +129,11 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   if (!openerSeat || !opening) return null
 
   const responderSeat = PARTNER_OF[openerSeat]
+  // Svararen är passad hand om hennes plats kom (och passade) före öppnarens i
+  // varvet från given – då gäller Drury över 1♥/1♠ (§6.7).
+  let responderIndex = -1
+  for (let i = 0; i < 4; i++) if (seatAt(deal.dealer, i) === responderSeat) responderIndex = i
+  const responderPassed = responderIndex < openerIndex
   const turns: AuctionTurn[] = [
     { seat: openerSeat, role: 'öppnare', call: opening.call, rule: opening.rule, explanation: opening.explanation, uncertain: opening.uncertain },
   ]
@@ -132,7 +143,7 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
     return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
   }
 
-  const response = computeResponse(opening.call, deal.hands[responderSeat])
+  const response = computeResponse(opening.call, deal.hands[responderSeat], responderPassed)
   turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
 
   // Svararen passade → utbjudet kontrakt, auktionen är slut.

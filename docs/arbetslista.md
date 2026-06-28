@@ -74,4 +74,17 @@
   placerar kontraktet (pass / 4NT kvantitativ / 6NT). Öppnaren fullföljer Stayman/
   transfer/Texas/minorfråga och tar ställning till kvantitativ 4NT.
   Avgränsning: exakta slamverktyg (RKC/Gerber/storslam) hör till §6 (punkt 18–20).
-- 🔜 Nästa: punkt **17** (Drury – svar på 1♥/1♠ endast som passad hand, §6.7)
+- ✅ Punkt **17** (Drury, §6.7) – `responses-drury.ts`. Passad hand över 1♥/1♠:
+  2♣ = limithöjning 3 trumf, 2♦ = limithöjning 4+ trumf; öppnaren rebjuder
+  högfärgen = lätt öppning (signoff), 3-läget = utgångsförsök, 4-läget = utgång.
+  Inkopplat i `buildAuction` (passad-hand-detektering: svararens plats kom före
+  öppnarens i varvet).
+- ✅ Punkt **18–20** (slamverktyg, §6.1–6.5) – `slam.ts`. **1430 RKC** (`respondToRKC`),
+  **trumfdam-fråga** (`respondToQueenAsk`), **cue-bid** (`cheapestCueBid`),
+  **Sjöbergs 5NT** kungfråga (`respondToKingAsk`), **Gerber** ess-/kungfråga
+  (`respondToGerber`/`respondToGerberKingAsk`) och **Exclusion** (`respondToExclusion`).
+  Avgränsning: dessa lever djupt i auktionen (efter trumföverenskommelse) och är
+  byggda som rena, testade motorfunktioner. Att låta en slumpad auktion växa hit
+  kräver ett djupare auktionslager (öppnarens/svararens 3:e–4:e bud) – tas separat.
+- 🔜 Nästa: punkt **21** (försvarsbud §7: inkliv + svar) – ELLER hoppa till
+  kortspelet (punkt 28–30, DDS-solver) om ägaren hellre vill spela ut korten.

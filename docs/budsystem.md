@@ -986,3 +986,15 @@ Det avslöjar längd/räkning direkt för partnern.
   byggaren (2NT och 3NT svarbara). Avgränsning: exakta slamverktyg (RKC/Gerber/
   storslam) hör till §6 (punkt 18–20). Kod, inte systemändring.
   **Nästa gång:** punkt 17 – Drury (svar på 1♥/1♠ endast som passad hand, §6.7).
+- **2026-06-28** – Budmotorn: **punkt 17–20** (Drury + alla slamverktyg) i koden.
+  **Punkt 17 Drury** (§6.7, `responses-drury.ts`): passad hand över 1♥/1♠ →
+  2♣ (limithöjning 3 trumf) / 2♦ (4+ trumf); öppnaren signalar lätt öppning genom
+  rebjuden högfärg, annars utgångsförsök/utgång. Inkopplat i `buildAuction` via
+  passad-hand-detektering. **Punkt 18–20 slamverktyg** (§6.1–6.5, `slam.ts`):
+  1430 RKC-svar, trumfdam-fråga, cue-bid (billigaste 1:a-rondskontroll), Sjöbergs
+  5NT-kungfråga (vilken kung), Gerber ess-/kungfråga och Exclusion (nyckelkort
+  utom renonsfärgens ess). Byggda som rena, testade motorfunktioner; full
+  inkoppling i en växande auktion kräver ett djupare auktionslager (öppnarens/
+  svararens 3:e–4:e bud) som tas separat. Kod, inte systemändring.
+  **Nästa gång:** punkt 21 – försvarsbud §7 (inkliv + svar), eller hoppa till
+  kortspelet (punkt 28–30, DDS-solver) om ägaren vill spela ut korten.
