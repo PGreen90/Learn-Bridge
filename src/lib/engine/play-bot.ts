@@ -12,6 +12,7 @@
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Rank } from '../../types/bridge'
 import { currentWinner, legalCards, side, type PlayState } from './play'
+import { leadFromSuit } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
@@ -44,20 +45,12 @@ function longestSuit(cards: Hand): Hand {
 }
 
 /**
- * Utspel: välj längsta färgen, och i den toppen av en honnörssekvens
- * (sammanhängande svit från toppen, ≥2 kort med toppkort J eller högre –
- * t.ex. KQJ→K, QJ10→Q, AK→A). Annars lågt från längsta färgen.
+ * Utspel (§8.3): välj längsta färgen och spela ut rätt kort i den – topp av en
+ * honnörssekvens (KQJ→K, QJ10→Q, AK→A), annars spotkort 3:e bästa (jämn längd)
+ * / 5:e=lägsta (udda längd). Kortvalet ligger i `signals.leadFromSuit`.
  */
 function openingLead(cards: Hand): Card {
-  const suit = longestSuit(cards)
-  const highToLow = [...suit].sort((a, b) => rankVal(b.rank) - rankVal(a.rank))
-  let run = 1
-  while (run < highToLow.length && rankVal(highToLow[run - 1].rank) - rankVal(highToLow[run].rank) === 1) {
-    run++
-  }
-  const top = highToLow[0]
-  if (run >= 2 && rankVal(top.rank) >= rankVal('J')) return top
-  return lowest(suit)
+  return leadFromSuit(longestSuit(cards))
 }
 
 /** Sant om `card` slår `against` givet utspelsfärg och trumf (samma regel som motorn). */

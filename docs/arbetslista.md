@@ -128,5 +128,11 @@
   honnörssekvens** (KQJ→K, QJ10→Q), annars lågt. Tester i `play-bot.test.ts`.
 - ✅ **Spelläget kopplat till en riktig auktion** – se Visuellt/UI ovan
   (`auction-contract.ts`).
-- 🔜 Nästa i kortspelet: punkt **28** (DDS double-dummy-solver i WebAssembly för
-  facit/poängsättning) och punkt **30** (markeringar & utspel, §8).
+- ✅ Punkt **30** (markeringar & utspel, §8) – `signals.ts` som rena, testade
+  encoders: **honnörsutspel** (topp av sekvens, §8.3), **spotutspel 3:e/5:e bästa**
+  (§8.3), **UDCA omvänd attityd + räkning** (§8.1) och **Lavinthal-sak** (§8.2).
+  Utspelet (`leadFromSuit`) är **inkopplat i botten** (`play-bot.ts` använder det i
+  stället för egen sekvenslogik). Att LÄSA motpartens signaler (full försvars-
+  strategi) hör ihop med DDS (punkt 28) och tas separat. Tester i `signals.test.ts`.
+- 🔜 Sista kortspelspunkten: punkt **28** (DDS double-dummy-solver i WebAssembly
+  för facit/poängsättning).

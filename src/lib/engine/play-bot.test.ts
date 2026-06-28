@@ -47,9 +47,9 @@ describe('utspel – topp av sekvens, annars lågt från längsta', () => {
     expect(botCard(state({ hand }), 'S')).toEqual(C('hearts', '5'))
   })
 
-  it('spotkort i rad (7654) räknas INTE som honnörssekvens → lågt', () => {
+  it('jämn 4-korts utan honnör (7654) → 3:e bästa (§8.3), ej honnörssekvens', () => {
     const hand: Hand = [C('clubs', '7'), C('clubs', '6'), C('clubs', '5'), C('clubs', '4'), C('diamonds', 'A')]
-    expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '4'))
+    expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '5'))
   })
 })
 

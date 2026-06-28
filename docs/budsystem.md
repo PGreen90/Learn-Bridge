@@ -1052,3 +1052,16 @@ Det avslöjar längd/räkning direkt för partnern.
   fortfarande billigast möjligt. Tester: `play-bot.test.ts` (8 st). De befintliga
   hel-utspelningstesterna (13 giltiga stick) är oförändrade. Ren logik, ingen
   systemändring. **Nästa gång:** DDS-solvern (punkt 28) + punkt 30 (markeringar/utspel).
+- **2026-06-29** – Punkt 30: **markeringar & utspel (§8)** som rena, testade
+  encoders i ny `src/lib/engine/signals.ts`. **§8.3 honnörsutspel** (`honorLead`):
+  topp av en sammanhängande honnörssekvens (AK→A, KQ→K, QJ→Q, JT→J, AK
+  dubbelton→A). **§8.3 spotutspel** (`spotLead`): 3:e bästa vid jämn längd, 5:e
+  (=lägsta) vid udda, dubbelton→högsta. **§8.1 UDCA omvänd** (`attitudeCard`/
+  `countCard`): attityd lågt=gillar/högt=ogillar, räkning lågt-högt=jämnt/
+  högt-lågt=udda. **§8.2 Lavinthal-sak** (`lavinthalDiscard`): högt=högre övriga
+  färgen, lågt=lägre. `leadFromSuit` (honnör före spot) är **inkopplat i
+  bottens utspel** (`play-bot.ts`); botten leder nu §8-korrekt (t.ex. 3:e bästa
+  ur en jämn 4-korts färg i stället för lägsta). Att LÄSA signaler (full
+  försvarsstrategi) hör ihop med DDS (punkt 28). Tester: `signals.test.ts` (23 st).
+  Ren logik, ingen systemändring. **Nästa gång:** DDS-solvern (punkt 28) – sista
+  kortspelspunkten.
