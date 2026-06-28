@@ -58,6 +58,9 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   RKC, cue-bid, Sjöbergs 5NT, Gerber, Exclusion) finns som testade
   motorfunktioner i `slam.ts` – ännu ej inkopplade i en växande auktion. Hela
   kartan ligger i **`docs/arbetslista.md`** (punkt 1–32).
+  **Handvärdering** (Bergens Adjust-3) finns i `evaluation.ts`: startpoäng,
+  stödpoäng och Bergenpoäng. Visas som `15 HP (17 TP)` i `HandView` men **styr
+  inte budbesluten** (rent pedagogiskt lager). Spec + plan i `docs/handvardering.md`.
   **Nästa: kortspelet (punkt 28–30)** – DDS double-dummy-solver (WebAssembly),
   spelläge (spela ut korten mot bottar) och markeringar/utspel (§8).
 

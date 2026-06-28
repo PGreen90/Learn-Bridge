@@ -108,7 +108,7 @@ export function Spela() {
             <BidTag call={r.call} />
           </span>
         </div>
-        <HandView hand={hand} />
+        <HandView hand={hand} showPoints />
         <p className="mt-2 text-sm text-slate-600">
           {r.explanation}
           {r.uncertain && <span className="ml-1 text-amber-600">⚑ osäker – kan vara stark 2♣</span>}

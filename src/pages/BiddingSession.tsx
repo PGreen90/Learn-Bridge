@@ -140,7 +140,7 @@ function Session({ themeId }: { themeId: string }) {
 
       <Panel>
         <p className="text-sm text-slate-500 mb-3">Din hand (Syd):</p>
-        <HandView hand={exercise.yourHand} />
+        <HandView hand={exercise.yourHand} showPoints />
       </Panel>
 
       {decision && (
