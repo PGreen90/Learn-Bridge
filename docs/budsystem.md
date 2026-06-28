@@ -1010,3 +1010,12 @@ Det avslöjar längd/räkning direkt för partnern.
   störda givar förgrenar av från det ostörda flödet (en konkurrensrond modelleras).
   Kod, inte systemändring. **Nästa gång:** kortspelet (punkt 28–30) – DDS double-
   dummy-solver + spelläge + markeringar/utspel (§8).
+- **2026-06-28** – Visuell omgång (UI): "Spela kort" ritas om till ett **grönt
+  filtbord i Synrey-stil**. Ny `src/components/PlayingCard.tsx` (riktigt kortface
+  + burgundy baksida med vit kant). Du sitter Syd nederst; korten ihoptryckta så
+  bara hörn-index syns, spelbart kort lyfts vid hover. **Träkarlen** läggs upp
+  prydligt (Öst/Väst staplad vertikalt, Nord i grupper). **Trumfen** alltid på
+  spelförarens högra hand sett från Syd, och **färgordningen alternerar svart/röd**
+  (cykeln ♠ ♦ ♣ ♥ roteras med trumfen, `orderedSuits`). Deployad och verifierad
+  live. Ren UI, ingen systemändring. **Nästa gång:** budlådan (auktion i fyra
+  kolumner + färgkodade budknappar), sedan DDS-solvern (punkt 28).

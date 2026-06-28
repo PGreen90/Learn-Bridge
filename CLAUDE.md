@@ -67,7 +67,15 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   spelar ut korten mot bottar – spelmotor `play.ts` (följa färg, trumf,
   stickvinnare), bottar `play-bot.ts` (tumregler), kontrakt `play-contract.ts`.
   Du sitter Syd (avslut + motspel). Spec i `docs/kortspel.md`.
-  **Nästa: punkt 28 (DDS-solver för facit) + punkt 30 (markeringar/utspel, §8).**
+  **Visuell omgång (Synrey-känsla):** "Spela kort" ritas nu som ett **grönt
+  filtbord** med riktiga spelkort (ny `src/components/PlayingCard.tsx`, burgundy
+  baksida), du i Syd nederst. Korten är ihoptryckta så bara hörn-indexet syns;
+  **träkarlen** läggs upp prydligt (sidoträkarl staplad, Nord i grupper);
+  **trumfen** ligger alltid på spelförarens högra hand sett från Syd och
+  **färgordningen alternerar svart/röd** (cykeln ♠ ♦ ♣ ♥ roteras med trumfen –
+  se `orderedSuits` i `Play.tsx`). Förebild: Synrey Bridge-appen.
+  **Nästa: budlådan (auktion + färgkodade budknappar), sedan punkt 28
+  (DDS-solver för facit) + punkt 30 (markeringar/utspel, §8).**
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).
