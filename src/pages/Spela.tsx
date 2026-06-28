@@ -1,35 +1,16 @@
 import { useState } from 'react'
 import type { Deal, Seat, Suit, Vulnerability } from '../types/bridge'
-import { SEAT_LABEL, seatAt, type ResolvedCall } from '../lib/bidding'
+import { SEAT_LABEL } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening } from '../lib/engine/openings'
-import { buildAuction, dealWithAuction, type AuctionTurn } from '../lib/engine/auction'
+import { buildAuction, dealWithAuction } from '../lib/engine/auction'
+import { turnsToCalls } from '../lib/engine/auction-contract'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
 import { HandView } from '../components/HandView'
 import { AuctionView } from '../components/AuctionView'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-
-/**
- * Motorns `turns` listar bara budsidans bud (öppnare/svarare + ev. ett inkliv).
- * För rutnätet behövs HELA medurs-följden från given, så vi fyller i de
- * mellanliggande motståndarpassarna.
- */
-function turnsToCalls(turns: AuctionTurn[], dealer: Seat): ResolvedCall[] {
-  const calls: ResolvedCall[] = []
-  let idx = 0
-  for (const turn of turns) {
-    let guard = 0
-    while (seatAt(dealer, idx) !== turn.seat && guard++ < 8) {
-      calls.push({ seat: seatAt(dealer, idx), bid: 'P' })
-      idx++
-    }
-    calls.push({ seat: turn.seat, bid: turn.call })
-    idx++
-  }
-  return calls
-}
 
 const SUIT_OF: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 

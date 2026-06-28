@@ -1028,3 +1028,16 @@ Det avslöjar längd/räkning direkt för partnern.
   Ren UI, ingen systemändring. **Nästa gång:** visa samma auktionsvy på
   **"Spela kort"-fliken** (se docs/arbetslista.md → Visuellt/UI), sedan budlådans
   budknappar / DDS-solvern (punkt 28).
+- **2026-06-29** – UI + brygga: **auktionsvyn på "Spela kort"-fliken**. Ny modul
+  `src/lib/engine/auction-contract.ts` är bryggan mellan budmotorn och kortspelet:
+  `dealForPlay` letar fram en giv vars (ostörda) auktion budats **klart** (motorns
+  `open: false`), `finalContract` plockar slutkontraktet (sista kontraktsbudet) +
+  spelföraren (den i kontraktssidan som **först nämnde färgen**). Kortspelet
+  använder nu detta i stället för den fristående `pickContract`-heuristiken, så
+  **budföljden som visas matchar kontraktet man spelar** (verifierat: 1♦–1NT–2♦ →
+  spelar 2♦ av Väst). `AuctionView` ligger i en hopfällbar panel. `turnsToCalls`
+  flyttad till samma modul och delas nu av Spela- och Spela kort-fliken (mindre
+  dubbelkod). Tester: `auction-contract.test.ts` (7 st, inkl. 100-givars-invariant
+  att sista budet = kontraktet). Städning: tog bort död `suitOfCall`/`SUIT_OF_CALL`
+  i `responses-weak2.ts` (tsc nu helt ren). Ren kod/UI, ingen systemändring.
+  **Nästa gång:** budlådans budknappar, sedan DDS-solvern (punkt 28) + punkt 30.

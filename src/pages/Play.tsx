@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Card, Deal, Hand, Rank, Seat, Suit } from '../types/bridge'
-import { SEAT_LABEL } from '../lib/bidding'
-import { dealRandom } from '../lib/engine/deal'
+import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import {
   contractResult,
   dummyOf,
@@ -14,10 +13,11 @@ import {
   type PlayedCard,
   type PlayState,
 } from '../lib/engine/play'
-import { pickContract } from '../lib/engine/play-contract'
+import { dealForPlay } from '../lib/engine/auction-contract'
 import { botCard } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
+import { AuctionView } from '../components/AuctionView'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 
@@ -31,13 +31,14 @@ const RANK_HIGH_TO_LOW: Rank[] = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', 
 interface Game {
   deal: Deal
   contract: Contract
+  /** Hela budföljden bakom kontraktet (null = ingen auktion, sällsynt fallback). */
+  calls: ResolvedCall[] | null
   play: PlayState
 }
 
 function newGame(): Game {
-  const deal = dealRandom()
-  const contract = pickContract(deal)
-  return { deal, contract, play: startPlay(deal, contract) }
+  const { deal, contract, calls } = dealForPlay()
+  return { deal, contract, calls, play: startPlay(deal, contract) }
 }
 
 /** Spelar ägaren (Syd) den här platsen? Vi spelar = både N och S; vi försvarar = bara S. */
@@ -82,6 +83,7 @@ function orderedSuits(seat: Seat, contract: Contract): Suit[] {
 
 export function Play() {
   const [game, setGame] = useState<Game>(newGame)
+  const [showAuction, setShowAuction] = useState(false)
   const { contract, play } = game
 
   // Bottarna spelar automatiskt när det är deras tur (liten fördröjning).
@@ -158,6 +160,31 @@ export function Play() {
           )}
         </p>
       </Panel>
+
+      {/* Hur kontraktet bjöds fram – återskapad budgivning, hopfälld som standard. */}
+      {game.calls && (
+        <Panel className="!p-4">
+          <button
+            type="button"
+            onClick={() => setShowAuction((v) => !v)}
+            className="flex w-full items-center justify-between text-left"
+          >
+            <span className="font-semibold">Budgivningen</span>
+            <span className="text-sm text-emerald-700">
+              {showAuction ? 'Dölj ▴' : 'Visa hur kontraktet bjöds ▾'}
+            </span>
+          </button>
+          {showAuction && (
+            <div className="mt-4 flex justify-center">
+              <AuctionView
+                calls={game.calls}
+                dealer={game.deal.dealer}
+                vulnerability={game.deal.vulnerability}
+              />
+            </div>
+          )}
+        </Panel>
+      )}
 
       {/* Det gröna filtbordet: Nord uppe, Väst/mitten/Öst, Syd nere (du).
           Allt centreras och hålls innanför filtkanten. */}

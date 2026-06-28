@@ -49,10 +49,13 @@
 30. Markeringar & utspel (UDCA, Lavinthal, 3:e/5:e, honnörsutspel) — §8
 
 ## Visuellt / UI
-- [ ] **Auktionen på "Spela kort"-fliken** – visa budgivningsrutnätet
-  (`AuctionView`) så man ser HUR man hamnade i kontraktet som spelas. Kräver att
-  kortspelet får tillgång till budföljden (motorn bygger auktionen redan i
-  Spela-fliken; återanvänd `turnsToCalls` + `buildAuction`/given). **Nästa.**
+- ✅ **Auktionen på "Spela kort"-fliken** – budgivningsrutnätet (`AuctionView`)
+  visas i en hopfällbar panel så man ser HUR kontraktet bjöds fram. Kortspelet
+  härleder nu kontraktet ur en FÄRDIG (ostörd) auktion via `dealForPlay` /
+  `finalContract` (`auction-contract.ts`) i stället för den fristående
+  `pickContract`-heuristiken, så budföljden matchar kontraktet man spelar.
+  Delad `turnsToCalls` (flyttad till `auction-contract.ts`, används av både
+  Spela- och Spela kort-fliken).
 
 ## Stöd som följer med (löpande)
 31. Hålfinnare utökas för varje nytt återbud/svar

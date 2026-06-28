@@ -77,9 +77,15 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   **Auktionsvyn klar:** `src/components/AuctionView.tsx` ritar budgivningen som
   rutnät V N Ö S med zon/sårbarhet, giv-markör, färgkodade bud (Pass/Dbl/Redbl)
   och inramat slutkontrakt – inkopplad i budträningen + Spela-fliken.
-  **Nästa: visa auktionsvyn även på "Spela kort"-fliken** (hur kontraktet nåddes,
-  se docs/arbetslista.md → Visuellt/UI), sedan budlådans budknappar + punkt 28
-  (DDS-solver för facit) + punkt 30 (markeringar/utspel, §8).
+  **Auktionsvyn på "Spela kort"-fliken klar:** kortspelet härleder nu kontraktet
+  ur en FÄRDIG (ostörd) auktion (`auction-contract.ts`: `dealForPlay` letar fram
+  en giv vars auktion budats klart, `finalContract` plockar slutkontraktet +
+  spelföraren som först nämnde färgen) i stället för den fristående
+  `pickContract`-heuristiken, så budföljden som visas matchar kontraktet man
+  spelar. `AuctionView` ligger i en hopfällbar panel ("Visa hur kontraktet
+  bjöds"). `turnsToCalls` är nu delad i `auction-contract.ts` (Spela + Spela kort).
+  **Nästa: budlådans budknappar + punkt 28 (DDS-solver för facit) + punkt 30
+  (markeringar/utspel, §8).**
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).

@@ -19,16 +19,10 @@ const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const RANK: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades'] // stigande budrang
 const rankOf = (s: Suit) => RANK.indexOf(s)
-const SUIT_OF_CALL: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 const isMajor = (s: Suit) => s === 'hearts' || s === 'spades'
 
 export function suitOfWeakTwo(call: string): Suit | null {
   return call === '2D' ? 'diamonds' : call === '2H' ? 'hearts' : call === '2S' ? 'spades' : null
-}
-
-function suitOfCall(call: string): Suit | null {
-  const m = call.match(/^\d(C|D|H|S)$/)
-  return m ? SUIT_OF_CALL[m[1]] : null
 }
 
 /** Antal topphonnörer (A/K/Q) i en färg. */
