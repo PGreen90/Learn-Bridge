@@ -83,9 +83,12 @@
   **trumfdam-fråga** (`respondToQueenAsk`), **cue-bid** (`cheapestCueBid`),
   **Sjöbergs 5NT** kungfråga (`respondToKingAsk`), **Gerber** ess-/kungfråga
   (`respondToGerber`/`respondToGerberKingAsk`) och **Exclusion** (`respondToExclusion`).
-  Avgränsning: dessa lever djupt i auktionen (efter trumföverenskommelse) och är
-  byggda som rena, testade motorfunktioner. Att låta en slumpad auktion växa hit
-  kräver ett djupare auktionslager (öppnarens/svararens 3:e–4:e bud) – tas separat.
+  **Inkopplade i en växande auktion:** `slam-auction.ts` (`slamInvestigation`)
+  hakar in **1430 RKC** efter en högfärgsfit via **Jacoby 2NT** när parets
+  samlade poäng (Bergenpoäng + stödpoäng) når **slamzon ≥ 33** (storslam ≥ 37).
+  Auktionen växer då vidare 4NT → RKC-svar → slamavslut (5/6/7 i trumf).
+  Avgränsning: övriga slamvägar (cue, Sjöberg, Gerber, Exclusion, minor-/NT-fit)
+  är fortfarande rena motorfunktioner, ej inkopplade i en växande auktion än.
 - ✅ Punkt **21–22** (inkliv + tvåfärgsinkliv, §7.1–7.2) – `overcalls.ts`.
   Enkelt inkliv, 1NT-inkliv (15–18), Michaels, ovanlig 2NT, upplysningsdubbling,
   hoppinkliv, samt advancers svar (cue=limit+, höjning, ny färg, NT).
@@ -102,5 +105,9 @@
   konkurrenshöjning, NT med stopp, redubbling). Störda givar förgrenar av från
   det ostörda flödet; en konkurrensrond modelleras, sedan markeras auktionen öppen.
   Avgränsning: vidare konkurrens (öppnarens/advancers fortsättning) tas senare.
+- ✅ **Handvärdering driver öppningen** – `openings.ts` använder nu **TP
+  (startpoäng) ≥ 12** som öppningströskel för färgöppning (Bergens grundregel),
+  i stället för rå hp. NT-stegen + starka 2♣ är fortsatt hp-definierade. Bra
+  11-hp-händer öppnar, platta D/kn-tunga 12-hp-händer avstår. Se `docs/handvardering.md`.
 - 🔜 Nästa: **kortspelet** (punkt 28–30): DDS double-dummy-solver i WebAssembly
   + spelläge (spela ut korten mot bottar) + markeringar/utspel (§8).

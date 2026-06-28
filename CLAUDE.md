@@ -59,8 +59,10 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   motorfunktioner i `slam.ts` – ännu ej inkopplade i en växande auktion. Hela
   kartan ligger i **`docs/arbetslista.md`** (punkt 1–32).
   **Handvärdering** (Bergens Adjust-3) finns i `evaluation.ts`: startpoäng,
-  stödpoäng och Bergenpoäng. Visas som `15 HP (17 TP)` i `HandView` men **styr
-  inte budbesluten** (rent pedagogiskt lager). Spec + plan i `docs/handvardering.md`.
+  stödpoäng och Bergenpoäng. Visas som `15 HP (17 TP)` i `HandView`. **TP styr nu
+  utvalda beslut:** öppningströskeln (`openings.ts`, färgöppning vid TP ≥ 12) och
+  slamzon (`slam-auction.ts`). **Slamverktygen är inkopplade i en växande auktion**
+  för Jacoby 2NT-fit (1430 RKC startar vid slamzon ≥ 33). Spec i `docs/handvardering.md`.
   **Nästa: kortspelet (punkt 28–30)** – DDS double-dummy-solver (WebAssembly),
   spelläge (spela ut korten mot bottar) och markeringar/utspel (§8).
 

@@ -148,10 +148,14 @@ uträkningen (Adjust-3, längd osv.) visas i en utfällbar ruta / tooltip.
 6. **Dokumentation + commit/push.** Uppdatera ändringslogg och arbetslista;
    deploya och verifiera live-länken.
 
-## Vad vi INTE gör i den här omgången
-- Ändrar **inte** ett enda budbeslut. `classifyOpening` m.fl. fortsätter på `hcp`.
-- Bygger **inte** in tröskelvärdena (26/29/33) i någon budväg.
-- Rör **inte** befintliga tester för budmotorn.
+## TP styr budbeslut (steg 2 – inkopplat senare)
+Efter den rent pedagogiska visningen kopplades TP in i utvalda beslut:
+- **Öppningströskeln** (`openings.ts`): färgöppning sker nu vid **TP ≥ 12**
+  (Bergens grundregel "öppna med 12+ startpoäng") i stället för hp ≥ 12.
+  NT-stegen och starka 2♣ är fortsatt hp-definierade (konventionella ranges).
+  Effekt: bra 11-hp-händer öppnar; platta D/kn-tunga 12-hp-händer (→ 11 TP) avstår.
+- **Slamzon** (`slam-auction.ts`): tröskeln **33** (Bergenpoäng + stödpoäng) avgör
+  om en Jacoby-2NT-auktion växer vidare till 1430 RKC; **37** för storslam.
 
 ## Öppna frågor / kantfall att bevaka
 - **Säkra stick (quick tricks):** öppningsregeln nämner "2 säkra stick". Vi

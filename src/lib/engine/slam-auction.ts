@@ -1,0 +1,69 @@
+// Kopplar in slamverktygen (slam.ts) i en VÄXANDE auktion. Slamverktygen är
+// ask/svar-funktioner som lever djupt i budgivningen (efter att trumf är
+// överenskommen). Här tas det första, entydiga fallet: en högfärgsfit via
+// Jacoby 2NT (utgångskrav) där parets samlade poäng når slamzon → kaptenen
+// (svararen) frågar 1430 RKC och placerar sedan kontraktet.
+//
+// Slamzon enligt Bergen: Bergenpoäng (öppnaren, omvärderad vid fit) +
+// stödpoäng (svararen som blir träkarl) ≥ 33. Storslam ≥ 37.
+
+import type { Hand, Suit } from '../../types/bridge'
+import { bergenPoints, dummyPoints } from './evaluation'
+import { hasTrumpQueen, keycards, respondToRKC } from './slam'
+
+const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+
+/** Ett extra steg i slamutredningen, med roll i stället för plats (sätts i buildAuction). */
+export interface SlamTurn {
+  role: 'öppnare' | 'svarare'
+  call: string
+  rule: string
+  explanation: string
+}
+
+/**
+ * Slamutredning efter en högfärgsfit (kaptenen = svararen frågar). Returnerar
+ * de extra buden (4NT → RKC-svar → slamavslut), eller null om paret inte når
+ * slamzon (då fortsätter den vanliga auktionen).
+ */
+export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: Suit): SlamTurn[] | null {
+  const combined = bergenPoints(openerHand, trump).bergenPoints + dummyPoints(responderHand, trump).dummyPoints
+  if (combined < 33) return null
+
+  const turns: SlamTurn[] = []
+
+  // Kaptenen (svararen) frågar nyckelkort med 1430 RKC.
+  turns.push({
+    role: 'svarare',
+    call: '4NT',
+    rule: '1430 RKC',
+    explanation: `slamzon (~${combined} poäng ihop) → 4NT (frågar nyckelkort).`,
+  })
+
+  // Öppnaren svarar på frågan.
+  const answer = respondToRKC(openerHand, trump)
+  turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
+
+  // Kaptenen räknar parets nyckelkort (4 ess + trumfkung) och placerar kontraktet.
+  const total = keycards(openerHand, trump) + keycards(responderHand, trump)
+  const queen = hasTrumpQueen(openerHand, trump) || hasTrumpQueen(responderHand, trump)
+  let call: string
+  let why: string
+  if (total <= 3) {
+    call = `5${LETTER[trump]}`
+    why = `två nyckelkort saknas → stanna i 5${SYM[trump]}.`
+  } else if (total === 4) {
+    call = `6${LETTER[trump]}`
+    why = `ett nyckelkort saknas → 6${SYM[trump]} (lillslam).`
+  } else if (queen && combined >= 37) {
+    call = `7${LETTER[trump]}`
+    why = `alla fem nyckelkort + trumfdam, storslamszon → 7${SYM[trump]} (storslam).`
+  } else {
+    call = `6${LETTER[trump]}`
+    why = `alla fem nyckelkort → 6${SYM[trump]} (lillslam).`
+  }
+  turns.push({ role: 'svarare', call, rule: 'slamavslut', explanation: why })
+
+  return turns
+}

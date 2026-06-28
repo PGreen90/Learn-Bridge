@@ -19,6 +19,7 @@ import { hasStopper } from './overcalls'
 import type { Suit } from '../../types/bridge'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
+import { slamInvestigation } from './slam-auction'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -243,6 +244,19 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
 
   // Öppnaren passade svararens bud → kontraktet är satt.
   if (rebid.call === 'P') return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+
+  // Slamutredning (punkt 18–20 inkopplade): efter en högfärgsfit via Jacoby 2NT
+  // kan paret nå slamzon → 1430 RKC växer auktionen vidare.
+  if (response.rule === 'Jacoby 2NT' && (openerSuit === 'hearts' || openerSuit === 'spades')) {
+    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit)
+    if (slam) {
+      for (const t of slam) {
+        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+      }
+      return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+    }
+  }
 
   // Svararens andra bud (dispatchas på hela sekvensen).
   const second = responderSecondBid(opening.call, response, rebid, deal.hands[responderSeat])
