@@ -122,6 +122,11 @@
   stickvinnare, räkning), `play-bot.ts` (bott-tumregler), `play-contract.ts`
   (heuristiskt kontrakt) och fliken **Spela kort** (`src/pages/Play.tsx`): klicka
   ut korten mot bottar, avslut + motspel, stickräkning, satt/bet. Se `docs/kortspel.md`.
+- ✅ **Bot-tumreglerna förfinade** (`play-bot.ts`): **andra hand lågt** (spar
+  honnörer i stället för att vinna i onödan), **ruffar aldrig partnerns vinnande
+  stick** (kastar lågt sidokort via `lowAvoidRuff`), och **utspel = topp av en
+  honnörssekvens** (KQJ→K, QJ10→Q), annars lågt. Tester i `play-bot.test.ts`.
+- ✅ **Spelläget kopplat till en riktig auktion** – se Visuellt/UI ovan
+  (`auction-contract.ts`).
 - 🔜 Nästa i kortspelet: punkt **28** (DDS double-dummy-solver i WebAssembly för
-  facit/poängsättning) och punkt **30** (markeringar & utspel, §8). Förfina även
-  bot-tumreglerna och koppla spelläget till en riktig auktion.
+  facit/poängsättning) och punkt **30** (markeringar & utspel, §8).

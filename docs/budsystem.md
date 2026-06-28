@@ -1041,3 +1041,14 @@ Det avslöjar längd/räkning direkt för partnern.
   att sista budet = kontraktet). Städning: tog bort död `suitOfCall`/`SUIT_OF_CALL`
   i `responses-weak2.ts` (tsc nu helt ren). Ren kod/UI, ingen systemändring.
   **Nästa gång:** budlådans budknappar, sedan DDS-solvern (punkt 28) + punkt 30.
+- **2026-06-29** – Kortspel: **förfinade bot-tumregler** (`play-bot.ts`). Tre
+  klassiska doktrinregler ersätter det tidigare "vinn alltid om du kan":
+  (1) **andra hand lågt** – när motståndaren leder och botten är näst på tur läggs
+  lågt (spar honnörer) i stället för att vinna direkt; (2) **ruffa aldrig partnerns
+  vinnande stick** – ny `lowAvoidRuff` kastar hellre lågt i en sidofärg än trumfar
+  ett stick partnern redan vinner (eller slösar trumf utan att vinna); (3) **utspel
+  = topp av honnörssekvens** (KQJ→K, QJ10→Q, AK→A), annars lågt från längsta färgen
+  (spotkort i rad som 7654 räknas inte som sekvens). Tredje/fjärde hand vinner
+  fortfarande billigast möjligt. Tester: `play-bot.test.ts` (8 st). De befintliga
+  hel-utspelningstesterna (13 giltiga stick) är oförändrade. Ren logik, ingen
+  systemändring. **Nästa gång:** DDS-solvern (punkt 28) + punkt 30 (markeringar/utspel).
