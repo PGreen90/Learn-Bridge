@@ -117,6 +117,24 @@ export function startingPoints(hand: Hand): Evaluation {
   }
 }
 
+/**
+ * Kortfärgspoäng som *väntar* på en fit – endast för visning. Bergens metod
+ * räknar ALDRIG korthet i startpoängen (man vet ännu inte om man har trumffit),
+ * men vi vill kunna visa ägaren att singel/dubbel/renons inte är glömda, bara
+ * uppskjutna. Enkel, trumf-oberoende skattning: dubbleton +1, singel +2,
+ * renons +3. Räknas in först i stöd-/Bergenpoängen när fit hittats.
+ */
+export function deferredShortness(hand: Hand): number {
+  const len = lengths(hand)
+  let pts = 0
+  for (const s of SUITS) {
+    if (len[s] === 2) pts += 1
+    else if (len[s] === 1) pts += 2
+    else if (len[s] === 0) pts += 3
+  }
+  return pts
+}
+
 /** Nivå 2 – svararens stödpoäng vid fit i en (oftast hög-)färg. */
 export interface DummyEvaluation extends Evaluation {
   /** Kortfärgspoäng: dubbleton +1 (var), singel +2 (+3 m. 4+ trumf), renons = antal trumf. */

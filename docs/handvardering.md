@@ -185,4 +185,8 @@ uträkningen (Adjust-3, längd osv.) visas i en utfällbar ruta / tooltip.
 - ✅ Punkt 5: visning `15 HP (17 TP)` i `HandView` (prop `showPoints`) med
   utfällbar uträkning. Inkopplad i Spela- och Budträning-vyerna. Verifierad i
   webbläsaren (alla fyra givhänder räknar rätt, inga konsolfel).
-- ☐ Punkt 6: commit/push + verifiera live (väntar på ägarens OK)
+- ✅ Punkt 6: commit/push + live ([live-länken](https://pgreen90.github.io/Learn-Bridge/) grön).
+- ✅ Tillägg: `deferredShortness()` + grå rad "Kortfärg (räknas först vid fit)" i
+  uträkningen. Bergens regel "ingen korthet i startpoäng vid öppning" gäller
+  fortfarande – men singel/dubbel/renons visas nu som *uppskjutna*, inte glömda,
+  med en notis om ungefärligt TP-värde när fit hittats.

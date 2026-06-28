@@ -1,7 +1,7 @@
 import type { Hand, Suit, Rank } from '../types/bridge'
 import { SuitSymbol } from './SuitSymbol'
 import { hcp } from '../lib/engine/hand'
-import { startingPoints } from '../lib/engine/evaluation'
+import { deferredShortness, startingPoints } from '../lib/engine/evaluation'
 
 // Bridge-konvention: visa färgerna i ordningen spader, hjärter, ruter, klöver,
 // och korten från högst (A) till lägst (2).
@@ -45,6 +45,7 @@ export function HandView({ hand, showPoints = false }: { hand: Hand; showPoints?
 function PointsLine({ hand }: { hand: Hand }) {
   const e = startingPoints(hand)
   const hp = hcp(hand)
+  const shortness = deferredShortness(hand)
 
   // Bara de delar som faktiskt ändrar poängen visas i uträkningen.
   const rows: { label: string; value: number }[] = [{ label: 'Honnörspoäng (Hp)', value: hp }]
@@ -75,8 +76,20 @@ function PointsLine({ hand }: { hand: Hand }) {
             <td className="py-0.5 pr-3">Totalpoäng (TP)</td>
             <td className="py-0.5 text-right font-mono tabular-nums">{e.startingPoints}</td>
           </tr>
+          {shortness > 0 && (
+            <tr className="text-slate-400 italic">
+              <td className="py-0.5 pr-3">Kortfärg (räknas först vid fit)</td>
+              <td className="py-0.5 text-right font-mono tabular-nums">({signed(shortness)})</td>
+            </tr>
+          )}
         </tbody>
       </table>
+      {shortness > 0 && (
+        <p className="mt-1 text-xs text-slate-400">
+          Singel/dubbel/renons ger poäng först när en trumffärg är hittad – då
+          blir handen värd ungefär {e.startingPoints + shortness} TP.
+        </p>
+      )}
     </details>
   )
 }

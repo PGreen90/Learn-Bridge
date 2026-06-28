@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { bergenPoints, dummyPoints, startingPoints } from './evaluation'
+import { bergenPoints, deferredShortness, dummyPoints, startingPoints } from './evaluation'
 
 // Faciten kommer från PDF:en "Hand Evaluation – Adjust-3 Method" (se
 // docs/handvardering.md). 13 av 16 facit-händer stämmer exakt med reglerna;
@@ -45,6 +45,22 @@ describe('startingPoints – delarna i detalj', () => {
   it('AK och AQ är inte tvivelaktiga dubbletonger, men KQ/Qx/Jx är det', () => {
     expect(startingPoints(parseHand('S:AK H:K543 D:K543 C:543')).dubiousHonors).toBe(0)
     expect(startingPoints(parseHand('S:KQ H:A543 D:A543 C:543')).dubiousHonors).toBe(-1)
+  })
+})
+
+describe('deferredShortness – uppskjuten kortfärg (bara visning)', () => {
+  it('dubbleton +1, singel +2, renons +3', () => {
+    // ♠T4 ♥6 ♦AKJ9862 ♣A72: dubbel spader +1, singel hjärter +2 = 3
+    expect(deferredShortness(parseHand('S:T4 H:6 D:AKJ9862 C:A72'))).toBe(3)
+    // renons + singel
+    expect(deferredShortness(parseHand('S:AJ62 H:6542 D:- C:AK987'))).toBe(3)
+    // balanserad utan korthet = 0
+    expect(deferredShortness(parseHand('S:AQ5 H:KJ7 D:Q842 C:K93'))).toBe(0)
+  })
+
+  it('räknas INTE in i startpoängen (TP rör sig inte)', () => {
+    const e = startingPoints(parseHand('S:T4 H:6 D:AKJ9862 C:A72'))
+    expect(e.startingPoints).toBe(16) // 12 Hp + 3 längd + 1 kvalitet, ingen korthet
   })
 })
 
