@@ -134,5 +134,17 @@
   Utspelet (`leadFromSuit`) är **inkopplat i botten** (`play-bot.ts` använder det i
   stället för egen sekvenslogik). Att LÄSA motpartens signaler (full försvars-
   strategi) hör ihop med DDS (punkt 28) och tas separat. Tester i `signals.test.ts`.
-- 🔜 Sista kortspelspunkten: punkt **28** (DDS double-dummy-solver i WebAssembly
-  för facit/poängsättning).
+- 🚧 Punkt **28** (DDS double-dummy-solver) – **researchad, blockerad på en
+  fungerande solver.** Bäst kandidat: npm-paketet **`bridge-dds`** (Apache-2.0,
+  bär Bo Haglunds DDS som självständig, base64-**inbäddad** WebAssembly → rätt
+  form för GitHub Pages, inga separata .wasm-filer att hosta). MEN i nuvarande
+  Chrome/V8 (juni 2026) **kraschar själva uträkningen**: `loadDds()` och lätta
+  anrop (`SetMaxThreads`) funkar, men `CalcDDtablePBN`/`SolveBoardPBN` ger
+  `RuntimeError: null function` i lösar-koden (gäller publicerade 1.4.0; 1.3.0
+  saknar inbäddad wasm och är sämre för Pages). Verifierat i webbläsaren via en
+  tillfällig probe. **Slutsats:** koppla inte in det trasiga paketet.
+  **Klart & testat ändå:** `src/lib/engine/dds.ts` → `dealToPbn` (giv → PBN-sträng
+  som vilken DDS-solver som helst tar emot), `dds.test.ts`. **Nästa steg för 28:**
+  (a) testa en nyare `bridge-dds` när den kommer / rapportera buggen uppströms,
+  (b) leta annat browser-DDS-npm, eller (c) bygga egen wasm från
+  `dds-bridge/dds` (emscripten) och hosta i repot. Kräver ägarens vägval.

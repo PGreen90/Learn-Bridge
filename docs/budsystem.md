@@ -1065,3 +1065,14 @@ Det avslöjar längd/räkning direkt för partnern.
   försvarsstrategi) hör ihop med DDS (punkt 28). Tester: `signals.test.ts` (23 st).
   Ren logik, ingen systemändring. **Nästa gång:** DDS-solvern (punkt 28) – sista
   kortspelspunkten.
+- **2026-06-29** – Punkt 28 (DDS-solver): **researchad, blockerad.** Utvärderade
+  npm-paketet `bridge-dds` (Apache-2.0, Bo Haglunds DDS som självständig
+  base64-inbäddad WebAssembly – rätt form för GitHub Pages). Bekräftade i
+  webbläsaren att `loadDds()` + lätta anrop fungerar men att den TUNGA lösar-koden
+  (`CalcDDtablePBN`/`SolveBoardPBN`) kraschar med `RuntimeError: null function` i
+  nuvarande Chrome/V8 – den publicerade 1.4.0-byggen är trasig, 1.3.0 saknar
+  inbäddad wasm. **Kopplade INTE in det trasiga paketet** (avinstallerat; ingen
+  ny dependency, vite.config orörd) – repot förblir grönt. Behöll den färdiga,
+  testade `dealToPbn` (giv → PBN) i `src/lib/engine/dds.ts` som byggsten. Se
+  docs/arbetslista.md punkt 28 för nästa steg (kräver ägarens vägval). Ingen
+  systemändring.
