@@ -22,17 +22,17 @@
 11. Smolen + svararens rebud efter fullföljd transfer/Stayman — §4.3
 12. Fjärde färg krav — §6.6
 
-## Saknade svarsmotorer (övriga öppningar)
+## Saknade svarsmotorer (övriga öppningar + passad hand)
 13. Svar på stark 2♣ (2♦ väntebud, andra negativa) — §4.4
 14. Svar på svaga tvåöppningar 2♦/2♥/2♠ + Ogust — §4.5
 15. Svar på spärröppningar (3-/4-läget) — §4.6
 16. Svar på 2NT-öppning (Stayman/transfers, 20–21) + hantera 3NT-öppning
+17. Drury — svar på 1♥/1♠ **endast som passad hand** (2♣ = limithöjning) — §6.7
 
 ## Slamverktyg (§6)
-17. 1430 RKC Blackwood + trumfdam-/kungfråga — §6.1
-18. Cue-bid / kontrollbud — §6.2
-19. Sjöbergs 5NT, Gerber, Exclusion Blackwood — §6.3–6.5
-20. Drury (passad hand) — §6.7
+18. 1430 RKC Blackwood + trumfdam-/kungfråga — §6.1
+19. Cue-bid / kontrollbud — §6.2
+20. Sjöbergs 5NT, Gerber, Exclusion Blackwood — §6.3–6.5
 
 ## Konkurrens / försvarsbud (§7)
 21. Inkliv + svar — §7.1
@@ -66,5 +66,12 @@
   förenklad och flaggad.
 - ✅ Punkt **15** (svar på spärröppningar 3-/4-läget: pass, höjning till utgång,
   ny färg krav, 3NT, samt öppnarens återbud) – `responses-preempt.ts`.
-  Avgränsning: 4NT (1430 RKC) och cue mot slam hör till §6 (punkt 17–18).
-- 🔜 Nästa: punkt **16** (svar på 2NT-öppning + hantera 3NT-öppning)
+  Avgränsning: 4NT (1430 RKC) och cue mot slam hör till §6 (punkt 18–19).
+- ✅ Punkt **16** (svar på 2NT-öppning + hantera 3NT-öppning) – `responses-2nt.ts`.
+  2NT är **utgångskrav-schema** (inga inbjudningsbud, till skillnad från 1NT):
+  3♣ Stayman, 3♦/3♥ transfer (svag=signoff, 11+=slam), 4♦/4♥ Texas (6-färg, ren
+  utgång), 3♠ minorfråga, 3NT, 4NT kvantitativ, 6NT. 3NT-öppningen (25–27): svararen
+  placerar kontraktet (pass / 4NT kvantitativ / 6NT). Öppnaren fullföljer Stayman/
+  transfer/Texas/minorfråga och tar ställning till kvantitativ 4NT.
+  Avgränsning: exakta slamverktyg (RKC/Gerber/storslam) hör till §6 (punkt 18–20).
+- 🔜 Nästa: punkt **17** (Drury – svar på 1♥/1♠ endast som passad hand, §6.7)

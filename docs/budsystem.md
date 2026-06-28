@@ -972,5 +972,17 @@ Det avslöjar längd/räkning direkt för partnern.
   utgång** (fit), **ny färg (krav)**, **3NT till spel** (stopp i sidofärger), samt
   öppnarens återbud på krav-ny-färg (stöd/rebjuden färg). Inkopplat i
   auktionsbyggaren (3C/3D/3H/3S/4C/4D/4H/4S svarbara). Avgränsning: 4NT (1430 RKC)
-  och cue mot slam tas i §6 (punkt 17–18). Kod, inte systemändring.
+  och cue mot slam tas i §6 (punkt 18–19). Kod, inte systemändring.
   **Nästa gång:** punkt 16 – svar på 2NT-öppning + hantera 3NT-öppning.
+- **2026-06-28** – Budmotorn: **punkt 16** (svar på 2NT-öppning + hantera 3NT-
+  öppning) i koden (`responses-2nt.ts`). Viktig skillnad mot 1NT: 2NT (20–21) är
+  **utgångskrav** så fort svararen har ~5 hp, alltså **inga inbjudningsbud** och
+  konventionerna ett steg upp. Schema: **3♣ Stayman**, **3♦/3♥ transfer** (svag =
+  signoff i delkontrakt, 11+ = slamintresse), **4♦/4♥ Texas** (6-färg, ren
+  utgång), **3♠ minorfråga** (5-4 minorer, slam), **3NT** till spel, **4NT
+  kvantitativ**, **6NT**. Öppnaren fullföljer Stayman/transfer/Texas/minorfråga
+  och accepterar kvantitativ 4NT med max. **3NT-öppningen** (25–27): svararen
+  placerar kontraktet (pass / 4NT kvantitativ / 6NT). Inkopplat i auktions-
+  byggaren (2NT och 3NT svarbara). Avgränsning: exakta slamverktyg (RKC/Gerber/
+  storslam) hör till §6 (punkt 18–20). Kod, inte systemändring.
+  **Nästa gång:** punkt 17 – Drury (svar på 1♥/1♠ endast som passad hand, §6.7).

@@ -11,6 +11,7 @@ import { respondTo1NT } from './responses-nt'
 import { respondTo2C } from './responses-2c'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { respondToPreempt, preemptOf } from './responses-preempt'
+import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 
@@ -66,8 +67,8 @@ export function dealWithMajorOpening(maxTries = 300): { deal: Deal; auction: Maj
 
 const PARTNER_OF: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
 const RESPONDABLE = new Set([
-  '1C', '1D', '1H', '1S', '1NT', '2C', '2D', '2H', '2S',
-  '3C', '3D', '3H', '3S', '4C', '4D', '4H', '4S',
+  '1C', '1D', '1H', '1S', '1NT', '2C', '2D', '2H', '2S', '2NT',
+  '3C', '3D', '3H', '3S', '3NT', '4C', '4D', '4H', '4S',
 ])
 const OPEN_SUIT: Record<string, Major | 'clubs' | 'diamonds'> = {
   '1C': 'clubs', '1D': 'diamonds', '1H': 'hearts', '1S': 'spades',
@@ -99,6 +100,8 @@ function computeResponse(openCall: string, responderHand: Deal['hands'][Seat]): 
   const preempt = preemptOf(openCall)
   if (preempt) return respondToPreempt(responderHand, preempt.suit, preempt.level)
   if (openCall === '1NT') return respondTo1NT(responderHand)
+  if (openCall === '2NT') return respondTo2NT(responderHand)
+  if (openCall === '3NT') return respondTo3NT(responderHand)
   const suit = OPEN_SUIT[openCall]
   if (suit === 'hearts' || suit === 'spades') return respondToMajor(responderHand, suit)
   return respondToMinor(responderHand, suit)
