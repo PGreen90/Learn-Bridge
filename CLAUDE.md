@@ -74,8 +74,12 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   **trumfen** ligger alltid på spelförarens högra hand sett från Syd och
   **färgordningen alternerar svart/röd** (cykeln ♠ ♦ ♣ ♥ roteras med trumfen –
   se `orderedSuits` i `Play.tsx`). Förebild: Synrey Bridge-appen.
-  **Nästa: budlådan (auktion + färgkodade budknappar), sedan punkt 28
-  (DDS-solver för facit) + punkt 30 (markeringar/utspel, §8).**
+  **Auktionsvyn klar:** `src/components/AuctionView.tsx` ritar budgivningen som
+  rutnät V N Ö S med zon/sårbarhet, giv-markör, färgkodade bud (Pass/Dbl/Redbl)
+  och inramat slutkontrakt – inkopplad i budträningen + Spela-fliken.
+  **Nästa: visa auktionsvyn även på "Spela kort"-fliken** (hur kontraktet nåddes,
+  se docs/arbetslista.md → Visuellt/UI), sedan budlådans budknappar + punkt 28
+  (DDS-solver för facit) + punkt 30 (markeringar/utspel, §8).
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).

@@ -134,7 +134,11 @@ function Session({ themeId }: { themeId: string }) {
       {shownCalls.length > 0 && (
         <Panel>
           <p className="text-sm text-slate-500 mb-3">Budgivningen hittills:</p>
-          <AuctionView calls={shownCalls} dealer={exercise.dealer} />
+          <AuctionView
+            calls={shownCalls}
+            dealer={exercise.dealer}
+            vulnerability={exercise.vulnerability}
+          />
         </Panel>
       )}
 

@@ -7,11 +7,12 @@ const STRAIN: Record<string, { sym: string; suit: Suit }> = {
   S: { sym: '♠', suit: 'spades' },
 }
 
-/** Visar ett bud snyggt: "1H" -> 1♥ (rött), "P" -> Pass, "1NT" -> 1NT. */
+/** Visar ett bud snyggt: "1H" -> 1♥ (rött), "P" -> Pass (grön), "1NT" -> 1NT.
+ *  Pass = grön, dubbling = röd, redubbling = blå (samma färger som budlådan). */
 export function BidLabel({ bid }: { bid: Bid }) {
-  if (bid === 'P') return <span>Pass</span>
-  if (bid === 'X') return <span>Dbl</span>
-  if (bid === 'XX') return <span>Redbl</span>
+  if (bid === 'P') return <span className="text-emerald-600">Pass</span>
+  if (bid === 'X') return <span className="text-red-600">Dbl</span>
+  if (bid === 'XX') return <span className="text-blue-600">Redbl</span>
 
   const level = bid[0]
   const strain = bid.slice(1)

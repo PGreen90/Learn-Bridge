@@ -48,6 +48,12 @@
 29. Kortspels-läge: spela ut korten mot bottar (avslut + motspel)
 30. Markeringar & utspel (UDCA, Lavinthal, 3:e/5:e, honnörsutspel) — §8
 
+## Visuellt / UI
+- [ ] **Auktionen på "Spela kort"-fliken** – visa budgivningsrutnätet
+  (`AuctionView`) så man ser HUR man hamnade i kontraktet som spelas. Kräver att
+  kortspelet får tillgång till budföljden (motorn bygger auktionen redan i
+  Spela-fliken; återanvänd `turnsToCalls` + `buildAuction`/given). **Nästa.**
+
 ## Stöd som följer med (löpande)
 31. Hålfinnare utökas för varje nytt återbud/svar
 32. Övningar i JSON som tränar de nya bitarna i budträningen

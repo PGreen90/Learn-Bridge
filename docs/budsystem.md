@@ -1019,3 +1019,12 @@ Det avslöjar längd/räkning direkt för partnern.
   (cykeln ♠ ♦ ♣ ♥ roteras med trumfen, `orderedSuits`). Deployad och verifierad
   live. Ren UI, ingen systemändring. **Nästa gång:** budlådan (auktion i fyra
   kolumner + färgkodade budknappar), sedan DDS-solvern (punkt 28).
+- **2026-06-28** – Visuell omgång (UI): **polerad auktionsvy** (`AuctionView`).
+  Rutnät V N Ö S med **zon/sårbarhet** (sårbart par rött), **giv-markör** ("giv ●"
+  + "(du)" på Syd), **färgkodade bud** (Pass grön, Dbl röd, Redbl blå via
+  `BidLabel`) och **inramat slutkontrakt**. Inkopplad i budträningen
+  (`BiddingSession`, med `exercise.vulnerability`) och i **Spela-fliken** (ny
+  `turnsToCalls` återskapar hela medurs-budföljden inkl. motståndarpassar).
+  Ren UI, ingen systemändring. **Nästa gång:** visa samma auktionsvy på
+  **"Spela kort"-fliken** (se docs/arbetslista.md → Visuellt/UI), sedan budlådans
+  budknappar / DDS-solvern (punkt 28).
