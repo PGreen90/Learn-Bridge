@@ -41,3 +41,15 @@ describe('classifyOpening', () => {
     expect(call('S:K85 H:Q84 D:J762 C:Q93')).toBe('P') // 8 hp, balanserad
   })
 })
+
+describe('TP styr öppningen (Bergens grundregel: 12+ startpoäng)', () => {
+  it('bra 11-hp-hand med 12 TP öppnar 1-minor (PDF Hand 4)', () => {
+    expect(call('S:AT4 H:T543 D:KJ67 C:KT')).toBe('1D') // 11 hp / 12 TP (Adjust-3 +1)
+  })
+  it('lång 10-hp-hand med 12 TP öppnar 1-högfärg (PDF Hand 1)', () => {
+    expect(call('S:AKQT5 H:T982 D:6 C:J67')).toBe('1S') // 10 hp / 12 TP (längd + kvalitet)
+  })
+  it('platt 12-hp-hand med bara 10 TP avstår (övervärderade D/kn)', () => {
+    expect(call('S:KQ5 H:KJ7 D:Q42 C:J32')).toBe('P') // 12 hp, 4-3-3-3 → 10 TP
+  })
+})

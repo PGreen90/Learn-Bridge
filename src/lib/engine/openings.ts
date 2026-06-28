@@ -3,6 +3,7 @@
 
 import type { Bid, Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
+import { startingPoints } from './evaluation'
 
 export interface OpeningResult {
   /** Budet, t.ex. "1S", "1NT", "2C", "P". */
@@ -21,6 +22,7 @@ const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts
 /** Räknar ut vad en hand öppnar med i 1:a hand utan störning. */
 export function classifyOpening(hand: Hand): OpeningResult {
   const p = hcp(hand)
+  const tp = startingPoints(hand).startingPoints
   const len = lengths(hand)
   const bal = isBalanced(hand)
 
@@ -36,8 +38,11 @@ export function classifyOpening(hand: Hand): OpeningResult {
   // Stark 2♣ (obalanserad 22+).
   if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `${p} hp (stark) → 2♣ (konstgjord, krav).` }
 
-  // Öppning på 1-läget (12+ hp).
-  if (p >= 12) {
+  // Öppning på 1-läget. Bergens grundregel: öppna med 12+ STARTPOÄNG (TP),
+  // inte 12+ hp. Så en bra 11-hp-hand (ess/tior/längd) öppnar, medan en platt
+  // 12-hp-hand som faller till 11 TP avstår. NT-stegen ovan är hp-definierade.
+  if (tp >= 12) {
+    const pts = tp === p ? `${p} hp` : `${p} hp / ${tp} TP`
     // Möjligt missat distributionellt 2♣ (stark obalanserad med lång färg) – flaggas.
     const uncertain = p >= 19 && !bal && Object.values(len).some((l) => l >= 6)
     if (len.spades >= 5 || len.hearts >= 5) {
@@ -45,7 +50,7 @@ export function classifyOpening(hand: Hand): OpeningResult {
       return {
         call: `1${BID[suit]}`,
         rule: '5-korts högfärg',
-        explanation: `${p} hp med ${len[suit]}-korts ${NAME[suit]} → 1${BID[suit]}.`,
+        explanation: `${pts} med ${len[suit]}-korts ${NAME[suit]} → 1${BID[suit]}.`,
         uncertain,
       }
     }
@@ -53,7 +58,7 @@ export function classifyOpening(hand: Hand): OpeningResult {
     return {
       call: `1${BID[m]}`,
       rule: 'minor-regeln',
-      explanation: `${p} hp, ingen 5-korts högfärg → 1${BID[m]} (minor-regeln).`,
+      explanation: `${pts}, ingen 5-korts högfärg → 1${BID[m]} (minor-regeln).`,
       uncertain,
     }
   }
