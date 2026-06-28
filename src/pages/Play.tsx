@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { Card, Deal, Hand, Rank, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
@@ -17,10 +17,15 @@ import {
 import { pickContract } from '../lib/engine/play-contract'
 import { botCard } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
+import { PlayingCard } from '../components/PlayingCard'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 
-const SUIT_ORDER: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
+// Grundordning som ALTERNERAR svart/röd för läsbarhet: ♠ ♦ ♣ ♥
+// (svart-röd-svart-röd). Ordningen är cyklisk (♥ → ♠ alternerar också), så den
+// kan roteras med trumfen i valfri ände utan att alterneringen bryts.
+// Inom varje färg ligger högsta kortet till vänster.
+const DISPLAY_SUITS: Suit[] = ['spades', 'diamonds', 'clubs', 'hearts']
 const RANK_HIGH_TO_LOW: Rank[] = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2']
 
 interface Game {
@@ -46,6 +51,33 @@ function sameCard(a: Card, b: Card) {
 
 function strainSymbol(contract: Contract) {
   return contract.strain === 'NT' ? <>NT</> : <SuitSymbol suit={contract.strain} />
+}
+
+/** Korten i en hand, sorterade per färg (S H R K) och högst → lägst. */
+function bySuit(hand: Card[], suit: Suit): Card[] {
+  return hand
+    .filter((c) => c.suit === suit)
+    .sort((a, b) => RANK_HIGH_TO_LOW.indexOf(a.rank) - RANK_HIGH_TO_LOW.indexOf(b.rank))
+}
+
+/**
+ * Färgernas ordning på en plats, sett från Syds (din) vy – med trumfen på
+ * spelförarens högra hand precis som vid ett riktigt bord:
+ *  - Nord/Syd (uppe/nere): trumfen längst till HÖGER.
+ *  - Öst (sida): trumfen NEDERST (= spelföraren Väst:s höger).
+ *  - Väst (sida): trumfen ÖVERST (= spelföraren Öst:s höger).
+ * Sang (NT) → ingen trumf, vanlig ordning ♠ ♥ ♣ ♦.
+ */
+function orderedSuits(seat: Seat, contract: Contract): Suit[] {
+  const trump = contract.strain === 'NT' ? null : (contract.strain as Suit)
+  if (!trump) return DISPLAY_SUITS
+  const i = DISPLAY_SUITS.indexOf(trump)
+  // Rotera den alternerande cykeln så trumfen hamnar i rätt ände:
+  //  - Väst (sidoträkarl): trumfen ÖVERST → trumfen först i ordningen.
+  //  - Övriga: trumfen i andra änden (HÖGER för Nord/Syd, NEDERST för Öst).
+  return seat === 'W'
+    ? [...DISPLAY_SUITS.slice(i), ...DISPLAY_SUITS.slice(0, i)]
+    : [...DISPLAY_SUITS.slice(i + 1), ...DISPLAY_SUITS.slice(0, i + 1)]
 }
 
 export function Play() {
@@ -84,11 +116,13 @@ export function Play() {
     return seat === dummy && openingLeadMade // vi försvarar → träkarlen visas efter utspel
   }
 
+  const seatProps = { game, isFaceUp, onPlay }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <header>
         <h1 className="text-2xl font-bold mb-1">Spela kort</h1>
-        <p className="text-slate-600">
+        <p className="text-slate-600 text-sm">
           Du sitter <strong>Syd</strong> och spelar mot datorn. Spelar din sida ut
           kontraktet styr du både Syd och träkarlen Nord; försvarar du spelar du
           bara Syd. Klicka ett kort när det är din tur.
@@ -125,26 +159,51 @@ export function Play() {
         </p>
       </Panel>
 
-      {/* Bord: Nord uppe, Väst/stick/Öst i mitten, Syd nere. */}
-      <div className="space-y-4">
-        <div className="flex justify-center">
-          <SeatView seat="N" {...{ game, isFaceUp, onPlay }} />
-        </div>
-        <div className="flex flex-wrap items-stretch justify-center gap-4">
-          <SeatView seat="W" {...{ game, isFaceUp, onPlay }} />
-          <TrickView play={play} />
-          <SeatView seat="E" {...{ game, isFaceUp, onPlay }} />
-        </div>
-        <div className="flex justify-center">
-          <SeatView seat="S" {...{ game, isFaceUp, onPlay }} />
+      {/* Det gröna filtbordet: Nord uppe, Väst/mitten/Öst, Syd nere (du).
+          Allt centreras och hålls innanför filtkanten. */}
+      <div
+        className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"
+        style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <SeatHand seat="N" {...seatProps} />
+          <div className="flex w-full items-center justify-between gap-2">
+            <SeatHand seat="W" {...seatProps} />
+            <TrickView play={play} />
+            <SeatHand seat="E" {...seatProps} />
+          </div>
+          <SeatHand seat="S" {...seatProps} />
         </div>
       </div>
     </div>
   )
 }
 
-/** En plats: namn, ev. roll, och handen (öppen och klickbar, eller dold). */
-function SeatView({
+/** Liten namnbricka för en plats, med roll och "din tur"-markering. */
+function SeatTag({
+  seat,
+  role,
+  active,
+}: {
+  seat: Seat
+  role: '' | 'spelförare' | 'träkarl'
+  active: boolean
+}) {
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+        active ? 'bg-amber-300 text-emerald-950 shadow' : 'bg-emerald-950/40 text-emerald-50'
+      }`}
+    >
+      <span>{SEAT_LABEL[seat]}</span>
+      {seat === 'S' && <span className="opacity-80">(du)</span>}
+      {role && <span className="opacity-70">· {role}</span>}
+    </div>
+  )
+}
+
+/** En plats vid bordet: namnbricka + handen som kortfan (öppen eller baksidor). */
+function SeatHand({
   seat,
   game,
   isFaceUp,
@@ -162,108 +221,151 @@ function SeatView({
   const isDummy = dummyOf(contract) === seat
   const myTurn = play.toAct === seat && controls(contract, seat) && !isComplete(play)
   const legal = myTurn ? legalCards(play, seat) : []
-
-  return (
-    <Panel className={`!p-3 w-full sm:w-72 ${myTurn ? 'ring-2 ring-emerald-500' : ''}`}>
-      <div className="flex items-baseline justify-between mb-2">
-        <span className="font-semibold">
-          {SEAT_LABEL[seat]}
-          {seat === 'S' && <span className="ml-1 text-xs text-emerald-600">(du)</span>}
-        </span>
-        <span className="text-xs text-slate-500">
-          {isDeclarer ? 'spelförare' : isDummy ? 'träkarl' : ''}
-        </span>
-      </div>
-      {faceUp ? (
-        <HandRows hand={hand} legal={legal} onPlay={myTurn ? onPlay : undefined} />
-      ) : (
-        <div className="bg-emerald-50 rounded-xl p-3 text-slate-400 text-sm">
-          {hand.length} dolda kort
-        </div>
-      )}
-    </Panel>
-  )
-}
-
-/** Handen radvis per färg. Lagliga kort klickbara när det är din tur. */
-function HandRows({
-  hand,
-  legal,
-  onPlay,
-}: {
-  hand: Hand
-  legal: Hand
-  onPlay?: (c: Card) => void
-}) {
   const legalSet = new Set(legal.map((c) => `${c.suit}${c.rank}`))
-  return (
-    <div className="bg-emerald-50 rounded-xl p-3 space-y-1">
-      {SUIT_ORDER.map((suit) => {
-        const cards = hand
-          .filter((c) => c.suit === suit)
-          .sort((a, b) => RANK_HIGH_TO_LOW.indexOf(a.rank) - RANK_HIGH_TO_LOW.indexOf(b.rank))
-        return (
-          <div key={suit} className="flex items-center gap-2 min-h-7">
-            <SuitSymbol suit={suit} className="w-5 shrink-0 text-center" />
-            <div className="flex flex-wrap gap-1">
-              {cards.length === 0 ? (
-                <span className="text-slate-400">—</span>
-              ) : (
-                cards.map((c) => {
-                  const playable = onPlay && legalSet.has(`${c.suit}${c.rank}`)
-                  return (
-                    <button
-                      key={c.rank}
-                      disabled={!playable}
-                      onClick={() => playable && onPlay!(c)}
-                      className={`font-mono text-lg leading-none px-1.5 py-1 rounded border transition-colors ${
-                        playable
-                          ? 'border-emerald-400 bg-white hover:bg-emerald-100 cursor-pointer text-slate-900'
-                          : onPlay
-                            ? 'border-transparent text-slate-300 cursor-not-allowed'
-                            : 'border-transparent text-slate-800'
-                      }`}
-                    >
-                      {c.rank}
-                    </button>
-                  )
-                })
-              )}
+  // Syd visas störst, övriga öppna händer mellanstora, dolda som små baksidor.
+  const size = seat === 'S' ? 'lg' : 'md'
+  // Korten trycks ihop så bara hörn-indexet syns (sista kortet i färgen helt).
+  const overlap = size === 'lg' ? '-ml-7' : '-ml-5'
+  const role = isDeclarer ? 'spelförare' : isDummy ? 'träkarl' : ''
+  // Träkarlen (utom Syd, som är din egen hand) läggs upp prydligt som i verkligheten.
+  const showDummy = faceUp && isDummy && seat !== 'S'
+
+  // En kort-cell: spelbar (klickbar) eller bara visad. `gap` = ev. överlapp-marginal.
+  const card = (c: Card, prevInGroup: boolean, gap: string): ReactNode => {
+    const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
+    return (
+      <PlayingCard
+        key={`${c.suit}${c.rank}`}
+        card={c}
+        size={size}
+        playable={playable}
+        dimmed={myTurn && !playable}
+        onClick={playable ? () => onPlay(c) : undefined}
+        className={prevInGroup ? gap : ''}
+      />
+    )
+  }
+
+  let body: ReactNode
+  if (!faceUp) {
+    body = <FanBacks count={hand.length} />
+  } else if (showDummy) {
+    body = <DummyHand seat={seat} contract={contract} hand={hand} card={card} />
+  } else {
+    body = (
+      <div className="flex items-end gap-1">
+        {orderedSuits(seat, contract).map((suit) => {
+          const cards = bySuit(hand, suit)
+          if (cards.length === 0) return null
+          return (
+            <div key={suit} className="flex">
+              {cards.map((c, i) => card(c, i > 0, overlap))}
             </div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      {seat !== 'S' && <SeatTag seat={seat} role={role} active={myTurn} />}
+      {body}
+      {seat === 'S' && <SeatTag seat={seat} role={role} active={myTurn} />}
     </div>
   )
 }
 
-/** Mitten: korten i pågående stick, annars förra (avslutade) sticket. */
+/**
+ * Träkarlens hand upplagd som vid ett riktigt bord: en färg per rad/grupp med
+ * trumfen på spelförarens HÖGRA sida sett från spelförarens plats.
+ *  - Nord träkarl (Syd spelar): grupper bredvid varandra, trumf längst till höger.
+ *  - Öst träkarl (Väst spelar): färger staplade, trumf längst ner (= Västs höger).
+ *  - Väst träkarl (Öst spelar): färger staplade, trumf överst (= Östs höger).
+ */
+function DummyHand({
+  seat,
+  contract,
+  hand,
+  card,
+}: {
+  seat: Seat
+  contract: Contract
+  hand: Hand
+  card: (c: Card, prevInGroup: boolean, gap: string) => ReactNode
+}) {
+  const vertical = seat === 'E' || seat === 'W'
+  const groups = orderedSuits(seat, contract)
+    .map((suit) => ({ suit, cards: bySuit(hand, suit) }))
+    .filter((g) => g.cards.length > 0)
+
+  if (vertical) {
+    return (
+      <div className="flex flex-col gap-1">
+        {groups.map(({ suit, cards }) => (
+          <div key={suit} className="flex">
+            {cards.map((c, i) => card(c, i > 0, '-ml-4'))}
+          </div>
+        ))}
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-end gap-1.5">
+      {groups.map(({ suit, cards }) => (
+        <div key={suit} className="flex">
+          {cards.map((c, i) => card(c, i > 0, '-ml-4'))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** En kompakt solfjäder av baksidor för en dold hand. */
+function FanBacks({ count }: { count: number }) {
+  return (
+    <div className="flex">
+      {Array.from({ length: count }).map((_, i) => (
+        <PlayingCard key={i} faceDown size="sm" className={i > 0 ? '-ml-4' : ''} />
+      ))}
+    </div>
+  )
+}
+
+/** Mitten: korten i pågående stick placerade mot rätt väderstreck. */
 function TrickView({ play }: { play: PlayState }) {
   const last =
     play.completedTricks.length > 0 ? play.completedTricks[play.completedTricks.length - 1] : undefined
   const trick: PlayedCard[] = play.currentTrick.length > 0 ? play.currentTrick : last?.cards ?? []
   const winner = play.currentTrick.length === 0 ? last?.winner : undefined
-  return (
-    <div className="hidden sm:flex items-center justify-center self-stretch">
-      <div className="relative h-40 w-40 rounded-md border border-slate-300 bg-slate-50 p-2">
-        {trick.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-xs text-slate-400">Sticket</div>
-        ) : (
-          <ul className="space-y-1 text-sm">
-            {trick.map((pc) => (
-              <li
-                key={pc.seat}
-                className={`flex items-center gap-2 ${pc.seat === winner ? 'font-bold text-emerald-700' : 'text-slate-600'}`}
-              >
-                <span className="w-8 shrink-0">{SEAT_LABEL[pc.seat].slice(0, 1)}</span>
-                <span className="font-mono">{pc.card.rank}</span>
-                <SuitSymbol suit={pc.card.suit} />
-                {pc.seat === winner && <span className="text-xs">✓</span>}
-              </li>
-            ))}
-          </ul>
-        )}
+  const at = (seat: Seat) => trick.find((pc) => pc.seat === seat)
+
+  const slot = (seat: Seat, pos: string) => {
+    const pc = at(seat)
+    return (
+      <div className={`absolute ${pos}`}>
+        {pc ? (
+          <PlayingCard
+            card={pc.card}
+            size="md"
+            className={pc.seat === winner ? 'ring-2 ring-amber-400' : ''}
+          />
+        ) : null}
       </div>
+    )
+  }
+
+  return (
+    <div className="relative h-36 w-36 rounded-2xl bg-emerald-900/25 ring-1 ring-emerald-100/10">
+      {trick.length === 0 && (
+        <div className="flex h-full items-center justify-center text-xs text-emerald-100/60">
+          Sticket
+        </div>
+      )}
+      {slot('N', 'top-1 left-1/2 -translate-x-1/2')}
+      {slot('S', 'bottom-1 left-1/2 -translate-x-1/2')}
+      {slot('W', 'left-1 top-1/2 -translate-y-1/2')}
+      {slot('E', 'right-1 top-1/2 -translate-y-1/2')}
     </div>
   )
 }
