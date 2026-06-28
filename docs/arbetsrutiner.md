@@ -17,6 +17,12 @@ metodiskt. Claude följer dessa; ägaren behöver inte göra något själv.
    förslag på dagens mål.*
 6. **Bekräfta dagens mål** med ägaren innan vi sätter igång.
 
+## 📋 Regel: visa alltid återstående punkter när ett jobb är klart
+När ett jobb precis avslutats och Claude frågar ägaren *vad vi ska göra härnäst*,
+ska Claude **alltid** presentera listan med återstående punkter ur
+`docs/arbetslista.md` (med status), så ägaren väljer nästa steg ur helheten i
+stället för ur minnet. Gäller varje sådant tillfälle, inte bara vid sessionsslut.
+
 ## 🔴 Sessionsavslut (avsluta smart & noggrant)
 > Mål: inget lämnas trasigt, allt är sparat, och nästa start blir lätt.
 
