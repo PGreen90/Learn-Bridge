@@ -45,17 +45,21 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   gratis/statiskt; människor online = framtid med backend). Kvalitet före tempo.
 - **Budmotor** byggs som modul i `src/lib/engine/` som omsätter systemboken
   (`docs/budsystem.md`) till kod, avsnitt för avsnitt, test-drivet (`npm test`).
-  Status: **M1–M3 klara + punkt 10–20**. Spela-fliken bygger ostörda auktioner
+  Status: **M1–M3 klara + punkt 10–27**. Spela-fliken bygger auktioner
   öppning → svar → öppnarens återbud → **svararens andra bud** för öppningarna
   1♣/1♦/1♥/1♠/1NT, **stark 2♣** (`responses-2c.ts`), **svaga tvåor 2♦/2♥/2♠**
   med Ogust (`responses-weak2.ts`), **spärröppningar 3X/4X**
   (`responses-preempt.ts`), **2NT/3NT-öppningar** (`responses-2nt.ts`) **samt
-  Drury** för passad hand (`responses-drury.ts`). **Slamverktygen** (1430 RKC,
-  cue-bid, Sjöbergs 5NT, Gerber, Exclusion) finns som testade motorfunktioner i
-  `slam.ts` – ännu ej inkopplade i en växande auktion (kräver djupare
-  auktionslager). Hela kartan ligger i **`docs/arbetslista.md`** (punkt 1–32).
-  **Nästa: punkt 21** – försvarsbud §7 (inkliv + svar), ELLER hoppa till
-  kortspelet (punkt 28–30, DDS-solver + spelläge) om ägaren vill spela ut korten.
+  Drury** för passad hand (`responses-drury.ts`). **Försvarsbuden §7** (punkt
+  21–27) finns: inkliv/Michaels/ovanlig 2NT (`overcalls.ts`), dubblingar
+  (`doubles.ts`), Lebensohl (`lebensohl.ts`), DONT (`dont.ts`), försvar mot
+  konventionella öppningar (`defense-conventional.ts`) och **störd budgivning**
+  inkopplad i `buildAuction` (LHO kliver in på riktigt). **Slamverktygen** (1430
+  RKC, cue-bid, Sjöbergs 5NT, Gerber, Exclusion) finns som testade
+  motorfunktioner i `slam.ts` – ännu ej inkopplade i en växande auktion. Hela
+  kartan ligger i **`docs/arbetslista.md`** (punkt 1–32).
+  **Nästa: kortspelet (punkt 28–30)** – DDS double-dummy-solver (WebAssembly),
+  spelläge (spela ut korten mot bottar) och markeringar/utspel (§8).
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).

@@ -86,5 +86,21 @@
   Avgränsning: dessa lever djupt i auktionen (efter trumföverenskommelse) och är
   byggda som rena, testade motorfunktioner. Att låta en slumpad auktion växa hit
   kräver ett djupare auktionslager (öppnarens/svararens 3:e–4:e bud) – tas separat.
-- 🔜 Nästa: punkt **21** (försvarsbud §7: inkliv + svar) – ELLER hoppa till
-  kortspelet (punkt 28–30, DDS-solver) om ägaren hellre vill spela ut korten.
+- ✅ Punkt **21–22** (inkliv + tvåfärgsinkliv, §7.1–7.2) – `overcalls.ts`.
+  Enkelt inkliv, 1NT-inkliv (15–18), Michaels, ovanlig 2NT, upplysningsdubbling,
+  hoppinkliv, samt advancers svar (cue=limit+, höjning, ny färg, NT).
+- ✅ Punkt **23** (dubblingar, §7.3) – `doubles.ts`. Negativ, responsiv,
+  stöddubbling (exakt 3) och advancers svar på upplysningsdubbling.
+- ✅ Punkt **24** (Lebensohl, §7.4) – `lebensohl.ts`. 2NT-relä (svag) vs direkt
+  3-läge (krav), cue=Stayman, "slow shows stopp" för 3NT.
+- ✅ Punkt **25** (DONT mot 1NT, §7.5) – `dont.ts`. X enfärg, 2♣/2♦/2♥ tvåfärg,
+  2♠ spader + advancer.
+- ✅ Punkt **26** (mot konventionella/svaga, §7.6) – `defense-conventional.ts`.
+  Mathe mot stark 1♣, försvar mot svaga tvåor, Multi 2♦ och spärrar.
+- ✅ Punkt **27** (störd budgivning i auktionsmotorn) – `auction.ts`. LHO kliver
+  in på riktigt (via `overcall`) och svararen reagerar (negativ dubbling,
+  konkurrenshöjning, NT med stopp, redubbling). Störda givar förgrenar av från
+  det ostörda flödet; en konkurrensrond modelleras, sedan markeras auktionen öppen.
+  Avgränsning: vidare konkurrens (öppnarens/advancers fortsättning) tas senare.
+- 🔜 Nästa: **kortspelet** (punkt 28–30): DDS double-dummy-solver i WebAssembly
+  + spelläge (spela ut korten mot bottar) + markeringar/utspel (§8).

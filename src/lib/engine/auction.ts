@@ -13,6 +13,10 @@ import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { respondToPreempt, preemptOf } from './responses-preempt'
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { respondToMajorPassed } from './responses-drury'
+import { overcall } from './overcalls'
+import { hcp, isBalanced, lengths } from './hand'
+import { hasStopper } from './overcalls'
+import type { Suit } from '../../types/bridge'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 
@@ -77,7 +81,7 @@ const OPEN_SUIT: Record<string, Major | 'clubs' | 'diamonds'> = {
 
 export interface AuctionTurn {
   seat: Seat
-  role: 'öppnare' | 'svarare'
+  role: 'öppnare' | 'svarare' | 'motståndare'
   call: string
   rule: string
   explanation: string
@@ -111,7 +115,73 @@ function computeResponse(openCall: string, responderHand: Deal['hands'][Seat], r
   return respondToMinor(responderHand, suit)
 }
 
-/** Bygger en ostörd auktion (öppning → svar → ev. återbud) för första öppningen. */
+// ---- Störd budgivning (punkt 27): motståndaren kliver in på riktigt --------
+
+const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+const SUIT_SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
+
+/** Tolkar ett inkliv ("1S"/"2H"/"X"/"2NT") → nivå + ev. färg. */
+function parseBid(call: string): { level: number; suit: Suit | null } {
+  const m = call.match(/^([1-7])(C|D|H|S)$/)
+  if (m) return { level: parseInt(m[1], 10), suit: { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }[m[2]] as Suit }
+  const nt = call.match(/^([1-7])NT$/)
+  if (nt) return { level: parseInt(nt[1], 10), suit: null }
+  return { level: 0, suit: null }
+}
+
+/** Lägsta nivå där (level, suit) ligger över referensbudet (refLevel, refSuit). */
+function cheapestLevelAbove(suit: Suit, refLevel: number, refSuit: Suit | null): number {
+  for (let L = 1; L <= 7; L++) {
+    const above = L > refLevel || (L === refLevel && refSuit !== null && rankIdx(suit) > rankIdx(refSuit))
+    if (above) return L
+  }
+  return 7
+}
+
+/**
+ * Svararens reaktion när motståndaren (LHO) klivit in efter vår öppning. §7.3.
+ * Negativ dubbling, konkurrenshöjning, NT med stopp, ny färg eller pass.
+ */
+function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit, overcallCall: string): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const { level: ovLevel, suit: ovSuit } = parseBid(overcallCall)
+
+  // Mot ett färginkliv:
+  if (ovSuit) {
+    // Negativ dubbling: 4+ i en objuden högfärg, 6+ hp.
+    const unbidMajors = (['hearts', 'spades'] as Suit[]).filter((s) => s !== openerSuit && s !== ovSuit)
+    for (const m of unbidMajors) {
+      if (len[m] >= 4 && p >= 6) {
+        return { call: 'X', rule: 'negativ dubbling', explanation: `${p} hp, 4+ ${m === 'hearts' ? 'hjärter' : 'spader'} → X (negativ dubbling).` }
+      }
+    }
+    // Konkurrenshöjning: 3+ stöd i öppnarens färg.
+    if (len[openerSuit] >= 3 && p >= 6) {
+      const L = cheapestLevelAbove(openerSuit, ovLevel, ovSuit)
+      return { call: `${L}${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${p} hp, ${len[openerSuit]} stöd → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
+    }
+    // NT med stopp i deras färg.
+    if (isBalanced(hand) && hasStopper(hand, ovSuit) && p >= 8) {
+      const L = cheapestLevelAbove('clubs', ovLevel, ovSuit) <= 1 ? 1 : 2
+      return { call: `${L}NT`, rule: 'NT med stopp', explanation: `${p} hp balanserad med stopp → ${L}NT.` }
+    }
+    return { call: 'P', rule: 'pass', explanation: `${p} hp – inget lämpligt i konkurrens → pass.` }
+  }
+
+  // Mot upplysningsdubbling (X): redubbla med 10+, annars stöd/pass.
+  if (overcallCall === 'X') {
+    if (p >= 10) return { call: 'XX', rule: 'redubbling', explanation: `${p} hp → XX (redubbling, lovar styrka).` }
+    if (len[openerSuit] >= 3) return { call: `2${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${p} hp, ${len[openerSuit]} stöd → 2${SUIT_SYM[openerSuit]}.` }
+    return { call: 'P', rule: 'pass', explanation: `${p} hp – pass.` }
+  }
+
+  return { call: 'P', rule: 'pass', explanation: `${p} hp – pass.` }
+}
+
+/** Bygger en (ev. störd) auktion för första öppningen. */
 export function buildAuction(deal: Deal): BuiltAuction | null {
   let openerSeat: Seat | null = null
   let openerIndex = -1
@@ -141,6 +211,20 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   // Öppningar vi inte har svarsregler för ännu: visa bara öppningen.
   if (!RESPONDABLE.has(opening.call)) {
     return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+  }
+
+  // Störd budgivning (punkt 27): efter en 1-läges färgöppning kan LHO kliva in.
+  const openerSuit = OPEN_SUIT[opening.call]
+  if (openerSuit) {
+    const lhoSeat = seatAt(deal.dealer, (openerIndex + 1) % 4)
+    const ov = overcall(deal.hands[lhoSeat], opening.call)
+    if (ov.call !== 'P') {
+      turns.push({ seat: lhoSeat, role: 'motståndare', call: ov.call, rule: ov.rule, explanation: ov.explanation, uncertain: ov.uncertain })
+      const action = competitiveResponderAction(deal.hands[responderSeat], openerSuit, ov.call)
+      turns.push({ seat: responderSeat, role: 'svarare', call: action.call, rule: action.rule, explanation: action.explanation, uncertain: action.uncertain })
+      // Konkurrensgrenen modelleras en rond; auktionen fortsätter senare.
+      return { openerSeat, responderSeat, openCall: opening.call, turns, open: action.call !== 'P' }
+    }
   }
 
   const response = computeResponse(opening.call, deal.hands[responderSeat], responderPassed)

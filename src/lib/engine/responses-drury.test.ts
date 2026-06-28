@@ -50,7 +50,7 @@ describe('buildAuction – Drury end-to-end (passad hand)', () => {
         N: parseHand('S:K43 H:Q84 D:KJ95 C:Q43'), // 11 hp, passar som given, 3 hjärter
         E: parseHand('S:Q876 H:53 D:Q76 C:JT98'), // passar
         S: parseHand('S:K5 H:AK962 D:Q43 C:432'), // 12 hp, öppnar 1♥ i 3:e hand
-        W: parseHand('S:AJT92 H:JT7 D:T82 C:K5'),
+        W: parseHand('S:QJ9 H:JT7 D:JT82 C:Q92'), // 7 hp, ingen 5-färg → passar (ostört)
       },
     }
     const a = buildAuction(deal)

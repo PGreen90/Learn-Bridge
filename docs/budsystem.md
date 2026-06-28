@@ -998,3 +998,15 @@ Det avslöjar längd/räkning direkt för partnern.
   svararens 3:e–4:e bud) som tas separat. Kod, inte systemändring.
   **Nästa gång:** punkt 21 – försvarsbud §7 (inkliv + svar), eller hoppa till
   kortspelet (punkt 28–30, DDS-solver) om ägaren vill spela ut korten.
+- **2026-06-28** – Budmotorn: **punkt 21–27** (hela §7 försvarsbud + störd
+  budgivning) i koden. **21–22** inkliv & tvåfärgsinkliv (`overcalls.ts`): enkelt/
+  1NT-inkliv, Michaels, ovanlig 2NT, upplysningsdubbling, hoppinkliv + advancer.
+  **23** dubblingar (`doubles.ts`): negativ, responsiv, stöd (exakt 3) + svar på
+  upplysnings-X. **24** Lebensohl (`lebensohl.ts`): 2NT-relä vs direkt 3-läge,
+  cue=Stayman, slow-shows-stopp. **25** DONT (`dont.ts`) mot deras 1NT. **26**
+  försvar mot konventionella/svaga (`defense-conventional.ts`): Mathe, svaga tvåor,
+  Multi 2♦, spärrar. **27** störd budgivning i `buildAuction`: LHO kliver in på
+  riktigt och svararen reagerar (negativ dubbling/konkurrenshöjning/NT/redubbling);
+  störda givar förgrenar av från det ostörda flödet (en konkurrensrond modelleras).
+  Kod, inte systemändring. **Nästa gång:** kortspelet (punkt 28–30) – DDS double-
+  dummy-solver + spelläge + markeringar/utspel (§8).
