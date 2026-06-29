@@ -1123,6 +1123,14 @@ Det avslöjar längd/räkning direkt för partnern.
   Tester: `slam-auction.test.ts` + nya `nt-slam.test.ts` (13 nya, totalt 394
   gröna). Ingen systemändring (följer §6.1–6.5). **Nästa gång:** budlådans
   budknappar (UI), eller DDS-webworker (punkt 28).
+- **2026-06-29** – UI (Spela kort, Feature 1 av 3): **två-klicks fan-ut vid
+  kortspel** (`Play.tsx`). När det är din tur väljer första klicket på ett kort
+  dess FÄRG – den fanas ut (gles + lyft + lätt förstoring) och övriga färger tonas
+  ned – och andra klicket på ett kort i den valda färgen spelar det. Minskar
+  felklick när korten ligger ihoptryckta. Gäller både Syd och träkarlen Nord (när
+  du är spelförare). Verifierat i webbläsaren (första klick väljer/fanar ut utan
+  att spela; andra klick spelar). Ren UI, ingen systemändring. **Nästa:** Feature 3
+  (klickbara bud + ALERT) och Feature 2 (stegbar omspelning).
 - **2026-06-29** – Buggfix (slam-cue): ägaren hittade i appen en olaglig auktion
   `1♥–2NT–4♦–4♣–…` på Spela kort. Cue-ronden (Steg 2) la alltid kontrollbudet på
   4-läget från klöver utan att kolla att budet var **lagligt** (högre än

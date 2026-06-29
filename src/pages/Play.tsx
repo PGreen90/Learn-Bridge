@@ -93,10 +93,16 @@ export function Play() {
   // Facit (double-dummy) för NUVARANDE ställning: tal = spelförarens totala stick
   // med perfekt spel, 'toohard' = för tung just nu, 'idle' = ej beräknat.
   const [facit, setFacit] = useState<number | 'idle' | 'toohard'>('idle')
+  // Vald färg i två-klicks-spelet: första klicket väljer (fan ut) färgen,
+  // andra klicket på ett kort i den färgen spelar det.
+  const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
   const { contract, play } = game
 
-  // Nollställ facit så fort ställningen ändras (du eller en bot la ett kort).
-  useEffect(() => setFacit('idle'), [play])
+  // Nollställ facit + färgval så fort ställningen ändras (du eller en bot la ett kort).
+  useEffect(() => {
+    setFacit('idle')
+    setSelectedSuit(null)
+  }, [play])
 
   function showFacit() {
     const rem = doubleDummyDeclarerRemaining(
@@ -135,6 +141,17 @@ export function Play() {
     })
   }
 
+  // Två-klicks: första klicket på ett kort väljer (och fanar ut) dess färg;
+  // klick på ett kort i den redan valda färgen spelar kortet.
+  function onCardClick(card: Card) {
+    if (selectedSuit !== card.suit) {
+      setSelectedSuit(card.suit)
+      return
+    }
+    onPlay(card)
+    setSelectedSuit(null)
+  }
+
   const done = isComplete(play)
   const result = contractResult(play)
   const declSide = side(contract.declarer)
@@ -147,7 +164,7 @@ export function Play() {
     return seat === dummy && openingLeadMade // vi försvarar → träkarlen visas efter utspel
   }
 
-  const seatProps = { game, isFaceUp, onPlay }
+  const seatProps = { game, isFaceUp, onCardClick, selectedSuit }
 
   return (
     <div className="space-y-5">
@@ -156,7 +173,8 @@ export function Play() {
         <p className="text-slate-600 text-sm">
           Du sitter <strong>Syd</strong> och spelar mot datorn. Spelar din sida ut
           kontraktet styr du både Syd och träkarlen Nord; försvarar du spelar du
-          bara Syd. Klicka ett kort när det är din tur.
+          bara Syd. När det är din tur: <strong>tryck en färg</strong> så fanas
+          den ut – <strong>klicka sedan kortet</strong> du vill spela.
         </p>
       </header>
 
@@ -284,12 +302,14 @@ function SeatHand({
   seat,
   game,
   isFaceUp,
-  onPlay,
+  onCardClick,
+  selectedSuit,
 }: {
   seat: Seat
   game: Game
   isFaceUp: (s: Seat) => boolean
-  onPlay: (c: Card) => void
+  onCardClick: (c: Card) => void
+  selectedSuit: Suit | null
 }) {
   const { contract, play } = game
   const hand = play.hands[seat]
@@ -307,7 +327,8 @@ function SeatHand({
   // Träkarlen (utom Syd, som är din egen hand) läggs upp prydligt som i verkligheten.
   const showDummy = faceUp && isDummy && seat !== 'S'
 
-  // En kort-cell: spelbar (klickbar) eller bara visad. `gap` = ev. överlapp-marginal.
+  // En kort-cell: spelbar (klickbar) eller bara visad. `prevInGroup` lägger på
+  // överlapp-marginalen `gap`; i en utfanad färg sätts den till false (kort glesas).
   const card = (c: Card, prevInGroup: boolean, gap: string): ReactNode => {
     const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
     return (
@@ -317,26 +338,43 @@ function SeatHand({
         size={size}
         playable={playable}
         dimmed={myTurn && !playable}
-        onClick={playable ? () => onPlay(c) : undefined}
+        onClick={playable ? () => onCardClick(c) : undefined}
         className={prevInGroup ? gap : ''}
       />
     )
   }
 
+  // Klassen för en färggrupp: den valda färgen fanas ut (gles + lyft), övriga
+  // tonas ned så länge en färg är vald. Bara aktivt på din tur.
+  const groupClass = (suit: Suit, vertical: boolean): string => {
+    const spread = myTurn && suit === selectedSuit
+    const dim = myTurn && selectedSuit !== null && !spread
+    return [
+      'flex transition-all',
+      vertical ? 'flex-col' : '',
+      spread ? `${vertical ? 'gap-1' : 'gap-1'} -translate-y-1 scale-105 origin-bottom z-10` : '',
+      dim ? 'opacity-50' : '',
+    ].join(' ')
+  }
+  const spreadSuit = (suit: Suit) => myTurn && suit === selectedSuit
+
   let body: ReactNode
   if (!faceUp) {
     body = <FanBacks count={hand.length} />
   } else if (showDummy) {
-    body = <DummyHand seat={seat} contract={contract} hand={hand} card={card} />
+    body = (
+      <DummyHand seat={seat} contract={contract} hand={hand} card={card} groupClass={groupClass} spreadSuit={spreadSuit} />
+    )
   } else {
     body = (
       <div className="flex items-end gap-1">
         {orderedSuits(seat, contract).map((suit) => {
           const cards = bySuit(hand, suit)
           if (cards.length === 0) return null
+          const spread = spreadSuit(suit)
           return (
-            <div key={suit} className="flex">
-              {cards.map((c, i) => card(c, i > 0, overlap))}
+            <div key={suit} className={groupClass(suit, false)}>
+              {cards.map((c, i) => card(c, !spread && i > 0, overlap))}
             </div>
           )
         })}
@@ -365,35 +403,31 @@ function DummyHand({
   contract,
   hand,
   card,
+  groupClass,
+  spreadSuit,
 }: {
   seat: Seat
   contract: Contract
   hand: Hand
   card: (c: Card, prevInGroup: boolean, gap: string) => ReactNode
+  groupClass: (suit: Suit, vertical: boolean) => string
+  spreadSuit: (suit: Suit) => boolean
 }) {
   const vertical = seat === 'E' || seat === 'W'
   const groups = orderedSuits(seat, contract)
     .map((suit) => ({ suit, cards: bySuit(hand, suit) }))
     .filter((g) => g.cards.length > 0)
 
-  if (vertical) {
-    return (
-      <div className="flex flex-col gap-1">
-        {groups.map(({ suit, cards }) => (
-          <div key={suit} className="flex">
-            {cards.map((c, i) => card(c, i > 0, '-ml-4'))}
-          </div>
-        ))}
-      </div>
-    )
-  }
   return (
-    <div className="flex items-end gap-1.5">
-      {groups.map(({ suit, cards }) => (
-        <div key={suit} className="flex">
-          {cards.map((c, i) => card(c, i > 0, '-ml-4'))}
-        </div>
-      ))}
+    <div className={vertical ? 'flex flex-col gap-1' : 'flex items-end gap-1.5'}>
+      {groups.map(({ suit, cards }) => {
+        const spread = spreadSuit(suit)
+        return (
+          <div key={suit} className={groupClass(suit, vertical)}>
+            {cards.map((c, i) => card(c, !spread && i > 0, '-ml-4'))}
+          </div>
+        )
+      })}
     </div>
   )
 }
