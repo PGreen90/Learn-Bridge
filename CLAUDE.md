@@ -37,72 +37,13 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   hårdkodade inne i komponenterna.
 - Budsystem: börja med ETT system, gör det ordentligt, lägg till fler
   senare. Bygg inte alla på en gång.
-## Beslut (uppdatera vid behov)
-- Budsystem att börja med: **2 över 1 (2/1)**. Endast detta först.
-- Första funktion: **budträning** – visa hand, ägaren väljer bud,
-  appen ger facit + förklaring.
-- Nästa stora riktning: **Spela mot datorn** (offline mot bottar först;
-  gratis/statiskt; människor online = framtid med backend). Kvalitet före tempo.
-- **Budmotor** byggs som modul i `src/lib/engine/` som omsätter systemboken
-  (`docs/budsystem.md`) till kod, avsnitt för avsnitt, test-drivet (`npm test`).
-  Status: **M1–M3 klara + punkt 10–27**. Spela-fliken bygger auktioner
-  öppning → svar → öppnarens återbud → **svararens andra bud** för öppningarna
-  1♣/1♦/1♥/1♠/1NT, **stark 2♣** (`responses-2c.ts`), **svaga tvåor 2♦/2♥/2♠**
-  med Ogust (`responses-weak2.ts`), **spärröppningar 3X/4X**
-  (`responses-preempt.ts`), **2NT/3NT-öppningar** (`responses-2nt.ts`) **samt
-  Drury** för passad hand (`responses-drury.ts`). **Försvarsbuden §7** (punkt
-  21–27) finns: inkliv/Michaels/ovanlig 2NT (`overcalls.ts`), dubblingar
-  (`doubles.ts`), Lebensohl (`lebensohl.ts`), DONT (`dont.ts`), försvar mot
-  konventionella öppningar (`defense-conventional.ts`) och **störd budgivning**
-  inkopplad i `buildAuction` (LHO kliver in på riktigt). **Slamverktygen** (1430
-  RKC, cue-bid, Sjöbergs 5NT, Gerber, Exclusion) finns som testade
-  motorfunktioner i `slam.ts` – ännu ej inkopplade i en växande auktion. Hela
-  kartan ligger i **`docs/arbetslista.md`** (punkt 1–32).
-  **Handvärdering** (Bergens Adjust-3) finns i `evaluation.ts`: startpoäng,
-  stödpoäng och Bergenpoäng. Visas som `15 HP (17 TP)` i `HandView`. **TP styr nu
-  utvalda beslut:** öppningströskeln (`openings.ts`, färgöppning vid TP ≥ 12) och
-  slamzon (`slam-auction.ts`). **Slamverktygen är inkopplade i en växande auktion**
-  för Jacoby 2NT-fit (1430 RKC startar vid slamzon ≥ 33). Spec i `docs/handvardering.md`.
-  **Kortspelet (punkt 29) klart:** fliken **Spela kort** (`src/pages/Play.tsx`)
-  spelar ut korten mot bottar – spelmotor `play.ts` (följa färg, trumf,
-  stickvinnare), bottar `play-bot.ts` (tumregler), kontrakt `play-contract.ts`.
-  Du sitter Syd (avslut + motspel). Spec i `docs/kortspel.md`.
-  **Visuell omgång (Synrey-känsla):** "Spela kort" ritas nu som ett **grönt
-  filtbord** med riktiga spelkort (ny `src/components/PlayingCard.tsx`, burgundy
-  baksida), du i Syd nederst. Korten är ihoptryckta så bara hörn-indexet syns;
-  **träkarlen** läggs upp prydligt (sidoträkarl staplad, Nord i grupper);
-  **trumfen** ligger alltid på spelförarens högra hand sett från Syd och
-  **färgordningen alternerar svart/röd** (cykeln ♠ ♦ ♣ ♥ roteras med trumfen –
-  se `orderedSuits` i `Play.tsx`). Förebild: Synrey Bridge-appen.
-  **Auktionsvyn klar:** `src/components/AuctionView.tsx` ritar budgivningen som
-  rutnät V N Ö S med zon/sårbarhet, giv-markör, färgkodade bud (Pass/Dbl/Redbl)
-  och inramat slutkontrakt – inkopplad i budträningen + Spela-fliken.
-  **Auktionsvyn på "Spela kort"-fliken klar:** kortspelet härleder nu kontraktet
-  ur en FÄRDIG (ostörd) auktion (`auction-contract.ts`: `dealForPlay` letar fram
-  en giv vars auktion budats klart, `finalContract` plockar slutkontraktet +
-  spelföraren som först nämnde färgen) i stället för den fristående
-  `pickContract`-heuristiken, så budföljden som visas matchar kontraktet man
-  spelar. `AuctionView` ligger i en hopfällbar panel ("Visa hur kontraktet
-  bjöds"). `turnsToCalls` är nu delad i `auction-contract.ts` (Spela + Spela kort).
-  **Punkt 30 (markeringar & utspel, §8) klar:** `signals.ts` – honnörsutspel,
-  3:e/5:e spotutspel, UDCA omvänd attityd/räkning, Lavinthal; `leadFromSuit`
-  inkopplat i bottens utspel (`play-bot.ts`). **Bot-tumreglerna förfinade** (andra
-  hand lågt, ruffar aldrig partnerns vinnare). **Punkt 28 (DDS-facit) klar:** egen
-  double-dummy-solver i ren TS (`dds.ts`, inga beroenden – de två npm-paketen var
-  trasiga), bevisad korrekt mot ett orakel; "Visa facit"-knapp på Spela kort visar
-  perfekt-spel-stick från nuvarande ställning. Avgränsning: en ren JS-DDS klarar
-  inte tunga 13-kortsgivar snabbt, så facit har en nodbudget och blir tillförlitligt
-  en bit in i given (se docs/arbetslista.md punkt 28).
-  **Slamverktygen är nu inkopplade i växande auktioner** (`slam-auction.ts`,
-  `nt-slam.ts`): Sjöbergs 5NT i RKC-grenen, cue-bid-rond före RKC, minor-fit-RKC
-  (inverterad minor), NT-slam med Gerber 4♣ över 1NT, och Exclusion efter splinter.
-  **Spela kort har tre UI-funktioner till:** två-klicks fan-ut för att spela kort,
-  **klickbara bud + ALERT-märke** i auktionsvyn (`alerts.ts`, blått A på konstgjorda
-  bud, klick visar betydelsen), och **stegbar omspelning** av en färdigspelad giv
-  (`PlayReplay.tsx`, händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader,
-  träkarlen i live-spelet i färgkolumner; delad `src/lib/cardLayout.ts`).
-  **Nästa: budlådans budknappar (du bjuder själv); "framkalla slutbud"-väljare
-  (ägarens idé, se docs/arbetslista.md); ev. webworker för DDS-facit på utspelet.**
+## Beslut
+- Budsystem: **2 över 1 (2/1)**. Endast detta (lägg till fler senare).
+- Första funktion: **budträning** – visa hand, välj bud, appen ger facit.
+- Nästa stora riktning: **Spela mot datorn** (offline mot bottar; kvalitet före tempo).
+- Budmotor byggs i `src/lib/engine/`, test-drivet (`npm test`).
+- Detaljerad implementationsstatus: **`docs/status.md`**
+- Byggordning framåt: **`docs/arbetslista.md`**
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).
