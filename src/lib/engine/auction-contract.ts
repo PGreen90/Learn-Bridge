@@ -40,7 +40,7 @@ export function turnsToCalls(turns: AuctionTurn[], dealer: Seat): ResolvedCall[]
       calls.push({ seat: seatAt(dealer, idx), bid: 'P' })
       idx++
     }
-    calls.push({ seat: turn.seat, bid: turn.call })
+    calls.push({ seat: turn.seat, bid: turn.call, rule: turn.rule, explanation: turn.explanation })
     idx++
   }
   return calls

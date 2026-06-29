@@ -1131,6 +1131,18 @@ Det avslöjar längd/räkning direkt för partnern.
   du är spelförare). Verifierat i webbläsaren (första klick väljer/fanar ut utan
   att spela; andra klick spelar). Ren UI, ingen systemändring. **Nästa:** Feature 3
   (klickbara bud + ALERT) och Feature 2 (stegbar omspelning).
+- **2026-06-29** – Spela kort/Budvisning (Feature 3): **klickbara bud + ALERT**
+  i auktionsvyn (`AuctionView`). Varje bud med en känd förklaring går nu att
+  klicka → en ruta under rutnätet visar *plats + bud + motorns förklaring*.
+  Konstgjorda (konventionella) bud får ett litet blått **A** (alert) och en
+  ALERT-tagg i rutan. Bedömningen görs i ny `src/lib/engine/alerts.ts`
+  (`isAlertRule` på budmotorns regelnamn: transfers, Stayman, Jacoby 2NT,
+  splinter, Bergen, RKC/Sjöberg/Gerber/Exclusion, cue-bud, Drury, Michaels,
+  ovanlig 2NT, DONT, Lebensohl, Ogust, Smolen, fjärde färg krav, konventionella
+  dubblingar m.m.). `ResolvedCall` bär nu valfria `rule`/`explanation`, ifyllda
+  av `turnsToCalls` (motståndarpassar lämnas tomma → ej klickbara). Verifierat
+  live: 1♥–1NT visade alert-A + "1NT (semi-forcing)". Tester: `alerts.test.ts`.
+  Totalt 398 gröna. Ren UI/databrygga, ingen systemändring.
 - **2026-06-29** – Buggfix (slam-cue): ägaren hittade i appen en olaglig auktion
   `1♥–2NT–4♦–4♣–…` på Spela kort. Cue-ronden (Steg 2) la alltid kontrollbudet på
   4-läget från klöver utan att kolla att budet var **lagligt** (högre än

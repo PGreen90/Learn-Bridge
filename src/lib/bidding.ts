@@ -113,6 +113,10 @@ export function seatAt(dealer: Seat, index: number): Seat {
 export interface ResolvedCall {
   seat: Seat
   bid: Bid
+  /** Budmotorns regelnamn (för alert-bedömning), om känt. */
+  rule?: string
+  /** Förklaring av budet (visas när man klickar på det i auktionsvyn), om känd. */
+  explanation?: string
 }
 
 export interface AuctionState {

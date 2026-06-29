@@ -52,9 +52,9 @@ describe('turnsToCalls – fyller i motståndarpassar', () => {
   it('öppnare S, svarare N (giv S): mellanliggande V passar', () => {
     const calls = turnsToCalls([turn('S', '1NT'), turn('N', '3NT', 'svarare')], 'S')
     expect(calls).toEqual([
-      { seat: 'S', bid: '1NT' },
-      { seat: 'W', bid: 'P' },
-      { seat: 'N', bid: '3NT' },
+      { seat: 'S', bid: '1NT', rule: 't', explanation: 'e' },
+      { seat: 'W', bid: 'P' }, // ifylld motståndarpass – ingen regel/förklaring
+      { seat: 'N', bid: '3NT', rule: 't', explanation: 'e' },
     ])
   })
 })
