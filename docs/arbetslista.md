@@ -1,5 +1,11 @@
 # Arbetslista — fullända budmotorn
 
+> 🔺 **NÄSTA SESSIONS PRIO:** systematisk felsökning enligt
+> `BUDSYSTEM – PRIORITERAD FELSÖKNINGS.txt` (repo-roten). Börja med FAS 0
+> (inventering: systembok mot kod) + arbetsregel A (facit före fix) och B
+> (`npm test` efter varje fix). Inga nya funktioner innan plan-punkt 1–6 är
+> verifierade.
+
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens
 > återbud så att en auktion aldrig stannar redan vid öppnarens andra bud för de

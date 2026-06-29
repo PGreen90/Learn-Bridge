@@ -1,0 +1,277 @@
+BUDSYSTEM – PRIORITERAD FELSÖKNINGSPLAN
+=======================================
+
+> Uppdaterad efter genomgång. Ändringar mot första versionen:
+> - NY FAS 0: inventering (systembok mot kod) flyttad FÖRST – den är kartan.
+> - NY arbetsregel: varje punkt ska ha ett FÖRVÄNTAT FACIT (giv → rätt bud),
+>   så granskningen blir testbar och inte tyckande. Facit landar som tester.
+> - NY arbetsregel: kör hela `npm test` efter varje fix (regressionsskydd).
+> - KÄNDA GRÄNSER markerade – de är beslutade avgränsningar, inte buggar att jaga.
+> - NY punkt: off-book Syd (du bjuder utanför systemet) – lagd i FAS 2.
+
+
+ARBETSREGLER (gäller hela planen)
+=================================
+
+A. FACIT FÖRE FIX
+   Innan en punkt felsöks: skriv ned minst en testrad – "given X → rätt bud Y,
+   rätt förklaring Z". Utan facit blir granskningen en åsikt. Facit skrivs som
+   nya tester i `src/lib/engine/*.test.ts`.
+
+B. REGRESSIONSSKYDD
+   Kör HELA `npm test` efter varje fix. En lagad punkt får aldrig bryta en
+   redan godkänd punkt (t.ex. får fix av höjningar efter inkliv inte knäcka
+   negativa dubblingar).
+
+C. KÄNDA GRÄNSER FELSÖKS INTE
+   Två saker är redan utredda och beslutade (se docs/status.md). De ska INTE
+   jagas som buggar – bara bekräftas att de fortfarande är inom sin gräns:
+   - DDS-facit har en nodbudget → tillförlitligt en bit in i given, inte på
+     tunga 13-kortslägen.
+   - Slam-quirk: ~0,25 % av slamlinjerna (Jacoby 2NT → cue → 1430 RKC) ger
+     ingen laglig medurs-auktion; budlådan stänger dem lagligt på sista budet.
+
+
+================================================
+
+FAS 0 – INVENTERING (GÖRS FÖRST – DETTA ÄR KARTAN)
+==================================================
+
+I. Systembok mot kod
+   Gå igenom alla kapitel i systemboken. Markera varje moment:
+   - KODAT
+   - DELVIS KODAT
+   - EJ KODAT
+   (Detta var gamla punkt 52. Flyttat hit: man kan inte verifiera att motorn
+   "aldrig tappar 2/1 GF" innan man vet vad som faktiskt är kodat.)
+
+II. Alla "tas senare"-avsnitt
+   Listas och granskas extra noggrant – det är där luckorna gömmer sig.
+   (Gamla punkt 53.)
+
+   → Resultatet av FAS 0 är en sanningskarta. Först därefter börjar FAS 1.
+
+
+================================================
+
+FAS 1 – KRITISKT (STOPPAR FEL SLUTKONTRAKT)
+===========================================
+
+1. Regel-ID/Förklaring/Beslut måste vara samma objekt
+   OBS: detta är en ARKITEKTURÄNDRING, inte en bugg-fix – räkna med att den
+   tar mest tid av allt i planen.
+   - Samma regel ska styra budval, förklaring, alert, kravstatus och
+     fortsättning.
+   - Eliminerar risken "rätt förklaring men fel logik".
+   - Idag är dessa utspridda: budlogik i rebids.ts/responses.ts m.fl.,
+     alerts i egen fil (alerts.ts), förklaring som text i övnings-JSON.
+
+2. Regelspårning
+   Logga för varje bud:
+   - matchande regler
+   - avvisade regler
+   - vald regel
+   - varför vald
+
+3. Laglighetskontroll före budval
+   Granska:
+   - cue-bid
+   - RKC
+   - Exclusion
+   - Lebensohl
+   - Ogust
+   - konkurrensbud
+
+4. Kravstatus
+   Verifiera att motorn aldrig tappar:
+   - 2/1 GF
+   - Fjärde färg GF
+   - Positivt svar på 2♣
+   - Jacoby 2NT GF
+
+================================================
+
+FAS 2 – KONKURRENS (STÖRSTA BUGGRISKEN)
+=======================================
+
+5. Höjningar efter inkliv
+   Testmatris:
+   1♥(X)
+   1♥(1♠)
+   1♥(2♣)
+   1♥(2♦)
+   1♠(2♥)
+
+6. Jordan 2NT
+   Kontrollera att 2NT efter dubbling inte behandlas som Jacoby.
+
+7. Negativa dubblingar
+   Verifiera alla vanliga sekvenser.
+
+8. Support Double
+   - endast rätt position
+   - exakt 3-korts stöd
+
+9. Responsiva dubblingar
+
+10. Advancer-logik
+    - höjning
+    - cue
+    - NT
+    - fit-jump
+
+10b. Off-book Syd (NY)
+    När du själv (Syd) bjuder utanför systemlinjen: vad gör datorpartnern?
+    Vanligaste läget för en nybörjare mot datorn. Idag öppet (ägarens beslut,
+    se docs/status.md). Definiera önskat beteende och facit innan fix.
+
+================================================
+
+FAS 3 – STÖDSYSTEM
+
+11. Gemensam fitklassificering
+    none / 2-stöd / 3-stöd / bra 3-stöd / 4-stöd / 4+ stöd
+
+12. Bergen
+    - aldrig med 3 stöd
+    - rätt intervall
+
+13. Jacoby 2NT
+    - rätt stöd
+    - ingen kortfärg
+
+14. Splinter
+    - relä
+    - kortfärg
+    - slamvärdering
+
+15. Bergen Game Try
+    Kontrollera: när används / HP/TP/LTC
+
+================================================
+
+FAS 4 – VÄRDERING
+
+16. HP vs TP vs LTC
+    Identifiera exakt vad motorn använder.
+
+17. Stödvärdering
+    - fitpoäng
+    - distributionsvärde
+    - kortfärger
+
+18. Slamvärdering
+    Nedvärdera K och D mot partnerns kortfärg.
+
+================================================
+
+FAS 5 – NT-SYSTEM
+
+19. Stayman
+20. Smolen
+21. Transfers
+22. Texas
+23. Minor Suit Stayman
+24. 2NT-systemet
+25. 3NT-öppningen
+
+================================================
+
+FAS 6 – MINORSYSTEM
+
+26. Minorregeln
+    3-3 / 4-4 / 5-5
+
+27. Inverterade minorer
+    1m-2m / 1m-3m
+
+28. Svaga hoppskift
+
+================================================
+
+FAS 7 – SVAGA ÖPPNINGAR
+
+29. Svaga tvåor
+30. Ogust
+31. Spärröppningar
+32. Regel 2-3-4
+
+================================================
+
+FAS 8 – SLAMSYSTEM
+
+33. Cue-bids
+34. 1430 RKC
+35. Trumfdamfrågan
+36. Sjöbergs 5NT
+37. Gerber
+38. Exclusion
+
+   KÄND GRÄNS (se arbetsregel C): slam-quirken i Jacoby 2NT → cue → 1430 RKC.
+   Bekräfta att den fortfarande stängs lagligt – jaga den inte som bugg.
+
+================================================
+
+FAS 9 – PASSAD HAND
+
+39. Drury
+40. Passad vs opassad hand
+
+================================================
+
+FAS 10 – FÖRSVARSBUD
+
+41. Michaels
+42. Ovanlig 2NT
+43. DONT
+44. Lebensohl
+45. Mathe
+46. Multi-försvar
+
+================================================
+
+FAS 11 – KORTSPEL
+
+47. Utspel
+    - top of sequence
+    - 3:e/5:e
+
+48. UDCA
+49. Lavinthal
+50. Signalavkodning
+51. DDS-gränsfall
+    KÄND GRÄNS (se arbetsregel C): DDS-nodbudget på tunga givar.
+    Bekräfta att facit är tillförlitligt en bit in i given – jaga inte
+    djupa 13-kortslägen som "fel".
+
+================================================
+
+FAS 12 – UI
+
+54. Budförklaringar
+55. Alertsystem
+56. Säkerställ att budlogik, budförklaring, kravstatus och alert ALLTID
+    kommer från samma regel. (Samma mål som punkt 1 – detta är UI-änden
+    av samma tråd.)
+
+================================================
+
+PRIORITERAD ORDNING
+===================
+
+0. Inventering (systembok mot kod)   ← görs först, det är kartan
+1. Regel-ID / budbeslut / förklaring  (arkitekturändring)
+2. Kravstatus
+3. Konkurrensbudgivning (inkl. off-book Syd)
+4. Fit- och stödlogik
+5. HP/TP/LTC
+6. NT-systemet
+7. Slamsystemet
+8. Minorer
+9. Svaga öppningar
+10. Försvarsbud
+11. Kortspel
+12. UI
+
+INGA nya funktioner innan punkt 1–6 är verifierade.
+Varje punkt: FACIT FÖRE FIX (arbetsregel A) + `npm test` efter (regel B).
