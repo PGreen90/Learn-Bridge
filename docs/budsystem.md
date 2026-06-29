@@ -1065,14 +1065,18 @@ Det avslöjar längd/räkning direkt för partnern.
   försvarsstrategi) hör ihop med DDS (punkt 28). Tester: `signals.test.ts` (23 st).
   Ren logik, ingen systemändring. **Nästa gång:** DDS-solvern (punkt 28) – sista
   kortspelspunkten.
-- **2026-06-29** – Punkt 28 (DDS-solver): **researchad, blockerad.** Utvärderade
-  npm-paketet `bridge-dds` (Apache-2.0, Bo Haglunds DDS som självständig
-  base64-inbäddad WebAssembly – rätt form för GitHub Pages). Bekräftade i
-  webbläsaren att `loadDds()` + lätta anrop fungerar men att den TUNGA lösar-koden
-  (`CalcDDtablePBN`/`SolveBoardPBN`) kraschar med `RuntimeError: null function` i
-  nuvarande Chrome/V8 – den publicerade 1.4.0-byggen är trasig, 1.3.0 saknar
-  inbäddad wasm. **Kopplade INTE in det trasiga paketet** (avinstallerat; ingen
-  ny dependency, vite.config orörd) – repot förblir grönt. Behöll den färdiga,
-  testade `dealToPbn` (giv → PBN) i `src/lib/engine/dds.ts` som byggsten. Se
-  docs/arbetslista.md punkt 28 för nästa steg (kräver ägarens vägval). Ingen
-  systemändring.
+- **2026-06-29** – Punkt 28 (DDS-solver): först **research** – npm-paketen
+  `bridge-dds` (kraschar i `CalcDDtablePBN`: `RuntimeError: null function` i
+  Chrome/V8) och `@bridge-tools/dd` (fel wasm-sökväg, oklart resultat) är båda
+  TRASIGA som publicerade. Därför **egen double-dummy-solver i ren TypeScript**
+  (`src/lib/engine/dds.ts`) – inga beroenden, ingen WebAssembly, funkar på Pages.
+  Teknik: alfa-beta med **nollfönster-binärsök**, **transpositionstabell** och
+  **likvärdiga-kort-reduktion**. **Korrekthet bevisad** mot ett oberoende orakel
+  (ren minimax på `play.ts`) över ~2000 små givar + kända fulla givar + mitt-i-
+  spelet-ställningar. **Inkopplat:** "Visa facit"-knapp på Spela kort som visar
+  spelförarens stick med perfekt spel från nuvarande ställning
+  (`doubleDummyDeclarerRemaining`). **Avgränsning (prestanda):** en ren JS-DDS
+  klarar inte tunga 13-kortsgivar (särskilt sang) på rimlig tid, så facit har en
+  **nodbudget** (fryser aldrig gränssnittet) och blir tillförlitligt en bit in i
+  given (få kort = snabbt); på utspelet kan det visa "för tung". Tester:
+  `dds.test.ts`. Totalt 379 tester gröna. Ingen systemändring.

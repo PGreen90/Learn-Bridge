@@ -84,8 +84,17 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   `pickContract`-heuristiken, så budföljden som visas matchar kontraktet man
   spelar. `AuctionView` ligger i en hopfällbar panel ("Visa hur kontraktet
   bjöds"). `turnsToCalls` är nu delad i `auction-contract.ts` (Spela + Spela kort).
-  **Nästa: budlådans budknappar + punkt 28 (DDS-solver för facit) + punkt 30
-  (markeringar/utspel, §8).**
+  **Punkt 30 (markeringar & utspel, §8) klar:** `signals.ts` – honnörsutspel,
+  3:e/5:e spotutspel, UDCA omvänd attityd/räkning, Lavinthal; `leadFromSuit`
+  inkopplat i bottens utspel (`play-bot.ts`). **Bot-tumreglerna förfinade** (andra
+  hand lågt, ruffar aldrig partnerns vinnare). **Punkt 28 (DDS-facit) klar:** egen
+  double-dummy-solver i ren TS (`dds.ts`, inga beroenden – de två npm-paketen var
+  trasiga), bevisad korrekt mot ett orakel; "Visa facit"-knapp på Spela kort visar
+  perfekt-spel-stick från nuvarande ställning. Avgränsning: en ren JS-DDS klarar
+  inte tunga 13-kortsgivar snabbt, så facit har en nodbudget och blir tillförlitligt
+  en bit in i given (se docs/arbetslista.md punkt 28).
+  **Nästa: budlådans budknappar (Visuellt/UI); ev. webworker + starkare beskärning
+  för DDS-facit redan på utspelet.**
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).

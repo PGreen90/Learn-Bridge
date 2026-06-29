@@ -14,6 +14,7 @@ import {
   type PlayState,
 } from '../lib/engine/play'
 import { dealForPlay } from '../lib/engine/auction-contract'
+import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
 import { botCard } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
@@ -81,10 +82,38 @@ function orderedSuits(seat: Seat, contract: Contract): Suit[] {
     : [...DISPLAY_SUITS.slice(i + 1), ...DISPLAY_SUITS.slice(0, i + 1)]
 }
 
+// Nodbudget för facit-lösaren: ~2 milj. noder (≈ 1–2 s i värsta fall) så
+// gränssnittet aldrig fryser. Sena ställningar (få kort kvar) löses direkt;
+// tidiga, tunga ställningar kan returnera null → vi visar ett vänligt meddelande.
+const FACIT_BUDGET = 2_000_000
+
 export function Play() {
   const [game, setGame] = useState<Game>(newGame)
   const [showAuction, setShowAuction] = useState(false)
+  // Facit (double-dummy) för NUVARANDE ställning: tal = spelförarens totala stick
+  // med perfekt spel, 'toohard' = för tung just nu, 'idle' = ej beräknat.
+  const [facit, setFacit] = useState<number | 'idle' | 'toohard'>('idle')
   const { contract, play } = game
+
+  // Nollställ facit så fort ställningen ändras (du eller en bot la ett kort).
+  useEffect(() => setFacit('idle'), [play])
+
+  function showFacit() {
+    const rem = doubleDummyDeclarerRemaining(
+      play.hands,
+      contract.strain,
+      contract.declarer,
+      play.currentTrick,
+      play.toAct,
+      FACIT_BUDGET,
+    )
+    if (rem === null) {
+      setFacit('toohard')
+      return
+    }
+    const declWon = side(contract.declarer) === 'NS' ? play.tricksNS : play.tricksEW
+    setFacit(declWon + rem)
+  }
 
   // Bottarna spelar automatiskt när det är deras tur (liten fördröjning).
   useEffect(() => {
@@ -144,7 +173,12 @@ export function Play() {
             N/S: <strong>{play.tricksNS}</strong> · Ö/V: <strong>{play.tricksEW}</strong> stick
             <span className="ml-2 text-slate-400">(behöver {result.needed})</span>
           </div>
-          <Button onClick={() => setGame(newGame())}>Ny giv →</Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={showFacit}>
+              Visa facit
+            </Button>
+            <Button onClick={() => setGame(newGame())}>Ny giv →</Button>
+          </div>
         </div>
         <p className="mt-2 text-sm">
           {done ? (
@@ -159,6 +193,22 @@ export function Play() {
             <span className="text-slate-400">Datorn spelar … ({SEAT_LABEL[play.toAct]})</span>
           )}
         </p>
+        {facit !== 'idle' && (
+          <p className="mt-1 text-sm">
+            {facit === 'toohard' ? (
+              <span className="text-slate-500">
+                Facit: ställningen är för tung att räkna snabbt just nu – prova igen längre in i given.
+              </span>
+            ) : (
+              <span className="text-sky-700">
+                Facit (perfekt spel): spelföraren tar totalt <strong>{facit}</strong> stick härifrån —{' '}
+                {facit >= result.needed
+                  ? `kontraktet håller${facit > result.needed ? ` (+${facit - result.needed})` : ''}.`
+                  : `${result.needed - facit} bet.`}
+              </span>
+            )}
+          </p>
+        )}
       </Panel>
 
       {/* Hur kontraktet bjöds fram – återskapad budgivning, hopfälld som standard. */}
