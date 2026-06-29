@@ -66,6 +66,28 @@ describe('buildAuction – slam växer fram via Jacoby 2NT', () => {
   })
 })
 
+describe('slamInvestigation – cue-budet måste vara lagligt (regression)', () => {
+  // Bugg funnen i appen: efter 1♥–2NT–4♦ (Jacoby-sidofärg) gav cue-ronden ett
+  // olagligt 4♣ (lägre än 4♦). Cue-budet ska nu antingen ligga lagligt ovanför
+  // öppnarens återbud, eller hoppas över.
+  it('öppnaren rebjöd 4♦ → svararen cue:ar lagligt 4♠ (aldrig 4♣)', () => {
+    const opener = parseHand('S:K4 H:AKQ85 D:AQ764 C:2') // 5 ruter → 4♦-rebud
+    const responder = parseHand('S:A53 H:JT72 D:K5 C:AQ86') // ♠-kontroll + ♣-kontroll
+    const turns = slamInvestigation(opener, responder, 'hearts', '4D')!
+    expect(turns[0].call).toBe('4S') // lagligt cue ovanför 4♦, inte 4♣
+    expect(turns.some((t) => t.call === '4C')).toBe(false)
+    expect(turns.some((t) => t.call === '4NT')).toBe(true)
+  })
+
+  it('öppnaren rebjöd 4♦, ingen laglig cue → rakt på 4NT', () => {
+    const opener = parseHand('S:KQ H:AKQ85 D:AQ764 C:2')
+    const responder = parseHand('S:Q53 H:JT72 D:K5 C:AQ86') // bara ♣-kontroll → ryms ej lagligt
+    const turns = slamInvestigation(opener, responder, 'hearts', '4D')!
+    expect(turns[0].call).toBe('4NT')
+    expect(turns.some((t) => t.call === '4C')).toBe(false)
+  })
+})
+
 describe('slamInvestigation – RKC efter minorfit (Steg 3)', () => {
   it('klöverfit i slamzon, 4 nyckelkort → 4NT, svar, 6♣', () => {
     const opener = parseHand('S:K3 H:AQ D:A43 C:KJT742') // 3 nyckelkort, 6-korts klöver

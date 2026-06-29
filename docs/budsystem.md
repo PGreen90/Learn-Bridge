@@ -1123,3 +1123,14 @@ Det avslöjar längd/räkning direkt för partnern.
   Tester: `slam-auction.test.ts` + nya `nt-slam.test.ts` (13 nya, totalt 394
   gröna). Ingen systemändring (följer §6.1–6.5). **Nästa gång:** budlådans
   budknappar (UI), eller DDS-webworker (punkt 28).
+- **2026-06-29** – Buggfix (slam-cue): ägaren hittade i appen en olaglig auktion
+  `1♥–2NT–4♦–4♣–…` på Spela kort. Cue-ronden (Steg 2) la alltid kontrollbudet på
+  4-läget från klöver utan att kolla att budet var **lagligt** (högre än
+  föregående). När öppnaren rebjudit en Jacoby-sidofärg på 4-läget (4♦) blev
+  svararens 4♣-cue otillåtet. Fix (`slam-auction.ts`): `slamInvestigation` tar nu
+  emot öppnarens återbud (`lastCall`) och cue-buddar bara lagligt ovanför det
+  (annars hoppas ronden över → rakt på 4NT). Dessutom **stannar motorn nu i
+  utgång i stället för att fråga RKC när paret saknar två nyckelkort** (≤3 av 5) –
+  då blev "stanna i 5 i trumf" tidigare ett bud under RKC-svaret (särskilt
+  minorfit). Tester: 2 nya regressionstester (`slam-auction.test.ts`). Totalt 396
+  gröna.

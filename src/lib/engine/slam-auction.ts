@@ -27,6 +27,14 @@ const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'he
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 
+/** Budets rang i stegen (1♣=0 … 7NT=34) så vi kan jämföra om ett bud är lagligt (högre). */
+const STRAIN_ORDER = ['C', 'D', 'H', 'S', 'NT']
+function bidRank(call: string): number {
+  const m = call.match(/^([1-7])(C|D|H|S|NT)$/)
+  if (!m) return -1 // Pass/X/XX – ingen nivå
+  return (parseInt(m[1], 10) - 1) * 5 + STRAIN_ORDER.indexOf(m[2])
+}
+
 /** Ett extra steg i slamutredningen, med roll i stället för plats (sätts i buildAuction). */
 export interface SlamTurn {
   role: 'öppnare' | 'svarare'
@@ -40,21 +48,32 @@ export interface SlamTurn {
  * de extra buden (4NT → RKC-svar → slamavslut), eller null om paret inte når
  * slamzon (då fortsätter den vanliga auktionen).
  */
-export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: Suit): SlamTurn[] | null {
+export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: Suit, lastCall?: string): SlamTurn[] | null {
   const combined = bergenPoints(openerHand, trump).bergenPoints + dummyPoints(responderHand, trump).dummyPoints
   if (combined < 33) return null
+
+  // Saknar paret TVÅ nyckelkort (≤3 av 5) ska man inte fråga RKC – då blir man
+  // strandad över utgång. Stanna i den vanliga auktionen (kräver två kontroller).
+  const total = keycards(openerHand, trump) + keycards(responderHand, trump)
+  const queen = hasTrumpQueen(openerHand, trump) || hasTrumpQueen(responderHand, trump)
+  if (total <= 3) return null
 
   const turns: SlamTurn[] = []
 
   // Cue-bid-rond före RKC (§6.2): med trumf överenskommen visar man kontroller
   // (ess/renons) billigast uppåt INNAN 4NT, så ett läckande hål syns. Kaptenen
   // (svararen) cue-buddar billigaste första-rondskontroll; öppnaren cue-buddar
-  // billigaste kontroll ovanför. Saknas kontroll hoppas ronden över.
-  const respCue = cheapestCueBid(responderHand, trump)
-  if (respCue) {
+  // billigaste kontroll ovanför. Buden måste vara LAGLIGA (högre än öppnarens
+  // återbud `lastCall`): har öppnaren redan rebjudit på 4-läget i en färg (t.ex.
+  // Jacoby-sidofärg 4♦) måste cue-budet ligga ovanför – annars hoppas ronden över.
+  const lastRank = lastCall ? bidRank(lastCall) : -1
+  const m4 = lastCall ? lastCall.match(/^4(C|D|H|S)$/) : null
+  const cueAbove: Suit | null = m4 ? SUIT_OF_LETTER[m4[1]] : null
+  const respCue = lastRank < bidRank('4NT') ? cheapestCueBid(responderHand, trump, cueAbove) : null
+  if (respCue && bidRank(respCue.call) > lastRank) {
     turns.push({ role: 'svarare', call: respCue.call, rule: respCue.rule, explanation: respCue.explanation })
     const openCue = cheapestCueBid(openerHand, trump, SUIT_OF_LETTER[respCue.call[1]])
-    if (openCue) {
+    if (openCue && bidRank(openCue.call) > bidRank(respCue.call)) {
       turns.push({ role: 'öppnare', call: openCue.call, rule: openCue.rule, explanation: openCue.explanation })
     }
   }
@@ -71,10 +90,7 @@ export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: 
   const answer = respondToRKC(openerHand, trump)
   turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
 
-  // Kaptenen räknar parets nyckelkort (4 ess + trumfkung) och placerar kontraktet.
-  const total = keycards(openerHand, trump) + keycards(responderHand, trump)
-  const queen = hasTrumpQueen(openerHand, trump) || hasTrumpQueen(responderHand, trump)
-
+  // Kaptenen placerar kontraktet (paret har minst 4 nyckelkort, se bail ovan).
   // Storslamszon med alla fem nyckelkort + trumfdam → fråga kungar (Sjöbergs 5NT)
   // innan vi tar ställning till storslam. En visad sidokung (6 i sidofärg) ger det
   // 13:e sticket → kaptenen lyfter till 7; ingen kung (öppnaren bjuder 6 i trumf)
@@ -100,19 +116,10 @@ export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: 
     return turns
   }
 
-  let call: string
-  let why: string
-  if (total <= 3) {
-    call = `5${LETTER[trump]}`
-    why = `två nyckelkort saknas → stanna i 5${SYM[trump]}.`
-  } else if (total === 4) {
-    call = `6${LETTER[trump]}`
-    why = `ett nyckelkort saknas → 6${SYM[trump]} (lillslam).`
-  } else {
-    call = `6${LETTER[trump]}`
-    why = `alla fem nyckelkort men ingen storslamszon → 6${SYM[trump]} (lillslam).`
-  }
-  turns.push({ role: 'svarare', call, rule: 'slamavslut', explanation: why })
+  const why = total === 4
+    ? `ett nyckelkort saknas → 6${SYM[trump]} (lillslam).`
+    : `alla fem nyckelkort men ingen storslamszon → 6${SYM[trump]} (lillslam).`
+  turns.push({ role: 'svarare', call: `6${LETTER[trump]}`, rule: 'slamavslut', explanation: why })
 
   return turns
 }

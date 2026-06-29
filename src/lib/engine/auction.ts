@@ -265,7 +265,7 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   const majorFit = response.rule === 'Jacoby 2NT' && (openerSuit === 'hearts' || openerSuit === 'spades')
   const minorFit = response.rule === 'inverterad minor' && (openerSuit === 'clubs' || openerSuit === 'diamonds')
   if (majorFit || minorFit) {
-    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit as Suit)
+    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit as Suit, rebid.call)
     if (slam) {
       for (const t of slam) {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat
