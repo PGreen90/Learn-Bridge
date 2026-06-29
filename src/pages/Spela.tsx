@@ -122,12 +122,12 @@ export function Spela() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold mb-1">Spela mot datorn</h1>
+        <h1 className="text-2xl font-bold mb-1">Budvisning</h1>
         <p className="text-slate-600">
-          Titta-läge: hela (ostörda) auktioner. Motorn delar ut en riktig giv och
-          visar vad varje hand öppnar med – och bygger sedan auktionen öppning →
-          svar → öppnarens återbud så långt systemboken räcker. Bra för att
-          bekräfta systemet och hitta hål.
+          Titta-läge för budgivning: motorn delar ut en riktig giv, visar vad
+          varje hand öppnar med och bygger sedan hela (ostörda) auktionen öppning →
+          svar → öppnarens återbud så långt systemboken räcker. Du tittar – datorn
+          budar. Bra för att bekräfta systemet och hitta hål.
         </p>
       </header>
 
