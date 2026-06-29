@@ -13,10 +13,11 @@
 // alla följer systemet stämmer historiken med linjen. (Udda Syd-bud "off-book"
 // hanteras senare – tills dess passar datorn för att stänga rond.)
 
-import type { Bid, Deal, Seat } from '../../types/bridge'
+import type { Bid, Deal, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
+import { answerTakeoutDouble } from './doubles'
 import { side, type Contract, type Strain } from './play'
 
 // ---- Bud-tolkning ----------------------------------------------------------
@@ -145,13 +146,43 @@ function sideOfStrain(history: ResolvedCall[], strain: string): 'NS' | 'EW' {
   return side(owner)
 }
 
+// ---- Svar på partnerns upplysningsdubbling ---------------------------------
+
+const PARTNER: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
+const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
+
+/**
+ * Är `seat` TVUNGEN att svara på partnerns upplysningsdubbling? Mönstret är:
+ *   (motst. öppnar färg) – X (partner = upplysning) – pass (din RHO) – seat
+ * En upplysningsdubbling ber partnern bjuda sin längsta objudna färg; passar
+ * RHO är partnern skyldig att svara (även med 0 hp). Kraven:
+ *  - partnerns senaste icke-pass-bud är ett X (och bara pass har följt sedan),
+ *  - vår sida har inte själv bjudit ett kontraktsbud (så X:et är take-out),
+ *  - motståndarna har öppnat i en färg (den dubblade färgen).
+ * Returnerar deras (dubblade) färg, annars null (= ingen påtvingad svarsplikt).
+ */
+function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  // Senaste icke-pass måste vara PARTNERNS dubbling (annars: RHO bjöd → ej tvång).
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
+  // Har vår sida redan bjudit ett kontraktsbud är X:et inte en ren take-out.
+  if (history.some((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))) return null
+  // Deras dubblade färg = senaste kontraktsbudet (öppningen) på motståndarsidan.
+  let theirSuit: Suit | null = null
+  for (const c of history) {
+    const cb = parseContractBid(c.bid)
+    if (cb && side(c.seat) !== side(seat)) theirSuit = SUIT_OF_LETTER[cb.strain] ?? null
+  }
+  return theirSuit
+}
+
 // ---- Bot-hjärnan -----------------------------------------------------------
 
 /**
  * Vad datorn bjuder på `seat` givet budgivningen så här långt. Bygger parets
  * kanoniska systemlinje med `buildAuction` och spelar upp den bud för bud.
- * När linjen tagit slut (eller given saknar öppning) passar datorn för att
- * stänga ronden.
+ * När linjen tagit slut faller vi tillbaka på tvingande lokala regler (svar på
+ * partnerns upplysningsdubbling); annars passar datorn för att stänga ronden.
  */
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
@@ -161,5 +192,15 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   const line = turnsToCalls(built.turns, deal.dealer)
   const next = line[history.length]
   if (next && next.seat === seat) return next
+
+  // Linjen tog slut: en upplysningsdubbling från partnern tvingar fram ett svar
+  // (partnern får inte lämnas att passa take-out-dubbla bort kontraktet).
+  const theirSuit = takeoutDoubleToAnswer(history, seat)
+  if (theirSuit) {
+    const ans = answerTakeoutDouble(deal.hands[seat], theirSuit)
+    if (legalCalls(history, seat).includes(ans.call as Bid)) {
+      return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+    }
+  }
   return pass
 }

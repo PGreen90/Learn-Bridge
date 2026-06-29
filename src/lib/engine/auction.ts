@@ -224,7 +224,13 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
       turns.push({ seat: lhoSeat, role: 'motståndare', call: ov.call, rule: ov.rule, explanation: ov.explanation, uncertain: ov.uncertain })
       const action = competitiveResponderAction(deal.hands[responderSeat], openerSuit, ov.call)
       turns.push({ seat: responderSeat, role: 'svarare', call: action.call, rule: action.rule, explanation: action.explanation, uncertain: action.uncertain })
-      // Konkurrensgrenen modelleras en rond; auktionen fortsätter senare.
+      // En upplysningsdubbling som svararen passar är INTE utbjuden: advancern
+      // (LHO:s partner) är skyldig att svara. Lämna auktionen öppen så vi inte
+      // härleder ett felaktigt "passat ut"-kontrakt – det levande svaret bjuds i
+      // budlådan (decideCall). Övriga konkurrensgrenar modelleras en rond.
+      if (ov.call === 'X' && action.call === 'P') {
+        return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+      }
       return { openerSeat, responderSeat, openCall: opening.call, turns, open: action.call !== 'P' }
     }
   }

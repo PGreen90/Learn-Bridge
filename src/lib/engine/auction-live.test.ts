@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
+import { parseHand } from '../bidding'
 import { dealRandom } from './deal'
 import { buildAuction } from './auction'
 import { finalContract, turnsToCalls } from './auction-contract'
@@ -14,6 +15,22 @@ import {
 
 function call(seat: Seat, bid: string): ResolvedCall {
   return { seat, bid }
+}
+
+/** Bygger en giv ur fyra handtexter (zon/bricka spelar ingen roll här). */
+function dealOf(dealer: Seat, hands: Record<Seat, string>): Deal {
+  return {
+    id: 'test',
+    dealer,
+    vulnerability: 'none',
+    board: 1,
+    hands: {
+      N: parseHand(hands.N),
+      E: parseHand(hands.E),
+      S: parseHand(hands.S),
+      W: parseHand(hands.W),
+    },
+  }
 }
 
 describe('seatToAct – vems tur det är', () => {
@@ -201,6 +218,42 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
       checked++
     }
     expect(checked).toBeGreaterThan(0)
+  })
+
+  // Nord öppnar 1♣, Öst upplysningsdubblar. Väst (Östs partner) MÅSTE svara när
+  // Syd passar – får inte passa take-out-dubbla bort kontraktet. (Buggen som
+  // syntes i budlådan: Väst passade med 5-korts spader.)
+  describe('svar på partnerns upplysningsdubbling', () => {
+    const deal = dealOf('N', {
+      N: 'S:A3 H:K3 D:K32 C:KQT432', // öppnar 1♣ (6-korts klöver, 15 hp)
+      E: 'S:KQ32 H:KJ32 D:KJ32 C:3', // upplysningsdubbling av 1♣ (13 hp, kort klöver)
+      S: 'S:765 H:Q765 D:Q65 C:765', // svag
+      W: 'S:KQT98 H:432 D:432 C:32', // 5-korts spader, svag
+    })
+
+    it('Väst tvingas bjuda sin längsta färg när Syd passar', () => {
+      const history = [call('N', '1C'), call('E', 'X'), call('S', 'P')]
+      const c = decideCall(deal, history, 'W')
+      expect(c.seat).toBe('W')
+      expect(c.bid).toBe('1S') // längsta objudna färg, billigaste nivå
+      expect(legalCalls(history, 'W')).toContain(c.bid)
+    })
+
+    it('Väst slipper svara (passar) om Syd själv bjuder över dubblingen', () => {
+      const history = [call('N', '1C'), call('E', 'X'), call('S', '2C')]
+      expect(decideCall(deal, history, 'W').bid).toBe('P')
+    })
+
+    it('en stark advancer (12+) cue-bjuder deras färg i stället', () => {
+      const strong = dealOf('N', {
+        N: 'S:A3 H:K3 D:K32 C:KQT432',
+        E: 'S:KQ32 H:KJ32 D:KJ32 C:3',
+        S: 'S:765 H:Q765 D:Q65 C:765',
+        W: 'S:AKJ98 H:AK2 D:432 C:32', // 14 hp → cue 2♣ (utgångskrav)
+      })
+      const history = [call('N', '1C'), call('E', 'X'), call('S', 'P')]
+      expect(decideCall(strong, history, 'W').bid).toBe('2C')
+    })
   })
 
   it('slam-quirken (två bud i rad, samma plats) är sällsynt – under 2 %', () => {
