@@ -9,10 +9,11 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { bergenPoints, dummyPoints } from './evaluation'
-import { hasTrumpQueen, keycards, respondToKingAsk, respondToRKC } from './slam'
+import { cheapestCueBid, hasTrumpQueen, keycards, respondToKingAsk, respondToRKC } from './slam'
 
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 
 /** Ett extra steg i slamutredningen, med roll i stället för plats (sätts i buildAuction). */
 export interface SlamTurn {
@@ -32,6 +33,19 @@ export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: 
   if (combined < 33) return null
 
   const turns: SlamTurn[] = []
+
+  // Cue-bid-rond före RKC (§6.2): med trumf överenskommen visar man kontroller
+  // (ess/renons) billigast uppåt INNAN 4NT, så ett läckande hål syns. Kaptenen
+  // (svararen) cue-buddar billigaste första-rondskontroll; öppnaren cue-buddar
+  // billigaste kontroll ovanför. Saknas kontroll hoppas ronden över.
+  const respCue = cheapestCueBid(responderHand, trump)
+  if (respCue) {
+    turns.push({ role: 'svarare', call: respCue.call, rule: respCue.rule, explanation: respCue.explanation })
+    const openCue = cheapestCueBid(openerHand, trump, SUIT_OF_LETTER[respCue.call[1]])
+    if (openCue) {
+      turns.push({ role: 'öppnare', call: openCue.call, rule: openCue.rule, explanation: openCue.explanation })
+    }
+  }
 
   // Kaptenen (svararen) frågar nyckelkort med 1430 RKC.
   turns.push({

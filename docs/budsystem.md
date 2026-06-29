@@ -1091,3 +1091,14 @@ Det avslöjar längd/räkning direkt för partnern.
   Tester: `slam-auction.test.ts` (5 st). Totalt 380 tester gröna. Ingen
   systemändring (motorn följer redan dokumenterad §6.3). **Nästa gång:** Steg 2 –
   cue-bid-rond före RKC efter högfärgsfit (se arbetslistan).
+- **2026-06-29** – Slamverktyg (Steg 2 av 5): **cue-bid-rond före RKC inkopplad**
+  (`slam-auction.ts`, §6.2). Efter en högfärgsfit i slamzon visar paret nu
+  kontroller INNAN 4NT: kaptenen (svararen) cue-buddar billigaste första-
+  rondskontroll (ess/renons) uppåt med `cheapestCueBid`, öppnaren cue-buddar
+  billigaste kontroll ovanför, sedan frågar kaptenen 4NT RKC. Saknas kontroll
+  hoppas ronden över (rakt på 4NT, som förut). Exempel ur systemboken realiseras:
+  1♠–2NT–3♠–4♦–4♥–4NT–… **Avgränsning:** en cue-rond modelleras (kontrollvisning
+  för realism/lärande); slutkontraktet styrs fortfarande av nyckelkortsräkningen,
+  så RKC fångar redan ett saknat ess. Tester: `slam-auction.test.ts` (6 st, inkl.
+  full auktion 1♠–2NT–3♠–4♦–4♥–4NT–5♦–6♠). Totalt 381 tester gröna. Ingen
+  systemändring. **Nästa gång:** Steg 3 – minor-fit-slam (1430 RKC efter minorfit).
