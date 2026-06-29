@@ -68,8 +68,26 @@
 - **Klickbara bud + ALERT-märke** i auktionsvyn – `alerts.ts` (blått A på konstgjorda bud, klick visar betydelsen).
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 
+## Budlådan – logiklagret (`auction-live.ts`)
+
+Förberedelse för en LEVANDE budgivning i "Spela kort" (i stället för en
+förgenererad auktion). Rent, testat (`auction-live.test.ts`, 20 tester):
+- `legalCalls(history, seat)` – bridge-reglerna för tillåtna bud (högre bud,
+  X mot motståndare, XX mot deras X).
+- `auctionComplete(history)` – tre pass efter ett bud / fyra inledande pass.
+- `contractFromCalls(history)` – slutkontrakt + spelförare ur en färdig budföljd.
+- `decideCall(deal, history, seat)` – **bot-hjärnan**: spelar upp parets
+  kanoniska systemlinje (`buildAuction`) bud för bud. Datorn (V/N/Ö) följer
+  linjen; Syd bjuder själv. Återanvänder hela den testade budmotorn.
+- **Känd gräns:** ~0,25 % av färdiga auktioner är slamlinjer (Jacoby 2NT → cue
+  → 1430 RKC) där `buildAuction` lägger två bud i rad på samma plats (öppnarens
+  cue hoppas över utan kontroll) → ingen laglig medurs-auktion. decideCall
+  stänger dem lagligt på sista budet. Fixas när slamverktygen kopplas in i
+  budlådan (se arbetslistan).
+
 ## Nästa steg (ur arbetslistan)
 
-- Budlådans budknappar (spelaren bjuder själv).
+- **Budlådans budknappar – UI-steget** (Syd klickar egna bud, turordning runt
+  bordet, spelet startar ur de verkliga buden). Logiklagret ovan är klart.
 - "Framkalla slutbud"-väljare (ägarens idé, se `docs/arbetslista.md`).
 - Ev. webworker för DDS-facit på utspelet.

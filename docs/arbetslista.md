@@ -61,8 +61,19 @@
   "visa en slam", "visa 3NT", "visa 4♥"), inte bara slumpmässiga givar. Bra både
   för att verifiera nya budvägar (t.ex. slamverktygen) och för riktad träning.
   Generalisering av den tänkta "Slamexempel →"-knappen.
-- ⬜ **Budlådans budknappar** – låt ägaren klicka egna bud i en riktig budlåda
-  (utpekat som nästa UI-steg i CLAUDE.md/ändringsloggen).
+- 🔶 **Budlådans budknappar** – låt ägaren klicka egna bud i en riktig budlåda.
+  - ✅ **Steg 1 – logiklagret** (`auction-live.ts`, testat): `legalCalls`,
+    `auctionComplete`, `contractFromCalls`, `decideCall` (bot-hjärnan som spelar
+    upp parets systemlinje bud för bud; datorn budar V/N/Ö, Syd själv).
+  - ⬜ **Steg 2 – UI**: klickbar budlåda för Syd, turordning runt bordet,
+    starta spelet ur de verkliga buden (ersätt `dealForPlay` i `Play.tsx`).
+  - ⬜ **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan generera två bud
+    i rad på samma plats (öppnarens cue hoppas över) → ej laglig medurs-auktion,
+    så budlådan stannar under slam där. Fixa i slammotorns cue-rond
+    (`slam-auction.ts`) så öppnaren alltid fyller luckan lagligt utan att
+    fabricera ett falskt kontroll-cue (mis-lär ägaren). Ovanligt (~0,25 %).
+  - ⬜ **Off-book Syd**: när Syd bjuder utanför systemlinjen kan datorpartnern
+    inte alltid hänga med (decideCall passar). Tas senare (ägarens beslut).
 
 ## Stöd som följer med (löpande)
 31. Hålfinnare utökas för varje nytt återbud/svar
