@@ -14,11 +14,20 @@ describe('slamInvestigation – RKC efter högfärgsfit', () => {
     expect(turns[1].role).toBe('öppnare') // öppnaren svarar
   })
 
-  it('storslam: alla 5 nyckelkort + trumfdam i storslamszon → 7 i trumf', () => {
-    const opener = parseHand('S:AKQ85 H:A43 D:A52 C:A2') // alla 5 nyckelkort
+  it('storslamszon, alla 5 nyckelkort + trumfdam → 5NT kungfråga; ingen sidokung → stannar i 6', () => {
+    const opener = parseHand('S:AKQ85 H:A43 D:A52 C:A2') // 5 nyckelkort, inga sidokungar
     const responder = parseHand('S:J7642 H:KQ5 D:KQ C:KQ4')
     const turns = slamInvestigation(opener, responder, 'spades')!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5S', '7S'])
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5S', '5NT', '6S'])
+    expect(turns[2].rule).toBe('Sjöberg 5NT') // kaptenen frågar kungar
+  })
+
+  it('storslamszon, kungfråga visar en sidokung → kaptenen lyfter till storslam (7)', () => {
+    const opener = parseHand('S:AKQ85 H:AK3 D:A52 C:A2') // 5 nyckelkort + hjärterkung
+    const responder = parseHand('S:J7642 H:Q5 D:KQ C:KQ43')
+    const turns = slamInvestigation(opener, responder, 'spades')!
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5S', '5NT', '6H', '7S'])
+    expect(turns[4].rule).toBe('slamavslut')
   })
 
   it('under slamzon → null (ingen slamutredning, vanlig auktion fortsätter)', () => {

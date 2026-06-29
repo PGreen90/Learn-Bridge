@@ -1080,3 +1080,14 @@ Det avslöjar längd/räkning direkt för partnern.
   **nodbudget** (fryser aldrig gränssnittet) och blir tillförlitligt en bit in i
   given (få kort = snabbt); på utspelet kan det visa "för tung". Tester:
   `dds.test.ts`. Totalt 379 tester gröna. Ingen systemändring.
+- **2026-06-29** – Slamverktyg (Steg 1 av 5): **Sjöbergs 5NT (kungfråga)
+  inkopplad i den växande auktionen** (`slam-auction.ts`). Efter en högfärgsfit
+  via Jacoby 2NT, när paret har alla fem nyckelkort + trumfdam i storslamszon
+  (≥37), frågar kaptenen nu kungar med **5NT** (§6.3) i stället för att chansa
+  rakt på storslam: en visad sidokung (öppnaren bjuder 6 i sidofärg) ger det 13:e
+  sticket → kaptenen lyfter till 7; ingen kung (öppnaren bjuder 6 i trumf) → man
+  stannar korrekt i 6; två+ kungar (öppnaren bjuder 7 i trumf) → storslam direkt.
+  Detta rättar samtidigt det gamla beteendet som bjöd storslam helt utan sidokung.
+  Tester: `slam-auction.test.ts` (5 st). Totalt 380 tester gröna. Ingen
+  systemändring (motorn följer redan dokumenterad §6.3). **Nästa gång:** Steg 2 –
+  cue-bid-rond före RKC efter högfärgsfit (se arbetslistan).

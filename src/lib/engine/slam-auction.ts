@@ -9,7 +9,7 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { bergenPoints, dummyPoints } from './evaluation'
-import { hasTrumpQueen, keycards, respondToRKC } from './slam'
+import { hasTrumpQueen, keycards, respondToKingAsk, respondToRKC } from './slam'
 
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
@@ -48,6 +48,32 @@ export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: 
   // Kaptenen räknar parets nyckelkort (4 ess + trumfkung) och placerar kontraktet.
   const total = keycards(openerHand, trump) + keycards(responderHand, trump)
   const queen = hasTrumpQueen(openerHand, trump) || hasTrumpQueen(responderHand, trump)
+
+  // Storslamszon med alla fem nyckelkort + trumfdam → fråga kungar (Sjöbergs 5NT)
+  // innan vi tar ställning till storslam. En visad sidokung (6 i sidofärg) ger det
+  // 13:e sticket → kaptenen lyfter till 7; ingen kung (öppnaren bjuder 6 i trumf)
+  // → stanna i 6; två+ kungar (öppnaren bjuder 7 i trumf) → storslam är redan satt.
+  if (total === 5 && queen && combined >= 37) {
+    turns.push({
+      role: 'svarare',
+      call: '5NT',
+      rule: 'Sjöberg 5NT',
+      explanation: `alla fem nyckelkort + trumfdam, storslamszon (~${combined} poäng) → 5NT (frågar kungar).`,
+    })
+    const kingAnswer = respondToKingAsk(openerHand, trump)
+    turns.push({ role: 'öppnare', call: kingAnswer.call, rule: kingAnswer.rule, explanation: kingAnswer.explanation })
+
+    if (kingAnswer.call !== `6${LETTER[trump]}` && kingAnswer.call !== `7${LETTER[trump]}`) {
+      turns.push({
+        role: 'svarare',
+        call: `7${LETTER[trump]}`,
+        rule: 'slamavslut',
+        explanation: `kung visad → storslam (7${SYM[trump]}).`,
+      })
+    }
+    return turns
+  }
+
   let call: string
   let why: string
   if (total <= 3) {
@@ -56,12 +82,9 @@ export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: 
   } else if (total === 4) {
     call = `6${LETTER[trump]}`
     why = `ett nyckelkort saknas → 6${SYM[trump]} (lillslam).`
-  } else if (queen && combined >= 37) {
-    call = `7${LETTER[trump]}`
-    why = `alla fem nyckelkort + trumfdam, storslamszon → 7${SYM[trump]} (storslam).`
   } else {
     call = `6${LETTER[trump]}`
-    why = `alla fem nyckelkort → 6${SYM[trump]} (lillslam).`
+    why = `alla fem nyckelkort men ingen storslamszon → 6${SYM[trump]} (lillslam).`
   }
   turns.push({ role: 'svarare', call, rule: 'slamavslut', explanation: why })
 
