@@ -19,7 +19,8 @@ import { hasStopper } from './overcalls'
 import type { Suit } from '../../types/bridge'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
-import { slamInvestigation } from './slam-auction'
+import { slamInvestigation, exclusionInvestigation } from './slam-auction'
+import { gerberInvestigation } from './nt-slam'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -228,6 +229,19 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
     }
   }
 
+  // NT-slam (Steg 4): över en naturlig 1NT kan svararen med en slamsäker
+  // balanserad hand fråga ess med Gerber 4♣ (i stället för kvantitativ 4NT).
+  if (opening.call === '1NT') {
+    const g = gerberInvestigation(deal.hands[openerSeat], deal.hands[responderSeat])
+    if (g) {
+      for (const t of g) {
+        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+      }
+      return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+    }
+  }
+
   const response = computeResponse(opening.call, deal.hands[responderSeat], responderPassed)
   turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
 
@@ -245,12 +259,29 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   // Öppnaren passade svararens bud → kontraktet är satt.
   if (rebid.call === 'P') return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
 
-  // Slamutredning (punkt 18–20 inkopplade): efter en högfärgsfit via Jacoby 2NT
-  // kan paret nå slamzon → 1430 RKC växer auktionen vidare.
-  if (response.rule === 'Jacoby 2NT' && (openerSuit === 'hearts' || openerSuit === 'spades')) {
-    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit)
+  // Slamutredning: efter en överenskommen trumf i slamzon växer 1430 RKC (med
+  // cue-rond + ev. Sjöbergs 5NT) auktionen vidare. Högfärgsfit via Jacoby 2NT
+  // (Steg 1–2) eller minorfit via inverterad minor (Steg 3).
+  const majorFit = response.rule === 'Jacoby 2NT' && (openerSuit === 'hearts' || openerSuit === 'spades')
+  const minorFit = response.rule === 'inverterad minor' && (openerSuit === 'clubs' || openerSuit === 'diamonds')
+  if (majorFit || minorFit) {
+    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit as Suit)
     if (slam) {
       for (const t of slam) {
+        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+      }
+      return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+    }
+  }
+
+  // Exclusion Blackwood (Steg 5): efter en splinter där öppnaren visat
+  // slamintresse (splinter-relä) kan svararen med en sidorenons hoppa till
+  // 5 i renonsfärgen och fråga nyckelkort utom esset där.
+  if (response.rule === 'tvetydig splinter' && rebid.rule === 'splinter-relä' && (openerSuit === 'hearts' || openerSuit === 'spades')) {
+    const exc = exclusionInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit as Suit)
+    if (exc) {
+      for (const t of exc) {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat
         turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
       }

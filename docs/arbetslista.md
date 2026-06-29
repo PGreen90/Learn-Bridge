@@ -96,8 +96,12 @@
   hakar in **1430 RKC** efter en högfärgsfit via **Jacoby 2NT** när parets
   samlade poäng (Bergenpoäng + stödpoäng) når **slamzon ≥ 33** (storslam ≥ 37).
   Auktionen växer då vidare 4NT → RKC-svar → slamavslut (5/6/7 i trumf).
-  Avgränsning: övriga slamvägar (cue, Sjöberg, Gerber, Exclusion, minor-/NT-fit)
-  är fortfarande rena motorfunktioner, ej inkopplade i en växande auktion än.
+  **Alla slamvägar nu inkopplade i växande auktioner** (Steg 1–5, 2026-06-29):
+  cue-rond + Sjöbergs 5NT i RKC-grenen (`slam-auction.ts`), **minorfit** via
+  inverterad minor (`auction.ts`), **Gerber 4♣** över 1NT (`nt-slam.ts`) och
+  **Exclusion** efter splinter-relä (`slam-auction.ts`). Avgränsningar: Gerber
+  över 2NT (kvantitativ tills vidare) och Exclusion när renons rankar över trumf
+  hanteras ej – då fortsätter den vanliga auktionen.
 - ✅ Punkt **21–22** (inkliv + tvåfärgsinkliv, §7.1–7.2) – `overcalls.ts`.
   Enkelt inkliv, 1NT-inkliv (15–18), Michaels, ovanlig 2NT, upplysningsdubbling,
   hoppinkliv, samt advancers svar (cue=limit+, höjning, ny färg, NT).

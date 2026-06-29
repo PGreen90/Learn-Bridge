@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Deal } from '../../types/bridge'
 import { parseHand } from '../bidding'
 import { buildAuction } from './auction'
-import { slamInvestigation } from './slam-auction'
+import { exclusionInvestigation, slamInvestigation } from './slam-auction'
 
 describe('slamInvestigation – RKC efter högfärgsfit', () => {
   it('lillslam: cue-rond före RKC, 4 nyckelkort → 6 i trumf', () => {
@@ -62,6 +62,84 @@ describe('buildAuction – slam växer fram via Jacoby 2NT', () => {
     }
     const a = buildAuction(deal)!
     expect(a.turns.map((t) => t.call)).toEqual(['1S', '2NT', '3S', '4D', '4H', '4NT', '5D', '6S'])
+    expect(a.open).toBe(false)
+  })
+})
+
+describe('slamInvestigation – RKC efter minorfit (Steg 3)', () => {
+  it('klöverfit i slamzon, 4 nyckelkort → 4NT, svar, 6♣', () => {
+    const opener = parseHand('S:K3 H:AQ D:A43 C:KJT742') // 3 nyckelkort, 6-korts klöver
+    const responder = parseHand('S:Q97 H:KJ D:KQ65 C:AQ85') // 1 nyckelkort (klöveress)
+    const turns = slamInvestigation(opener, responder, 'clubs')!
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '6C'])
+  })
+})
+
+describe('buildAuction – minorfit-slam via inverterad minor (Steg 3)', () => {
+  it('1C–2C–3C–4NT–5D–6C i en hel auktion', () => {
+    const deal: Deal = {
+      id: 'slam-minor',
+      dealer: 'N',
+      vulnerability: 'none',
+      board: 1,
+      hands: {
+        N: parseHand('S:K3 H:AQ D:A43 C:KJT742'), // 17 hp, 6 klöver → 1C
+        E: parseHand('S:JT8 H:9876 D:987 C:963'), // svag → inget inkliv
+        S: parseHand('S:Q97 H:KJ D:KQ65 C:AQ85'), // 17 hp, 4 klöver, ingen högfärg → inverterad minor
+        W: parseHand('S:A6542 H:T5432 D:JT2 C:-'),
+      },
+    }
+    const a = buildAuction(deal)!
+    expect(a.turns.map((t) => t.call)).toEqual(['1C', '2C', '3C', '4NT', '5D', '6C'])
+    expect(a.open).toBe(false)
+  })
+})
+
+describe('exclusionInvestigation – voidwood efter splinter (Steg 5)', () => {
+  it('renons under trumf, alla nyckelkort utom renons-esset → storslam', () => {
+    const opener = parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6') // spaderfit, 1 sidoess (♠A)
+    const responder = parseHand('S:KJ43 H:A752 D:AQ876 C:-') // klöverrenons, ♥A+♦A+♠K
+    const turns = exclusionInvestigation(opener, responder, 'spades')!
+    // svararen frågar 5♣ (Exclusion, klöveress borträknat), öppnaren svarar, 7♠
+    expect(turns.map((t) => t.call)).toEqual(['5C', '5D', '7S'])
+    expect(turns[0].rule).toBe('Exclusion')
+  })
+
+  it('renons som rankar ÖVER trumf → null (håller budnivåerna lagliga)', () => {
+    const opener = parseHand('S:- H:AKQ52 D:KQ4 C:AQ52') // hjärterfit, spaderrenons hos öppnaren spelar ingen roll
+    const responder = parseHand('S:- H:JT983 D:A765 C:K43') // spaderrenons rankar över hjärter
+    expect(exclusionInvestigation(opener, responder, 'hearts')).toBeNull()
+  })
+
+  it('ingen sidorenons → null', () => {
+    const opener = parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6')
+    const responder = parseHand('S:KJ43 H:A75 D:AQ87 C:62') // singel ingenstans, ingen renons
+    expect(exclusionInvestigation(opener, responder, 'spades')).toBeNull()
+  })
+
+  it('två+ nyckelkort saknas → null (ej slamsäkert)', () => {
+    const opener = parseHand('S:QJ43 H:KQ6 D:KQ4 C:KQ8') // 0 ess, ingen trumfkung
+    const responder = parseHand('S:QJ762 H:KQ52 D:KQ43 C:-') // klöverrenons, 0 ess, ingen trumfkung
+    expect(exclusionInvestigation(opener, responder, 'spades')).toBeNull()
+  })
+})
+
+describe('buildAuction – Exclusion växer fram efter splinter (Steg 5)', () => {
+  it('1S–3H(splinter)–3S(relä)–5C(Exclusion)–5D–7S', () => {
+    const deal: Deal = {
+      id: 'slam-exclusion',
+      dealer: 'N',
+      vulnerability: 'none',
+      board: 1,
+      hands: {
+        N: parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6'), // 18 hp, 5 spader → 1S, slamintresse → relä
+        E: parseHand('S:T9 H:T98 D:T95 C:98743'), // svag → inget inkliv
+        S: parseHand('S:KJ43 H:A752 D:AQ876 C:-'), // 4 spader + klöverrenons → splinter
+        W: parseHand('S:86 H:J63 D:42 C:AQJT52'),
+      },
+    }
+    const a = buildAuction(deal)!
+    expect(a.turns.map((t) => t.call)).toEqual(['1S', '3H', '3S', '5C', '5D', '7S'])
     expect(a.open).toBe(false)
   })
 })

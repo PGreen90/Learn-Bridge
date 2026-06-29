@@ -9,11 +9,23 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { bergenPoints, dummyPoints } from './evaluation'
-import { cheapestCueBid, hasTrumpQueen, keycards, respondToKingAsk, respondToRKC } from './slam'
+import { lengths } from './hand'
+import {
+  cheapestCueBid,
+  exclusionKeycards,
+  hasTrumpQueen,
+  keycards,
+  respondToExclusion,
+  respondToKingAsk,
+  respondToRKC,
+} from './slam'
 
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
+const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 
 /** Ett extra steg i slamutredningen, med roll i stället för plats (sätts i buildAuction). */
 export interface SlamTurn {
@@ -100,6 +112,48 @@ export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: 
     call = `6${LETTER[trump]}`
     why = `alla fem nyckelkort men ingen storslamszon → 6${SYM[trump]} (lillslam).`
   }
+  turns.push({ role: 'svarare', call, rule: 'slamavslut', explanation: why })
+
+  return turns
+}
+
+/**
+ * Exclusion Blackwood (§6.5) efter en splinter där öppnaren visat slamintresse
+ * (splinter-relä). Svararen, som har en sidorenons, hoppar till 5 i renonsfärgen
+ * och frågar nyckelkort UTOM esset där; öppnaren svarar i steg; svararen placerar
+ * slam. Returnerar null (→ vanlig auktion) om förutsättningarna inte håller:
+ *  - ingen sidorenons, eller renonsfärgen rankar ≥ trumf (då kan öppnarens
+ *    stegsvar tränga undan 6 i trumf → vi håller oss till lagliga nivåer),
+ *  - paret når inte slamzon, eller två+ nyckelkort saknas (ej slamsäkert).
+ */
+export function exclusionInvestigation(openerHand: Hand, responderHand: Hand, trump: Suit): SlamTurn[] | null {
+  const len = lengths(responderHand)
+  const voidSuit = RANK_ORDER.find((s) => s !== trump && len[s] === 0)
+  if (!voidSuit) return null
+  if (rankIdx(voidSuit) >= rankIdx(trump)) return null
+
+  const combined = bergenPoints(openerHand, trump).bergenPoints + dummyPoints(responderHand, trump).dummyPoints
+  if (combined < 33) return null
+
+  // Nyckelkort utom renonsfärgens ess: 3 sidoess + trumfkung = max 4.
+  const total = exclusionKeycards(openerHand, trump, voidSuit) + exclusionKeycards(responderHand, trump, voidSuit)
+  const missing = 4 - total
+  if (missing >= 2) return null // inte slamsäkert → vanlig auktion fortsätter
+
+  const turns: SlamTurn[] = []
+  turns.push({
+    role: 'svarare',
+    call: `5${LETTER[voidSuit]}`,
+    rule: 'Exclusion',
+    explanation: `renons i ${NAME[voidSuit]} → 5${SYM[voidSuit]} (Exclusion: frågar nyckelkort utom esset där).`,
+  })
+  const answer = respondToExclusion(openerHand, trump, voidSuit)
+  turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
+
+  const call = missing === 0 ? `7${LETTER[trump]}` : `6${LETTER[trump]}`
+  const why = missing === 0
+    ? `inget nyckelkort saknas (renons-esset borträknat) → storslam 7${SYM[trump]}.`
+    : `ett nyckelkort saknas → lillslam 6${SYM[trump]}.`
   turns.push({ role: 'svarare', call, rule: 'slamavslut', explanation: why })
 
   return turns

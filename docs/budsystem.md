@@ -1102,3 +1102,24 @@ Det avslöjar längd/räkning direkt för partnern.
   så RKC fångar redan ett saknat ess. Tester: `slam-auction.test.ts` (6 st, inkl.
   full auktion 1♠–2NT–3♠–4♦–4♥–4NT–5♦–6♠). Totalt 381 tester gröna. Ingen
   systemändring. **Nästa gång:** Steg 3 – minor-fit-slam (1430 RKC efter minorfit).
+- **2026-06-29** – Slamverktyg (Steg 3–5 av 5, klart): resten av slamvägarna
+  inkopplade i växande auktioner.
+  **Steg 3 minor-fit** (`auction.ts`): `slamInvestigation` (suit-agnostisk) körs nu
+  även efter **inverterad minor** (klöver-/ruterfit i slamzon) → 1430 RKC växer
+  fram (ex. 1♣–2♣–3♣–4NT–5♦–6♣).
+  **Steg 4 Gerber** (ny `nt-slam.ts`): över en naturlig 1NT frågar en slamsäker
+  balanserad hand (18+ hp, ingen högfärg/MSS) ess med **Gerber 4♣** (§6.4) →
+  ess-svar → placerar 6NT, eller 4NT om två ess saknas, eller kungfråga 5♣ → 7NT
+  i storslamszon (≈37+). Kvantitativ 4NT (16–17) ligger kvar i den vanliga kedjan.
+  Avgränsning: Gerber kopplas in över 1NT; över 2NT används tills vidare
+  kvantitativ 4NT/6NT.
+  **Steg 5 Exclusion** (`slam-auction.ts`): efter en **splinter** där öppnaren
+  visat slamintresse (splinter-relä) kan svararen med en **sidorenons** hoppa till
+  5 i renonsfärgen (**Exclusion**, §6.5) och fråga nyckelkort utom esset där →
+  placerar 6/7 i trumf (ex. 1♠–3♥–3♠–5♣–5♦–7♠). Trygga avgränsningar (motorn har
+  båda händerna och förkalkylerar): triggas bara när renonsfärgen rankar UNDER
+  trumf (håller budnivåerna lagliga) och när det är slamsäkert (≤1 nyckelkort
+  saknas); annars fortsätter den vanliga auktionen.
+  Tester: `slam-auction.test.ts` + nya `nt-slam.test.ts` (13 nya, totalt 394
+  gröna). Ingen systemändring (följer §6.1–6.5). **Nästa gång:** budlådans
+  budknappar (UI), eller DDS-webworker (punkt 28).
