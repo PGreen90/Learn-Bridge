@@ -56,6 +56,13 @@
   `pickContract`-heuristiken, så budföljden matchar kontraktet man spelar.
   Delad `turnsToCalls` (flyttad till `auction-contract.ts`, används av både
   Spela- och Spela kort-fliken).
+- ⬜ **Framkalla olika slutbud (idé från ägaren 2026-06-29)** – en knapp/väljare
+  som letar fram en giv vars auktion slutar i ett *valt* slutkontrakt (t.ex.
+  "visa en slam", "visa 3NT", "visa 4♥"), inte bara slumpmässiga givar. Bra både
+  för att verifiera nya budvägar (t.ex. slamverktygen) och för riktad träning.
+  Generalisering av den tänkta "Slamexempel →"-knappen.
+- ⬜ **Budlådans budknappar** – låt ägaren klicka egna bud i en riktig budlåda
+  (utpekat som nästa UI-steg i CLAUDE.md/ändringsloggen).
 
 ## Stöd som följer med (löpande)
 31. Hålfinnare utökas för varje nytt återbud/svar
