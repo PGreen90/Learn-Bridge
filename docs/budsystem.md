@@ -1131,6 +1131,24 @@ Det avslöjar längd/räkning direkt för partnern.
   du är spelförare). Verifierat i webbläsaren (första klick väljer/fanar ut utan
   att spela; andra klick spelar). Ren UI, ingen systemändring. **Nästa:** Feature 3
   (klickbara bud + ALERT) och Feature 2 (stegbar omspelning).
+- **2026-06-29** – Spela kort (Feature 2): **stegbar omspelning** av en
+  färdigspelad giv (`src/components/PlayReplay.tsx`). När given är slut byts
+  livebordet mot en omspelning: alla fyra händer ligger upplagda **sorterade i
+  färg** (som vid bordet) i respektive väderstreck – Väst/Öst som **staplade
+  vågräta färgrader** (Fun Bridge-stil): en rad per färg, med varje färgs högsta
+  kort fullt synligt INÅT mot mitten (Öst åt vänster, Väst åt höger) och de lägre
+  intuckade utåt – och man stegar stick för stick
+  (⏮ ◀ Föregående · Stick X/13 + vem som vann · Nästa ▶ ⏭, eller klicka ett kort
+  för att hoppa dit). Mitten visar det aktuella sticket mot rätt väderstreck med
+  vinnaren inramad; det aktuella stickets kort gulmarkeras i varje hand.
+  Budgivningspanelen fälls dessutom ut automatiskt när given är klar så
+  budförklaringarna (klickbara, Feature 3) finns till hands. Samtidigt:
+  **träkarlen läggs nu upp i Fun Bridge-stil** – sidoträkarlen (Ö/V) ritas som
+  separata vertikala färgkolumner sida vid sida i stället för en enda lång kolumn
+  (`DummyHand` i `Play.tsx`). Färg- och sorteringslogiken är utbruten till delad
+  `src/lib/cardLayout.ts` (`bySuit`, `orderedSuits`), använd av både bordet och
+  omspelningen. Verifierat live (sidoträkarl i kolumner; omspelning färgsorterad,
+  stegning fungerar). Ren UI, ingen systemändring. 398 tester gröna.
 - **2026-06-29** – Spela kort/Budvisning (Feature 3): **klickbara bud + ALERT**
   i auktionsvyn (`AuctionView`). Varje bud med en känd förklaring går nu att
   klicka → en ruta under rutnätet visar *plats + bud + motorns förklaring*.

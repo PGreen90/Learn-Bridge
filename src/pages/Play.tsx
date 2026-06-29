@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import type { Card, Deal, Hand, Rank, Seat, Suit } from '../types/bridge'
+import type { Card, Deal, Hand, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import {
   contractResult,
@@ -18,16 +18,11 @@ import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
 import { botCard } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
+import { PlayReplay } from '../components/PlayReplay'
 import { AuctionView } from '../components/AuctionView'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-
-// Grundordning som ALTERNERAR svart/röd för läsbarhet: ♠ ♦ ♣ ♥
-// (svart-röd-svart-röd). Ordningen är cyklisk (♥ → ♠ alternerar också), så den
-// kan roteras med trumfen i valfri ände utan att alterneringen bryts.
-// Inom varje färg ligger högsta kortet till vänster.
-const DISPLAY_SUITS: Suit[] = ['spades', 'diamonds', 'clubs', 'hearts']
-const RANK_HIGH_TO_LOW: Rank[] = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2']
+import { bySuit, orderedSuits } from '../lib/cardLayout'
 
 interface Game {
   deal: Deal
@@ -53,33 +48,6 @@ function sameCard(a: Card, b: Card) {
 
 function strainSymbol(contract: Contract) {
   return contract.strain === 'NT' ? <>NT</> : <SuitSymbol suit={contract.strain} />
-}
-
-/** Korten i en hand, sorterade per färg (S H R K) och högst → lägst. */
-function bySuit(hand: Card[], suit: Suit): Card[] {
-  return hand
-    .filter((c) => c.suit === suit)
-    .sort((a, b) => RANK_HIGH_TO_LOW.indexOf(a.rank) - RANK_HIGH_TO_LOW.indexOf(b.rank))
-}
-
-/**
- * Färgernas ordning på en plats, sett från Syds (din) vy – med trumfen på
- * spelförarens högra hand precis som vid ett riktigt bord:
- *  - Nord/Syd (uppe/nere): trumfen längst till HÖGER.
- *  - Öst (sida): trumfen NEDERST (= spelföraren Väst:s höger).
- *  - Väst (sida): trumfen ÖVERST (= spelföraren Öst:s höger).
- * Sang (NT) → ingen trumf, vanlig ordning ♠ ♥ ♣ ♦.
- */
-function orderedSuits(seat: Seat, contract: Contract): Suit[] {
-  const trump = contract.strain === 'NT' ? null : (contract.strain as Suit)
-  if (!trump) return DISPLAY_SUITS
-  const i = DISPLAY_SUITS.indexOf(trump)
-  // Rotera den alternerande cykeln så trumfen hamnar i rätt ände:
-  //  - Väst (sidoträkarl): trumfen ÖVERST → trumfen först i ordningen.
-  //  - Övriga: trumfen i andra änden (HÖGER för Nord/Syd, NEDERST för Öst).
-  return seat === 'W'
-    ? [...DISPLAY_SUITS.slice(i), ...DISPLAY_SUITS.slice(0, i)]
-    : [...DISPLAY_SUITS.slice(i + 1), ...DISPLAY_SUITS.slice(0, i + 1)]
 }
 
 // Nodbudget för facit-lösaren: ~2 milj. noder (≈ 1–2 s i värsta fall) så
@@ -153,6 +121,13 @@ export function Play() {
   }
 
   const done = isComplete(play)
+
+  // När given är färdigspelad: fäll ut budgivningen automatiskt så förklaringarna
+  // syns vid omspelningen.
+  useEffect(() => {
+    if (done) setShowAuction(true)
+  }, [done])
+
   const result = contractResult(play)
   const declSide = side(contract.declarer)
   const dummy = dummyOf(contract)
@@ -254,22 +229,26 @@ export function Play() {
         </Panel>
       )}
 
-      {/* Det gröna filtbordet: Nord uppe, Väst/mitten/Öst, Syd nere (du).
-          Allt centreras och hålls innanför filtkanten. */}
-      <div
-        className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"
-        style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <SeatHand seat="N" {...seatProps} />
-          <div className="flex w-full items-center justify-between gap-2">
-            <SeatHand seat="W" {...seatProps} />
-            <TrickView play={play} />
-            <SeatHand seat="E" {...seatProps} />
+      {/* Färdigspelad giv → stegbar omspelning. Annars det gröna filtbordet:
+          Nord uppe, Väst/mitten/Öst, Syd nere (du). */}
+      {done ? (
+        <PlayReplay key={game.deal.id} deal={game.deal} contract={contract} tricks={play.completedTricks} />
+      ) : (
+        <div
+          className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"
+          style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <SeatHand seat="N" {...seatProps} />
+            <div className="flex w-full items-center justify-between gap-2">
+              <SeatHand seat="W" {...seatProps} />
+              <TrickView play={play} />
+              <SeatHand seat="E" {...seatProps} />
+            </div>
+            <SeatHand seat="S" {...seatProps} />
           </div>
-          <SeatHand seat="S" {...seatProps} />
         </div>
-      </div>
+      )}
     </div>
   )
 }
@@ -418,13 +397,16 @@ function DummyHand({
     .map((suit) => ({ suit, cards: bySuit(hand, suit) }))
     .filter((g) => g.cards.length > 0)
 
+  // Sidoträkarl (Ö/V): färgerna som separata vertikala kolumner sida vid sida
+  // (Fun Bridge-stil) → kort överlappar lodrätt med -mt. Nord-träkarl: färgerna
+  // som vågräta grupper bredvid varandra → kort överlappar i sidled med -ml.
   return (
-    <div className={vertical ? 'flex flex-col gap-1' : 'flex items-end gap-1.5'}>
+    <div className={vertical ? 'flex items-start gap-1.5' : 'flex items-end gap-1.5'}>
       {groups.map(({ suit, cards }) => {
         const spread = spreadSuit(suit)
         return (
           <div key={suit} className={groupClass(suit, vertical)}>
-            {cards.map((c, i) => card(c, !spread && i > 0, '-ml-4'))}
+            {cards.map((c, i) => card(c, !spread && i > 0, vertical ? '-mt-6' : '-ml-4'))}
           </div>
         )
       })}
