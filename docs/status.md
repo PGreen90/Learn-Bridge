@@ -71,7 +71,7 @@
 ## Budlådan – logiklagret (`auction-live.ts`)
 
 Förberedelse för en LEVANDE budgivning i "Spela kort" (i stället för en
-förgenererad auktion). Rent, testat (`auction-live.test.ts`, 20 tester):
+förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
 - `legalCalls(history, seat)` – bridge-reglerna för tillåtna bud (högre bud,
   X mot motståndare, XX mot deras X).
 - `auctionComplete(history)` – tre pass efter ett bud / fyra inledande pass.
@@ -79,6 +79,12 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 20 tester):
 - `decideCall(deal, history, seat)` – **bot-hjärnan**: spelar upp parets
   kanoniska systemlinje (`buildAuction`) bud för bud. Datorn (V/N/Ö) följer
   linjen; Syd bjuder själv. Återanvänder hela den testade budmotorn.
+- **Svar på partnerns upplysningsdubbling (fix 2026-06-29):** när en motståndare
+  upplysningsdubblar och svararen passar är auktionen INTE utbjuden – advancern
+  (dubblarens partner) måste svara. `buildAuction` markerar nu det läget som öppet
+  (förut härleddes ett felaktigt "passat ut"-kontrakt), och `decideCall` tvingar
+  via `takeoutDoubleToAnswer` fram advancerns svar (`answerTakeoutDouble`: längsta
+  objudna färg, 12+ = cue). Historiedriven → robust även när Syd bjuder off-book.
 - **Känd gräns:** ~0,25 % av färdiga auktioner är slamlinjer (Jacoby 2NT → cue
   → 1430 RKC) där `buildAuction` lägger två bud i rad på samma plats (öppnarens
   cue hoppas över utan kontroll) → ingen laglig medurs-auktion. decideCall
