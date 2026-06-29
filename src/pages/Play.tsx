@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import type { Card, Deal, Hand, Seat, Suit } from '../types/bridge'
+import type { Bid, Card, Deal, Hand, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import {
   contractResult,
@@ -13,28 +13,38 @@ import {
   type PlayedCard,
   type PlayState,
 } from '../lib/engine/play'
-import { dealForPlay } from '../lib/engine/auction-contract'
+import { dealRandom } from '../lib/engine/deal'
+import {
+  auctionComplete,
+  contractFromCalls,
+  decideCall,
+  legalCalls,
+  seatToAct,
+} from '../lib/engine/auction-live'
 import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
 import { botCard } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
 import { PlayReplay } from '../components/PlayReplay'
 import { AuctionView } from '../components/AuctionView'
+import { BiddingBox } from '../components/BiddingBox'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-import { bySuit, orderedSuits } from '../lib/cardLayout'
+import { bySuit, orderedSuits, DISPLAY_SUITS } from '../lib/cardLayout'
 
+// En giv går genom två faser: först budgivningen (du klickar Syds bud i budlådan,
+// datorn budar V/N/Ö ett i taget runt bordet), sedan kortspelet ur de verkliga
+// buden. `contract` är null tills budgivningen är klar.
 interface Game {
   deal: Deal
-  contract: Contract
-  /** Hela budföljden bakom kontraktet (null = ingen auktion, sällsynt fallback). */
-  calls: ResolvedCall[] | null
-  play: PlayState
+  /** Den levande budföljden, ett bud i taget runt bordet. */
+  history: ResolvedCall[]
+  phase: 'bidding' | 'play'
+  contract: Contract | null
 }
 
 function newGame(): Game {
-  const { deal, contract, calls } = dealForPlay()
-  return { deal, contract, calls, play: startPlay(deal, contract) }
+  return { deal: dealRandom(), history: [], phase: 'bidding', contract: null }
 }
 
 /** Spelar ägaren (Syd) den här platsen? Vi spelar = både N och S; vi försvarar = bara S. */
@@ -50,13 +60,207 @@ function strainSymbol(contract: Contract) {
   return contract.strain === 'NT' ? <>NT</> : <SuitSymbol suit={contract.strain} />
 }
 
+// ===========================================================================
+// Fas-styrning: budgivning → spel.
+// ===========================================================================
+
+export function Play() {
+  const [game, setGame] = useState<Game>(newGame)
+
+  const complete = auctionComplete(game.history)
+
+  // Datorn budar V/N/Ö när det är deras tur (liten fördröjning, som korten).
+  useEffect(() => {
+    if (game.phase !== 'bidding' || complete) return
+    if (seatToAct(game.deal.dealer, game.history.length) === 'S') return // din tur
+    const id = setTimeout(() => {
+      setGame((g) => {
+        if (g.phase !== 'bidding' || auctionComplete(g.history)) return g
+        const seat = seatToAct(g.deal.dealer, g.history.length)
+        if (seat === 'S') return g
+        return { ...g, history: [...g.history, decideCall(g.deal, g.history, seat)] }
+      })
+    }, 700)
+    return () => clearTimeout(id)
+  }, [game, complete])
+
+  // När budgivningen är klar och gav ett kontrakt → gå till spelfasen.
+  useEffect(() => {
+    if (game.phase !== 'bidding' || !complete) return
+    const contract = contractFromCalls(game.history)
+    if (!contract) return // passades ut – hanteras i budvyn
+    setGame((g) => ({ ...g, phase: 'play', contract }))
+  }, [game, complete])
+
+  function onBid(bid: Bid) {
+    setGame((g) => {
+      if (g.phase !== 'bidding') return g
+      if (seatToAct(g.deal.dealer, g.history.length) !== 'S') return g
+      if (!legalCalls(g.history, 'S').includes(bid)) return g
+      return { ...g, history: [...g.history, { seat: 'S', bid }] }
+    })
+  }
+
+  if (game.phase === 'play' && game.contract) {
+    return (
+      <PlayTable
+        key={game.deal.id}
+        deal={game.deal}
+        contract={game.contract}
+        calls={game.history}
+        onNewGame={() => setGame(newGame())}
+      />
+    )
+  }
+
+  return (
+    <BiddingPhase
+      game={game}
+      complete={complete}
+      onBid={onBid}
+      onNewGame={() => setGame(newGame())}
+    />
+  )
+}
+
+// ===========================================================================
+// Budfasen: din hand, budgivningen som växer fram, och budlådan när det är din tur.
+// ===========================================================================
+
+function BiddingPhase({
+  game,
+  complete,
+  onBid,
+  onNewGame,
+}: {
+  game: Game
+  complete: boolean
+  onBid: (bid: Bid) => void
+  onNewGame: () => void
+}) {
+  const toAct = seatToAct(game.deal.dealer, game.history.length)
+  const yourTurn = !complete && toAct === 'S'
+  const passedOut = complete && !contractFromCalls(game.history)
+
+  return (
+    <div className="space-y-5">
+      <header>
+        <h1 className="text-2xl font-bold mb-1">Spela kort</h1>
+        <p className="text-slate-600 text-sm">
+          Du sitter <strong>Syd</strong>. Först budar ni fram kontraktet: när det är
+          din tur <strong>klickar du ditt bud</strong> i budlådan, datorn sköter
+          Väst, Nord och Öst. När budgivningen är klar börjar kortspelet.
+        </p>
+      </header>
+
+      <Panel className="!p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="font-semibold">Budgivning</span>
+          <Button variant="secondary" onClick={onNewGame}>
+            Ny giv →
+          </Button>
+        </div>
+        <p className="mt-2 text-sm">
+          {passedOut ? (
+            <span className="text-slate-500">Ingen öppnade – given passades ut. Ta en ny giv.</span>
+          ) : yourTurn ? (
+            <span className="text-emerald-700 font-medium">Din tur att bjuda.</span>
+          ) : (
+            <span className="text-slate-400">Datorn budar … ({SEAT_LABEL[toAct]})</span>
+          )}
+        </p>
+      </Panel>
+
+      {/* Budgivningen som växer fram, plats för plats. */}
+      {game.history.length > 0 && (
+        <div className="flex justify-center">
+          <AuctionView
+            calls={game.history}
+            dealer={game.deal.dealer}
+            vulnerability={game.deal.vulnerability}
+          />
+        </div>
+      )}
+
+      {/* Grönt filt: din hand öppen, de andra som baksidor. Aktiv plats markeras. */}
+      <div
+        className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"
+        style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <BiddingSeat seat="N" hand={game.deal.hands.N} active={toAct === 'N'} />
+          <div className="flex w-full items-center justify-between gap-2">
+            <BiddingSeat seat="W" hand={game.deal.hands.W} active={toAct === 'W'} />
+            <BiddingSeat seat="E" hand={game.deal.hands.E} active={toAct === 'E'} />
+          </div>
+          <BiddingSeat seat="S" hand={game.deal.hands.S} active={toAct === 'S'} />
+        </div>
+      </div>
+
+      {/* Budlådan – bara när det faktiskt är din tur. */}
+      {yourTurn && (
+        <Panel className="!p-4">
+          <p className="mb-3 text-center text-sm text-slate-600">Ditt bud:</p>
+          <BiddingBox legal={legalCalls(game.history, 'S')} onBid={onBid} />
+        </Panel>
+      )}
+    </div>
+  )
+}
+
+/** En plats i budfasen: namnbricka + handen (Syd öppen och sorterad, övriga baksidor). */
+function BiddingSeat({ seat, hand, active }: { seat: Seat; hand: Hand; active: boolean }) {
+  const faceUp = seat === 'S'
+  const tag = <SeatTag seat={seat} role="" active={active} />
+  const body = faceUp ? (
+    <div className="flex items-end gap-1">
+      {DISPLAY_SUITS.map((suit) => {
+        const cards = bySuit(hand, suit)
+        if (cards.length === 0) return null
+        return (
+          <div key={suit} className="flex">
+            {cards.map((c, i) => (
+              <PlayingCard key={`${c.suit}${c.rank}`} card={c} size="md" className={i > 0 ? '-ml-5' : ''} />
+            ))}
+          </div>
+        )
+      })}
+    </div>
+  ) : (
+    <FanBacks count={hand.length} />
+  )
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      {seat !== 'S' && tag}
+      {body}
+      {seat === 'S' && tag}
+    </div>
+  )
+}
+
+// ===========================================================================
+// Spelfasen: det gröna bordet, korten, facit och omspelningen. Egen komponent så
+// att spelfasens hooks bara körs när kontrakt + spelläge finns på riktigt.
+// ===========================================================================
+
 // Nodbudget för facit-lösaren: ~2 milj. noder (≈ 1–2 s i värsta fall) så
 // gränssnittet aldrig fryser. Sena ställningar (få kort kvar) löses direkt;
 // tidiga, tunga ställningar kan returnera null → vi visar ett vänligt meddelande.
 const FACIT_BUDGET = 2_000_000
 
-export function Play() {
-  const [game, setGame] = useState<Game>(newGame)
+function PlayTable({
+  deal,
+  contract,
+  calls,
+  onNewGame,
+}: {
+  deal: Deal
+  contract: Contract
+  calls: ResolvedCall[]
+  onNewGame: () => void
+}) {
+  const [play, setPlay] = useState<PlayState>(() => startPlay(deal, contract))
   const [showAuction, setShowAuction] = useState(false)
   // Facit (double-dummy) för NUVARANDE ställning: tal = spelförarens totala stick
   // med perfekt spel, 'toohard' = för tung just nu, 'idle' = ej beräknat.
@@ -64,7 +268,6 @@ export function Play() {
   // Vald färg i två-klicks-spelet: första klicket väljer (fan ut) färgen,
   // andra klicket på ett kort i den färgen spelar det.
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
-  const { contract, play } = game
 
   // Nollställ facit + färgval så fort ställningen ändras (du eller en bot la ett kort).
   useEffect(() => {
@@ -93,19 +296,19 @@ export function Play() {
   useEffect(() => {
     if (isComplete(play) || controls(contract, play.toAct)) return
     const id = setTimeout(() => {
-      setGame((g) => {
-        if (isComplete(g.play) || controls(g.contract, g.play.toAct)) return g
-        return { ...g, play: playCard(g.play, botCard(g.play, g.play.toAct)) }
+      setPlay((p) => {
+        if (isComplete(p) || controls(contract, p.toAct)) return p
+        return playCard(p, botCard(p, p.toAct))
       })
     }, 750)
     return () => clearTimeout(id)
-  }, [game, contract, play])
+  }, [contract, play])
 
   function onPlay(card: Card) {
-    setGame((g) => {
-      if (isComplete(g.play) || !controls(g.contract, g.play.toAct)) return g
-      if (!legalCards(g.play, g.play.toAct).some((c) => sameCard(c, card))) return g
-      return { ...g, play: playCard(g.play, card) }
+    setPlay((p) => {
+      if (isComplete(p) || !controls(contract, p.toAct)) return p
+      if (!legalCards(p, p.toAct).some((c) => sameCard(c, card))) return p
+      return playCard(p, card)
     })
   }
 
@@ -139,7 +342,7 @@ export function Play() {
     return seat === dummy && openingLeadMade // vi försvarar → träkarlen visas efter utspel
   }
 
-  const seatProps = { game, isFaceUp, onCardClick, selectedSuit }
+  const seatProps = { contract, play, isFaceUp, onCardClick, selectedSuit }
 
   return (
     <div className="space-y-5">
@@ -170,7 +373,7 @@ export function Play() {
             <Button variant="secondary" onClick={showFacit}>
               Visa facit
             </Button>
-            <Button onClick={() => setGame(newGame())}>Ny giv →</Button>
+            <Button onClick={onNewGame}>Ny giv →</Button>
           </div>
         </div>
         <p className="mt-2 text-sm">
@@ -204,35 +407,29 @@ export function Play() {
         )}
       </Panel>
 
-      {/* Hur kontraktet bjöds fram – återskapad budgivning, hopfälld som standard. */}
-      {game.calls && (
-        <Panel className="!p-4">
-          <button
-            type="button"
-            onClick={() => setShowAuction((v) => !v)}
-            className="flex w-full items-center justify-between text-left"
-          >
-            <span className="font-semibold">Budgivningen</span>
-            <span className="text-sm text-emerald-700">
-              {showAuction ? 'Dölj ▴' : 'Visa hur kontraktet bjöds ▾'}
-            </span>
-          </button>
-          {showAuction && (
-            <div className="mt-4 flex justify-center">
-              <AuctionView
-                calls={game.calls}
-                dealer={game.deal.dealer}
-                vulnerability={game.deal.vulnerability}
-              />
-            </div>
-          )}
-        </Panel>
-      )}
+      {/* Hur kontraktet bjöds fram – den verkliga budgivningen, hopfälld som standard. */}
+      <Panel className="!p-4">
+        <button
+          type="button"
+          onClick={() => setShowAuction((v) => !v)}
+          className="flex w-full items-center justify-between text-left"
+        >
+          <span className="font-semibold">Budgivningen</span>
+          <span className="text-sm text-emerald-700">
+            {showAuction ? 'Dölj ▴' : 'Visa hur kontraktet bjöds ▾'}
+          </span>
+        </button>
+        {showAuction && (
+          <div className="mt-4 flex justify-center">
+            <AuctionView calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
+          </div>
+        )}
+      </Panel>
 
       {/* Färdigspelad giv → stegbar omspelning. Annars det gröna filtbordet:
           Nord uppe, Väst/mitten/Öst, Syd nere (du). */}
       {done ? (
-        <PlayReplay key={game.deal.id} deal={game.deal} contract={contract} tricks={play.completedTricks} />
+        <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} />
       ) : (
         <div
           className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"
@@ -279,18 +476,19 @@ function SeatTag({
 /** En plats vid bordet: namnbricka + handen som kortfan (öppen eller baksidor). */
 function SeatHand({
   seat,
-  game,
+  contract,
+  play,
   isFaceUp,
   onCardClick,
   selectedSuit,
 }: {
   seat: Seat
-  game: Game
+  contract: Contract
+  play: PlayState
   isFaceUp: (s: Seat) => boolean
   onCardClick: (c: Card) => void
   selectedSuit: Suit | null
 }) {
-  const { contract, play } = game
   const hand = play.hands[seat]
   const faceUp = isFaceUp(seat)
   const isDeclarer = contract.declarer === seat

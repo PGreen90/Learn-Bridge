@@ -65,8 +65,14 @@
   - ✅ **Steg 1 – logiklagret** (`auction-live.ts`, testat): `legalCalls`,
     `auctionComplete`, `contractFromCalls`, `decideCall` (bot-hjärnan som spelar
     upp parets systemlinje bud för bud; datorn budar V/N/Ö, Syd själv).
-  - ⬜ **Steg 2 – UI**: klickbar budlåda för Syd, turordning runt bordet,
-    starta spelet ur de verkliga buden (ersätt `dealForPlay` i `Play.tsx`).
+  - ✅ **Steg 2 – UI** (`BiddingBox.tsx` + budfas i `Play.tsx`): klickbar budlåda
+    för Syd (35 bud + Pass/X/XX, otillåtna gråas ut via `legalCalls`), datorn
+    budar V/N/Ö ett i taget runt bordet (`decideCall`, 700 ms fördröjning), och
+    kortspelet startar ur de **verkliga** buden (`contractFromCalls`) i stället
+    för `dealForPlay`. Budfasen visar din hand öppen + de andra som baksidor och
+    budgivningsrutnätet som växer fram. Passas given ut visas det och man tar en
+    ny giv. `Play.tsx` är delad i en fas-styrning + fristående `PlayTable`.
+    Verifierad i webbläsaren (budlåda → levande auktion → 3NT → spel).
   - ⬜ **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan generera två bud
     i rad på samma plats (öppnarens cue hoppas över) → ej laglig medurs-auktion,
     så budlådan stannar under slam där. Fixa i slammotorns cue-rond

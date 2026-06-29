@@ -85,9 +85,26 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 20 tester):
   stänger dem lagligt på sista budet. Fixas när slamverktygen kopplas in i
   budlådan (se arbetslistan).
 
+## Budlådan – UI:t (`BiddingBox.tsx` + budfas i `Play.tsx`)
+
+"Spela kort" har nu en **levande budgivning** före kortspelet:
+- `BiddingBox.tsx` – klickbar budlåda: 35 kontraktsbud (nivå 1–7 × ♣♦♥♠ NT) +
+  Pass/dubbelt/redubbelt. Otillåtna bud gråas ut (`legalCalls`).
+- `Play.tsx` är delad i en **fas-styrning** (`Play`: budgivning → spel) och en
+  fristående **`PlayTable`** (det gröna bordet, facit, omspelning). I budfasen
+  budar datorn V/N/Ö ett i taget (`decideCall`, 700 ms), Syd klickar själv. När
+  `auctionComplete` slår till härleds kontraktet ur de **verkliga** buden
+  (`contractFromCalls`) och spelet startar – `dealForPlay` används inte längre.
+- Budfasen visar din hand öppen, de andra som baksidor, och auktionsrutnätet som
+  växer fram. Passas given ut syns det och man tar en ny giv.
+- Verifierad i webbläsaren: budlåda → levande auktion → 3NT av Öst → kortspel.
+
 ## Nästa steg (ur arbetslistan)
 
-- **Budlådans budknappar – UI-steget** (Syd klickar egna bud, turordning runt
-  bordet, spelet startar ur de verkliga buden). Logiklagret ovan är klart.
+- **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på
+  samma plats → ingen laglig medurs-auktion; budlådan stannar där. Fixas i
+  `slam-auction.ts` (öppnaren fyller luckan lagligt). Ovanligt (~0,25 %).
+- **Off-book Syd**: bjuder Syd utanför systemlinjen passar datorpartnern. Tas
+  senare (ägarens beslut).
 - "Framkalla slutbud"-väljare (ägarens idé, se `docs/arbetslista.md`).
 - Ev. webworker för DDS-facit på utspelet.
