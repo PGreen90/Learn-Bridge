@@ -93,8 +93,16 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   perfekt-spel-stick från nuvarande ställning. Avgränsning: en ren JS-DDS klarar
   inte tunga 13-kortsgivar snabbt, så facit har en nodbudget och blir tillförlitligt
   en bit in i given (se docs/arbetslista.md punkt 28).
-  **Nästa: budlådans budknappar (Visuellt/UI); ev. webworker + starkare beskärning
-  för DDS-facit redan på utspelet.**
+  **Slamverktygen är nu inkopplade i växande auktioner** (`slam-auction.ts`,
+  `nt-slam.ts`): Sjöbergs 5NT i RKC-grenen, cue-bid-rond före RKC, minor-fit-RKC
+  (inverterad minor), NT-slam med Gerber 4♣ över 1NT, och Exclusion efter splinter.
+  **Spela kort har tre UI-funktioner till:** två-klicks fan-ut för att spela kort,
+  **klickbara bud + ALERT-märke** i auktionsvyn (`alerts.ts`, blått A på konstgjorda
+  bud, klick visar betydelsen), och **stegbar omspelning** av en färdigspelad giv
+  (`PlayReplay.tsx`, händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader,
+  träkarlen i live-spelet i färgkolumner; delad `src/lib/cardLayout.ts`).
+  **Nästa: budlådans budknappar (du bjuder själv); "framkalla slutbud"-väljare
+  (ägarens idé, se docs/arbetslista.md); ev. webworker för DDS-facit på utspelet.**
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).
