@@ -134,6 +134,12 @@ describe('punkt 2 – återbud efter enkel höjning (Bergen game try)', () => {
   it('4♠ direkt med stark hand', () => {
     expect(raise('S:AKQ74 H:AQ D:KJ2 C:Q42', 'spades')).toBe('4S') // 18+ hp
   })
+
+  it('TP-steg C: formstark 11:a → game try (singel + sidofärg = 15 Bergenp.)', () => {
+    // Rå hp = 11 (förut pass), men singel hjärter + 5 trumf + 4-korts ruter ger 15
+    // Bergenpoäng → utgångsförsök i stället för pass.
+    expect(raise('S:AQ862 H:4 D:KQ73 C:953', 'spades')).toBe('2NT')
+  })
 })
 
 describe('punkt 3 – återbud efter 2-över-1 GF', () => {
@@ -165,6 +171,12 @@ describe('punkt 4 – återbud efter Bergen-höjningar', () => {
 
   it('Bergen spärr, minimum → pass', () => {
     expect(bergen('S:K3 H:AQ842 D:Q42 C:Q42', 'hearts', 'Bergen spärr')).toBe('P') // 13 hp
+  })
+
+  it('TP-steg C: formstark 11:a accepterar utgång mot limithöjning (ägarens hand)', () => {
+    // Du öppnade 1♠, partnern limithöjde (3♦). 11 hp men singel + 5 trumf + 4-korts
+    // ruter = 15 Bergenpoäng → 4♠ i stället för att stanna 3♠. Ägarens beslut.
+    expect(bergen('S:AQ862 H:4 D:KQ73 C:953', 'spades', 'Bergen limit')).toBe('4S')
   })
 })
 

@@ -23,7 +23,11 @@
   12 HP öppnar alltid, bra 11:or uppgraderar) och slamzon (`slam-auction.ts`).
 - **TP-steg B:** svararens högfärgshöjningar väljer nivå på stödpoäng =
   `max(HP, dummyPoints)` (`responses.ts`) – korthet lyfter (→ splinter), men
-  nedgraderar aldrig under HP. Kvar: öppnarens återbud (C) + sang-nudge (D).
+  nedgraderar aldrig under HP.
+- **TP-steg C-1:** öppnarens högfärgs-accepter (enkel höjning, Bergen, splinter)
+  räknar Bergenpoäng = `max(HP, bergenPoints)` (`rebids.ts`) – form lyfter mot
+  game try/utgång/slamintresse, aldrig under HP. Kvar: minorhöjningar + sang-
+  accepter (C-2/C-3) + sang-nudge för öppning (D).
 - Spec: `docs/handvardering.md`
 
 ## Slamverktyg (`slam.ts`, `slam-auction.ts`, `nt-slam.ts`)

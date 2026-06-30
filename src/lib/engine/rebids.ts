@@ -7,6 +7,7 @@
 // auktionen vid två bud tills vidare.
 
 import type { Hand, Suit } from '../../types/bridge'
+import { bergenPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
@@ -154,11 +155,16 @@ export function openerRebidAfterSemiForcing1NT(hand: Hand, M: Major): ResponseRe
 
 export function openerRebidAfterSimpleRaise(hand: Hand, M: Major): ResponseResult {
   const p = hcp(hand)
+  // TP-steg C: öppnaren har en känd högfärgsfit → räkna BERGENPOÄNG (extra trumf,
+  // sidofärger, korthet), men aldrig under hp ("nedgradera aldrig"). Form lyfter
+  // alltså mot game try / utgång, men en platt minimihand stannar på hp-golvet.
+  const bp = Math.max(p, bergenPoints(hand, M).bergenPoints)
+  const txt = bp > p ? `${p} hp / ${bp} Bergenp.` : `${p} hp`
   const mBid = BID[M]
   const mSym = SYM[M]
-  if (p >= 18) return { call: `4${mBid}`, rule: 'rebid: utgång', explanation: `${p} hp – tillräckligt → 4${mSym} (utgång).` }
-  if (p >= 15) return { call: '2NT', rule: 'Bergen game try', explanation: `${p} hp – utgångsförsök → 2NT (Bergen game try, krav).` }
-  return { call: 'P', rule: 'rebid: pass', explanation: `${p} hp minimum mittemot enkel höjning → pass (delkontrakt).` }
+  if (bp >= 18) return { call: `4${mBid}`, rule: 'rebid: utgång', explanation: `${txt} – tillräckligt → 4${mSym} (utgång).` }
+  if (bp >= 15) return { call: '2NT', rule: 'Bergen game try', explanation: `${txt} – utgångsförsök → 2NT (Bergen game try, krav).` }
+  return { call: 'P', rule: 'rebid: pass', explanation: `${txt} minimum mittemot enkel höjning → pass (delkontrakt).` }
 }
 
 // === Punkt 3: återbud efter ett 2-över-1 GF-svar, §5.3 ======================
@@ -193,25 +199,34 @@ export function openerRebidAfter2over1(hand: Hand, opened: Suit, responder: Suit
 
 export function openerRebidAfterBergen(hand: Hand, M: Major, rule: string): ResponseResult {
   const p = hcp(hand)
+  // TP-steg C: känd 4-korts-fit → räkna Bergenpoäng (aldrig under hp). En formstark
+  // minimihand (t.ex. 11 hp + singel + 5 trumf = 15 Bergenp.) accepterar nu utgång
+  // mittemot en limithöjning, där rå hp förut stannade lågt. Ägarens beslut.
+  const bp = Math.max(p, bergenPoints(hand, M).bergenPoints)
+  const txt = bp > p ? `${p} hp / ${bp} Bergenp.` : `${p} hp`
   const mBid = BID[M]
   const mSym = SYM[M]
-  const game: ResponseResult = { call: `4${mBid}`, rule: 'rebid: utgång', explanation: `${p} hp → 4${mSym} (utgång).` }
-  const stay: ResponseResult = { call: `3${mBid}`, rule: 'rebid: stanna', explanation: `${p} hp minimum → 3${mSym} (stannar lågt).` }
-  if (rule === 'Bergen konstruktiv') return p >= 15 ? game : stay // svararen 7–10
-  if (rule === 'Bergen limit') return p >= 13 ? game : stay // svararen 10–12
+  const game: ResponseResult = { call: `4${mBid}`, rule: 'rebid: utgång', explanation: `${txt} → 4${mSym} (utgång).` }
+  const stay: ResponseResult = { call: `3${mBid}`, rule: 'rebid: stanna', explanation: `${txt} minimum → 3${mSym} (stannar lågt).` }
+  if (rule === 'Bergen konstruktiv') return bp >= 15 ? game : stay // svararen 7–10
+  if (rule === 'Bergen limit') return bp >= 13 ? game : stay // svararen 10–12
   // Bergen spärr (svararen 0–6).
-  return p >= 18 ? game : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp mittemot spärrhöjning → pass.` }
+  return bp >= 18 ? game : { call: 'P', rule: 'rebid: pass', explanation: `${txt} mittemot spärrhöjning → pass.` }
 }
 
 // === Punkt 5: återbud efter tvetydig splinter, §4.1 =========================
 
 export function openerRebidAfterSplinter(hand: Hand, M: Major): ResponseResult {
   const p = hcp(hand)
-  if (p >= 15) {
+  // TP-steg C: splinter är redan GF, så frågan är slam. Räkna Bergenpoäng (aldrig
+  // under hp) – en formstark öppnare visar slamintresse även med hp en gnutta kort.
+  const bp = Math.max(p, bergenPoints(hand, M).bergenPoints)
+  const txt = bp > p ? `${p} hp / ${bp} Bergenp.` : `${p} hp`
+  if (bp >= 15) {
     const relay = M === 'hearts' ? '3NT' : '3S' // relä som frågar efter den korta färgen
-    return { call: relay, rule: 'splinter-relä', explanation: `${p} hp – slamintresse → ${pretty(relay)} (relä, frågar efter kort färg).` }
+    return { call: relay, rule: 'splinter-relä', explanation: `${txt} – slamintresse → ${pretty(relay)} (relä, frågar efter kort färg).` }
   }
-  return { call: `4${BID[M]}`, rule: 'rebid: signoff', explanation: `${p} hp – olämplig för slam → 4${SYM[M]} (signoff).` }
+  return { call: `4${BID[M]}`, rule: 'rebid: signoff', explanation: `${txt} – olämplig för slam → 4${SYM[M]} (signoff).` }
 }
 
 // === Punkt 6: återbud efter Jacoby 2NT, §4.1 ================================
