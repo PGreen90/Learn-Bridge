@@ -15,6 +15,7 @@ const ALL_ENGINE_RULES: string[] = [
   'Drury: riktig öppning', 'Drury: utgångsförsök', 'Exclusion', 'Gerber kungfråga',
   'Gerber', 'Gerber: stannar', 'Jacoby 2NT', 'Jacoby-transfer', 'Jacoby: 3NT',
   'Jacoby: kortfärg', 'Jacoby: minimum', 'Jacoby: sidofärg', 'Jacoby: slamintresse',
+  'Jordan 2NT',
   'Lebensohl 2NT (slow → 3NT, visar stopp)', 'Lebensohl 2NT (svag)',
   'Lebensohl cue (Stayman, krav)', 'Lebensohl direkt 3-läge (krav)', 'MSS-svar',
   'Mathe 1NT (minorer)', 'Mathe X (högfärger)', 'Michaels', 'Minor Suit Stayman',

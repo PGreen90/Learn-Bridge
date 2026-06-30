@@ -11,10 +11,18 @@
 >   fixade två olagliga-bud-buggar (Ogust 2♦-placering; NT mot hoppinkliv) +
 >   deterministiskt laglighetstest (`legality.test.ts`, 4000 givar, verifierat
 >   mot 60 000). Punkt 4 (kravstatus) = `forcing`-fältet. Testsvit 434 grön.
-> - ⬜ **Näst på tur: FAS 2 (konkurrens)** – planens störst-buggrisk. Sanningskartan:
->   merparten av §7 är kodat men ej inkopplat i levande auktion; konkurrens
->   modelleras bara en rond. Arbetsregel A (facit före fix) + B (`npm test`).
->   FAS 1 punkt 2 tung del (matchande/avvisade regler) är medvetet uppskjuten.
+> - 🔶 **FAS 2 (konkurrens) pågår.** ✅ **Punkt 5+6 klara (2026-06-30):**
+>   svararens höjningar efter inkliv facit-granskade (`auction-competitive-raises.test.ts`)
+>   – **cue i deras färg = limithöjning+** (3+ stöd, 10+ hp, krav) i stället för
+>   underbjuden enkel höjning, och **Jordan 2NT** (limithöjning med 4 trumf efter
+>   upplysningsdubbling, systembok rad 193) som tidigare saknades helt. 2NT efter X
+>   tolkas nu uttryckligen som Jordan, aldrig Jacoby. "Jordan 2NT" tillagd i
+>   regelregistret. Testsvit 440 grön. Avgränsning: öppnarens *fortsättning* i
+>   konkurrens (acceptera/avböja inbjudan) är fortsatt en rond – hör till resten av FAS 2.
+>   ⬜ **Näst på tur: punkt 7–10** (negativa/responsiva/stöddubblingar + advancer)
+>   – merparten av §7 är kodat men ej inkopplat i levande auktion. Arbetsregel A
+>   (facit före fix) + B (`npm test`). FAS 1 punkt 2 tung del (matchande/avvisade
+>   regler) är medvetet uppskjuten.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

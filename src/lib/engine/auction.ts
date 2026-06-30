@@ -163,7 +163,13 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
     // inkliv på valfri nivå, inte bara 1-läget).
     const neg = negativeDouble(hand, openerSuit, overcallCall)
     if (neg) return neg
-    // Konkurrenshöjning: 3+ stöd i öppnarens färg.
+    // Limithöjning eller bättre (§7.1): cue i DERAS färg med 3+ stöd och 10+ hp
+    // (krav). Skiljer en inbjudande+ höjning från den rena konkurrenshöjningen.
+    if (len[openerSuit] >= 3 && p >= 10) {
+      const L = ovLevel + 1 // billigaste cue av deras färg ligger en nivå över inklivet
+      return { call: `${L}${LETTER[ovSuit]}`, rule: 'cue (limithöjning+)', explanation: `${p} hp, ${len[openerSuit]} stöd → cue ${SUIT_SYM[ovSuit]} (limithöjning+, krav).` }
+    }
+    // Konkurrenshöjning: 3+ stöd i öppnarens färg, 6–9 (spärr/konkurrens, ej inbjudan).
     if (len[openerSuit] >= 3 && p >= 6) {
       const L = cheapestLevelAbove(openerSuit, ovLevel, ovSuit)
       return { call: `${L}${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${p} hp, ${len[openerSuit]} stöd → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
@@ -178,8 +184,13 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
     return { call: 'P', rule: 'pass', explanation: `${p} hp – inget lämpligt i konkurrens → pass.` }
   }
 
-  // Mot upplysningsdubbling (X): redubbla med 10+, annars stöd/pass.
+  // Mot upplysningsdubbling (X): Jordan 2NT (limithöjning, 4+ trumf), annars
+  // redubbla med 10+ utan fit, annars stöd/pass.
   if (overcallCall === 'X') {
+    // Jordan 2NT (§7.3, rad 193): 4+ stöd och limitvärden → 2NT, INTE Jacoby.
+    if (len[openerSuit] >= 4 && p >= 10) {
+      return { call: '2NT', rule: 'Jordan 2NT', explanation: `${p} hp, ${len[openerSuit]} trumf → 2NT (Jordan, limithöjning+ med fit).` }
+    }
     if (p >= 10) return { call: 'XX', rule: 'redubbling', explanation: `${p} hp → XX (redubbling, lovar styrka).` }
     if (len[openerSuit] >= 3) return { call: `2${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${p} hp, ${len[openerSuit]} stöd → 2${SUIT_SYM[openerSuit]}.` }
     return { call: 'P', rule: 'pass', explanation: `${p} hp – pass.` }

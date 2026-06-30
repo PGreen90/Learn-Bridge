@@ -119,6 +119,22 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   2♦, och NT mot hoppinkliv. Deterministiskt `legality.test.ts` (4000 givar,
   verifierat mot 60 000) vaktar att budlådan aldrig ger ett olagligt bud.
 
+## Konkurrens – svararens höjningar efter inkliv (FAS 2 punkt 5+6)
+
+- **Cue = limithöjning eller bättre** (`auction.ts` `competitiveResponderAction`):
+  efter motståndarens färginkliv bjuder svararen med 3+ stöd och 10+ hp **cue i
+  deras färg** (krav, `cue (limithöjning+)`), i stället för en underbjuden enkel
+  höjning. Svaga händer (6–9) ger fortfarande `konkurrenshöjning`.
+- **Jordan 2NT** (systembok §7.3, rad 193): efter motståndarens upplysningsdubbling
+  bjuder svararen med 4+ trumf och 10+ hp **2NT = Jordan** (limithöjning med fit).
+  XX används nu bara med 10+ **utan** fyrkortsfit. 2NT efter X tolkas uttryckligen
+  som Jordan – **aldrig Jacoby** (vaktat i test).
+- Ny regel **"Jordan 2NT"** i `rules.ts` (kravnivå inbjudan, alertas).
+- Facit: `auction-competitive-raises.test.ts` (planens testmatris 1♥(X)/1♥(1♠)/
+  1♥(2♣)/1♥(2♦)/1♠(2♥)). Hela sviten 440 grön.
+- **Avgränsning:** öppnarens fortsättning i konkurrens (acceptera/avböja
+  inbjudan) modelleras fortfarande en rond – hör till resten av FAS 2.
+
 ## Nästa steg (ur arbetslistan)
 
 - **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på
