@@ -41,5 +41,5 @@ describe('FAS 1 punkt 3 – decideCall ger bara lagliga bud (deterministiskt)', 
       }
       expect(auctionComplete(history), `giv ${i} blev aldrig klar: ${handsStr(deal)}`).toBe(true)
     }
-  })
+  }, 30000) // tungt deterministiskt svep (4000 givar) – behöver mer än default 5 s under parallell last
 })

@@ -19,10 +19,15 @@
 >   tolkas nu uttryckligen som Jordan, aldrig Jacoby. "Jordan 2NT" tillagd i
 >   regelregistret. Testsvit 440 grön. Avgränsning: öppnarens *fortsättning* i
 >   konkurrens (acceptera/avböja inbjudan) är fortsatt en rond – hör till resten av FAS 2.
->   ⬜ **Näst på tur: punkt 7–10** (negativa/responsiva/stöddubblingar + advancer)
->   – merparten av §7 är kodat men ej inkopplat i levande auktion. Arbetsregel A
->   (facit före fix) + B (`npm test`). FAS 1 punkt 2 tung del (matchande/avvisade
->   regler) är medvetet uppskjuten.
+>   ✅ **Punkt 7 klar (2026-06-30):** negativa dubblingar verifierade över hela den
+>   vanliga sekvensmatrisen (`negative-doubles.test.ts`). Alla objuden-högfärgs-lägen
+>   var redan rätt; **lucka lagad** – när motståndaren klivit in i den andra
+>   högfärgen (båda objudna färgerna minorer, t.ex. 1♥–(1♠)/1♠–(2♥)) ger svararen
+>   nu **negativ X på 4-4 minorer utan fit** (förut pass). Testsvit 452 grön
+>   (legality-svepet fick uttryckligt 30 s-tidsspann).
+>   ⬜ **Näst på tur: punkt 8–10** (stöd-/responsiva dubblingar + advancer)
+>   – kodat men ej inkopplat i levande auktion. Arbetsregel A (facit före fix)
+>   + B (`npm test`). FAS 1 punkt 2 tung del (matchande/avvisade regler) uppskjuten.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

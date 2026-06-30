@@ -42,6 +42,15 @@ export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): Re
       return { call: 'X', rule: 'negativ dubbling', explanation: `${p} hp, 4+ ${NAME[m]} → X (negativ dubbling, visar objuden högfärg).` }
     }
   }
+
+  // Ingen objuden högfärg: när motståndaren klivit in i den ANDRA högfärgen är
+  // båda objudna färgerna minorer (t.ex. 1♥–(1♠), 1♠–(2♥)). X visar då minorerna
+  // (4-4+) – men bara UTAN fit för partnern (med fit höjer man i stället).
+  const unbid = RANK_ORDER.filter((s) => s !== ourOpen && s !== their)
+  const bothMinors = unbid.length === 2 && unbid.every((s) => s === 'clubs' || s === 'diamonds')
+  if (bothMinors && len.clubs >= 4 && len.diamonds >= 4 && len[ourOpen] < 3) {
+    return { call: 'X', rule: 'negativ dubbling', explanation: `${p} hp, 4-4 i minorerna → X (negativ dubbling, visar objudna minorer).` }
+  }
   return null
 }
 

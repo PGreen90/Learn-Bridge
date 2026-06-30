@@ -135,6 +135,17 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
 - **Avgränsning:** öppnarens fortsättning i konkurrens (acceptera/avböja
   inbjudan) modelleras fortfarande en rond – hör till resten av FAS 2.
 
+### Negativa dubblingar verifierade (FAS 2 punkt 7)
+
+- Hela den vanliga sekvensmatrisen facit-låst i `negative-doubles.test.ts`.
+- Alla lägen med en **objuden 4-korts högfärg** (1♣/1♦-öppning + inkliv, samt
+  2-lägesinkliv) var redan korrekta → X (`negativ dubbling`).
+- **Lucka lagad** (`doubles.ts` `negativeDouble`): när motståndaren klivit in i
+  den **andra högfärgen** är båda objudna färgerna minorer (1♥–(1♠), 1♠–(2♥)).
+  Svararen ger nu **negativ X med 4-4 i minorerna** – men bara **utan fit** för
+  partnern (med 3+ stöd höjs i stället). Förut blev det pass (lucka).
+- Inkopplat i levande auktion (`competitiveResponderAction` anropar `negativeDouble`).
+
 ## Nästa steg (ur arbetslistan)
 
 - **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på
