@@ -159,6 +159,28 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   som ett eget bud utanför systemet.
 - **Känd gräns:** motorn är generativ (hand → bud), inte tolkande (bud → betydelse),
   så bara det rekommenderade budet har en äkta förklaring i ett givet läge.
+  → **Delvis löst av tolkningslagret nedan** (egna bud får nu alltid en tolkning).
+
+## Tolkande budmotor – steg 1+2 (PIVOT, `auction-interpret.ts`)
+
+Pivot mot en TOLKANDE motor (läser den faktiska auktionen) bredvid den
+generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
+
+- **`src/lib/engine/auction-interpret.ts`** – rent, läsande lager.
+  `interpretCall(history, index)` / `interpretLastCall(history)` ger ALLTID en
+  `CallInterpretation` `{text, confidence: säker|trolig|gissning, forcing?}` –
+  aldrig tom. Säker = motorns egen `rule` (via `ruleInfo`); annars heuristik ur
+  buden: Michaels-cue (via position), stöd/höjning i partnerns färg (enkel/
+  inbjudande/utgång), äkta cue = stark höjning, rebjuden färg, sang, ny färg/
+  svagt hoppskift, samt pass/X/XX. Facit i `auction-interpret.test.ts`.
+- **Inkopplat i UI (steg 2):** den gamla *"Eget bud – utanför systemlinjen (ingen
+  förklaring)"* är **borttagen**. Egna/off-book-bud tolkas nu både i budlådans
+  infopanel (`BiddingBox.tsx`, med säkerhets-badge) och i auktionsrutnätet
+  (`Play.tsx` `onBid` → klickbart, "Eget bud. &lt;tolkning&gt;"). `BiddingBox`
+  tar nu en `history`-prop. Motorns egna bud (med regel) är oförändrade.
+- **Avgränsning (nästa steg):** datorpartnern följer fortfarande sin egen rad och
+  passar när Syd bjuder off-book. Att route:a `decideCall` genom tolkningen (så
+  partnern hänger med) är pivotens kärna och tas härnäst.
 
 ## Nästa steg (ur arbetslistan)
 

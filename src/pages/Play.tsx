@@ -21,6 +21,7 @@ import {
   legalCalls,
   seatToAct,
 } from '../lib/engine/auction-live'
+import { interpretCall } from '../lib/engine/auction-interpret'
 import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
 import { botCard } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
@@ -101,10 +102,16 @@ export function Play() {
       // bud med motorns systemlinje får det den äkta förklaringen; annars märks
       // det som ett eget bud utanför systemet (motorn kan inte tolka det).
       const sys = decideCall(g.deal, g.history, 'S')
-      const call: ResolvedCall =
-        sys.bid === bid
-          ? { seat: 'S', bid, rule: sys.rule, explanation: sys.explanation ?? 'Motorns rekommenderade bud.' }
-          : { seat: 'S', bid, rule: 'eget bud', explanation: 'Eget bud – utanför systemlinjen (motorn har ingen förklaring här).' }
+      let call: ResolvedCall
+      if (sys.bid === bid) {
+        call = { seat: 'S', bid, rule: sys.rule, explanation: sys.explanation ?? 'Motorns rekommenderade bud.' }
+      } else {
+        // Off-book: motorn föreskriver inte budet, men ska ALLTID kunna tolka det.
+        // Tolkningslagret läser auktionen och ger en bästa-möjliga förklaring.
+        const interp = interpretCall([...g.history, { seat: 'S', bid }], g.history.length)
+        const tag = interp.confidence === 'gissning' ? ' (osäker tolkning)' : ''
+        call = { seat: 'S', bid, rule: 'eget bud', explanation: `Eget bud. ${interp.text}${tag}` }
+      }
       return { ...g, history: [...g.history, call] }
     })
   }
@@ -212,7 +219,7 @@ function BiddingPhase({
       {yourTurn && (
         <Panel className="!p-4">
           <p className="mb-3 text-center text-sm text-slate-600">Ditt bud:</p>
-          <BiddingBox legal={legalCalls(game.history, 'S')} onBid={onBid} recommendation={recommendation} />
+          <BiddingBox legal={legalCalls(game.history, 'S')} onBid={onBid} recommendation={recommendation} history={game.history} />
         </Panel>
       )}
     </div>

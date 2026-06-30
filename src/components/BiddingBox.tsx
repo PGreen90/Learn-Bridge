@@ -12,6 +12,7 @@ import { useState } from 'react'
 import type { Bid, Suit } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import { isAlertRule } from '../lib/engine/alerts'
+import { interpretCall } from '../lib/engine/auction-interpret'
 import { SuitSymbol } from './SuitSymbol'
 import { BidLabel } from './BidLabel'
 
@@ -64,11 +65,14 @@ export function BiddingBox({
   legal,
   onBid,
   recommendation = null,
+  history = [],
 }: {
   legal: Bid[]
   onBid: (bid: Bid) => void
   /** Motorns rekommenderade bud (markeras + får äkta förklaring). */
   recommendation?: ResolvedCall | null
+  /** Budföljden så här långt – så även egna bud kan tolkas (alltid en förklaring). */
+  history?: ResolvedCall[]
 }) {
   const allowed = new Set(legal)
   const [selected, setSelected] = useState<Bid | null>(null)
@@ -85,9 +89,12 @@ export function BiddingBox({
   }
 
   const isRec = selected !== null && selected === recBid
+  // Egna bud (ej motorns rekommendation) tolkas ur auktionen – aldrig tomt.
+  const selInterp =
+    selected !== null && !isRec ? interpretCall([...history, { seat: 'S', bid: selected }], history.length) : null
   const selExpl = isRec
     ? recommendation?.explanation ?? 'Motorns rekommenderade bud.'
-    : 'Utanför systemlinjen — motorn har ingen förklaring för det här budet i det här läget.'
+    : selInterp?.text ?? ''
   const selAlert = isRec ? isAlertRule(recommendation?.rule) : false
 
   return (
@@ -131,6 +138,11 @@ export function BiddingBox({
             </span>
             {isRec && (
               <span className="rounded bg-emerald-600 px-1 text-[10px] font-bold text-white align-middle">MOTORNS BUD</span>
+            )}
+            {selInterp && (
+              <span className="rounded bg-slate-500 px-1 text-[10px] font-bold text-white align-middle uppercase" title="Hur säker tolkningen är">
+                {selInterp.confidence}
+              </span>
             )}
             {selAlert && (
               <span className="rounded bg-sky-600 px-1 text-[10px] font-bold text-white align-middle">ALERT</span>
