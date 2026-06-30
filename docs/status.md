@@ -146,6 +146,20 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   partnern (med 3+ stöd höjs i stället). Förut blev det pass (lucka).
 - Inkopplat i levande auktion (`competitiveResponderAction` anropar `negativeDouble`).
 
+## Klickbara bud med betydelse (valideringsstöd)
+
+- **Budlådan** (`BiddingBox.tsx`) är nu tvåstegs: ett klick **väljer** ett bud och
+  visar dess betydelse i en infopanel, sedan bekräftar man med "Bjud". Motorns
+  rekommenderade bud (för din hand i läget) markeras med en grön prick och får sin
+  **äkta** förklaring (+ ALERT om konstgjort); övriga bud märks "utanför
+  systemlinjen". Rekommendationen kommer från `decideCall(deal, history, 'S')`.
+- **Auktionsrutnätet** (`AuctionView`): Syds egna bud bär nu `rule`/`explanation`
+  (sätts i `Play.tsx` `onBid` via `decideCall`) → klickbara precis som datorns bud.
+  Stämmer ditt bud med systemlinjen får det den äkta förklaringen, annars märks det
+  som ett eget bud utanför systemet.
+- **Känd gräns:** motorn är generativ (hand → bud), inte tolkande (bud → betydelse),
+  så bara det rekommenderade budet har en äkta förklaring i ett givet läge.
+
 ## Nästa steg (ur arbetslistan)
 
 - **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på
