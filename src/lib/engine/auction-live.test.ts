@@ -325,6 +325,54 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     })
   })
 
+  // Off-book i KONKURRENS: när motståndarna också bjudit ska boten fortsätta
+  // konkurrera i stället för att tystna. Vi matar in en störd budföljd (Syd
+  // off-book 1♥, Väst inkliv 1♠) och kontrollerar att både partnern och
+  // motståndarens advancer agerar vettigt.
+  describe('off-book i konkurrens', () => {
+    it('partnern höjer i konkurrens (Nord 2♥ med fit över Västs 1♠-inkliv)', () => {
+      const deal = dealOf('S', {
+        S: 'S:KQ4 H:AQ5 D:K843 C:QJ2', // 17 hp balanserad → linjen säger 1NT
+        W: 'S:AJ984 H:A5 D:KQ5 C:72', // (inklivshand – matas in i historiken)
+        N: 'S:A73 H:K642 D:Q52 C:83', // 9 hp, 4-korts hjärterstöd
+        E: 'S:Q652 H:JT7 D:J96 C:T54',
+      })
+      const history = [call('S', '1H'), call('W', '1S')]
+      const c = decideCall(deal, history, 'N')
+      expect(c.bid).toBe('2H')
+      expect(legalCalls(history, 'N')).toContain('2H')
+    })
+
+    it('motståndarens advancer konkurrerar (Öst höjer Västs 1♠ till 2♠)', () => {
+      const deal = dealOf('S', {
+        S: 'S:KQ4 H:AQ5 D:K843 C:QJ2',
+        W: 'S:AJ98 H:A5 D:KQ75 C:72', // Väst klev in 1♠ (matas in)
+        N: 'S:73 H:KJ6 D:J43 C:98542',
+        E: 'S:KQ65 H:732 D:982 C:K63', // 8 hp, 4-korts spaderstöd för Väst
+      })
+      const history = [call('S', '1H'), call('W', '1S'), call('N', 'P')]
+      const c = decideCall(deal, history, 'E')
+      expect(c.bid).toBe('2S')
+      expect(legalCalls(history, 'E')).toContain('2S')
+    })
+
+    it('öppen konkurrensauktion spelas ut lagligt och avslutas', () => {
+      // En störd budföljd som linjen bara modellerar en rond av ska ändå nå ett
+      // slut – boten ska aldrig fastna eller bjuda olagligt i fortsättningen.
+      for (let i = 0; i < 200; i++) {
+        const deal = dealRandom()
+        const history: ResolvedCall[] = []
+        for (let step = 0; step < 40 && !auctionComplete(history); step++) {
+          const seat = seatToAct(deal.dealer, history.length)
+          const c = decideCall(deal, history, seat)
+          expect(legalCalls(history, seat)).toContain(c.bid)
+          history.push(c)
+        }
+        expect(auctionComplete(history)).toBe(true)
+      }
+    })
+  })
+
   it('slam-quirken (två bud i rad, samma plats) är sällsynt – under 2 %', () => {
     let closed = 0
     let quirky = 0

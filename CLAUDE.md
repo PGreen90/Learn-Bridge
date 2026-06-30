@@ -51,8 +51,11 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   off-book (`divergedFromLine`) och datorpartnern svarar historiedrivet
   (`offBookResponse`): stöd m. fit graderat efter stödpoäng (3-korts fit för
   öppnad högfärg, annars 4+; enkel/inbjudan/utgång), annars egen färg/sang.
-  On-book bevisat oförändrat. **NÄSTA GÅNG STARTAR VI MED:** off-book-svar i
-  KONKURRENS (motståndarna har också bjudit) – sedan §7-försvar i budlådan.
+  On-book bevisat oförändrat. **Konkurrens-fortsättning klar:** `decideCall`
+  svarar historiedrivet även när linjen tagit slut men auktionen är öppen
+  (`built.open`) – störda auktioner dör inte längre efter en rond; partner +
+  advancer konkurrerar vidare. **NÄSTA GÅNG STARTAR VI MED:** §7-försvaret in i
+  budlådan (riktiga off-book-inkliv av motståndarna) – sedan slam-quirken.
 - Budmotor byggs i `src/lib/engine/`, test-drivet (`npm test`).
 - Detaljerad implementationsstatus: **`docs/status.md`**
 - Byggordning framåt: **`docs/arbetslista.md`** (NB: pivoten ovan går före den gamla

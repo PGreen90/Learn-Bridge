@@ -395,10 +395,15 @@ function divergedFromLine(history: ResolvedCall[], line: ResolvedCall[]): boolea
 /**
  * Vad datorn bjuder på `seat` givet budgivningen så här långt. Bygger parets
  * kanoniska systemlinje med `buildAuction` och spelar upp den bud för bud – men
- * BARA så länge den verkliga budföljden följer linjen. Har Syd bjudit off-book
- * (linjen stämmer inte längre) lämnar vi linjen och svarar historiedrivet:
- * tvingande svar på partnerns upplysningsdubbling, annars stöd för partnerns
- * egna färg i tydliga lägen, annars pass.
+ * BARA så länge den verkliga budföljden följer linjen. Två lägen lämnar linjen
+ * och svarar historiedrivet i stället för att tappa tråden:
+ *  1. **Off-book:** Syd har bjudit något annat än linjen (`divergedFromLine`).
+ *  2. **Konkurrens:** linjen tog slut men auktionen är fortfarande ÖPPEN
+ *     (`built.open`). `buildAuction` modellerar bara EN konkurrensrond, så utan
+ *     detta skulle störda auktioner dö ut direkt – nu konkurrerar både partnern
+ *     och motståndarna vidare (stöd m. fit / egen färg / pass).
+ * Skillnaden mot en FÄRDIG linje (`built.open === false`): där är de extra
+ * turerna bara avslutande pass och boten ska passa.
  */
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
@@ -425,9 +430,11 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     }
   }
 
-  // Pivotens kärna: har Syd bjudit off-book, häng med och svara historiedrivet
-  // (stöd partnerns färg, annars egen färg/sang) i stället för att passa.
-  if (offBook) {
+  // Häng med och svara historiedrivet när linjen inte styr oss längre:
+  // off-book (Syd bjöd eget), eller en öppen konkurrensauktion som linjen bara
+  // modellerat en rond av.
+  const lineExhaustedOpen = !offBook && history.length >= line.length && built.open
+  if (offBook || lineExhaustedOpen) {
     const response = offBookResponse(deal, history, seat)
     if (response) return response
   }

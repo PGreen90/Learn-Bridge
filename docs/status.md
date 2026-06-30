@@ -190,9 +190,17 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
     från 6 hp, 2-läget från 12), annars balanserad **sang** efter styrka (1NT/
     2NT/3NT), annars pass. Bara när partnern redan bjudit – inga påhittade inkliv.
   - On-book-auktioner är **bevisat oförändrade** (facit i `auction-live.test.ts`).
-- **Avgränsning (nästa steg):** off-book-svar i **konkurrens** (när motståndarna
-  också bjudit) är fortfarande tunt; öppnarens/Syds vidare off-book-ronder och
-  §7-försvaret i den levande budlådan återstår.
+- **Konkurrens-fortsättning klar:** `buildAuction` modellerar bara EN
+  konkurrensrond (`built.open`), så störda auktioner dog förut ut direkt. Nu
+  fortsätter `decideCall` att svara historiedrivet (`offBookResponse`) även när
+  linjen tagit slut men auktionen är **öppen** – både partnern och
+  motståndarnas advancer konkurrerar vidare (höjer m. fit / egen färg / pass).
+  Skiljt från en **färdig** linje (`open === false`), där de extra turerna bara
+  är avslutande pass. Facit: partnern höjer i konkurrens, advancern höjer
+  inklivet, och 200 slumpade öppna auktioner spelas ut lagligt till slut.
+- **Avgränsning (nästa steg):** motståndarna *inleder* fortfarande ingen
+  konkurrens i rent off-book-läge (de kliver bara in via linjen) – riktiga
+  off-book-inkliv hör till §7-försvaret i budlådan, som återstår.
 
 ## Nästa steg (ur arbetslistan)
 
