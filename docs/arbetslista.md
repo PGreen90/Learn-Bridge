@@ -107,8 +107,15 @@
     så budlådan stannar under slam där. Fixa i slammotorns cue-rond
     (`slam-auction.ts`) så öppnaren alltid fyller luckan lagligt utan att
     fabricera ett falskt kontroll-cue (mis-lär ägaren). Ovanligt (~0,25 %).
-  - ⬜ **Off-book Syd**: när Syd bjuder utanför systemlinjen kan datorpartnern
-    inte alltid hänga med (decideCall passar). Tas senare (ägarens beslut).
+  - ✅ **Off-book Syd**: datorpartnern hänger med och svarar på Syds egna bud
+    (stöd m. fit graderat efter styrka, annars egen färg/sang). Se "Tolkande
+    budmotor steg 3" i `docs/status.md`.
+  - ✅ **§7-inkliv off-book** (`maybeOvercall` i `auction-live.ts`): när auktionen
+    gått off-book kliver motståndarna in på riktigt (direkt sits, motståndaren
+    öppnade nyss 1 i färg) via §7-motorn `overcall` – inkliv/X/Michaels/ovanlig
+    2NT, i stället för att tystna. Facit i `auction-live.test.ts`.
+  - ⬜ **Off-book §7 vidare**: balansering (inkliv efter en passrunda) och inkliv
+    över andra öppningar (1NT, svaga tvåor, hoppöppningar). Sedan slam-quirken.
 
 ## Stöd som följer med (löpande)
 31. Hålfinnare utökas för varje nytt återbud/svar

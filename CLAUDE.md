@@ -54,8 +54,12 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   On-book bevisat oförändrat. **Konkurrens-fortsättning klar:** `decideCall`
   svarar historiedrivet även när linjen tagit slut men auktionen är öppen
   (`built.open`) – störda auktioner dör inte längre efter en rond; partner +
-  advancer konkurrerar vidare. **NÄSTA GÅNG STARTAR VI MED:** §7-försvaret in i
-  budlådan (riktiga off-book-inkliv av motståndarna) – sedan slam-quirken.
+  advancer konkurrerar vidare. **§7-inkliv i budlådan klart:** när auktionen gått
+  off-book kliver motståndarna in på RIKTIGT via `overcall` (`maybeOvercall` i
+  `auction-live.ts`) i stället för att tystna – men bara DIREKT sits (motståndaren
+  öppnade nyss 1 i färg, vår sida har inte sagt något). Inkliv/X/Michaels/ovanlig
+  2NT ur §7-motorn. **NÄSTA GÅNG STARTAR VI MED:** balansering (inkliv efter en
+  passrunda) + inkliv över andra öppningar (1NT/svaga tvåor) – sedan slam-quirken.
 - Budmotor byggs i `src/lib/engine/`, test-drivet (`npm test`).
 - Detaljerad implementationsstatus: **`docs/status.md`**
 - Byggordning framåt: **`docs/arbetslista.md`** (NB: pivoten ovan går före den gamla

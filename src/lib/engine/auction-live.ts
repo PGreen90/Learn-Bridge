@@ -20,6 +20,7 @@ import { turnsToCalls } from './auction-contract'
 import { answerTakeoutDouble } from './doubles'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
+import { openingSuit, overcall } from './overcalls'
 import { side, type Contract, type Strain } from './play'
 
 // ---- Bud-tolkning ----------------------------------------------------------
@@ -376,6 +377,37 @@ function offBookResponse(deal: Deal, history: ResolvedCall[], seat: Seat): Resol
   return raiseWithFit(deal, history, seat, partnerSuit) ?? respondWithoutFit(deal, history, seat, partnerSuit)
 }
 
+// ---- Off-book: motståndarnas riktiga inkliv (§7-försvaret in i budlådan) -----
+//
+// När auktionen gått off-book modellerar den kanoniska linjen inte längre
+// motståndarnas konkurrens. Förut tystnade de då (passade). Här kliver de in på
+// RIKTIGT via §7-motorn (`overcall`) i stället. Medvetet smalt och bevisbart
+// korrekt: bara DIREKT inklivssits – motståndaren har precis öppnat 1 i färg och
+// vår sida har ännu inte sagt något. Balansering (efter en passrunda) och inkliv
+// över andra öppningar (1NT, svaga tvåor, hoppöppningar) hör till senare utbyggnad.
+
+/**
+ * Får `seat` kliva in på riktigt här? Kraven (direkt sits):
+ *  - exakt ETT kontraktsbud i historiken så här långt (= öppningen, ingen har
+ *    bjudit förut), och det är MOTSTÅNDARSIDANS,
+ *  - det budet är auktionens senaste bud (RHO öppnade nyss → direkt sits, inte
+ *    balansering efter en passrunda),
+ *  - och det är en 1-läges färgöppning, som §7-inklivet är byggt för.
+ * Returnerar inklivet (eller X/Michaels/ovanlig 2NT) ur `overcall`, annars null.
+ */
+function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const last = history[history.length - 1]
+  if (!last || !parseContractBid(last.bid) || !openingSuit(last.bid)) return null
+  // Endast öppningen får ha bjudits hittills, och den ska vara motståndarnas.
+  if (history.filter((c) => parseContractBid(c.bid)).length !== 1) return null
+  if (side(last.seat) === side(seat)) return null
+
+  const res = overcall(deal.hands[seat], last.bid)
+  if (res.call === 'P') return null
+  if (!legalCalls(history, seat).includes(res.call as Bid)) return null
+  return { seat, bid: res.call as Bid, rule: res.rule, explanation: res.explanation }
+}
+
 // ---- Bot-hjärnan -----------------------------------------------------------
 
 /**
@@ -435,6 +467,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   // modellerat en rond av.
   const lineExhaustedOpen = !offBook && history.length >= line.length && built.open
   if (offBook || lineExhaustedOpen) {
+    // Motståndarna kliver in på riktigt (direkt sits) i stället för att tystna.
+    const oc = maybeOvercall(deal, history, seat)
+    if (oc) return oc
     const response = offBookResponse(deal, history, seat)
     if (response) return response
   }

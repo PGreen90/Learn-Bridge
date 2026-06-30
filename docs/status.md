@@ -198,9 +198,16 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
   Skiljt från en **färdig** linje (`open === false`), där de extra turerna bara
   är avslutande pass. Facit: partnern höjer i konkurrens, advancern höjer
   inklivet, och 200 slumpade öppna auktioner spelas ut lagligt till slut.
-- **Avgränsning (nästa steg):** motståndarna *inleder* fortfarande ingen
-  konkurrens i rent off-book-läge (de kliver bara in via linjen) – riktiga
-  off-book-inkliv hör till §7-försvaret i budlådan, som återstår.
+- **§7-inkliv i budlådan klart (`maybeOvercall` i `auction-live.ts`):**
+  motståndarna *inleder* nu egen konkurrens även i rent off-book-läge. När
+  auktionen gått off-book och en motståndare precis öppnat 1 i färg (och vår sida
+  inte sagt något) kliver boten in på riktigt via §7-motorn (`overcall`): enkelt
+  inkliv, upplysningsdubbling, Michaels, ovanlig 2NT. Medvetet smalt och
+  bevisbart korrekt – bara **direkt sits** (RHO öppnade nyss). Facit:
+  `auction-live.test.ts` (Väst kliver in 1♠ / X över Syds off-book 1♥; svag hand
+  passar; ingen falsk balansering efter en passrunda). On-book bevisat oförändrat.
+- **Avgränsning (nästa steg):** balansering (inkliv efter en passrunda) och inkliv
+  över andra öppningar (1NT, svaga tvåor, hoppöppningar) återstår.
 
 ## Nästa steg (ur arbetslistan)
 

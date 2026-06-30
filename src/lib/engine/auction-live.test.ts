@@ -373,6 +373,60 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     })
   })
 
+  // §7-försvaret in i budlådan: när auktionen gått off-book ska motståndarna
+  // kunna KLIVA IN på riktigt (direkt sits) i stället för att tystna. Syd är
+  // balanserad 17 hp → linjen öppnar 1NT; vi matar in ett annat öppningsbud för
+  // Syd för att tvinga fram off-book, och kollar Västs aktion direkt över det.
+  describe('off-book: motståndarna kliver in på riktigt (§7)', () => {
+    const base = {
+      S: 'S:KQ4 H:AQ5 D:K843 C:QJ2', // 17 hp balanserad → linjen säger 1NT
+      N: 'S:T92 H:T76 D:752 C:T954', // svag, irrelevant här
+    }
+    const dealWithEW = (e: string, w: string) => dealOf('S', { ...base, E: e, W: w })
+
+    it('Väst kliver in 1♠ över Syds off-book 1♥ med bra 5-korts färg', () => {
+      const deal = dealWithEW(
+        'S:73 H:KJ65 D:Q92 C:8643', // Öst – irrelevant, Väst agerar
+        'S:KQJ85 H:43 D:KJ86 C:Q5', // 12 hp, 5-korts spader, kort klöver → inkliv 1♠ (ej X)
+      )
+      const history = [call('S', '1H')]
+      const c = decideCall(deal, history, 'W')
+      expect(c.bid).toBe('1S')
+      expect(c.rule).toBe('enkelt inkliv')
+      expect(legalCalls(history, 'W')).toContain('1S')
+    })
+
+    it('Väst upplysningsdubblar Syds off-book 1♥ med kort hjärter + öppningsstyrka', () => {
+      const deal = dealWithEW(
+        'S:73 H:Q865 D:T92 C:8643',
+        'S:KQ54 H:3 D:KJ65 C:AJ72', // 14 hp, singel hjärter, stöd i övriga → X
+      )
+      const history = [call('S', '1H')]
+      const c = decideCall(deal, history, 'W')
+      expect(c.bid).toBe('X')
+      expect(c.rule).toBe('upplysningsdubbling')
+    })
+
+    it('Väst passar med en svag hand (inget lämpligt inkliv)', () => {
+      const deal = dealWithEW(
+        'S:73 H:KJ65 D:Q92 C:8643',
+        'S:865 H:J983 D:JT6 C:T54', // 1 hp → pass
+      )
+      expect(decideCall(deal, [call('S', '1H')], 'W').bid).toBe('P')
+    })
+
+    it('inget falskt inkliv i balansering: efter en passrunda kliver boten inte in', () => {
+      // Syd 1♥ (off-book), Väst pass, Nord pass → Öst sitter i balanseringssits.
+      // Det är ett senare steg; här ska Öst (svag) inte hitta på ett inkliv.
+      const deal = dealWithEW(
+        'S:KQJ85 H:43 D:KJ4 C:Q52', // Öst har inklivshanden, men sitter i balansering
+        'S:73 H:KJ65 D:Q92 C:8643',
+      )
+      const history = [call('S', '1H'), call('W', 'P'), call('N', 'P')]
+      expect(decideCall(deal, history, 'E').bid).toBe('P')
+    })
+  })
+
   it('slam-quirken (två bud i rad, samma plats) är sällsynt – under 2 %', () => {
     let closed = 0
     let quirky = 0
