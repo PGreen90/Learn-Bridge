@@ -97,7 +97,15 @@ export function Play() {
       if (g.phase !== 'bidding') return g
       if (seatToAct(g.deal.dealer, g.history.length) !== 'S') return g
       if (!legalCalls(g.history, 'S').includes(bid)) return g
-      return { ...g, history: [...g.history, { seat: 'S', bid }] }
+      // Fäst budets betydelse så det blir klickbart i auktionsvyn. Stämmer ditt
+      // bud med motorns systemlinje får det den äkta förklaringen; annars märks
+      // det som ett eget bud utanför systemet (motorn kan inte tolka det).
+      const sys = decideCall(g.deal, g.history, 'S')
+      const call: ResolvedCall =
+        sys.bid === bid
+          ? { seat: 'S', bid, rule: sys.rule, explanation: sys.explanation ?? 'Motorns rekommenderade bud.' }
+          : { seat: 'S', bid, rule: 'eget bud', explanation: 'Eget bud – utanför systemlinjen (motorn har ingen förklaring här).' }
+      return { ...g, history: [...g.history, call] }
     })
   }
 
@@ -141,6 +149,9 @@ function BiddingPhase({
   const toAct = seatToAct(game.deal.dealer, game.history.length)
   const yourTurn = !complete && toAct === 'S'
   const passedOut = complete && !contractFromCalls(game.history)
+  // Motorns rekommenderade bud för din hand i det här läget (markeras i budlådan
+  // och ger den äkta förklaringen för det budet).
+  const recommendation = yourTurn ? decideCall(game.deal, game.history, 'S') : null
 
   return (
     <div className="space-y-5">
@@ -201,7 +212,7 @@ function BiddingPhase({
       {yourTurn && (
         <Panel className="!p-4">
           <p className="mb-3 text-center text-sm text-slate-600">Ditt bud:</p>
-          <BiddingBox legal={legalCalls(game.history, 'S')} onBid={onBid} />
+          <BiddingBox legal={legalCalls(game.history, 'S')} onBid={onBid} recommendation={recommendation} />
         </Panel>
       )}
     </div>
