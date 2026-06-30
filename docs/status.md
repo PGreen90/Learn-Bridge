@@ -178,16 +178,30 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
   infopanel (`BiddingBox.tsx`, med säkerhets-badge) och i auktionsrutnätet
   (`Play.tsx` `onBid` → klickbart, "Eget bud. &lt;tolkning&gt;"). `BiddingBox`
   tar nu en `history`-prop. Motorns egna bud (med regel) är oförändrade.
-- **Avgränsning (nästa steg):** datorpartnern följer fortfarande sin egen rad och
-  passar när Syd bjuder off-book. Att route:a `decideCall` genom tolkningen (så
-  partnern hänger med) är pivotens kärna och tas härnäst.
+- **Steg 3 klart (pivotens kärna):** `decideCall` (`auction-live.ts`) följer nu
+  ideallinjen **bara så länge den verkliga budföljden inte motsagt den**
+  (`divergedFromLine`). Bjuder Syd off-book lämnar boten linjen och svarar
+  historiedrivet (`offBookResponse`) i stället för att passa:
+  - **Stöd med fit** (`raiseWithFit`): 3-korts fit räcker för en **öppnad
+    högfärg** (5+ lovad), annars krävs 4+. Höjningen graderas efter stödpoäng
+    (`dummyPoints`): 6–10 → enkel höjning, 11–12 → inbjudande hopp, 13+ → utgång
+    (4 i hf; minorutgång blåses inte ut).
+  - **Utan fit** (`respondWithoutFit`): egen 4+ färg på billigaste läge (1-läget
+    från 6 hp, 2-läget från 12), annars balanserad **sang** efter styrka (1NT/
+    2NT/3NT), annars pass. Bara när partnern redan bjudit – inga påhittade inkliv.
+  - On-book-auktioner är **bevisat oförändrade** (facit i `auction-live.test.ts`).
+- **Avgränsning (nästa steg):** off-book-svar i **konkurrens** (när motståndarna
+  också bjudit) är fortfarande tunt; öppnarens/Syds vidare off-book-ronder och
+  §7-försvaret i den levande budlådan återstår.
 
 ## Nästa steg (ur arbetslistan)
 
 - **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på
   samma plats → ingen laglig medurs-auktion; budlådan stannar där. Fixas i
   `slam-auction.ts` (öppnaren fyller luckan lagligt). Ovanligt (~0,25 %).
-- **Off-book Syd**: bjuder Syd utanför systemlinjen passar datorpartnern. Tas
-  senare (ägarens beslut).
+- **Off-book Syd – grunden klar:** datorpartnern hänger nu med och svarar på Syds
+  egna bud (stöd m. fit graderat efter styrka, annars egen färg/sang – se
+  "Tolkande budmotor – steg 3" ovan). Kvar att bredda: off-book-svar i
+  konkurrens och vidare ronder.
 - "Framkalla slutbud"-väljare (ägarens idé, se `docs/arbetslista.md`).
 - Ev. webworker för DDS-facit på utspelet.

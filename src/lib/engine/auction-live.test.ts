@@ -256,6 +256,75 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     })
   })
 
+  // Pivotens kärna: när Syd bjuder utanför systemlinjen (off-book) ska
+  // datorpartnern HÄNGA MED i stället för att passa – stöda partnerns färg vid
+  // fit (graderat efter styrka), annars bjuda egen färg/sang. Syd är balanserad
+  // 17 hp så motorns linje öppnar 1NT; vi matar in ett annat öppningsbud för Syd
+  // för att tvinga fram divergensen.
+  describe('off-book: datorpartnern svarar på Syds egna bud', () => {
+    const base = {
+      S: 'S:KQ4 H:AQ5 D:K843 C:QJ2', // 17 hp, balanserad → linjen säger 1NT
+      W: 'S:865 H:J983 D:JT6 C:T54',
+      E: 'S:T92 H:T76 D:AQ7 C:AK97',
+    }
+    const dealWithN = (n: string) => dealOf('S', { ...base, N: n })
+
+    // ---- Steg 1: 3-korts fit för en öppnad högfärg räcker -------------------
+    it('Nord höjer Syds off-book 1♠ till 2♠ med 3-korts fit (svag)', () => {
+      const deal = dealWithN('S:A73 H:K642 D:952 C:863') // 7 hp, 3-korts spader
+      const history = [call('S', '1S'), call('W', 'P')]
+      const c = decideCall(deal, history, 'N')
+      expect(c.bid).toBe('2S')
+      expect(legalCalls(history, 'N')).toContain('2S')
+    })
+
+    // ---- Steg 2: styrkan styr höjningens nivå -------------------------------
+    it('inbjudande styrka (11–12 stödpoäng) → hopp till 3♠', () => {
+      const deal = dealWithN('S:KQ73 H:K65 D:Q92 C:83') // 10 hp + dubbleton → inbjudan
+      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('3S')
+    })
+
+    it('utgångsstyrka (13+ stödpoäng) → direkt till 4♠', () => {
+      const deal = dealWithN('S:KQ73 H:AK5 D:K92 C:83') // 15 hp + fit → utgång
+      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('4S')
+    })
+
+    // ---- Steg 3: utan fit – egen färg eller sang ----------------------------
+    it('utan fit men egen 4-färg på 1-läget → ny färg (1♥ över Syds 1♣)', () => {
+      const deal = dealWithN('S:743 H:KQ65 D:KJ2 C:863') // 9 hp, 4-korts hjärter, 3 klöver
+      expect(decideCall(deal, [call('S', '1C'), call('W', 'P')], 'N').bid).toBe('1H')
+    })
+
+    it('utan fit, balanserad utan billig färg → 1NT-svar', () => {
+      const deal = dealWithN('S:A3 H:K642 D:9532 C:863') // 7 hp, balanserad, 2-korts spader
+      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('1NT')
+    })
+
+    it('för svag hand (<6 hp) passar fortfarande', () => {
+      const deal = dealWithN('S:A3 H:8642 D:9532 C:863') // 4 hp
+      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('P')
+    })
+
+    it('motståndaren (Väst) lägger sig still – svarar inte på Syds bud', () => {
+      // Väst är Syds motståndare, inte partner → inget svar, bara pass.
+      const deal = dealWithN('S:A73 H:K642 D:952 C:863')
+      expect(decideCall(deal, [call('S', '1S')], 'W').bid).toBe('P')
+    })
+
+    // ---- Säkerhet: on-book-auktioner är HELT oförändrade --------------------
+    it('on-book budgivning är oförändrad (off-book-svaret triggar aldrig)', () => {
+      for (let i = 0; i < 150; i++) {
+        const d = dealRandom()
+        const built = buildAuction(d)
+        if (!built || built.open) continue
+        if (!isLegalMedurs(built.turns)) continue
+        const expected = finalContract(built)
+        if (!expected) continue
+        expect(contractFromCalls(playOut(d))).toEqual(expected)
+      }
+    })
+  })
+
   it('slam-quirken (två bud i rad, samma plats) är sällsynt – under 2 %', () => {
     let closed = 0
     let quirky = 0

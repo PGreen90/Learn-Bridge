@@ -41,9 +41,22 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
 - Budsystem: **2 över 1 (2/1)**. Endast detta (lägg till fler senare).
 - Första funktion: **budträning** – visa hand, välj bud, appen ger facit.
 - Nästa stora riktning: **Spela mot datorn** (offline mot bottar; kvalitet före tempo).
+- **Målgrupp (beslut 2026-06-30): erfaren spelare** – en pålitlig, robust 2/1-
+  partner/motståndare (inte nybörjarträning först).
+- **PIVOT (beslut 2026-06-30): tolkande budmotor.** Roten till "stel/inkomplett/
+  felaktig" var att motorn är **generativ** (hand → en kanonisk rad). Vi bygger ett
+  **tolkande** lager (`src/lib/engine/auction-interpret.ts`) som läser den faktiska
+  auktionen. **Steg 1+2 klara & live:** egna/off-book-bud får ALLTID en förklaring.
+  **Steg 3 klart (kärnan):** `decideCall` lämnar ideallinjen när Syd bjuder
+  off-book (`divergedFromLine`) och datorpartnern svarar historiedrivet
+  (`offBookResponse`): stöd m. fit graderat efter stödpoäng (3-korts fit för
+  öppnad högfärg, annars 4+; enkel/inbjudan/utgång), annars egen färg/sang.
+  On-book bevisat oförändrat. **NÄSTA GÅNG STARTAR VI MED:** off-book-svar i
+  KONKURRENS (motståndarna har också bjudit) – sedan §7-försvar i budlådan.
 - Budmotor byggs i `src/lib/engine/`, test-drivet (`npm test`).
 - Detaljerad implementationsstatus: **`docs/status.md`**
-- Byggordning framåt: **`docs/arbetslista.md`**
+- Byggordning framåt: **`docs/arbetslista.md`** (NB: pivoten ovan går före den gamla
+  FAS-ordningen i felsökningsplanen).
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt).
