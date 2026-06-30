@@ -75,6 +75,14 @@ ovanpå startpoängen:
 *Obs:* kortfärgspoäng räknas **aldrig** när man öppnar (innan fit). Bara
 tvivelaktiga kort-honnörer (steg 4) påverkar startpoängen.
 
+**INKOPPLAD (TP-steg B, `responses.ts` `respondToMajor`):** svararens
+högfärgshöjningar väljer nivå på **stödpoäng = `max(HP, dummyPoints)`** i stället
+för rå HP. `max(...)` = "nedgradera aldrig under HP" (ägarens princip): korthet/
+längd får *lyfta* en höjning (11 HP + singel + 4 trumf = 14 stödp. → splinter/GF),
+men en platt övervärderad hand stannar på HP-golvet. Trösklarna (Bergen spärr <7 /
+konstruktiv 7–9 / limit 10–12 / Jacoby ≥13 / splinter ≥12 m. kortfärg) läses nu i
+stödpoäng.
+
 ### Nivå 3 — Bergenpoäng (ÖPPNAREN, efter att fit hittats)
 
 När öppnaren fått veta att fit finns omvärderas handen uppåt:

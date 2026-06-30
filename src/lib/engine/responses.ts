@@ -3,6 +3,7 @@
 // fit-svaren först (splinter → Jacoby → Bergen), sedan färgsvar och NT.
 
 import type { Bid, Forcing, Hand, Suit } from '../../types/bridge'
+import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 
 export type Major = 'hearts' | 'spades'
@@ -41,33 +42,41 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   const M = BID[opened]
   const MSYM = opened === 'hearts' ? '♥' : '♠'
 
+  // STÖDPOÄNG (TP-steg B, ägarens beslut 2026-06-30): vid fit räknar svararen
+  // stödpoäng (Bergen: singel +3 m. 4 trumf, dubbel +1 …) i stället för rå hp –
+  // MEN aldrig under hp (en hand nedgraderas aldrig av sin form). Korthet/längd
+  // får alltså LYFTA en höjning över inbjudan→utgång-gränsen (t.ex. 11 hp + singel
+  // + 4 trumf → splinter), men en platt övervärderad hand stannar på hp-golvet.
+  const sp = Math.max(p, dummyPoints(hand, opened).dummyPoints)
+  const spTxt = sp > p ? `${p} hp / ${sp} stödp.` : `${p} hp`
+
   if (p < 6) return { call: 'P', rule: 'pass', explanation: `${p} hp – för svagt för att svara → pass.` }
 
-  // ---- Fit: 4+ stöd ----
+  // ---- Fit: 4+ stöd (stödpoäng styr nivån) ----
   if (support >= 4) {
-    if (p >= 12 && shortness) {
+    if (sp >= 12 && shortness) {
       const call = opened === 'hearts' ? '3S' : '3H'
       const sym = opened === 'hearts' ? '3♠' : '3♥'
-      return { call, rule: 'tvetydig splinter', explanation: `${p} hp, ${support} stöd + kortfärg → ${sym} (tvetydig splinter, GF).` }
+      return { call, rule: 'tvetydig splinter', explanation: `${spTxt}, ${support} stöd + kortfärg → ${sym} (tvetydig splinter, GF).` }
     }
-    if (p >= 13) {
-      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `${p} hp, ${support} stöd, ingen kortfärg → 2NT (Jacoby, GF).` }
+    if (sp >= 13) {
+      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `${spTxt}, ${support} stöd, ingen kortfärg → 2NT (Jacoby, GF).` }
     }
     if (support === 4) {
-      if (p >= 10) return { call: '3D', rule: 'Bergen limit', explanation: `${p} hp, 4 stöd → 3♦ (Bergen, limithöjning).` }
-      if (p >= 7) return { call: '3C', rule: 'Bergen konstruktiv', explanation: `${p} hp, 4 stöd → 3♣ (Bergen, konstruktiv).` }
-      return { call: `3${M}`, rule: 'Bergen spärr', explanation: `${p} hp, 4 stöd → 3${MSYM} (Bergen, spärrhöjning).` }
+      if (sp >= 10) return { call: '3D', rule: 'Bergen limit', explanation: `${spTxt}, 4 stöd → 3♦ (Bergen, limithöjning).` }
+      if (sp >= 7) return { call: '3C', rule: 'Bergen konstruktiv', explanation: `${spTxt}, 4 stöd → 3♣ (Bergen, konstruktiv).` }
+      return { call: `3${M}`, rule: 'Bergen spärr', explanation: `${spTxt}, 4 stöd → 3${MSYM} (Bergen, spärrhöjning).` }
     }
     // 5+ stöd, ej GF
-    if (p <= 9) return { call: `4${M}`, rule: 'spärr till utgång', explanation: `${p} hp, ${support} stöd – spärr → 4${MSYM}.` }
-    return { call: '3D', rule: 'Bergen limit', explanation: `${p} hp, ${support} stöd → 3♦ (limithöjning).`, uncertain: true }
+    if (sp <= 9) return { call: `4${M}`, rule: 'spärr till utgång', explanation: `${spTxt}, ${support} stöd – spärr → 4${MSYM}.` }
+    return { call: '3D', rule: 'Bergen limit', explanation: `${spTxt}, ${support} stöd → 3♦ (limithöjning).`, uncertain: true }
   }
 
-  // ---- 3-korts stöd ----
+  // ---- 3-korts stöd (stödpoäng styr; korthet lyfter mot limithöjning) ----
   if (support === 3) {
-    if (p <= 9) return { call: `2${M}`, rule: 'enkel höjning', explanation: `${p} hp, 3 stöd → 2${MSYM} (enkel höjning).` }
-    if (p <= 12) return { call: '1NT', rule: 'semi-forcing 1NT', explanation: `${p} hp, 3-korts limithöjning → 1NT (semi-forcing), höjer sedan.` }
-    // 13+ med 3 stöd → faller vidare till 2/1.
+    if (sp <= 9) return { call: `2${M}`, rule: 'enkel höjning', explanation: `${spTxt}, 3 stöd → 2${MSYM} (enkel höjning).` }
+    if (sp <= 12) return { call: '1NT', rule: 'semi-forcing 1NT', explanation: `${spTxt}, 3-korts limithöjning → 1NT (semi-forcing), höjer sedan.` }
+    // 13+ stödpoäng med 3 stöd → faller vidare till 2/1.
   }
 
   // ---- Ny färg på 1-läget: bara spader över 1♥ ----

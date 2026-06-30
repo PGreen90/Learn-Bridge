@@ -35,8 +35,26 @@ describe('respondToMajor', () => {
     expect(resp('S:843 H:K974 D:KJ2 C:763', 'hearts')).toBe('3C') // 7 hp, 4 stöd
   })
 
-  it('Bergen spärr (3 i färgen) med 4 stöd och svag', () => {
-    expect(resp('S:8432 H:K974 D:K72 C:63', 'hearts')).toBe('3H') // 6 hp, 4 stöd
+  it('Bergen spärr (3 i färgen) med 4 stöd och svag (platt, inga stödp.)', () => {
+    expect(resp('S:843 H:K974 D:K72 C:632', 'hearts')).toBe('3H') // 6 hp, 4 stöd, platt
+  })
+
+  // ---- TP-steg B: stödpoäng (max(hp, dummyPoints)) lyfter höjningar ----
+  it('splinter-uppgradering: 11 hp + singel + 4 trumf → utgångskrav (ägarens hand)', () => {
+    // Rå hp = 11 (under splintergränsen 12), men singel hjärter + 4 trumf ger 14
+    // stödpoäng → tvetydig splinter (GF). Ägarens beslut 2026-06-30.
+    expect(resp('S:KQ75 H:3 D:Q9842 C:KJ4', 'spades')).toBe('3H')
+  })
+
+  it('dubbelton lyfter en svag 4-stödshand till konstruktiv 3♣', () => {
+    // 6 hp men dubbelton klöver → 7 stödpoäng → Bergen konstruktiv (ej ren spärr).
+    expect(resp('S:8432 H:K974 D:K72 C:63', 'hearts')).toBe('3C')
+  })
+
+  it('platt övervärderad 11:a nedgraderas ALDRIG under hp (stannar limithöjning 3♦)', () => {
+    // 11 hp, 4-3-3-3, D/kn-tung → bara 9 stödpoäng, men hp-golvet håller den på
+    // limithöjning (3♦), inte konstruktiv. "Nedgradera aldrig" gäller även här.
+    expect(resp('S:KJ3 H:K974 D:Q82 C:Q53', 'hearts')).toBe('3D')
   })
 
   it('ny färg 1♠ med 4 spader över 1♥', () => {

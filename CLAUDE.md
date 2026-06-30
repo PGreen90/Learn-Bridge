@@ -45,9 +45,13 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   sällan). TP får däremot *uppgradera* (bra 11:a öppnar) och *nudga sang*. Omfång:
   brett (öppning → svar → återbud), men implementeras **i test-låsta steg** så
   on-book aldrig rubbas. **Steg A klart:** öppningsgolvet (`openings.ts`:
-  `HP ≥ 12 || TP ≥ 12`). **Kvar:** B = svararens inbjudan/utgång på TP, C =
-  öppnarens återbud på TP, D = TP-nudge för sang. Ägaren vill ge **mänsklig input
-  i konkreta budsituationer** löpande – fråga hellre än gissa.
+  `HP ≥ 12 || TP ≥ 12`). **Steg B klart:** svararens högfärgshöjningar räknar
+  **stödpoäng = `max(HP, dummyPoints)`** (`responses.ts` `respondToMajor`) – Bergen
+  fullt (singel +3 m. 4 trumf) men aldrig under HP, så korthet *lyfter* en höjning
+  (11 HP + singel + 4 trumf → splinter) men platta händer nedgraderas aldrig.
+  **Kvar:** C = öppnarens återbud på TP (+ ev. svararens minorhöjningar), D =
+  TP-nudge för sang. Ägaren vill ge **mänsklig input i konkreta budsituationer**
+  löpande – fråga hellre än gissa.
 - Första funktion: **budträning** – visa hand, välj bud, appen ger facit.
 - Nästa stora riktning: **Spela mot datorn** (offline mot bottar; kvalitet före tempo).
 - **Målgrupp (beslut 2026-06-30): erfaren spelare** – en pålitlig, robust 2/1-

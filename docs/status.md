@@ -19,7 +19,11 @@
 
 - Bergens Adjust-3 i `evaluation.ts`: startpoäng, stödpoäng och Bergenpoäng.
 - Visas som `15 HP (17 TP)` i `HandView`.
-- TP styr öppningströskeln (`openings.ts`, färgöppning vid TP ≥ 12) och slamzon (`slam-auction.ts`).
+- TP styr öppningströskeln (`openings.ts`, färgöppning vid `HP ≥ 12 || TP ≥ 12`:
+  12 HP öppnar alltid, bra 11:or uppgraderar) och slamzon (`slam-auction.ts`).
+- **TP-steg B:** svararens högfärgshöjningar väljer nivå på stödpoäng =
+  `max(HP, dummyPoints)` (`responses.ts`) – korthet lyfter (→ splinter), men
+  nedgraderar aldrig under HP. Kvar: öppnarens återbud (C) + sang-nudge (D).
 - Spec: `docs/handvardering.md`
 
 ## Slamverktyg (`slam.ts`, `slam-auction.ts`, `nt-slam.ts`)
