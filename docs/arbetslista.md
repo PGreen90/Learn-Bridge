@@ -1,10 +1,13 @@
 # Arbetslista — fullända budmotorn
 
 > 🔺 **NÄSTA SESSIONS PRIO:** systematisk felsökning enligt
-> `BUDSYSTEM – PRIORITERAD FELSÖKNINGS.txt` (repo-roten). Börja med FAS 0
-> (inventering: systembok mot kod) + arbetsregel A (facit före fix) och B
-> (`npm test` efter varje fix). Inga nya funktioner innan plan-punkt 1–6 är
-> verifierade.
+> `BUDSYSTEM – PRIORITERAD FELSÖKNINGS.txt` (repo-roten).
+> - ✅ **FAS 0 klar (2026-06-30):** inventeringen ligger i `docs/sanningskarta.md`
+>   (systembok mot faktisk kod). Två huvudfynd: §7-försvar mestadels kodat men
+>   ej inkopplat i levande auktion, och kravstatus är inte ett maskinläsbart fält.
+> - ⬜ **Näst på tur: FAS 1** – samla regel-ID/budval/förklaring/kravstatus/alert
+>   till samma objekt. Arbetsregel A (facit före fix) + B (`npm test` efter varje
+>   fix). Inga nya funktioner innan plan-punkt 1–6 är verifierade.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens
