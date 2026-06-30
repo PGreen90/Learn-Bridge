@@ -1,5 +1,11 @@
 # TP i budvalet — arbetslista
 
+> 🔺 **NÄSTA GÅNG BÖRJAR VI MED:** Steg C-2 (minorhöjningar på TP). Inled med att
+> **fråga ägaren om konkreta exempelhänder** – öppen fråga: *ska korthet väga i
+> minorhöjningar, eller bara längd/sidofärg?* (Städning klar 2026-07-01:
+> `pointsWithFloor`-hjälpare + globalt invariant-test. Kvar i städning om vi vill:
+> slamzon-tröskelns konsekvenskoll.)
+
 > Boten ska tänka i **totalpoäng (TP/fördelning)**, inte rå HP (ägarens beslut
 > 2026-06-30). Byggs i **test-låsta steg** så on-book aldrig rubbas.
 >
