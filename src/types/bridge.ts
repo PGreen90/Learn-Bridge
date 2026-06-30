@@ -38,6 +38,20 @@ export type Vulnerability = 'none' | 'ns' | 'ew' | 'all'
  */
 export type Bid = string
 
+/**
+ * Kravnivå för ett bud – de sex nivåerna ur systembokens §2 (markeringsstandard).
+ * Maskinläsbart fält så motorn kan resonera om krav i stället för att gömma det
+ * i förklaringstexten.
+ */
+export type Forcing =
+  | 'avslut' // Avslut (sign-off / till spel)
+  | 'ej-krav' // Ej krav (partnern får passa)
+  | 'semi-krav' // Semi-krav (partnern får passa med minimum; t.ex. semi-forcing 1NT)
+  | 'inbjudan' // Inbjudan (limit)
+  | 'krav-1-rond' // Krav 1 rond
+  | 'utgangskrav' // Utgångskrav (GF)
+  | 'slamintresse' // Slamintresse
+
 /** De tre lägena användaren kan välja mellan. */
 export type Scope = 'opening' | 'opening-response' | 'full-auction'
 

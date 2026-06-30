@@ -73,6 +73,24 @@ describe('responderPlaceAfterOgust – svararen placerar', () => {
   it('signoff (3♥) mittemot minimum', () => {
     expect(responderPlaceAfterOgust(hand, 'hearts', r('3C', 'Ogust: min/dålig'))?.call).toBe('3H')
   })
+
+  // FAS 1 punkt 3 (laglighet): öppnarens Ogust-svar på 2♦ ligger redan på
+  // 3-läget, så svararens placering FÅR ALDRIG ligga på eller under svaret.
+  describe('2♦: placeringen är alltid laglig (högre än svaret eller pass)', () => {
+    const dHand = parseHand('S:AQ2 H:K84 D:K42 C:KJ32') // 3 ruterstöd, 11+
+    it('min/bra (svar 3♦) → pass (3♦ redan nått) – inte olagligt 3♦', () => {
+      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3D', 'Ogust: min/bra'))?.call).toBe('P')
+    })
+    it('min/dålig (svar 3♣) → 3♦ (laglig signoff)', () => {
+      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3C', 'Ogust: min/dålig'))?.call).toBe('3D')
+    })
+    it('max/utmärkt (svar 3NT) → pass (3NT redan nått) – inte olagligt 3NT', () => {
+      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3NT', 'Ogust: max/utmärkt'))?.call).toBe('P')
+    })
+    it('max/bra (svar 3♠) → 3NT (laglig utgång)', () => {
+      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3S', 'Ogust: max/bra'))?.call).toBe('3NT')
+    })
+  })
 })
 
 describe('buildAuction – svag tvåa end-to-end (inkoppling)', () => {
@@ -91,5 +109,8 @@ describe('buildAuction – svag tvåa end-to-end (inkoppling)', () => {
     }
     const a = buildAuction(deal)
     expect(a?.turns.map((t) => t.call)).toEqual(['2H', '2NT', '3S', '4H'])
+    // Steg 3 + 6: varje tur bär kravnivå + alert ur regelregistret.
+    expect(a?.turns.map((t) => t.forcing)).toEqual(['ej-krav', 'krav-1-rond', 'ej-krav', 'avslut'])
+    expect(a?.turns.map((t) => t.alert)).toEqual([false, true, true, false])
   })
 })

@@ -2,17 +2,25 @@
 // Härlett ur systemboken §4.1. Prioriteringsordningen är det viktiga: vi testar
 // fit-svaren först (splinter → Jacoby → Bergen), sedan färgsvar och NT.
 
-import type { Bid, Hand, Suit } from '../../types/bridge'
+import type { Bid, Forcing, Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 
 export type Major = 'hearts' | 'spades'
 export type Minor = 'clubs' | 'diamonds'
 
 export interface ResponseResult {
+  /**
+   * `rule` är budets STABILA identitet (kort regelnamn, t.ex. "Jacoby 2NT").
+   * Skild från den användarvända `explanation`. Regelregistret (`rules.ts`)
+   * nycklas på den och härleder kravnivå (`forcing`) + alert ur SAMMA regel –
+   * målet med FAS 1.
+   */
   call: Bid
   rule: string
   explanation: string
   uncertain?: boolean
+  /** Budets kravnivå (§2). Frivilligt tills regelregistret fyllt i det. */
+  forcing?: Forcing
 }
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }

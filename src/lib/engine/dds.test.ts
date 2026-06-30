@@ -93,6 +93,8 @@ describe('double-dummy solver – stämmer mot oraklet (ren minimax) på små gi
     expect(checked).toBe(100 * 5 * 4)
   })
 
+  // Tung men korrekt: djupare DDS-träd som passerar isolerat (~7 s) men kan
+  // spräcka standardgränsen 5 s under full-suite-last → egen timeout (ej logik).
   it('30 slumpgivar (4 kort/hand) – djupare träd', () => {
     const rng = mulberry32(999)
     for (let n = 0; n < 30; n++) {
@@ -105,7 +107,7 @@ describe('double-dummy solver – stämmer mot oraklet (ren minimax) på små gi
         }
       }
     }
-  })
+  }, 30000)
 
   it('position-mitt-i-spelet (delvis spelat stick) stämmer mot oraklet', () => {
     const rng = mulberry32(2024)

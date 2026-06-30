@@ -105,6 +105,20 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   växer fram. Passas given ut syns det och man tar en ny giv.
 - Verifierad i webbläsaren: budlåda → levande auktion → 3NT av Öst → kortspel.
 
+## Regelregister & kravstatus (FAS 1, `rules.ts`)
+
+- **`src/lib/engine/rules.ts`** – en sanningskälla: budets `rule` → kravnivå
+  (`forcing`, §2:s sex nivåer + `semi-krav`) och alert. Kravnivå för alla ~150
+  regelnamn motorn producerar (facit + fullständighetstest i `rules.test.ts`).
+- **`forcing`/`alert` på varje bud** (`AuctionTurn`), ifyllt centralt i
+  `buildAuction`s `finish()`-chokepoint. `ruleInfo(rule)` ger {kravnivå, alert}.
+- **`alerts.ts`** är nu ett tunt gränssnitt över registret (alert single-sourcad).
+- **Negativ dubbling** finns i EN version (`doubles.ts`), nu för inkliv på
+  valfri nivå.
+- **Laglighet (punkt 3):** två olagliga-bud-buggar fixade – Ogust-placering på
+  2♦, och NT mot hoppinkliv. Deterministiskt `legality.test.ts` (4000 givar,
+  verifierat mot 60 000) vaktar att budlådan aldrig ger ett olagligt bud.
+
 ## Nästa steg (ur arbetslistan)
 
 - **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på

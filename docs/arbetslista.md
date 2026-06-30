@@ -3,11 +3,18 @@
 > 🔺 **NÄSTA SESSIONS PRIO:** systematisk felsökning enligt
 > `BUDSYSTEM – PRIORITERAD FELSÖKNINGS.txt` (repo-roten).
 > - ✅ **FAS 0 klar (2026-06-30):** inventeringen ligger i `docs/sanningskarta.md`
->   (systembok mot faktisk kod). Två huvudfynd: §7-försvar mestadels kodat men
->   ej inkopplat i levande auktion, och kravstatus är inte ett maskinläsbart fält.
-> - ⬜ **Näst på tur: FAS 1** – samla regel-ID/budval/förklaring/kravstatus/alert
->   till samma objekt. Arbetsregel A (facit före fix) + B (`npm test` efter varje
->   fix). Inga nya funktioner innan plan-punkt 1–6 är verifierade.
+>   (systembok mot faktisk kod).
+> - ✅ **FAS 1 klar (2026-06-30):** regelregister `src/lib/engine/rules.ts` –
+>   kravnivå (`forcing`, §2) + alert härleds nu ur SAMMA regel (punkt 1), läggs
+>   på varje bud (`forcing`/`alert` på AuctionTurn), alert single-sourced (punkt
+>   1), `ruleInfo()` som spårningsgrund (punkt 2). Punkt 3 (laglighet): hittade +
+>   fixade två olagliga-bud-buggar (Ogust 2♦-placering; NT mot hoppinkliv) +
+>   deterministiskt laglighetstest (`legality.test.ts`, 4000 givar, verifierat
+>   mot 60 000). Punkt 4 (kravstatus) = `forcing`-fältet. Testsvit 434 grön.
+> - ⬜ **Näst på tur: FAS 2 (konkurrens)** – planens störst-buggrisk. Sanningskartan:
+>   merparten av §7 är kodat men ej inkopplat i levande auktion; konkurrens
+>   modelleras bara en rond. Arbetsregel A (facit före fix) + B (`npm test`).
+>   FAS 1 punkt 2 tung del (matchande/avvisade regler) är medvetet uppskjuten.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

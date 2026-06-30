@@ -205,3 +205,26 @@ i planen:
 Inga nya funktioner förrän FAS 1–6 är verifierade (planens regel). Nästa steg
 enligt planen: **FAS 1 punkt 1** – samla regel-ID/budval/förklaring/kravstatus/
 alert till *samma* objekt.
+
+---
+
+## IV. Uppdatering efter FAS 1 (2026-06-30)
+
+Följande fynd ur kartan är nu åtgärdade i FAS 1:
+
+- **Kravstatus är inte ett fält** (§2) → **löst.** `Forcing`-typ + `forcing`-fält
+  på buden, härlett ur regelregistret `src/lib/engine/rules.ts` (kravnivå för
+  alla ~150 regler). Punkt 1 + 4.
+- **Budval/förklaring/alert utspritt** → **löst.** Alert single-sourcad i
+  `rules.ts`; `alerts.ts` är ett tunt gränssnitt. `ruleInfo()` ger den valda
+  regelns {kravnivå, alert} i ett objekt (spårningsgrund, punkt 2 lättversion).
+- **Dubblerad negativ dubbling** (auction.ts vs doubles.ts) → **löst.** En källa
+  (`doubles.ts`), nu generaliserad till inkliv på valfri nivå.
+- **Olagliga bud (punkt 3, laglighet)** → **två buggar hittade & fixade:**
+  (1) Ogust på 2♦: svararens placering kunde bjuda 3♦/3NT som öppnaren redan
+  bjudit (olagligt) → passar nu rätt; (2) NT mot **hoppinkliv** på 3-läget gav
+  olagligt 2NT → passar nu. Bevisat med deterministiskt `legality.test.ts`
+  (4000 givar) + 60 000-givars sweep.
+
+Kvar (ej i FAS 1): full regelspårning med matchande/avvisade regler (punkt 2
+tung del), samt allt under **§7-konkurrens** (inkopplingen) som hör till **FAS 2**.

@@ -16,7 +16,9 @@ import { respondToMajorPassed } from './responses-drury'
 import { overcall } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
-import type { Suit } from '../../types/bridge'
+import type { Forcing, Suit } from '../../types/bridge'
+import { forcingOf, isAlertRule } from './rules'
+import { negativeDouble } from './doubles'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation } from './slam-auction'
@@ -88,6 +90,10 @@ export interface AuctionTurn {
   rule: string
   explanation: string
   uncertain?: boolean
+  /** Kravnivå (§2), härledd ur `rule` via regelregistret. Frivillig. */
+  forcing?: Forcing
+  /** Konstgjort/alertpliktigt bud, härlett ur `rule` via registret. Frivilligt. */
+  alert?: boolean
 }
 
 export interface BuiltAuction {
@@ -153,20 +159,19 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
 
   // Mot ett färginkliv:
   if (ovSuit) {
-    // Negativ dubbling: 4+ i en objuden högfärg, 6+ hp.
-    const unbidMajors = (['hearts', 'spades'] as Suit[]).filter((s) => s !== openerSuit && s !== ovSuit)
-    for (const m of unbidMajors) {
-      if (len[m] >= 4 && p >= 6) {
-        return { call: 'X', rule: 'negativ dubbling', explanation: `${p} hp, 4+ ${m === 'hearts' ? 'hjärter' : 'spader'} → X (negativ dubbling).` }
-      }
-    }
+    // Negativ dubbling (§7.3) – EN källa: samma logik som doubles.ts (gäller
+    // inkliv på valfri nivå, inte bara 1-läget).
+    const neg = negativeDouble(hand, openerSuit, overcallCall)
+    if (neg) return neg
     // Konkurrenshöjning: 3+ stöd i öppnarens färg.
     if (len[openerSuit] >= 3 && p >= 6) {
       const L = cheapestLevelAbove(openerSuit, ovLevel, ovSuit)
       return { call: `${L}${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${p} hp, ${len[openerSuit]} stöd → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
     }
-    // NT med stopp i deras färg.
-    if (isBalanced(hand) && hasStopper(hand, ovSuit) && p >= 8) {
+    // NT med stopp i deras färg – bara mot inkliv på 1–2-läget. Mot ett
+    // hoppinkliv på 3-läget vore 2NT OLAGLIGT (under deras bud) och 3NT
+    // osunt på bara 8+ → då passar svararen i stället (FAS 1 punkt 3).
+    if (ovLevel <= 2 && isBalanced(hand) && hasStopper(hand, ovSuit) && p >= 8) {
       const L = cheapestLevelAbove('clubs', ovLevel, ovSuit) <= 1 ? 1 : 2
       return { call: `${L}NT`, rule: 'NT med stopp', explanation: `${p} hp balanserad med stopp → ${L}NT.` }
     }
@@ -210,9 +215,20 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
     { seat: openerSeat, role: 'öppnare', call: opening.call, rule: opening.rule, explanation: opening.explanation, uncertain: opening.uncertain },
   ]
 
+  // Enda chokepoint för att bygga resultatet: fyller varje turns kravnivå
+  // (§2) ur regelregistret innan auktionen returneras, så `forcing` alltid
+  // härleds ur SAMMA regel som budet.
+  const finish = (open: boolean): BuiltAuction => {
+    for (const t of turns) {
+      if (t.forcing === undefined) t.forcing = forcingOf(t.rule)
+      if (t.alert === undefined) t.alert = isAlertRule(t.rule)
+    }
+    return { openerSeat: openerSeat!, responderSeat, openCall: opening!.call, turns, open }
+  }
+
   // Öppningar vi inte har svarsregler för ännu: visa bara öppningen.
   if (!RESPONDABLE.has(opening.call)) {
-    return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+    return finish(true)
   }
 
   // Störd budgivning (punkt 27): efter en 1-läges färgöppning kan LHO kliva in.
@@ -229,9 +245,9 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
       // härleder ett felaktigt "passat ut"-kontrakt – det levande svaret bjuds i
       // budlådan (decideCall). Övriga konkurrensgrenar modelleras en rond.
       if (ov.call === 'X' && action.call === 'P') {
-        return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+        return finish(true)
       }
-      return { openerSeat, responderSeat, openCall: opening.call, turns, open: action.call !== 'P' }
+      return finish(action.call !== 'P')
     }
   }
 
@@ -244,7 +260,7 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat
         turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
       }
-      return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+      return finish(false)
     }
   }
 
@@ -252,18 +268,18 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
 
   // Svararen passade → utbjudet kontrakt, auktionen är slut.
-  if (response.call === 'P') return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+  if (response.call === 'P') return finish(false)
 
   // Öppnarens återbud (dispatchas på öppning + svar).
   const rebid = openerSecondBid(opening.call, response, deal.hands[openerSeat])
   if (!rebid) {
     // Inget återbud ännu (svarstyp utan regel): auktionen fortsätter senare.
-    return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+    return finish(true)
   }
   turns.push({ seat: openerSeat, role: 'öppnare', call: rebid.call, rule: rebid.rule, explanation: rebid.explanation, uncertain: rebid.uncertain })
 
   // Öppnaren passade svararens bud → kontraktet är satt.
-  if (rebid.call === 'P') return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+  if (rebid.call === 'P') return finish(false)
 
   // Slamutredning: efter en överenskommen trumf i slamzon växer 1430 RKC (med
   // cue-rond + ev. Sjöbergs 5NT) auktionen vidare. Högfärgsfit via Jacoby 2NT
@@ -277,7 +293,7 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat
         turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
       }
-      return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+      return finish(false)
     }
   }
 
@@ -291,7 +307,7 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat
         turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
       }
-      return { openerSeat, responderSeat, openCall: opening.call, turns, open: false }
+      return finish(false)
     }
   }
 
@@ -299,11 +315,11 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   const second = responderSecondBid(opening.call, response, rebid, deal.hands[responderSeat])
   if (second) {
     turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
-    return { openerSeat, responderSeat, openCall: opening.call, turns, open: second.call !== 'P' }
+    return finish(second.call !== 'P')
   }
 
   // Svararens andra bud saknar regel än: auktionen fortsätter senare.
-  return { openerSeat, responderSeat, openCall: opening.call, turns, open: true }
+  return finish(true)
 }
 
 /** Slumpar givar tills en med en öppning vi kan bygga vidare på dyker upp. */

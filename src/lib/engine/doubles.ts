@@ -10,13 +10,19 @@
 import type { Hand, Suit } from '../../types/bridge'
 import { hcp, lengths } from './hand'
 import type { ResponseResult } from './responses'
-import { openingSuit } from './overcalls'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
+const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
+
+/** Färgen i ett färgbud på VALFRI nivå ("1S"/"2C" → spades/clubs; "X"/"1NT" → null). */
+function suitOfBid(call: string): Suit | null {
+  const m = call.match(/^[1-7](C|D|H|S)$/)
+  return m ? SUIT_OF_LETTER[m[1]] : null
+}
 
 /**
  * Negativ dubbling: vi öppnade `ourOpen`, motståndaren klev in (`theirCall`).
@@ -24,7 +30,7 @@ const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
  * null = ingen negativ dubbling (svara naturligt i stället).
  */
 export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): ResponseResult | null {
-  const their = openingSuit(theirCall)
+  const their = suitOfBid(theirCall)
   if (!their) return null
   const p = hcp(hand)
   const len = lengths(hand)

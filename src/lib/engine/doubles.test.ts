@@ -9,6 +9,9 @@ describe('negativeDouble (§7.3)', () => {
   it('null utan objuden 4-korts högfärg', () => {
     expect(negativeDouble(parseHand('S:32 H:K3 D:KQ43 C:5432'), 'diamonds', '1S')).toBeNull()
   })
+  it('gäller även inkliv på 2-läget: 1♦–(2♣)–X med 4 hjärter', () => {
+    expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '2C')?.call).toBe('X')
+  })
 })
 
 describe('responsiveDouble (§7.3)', () => {

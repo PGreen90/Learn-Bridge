@@ -129,7 +129,17 @@ export function responderPlaceAfterOgust(hand: Hand, opened: Suit, ogust: Respon
     return { call: `3${bid}`, rule: 'svararens signoff', explanation: `${p} hp mittemot minimum → 3${sym} (stannar, öppnaren passar).` }
   }
 
-  // Minoröppning (2♦): sikta 3NT vid max, annars stanna lågt. Förenkling – flaggas.
-  if (max) return { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot max → 3NT.`, uncertain: true }
-  return { call: `3${bid}`, rule: 'svararens signoff', explanation: `${p} hp mittemot minimum → 3${sym} (delkontrakt).`, uncertain: true }
+  // Minoröppning (2♦): öppnarens Ogust-svar ligger REDAN på 3-läget (3♣–3NT),
+  // så svararens placering måste vara LAGLIG (högre än svaret) – annars pass.
+  // Förenkling kring exakt slutkontrakt kvarstår (flaggas).
+  if (max) {
+    // Sikta utgång (3NT). Är svaret redan 3NT (max/utmärkt) → passa det.
+    return ogust.call === '3NT'
+      ? { call: 'P', rule: 'svararens pass', explanation: `${p} hp mittemot max – 3NT redan nått → pass.`, uncertain: true }
+      : { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot max → 3NT.`, uncertain: true }
+  }
+  // Minimum: stanna i trumf. Är svaret redan 3♦ (min/bra) → passa; annars rätta till 3♦.
+  return ogust.call === `3${bid}`
+    ? { call: 'P', rule: 'svararens pass', explanation: `${p} hp mittemot minimum – 3${sym} redan nått → pass.`, uncertain: true }
+    : { call: `3${bid}`, rule: 'svararens signoff', explanation: `${p} hp mittemot minimum → 3${sym} (delkontrakt).`, uncertain: true }
 }
