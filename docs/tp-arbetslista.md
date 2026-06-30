@@ -1,0 +1,72 @@
+# TP i budvalet — arbetslista
+
+> Boten ska tänka i **totalpoäng (TP/fördelning)**, inte rå HP (ägarens beslut
+> 2026-06-30). Byggs i **test-låsta steg** så on-book aldrig rubbas.
+>
+> **Låst princip (gäller överallt):** *nedgradera aldrig.* En hand värderas till
+> `max(HP, TP-mått)` – form/korthet får **lyfta** ett bud, men aldrig sänka det
+> under HP (en människa nedgraderar i princip aldrig en bra hand).
+>
+> Mått efter läge: **startpoäng** (ingen fit), **stödpoäng** = `dummyPoints`
+> (svararen, fit i färg), **Bergenpoäng** = `bergenPoints` (öppnaren, fit i färg).
+> Spec: `docs/handvardering.md`. Ägaren vill ge **mänsklig input i konkreta
+> budsituationer** – fråga med exempelhänder, gissa inte.
+
+## ✅ Klart (pushat + live)
+- **Steg A — öppningsgolvet.** `openings.ts`: färgöppning vid `HP ≥ 12 || TP ≥ 12`.
+  12 HP öppnar alltid, bra 11:or (TP≥12) uppgraderar, platta 11:or avstår.
+- **Steg B — svararens högfärgshöjningar.** `responses.ts` `respondToMajor`:
+  fit-grenarna väljer nivå på **stödpoäng = `max(HP, dummyPoints)`**. Korthet
+  lyfter (11 HP + singel + 4 trumf → splinter); platt övervärderad hand stannar.
+- **Steg C-1 — öppnarens högfärgs-accepter.** `rebids.ts`:
+  `openerRebidAfterSimpleRaise`, `openerRebidAfterBergen`,
+  `openerRebidAfterSplinter` räknar **Bergenpoäng = `max(HP, bergenPoints)`**.
+
+## ⬜ Kvar att bygga
+
+### Steg C-2 — minorhöjningar på TP
+Fit i minor siktar oftast 3NT (HP/stoppar-styrt), men 5m/slam i minor är
+formstyrt. **Mänsklig input behövs:** ska korthet väga i minorhöjningar, eller
+bara längd/sidofärg?
+- `responses.ts` `respondToMinor`: inverterad minor (svag/stark), 2NT-inbjudan,
+  gap-handen — i dag rå HP.
+- `rebids.ts` `openerRebidAfterInvertedMinor`: 3NT-accept (HP/stopp) vs
+  minimumsbud — i dag rå HP.
+
+### Steg C-3 — sang-accepter på TP
+Öppnaren/svararen accepterar en sanginbjudan. Balanserat → måttet är
+**startpoäng** (bra ess/tior, 5-korts färg, längd – ingen kortfärg i NT).
+**Mänsklig input behövs:** när väger en femkortsfärg upp en sanghand?
+- `rebids.ts` `openerRebidAfterLimitedResponse` ('2NT inbjudan' → 3NT vid p≥14).
+- `responses-2nt.ts` `openerRebidAfter2NTResponse` ('2NT inbjudan' → 3NT vid p≥16).
+- Svararens egen sang-inbjudan vs utgång (semi-forcing 1NT-grenen, `responder-rebids.ts`).
+
+### Steg D — TP-nudge för sangöppning
+`openings.ts`: 1NT (15–17) / 2NT (20–21) / 3NT (25–27) är i dag rena HP-steg.
+Ägaren valde att **låta TP nudga sang** (Q3, 2026-06-30): t.ex. en stark 14 med
+femkortsfärg/bra ess räknas upp i 1NT-zonen. **Mest omdömeskrävande** – avviker
+från ren 2/1; bygg sist och med tydliga exempelhänder. NB: får aldrig krocka med
+öppningsgolvet (Steg A) eller sänka en hand.
+
+## ⬜ Sekundära TP-lägen (efter C/D, om vi vill gå hela vägen "brett")
+- **Drury** (`responses-drury.ts`): passad hand, limithöjning – väg stödpoäng.
+- **Game tries** (lång färg / hjälpfärg) – formstyrda till sin natur.
+- **§7 inkliv/advancer** (`overcalls.ts`, `doubles.ts`): väg färgkvalitet/form,
+  inte bara HP (eget domän – egen runda).
+- **Off-book i budlådan** (`auction-live.ts`): `raiseWithFit` använder redan
+  `dummyPoints` – kontrollera att off-book-svaren är linje med Steg B/C.
+
+## 🔧 Städning / konsekvens
+- **Gemensam hjälpare** `pointsWithFloor(hand, mått)` så `max(HP, …)`-mönstret är
+  single-sourcat i stället för inlinat på flera ställen (A/B/C-1 i dag).
+- **Visa TP-måttet i budförklaringen** konsekvent (`spTxt`/`txt` finns i B/C-1) så
+  ägaren ser *varför* ett bud lyftes.
+- **Hålfinnare/övningar** (`docs/arbetslista.md` punkt 31–32) som tränar de nya
+  TP-lyften.
+
+## Arbetsregler (varje steg)
+1. **Facit före fix** – uppdatera/lägg testfall som låser det nya beslutet.
+2. **`npm test` grön** – hela sviten, inkl. on-book-svepen (inga regressions).
+3. **`max(HP, …)`-golvet** – verifiera att inget facit nedgraderas.
+4. **Fråga ägaren** vid varje omdömesläge (konkreta exempelhänder).
+5. Uppdatera `docs/handvardering.md` (spec), `docs/status.md`, `CLAUDE.md` (beslut).
