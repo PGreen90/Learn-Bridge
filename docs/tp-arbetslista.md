@@ -48,6 +48,19 @@ femkortsfärg/bra ess räknas upp i 1NT-zonen. **Mest omdömeskrävande** – av
 från ren 2/1; bygg sist och med tydliga exempelhänder. NB: får aldrig krocka med
 öppningsgolvet (Steg A) eller sänka en hand.
 
+### Steg E — öppnarens reverse / hoppskift på TP (tillagt 2026-07-01)
+Styrkegrindade återbud: en **reverse** kräver extra. En formstark 16:a
+(`bergenPoints`) bör kunna reversera medan en platt 17:a kanske inte ska. I dag
+rå HP i `rebids.ts`. Naturlig granne till C-1 (samma mått, öppnarens sida).
+**Mänsklig input behövs:** ska form lyfta in i reverse-zon, eller hålla reverse
+rent HP-styrt för att inte vilseleda svararen om styrkan?
+
+### Steg F — tredje/fjärde-hands lättöppning (tillagt 2026-07-01)
+Människor öppnar lätt i 3:e hand med form (Drury, Steg-sekundär, täcker *svaret* –
+inte själva beslutet att öppna lätt). Eget omdöme bredvid Steg A (öppningsgolvet).
+**Mänsklig input behövs:** hur lätt får 3:e hand öppna, och ska 4:e hand
+(Pearson/regeln om 15) skilja sig?
+
 ## ⬜ Sekundära TP-lägen (efter C/D, om vi vill gå hela vägen "brett")
 - **Drury** (`responses-drury.ts`): passad hand, limithöjning – väg stödpoäng.
 - **Game tries** (lång färg / hjälpfärg) – formstyrda till sin natur.
@@ -59,6 +72,13 @@ från ren 2/1; bygg sist och med tydliga exempelhänder. NB: får aldrig krocka 
 ## 🔧 Städning / konsekvens
 - **Gemensam hjälpare** `pointsWithFloor(hand, mått)` så `max(HP, …)`-mönstret är
   single-sourcat i stället för inlinat på flera ställen (A/B/C-1 i dag).
+- **Invariant-test "nedgradera aldrig"** (tillagt 2026-07-01): ett property-svep
+  som för många slumpgivar bevisar att inget TP-bud hamnar *under* HP-golvet.
+  Låser själva grundprincipen globalt, inte bara per steg. Billig försäkring mot
+  framtida regressions; körs i hela `npm test`-sviten.
+- **Slamzon-tröskeln (≥33/≥37) — konsekvenskoll** (tillagt 2026-07-01):
+  `slam-auction.ts` summerar redan Bergen+stödpoäng. Auditera att den summeringen
+  inte dubbelräknar form mot A/B/C (två TP-mått som båda lyfter samma korthet).
 - **Visa TP-måttet i budförklaringen** konsekvent (`spTxt`/`txt` finns i B/C-1) så
   ägaren ser *varför* ett bud lyftes.
 - **Hålfinnare/övningar** (`docs/arbetslista.md` punkt 31–32) som tränar de nya
