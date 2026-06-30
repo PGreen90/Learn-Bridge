@@ -3,7 +3,7 @@
 // fit-svaren först (splinter → Jacoby → Bergen), sedan färgsvar och NT.
 
 import type { Bid, Forcing, Hand, Suit } from '../../types/bridge'
-import { dummyPoints } from './evaluation'
+import { pointsWithFloor } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 
 export type Major = 'hearts' | 'spades'
@@ -47,8 +47,7 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   // MEN aldrig under hp (en hand nedgraderas aldrig av sin form). Korthet/längd
   // får alltså LYFTA en höjning över inbjudan→utgång-gränsen (t.ex. 11 hp + singel
   // + 4 trumf → splinter), men en platt övervärderad hand stannar på hp-golvet.
-  const sp = Math.max(p, dummyPoints(hand, opened).dummyPoints)
-  const spTxt = sp > p ? `${p} hp / ${sp} stödp.` : `${p} hp`
+  const { points: sp, text: spTxt } = pointsWithFloor(hand, opened, 'support')
 
   if (p < 6) return { call: 'P', rule: 'pass', explanation: `${p} hp – för svagt för att svara → pass.` }
 

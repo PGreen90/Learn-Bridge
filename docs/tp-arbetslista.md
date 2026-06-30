@@ -70,12 +70,18 @@ inte själva beslutet att öppna lätt). Eget omdöme bredvid Steg A (öppningsg
   `dummyPoints` – kontrollera att off-book-svaren är linje med Steg B/C.
 
 ## 🔧 Städning / konsekvens
-- **Gemensam hjälpare** `pointsWithFloor(hand, mått)` så `max(HP, …)`-mönstret är
-  single-sourcat i stället för inlinat på flera ställen (A/B/C-1 i dag).
-- **Invariant-test "nedgradera aldrig"** (tillagt 2026-07-01): ett property-svep
-  som för många slumpgivar bevisar att inget TP-bud hamnar *under* HP-golvet.
-  Låser själva grundprincipen globalt, inte bara per steg. Billig försäkring mot
-  framtida regressions; körs i hela `npm test`-sviten.
+- ✅ **Gemensam hjälpare** `pointsWithFloor(hand, trump, kind)` (2026-07-01,
+  `evaluation.ts`): `max(HP, fit-mått)`-mönstret är nu single-sourcat. Ersatte de
+  fyra inlinade ställena (`responses.ts` stödpoäng + `rebids.ts` ×3 Bergenpoäng).
+  Returnerar `{hp, measure, points, lifted, text}` så förklaringstexten
+  (`"11 hp / 14 stödp."`) också är single-sourcad. Beteendebevarande – 485 tester
+  gröna, `tsc` rent.
+- ✅ **Invariant-test "nedgradera aldrig"** (2026-07-01, `tp-invariant.test.ts`):
+  seedat svep (3000 givar × 4 händer × 4 trumf × stöd/Bergen, ~96 000 fall)
+  bevisar att `pointsWithFloor` aldrig ger poäng under HP-golvet. Räknar även
+  faktiska lyft (`liftedCount > 0`) så testet inte är vakuöst. Låser principen
+  globalt, inte bara per steg. Eftersom alla fyra TP-budbeslut nu läser
+  `pointsWithFloor` skyddar detta hela domänen.
 - **Slamzon-tröskeln (≥33/≥37) — konsekvenskoll** (tillagt 2026-07-01):
   `slam-auction.ts` summerar redan Bergen+stödpoäng. Auditera att den summeringen
   inte dubbelräknar form mot A/B/C (två TP-mått som båda lyfter samma korthet).

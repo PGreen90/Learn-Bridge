@@ -7,7 +7,7 @@
 // auktionen vid två bud tills vidare.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { bergenPoints } from './evaluation'
+import { pointsWithFloor } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
@@ -154,12 +154,10 @@ export function openerRebidAfterSemiForcing1NT(hand: Hand, M: Major): ResponseRe
 // === Punkt 2: återbud efter enkel höjning (1♥–2♥/1♠–2♠), Bergen game try =====
 
 export function openerRebidAfterSimpleRaise(hand: Hand, M: Major): ResponseResult {
-  const p = hcp(hand)
   // TP-steg C: öppnaren har en känd högfärgsfit → räkna BERGENPOÄNG (extra trumf,
   // sidofärger, korthet), men aldrig under hp ("nedgradera aldrig"). Form lyfter
   // alltså mot game try / utgång, men en platt minimihand stannar på hp-golvet.
-  const bp = Math.max(p, bergenPoints(hand, M).bergenPoints)
-  const txt = bp > p ? `${p} hp / ${bp} Bergenp.` : `${p} hp`
+  const { points: bp, text: txt } = pointsWithFloor(hand, M, 'bergen')
   const mBid = BID[M]
   const mSym = SYM[M]
   if (bp >= 18) return { call: `4${mBid}`, rule: 'rebid: utgång', explanation: `${txt} – tillräckligt → 4${mSym} (utgång).` }
@@ -198,12 +196,10 @@ export function openerRebidAfter2over1(hand: Hand, opened: Suit, responder: Suit
 // === Punkt 4: återbud efter Bergen-höjningar, §4.1 ==========================
 
 export function openerRebidAfterBergen(hand: Hand, M: Major, rule: string): ResponseResult {
-  const p = hcp(hand)
   // TP-steg C: känd 4-korts-fit → räkna Bergenpoäng (aldrig under hp). En formstark
   // minimihand (t.ex. 11 hp + singel + 5 trumf = 15 Bergenp.) accepterar nu utgång
   // mittemot en limithöjning, där rå hp förut stannade lågt. Ägarens beslut.
-  const bp = Math.max(p, bergenPoints(hand, M).bergenPoints)
-  const txt = bp > p ? `${p} hp / ${bp} Bergenp.` : `${p} hp`
+  const { points: bp, text: txt } = pointsWithFloor(hand, M, 'bergen')
   const mBid = BID[M]
   const mSym = SYM[M]
   const game: ResponseResult = { call: `4${mBid}`, rule: 'rebid: utgång', explanation: `${txt} → 4${mSym} (utgång).` }
@@ -217,11 +213,9 @@ export function openerRebidAfterBergen(hand: Hand, M: Major, rule: string): Resp
 // === Punkt 5: återbud efter tvetydig splinter, §4.1 =========================
 
 export function openerRebidAfterSplinter(hand: Hand, M: Major): ResponseResult {
-  const p = hcp(hand)
   // TP-steg C: splinter är redan GF, så frågan är slam. Räkna Bergenpoäng (aldrig
   // under hp) – en formstark öppnare visar slamintresse även med hp en gnutta kort.
-  const bp = Math.max(p, bergenPoints(hand, M).bergenPoints)
-  const txt = bp > p ? `${p} hp / ${bp} Bergenp.` : `${p} hp`
+  const { points: bp, text: txt } = pointsWithFloor(hand, M, 'bergen')
   if (bp >= 15) {
     const relay = M === 'hearts' ? '3NT' : '3S' // relä som frågar efter den korta färgen
     return { call: relay, rule: 'splinter-relä', explanation: `${txt} – slamintresse → ${pretty(relay)} (relä, frågar efter kort färg).` }

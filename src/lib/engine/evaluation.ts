@@ -171,6 +171,45 @@ export interface BergenEvaluation extends Evaluation {
   bergenPoints: number
 }
 
+/**
+ * "Nedgradera aldrig"-golvet (ägarens TP-princip, se docs/tp-arbetslista.md):
+ * värdera handen till `max(hp, fit-mått)`. Form/korthet får LYFTA ett bud, men
+ * aldrig sänka det under hp. Detta är single-source för A/B/C-mönstret som annars
+ * var inlinat på fyra ställen (`responses.ts` stödpoäng, `rebids.ts` ×3 Bergenpoäng).
+ *
+ * `kind`: `'support'` = svararens stödpoäng (`dummyPoints`), `'bergen'` =
+ * öppnarens Bergenpoäng (`bergenPoints`). `trump` = den färg fiten finns i.
+ */
+export interface FlooredPoints {
+  /** Råa honnörspoäng = golvet vi aldrig går under. */
+  hp: number
+  /** Det råa fit-måttet (stöd-/Bergenpoäng) innan golvet. */
+  measure: number
+  /** `max(hp, measure)` – poängen budbeslutet ska läsa. */
+  points: number
+  /** true om formen lyfte handen över hp. */
+  lifted: boolean
+  /** Förklaringstext: `"11 hp / 14 stödp."` vid lyft, annars `"11 hp"`. */
+  text: string
+}
+
+export function pointsWithFloor(
+  hand: Hand,
+  trump: Suit,
+  kind: 'support' | 'bergen',
+  opts: { notrump?: boolean } = {},
+): FlooredPoints {
+  const hp = hcp(hand)
+  const measure =
+    kind === 'support'
+      ? dummyPoints(hand, trump).dummyPoints
+      : bergenPoints(hand, trump, opts).bergenPoints
+  const points = Math.max(hp, measure)
+  const lifted = points > hp
+  const label = kind === 'support' ? 'stödp.' : 'Bergenp.'
+  return { hp, measure, points, lifted, text: lifted ? `${hp} hp / ${points} ${label}` : `${hp} hp` }
+}
+
 /** Nivå 3: Bergenpoäng. `notrump` = true i sangkontrakt (ingen kortfärg räknas). */
 export function bergenPoints(hand: Hand, trump: Suit, opts: { notrump?: boolean } = {}): BergenEvaluation {
   const base = startingPoints(hand)
