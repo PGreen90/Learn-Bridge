@@ -39,6 +39,15 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   senare. Bygg inte alla på en gång.
 ## Beslut
 - Budsystem: **2 över 1 (2/1)**. Endast detta (lägg till fler senare).
+- **TP i budvalet (beslut 2026-06-30, byggs i steg).** Boten ska tänka i
+  totalpoäng (TP/fördelning), inte rå HP. **Låst regel:** en **12 HP-hand öppnar
+  alltid** – TP får aldrig *nedgradera* en öppningshand (människor gör det extremt
+  sällan). TP får däremot *uppgradera* (bra 11:a öppnar) och *nudga sang*. Omfång:
+  brett (öppning → svar → återbud), men implementeras **i test-låsta steg** så
+  on-book aldrig rubbas. **Steg A klart:** öppningsgolvet (`openings.ts`:
+  `HP ≥ 12 || TP ≥ 12`). **Kvar:** B = svararens inbjudan/utgång på TP, C =
+  öppnarens återbud på TP, D = TP-nudge för sang. Ägaren vill ge **mänsklig input
+  i konkreta budsituationer** löpande – fråga hellre än gissa.
 - Första funktion: **budträning** – visa hand, välj bud, appen ger facit.
 - Nästa stora riktning: **Spela mot datorn** (offline mot bottar; kvalitet före tempo).
 - **Målgrupp (beslut 2026-06-30): erfaren spelare** – en pålitlig, robust 2/1-

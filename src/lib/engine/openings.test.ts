@@ -49,7 +49,12 @@ describe('TP styr öppningen (Bergens grundregel: 12+ startpoäng)', () => {
   it('lång 10-hp-hand med 12 TP öppnar 1-högfärg (PDF Hand 1)', () => {
     expect(call('S:AKQT5 H:T982 D:6 C:J67')).toBe('1S') // 10 hp / 12 TP (längd + kvalitet)
   })
-  it('platt 12-hp-hand med bara 10 TP avstår (övervärderade D/kn)', () => {
-    expect(call('S:KQ5 H:KJ7 D:Q42 C:J32')).toBe('P') // 12 hp, 4-3-3-3 → 10 TP
+  it('platt 12-hp-hand öppnar ÄNDÅ (ägarens regel: 12 hp nedgraderas aldrig)', () => {
+    // 12 hp, 4-3-3-3 → bara 10 TP, men en människa öppnar i princip alltid 12 hp.
+    // HP-golvet (≥12) går före TP-nedgraderingen. Ingen 5-högfärg → minor-regeln.
+    expect(call('S:KQ52 H:KJ7 D:Q42 C:J32')).toBe('1C')
+  })
+  it('platt 11-hp-hand (TP < 12) avstår fortfarande', () => {
+    expect(call('S:KQ52 H:KJ7 D:Q42 C:T32')).toBe('P') // 11 hp, 4-3-3-3 → under golvet
   })
 })

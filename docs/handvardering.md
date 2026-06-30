@@ -51,8 +51,14 @@ Sex steg, i ordning:
    7-2-2-2** (i färgkontrakt). I NT-kontrakt: dra ifrån 1 även för 4-3-3-3.
 
 → **Startpoäng = summan av steg 1–6.**
-**Öppningsregel (referens, ej inkopplad nu):** öppna 1-i-färg med **12+ startpoäng
-och minst 2 säkra stick**.
+**Öppningsregel (INKOPPLAD, `openings.ts`):** öppna 1-i-färg när **HP ≥ 12
+ELLER startpoäng (TP) ≥ 12**. Två vägar (ägarens beslut 2026-06-30):
+- **HP-golv:** 12+ honnörspoäng öppnar *alltid* – en människa nedgraderar i
+  princip aldrig en öppningshand, så TP får aldrig sänka en 12-hp-hand under
+  tröskeln (t.ex. en platt 4-3-3-3 med 12 hp / 10 TP öppnar ändå).
+- **TP-upgrade:** en bra 11-hp-hand som når 12 TP (ess/tior/längd/kvalitet)
+  öppnar också. En platt 11:a (TP < 12) avstår fortfarande.
+NT-stegen (1NT 15–17 osv.) är hp-definierade.
 
 ### Nivå 2 — Stödpoäng (svararen, vid fit i HÖGFÄRG)
 

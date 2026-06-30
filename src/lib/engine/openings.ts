@@ -38,11 +38,14 @@ export function classifyOpening(hand: Hand): OpeningResult {
   // Stark 2♣ (obalanserad 22+).
   if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `${p} hp (stark) → 2♣ (konstgjord, krav).` }
 
-  // Öppning på 1-läget. Bergens grundregel: öppna med 12+ STARTPOÄNG (TP),
-  // inte 12+ hp. Så en bra 11-hp-hand (ess/tior/längd) öppnar, medan en platt
-  // 12-hp-hand som faller till 11 TP avstår. NT-stegen ovan är hp-definierade.
-  if (tp >= 12) {
-    const pts = tp === p ? `${p} hp` : `${p} hp / ${tp} TP`
+  // Öppning på 1-läget. Två vägar in (ägarens beslut 2026-06-30):
+  //  • 12+ HP öppnar ALLTID – en människa nedgraderar i princip aldrig en
+  //    öppningshand, så TP får aldrig sänka en 12-hp-hand under tröskeln.
+  //  • 11 HP med fördelning (Bergens grundregel: 12+ STARTPOÄNG/TP) öppnar också
+  //    – ess/tior/längd lyfter en bra 11:a till öppning.
+  // En platt 11-hp-hand (TP < 12) avstår fortfarande. NT-stegen ovan är hp-def.
+  if (p >= 12 || tp >= 12) {
+    const pts = tp > p ? `${p} hp / ${tp} TP` : `${p} hp`
     // Möjligt missat distributionellt 2♣ (stark obalanserad med lång färg) – flaggas.
     const uncertain = p >= 19 && !bal && Object.values(len).some((l) => l >= 6)
     if (len.spades >= 5 || len.hearts >= 5) {
