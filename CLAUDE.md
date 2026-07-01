@@ -1,6 +1,42 @@
 # CLAUDE.md — Bridge-app
 Läs den här filen först varje session.
 
+## 🗺️ Projektkarta — NU / NÄST / SENARE / PARKERAT
+> **Detta är överblicken. Läs den först.** `docs/arbetslista.md`, `docs/status.md`
+> och felsökningsplanen är detaljnivån — kartan här styr ordningen.
+>
+> **Järnregel:** 🔵 NU innehåller **exakt en sak**. Inget annat rörs förrän den är
+> klar. Kommer ägaren med en ny idé mitt i ett NU-jobb ska Claude **stoppa** och
+> säga *"bra idé — men just nu är NU: X, den rör vi inte"*, och lägga idén i
+> ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
+> visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
+
+### 🔵 NU (det enda vi jobbar på)
+**FAS 2 konkurrens — gör klar.** Slutför de sista punkterna i felsökningsplanens
+FAS 2 så att störd budgivning blir bevisat korrekt (facit före fix + `npm test`):
+- **Punkt 8 — Support Double** (kodat i `doubles.ts`, ej inkopplat i levande auktion).
+- **Punkt 9 — Responsiva dubblingar** (kodat, ej inkopplat).
+- **Punkt 10 — Advancer-logik** (höjning / cue / NT / fit-jump).
+- **Punkt 10b — Off-book Syd:** definiera önskat beteende + facit (grunden finns).
+
+### 🟢 NÄST (max 3, i ordning)
+1. **FAS 3 — Fit- & stödlogik:** gemensam fitklassificering, Bergen (aldrig m. 3
+   stöd), Jacoby 2NT, Splinter, Bergen Game Try.
+2. **FAS 4 — Värdering:** HP vs TP vs LTC. *Här bor även TP-steg C-2/C-3/D*
+   (minorhöjningar, sang-accepter, sang-nudge) — de flyttas hit, jagas inte löst.
+3. **FAS 5 — NT-systemet:** Stayman, Smolen, transfers, Texas, MSS, 2NT, 3NT.
+
+### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- FAS 6 Minorer · FAS 7 Svaga öppningar · FAS 8 Slam · FAS 9 Passad hand ·
+  FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt enligt felsökningsplanen).
+
+### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
+- **Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC): känd gräns, stängs lagligt.
+  Bekräfta bara att den fortfarande stängs — jaga den aldrig som bugg.
+- **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.
+- **Off-book §7 bredd** (balansering + inkliv över 1NT/svaga tvåor/spärrar).
+- **"Framkalla slutbud"-väljaren** (ägaridé) + **webworker för DDS-facit**.
+
 ## Arbetsrutiner (följ varje gång)
 - **Vid sessionsstart:** följ 🟢-checklistan i `docs/arbetsrutiner.md`.
 - **Vid sessionsslut:** följ 🔴-checklistan i `docs/arbetsrutiner.md`.
