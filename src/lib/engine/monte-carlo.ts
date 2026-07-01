@@ -16,7 +16,7 @@
 
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { playedCards, visibleSeats } from './card-counting'
-import { hcp } from './hand'
+import { hcp, suitHcp } from './hand'
 import { legalCards, playCard, side, type PlayState } from './play'
 import { doubleDummyDeclarerRemaining } from './dds'
 import type { HandModel, SeatConstraint } from './hand-model'
@@ -73,6 +73,9 @@ function satisfies(c: SeatConstraint, assigned: Hand, played: Card[]): boolean {
     if (c.voids.has(s)) continue
     const orig = countSuit(assigned, s) + countSuit(played, s)
     if (orig < c.length[s].min || orig > c.length[s].max) return false
+    // Per-färg-HP (signalavkodning): ursprungshanden = tilldelade + spelade kort.
+    const suitPts = suitHcp(assigned, s) + suitHcp(played, s)
+    if (suitPts < c.suitHcp[s].min || suitPts > c.suitHcp[s].max) return false
   }
   const origHcp = hcp(assigned) + hcp(played)
   return origHcp >= c.hcpMin && origHcp <= c.hcpMax

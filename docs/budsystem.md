@@ -849,6 +849,20 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-01** – **FAS 11 pt 50 – signalavkodning (öppningsutspelet → hand-modellen)**
+  (testsvit 717). Ny `signal-decode.ts`: motspelaren *läser* botens öppningsutspel
+  och matar in slutsatsen i hand-modellen så Monte-Carlo-samplaren delar ut de
+  dolda händerna troligare. Två **vattentäta**, ärliga slutsatser: (1) **längd** –
+  boten leder ur sin längsta färg och en 13-kortshand har alltid ≥4 i sin längsta
+  → utspelsfärgen ≥4 kort; (2) **honnör** – bara när det utspelade kortet bevisligen
+  är utspelarens högsta i färgen (alla högre kort syns för den agerande) och är en
+  honnör → utspelaren håller den touchérande honnören under (A→A-K, K→K-D, D→D-kn,
+  kn→kn-10). Undviker A-D-kn-fällan (kn som 3:e bästa). **Ingen tjuvkik:** bara
+  bottars utspel avkodas (deterministisk §8.3), aldrig människans (Syd).
+  Hand-modellen fick ett **per-färg-HP-spann** (`suitHcp`) som samplaren
+  (`monte-carlo.satisfies`) nu upprätthåller → den avkodade honnören placeras
+  faktiskt hos utspelaren. Inkopplat i `botCardSmart`. Facit i `signal-decode.test.ts`
+  (e2e: samplaren tvingas ge Öst D♥ efter K♥-utspel med A♥ synlig).
 - **2026-07-01** – **FAS 11 pt 47–49 – facit-granskning av `signals.ts` mot §8**
   (testsvit 711). Alla encoders lästa mot systemboken → **svaren matchar facit**
   (honnörsutspel topp-av-sekvens, 3:e/5:e spotutspel, UDCA omvänd attityd/räkning,

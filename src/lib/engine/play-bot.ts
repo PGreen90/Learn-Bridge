@@ -15,6 +15,7 @@ import type { ResolvedCall } from '../bidding'
 import { currentWinner, legalCards, side, type PlayState } from './play'
 import { isSureWinner, playedCards, shownVoids, unseenTrumpCount } from './card-counting'
 import { buildHandModel } from './hand-model'
+import { applyOpeningLeadSignal } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
 import { leadFromSuit } from './signals'
 
@@ -149,6 +150,9 @@ export function botCardSmart(
   if (openingLead || state.hands[seat].length > maxCards) return botCard(state, seat)
 
   const model = buildHandModel(calls, { voids: shownVoids(state) })
+  // Signalavkodning (pt 50): skärp modellen med det öppningsutspelet avslöjar
+  // (längd + ev. touchérande honnör), sett ur den agerande platsens synvinkel.
+  applyOpeningLeadSignal(model, state, seat)
   const choice = chooseCardMonteCarlo(state, seat, model, {
     samples: opts.samples ?? 24,
     maxNodes: opts.maxNodes ?? 150_000,

@@ -166,8 +166,12 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 - **Steg 3c (`play-bot.ts` `botCardSmart`, inkopplad i `Play.tsx`):** MC i slutspelet
   (≤7 kort kvar), annars tumregler (öppningsutspel / tung giv / ett-lagligt-kort).
   Bevisat i test: 6-korts-slutspel där tumregeln tar 2 stick, MC tar facit 3.
-- **Kvar (FAS 11):** signalavkodning (pt 50), "Varför?"-knapp, tänj MC-fönstret
-  tidigare (ev. webworker). Facit-granska `signals.ts` (pt 47–49).
+- **Steg 3d – signalavkodning (pt 50, `signal-decode.ts`):** motspelaren läser
+  botens ÖPPNINGSUTSPEL och skärper hand-modellen. Längd (leder ur längsta → ≥4)
+  + honnör (bara när utspelaren bevisligen är högst i färgen → touchérande honnör).
+  Hand-modellen fick per-färg-HP-spann (`suitHcp`) som samplaren upprätthåller.
+  Bara bottars utspel avkodas (ingen tjuvkik på människan). Inkopplat i `botCardSmart`.
+- **Kvar (FAS 11):** "Varför?"-knapp, tänj MC-fönstret tidigare (ev. webworker).
 
 ## Kortspel (punkt 29)
 

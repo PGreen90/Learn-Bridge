@@ -36,12 +36,18 @@ export interface Range {
   max: number
 }
 
+/** Max honnörspoäng i EN färg (A+K+D+kn = 4+3+2+1). */
+const SUIT_HCP_CEIL = 10
+
 /** Vad auktionen (+ spelet) ärligt säger om EN plats hand. */
 export interface SeatConstraint {
   hcpMin: number
   hcpMax: number
   /** Längd-spann per färg (default 0–13). */
   length: Record<Suit, Range>
+  /** Honnörspoäng-spann per färg (default 0–10). Skärps av signalavkodning
+   *  (t.ex. honnörsutspel → utspelaren håller den touchérande honnören). */
+  suitHcp: Record<Suit, Range>
   /** Färger platsen bevisat sig sakna (t.ex. via show-out under spelet). */
   voids: Set<Suit>
 }
@@ -50,8 +56,12 @@ export type HandModel = Record<Seat, SeatConstraint>
 
 function fresh(): SeatConstraint {
   const length = {} as Record<Suit, Range>
-  for (const s of SUITS) length[s] = { min: 0, max: 13 }
-  return { hcpMin: 0, hcpMax: HCP_CEIL, length, voids: new Set() }
+  const suitHcp = {} as Record<Suit, Range>
+  for (const s of SUITS) {
+    length[s] = { min: 0, max: 13 }
+    suitHcp[s] = { min: 0, max: SUIT_HCP_CEIL }
+  }
+  return { hcpMin: 0, hcpMax: HCP_CEIL, length, suitHcp, voids: new Set() }
 }
 
 interface ParsedBid {
@@ -198,8 +208,13 @@ function narrowHcp(c: SeatConstraint, min: number, max: number): void {
 function hcpFloor(c: SeatConstraint, min: number): void {
   c.hcpMin = Math.max(c.hcpMin, min)
 }
-function lenMin(c: SeatConstraint, suit: Suit, min: number): void {
+/** Höj längd-golvet i en färg (exporterad för signalavkodningen). */
+export function lenMin(c: SeatConstraint, suit: Suit, min: number): void {
   c.length[suit].min = Math.max(c.length[suit].min, min)
+}
+/** Höj honnörspoäng-golvet i en färg (exporterad för signalavkodningen). */
+export function suitHcpFloor(c: SeatConstraint, suit: Suit, min: number): void {
+  c.suitHcp[suit].min = Math.max(c.suitHcp[suit].min, min)
 }
 function narrowLen(c: SeatConstraint, suit: Suit, min: number, max: number): void {
   c.length[suit].min = Math.max(c.length[suit].min, min)
@@ -208,5 +223,8 @@ function narrowLen(c: SeatConstraint, suit: Suit, min: number, max: number): voi
 /** Håll golv <= tak för både HP och längder (skydd mot motstridiga inferenser). */
 function clampFloor(c: SeatConstraint): void {
   if (c.hcpMin > c.hcpMax) c.hcpMin = c.hcpMax
-  for (const s of SUITS) if (c.length[s].min > c.length[s].max) c.length[s].min = c.length[s].max
+  for (const s of SUITS) {
+    if (c.length[s].min > c.length[s].max) c.length[s].min = c.length[s].max
+    if (c.suitHcp[s].min > c.suitHcp[s].max) c.suitHcp[s].min = c.suitHcp[s].max
+  }
 }
