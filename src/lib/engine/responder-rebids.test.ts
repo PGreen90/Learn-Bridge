@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Major, ResponseResult } from './responses'
 import { parseHand } from '../bidding'
 import type { Suit } from '../../types/bridge'
-import { responderAnswerBergenGameTry, responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction, responderRevealSplinterShortness } from './responder-rebids'
+import { responderAnswerBergenGameTry, responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction, responderRebidIn2NTAuction, responderRevealSplinterShortness } from './responder-rebids'
 
 function r10(notation: string, M: Major, call: string, rule: string): string {
   const rebid: ResponseResult = { call, rule, explanation: '' }
@@ -190,6 +190,42 @@ describe('punkt 11 – svararens andra bud i 1NT-auktioner', () => {
 
   it('Texas – öppnaren fullföljde → pass', () => {
     expect(r11('S:7 H:KQ8642 D:KQ2 C:952', 'Texas', '4D', '4H')).toBe('P')
+  })
+})
+
+describe('punkt 24 – svararens andra bud efter 2NT-öppning (GF, placera kontrakt)', () => {
+  const r2nt = (n: string, rule: string, respCall: string, rebidCall: string): string => {
+    const response: ResponseResult = { call: respCall, rule, explanation: '' }
+    const rebid: ResponseResult = { call: rebidCall, rule: '', explanation: '' }
+    return responderRebidIn2NTAuction(response, rebid, parseHand(n))?.call ?? 'null'
+  }
+
+  it('Stayman (2NT), fit i öppnarens spader → 4♠', () => {
+    expect(r2nt('S:KJ43 H:Q42 D:K43 C:432', 'Stayman (2NT)', '3C', '3S')).toBe('4S') // 8 hp, 4 spader
+  })
+
+  it('Stayman (2NT), ingen fit (öppnaren 3♦) → 3NT', () => {
+    expect(r2nt('S:KJ43 H:Q42 D:K43 C:432', 'Stayman (2NT)', '3C', '3D')).toBe('3NT')
+  })
+
+  it('Stayman (2NT), 5-4 hf efter 3♦ → Smolen 3♥ (5 spader)', () => {
+    expect(r2nt('S:KJ432 H:Q543 D:K4 C:43', 'Stayman (2NT)', '3C', '3D')).toBe('3H')
+  })
+
+  it('Stayman (2NT), 5-4 hf efter 3♦ → Smolen 3♠ (5 hjärter)', () => {
+    expect(r2nt('S:Q543 H:KJ432 D:K4 C:43', 'Stayman (2NT)', '3C', '3D')).toBe('3S')
+  })
+
+  it('transfer (2NT) svag signoff (p<5) → pass', () => {
+    expect(r2nt('S:2 H:J87632 D:5432 C:43', 'transfer (2NT)', '3D', '3H')).toBe('P') // 1 hp
+  })
+
+  it('transfer (2NT), 5-korts hf GF → 3NT (öppnaren väljer)', () => {
+    expect(r2nt('S:K3 H:KJ432 D:Q43 C:432', 'transfer (2NT)', '3D', '3H')).toBe('3NT') // 9 hp, 5 hjärter
+  })
+
+  it('transfer (2NT), 6-korts hf GF → 4♥', () => {
+    expect(r2nt('S:K3 H:KQ8432 D:43 C:K2', 'transfer (2NT)', '3D', '3H')).toBe('4H') // 11 hp, 6 hjärter
   })
 })
 

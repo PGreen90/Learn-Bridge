@@ -1207,3 +1207,11 @@ Det avslöjar längd/räkning direkt för partnern.
   verifierade oförändrat rätt. Två SYSTEMBESLUT (garbage Stayman JA; 5-5-schemat)
   nedskrivna i §4.3. +15 tester (574 gröna). **Nästa gång:** punkt 24/25
   (2NT-systemet + 3NT-öppningen), sedan punkt 23 (Minor Suit Stayman-fortsättning).
+- **2026-07-01** – Budmotorn (**FAS 5 punkt 24–25, 2NT/3NT**), test-låst:
+  2NT-systemet (20–21) och 3NT-öppningen (25–27) verifierade rätt (turerna 1–3:
+  GF-schema + öppnarens fullföljande + placering av kvantitativ 4NT). **Byggde
+  svararens turn 4 efter 2NT** (`responderRebidIn2NTAuction`): minorfit→utgång,
+  ingen fit→3NT, 5-4 hf efter 2NT–3♣–3♦→**Smolen över 2NT** (speglar 1NT-varianten),
+  svag transfer→pass. 2NT-auktioner löser sig nu helt på systemlinjen. +7 tester
+  (581 gröna). Kod, inte systemändring. **Nästa gång:** punkt 23 (Minor Suit
+  Stayman-fortsättning – svararens turn 4; slam-grenen hör till FAS 8).

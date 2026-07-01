@@ -63,6 +63,11 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
     return responderRebidIn1NTAuction(response, rebid, hand)
   }
 
+  // FAS 5 punkt 24 – 2NT-auktioner (placera kontraktet efter Stayman/transfer).
+  if (openCall === '2NT') {
+    return responderRebidIn2NTAuction(response, rebid, hand)
+  }
+
   // Punkt 12 – färgauktioner efter ett 1-läges färgsvar (fjärde färg krav m.m.).
   if (['1C', '1D', '1H', '1S'].includes(openCall) && response.rule === 'ny färg (1-läget)') {
     const opened = suitOfCall(openCall)
@@ -279,6 +284,48 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
 
     default:
       return null // Minor Suit Stayman-fortsättning m.m. tas senare
+  }
+}
+
+// === FAS 5 punkt 24: svararens andra bud efter en 2NT-öppning ================
+// 2NT (20–21) är GF-schema (inga inbjudningsbud). Efter Stayman/transfer placerar
+// svararen kontraktet på utgångsnivå: höj funnen fit → utgång, ingen fit → 3NT,
+// 5-4 i högfärgerna efter 3♦ → Smolen (speglar 1NT-varianten: bjud 4-korts hf,
+// visa 5 i den andra – starka handen blir spelförare). Minorfråga/slam = §6.
+export function responderRebidIn2NTAuction(response: ResponseResult, rebid: ResponseResult, hand: Hand): ResponseResult | null {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const sp = len.spades
+  const he = len.hearts
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${p} hp – ${why} → pass.` })
+
+  switch (response.rule) {
+    case 'Stayman (2NT)': {
+      if (rebid.call === '3D') {
+        // Öppnaren förnekade 4-korts högfärg.
+        if ((sp === 5 && he === 4) || (he === 5 && sp === 4)) {
+          const call = sp === 5 ? '3H' : '3S' // bjud 4-korts hf → visar 5 i den andra
+          return { call, rule: 'Smolen', explanation: `5-4 i högfärgerna → ${SYM[suitOfCall(call)!]} (Smolen över 2NT, GF).` }
+        }
+        return { call: '3NT', rule: 'till spel', explanation: `${p} hp utan fit → 3NT.` }
+      }
+      // Öppnaren visade en högfärg (3♥/3♠).
+      const target = suitOfCall(rebid.call)
+      if (target && len[target] >= 4) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `${p} hp + fit → 4${SYM[target]}.` }
+      return { call: '3NT', rule: 'till spel', explanation: `${p} hp utan fit → 3NT.` }
+    }
+
+    case 'transfer (2NT)': {
+      const target: Suit = response.call === '3D' ? 'hearts' : 'spades'
+      // Svag (signoff i delkontrakt) → passa den fullföljda transfern.
+      if (p < 5) return pass('svag – transfern var ett signoff i delkontrakt')
+      if (len[target] >= 6) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `${p} hp, 6+ ${NAME[target]} → 4${SYM[target]}.` }
+      // Exakt 5-korts högfärg, GF → 3NT (öppnaren väljer 3NT eller 4 i färgen).
+      return { call: '3NT', rule: 'till spel', explanation: `${p} hp, 5 ${NAME[target]} → 3NT (öppnaren väljer 3NT/4 i färgen).` }
+    }
+
+    default:
+      return null // Texas/minorfråga/3NT/4NT/6NT är redan placerade (minorfråga-slam = §6)
   }
 }
 
