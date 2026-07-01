@@ -25,9 +25,13 @@
 >   högfärgen (båda objudna färgerna minorer, t.ex. 1♥–(1♠)/1♠–(2♥)) ger svararen
 >   nu **negativ X på 4-4 minorer utan fit** (förut pass). Testsvit 452 grön
 >   (legality-svepet fick uttryckligt 30 s-tidsspann).
->   ⬜ **Näst på tur: punkt 8–10** (stöd-/responsiva dubblingar + advancer)
->   – kodat men ej inkopplat i levande auktion. Arbetsregel A (facit före fix)
->   + B (`npm test`). FAS 1 punkt 2 tung del (matchande/avvisade regler) uppskjuten.
+>   ✅ **Punkt 8 klar (2026-07-01):** stöddubbling inkopplad i `buildAuction`
+>   (gren 1 färg–(P)–1M–(RHO-inkliv)→X). `supportDouble` gjord positions-/
+>   nivåmedveten (t.o.m. 2M, standard). Facit: `doubles.test.ts` +
+>   `auction-support-double.test.ts`. Testsvit 499 grön.
+>   ⬜ **Näst på tur: punkt 9–10 + 10b** (responsiva dubblingar + advancer +
+>   off-book Syd) – kodat men ej inkopplat i levande auktion. Arbetsregel A (facit
+>   före fix) + B (`npm test`). FAS 1 punkt 2 tung del (matchande/avvisade regler) uppskjuten.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

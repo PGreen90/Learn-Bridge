@@ -72,15 +72,21 @@ export function responsiveDouble(hand: Hand, theirSuit: Suit): ResponseResult | 
 }
 
 /**
- * Stöddubbling: 1m–(P)–1M–(inkliv). Öppnarens X visar EXAKT 3-korts stöd i
- * partnerns högfärg (direkt höjning = 4 stöd). null = ingen stöddubbling.
+ * Stöddubbling: 1m–(P)–1M–(RHO-inkliv). Öppnarens X visar EXAKT 3-korts stöd i
+ * partnerns högfärg (en direkt höjning = 4 stöd). Gäller bara över ett
+ * FÄRGINKLIV och bara så länge "2 i partnerns högfärg" fortfarande kan bjudas
+ * (standard 2/1: t.o.m. 2M). Tar inklivet bort den nivån (t.ex. 1♥–(2♠))
+ * betyder X något annat → null. null = ingen stöddubbling (bjud naturligt).
  */
-export function supportDouble(hand: Hand, partnerMajor: Suit): ResponseResult | null {
-  const support = lengths(hand)[partnerMajor]
-  if (support === 3) {
-    return { call: 'X', rule: 'stöddubbling', explanation: `exakt 3 stöd i ${NAME[partnerMajor]} → X (stöddubbling).` }
-  }
-  return null
+export function supportDouble(hand: Hand, partnerMajor: Suit, rhoCall: string): ResponseResult | null {
+  const their = suitOfBid(rhoCall)
+  if (!their) return null // stöd-X finns bara över RHO:s färginkliv
+  if (lengths(hand)[partnerMajor] !== 3) return null // exakt 3 stöd
+  // Gäller bara om "2 i partnerns högfärg" fortfarande ligger över RHO:s inkliv.
+  const ovLevel = Number(rhoCall[0])
+  const twoMajorAvailable = 2 > ovLevel || (2 === ovLevel && rankIdx(partnerMajor) > rankIdx(their))
+  if (!twoMajorAvailable) return null
+  return { call: 'X', rule: 'stöddubbling', explanation: `exakt 3 stöd i ${NAME[partnerMajor]} → X (stöddubbling).` }
 }
 
 /** Advancers svar på partnerns upplysningsdubbling (bjud bästa färg). §7.3. */

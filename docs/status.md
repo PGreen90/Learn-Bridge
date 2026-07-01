@@ -154,6 +154,20 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   partnern (med 3+ stöd höjs i stället). Förut blev det pass (lucka).
 - Inkopplat i levande auktion (`competitiveResponderAction` anropar `negativeDouble`).
 
+### Stöddubbling inkopplad (FAS 2 punkt 8)
+
+- **`supportDouble` (`doubles.ts`)** gjord positions-/nivåmedveten: tar RHO:s
+  inkliv som parameter och ger X **bara** över ett färginkliv där `2` i partnerns
+  högfärg fortfarande kan bjudas (standard 2/1, t.o.m. 2M). Exakt 3 stöd → X;
+  4 stöd = direkt höjning, 2 = naturligt.
+- **Inkopplad i `buildAuction`:** ny störningsgren `1 färg–(P)–1♥/1♠–(RHO-inkliv)
+  →X`. Återanvänder den testade inklivsmotorn (`overcall` med svararens 1M som
+  referens). Grenen slår till **bara** när stöd-X faktiskt gäller (öppnaren har
+  exakt 3 stöd) → inga ostörda auktioner trunkeras (icke-regressivt). Öppnarens
+  övriga konkurrenssvar (utan exakt 3 stöd) hör till en senare punkt.
+- Facit: `doubles.test.ts` (enhet) + `auction-support-double.test.ts` (hela
+  sekvensen `1♦–(P)–1♥–(1♠)–X`). Testsvit 499 grön.
+
 ## Klickbara bud med betydelse (valideringsstöd)
 
 - **Budlådan** (`BiddingBox.tsx`) är nu tvåstegs: ett klick **väljer** ett bud och

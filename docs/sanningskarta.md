@@ -135,7 +135,7 @@ aldrig i en levande auktion.
 | §7.3 Upplysningsdubbling | KODAT | `overcalls.ts` | **Ja** (kan returneras som inkliv). |
 | §7.3 Negativ dubbling | KODAT (dubblerad!) | `doubles.ts` `negativeDouble` **och** inline i `auction.ts` | **Ja**, men via `auction.ts`-versionen – `doubles.ts`-versionen är oanvänd. Dubblerad logik → FAS 1. |
 | §7.3 Responsiv dubbling | KODAT | `doubles.ts` `responsiveDouble` | **Nej.** |
-| §7.3 Stöddubbling (exakt 3) | KODAT | `doubles.ts` `supportDouble` | **Nej.** |
+| §7.3 Stöddubbling (exakt 3) | KODAT + INKOPPLAD | `doubles.ts` `supportDouble` + gren i `auction.ts` | **Ja** (FAS 2 punkt 8, 2026-07-01): 1 färg–(P)–1M–(RHO-inkliv)→X, positions-/nivåmedveten (t.o.m. 2M). |
 | §7.3 Advancers svar på upplysningsdubbling | KODAT | `doubles.ts` `answerTakeoutDouble` | **Ja** – men bara i budlådan (`decideCall`-fallback), ej i `buildAuction`. |
 | §7.4 Lebensohl | KODAT | `lebensohl.ts` | **Nej.** |
 | §7.5 DONT mot 1NT | KODAT | `dont.ts` | **Nej** (ingen auktion modellerar oss som inkliv över *deras* 1NT). |

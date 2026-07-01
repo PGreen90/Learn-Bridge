@@ -24,11 +24,28 @@ describe('responsiveDouble (§7.3)', () => {
 })
 
 describe('supportDouble (§7.3)', () => {
-  it('exakt 3 stöd → X', () => {
-    expect(supportDouble(parseHand('S:K43 H:A32 D:KQ32 C:432'), 'spades')?.call).toBe('X')
+  // 1♦–(P)–1♥–(inkliv): öppnaren med exakt 3 hjärter.
+  const threeHearts = parseHand('S:A32 H:K32 D:KQ432 C:32')
+  it('exakt 3 stöd, inkliv 1♠ (2♥ finns kvar) → X', () => {
+    expect(supportDouble(threeHearts, 'hearts', '1S')?.call).toBe('X')
+  })
+  it('exakt 3 stöd, inkliv 2♣ (2♥ finns kvar) → X', () => {
+    expect(supportDouble(threeHearts, 'hearts', '2C')?.call).toBe('X')
+  })
+  it('exakt 3 spader, inkliv 2♥ (2♠ finns kvar) → X', () => {
+    expect(supportDouble(parseHand('S:K32 H:A32 D:32 C:KQ432'), 'spades', '2H')?.call).toBe('X')
+  })
+  it('exakt 3 stöd men inkliv 2♠ tar bort 2♥ → null (stöd-X av)', () => {
+    expect(supportDouble(threeHearts, 'hearts', '2S')).toBeNull()
+  })
+  it('inget inkliv (RHO pass) → null (stöd-X finns inte)', () => {
+    expect(supportDouble(threeHearts, 'hearts', 'P')).toBeNull()
   })
   it('4 stöd → null (höj naturligt i stället)', () => {
-    expect(supportDouble(parseHand('S:K432 H:A32 D:KQ3 C:432'), 'spades')).toBeNull()
+    expect(supportDouble(parseHand('S:K432 H:A32 D:KQ3 C:432'), 'spades', '2H')).toBeNull()
+  })
+  it('2 stöd → null', () => {
+    expect(supportDouble(parseHand('S:K2 H:A32 D:KQ432 C:432'), 'spades', '2H')).toBeNull()
   })
 })
 

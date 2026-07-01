@@ -18,7 +18,7 @@ import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
-import { negativeDouble } from './doubles'
+import { negativeDouble, supportDouble } from './doubles'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation } from './slam-auction'
@@ -280,6 +280,27 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
 
   // Svararen passade → utbjudet kontrakt, auktionen är slut.
   if (response.call === 'P') return finish(false)
+
+  // Stöddubbling (punkt 8, §7.3): öppning 1 i färg – (LHO pass) – svararen 1♥/1♠
+  // – (RHO kliver in). Öppnaren med EXAKT 3 stöd upplyser med en stöddubbling
+  // (en direkt höjning = 4 stöd). Vi modellerar den här störningsronden BARA när
+  // stöd-X faktiskt slår till – annars skulle vi trunkera massor av ostörda
+  // auktioner. Öppnarens övriga konkurrenssvar hör till en senare punkt, så då
+  // lämnas linjen ostörd som förut (RHO:s ev. inkliv modelleras inte).
+  const respMajor: Suit | null = response.call === '1H' ? 'hearts' : response.call === '1S' ? 'spades' : null
+  if (openerSuit && respMajor) {
+    const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+    const rho = overcall(deal.hands[rhoSeat], response.call)
+    // Bara ett äkta färginkliv (ej i öppnarens egen färg) kan utlösa stöd-X.
+    if (rho.call !== 'P' && parseBid(rho.call).suit !== openerSuit) {
+      const sd = supportDouble(deal.hands[openerSeat], respMajor, rho.call)
+      if (sd) {
+        turns.push({ seat: rhoSeat, role: 'motståndare', call: rho.call, rule: rho.rule, explanation: rho.explanation, uncertain: rho.uncertain })
+        turns.push({ seat: openerSeat, role: 'öppnare', call: sd.call, rule: sd.rule, explanation: sd.explanation })
+        return finish(true)
+      }
+    }
+  }
 
   // Öppnarens återbud (dispatchas på öppning + svar).
   const rebid = openerSecondBid(opening.call, response, deal.hands[openerSeat])
