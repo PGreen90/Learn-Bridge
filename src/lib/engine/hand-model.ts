@@ -5,15 +5,17 @@
 // HP:na och fördelningen ur vad varje plats visat/förnekat.
 //
 // Del 1: HP-liggaren (öppnarens spann + passad hand + renonser).
-// Del 2 (denna): FÄRGLÄNGDER ur naturliga bud – konservativa GOLV som aldrig
-// kan vara fel (ett falskt spann förgiftar Monte Carlo-samplingen i Steg 3):
-//   • öppning 1♥/1♠ → 5+, 1♣/1♦ → 3+, 1NT/2NT → balanserat (2–5 i varje färg)
-//   • ny naturlig färg (ej höjning/cue) → 4+;  rebjuden egen färg → 6+
-//   • känd renons → exakt 0 (hård fakta, slår budinferensen)
+// Del 2: FÄRGLÄNGDER ur naturliga bud – konservativa GOLV som aldrig kan vara
+// fel: öppning 1♥/1♠ → 5+, 1♣/1♦ → 3+, 1NT/2NT → balanserat (2–5/färg), ny
+// naturlig färg → 4+, rebjuden färg → 6+, känd renons → 0.
+// Del 3 (denna): svaga/spärr-öppningar (svag tvåa 4–11 hp + 6-färg, spärr ≤11
+//   + 6-färg, stark 2♣ = inget säkert golv) och SVARARENS HP-golv i en ostörd,
+//   opassad sekvens: 1-lägessvar (ny färg) → 6+, 2/1 utgångskrav → 12+.
 // Modellen KONSUMERAS ännu inte av botten; det gör Monte Carlo i Steg 3.
 //
-// DEL 3 (kommer): svarar-/inklivsspann i HP, svaga tvåor/spärrar/stark 2♣,
-// samt skärpning ur spelade kort (exakt återstående längd).
+// SENARE: inklivsspann, superstark/skev 2♣-form, och skärpning ur redan spelade
+// kort (exakt återstående längd) – det sistnämnda hör hemma i Monte Carlo-
+// samplaren (Steg 3), som delar ut bara osedda kort med renons/antal som grind.
 
 import type { Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
@@ -88,6 +90,29 @@ export function buildHandModel(
     if (!contractBefore) model[seat].hcpMax = Math.min(model[seat].hcpMax, 11)
   }
 
+  // Svararens HP-golv i en OSTÖRD, OPASSAD 1-lägessekvens (del 3). Endast över
+  // en 1-i-färg-öppning: 1-lägessvar (ny färg) = 6+, 2/1 (ny färg på 2-läget,
+  // lägre än öppningsfärgen) = utgångskrav 12+.
+  if (openerIdx >= 0) {
+    const openerSeat = calls[openerIdx].seat
+    const op = parse(calls[openerIdx].bid)!
+    if (op.strain !== 'NT' && op.level === 1) {
+      const responder = PARTNER[openerSeat]
+      const respIdx = calls.findIndex((c, idx) => idx > openerIdx && c.seat === responder)
+      const firstRespIdx = calls.findIndex((c) => c.seat === responder)
+      if (respIdx >= 0 && firstRespIdx === respIdx) {
+        const rp = parse(calls[respIdx].bid)
+        const contested = calls
+          .slice(openerIdx + 1, respIdx)
+          .some((c) => SIDE[c.seat] !== SIDE[openerSeat] && CONTRACT_BID.test(c.bid))
+        if (rp && rp.strain !== 'NT' && !contested) {
+          if (rp.level === 1) hcpFloor(model[responder], 6)
+          else if (rp.level === 2 && suitRank(rp.strain) < suitRank(op.strain)) hcpFloor(model[responder], 12)
+        }
+      }
+    }
+  }
+
   // Färglängder ur naturliga färgbud (öppningen redan hanterad ovan).
   calls.forEach((c, i) => {
     if (i === openerIdx) return
@@ -128,11 +153,27 @@ function applyOpening(c: SeatConstraint, level: number, strain: string): void {
     if (level === 1 || level === 2) for (const s of SUITS) narrowLen(c, s, 2, 5)
     return
   }
-  if (level !== 1) return // svaga tvåor/spärrar/stark 2♣ → del 3
-  narrowHcp(c, 12, 21)
   const suit = STRAIN_SUIT[strain]!
-  // 2/1: högfärgsöppning 5+, minoröppning 3+ (better minor).
-  lenMin(c, suit, suit === 'hearts' || suit === 'spades' ? 5 : 3)
+  if (level === 1) {
+    narrowHcp(c, 12, 21)
+    // 2/1: högfärgsöppning 5+, minoröppning 3+ (better minor).
+    lenMin(c, suit, suit === 'hearts' || suit === 'spades' ? 5 : 3)
+    return
+  }
+  if (level === 2) {
+    // Stark 2♣ är artificiell → inget säkert HP/längd-golv. Svag tvåa (2♦/2♥/2♠)
+    // = 4–11 hp, 6-korts färg.
+    if (strain === 'C') return
+    narrowHcp(c, 4, 11)
+    lenMin(c, suit, 6)
+    return
+  }
+  if (level === 3) {
+    // Spärröppning: förnekar öppningsstyrka (≤ 11), lång färg (6+).
+    c.hcpMax = Math.min(c.hcpMax, 11)
+    lenMin(c, suit, 6)
+  }
+  // 4-läget och högre: kan vara spärr ELLER stark → inget säkert golv (senare).
 }
 
 function bidSuitBefore(seat: Seat, suit: Suit, prior: ResolvedCall[]): boolean {
@@ -145,9 +186,17 @@ function opponentBidSuit(seat: Seat, suit: Suit, prior: ResolvedCall[]): boolean
   return prior.some((c) => SIDE[c.seat] !== SIDE[seat] && STRAIN_SUIT[parse(c.bid)?.strain ?? ''] === suit)
 }
 
+/** Rank för en färg-strain (C<D<H<S), för att känna igen 2/1 (lägre än öppningen). */
+function suitRank(strain: string): number {
+  return 'CDHS'.indexOf(strain)
+}
 function narrowHcp(c: SeatConstraint, min: number, max: number): void {
   c.hcpMin = Math.max(c.hcpMin, min)
   c.hcpMax = Math.min(c.hcpMax, max)
+}
+/** Höj bara HP-golvet (utan att röra taket). */
+function hcpFloor(c: SeatConstraint, min: number): void {
+  c.hcpMin = Math.max(c.hcpMin, min)
 }
 function lenMin(c: SeatConstraint, suit: Suit, min: number): void {
   c.length[suit].min = Math.max(c.length[suit].min, min)

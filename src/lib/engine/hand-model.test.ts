@@ -96,3 +96,49 @@ describe('buildHandModel – färglängder ur naturliga bud (Steg 2 del 2)', () 
     expect(m.E.length.spades.min).toBe(0)
   })
 })
+
+describe('buildHandModel – svaga öppningar + svararens golv (Steg 2 del 3)', () => {
+  it('svag tvåöppning 2♥ → 4–11 hp, 6+ hjärter', () => {
+    const m = buildHandModel(calls(['N', '2H']))
+    expect(m.N.hcpMin).toBe(4)
+    expect(m.N.hcpMax).toBe(11)
+    expect(m.N.length.hearts.min).toBe(6)
+  })
+
+  it('spärröppning 3♠ → högst 11 hp, 6+ spader', () => {
+    const m = buildHandModel(calls(['N', '3S']))
+    expect(m.N.hcpMax).toBe(11)
+    expect(m.N.length.spades.min).toBe(6)
+  })
+
+  it('stark 2♣ → inget säkert HP-golv (artificiellt)', () => {
+    const m = buildHandModel(calls(['N', '2C']))
+    expect(m.N.hcpMin).toBe(0)
+    expect(m.N.hcpMax).toBe(37)
+  })
+
+  it('1-lägessvar i ny färg (ostört, opassat) → 6+ hp', () => {
+    // 1♣ – (P) – 1♥
+    const m = buildHandModel(calls(['N', '1C'], ['E', 'P'], ['S', '1H']))
+    expect(m.S.hcpMin).toBe(6)
+  })
+
+  it('2/1 (ny färg på 2-läget lägre än öppningen) → utgångskrav 12+', () => {
+    // 1♠ – (P) – 2♣ = 2/1 GF
+    const m = buildHandModel(calls(['N', '1S'], ['E', 'P'], ['S', '2C']))
+    expect(m.S.hcpMin).toBe(12)
+  })
+
+  it('inkliv mellan öppning och svar → svararens 12-golv gäller INTE (kan konkurrera)', () => {
+    // 1♠ – (2♥ inkliv) – 3♣ : störd, 2/1-golvet ska inte sättas.
+    const m = buildHandModel(calls(['N', '1S'], ['E', '2H'], ['S', '3C']))
+    expect(m.S.hcpMin).toBe(0)
+  })
+
+  it('passad hand som svarar 2/1 → inget 12-golv (passad = ≤11)', () => {
+    // S passar först, sen N öppnar 1♠, S "2/1" 2♣ → passad, ska kapas till ≤11.
+    const m = buildHandModel(calls(['S', 'P'], ['W', 'P'], ['N', '1S'], ['E', 'P'], ['S', '2C']))
+    expect(m.S.hcpMax).toBe(11)
+    expect(m.S.hcpMin).toBeLessThanOrEqual(11)
+  })
+})
