@@ -17,7 +17,8 @@
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { playedCards, visibleSeats } from './card-counting'
 import { hcp } from './hand'
-import type { PlayState } from './play'
+import { legalCards, playCard, side, type PlayState } from './play'
+import { doubleDummyDeclarerRemaining } from './dds'
 import type { HandModel, SeatConstraint } from './hand-model'
 
 const SEATS: Seat[] = ['N', 'E', 'S', 'W']
@@ -140,4 +141,62 @@ export function sampleLayouts(
     out.push(found)
   }
   return out
+}
+
+export interface MonteCarloChoice {
+  /** Kortet röstningen valde. */
+  card: Card
+  /** Genomsnittligt antal stick SPELFÖRAREN tar efter kortet (över sampeln). */
+  score: number
+  /** Hur många sampel som faktiskt bidrog (DDS inom budget). */
+  samples: number
+}
+
+/**
+ * Monte-Carlo-DDS (docs/bot-hjarna.md, Steg 3b): för varje lagligt kort samplar
+ * vi troliga givar (Steg 3a) och kör DDS på var och en → väljer kortet som ger
+ * bäst genomsnittligt resultat. "Bäst" = flest stick åt spelföraren om `seat`
+ * spelar med spelföraren, annars FÄRRST (motspelaren minimerar). DDS används
+ * här ÄRLIGT – den ser bara de troliga korten, aldrig de verkliga dolda.
+ *
+ * Returnerar `null` om vi inte fick fram några sampel eller inget DDS-svar inom
+ * nodbudgeten – då faller anroparen tillbaka på tumreglerna (`play-bot.ts`).
+ */
+export function chooseCardMonteCarlo(
+  state: PlayState,
+  seat: Seat,
+  model: HandModel,
+  opts: { samples?: number; maxNodes?: number } = {},
+): MonteCarloChoice | null {
+  const samplesN = opts.samples ?? 20
+  const maxNodes = opts.maxNodes ?? 50_000
+  const legal = legalCards(state, seat)
+  if (legal.length === 0) return null
+
+  const layouts = sampleLayouts(state, seat, model, samplesN)
+  if (layouts.length === 0) return null
+
+  const declSide = side(state.contract.declarer)
+  const maximizeDeclarer = side(seat) === declSide
+
+  let best: MonteCarloChoice | null = null
+  for (const card of legal) {
+    let total = 0
+    let counted = 0
+    for (const layout of layouts) {
+      const next = playCard({ ...state, hands: layout }, card)
+      const dd = doubleDummyDeclarerRemaining(
+        next.hands, next.contract.strain, next.contract.declarer, next.currentTrick, next.toAct, maxNodes,
+      )
+      if (dd === null) continue // för tung ställning → hoppa detta sampel
+      const banked = declSide === 'NS' ? next.tricksNS : next.tricksEW
+      total += banked + dd
+      counted++
+    }
+    if (counted === 0) continue
+    const score = total / counted
+    const better = best === null || (maximizeDeclarer ? score > best.score : score < best.score)
+    if (better) best = { card, score, samples: counted }
+  }
+  return best
 }
