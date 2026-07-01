@@ -16,11 +16,13 @@ function state(opts: {
   trick?: PlayedCard[] // redan lagda kort i sticket
   leader?: Seat
   completedTricks?: Trick[] // avslutade stick (för att skilja mitt-i-given från utspel)
+  declarer?: Seat // spelförare (default N)
+  otherHands?: Partial<Record<Seat, Hand>> // t.ex. träkarlens kort
 }): PlayState {
   const seat = opts.seat ?? 'S'
   const trump = opts.trump === undefined ? null : opts.trump
-  const contract: Contract = { declarer: 'N', strain: trump ?? 'NT', level: 3 }
-  const hands: Record<Seat, Hand> = { N: [], E: [], S: [], W: [] }
+  const contract: Contract = { declarer: opts.declarer ?? 'N', strain: trump ?? 'NT', level: 3 }
+  const hands: Record<Seat, Hand> = { N: [], E: [], S: [], W: [], ...opts.otherHands }
   hands[seat] = opts.hand
   return {
     contract,
@@ -82,6 +84,32 @@ describe('Steg 1 – ärlig stickföring: cash:a säkra vinnare på lead', () =>
     // inte cash-out (annars underleder man ess på utspelet).
     const hand: Hand = [C('hearts', 'A'), C('hearts', 'K'), C('hearts', 'Q'), C('spades', '7'), C('spades', '6'), C('spades', '5'), C('spades', '4')]
     expect(botCard(state({ hand }), 'S')).toEqual(C('spades', '5'))
+  })
+})
+
+describe('Steg 1b – cash:a sidofärgsvinnare när trumfen är räknad', () => {
+  // Spelförare S, träkarl N. S har ♥A (sidofärgsvinnare) + ♠2 + låga ruter.
+  const declHand: Hand = [C('hearts', 'A'), C('spades', '2'), C('diamonds', '5'), C('diamonds', '4'), C('diamonds', '3')]
+
+  it('alla trumf räknade (syns hos spelförarsidan) → cashar ♥A trots trumfkontrakt', () => {
+    // Träkarl N håller de 12 övriga spadren → 0 osedda trumf, ingen kan ruffa.
+    const dummySpades: Hand = (['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3'] as const).map((r) => C('spades', r))
+    const s = state({
+      trump: 'spades', declarer: 'S', seat: 'S', hand: declHand,
+      otherHands: { N: dummySpades }, completedTricks: [doneTrick()],
+    })
+    expect(botCard(s, 'S')).toEqual(C('hearts', 'A'))
+  })
+
+  it('trumf fortfarande ute → cashar INTE ♥A (kan ruffas), leder normalt', () => {
+    // Träkarl har bara en spader → 11 osedda trumf → sidofärg osäker.
+    const s = state({
+      trump: 'spades', declarer: 'S', seat: 'S', hand: declHand,
+      otherHands: { N: [C('spades', '3')] }, completedTricks: [doneTrick()],
+    })
+    const chosen = botCard(s, 'S')
+    expect(chosen).not.toEqual(C('hearts', 'A')) // inte den ruffbara vinnaren
+    expect(chosen.suit).toBe('diamonds') // leder lågt ur längsta färgen i stället
   })
 })
 
