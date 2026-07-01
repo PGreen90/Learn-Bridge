@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Bid, Card, Deal, Hand, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import {
@@ -23,7 +23,7 @@ import {
 } from '../lib/engine/auction-live'
 import { interpretCall } from '../lib/engine/auction-interpret'
 import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
-import { botCardSmartReasoned } from '../lib/engine/play-bot'
+import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
 import { PlayReplay } from '../components/PlayReplay'
@@ -299,6 +299,23 @@ function PlayTable({
   // Datorns senaste drag + varför (för "Varför?"-knappen). Fälls ut på begäran.
   const [lastBotMove, setLastBotMove] = useState<{ seat: Seat; card: Card; reason: string } | null>(null)
   const [showWhy, setShowWhy] = useState(false)
+  // Sant medan bot-hjärnan räknar Monte-Carlo i webworkern (visar "tänker …").
+  const [thinking, setThinking] = useState(false)
+  // Webworkern som kör den tunga Monte-Carlo-DDS:en av huvudtråden (skapas en gång).
+  const workerRef = useRef<Worker | null>(null)
+  const reqCounter = useRef(0)
+
+  useEffect(() => {
+    try {
+      workerRef.current = new Worker(new URL('../lib/engine/mc-worker.ts', import.meta.url), { type: 'module' })
+    } catch {
+      workerRef.current = null // ingen worker (t.ex. äldre miljö) → körs inline i stället
+    }
+    return () => {
+      workerRef.current?.terminate()
+      workerRef.current = null
+    }
+  }, [])
 
   // Nollställ facit + färgval så fort ställningen ändras (du eller en bot la ett kort).
   useEffect(() => {
@@ -323,27 +340,62 @@ function PlayTable({
     setFacit(declWon + rem)
   }
 
-  // Bottarna spelar automatiskt när det är deras tur (liten fördröjning).
+  // Bottarna spelar automatiskt när det är deras tur. Tunga Monte-Carlo-beslut
+  // (slutspelet) räknas i webworkern så gränssnittet inte fryser; snabba tumregler
+  // körs inline med en liten paus för känsla.
   useEffect(() => {
     if (isComplete(play) || controls(contract, play.toAct)) return
-    const id = setTimeout(() => {
-      const seat = play.toAct
-      // Bot-hjärnan: Monte-Carlo-DDS i slutspelet (seedad ur auktionen + kända
-      // renonser), annars ärliga tumregler. Se play-bot.ts botCardSmartReasoned.
-      // Kortet + motiveringen räknas ur den aktuella ställningen (`play`); vi
-      // sparar "varför" för knappen och spelar sedan kortet.
-      const choice = botCardSmartReasoned(play, seat, calls)
+    const seat = play.toAct
+    let cancelled = false
+
+    // Spela det bot-hjärnan valde (med skydd om ställningen hunnit ändras).
+    const apply = (choice: { card: Card; reason: string }) => {
+      if (cancelled) return
+      setThinking(false)
       setLastBotMove({ seat, card: choice.card, reason: choice.reason })
       setShowWhy(false)
       setPlay((p) => {
         if (isComplete(p) || controls(contract, p.toAct)) return p
-        // Skydd: om ställningen hunnit ändras är det valda kortet kanske inte längre
-        // lagligt – fall då tillbaka på ett lagligt kort så inget kraschar.
         const stillLegal = legalCards(p, p.toAct).some((c) => sameCard(c, choice.card))
         return playCard(p, stillLegal ? choice.card : legalCards(p, p.toAct)[0])
       })
-    }, 750)
-    return () => clearTimeout(id)
+    }
+
+    const worker = workerRef.current
+    // Snabb tumregel (öppningsutspel / ett kort / över MC-fönstret), eller ingen
+    // worker tillgänglig → räkna inline efter en kort paus.
+    if (!worker || !usesMonteCarlo(play, seat)) {
+      const id = setTimeout(() => apply(botCardSmartReasoned(play, seat, calls)), 750)
+      return () => {
+        cancelled = true
+        clearTimeout(id)
+      }
+    }
+
+    // Tungt slutspelsbeslut → webworkern. Gränssnittet visar "tänker …".
+    setThinking(true)
+    const reqId = ++reqCounter.current
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.reqId !== reqId) return
+      worker.removeEventListener('message', onMessage)
+      clearTimeout(timeoutId)
+      if (e.data.error || !e.data.card) apply(botCardReasoned(play, seat)) // fallback: tumregel
+      else apply({ card: e.data.card as Card, reason: e.data.reason as string })
+    }
+    // Skydd: om workern skulle hänga orimligt länge, falla tillbaka på tumregeln.
+    const timeoutId = setTimeout(() => {
+      worker.removeEventListener('message', onMessage)
+      apply(botCardReasoned(play, seat))
+    }, 15000)
+    worker.addEventListener('message', onMessage)
+    worker.postMessage({ reqId, state: play, seat, calls })
+
+    return () => {
+      cancelled = true
+      worker.removeEventListener('message', onMessage)
+      clearTimeout(timeoutId)
+      setThinking(false)
+    }
   }, [contract, play, calls])
 
   function onPlay(card: Card) {
@@ -427,6 +479,8 @@ function PlayTable({
             </span>
           ) : controls(contract, play.toAct) ? (
             <span className="text-emerald-700 font-medium">Din tur – {SEAT_LABEL[play.toAct]} spelar.</span>
+          ) : thinking ? (
+            <span className="text-amber-600">Bot-hjärnan räknar (Monte Carlo) … ({SEAT_LABEL[play.toAct]})</span>
           ) : (
             <span className="text-slate-400">Datorn spelar … ({SEAT_LABEL[play.toAct]})</span>
           )}

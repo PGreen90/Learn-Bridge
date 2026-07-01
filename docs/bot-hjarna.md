@@ -21,10 +21,19 @@ Guldstandarden är **Monte Carlo**: dela ut många slumpade givar som stämmer m
 allt vi *ärligt* vet → kör DDS på var och en → spela kortet som vinner oftast.
 Så spelar starka bottar i världen (GIB m.fl.).
 
-## Status (2026-07-01): Steg 1–3 KLARA & live (testsvit 697)
-Trappan nedan är byggd hela vägen. Bottarna spelar nu Monte-Carlo-DDS i slutspelet
-via `botCardSmart` (`play-bot.ts`), inkopplad i `Play.tsx`. Kvar i eposet: signal-
-avkodning (pt 50), "Varför?"-knapp, tänj MC-fönstret tidigare. Se `docs/status.md`.
+## Status (2026-07-02): HELA EPOSET KLART & live (testsvit 727)
+Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
+- **Signalavkodning (pt 50, `signal-decode.ts`):** motspelaren läser botens
+  öppningsutspel (§8.3) → skärper hand-modellen (längd ≥4 + touchérande honnör när
+  entydig). Hand-modellen fick per-färg-HP-spann (`suitHcp`) som samplaren håller.
+  Bara bottars utspel avkodas (ingen tjuvkik på människan).
+- **"Varför?"-knapp:** `botCardReasoned`/`botCardSmartReasoned` (`play-bot.ts`) ger
+  klartextsmotivering per drag; `Play.tsx` visar "Öst spelade 3♣. Varför?".
+- **Tänj MC-fönstret + webworker:** MC körs i `mc-worker.ts` av huvudtråden (ingen
+  frys), adaptiv `mcBudget`, fönstret 7 → 8 kort. Uppmätt: 7 kort ~2 s, 8 kort ~3,7 s.
+- **pt 47–49 (`signals.ts`):** facit-granskad mot §8, luckor låsta.
+
+Se `docs/status.md` för detaljer.
 
 ## Trappan (byggs i ordning, test-låst — FACIT FÖRE FIX)
 

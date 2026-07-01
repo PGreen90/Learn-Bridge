@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
-import { botCard, botCardSmart } from './play-bot'
+import { botCard, botCardSmart, mcBudget, usesMonteCarlo } from './play-bot'
 import { isComplete, playCard, side, type Contract, type PlayState, type Trick } from './play'
 
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
@@ -81,6 +81,37 @@ describe('botCardSmart – tumreglerna orörda utanför Monte-Carlo-fönstret', 
     const hand: Hand = (['A', 'K', 'Q', 'J', '9', '7', '5', '3'] as Rank[]).map((r) => C('spades', r))
     const s = state({ hand, completedTricks: [doneTrick()] })
     expect(botCardSmart(s, 'S', [], { maxCardsForMC: 7 })).toEqual(botCard(s, 'S'))
+  })
+})
+
+// Tänjt MC-fönster (docs/bot-hjarna.md): adaptiv budget + gräns 8, MC körs i webworker.
+describe('adaptiv MC-budget (mcBudget) – uppmätt kostnadstrappa', () => {
+  it('färre kort = fler sampel (billigare → högre kvalitet)', () => {
+    expect(mcBudget(5).samples).toBe(30)
+    expect(mcBudget(6).samples).toBe(30)
+    expect(mcBudget(7).samples).toBe(24)
+    expect(mcBudget(8).samples).toBe(12)
+  })
+  it('sampelantalet är monotont icke-ökande med kortantalet', () => {
+    const s = [4, 5, 6, 7, 8].map((n) => mcBudget(n).samples)
+    for (let i = 1; i < s.length; i++) expect(s[i]).toBeLessThanOrEqual(s[i - 1])
+  })
+})
+
+describe('usesMonteCarlo – när gränssnittet ska räkna i webworkern', () => {
+  const eight: Hand = (['A', 'K', 'Q', 'J', '9', '7', '5', '3'] as Rank[]).map((r) => C('spades', r))
+  it('öppningsutspel (trick 1) → nej (utspelsdoktrin, ingen MC)', () => {
+    expect(usesMonteCarlo(state({ hand: eight }), 'S')).toBe(false)
+  })
+  it('ett lagligt kort → nej', () => {
+    expect(usesMonteCarlo(state({ hand: [C('hearts', '7')], completedTricks: [doneTrick()] }), 'S')).toBe(false)
+  })
+  it('8 kort mitt i given (inom fönstret) → ja', () => {
+    expect(usesMonteCarlo(state({ hand: eight, completedTricks: [doneTrick()] }), 'S')).toBe(true)
+  })
+  it('9 kort (över fönstret) → nej', () => {
+    const nine: Hand = (['A', 'K', 'Q', 'J', '9', '7', '5', '3', '2'] as Rank[]).map((r) => C('spades', r))
+    expect(usesMonteCarlo(state({ hand: nine, completedTricks: [doneTrick()] }), 'S')).toBe(false)
   })
 })
 

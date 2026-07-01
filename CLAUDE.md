@@ -11,7 +11,9 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU (Steg 3 klar & live – välj nästa)
+### 🔵 NU (FAS 11-eposet KLART & live – välj nästa FAS)
+> **2026-07-02:** hela FAS 11-svansen klar & pushad (testsvit 727). NU är åter
+> tomt – ägaren väljer nästa FAS/riktning ur NÄST/SENARE.
 **🧠 FAS 11 — Bot-hjärnan (kortspel/motspel-förfining), OMSTRUKTURERAD** (start
 2026-07-01). Ägaren pekade ut den riktiga smärtan: bottarna tar t.ex. 10 stick
 där 13 var kalla — usel stickföring, "kryper under i onödan". FAS 11 (signaler)
@@ -36,10 +38,14 @@ Trappan (test-låst, FACIT FÖRE FIX):
   MC i slutspelet (≤7 kort, seedad ur auktionen + `shownVoids`), annars tumregler
   (öppningsutspel / tung giv / ett-lagligt-kort → fallback, tidigt spel orört).
   Bevisat: 6-korts-slutspel 2→3 stick, facit nått utan tjuvkik.
-- **NÄSTA (välj):** **signalavkodning** (FAS 11 pt 50 – motspelaren läser partnerns
-  markering → in i hand-modellen), **"Varför?"-knapp** (botten förklarar draget),
-  eller **tänj MC-fönstret** tidigare (ev. webworker för DDS). pt 47–49 (utspel/
-  UDCA/Lavinthal): facit-granska `signals.ts` mot §8. pt 51 DDS-gräns = bekräfta bara.
+- **Svansen ✅ KLAR & live** (2026-07-02, testsvit 727): **pt 47–49** facit-granskning
+  av `signals.ts` mot §8 (14 facit-lås). **pt 50 signalavkodning** (`signal-decode.ts`):
+  motspelaren läser botens öppningsutspel → hand-modellen (längd ≥4 + touchérande
+  honnör när entydig); modellen fick per-färg-HP `suitHcp`. **"Varför?"-knapp**
+  (`botCardReasoned` + `Play.tsx`). **Webworker + tänjt MC-fönster** (`mc-worker.ts`,
+  adaptiv `mcBudget`, 7 → 8 kort, ingen UI-frys; uppmätt 7 kort ~2 s, 8 kort ~3,7 s).
+  pt 51 DDS-gräns = känd, bekräftad. **Kvar (SENARE):** avancerad teknik
+  (slutkast/inkast/squeeze), svårighetsnivåer.
 **Scope (ägarbeslut 2026-07-01):** MED = "Varför?"-knapp (botten förklarar draget)
 + avancerad teknik (slutkast/inkast/squeeze). SENARE = svårighetsnivåer.
 

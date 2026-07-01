@@ -154,6 +154,20 @@ export interface SmartOpts {
 }
 
 /**
+ * Adaptiv Monte-Carlo-budget efter hur många kort som är kvar. Uppmätt (riktiga
+ * givar, se historiken): DDS-kostnaden växer brant med kortantalet. Ju djupare in
+ * i given (färre kort) desto billigare → fler sampel = högre kvalitet. Vid den
+ * tänjda kanten (8 kort) skärs sampel/nodbudget ner så en körning stannar run
+ * ett par sekunder – acceptabelt eftersom MC nu körs i en webworker (av
+ * huvudtråden), aldrig fryser gränssnittet.
+ */
+export function mcBudget(cardsLeft: number): { samples: number; maxNodes: number } {
+  if (cardsLeft <= 6) return { samples: 30, maxNodes: 200_000 }
+  if (cardsLeft === 7) return { samples: 24, maxNodes: 150_000 }
+  return { samples: 12, maxNodes: 110_000 } // 8 kort (tänjt fönster): bantad budget
+}
+
+/**
  * Bottens kortval MED bot-hjärnan (docs/bot-hjarna.md, Steg 3c). Använder
  * Monte-Carlo-DDS (`chooseCardMonteCarlo`) i slutspelet – när given är liten nog
  * att lösas snabbt – och faller annars tillbaka på de ärliga tumreglerna
@@ -177,16 +191,18 @@ export function botCardSmartReasoned(
   if (legal.length === 1) return { card: legal[0], reason: 'Bara ett lagligt kort att spela.' }
 
   const openingLead = state.completedTricks.length === 0 && state.currentTrick.length === 0
-  const maxCards = opts.maxCardsForMC ?? 7
-  if (openingLead || state.hands[seat].length > maxCards) return botCardReasoned(state, seat)
+  const cardsLeft = state.hands[seat].length
+  const maxCards = opts.maxCardsForMC ?? 8
+  if (openingLead || cardsLeft > maxCards) return botCardReasoned(state, seat)
 
   const model = buildHandModel(calls, { voids: shownVoids(state) })
   // Signalavkodning (pt 50): skärp modellen med det öppningsutspelet avslöjar
   // (längd + ev. touchérande honnör), sett ur den agerande platsens synvinkel.
   applyOpeningLeadSignal(model, state, seat)
+  const budget = mcBudget(cardsLeft)
   const choice = chooseCardMonteCarlo(state, seat, model, {
-    samples: opts.samples ?? 24,
-    maxNodes: opts.maxNodes ?? 150_000,
+    samples: opts.samples ?? budget.samples,
+    maxNodes: opts.maxNodes ?? budget.maxNodes,
   })
   if (!choice) return botCardReasoned(state, seat)
   return {
@@ -195,6 +211,19 @@ export function botCardSmartReasoned(
       `Bot-hjärnan tänkte som en expert: jag delade ut ${choice.samples} troliga lägen (utifrån ` +
       `budgivningen och korten som fallit) och spelade igenom dem – det här kortet gav flest stick i snitt.`,
   }
+}
+
+/**
+ * Sant om `botCardSmartReasoned` skulle köra Monte-Carlo (tung, sekunder) för det
+ * här läget – i motsats till en direkt tumregel (öppningsutspel / ett lagligt kort
+ * / över MC-fönstret). Gränssnittet använder detta för att avgöra om draget ska
+ * räknas i en webworker (av huvudtråden) med en "tänker …"-indikator.
+ */
+export function usesMonteCarlo(state: PlayState, seat: Seat, opts: SmartOpts = {}): boolean {
+  if (legalCards(state, seat).length <= 1) return false
+  const openingLead = state.completedTricks.length === 0 && state.currentTrick.length === 0
+  const maxCards = opts.maxCardsForMC ?? 8
+  return !openingLead && state.hands[seat].length <= maxCards
 }
 
 /** Bottens kortval MED bot-hjärnan (docs/bot-hjarna.md, Steg 3c). Se `botCardSmartReasoned`. */

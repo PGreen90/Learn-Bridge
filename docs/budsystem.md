@@ -849,6 +849,16 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-02** – **FAS 11 – tänj MC-fönstret + webworker (av huvudtråden)**
+  (testsvit 727). **Uppmätt** (riktiga givar): Monte-Carlo tog redan ~2 s vid 7
+  kort och 8+ s vid 8 kort – på huvudtråden fryser det fliken. Lösning: (1) MC
+  flyttad till en **webworker** (`mc-worker.ts`) → gränssnittet fryser aldrig,
+  visar "Bot-hjärnan räknar (Monte Carlo) …" och faller tillbaka på tumregeln vid
+  timeout/fel; (2) **adaptiv budget** (`mcBudget`): färre kort = fler sampel
+  (billigare, bättre), 8 kort = bantad budget (~3,7 s); (3) **MC-fönstret tänjt
+  7 → 8 kort** (nu ofarligt av huvudtråden). `usesMonteCarlo` avgör om ett drag
+  räknas i workern eller inline. Verifierad i webbläsaren (worker hämtas med rätt
+  base-path, postMessage-rundtur 37 ms, inga fel). Facit i `play-bot-smart.test.ts`.
 - **2026-07-02** – **FAS 11 – "Varför?"-knapp (botten förklarar sitt kortval)**
   (testsvit 721). `play-bot.ts` fick `botCardReasoned`/`botCardSmartReasoned` som
   ger SAMMA kort som förut + en klartextsmotivering: utspel (§8.3 topp av sekvens

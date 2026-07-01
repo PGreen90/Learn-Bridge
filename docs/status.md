@@ -174,7 +174,11 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 - **"Varför?"-knapp (klar):** `botCardReasoned`/`botCardSmartReasoned` (`play-bot.ts`)
   ger samma kort + en klartextsmotivering per drag. Inkopplat i `Play.tsx` – efter
   varje botdrag visas "Öst spelade 3♣. Varför?" som fälls ut. Verifierad i webbläsaren.
-- **Kvar (FAS 11):** tänj MC-fönstret tidigare (ev. webworker för DDS).
+- **Tänj MC-fönstret + webworker (klar):** MC flyttad till `mc-worker.ts` (av
+  huvudtråden → ingen frys, "räknar …"-indikator, timeout-fallback). Adaptiv
+  `mcBudget` (färre kort = fler sampel; 8 kort = bantad ~3,7 s). Fönstret tänjt
+  7 → 8 kort. `usesMonteCarlo` väljer worker vs inline. Verifierad i webbläsaren.
+- **FAS 11-eposet därmed helt klart** (Steg 1–3 + pt 47–50 + "Varför?" + webworker).
 
 ## Kortspel (punkt 29)
 
