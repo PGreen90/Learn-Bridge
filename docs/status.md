@@ -61,6 +61,19 @@
   (`openings.ts`) trådad genom `buildAuction` + `Spela.tsx` (lokal dubblett borttagen).
   Facit i `openings.test.ts` (startp. 15 nudgas bara ej sårbar; startp. 16 alltid).
 
+## NT-systemet (FAS 5, punkt 19–22 klara 2026-07-01; 23–25 kvar)
+
+- **Punkt 19 Stayman** (`responses-nt.ts` + `responder-rebids.ts`): lagad
+  inbjudnings-5-4-lucka (2♣–2♦ med 5-4 hf + 8–9 → naturlig 2♥/2♠, ej 2NT) +
+  **garbage Stayman** (svag exakt 4-4 hf + kort klöver → 2♣, passar svaret).
+- **Punkt 20 Smolen**: verifierad oförändrat rätt (5-4 GF → hopp i kortare hf).
+- **Punkt 21 Jacoby-transfer**: kärnan verifierad; **5-5-högfärgsschemat** byggt –
+  transferriktningen kodar styrkan (svag→2♣ garbage-route, inbj→2♦ sedan 2♠,
+  GF→2♥ sedan 3♥). Tvåfärgs-GF via 3♣/3♦ (minor) flaggad SENARE (ej begärt).
+- **Punkt 22 Texas**: verifierad (6-korts hf 10–15 → 4♦/4♥, öppnaren fullföljer).
+- Ny hjälpare `suitHcp` (`hand.ts`) för färgstyrka. Två systembeslut i §4.3.
+- **Kvar:** punkt 23 (MSS-fortsättning byggs), 24 (2NT-systemet), 25 (3NT-öppning).
+
 ## Handvärdering
 
 - Bergens Adjust-3 i `evaluation.ts`: startpoäng, stödpoäng och Bergenpoäng.

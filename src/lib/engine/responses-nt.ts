@@ -24,6 +24,24 @@ export function respondTo1NT(hand: Hand): ResponseResult {
     return { call: '2C', rule: 'Stayman', explanation: `${p} hp, 5-4 i högfärgerna → 2♣ (Stayman; Smolen om öppnaren saknar högfärg).` }
   }
 
+  // ---- Garbage/drop-dead Stayman: svag hand (0–7), exakt 4-4 i högfärgerna,
+  // kort klöver (4-4-4-1 eller 4-4-5-0) → 2♣ och PASSA öppnarens svar. Alla tre
+  // svaren (2♦/2♥/2♠) landar i en 4-4-fit eller 4+ ruter, bättre än 1NT med
+  // klöversingel/renons. Ingen 5-korts högfärg (då transfer i stället). ----
+  if (p <= 7 && sp === 4 && he === 4 && len.clubs <= 1) {
+    return { call: '2C', rule: 'Stayman', explanation: `${p} hp, 4-4 i högfärgerna + kort klöver → 2♣ (garbage Stayman; passar öppnarens svar).` }
+  }
+
+  // ---- 5-5 i högfärgerna: transferriktningen KODAR styrkan (ägarbeslut) ----
+  //  svag (0–7)   → 2♣ (garbage-route: passa hf-svar, annars 2 i bästa hf över 2♦)
+  //  inbjudan(8–9)→ 2♦ (transfer ♥), sedan 2♠  = 5-5, inbjudan
+  //  GF (10+)     → 2♥ (transfer ♠), sedan 3♥  = 5-5, GF
+  if (sp === 5 && he === 5) {
+    if (p >= 10) return { call: '2H', rule: 'Jacoby-transfer', explanation: `${p} hp, 5-5 i högfärgerna, GF → 2♥ (transfer till spader; 3♥ sedan = 5-5).` }
+    if (p >= 8) return { call: '2D', rule: 'Jacoby-transfer', explanation: `${p} hp, 5-5 i högfärgerna, inbjudan → 2♦ (transfer till hjärter; 2♠ sedan = 5-5).` }
+    return { call: '2C', rule: 'Stayman', explanation: `${p} hp, 5-5 i högfärgerna, svag → 2♣ (garbage; passar hf-svar, annars 2 i bästa hf).` }
+  }
+
   // ---- 5+ högfärg → transfer (Jacoby) eller Texas ----
   const major = sp >= 5 && sp >= he ? 'spades' : he >= 5 ? 'hearts' : null
   if (major) {

@@ -136,6 +136,42 @@ describe('punkt 11 – svararens andra bud i 1NT-auktioner', () => {
     expect(r11('S:KQ85 H:72 D:KJ42 C:Q52', 'Stayman', '2C', '2H')).toBe('3NT') // 11 hp
   })
 
+  it('Stayman, 5-4 i högfärgerna, inbjudan (8–9) efter 2♦ → naturlig 2♠', () => {
+    expect(r11('S:KQ842 H:KT85 D:73 C:52', 'Stayman', '2C', '2D')).toBe('2S') // 8 hp, 5-4
+  })
+
+  it('Stayman, 5-4 i högfärgerna, inbjudan (8–9) efter 2♦ → naturlig 2♥', () => {
+    expect(r11('S:KT85 H:KQ842 D:73 C:52', 'Stayman', '2C', '2D')).toBe('2H') // 8 hp, 4-5
+  })
+
+  it('5-5 i högfärgerna, inbjudan: transfer ♥ (2♦→2♥) → 2♠ visar 5-5', () => {
+    expect(r11('S:KQ876 H:KJ765 D:3 C:42', 'Jacoby-transfer', '2D', '2H')).toBe('2S') // 9 hp
+  })
+
+  it('5-5 i högfärgerna, GF: transfer ♠ (2♥→2♠) → 3♥ visar 5-5', () => {
+    expect(r11('S:AQ876 H:KJ765 D:3 C:42', 'Jacoby-transfer', '2H', '2S')).toBe('3H') // 10 hp
+  })
+
+  it('5-5 i högfärgerna, svag: Stayman, öppnaren bjöd 2♦ → 2 i bästa hf', () => {
+    expect(r11('S:Q8765 H:K8765 D:32 C:4', 'Stayman', '2C', '2D')).toBe('2H') // hjärter starkare
+  })
+
+  it('5-5 i högfärgerna, svag: Stayman, öppnaren bjöd 2♥ (hf) → pass', () => {
+    expect(r11('S:Q8765 H:K8765 D:32 C:4', 'Stayman', '2C', '2H')).toBe('P')
+  })
+
+  it('garbage Stayman: svag 4-4-4-1, öppnaren bjöd 2♦ → pass', () => {
+    expect(r11('S:Q652 H:K843 D:J642 C:5', 'Stayman', '2C', '2D')).toBe('P') // 6 hp
+  })
+
+  it('garbage Stayman: svag 4-4-4-1, öppnaren bjöd 2♥ → pass', () => {
+    expect(r11('S:Q652 H:K843 D:J642 C:5', 'Stayman', '2C', '2H')).toBe('P') // 6 hp
+  })
+
+  it('garbage Stayman: svag 4-4-4-1, öppnaren bjöd 2♠ → pass', () => {
+    expect(r11('S:Q652 H:K843 D:J642 C:5', 'Stayman', '2C', '2S')).toBe('P') // 6 hp
+  })
+
   it('Jacoby fullföljd, svag → pass', () => {
     expect(r11('S:73 H:KQ862 D:9742 C:52', 'Jacoby-transfer', '2D', '2H')).toBe('P') // 5 hp
   })

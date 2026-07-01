@@ -281,8 +281,13 @@ en 4-korts hf. Öppnaren svarar:
 - 2NT = inbjudan utan fit; 3NT = avslut, balanserad.
 - efter 2♦ (ingen hf): 2♥/2♠ = 5-4 i hf, inbjudan; annars NT efter styrka.
 
-**Svag variant:** "garbage/svag Stayman" (svag 3-färgshand kort i ♣, passar
-valfritt svar) är en möjlig tilläggsvariant – **beslut tas senare**.
+**Garbage/svag Stayman (beslut 2026-07-01: JA).** En svag hand (0–7 hp) med
+**exakt 4-4 i högfärgerna** och kort klöver (4-4-4-1 eller 4-4-5-0) bjuder 2♣ och
+**passar** öppnarens svar (2♦/2♥/2♠) – varje svar landar i en 4-4-fit eller 4+
+ruter, bättre än 1NT med klöversingel/renons. Ingen 5-korts högfärg (då transfer).
+
+**5-4 i högfärgerna, inbjudan (8–9):** efter 2♣–2♦ (öppnaren förnekar hf) visar
+svararen sin **5-korts** högfärg naturligt på 2-läget (2♥/2♠), inte 2NT.
 
 #### Smolen (efter 1NT–2♣–2♦)
 När öppnaren förnekat 4-korts hf (2♦) visar svararen 5-4 i hf med GF-styrka genom
@@ -318,6 +323,13 @@ och döljs för motståndarna.
 | 4NT | kvantitativ slaminbjudan |
 
 Spader-transfern (2♥→♠) fungerar spegelvänt.
+
+**5-5 i högfärgerna (beslut 2026-07-01): transferriktningen kodar styrkan.**
+| Styrka | 1:a bud | 2:a bud |
+|---|---|---|
+| svag (0–7) | 2♣ (Stayman) | passa hf-svar; över 2♦ = 2 i bästa högfärg |
+| inbjudan (8–9) | 2♦ (transfer ♥) | 2♠ (visar 5-5, inbjudan) |
+| GF (10+) | 2♥ (transfer ♠) | 3♥ (visar 5-5, öppnaren väljer högfärg) |
 
 #### Texas-transfer (4♦ / 4♥)
 För en lång hf med **utgångsstyrka men utan slamintresse**:
@@ -1186,3 +1198,12 @@ Det avslöjar längd/räkning direkt för partnern.
   1-lägesåterbud/hoppskift när en stark hand ändå öppnat på 1-läget, (b) ärligt
   giv-facit (perfekt spel från utspelet, inte "härifrån"), (c) DDS-optimal
   spelföring så toppstick faktiskt tas. **Nästa gång:** punkt (a) budgivning.
+- **2026-07-01** – Budmotorn (**FAS 5 punkt 19–22, NT-systemet**), test-låst:
+  **Stayman** – lagade inbjudnings-5-4-luckan (1NT–2♣–2♦ med 5-4 hf + 8–9 hp
+  visar nu 5-korts hf naturligt på 2-läget, inte 2NT) och byggde **garbage
+  Stayman** (svag exakt 4-4 hf + kort klöver → 2♣, passar svaret). **Transfers** –
+  kärnan verifierad; byggde **5-5-högfärgsschemat** (transferriktningen kodar
+  styrkan: svag→2♣, inbj→2♦ sedan 2♠, GF→2♥ sedan 3♥). **Smolen + Texas**
+  verifierade oförändrat rätt. Två SYSTEMBESLUT (garbage Stayman JA; 5-5-schemat)
+  nedskrivna i §4.3. +15 tester (574 gröna). **Nästa gång:** punkt 24/25
+  (2NT-systemet + 3NT-öppningen), sedan punkt 23 (Minor Suit Stayman-fortsättning).

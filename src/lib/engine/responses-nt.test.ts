@@ -23,6 +23,30 @@ describe('respondTo1NT', () => {
     expect(r1nt('S:AQ85 H:KJ872 D:42 C:53')).toBe('2C') // 10 hp, 4-5 hf
   })
 
+  it('5-5 i högfärgerna, svag → 2♣ (garbage-route)', () => {
+    expect(r1nt('S:Q8765 H:K8765 D:32 C:4')).toBe('2C') // 5 hp, 5-5
+  })
+
+  it('5-5 i högfärgerna, inbjudan (8–9) → 2♦ (transfer ♥, styrka kodad)', () => {
+    expect(r1nt('S:KQ876 H:KJ765 D:3 C:42')).toBe('2D') // 9 hp, 5-5
+  })
+
+  it('5-5 i högfärgerna, GF (10+) → 2♥ (transfer ♠, styrka kodad)', () => {
+    expect(r1nt('S:AQ876 H:KJ765 D:3 C:42')).toBe('2H') // 10 hp, 5-5
+  })
+
+  it('garbage Stayman: svag 4-4-4-1 kort i klöver → 2♣', () => {
+    expect(r1nt('S:Q652 H:K843 D:J642 C:5')).toBe('2C') // 6 hp, 4-4-4-1
+  })
+
+  it('garbage Stayman: svag 4-4-5-0 (renons klöver) → 2♣', () => {
+    expect(r1nt('S:Q652 H:K843 D:J6425 C:-')).toBe('2C') // 4-4-5-0
+  })
+
+  it('svag 4-3-3-3 utan 4-4 i högfärg → pass (inte garbage Stayman)', () => {
+    expect(r1nt('S:8632 H:Q72 D:K93 C:J54')).toBe('P') // 5 hp, bara 4 spader
+  })
+
   it('Jacoby-transfer till hjärter (2♦) med 5 hjärter', () => {
     expect(r1nt('S:73 H:KQ862 D:Q42 C:953')).toBe('2D') // 7 hp
   })

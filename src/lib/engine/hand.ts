@@ -14,6 +14,11 @@ export function hcp(hand: Hand): number {
   return hand.reduce((sum, c) => sum + (HCP_BY_RANK[c.rank] ?? 0), 0)
 }
 
+/** Honnörspoäng inom EN färg (A=4, K=3, D=2, kn=1). */
+export function suitHcp(hand: Hand, suit: Suit): number {
+  return hand.reduce((sum, c) => sum + (c.suit === suit ? (HCP_BY_RANK[c.rank] ?? 0) : 0), 0)
+}
+
 /** Antal kort per färg, t.ex. { spades: 5, hearts: 3, diamonds: 3, clubs: 2 }. */
 export function lengths(hand: Hand): Record<Suit, number> {
   const out: Record<Suit, number> = { spades: 0, hearts: 0, diamonds: 0, clubs: 0 }

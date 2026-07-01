@@ -5,7 +5,7 @@
 // stannar (som tidigare) tills regeln finns.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { hcp, isBalanced, lengths } from './hand'
+import { hcp, isBalanced, lengths, suitHcp } from './hand'
 import { pointsWithFloor } from './evaluation'
 import type { Major, ResponseResult } from './responses'
 import { responderSecondBidAfter2C } from './responses-2c'
@@ -207,11 +207,27 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
 
   switch (response.rule) {
     case 'Stayman': {
+      // Garbage Stayman: 2♣ med 0–7 hp (per definition svag). Riktig Stayman
+      // lovar 8+. 5-5 i högfärgerna: passa ett hf-svar (fit), men över 2♦
+      // (ingen hf) bjud 2 i den bästa högfärgen. Annars (4-4-4-1) passa alltid.
+      if (p <= 7) {
+        if (sp === 5 && he === 5 && rebid.call === '2D') {
+          const call = suitHcp(hand, 'spades') > suitHcp(hand, 'hearts') ? '2S' : '2H'
+          return { call, rule: 'svararens signoff', explanation: `${p} hp, 5-5 i högfärgerna, svag → ${SYM[suitOfCall(call)!]} (bästa delfärg).` }
+        }
+        return pass('garbage Stayman – bättre delkontrakt än 1NT')
+      }
       if (rebid.call === '2D') {
         // Öppnaren förnekade 4-korts högfärg.
         if (((sp === 5 && he === 4) || (he === 5 && sp === 4)) && p >= 10) {
           const call = sp === 5 && he === 4 ? '3H' : '3S' // hoppa i den KORTARE högfärgen
           return { call, rule: 'Smolen', explanation: `${p} hp, 5-4 i högfärgerna → ${SYM[suitOfCall(call)!]} på 3-läget (Smolen, GF).` }
+        }
+        // 5-4 i högfärgerna med inbjudningsstyrka (8–9): visa den LÅNGA
+        // högfärgen naturligt på 2-läget (systembok §4.3), inte 2NT.
+        if ((sp === 5 && he === 4) || (he === 5 && sp === 4)) {
+          const call = sp === 5 ? '2S' : '2H'
+          return { call, rule: 'inbjudan', explanation: `${p} hp, 5-4 i högfärgerna → ${SYM[suitOfCall(call)!]} (naturlig inbjudan, 5-korts högfärg).` }
         }
         return p >= 10
           ? { call: '3NT', rule: 'till spel', explanation: `${p} hp utan fit → 3NT.` }
@@ -234,6 +250,14 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
       const tBid = BID[target]
       const tSym = SYM[target]
       if (rebid.rule === 'superaccept') return { call: `4${tBid}`, rule: 'utgång', explanation: `${p} hp – accepterar superaccept → 4${tSym}.` }
+      // 5-5 i högfärgerna: transferriktningen kodade styrkan (ägarbeslut).
+      // Transfer till ♥ (2♦) = inbjudan → visa 5-5 med 2♠; transfer till ♠ (2♥)
+      // = GF → visa 5-5 med 3♥ (den andra högfärgen på 3-läget).
+      if (len.hearts === 5 && len.spades === 5) {
+        return target === 'hearts'
+          ? { call: '2S', rule: 'inbjudan', explanation: `${p} hp, 5-5 i högfärgerna → 2♠ (inbjudan; öppnaren väljer).` }
+          : { call: '3H', rule: 'utgång', explanation: `${p} hp, 5-5 i högfärgerna, GF → 3♥ (öppnaren väljer högfärg).` }
+      }
       if (len[target] >= 6) {
         if (p >= 10) return { call: `4${tBid}`, rule: 'utgång', explanation: `${p} hp, 6+ ${NAME[target]} → 4${tSym}.` }
         if (p >= 8) return { call: `3${tBid}`, rule: 'inbjudan', explanation: `${p} hp, 6+ ${NAME[target]} → 3${tSym} (inbjudan).` }
