@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { botCard } from './play-bot'
-import type { Contract, PlayedCard, PlayState } from './play'
+import type { Contract, PlayedCard, PlayState, Trick } from './play'
 
 const C = (suit: Suit, rank: Rank): Card => ({ suit, rank })
+
+/** Ett avslutat stick (bara för att markera att given inte är på trick 1). */
+const doneTrick = (winner: Seat = 'W'): Trick => ({ leader: winner, cards: [], winner })
 
 /** Bygger ett kortspelsläge för att testa botCard i en viss situation. */
 function state(opts: {
@@ -12,6 +15,7 @@ function state(opts: {
   seat?: Seat // den agerande platsen (default S)
   trick?: PlayedCard[] // redan lagda kort i sticket
   leader?: Seat
+  completedTricks?: Trick[] // avslutade stick (för att skilja mitt-i-given från utspel)
 }): PlayState {
   const seat = opts.seat ?? 'S'
   const trump = opts.trump === undefined ? null : opts.trump
@@ -25,7 +29,7 @@ function state(opts: {
     leader: opts.leader ?? 'W',
     toAct: seat,
     currentTrick: opts.trick ?? [],
-    completedTricks: [],
+    completedTricks: opts.completedTricks ?? [],
     tricksNS: 0,
     tricksEW: 0,
   }
@@ -50,6 +54,34 @@ describe('utspel – topp av sekvens, annars lågt från längsta', () => {
   it('jämn 4-korts utan honnör (7654) → 3:e bästa (§8.3), ej honnörssekvens', () => {
     const hand: Hand = [C('clubs', '7'), C('clubs', '6'), C('clubs', '5'), C('clubs', '4'), C('diamonds', 'A')]
     expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '5'))
+  })
+})
+
+describe('Steg 1 – ärlig stickföring: cash:a säkra vinnare på lead', () => {
+  it('sang, inne mitt i given: cashar HA i stället för lågt ur längsta färgen', () => {
+    // Längsta färg = spader (S7654, ingen honnör) → gamla botten ledde lågt spader.
+    // Men HA/HK/HQ är säkra vinnare → cash:a esset först, ta stick där stick finns.
+    const hand: Hand = [C('hearts', 'A'), C('hearts', 'K'), C('hearts', 'Q'), C('spades', '7'), C('spades', '6'), C('spades', '5'), C('spades', '4')]
+    expect(botCard(state({ hand, completedTricks: [doneTrick()] }), 'S')).toEqual(C('hearts', 'A'))
+  })
+
+  it('trumfkontrakt: cashar toppen av trumf (SA) när man är inne', () => {
+    const hand: Hand = [C('spades', 'A'), C('hearts', '4'), C('diamonds', '3'), C('clubs', '2')]
+    expect(botCard(state({ trump: 'spades', hand, completedTricks: [doneTrick()] }), 'S')).toEqual(C('spades', 'A'))
+  })
+
+  it('cashar INTE ett icke-topp-kort (HA fortfarande ute) → leder normalt', () => {
+    // HK är ingen säker vinnare (HA ospelad + ej på hand). Längsta = klöver 7654
+    // utan honnör → utspelsvalet 3:e bästa (C5), inte HK.
+    const hand: Hand = [C('hearts', 'K'), C('hearts', '2'), C('clubs', '7'), C('clubs', '6'), C('clubs', '5'), C('clubs', '4')]
+    expect(botCard(state({ hand, completedTricks: [doneTrick()] }), 'S')).toEqual(C('clubs', '5'))
+  })
+
+  it('på ÄKTA utspel (trick 1, inga avslutade stick) cashar man inte – utspelsdoktrin', () => {
+    // Samma hand som första testet men på utspelet → längsta färg-doktrin gäller,
+    // inte cash-out (annars underleder man ess på utspelet).
+    const hand: Hand = [C('hearts', 'A'), C('hearts', 'K'), C('hearts', 'Q'), C('spades', '7'), C('spades', '6'), C('spades', '5'), C('spades', '4')]
+    expect(botCard(state({ hand }), 'S')).toEqual(C('spades', '5'))
   })
 })
 

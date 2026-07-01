@@ -12,7 +12,28 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**🎉 FAS 10 — Försvarsbud (§7) KLAR** (2026-07-01, testsvit 644, **ej pushad än**).
+**🧠 FAS 11 — Bot-hjärnan (kortspel/motspel-förfining), OMSTRUKTURERAD** (start
+2026-07-01). Ägaren pekade ut den riktiga smärtan: bottarna tar t.ex. 10 stick
+där 13 var kalla — usel stickföring, "kryper under i onödan". FAS 11 (signaler)
+löser INTE det. Så FAS 11 blev ett större epos: **expertspel via ärlig enkeldummy-
+inferens** — bottarna ska läsa bordet (räkna de 40 HP:na, dra bort budvisning +
+fallna kort). **Järnprincip: ingen tjuvkik** (DDS ser alla händer = fusk; används
+i stället över *troliga* händer via Monte Carlo). **Färdplan i `docs/bot-hjarna.md`.**
+Trappan (test-låst, FACIT FÖRE FIX):
+- **Steg 1** — ärlig stickföring i `play-bot.ts`: cash:a säkra vinnare (räknas
+  ärligt), kryp aldrig under med högsta kvarvarande kortet. Steg 1a = sang +
+  trumffärg; sidofärg-i-trumf skjuts till känd-renons-räkning. ← **VI ÄR HÄR.**
+- **Steg 2** — hand-modellen (ryggraden = visionen): inferensmotor seedad ur
+  auktionen (HP-spann, längder, renonser, utpekade kort).
+- **Steg 3** — Monte-Carlo-DDS över modellen + signalavkodning (FAS 11 pt 50).
+- **FAS 11 pt 47–49** (utspel/UDCA/Lavinthal): facit-granska `signals.ts` mot §8.
+  pt 51 DDS-gräns = bekräfta bara.
+**Scope (ägarbeslut 2026-07-01):** MED = "Varför?"-knapp (botten förklarar draget)
++ avancerad teknik (slutkast/inkast/squeeze). SENARE = svårighetsnivåer.
+
+--- FAS 10 pushad (testsvit 644, commit 3208482) ---
+
+**🎉 FAS 10 — Försvarsbud (§7) KLAR** (2026-07-01, testsvit 644).
 Facit-granskning §7.1–7.6: alla verktyg (`overcalls.ts`, `doubles.ts`,
 `lebensohl.ts`, `dont.ts`, `defense-conventional.ts`) lästa mot systemboken →
 **svaren matchar facit**, väl testtäckta (overcalls 24, doubles 15,
@@ -22,13 +43,10 @@ defense-conventional 14, dont 7, lebensohl 6). **Byggd lucka:** `advanceTwoSuite
 visade färger advancern är längst i (lika längd → högfärgen); **aldrig pass ostört**;
 contested → pass tillåtet (partnern rebjuder sin ospecificerade färg; Michaels över
 högfärg utan hf-fit → ostört 3♣ pass-eller-rätta). Facit i `overcalls.test.ts`.
-**NÄSTA:** flytta upp NÄST → **FAS 11 (Kortspel/motspel-förfining)** blir nästa NU –
-låt ägaren bekräfta. (Off-book §7-bredd + tvåfärg-advancern LIVE i budlådan =
-🅿️ PARKERAT/SENARE, inte nu.)
 
---- FAS 9 (testsvit 635, ej pushad) ---
+--- FAS 9 pushad (testsvit 635, i commit 3208482) ---
 
-**🎉 FAS 9 — Passad hand: Drury KLAR** (2026-07-01, testsvit 635, **ej pushad än**).
+**🎉 FAS 9 — Passad hand: Drury KLAR** (2026-07-01, testsvit 635, pushad).
 Facit-granskning §6.7: Drury-basen (`responses-drury.ts`) matchar systemboken exakt
 (2♣ = 3 trumf, 2♦ = 4+ trumf, 10–12 hp; öppnarens 2M signoff / 3M utgångsförsök /
 4M utgång). **Byggd lucka (auktionen dog förut):** `responderAnswerDrury` –
@@ -155,10 +173,9 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **FAS 11 — Kortspel/motspel-förfining** (enligt felsökningsplanen).
-2. **FAS 12 — UI** (enligt felsökningsplanen).
-3. **Off-book §7 LIVE:** koppla in tvåfärg-advancern + balansering i budlådan
-   (i dag PARKERAT – advancern finns som testad funktion men ej live).
+1. **Bot-hjärnan Steg 2** — hand-modellen (inferensmotor seedad ur auktionen).
+2. **Bot-hjärnan Steg 3** — Monte-Carlo-DDS + signalavkodning (FAS 11 pt 50).
+3. **FAS 12 — UI** (enligt felsökningsplanen) + "Varför?"-knapp (bot förklarar drag).
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt

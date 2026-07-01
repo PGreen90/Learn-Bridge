@@ -22,6 +22,46 @@ function lowest(cards: Hand): Card {
   return cards.reduce((lo, c) => (rankVal(c.rank) < rankVal(lo.rank) ? c : lo))
 }
 
+/** Högsta kortet (efter valör) i en lista. */
+function highest(cards: Hand): Card {
+  return cards.reduce((hi, c) => (rankVal(c.rank) > rankVal(hi.rank) ? c : hi))
+}
+
+/** Alla kort som redan fallit (avslutade stick + det pågående sticket). */
+function playedCards(state: PlayState): Card[] {
+  const out: Card[] = []
+  for (const t of state.completedTricks) for (const pc of t.cards) out.push(pc.card)
+  for (const pc of state.currentTrick) out.push(pc.card)
+  return out
+}
+
+/**
+ * Säker vinnare (ärlig räkning, INGEN tjuvkik): sant om inget HÖGRE kort i samma
+ * färg är ospelat. Räknas som "varje högre rank i färgen är antingen redan spelad
+ * eller på egen hand". Kräver inte att man vet VAR korten sitter – bara att inga
+ * finns kvar. Detta är grundstenen i bottens korträkning (docs/bot-hjarna.md).
+ */
+function isSureWinner(card: Card, hand: Hand, played: Card[]): boolean {
+  const higher = RANK_LOW_TO_HIGH.slice(rankVal(card.rank) + 1)
+  for (const r of higher) {
+    const seen =
+      played.some((c) => c.suit === card.suit && c.rank === r) ||
+      hand.some((c) => c.suit === card.suit && c.rank === r)
+    if (!seen) return false // ett högre kort är fortfarande ute → inte säkert stick
+  }
+  return true
+}
+
+/**
+ * Får vinnaren cash:as riskfritt? Sang: alltid. Trumfkontrakt: bara trumffärgens
+ * vinnare (Steg 1a) – en sidofärgsvinnare kan ruffas av en renons-motståndare.
+ * Den skärpningen (cash:a sidofärg tills en känd renons dyker upp) hör till Steg
+ * 1b/Steg 2 när korträkningen vet vem som saknar färgen.
+ */
+function cashSafe(card: Card, trump: Suit | null): boolean {
+  return trump === null || card.suit === trump
+}
+
 /**
  * Lägsta kortet, men undvik att trumfa i onödan: kasta hellre lågt i en sidofärg
  * (så vi inte ruffar partnerns egna vinnande stick eller slösar trumf utan att
@@ -70,8 +110,18 @@ function beats(card: Card, against: Card, led: Suit, trump: Suit | null): boolea
 export function botCard(state: PlayState, seat: Seat): Card {
   const legal = legalCards(state, seat)
 
-  // Utspel: topp av sekvens, annars lågt från längsta färgen.
-  if (state.currentTrick.length === 0) return openingLead(legal)
+  // På lead:
+  if (state.currentTrick.length === 0) {
+    // Äkta utspel (trick 1, inga avslutade stick): utspelsdoktrin, inte cash-out
+    // – man underleder inte ess/vinnare på utspelet.
+    if (state.completedTricks.length === 0) return openingLead(legal)
+    // Mitt i given och inne: cash:a säkra vinnare uppifrån i stället för att leda
+    // lågt ur längsta färgen (annars tas 10 stick där 13 var kalla).
+    const played = playedCards(state)
+    const cashable = legal.filter((c) => cashSafe(c, state.trump) && isSureWinner(c, legal, played))
+    if (cashable.length > 0) return highest(cashable)
+    return openingLead(legal)
+  }
 
   const led = state.currentTrick[0].card.suit
   const bestSeat = currentWinner(state.currentTrick, state.trump)
