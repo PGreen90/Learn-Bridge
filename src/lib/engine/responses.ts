@@ -3,7 +3,7 @@
 // fit-svaren först (splinter → Jacoby → Bergen), sedan färgsvar och NT.
 
 import type { Bid, Forcing, Hand, Suit } from '../../types/bridge'
-import { pointsWithFloor } from './evaluation'
+import { classifyFit, pointsWithFloor } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 
 export type Major = 'hearts' | 'spades'
@@ -35,7 +35,10 @@ function otherMajor(m: Major): Major {
 export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
-  const support = len[opened]
+  // Gemensam fitklassificering (FAS 3 punkt 11) styr fit-grenarna. `hasFourPlus`
+  // är Bergen-/Jacoby-grinden: de får STRUKTURELLT aldrig fyras med bara 3 stöd.
+  const fit = classifyFit(hand, opened)
+  const support = fit.trumps
   const other = otherMajor(opened)
   const sideSuits = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter((s) => s !== opened)
   const shortness = sideSuits.some((s) => len[s] <= 1)
@@ -51,8 +54,9 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
 
   if (p < 6) return { call: 'P', rule: 'pass', explanation: `${p} hp – för svagt för att svara → pass.` }
 
-  // ---- Fit: 4+ stöd (stödpoäng styr nivån) ----
-  if (support >= 4) {
+  // ---- Fit: 4+ stöd (stödpoäng styr nivån). Bergen/Jacoby/splinter bor HÄR –
+  //      grinden `fit.hasFourPlus` garanterar att de aldrig når 3-stödshänder. ----
+  if (fit.hasFourPlus) {
     if (sp >= 12 && shortness) {
       const call = opened === 'hearts' ? '3S' : '3H'
       const sym = opened === 'hearts' ? '3♠' : '3♥'

@@ -6,6 +6,7 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
+import { pointsWithFloor } from './evaluation'
 import type { Major, ResponseResult } from './responses'
 import { responderSecondBidAfter2C } from './responses-2c'
 import { responderPlaceAfterOgust, suitOfWeakTwo } from './responses-weak2'
@@ -69,6 +70,16 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
     if (opened && responderSuit) return responderRebidColorAuction(hand, opened, responderSuit, rebid)
   }
 
+  // FAS 3 punkt 14 – svararen visar kortfärgen efter tvetydig splinter + relä.
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'tvetydig splinter' && rebid.rule === 'splinter-relä') {
+    return responderRevealSplinterShortness(hand, openCall === '1H' ? 'hearts' : 'spades')
+  }
+
+  // FAS 3 punkt 15 – svararen svarar på Bergen game try (1M–2M–2NT).
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'enkel höjning' && rebid.rule === 'Bergen game try') {
+    return responderAnswerBergenGameTry(hand, openCall === '1H' ? 'hearts' : 'spades')
+  }
+
   // Punkt 13 – svararens andra bud efter stark 2♣ (andra negativa m.m.).
   if (openCall === '2C') {
     return responderSecondBidAfter2C(hand, response, rebid)
@@ -81,6 +92,59 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
   }
 
   return null
+}
+
+// === FAS 3 punkt 14: svararen visar kortfärgen efter splinter-relä ==========
+// Tvetydig splinter (singel/renons någonstans) → öppnaren relär → svararen visar
+// VILKEN färg kortheten sitter i, UPP-THE-LINE (ägarens beslut 2026-07-01):
+// lägsta lediga bud = lägsta möjliga kortfärg. Icke-trumffärgerna är alltid tre i
+// rangordning (♣ < ♦ < ♥ < ♠), och de tre stegen ovanför relät (3NT resp. 3♠) är
+// i praktiken 4♣ / 4♦ / 4♥. En slamsäker renons fångas redan av Exclusion i
+// auction.ts; hit når singlar (och renonser som inte var slamsäkra).
+// Öppnarens slamvärdering på den visade kortfärgen (nedvärdera K/D mittemot) hör
+// till FAS 4 punkt 18 – här stannar kedjan vid att kortfärgen är VISAD.
+export function responderRevealSplinterShortness(hand: Hand, M: Major): ResponseResult | null {
+  const len = lengths(hand)
+  const nonTrump = RANK.filter((s) => s !== M) // 3 färger, stigande rang
+  const shortSuit = nonTrump.find((s) => len[s] <= 1)
+  if (!shortSuit) return null
+  const stepCalls = ['4C', '4D', '4H']
+  const call = stepCalls[nonTrump.indexOf(shortSuit)]
+  const isVoid = len[shortSuit] === 0
+  return {
+    call,
+    rule: 'splinter: kortfärg',
+    explanation: `${isVoid ? 'renons' : 'singel'} i ${NAME[shortSuit]} → ${pretty(call)} (visar kortfärgen upp-the-line, GF/slamintresse).`,
+  }
+}
+
+// === FAS 3 punkt 15: svararens svar på Bergen game try (1M–2M–2NT) ==========
+// Öppnaren har frågat med 2NT (game try, 15–17 Bergenpoäng). Svararen gjorde en
+// enkel höjning (3 stöd, 6–9 stödpoäng) och beskriver nu enligt Bergens ÄKTA
+// variant (ägarens beslut 2026-07-01): visa KORTHET upp-the-line så öppnaren kan
+// värdera ruffvärdet, annars säg bara max/min i trumf.
+//   3M         = platt minimum (6–7) → avböjer, öppnaren passar
+//   4M         = platt maximum (8–9), ingen korthet → accepterar utgång
+//   3 sidofärg = korthet (singel/renons) i den färgen (billigast först) → öppnaren
+//                värderar; nyttig korthet mittemot öppnarens svaghet lyfter mot game
+export function responderAnswerBergenGameTry(hand: Hand, M: Major): ResponseResult {
+  const len = lengths(hand)
+  const { points: sp } = pointsWithFloor(hand, M, 'support')
+  const mBid = BID[M]
+  const mSym = SYM[M]
+  // Korthet visas upp-the-line (billigaste kortfärg) – varje sidofärg har ett eget
+  // 3-lägesbud, alla under utgång 4M.
+  const shortSuit = RANK.filter((s) => s !== M).find((s) => len[s] <= 1)
+  if (shortSuit) {
+    const isVoid = len[shortSuit] === 0
+    return {
+      call: `3${BID[shortSuit]}`,
+      rule: 'game try: kortfärg',
+      explanation: `${isVoid ? 'renons' : 'singel'} i ${NAME[shortSuit]} → 3${SYM[shortSuit]} (visar korthet, öppnaren värderar).`,
+    }
+  }
+  if (sp >= 8) return { call: `4${mBid}`, rule: 'game try: accepterar', explanation: `${sp} stödp., platt maximum → 4${mSym} (accepterar utgång).` }
+  return { call: `3${mBid}`, rule: 'game try: signoff', explanation: `${sp} stödp., platt minimum → 3${mSym} (avböjer).` }
 }
 
 // === Punkt 10: svararens andra bud efter semi-forcing 1NT, §5.1 =============

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { bergenPoints, deferredShortness, dummyPoints, playingTricks, startingPoints } from './evaluation'
+import { bergenPoints, classifyFit, deferredShortness, dummyPoints, playingTricks, startingPoints } from './evaluation'
 
 // Faciten kommer från PDF:en "Hand Evaluation – Adjust-3 Method" (se
 // docs/handvardering.md). 13 av 16 facit-händer stämmer exakt med reglerna;
@@ -112,6 +112,58 @@ describe('bergenPoints – Nivå 3 (PDF facit-händer)', () => {
   it('i sang räknas ingen kortfärg, bara trumflängd + sidofärger', () => {
     const e = bergenPoints(parseHand('S:AK42 H:KQ632 D:AKT9 C:-'), 'hearts', { notrump: true })
     expect(e.shortSuit).toBe(0)
+  })
+})
+
+describe('classifyFit – gemensam fitklassificering (FAS 3 punkt 11)', () => {
+  const cf = (n: string, trump: Parameters<typeof classifyFit>[1]) => classifyFit(parseHand(n), trump)
+
+  it('0–1 trumf = ingen fit', () => {
+    // singel spader
+    const e = cf('S:5 H:AK43 D:KQ54 C:Q543', 'spades')
+    expect(e.fit).toBe('none')
+    expect(e.hasFit).toBe(false)
+    expect(e.hasFourPlus).toBe(false)
+  })
+
+  it('2 trumf = two (dubbelton-stöd, ingen höjning på egen hand)', () => {
+    const e = cf('S:54 H:AK43 D:KQ54 C:Q54', 'spades')
+    expect(e.fit).toBe('two')
+    expect(e.hasFit).toBe(false)
+  })
+
+  it('platt 3 trumf utan honnör = three', () => {
+    // ♠432 (inga trumfhonnörer), 4-3-3-3-ish utan singel/renons
+    const e = cf('S:432 H:KJ3 D:Q542 C:K54', 'spades')
+    expect(e.fit).toBe('three')
+    expect(e.hasFit).toBe(true)
+    expect(e.hasFourPlus).toBe(false)
+  })
+
+  it('3 trumf MED trumfhonnör = good-three', () => {
+    // ♠K32 – kung i trumf lyfter till bra 3-stöd
+    expect(cf('S:K32 H:KJ3 D:Q542 C:K54', 'spades').fit).toBe('good-three')
+  })
+
+  it('3 trumf med kort sidofärg (singel) = good-three även utan trumfhonnör', () => {
+    // ♠432 (inga honnörer) men singel hjärter → ruffvärde
+    expect(cf('S:432 H:6 D:KQ542 C:K543', 'spades').fit).toBe('good-three')
+  })
+
+  it('3 trumf med bara en dubbelton (ingen honnör/singel) räknas INTE som bra', () => {
+    // ♠432, kortaste sidofärg = dubbelton → förblir platt three
+    expect(cf('S:432 H:65 D:KQ542 C:K54', 'spades').fit).toBe('three')
+  })
+
+  it('exakt 4 trumf = four', () => {
+    const e = cf('S:5432 H:AK3 D:K542 C:54', 'spades')
+    expect(e.fit).toBe('four')
+    expect(e.hasFourPlus).toBe(true)
+  })
+
+  it('5+ trumf = five-plus', () => {
+    expect(cf('S:76543 H:AK3 D:K54 C:54', 'spades').fit).toBe('five-plus')
+    expect(cf('S:765432 H:AK D:K54 C:54', 'spades').fit).toBe('five-plus')
   })
 })
 

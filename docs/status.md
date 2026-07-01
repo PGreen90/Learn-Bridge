@@ -15,6 +15,27 @@
 - **Drury** för passad hand – `responses-drury.ts`
 - **Försvarsbud §7** (punkt 21–27): inkliv/Michaels/ovanlig 2NT (`overcalls.ts`), dubblingar (`doubles.ts`), Lebensohl (`lebensohl.ts`), DONT (`dont.ts`), försvar mot konventionella öppningar (`defense-conventional.ts`) — störd budgivning inkopplad i `buildAuction` (LHO kliver in på riktigt).
 
+## Stödsystem (FAS 3, klar 2026-07-01)
+
+- **Punkt 11 – gemensam fitklassificering** (`classifyFit` i `evaluation.ts`): EN
+  sanningskälla för fitens kvalitet – `none / two / three / good-three / four /
+  five-plus` (+ `hasFit`, `hasFourPlus`). "Bra 3-stöd" = 3 trumf med trumfhonnör
+  (E/K/D) eller kort sidofärg (singel/renons).
+- **Punkt 12 – Bergen aldrig med 3 stöd:** `respondToMajor` (`responses.ts`) fyrar
+  Bergen/Jacoby/splinter via grinden `classifyFit(...).hasFourPlus`. Intervall:
+  3♣ = 7–9 konstruktiv, 3♦ = 10–12 limit, 3M = 0–6 spärr.
+- **Punkt 13 – Jacoby 2NT:** 4+ stöd (`hasFourPlus`), "ingen kortfärg" via
+  ordningen (splinter-kollen kommer före → singel/renons splintrar i stället).
+- **Punkt 14 – splinter kortfärg:** efter tvetydig splinter + öppnarens relä visar
+  svararen singelns färg upp-the-line (billigaste steg = lägsta möjliga kortfärg,
+  4♣/4♦/4♥) – `responderRevealSplinterShortness`. Renons via Exclusion. Öppnarens
+  slamvärdering på kortfärgen = FAS 4 punkt 18.
+- **Punkt 15 – Bergen game try:** trigger 1M–2M–2NT använder TP/Bergenpoäng 15–17.
+  Svararen svarar enligt Bergens äkta variant (visa korthet upp-the-line, annars
+  platt 3M signoff / 4M accept) – `responderAnswerBergenGameTry`.
+- Ägarbeslut 2026-07-01: både splinter-kortfärg och game try-svar visar korthet
+  **upp-the-line** (billigaste bud = lägsta möjliga kortfärg).
+
 ## Handvärdering
 
 - Bergens Adjust-3 i `evaluation.ts`: startpoäng, stödpoäng och Bergenpoäng.

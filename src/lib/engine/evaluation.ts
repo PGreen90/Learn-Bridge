@@ -118,6 +118,61 @@ export function startingPoints(hand: Hand): Evaluation {
 }
 
 /**
+ * Gemensam fitklassificering (FAS 3 punkt 11). EN sanningskälla för *hur bra*
+ * stödet är i partnerns (oftast öppnade) färg, så att Bergen, Jacoby 2NT,
+ * splinter och game try alla frågar SAMMA funktion i stället för att räkna trumf
+ * ad hoc (`support >= 4`, `=== 3` …) var för sig. Klasserna följer
+ * felsökningsplanens FAS 3:
+ *
+ *   none        0–1 trumf  – ingen spelfit
+ *   two         2 trumf    – dubbelton-stöd (ingen höjning på egen hand)
+ *   three       3 trumf    – platt/svagt (enkel höjnings-material)
+ *   good-three  3 trumf    – MED en trumfhonnör (E/K/D) ELLER en kort sidofärg
+ *                            (singel/renons = ruffvärde). En dubbelton räknas
+ *                            INTE – den är för vanlig och ger knappt ruff med
+ *                            bara 3 trumf. "Bra 3-stöd" får därför lyfta en
+ *                            höjning där platt 3-stöd inte gör det.
+ *   four        exakt 4 trumf
+ *   five-plus   5+ trumf
+ *
+ * OBS: bara antal + kvalitet på själva fiten. Poängen (stöd-/Bergenpoäng) och
+ * VILKET bud det blir hör hemma i budlagret – den här funktionen säger inget om
+ * hp eller nivå.
+ */
+export type FitClass = 'none' | 'two' | 'three' | 'good-three' | 'four' | 'five-plus'
+
+export interface FitEvaluation {
+  /** Antal trumf (kort i partnerns/den öppnade färgen). */
+  trumps: number
+  /** Fitklassen enligt FAS 3 punkt 11. */
+  fit: FitClass
+  /** true om vi har spelfit (3+ trumf) – höjbart. */
+  hasFit: boolean
+  /** true för `four` och `five-plus` – 4+ trumf (Bergen/Jacoby-material). */
+  hasFourPlus: boolean
+}
+
+/** Nivå 0: klassificera fiten i `trump` (partnerns färg). Se `FitClass`. */
+export function classifyFit(hand: Hand, trump: Suit): FitEvaluation {
+  const bySuit = ranksBySuit(hand)
+  const trumpRanks = bySuit[trump]
+  const trumps = trumpRanks.length
+  const len = lengths(hand)
+
+  let fit: FitClass
+  if (trumps <= 1) fit = 'none'
+  else if (trumps === 2) fit = 'two'
+  else if (trumps === 3) {
+    const trumpHonor = trumpRanks.some((r) => r === 'A' || r === 'K' || r === 'Q')
+    const ruffValue = SUITS.some((s) => s !== trump && len[s] <= 1) // singel/renons
+    fit = trumpHonor || ruffValue ? 'good-three' : 'three'
+  } else if (trumps === 4) fit = 'four'
+  else fit = 'five-plus'
+
+  return { trumps, fit, hasFit: trumps >= 3, hasFourPlus: trumps >= 4 }
+}
+
+/**
  * Spelstick (eng. *playing tricks*): ungefär hur många stick handen tar på EGEN
  * hand som spelförare, driven av långa starka färger – inte bara honnörspoäng.
  * Svarar på frågan "hur nära utgång är jag själv?", vilket är måttet

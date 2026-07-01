@@ -39,9 +39,17 @@
 >   ✅ **Punkt 10b klar (2026-07-01):** off-book Syd definierad och låst
 >   (`docs/off-book-syd.md`, ägaren "lås som det är"); facit-luckor fyllda i
 >   `auction-live.test.ts` (2-läges färg, 2NT, minorfit utan blast). Testsvit 506 grön.
->   🎉 **HELA FAS 2 (konkurrens) KLAR.** Nästa: ägaren väljer nytt NU ur NÄST
->   (naturlig kandidat FAS 3 fit-/stödlogik). FAS 1 punkt 2 tung del
+>   🎉 **HELA FAS 2 (konkurrens) KLAR.** FAS 1 punkt 2 tung del
 >   (matchande/avvisade regler) fortsatt uppskjuten.
+> - ✅ **HELA FAS 3 (stödsystem) KLAR (2026-07-01), testsvit 535:**
+>   - Punkt 11 `classifyFit` (`evaluation.ts`) – gemensam fitklassificering.
+>   - Punkt 12 Bergen aldrig med 3 stöd (grind `hasFourPlus` i `responses.ts`).
+>   - Punkt 13 Jacoby 2NT (4+ stöd, ingen kortfärg via ordningen).
+>   - Punkt 14 splinter kortfärg upp-the-line (`responderRevealSplinterShortness`).
+>   - Punkt 15 Bergen game try-svar, visa korthet (`responderAnswerBergenGameTry`).
+>   Två ägarbeslut låsta (upp-the-line-visning). Nästa: ägaren väljer NU ur NÄST
+>   (naturlig kandidat FAS 4 värdering; öppnarens slamvärdering efter splinter-
+>   kortfärg/game try hör dit = FAS 4 punkt 18).
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

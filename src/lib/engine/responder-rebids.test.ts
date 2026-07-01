@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Major, ResponseResult } from './responses'
 import { parseHand } from '../bidding'
 import type { Suit } from '../../types/bridge'
-import { responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction } from './responder-rebids'
+import { responderAnswerBergenGameTry, responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction, responderRevealSplinterShortness } from './responder-rebids'
 
 function r10(notation: string, M: Major, call: string, rule: string): string {
   const rebid: ResponseResult = { call, rule, explanation: '' }
@@ -19,6 +19,71 @@ function r12(notation: string, opened: Suit, responderSuit: Suit, rebidCall: str
   const rebid: ResponseResult = { call: rebidCall, rule: rebidRule, explanation: '' }
   return responderRebidColorAuction(parseHand(notation), opened, responderSuit, rebid)?.call ?? 'null'
 }
+
+describe('FAS 3 punkt 14 – svararen visar kortfärgen efter splinter-relä (upp-the-line)', () => {
+  const reveal = (n: string, M: Major) => responderRevealSplinterShortness(parseHand(n), M)
+
+  // Hjärterfit: icke-trumf = ♣ ♦ ♠ → stegen 4♣ / 4♦ / 4♥.
+  it('1♥: singel klöver → 4♣ (lägsta steget)', () => {
+    expect(reveal('S:K43 H:KQ74 D:AJ852 C:3', 'hearts')?.call).toBe('4C')
+  })
+  it('1♥: singel ruter → 4♦', () => {
+    expect(reveal('S:K43 H:KQ74 D:3 C:AJ852', 'hearts')?.call).toBe('4D')
+  })
+  it('1♥: singel spader → 4♥ (högsta steget)', () => {
+    expect(reveal('S:3 H:KQ74 D:AJ85 C:K432', 'hearts')?.call).toBe('4H')
+  })
+  it('1♥: renons spader → 4♥ och märks som renons', () => {
+    const r = reveal('S:- H:KQ742 D:AJ85 C:K43', 'hearts')
+    expect(r?.call).toBe('4H')
+    expect(r?.explanation).toContain('renons')
+  })
+
+  // Spaderfit: icke-trumf = ♣ ♦ ♥ → stegen 4♣ / 4♦ / 4♥.
+  it('1♠: singel klöver → 4♣', () => {
+    expect(reveal('S:KQ74 H:AJ85 D:K43 C:3', 'spades')?.call).toBe('4C')
+  })
+  it('1♠: singel hjärter → 4♥ (högsta steget, under utgång 4♠)', () => {
+    expect(reveal('S:KQ74 H:3 D:AJ85 C:K43', 'spades')?.call).toBe('4H')
+  })
+
+  it('regel + märkning: budet bär regeln "splinter: kortfärg"', () => {
+    expect(reveal('S:K43 H:KQ74 D:AJ852 C:3', 'hearts')?.rule).toBe('splinter: kortfärg')
+  })
+
+  it('utan kortfärg (ingen singel/renons) → null', () => {
+    expect(reveal('S:K43 H:KQ74 D:A85 C:Q83', 'hearts')).toBe(null)
+  })
+})
+
+describe('FAS 3 punkt 15 – svararens svar på Bergen game try (1M–2M–2NT, visa korthet)', () => {
+  const ans = (n: string, M: Major) => responderAnswerBergenGameTry(parseHand(n), M)
+
+  it('platt minimum (ingen korthet, svag) → 3M signoff', () => {
+    expect(ans('S:K54 H:J83 D:9742 C:Q83', 'hearts').call).toBe('3H')
+  })
+  it('platt maximum (ingen korthet, 8–9 stödp.) → 4M accepterar', () => {
+    const r = ans('S:Q54 H:Q83 D:KJ42 C:J83', 'hearts')
+    expect(r.call).toBe('4H')
+    expect(r.rule).toBe('game try: accepterar')
+  })
+
+  // Korthet visas upp-the-line (♣ före ♦ före ♠ vid hjärterfit).
+  it('singel klöver → 3♣', () => {
+    expect(ans('S:K54 H:Q83 D:87432 C:9', 'hearts').call).toBe('3C')
+  })
+  it('singel ruter → 3♦', () => {
+    expect(ans('S:K54 H:Q83 D:9 C:Q87432', 'hearts').call).toBe('3D')
+  })
+  it('singel spader → 3♠', () => {
+    const r = ans('S:9 H:Q83 D:K7432 C:Q84', 'hearts')
+    expect(r.call).toBe('3S')
+    expect(r.rule).toBe('game try: kortfärg')
+  })
+  it('spaderfit: singel hjärter → 3♥ (under utgång 4♠)', () => {
+    expect(ans('S:K843 H:9 D:Q742 C:K83', 'spades').call).toBe('3H')
+  })
+})
 
 describe('punkt 10 – svararens andra bud efter semi-forcing 1NT', () => {
   it('pass på öppnarens utgång', () => {

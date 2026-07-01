@@ -12,35 +12,43 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**✅ FAS 2 KONKURRENS KLAR (2026-07-01).** Alla punkter nedan gröna (testsvit 506).
-**NU-facket är tomt — nästa steg: ägaren väljer ett NU ur 🟢 NÄST** (naturlig
-kandidat: FAS 3). Rör inget nytt förrän valet är gjort.
+**✅ FAS 3 STÖDSYSTEM KLAR (2026-07-01).** Alla fem punkter (11–15) gröna
+(testsvit 535). **NU-facket är tomt — nästa steg: ägaren väljer ett NU ur 🟢 NÄST**
+(naturlig kandidat: FAS 4 Värdering). Rör inget nytt förrän valet är gjort.
 
-Slutförd FAS 2 (facit före fix + `npm test`):
-- ✅ **Punkt 8 — Support Double** (klar 2026-07-01): `supportDouble` positions-/
-  nivåmedveten (t.o.m. 2M) + inkopplad i `buildAuction` (grenen 1 färg–(P)–1M–
-  (RHO-inkliv)→X, bara när stöd-X faktiskt slår till). Facit i `doubles.test.ts`
-  + `auction-support-double.test.ts`.
-- ✅ **Punkt 9 — Responsiva dubblingar** (klar 2026-07-01): `responsiveDouble`
-  inkopplad i `buildAuction` – (1M)–X(LHO)–2M(svararen höjer)–X(advancern
-  responsivt). Facit i `auction-responsive-double.test.ts`.
-- ✅ **Punkt 10 — Advancer-logik** (klar 2026-07-01): `advanceOvercall` inkopplad
-  i det ostörda advance-läget (1 färg–(enkelt 1-läges inkliv)–(svararen passar)–
-  advancern: höjning/cue/ny färg/NT/fit-jump). **Fit-jump nykodad** (systembok rad
-  714). Facit i `auction-advancer.test.ts` + `overcalls.test.ts`.
-- ✅ **Punkt 10b — Off-book Syd** (klar 2026-07-01): beteendet definierat och
-  låst (`docs/off-book-syd.md`, ägaren "lås som det är"). Facit-luckor fyllda i
-  `auction-live.test.ts` (2-läges färg, 2NT, minorfit utan blast).
+Slutförd FAS 3 (facit + `npm test`):
+- ✅ **Punkt 11 — Gemensam fitklassificering** (klar 2026-07-01): `classifyFit`
+  (`evaluation.ts`) ger EN sanningskälla för fitens kvalitet: `none / two / three /
+  good-three / four / five-plus`. "Bra 3-stöd" = 3 trumf med trumfhonnör (E/K/D)
+  ELLER kort sidofärg (singel/renons). Facit i `evaluation.test.ts`.
+- ✅ **Punkt 12 — Bergen aldrig med 3 stöd** (klar 2026-07-01): Bergen-grinden går
+  nu via `classifyFit(...).hasFourPlus` i `respondToMajor` (`responses.ts`) →
+  strukturellt omöjligt att fyra Bergen/Jacoby/splinter med 3 stöd. Intervall
+  bekräftade (3♣ = 7–9, 3♦ = 10–12, 3M = 0–6). Facit i `responses.test.ts`.
+- ✅ **Punkt 13 — Jacoby 2NT** (klar 2026-07-01): rätt stöd (4+ via `hasFourPlus`),
+  "ingen kortfärg" garanteras av ordningen (splinter-kollen först → hand med
+  singel/renons splintrar i stället). Facit i `responses.test.ts`.
+- ✅ **Punkt 14 — Splinter kortfärg** (klar 2026-07-01): efter tvetydig splinter +
+  relä visar svararen singelns färg **upp-the-line** (ägarbeslut: billigaste steg =
+  lägsta möjliga kortfärg, 4♣/4♦/4♥) via `responderRevealSplinterShortness`.
+  Renons går redan via Exclusion. Öppnarens honnörsnedvärdering mot kortfärgen =
+  FAS 4 punkt 18. Hela kedjan verifierad (1♥–3♠–3NT–4♦).
+- ✅ **Punkt 15 — Bergen game try** (klar 2026-07-01): triggern (1M–2M–2NT) fanns
+  och använder rätt mått (**TP/Bergenpoäng 15–17**, ej rå HP/LTC). Svararen svarar
+  nu (fanns inte förut) enligt **Bergens äkta variant** (ägarbeslut): visa KORTHET
+  upp-the-line (3 sidofärg), annars platt 3M signoff / 4M accept via
+  `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **FAS 3 — Fit- & stödlogik:** gemensam fitklassificering, Bergen (aldrig m. 3
-   stöd), Jacoby 2NT, Splinter, Bergen Game Try.
-2. **FAS 4 — Värdering:** HP vs TP vs LTC. *Här bor även TP-steg C-2/C-3/D*
+1. **FAS 4 — Värdering:** HP vs TP vs LTC. *Här bor även TP-steg C-2/C-3/D*
    (minorhöjningar, sang-accepter, sang-nudge) — de flyttas hit, jagas inte löst.
-3. **FAS 5 — NT-systemet:** Stayman, Smolen, transfers, Texas, MSS, 2NT, 3NT.
+   **Punkt 18 Slamvärdering** (nedvärdera K/D mot partnerns kortfärg) ligger här –
+   dit hör öppnarens agerande efter splinter-kortfärg (FAS 3 punkt 14) & game try.
+2. **FAS 5 — NT-systemet:** Stayman, Smolen, transfers, Texas, MSS, 2NT, 3NT.
+3. **FAS 6 — Minorsystem:** minorregeln, inverterade minorer, svaga hoppskift.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
-- FAS 6 Minorer · FAS 7 Svaga öppningar · FAS 8 Slam · FAS 9 Passad hand ·
+- FAS 7 Svaga öppningar · FAS 8 Slam · FAS 9 Passad hand ·
   FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt enligt felsökningsplanen).
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)

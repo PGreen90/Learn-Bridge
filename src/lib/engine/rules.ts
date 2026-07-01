@@ -21,6 +21,8 @@ import type { Forcing } from '../../types/bridge'
 const ALERT_RULE_PREFIXES: string[] = [
   'tvetydig splinter',
   'splinter-relä',
+  'splinter: kortfärg',
+  'game try: kortfärg',
   'Jacoby 2NT',
   'Jacoby-transfer',
   'transfer', // "transfer (2NT)"
@@ -164,6 +166,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // ---- Konventionella höjningar / svar (§4.1) ----
   'tvetydig splinter': 'utgangskrav',
   'splinter-relä': 'slamintresse',
+  'splinter: kortfärg': 'slamintresse',
   'Jacoby 2NT': 'utgangskrav',
   'Jacoby: sidofärg': 'utgangskrav',
   'Jacoby: kortfärg': 'utgangskrav',
@@ -174,6 +177,9 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'Bergen limit': 'inbjudan',
   'Bergen spärr': 'avslut',
   'Bergen game try': 'krav-1-rond',
+  'game try: kortfärg': 'inbjudan',
+  'game try: accepterar': 'avslut',
+  'game try: signoff': 'avslut',
   'semi-forcing 1NT': 'semi-krav',
   'inverterad minor': 'krav-1-rond',
   'inverterad minor, svag': 'avslut',

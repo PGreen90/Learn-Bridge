@@ -76,6 +76,49 @@ describe('respondToMajor', () => {
   it('3NT med 13–15 balanserad, exakt 2 i öppningsfärgen', () => {
     expect(resp('S:KQ5 H:Q4 D:KJ83 C:Q985', 'hearts')).toBe('3NT') // 13 hp balanserad
   })
+
+  // ---- FAS 3 punkt 12: Bergen ALDRIG med 3 stöd (strukturell grind hasFourPlus) ----
+  describe('Bergen aldrig med 3-korts stöd', () => {
+    // Rena 3-stödshänder över hela styrkeregistret (svag → limit → GF). Ingen av
+    // dem får bli ett Bergen-bud (3♣/3♦ eller 3M som spärrhöjning).
+    const threeSupport: [string, string][] = [
+      ['S:K83 H:Q74 D:8642 C:K53', 'svag ~8'],
+      ['S:KQ3 H:K74 D:Q642 C:J53', 'konstruktiv ~11'],
+      ['S:AQ3 H:K74 D:KJ42 C:Q53', 'limit ~14'],
+      ['S:842 H:K74 D:96532 C:73', 'svag med singel-ish'],
+    ]
+    for (const [h, label] of threeSupport) {
+      it(`${label}: ${h} → inget Bergen-bud`, () => {
+        const r = respondToMajor(parseHand(h), 'hearts')
+        expect(r.rule.startsWith('Bergen')).toBe(false)
+        expect(['3C', '3D']).not.toContain(r.call)
+        expect(r.call).not.toBe('3H') // 3M vore Bergen spärr
+      })
+    }
+  })
+
+  // ---- FAS 3 punkt 13: Jacoby 2NT – rätt stöd (4+), ingen kortfärg ----
+  describe('Jacoby 2NT', () => {
+    it('4 stöd, GF-styrka, balanserat (ingen kortfärg) → 2NT Jacoby', () => {
+      const r = respondToMajor(parseHand('S:K94 H:KQ74 D:A83 C:Q53'), 'hearts')
+      expect(r.call).toBe('2NT')
+      expect(r.rule).toBe('Jacoby 2NT')
+    })
+
+    it('samma styrka men MED kortfärg → splinter, aldrig Jacoby', () => {
+      // 4 hjärter, singel ruter, GF → tvetydig splinter (3♠), inte 2NT.
+      const r = respondToMajor(parseHand('S:KQ95 H:KQ73 D:8 C:K842'), 'hearts')
+      expect(r.call).not.toBe('2NT')
+      expect(r.rule).not.toBe('Jacoby 2NT')
+      expect(r.rule).toContain('splinter')
+    })
+
+    it('3-korts stöd med GF-styrka bjuder ALDRIG Jacoby 2NT', () => {
+      // 15 hp men bara 3 hjärter → faller till 2/1, inte Jacoby (kräver 4+).
+      const r = respondToMajor(parseHand('S:AQ3 H:K74 D:AKJ2 C:Q53'), 'hearts')
+      expect(r.rule).not.toBe('Jacoby 2NT')
+    })
+  })
 })
 
 describe('respondToMinor', () => {
