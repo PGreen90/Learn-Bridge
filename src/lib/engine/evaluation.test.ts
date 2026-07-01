@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { bergenPoints, classifyFit, deferredShortness, dummyPoints, playingTricks, startingPoints } from './evaluation'
+import { bergenPoints, classifyFit, deferredShortness, dummyPoints, playingTricks, startingPoints, wastedHonorsOppositeShortness } from './evaluation'
 
 // Faciten kommer från PDF:en "Hand Evaluation – Adjust-3 Method" (se
 // docs/handvardering.md). 13 av 16 facit-händer stämmer exakt med reglerna;
@@ -164,6 +164,77 @@ describe('classifyFit – gemensam fitklassificering (FAS 3 punkt 11)', () => {
   it('5+ trumf = five-plus', () => {
     expect(cf('S:76543 H:AK3 D:K54 C:54', 'spades').fit).toBe('five-plus')
     expect(cf('S:765432 H:AK D:K54 C:54', 'spades').fit).toBe('five-plus')
+  })
+})
+
+describe('FAS 4 punkt 17 – stödvärderingens tre komponenter', () => {
+  // Bergens asymmetri: LÅNGTRUMF-handen (öppnaren, bergenPoints) räknar
+  // fitpoäng + distributionsvärde + kortfärger; STÖDHANDEN (svararen, dummyPoints)
+  // räknar kortfärger. Här isoleras varje komponent.
+
+  describe('fitpoäng – extra trumflängd (öppnarens bergenPoints.extraTrump)', () => {
+    it('5 trumf ger 0, 6 ger +1, 7 ger +2', () => {
+      expect(bergenPoints(parseHand('S:AK654 H:K5 D:Q543 C:53'), 'spades').extraTrump).toBe(0)
+      expect(bergenPoints(parseHand('S:AK7654 H:K5 D:Q54 C:53'), 'spades').extraTrump).toBe(1)
+      expect(bergenPoints(parseHand('S:AK76543 H:K5 D:Q5 C:53'), 'spades').extraTrump).toBe(2)
+    })
+  })
+
+  describe('distributionsvärde – sidofärger (bergenPoints.sideSuits)', () => {
+    it('+1 per 4-/5-korts sidofärg', () => {
+      // ♠ trumf + en 4-korts ruter → 1 sidofärg.
+      expect(bergenPoints(parseHand('S:AK654 H:K5 D:Q543 C:53'), 'spades').sideSuits).toBe(1)
+      // ♠ trumf + 4-korts ruter + 5-korts klöver → 2 sidofärger.
+      expect(bergenPoints(parseHand('S:AK65 H:5 D:Q543 C:5432'), 'spades').sideSuits).toBe(2)
+    })
+  })
+
+  describe('kortfärger – korthet (bergenPoints.shortSuit / dummyPoints.shortness)', () => {
+    it('öppnaren: singel +2, renons +4, två dubbletonger +1', () => {
+      expect(bergenPoints(parseHand('S:AK654 H:5 D:Q5432 C:53'), 'spades').shortSuit).toBe(2) // singel ♥
+      expect(bergenPoints(parseHand('S:AK654 H:- D:Q5432 C:532'), 'spades').shortSuit).toBe(4) // renons ♥
+      expect(bergenPoints(parseHand('S:AK543 H:54 D:Q5 C:5432'), 'spades').shortSuit).toBe(1) // 2 dubbletonger (♥,♦)
+    })
+    it('stödhanden: singel +2 (3 trumf) men +3 (4 trumf), renons = antal trumf', () => {
+      // singel ♥ med 3 spader → +2
+      expect(dummyPoints(parseHand('S:K54 H:5 D:Q5432 C:5432'), 'spades').shortness).toBe(2)
+      // singel ♥ med 4 spader → +3
+      expect(dummyPoints(parseHand('S:K543 H:5 D:Q543 C:5432'), 'spades').shortness).toBe(3)
+      // renons ♥ med 4 spader → 4 (= antal trumf)
+      expect(dummyPoints(parseHand('S:K543 H:- D:Q5432 C:5432'), 'spades').shortness).toBe(4)
+    })
+  })
+
+  it('sanningskarta: LTC finns inte – motorn värderar bara på HP + TP', () => {
+    // Regressionsvakt för FAS 4 punkt 16-beslutet: ingen förlorarräkning smyger in.
+    // (Rent dokumenterande – evaluation.ts exponerar inga LTC-fält.)
+    const e = dummyPoints(parseHand('S:K543 H:5 D:Q543 C:5432'), 'spades')
+    expect(Object.keys(e)).not.toContain('losers')
+    expect(Object.keys(e)).not.toContain('ltc')
+  })
+})
+
+describe('FAS 4 punkt 18 – slamvärdering: nedvärdera K/D mot partnerns kortfärg', () => {
+  // Partnern är kort i ♥; vi räknar hur mycket av VÅRA honnörer där som är dött.
+  const w = (n: string) => wastedHonorsOppositeShortness(parseHand(n), 'hearts')
+
+  it('kung i kortfärgen = −2', () => {
+    expect(w('S:A54 H:K32 D:Q543 C:53')).toBe(2)
+  })
+  it('KD i kortfärgen = −4', () => {
+    expect(w('S:A54 H:KQ2 D:Q54 C:53')).toBe(4)
+  })
+  it('KDkn i kortfärgen = −5', () => {
+    expect(w('S:A54 H:KQJ D:Q54 C:53')).toBe(5)
+  })
+  it('esset behålls (kontroll) – A ensam = 0', () => {
+    expect(w('S:A54 H:A32 D:Q543 C:53')).toBe(0)
+  })
+  it('EKD → esset kvar, K+D dras = −4', () => {
+    expect(w('S:54 H:AKQ D:Q5432 C:53')).toBe(4)
+  })
+  it('inga honnörer i kortfärgen = 0', () => {
+    expect(w('S:A54 H:432 D:KQ54 C:K3')).toBe(0)
   })
 })
 

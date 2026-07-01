@@ -4,6 +4,21 @@ import { parseHand } from '../bidding'
 import { buildAuction } from './auction'
 import { exclusionInvestigation, slamInvestigation } from './slam-auction'
 
+describe('FAS 4 punkt 18 – slamvärdering nedvärderar honnörer mot partnerns kortfärg', () => {
+  // Öppnaren visade singel hjärter (Jacoby-kortfärg); svararens KQ i hjärter är
+  // dött. Rått ligger paret i slamzon (36), men efter nedvärderingen (−4) faller
+  // det till 32 → RKC ska INTE startas (annars strandar man över utgång).
+  const opener = parseHand('S:AKQ54 H:5 D:AQ54 C:KJ4')  // 5 spader, singel ♥
+  const responder = parseHand('S:JT86 H:KQ2 D:K32 C:A32') // 4 spader, KQ ♥ (dött mot singeln)
+
+  it('utan kortfärgs-info: rått i slamzon → slam utreds', () => {
+    expect(slamInvestigation(opener, responder, 'spades', '3H')).not.toBeNull()
+  })
+  it('med öppnarens korta hjärter: nedvärderas under zonen → ingen slam (null)', () => {
+    expect(slamInvestigation(opener, responder, 'spades', '3H', 'hearts')).toBeNull()
+  })
+})
+
 describe('slamInvestigation – RKC efter högfärgsfit', () => {
   it('lillslam: cue-rond före RKC, 4 nyckelkort → 6 i trumf', () => {
     const opener = parseHand('S:AKQ85 H:A43 D:KJ7 C:82') // 3 nyckelkort, hjärteress

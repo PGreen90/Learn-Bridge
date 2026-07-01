@@ -36,6 +36,27 @@
 - Ägarbeslut 2026-07-01: både splinter-kortfärg och game try-svar visar korthet
   **upp-the-line** (billigaste bud = lägsta möjliga kortfärg).
 
+## Värdering (FAS 4, punkt 16–18 + C-2/C-3 klara 2026-07-01; D väntar på ägaren)
+
+- **Punkt 16 – sanningskarta HP/TP/LTC:** motorn kör HP + TP (start-/stöd-/
+  Bergenpoäng); **LTC finns inte**. Beslut: inför INTE LTC (TP täcker det;
+  konsistent med den låsta TP-principen). Karta + beslut i `docs/handvardering.md`.
+- **Punkt 17 – stödvärdering verifierad:** de tre komponenterna isolerade och
+  låsta (`evaluation.test.ts`): fitpoäng (`bergenPoints.extraTrump`),
+  distributionsvärde (`sideSuits`), kortfärger (`shortSuit`/`shortness`). Bergens
+  asymmetri bekräftad (stödhanden värderar korthet, långtrumf-handen längd).
+- **Punkt 18 – slamvärdering:** `wastedHonorsOppositeShortness` (`evaluation.ts`)
+  nedvärderar K−2/D−2/kn−1 mot partnerns visade kortfärg (esset behålls).
+  Inkopplat i `slamInvestigation`: visar öppnaren singel (Jacoby-kortfärg) dras
+  svararens döda honnörer av innan slamzon-porten (bevisat: rått 36 → slam;
+  justerat 32 → ingen strandad slam).
+- **Steg C-2 – minorhöjningar på TP:** lyfts på längd/sidofärg (`bergenPoints
+  {notrump}`), aldrig korthet (minorfit siktar 3NT). `responses.ts respondToMinor`.
+- **Steg C-3 – sang-accepter på TP:** 3NT-accepter på startpoäng (5-korts färg/
+  löpande honnörer lyfter). `rebids.ts`.
+- **Steg D – TP-nudge för sangöppning: EJ byggd** – ändrar öppningsfundamentet,
+  kräver ägarens exempelhänder (vilka 14:or nudgas). Se `docs/tp-arbetslista.md`.
+
 ## Handvärdering
 
 - Bergens Adjust-3 i `evaluation.ts`: startpoäng, stödpoäng och Bergenpoäng.

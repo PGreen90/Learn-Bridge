@@ -173,6 +173,29 @@ export function classifyFit(hand: Hand, trump: Suit): FitEvaluation {
 }
 
 /**
+ * Slamvärdering (FAS 4 punkt 18): *nedvärdera K och D mittemot partnerns
+ * kortfärg.* När partnern visat en singel/renons i en sidofärg (splinter,
+ * Jacoby-kortfärg, game try-kortfärg) sitter dina egna honnörer där mestadels
+ * döda – partnern ruffar färgen, så K/D drar inte hem några stick. Esset behålls
+ * (första-rondskontroll), kungen tappar ~2, damen ~2, knekten ~1.
+ *
+ * Returnerar POÄNGEN att DRA IFRÅN den här handens slampoäng (aldrig negativ).
+ * Rent mått – budlagret bestämmer var det används (i praktiken: dra av från den
+ * kombinerade slamzon-summan innan man frågar RKC).
+ */
+export function wastedHonorsOppositeShortness(hand: Hand, partnerShortSuit: Suit): number {
+  const ranks = ranksBySuit(hand)[partnerShortSuit]
+  let deduct = 0
+  for (const r of ranks) {
+    if (r === 'K') deduct += 2
+    else if (r === 'Q') deduct += 2
+    else if (r === 'J') deduct += 1
+    // Ess = kontroll, behålls (0). Småkort = redan värdelösa (0).
+  }
+  return deduct
+}
+
+/**
  * Spelstick (eng. *playing tricks*): ungefär hur många stick handen tar på EGEN
  * hand som spelförare, driven av långa starka färger – inte bara honnörspoäng.
  * Svarar på frågan "hur nära utgång är jag själv?", vilket är måttet

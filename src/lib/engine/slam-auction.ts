@@ -8,7 +8,7 @@
 // stödpoäng (svararen som blir träkarl) ≥ 33. Storslam ≥ 37.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { bergenPoints, dummyPoints } from './evaluation'
+import { bergenPoints, dummyPoints, wastedHonorsOppositeShortness } from './evaluation'
 import { lengths } from './hand'
 import {
   cheapestCueBid,
@@ -48,8 +48,19 @@ export interface SlamTurn {
  * de extra buden (4NT → RKC-svar → slamavslut), eller null om paret inte når
  * slamzon (då fortsätter den vanliga auktionen).
  */
-export function slamInvestigation(openerHand: Hand, responderHand: Hand, trump: Suit, lastCall?: string): SlamTurn[] | null {
-  const combined = bergenPoints(openerHand, trump).bergenPoints + dummyPoints(responderHand, trump).dummyPoints
+export function slamInvestigation(
+  openerHand: Hand,
+  responderHand: Hand,
+  trump: Suit,
+  lastCall?: string,
+  partnerShortSuit?: Suit,
+): SlamTurn[] | null {
+  const raw = bergenPoints(openerHand, trump).bergenPoints + dummyPoints(responderHand, trump).dummyPoints
+  // FAS 4 punkt 18: har öppnaren visat korthet i en sidofärg (Jacoby-kortfärg)
+  // sitter SVARARENS K/D där döda → dra av dem innan slamzon-porten, annars
+  // överbjuds slam på honnörer som partnern ändå ruffar bort.
+  const wasted = partnerShortSuit ? wastedHonorsOppositeShortness(responderHand, partnerShortSuit) : 0
+  const combined = raw - wasted
   if (combined < 33) return null
 
   // Saknar paret TVÅ nyckelkort (≤3 av 5) ska man inte fråga RKC – då blir man

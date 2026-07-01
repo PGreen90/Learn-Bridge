@@ -1,10 +1,8 @@
 # TP i budvalet — arbetslista
 
-> 🔺 **NÄSTA GÅNG BÖRJAR VI MED:** Steg C-2 (minorhöjningar på TP). Inled med att
-> **fråga ägaren om konkreta exempelhänder** – öppen fråga: *ska korthet väga i
-> minorhöjningar, eller bara längd/sidofärg?* (Städning klar 2026-07-01:
-> `pointsWithFloor`-hjälpare + globalt invariant-test. Kvar i städning om vi vill:
-> slamzon-tröskelns konsekvenskoll.)
+> 🔺 **NÄSTA GÅNG BÖRJAR VI MED:** Steg D (TP-nudge för sangöppning) – **kräver
+> ägarens exempelhänder** (vilka 14:or nudgas till 1NT: 5-korts högfärg vs löpande
+> minor vs starka ess?). Steg C-2 + C-3 klara 2026-07-01 (se nedan).
 
 > Boten ska tänka i **totalpoäng (TP/fördelning)**, inte rå HP (ägarens beslut
 > 2026-06-30). Byggs i **test-låsta steg** så on-book aldrig rubbas.
@@ -27,25 +25,21 @@
 - **Steg C-1 — öppnarens högfärgs-accepter.** `rebids.ts`:
   `openerRebidAfterSimpleRaise`, `openerRebidAfterBergen`,
   `openerRebidAfterSplinter` räknar **Bergenpoäng = `max(HP, bergenPoints)`**.
+- **Steg C-2 — minorhöjningar på TP (klar 2026-07-01, FAS 4).** Beslut (autonomt,
+  för granskning): minorfit siktar oftast 3NT där singel är en NACKDEL → minor-
+  höjningar lyfts på **`max(HP, bergenPoints{notrump})`** (längd + sidofärg,
+  ALDRIG korthet). Inkopplat i `responses.ts respondToMinor` (inverterad stark +
+  gap-hand). **Öppnarens `openerRebidAfterInvertedMinor` lämnades medvetet på
+  HP/stopp** – det är en 3NT-jakt där form/korthet inte ska väga (minorslam sköts
+  av slammaskineriet). Facit i `responses.test.ts`.
+- **Steg C-3 — sang-accepter på TP (klar 2026-07-01, FAS 4).** Spelinbjudans-
+  accepter (3NT) räknar nu **startpoäng** (`max(HP, startingPoints)` – 5-korts
+  färg/löpande honnörer lyfter, ingen kortfärg i NT), golvat vid HP.
+  `rebids.ts`: `openerRebidAfterLimitedResponse` (minor 1m–2NT, p≥14) och
+  `openerRebidAfter1NTResponse` (1NT–2NT kvantitativ, p≥16). Facit i
+  `rebids.test.ts` (13 hp + AKQxx accepterar; platt quack-13 passar).
 
 ## ⬜ Kvar att bygga
-
-### Steg C-2 — minorhöjningar på TP
-Fit i minor siktar oftast 3NT (HP/stoppar-styrt), men 5m/slam i minor är
-formstyrt. **Mänsklig input behövs:** ska korthet väga i minorhöjningar, eller
-bara längd/sidofärg?
-- `responses.ts` `respondToMinor`: inverterad minor (svag/stark), 2NT-inbjudan,
-  gap-handen — i dag rå HP.
-- `rebids.ts` `openerRebidAfterInvertedMinor`: 3NT-accept (HP/stopp) vs
-  minimumsbud — i dag rå HP.
-
-### Steg C-3 — sang-accepter på TP
-Öppnaren/svararen accepterar en sanginbjudan. Balanserat → måttet är
-**startpoäng** (bra ess/tior, 5-korts färg, längd – ingen kortfärg i NT).
-**Mänsklig input behövs:** när väger en femkortsfärg upp en sanghand?
-- `rebids.ts` `openerRebidAfterLimitedResponse` ('2NT inbjudan' → 3NT vid p≥14).
-- `responses-2nt.ts` `openerRebidAfter2NTResponse` ('2NT inbjudan' → 3NT vid p≥16).
-- Svararens egen sang-inbjudan vs utgång (semi-forcing 1NT-grenen, `responder-rebids.ts`).
 
 ### Steg D — TP-nudge för sangöppning
 `openings.ts`: 1NT (15–17) / 2NT (20–21) / 3NT (25–27) är i dag rena HP-steg.

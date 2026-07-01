@@ -12,10 +12,26 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**✅ FAS 3 STÖDSYSTEM KLAR (2026-07-01).** Alla fem punkter (11–15) gröna
-(testsvit 535). **NU-facket är tomt — nästa steg: ägaren väljer ett NU ur 🟢 NÄST**
-(naturlig kandidat: FAS 4 Värdering). Rör inget nytt förrän valet är gjort.
+**🔶 FAS 4 VÄRDERING – punkt 16–18 + C-2/C-3 KLARA (2026-07-01, testsvit 551).**
+Kvar: **Steg D (TP-nudge för sangöppning)** – medvetet EJ byggd, den ändrar
+öppningsfundamentet och kräver **ägarens exempelhänder** (vilka 14:or nudgas till
+1NT: 5-korts högfärg vs löpande minor vs starka ess?). **NU = Steg D, väntar på
+ägarens val.** Rör inget annat.
 
+Slutförd FAS 4 (facit + `npm test`, autonom körning – besluten för granskning):
+- ✅ **Punkt 16 — HP/TP/LTC-karta:** motorn kör HP + TP; **LTC finns inte**.
+  Beslut: inför inte LTC (TP täcker det). Karta i `docs/handvardering.md`.
+- ✅ **Punkt 17 — stödvärdering verifierad:** fitpoäng/distributionsvärde/kortfärger
+  isolerade + låsta (`evaluation.test.ts`); Bergens asymmetri bekräftad.
+- ✅ **Punkt 18 — slamvärdering:** `wastedHonorsOppositeShortness` nedvärderar
+  K/D mot partnerns kortfärg (ess behålls), inkopplat i `slamInvestigation` via
+  Jacoby-kortfärg. Knyter ihop FAS 3-svansen.
+- ✅ **Steg C-2 — minorhöjningar på TP:** längd/sidofärg lyfter, aldrig korthet
+  (minorfit siktar 3NT). `responses.ts`.
+- ✅ **Steg C-3 — sang-accepter på TP:** 3NT-accepter på startpoäng. `rebids.ts`.
+- ⏸️ **Steg D — sang-nudge:** HÅLLS för ägaren (öppningsfundament).
+
+---
 Slutförd FAS 3 (facit + `npm test`):
 - ✅ **Punkt 11 — Gemensam fitklassificering** (klar 2026-07-01): `classifyFit`
   (`evaluation.ts`) ger EN sanningskälla för fitens kvalitet: `none / two / three /
@@ -40,16 +56,14 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **FAS 4 — Värdering:** HP vs TP vs LTC. *Här bor även TP-steg C-2/C-3/D*
-   (minorhöjningar, sang-accepter, sang-nudge) — de flyttas hit, jagas inte löst.
-   **Punkt 18 Slamvärdering** (nedvärdera K/D mot partnerns kortfärg) ligger här –
-   dit hör öppnarens agerande efter splinter-kortfärg (FAS 3 punkt 14) & game try.
-2. **FAS 5 — NT-systemet:** Stayman, Smolen, transfers, Texas, MSS, 2NT, 3NT.
-3. **FAS 6 — Minorsystem:** minorregeln, inverterade minorer, svaga hoppskift.
+1. **FAS 5 — NT-systemet:** Stayman, Smolen, transfers, Texas, MSS, 2NT, 3NT.
+2. **FAS 6 — Minorsystem:** minorregeln, inverterade minorer, svaga hoppskift.
+3. **FAS 7 — Svaga öppningar:** svaga tvåor, Ogust, spärröppningar, regel 2-3-4.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
-- FAS 7 Svaga öppningar · FAS 8 Slam · FAS 9 Passad hand ·
-  FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt enligt felsökningsplanen).
+- FAS 8 Slam · FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel ·
+  FAS 12 UI (allt enligt felsökningsplanen). Även TP-steg E (reverse/hoppskift på
+  TP) + F (3:e/4:e-hands lättöppning) ur `docs/tp-arbetslista.md`.
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
 - **Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC): känd gräns, stängs lagligt.

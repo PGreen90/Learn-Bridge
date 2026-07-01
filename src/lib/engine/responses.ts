@@ -118,6 +118,12 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
   const len = lengths(hand)
   const support = len[opened]
   const bal = isBalanced(hand)
+  // TP-steg C-2 (FAS 4): minorfit siktar oftast 3NT, där en singel är en NACKDEL
+  // (ingen stopp). Därför lyfter minorhöjningar på LÄNGD + SIDOFÄRG men ALDRIG på
+  // korthet: måttet är `bergenPoints{notrump}` (extra trumf + sidofärger, ingen
+  // kortfärg), golvat vid HP så en hand aldrig nedgraderas. Balanserade sang-
+  // placeringar (3NT/2NT) står kvar på rå HP – de är stopp-/HP-styrda.
+  const mp = pointsWithFloor(hand, opened, 'bergen', { notrump: true }).points
   const m = BID[opened]
   const msym = opened === 'clubs' ? '♣' : '♦'
   const otherMinor: Minor = opened === 'clubs' ? 'diamonds' : 'clubs'
@@ -151,12 +157,13 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
 
   // Härefter: ingen biudbar 4-korts högfärg.
 
-  // ---- Stark inverterad höjning: 4+ stöd, 10+ hp (ingen högfärg) ----
-  if (support >= 4 && p >= 10) {
+  // ---- Stark inverterad höjning: 4+ stöd, 10+ TP (längd/sidofärg lyfter) ----
+  if (support >= 4 && mp >= 10) {
     if (bal && p >= 13 && p <= 15) {
       return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad utan högfärg → 3NT (till spel).` }
     }
-    return { call: `2${m}`, rule: 'inverterad minor', explanation: `${p} hp, ${support} stöd, ingen högfärg → 2${msym} (inverterad minor, krav).` }
+    const lift = mp > p ? ` (${p} hp / ${mp} TP)` : ''
+    return { call: `2${m}`, rule: 'inverterad minor', explanation: `${p} hp, ${support} stöd, ingen högfärg → 2${msym} (inverterad minor, krav)${lift}.` }
   }
 
   // ---- 3NT till spel: 13–15 balanserad, ingen högfärg ----
@@ -174,8 +181,8 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
     return { call: '2NT', rule: '2NT inbjudan', explanation: `${p} hp balanserad, ingen högfärg → 2NT (inbjudan).` }
   }
 
-  // ---- Gap-handen: 7–9 hp med stöd men utan högfärg (för svagt för inverterad) → 1NT ----
-  if (support >= 4 && p >= 7 && p <= 9) {
+  // ---- Gap-handen: 7–9 TP med stöd men utan högfärg (för svagt för inverterad) → 1NT ----
+  if (support >= 4 && mp >= 7 && mp <= 9) {
     return { call: '1NT', rule: 'gap-hand 1NT', explanation: `${p} hp med stöd men utan högfärg (för svagt för inverterad) → 1NT.` }
   }
 

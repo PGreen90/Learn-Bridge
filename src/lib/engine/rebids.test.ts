@@ -243,8 +243,15 @@ describe('punkt 8 – återbud efter begränsade svar', () => {
     expect(limited('S:KQ3 H:KJ2 D:Q42 C:AQ42', '2NT inbjudan', '2NT', 'clubs')).toBe('3NT') // 17 hp
   })
 
-  it('2NT-inbjudan, minimum → pass', () => {
-    expect(limited('S:32 H:Q42 D:Q42 C:AKQ42', '2NT inbjudan', '2NT', 'clubs')).toBe('P') // 13 hp
+  it('2NT-inbjudan, platt minimum → pass', () => {
+    // 13 hp men platt 4-3-3-3, quack-tungt → startpoäng ~11 (golvat 13) < 14 → pass.
+    expect(limited('S:Q32 H:Q42 D:KJ2 C:KQ42', '2NT inbjudan', '2NT', 'clubs')).toBe('P')
+  })
+
+  // FAS 4 steg C-3: startpoäng lyfter en NT-accept (5-korts färg / löpande honnörer).
+  it('2NT-inbjudan, 13 hp MEN solid 5-korts färg → accepterar 3NT (C-3)', () => {
+    // ♣AKQ42 = 5 löpande stick → startpoäng 15 → accepterar trots 13 råa HP.
+    expect(limited('S:32 H:Q42 D:Q42 C:AKQ42', '2NT inbjudan', '2NT', 'clubs')).toBe('3NT')
   })
 
   it('svagt hoppskift, minimum → pass', () => {

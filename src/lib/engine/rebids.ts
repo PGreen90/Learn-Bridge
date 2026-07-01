@@ -7,7 +7,7 @@
 // auktionen vid två bud tills vidare.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { pointsWithFloor } from './evaluation'
+import { pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
@@ -290,8 +290,14 @@ export function openerRebidAfterLimitedResponse(hand: Hand, response: ResponseRe
     case '3NT till spel':
     case 'spärr till utgång':
       return pass
-    case '2NT inbjudan': // minoröppning, svararen 11–12 inbjuder
-      return p >= 14 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT.` } : pass
+    case '2NT inbjudan': { // minoröppning, svararen 11–12 inbjuder
+      // TP-steg C-3: acceptera sanginbjudan på STARTPOÄNG (5-korts färg, bra
+      // ess/tior, längd lyfter en NT-hand som spelar bättre än sina råa HP),
+      // golvat vid HP så en hand aldrig nedgraderas. Ingen kortfärg i NT.
+      const ntp = Math.max(p, startingPoints(hand).startingPoints)
+      const lift = ntp > p ? ` (${p} hp / ${ntp} startp.)` : ''
+      return ntp >= 14 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT${lift}.` } : pass
+    }
     case '1NT':
     case 'gap-hand 1NT':
       if (p >= 18 && bal) return { call: '3NT', rule: 'rebid: 3NT', explanation: `${p} hp balanserad → 3NT.` }
@@ -336,8 +342,14 @@ export function openerRebidAfter1NTResponse(response: ResponseResult, hand: Hand
       if (len.clubs >= 4) return { call: '3C', rule: 'MSS-svar', explanation: '4+ klöver → 3♣.' }
       if (len.diamonds >= 4) return { call: '3D', rule: 'MSS-svar', explanation: '4+ ruter (förnekar 4 klöver) → 3♦.' }
       return p >= 17 ? { call: '3NT', rule: 'MSS-svar', explanation: 'ingen 4-korts minor, max → 3NT.' } : { call: '2NT', rule: 'MSS-svar', explanation: 'ingen 4-korts minor → 2NT.' }
-    case '2NT inbjudan':
-      return p >= 16 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp minimum → pass.` }
+    case '2NT inbjudan': {
+      // TP-steg C-3: 1NT-öppning (15–17), svararen inbjuder kvantitativt med 2NT.
+      // Acceptera på startpoäng – en 15:a med 5-korts färg/bra ess/tior spelar som
+      // en 16:a och accepterar; en platt quack-15:a avböjer. Golvat vid HP.
+      const ntp = Math.max(p, startingPoints(hand).startingPoints)
+      const lift = ntp > p ? ` (${p} hp / ${ntp} startp.)` : ''
+      return ntp >= 16 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT${lift}.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp minimum → pass.` }
+    }
     case '3NT till spel':
       return { call: 'P', rule: 'rebid: pass', explanation: 'till spel → pass.' }
     case '4NT kvantitativ':

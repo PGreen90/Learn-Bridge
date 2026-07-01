@@ -181,4 +181,18 @@ describe('respondToMinor', () => {
   it('gap-handen → 1NT med 7–9 och stöd men utan högfärg', () => {
     expect(respM('S:K3 H:972 D:KJ42 C:9532', 'diamonds')).toBe('1NT') // 7 hp, 4 stöd
   })
+
+  // ---- FAS 4 steg C-2: minorhöjningar på TP (längd/sidofärg lyfter, korthet ej) ----
+  describe('C-2 – minorhöjning lyfts på längd/sidofärg, inte korthet', () => {
+    it('formstark 9-poängare (5 stöd + 4-korts sidofärg) lyfts till inverterad minor', () => {
+      // 9 hp, men 5 ruter + 4 klöver → bergen-notrump 11 TP → stark inverterad 2♦.
+      // (Rå HP 9 hade blivit gap-hand 1NT; formen lyfter, inte kortheten.)
+      expect(respM('S:K3 H:82 D:K8642 C:K432', 'diamonds')).toBe('2D')
+    })
+
+    it('platt 9-poängare (ingen extra längd) lyfts INTE – stannar gap-hand 1NT', () => {
+      // 9 hp, 3-3-4-3, ingen sidofärg → bergen-notrump ≈ HP → för svag för inverterad.
+      expect(respM('S:Q54 H:Q54 D:K642 C:Q54', 'diamonds')).toBe('1NT')
+    })
+  })
 })

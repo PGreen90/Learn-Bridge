@@ -344,7 +344,10 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   const majorFit = response.rule === 'Jacoby 2NT' && (openerSuit === 'hearts' || openerSuit === 'spades')
   const minorFit = response.rule === 'inverterad minor' && (openerSuit === 'clubs' || openerSuit === 'diamonds')
   if (majorFit || minorFit) {
-    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit as Suit, rebid.call)
+    // FAS 4 punkt 18: visade öppnaren en singel/renons (Jacoby-kortfärg) skickar
+    // vi in den korta färgen så slamzonen nedvärderar svararens honnörer där.
+    const openerShort = rebid.rule === 'Jacoby: kortfärg' ? (parseBid(rebid.call).suit ?? undefined) : undefined
+    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit as Suit, rebid.call, openerShort)
     if (slam) {
       for (const t of slam) {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat

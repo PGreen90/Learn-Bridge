@@ -171,6 +171,39 @@ Efter den rent pedagogiska visningen kopplades TP in i utvalda beslut:
 - **Slamzon** (`slam-auction.ts`): tröskeln **33** (Bergenpoäng + stödpoäng) avgör
   om en Jacoby-2NT-auktion växer vidare till 1430 RKC; **37** för storslam.
 
+## FAS 4 punkt 16 — Sanningskarta: HP vs TP vs LTC (2026-07-01)
+> Felsökningsplanens FAS 4 punkt 16: *"identifiera exakt vad motorn använder."*
+> Här är kartan efter en genomsökning av `src/lib/engine/` (icke-testfiler).
+
+**Regeln motorn följer (härledd ur koden):**
+- **Öppningsgolv → TP.** `openings.ts`: färgöppning vid `startingPoints ≥ 12`;
+  stark 2♣ även på **spelstick** (`playingTricks ≥ 8½`). NT-steg + 2♣-hp-gren är
+  hp-definierade (konventionella ranges).
+- **Känd fit → TP med hp-golv.** När en trumffit är etablerad räknas
+  stöd-/Bergenpoäng via `pointsWithFloor(..., max(hp, mått))`:
+  - `responses.ts` (svararens högfärgshöjningar, `'support'`) + `classifyFit`.
+  - `rebids.ts` (öppnarens accepter efter höjning/Bergen/splinter, `'bergen'`).
+  - `responder-rebids.ts` (game try-svar, `'support'`).
+  - `auction-live.ts` (off-book-höjning, `dummyPoints`).
+  - `slam-auction.ts` (slamzon = `bergenPoints + dummyPoints`).
+- **Ingen fit / sang / konkurrens → rå HP.** Sangbeslut, inkliv, dubblingar,
+  försvarsbud, svar utan fit m.m. läser `hcp(hand)` direkt (`overcalls.ts`,
+  `doubles.ts`, `defense-conventional.ts`, `responses-2nt.ts`, `lebensohl.ts` …).
+
+**LTC (losing trick count / "förlorare"): FINNS INTE i motorn.** Sökning på
+`losing / förlorare / LTC / loserCount` gav noll träffar i motorlagret.
+
+### Beslut om LTC (fattat 2026-07-01, öppet för ägaren att ändra)
+**Vi inför INTE LTC som eget värderingsmått.** Skäl: ägarens låsta princip är
+Bergens **TP** (beslut 2026-06-30), och TP fångar redan det LTC skattar –
+trumflängd, korthet, sidofärger, fit. Att lägga in LTC som en konkurrerande
+drivare skulle ge två system som drar åt olika håll och riskerar den bevisat
+stabila on-book-baslinjen. LTC-intuitionen ("räkna förlorare") lever alltså
+vidare *implicit* i TP:s längd-/korthetsbonusar. Om ägaren senare vill ha LTC
+kopplas den in som en **korskontroll/tie-break** i fit-lägen, inte som ersättare.
+Se [[terminology-losing-tricks]] för svensk vokabulär ("förlorare") om det blir
+aktuellt.
+
 ## Öppna frågor / kantfall att bevaka
 - **Säkra stick (quick tricks):** öppningsregeln nämner "2 säkra stick". Vi
   *visar* TP men inkopplar inte öppningsregeln, så vi kan vänta med en

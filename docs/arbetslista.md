@@ -47,9 +47,16 @@
 >   - Punkt 13 Jacoby 2NT (4+ stöd, ingen kortfärg via ordningen).
 >   - Punkt 14 splinter kortfärg upp-the-line (`responderRevealSplinterShortness`).
 >   - Punkt 15 Bergen game try-svar, visa korthet (`responderAnswerBergenGameTry`).
->   Två ägarbeslut låsta (upp-the-line-visning). Nästa: ägaren väljer NU ur NÄST
->   (naturlig kandidat FAS 4 värdering; öppnarens slamvärdering efter splinter-
->   kortfärg/game try hör dit = FAS 4 punkt 18).
+>   Två ägarbeslut låsta (upp-the-line-visning).
+> - 🔶 **FAS 4 (värdering) punkt 16–18 + C-2/C-3 KLARA (2026-07-01), testsvit 551:**
+>   - Punkt 16: HP/TP/LTC-karta (`docs/handvardering.md`) – LTC införs inte.
+>   - Punkt 17: stödvärderingens tre komponenter isolerade/låsta (`evaluation.test.ts`).
+>   - Punkt 18: `wastedHonorsOppositeShortness` – nedvärderar honnörer mot partnerns
+>     kortfärg, inkopplat i `slamInvestigation` (Jacoby-kortfärg).
+>   - C-2: minorhöjningar på TP (längd/sidofärg, ej korthet) – `responses.ts`.
+>   - C-3: sang-accepter (3NT) på startpoäng – `rebids.ts`.
+>   **KVAR: Steg D (TP-nudge för sangöppning)** – hålls för ägaren (öppningsfundament,
+>   kräver exempelhänder). Nästa NU.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens
