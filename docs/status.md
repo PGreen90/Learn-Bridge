@@ -61,7 +61,7 @@
   (`openings.ts`) trådad genom `buildAuction` + `Spela.tsx` (lokal dubblett borttagen).
   Facit i `openings.test.ts` (startp. 15 nudgas bara ej sårbar; startp. 16 alltid).
 
-## NT-systemet (FAS 5, punkt 19–22 + 24–25 klara 2026-07-01; punkt 23 kvar)
+## NT-systemet (FAS 5 KLAR 2026-07-01, punkt 19–25, testsvit 587)
 
 - **Punkt 19 Stayman** (`responses-nt.ts` + `responder-rebids.ts`): lagad
   inbjudnings-5-4-lucka (2♣–2♦ med 5-4 hf + 8–9 → naturlig 2♥/2♠, ej 2NT) +
@@ -79,10 +79,14 @@
 - **Punkt 25 3NT-öppningen**: verifierad (svararen placerar pass/4NT kvant/6NT;
   öppnaren tar ställning till kvantitativ 4NT, max 27).
 - Ny hjälpare `suitHcp` (`hand.ts`) för färgstyrka. Systembeslut i §4.3.
-- **Kvar (nästa session): punkt 23 Minor Suit Stayman-fortsättning.** Första budet
-  (2♠) + öppnarens svar (3♣/3♦/2NT/3NT) finns; **svararens turn 4 returnerar null**
-  och ska byggas. Ägarbeslut: GF-placering nu (minorfit→höj/3NT, ingen fit→3NT),
-  cue/RKC-slam på minorfiten + öppnarens 3♥/3♠-stopp/4♣-4♦-max flaggas **FAS 8**.
+- **Punkt 23 Minor Suit Stayman KLAR:** svararens turn 4 byggd i
+  `responderRebidIn1NTAuction` (case `Minor Suit Stayman`). Insikt: MSS-handen har
+  alltid 4+ i BÅDA minorerna (5-4+), så en fit hittas garanterat när öppnaren visar
+  en minor (3♣/3♦). Ägarbeslut 2026-07-01: **3NT som standard**; höj minorn
+  (`4♣/4♦`, ny regel `Minor Suit Stayman: höjning` = slamintresse) **bara med ~16+
+  hp** (paret ≈ 33). Ingen fit (öppnarens 2NT) → 3NT; öppnarens 3NT (max) → pass.
+  Fortsatt cue/RKC på minorfiten + öppnarens 3♥/3♠-stopp/4♣-4♦-max = **FAS 8**.
+  Facit i `responder-rebids.test.ts`. **Hela FAS 5 NT-systemet är därmed klart.**
 
 ## Handvärdering
 

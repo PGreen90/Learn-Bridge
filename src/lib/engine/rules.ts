@@ -198,6 +198,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'Texas (2NT)': 'krav-1-rond',
   Smolen: 'utgangskrav',
   'Minor Suit Stayman': 'utgangskrav',
+  'Minor Suit Stayman: höjning': 'slamintresse',
   'MSS-svar': 'utgangskrav',
   'minorfråga (2NT)': 'slamintresse',
   '4NT kvantitativ': 'slamintresse',

@@ -20,6 +20,7 @@ const ALL_ENGINE_RULES: string[] = [
   'Lebensohl 2NT (slow → 3NT, visar stopp)', 'Lebensohl 2NT (svag)',
   'Lebensohl cue (Stayman, krav)', 'Lebensohl direkt 3-läge (krav)', 'MSS-svar',
   'Mathe 1NT (minorer)', 'Mathe X (högfärger)', 'Michaels', 'Minor Suit Stayman',
+  'Minor Suit Stayman: höjning',
   'NT med stopp', 'NT-svar', 'Ogust', 'Ogust: max/bra', 'Ogust: max/dålig',
   'Ogust: max/utmärkt', 'Ogust: min/bra', 'Ogust: min/dålig', 'Sjöberg 5NT',
   'Smolen', 'Stayman (2NT)', 'Stayman', 'Stayman-svar', 'Texas (2NT)', 'Texas',

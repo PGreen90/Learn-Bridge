@@ -12,8 +12,8 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**🔶 FAS 5 NT-SYSTEMET PÅGÅR (2026-07-01, testsvit 581).** Punkt **19–22 + 24–25
-klara**; **kvar: punkt 23 Minor Suit Stayman** (nästa session).
+**🎉 FAS 5 NT-SYSTEMET KLAR (2026-07-01, testsvit 587).** Punkt **19–25 klara**.
+Nästa NU hämtas ur 🟢 NÄST (naturlig kandidat: **FAS 6 Minorsystem**) – ägaren väljer.
 - ✅ **19 Stayman:** lagad inbjudnings-5-4-lucka (naturlig 2♥/2♠) + **garbage
   Stayman** (svag exakt 4-4 hf + kort klöver → 2♣, passar svaret). Ägarbeslut.
 - ✅ **20 Smolen** verifierad. ✅ **22 Texas** verifierad.
@@ -22,10 +22,12 @@ klara**; **kvar: punkt 23 Minor Suit Stayman** (nästa session).
 - ✅ **24 2NT-systemet:** turerna 1–3 verifierade + **svararens turn 4 byggd**
   (`responderRebidIn2NTAuction`: minorfit→utgång, ingen fit→3NT, Smolen över 2NT).
 - ✅ **25 3NT-öppningen** verifierad.
-- ⬜ **23 Minor Suit Stayman (NÄSTA GÅNG):** 2♠ + öppnarens svar finns; **svararens
-  turn 4 är null och ska byggas.** Ägarbeslut: GF-placering nu (minorfit→höj/3NT,
-  ingen fit→3NT); cue/RKC-slam på minorfiten + öppnarens 3♥/3♠-stopp & 4♣/4♦-max
-  flaggas **FAS 8**. Detaljer i `docs/status.md`.
+- ✅ **23 Minor Suit Stayman:** svararens turn 4 byggd
+  (`responderRebidIn1NTAuction`, case `Minor Suit Stayman`). Fit hittas alltid när
+  öppnaren visar en minor (svararen har alltid 4+ i båda). Ägarbeslut: **3NT som
+  standard**, höj minorn (`Minor Suit Stayman: höjning`) **bara med slamintresse
+  ~16+**; ingen fit→3NT. Fortsatt cue/RKC + öppnarens 3♥/3♠-stopp & 4♣/4♦-max =
+  **FAS 8**. Facit i `responder-rebids.test.ts`.
 
 Slutförd FAS 4 (facit + `npm test`, autonom körning – besluten för granskning):
 - ✅ **Punkt 16 — HP/TP/LTC-karta:** motorn kör HP + TP; **LTC finns inte**.
