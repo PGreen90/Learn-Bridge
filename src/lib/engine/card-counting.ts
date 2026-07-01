@@ -57,7 +57,7 @@ export function isSureWinner(card: Card, hand: Hand, played: Card[]): boolean {
  * Vilka platser den aktande platsen ÄRLIGT ser korten på: egen hand + träkarlen
  * (som ligger öppen). Sitter man på spelförarsidan ser man hela den sidan.
  */
-function visibleSeats(state: PlayState, seat: Seat): Seat[] {
+export function visibleSeats(state: PlayState, seat: Seat): Seat[] {
   const dummy = dummyOf(state.contract)
   const declarer = state.contract.declarer
   if (seat === declarer || seat === dummy) return [declarer, dummy]
