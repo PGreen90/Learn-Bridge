@@ -142,10 +142,21 @@ describe('exclusionInvestigation – voidwood efter splinter (Steg 5)', () => {
     expect(turns[0].rule).toBe('Exclusion')
   })
 
-  it('renons som rankar ÖVER trumf → null (håller budnivåerna lagliga)', () => {
-    const opener = parseHand('S:- H:AKQ52 D:KQ4 C:AQ52') // hjärterfit, spaderrenons hos öppnaren spelar ingen roll
-    const responder = parseHand('S:- H:JT983 D:A765 C:K43') // spaderrenons rankar över hjärter
-    expect(exclusionInvestigation(opener, responder, 'hearts')).toBeNull()
+  it('renons som rankar ÖVER trumf (spader över hjärter) → 5♠, alla nyckelkort → storslam', () => {
+    const opener = parseHand('S:- H:AKQ52 D:KQ4 C:AQ52') // hjärterfit, ♥A+♣A + trumfkung = 3
+    const responder = parseHand('S:- H:JT983 D:A765 C:K43') // spaderrenons, ♦A → totalt 4 nyckelkort
+    const turns = exclusionInvestigation(opener, responder, 'hearts')!
+    expect(turns.map((t) => t.call)).toEqual(['5S', '6C', '7H']) // 5♠ Exclusion, 6♣ svar, 7♥ storslam
+    expect(turns[0].rule).toBe('Exclusion')
+  })
+
+  it('renons över trumf, öppnarens steg 4 = 6 i trumf → svararen passar (lillslam)', () => {
+    const opener = parseHand('S:32 H:AQJ42 D:KQJ C:AK6') // ♥A+♣A + trumfdam, ingen trumfkung → 2 nyckelkort + dam
+    const responder = parseHand('S:- H:T9843 D:AK76 C:KQ42') // spaderrenons, ♦A → 1 nyckelkort (totalt 3, ett saknas)
+    const turns = exclusionInvestigation(opener, responder, 'hearts')!
+    // öppnarens steg 4 (2 nyckelkort + dam) = 6♥; svararen kan inte bjuda om 6♥ → passar
+    expect(turns.map((t) => t.call)).toEqual(['5S', '6H', 'P'])
+    expect(turns[2].rule).toBe('slamavslut')
   })
 
   it('ingen sidorenons → null', () => {
@@ -239,6 +250,24 @@ describe('buildAuction – Exclusion växer fram efter splinter (Steg 5)', () =>
     }
     const a = buildAuction(deal)!
     expect(a.turns.map((t) => t.call)).toEqual(['1S', '3H', '3S', '5C', '5D', '7S'])
+    expect(a.open).toBe(false)
+  })
+
+  it('renons över trumf: 1H–3S(splinter)–3NT(relä)–5S(Exclusion)–6H–7H', () => {
+    const deal: Deal = {
+      id: 'slam-exclusion-hearts',
+      dealer: 'N',
+      vulnerability: 'none',
+      board: 1,
+      hands: {
+        N: parseHand('S:AQ3 H:AKQ85 D:42 C:K76'), // 18 hp, 5 hjärter → 1H, slamintresse → relä
+        E: parseHand('S:642 H:73 D:JT93 C:T985'), // svag, ingen 5-färg → inget inkliv
+        S: parseHand('S:- H:JT964 D:AKQ5 C:A432'), // 4+ hjärter + spaderrenons → splinter, sedan Exclusion
+        W: parseHand('S:KJT985 H:2 D:876 C:QJ'),
+      },
+    }
+    const a = buildAuction(deal)!
+    expect(a.turns.map((t) => t.call)).toEqual(['1H', '3S', '3NT', '5S', '6H', '7H'])
     expect(a.open).toBe(false)
   })
 })

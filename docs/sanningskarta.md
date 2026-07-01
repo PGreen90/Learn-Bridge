@@ -110,8 +110,8 @@ Inget att koda – grunden återspeglas i `openings.ts`. **KODAT.**
 | §6.1 1430 RKC + trumfdam-fråga | KODAT | `slam.ts` `respondToRKC`/`respondToQueenAsk` | Ja – `slam-auction.ts` efter Jacoby 2NT-fit / inverterad minor-fit i slamzon. |
 | §6.2 Cue-bid | KODAT | `slam.ts` `cheapestCueBid` | Ja – cue-rond före RKC i `slam-auction.ts`. |
 | §6.3 Sjöbergs 5NT | KODAT | `slam.ts` `respondToKingAsk` | Ja – i storslamszon i `slam-auction.ts`. |
-| §6.4 Gerber | KODAT | `slam.ts` `respondToGerber(+KingAsk)` | Ja – över **1NT** (`nt-slam.ts`). Över 2NT: **kvantitativ tills vidare** (DELVIS). |
-| §6.5 Exclusion Blackwood | KODAT | `slam.ts` `respondToExclusion` | Ja – efter splinter-relä (`slam-auction.ts`). DELVIS: renons som **rankar över trumf** hanteras ej. |
+| §6.4 Gerber | KODAT | `slam.ts` `respondToGerber(+KingAsk)` | Ja – över **1NT** (`gerberInvestigation`) OCH **2NT** (`gerber2NTInvestigation`, `nt-slam.ts`), inkopplade i `buildAuction`. |
+| §6.5 Exclusion Blackwood | KODAT | `slam.ts` `respondToExclusion` | Ja – efter splinter-relä (`slam-auction.ts`), inkl. renons som **rankar över trumf** (hjärter+spaderrenons → 5♠; svararen passar när öppnarens steg 4 satt 6♥). |
 | §6.6 Fjärde färg krav | KODAT | `responder-rebids.ts` `fourthSuit` | Ja. Beslut: **GF**. |
 | §6.7 Drury (tvåvägs) | KODAT | `responses-drury.ts` | Ja – passad-hand-gren i `buildAuction`. |
 

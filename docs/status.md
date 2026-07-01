@@ -142,7 +142,9 @@
 ## Slamverktyg (`slam.ts`, `slam-auction.ts`, `nt-slam.ts`)
 
 - 1430 RKC, cue-bid, Sjöbergs 5NT, Gerber, Exclusion — testade motorfunktioner.
-- Inkopplade i växande auktioner: Jacoby 2NT-fit (1430 RKC vid slamzon ≥ 33), Sjöbergs 5NT i RKC-grenen, cue-bid-rond före RKC, minor-fit-RKC (inverterad minor), NT-slam med Gerber 4♣ över 1NT, Exclusion efter splinter.
+- Inkopplade i växande auktioner: Jacoby 2NT-fit (1430 RKC vid slamzon ≥ 33), Sjöbergs 5NT i RKC-grenen, cue-bid-rond före RKC, minor-fit-RKC (inverterad minor), NT-slam med Gerber 4♣ över **1NT och 2NT** (`gerberInvestigation`/`gerber2NTInvestigation` i `nt-slam.ts`), Exclusion efter splinter.
+- **Gerber över 2NT (FAS 8, 2026-07-01):** en balanserad slamsäker svarare (13+ hp mittemot 20–21 ≈ 33+) frågar ess med 4♣ i stället för att blint blåsa 6NT (kan nu stanna i 4NT om två ess saknas, driva storslam via 5♣-kungfrågan ≈37+). Delad sekvensbyggare med 1NT-Gerber. Facit i `nt-slam.test.ts`.
+- **Exclusion när renons rankar över trumf (FAS 8, 2026-07-01):** `exclusionInvestigation` (`slam-auction.ts`) hanterar nu även hjärter trumf + spaderrenons (5♠ Exclusion, lagligt över 3NT-relät). Öppnarens högsta stegsvar (steg 4) landar på exakt 6♥; vill svararen bara ha lillslam passar hon (i stället för att olagligt bjuda om 6♥). Nivåbailen borttagen. Facit i `slam-auction.test.ts`. **FAS 8 (Slamsystem) därmed helt klar (testsvit 630).**
 
 ## Kortspel (punkt 29)
 

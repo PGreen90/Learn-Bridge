@@ -202,9 +202,13 @@
   **Alla slamvägar nu inkopplade i växande auktioner** (Steg 1–5, 2026-06-29):
   cue-rond + Sjöbergs 5NT i RKC-grenen (`slam-auction.ts`), **minorfit** via
   inverterad minor (`auction.ts`), **Gerber 4♣** över 1NT (`nt-slam.ts`) och
-  **Exclusion** efter splinter-relä (`slam-auction.ts`). Avgränsningar: Gerber
-  över 2NT (kvantitativ tills vidare) och Exclusion när renons rankar över trumf
-  hanteras ej – då fortsätter den vanliga auktionen.
+  **Exclusion** efter splinter-relä (`slam-auction.ts`). **Gerber över 2NT klar**
+  (FAS 8, 2026-07-01): `gerber2NTInvestigation` (`nt-slam.ts`) – balanserad
+  slamsäker svarare (13+ mittemot 20–21 ≈ 33+) frågar ess med 4♣ i stället för
+  att blint blåsa 6NT. **Exclusion när renons rankar över trumf klar** (FAS 8,
+  2026-07-01): hjärter trumf + spaderrenons ger nu 5♠ Exclusion; svararen passar
+  när öppnarens steg 4 redan satt 6♥ (i stället för olagligt ombud). **FAS 8 helt
+  klar** (testsvit 630).
 - ✅ Punkt **21–22** (inkliv + tvåfärgsinkliv, §7.1–7.2) – `overcalls.ts`.
   Enkelt inkliv, 1NT-inkliv (15–18), Michaels, ovanlig 2NT, upplysningsdubbling,
   hoppinkliv, samt advancers svar (cue=limit+, höjning, ny färg, NT).

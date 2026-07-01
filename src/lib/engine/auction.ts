@@ -22,7 +22,7 @@ import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
-import { gerberInvestigation } from './nt-slam'
+import { gerberInvestigation, gerber2NTInvestigation } from './nt-slam'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -291,6 +291,19 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   // balanserad hand fråga ess med Gerber 4♣ (i stället för kvantitativ 4NT).
   if (opening.call === '1NT') {
     const g = gerberInvestigation(deal.hands[openerSeat], deal.hands[responderSeat])
+    if (g) {
+      for (const t of g) {
+        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+      }
+      return finish(false)
+    }
+  }
+
+  // NT-slam över 2NT (FAS 8): en balanserad slamsäker svarare (13+ mittemot
+  // 20–21 ≈ 33+) frågar ess med Gerber 4♣ i stället för att blint blåsa 6NT.
+  if (opening.call === '2NT') {
+    const g = gerber2NTInvestigation(deal.hands[openerSeat], deal.hands[responderSeat])
     if (g) {
       for (const t of g) {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat

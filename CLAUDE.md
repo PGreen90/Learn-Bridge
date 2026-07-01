@@ -12,12 +12,27 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**FAS 8 — Slamsystem pågår.** Punkt 1 (MSS-slam) + facit-granskning KLARA & pushade
-(2026-07-01, testsvit 621). **NÄSTA:** punkt 2 (Gerber över 2NT) eller punkt 3
-(Exclusion när renonsfärg rankar över trumf) – ägaren väljer. (Slam-quirken =
-🅿️ PARKERAT, jaga aldrig.)
+**🎉 FAS 8 — Slamsystem KLAR** (2026-07-01, testsvit 630). Punkt 1 (MSS-slam) +
+facit-granskning §6.1–6.5 pushade (testsvit 621). Punkt 2 (Gerber över 2NT) +
+punkt 3 (Exclusion när renons rankar över trumf) KLARA men **ej pushade än**
+(testsvit 630). **NÄSTA:** flytta upp NÄST → **FAS 9 (Passad hand: Drury)** blir
+nästa NU – låt ägaren bekräfta. (Slam-quirken = 🅿️ PARKERAT, jaga aldrig.)
 
-FAS 8 klart hittills (facit + `npm test`, testsvit 621):
+FAS 8 klart (facit + `npm test`, testsvit 630):
+- ✅ **Punkt 3 Exclusion när renons rankar över trumf** (2026-07-01): nivåbailen
+  (`voidSuit >= trump → null`) borttagen ur `exclusionInvestigation`
+  (`slam-auction.ts`). Enda inkopplade fallet är **hjärter trumf + spaderrenons →
+  5♠** (lagligt över 3NT-relät). Öppnarens högsta stegsvar (steg 4) landar på
+  exakt **6♥**; vill svararen bara ha lillslam **passar** hon (i stället för att
+  olagligt bjuda om 6♥). Storslam-grenen bjuder 7♥ som förut. E2e
+  `1H–3♠–3NT–5♠–6♥–7♥`. Facit i `slam-auction.test.ts`.
+- ✅ **Punkt 2 Gerber över 2NT** (2026-07-01): `gerber2NTInvestigation` (`nt-slam.ts`),
+  inkopplad i `auction.ts` som 2NT-blocket (speglar 1NT-Gerber-blocket). En
+  balanserad slamsäker svarare (**13+ hp** mittemot 20–21 ≈ 33+) frågar ess med
+  **4♣ Gerber** i stället för att blint blåsa 6NT: stannar i 4NT om två ess saknas,
+  6NT med ett ess ute, storslam 7NT via 5♣-kungfrågan (≈37+). 11–12 stannar som
+  kvantitativ 4NT (`respondTo2NT`, orört). Delad `buildGerberSequence` med
+  1NT-grenen. E2e `2NT–4♣–4♠–6NT`. Facit i `nt-slam.test.ts`.
 - ✅ **Punkt 1 MSS-slam** (2026-07-01): slamfortsättning efter `1NT–2♠–3♣/3♦`
   (minorfit garanterad). Ny `mssMinorFitContinuation` (`slam-auction.ts`),
   inkopplad i `auction.ts`; döda 4-minor-grenen bort ur `responder-rebids.ts`.
@@ -110,11 +125,9 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **FAS 8 — Slamsystem:** cue-bids, 1430 RKC, trumfdamfrågan, Sjöbergs 5NT,
-   Gerber, Exclusion. Verktygen finns – facit-granskning + inkoppling i
-   minorfit-slam/MSS-slam. (Känd gräns: slam-quirken, jaga den inte.)
-2. **FAS 9 — Passad hand:** Drury + passad vs opassad hand.
-3. **FAS 10 — Försvarsbud:** Michaels, ovanlig 2NT, DONT, Lebensohl, Mathe, Multi.
+1. **FAS 9 — Passad hand:** Drury + passad vs opassad hand.
+2. **FAS 10 — Försvarsbud:** Michaels, ovanlig 2NT, DONT, Lebensohl, Mathe, Multi.
+3. **FAS 11 — Kortspel/motspel-förfining** (enligt felsökningsplanen).
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt

@@ -25,7 +25,6 @@ const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥'
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
-const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 
 /** Budets rang i stegen (1♣=0 … 7NT=34) så vi kan jämföra om ett bud är lagligt (högre). */
 const STRAIN_ORDER = ['C', 'D', 'H', 'S', 'NT']
@@ -140,15 +139,20 @@ export function slamInvestigation(
  * (splinter-relä). Svararen, som har en sidorenons, hoppar till 5 i renonsfärgen
  * och frågar nyckelkort UTOM esset där; öppnaren svarar i steg; svararen placerar
  * slam. Returnerar null (→ vanlig auktion) om förutsättningarna inte håller:
- *  - ingen sidorenons, eller renonsfärgen rankar ≥ trumf (då kan öppnarens
- *    stegsvar tränga undan 6 i trumf → vi håller oss till lagliga nivåer),
+ *  - ingen sidorenons,
  *  - paret når inte slamzon, eller två+ nyckelkort saknas (ej slamsäkert).
+ *
+ * Renonsfärg som rankar ÖVER trumf hanteras nu (FAS 8, 2026-07-01). I den
+ * inkopplade högfärgsgrenen är enda fallet hjärter trumf + spaderrenons → 5♠.
+ * Öppnarens högsta stegsvar (steg 4 = 2 nyckelkort med trumfdam) landar då på
+ * exakt 6 i trumf (6♥). Vill svararen bara ha lillslam kan hon inte bjuda om
+ * 6♥ (olagligt) → hon PASSAR i stället. Grundslutbudet (6/7 i trumf) ligger
+ * annars alltid över öppnarens svar, så vi behöver ingen nivåbail längre.
  */
 export function exclusionInvestigation(openerHand: Hand, responderHand: Hand, trump: Suit): SlamTurn[] | null {
   const len = lengths(responderHand)
   const voidSuit = RANK_ORDER.find((s) => s !== trump && len[s] === 0)
   if (!voidSuit) return null
-  if (rankIdx(voidSuit) >= rankIdx(trump)) return null
 
   const combined = bergenPoints(openerHand, trump).bergenPoints + dummyPoints(responderHand, trump).dummyPoints
   if (combined < 33) return null
@@ -168,11 +172,18 @@ export function exclusionInvestigation(openerHand: Hand, responderHand: Hand, tr
   const answer = respondToExclusion(openerHand, trump, voidSuit)
   turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
 
-  const call = missing === 0 ? `7${LETTER[trump]}` : `6${LETTER[trump]}`
+  const target = missing === 0 ? `7${LETTER[trump]}` : `6${LETTER[trump]}`
+  // Nådde öppnarens stegsvar redan slutbudet (steg 4 = 6 i trumf, lillslam)?
+  // Då kan svararen inte bjuda om det – hon passar och satsar på det öppnaren satt.
+  if (bidRank(answer.call) >= bidRank(target)) {
+    turns.push({ role: 'svarare', call: 'P', rule: 'slamavslut', explanation: `öppnarens svar (${answer.call}) satte redan lillslammen i trumf → pass.` })
+    return turns
+  }
+
   const why = missing === 0
     ? `inget nyckelkort saknas (renons-esset borträknat) → storslam 7${SYM[trump]}.`
     : `ett nyckelkort saknas → lillslam 6${SYM[trump]}.`
-  turns.push({ role: 'svarare', call, rule: 'slamavslut', explanation: why })
+  turns.push({ role: 'svarare', call: target, rule: 'slamavslut', explanation: why })
 
   return turns
 }
