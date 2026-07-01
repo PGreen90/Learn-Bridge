@@ -176,6 +176,20 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   Bara efter en enkel höjning av öppnarens färg. Facit:
   `auction-responsive-double.test.ts`. Testsvit 500 grön.
 
+### Advancer-logik inkopplad + fit-jump (FAS 2 punkt 10)
+
+- **`advanceOvercall` (`overcalls.ts`)** inkopplad i `buildAuction` i det ostörda
+  advance-läget: öppning 1 i färg – (LHO enkelt 1-läges inkliv) – (svararen
+  passar) – **advancern** (inklivarens partner) svarar: höjning, cue =
+  limithöjning+, ny färg, NT eller fit-jump. Medvetet smalt (bara 1-läges inkliv +
+  svararens pass) så budet garanterat är lagligt; kontesterade advance-lägen tas
+  senare.
+- **Fit-jump nykodad** (systembok §7.1 rad 714): 4+ stöd för partnerns färg + egen
+  5+ sidofärg, inbjudande+ → HOPP i sidofärgen (visar fit + trickkälla). Hoppnivån
+  räknas ur partnerns inklivsnivå (ny `overcallLevel`-param, default 1).
+- Facit: `overcalls.test.ts` (fit-jump enhet) + `auction-advancer.test.ts`
+  (hela sekvensen, fit-jump + cue). Testsvit 503 grön.
+
 ## Klickbara bud med betydelse (valideringsstöd)
 
 - **Budlådan** (`BiddingBox.tsx`) är nu tvåstegs: ett klick **väljer** ett bud och

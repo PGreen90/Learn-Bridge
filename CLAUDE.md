@@ -21,7 +21,10 @@ FAS 2 så att störd budgivning blir bevisat korrekt (facit före fix + `npm tes
 - ✅ **Punkt 9 — Responsiva dubblingar** (klar 2026-07-01): `responsiveDouble`
   inkopplad i `buildAuction` – (1M)–X(LHO)–2M(svararen höjer)–X(advancern
   responsivt). Facit i `auction-responsive-double.test.ts`.
-- **Punkt 10 — Advancer-logik** (höjning / cue / NT / fit-jump).
+- ✅ **Punkt 10 — Advancer-logik** (klar 2026-07-01): `advanceOvercall` inkopplad
+  i det ostörda advance-läget (1 färg–(enkelt 1-läges inkliv)–(svararen passar)–
+  advancern: höjning/cue/ny färg/NT/fit-jump). **Fit-jump nykodad** (systembok rad
+  714). Facit i `auction-advancer.test.ts` + `overcalls.test.ts`.
 - **Punkt 10b — Off-book Syd:** definiera önskat beteende + facit (grunden finns).
 
 ### 🟢 NÄST (max 3, i ordning)

@@ -115,8 +115,11 @@ export function overcall(hand: Hand, theirCall: string): ResponseResult {
   return pass
 }
 
-/** Svar på partnerns enkla inkliv (advancer). §7.1. */
-export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit): ResponseResult {
+/**
+ * Svar på partnerns enkla inkliv (advancer). §7.1. `overcallLevel` = nivån
+ * partnerns inkliv låg på (styr hoppet i en fit-jump); default 1.
+ */
+export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit, overcallLevel = 1): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   const support = len[partnerSuit]
@@ -124,6 +127,22 @@ export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit):
   const bid = BID[partnerSuit]
 
   if (p < 6 && support < 3) return { call: 'P', rule: 'pass', explanation: `${p} hp utan stöd → pass.` }
+
+  // Fit-jump (§7.1, rad 714): bra stöd (4+) + egen 5+ sidofärg, inbjudande+ →
+  // HOPP i sidofärgen (visar fit + trickkälla). Går före cue när en klar
+  // sidofärg finns. Hoppnivån = billigaste läget för färgen + 1.
+  if (support >= 4 && p >= 10) {
+    let side: Suit | null = null
+    for (const s of RANK_ORDER) {
+      if (s === partnerSuit || s === theirSuit || len[s] < 5) continue
+      if (side === null || len[s] > len[side] || (len[s] === len[side] && rankIdx(s) > rankIdx(side))) side = s
+    }
+    if (side) {
+      const cheapest = rankIdx(side) > rankIdx(partnerSuit) ? overcallLevel : overcallLevel + 1
+      const jump = cheapest + 1
+      return { call: `${jump}${BID[side]}`, rule: 'fit-jump', explanation: `${p} hp, ${support} stöd + ${len[side]}-korts ${NAME[side]} → ${jump}${SYM[side]} (fit-jump, inbjudande+).` }
+    }
+  }
 
   // Cue-bud i deras färg = limithöjning eller bättre (bra stöd, krav).
   if (support >= 3 && p >= 11) {

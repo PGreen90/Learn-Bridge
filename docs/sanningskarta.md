@@ -129,8 +129,8 @@ aldrig i en levande auktion.
 | Moment | Status (kod) | Var i koden | Inkopplad i auktion? |
 |---|---|---|---|
 | §7.1 Enkelt inkliv / 1NT-inkliv / hoppinkliv | KODAT | `overcalls.ts` `overcall` | **Ja** (LHO över vår 1-färgsöppning). |
-| §7.1 Advancer (svar på inkliv: höjning, cue, ny färg, NT) | KODAT | `overcalls.ts` `advanceOvercall` | **Nej** – aldrig anropad i `buildAuction`/`decideCall`. |
-| §7.1 Advancers **fit-jump** | EJ KODAT | — | Står i systembokstabellen, saknas i `advanceOvercall`. |
+| §7.1 Advancer (svar på inkliv: höjning, cue, ny färg, NT) | KODAT + INKOPPLAD | `overcalls.ts` `advanceOvercall` + gren i `auction.ts` | **Ja** (FAS 2 punkt 10, 2026-07-01): ostört advance-läge (enkelt 1-läges inkliv + svararen passar). |
+| §7.1 Advancers **fit-jump** | KODAT + INKOPPLAD | `overcalls.ts` `advanceOvercall` | **Ja** (FAS 2 punkt 10): 4+ stöd + 5+ sidofärg, inbjudande+ → hopp. |
 | §7.2 Michaels + ovanlig 2NT | KODAT | `overcalls.ts` | **Ja** som LHO-inkliv (advancer ej). |
 | §7.3 Upplysningsdubbling | KODAT | `overcalls.ts` | **Ja** (kan returneras som inkliv). |
 | §7.3 Negativ dubbling | KODAT (dubblerad!) | `doubles.ts` `negativeDouble` **och** inline i `auction.ts` | **Ja**, men via `auction.ts`-versionen – `doubles.ts`-versionen är oanvänd. Dubblerad logik → FAS 1. |

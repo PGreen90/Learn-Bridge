@@ -44,6 +44,12 @@ describe('advanceOvercall – svar på partnerns inkliv (§7.1)', () => {
   it('ny färg naturlig (egen 5-färg, ej stöd)', () => {
     expect(advanceOvercall(parseHand('S:KQ543 H:2 D:432 C:K432'), 'hearts', 'diamonds').call).toBe('2S')
   })
+  it('fit-jump: 4 stöd + egen 5-färg, inbjudande+ → hopp i sidofärgen', () => {
+    // partnern klev in 1♥, advancern har 4 hjärter + 5 spader, 10 hp → 2♠ (fit-jump).
+    const r = advanceOvercall(parseHand('S:KQJ54 H:A432 D:32 C:32'), 'hearts', 'diamonds')
+    expect(r.call).toBe('2S')
+    expect(r.rule).toBe('fit-jump')
+  })
 })
 
 describe('hasStopper', () => {

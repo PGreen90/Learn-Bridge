@@ -32,9 +32,13 @@
 >   ✅ **Punkt 9 klar (2026-07-01):** responsiv dubbling inkopplad i `buildAuction`
 >   – (1M)–X(LHO)–2M(svararen höjer)–X(advancern). Facit:
 >   `auction-responsive-double.test.ts`. Testsvit 500 grön.
->   ⬜ **Näst på tur: punkt 10 + 10b** (advancer-logik + off-book Syd) – kodat men
->   ej inkopplat i levande auktion. Arbetsregel A (facit före fix) + B (`npm test`).
->   FAS 1 punkt 2 tung del (matchande/avvisade regler) uppskjuten.
+>   ✅ **Punkt 10 klar (2026-07-01):** advancer-logik inkopplad i det ostörda
+>   advance-läget (1 färg–(enkelt 1-läges inkliv)–(svararen passar)–advancern).
+>   Fit-jump nykodad (systembok rad 714). Facit: `auction-advancer.test.ts` +
+>   `overcalls.test.ts`. Testsvit 503 grön.
+>   ⬜ **Näst på tur: punkt 10b** (off-book Syd) – definiera önskat beteende + facit.
+>   Arbetsregel A (facit före fix) + B (`npm test`). FAS 1 punkt 2 tung del
+>   (matchande/avvisade regler) uppskjuten.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

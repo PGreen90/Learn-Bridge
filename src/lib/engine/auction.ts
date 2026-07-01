@@ -13,7 +13,7 @@ import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { respondToPreempt, preemptOf } from './responses-preempt'
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { respondToMajorPassed } from './responses-drury'
-import { overcall } from './overcalls'
+import { overcall, advanceOvercall } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
@@ -268,6 +268,19 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
         if (resp) {
           turns.push({ seat: advancerSeat, role: 'motståndare', call: resp.call, rule: resp.rule, explanation: resp.explanation })
           return finish(true)
+        }
+      }
+      // Advancer-logik (punkt 10, §7.1): efter partnerns enkla 1-läges inkliv och
+      // svararens pass svarar advancern (inklivarens partner): höjning, cue =
+      // limithöjning+, ny färg, NT eller fit-jump. Bara i det ostörda advance-
+      // läget (svararen passade) över ett 1-läges inkliv, så budet blir lagligt.
+      if (ov.rule === 'enkelt inkliv' && /^1[CDHS]$/.test(ov.call) && action.call === 'P') {
+        const partnerSuit = parseBid(ov.call).suit
+        if (partnerSuit) {
+          const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+          const adv = advanceOvercall(deal.hands[advancerSeat], partnerSuit, openerSuit, 1)
+          turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
+          return finish(adv.call !== 'P')
         }
       }
       return finish(action.call !== 'P')
