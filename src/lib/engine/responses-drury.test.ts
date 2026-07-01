@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { respondToMajorPassed, openerRebidAfterDrury } from './responses-drury'
+import { respondToMajorPassed, openerRebidAfterDrury, responderAnswerDrury } from './responses-drury'
+import type { ResponseResult } from './responses'
 import { buildAuction } from './auction'
 import type { Deal } from '../../types/bridge'
 
@@ -39,6 +40,30 @@ describe('openerRebidAfterDrury – öppnarens återbud', () => {
   })
 })
 
+describe('responderAnswerDrury – svararens placering efter Drury-återbud (FAS 9)', () => {
+  const invite: ResponseResult = { call: '3H', rule: 'Drury: utgångsförsök', explanation: '' }
+  const signoff: ResponseResult = { call: '2H', rule: 'Drury: lätt öppning', explanation: '' }
+  const game: ResponseResult = { call: '4H', rule: 'Drury: riktig öppning', explanation: '' }
+
+  it('accepterar utgångsförsök (3♥ → 4♥) med stödpoäng ≥ 11', () => {
+    // 11 hp, 4 trumf + dubbelton spader → stödpoäng lyfter över 11.
+    expect(responderAnswerDrury(parseHand('S:K4 H:Q842 D:KJ95 C:Q43'), 'hearts', invite).call).toBe('4H')
+  })
+
+  it('avböjer utgångsförsök (3♥ → pass) med botten av intervallet', () => {
+    // 10 hp, 4 trumf, platt 4-3-3-3 (ingen korthet) → stödpoäng 10 < 11 → pass.
+    expect(responderAnswerDrury(parseHand('S:K43 H:Q842 D:K52 C:Q43'), 'hearts', invite).call).toBe('P')
+  })
+
+  it('passar öppnarens signoff (2♥)', () => {
+    expect(responderAnswerDrury(parseHand('S:K43 H:Q842 D:K52 C:Q43'), 'hearts', signoff).call).toBe('P')
+  })
+
+  it('passar öppnarens utgång (4♥)', () => {
+    expect(responderAnswerDrury(parseHand('S:K4 H:Q842 D:KJ95 C:Q43'), 'hearts', game).call).toBe('P')
+  })
+})
+
 describe('buildAuction – Drury end-to-end (passad hand)', () => {
   it('bygger 1♥ – 2♣ – 2♥ (passad limithöjning mot lätt öppning)', () => {
     const deal: Deal = {
@@ -54,7 +79,25 @@ describe('buildAuction – Drury end-to-end (passad hand)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '2C', '2H'])
+    // Svararen passar signoffen → kontraktet 2♥ är fast (FAS 9).
+    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '2C', '2H', 'P'])
+  })
+
+  it('bygger 1♥ – 2♦ – 3♥ – 4♥ (måttlig öppning inbjuder, toppen accepterar)', () => {
+    const deal: Deal = {
+      id: 'test',
+      board: 3,
+      dealer: 'N',
+      vulnerability: 'none',
+      hands: {
+        N: parseHand('S:K4 H:Q842 D:KJ95 C:Q43'), // 11 hp, 4 hjärter, dubbelton → topp av limithöjningen, passar som given
+        E: parseHand('S:QJT98 H:975 D:87 C:AK2'), // 10 hp, ingen 5-korts högfärg att öppna → passar
+        S: parseHand('S:A3 H:AKJT6 D:Q43 C:765'), // 14 hp, öppnar 1♥ i 3:e hand → utgångsförsök 3♥
+        W: parseHand('S:7652 H:3 D:AT62 C:JT98'), // 5 hp → passar (ostört)
+      },
+    }
+    const a = buildAuction(deal)
+    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '2D', '3H', '4H'])
   })
 
   it('i 1:a hand (ej passad) gäller vanligt svar, inte Drury', () => {

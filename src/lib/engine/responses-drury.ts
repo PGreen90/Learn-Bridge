@@ -15,6 +15,7 @@
 
 import type { Hand } from '../../types/bridge'
 import { hcp, lengths } from './hand'
+import { pointsWithFloor } from './evaluation'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
 
 const SYM: Record<Major, string> = { hearts: '♥', spades: '♠' }
@@ -54,4 +55,31 @@ export function openerRebidAfterDrury(hand: Hand, opened: Major): ResponseResult
   }
   // Lätt öppning → rebjuden högfärg = signoff (svararen passar).
   return { call: `2${bid}`, rule: 'Drury: lätt öppning', explanation: `${p} hp – lätt öppning → 2${sym} (signoff, svararen passar).` }
+}
+
+/**
+ * Svararens placering efter öppnarens Drury-återbud (FAS 9).
+ *   - 2M (lätt öppning, signoff) → pass.
+ *   - 3M (utgångsförsök) → acceptera 4M med **stödpoäng ≥ 11** (ägarbeslut
+ *     2026-07-01: samma omvärdering `max(hp, dummyPoints)` som resten av
+ *     motorn – 4+ trumf och korta sidofärger lyfter toppen av 10–12-intervallet
+ *     över tröskeln), annars pass (botten av intervallet).
+ *   - 4M (riktig öppning, utgång) → pass.
+ * Svararen är passad hand → allt är begränsat till utgång, aldrig slam.
+ */
+export function responderAnswerDrury(hand: Hand, opened: Major, rebid: ResponseResult): ResponseResult {
+  const sym = SYM[opened]
+  const bid = BIDOF[opened]
+
+  // Bara öppnarens utgångsförsök (3M) kräver ett beslut – signoff/utgång passas.
+  if (rebid.call === `3${bid}`) {
+    const sp = pointsWithFloor(hand, opened, 'support')
+    if (sp.points >= 11) {
+      return { call: `4${bid}`, rule: 'Drury: accepterar utgångsförsök', explanation: `${sp.text} – toppen av limithöjningen → 4${sym} (accepterar).` }
+    }
+    return { call: 'P', rule: 'Drury: avböjer utgångsförsök', explanation: `${sp.text} – botten av limithöjningen → pass (avböjer 3${sym}).` }
+  }
+
+  // Öppnaren har redan placerat kontraktet (2M signoff / 4M utgång) → pass.
+  return { call: 'P', rule: 'Drury: passar öppnarens placering', explanation: `Öppnaren placerade kontraktet (${rebid.call}) → pass.` }
 }

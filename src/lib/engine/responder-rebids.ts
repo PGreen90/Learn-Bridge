@@ -10,6 +10,7 @@ import { pointsWithFloor } from './evaluation'
 import type { Major, ResponseResult } from './responses'
 import { responderSecondBidAfter2C } from './responses-2c'
 import { responderPlaceAfterOgust, suitOfWeakTwo } from './responses-weak2'
+import { responderAnswerDrury } from './responses-drury'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
@@ -83,6 +84,12 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
   // FAS 3 punkt 15 – svararen svarar på Bergen game try (1M–2M–2NT).
   if ((openCall === '1H' || openCall === '1S') && response.rule === 'enkel höjning' && rebid.rule === 'Bergen game try') {
     return responderAnswerBergenGameTry(hand, openCall === '1H' ? 'hearts' : 'spades')
+  }
+
+  // FAS 9 – svararen (passad hand) placerar kontraktet efter öppnarens Drury-
+  // återbud (§6.7): accepterar/avböjer utgångsförsöket, annars passar signoff/utgång.
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'Drury') {
+    return responderAnswerDrury(hand, openCall === '1H' ? 'hearts' : 'spades', rebid)
   }
 
   // Punkt 13 – svararens andra bud efter stark 2♣ (andra negativa m.m.).
