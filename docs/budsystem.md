@@ -849,6 +849,15 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-01** – **FAS 11 pt 47–49 – facit-granskning av `signals.ts` mot §8**
+  (testsvit 711). Alla encoders lästa mot systemboken → **svaren matchar facit**
+  (honnörsutspel topp-av-sekvens, 3:e/5:e spotutspel, UDCA omvänd attityd/räkning,
+  Lavinthal-sak). **Ingen kodändring.** Låste 14 tidigare oskyddade facit-beteenden
+  i `signals.test.ts`: inre/längre honnörssekvenser (K-Q-10→K, A-K-Q-J→A),
+  topp-utan-sekvens-fallbacken (A-J-10-9 → spot 3:e bästa), längre spotfärger
+  (7-korts→lägsta, 8-korts→3:e), samt dubbelton/singel-spare för attityd/räkning/
+  Lavinthal. Känd förenkling (som Rusinow, §8.4): inre sekvenser under en glapp-topp
+  leds inte som honnör utan faller till spot – noterad, ej byggd.
 - **2026-07-01** – Budmotorn: **FAS 10 (försvarsbud §7)** facit-granskad + klar
   (testsvit 644). Alla §7-verktyg lästa mot systemboken → **svaren matchar facit**
   (inkliv/Michaels/ovanlig 2NT, upplysnings-/negativ-/responsiv-/stöddubbling,

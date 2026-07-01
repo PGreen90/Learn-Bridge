@@ -42,6 +42,47 @@ describe('§8.3 leadFromSuit – honnör före spot', () => {
     expect(leadFromSuit(cards('A', '9', '7', '5', '3'))).toEqual(C('3')))
 })
 
+// Facit-LÅS (granskning 2026-07-01): beteenden §8 definierar men som inte var
+// låsta i test. Ingen kodändring – bara skydd mot tyst regression.
+describe('§8.3 honnörsutspel – facit-lås (inre/längre sekvenser)', () => {
+  it('K-Q-10-x → K (K-Q topp, glapp under)', () =>
+    expect(honorLead(cards('K', 'Q', '10', '4'))).toEqual(C('K')))
+  it('Q-J-9 → Q (Q-J topp, glapp under)', () =>
+    expect(honorLead(cards('Q', 'J', '9'))).toEqual(C('Q')))
+  it('A-K-Q-J → A (lång solid sekvens, fortfarande toppen)', () =>
+    expect(honorLead(cards('A', 'K', 'Q', 'J'))).toEqual(C('A')))
+  it('J-10-9-x → J (knekt-topp räcker som lägsta honnör)', () =>
+    expect(honorLead(cards('J', '10', '9', '2'))).toEqual(C('J')))
+  it('10-9-8 → null (topp under knekt är ingen honnörssekvens)', () =>
+    expect(honorLead(cards('10', '9', '8'))).toBeNull())
+  it('A-J-10-9 → null (esset rör inte knekten → topp är ingen sekvens)', () =>
+    expect(honorLead(cards('A', 'J', '10', '9'))).toBeNull())
+})
+
+describe('§8.3 spotkortsutspel – facit-lås (längre färger)', () => {
+  it('udda 7-korts → lägsta', () =>
+    expect(spotLead(cards('K', 'J', '9', '7', '5', '3', '2'))).toEqual(C('2')))
+  it('jämn 8-korts → 3:e bästa', () =>
+    expect(spotLead(cards('A', 'K', 'J', '9', '7', '5', '3', '2'))).toEqual(C('J')))
+  it('singelton → kortet självt', () => expect(spotLead(cards('7'))).toEqual(C('7')))
+})
+
+describe('§8.3 leadFromSuit – facit-lås (topp-utan-sekvens faller till spot)', () => {
+  it('A-J-10-9 (ingen topp-sekvens, jämn) → 3:e bästa spot', () =>
+    expect(leadFromSuit(cards('A', 'J', '10', '9'))).toEqual(C('10')))
+  it('A-Q-J-x (glapp-topp, jämn) → 3:e bästa spot', () =>
+    expect(leadFromSuit(cards('A', 'Q', 'J', '4'))).toEqual(C('J')))
+})
+
+describe('§8.1/§8.2 markeringar – facit-lås (dubbelton/singel spare)', () => {
+  it('attityd uppmuntrar ur dubbelton → lägsta', () =>
+    expect(attitudeCard(cards('7', '3'), true)).toEqual(C('3')))
+  it('räkning udda ur singel → kortet självt', () =>
+    expect(countCard(cards('6'), false)).toEqual(C('6')))
+  it('Lavinthal vill ha lägre ur dubbelton → lägsta', () =>
+    expect(lavinthalDiscard(cards('9', '4'), false)).toEqual(C('4')))
+})
+
 describe('§8.1 UDCA omvänd attityd', () => {
   it('uppmuntrar → lägsta kortet', () =>
     expect(attitudeCard(cards('9', '4', '2'), true)).toEqual(C('2')))
