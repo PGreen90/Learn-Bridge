@@ -305,6 +305,22 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
       expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('P')
     })
 
+    // ---- Grenluckor (punkt 10b): lås 2-läges färg, 2NT och minor-utan-blast ----
+    it('utan fit, egen färg på 2-läget kräver 12+ (2♣ över Syds 1♠)', () => {
+      const deal = dealWithN('S:A2 H:K3 D:832 C:KQJ842') // 13 hp, 6 klöver, 2 spader
+      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('2C')
+    })
+
+    it('utan fit, balanserad 11–12 → 2NT (för svag för 2-läges färg)', () => {
+      const deal = dealWithN('S:A2 H:KJ32 D:Q432 C:J83') // 11 hp balanserad, 2 spader
+      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('2NT')
+    })
+
+    it('minorfit blåses inte ut: 13+ med 5-korts ruter → 3♦, inte 5♦', () => {
+      const deal = dealWithN('S:A2 H:K3 D:KQ982 C:Q832') // 14 hp, 5-korts ruterfit
+      expect(decideCall(deal, [call('S', '1D'), call('W', 'P')], 'N').bid).toBe('3D')
+    })
+
     it('motståndaren (Väst) lägger sig still – svarar inte på Syds bud', () => {
       // Väst är Syds motståndare, inte partner → inget svar, bara pass.
       const deal = dealWithN('S:A73 H:K642 D:952 C:863')

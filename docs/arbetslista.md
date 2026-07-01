@@ -36,9 +36,12 @@
 >   advance-läget (1 färg–(enkelt 1-läges inkliv)–(svararen passar)–advancern).
 >   Fit-jump nykodad (systembok rad 714). Facit: `auction-advancer.test.ts` +
 >   `overcalls.test.ts`. Testsvit 503 grön.
->   ⬜ **Näst på tur: punkt 10b** (off-book Syd) – definiera önskat beteende + facit.
->   Arbetsregel A (facit före fix) + B (`npm test`). FAS 1 punkt 2 tung del
->   (matchande/avvisade regler) uppskjuten.
+>   ✅ **Punkt 10b klar (2026-07-01):** off-book Syd definierad och låst
+>   (`docs/off-book-syd.md`, ägaren "lås som det är"); facit-luckor fyllda i
+>   `auction-live.test.ts` (2-läges färg, 2NT, minorfit utan blast). Testsvit 506 grön.
+>   🎉 **HELA FAS 2 (konkurrens) KLAR.** Nästa: ägaren väljer nytt NU ur NÄST
+>   (naturlig kandidat FAS 3 fit-/stödlogik). FAS 1 punkt 2 tung del
+>   (matchande/avvisade regler) fortsatt uppskjuten.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

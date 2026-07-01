@@ -12,8 +12,11 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**FAS 2 konkurrens — gör klar.** Slutför de sista punkterna i felsökningsplanens
-FAS 2 så att störd budgivning blir bevisat korrekt (facit före fix + `npm test`):
+**✅ FAS 2 KONKURRENS KLAR (2026-07-01).** Alla punkter nedan gröna (testsvit 506).
+**NU-facket är tomt — nästa steg: ägaren väljer ett NU ur 🟢 NÄST** (naturlig
+kandidat: FAS 3). Rör inget nytt förrän valet är gjort.
+
+Slutförd FAS 2 (facit före fix + `npm test`):
 - ✅ **Punkt 8 — Support Double** (klar 2026-07-01): `supportDouble` positions-/
   nivåmedveten (t.o.m. 2M) + inkopplad i `buildAuction` (grenen 1 färg–(P)–1M–
   (RHO-inkliv)→X, bara när stöd-X faktiskt slår till). Facit i `doubles.test.ts`
@@ -25,7 +28,9 @@ FAS 2 så att störd budgivning blir bevisat korrekt (facit före fix + `npm tes
   i det ostörda advance-läget (1 färg–(enkelt 1-läges inkliv)–(svararen passar)–
   advancern: höjning/cue/ny färg/NT/fit-jump). **Fit-jump nykodad** (systembok rad
   714). Facit i `auction-advancer.test.ts` + `overcalls.test.ts`.
-- **Punkt 10b — Off-book Syd:** definiera önskat beteende + facit (grunden finns).
+- ✅ **Punkt 10b — Off-book Syd** (klar 2026-07-01): beteendet definierat och
+  låst (`docs/off-book-syd.md`, ägaren "lås som det är"). Facit-luckor fyllda i
+  `auction-live.test.ts` (2-läges färg, 2NT, minorfit utan blast).
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **FAS 3 — Fit- & stödlogik:** gemensam fitklassificering, Bergen (aldrig m. 3
