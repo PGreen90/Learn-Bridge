@@ -1227,3 +1227,10 @@ Det avslöjar längd/räkning direkt för partnern.
   svag transfer→pass. 2NT-auktioner löser sig nu helt på systemlinjen. +7 tester
   (581 gröna). Kod, inte systemändring. **Nästa gång:** punkt 23 (Minor Suit
   Stayman-fortsättning – svararens turn 4; slam-grenen hör till FAS 8).
+- **2026-07-01** – **FAS 8 påbörjad – facit-granskning §6.1–6.5.** Alla sex
+  slamverktyg i `slam.ts` genomlästa mot systemboken: **inget fel i svaren**,
+  koden matchar facit exakt (1430 RKC, trumfdamfråga, cue-bud, Sjöbergs 5NT,
+  Gerber ess/kung, Exclusion). Två luckor i facit-LÅSNINGEN täppta med 6 nya
+  tester (Gerber kungfrågan 0/1/3/4 kungar + Exclusion steg 3–4). Ingen
+  systemändring, ingen kodändring (618 gröna). **Nästa gång:** punkt 1 MSS-slam
+  (slamfortsättning cue/RKC efter Minor Suit Stayman-minorfit).

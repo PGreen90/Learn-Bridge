@@ -12,11 +12,19 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**🎉 FAS 6 MINORSYSTEM + FAS 7 SVAGA ÖPPNINGAR KLARA (2026-07-01, testsvit 612).**
-Ägaren körde BÅDA i samma session. **NÄSTA SESSION BÖRJAR MED: FAS 8 — Slamsystem**
-(cue-bids, 1430 RKC, trumfdamfrågan, Sjöbergs 5NT, Gerber, Exclusion – verktygen
-finns i `slam.ts`/`slam-auction.ts`/`nt-slam.ts`, FAS 8 är facit-granskning +
-inkoppling i minorfit-slam/MSS-slam). **Ej pushat/deployat än** – be om lov (PCD).
+**FAS 8 — Slamsystem pågår. NU = punkt 1 MSS-slam** (slamfortsättning cue/RKC
+efter att Minor Suit Stayman hittat en minorfit med slamintresse). Kräver
+ägarbeslut i konkreta budsituationer – fråga, gissa inte. **Ej pushat/deployat
+än** (utom facit-granskningen nedan) – be om lov (PCD).
+
+FAS 8 klart hittills (facit + `npm test`, testsvit 618):
+- ✅ **Facit-granskning §6.1–6.5** (2026-07-01): alla sex slamverktyg i `slam.ts`
+  lästa mot systemboken → **inget fel i svaren**, koden matchar facit exakt (1430
+  RKC, trumfdamfråga, cue-bud, Sjöbergs 5NT, Gerber ess/kung, Exclusion). Täppte
+  två luckor i facit-LÅSNINGEN (tester): Gerber kungfrågan (3 grenar olåsta) +
+  Exclusion steg 3–4. La till 6 facit-lås i `slam.test.ts`. Ingen kodändring.
+
+--- FAS 6 + 7 (testsvit 612, ej pushat) ---
 
 FAS 6 (facit + `npm test`):
 - ✅ **26 Minor-regeln** verifierad + facit-låst (3-3♣/4-4♦/5-5♦/längsta minorn).

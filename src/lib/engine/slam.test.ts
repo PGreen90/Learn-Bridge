@@ -100,8 +100,20 @@ describe('§6.4 Gerber – ess- och kungfråga', () => {
   it('3 ess → 4NT', () => {
     expect(respondToGerber(h('S:A432 H:A32 D:A32 C:Q32')).call).toBe('4NT')
   })
+  it('kungfråga 5♣: 0 kungar → 5♦', () => {
+    expect(respondToGerberKingAsk(h('S:Q432 H:Q32 D:Q32 C:Q32')).call).toBe('5D')
+  })
+  it('kungfråga 5♣: 1 kung → 5♥', () => {
+    expect(respondToGerberKingAsk(h('S:K432 H:Q32 D:Q32 C:Q32')).call).toBe('5H')
+  })
   it('kungfråga 5♣: 2 kungar → 5♠', () => {
     expect(respondToGerberKingAsk(h('S:K432 H:K32 D:Q32 C:Q32')).call).toBe('5S')
+  })
+  it('kungfråga 5♣: 3 kungar → 5NT', () => {
+    expect(respondToGerberKingAsk(h('S:K432 H:K32 D:K32 C:Q32')).call).toBe('5NT')
+  })
+  it('kungfråga 5♣: 4 kungar → 5♦ (tvetydigt med 0)', () => {
+    expect(respondToGerberKingAsk(h('S:K432 H:K32 D:K32 C:K32')).call).toBe('5D')
   })
 })
 
@@ -113,5 +125,13 @@ describe('§6.5 Exclusion Blackwood', () => {
   it('3 nyckelkort → steg 2 (5♥)', () => {
     // void = klöver; HA + DA = 2 ess (klöveress bort) + trumfkung = 3
     expect(respondToExclusion(h('S:K32 H:A32 D:A2 C:A5432'), 'spades', 'clubs').call).toBe('5H')
+  })
+  it('2 nyckelkort utan trumfdam → steg 3 (5♠)', () => {
+    // void = klöver; HA + DA = 2 ess, ingen trumfkung, ingen spaderdam, <5 spader
+    expect(respondToExclusion(h('S:J432 H:A5432 D:A432 C:-'), 'spades', 'clubs').call).toBe('5S')
+  })
+  it('2 nyckelkort med trumfdam → steg 4 (5NT)', () => {
+    // void = klöver; HA + DA = 2 ess, ingen trumfkung, spaderdam finns
+    expect(respondToExclusion(h('S:Q432 H:A5432 D:A432 C:-'), 'spades', 'clubs').call).toBe('5NT')
   })
 })
