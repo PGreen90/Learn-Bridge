@@ -29,9 +29,12 @@
 >   (gren 1 färg–(P)–1M–(RHO-inkliv)→X). `supportDouble` gjord positions-/
 >   nivåmedveten (t.o.m. 2M, standard). Facit: `doubles.test.ts` +
 >   `auction-support-double.test.ts`. Testsvit 499 grön.
->   ⬜ **Näst på tur: punkt 9–10 + 10b** (responsiva dubblingar + advancer +
->   off-book Syd) – kodat men ej inkopplat i levande auktion. Arbetsregel A (facit
->   före fix) + B (`npm test`). FAS 1 punkt 2 tung del (matchande/avvisade regler) uppskjuten.
+>   ✅ **Punkt 9 klar (2026-07-01):** responsiv dubbling inkopplad i `buildAuction`
+>   – (1M)–X(LHO)–2M(svararen höjer)–X(advancern). Facit:
+>   `auction-responsive-double.test.ts`. Testsvit 500 grön.
+>   ⬜ **Näst på tur: punkt 10 + 10b** (advancer-logik + off-book Syd) – kodat men
+>   ej inkopplat i levande auktion. Arbetsregel A (facit före fix) + B (`npm test`).
+>   FAS 1 punkt 2 tung del (matchande/avvisade regler) uppskjuten.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

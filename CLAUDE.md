@@ -18,7 +18,9 @@ FAS 2 så att störd budgivning blir bevisat korrekt (facit före fix + `npm tes
   nivåmedveten (t.o.m. 2M) + inkopplad i `buildAuction` (grenen 1 färg–(P)–1M–
   (RHO-inkliv)→X, bara när stöd-X faktiskt slår till). Facit i `doubles.test.ts`
   + `auction-support-double.test.ts`.
-- **Punkt 9 — Responsiva dubblingar** (kodat, ej inkopplat).
+- ✅ **Punkt 9 — Responsiva dubblingar** (klar 2026-07-01): `responsiveDouble`
+  inkopplad i `buildAuction` – (1M)–X(LHO)–2M(svararen höjer)–X(advancern
+  responsivt). Facit i `auction-responsive-double.test.ts`.
 - **Punkt 10 — Advancer-logik** (höjning / cue / NT / fit-jump).
 - **Punkt 10b — Off-book Syd:** definiera önskat beteende + facit (grunden finns).
 

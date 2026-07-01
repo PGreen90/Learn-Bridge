@@ -18,7 +18,7 @@ import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
-import { negativeDouble, supportDouble } from './doubles'
+import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation } from './slam-auction'
@@ -257,6 +257,18 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
       // budlådan (decideCall). Övriga konkurrensgrenar modelleras en rond.
       if (ov.call === 'X' && action.call === 'P') {
         return finish(true)
+      }
+      // Responsiv dubbling (punkt 9, §7.3): (1M)–X(LHO upplysning)–2M(svararen
+      // höjer)–X(advancern). När svararen HÖJT öppnarens färg efter en
+      // upplysningsdubbling kan advancern (dubblarens partner) svara responsivt
+      // med stöd i de objudna färgerna. Bara efter en enkel höjning av vår färg.
+      if (ov.call === 'X' && action.rule === 'konkurrenshöjning') {
+        const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+        const resp = responsiveDouble(deal.hands[advancerSeat], openerSuit)
+        if (resp) {
+          turns.push({ seat: advancerSeat, role: 'motståndare', call: resp.call, rule: resp.rule, explanation: resp.explanation })
+          return finish(true)
+        }
       }
       return finish(action.call !== 'P')
     }

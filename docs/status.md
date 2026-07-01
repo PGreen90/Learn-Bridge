@@ -168,6 +168,14 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
 - Facit: `doubles.test.ts` (enhet) + `auction-support-double.test.ts` (hela
   sekvensen `1♦–(P)–1♥–(1♠)–X`). Testsvit 499 grön.
 
+### Responsiv dubbling inkopplad (FAS 2 punkt 9)
+
+- **Inkopplad i `buildAuction`:** efter (1M)–X(LHO upplysning)–2M(svararens
+  konkurrenshöjning) svarar advancern (dubblarens partner) med en **responsiv X**
+  (`responsiveDouble`: 7+ hp, stöd i de objudna färgerna, ingen lång egen).
+  Bara efter en enkel höjning av öppnarens färg. Facit:
+  `auction-responsive-double.test.ts`. Testsvit 500 grön.
+
 ## Klickbara bud med betydelse (valideringsstöd)
 
 - **Budlådan** (`BiddingBox.tsx`) är nu tvåstegs: ett klick **väljer** ett bud och
