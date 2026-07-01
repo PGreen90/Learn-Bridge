@@ -11,8 +11,11 @@
 
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Rank } from '../../types/bridge'
+import type { ResolvedCall } from '../bidding'
 import { currentWinner, legalCards, side, type PlayState } from './play'
-import { isSureWinner, playedCards, unseenTrumpCount } from './card-counting'
+import { isSureWinner, playedCards, shownVoids, unseenTrumpCount } from './card-counting'
+import { buildHandModel } from './hand-model'
+import { chooseCardMonteCarlo } from './monte-carlo'
 import { leadFromSuit } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -107,4 +110,48 @@ export function botCard(state: PlayState, seat: Seat): Card {
   // Tredje/fjärde hand: vinn billigast möjligt om något slår, annars kasta lågt.
   const winners = legal.filter((c) => beats(c, bestCard, led, state.trump))
   return winners.length > 0 ? lowest(winners) : lowAvoidRuff(legal, state.trump)
+}
+
+export interface SmartOpts {
+  /** Antal Monte-Carlo-sampel per beslut. */
+  samples?: number
+  /** Nodbudget per DDS-körning (håller webbläsaren responsiv). */
+  maxNodes?: number
+  /** Max kort kvar i handen för att MC ska köras (annars tumregler). */
+  maxCardsForMC?: number
+}
+
+/**
+ * Bottens kortval MED bot-hjärnan (docs/bot-hjarna.md, Steg 3c). Använder
+ * Monte-Carlo-DDS (`chooseCardMonteCarlo`) i slutspelet – när given är liten nog
+ * att lösas snabbt – och faller annars tillbaka på de ärliga tumreglerna
+ * (`botCard`). Hand-modellen seedas ur den verkliga auktionen (`calls`) plus
+ * kända renonser från spelet (`shownVoids`). Ingen tjuvkik: modellen och
+ * samplingen ser bara ärligt känd information.
+ *
+ * MC hoppas över (→ tumregler) när:
+ *  • det bara finns ett lagligt kort (inget att välja på),
+ *  • det är öppningsutspelet (trick 1, motspelet – utspelsdoktrin gäller, §8.3),
+ *  • handen är större än `maxCardsForMC` (tidiga, tunga ställningar = för långsamt;
+ *    vinsten ligger ändå i slutspelet: stickföring, ingångar, slutkast).
+ */
+export function botCardSmart(
+  state: PlayState,
+  seat: Seat,
+  calls: ResolvedCall[] = [],
+  opts: SmartOpts = {},
+): Card {
+  const legal = legalCards(state, seat)
+  if (legal.length === 1) return legal[0]
+
+  const openingLead = state.completedTricks.length === 0 && state.currentTrick.length === 0
+  const maxCards = opts.maxCardsForMC ?? 7
+  if (openingLead || state.hands[seat].length > maxCards) return botCard(state, seat)
+
+  const model = buildHandModel(calls, { voids: shownVoids(state) })
+  const choice = chooseCardMonteCarlo(state, seat, model, {
+    samples: opts.samples ?? 24,
+    maxNodes: opts.maxNodes ?? 150_000,
+  })
+  return choice ? choice.card : botCard(state, seat)
 }

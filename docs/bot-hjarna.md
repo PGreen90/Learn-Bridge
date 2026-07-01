@@ -21,6 +21,11 @@ Guldstandarden är **Monte Carlo**: dela ut många slumpade givar som stämmer m
 allt vi *ärligt* vet → kör DDS på var och en → spela kortet som vinner oftast.
 Så spelar starka bottar i världen (GIB m.fl.).
 
+## Status (2026-07-01): Steg 1–3 KLARA & live (testsvit 697)
+Trappan nedan är byggd hela vägen. Bottarna spelar nu Monte-Carlo-DDS i slutspelet
+via `botCardSmart` (`play-bot.ts`), inkopplad i `Play.tsx`. Kvar i eposet: signal-
+avkodning (pt 50), "Varför?"-knapp, tänj MC-fönstret tidigare. Se `docs/status.md`.
+
 ## Trappan (byggs i ordning, test-låst — FACIT FÖRE FIX)
 
 ### Steg 1 — Ärlig stickföring (stoppa blödningen)

@@ -146,6 +146,29 @@
 - **Gerber över 2NT (FAS 8, 2026-07-01):** en balanserad slamsäker svarare (13+ hp mittemot 20–21 ≈ 33+) frågar ess med 4♣ i stället för att blint blåsa 6NT (kan nu stanna i 4NT om två ess saknas, driva storslam via 5♣-kungfrågan ≈37+). Delad sekvensbyggare med 1NT-Gerber. Facit i `nt-slam.test.ts`.
 - **Exclusion när renons rankar över trumf (FAS 8, 2026-07-01):** `exclusionInvestigation` (`slam-auction.ts`) hanterar nu även hjärter trumf + spaderrenons (5♠ Exclusion, lagligt över 3NT-relät). Öppnarens högsta stegsvar (steg 4) landar på exakt 6♥; vill svararen bara ha lillslam passar hon (i stället för att olagligt bjuda om 6♥). Nivåbailen borttagen. Facit i `slam-auction.test.ts`. **FAS 8 (Slamsystem) därmed helt klar (testsvit 630).**
 
+## Bot-hjärnan – Monte-Carlo-DDS (FAS 11 Steg 1–3 KLAR, testsvit 697)
+
+Färdplan i `docs/bot-hjarna.md`. Bottarna spelar nu "läsa bordet"-spel utan
+tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
+
+- **Steg 1 (`play-bot.ts`, `card-counting.ts`):** ärlig stickföring – cash:a säkra
+  vinnare (inget högre kort ospelat), kryp aldrig under; sidofärgsvinnare först när
+  trumfen är räknad (`unseenTrumpCount`). Kända renonser via `shownVoids`.
+- **Steg 2 (`hand-model.ts`):** `buildHandModel(calls, {voids})` tolkar auktionen
+  till HP-spann + färglängd-spann + renonser per plats (konservativa golv).
+- **Steg 3a (`monte-carlo.ts` `sampleLayouts`):** delar ut de osedda korten till de
+  två dolda händerna så varje giv stämmer med modellen; ursprungslängd/HP räknas som
+  redan spelade + tilldelade kort. Renons-tvingad utdelning skär bort kasserade
+  försök; omöjliga krav → tom lista (fallback).
+- **Steg 3b (`monte-carlo.ts` `chooseCardMonteCarlo`):** DDS ärligt på sampeln →
+  röstar fram kortet med bäst genomsnitt (max stick åt spelföraren, min som
+  motspelare). Nodbudget → `null` = fallback.
+- **Steg 3c (`play-bot.ts` `botCardSmart`, inkopplad i `Play.tsx`):** MC i slutspelet
+  (≤7 kort kvar), annars tumregler (öppningsutspel / tung giv / ett-lagligt-kort).
+  Bevisat i test: 6-korts-slutspel där tumregeln tar 2 stick, MC tar facit 3.
+- **Kvar (FAS 11):** signalavkodning (pt 50), "Varför?"-knapp, tänj MC-fönstret
+  tidigare (ev. webworker). Facit-granska `signals.ts` (pt 47–49).
+
 ## Kortspel (punkt 29)
 
 - Flik **"Spela kort"** – `src/pages/Play.tsx`

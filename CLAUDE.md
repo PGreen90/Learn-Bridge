@@ -11,7 +11,7 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU (det enda vi jobbar på)
+### 🔵 NU (Steg 3 klar & live – välj nästa)
 **🧠 FAS 11 — Bot-hjärnan (kortspel/motspel-förfining), OMSTRUKTURERAD** (start
 2026-07-01). Ägaren pekade ut den riktiga smärtan: bottarna tar t.ex. 10 stick
 där 13 var kalla — usel stickföring, "kryper under i onödan". FAS 11 (signaler)
@@ -26,13 +26,20 @@ Trappan (test-låst, FACIT FÖRE FIX):
 - **Steg 2 ✅ KLAR & live** — hand-modellen `hand-model.ts` (ryggraden):
   tolkar auktionen till HP-spann + färglängder + renonser per plats. Del 1
   (HP-liggare), del 2 (längder), del 3 (svaga öppningar + svararens golv 6+/12+).
-  Konservativa golv (falskt spann förgiftar samplingen). Testsvit 680. Ännu ej
-  konsumerad – det gör Steg 3.
-- **Steg 3** — **Monte-Carlo-DDS** över modellen + signalavkodning (FAS 11 pt
-  50). Sampla osedda kort som stämmer med `hand-model` → DDS var och en → rösta
-  fram bästa kortet. Här börjar botten "läsa bordet" på riktigt. ← **VI ÄR HÄR.**
-- **FAS 11 pt 47–49** (utspel/UDCA/Lavinthal): facit-granska `signals.ts` mot §8.
-  pt 51 DDS-gräns = bekräfta bara.
+  Testsvit 680.
+- **Steg 3 ✅ KLAR & live** (2026-07-01, testsvit 697) — **Monte-Carlo-DDS**
+  (`monte-carlo.ts`). **3a** `sampleLayouts` delar ärligt ut de osedda korten till de
+  två dolda händerna så varje giv stämmer med hand-modellen (renonser/längd/HP,
+  skärpt av redan spelade kort per plats). **3b** `chooseCardMonteCarlo` kör DDS
+  ärligt på sampeln och röstar fram kortet med bäst snitt (max stick åt spelföraren,
+  min som motspelare). **3c** `botCardSmart` (`play-bot.ts`) inkopplad i `Play.tsx`:
+  MC i slutspelet (≤7 kort, seedad ur auktionen + `shownVoids`), annars tumregler
+  (öppningsutspel / tung giv / ett-lagligt-kort → fallback, tidigt spel orört).
+  Bevisat: 6-korts-slutspel 2→3 stick, facit nått utan tjuvkik.
+- **NÄSTA (välj):** **signalavkodning** (FAS 11 pt 50 – motspelaren läser partnerns
+  markering → in i hand-modellen), **"Varför?"-knapp** (botten förklarar draget),
+  eller **tänj MC-fönstret** tidigare (ev. webworker för DDS). pt 47–49 (utspel/
+  UDCA/Lavinthal): facit-granska `signals.ts` mot §8. pt 51 DDS-gräns = bekräfta bara.
 **Scope (ägarbeslut 2026-07-01):** MED = "Varför?"-knapp (botten förklarar draget)
 + avancerad teknik (slutkast/inkast/squeeze). SENARE = svårighetsnivåer.
 

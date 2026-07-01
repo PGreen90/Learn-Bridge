@@ -23,7 +23,7 @@ import {
 } from '../lib/engine/auction-live'
 import { interpretCall } from '../lib/engine/auction-interpret'
 import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
-import { botCard } from '../lib/engine/play-bot'
+import { botCardSmart } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
 import { PlayReplay } from '../components/PlayReplay'
@@ -316,7 +316,9 @@ function PlayTable({
     const id = setTimeout(() => {
       setPlay((p) => {
         if (isComplete(p) || controls(contract, p.toAct)) return p
-        return playCard(p, botCard(p, p.toAct))
+        // Bot-hjärnan: Monte-Carlo-DDS i slutspelet (seedad ur auktionen + kända
+        // renonser), annars ärliga tumregler. Se play-bot.ts botCardSmart.
+        return playCard(p, botCardSmart(p, p.toAct, calls))
       })
     }, 750)
     return () => clearTimeout(id)
