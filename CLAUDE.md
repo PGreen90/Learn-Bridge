@@ -20,12 +20,17 @@ inferens** — bottarna ska läsa bordet (räkna de 40 HP:na, dra bort budvisnin
 fallna kort). **Järnprincip: ingen tjuvkik** (DDS ser alla händer = fusk; används
 i stället över *troliga* händer via Monte Carlo). **Färdplan i `docs/bot-hjarna.md`.**
 Trappan (test-låst, FACIT FÖRE FIX):
-- **Steg 1** — ärlig stickföring i `play-bot.ts`: cash:a säkra vinnare (räknas
-  ärligt), kryp aldrig under med högsta kvarvarande kortet. Steg 1a = sang +
-  trumffärg; sidofärg-i-trumf skjuts till känd-renons-räkning. ← **VI ÄR HÄR.**
-- **Steg 2** — hand-modellen (ryggraden = visionen): inferensmotor seedad ur
-  auktionen (HP-spann, längder, renonser, utpekade kort).
-- **Steg 3** — Monte-Carlo-DDS över modellen + signalavkodning (FAS 11 pt 50).
+- **Steg 1 ✅ KLAR & live** — ärlig stickföring i `play-bot.ts`: cash:a säkra
+  vinnare, kryp aldrig under. 1a (sang+trumf) + 1b (sidofärg när trumfen är
+  räknad via `card-counting.ts`: `unseenTrumpCount`). Testsvit 659.
+- **Steg 2 ✅ KLAR & live** — hand-modellen `hand-model.ts` (ryggraden):
+  tolkar auktionen till HP-spann + färglängder + renonser per plats. Del 1
+  (HP-liggare), del 2 (längder), del 3 (svaga öppningar + svararens golv 6+/12+).
+  Konservativa golv (falskt spann förgiftar samplingen). Testsvit 680. Ännu ej
+  konsumerad – det gör Steg 3.
+- **Steg 3** — **Monte-Carlo-DDS** över modellen + signalavkodning (FAS 11 pt
+  50). Sampla osedda kort som stämmer med `hand-model` → DDS var och en → rösta
+  fram bästa kortet. Här börjar botten "läsa bordet" på riktigt. ← **VI ÄR HÄR.**
 - **FAS 11 pt 47–49** (utspel/UDCA/Lavinthal): facit-granska `signals.ts` mot §8.
   pt 51 DDS-gräns = bekräfta bara.
 **Scope (ägarbeslut 2026-07-01):** MED = "Varför?"-knapp (botten förklarar draget)
