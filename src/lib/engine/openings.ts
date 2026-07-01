@@ -3,7 +3,13 @@
 
 import type { Bid, Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
-import { startingPoints } from './evaluation'
+import { playingTricks, startingPoints } from './evaluation'
+
+/** Spelstick snyggt: 8 → "8", 8.5 → "8½". */
+function fmtTricks(t: number): string {
+  const whole = Math.floor(t)
+  return t - whole >= 0.5 ? `${whole}½` : `${whole}`
+}
 
 export interface OpeningResult {
   /** Budet, t.ex. "1S", "1NT", "2C", "P". */
@@ -37,6 +43,19 @@ export function classifyOpening(hand: Hand): OpeningResult {
 
   // Stark 2♣ (obalanserad 22+).
   if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `${p} hp (stark) → 2♣ (konstgjord, krav).` }
+
+  // Distributionellt stark 2♣ (ägarens beslut 2026-07-01): en hand med många
+  // SPELSTICK är nära utgång på egen hand och öppnar 2♣ även om HP < 22. Gräns
+  // ~8½ spelstick. Balanserade NT-öppningar/22+ har redan returnerats ovan, så
+  // det här fångar de starka fördelningshänderna (lång stark färg + sidohonnörer).
+  const pt = playingTricks(hand)
+  if (pt >= 8.5) {
+    return {
+      call: '2C',
+      rule: 'stark 2♣',
+      explanation: `${p} hp men ~${fmtTricks(pt)} spelstick (nära utgång på egen hand) → 2♣ (stark, krav).`,
+    }
+  }
 
   // Öppning på 1-läget. Två vägar in (ägarens beslut 2026-06-30):
   //  • 12+ HP öppnar ALLTID – en människa nedgraderar i princip aldrig en

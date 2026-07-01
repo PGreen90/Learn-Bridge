@@ -37,6 +37,17 @@ describe('classifyOpening', () => {
     expect(call('S:AKQJT98 H:AK D:AKQ C:4')).toBe('2C') // 26 hp, 7-2-3-1
   })
 
+  it('distributionellt 2♣ på spelstick (HP < 22, ~8½ spelstick)', () => {
+    // 20 hp men ~8½ spelstick (löpande 6-korts hjärter + EK + garderad kung) →
+    // nära utgång på egen hand → 2♣, inte 1♥. Ägarens beslut 2026-07-01.
+    expect(call('S:AK H:AKQJ98 D:K2 C:432')).toBe('2C')
+  })
+
+  it('lång stark hand UNDER 8½ spelstick öppnar 1 i färg', () => {
+    // Samma form men ♦32 (ingen garderad kung) → 8 spelstick < 8½ → 1♥.
+    expect(call('S:AK H:AKQJ98 D:32 C:432')).toBe('1H') // 17 hp, 8 spelstick
+  })
+
   it('pass med för svag hand', () => {
     expect(call('S:K85 H:Q84 D:J762 C:Q93')).toBe('P') // 8 hp, balanserad
   })

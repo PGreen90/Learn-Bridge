@@ -118,6 +118,52 @@ export function startingPoints(hand: Hand): Evaluation {
 }
 
 /**
+ * Spelstick (eng. *playing tricks*): ungefär hur många stick handen tar på EGEN
+ * hand som spelförare, driven av långa starka färger – inte bara honnörspoäng.
+ * Svarar på frågan "hur nära utgång är jag själv?", vilket är måttet
+ * bridgespelare använder för en stark, distributionell 2♣-öppning: en hand med
+ * få HP men många spelstick (t.ex. ♥E K D kn x x + ♠E K ≈ 8 spelstick).
+ *
+ * Metod (halvstick tillåts, exakta värden är tunbara – se docs/handvardering.md):
+ * per färg räknas topphonnörer + långa kort:
+ *   EKD=3 · EK=2 · ED=1½ · EknT=1½ · E=1 · KDkn=2 · KD=1 · KknT=1 · Kx(gard.)=½ ·
+ *   Dkn=½, plus +1 per kort utöver det tredje i en färg som har en topphonnör
+ *   (E/K/D) att etablera de långa korten med. Summan kapas till färgens längd.
+ */
+export function playingTricks(hand: Hand): number {
+  const bySuit = ranksBySuit(hand)
+  let total = 0
+  for (const s of SUITS) total += suitPlayingTricks(bySuit[s])
+  return total
+}
+
+/** Spelstick i en enskild färg (kort sorterade högst → lägst). */
+function suitPlayingTricks(ranks: Rank[]): number {
+  const len = ranks.length
+  if (len === 0) return 0
+  const has = (r: Rank) => ranks.includes(r)
+  const A = has('A'), K = has('K'), Q = has('Q'), J = has('J'), T = has('10')
+
+  let honors: number
+  if (A && K && Q) honors = 3
+  else if (A && K) honors = 2
+  else if (A && Q) honors = 1.5
+  else if (A && J && T) honors = 1.5 // E kn 10
+  else if (A) honors = 1
+  else if (K && Q && J) honors = 2 // K D kn
+  else if (K && Q) honors = 1
+  else if (K && J && T) honors = 1 // K kn 10
+  else if (K && len >= 2) honors = 0.5 // K x (garderad kung)
+  else if (Q && J) honors = 0.5
+  else honors = 0
+
+  // Långa kort (utöver det tredje) – bara om ess/kung finns att köra hem den
+  // långa färgen på (en ensam dam räcker inte för att etablera de långa korten).
+  const long = len > 3 && (A || K) ? len - 3 : 0
+  return Math.min(len, honors + long)
+}
+
+/**
  * Kortfärgspoäng som *väntar* på en fit – endast för visning. Bergens metod
  * räknar ALDRIG korthet i startpoängen (man vet ännu inte om man har trumffit),
  * men vi vill kunna visa ägaren att singel/dubbel/renons inte är glömda, bara

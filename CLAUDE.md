@@ -56,6 +56,13 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   mot en limithöjning). **Kvar:** C-2 = svararens/öppnarens **minorhöjningar** på
   TP, C-3 = **sang-accepter**, D = TP-nudge för **sangöppning**. Ägaren vill ge
   **mänsklig input i konkreta budsituationer** löpande – fråga hellre än gissa.
+- **Spelstick i öppningen (beslut 2026-07-01).** Nytt värderingsmått `playingTricks`
+  (`evaluation.ts`): honnörer + långa kort (+1/kort över 3 i en färg med ess/kung).
+  En hand med **≥ 8½ spelstick öppnar 2♣** (stark) även med HP < 22 – starka
+  fördelningshänder (lång stark färg, få hp) tas nu om hand i stället för att öppna
+  1 i färg och tolkas som minimum. Balanserade 22+ oförändrat. Visas i `HandView`.
+  **Kvar (ägarens prio):** starkare 1-lägesåterbud/hoppskift när en stark hand ändå
+  öppnar på 1-läget; sedan ärligt giv-facit + DDS-optimal spelföring (uppskjutet).
 - Första funktion: **budträning** – visa hand, välj bud, appen ger facit.
 - Nästa stora riktning: **Spela mot datorn** (offline mot bottar; kvalitet före tempo).
 - **Målgrupp (beslut 2026-06-30): erfaren spelare** – en pålitlig, robust 2/1-

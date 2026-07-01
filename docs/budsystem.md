@@ -1172,3 +1172,17 @@ Det avslöjar längd/räkning direkt för partnern.
   då blev "stanna i 5 i trumf" tidigare ett bud under RKC-svaret (särskilt
   minorfit). Tester: 2 nya regressionstester (`slam-auction.test.ts`). Totalt 396
   gröna.
+- **2026-07-01** – Felsökning "spela kort" (ägaren hittade en giv där V/Ö borde
+  spela slam men stannade i 3NT). Rotorsak i budgivningen: **2♣-öppningen var helt
+  HP-styrd** (≥22 hp), så en stark FÖRDELNINGShand (få hp men lång stark färg)
+  öppnade 1 i färg och behandlades sedan som minimum. **Beslut (ägaren): inför
+  spelstick.** Nytt värderingsmått `playingTricks` (`evaluation.ts`): topphonnörer
+  (EKD=3, EK=2, ED=1½ …) + långa kort (+1 per kort utöver det tredje i en färg med
+  ess/kung att köra hem den på). En hand med **≥ 8½ spelstick öppnar nu 2♣**
+  (`openings.ts`, regel `stark 2♣`) även med hp < 22 – "nära utgång på egen hand".
+  Den balanserade 22+-regeln ligger kvar orörd. Spelsticken visas i handvyn bredvid
+  HP/TP (`HandView.tsx`). Tester: 5 nya spelsticks- + 2 nya öppningstester, on-book
+  bevisat orört (493 gröna). **Sparat till senare** (ägarens prio): (a) startkare
+  1-lägesåterbud/hoppskift när en stark hand ändå öppnat på 1-läget, (b) ärligt
+  giv-facit (perfekt spel från utspelet, inte "härifrån"), (c) DDS-optimal
+  spelföring så toppstick faktiskt tas. **Nästa gång:** punkt (a) budgivning.

@@ -1,7 +1,7 @@
 import type { Hand, Suit, Rank } from '../types/bridge'
 import { SuitSymbol } from './SuitSymbol'
 import { hcp } from '../lib/engine/hand'
-import { deferredShortness, startingPoints } from '../lib/engine/evaluation'
+import { deferredShortness, playingTricks, startingPoints } from '../lib/engine/evaluation'
 
 // Bridge-konvention: visa färgerna i ordningen spader, hjärter, ruter, klöver,
 // och korten från högst (A) till lägst (2).
@@ -15,6 +15,12 @@ function sortRanks(ranks: Rank[]): Rank[] {
 /** Skriver tal med tecken: 0 → "0", 2 → "+2", −1 → "−1". */
 function signed(n: number): string {
   return n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '0'
+}
+
+/** Spelstick snyggt: 8 → "8", 8.5 → "8½". */
+function fmtTricks(t: number): string {
+  const whole = Math.floor(t)
+  return t - whole >= 0.5 ? `${whole}½` : `${whole}`
 }
 
 /**
@@ -46,6 +52,7 @@ function PointsLine({ hand }: { hand: Hand }) {
   const e = startingPoints(hand)
   const hp = hcp(hand)
   const shortness = deferredShortness(hand)
+  const tricks = playingTricks(hand)
 
   // Bara de delar som faktiskt ändrar poängen visas i uträkningen.
   const rows: { label: string; value: number }[] = [{ label: 'Honnörspoäng (Hp)', value: hp }]
@@ -59,7 +66,7 @@ function PointsLine({ hand }: { hand: Hand }) {
     <details className="mt-2 border-t border-emerald-200 pt-2 text-sm">
       <summary className="cursor-pointer text-slate-700 marker:text-emerald-500">
         <span className="font-semibold text-slate-900">{hp} HP</span>{' '}
-        <span className="text-emerald-700">({e.startingPoints} TP)</span>
+        <span className="text-emerald-700">({e.startingPoints} TP · {fmtTricks(tricks)} spelstick)</span>
         <span className="ml-2 text-xs text-slate-400">– så räknas TP</span>
       </summary>
       <table className="mt-2 w-full max-w-xs text-slate-600">

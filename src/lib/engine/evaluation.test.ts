@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { bergenPoints, deferredShortness, dummyPoints, startingPoints } from './evaluation'
+import { bergenPoints, deferredShortness, dummyPoints, playingTricks, startingPoints } from './evaluation'
 
 // Faciten kommer från PDF:en "Hand Evaluation – Adjust-3 Method" (se
 // docs/handvardering.md). 13 av 16 facit-händer stämmer exakt med reglerna;
@@ -112,5 +112,34 @@ describe('bergenPoints – Nivå 3 (PDF facit-händer)', () => {
   it('i sang räknas ingen kortfärg, bara trumflängd + sidofärger', () => {
     const e = bergenPoints(parseHand('S:AK42 H:KQ632 D:AKT9 C:-'), 'hearts', { notrump: true })
     expect(e.shortSuit).toBe(0)
+  })
+})
+
+describe('playingTricks – spelstick (nära utgång på egen hand)', () => {
+  const pt = (n: string) => playingTricks(parseHand(n))
+
+  it('lång löpande färg: EKD + långa kort = längden', () => {
+    // ♠AKQ432: AKD = 3 topp + 3 långa (utöver 3) = 6, inga andra stick.
+    expect(pt('S:AKQ432 H:765 D:76 C:76')).toBe(6)
+  })
+
+  it('ägarens exempel-form: 6-korts högfärg + EK vid sidan ≈ 8', () => {
+    // ♥AKQJ98 = 6, ♠AK = 2 → 8 spelstick (~ en 20-hp-hand nära utgång själv).
+    expect(pt('S:AK H:AKQJ98 D:32 C:432')).toBe(8)
+  })
+
+  it('garderad kung ger ett halvt spelstick → 8½', () => {
+    // Samma som ovan men ♦K2 (garderad kung) lyfter till 8½ – 2♣-gränsen.
+    expect(pt('S:AK H:AKQJ98 D:K2 C:432')).toBe(8.5)
+  })
+
+  it('platt honnörshand tar få spelstick trots hyfsad HP', () => {
+    // ♠AQ5 ♥KJ7 ♦Q842 ♣K93 = 15 HP men bara ~2½ spelstick (inga långa färger).
+    expect(pt('S:AQ5 H:KJ7 D:Q842 C:K93')).toBe(2.5)
+  })
+
+  it('långa kort ger stick bara med en topphonnör att etablera med', () => {
+    // ♦8765432 (7 hackor) räknas som 0 spelstick – ingen honnör att köra hem den på.
+    expect(pt('S:A2 H:A2 D:8765432 C:A2')).toBe(3) // bara de tre essen
   })
 })
