@@ -54,8 +54,12 @@
   {notrump}`), aldrig korthet (minorfit siktar 3NT). `responses.ts respondToMinor`.
 - **Steg C-3 – sang-accepter på TP:** 3NT-accepter på startpoäng (5-korts färg/
   löpande honnörer lyfter). `rebids.ts`.
-- **Steg D – TP-nudge för sangöppning: EJ byggd** – ändrar öppningsfundamentet,
-  kräver ägarens exempelhänder (vilka 14:or nudgas). Se `docs/tp-arbetslista.md`.
+- **Steg D – TP-nudge för sangöppning (komplett):** bra 14 (`p === 14 && ingen
+  5-korts färg`) → 1NT (`openings.ts`). 5-korts minor → öppna minorn (bevarar
+  1-läges major-svar), 5-korts major → öppna 1M. **Sårbarheten sätter tröskeln:**
+  ej sårbar → startpoäng ≥ 15 (aggressiv), sårbar → ≥ 16 (passiv). `isVulnerable`
+  (`openings.ts`) trådad genom `buildAuction` + `Spela.tsx` (lokal dubblett borttagen).
+  Facit i `openings.test.ts` (startp. 15 nudgas bara ej sårbar; startp. 16 alltid).
 
 ## Handvärdering
 

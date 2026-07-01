@@ -1,9 +1,17 @@
 // Budmotorns första del: öppningsbudet. Härlett direkt ur systemboken §3
 // (öppningsbud + minor-regeln). Funktionen är ren: hand in → bud + förklaring ut.
 
-import type { Bid, Hand, Suit } from '../../types/bridge'
+import type { Bid, Hand, Seat, Suit, Vulnerability } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import { playingTricks, startingPoints } from './evaluation'
+
+/** Är positionen `seat` sårbar i den här givens sårbarhet? */
+export function isVulnerable(seat: Seat, vul: Vulnerability): boolean {
+  if (vul === 'all') return true
+  if (vul === 'none') return false
+  if (vul === 'ns') return seat === 'N' || seat === 'S'
+  return seat === 'E' || seat === 'W' // 'ew'
+}
 
 /** Spelstick snyggt: 8 → "8", 8.5 → "8½". */
 function fmtTricks(t: number): string {
@@ -25,8 +33,12 @@ export interface OpeningResult {
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 
-/** Räknar ut vad en hand öppnar med i 1:a hand utan störning. */
-export function classifyOpening(hand: Hand): OpeningResult {
+/**
+ * Räknar ut vad en hand öppnar med i 1:a hand utan störning. `vulnerable` styr
+ * bara TP-nudgen (Steg D): ej sårbar = aggressiv (nudge vid startpoäng ≥ 15),
+ * sårbar = passiv (≥ 16). Default `false` (bakåtkompatibelt).
+ */
+export function classifyOpening(hand: Hand, vulnerable = false): OpeningResult {
   const p = hcp(hand)
   const tp = startingPoints(hand).startingPoints
   const len = lengths(hand)
@@ -38,6 +50,22 @@ export function classifyOpening(hand: Hand): OpeningResult {
     if (p >= 20 && p <= 21) return { call: '2NT', rule: '2NT', explanation: `Balanserad ${p} hp (20–21) → 2NT.` }
     if (p >= 25 && p <= 27) return { call: '3NT', rule: '3NT', explanation: `Balanserad ${p} hp (25–27) → 3NT.` }
     if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `Balanserad ${p} hp (22+) → 2♣ (konstgjord, krav).` }
+
+    // TP-steg D (FAS 4, ägarbeslut 2026-07-01, steg b – sårbarhets-oberoende):
+    // en "bra 14" (14 hp MEN startpoäng ≥ 15 – bra ess/tior/kvalitetsfärg som
+    // motorn redan väger in) nudgas upp i 1NT-öppningszonen. Villkor:
+    //  • Ingen 5-korts färg (dvs 4-3-3-3 / 4-4-3-2). En 5-korts MINOR öppnar
+    //    minorn (bevarar partnerns 4-korts-major-svar på 1-läget); en 5-korts
+    //    MAJOR öppnar 1M (visar majoren). Därför nudge bara utan 5-korts färg.
+    //  • Samma regel-id '1NT' → svararen tolkar det som en vanlig 1NT-öppning.
+    //  • Sårbarheten sätter tröskeln: ej sårbar = aggressiv (≥15), sårbar =
+    //    passiv (≥16) – en formstark 14:a chansar hellre i zonfördel.
+    const noFiveCardSuit = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).every((s) => len[s] < 5)
+    const nudgeFloor = vulnerable ? 16 : 15
+    if (p === 14 && tp >= nudgeFloor && noFiveCardSuit) {
+      const zon = vulnerable ? 'sårbar ≥16' : 'ej sårbar ≥15'
+      return { call: '1NT', rule: '1NT', explanation: `Balanserad bra 14 (${p} hp / ${tp} startp., ${zon}) → 1NT (uppvärderad).` }
+    }
     // 12–14 och 18–19 balanserade öppnar i färg → faller vidare nedan.
   }
 

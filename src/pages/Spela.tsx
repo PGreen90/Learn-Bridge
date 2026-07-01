@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import type { Deal, Seat, Suit, Vulnerability } from '../types/bridge'
+import type { Deal, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
-import { classifyOpening } from '../lib/engine/openings'
+import { classifyOpening, isVulnerable } from '../lib/engine/openings'
 import { buildAuction, dealWithAuction } from '../lib/engine/auction'
 import { turnsToCalls } from '../lib/engine/auction-contract'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
@@ -15,14 +15,6 @@ import { Button } from '../components/Button'
 const SUIT_OF: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 
 const SEAT_SHORT: Record<Seat, string> = { N: 'N', E: 'Ö', S: 'S', W: 'V' }
-
-/** Är platsen i zon (sårbar) givet givens sårbarhet? */
-function isVulnerable(seat: Seat, v: Vulnerability): boolean {
-  if (v === 'all') return true
-  if (v === 'ns') return seat === 'N' || seat === 'S'
-  if (v === 'ew') return seat === 'E' || seat === 'W'
-  return false
-}
 
 /**
  * BBO-liknande brickmarkör i mitten av bordet: varje väderstreck rött i zon,
@@ -91,7 +83,7 @@ export function Spela() {
 
   function seatPanel(seat: Seat) {
     const hand = deal.hands[seat]
-    const r = classifyOpening(hand)
+    const r = classifyOpening(hand, isVulnerable(seat, deal.vulnerability))
     const isOpener = auction?.openerSeat === seat
     const isResponder = hasResponse && auction?.responderSeat === seat
     return (

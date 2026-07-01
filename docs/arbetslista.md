@@ -55,8 +55,11 @@
 >     kortfärg, inkopplat i `slamInvestigation` (Jacoby-kortfärg).
 >   - C-2: minorhöjningar på TP (längd/sidofärg, ej korthet) – `responses.ts`.
 >   - C-3: sang-accepter (3NT) på startpoäng – `rebids.ts`.
->   **KVAR: Steg D (TP-nudge för sangöppning)** – hålls för ägaren (öppningsfundament,
->   kräver exempelhänder). Nästa NU.
+>   - Steg D: sang-nudge (komplett) – bra 14 (ingen 5-korts färg) → 1NT; 5-korts
+>     minor öppnar minorn, 5-korts major öppnar 1M. Sårbarheten modulerar tröskeln
+>     (ej sårbar ≥15, sårbar ≥16) via `isVulnerable`+`buildAuction` (`openings.ts`).
+>   🎉 **HELA FAS 4 KLAR (testsvit 559).** Nästa: ägaren väljer NU ur NÄST
+>   (naturlig kandidat FAS 5 NT-systemet).
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens

@@ -12,11 +12,10 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**🔶 FAS 4 VÄRDERING – punkt 16–18 + C-2/C-3 KLARA (2026-07-01, testsvit 551).**
-Kvar: **Steg D (TP-nudge för sangöppning)** – medvetet EJ byggd, den ändrar
-öppningsfundamentet och kräver **ägarens exempelhänder** (vilka 14:or nudgas till
-1NT: 5-korts högfärg vs löpande minor vs starka ess?). **NU = Steg D, väntar på
-ägarens val.** Rör inget annat.
+**✅ FAS 4 VÄRDERING KLAR (2026-07-01, testsvit 559).** Punkt 16–18 + TP-steg
+C-2/C-3 + hela Steg D (sang-nudge inkl. sårbarhet). **NU-facket är tomt — nästa
+steg: ägaren väljer ett NU ur 🟢 NÄST** (naturlig kandidat: FAS 5 NT-systemet).
+Rör inget nytt förrän valet är gjort.
 
 Slutförd FAS 4 (facit + `npm test`, autonom körning – besluten för granskning):
 - ✅ **Punkt 16 — HP/TP/LTC-karta:** motorn kör HP + TP; **LTC finns inte**.
@@ -29,7 +28,10 @@ Slutförd FAS 4 (facit + `npm test`, autonom körning – besluten för granskni
 - ✅ **Steg C-2 — minorhöjningar på TP:** längd/sidofärg lyfter, aldrig korthet
   (minorfit siktar 3NT). `responses.ts`.
 - ✅ **Steg C-3 — sang-accepter på TP:** 3NT-accepter på startpoäng. `rebids.ts`.
-- ⏸️ **Steg D — sang-nudge:** HÅLLS för ägaren (öppningsfundament).
+- ✅ **Steg D — sang-nudge (komplett):** bra 14 (ingen 5-korts färg) → 1NT
+  (`openings.ts`). 5-korts minor öppnar minorn, 5-korts major öppnar 1M.
+  **Sårbarheten modulerar tröskeln:** ej sårbar = aggressiv (startp. ≥15), sårbar
+  = passiv (≥16). `isVulnerable` trådad via `buildAuction`. Facit i `openings.test.ts`.
 
 ---
 Slutförd FAS 3 (facit + `npm test`):

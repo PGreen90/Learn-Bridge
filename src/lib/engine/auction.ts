@@ -5,7 +5,7 @@
 import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
-import { classifyOpening } from './openings'
+import { classifyOpening, isVulnerable } from './openings'
 import { respondToMajor, respondToMinor, type Major, type ResponseResult } from './responses'
 import { respondTo1NT } from './responses-nt'
 import { respondTo2C } from './responses-2c'
@@ -41,7 +41,7 @@ const PARTNER: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
 export function firstMajorOpeningAuction(deal: Deal): MajorAuction | null {
   for (let i = 0; i < 4; i++) {
     const seat = seatAt(deal.dealer, i)
-    const open = classifyOpening(deal.hands[seat])
+    const open = classifyOpening(deal.hands[seat], isVulnerable(seat, deal.vulnerability))
     if (open.call === 'P') continue
     if (open.call === '1H' || open.call === '1S') {
       const openSuit: Major = open.call === '1H' ? 'hearts' : 'spades'
@@ -206,7 +206,7 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   let opening = null as ReturnType<typeof classifyOpening> | null
   for (let i = 0; i < 4; i++) {
     const seat = seatAt(deal.dealer, i)
-    const o = classifyOpening(deal.hands[seat])
+    const o = classifyOpening(deal.hands[seat], isVulnerable(seat, deal.vulnerability))
     if (o.call !== 'P') {
       openerSeat = seat
       openerIndex = i

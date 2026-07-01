@@ -1,8 +1,8 @@
 # TP i budvalet — arbetslista
 
-> 🔺 **NÄSTA GÅNG BÖRJAR VI MED:** Steg D (TP-nudge för sangöppning) – **kräver
-> ägarens exempelhänder** (vilka 14:or nudgas till 1NT: 5-korts högfärg vs löpande
-> minor vs starka ess?). Steg C-2 + C-3 klara 2026-07-01 (se nedan).
+> 🔺 **NÄSTA GÅNG:** hela A–D klara (öppningsgolv, höjningar, accepter, sang-nudge
+> inkl. sårbarhet). Kvar i "brett" TP: Steg E (reverse/hoppskift), Steg F (3:e/4:e-
+> hands lättöppning) + sekundära TP-lägen nedan – hämtas när ägaren vill.
 
 > Boten ska tänka i **totalpoäng (TP/fördelning)**, inte rå HP (ägarens beslut
 > 2026-06-30). Byggs i **test-låsta steg** så on-book aldrig rubbas.
@@ -42,11 +42,24 @@
 ## ⬜ Kvar att bygga
 
 ### Steg D — TP-nudge för sangöppning
-`openings.ts`: 1NT (15–17) / 2NT (20–21) / 3NT (25–27) är i dag rena HP-steg.
-Ägaren valde att **låta TP nudga sang** (Q3, 2026-06-30): t.ex. en stark 14 med
-femkortsfärg/bra ess räknas upp i 1NT-zonen. **Mest omdömeskrävande** – avviker
-från ren 2/1; bygg sist och med tydliga exempelhänder. NB: får aldrig krocka med
-öppningsgolvet (Steg A) eller sänka en hand.
+**Steg b (sårbarhets-oberoende) KLAR 2026-07-01.** Ägarens resonemang (efter
+exempelhänder): (1) 5-korts major > 5-korts minor i värde; (2) en 5-korts major i
+5-3-3-2 är besvärlig att rebjuda → talar för 1NT; (3) öppnar man 1NT med en
+5-korts minor berövas partnern att visa en 4-korts major på 1-läget → öppna
+minorn. Regel (i `openings.ts`, balanserad gren):
+- **Bra 14 → 1NT:** `p === 14 && startpoäng ≥ 15 && ingen 5-korts färg`
+  (4-3-3-3/4-4-3-2). Samma regel-id `'1NT'`. Honnörskvaliteten (Q2 sänker, AQ109/
+  tior lyfter) fångas redan av `startingPoints`, så tröskeln ≥15 självväljer bra
+  14:or. Facit i `openings.test.ts` (bra 14 → 1NT; 5-korts minor → 1♦; 5-korts
+  major → 1♠; platt quack-14 → minor).
+- **5-korts major** som når tröskeln behåller vi som 1M tills fler exempel (punkt 1
+  vinner i tveksamma fall).
+
+**✅ Steg D-vulnerabilitet KLAR 2026-07-01:** `classifyOpening(hand, vulnerable)`
+tar nu en sårbarhetsflagga; `isVulnerable(seat, vul)` (`openings.ts`, exporterad)
+trådas in via `buildAuction` (och `Spela.tsx` – lokal dubblett borttagen). Regel:
+ej sårbar → nudge vid startp. ≥ 15, sårbar → ≥ 16. Facit i `openings.test.ts`
+(startp. 15 nudgas bara ej sårbar; startp. 16 alltid). Default `false` (bakåtkompat).
 
 ### Steg E — öppnarens reverse / hoppskift på TP (tillagt 2026-07-01)
 Styrkegrindade återbud: en **reverse** kräver extra. En formstark 16:a

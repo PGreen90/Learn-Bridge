@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { classifyOpening } from './openings'
+import { classifyOpening, isVulnerable } from './openings'
 
 function call(notation: string): string {
   return classifyOpening(parseHand(notation)).call
+}
+
+/** Öppningsbud med explicit sårbarhet (för TP-nudgens Steg D-vulnerabilitet). */
+function callVul(notation: string, vulnerable: boolean): string {
+  return classifyOpening(parseHand(notation), vulnerable).call
 }
 
 describe('classifyOpening', () => {
@@ -23,6 +28,59 @@ describe('classifyOpening', () => {
   it('minor-regeln utan 5-korts högfärg', () => {
     expect(call('S:KQ72 H:A85 D:K84 C:QT3')).toBe('1C') // 14 hp, 4-3-3-3, klöver 3-3
     expect(call('S:KQ5 H:A8 D:KT62 C:QT43')).toBe('1D') // 14 hp, minorer 4-4
+  })
+
+  // ---- FAS 4 steg D (b): TP-nudge för sangöppning (sårbarhets-oberoende) ----
+  describe('TP-nudge: bra 14 → 1NT (utan 5-korts färg)', () => {
+    it('bra 14 (två kvalitetsfärger + tior, startp. ≥15) → 1NT', () => {
+      // ♠AJ102 ♥KJ102 ♦Q2 ♣K32: 14 hp, 4-4-3-2, startpoäng 15 → uppvärderad 1NT.
+      expect(call('S:AJT2 H:KJT2 D:Q2 C:K32')).toBe('1NT')
+    })
+
+    it('5-korts MINOR med samma styrka → öppnar minorn (ej 1NT)', () => {
+      // ♠K42 ♥Q42 ♦AQ1092 ♣K2: 14 hp, startp. 15, MEN 5 ruter → 1♦ (bevarar
+      // partnerns 4-korts-major-svar på 1-läget). Ägarbeslut punkt 3.
+      expect(call('S:K42 H:Q42 D:AQT92 C:K2')).toBe('1D')
+    })
+
+    it('5-korts MAJOR med samma styrka → öppnar 1M (ej 1NT)', () => {
+      // ♠AKJ92 ♥Q102 ♦KJ2 ♣32: 14 hp, startp. 15, MEN 5 spader → 1♠ (visa majoren).
+      expect(call('S:AKJ92 H:QT2 D:KJ2 C:32')).toBe('1S')
+    })
+
+    it('platt quack-14 (startp. <15) nudgas INTE → minor-regeln', () => {
+      // ♠KQ2 ♥QJ2 ♦KJ92 ♣Q2: 14 hp men quack-tung + Q2 → startpoäng 11 → 1♦.
+      expect(call('S:KQ2 H:QJ2 D:KJ92 C:Q2')).toBe('1D')
+    })
+  })
+
+  // ---- FAS 4 steg D-vulnerabilitet: ej sårbar aggressiv (≥15), sårbar passiv (≥16) ----
+  describe('TP-nudge modulerad av sårbarhet', () => {
+    it('startpoäng 15: nudgas EJ sårbar (→1NT), men INTE sårbar (→minor)', () => {
+      const h = 'S:AJT2 H:KJT2 D:Q2 C:K32' // 14 hp, startp. 15
+      expect(callVul(h, false)).toBe('1NT') // ej sårbar = aggressiv
+      expect(callVul(h, true)).toBe('1C') // sårbar = passiv, faller till minor-regeln
+    })
+
+    it('startpoäng 16: nudgas OAVSETT sårbarhet (→1NT)', () => {
+      const h = 'S:KJT9 H:QJT9 D:AK C:432' // 14 hp, startp. 16
+      expect(callVul(h, false)).toBe('1NT')
+      expect(callVul(h, true)).toBe('1NT')
+    })
+  })
+
+  describe('isVulnerable', () => {
+    it('none/all', () => {
+      expect(isVulnerable('N', 'none')).toBe(false)
+      expect(isVulnerable('E', 'all')).toBe(true)
+    })
+    it('ns/ew träffar rätt par', () => {
+      expect(isVulnerable('N', 'ns')).toBe(true)
+      expect(isVulnerable('S', 'ns')).toBe(true)
+      expect(isVulnerable('E', 'ns')).toBe(false)
+      expect(isVulnerable('W', 'ew')).toBe(true)
+      expect(isVulnerable('N', 'ew')).toBe(false)
+    })
   })
 
   it('svag tvåa med 6-korts ♦/♥/♠ och 6–11', () => {
