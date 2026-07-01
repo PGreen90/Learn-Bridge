@@ -50,3 +50,49 @@ describe('buildHandModel – HP-liggaren ur auktionen (Steg 2 del 1)', () => {
     for (const seat of ['N', 'E', 'S', 'W'] as Seat[]) expect(m[seat].hcpMax).toBe(11)
   })
 })
+
+describe('buildHandModel – färglängder ur naturliga bud (Steg 2 del 2)', () => {
+  it('högfärgsöppning 1♥ → öppnaren 5+ hjärter', () => {
+    const m = buildHandModel(calls(['N', '1H']))
+    expect(m.N.length.hearts.min).toBe(5)
+  })
+
+  it('minoröppning 1♣ → öppnaren 3+ klöver (inte 4)', () => {
+    const m = buildHandModel(calls(['N', '1C']))
+    expect(m.N.length.clubs.min).toBe(3)
+  })
+
+  it('1NT-öppning → balanserad: varje färg 2–5', () => {
+    const m = buildHandModel(calls(['N', '1NT']))
+    for (const s of ['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]) {
+      expect(m.N.length[s].min).toBe(2)
+      expect(m.N.length[s].max).toBe(5)
+    }
+  })
+
+  it('svararens nya färg → 4+ i den färgen', () => {
+    // N 1♣ – (P) – S 1♥ : svararens 1♥ = ny naturlig färg.
+    const m = buildHandModel(calls(['N', '1C'], ['E', 'P'], ['S', '1H']))
+    expect(m.S.length.hearts.min).toBe(4)
+  })
+
+  it('rebjuden egen färg → 6+', () => {
+    // N 1♥ – (P) – S 1NT – (P) – N 2♥ : rebjuden hjärter.
+    const m = buildHandModel(calls(['N', '1H'], ['E', 'P'], ['S', '1NT'], ['W', 'P'], ['N', '2H']))
+    expect(m.N.length.hearts.min).toBe(6)
+  })
+
+  it('höjning av partnerns färg → INGEN egen längd-inferens (kan vara 3-stöd)', () => {
+    // N 1♥ – (P) – S 2♥ : S höjer, vi vet inte S:s egen hjärterlängd säkert.
+    const m = buildHandModel(calls(['N', '1H'], ['E', 'P'], ['S', '2H']))
+    expect(m.S.length.hearts.min).toBe(0)
+  })
+
+  it('känd renons slår budinferensen → längd exakt 0', () => {
+    // Ö "visade" spader men en renons är känd från spelet → 0 vinner.
+    const voids: Record<Seat, Set<Suit>> = { N: new Set(), E: new Set(['spades']), S: new Set(), W: new Set() }
+    const m = buildHandModel(calls(['N', 'P'], ['E', '1S']), { voids })
+    expect(m.E.length.spades.max).toBe(0)
+    expect(m.E.length.spades.min).toBe(0)
+  })
+})
