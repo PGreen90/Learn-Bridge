@@ -849,6 +849,15 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-02** – **FAS 11 – "Varför?"-knapp (botten förklarar sitt kortval)**
+  (testsvit 721). `play-bot.ts` fick `botCardReasoned`/`botCardSmartReasoned` som
+  ger SAMMA kort som förut + en klartextsmotivering: utspel (§8.3 topp av sekvens
+  vs. 3:e/5:e bästa), "cashar säker vinnare", "andra hand lågt", "ruffar aldrig
+  partnern", "vinner billigast", och Monte-Carlo-draget ("delade ut N troliga
+  lägen … flest stick i snitt"). De gamla `botCard`/`botCardSmart` är tunna
+  wrappers (oförändrat beteende, alla tester gröna). Inkopplat i `Play.tsx`: efter
+  varje botdrag visas "Öst spelade 3♣. **Varför?**" → klick fäller ut motiveringen.
+  Verifierad i webbläsaren. Facit i `play-bot.test.ts`.
 - **2026-07-01** – **FAS 11 pt 50 – signalavkodning (öppningsutspelet → hand-modellen)**
   (testsvit 717). Ny `signal-decode.ts`: motspelaren *läser* botens öppningsutspel
   och matar in slutsatsen i hand-modellen så Monte-Carlo-samplaren delar ut de

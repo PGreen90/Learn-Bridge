@@ -171,7 +171,10 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   + honnör (bara när utspelaren bevisligen är högst i färgen → touchérande honnör).
   Hand-modellen fick per-färg-HP-spann (`suitHcp`) som samplaren upprätthåller.
   Bara bottars utspel avkodas (ingen tjuvkik på människan). Inkopplat i `botCardSmart`.
-- **Kvar (FAS 11):** "Varför?"-knapp, tänj MC-fönstret tidigare (ev. webworker).
+- **"Varför?"-knapp (klar):** `botCardReasoned`/`botCardSmartReasoned` (`play-bot.ts`)
+  ger samma kort + en klartextsmotivering per drag. Inkopplat i `Play.tsx` – efter
+  varje botdrag visas "Öst spelade 3♣. Varför?" som fälls ut. Verifierad i webbläsaren.
+- **Kvar (FAS 11):** tänj MC-fönstret tidigare (ev. webworker för DDS).
 
 ## Kortspel (punkt 29)
 

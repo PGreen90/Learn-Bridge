@@ -23,7 +23,7 @@ import {
 } from '../lib/engine/auction-live'
 import { interpretCall } from '../lib/engine/auction-interpret'
 import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
-import { botCardSmart } from '../lib/engine/play-bot'
+import { botCardSmartReasoned } from '../lib/engine/play-bot'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
 import { PlayReplay } from '../components/PlayReplay'
@@ -59,6 +59,16 @@ function sameCard(a: Card, b: Card) {
 
 function strainSymbol(contract: Contract) {
   return contract.strain === 'NT' ? <>NT</> : <SuitSymbol suit={contract.strain} />
+}
+
+/** Ett kort som text: valör + färgsymbol (t.ex. "K♥"), för "Varför?"-raden. */
+function CardLabel({ card }: { card: Card }) {
+  return (
+    <span className="whitespace-nowrap font-semibold">
+      {card.rank}
+      <SuitSymbol suit={card.suit} />
+    </span>
+  )
 }
 
 // ===========================================================================
@@ -286,6 +296,9 @@ function PlayTable({
   // Vald färg i två-klicks-spelet: första klicket väljer (fan ut) färgen,
   // andra klicket på ett kort i den färgen spelar det.
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
+  // Datorns senaste drag + varför (för "Varför?"-knappen). Fälls ut på begäran.
+  const [lastBotMove, setLastBotMove] = useState<{ seat: Seat; card: Card; reason: string } | null>(null)
+  const [showWhy, setShowWhy] = useState(false)
 
   // Nollställ facit + färgval så fort ställningen ändras (du eller en bot la ett kort).
   useEffect(() => {
@@ -314,15 +327,24 @@ function PlayTable({
   useEffect(() => {
     if (isComplete(play) || controls(contract, play.toAct)) return
     const id = setTimeout(() => {
+      const seat = play.toAct
+      // Bot-hjärnan: Monte-Carlo-DDS i slutspelet (seedad ur auktionen + kända
+      // renonser), annars ärliga tumregler. Se play-bot.ts botCardSmartReasoned.
+      // Kortet + motiveringen räknas ur den aktuella ställningen (`play`); vi
+      // sparar "varför" för knappen och spelar sedan kortet.
+      const choice = botCardSmartReasoned(play, seat, calls)
+      setLastBotMove({ seat, card: choice.card, reason: choice.reason })
+      setShowWhy(false)
       setPlay((p) => {
         if (isComplete(p) || controls(contract, p.toAct)) return p
-        // Bot-hjärnan: Monte-Carlo-DDS i slutspelet (seedad ur auktionen + kända
-        // renonser), annars ärliga tumregler. Se play-bot.ts botCardSmart.
-        return playCard(p, botCardSmart(p, p.toAct, calls))
+        // Skydd: om ställningen hunnit ändras är det valda kortet kanske inte längre
+        // lagligt – fall då tillbaka på ett lagligt kort så inget kraschar.
+        const stillLegal = legalCards(p, p.toAct).some((c) => sameCard(c, choice.card))
+        return playCard(p, stillLegal ? choice.card : legalCards(p, p.toAct)[0])
       })
     }, 750)
     return () => clearTimeout(id)
-  }, [contract, play])
+  }, [contract, play, calls])
 
   function onPlay(card: Card) {
     setPlay((p) => {
@@ -423,6 +445,22 @@ function PlayTable({
                   : `${result.needed - facit} bet.`}
               </span>
             )}
+          </p>
+        )}
+        {/* "Varför?" – datorn förklarar sitt senaste kortval i klartext. */}
+        {lastBotMove && !done && (
+          <p className="mt-1 text-sm">
+            <span className="text-slate-500">
+              {SEAT_LABEL[lastBotMove.seat]} spelade <CardLabel card={lastBotMove.card} />.
+            </span>{' '}
+            <button
+              type="button"
+              onClick={() => setShowWhy((v) => !v)}
+              className="font-medium text-emerald-700 hover:underline"
+            >
+              {showWhy ? 'Dölj' : 'Varför?'}
+            </button>
+            {showWhy && <span className="ml-1 text-slate-600">{lastBotMove.reason}</span>}
           </p>
         )}
       </Panel>

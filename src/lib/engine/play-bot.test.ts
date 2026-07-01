@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
-import { botCard } from './play-bot'
+import { botCard, botCardReasoned } from './play-bot'
 import type { Contract, PlayedCard, PlayState, Trick } from './play'
 
 const C = (suit: Suit, rank: Rank): Card => ({ suit, rank })
@@ -157,5 +157,47 @@ describe('aldrig ruffa partnerns vinnande stick', () => {
       hand: [C('spades', '2'), C('clubs', '3')],
     })
     expect(botCard(s, 'N')).toEqual(C('clubs', '3'))
+  })
+})
+
+// "Varför?"-knappen (docs/bot-hjarna.md): botCardReasoned ger SAMMA kort som
+// botCard + en klartextsmotivering som matchar den tumregel som slog till.
+describe('botCardReasoned – kort + förklaring (Varför?-knappen)', () => {
+  const spadesSeq: Hand = [C('spades', 'K'), C('spades', 'Q'), C('spades', 'J'), C('spades', '5'), C('hearts', 'A'), C('hearts', '8'), C('hearts', '3')]
+
+  it('samma kort som botCard, alltid en icke-tom motivering', () => {
+    const s = state({ hand: spadesSeq })
+    const r = botCardReasoned(s, 'S')
+    expect(r.card).toEqual(botCard(s, 'S'))
+    expect(r.reason.length).toBeGreaterThan(0)
+  })
+
+  it('utspel med honnörssekvens → förklaring nämner utspel + topp av sekvens', () => {
+    const r = botCardReasoned(state({ hand: spadesSeq }), 'S')
+    expect(r.card).toEqual(C('spades', 'K'))
+    expect(r.reason).toContain('Utspel')
+    expect(r.reason).toContain('honnörssekvensen')
+  })
+
+  it('andra hand mot motståndaren → "Andra hand lågt"', () => {
+    const s = state({
+      seat: 'N', leader: 'E',
+      trick: [{ seat: 'E', card: C('diamonds', '5') }],
+      hand: [C('diamonds', 'K'), C('diamonds', '4'), C('clubs', '2')],
+    })
+    const r = botCardReasoned(s, 'N')
+    expect(r.card).toEqual(C('diamonds', '4'))
+    expect(r.reason).toContain('Andra hand lågt')
+  })
+
+  it('partnern vinner redan → förklaring nämner att vi inte ruffar partnern', () => {
+    const s = state({
+      seat: 'N', trump: 'spades', leader: 'S',
+      trick: [{ seat: 'S', card: C('hearts', 'A') }, { seat: 'W', card: C('hearts', '2') }],
+      hand: [C('spades', '2'), C('clubs', '3')],
+    })
+    const r = botCardReasoned(s, 'N')
+    expect(r.card).toEqual(C('clubs', '3'))
+    expect(r.reason).toContain('ruffar aldrig')
   })
 })

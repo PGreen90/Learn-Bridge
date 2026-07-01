@@ -17,7 +17,7 @@ import { isSureWinner, playedCards, shownVoids, unseenTrumpCount } from './card-
 import { buildHandModel } from './hand-model'
 import { applyOpeningLeadSignal } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
-import { leadFromSuit } from './signals'
+import { honorLead, leadFromSuit } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
@@ -76,15 +76,32 @@ function beats(card: Card, against: Card, led: Suit, trump: Suit | null): boolea
   return false
 }
 
-/** Väljer ett lagligt kort åt `seat` enligt enkla tumregler. */
-export function botCard(state: PlayState, seat: Seat): Card {
+/** Ett kortval + en förklaring i klartext (för "Varför?"-knappen, docs/bot-hjarna.md). */
+export interface CardChoice {
+  card: Card
+  reason: string
+}
+
+/**
+ * Tumregel-valet MED förklaring. Samma logik som `botCard` men returnerar också
+ * en klartextsmotivering ("Varför?"). Beskrivningarna följer nybörjardoktrinen.
+ */
+export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   const legal = legalCards(state, seat)
+  if (legal.length === 1) return { card: legal[0], reason: 'Bara ett lagligt kort att spela.' }
 
   // På lead:
   if (state.currentTrick.length === 0) {
     // Äkta utspel (trick 1, inga avslutade stick): utspelsdoktrin, inte cash-out
     // – man underleder inte ess/vinnare på utspelet.
-    if (state.completedTricks.length === 0) return openingLead(legal)
+    if (state.completedTricks.length === 0) {
+      const card = openingLead(legal)
+      const isHonor = honorLead(longestSuit(legal)) !== null
+      const reason = isHonor
+        ? 'Utspel (§8.3): jag spelar ut min längsta färg och toppar honnörssekvensen.'
+        : 'Utspel (§8.3): jag spelar ut min längsta färg med 3:e/5:e bästa kort så partnern ser längden.'
+      return { card, reason }
+    }
     // Mitt i given och inne: cash:a säkra vinnare uppifrån i stället för att leda
     // lågt ur längsta färgen (annars tas 10 stick där 13 var kalla).
     // Sang eller räknad trumf (ingen dold hand kan ruffa) → även sidofärgs­-
@@ -94,8 +111,10 @@ export function botCard(state: PlayState, seat: Seat): Card {
     const cashable = legal.filter(
       (c) => isSureWinner(c, legal, played) && (noRuffThreat || c.suit === state.trump),
     )
-    if (cashable.length > 0) return highest(cashable)
-    return openingLead(legal)
+    if (cashable.length > 0) {
+      return { card: highest(cashable), reason: 'Jag är inne och cashar en säker vinnare – inget högre kort är kvar i färgen.' }
+    }
+    return { card: openingLead(legal), reason: 'Jag är inne och spelar ut ur min längsta färg.' }
   }
 
   const led = state.currentTrick[0].card.suit
@@ -103,14 +122,26 @@ export function botCard(state: PlayState, seat: Seat): Card {
   const bestCard = state.currentTrick.find((pc) => pc.seat === bestSeat)!.card
 
   // Partnern leder redan sticket → slösa inte, kasta lågt (ruffa aldrig partnern).
-  if (side(bestSeat) === side(seat)) return lowAvoidRuff(legal, state.trump)
+  if (side(bestSeat) === side(seat)) {
+    return { card: lowAvoidRuff(legal, state.trump), reason: 'Partnern vinner redan sticket – jag kastar lågt och ruffar aldrig partnerns stick.' }
+  }
 
   // Andra hand (bara utspelet lagt än så länge, motståndaren leder) → lågt.
-  if (state.currentTrick.length === 1) return lowAvoidRuff(legal, state.trump)
+  if (state.currentTrick.length === 1) {
+    return { card: lowAvoidRuff(legal, state.trump), reason: 'Andra hand lågt – jag sparar honnörerna till senare.' }
+  }
 
   // Tredje/fjärde hand: vinn billigast möjligt om något slår, annars kasta lågt.
   const winners = legal.filter((c) => beats(c, bestCard, led, state.trump))
-  return winners.length > 0 ? lowest(winners) : lowAvoidRuff(legal, state.trump)
+  if (winners.length > 0) {
+    return { card: lowest(winners), reason: 'Jag vinner sticket så billigt som möjligt.' }
+  }
+  return { card: lowAvoidRuff(legal, state.trump), reason: 'Inget av mina kort vinner sticket – jag kastar lågt.' }
+}
+
+/** Väljer ett lagligt kort åt `seat` enligt enkla tumregler. */
+export function botCard(state: PlayState, seat: Seat): Card {
+  return botCardReasoned(state, seat).card
 }
 
 export interface SmartOpts {
@@ -136,18 +167,18 @@ export interface SmartOpts {
  *  • handen är större än `maxCardsForMC` (tidiga, tunga ställningar = för långsamt;
  *    vinsten ligger ändå i slutspelet: stickföring, ingångar, slutkast).
  */
-export function botCardSmart(
+export function botCardSmartReasoned(
   state: PlayState,
   seat: Seat,
   calls: ResolvedCall[] = [],
   opts: SmartOpts = {},
-): Card {
+): CardChoice {
   const legal = legalCards(state, seat)
-  if (legal.length === 1) return legal[0]
+  if (legal.length === 1) return { card: legal[0], reason: 'Bara ett lagligt kort att spela.' }
 
   const openingLead = state.completedTricks.length === 0 && state.currentTrick.length === 0
   const maxCards = opts.maxCardsForMC ?? 7
-  if (openingLead || state.hands[seat].length > maxCards) return botCard(state, seat)
+  if (openingLead || state.hands[seat].length > maxCards) return botCardReasoned(state, seat)
 
   const model = buildHandModel(calls, { voids: shownVoids(state) })
   // Signalavkodning (pt 50): skärp modellen med det öppningsutspelet avslöjar
@@ -157,5 +188,21 @@ export function botCardSmart(
     samples: opts.samples ?? 24,
     maxNodes: opts.maxNodes ?? 150_000,
   })
-  return choice ? choice.card : botCard(state, seat)
+  if (!choice) return botCardReasoned(state, seat)
+  return {
+    card: choice.card,
+    reason:
+      `Bot-hjärnan tänkte som en expert: jag delade ut ${choice.samples} troliga lägen (utifrån ` +
+      `budgivningen och korten som fallit) och spelade igenom dem – det här kortet gav flest stick i snitt.`,
+  }
+}
+
+/** Bottens kortval MED bot-hjärnan (docs/bot-hjarna.md, Steg 3c). Se `botCardSmartReasoned`. */
+export function botCardSmart(
+  state: PlayState,
+  seat: Seat,
+  calls: ResolvedCall[] = [],
+  opts: SmartOpts = {},
+): Card {
+  return botCardSmartReasoned(state, seat, calls, opts).card
 }
