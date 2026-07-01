@@ -30,6 +30,28 @@ describe('classifyOpening', () => {
     expect(call('S:KQ5 H:A8 D:KT62 C:QT43')).toBe('1D') // 14 hp, minorer 4-4
   })
 
+  // ---- FAS 7 punkt 26: minor-regeln 3-3 / 4-4 / 5-5 / olika längd (§3) -------
+  describe('minor-regeln (facit: 3-3♣ / 4-4♦ / 5-5♦ / längsta minorn)', () => {
+    it('3-3 minorer → 1♣ (billigast)', () => {
+      expect(call('S:KQ72 H:A85 D:K84 C:QT3')).toBe('1C') // 14 hp, 4-3-3-3, minorer 3-3
+    })
+    it('4-4 minorer → 1♦ (plats att bjuda klöver nästa vända)', () => {
+      expect(call('S:KQ5 H:A8 D:KT62 C:QT43')).toBe('1D') // 4-4 i minorerna
+    })
+    it('5-5 minorer → 1♦ (öppnar ruter, klöver naturligt nästa vända)', () => {
+      expect(call('S:Q2 H:J3 D:KQ983 C:KJ842')).toBe('1D') // 12 hp, 5-5, obalanserad
+    })
+    it('olika längd → längsta minorn (5♣-3♦ → 1♣)', () => {
+      expect(call('S:Q42 H:J3 D:KQ9 C:KJ842')).toBe('1C') // klöver längre
+    })
+    it('olika längd → längsta minorn (5♦-3♣ → 1♦)', () => {
+      expect(call('S:Q42 H:J3 D:KJ842 C:KQ9')).toBe('1D') // ruter längre
+    })
+    it('olika längd → längsta minorn (4♣-3♦ → 1♣)', () => {
+      expect(call('S:K84 H:A85 D:Q84 C:KQ72')).toBe('1C') // klöver 4, ruter 3
+    })
+  })
+
   // ---- FAS 4 steg D (b): TP-nudge för sangöppning (sårbarhets-oberoende) ----
   describe('TP-nudge: bra 14 → 1NT (utan 5-korts färg)', () => {
     it('bra 14 (två kvalitetsfärger + tior, startp. ≥15) → 1NT', () => {
@@ -125,5 +147,40 @@ describe('TP styr öppningen (Bergens grundregel: 12+ startpoäng)', () => {
   })
   it('platt 11-hp-hand (TP < 12) avstår fortfarande', () => {
     expect(call('S:KQ52 H:KJ7 D:Q42 C:T32')).toBe('P') // 11 hp, 4-3-3-3 → under golvet
+  })
+})
+
+// ---- FAS 7 punkt 32: Regel 2-3-4 – kvalitetsgrind på spärröppningen ---------
+// Ägarbeslut 2026-07-01: topphonnörer (A/K/Q) i den långa färgen, modulerat av
+// sårbarhet. 3-läget: ej sårbar ≥1, sårbar ≥2. 4-läget: ej sårbar valfri, sårbar ≥1.
+describe('Regel 2-3-4 – sårbarhet + färgkvalitet styr spärröppningen', () => {
+  it('sund färg (2 topphonnörer) spärrar på 3-läget i BÅDA zonerna', () => {
+    const h = 'S:KQJ7432 H:8 D:Q72 C:95' // ♠KQ = 2 topphonnörer
+    expect(callVul(h, false)).toBe('3S')
+    expect(callVul(h, true)).toBe('3S')
+  })
+
+  it('en topphonnör: 3♠ ej sårbar, men PASS sårbar', () => {
+    const h = 'S:KJ97432 H:8 D:Q72 C:95' // ♠K = 1 topphonnör
+    expect(callVul(h, false)).toBe('3S')
+    expect(callVul(h, true)).toBe('P')
+  })
+
+  it('skräpfärg (0 topphonnörer) spärrar ALDRIG på 3-läget', () => {
+    const h = 'S:JT97432 H:8 D:Q72 C:95' // ♠ ingen A/K/Q (T = tian)
+    expect(callVul(h, false)).toBe('P')
+    expect(callVul(h, true)).toBe('P')
+  })
+
+  it('8-korts färg med en topphonnör → 4♠ i båda zonerna', () => {
+    const h = 'S:KJT97432 H:8 D:Q7 C:96' // 8 spader, ♠K = 1 topp
+    expect(callVul(h, false)).toBe('4S')
+    expect(callVul(h, true)).toBe('4S')
+  })
+
+  it('8-korts skräpfärg (0 topp): 4♠ ej sårbar, PASS sårbar', () => {
+    const h = 'S:JT987432 H:8 D:Q7 C:96' // 8 spader, ingen A/K/Q
+    expect(callVul(h, false)).toBe('4S')
+    expect(callVul(h, true)).toBe('P')
   })
 })

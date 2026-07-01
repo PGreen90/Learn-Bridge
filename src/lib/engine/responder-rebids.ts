@@ -96,7 +96,64 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
     return responderPlaceAfterOgust(hand, weak, rebid)
   }
 
+  // FAS 6 punkt 27 – svararen placerar kontraktet efter inverterad minor.
+  if ((openCall === '1C' || openCall === '1D') && response.rule.startsWith('inverterad minor')) {
+    return responderRebidAfterInvertedMinor(hand, openCall === '1C' ? 'clubs' : 'diamonds', rebid)
+  }
+
   return null
+}
+
+// === FAS 6 punkt 27: svararens fortsättning efter inverterad minor, §4.2 =====
+// Efter den STARKA inverterade höjningen (1m–2m, 10+ krav) beskriver öppnaren sin
+// hand (stopp-visning / 2NT / 3m minimum / 3NT 18–19). Svararen är nu kapten mot
+// 3NT (systembok §4.2: "fortsätter mot 3NT, visar stopp i objudna färger"). Efter
+// den SVAGA höjningen (1m–3m) passar öppnaren normalt; bjöd öppnaren ändå 3NT
+// (18+) placerar svararen bara pass. Cue/RKC-slam på minorfiten = FAS 8.
+export function responderRebidAfterInvertedMinor(hand: Hand, m: Suit, rebid: ResponseResult): ResponseResult | null {
+  const p = hcp(hand)
+  const mBid = BID[m]
+  const mSym = SYM[m]
+  const sideSuits = RANK.filter((s) => s !== m) // 3 objudna färger (2 hf + andra minorn)
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${p} hp – ${why} → pass.` })
+
+  switch (rebid.rule) {
+    case 'inverterad: 3NT': // öppnaren 18–19 balanserad – utgång bjuden
+    case 'rebid: 3NT': // öppnaren tog svaga höjningen till 3NT
+      return pass('öppnaren bjöd 3NT (till spel), står')
+
+    case 'inverterad: 2NT':
+      // Öppnaren 12–14 balanserad (ej krav). Den starka höjningen var 10+, så paret
+      // har ≥ 22. Med utgångsvärden (11+) → 3NT; annars stannar 2NT.
+      return p >= 11
+        ? { call: '3NT', rule: '3NT till spel', explanation: `${p} hp mittemot balanserad 12–14 → 3NT (till spel).` }
+        : pass('minimumhöjning mittemot 12–14 – 2NT räcker')
+
+    case 'inverterad: minimum': {
+      // Öppnaren rebjöd minorn (3m): minimum UTAN stopp att visa. Svararen stannar
+      // om inte stark; med utgångsvärden + stopp i BÅDA högfärgerna vågar vi 3NT
+      // (öppnaren saknade en stopp → svararen måste själv täcka sidofärgerna).
+      const majorsStopped = hasStopper(hand, 'hearts') && hasStopper(hand, 'spades')
+      return p >= 13 && majorsStopped
+        ? { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i båda högfärgerna → 3NT (till spel).` }
+        : pass('öppnaren minimum utan stopp – stannar i delkontrakt')
+    }
+
+    case 'inverterad: stopp-visning': {
+      // Öppnaren visade en stopp i en sidofärg (krav, letar 3NT). Svararen bjuder
+      // 3NT när de ÖVRIGA sidofärgerna är täckta; annars höjer minorn mot
+      // minorutgång (5m). Fortsatt stopp-letande upp-the-line = FAS 8 (flaggas).
+      const shown = suitOfCall(rebid.call)
+      const remaining = sideSuits.filter((s) => s !== shown)
+      if (remaining.every((s) => hasStopper(hand, s))) {
+        return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp – resterande sidofärger täckta → 3NT (till spel).` }
+      }
+      return { call: `5${mBid}`, rule: 'höjning till utgång', explanation: `${p} hp utan stopp i alla sidofärger → 5${mSym} (minorutgång; 3NT osäker).`, uncertain: true }
+    }
+
+    default:
+      return null
+  }
 }
 
 // === FAS 3 punkt 14: svararen visar kortfärgen efter splinter-relä ==========

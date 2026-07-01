@@ -203,8 +203,11 @@ trumf → 3 i trumf):
 - **Höjningar är inverterade:** 1m–2m = **stark** (10+ hp, krav, 4+ stöd, ingen
   4-korts hf); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
   spärrar direkt, den starka hålls låg för att få plats att utforska.
-- Ny färg på 2-läget utan hopp = **2-över-1 GF**. **Hoppskift** i ny färg
-  (t.ex. 1♣–2♥, 1♦–3♣) = **svaga** (6-korts färg, ~6–10 hp), som i hf.
+- Ny färg på 2-läget utan hopp = **2-över-1 GF**. **Hoppskift i ny HÖGFÄRG**
+  (t.ex. 1♣–2♥, 1♣–2♠, 1♦–2♥, 1♦–2♠) = **svaga** (6-korts färg, ~6–10 hp), som i
+  hf. **Inget svagt hoppskift i den andra minorn** (ägarbeslut 2026-07-01): 1♦–3♣
+  spelas EJ som svag hoppskift – en svag 6-korts klöverhand över 1♦ bjuder **1NT**
+  (följer detaljtabellen nedan).
 - "Gap-handen" 7–9 hp med stöd men utan hf: bjud **1NT** (inverterad
   höjning kräver 10+).
 
@@ -840,6 +843,15 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-01** – Budmotorn: **FAS 6 (minorsystem) + FAS 7 (svaga öppningar)**
+  facit-granskade och kompletta (testsvit 612). FAS 6: minor-regeln facit-låst,
+  **svararens fortsättning efter inverterad minor byggd** (mot 3NT), svaga
+  hoppskift verifierade (**ägarbeslut: inget 1♦–3♣**, §4.2 ovan). FAS 7: svaga
+  tvåor/Ogust verifierade, **öppnarens feature-visning på spärr byggd** (§4.6),
+  **Regel 2-3-4 inkopplad som sårbarhets-/kvalitetsgrind på spärröppningen**
+  (ägarbeslut, öppningsstruktur: topphonnörer A/K/Q i den långa färgen – 3-läget
+  ej sårbar ≥1/sårbar ≥2, 4-läget valfri/≥1; 12 HP-golvet orört). Presshöjning
+  över spärr avvisad (bara utgångsvärden). **Nästa gång:** FAS 8 slamsystemet.
 - **2026-06-25** – Systembok skapad. Öppningsbud + minor-regeln nedskrivna.
 - **2026-06-25** – Avsnitt 4.1 (Svar på 1♥/1♠) nedskrivet: höjningar, splinter
   (3-läge=singleton, 4-läge=renons), Jacoby 2NT, svagt hoppskift (endast 1♥–2♠),

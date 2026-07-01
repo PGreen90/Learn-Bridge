@@ -88,6 +88,42 @@
   Fortsatt cue/RKC på minorfiten + öppnarens 3♥/3♠-stopp/4♣-4♦-max = **FAS 8**.
   Facit i `responder-rebids.test.ts`. **Hela FAS 5 NT-systemet är därmed klart.**
 
+## Minorsystem (FAS 6 KLAR 2026-07-01, testsvit 612)
+
+- **Punkt 26 Minor-regeln** verifierad + facit-låst (`openings.test.ts`): 3-3 → 1♣,
+  4-4 → 1♦, 5-5 → 1♦, olika längd → längsta minorn (`openMinor` i `openings.ts`).
+- **Punkt 27 Inverterade minorer**: svararens första bud (`respondToMinor`) och
+  öppnarens återbud (`openerRebidAfterInvertedMinor`) fanns; **svararens
+  fortsättning byggd** (`responderRebidAfterInvertedMinor` i `responder-rebids.ts`) –
+  auktionen dog förut vid öppnarens återbud. Svararen placerar nu mot 3NT: efter
+  öppnarens 2NT (12–14) → 3NT med 11+, efter stopp-visning → 3NT när övriga
+  sidofärger är täckta (annars 5m, flaggad), efter 3m minimum → 3NT bara med 13+
+  och båda hf stoppade, efter 3NT → pass. End-to-end `1♦–2♦–2NT–3NT` bygger.
+  Slam på minorfit (cue/RKC) = FAS 8.
+- **Punkt 28 Svaga hoppskift** verifierade (2♥/2♠ över 1m; 1♥–2♠). **Ägarbeslut
+  2026-07-01:** INGET svagt hoppskift i den andra minorn (1♦–3♣) – systembokens
+  prosa-exempel gäller inte; en svag 6-korts klöver över 1♦ bjuder 1NT (följer
+  detaljtabellen). Facit-låst i `responses.test.ts`.
+
+## Svaga öppningar (FAS 7 KLAR 2026-07-01, testsvit 612)
+
+- **Punkt 29 Svaga tvåor + Punkt 30 Ogust** verifierade (redan väl täckta):
+  `respondToWeakTwo`, `openerRebidAfterOgust`, `openerRebidAfterNewSuit`,
+  `responderPlaceAfterOgust` (`responses-weak2.ts`).
+- **Punkt 31 Spärröppningar**: `respondToPreempt` + `openerRebidAfterPreemptNewSuit`
+  (`responses-preempt.ts`). **Öppnarens feature-visning byggd** (saknades): maximum
+  (~9+ hp) utan stöd visar en yttre A/K i en sidofärg upp-the-line (ny regel
+  `rebid: feature`, systembok §4.6). **Ägarbeslut 2026-07-01:** svag stödhand
+  PRESSAR inte till utgång över en spärr – höjer bara med utgångsvärden (nuvarande
+  beteende bekräftat + facit-låst).
+- **Punkt 32 Regel 2-3-4 (ägarbeslut 2026-07-01, öppningsstruktur):** kvalitetsgrind
+  på spärröppningen i `openings.ts` (`topHonorCount`), modulerad av sårbarhet
+  (`isVulnerable` tråas redan in via `buildAuction`). Topphonnörer = A/K/Q i den
+  långa färgen. **3-läget** (7-korts): ej sårbar ≥ 1, sårbar ≥ 2. **4-läget**
+  (8-korts): ej sårbar valfri, sårbar ≥ 1. Skräpfärg spärrar aldrig. Faller handen
+  igenom grinden → ingen spärr (pass). **12 HP-golvet är orört** – detta rör bara
+  svaga spärrhänder. Facit i `openings.test.ts`.
+
 ## Handvärdering
 
 - Bergens Adjust-3 i `evaluation.ts`: startpoäng, stödpoäng och Bergenpoäng.

@@ -195,4 +195,11 @@ describe('respondToMinor', () => {
       expect(respM('S:Q54 H:Q54 D:K642 C:Q54', 'diamonds')).toBe('1NT')
     })
   })
+
+  // ---- FAS 6 punkt 28 (ägarbeslut 2026-07-01): INGET svagt hoppskift i den ----
+  // andra minorn. En svag 6-korts klöverhand över 1♦ bjuder 1NT, inte 3♣ (följer
+  // detaljtabellen; systembokens prosa-exempel "1♦–3♣" gäller alltså inte).
+  it('svag 6-korts klöver över 1♦ → 1NT (INTE 3♣ hoppskift)', () => {
+    expect(respM('S:32 H:J43 D:K3 C:KQ9764', 'diamonds')).toBe('1NT') // 9 hp, 6 klöver
+  })
 })

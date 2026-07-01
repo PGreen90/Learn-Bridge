@@ -114,13 +114,23 @@ export function classifyOpening(hand: Hand, vulnerable = false): OpeningResult {
   }
 
   // Spärröppning (7+ korts färg, svag) – kollas före svag tvåa.
+  // Regel 2-3-4 (ägarbeslut 2026-07-01): kvalitetsgrind på topphonnörer (A/K/Q) i
+  // den långa färgen, modulerad av sårbarhet – sårbar kräver mer disciplin.
+  //   3-läget (7-korts): ej sårbar ≥ 1 topphonnör, sårbar ≥ 2.
+  //   4-läget (8-korts): ej sårbar valfri, sårbar ≥ 1.
+  // En 12 HP-hand har redan öppnat (låst regel); detta rör bara svaga spärrhänder.
+  // Faller handen igenom grinden → ingen spärr (pass, om ingen svag tvåa gäller).
   for (const suit of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
     if (len[suit] >= 7) {
       const level = len[suit] >= 8 ? 4 : 3
+      const tops = topHonorCount(hand, suit)
+      const need = level >= 4 ? (vulnerable ? 1 : 0) : vulnerable ? 2 : 1
+      if (tops < need) break // för dålig färg för sårbarheten → ingen spärr
+      const zon = vulnerable ? 'sårbar' : 'ej sårbar'
       return {
         call: `${level}${BID[suit]}`,
         rule: 'spärr',
-        explanation: `${p} hp med ${len[suit]}-korts ${NAME[suit]} → ${level}${BID[suit]} (spärröppning).`,
+        explanation: `${p} hp med ${len[suit]}-korts ${NAME[suit]} (${tops} topphonnör, ${zon}) → ${level}${BID[suit]} (spärröppning).`,
       }
     }
   }
@@ -140,6 +150,12 @@ export function classifyOpening(hand: Hand, vulnerable = false): OpeningResult {
 
   // Annars pass.
   return { call: 'P', rule: 'pass', explanation: `${p} hp, ingen öppning → pass.` }
+}
+
+/** Antal topphonnörer (A/K/Q) i en färg – grund för Regel 2-3-4-grinden. */
+function topHonorCount(hand: Hand, suit: Suit): number {
+  const ranks = hand.filter((c) => c.suit === suit).map((c) => c.rank)
+  return (['A', 'K', 'Q'] as const).filter((r) => ranks.includes(r)).length
 }
 
 /** Minor-regeln: längsta minorn; vid lika 4-4/5-5 → ruter, 3-3 → klöver. */

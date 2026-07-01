@@ -12,11 +12,33 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
+**🎉 FAS 6 MINORSYSTEM + FAS 7 SVAGA ÖPPNINGAR KLARA (2026-07-01, testsvit 612).**
+Ägaren körde BÅDA i samma session. **NÄSTA SESSION BÖRJAR MED: FAS 8 — Slamsystem**
+(cue-bids, 1430 RKC, trumfdamfrågan, Sjöbergs 5NT, Gerber, Exclusion – verktygen
+finns i `slam.ts`/`slam-auction.ts`/`nt-slam.ts`, FAS 8 är facit-granskning +
+inkoppling i minorfit-slam/MSS-slam). **Ej pushat/deployat än** – be om lov (PCD).
+
+FAS 6 (facit + `npm test`):
+- ✅ **26 Minor-regeln** verifierad + facit-låst (3-3♣/4-4♦/5-5♦/längsta minorn).
+- ✅ **27 Inverterade minorer:** **svararens fortsättning byggd**
+  (`responderRebidAfterInvertedMinor`) – auktionen dog förut vid öppnarens återbud.
+  Placerar mot 3NT (2NT→3NT m. 11+, stopp-visning→3NT om täckt annars 5m, 3m
+  minimum→3NT bara m. 13+ & båda hf stoppade, 3NT→pass). E2e `1♦–2♦–2NT–3NT`.
+- ✅ **28 Svaga hoppskift** verifierade. **Ägarbeslut:** inget 1♦–3♣ (behåll 1NT).
+
+FAS 7 (facit + `npm test`):
+- ✅ **29 Svaga tvåor + 30 Ogust** verifierade (redan väl täckta).
+- ✅ **31 Spärröppningar:** **öppnarens feature-visning byggd** (`rebid: feature`,
+  maximum utan stöd visar yttre A/K). **Ägarbeslut:** svag stödhand pressar INTE
+  (bara utgångsvärden höjer).
+- ✅ **32 Regel 2-3-4 (ägarbeslut, öppningsstruktur):** kvalitetsgrind på
+  spärröppningen (`topHonorCount` i `openings.ts`), sårbarhets-modulerad.
+  Topphonnörer A/K/Q: 3-läget ej sårbar ≥1/sårbar ≥2; 4-läget valfri/≥1. Skräp
+  spärrar aldrig. **12 HP-golvet orört.** Facit i `openings.test.ts`.
+
+--- Historik ---
 **🎉 FAS 5 NT-SYSTEMET KLAR (2026-07-01, testsvit 587, pushat+deployat).**
-Punkt **19–25 klara**. **NÄSTA SESSION BÖRJAR MED: FAS 7 — Svaga öppningar**
-(ägarval 2026-07-01: hoppa förbi FAS 6 tills vidare). Svaga tvåor, Ogust,
-spärröppningar, regel 2-3-4. Grunderna finns redan (`responses-weak2.ts`,
-`responses-preempt.ts`) – FAS 7 är facit-granskning + luckor, som FAS 5.
+Punkt **19–25 klara**. FAS 5 var facit-granskning + luckor.
 - ✅ **19 Stayman:** lagad inbjudnings-5-4-lucka (naturlig 2♥/2♠) + **garbage
   Stayman** (svag exakt 4-4 hf + kort klöver → 2♣, passar svaret). Ägarbeslut.
 - ✅ **20 Smolen** verifierad. ✅ **22 Texas** verifierad.
@@ -73,10 +95,11 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **FAS 7 — Svaga öppningar:** svaga tvåor, Ogust, spärröppningar, regel 2-3-4.
-   (Ägarval: nästa session. Flyttad före FAS 6.)
-2. **FAS 6 — Minorsystem:** minorregeln, inverterade minorer, svaga hoppskift.
-3. **FAS 8 — Slam:** cue/RKC på minorfit, MSS-slamfortsättning m.m.
+1. **FAS 8 — Slamsystem:** cue-bids, 1430 RKC, trumfdamfrågan, Sjöbergs 5NT,
+   Gerber, Exclusion. Verktygen finns – facit-granskning + inkoppling i
+   minorfit-slam/MSS-slam. (Känd gräns: slam-quirken, jaga den inte.)
+2. **FAS 9 — Passad hand:** Drury + passad vs opassad hand.
+3. **FAS 10 — Försvarsbud:** Michaels, ovanlig 2NT, DONT, Lebensohl, Mathe, Multi.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { Major, ResponseResult } from './responses'
 import { parseHand } from '../bidding'
 import type { Suit } from '../../types/bridge'
-import { responderAnswerBergenGameTry, responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction, responderRebidIn2NTAuction, responderRevealSplinterShortness } from './responder-rebids'
+import { responderAnswerBergenGameTry, responderRebidAfterInvertedMinor, responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction, responderRebidIn2NTAuction, responderRevealSplinterShortness } from './responder-rebids'
+import { buildAuction } from './auction'
+import type { Deal } from '../../types/bridge'
 
 function r10(notation: string, M: Major, call: string, rule: string): string {
   const rebid: ResponseResult = { call, rule, explanation: '' }
@@ -286,5 +288,63 @@ describe('punkt 12 – svararens andra bud i färgauktioner (fjärde färg krav)
 
   it('öppnaren rebjöd sin färg, svag preferens → pass', () => {
     expect(r12('S:KQ842 H:3 D:K72 C:9542', 'diamonds', 'spades', '2D', 'rebjuden färg')).toBe('P') // 8 hp, 3 ruter
+  })
+})
+
+describe('FAS 6 punkt 27 – svararens fortsättning efter inverterad minor (1♦–2♦–…)', () => {
+  const inv = (n: string, rebidCall: string, rebidRule: string, m: Suit = 'diamonds'): ResponseResult | null =>
+    responderRebidAfterInvertedMinor(parseHand(n), m, { call: rebidCall, rule: rebidRule, explanation: '' })
+
+  it('öppnaren 18–19 balanserad (3NT) → pass (utgång står)', () => {
+    expect(inv('S:A32 H:A32 D:KJ643 C:32', '3NT', 'inverterad: 3NT')?.call).toBe('P')
+  })
+
+  it('öppnaren 12–14 balanserad (2NT) + utgångsvärden (11+) → 3NT', () => {
+    expect(inv('S:K84 H:Q72 D:KJ42 C:Q32', '2NT', 'inverterad: 2NT')?.call).toBe('3NT') // 11 hp
+  })
+
+  it('öppnaren 12–14 balanserad (2NT) + minimumhöjning (10) → pass (2NT räcker)', () => {
+    expect(inv('S:K84 H:J72 D:KJ42 C:Q32', '2NT', 'inverterad: 2NT')?.call).toBe('P') // 10 hp
+  })
+
+  it('öppnaren minimum utan stopp (3♦) + stark med båda hf stoppade → 3NT', () => {
+    expect(inv('S:AQ4 H:KJ7 D:K842 C:Q3', '3D', 'inverterad: minimum')?.call).toBe('3NT') // 15 hp
+  })
+
+  it('öppnaren minimum utan stopp (3♦) + saknar spaderstopp → pass', () => {
+    expect(inv('S:432 H:KJ7 D:KQ42 C:AQ3', '3D', 'inverterad: minimum')?.call).toBe('P') // 14 hp, ingen ♠-stopp
+  })
+
+  it('öppnaren stopp-visning (2♥) + övriga sidofärger täckta → 3NT', () => {
+    expect(inv('S:AQ4 H:842 D:KQ42 C:KJ3', '2H', 'inverterad: stopp-visning')?.call).toBe('3NT')
+  })
+
+  it('öppnaren stopp-visning (2♥) + ingen spaderstopp → 5♦ (minorutgång, flaggad)', () => {
+    const r = inv('S:432 H:842 D:KQ42 C:KJ3', '2H', 'inverterad: stopp-visning')
+    expect(r?.call).toBe('5D')
+    expect(r?.uncertain).toBe(true)
+  })
+
+  it('svag höjning (1♦–3♦) + öppnaren 3NT → pass', () => {
+    expect(inv('S:32 H:432 D:KJ8643 C:32', '3NT', 'rebid: 3NT')?.call).toBe('P')
+  })
+})
+
+describe('buildAuction – inverterad minor end-to-end (FAS 6 inkoppling)', () => {
+  it('bygger 1♦ – 2♦ – 2NT – 3NT (stark inverterad → 12–14 → utgång)', () => {
+    const deal: Deal = {
+      id: 'test',
+      board: 1,
+      dealer: 'N',
+      vulnerability: 'none',
+      hands: {
+        N: parseHand('S:KQ4 H:KJ7 D:A842 C:432'), // 13 hp bal, minor-regeln → 1♦, rebid 2NT
+        S: parseHand('S:A2 H:A32 D:KJ643 C:432'), // 12 hp, 5 ruterstöd → 2♦ inverterad, sen 3NT
+        E: parseHand('S:J876 H:Q865 D:7 C:QJ95'),
+        W: parseHand('S:T953 H:T94 D:QT5 C:KT8'),
+      },
+    }
+    const a = buildAuction(deal)
+    expect(a?.turns.map((t) => t.call)).toEqual(['1D', '2D', '2NT', '3NT'])
   })
 })

@@ -132,6 +132,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'rebjuden färg': 'ej-krav',
   'rebid: egen färg': 'ej-krav',
   'rebid: stöd': 'ej-krav',
+  'rebid: feature': 'ej-krav',
   'NT med stopp': 'ej-krav',
   'NT-svar': 'ej-krav',
   'andra negativa': 'ej-krav',

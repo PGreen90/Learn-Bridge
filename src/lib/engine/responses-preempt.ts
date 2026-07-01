@@ -38,6 +38,12 @@ function hasStopper(hand: Hand, suit: Suit): boolean {
   return false
 }
 
+/** Har färgen en yttre topphonnör (A eller K)? Grund för "feature"-visning. */
+function topHonor(hand: Hand, suit: Suit): boolean {
+  const ranks = hand.filter((c) => c.suit === suit).map((c) => c.rank)
+  return ranks.includes('A') || ranks.includes('K')
+}
+
 /** Längsta sidofärgen (≠ trumf) med minst `min` kort; lika → högst rankad. */
 function longestSide(len: Record<Suit, number>, opened: Suit, min: number): Suit | null {
   let best: Suit | null = null
@@ -108,6 +114,21 @@ export function openerRebidAfterPreemptNewSuit(hand: Hand, opened: Suit, newSuit
     const gameLevel = isMajor(newSuit) ? 4 : 5
     if (responderLevel >= gameLevel) return pass(`stöd i ${NAME[newSuit]}, utgång redan nådd`)
     return { call: `${gameLevel}${BID[newSuit]}`, rule: 'rebid: stöd', explanation: `${p} hp, ${len[newSuit]} stöd i ${NAME[newSuit]} → ${gameLevel}${SYM[newSuit]} (utgång).` }
+  }
+
+  // Maximum spärr (~9–11) UTAN stöd → visa en "feature" (yttre A/K) i en sidofärg
+  // som ryms billigast över svararens bud och under egen utgång (systembok §4.6).
+  // Visas upp-the-line (billigaste sidofärg med A/K, samma nivå = högre rankad än
+  // svararens färg). Minimum eller ingen billig feature → rebjuden färg nedan.
+  const ownGameForFeature = isMajor(opened) ? 4 : 5
+  if (p >= 9 && responderLevel < ownGameForFeature) {
+    for (const s of RANK) {
+      if (s === opened || s === newSuit) continue
+      if (rankOf(s) <= rankOf(newSuit)) continue // bara samma nivå (ingen dyr hopp-feature)
+      if (topHonor(hand, s)) {
+        return { call: `${responderLevel}${BID[s]}`, rule: 'rebid: feature', explanation: `${p} hp (maximum), yttre honnör i ${NAME[s]} → ${responderLevel}${SYM[s]} (feature, visar sidohonnör).` }
+      }
+    }
   }
 
   // Ingen passning: rebjuda egen färg billigast om det ryms under/på utgång.

@@ -16,6 +16,12 @@ describe('respondToPreempt – svararens svar på spärr', () => {
     expect(resp('S:K84 H:Q73 D:K842 C:J96', 'spades', 3)).toBe('P') // 9 hp
   })
 
+  // FAS 7 (ägarbeslut 2026-07-01): svag hand med 4-korts stöd PRESSAR inte till
+  // utgång – höjer bara med utgångsvärden. En svag stödhand passar (ej 4♥).
+  it('svag hand (8 hp) med 4-korts stöd → pass (ingen presshöjning)', () => {
+    expect(resp('S:K84 H:Q762 D:K84 C:962', 'hearts', 3)).toBe('P') // 8 hp, 4 hjärter
+  })
+
   it('höjning till utgång med stark fit (16+)', () => {
     expect(resp('S:A4 H:AKQ2 D:KQ32 C:542', 'spades', 3)).toBe('4S') // 18 hp, 2 stöd
   })
@@ -44,6 +50,22 @@ describe('openerRebidAfterPreemptNewSuit – öppnarens återbud', () => {
 
   it('rebjuder egen färg utan stöd (3♠–4♥ → 4♠)', () => {
     expect(openerRebidAfterPreemptNewSuit(parseHand('S:KQJ9764 H:5 D:K32 C:42'), 'spades', 'hearts').call).toBe('4S')
+  })
+
+  // FAS 7 punkt 31: maximum spärr UTAN stöd visar en yttre A/K ("feature", §4.6).
+  describe('feature-visning (maximum utan stöd)', () => {
+    it('3♣–3♥ – max med spaderkung → 3♠ (feature upp-the-line)', () => {
+      // 3♣ (7 klöver), svararen 3♥ krav. Öppnaren max (11 hp) med ♠K + ♦A → 3♠.
+      expect(openerRebidAfterPreemptNewSuit(parseHand('S:K5 H:82 D:A2 C:KJ97642'), 'clubs', 'hearts').call).toBe('3S')
+    })
+    it('minimum (6 hp) med sidohonnör → rebjuder egen färg (feature kräver max)', () => {
+      // 3♣–3♥, minimum (6 hp) trots ♠K → 4♣ (rebjuden färg, ryms under 5♣).
+      expect(openerRebidAfterPreemptNewSuit(parseHand('S:K2 H:8 D:832 C:QJ97642'), 'clubs', 'hearts').call).toBe('4C')
+    })
+    it('max men bara låg-rankad sidohonnör (dyr feature) → rebjuder egen färg', () => {
+      // 3♥–3♠, max med ♦K men ruter lägre rankad än spader (skulle kräva 4♦) → 4♥.
+      expect(openerRebidAfterPreemptNewSuit(parseHand('S:52 H:KQJ9874 D:K3 C:52'), 'hearts', 'spades').call).toBe('4H')
+    })
   })
 })
 

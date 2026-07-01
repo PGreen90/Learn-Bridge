@@ -60,6 +60,17 @@
 >     (ej sårbar ≥15, sårbar ≥16) via `isVulnerable`+`buildAuction` (`openings.ts`).
 >   🎉 **HELA FAS 4 KLAR (testsvit 559).** Nästa: ägaren väljer NU ur NÄST
 >   (naturlig kandidat FAS 5 NT-systemet).
+> - 🎉 **HELA FAS 5 NT-SYSTEMET KLAR (2026-07-01, testsvit 587)** – punkt 19–25.
+> - 🎉 **HELA FAS 6 MINORSYSTEM + FAS 7 SVAGA ÖPPNINGAR KLARA (2026-07-01,
+>   testsvit 612)** – ägaren körde båda i samma session:
+>   - **FAS 6:** minor-regeln facit-låst; **svararens fortsättning efter inverterad
+>     minor byggd** (luckan där auktionen dog); svaga hoppskift verifierade
+>     (ägarbeslut: inget 1♦–3♣, behåll 1NT).
+>   - **FAS 7:** svaga tvåor/Ogust verifierade; **öppnarens feature-visning på
+>     spärr byggd** (`rebid: feature`); **Regel 2-3-4 inkopplad som
+>     sårbarhets-/kvalitetsgrind på spärröppningen** (ägarbeslut, öppningsstruktur:
+>     topphonnörer A/K/Q, 3-läget ej sårbar ≥1/sårbar ≥2, 4-läget valfri/≥1);
+>     presshöjning avvisad (bara utgångsvärden). Se `docs/status.md`.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens
