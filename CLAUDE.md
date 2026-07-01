@@ -12,8 +12,11 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**🎉 FAS 5 NT-SYSTEMET KLAR (2026-07-01, testsvit 587).** Punkt **19–25 klara**.
-Nästa NU hämtas ur 🟢 NÄST (naturlig kandidat: **FAS 6 Minorsystem**) – ägaren väljer.
+**🎉 FAS 5 NT-SYSTEMET KLAR (2026-07-01, testsvit 587, pushat+deployat).**
+Punkt **19–25 klara**. **NÄSTA SESSION BÖRJAR MED: FAS 7 — Svaga öppningar**
+(ägarval 2026-07-01: hoppa förbi FAS 6 tills vidare). Svaga tvåor, Ogust,
+spärröppningar, regel 2-3-4. Grunderna finns redan (`responses-weak2.ts`,
+`responses-preempt.ts`) – FAS 7 är facit-granskning + luckor, som FAS 5.
 - ✅ **19 Stayman:** lagad inbjudnings-5-4-lucka (naturlig 2♥/2♠) + **garbage
   Stayman** (svag exakt 4-4 hf + kort klöver → 2♣, passar svaret). Ägarbeslut.
 - ✅ **20 Smolen** verifierad. ✅ **22 Texas** verifierad.
@@ -70,14 +73,15 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **FAS 5 — NT-systemet:** Stayman, Smolen, transfers, Texas, MSS, 2NT, 3NT.
+1. **FAS 7 — Svaga öppningar:** svaga tvåor, Ogust, spärröppningar, regel 2-3-4.
+   (Ägarval: nästa session. Flyttad före FAS 6.)
 2. **FAS 6 — Minorsystem:** minorregeln, inverterade minorer, svaga hoppskift.
-3. **FAS 7 — Svaga öppningar:** svaga tvåor, Ogust, spärröppningar, regel 2-3-4.
+3. **FAS 8 — Slam:** cue/RKC på minorfit, MSS-slamfortsättning m.m.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
-- FAS 8 Slam · FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel ·
-  FAS 12 UI (allt enligt felsökningsplanen). Även TP-steg E (reverse/hoppskift på
-  TP) + F (3:e/4:e-hands lättöppning) ur `docs/tp-arbetslista.md`.
+- FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt
+  enligt felsökningsplanen). Även TP-steg E (reverse/hoppskift på TP) + F
+  (3:e/4:e-hands lättöppning) ur `docs/tp-arbetslista.md`.
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
 - **Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC): känd gräns, stängs lagligt.
