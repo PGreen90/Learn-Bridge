@@ -736,8 +736,14 @@ Två sätt att visa **5-5** (eller bättre) direkt:
 - **Ovanlig 2NT** (hopp till 2NT) = de **två lägsta objudna färgerna**.
 
 **Styrkezoner:** spela "två zoner" – antingen **svag** (spärr-aktig, ~6–11 hp)
-eller **stark** (utgångsvilja), undvik mellanläget. Advancer cue-budar för att
-fråga om zon/styrka.
+eller **stark** (utgångsvilja), undvik mellanläget.
+
+**Advancer (ägarbeslut 2026-07-01):** ger **preferens till den av partnerns visade
+färger hon själv är längst i** (lika längd → högfärgen). I en **ostörd** budgivning
+får hon **aldrig passa** – hon måste ta ut tvåfärgshanden. Är motståndarna inne
+finns **spelrum för pass**, och partnern kan bjuda igen för att visa sin
+**ospecificerade** färg (t.ex. Michaels över deras högfärg, där ena färgen är en
+okänd minor – utan högfärgsfit bjuder advancern då ostört 3♣ pass-eller-rätta).
 
 ### 7.3 Dubblingar
 - **Upplysningsdubbling:** dubbling av deras öppning = kort i deras färg, stöd i
@@ -843,6 +849,26 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-01** – Budmotorn: **FAS 10 (försvarsbud §7)** facit-granskad + klar
+  (testsvit 644). Alla §7-verktyg lästa mot systemboken → **svaren matchar facit**
+  (inkliv/Michaels/ovanlig 2NT, upplysnings-/negativ-/responsiv-/stöddubbling,
+  Lebensohl, DONT, Mathe, svaga tvåor, Multi, spärrar). **Byggd lucka:**
+  `advanceTwoSuiter` (`overcalls.ts`) – advancerns svar på partnerns tvåfärgsinkliv
+  (Michaels / ovanlig 2NT), som saknades helt. **Ägarbeslut** (se §7.2 ovan):
+  preferens till den längsta av partnerns färger (lika → högfärgen), aldrig pass
+  ostört, contested → pass tillåtet. Facit i `overcalls.test.ts`. **Nästa gång:**
+  FAS 11 kortspel/motspel-förfining.
+- **2026-07-01** – Budmotorn: **FAS 9 (passad hand: Drury)** klar (testsvit 635).
+  Facit-granskning §6.7: Drury-basen (`responses-drury.ts`) matchar systemboken –
+  ingen textändring behövdes. **Byggd lucka:** `responderAnswerDrury` – svararens
+  (passade handen) placering efter öppnarens Drury-återbud, inkopplad i
+  `responderSecondBid`. Auktionen dog förut vid öppnarens 3M-utgångsförsök.
+  **Ägarbeslut:** acceptera 3M med **stödpoäng ≥ 11** (`max(hp, dummyPoints)`),
+  annars pass; öppnarens 2M-signoff / 4M-utgång passas. Signoff-auktioner stängs
+  nu med svararens pass. E2e `1♥–2♦–3♥–4♥`. **Nästa gång:** FAS 10 försvarsbud.
+- **2026-07-01** – Budmotorn: **FAS 8 (slamsystemet)** klar (testsvit 630, commit
+  `340028a`): MSS-slam, facit-granskning §6.1–6.5, Gerber över 2NT, Exclusion när
+  renons rankar över trumf.
 - **2026-07-01** – Budmotorn: **FAS 6 (minorsystem) + FAS 7 (svaga öppningar)**
   facit-granskade och kompletta (testsvit 612). FAS 6: minor-regeln facit-låst,
   **svararens fortsättning efter inverterad minor byggd** (mot 3NT), svaga

@@ -115,6 +115,74 @@ export function overcall(hand: Hand, theirCall: string): ResponseResult {
   return pass
 }
 
+/** Billigaste lagliga budet i `suit` STRIKT över partnerns tvåfärgsbud `refCall`. */
+function cheapestBid(suit: Suit, refCall: string): string {
+  const m = refCall.match(/^(\d)(NT|C|D|H|S)$/)
+  if (!m) return `${BID[suit]}` // ska aldrig hända
+  const refLevel = Number(m[1])
+  if (m[2] === 'NT') return `${refLevel + 1}${BID[suit]}` // NT är högst i nivån → upp ett steg
+  const refSuit = SUIT_OF_LETTER[m[2]]
+  const level = rankIdx(suit) > rankIdx(refSuit) ? refLevel : refLevel + 1
+  return `${level}${BID[suit]}`
+}
+
+/**
+ * Advancers svar på partnerns TVÅFÄRGSINKLIV (Michaels / ovanlig 2NT). §7.2.
+ *
+ * Ägarbeslut 2026-07-01: advancern ger **preferens till den av partnerns visade
+ * färger hon själv är längst i** (lika längd → högfärgen). I en **ostörd**
+ * budgivning får hon **aldrig passa** – hon måste ta ut tvåfärgshanden. Är
+ * motståndarna inne (`contested`) finns spelrum för pass, och partnern kan bjuda
+ * igen för att visa sin ospecificerade färg (relevant för Michaels över deras
+ * högfärg, där ena färgen är en okänd minor).
+ *
+ * `partnerCall` = partnerns bud ("2C"/"2D"/"2H"/"2S" = Michaels-cue, "2NT" =
+ * ovanlig). `theirSuit` = motståndarens öppningsfärg.
+ */
+export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Suit, contested = false): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const unbid = RANK_ORDER.filter((s) => s !== theirSuit)
+
+  // Vilka färger LOVAR partnern konkret?
+  let known: Suit[]
+  let unknownMinor = false
+  if (partnerCall === '2NT') {
+    known = unbid.slice(0, 2) // ovanlig 2NT = de två lägsta objudna (båda kända)
+  } else if (isMinor(theirSuit)) {
+    known = ['hearts', 'spades'] // Michaels över deras minor = båda högfärgerna
+  } else {
+    known = [theirSuit === 'hearts' ? 'spades' : 'hearts'] // andra högfärgen …
+    unknownMinor = true // … + en OKÄND minor
+  }
+
+  const passContested: ResponseResult = { call: 'P', rule: 'pass', explanation: 'motståndarna är inne → pass (partnern kan bjuda igen och visa sin färg).' }
+
+  // Michaels över deras högfärg: känd högfärg + ospecificerad minor.
+  if (unknownMinor) {
+    const major = known[0]
+    if (len[major] >= 3) {
+      const call = cheapestBid(major, partnerCall)
+      return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[major]}-korts ${NAME[major]} → ${call} (preferens till partnerns högfärg).` }
+    }
+    // Ingen högfärgsfit. Contested + svag → passa (partnern rättar sedan sin minor).
+    if (contested && p < 8) return passContested
+    // Ostört: aldrig passa → 3♣ pass-eller-rätta (partnern passar/rättar till sin minor).
+    return { call: '3C', rule: 'advance tvåfärg (pass-eller-rätta minor)', explanation: `ingen högfärgsfit → 3♣ (pass-eller-rätta; partnern passar med klöver, rättar till ruter).` }
+  }
+
+  // Båda färgerna kända (Michaels över minor / ovanlig 2NT): bjud den vi är
+  // längst i (lika längd → högre rankad = högfärgen).
+  let best = known[0]
+  for (const s of known) {
+    if (len[s] > len[best] || (len[s] === len[best] && rankIdx(s) > rankIdx(best))) best = s
+  }
+  // Contested utan fit i någon av färgerna och svag → passa (spelrum finns).
+  if (contested && known.every((s) => len[s] < 3) && p < 8) return passContested
+  const call = cheapestBid(best, partnerCall)
+  return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[best]}-korts ${NAME[best]} (längst av partnerns färger) → ${call} (preferens).` }
+}
+
 /**
  * Svar på partnerns enkla inkliv (advancer). §7.1. `overcallLevel` = nivån
  * partnerns inkliv låg på (styr hoppet i en fit-jump); default 1.

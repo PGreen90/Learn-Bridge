@@ -71,6 +71,16 @@
 >     sårbarhets-/kvalitetsgrind på spärröppningen** (ägarbeslut, öppningsstruktur:
 >     topphonnörer A/K/Q, 3-läget ej sårbar ≥1/sårbar ≥2, 4-läget valfri/≥1);
 >     presshöjning avvisad (bara utgångsvärden). Se `docs/status.md`.
+> - 🎉 **HELA FAS 9 PASSAD HAND: DRURY KLAR (2026-07-01, testsvit 635):**
+>   facit-granskning §6.7 (Drury-basen matchar systemboken) + byggd lucka
+>   `responderAnswerDrury` (svararens placering efter öppnarens Drury-återbud;
+>   auktionen dog förut vid 3M-utgångsförsöket). Ägarbeslut: acceptera med
+>   stödpoäng ≥ 11. Se punkt 17 nedan + `docs/status.md`.
+> - 🎉 **HELA FAS 10 FÖRSVARSBUD (§7) KLAR (2026-07-01, testsvit 644):**
+>   facit-granskning §7.1–7.6 (alla verktyg matchar systemboken) + byggd lucka
+>   `advanceTwoSuiter` (advancerns svar på Michaels/ovanlig 2NT, saknades helt).
+>   Ägarbeslut: preferens till längsta av partnerns färger (lika → högfärgen),
+>   aldrig pass ostört. Se punkt 21–22 nedan.
 
 > Vad som behöver på plats för att göra budmotorn (och till sist kortspelet)
 > komplett. Numrerad byggordning. Punkterna **1–9** stänger **M3** (öppnarens
@@ -190,7 +200,12 @@
   2♣ = limithöjning 3 trumf, 2♦ = limithöjning 4+ trumf; öppnaren rebjuder
   högfärgen = lätt öppning (signoff), 3-läget = utgångsförsök, 4-läget = utgång.
   Inkopplat i `buildAuction` (passad-hand-detektering: svararens plats kom före
-  öppnarens i varvet).
+  öppnarens i varvet). **FAS 9 (2026-07-01, testsvit 635):** facit-granskning §6.7
+  (basen matchar) + byggd lucka `responderAnswerDrury` (svararens placering efter
+  öppnarens återbud, inkopplad i `responderSecondBid`) – auktionen dog förut vid
+  öppnarens 3M-utgångsförsök. Ägarbeslut: acceptera med **stödpoäng ≥ 11**
+  (`pointsWithFloor`), annars pass; 2M/4M passas. Signoff-auktioner stängs nu med
+  svararens pass. E2e `1♥–2♦–3♥–4♥`.
 - ✅ Punkt **18–20** (slamverktyg, §6.1–6.5) – `slam.ts`. **1430 RKC** (`respondToRKC`),
   **trumfdam-fråga** (`respondToQueenAsk`), **cue-bid** (`cheapestCueBid`),
   **Sjöbergs 5NT** kungfråga (`respondToKingAsk`), **Gerber** ess-/kungfråga
@@ -211,7 +226,12 @@
   klar** (testsvit 630).
 - ✅ Punkt **21–22** (inkliv + tvåfärgsinkliv, §7.1–7.2) – `overcalls.ts`.
   Enkelt inkliv, 1NT-inkliv (15–18), Michaels, ovanlig 2NT, upplysningsdubbling,
-  hoppinkliv, samt advancers svar (cue=limit+, höjning, ny färg, NT).
+  hoppinkliv, samt advancers svar (cue=limit+, höjning, ny färg, NT). **FAS 10
+  (2026-07-01, testsvit 644):** byggd lucka `advanceTwoSuiter` – advancerns svar på
+  partnerns TVÅFÄRGSINKLIV (Michaels/ovanlig 2NT), som saknades. Ägarbeslut:
+  preferens till den av partnerns färger advancern är längst i (lika → högfärgen),
+  aldrig pass ostört, contested → pass tillåtet. Facit i `overcalls.test.ts`.
+  (LIVE-inkoppling i budlådan = parkerad off-book §7-bredd.)
 - ✅ Punkt **23** (dubblingar, §7.3) – `doubles.ts`. Negativ, responsiv,
   stöddubbling (exakt 3) och advancers svar på upplysningsdubbling.
 - ✅ Punkt **24** (Lebensohl, §7.4) – `lebensohl.ts`. 2NT-relä (svag) vs direkt

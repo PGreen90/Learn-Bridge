@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { overcall, advanceOvercall, hasStopper } from './overcalls'
+import { overcall, advanceOvercall, advanceTwoSuiter, hasStopper } from './overcalls'
 
 const o = (n: string, their: string) => overcall(parseHand(n), their).call
 
@@ -49,6 +49,46 @@ describe('advanceOvercall – svar på partnerns inkliv (§7.1)', () => {
     const r = advanceOvercall(parseHand('S:KQJ54 H:A432 D:32 C:32'), 'hearts', 'diamonds')
     expect(r.call).toBe('2S')
     expect(r.rule).toBe('fit-jump')
+  })
+})
+
+describe('advanceTwoSuiter – svar på Michaels / ovanlig 2NT (§7.2, ägarbeslut)', () => {
+  const a = (n: string, partnerCall: string, their: 'clubs' | 'diamonds' | 'hearts' | 'spades', contested = false) =>
+    advanceTwoSuiter(parseHand(n), partnerCall, their, contested)
+
+  // Michaels över deras minor (2♣) = båda högfärgerna. Bjud den längsta.
+  it('Michaels 2♣: längst i spader → 2♠', () => {
+    expect(a('S:KJ432 H:32 D:Q432 C:432', '2C', 'clubs').call).toBe('2S')
+  })
+  it('Michaels 2♣: längst i hjärter → 2♥', () => {
+    expect(a('S:32 H:KJ432 D:Q432 C:432', '2C', 'clubs').call).toBe('2H')
+  })
+  it('Michaels 2♣: lika långa högfärger → högfärgen (spader) 2♠', () => {
+    expect(a('S:K32 H:Q32 D:J432 C:432', '2C', 'clubs').call).toBe('2S')
+  })
+
+  // Ovanlig 2NT över (1♠) = de två lägsta objudna (klöver+ruter).
+  it('ovanlig 2NT: längst i ruter → 3♦', () => {
+    expect(a('S:432 H:432 D:KJ32 C:Q32', '2NT', 'spades').call).toBe('3D')
+  })
+  it('ovanlig 2NT: längst i klöver → 3♣', () => {
+    expect(a('S:432 H:432 D:Q32 C:KJ32', '2NT', 'spades').call).toBe('3C')
+  })
+
+  // Michaels över deras högfärg (2♠) = andra högfärgen (hjärter) + OKÄND minor.
+  it('Michaels 2♠: hjärterfit → 3♥ (preferens)', () => {
+    expect(a('S:32 H:K432 D:432 C:5432', '2S', 'spades').call).toBe('3H')
+  })
+  it('Michaels 2♠: ingen högfärgsfit, ostört → 3♣ (pass-eller-rätta minor)', () => {
+    expect(a('S:432 H:32 D:K432 C:5432', '2S', 'spades').call).toBe('3C')
+  })
+  it('Michaels 2♠: ingen fit + contested + svag → pass (partnern rättar sin minor)', () => {
+    expect(a('S:432 H:32 D:K432 C:5432', '2S', 'spades', true).call).toBe('P')
+  })
+
+  // Ägarregel: aldrig passa i en ostörd budgivning – även en usel hand tar ut.
+  it('svag hand får ALDRIG passa ostört → bjuder ändå (2♠)', () => {
+    expect(a('S:J432 H:32 D:432 C:5432', '2C', 'clubs').call).toBe('2S')
   })
 })
 

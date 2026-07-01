@@ -12,11 +12,41 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
+**🎉 FAS 10 — Försvarsbud (§7) KLAR** (2026-07-01, testsvit 644, **ej pushad än**).
+Facit-granskning §7.1–7.6: alla verktyg (`overcalls.ts`, `doubles.ts`,
+`lebensohl.ts`, `dont.ts`, `defense-conventional.ts`) lästa mot systemboken →
+**svaren matchar facit**, väl testtäckta (overcalls 24, doubles 15,
+defense-conventional 14, dont 7, lebensohl 6). **Byggd lucka:** `advanceTwoSuiter`
+(`overcalls.ts`) – advancerns svar på partnerns tvåfärgsinkliv (Michaels / ovanlig
+2NT), som saknades helt. **Ägarbeslut 2026-07-01:** preferens till den av partnerns
+visade färger advancern är längst i (lika längd → högfärgen); **aldrig pass ostört**;
+contested → pass tillåtet (partnern rebjuder sin ospecificerade färg; Michaels över
+högfärg utan hf-fit → ostört 3♣ pass-eller-rätta). Facit i `overcalls.test.ts`.
+**NÄSTA:** flytta upp NÄST → **FAS 11 (Kortspel/motspel-förfining)** blir nästa NU –
+låt ägaren bekräfta. (Off-book §7-bredd + tvåfärg-advancern LIVE i budlådan =
+🅿️ PARKERAT/SENARE, inte nu.)
+
+--- FAS 9 (testsvit 635, ej pushad) ---
+
+**🎉 FAS 9 — Passad hand: Drury KLAR** (2026-07-01, testsvit 635, **ej pushad än**).
+Facit-granskning §6.7: Drury-basen (`responses-drury.ts`) matchar systemboken exakt
+(2♣ = 3 trumf, 2♦ = 4+ trumf, 10–12 hp; öppnarens 2M signoff / 3M utgångsförsök /
+4M utgång). **Byggd lucka (auktionen dog förut):** `responderAnswerDrury` –
+svararens (passade handen) placering efter öppnarens Drury-återbud, inkopplad i
+`responderSecondBid` (`responder-rebids.ts`). **Ägarbeslut 2026-07-01:** accepterar
+3M-utgångsförsöket med **stödpoäng ≥ 11** (`pointsWithFloor(..., 'support')`, samma
+`max(hp, dummyPoints)`-omvärdering som Steg B/C – 4+ trumf + korta sidofärger lyfter
+toppen av 10–12), annars pass; 2M-signoff / 4M-utgång passas alltid. Sidoeffekt:
+signoff-auktioner stängs nu med svararens pass (`1♥–2♣–2♥–P`) i stället för att
+lämnas öppna. E2e `1♥–2♦–3♥–4♥`. Facit i `responses-drury.test.ts`.
+**NÄSTA:** flytta upp NÄST → **FAS 10 (Försvarsbud)** blir nästa NU – låt ägaren
+bekräfta. (Slam-quirken = 🅿️ PARKERAT, jaga aldrig.)
+
+--- FAS 8 (testsvit 630, pushat) ---
+
 **🎉 FAS 8 — Slamsystem KLAR** (2026-07-01, testsvit 630). Punkt 1 (MSS-slam) +
-facit-granskning §6.1–6.5 pushade (testsvit 621). Punkt 2 (Gerber över 2NT) +
-punkt 3 (Exclusion när renons rankar över trumf) KLARA men **ej pushade än**
-(testsvit 630). **NÄSTA:** flytta upp NÄST → **FAS 9 (Passad hand: Drury)** blir
-nästa NU – låt ägaren bekräfta. (Slam-quirken = 🅿️ PARKERAT, jaga aldrig.)
+facit-granskning §6.1–6.5 (testsvit 621) + punkt 2 (Gerber över 2NT) + punkt 3
+(Exclusion när renons rankar över trumf) — allt pushat (commit `340028a`).
 
 FAS 8 klart (facit + `npm test`, testsvit 630):
 - ✅ **Punkt 3 Exclusion när renons rankar över trumf** (2026-07-01): nivåbailen
@@ -125,9 +155,10 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **FAS 9 — Passad hand:** Drury + passad vs opassad hand.
-2. **FAS 10 — Försvarsbud:** Michaels, ovanlig 2NT, DONT, Lebensohl, Mathe, Multi.
-3. **FAS 11 — Kortspel/motspel-förfining** (enligt felsökningsplanen).
+1. **FAS 11 — Kortspel/motspel-förfining** (enligt felsökningsplanen).
+2. **FAS 12 — UI** (enligt felsökningsplanen).
+3. **Off-book §7 LIVE:** koppla in tvåfärg-advancern + balansering i budlådan
+   (i dag PARKERAT – advancern finns som testad funktion men ej live).
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt
