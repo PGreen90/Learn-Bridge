@@ -340,23 +340,15 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
       return pass('kontraktet är satt')
 
     case 'Minor Suit Stayman': {
-      // FAS 5 punkt 23. Svararen har 5-4+ i minorerna, GF/slam (13+). Öppnaren har
-      // svarat: 3♣ = 4+ klöver, 3♦ = 4+ ruter (förnekar 4 klöver), 2NT = ingen
-      // 4-korts minor (ej max), 3NT = ingen 4-korts minor (max). Eftersom svararen
-      // ALLTID har 4+ i båda minorerna hittas en fit garanterat när öppnaren visar
-      // en minor. Ägarbeslut 2026-07-01: GF-placering nu – ingen fit → 3NT; fit →
-      // 3NT som standard, höj minorn BARA med slamintresse (~16+ hp, paret ≈ 33).
-      // Fortsatt cue/RKC på minorfiten + öppnarens stopp-/max-bud = FAS 8.
+      // FAS 5 punkt 23 + FAS 8. Svararen har 5-4+ i minorerna, GF/slam (13+).
+      // Öppnaren har svarat: 3♣ = 4+ klöver, 3♦ = 4+ ruter (förnekar 4 klöver),
+      // 2NT = ingen 4-korts minor (ej max), 3NT = ingen 4-korts minor (max).
+      // No-fit-fallen placeras här; MINORFITEN (3♣/3♦) – inkl. hela slam-/NT-
+      // placeringen – ägs av auction.ts via mssMinorFitContinuation (behöver
+      // BÅDA händerna för NT-säkerhets- och nyckelkortsbedömningen).
       if (rebid.call === '3NT') return pass('öppnaren visade max utan minorfit – 3NT står')
       if (rebid.call === '2NT') return { call: '3NT', rule: 'till spel', explanation: `${p} hp, ingen minorfit → 3NT.` }
-      const target = suitOfCall(rebid.call) // 3♣ = klöver, 3♦ = ruter
-      if (target) {
-        if (p >= 16) {
-          return { call: `4${BID[target]}`, rule: 'Minor Suit Stayman: höjning', explanation: `${p} hp + ${NAME[target]}fit, slamintresse → 4${SYM[target]} (sätter trumf; fortsättning cue/RKC).` }
-        }
-        return { call: '3NT', rule: 'till spel', explanation: `${p} hp + ${NAME[target]}fit utan slamintresse → 3NT (utgång).` }
-      }
-      return null
+      return null // 3♣/3♦ minorfit hanteras i auction.ts (mssMinorFitContinuation)
     }
 
     default:

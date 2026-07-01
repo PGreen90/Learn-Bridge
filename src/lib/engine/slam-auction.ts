@@ -9,7 +9,7 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { bergenPoints, dummyPoints, wastedHonorsOppositeShortness } from './evaluation'
-import { lengths } from './hand'
+import { hcp, lengths } from './hand'
 import {
   cheapestCueBid,
   exclusionKeycards,
@@ -174,5 +174,108 @@ export function exclusionInvestigation(openerHand: Hand, responderHand: Hand, tr
     : `ett nyckelkort saknas → lillslam 6${SYM[trump]}.`
   turns.push({ role: 'svarare', call, rule: 'slamavslut', explanation: why })
 
+  return turns
+}
+
+// === MSS-slam (FAS 8): slamfortsättning efter Minor Suit Stayman-minorfit ====
+//
+// Efter 1NT–2♠–3♣/3♦ har svararen (kaptenen) 5-4+ i minorerna och GF/slam; en
+// minorfit är garanterad när öppnaren visat en minor. Svararen driver med hela
+// slamarsenalen och PLACERAR sedan smartast.
+//
+// Ägarbeslut 2026-07-01: **NT om säkert, annars minor.** Öppnaren är balanserad,
+// så en NT-slam (6NT/7NT) ger 10 poäng mer och slipper stjälningsrisk – det är
+// grundvalet. Motorn byter till minor-slam (6/7-minor) BARA när NT är osäkert:
+// en högfärg gapar (ingen A/K/Q hos någondera → snabb förlorare i NT) eller
+// svararen har en högfärgsrenons (ruffvärde talar för färgkontrakt). Handstyrt
+// per giv – ingen fast regel. "Hur högt" avgörs av nyckelkort + poäng.
+
+const MAJORS: Suit[] = ['hearts', 'spades']
+const hasTopHonor = (hand: Hand, suit: Suit) =>
+  hand.some((c) => c.suit === suit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q'))
+
+/** NT osäkert: en högfärg gapar (ingen A/K/Q någonstans) eller svararrenons i hf. */
+function ntUnsafe(openerHand: Hand, responderHand: Hand): boolean {
+  const hole = MAJORS.some((m) => !hasTopHonor(openerHand, m) && !hasTopHonor(responderHand, m))
+  const rl = lengths(responderHand)
+  const responderMajorVoid = MAJORS.some((m) => rl[m] === 0)
+  return hole || responderMajorVoid
+}
+
+/**
+ * Svararens fortsättning efter 1NT–2♠–3♣/3♦ (minorfit funnen). Returnerar hela
+ * placeringen (asksekvens + slutbud), aldrig null – en fit finns alltid.
+ */
+export function mssMinorFitContinuation(
+  openerHand: Hand,
+  responderHand: Hand,
+  minor: Suit, // 'clubs' | 'diamonds'
+  openerRebidCall: string, // '3C' | '3D'
+): SlamTurn[] {
+  // NT osäkert → minor-slam-spåret: återanvänd suit-slam-maskineriet (cue → RKC
+  // → 6/7-minor). Räcker det inte till slam (för svagt / två nyckelkort borta)
+  // → minorutgång 5m (kan stjäla förlorare, till skillnad från 3NT).
+  if (ntUnsafe(openerHand, responderHand)) {
+    const slam = slamInvestigation(openerHand, responderHand, minor, openerRebidCall)
+    if (slam) return slam
+    return [{
+      role: 'svarare',
+      call: `5${LETTER[minor]}`,
+      rule: 'MSS: minorutgång',
+      explanation: `NT osäkert (högfärg utan håll/renons), för svagt för slam → 5${SYM[minor]} (minorutgång).`,
+    }]
+  }
+
+  // NT-säkert (alla högfärger täckta, ingen renons) → sikta NT-slam. Poängen
+  // avgör NT-zonen (balanserat par → rå hp, inte fördelning): 33+ = lillslam,
+  // 37+ = storslam. Saknar paret slamzon ELLER två nyckelkort → stanna i 3NT
+  // (annars strandar RKC-frågan över utgång, precis som i slamInvestigation).
+  const points = hcp(openerHand) + hcp(responderHand)
+  const total = keycards(openerHand, minor) + keycards(responderHand, minor)
+  const queen = hasTrumpQueen(openerHand, minor) || hasTrumpQueen(responderHand, minor)
+  if (points < 33 || total <= 3) {
+    return [{
+      role: 'svarare',
+      call: '3NT',
+      rule: 'till spel',
+      explanation: `${points} hp ihop, minorfit men ej slamsäkert → 3NT (balanserad utgång).`,
+    }]
+  }
+
+  const turns: SlamTurn[] = []
+  turns.push({
+    role: 'svarare',
+    call: '4NT',
+    rule: '1430 RKC',
+    explanation: `slamzon (~${points} hp), NT-säker minorfit → 4NT (frågar nyckelkort inför NT-slam).`,
+  })
+  const answer = respondToRKC(openerHand, minor)
+  turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
+
+  // Storslamszon + alla fem nyckelkort + trumfdam → kungfråga (Sjöberg 5NT): en
+  // visad sidokung ger 13:e sticket → 7NT; ingen kung → 6NT.
+  if (points >= 37 && total === 5 && queen) {
+    turns.push({
+      role: 'svarare',
+      call: '5NT',
+      rule: 'Sjöberg 5NT',
+      explanation: `alla fem nyckelkort + trumfdam, storslamszon (~${points} hp) → 5NT (frågar kungar).`,
+    })
+    const kingAnswer = respondToKingAsk(openerHand, minor)
+    turns.push({ role: 'öppnare', call: kingAnswer.call, rule: kingAnswer.rule, explanation: kingAnswer.explanation })
+    const noKing = kingAnswer.call === `6${LETTER[minor]}`
+    turns.push({
+      role: 'svarare',
+      call: noKing ? '6NT' : '7NT',
+      rule: 'slamavslut',
+      explanation: noKing ? 'ingen sidokung → 6NT.' : 'sidokung visad → storslam 7NT.',
+    })
+    return turns
+  }
+
+  const why = total === 4
+    ? `ett nyckelkort saknas → 6NT (lillslam).`
+    : `alla fem nyckelkort men ingen storslamszon → 6NT (lillslam).`
+  turns.push({ role: 'svarare', call: '6NT', rule: 'slamavslut', explanation: why })
   return turns
 }

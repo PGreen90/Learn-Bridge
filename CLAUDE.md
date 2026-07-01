@@ -12,12 +12,19 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU (det enda vi jobbar på)
-**FAS 8 — Slamsystem pågår. NU = punkt 1 MSS-slam** (slamfortsättning cue/RKC
-efter att Minor Suit Stayman hittat en minorfit med slamintresse). Kräver
-ägarbeslut i konkreta budsituationer – fråga, gissa inte. **Ej pushat/deployat
-än** (utom facit-granskningen nedan) – be om lov (PCD).
+**FAS 8 — Slamsystem pågår.** Punkt 1 (MSS-slam) + facit-granskning KLARA & pushade
+(2026-07-01, testsvit 621). **NÄSTA:** punkt 2 (Gerber över 2NT) eller punkt 3
+(Exclusion när renonsfärg rankar över trumf) – ägaren väljer. (Slam-quirken =
+🅿️ PARKERAT, jaga aldrig.)
 
-FAS 8 klart hittills (facit + `npm test`, testsvit 618):
+FAS 8 klart hittills (facit + `npm test`, testsvit 621):
+- ✅ **Punkt 1 MSS-slam** (2026-07-01): slamfortsättning efter `1NT–2♠–3♣/3♦`
+  (minorfit garanterad). Ny `mssMinorFitContinuation` (`slam-auction.ts`),
+  inkopplad i `auction.ts`; döda 4-minor-grenen bort ur `responder-rebids.ts`.
+  **Ägarbeslut: NT om säkert, annars minor.** NT-säkert (alla hf har A/K/Q +
+  ingen svararrenons) → 6NT (33–36) / 7NT (37+), för svagt → 3NT. NT osäkert
+  (gapande hf / renons) → minor-slam via `slamInvestigation` (cue→RKC→6/7m), för
+  svagt → 5m. Hela arsenalen (cue/RKC/Sjöberg). E2e `1NT–2♠–3♣–4NT–5♦–6NT`.
 - ✅ **Facit-granskning §6.1–6.5** (2026-07-01): alla sex slamverktyg i `slam.ts`
   lästa mot systemboken → **inget fel i svaren**, koden matchar facit exakt (1430
   RKC, trumfdamfråga, cue-bud, Sjöbergs 5NT, Gerber ess/kung, Exclusion). Täppte

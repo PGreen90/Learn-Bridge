@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Deal } from '../../types/bridge'
 import { parseHand } from '../bidding'
 import { buildAuction } from './auction'
-import { exclusionInvestigation, slamInvestigation } from './slam-auction'
+import { exclusionInvestigation, mssMinorFitContinuation, slamInvestigation } from './slam-auction'
 
 describe('FAS 4 punkt 18 – slamvärdering nedvärderar honnörer mot partnerns kortfärg', () => {
   // Öppnaren visade singel hjärter (Jacoby-kortfärg); svararens KQ i hjärter är
@@ -158,6 +158,68 @@ describe('exclusionInvestigation – voidwood efter splinter (Steg 5)', () => {
     const opener = parseHand('S:QJ43 H:KQ6 D:KQ4 C:KQ8') // 0 ess, ingen trumfkung
     const responder = parseHand('S:QJ762 H:KQ52 D:KQ43 C:-') // klöverrenons, 0 ess, ingen trumfkung
     expect(exclusionInvestigation(opener, responder, 'spades')).toBeNull()
+  })
+})
+
+describe('mssMinorFitContinuation – MSS-slam (FAS 8, NT om säkert annars minor)', () => {
+  it('NT-säker slamzon → 4NT RKC, svar, 6NT (inte 6-minor)', () => {
+    const opener = parseHand('S:AJ3 H:AQ3 D:K32 C:K654') // 17, balanserad, 4 klöver, 3 nyckelkort
+    const responder = parseHand('S:K2 H:K2 D:AQJ54 C:AQ32') // 19, 5-4 minorer, 2 nyckelkort
+    const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '6NT'])
+    expect(turns[2].rule).toBe('slamavslut')
+  })
+
+  it('NT-säker storslamszon, alla nyckelkort + dam → 5NT kungfråga, kung visad → 7NT', () => {
+    const opener = parseHand('S:AJ3 H:A32 D:K32 C:K654') // 15, 3 nyckelkort, rutervkung
+    const responder = parseHand('S:KQ5 H:KQ D:AQ42 C:AQJ8') // 22, 4-4 minorer, 2 nyckelkort + klöverdam
+    const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '6D', '7NT'])
+    expect(turns[2].rule).toBe('Sjöberg 5NT')
+  })
+
+  it('NT-säkert men under slamzon → 3NT (ingen fråga)', () => {
+    const opener = parseHand('S:Q32 H:AKQ D:K32 C:J542') // 15, alla hf täckta
+    const responder = parseHand('S:AK2 H:J2 D:AQ842 C:Q83') // 5-4, för lite ihop för slam
+    const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
+    expect(turns.map((t) => t.call)).toEqual(['3NT'])
+  })
+
+  it('gapande högfärg (ingen A/K/Q i hjärter) → minor-spåret (klöverkontrakt, inte NT)', () => {
+    const opener = parseHand('S:AKQ H:432 D:K3 C:AJ642') // hjärterhål, 5 klöver
+    const responder = parseHand('S:J2 H:65 D:AKQ54 C:KQ83') // hjärterhål också, slamvärden
+    const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
+    const last = turns[turns.length - 1].call
+    expect(last.endsWith('C')).toBe(true) // klövermål (6♣ eller 5♣), aldrig NT
+    expect(turns.some((t) => t.call.includes('NT') && t.call !== '4NT')).toBe(false)
+  })
+
+  it('gapande högfärg + för svagt → minorutgång 5♣ (inte 3NT)', () => {
+    const opener = parseHand('S:AKQ H:432 D:K32 C:J542') // hjärterhål, 4 klöver, 12
+    const responder = parseHand('S:J2 H:65 D:KQ654 C:KQ83') // hjärterhål, ~11, för svagt
+    const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
+    expect(turns.map((t) => t.call)).toEqual(['5C'])
+    expect(turns[0].rule).toBe('MSS: minorutgång')
+  })
+})
+
+describe('buildAuction – MSS-slam växer fram (FAS 8)', () => {
+  it('1NT–2♠–3♣–4NT–5D–6NT i en hel auktion (NT-säker minorfit-slam)', () => {
+    const deal: Deal = {
+      id: 'slam-mss',
+      dealer: 'N',
+      vulnerability: 'none',
+      board: 1,
+      hands: {
+        N: parseHand('S:AJ3 H:AQ3 D:K32 C:K654'), // 17 balanserad → 1NT
+        E: parseHand('S:QT98 H:JT98 D:T9 C:JT9'), // svag → passar
+        S: parseHand('S:K2 H:K2 D:AQJ54 C:AQ32'), // 19, 5-4 minorer, ingen 4-korts hf → 2♠ MSS
+        W: parseHand('S:7654 H:7654 D:876 C:87'),
+      },
+    }
+    const a = buildAuction(deal)!
+    expect(a.turns.map((t) => t.call)).toEqual(['1NT', '2S', '3C', '4NT', '5D', '6NT'])
+    expect(a.open).toBe(false)
   })
 })
 

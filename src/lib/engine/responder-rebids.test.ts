@@ -196,28 +196,21 @@ describe('punkt 11 – svararens andra bud i 1NT-auktioner', () => {
 })
 
 describe('FAS 5 punkt 23 – svararens andra bud efter Minor Suit Stayman (2♠)', () => {
-  // Svararen har 5-4+ i minorerna, GF (13+). En fit hittas alltid när öppnaren
-  // visar en minor (3♣/3♦). Ägarbeslut: 3NT som standard, höj minorn bara med
-  // slamintresse (~16+). Ingen fit (öppnarens 2NT) → 3NT; öppnarens 3NT står.
+  // Svararen har 5-4+ i minorerna, GF (13+). NO-FIT-fallen placeras här: ingen
+  // 4-korts minor (öppnaren 2NT/3NT) → 3NT / pass. MINORFITEN (öppnaren 3♣/3♦)
+  // – inkl. slam-/NT-placeringen – ägs av auction.ts (mssMinorFitContinuation)
+  // och testas i slam-auction.test.ts (FAS 8). Här returneras null för 3♣/3♦.
   const mss = (n: string, rebidCall: string) => r11(n, 'Minor Suit Stayman', '2S', rebidCall)
 
-  it('klöverfit (öppnaren 3♣), utan slamintresse → 3NT', () => {
-    expect(mss('S:A3 H:72 D:AQ842 C:KJ85', '3C')).toBe('3NT') // 14 hp
-  })
-  it('ruterfit (öppnaren 3♦), utan slamintresse → 3NT', () => {
-    expect(mss('S:A3 H:72 D:AQ842 C:KJ85', '3D')).toBe('3NT') // 14 hp
-  })
-  it('klöverfit (öppnaren 3♣) med slamintresse (17 hp) → 4♣', () => {
-    expect(mss('S:A3 H:K2 D:AQ842 C:KJ85', '3C')).toBe('4C') // 17 hp, sätter trumf
-  })
-  it('ruterfit (öppnaren 3♦) med slamintresse (17 hp) → 4♦', () => {
-    expect(mss('S:A3 H:K2 D:AQ842 C:KJ85', '3D')).toBe('4D') // 17 hp, sätter trumf
-  })
   it('ingen minorfit (öppnaren 2NT) → 3NT', () => {
     expect(mss('S:A3 H:72 D:AQ842 C:KJ85', '2NT')).toBe('3NT')
   })
   it('öppnaren visade max utan minorfit (3NT) → pass', () => {
     expect(mss('S:A3 H:72 D:AQ842 C:KJ85', '3NT')).toBe('P')
+  })
+  it('minorfit (3♣/3♦) hanteras i auction.ts → null här (r11 ger "null")', () => {
+    expect(mss('S:A3 H:K2 D:AQ842 C:KJ85', '3C')).toBe('null')
+    expect(mss('S:A3 H:K2 D:AQ842 C:KJ85', '3D')).toBe('null')
   })
 })
 

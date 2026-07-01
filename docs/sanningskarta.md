@@ -72,7 +72,7 @@ Inget att koda – grunden återspeglas i `openings.ts`. **KODAT.**
 | Smolen | KODAT | `responder-rebids.ts` `responderRebidIn1NTAuction` | |
 | Texas | KODAT | `responses-nt.ts`, `rebids.ts` | |
 | Minor Suit Stayman – **svararens första bud + öppnarens svar** | KODAT | `responses-nt.ts`, `rebids.ts` | |
-| Minor Suit Stayman – **svararens andra bud (placering)** | EJ KODAT | — | `responderRebidIn1NTAuction` returnerar `null` här (default). Tas senare. |
+| Minor Suit Stayman – **svararens andra bud (placering)** | KODAT | `responder-rebids.ts` (no-fit), `slam-auction.ts` `mssMinorFitContinuation` (minorfit, via `auction.ts`) | FAS 8: NT om säkert (6NT/7NT) annars minor-slam/utgång. |
 | Direkt 3♣/3♦/3♥/3♠ (naturlig 6-färg slamförsök) | EJ KODAT (medvetet) | — | Överlappar transfers/MSS; utelämnat tills hålfinnaren visar behov. |
 | 4NT kvantitativ | KODAT | `responses-nt.ts` | |
 | Gerber-slam över 1NT | KODAT | `nt-slam.ts` `gerberInvestigation` (inkopplad i `buildAuction`) | |

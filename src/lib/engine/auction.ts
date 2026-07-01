@@ -21,7 +21,7 @@ import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
-import { slamInvestigation, exclusionInvestigation } from './slam-auction'
+import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
 import { gerberInvestigation } from './nt-slam'
 
 export interface MajorAuction {
@@ -369,6 +369,20 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
       }
       return finish(false)
     }
+  }
+
+  // MSS-slam (FAS 8): efter 1NT–2♠–3♣/3♦ har svararen (kaptenen) 5-4+ i minorerna
+  // och en minorfit är garanterad. Svararen driver mot slam med hela arsenalen och
+  // placerar NT-slam (6NT/7NT) när alla färger är täckta, annars minor-slam/utgång
+  // (behöver BÅDA händerna → ligger här, inte i responderSecondBid).
+  if (opening.call === '1NT' && response.rule === 'Minor Suit Stayman' && (rebid.call === '3C' || rebid.call === '3D')) {
+    const minor: Suit = rebid.call === '3C' ? 'clubs' : 'diamonds'
+    const cont = mssMinorFitContinuation(deal.hands[openerSeat], deal.hands[responderSeat], minor, rebid.call)
+    for (const t of cont) {
+      const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+      turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+    }
+    return finish(false)
   }
 
   // Svararens andra bud (dispatchas på hela sekvensen).

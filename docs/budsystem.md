@@ -1234,3 +1234,14 @@ Det avslöjar längd/räkning direkt för partnern.
   tester (Gerber kungfrågan 0/1/3/4 kungar + Exclusion steg 3–4). Ingen
   systemändring, ingen kodändring (618 gröna). **Nästa gång:** punkt 1 MSS-slam
   (slamfortsättning cue/RKC efter Minor Suit Stayman-minorfit).
+- **2026-07-01** – **FAS 8 punkt 1 – MSS-slam.** Slamfortsättning efter
+  `1NT–2♠–3♣/3♦` (minorfit garanterad – svararen har 4+ i båda minorerna).
+  Ny `mssMinorFitContinuation` (`slam-auction.ts`), inkopplad i `auction.ts`.
+  **Ägarbeslut: NT om säkert, annars minor.** Öppnaren är balanserad → NT-slam
+  ger mer poäng och slipper stjälning: NT-säkert (alla hf har A/K/Q + svararen
+  saknar renons) → 6NT (33–36 hp) / 7NT (37+ via Sjöbergs kungfråga), för svagt
+  → 3NT. NT osäkert (en hf gapar / svararrenons) → minor-slam via cue→1430 RKC
+  (6/7-minor), för svagt → 5-minorutgång (kan stjäla). Hela slamarsenalen. Döda
+  4-minor-grenen bort ur `responder-rebids.ts`. +3 tester (621 gröna). Kod, inte
+  systemändring. **Nästa gång:** punkt 2 (Gerber över 2NT) eller punkt 3
+  (Exclusion när renonsfärg rankar över trumf).
