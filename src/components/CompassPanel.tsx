@@ -36,14 +36,14 @@ export function CompassPanel({
   vulnerability: Vulnerability
 }) {
   return (
-    <div className="flex w-32 shrink-0 flex-col justify-between rounded-lg bg-emerald-950/60 p-2.5 ring-1 ring-emerald-100/10">
+    <div className="flex w-24 shrink-0 flex-col justify-between rounded-lg bg-emerald-950/60 p-2 ring-1 ring-emerald-100/10 sm:w-32 sm:p-2.5">
       {/* Kompassrosen med väderstrecken runt om. */}
       <div className="grid grid-cols-3 grid-rows-3 place-items-center">
         <div />
         <CompassLetter letter="N" dealer={dealer} />
         <div />
         <CompassLetter letter="W" dealer={dealer} />
-        <svg viewBox="0 0 40 40" className="h-12 w-12" aria-hidden>
+        <svg viewBox="0 0 40 40" className="h-9 w-9 sm:h-12 sm:w-12" aria-hidden>
           {/* Fyruddig stjärna (kompassros) med en spader i mitten. */}
           <polygon
             points="20,1 24,16 39,20 24,24 20,39 16,24 1,20 16,16"
@@ -60,7 +60,7 @@ export function CompassPanel({
         <CompassLetter letter="S" dealer={dealer} />
         <div />
       </div>
-      <div className="mt-2 text-[11px] leading-tight text-emerald-50/90">
+      <div className="mt-2 text-[10px] leading-tight text-emerald-50/90 sm:text-[11px]">
         <div>Bricka {board}</div>
         <div>{VUL_TEXT[vulnerability]}</div>
       </div>

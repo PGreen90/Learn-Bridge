@@ -1,5 +1,5 @@
 import type { Bid } from '../types/bridge'
-import { BidLabel } from './BidLabel'
+import { bidChipTone, BidChipContent } from './BidChip'
 
 interface Props {
   options: Bid[]
@@ -9,26 +9,29 @@ interface Props {
   onChoose: (bid: Bid) => void
 }
 
-/** Raden med budknappar. Efter svar: grönt = rätt, rött = ditt felval. */
+/** Raden med budknappar som färgkodade Synrey-chips.
+ *  Efter svar: grön ram = rätt, röd ram = ditt felval, övriga tonas ner. */
 export function BidOptions({ options, chosen, answer, onChoose }: Props) {
   const answered = chosen !== null
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap justify-center gap-2">
       {options.map((opt) => {
-        let cls = 'bg-white border-slate-300 hover:bg-slate-100'
+        let extra = ''
         if (answered) {
-          if (opt === answer) cls = 'bg-emerald-100 border-emerald-500 text-emerald-900'
-          else if (opt === chosen) cls = 'bg-red-100 border-red-500 text-red-900'
-          else cls = 'bg-white border-slate-200 text-slate-400'
+          if (opt === answer) extra = 'ring-2 ring-emerald-400 -translate-y-0.5'
+          else if (opt === chosen) extra = 'ring-2 ring-red-500'
+          else extra = 'opacity-30'
         }
         return (
           <button
             key={opt}
             disabled={answered}
             onClick={() => onChoose(opt)}
-            className={`min-w-14 rounded-lg border px-4 py-2 text-lg font-bold transition-colors disabled:cursor-default ${cls}`}
+            className={`flex h-11 min-w-16 items-center justify-center rounded-lg px-3 text-lg font-bold shadow-sm transition-all ${bidChipTone(opt)} ${
+              answered ? '' : 'cursor-pointer hover:brightness-105'
+            } ${extra}`}
           >
-            <BidLabel bid={opt} />
+            <BidChipContent bid={opt} />
           </button>
         )
       })}

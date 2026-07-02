@@ -63,7 +63,7 @@ export function AuctionGrid({
         {ORDER.map((seat) => (
           <div
             key={seat}
-            className={`pb-1 text-center text-sm font-semibold ${
+            className={`pb-1 text-center text-xs font-semibold sm:text-sm ${
               vulnerable(seat, vulnerability) ? 'text-red-300' : 'text-yellow-100/90'
             } ${dealer === seat ? 'underline underline-offset-4 decoration-yellow-300' : ''}`}
             title={dealer === seat ? 'Given (börjar buda)' : undefined}

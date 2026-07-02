@@ -34,7 +34,8 @@ import { SideStack } from '../components/SideStack'
 import { CompassPanel } from '../components/CompassPanel'
 import { BiddingBox } from '../components/BiddingBox'
 import { Button } from '../components/Button'
-import { bySuit, handSuitsTrumpFirst, HAND_SUITS } from '../lib/cardLayout'
+import { HandFan } from '../components/HandFan'
+import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
 
 // En giv går genom två faser: först budgivningen (du klickar Syds bud i budlådan,
 // datorn budar V/N/Ö ett i taget runt bordet), sedan kortspelet ur de verkliga
@@ -94,13 +95,16 @@ export function Play() {
     return () => clearTimeout(id)
   }, [game, complete])
 
-  // När budgivningen är klar och gav ett kontrakt → gå till spelfasen.
-  useEffect(() => {
-    if (game.phase !== 'bidding' || !complete) return
-    const contract = contractFromCalls(game.history)
-    if (!contract) return // passades ut – hanteras i budvyn
-    setGame((g) => ({ ...g, phase: 'play', contract }))
-  }, [game, complete])
+  // Budgivningen klar med kontrakt → ägaren BEKRÄFTAR i den vita dialogen
+  // ("1♠ spelas av Syd – Bekräfta", som Synrey) innan kortspelet börjar.
+  function confirmContract() {
+    setGame((g) => {
+      if (g.phase !== 'bidding' || !auctionComplete(g.history)) return g
+      const contract = contractFromCalls(g.history)
+      if (!contract) return g
+      return { ...g, phase: 'play', contract }
+    })
+  }
 
   function onBid(bid: Bid) {
     setGame((g) => {
@@ -142,6 +146,7 @@ export function Play() {
       game={game}
       complete={complete}
       onBid={onBid}
+      onConfirm={confirmContract}
       onNewGame={() => setGame(newGame())}
     />
   )
@@ -156,17 +161,20 @@ function BiddingPhase({
   game,
   complete,
   onBid,
+  onConfirm,
   onNewGame,
 }: {
   game: Game
   complete: boolean
   onBid: (bid: Bid) => void
+  onConfirm: () => void
   onNewGame: () => void
 }) {
   const [showMenu, setShowMenu] = useState(false)
   const toAct = complete ? null : seatToAct(game.deal.dealer, game.history.length)
   const yourTurn = toAct === 'S'
-  const passedOut = complete && !contractFromCalls(game.history)
+  const finalContract = complete ? contractFromCalls(game.history) : null
+  const passedOut = complete && !finalContract
   // Motorns rekommenderade bud för din hand i det här läget (markeras i budlådan
   // och ger den äkta förklaringen för det budet).
   const recommendation = yourTurn ? decideCall(game.deal, game.history, 'S') : null
@@ -209,6 +217,27 @@ function BiddingPhase({
           HCP {hcp(game.deal.hands.S)}
         </div>
       </div>
+
+      {/* Kontrakt bjudet: vit bekräftelsedialog (Synreys "Declared by South"). */}
+      {finalContract && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30">
+          <div className="min-w-60 rounded-xl bg-white p-4 text-center shadow-xl">
+            <div className="flex items-center justify-center gap-2 pb-3">
+              <BidChip bid={`${finalContract.level}${STRAIN_CODE[finalContract.strain]}`} />
+              <span className="text-sm font-medium text-slate-700">
+                spelas av {SEAT_LABEL[finalContract.declarer]}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="w-full border-t border-slate-200 pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
+            >
+              Bekräfta
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Passades given ut: vit dialog (Synrey-stil) med ny giv. */}
       {passedOut && (
@@ -257,17 +286,6 @@ function TableMenu({
   )
 }
 
-/** Din hand som en tät solfjäder (Synrey-ordning ♠ ♥ ♣ ♦, högsta kortet vänster). */
-function HandFan({ hand }: { hand: Hand }) {
-  const cards = HAND_SUITS.flatMap((suit) => bySuit(hand, suit))
-  return (
-    <div className="flex justify-center">
-      {cards.map((c, i) => (
-        <PlayingCard key={`${c.suit}${c.rank}`} card={c} size="lg" className={i > 0 ? '-ml-7' : ''} />
-      ))}
-    </div>
-  )
-}
 
 // ===========================================================================
 // Spelfasen: det gröna bordet, korten, facit och omspelningen. Egen komponent så

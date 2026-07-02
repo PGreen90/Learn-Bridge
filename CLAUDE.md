@@ -32,8 +32,14 @@ Läs den här filen först varje session.
    ägarverifierat mot Synrey-bilder): spelvyn — motståndare helt dolda,
    kolumnträkarl, 👍-turmarkering, ⓘ/⋮-overlays, resultatdialog → omspelning;
    `SideStack` = Ö/V-kort vridna 90° med valörindex IN mot mitten (Öst speglad
-   via `mirrorCorners`). **Kvar (steg 3, finputs):** ev. "Declared by South"-
-   bekräftelse, mobilfinish, Budvisning/budträning-flikarna till samma stil.
+   via `mirrorCorners`). **Steg 3 ✅ KLART** (2026-07-02, ej pushat ännu):
+   (a) "spelas av Syd"-bekräftelsedialog efter budgivningen (auto-hoppet borta,
+   `confirmContract`); (b) budträningen på grönt filt (`AuctionGrid` m. teal
+   turmarkering, budalternativ som Synrey-chips i `BidOptions`, handsolfjäder +
+   HCP·TP-bricka, vitt facit-kort); (c) Budvisningen: auktionen på filt m.
+   `AuctionGrid`, alla bud som `BidChip`; (d) mobilfinish (kompass w-24 på
+   mobil, responsiva rubriker — alla vyer utan overflow på 375 px). Delade
+   `HandFan`; döda `AuctionView` borttagen (allt går via `AuctionGrid`).
 
 --- FAS 11 pushad (testsvit 727, commit e20b7ac) ---
 

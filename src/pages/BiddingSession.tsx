@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-import { HandView } from '../components/HandView'
-import { AuctionView } from '../components/AuctionView'
+import { AuctionGrid } from '../components/AuctionGrid'
 import { BidOptions } from '../components/BidOptions'
+import { HandFan } from '../components/HandFan'
 import { getExercises, getTheme, resolveAuction, type ResolvedCall } from '../lib/bidding'
+import { hcp } from '../lib/engine/hand'
+import { startingPoints } from '../lib/engine/evaluation'
 import { saveValue } from '../lib/storage'
 import type { Bid } from '../types/bridge'
 
@@ -115,65 +117,71 @@ function Session({ themeId }: { themeId: string }) {
       ? 'Nästa fråga'
       : 'Se resultat'
 
-  return (
-    <div className="space-y-6">
-      <Panel>
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-bold">{theme.title}</h1>
-            <p className="text-sm text-slate-500">
-              Fråga {exIndex + 1} av {exercises.length}
-            </p>
-          </div>
-          <Link to="/budtraning" className="text-sm text-emerald-700 underline shrink-0">
-            Avbryt
-          </Link>
-        </div>
-      </Panel>
+  const hp = hcp(exercise.yourHand)
+  const tp = startingPoints(exercise.yourHand).startingPoints
 
-      {shownCalls.length > 0 && (
-        <Panel>
-          <p className="text-sm text-slate-500 mb-3">Budgivningen hittills:</p>
-          <AuctionView
+  return (
+    <div className="space-y-4">
+      {/* Tunn sidhuvud-rad: tema, framsteg och avbryt. */}
+      <div className="flex items-center justify-between gap-3 px-1">
+        <div>
+          <h1 className="text-lg font-bold leading-tight">{theme.title}</h1>
+          <p className="text-xs text-slate-500">
+            Fråga {exIndex + 1} av {exercises.length}
+          </p>
+        </div>
+        <Link to="/budtraning" className="shrink-0 text-sm text-emerald-700 underline">
+          Avbryt
+        </Link>
+      </div>
+
+      {/* Grönt filt (Synrey): auktionen överst, frågan + budchips i mitten,
+          din hand som solfjäder längst ner. */}
+      <div
+        className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
+        style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+      >
+        <div className="p-2.5">
+          <AuctionGrid
             calls={shownCalls}
             dealer={exercise.dealer}
             vulnerability={exercise.vulnerability}
+            activeSeat={!answered && decision ? exercise.yourSeat : null}
           />
-        </Panel>
-      )}
+        </div>
 
-      <Panel>
-        <p className="text-sm text-slate-500 mb-3">Din hand (Syd):</p>
-        <HandView hand={exercise.yourHand} showPoints />
-      </Panel>
+        {decision && (
+          <div className="px-3 pb-4 pt-1">
+            <p className="mb-2.5 text-center text-sm font-medium text-emerald-50">{promptText}</p>
+            <BidOptions
+              options={decision.options}
+              chosen={chosen}
+              answer={decision.answer}
+              onChoose={choose}
+            />
 
-      {decision && (
-        <Panel>
-          <p className="font-semibold text-slate-800 mb-3">{promptText}</p>
-          <BidOptions
-            options={decision.options}
-            chosen={chosen}
-            answer={decision.answer}
-            onChoose={choose}
-          />
-
-          {answered && (
-            <div className="mt-5">
-              <div
-                className={`rounded-xl p-4 ${
-                  isCorrect ? 'bg-emerald-50 text-emerald-900' : 'bg-red-50 text-red-900'
-                }`}
-              >
-                <p className="font-semibold mb-1">{isCorrect ? '✓ Rätt!' : '✗ Inte riktigt.'}</p>
-                <p className="text-sm">{decision.explanation}</p>
+            {answered && (
+              <div className="mx-auto mt-4 max-w-md rounded-xl bg-white p-3 text-left shadow-xl ring-1 ring-slate-200">
+                <p className={`mb-1 font-semibold ${isCorrect ? 'text-emerald-700' : 'text-red-600'}`}>
+                  {isCorrect ? '✓ Rätt!' : '✗ Inte riktigt.'}
+                </p>
+                <p className="text-sm text-slate-700">{decision.explanation}</p>
+                <div className="mt-3">
+                  <Button onClick={next}>{nextLabel} →</Button>
+                </div>
               </div>
-              <div className="mt-4">
-                <Button onClick={next}>{nextLabel} →</Button>
-              </div>
-            </div>
-          )}
-        </Panel>
-      )}
+            )}
+          </div>
+        )}
+
+        {/* Din hand + HCP/TP-bricka (Synrey). */}
+        <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-2 pb-2.5 pt-3">
+          <HandFan hand={exercise.yourHand} />
+          <div className="absolute bottom-2 right-2 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-semibold text-white">
+            HCP {hp} · {tp} TP
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

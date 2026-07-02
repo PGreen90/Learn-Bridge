@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Deal, Seat, Suit } from '../types/bridge'
+import type { Deal, Seat } from '../types/bridge'
 import { SEAT_LABEL } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening, isVulnerable } from '../lib/engine/openings'
@@ -7,12 +7,10 @@ import { buildAuction, dealWithAuction } from '../lib/engine/auction'
 import { turnsToCalls } from '../lib/engine/auction-contract'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
 import { HandView } from '../components/HandView'
-import { AuctionView } from '../components/AuctionView'
-import { SuitSymbol } from '../components/SuitSymbol'
+import { AuctionGrid } from '../components/AuctionGrid'
+import { BidChip } from '../components/BidChip'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-
-const SUIT_OF: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 
 const SEAT_SHORT: Record<Seat, string> = { N: 'N', E: 'Ö', S: 'S', W: 'V' }
 
@@ -51,19 +49,6 @@ function BoardMarker({ deal }: { deal: Deal }) {
   )
 }
 
-/** Visar ett bud snyggt: "Pass", "1 NT" eller "1 ♠" (med färgsymbol). */
-function BidTag({ call }: { call: string }) {
-  if (call === 'P') return <span className="font-bold text-slate-600">Pass</span>
-  const m = call.match(/^(\d)(C|D|H|S|NT)$/)
-  if (!m) return <span className="font-bold">{call}</span>
-  const [, level, suit] = m
-  return (
-    <span className="font-bold text-emerald-700">
-      {level} {suit === 'NT' ? 'NT' : <SuitSymbol suit={SUIT_OF[suit]} />}
-    </span>
-  )
-}
-
 export function Spela() {
   const [deal, setDeal] = useState<Deal>(() => dealRandom())
   const [openSurvey, setOpenSurvey] = useState<OpeningSurvey | null>(null)
@@ -98,9 +83,7 @@ export function Spela() {
             {isOpener && <span className="ml-2 text-xs text-emerald-600">öppnare</span>}
             {isResponder && <span className="ml-2 text-xs text-sky-600">svarare</span>}
           </span>
-          <span className="text-lg">
-            <BidTag call={r.call} />
-          </span>
+          <BidChip bid={r.call} />
         </div>
         <HandView hand={hand} showPoints />
         <p className="mt-2 text-sm text-slate-600">
@@ -149,8 +132,12 @@ export function Spela() {
       {auction && hasResponse && (
         <Panel>
           <h2 className="text-lg font-semibold mb-3">Auktionen (ostörd – motståndarna passar)</h2>
-          <div className="mb-5 flex justify-center">
-            <AuctionView
+          {/* Auktionen på grönt filt med Synrey-chips (klicka ett bud → förklaring). */}
+          <div
+            className="mb-5 rounded-2xl border border-emerald-950/30 p-2.5 shadow-inner"
+            style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+          >
+            <AuctionGrid
               calls={turnsToCalls(auction.turns, deal.dealer)}
               dealer={deal.dealer}
               vulnerability={deal.vulnerability}
@@ -164,8 +151,8 @@ export function Spela() {
                   <span className="font-semibold">{SEAT_LABEL[turn.seat]}</span>{' '}
                   <span className="text-slate-500">({turn.role})</span>
                 </span>
-                <span className="w-14 shrink-0 text-lg">
-                  <BidTag call={turn.call} />
+                <span className="w-14 shrink-0">
+                  <BidChip bid={turn.call} />
                 </span>
                 <span className="text-sm text-slate-600">
                   {turn.explanation}
@@ -241,7 +228,7 @@ function SurveyTable({
           {uncertain.map((u, i) => (
             <li key={i} className="text-slate-700">
               <span className="font-mono text-slate-500">{u.notation}</span> →{' '}
-              <BidTag call={u.result.call} />
+              <BidChip bid={u.result.call} />
             </li>
           ))}
         </ul>
