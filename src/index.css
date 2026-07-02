@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
+/* Självhostade typsnitt (buntas av Vite → funkar offline och på GitHub Pages).
+   Inter = all brödtext/UI. Space Grotesk = rubriker + RebidZ-ordmärket. */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/space-grotesk";
+
+/* RebidZ designgrund — tokens som HELA appen bygger på. Ändra här, aldrig
+   ad hoc i komponenterna. */
+@theme {
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  --font-display:
+    'Space Grotesk Variable', 'Inter Variable', ui-sans-serif, system-ui,
+    sans-serif;
+
+  /* Guld/mässing — RebidZ accentfärg ("premium kortklubb"). Används sparsamt:
+     ordmärkets Z, utmärkelser, premium-detaljer. Aldrig som stor bakgrund. */
+  --color-gold-100: #faf3dc;
+  --color-gold-200: #f3e4b3;
+  --color-gold-300: #e8cf85;
+  --color-gold-400: #d9b556;
+  --color-gold-500: #c39a33;
+  --color-gold-600: #a17c24;
+  --color-gold-700: #7d5e1c;
+}
+
+/* Rubriker sätts i display-typsnittet; lite tightare spärrning ser dyrare ut. */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
 /* Mörkt läge styrs av klassen "dark" på <html> (togglas i sidhuvudet och sätts
    tidigt av index.html) – inte direkt av systemets läge. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -19,12 +57,42 @@
     box-shadow 1s ease !important;
 }
 
-/* Ett kort som "läggs" på bordet i omspelningen (Synrey-känsla): landar mjukt. */
-@keyframes replay-card-in {
-  from { opacity: 0; transform: translateY(-8px) scale(0.85); }
+/* ===== Rörelse (designlyftet steg 3) ==================================== */
+
+/* Ett spelat kort glider in mot mitten FRÅN SPELARENS HÅLL: Nord uppifrån,
+   Syd nerifrån, Väst/Öst från sidorna. Transform-keyframen samsas med
+   Tailwinds rotate-/translate-egenskaper (v4 håller dem separata). */
+@keyframes card-in-n { from { opacity: 0; transform: translateY(-16px) scale(0.9); } to { opacity: 1; } }
+@keyframes card-in-s { from { opacity: 0; transform: translateY(16px) scale(0.9); } to { opacity: 1; } }
+@keyframes card-in-w { from { opacity: 0; transform: translateX(-16px) scale(0.9); } to { opacity: 1; } }
+@keyframes card-in-e { from { opacity: 0; transform: translateX(16px) scale(0.9); } to { opacity: 1; } }
+.card-in-n { animation: card-in-n 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
+.card-in-s { animation: card-in-s 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
+.card-in-w { animation: card-in-w 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
+.card-in-e { animation: card-in-e 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
+
+/* Utdelningen: handens kort kaskadar in ett i taget. Fördröjningen per kort
+   sätts inline (animationDelay) – "both" håller kortet osynligt tills dess. */
+@keyframes deal-in {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; }
 }
-.replay-card-in { animation: replay-card-in 260ms ease-out; }
+.deal-in { animation: deal-in 300ms ease-out both; }
+
+/* Sidbyte: nya sidans innehåll tonar in med en liten lyftning. */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; }
+}
+.page-in { animation: page-in 220ms ease-out; }
+
+/* Användare som bett systemet om minskad rörelse får allt utan animation. */
+@media (prefers-reduced-motion: reduce) {
+  .card-in-n, .card-in-s, .card-in-w, .card-in-e,
+  .deal-in, .page-in {
+    animation: none;
+  }
+}
 
 /* Stil för renderad markdown från systemboken (Budsystem-sidan). */
 .md { color: #334155; font-size: 0.95rem; line-height: 1.65; }

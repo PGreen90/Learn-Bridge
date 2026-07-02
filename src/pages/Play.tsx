@@ -773,6 +773,7 @@ function SouthFan({
   selectedSuit: Suit | null
 }) {
   const { myTurn, legalSet } = turnInfo(play, contract, 'S')
+  let dealt = 0 // löpande kortindex över alla färggrupper → utdelningskaskaden
   return (
     <div className="flex items-end justify-center">
       {handSuitsTrumpFirst(contract.strain).map((suit) => {
@@ -795,7 +796,8 @@ function SouthFan({
                   playable={playable}
                   dimmed={myTurn && !playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
-                  className={!spread && i > 0 ? '-ml-6' : ''}
+                  className={`deal-in ${!spread && i > 0 ? '-ml-6' : ''}`}
+                  style={{ animationDelay: `${dealt++ * 35}ms` }}
                 />
               )
             })}
@@ -804,6 +806,14 @@ function SouthFan({
       })}
     </div>
   )
+}
+
+/** Spelat kort glider in från spelarens håll (animationsklasserna i index.css). */
+const CARD_IN: Record<Seat, string> = {
+  N: 'card-in-n',
+  S: 'card-in-s',
+  W: 'card-in-w',
+  E: 'card-in-e',
 }
 
 /** Sticket i mitten (live): mörk platta, väderstrecken runt om — tummen 👍 visar
@@ -821,7 +831,7 @@ function TrickCenterLive({ play, thinking }: { play: PlayState; thinking: boolea
     const pc = at(seat)
     if (!pc) return null
     return (
-      <div className={`absolute ${pos} ${rotate} replay-card-in`}>
+      <div className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
         <PlayingCard card={pc.card} size="sm" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
       </div>
     )

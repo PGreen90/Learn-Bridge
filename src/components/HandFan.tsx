@@ -12,7 +12,13 @@ export function HandFan({ hand, size = 'lg' }: { hand: Hand; size?: 'sm' | 'md' 
   return (
     <div className="flex justify-center">
       {cards.map((c, i) => (
-        <PlayingCard key={`${c.suit}${c.rank}`} card={c} size={size} className={i > 0 ? overlap : ''} />
+        <PlayingCard
+          key={`${c.suit}${c.rank}`}
+          card={c}
+          size={size}
+          className={`deal-in ${i > 0 ? overlap : ''}`}
+          style={{ animationDelay: `${i * 35}ms` }}
+        />
       ))}
     </div>
   )

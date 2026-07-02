@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
+import { BrandMark } from './BrandMark'
 
 const NAV = [
   { to: '/', label: 'Hem', end: true },
@@ -17,6 +18,7 @@ const NAV = [
 export function Layout() {
   const [theme, setTheme] = useState(currentTheme)
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
 
   // Ljust/mörkt läge: månen tänder mörkret, solen släcker det.
   const themeButton = (
@@ -41,7 +43,13 @@ export function Layout() {
     <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="bg-emerald-800 text-white shadow dark:bg-emerald-950">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <span className="text-xl font-bold whitespace-nowrap">♠ Learn Bridge</span>
+          {/* Ordmärket: logotypen + RebidZ i display-typsnittet, Z:et i guld. */}
+          <NavLink to="/" className="flex items-center gap-2 whitespace-nowrap">
+            <BrandMark className="h-7 w-7" />
+            <span className="font-display text-xl font-bold tracking-tight">
+              Rebid<span className="text-gold-400">Z</span>
+            </span>
+          </NavLink>
 
           {/* Större skärmar: alla länkar i rad. */}
           <nav className="hidden sm:flex flex-wrap items-center gap-1 ml-auto">
@@ -91,7 +99,10 @@ export function Layout() {
         )}
       </header>
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <Outlet />
+        {/* key per adress → innehållet tonar in vid varje sidbyte (page-in). */}
+        <div key={location.pathname} className="page-in">
+          <Outlet />
+        </div>
       </main>
     </div>
   )

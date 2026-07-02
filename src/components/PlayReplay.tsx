@@ -170,15 +170,23 @@ function Fan({ cards, size, overlap }: { cards: Card[]; size: 'sm' | 'md'; overl
   )
 }
 
+/** Spelat kort glider in från spelarens håll (animationsklasserna i index.css). */
+const CARD_IN: Record<Seat, string> = {
+  N: 'card-in-n',
+  S: 'card-in-s',
+  W: 'card-in-w',
+  E: 'card-in-e',
+}
+
 /** Sticket i mitten: mörk platta, väderstrecken runt om, korten lagda mot sin
- *  plats (V/Ö på tvären) — varje nytt kort landar med en liten animation. */
+ *  plats (V/Ö på tvären) — varje nytt kort glider in från sin spelare. */
 function TrickCenter({ cards, winner }: { cards: PlayedCard[]; winner: Seat | null }) {
   const at = (seat: Seat) => cards.find((pc) => pc.seat === seat)
   const card = (seat: Seat, pos: string, rotate = '') => {
     const pc = at(seat)
     if (!pc) return null
     return (
-      <div className={`absolute ${pos} ${rotate} replay-card-in`}>
+      <div className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
         <PlayingCard card={pc.card} size="sm" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
       </div>
     )

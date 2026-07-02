@@ -11,8 +11,28 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
-> **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
+### 🔵 NU — 🎨 DESIGNLYFTET (start 2026-07-02)
+> **Ägarbeslut 2026-07-02:** appen heter **RebidZ** (ägarens eget namn; konflikt-
+> kollat — fritt bland appar/bolag/domäner). Ägaren ser business-potential på
+> sikt → designen ska hålla produktnivå. Stil: **eget & snyggare än Synrey**
+> (fria händer; gröna bordet + layouten behålls). Repo/URL byts INTE nu.
+> **Alla fyra stegen BYGGDA & verifierade 2026-07-02 (testsvit 1484 grön,
+> EJ pushat — väntar ägar-OK):**
+> **Steg 1 ✅** designgrunden — Inter (brödtext) + Space Grotesk (rubriker/
+> ordmärke), självhostade @fontsource; guld-tokens (`--color-gold-*`) +
+> `--font-display` i `index.css` @theme; RebidZ-ordmärke i sidhuvudet;
+> sidtitel + meta description. **Steg 2 ✅** korten & bordet —
+> `PlayingCard.tsx`: gradient-framsida, Space Grotesk-index, stort ess-pip,
+> RebidZ-baksida (smaragd + guldram; vilande tills utdelningsanimation);
+> `Felt.tsx`: ljus uppifrån + SVG-brus (filtväv) + kantdjup. **Steg 3 ✅**
+> rörelse — spelade kort glider in från spelarens håll (`card-in-n/s/w/e`),
+> utdelningskaskad (`deal-in`, 35 ms/kort), sidbyten tonar (`page-in`),
+> tryckrespons (`active:scale`), allt av vid `prefers-reduced-motion`.
+> **Steg 4 ✅** identitet — `BrandMark.tsx` (guldspader på smaragd) i sidhuvud
+> + hero; `public/favicon.svg` (Vite rebaser sökvägen, verifierat 200);
+> `theme-color`; ny startsida: hero på filtet (logotyp, tagline, dekorativ
+> solfjäder, guld-CTA) + lägeskorten. Mobil 375 px verifierad överallt.
+> **Kvar:** ägar-OK → PCD; påminn om att köpa rebidz.com/.se.
 >
 > **🎉 Felrapportering i Spela kort KLAR & LIVE (2026-07-02, testsvit 1481,
 > commit `05d922e`):** dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela
