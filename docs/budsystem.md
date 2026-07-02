@@ -849,7 +849,20 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
-- **2026-07-02** – **FAS 11 – tänj MC-fönstret + webworker (av huvudtråden)**
+- **2026-07-02** – **Felrapport #2–4 lagade: kravbud får aldrig passas** (testsvit
+  1507, commit `df5bf21`, live). Tre spelade givar där bottarna passade bort krav:
+  (1) **öppnarens svar på negativ dubbling** byggt (`openerAnswerNegativeDouble`,
+  §7.3 "öppnaren svarar som på en upplysningsdubbling": utlovad hf billigast /
+  hopp 16+ / NT med stopp / egen 6+ färg – aldrig pass) + **advancern höjer
+  partnerns hoppinkliv spärrande med 3-korts stöd** (hoppinkliv lovar 6+ kort);
+  (2) **öppnarens svar på fjärde färg** byggt (`openerAnswerFourthSuit`, §6.6-
+  prioriteten: stöd / extra längd 6-4·5-5 / NT med stopp / höjning – aldrig pass,
+  undantagen respekteras); (3) **svararens fortsättning i 2/1 GF** byggd
+  (`responderRebidIn2over1Auction`, §5.3: fast arrival, försenat stöd, NT med
+  stopp, andrafärgshöjning – aldrig pass under utgång; facket saknades helt i
+  `responderSecondBid`). Alla tre givarna facit-låsta exakt ur rapporterna.
+  **Beslut:** /felrapporter lämnar alltid en STANDARDRAPPORT (vad hände /
+  anledning / fix / test) – inskrivet i kommandofilen.
   (testsvit 727). **Uppmätt** (riktiga givar): Monte-Carlo tog redan ~2 s vid 7
   kort och 8+ s vid 8 kort – på huvudtråden fryser det fliken. Lösning: (1) MC
   flyttad till en **webworker** (`mc-worker.ts`) → gränssnittet fryser aldrig,

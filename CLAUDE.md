@@ -14,6 +14,23 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
+> **🎉 Felrapport #1–4 LAGADE & LIVE (2026-07-02 kväll, commits `9a6b09e` +
+> `df5bf21`, testsvit 1507):** felrapporteringskedjan bevisad end-to-end fyra
+> gånger. #1 motspel: tredje hand vinner nu högt nog att TRÄKARLEN (som spelar
+> efter, öppen information) inte går över (`play-bot.ts`). #2–4 budgivning,
+> gemensam rot **kravbud passades bort**: (a) öppnarens svar på **negativ
+> dubbling** byggt (`openerAnswerNegativeDouble`, `doubles.ts` §7.3 — aldrig
+> pass) + **spärrhöjning** av partnerns hoppinkliv med 3-korts stöd
+> (`auction-live.ts`, hoppinkliv lovar 6+); (b) öppnarens svar på **fjärde
+> färg** byggt (`openerAnswerFourthSuit`, `rebids.ts` §6.6-prioriteten);
+> (c) svararens **2/1 GF-fortsättning** byggd (`responderRebidIn2over1Auction`,
+> `responder-rebids.ts` §5.3 fast arrival — facket saknades helt i
+> `responderSecondBid`). Alla fyra givarna facit-låsta EXAKT ur rapporterna.
+> **Ägarbeslut:** /felrapporter lämnar alltid STANDARDRAPPORT (vad hände /
+> anledning / fix / test) — inskrivet i kommandofilen. **Bevaka:** Öst-läget
+> över spärrhöjningen (1♣–2♥–X–3♥ → konkurrera 3♠ eller passa?) är ett NYTT
+> frivilligt läge — boten passar; ägarbeslut om det känns fel i spel.
+>
 > **🎉 🎨 DESIGNLYFTET KLART & LIVE (2026-07-02, commit `186a362`, testsvit
 > 1484):** appen heter **RebidZ** (ägarens eget namn; konfliktkollat — fritt
 > bland appar/bolag/domäner; **påminn ägaren köpa rebidz.com/.se**). Ägaren ser
