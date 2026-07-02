@@ -108,7 +108,81 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
     return responderRebidAfterInvertedMinor(hand, openCall === '1C' ? 'clubs' : 'diamonds', rebid)
   }
 
+  // Felrapport #4 – svararens fortsättning i en 2/1 GF-auktion (§5.3). Utgång
+  // är säkrad: svararen får ALDRIG passa under utgång.
+  if (response.rule === '2-över-1 GF') {
+    const opened = suitOfCall(openCall)
+    const responderSuit = suitOfCall(response.call)
+    if (opened && responderSuit) return responderRebidIn2over1Auction(hand, opened, responderSuit, rebid)
+  }
+
   return null
+}
+
+// === Felrapport #4: svararens andra bud i en 2/1 GF-auktion, §5.3 ===========
+//
+// Efter ett 2-över-1-svar är UTGÅNG redan säkrad ("grundregel i hela systemet",
+// ägarbeslut 2026-07-02) – svararen får aldrig passa under utgångsnivån.
+// Naturligt och lugnt enligt §5.3, i prioritetsordning:
+//   1. öppnaren bjöd 3NT → utgång nådd, pass,
+//   2. öppnaren bjöd 2NT (balanserad) → höj till 3NT,
+//   3. 3-korts stöd i öppnarens högfärg (5+ lovade) → sätt trumf
+//      ("fast arrival": minimum går direkt i 4M, extra styrka kryper via 3M),
+//   4. sang med stopp i de objudna färgerna → 3NT,
+//   5. stöd (4+) i öppnarens andrafärg → höjning (krav, GF),
+//   6. rebjud egen 6+ färg,
+//   7. nödutväg: preferens till öppnarens första färg (pass är förbjudet).
+export function responderRebidIn2over1Auction(
+  hand: Hand,
+  opened: Suit,
+  responderSuit: Suit,
+  rebid: ResponseResult,
+): ResponseResult | null {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const rule = '2/1: fortsättning'
+
+  // 1–2. Öppnaren bjöd sang.
+  if (rebid.call === '3NT') {
+    return { call: 'P', rule: 'svararens pass', explanation: `${p} hp – öppnaren bjöd 3NT (utgång nådd) → pass.` }
+  }
+  if (rebid.call === '2NT') {
+    return { call: '3NT', rule, explanation: `${p} hp mittemot balanserad öppnare – utgångskravet fullföljs → 3NT.` }
+  }
+
+  const openedMajor = opened === 'hearts' || opened === 'spades'
+  const rebidSuit = suitOfCall(rebid.call)
+
+  // 3. Försenat stöd i öppnarens högfärg (5+ lovade) → trumf satt.
+  if (openedMajor && len[opened] >= 3) {
+    // Fast arrival (§5.3): snabb utgång = minimum, långsam väg = extra styrka.
+    const call = p >= 15 ? bidAbove(opened, rebid.call) : `4${BID[opened]}`
+    const label = p >= 15 ? `${pretty(call)} (trumf satt, extra styrka – långsam väg)` : `4${SYM[opened]} (fast arrival, minimum-GF)`
+    return { call, rule, explanation: `${p} hp med ${len[opened]}-korts stöd i ${NAME[opened]} → ${label}.` }
+  }
+
+  // 4. Sang med stopp i de objudna färgerna.
+  const bidSuits = new Set<Suit>([opened, responderSuit, ...(rebidSuit ? [rebidSuit] : [])])
+  const unbid = RANK.filter((s) => !bidSuits.has(s))
+  if (unbid.every((s) => hasStopper(hand, s))) {
+    return { call: '3NT', rule, explanation: `${p} hp, stopp i ${unbid.map((s) => NAME[s]).join(' och ') || 'alla färger'} → 3NT (utgångskravet fullföljs).` }
+  }
+
+  // 5. Stöd (4+) i öppnarens visade andrafärg → höjning (krav i GF).
+  if (rebidSuit && rebidSuit !== opened && rebidSuit !== responderSuit && len[rebidSuit] >= 4) {
+    const call = bidAbove(rebidSuit, rebid.call)
+    return { call, rule, explanation: `${p} hp med 4-korts stöd i ${NAME[rebidSuit]} → ${pretty(call)} (höjning, GF).` }
+  }
+
+  // 6. Rebjud egen 6+ färg (extra längd).
+  if (len[responderSuit] >= 6) {
+    const call = bidAbove(responderSuit, rebid.call)
+    return { call, rule, explanation: `${p} hp, 6+ ${NAME[responderSuit]} → ${pretty(call)} (extra längd, GF).` }
+  }
+
+  // 7. Nödutväg: preferens till öppnarens första färg – kravet får aldrig passas.
+  const call = bidAbove(opened, rebid.call)
+  return { call, rule, explanation: `${p} hp – preferens till ${NAME[opened]} (2/1 är utgångskrav, pass förbjudet).` }
 }
 
 // === FAS 6 punkt 27: svararens fortsättning efter inverterad minor, §4.2 =====

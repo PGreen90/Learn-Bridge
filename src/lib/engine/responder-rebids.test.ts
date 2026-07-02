@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Major, ResponseResult } from './responses'
 import { parseHand } from '../bidding'
 import type { Suit } from '../../types/bridge'
-import { responderAnswerBergenGameTry, responderRebidAfterInvertedMinor, responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction, responderRebidIn2NTAuction, responderRevealSplinterShortness } from './responder-rebids'
+import { responderAnswerBergenGameTry, responderRebidAfterInvertedMinor, responderRebidAfterSemiForcing1NT, responderRebidColorAuction, responderRebidIn1NTAuction, responderRebidIn2over1Auction, responderRebidIn2NTAuction, responderRevealSplinterShortness } from './responder-rebids'
 import { buildAuction } from './auction'
 import type { Deal } from '../../types/bridge'
 
@@ -339,5 +339,42 @@ describe('buildAuction – inverterad minor end-to-end (FAS 6 inkoppling)', () =
     }
     const a = buildAuction(deal)
     expect(a?.turns.map((t) => t.call)).toEqual(['1D', '2D', '2NT', '3NT'])
+  })
+})
+
+// Felrapport #4: svararens fortsättning i 2/1 GF-auktioner (§5.3) – utgång är
+// säkrad, svararen får ALDRIG passa under utgång. Sammanhang i färgfallen:
+// 1♠–2♦–3♣ (öppning spader, 2/1 i ruter, öppnarens andrafärg klöver).
+describe('responderRebidIn2over1Auction (§5.3, felrapport #4)', () => {
+  const after3C = (hand: string) =>
+    responderRebidIn2over1Auction(parseHand(hand), 'spades', 'diamonds', { call: '3C', rule: 'rebid: ny färg (GF)', explanation: '' })!
+
+  it('öppnaren bjöd 3NT → utgång nådd, pass', () => {
+    const r = responderRebidIn2over1Auction(parseHand('S:3 H:QJ72 D:AKQJ9 C:T76'), 'spades', 'diamonds', { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: '' })!
+    expect(r.call).toBe('P')
+  })
+  it('öppnaren bjöd 2NT (balanserad) → höj till 3NT', () => {
+    const r = responderRebidIn2over1Auction(parseHand('S:3 H:QJ72 D:AKQJ9 C:T76'), 'spades', 'diamonds', { call: '2NT', rule: 'rebid: 2NT (GF)', explanation: '' })!
+    expect(r.call).toBe('3NT')
+  })
+  it('3-korts stöd i öppnarens högfärg, minimum-GF → 4♠ (fast arrival)', () => {
+    expect(after3C('S:Q83 H:872 D:AKQJ9 C:76').call).toBe('4S')
+  })
+  it('3-korts stöd + extra styrka (15+) → 3♠ (långsam väg, slamrum)', () => {
+    expect(after3C('S:Q83 H:A72 D:AKQJ9 C:A6').call).toBe('3S')
+  })
+  it('inget stöd men objudna färgen stoppad → 3NT (Nords hand ur felrapporten)', () => {
+    const r = after3C('S:3 H:QJ72 D:AKQJ9 C:T76')
+    expect(r.call).toBe('3NT')
+    expect(r.rule).toBe('2/1: fortsättning')
+  })
+  it('varken stöd eller stopp, men 4-korts stöd i andrafärgen → höjning 4♣', () => {
+    expect(after3C('S:3 H:872 D:AKQJ9 C:KJ76').call).toBe('4C')
+  })
+  it('egen 6+ färg → rebjud (3♦)', () => {
+    expect(after3C('S:A3 H:872 D:AKQJ93 C:76').call).toBe('3D')
+  })
+  it('nödutväg: preferens till öppnarens färg – aldrig pass (3♠)', () => {
+    expect(after3C('S:A3 H:872 D:AKQJ9 C:762').call).toBe('3S')
   })
 })

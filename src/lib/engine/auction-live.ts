@@ -17,7 +17,8 @@ import type { Bid, Deal, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
-import { answerTakeoutDouble } from './doubles'
+import { answerTakeoutDouble, openerAnswerNegativeDouble } from './doubles'
+import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import { openingSuit, overcall } from './overcalls'
@@ -179,6 +180,88 @@ function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): Suit | null
   return theirSuit
 }
 
+/**
+ * Är `seat` (öppnaren) TVUNGEN att svara på partnerns NEGATIVA dubbling?
+ * Mönstret (§7.3): vi öppnade 1 i färg – motståndaren klev in i färg – partnern
+ * dubblade (negativt = upplysning, rondkrav) – och bara pass har följt sedan.
+ * Öppnaren får då aldrig passa (felrapport #2: auktionen dog på öppnarens pass).
+ * Kraven:
+ *  - partnerns senaste icke-pass-bud är ett X (inget har bjudits över det),
+ *  - auktionens FÖRSTA kontraktsbud är `seat`s egen 1-läges färgöppning,
+ *  - vår sida har inte bjudit något annat kontraktsbud (X:et är svararens första
+ *    besked, inte straff i en utvecklad auktion),
+ *  - motståndarna har klivit in i EN FÄRG (det X:et dubblar).
+ * Returnerar {ourOpen, theirCall}, annars null.
+ */
+function negativeDoubleToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { ourOpen: Suit; theirCall: string } | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
+
+  const open = openingBid(history)
+  if (!open || open.seat !== seat || open.level !== 1) return null
+  const ourOpen = SUIT_OF_LETTER[open.strain]
+  if (!ourOpen) return null // 1NT-öppning → X:et är något annat än negativt
+
+  // Vår sida får bara ha öppningen som kontraktsbud (annars är X:et inte negativt).
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1) return null
+
+  // Deras inkliv = senaste kontraktsbudet i historiken, från motståndarsidan, i färg.
+  let theirCall: string | null = null
+  for (const c of history) {
+    if (!parseContractBid(c.bid)) continue
+    theirCall = side(c.seat) !== side(seat) && SUIT_OF_LETTER[parseContractBid(c.bid)!.strain] ? c.bid : null
+  }
+  if (!theirCall) return null
+  return { ourOpen, theirCall }
+}
+
+/**
+ * Har partnern just bjudit FJÄRDE FÄRG (§6.6, utgångskrav) som `seat` (öppnaren)
+ * måste svara på? Mönstret (ostört): vår 1-läges färgöppning – partnerns
+ * 1-läges färgsvar – vårt 1-läges färgåterbud (ny färg) – partnerns bud i den
+ * FJÄRDE färgen på 2-läget. Kravet får aldrig passas (felrapport #3).
+ * Undantag ur systemboken: motståndarna stör (kontraktsbud), passad hand, och
+ * "alla fyra färger på 1-läget" (fjärde färgen kunde bjudits på 1-läget → den
+ * är naturlig, inte konstgjord). Returnerar färgerna, annars null.
+ */
+function fourthSuitToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { opened: Suit; second: Suit; responderSuit: Suit; fourth: Suit } | null {
+  if (opponentsHaveBid(history, seat)) return null // stört → fjärde färg gäller inte
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
+
+  // Kontraktsbuden ska vara exakt: vår öppning, partnerns svar, vårt återbud,
+  // partnerns fjärde färg – alla i färg, de tre första på 1-läget.
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length !== 4 || bids[3] !== lastNonPass) return null
+  if (bids[0].seat !== seat || bids[1].seat !== PARTNER[seat] || bids[2].seat !== seat) return null
+  const cbs = bids.map((c) => parseContractBid(c.bid)!)
+  if (cbs.some((cb) => cb.strain === 'NT')) return null
+  const strains = cbs.map((cb) => cb.strain)
+  if (new Set(strains).size !== 4) return null // fjärde färg = fyra OLIKA färger
+  if (!cbs.slice(0, 3).every((cb) => cb.level === 1) || cbs[3].level !== 2) return null
+  // Kunde fjärde färgen bjudits redan på 1-läget (rankar över vårt återbud) är
+  // den naturlig (systembokens undantag) – och ett HOPP till 2-läget är inget
+  // fjärde färg-krav.
+  if (STRAINS.indexOf(strains[3] as (typeof STRAINS)[number]) > STRAINS.indexOf(strains[2] as (typeof STRAINS)[number])) return null
+  // Passad hand: passade partnern innan sitt första bud gäller fjärde färg inte.
+  const firstPartnerBid = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
+  if (history.slice(0, firstPartnerBid).some((c) => c.seat === PARTNER[seat])) return null
+
+  return {
+    opened: SUIT_OF_LETTER[strains[0]],
+    second: SUIT_OF_LETTER[strains[2]],
+    responderSuit: SUIT_OF_LETTER[strains[1]],
+    fourth: SUIT_OF_LETTER[strains[3]],
+  }
+}
+
 // ---- Off-book: svara historiedrivet på Syds egna bud (pivotens kärna) -------
 //
 // När Syd bjudit utanför systemlinjen (off-book) har partnern ingen kanonisk
@@ -246,12 +329,42 @@ function cheapestBidIn(history: ResolvedCall[], seat: Seat, strain: string): Bid
 }
 
 /**
+ * Var partnerns färg ett HOPP-inkliv över motståndarnas öppning? Ett svagt
+ * hoppinkliv (t.ex. 2♥ över 1♣) lovar 6+ kort i färgen — då räcker 3-korts
+ * stöd för fit (9 trumf), och en höjning är SPÄRR (lag om totala stick), inte
+ * styrkevisning. (Felrapport #2, ägarbeslut 2026-07-02.)
+ */
+function partnerJumpOvercalled(
+  history: ResolvedCall[],
+  seat: Seat,
+  partnerSuit: { strain: string },
+): boolean {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat)) return false // inkliv kräver deras öppning
+  let prevValue = 0
+  for (const c of history) {
+    const cb = parseContractBid(c.bid)
+    if (!cb) continue
+    if (c.seat === PARTNER[seat] && cb.strain === partnerSuit.strain) {
+      // Hopp = budet ligger en hel nivå över det billigaste lagliga i färgen.
+      let minLevel = 1
+      while (bidValue(minLevel, cb.strain) <= prevValue) minLevel++
+      return cb.level > minLevel
+    }
+    prevValue = bidValue(cb.level, cb.strain)
+  }
+  return false
+}
+
+/**
  * Hur många trumf vi kräver för att kalla det fit i partnerns färg. Öppnade
  * partnern den HÖGfärgen på 1-läget lovar den 5+ → 3-korts stöd räcker (8-korts
- * fit). I alla andra fall (minor, eller en högfärg som inte är öppningen) kräver
- * vi 4+ för att vara säkra på fit.
+ * fit). Samma sak när partnern HOPPINKLIVIT (6+ kort lovade). I alla andra fall
+ * (minor, eller en högfärg som inte är öppningen) kräver vi 4+ för att vara
+ * säkra på fit.
  */
 function fitLengthNeeded(history: ResolvedCall[], seat: Seat, partnerSuit: { strain: string; level: number }): number {
+  if (partnerJumpOvercalled(history, seat, partnerSuit)) return 3
   const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
   const open = openingBid(history)
   const partnerOpenedMajor =
@@ -279,6 +392,20 @@ function raiseWithFit(
 
   const sp = dummyPoints(hand, suit).dummyPoints
   if (sp < 6) return null // för svagt för att höja
+
+  // Partnern hoppinklev (svagt, 6+ kort) → höjningen är SPÄRR: en nivå upp,
+  // aldrig styrkegraderad (partnern har max ~9 hp – utgångsblås vore fel).
+  if (partnerJumpOvercalled(history, seat, partnerSuit)) {
+    const bid = `${partnerSuit.level + 1}${partnerSuit.strain}` as Bid
+    if (legalCalls(history, seat).includes(bid)) {
+      return {
+        seat,
+        bid,
+        explanation: `Höjer partnerns spärr – 3+ stöd mot ett hoppinkliv (6+ kort) gör det svårare för motståndarna.`,
+      }
+    }
+    return null
+  }
 
   const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
   // Önskad nivå efter styrka. Utgång bara i högfärg (4-läget); minorutgång (5-läget)
@@ -457,6 +584,28 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   const theirSuit = takeoutDoubleToAnswer(history, seat)
   if (theirSuit) {
     const ans = answerTakeoutDouble(deal.hands[seat], theirSuit)
+    if (legalCalls(history, seat).includes(ans.call as Bid)) {
+      return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+    }
+  }
+
+  // Samma tvång för öppnaren mot partnerns NEGATIVA dubbling (§7.3, rondkrav):
+  // öppnaren får aldrig lämnas att passa bort svararens upplysning.
+  const neg = negativeDoubleToAnswer(history, seat)
+  if (neg) {
+    const ans = openerAnswerNegativeDouble(deal.hands[seat], neg.ourOpen, neg.theirCall)
+    if (legalCalls(history, seat).includes(ans.call as Bid)) {
+      return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+    }
+  }
+
+  // Partnerns FJÄRDE FÄRG (§6.6) är utgångskrav – öppnaren svarar alltid
+  // (stöd / extra längd / NT med stopp / höjning), passar aldrig.
+  const fourth = fourthSuitToAnswer(history, seat)
+  if (fourth) {
+    const ans = openerAnswerFourthSuit(
+      deal.hands[seat], fourth.opened, fourth.second, fourth.responderSuit, fourth.fourth,
+    )
     if (legalCalls(history, seat).includes(ans.call as Bid)) {
       return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
     }

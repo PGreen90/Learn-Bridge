@@ -4,6 +4,7 @@ import type { Major } from './responses'
 import { parseHand } from '../bidding'
 import type { ResponseResult } from './responses'
 import {
+  openerAnswerFourthSuit,
   openerRebidAfter1LevelResponse,
   openerRebidAfter1NTResponse,
   openerRebidAfter2over1,
@@ -286,5 +287,34 @@ describe('punkt 9 – öppnarens fullföljanden efter 1NT-svar', () => {
 
   it('Minor Suit Stayman → 3♣ med 4 klöver', () => {
     expect(after1nt('Minor Suit Stayman', '2S', 'S:K32 H:KQ3 D:A42 C:KQ42')).toBe('3C')
+  })
+})
+
+// Fjärde färg krav (§6.6): öppnarens svar – facit-lås ur felrapport #3.
+// Sammanhang i alla fall: 1♣–1♥–1♠–2♦ (öppning klöver, återbud spader,
+// svararens färg hjärter, fjärde färgen ruter). Prioriteten kommer ur §6.6.
+describe('openerAnswerFourthSuit (§6.6, felrapport #3)', () => {
+  const answer = (hand: string) =>
+    openerAnswerFourthSuit(parseHand(hand), 'clubs', 'spades', 'hearts', 'diamonds')
+
+  it('prio 1: 3-korts stöd i svararens högfärg → 2♥', () => {
+    expect(answer('S:AQ95 H:K64 D:32 C:KQ76').call).toBe('2H')
+  })
+  it('prio 2a: 6-4 → återbud av öppningsfärgen (3♣)', () => {
+    expect(answer('S:AQ95 H:6 D:32 C:AKQ764').call).toBe('3C')
+  })
+  it('prio 2b: 5-5 → rebjud andrafärgen (2♠)', () => {
+    expect(answer('S:AQ952 H:6 D:32 C:KQ764').call).toBe('2S')
+  })
+  it('prio 3: stopp i fjärde färgen → 2NT (Nords hand ur felrapporten)', () => {
+    const r = answer('S:AT95 H:T D:AT4 C:QT764')
+    expect(r.call).toBe('2NT')
+    expect(r.rule).toBe('svar på fjärde färg')
+  })
+  it('prio 4: 4 kort i fjärde färgen utan stopp → höjning (3♦)', () => {
+    expect(answer('S:AQ95 H:62 D:T987 C:KQ7').call).toBe('3D')
+  })
+  it('nödutväg: varken stöd, längd eller stopp → billigaste återbud (aldrig pass)', () => {
+    expect(answer('S:AQ95 H:76 D:32 C:KQJ76').call).toBe('3C')
   })
 })

@@ -472,3 +472,75 @@ function rebidAfterMinorResponse(m: Suit, response: ResponseResult, hand: Hand):
       return null
   }
 }
+
+// === Fjärde färg krav (§6.6): öppnarens svar ================================
+//
+// Svararens bud i den FJÄRDE färgen (1♣–1♥–1♠–2♦ osv.) är konstgjort och
+// UTGÅNGSKRAV – öppnaren får aldrig passa (felrapport #3: auktionen dog på
+// öppnarens pass). Svarsprioriteten kommer rakt ur systemboken §6.6:
+//   1. visa 3-korts stöd i svararens högfärg,
+//   2. rebjuda en färg för extra längd (6-4 / 5-5),
+//   3. bjuda NT med stopp i fjärde färgen,
+//   4. (sällan) höja fjärde färgen med 4 kort.
+// Nödutväg (inget av ovan): billigaste återbud av öppningsfärgen – svara MÅSTE man.
+
+/** Enkel stoppkontroll: A, Kx, Qxx eller Jxxx i färgen. */
+function stopperIn(hand: Hand, suit: Suit): boolean {
+  const cards = hand.filter((c) => c.suit === suit)
+  const has = (r: string) => cards.some((c) => c.rank === r)
+  if (has('A')) return true
+  if (has('K') && cards.length >= 2) return true
+  if (has('Q') && cards.length >= 3) return true
+  if (has('J') && cards.length >= 4) return true
+  return false
+}
+
+/**
+ * Öppnarens svar på svararens fjärde färg-krav. `opened`/`second` = öppnarens
+ * två visade färger, `responderSuit` = svararens första färg, `fourth` = den
+ * konstgjorda fjärde färgen (bjuden på 2-läget). Returnerar ALLTID ett bud.
+ */
+export function openerAnswerFourthSuit(
+  hand: Hand,
+  opened: Suit,
+  second: Suit,
+  responderSuit: Suit,
+  fourth: Suit,
+): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const rule = 'svar på fjärde färg'
+  // Billigaste nivån över fjärde färgen (som ligger på 2-läget).
+  const cheap = (s: Suit) => (rankOf(s) > rankOf(fourth) ? 2 : 3)
+
+  // 1. Tre-korts stöd i svararens högfärg (5+ lovade i sammanhanget).
+  if ((responderSuit === 'hearts' || responderSuit === 'spades') && len[responderSuit] >= 3) {
+    const call = `${cheap(responderSuit)}${BID[responderSuit]}`
+    return { call, rule, explanation: `${p} hp, ${len[responderSuit]}-korts stöd i partnerns ${NAME[responderSuit]} → ${pretty(call)} (svar på fjärde färgen).` }
+  }
+
+  // 2. Extra längd: 6+ i öppningsfärgen (6-4) eller 5+ i andrafärgen (5-5).
+  if (len[opened] >= 6) {
+    const call = `${cheap(opened)}${BID[opened]}`
+    return { call, rule, explanation: `${p} hp, 6+ ${NAME[opened]} → ${pretty(call)} (extra längd, svar på fjärde färgen).` }
+  }
+  if (len[second] >= 5) {
+    const call = `${cheap(second)}${BID[second]}`
+    return { call, rule, explanation: `${p} hp, 5-5 i ${NAME[opened]}/${NAME[second]} → ${pretty(call)} (extra längd, svar på fjärde färgen).` }
+  }
+
+  // 3. NT med stopp i fjärde färgen (2NT ligger alltid över ett 2-lägesbud).
+  if (stopperIn(hand, fourth)) {
+    return { call: '2NT', rule, explanation: `${p} hp, stopp i ${NAME[fourth]} → 2NT (svar på fjärde färgen, mot 3NT).` }
+  }
+
+  // 4. Höj fjärde färgen med 4 kort (visar äkta fit i den – sällsynt).
+  if (len[fourth] >= 4) {
+    const call = `3${BID[fourth]}`
+    return { call, rule, explanation: `${p} hp, 4-korts ${NAME[fourth]} → ${pretty(call)} (höjning av fjärde färgen).` }
+  }
+
+  // Nödutväg: billigaste återbud av öppningsfärgen (kravet får aldrig passas).
+  const call = `${cheap(opened)}${BID[opened]}`
+  return { call, rule, explanation: `${p} hp, inget stopp och ingen extra form – ${pretty(call)} (fjärde färgen är krav, pass förbjudet).` }
+}

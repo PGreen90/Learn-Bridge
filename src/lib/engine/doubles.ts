@@ -1,14 +1,16 @@
 // Punkt 23: dubblingar, systembok §7.3.
 //
-//   negativeDouble       – svararens dubbling när VI öppnat och de klivit in
-//   responsiveDouble     – vår dubbling när de bjudit och höjt en färg
-//   supportDouble        – öppnarens dubbling = exakt 3 stöd i partnerns hf
-//   answerTakeoutDouble  – advancers svar på partnerns upplysningsdubbling
+//   negativeDouble             – svararens dubbling när VI öppnat och de klivit in
+//   openerAnswerNegativeDouble – öppnarens SVAR på den (rondkrav, aldrig pass)
+//   responsiveDouble           – vår dubbling när de bjudit och höjt en färg
+//   supportDouble              – öppnarens dubbling = exakt 3 stöd i partnerns hf
+//   answerTakeoutDouble        – advancers svar på partnerns upplysningsdubbling
 //
 // Upplysningsdubblingen SJÄLV (när motståndaren öppnat) bor i `overcalls.ts`.
 
 import type { Hand, Suit } from '../../types/bridge'
 import { hcp, lengths } from './hand'
+import { hasStopper } from './overcalls'
 import type { ResponseResult } from './responses'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
@@ -52,6 +54,80 @@ export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): Re
     return { call: 'X', rule: 'negativ dubbling', explanation: `${p} hp, 4-4 i minorerna → X (negativ dubbling, visar objudna minorer).` }
   }
   return null
+}
+
+/**
+ * Öppnarens SVAR på partnerns negativa dubbling (§7.3: "öppnaren svarar som på
+ * en upplysningsdubbling"). Dubblingen är RONDKRAV – öppnaren får aldrig passa
+ * (felrapport #2: auktionen dog när öppnaren lämnades att passa). Prioritet:
+ *   1. den objudna högfärg dubblingen visar (4+ hos öppnaren) – billigast med
+ *      minimum (12–15), hoppande med 16+,
+ *   2. sang med stopp i deras färg (balanserat alternativ),
+ *   3. återbud av egen 6+ färg,
+ *   4. annan objuden 4+ färg (billigast),
+ *   5. nödutväg: återbud av öppningsfärgen (svara MÅSTE man).
+ */
+export function openerAnswerNegativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): ResponseResult {
+  const their = suitOfBid(theirCall)!
+  const theirLevel = Number(theirCall[0])
+  const p = hcp(hand)
+  const len = lengths(hand)
+
+  /** Billigaste nivån för `suit` över deras inkliv. */
+  const cheapLevel = (suit: Suit) => (rankIdx(suit) > rankIdx(their) ? theirLevel : theirLevel + 1)
+
+  // 1. Objuden högfärg (den dubblingen lovar 4+ kort i) – bjud den med 4+ stöd.
+  const unbidMajors = (['hearts', 'spades'] as Suit[]).filter((s) => s !== ourOpen && s !== their)
+  for (const m of unbidMajors) {
+    if (len[m] >= 4) {
+      const lvl = cheapLevel(m) + (p >= 16 ? 1 : 0)
+      const strength = p >= 16 ? `${p} hp, hoppande (extra styrka)` : `${p} hp, minimum`
+      return {
+        call: `${lvl}${BID[m]}`,
+        rule: 'svar på negativ dubbling',
+        explanation: `Partnerns negativa dubbling visar 4+ ${NAME[m]} – ${strength} → ${lvl}${SYM[m]}.`,
+      }
+    }
+  }
+
+  // 2. Sang med stopp i deras färg.
+  if (hasStopper(hand, their)) {
+    const ntLevel = theirLevel // NT rankar över alla färger → alltid samma nivå
+    return {
+      call: `${ntLevel}NT`,
+      rule: 'svar på negativ dubbling',
+      explanation: `Ingen fjärde högfärg men stopp i deras färg → ${ntLevel} sang (${p} hp).`,
+    }
+  }
+
+  // 3. Egen 6+ färg om.
+  if (len[ourOpen] >= 6) {
+    return {
+      call: `${cheapLevel(ourOpen)}${BID[ourOpen]}`,
+      rule: 'svar på negativ dubbling',
+      explanation: `Ingen passande färg att visa – återbud av ${NAME[ourOpen]} (6+ kort, ${p} hp).`,
+    }
+  }
+
+  // 4. Annan objuden 4+ färg, billigast.
+  const others = RANK_ORDER.filter((s) => s !== ourOpen && s !== their && len[s] >= 4).sort(
+    (a, b) => cheapLevel(a) - cheapLevel(b) || rankIdx(a) - rankIdx(b),
+  )
+  if (others.length > 0) {
+    const s = others[0]
+    return {
+      call: `${cheapLevel(s)}${BID[s]}`,
+      rule: 'svar på negativ dubbling',
+      explanation: `Näst bästa färgen ${NAME[s]} (4+ kort, ${p} hp) – dubblingen måste besvaras.`,
+    }
+  }
+
+  // 5. Nödutväg: billigaste återbud av öppningsfärgen (pass är förbjudet).
+  return {
+    call: `${cheapLevel(ourOpen)}${BID[ourOpen]}`,
+    rule: 'svar på negativ dubbling',
+    explanation: `Inget bättre att säga – återbud av ${NAME[ourOpen]} (dubblingen är rondkrav).`,
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { negativeDouble, responsiveDouble, supportDouble, answerTakeoutDouble } from './doubles'
+import { negativeDouble, openerAnswerNegativeDouble, responsiveDouble, supportDouble, answerTakeoutDouble } from './doubles'
 
 describe('negativeDouble (§7.3)', () => {
   it('1♦–(1♠)–X med 4+ hjärter', () => {
@@ -11,6 +11,30 @@ describe('negativeDouble (§7.3)', () => {
   })
   it('gäller även inkliv på 2-läget: 1♦–(2♣)–X med 4 hjärter', () => {
     expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '2C')?.call).toBe('X')
+  })
+})
+
+// Öppnarens svar på partnerns negativa dubbling – rondkrav, aldrig pass.
+// Facit ur felrapport #2 (bricka 14): 1♣–(2♥)–X → öppnaren bjuder sin 4-korts
+// spader billigast med minimum. §7.3: "öppnaren svarar som på en upplysningsdubbling".
+describe('openerAnswerNegativeDouble (§7.3, felrapport #2)', () => {
+  it('1♣–(2♥)–X, minimum med 4 spader → 2♠ (billigast)', () => {
+    // Östs hand ur felrapporten (12 hp, JT97 i spader).
+    const r = openerAnswerNegativeDouble(parseHand('S:JT97 H:KJ D:53 C:AK852'), 'clubs', '2H')
+    expect(r.call).toBe('2S')
+    expect(r.rule).toBe('svar på negativ dubbling')
+  })
+  it('extra styrka (16+) → hoppande 3♠', () => {
+    expect(openerAnswerNegativeDouble(parseHand('S:AQ97 H:KJ D:A3 C:AK852'), 'clubs', '2H').call).toBe('3S')
+  })
+  it('1♦–(1♠)–X med 4 hjärter → 2♥ (högfärgen rankar under deras → nivån upp)', () => {
+    expect(openerAnswerNegativeDouble(parseHand('S:32 H:KQ43 D:AQJ32 C:43'), 'diamonds', '1S').call).toBe('2H')
+  })
+  it('ingen fjärde högfärg men stopp i deras färg → billigaste sang', () => {
+    expect(openerAnswerNegativeDouble(parseHand('S:32 H:KQ2 D:AQ432 C:K32'), 'diamonds', '2H').call).toBe('2NT')
+  })
+  it('varken högfärg eller stopp: 6+ egen färg → återbud (aldrig pass)', () => {
+    expect(openerAnswerNegativeDouble(parseHand('S:432 H:32 D:AKQJ32 C:K2'), 'diamonds', '2H').call).toBe('3D')
   })
 })
 

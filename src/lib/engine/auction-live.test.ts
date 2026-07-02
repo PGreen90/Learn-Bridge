@@ -455,3 +455,76 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     expect(quirky / closed).toBeLessThan(0.02)
   })
 })
+
+// Felrapport #2 (github.com/PGreen90/Learn-Bridge/issues/2): bricka 14,
+// 1♣ (Ö) – 2♥ (S, svagt hoppinkliv) – X (V, negativ dubbling) – P – P – P.
+// Ägarbeslut 2026-07-02: (1) Öst FÅR INTE passa partnerns negativa dubbling
+// (rondkrav, §7.3 "öppnaren svarar som på en upplysningsdubbling") – med 4
+// spader (som X:et visar) bjuder Öst 2♠. (2) Nord (inklivarens partner) höjer
+// spärren till 3♥ med 3-korts stöd – partnerns hoppinkliv lovar 6+ kort.
+describe('felrapport #2 – negativ dubbling måste besvaras + höj partnerns spärr', () => {
+  const deal = dealOf('E', {
+    N: 'S:K2 H:A62 D:KQ76 C:Q763',
+    E: 'S:JT97 H:KJ D:53 C:AK852',
+    S: 'S:A43 H:QT9875 D:T984 C:-',
+    W: 'S:Q865 H:43 D:AJ2 C:JT94',
+  })
+
+  it('Öst svarar 2♠ på Västs negativa dubbling (rondkrav – pass förbjudet)', () => {
+    const history = [call('E', '1C'), call('S', '2H'), call('W', 'X'), call('N', 'P')]
+    const c = decideCall(deal, history, 'E')
+    expect(c.bid).toBe('2S')
+  })
+
+  it('Nord höjer Syds svaga hoppinkliv till 3♥ med 3-korts stöd (spärrhöjning)', () => {
+    const history = [call('E', '1C'), call('S', '2H'), call('W', 'X')]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('3H')
+  })
+})
+
+// Felrapport #3 (github.com/PGreen90/Learn-Bridge/issues/3): bricka 1,
+// 1♣ (N) – 1♥ (S) – 1♠ (N) – 2♦ (S = FJÄRDE FÄRG, utgångskrav §6.6) – och Nord
+// PASSADE. Ett kravbud får aldrig passas: Nord svarar enligt §6.6-prioriteten
+// (stöd i partnerns hf / extra längd / NT med stopp i fjärde färgen / höjning).
+// Nords hand: inget hjärterstöd (singel), ingen 6-4/5-5, men ♦A = stopp → 2NT.
+describe('felrapport #3 – fjärde färg är krav, öppnaren får inte passa', () => {
+  const deal = dealOf('N', {
+    N: 'S:AT95 H:T D:AT4 C:QT764',
+    E: 'S:K7 H:J862 D:Q932 C:K92',
+    S: 'S:J8 H:AQ954 D:J8 C:AJ85',
+    W: 'S:Q6432 H:K73 D:K765 C:3',
+  })
+
+  it('1♣–1♥–1♠–2♦ (fjärde färg): Nord bjuder 2NT med ruterstopp', () => {
+    const history = [
+      call('N', '1C'), call('E', 'P'), call('S', '1H'), call('W', 'P'),
+      call('N', '1S'), call('E', 'P'), call('S', '2D'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('2NT')
+  })
+})
+
+// Felrapport #4 (github.com/PGreen90/Learn-Bridge/issues/4): bricka 6,
+// P – 1♠ (S) – P – 2♦ (N, 2-över-1) – P – 3♣ (S) – P – och Nord PASSADE.
+// Ägaren: "2 över 1 = game force, partner får inte passa – grundregel i hela
+// systemet." Nord (14 hp, ♥QJ72 stoppade, inget spaderstöd, bara 3 klöver)
+// fortsätter naturligt mot utgången: 3NT.
+describe('felrapport #4 – 2-över-1 är utgångskrav, svararen får inte passa', () => {
+  const deal = dealOf('E', {
+    N: 'S:3 H:QJ72 D:AKQJ9 C:T76',
+    E: 'S:AT84 H:KT3 D:762 C:A93',
+    S: 'S:KQJ52 H:84 D:43 C:KQ84',
+    W: 'S:976 H:A965 D:T85 C:J52',
+  })
+
+  it('P–1♠–P–2♦–P–3♣–P: Nord bjuder 3NT (hjärterstopp, utgångskravet fullföljs)', () => {
+    const history = [
+      call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2D'),
+      call('E', 'P'), call('S', '3C'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('3NT')
+  })
+})
