@@ -11,8 +11,11 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Felrapportering i Spela kort (vald av ägaren 2026-07-02)
-> Dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela
+### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
+> **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
+>
+> **🎉 Felrapportering i Spela kort KLAR & LIVE (2026-07-02, testsvit 1481,
+> commit `05d922e`):** dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela
 > given + auktionen + sticken följer med som förifylld **GitHub-issue**
 > (etiketten `felrapport` skapad i repot). Kommandot **`/felrapporter`**
 > (`.claude/commands/felrapporter.md`) läser rapporterna via `gh`, återskapar
