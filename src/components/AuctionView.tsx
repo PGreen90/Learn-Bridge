@@ -2,8 +2,21 @@ import { useState } from 'react'
 import type { Seat, Vulnerability } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import { SEAT_LABEL } from '../lib/bidding'
-import { isAlertRule } from '../lib/engine/alerts'
+import { FORCING_LABEL, ruleInfo } from '../lib/engine/rules'
+import type { Forcing } from '../types/bridge'
 import { BidLabel } from './BidLabel'
+
+// Färg per kravnivå (§2) – lugna toner för "får passas", varmare ju mer budet
+// kräver av partnern. Etiketten själv kommer ur regelregistret (FORCING_LABEL).
+const FORCING_BADGE: Record<Forcing, string> = {
+  avslut: 'bg-slate-200 text-slate-700',
+  'ej-krav': 'bg-slate-200 text-slate-700',
+  'semi-krav': 'bg-amber-100 text-amber-800',
+  inbjudan: 'bg-amber-100 text-amber-800',
+  'krav-1-rond': 'bg-orange-100 text-orange-800',
+  utgangskrav: 'bg-red-100 text-red-800',
+  slamintresse: 'bg-purple-100 text-purple-800',
+}
 
 // Kolumnordning V N Ö S (medurs), så Syd – din plats – står längst till höger.
 const ORDER: Seat[] = ['W', 'N', 'E', 'S']
@@ -52,8 +65,10 @@ export function AuctionView({
     if (c && isContractBid(c.bid)) contractCell = i
   })
 
+  // FAS 12 punkt 56: kravnivå + alert läses ur SAMMA regel via ruleInfo, så att
+  // det som visas alltid hör till budets valda regel (aldrig två olika källor).
   const chosen = selected !== null ? cells[selected] : null
-  const chosenAlert = chosen ? isAlertRule(chosen.rule) : false
+  const chosenInfo = chosen ? ruleInfo(chosen.rule) : null
 
   return (
     <div className="inline-block">
@@ -76,7 +91,7 @@ export function AuctionView({
           })}
           {cells.map((cell, i) => {
             const isSouth = ORDER[i % 4] === 'S'
-            const alert = cell ? isAlertRule(cell.rule) : false
+            const alert = cell ? ruleInfo(cell.rule).alert : false
             const clickable = !!cell?.explanation
             const isSel = selected === i
             const inner = cell ? (
@@ -121,7 +136,15 @@ export function AuctionView({
           <span className="font-semibold text-emerald-700">
             <BidLabel bid={chosen.bid} />
           </span>
-          {chosenAlert && (
+          {chosenInfo?.forcing && (
+            <span
+              className={`ml-1.5 rounded px-1.5 text-[10px] font-semibold align-middle ${FORCING_BADGE[chosenInfo.forcing]}`}
+              title="Kravnivå: vad budet kräver av partnern"
+            >
+              {FORCING_LABEL[chosenInfo.forcing]}
+            </span>
+          )}
+          {chosenInfo?.alert && (
             <span className="ml-1.5 rounded bg-sky-600 px-1 text-[10px] font-bold text-white align-middle">
               ALERT
             </span>

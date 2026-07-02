@@ -268,6 +268,22 @@ export function forcingOf(rule: string | undefined): Forcing | undefined {
   return rule ? FORCING_BY_RULE[rule] : undefined
 }
 
+/**
+ * Visningstext för kravnivån (FAS 12 punkt 56): det UI:t skriver ut när det
+ * visar ett buds kravstatus. Ligger här (inte i komponenten) så att etiketten
+ * hör till samma regelregister som kravnivån själv – Record<Forcing, string>
+ * tvingar en etikett för varje nivå när typen växer.
+ */
+export const FORCING_LABEL: Record<Forcing, string> = {
+  avslut: 'Avslut',
+  'ej-krav': 'Ej krav',
+  'semi-krav': 'Semi-krav',
+  inbjudan: 'Inbjudan',
+  'krav-1-rond': 'Krav 1 rond',
+  utgangskrav: 'Utgångskrav',
+  slamintresse: 'Slamintresse',
+}
+
 /** Strukturerad bild av den VALDA regeln bakom ett bud (grund för regelspårning). */
 export interface RuleInfo {
   rule: string | undefined

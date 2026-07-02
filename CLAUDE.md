@@ -11,9 +11,25 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU (FAS 11-eposet KLART & live – välj nästa FAS)
-> **2026-07-02:** hela FAS 11-svansen klar & pushad (testsvit 727). NU är åter
-> tomt – ägaren väljer nästa FAS/riktning ur NÄST/SENARE.
+### 🔵 NU — 🎨 FAS 12: UI (ägarval 2026-07-02)
+**FAS 12 — UI**, sista fasen i felsökningsplanen. Två trådar:
+1. ✅ **Felsökningsplanens punkt 54–56 KLARA** (2026-07-02, testsvit 729):
+   budförklaringar (54) + alert (55) fanns redan i `AuctionView` (klickbara bud,
+   A-markör + ALERT-badge). Byggd lucka (56): **kravnivå-etikett** i
+   förklaringspanelen — `FORCING_LABEL` (`rules.ts`, facit-låst) + färgkodad
+   badge, och panelen läser kravnivå + alert ur **ETT** `ruleInfo`-anrop (samma
+   regel, aldrig två källor). Verifierat i webbläsaren: "Krav 1 rond"+ALERT på
+   negativ dubbling, "Ej krav" på svag tvåöppning. Båda flikarna täcks
+   (budträning + spel går genom samma `AuctionView`).
+2. **Synrey-riktningen (ägarbeslut, minnesanteckning):** modellera utseendet på
+   Synrey Bridge-appen — bordet, budlådan, kortspelet. Behåll emerald-paletten.
+   Inkrementellt, inte big-bang.
+Arbetsordning föreslås: först punkt 54–56 (litet, knyter ihop FAS 1-tråden),
+sedan Synrey-lyftet bit för bit (bord → budlåda → kortspel). Ägaren bekräftar
+ordningen innan bygget startar.
+
+--- FAS 11 pushad (testsvit 727, commit e20b7ac) ---
+
 **🧠 FAS 11 — Bot-hjärnan (kortspel/motspel-förfining), OMSTRUKTURERAD** (start
 2026-07-01). Ägaren pekade ut den riktiga smärtan: bottarna tar t.ex. 10 stick
 där 13 var kalla — usel stickföring, "kryper under i onödan". FAS 11 (signaler)
@@ -191,13 +207,9 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-> **Städat 2026-07-02:** gamla NÄST-punkterna (Bot-hjärnan Steg 2 & 3) är klara
-> och live sedan FAS 11-eposet; "Varför?"-knappen är också redan byggd. Ny lista:
-1. **FAS 12 — UI** (enligt felsökningsplanen) — Synrey-inspirerat utseende: bord,
-   budlåda, kortspel. Gör appen trevligare att använda.
-2. **Avancerad kortspelsteknik** — slutkast/inkast/squeeze i bot-hjärnan
+1. **Avancerad kortspelsteknik** — slutkast/inkast/squeeze i bot-hjärnan
    (MED-scope ur FAS 11-svansen som sköts till SENARE, se `docs/bot-hjarna.md`).
-3. **TP-steg E & F** — reverse/hoppskift på TP (E) + 3:e/4:e-hands lättöppning (F)
+2. **TP-steg E & F** — reverse/hoppskift på TP (E) + 3:e/4:e-hands lättöppning (F)
    ur `docs/tp-arbetslista.md`.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { isAlertRule as oldIsAlertRule } from './alerts'
-import { forcingOf, isAlertRule, knownForcingRules, ruleInfo } from './rules'
+import { FORCING_LABEL, forcingOf, isAlertRule, knownForcingRules, ruleInfo } from './rules'
 
 // Den KOMPLETTA uppsättningen regelnamn som budmotorn faktiskt producerar
 // (utvunnen ur `rule: '...'` i src/lib/engine, exkl. testfiler). Hålls i synk
@@ -124,5 +124,25 @@ describe('ruleInfo – strukturerad bild av vald regel (FAS 1 punkt 2)', () => {
     expect(ruleInfo('2-över-1 GF')).toEqual({ rule: '2-över-1 GF', forcing: 'utgangskrav', alert: false })
     expect(ruleInfo('pass')).toEqual({ rule: 'pass', forcing: 'avslut', alert: false })
     expect(ruleInfo(undefined)).toEqual({ rule: undefined, forcing: undefined, alert: false })
+  })
+})
+
+describe('FORCING_LABEL – visningstext för kravnivån (FAS 12 punkt 56)', () => {
+  it('har en läsbar svensk etikett för varje kravnivå', () => {
+    expect(FORCING_LABEL['avslut']).toBe('Avslut')
+    expect(FORCING_LABEL['ej-krav']).toBe('Ej krav')
+    expect(FORCING_LABEL['semi-krav']).toBe('Semi-krav')
+    expect(FORCING_LABEL['inbjudan']).toBe('Inbjudan')
+    expect(FORCING_LABEL['krav-1-rond']).toBe('Krav 1 rond')
+    expect(FORCING_LABEL['utgangskrav']).toBe('Utgångskrav')
+    expect(FORCING_LABEL['slamintresse']).toBe('Slamintresse')
+  })
+
+  it('täcker exakt Forcing-typens alla nivåer (ingen glöms när typen växer)', () => {
+    // Nyckelmängden låses – läggs en ny kravnivå till i Forcing-typen utan
+    // etikett bryter TypeScript-bygget, och detta test låser antalet.
+    expect(Object.keys(FORCING_LABEL).sort()).toEqual(
+      ['avslut', 'ej-krav', 'inbjudan', 'krav-1-rond', 'semi-krav', 'slamintresse', 'utgangskrav'],
+    )
   })
 })
