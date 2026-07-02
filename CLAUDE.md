@@ -21,12 +21,19 @@ Läs den här filen först varje session.
    regel, aldrig två källor). Verifierat i webbläsaren: "Krav 1 rond"+ALERT på
    negativ dubbling, "Ej krav" på svag tvåöppning. Båda flikarna täcks
    (budträning + spel går genom samma `AuctionView`).
-2. **Synrey-riktningen (ägarbeslut, minnesanteckning):** modellera utseendet på
-   Synrey Bridge-appen — bordet, budlådan, kortspelet. Behåll emerald-paletten.
-   Inkrementellt, inte big-bang.
-Arbetsordning föreslås: först punkt 54–56 (litet, knyter ihop FAS 1-tråden),
-sedan Synrey-lyftet bit för bit (bord → budlåda → kortspel). Ägaren bekräftar
-ordningen innan bygget startar.
+2. **Synrey-riktningen (ägarbeslut + 5 skärmdumpar 2026-07-02):** efterapa
+   Synrey Bridge så nära det går. **Steg 1 ✅ KLART & live** (commit `3aa3186`):
+   budlådan kopierad rakt av (NT/♠/♥/♦/♣-rutnät, X/XX/PASS/OK, välj→OK),
+   kompasspanel, auktionsrutnät m. färgchips + vit förklarings-popup,
+   fyrfärgslek (`suitColors.ts`), minimal budfas (⋮-meny, HCP-bricka, dolda
+   motståndare), omspelningen helt omgjord (alla händer uppe, trumf VÄNSTER
+   via `handSuitsTrumpFirst`, » spelar sticket ett kort i taget m. animation,
+   « bakåt, svart kontrakt-list). **Steg 2 ✅ KLART & live** (commit `adf647a`,
+   ägarverifierat mot Synrey-bilder): spelvyn — motståndare helt dolda,
+   kolumnträkarl, 👍-turmarkering, ⓘ/⋮-overlays, resultatdialog → omspelning;
+   `SideStack` = Ö/V-kort vridna 90° med valörindex IN mot mitten (Öst speglad
+   via `mirrorCorners`). **Kvar (steg 3, finputs):** ev. "Declared by South"-
+   bekräftelse, mobilfinish, Budvisning/budträning-flikarna till samma stil.
 
 --- FAS 11 pushad (testsvit 727, commit e20b7ac) ---
 
