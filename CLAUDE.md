@@ -12,10 +12,11 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — 🎨 FAS 12: UI (ägarval 2026-07-02)
-> **NÄSTA GÅNG STARTAR VI MED (ägarbesked 2026-07-02): förfining av UI:t.**
-> Grunden (punkt 54–56 + Synrey steg 1–3) är klar & live — nästa session
-> putsar vi detaljerna (ägaren pekar ut vad som ska förfinas).
-**FAS 12 — UI**, sista fasen i felsökningsplanen. Två trådar:
+> **UI-FÖRFININGSPASSET 2026-07-02 LEVERERAT & LIVE** (commits `a654c0e`→`b653808`).
+> **NÄSTA GÅNG:** ägarbesked vid sessionsslut: *"vi kommer återkomma till mer UI
+> längre fram"* — starta med att visa NÄST-listan och låt ägaren välja: mer
+> UI-förfining (ägaren pekar ut) eller flytta upp en NÄST-punkt.
+**FAS 12 — UI**, sista fasen i felsökningsplanen. Tre trådar:
 1. ✅ **Felsökningsplanens punkt 54–56 KLARA** (2026-07-02, testsvit 729):
    budförklaringar (54) + alert (55) fanns redan i `AuctionView` (klickbara bud,
    A-markör + ALERT-badge). Byggd lucka (56): **kravnivå-etikett** i
@@ -35,7 +36,7 @@ Läs den här filen först varje session.
    ägarverifierat mot Synrey-bilder): spelvyn — motståndare helt dolda,
    kolumnträkarl, 👍-turmarkering, ⓘ/⋮-overlays, resultatdialog → omspelning;
    `SideStack` = Ö/V-kort vridna 90° med valörindex IN mot mitten (Öst speglad
-   via `mirrorCorners`). **Steg 3 ✅ KLART** (2026-07-02, ej pushat ännu):
+   via `mirrorCorners`). **Steg 3 ✅ KLART & live** (commit `20c7166`):
    (a) "spelas av Syd"-bekräftelsedialog efter budgivningen (auto-hoppet borta,
    `confirmContract`); (b) budträningen på grönt filt (`AuctionGrid` m. teal
    turmarkering, budalternativ som Synrey-chips i `BidOptions`, handsolfjäder +
@@ -43,6 +44,29 @@ Läs den här filen först varje session.
    `AuctionGrid`, alla bud som `BidChip`; (d) mobilfinish (kompass w-24 på
    mobil, responsiva rubriker — alla vyer utan overflow på 375 px). Delade
    `HandFan`; döda `AuctionView` borttagen (allt går via `AuctionGrid`).
+3. ✅ **Förfiningspasset (2026-07-02, ALLT live):**
+   (a) **Mörkt/ljust läge**: sol/måne-knapp i sidhuvudet, valet i localStorage,
+   följer systemet som standard; `dark:`-varianter på allt runt spelborden
+   (`src/lib/theme.ts`; klassen sätts i `index.html` FÖRE laddning = ingen vit
+   blink); **1 s-toning** vid växling (`.theme-fade`, aktiv bara under bytet).
+   (b) **Mobilmeny**: sidhuvudet en rad på <640 px, ☰ fäller ut menyn.
+   (c) **Ny startsida**: fyra klickbara lägeskort, Spela kort främst (grön ram).
+   (d) **Sök i Budsystem**: filtrerar sektioner medan man skriver, träffar fälls
+   ut, rubrikträffar gulmarkeras, träffantal visas.
+   (e) **`Felt.tsx`**: EN sanningskälla för gröna bordet (5 kopior ersatta).
+   (f) **♠ SVART överallt** (ägarbeslut): kort, chips, löptext — allt via
+   `suitColors.ts` (ljusare löptextvariant i mörkt läge, ALDRIG på korten).
+   (g) **Budvisningen HELT ombyggd** (ägarbeslut: "så likt Spela kort som
+   möjligt"): ETT bord, alla fyra händer öppna — N/S spegelsymmetri (md-kort +
+   mörka remsor), V/Ö sidostaplar, hp-brickor vid alla händer; auktionen i
+   mitten spelas upp bud för bud (700 ms, pulserande turmarkering, klick →
+   förklaringspopup m. kravnivå/ALERT); byggd med **LEVANDE budmotorn**
+   (`buildFullAuction` via `decideCall` — auktionen bjuds ALLTID klart,
+   "… auktionen fortsätter"-texten borta för gott); poäng/steg-för-steg +
+   hålfinnare hopfällda under bordet; ryms på EN mobilskärm. Tätare
+   `AuctionGrid` (delas av alla vyer).
+   **Känt:** `play-bot-smart.test.ts` slumpflaggar sällsynt (Monte Carlo,
+   ej relaterat) — ägaren startade stabiliseringsuppgift i egen session.
 
 --- FAS 11 pushad (testsvit 727, commit e20b7ac) ---
 
