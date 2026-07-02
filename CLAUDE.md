@@ -191,14 +191,19 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Bot-hjärnan Steg 2** — hand-modellen (inferensmotor seedad ur auktionen).
-2. **Bot-hjärnan Steg 3** — Monte-Carlo-DDS + signalavkodning (FAS 11 pt 50).
-3. **FAS 12 — UI** (enligt felsökningsplanen) + "Varför?"-knapp (bot förklarar drag).
+> **Städat 2026-07-02:** gamla NÄST-punkterna (Bot-hjärnan Steg 2 & 3) är klara
+> och live sedan FAS 11-eposet; "Varför?"-knappen är också redan byggd. Ny lista:
+1. **FAS 12 — UI** (enligt felsökningsplanen) — Synrey-inspirerat utseende: bord,
+   budlåda, kortspel. Gör appen trevligare att använda.
+2. **Avancerad kortspelsteknik** — slutkast/inkast/squeeze i bot-hjärnan
+   (MED-scope ur FAS 11-svansen som sköts till SENARE, se `docs/bot-hjarna.md`).
+3. **TP-steg E & F** — reverse/hoppskift på TP (E) + 3:e/4:e-hands lättöppning (F)
+   ur `docs/tp-arbetslista.md`.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
-- FAS 9 Passad hand · FAS 10 Försvarsbud · FAS 11 Kortspel · FAS 12 UI (allt
-  enligt felsökningsplanen). Även TP-steg E (reverse/hoppskift på TP) + F
-  (3:e/4:e-hands lättöppning) ur `docs/tp-arbetslista.md`.
+- **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
+- FAS 9 Passad hand, FAS 10 Försvarsbud, FAS 11 Kortspel = **KLARA & pushade**
+  (bara kvar här som historik — behandla dem inte som återstående arbete).
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
 - **Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC): känd gräns, stängs lagligt.
