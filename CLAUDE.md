@@ -12,6 +12,9 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — 🎨 FAS 12: UI (ägarval 2026-07-02)
+> **NÄSTA GÅNG STARTAR VI MED (ägarbesked 2026-07-02): förfining av UI:t.**
+> Grunden (punkt 54–56 + Synrey steg 1–3) är klar & live — nästa session
+> putsar vi detaljerna (ägaren pekar ut vad som ska förfinas).
 **FAS 12 — UI**, sista fasen i felsökningsplanen. Två trådar:
 1. ✅ **Felsökningsplanens punkt 54–56 KLARA** (2026-07-02, testsvit 729):
    budförklaringar (54) + alert (55) fanns redan i `AuctionView` (klickbara bud,
