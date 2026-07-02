@@ -59,11 +59,11 @@ export function AuctionGrid({
 
   return (
     <div className="relative flex-1 rounded-lg bg-emerald-950/60 p-2 ring-1 ring-emerald-100/10">
-      <div className="grid grid-cols-4 gap-y-1.5">
+      <div className="grid grid-cols-4 gap-y-1">
         {ORDER.map((seat) => (
           <div
             key={seat}
-            className={`pb-1 text-center text-xs font-semibold sm:text-sm ${
+            className={`pb-0.5 text-center text-xs font-semibold sm:text-sm ${
               vulnerable(seat, vulnerability) ? 'text-red-300' : 'text-yellow-100/90'
             } ${dealer === seat ? 'underline underline-offset-4 decoration-yellow-300' : ''}`}
             title={dealer === seat ? 'Given (börjar buda)' : undefined}
@@ -72,7 +72,7 @@ export function AuctionGrid({
           </div>
         ))}
         {cells.map((cell, i) => (
-          <div key={i} className="flex h-7 items-center justify-center">
+          <div key={i} className="flex h-6 items-center justify-center">
             {cell ? (
               <button type="button" onClick={() => setSelected((s) => (s === i ? null : i))}>
                 <BidChip

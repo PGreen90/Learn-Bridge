@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Deal, Hand, Seat } from '../types/bridge'
-import { SEAT_LABEL } from '../lib/bidding'
+import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening, isVulnerable } from '../lib/engine/openings'
-import { buildAuction, dealWithAuction } from '../lib/engine/auction'
-import { turnsToCalls } from '../lib/engine/auction-contract'
+import { dealWithAuction } from '../lib/engine/auction'
+import { auctionComplete, decideCall, seatToAct } from '../lib/engine/auction-live'
 import { hcp } from '../lib/engine/hand'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
 import { bySuit, HAND_SUITS } from '../lib/cardLayout'
@@ -24,11 +24,23 @@ import { Button } from '../components/Button'
 // klick på ett lagt bud ger förklaringen (kravnivå + ALERT) i vita popupen.
 // Poänguträkningar och hålfinnarna ligger hopfällda under bordet.
 
-/** Platsen som bjuder som nr `index` när `dealer` börjar (medurs N→Ö→S→V). */
-const CLOCKWISE: Seat[] = ['N', 'E', 'S', 'W']
-function seatAt(dealer: Seat, index: number): Seat {
-  return CLOCKWISE[(CLOCKWISE.indexOf(dealer) + index) % 4]
+/**
+ * Hela budgivningen via den LEVANDE budmotorn (samma som Spela kort): varje
+ * plats bjuder i tur och ordning tills auktionen är slut. Motorn har alltid
+ * ett bud (on-book, off-book-fortsättning eller pass) — auktionen dör aldrig
+ * halvvägs som gamla ideallinje-byggaren kunde göra.
+ */
+function buildFullAuction(deal: Deal): ResolvedCall[] {
+  const history: ResolvedCall[] = []
+  let guard = 0
+  while (!auctionComplete(history) && guard++ < 80) {
+    history.push(decideCall(deal, history, seatToAct(deal.dealer, history.length)))
+  }
+  return history
 }
+
+/** Partnern mittemot. */
+const PARTNER: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
 
 /** En hands kort i solfjäderordning (♠ ♥ ♣ ♦, som HandFan) för sidostaplarna. */
 function fanCards(hand: Hand) {
@@ -51,11 +63,11 @@ export function Spela() {
   // Antal bud som hittills lagts på bordet (uppspelningen).
   const [shown, setShown] = useState(0)
 
-  const auction = useMemo(() => buildAuction(deal), [deal])
-  const calls = useMemo(
-    () => (auction ? turnsToCalls(auction.turns, deal.dealer) : []),
-    [auction, deal.dealer],
-  )
+  const calls = useMemo(() => buildFullAuction(deal), [deal])
+  // Öppnaren = första platsen som inte passar; svararen = öppnarens partner.
+  const openerSeat = calls.find((c) => c.bid !== 'P')?.seat ?? null
+  const responderSeat = openerSeat ? PARTNER[openerSeat] : null
+  const passedOut = calls.length > 0 && calls.every((c) => c.bid === 'P')
 
   // Datorn budar i samma takt som i Spela kort: nästa bud var 700:e ms.
   const playing = shown < calls.length
@@ -99,12 +111,14 @@ export function Spela() {
         )}
       </div>
 
-      {/* Bordet: alla fyra händer öppna runt auktionen (som omspelningen). */}
+      {/* Bordet: alla fyra händer öppna runt auktionen (som omspelningen).
+          Nord och Syd är SPEGELBILDER av varandra: samma kortstorlek, samma
+          mörka remsa, hp-brickan i ytterhörnet (ägarbeslut: symmetri). */}
       <Felt>
-        {/* Nord: solfjäder överst + hp-bricka i hörnet. */}
-        <div className="relative pt-3">
-          <HandFan hand={deal.hands.N} size="sm" />
-          <div className="absolute left-2 top-2">
+        {/* Nord: solfjäder i remsan överst + hp-bricka. */}
+        <div className="relative border-b border-emerald-100/10 bg-emerald-950/25 px-2 pb-3 pt-2.5">
+          <HandFan hand={deal.hands.N} size="md" />
+          <div className="absolute right-2 top-2">
             <HpTag label="N" hand={deal.hands.N} />
           </div>
         </div>
@@ -122,14 +136,9 @@ export function Spela() {
               vulnerability={deal.vulnerability}
               activeSeat={activeSeat}
             />
-            {!auction && (
+            {passedOut && !playing && (
               <p className="mt-2 text-center text-xs text-emerald-50/80">
-                Motorn hittade ingen öppning – given passas ut.
-              </p>
-            )}
-            {auction?.open && !playing && (
-              <p className="mt-2 text-center text-xs text-emerald-50/80">
-                … auktionen fortsätter – motorn har inte regler för nästa bud ännu.
+                Ingen öppnade – given passades ut.
               </p>
             )}
             {!playing && calls.length > 0 && (
@@ -150,11 +159,11 @@ export function Spela() {
           <div>{VUL_TEXT[deal.vulnerability]}</div>
         </div>
 
-        {/* Syd: solfjäder i remsan längst ner + HCP-bricka (som Spela kort). */}
+        {/* Syd: solfjäder i remsan längst ner + hp-bricka (spegel av Nord). */}
         <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-2 pb-2.5 pt-3">
           <HandFan hand={deal.hands.S} size="md" />
-          <div className="absolute bottom-2 right-2 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-semibold text-white">
-            HCP {hcp(deal.hands.S)}
+          <div className="absolute bottom-2 right-2">
+            <HpTag label="S" hand={deal.hands.S} />
           </div>
         </div>
       </Felt>
@@ -168,29 +177,31 @@ export function Spela() {
         <div className="border-t border-slate-100 dark:border-slate-800 px-4 pb-4 pt-3">
           <div className="grid gap-3 sm:grid-cols-2">
             {(['N', 'W', 'E', 'S'] as Seat[]).map((seat) => (
-              <SeatDetails key={seat} deal={deal} seat={seat} auction={auction} />
+              <SeatDetails
+                key={seat}
+                deal={deal}
+                seat={seat}
+                openerSeat={openerSeat}
+                responderSeat={responderSeat}
+              />
             ))}
           </div>
-          {auction && auction.turns.length > 0 && (
+          {calls.length > 0 && (
             <>
               <h3 className="mb-2 mt-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Budgivningen steg för steg
               </h3>
               <ol className="space-y-2">
-                {auction.turns.map((turn, i) => (
+                {calls.map((call, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <span className="w-28 shrink-0 text-sm">
-                      <span className="font-semibold">{SEAT_LABEL[turn.seat]}</span>{' '}
-                      <span className="text-slate-500 dark:text-slate-400">({turn.role})</span>
+                    <span className="w-16 shrink-0 text-sm font-semibold">
+                      {SEAT_LABEL[call.seat]}
                     </span>
                     <span className="w-14 shrink-0">
-                      <BidChip bid={turn.call} />
+                      <BidChip bid={call.bid} />
                     </span>
                     <span className="text-sm text-slate-600 dark:text-slate-400">
-                      {turn.explanation}
-                      {turn.uncertain && (
-                        <span className="ml-1 text-amber-600">⚑ osäker – förenkling i motorn</span>
-                      )}
+                      {call.explanation ?? '—'}
                     </span>
                   </li>
                 ))}
@@ -252,16 +263,18 @@ const VUL_TEXT: Record<Deal['vulnerability'], string> = {
 function SeatDetails({
   deal,
   seat,
-  auction,
+  openerSeat,
+  responderSeat,
 }: {
   deal: Deal
   seat: Seat
-  auction: ReturnType<typeof buildAuction>
+  openerSeat: Seat | null
+  responderSeat: Seat | null
 }) {
   const hand = deal.hands[seat]
   const r = classifyOpening(hand, isVulnerable(seat, deal.vulnerability))
-  const isOpener = auction?.openerSeat === seat
-  const isResponder = (auction?.turns.length ?? 0) >= 2 && auction?.responderSeat === seat
+  const isOpener = openerSeat === seat
+  const isResponder = responderSeat === seat
   return (
     <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
       <div className="mb-2 flex items-baseline justify-between">
