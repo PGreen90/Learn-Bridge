@@ -12,7 +12,7 @@
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Rank } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { currentWinner, legalCards, side, type PlayState } from './play'
+import { currentWinner, dummyOf, legalCards, side, type PlayState } from './play'
 import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats } from './card-counting'
 import { buildHandModel } from './hand-model'
 import { applyOpeningLeadSignal } from './signal-decode'
@@ -207,6 +207,25 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   // Tredje/fjärde hand: vinn billigast möjligt om något slår, annars kasta lågt.
   const winners = legal.filter((c) => beats(c, bestCard, led, state.trump))
   if (winners.length > 0) {
+    // Träkarlen spelar EFTER oss (motspel, tredje hand) → öppen information:
+    // "billigast" måste hålla även mot bordets bästa svar, annars går bordets
+    // hacka över vår (felrapport #1: V slog ♥3 med ♥4, bordets ♥5 vann).
+    // Toppar bordet allt vi har gäller gamla regeln (billigaste vinnaren).
+    const dummy = dummyOf(state.contract)
+    const dummyPlaysAfterUs =
+      side(seat) !== side(state.contract.declarer) &&
+      !state.currentTrick.some((pc) => pc.seat === dummy)
+    if (dummyPlaysAfterUs) {
+      const dummyInLed = state.hands[dummy].filter((c) => c.suit === led)
+      const dummyLegal = dummyInLed.length > 0 ? dummyInLed : state.hands[dummy]
+      const holding = winners.filter((c) => !dummyLegal.some((d) => beats(d, c, led, state.trump)))
+      if (holding.length > 0) {
+        return {
+          card: lowest(holding),
+          reason: 'Jag vinner sticket så billigt som möjligt – men högt nog att bordet inte går över.',
+        }
+      }
+    }
     return { card: lowest(winners), reason: 'Jag vinner sticket så billigt som möjligt.' }
   }
   const guarded = guardedDiscard(state, seat, legal)

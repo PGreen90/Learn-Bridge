@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
+import type { Card, Deal, Hand, Rank, Seat, Suit } from '../../types/bridge'
+import { parseHand } from '../bidding'
 import { botCard, botCardReasoned } from './play-bot'
-import type { Contract, PlayedCard, PlayState, Trick } from './play'
+import { playCard, startPlay, type Contract, type PlayedCard, type PlayState, type Trick } from './play'
 
 const C = (suit: Suit, rank: Rank): Card => ({ suit, rank })
 
@@ -139,6 +140,72 @@ describe('tredje hand – vinn billigast', () => {
       hand: [C('hearts', 'K'), C('hearts', 'Q'), C('hearts', '2')],
     })
     expect(botCard(s, 'N')).toEqual(C('hearts', 'Q')) // billigaste kortet som slår 9
+  })
+})
+
+describe('tredje hand – vinnaren måste hålla mot träkarlen (spelar efter oss)', () => {
+  it('billigaste vinnaren som även slår bordets kort – inte bara det som redan ligger', () => {
+    // Spelförare S ⇒ träkarl N, som spelar SIST i sticket (öppen information).
+    // Ö leder ♥2, S lägger ♥3. V:s ♥4 "vinner" mot ♥3 men bordets ♥5/♥7 går
+    // över – ♥J är billigaste kortet som håller hela vägen.
+    const s = state({
+      seat: 'W', leader: 'E', declarer: 'S',
+      trick: [
+        { seat: 'E', card: C('hearts', '2') },
+        { seat: 'S', card: C('hearts', '3') },
+      ],
+      hand: [C('hearts', 'K'), C('hearts', 'J'), C('hearts', '4')],
+      otherHands: { N: [C('hearts', '7'), C('hearts', '5')] },
+    })
+    expect(botCard(s, 'W')).toEqual(C('hearts', 'J'))
+  })
+
+  it('bordet toppar allt vi kan vinna med → gamla regeln (billigaste vinnaren) gäller', () => {
+    // Träkarlen håller ♥A ⇒ inget av V:s kort håller sticket. Då gäller den
+    // gamla tumregeln oförändrat: billigaste kortet som slår det som ligger.
+    const s = state({
+      seat: 'W', leader: 'E', declarer: 'S',
+      trick: [
+        { seat: 'E', card: C('hearts', '2') },
+        { seat: 'S', card: C('hearts', '3') },
+      ],
+      hand: [C('hearts', 'K'), C('hearts', '4')],
+      otherHands: { N: [C('hearts', 'A'), C('hearts', '5')] },
+    })
+    expect(botCard(s, 'W')).toEqual(C('hearts', '4'))
+  })
+})
+
+// Felrapport #1 (github.com/PGreen90/Learn-Bridge/issues/1): bricka 8, 2♦ av S.
+// Ägaren: "i trick 4 så skall väst ta sticket, kryper nu och tappar detta stick".
+// Given återskapad EXAKT ur rapporten (FACIT FÖRE FIX).
+describe('felrapport #1 – V kryper i stick 4 och tappar sticket till bordet', () => {
+  it('stick 4: Ö ♥2, S ♥3 → V spelar ♥J (inte ♥4 som bordets ♥5 slår)', () => {
+    const deal: Deal = {
+      id: 'felrapport-1',
+      board: 8,
+      dealer: 'W',
+      vulnerability: 'none',
+      hands: {
+        N: parseHand('S:Q93 H:875 D:862 C:9853'),
+        E: parseHand('S:A72 H:AT92 D:K3 C:KQ64'),
+        S: parseHand('S:KT5 H:Q3 D:AJT954 C:J7'),
+        W: parseHand('S:J864 H:KJ64 D:Q7 C:AT2'),
+      },
+    }
+    let s = startPlay(deal, { declarer: 'S', strain: 'diamonds', level: 2 })
+    // Stick 1–3 + Ö:s ♥2 och S:s ♥3 i stick 4, exakt som i rapporten:
+    const played: [Suit, Rank][] = [
+      ['hearts', '6'], ['hearts', '8'], ['hearts', '9'], ['hearts', 'Q'], // stick 1 (S)
+      ['spades', '5'], ['spades', '4'], ['spades', '9'], ['spades', 'A'], // stick 2 (Ö)
+      ['clubs', 'K'], ['clubs', '7'], ['clubs', '2'], ['clubs', '3'],     // stick 3 (Ö)
+      ['hearts', '2'], ['hearts', '3'],                                   // stick 4: Ö leder, S lägger
+    ]
+    for (const [suit, rank] of played) s = playCard(s, { suit, rank })
+
+    expect(s.toAct).toBe('W')
+    // Bordet (N) har ♥75 kvar; V har ♥KJ4. ♥J = billigaste kortet som håller.
+    expect(botCard(s, 'W')).toEqual(C('hearts', 'J'))
   })
 })
 

@@ -40,6 +40,11 @@ som innehåller HELA given maskinläsbart. Din uppgift: läs rapporterna,
 4. **Laga felet** tills facit-testet (och hela `npm test`) är grönt.
    Ändra aldrig on-book-beteende utan att befintliga facit-lås skyddar det.
 
+   **Förklara alltid ORSAKEN till felet för ägaren** (ägarbeslut 2026-07-02),
+   på enkel svenska, i sammanfattningen efter fixen: inte bara VAD som var fel
+   i given, utan VARFÖR koden gjorde fel (vilken regel/tumregel som brast och
+   varför den resonerade som den gjorde) och hur fixen ändrar resonemanget.
+
 5. **Stäng issuen med förklaring på enkel svenska:**
    `gh issue close <nummer> --repo PGreen90/Learn-Bridge --comment "..."`
    — vad som var fel, vad som ändrades, vilket test som låser det.
