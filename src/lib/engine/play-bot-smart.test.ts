@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { botCard, botCardSmart, mcBudget, usesMonteCarlo } from './play-bot'
 import { isComplete, playCard, side, type Contract, type PlayState, type Trick } from './play'
@@ -115,8 +115,26 @@ describe('usesMonteCarlo – när gränssnittet ska räkna i webworkern', () => 
   })
 })
 
+/** Deterministisk PRNG (mulberry32). MC-samplingen (`shuffled` i monte-carlo.ts)
+ * drar ur Math.random – med 60 sampel valde röstningen fel kort för ~1 seed av 10
+ * (flaky). Seedskanning (1–30): 60 sampel föll för 3/30, 100 sampel för 0/30.
+ * Därför: 100 sampel (bär beviset för ALLA skannade seedar) + seedad ström
+ * (reproducerbart). Samma ärliga sampling – ingen tjuvkik, inget motorbyte. */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
 describe('botCardSmart – Monte-Carlo lyfter stickföringen i slutspelet (Steg 3c)', () => {
+  afterEach(() => vi.restoreAllMocks())
+
   it('6-korts NT-slutspel: MC-spelföraren tar facit 3 (tumregeln bara 2)', () => {
+    vi.spyOn(Math, 'random').mockImplementation(mulberry32(1))
     const live: Record<Seat, Hand> = {
       N: [C('spades', '8'), C('hearts', 'Q'), C('hearts', '6'), C('diamonds', 'Q'), C('diamonds', '5'), C('clubs', 'K')],
       E: [C('spades', '6'), C('hearts', '8'), C('diamonds', 'A'), C('diamonds', 'K'), C('diamonds', '10'), C('clubs', '2')],
@@ -135,7 +153,7 @@ describe('botCardSmart – Monte-Carlo lyfter stickföringen i slutspelet (Steg 
     let mc = start
     while (!isComplete(mc)) {
       const seat = mc.toAct
-      const card = side(seat) === 'NS' ? botCardSmart(mc, seat, [], { samples: 60 }) : botCard(mc, seat)
+      const card = side(seat) === 'NS' ? botCardSmart(mc, seat, [], { samples: 100 }) : botCard(mc, seat)
       mc = playCard(mc, card)
     }
     expect(nsTricks(mc)).toBe(3)
