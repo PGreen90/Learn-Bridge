@@ -8,6 +8,20 @@ import type { Contract } from './engine/play'
 // Grundordning som ALTERNERAR svart/röd för läsbarhet: ♠ ♦ ♣ ♥. Cyklisk, så den
 // kan roteras med trumfen utan att alterneringen bryts. Högsta kortet vänster.
 export const DISPLAY_SUITS: Suit[] = ['spades', 'diamonds', 'clubs', 'hearts']
+
+// Handens färgordning i budfasen (Synrey-ordning, fyrfärgslek): ♠ ♥ ♣ ♦.
+// Ingen trumf ännu — med fyra kulörer behövs ingen svart/röd-alternering.
+export const HAND_SUITS: Suit[] = ['spades', 'hearts', 'clubs', 'diamonds']
+
+/**
+ * Färgordningen när trumfen är känd (ägarbeslut 2026-07-02, som Synrey):
+ * trumfen längst till VÄNSTER, sedan övriga färger i Synrey-ordningen.
+ * Sang → ingen trumf, vanliga ordningen ♠ ♥ ♣ ♦.
+ */
+export function handSuitsTrumpFirst(strain: Suit | 'NT'): Suit[] {
+  if (strain === 'NT') return HAND_SUITS
+  return [strain, ...HAND_SUITS.filter((s) => s !== strain)]
+}
 const RANK_HIGH_TO_LOW: Rank[] = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2']
 
 /** Korten i en hand av en viss färg, sorterade högst → lägst. */

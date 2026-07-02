@@ -1,18 +1,11 @@
 import type { Card, Suit } from '../types/bridge'
+import { SUIT_TEXT } from '../lib/suitColors'
 
 const SYMBOL: Record<Suit, string> = {
   spades: '♠',
   hearts: '♥',
   diamonds: '♦',
   clubs: '♣',
-}
-
-// Röda färger (hjärter/ruter) vs svarta (spader/klöver).
-const IS_RED: Record<Suit, boolean> = {
-  spades: false,
-  hearts: true,
-  diamonds: true,
-  clubs: false,
 }
 
 type Size = 'sm' | 'md' | 'lg'
@@ -67,8 +60,8 @@ export function PlayingCard({
     )
   }
 
-  const red = IS_RED[card.suit]
-  const ink = red ? 'text-red-600' : 'text-slate-900'
+  // Fyrfärgslek (Synrey-stil): ♠ blå, ♥ röd, ♦ orange, ♣ grön.
+  const ink = SUIT_TEXT[card.suit]
   const corner = (
     <div className={`flex flex-col items-center leading-none ${ink} ${s.rank} font-semibold`}>
       <span>{card.rank}</span>

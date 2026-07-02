@@ -1,176 +1,238 @@
-import { useState } from 'react'
-import type { Card, Deal, Seat } from '../types/bridge'
-import { SEAT_LABEL } from '../lib/bidding'
-import type { Contract, Trick } from '../lib/engine/play'
-import { bySuit, orderedSuits } from '../lib/cardLayout'
+// Omspelning av en färdigspelad giv i Synrey-stil (FAS 12, ägarspec 2026-07-02):
+// alla fyra händer ligger upplagda runt bordet (N uppe, V/Ö på sidorna som
+// lodräta staplar, S nere), trumfen längst till VÄNSTER i varje hand. Mitten
+// visar först auktionen; högerpilen (») spelar upp nästa stick ETT KORT I TAGET
+// (som i verkligheten) och de spelade korten försvinner ur händerna. Vänsterpilen
+// («) stegar tillbaka. Svarta listen visar kontraktet + ställningen NS/ÖV.
+
+import { useEffect, useState } from 'react'
+import type { Card, Deal, Seat, Vulnerability } from '../types/bridge'
+import type { ResolvedCall } from '../lib/bidding'
+import type { Contract, PlayedCard, Trick } from '../lib/engine/play'
+import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
+import { AuctionGrid } from './AuctionGrid'
+import { BidChip } from './BidChip'
 import { PlayingCard } from './PlayingCard'
-import { Button } from './Button'
 
 const key = (c: Card) => `${c.suit}${c.rank}`
 
-/** För varje plats: en karta kort → vilket stick (0..12) kortet spelades i. */
-function trickIndexBySeat(tricks: Trick[]): Record<Seat, Record<string, number>> {
-  const out = { N: {}, E: {}, S: {}, W: {} } as Record<Seat, Record<string, number>>
-  tricks.forEach((t, i) => {
-    for (const pc of t.cards) out[pc.seat][key(pc.card)] = i
-  })
-  return out
+const VUL_TEXT: Record<Vulnerability, string> = {
+  none: 'Ingen i zon',
+  ns: 'NS i zon',
+  ew: 'ÖV i zon',
+  all: 'Alla i zon',
 }
 
-/**
- * Omspelning av en färdigspelad giv: alla fyra händer ligger upplagda SORTERADE
- * I FÄRG (som vid bordet), och man stegar stick för stick. Kortet som spelades i
- * det aktuella sticket lyfts fram (gul ram). Mitten visar det aktuella sticket
- * placerat mot rätt väderstreck med vinnaren inramad.
- */
+const STRAIN_CODE: Record<string, string> = {
+  clubs: 'C',
+  diamonds: 'D',
+  hearts: 'H',
+  spades: 'S',
+  NT: 'NT',
+}
+
 export function PlayReplay({
   deal,
   contract,
   tricks,
+  calls,
 }: {
   deal: Deal
   contract: Contract
   tricks: Trick[]
+  calls: ResolvedCall[]
 }) {
-  const [step, setStep] = useState(0)
-  const last = tricks.length - 1
-  const trickOf = trickIndexBySeat(tricks)
-  const current = tricks[step]
-  const cardAt = (seat: Seat) => current?.cards.find((c) => c.seat === seat)?.card
+  // `played` = antal färdigvisade stick. `anim` = hur många kort i NÄSTA stick
+  // som hittills lagts på bordet (1–4 under uppspelningen, 0 = ingen uppspelning).
+  const [played, setPlayed] = useState(0)
+  const [anim, setAnim] = useState(0)
 
-  const groupsFor = (seat: Seat) =>
-    orderedSuits(seat, contract)
-      .map((suit) => ({ suit, cards: bySuit(deal.hands[seat], suit) }))
-      .filter((g) => g.cards.length > 0)
-
-  // Ett kort i omspelningen. `here` = kortet spelades i det aktuella sticket
-  // (gulmarkeras och lyfts överst). `z` styr stapelordningen i en intuckad rad.
-  const replayCard = (seat: Seat, c: Card, overlap: string, z: number) => {
-    const t = trickOf[seat][key(c)]
-    const here = t === step
-    return (
-      <button
-        key={key(c)}
-        type="button"
-        onClick={() => setStep(t)}
-        title={`Stick ${t + 1}`}
-        style={{ zIndex: here ? 50 : z }}
-        className={`${overlap} transition-all`}
-      >
-        <PlayingCard card={c} size="sm" className={here ? 'relative ring-2 ring-amber-400' : ''} />
-      </button>
+  // Uppspelningen: ett kort i taget med kort paus; när alla fyra ligger, en liten
+  // extra paus innan sticket räknas som klart (och nästa hand kan stega vidare).
+  useEffect(() => {
+    if (anim === 0) return
+    const id = setTimeout(
+      () => {
+        if (anim >= 4) {
+          setPlayed((p) => p + 1)
+          setAnim(0)
+        } else {
+          setAnim((a) => a + 1)
+        }
+      },
+      anim >= 4 ? 650 : 380,
     )
+    return () => clearTimeout(id)
+  }, [anim])
+
+  const next = () => {
+    if (anim > 0) {
+      // Otålig? Ett tryck till lägger klart sticket direkt.
+      setPlayed((p) => p + 1)
+      setAnim(0)
+      return
+    }
+    if (played < tricks.length) setAnim(1)
+  }
+  const prev = () => {
+    setAnim(0)
+    setPlayed((p) => Math.max(0, p - 1))
   }
 
-  // Nord/Syd: färgerna som vågräta grupper bredvid varandra (höga kort vänster).
-  function topBottomHand(seat: Seat) {
-    return (
-      <div className="flex items-end gap-1.5">
-        {groupsFor(seat).map(({ suit, cards }) => (
-          <div key={suit} className="flex">
-            {cards.map((c, i) => replayCard(seat, c, i > 0 ? '-ml-5' : '', cards.length - i))}
-          </div>
-        ))}
-      </div>
-    )
-  }
+  // Korten som redan lämnat händerna: alla färdiga stick + de som hunnit läggas
+  // i sticket som spelas upp just nu.
+  const gone = new Set<string>()
+  tricks.slice(0, played).forEach((t) => t.cards.forEach((pc) => gone.add(key(pc.card))))
+  const animTrick = anim > 0 ? tricks[played] : null
+  animTrick?.cards.slice(0, anim).forEach((pc) => gone.add(key(pc.card)))
 
-  // Väst/Öst (Fun Bridge): färgerna som vågräta rader STAPLADE på varandra. I varje
-  // rad ligger det HÖGSTA kortet fullt synligt INÅT mot mitten (Öst: vänster, Väst:
-  // höger), de lägre intuckade utåt. `innerLeft` = höga kort åt vänster (Öst).
-  function sideHand(seat: Seat, innerLeft: boolean) {
-    return (
-      <div className={`flex flex-col gap-1 ${innerLeft ? 'items-start' : 'items-end'}`}>
-        {groupsFor(seat).map(({ suit, cards }) => {
-          // Öst: hög→låg (hög vänster). Väst: låg→hög (hög höger). Inre kortet överst.
-          const ordered = innerLeft ? cards : [...cards].reverse()
-          return (
-            <div key={suit} className="flex">
-              {ordered.map((c, i) =>
-                replayCard(seat, c, i > 0 ? '-ml-4' : '', innerLeft ? ordered.length - i : i + 1),
-              )}
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
+  const suits = handSuitsTrumpFirst(contract.strain)
+  const handCards = (seat: Seat): Card[] =>
+    suits.flatMap((suit) => bySuit(deal.hands[seat], suit)).filter((c) => !gone.has(key(c)))
 
-  // Mitten: aktuellt stick mot rätt väderstreck, vinnaren inramad.
-  const slot = (seat: Seat, pos: string) => {
-    const c = cardAt(seat)
-    return (
-      <div className={`absolute ${pos}`}>
-        {c && (
-          <PlayingCard card={c} size="sm" className={current?.winner === seat ? 'ring-2 ring-amber-400' : ''} />
-        )}
-      </div>
-    )
-  }
+  // Mitten: sticket som spelas upp > senast färdiga sticket > auktionen (start).
+  const shownCards: PlayedCard[] | null = animTrick
+    ? animTrick.cards.slice(0, anim)
+    : played > 0
+      ? tricks[played - 1].cards
+      : null
+  const shownWinner = !animTrick && played > 0 ? tricks[played - 1].winner : null
+
+  const tricksNS = tricks.slice(0, played).filter((t) => t.winner === 'N' || t.winner === 'S').length
+  const tricksEW = played - tricksNS
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <Button variant="secondary" onClick={() => setStep(0)} disabled={step === 0}>
-          ⏮
-        </Button>
-        <Button variant="secondary" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
-          ◀ Föregående
-        </Button>
-        <span className="min-w-28 text-center text-sm font-medium">
-          Stick {step + 1} / {tricks.length}
-          <span className="ml-2 text-slate-500">{SEAT_LABEL[current.winner]} vann</span>
-        </span>
-        <Button variant="secondary" onClick={() => setStep((s) => Math.min(last, s + 1))} disabled={step === last}>
-          Nästa ▶
-        </Button>
-        <Button variant="secondary" onClick={() => setStep(last)} disabled={step === last}>
-          ⏭
-        </Button>
+    <div
+      className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
+      style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+    >
+      {/* Nord: vågrät solfjäder överst. */}
+      <div className="flex justify-center pt-3">
+        <Fan cards={handCards('N')} size="sm" overlap="-ml-5" />
       </div>
 
-      <div
-        className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 shadow-inner"
-        style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <ReplaySeatTag seat="N" contract={contract} />
-          {topBottomHand('N')}
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="flex flex-col items-center gap-1">
-              <ReplaySeatTag seat="W" contract={contract} />
-              {sideHand('W', false)}
+      {/* Mittraden: Väst | mitten (auktion/stick) | Öst. */}
+      <div className="flex items-center justify-between gap-1 px-2 py-3">
+        <Stack cards={handCards('W')} />
+        <div className="flex min-h-44 flex-1 items-center justify-center">
+          {shownCards ? (
+            <TrickCenter cards={shownCards} winner={shownWinner} />
+          ) : (
+            <div className="w-full max-w-xs">
+              <AuctionGrid calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
             </div>
-            <div className="relative h-32 w-32 shrink-0 rounded-2xl bg-emerald-900/25 ring-1 ring-emerald-100/10">
-              {slot('N', 'top-1 left-1/2 -translate-x-1/2')}
-              {slot('S', 'bottom-1 left-1/2 -translate-x-1/2')}
-              {slot('W', 'left-1 top-1/2 -translate-y-1/2')}
-              {slot('E', 'right-1 top-1/2 -translate-y-1/2')}
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <ReplaySeatTag seat="E" contract={contract} />
-              {sideHand('E', true)}
-            </div>
-          </div>
-          {topBottomHand('S')}
-          <ReplaySeatTag seat="S" contract={contract} />
+          )}
+        </div>
+        <Stack cards={handCards('E')} />
+      </div>
+
+      {/* Bricka + zon nere till vänster (Synrey). */}
+      <div className="px-3 pb-2 text-xs leading-tight text-emerald-50/90">
+        <div>Bricka {deal.board}</div>
+        <div>{VUL_TEXT[deal.vulnerability]}</div>
+      </div>
+
+      {/* Svarta listen: kontraktet som chip + ställningen. */}
+      <div className="flex justify-center pb-2">
+        <div className="flex items-center gap-2 rounded-lg bg-slate-900/85 px-3 py-1 shadow">
+          <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
+          <span className="text-sm font-semibold text-white">
+            NS:{tricksNS} ÖV:{tricksEW}
+          </span>
         </div>
       </div>
-      <p className="text-center text-xs text-slate-500">
-        Korten ligger sorterade i färg. Klicka ett kort eller använd knapparna för att stega
-        genom sticken; det aktuella stickets kort är gulmarkerat. Bricka {deal.board}.
-      </p>
+
+      {/* Syd: din hand + stegpilarna « » (Synrey). */}
+      <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-12 pb-2.5 pt-3">
+        <Fan cards={handCards('S')} size="md" overlap="-ml-6" />
+        {played > 0 && (
+          <ArrowButton side="left" onClick={prev} label="Föregående stick">
+            «
+          </ArrowButton>
+        )}
+        {(played < tricks.length || anim > 0) && (
+          <ArrowButton side="right" onClick={next} label="Nästa stick">
+            »
+          </ArrowButton>
+        )}
+      </div>
     </div>
   )
 }
 
-function ReplaySeatTag({ seat, contract }: { seat: Seat; contract: Contract }) {
-  const role = contract.declarer === seat ? 'spelförare' : ''
+/** En vågrät solfjäder av öppna kort (N/S). */
+function Fan({ cards, size, overlap }: { cards: Card[]; size: 'sm' | 'md'; overlap: string }) {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-950/40 px-2.5 py-0.5 text-xs font-medium text-emerald-50">
-      <span>{SEAT_LABEL[seat]}</span>
-      {seat === 'S' && <span className="opacity-80">(du)</span>}
-      {role && <span className="opacity-70">· {role}</span>}
+    <div className="flex min-h-10 justify-center">
+      {cards.map((c, i) => (
+        <PlayingCard key={key(c)} card={c} size={size} className={i > 0 ? overlap : ''} />
+      ))}
     </div>
+  )
+}
+
+/** En lodrät stapel av öppna kort (V/Ö): bara överkanten av varje kort syns. */
+function Stack({ cards }: { cards: Card[] }) {
+  return (
+    <div className="flex w-8 shrink-0 flex-col items-center">
+      {cards.map((c, i) => (
+        <PlayingCard key={key(c)} card={c} size="sm" className={i > 0 ? '-mt-7' : ''} />
+      ))}
+    </div>
+  )
+}
+
+/** Sticket i mitten: mörk platta, väderstrecken runt om, korten lagda mot sin
+ *  plats (V/Ö på tvären) — varje nytt kort landar med en liten animation. */
+function TrickCenter({ cards, winner }: { cards: PlayedCard[]; winner: Seat | null }) {
+  const at = (seat: Seat) => cards.find((pc) => pc.seat === seat)
+  const card = (seat: Seat, pos: string, rotate = '') => {
+    const pc = at(seat)
+    if (!pc) return null
+    return (
+      <div className={`absolute ${pos} ${rotate} replay-card-in`}>
+        <PlayingCard card={pc.card} size="sm" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
+      </div>
+    )
+  }
+  const letter = (label: string, pos: string) => (
+    <span className={`absolute ${pos} text-sm font-semibold text-yellow-300`}>{label}</span>
+  )
+  return (
+    <div className="relative h-44 w-40">
+      <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-emerald-950/50 ring-1 ring-emerald-100/10" />
+      {letter('N', 'top-4 left-1/2 -translate-x-1/2')}
+      {letter('S', 'bottom-4 left-1/2 -translate-x-1/2')}
+      {letter('V', 'left-5 top-1/2 -translate-y-1/2')}
+      {letter('Ö', 'right-5 top-1/2 -translate-y-1/2')}
+      {card('N', 'top-0 left-1/2 -translate-x-1/2')}
+      {card('S', 'bottom-0 left-1/2 -translate-x-1/2')}
+      {card('W', 'left-1 top-1/2 -translate-y-1/2', 'rotate-90')}
+      {card('E', 'right-1 top-1/2 -translate-y-1/2', '-rotate-90')}
+    </div>
+  )
+}
+
+/** Stegpil (« ») i Synrey-stil: mörk rundad knapp i hörnet av Syd-remsan. */
+function ArrowButton({
+  side,
+  onClick,
+  label,
+  children,
+}: {
+  side: 'left' | 'right'
+  onClick: () => void
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={`absolute bottom-3 ${side === 'left' ? 'left-2' : 'right-2'} flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900/70 text-xl font-bold text-white shadow hover:bg-slate-900/90`}
+    >
+      {children}
+    </button>
   )
 }

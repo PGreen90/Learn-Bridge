@@ -1,4 +1,5 @@
 import type { Bid, Suit } from '../types/bridge'
+import { SUIT_TEXT } from '../lib/suitColors'
 
 const STRAIN: Record<string, { sym: string; suit: Suit }> = {
   C: { sym: '♣', suit: 'clubs' },
@@ -7,7 +8,7 @@ const STRAIN: Record<string, { sym: string; suit: Suit }> = {
   S: { sym: '♠', suit: 'spades' },
 }
 
-/** Visar ett bud snyggt: "1H" -> 1♥ (rött), "P" -> Pass (grön), "1NT" -> 1NT.
+/** Visar ett bud snyggt: "1H" -> 1♥, "P" -> Pass. Fyrfärgslek via suitColors.ts.
  *  Pass = grön, dubbling = röd, redubbling = blå (samma färger som budlådan). */
 export function BidLabel({ bid }: { bid: Bid }) {
   if (bid === 'P') return <span className="text-emerald-600">Pass</span>
@@ -22,11 +23,10 @@ export function BidLabel({ bid }: { bid: Bid }) {
   const s = STRAIN[strain]
   if (!s) return <span>{bid}</span>
 
-  const color = s.suit === 'hearts' || s.suit === 'diamonds' ? 'text-red-600' : 'text-slate-900'
   return (
     <span>
       {level}
-      <span className={color}>{s.sym}</span>
+      <span className={SUIT_TEXT[s.suit]}>{s.sym}</span>
     </span>
   )
 }

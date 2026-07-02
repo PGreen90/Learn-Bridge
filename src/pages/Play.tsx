@@ -24,14 +24,17 @@ import {
 import { interpretCall } from '../lib/engine/auction-interpret'
 import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../lib/engine/play-bot'
+import { hcp } from '../lib/engine/hand'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
 import { PlayReplay } from '../components/PlayReplay'
 import { AuctionView } from '../components/AuctionView'
+import { AuctionGrid } from '../components/AuctionGrid'
+import { CompassPanel } from '../components/CompassPanel'
 import { BiddingBox } from '../components/BiddingBox'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-import { bySuit, orderedSuits, DISPLAY_SUITS } from '../lib/cardLayout'
+import { bySuit, orderedSuits, HAND_SUITS } from '../lib/cardLayout'
 
 // En giv går genom två faser: först budgivningen (du klickar Syds bud i budlådan,
 // datorn budar V/N/Ö ett i taget runt bordet), sedan kortspelet ur de verkliga
@@ -149,7 +152,8 @@ export function Play() {
 }
 
 // ===========================================================================
-// Budfasen: din hand, budgivningen som växer fram, och budlådan när det är din tur.
+// Budfasen (Synrey-stil): kompass + auktionsrutnät överst, budlådan i mitten,
+// din hand som solfjäder längst ner. Motståndarnas kort visas inte alls.
 // ===========================================================================
 
 function BiddingPhase({
@@ -163,106 +167,108 @@ function BiddingPhase({
   onBid: (bid: Bid) => void
   onNewGame: () => void
 }) {
-  const toAct = seatToAct(game.deal.dealer, game.history.length)
-  const yourTurn = !complete && toAct === 'S'
+  const [showMenu, setShowMenu] = useState(false)
+  const toAct = complete ? null : seatToAct(game.deal.dealer, game.history.length)
+  const yourTurn = toAct === 'S'
   const passedOut = complete && !contractFromCalls(game.history)
   // Motorns rekommenderade bud för din hand i det här läget (markeras i budlådan
   // och ger den äkta förklaringen för det budet).
   const recommendation = yourTurn ? decideCall(game.deal, game.history, 'S') : null
 
   return (
-    <div className="space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold mb-1">Spela kort</h1>
-        <p className="text-slate-600 text-sm">
-          Du sitter <strong>Syd</strong>. Först budar ni fram kontraktet: när det är
-          din tur <strong>klickar du ditt bud</strong> i budlådan, datorn sköter
-          Väst, Nord och Öst. När budgivningen är klar börjar kortspelet.
-        </p>
-      </header>
+    <div
+      className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
+      style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+    >
+      {/* Överst: kompass (giv + bricka + zon), auktionen och menyknappen. */}
+      <div className="flex items-stretch gap-2 p-2.5">
+        <CompassPanel dealer={game.deal.dealer} board={game.deal.board} vulnerability={game.deal.vulnerability} />
+        <AuctionGrid
+          calls={game.history}
+          dealer={game.deal.dealer}
+          vulnerability={game.deal.vulnerability}
+          activeSeat={toAct}
+        />
+        <TableMenu open={showMenu} onToggle={() => setShowMenu((v) => !v)} onNewGame={onNewGame}>
+          Du sitter <strong>Syd</strong>. När din ruta i auktionen lyser är det din tur:
+          klicka ett bud i budlådan och bekräfta med <strong>OK</strong>. Datorn sköter
+          Väst, Nord och Öst. Klicka ett lagt bud för att se vad det betyder.
+        </TableMenu>
+      </div>
 
-      <Panel className="!p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="font-semibold">Budgivning</span>
-          <Button variant="secondary" onClick={onNewGame}>
-            Ny giv →
-          </Button>
-        </div>
-        <p className="mt-2 text-sm">
-          {passedOut ? (
-            <span className="text-slate-500">Ingen öppnade – given passades ut. Ta en ny giv.</span>
-          ) : yourTurn ? (
-            <span className="text-emerald-700 font-medium">Din tur att bjuda.</span>
-          ) : (
-            <span className="text-slate-400">Datorn budar … ({SEAT_LABEL[toAct]})</span>
-          )}
-        </p>
-      </Panel>
+      {/* Budlådan – alltid synlig; otillåtna/inte-din-tur tonas ner. */}
+      <div className="px-2.5 pb-3">
+        <BiddingBox
+          legal={yourTurn ? legalCalls(game.history, 'S') : []}
+          onBid={onBid}
+          recommendation={recommendation}
+          history={game.history}
+        />
+      </div>
 
-      {/* Budgivningen som växer fram, plats för plats. */}
-      {game.history.length > 0 && (
-        <div className="flex justify-center">
-          <AuctionView
-            calls={game.history}
-            dealer={game.deal.dealer}
-            vulnerability={game.deal.vulnerability}
-          />
-        </div>
-      )}
-
-      {/* Grönt filt: din hand öppen, de andra som baksidor. Aktiv plats markeras. */}
-      <div
-        className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"
-        style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <BiddingSeat seat="N" hand={game.deal.hands.N} active={toAct === 'N'} />
-          <div className="flex w-full items-center justify-between gap-2">
-            <BiddingSeat seat="W" hand={game.deal.hands.W} active={toAct === 'W'} />
-            <BiddingSeat seat="E" hand={game.deal.hands.E} active={toAct === 'E'} />
-          </div>
-          <BiddingSeat seat="S" hand={game.deal.hands.S} active={toAct === 'S'} />
+      {/* Din hand som solfjäder + HCP-bricka (Synrey). */}
+      <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-2 pb-2.5 pt-3">
+        <HandFan hand={game.deal.hands.S} />
+        <div className="absolute bottom-2 right-2 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-semibold text-white">
+          HCP {hcp(game.deal.hands.S)}
         </div>
       </div>
 
-      {/* Budlådan – bara när det faktiskt är din tur. */}
-      {yourTurn && (
-        <Panel className="!p-4">
-          <p className="mb-3 text-center text-sm text-slate-600">Ditt bud:</p>
-          <BiddingBox legal={legalCalls(game.history, 'S')} onBid={onBid} recommendation={recommendation} history={game.history} />
-        </Panel>
+      {/* Passades given ut: vit dialog (Synrey-stil) med ny giv. */}
+      {passedOut && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30">
+          <div className="rounded-xl bg-white p-4 text-center shadow-xl">
+            <p className="mb-3 text-sm text-slate-700">Ingen öppnade – given passades ut.</p>
+            <Button onClick={onNewGame}>Ny giv →</Button>
+          </div>
+        </div>
       )}
     </div>
   )
 }
 
-/** En plats i budfasen: namnbricka + handen (Syd öppen och sorterad, övriga baksidor). */
-function BiddingSeat({ seat, hand, active }: { seat: Seat; hand: Hand; active: boolean }) {
-  const faceUp = seat === 'S'
-  const tag = <SeatTag seat={seat} role="" active={active} />
-  const body = faceUp ? (
-    <div className="flex items-end gap-1">
-      {DISPLAY_SUITS.map((suit) => {
-        const cards = bySuit(hand, suit)
-        if (cards.length === 0) return null
-        return (
-          <div key={suit} className="flex">
-            {cards.map((c, i) => (
-              <PlayingCard key={`${c.suit}${c.rank}`} card={c} size="md" className={i > 0 ? '-ml-5' : ''} />
-            ))}
-          </div>
-        )
-      })}
-    </div>
-  ) : (
-    <FanBacks count={hand.length} />
-  )
-
+/** Menyknappen (⋮) uppe till höger: expanderar i en overlay med ny giv + hjälp. */
+function TableMenu({
+  open,
+  onToggle,
+  onNewGame,
+  children,
+}: {
+  open: boolean
+  onToggle: () => void
+  onNewGame: () => void
+  children: ReactNode
+}) {
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      {seat !== 'S' && tag}
-      {body}
-      {seat === 'S' && tag}
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950/60 text-lg font-bold text-emerald-50 ring-1 ring-emerald-100/10 hover:bg-emerald-950/80"
+        aria-label="Meny"
+      >
+        ⋮
+      </button>
+      {open && (
+        <div className="absolute right-0 top-11 z-30 w-64 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+          <Button className="w-full" onClick={onNewGame}>
+            Ny giv →
+          </Button>
+          <p className="mt-3 text-xs leading-relaxed text-slate-600">{children}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Din hand som en tät solfjäder (Synrey-ordning ♠ ♥ ♣ ♦, högsta kortet vänster). */
+function HandFan({ hand }: { hand: Hand }) {
+  const cards = HAND_SUITS.flatMap((suit) => bySuit(hand, suit))
+  return (
+    <div className="flex justify-center">
+      {cards.map((c, i) => (
+        <PlayingCard key={`${c.suit}${c.rank}`} card={c} size="lg" className={i > 0 ? '-ml-7' : ''} />
+      ))}
     </div>
   )
 }
@@ -541,7 +547,7 @@ function PlayTable({
       {/* Färdigspelad giv → stegbar omspelning. Annars det gröna filtbordet:
           Nord uppe, Väst/mitten/Öst, Syd nere (du). */}
       {done ? (
-        <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} />
+        <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
       ) : (
         <div
           className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"

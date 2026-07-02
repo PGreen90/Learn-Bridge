@@ -1,4 +1,5 @@
 import type { Suit } from '../types/bridge'
+import { SUIT_TEXT } from '../lib/suitColors'
 
 const SYMBOL: Record<Suit, string> = {
   spades: '♠',
@@ -7,14 +8,7 @@ const SYMBOL: Record<Suit, string> = {
   clubs: '♣',
 }
 
-// Röda färger: hjärter & ruter. Svarta: spader & klöver.
-const COLOR: Record<Suit, string> = {
-  spades: 'text-slate-900',
-  hearts: 'text-red-600',
-  diamonds: 'text-red-600',
-  clubs: 'text-slate-900',
-}
-
+// Fyrfärgslek (Synrey-stil): ♠ blå, ♥ röd, ♦ orange, ♣ grön — se suitColors.ts.
 export function SuitSymbol({ suit, className = '' }: { suit: Suit; className?: string }) {
-  return <span className={`${COLOR[suit]} ${className}`}>{SYMBOL[suit]}</span>
+  return <span className={`${SUIT_TEXT[suit]} ${className}`}>{SYMBOL[suit]}</span>
 }

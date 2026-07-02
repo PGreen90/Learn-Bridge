@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Ett kort som "läggs" på bordet i omspelningen (Synrey-känsla): landar mjukt. */
+@keyframes replay-card-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.85); }
+  to { opacity: 1; }
+}
+.replay-card-in { animation: replay-card-in 260ms ease-out; }
+
 /* Stil för renderad markdown från systemboken (Budsystem-sidan). */
 .md { color: #334155; font-size: 0.95rem; line-height: 1.65; }
 .md > :first-child { margin-top: 0; }
