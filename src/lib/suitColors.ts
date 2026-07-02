@@ -12,6 +12,18 @@ export const SUIT_TEXT: Record<Suit, string> = {
   clubs: 'text-green-700',
 }
 
+/**
+ * Ljusare kulörer för symboler i LÖPTEXT i mörkt läge (annars drunknar blå/grön
+ * mot mörk bakgrund). Används av SuitSymbol – ALDRIG av korten (PlayingCard),
+ * vars framsida alltid är vit och behåller de mörka kulörerna.
+ */
+export const SUIT_TEXT_DARK: Record<Suit, string> = {
+  spades: 'dark:text-blue-400',
+  hearts: 'dark:text-red-400',
+  diamonds: 'dark:text-orange-400',
+  clubs: 'dark:text-green-400',
+}
+
 /** Chip-stil (bakgrund + text) för ett kontraktsbud per trumfslag, Synrey-paletten. */
 export const STRAIN_CHIP: Record<'NT' | 'S' | 'H' | 'D' | 'C', string> = {
   NT: 'bg-purple-100 text-purple-800',

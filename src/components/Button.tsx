@@ -4,8 +4,9 @@ type Variant = 'primary' | 'secondary' | 'ghost'
 
 const STYLES: Record<Variant, string> = {
   primary: 'bg-emerald-600 hover:bg-emerald-700 text-white',
-  secondary: 'bg-white hover:bg-slate-100 text-slate-900 border border-slate-300',
-  ghost: 'bg-transparent hover:bg-black/5 text-slate-900',
+  secondary:
+    'bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 dark:border-slate-600',
+  ghost: 'bg-transparent hover:bg-black/5 text-slate-900 dark:text-slate-100 dark:hover:bg-white/10',
 }
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {

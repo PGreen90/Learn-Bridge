@@ -31,8 +31,8 @@ function Session({ themeId }: { themeId: string }) {
   if (!theme || exercises.length === 0) {
     return (
       <Panel>
-        <p className="text-slate-600">Temat hittades inte.</p>
-        <Link to="/budtraning" className="text-emerald-700 underline">
+        <p className="text-slate-600 dark:text-slate-400">Temat hittades inte.</p>
+        <Link to="/budtraning" className="text-emerald-700 dark:text-emerald-400 underline">
           Tillbaka till budträning
         </Link>
       </Panel>
@@ -44,10 +44,10 @@ function Session({ themeId }: { themeId: string }) {
       <div className="space-y-6">
         <Panel className="text-center">
           <h1 className="text-2xl font-bold mb-2">Klart! 🎉</h1>
-          <p className="text-lg text-slate-700 mb-1">
+          <p className="text-lg text-slate-700 dark:text-slate-300 mb-1">
             Du fick <b>{score.correct}</b> av <b>{score.total}</b> rätt
           </p>
-          <p className="text-slate-500 mb-6">Temat: {theme.title}</p>
+          <p className="text-slate-500 dark:text-slate-400 mb-6">Temat: {theme.title}</p>
           <div className="flex flex-wrap gap-2 justify-center">
             <Button onClick={restart}>Träna igen</Button>
             <Link to="/budtraning">
@@ -126,11 +126,11 @@ function Session({ themeId }: { themeId: string }) {
       <div className="flex items-center justify-between gap-3 px-1">
         <div>
           <h1 className="text-lg font-bold leading-tight">{theme.title}</h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Fråga {exIndex + 1} av {exercises.length}
           </p>
         </div>
-        <Link to="/budtraning" className="shrink-0 text-sm text-emerald-700 underline">
+        <Link to="/budtraning" className="shrink-0 text-sm text-emerald-700 dark:text-emerald-400 underline">
           Avbryt
         </Link>
       </div>

@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bridge – lär dig buda och spela</title>
+    <script>
+      // Sätt mörkt läge FÖRE appen laddar, annars blinkar sidan vit en stund.
+      // Sparat val vinner; utan sparat val följer vi systemets läge.
+      // (Värdet är JSON-sparat av src/lib/storage.ts, därav citattecknen.)
+      try {
+        var saved = localStorage.getItem('learnbridge:theme')
+        var dark =
+          saved === '"dark"' ||
+          (saved === null && matchMedia('(prefers-color-scheme: dark)').matches)
+        if (dark) document.documentElement.classList.add('dark')
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+/* Mörkt läge styrs av klassen "dark" på <html> (togglas i sidhuvudet och sätts
+   tidigt av index.html) – inte direkt av systemets läge. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Mjuk toning (~1 s) mellan ljust och mörkt. Klassen ligger på <html> BARA
+   under själva växlingen (se toggleTheme) – annars skulle varje hover och
+   sidbyte också tona långsamt. !important vinner över utilities som redan
+   har transition-colors (150 ms). */
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition:
+    background-color 1s ease,
+    color 1s ease,
+    border-color 1s ease,
+    box-shadow 1s ease !important;
+}
+
 /* Ett kort som "läggs" på bordet i omspelningen (Synrey-känsla): landar mjukt. */
 @keyframes replay-card-in {
   from { opacity: 0; transform: translateY(-8px) scale(0.85); }
@@ -24,3 +43,14 @@
 .md table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; margin: 0.6rem 0; font-size: 0.85rem; }
 .md th, .md td { border: 1px solid #e2e8f0; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
 .md th { background: #f1f5f9; font-weight: 600; color: #0f172a; white-space: nowrap; }
+
+/* Samma markdown-stilar i mörkt läge. */
+.dark .md { color: #cbd5e1; }
+.dark .md strong { color: #f1f5f9; }
+.dark .md h3 { color: #6ee7b7; }
+.dark .md h4 { color: #34d399; }
+.dark .md a { color: #34d399; }
+.dark .md code { background: #1e293b; }
+.dark .md blockquote { color: #94a3b8; }
+.dark .md th, .dark .md td { border-color: #334155; }
+.dark .md th { background: #1e293b; color: #f1f5f9; }

@@ -54,7 +54,7 @@ export function BudSystem() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold mb-1">Budsystem</h1>
-        <p className="text-slate-600">
+        <p className="text-slate-600 dark:text-slate-400">
           Vårt 2-över-1-system i sin helhet – öppningar, svar, återbud, slam,
           försvar och markeringar. Klicka på en rubrik för att fälla ut.
         </p>
@@ -64,24 +64,24 @@ export function BudSystem() {
         {SECTIONS.map((s) => (
           <details
             key={s.title}
-            className="group rounded-xl border border-slate-200 bg-white shadow-sm"
+            className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
           >
-            <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-semibold text-emerald-900 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-semibold text-emerald-900 dark:text-emerald-200 [&::-webkit-details-marker]:hidden">
               <span>{s.title}</span>
               <span className="text-slate-400 transition-transform group-open:rotate-180">
                 ▾
               </span>
             </summary>
-            <div className="border-t border-slate-100 px-4 pb-4 pt-2">
+            <div className="border-t border-slate-100 dark:border-slate-800 px-4 pb-4 pt-2">
               {s.intro && <Markdown>{s.intro}</Markdown>}
               {s.subs.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {s.subs.map((sub) => (
                     <details
                       key={sub.title}
-                      className="group/sub rounded-lg border border-slate-200 bg-slate-50"
+                      className="group/sub rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60"
                     >
-                      <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm font-medium text-slate-800 [&::-webkit-details-marker]:hidden">
+                      <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
                         <span>{sub.title}</span>
                         <span className="text-slate-400 transition-transform group-open/sub:rotate-180">
                           ▾

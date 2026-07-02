@@ -24,7 +24,7 @@ function BoardMarker({ deal }: { deal: Deal }) {
     return (
       <div
         className={`absolute ${pos} flex h-8 w-8 flex-col items-center justify-center rounded text-xs font-bold leading-none
-          ${vul ? 'bg-red-500 text-white' : 'bg-white text-slate-600 border border-slate-300'}`}
+          ${vul ? 'bg-red-500 text-white' : 'bg-white text-slate-600 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600'}`}
       >
         <span>{SEAT_SHORT[seat]}</span>
         {deal.dealer === seat && (
@@ -35,14 +35,14 @@ function BoardMarker({ deal }: { deal: Deal }) {
   }
   return (
     <div className="hidden sm:flex items-center justify-center self-stretch">
-      <div className="relative h-28 w-28 rounded-md border border-slate-300 bg-slate-50">
+      <div className="relative h-28 w-28 rounded-md border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
         {chip('N', 'left-1/2 top-1 -translate-x-1/2')}
         {chip('W', 'left-1 top-1/2 -translate-y-1/2')}
         {chip('E', 'right-1 top-1/2 -translate-y-1/2')}
         {chip('S', 'left-1/2 bottom-1 -translate-x-1/2')}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[9px] uppercase tracking-wide text-slate-400 leading-none">Bricka</span>
-          <span className="text-lg font-bold text-slate-700 leading-tight">{deal.board}</span>
+          <span className="text-[9px] uppercase tracking-wide text-slate-400 dark:text-slate-500 leading-none">Bricka</span>
+          <span className="text-lg font-bold text-slate-700 dark:text-slate-200 leading-tight">{deal.board}</span>
         </div>
       </div>
     </div>
@@ -79,14 +79,14 @@ export function Spela() {
         <div className="flex items-baseline justify-between mb-2">
           <span className="font-semibold">
             {SEAT_LABEL[seat]}
-            {deal.dealer === seat && <span className="ml-2 text-xs text-slate-500">(giv)</span>}
-            {isOpener && <span className="ml-2 text-xs text-emerald-600">öppnare</span>}
-            {isResponder && <span className="ml-2 text-xs text-sky-600">svarare</span>}
+            {deal.dealer === seat && <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">(giv)</span>}
+            {isOpener && <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">öppnare</span>}
+            {isResponder && <span className="ml-2 text-xs text-sky-600 dark:text-sky-400">svarare</span>}
           </span>
           <BidChip bid={r.call} />
         </div>
         <HandView hand={hand} showPoints />
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           {r.explanation}
           {r.uncertain && <span className="ml-1 text-amber-600">⚑ osäker – kan vara stark 2♣</span>}
         </p>
@@ -98,7 +98,7 @@ export function Spela() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold mb-1">Budvisning</h1>
-        <p className="text-slate-600">
+        <p className="text-slate-600 dark:text-slate-400">
           Titta-läge för budgivning: motorn delar ut en riktig giv, visar vad
           varje hand öppnar med och bygger sedan hela (ostörda) auktionen öppning →
           svar → öppnarens återbud så långt systemboken räcker. Du tittar – datorn
@@ -143,18 +143,18 @@ export function Spela() {
               vulnerability={deal.vulnerability}
             />
           </div>
-          <p className="text-sm text-slate-500 mb-2">Förklaringar:</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Förklaringar:</p>
           <ol className="space-y-2">
             {auction.turns.map((turn, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="w-28 shrink-0 text-sm">
                   <span className="font-semibold">{SEAT_LABEL[turn.seat]}</span>{' '}
-                  <span className="text-slate-500">({turn.role})</span>
+                  <span className="text-slate-500 dark:text-slate-400">({turn.role})</span>
                 </span>
                 <span className="w-14 shrink-0">
                   <BidChip bid={turn.call} />
                 </span>
-                <span className="text-sm text-slate-600">
+                <span className="text-sm text-slate-600 dark:text-slate-400">
                   {turn.explanation}
                   {turn.uncertain && (
                     <span className="ml-1 text-amber-600">⚑ osäker – förenkling i motorn</span>
@@ -164,7 +164,7 @@ export function Spela() {
             ))}
           </ol>
           {auction.open && (
-            <p className="mt-3 text-sm text-slate-500">
+            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
               … auktionen fortsätter – motorn har inte regler för nästa bud ännu.
             </p>
           )}
@@ -204,7 +204,7 @@ function SurveyTable({
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       <table className="w-full text-sm mb-4">
         <thead>
-          <tr className="text-left text-slate-500 border-b border-slate-200">
+          <tr className="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
             <th className="py-1">Regel</th>
             <th className="py-1 text-right">Antal</th>
             <th className="py-1 text-right">Andel</th>
@@ -212,7 +212,7 @@ function SurveyTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.rule} className="border-b border-slate-100">
+            <tr key={row.rule} className="border-b border-slate-100 dark:border-slate-800">
               <td className="py-1">{row.rule}</td>
               <td className="py-1 text-right tabular-nums">{row.count.toLocaleString('sv-SE')}</td>
               <td className="py-1 text-right tabular-nums">{row.pct} %</td>
@@ -222,12 +222,12 @@ function SurveyTable({
       </table>
       <h3 className="font-medium mb-1">Osäkra händer ({uncertain.length} exempel)</h3>
       {uncertain.length === 0 ? (
-        <p className="text-sm text-slate-600">Inga osäkra händer i den här körningen.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Inga osäkra händer i den här körningen.</p>
       ) : (
         <ul className="space-y-1 text-sm">
           {uncertain.map((u, i) => (
-            <li key={i} className="text-slate-700">
-              <span className="font-mono text-slate-500">{u.notation}</span> →{' '}
+            <li key={i} className="text-slate-700 dark:text-slate-300">
+              <span className="font-mono text-slate-500 dark:text-slate-400">{u.notation}</span> →{' '}
               <BidChip bid={u.result.call} />
             </li>
           ))}
