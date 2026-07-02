@@ -1,52 +1,46 @@
-import { useState } from 'react'
-import type { Deal, Seat } from '../types/bridge'
+import { useEffect, useMemo, useState } from 'react'
+import type { Deal, Hand, Seat } from '../types/bridge'
 import { SEAT_LABEL } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening, isVulnerable } from '../lib/engine/openings'
 import { buildAuction, dealWithAuction } from '../lib/engine/auction'
 import { turnsToCalls } from '../lib/engine/auction-contract'
+import { hcp } from '../lib/engine/hand'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
+import { bySuit, HAND_SUITS } from '../lib/cardLayout'
 import { HandView } from '../components/HandView'
 import { AuctionGrid } from '../components/AuctionGrid'
-import { Felt } from '../components/Felt'
 import { BidChip } from '../components/BidChip'
+import { Felt } from '../components/Felt'
+import { HandFan } from '../components/HandFan'
+import { SideStack } from '../components/SideStack'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 
-const SEAT_SHORT: Record<Seat, string> = { N: 'N', E: 'Ö', S: 'S', W: 'V' }
+// Budvisningen (omgjord 2026-07-02, ägarbeslut: "så likt Spela kort som
+// möjligt"): ETT grönt bord med alla fyra händer öppna — Nord solfjäder uppe,
+// Väst/Öst som vridna sidostaplar, Syd solfjäder nere — och auktionen i mitten.
+// Buden läggs ett i taget i samma takt som när datorn budar i Spela kort;
+// klick på ett lagt bud ger förklaringen (kravnivå + ALERT) i vita popupen.
+// Poänguträkningar och hålfinnarna ligger hopfällda under bordet.
 
-/**
- * BBO-liknande brickmarkör i mitten av bordet: varje väderstreck rött i zon,
- * vitt utanför zon. Giv märks med "D". Bricknumret står i mitten.
- */
-function BoardMarker({ deal }: { deal: Deal }) {
-  function chip(seat: Seat, pos: string) {
-    const vul = isVulnerable(seat, deal.vulnerability)
-    return (
-      <div
-        className={`absolute ${pos} flex h-8 w-8 flex-col items-center justify-center rounded text-xs font-bold leading-none
-          ${vul ? 'bg-red-500 text-white' : 'bg-white text-slate-600 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600'}`}
-      >
-        <span>{SEAT_SHORT[seat]}</span>
-        {deal.dealer === seat && (
-          <span className="mt-0.5 text-[8px] font-semibold opacity-80">D</span>
-        )}
-      </div>
-    )
-  }
+/** Platsen som bjuder som nr `index` när `dealer` börjar (medurs N→Ö→S→V). */
+const CLOCKWISE: Seat[] = ['N', 'E', 'S', 'W']
+function seatAt(dealer: Seat, index: number): Seat {
+  return CLOCKWISE[(CLOCKWISE.indexOf(dealer) + index) % 4]
+}
+
+/** En hands kort i solfjäderordning (♠ ♥ ♣ ♦, som HandFan) för sidostaplarna. */
+function fanCards(hand: Hand) {
+  return HAND_SUITS.flatMap((suit) => bySuit(hand, suit))
+}
+
+/** Liten mörk hp-bricka (som HCP-brickan i Spela kort). */
+function HpTag({ label, hand }: { label: string; hand: Hand }) {
   return (
-    <div className="hidden sm:flex items-center justify-center self-stretch">
-      <div className="relative h-28 w-28 rounded-md border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
-        {chip('N', 'left-1/2 top-1 -translate-x-1/2')}
-        {chip('W', 'left-1 top-1/2 -translate-y-1/2')}
-        {chip('E', 'right-1 top-1/2 -translate-y-1/2')}
-        {chip('S', 'left-1/2 bottom-1 -translate-x-1/2')}
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[9px] uppercase tracking-wide text-slate-400 dark:text-slate-500 leading-none">Bricka</span>
-          <span className="text-lg font-bold text-slate-700 dark:text-slate-200 leading-tight">{deal.board}</span>
-        </div>
-      </div>
-    </div>
+    <span className="rounded-md bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+      {label} {hcp(hand)} hp
+    </span>
   )
 }
 
@@ -54,112 +48,157 @@ export function Spela() {
   const [deal, setDeal] = useState<Deal>(() => dealRandom())
   const [openSurvey, setOpenSurvey] = useState<OpeningSurvey | null>(null)
   const [respSurvey, setRespSurvey] = useState<ResponseSurvey | null>(null)
+  // Antal bud som hittills lagts på bordet (uppspelningen).
+  const [shown, setShown] = useState(0)
 
-  const auction = buildAuction(deal)
-  const hasResponse = (auction?.turns.length ?? 0) >= 2
+  const auction = useMemo(() => buildAuction(deal), [deal])
+  const calls = useMemo(
+    () => (auction ? turnsToCalls(auction.turns, deal.dealer) : []),
+    [auction, deal.dealer],
+  )
 
-  function newDeal() {
-    setDeal(dealRandom())
-  }
+  // Datorn budar i samma takt som i Spela kort: nästa bud var 700:e ms.
+  const playing = shown < calls.length
+  useEffect(() => {
+    if (!playing) return
+    const id = setTimeout(() => setShown((n) => n + 1), 700)
+    return () => clearTimeout(id)
+  }, [playing, shown])
 
-  function newAuctionDeal() {
-    const found = dealWithAuction()
-    if (found) setDeal(found.deal)
-  }
+  const activeSeat = playing ? calls[shown].seat : null
 
-  function seatPanel(seat: Seat) {
-    const hand = deal.hands[seat]
-    const r = classifyOpening(hand, isVulnerable(seat, deal.vulnerability))
-    const isOpener = auction?.openerSeat === seat
-    const isResponder = hasResponse && auction?.responderSeat === seat
-    return (
-      <Panel
-        key={seat}
-        className={`!p-4 w-full sm:w-72 ${isOpener ? 'ring-2 ring-emerald-500' : isResponder ? 'ring-2 ring-sky-400' : ''}`}
-      >
-        <div className="flex items-baseline justify-between mb-2">
-          <span className="font-semibold">
-            {SEAT_LABEL[seat]}
-            {deal.dealer === seat && <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">(giv)</span>}
-            {isOpener && <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">öppnare</span>}
-            {isResponder && <span className="ml-2 text-xs text-sky-600 dark:text-sky-400">svarare</span>}
-          </span>
-          <BidChip bid={r.call} />
-        </div>
-        <HandView hand={hand} showPoints />
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          {r.explanation}
-          {r.uncertain && <span className="ml-1 text-amber-600">⚑ osäker – kan vara stark 2♣</span>}
-        </p>
-      </Panel>
-    )
+  function loadDeal(d: Deal) {
+    setDeal(d)
+    setShown(0)
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <header>
         <h1 className="text-2xl font-bold mb-1">Budvisning</h1>
         <p className="text-slate-600 dark:text-slate-400">
-          Titta-läge: motorn delar ut en giv, budar alla fyra händerna enligt
-          systemboken och förklarar varje bud. Du tittar – datorn budar.
+          Titta-läge: motorn delar ut en giv och budar alla fyra händerna enligt
+          systemboken. Klicka på ett lagt bud för att se vad det betyder.
         </p>
       </header>
 
       <div className="flex flex-wrap gap-3">
-        <Button onClick={newDeal}>Ny giv →</Button>
-        <Button onClick={newAuctionDeal}>Öppning + auktion →</Button>
+        <Button onClick={() => loadDeal(dealRandom())}>Ny giv →</Button>
+        <Button
+          onClick={() => {
+            const found = dealWithAuction()
+            if (found) loadDeal(found.deal)
+          }}
+        >
+          Öppning + auktion →
+        </Button>
+        {!playing && calls.length > 0 && (
+          <Button variant="secondary" onClick={() => setShown(0)}>
+            Spela upp igen
+          </Button>
+        )}
       </div>
 
-      {/* Händerna placerade som vid ett bridgebord: Nord uppe, Väst vänster,
-          Öst höger, Syd nere. På liten skärm staplas de N → V → Ö → S. */}
-      <div className="space-y-4">
-        <div className="flex justify-center">{seatPanel('N')}</div>
-        <div className="flex flex-wrap items-stretch justify-center gap-4">
-          {seatPanel('W')}
-          <BoardMarker deal={deal} />
-          {seatPanel('E')}
+      {/* Bordet: alla fyra händer öppna runt auktionen (som omspelningen). */}
+      <Felt>
+        {/* Nord: solfjäder överst + hp-bricka i hörnet. */}
+        <div className="relative pt-3">
+          <HandFan hand={deal.hands.N} size="sm" />
+          <div className="absolute left-2 top-2">
+            <HpTag label="N" hand={deal.hands.N} />
+          </div>
         </div>
-        <div className="flex justify-center">{seatPanel('S')}</div>
-      </div>
 
-      {auction && hasResponse && (
-        <Panel>
-          <h2 className="text-lg font-semibold mb-3">Auktionen (ostörd – motståndarna passar)</h2>
-          {/* Auktionen på grönt filt med Synrey-chips (klicka ett bud → förklaring). */}
-          <Felt rounded="rounded-2xl" className="mb-5 p-2.5">
+        {/* Mittraden: Väst | auktionen | Öst. */}
+        <div className="flex items-start justify-between gap-1 px-2 py-3">
+          <div className="flex flex-col items-center gap-1.5">
+            <SideStack cards={fanCards(deal.hands.W)} side="W" />
+            <HpTag label="V" hand={deal.hands.W} />
+          </div>
+          <div className="w-full max-w-sm self-center px-1">
             <AuctionGrid
-              calls={turnsToCalls(auction.turns, deal.dealer)}
+              calls={calls.slice(0, shown)}
               dealer={deal.dealer}
               vulnerability={deal.vulnerability}
+              activeSeat={activeSeat}
             />
-          </Felt>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Förklaringar:</p>
-          <ol className="space-y-2">
-            {auction.turns.map((turn, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="w-28 shrink-0 text-sm">
-                  <span className="font-semibold">{SEAT_LABEL[turn.seat]}</span>{' '}
-                  <span className="text-slate-500 dark:text-slate-400">({turn.role})</span>
-                </span>
-                <span className="w-14 shrink-0">
-                  <BidChip bid={turn.call} />
-                </span>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
-                  {turn.explanation}
-                  {turn.uncertain && (
-                    <span className="ml-1 text-amber-600">⚑ osäker – förenkling i motorn</span>
-                  )}
-                </span>
-              </li>
+            {!auction && (
+              <p className="mt-2 text-center text-xs text-emerald-50/80">
+                Motorn hittade ingen öppning – given passas ut.
+              </p>
+            )}
+            {auction?.open && !playing && (
+              <p className="mt-2 text-center text-xs text-emerald-50/80">
+                … auktionen fortsätter – motorn har inte regler för nästa bud ännu.
+              </p>
+            )}
+            {!playing && calls.length > 0 && (
+              <p className="mt-2 text-center text-[11px] text-emerald-50/70">
+                Klicka ett bud för förklaring.
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <SideStack cards={fanCards(deal.hands.E)} side="E" />
+            <HpTag label="Ö" hand={deal.hands.E} />
+          </div>
+        </div>
+
+        {/* Bricka + zon nere till vänster (som spelvyn). */}
+        <div className="px-3 pb-2 text-xs leading-tight text-emerald-50/90">
+          <div>Bricka {deal.board}</div>
+          <div>{VUL_TEXT[deal.vulnerability]}</div>
+        </div>
+
+        {/* Syd: solfjäder i remsan längst ner + HCP-bricka (som Spela kort). */}
+        <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-2 pb-2.5 pt-3">
+          <HandFan hand={deal.hands.S} size="md" />
+          <div className="absolute bottom-2 right-2 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-semibold text-white">
+            HCP {hcp(deal.hands.S)}
+          </div>
+        </div>
+      </Felt>
+
+      {/* Fördjupningen: poänguträkningar + alla budförklaringar i läsform. */}
+      <details className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
+          <span>🔎 Händernas poäng & alla budförklaringar</span>
+          <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
+        </summary>
+        <div className="border-t border-slate-100 dark:border-slate-800 px-4 pb-4 pt-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(['N', 'W', 'E', 'S'] as Seat[]).map((seat) => (
+              <SeatDetails key={seat} deal={deal} seat={seat} auction={auction} />
             ))}
-          </ol>
-          {auction.open && (
-            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-              … auktionen fortsätter – motorn har inte regler för nästa bud ännu.
-            </p>
+          </div>
+          {auction && auction.turns.length > 0 && (
+            <>
+              <h3 className="mb-2 mt-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Budgivningen steg för steg
+              </h3>
+              <ol className="space-y-2">
+                {auction.turns.map((turn, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="w-28 shrink-0 text-sm">
+                      <span className="font-semibold">{SEAT_LABEL[turn.seat]}</span>{' '}
+                      <span className="text-slate-500 dark:text-slate-400">({turn.role})</span>
+                    </span>
+                    <span className="w-14 shrink-0">
+                      <BidChip bid={turn.call} />
+                    </span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                      {turn.explanation}
+                      {turn.uncertain && (
+                        <span className="ml-1 text-amber-600">⚑ osäker – förenkling i motorn</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </>
           )}
-        </Panel>
-      )}
+        </div>
+      </details>
 
       {/* Hålfinnarna är testverktyg för motorn – hopfällda så de inte stör. */}
       <details className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -202,6 +241,53 @@ export function Spela() {
   )
 }
 
+const VUL_TEXT: Record<Deal['vulnerability'], string> = {
+  none: 'Ingen i zon',
+  ns: 'NS i zon',
+  ew: 'ÖV i zon',
+  all: 'Alla i zon',
+}
+
+/** En plats i fördjupningen: hand som text + poäng + vad handen öppnar med. */
+function SeatDetails({
+  deal,
+  seat,
+  auction,
+}: {
+  deal: Deal
+  seat: Seat
+  auction: ReturnType<typeof buildAuction>
+}) {
+  const hand = deal.hands[seat]
+  const r = classifyOpening(hand, isVulnerable(seat, deal.vulnerability))
+  const isOpener = auction?.openerSeat === seat
+  const isResponder = (auction?.turns.length ?? 0) >= 2 && auction?.responderSeat === seat
+  return (
+    <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+      <div className="mb-2 flex items-baseline justify-between">
+        <span className="text-sm font-semibold">
+          {SEAT_LABEL[seat]}
+          {deal.dealer === seat && (
+            <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">(giv)</span>
+          )}
+          {isOpener && (
+            <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">öppnare</span>
+          )}
+          {isResponder && (
+            <span className="ml-2 text-xs text-sky-600 dark:text-sky-400">svarare</span>
+          )}
+        </span>
+        <BidChip bid={r.call} />
+      </div>
+      <HandView hand={hand} showPoints />
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        {r.explanation}
+        {r.uncertain && <span className="ml-1 text-amber-600">⚑ osäker – kan vara stark 2♣</span>}
+      </p>
+    </div>
+  )
+}
+
 function SurveyTable({
   title,
   rows,
@@ -212,7 +298,7 @@ function SurveyTable({
   uncertain: { notation: string; result: { call: string } }[]
 }) {
   return (
-    <Panel>
+    <Panel className="!p-4 !shadow-none border border-slate-200 dark:border-slate-700">
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       <table className="w-full text-sm mb-4">
         <thead>
