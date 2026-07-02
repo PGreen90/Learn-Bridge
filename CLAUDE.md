@@ -11,13 +11,15 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — 🎨 DESIGNLYFTET (start 2026-07-02)
-> **Ägarbeslut 2026-07-02:** appen heter **RebidZ** (ägarens eget namn; konflikt-
-> kollat — fritt bland appar/bolag/domäner). Ägaren ser business-potential på
-> sikt → designen ska hålla produktnivå. Stil: **eget & snyggare än Synrey**
-> (fria händer; gröna bordet + layouten behålls). Repo/URL byts INTE nu.
-> **Alla fyra stegen BYGGDA & verifierade 2026-07-02 (testsvit 1484 grön,
-> EJ pushat — väntar ägar-OK):**
+### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
+> **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
+>
+> **🎉 🎨 DESIGNLYFTET KLART & LIVE (2026-07-02, commit `186a362`, testsvit
+> 1484):** appen heter **RebidZ** (ägarens eget namn; konfliktkollat — fritt
+> bland appar/bolag/domäner; **påminn ägaren köpa rebidz.com/.se**). Ägaren ser
+> business-potential → designen håller produktnivå. Stil: eget & snyggare än
+> Synrey (gröna bordet + layouten behållna). Repo/URL byts INTE.
+> **Alla fyra stegen byggda, verifierade & deployade:**
 > **Steg 1 ✅** designgrunden — Inter (brödtext) + Space Grotesk (rubriker/
 > ordmärke), självhostade @fontsource; guld-tokens (`--color-gold-*`) +
 > `--font-display` i `index.css` @theme; RebidZ-ordmärke i sidhuvudet;
@@ -32,7 +34,7 @@ Läs den här filen först varje session.
 > + hero; `public/favicon.svg` (Vite rebaser sökvägen, verifierat 200);
 > `theme-color`; ny startsida: hero på filtet (logotyp, tagline, dekorativ
 > solfjäder, guld-CTA) + lägeskorten. Mobil 375 px verifierad överallt.
-> **Kvar:** ägar-OK → PCD; påminn om att köpa rebidz.com/.se.
+> Live-länken verifierad efter deploy (sida + favicon 200, titeln "RebidZ").
 >
 > **🎉 Felrapportering i Spela kort KLAR & LIVE (2026-07-02, testsvit 1481,
 > commit `05d922e`):** dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela
