@@ -11,8 +11,16 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
-> **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
+### 🔵 NU — Felrapportering i Spela kort (vald av ägaren 2026-07-02)
+> Dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela
+> given + auktionen + sticken följer med som förifylld **GitHub-issue**
+> (etiketten `felrapport` skapad i repot). Kommandot **`/felrapporter`**
+> (`.claude/commands/felrapporter.md`) läser rapporterna via `gh`, återskapar
+> given som test (FACIT FÖRE FIX), lagar och stänger issuen. Byggt:
+> `src/lib/felrapport.ts` (rapportformatet, test-låst i `felrapport.test.ts` —
+> händerna i `parseHand`-format så given alltid kan återskapas exakt),
+> `FelrapportDialog.tsx`, inkopplad i `Play.tsx` (resultatdialogen,
+> omspelningsvyn och utpassad giv).
 >
 > **🎉 🧠 Avancerad kortspelsteknik KLAR & pushad (2026-07-02, testsvit 1474):**
 > MED-scopet (slutkast/inkast + skvis) levererat i två steg, FACIT FÖRE FIX,
@@ -267,13 +275,8 @@ Slutförd FAS 3 (facit + `npm test`):
 2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
-- **Felrapportering i Spela kort** (ägaridé 2026-07-02): dialog efter varje giv
-  ("Kändes given rätt?"), kategori (felaktig budgivning m.m.) + fritext, rapporten
-  innehåller HELA given + auktionen och skickas som **GitHub-issue** (förifylld
-  issue-länk först; PAT-i-localStorage-varianten senare). Eget kommando
-  `/felrapporter` läser issues via `gh`, återskapar given som test (FACIT FÖRE
-  FIX), lagar, stänger issue. OBS: webbläsaren kan inte pusha till git — Issues
-  är kanalen.
+- **Felrapportering: PAT-i-localStorage-varianten** (skicka issuen direkt från
+  appen utan att öppna GitHub) — grundvarianten (förifylld issue-länk) = 🔵 NU.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
 - **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade:
   byggs bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).

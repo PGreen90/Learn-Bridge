@@ -35,6 +35,7 @@ import { CompassPanel } from '../components/CompassPanel'
 import { BiddingBox } from '../components/BiddingBox'
 import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
+import { FelrapportDialog } from '../components/FelrapportDialog'
 import { HandFan } from '../components/HandFan'
 import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
 
@@ -172,6 +173,7 @@ function BiddingPhase({
   onNewGame: () => void
 }) {
   const [showMenu, setShowMenu] = useState(false)
+  const [reporting, setReporting] = useState(false)
   const toAct = complete ? null : seatToAct(game.deal.dealer, game.history.length)
   const yourTurn = toAct === 'S'
   const finalContract = complete ? contractFromCalls(game.history) : null
@@ -238,13 +240,33 @@ function BiddingPhase({
       )}
 
       {/* Passades given ut: vit dialog (Synrey-stil) med ny giv. */}
-      {passedOut && (
+      {passedOut && !reporting && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30">
           <div className="rounded-xl bg-white p-4 text-center shadow-xl">
             <p className="mb-3 text-sm text-slate-700">Ingen öppnade – given passades ut.</p>
             <Button onClick={onNewGame}>Ny giv →</Button>
+            <div>
+              <button
+                type="button"
+                onClick={() => setReporting(true)}
+                className="mt-3 text-xs font-medium text-slate-500 underline hover:text-slate-700"
+              >
+                Kändes något fel? Rapportera given
+              </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Felrapporten: hela given + auktionen skickas som förifylld GitHub-issue. */}
+      {reporting && (
+        <FelrapportDialog
+          deal={game.deal}
+          calls={game.history}
+          contract={null}
+          tricks={[]}
+          onClose={() => setReporting(false)}
+        />
       )}
     </Felt>
   )
@@ -313,6 +335,8 @@ function PlayTable({
   const [showInfo, setShowInfo] = useState(false)
   // Resultatdialogen när given är färdigspelad; stängs → omspelningen.
   const [resultSeen, setResultSeen] = useState(false)
+  // Felrapport-dialogen ("Kändes given rätt?") — nås från resultatdialogen.
+  const [reporting, setReporting] = useState(false)
   // Facit (double-dummy) för NUVARANDE ställning: tal = spelförarens totala stick
   // med perfekt spel, 'toohard' = för tung just nu, 'idle' = ej beräknat.
   const [facit, setFacit] = useState<number | 'idle' | 'toohard'>('idle')
@@ -457,7 +481,7 @@ function PlayTable({
     return (
       <div className="relative">
         <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
-        {!resultSeen ? (
+        {!resultSeen && !reporting ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center rounded-3xl bg-black/30">
             <div className="rounded-xl bg-white p-5 text-center shadow-xl">
               <p className={`mb-4 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
@@ -471,12 +495,32 @@ function PlayTable({
                 </Button>
                 <Button onClick={onNewGame}>Ny giv →</Button>
               </div>
+              <button
+                type="button"
+                onClick={() => setReporting(true)}
+                className="mt-3 text-xs font-medium text-slate-500 underline hover:text-slate-700"
+              >
+                Kändes något fel? Rapportera given
+              </button>
             </div>
           </div>
-        ) : (
-          <div className="mt-3 flex justify-center">
+        ) : resultSeen ? (
+          <div className="mt-3 flex justify-center gap-2">
+            <Button variant="secondary" onClick={() => setReporting(true)}>
+              Rapportera fel
+            </Button>
             <Button onClick={onNewGame}>Ny giv →</Button>
           </div>
+        ) : null}
+        {/* Felrapporten: hela given + auktionen + sticken → förifylld GitHub-issue. */}
+        {reporting && (
+          <FelrapportDialog
+            deal={deal}
+            calls={calls}
+            contract={contract}
+            tricks={play.completedTricks}
+            onClose={() => setReporting(false)}
+          />
         )}
       </div>
     )

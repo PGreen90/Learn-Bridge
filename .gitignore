@@ -5,7 +5,8 @@ dist-ssr
 .DS_Store
 .vscode/*
 !.vscode/extensions.json
-.claude/
+.claude/*
+!.claude/commands/
 
 # Källmaterial (PDF:er) hör inte hemma i kod-repot – för stora/onödiga
 *.pdf

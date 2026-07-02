@@ -398,6 +398,27 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
 - **Avgränsning (nästa steg):** balansering (inkliv efter en passrunda) och inkliv
   över andra öppningar (1NT, svaga tvåor, hoppöppningar) återstår.
 
+## Felrapportering i Spela kort (2026-07-02, testsvit 1481)
+
+- **Rapportdialogen** (`src/components/FelrapportDialog.tsx`): "Kändes något
+  fel? Rapportera given" nås från resultatdialogen, omspelningsvyn och
+  utpassad giv i `Play.tsx`. Kategori (5 val) + fritext → knappen öppnar en
+  **förifylld GitHub-issue** (etiketten `felrapport`, skapad i repot) med HELA
+  given: händerna, budgivningen, kontraktet och alla spelade stick. Webbläsaren
+  kan inte pusha till git — Issues är kanalen hem.
+- **Rapportformatet** (`src/lib/felrapport.ts`, test-låst i
+  `felrapport.test.ts`): läsbar sammanfattning + maskinläsbart
+  ```felrapport```-block. Händerna i `parseHand`-format (`formatHand` med
+  garanterad rundresa), stick-rader med utspelare + vinnare → given kan alltid
+  återskapas EXAKT som test.
+- **Kommandot `/felrapporter`** (`.claude/commands/felrapporter.md`): läser
+  öppna felrapport-issues via `gh`, återskapar given som test (FACIT FÖRE
+  FIX), lagar felet, stänger issuen med förklaring. Formatdokumentationen bor
+  i kommandofilen och ändras ihop med `felrapport.test.ts`.
+- Verifierat i webbläsaren: båda flödena (färdigspelad + utpassad giv) ger
+  korrekt URL till `PGreen90/Learn-Bridge/issues/new` med alla 13 stick.
+- **Kvar (SENARE):** PAT-i-localStorage-varianten (skicka utan att öppna GitHub).
+
 ## Nästa steg (ur arbetslistan)
 
 - **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på
