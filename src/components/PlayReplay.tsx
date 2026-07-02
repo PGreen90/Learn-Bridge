@@ -12,6 +12,7 @@ import type { Contract, PlayedCard, Trick } from '../lib/engine/play'
 import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
 import { AuctionGrid } from './AuctionGrid'
 import { BidChip } from './BidChip'
+import { Felt } from './Felt'
 import { PlayingCard } from './PlayingCard'
 import { SideStack } from './SideStack'
 
@@ -103,10 +104,7 @@ export function PlayReplay({
   const tricksEW = played - tricksNS
 
   return (
-    <div
-      className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
-      style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-    >
+    <Felt>
       {/* Nord: vågrät solfjäder överst. */}
       <div className="flex justify-center pt-3">
         <Fan cards={handCards('N')} size="sm" overlap="-ml-5" />
@@ -157,7 +155,7 @@ export function PlayReplay({
           </ArrowButton>
         )}
       </div>
-    </div>
+    </Felt>
   )
 }
 

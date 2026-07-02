@@ -8,6 +8,7 @@ import { turnsToCalls } from '../lib/engine/auction-contract'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
 import { HandView } from '../components/HandView'
 import { AuctionGrid } from '../components/AuctionGrid'
+import { Felt } from '../components/Felt'
 import { BidChip } from '../components/BidChip'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
@@ -99,22 +100,14 @@ export function Spela() {
       <header>
         <h1 className="text-2xl font-bold mb-1">Budvisning</h1>
         <p className="text-slate-600 dark:text-slate-400">
-          Titta-läge för budgivning: motorn delar ut en riktig giv, visar vad
-          varje hand öppnar med och bygger sedan hela (ostörda) auktionen öppning →
-          svar → öppnarens återbud så långt systemboken räcker. Du tittar – datorn
-          budar. Bra för att bekräfta systemet och hitta hål.
+          Titta-läge: motorn delar ut en giv, budar alla fyra händerna enligt
+          systemboken och förklarar varje bud. Du tittar – datorn budar.
         </p>
       </header>
 
       <div className="flex flex-wrap gap-3">
         <Button onClick={newDeal}>Ny giv →</Button>
         <Button onClick={newAuctionDeal}>Öppning + auktion →</Button>
-        <Button variant="secondary" onClick={() => setOpenSurvey(surveyOpenings(2000))}>
-          Hålfinnare: öppningar
-        </Button>
-        <Button variant="secondary" onClick={() => setRespSurvey(surveyResponses(5000))}>
-          Hålfinnare: svar
-        </Button>
       </div>
 
       {/* Händerna placerade som vid ett bridgebord: Nord uppe, Väst vänster,
@@ -133,16 +126,13 @@ export function Spela() {
         <Panel>
           <h2 className="text-lg font-semibold mb-3">Auktionen (ostörd – motståndarna passar)</h2>
           {/* Auktionen på grönt filt med Synrey-chips (klicka ett bud → förklaring). */}
-          <div
-            className="mb-5 rounded-2xl border border-emerald-950/30 p-2.5 shadow-inner"
-            style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-          >
+          <Felt rounded="rounded-2xl" className="mb-5 p-2.5">
             <AuctionGrid
               calls={turnsToCalls(auction.turns, deal.dealer)}
               dealer={deal.dealer}
               vulnerability={deal.vulnerability}
             />
-          </div>
+          </Felt>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Förklaringar:</p>
           <ol className="space-y-2">
             {auction.turns.map((turn, i) => (
@@ -171,21 +161,43 @@ export function Spela() {
         </Panel>
       )}
 
-      {openSurvey && (
-        <SurveyTable
-          title={`Hålfinnare öppningar – ${openSurvey.hands.toLocaleString('sv-SE')} händer`}
-          rows={openSurvey.byRule}
-          uncertain={openSurvey.uncertain}
-        />
-      )}
-
-      {respSurvey && (
-        <SurveyTable
-          title={`Hålfinnare svar – ${respSurvey.auctions.toLocaleString('sv-SE')} högfärgsöppningar`}
-          rows={respSurvey.byRule}
-          uncertain={respSurvey.uncertain}
-        />
-      )}
+      {/* Hålfinnarna är testverktyg för motorn – hopfällda så de inte stör. */}
+      <details className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
+          <span>🛠 Hålfinnare – testverktyg för budmotorn</span>
+          <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
+        </summary>
+        <div className="border-t border-slate-100 dark:border-slate-800 px-4 pb-4 pt-3">
+          <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
+            Kör tusentals slumphänder genom motorn och visar hur ofta varje regel
+            träffar – bra för att hitta hål i systemet.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="secondary" onClick={() => setOpenSurvey(surveyOpenings(2000))}>
+              Hålfinnare: öppningar
+            </Button>
+            <Button variant="secondary" onClick={() => setRespSurvey(surveyResponses(5000))}>
+              Hålfinnare: svar
+            </Button>
+          </div>
+          <div className="mt-4 space-y-4">
+            {openSurvey && (
+              <SurveyTable
+                title={`Hålfinnare öppningar – ${openSurvey.hands.toLocaleString('sv-SE')} händer`}
+                rows={openSurvey.byRule}
+                uncertain={openSurvey.uncertain}
+              />
+            )}
+            {respSurvey && (
+              <SurveyTable
+                title={`Hålfinnare svar – ${respSurvey.auctions.toLocaleString('sv-SE')} högfärgsöppningar`}
+                rows={respSurvey.byRule}
+                uncertain={respSurvey.uncertain}
+              />
+            )}
+          </div>
+        </div>
+      </details>
     </div>
   )
 }

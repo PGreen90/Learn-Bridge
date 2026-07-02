@@ -1,5 +1,5 @@
 // Budlådan i Synrey-stil (FAS 12): rutnät med kolumnerna 1NT/1♠/1♥/1♦/1♣ och
-// raderna 1–7, färgkodade chips (NT lila, ♠ blå, ♥ röd, ♦ orange, ♣ grön) och
+// raderna 1–7, färgkodade chips (NT lila, ♠ svart, ♥ röd, ♦ orange, ♣ grön) och
 // nedersta raden X / XX / PASS / OK. Ett klick VÄLJER budet (chipet markeras och
 // en kort betydelse-rad visas), OK bekräftar. Otillåtna bud tonas ner.
 //

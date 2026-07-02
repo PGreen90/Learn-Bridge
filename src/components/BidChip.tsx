@@ -1,5 +1,5 @@
 // Ett bud som färgkodat chip i Synrey-stil: pastellplatta med nivå + symbol i
-// färgens kulör (NT lila, ♠ blå, ♥ röd, ♦ orange, ♣ grön), PASS grön, X mörkröd,
+// färgens kulör (NT lila, ♠ svart, ♥ röd, ♦ orange, ♣ grön), PASS grön, X mörkröd,
 // XX mörkblå. Används av budlådan (knapparna) och auktionsrutnätet (lagda bud).
 
 import type { Bid } from '../types/bridge'

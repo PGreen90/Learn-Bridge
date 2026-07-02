@@ -67,7 +67,7 @@ export function PlayingCard({
     )
   }
 
-  // Fyrfärgslek (Synrey-stil): ♠ blå, ♥ röd, ♦ orange, ♣ grön.
+  // Fyrfärgslek: ♠ svart, ♥ röd, ♦ orange, ♣ grön.
   const ink = SUIT_TEXT[card.suit]
   const corner = (
     <div className={`flex flex-col items-center leading-none ${ink} ${s.rank} font-semibold`}>

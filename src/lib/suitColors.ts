@@ -1,12 +1,12 @@
-// Fyrfärgslek (Synrey-stil, FAS 12): varje färg har sin egen kulör så den känns
-// igen blixtsnabbt — ♠ blå, ♥ röd, ♦ orange, ♣ grön. Används genomgående:
-// symboler i text, kortens tryck och budlådans/auktionens chips.
+// Fyrfärgslek (FAS 12, ägarbeslut 2026-07-02): ♠ SVART (som i en riktig
+// fyrfärgslek), ♥ röd, ♦ orange, ♣ grön. Används genomgående: symboler i
+// text, kortens tryck och budlådans/auktionens chips.
 
 import type { Suit } from '../types/bridge'
 
 /** Textfärgen för en färgsymbol (fyrfärgslek). */
 export const SUIT_TEXT: Record<Suit, string> = {
-  spades: 'text-blue-700',
+  spades: 'text-slate-900',
   hearts: 'text-red-600',
   diamonds: 'text-orange-500',
   clubs: 'text-green-700',
@@ -18,7 +18,7 @@ export const SUIT_TEXT: Record<Suit, string> = {
  * vars framsida alltid är vit och behåller de mörka kulörerna.
  */
 export const SUIT_TEXT_DARK: Record<Suit, string> = {
-  spades: 'dark:text-blue-400',
+  spades: 'dark:text-slate-100',
   hearts: 'dark:text-red-400',
   diamonds: 'dark:text-orange-400',
   clubs: 'dark:text-green-400',
@@ -27,7 +27,7 @@ export const SUIT_TEXT_DARK: Record<Suit, string> = {
 /** Chip-stil (bakgrund + text) för ett kontraktsbud per trumfslag, Synrey-paletten. */
 export const STRAIN_CHIP: Record<'NT' | 'S' | 'H' | 'D' | 'C', string> = {
   NT: 'bg-purple-100 text-purple-800',
-  S: 'bg-blue-100 text-blue-700',
+  S: 'bg-slate-200 text-slate-900',
   H: 'bg-red-100 text-red-600',
   D: 'bg-orange-100 text-orange-600',
   C: 'bg-green-100 text-green-700',

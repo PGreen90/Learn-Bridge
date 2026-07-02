@@ -4,6 +4,7 @@ import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 import { AuctionGrid } from '../components/AuctionGrid'
 import { BidOptions } from '../components/BidOptions'
+import { Felt } from '../components/Felt'
 import { HandFan } from '../components/HandFan'
 import { getExercises, getTheme, resolveAuction, type ResolvedCall } from '../lib/bidding'
 import { hcp } from '../lib/engine/hand'
@@ -137,10 +138,7 @@ function Session({ themeId }: { themeId: string }) {
 
       {/* Grönt filt (Synrey): auktionen överst, frågan + budchips i mitten,
           din hand som solfjäder längst ner. */}
-      <div
-        className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
-        style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-      >
+      <Felt>
         <div className="p-2.5">
           <AuctionGrid
             calls={shownCalls}
@@ -181,7 +179,7 @@ function Session({ themeId }: { themeId: string }) {
             HCP {hp} · {tp} TP
           </div>
         </div>
-      </div>
+      </Felt>
     </div>
   )
 }

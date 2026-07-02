@@ -33,6 +33,7 @@ import { BidChip } from '../components/BidChip'
 import { SideStack } from '../components/SideStack'
 import { CompassPanel } from '../components/CompassPanel'
 import { BiddingBox } from '../components/BiddingBox'
+import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
 import { HandFan } from '../components/HandFan'
 import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
@@ -180,10 +181,7 @@ function BiddingPhase({
   const recommendation = yourTurn ? decideCall(game.deal, game.history, 'S') : null
 
   return (
-    <div
-      className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
-      style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-    >
+    <Felt>
       {/* Överst: kompass (giv + bricka + zon), auktionen och menyknappen. */}
       <div className="flex items-stretch gap-2 p-2.5">
         <CompassPanel dealer={game.deal.dealer} board={game.deal.board} vulnerability={game.deal.vulnerability} />
@@ -248,7 +246,7 @@ function BiddingPhase({
           </div>
         </div>
       )}
-    </div>
+    </Felt>
   )
 }
 
@@ -492,10 +490,7 @@ function PlayTable({
   const eastOpen = isFaceUp('E')
 
   return (
-    <div
-      className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
-      style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-    >
+    <Felt>
       {/* ⓘ (budgivningen) + ⋮ (meny) uppe till höger. */}
       <div className="absolute right-2.5 top-2.5 z-20 flex gap-1.5">
         <button
@@ -634,7 +629,7 @@ function PlayTable({
           selectedSuit={selectedSuit}
         />
       </div>
-    </div>
+    </Felt>
   )
 }
 

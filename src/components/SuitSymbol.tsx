@@ -8,7 +8,7 @@ const SYMBOL: Record<Suit, string> = {
   clubs: '♣',
 }
 
-// Fyrfärgslek (Synrey-stil): ♠ blå, ♥ röd, ♦ orange, ♣ grön — se suitColors.ts.
+// Fyrfärgslek: ♠ svart, ♥ röd, ♦ orange, ♣ grön — se suitColors.ts.
 export function SuitSymbol({ suit, className = '' }: { suit: Suit; className?: string }) {
   return (
     <span className={`${SUIT_TEXT[suit]} ${SUIT_TEXT_DARK[suit]} ${className}`}>{SYMBOL[suit]}</span>
