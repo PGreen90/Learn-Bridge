@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
-import { BrandMark } from './BrandMark'
+import { BrandMark, Wordmark } from './BrandMark'
 
 const NAV = [
   { to: '/', label: 'Hem', end: true },
@@ -40,15 +40,14 @@ export function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <header className="bg-emerald-800 text-white shadow dark:bg-emerald-950">
+    <div className="min-h-screen bg-club-50 text-slate-900 dark:bg-club-950 dark:text-slate-100">
+      {/* Guldlinjen under sidhuvudet följer med på VARJE flik = klubbtemat. */}
+      <header className="border-b border-gold-400/40 bg-emerald-900 text-white shadow dark:bg-club-900">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          {/* Ordmärket: logotypen + RebidZ i display-typsnittet, Z:et i guld. */}
+          {/* Logotypen + inramade ordmärket (guldserif, spader-prick på i:et). */}
           <NavLink to="/" className="flex items-center gap-2 whitespace-nowrap">
             <BrandMark className="h-7 w-7" />
-            <span className="font-display text-xl font-bold tracking-tight">
-              Rebid<span className="text-gold-400">Z</span>
-            </span>
+            <Wordmark framed className="text-xl" />
           </NavLink>
 
           {/* Större skärmar: alla länkar i rad. */}

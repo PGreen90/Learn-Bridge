@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 export function Panel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={`bg-white rounded-2xl shadow-md p-6 dark:bg-slate-900 dark:shadow-none dark:ring-1 dark:ring-slate-800 ${className}`}
+      className={`bg-white rounded-2xl shadow-md ring-1 ring-emerald-950/5 p-6 dark:bg-club-900 dark:shadow-none dark:ring-emerald-100/10 ${className}`}
     >
       {children}
     </div>

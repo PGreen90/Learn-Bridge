@@ -2,6 +2,52 @@
 // är knivskarp i alla storlekar (sidhuvud, hero, ikoner) och alltid följer
 // varumärkesfärgerna. Samma konstverk ligger som public/favicon.svg – ändras
 // formen här ska favicon uppdateras i takt.
+
+/**
+ * Ordmärket "rebidz" (ägarens vision 2026-07-02): gemener i varumärkesserifen
+ * Fraunces med guldgradient — och SPADERN SOM PRICK över i:et. Tricket: ett
+ * prickfritt i (ı, U+0131) med ♠ positionerad ovanför, allt i em-mått så det
+ * skalar med textstorleken (sidhuvud som hero).
+ */
+export function Wordmark({
+  className = '',
+  framed = false,
+}: {
+  className?: string
+  /** Tunn guldram runt ordmärket (ägarens logo-vision, bild 2). Ramen och
+   *  luften runt om mäts i em → skalar med textstorleken. */
+  framed?: boolean
+}) {
+  const mark = (
+    <span role="img" aria-label="rebidz" className="font-brand font-semibold tracking-tight">
+      {/* Gradienten sätts PER SEGMENT: background-clip: text målar inte in i
+          positionerade barn, så i-segmentet (relative) behöver sin egen. Den
+          lodräta gradienten är identisk i alla segment → skarven syns inte. */}
+      <span aria-hidden>
+        <span className="text-gold-gradient">reb</span>
+        <span className="text-gold-gradient relative">
+          ı
+          {/* Spader-pricken: 5 px över i:ets topp vid herostorlek (ägarbeslut
+              2026-07-02), skalar med texten. OBS: top i em räknas på spaderns
+              EGEN font-size (0.4em av ordmärket). */}
+          <span className="absolute left-1/2 top-[0.04em] -translate-x-1/2 text-[0.4em] leading-none text-gold-400">
+            ♠
+          </span>
+        </span>
+        <span className="text-gold-gradient">dz</span>
+      </span>
+    </span>
+  )
+
+  if (!framed) return <span className={className}>{mark}</span>
+  return (
+    <span
+      className={`inline-block rounded-[0.22em] border border-gold-400/60 px-[0.4em] pb-0 pt-[0.2em] leading-none ${className}`}
+    >
+      {mark}
+    </span>
+  )
+}
 export function BrandMark({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden focusable="false">

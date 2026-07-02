@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import bookRaw from '../../docs/budsystem.md?raw'
@@ -106,14 +106,14 @@ export function BudSystem() {
             placeholder="Sök i systemet, t.ex. Stayman, spärr, 1NT …"
             className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm
               placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2
-              focus:ring-emerald-200 dark:border-slate-700 dark:bg-slate-900 dark:placeholder:text-slate-500
+              focus:ring-emerald-200 dark:border-emerald-100/10 dark:bg-club-900 dark:placeholder:text-slate-500
               dark:focus:ring-emerald-900"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-club-800 dark:hover:text-slate-300"
               aria-label="Rensa sökningen"
             >
               ✕
@@ -134,7 +134,7 @@ export function BudSystem() {
           <details
             key={s.title}
             open={q ? true : undefined}
-            className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
+            className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900"
           >
             <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-semibold text-emerald-900 dark:text-emerald-200 [&::-webkit-details-marker]:hidden">
               <span>
@@ -144,7 +144,7 @@ export function BudSystem() {
                 ▾
               </span>
             </summary>
-            <div className="border-t border-slate-100 dark:border-slate-800 px-4 pb-4 pt-2">
+            <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-2">
               {s.intro && <Markdown>{s.intro}</Markdown>}
               {s.subs.length > 0 && (
                 <div className="mt-3 space-y-2">
@@ -152,7 +152,7 @@ export function BudSystem() {
                     <details
                       key={sub.title}
                       open={q ? true : undefined}
-                      className="group/sub rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60"
+                      className="group/sub rounded-lg border border-emerald-950/10 bg-club-50 dark:border-emerald-100/10 dark:bg-club-800/60"
                     >
                       <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
                         <span>

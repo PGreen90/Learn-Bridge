@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 /* Självhostade typsnitt (buntas av Vite → funkar offline och på GitHub Pages).
-   Inter = all brödtext/UI. Space Grotesk = rubriker + RebidZ-ordmärket. */
+   Inter = all brödtext/UI. Space Grotesk = rubriker/siffror.
+   Fraunces = varumärkesserifen i rebidz-ordmärket (ägarens vision:
+   guldserif på smaragd, som en anrik kortklubb). */
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/fraunces";
 
 /* RebidZ designgrund — tokens som HELA appen bygger på. Ändra här, aldrig
    ad hoc i komponenterna. */
@@ -14,9 +17,19 @@
   --font-display:
     'Space Grotesk Variable', 'Inter Variable', ui-sans-serif, system-ui,
     sans-serif;
+  --font-brand: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
 
-  /* Guld/mässing — RebidZ accentfärg ("premium kortklubb"). Används sparsamt:
-     ordmärkets Z, utmärkelser, premium-detaljer. Aldrig som stor bakgrund. */
+  /* Klubbens ytor — appens bakgrunder och paneler. Grönt tema RAKT IGENOM
+     (aldrig blågrå slate på stora ytor): ljust läge = mjuk salviaton,
+     mörkt läge = djup grönsvart som filtet vilar på. */
+  --color-club-50: #f2f6f3;
+  --color-club-100: #e6ede8;
+  --color-club-800: #0b3529;
+  --color-club-900: #06231b;
+  --color-club-950: #031510;
+
+  /* Guld/mässing — rebidz accentfärg ("premium kortklubb"). Används sparsamt:
+     ordmärket, ramar, utmärkelser. Aldrig som stor bakgrund. */
   --color-gold-100: #faf3dc;
   --color-gold-200: #f3e4b3;
   --color-gold-300: #e8cf85;
@@ -26,13 +39,27 @@
   --color-gold-700: #7d5e1c;
 }
 
+/* Guldgradient på text — rebidz-ordmärket (ägarens vision: guldserif). */
+.text-gold-gradient {
+  background: linear-gradient(180deg, #e8cf85 0%, #d9b556 55%, #c39a33 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* Rubriker sätts i display-typsnittet; lite tightare spärrning ser dyrare ut. */
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  h1, h2, h3 {
+  /* Sidrubriker (h1) i varumärkesserifen = klubbkänslan följer med på VARJE
+     flik. Mellanrubriker i display-typsnittet. */
+  h1 {
+    font-family: var(--font-brand);
+    letter-spacing: -0.01em;
+  }
+  h2, h3 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }

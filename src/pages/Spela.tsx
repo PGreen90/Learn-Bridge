@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import type { Deal, Hand, Seat } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
@@ -169,12 +169,12 @@ export function Spela() {
       </Felt>
 
       {/* Fördjupningen: poänguträkningar + alla budförklaringar i läsform. */}
-      <details className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <details className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900">
         <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
           <span>🔎 Händernas poäng & alla budförklaringar</span>
           <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
         </summary>
-        <div className="border-t border-slate-100 dark:border-slate-800 px-4 pb-4 pt-3">
+        <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-3">
           <div className="grid gap-3 sm:grid-cols-2">
             {(['N', 'W', 'E', 'S'] as Seat[]).map((seat) => (
               <SeatDetails
@@ -212,12 +212,12 @@ export function Spela() {
       </details>
 
       {/* Hålfinnarna är testverktyg för motorn – hopfällda så de inte stör. */}
-      <details className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <details className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900">
         <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
           <span>🛠 Hålfinnare – testverktyg för budmotorn</span>
           <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
         </summary>
-        <div className="border-t border-slate-100 dark:border-slate-800 px-4 pb-4 pt-3">
+        <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-3">
           <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
             Kör tusentals slumphänder genom motorn och visar hur ofta varje regel
             träffar – bra för att hitta hål i systemet.

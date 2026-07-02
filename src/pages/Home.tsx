@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { BrandMark } from '../components/BrandMark'
+import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
 import { PlayingCard } from '../components/PlayingCard'
 import type { Card } from '../types/bridge'
@@ -18,8 +18,8 @@ const HERO_CARDS: Card[] = [
 const HERO_TILT = ['-rotate-12 translate-y-2', '-rotate-4', 'rotate-4', 'rotate-12 translate-y-2']
 
 const CARD =
-  'block rounded-2xl bg-white p-5 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] ' +
-  'dark:bg-slate-900 dark:shadow-none dark:ring-1 dark:ring-slate-800 dark:hover:bg-slate-800'
+  'block rounded-2xl bg-white p-5 shadow-md ring-1 ring-emerald-950/5 transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] ' +
+  'dark:bg-club-900 dark:shadow-none dark:ring-emerald-100/10 dark:hover:bg-club-800'
 
 /** Emoji-ikon i en tonad ruta, så korten känns igen blixtsnabbt. */
 function CardIcon({ children }: { children: string }) {
@@ -60,12 +60,17 @@ function ModeCard({
 export function Home() {
   return (
     <div className="space-y-4">
-      {/* Heron: varumärket + vägen in i spelet. */}
+      {/* Heron: varumärket + vägen in i spelet. Tunn guldram som i ägarens
+          logo-vision (bild 3): en inre border på filtet. */}
       <Felt className="px-6 py-10 sm:px-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-3 rounded-2xl border border-gold-400/40"
+        />
         <div className="flex flex-col items-center gap-4 text-center">
           <BrandMark className="h-14 w-14 drop-shadow-md" />
-          <h1 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Rebid<span className="text-gold-400">Z</span>
+          <h1 className="text-5xl sm:text-6xl">
+            <Wordmark framed />
           </h1>
           <p className="max-w-md text-emerald-50/90">
             Spela och lär dig bridge mot en partner som kan 2/1-systemet — direkt i

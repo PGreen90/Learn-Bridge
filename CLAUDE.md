@@ -34,7 +34,15 @@ Läs den här filen först varje session.
 > + hero; `public/favicon.svg` (Vite rebaser sökvägen, verifierat 200);
 > `theme-color`; ny startsida: hero på filtet (logotyp, tagline, dekorativ
 > solfjäder, guld-CTA) + lägeskorten. Mobil 375 px verifierad överallt.
-> Live-länken verifierad efter deploy (sida + favicon 200, titeln "RebidZ").
+> **Omtag 2 (ägarens logo-vision, samma dag):** namnet skrivs **rebidz —
+> ALLTID gemener** (ägarbeslut). Ordmärket = Fraunces-serif i guldgradient
+> med **spader som prick över i:et** (5 px över i:et vid herostorlek,
+> em-skalat — ägarbeslut) i **tunn guldram** (`Wordmark framed`,
+> `BrandMark.tsx`). **Klubbtema på ALLA flikar:** `club`-färgtokens
+> (`index.css`) — gröna ytor i båda lägena (aldrig slate på stora ytor),
+> guldlinje under sidhuvudet, alla h1 i varumärkesserifen, paneler/kort/
+> detaljer/sökfält smaragdtonade (Panel, Home, Spela, BudSystem,
+> BiddingPractice, Button secondary).
 >
 > **🎉 Felrapportering i Spela kort KLAR & LIVE (2026-07-02, testsvit 1481,
 > commit `05d922e`):** dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela

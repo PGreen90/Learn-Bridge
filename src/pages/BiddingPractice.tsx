@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Panel } from '../components/Panel'
 import { getExercises, getThemesByScope, SCOPES } from '../lib/bidding'
@@ -31,7 +31,7 @@ export function BiddingPractice() {
               className={`text-left rounded-xl border p-3 transition-colors ${
                 scope === s.id
                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40'
-                  : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800'
+                  : 'border-emerald-950/10 bg-white hover:bg-club-50 dark:border-emerald-100/10 dark:bg-club-900 dark:hover:bg-club-800'
               }`}
             >
               <div className="font-semibold text-slate-900 dark:text-slate-100">{s.title}</div>
@@ -51,7 +51,7 @@ export function BiddingPractice() {
               <Link
                 key={t.id}
                 to={`/budtraning/${t.id}`}
-                className="flex items-center justify-between rounded-xl border border-slate-200 p-4 hover:bg-slate-50 transition-colors dark:border-slate-700 dark:hover:bg-slate-800"
+                className="flex items-center justify-between rounded-xl border border-emerald-950/10 p-4 hover:bg-club-50 transition-colors dark:border-emerald-100/10 dark:hover:bg-club-800"
               >
                 <div>
                   <div className="font-semibold text-slate-900 dark:text-slate-100">{t.title}</div>
