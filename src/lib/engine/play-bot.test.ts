@@ -190,14 +190,29 @@ describe('botCardReasoned – kort + förklaring (Varför?-knappen)', () => {
     expect(r.reason).toContain('Andra hand lågt')
   })
 
-  it('partnern vinner redan → förklaring nämner att vi inte ruffar partnern', () => {
+  it('partnern vinner redan (motspel) → förklaring nämner att vi inte ruffar partnern', () => {
+    // Spelförare Ö ⇒ N/S är motspelare: motspelets gamla "kasta lågt"-gren gäller
+    // (kast-vakten, Steg B1, är bara spelförarsidans – den ser båda händerna).
     const s = state({
-      seat: 'N', trump: 'spades', leader: 'S',
+      seat: 'N', trump: 'spades', leader: 'S', declarer: 'E',
       trick: [{ seat: 'S', card: C('hearts', 'A') }, { seat: 'W', card: C('hearts', '2') }],
       hand: [C('spades', '2'), C('clubs', '3')],
     })
     const r = botCardReasoned(s, 'N')
     expect(r.card).toEqual(C('clubs', '3'))
     expect(r.reason).toContain('ruffar aldrig')
+  })
+
+  it('spelförarsidan sakar → kast-vakten förklarar att hotkorten vaktas (Steg B1)', () => {
+    // Samma läge men N är träkarl (spelförare S) ⇒ kast-vakten väljer sakningen.
+    // Den ruffar fortfarande aldrig partnern (trumfen är aldrig kandidat).
+    const s = state({
+      seat: 'N', trump: 'spades', leader: 'S', declarer: 'S',
+      trick: [{ seat: 'S', card: C('hearts', 'A') }, { seat: 'W', card: C('hearts', '2') }],
+      hand: [C('spades', '2'), C('clubs', '3')],
+    })
+    const r = botCardReasoned(s, 'N')
+    expect(r.card).toEqual(C('clubs', '3'))
+    expect(r.reason).toContain('vaktar')
   })
 })

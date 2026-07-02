@@ -11,11 +11,26 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — 🎨 FAS 12: UI (ägarval 2026-07-02)
-> **UI-FÖRFININGSPASSET 2026-07-02 LEVERERAT & LIVE** (commits `a654c0e`→`b653808`).
-> **NÄSTA GÅNG:** ägarbesked vid sessionsslut: *"vi kommer återkomma till mer UI
-> längre fram"* — starta med att visa NÄST-listan och låt ägaren välja: mer
-> UI-förfining (ägaren pekar ut) eller flytta upp en NÄST-punkt.
+### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
+> **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
+>
+> **🎉 🧠 Avancerad kortspelsteknik KLAR & pushad (2026-07-02, testsvit 1474):**
+> MED-scopet (slutkast/inkast + skvis) levererat i två steg, FACIT FÖRE FIX,
+> ingen tjuvkik. Trappan + design-lärdomarna i `docs/bot-hjarna.md`.
+> **Steg A** (`play-bot-technique.test.ts`): tre DDS-verifierade facit-givar
+> bevisar att MC-fönstret EXEKVERAR teknikerna — A0 korsruff m. lönnkast
+> (MC 6/6, tumregel 5), A1 slutkast (MC 5, tumregel 4; Östs VISADE ruterrenons
+> låser ♦K hos Väst i samplingen = äkta inferens), A2 enkel skvis (MC 4,
+> tumregel 3). **Steg B** = luckan FÖRE MC-fönstret (9–13 kort): B0-facit
+> (9-korts skvis: Nords första sakning vid 9 kort avgör — rätt kast 6, ♠5 = 5)
+> + **B1 kast-vakt** (`guardedDiscard`, `play-bot.ts`): spelförarsidans
+> sakningar vaktar lastbärande kort via ärlig räkning i stället för "kasta
+> lägst"; vakten ensam lyfte gamla 6-korts-referensen 2→3. Robust över seedar
+> 1–10. (Testräkningen: vitest 4 räknar varje it.each-fall — gamla "testsvit
+> 729" var samma svit i annan räknebas.) Villkorade B2 (cash-ordning) + Steg C
+> (rätta räkningen) = ⚪ SENARE, byggs bara vid bevisat behov (facit-giv).
+> (Historik: FAS 12 UI levererat & live 2026-07-02, commits `a654c0e`→`b653808`;
+> mer UI återkommer längre fram enligt ägaren — detaljerna i punkterna nedan.)
 **FAS 12 — UI**, sista fasen i felsökningsplanen. Tre trådar:
 1. ✅ **Felsökningsplanens punkt 54–56 KLARA** (2026-07-02, testsvit 729):
    budförklaringar (54) + alert (55) fanns redan i `AuctionView` (klickbara bud,
@@ -247,13 +262,23 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Avancerad kortspelsteknik** — slutkast/inkast/squeeze i bot-hjärnan
-   (MED-scope ur FAS 11-svansen som sköts till SENARE, se `docs/bot-hjarna.md`).
-2. **TP-steg E & F** — reverse/hoppskift på TP (E) + 3:e/4:e-hands lättöppning (F)
-   ur `docs/tp-arbetslista.md`.
+1. **TP-steg E & F** — reverse/hoppskift på TP (E) + 3:e/4:e-hands lättöppning (F)
+   ur `docs/tp-arbetslista.md`. Kräver ägarens input (exempelhänder).
+2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **Felrapportering i Spela kort** (ägaridé 2026-07-02): dialog efter varje giv
+  ("Kändes given rätt?"), kategori (felaktig budgivning m.m.) + fritext, rapporten
+  innehåller HELA given + auktionen och skickas som **GitHub-issue** (förifylld
+  issue-länk först; PAT-i-localStorage-varianten senare). Eget kommando
+  `/felrapporter` läser issues via `gh`, återskapar given som test (FACIT FÖRE
+  FIX), lagar, stänger issue. OBS: webbläsaren kan inte pusha till git — Issues
+  är kanalen.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
+- **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade:
+  byggs bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).
+- **Motspelarnas kast-vakt** — B1 gäller bara spelförarsidan; försvarets
+  sakningar kräver inferens om partnerns hand (eget arbete).
 - FAS 9 Passad hand, FAS 10 Försvarsbud, FAS 11 Kortspel = **KLARA & pushade**
   (bara kvar här som historik — behandla dem inte som återstående arbete).
 

@@ -133,7 +133,7 @@ function mulberry32(seed: number): () => number {
 describe('botCardSmart – Monte-Carlo lyfter stickföringen i slutspelet (Steg 3c)', () => {
   afterEach(() => vi.restoreAllMocks())
 
-  it('6-korts NT-slutspel: MC-spelföraren tar facit 3 (tumregeln bara 2)', () => {
+  it('6-korts NT-slutspel: MC-spelföraren tar facit 3 (tumregeln utan vakt tappade ett)', () => {
     vi.spyOn(Math, 'random').mockImplementation(mulberry32(1))
     const live: Record<Seat, Hand> = {
       N: [C('spades', '8'), C('hearts', 'Q'), C('hearts', '6'), C('diamonds', 'Q'), C('diamonds', '5'), C('clubs', 'K')],
@@ -144,10 +144,12 @@ describe('botCardSmart – Monte-Carlo lyfter stickföringen i slutspelet (Steg 
     const start = fabricate(live, 'S', 'NT', 'W')
     const nsTricks = (s: PlayState) => (side(s.contract.declarer) === 'NS' ? s.tricksNS : s.tricksEW)
 
-    // Referens: alla platser tumregler → spelföraren tappar ett stick.
+    // Referens: alla platser tumregler. Historik: före kast-vakten (Steg B1,
+    // docs/bot-hjarna.md) tappade tumregel-spelföraren ett stick här (2 av 3) –
+    // vakten på spelförarsidans sakningar räddar det. Låst på facit 3.
     let ref = start
     while (!isComplete(ref)) ref = playCard(ref, botCard(ref, ref.toAct))
-    expect(nsTricks(ref)).toBe(2)
+    expect(nsTricks(ref)).toBe(3)
 
     // Monte-Carlo på spelförarsidan, tumregler i försvaret → facit 3.
     let mc = start

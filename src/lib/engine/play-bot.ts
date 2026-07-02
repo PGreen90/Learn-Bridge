@@ -13,7 +13,7 @@ import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Rank } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { currentWinner, legalCards, side, type PlayState } from './play'
-import { isSureWinner, playedCards, shownVoids, unseenTrumpCount } from './card-counting'
+import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats } from './card-counting'
 import { buildHandModel } from './hand-model'
 import { applyOpeningLeadSignal } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
@@ -41,6 +41,70 @@ function lowAvoidRuff(legal: Hand, trump: Suit | null): Card {
   if (!trump) return lowest(legal)
   const offTrump = legal.filter((c) => c.suit !== trump)
   return lowest(offTrump.length > 0 ? offTrump : legal)
+}
+
+/**
+ * Kast-vakt (Steg B1, docs/bot-hjarna.md): när SPELFÖRARSIDAN sakar (kan inte
+ * följa färg) väljs kortet med minst framtida värde – inte blint "lägst rank".
+ * Tumregelns gamla val (lägsta kortet) kastar annars bort hotkort: en femma
+ * bredvid partnerns ess kan växa till ett stick (skvis/promovering) medan en
+ * hacka i en lång stark färg är rent överskott.
+ *
+ * Ärlig räkning (ingen tjuvkik): platsen ser sin egen hand + träkarlen
+ * (spelförarsidan ser hela sin sida via `visibleSeats`) och det som fallit.
+ * Ett kort är LASTBÄRANDE (kan växa till ett stick) om antalet OSEDDA högre
+ * kort i färgen är ≤ egna sidans kvarvarande högre kort i färgen – våra toppar
+ * kan då dra ut/fälla allt som sitter över. Sakningsordning:
+ *   1. icke-lastbärande kort, lägst rank först (rent skräp åker först),
+ *   2. annars det lastbärande kort med FLEST egna högre kort över sig
+ *      (djupast överskott – hackan i en lång stark färg), lägst rank vid lika.
+ *
+ * Returnerar `null` när vakten inte gäller (motspelare, följer färg, eller
+ * bara trumf kvar) – då tar den gamla tumregeln (`lowAvoidRuff`) över.
+ */
+function guardedDiscard(state: PlayState, seat: Seat, legal: Hand): Card | null {
+  if (side(seat) !== side(state.contract.declarer)) return null // bara spelförarsidan
+  if (state.currentTrick.length === 0) return null // utspel, ingen sakning
+  const led = state.currentTrick[0].card.suit
+  if (legal.some((c) => c.suit === led)) return null // följer färg → ingen sakning
+  const candidates = state.trump === null ? legal : legal.filter((c) => c.suit !== state.trump)
+  if (candidates.length === 0) return null // bara trumf kvar → gamla regeln
+
+  // Sedda kort per färg: spelade + egna sidans händer (ärligt synligt).
+  const seen = new Map<Suit, Set<Rank>>()
+  const note = (c: Card) => (seen.get(c.suit) ?? seen.set(c.suit, new Set()).get(c.suit)!).add(c.rank)
+  for (const c of playedCards(state)) note(c)
+  const visible = visibleSeats(state, seat)
+  for (const v of visible) for (const c of state.hands[v]) note(c)
+
+  /** Egna sidans kvarvarande högre kort i färgen. */
+  const ownHigher = (card: Card) =>
+    visible.reduce(
+      (n, v) => n + state.hands[v].filter((c) => c.suit === card.suit && rankVal(c.rank) > rankVal(card.rank)).length,
+      0,
+    )
+  /** Osedda högre kort i färgen (kan sitta hos motståndarna). */
+  const unseenHigher = (card: Card) => {
+    const s = seen.get(card.suit) ?? new Set<Rank>()
+    return RANK_LOW_TO_HIGH.slice(rankVal(card.rank) + 1).filter((r) => !s.has(r)).length
+  }
+
+  let best: Card | null = null
+  let bestKey: [number, number, number] | null = null // [lastbärande, -överskott, rank]
+  for (const c of candidates) {
+    const own = ownHigher(c)
+    const loadBearing = unseenHigher(c) <= own ? 1 : 0
+    const key: [number, number, number] = [loadBearing, -own, rankVal(c.rank)]
+    if (
+      bestKey === null ||
+      key[0] < bestKey[0] ||
+      (key[0] === bestKey[0] && (key[1] < bestKey[1] || (key[1] === bestKey[1] && key[2] < bestKey[2])))
+    ) {
+      best = c
+      bestKey = key
+    }
+  }
+  return best
 }
 
 /** Korten i den längsta färgen (vid lika: första i kortordningen). */
@@ -121,13 +185,22 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   const bestSeat = currentWinner(state.currentTrick, state.trump)
   const bestCard = state.currentTrick.find((pc) => pc.seat === bestSeat)!.card
 
+  // Vid sakning (kan inte följa färg) vaktar spelförarsidan sina hotkort
+  // (Steg B1, kast-vakten) – annars gäller gamla "kasta lågt".
+  const guardReason =
+    'Jag vaktar mina hotkort: sakar ur färgen där vår sida har störst överskott och behåller kort som kan växa till stick.'
+
   // Partnern leder redan sticket → slösa inte, kasta lågt (ruffa aldrig partnern).
   if (side(bestSeat) === side(seat)) {
+    const guarded = guardedDiscard(state, seat, legal)
+    if (guarded) return { card: guarded, reason: guardReason }
     return { card: lowAvoidRuff(legal, state.trump), reason: 'Partnern vinner redan sticket – jag kastar lågt och ruffar aldrig partnerns stick.' }
   }
 
   // Andra hand (bara utspelet lagt än så länge, motståndaren leder) → lågt.
   if (state.currentTrick.length === 1) {
+    const guarded = guardedDiscard(state, seat, legal)
+    if (guarded) return { card: guarded, reason: guardReason }
     return { card: lowAvoidRuff(legal, state.trump), reason: 'Andra hand lågt – jag sparar honnörerna till senare.' }
   }
 
@@ -136,6 +209,8 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   if (winners.length > 0) {
     return { card: lowest(winners), reason: 'Jag vinner sticket så billigt som möjligt.' }
   }
+  const guarded = guardedDiscard(state, seat, legal)
+  if (guarded) return { card: guarded, reason: guardReason }
   return { card: lowAvoidRuff(legal, state.trump), reason: 'Inget av mina kort vinner sticket – jag kastar lågt.' }
 }
 

@@ -83,10 +83,61 @@ räkna spelförarens hand, täcka honnör med honnör (bara när det befordrar),
 motspelets stick. 
 
 **Beslutat MED i scopet (ägaren 2026-07-01):**
-- **"Varför?"-knapp** — botten förklarar sitt kortval i klartext (parallell till
-  budförklaringslagret). Bygger på att hjärnan redan resonerar → in efter Steg 2–3.
+- **"Varför?"-knapp** — ✅ byggd (se status ovan).
 - **Avancerad teknik** — slutkast/inkast (endplay/throw-in) + squeeze i
-  spelförarplanen. Monte-Carlo-DDS fångar redan en del automatiskt.
+  spelförarplanen. **= NUVARANDE NU (ägarval 2026-07-02), trappa nedan.**
+
+## Avancerad teknik — trappan (NU sedan 2026-07-02)
+> **Nyckelinsikt:** Monte-Carlo-DDS:en hittar redan slutkast & skvis *automatiskt*
+> i slutspelsfönstret (≤8 kort) — DDS:en ser tekniken i varje sampel, och
+> röstningen gynnar linjer som fungerar i ALLA lägen (ett slutkast är 100 %,
+> masken 50 %). **Luckan är förberedelsen vid 9–13 kort:** där spelar tumregler
+> som kan sabotera positionen INNAN fönstret öppnas — kasta hotkort i förtid,
+> casha i blockerande ordning, missa att rätta stickräkningen. Trappan:
+- **Steg A ✅ KLAR (2026-07-02) — Facit-lås på exekveringen (FACIT FÖRE FIX):**
+  `play-bot-technique.test.ts`, tre DDS-verifierade givar där MC når facit och
+  tumregeln tappar stick (alla robusta över seedar 1–10, seedad mulberry32):
+  - **A0 korsruff m. lönnkast** (6-korts, ♠-trumf): facit 6 av 6 — Nord sakar
+    ♥8 på ♦E, ♥7 ruffas hos Nord, klöver hos Syd, ♦D ruffas över täckande K.
+    MC 6, tumregel 5 (cashar rakt, tappar hjärtern).
+  - **A1 slutkast/inkast** (6-korts, ♠-trumf): facit 5 — Öst har VISAT
+    ruterrenons (sakade på ett tidigare ruterstick) → hand-modellen tvingar
+    ♦K/kn till Väst i varje sampel (äkta inferens!). Rakt spel 4 (♦D alltid
+    bakom garderad K, ingen Nord-ingång); 5 bara via strip & ♥7-exit — Väst
+    inkastad: ruter in i gaffeln, ruff-och-släng, eller Nord ruffar över.
+    MC 5, tumregel 4.
+  - **A2 enkel skvis** (4-korts, NT): facit 4 — Väst vaktar båda hoten (♠K4+♥K4
+    mot ♠E5+♥E5), ♦E skviskortet. Nyckeln är Nords avkast: MC räknar ärligt
+    (en osedd spader kvar men två hjärter → behåll ♠E5) och tar 4; tumregeln
+    kastar "lägst", river sitt eget hot → 3.
+  - **Lärdomar:** (1) testhjälparen `fabricate` måste låta SYD leda första
+    fyllnadssticket — annars läser signalavkodningen (pt 50) ett fabricerat
+    "öppningsutspel" från dold plats och förgiftar samplingen → tyst
+    tumregel-fallback. (2) MC-DDS kan INTE värdera informations-/garantivinster
+    som skiljer per-sampel-optimala linjer (per-sampel spelar DDS alltid
+    "rätt" mask) — diskriminering kräver att tekniklinjen är bättre ÄVEN
+    dubbeldummy per sampel (A1 löser det via Östs visade renons).
+- **Steg B ✅ KLAR (2026-07-02) — Bevara positionen (9–13 kort, spelförarsidan):**
+  - **B0 facit-giv** (`play-bot-technique.test.ts`): 9-korts NT-skvis där Nords
+    FÖRSTA sakning sker vid 9 kort = utanför MC-fönstret. DDS-låst: facit 6;
+    sakas hotkortet ♠5 faller facit till 5 — och det var precis vad gamla
+    "kasta lägst"-tumregeln gjorde. Design-lärdomar (fyra oracle-iterationer!):
+    ge inte spelföraren fria topstick som når taket ändå (då är hoten aldrig
+    lastbärande), täck motspelarens inkast-reserv (Östs ♥6 punkterar Västs
+    ♥4-utspel som plan B) och kapa dummy-hackornas längdstick (Östs ♦kn10xx).
+  - **B1 kast-vakt** (`guardedDiscard`, `play-bot.ts`): när SPELFÖRARSIDAN sakar
+    väljs inte längre blint lägsta kortet. Ärlig räkning (egen sida + spelat):
+    ett kort är *lastbärande* om osedda högre kort ≤ egna sidans högre kort
+    (våra toppar drar ut dem). Saka: (1) icke-lastbärande, lägst först;
+    (2) annars djupast överskott (flest egna högre kort över sig), lägst vid
+    lika. Bara spelförarsidan (motspelarnas sakningar orörda — deras inferens
+    är ett senare arbete). Sidoeffekt: gamla 6-korts-referensen i
+    `play-bot-smart.test.ts` lyftes 2→3 av vakten ensam (uppdaterad + låst).
+  - **B2 cash-ordning (blockera inte)** = EJ byggd — byggs bara om en facit-giv
+    visar behovet (ingen har gjort det än).
+- **Steg C (om B inte räcker) — Rätta räkningen:** ducka ett stick medvetet när
+  stickräkningen behöver rättas för en skvis (svårast; byggs bara om facit-givar
+  visar behovet).
 
 **Beslutat SENARE (ägaren 2026-07-01):**
 - **Svårighetsnivåer** — samma hjärna med rattar (nybörjar-tumregler → expert
