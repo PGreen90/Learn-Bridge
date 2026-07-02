@@ -13,6 +13,7 @@ import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
 import { AuctionGrid } from './AuctionGrid'
 import { BidChip } from './BidChip'
 import { PlayingCard } from './PlayingCard'
+import { SideStack } from './SideStack'
 
 const key = (c: Card) => `${c.suit}${c.rank}`
 
@@ -113,7 +114,7 @@ export function PlayReplay({
 
       {/* Mittraden: Väst | mitten (auktion/stick) | Öst. */}
       <div className="flex items-center justify-between gap-1 px-2 py-3">
-        <Stack cards={handCards('W')} />
+        <SideStack cards={handCards('W')} side="W" />
         <div className="flex min-h-44 flex-1 items-center justify-center">
           {shownCards ? (
             <TrickCenter cards={shownCards} winner={shownWinner} />
@@ -123,7 +124,7 @@ export function PlayReplay({
             </div>
           )}
         </div>
-        <Stack cards={handCards('E')} />
+        <SideStack cards={handCards('E')} side="E" />
       </div>
 
       {/* Bricka + zon nere till vänster (Synrey). */}
@@ -166,17 +167,6 @@ function Fan({ cards, size, overlap }: { cards: Card[]; size: 'sm' | 'md'; overl
     <div className="flex min-h-10 justify-center">
       {cards.map((c, i) => (
         <PlayingCard key={key(c)} card={c} size={size} className={i > 0 ? overlap : ''} />
-      ))}
-    </div>
-  )
-}
-
-/** En lodrät stapel av öppna kort (V/Ö): bara överkanten av varje kort syns. */
-function Stack({ cards }: { cards: Card[] }) {
-  return (
-    <div className="flex w-8 shrink-0 flex-col items-center">
-      {cards.map((c, i) => (
-        <PlayingCard key={key(c)} card={c} size="sm" className={i > 0 ? '-mt-7' : ''} />
       ))}
     </div>
   )

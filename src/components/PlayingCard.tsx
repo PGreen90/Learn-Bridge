@@ -26,6 +26,12 @@ interface Props {
   playable?: boolean
   /** Spelbart kort men inte lagligt just nu: nedtonat. */
   dimmed?: boolean
+  /**
+   * Hörnindexen på ANDRA diagonalen (nere-vänster + uppe-höger i stället för
+   * uppe-vänster + nere-höger). Behövs när ett vridet kort ska visa valören mot
+   * bordets mitt (Östs sidostapel) – rotation ensam kan aldrig byta diagonal.
+   */
+  mirrorCorners?: boolean
   onClick?: () => void
   className?: string
 }
@@ -41,6 +47,7 @@ export function PlayingCard({
   size = 'md',
   playable = false,
   dimmed = false,
+  mirrorCorners = false,
   onClick,
   className = '',
 }: Props) {
@@ -69,7 +76,15 @@ export function PlayingCard({
     </div>
   )
 
-  const inner = (
+  const inner = mirrorCorners ? (
+    // Andra diagonalen OCH indexen 180-vridna: när kortet sedan roteras 90° blir
+    // texten läsbar åt motsatt håll mot ett vanligt vridet kort (Öst speglar Väst).
+    <>
+      <div className="absolute bottom-0.5 left-0.5 rotate-180">{corner}</div>
+      <div className={`${s.pip} ${ink} leading-none`}>{SYMBOL[card.suit]}</div>
+      <div className="absolute top-0.5 right-0.5">{corner}</div>
+    </>
+  ) : (
     <>
       <div className="absolute top-0.5 left-0.5">{corner}</div>
       <div className={`${s.pip} ${ink} leading-none`}>{SYMBOL[card.suit]}</div>

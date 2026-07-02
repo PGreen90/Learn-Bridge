@@ -28,13 +28,13 @@ import { hcp } from '../lib/engine/hand'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { PlayingCard } from '../components/PlayingCard'
 import { PlayReplay } from '../components/PlayReplay'
-import { AuctionView } from '../components/AuctionView'
 import { AuctionGrid } from '../components/AuctionGrid'
+import { BidChip } from '../components/BidChip'
+import { SideStack } from '../components/SideStack'
 import { CompassPanel } from '../components/CompassPanel'
 import { BiddingBox } from '../components/BiddingBox'
-import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-import { bySuit, orderedSuits, HAND_SUITS } from '../lib/cardLayout'
+import { bySuit, handSuitsTrumpFirst, HAND_SUITS } from '../lib/cardLayout'
 
 // En giv går genom två faser: först budgivningen (du klickar Syds bud i budlådan,
 // datorn budar V/N/Ö ett i taget runt bordet), sedan kortspelet ur de verkliga
@@ -58,10 +58,6 @@ function controls(contract: Contract, seat: Seat): boolean {
 
 function sameCard(a: Card, b: Card) {
   return a.suit === b.suit && a.rank === b.rank
-}
-
-function strainSymbol(contract: Contract) {
-  return contract.strain === 'NT' ? <>NT</> : <SuitSymbol suit={contract.strain} />
 }
 
 /** Ett kort som text: valör + färgsymbol (t.ex. "K♥"), för "Varför?"-raden. */
@@ -295,7 +291,12 @@ function PlayTable({
   onNewGame: () => void
 }) {
   const [play, setPlay] = useState<PlayState>(() => startPlay(deal, contract))
-  const [showAuction, setShowAuction] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  // ⓘ-knappen: budgivningen som vit overlay (Synrey-minimalism – inget syns
+  // förrän man ber om det).
+  const [showInfo, setShowInfo] = useState(false)
+  // Resultatdialogen när given är färdigspelad; stängs → omspelningen.
+  const [resultSeen, setResultSeen] = useState(false)
   // Facit (double-dummy) för NUVARANDE ställning: tal = spelförarens totala stick
   // med perfekt spel, 'toohard' = för tung just nu, 'idle' = ej beräknat.
   const [facit, setFacit] = useState<number | 'idle' | 'toohard'>('idle')
@@ -424,13 +425,6 @@ function PlayTable({
   }
 
   const done = isComplete(play)
-
-  // När given är färdigspelad: fäll ut budgivningen automatiskt så förklaringarna
-  // syns vid omspelningen.
-  useEffect(() => {
-    if (done) setShowAuction(true)
-  }, [done])
-
   const result = contractResult(play)
   const declSide = side(contract.declarer)
   const dummy = dummyOf(contract)
@@ -442,287 +436,259 @@ function PlayTable({
     return seat === dummy && openingLeadMade // vi försvarar → träkarlen visas efter utspel
   }
 
-  const seatProps = { contract, play, isFaceUp, onCardClick, selectedSuit }
-
-  return (
-    <div className="space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold mb-1">Spela kort</h1>
-        <p className="text-slate-600 text-sm">
-          Du sitter <strong>Syd</strong> och spelar mot datorn. Spelar din sida ut
-          kontraktet styr du både Syd och träkarlen Nord; försvarar du spelar du
-          bara Syd. När det är din tur: <strong>tryck en färg</strong> så fanas
-          den ut – <strong>klicka sedan kortet</strong> du vill spela.
-        </p>
-      </header>
-
-      <Panel className="!p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="text-lg">
-            <span className="text-slate-500 text-sm mr-2">Kontrakt</span>
-            <span className="font-bold text-emerald-700">
-              {contract.level} {strainSymbol(contract)}
-            </span>{' '}
-            <span className="text-slate-600">av {SEAT_LABEL[contract.declarer]}</span>
+  // Färdigspelad giv: resultatdialog ovanpå, sedan omspelningen (Synrey-stil).
+  if (done) {
+    return (
+      <div className="relative">
+        <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
+        {!resultSeen ? (
+          <div className="absolute inset-0 z-30 flex items-center justify-center rounded-3xl bg-black/30">
+            <div className="rounded-xl bg-white p-5 text-center shadow-xl">
+              <p className={`mb-4 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
+                {result.made
+                  ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
+                  : `${-result.diff} bet (${result.declarerTricks} stick).`}
+              </p>
+              <div className="flex justify-center gap-2">
+                <Button variant="secondary" onClick={() => setResultSeen(true)}>
+                  Se omspelningen
+                </Button>
+                <Button onClick={onNewGame}>Ny giv →</Button>
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-slate-600">
-            N/S: <strong>{play.tricksNS}</strong> · Ö/V: <strong>{play.tricksEW}</strong> stick
-            <span className="ml-2 text-slate-400">(behöver {result.needed})</span>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={showFacit}>
-              Visa facit
-            </Button>
+        ) : (
+          <div className="mt-3 flex justify-center">
             <Button onClick={onNewGame}>Ny giv →</Button>
           </div>
-        </div>
-        <p className="mt-2 text-sm">
-          {done ? (
-            <span className={result.made ? 'text-emerald-700 font-semibold' : 'text-red-600 font-semibold'}>
-              {result.made
-                ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
-                : `${-result.diff} bet (${result.declarerTricks} stick).`}
-            </span>
-          ) : controls(contract, play.toAct) ? (
-            <span className="text-emerald-700 font-medium">Din tur – {SEAT_LABEL[play.toAct]} spelar.</span>
-          ) : thinking ? (
-            <span className="text-amber-600">Bot-hjärnan räknar (Monte Carlo) … ({SEAT_LABEL[play.toAct]})</span>
-          ) : (
-            <span className="text-slate-400">Datorn spelar … ({SEAT_LABEL[play.toAct]})</span>
-          )}
-        </p>
-        {facit !== 'idle' && (
-          <p className="mt-1 text-sm">
-            {facit === 'toohard' ? (
-              <span className="text-slate-500">
-                Facit: ställningen är för tung att räkna snabbt just nu – prova igen längre in i given.
-              </span>
-            ) : (
-              <span className="text-sky-700">
-                Facit (perfekt spel): spelföraren tar totalt <strong>{facit}</strong> stick härifrån —{' '}
-                {facit >= result.needed
-                  ? `kontraktet håller${facit > result.needed ? ` (+${facit - result.needed})` : ''}.`
-                  : `${result.needed - facit} bet.`}
-              </span>
-            )}
-          </p>
         )}
-        {/* "Varför?" – datorn förklarar sitt senaste kortval i klartext. */}
-        {lastBotMove && !done && (
-          <p className="mt-1 text-sm">
-            <span className="text-slate-500">
-              {SEAT_LABEL[lastBotMove.seat]} spelade <CardLabel card={lastBotMove.card} />.
-            </span>{' '}
-            <button
-              type="button"
-              onClick={() => setShowWhy((v) => !v)}
-              className="font-medium text-emerald-700 hover:underline"
-            >
-              {showWhy ? 'Dölj' : 'Varför?'}
-            </button>
-            {showWhy && <span className="ml-1 text-slate-600">{lastBotMove.reason}</span>}
-          </p>
-        )}
-      </Panel>
-
-      {/* Hur kontraktet bjöds fram – den verkliga budgivningen, hopfälld som standard. */}
-      <Panel className="!p-4">
-        <button
-          type="button"
-          onClick={() => setShowAuction((v) => !v)}
-          className="flex w-full items-center justify-between text-left"
-        >
-          <span className="font-semibold">Budgivningen</span>
-          <span className="text-sm text-emerald-700">
-            {showAuction ? 'Dölj ▴' : 'Visa hur kontraktet bjöds ▾'}
-          </span>
-        </button>
-        {showAuction && (
-          <div className="mt-4 flex justify-center">
-            <AuctionView calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
-          </div>
-        )}
-      </Panel>
-
-      {/* Färdigspelad giv → stegbar omspelning. Annars det gröna filtbordet:
-          Nord uppe, Väst/mitten/Öst, Syd nere (du). */}
-      {done ? (
-        <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
-      ) : (
-        <div
-          className="overflow-hidden rounded-3xl border border-emerald-950/30 px-4 py-5 sm:px-8 sm:py-7 shadow-inner"
-          style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
-        >
-          <div className="flex flex-col items-center gap-4">
-            <SeatHand seat="N" {...seatProps} />
-            <div className="flex w-full items-center justify-between gap-2">
-              <SeatHand seat="W" {...seatProps} />
-              <TrickView play={play} />
-              <SeatHand seat="E" {...seatProps} />
-            </div>
-            <SeatHand seat="S" {...seatProps} />
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-/** Liten namnbricka för en plats, med roll och "din tur"-markering. */
-function SeatTag({
-  seat,
-  role,
-  active,
-}: {
-  seat: Seat
-  role: '' | 'spelförare' | 'träkarl'
-  active: boolean
-}) {
-  return (
-    <div
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-        active ? 'bg-amber-300 text-emerald-950 shadow' : 'bg-emerald-950/40 text-emerald-50'
-      }`}
-    >
-      <span>{SEAT_LABEL[seat]}</span>
-      {seat === 'S' && <span className="opacity-80">(du)</span>}
-      {role && <span className="opacity-70">· {role}</span>}
-    </div>
-  )
-}
-
-/** En plats vid bordet: namnbricka + handen som kortfan (öppen eller baksidor). */
-function SeatHand({
-  seat,
-  contract,
-  play,
-  isFaceUp,
-  onCardClick,
-  selectedSuit,
-}: {
-  seat: Seat
-  contract: Contract
-  play: PlayState
-  isFaceUp: (s: Seat) => boolean
-  onCardClick: (c: Card) => void
-  selectedSuit: Suit | null
-}) {
-  const hand = play.hands[seat]
-  const faceUp = isFaceUp(seat)
-  const isDeclarer = contract.declarer === seat
-  const isDummy = dummyOf(contract) === seat
-  const myTurn = play.toAct === seat && controls(contract, seat) && !isComplete(play)
-  const legal = myTurn ? legalCards(play, seat) : []
-  const legalSet = new Set(legal.map((c) => `${c.suit}${c.rank}`))
-  // Syd visas störst, övriga öppna händer mellanstora, dolda som små baksidor.
-  const size = seat === 'S' ? 'lg' : 'md'
-  // Korten trycks ihop så bara hörn-indexet syns (sista kortet i färgen helt).
-  const overlap = size === 'lg' ? '-ml-7' : '-ml-5'
-  const role = isDeclarer ? 'spelförare' : isDummy ? 'träkarl' : ''
-  // Träkarlen (utom Syd, som är din egen hand) läggs upp prydligt som i verkligheten.
-  const showDummy = faceUp && isDummy && seat !== 'S'
-
-  // En kort-cell: spelbar (klickbar) eller bara visad. `prevInGroup` lägger på
-  // överlapp-marginalen `gap`; i en utfanad färg sätts den till false (kort glesas).
-  const card = (c: Card, prevInGroup: boolean, gap: string): ReactNode => {
-    const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
-    return (
-      <PlayingCard
-        key={`${c.suit}${c.rank}`}
-        card={c}
-        size={size}
-        playable={playable}
-        dimmed={myTurn && !playable}
-        onClick={playable ? () => onCardClick(c) : undefined}
-        className={prevInGroup ? gap : ''}
-      />
-    )
-  }
-
-  // Klassen för en färggrupp: den valda färgen fanas ut (gles + lyft), övriga
-  // tonas ned så länge en färg är vald. Bara aktivt på din tur.
-  const groupClass = (suit: Suit, vertical: boolean): string => {
-    const spread = myTurn && suit === selectedSuit
-    const dim = myTurn && selectedSuit !== null && !spread
-    return [
-      'flex transition-all',
-      vertical ? 'flex-col' : '',
-      spread ? `${vertical ? 'gap-1' : 'gap-1'} -translate-y-1 scale-105 origin-bottom z-10` : '',
-      dim ? 'opacity-50' : '',
-    ].join(' ')
-  }
-  const spreadSuit = (suit: Suit) => myTurn && suit === selectedSuit
-
-  let body: ReactNode
-  if (!faceUp) {
-    body = <FanBacks count={hand.length} />
-  } else if (showDummy) {
-    body = (
-      <DummyHand seat={seat} contract={contract} hand={hand} card={card} groupClass={groupClass} spreadSuit={spreadSuit} />
-    )
-  } else {
-    body = (
-      <div className="flex items-end gap-1">
-        {orderedSuits(seat, contract).map((suit) => {
-          const cards = bySuit(hand, suit)
-          if (cards.length === 0) return null
-          const spread = spreadSuit(suit)
-          return (
-            <div key={suit} className={groupClass(suit, false)}>
-              {cards.map((c, i) => card(c, !spread && i > 0, overlap))}
-            </div>
-          )
-        })}
       </div>
     )
   }
 
+  // Vem ligger öppen var? Nord-sidans öppna hand visas som färgkolumner uppe
+  // (träkarlen när du spelar, eller spelföraren Nord när Syd är träkarl); en
+  // Ö/V-träkarl som lodrät stapel på sin sida. Dolda händer visas INTE alls.
+  const northOpen = isFaceUp('N')
+  const westOpen = isFaceUp('W')
+  const eastOpen = isFaceUp('E')
+
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      {seat !== 'S' && <SeatTag seat={seat} role={role} active={myTurn} />}
-      {body}
-      {seat === 'S' && <SeatTag seat={seat} role={role} active={myTurn} />}
+    <div
+      className="relative overflow-hidden rounded-3xl border border-emerald-950/30 shadow-inner"
+      style={{ background: 'radial-gradient(circle at 50% 40%, #15795b 0%, #0f5e49 70%, #0b4a3a 100%)' }}
+    >
+      {/* ⓘ (budgivningen) + ⋮ (meny) uppe till höger. */}
+      <div className="absolute right-2.5 top-2.5 z-20 flex gap-1.5">
+        <button
+          type="button"
+          onClick={() => {
+            setShowInfo((v) => !v)
+            setShowMenu(false)
+          }}
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950/60 text-sm font-bold text-emerald-50 ring-1 ring-emerald-100/10 hover:bg-emerald-950/80"
+          aria-label="Budgivningen"
+        >
+          i
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setShowMenu((v) => !v)
+            setShowInfo(false)
+          }}
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950/60 text-lg font-bold text-emerald-50 ring-1 ring-emerald-100/10 hover:bg-emerald-950/80"
+          aria-label="Meny"
+        >
+          ⋮
+        </button>
+      </div>
+
+      {/* Meny-overlay: ny giv, facit och hjälp – inget av det stör bordet annars. */}
+      {showMenu && (
+        <div className="absolute right-2.5 top-13 z-30 w-72 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+          <div className="flex gap-2">
+            <Button className="flex-1" onClick={onNewGame}>
+              Ny giv →
+            </Button>
+            <Button variant="secondary" className="flex-1" onClick={showFacit}>
+              Visa facit
+            </Button>
+          </div>
+          {facit !== 'idle' && (
+            <p className="mt-2 text-xs leading-relaxed">
+              {facit === 'toohard' ? (
+                <span className="text-slate-500">
+                  Facit: ställningen är för tung att räkna snabbt just nu – prova igen längre in i given.
+                </span>
+              ) : (
+                <span className="text-sky-700">
+                  Facit (perfekt spel): spelföraren tar totalt <strong>{facit}</strong> stick härifrån —{' '}
+                  {facit >= result.needed
+                    ? `kontraktet håller${facit > result.needed ? ` (+${facit - result.needed})` : ''}.`
+                    : `${result.needed - facit} bet.`}
+                </span>
+              )}
+            </p>
+          )}
+          <p className="mt-3 text-xs leading-relaxed text-slate-600">
+            Kontraktet är <strong>{contract.level}{STRAIN_CODE[contract.strain] === 'NT' ? 'NT' : ''}</strong>
+            {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}
+            {SEAT_LABEL[contract.declarer]} (behöver {result.needed} stick). Tummen visar vems tur det är.
+            När det är din tur: tryck en färg så lyfts den – klicka sedan kortet du vill spela.
+          </p>
+        </div>
+      )}
+
+      {/* ⓘ-overlay: budgivningen som ledde till kontraktet (klickbara förklaringar). */}
+      {showInfo && (
+        <div className="absolute left-1/2 top-13 z-30 w-full max-w-sm -translate-x-1/2 px-3">
+          <div className="rounded-xl bg-white p-2 shadow-xl ring-1 ring-slate-200">
+            <AuctionGrid calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
+          </div>
+        </div>
+      )}
+
+      {/* Nord-sidans öppna hand som färgkolumner (trumf längst till vänster). */}
+      <div className="flex min-h-16 justify-center pt-3">
+        {northOpen && (
+          <SuitColumns
+            hand={play.hands.N}
+            contract={contract}
+            play={play}
+            seat="N"
+            onCardClick={onCardClick}
+            selectedSuit={selectedSuit}
+          />
+        )}
+      </div>
+
+      {/* Mittraden: ev. V/Ö-träkarl på sin sida + sticket i mitten. */}
+      <div className="flex items-center justify-between gap-1 px-2 py-2">
+        <div className="w-10 shrink-0">
+          {westOpen && <SideStack cards={sideCards(play.hands.W, contract)} side="W" />}
+        </div>
+        <TrickCenterLive play={play} thinking={thinking} />
+        <div className="w-10 shrink-0">
+          {eastOpen && <SideStack cards={sideCards(play.hands.E, contract)} side="E" />}
+        </div>
+      </div>
+
+      {/* Bricka + zon nere till vänster. */}
+      <div className="px-3 pb-2 text-xs leading-tight text-emerald-50/90">
+        <div>Bricka {deal.board}</div>
+        <div>{VUL_TEXT[deal.vulnerability]}</div>
+      </div>
+
+      {/* Svarta listen: kontraktet + ställningen. */}
+      <div className="flex justify-center pb-1.5">
+        <div className="flex items-center gap-2 rounded-lg bg-slate-900/85 px-3 py-1 shadow">
+          <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
+          <span className="text-sm font-semibold text-white">
+            NS:{play.tricksNS} ÖV:{play.tricksEW}
+          </span>
+          <span className="text-xs text-slate-400">mål {result.needed}</span>
+        </div>
+      </div>
+
+      {/* "Varför?" – datorns senaste kort, förklaring på begäran (minimalism). */}
+      {lastBotMove && (
+        <p className="px-4 pb-1.5 text-center text-xs text-emerald-50/80">
+          {SEAT_LABEL[lastBotMove.seat]} spelade <CardLabel card={lastBotMove.card} />{' '}
+          <button
+            type="button"
+            onClick={() => setShowWhy((v) => !v)}
+            className="font-semibold text-yellow-200 hover:underline"
+          >
+            {showWhy ? 'Dölj' : 'Varför?'}
+          </button>
+          {showWhy && <span className="ml-1">{lastBotMove.reason}</span>}
+        </p>
+      )}
+
+      {/* Din hand som solfjäder längst ner (trumf längst till vänster). */}
+      <div className="border-t border-emerald-100/10 bg-emerald-950/25 px-2 pb-2.5 pt-3">
+        <SouthFan
+          hand={play.hands.S}
+          contract={contract}
+          play={play}
+          onCardClick={onCardClick}
+          selectedSuit={selectedSuit}
+        />
+      </div>
     </div>
   )
 }
 
-/**
- * Träkarlens hand upplagd som vid ett riktigt bord: en färg per rad/grupp med
- * trumfen på spelförarens HÖGRA sida sett från spelförarens plats.
- *  - Nord träkarl (Syd spelar): grupper bredvid varandra, trumf längst till höger.
- *  - Öst träkarl (Väst spelar): färger staplade, trumf längst ner (= Västs höger).
- *  - Väst träkarl (Öst spelar): färger staplade, trumf överst (= Östs höger).
- */
-function DummyHand({
-  seat,
-  contract,
-  hand,
-  card,
-  groupClass,
-  spreadSuit,
-}: {
-  seat: Seat
-  contract: Contract
-  hand: Hand
-  card: (c: Card, prevInGroup: boolean, gap: string) => ReactNode
-  groupClass: (suit: Suit, vertical: boolean) => string
-  spreadSuit: (suit: Suit) => boolean
-}) {
-  const vertical = seat === 'E' || seat === 'W'
-  const groups = orderedSuits(seat, contract)
-    .map((suit) => ({ suit, cards: bySuit(hand, suit) }))
-    .filter((g) => g.cards.length > 0)
+const VUL_TEXT: Record<Deal['vulnerability'], string> = {
+  none: 'Ingen i zon',
+  ns: 'NS i zon',
+  ew: 'ÖV i zon',
+  all: 'Alla i zon',
+}
 
-  // Sidoträkarl (Ö/V): färgerna som separata vertikala kolumner sida vid sida
-  // (Fun Bridge-stil) → kort överlappar lodrätt med -mt. Nord-träkarl: färgerna
-  // som vågräta grupper bredvid varandra → kort överlappar i sidled med -ml.
+const STRAIN_CODE: Record<string, string> = {
+  clubs: 'C',
+  diamonds: 'D',
+  hearts: 'H',
+  spades: 'S',
+  NT: 'NT',
+}
+
+/** Får platsen spela just nu, styrd av dig? (för klickbarhet + markering) */
+function turnInfo(play: PlayState, contract: Contract, seat: Seat) {
+  const myTurn = play.toAct === seat && controls(contract, seat) && !isComplete(play)
+  const legal = myTurn ? legalCards(play, seat) : []
+  return { myTurn, legalSet: new Set(legal.map((c) => `${c.suit}${c.rank}`)) }
+}
+
+/**
+ * En öppen hand som färgkolumner (Synrey-träkarlen): en lodrät kolumn per färg,
+ * trumfen i vänstra kolumnen, högsta kortet överst. Två-klicks-spelet: klick i
+ * en färg väljer (lyfter) kolumnen, klick i vald färg spelar kortet.
+ */
+function SuitColumns({
+  hand,
+  contract,
+  play,
+  seat,
+  onCardClick,
+  selectedSuit,
+}: {
+  hand: Hand
+  contract: Contract
+  play: PlayState
+  seat: Seat
+  onCardClick: (c: Card) => void
+  selectedSuit: Suit | null
+}) {
+  const { myTurn, legalSet } = turnInfo(play, contract, seat)
   return (
-    <div className={vertical ? 'flex items-start gap-1.5' : 'flex items-end gap-1.5'}>
-      {groups.map(({ suit, cards }) => {
-        const spread = spreadSuit(suit)
+    <div className="flex items-start justify-center gap-1.5">
+      {handSuitsTrumpFirst(contract.strain).map((suit) => {
+        const cards = bySuit(hand, suit)
+        if (cards.length === 0) return null
+        const spread = myTurn && suit === selectedSuit
+        const dim = myTurn && selectedSuit !== null && !spread
         return (
-          <div key={suit} className={groupClass(suit, vertical)}>
-            {cards.map((c, i) => card(c, !spread && i > 0, vertical ? '-mt-6' : '-ml-4'))}
+          <div
+            key={suit}
+            className={`flex flex-col transition-all ${spread ? '-translate-y-1 z-10' : ''} ${dim ? 'opacity-50' : ''}`}
+          >
+            {cards.map((c, i) => {
+              const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
+              return (
+                <PlayingCard
+                  key={`${c.suit}${c.rank}`}
+                  card={c}
+                  size="sm"
+                  playable={playable}
+                  dimmed={myTurn && !playable}
+                  onClick={playable ? () => onCardClick(c) : undefined}
+                  className={i > 0 ? '-mt-7' : ''}
+                />
+              )
+            })}
           </div>
         )
       })}
@@ -730,51 +696,101 @@ function DummyHand({
   )
 }
 
-/** En kompakt solfjäder av baksidor för en dold hand. */
-function FanBacks({ count }: { count: number }) {
+/** En Ö/V-träkarls kort i visningsordning (trumf överst) för SideStack. */
+function sideCards(hand: Hand, contract: Contract): Card[] {
+  return handSuitsTrumpFirst(contract.strain).flatMap((suit) => bySuit(hand, suit))
+}
+
+/** Din hand som solfjäder (Syd): färggrupper, vald färg lyfts, trumf vänster. */
+function SouthFan({
+  hand,
+  contract,
+  play,
+  onCardClick,
+  selectedSuit,
+}: {
+  hand: Hand
+  contract: Contract
+  play: PlayState
+  onCardClick: (c: Card) => void
+  selectedSuit: Suit | null
+}) {
+  const { myTurn, legalSet } = turnInfo(play, contract, 'S')
   return (
-    <div className="flex">
-      {Array.from({ length: count }).map((_, i) => (
-        <PlayingCard key={i} faceDown size="sm" className={i > 0 ? '-ml-4' : ''} />
-      ))}
+    <div className="flex items-end justify-center">
+      {handSuitsTrumpFirst(contract.strain).map((suit) => {
+        const cards = bySuit(hand, suit)
+        if (cards.length === 0) return null
+        const spread = myTurn && suit === selectedSuit
+        const dim = myTurn && selectedSuit !== null && !spread
+        return (
+          <div
+            key={suit}
+            className={`flex transition-all ${spread ? 'gap-1 -translate-y-1.5 z-10 mx-1' : ''} ${dim ? 'opacity-50' : ''}`}
+          >
+            {cards.map((c, i) => {
+              const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
+              return (
+                <PlayingCard
+                  key={`${c.suit}${c.rank}`}
+                  card={c}
+                  size="md"
+                  playable={playable}
+                  dimmed={myTurn && !playable}
+                  onClick={playable ? () => onCardClick(c) : undefined}
+                  className={!spread && i > 0 ? '-ml-6' : ''}
+                />
+              )
+            })}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-/** Mitten: korten i pågående stick placerade mot rätt väderstreck. */
-function TrickView({ play }: { play: PlayState }) {
+/** Sticket i mitten (live): mörk platta, väderstrecken runt om — tummen 👍 visar
+ *  vems tur det är (pulserar när bot-hjärnan räknar). Mellan sticken ligger det
+ *  senast vunna sticket kvar med vinnarkortet gulmarkerat. */
+function TrickCenterLive({ play, thinking }: { play: PlayState; thinking: boolean }) {
   const last =
     play.completedTricks.length > 0 ? play.completedTricks[play.completedTricks.length - 1] : undefined
   const trick: PlayedCard[] = play.currentTrick.length > 0 ? play.currentTrick : last?.cards ?? []
   const winner = play.currentTrick.length === 0 ? last?.winner : undefined
   const at = (seat: Seat) => trick.find((pc) => pc.seat === seat)
+  const toAct = isComplete(play) ? null : play.toAct
 
-  const slot = (seat: Seat, pos: string) => {
+  const card = (seat: Seat, pos: string, rotate = '') => {
     const pc = at(seat)
+    if (!pc) return null
     return (
-      <div className={`absolute ${pos}`}>
-        {pc ? (
-          <PlayingCard
-            card={pc.card}
-            size="md"
-            className={pc.seat === winner ? 'ring-2 ring-amber-400' : ''}
-          />
-        ) : null}
+      <div className={`absolute ${pos} ${rotate} replay-card-in`}>
+        <PlayingCard card={pc.card} size="sm" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
       </div>
     )
   }
+  const letter = (seat: Seat, label: string, pos: string) => (
+    <span className={`absolute ${pos} flex items-center gap-0.5 text-sm font-semibold text-yellow-300`}>
+      {toAct === seat && (
+        <span className={thinking ? 'animate-pulse' : ''} title={thinking ? 'Bot-hjärnan räknar …' : 'Ska spela'}>
+          👍
+        </span>
+      )}
+      {label}
+    </span>
+  )
 
   return (
-    <div className="relative h-36 w-36 rounded-2xl bg-emerald-900/25 ring-1 ring-emerald-100/10">
-      {trick.length === 0 && (
-        <div className="flex h-full items-center justify-center text-xs text-emerald-100/60">
-          Sticket
-        </div>
-      )}
-      {slot('N', 'top-1 left-1/2 -translate-x-1/2')}
-      {slot('S', 'bottom-1 left-1/2 -translate-x-1/2')}
-      {slot('W', 'left-1 top-1/2 -translate-y-1/2')}
-      {slot('E', 'right-1 top-1/2 -translate-y-1/2')}
+    <div className="relative h-44 w-40 shrink-0">
+      <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-emerald-950/50 ring-1 ring-emerald-100/10" />
+      {letter('N', 'N', 'top-4 left-1/2 -translate-x-1/2')}
+      {letter('S', 'S', 'bottom-4 left-1/2 -translate-x-1/2')}
+      {letter('W', 'V', 'left-4 top-1/2 -translate-y-1/2')}
+      {letter('E', 'Ö', 'right-4 top-1/2 -translate-y-1/2')}
+      {card('N', 'top-0 left-1/2 -translate-x-1/2')}
+      {card('S', 'bottom-0 left-1/2 -translate-x-1/2')}
+      {card('W', 'left-0 top-1/2 -translate-y-1/2', 'rotate-90')}
+      {card('E', 'right-0 top-1/2 -translate-y-1/2', '-rotate-90')}
     </div>
   )
 }
