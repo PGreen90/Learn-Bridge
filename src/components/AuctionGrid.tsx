@@ -108,10 +108,11 @@ export function AuctionGrid({
             {chosenInfo?.alert && (
               <span className="rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>
             )}
+            {/* Stort tryckvänligt kryss (minst ~40 px träffyta för tummen). */}
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="ml-auto rounded px-1.5 text-sm text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="-my-2 -mr-2 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700"
               aria-label="Stäng"
             >
               ✕

@@ -97,7 +97,9 @@ export function Layout() {
           </nav>
         )}
       </header>
-      <main className="max-w-3xl mx-auto px-4 py-8">
+      {/* Mobil: mindre luft + safe-area-marginal i botten så iPhones egna
+          gränssnitt (verktygsfältet/hemindikatorn) aldrig täcker korten. */}
+      <main className="max-w-3xl mx-auto px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8">
         {/* key per adress → innehållet tonar in vid varje sidbyte (page-in). */}
         <div key={location.pathname} className="page-in">
           <Outlet />

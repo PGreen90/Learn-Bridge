@@ -14,6 +14,38 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
+> **🎉 UI-pass i Spela kort KLART (2026-07-03, testsvit 1537 grön, bygget ok):**
+> fem ägarönskemål på mobilen. (1) **Kortens symboler flöt ihop** på spelade
+> kort → `PlayingCard.tsx` har nu ETT hörnindex (det nedvända borttaget
+> ÖVERALLT), mittsymbolen knuffad diagonalt bort från hörnet, essets pip ett
+> snäpp mindre. (2) **Stäng-krysset** i förklaringspopupen 44×44 px
+> (`AuctionGrid.tsx`). (3) **iPhone-safe-area**: `viewport-fit=cover`
+> (`index.html`) + botten-marginal `env(safe-area-inset-bottom)` och mindre
+> mobilluft (`Layout.tsx`). (4) **Alla ramar/borders på korten borttagna**
+> (ägarbeslut — även gröna "spelbar"-ringen; ospelbara tonas fortfarande ner)
+> och **Nords träkarlskolumner expanderar VERTIKALT** när färgen väljs
+> (`-mt-3` i st.f. `-mt-7`, `Play.tsx`), samma tanke som Syds solfjäder.
+> (5) **👍-turmarkören ersatt av mjuk ljuskägla** (spotlight): radiellt vitt
+> ljus m. `mix-blend-mode: screen` bakom aktiv spelares bokstav i sticket,
+> tonar 0,7 s vid turbyte, pulserar när bot-hjärnan räknar
+> (`TrickCenterLive`, `Play.tsx`). Gula vinnarringen i sticket är KVAR
+> (markering, ej ram — ägaren sa inget om den).
+>
+> **🎉 Felrapport #5 LAGAD & LIVE (2026-07-03, commits `7e68178` + `1125213`,
+> testsvit 1537):** bricka 8 — motorn ville passa ut given trots klar
+> balansering, och Nord höjde inte partnerns inkliv. Två rötter: (a)
+> **balansering byggd** — fjärde hand får hela §7-arsenalen i utpassningsläget,
+> både i kanoniska linjen (`auction.ts`, lämnar auktionen öppen) och off-book
+> (`maybeOvercall`, `auction-live.ts`); samma krav som direkt sits ("låna en
+> kung"-lättnaden = senare förfining, ⚪); (b) **`divergedFromLine`** räknar nu
+> ett riktigt bud BORTOM en stängd linje som off-book (modellen trodde given
+> var utpassad → partnerns svarslogik kopplades aldrig in). Given facit-låst
+> EXAKT ur rapporten (1♦–P–P–1♥–P–2♥–P–P–P). **Ägarbeslut (exempelhänder
+> H1–H4): AGGRESSIV upplysningsdubbling** — golv 10 hp med perfekt form (max 2
+> i deras färg + stöd i alla objudna + ingen egen 5-korts färg; 12+ som förut),
+> `overcalls.ts` + budsystem §7.1/§7.3. **Bevaka:** bottarna balanserar nu även
+> MOT ägaren (symmetriskt — korrekt bridge, säg till om det känns fel i spel).
+>
 > **🎉 TP-steg E & F KLARA (2026-07-03, testsvit 1528 — hela TP-arbetslistan
 > A–F därmed komplett):** ägarbeslut efter exempelhänder + bridgebum-bekräftat.
 > **E — reverse/hoppskift på TP:** styrkan i `max(hp, startpoäng)`
@@ -338,9 +370,7 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Felrapport #5** — öppen GitHub-issue: "Felaktig budgivning (bricka 8,
-   1♥ av S)" — körs med `/felrapporter`.
-2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
+1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - **Felrapportering: PAT-i-localStorage-varianten** (skicka issuen direkt från
@@ -357,7 +387,9 @@ Slutförd FAS 3 (facit + `npm test`):
 - **Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC): känd gräns, stängs lagligt.
   Bekräfta bara att den fortfarande stängs — jaga den aldrig som bugg.
 - **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.
-- **Off-book §7 bredd** (balansering + inkliv över 1NT/svaga tvåor/spärrar).
+- **Off-book §7 bredd** (inkliv över 1NT/svaga tvåor/spärrar; balansering
+  BYGGD 2026-07-03 via felrapport #5 — kvar här: "låna en kung"-lättnaden,
+  dvs. lättare krav i balanseringssits än direkt sits).
 - **"Framkalla slutbud"-väljaren** (ägaridé) + **webworker för DDS-facit**.
 
 ## Arbetsrutiner (följ varje gång)

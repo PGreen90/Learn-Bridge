@@ -591,7 +591,7 @@ function PlayTable({
           <p className="mt-3 text-xs leading-relaxed text-slate-600">
             Kontraktet är <strong>{contract.level}{STRAIN_CODE[contract.strain] === 'NT' ? 'NT' : ''}</strong>
             {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}
-            {SEAT_LABEL[contract.declarer]} (behöver {result.needed} stick). Tummen visar vems tur det är.
+            {SEAT_LABEL[contract.declarer]} (behöver {result.needed} stick). Ljuskäglan visar vems tur det är.
             När det är din tur: tryck en färg så lyfts den – klicka sedan kortet du vill spela.
           </p>
         </div>
@@ -702,7 +702,8 @@ function turnInfo(play: PlayState, contract: Contract, seat: Seat) {
 /**
  * En öppen hand som färgkolumner (Synrey-träkarlen): en lodrät kolumn per färg,
  * trumfen i vänstra kolumnen, högsta kortet överst. Två-klicks-spelet: klick i
- * en färg väljer (lyfter) kolumnen, klick i vald färg spelar kortet.
+ * en färg väljer kolumnen som då EXPANDERAR på höjden (samma tanke som Syds
+ * solfjäder fast lodrätt), klick i vald färg spelar kortet.
  */
 function SuitColumns({
   hand,
@@ -742,7 +743,7 @@ function SuitColumns({
                   playable={playable}
                   dimmed={myTurn && !playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
-                  className={i > 0 ? '-mt-7' : ''}
+                  className={i > 0 ? (spread ? '-mt-3' : '-mt-7') : ''}
                 />
               )
             })}
@@ -816,9 +817,10 @@ const CARD_IN: Record<Seat, string> = {
   E: 'card-in-e',
 }
 
-/** Sticket i mitten (live): mörk platta, väderstrecken runt om — tummen 👍 visar
- *  vems tur det är (pulserar när bot-hjärnan räknar). Mellan sticken ligger det
- *  senast vunna sticket kvar med vinnarkortet gulmarkerat. */
+/** Sticket i mitten (live): mörk platta, väderstrecken runt om — en mjuk
+ *  ljuskägla (spotlight) lyser upp platsen som är i tur (pulserar när
+ *  bot-hjärnan räknar). Mellan sticken ligger det senast vunna sticket kvar
+ *  med vinnarkortet gulmarkerat. */
 function TrickCenterLive({ play, thinking }: { play: PlayState; thinking: boolean }) {
   const last =
     play.completedTricks.length > 0 ? play.completedTricks[play.completedTricks.length - 1] : undefined
@@ -836,16 +838,30 @@ function TrickCenterLive({ play, thinking }: { play: PlayState; thinking: boolea
       </div>
     )
   }
-  const letter = (seat: Seat, label: string, pos: string) => (
-    <span className={`absolute ${pos} flex items-center gap-0.5 text-sm font-semibold text-yellow-300`}>
-      {toAct === seat && (
-        <span className={thinking ? 'animate-pulse' : ''} title={thinking ? 'Bot-hjärnan räknar …' : 'Ska spela'}>
-          👍
-        </span>
-      )}
-      {label}
-    </span>
-  )
+  const letter = (seat: Seat, label: string, pos: string) => {
+    const active = toAct === seat
+    return (
+      <span
+        className={`absolute ${pos} flex items-center justify-center text-sm font-semibold text-yellow-300`}
+        title={active ? (thinking ? 'Bot-hjärnan räknar …' : 'Ska spela') : undefined}
+      >
+        {/* Ljuskäglan: vitt radiellt ljus som tonar ut mot kanterna. mix-blend-mode
+            screen ljusar bara UPP det som ligger under — färgerna ändras inte. */}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full transition-opacity duration-700 ${
+            active ? (thinking ? 'animate-pulse' : 'opacity-100') : 'opacity-0'
+          }`}
+          style={{
+            background:
+              'radial-gradient(closest-side, rgba(255,255,255,0.34), rgba(255,255,255,0.12) 55%, transparent 78%)',
+            mixBlendMode: 'screen',
+          }}
+        />
+        <span className="relative">{label}</span>
+      </span>
+    )
+  }
 
   return (
     <div className="relative h-44 w-40 shrink-0">
