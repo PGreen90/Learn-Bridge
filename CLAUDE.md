@@ -14,8 +14,28 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
-> **🎉 CLAIM TRICKS + AUTO CLAIM KLART (2026-07-03 kväll, testsvit 1560, bygget
-> ok, EJ committat — ägaren sköter commit/push):** ägarönskemål, två funktioner.
+> **🎉 Felrapport #10–#13 LAGADE & LIVE (2026-07-04, commit `26b4267`, testsvit
+> 1626, deploy grön, issues #10–#13 stängda):** **#10** 4NT är essfråga även
+> UTAN överenskommen trumf när sidans senaste naturliga bud var en FÄRG (t.ex.
+> 4NT på partnerns 3♠-spärr) — kvantitativt bara över sang (`slamAskTrump`,
+> `auction-live.ts`; samma regel i tolkningslagret via `askTrumpFallback`).
+> **#11** partnerns cue i motståndarnas färg passas aldrig ut — känns nu igen
+> även på 3-läget och över X/deras egen höjning (`partnerTwoSuiterToAnswer`);
+> Nord ger preferens (3♠). **#12** kortspel: andra hand med LÖPANDE toppvinnare
+> (2+ säkra) går upp med billigaste säkra vinnaren i stället för att "maska"
+> (♥8 ur AKQT98 lät knekten vinna); ensamt säkert kort ligger kvar lågt
+> (hold-up orörd), visad renons hos kommande spelare → lågt (`play-bot.ts`).
+> **#13** partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG: 4M med 3+
+> stöd, annars pass — transferns relä läses aldrig som naturlig färg
+> (`transferGameChoiceToAnswer`, ligger FÖRE det generella off-book-svaret).
+> Alla fyra givarna facit-låsta EXAKT ur rapporterna. **Samma push:**
+> parallellsessionens poängräkning + X/XX i kontraktet (`scoring.ts` enligt
+> ägarens poängguide) som egen commit `0864224`. **Bevaka:** bottarna svarar
+> på essfrågor utan formell trumf, går upp med toppsekvenser som andra hand
+> och väljer 4M/pass efter transfer-3NT.
+>
+> **🎉 CLAIM TRICKS + AUTO CLAIM KLART (2026-07-03 kväll, testsvit 1560,
+> committat i `8914903`):** ägarönskemål, två funktioner.
 > **(1) Manuell claim** — ⋮-menyn (spelfasen) har knappen "Claim tricks" (bara
 > när DIN sida är spelförare). Dialogen listar sidans TOTALA stick i given
 > (redan vunna → vunna+återstående) med kontrakt/±-etikett; DDS-lösaren dömer
@@ -443,11 +463,9 @@ Slutförd FAS 3 (facit + `npm test`):
   1♠–2NT–P–P–P — advancern ska aldrig passa ostört (ägarbeslut FAS 10).
   Live-budlådan är lagad; luckan finns bara i förbyggda linjer (Budvisningen
   m.m.). Trä in `advanceTwoSuiter` i linjens konkurrensrond.
-- **Dubblingar (X/XX) in i slutkontraktet** (granskningsfynd 2026-07-03):
-  `Contract` saknar dubblad/redubblad-flagga — ett dubblat kontrakt spelas och
-  redovisas som odubblat. Blir relevant först när appen räknar poäng i siffror;
-  trä då X/XX genom `contractFromCalls` (nu EN sanningskälla i
-  `auction-contract.ts`) + resultatdialogen.
+- ~~**Dubblingar (X/XX) in i slutkontraktet**~~ **KLAR 2026-07-04** (commit
+  `0864224`, parallellsession): X/XX följer med genom `contractFromCalls` och
+  poängräkningen (`scoring.ts` enligt ägarens poängguide) är byggd.
 - **Felrapportering: PAT-i-localStorage-varianten** (skicka issuen direkt från
   appen utan att öppna GitHub) — grundvarianten (förifylld issue-länk) = 🔵 NU.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
