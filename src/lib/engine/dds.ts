@@ -63,6 +63,60 @@ function trickWinner(trick: Play[], trump: number): number {
 const BUDGET = Symbol('dds-budget')
 
 /**
+ * Lagliga, AVDUBBADE drag för `seat` givet utspelsfärgen, hög → låg. Inom en
+ * färg slås löpande sviter (inget motståndarkort emellan, enligt `inPlay`-
+ * bitmaskarna) ihop till ett drag – likvärdiga kort ger identiskt resultat.
+ * Delas av lösaren (optimalt spel) och claim-kontrollen (alla spelsätt).
+ */
+function legalMovesFor(hands: ICard[][], inPlay: number[], seat: number, leadSuit: number): ICard[] {
+  const hand = hands[seat]
+  let cand = hand
+  if (leadSuit >= 0) {
+    const inSuit = hand.filter((c) => c.s === leadSuit)
+    if (inSuit.length > 0) cand = inSuit
+  }
+  const bySuit: ICard[][] = [[], [], [], []]
+  for (const c of cand) bySuit[c.s].push(c)
+
+  const out: ICard[] = []
+  for (let s = 0; s < 4; s++) {
+    const arr = bySuit[s]
+    if (arr.length === 0) continue
+    arr.sort((a, b) => b.r - a.r) // hög → låg
+    let prevKept = -1
+    for (const c of arr) {
+      if (prevKept < 0) {
+        out.push(c)
+        prevKept = c.r
+        continue
+      }
+      let oppBetween = false
+      for (let r = c.r + 1; r < prevKept; r++) {
+        if (inPlay[s] & (1 << r)) {
+          oppBetween = true
+          break
+        }
+      }
+      if (oppBetween) out.push(c) // ett motståndarkort skiljer → eget drag
+      prevKept = c.r // annars likvärdig: utöka sviten, hoppa över kortet
+    }
+  }
+  return out
+}
+
+/** Kanonisk, billig positionsnyckel (bara vid stickstart) ur hand-bitmaskarna. */
+function positionKey(toAct: number, hm: number[]): string {
+  return (
+    toAct +
+    ':' +
+    hm[0] + ',' + hm[1] + ',' + hm[2] + ',' + hm[3] + ',' +
+    hm[4] + ',' + hm[5] + ',' + hm[6] + ',' + hm[7] + ',' +
+    hm[8] + ',' + hm[9] + ',' + hm[10] + ',' + hm[11] + ',' +
+    hm[12] + ',' + hm[13] + ',' + hm[14] + ',' + hm[15]
+  )
+}
+
+/**
  * Lösarens kärna: max antal stick som `targetSide` (0 = N/S, 1 = Ö/V) kan ta när
  * `leaderIdx` spelar ut, med trumf `trump` (−1 = sang). Båda sidor spelar
  * optimalt. Returnerar ett tal 0–13. Söker högst `maxNodes` noder (kastar
@@ -93,46 +147,6 @@ function solveDeal(
     }
   }
 
-  /**
-   * Lagliga, AVDUBBADE drag för `seat` givet utspelsfärgen, hög → låg. Inom en
-   * färg slås löpande sviter (inget motståndarkort emellan) ihop till ett drag.
-   */
-  function legalMoves(seat: number, leadSuit: number): ICard[] {
-    const hand = hands[seat]
-    let cand = hand
-    if (leadSuit >= 0) {
-      const inSuit = hand.filter((c) => c.s === leadSuit)
-      if (inSuit.length > 0) cand = inSuit
-    }
-    const bySuit: ICard[][] = [[], [], [], []]
-    for (const c of cand) bySuit[c.s].push(c)
-
-    const out: ICard[] = []
-    for (let s = 0; s < 4; s++) {
-      const arr = bySuit[s]
-      if (arr.length === 0) continue
-      arr.sort((a, b) => b.r - a.r) // hög → låg
-      let prevKept = -1
-      for (const c of arr) {
-        if (prevKept < 0) {
-          out.push(c)
-          prevKept = c.r
-          continue
-        }
-        let oppBetween = false
-        for (let r = c.r + 1; r < prevKept; r++) {
-          if (inPlay[s] & (1 << r)) {
-            oppBetween = true
-            break
-          }
-        }
-        if (oppBetween) out.push(c) // ett motståndarkort skiljer → eget drag
-        prevKept = c.r // annars likvärdig: utöka sviten, hoppa över kortet
-      }
-    }
-    return out
-  }
-
   /** Bästa (vinnande) kortet i det PÅGÅENDE sticket, för dragordning. */
   function currentBest(): Play | null {
     if (trick.length === 0) return null
@@ -160,19 +174,6 @@ function solveDeal(
     })
   }
 
-  /** Kanonisk, billig nyckel för transpositionstabellen (bara vid stickstart). */
-  function key(toAct: number): string {
-    // Platsernas kort-bitmaskar är redan kanoniska; ingen sortering behövs.
-    return (
-      toAct +
-      ':' +
-      hm[0] + ',' + hm[1] + ',' + hm[2] + ',' + hm[3] + ',' +
-      hm[4] + ',' + hm[5] + ',' + hm[6] + ',' + hm[7] + ',' +
-      hm[8] + ',' + hm[9] + ',' + hm[10] + ',' + hm[11] + ',' +
-      hm[12] + ',' + hm[13] + ',' + hm[14] + ',' + hm[15]
-    )
-  }
-
   // Alfa-beta (fail-soft). Returnerar målsidans stick från positionen till slutet.
   function ab(toAct: number, alpha: number, beta: number): number {
     if (++nodes > maxNodes) throw BUDGET
@@ -182,7 +183,7 @@ function solveDeal(
     let k = ''
     let ttMove = -1
     if (trickStart) {
-      k = key(toAct)
+      k = positionKey(toAct, hm)
       const e = tt.get(k)
       if (e) {
         if (e.lo >= beta) return e.lo
@@ -197,7 +198,7 @@ function solveDeal(
 
     const leadSuit = trick.length > 0 ? trick[0].s : -1
     const maximizing = toAct % 2 === targetSide
-    const moves = legalMoves(toAct, leadSuit)
+    const moves = legalMovesFor(hands, inPlay, toAct, leadSuit)
     orderMoves(moves, leadSuit, ttMove)
     let best = maximizing ? -Infinity : Infinity
     let bestMv = -1
@@ -329,6 +330,94 @@ export function doubleDummyDeclarerRemaining(
     return solveDeal(internal, trump, SEATS.indexOf(toAct), SEATS.indexOf(declarer) % 2, maxNodes, initialTrick)
   } catch (e) {
     if (e === BUDGET) return null
+    throw e
+  }
+}
+
+/**
+ * Auto Claim-kontrollen: kan `claimSide`s sida INTE förlora ett enda av de
+ * återstående sticken, OAVSETT hur den själv spelar? Till skillnad från lösaren
+ * ovan (som antar optimalt spel) prövas här ALLA lagliga kort för ALLA fyra
+ * spelare: sant bara om sidan vinner varje stick i varenda spelbar linje –
+ * det finns alltså inget sätt att spela bort något. `leader` spelar ut.
+ * Returnerar `false` vid överskriden nodbudget (hellre spela vidare än frysa).
+ */
+export function sureWinAllRemaining(
+  handsBySeat: Record<Seat, Card[]>,
+  strain: Strain,
+  claimSide: Seat,
+  leader: Seat,
+  maxNodes = 250_000,
+): boolean {
+  const trump = strain === 'NT' ? -1 : SUIT_IDX[strain]
+  const hands = SEATS.map((s) => handToInternal(handsBySeat[s]))
+  const targetSide = SEATS.indexOf(claimSide) % 2
+
+  const inPlay = [0, 0, 0, 0]
+  const hm = new Array(16).fill(0)
+  for (let seat = 0; seat < 4; seat++) {
+    for (const c of hands[seat]) {
+      inPlay[c.s] |= 1 << c.r
+      hm[seat * 4 + c.s] |= 1 << c.r
+    }
+  }
+
+  const memo = new Map<string, boolean>()
+  const trick: Play[] = []
+  let nodes = 0
+
+  // Sant om ALLA linjer härifrån ger målsidan samtliga återstående stick.
+  function all(toAct: number): boolean {
+    if (++nodes > maxNodes) throw BUDGET
+    const trickStart = trick.length === 0
+    if (trickStart && hands[toAct].length === 0) return true // allt spelat, inget förlorat
+
+    let k = ''
+    if (trickStart) {
+      k = positionKey(toAct, hm)
+      const m = memo.get(k)
+      if (m !== undefined) return m
+    }
+
+    const leadSuit = trick.length > 0 ? trick[0].s : -1
+    const moves = legalMovesFor(hands, inPlay, toAct, leadSuit)
+    let ok = true
+    for (const card of moves) {
+      const hand = hands[toAct]
+      hand.splice(hand.indexOf(card), 1)
+      inPlay[card.s] &= ~(1 << card.r)
+      hm[toAct * 4 + card.s] &= ~(1 << card.r)
+      trick.push({ seat: toAct, s: card.s, r: card.r })
+
+      if (trick.length === 4) {
+        const winner = trickWinner(trick, trump)
+        if (winner % 2 !== targetSide) {
+          ok = false // motsidan vann ett stick i den här linjen → ingen säker claim
+        } else {
+          const saved = trick.splice(0, 4)
+          ok = all(winner)
+          trick.push(...saved)
+        }
+      } else {
+        ok = all((toAct + 1) % 4)
+      }
+
+      trick.pop()
+      inPlay[card.s] |= 1 << card.r
+      hm[toAct * 4 + card.s] |= 1 << card.r
+      hand.push(card)
+
+      if (!ok) break
+    }
+
+    if (trickStart) memo.set(k, ok)
+    return ok
+  }
+
+  try {
+    return all(SEATS.indexOf(leader))
+  } catch (e) {
+    if (e === BUDGET) return false
     throw e
   }
 }

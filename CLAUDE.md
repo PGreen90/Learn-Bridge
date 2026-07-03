@@ -14,6 +14,28 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
+> **🎉 CLAIM TRICKS + AUTO CLAIM KLART (2026-07-03 kväll, testsvit 1560, bygget
+> ok, EJ committat — ägaren sköter commit/push):** ägarönskemål, två funktioner.
+> **(1) Manuell claim** — ⋮-menyn (spelfasen) har knappen "Claim tricks" (bara
+> när DIN sida är spelförare). Dialogen listar sidans TOTALA stick i given
+> (redan vunna → vunna+återstående) med kontrakt/±-etikett; DDS-lösaren dömer
+> mot PERFEKT motspel (`adjudicateClaim`, `claim.ts` + `doubleDummyDeclarer-
+> Remaining`). Godkänd → given avslutas med det claimade resultatet
+> (resultatdialogen visar "Claim godkänd"); annars **"Claim nekad — går inte
+> att säkra"** och man spelar vidare; för tung ställning → "spela ett stick
+> till". **(2) Auto Claim** — av/på-knapp i SAMMA meny (sparas i localStorage,
+> `learnbridge:autoClaim`, PÅ som standard). När ett nytt stick ska börja och
+> spelförarsidan OMÖJLIGT kan förlora fler stick OAVSETT spelsätt (t.ex. bara
+> höga trumf kvar, eller idel toppkort) stängs given automatiskt — gäller BÅDE
+> dig och datorn som spelförare. Strängare mått än manuell claim: ny lösare
+> `sureWinAllRemaining` (`dds.ts`) prövar ALLA lagliga kort för alla fyra
+> spelare → sant bara om varenda linje vinner varje stick (en fungerande mask
+> går att spela hem = manuell claim OK, men går också att spela bort = aldrig
+> Auto Claim). DDS-lösarens `legalMoves`/`key` utlyfta till modulnivå
+> (`legalMovesFor`/`positionKey`) och delas — inga dubbletter. Facit-lås:
+> `claim.test.ts` (15 fall, ägarens båda exempel + mask-skillnaden + symmetri
+> för bot-spelförare + nodbudget). Bottarna pausar medan claim-dialogen är öppen.
+>
 > **🎉 Felrapport #6, #7 & #9 LAGADE (2026-07-03 kväll, testsvit 1545):**
 > **#6 motspel:** motspelaren cashar aldrig en ENSAM säker vinnare i färsk färg
 > (torrt ess göder spelförarens honnörer) — bara löpande toppar (2+) eller i

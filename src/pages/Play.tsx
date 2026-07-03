@@ -11,9 +11,12 @@ import {
   startPlay,
   type Contract,
   type PlayedCard,
+  type PlayResult,
   type PlayState,
   type Trick,
 } from '../lib/engine/play'
+import { adjudicateClaim, autoClaimAvailable, declarerTricksWon, remainingTricks } from '../lib/engine/claim'
+import { loadValue, saveValue } from '../lib/storage'
 import { dealRandom } from '../lib/engine/deal'
 import {
   auctionComplete,
@@ -345,6 +348,13 @@ function PlayTable({
   // Vald färg i två-klicks-spelet: första klicket väljer (fan ut) färgen,
   // andra klicket på ett kort i den färgen spelar det.
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
+  // Claim (ägarönskemål 2026-07-03): `claimed` avslutar given med det claimade
+  // resultatet i stället för att spela ut resten. `claiming` = dialogen öppen,
+  // `claimMsg` = "Claim nekad"-beskedet, `autoClaim` = av/på-valet (sparas).
+  const [claimed, setClaimed] = useState<{ total: number; auto: boolean } | null>(null)
+  const [claiming, setClaiming] = useState(false)
+  const [claimMsg, setClaimMsg] = useState<string | null>(null)
+  const [autoClaim, setAutoClaim] = useState<boolean>(() => loadValue('autoClaim', true))
   // Bottarnas motiveringar per spelat kort (kortnyckel → plats + varför).
   // Tryck på ett spelat kort på bordet visar förklaringen i raden under listen.
   const [botReasons, setBotReasons] = useState<Record<string, { seat: Seat; reason: string }>>({})
@@ -396,7 +406,9 @@ function PlayTable({
   // (slutspelet) räknas i webworkern så gränssnittet inte fryser; snabba tumregler
   // körs inline med en liten paus för känsla.
   useEffect(() => {
-    if (isComplete(play) || controls(contract, play.toAct)) return
+    // Bottarna pausar när en claim är lagd (given är slut) eller medan
+    // claim-dialogen är öppen (ställningen får inte ändras under bedömningen).
+    if (claimed || claiming || isComplete(play) || controls(contract, play.toAct)) return
     const seat = play.toAct
     let cancelled = false
 
@@ -451,14 +463,46 @@ function PlayTable({
       clearTimeout(timeoutId)
       setThinking(false)
     }
-  }, [contract, play, calls])
+  }, [contract, play, calls, claimed, claiming])
+
+  // Auto Claim: när ett nytt stick ska börja och spelförarsidan OMÖJLIGT kan
+  // förlora fler stick (oavsett spelsätt) stängs given automatiskt – gäller både
+  // när du är spelförare och när datorn är det. Slås av/på i ⋮-menyn.
+  useEffect(() => {
+    if (!autoClaim || claimed || claiming || isComplete(play)) return
+    if (play.currentTrick.length > 0) return
+    if (!autoClaimAvailable(play)) return
+    setClaimed({ total: declarerTricksWon(play) + remainingTricks(play), auto: true })
+  }, [play, autoClaim, claimed, claiming])
 
   function onPlay(card: Card) {
     setPlay((p) => {
-      if (isComplete(p) || !controls(contract, p.toAct)) return p
+      if (claimed || isComplete(p) || !controls(contract, p.toAct)) return p
       if (!legalCards(p, p.toAct).some((c) => sameCard(c, card))) return p
       return playCard(p, card)
     })
+  }
+
+  // Manuell claim: du anger sidans TOTALA stick i given; DDS-lösaren dömer om
+  // de går att säkra mot bästa motspel. Godkänd → given avslutas. Nekad → spela
+  // vidare. "Oavgjord" = ställningen är för tung att räkna just nu.
+  function onClaim(total: number) {
+    const v = adjudicateClaim(play, total, FACIT_BUDGET)
+    if (v.verdict === 'godkänd') {
+      setClaimed({ total, auto: false })
+      setClaiming(false)
+      setClaimMsg(null)
+    } else if (v.verdict === 'nekad') {
+      setClaimMsg(`Claim nekad — ${total} stick går inte att säkra mot bästa motspel. Spela vidare!`)
+    } else {
+      setClaimMsg('Ställningen är för tung att kontrollera just nu — spela något stick till och försök igen.')
+    }
+  }
+
+  function toggleAutoClaim() {
+    const next = !autoClaim
+    setAutoClaim(next)
+    saveValue('autoClaim', next)
   }
 
   // Två-klicks: första klicket på ett kort väljer (och fanar ut) dess färg;
@@ -483,8 +527,18 @@ function PlayTable({
     )
   }
 
-  const done = isComplete(play)
-  const result = contractResult(play)
+  // En godkänd claim (manuell eller auto) avslutar given med det claimade
+  // resultatet — de ospelade sticken bokförs enligt claimen.
+  const done = isComplete(play) || claimed !== null
+  const needed = 6 + contract.level
+  const result: PlayResult = claimed
+    ? {
+        declarerTricks: claimed.total,
+        needed,
+        made: claimed.total >= needed,
+        diff: claimed.total - needed,
+      }
+    : contractResult(play)
   const declSide = side(contract.declarer)
   const dummy = dummyOf(contract)
   const openingLeadMade = play.completedTricks.length > 0 || play.currentTrick.length > 0
@@ -503,11 +557,18 @@ function PlayTable({
         {!resultSeen && !reporting ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center rounded-3xl bg-black/30">
             <div className="rounded-xl bg-white p-5 text-center shadow-xl">
-              <p className={`mb-4 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
+              <p className={`${claimed ? 'mb-1' : 'mb-4'} text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
                 {result.made
                   ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
                   : `${-result.diff} bet (${result.declarerTricks} stick).`}
               </p>
+              {claimed && (
+                <p className="mb-4 text-xs text-slate-500">
+                  {claimed.auto
+                    ? 'Auto Claim: resten av sticken var 100 % säkra för spelföraren.'
+                    : 'Claim godkänd — resten av sticken bokfördes utan spel.'}
+                </p>
+              )}
               <div className="flex justify-center gap-2">
                 <Button variant="secondary" onClick={() => setResultSeen(true)}>
                   Se omspelningen
@@ -591,6 +652,35 @@ function PlayTable({
               Visa facit
             </Button>
           </div>
+          {/* Claim: bara när DIN sida är spelförare (motspelare claimar inte). */}
+          {declSide === 'NS' && (
+            <Button
+              variant="secondary"
+              className="mt-2 w-full"
+              onClick={() => {
+                setShowMenu(false)
+                setClaimMsg(null)
+                setClaiming(true)
+              }}
+            >
+              Claim tricks
+            </Button>
+          )}
+          {/* Auto Claim av/på: gäller både dig och datorn som spelförare. */}
+          <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-100 px-2.5 py-1.5">
+            <span className="text-xs font-medium text-slate-600">
+              Auto Claim <span className="text-slate-400">(säkra stick tas automatiskt)</span>
+            </span>
+            <button
+              type="button"
+              onClick={toggleAutoClaim}
+              className={`rounded-full px-3 py-0.5 text-xs font-bold ${
+                autoClaim ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-600'
+              }`}
+            >
+              {autoClaim ? 'På' : 'Av'}
+            </button>
+          </div>
           {facit !== 'idle' && (
             <p className="mt-2 text-xs leading-relaxed">
               {facit === 'toohard' ? (
@@ -615,6 +705,21 @@ function PlayTable({
             Tryck på ett spelat kort på bordet för att se varför datorn valde det.
           </p>
         </div>
+      )}
+
+      {/* Claim-dialogen: ange sidans TOTALA stick i given; DDS dömer claimen. */}
+      {claiming && (
+        <ClaimDialog
+          won={declarerTricksWon(play)}
+          remaining={remainingTricks(play)}
+          needed={result.needed}
+          message={claimMsg}
+          onClaim={onClaim}
+          onClose={() => {
+            setClaiming(false)
+            setClaimMsg(null)
+          }}
+        />
       )}
 
       {/* ⓘ-overlay: budgivningen som ledde till kontraktet (klickbara förklaringar). */}
@@ -920,6 +1025,68 @@ function LastTrickPanel({
         {card('S', 'bottom-0 left-1/2 -translate-x-1/2')}
         {card('W', 'left-0 top-1/2 -translate-y-1/2', 'rotate-90')}
         {card('E', 'right-0 top-1/2 -translate-y-1/2', '-rotate-90')}
+      </div>
+    </div>
+  )
+}
+
+/** Claim-dialogen (ägarönskemål 2026-07-03): du påstår hur många stick din sida
+ *  tar TOTALT i given (t.ex. "kontrakt +2"). Appen dömer med facit-lösaren: går
+ *  sticken att säkra mot bästa motspel godkänns claimen och given avslutas,
+ *  annars visas "Claim nekad" och spelet fortsätter. */
+function ClaimDialog({
+  won,
+  remaining,
+  needed,
+  message,
+  onClaim,
+  onClose,
+}: {
+  won: number
+  remaining: number
+  needed: number
+  message: string | null
+  onClaim: (total: number) => void
+  onClose: () => void
+}) {
+  const totals: number[] = []
+  for (let t = won; t <= won + remaining; t++) totals.push(t)
+  const diffLabel = (t: number) => (t === needed ? 'kontrakt' : t > needed ? `+${t - needed}` : `${t - needed}`)
+  return (
+    <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/30 px-3">
+      <div className="w-full max-w-sm rounded-xl bg-white p-4 text-center shadow-xl">
+        <p className="text-sm font-bold text-slate-800">Claim tricks</p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+          Din sida har <strong>{won}</strong> stick och <strong>{remaining}</strong> återstår.
+          Hur många stick tar ni <strong>totalt</strong> i given?
+        </p>
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {totals.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => onClaim(t)}
+              className={`min-w-12 rounded-lg px-2 py-1.5 ring-1 transition-colors ${
+                t >= needed
+                  ? 'bg-emerald-50 ring-emerald-200 hover:bg-emerald-100'
+                  : 'bg-slate-50 ring-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              <span className="block text-sm font-bold text-slate-800">{t}</span>
+              <span className={`block text-[10px] font-medium ${t >= needed ? 'text-emerald-700' : 'text-slate-500'}`}>
+                {diffLabel(t)}
+              </span>
+            </button>
+          ))}
+        </div>
+        {message && <p className="mt-3 text-xs font-semibold text-red-600">{message}</p>}
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-3 w-full border-t border-slate-200 pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
+        >
+          Avbryt — spela vidare
+        </button>
       </div>
     </div>
   )
