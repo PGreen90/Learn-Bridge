@@ -32,6 +32,28 @@ describe('overcall – inkliv över deras 1-läges öppning (§7.1–7.2)', () =
   it('inget inkliv mot deras 1NT (hanteras av DONT)', () => {
     expect(o('S:KQ542 H:K32 D:32 C:432', '1NT')).toBe('P')
   })
+
+  // Ägarbeslut 2026-07-03 (uppföljning felrapport #5, exempelhänder H1–H4):
+  // AGGRESSIV STANDARD för upplysningsdubblingen – golvet sänkt till 10 hp,
+  // men BARA när formen är rätt (max 2 kort i deras färg + stöd i alla
+  // objudna). Jämna händer utan korthet dubblar aldrig under 12.
+  describe('aggressiv upplysningsdubbling (10–11 hp med rätt form)', () => {
+    it('H2: 10 hp, singel i deras ruter, 4-4 hf → X', () => {
+      expect(o('S:KQ64 H:AJ53 D:2 C:T874', '1D')).toBe('X')
+    })
+    it('H4: 11 hp, dubbelton i deras ruter, stöd i övriga → X', () => {
+      expect(o('S:A63 H:KJ64 D:43 C:QJ83', '1D')).toBe('X')
+    })
+    it('H1 (bricka 8-Nord): jämn 10:a med 3 kort i deras färg → pass', () => {
+      expect(o('S:A63 H:J643 D:J43 C:A83', '1D')).toBe('P')
+    })
+    it('H3: perfekt form men bara 8 hp → pass', () => {
+      expect(o('S:KJ85 H:QT94 D:4 C:J973', '1D')).toBe('P')
+    })
+    it('10–11 med egen 5-korts färg → enkelt inkliv, inte X', () => {
+      expect(o('S:KJT98 H:76 D:Q97 C:A76', '1H')).toBe('1S') // 10 hp, 5 spader
+    })
+  })
 })
 
 describe('advanceOvercall – svar på partnerns inkliv (§7.1)', () => {

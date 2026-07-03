@@ -49,7 +49,7 @@ describe('buildAuction – störd budgivning (punkt 27)', () => {
       vulnerability: 'none',
       hands: {
         N: parseHand('S:K2 H:AKJ43 D:K32 C:432'), // öppnar 1♥
-        E: parseHand('S:QJ9 H:Q2 D:QT98 C:QJ95'), // 10 hp, ingen 5-färg → passar
+        E: parseHand('S:QJ9 H:Q32 D:QT98 C:QJ9'), // 3 kort i deras hjärter → passar (även aggressiv X kräver max 2)
         S: parseHand('S:Q43 H:K987 D:K32 C:432'), //  4 stöd
         W: parseHand('S:T87 H:65 D:A765 C:T765'),
       },

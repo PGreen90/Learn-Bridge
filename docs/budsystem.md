@@ -739,6 +739,10 @@ Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam)
   tvåa).
 - **1NT-inkliv:** 15–18 hp, bra stopp i deras färg – **kör samma system som över
   en 1NT-öppning** (Stayman, transfers m.m., §4.3), fast med 15–18 hp.
+- **Balansering (utpassningsläget, felrapport #5):** efter deras 1-lägesöppning
+  och två pass får fjärde hand hela §7-arsenalen (inkliv/X/Michaels/ovanlig 2NT)
+  – given passas inte ut med en klar aktion på handen. Samma krav som direkt
+  sits (medvetet konservativt; "låna en kung"-lättnaden är en senare förfining).
 
 **Svar på partnerns enkla inkliv:**
 | Svar | Betydelse |
@@ -767,8 +771,12 @@ finns **spelrum för pass**, och partnern kan bjuda igen för att visa sin
 okänd minor – utan högfärgsfit bjuder advancern då ostört 3♣ pass-eller-rätta).
 
 ### 7.3 Dubblingar
-- **Upplysningsdubbling:** dubbling av deras öppning = kort i deras färg, stöd i
-  övriga + öppningsstyrka (eller en stark hand). Partnern bjuder sin bästa färg.
+- **Upplysningsdubbling:** dubbling av deras öppning = kort i deras färg (max 2),
+  stöd i övriga + öppningsstyrka (eller en stark hand). Partnern bjuder sin bästa
+  färg. **Aggressiv standard (ägarbeslut 2026-07-03):** golvet är **10–11 hp** när
+  formen är perfekt – max 2 i deras färg, stöd i alla objudna och **ingen egen
+  5-korts färg** (då inkliver vi hellre). Jämna händer utan korthet dubblar aldrig
+  under öppningsstyrka.
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
   upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
   ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Öppnaren svarar som på en upplysningsdubbling.

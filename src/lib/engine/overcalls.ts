@@ -90,11 +90,16 @@ export function overcall(hand: Hand, theirCall: string): ResponseResult {
     return { call: '1NT', rule: '1NT-inkliv', explanation: `${p} hp balanserad med stopp i ${NAME[their]} → 1NT-inkliv (kör 1NT-systemet).` }
   }
 
-  // 4) Upplysningsdubbling: kort i deras färg, stöd i övriga, öppningsstyrka.
+  // 4) Upplysningsdubbling: kort i deras färg, stöd i övriga. Ägarbeslut
+  // 2026-07-03 (aggressiv standard, uppföljning felrapport #5): golvet är
+  // 10 hp – men BARA med perfekt form (max 2 i deras färg + stöd i alla
+  // objudna + INGEN egen 5-korts färg, då inkliver vi hellre). Med
+  // öppningsstyrka (12+) räcker som förut även en hand med 5-korts färg.
+  // Jämna händer utan korthet dubblar aldrig.
   const shortTheirs = len[their] <= 2
   const supportUnbid = unbid.every((s) => len[s] >= 3)
   const longestUnbid = Math.max(...unbid.map((s) => len[s]))
-  if (shortTheirs && supportUnbid && p >= 12 && longestUnbid <= 5) {
+  if (shortTheirs && supportUnbid && ((p >= 12 && longestUnbid <= 5) || (p >= 10 && longestUnbid <= 4))) {
     return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[their]}, stöd i övriga → X (upplysning).` }
   }
 
