@@ -47,45 +47,53 @@ export function turnsToCalls(turns: AuctionTurn[], dealer: Seat): ResolvedCall[]
 }
 
 /**
- * Slutkontraktet ur en färdig auktion, eller `null` om auktionen ännu är öppen
- * (motorn har inte budat klart) eller saknar kontraktsbud.
+ * Slutkontraktet ur en budföljd – EN sanningskälla för regeln (delas av
+ * budlådan i "Spela kort" och `finalContract`). Sista kontraktsbudet ger nivå +
+ * färg; spelföraren = den i den vinnande sidan som FÖRST nämnde slutfärgen
+ * (vanlig bridgeregel). Returnerar null när inget kontraktsbud finns (utpassat).
  */
-export function finalContract(auction: BuiltAuction): Contract | null {
-  if (auction.open) return null
-
-  // Sista kontraktsbudet = slutkontraktets nivå + färg.
+export function contractFromCalls(history: ResolvedCall[]): Contract | null {
   let last: { level: number; suit: string } | null = null
-  for (const turn of auction.turns) {
-    const m = CONTRACT_BID.exec(turn.call)
+  for (const c of history) {
+    const m = CONTRACT_BID.exec(c.bid)
     if (m) last = { level: Number(m[1]), suit: m[2] }
   }
   if (!last) return null
 
-  const strain = STRAIN_OF[last.suit]
-  const contractSide = sideOfStrain(auction.turns, last.suit)
+  const contractSide = sideOfStrain(history, last.suit)
 
   // Spelförare = den i kontraktssidan som FÖRST nämnde färgen.
   let declarer: Seat | null = null
-  for (const turn of auction.turns) {
-    const m = CONTRACT_BID.exec(turn.call)
-    if (m && m[2] === last.suit && side(turn.seat) === contractSide) {
-      declarer = turn.seat
+  for (const c of history) {
+    const m = CONTRACT_BID.exec(c.bid)
+    if (m && m[2] === last.suit && side(c.seat) === contractSide) {
+      declarer = c.seat
       break
     }
   }
   if (!declarer) return null
 
-  return { declarer, strain, level: last.level }
+  return { declarer, strain: STRAIN_OF[last.suit], level: last.level }
 }
 
 /** Vilken sida (N/S eller Ö/V) som äger slutkontraktet (sista som bjöd färgen). */
-function sideOfStrain(turns: AuctionTurn[], suit: string): 'NS' | 'EW' {
+function sideOfStrain(history: ResolvedCall[], suit: string): 'NS' | 'EW' {
   let owner: Seat = 'S'
-  for (const turn of turns) {
-    const m = CONTRACT_BID.exec(turn.call)
-    if (m && m[2] === suit) owner = turn.seat
+  for (const c of history) {
+    const m = CONTRACT_BID.exec(c.bid)
+    if (m && m[2] === suit) owner = c.seat
   }
   return side(owner)
+}
+
+/**
+ * Slutkontraktet ur en färdig auktion, eller `null` om auktionen ännu är öppen
+ * (motorn har inte budat klart) eller saknar kontraktsbud. Delegerar till
+ * `contractFromCalls` så härledningsregeln bara finns på ETT ställe.
+ */
+export function finalContract(auction: BuiltAuction): Contract | null {
+  if (auction.open) return null
+  return contractFromCalls(auction.turns.map((t) => ({ seat: t.seat, bid: t.call })))
 }
 
 export interface PlayDeal {

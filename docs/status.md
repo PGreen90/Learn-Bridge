@@ -240,6 +240,9 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   X mot motståndare, XX mot deras X).
 - `auctionComplete(history)` – tre pass efter ett bud / fyra inledande pass.
 - `contractFromCalls(history)` – slutkontrakt + spelförare ur en färdig budföljd.
+  **EN sanningskälla (2026-07-03):** implementationen bor i `auction-contract.ts`
+  (re-exporteras här); `finalContract` delegerar till samma funktion, så
+  härledningsregeln aldrig kan glida isär mellan omspelningen och budlådan.
 - `decideCall(deal, history, seat)` – **bot-hjärnan**: spelar upp parets
   kanoniska systemlinje (`buildAuction`) bud för bud. Datorn (V/N/Ö) följer
   linjen; Syd bjuder själv. Återanvänder hela den testade budmotorn.

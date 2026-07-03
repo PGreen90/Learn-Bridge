@@ -22,18 +22,11 @@ import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import { openingSuit, overcall } from './overcalls'
-import { side, type Contract, type Strain } from './play'
+import { side } from './play'
 
 // ---- Bud-tolkning ----------------------------------------------------------
 
 const STRAINS = ['C', 'D', 'H', 'S', 'NT'] as const
-const STRAIN_OF: Record<string, Strain> = {
-  C: 'clubs',
-  D: 'diamonds',
-  H: 'hearts',
-  S: 'spades',
-  NT: 'NT',
-}
 const CONTRACT_BID = /^([1-7])(C|D|H|S|NT)$/
 
 /** Ett kontraktsbud (nivå + färg) tolkat, eller null för P/X/XX. */
@@ -113,42 +106,10 @@ export function auctionComplete(history: ResolvedCall[]): boolean {
 
 // ---- Slutkontraktet ur en färdig budföljd ---------------------------------
 
-/**
- * Härleder slutkontraktet ur en (färdig) budföljd. Spelföraren = den i den
- * vinnande sidan som FÖRST nämnde slutfärgen. Returnerar null när given passats
- * ut (inget kontraktsbud).
- */
-export function contractFromCalls(history: ResolvedCall[]): Contract | null {
-  let last: { level: number; strain: string } | null = null
-  for (const c of history) {
-    const cb = parseContractBid(c.bid)
-    if (cb) last = cb
-  }
-  if (!last) return null
-
-  const winningSide = sideOfStrain(history, last.strain)
-  let declarer: Seat | null = null
-  for (const c of history) {
-    const cb = parseContractBid(c.bid)
-    if (cb && cb.strain === last.strain && side(c.seat) === winningSide) {
-      declarer = c.seat
-      break
-    }
-  }
-  if (!declarer) return null
-
-  return { declarer, strain: STRAIN_OF[last.strain], level: last.level }
-}
-
-/** Vilken sida som äger slutfärgen (den som bjöd den sist). */
-function sideOfStrain(history: ResolvedCall[], strain: string): 'NS' | 'EW' {
-  let owner: Seat = 'S'
-  for (const c of history) {
-    const cb = parseContractBid(c.bid)
-    if (cb && cb.strain === strain) owner = c.seat
-  }
-  return side(owner)
-}
+// EN sanningskälla: härledningen bor i auction-contract.ts (delas med
+// `finalContract`). Re-exporteras här så budlådans användare (Play.tsx m.fl.)
+// hittar den bland de övriga auktionsverktygen.
+export { contractFromCalls } from './auction-contract'
 
 // ---- Svar på partnerns upplysningsdubbling ---------------------------------
 

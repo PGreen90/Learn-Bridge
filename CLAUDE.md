@@ -14,6 +14,19 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
+> **🎉 Systemgranskning + städning KLAR (2026-07-03 kväll, testsvit 1537 grön,
+> EJ committad — ägaren sköter commit/push själv):** full granskning av
+> budcykeln/bot-tillståndet på ägarens begäran. Resultat: `decideCall` är
+> tillståndslös (räknar om allt ur historiken varje tur — inget bot-tillstånd
+> kan bli inaktuellt), inga races i `Play.tsx` (funktionell setState +
+> dubbelkoll i uppdateraren), lagligheten vaktas av `legalCalls`. **Åtgärdat:**
+> dubblettkopian av kontraktshärledningen borttagen — `contractFromCalls` bor
+> nu ENBART i `auction-contract.ts` (re-export i `auction-live.ts`,
+> `finalContract` delegerar); `*.tsbuildinfo` gitignorerad. **Nytt fynd →
+> ⚪ SENARE:** X/XX följer inte med in i slutkontraktet. (OBS: ägarens prompt
+> talade om "bid retractions"/auktionssajt — utrett och avfärdat tillsammans,
+> bud kan aldrig dras tillbaka i bridge.)
+>
 > **🎉 UI-pass i Spela kort KLART (2026-07-03, testsvit 1537 grön, bygget ok):**
 > fem ägarönskemål på mobilen. (1) **Kortens symboler flöt ihop** på spelade
 > kort → `PlayingCard.tsx` har nu ETT hörnindex (det nedvända borttaget
@@ -386,6 +399,11 @@ Slutförd FAS 3 (facit + `npm test`):
 1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **Dubblingar (X/XX) in i slutkontraktet** (granskningsfynd 2026-07-03):
+  `Contract` saknar dubblad/redubblad-flagga — ett dubblat kontrakt spelas och
+  redovisas som odubblat. Blir relevant först när appen räknar poäng i siffror;
+  trä då X/XX genom `contractFromCalls` (nu EN sanningskälla i
+  `auction-contract.ts`) + resultatdialogen.
 - **Felrapportering: PAT-i-localStorage-varianten** (skicka issuen direkt från
   appen utan att öppna GitHub) — grundvarianten (förifylld issue-länk) = 🔵 NU.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
