@@ -12,6 +12,7 @@ import {
   type Contract,
   type PlayedCard,
   type PlayState,
+  type Trick,
 } from '../lib/engine/play'
 import { dealRandom } from '../lib/engine/deal'
 import {
@@ -26,6 +27,7 @@ import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../lib/engine/play-bot'
 import { hcp } from '../lib/engine/hand'
 import { SuitSymbol } from '../components/SuitSymbol'
+import { SuitText } from '../components/SuitText'
 import { PlayingCard } from '../components/PlayingCard'
 import { PlayReplay } from '../components/PlayReplay'
 import { AuctionGrid } from '../components/AuctionGrid'
@@ -343,9 +345,10 @@ function PlayTable({
   // Vald färg i två-klicks-spelet: första klicket väljer (fan ut) färgen,
   // andra klicket på ett kort i den färgen spelar det.
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
-  // Datorns senaste drag + varför (för "Varför?"-knappen). Fälls ut på begäran.
-  const [lastBotMove, setLastBotMove] = useState<{ seat: Seat; card: Card; reason: string } | null>(null)
-  const [showWhy, setShowWhy] = useState(false)
+  // Bottarnas motiveringar per spelat kort (kortnyckel → plats + varför).
+  // Tryck på ett spelat kort på bordet visar förklaringen i raden under listen.
+  const [botReasons, setBotReasons] = useState<Record<string, { seat: Seat; reason: string }>>({})
+  const [explain, setExplain] = useState<{ seat: Seat; card: Card; reason: string } | null>(null)
   // Sant medan bot-hjärnan räknar Monte-Carlo i webworkern (visar "tänker …").
   const [thinking, setThinking] = useState(false)
   // Webworkern som kör den tunga Monte-Carlo-DDS:en av huvudtråden (skapas en gång).
@@ -364,10 +367,12 @@ function PlayTable({
     }
   }, [])
 
-  // Nollställ facit + färgval så fort ställningen ändras (du eller en bot la ett kort).
+  // Nollställ facit + färgval + öppen kortförklaring så fort ställningen ändras
+  // (du eller en bot la ett kort).
   useEffect(() => {
     setFacit('idle')
     setSelectedSuit(null)
+    setExplain(null)
   }, [play])
 
   function showFacit() {
@@ -399,12 +404,15 @@ function PlayTable({
     const apply = (choice: { card: Card; reason: string }) => {
       if (cancelled) return
       setThinking(false)
-      setLastBotMove({ seat, card: choice.card, reason: choice.reason })
-      setShowWhy(false)
+      // Kortet som faktiskt läggs (fallback om valet hunnit bli olagligt) +
+      // motiveringen sparas så kortet kan förklaras med ett tryck på bordet.
+      const legal = legalCards(play, seat)
+      const card = legal.some((c) => sameCard(c, choice.card)) ? choice.card : legal[0]
+      setBotReasons((m) => ({ ...m, [`${card.suit}${card.rank}`]: { seat, reason: choice.reason } }))
       setPlay((p) => {
         if (isComplete(p) || controls(contract, p.toAct)) return p
-        const stillLegal = legalCards(p, p.toAct).some((c) => sameCard(c, choice.card))
-        return playCard(p, stillLegal ? choice.card : legalCards(p, p.toAct)[0])
+        const stillLegal = legalCards(p, p.toAct).some((c) => sameCard(c, card))
+        return playCard(p, stillLegal ? card : legalCards(p, p.toAct)[0])
       })
     }
 
@@ -462,6 +470,17 @@ function PlayTable({
     }
     onPlay(card)
     setSelectedSuit(null)
+  }
+
+  // Tryck på ett SPELAT kort på bordet (sticket i mitten eller förra sticket):
+  // botens motivering visas i raden under listen; samma kort igen stänger.
+  const reasonFor = (pc: PlayedCard) => botReasons[`${pc.card.suit}${pc.card.rank}`]
+  function onPlayedCardClick(pc: PlayedCard) {
+    const info = reasonFor(pc)
+    if (!info) return
+    setExplain((e) =>
+      e && sameCard(e.card, pc.card) ? null : { seat: pc.seat, card: pc.card, reason: info.reason },
+    )
   }
 
   const done = isComplete(play)
@@ -593,6 +612,7 @@ function PlayTable({
             {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}
             {SEAT_LABEL[contract.declarer]} (behöver {result.needed} stick). Ljuskäglan visar vems tur det är.
             När det är din tur: tryck en färg så lyfts den – klicka sedan kortet du vill spela.
+            Tryck på ett spelat kort på bordet för att se varför datorn valde det.
           </p>
         </div>
       )}
@@ -620,12 +640,34 @@ function PlayTable({
         )}
       </div>
 
+      {/* Förra sticket i miniatyr uppe i hörnet — förminskad (75 %) och ankrad
+          så den går fri från det pågående stickets V/Ö-kort även på 375 px;
+          flyttar till vänstra hörnet när Öst-träkarlen behöver högersidan. */}
+      {play.completedTricks.length > 0 && (
+        <div
+          className={`absolute z-10 scale-75 ${
+            eastOpen ? 'left-2.5 top-2.5 origin-top-left' : 'right-2.5 top-13 origin-top-right'
+          }`}
+        >
+          <LastTrickPanel
+            trick={play.completedTricks[play.completedTricks.length - 1]}
+            onCardClick={onPlayedCardClick}
+            hasReason={(pc) => !!reasonFor(pc)}
+          />
+        </div>
+      )}
+
       {/* Mittraden: ev. V/Ö-träkarl på sin sida + sticket i mitten. */}
       <div className="flex items-center justify-between gap-1 px-2 py-2">
         <div className="w-10 shrink-0">
           {westOpen && <SideStack cards={sideCards(play.hands.W, contract)} side="W" />}
         </div>
-        <TrickCenterLive play={play} thinking={thinking} />
+        <TrickCenterLive
+          play={play}
+          thinking={thinking}
+          onCardClick={onPlayedCardClick}
+          hasReason={(pc) => !!reasonFor(pc)}
+        />
         <div className="w-10 shrink-0">
           {eastOpen && <SideStack cards={sideCards(play.hands.E, contract)} side="E" />}
         </div>
@@ -648,19 +690,18 @@ function PlayTable({
         </div>
       </div>
 
-      {/* "Varför?" – datorns senaste kort, förklaring på begäran (minimalism). */}
-      {lastBotMove && (
-        <p className="px-4 pb-1.5 text-center text-xs text-emerald-50/80">
-          {SEAT_LABEL[lastBotMove.seat]} spelade <CardLabel card={lastBotMove.card} />{' '}
-          <button
-            type="button"
-            onClick={() => setShowWhy((v) => !v)}
-            className="font-semibold text-yellow-200 hover:underline"
-          >
-            {showWhy ? 'Dölj' : 'Varför?'}
-          </button>
-          {showWhy && <span className="ml-1">{lastBotMove.reason}</span>}
+      {/* Kortförklaringen: tryck på ett spelat kort på bordet → botens motivering. */}
+      {explain ? (
+        <p className="px-4 pb-1.5 text-center text-xs text-emerald-50/90">
+          {SEAT_LABEL[explain.seat]} spelade <CardLabel card={explain.card} />:{' '}
+          <SuitText>{explain.reason}</SuitText>
         </p>
+      ) : (
+        Object.keys(botReasons).length > 0 && (
+          <p className="px-4 pb-1.5 text-center text-xs text-emerald-50/50">
+            Tryck på spelat kort för förklaring
+          </p>
+        )
       )}
 
       {/* Din hand som solfjäder längst ner (trumf längst till vänster). */}
@@ -817,11 +858,88 @@ const CARD_IN: Record<Seat, string> = {
   E: 'card-in-e',
 }
 
+/** Ett spelat kort på bordet: klickbart när boten har en motivering —
+ *  trycket visar förklaringen i raden under listen. */
+function PlayedCardView({
+  pc,
+  winner,
+  canExplain,
+  onClick,
+}: {
+  pc: PlayedCard
+  winner: boolean
+  canExplain: boolean
+  onClick: () => void
+}) {
+  const face = <PlayingCard card={pc.card} size="sm" className={winner ? 'ring-2 ring-amber-400' : ''} />
+  if (!canExplain) return face
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="cursor-pointer"
+      aria-label={`Varför spelade ${SEAT_LABEL[pc.seat]} det här kortet?`}
+    >
+      {face}
+    </button>
+  )
+}
+
+/** Förra (senast färdigspelade) sticket i miniatyr uppe i hörnet (ägarönskemål
+ *  2026-07-03): korten i kompassläge, vinnarkortet gulmarkerat. Bottarnas kort
+ *  är klickbara → samma förklaringsrad som sticket i mitten. */
+function LastTrickPanel({
+  trick,
+  onCardClick,
+  hasReason,
+}: {
+  trick: Trick
+  onCardClick: (pc: PlayedCard) => void
+  hasReason: (pc: PlayedCard) => boolean
+}) {
+  const at = (seat: Seat) => trick.cards.find((pc) => pc.seat === seat)
+  const card = (seat: Seat, pos: string, rotate = '') => {
+    const pc = at(seat)
+    if (!pc) return null
+    return (
+      <div className={`absolute ${pos} ${rotate}`}>
+        <PlayedCardView
+          pc={pc}
+          winner={trick.winner === seat}
+          canExplain={hasReason(pc)}
+          onClick={() => onCardClick(pc)}
+        />
+      </div>
+    )
+  }
+  return (
+    <div className="rounded-xl bg-emerald-950/45 px-1.5 pb-1.5 pt-0.5 ring-1 ring-emerald-100/10">
+      <div className="pb-0.5 text-center text-[10px] font-medium text-emerald-50/70">Förra sticket</div>
+      <div className="relative h-32 w-26">
+        {card('N', 'top-0 left-1/2 -translate-x-1/2')}
+        {card('S', 'bottom-0 left-1/2 -translate-x-1/2')}
+        {card('W', 'left-0 top-1/2 -translate-y-1/2', 'rotate-90')}
+        {card('E', 'right-0 top-1/2 -translate-y-1/2', '-rotate-90')}
+      </div>
+    </div>
+  )
+}
+
 /** Sticket i mitten (live): mörk platta, väderstrecken runt om — en mjuk
  *  ljuskägla (spotlight) lyser upp platsen som är i tur (pulserar när
  *  bot-hjärnan räknar). Mellan sticken ligger det senast vunna sticket kvar
- *  med vinnarkortet gulmarkerat. */
-function TrickCenterLive({ play, thinking }: { play: PlayState; thinking: boolean }) {
+ *  med vinnarkortet gulmarkerat; bottarnas kort är klickbara → förklaring. */
+function TrickCenterLive({
+  play,
+  thinking,
+  onCardClick,
+  hasReason,
+}: {
+  play: PlayState
+  thinking: boolean
+  onCardClick: (pc: PlayedCard) => void
+  hasReason: (pc: PlayedCard) => boolean
+}) {
   const last =
     play.completedTricks.length > 0 ? play.completedTricks[play.completedTricks.length - 1] : undefined
   const trick: PlayedCard[] = play.currentTrick.length > 0 ? play.currentTrick : last?.cards ?? []
@@ -834,7 +952,12 @@ function TrickCenterLive({ play, thinking }: { play: PlayState; thinking: boolea
     if (!pc) return null
     return (
       <div className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
-        <PlayingCard card={pc.card} size="sm" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
+        <PlayedCardView
+          pc={pc}
+          winner={winner === seat}
+          canExplain={hasReason(pc)}
+          onClick={() => onCardClick(pc)}
+        />
       </div>
     )
   }

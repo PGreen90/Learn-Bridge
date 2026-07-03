@@ -6,6 +6,7 @@ import { AuctionGrid } from '../components/AuctionGrid'
 import { BidOptions } from '../components/BidOptions'
 import { Felt } from '../components/Felt'
 import { HandFan } from '../components/HandFan'
+import { SuitText } from '../components/SuitText'
 import { getExercises, getTheme, resolveAuction, type ResolvedCall } from '../lib/bidding'
 import { hcp } from '../lib/engine/hand'
 import { startingPoints } from '../lib/engine/evaluation'
@@ -163,7 +164,9 @@ function Session({ themeId }: { themeId: string }) {
                 <p className={`mb-1 font-semibold ${isCorrect ? 'text-emerald-700' : 'text-red-600'}`}>
                   {isCorrect ? '✓ Rätt!' : '✗ Inte riktigt.'}
                 </p>
-                <p className="text-sm text-slate-700">{decision.explanation}</p>
+                <p className="text-sm text-slate-700">
+                  <SuitText>{decision.explanation}</SuitText>
+                </p>
                 <div className="mt-3">
                   <Button onClick={next}>{nextLabel} →</Button>
                 </div>

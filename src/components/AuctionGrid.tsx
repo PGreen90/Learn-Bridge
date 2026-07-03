@@ -11,6 +11,7 @@ import { SEAT_LABEL } from '../lib/bidding'
 import { FORCING_LABEL, ruleInfo } from '../lib/engine/rules'
 import { BidChip } from './BidChip'
 import { BidLabel } from './BidLabel'
+import { SuitText } from './SuitText'
 
 // Kolumnordning V N Ö S (medurs), så Syd – din plats – står längst till höger.
 const ORDER: Seat[] = ['W', 'N', 'E', 'S']
@@ -119,7 +120,9 @@ export function AuctionGrid({
             </button>
           </div>
           <p className="pt-2 text-sm text-slate-700">
-            {chosen.explanation ?? (
+            {chosen.explanation ? (
+              <SuitText>{chosen.explanation}</SuitText>
+            ) : (
               <span className="text-slate-400">
                 Ingen förklaring för <BidLabel bid={chosen.bid} />.
               </span>

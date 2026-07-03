@@ -12,6 +12,7 @@ import type { ResolvedCall } from '../lib/bidding'
 import { isAlertRule } from '../lib/engine/alerts'
 import { interpretCall } from '../lib/engine/auction-interpret'
 import { bidChipTone, BidChipContent } from './BidChip'
+import { SuitText } from './SuitText'
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7]
 // Kolumnordning som i Synrey: NT längst till vänster, sedan ♠ ♥ ♦ ♣ (fallande).
@@ -113,7 +114,7 @@ export function BiddingBox({
         <p className="px-1 text-xs leading-snug text-emerald-50/90">
           {isRec && <span className="mr-1 rounded bg-emerald-600 px-1 text-[10px] font-bold text-white">MOTORNS BUD</span>}
           {selAlert && <span className="mr-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>}
-          {selExpl}
+          <SuitText>{selExpl}</SuitText>
         </p>
       )}
 

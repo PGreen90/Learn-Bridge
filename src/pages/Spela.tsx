@@ -16,6 +16,7 @@ import { HandFan } from '../components/HandFan'
 import { SideStack } from '../components/SideStack'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
+import { SuitText } from '../components/SuitText'
 
 // Budvisningen (omgjord 2026-07-02, ägarbeslut: "så likt Spela kort som
 // möjligt"): ETT grönt bord med alla fyra händer öppna — Nord solfjäder uppe,
@@ -201,7 +202,7 @@ export function Spela() {
                       <BidChip bid={call.bid} />
                     </span>
                     <span className="text-sm text-slate-600 dark:text-slate-400">
-                      {call.explanation ?? '—'}
+                      {call.explanation ? <SuitText>{call.explanation}</SuitText> : '—'}
                     </span>
                   </li>
                 ))}
@@ -294,8 +295,12 @@ function SeatDetails({
       </div>
       <HandView hand={hand} showPoints />
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        {r.explanation}
-        {r.uncertain && <span className="ml-1 text-amber-600">⚑ osäker – kan vara stark 2♣</span>}
+        <SuitText>{r.explanation}</SuitText>
+        {r.uncertain && (
+          <span className="ml-1 text-amber-600">
+            <SuitText>⚑ osäker – kan vara stark 2♣</SuitText>
+          </span>
+        )}
       </p>
     </div>
   )

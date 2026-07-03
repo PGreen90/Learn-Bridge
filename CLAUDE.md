@@ -30,6 +30,19 @@ Läs den här filen först varje session.
 > tonar 0,7 s vid turbyte, pulserar när bot-hjärnan räknar
 > (`TrickCenterLive`, `Play.tsx`). Gula vinnarringen i sticket är KVAR
 > (markering, ej ram — ägaren sa inget om den).
+> (6) **"Förra sticket"-panel** uppe i hörnet (`LastTrickPanel`, `Play.tsx`):
+> senaste färdiga sticket i kompassläge, vinnaren gulmarkerad; förminskad 75 %
+> och flyttar till VÄNSTRA hörnet när Öst-träkarlen tar högersidan (annars
+> låg den ovanpå pågående stickets V/Ö-kort på 375 px — luriga överlappet
+> syntes som "mörkt kort"). (7) **Tryck på spelat kort → förklaring**: alla
+> bottars kort på bordet (mitten + förra sticket) klickbara, motiveringen i
+> raden under listen; frasen "X spelade Y Varför?" ersatt med "Tryck på
+> spelat kort för förklaring" (`botReasons`/`PlayedCardView`, `Play.tsx`).
+> (8) **Färgsymboler i löptext ALLTID fyrfärgade** (ägarbeslut):
+> `SuitText.tsx` (delad) + rehype-plugin i `BudSystem.tsx` (markdown-boken,
+> inkl. rubriker/sökträffar); inkopplad i förklaringspopupen, budlådans
+> betydelserad, kortförklaringen, Budvisningens listor och budträningens
+> facit.
 >
 > **🎉 Felrapport #5 LAGAD & LIVE (2026-07-03, commits `7e68178` + `1125213`,
 > testsvit 1537):** bricka 8 — motorn ville passa ut given trots klar

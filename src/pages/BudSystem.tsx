@@ -2,6 +2,8 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import bookRaw from '../../docs/budsystem.md?raw'
+import { SUIT_TEXT, SUIT_TEXT_DARK } from '../lib/suitColors'
+import { CHAR_SUIT, SuitText } from '../components/SuitText'
 
 // Sidan läser systemboken (docs/budsystem.md) direkt och visar den i utfällbara
 // sektioner. Boken är sanningskällan – ändra där, så uppdateras sidan automatiskt.
@@ -43,25 +45,70 @@ function parseBook(md: string): Section[] {
 
 const SECTIONS = parseBook(bookRaw)
 
+// En nod i markdown-renderarens HTML-träd (hast) — bara fälten vi rör.
+type HastNode = {
+  type: string
+  value?: string
+  tagName?: string
+  properties?: Record<string, unknown>
+  children?: HastNode[]
+}
+
+/**
+ * Rehype-plugin: färglägger alla ♠ ♥ ♦ ♣ i bokens text med fyrfärgsleken
+ * (samma kulörer som budlådan, ägarbeslut 2026-07-03). Går igenom textnoderna
+ * och sveper varje symboltecken i ett färgat <span>.
+ */
+function rehypeSuitColors() {
+  const visit = (node: HastNode) => {
+    if (!node.children) return
+    node.children = node.children.flatMap((child): HastNode[] => {
+      if (child.type === 'text' && child.value && /[♠♥♦♣]/.test(child.value)) {
+        return child.value
+          .split(/([♠♥♦♣])/)
+          .filter((s) => s !== '')
+          .map((s): HastNode => {
+            const suit = CHAR_SUIT[s]
+            if (!suit) return { type: 'text', value: s }
+            return {
+              type: 'element',
+              tagName: 'span',
+              properties: { className: [SUIT_TEXT[suit], SUIT_TEXT_DARK[suit]] },
+              children: [{ type: 'text', value: s }],
+            }
+          })
+      }
+      visit(child)
+      return [child]
+    })
+  }
+  return (tree: HastNode) => {
+    visit(tree)
+    return tree
+  }
+}
+
 function Markdown({ children }: { children: string }) {
   return (
     <div className="md">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSuitColors]}>
+        {children}
+      </ReactMarkdown>
     </div>
   )
 }
 
-/** Rubrik med första sökträffen gulmarkerad. */
+/** Rubrik med första sökträffen gulmarkerad (färgsymboler alltid i fyrfärg). */
 function Highlight({ text, q }: { text: string; q: string }) {
   const i = q ? text.toLowerCase().indexOf(q) : -1
-  if (i < 0) return <>{text}</>
+  if (i < 0) return <SuitText>{text}</SuitText>
   return (
     <>
-      {text.slice(0, i)}
+      <SuitText>{text.slice(0, i)}</SuitText>
       <mark className="rounded bg-yellow-200 px-0.5 dark:bg-yellow-600/50 dark:text-inherit">
-        {text.slice(i, i + q.length)}
+        <SuitText>{text.slice(i, i + q.length)}</SuitText>
       </mark>
-      {text.slice(i + q.length)}
+      <SuitText>{text.slice(i + q.length)}</SuitText>
     </>
   )
 }
