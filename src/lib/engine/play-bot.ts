@@ -229,7 +229,28 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   }
 
   // Andra hand (bara utspelet lagt än så länge, motståndaren leder) → lågt.
+  // UNDANTAG (felrapport #12): med LÖPANDE toppvinnare i den ledda färgen
+  // (2+ säkra vinnare) finns inget att spara på – gå upp med den billigaste
+  // säkra vinnaren i stället för att skänka bort sticket (Väst la ♥8 ur
+  // ♥AKQT98 och Nords knekt vann). Ett ENSAMT säkert kort (t.ex. torrt ess)
+  // läggs fortfarande lågt – hold-up/andra hand lågt-doktrinen består. Har en
+  // kvarvarande spelare visat renons i färgen kan honnören ruffas → lågt.
   if (state.currentTrick.length === 1) {
+    const sure = legal.filter((c) => c.suit === led && isSureWinner(c, legal, playedCards(state)))
+    if (sure.length >= 2) {
+      const voids = shownVoids(state)
+      const yetToPlay = (['N', 'E', 'S', 'W'] as Seat[]).filter(
+        (s) => s !== seat && !state.currentTrick.some((pc) => pc.seat === s),
+      )
+      const ruffRisk =
+        state.trump !== null && led !== state.trump && yetToPlay.some((s) => voids[s].has(led))
+      if (!ruffRisk) {
+        return {
+          card: lowest(sure),
+          reason: 'Löpande toppvinnare i färgen – jag går upp med den billigaste säkra vinnaren i stället för att maska bort sticket.',
+        }
+      }
+    }
     const guarded = guardedDiscard(state, seat, legal)
     if (guarded) return { card: guarded, reason: guardReason }
     return { card: lowAvoidRuff(legal, state.trump), reason: 'Andra hand lågt – jag sparar honnörerna till senare.' }

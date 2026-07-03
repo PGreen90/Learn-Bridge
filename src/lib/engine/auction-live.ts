@@ -17,7 +17,7 @@ import type { Bid, Deal, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
-import { answerTakeoutDouble, openerAnswerNegativeDouble } from './doubles'
+import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from './doubles'
 import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
@@ -237,10 +237,15 @@ function isTwoSuiterBid(bid: Bid, openStrain: string): boolean {
 
 /**
  * Har partnern gjort ett TVÅFÄRGSINKLIV som `seat` (advancern) ännu inte svarat
- * på? Kraven (felrapport #7 – luckan lät auktionen dö i stället för preferens):
+ * på? Kraven (felrapport #7 – luckan lät auktionen dö i stället för preferens;
+ * #11 – Nord passade ut partnerns 3♣-cue):
  *  - motståndarna öppnade 1 i färg (auktionens första kontraktsbud),
- *  - partnerns inkliv kom i DIREKT/balanserings-sits (bara pass emellan) och är
- *    vår sidas ENDA kontraktsbud (advancern har inte svarat än),
+ *  - partnerns inkliv är vår sidas ENDA kontraktsbud (advancern har inte
+ *    svarat än) och är en CUE i deras färg (2- eller 3-läget – höjer de sin
+ *    öppning kommer cuet ett läge högre) eller 2NT,
+ *  - mellan öppningen och inklivet ligger bara pass, dubblingar och
+ *    motståndarnas höjning av sin EGEN färg (t.ex. 1♣ – X – 2♣ – 3♣);
+ *    ett annat kontraktsbud emellan ändrar cuets mening → null,
  *  - inget kontraktsbud har kommit efter inklivet (X/pass ändrar inte läget –
  *    preferensplikten består; ett bud över tar oss till vanlig konkurrens).
  * Returnerar argumenten till `advanceTwoSuiter`, annars null.
@@ -257,11 +262,18 @@ function partnerTwoSuiterToAnswer(
   const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
   if (ourBids.length !== 1 || ourBids[0].seat !== PARTNER[seat]) return null
   const pc = ourBids[0]
-  if (!isTwoSuiterBid(pc.bid, open.strain)) return null
+  const pcb = parseContractBid(pc.bid)!
+  const isCue = pcb.strain === open.strain && pcb.level <= 3
+  if (!isCue && !isTwoSuiterBid(pc.bid, open.strain)) return null
 
   const openIdx = history.findIndex((c) => parseContractBid(c.bid))
   const pcIdx = history.indexOf(pc)
-  if (!history.slice(openIdx + 1, pcIdx).every((c) => c.bid === 'P')) return null // ej direkt sits → annat bud
+  for (const c of history.slice(openIdx + 1, pcIdx)) {
+    if (c.bid === 'P' || c.bid === 'X' || c.bid === 'XX') continue
+    const cb = parseContractBid(c.bid)
+    if (cb && cb.strain === open.strain && side(c.seat) !== side(seat)) continue // deras egen höjning
+    return null // annat kontraktsbud emellan → inte ett rent tvåfärgsläge
+  }
   const after = history.slice(pcIdx + 1)
   if (after.some((c) => parseContractBid(c.bid))) return null // någon bjöd över → vanlig konkurrens
   const contested = after.some((c) => c.bid !== 'P')
@@ -357,16 +369,71 @@ function agreedTrump(history: ResolvedCall[], seat: Seat): Suit | null {
 }
 
 /**
+ * Trumffärgen partnerns 4NT-essfråga gäller. Två steg:
+ *  1. ÖVERENSKOMMEN trumf (en färg båda bjudit) – felrapport #9.
+ *  2. Ingen överenskommelse? Standardregeln (felrapport #10: 4NT direkt på
+ *     partnerns 3♠-spärr passades): 4NT är essfråga så länge sidans senaste
+ *     naturliga bud FÖRE frågan var en FÄRG – trumfen är den färgen.
+ *     Kvantitativt är 4NT bara när sidans senaste bud var SANG.
+ * Ankras vid partnerns FÖRSTA 4NT så kungfrågan (5NT) läser samma trumf och
+ * aldrig snubblar på det konstgjorda stegsvaret (5♣/5♦/…) däremellan.
+ */
+function slamAskTrump(history: ResolvedCall[], seat: Seat): Suit | null {
+  const agreed = agreedTrump(history, seat)
+  if (agreed) return agreed
+  const askIdx = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid === '4NT')
+  if (askIdx < 0) return null
+  for (let i = askIdx - 1; i >= 0; i--) {
+    const c = history[i]
+    if (side(c.seat) !== side(seat)) continue
+    const cb = parseContractBid(c.bid)
+    if (!cb) continue
+    if (cb.strain === 'NT') return null // sidans senaste bud var sang → kvantitativt
+    if (opponentsBidStrain(history, seat, cb.strain)) continue // cue, ingen egen färg
+    return SUIT_OF_LETTER[cb.strain]
+  }
+  return null
+}
+
+/**
  * Ska `seat` svara på partnerns 4NT-ESSFRÅGA (1430 RKC, §6.1)? Kraven
- * (felrapport #9 – Nord passade på en "odiskutabel essfråga"):
+ * (felrapport #9 + #10 – Nord passade på en "odiskutabel essfråga"):
  *  - partnerns senaste icke-pass är 4NT (bara pass har följt),
- *  - vår sida har en ÖVERENSKOMMEN trumf (en färg båda bjudit) – då är 4NT
- *    aldrig naturligt/kvantitativt. Returnerar trumffärgen, annars null.
+ *  - trumfen kan härledas via `slamAskTrump` (överenskommen färg, eller
+ *    sidans senaste naturliga färg – t.ex. spärröppningen 4NT ställs på).
+ * Returnerar trumffärgen, annars null.
  */
 function rkcToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
   const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '4NT') return null
-  return agreedTrump(history, seat)
+  return slamAskTrump(history, seat)
+}
+
+/**
+ * Har partnern bett öppnaren VÄLJA UTGÅNG efter en Jacoby-transfer
+ * (felrapport #13: transferns relä lästes som naturlig hjärter → 4♥ på en
+ * 2-kortsfärg)? Mönstret (§5, ostört): `seat` öppnade 1NT/2NT, partnern
+ * överförde (relät = färgen UNDER högfärgen), `seat` fullföljde transfern,
+ * partnern bjöd 3NT = "pass med 2-korts stöd, 4M med 3+" och bara pass har
+ * följt. Motståndarna ska ha varit tysta (inga kontraktsbud). Returnerar
+ * transferns högfärg, annars null.
+ */
+function transferGameChoiceToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '3NT') return null
+
+  // Auktionens kontraktsbud i exakt denna ordning, alla från vår sida:
+  // NT-öppning, relä, fullföljd transfer, 3NT.
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length !== 4 || bids.some((c) => side(c.seat) !== side(seat))) return null
+  const [open, relay, complete, nt] = bids
+  if (open.seat !== seat || (open.bid !== '1NT' && open.bid !== '2NT')) return null
+  const level = open.bid === '1NT' ? 2 : 3
+  if (relay.seat !== PARTNER[seat] || (relay.bid !== `${level}D` && relay.bid !== `${level}H`)) return null
+  const target: Suit = relay.bid === `${level}D` ? 'hearts' : 'spades'
+  if (complete.seat !== seat || complete.bid !== `${level}${letterOfSuit(target)}`) return null
+  if (nt !== lastNonPass) return null
+  return target
 }
 
 /**
@@ -377,7 +444,7 @@ function kingAskToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
   const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '5NT') return null
   if (!history.some((c) => c.seat === PARTNER[seat] && c.bid === '4NT')) return null
-  return agreedTrump(history, seat)
+  return slamAskTrump(history, seat)
 }
 
 // ---- Off-book: svara historiedrivet på Syds egna bud (pivotens kärna) -------
@@ -390,6 +457,7 @@ function kingAskToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
 // regel ska vara TYDLIGT korrekt även om den är smal.
 
 const SWE_NAME: Record<string, string> = { C: 'klöver', D: 'ruter', H: 'hjärter', S: 'spader' }
+const SYM_OF_LETTER: Record<string, string> = { C: '♣', D: '♦', H: '♥', S: '♠' }
 const SUIT_STRAINS = ['C', 'D', 'H', 'S'] as const
 
 /** Första kontraktsbudet i historiken (öppningen), eller null om inget bjudits. */
@@ -664,6 +732,32 @@ function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): Resolve
   return { seat, bid: res.call as Bid, rule: res.rule, explanation: res.explanation + note }
 }
 
+/**
+ * Får `seat` STRAFFDUBBLA här (ägarbeslut 2026-07-04, poängarbetet)? Kraven —
+ * medvetet stränga, så X:et aldrig kan förväxlas med en konventionell dubbling:
+ *  - senaste icke-pass är motståndarnas FÄRGKONTRAKT på 3-läget eller högre
+ *    (låga delkontrakt straffdubblas inte – för lite att vinna, X kan ge dem
+ *    utgång; NT-kontrakt dubblas inte här),
+ *  - vår sida har gjort MINST TVÅ kontraktsbud: då kan partnern omöjligt läsa
+ *    X:et som upplysning/negativt/tvåfärgssvar (alla de detektorerna kräver
+ *    max ett kontraktsbud från vår sida) – X:et står som straff,
+ *  - handen håller `penaltyDouble`-kraven (2+ säkra trumfstick + 10+ hp).
+ */
+function maybePenaltyDouble(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
+  const cb = parseContractBid(lastNonPass.bid)
+  if (!cb || cb.strain === 'NT' || cb.level < 3) return null
+
+  const ourContractBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourContractBids.length < 2) return null
+  if (!legalCalls(history, seat).includes('X')) return null
+
+  const ans = penaltyDouble(deal.hands[seat], SUIT_OF_LETTER[cb.strain])
+  if (!ans) return null
+  return { seat, bid: 'X', rule: ans.rule, explanation: ans.explanation }
+}
+
 // ---- Bot-hjärnan -----------------------------------------------------------
 
 /**
@@ -790,6 +884,34 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       const ans = respondToKingAsk(deal.hands[seat], kingTrump)
       if (legalCalls(history, seat).includes(ans.call as Bid)) {
         return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+      }
+    }
+
+    // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
+    // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp, och bara när
+    // X:et omöjligt kan läsas som en konventionell dubbling.
+    const pen = maybePenaltyDouble(deal, history, seat)
+    if (pen) return pen
+
+    // Partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG (felrapport #13):
+    // 4 i högfärgen med 3-korts stöd, annars pass (3NT står). Måste ligga FÖRE
+    // det generella off-book-svaret, som annars läser transferns relä som en
+    // naturlig färg och "stöder" den.
+    const transferMajor = transferGameChoiceToAnswer(history, seat)
+    if (transferMajor) {
+      const support = lengths(deal.hands[seat])[transferMajor]
+      if (support >= 3) {
+        const bid = `4${letterOfSuit(transferMajor)}` as Bid
+        if (legalCalls(history, seat).includes(bid)) {
+          return {
+            seat, bid, rule: 'till spel',
+            explanation: `partnerns 3NT efter transfern = välj utgång: ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → 4 ${SWE_NAME[letterOfSuit(transferMajor)]} (5-3-fiten före sang).`,
+          }
+        }
+      }
+      return {
+        seat, bid: 'P', rule: 'pass',
+        explanation: `partnerns 3NT efter transfern = välj utgång: bara ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → pass (3NT står).`,
       }
     }
 

@@ -151,6 +151,29 @@ describe('felrapport #9 – svar på negativ dubbling + 4NT-essfrågan', () => {
   })
 })
 
+// Felrapport #10 (github.com/PGreen90/Learn-Bridge/issues/10): 4NT direkt på
+// partnerns 3♠-spärr tolkades som "till spel" (ingen ÖVERENSKOMMEN trumf –
+// bara Nord hade bjudit spader). Standardregeln: 4NT är essfråga när sidans
+// senaste naturliga bud var en FÄRG (kvantitativt bara över sang) – trumfen
+// är den färgen.
+describe('felrapport #10 – 4NT på partnerns spärröppning tolkas som essfråga', () => {
+  it('P–3♠–P–4NT = essfråga 1430 RKC med spader som trumf', () => {
+    const hist = h(['W', 'P'], ['N', '3S'], ['E', 'P'], ['S', '4NT'])
+    const r = interpretCall(hist, 3)
+    expect(r.text).toMatch(/essfråga/i)
+    expect(r.text).toMatch(/1430/)
+    expect(r.text).toMatch(/spader/i)
+    expect(r.text).not.toMatch(/till spel/i)
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+
+  it('1NT–4NT förblir kvantitativt/naturligt (INTE essfråga)', () => {
+    const hist = h(['S', '1NT'], ['W', 'P'], ['N', '4NT'])
+    const r = interpretCall(hist, 2)
+    expect(r.text).not.toMatch(/essfråga/i)
+  })
+})
+
 describe('motorns egen regel går före heuristiken (säker)', () => {
   it('använder budets explanation och kravnivå ur registret', () => {
     const hist = h(['N', '1H'], ['S', '2C', '2-över-1 GF', 'Tvåöver ett: utgångskrav, naturligt klöver'])

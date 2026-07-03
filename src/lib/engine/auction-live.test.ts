@@ -145,6 +145,31 @@ describe('contractFromCalls – slutkontrakt ur en budföljd', () => {
     ])
     expect(c).toEqual({ declarer: 'W', strain: 'diamonds', level: 2 })
   })
+
+  // X/XX ska följa med in i slutkontraktet (poängräkningen kräver det).
+  it('dubblat kontrakt: X följer med', () => {
+    const c = contractFromCalls([
+      call('S', '4H'), call('W', 'X'), call('N', 'P'), call('E', 'P'), call('S', 'P'),
+    ])
+    expect(c).toEqual({ declarer: 'S', strain: 'hearts', level: 4, doubled: 'X' })
+  })
+
+  it('redubblat kontrakt: XX följer med', () => {
+    const c = contractFromCalls([
+      call('S', '2S'), call('W', 'X'), call('N', 'XX'), call('E', 'P'), call('S', 'P'), call('W', 'P'),
+    ])
+    expect(c).toEqual({ declarer: 'S', strain: 'spades', level: 2, doubled: 'XX' })
+  })
+
+  it('nytt bud nollställer dubblingen: slutkontraktet är odubblat', () => {
+    // 2H dubblas, men Öst flyr till 2S som passas ut → 2S ODUBBLAT.
+    const c = contractFromCalls([
+      call('N', '2H'), call('E', 'X'), call('S', 'P'), call('W', '2S'),
+      call('N', 'P'), call('E', 'P'), call('S', 'P'),
+    ])
+    expect(c?.doubled).toBeUndefined()
+    expect(c).toEqual({ declarer: 'W', strain: 'spades', level: 2 })
+  })
 })
 
 // Känd gräns: vissa slamlinjer (Jacoby 2NT → cue → 1430 RKC) genererar i
@@ -338,6 +363,49 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
         if (!expected) continue
         expect(contractFromCalls(playOut(d))).toEqual(expected)
       }
+    })
+  })
+
+  // Straffdubbling (ägarbeslut 2026-07-04, poängarbetet): boten dubblar
+  // motståndarnas höga färgkontrakt med trumfstack + styrka — men BARA när
+  // X:et inte kan läsas som en konventionell dubbling (vår sida har redan
+  // gjort två kontraktsbud) och kontraktet är på 3-läget eller högre.
+  describe('straffdubbling i live-flödet', () => {
+    // Väst öppnar 1♥, Öst höjer, Syd kliver (off-book) in i spader — och Väst
+    // sitter med EK-tredje i spader + 13 hp: kontraktet ska betas → X.
+    const base = dealOf('W', {
+      W: 'S:AK5 H:KQJ94 D:752 C:83', // 13 hp, EK i deras spader = 2 säkra trumfstick
+      N: 'S:432 H:82 D:QJT3 C:J972', // svag
+      E: 'S:76 H:A763 D:K64 C:QT65', // hjärterhöjning
+      S: 'S:QJT98 H:T5 D:A98 C:AK4', // Syds off-book spaderbud
+    })
+
+    it('Väst straffdubblar Syds 3♠ (EK i trumfen + 13 hp, vår sida har bjudit två gånger)', () => {
+      const history = [call('W', '1H'), call('N', 'P'), call('E', '2H'), call('S', '3S')]
+      const c = decideCall(base, history, 'W')
+      expect(c.bid).toBe('X')
+      expect(c.rule).toBe('straffdubbling')
+    })
+
+    it('utan trumfstick passar samma styrka i stället (ingen X)', () => {
+      const noStack = dealOf('W', {
+        W: 'S:542 H:KQJ94 D:KQ2 C:83', // 11 hp men NOLL trumfstick i spader
+        N: 'S:AK3 H:82 D:JT73 C:J972',
+        E: 'S:76 H:A763 D:654 C:QT65',
+        S: 'S:QJT98 H:T5 D:A98 C:AK4',
+      })
+      const history = [call('W', '1H'), call('N', 'P'), call('E', '2H'), call('S', '3S')]
+      expect(decideCall(noStack, history, 'W').bid).toBe('P')
+    })
+
+    it('låga delkontrakt straffdubblas inte (2♠ → pass)', () => {
+      const history = [call('W', '1H'), call('N', 'P'), call('E', '2H'), call('S', '2S')]
+      expect(decideCall(base, history, 'W').bid).not.toBe('X')
+    })
+
+    it('bara ETT eget kontraktsbud → ingen straffdubbling (X kunde läsas konventionellt)', () => {
+      const history = [call('W', '1H'), call('N', 'P'), call('E', 'P'), call('S', '3S')]
+      expect(decideCall(base, history, 'W').bid).not.toBe('X')
     })
   })
 
@@ -612,6 +680,93 @@ describe('felrapport #9 – 4NT med överenskommen trumf är essfråga (1430 RKC
     ]
     const c = decideCall(deal, history, 'N')
     expect(c.bid).toBe('5D')
+  })
+})
+
+// Felrapport #11 (github.com/PGreen90/Learn-Bridge/issues/11): bricka 11,
+// P (S) – 1♣ (V) – X (N) – 2♣ (Ö) – 3♣ (S) – P – P – P: Syds cue i
+// motståndarnas klöver (appen förklarade det som Michaels: båda högfärgerna)
+// PASSADES av Nord → 3♣ spelades i motståndarnas färg, 3 bet. Ett cue-bud i
+// deras färg är konstgjort och får aldrig passas. Igenkänningen krävde
+// (a) cue på exakt 2-läget och (b) bara pass mellan öppningen och cuet —
+// här kom cuet på 3-läget (Öst höjde) efter Nords upplysningsdubbling.
+// Nord föredrar spader (4 kort mot 3 hjärter) → 3♠.
+describe('felrapport #11 – partnerns cue i motståndarnas färg får aldrig passas', () => {
+  const deal = dealOf('S', {
+    N: 'S:KJ53 H:K64 D:JT94 C:K4',
+    E: 'S:- H:T73 D:AQ875 C:T9862',
+    S: 'S:98642 H:AQ82 D:K62 C:5',
+    W: 'S:AQT7 H:J95 D:3 C:AQJ73',
+  })
+
+  it('P–1♣–X–2♣–3♣–P: Nord ger preferens 3♠ (4-korts spader)', () => {
+    const history = [
+      call('S', 'P'), call('W', '1C'), call('N', 'X'), call('E', '2C'),
+      call('S', '3C'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('3S')
+  })
+})
+
+// Felrapport #13 (github.com/PGreen90/Learn-Bridge/issues/13): bricka 16,
+// P – 1NT (N) – P – 2♥ (S, Jacoby-transfer = 5+ spader) – P – 2♠ – P – 3NT
+// (S, "välj utgång: pass med 2 spader, 4♠ med 3") – och Nord bjöd 4♥!
+// Transferbudet 2♥ är KONSTGJORT (visar spader, säger inget om hjärter) men
+// lästes som en naturlig hjärterfärg → Nord "stödde" till 4♥ på en
+// 2-kortsfärg (3 bet). Nord har ♠K75 = 3-korts stöd → 4♠.
+describe('felrapport #13 – öppnaren väljer utgång efter transfer + 3NT', () => {
+  const deal = dealOf('W', {
+    N: 'S:K75 H:AKT8 D:J98 C:A82',
+    E: 'S:42 H:QJ652 D:K53 C:KT5',
+    S: 'S:AQJT3 H:74 D:QT64 C:Q7',
+    W: 'S:986 H:93 D:A72 C:J9643',
+  })
+
+  it('P–1NT–P–2♥–P–2♠–P–3NT–P: Nord bjuder 4♠ (3-korts stöd), aldrig 4♥', () => {
+    const history = [
+      call('W', 'P'), call('N', '1NT'), call('E', 'P'), call('S', '2H'),
+      call('W', 'P'), call('N', '2S'), call('E', 'P'), call('S', '3NT'),
+      call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('4S')
+  })
+})
+
+// Felrapport #10 (github.com/PGreen90/Learn-Bridge/issues/10): bricka 12,
+// P (V) – 3♠ (N) – P – 4NT (S) – och Nord PASSADE: 4NT spelades som kontrakt
+// (13 stick togs – lillslammen missades). Ägaren: "partner svarar inte på min
+// 4NT essfråga, helt oacceptabelt." Här har bara NORD bjudit spader (spärren),
+// så #9-vakten (trumf = färg BÅDA bjudit) slog inte till. Standardregeln:
+// 4NT är essfråga även UTAN överenskommen trumf när sidans senaste naturliga
+// bud var en FÄRG (kvantitativt bara över sang) – trumfen är den färgen.
+// Nord har 1 nyckelkort (♠K) → 5♣ (1 eller 4 i 1430-schemat).
+describe('felrapport #10 – 4NT på partnerns spärröppning är essfråga (RKC i spärrfärgen)', () => {
+  const deal = dealOf('W', {
+    N: 'S:KQ98732 H:7 D:- C:QT864',
+    E: 'S:J65 H:AJ64 D:T9863 C:2',
+    S: 'S:A H:T83 D:AQ4 C:AKJ753',
+    W: 'S:T4 H:KQ952 D:KJ752 C:9',
+  })
+
+  it('P–3♠–P–4NT–P: Nord svarar 5♣ (1 nyckelkort) – passar aldrig essfrågan', () => {
+    const history = [
+      call('W', 'P'), call('N', '3S'), call('E', 'P'), call('S', '4NT'),
+      call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('5C')
+  })
+
+  it('följer Syd upp med 5NT (kungfrågan) svarar Nord 6♠ – ingen sidokung', () => {
+    const history = [
+      call('W', 'P'), call('N', '3S'), call('E', 'P'), call('S', '4NT'),
+      call('W', 'P'), call('N', '5C'), call('E', 'P'), call('S', '5NT'),
+      call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('6S')
   })
 })
 

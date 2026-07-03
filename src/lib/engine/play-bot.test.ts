@@ -127,6 +127,41 @@ describe('andra hand lågt', () => {
   })
 })
 
+// Felrapport #12 (github.com/PGreen90/Learn-Bridge/issues/12): bricka 3,
+// 4♠ av Öst. Stick 4: Syd vänder med ♥3, träkarlen Väst håller ♥AKQT98 –
+// och lade ♥8 ("mask") som Nords knekt vann. Ägaren: "väst ska gå upp med ett
+// garanterat stort hjärter, finns ingen anledning till en mask här." Med
+// LÖPANDE toppvinnare (A, K och Q är alla säkra – bara knekten är ute och
+// den slår ingen av dem) finns inget att spara på: gå upp med den BILLIGASTE
+// säkra vinnaren, ♥Q. Ett ensamt säkert kort (torrt ess) läggs fortfarande
+// lågt (hold-up-doktrinen orörd – testet "Kx → lågt" ovan vaktar den).
+describe('felrapport #12 – andra hand går upp med löpande toppvinnare', () => {
+  const deal: Deal = {
+    id: 'felrapport-12', dealer: 'S', vulnerability: 'ew', board: 3,
+    hands: {
+      N: parseHand('S:J9 H:J2 D:76532 C:Q982'),
+      E: parseHand('S:KQ542 H:74 D:JT84 C:76'),
+      S: parseHand('S:T8 H:653 D:AK9 C:AKJ43'),
+      W: parseHand('S:A763 H:AKQT98 D:Q C:T5'),
+    },
+  }
+  const contract: Contract = { declarer: 'E', strain: 'spades', level: 4 }
+
+  it('stick 4: Väst (träkarlen) går upp med ♥Q ur AKQT98 – maskar aldrig med 8:an', () => {
+    let s = startPlay(deal, contract)
+    // Stick 1–3 exakt ur rapporten + Syds ♥3 i stick 4.
+    const played: Array<[Suit, Rank]> = [
+      ['clubs', 'A'], ['clubs', '5'], ['clubs', '2'], ['clubs', '6'],
+      ['clubs', 'K'], ['clubs', '10'], ['clubs', '8'], ['clubs', '7'],
+      ['diamonds', 'A'], ['diamonds', 'Q'], ['diamonds', '2'], ['diamonds', '4'],
+      ['hearts', '3'],
+    ]
+    for (const [suit, rank] of played) s = playCard(s, C(suit, rank))
+    expect(s.toAct).toBe('W')
+    expect(botCard(s, 'W')).toEqual(C('hearts', 'Q'))
+  })
+})
+
 describe('tredje hand – vinn billigast', () => {
   it('partnern leder, motståndaren övertar, 3:e hand vinner med billigaste vinnaren', () => {
     // S leder H4 (partner till N), V lägger H9 (övertar), N (3:e hand) på tur.

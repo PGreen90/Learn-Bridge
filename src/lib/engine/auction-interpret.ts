@@ -187,6 +187,24 @@ function agreedSuit(seat: Seat, prior: ResolvedCall[]): string | null {
   return agreed[0]
 }
 
+/**
+ * Trumfen 4NT-essfrågan gäller när ingen färg är ÖVERENSKOMMEN: sidans senaste
+ * naturliga färgbud före frågan (felrapport #10 – 4NT på partnerns spärr).
+ * Var sidans senaste bud SANG är 4NT kvantitativt → null.
+ */
+function askTrumpFallback(seat: Seat, prior: ResolvedCall[]): string | null {
+  for (let i = prior.length - 1; i >= 0; i--) {
+    const c = prior[i]
+    if (SIDE[c.seat] !== SIDE[seat]) continue
+    const cb = parseBid(c.bid)
+    if (!cb) continue
+    if (cb.strain === 'NT') return null
+    if (isCueOfOpponentSuit(c.seat, cb.strain, prior.slice(0, i))) continue
+    return cb.strain
+  }
+  return null
+}
+
 /** Senaste kontraktsbudet före `prior`s slut (för pass/dubbel-texter). */
 function lastContract(prior: ResolvedCall[]): { seat: Seat; cb: ParsedBid } | null {
   for (let i = prior.length - 1; i >= 0; i--) {
@@ -332,9 +350,12 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
   // Sangbud.
   if (cb.strain === 'NT') {
     // 4NT med ÖVERENSKOMMEN trumf (båda i paret har bjudit färgen) är aldrig
-    // naturligt: essfrågan 1430 RKC (§6.1). Felrapport #9.
+    // naturligt: essfrågan 1430 RKC (§6.1). Felrapport #9. Utan överenskommen
+    // trumf gäller standardregeln (felrapport #10): essfråga även när sidans
+    // senaste naturliga bud var en FÄRG (t.ex. 4NT på partnerns spärr) –
+    // kvantitativt bara över sang.
     if (cb.level === 4) {
-      const trump = agreedSuit(seat, prior)
+      const trump = agreedSuit(seat, prior) ?? askTrumpFallback(seat, prior)
       if (trump) {
         return {
           text:
