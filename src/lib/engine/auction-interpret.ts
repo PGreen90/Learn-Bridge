@@ -145,6 +145,48 @@ function michaelsPhrase(openerStrain: string): string {
   return `${NAME[suits[0]]} och en lågfärg`
 }
 
+/**
+ * Har partnern just gjort en NEGATIV DUBBLING vars visade högfärg(er) `seat`
+ * (öppnaren) nu ska välja bland? Mönstret (§7.3): `seat` öppnade 1 i färg,
+ * motståndarna klev in i färg, partnerns senaste icke-pass är X. Dubblingen
+ * visar 4+ kort i de OBJUDNA högfärgerna – öppnarens färgval där är ett SVAR
+ * graderat efter styrka, aldrig en egen spärr (felrapport #9).
+ */
+function negativeDoubleShown(seat: Seat, prior: ResolvedCall[]): Set<string> {
+  const none = new Set<string>()
+  const open = opening(prior)
+  if (!open || open.seat !== seat || open.cb.level !== 1 || open.cb.strain === 'NT') return none
+  const lastNonPass = [...prior].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return none
+  // Vår sidas enda kontraktsbud är öppningen (annars är X:et något annat).
+  const ourBids = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
+  if (ourBids.length !== 1) return none
+  // Deras inkliv i färg = senaste kontraktsbudet, på motståndarsidan.
+  const last = lastContract(prior)
+  if (!last || SIDE[last.seat] === SIDE[seat] || last.cb.strain === 'NT') return none
+  const shown = new Set<string>()
+  for (const m of ['H', 'S']) {
+    if (m !== open.cb.strain && m !== last.cb.strain) shown.add(m)
+  }
+  return shown
+}
+
+/**
+ * Färg (strain) som BÅDA i paret bjudit naturligt = överenskommen trumf
+ * (senast bjudna om flera). null när ingen fit är överenskommen.
+ */
+function agreedSuit(seat: Seat, prior: ResolvedCall[]): string | null {
+  const own = suitsShown(seat, prior)
+  const partner = suitsShown(PARTNER[seat], prior)
+  const agreed = [...own].filter((s) => partner.has(s))
+  if (agreed.length === 0) return null
+  for (let i = prior.length - 1; i >= 0; i--) {
+    const cb = parseBid(prior[i].bid)
+    if (cb && agreed.includes(cb.strain)) return cb.strain
+  }
+  return agreed[0]
+}
+
 /** Senaste kontraktsbudet före `prior`s slut (för pass/dubbel-texter). */
 function lastContract(prior: ResolvedCall[]): { seat: Seat; cb: ParsedBid } | null {
   for (let i = prior.length - 1; i >= 0; i--) {
@@ -217,6 +259,33 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
     }
   }
 
+  // Svar på partnerns NEGATIVA dubbling: X:et visade 4+ kort i objudna
+  // högfärger – öppnarens färgval är ett graderat SVAR, ingen egen spärr
+  // (felrapport #9: 3♥/4♥ lästes som "lång färg, begränsad styrka").
+  const negDblSuits = negativeDoubleShown(seat, prior)
+  if (cb.strain !== 'NT' && negDblSuits.has(cb.strain)) {
+    const last = lastContract(prior)!
+    const minLevel = last.cb.level + (rankAbove(cb.strain, last.cb.strain) ? 0 : 1)
+    if (isGameLevel(cb)) {
+      return {
+        text: `Svar på partnerns negativa dubbling — utgång i ${name} (${cb.level}${sym}): partnern visade 4+ ${name}, du har fit och utgångsvärden.`,
+        confidence: 'trolig',
+        forcing: 'avslut',
+      }
+    }
+    if (cb.level > minLevel) {
+      return {
+        text: `Svar på partnerns negativa dubbling — hoppet till ${cb.level}${sym} är INBJUDANDE: partnern visade 4+ ${name}, du har fit och extra styrka (~16+).`,
+        confidence: 'trolig',
+        forcing: 'inbjudan',
+      }
+    }
+    return {
+      text: `Svar på partnerns negativa dubbling — ${cb.level}${sym} väljer ${name} (partnern visade 4+ kort) med minimihand.`,
+      confidence: 'trolig',
+    }
+  }
+
   // Stöd/höjning i partnerns visade färg.
   if (cb.strain !== 'NT' && partnerSuits.has(cb.strain)) {
     const comp = competitive ? ' Samtidigt tar du budet vidare i konkurrensen.' : ''
@@ -262,6 +331,20 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
 
   // Sangbud.
   if (cb.strain === 'NT') {
+    // 4NT med ÖVERENSKOMMEN trumf (båda i paret har bjudit färgen) är aldrig
+    // naturligt: essfrågan 1430 RKC (§6.1). Felrapport #9.
+    if (cb.level === 4) {
+      const trump = agreedSuit(seat, prior)
+      if (trump) {
+        return {
+          text:
+            `4 sang — essfråga (1430 RKC) med ${NAME[trump]} som trumf. ` +
+            `Partnern svarar i steg: 5♣ = 1/4 nyckelkort, 5♦ = 0/3, 5♥ = 2 utan trumfdam, 5♠ = 2 med.`,
+          confidence: 'trolig',
+          forcing: 'krav-1-rond',
+        }
+      }
+    }
     const stopp = competitive ? ' (lovar stopp i motståndarnas färg)' : ''
     if (cb.level >= 3) {
       return { text: `${cb.level} sang — till spel, balanserad hand${stopp}.`, confidence: 'trolig', forcing: 'avslut' }

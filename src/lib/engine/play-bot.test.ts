@@ -209,6 +209,40 @@ describe('felrapport #1 – V kryper i stick 4 och tappar sticket till bordet', 
   })
 })
 
+// Felrapport #6 (github.com/PGreen90/Learn-Bridge/issues/6): bricka 7, 3NT av N.
+// Ägaren: "öst spelar ut spader och bör fortsätta spela spader (men byter färg)
+// fel 1. fel 2 öst spelar ut ruter ess vilket gör motståndets honörer stora."
+// Given återskapad EXAKT ur rapporten (FACIT FÖRE FIX). Rätt motspel: Ö vinner
+// stick 1 med ♠Q och FORTSÄTTER spader (Väst har ♠AK kvar) – cashar inte det
+// torra ruteresset, som bara gör spelförarens ♦KQJT stora.
+describe('felrapport #6 – Ö fortsätter spadern i stick 2, cashar inte torrt ess', () => {
+  it('stick 2: Ö inne på ♠Q → spelar spader, ALDRIG ♦A', () => {
+    const deal: Deal = {
+      id: 'felrapport-6',
+      board: 7,
+      dealer: 'S',
+      vulnerability: 'all',
+      hands: {
+        N: parseHand('S:T2 H:Q96 D:J86 C:AKQJ9'),
+        E: parseHand('S:QJ43 H:854 D:A75 C:872'),
+        S: parseHand('S:986 H:AK2 D:KQT43 C:65'),
+        W: parseHand('S:AK75 H:JT73 D:92 C:T43'),
+      },
+    }
+    let s = startPlay(deal, { declarer: 'N', strain: 'NT', level: 3 })
+    // Stick 1 exakt som i rapporten: Ö ♠Q, S ♠6, V ♠5, N ♠2 → Ö vinner.
+    const trick1: [Suit, Rank][] = [
+      ['spades', 'Q'], ['spades', '6'], ['spades', '5'], ['spades', '2'],
+    ]
+    for (const [suit, rank] of trick1) s = playCard(s, { suit, rank })
+
+    expect(s.toAct).toBe('E')
+    const chosen = botCard(s, 'E')
+    expect(chosen.suit).toBe('spades') // fel 1: färgbytet
+    expect(chosen).not.toEqual(C('diamonds', 'A')) // fel 2: torra esset
+  })
+})
+
 describe('aldrig ruffa partnerns vinnande stick', () => {
   it('partnern leder ess och vinner; renons → kastar lågt sidokort, ruffar inte', () => {
     // Trumf = spader. S spelar HA (vinner), V lägger H2. N renons i hjärter med

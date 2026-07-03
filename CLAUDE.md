@@ -14,6 +14,23 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
+> **🎉 Felrapport #6, #7 & #9 LAGADE (2026-07-03 kväll, testsvit 1545):**
+> **#6 motspel:** motspelaren cashar aldrig en ENSAM säker vinnare i färsk färg
+> (torrt ess göder spelförarens honnörer) — bara löpande toppar (2+) eller i
+> redan attackerad färg; annars fortsätts utspelfärgen §8 (`play-bot.ts`).
+> **#7 budgivning:** advancerns preferenssvar på Michaels/ovanlig 2NT
+> (`advanceTwoSuiter`, FAS 10) inkopplat i live-flödet + NY flyktregel: eget
+> DUBBLAT tvåfärgsinkliv passas aldrig ut — fly till längsta visade färgen
+> (`auction-live.ts`). **#9 slam:** partnerns 4NT med överenskommen trumf
+> (båda bjudit färgen) besvaras ALLTID som 1430 RKC (`respondToRKC`), 5NT =
+> kungfrågan (Sjöberg); tolkningslagret visar öppnarens 2♥/3♥/4♥ efter negativ
+> dubbling som graderade SVAR (inte spärr) och 4NT som essfråga
+> (`auction-interpret.ts`). Alla givar facit-låsta EXAKT ur rapporterna.
+> **Nytt fynd → ⚪ SENARE:** kanoniska linjen (`auction.ts`) kan fortfarande
+> passa ut ett OSTÖRT tvåfärgsinkliv (1♠–2NT–P–P–P) — bryter "aldrig pass
+> ostört"; bara förbyggda linjer, inte budlådan. **Bevaka:** bottarna svarar nu
+> på Michaels och essfrågor även i fria auktioner; motspelarna sparar torra ess.
+>
 > **🎉 Systemgranskning + städning KLAR (2026-07-03 kväll, testsvit 1537 grön,
 > EJ committad — ägaren sköter commit/push själv):** full granskning av
 > budcykeln/bot-tillståndet på ägarens begäran. Resultat: `decideCall` är
@@ -399,6 +416,11 @@ Slutförd FAS 3 (facit + `npm test`):
 1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **Kanoniska linjen passar ut ostörda tvåfärgsinkliv** (fynd felrapport #7,
+  2026-07-03): `buildAuction` (`auction.ts`) kan stänga en linje som
+  1♠–2NT–P–P–P — advancern ska aldrig passa ostört (ägarbeslut FAS 10).
+  Live-budlådan är lagad; luckan finns bara i förbyggda linjer (Budvisningen
+  m.m.). Trä in `advanceTwoSuiter` i linjens konkurrensrond.
 - **Dubblingar (X/XX) in i slutkontraktet** (granskningsfynd 2026-07-03):
   `Contract` saknar dubblad/redubblad-flagga — ett dubblat kontrakt spelas och
   redovisas som odubblat. Blir relevant först när appen räknar poäng i siffror;

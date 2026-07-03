@@ -557,6 +557,64 @@ describe('felrapport #5 – balansering i utpassningsläget + höjning av inkliv
   })
 })
 
+// Felrapport #7 (github.com/PGreen90/Learn-Bridge/issues/7): bricka 6,
+// P – 1♣ (S) – 2♣ (V, Michaels = båda högfärgerna) – X (N) – P – P – P:
+// auktionen dog och Väst spelade sitt EGET konstgjorda 2♣ dubblat med EN
+// klöver på handen (4 bet). Två luckor:
+//  (a) advancerns preferenssvar på tvåfärgsinklivet (§7.2, advanceTwoSuiter
+//      fanns sedan FAS 10) var aldrig inkopplat i live-flödet — Öst ska ge
+//      preferens 2♠ med 3-korts stöd även över dubblingen;
+//  (b) tvåfärgshanden får ALDRIG passa ut sitt eget dubblade cue-bud: när
+//      partnern inte visat preferens flyr Väst till sin längsta visade färg (2♥).
+describe('felrapport #7 – Michaels-cue får aldrig passas ut dubblat', () => {
+  const deal = dealOf('E', {
+    N: 'S:K874 H:AQ7 D:K853 C:K8',
+    E: 'S:Q93 H:84 D:QJ96 C:JT95',
+    S: 'S:5 H:T6 D:AT72 C:AQ6432',
+    W: 'S:AJT62 H:KJ9532 D:4 C:7',
+  })
+
+  it('Öst (advancer) ger preferens 2♠ med 3-korts stöd, även över X', () => {
+    const history = [call('E', 'P'), call('S', '1C'), call('W', '2C'), call('N', 'X')]
+    const c = decideCall(deal, history, 'E')
+    expect(c.bid).toBe('2S')
+  })
+
+  it('kommer 2♣X tillbaka opreffat flyr Väst till längsta högfärgen: 2♥', () => {
+    const history = [
+      call('E', 'P'), call('S', '1C'), call('W', '2C'), call('N', 'X'),
+      call('E', 'P'), call('S', 'P'),
+    ]
+    const c = decideCall(deal, history, 'W')
+    expect(c.bid).toBe('2H')
+  })
+})
+
+// Felrapport #9 (github.com/PGreen90/Learn-Bridge/issues/9): bricka 15,
+// 1♦ (S) – 1♠ – X (N, negativ dubbling) – P – 2♥ – P – 4♥ – P – 4NT – och Nord
+// PASSADE: 4NT spelades som kontrakt. Ägaren: "4NT skall vara essfråga RKC
+// 1430 … odiskutabel essfråga." Hjärtern är överenskommen (båda har bjudit
+// den) → 4NT är aldrig naturligt. Nord har 3 nyckelkort (♥E, ♥K, ♦E) → 5♦
+// (0 eller 3 i 1430-schemat).
+describe('felrapport #9 – 4NT med överenskommen trumf är essfråga (1430 RKC)', () => {
+  const deal = dealOf('S', {
+    N: 'S:Q9 H:AKJ4 D:AJ9 C:Q943',
+    E: 'S:8532 H:T76 D:8 C:T8652',
+    S: 'S:A6 H:Q953 D:KQT432 C:J',
+    W: 'S:KJT74 H:82 D:765 C:AK7',
+  })
+
+  it('Nord svarar 5♦ (3 nyckelkort) på Syds 4NT – passar aldrig essfrågan', () => {
+    const history = [
+      call('S', '1D'), call('W', '1S'), call('N', 'X'), call('E', 'P'),
+      call('S', '2H'), call('W', 'P'), call('N', '4H'), call('E', 'P'),
+      call('S', '4NT'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('5D')
+  })
+})
+
 // Felrapport #4 (github.com/PGreen90/Learn-Bridge/issues/4): bricka 6,
 // P – 1♠ (S) – P – 2♦ (N, 2-över-1) – P – 3♣ (S) – P – och Nord PASSADE.
 // Ägaren: "2 över 1 = game force, partner får inte passa – grundregel i hela

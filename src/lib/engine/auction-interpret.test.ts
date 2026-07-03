@@ -106,6 +106,51 @@ describe('heuristiska grundfall', () => {
   })
 })
 
+// Felrapport #9 (github.com/PGreen90/Learn-Bridge/issues/9): efter partnerns
+// negativa dubbling (visar 4+ i objuden högfärg) tolkades öppnarens 3♥/4♥ som
+// "spärrliknande bud" (lång egen färg, svagt). Fel: de är graderade SVAR på
+// dubblingen. Och 4NT med överenskommen trumf tolkades som "till spel" –
+// odiskutabel essfråga (1430 RKC).
+describe('felrapport #9 – svar på negativ dubbling + 4NT-essfrågan', () => {
+  // 1♦ (S) – 1♠ (V) – X (N, negativ) – P: Syd väljer nu sitt svar.
+  const base: Array<[ResolvedCall['seat'], string]> = [
+    ['S', '1D'], ['W', '1S'], ['N', 'X'], ['E', 'P'],
+  ]
+
+  it('2♥ = minimisvar som väljer partnerns visade högfärg', () => {
+    const r = interpretCall(h(...base, ['S', '2H']), 4)
+    expect(r.text).toMatch(/negativa dubbling/i)
+    expect(r.text).not.toMatch(/lång färg|spärr/i)
+  })
+
+  it('3♥ = inbjudande hopp med extra styrka – INTE en egen spärr', () => {
+    const r = interpretCall(h(...base, ['S', '3H']), 4)
+    expect(r.text).toMatch(/negativa dubbling/i)
+    expect(r.text).not.toMatch(/lång färg|spärr/i)
+    expect(r.forcing).toBe('inbjudan')
+  })
+
+  it('4♥ = utgångssvar på dubblingen', () => {
+    const r = interpretCall(h(...base, ['S', '4H']), 4)
+    expect(r.text).toMatch(/negativa dubbling/i)
+    expect(r.text).toMatch(/utgång/i)
+    expect(r.forcing).toBe('avslut')
+  })
+
+  it('4NT med överenskommen trumf (båda bjudit hjärter) = essfråga 1430 RKC', () => {
+    const hist = h(
+      ['S', '1D'], ['W', '1S'], ['N', 'X'], ['E', 'P'],
+      ['S', '2H'], ['W', 'P'], ['N', '4H'], ['E', 'P'],
+      ['S', '4NT'],
+    )
+    const r = interpretCall(hist, 8)
+    expect(r.text).toMatch(/essfråga/i)
+    expect(r.text).toMatch(/1430/)
+    expect(r.text).not.toMatch(/till spel/i)
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+})
+
 describe('motorns egen regel går före heuristiken (säker)', () => {
   it('använder budets explanation och kravnivå ur registret', () => {
     const hist = h(['N', '1H'], ['S', '2C', '2-över-1 GF', 'Tvåöver ett: utgångskrav, naturligt klöver'])

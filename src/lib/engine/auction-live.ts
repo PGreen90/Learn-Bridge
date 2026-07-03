@@ -21,8 +21,9 @@ import { answerTakeoutDouble, openerAnswerNegativeDouble } from './doubles'
 import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
-import { openingSuit, overcall } from './overcalls'
+import { advanceTwoSuiter, openingSuit, overcall } from './overcalls'
 import { side } from './play'
+import { respondToKingAsk, respondToRKC } from './slam'
 
 // ---- Bud-tolkning ----------------------------------------------------------
 
@@ -221,6 +222,162 @@ function fourthSuitToAnswer(
     responderSuit: SUIT_OF_LETTER[strains[1]],
     fourth: SUIT_OF_LETTER[strains[3]],
   }
+}
+
+// ---- Tvåfärgsinkliv (Michaels / ovanlig 2NT, §7.2) i den levande auktionen --
+
+/**
+ * Är `bid` ett TVÅFÄRGSINKLIV över motståndarnas 1-lägesöppning i `openStrain`?
+ * Michaels-cue = 2 i DERAS färg; ovanlig 2NT = 2NT. Båda är konstgjorda och
+ * lovar 5-5 i två ANDRA färger.
+ */
+function isTwoSuiterBid(bid: Bid, openStrain: string): boolean {
+  return bid === (`2${openStrain}` as Bid) || bid === '2NT'
+}
+
+/**
+ * Har partnern gjort ett TVÅFÄRGSINKLIV som `seat` (advancern) ännu inte svarat
+ * på? Kraven (felrapport #7 – luckan lät auktionen dö i stället för preferens):
+ *  - motståndarna öppnade 1 i färg (auktionens första kontraktsbud),
+ *  - partnerns inkliv kom i DIREKT/balanserings-sits (bara pass emellan) och är
+ *    vår sidas ENDA kontraktsbud (advancern har inte svarat än),
+ *  - inget kontraktsbud har kommit efter inklivet (X/pass ändrar inte läget –
+ *    preferensplikten består; ett bud över tar oss till vanlig konkurrens).
+ * Returnerar argumenten till `advanceTwoSuiter`, annars null.
+ */
+function partnerTwoSuiterToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { partnerCall: string; theirSuit: Suit; contested: boolean } | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat) || open.level !== 1) return null
+  const theirSuit = SUIT_OF_LETTER[open.strain]
+  if (!theirSuit) return null
+
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1 || ourBids[0].seat !== PARTNER[seat]) return null
+  const pc = ourBids[0]
+  if (!isTwoSuiterBid(pc.bid, open.strain)) return null
+
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  const pcIdx = history.indexOf(pc)
+  if (!history.slice(openIdx + 1, pcIdx).every((c) => c.bid === 'P')) return null // ej direkt sits → annat bud
+  const after = history.slice(pcIdx + 1)
+  if (after.some((c) => parseContractBid(c.bid))) return null // någon bjöd över → vanlig konkurrens
+  const contested = after.some((c) => c.bid !== 'P')
+  return { partnerCall: pc.bid, theirSuit, contested }
+}
+
+/**
+ * Står `seat`s EGET tvåfärgsinkliv DUBBLAT som senaste kontraktsbud utan att
+ * partnern visat preferens? Budet är konstgjort (lovar 5-5 i två ANDRA färger)
+ * och får ALDRIG spelas (felrapport #7: 2♣X av Väst med EN klöver → 4 bet).
+ * Flykten: den längsta av de visade färgerna (lika längd → högre rankad, samma
+ * regel som advancerns preferens).
+ */
+function ownDoubledTwoSuiterRescue(
+  deal: Deal,
+  history: ResolvedCall[],
+  seat: Seat,
+): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat) || open.level !== 1) return null
+  const theirSuit = SUIT_OF_LETTER[open.strain]
+  if (!theirSuit) return null
+
+  // Vår sidas enda kontraktsbud är MITT tvåfärgsinkliv i direkt/balanserings-sits.
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1 || ourBids[0].seat !== seat) return null
+  const mine = ourBids[0]
+  if (!isTwoSuiterBid(mine.bid, open.strain)) return null
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  const mineIdx = history.indexOf(mine)
+  if (!history.slice(openIdx + 1, mineIdx).every((c) => c.bid === 'P')) return null
+
+  // Efter inklivet: bara pass och (minst en) dubbling – budet står dubblat.
+  const after = history.slice(mineIdx + 1)
+  if (after.some((c) => c.bid !== 'P' && c.bid !== 'X')) return null
+  if (!after.some((c) => c.bid === 'X' && side(c.seat) !== side(seat))) return null
+
+  // Vilka färger visade inklivet? (Samma schema som `overcall`/`advanceTwoSuiter`.)
+  const len = lengths(deal.hands[seat])
+  const unbid = SUIT_STRAINS.filter((st) => st !== open.strain).map((st) => SUIT_OF_LETTER[st])
+  let shown: Suit[]
+  if (mine.bid === '2NT') {
+    shown = unbid.slice(0, 2) // ovanlig 2NT = de två lägsta objudna
+  } else if (theirSuit === 'clubs' || theirSuit === 'diamonds') {
+    shown = ['hearts', 'spades'] // Michaels över minor = båda högfärgerna
+  } else {
+    const otherMajor: Suit = theirSuit === 'hearts' ? 'spades' : 'hearts'
+    shown = [otherMajor, len.clubs >= len.diamonds ? 'clubs' : 'diamonds']
+  }
+  let best = shown[0]
+  for (const s of shown) {
+    if (len[s] > len[best] || (len[s] === len[best] && SUIT_STRAINS.indexOf(letterOfSuit(s)) > SUIT_STRAINS.indexOf(letterOfSuit(best)))) best = s
+  }
+  const bid = cheapestBidIn(history, seat, letterOfSuit(best))
+  if (!bid) return null
+  return {
+    seat,
+    bid,
+    explanation:
+      `Mitt tvåfärgsinkliv är konstgjort (5-5 i två andra färger) och står dubblat – ` +
+      `partnern visade ingen preferens, så jag flyr till min längsta visade färg: ${SWE_NAME[letterOfSuit(best)]}.`,
+  }
+}
+
+/** Färgbokstaven ('C'/'D'/'H'/'S') för en Suit (omvänd SUIT_OF_LETTER). */
+function letterOfSuit(suit: Suit): (typeof SUIT_STRAINS)[number] {
+  return SUIT_STRAINS.find((st) => SUIT_OF_LETTER[st] === suit)!
+}
+
+// ---- Essfrågan 4NT (1430 RKC) i den levande auktionen -----------------------
+
+/**
+ * Parets ÖVERENSKOMNA trumf: en färg BÅDA parterna bjudit som kontraktsbud
+ * (senast bjudna om flera). null när ingen fit är överenskommen.
+ */
+function agreedTrump(history: ResolvedCall[], seat: Seat): Suit | null {
+  const strainsOf = (s: Seat) =>
+    new Set(
+      history
+        .filter((c) => c.seat === s)
+        .map((c) => parseContractBid(c.bid)?.strain)
+        .filter((st): st is string => !!st && st !== 'NT'),
+    )
+  const mine = strainsOf(seat)
+  const partners = strainsOf(PARTNER[seat])
+  const agreed = [...mine].filter((st) => partners.has(st))
+  if (agreed.length === 0) return null
+  for (let i = history.length - 1; i >= 0; i--) {
+    const cb = parseContractBid(history[i].bid)
+    if (cb && agreed.includes(cb.strain)) return SUIT_OF_LETTER[cb.strain]
+  }
+  return SUIT_OF_LETTER[agreed[0]]
+}
+
+/**
+ * Ska `seat` svara på partnerns 4NT-ESSFRÅGA (1430 RKC, §6.1)? Kraven
+ * (felrapport #9 – Nord passade på en "odiskutabel essfråga"):
+ *  - partnerns senaste icke-pass är 4NT (bara pass har följt),
+ *  - vår sida har en ÖVERENSKOMMEN trumf (en färg båda bjudit) – då är 4NT
+ *    aldrig naturligt/kvantitativt. Returnerar trumffärgen, annars null.
+ */
+function rkcToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '4NT') return null
+  return agreedTrump(history, seat)
+}
+
+/**
+ * Ska `seat` svara på partnerns 5NT-KUNGFRÅGA (Sjöberg, §6.3)? Bara i en
+ * essfrågesekvens: partnern har tidigare bjudit 4NT (essfrågan) och nu 5NT.
+ */
+function kingAskToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '5NT') return null
+  if (!history.some((c) => c.seat === PARTNER[seat] && c.bid === '4NT')) return null
+  return agreedTrump(history, seat)
 }
 
 // ---- Off-book: svara historiedrivet på Syds egna bud (pivotens kärna) -------
@@ -597,6 +754,45 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // i stället för att tystna.
     const oc = maybeOvercall(deal, history, seat)
     if (oc) return oc
+
+    // Partnerns TVÅFÄRGSINKLIV (Michaels / ovanlig 2NT, §7.2) besvaras med
+    // preferens via advanceTwoSuiter – verktyget fanns (FAS 10) men var aldrig
+    // inkopplat i live-flödet, så auktionen dog (felrapport #7). Även
+    // advancerns medvetna pass (contested, svag utan fit) går den här vägen.
+    const twoSuiter = partnerTwoSuiterToAnswer(history, seat)
+    if (twoSuiter) {
+      const ans = advanceTwoSuiter(
+        deal.hands[seat], twoSuiter.partnerCall, twoSuiter.theirSuit, twoSuiter.contested,
+      )
+      if (legalCalls(history, seat).includes(ans.call as Bid)) {
+        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+      }
+    }
+
+    // Ett EGET dubblat tvåfärgsinkliv får aldrig passas ut (felrapport #7):
+    // budet är konstgjort – utan preferens från partnern flyr vi till den
+    // längsta visade färgen.
+    const rescue = ownDoubledTwoSuiterRescue(deal, history, seat)
+    if (rescue) return rescue
+
+    // Partnerns 4NT med överenskommen trumf är ESSFRÅGAN (1430 RKC, §6.1) och
+    // får aldrig passas (felrapport #9: 4NT blev spelat kontrakt). 5NT därefter
+    // är kungfrågan (Sjöberg, §6.3) – svara alltid.
+    const rkcTrump = rkcToAnswer(history, seat)
+    if (rkcTrump) {
+      const ans = respondToRKC(deal.hands[seat], rkcTrump)
+      if (legalCalls(history, seat).includes(ans.call as Bid)) {
+        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+      }
+    }
+    const kingTrump = kingAskToAnswer(history, seat)
+    if (kingTrump) {
+      const ans = respondToKingAsk(deal.hands[seat], kingTrump)
+      if (legalCalls(history, seat).includes(ans.call as Bid)) {
+        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+      }
+    }
+
     const response = offBookResponse(deal, history, seat)
     if (response) return response
   }

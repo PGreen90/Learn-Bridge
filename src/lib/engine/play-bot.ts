@@ -175,8 +175,39 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
     const cashable = legal.filter(
       (c) => isSureWinner(c, legal, played) && (noRuffThreat || c.suit === state.trump),
     )
-    if (cashable.length > 0) {
-      return { card: highest(cashable), reason: 'Jag är inne och cashar en säker vinnare – inget högre kort är kvar i färgen.' }
+    // MOTSPELAREN cash:ar försiktigare än spelförarsidan (felrapport #6): ett
+    // ENSAMT säkert stick i en FÄRSK färg (t.ex. ett torrt ess) gör spelförarens
+    // honnörer under stora. Cash:a bara när färgen har minst två säkra vinnare
+    // (löpande topp) eller när vår sida redan attackerat färgen (lett den i ett
+    // färdigt stick – då är den etablerad, t.ex. sista vinnaren efter EK cashade).
+    // Annars gäller §8-doktrinen: fortsätt utspelfärgen i stället för att öppna
+    // en ny färg åt spelföraren.
+    const defender = side(seat) !== side(state.contract.declarer)
+    const attacked = new Set<Suit>()
+    if (defender) {
+      for (const t of state.completedTricks) {
+        const first = t.cards[0]
+        if (first && side(first.seat) === side(seat)) attacked.add(first.card.suit)
+      }
+    }
+    const safeCash = defender
+      ? cashable.filter(
+          (c) => attacked.has(c.suit) || cashable.filter((w) => w.suit === c.suit).length >= 2,
+        )
+      : cashable
+    if (safeCash.length > 0) {
+      return { card: highest(safeCash), reason: 'Jag är inne och cashar en säker vinnare – inget högre kort är kvar i färgen.' }
+    }
+    // Motspelets utspelfärg (trick 1, om den leddes av vår sida) fortsätts före
+    // allt annat – partnerns honnörer sitter ofta bakom den.
+    const t1 = state.completedTricks[0]?.cards[0]
+    const attackSuit = defender && t1 && side(t1.seat) === side(seat) ? t1.card.suit : null
+    const attack = attackSuit !== null ? legal.filter((c) => c.suit === attackSuit) : []
+    if (attack.length > 0) {
+      return {
+        card: leadFromSuit(attack),
+        reason: 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.',
+      }
     }
     return { card: openingLead(legal), reason: 'Jag är inne och spelar ut ur min längsta färg.' }
   }
