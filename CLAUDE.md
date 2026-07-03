@@ -14,6 +14,33 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
+> **🎉 POÄNGSYSTEMET KLART & LIVE (2026-07-04, testsvit 1626 grön, bygget ok,
+> verifierat i webbläsaren — resultatdialog "8 bet (1 stick). Ö/V +800";
+> committat/pushat av parallellsessionen i `0864224` + `26b4267`):**
+> ägarönskemål, full tävlingspoäng i Spela kort. **(1) X/XX in i slutkontraktet** (gamla SENARE-fyndet, nu löst):
+> `Contract` fick `doubled?: 'X' | 'XX'`; `contractFromCalls`
+> (auction-contract.ts) läser dubblingen (nollställs av nytt bud); X/XX-märke i
+> bekräftelsedialogen, svarta kontrakt-listen, omspelningen och felrapportens
+> kontrakttext. **(2) `scoring.ts`** — hela poängtabellen (trickpoäng
+> 20/30/40+30 dubblat ×2/×4, delkontrakt 50, utgång 300/500 på DUBBLADE
+> trickpoäng, slam 500/750 + 1000/1500, insult 50/100, övertrick 20/30 /
+> 100/200 / 200/400, straffar 50/100-serien + dubblade 100-300-500(+300) resp.
+> 200-500-800(+300), redubblat ×2) — VARJE cell i ägarens poängguide facit-låst
+> i `scoring.test.ts` (4♥=420/620, 3 dubblade straff i zon=800, 2♥X hemma=470/670
+> osv.). **(3) Resultatdialogen** visar vem som fick poängen i samma ruta som
+> resultatet, t.ex. **"Ö/V +420"** (`scoreLine`, zonen från brickan).
+> **Ägarbeslut:** BARA per giv — löpande ställning väntar tills tävlingar/
+> matcher finns; poängen visas bara i resultatdialogen. **(4) Bottarna
+> straffdubblar** (ägarbeslut): `penaltyDouble` (doubles.ts, 2+ säkra
+> trumfstick i deras färg + 10+ hp) via `maybePenaltyDouble` (auction-live.ts)
+> — bara färgkontrakt på 3-läget+, och BARA när vår sida gjort 2+ kontraktsbud
+> (då kan X:et omöjligt läsas som upplysning/negativt/tvåfärgssvar — de
+> detektorerna kräver max ett eget kontraktsbud). **Bevaka:** bottarna kan nu
+> straffdubbla ÄGAREN vid offringar på 3-läget+ — säg till om det känns för
+> aggressivt. **Sidofynd lagat:** #13-koden (transfer-utgångsvalet) refererade
+> saknade `SYM_OF_LETTER` (kraschade decideCall i vissa lägen) → kartan tillagd
+> i auction-live.ts.
+>
 > **🎉 Felrapport #10–#13 LAGADE & LIVE (2026-07-04, commit `26b4267`, testsvit
 > 1626, deploy grön, issues #10–#13 stängda):** **#10** 4NT är essfråga även
 > UTAN överenskommen trumf när sidans senaste naturliga bud var en FÄRG (t.ex.
