@@ -506,33 +506,44 @@ function offBookResponse(deal: Deal, history: ResolvedCall[], seat: Seat): Resol
 
 // ---- Off-book: motståndarnas riktiga inkliv (§7-försvaret in i budlådan) -----
 //
-// När auktionen gått off-book modellerar den kanoniska linjen inte längre
-// motståndarnas konkurrens. Förut tystnade de då (passade). Här kliver de in på
-// RIKTIGT via §7-motorn (`overcall`) i stället. Medvetet smalt och bevisbart
-// korrekt: bara DIREKT inklivssits – motståndaren har precis öppnat 1 i färg och
-// vår sida har ännu inte sagt något. Balansering (efter en passrunda) och inkliv
-// över andra öppningar (1NT, svaga tvåor, hoppöppningar) hör till senare utbyggnad.
+// När den kanoniska linjen inte modellerar motståndarnas konkurrens tystnade de
+// förut (passade). Här kliver de in på RIKTIGT via §7-motorn (`overcall`) i
+// stället. Två bevisbart korrekta sitsar:
+//  - DIREKT: motståndaren öppnade nyss 1 i färg och vår sida har inte sagt något.
+//  - BALANSERING (felrapport #5): deras 1-lägesöppning följd av TVÅ pass – fjärde
+//    hand får inte passa ut given med ett klart inkliv på handen.
+// Inkliv över andra öppningar (1NT, svaga tvåor, hoppöppningar) hör till senare
+// utbyggnad.
 
 /**
- * Får `seat` kliva in på riktigt här? Kraven (direkt sits):
+ * Får `seat` kliva in på riktigt här? Kraven:
  *  - exakt ETT kontraktsbud i historiken så här långt (= öppningen, ingen har
- *    bjudit förut), och det är MOTSTÅNDARSIDANS,
- *  - det budet är auktionens senaste bud (RHO öppnade nyss → direkt sits, inte
- *    balansering efter en passrunda),
- *  - och det är en 1-läges färgöppning, som §7-inklivet är byggt för.
+ *    bjudit förut), och det är MOTSTÅNDARSIDANS 1-läges färgöppning,
+ *  - budet är auktionens senaste (direkt sits) ELLER följt av exakt två pass
+ *    (balanseringssits – utpassningsläget, felrapport #5).
  * Returnerar inklivet (eller X/Michaels/ovanlig 2NT) ur `overcall`, annars null.
+ * Balanseringen använder samma §7-krav som direkt sits (medvetet konservativt –
+ * "låna en kung"-lättnaden är en senare förfining).
  */
 function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
-  const last = history[history.length - 1]
-  if (!last || !parseContractBid(last.bid) || !openingSuit(last.bid)) return null
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  if (openIdx === -1) return null
+  const open = history[openIdx]
+  if (!openingSuit(open.bid)) return null
   // Endast öppningen får ha bjudits hittills, och den ska vara motståndarnas.
   if (history.filter((c) => parseContractBid(c.bid)).length !== 1) return null
-  if (side(last.seat) === side(seat)) return null
+  if (side(open.seat) === side(seat)) return null
 
-  const res = overcall(deal.hands[seat], last.bid)
+  const after = history.slice(openIdx + 1)
+  const direct = after.length === 0
+  const balancing = after.length === 2 && after.every((c) => c.bid === 'P')
+  if (!direct && !balancing) return null
+
+  const res = overcall(deal.hands[seat], open.bid)
   if (res.call === 'P') return null
   if (!legalCalls(history, seat).includes(res.call as Bid)) return null
-  return { seat, bid: res.call as Bid, rule: res.rule, explanation: res.explanation }
+  const note = balancing ? ' (balansering – utpassningsläget)' : ''
+  return { seat, bid: res.call as Bid, rule: res.rule, explanation: res.explanation + note }
 }
 
 // ---- Bot-hjärnan -----------------------------------------------------------
@@ -541,12 +552,17 @@ function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): Resolve
  * Har den VERKLIGA budföljden lämnat den kanoniska systemlinjen? Den jämförs
  * bud för bud så långt de överlappar; en motsägelse (Syd bjöd något annat än
  * linjen) = off-book. Att historiken bara är LÄNGRE än linjen (de avslutande
- * passen i en färdig auktion) räknas INTE som off-book.
+ * passen i en färdig auktion) räknas INTE som off-book – men ett RIKTIGT bud
+ * bortom linjens slut (t.ex. en balansering där modellen trodde given passades
+ * ut, felrapport #5) gör det: då gäller linjen inte längre.
  */
 function divergedFromLine(history: ResolvedCall[], line: ResolvedCall[]): boolean {
   const overlap = Math.min(history.length, line.length)
   for (let i = 0; i < overlap; i++) {
     if (history[i].bid !== line[i].bid) return true
+  }
+  for (let i = line.length; i < history.length; i++) {
+    if (history[i].bid !== 'P') return true
   }
   return false
 }
@@ -616,7 +632,8 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   // modellerat en rond av.
   const lineExhaustedOpen = !offBook && history.length >= line.length && built.open
   if (offBook || lineExhaustedOpen) {
-    // Motståndarna kliver in på riktigt (direkt sits) i stället för att tystna.
+    // Motståndarna kliver in på riktigt (direkt sits eller balansering)
+    // i stället för att tystna.
     const oc = maybeOvercall(deal, history, seat)
     if (oc) return oc
     const response = offBookResponse(deal, history, seat)

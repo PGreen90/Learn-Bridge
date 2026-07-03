@@ -317,8 +317,31 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   const response = computeResponse(opening.call, deal.hands[responderSeat], responderPassed)
   turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
 
-  // Svararen passade → utbjudet kontrakt, auktionen är slut.
-  if (response.call === 'P') return finish(false)
+  // Svararen passade → given är på väg att passas ut till öppningsbudet.
+  // BALANSERING (felrapport #5): innan kontraktet sätts får fjärde hand
+  // (utpassningsläget) en riktig §7-chans – given ska inte dö när balanserings-
+  // sitsen har ett klart inkliv/X på handen. Samma krav som direkt sits
+  // (medvetet konservativt – "låna en kung"-lättnaden är en senare förfining).
+  // Fortsättningen (advancerns höjning m.m.) bjuds levande i budlådan
+  // (`decideCall`), därför lämnas auktionen öppen.
+  if (response.call === 'P') {
+    if (openerSuit) {
+      const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+      const bal = overcall(deal.hands[balancerSeat], opening.call)
+      if (bal.call !== 'P') {
+        turns.push({
+          seat: balancerSeat,
+          role: 'motståndare',
+          call: bal.call,
+          rule: bal.rule,
+          explanation: `${bal.explanation} (balansering – utpassningsläget)`,
+          uncertain: bal.uncertain,
+        })
+        return finish(true)
+      }
+    }
+    return finish(false)
+  }
 
   // Stöddubbling (punkt 8, §7.3): öppning 1 i färg – (LHO pass) – svararen 1♥/1♠
   // – (RHO kliver in). Öppnaren med EXAKT 3 stöd upplyser med en stöddubbling

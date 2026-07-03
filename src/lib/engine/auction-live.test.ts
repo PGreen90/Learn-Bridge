@@ -431,11 +431,23 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
       expect(decideCall(deal, [call('S', '1H')], 'W').bid).toBe('P')
     })
 
-    it('inget falskt inkliv i balansering: efter en passrunda kliver boten inte in', () => {
-      // Syd 1♥ (off-book), Väst pass, Nord pass → Öst sitter i balanseringssits.
-      // Det är ett senare steg; här ska Öst (svag) inte hitta på ett inkliv.
+    it('balansering (felrapport #5): i utpassningsläget kliver boten in med inklivshanden', () => {
+      // Syd 1♥ (off-book), Väst pass, Nord pass → Öst sitter i balanseringssits
+      // och får inte passa ut given med en klar §7-aktion på handen (här: kort
+      // hjärter + stöd i övriga färger → upplysningsdubbling).
       const deal = dealWithEW(
-        'S:KQJ85 H:43 D:KJ4 C:Q52', // Öst har inklivshanden, men sitter i balansering
+        'S:KQJ85 H:43 D:KJ4 C:Q52', // 12 hp, kort i deras hjärter → X i balansering
+        'S:73 H:KJ65 D:Q92 C:8643',
+      )
+      const history = [call('S', '1H'), call('W', 'P'), call('N', 'P')]
+      const c = decideCall(deal, history, 'E')
+      expect(c.bid).toBe('X')
+      expect(c.rule).toBe('upplysningsdubbling')
+    })
+
+    it('ingen balansering med svag hand: given får passas ut', () => {
+      const deal = dealWithEW(
+        'S:86532 H:J98 D:JT6 C:T5', // 2 hp → inget inkliv ens i balansering
         'S:73 H:KJ65 D:Q92 C:8643',
       )
       const history = [call('S', '1H'), call('W', 'P'), call('N', 'P')]
@@ -503,6 +515,45 @@ describe('felrapport #3 – fjärde färg är krav, öppnaren får inte passa', 
     ]
     const c = decideCall(deal, history, 'N')
     expect(c.bid).toBe('2NT')
+  })
+})
+
+// Felrapport #5 (github.com/PGreen90/Learn-Bridge/issues/5): bricka 8,
+// 1♦ (V) – P – P – och motorn ville att SYD (12 hp, ♥KQT952 sexkorts) skulle
+// passa ut given: balansering i utpassningsläget fanns inte (linjen fyller
+// motståndarsitsarna med pass). Efter Syds 1♥ passade dessutom Nord trots
+// 4-korts hjärterstöd. Facit: Syd balanserar 1♥, Nord höjer till 2♥.
+// (Nords direkta X över 1♦ med 10 hp platt är standardpass — ägarfråga i issuen.)
+describe('felrapport #5 – balansering i utpassningsläget + höjning av inklivet', () => {
+  const deal = dealOf('W', {
+    N: 'S:A63 H:J643 D:J43 C:A83',
+    E: 'S:T7542 H:87 D:A98 C:J52',
+    S: 'S:QJ8 H:KQT952 D:Q2 C:QT',
+    W: 'S:K9 H:A D:KT765 C:K9764',
+  })
+
+  it('1♦–P–P: Syd balanserar 1♥ (given får inte passas ut med ett klart inkliv)', () => {
+    const history = [call('W', '1D'), call('N', 'P'), call('E', 'P')]
+    const c = decideCall(deal, history, 'S')
+    expect(c.bid).toBe('1H')
+  })
+
+  it('efter balanseringen höjer Nord till 2♥ med 4-korts stöd', () => {
+    const history = [
+      call('W', '1D'), call('N', 'P'), call('E', 'P'),
+      call('S', '1H'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('2H')
+  })
+
+  it('hela given bjuds av motorn till 2♥ av Syd', () => {
+    const history: ResolvedCall[] = []
+    for (let step = 0; step < 40 && !auctionComplete(history); step++) {
+      const seat = seatToAct(deal.dealer, history.length)
+      history.push(decideCall(deal, history, seat))
+    }
+    expect(history.map((c) => c.bid).join(' ')).toBe('1D P P 1H P 2H P P P')
   })
 })
 
