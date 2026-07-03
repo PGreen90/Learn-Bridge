@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { negativeDouble, openerAnswerNegativeDouble, responsiveDouble, supportDouble, answerTakeoutDouble } from './doubles'
+import { negativeDouble, openerAnswerNegativeDouble, penaltyDouble, responsiveDouble, supportDouble, answerTakeoutDouble } from './doubles'
 
 describe('negativeDouble (§7.3)', () => {
   it('1♦–(1♠)–X med 4+ hjärter', () => {
@@ -82,5 +82,31 @@ describe('answerTakeoutDouble (§7.3)', () => {
   })
   it('12+ → cue deras färg (krav)', () => {
     expect(answerTakeoutDouble(parseHand('S:AQ43 H:KJ32 D:32 C:K32'), 'diamonds').call).toBe('2D')
+  })
+})
+
+// Straffdubblingen (ägarbeslut 2026-07-04, poängarbetet): 2+ säkra trumfstick
+// i deras färg + 10+ hp. Läges-vakterna (nivå 3+, vår sida har bjudit två
+// kontraktsbud) ligger i auction-live.ts och testas där.
+describe('penaltyDouble (straffdubbling)', () => {
+  it('EK i deras färg + 13 hp → X', () => {
+    const r = penaltyDouble(parseHand('S:AK5 H:KQJ94 D:752 C:83'), 'spades')
+    expect(r?.call).toBe('X')
+    expect(r?.rule).toBe('straffdubbling')
+  })
+  it('E + D-tredje i deras färg (2 trumfstick) + 10 hp → X', () => {
+    expect(penaltyDouble(parseHand('S:AQ5 H:KJ54 D:7532 C:83'), 'spades')?.call).toBe('X')
+  })
+  it('bara ETT trumfstick (Kx) → null', () => {
+    expect(penaltyDouble(parseHand('S:K5 H:AQJ94 D:752 C:Q83'), 'spades')).toBeNull()
+  })
+  it('D-dubbelton räknas inte som stick: ED-andra = 1 stick → null', () => {
+    expect(penaltyDouble(parseHand('S:AQ H:KJ954 D:752 C:983'), 'spades')).toBeNull()
+  })
+  it('singel K räknas inte som trumfstick → null (trots 13 hp)', () => {
+    expect(penaltyDouble(parseHand('S:K H:AQ954 D:A532 C:983'), 'spades')).toBeNull()
+  })
+  it('trumfstack men bara 9 hp → null (för lite sidostyrka)', () => {
+    expect(penaltyDouble(parseHand('S:AK5 H:J954 D:752 C:983'), 'spades')).toBeNull()
   })
 })

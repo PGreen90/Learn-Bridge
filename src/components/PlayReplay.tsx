@@ -135,6 +135,7 @@ export function PlayReplay({
       <div className="flex justify-center pb-2">
         <div className="flex items-center gap-2 rounded-lg bg-slate-900/85 px-3 py-1 shadow">
           <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
+          {contract.doubled && <span className="text-sm font-bold text-red-400">{contract.doubled}</span>}
           <span className="text-sm font-semibold text-white">
             NS:{tricksNS} ÖV:{tricksEW}
           </span>

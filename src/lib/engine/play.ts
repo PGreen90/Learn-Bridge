@@ -11,6 +11,8 @@ export interface Contract {
   declarer: Seat
   strain: Strain
   level: number // 1–7
+  /** Dubblat (X) eller redubblat (XX) kontrakt; utelämnat = odubblat. */
+  doubled?: 'X' | 'XX'
 }
 
 export interface PlayedCard {

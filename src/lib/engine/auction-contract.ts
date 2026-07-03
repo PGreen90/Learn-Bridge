@@ -54,9 +54,18 @@ export function turnsToCalls(turns: AuctionTurn[], dealer: Seat): ResolvedCall[]
  */
 export function contractFromCalls(history: ResolvedCall[]): Contract | null {
   let last: { level: number; suit: string } | null = null
+  // X/XX gäller det SENASTE kontraktsbudet – ett nytt bud nollställer dubblingen.
+  let doubled: 'X' | 'XX' | undefined
   for (const c of history) {
     const m = CONTRACT_BID.exec(c.bid)
-    if (m) last = { level: Number(m[1]), suit: m[2] }
+    if (m) {
+      last = { level: Number(m[1]), suit: m[2] }
+      doubled = undefined
+    } else if (c.bid === 'X') {
+      doubled = 'X'
+    } else if (c.bid === 'XX') {
+      doubled = 'XX'
+    }
   }
   if (!last) return null
 
@@ -73,7 +82,9 @@ export function contractFromCalls(history: ResolvedCall[]): Contract | null {
   }
   if (!declarer) return null
 
-  return { declarer, strain: STRAIN_OF[last.suit], level: last.level }
+  const contract: Contract = { declarer, strain: STRAIN_OF[last.suit], level: last.level }
+  if (doubled) contract.doubled = doubled
+  return contract
 }
 
 /** Vilken sida (N/S eller Ö/V) som äger slutkontraktet (sista som bjöd färgen). */

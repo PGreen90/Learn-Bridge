@@ -26,6 +26,7 @@ import {
   seatToAct,
 } from '../lib/engine/auction-live'
 import { interpretCall } from '../lib/engine/auction-interpret'
+import { scoreLine } from '../lib/engine/scoring'
 import { doubleDummyDeclarerRemaining } from '../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../lib/engine/play-bot'
 import { hcp } from '../lib/engine/hand'
@@ -229,6 +230,9 @@ function BiddingPhase({
           <div className="min-w-60 rounded-xl bg-white p-4 text-center shadow-xl">
             <div className="flex items-center justify-center gap-2 pb-3">
               <BidChip bid={`${finalContract.level}${STRAIN_CODE[finalContract.strain]}`} />
+              {finalContract.doubled && (
+                <span className="text-sm font-bold text-red-600">{finalContract.doubled}</span>
+              )}
               <span className="text-sm font-medium text-slate-700">
                 spelas av {SEAT_LABEL[finalContract.declarer]}
               </span>
@@ -540,6 +544,9 @@ function PlayTable({
       }
     : contractResult(play)
   const declSide = side(contract.declarer)
+  // Poängen för given (ägarens poängguide): vem som fick dem + hur många,
+  // t.ex. "Ö/V +420". Zonen kommer från brickan.
+  const score = done ? scoreLine(contract, result.declarerTricks, deal.vulnerability) : null
   const dummy = dummyOf(contract)
   const openingLeadMade = play.completedTricks.length > 0 || play.currentTrick.length > 0
 
@@ -557,11 +564,16 @@ function PlayTable({
         {!resultSeen && !reporting ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center rounded-3xl bg-black/30">
             <div className="rounded-xl bg-white p-5 text-center shadow-xl">
-              <p className={`${claimed ? 'mb-1' : 'mb-4'} text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
+              <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
                 {result.made
                   ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
                   : `${-result.diff} bet (${result.declarerTricks} stick).`}
               </p>
+              {score && (
+                <p className={`${claimed ? 'mb-1' : 'mb-4'} text-base font-bold text-slate-800`}>
+                  {score.label}
+                </p>
+              )}
               {claimed && (
                 <p className="mb-4 text-xs text-slate-500">
                   {claimed.auto
@@ -788,6 +800,7 @@ function PlayTable({
       <div className="flex justify-center pb-1.5">
         <div className="flex items-center gap-2 rounded-lg bg-slate-900/85 px-3 py-1 shadow">
           <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
+          {contract.doubled && <span className="text-sm font-bold text-red-400">{contract.doubled}</span>}
           <span className="text-sm font-semibold text-white">
             NS:{play.tricksNS} ÖV:{play.tricksEW}
           </span>

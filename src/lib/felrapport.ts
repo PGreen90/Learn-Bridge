@@ -85,11 +85,12 @@ function handPretty(hand: Hand): string {
   }).join(' ')
 }
 
-/** Kontraktet som läsbar text: "4♥ av Nord". */
+/** Kontraktet som läsbar text: "4♥ av Nord" (dubblat: "4♥ X av Nord"). */
 function contractPretty(contract: Contract): string {
   const code = STRAIN_CODE[contract.strain]
   const suit = SUITS.find((s) => SUIT_LETTER[s] === code)
-  return `${contract.level}${suit ? SUIT_SYMBOL[suit] : 'NT'} av ${SEAT_LABEL[contract.declarer]}`
+  const dbl = contract.doubled ? ` ${contract.doubled}` : ''
+  return `${contract.level}${suit ? SUIT_SYMBOL[suit] : 'NT'}${dbl} av ${SEAT_LABEL[contract.declarer]}`
 }
 
 /** Spelförarens sticksumma + resultattext ("9 stick — 1 bet"), om given spelats. */

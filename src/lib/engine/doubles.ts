@@ -189,3 +189,34 @@ export function answerTakeoutDouble(hand: Hand, theirSuit: Suit): ResponseResult
   // 0–8 → billigaste färgbud (påtvingat svar; svaghet tillåts).
   return { call: `${lvl}${BID[best]}`, rule: 'färgbud', explanation: `${p} hp – bjuder bästa färg ${NAME[best]} → ${lvl}${SYM[best]}.` }
 }
+
+/**
+ * STRAFFDUBBLING (ägarbeslut 2026-07-04, poängarbetet): dubbla motståndarnas
+ * färgkontrakt när vi väntar oss att sätta det med marginal. Sunda krav —
+ * medvetet stränga, en straffdubbling som går hem kostar utgången:
+ *  - minst 2 SÄKRA trumfstick i deras färg (E; K bakom med 2+ kort; D med 3+),
+ *  - minst 10 hp (styrka till sidostick utöver trumfsticken).
+ * Vem X:et får riktas mot (nivå, att det inte kan läsas som upplysning/negativt)
+ * vaktas av anroparen (`maybePenaltyDouble` i auction-live.ts).
+ * null = ingen straffdubbling.
+ */
+export function penaltyDouble(hand: Hand, theirSuit: Suit): ResponseResult | null {
+  const p = hcp(hand)
+  if (p < 10) return null
+
+  const holding = hand.filter((c) => c.suit === theirSuit)
+  const has = (rank: string) => holding.some((c) => c.rank === rank)
+  let trumpTricks = 0
+  if (has('A')) trumpTricks++
+  if (has('K') && holding.length >= 2) trumpTricks++
+  if (has('Q') && holding.length >= 3) trumpTricks++
+  if (trumpTricks < 2) return null
+
+  return {
+    call: 'X',
+    rule: 'straffdubbling',
+    explanation:
+      `${trumpTricks} säkra trumfstick i deras ${NAME[theirSuit]} och ${p} hp – ` +
+      `kontraktet ska betas, X (straffdubbling).`,
+  }
+}
