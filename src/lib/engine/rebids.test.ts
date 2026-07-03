@@ -235,6 +235,40 @@ describe('punkt 7 – återbud efter inverterade minorhöjningar', () => {
   })
 })
 
+// ---- TP-steg E: öppnarens reverse/hoppskift på startpoäng (ägarbeslut 2026-07-03) ----
+// Form får LYFTA in i reverse-/hoppskiftszonen (max(hp, startpoäng), aldrig under
+// hp), och hoppskiftet efter 1-lägessvar (19+, utgångskrav) byggdes – facket
+// saknades helt (en 19-poängare rebjöd "2♣ minimum, ej krav").
+describe('TP-steg E – reverse/hoppskift på TP', () => {
+  it('reverse-lyft: 15 hp men 6-4 med kvalitetsfärger (19 startp.) → 2♥', () => {
+    expect(reb('S:4 H:AQJ5 D:AKJ976 C:4', 'diamonds', 'spades')).toBe('2H')
+  })
+
+  it('svag 6-4 utan lyft (11 hp / 12 startp.) reverserar INTE → 2♦', () => {
+    expect(reb('S:4 H:QJ52 D:KQJ976 C:Q4', 'diamonds', 'spades')).toBe('2D')
+  })
+
+  it('hoppskift med rena 19 hp (luckan: förut "2♣ minimum") → 3♣ (utgångskrav)', () => {
+    expect(reb('S:4 H:A42 D:AKQ76 C:KQJ3', 'diamonds', 'spades')).toBe('3C')
+  })
+
+  it('hoppskift-lyft: 17 hp men 6-5 (22 startp.) → 3♦ (utgångskrav)', () => {
+    expect(reb('S:3 H:AKQJ76 D:AQJ98 C:-', 'hearts', 'spades')).toBe('3D')
+  })
+
+  it('under 19 (14 hp / 16 startp.) hoppar INTE → 2♣ (naturlig)', () => {
+    expect(reb('S:4 H:K42 D:AKJ76 C:K532', 'diamonds', 'spades')).toBe('2C')
+  })
+
+  it('semi-forcing 1NT: reverse-lyft 15 hp / 18 startp. → 2♠', () => {
+    expect(sfnt('S:AQJ4 H:AKJ76 D:42 C:42', 'hearts')).toBe('2S')
+  })
+
+  it('semi-forcing 1NT: hoppskift-lyft 15 hp / 18 startp. → 3♦', () => {
+    expect(sfnt('S:4 H:AKJ76 D:AQJ4 C:432', 'hearts')).toBe('3D')
+  })
+})
+
 describe('punkt 8 – återbud efter begränsade svar', () => {
   it('3NT till spel → pass', () => {
     expect(limited('S:K3 H:AQ842 D:Q42 C:Q42', '3NT till spel', '3NT', 'hearts')).toBe('P')

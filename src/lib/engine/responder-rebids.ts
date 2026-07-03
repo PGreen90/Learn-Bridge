@@ -529,6 +529,26 @@ export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSu
       return null
     }
 
+    // Öppnarens hoppskift (1x–1y–3z, TP-steg E) är UTGÅNGSKRAV – svararen får
+    // ALDRIG passa: placera kontraktet (fast arrival, öppnaren har visat styrkan).
+    case 'hoppskift': {
+      const second = suitOfCall(rebid.call)
+      const fourth = second ? RANK.find((s) => s !== opened && s !== y && s !== second) : undefined
+      if ((opened === 'hearts' || opened === 'spades') && len[opened] >= 3) {
+        return { call: `4${BID[opened]}`, rule: 'utgång', explanation: `${p} hp, ${len[opened]} stöd → 4${SYM[opened]} (utgång mot hoppskiftet).` }
+      }
+      if (yMaj && len[y] >= 6) {
+        return { call: `4${BID[y]}`, rule: 'utgång', explanation: `${p} hp, 6+ ${NAME[y]} → 4${SYM[y]}.` }
+      }
+      if (fourth && hasStopper(hand, fourth)) {
+        return { call: '3NT', rule: 'till spel', explanation: `${p} hp, stopp i ${NAME[fourth]} → 3NT.` }
+      }
+      if (second && len[second] >= 4) {
+        return { call: `5${BID[second]}`, rule: 'utgång', explanation: `${p} hp, ${len[second]} stöd i ${NAME[second]} → 5${SYM[second]}.` }
+      }
+      return { call: '3NT', rule: 'till spel', explanation: `${p} hp – utgångskrav utan bättre bud → 3NT (förenkling).` }
+    }
+
     default:
       return null // 'oklart' m.m.
   }
@@ -563,6 +583,11 @@ function fourthSuit(hand: Hand, x: Suit, y: Suit, second: Suit, rebid: ResponseR
   if (len[x] >= 2) {
     const call = bidAbove(x, rebid.call)
     return { call, rule: 'preferens', explanation: `${p} hp – preferens → ${pretty(call)}.` }
+  }
+  // En reverse är krav 1 rond – får aldrig passas (TP-steg E gör reverser
+  // vanligare, så hålet täpps): utan preferens → 2NT som kravsvar.
+  if (rebid.rule === 'reverse') {
+    return { call: '2NT', rule: 'krav-svar', explanation: `${p} hp – krav efter reverse, ingen preferens → 2NT.` }
   }
   return { call: 'P', rule: 'svararens pass', explanation: `${p} hp – inget bättre → pass.` }
 }

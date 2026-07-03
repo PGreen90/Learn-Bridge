@@ -186,6 +186,15 @@ Efter den rent pedagogiska visningen kopplades TP in i utvalda beslut:
   - `responder-rebids.ts` (game try-svar, `'support'`).
   - `auction-live.ts` (off-book-höjning, `dummyPoints`).
   - `slam-auction.ts` (slamzon = `bergenPoints + dummyPoints`).
+- **Styrkegrindade återbud utan fit → startpoäng med hp-golv (TP-steg E,
+  2026-07-03).** `pointsWithFloor` fick en tredje kind **`'starting'`**
+  (`trump = null`): `rebids.ts` reverse (≥16) + hoppskift (≥19) i både
+  `openerRebidAfter1LevelResponse` och `openerRebidAfterSemiForcing1NT` läser
+  `max(hp, startingPoints)` – form lyfter, aldrig under hp.
+- **Positionen påverkar öppningsgolvet (TP-steg F, 2026-07-03).**
+  `classifyOpening(hand, vulnerable, seatOrder)`: 3:e hand öppnar 1M lätt med
+  10–11 hp + bra 5+ högfärg (≥2 topphonnörer); 4:e hand följer regeln om 15
+  (hp + antal spader ≥ 15, annars passa ut).
 - **Ingen fit / sang / konkurrens → rå HP.** Sangbeslut, inkliv, dubblingar,
   försvarsbud, svar utan fit m.m. läser `hcp(hand)` direkt (`overcalls.ts`,
   `doubles.ts`, `defense-conventional.ts`, `responses-2nt.ts`, `lebensohl.ts` …).

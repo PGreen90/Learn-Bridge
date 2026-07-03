@@ -22,6 +22,23 @@ function r12(notation: string, opened: Suit, responderSuit: Suit, rebidCall: str
   return responderRebidColorAuction(parseHand(notation), opened, responderSuit, rebid)?.call ?? 'null'
 }
 
+// ---- TP-steg E: svararens fortsättning efter öppnarens hoppskift (GF) --------
+// Hoppskiftet är utgångskrav → svararen får ALDRIG passa: placera kontraktet
+// (fast arrival – öppnaren har redan visat styrkan).
+describe('TP-steg E – svararen efter öppnarens hoppskift (1x–1y–3z, GF)', () => {
+  it('3-korts stöd i öppnarens högfärg → utgång 4M', () => {
+    expect(r12('S:KQ762 H:K85 D:432 C:42', 'hearts', 'spades', '3D', 'hoppskift')).toBe('4H')
+  })
+
+  it('stopp i fjärde färgen → 3NT', () => {
+    expect(r12('S:KQ762 H:K854 D:32 C:42', 'diamonds', 'spades', '3C', 'hoppskift')).toBe('3NT')
+  })
+
+  it('fit i hoppskiftsfärgen, inget stopp → 5 i minorn', () => {
+    expect(r12('S:KQ76 H:854 D:32 C:J432', 'diamonds', 'spades', '3C', 'hoppskift')).toBe('5C')
+  })
+})
+
 describe('FAS 3 punkt 14 – svararen visar kortfärgen efter splinter-relä (upp-the-line)', () => {
   const reveal = (n: string, M: Major) => responderRevealSplinterShortness(parseHand(n), M)
 

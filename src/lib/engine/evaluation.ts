@@ -302,7 +302,8 @@ export interface BergenEvaluation extends Evaluation {
  * var inlinat på fyra ställen (`responses.ts` stödpoäng, `rebids.ts` ×3 Bergenpoäng).
  *
  * `kind`: `'support'` = svararens stödpoäng (`dummyPoints`), `'bergen'` =
- * öppnarens Bergenpoäng (`bergenPoints`). `trump` = den färg fiten finns i.
+ * öppnarens Bergenpoäng (`bergenPoints`), `'starting'` = startpoäng (ingen känd
+ * fit, TP-steg E). `trump` = den färg fiten finns i (`null` för `'starting'`).
  */
 export interface FlooredPoints {
   /** Råa honnörspoäng = golvet vi aldrig går under. */
@@ -319,18 +320,20 @@ export interface FlooredPoints {
 
 export function pointsWithFloor(
   hand: Hand,
-  trump: Suit,
-  kind: 'support' | 'bergen',
+  trump: Suit | null,
+  kind: 'support' | 'bergen' | 'starting',
   opts: { notrump?: boolean } = {},
 ): FlooredPoints {
   const hp = hcp(hand)
   const measure =
     kind === 'support'
-      ? dummyPoints(hand, trump).dummyPoints
-      : bergenPoints(hand, trump, opts).bergenPoints
+      ? dummyPoints(hand, trump!).dummyPoints
+      : kind === 'bergen'
+        ? bergenPoints(hand, trump!, opts).bergenPoints
+        : startingPoints(hand).startingPoints
   const points = Math.max(hp, measure)
   const lifted = points > hp
-  const label = kind === 'support' ? 'stödp.' : 'Bergenp.'
+  const label = kind === 'support' ? 'stödp.' : kind === 'bergen' ? 'Bergenp.' : 'startp.'
   return { hp, measure, points, lifted, text: lifted ? `${hp} hp / ${points} ${label}` : `${hp} hp` }
 }
 

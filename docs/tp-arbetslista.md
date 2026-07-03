@@ -1,8 +1,9 @@
 # TP i budvalet — arbetslista
 
-> 🔺 **NÄSTA GÅNG:** hela A–D klara (öppningsgolv, höjningar, accepter, sang-nudge
-> inkl. sårbarhet). Kvar i "brett" TP: Steg E (reverse/hoppskift), Steg F (3:e/4:e-
-> hands lättöppning) + sekundära TP-lägen nedan – hämtas när ägaren vill.
+> 🔺 **HELA A–F KLARA (2026-07-03).** Öppningsgolv, höjningar, accepter,
+> sang-nudge, reverse/hoppskift och 3:e/4:e-hands lättöppning – allt på TP med
+> "nedgradera aldrig"-golvet. Kvar: bara de sekundära TP-lägena nedan – hämtas
+> när ägaren vill.
 
 > Boten ska tänka i **totalpoäng (TP/fördelning)**, inte rå HP (ägarens beslut
 > 2026-06-30). Byggs i **test-låsta steg** så on-book aldrig rubbas.
@@ -39,6 +40,32 @@
   `openerRebidAfter1NTResponse` (1NT–2NT kvantitativ, p≥16). Facit i
   `rebids.test.ts` (13 hp + AKQxx accepterar; platt quack-13 passar).
 
+- **Steg E — öppnarens reverse/hoppskift på TP (klar 2026-07-03).** Ägarbeslut
+  (efter exempelhänder): form LYFTER in i reverse-/hoppskiftszonen via
+  **`max(hp, startpoäng)`** (`pointsWithFloor(hand, null, 'starting')` – ny
+  `'starting'`-kind). Reverse ≥ 16, hoppskift ≥ 19 (utgångskrav). Bekräftat mot
+  bridgebum ("16+ points", inte strikt HCP). Byggt i `rebids.ts`:
+  (a) `openerRebidAfter1LevelResponse` – reverse-grinden på golvade startpoäng
+  + **hoppskift-facket byggt** (fanns inte: en 19-poängare utan fit rebjöd
+  "2♣ minimum, ej krav"!), regel-id `hoppskift` = utgångskrav i `rules.ts`;
+  (b) `openerRebidAfterSemiForcing1NT` – reverse/hoppskift-grinden (16+) på
+  samma golv. **Svararens fortsättning byggd** (`responder-rebids.ts`): efter
+  hoppskiftet placeras kontraktet (4M med 3-stöd / 4y / 3NT med stopp / 5m –
+  fast arrival, ALDRIG pass) + pass-vakt efter reverse utan preferens (→ 2NT
+  kravsvar). Facit i `rebids.test.ts` + `responder-rebids.test.ts`.
+- **Steg F — 3:e/4:e-hands lättöppning (klar 2026-07-03).** Ägarbeslut (efter
+  exempelhänder): **3:e hand** öppnar 1M lätt med **10–11 hp (sårbar 11)** och
+  en BRA 5+ högfärg (≥2 topphonnörer A/K/Q, samma kvalitetsmått som Regel
+  2-3-4) – aldrig lätt i minor, aldrig lätt 1NT (standard); Drury (§6.7,
+  redan byggd) skyddar svaret, lätt öppnare signar av. **4:e hand: regeln om
+  15 (Pearson)** – marginalhand (9–11 hp): hp + antal spader ≥ 15 → öppna,
+  annars passas given ut; ingen spärr/svag tvåa i 4:e hand under golvet.
+  Bekräftat mot bridgebum (Pearson points). Byggt: `classifyOpening(hand,
+  vulnerable, seatOrder)` (`openings.ts`), positionen trådad i `buildAuction`
+  (`auction.ts`); `firstMajorOpeningAuction`/`survey` kvar på 1:a hand
+  (default, medvetet – de saknar Drury-vägen). Regel-id:n `lättöppning` +
+  `regeln om 15` i `rules.ts`. Facit i `openings.test.ts`.
+
 ## ⬜ Kvar att bygga
 
 ### Steg D — TP-nudge för sangöppning
@@ -60,19 +87,6 @@ tar nu en sårbarhetsflagga; `isVulnerable(seat, vul)` (`openings.ts`, exportera
 trådas in via `buildAuction` (och `Spela.tsx` – lokal dubblett borttagen). Regel:
 ej sårbar → nudge vid startp. ≥ 15, sårbar → ≥ 16. Facit i `openings.test.ts`
 (startp. 15 nudgas bara ej sårbar; startp. 16 alltid). Default `false` (bakåtkompat).
-
-### Steg E — öppnarens reverse / hoppskift på TP (tillagt 2026-07-01)
-Styrkegrindade återbud: en **reverse** kräver extra. En formstark 16:a
-(`bergenPoints`) bör kunna reversera medan en platt 17:a kanske inte ska. I dag
-rå HP i `rebids.ts`. Naturlig granne till C-1 (samma mått, öppnarens sida).
-**Mänsklig input behövs:** ska form lyfta in i reverse-zon, eller hålla reverse
-rent HP-styrt för att inte vilseleda svararen om styrkan?
-
-### Steg F — tredje/fjärde-hands lättöppning (tillagt 2026-07-01)
-Människor öppnar lätt i 3:e hand med form (Drury, Steg-sekundär, täcker *svaret* –
-inte själva beslutet att öppna lätt). Eget omdöme bredvid Steg A (öppningsgolvet).
-**Mänsklig input behövs:** hur lätt får 3:e hand öppna, och ska 4:e hand
-(Pearson/regeln om 15) skilja sig?
 
 ## ⬜ Sekundära TP-lägen (efter C/D, om vi vill gå hela vägen "brett")
 - **Drury** (`responses-drury.ts`): passad hand, limithöjning – väg stödpoäng.

@@ -36,7 +36,7 @@
 - Ägarbeslut 2026-07-01: både splinter-kortfärg och game try-svar visar korthet
   **upp-the-line** (billigaste bud = lägsta möjliga kortfärg).
 
-## Värdering (FAS 4, punkt 16–18 + C-2/C-3 klara 2026-07-01; D väntar på ägaren)
+## Värdering (FAS 4 punkt 16–18 + TP-steg A–F, ALLA klara 2026-07-03)
 
 - **Punkt 16 – sanningskarta HP/TP/LTC:** motorn kör HP + TP (start-/stöd-/
   Bergenpoäng); **LTC finns inte**. Beslut: inför INTE LTC (TP täcker det;
@@ -60,6 +60,17 @@
   ej sårbar → startpoäng ≥ 15 (aggressiv), sårbar → ≥ 16 (passiv). `isVulnerable`
   (`openings.ts`) trådad genom `buildAuction` + `Spela.tsx` (lokal dubblett borttagen).
   Facit i `openings.test.ts` (startp. 15 nudgas bara ej sårbar; startp. 16 alltid).
+- **Steg E – reverse/hoppskift på TP (klar 2026-07-03):** styrkan i
+  `max(hp, startpoäng)` (`pointsWithFloor(..., null, 'starting')` – ny kind).
+  Reverse ≥ 16, hoppskift ≥ 19 (utgångskrav). **Hoppskift-facket efter
+  1-lägessvar byggt** (fanns inte – 19-poängare rebjöd "2♣ minimum") + svararens
+  fortsättning (placera kontraktet, aldrig pass) + pass-vakt efter reverse.
+  `rebids.ts`, `responder-rebids.ts`, `rules.ts` (`hoppskift` = utgångskrav).
+- **Steg F – lättöppning i 3:e/4:e hand (klar 2026-07-03):**
+  `classifyOpening(hand, vulnerable, seatOrder)`. 3:e hand: 1M med 10–11 hp
+  (sårbar 11) + bra 5+ högfärg (≥2 topphonnörer A/K/Q); aldrig minor/1NT lätt;
+  Drury skyddar. 4:e hand: regeln om 15 (hp + spader ≥ 15 → öppna, annars passa
+  ut; ingen spärr under golvet). Positionen trådad i `buildAuction` (`auction.ts`).
 
 ## NT-systemet (FAS 5 KLAR 2026-07-01, punkt 19–25, testsvit 587)
 

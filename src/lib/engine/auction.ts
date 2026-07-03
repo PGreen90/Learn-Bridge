@@ -206,7 +206,8 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
   let opening = null as ReturnType<typeof classifyOpening> | null
   for (let i = 0; i < 4; i++) {
     const seat = seatAt(deal.dealer, i)
-    const o = classifyOpening(deal.hands[seat], isVulnerable(seat, deal.vulnerability))
+    // Positionen (1:a–4:e hand) trådas in för TP-steg F: 3:e/4:e hand öppnar lätt.
+    const o = classifyOpening(deal.hands[seat], isVulnerable(seat, deal.vulnerability), (i + 1) as 1 | 2 | 3 | 4)
     if (o.call !== 'P') {
       openerSeat = seat
       openerIndex = i

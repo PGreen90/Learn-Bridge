@@ -74,10 +74,13 @@ export function openerRebidAfter1LevelResponse(hand: Hand, opened: Suit, respond
   }
 
   // 3. Reverse: 16+, en högre ny färg (4+) med längre första färg → 2 i den högre.
-  if (p >= 16) {
+  // TP-steg E (ägarbeslut 2026-07-03): styrkan räknas i max(hp, startpoäng) –
+  // form (längd/kvalitetsfärger) får LYFTA in i reverse-zonen, aldrig under hp.
+  const sp = pointsWithFloor(hand, null, 'starting')
+  if (sp.points >= 16) {
     for (const z of RANK) {
       if (z !== opened && z !== responderSuit && rankOf(z) > rankOf(opened) && len[z] >= 4 && len[opened] > len[z]) {
-        return { call: `2${BID[z]}`, rule: 'reverse', explanation: `${p} hp, längre ${NAME[opened]} + 4+ ${NAME[z]} → 2${SYM[z]} (reverse, 16+, krav).` }
+        return { call: `2${BID[z]}`, rule: 'reverse', explanation: `${sp.text}, längre ${NAME[opened]} + 4+ ${NAME[z]} → 2${SYM[z]} (reverse, 16+, krav).` }
       }
     }
   }
@@ -86,6 +89,19 @@ export function openerRebidAfter1LevelResponse(hand: Hand, opened: Suit, respond
   if (bal) {
     if (p >= 18 && p <= 19) return { call: '2NT', rule: '2NT (18–19)', explanation: `${p} hp balanserad → 2NT (18–19, inbjuder 3NT).` }
     return { call: '1NT', rule: '1NT (12–14)', explanation: `${p} hp balanserad → 1NT (12–14).` }
+  }
+
+  // 4b. Hoppskift i ny LÄGRE färg (§5.2): max(hp, startpoäng) ≥ 19 → utgångskrav.
+  // TP-steg E: facket saknades helt – en 19-poängare utan fit rebjöd förut
+  // "2♣ (minimum, ej krav)". Högre nya färger täcks av reversen (krav) ovan.
+  if (sp.points >= 19) {
+    let best: Suit | null = null
+    for (const z of RANK) {
+      if (z !== opened && z !== responderSuit && rankOf(z) < rankOf(opened) && len[z] >= 4) {
+        if (best === null || len[z] > len[best]) best = z
+      }
+    }
+    if (best) return { call: `3${BID[best]}`, rule: 'hoppskift', explanation: `${sp.text}, 4+ ${NAME[best]} → 3${SYM[best]} (hoppskift, utgångskrav).` }
   }
 
   // 5. Rebjuda egen 6-korts färg.
@@ -135,12 +151,14 @@ export function openerRebidAfterSemiForcing1NT(hand: Hand, M: Major): ResponseRe
   }
   // 18–19 balanserad.
   if (bal && p >= 18 && p <= 19) return { call: '2NT', rule: 'rebid: 2NT (18–19)', explanation: `${p} hp balanserad → 2NT (18–19, inbjuder 3NT).` }
-  // Stark 5-4 (16+): reverse eller hoppskift.
-  if (p >= 16 && lenM >= 5) {
-    if (M === 'hearts' && len.spades >= 4) return { call: '2S', rule: 'rebid: reverse', explanation: `${p} hp, 5-4 (♥-♠) → 2♠ (reverse, krav).` }
+  // Stark 5-4 (16+): reverse eller hoppskift. TP-steg E (ägarbeslut 2026-07-03):
+  // styrkan räknas i max(hp, startpoäng) – form lyfter, aldrig under hp.
+  const sp = pointsWithFloor(hand, null, 'starting')
+  if (sp.points >= 16 && lenM >= 5) {
+    if (M === 'hearts' && len.spades >= 4) return { call: '2S', rule: 'rebid: reverse', explanation: `${sp.text}, 5-4 (♥-♠) → 2♠ (reverse, krav).` }
     const m4 = betterMinor(len, 4)
-    if (m4) return { call: `3${BID[m4]}`, rule: 'rebid: hoppskift', explanation: `${p} hp, 5-4 → 3${SYM[m4]} (hoppskift, krav).` }
-    if (M === 'spades' && len.hearts >= 4) return { call: '3H', rule: 'rebid: hoppskift', explanation: `${p} hp, 5-4 (♠-♥) → 3♥ (hoppskift, krav).` }
+    if (m4) return { call: `3${BID[m4]}`, rule: 'rebid: hoppskift', explanation: `${sp.text}, 5-4 → 3${SYM[m4]} (hoppskift, krav).` }
+    if (M === 'spades' && len.hearts >= 4) return { call: '3H', rule: 'rebid: hoppskift', explanation: `${sp.text}, 5-4 (♠-♥) → 3♥ (hoppskift, krav).` }
   }
   // Minimum balanserad → pass (1NT är semi-forcing).
   if (bal) return { call: 'P', rule: 'rebid: pass', explanation: `${p} hp balanserad minimum → pass (1NT är semi-forcing).` }

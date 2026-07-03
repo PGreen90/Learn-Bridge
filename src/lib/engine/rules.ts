@@ -79,6 +79,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'stark 2♣': 'utgangskrav',
   '5-korts högfärg': 'ej-krav',
   'minor-regeln': 'ej-krav',
+  lättöppning: 'ej-krav',
+  'regeln om 15': 'ej-krav',
   spärr: 'avslut',
   'svag tvåa': 'ej-krav',
 
@@ -154,6 +156,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   '2-över-1 GF': 'utgangskrav',
   'ny färg (GF)': 'utgangskrav',
   'rebid: hoppskift': 'utgangskrav',
+  hoppskift: 'utgangskrav',
   'rebid: egen färg (GF)': 'utgangskrav',
   'rebid: stöd (GF)': 'utgangskrav',
   'rebid: 3NT (GF)': 'avslut',

@@ -34,11 +34,13 @@ const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spad
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 
 /**
- * Räknar ut vad en hand öppnar med i 1:a hand utan störning. `vulnerable` styr
- * bara TP-nudgen (Steg D): ej sårbar = aggressiv (nudge vid startpoäng ≥ 15),
- * sårbar = passiv (≥ 16). Default `false` (bakåtkompatibelt).
+ * Räknar ut vad en hand öppnar med utan störning. `vulnerable` styr TP-nudgen
+ * (Steg D: ej sårbar = aggressiv, startpoäng ≥ 15; sårbar = passiv, ≥ 16) och
+ * lättöppningsgolvet i 3:e hand. `seatOrder` = position i varvet från given
+ * (1–4); 3:e/4:e hand får öppna lätt (TP-steg F). Default 1:a hand
+ * (bakåtkompatibelt).
  */
-export function classifyOpening(hand: Hand, vulnerable = false): OpeningResult {
+export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2 | 3 | 4 = 1): OpeningResult {
   const p = hcp(hand)
   const tp = startingPoints(hand).startingPoints
   const len = lengths(hand)
@@ -111,6 +113,43 @@ export function classifyOpening(hand: Hand, vulnerable = false): OpeningResult {
       explanation: `${pts}, ingen 5-korts högfärg → 1${BID[m]} (minor-regeln).`,
       uncertain,
     }
+  }
+
+  // TP-steg F (ägarbeslut 2026-07-03): lättöppning i 3:e hand. Partnern har
+  // redan passat (begränsad hand, Drury §6.7 skyddar svaret) → öppna 1M lätt
+  // med 10–11 hp (sårbar kräver 11) och en BRA 5+ högfärg: ≥2 topphonnörer
+  // A/K/Q (samma kvalitetsmått som Regel 2-3-4) – utspelsdirigerande och
+  // störande. ALDRIG lätt i minor, aldrig lätt 1NT (standard, bridgebum).
+  // Faller handen igenom grinden → spärr/svag tvåa gäller som vanligt.
+  if (seatOrder === 3 && p >= (vulnerable ? 11 : 10)) {
+    let light: Suit | null = null
+    for (const s of ['spades', 'hearts'] as Suit[]) {
+      if (len[s] >= 5 && topHonorCount(hand, s) >= 2 && (light === null || len[s] > len[light])) light = s
+    }
+    if (light) {
+      return {
+        call: `1${BID[light]}`,
+        rule: 'lättöppning',
+        explanation: `${p} hp men bra ${len[light]}-korts ${NAME[light]} (${topHonorCount(hand, light)} topphonnörer) i 3:e hand → 1${BID[light]} (lättöppning, partnern har passat).`,
+      }
+    }
+  }
+
+  // TP-steg F: 4:e hand – regeln om 15 (Pearson). Alla har passat, så öppnar vi
+  // inte passas given ut. Marginalhänder (9–11 hp): hp + antal SPADER ≥ 15 →
+  // öppna (spadrarna avgör vem som äger delkontraktskampen), annars passa ut.
+  // Ingen spärr/svag tvåa i 4:e hand under golvet – ingen kvar att spärra mot.
+  if (seatOrder === 4) {
+    const pearson = p + len.spades
+    if (p >= 9 && pearson >= 15) {
+      if (len.spades >= 5 || len.hearts >= 5) {
+        const suit: Suit = len.spades >= len.hearts ? 'spades' : 'hearts'
+        return { call: `1${BID[suit]}`, rule: 'regeln om 15', explanation: `${p} hp + ${len.spades} spader = ${pearson} (≥15, regeln om 15 i 4:e hand) → 1${BID[suit]}.` }
+      }
+      const m = openMinor(len)
+      return { call: `1${BID[m]}`, rule: 'regeln om 15', explanation: `${p} hp + ${len.spades} spader = ${pearson} (≥15, regeln om 15 i 4:e hand) → 1${BID[m]} (minor-regeln).` }
+    }
+    return { call: 'P', rule: 'pass', explanation: `${p} hp + ${len.spades} spader = ${pearson} (<15, regeln om 15 i 4:e hand) → pass (given passas ut).` }
   }
 
   // Spärröppning (7+ korts färg, svag) – kollas före svag tvåa.

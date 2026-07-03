@@ -11,6 +11,11 @@ function callVul(notation: string, vulnerable: boolean): string {
   return classifyOpening(parseHand(notation), vulnerable).call
 }
 
+/** Öppningsbud med explicit position runt bordet (för Steg F: 3:e/4:e hand). */
+function callSeat(notation: string, seatOrder: 1 | 2 | 3 | 4, vulnerable = false): string {
+  return classifyOpening(parseHand(notation), vulnerable, seatOrder).call
+}
+
 describe('classifyOpening', () => {
   it('1NT med balanserad 15–17', () => {
     expect(call('S:AQ5 H:KJ7 D:Q842 C:K93')).toBe('1NT') // 15 hp, 3-3-4-3
@@ -147,6 +152,65 @@ describe('TP styr öppningen (Bergens grundregel: 12+ startpoäng)', () => {
   })
   it('platt 11-hp-hand (TP < 12) avstår fortfarande', () => {
     expect(call('S:KQ52 H:KJ7 D:Q42 C:T32')).toBe('P') // 11 hp, 4-3-3-3 → under golvet
+  })
+})
+
+// ---- TP-steg F: lättöppning i 3:e/4:e hand (ägarbeslut 2026-07-03) ----------
+// 3:e hand: 10–11 hp öppnar 1M med bra 5+ högfärg (≥2 topphonnörer A/K/Q),
+// sårbar krävs 11 – ALDRIG lätt i minor, aldrig lätt 1NT. Drury skyddar svaret.
+// 4:e hand: regeln om 15 (Pearson) – hp + antal spader ≥ 15 → öppna (hp 9–11),
+// annars passas given ut (ingen spärr/svag tvåa när alla redan passat).
+describe('TP-steg F – lättöppning i 3:e och 4:e hand', () => {
+  it('3:e hand ej sårbar: 10 hp + bra 5-korts spader → 1♠ (i 1:a hand: pass)', () => {
+    const h = 'S:KQJ98 H:A54 D:872 C:43' // 10 hp, ♠KQ = 2 topphonnörer
+    expect(callSeat(h, 3)).toBe('1S')
+    expect(callSeat(h, 1)).toBe('P')
+  })
+
+  it('3:e hand sårbar: 10 hp räcker INTE (kräver 11)', () => {
+    expect(callSeat('S:KQJ98 H:A54 D:872 C:43', 3, true)).toBe('P')
+  })
+
+  it('3:e hand sårbar: 11 hp + bra färg → 1♠', () => {
+    expect(callSeat('S:KQ982 H:QJ4 D:K72 C:43', 3, true)).toBe('1S') // 11 hp / 10 TP
+  })
+
+  it('kvalitetsgrinden: 10 hp med skräpfärg (0 topphonnörer) → pass', () => {
+    expect(callSeat('S:J8765 H:AK4 D:Q72 C:43', 3)).toBe('P')
+  })
+
+  it('aldrig lätt öppning i MINOR: 10 hp + bra ruter → pass', () => {
+    expect(callSeat('S:43 H:A54 D:KQJ98 C:872', 3)).toBe('P')
+  })
+
+  it('3:e hand: bra 6-korts major med 11 hp → 1♠ (före svag tvåa; 1:a hand: 2♠)', () => {
+    const h = 'S:KQ9872 H:A54 D:Q2 C:43' // 11 hp / 11 TP (under Steg A-golvet)
+    expect(callSeat(h, 3)).toBe('1S')
+    expect(callSeat(h, 1)).toBe('2S')
+  })
+
+  it('4:e hand: regeln om 15 uppfylld (10 hp + 5 spader = 15) → 1♠', () => {
+    const h = 'S:KJ987 H:A43 D:Q87 C:92' // 10 hp / 10 TP
+    expect(callSeat(h, 4)).toBe('1S')
+    expect(callSeat(h, 1)).toBe('P')
+  })
+
+  it('4:e hand: under 15 (10 hp + 4 spader = 14) → passa ut', () => {
+    expect(callSeat('S:KJ87 H:A43 D:Q876 C:92', 4)).toBe('P')
+  })
+
+  it('4:e hand: hp i fel färger (11 hp + 1 spader = 12) → passa ut', () => {
+    expect(callSeat('S:2 H:AQ43 D:K876 C:Q92', 4)).toBe('P')
+  })
+
+  it('4:e hand: svag tvåa-hand under golvet → passa ut (ingen spärr i 4:e)', () => {
+    const h = 'S:2 H:KQJ982 D:Q76 C:932' // 8 hp – i 1:a hand svag tvåa
+    expect(callSeat(h, 4)).toBe('P')
+    expect(callSeat(h, 1)).toBe('2H')
+  })
+
+  it('4:e hand: riktig öppningshand öppnar som vanligt (oavsett spader)', () => {
+    expect(callSeat('S:2 H:AQ43 D:KQ76 C:Q92', 4)).toBe('1D') // 13 hp
   })
 })
 

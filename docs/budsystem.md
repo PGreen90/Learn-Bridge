@@ -47,6 +47,20 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force) ·
 | 5–5 | **1♦** (för att kunna bjuda klöver naturligt nästa vända) |
 | Olika längd | Den **längsta** minorn |
 
+### Lättöppningar i 3:e och 4:e hand (TP-steg F, ägarbeslut 2026-07-03)
+När partnern redan passat är öppningskraven lägre (svaret är begränsat och
+**Drury** §6.7 skyddar mot att paret hamnar för högt):
+- **3:e hand:** öppna **1♥/1♠ lätt med 10–11 hp** (sårbar krävs 11) om
+  högfärgen är **bra**: 5+ kort med **≥2 topphonnörer (A/K/Q)** – samma
+  kvalitetsmått som Regel 2-3-4. Poängen är utspelsdirigering + störning.
+  **Aldrig** lätt öppning i minor, **aldrig** lätt 1NT. Efter en lätt öppning
+  signar öppnaren av (Drury-återbudet 2M = "lätt öppning").
+- **4:e hand – regeln om 15 (Pearson):** med en marginalhand (9–11 hp):
+  **hp + antal spader ≥ 15 → öppna**, annars **passa ut** given. Spadrarna
+  avgör vem som vinner delkontraktskampen. Ingen spärr/svag tvåa i 4:e hand
+  under öppningsgolvet – det finns ingen kvar att spärra mot.
+Källa: bridgebum.com (Pearson points; third seat openings).
+
 ## 4. Svar & fortsättningar
 ### 4.1 Svar på 1♥ / 1♠
 *(Ohöjd hand, ingen störning. Passad hand/Drury och konkurrens tas senare.)*
@@ -484,6 +498,13 @@ placera kontraktet. Tre styrkenivåer styr valet:
 - **Reverse** = att rebjuda en *högre* ny färg på 2-läget än sin första (t.ex.
   1♦–1♠–2♥). Lovar **extra** (~16+ hp) och längre första färg. Krav 1 rond.
 - **Hoppskift i ny färg** (t.ex. 1♦–1♠–3♣) = 19+ hp, utgångskrav.
+- **TP-steg E (ägarbeslut 2026-07-03):** styrkenivåerna för reverse/hoppskift
+  räknas i **max(hp, startpoäng)** – form (längd + kvalitetsfärger) får LYFTA
+  in i reverse- (≥16) och hoppskiftszonen (≥19), aldrig sänka under hp. En
+  6-4:a med 15 hp och två kvalitetsfärger reverserar; en platt hand följer hp.
+  Svararen får **aldrig passa** ett hoppskift: hon placerar kontraktet
+  (4M med 3-korts stöd / 3NT med stopp i fjärde färgen / 5m med fit).
+  Källa: bridgebum.com ("16+ points", inte strikt HCP).
 - **1x–1y–2NT** = 18–19 hp balanserad (för svag för 1NT-öppning, för stark för
   att bara rebjuda 1NT).
 - I en **2/1 GF-budgivning** är paret redan bundet till utgång – öppnaren bjuder
@@ -1326,3 +1347,19 @@ Det avslöjar längd/räkning direkt för partnern.
   4-minor-grenen bort ur `responder-rebids.ts`. +3 tester (621 gröna). Kod, inte
   systemändring. **Nästa gång:** punkt 2 (Gerber över 2NT) eller punkt 3
   (Exclusion när renonsfärg rankar över trumf).
+- **2026-07-03** – **TP-steg E + F (SYSTEMÄNDRING, ägarbeslut efter
+  exempelhänder).** **E: reverse/hoppskift på TP** (§5-principerna): styrkan
+  räknas i **max(hp, startpoäng)** – form lyfter in i reverse- (≥16) och
+  hoppskiftszonen (≥19), aldrig under hp (bekräftat mot bridgebum: reverse =
+  "16+ points"). Byggda luckor: **öppnarens hoppskift efter 1-lägessvar fanns
+  inte** (en 19-poängare utan fit rebjöd "2♣ minimum, ej krav") – nytt fack
+  `hoppskift` (utgångskrav) i `openerRebidAfter1LevelResponse`; **svararens
+  fortsättning efter hoppskiftet** byggd (placera kontraktet, aldrig pass) +
+  pass-vakt efter reverse utan preferens (→ 2NT kravsvar). Semi-forcing-grenens
+  reverse/hoppskift (§5.1) på samma golv. **F: lättöppningar i 3:e/4:e hand**
+  (nytt §3-avsnitt): 3:e hand 1M med 10–11 hp (sårbar 11) + bra 5+ högfärg
+  (≥2 topphonnörer A/K/Q); aldrig lätt minor/1NT; Drury skyddar. 4:e hand
+  **regeln om 15** (hp + spader ≥ 15 → öppna, annars passa ut; ingen spärr i
+  4:e hand under golvet). `classifyOpening` fick `seatOrder`, positionen trådad
+  i `buildAuction`. +16 tester, facit FÖRE fix (13 låsta fel bevisade), on-book
+  orört (1528 gröna).

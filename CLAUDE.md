@@ -14,6 +14,24 @@ Läs den här filen först varje session.
 ### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
 > **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
 >
+> **🎉 TP-steg E & F KLARA (2026-07-03, testsvit 1528 — hela TP-arbetslistan
+> A–F därmed komplett):** ägarbeslut efter exempelhänder + bridgebum-bekräftat.
+> **E — reverse/hoppskift på TP:** styrkan i `max(hp, startpoäng)`
+> (`pointsWithFloor` fick kind `'starting'`); reverse ≥16, hoppskift ≥19
+> (utgångskrav). Byggda luckor: öppnarens **hoppskift efter 1-lägessvar
+> saknades helt** (19-poängare rebjöd "2♣ minimum, ej krav"!) — nytt fack
+> `hoppskift` i `rebids.ts` + `rules.ts`; **svararens fortsättning** efter
+> hoppskiftet (placera kontraktet — 4M/3NT/5m, ALDRIG pass) + pass-vakt efter
+> reverse utan preferens (→ 2NT kravsvar) i `responder-rebids.ts`.
+> **F — lättöppning 3:e/4:e hand:** `classifyOpening(hand, vulnerable,
+> seatOrder)`, positionen trådad i `buildAuction`. 3:e hand: 1M med 10–11 hp
+> (sårbar 11) + bra 5+ högfärg (≥2 topphonnörer A/K/Q) — aldrig lätt
+> minor/1NT; Drury (§6.7, redan byggd) skyddar svaret. 4:e hand: **regeln om
+> 15** (hp + spader ≥ 15 → öppna, annars passas given ut; ingen spärr/svag
+> tvåa i 4:e hand under golvet). Facit FÖRE fix (13 låsta fel bevisade), +16
+> tester, on-book orört. Docs uppdaterade (budsystem §3+§5, tp-arbetslista,
+> handvardering, status).
+>
 > **🎉 Felrapport #1–4 LAGADE & LIVE (2026-07-02 kväll, commits `9a6b09e` +
 > `df5bf21`, testsvit 1507):** felrapporteringskedjan bevisad end-to-end fyra
 > gånger. #1 motspel: tredje hand vinner nu högt nog att TRÄKARLEN (som spelar
@@ -320,8 +338,8 @@ Slutförd FAS 3 (facit + `npm test`):
   `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **TP-steg E & F** — reverse/hoppskift på TP (E) + 3:e/4:e-hands lättöppning (F)
-   ur `docs/tp-arbetslista.md`. Kräver ägarens input (exempelhänder).
+1. **Felrapport #5** — öppen GitHub-issue: "Felaktig budgivning (bricka 8,
+   1♥ av S)" — körs med `/felrapporter`.
 2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
