@@ -22,16 +22,27 @@ slutanvändaren, facit/claim är begravda ett klick för djupt, och det finns in
 
 | # | Fynd | Prioritet | Lagat nu? |
 |---|------|-----------|-----------|
-| 1 | Ruter-orange under kontrastgränsen mot vita kortet (mätt 2.80:1) | MEDIUM | Nej – rör designtoken, kräver ägarens ja |
-| 2 | Utvecklarverktyget "Hålfinnare" syns för slutanvändaren i Budvisning | MEDIUM | Nej |
-| 3 | Ingen facit-/rätt-återkoppling på DINA egna bud/kort i Spela-läget | MEDIUM | Nej – delvis medvetet designval |
-| 4 | "Visa facit" och "Claim" ligger begravda i ⋮-menyn | LÅG | Nej |
-| 5 | Blockerande dialoger positioneras i filten, inte mot skärmen (`absolute` ej `fixed`) | LÅG | Nej |
-| 6 | Meny-/info-overlays i spelvyn saknar klick-utanför-för-att-stänga | LÅG | Nej |
-| 7 | Tre snarlika lägen + route-namn (`/spela` = "Budvisning") lätt att förväxla | LÅG | Nej |
-| 8 | Små kort (10 px valör), skalade 75 % i "Förra sticket" → tunn läsbarhet | LÅG | Nej |
+| 1 | Ruter-orange under kontrastgränsen mot vita kortet (mätt 2.80:1) | MEDIUM | ✅ Ja – orange-700 (5.18:1) |
+| 2 | Utvecklarverktyget "Hålfinnare" syns för slutanvändaren i Budvisning | MEDIUM | ✅ Ja – gömt bakom `import.meta.env.DEV` |
+| 3 | Ingen facit-/rätt-återkoppling på DINA egna bud/kort i Spela-läget | MEDIUM | ◑ Delvis – del 1 (budhint) gjord; del 2 (auto-facit) → SENARE, se nedan |
+| 4 | "Visa facit" och "Claim" ligger begravda i ⋮-menyn | LÅG | ✅ Ja – facit som direktknapp på bordet |
+| 5 | Blockerande dialoger positioneras i filten, inte mot skärmen (`absolute` ej `fixed`) | LÅG | ✅ Ja – `fixed inset-0 z-50` |
+| 6 | Meny-/info-overlays i spelvyn saknar klick-utanför-för-att-stänga | LÅG | ✅ Ja – osynlig backdrop stänger |
+| 7 | Tre snarlika lägen + route-namn (`/spela` = "Budvisning") lätt att förväxla | LÅG | ✅ Ja – route → `/budvisning`, 2×2 lägeskort på Home |
+| 8 | Små kort (10 px valör), skalade 75 % i "Förra sticket" → tunn läsbarhet | LÅG | ◑ 85 %-bump gjord, ⚠️ 375px-check utestående |
 
 Inga fynd klassade KRITISK eller HÖG.
+
+### Åtgärdsnoteringar (audit session 6)
+
+- **#3 del 2 (auto-facit på hela given): byggd, mätt, backad → SENARE.** Helgivens
+  double-dummy från utspelet är för tung för TS-lösaren: en probe på 80 riktiga
+  kontrakt gav **1 löst / 79 "för tung"** (~1,7 s var, spränger 2M-nodbudgeten).
+  Skulle frysa UI:t och nästan alltid visa "kunde inte räknas". Kräver webworker
+  (möjliga långa väntetider) eller snabbare lösare. Ägarbeslut: SENARE.
+- **#8: 375px-överlappskontrollen är utestående.** 85 %-ändringen är committad men
+  kunde inte ögonkollas på 375 px denna session (extern dev-server blockerade
+  förhandsvisningen). Måste verifieras innan merge; annars åter till 75 %.
 
 ---
 
