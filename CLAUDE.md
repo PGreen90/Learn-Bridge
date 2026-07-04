@@ -29,6 +29,13 @@ Läs den här filen först varje session.
 > för game try där — konventionens kända avvägning). Facit:
 > `auction-opener-competition.test.ts` (7 integrationstester). Se 👀 Bevaka nedan.
 >
+> **Sidospår klart & live (2026-07-04, mergepunkt `213d90e`):** felrapportering
+> inkopplad i **Budvisningen** (`Spela.tsx`) — knappen "Rapportera fel →" dyker upp
+> så snart auktionen budats färdigt (korten spelas aldrig där, så inga stick följer
+> med; kontraktet härleds ur buden). Samma `FelrapportDialog` som i Spela kort, men
+> med valfri bud-specifik text ("Rapportera fel i budgivningen" +
+> `BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
+>
 > **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** öppnarens rond-2 när partnern
 > bjöd NY färg / 1NT (ej höjning); balanseringens "låna en kung"-lättnad; bredare
 > flerronds-konkurrens. Delbit 3 (Mathe mot stark 1♣) förblir PARKERAD.

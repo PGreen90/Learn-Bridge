@@ -878,6 +878,16 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-04** – **Felrapportering i Budvisningen (mergepunkt `213d90e`, live).**
+  Samma `FelrapportDialog` som i Spela kort är nu inkopplad i Budvisningen
+  (`Spela.tsx`): knappen "Rapportera fel →" dyker upp så snart auktionen budats
+  färdigt – man behöver inte spela klart korten (görs ändå aldrig här).
+  Kontraktet härleds ur buden (`contractFromCalls`), inga stick följer med.
+  Dialogen fick valfria `title`/`intro`/`categories` så Budvisningen visar
+  bud-specifik text ("Rapportera fel i budgivningen" + `BIDDING_REPORT_CATEGORIES`:
+  Felaktig budgivning / Fel budförklaring / Fel slutkontrakt / Annat) utan att
+  röra Spela kort-varianten. UI/verktygsändring – ingen budregel påverkad; hela
+  sviten grön.
 - **2026-07-04** – **R1 Fynd #2 delbit 6: öppnarens rond-2 i inklämt konkurrens­läge**
   (hela sviten grön, gren `feat/opener-competition-round2`). Efter partnerns enkla
   högfärgshöjning i konkurrens (`1M–(inkliv)–2M–(deras inklämda bud)`) fattar

@@ -473,6 +473,15 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
   i kommandofilen och ändras ihop med `felrapport.test.ts`.
 - Verifierat i webbläsaren: båda flödena (färdigspelad + utpassad giv) ger
   korrekt URL till `PGreen90/Learn-Bridge/issues/new` med alla 13 stick.
+- **Även i Budvisningen (2026-07-04, live):** samma `FelrapportDialog` är
+  inkopplad i `Spela.tsx`. Knappen "Rapportera fel →" dyker upp så snart
+  auktionen budats färdigt (korten spelas aldrig i Budvisningen, så man behöver
+  inte spela klart först). Kontraktet härleds ur buden (`contractFromCalls`),
+  inga stick skickas med. Dialogen fick valfria `title`/`intro`/`categories` så
+  Budvisningen visar bud-specifik text ("Rapportera fel i budgivningen" +
+  `BIDDING_REPORT_CATEGORIES`: Felaktig budgivning / Fel budförklaring / Fel
+  slutkontrakt / Annat) utan att röra Spela kort-varianten. `category` vidgad
+  till `string`.
 - **Kvar (SENARE):** PAT-i-localStorage-varianten (skicka utan att öppna GitHub).
 
 ## Nästa steg (ur arbetslistan)
