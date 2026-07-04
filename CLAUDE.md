@@ -127,6 +127,14 @@ Läs den här filen först varje session.
 Interaktiv webbapp för att lära sig och spela bridge (kortspelet).
 Användaren ska kunna spela olika händer och lära sig olika budsystem.
 Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
+- **Appen heter `RebidZ`** i gränssnittet (ägarens eget namn, beslut 2026-07-02).
+  **Repo och URL förblir `Learn-Bridge`** (medvetet – byt inte). Ser du "RebidZ" i
+  koden och "Bridge-app" i äldre text är RebidZ det rätta produktnamnet.
+- **Designriktning (låst):** Synrey-inspirerat uttryck, **emerald-palett**, egen
+  stil tillåten bortom Synrey. **Spader är SVARTA (ägaröverride – ändra INTE
+  tillbaka till konventionell färg).** Läs de verkliga färgerna i `src/index.css`,
+  anta dem inte. Framtida plattform-ambition (konton/multiplayer): `docs/framtid-
+  multiplayer-plattform.md` = PARKERAT tills ägaren säger "kör".
 ## Vem jag bygger för
 Ägaren är nybörjare utan programmeringsbakgrund.
 - Förklara på enkel svenska. Inga tekniska termer utan förklaring.
@@ -200,8 +208,9 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   off-book kliver motståndarna in på RIKTIGT via `overcall` (`maybeOvercall` i
   `auction-live.ts`) i stället för att tystna – men bara DIREKT sits (motståndaren
   öppnade nyss 1 i färg, vår sida har inte sagt något). Inkliv/X/Michaels/ovanlig
-  2NT ur §7-motorn. **NÄSTA GÅNG STARTAR VI MED:** balansering (inkliv efter en
-  passrunda) + inkliv över andra öppningar (1NT/svaga tvåor) – sedan slam-quirken.
+  2NT ur §7-motorn. *(Balansering + inkliv över 1NT/svaga tvåor/spärrar byggdes
+  senare – R1 Fynd #2 delbit 1–2, live. Slam-quirken är en känd, laglig gräns, se
+  🅿️ PARKERAT. Vad som är NÄST styrs av projektkartan högst upp, inte av denna rad.)*
 - Budmotor byggs i `src/lib/engine/`, test-drivet (`npm test`).
 - **Innan du rör budlogik:** läs "Budmotorns tre auktionslager + `open`-handoff"
   i `docs/status.md` — det avgör om ny logik hör hemma i `auction.ts` (on-book),
