@@ -939,6 +939,55 @@ describe('Fynd #2 delbit 4 – svar när motståndaren stör vår öppning', () 
   })
 })
 
+// Fynd #2 delbit 5 – FORTSÄTTNING bortom en konkurrensrond (Case A): efter att vi
+// öppnat 1NT, motståndaren stört med DONT-X och partnern REDUBBLAT (XX = värden),
+// äger vår sida handen (15–17 + 8+ = 23+, majoriteten). Flyr motståndarna undan
+// XX:et till en färg ska vår sida STRAFFDUBBLA dem – varje steg – i stället för
+// att låta dem smita undubblat. Idag passar öppnaren flykten (auktionen dör efter
+// att XX-detektorn svarat en gång). Ägarbeslut 2026-07-04 (Case A).
+describe('Fynd #2 delbit 5 – straffdubbla flykten efter vår XX (Case A)', () => {
+  // Syd 1NT (16, jämn) · Väst DONT-X (6-korts hjärter enfärg, 9 hp) · Nord XX
+  // (9 hp, ingen 5-färg → värden) · Öst flyr (2♣-relä) → Syd ska X (straff).
+  const deal = dealOf('S', {
+    S: 'S:A83 H:K84 D:AQ76 C:K92',   // 16 hp, jämn → 1NT
+    W: 'S:4 H:KQJ962 D:K83 C:975',   // 6-korts hjärter enfärg, 9 hp → DONT X
+    N: 'S:Q92 H:52 D:KJ53 C:QJ84',   // 9 hp, ingen 5-färg → XX (värden)
+    E: 'S:KJT765 H:73 D:942 C:A6',
+  })
+
+  it('förutsättning: XX är reachable (buildAuction modellerar DONT-X, Nord XX:ar)', () => {
+    expect(buildAuction(deal)?.turns[0].call).toBe('1NT')
+    expect(buildAuction(deal)?.turns[1].call).toBe('X') // DONT-enfärg modelleras
+    expect(decideCall(deal, [call('S', '1NT'), call('W', 'X')], 'N'))
+      .toMatchObject({ bid: 'XX', rule: 'straff/värden' })
+  })
+
+  it('Syd (öppnaren) straffdubblar deras flykt: 1NT–(X)–XX–(2♣) → X', () => {
+    const history = [call('S', '1NT'), call('W', 'X'), call('N', 'XX'), call('E', '2C')]
+    const c = decideCall(deal, history, 'S')
+    expect(c.bid).toBe('X')
+    expect(c.rule).toBe('straffdubbling (vi äger handen)')
+  })
+
+  it('vi jagar dem: rättar de sig (2♥) dubblar Nord vidare', () => {
+    const history = [
+      call('S', '1NT'), call('W', 'X'), call('N', 'XX'),
+      call('E', '2C'), call('S', 'X'), call('W', '2H'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('X')
+    expect(c.rule).toBe('straffdubbling (vi äger handen)')
+  })
+
+  it('säkerhet: utan vår XX fyras inte straffregeln (ingen redubbling = ingen "äger handen")', () => {
+    // Vårt 1NT störs av DONT-2♥ (tvåfärg), Nord svarar naturligt/pass (INGEN XX).
+    // Flyr de vidare får straff-regeln INTE utlösas – vi har inte visat ägande.
+    const history = [call('S', '1NT'), call('W', '2H'), call('N', 'P'), call('E', 'P')]
+    const c = decideCall(deal, history, 'S')
+    expect(c.rule).not.toBe('straffdubbling (vi äger handen)')
+  })
+})
+
 // R1-fynd #5: answerTakeoutDouble antog att motståndarnas öppning låg på
 // 1-läget. När Syd (människan) upplysningsdubblar en SVAG TVÅA måste Nord svara
 // på 2-/3-läget – men motorn räknade fram 1-lägesbud (t.ex. 1♠), som är olagliga
