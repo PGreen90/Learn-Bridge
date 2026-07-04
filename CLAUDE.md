@@ -11,26 +11,23 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — R1 Fynd #2: bredda störd budgivning (delbit 6 byggd på gren, VÄNTAR MERGE)
-> **NÄSTA GÅNG börjar vi med:** merga grenen `feat/opener-competition-round2` (om
-> ägaren gett PCD-ok) och välj sedan nästa delbit av R1 #2, eller en annan punkt ur
-> R6:s handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
+### 🔵 NU — inget aktivt bygge. Ägaren väljer nästa delbit av R1 #2 (eller annat spår).
+> **NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln). Bra
+> kandidater: **nästa delbit av R1 #2** (se "Kvar" nedan) eller en punkt ur R6:s
+> handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
 >
-> **Läget (2026-07-04, audit session 9):** Hela revisionen R1–R6 är KLAR + live
-> (0 KRITISK, 2 HÖG båda i R1, 27/32 fynd lagade under revisionen; slutrapport
-> `docs/audit/SLUTRAPPORT.md`). Ägaren valde sedan att börja på **R1 Fynd #2 — den
-> generella flerronds-konkurrensen** (avblockerad: R2 #1 gjorde `decideCall`-kedjan
-> datadriven, R4 #4 dokumenterade tre-lager-kontraktet).
+> **Läget (2026-07-04, audit session 9 avslutad):** Hela revisionen R1–R6 KLAR +
+> live (0 KRITISK, 2 HÖG båda i R1, 27/32 fynd lagade; slutrapport
+> `docs/audit/SLUTRAPPORT.md`). Därefter startade R1 Fynd #2 (bredda störd
+> budgivning) och **delbit 6 är byggd, mergad (`ce7f1cd`) och LIVE.**
 >
-> **Delbit 6 KLAR på gren `feat/opener-competition-round2` (ej mergad — väntar
-> ägarens PCD-ok):** öppnarens rond-2-beslut i det INKLÄMDA konkurrensläget efter
+> **Delbit 6 (LIVE):** öppnarens rond-2 i det INKLÄMDA konkurrensläget efter
 > partnerns enkla högfärgshöjning (`1M–(inkliv)–2M–(deras inklämda bud)`): pass
 > (minimum) · 3M (6:e trumf, lagen om totala stick) · **X = MAXIMAL DUBBLING (game
 > try, 15–17)** · 4M (utgång, 18+); partnern svarar X:et 4M (accept, 8+ stöd) /
-> 3M (avböj). Skopat till det inklämda läget (cue > 3M → X blir game try). Två
-> detektorer i `decideCall`, FÖRE `maybePenaltyDouble` (X reserverat för game try
-> där — konventionens kända avvägning). Facit: `auction-opener-competition.test.ts`
-> (7 integrationstester). Hela sviten grön (`npm test`), tsc rent.
+> 3M (avböj). Två detektorer i `decideCall`, FÖRE `maybePenaltyDouble` (X reserverat
+> för game try där — konventionens kända avvägning). Facit:
+> `auction-opener-competition.test.ts` (7 integrationstester). Se 👀 Bevaka nedan.
 >
 > **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** öppnarens rond-2 när partnern
 > bjöd NY färg / 1NT (ej höjning); balanseringens "låna en kung"-lättnad; bredare
