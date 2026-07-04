@@ -48,6 +48,13 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Takeout-doublingar (felrapport #23 + tvåfärgs-X, 2026-07-05, NYTT):** (1) en
+  **17+ enfärgs-monster** upplysningsdubblar nu en öppning och visar sedan sin färg
+  via ett **monster-återbud** som hoppar till utgång (t.ex. (1♣)–X–…–4♠) — säg till
+  om det känns för aggressivt att jumpa hela vägen till game. (2) När motståndarna
+  bjudit **två färger** (1♦–P–1♥) dubblar en **4-4-hand (10+)** de objudna
+  färgerna; advancern svarar aldrig längre i deras egen färg. Regler i
+  `docs/budsystem.md` §7.3.
 - **Öppnarens rond-2 i inklämt konkurrensläge (R1 Fynd #2 delbit 6, NYTT):** efter
   `1M–(inkliv)–2M–(deras inklämda bud)` passar öppnaren inte längre blint. Med
   minimum + 6:e trumf konkurrerar den 3M; med utgångsintresse (~15–17) dubblar den
@@ -90,6 +97,14 @@ Läs den här filen först varje session.
 1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **17+ enfärgs-monster EFTER två bjudna färger (takeout, 2026-07-05):** en 17+
+  enfärgshand som borde upplysningsdubbla när motståndarna redan bjudit två färger
+  (t.ex. 1♦–P–1♥) gör det INTE — där följer `decideCall` en färdig buildAuction-
+  linje som passar handen, så live-hanteraren (`maybeTakeoutOfResponse`, som bara
+  gör 4-4) når aldrig fram. Att tvinga monster-dubbling där kräver att den
+  generativa linjen i `auction.ts` (`buildAuction`) modellerar inklivet — ett
+  grundläggande ingrepp. Öppningsfallet + 4-4-fallet är klara & live (felrapport
+  #23, §7.3). Plockas upp om en giv bevisar att luckan svider.
 - **Auto-facit på hela given i webworker (R3 fynd #3 del 2):** visa spelförarens
   double-dummy-optimum automatiskt i resultatdialogen. Byggdes synkront men
   backades — helgivs-DDS från utspelet är för tung (probe: 79/80 kontrakt gav upp

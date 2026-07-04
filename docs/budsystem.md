@@ -776,6 +776,15 @@ okänd minor – utan högfärgsfit bjuder advancern då ostört 3♣ pass-eller
   formen är perfekt – max 2 i deras färg, stöd i alla objudna och **ingen egen
   5-korts färg** (då inkliver vi hellre). Jämna händer utan korthet dubblar aldrig
   under öppningsstyrka.
+  - **17+ monster (ägarbeslut 2026-07-05, felrapport #23):** en hand med **17+ hp
+    och en egen lång färg** är för stark för ett enkelt inkliv (partnern kan passa
+    inklivet → kall utgång missas). Den **dubblar först** (upplysning, valfri form)
+    och "överröstar" sedan partnern genom att **bjuda/hoppa i sin egen färg** — då
+    är den starka enfärgshanden signalerad. *Ex:* (1♣)–X–(P)–1♥–(P)–4♠.
+  - **Två färger redan bjudna (ägarbeslut 2026-07-05):** när motståndarna bjudit
+    öppning + svar i **två** färger (t.ex. 1♦–(P)–1♥) lovar X **4+ 4+ i de två
+    objudna färgerna** (äkta 4-4 – partnern har bara två färger att välja mellan),
+    10+ hp. Advancern svarar aldrig i en av deras bjudna färger.
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
   upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
   ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Öppnaren svarar som på en upplysningsdubbling.
@@ -877,6 +886,17 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-05** – **Felrapporter #20/#22/#23 + takeout-utbyggnad (live).** Fyra
+  felrapporter avklarade: **#20** DONT-advancern relä:ar 2♦ (pass-eller-rätta) i
+  stället för att passa singel-klöver, och inklivaren rättar till sin högre färg;
+  **#22** stark svarare (19+ hp) tar utgång även mittemot en minimum-Ogust (4M med
+  fit, annars 3NT); **#21** stängd som "inget fel" (botens pass var sund bridge);
+  **#23** 17+ enfärgs-monster upplysningsdubblar och visar sedan sin färg via ett
+  **monster-återbud** → når 4♠ (se §7.3). Samtidigt byggd **tvåfärgs-takeout**
+  (1♦–P–1♥–X = 4+4+ i objudna, §7.3) och en takeout-bugg lagad: advancern kunde
+  förr svara i motståndarnas egen färg – nu utesluts alla bjudna färger. **Medvetet
+  EJ byggt:** den rena 17+-enfärgsmonstern *efter två bjudna färger* (kräver ändring
+  i buildAuction-linjen – framtida jobb). Hela sviten grön, tsc rent.
 - **2026-07-04** – **Felrapportering i Budvisningen (mergepunkt `213d90e`, live).**
   Samma `FelrapportDialog` som i Spela kort är nu inkopplad i Budvisningen
   (`Spela.tsx`): knappen "Rapportera fel →" dyker upp så snart auktionen budats
