@@ -57,9 +57,24 @@ och NT-buggen kan lagas i en liten, säker fix (facit först).
     (`maybeOvercall`). Funktionen är färdig + enhetstestad och plockas upp först
     den dag appen får FLER budsystem (t.ex. stark klöver/Precision). Se PARKERAT
     i `CLAUDE.md`.
-  - Delbit 4 (konkurrens efter VÅRA 1NT/2♣/svaga/spärr – NÄSTA) och delbit 5
-    (fortsättningar bortom en rond) – kvarstår.
-Baslinje efter fixarna + delbit 1 + delbit 2: **1639 tester gröna**.
+  - **Delbit 4 KLAR (väg A)** (`+ contested-openings`): svararen svarar nu när
+    MOTSTÅNDAREN stör VÅR icke-1-färgs-öppning, i stället för att passa. Ny modul
+    `contested-openings.ts` (`answerNTInterference` + `answerPreemptInterference`)
+    inkopplad i `decideCall` via två detektorer (`ntInterferenceToAnswer`,
+    `ownPreemptInterferenceToAnswer`). **Reachability-fynd (avgörande för scope):**
+    appen modellerar bara DONT-störning över vårt 1NT (deras X-relä / 2-lägesbud)
+    och takeout-X/inkliv över vår svaga tvåa/spärr; NATURLIGT 1NT-inkliv och
+    störning av vårt 2♣ skapas aldrig. Ägaren valde väg A: bygg bara det som
+    faktiskt nås → Lebensohl/negativ-X-över-naturligt-1NT-inkliv och 2♣-störning
+    byggdes MEDVETET inte (skulle bli död kod – exakt Fynd #4:s antimönster).
+    Schema (ägarbeslut 2026-07-04): över DONT-störning av 1NT = X/XX straff/värden
+    (golv 8), egen 5+ färg naturligt, annars pass; över takeout-X av svag tvåa/spärr
+    = XX värden (golv 10), fit = fortsatt spärrhöjning, annars pass. Facit: 12
+    enhetstester (`contested-openings.test.ts`) + 2 integrationstester i
+    `auction-live.test.ts` som bevisar att verktygen NÅS live. 1653 gröna.
+  - Delbit 5 (fortsättningar bortom en rond) – kvarstår.
+Baslinje efter fixarna + delbit 1 + delbit 2: 1639 tester gröna. Efter delbit 4:
+**1653 tester gröna**.
 
 ---
 
