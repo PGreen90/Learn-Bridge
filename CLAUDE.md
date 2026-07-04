@@ -11,29 +11,28 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — R5 (Git, deployment & process) KLAR på gren, VÄNTAR MERGE
-> **NÄSTA GÅNG börjar vi med: R6 — slutrapporten** (sista revisionssteget,
-> `AUDIT_PROMPTS.md`; väger ihop R1–R5 till `docs/audit/SLUTRAPPORT.md`). Full bild
-> av R5: **`docs/audit/r5-git-deploy.md`**.
+### 🔵 NU — REVISIONEN R1–R6 KLAR + LIVE. Väntar ägarens val av nästa NU.
+> **NÄSTA GÅNG börjar vi med: ägaren väljer nästa fokus ur R6:s handlingsplan**
+> (`docs/audit/SLUTRAPPORT.md`) eller NÄST-listan nedan. Just nu är inget bygge
+> aktivt — järnregeln säger att ägaren pekar ut nästa NU (en sak), inte Claude.
 >
-> **Läget (2026-07-04, audit session 8):** R1 klar. R2 klar + live. R3 klar + live.
-> **R4 klar + live** (mergad `24a129e`). **R5 klar på gren `audit/r5-git-deploy`
-> (ej mergad — väntar ägarens PCD-ok):** git-hantverket är starkt (små spårbara
-> commits, `--no-ff`-merge per funktion, reproducerbar deploy), inga KRITISK/HÖG.
-> 5 fynd, alla MEDIUM/LÅG, ägaren valde "laga alla":
-> **#1** deployen körde inte tester/typkoll → nu en `test`-grind (`npx tsc` +
-> `npm test`) som build/deploy beror på; **#2** vaktest låser Vite `base`
-> (`src/deploy-config.test.ts`); **#3** vitest scannade in parallella
-> `.claude/worktrees/` (dubbelkörda tester) → uteslutet + DDS-testet fick robust
-> 30 s-timeout; **#4** rollback/"senast gröna live" dokumenterat i CLAUDE.md;
-> **#5** `cancel-in-progress` = observation (ingen åtgärd). **Testsviten grön
-> (`npm test`)** efter fixarna; kodfixarna rör bara CI/testinfra, inte budmotorn.
+> **Läget (2026-07-04, audit session 9):** Hela revisionen är KLAR och mergad.
+> R1 klar + live. R2 klar + live. R3 klar + live. R4 klar + live. R5 klar + live.
+> **R6 (slutrapporten) klar + live** — `docs/audit/SLUTRAPPORT.md`. Resultat över
+> alla steg: **0 KRITISK, 2 HÖG** (båda i R1), 16 MEDIUM, 14 LÅG = 32 fynd, varav
+> **27 lagade under revisionen**. Grunden bedöms sund (ren motor, enhetligt UI, rik
+> dok, pålitlig deploy). Audit-grenarna städade efter merge.
 >
-> **Delbit 3 (Mathe mot stark 1♣) är PARKERAD (ägarbeslut 2026-07-04)** — sparad
-> som framtidsidé, se 🅿️ PARKERAT nedan.
+> **Det enda stora som återstår (ägarstyrt, ej aktivt):** R1 Fynd #2 — den GENERELLA
+> flerronds-konkurrensen bortom Case A. **Nu AVBLOCKERAD:** R2 #1 gjorde
+> `decideCall`-kedjan datadriven och R4 #4 dokumenterade tre-lager-kontraktet, så
+> bredd kan byggas utan att öka skulden R1/R2 varnade för. Byggs delbit för delbit
+> med exempelhänder + ägarens ja + ett integrationstest per konvention. Delbit 3
+> (Mathe mot stark 1♣) förblir PARKERAD tills fler budsystem läggs till.
 >
-> **Kvar sedan tidigare:** den GENERELLA flerronds-konkurrensen bortom Case A
-> (R1 Fynd #2) — medvetet uppskjuten. Ägaren valde "bygg hela #2, delbit för delbit".
+> **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
+> kräver webworker), R3 #8 ("Förra sticket" 85 % — 375px-koll utestående). Se
+> ⚪ SENARE nedan.
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
