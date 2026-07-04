@@ -12,26 +12,34 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — Projektrevision R1 pågår (delen som är klar är MERGAD + LIVE)
-> **NÄSTA GÅNG börjar vi med: Fynd #2 delbit 2** — takeout/Lebensohl mot deras
-> svaga tvåor/spärrar (ny gren `audit/r1-fynd2-delbit2`; starta med exempelhänder
-> + fråga ägaren om trösklarna, precis som DONT-golvet). Full bild:
-> **`docs/audit/r1-budsystem.md`**.
+> **NÄSTA GÅNG börjar vi med: Fynd #2 delbit 4** — konkurrens efter VÅRA
+> icke-1-färgs-öppningar (1NT/2♣/svaga tvåor/spärr). Delbit 3 (Mathe mot deras
+> stark 1♣) hoppas troligen över: bottarna öppnar aldrig stark konstgjord 1♣ i
+> det här systemet (2♣ = stark), så Mathe är utanför omfånget — bekräfta med
+> ägaren och gå vidare till delbit 4. Starta som förut: exempelhänder + fråga
+> ägaren om trösklarna. Full bild: **`docs/audit/r1-budsystem.md`**.
 >
 > **Läget (2026-07-04):** R1-rapporten skriven; fynd #1/#3/#4/#5 lagade (facit
-> först); **Fynd #2 (§7-konkurrens) delbit 1/5 klar** — DONT mot deras 1NT
-> inkopplad (golv 8 hp direkt / 6 hp balansering; ägarbeslut). Allt detta är
-> **mergat till main och deployat live** (2026-07-04, 1635 tester gröna).
-> **Kvar av #2:** delbit 2 (takeout/Lebensohl mot svaga/spärr), 3 (Mathe mot
-> deras 1♣), 4 (konkurrens efter VÅRA 1NT/2♣/svaga), 5 (fortsättningar bortom en
-> rond). Ägaren valde "bygg hela #2, delbit för delbit".
+> först); **Fynd #2 (§7-konkurrens) delbit 1 + 2 klara.** Delbit 1 = DONT mot
+> deras 1NT (golv 8/6). Delbit 2 = takeout/Lebensohl mot deras svaga tvåor +
+> spärrar (golv 12 ej sårbar / 13 sårbar direkt, 10 balansering; spärr-X kvar på
+> 14). **1639 tester gröna**, mergat + live (2026-07-04).
+> **Kvar av #2:** delbit 3 (Mathe – troligen inaktuell), 4 (konkurrens efter
+> VÅRA 1NT/2♣/svaga), 5 (fortsättningar bortom en rond). Ägaren valde "bygg hela
+> #2, delbit för delbit".
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **DONT mot deras 1NT (R1 Fynd #2 delbit 1, NYTT):** bottarna stör nu deras
+- **DONT mot deras 1NT (R1 Fynd #2 delbit 1):** bottarna stör nu deras
   1NT-öppning med DONT (X/2-läget) — golv 8 hp direkt, 6 hp balansering. Säg till
   om det känns för aggressivt/passivt.
+- **Försvar mot deras svaga tvåor/spärrar (R1 Fynd #2 delbit 2, NYTT):** bottarna
+  kliver nu in mot motståndarnas svaga 2♦/2♥/2♠ och spärrar (3-läget+) — takeout-X,
+  2NT (15–18), cue, naturligt, 3NT. Golv för takeout-X: 12 hp ej sårbar / 13 sårbar
+  direkt, 10 hp balansering; mot spärr 14 hp (medvetet stramare — säg till om du
+  vill lätta även spärr-balanseringen).
 - **Straffdubbling mot ägaren:** bottarna kan nu straffdubbla ÄGAREN vid
   offringar på 3-läget+ (poängsystemet). Säg till om det känns för aggressivt.
 - **Essfrågor utan formell trumf / toppsekvenser andra hand / 4M-pass efter
