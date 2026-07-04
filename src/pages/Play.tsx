@@ -768,13 +768,14 @@ function PlayTable({
         )}
       </div>
 
-      {/* Förra sticket i miniatyr uppe i hörnet — förminskad (85 %, R3-fynd #8:
-          bump från 75 % för läsbarhet) och ankrad så den går fri från det
-          pågående stickets V/Ö-kort även på 375 px; flyttar till vänstra hörnet
-          när Öst-träkarlen behöver högersidan. */}
+      {/* Förra sticket i miniatyr uppe i hörnet — förminskad (75 %) och ankrad
+          så den går fri från det pågående stickets V/Ö-kort även på 375 px;
+          flyttar till vänstra hörnet när Öst-träkarlen behöver högersidan.
+          (R3-fynd #8: en 85%-bump provades men backades – 375px-överlappet
+          kunde inte verifieras; tas om när mobil-preview är tillgänglig.) */}
       {play.completedTricks.length > 0 && (
         <div
-          className={`absolute z-10 scale-[0.85] ${
+          className={`absolute z-10 scale-75 ${
             eastOpen ? 'left-2.5 top-2.5 origin-top-left' : 'right-2.5 top-13 origin-top-right'
           }`}
         >
