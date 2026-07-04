@@ -203,6 +203,9 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   2NT ur §7-motorn. **NÄSTA GÅNG STARTAR VI MED:** balansering (inkliv efter en
   passrunda) + inkliv över andra öppningar (1NT/svaga tvåor) – sedan slam-quirken.
 - Budmotor byggs i `src/lib/engine/`, test-drivet (`npm test`).
+- **Innan du rör budlogik:** läs "Budmotorns tre auktionslager + `open`-handoff"
+  i `docs/status.md` — det avgör om ny logik hör hemma i `auction.ts` (on-book),
+  `auction-live.ts` (konkurrens/off-book) eller `auction-interpret.ts` (förklaring).
 - Detaljerad implementationsstatus: **`docs/status.md`**
 - Byggordning framåt: **`docs/arbetslista.md`** (NB: pivoten ovan går före den gamla
   FAS-ordningen i felsökningsplanen).
