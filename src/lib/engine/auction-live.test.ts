@@ -846,3 +846,24 @@ describe('R1-fynd #4 – dokumenterad §7-inkopplingslucka (flippar när Fynd #2
     expect(decideCall(deal, [call('E', '2S')], 'S').bid).toBe('P') // LUCKA: ingen takeout-X
   })
 })
+
+// R1-fynd #5: answerTakeoutDouble antog att motståndarnas öppning låg på
+// 1-läget. När Syd (människan) upplysningsdubblar en SVAG TVÅA måste Nord svara
+// på 2-/3-läget – men motorn räknade fram 1-lägesbud (t.ex. 1♠), som är olagliga
+// över 2♥, varpå anroparens laglighetsvakt släppte budet och Nord PASSADE bort
+// partnerns rondkrav. Facit: Nord bjuder sin bästa färg på lägsta lagliga nivå.
+describe('R1-fynd #5 – svar på takeout-X av en svag tvåa (ej 1-lägesantagande)', () => {
+  const deal = dealOf('E', {
+    E: 'S:5 H:KQ9832 D:K3 C:9762',   // 6-korts hjärter ~8 hp → svag 2♥
+    S: 'S:AQ2 H:5 D:AQ84 C:AKJ3',    // kort hjärter, 19 hp, stöd i övriga → X (takeout)
+    N: 'S:QJ92 H:64 D:8732 C:642',   // ~3 hp, 4 spader → tvingas svara 2♠
+    W: 'S:KT8743 H:JT7 D:JT C:QT',
+  })
+
+  it('E 2♥ – (S X) – (W P) – N 2♠ (tvunget svar, EJ pass)', () => {
+    const history = [call('E', '2H'), call('S', 'X'), call('W', 'P')]
+    expect(buildAuction(deal)?.turns[0].call).toBe('2H') // förutsättning: svag 2♥
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('2S')
+  })
+})

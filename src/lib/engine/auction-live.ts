@@ -127,19 +127,24 @@ const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'he
  *  - motståndarna har öppnat i en färg (den dubblade färgen).
  * Returnerar deras (dubblade) färg, annars null (= ingen påtvingad svarsplikt).
  */
-function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Suit; level: number } | null {
   const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
   // Senaste icke-pass måste vara PARTNERNS dubbling (annars: RHO bjöd → ej tvång).
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
   // Har vår sida redan bjudit ett kontraktsbud är X:et inte en ren take-out.
   if (history.some((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))) return null
-  // Deras dubblade färg = senaste kontraktsbudet (öppningen) på motståndarsidan.
-  let theirSuit: Suit | null = null
+  // Deras dubblade färg + nivå = senaste kontraktsbudet (öppningen) på
+  // motståndarsidan. Nivån behövs så svaret hamnar lagligt även när en SVAG TVÅA
+  // dubblats (R1-fynd #5). Ett NT-bud är ingen take-out-färg → hoppas över.
+  let their: { suit: Suit; level: number } | null = null
   for (const c of history) {
     const cb = parseContractBid(c.bid)
-    if (cb && side(c.seat) !== side(seat)) theirSuit = SUIT_OF_LETTER[cb.strain] ?? null
+    if (cb && side(c.seat) !== side(seat)) {
+      const suit = SUIT_OF_LETTER[cb.strain]
+      if (suit) their = { suit, level: cb.level }
+    }
   }
-  return theirSuit
+  return their
 }
 
 /**
@@ -840,9 +845,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   // Linjen gäller inte här (slut eller off-book): en upplysningsdubbling från
   // partnern tvingar fram ett svar (partnern får inte lämnas att passa
   // take-out-dubbla bort kontraktet).
-  const theirSuit = takeoutDoubleToAnswer(history, seat)
-  if (theirSuit) {
-    const ans = answerTakeoutDouble(deal.hands[seat], theirSuit)
+  const takeout = takeoutDoubleToAnswer(history, seat)
+  if (takeout) {
+    const ans = answerTakeoutDouble(deal.hands[seat], takeout.suit, takeout.level)
     if (legalCalls(history, seat).includes(ans.call as Bid)) {
       return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
     }
