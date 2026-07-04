@@ -8,7 +8,7 @@ import type { Card, Deal, Hand, Rank, Seat, Suit, Vulnerability } from '../types
 import { SEAT_LABEL, type ResolvedCall } from './bidding'
 import { side, type Contract, type Trick } from './engine/play'
 
-/** Kategorierna ägaren kan välja i rapportdialogen. */
+/** Kategorierna ägaren kan välja i rapportdialogen från Spela kort (hela given). */
 export const REPORT_CATEGORIES = [
   'Felaktig budgivning',
   'Fel budförklaring',
@@ -18,6 +18,17 @@ export const REPORT_CATEGORIES = [
 ] as const
 export type ReportCategory = (typeof REPORT_CATEGORIES)[number]
 
+/**
+ * Kategorierna i Budvisningen: där spelas korten aldrig, så bara rent
+ * budgivningsspecifika alternativ (+ "Annat") visas — inga stick/resultat.
+ */
+export const BIDDING_REPORT_CATEGORIES = [
+  'Felaktig budgivning',
+  'Fel budförklaring',
+  'Fel slutkontrakt',
+  'Annat',
+] as const
+
 export interface FelrapportInput {
   deal: Deal
   calls: ResolvedCall[]
@@ -25,7 +36,8 @@ export interface FelrapportInput {
   contract: Contract | null
   /** Färdigspelade stick, i ordning (tom lista om inget spelats). */
   tricks: Trick[]
-  category: ReportCategory
+  /** Vald kategori (ur REPORT_CATEGORIES eller BIDDING_REPORT_CATEGORIES). */
+  category: string
   description: string
 }
 

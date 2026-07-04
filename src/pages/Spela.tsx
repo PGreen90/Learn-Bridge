@@ -4,7 +4,7 @@ import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening, isVulnerable } from '../lib/engine/openings'
 import { dealWithAuction } from '../lib/engine/auction'
-import { auctionComplete, decideCall, seatToAct } from '../lib/engine/auction-live'
+import { auctionComplete, contractFromCalls, decideCall, seatToAct } from '../lib/engine/auction-live'
 import { hcp } from '../lib/engine/hand'
 import { surveyOpenings, surveyResponses, type OpeningSurvey, type ResponseSurvey } from '../lib/engine/survey'
 import { bySuit, HAND_SUITS } from '../lib/cardLayout'
@@ -17,6 +17,8 @@ import { SideStack } from '../components/SideStack'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 import { SuitText } from '../components/SuitText'
+import { FelrapportDialog } from '../components/FelrapportDialog'
+import { BIDDING_REPORT_CATEGORIES } from '../lib/felrapport'
 
 // Budvisningen (omgjord 2026-07-02, ägarbeslut: "så likt Spela kort som
 // möjligt"): ETT grönt bord med alla fyra händer öppna — Nord solfjäder uppe,
@@ -63,8 +65,13 @@ export function Spela() {
   const [respSurvey, setRespSurvey] = useState<ResponseSurvey | null>(null)
   // Antal bud som hittills lagts på bordet (uppspelningen).
   const [shown, setShown] = useState(0)
+  // Felrapport-dialogen (samma som i Spela kort): öppnas när auktionen är klar.
+  const [reporting, setReporting] = useState(false)
 
   const calls = useMemo(() => buildFullAuction(deal), [deal])
+  // Slutkontraktet ur den färdiga auktionen (null = given passades ut) — följer
+  // med felrapporten så den blir lika komplett som en rapport från Spela kort.
+  const contract = useMemo(() => contractFromCalls(calls), [calls])
   // Öppnaren = första platsen som inte passar; svararen = öppnarens partner.
   const openerSeat = calls.find((c) => c.bid !== 'P')?.seat ?? null
   const responderSeat = openerSeat ? PARTNER[openerSeat] : null
@@ -83,6 +90,7 @@ export function Spela() {
   function loadDeal(d: Deal) {
     setDeal(d)
     setShown(0)
+    setReporting(false)
   }
 
   return (
@@ -108,6 +116,14 @@ export function Spela() {
         {!playing && calls.length > 0 && (
           <Button variant="secondary" onClick={() => setShown(0)}>
             Spela upp igen
+          </Button>
+        )}
+        {/* Så snart budgivningen är klar går det att felrapportera given — här
+            behöver man alltså inte spela klart korten först (görs ändå inte i
+            Budvisningen). Samma dialog + förifyllda GitHub-issue som Spela kort. */}
+        {!playing && calls.length > 0 && (
+          <Button variant="secondary" onClick={() => setReporting(true)}>
+            Rapportera fel →
           </Button>
         )}
       </div>
@@ -168,6 +184,21 @@ export function Spela() {
           </div>
         </div>
       </Felt>
+
+      {/* Felrapporten: hela given + auktionen (kontrakt härlett ur buden, inga
+          stick eftersom Budvisningen inte spelar korten) → förifylld GitHub-issue. */}
+      {reporting && (
+        <FelrapportDialog
+          deal={deal}
+          calls={calls}
+          contract={contract}
+          tricks={[]}
+          onClose={() => setReporting(false)}
+          title="Rapportera fel i budgivningen"
+          intro="Hela given (händerna och budgivningen) följer med automatiskt. Korten spelas inte i Budvisningen, så inga stick skickas med."
+          categories={BIDDING_REPORT_CATEGORIES}
+        />
+      )}
 
       {/* Fördjupningen: poänguträkningar + alla budförklaringar i läsform. */}
       <details className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900">
