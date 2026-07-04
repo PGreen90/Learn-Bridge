@@ -49,9 +49,16 @@ och NT-buggen kan lagas i en liten, säker fix (facit först).
     bevakas). Svaret på partnerns takeout-X rider på Fynd #5:s level-medvetna
     `answerTakeoutDouble`. Mathe/Multi träddes INTE in (bottarna öppnar aldrig
     stark 1♣/Multi 2♦ → utanför omfånget). 1639 gröna.
-  - Delbit 3 (Mathe mot deras 1♣ – troligen inaktuell, se ovan), delbit 4
-    (konkurrens efter VÅRA 1NT/2♣/svaga/spärr), delbit 5 (fortsättningar bortom
-    en rond) – kvarstår.
+  - **Delbit 3 (Mathe mot stark 1♣) PARKERAD som framtidsidé** (ägarbeslut
+    2026-07-04). Skälet: i vårt 2/1-system är 1♣ en NATURLIG öppning och den
+    starka handen öppnar 2♣ (`openings.ts`: `stark 2♣, konstgjord`), så en stark
+    konstgjord 1♣ finns aldrig på bordet → `defendStrongClub` har inget läge att
+    utlösas i, och mot naturlig 1♣ räcker de redan inkopplade vanliga inkliven
+    (`maybeOvercall`). Funktionen är färdig + enhetstestad och plockas upp först
+    den dag appen får FLER budsystem (t.ex. stark klöver/Precision). Se PARKERAT
+    i `CLAUDE.md`.
+  - Delbit 4 (konkurrens efter VÅRA 1NT/2♣/svaga/spärr – NÄSTA) och delbit 5
+    (fortsättningar bortom en rond) – kvarstår.
 Baslinje efter fixarna + delbit 1 + delbit 2: **1639 tester gröna**.
 
 ---

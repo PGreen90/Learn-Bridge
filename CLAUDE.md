@@ -13,20 +13,22 @@ Läs den här filen först varje session.
 
 ### 🔵 NU — Projektrevision R1 pågår (delen som är klar är MERGAD + LIVE)
 > **NÄSTA GÅNG börjar vi med: Fynd #2 delbit 4** — konkurrens efter VÅRA
-> icke-1-färgs-öppningar (1NT/2♣/svaga tvåor/spärr). Delbit 3 (Mathe mot deras
-> stark 1♣) hoppas troligen över: bottarna öppnar aldrig stark konstgjord 1♣ i
-> det här systemet (2♣ = stark), så Mathe är utanför omfånget — bekräfta med
-> ägaren och gå vidare till delbit 4. Starta som förut: exempelhänder + fråga
-> ägaren om trösklarna. Full bild: **`docs/audit/r1-budsystem.md`**.
+> icke-1-färgs-öppningar (1NT/2♣/svaga tvåor/spärr). Starta som förut:
+> exempelhänder + fråga ägaren om trösklarna. Full bild:
+> **`docs/audit/r1-budsystem.md`**.
+>
+> **Delbit 3 (Mathe mot stark 1♣) är PARKERAD (ägarbeslut 2026-07-04)** — sparad
+> som framtidsidé, se 🅿️ PARKERAT nedan. Bygg den INTE nu; hoppa direkt till
+> delbit 4.
 >
 > **Läget (2026-07-04):** R1-rapporten skriven; fynd #1/#3/#4/#5 lagade (facit
 > först); **Fynd #2 (§7-konkurrens) delbit 1 + 2 klara.** Delbit 1 = DONT mot
 > deras 1NT (golv 8/6). Delbit 2 = takeout/Lebensohl mot deras svaga tvåor +
 > spärrar (golv 12 ej sårbar / 13 sårbar direkt, 10 balansering; spärr-X kvar på
 > 14). **1639 tester gröna**, mergat + live (2026-07-04).
-> **Kvar av #2:** delbit 3 (Mathe – troligen inaktuell), 4 (konkurrens efter
-> VÅRA 1NT/2♣/svaga), 5 (fortsättningar bortom en rond). Ägaren valde "bygg hela
-> #2, delbit för delbit".
+> **Kvar av #2:** delbit 4 (konkurrens efter VÅRA 1NT/2♣/svaga — NÄSTA), 5
+> (fortsättningar bortom en rond). Delbit 3 parkerad (ovan). Ägaren valde "bygg
+> hela #2, delbit för delbit".
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
@@ -81,6 +83,17 @@ Läs den här filen först varje session.
   BYGGD 2026-07-03 via felrapport #5 — kvar här: "låna en kung"-lättnaden,
   dvs. lättare krav i balanseringssits än direkt sits).
 - **"Framkalla slutbud"-väljaren** (ägaridé) + **webworker för DDS-facit**.
+- **Mathe mot stark konstgjord 1♣ (R1 Fynd #2 delbit 3) — FRAMTIDSIDÉ, ägarbeslut
+  2026-07-04.** Funktionen `defendStrongClub` (`defense-conventional.ts`) är
+  färdig + enhetstestad men medvetet EJ inkopplad, för i vårt 2/1-system är 1♣
+  en NATURLIG öppning (den starka handen öppnar 2♣) → en stark konstgjord 1♣ kan
+  aldrig dyka upp, så Mathe har inget läge att utlösas i. Mot naturlig 1♣ räcker
+  vanliga inkliv/upplysningsdubbling (redan inkopplat via `maybeOvercall`).
+  **Plockas upp först den dag vi lägger till FLER budsystem** (t.ex. stark klöver/
+  Precision) — då blir den relevant, antingen för att bottarna spelar systemet
+  själva eller möter en motståndare som gör det. Kopplas då in på samma sätt som
+  DONT/svaga-två-försvaret (detektor i `buildAuction`). Se
+  `docs/audit/r1-budsystem.md` (Fynd #2, delbit 3).
 
 ## Arbetsrutiner (följ varje gång)
 - **Vid sessionsstart:** följ 🟢-checklistan i `docs/arbetsrutiner.md`.
