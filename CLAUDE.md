@@ -11,13 +11,27 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — (tomt — väljs vid nästa sessionsstart)
-> **NÄSTA GÅNG:** visa 🟢 NÄST-listan och låt ägaren välja nästa NU.
+### 🔵 NU — Projektrevision R1 pågår (gren `audit/r1-budsystem`, EJ mergad)
+> **NÄSTA GÅNG börjar vi med: Fynd #2 delbit 2** — takeout/Lebensohl mot deras
+> svaga tvåor/spärrar (starta med exempelhänder + fråga ägaren om trösklarna,
+> precis som DONT-golvet). Fullständig lägesbild: **`docs/audit/r1-budsystem.md`**.
+>
+> **Läget (2026-07-04):** R1-rapporten skriven; fynd #1/#3/#4/#5 lagade (facit
+> först, separata commits); **Fynd #2 (§7-konkurrens) delbit 1/5 klar** — DONT
+> mot deras 1NT inkopplad (golv 8 hp direkt / 6 hp balansering; ägarbeslut).
+> **Kvar av #2:** delbit 2 (takeout/Lebensohl mot svaga/spärr), 3 (Mathe mot
+> deras 1♣), 4 (konkurrens efter VÅRA 1NT/2♣/svaga), 5 (fortsättningar bortom en
+> rond). Ägaren valde "bygg hela #2, delbit för delbit".
+> **Öppet ägarbeslut:** grenen `audit/r1-budsystem` är EJ pushad/mergad (fråga-
+> innan-PCD) — ägaren godkänner merge till main när R1 är klar. 1635 tester gröna.
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **DONT mot deras 1NT (R1 Fynd #2 delbit 1, NYTT):** bottarna stör nu deras
+  1NT-öppning med DONT (X/2-läget) — golv 8 hp direkt, 6 hp balansering. Säg till
+  om det känns för aggressivt/passivt.
 - **Straffdubbling mot ägaren:** bottarna kan nu straffdubbla ÄGAREN vid
   offringar på 3-läget+ (poängsystemet). Säg till om det känns för aggressivt.
 - **Essfrågor utan formell trumf / toppsekvenser andra hand / 4M-pass efter
