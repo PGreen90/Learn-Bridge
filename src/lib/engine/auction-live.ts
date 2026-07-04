@@ -893,6 +893,35 @@ function ownPreemptInterferenceToAnswer(
   return { ourSuit, ourLevel: open.level, theirCall: lastNonPass.bid }
 }
 
+/**
+ * Case A (Fynd #2 delbit 5): FORTSÄTTNINGEN efter vårt 1NT + partnerns värde-XX.
+ * Har motståndaren stört vårt 1NT med DONT och partnern REDUBBLAT (XX = 8+ hp,
+ * delbit 4) äger vår sida handen: 1NT (15–17) + XX (8+) = 23+, majoriteten. Flyr
+ * de då undan till en färg straffdubblar vi dem – VARJE steg, tills de får spela
+ * dubblat. Utan detta passar öppnaren flykten (auktionen dör efter att XX-
+ * detektorn svarat en gång). Kraven:
+ *  - auktionens öppning är VÅRT 1NT (första kontraktsbud, vår sida, 1NT),
+ *  - vår sida har ett XX i historiken (enda vägen dit är värde-XX:et över deras
+ *    DONT-X – XX kan inte uppstå på annat sätt efter vårt eget 1NT),
+ *  - senaste icke-pass är motståndarnas FÄRGkontraktsbud (deras flykt – DONT
+ *    flyr aldrig till NT), och X är lagligt för oss nu.
+ * Returnerar deras flyktfärg + nivå, annars null. INGEN handkvalitetsgrind:
+ * mönstret garanterar att vi äger balansen, så dubblingen är korrekt oavsett
+ * vilken av våra två händer som råkar vara i tur (öppnaren eller XX-svararen).
+ */
+function runoutAfterOurRedouble(history: ResolvedCall[], seat: Seat): { suit: Suit; level: number } | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1) return null
+  if (side(open.seat) !== side(seat)) return null // måste vara VÅRT 1NT
+  if (!history.some((c) => side(c.seat) === side(seat) && c.bid === 'XX')) return null
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
+  const cb = parseContractBid(lastNonPass.bid)
+  if (!cb || cb.strain === 'NT') return null // bara deras FÄRGflykt straffdubblas
+  if (!legalCalls(history, seat).includes('X')) return null
+  return { suit: SUIT_OF_LETTER[cb.strain], level: cb.level }
+}
+
 // ---- Bot-hjärnan -----------------------------------------------------------
 
 /**
@@ -1060,6 +1089,21 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       return {
         seat, bid: 'P', rule: 'pass',
         explanation: `partnerns 3NT efter transfern = välj utgång: bara ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → pass (3NT står).`,
+      }
+    }
+
+    // Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vår
+    // sida handen. Flyr motståndarna undan till en färg straffdubblar vi dem –
+    // varje steg. Måste ligga FÖRE delbit 4:s svarsdetektor (som annars läser
+    // flykten som "svararen svarar på störningen" och bara doblar via svararen,
+    // aldrig via öppnaren) och före off-book-svaret.
+    const runout = runoutAfterOurRedouble(history, seat)
+    if (runout) {
+      return {
+        seat, bid: 'X', rule: 'straffdubbling (vi äger handen)',
+        explanation:
+          `Vi öppnade 1NT och partnern redubblade (XX) – vår sida har 23+ och äger handen. ` +
+          `Motståndarna flyr till ${runout.level}${SWE_NAME[letterOfSuit(runout.suit)]} → straffdubbling.`,
       }
     }
 
