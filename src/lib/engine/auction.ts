@@ -206,7 +206,23 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
 }
 
 /** Bygger en (ev. störd) auktion för första öppningen. */
+// Minne per giv (R2-fynd #3): `buildAuction` är en ren funktion av given, och
+// samma giv byggs om vid VARJE bot-tur (`decideCall` anropar den varje gång) och
+// vid varje omritning i spelskärmen. En `WeakMap` på giv-objektet återanvänder den
+// redan byggda linjen i stället för att räkna om den. Säkert eftersom given är
+// oföränderlig under handen och alla anropare bara LÄSER resultatet. WeakMap →
+// posten städas automatiskt när given inte längre används (inget minnesläckage).
+const auctionCache = new WeakMap<Deal, BuiltAuction | null>()
+
 export function buildAuction(deal: Deal): BuiltAuction | null {
+  const cached = auctionCache.get(deal)
+  if (cached !== undefined) return cached // OBS: null är ett giltigt cachat svar (ingen öppnar)
+  const result = buildAuctionCore(deal)
+  auctionCache.set(deal, result)
+  return result
+}
+
+function buildAuctionCore(deal: Deal): BuiltAuction | null {
   let openerSeat: Seat | null = null
   let openerIndex = -1
   let opening = null as ReturnType<typeof classifyOpening> | null
