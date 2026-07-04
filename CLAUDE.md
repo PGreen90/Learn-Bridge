@@ -11,19 +11,19 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Projektrevision R1 pågår (gren `audit/r1-budsystem`, EJ mergad)
+### 🔵 NU — Projektrevision R1 pågår (delen som är klar är MERGAD + LIVE)
 > **NÄSTA GÅNG börjar vi med: Fynd #2 delbit 2** — takeout/Lebensohl mot deras
-> svaga tvåor/spärrar (starta med exempelhänder + fråga ägaren om trösklarna,
-> precis som DONT-golvet). Fullständig lägesbild: **`docs/audit/r1-budsystem.md`**.
+> svaga tvåor/spärrar (ny gren `audit/r1-fynd2-delbit2`; starta med exempelhänder
+> + fråga ägaren om trösklarna, precis som DONT-golvet). Full bild:
+> **`docs/audit/r1-budsystem.md`**.
 >
 > **Läget (2026-07-04):** R1-rapporten skriven; fynd #1/#3/#4/#5 lagade (facit
-> först, separata commits); **Fynd #2 (§7-konkurrens) delbit 1/5 klar** — DONT
-> mot deras 1NT inkopplad (golv 8 hp direkt / 6 hp balansering; ägarbeslut).
+> först); **Fynd #2 (§7-konkurrens) delbit 1/5 klar** — DONT mot deras 1NT
+> inkopplad (golv 8 hp direkt / 6 hp balansering; ägarbeslut). Allt detta är
+> **mergat till main och deployat live** (2026-07-04, 1635 tester gröna).
 > **Kvar av #2:** delbit 2 (takeout/Lebensohl mot svaga/spärr), 3 (Mathe mot
 > deras 1♣), 4 (konkurrens efter VÅRA 1NT/2♣/svaga), 5 (fortsättningar bortom en
 > rond). Ägaren valde "bygg hela #2, delbit för delbit".
-> **Öppet ägarbeslut:** grenen `audit/r1-budsystem` är EJ pushad/mergad (fråga-
-> innan-PCD) — ägaren godkänner merge till main när R1 är klar. 1635 tester gröna.
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
