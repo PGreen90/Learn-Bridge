@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, configDefaults } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -7,4 +7,10 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   base: '/Learn-Bridge/',
   plugins: [react(), tailwindcss()],
+  test: {
+    // R5-fynd #3: .claude/worktrees/ innehåller parallella Claude Code-worktrees
+    // med egna kopior av testerna – uteslut dem så `npm test` bara kör DENNA
+    // arbetskopia (annars körs samma test dubbelt och kan flagga fel giv).
+    exclude: [...configDefaults.exclude, '.claude/**'],
+  },
 })

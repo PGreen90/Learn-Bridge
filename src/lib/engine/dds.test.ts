@@ -76,6 +76,8 @@ function oracle(state: PlayState, target: 'NS' | 'EW'): number {
 }
 
 describe('double-dummy solver – stämmer mot oraklet (ren minimax) på små givar', () => {
+  // Passerar isolerat men den tunga minimax-loopen kan spräcka standardgränsen
+  // 5 s under full-suite-last (CPU-strid) → egen timeout, som djuptesten nedan.
   it('100 slumpgivar (3 kort/hand), alla strain × utspelare', () => {
     const rng = mulberry32(12345)
     let checked = 0
@@ -91,7 +93,7 @@ describe('double-dummy solver – stämmer mot oraklet (ren minimax) på små gi
       }
     }
     expect(checked).toBe(100 * 5 * 4)
-  })
+  }, 30000)
 
   // Tung men korrekt: djupare DDS-träd som passerar isolerat (~7 s) men kan
   // spräcka standardgränsen 5 s under full-suite-last → egen timeout (ej logik).
