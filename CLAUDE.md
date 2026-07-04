@@ -11,32 +11,27 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — R1 klar; Fynd #2:s definierade omfång KLART (MERGAT + LIVE)
-> **NÄSTA GÅNG börjar vi med: R2 — teknisk arkitektur & skalbarhet** (nästa
-> revisionssteg, `AUDIT_PROMPTS.md`). R2 ska komma FÖRE bredare flerronds-
-> konkurrens: R1-rapporten varnar för att stapla fler §7-detektorer innan
-> arkitekturbeslutet tas. Full bild: **`docs/audit/r1-budsystem.md`**.
+### 🔵 NU — R2 (arkitektur) KLAR: fynd #1–#4 åtgärdade (MERGAT + LIVE)
+> **NÄSTA GÅNG börjar vi med: R3 — UI/UX & Quality of Life** (nästa revisionssteg,
+> `AUDIT_PROMPTS.md`). Full bild av R2: **`docs/audit/r2-arkitektur.md`**.
 >
 > **Delbit 3 (Mathe mot stark 1♣) är PARKERAD (ägarbeslut 2026-07-04)** — sparad
 > som framtidsidé, se 🅿️ PARKERAT nedan.
 >
-> **Läget (2026-07-04):** R1-rapporten skriven; fynd #1/#3/#4/#5 lagade (facit
-> först); **Fynd #2 (§7-konkurrens) delbit 1 + 2 + 4 + 5 klara.** Delbit 1 = DONT
-> mot deras 1NT (golv 8/6). Delbit 2 = takeout/Lebensohl mot deras svaga tvåor +
-> spärrar (golv 12 ej sårbar / 13 sårbar direkt, 10 balansering; spärr-X kvar på
-> 14). **Delbit 4 (väg A)** = svararen svarar när MOTSTÅNDAREN stör VÅR öppning:
-> DONT-störning av vårt 1NT → X/XX straff/värden (golv 8) / naturligt / pass;
-> takeout-X av vår svaga tvåa/spärr → XX värden (golv 10) / spärrhöjning / pass
-> (`contested-openings.ts`). **Delbit 5 (Case A)** = fortsättning bortom EN rond:
-> efter vårt 1NT + partnerns värde-XX äger vår sida handen (23+), så flyr de undan
-> straffdubblar vi dem — varje steg (`runoutAfterOurRedouble`, `auction-live.ts`).
-> Reachability-fynd: appen skapar bara DONT över vårt 1NT och takeout över svaga/
-> spärr — naturligt-1NT-inkliv + 2♣-störning byggdes MEDVETET inte (skulle bli
-> död kod). **1657 tester gröna**, mergat + live.
-> **Fynd #2:s definierade omfång är därmed klart** (delbit 1/2/4/5; delbit 3
-> parkerad). **Kvar (efter R2):** den GENERELLA flerronds-konkurrensen bortom
-> Case A — medvetet uppskjuten så vi inte staplar fler detektorer före R2.
-> Ägaren valde "bygg hela #2, delbit för delbit".
+> **Läget (2026-07-04, audit session 5):** R1 klar (fynd #1/#3/#4/#5 lagade;
+> Fynd #2 delbit 1/2/4/5 byggda; delbit 3 parkerad). **R2 (arkitektur) klar och
+> LIVE:** inga KRITISK/HÖG-fynd — grunden är sund (rena funktioner, EN
+> kontraktskälla, tät motor↔UI-gräns, budgeterat kortspel). **Fynd #1–#4
+> åtgärdade beteendebevarande** (ägaren valde förslag, ett fynd i taget):
+> #1 = `decideCall` gjord datadriven (två ordnade, namngivna detektorlistor +
+> `answered`-helper i stället för 17 ordningsberoende if-block; #4 löstes inuti);
+> #2 = gränsen motor↔`interpretCall`-heuristik dokumenterad + skyddsnät-test;
+> #3 = `buildAuction` memoiserad (WeakMap per giv) + `useMemo` i `Play.tsx`.
+> #5 = notering utan åtgärd. **1676 tester gröna + `tsc` rent**, spelskärmen
+> rök-verifierad, mergat + live.
+> **Kvar (efter revisionen):** den GENERELLA flerronds-konkurrensen bortom Case A
+> (Fynd #2) — medvetet uppskjuten så vi inte staplar fler detektorer. Ägaren valde
+> "bygg hela #2, delbit för delbit".
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
