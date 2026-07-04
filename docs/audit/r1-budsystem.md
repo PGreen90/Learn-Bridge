@@ -38,12 +38,14 @@ och NT-buggen kan lagas i en liten, säker fix (facit först).
   tredje (oanropade §7-konventioner) fick karakteriseringstester som flippar när
   #2 byggs.
 - **#5 lagat** (`eeb0fbf`): `answerTakeoutDouble` är nivåmedveten.
-- **#2 kvarstår** – det stora konkurrensbygget. Enligt fix-protokollet ("allt
-  större lagas inte på plats") och CLAUDE.md (budomdöme kräver exempelhänder +
-  ägarens ja) byggs det ägarstyrt, en delbit i taget, och **arkitekturen (R2)
-  bör avgöras först** (detektor-mönster vs enhetligt konkurrenslager – se
-  slutsatsen nedan).
-Baslinje efter fixarna: **1632 tester gröna**.
+- **#2 pågår** – det stora konkurrensbygget, ägarstyrt (ägaren valde "bygg hela
+  #2 nu, delbit för delbit"), en delbit i taget med exempelhänder + ja.
+  - **Delbit 1 KLAR** (`+ DONT`): DONT mot deras 1NT inkopplad (direkt golv
+    8 hp / balansering 6 hp; advancer-relä + X-rättelse). 1635 gröna.
+  - Delbit 2 (takeout/Lebensohl mot deras svaga tvåor/spärrar), delbit 3 (Mathe
+    mot deras 1♣), delbit 4 (konkurrens efter VÅRA 1NT/2♣/svaga/spärr), delbit 5
+    (fortsättningar bortom en rond) – kvarstår.
+Baslinje efter fixarna + delbit 1: **1635 tester gröna**.
 
 ---
 
