@@ -11,24 +11,30 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — REVISIONEN R1–R6 KLAR + LIVE. Väntar ägarens val av nästa NU.
-> **NÄSTA GÅNG börjar vi med: ägaren väljer nästa fokus ur R6:s handlingsplan**
-> (`docs/audit/SLUTRAPPORT.md`) eller NÄST-listan nedan. Just nu är inget bygge
-> aktivt — järnregeln säger att ägaren pekar ut nästa NU (en sak), inte Claude.
+### 🔵 NU — R1 Fynd #2: bredda störd budgivning (delbit 6 byggd på gren, VÄNTAR MERGE)
+> **NÄSTA GÅNG börjar vi med:** merga grenen `feat/opener-competition-round2` (om
+> ägaren gett PCD-ok) och välj sedan nästa delbit av R1 #2, eller en annan punkt ur
+> R6:s handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
 >
-> **Läget (2026-07-04, audit session 9):** Hela revisionen är KLAR och mergad.
-> R1 klar + live. R2 klar + live. R3 klar + live. R4 klar + live. R5 klar + live.
-> **R6 (slutrapporten) klar + live** — `docs/audit/SLUTRAPPORT.md`. Resultat över
-> alla steg: **0 KRITISK, 2 HÖG** (båda i R1), 16 MEDIUM, 14 LÅG = 32 fynd, varav
-> **27 lagade under revisionen**. Grunden bedöms sund (ren motor, enhetligt UI, rik
-> dok, pålitlig deploy). Audit-grenarna städade efter merge.
+> **Läget (2026-07-04, audit session 9):** Hela revisionen R1–R6 är KLAR + live
+> (0 KRITISK, 2 HÖG båda i R1, 27/32 fynd lagade under revisionen; slutrapport
+> `docs/audit/SLUTRAPPORT.md`). Ägaren valde sedan att börja på **R1 Fynd #2 — den
+> generella flerronds-konkurrensen** (avblockerad: R2 #1 gjorde `decideCall`-kedjan
+> datadriven, R4 #4 dokumenterade tre-lager-kontraktet).
 >
-> **Det enda stora som återstår (ägarstyrt, ej aktivt):** R1 Fynd #2 — den GENERELLA
-> flerronds-konkurrensen bortom Case A. **Nu AVBLOCKERAD:** R2 #1 gjorde
-> `decideCall`-kedjan datadriven och R4 #4 dokumenterade tre-lager-kontraktet, så
-> bredd kan byggas utan att öka skulden R1/R2 varnade för. Byggs delbit för delbit
-> med exempelhänder + ägarens ja + ett integrationstest per konvention. Delbit 3
-> (Mathe mot stark 1♣) förblir PARKERAD tills fler budsystem läggs till.
+> **Delbit 6 KLAR på gren `feat/opener-competition-round2` (ej mergad — väntar
+> ägarens PCD-ok):** öppnarens rond-2-beslut i det INKLÄMDA konkurrensläget efter
+> partnerns enkla högfärgshöjning (`1M–(inkliv)–2M–(deras inklämda bud)`): pass
+> (minimum) · 3M (6:e trumf, lagen om totala stick) · **X = MAXIMAL DUBBLING (game
+> try, 15–17)** · 4M (utgång, 18+); partnern svarar X:et 4M (accept, 8+ stöd) /
+> 3M (avböj). Skopat till det inklämda läget (cue > 3M → X blir game try). Två
+> detektorer i `decideCall`, FÖRE `maybePenaltyDouble` (X reserverat för game try
+> där — konventionens kända avvägning). Facit: `auction-opener-competition.test.ts`
+> (7 integrationstester). Hela sviten grön (`npm test`), tsc rent.
+>
+> **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** öppnarens rond-2 när partnern
+> bjöd NY färg / 1NT (ej höjning); balanseringens "låna en kung"-lättnad; bredare
+> flerronds-konkurrens. Delbit 3 (Mathe mot stark 1♣) förblir PARKERAD.
 >
 > **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
 > kräver webworker), R3 #8 ("Förra sticket" 85 % — 375px-koll utestående). Se
@@ -38,6 +44,13 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Öppnarens rond-2 i inklämt konkurrensläge (R1 Fynd #2 delbit 6, NYTT):** efter
+  `1M–(inkliv)–2M–(deras inklämda bud)` passar öppnaren inte längre blint. Med
+  minimum + 6:e trumf konkurrerar den 3M; med utgångsintresse (~15–17) dubblar den
+  (**X = maximal dubbling = game try**, INTE straff i det läget); med 18+ bjuder den
+  4M. Partnern svarar X:et 4M (max) / 3M (min). Golv: 15+ = game try, 18+ = utgång
+  (speglar den ostörda openerRebidAfterSimpleRaise). Säg till om X-som-game-try
+  känns fel, eller om golven bör justeras.
 - **DONT mot deras 1NT (R1 Fynd #2 delbit 1):** bottarna stör nu deras
   1NT-öppning med DONT (X/2-läget) — golv 8 hp direkt, 6 hp balansering. Säg till
   om det känns för aggressivt/passivt.
