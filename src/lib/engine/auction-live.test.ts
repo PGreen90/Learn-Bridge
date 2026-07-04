@@ -815,3 +815,34 @@ describe('R1-fynd #3 – Jacoby-2NT-fit sätter trumf inför off-book essfråga'
     expect(c.rule).toBe('1430 RKC')
   })
 })
+
+// R1-fynd #4 (testfläck): de "färdiga men oanropade" §7-konventionerna (DONT mot
+// deras 1NT, takeout/Lebensohl mot deras svaga/spärr, Mathe) har egna
+// enhetstester men NÅS aldrig i en levande auktion (Fynd #2 – konkurrensen är
+// inte inkopplad efter deras icke-1-färgs-öppningar). Dessa KARAKTERISERINGS-
+// tester låser dagens lucka: boten passar i stället för att bjuda konventionen.
+// När Fynd #2 kopplar in §7 ska de här smälla till → uppdatera dem till FACIT
+// för det verkliga budet (2♠/X respektive X). Se docs/audit/r1-budsystem.md.
+describe('R1-fynd #4 – dokumenterad §7-inkopplingslucka (flippar när Fynd #2 byggs)', () => {
+  it('mot deras 1NT: DONT-enfärgshand passar i dag (borde bli 2♠/X)', () => {
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 hp balanserad → 1NT
+      S: 'S:KQJ982 H:54 D:76 C:432',   // 6-korts spader ~6 hp = DONT-enfärg
+      N: 'S:73 H:9762 D:9854 C:965',
+      W: 'S:T64 H:AJT3 D:AJT C:AQ8',
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('1NT') // förutsättning: de öppnar 1NT
+    expect(decideCall(deal, [call('E', '1NT')], 'S').bid).toBe('P') // LUCKA: ingen DONT
+  })
+
+  it('mot deras svaga 2♠: takeout-hand passar i dag (borde bli X)', () => {
+    const deal = dealOf('E', {
+      E: 'S:KQ9832 H:54 D:K3 C:762',   // 6-korts spader ~8 hp → svag 2♠
+      S: 'S:2 H:AKJ3 D:AQ84 C:KJ32',   // kort spader, 17 hp, stöd i övriga = takeout
+      N: 'S:AJ765 H:Q62 D:95 C:A85',
+      W: 'S:T4 H:T987 D:JT76 C:QT9',
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('2S') // förutsättning: de öppnar svag 2♠
+    expect(decideCall(deal, [call('E', '2S')], 'S').bid).toBe('P') // LUCKA: ingen takeout-X
+  })
+})
