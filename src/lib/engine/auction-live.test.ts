@@ -792,3 +792,120 @@ describe('felrapport #4 – 2-över-1 är utgångskrav, svararen får inte passa
     expect(c.bid).toBe('3NT')
   })
 })
+
+// R1-fynd #3: off-book-lagret läste ett KONSTGJORT bud (Jacoby-kortfärg 3♣) som
+// en naturlig klöverfärg när det letade trumf inför essfrågan. En Jacoby-2NT-fit
+// sätter öppnarens HÖGFÄRG som trumf (systembok §6.1) – Nord ska svara RKC för
+// hjärter (5♦ = 3 nyckelkort), inte för klöver (5♥ = 2 nyckelkort).
+describe('R1-fynd #3 – Jacoby-2NT-fit sätter trumf inför off-book essfråga', () => {
+  const deal = dealOf('N', {
+    N: 'S:AQ2 H:AKJ43 D:Q432 C:5',   // 1♥, klöversingel → 3♣ (Jacoby-kortfärg)
+    S: 'S:K54 H:Q1052 D:AK5 C:K43',  // Jacoby 2NT (4 hjärter, 15 hp)
+    E: 'S:876 H:76 D:9876 C:9876',
+    W: 'S:JT93 H:98 D:JT C:QJT82',
+  })
+
+  it('1♥–2NT–3♣–4NT: Nord svarar 5♦ (RKC hjärter, 3 nyckelkort), EJ 5♥', () => {
+    const history = [
+      call('N', '1H'), call('E', 'P'), call('S', '2NT'), call('W', 'P'),
+      call('N', '3C'), call('E', 'P'), call('S', '4NT'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('5D')
+    expect(c.rule).toBe('1430 RKC')
+  })
+})
+
+// R1-fynd #4 (testfläck): de "färdiga men oanropade" §7-konventionerna (DONT mot
+// deras 1NT, takeout/Lebensohl mot deras svaga/spärr, Mathe) har egna
+// enhetstester men NÅS aldrig i en levande auktion (Fynd #2 – konkurrensen är
+// inte inkopplad efter deras icke-1-färgs-öppningar). Dessa KARAKTERISERINGS-
+// tester låser dagens lucka: boten passar i stället för att bjuda konventionen.
+// När Fynd #2 kopplar in §7 ska de här smälla till → uppdatera dem till FACIT
+// för det verkliga budet (2♠/X respektive X). Se docs/audit/r1-budsystem.md.
+describe('R1-fynd #4 – dokumenterad §7-inkopplingslucka (flippar när Fynd #2 byggs)', () => {
+  it('under DONT-golvet: 6-hp-hand passar mot deras 1NT (sund standard, delbit 1)', () => {
+    // Delbit 1 av Fynd #2 kopplade in DONT MEN med ägarens golv 8 hp (direkt).
+    // En 6-hp-hand passar därför korrekt – detta låser den gränsen.
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 hp balanserad → 1NT
+      S: 'S:KQJ982 H:54 D:76 C:432',   // 6-korts spader ~6 hp < golvet
+      N: 'S:73 H:9762 D:9854 C:965',
+      W: 'S:T64 H:AJT3 D:AJT C:AQ8',
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('1NT')
+    expect(decideCall(deal, [call('E', '1NT')], 'S').bid).toBe('P') // under 8-hp-golvet
+  })
+
+  it('mot deras svaga 2♠: takeout-hand passar i dag (borde bli X – delbit 2)', () => {
+    const deal = dealOf('E', {
+      E: 'S:KQ9832 H:54 D:K3 C:762',   // 6-korts spader ~8 hp → svag 2♠
+      S: 'S:2 H:AKJ3 D:AQ84 C:KJ32',   // kort spader, 17 hp, stöd i övriga = takeout
+      N: 'S:AJ765 H:Q62 D:95 C:A85',
+      W: 'S:T4 H:T987 D:JT76 C:QT9',
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('2S') // förutsättning: de öppnar svag 2♠
+    expect(decideCall(deal, [call('E', '2S')], 'S').bid).toBe('P') // LUCKA: ingen takeout-X
+  })
+})
+
+// R1-fynd #5: answerTakeoutDouble antog att motståndarnas öppning låg på
+// 1-läget. När Syd (människan) upplysningsdubblar en SVAG TVÅA måste Nord svara
+// på 2-/3-läget – men motorn räknade fram 1-lägesbud (t.ex. 1♠), som är olagliga
+// över 2♥, varpå anroparens laglighetsvakt släppte budet och Nord PASSADE bort
+// partnerns rondkrav. Facit: Nord bjuder sin bästa färg på lägsta lagliga nivå.
+describe('R1-fynd #5 – svar på takeout-X av en svag tvåa (ej 1-lägesantagande)', () => {
+  const deal = dealOf('E', {
+    E: 'S:5 H:KQ9832 D:K3 C:9762',   // 6-korts hjärter ~8 hp → svag 2♥
+    S: 'S:AQ2 H:5 D:AQ84 C:AKJ3',    // kort hjärter, 19 hp, stöd i övriga → X (takeout)
+    N: 'S:QJ92 H:64 D:8732 C:642',   // ~3 hp, 4 spader → tvingas svara 2♠
+    W: 'S:KT8743 H:JT7 D:JT C:QT',
+  })
+
+  it('E 2♥ – (S X) – (W P) – N 2♠ (tvunget svar, EJ pass)', () => {
+    const history = [call('E', '2H'), call('S', 'X'), call('W', 'P')]
+    expect(buildAuction(deal)?.turns[0].call).toBe('2H') // förutsättning: svag 2♥
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('2S')
+  })
+})
+
+// Fynd #2 delbit 1 – DONT mot deras 1NT (systembok §7.5) inkopplad i budlådan.
+// Ägarbeslut 2026-07-04: golv 8 hp direkt / 6 hp balansering + rätt form.
+describe('Fynd #2 delbit 1 – DONT mot deras 1NT', () => {
+  it('direkt tvåfärg: E 1NT – S 2♥ (5-4 hjärter/spader), advancern passar', () => {
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 → 1NT
+      S: 'S:KQ1098 H:KJ32 D:5 C:432',  // 5-4 S/H, 11 hp → 2♥ (lägre färgen visar ♥+♠)
+      W: 'S:J43 H:9876 D:AJ76 C:AQ',
+      N: 'S:762 H:A5 D:KT98 C:T985',
+    })
+    expect(decideCall(deal, [call('E', '1NT')], 'S')).toMatchObject({ bid: '2H', rule: 'DONT tvåfärg' })
+    expect(decideCall(deal, [call('E', '1NT'), call('S', '2H'), call('W', 'P')], 'N').bid).toBe('P')
+  })
+
+  it('direkt enfärg: E 1NT – S X – (P) – N 2♣ (relä) – (P) – S 2♥ (rättelse)', () => {
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 → 1NT
+      S: 'S:3 H:AKJ1098 D:K32 C:432',  // 6-korts hjärter ~12 hp → X (enfärg)
+      W: 'S:KT8742 H:762 D:J54 C:7',
+      N: 'S:QJ96 H:5 D:T98 C:T9865',
+    })
+    expect(decideCall(deal, [call('E', '1NT')], 'S')).toMatchObject({ bid: 'X', rule: 'DONT X (enfärg)' })
+    expect(decideCall(deal, [call('E', '1NT'), call('S', 'X'), call('W', 'P')], 'N').bid).toBe('2C')
+    const corr = decideCall(deal, [call('E', '1NT'), call('S', 'X'), call('W', 'P'), call('N', '2C'), call('E', 'P')], 'S')
+    expect(corr).toMatchObject({ bid: '2H', rule: 'DONT: rättelse' })
+  })
+
+  it('balansering: E 1NT – (P) – (P) – N 2♥ (golv 6 hp)', () => {
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 → 1NT
+      S: 'S:7432 H:876 D:765 C:765',   // 0 hp → pass
+      W: 'S:Q73 H:J8 D:T9842 C:J43',   // 5 hp, ingen 4-hf → pass
+      N: 'S:KQ1098 H:KJ32 D:5 C:432',  // 11 hp 5-4 → balansering-DONT 2♥
+    })
+    const bid = decideCall(deal, [call('E', '1NT'), call('S', 'P'), call('W', 'P')], 'N')
+    expect(bid.bid).toBe('2H')
+    expect(bid.explanation).toContain('balansering')
+  })
+})

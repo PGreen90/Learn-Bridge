@@ -23,6 +23,7 @@ import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
 import { gerberInvestigation, gerber2NTInvestigation } from './nt-slam'
+import { dontOvercall } from './dont'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -178,7 +179,11 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
     // hoppinkliv på 3-läget vore 2NT OLAGLIGT (under deras bud) och 3NT
     // osunt på bara 8+ → då passar svararen i stället (FAS 1 punkt 3).
     if (ovLevel <= 2 && isBalanced(hand) && hasStopper(hand, ovSuit) && p >= 8) {
-      const L = cheapestLevelAbove('clubs', ovLevel, ovSuit) <= 1 ? 1 : 2
+      // Billigaste NT över ett FÄRGinkliv på nivå `ovLevel` är exakt `ovLevel`:
+      // sang rankar över alla färger, så 1NT är lagligt över (1♠), 2NT över (2♣)
+      // osv. (Tidigare beräknades nivån via klöver som proxy → alltid en nivå
+      // för högt: 1♥–(1♠)–2NT i stället för naturligt 1NT. R1-fynd #1.)
+      const L = ovLevel
       return { call: `${L}NT`, rule: 'NT med stopp', explanation: `${p} hp balanserad med stopp → ${L}NT.` }
     }
     return { call: 'P', rule: 'pass', explanation: `${p} hp – inget lämpligt i konkurrens → pass.` }
@@ -288,6 +293,23 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
     }
   }
 
+  // §7.5 DONT mot deras 1NT (Fynd #2, delbit 1): LHO stör direkt över en
+  // 1NT-öppning. Ägarbeslut 2026-07-04: golv 8 hp i direkt sits + rätt form
+  // (dontOvercall kräver 5-4+ eller 6-korts). Vi modellerar bara SJÄLVA inklivet
+  // här (en rond) och lämnar auktionen öppen – advancerns relä/preferens och
+  // X-arens rättelse bjuds levande i budlådan (`decideCall`). Balansering (efter
+  // två pass) hanteras också i `decideCall`.
+  if (opening.call === '1NT') {
+    const lhoSeat = seatAt(deal.dealer, (openerIndex + 1) % 4)
+    if (hcp(deal.hands[lhoSeat]) >= 8) {
+      const d = dontOvercall(deal.hands[lhoSeat])
+      if (d.call !== 'P') {
+        turns.push({ seat: lhoSeat, role: 'motståndare', call: d.call, rule: d.rule, explanation: d.explanation })
+        return finish(true)
+      }
+    }
+  }
+
   // NT-slam (Steg 4): över en naturlig 1NT kan svararen med en slamsäker
   // balanserad hand fråga ess med Gerber 4♣ (i stället för kvantitativ 4NT).
   if (opening.call === '1NT') {
@@ -338,6 +360,19 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
           uncertain: bal.uncertain,
         })
         return finish(true)
+      }
+    }
+    // §7.5 DONT i balansering (Fynd #2, delbit 1): deras 1NT passas ut till
+    // fjärde hand. Ägarbeslut: lättare golv (6 hp) i balansering. Alla DONT-bud
+    // (2-läget/X) ligger över 1NT → alltid lagliga här.
+    if (opening.call === '1NT') {
+      const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+      if (hcp(deal.hands[balancerSeat]) >= 6) {
+        const d = dontOvercall(deal.hands[balancerSeat])
+        if (d.call !== 'P') {
+          turns.push({ seat: balancerSeat, role: 'motståndare', call: d.call, rule: d.rule, explanation: `${d.explanation} (balansering)` })
+          return finish(true)
+        }
       }
     }
     return finish(false)

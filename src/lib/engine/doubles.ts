@@ -165,8 +165,14 @@ export function supportDouble(hand: Hand, partnerMajor: Suit, rhoCall: string): 
   return { call: 'X', rule: 'stöddubbling', explanation: `exakt 3 stöd i ${NAME[partnerMajor]} → X (stöddubbling).` }
 }
 
-/** Advancers svar på partnerns upplysningsdubbling (bjud bästa färg). §7.3. */
-export function answerTakeoutDouble(hand: Hand, theirSuit: Suit): ResponseResult {
+/**
+ * Advancers svar på partnerns upplysningsdubbling (bjud bästa färg). §7.3.
+ * `theirLevel` = nivån motståndarnas öppning (den dubblade färgen) ligger på.
+ * Default 1 (bakåtkompatibelt). Dubblas en SVAG TVÅA måste svaret hamna över
+ * 2-läget – annars räknar motorn fram olagliga 1-lägesbud och budet släpps av
+ * anroparens laglighetsvakt → påtvingat svar tappas (R1-fynd #5).
+ */
+export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   const unbid = RANK_ORDER.filter((s) => s !== theirSuit)
@@ -176,17 +182,21 @@ export function answerTakeoutDouble(hand: Hand, theirSuit: Suit): ResponseResult
   for (const s of unbid) {
     if (len[s] > len[best] || (len[s] === len[best] && rankIdx(s) > rankIdx(best))) best = s
   }
-  const lvl = rankIdx(best) > rankIdx(theirSuit) ? 1 : 2
+  // Billigaste nivån att bjuda `best` på ÖVER deras öppning: en färg som rankar
+  // över deras kan bjudas på samma nivå, annars ett steg upp.
+  const lvl = rankIdx(best) > rankIdx(theirSuit) ? theirLevel : theirLevel + 1
+  const cueLevel = theirLevel + 1 // cue i deras färg = ett steg upp över öppningen
 
   // 12+ → cue deras färg (utgångskrav, låter partnern beskriva vidare).
   if (p >= 12) {
-    return { call: `2${BID[theirSuit]}`, rule: 'cue (krav)', explanation: `${p} hp – för starkt för bara ett färgbud → cue ${SYM[theirSuit]} (krav).` }
+    return { call: `${cueLevel}${BID[theirSuit]}`, rule: 'cue (krav)', explanation: `${p} hp – för starkt för bara ett färgbud → cue ${SYM[theirSuit]} (krav).` }
   }
-  // 9–11 → hoppbud (inbjudande).
-  if (p >= 9) {
+  // 9–11 → hoppbud (inbjudande) – bara meningsfullt över en 1-lägesöppning; över
+  // en svag tvåa har öppningen redan ätit utrymmet, så vi bjuder naturligt.
+  if (p >= 9 && theirLevel === 1) {
     return { call: `${lvl + 1}${BID[best]}`, rule: 'hoppbud (inbjudan)', explanation: `${p} hp med ${len[best]}-korts ${NAME[best]} → ${lvl + 1}${SYM[best]} (inbjudande).` }
   }
-  // 0–8 → billigaste färgbud (påtvingat svar; svaghet tillåts).
+  // 0–8 (och 9–11 över en högre öppning) → billigaste färgbud (påtvingat svar).
   return { call: `${lvl}${BID[best]}`, rule: 'färgbud', explanation: `${p} hp – bjuder bästa färg ${NAME[best]} → ${lvl}${SYM[best]}.` }
 }
 

@@ -878,6 +878,13 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-04** – **Projektrevision R1 (gren `audit/r1-budsystem`, ej mergad).**
+  Fynd #1/#3/#4/#5 lagade (facit först). **Fynd #2 delbit 1: DONT (§7.5) mot deras
+  1NT inkopplad** i den levande budlådan (var kodad men aldrig anropad). **Ägar-
+  beslut:** golv **8 hp i direkt sits, 6 hp i balansering** + rätt form
+  (5-4+ eller 6-korts). Advancerns relä (2♣ efter X) + X-arens rättelse byggda så
+  en DONT-X aldrig spelas som straffdubbling. Kvar av #2: takeout/Lebensohl mot
+  svaga/spärr, Mathe, konkurrens efter våra egna öppningar. 1635 tester gröna.
 - **2026-07-02** – **Felrapport #2–4 lagade: kravbud får aldrig passas** (testsvit
   1507, commit `df5bf21`, live). Tre spelade givar där bottarna passade bort krav:
   (1) **öppnarens svar på negativ dubbling** byggt (`openerAnswerNegativeDouble`,

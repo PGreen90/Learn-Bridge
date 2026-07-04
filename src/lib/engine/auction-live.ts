@@ -18,6 +18,7 @@ import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
 import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from './doubles'
+import { advanceDONT } from './dont'
 import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
@@ -127,19 +128,24 @@ const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'he
  *  - motståndarna har öppnat i en färg (den dubblade färgen).
  * Returnerar deras (dubblade) färg, annars null (= ingen påtvingad svarsplikt).
  */
-function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Suit; level: number } | null {
   const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
   // Senaste icke-pass måste vara PARTNERNS dubbling (annars: RHO bjöd → ej tvång).
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
   // Har vår sida redan bjudit ett kontraktsbud är X:et inte en ren take-out.
   if (history.some((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))) return null
-  // Deras dubblade färg = senaste kontraktsbudet (öppningen) på motståndarsidan.
-  let theirSuit: Suit | null = null
+  // Deras dubblade färg + nivå = senaste kontraktsbudet (öppningen) på
+  // motståndarsidan. Nivån behövs så svaret hamnar lagligt även när en SVAG TVÅA
+  // dubblats (R1-fynd #5). Ett NT-bud är ingen take-out-färg → hoppas över.
+  let their: { suit: Suit; level: number } | null = null
   for (const c of history) {
     const cb = parseContractBid(c.bid)
-    if (cb && side(c.seat) !== side(seat)) theirSuit = SUIT_OF_LETTER[cb.strain] ?? null
+    if (cb && side(c.seat) !== side(seat)) {
+      const suit = SUIT_OF_LETTER[cb.strain]
+      if (suit) their = { suit, level: cb.level }
+    }
   }
-  return theirSuit
+  return their
 }
 
 /**
@@ -369,18 +375,49 @@ function agreedTrump(history: ResolvedCall[], seat: Seat): Suit | null {
 }
 
 /**
- * Trumffärgen partnerns 4NT-essfråga gäller. Två steg:
+ * Har vår sida etablerat en HÖGFÄRGS-fit via **Jacoby 2NT** (systembok §4.1)?
+ * Mönstret: vår sidas 1♥/1♠-öppning, och svararens (partnern till öppnaren)
+ * FÖRSTA bud efter öppningen är **2NT** – i 2/1 är direkt 2NT över 1M alltid
+ * Jacoby (utgångskravande högfärgshöjning). Även 1M–(X)–2NT (Jordan) sätter
+ * majoren som fit. Trumfen är då öppnarens högfärg, även om ingen bjudit den som
+ * ett naturligt FÄRGbud (2NT är konstgjort) – därför missar `agreedTrump` den.
+ * Returnerar högfärgen, annars null. Ett motståndar-KONTRAKTsbud mellan
+ * öppningen och 2NT betyder att 2NT är något annat → null.
+ */
+function jacobyFitTrump(history: ResolvedCall[], seat: Seat): Suit | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) !== side(seat) || open.level !== 1) return null
+  const major = SUIT_OF_LETTER[open.strain]
+  if (major !== 'hearts' && major !== 'spades') return null
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  // Första KONTRAKTsbudet efter öppningen (pass/X/XX hoppas över).
+  for (let i = openIdx + 1; i < history.length; i++) {
+    if (!parseContractBid(history[i].bid)) continue
+    if (side(history[i].seat) !== side(seat)) return null // motståndarna bjöd → ej Jacoby
+    if (history[i].seat === open.seat) return null // öppnarens eget bud, inte svararens svar
+    return history[i].bid === '2NT' ? major : null // svararens första svar
+  }
+  return null
+}
+
+/**
+ * Trumffärgen partnerns 4NT-essfråga gäller. Tre steg:
  *  1. ÖVERENSKOMMEN trumf (en färg båda bjudit) – felrapport #9.
- *  2. Ingen överenskommelse? Standardregeln (felrapport #10: 4NT direkt på
- *     partnerns 3♠-spärr passades): 4NT är essfråga så länge sidans senaste
- *     naturliga bud FÖRE frågan var en FÄRG – trumfen är den färgen.
- *     Kvantitativt är 4NT bara när sidans senaste bud var SANG.
+ *  2. KONVENTIONS-fit utan naturligt färgbud: en Jacoby 2NT sätter öppnarens
+ *     högfärg som trumf (R1-fynd #3 – annars lästes öppnarens konstgjorda
+ *     Jacoby-kortfärg, t.ex. 3♣, som en naturlig klöverfärg → fel essredovisning).
+ *  3. Ingen av ovan? Standardregeln (felrapport #10: 4NT direkt på partnerns
+ *     3♠-spärr passades): 4NT är essfråga så länge sidans senaste naturliga bud
+ *     FÖRE frågan var en FÄRG – trumfen är den färgen. Kvantitativt är 4NT bara
+ *     när sidans senaste bud var SANG.
  * Ankras vid partnerns FÖRSTA 4NT så kungfrågan (5NT) läser samma trumf och
  * aldrig snubblar på det konstgjorda stegsvaret (5♣/5♦/…) däremellan.
  */
 function slamAskTrump(history: ResolvedCall[], seat: Seat): Suit | null {
   const agreed = agreedTrump(history, seat)
   if (agreed) return agreed
+  const jacoby = jacobyFitTrump(history, seat)
+  if (jacoby) return jacoby
   const askIdx = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid === '4NT')
   if (askIdx < 0) return null
   for (let i = askIdx - 1; i >= 0; i--) {
@@ -457,7 +494,6 @@ function kingAskToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
 // regel ska vara TYDLIGT korrekt även om den är smal.
 
 const SWE_NAME: Record<string, string> = { C: 'klöver', D: 'ruter', H: 'hjärter', S: 'spader' }
-const SYM_OF_LETTER: Record<string, string> = { C: '♣', D: '♦', H: '♥', S: '♠' }
 const SUIT_STRAINS = ['C', 'D', 'H', 'S'] as const
 
 /** Första kontraktsbudet i historiken (öppningen), eller null om inget bjudits. */
@@ -758,6 +794,55 @@ function maybePenaltyDouble(deal: Deal, history: ResolvedCall[], seat: Seat): Re
   return { seat, bid: 'X', rule: ans.rule, explanation: ans.explanation }
 }
 
+// ---- DONT-fortsättningar mot deras 1NT (§7.5, Fynd #2 delbit 1) -------------
+
+/**
+ * Har partnern gjort ett DONT-bud mot motståndarnas 1NT som `seat` (advancern)
+ * ska svara på? Mönstret: motståndarnas 1NT-öppning, och partnerns DONT-bud
+ * (X / 2♣ / 2♦ / 2♥ / 2♠) är vår sidas ENDA aktion, senaste icke-pass, följt av
+ * bara pass. Returnerar partnerns DONT-bud, annars null. (X får aldrig lämnas att
+ * passas – det är ett relä; jfr felrapport #7 för tvåfärgsinkliv.)
+ */
+function partnerDONTToAnswer(history: ResolvedCall[], seat: Seat): string | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
+  if (!['X', '2C', '2D', '2H', '2S'].includes(lastNonPass.bid)) return null
+  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourActions.length !== 1 || ourActions[0] !== lastNonPass) return null
+  return lastNonPass.bid
+}
+
+/**
+ * Står `seat`s egen DONT-X (enfärgshand) och väntar på rättelse? Mönstret:
+ * motståndarnas 1NT, vår X, partnerns FORCERADE 2♣-relä, sedan bara pass. X:et
+ * lovar en 6+ enfärgshand – vi rättar till den (pass med klöver-enfärg). Utan
+ * detta skulle X:et bli spelat som straffdubbling av 1NT.
+ */
+function ownDONTXToCorrect(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
+  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourActions.length !== 2) return null
+  if (ourActions[0].seat !== seat || ourActions[0].bid !== 'X') return null
+  if (ourActions[1].seat !== PARTNER[seat] || ourActions[1].bid !== '2C') return null
+  const idx = history.indexOf(ourActions[1])
+  if (!history.slice(idx + 1).every((c) => c.bid === 'P')) return null
+
+  const len = lengths(deal.hands[seat])
+  const suit = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st]).find((s) => len[s] >= 6)
+  if (!suit || suit === 'clubs') {
+    return { seat, bid: 'P', rule: 'DONT: pass (klöver)', explanation: 'min DONT-enfärg är klöver → passa partnerns 2♣-relä.' }
+  }
+  const bid = cheapestBidIn(history, seat, letterOfSuit(suit))
+  if (!bid) return null
+  return {
+    seat, bid, rule: 'DONT: rättelse',
+    explanation: `min DONT-enfärg är ${SWE_NAME[letterOfSuit(suit)]} (6+) → rättar partnerns 2♣-relä till ${bid}.`,
+  }
+}
+
 // ---- Bot-hjärnan -----------------------------------------------------------
 
 /**
@@ -809,9 +894,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   // Linjen gäller inte här (slut eller off-book): en upplysningsdubbling från
   // partnern tvingar fram ett svar (partnern får inte lämnas att passa
   // take-out-dubbla bort kontraktet).
-  const theirSuit = takeoutDoubleToAnswer(history, seat)
-  if (theirSuit) {
-    const ans = answerTakeoutDouble(deal.hands[seat], theirSuit)
+  const takeout = takeoutDoubleToAnswer(history, seat)
+  if (takeout) {
+    const ans = answerTakeoutDouble(deal.hands[seat], takeout.suit, takeout.level)
     if (legalCalls(history, seat).includes(ans.call as Bid)) {
       return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
     }
@@ -848,6 +933,19 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // i stället för att tystna.
     const oc = maybeOvercall(deal, history, seat)
     if (oc) return oc
+
+    // DONT-fortsättningar (§7.5, Fynd #2 delbit 1): partnerns DONT-bud mot deras
+    // 1NT besvaras (relä 2♣ efter X / preferens efter tvåfärg), och vår egen
+    // DONT-X rättas till sin riktiga färg efter partnerns relä.
+    const dontAdvance = partnerDONTToAnswer(history, seat)
+    if (dontAdvance) {
+      const ans = advanceDONT(deal.hands[seat], dontAdvance)
+      if (legalCalls(history, seat).includes(ans.call as Bid)) {
+        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+      }
+    }
+    const dontCorrect = ownDONTXToCorrect(deal, history, seat)
+    if (dontCorrect) return dontCorrect
 
     // Partnerns TVÅFÄRGSINKLIV (Michaels / ovanlig 2NT, §7.2) besvaras med
     // preferens via advanceTwoSuiter – verktyget fanns (FAS 10) men var aldrig

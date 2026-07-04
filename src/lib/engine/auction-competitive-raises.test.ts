@@ -53,6 +53,36 @@ describe('FAS 2 punkt 6 – Jordan 2NT efter upplysningsdubbling', () => {
   })
 })
 
+describe('R1-fynd #1 – konkurrens-NT-svaret på rätt nivå', () => {
+  // FACIT: efter vår 1-lägesöppning och ett 1-läges inkliv visar en jämn hand
+  // med stopp och 8–10 hp NATURLIG 1NT (6–10) – inte 2NT (som lovar 11–12).
+  // Billigaste NT över ett färginkliv på nivå N är exakt nivå N (NT rankar över
+  // alla färger), så över (1♠) är 1NT lagligt och korrekt.
+  it('1♥ – (1♠) – 1NT (naturligt, spaderstopp, 9 hp – EJ 2NT)', () => {
+    const a = buildAuction(
+      deal(
+        'S:K2 H:AKJ43 D:K32 C:432', // 14 hp, 5 hjärter → 1♥
+        'S:AQT98 H:K5 D:KT32 C:32', // 12 hp, 5 spader → 1♠
+        'S:KJ32 H:54 D:KQ4 C:5432', // 9 hp, jämn (4-2-3-4), spaderstopp, 2 hjärter → 1NT
+      ),
+    )
+    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '1S', '1NT'])
+    expect(a?.turns[2].rule).toBe('NT med stopp')
+  })
+
+  it('1♥ – (2♣) – 2NT (naturligt över ett 2-läges inkliv, spaderstopp finns kvar)', () => {
+    const a = buildAuction(
+      deal(
+        'S:K2 H:AKJ43 D:K32 C:432', // 1♥
+        'S:32 H:54 D:KT32 C:AQT98', // 12 hp, 5 klöver → 2♣
+        'S:K43 H:54 D:KQ42 C:Q432', // 10 hp, jämn (3-2-4-4), <4 spader (ingen negativ X), klöverstopp → 2NT
+      ),
+    )
+    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '2C', '2NT'])
+    expect(a?.turns[2].rule).toBe('NT med stopp')
+  })
+})
+
 describe('FAS 2 punkt 5 – svararens höjningar efter färginkliv', () => {
   it('1♥ – (1♠) – 2♠ (cue = limithöjning med stöd)', () => {
     const a = buildAuction(
