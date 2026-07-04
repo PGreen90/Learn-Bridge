@@ -11,26 +11,32 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Projektrevision R1 pågår (delen som är klar är MERGAD + LIVE)
-> **NÄSTA GÅNG börjar vi med: Fynd #2 delbit 5** — fortsättningar bortom EN
-> konkurrensrond (auktionen dör idag efter att en detektor svarat en gång). Full
-> bild: **`docs/audit/r1-budsystem.md`**.
+### 🔵 NU — R1 klar; Fynd #2:s definierade omfång KLART (MERGAT + LIVE)
+> **NÄSTA GÅNG börjar vi med: R2 — teknisk arkitektur & skalbarhet** (nästa
+> revisionssteg, `AUDIT_PROMPTS.md`). R2 ska komma FÖRE bredare flerronds-
+> konkurrens: R1-rapporten varnar för att stapla fler §7-detektorer innan
+> arkitekturbeslutet tas. Full bild: **`docs/audit/r1-budsystem.md`**.
 >
 > **Delbit 3 (Mathe mot stark 1♣) är PARKERAD (ägarbeslut 2026-07-04)** — sparad
 > som framtidsidé, se 🅿️ PARKERAT nedan.
 >
 > **Läget (2026-07-04):** R1-rapporten skriven; fynd #1/#3/#4/#5 lagade (facit
-> först); **Fynd #2 (§7-konkurrens) delbit 1 + 2 + 4 klara.** Delbit 1 = DONT mot
-> deras 1NT (golv 8/6). Delbit 2 = takeout/Lebensohl mot deras svaga tvåor +
+> först); **Fynd #2 (§7-konkurrens) delbit 1 + 2 + 4 + 5 klara.** Delbit 1 = DONT
+> mot deras 1NT (golv 8/6). Delbit 2 = takeout/Lebensohl mot deras svaga tvåor +
 > spärrar (golv 12 ej sårbar / 13 sårbar direkt, 10 balansering; spärr-X kvar på
 > 14). **Delbit 4 (väg A)** = svararen svarar när MOTSTÅNDAREN stör VÅR öppning:
 > DONT-störning av vårt 1NT → X/XX straff/värden (golv 8) / naturligt / pass;
 > takeout-X av vår svaga tvåa/spärr → XX värden (golv 10) / spärrhöjning / pass
-> (`contested-openings.ts`). Reachability-fynd: appen skapar bara DONT över vårt
-> 1NT och takeout över svaga/spärr — naturligt-1NT-inkliv + 2♣-störning byggdes
-> MEDVETET inte (skulle bli död kod). **1653 tester gröna**, mergat + live.
-> **Kvar av #2:** delbit 5 (fortsättningar bortom en rond). Delbit 3 parkerad
-> (ovan). Ägaren valde "bygg hela #2, delbit för delbit".
+> (`contested-openings.ts`). **Delbit 5 (Case A)** = fortsättning bortom EN rond:
+> efter vårt 1NT + partnerns värde-XX äger vår sida handen (23+), så flyr de undan
+> straffdubblar vi dem — varje steg (`runoutAfterOurRedouble`, `auction-live.ts`).
+> Reachability-fynd: appen skapar bara DONT över vårt 1NT och takeout över svaga/
+> spärr — naturligt-1NT-inkliv + 2♣-störning byggdes MEDVETET inte (skulle bli
+> död kod). **1657 tester gröna**, mergat + live.
+> **Fynd #2:s definierade omfång är därmed klart** (delbit 1/2/4/5; delbit 3
+> parkerad). **Kvar (efter R2):** den GENERELLA flerronds-konkurrensen bortom
+> Case A — medvetet uppskjuten så vi inte staplar fler detektorer före R2.
+> Ägaren valde "bygg hela #2, delbit för delbit".
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
@@ -50,6 +56,12 @@ Läs den här filen först varje session.
   passa. När du öppnar en svag tvåa/spärr och de takeout-dubblar redubblar partnern
   med 10+ (värden) eller höjer spärrartat med fit. Säg till om golven (8 / 10)
   känns fel.
+- **Straffdubbla flykten efter vår XX (R1 Fynd #2 delbit 5, NYTT):** öppnar du
+  1NT, de stör med DONT och din bot-partner redubblar (XX = vi äger handen), så
+  flyr motståndarna undan till en färg STRAFFDUBBLAR din sida dem nu — varje steg,
+  tills de får spela dubblat — i stället för att passa flykten. Utlöses bara efter
+  vårt 1NT + XX (inte efter svaga tvåor/spärrar — där äger vi inte handen). Säg
+  till om det känns för aggressivt att dubbla varje flyktbud.
 - **Straffdubbling mot ägaren:** bottarna kan nu straffdubbla ÄGAREN vid
   offringar på 3-läget+ (poängsystemet). Säg till om det känns för aggressivt.
 - **Essfrågor utan formell trumf / toppsekvenser andra hand / 4M-pass efter

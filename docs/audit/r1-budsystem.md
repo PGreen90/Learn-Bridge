@@ -72,9 +72,27 @@ och NT-buggen kan lagas i en liten, säker fix (facit först).
     = XX värden (golv 10), fit = fortsatt spärrhöjning, annars pass. Facit: 12
     enhetstester (`contested-openings.test.ts`) + 2 integrationstester i
     `auction-live.test.ts` som bevisar att verktygen NÅS live. 1653 gröna.
-  - Delbit 5 (fortsättningar bortom en rond) – kvarstår.
+  - **Delbit 5 KLAR (Case A)** (`+ runoutAfterOurRedouble`): FORTSÄTTNING bortom
+    en konkurrensrond. Efter vårt 1NT + partnerns värde-XX (delbit 4) äger vår
+    sida handen (15–17 + 8+ = 23+, majoriteten). Flyr motståndarna undan XX:et
+    till en färg STRAFFDUBBLAR vi dem nu – varje steg, tills de får spela dubblat
+    – i stället för att öppnaren passar flykten (auktionen dog förut efter att
+    XX-detektorn svarat en gång). Ny detektor `runoutAfterOurRedouble`
+    (`auction-live.ts`) inkopplad i `decideCall` FÖRE delbit 4:s svarsdetektor
+    (så både öppnaren OCH XX-svararen doblar, med enhetlig "vi äger handen"-
+    motivering). Ingen handkvalitetsgrind: mönstret garanterar majoriteten.
+    **Medveten avgränsning (Case A only):** bara flykt efter vårt 1NT+XX byggdes.
+    Flykt efter vår svaga tvåa/spärr+XX är INTE en straffsits (öppnaren är svag →
+    vi äger inte handen), och den GENERELLA flerronds-konkurrensen (den öppna,
+    svåra delen) sköts MEDVETET till efter R2:s arkitekturbeslut – R1-rapporten
+    varnar för att stapla fler detektorer innan dess (se "Kan nya konventioner
+    läggas till…" nedan). Facit: 4 integrationstester i `auction-live.test.ts`
+    (reachability + öppnaren doblar + vi jagar dem vidare + säkerhet utan XX).
+    **1657 gröna.**
 Baslinje efter fixarna + delbit 1 + delbit 2: 1639 tester gröna. Efter delbit 4:
-**1653 tester gröna**.
+1653 tester gröna. Efter delbit 5 (Case A): **1657 tester gröna**. Därmed är
+Fynd #2:s DEFINIERADE omfång klart (delbit 1/2/4/5; delbit 3 parkerad); bredare
+flerronds-konkurrens väntar på R2.
 
 ---
 
