@@ -21,7 +21,7 @@ import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from '
 import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { openerAnswerFourthSuit } from './rebids'
-import { dummyPoints } from './evaluation'
+import { dummyPoints, pointsWithFloor } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import { advanceTwoSuiter, openingSuit, overcall } from './overcalls'
 import { side } from './play'
@@ -1161,6 +1161,122 @@ function answerWeakTwoCue(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
   return null
 }
 
+/**
+ * Öppnarens ROND-2-beslut i det INKLÄMDA konkurrensläget efter partnerns enkla
+ * högfärgshöjning (R1 Fynd #2, delbit 6). Mönster: VÅR 1-högfärgsöppning (1♥/1♠),
+ * ett inkliv, partnern höjde till 2M (enkel höjning, 6–9), och motståndarna
+ * konkurrerade så att ett cue-bud i deras färg skulle hamna ÖVER 3M (inget
+ * avböjnings-utrymme under utgång). Då används MAXIMAL DUBBLING: X = game try.
+ * Returnerar { major } när mönstret + den inklämda triggern gäller, annars null.
+ */
+function openerMaximalToAnswer(history: ResolvedCall[], seat: Seat): { major: string } | null {
+  const open = openingBid(history)
+  if (!open || (open.strain !== 'H' && open.strain !== 'S') || open.level !== 1) return null
+  if (open.seat !== seat) return null // VÅR öppning, ÖPPNAREN själv svarar
+  const M = open.strain
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2) return null
+  if (ourBids[0].seat !== seat || ourBids[1].seat !== PARTNER[seat]) return null // öppning + partnerns höjning
+  const raise = parseContractBid(ourBids[1].bid)!
+  if (raise.strain !== M || raise.level !== 2) return null // partnerns ENKLA höjning 2M
+  // Motståndarna gjorde det SENASTE kontraktsbudet (de konkurrerade) i en färg.
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+  const lastContract = contractBids[contractBids.length - 1]
+  if (side(lastContract.seat) === side(seat)) return null
+  const theirStrain = parseContractBid(lastContract.bid)!.strain
+  if (theirStrain === 'NT' || theirStrain === M) return null
+  const lastIdx = history.indexOf(lastContract)
+  if (history.slice(lastIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter
+  // Inklämt? Cue (billigaste i deras färg) hamnar ÖVER 3M → ingen 3M-avböjning
+  // under utgång → X blir game try (annars ligger fallet utanför delbit 6).
+  const cue = cheapestBidIn(history, seat, theirStrain)
+  const threeM = `3${M}` as Bid
+  if (!cue || !legalCalls(history, seat).includes(threeM)) return null
+  const cb = parseContractBid(cue)!
+  if (bidValue(cb.level, cb.strain) <= bidValue(3, M)) return null // cue under/på 3M → ej inklämt (utanför scope)
+  return { major: M }
+}
+
+/** Öppnarens val i det inklämda läget: pass / 3M / X (game try) / 4M. */
+function openerCompetesAfterRaise(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const m = openerMaximalToAnswer(history, seat)
+  if (!m) return null
+  const M = m.major
+  const hand = deal.hands[seat]
+  const suit = SUIT_OF_LETTER[M]
+  const bp = pointsWithFloor(hand, suit, 'bergen').points
+  const legal = legalCalls(history, seat)
+  const game = `4${M}` as Bid
+  const threeM = `3${M}` as Bid
+  const mSym = SWE_NAME[M]
+  // Utgångshand → utgång oavsett partnerns exakta styrka.
+  if (bp >= 18 && legal.includes(game)) {
+    return {
+      seat, bid: game, rule: 'öppnaren bjuder utgång i konkurrens',
+      explanation: `~${bp} totalpoäng mittemot partnerns höjning → utgång ${game} i ${mSym}.`,
+    }
+  }
+  // Utgångsintresse (~15–17) → X = game try (maximal dubbling; cue vore utan
+  // avböjnings-utrymme). Partnern bjuder 4M med maximum, annars 3M.
+  if (bp >= 15 && legal.includes('X')) {
+    return {
+      seat, bid: 'X', rule: 'maximal dubbling (game try)',
+      explanation: `~${bp} totalpoäng, utgångsintresse mittemot en 6–9-höjning – motståndarnas bud kläm­mer bort cue-budet, så X är game try: partnern bjuder ${game} med ett maximum, annars ${threeM}.`,
+    }
+  }
+  // Minimum men 6:e trumfen (9+ trumf ihop) → konkurrera på lagen om totala stick.
+  if (lengths(hand)[suit] >= 6 && legal.includes(threeM)) {
+    return {
+      seat, bid: threeM, rule: 'öppnaren konkurrerar (6:e trumfen)',
+      explanation: `Minimum men 6:e trumfen (9+ trumf ihop) → ${threeM} på lagen om totala stick (ej krav); säljer inte given billigt.`,
+    }
+  }
+  // Dött minimum → försvara deras kontrakt.
+  return {
+    seat, bid: 'P', rule: 'öppnaren passar i konkurrens',
+    explanation: `Dött minimum mittemot partnerns enkla höjning (6–9) – jag konkurrerar inte utan försvarar deras kontrakt.`,
+  }
+}
+
+/**
+ * Svarar öppnarens MAXIMAL-DUBBLING (delbit 6:s game try). Mönster: VÅR
+ * 1-högfärgsöppning, MIN enkla höjning (2M), och ÖPPNARENS X som senaste
+ * icke-pass-call. Jag (svararen som höjde) dömer: 4M med ett maximum av höjningen
+ * (8+ stödpoäng), annars 3M (avböjer). Returnerar bud, annars null.
+ */
+function answerOpenerMaximal(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || (open.strain !== 'H' && open.strain !== 'S') || open.level !== 1) return null
+  if (open.seat !== PARTNER[seat]) return null // partnern (öppnaren) dubblade; JAG (svararen) svarar
+  const M = open.strain
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2) return null // öppning + min höjning (X är inget kontraktsbud)
+  if (ourBids[0].seat !== PARTNER[seat] || ourBids[1].seat !== seat) return null
+  const raise = parseContractBid(ourBids[1].bid)!
+  if (raise.strain !== M || raise.level !== 2) return null // min ENKLA höjning
+  // Öppnarens senaste icke-pass-call = X (game try).
+  const lastCall = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastCall || lastCall.seat !== PARTNER[seat] || lastCall.bid !== 'X') return null
+  const sp = pointsWithFloor(deal.hands[seat], SUIT_OF_LETTER[M], 'support').points
+  const legal = legalCalls(history, seat)
+  const game = `4${M}` as Bid
+  const decline = cheapestBidIn(history, seat, M) // 3M
+  const mSym = SWE_NAME[M]
+  if (sp >= 8 && legal.includes(game)) {
+    return {
+      seat, bid: game, rule: 'accepterar game-try',
+      explanation: `Partnerns X är ett game try (maximal dubbling); jag är maximum av höjningen (${sp} stödpoäng i ${mSym}) → accepterar utgång ${game}.`,
+    }
+  }
+  if (decline && legal.includes(decline)) {
+    return {
+      seat, bid: decline, rule: 'avböjer game-try',
+      explanation: `Partnerns X är ett game try; med ett minimum (${sp} stödpoäng i ${mSym}) återgår jag till ${decline} (avböjer).`,
+    }
+  }
+  return null
+}
+
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
   const built = buildAuction(deal)
@@ -1226,6 +1342,13 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
         (trump) => respondToRKC(hand, trump), history, seat),
       () => answered(kingAskToAnswer(history, seat),
         (trump) => respondToKingAsk(hand, trump), history, seat),
+      // Öppnarens rond-2 i det INKLÄMDA konkurrensläget + partnerns svar på
+      // maximal-dubblingen (R1 Fynd #2 delbit 6). Måste ligga FÖRE
+      // maybePenaltyDouble: i det inklämda läget är X reserverat för game try
+      // (maximal dubbling) – vi ger medvetet upp straffdubblingen där. Bara det
+      // specifika mönstret matchas; annars faller det igenom orört.
+      () => answerOpenerMaximal(deal, history, seat),
+      () => openerCompetesAfterRaise(deal, history, seat),
       // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
       // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp.
       () => maybePenaltyDouble(deal, history, seat),
