@@ -905,6 +905,40 @@ describe('Fynd #2 delbit 2 – försvar mot deras svaga tvåor/spärrar', () => 
   })
 })
 
+// Fynd #2 delbit 4 – motståndaren stör VÅR icke-1-färgs-öppning, och svararen
+// (öppnarens partner) måste svara i stället för att passa. Ägarbeslut 2026-07-04
+// (väg A): appen skapar bara DONT-störning över vårt 1NT och takeout-X/inkliv
+// över vår svaga tvåa/spärr – så bara det byggs (naturligt-1NT-inkliv och
+// störning av vårt 2♣ modelleras aldrig → skulle bli död kod). Detta är
+// integrationsfacit som bevisar att verktygen NÅS i en levande auktion.
+describe('Fynd #2 delbit 4 – svar när motståndaren stör vår öppning', () => {
+  it('vårt 1NT störs av DONT (2♥) → svararen dubblar (straff/värden)', () => {
+    const deal = dealOf('S', {
+      S: 'S:A83 H:K84 D:AQ76 C:K92',    // 16 hp, jämn → 1NT
+      W: 'S:KJ64 H:AJ973 D:4 C:T65',    // 5-4 hjärter+spader, 9 hp → DONT 2♥
+      N: 'S:Q92 H:Q2 D:KJ53 C:QJ84',    // 11 hp, ingen 5-färg → straff-X
+      E: 'S:T75 H:T65 D:T982 C:A73',
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('1NT')
+    expect(buildAuction(deal)?.turns[1].call).toBe('2H') // DONT-störningen modelleras
+    expect(decideCall(deal, [call('S', '1NT'), call('W', '2H')], 'N'))
+      .toMatchObject({ bid: 'X', rule: 'straff/värden' })
+  })
+
+  it('vår svaga 2♠ störs av takeout-X → svararen redubblar (värden, 10+)', () => {
+    const deal = dealOf('S', {
+      S: 'S:KJ9863 H:54 D:K72 C:T5',    // 6-korts spader, 7 hp → svag 2♠
+      W: 'S:2 H:KJ73 D:AQ85 C:KJ93',    // singel spader, 14 hp, stöd i övriga → takeout-X
+      N: 'S:Q5 H:AQ6 D:JT94 C:Q874',    // 11 hp, 2 spader (ingen fit) → XX (värden)
+      E: 'S:AT74 H:T982 D:63 C:A62',
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('2S')
+    expect(buildAuction(deal)?.turns[1].call).toBe('X') // takeout-störningen modelleras
+    expect(decideCall(deal, [call('S', '2S'), call('W', 'X')], 'N'))
+      .toMatchObject({ bid: 'XX', rule: 'redubbling (värden)' })
+  })
+})
+
 // R1-fynd #5: answerTakeoutDouble antog att motståndarnas öppning låg på
 // 1-läget. När Syd (människan) upplysningsdubblar en SVAG TVÅA måste Nord svara
 // på 2-/3-läget – men motorn räknade fram 1-lägesbud (t.ex. 1♠), som är olagliga
