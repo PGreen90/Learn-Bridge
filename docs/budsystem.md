@@ -878,6 +878,21 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-04** – **R1 Fynd #2 delbit 6: öppnarens rond-2 i inklämt konkurrens­läge**
+  (hela sviten grön, gren `feat/opener-competition-round2`). Efter partnerns enkla
+  högfärgshöjning i konkurrens (`1M–(inkliv)–2M–(deras inklämda bud)`) fattar
+  öppnaren nu ett riktigt beslut i stället för att falla till den grova off-book-
+  catch-allen: **pass** (dött minimum) · **3M** (minimum + 6:e trumfen, lagen om
+  totala stick) · **X = MAXIMAL DUBBLING** (game try, ~15–17 – motståndarnas bud
+  klämmer bort cue-budet så X blir game try, INTE straff i just det läget) · **4M**
+  (utgång, 18+). Partnern svarar X:et **4M** (accept, 8+ stödpoäng) / **3M**
+  (avböjer, minimum). Golven speglar den ostörda `openerRebidAfterSimpleRaise`
+  (15+ game try, 18+ utgång). Skopat till det INKLÄMDA läget (cue hamnar över 3M).
+  Två detektorer i `decideCall`, FÖRE `maybePenaltyDouble` (maximal-dubblingens
+  kända avvägning: straffdubblingen ges medvetet upp där). Ägarbeslut 2026-07-04
+  (rättad från ett felaktigt cue-förslag – 3♥ är olagligt under 3♠). Facit före
+  fix: `auction-opener-competition.test.ts`. Kvar av #2: öppnarens rond-2 när
+  partnern bjöd ny färg/1NT, balanseringens lättnad, bredare flerronds-konkurrens.
 - **2026-07-04** – **Revision R4 (gren `audit/r4-dok-ai`): rättat Bergen 3♣-golvet
   i boken.** Boken angav tidigare **3♣ = 7–10** samtidigt som **3♦ = 10–12** →
   talet 10 låg i båda. Koden (`responses.ts`) placerar en exakt 10:a i **3♦
