@@ -4,6 +4,16 @@
 > sticken ut. Ägaren (Syd) spelar mot tre bottar. "Avslut + motspel" = ägaren
 > kan vara både spelförare och motspelare. Status längst ned.
 
+> ⚠️ **NUTIDSNOT (2026-07-04): denna fil beskriver den FÖRSTA byggomgången.**
+> Spelläget har vuxit långt förbi det som står under "Status"/"Återstår"/
+> "Avgränsningar" nedan. Det som här står som "ännu inte" ÄR numera byggt & live:
+> kontraktet härleds ur en **riktig auktion** (`auction-contract.ts`, inte
+> heuristiska `pickContract`/`dealForPlay`), bottarna spelar med **bot-hjärna
+> (Monte-Carlo-DDS + signalavkodning)** i stället för bara tumregler,
+> **DDS-facit** och **markeringar/utspel** är inkopplade. **För nuläget, läs
+> `docs/status.md` (spel-avsnitten) och `docs/bot-hjarna.md`** — behandla
+> avsnitten nedan som historik över hur spelläget först byggdes.
+
 ## Mål
 - Ett **spelläge** där man klickar fram korten stick för stick mot datorn.
 - Ägaren sitter alltid **Syd**. Är kontraktet N/S spelar ägaren ut det (och
@@ -58,7 +68,7 @@
 - Ägaren spelar alltid **Syd** → **både avslut och motspel** beroende på kontrakt.
 - Idag byggs **steg A + B** (motor + bottar); UI tas i nästa omgång.
 
-## Status
+## Status (första byggomgången — se NUTIDSNOT överst för nuläget)
 - ✅ Plan godkänd + vägval beslutade.
 - ✅ **Steg A – spelmotorn** (`play.ts`): `startPlay`, `legalCards` (följa färg),
   `playCard` (stickvinnare m. trumf, stickräkning), `currentWinner`, `isComplete`,
@@ -73,8 +83,9 @@
   vinnarmarkering, löpande stickräkning, satt/bet-resultat, "Ny giv". Verifierad
   i webbläsaren (utspel, följa färg, ruff, stickräkning – inga konsolfel).
 
-## Återstår (nästa omgångar)
-- Bot-tumreglerna är basala (stjäl t.ex. partnerns stick ibland) – förfinas senare.
-- Minorkontrakt väljs inte (förenkling i `pickContract`).
-- DDS-facit/poängsättning (punkt 28) och markeringar/utspel (punkt 30, §8).
-- Koppla spelläget till en riktig auktion i stället för heuristiskt kontrakt.
+## Återstår (från första omgången — NUMERA MEST KLART, se NUTIDSNOT)
+> Historisk lista. Merparten är byggd sedan dess (`status.md`/`bot-hjarna.md`):
+- ~~Bot-tumreglerna är basala~~ → bot-hjärna (Monte-Carlo-DDS) byggd & live.
+- Minorkontrakt via heuristik: ersatt av kontrakt ur riktig auktion.
+- ~~DDS-facit/poängsättning + markeringar/utspel~~ → inkopplade.
+- ~~Koppla spelläget till en riktig auktion~~ → gjort (`auction-contract.ts`).
