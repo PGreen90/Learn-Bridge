@@ -22,11 +22,28 @@ och NT-buggen kan lagas i en liten, säker fix (facit först).
 
 | # | Fynd | Prioritet | Lagat nu? |
 |---|------|-----------|-----------|
-| 1 | Konkurrens-NT överbjuds: 1♥–(1♠)–**2NT** i stället för naturligt 1NT (fel nivåberäkning) | **HÖG** | Nej – rapporterat (facit-först-fix föreslås) |
-| 2 | §7-konkurrens fortfarande till stor del EJ inkopplad (Lebensohl/DONT/Mathe/Multi/spärr-försvar når aldrig en levande auktion; ingen konkurrens efter 1NT/2♣/2NT/svaga/spärr) | **HÖG** | Nej – strukturellt, hör till plan |
-| 3 | Off-book-lagret läser ALLA partnerfärger som naturliga → konstgjorda bud (Jacoby-kortfärg, Bergen, Drury, cue) kan misstolkas när Syd viker av från linjen | **MEDIUM** (PLAUSIBEL) | Nej – rapporterat |
-| 4 | Blinda testfläckar: konkurrens-NT-grenarna (`NT med stopp`) helt otestade; de "färdiga" §7-konventionerna enhetstestas men har noll integrationstäckning (för att de aldrig nås) | **MEDIUM** | Nej – rapporterat |
-| 5 | Latenta odefinierade fortsättningar: `answerTakeoutDouble` antar 1-lägesöppning (cue `2♥` blir olagligt mot en dubblad svag tvåa) – ofarligt idag men odefinierat | **LÅG** | Nej – noterat |
+| 1 | Konkurrens-NT överbjuds: 1♥–(1♠)–**2NT** i stället för naturligt 1NT (fel nivåberäkning) | **HÖG** | **JA** (commit `b17c968`, facit först) |
+| 2 | §7-konkurrens fortfarande till stor del EJ inkopplad (Lebensohl/DONT/Mathe/Multi/spärr-försvar når aldrig en levande auktion; ingen konkurrens efter 1NT/2♣/2NT/svaga/spärr) | **HÖG** | Nej – stort bygge, ägarstyrt (se Åtgärdslogg) |
+| 3 | Off-book-lagret läser ALLA partnerfärger som naturliga → konstgjorda bud (Jacoby-kortfärg, Bergen, Drury, cue) kan misstolkas när Syd viker av från linjen | **MEDIUM** (→ CONFIRMED) | **JA** (commit `132403d`, Jacoby-2NT-fit) |
+| 4 | Blinda testfläckar: konkurrens-NT-grenarna (`NT med stopp`) helt otestade; de "färdiga" §7-konventionerna enhetstestas men har noll integrationstäckning (för att de aldrig nås) | **MEDIUM** | **JA** (commits `b17c968`+`132403d`+`b9a40c4`) |
+| 5 | Odefinierade fortsättningar: `answerTakeoutDouble` antar 1-lägesöppning (cue `2♥` blir olagligt mot en dubblad svag tvåa) – nåbart när Syd dubblar en svag tvåa | **LÅG→MEDIUM** | **JA** (commit `eeb0fbf`) |
+
+## Åtgärdslogg (2026-07-04)
+
+Ägaren valde att laga alla fynd, en i taget, facit först. Status:
+- **#1 lagat** (`b17c968`): billigaste NT över ett färginkliv = inklivets nivå.
+- **#3 lagat** (`132403d`, uppgraderad PLAUSIBEL→CONFIRMED): en Jacoby-2NT-fit
+  sätter öppnarens högfärg som trumf inför en off-book essfråga (`jacobyFitTrump`).
+- **#4 lagat** (`b9a40c4`): #1/#3 gav aktiva tester för två av tre fläckar; den
+  tredje (oanropade §7-konventioner) fick karakteriseringstester som flippar när
+  #2 byggs.
+- **#5 lagat** (`eeb0fbf`): `answerTakeoutDouble` är nivåmedveten.
+- **#2 kvarstår** – det stora konkurrensbygget. Enligt fix-protokollet ("allt
+  större lagas inte på plats") och CLAUDE.md (budomdöme kräver exempelhänder +
+  ägarens ja) byggs det ägarstyrt, en delbit i taget, och **arkitekturen (R2)
+  bör avgöras först** (detektor-mönster vs enhetligt konkurrenslager – se
+  slutsatsen nedan).
+Baslinje efter fixarna: **1632 tester gröna**.
 
 ---
 
