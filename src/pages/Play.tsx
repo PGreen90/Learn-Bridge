@@ -661,14 +661,11 @@ function PlayTable({
       {/* Meny-overlay: ny giv, facit och hjälp – inget av det stör bordet annars. */}
       {showMenu && (
         <div className="absolute right-2.5 top-13 z-30 w-72 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={onNewGame}>
-              Ny giv →
-            </Button>
-            <Button variant="secondary" className="flex-1" onClick={showFacit}>
-              Visa facit
-            </Button>
-          </div>
+          {/* Facit finns nu som direktknapp på bordet (R3-fynd #4); menyn har
+              bara ny giv, claim och hjälp. */}
+          <Button className="w-full" onClick={onNewGame}>
+            Ny giv →
+          </Button>
           {/* Claim: bara när DIN sida är spelförare (motspelare claimar inte). */}
           {declSide === 'NS' && (
             <Button
@@ -698,22 +695,6 @@ function PlayTable({
               {autoClaim ? 'På' : 'Av'}
             </button>
           </div>
-          {facit !== 'idle' && (
-            <p className="mt-2 text-xs leading-relaxed">
-              {facit === 'toohard' ? (
-                <span className="text-slate-500">
-                  Facit: ställningen är för tung att räkna snabbt just nu – prova igen längre in i given.
-                </span>
-              ) : (
-                <span className="text-sky-700">
-                  Facit (perfekt spel): spelföraren tar totalt <strong>{facit}</strong> stick härifrån —{' '}
-                  {facit >= result.needed
-                    ? `kontraktet håller${facit > result.needed ? ` (+${facit - result.needed})` : ''}.`
-                    : `${result.needed - facit} bet.`}
-                </span>
-              )}
-            </p>
-          )}
           <p className="mt-3 text-xs leading-relaxed text-slate-600">
             Kontraktet är <strong>{contract.level}{STRAIN_CODE[contract.strain] === 'NT' ? 'NT' : ''}</strong>
             {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}
@@ -801,8 +782,9 @@ function PlayTable({
         <div>{VUL_TEXT[deal.vulnerability]}</div>
       </div>
 
-      {/* Svarta listen: kontraktet + ställningen. */}
-      <div className="flex justify-center pb-1.5">
+      {/* Svarta listen: kontraktet + ställningen + facit-knapp (R3-fynd #4:
+          facit ett klick bort på bordet i stället för begravd i ⋮-menyn). */}
+      <div className="flex items-center justify-center gap-2 pb-1.5">
         <div className="flex items-center gap-2 rounded-lg bg-slate-900/85 px-3 py-1 shadow">
           <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
           {contract.doubled && <span className="text-sm font-bold text-red-400">{contract.doubled}</span>}
@@ -811,7 +793,32 @@ function PlayTable({
           </span>
           <span className="text-xs text-slate-400">mål {result.needed}</span>
         </div>
+        <button
+          type="button"
+          onClick={showFacit}
+          className="rounded-lg bg-emerald-950/60 px-2.5 py-1 text-xs font-semibold text-emerald-50 ring-1 ring-emerald-100/10 hover:bg-emerald-950/80"
+        >
+          Facit
+        </button>
       </div>
+
+      {/* Facit-resultatet på bordet (ljus text på filten). */}
+      {facit !== 'idle' && (
+        <p className="px-4 pb-1.5 text-center text-xs leading-relaxed">
+          {facit === 'toohard' ? (
+            <span className="text-emerald-50/70">
+              Facit: ställningen är för tung att räkna snabbt just nu – prova längre in i given.
+            </span>
+          ) : (
+            <span className="text-sky-200">
+              Facit (perfekt spel): spelföraren tar totalt <strong>{facit}</strong> stick härifrån —{' '}
+              {facit >= result.needed
+                ? `kontraktet håller${facit > result.needed ? ` (+${facit - result.needed})` : ''}.`
+                : `${result.needed - facit} bet.`}
+            </span>
+          )}
+        </p>
+      )}
 
       {/* Kortförklaringen: tryck på ett spelat kort på bordet → botens motivering. */}
       {explain ? (
