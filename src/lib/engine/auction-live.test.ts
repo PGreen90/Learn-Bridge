@@ -1210,3 +1210,80 @@ describe('Fynd #2 delbit 1 – DONT mot deras 1NT', () => {
     expect(south.rule).toBe('DONT: rättelse (tvåfärg)')
   })
 })
+
+// Felrapport #23 (bricka 5): Syd (17 hp, 7 solida spader) passade motståndarens
+// 1♣ – för stark för ett kapat inkliv, för lite stöd för en formstark X.
+// Ägarregel: X (upplysning, 17+ valfri form), sedan "överrösta" partnern genom
+// att bjuda egen färg = signalerar monstret → paret når kall utgång 4♠.
+describe('Felrapport #23 – 17+ monster: upplysningsdubbling + monster-återbud', () => {
+  const deal = dealOf('N', {
+    N: 'S:84 H:J973 D:KJ62 C:T94',
+    E: 'S:9 H:A5 D:973 C:KQJ8753',      // 10 hp, 7 klöver → öppnar 1♣
+    S: 'S:AKQ7653 H:Q4 D:Q54 C:A',      // 17 hp, 7 solida spader → monster
+    W: 'S:JT2 H:KT862 D:AT8 C:62',
+  })
+
+  it('Syd upplysningsdubblar 1♣ i stället för att passa monstret', () => {
+    const s = decideCall(deal, [call('N', 'P'), call('E', '1C')], 'S')
+    expect(s.bid).toBe('X')
+    expect(s.rule).toBe('upplysningsdubbling (stark)')
+  })
+
+  it('Syd bjuder monster-återbudet 4♠ efter partnerns påtvingade svar', () => {
+    // N P, E 1C, S X, W P, N 1H (tvunget svar), E P → Syd igen.
+    const s = decideCall(
+      deal,
+      [call('N', 'P'), call('E', '1C'), call('S', 'X'), call('W', 'P'), call('N', '1H'), call('E', 'P')],
+      'S',
+    )
+    expect(s.bid).toBe('4S')
+    expect(s.rule).toBe('monster-återbud (utgång)')
+  })
+
+  it('hela auktionen landar i 4♠ av Syd', () => {
+    const order: Seat[] = ['N', 'E', 'S', 'W']
+    let h: ResolvedCall[] = [call('N', 'P')]
+    let idx = order.indexOf('E')
+    let passes = 0
+    while (passes < 3 && h.length < 20) {
+      const seat = order[idx % 4]
+      const c = decideCall(deal, h, seat)
+      h = [...h, call(seat, c.bid)]
+      passes = c.bid === 'P' ? passes + 1 : 0
+      idx++
+    }
+    const contractBids = h.filter((c) => /^[1-7](C|D|H|S|NT)$/.test(c.bid))
+    const last = contractBids[contractBids.length - 1]
+    expect(last.bid).toBe('4S')
+    expect(last.seat).toBe('S')
+  })
+})
+
+// Två-färgs upplysningsdubbling (ägarregel 2026-07-05): när motståndarna bjudit
+// TVÅ 1-lägesfärger (öppning + svar), t.ex. 1♦–P–1♥, lovar X 4+4+ i de objudna
+// färgerna. Advancern får ALDRIG svara i en av deras bjudna färger (buggen förr:
+// answerTakeoutDouble uteslöt bara den dubblade → kunde bjuda öppnarens ruter).
+describe('Två-färgs upplysningsdubbling – 1♦–P–1♥–X (4-4 i objudna)', () => {
+  const deal = dealOf('N', {
+    N: 'S:AJ4 H:K87 D:AKQ3 C:T92',   // öppnar 1♦
+    E: 'S:T6 H:52 D:KJ984 C:Q76',    // advancer – LÅNG ruter (öppnarens färg)
+    S: 'S:972 H:AQT63 D:6 C:AK54',   // svarar 1♥
+    W: 'S:KQ85 H:32 D:A76 C:KJ84',   // 13 hp, 4-4 spader/klöver → X
+  })
+
+  it('W upplysningsdubblar med 4-4 i de objudna färgerna', () => {
+    const w = decideCall(deal, [call('N', '1D'), call('E', 'P'), call('S', '1H')], 'W')
+    expect(w.bid).toBe('X')
+    expect(w.rule).toBe('upplysningsdubbling')
+  })
+
+  it('advancern svarar i objuden färg (2♣), ALDRIG öppnarens ruter', () => {
+    const e = decideCall(
+      deal,
+      [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', 'X'), call('N', 'P')],
+      'E',
+    )
+    expect(e.bid).toBe('2C')
+    expect(e.bid).not.toBe('2D') // öppnarens färg – aldrig
+  })
+})

@@ -90,6 +90,17 @@ export function overcall(hand: Hand, theirCall: string): ResponseResult {
     return { call: '1NT', rule: '1NT-inkliv', explanation: `${p} hp balanserad med stopp i ${NAME[their]} → 1NT-inkliv (kör 1NT-systemet).` }
   }
 
+  // 3.5) 17+ MONSTER (ägarregel, felrapport #23): en hand med 17+ hp och en egen
+  // lång färg är FÖR STARK för ett enkelt inkliv – partnern kan passa inklivet och
+  // en kall utgång missas. Starta i stället med X (upplysning, rondkrav) oavsett
+  // fördelning; på nästa varv "överröstar" vi partnern och bjuder vår egna färg,
+  // och DÅ är den starka enfärgshanden signalerad. (Balanserade 17–18 med stopp
+  // tas redan av 1NT-inklivet ovan, så hit når bara den obalanserade monstern.)
+  const strongSuit = bestOvercallSuit(len, their)
+  if (p >= 17 && strongSuit) {
+    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `${p} hp – för starkt för ett enkelt inkliv → X (upplysning; visar egna ${NAME[strongSuit]} på nästa varv, monster).` }
+  }
+
   // 4) Upplysningsdubbling: kort i deras färg, stöd i övriga. Ägarbeslut
   // 2026-07-03 (aggressiv standard, uppföljning felrapport #5): golvet är
   // 10 hp – men BARA med perfekt form (max 2 i deras färg + stöd i alla

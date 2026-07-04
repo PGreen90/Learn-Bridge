@@ -83,6 +83,17 @@ describe('answerTakeoutDouble (§7.3)', () => {
   it('12+ → cue deras färg (krav)', () => {
     expect(answerTakeoutDouble(parseHand('S:AQ43 H:KJ32 D:32 C:K32'), 'diamonds').call).toBe('2D')
   })
+
+  // Två färger bjudna (1♦–1♥–X): svaret får ALDRIG hamna i en av deras färger.
+  // bidSuits utesluter både ruter och hjärter → svara i objuden ♠/♣.
+  it('två färger bjudna: undviker öppnarens ruter trots lång ruter', () => {
+    const h = parseHand('S:T6 H:52 D:KJ984 C:Q765') // längst i deras ruter (5)
+    expect(answerTakeoutDouble(h, 'hearts', 1, ['diamonds', 'hearts']).call).toBe('2C')
+  })
+  it('två färger bjudna: väljer längsta OBJUDNA (spader) framför klöver', () => {
+    const h = parseHand('S:KJ85 H:3 D:T9752 C:Q63') // 4 spader, 3 klöver, lång ruter
+    expect(answerTakeoutDouble(h, 'hearts', 1, ['diamonds', 'hearts']).call).toBe('1S')
+  })
 })
 
 // Straffdubblingen (ägarbeslut 2026-07-04, poängarbetet): 2+ säkra trumfstick

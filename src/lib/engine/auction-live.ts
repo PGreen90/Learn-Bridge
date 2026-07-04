@@ -129,24 +129,31 @@ const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'he
  *  - motståndarna har öppnat i en färg (den dubblade färgen).
  * Returnerar deras (dubblade) färg, annars null (= ingen påtvingad svarsplikt).
  */
-function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Suit; level: number } | null {
+function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Suit; level: number; bidSuits: Suit[] } | null {
   const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
   // Senaste icke-pass måste vara PARTNERNS dubbling (annars: RHO bjöd → ej tvång).
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
   // Har vår sida redan bjudit ett kontraktsbud är X:et inte en ren take-out.
   if (history.some((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))) return null
-  // Deras dubblade färg + nivå = senaste kontraktsbudet (öppningen) på
-  // motståndarsidan. Nivån behövs så svaret hamnar lagligt även när en SVAG TVÅA
-  // dubblats (R1-fynd #5). Ett NT-bud är ingen take-out-färg → hoppas över.
-  let their: { suit: Suit; level: number } | null = null
+  // Deras dubblade färg = SENASTE motståndarfärgen; nivån = HÖGSTA (så svaret blir
+  // lagligt även när en svag tvåa dubblats, R1-fynd #5). `bidSuits` = ALLA färger
+  // de bjudit, så advancern aldrig svarar i en av dem (t.ex. öppnarens ruter efter
+  // 1♦–1♥–X). Ett NT-bud är ingen take-out-färg → hoppas över.
+  let their: Suit | null = null
+  let level = 1
+  const bidSuits: Suit[] = []
   for (const c of history) {
     const cb = parseContractBid(c.bid)
     if (cb && side(c.seat) !== side(seat)) {
       const suit = SUIT_OF_LETTER[cb.strain]
-      if (suit) their = { suit, level: cb.level }
+      if (suit) {
+        their = suit
+        level = Math.max(level, cb.level)
+        if (!bidSuits.includes(suit)) bidSuits.push(suit)
+      }
     }
   }
-  return their
+  return their ? { suit: their, level, bidSuits } : null
 }
 
 /**
@@ -342,6 +349,71 @@ function ownDoubledTwoSuiterRescue(
     explanation:
       `Mitt tvåfärgsinkliv är konstgjort (5-5 i två andra färger) och står dubblat – ` +
       `partnern visade ingen preferens, så jag flyr till min längsta visade färg: ${SWE_NAME[letterOfSuit(best)]}.`,
+  }
+}
+
+/**
+ * Står `seat`s egen 17+ UPPLYSNINGSDUBBLING och väntar på monster-återbudet?
+ * Mönstret (ägarregel, felrapport #23): motståndaren öppnade 1 i färg, VÅR X är
+ * mitt enda egna bud hittills (jag har ännu inte visat färg), och nu är det min
+ * tur igen. Med 17+ hp och en lång egen färg "överröstar" jag partnern och bjuder
+ * min färg – det är signalen för den starka enfärgshanden som var för stark för
+ * ett enkelt inkliv. Är färgen självförsörjande (6+ med 2+ topphonnörer) hoppar
+ * jag direkt till utgång; annars visar jag färgen billigast (krav).
+ */
+function ownStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat) || open.level !== 1) return null
+  // Mitt enda egna icke-pass-bud hittills = X (upplysningsdubblingen).
+  const myActions = history.filter((c) => c.seat === seat && c.bid !== 'P')
+  if (myActions.length !== 1 || myActions[0].bid !== 'X') return null
+
+  // ALLA färger motståndarna bjudit (öppning + ev. svarsfärg) – vår färg måste
+  // vara en OBJUDEN (annars "återbjuder" monstret deras egen färg, t.ex. hjärter
+  // efter 1♦–1♥–X).
+  const theirSuits = new Set<Suit>()
+  for (const c of history) {
+    const cb = parseContractBid(c.bid)
+    if (cb && side(c.seat) !== side(seat)) {
+      const s = SUIT_OF_LETTER[cb.strain]
+      if (s) theirSuits.add(s)
+    }
+  }
+
+  const hand = deal.hands[seat]
+  if (hcp(hand) < 17) return null
+  const len = lengths(hand)
+  // Min längsta egna 5+ OBJUDNA färg; lika längd → högre rankad.
+  let suit: Suit | null = null
+  for (const st of SUIT_STRAINS) {
+    const s = SUIT_OF_LETTER[st]
+    if (theirSuits.has(s) || len[s] < 5) continue
+    if (!suit || len[s] > len[suit] || (len[s] === len[suit] && st > letterOfSuit(suit))) suit = s
+  }
+  if (!suit) return null
+
+  const tops = hand.filter((c) => c.suit === suit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length
+  const selfSufficient = len[suit] >= 6 && tops >= 2
+  const isMajor = suit === 'hearts' || suit === 'spades'
+  const letter = letterOfSuit(suit)
+  const legal = legalCalls(history, seat)
+
+  // Självförsörjande → hoppa till utgång (4M / 5m).
+  if (selfSufficient) {
+    const game = (isMajor ? `4${letter}` : `5${letter}`) as Bid
+    if (legal.includes(game)) {
+      return {
+        seat, bid: game, rule: 'monster-återbud (utgång)',
+        explanation: `17+ hp med självförsörjande ${SWE_NAME[letter]} – för stark för ett enkelt inkliv → utgång ${game} (upplysningsdubblingen visade monstret).`,
+      }
+    }
+  }
+  // Annars visa färgen billigast (krav; jag "överröstar" partnern).
+  const bid = cheapestBidIn(history, seat, letter)
+  if (!bid || !legal.includes(bid)) return null
+  return {
+    seat, bid, rule: 'monster-återbud',
+    explanation: `17+ hp – jag bjuder min egna ${SWE_NAME[letter]} över dubblingen (för stark för ett enkelt inkliv, krav).`,
   }
 }
 
@@ -869,6 +941,47 @@ function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): Resolve
 }
 
 /**
+ * Upplysningsdubbling när motståndarna redan bjudit TVÅ 1-lägesfärger (öppning +
+ * svar i ny färg), t.ex. 1♦–(P)–1♥ och vi sitter DIREKT över svararen. Ägarregel
+ * (2026-07-05): X är fortfarande takeout, men lovar då **4+ 4+ i de två OBJUDNA
+ * färgerna** (äkta 4-4 – partnern har bara två färger att välja mellan), 10+ hp.
+ * En 5-korts objuden färg inkliver vi hellre (sköts av on-book-linjen), så här
+ * krävs exakt 4-4. (17+-monstret hanteras i öppningsfallet, se `overcall` +
+ * `ownStrongDoubleRebid`.) null = ingen sådan dubbling.
+ */
+function maybeTakeoutOfResponse(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+  if (contractBids.length !== 2) return null
+  const [openBid, respBid] = contractBids
+  const ob = parseContractBid(openBid.bid)!
+  const rb = parseContractBid(respBid.bid)!
+  if (ob.level !== 1 || rb.level !== 1) return null
+  const openSuit = SUIT_OF_LETTER[ob.strain]
+  const respSuit = SUIT_OF_LETTER[rb.strain]
+  if (!openSuit || !respSuit || openSuit === respSuit) return null
+  // Båda kontraktsbuden ska vara MOTSTÅNDARNAS (samma sida, ej vår).
+  if (side(openBid.seat) === side(seat) || side(openBid.seat) !== side(respBid.seat)) return null
+  // Vi sitter direkt över svararen: svararens bud är senaste icke-pass.
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass !== respBid) return null
+
+  const hand = deal.hands[seat]
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const unbid = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter((s) => s !== openSuit && s !== respSuit)
+  const [u1, u2] = unbid
+  // Exakt 4-4 i de objudna (en 5-korts objuden färg inkliver vi hellre).
+  const fourFour = len[u1] >= 4 && len[u2] >= 4 && len[u1] < 5 && len[u2] < 5
+  if (p < 10 || !fourFour) return null
+  if (!legalCalls(history, seat).includes('X' as Bid)) return null
+
+  return {
+    seat, bid: 'X', rule: 'upplysningsdubbling',
+    explanation: `${p} hp, 4-4 i ${SWE_NAME[letterOfSuit(u1)]}+${SWE_NAME[letterOfSuit(u2)]} (deras ${SWE_NAME[letterOfSuit(openSuit)]}+${SWE_NAME[letterOfSuit(respSuit)]} objudna) → X (upplysning).`,
+  }
+}
+
+/**
  * Får `seat` STRAFFDUBBLA här (ägarbeslut 2026-07-04, poängarbetet)? Kraven —
  * medvetet stränga, så X:et aldrig kan förväxlas med en konventionell dubbling:
  *  - senaste icke-pass är motståndarnas FÄRGKONTRAKT på 3-läget eller högre
@@ -1337,7 +1450,7 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   const forcedAnswers: Array<() => ResolvedCall | null> = [
     // Upplysningsdubbling från partnern (§7): svara, passa aldrig bort den.
     () => answered(takeoutDoubleToAnswer(history, seat),
-      (t) => answerTakeoutDouble(hand, t.suit, t.level), history, seat),
+      (t) => answerTakeoutDouble(hand, t.suit, t.level, t.bidSuits), history, seat),
     // Partnerns NEGATIVA dubbling (§7.3, rondkrav): öppnaren svarar alltid.
     () => answered(negativeDoubleToAnswer(history, seat),
       (n) => openerAnswerNegativeDouble(hand, n.ourOpen, n.theirCall), history, seat),
@@ -1361,6 +1474,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     const contestedAnswers: Array<() => ResolvedCall | null> = [
       // Motståndarna kliver in på riktigt (direkt sits eller balansering).
       () => maybeOvercall(deal, history, seat),
+      // Upplysningsdubbling när de bjudit TVÅ 1-lägesfärger (1♦–P–1♥–X): 4-4 i de
+      // objudna färgerna (eller 17+ monster). Ägarregel 2026-07-05.
+      () => maybeTakeoutOfResponse(deal, history, seat),
       // Partnerns DONT-bud mot deras 1NT besvaras (§7.5, Fynd #2 delbit 1) …
       () => answered(partnerDONTToAnswer(history, seat),
         (d) => advanceDONT(hand, d), history, seat),
@@ -1376,6 +1492,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // Ett EGET dubblat tvåfärgsinkliv får aldrig passas ut (felrapport #7):
       // konstgjort – utan preferens flyr vi till den längsta visade färgen.
       () => ownDoubledTwoSuiterRescue(deal, history, seat),
+      // Vår egen 17+ upplysningsdubbling får sitt monster-återbud (felrapport #23):
+      // vi bjuder/hoppar i egen färg för att visa den för starka enfärgshanden.
+      () => ownStrongDoubleRebid(deal, history, seat),
       // Partnerns 4NT med trumf = ESSFRÅGAN (1430 RKC, §6.1); 5NT = kungfrågan
       // (Sjöberg, §6.3). Får aldrig passas (felrapport #9).
       () => answered(rkcToAnswer(history, seat),

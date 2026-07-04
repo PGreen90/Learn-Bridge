@@ -172,10 +172,13 @@ export function supportDouble(hand: Hand, partnerMajor: Suit, rhoCall: string): 
  * 2-läget – annars räknar motorn fram olagliga 1-lägesbud och budet släpps av
  * anroparens laglighetsvakt → påtvingat svar tappas (R1-fynd #5).
  */
-export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1): ResponseResult {
+export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1, bidSuits: Suit[] = [theirSuit]): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
-  const unbid = RANK_ORDER.filter((s) => s !== theirSuit)
+  // Uteslut ALLA färger motståndarna bjudit (inte bara den dubblade). När två
+  // färger är bjudna – t.ex. 1♦–1♥–X – får svaret aldrig hamna i öppnarens ruter
+  // (felrapport-uppföljning: advancern bjöd deras egen färg).
+  const unbid = RANK_ORDER.filter((s) => !bidSuits.includes(s))
 
   // Längsta objudna färg; lika längd → högfärg/högre rankad.
   let best = unbid[0]
