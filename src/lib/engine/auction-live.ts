@@ -18,6 +18,7 @@ import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
 import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from './doubles'
+import { advanceDONT } from './dont'
 import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
@@ -493,7 +494,6 @@ function kingAskToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
 // regel ska vara TYDLIGT korrekt även om den är smal.
 
 const SWE_NAME: Record<string, string> = { C: 'klöver', D: 'ruter', H: 'hjärter', S: 'spader' }
-const SYM_OF_LETTER: Record<string, string> = { C: '♣', D: '♦', H: '♥', S: '♠' }
 const SUIT_STRAINS = ['C', 'D', 'H', 'S'] as const
 
 /** Första kontraktsbudet i historiken (öppningen), eller null om inget bjudits. */
@@ -794,6 +794,55 @@ function maybePenaltyDouble(deal: Deal, history: ResolvedCall[], seat: Seat): Re
   return { seat, bid: 'X', rule: ans.rule, explanation: ans.explanation }
 }
 
+// ---- DONT-fortsättningar mot deras 1NT (§7.5, Fynd #2 delbit 1) -------------
+
+/**
+ * Har partnern gjort ett DONT-bud mot motståndarnas 1NT som `seat` (advancern)
+ * ska svara på? Mönstret: motståndarnas 1NT-öppning, och partnerns DONT-bud
+ * (X / 2♣ / 2♦ / 2♥ / 2♠) är vår sidas ENDA aktion, senaste icke-pass, följt av
+ * bara pass. Returnerar partnerns DONT-bud, annars null. (X får aldrig lämnas att
+ * passas – det är ett relä; jfr felrapport #7 för tvåfärgsinkliv.)
+ */
+function partnerDONTToAnswer(history: ResolvedCall[], seat: Seat): string | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
+  if (!['X', '2C', '2D', '2H', '2S'].includes(lastNonPass.bid)) return null
+  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourActions.length !== 1 || ourActions[0] !== lastNonPass) return null
+  return lastNonPass.bid
+}
+
+/**
+ * Står `seat`s egen DONT-X (enfärgshand) och väntar på rättelse? Mönstret:
+ * motståndarnas 1NT, vår X, partnerns FORCERADE 2♣-relä, sedan bara pass. X:et
+ * lovar en 6+ enfärgshand – vi rättar till den (pass med klöver-enfärg). Utan
+ * detta skulle X:et bli spelat som straffdubbling av 1NT.
+ */
+function ownDONTXToCorrect(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
+  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourActions.length !== 2) return null
+  if (ourActions[0].seat !== seat || ourActions[0].bid !== 'X') return null
+  if (ourActions[1].seat !== PARTNER[seat] || ourActions[1].bid !== '2C') return null
+  const idx = history.indexOf(ourActions[1])
+  if (!history.slice(idx + 1).every((c) => c.bid === 'P')) return null
+
+  const len = lengths(deal.hands[seat])
+  const suit = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st]).find((s) => len[s] >= 6)
+  if (!suit || suit === 'clubs') {
+    return { seat, bid: 'P', rule: 'DONT: pass (klöver)', explanation: 'min DONT-enfärg är klöver → passa partnerns 2♣-relä.' }
+  }
+  const bid = cheapestBidIn(history, seat, letterOfSuit(suit))
+  if (!bid) return null
+  return {
+    seat, bid, rule: 'DONT: rättelse',
+    explanation: `min DONT-enfärg är ${SWE_NAME[letterOfSuit(suit)]} (6+) → rättar partnerns 2♣-relä till ${bid}.`,
+  }
+}
+
 // ---- Bot-hjärnan -----------------------------------------------------------
 
 /**
@@ -884,6 +933,19 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // i stället för att tystna.
     const oc = maybeOvercall(deal, history, seat)
     if (oc) return oc
+
+    // DONT-fortsättningar (§7.5, Fynd #2 delbit 1): partnerns DONT-bud mot deras
+    // 1NT besvaras (relä 2♣ efter X / preferens efter tvåfärg), och vår egen
+    // DONT-X rättas till sin riktiga färg efter partnerns relä.
+    const dontAdvance = partnerDONTToAnswer(history, seat)
+    if (dontAdvance) {
+      const ans = advanceDONT(deal.hands[seat], dontAdvance)
+      if (legalCalls(history, seat).includes(ans.call as Bid)) {
+        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+      }
+    }
+    const dontCorrect = ownDONTXToCorrect(deal, history, seat)
+    if (dontCorrect) return dontCorrect
 
     // Partnerns TVÅFÄRGSINKLIV (Michaels / ovanlig 2NT, §7.2) besvaras med
     // preferens via advanceTwoSuiter – verktyget fanns (FAS 10) men var aldrig

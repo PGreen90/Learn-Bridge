@@ -824,18 +824,20 @@ describe('R1-fynd #3 – Jacoby-2NT-fit sätter trumf inför off-book essfråga'
 // När Fynd #2 kopplar in §7 ska de här smälla till → uppdatera dem till FACIT
 // för det verkliga budet (2♠/X respektive X). Se docs/audit/r1-budsystem.md.
 describe('R1-fynd #4 – dokumenterad §7-inkopplingslucka (flippar när Fynd #2 byggs)', () => {
-  it('mot deras 1NT: DONT-enfärgshand passar i dag (borde bli 2♠/X)', () => {
+  it('under DONT-golvet: 6-hp-hand passar mot deras 1NT (sund standard, delbit 1)', () => {
+    // Delbit 1 av Fynd #2 kopplade in DONT MEN med ägarens golv 8 hp (direkt).
+    // En 6-hp-hand passar därför korrekt – detta låser den gränsen.
     const deal = dealOf('E', {
       E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 hp balanserad → 1NT
-      S: 'S:KQJ982 H:54 D:76 C:432',   // 6-korts spader ~6 hp = DONT-enfärg
+      S: 'S:KQJ982 H:54 D:76 C:432',   // 6-korts spader ~6 hp < golvet
       N: 'S:73 H:9762 D:9854 C:965',
       W: 'S:T64 H:AJT3 D:AJT C:AQ8',
     })
-    expect(buildAuction(deal)?.turns[0].call).toBe('1NT') // förutsättning: de öppnar 1NT
-    expect(decideCall(deal, [call('E', '1NT')], 'S').bid).toBe('P') // LUCKA: ingen DONT
+    expect(buildAuction(deal)?.turns[0].call).toBe('1NT')
+    expect(decideCall(deal, [call('E', '1NT')], 'S').bid).toBe('P') // under 8-hp-golvet
   })
 
-  it('mot deras svaga 2♠: takeout-hand passar i dag (borde bli X)', () => {
+  it('mot deras svaga 2♠: takeout-hand passar i dag (borde bli X – delbit 2)', () => {
     const deal = dealOf('E', {
       E: 'S:KQ9832 H:54 D:K3 C:762',   // 6-korts spader ~8 hp → svag 2♠
       S: 'S:2 H:AKJ3 D:AQ84 C:KJ32',   // kort spader, 17 hp, stöd i övriga = takeout
@@ -865,5 +867,45 @@ describe('R1-fynd #5 – svar på takeout-X av en svag tvåa (ej 1-lägesantagan
     expect(buildAuction(deal)?.turns[0].call).toBe('2H') // förutsättning: svag 2♥
     const c = decideCall(deal, history, 'N')
     expect(c.bid).toBe('2S')
+  })
+})
+
+// Fynd #2 delbit 1 – DONT mot deras 1NT (systembok §7.5) inkopplad i budlådan.
+// Ägarbeslut 2026-07-04: golv 8 hp direkt / 6 hp balansering + rätt form.
+describe('Fynd #2 delbit 1 – DONT mot deras 1NT', () => {
+  it('direkt tvåfärg: E 1NT – S 2♥ (5-4 hjärter/spader), advancern passar', () => {
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 → 1NT
+      S: 'S:KQ1098 H:KJ32 D:5 C:432',  // 5-4 S/H, 11 hp → 2♥ (lägre färgen visar ♥+♠)
+      W: 'S:J43 H:9876 D:AJ76 C:AQ',
+      N: 'S:762 H:A5 D:KT98 C:T985',
+    })
+    expect(decideCall(deal, [call('E', '1NT')], 'S')).toMatchObject({ bid: '2H', rule: 'DONT tvåfärg' })
+    expect(decideCall(deal, [call('E', '1NT'), call('S', '2H'), call('W', 'P')], 'N').bid).toBe('P')
+  })
+
+  it('direkt enfärg: E 1NT – S X – (P) – N 2♣ (relä) – (P) – S 2♥ (rättelse)', () => {
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 → 1NT
+      S: 'S:3 H:AKJ1098 D:K32 C:432',  // 6-korts hjärter ~12 hp → X (enfärg)
+      W: 'S:KT8742 H:762 D:J54 C:7',
+      N: 'S:QJ96 H:5 D:T98 C:T9865',
+    })
+    expect(decideCall(deal, [call('E', '1NT')], 'S')).toMatchObject({ bid: 'X', rule: 'DONT X (enfärg)' })
+    expect(decideCall(deal, [call('E', '1NT'), call('S', 'X'), call('W', 'P')], 'N').bid).toBe('2C')
+    const corr = decideCall(deal, [call('E', '1NT'), call('S', 'X'), call('W', 'P'), call('N', '2C'), call('E', 'P')], 'S')
+    expect(corr).toMatchObject({ bid: '2H', rule: 'DONT: rättelse' })
+  })
+
+  it('balansering: E 1NT – (P) – (P) – N 2♥ (golv 6 hp)', () => {
+    const deal = dealOf('E', {
+      E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 → 1NT
+      S: 'S:7432 H:876 D:765 C:765',   // 0 hp → pass
+      W: 'S:Q73 H:J8 D:T9842 C:J43',   // 5 hp, ingen 4-hf → pass
+      N: 'S:KQ1098 H:KJ32 D:5 C:432',  // 11 hp 5-4 → balansering-DONT 2♥
+    })
+    const bid = decideCall(deal, [call('E', '1NT'), call('S', 'P'), call('W', 'P')], 'N')
+    expect(bid.bid).toBe('2H')
+    expect(bid.explanation).toContain('balansering')
   })
 })
