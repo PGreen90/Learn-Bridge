@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Bid, Card, Deal, Hand, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import {
@@ -185,8 +185,13 @@ function BiddingPhase({
   const finalContract = complete ? contractFromCalls(game.history) : null
   const passedOut = complete && !finalContract
   // Motorns rekommenderade bud för din hand i det här läget (markeras i budlådan
-  // och ger den äkta förklaringen för det budet).
-  const recommendation = yourTurn ? decideCall(game.deal, game.history, 'S') : null
+  // och ger den äkta förklaringen för det budet). useMemo (R2-fynd #3) så den bara
+  // räknas om när given eller budhistoriken ändras – inte vid orelaterade
+  // omritningar (t.ex. när menyn eller felrapport-dialogen öppnas).
+  const recommendation = useMemo(
+    () => (yourTurn ? decideCall(game.deal, game.history, 'S') : null),
+    [yourTurn, game.deal, game.history],
+  )
 
   return (
     <Felt>

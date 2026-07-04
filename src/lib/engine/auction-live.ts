@@ -1055,6 +1055,112 @@ function divergedFromLine(history: ResolvedCall[], line: ResolvedCall[]): boolea
  * Skillnaden mot en FÄRDIG linje (`built.open === false`): där är de extra
  * turerna bara avslutande pass och boten ska passa.
  */
+/**
+ * Kör mönstret "detektor → svar → laglighetskoll" som annars upprepades för varje
+ * konvention: om `detected` är falsy hoppas steget över; annars byggs svaret och
+ * returneras bara om budet är lagligt just här (annars null → nästa steg prövas).
+ * Så en detektor kan aldrig råka lämna ett olagligt bud, och kedjan i decideCall
+ * blir en läsbar, ordnad lista i stället för 17 nästan identiska if-block.
+ */
+function answered<T>(
+  detected: T | null | undefined,
+  answer: (d: T) => { call: string; rule?: string; explanation?: string },
+  history: ResolvedCall[],
+  seat: Seat,
+): ResolvedCall | null {
+  if (!detected) return null
+  const ans = answer(detected)
+  const bid = ans.call as Bid
+  if (!legalCalls(history, seat).includes(bid)) return null
+  return { seat, bid, rule: ans.rule, explanation: ans.explanation }
+}
+
+/**
+ * Partnerns 3NT efter fullföljd transfer = välj utgång (felrapport #13): 4 i
+ * högfärgen med 3-korts stöd, annars pass (3NT står).
+ */
+function answerTransferGameChoice(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const transferMajor = transferGameChoiceToAnswer(history, seat)
+  if (!transferMajor) return null
+  const support = lengths(deal.hands[seat])[transferMajor]
+  if (support >= 3) {
+    const bid = `4${letterOfSuit(transferMajor)}` as Bid
+    if (legalCalls(history, seat).includes(bid)) {
+      return {
+        seat, bid, rule: 'till spel',
+        explanation: `partnerns 3NT efter transfern = välj utgång: ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → 4 ${SWE_NAME[letterOfSuit(transferMajor)]} (5-3-fiten före sang).`,
+      }
+    }
+  }
+  return {
+    seat, bid: 'P', rule: 'pass',
+    explanation: `partnerns 3NT efter transfern = välj utgång: bara ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → pass (3NT står).`,
+  }
+}
+
+/**
+ * Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vår sida
+ * handen; straffdubbla motståndarnas flykt undan till en färg – varje steg.
+ */
+function answerRunout(history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const runout = runoutAfterOurRedouble(history, seat)
+  if (!runout) return null
+  return {
+    seat, bid: 'X', rule: 'straffdubbling (vi äger handen)',
+    explanation:
+      `Vi öppnade 1NT och partnern redubblade (XX) – vår sida har 23+ och äger handen. ` +
+      `Motståndarna flyr till ${runout.level}${SWE_NAME[letterOfSuit(runout.suit)]} → straffdubbling.`,
+  }
+}
+
+/**
+ * Öppnaren svarar partnerns CUE-höjning i motståndarnas färg (felrapport #16):
+ * minimum → billigaste återbud i vår färg, maximum (15+ hp) → accepterar utgång.
+ */
+function answerCueRaise(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const cueRaise = partnerCueRaiseToAnswer(history, seat)
+  if (!cueRaise) return null
+  const strain = cueRaise.agreedStrain
+  const isMajor = strain === 'H' || strain === 'S'
+  const signoff = cheapestBidIn(history, seat, strain)
+  const gameBid = `${isMajor ? 4 : 5}${strain}` as Bid
+  const legal = legalCalls(history, seat)
+  const acceptGame = hcp(deal.hands[seat]) >= 15 && legal.includes(gameBid)
+  const bid = (acceptGame ? gameBid : signoff) as Bid | null
+  if (bid && legal.includes(bid)) {
+    return {
+      seat, bid, rule: 'svar på cue-höjning',
+      explanation: acceptGame
+        ? `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jag är maximum → accepterar utgång ${bid}.`
+        : `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]} och är krav; med ett minimum återgår jag billigast i vår färg (${bid}).`,
+    }
+  }
+  return null
+}
+
+/**
+ * Advancern svarar partnerns TVÅFÄRGS-cue över motståndarnas svaga tvåa
+ * (felrapport #18): ge preferens till längsta sidofärg (≠ deras), passa aldrig.
+ */
+function answerWeakTwoCue(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const wtCue = partnerWeakTwoCueToAnswer(history, seat)
+  if (!wtCue) return null
+  const len = lengths(deal.hands[seat])
+  const sideStrains = SUIT_STRAINS.filter((st) => st !== wtCue.theirStrain)
+  let best = sideStrains[0]
+  for (const st of sideStrains) {
+    if (len[SUIT_OF_LETTER[st]] > len[SUIT_OF_LETTER[best]]) best = st
+  }
+  const bid = cheapestBidIn(history, seat, best)
+  if (bid && legalCalls(history, seat).includes(bid)) {
+    return {
+      seat, bid, rule: 'svar på tvåfärgs-cue',
+      explanation: `Partnerns cue lovar en stark tvåfärgshand (krav) – jag ger preferens till min längsta sidofärg ${SWE_NAME[best]} (${bid}), passar aldrig cuet.`,
+    }
+  }
+  return null
+}
+
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
   const built = buildAuction(deal)
@@ -1069,217 +1175,90 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     if (next && next.seat === seat) return next
   }
 
-  // Linjen gäller inte här (slut eller off-book): en upplysningsdubbling från
-  // partnern tvingar fram ett svar (partnern får inte lämnas att passa
-  // take-out-dubbla bort kontraktet).
-  const takeout = takeoutDoubleToAnswer(history, seat)
-  if (takeout) {
-    const ans = answerTakeoutDouble(deal.hands[seat], takeout.suit, takeout.level)
-    if (legalCalls(history, seat).includes(ans.call as Bid)) {
-      return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-    }
+  const hand = deal.hands[seat]
+
+  // ---- Tvingande svar (gäller ÄVEN on-book) --------------------------------
+  // Linjen gav inget bud för oss här. Vissa lägen är ändå rondkrav: partnern får
+  // ALDRIG lämnas att passa bort en upplysning/fjärde färg. Prövas i ordning;
+  // första steget som ger ett lagligt bud vinner.
+  const forcedAnswers: Array<() => ResolvedCall | null> = [
+    // Upplysningsdubbling från partnern (§7): svara, passa aldrig bort den.
+    () => answered(takeoutDoubleToAnswer(history, seat),
+      (t) => answerTakeoutDouble(hand, t.suit, t.level), history, seat),
+    // Partnerns NEGATIVA dubbling (§7.3, rondkrav): öppnaren svarar alltid.
+    () => answered(negativeDoubleToAnswer(history, seat),
+      (n) => openerAnswerNegativeDouble(hand, n.ourOpen, n.theirCall), history, seat),
+    // Partnerns FJÄRDE FÄRG (§6.6, utgångskrav): öppnaren svarar alltid.
+    () => answered(fourthSuitToAnswer(history, seat),
+      (f) => openerAnswerFourthSuit(hand, f.opened, f.second, f.responderSuit, f.fourth), history, seat),
+  ]
+  for (const run of forcedAnswers) {
+    const call = run()
+    if (call) return call
   }
 
-  // Samma tvång för öppnaren mot partnerns NEGATIVA dubbling (§7.3, rondkrav):
-  // öppnaren får aldrig lämnas att passa bort svararens upplysning.
-  const neg = negativeDoubleToAnswer(history, seat)
-  if (neg) {
-    const ans = openerAnswerNegativeDouble(deal.hands[seat], neg.ourOpen, neg.theirCall)
-    if (legalCalls(history, seat).includes(ans.call as Bid)) {
-      return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-    }
-  }
-
-  // Partnerns FJÄRDE FÄRG (§6.6) är utgångskrav – öppnaren svarar alltid
-  // (stöd / extra längd / NT med stopp / höjning), passar aldrig.
-  const fourth = fourthSuitToAnswer(history, seat)
-  if (fourth) {
-    const ans = openerAnswerFourthSuit(
-      deal.hands[seat], fourth.opened, fourth.second, fourth.responderSuit, fourth.fourth,
-    )
-    if (legalCalls(history, seat).includes(ans.call as Bid)) {
-      return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-    }
-  }
-
-  // Häng med och svara historiedrivet när linjen inte styr oss längre:
-  // off-book (Syd bjöd eget), eller en öppen konkurrensauktion som linjen bara
-  // modellerat en rond av.
+  // ---- Historiedrivna svar när linjen inte styr längre ---------------------
+  // Off-book (Syd bjöd eget) eller en öppen konkurrensauktion som linjen bara
+  // modellerat en rond av. ORDNINGEN I LISTAN ÄR BETYDELSEFULL: flera steg måste
+  // ligga FÖRE det generella off-book-svaret sist (annars läser det ett
+  // konstgjort relä/cue som en naturlig färg och stöder/passar fel). Lägg nya
+  // konventioner på rätt plats i listan – inte sist av bekvämlighet.
   const lineExhaustedOpen = !offBook && history.length >= line.length && built.open
   if (offBook || lineExhaustedOpen) {
-    // Motståndarna kliver in på riktigt (direkt sits eller balansering)
-    // i stället för att tystna.
-    const oc = maybeOvercall(deal, history, seat)
-    if (oc) return oc
-
-    // DONT-fortsättningar (§7.5, Fynd #2 delbit 1): partnerns DONT-bud mot deras
-    // 1NT besvaras (relä 2♣ efter X / preferens efter tvåfärg), och vår egen
-    // DONT-X rättas till sin riktiga färg efter partnerns relä.
-    const dontAdvance = partnerDONTToAnswer(history, seat)
-    if (dontAdvance) {
-      const ans = advanceDONT(deal.hands[seat], dontAdvance)
-      if (legalCalls(history, seat).includes(ans.call as Bid)) {
-        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-      }
+    const contestedAnswers: Array<() => ResolvedCall | null> = [
+      // Motståndarna kliver in på riktigt (direkt sits eller balansering).
+      () => maybeOvercall(deal, history, seat),
+      // Partnerns DONT-bud mot deras 1NT besvaras (§7.5, Fynd #2 delbit 1) …
+      () => answered(partnerDONTToAnswer(history, seat),
+        (d) => advanceDONT(hand, d), history, seat),
+      // … och vår egen DONT-X rättas till sin riktiga färg efter partnerns relä.
+      () => ownDONTXToCorrect(deal, history, seat),
+      // Partnerns TVÅFÄRGSINKLIV (Michaels/ovanlig 2NT, §7.2): preferens via
+      // advanceTwoSuiter; även advancerns medvetna pass (felrapport #7).
+      () => answered(partnerTwoSuiterToAnswer(history, seat),
+        (t) => advanceTwoSuiter(hand, t.partnerCall, t.theirSuit, t.contested), history, seat),
+      // Ett EGET dubblat tvåfärgsinkliv får aldrig passas ut (felrapport #7):
+      // konstgjort – utan preferens flyr vi till den längsta visade färgen.
+      () => ownDoubledTwoSuiterRescue(deal, history, seat),
+      // Partnerns 4NT med trumf = ESSFRÅGAN (1430 RKC, §6.1); 5NT = kungfrågan
+      // (Sjöberg, §6.3). Får aldrig passas (felrapport #9).
+      () => answered(rkcToAnswer(history, seat),
+        (trump) => respondToRKC(hand, trump), history, seat),
+      () => answered(kingAskToAnswer(history, seat),
+        (trump) => respondToKingAsk(hand, trump), history, seat),
+      // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
+      // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp.
+      () => maybePenaltyDouble(deal, history, seat),
+      // Partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG (felrapport #13).
+      // Måste ligga FÖRE off-book-svaret (som annars stöder transferns relä).
+      () => answerTransferGameChoice(deal, history, seat),
+      // Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vi
+      // handen – straffdubbla flykten. Måste ligga FÖRE delbit 4-detektorerna
+      // (ntInterference) och off-book-svaret.
+      () => answerRunout(history, seat),
+      // Motståndaren störde VÅR icke-1-färgs-öppning (Fynd #2 delbit 4):
+      // svararen svarar. Måste ligga FÖRE off-book-svaret.
+      () => answered(ntInterferenceToAnswer(history, seat),
+        (i) => answerNTInterference(hand, i), history, seat),
+      () => answered(ownPreemptInterferenceToAnswer(history, seat),
+        (p) => answerPreemptInterference(hand, p.ourSuit, p.theirCall, p.ourLevel), history, seat),
+      // Öppnaren svarar partnerns CUE-HÖJNING i motståndarnas färg (felrapport
+      // #16): cue = krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
+      () => answerCueRaise(deal, history, seat),
+      // Advancern svarar partnerns TVÅFÄRGS-CUE över deras svaga tvåa (felrapport
+      // #18): krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
+      () => answerWeakTwoCue(deal, history, seat),
+      // Inklivaren stöttar advancerns NYA färg (felrapport #15): enkel stödhöjning
+      // i stället för att passa. Måste ligga FÖRE off-book-svaret (som annars
+      // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).
+      () => overcallerRaiseAdvance(deal, history, seat),
+      // Generellt historiedrivet off-book-svar (sist – fångar övrigt).
+      () => offBookResponse(deal, history, seat),
+    ]
+    for (const run of contestedAnswers) {
+      const call = run()
+      if (call) return call
     }
-    const dontCorrect = ownDONTXToCorrect(deal, history, seat)
-    if (dontCorrect) return dontCorrect
-
-    // Partnerns TVÅFÄRGSINKLIV (Michaels / ovanlig 2NT, §7.2) besvaras med
-    // preferens via advanceTwoSuiter – verktyget fanns (FAS 10) men var aldrig
-    // inkopplat i live-flödet, så auktionen dog (felrapport #7). Även
-    // advancerns medvetna pass (contested, svag utan fit) går den här vägen.
-    const twoSuiter = partnerTwoSuiterToAnswer(history, seat)
-    if (twoSuiter) {
-      const ans = advanceTwoSuiter(
-        deal.hands[seat], twoSuiter.partnerCall, twoSuiter.theirSuit, twoSuiter.contested,
-      )
-      if (legalCalls(history, seat).includes(ans.call as Bid)) {
-        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-      }
-    }
-
-    // Ett EGET dubblat tvåfärgsinkliv får aldrig passas ut (felrapport #7):
-    // budet är konstgjort – utan preferens från partnern flyr vi till den
-    // längsta visade färgen.
-    const rescue = ownDoubledTwoSuiterRescue(deal, history, seat)
-    if (rescue) return rescue
-
-    // Partnerns 4NT med överenskommen trumf är ESSFRÅGAN (1430 RKC, §6.1) och
-    // får aldrig passas (felrapport #9: 4NT blev spelat kontrakt). 5NT därefter
-    // är kungfrågan (Sjöberg, §6.3) – svara alltid.
-    const rkcTrump = rkcToAnswer(history, seat)
-    if (rkcTrump) {
-      const ans = respondToRKC(deal.hands[seat], rkcTrump)
-      if (legalCalls(history, seat).includes(ans.call as Bid)) {
-        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-      }
-    }
-    const kingTrump = kingAskToAnswer(history, seat)
-    if (kingTrump) {
-      const ans = respondToKingAsk(deal.hands[seat], kingTrump)
-      if (legalCalls(history, seat).includes(ans.call as Bid)) {
-        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-      }
-    }
-
-    // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
-    // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp, och bara när
-    // X:et omöjligt kan läsas som en konventionell dubbling.
-    const pen = maybePenaltyDouble(deal, history, seat)
-    if (pen) return pen
-
-    // Partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG (felrapport #13):
-    // 4 i högfärgen med 3-korts stöd, annars pass (3NT står). Måste ligga FÖRE
-    // det generella off-book-svaret, som annars läser transferns relä som en
-    // naturlig färg och "stöder" den.
-    const transferMajor = transferGameChoiceToAnswer(history, seat)
-    if (transferMajor) {
-      const support = lengths(deal.hands[seat])[transferMajor]
-      if (support >= 3) {
-        const bid = `4${letterOfSuit(transferMajor)}` as Bid
-        if (legalCalls(history, seat).includes(bid)) {
-          return {
-            seat, bid, rule: 'till spel',
-            explanation: `partnerns 3NT efter transfern = välj utgång: ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → 4 ${SWE_NAME[letterOfSuit(transferMajor)]} (5-3-fiten före sang).`,
-          }
-        }
-      }
-      return {
-        seat, bid: 'P', rule: 'pass',
-        explanation: `partnerns 3NT efter transfern = välj utgång: bara ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → pass (3NT står).`,
-      }
-    }
-
-    // Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vår
-    // sida handen. Flyr motståndarna undan till en färg straffdubblar vi dem –
-    // varje steg. Måste ligga FÖRE delbit 4:s svarsdetektor (som annars läser
-    // flykten som "svararen svarar på störningen" och bara doblar via svararen,
-    // aldrig via öppnaren) och före off-book-svaret.
-    const runout = runoutAfterOurRedouble(history, seat)
-    if (runout) {
-      return {
-        seat, bid: 'X', rule: 'straffdubbling (vi äger handen)',
-        explanation:
-          `Vi öppnade 1NT och partnern redubblade (XX) – vår sida har 23+ och äger handen. ` +
-          `Motståndarna flyr till ${runout.level}${SWE_NAME[letterOfSuit(runout.suit)]} → straffdubbling.`,
-      }
-    }
-
-    // Motståndaren har stört VÅR icke-1-färgs-öppning (Fynd #2 delbit 4):
-    // svararen (öppnarens partner) svarar i stället för att passa. Måste ligga
-    // FÖRE det generella off-book-svaret, som annars kunde stödja/tolka fel.
-    const ntInterf = ntInterferenceToAnswer(history, seat)
-    if (ntInterf) {
-      const ans = answerNTInterference(deal.hands[seat], ntInterf)
-      if (legalCalls(history, seat).includes(ans.call as Bid)) {
-        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-      }
-    }
-    const preemptInterf = ownPreemptInterferenceToAnswer(history, seat)
-    if (preemptInterf) {
-      const ans = answerPreemptInterference(
-        deal.hands[seat], preemptInterf.ourSuit, preemptInterf.theirCall, preemptInterf.ourLevel,
-      )
-      if (legalCalls(history, seat).includes(ans.call as Bid)) {
-        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
-      }
-    }
-
-    // Öppnaren svarar partnerns CUE-HÖJNING i motståndarnas färg (felrapport
-    // #16): ett cue-bud är konstgjort krav och får aldrig passas. Minimum
-    // (öppningsstyrka, ≤14 hp) → billigaste återbud i vår färg; maximum (15+ hp)
-    // → accepterar utgång. Måste ligga FÖRE off-book-svaret, som annars läser
-    // cuet som en naturlig färg och passar.
-    const cueRaise = partnerCueRaiseToAnswer(history, seat)
-    if (cueRaise) {
-      const strain = cueRaise.agreedStrain
-      const isMajor = strain === 'H' || strain === 'S'
-      const signoff = cheapestBidIn(history, seat, strain)
-      const gameBid = `${isMajor ? 4 : 5}${strain}` as Bid
-      const legal = legalCalls(history, seat)
-      const acceptGame = hcp(deal.hands[seat]) >= 15 && legal.includes(gameBid)
-      const bid = (acceptGame ? gameBid : signoff) as Bid | null
-      if (bid && legal.includes(bid)) {
-        return {
-          seat, bid, rule: 'svar på cue-höjning',
-          explanation: acceptGame
-            ? `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jag är maximum → accepterar utgång ${bid}.`
-            : `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]} och är krav; med ett minimum återgår jag billigast i vår färg (${bid}).`,
-        }
-      }
-    }
-
-    // Advancern svarar partnerns TVÅFÄRGS-CUE över motståndarnas svaga tvåa
-    // (felrapport #18): cuet är krav och får aldrig passas (annars spelas det i
-    // deras färg). Jag ger preferens till min längsta sidofärg (≠ deras) på
-    // billigaste lagliga läge. Måste ligga FÖRE off-book-svaret.
-    const wtCue = partnerWeakTwoCueToAnswer(history, seat)
-    if (wtCue) {
-      const len = lengths(deal.hands[seat])
-      const sideStrains = SUIT_STRAINS.filter((st) => st !== wtCue.theirStrain)
-      let best = sideStrains[0]
-      for (const st of sideStrains) {
-        if (len[SUIT_OF_LETTER[st]] > len[SUIT_OF_LETTER[best]]) best = st
-      }
-      const bid = cheapestBidIn(history, seat, best)
-      if (bid && legalCalls(history, seat).includes(bid)) {
-        return {
-          seat, bid, rule: 'svar på tvåfärgs-cue',
-          explanation: `Partnerns cue lovar en stark tvåfärgshand (krav) – jag ger preferens till min längsta sidofärg ${SWE_NAME[best]} (${bid}), passar aldrig cuet.`,
-        }
-      }
-    }
-
-    // Inklivaren stöttar advancerns NYA färg (felrapport #15): en enkel
-    // stödhöjning i stället för att passa preferensbudet. Måste ligga FÖRE det
-    // generella off-book-svaret, som annars kräver 4-korts stöd för en minor och
-    // därmed passar en klar 3-korts fit mot advancerns 5+ färg.
-    const raiseAdvance = overcallerRaiseAdvance(deal, history, seat)
-    if (raiseAdvance) return raiseAdvance
-
-    const response = offBookResponse(deal, history, seat)
-    if (response) return response
   }
 
   return pass

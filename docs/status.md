@@ -376,6 +376,11 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
   buden: Michaels-cue (via position), stöd/höjning i partnerns färg (enkel/
   inbjudande/utgång), äkta cue = stark höjning, rebjuden färg, sang, ny färg/
   svagt hoppskift, samt pass/X/XX. Facit i `auction-interpret.test.ts`.
+  - **GRÄNS (R2-fynd #2):** heuristiken är en SEPARAT läsning som gäller bara bud
+    UTAN motor-regel (människans off-book-bud) – bottarnas bud tolkas alltid ur
+    motorns `rule`. Följd: en ny konvention måste läras heuristiken *separat*.
+    Skyddsnät i `auction-interpret.test.ts` ("skyddsnät: ett bud MED motor-regel …")
+    låser att ett bud med regel alltid tolkas ur regeln, så källorna inte glider isär.
 - **Inkopplat i UI (steg 2):** den gamla *"Eget bud – utanför systemlinjen (ingen
   förklaring)"* är **borttagen**. Egna/off-book-bud tolkas nu både i budlådans
   infopanel (`BiddingBox.tsx`, med säkerhets-badge) och i auktionsrutnätet

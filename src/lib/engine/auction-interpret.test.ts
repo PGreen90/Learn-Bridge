@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { ResolvedCall } from '../bidding'
 import { interpretCall, interpretLastCall } from './auction-interpret'
+import { ruleInfo } from './rules'
 
 // Facit för tolkningslagret (arbetsregel A). Kärnlöftet: ALDRIG tom förklaring.
 // Vi testar betydelse via nyckelord (robustare än exakt textmatchning).
@@ -182,4 +183,36 @@ describe('motorns egen regel går före heuristiken (säker)', () => {
     expect(r.text).toMatch(/utgångskrav/i)
     expect(r.forcing).toBe('utgangskrav')
   })
+})
+
+// SKYDDSNÄT (R2-fynd #2): motorn och heuristiken är två läsare av budbetydelsen.
+// Bottarnas bud bär alltid en motor-`rule`; interpretCall MÅSTE deferra till den
+// (säker tolkning + SAMMA kravnivå som regelregistret). Detta test låser fast att
+// de två källorna inte glider isär – ett bud med regel tolkas alltid ur regeln,
+// aldrig ur heuristikens gissning. Lägger vi en ny konvention med en ny regel bör
+// dess namn läggas till här (och forcingOf i rules.ts kunna svara på den).
+describe('skyddsnät: ett bud MED motor-regel tolkas alltid ur regeln', () => {
+  const ruledCalls: Array<{ rule: string; explanation?: string }> = [
+    { rule: '5-korts högfärg' },
+    { rule: 'fjärde färg krav' },
+    { rule: 'fullföljd transfer' },
+    { rule: 'negativ dubbling' },
+    { rule: 'enkelt inkliv' },
+    { rule: 'till spel', explanation: 'Motorns egen förklaring: väljer utgång.' },
+  ]
+
+  for (const { rule, explanation } of ruledCalls) {
+    it(`"${rule}" → säker tolkning med regelns kravnivå`, () => {
+      const call: ResolvedCall = { seat: 'S', bid: '2H', rule, ...(explanation ? { explanation } : {}) }
+      const hist: ResolvedCall[] = [{ seat: 'N', bid: '1H' }, call]
+      const r = interpretCall(hist, 1)
+      // Deferrar till motorn, inte heuristiken:
+      expect(r.confidence).toBe('säker')
+      expect(r.text.length).toBeGreaterThan(0)
+      // Kravnivån kommer ur SAMMA källa som motorn (regelregistret):
+      expect(r.forcing).toBe(ruleInfo(rule).forcing)
+      // När motorn gav en egen förklaring används den ordagrant:
+      if (explanation) expect(r.text).toBe(explanation)
+    })
+  }
 })

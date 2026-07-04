@@ -9,6 +9,15 @@
 // "utanför systemlinjen". När motorn själv satt en `rule` på budet används den
 // (säker tolkning). Saknas regel (t.ex. ett eget off-book-bud) härleds en
 // bästa-möjliga tolkning ur buden runt bordet, med ärlig säkerhetsgradering.
+//
+// GRÄNS (R2-fynd #2, håll denna): heuristiken nedan (interpretContractBid m.fl.)
+// är en SEPARAT, förenklad läsning av budbetydelsen och gäller BARA bud UTAN
+// motor-regel – i praktiken människans egna off-book-bud. Bottarnas bud bär alltid
+// en `rule` och tolkas via gren (1) ovan, dvs. ur motorn. Följd: när en NY
+// konvention läggs till lär sig motorn den automatiskt, men heuristiken här måste
+// läras samma konvention SEPARAT – annars glider förklaringen av ett mänskligt bud
+// isär från vad motorn faktiskt menar. Skyddsnät: `auction-interpret.test.ts`
+// vaktar att ett bud MED regel alltid tolkas ur regeln (säker + samma kravnivå).
 
 import type { Bid, Forcing, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'

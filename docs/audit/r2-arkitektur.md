@@ -24,15 +24,23 @@ R1 gav), inte att bygga om något nu.
 
 | # | Fynd | Prioritet | Lagat nu? |
 |---|------|-----------|-----------|
-| 1 | `decideCall` är en ordningsberoende kedja av 17 handskrivna detektorer – skalbarhetsflaskhalsen | MEDIUM | Nej (rapporteras – kärnlogik, rörs ej tyst) |
-| 2 | Två läsare av budens betydelse: motorns regel + `interpretCall`-heuristiken kan glida isär | MEDIUM | Nej (rapporteras) |
-| 3 | `buildAuction` körs om från grunden vid varje `decideCall` och varje render i Play.tsx | LÅG–MEDIUM | Nej (rapporteras) |
-| 4 | 17× kopierad `legalCalls(...).includes`-boilerplate i `decideCall` | LÅG | Nej (ingår i fix för #1) |
-| 5 | `responses.ts` är en bred nav (13 importörer, delad `ResponseResult`-typ) | LÅG | Nej (notering) |
+| 1 | `decideCall` är en ordningsberoende kedja av 17 handskrivna detektorer – skalbarhetsflaskhalsen | MEDIUM | ✅ JA (Förslag B: datadriven, ordnad lista + `answered`-helper) |
+| 2 | Två läsare av budens betydelse: motorns regel + `interpretCall`-heuristiken kan glida isär | MEDIUM | ✅ JA (Förslag C: gräns dokumenterad + skyddsnät-test) |
+| 3 | `buildAuction` körs om från grunden vid varje `decideCall` och varje render i Play.tsx | LÅG–MEDIUM | ✅ JA (Förslag C: WeakMap-minne + `useMemo` i Play.tsx) |
+| 4 | 17× kopierad `legalCalls(...).includes`-boilerplate i `decideCall` | LÅG | ✅ JA (löstes inuti #1:s `answered`-helper) |
+| 5 | `responses.ts` är en bred nav (13 importörer, delad `ResponseResult`-typ) | LÅG | Notering – ingen åtgärd (behandla som publikt kontrakt) |
 | ✓ | **Verifierat GOTT:** kontraktshärledningen är EN källa (`auction-contract.ts`) | — | Inget att göra |
 
-**Ingen KRITISK. Ingen HÖG.** Arkitekturen är i grunden frisk; fynden är teknisk
+**Ingen KRITISK. Ingen HÖG.** Arkitekturen är i grunden frisk; fynden var teknisk
 skuld och skalbarhet, inte fel i budgivningen.
+
+### Åtgärdat i denna session (audit session 5)
+Fynd #1–#4 hanterades på plats efter ägarens val, fynd för fynd. Metod: rena,
+beteendebevarande ändringar – **1676 tester gröna + `tsc` rent** före och efter
+varje steg, spelskärmen rök-verifierad i förhandsvisningen. Kärnlogiken (`decideCall`,
+`buildAuction`, `interpretCall`) ändrades bara i STRUKTUR, aldrig i budval; de 88
+`auction-live`-testerna + 6 nya `auction-interpret`-skyddsnät vaktar det. Fynd #5
+är en medveten notering utan åtgärd.
 
 ---
 
