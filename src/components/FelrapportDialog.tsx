@@ -2,17 +2,19 @@ import { useState } from 'react'
 import type { Deal } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import type { Contract, Trick } from '../lib/engine/play'
-import {
-  REPORT_CATEGORIES,
-  felrapportUrl,
-  type ReportCategory,
-} from '../lib/felrapport'
+import { REPORT_CATEGORIES, felrapportUrl } from '../lib/felrapport'
 import { Button } from './Button'
+
+/** Standardtexten (Spela kort): hela given inklusive sticken följer med. */
+const DEFAULT_INTRO = 'Hela given (händerna, budgivningen och sticken) följer med automatiskt.'
 
 /**
  * "Kändes given rätt?"-dialogen: ägaren väljer kategori + skriver fritt, och
- * knappen öppnar en FÖRIFYLLD GitHub-issue (hela given + auktionen + sticken
+ * knappen öppnar en FÖRIFYLLD GitHub-issue (hela given + auktionen + ev. stick
  * följer med automatiskt). På GitHub räcker det att klicka "Submit new issue".
+ *
+ * `title`, `intro` och `categories` kan sättas per plats: Spela kort använder
+ * standarden (hela given), Budvisningen skickar budgivningsspecifik text.
  */
 export function FelrapportDialog({
   deal,
@@ -20,14 +22,20 @@ export function FelrapportDialog({
   contract,
   tricks,
   onClose,
+  title = 'Rapportera fel i given',
+  intro = DEFAULT_INTRO,
+  categories = REPORT_CATEGORIES,
 }: {
   deal: Deal
   calls: ResolvedCall[]
   contract: Contract | null
   tricks: Trick[]
   onClose: () => void
+  title?: string
+  intro?: string
+  categories?: readonly string[]
 }) {
-  const [category, setCategory] = useState<ReportCategory>(REPORT_CATEGORIES[0])
+  const [category, setCategory] = useState<string>(categories[0])
   const [description, setDescription] = useState('')
 
   function openIssue() {
@@ -39,14 +47,12 @@ export function FelrapportDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
       <div className="w-full max-w-sm rounded-xl bg-white p-4 text-left shadow-xl">
-        <h2 className="text-sm font-bold text-slate-800">Rapportera fel i given</h2>
-        <p className="mt-1 text-xs leading-relaxed text-slate-500">
-          Hela given (händerna, budgivningen och sticken) följer med automatiskt.
-        </p>
+        <h2 className="text-sm font-bold text-slate-800">{title}</h2>
+        <p className="mt-1 text-xs leading-relaxed text-slate-500">{intro}</p>
 
         <fieldset className="mt-3 space-y-1.5">
           <legend className="sr-only">Vad kändes fel?</legend>
-          {REPORT_CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <label key={c} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
               <input
                 type="radio"
