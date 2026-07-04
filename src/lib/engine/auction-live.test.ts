@@ -792,3 +792,26 @@ describe('felrapport #4 – 2-över-1 är utgångskrav, svararen får inte passa
     expect(c.bid).toBe('3NT')
   })
 })
+
+// R1-fynd #3: off-book-lagret läste ett KONSTGJORT bud (Jacoby-kortfärg 3♣) som
+// en naturlig klöverfärg när det letade trumf inför essfrågan. En Jacoby-2NT-fit
+// sätter öppnarens HÖGFÄRG som trumf (systembok §6.1) – Nord ska svara RKC för
+// hjärter (5♦ = 3 nyckelkort), inte för klöver (5♥ = 2 nyckelkort).
+describe('R1-fynd #3 – Jacoby-2NT-fit sätter trumf inför off-book essfråga', () => {
+  const deal = dealOf('N', {
+    N: 'S:AQ2 H:AKJ43 D:Q432 C:5',   // 1♥, klöversingel → 3♣ (Jacoby-kortfärg)
+    S: 'S:K54 H:Q1052 D:AK5 C:K43',  // Jacoby 2NT (4 hjärter, 15 hp)
+    E: 'S:876 H:76 D:9876 C:9876',
+    W: 'S:JT93 H:98 D:JT C:QJT82',
+  })
+
+  it('1♥–2NT–3♣–4NT: Nord svarar 5♦ (RKC hjärter, 3 nyckelkort), EJ 5♥', () => {
+    const history = [
+      call('N', '1H'), call('E', 'P'), call('S', '2NT'), call('W', 'P'),
+      call('N', '3C'), call('E', 'P'), call('S', '4NT'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('5D')
+    expect(c.rule).toBe('1430 RKC')
+  })
+})

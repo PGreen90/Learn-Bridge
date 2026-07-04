@@ -369,18 +369,49 @@ function agreedTrump(history: ResolvedCall[], seat: Seat): Suit | null {
 }
 
 /**
- * Trumffärgen partnerns 4NT-essfråga gäller. Två steg:
+ * Har vår sida etablerat en HÖGFÄRGS-fit via **Jacoby 2NT** (systembok §4.1)?
+ * Mönstret: vår sidas 1♥/1♠-öppning, och svararens (partnern till öppnaren)
+ * FÖRSTA bud efter öppningen är **2NT** – i 2/1 är direkt 2NT över 1M alltid
+ * Jacoby (utgångskravande högfärgshöjning). Även 1M–(X)–2NT (Jordan) sätter
+ * majoren som fit. Trumfen är då öppnarens högfärg, även om ingen bjudit den som
+ * ett naturligt FÄRGbud (2NT är konstgjort) – därför missar `agreedTrump` den.
+ * Returnerar högfärgen, annars null. Ett motståndar-KONTRAKTsbud mellan
+ * öppningen och 2NT betyder att 2NT är något annat → null.
+ */
+function jacobyFitTrump(history: ResolvedCall[], seat: Seat): Suit | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) !== side(seat) || open.level !== 1) return null
+  const major = SUIT_OF_LETTER[open.strain]
+  if (major !== 'hearts' && major !== 'spades') return null
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  // Första KONTRAKTsbudet efter öppningen (pass/X/XX hoppas över).
+  for (let i = openIdx + 1; i < history.length; i++) {
+    if (!parseContractBid(history[i].bid)) continue
+    if (side(history[i].seat) !== side(seat)) return null // motståndarna bjöd → ej Jacoby
+    if (history[i].seat === open.seat) return null // öppnarens eget bud, inte svararens svar
+    return history[i].bid === '2NT' ? major : null // svararens första svar
+  }
+  return null
+}
+
+/**
+ * Trumffärgen partnerns 4NT-essfråga gäller. Tre steg:
  *  1. ÖVERENSKOMMEN trumf (en färg båda bjudit) – felrapport #9.
- *  2. Ingen överenskommelse? Standardregeln (felrapport #10: 4NT direkt på
- *     partnerns 3♠-spärr passades): 4NT är essfråga så länge sidans senaste
- *     naturliga bud FÖRE frågan var en FÄRG – trumfen är den färgen.
- *     Kvantitativt är 4NT bara när sidans senaste bud var SANG.
+ *  2. KONVENTIONS-fit utan naturligt färgbud: en Jacoby 2NT sätter öppnarens
+ *     högfärg som trumf (R1-fynd #3 – annars lästes öppnarens konstgjorda
+ *     Jacoby-kortfärg, t.ex. 3♣, som en naturlig klöverfärg → fel essredovisning).
+ *  3. Ingen av ovan? Standardregeln (felrapport #10: 4NT direkt på partnerns
+ *     3♠-spärr passades): 4NT är essfråga så länge sidans senaste naturliga bud
+ *     FÖRE frågan var en FÄRG – trumfen är den färgen. Kvantitativt är 4NT bara
+ *     när sidans senaste bud var SANG.
  * Ankras vid partnerns FÖRSTA 4NT så kungfrågan (5NT) läser samma trumf och
  * aldrig snubblar på det konstgjorda stegsvaret (5♣/5♦/…) däremellan.
  */
 function slamAskTrump(history: ResolvedCall[], seat: Seat): Suit | null {
   const agreed = agreedTrump(history, seat)
   if (agreed) return agreed
+  const jacoby = jacobyFitTrump(history, seat)
+  if (jacoby) return jacoby
   const askIdx = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid === '4NT')
   if (askIdx < 0) return null
   for (let i = askIdx - 1; i >= 0; i--) {
