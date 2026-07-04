@@ -231,7 +231,7 @@ function BiddingPhase({
 
       {/* Kontrakt bjudet: vit bekräftelsedialog (Synreys "Declared by South"). */}
       {finalContract && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="min-w-60 rounded-xl bg-white p-4 text-center shadow-xl">
             <div className="flex items-center justify-center gap-2 pb-3">
               <BidChip bid={`${finalContract.level}${STRAIN_CODE[finalContract.strain]}`} />
@@ -255,7 +255,7 @@ function BiddingPhase({
 
       {/* Passades given ut: vit dialog (Synrey-stil) med ny giv. */}
       {passedOut && !reporting && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="rounded-xl bg-white p-4 text-center shadow-xl">
             <p className="mb-3 text-sm text-slate-700">Ingen öppnade – given passades ut.</p>
             <Button onClick={onNewGame}>Ny giv →</Button>
@@ -309,12 +309,22 @@ function TableMenu({
         ⋮
       </button>
       {open && (
-        <div className="absolute right-0 top-11 z-30 w-64 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
-          <Button className="w-full" onClick={onNewGame}>
-            Ny giv →
-          </Button>
-          <p className="mt-3 text-xs leading-relaxed text-slate-600">{children}</p>
-        </div>
+        <>
+          {/* Klick utanför stänger menyn (R3-fynd #6). */}
+          <button
+            type="button"
+            aria-hidden
+            tabIndex={-1}
+            className="fixed inset-0 z-30 cursor-default"
+            onClick={onToggle}
+          />
+          <div className="absolute right-0 top-11 z-40 w-64 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+            <Button className="w-full" onClick={onNewGame}>
+              Ny giv →
+            </Button>
+            <p className="mt-3 text-xs leading-relaxed text-slate-600">{children}</p>
+          </div>
+        </>
       )}
     </div>
   )
@@ -567,7 +577,7 @@ function PlayTable({
       <div className="relative">
         <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
         {!resultSeen && !reporting ? (
-          <div className="absolute inset-0 z-30 flex items-center justify-center rounded-3xl bg-black/30">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
             <div className="rounded-xl bg-white p-5 text-center shadow-xl">
               <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
                 {result.made
@@ -658,9 +668,24 @@ function PlayTable({
         </button>
       </div>
 
+      {/* Klick utanför stänger ⋮/ⓘ (R3-fynd #6): en osynlig heltäckande yta bakom
+          panelerna fångar klicket i stället för att man måste trycka knappen igen. */}
+      {(showMenu || showInfo) && (
+        <button
+          type="button"
+          aria-hidden
+          tabIndex={-1}
+          className="fixed inset-0 z-30 cursor-default"
+          onClick={() => {
+            setShowMenu(false)
+            setShowInfo(false)
+          }}
+        />
+      )}
+
       {/* Meny-overlay: ny giv, facit och hjälp – inget av det stör bordet annars. */}
       {showMenu && (
-        <div className="absolute right-2.5 top-13 z-30 w-72 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+        <div className="absolute right-2.5 top-13 z-40 w-72 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
           {/* Facit finns nu som direktknapp på bordet (R3-fynd #4); menyn har
               bara ny giv, claim och hjälp. */}
           <Button className="w-full" onClick={onNewGame}>
@@ -722,7 +747,7 @@ function PlayTable({
 
       {/* ⓘ-overlay: budgivningen som ledde till kontraktet (klickbara förklaringar). */}
       {showInfo && (
-        <div className="absolute left-1/2 top-13 z-30 w-full max-w-sm -translate-x-1/2 px-3">
+        <div className="absolute left-1/2 top-13 z-40 w-full max-w-sm -translate-x-1/2 px-3">
           <div className="rounded-xl bg-white p-2 shadow-xl ring-1 ring-slate-200">
             <AuctionGrid calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
           </div>
@@ -1078,7 +1103,7 @@ function ClaimDialog({
   for (let t = won; t <= won + remaining; t++) totals.push(t)
   const diffLabel = (t: number) => (t === needed ? 'kontrakt' : t > needed ? `+${t - needed}` : `${t - needed}`)
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/30 px-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-3">
       <div className="w-full max-w-sm rounded-xl bg-white p-4 text-center shadow-xl">
         <p className="text-sm font-bold text-slate-800">Claim tricks</p>
         <p className="mt-1 text-xs leading-relaxed text-slate-600">

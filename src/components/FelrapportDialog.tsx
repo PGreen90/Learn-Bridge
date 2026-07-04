@@ -37,7 +37,7 @@ export function FelrapportDialog({
   }
 
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 p-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
       <div className="w-full max-w-sm rounded-xl bg-white p-4 text-left shadow-xl">
         <h2 className="text-sm font-bold text-slate-800">Rapportera fel i given</h2>
         <p className="mt-1 text-xs leading-relaxed text-slate-500">
