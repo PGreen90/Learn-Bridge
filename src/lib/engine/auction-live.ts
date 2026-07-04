@@ -19,6 +19,7 @@ import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
 import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from './doubles'
 import { advanceDONT } from './dont'
+import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
@@ -843,6 +844,55 @@ function ownDONTXToCorrect(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   }
 }
 
+// ---- Motståndaren stör VÅR icke-1-färgs-öppning (§7, Fynd #2 delbit 4) ------
+
+/**
+ * Har motståndaren stört VÅRT 1NT med DONT, så att svararen (öppnarens partner)
+ * ska svara i stället för att passa? Mönstret: vår 1NT-öppning, motståndarens
+ * DONT-bud (X / 2♣–2♠) är senaste icke-pass och vår sida har bara bjudit 1NT.
+ * Returnerar deras DONT-bud, annars null. (Skiljer sig från DONT-FÖRSVARET, där
+ * 1NT är MOTSTÅNDARNAS öppning – här är 1NT vårt eget.)
+ */
+function ntInterferenceToAnswer(history: ResolvedCall[], seat: Seat): string | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1) return null
+  if (side(open.seat) !== side(seat)) return null // måste vara VÅRT 1NT
+  if (seat !== PARTNER[open.seat]) return null // seat = svararen (öppnarens partner)
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1) return null // bara 1NT bjudet av oss (svararens FÖRSTA svar)
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
+  if (!['X', '2C', '2D', '2H', '2S'].includes(lastNonPass.bid)) return null
+  return lastNonPass.bid
+}
+
+/**
+ * Har motståndaren stört VÅR svaga tvåa/spärr, så att svararen ska svara?
+ * Mönstret: vår öppning är en svag tvåa (2♦/2♥/2♠) eller spärr (3-läget+ i färg),
+ * motståndarens störning (X / inkliv) är senaste icke-pass och vår sida har bara
+ * bjudit öppningen. Returnerar {ourSuit, ourLevel, theirCall}, annars null.
+ */
+function ownPreemptInterferenceToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { ourSuit: Suit; ourLevel: number; theirCall: string } | null {
+  const open = openingBid(history)
+  if (!open) return null
+  const ourSuit = SUIT_OF_LETTER[open.strain]
+  if (!ourSuit) return null // 1NT/2NT-öppning – hanteras inte här
+  const isWeakTwo = open.level === 2 && open.strain !== 'C' // 2♣ = stark, ej svag tvåa
+  const isPreempt = open.level >= 3
+  if (!isWeakTwo && !isPreempt) return null
+  if (side(open.seat) !== side(seat)) return null // VÅR öppning
+  if (seat !== PARTNER[open.seat]) return null // seat = svararen (öppnarens partner)
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1) return null // bara öppningen bjuden av oss (svararens FÖRSTA svar)
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
+  if (lastNonPass.bid === 'XX') return null // deras ev. XX besvaras inte här
+  return { ourSuit, ourLevel: open.level, theirCall: lastNonPass.bid }
+}
+
 // ---- Bot-hjärnan -----------------------------------------------------------
 
 /**
@@ -1010,6 +1060,26 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       return {
         seat, bid: 'P', rule: 'pass',
         explanation: `partnerns 3NT efter transfern = välj utgång: bara ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → pass (3NT står).`,
+      }
+    }
+
+    // Motståndaren har stört VÅR icke-1-färgs-öppning (Fynd #2 delbit 4):
+    // svararen (öppnarens partner) svarar i stället för att passa. Måste ligga
+    // FÖRE det generella off-book-svaret, som annars kunde stödja/tolka fel.
+    const ntInterf = ntInterferenceToAnswer(history, seat)
+    if (ntInterf) {
+      const ans = answerNTInterference(deal.hands[seat], ntInterf)
+      if (legalCalls(history, seat).includes(ans.call as Bid)) {
+        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
+      }
+    }
+    const preemptInterf = ownPreemptInterferenceToAnswer(history, seat)
+    if (preemptInterf) {
+      const ans = answerPreemptInterference(
+        deal.hands[seat], preemptInterf.ourSuit, preemptInterf.theirCall, preemptInterf.ourLevel,
+      )
+      if (legalCalls(history, seat).includes(ans.call as Bid)) {
+        return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
       }
     }
 
