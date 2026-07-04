@@ -3,6 +3,12 @@
 Fasta rutiner för varje arbetssession, så att vi alltid börjar och slutar
 metodiskt. Claude följer dessa; ägaren behöver inte göra något själv.
 
+> 📌 **Konvention om testantal (R4):** siffror som "testsvit 1626" i docs och
+> `MEMORY.md` är **historiska tidsstämplar** för när något byggdes — inte
+> live-status. De driver naturligt isär (varje nytt test ändrar totalen), så jaga
+> INTE synk mellan dem. **Enda sanningen om testläget just nu = kör `npm test`.**
+> Skriv gärna "hela sviten grön" i stället för en absolut siffra i nya noter.
+
 ## 🟢 Sessionsstart (starta metodiskt)
 > Mål: snabbt veta *var vi är* och *vad vi gör idag* innan något ändras.
 

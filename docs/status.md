@@ -232,6 +232,43 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 - **Klickbara bud + ALERT-märke** i auktionsvyn – `alerts.ts` (blått A på konstgjorda bud, klick visar betydelsen).
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 
+## Budmotorns tre auktionslager + `open`-handoff (ARKITEKTURKONTRAKT — läs före budarbete)
+
+> **Varför detta står här (R2→R4):** det här är motorns viktigaste och tidigare
+> minst dokumenterade koppling. En session som ska röra budlogik MÅSTE veta vilket
+> av tre lager den jobbar i — annars byggs logiken i fel fil eller dubbleras.
+
+Budgivningen är medvetet delad i **tre lager med olika ansvar**:
+
+1. **`auction.ts` (`buildAuction`) — GENERATIVT.** Bygger parets kanoniska
+   systemlinje (hand → en rad) och modellerar **EN** konkurrensrond. Sätter sedan
+   flaggan **`open: true`** på resultatet (`BuiltAuction`) och lämnar över. Här bor
+   on-book-kärnan (öppning/svar/återbud/slam) + den första störningsronden.
+2. **`auction-live.ts` (`decideCall`) — LEVANDE.** Spelar upp linjen från
+   `buildAuction` bud för bud tills den tar slut ELLER Syd bjuder off-book
+   (`divergedFromLine`). Tar sedan över live via en **ordnad kedja av detektorer**
+   (`…ToAnswer`/`…ToCorrect`/`…Rescue`) + `offBookResponse`. All konkurrens BORTOM
+   den enda ronden i `auction.ts`, och alla svar på Syds egna bud, bor här.
+3. **`auction-interpret.ts` (`interpretCall`) — FÖRKLARANDE.** Översätter ett bud
+   till läsbar text för användaren. Använder motorns `rule` när budet har en
+   (`confidence: säker`); annars en SEPARAT heuristik (bara för människans
+   off-book-bud utan regel).
+
+**`open`-flaggan är seamen.** `auction.ts` säger via `open` "jag är klar med det
+jag modellerar — auktionen är fortfarande öppen, ta vid". `decideCall` läser det
+och fortsätter live. **Regel för framtida arbete:**
+- Ny **on-book**-fortsättning (ostörd systemlinje, en ny konvention i vårt system)
+  → byggs i **`auction.ts`** (eller dess `responses*/rebids*`-filer).
+- Ny **konkurrens/off-book**-hantering (svar på motståndarnas bud bortom en rond,
+  svar på Syds egna bud) → byggs i **`auction-live.ts`** som en detektor i kedjan;
+  ordningen är korrekthetskritisk (kommentarerna "Måste ligga FÖRE …" i filen).
+- Ny **budförklaring** för människans off-book-bud → **`auction-interpret.ts`**.
+
+Detektorkedjan i `decideCall` är den del som blir tung att underhålla först när
+systemet växer (R2 Fynd #1) — lägg inte fler konkurrenskonventioner ovanpå den utan
+att först väga R2:s förslag att göra kedjan datadriven. Se
+[`docs/audit/r2-arkitektur.md`](audit/r2-arkitektur.md).
+
 ## Budlådan – logiklagret (`auction-live.ts`)
 
 Förberedelse för en LEVANDE budgivning i "Spela kort" (i stället för en

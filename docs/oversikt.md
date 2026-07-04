@@ -17,7 +17,7 @@
 
 ## Svar på 1♥ / 1♠
 - Ny färg 1-steg · semi-forcing 1NT · 2/1 GF
-- **Bergen:** 3♣ = 7–10 · 3♦ = 10–12 · 3 i hf = spärr
+- **Bergen:** 3♣ = 7–9 · 3♦ = 10–12 · 3 i hf = spärr
 - Enkel höjning + **Bergen game try** (2NT)
 - **Jacoby 2NT** (4+ stöd, 13+) · **tvetydig splinter** (3♠/3♥)
 - 3NT = 13–15 balanserad

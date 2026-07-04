@@ -206,6 +206,11 @@ Inga nya funktioner förrän FAS 1–6 är verifierade (planens regel). Nästa s
 enligt planen: **FAS 1 punkt 1** – samla regel-ID/budval/förklaring/kravstatus/
 alert till *samma* objekt.
 
+> ⚠️ **Föråldrat (kvar som historik).** Ovanstående "nästa steg" gällde 2026-06-30.
+> **Hela FAS 0–12 är sedan dess genomförd.** Vad som är NU/NÄST styrs numera av
+> projektkartan i `CLAUDE.md` + revisionen R1–R6 (`AUDIT_PROMPTS.md`), inte av
+> denna rad. Sanningskartan i sig är fortfarande giltig som bok-mot-kod-inventering.
+
 ---
 
 ## IV. Uppdatering efter FAS 1 (2026-06-30)

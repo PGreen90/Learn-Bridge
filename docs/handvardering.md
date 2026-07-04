@@ -10,10 +10,15 @@
   Två händer med samma honnörspoäng kan vara olika starka.
 - Vi inför en **totalpoäng (TP)** som värderar handen mer rättvist, och visar
   den **bredvid** honnörspoängen i appen: **`15 HP (17 TP)`**.
-- **Viktig låsning:** TP **styr INTE budbesluten** i det här steget. Budmotorn
-  fattar beslut precis som idag (på `hcp`). TP är ett pedagogiskt lager som visar
-  ägaren *varför* en hand är värd mer eller mindre än de råa honnörspoängen.
-  Inkoppling i budlogiken är ett separat, framtida beslut.
+- **Historik (viktigt att inte läsa fel):** TP började som ett rent *pedagogiskt*
+  lager som bara visades bredvid HP och INTE styrde några budbeslut. **Det gäller
+  inte längre.** TP är sedan 2026-06-30→07-03 **inkopplat i utvalda budbeslut**
+  (öppningsgolv, slamzon, svararens/öppnarens höjningar, reverse/hoppskift, sang-
+  nudge, 3:e/4:e-hands lättöppning) enligt den låsta principen **"nedgradera
+  aldrig"** — `max(HP, TP-mått)`, så form/korthet får *lyfta* ett bud men aldrig
+  sänka det under HP, och en 12 HP-hand öppnar alltid. Full karta över vad som är
+  TP-styrt vs rå HP finns längre ner ("FAS 4 punkt 16 — Sanningskarta") och i
+  `docs/tp-arbetslista.md`. TP visas fortfarande bredvid HP i appen (`15 HP (17 TP)`).
 
 ## Terminologi (svensk vokabulär)
 - **Hp** = honnörspoäng = HCP (A=4, K=3, D=2, kn=1). Finns redan som `hcp()`.

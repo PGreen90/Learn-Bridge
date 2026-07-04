@@ -67,7 +67,7 @@ Källa: bridgebum.com (Pearson points; third seat openings).
 
 **Principer för höjningar (Bergen + splinter):**
 - Med **exakt 4 trumf** och ingen kortfärg används **Bergen-höjningar** på
-  3-läget (standard): **3♣** = 7–10 hp (konstruktiv), **3♦** = 10–12 hp
+  3-läget (standard): **3♣** = 7–9 hp (konstruktiv), **3♦** = 10–12 hp
   (limit/inbjudan), **3 i hf** = 0–6 hp (spärr). Bygger på lagen om
   totala stick (9 trumfer → 3-läget).
 - Med **3-korts** stöd: enkel höjning till 2-läget (6–9 hp). En **3-korts
@@ -94,7 +94,7 @@ Källa: bridgebum.com (Pearson points; third seat openings).
 | 2♥ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
 | 2♠ | 6-korts ♠, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
 | 2NT | 4+ stöd, 13+ hp, balanserad (ingen kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
-| 3♣ | 4 trumf, 7–10 hp (konstruktiv) | Inbjudan | Bergen ● |
+| 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
 | 3♥ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
 | 3♠ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
@@ -108,7 +108,7 @@ Källa: bridgebum.com (Pearson points; third seat openings).
 | 2♣ / 2♦ / 2♥ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
 | 2♠ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
 | 2NT | 4+ stöd, 13+ hp, balanserad | Utgångskrav, slamintresse | Jacoby 2NT ● |
-| 3♣ | 4 trumf, 7–10 hp (konstruktiv) | Inbjudan | Bergen ● |
+| 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
 | 3♥ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
 | 3♠ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
@@ -878,7 +878,11 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
-- **2026-07-04** – **Projektrevision R1 (gren `audit/r1-budsystem`, ej mergad).**
+- **2026-07-04** – **Revision R4 (gren `audit/r4-dok-ai`): rättat Bergen 3♣-golvet
+  i boken.** Boken angav tidigare **3♣ = 7–10** samtidigt som **3♦ = 10–12** →
+  talet 10 låg i båda. Koden (`responses.ts`) placerar en exakt 10:a i **3♦
+  (limit)**, så bokens rätta intervall är **3♣ = 7–9, 3♦ = 10–12**. Endast
+  redaktionell rättelse (§4.1-tabellerna + översikten) – **ingen beteendeändring**.
   Fynd #1/#3/#4/#5 lagade (facit först). **Fynd #2 delbit 1: DONT (§7.5) mot deras
   1NT inkopplad** i den levande budlådan (var kodad men aldrig anropad). **Ägar-
   beslut:** golv **8 hp i direkt sits, 6 hp i balansering** + rätt form
