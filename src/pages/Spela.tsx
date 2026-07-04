@@ -212,43 +212,47 @@ export function Spela() {
         </div>
       </details>
 
-      {/* Hålfinnarna är testverktyg för motorn – hopfällda så de inte stör. */}
-      <details className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900">
-        <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
-          <span>🛠 Hålfinnare – testverktyg för budmotorn</span>
-          <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
-        </summary>
-        <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-3">
-          <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
-            Kör tusentals slumphänder genom motorn och visar hur ofta varje regel
-            träffar – bra för att hitta hål i systemet.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="secondary" onClick={() => setOpenSurvey(surveyOpenings(2000))}>
-              Hålfinnare: öppningar
-            </Button>
-            <Button variant="secondary" onClick={() => setRespSurvey(surveyResponses(5000))}>
-              Hålfinnare: svar
-            </Button>
+      {/* Hålfinnarna är testverktyg för budmotorn (R3-fynd #2): syns BARA i
+          utvecklingsläge (import.meta.env.DEV). I den byggda appen som ägaren
+          och andra använder göms de helt – de var förr synliga för alla. */}
+      {import.meta.env.DEV && (
+        <details className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900">
+          <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
+            <span>🛠 Hålfinnare – testverktyg för budmotorn (bara i dev)</span>
+            <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
+          </summary>
+          <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-3">
+            <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
+              Kör tusentals slumphänder genom motorn och visar hur ofta varje regel
+              träffar – bra för att hitta hål i systemet.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button variant="secondary" onClick={() => setOpenSurvey(surveyOpenings(2000))}>
+                Hålfinnare: öppningar
+              </Button>
+              <Button variant="secondary" onClick={() => setRespSurvey(surveyResponses(5000))}>
+                Hålfinnare: svar
+              </Button>
+            </div>
+            <div className="mt-4 space-y-4">
+              {openSurvey && (
+                <SurveyTable
+                  title={`Hålfinnare öppningar – ${openSurvey.hands.toLocaleString('sv-SE')} händer`}
+                  rows={openSurvey.byRule}
+                  uncertain={openSurvey.uncertain}
+                />
+              )}
+              {respSurvey && (
+                <SurveyTable
+                  title={`Hålfinnare svar – ${respSurvey.auctions.toLocaleString('sv-SE')} högfärgsöppningar`}
+                  rows={respSurvey.byRule}
+                  uncertain={respSurvey.uncertain}
+                />
+              )}
+            </div>
           </div>
-          <div className="mt-4 space-y-4">
-            {openSurvey && (
-              <SurveyTable
-                title={`Hålfinnare öppningar – ${openSurvey.hands.toLocaleString('sv-SE')} händer`}
-                rows={openSurvey.byRule}
-                uncertain={openSurvey.uncertain}
-              />
-            )}
-            {respSurvey && (
-              <SurveyTable
-                title={`Hålfinnare svar – ${respSurvey.auctions.toLocaleString('sv-SE')} högfärgsöppningar`}
-                rows={respSurvey.byRule}
-                uncertain={respSurvey.uncertain}
-              />
-            )}
-          </div>
-        </div>
-      </details>
+        </details>
+      )}
     </div>
   )
 }
