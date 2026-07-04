@@ -46,12 +46,26 @@ export function dontOvercall(hand: Hand): ResponseResult {
   return { call: 'P', rule: 'pass', explanation: 'ingen en-/tvåfärgshand → pass.' }
 }
 
-/** Advancers svar på partnerns DONT-bud (förenklad). §7.5. */
-export function advanceDONT(_hand: Hand, partnerCall: string): ResponseResult {
+/** Advancers svar på partnerns DONT-bud. §7.5. */
+export function advanceDONT(hand: Hand, partnerCall: string): ResponseResult {
   // Efter X: påtvingad relä 2♣ (partnern passar/rättar till sin riktiga färg).
   if (partnerCall === 'X') {
     return { call: '2C', rule: 'DONT relä', explanation: 'svar på X → 2♣ (pass-eller-rätta åt partnern).' }
   }
-  // Efter ett tvåfärgsbud: passa med stöd (förenkling – stöd antas vanligt).
+  const len = lengths(hand)
+  // 2♣ / 2♦ = den lägre färgen + en HÖGRE (5-4+). Med stöd (3+) i den visade
+  // lägre färgen passar vi; UTAN stöd relä:ar vi ETT steg upp (pass-eller-rätta)
+  // så partnern rättar till sin högre färg – annars fastnar vi i en misfit i den
+  // lägre färgen (felrapport #20: Nord passade 2♣ med singel klöver).
+  if (partnerCall === '2C' || partnerCall === '2D') {
+    const shown: Suit = partnerCall === '2C' ? 'clubs' : 'diamonds'
+    if (len[shown] >= 3) {
+      return { call: 'P', rule: 'pass', explanation: `${len[shown]} kort i ${NAME[shown]} → passa partnerns ${partnerCall} (stöd i den visade färgen).` }
+    }
+    const relay = partnerCall === '2C' ? '2D' : '2H'
+    return { call: relay, rule: 'DONT pass-eller-rätta', explanation: `kort i ${NAME[shown]} (${len[shown]}) → ${relay} (pass-eller-rätta: partnern rättar till sin högre färg).` }
+  }
+  // Efter 2♥ (hjärter+spader) eller 2♠ (enfärg): passa (förenkling – stöd antas;
+  // 2♥ säger inget om vilken högfärg som är längst, så vi rör den inte).
   return { call: 'P', rule: 'pass', explanation: 'stöd i partnerns visade färg → pass.' }
 }

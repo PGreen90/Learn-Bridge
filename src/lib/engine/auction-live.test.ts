@@ -1184,4 +1184,29 @@ describe('Fynd #2 delbit 1 – DONT mot deras 1NT', () => {
     expect(bid.bid).toBe('2H')
     expect(bid.explanation).toContain('balansering')
   })
+
+  // Felrapport #20 (bricka 12): W 1NT – (P) – (P) – S 2♣ (DONT, klöver+spader).
+  // Nord PASSADE 2♣ med singel klöver → misfit. Facit: Nord relä:ar 2♦
+  // (pass-eller-rätta) och Syd rättar till 2♠ (sin högre färg = 6-korts spader).
+  it('DONT-tvåfärg i balansering: Nord relä:ar 2♦, Syd rättar 2♠ (ej passad misfit)', () => {
+    const deal = dealOf('W', {
+      N: 'S:JT97 H:J732 D:9862 C:K',      // 5 hp, singel klöver
+      E: 'S:2 H:K865 D:Q75 C:Q9762',
+      S: 'S:AQ8654 H:AT D:J C:T854',       // 6-4 spader/klöver → DONT 2♣ (visar ♣+♠)
+      W: 'S:K3 H:Q94 D:AKT43 C:AJ3',       // 15 → 1NT
+    })
+    // Syd öppnar DONT-tvåfärg i balanseringssitsen.
+    expect(decideCall(deal, [call('W', '1NT'), call('N', 'P'), call('E', 'P')], 'S').bid).toBe('2C')
+    // Nord får inte passa singel-klövern – relä:ar 2♦ (pass-eller-rätta).
+    const north = decideCall(deal, [call('W', '1NT'), call('N', 'P'), call('E', 'P'), call('S', '2C')], 'N')
+    expect(north.bid).toBe('2D')
+    // Syd rättar reläet till sin högre visade färg = spader.
+    const south = decideCall(
+      deal,
+      [call('W', '1NT'), call('N', 'P'), call('E', 'P'), call('S', '2C'), call('W', 'P'), call('N', '2D'), call('E', 'P')],
+      'S',
+    )
+    expect(south.bid).toBe('2S')
+    expect(south.rule).toBe('DONT: rättelse (tvåfärg)')
+  })
 })

@@ -943,6 +943,43 @@ function ownDONTXToCorrect(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   }
 }
 
+/**
+ * Står `seat`s egen DONT-TVÅFÄRGSbud (2♣/2♦ = lägre färg + en högre) och väntar
+ * på rättelse efter partnerns pass-eller-rätta-relä? Mönstret: motståndarnas 1NT,
+ * vårt 2♣/2♦, partnerns relä ETT steg upp (2♣→2♦ · 2♦→2♥), sedan bara pass.
+ * Partnern saknade stöd i den lägre färgen och ber oss visa den HÖGRE – vi rättar
+ * dit (felrapport #20). Utan detta skulle relä-budet bli spelat som ett äkta
+ * naturligt bud i en misfit.
+ */
+function ownDONTTwoSuiterToCorrect(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
+  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourActions.length !== 2) return null
+  const [mine, relay] = ourActions
+  if (mine.seat !== seat) return null
+  const relayFor: Record<string, string> = { '2C': '2D', '2D': '2H' } // 2♥/2♠/X hanteras ej här
+  const expectRelay = relayFor[mine.bid]
+  if (!expectRelay || relay.seat !== PARTNER[seat] || relay.bid !== expectRelay) return null
+  const idx = history.indexOf(relay)
+  if (!history.slice(idx + 1).every((c) => c.bid === 'P')) return null
+
+  // Min HÖGRE av de två DONT-färgerna (de två längsta i handen; högst rankad).
+  const len = lengths(deal.hands[seat])
+  const twoLongest = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st])
+    .sort((a, b) => len[b] - len[a] || SUIT_STRAINS.indexOf(letterOfSuit(b)) - SUIT_STRAINS.indexOf(letterOfSuit(a)))
+    .slice(0, 2)
+  const higher = SUIT_STRAINS.indexOf(letterOfSuit(twoLongest[0])) > SUIT_STRAINS.indexOf(letterOfSuit(twoLongest[1]))
+    ? twoLongest[0]
+    : twoLongest[1]
+  const bid = cheapestBidIn(history, seat, letterOfSuit(higher))
+  if (!bid) return null
+  return {
+    seat, bid, rule: 'DONT: rättelse (tvåfärg)',
+    explanation: `partnern relä:ade (${relay.bid}) → visar min högre färg ${SWE_NAME[letterOfSuit(higher)]} → ${bid}.`,
+  }
+}
+
 // ---- Motståndaren stör VÅR icke-1-färgs-öppning (§7, Fynd #2 delbit 4) ------
 
 /**
@@ -1329,6 +1366,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
         (d) => advanceDONT(hand, d), history, seat),
       // … och vår egen DONT-X rättas till sin riktiga färg efter partnerns relä.
       () => ownDONTXToCorrect(deal, history, seat),
+      // … och vårt egna DONT-tvåfärgsbud (2♣/2♦) rättas till den högre färgen när
+      // partnern relä:at pass-eller-rätta (felrapport #20).
+      () => ownDONTTwoSuiterToCorrect(deal, history, seat),
       // Partnerns TVÅFÄRGSINKLIV (Michaels/ovanlig 2NT, §7.2): preferens via
       // advanceTwoSuiter; även advancerns medvetna pass (felrapport #7).
       () => answered(partnerTwoSuiterToAnswer(history, seat),

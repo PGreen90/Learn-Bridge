@@ -119,6 +119,7 @@ export function openerRebidAfterNewSuit(hand: Hand, opened: Suit, newSuit: Suit)
 /** Svararen placerar kontraktet efter öppnarens Ogust-svar. §4.5. */
 export function responderPlaceAfterOgust(hand: Hand, opened: Suit, ogust: ResponseResult): ResponseResult | null {
   const p = hcp(hand)
+  const len = lengths(hand)
   const bid = BID[opened]
   const sym = SYM[opened]
   const max = ogust.rule === 'Ogust: max/dålig' || ogust.rule === 'Ogust: max/bra' || ogust.rule === 'Ogust: max/utmärkt'
@@ -126,6 +127,15 @@ export function responderPlaceAfterOgust(hand: Hand, opened: Suit, ogust: Respon
   if (isMajor(opened)) {
     if (ogust.rule === 'Ogust: max/utmärkt') return { call: `4${bid}`, rule: 'till spel', explanation: `${p} hp mittemot max + solid färg → 4${sym}.` }
     if (max) return { call: `4${bid}`, rule: 'till spel', explanation: `${p} hp mittemot maximum → 4${sym} (utgång).` }
+    // Svararens EGEN styrka kan bära utgång även mittemot en MINIMUM svag tvåa:
+    // ~19+ hp + partnerns 6-korts färg ≈ utgång oavsett öppnarens tier (felrapport
+    // #22: Öst hade 22 hp och stack i 3♠). Med trumfstöd (3+) → utgång i färgen;
+    // utan fit (kort trumf) → 3NT och låt partnerns långfärg ge sticken.
+    if (p >= 19) {
+      return len[opened] >= 3
+        ? { call: `4${bid}`, rule: 'till spel', explanation: `${p} hp på egen styrka + ${len[opened]} trumf → 4${sym} (utgång, även mittemot minimum).` }
+        : { call: '3NT', rule: 'till spel (3NT)', explanation: `${p} hp på egen styrka men bara ${len[opened]} trumf → 3NT (partnerns långfärg ger stick).` }
+    }
     return { call: `3${bid}`, rule: 'svararens signoff', explanation: `${p} hp mittemot minimum → 3${sym} (stannar, öppnaren passar).` }
   }
 

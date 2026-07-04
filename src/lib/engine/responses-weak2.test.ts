@@ -74,6 +74,19 @@ describe('responderPlaceAfterOgust – svararen placerar', () => {
     expect(responderPlaceAfterOgust(hand, 'hearts', r('3C', 'Ogust: min/dålig'))?.call).toBe('3H')
   })
 
+  // Felrapport #22 (bricka 3): Öst frågade Ogust med en 22-hp-hand, öppnaren
+  // svarade minimum (3♣) och Öst STACK i 3♠ trots att egen styrka bär utgång.
+  // Facit: med 19+ hp och kort trumf (singel ♠) → 3NT (stopp överallt, partnerns
+  // spaderfärg ger sticken); en 13-hp-hand fortsätter att stanna mot minimum.
+  it('stark svarare (22 hp, singel trumf) → 3NT mittemot minimum', () => {
+    const bigNoFit = parseHand('S:A H:AJ75 D:AK86 C:AQT8') // 22 hp, 1 spader
+    expect(responderPlaceAfterOgust(bigNoFit, 'spades', r('3C', 'Ogust: min/dålig'))?.call).toBe('3NT')
+  })
+  it('stark svarare (19+ hp) MED trumffit → utgång i färgen (4♥)', () => {
+    const bigFit = parseHand('S:A2 H:AQ5 D:AKJ6 C:AQ87') // 22 hp, 3 hjärterstöd
+    expect(responderPlaceAfterOgust(bigFit, 'hearts', r('3C', 'Ogust: min/dålig'))?.call).toBe('4H')
+  })
+
   // FAS 1 punkt 3 (laglighet): öppnarens Ogust-svar på 2♦ ligger redan på
   // 3-läget, så svararens placering FÅR ALDRIG ligga på eller under svaret.
   describe('2♦: placeringen är alltid laglig (högre än svaret eller pass)', () => {
@@ -112,5 +125,21 @@ describe('buildAuction – svag tvåa end-to-end (inkoppling)', () => {
     // Steg 3 + 6: varje tur bär kravnivå + alert ur regelregistret.
     expect(a?.turns.map((t) => t.forcing)).toEqual(['ej-krav', 'krav-1-rond', 'ej-krav', 'avslut'])
     expect(a?.turns.map((t) => t.alert)).toEqual([false, true, true, false])
+  })
+
+  // Felrapport #22 (bricka 3): Väst svag 2♠, Öst 22 hp frågar Ogust, Väst 3♣
+  // (minimum), Öst ska bjuda UTGÅNG 3NT – inte stanna i 3♠.
+  it('bygger 2♠ – 2NT – 3♣ – 3NT (stark svarare tar utgång mot minimum)', () => {
+    const deal: Deal = {
+      id: 'test', board: 1, dealer: 'W', vulnerability: 'ew',
+      hands: {
+        W: parseHand('S:QJ9853 H:8 D:752 C:K94'),   // 6-korts spader, ~6 hp → svag 2♠, Ogust-svar 3♣
+        E: parseHand('S:A H:AJ75 D:AK86 C:AQT8'),    // 22 hp, singel spader → Ogust, sen 3NT
+        N: parseHand('S:T7642 H:KQT9 D:T C:762'),
+        S: parseHand('S:K H:6432 D:QJ943 C:J53'),
+      },
+    }
+    const a = buildAuction(deal)
+    expect(a?.turns.map((t) => t.call)).toEqual(['2S', '2NT', '3C', '3NT'])
   })
 })
