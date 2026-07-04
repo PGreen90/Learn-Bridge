@@ -903,6 +903,15 @@ Det avslöjar längd/räkning direkt för partnern.
   `responderSecondBid`). Alla tre givarna facit-låsta exakt ur rapporterna.
   **Beslut:** /felrapporter lämnar alltid en STANDARDRAPPORT (vad hände /
   anledning / fix / test) – inskrivet i kommandofilen.
+- **2026-07-02** – **Flakigt MC-slutspelstest stabiliserat** (testsvit 729, endast
+  testfil – motorn orörd). 6-korts NT-testet i `play-bot-smart.test.ts` föll ~1
+  gång av 10–20: Monte-Carlo-röstningen samplar via `Math.random` och med 60
+  sampel valde den ibland fel kort av ren slumpvarians. Seedskanning (30 seedar):
+  60 sampel föll för 3/30, **100 sampel för 0/30**. Fix: sampelbudget 60 → 100 +
+  deterministisk seedad slumpström (mulberry32 via `vi.spyOn(Math, 'random')`,
+  återställd i `afterEach`). Verifierat: testfilen 20/20 gröna körningar,
+  `npm test` × 3 = 729 passed. Commit `5117d3f`.
+- **2026-07-02** – **FAS 11 – tänj MC-fönstret + webworker (av huvudtråden)**
   (testsvit 727). **Uppmätt** (riktiga givar): Monte-Carlo tog redan ~2 s vid 7
   kort och 8+ s vid 8 kort – på huvudtråden fryser det fliken. Lösning: (1) MC
   flyttad till en **webworker** (`mc-worker.ts`) → gränssnittet fryser aldrig,
