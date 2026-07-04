@@ -36,19 +36,40 @@ vill — de flesta är rena dokumentändringar utan risk för koden.
 
 | # | Fynd | Prioritet | Lagat nu? |
 |---|------|-----------|-----------|
-| 1 | `handvardering.md` säger med fet "Viktig låsning" att TP INTE styr budbesluten — direkt motsägelse mot resten av samma fil + verkligheten (TP styr öppning/slam/höjningar) | **MEDIUM** | Nej – ägarval |
-| 2 | Bergen 3♣-intervallet: systembok + översikt säger 7–10, `status.md` säger 7–9; systemboken har dessutom ett **överlappande** golv (3♣ = 7–10 OCH 3♦ = 10–12 → "10" i båda) → parallella sessioner kan koda olika | **MEDIUM** | Nej – ägarval |
-| 3 | `kortspel.md` (Status/Återstår/Avgränsningar) beskriver spelläget flera iterationer föråldrat (heuristiskt `pickContract`/`dealForPlay`, inga signaler, ingen DDS-facit, inga bot-hjärna) | **MEDIUM** | Nej – ägarval |
-| 4 | Tre-lager-auktionskontraktet (`open`-flaggan: `auction.ts` → `auction-live.ts` → `auction-interpret.ts`) är odokumenterat — R2 rekommenderade uttryckligen att skriva ner det; finns bara i R2-rapporten | **MEDIUM** | Nej – ägarval |
-| 5 | Föråldrade "NÄSTA/PRIO"-pekare i planeringsdokumenten (`arbetslista.md` rad 3, `sanningskarta.md` "Nästa steg: FAS 1") pekar på sedan länge klart arbete och konkurrerar med `CLAUDE.md`-kartan om vad som är nästa | **MEDIUM** | Nej – ägarval |
-| 6 | `CLAUDE.md`s "## Beslut"-block talar fortfarande i FAS-termer och säger "NÄSTA GÅNG STARTAR VI MED: balansering …" (klart via R1) + "Inga nya funktioner förrän FAS 1–6" — nedre halvan är en tidskapsel som motsäger kartan högst upp | **MEDIUM** | Nej – ägarval |
-| 7 | App-namnet **RebidZ** och designöverriden (spader SVARTA, emerald) finns i koden + `MEMORY.md` + `AUDIT_PROMPTS.md` men INTE i `CLAUDE.md`/systemboken (som fortfarande heter "Bridge-app") → en läsare som bara ser docs vet inte namnet, en som "rättar" spaderfärgen bryter ett medvetet beslut | **LÅG–MEDIUM** | Nej – ägarval |
-| 8 | Hårdkodade testantal (587/612/…/1676) i minst 6 dokument + `MEMORY.md` glider isär vid varje ny test | **LÅG** | Nej – ägarval |
-| 9 | Ingen `README.md` i repo-roten — en människa som landar på GitHub-repot har ingen ingång (CLAUDE.md är AI-orienterad) | **LÅG** | Nej – ägarval |
+| 1 | `handvardering.md` säger med fet "Viktig låsning" att TP INTE styr budbesluten — direkt motsägelse mot resten av samma fil + verkligheten (TP styr öppning/slam/höjningar) | **MEDIUM** | ✅ Ja (`72357e2`) |
+| 2 | Bergen 3♣-intervallet: systembok + översikt säger 7–10, `status.md` säger 7–9; systemboken har dessutom ett **överlappande** golv (3♣ = 7–10 OCH 3♦ = 10–12 → "10" i båda) → parallella sessioner kan koda olika | **MEDIUM** | ✅ Ja – bok→7–9 (`5a4f1c6`) |
+| 3 | `kortspel.md` (Status/Återstår/Avgränsningar) beskriver spelläget flera iterationer föråldrat (heuristiskt `pickContract`/`dealForPlay`, inga signaler, ingen DDS-facit, inga bot-hjärna) | **MEDIUM** | ✅ Ja (`6f5eac9`) |
+| 4 | Tre-lager-auktionskontraktet (`open`-flaggan: `auction.ts` → `auction-live.ts` → `auction-interpret.ts`) är odokumenterat — R2 rekommenderade uttryckligen att skriva ner det; finns bara i R2-rapporten | **MEDIUM** | ✅ Ja (`f68628a`) |
+| 5 | Föråldrade "NÄSTA/PRIO"-pekare i planeringsdokumenten (`arbetslista.md` rad 3, `sanningskarta.md` "Nästa steg: FAS 1") pekar på sedan länge klart arbete och konkurrerar med `CLAUDE.md`-kartan om vad som är nästa | **MEDIUM** | ✅ Ja (`06b9f26`) |
+| 6 | `CLAUDE.md`s "## Beslut"-block talar fortfarande i FAS-termer och säger "NÄSTA GÅNG STARTAR VI MED: balansering …" (klart via R1) + "Inga nya funktioner förrän FAS 1–6" — nedre halvan är en tidskapsel som motsäger kartan högst upp | **MEDIUM** | ✅ Ja (`37753b1`) |
+| 7 | App-namnet **RebidZ** och designöverriden (spader SVARTA, emerald) finns i koden + `MEMORY.md` + `AUDIT_PROMPTS.md` men INTE i `CLAUDE.md`/systemboken (som fortfarande heter "Bridge-app") → en läsare som bara ser docs vet inte namnet, en som "rättar" spaderfärgen bryter ett medvetet beslut | **LÅG–MEDIUM** | ✅ Ja (`37753b1`) |
+| 8 | Hårdkodade testantal (587/612/…/1676) i minst 6 dokument + `MEMORY.md` glider isär vid varje ny test | **LÅG** | ✅ Ja – konvention (`8c0a1a3`) |
+| 9 | Ingen `README.md` i repo-roten — en människa som landar på GitHub-repot har ingen ingång (CLAUDE.md är AI-orienterad) | **LÅG** | ✅ Ja (`8c0a1a3`) |
 | ✓ | **Verifierat GOTT:** terminologin är genomgående konsekvent (hf/lf/hp/TP/startpoäng definierade i `oversikt.md` + `handvardering.md`; "förlorare" låst för LTC); systemboken är EN tydlig sanningskälla | — | Inget att göra |
 
 **Ingen KRITISK. Ingen HÖG.** Alla fynd är dokumentationsdrift eller
 AI-förvaltningstydlighet — inget kan producera ett felaktigt bud.
+
+## Åtgärdslogg (2026-07-04, audit session 7)
+
+Ägaren valde att laga **alla nio fynd**, ett i taget (rena dokumentändringar; #2
+efter ägarbeslut att rätta boken snarare än koden). Inga kodändringar → ingen
+testpåverkan. Commits på gren `audit/r4-dok-ai`:
+- **#4** (`f68628a`): nytt avsnitt "Budmotorns tre auktionslager + `open`-handoff"
+  i `status.md` + pekare i `CLAUDE.md`.
+- **#1** (`72357e2`): `handvardering.md` — feta "TP styr INTE budbesluten" ersatt
+  med korrekt historik (TP styr numera utvalda beslut, "nedgradera aldrig").
+- **#3** (`6f5eac9`): `kortspel.md` — NUTIDSNOT överst + Status/Återstår märkta
+  som första-omgångshistorik, pekar till `status.md`/`bot-hjarna.md`.
+- **#2** (`5a4f1c6`): `budsystem.md` (§4.1-tabeller + princip) + `oversikt.md`
+  ändrade 3♣ = 7–10 → **7–9** (matchar koden: `sp>=10 → 3♦`). Ändringsloggpost.
+  Ingen beteendeändring.
+- **#5** (`06b9f26`): historik-noter i `arbetslista.md`-toppen + `sanningskarta.md`
+  sektion III (kartan i `CLAUDE.md` + R1–R6 är enda källa för NU/NÄST).
+- **#6+#7** (`37753b1`): `CLAUDE.md` — föråldrad "NÄSTA GÅNG"-rad → historik-not;
+  "Vad det här är" namnger appen RebidZ + låst designriktning (spader svarta).
+- **#8+#9** (`8c0a1a3`): konventionsrad om testantal i `arbetsrutiner.md`; ny
+  `README.md` i repo-roten.
 
 ---
 

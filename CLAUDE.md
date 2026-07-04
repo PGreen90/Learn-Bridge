@@ -11,24 +11,25 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — R3 (UI/UX & QoL) KLAR: fynd #1–#7 åtgärdade (MERGAT + LIVE)
-> **NÄSTA GÅNG börjar vi med: R4 — Dokumentation & AI-förvaltningsbarhet** (nästa
-> revisionssteg, `AUDIT_PROMPTS.md`). Full bild av R3: **`docs/audit/r3-uiux-qol.md`**.
+### 🔵 NU — R4 (Dokumentation & AI-förvaltning) KLAR på gren, VÄNTAR MERGE
+> **NÄSTA GÅNG börjar vi med: R5 — Git, deployment & process** (nästa revisionssteg,
+> `AUDIT_PROMPTS.md`; sist R6 = slutrapport). Full bild av R4:
+> **`docs/audit/r4-dok-ai.md`**.
+>
+> **Läget (2026-07-04, audit session 7):** R1 klar. R2 klar + live. R3 klar + live.
+> **R4 klar på gren `audit/r4-dok-ai` (ej mergad — väntar ägarens PCD-ok):**
+> dokumentationen är rik och välskött (EN systembok, konsekvent terminologi), inga
+> KRITISK/HÖG. 9 fynd, alla MEDIUM/LÅG, alla åtgärdade som rena dokumentändringar
+> (ägaren valde "laga alla"): #1 TP-motsägelse i `handvardering.md`; #2 Bergen 3♣
+> 7–10→7–9 i boken (matchar koden, ingen beteendeändring); #3 `kortspel.md`
+> markerad som föråldrad; **#4 tre-lager-auktionskontraktet dokumenterat** (R2:s
+> R4-ask); #5 föråldrade NÄSTA-pekare neutraliserade; #6 CLAUDE.md-tidskapsel
+> städad; #7 RebidZ-namn + designnot in i CLAUDE.md; #8 testantal-konvention;
+> #9 ny README. Inga kodändringar → ingen testpåverkan.
 >
 > **Delbit 3 (Mathe mot stark 1♣) är PARKERAD (ägarbeslut 2026-07-04)** — sparad
 > som framtidsidé, se 🅿️ PARKERAT nedan.
 >
-> **Läget (2026-07-04, audit session 6):** R1 klar. R2 (arkitektur) klar + live.
-> **R3 (UI/UX & QoL) klar och LIVE:** inga KRITISK/HÖG-fynd — gränssnittet är sunt
-> (EN Felt-källa, bra a11y, respekt för minskad rörelse). 8 fynd, alla MEDIUM/LÅG,
-> hanterade ett i taget (ägaren valde omfång per fynd): #1 ruter-orange → orange-700
-> (mätt 2.80→5.18:1); #2 "Hålfinnare" gömd i produktion (`import.meta.env.DEV`);
-> #3 budhint "Motorn hade valt X" (del 1) — **del 2 (auto-facit) → SENARE** efter
-> mätning (helgivs-DDS för tung: 79/80 gav upp); #4 facit som direktknapp på bordet;
-> #5 modaler `fixed` mot skärmen; #6 klick-utanför stänger menyer; #7 route
-> `/spela`→`/budvisning` + 2×2 lägeskort på Home; **#8 (Förra sticket 75→85 %)
-> provades men BACKADES** — 375px-överlappet gick inte att verifiera (extern server
-> blockerade preview). **1676 tester gröna + `tsc` rent**, mergat + live.
 > **Kvar sedan tidigare:** den GENERELLA flerronds-konkurrensen bortom Case A
 > (R1 Fynd #2) — medvetet uppskjuten. Ägaren valde "bygg hela #2, delbit för delbit".
 >
