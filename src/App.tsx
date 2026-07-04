@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 import { BiddingPractice } from './pages/BiddingPractice'
@@ -19,7 +19,11 @@ export default function App() {
           <Route path="budtraning" element={<BiddingPractice />} />
           <Route path="budtraning/:themeId" element={<BiddingSession />} />
           <Route path="budsystem" element={<BudSystem />} />
-          <Route path="spela" element={<Spela />} />
+          {/* Budvisning = titta-läget. Routen hette förr "spela" men det krockade
+              med "spela-kort" (det riktiga spelet); "budvisning" matchar etiketten
+              (R3-fynd #7). Gamla /spela-länkar redirectar hit. */}
+          <Route path="budvisning" element={<Spela />} />
+          <Route path="spela" element={<Navigate to="/budvisning" replace />} />
           <Route path="spela-kort" element={<Play />} />
           <Route path="installningar" element={<Settings />} />
         </Route>
