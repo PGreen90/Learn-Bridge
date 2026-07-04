@@ -8,7 +8,10 @@ import type { Suit } from '../types/bridge'
 export const SUIT_TEXT: Record<Suit, string> = {
   spades: 'text-slate-900',
   hearts: 'text-red-600',
-  diamonds: 'text-orange-500',
+  // Ruter använder orange-700 (inte -500): på det vita kortet ger -500 bara
+  // 2.80:1 kontrast (under WCAG AA 4.5), -700 ger 5.18:1 och läser fortfarande
+  // tydligt som "orange", väl skild från hjärterröd (R3-fynd #1, mätt).
+  diamonds: 'text-orange-700',
   clubs: 'text-green-700',
 }
 

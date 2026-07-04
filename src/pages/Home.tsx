@@ -109,25 +109,30 @@ export function Home() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <ModeCard
+          to="/spela-kort"
+          icon="🃏"
+          title="Spela kort"
+          description="Spela en hel giv mot datorn – bud och kortspel."
+        />
+        <ModeCard
           to="/budtraning"
           icon="🎯"
           title="Budträning"
           description="Öva på att hitta rätt bud, tema för tema."
         />
         <ModeCard
-          to="/spela"
+          to="/budvisning"
           icon="👁️"
           title="Budvisning"
           description="Titta när datorn budar alla fyra händerna."
         />
+        <ModeCard
+          to="/budsystem"
+          icon="📖"
+          title="Budsystem"
+          description="Hela 2/1-systemet att läsa, sektion för sektion."
+        />
       </div>
-
-      <ModeCard
-        to="/budsystem"
-        icon="📖"
-        title="Budsystem"
-        description="Hela 2/1-systemet att läsa, sektion för sektion."
-      />
     </div>
   )
 }

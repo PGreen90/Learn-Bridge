@@ -11,7 +11,7 @@ import type { Bid } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import { isAlertRule } from '../lib/engine/alerts'
 import { interpretCall } from '../lib/engine/auction-interpret'
-import { bidChipTone, BidChipContent } from './BidChip'
+import { BidChip, bidChipTone, BidChipContent } from './BidChip'
 import { SuitText } from './SuitText'
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7]
@@ -115,6 +115,15 @@ export function BiddingBox({
           {isRec && <span className="mr-1 rounded bg-emerald-600 px-1 text-[10px] font-bold text-white">MOTORNS BUD</span>}
           {selAlert && <span className="mr-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>}
           <SuitText>{selExpl}</SuitText>
+        </p>
+      )}
+
+      {/* R3-fynd #3: väljer du ett annat bud än motorns rekommendation visas det
+          diskret så du vet vad partnern/systemet hade valt – utan att hindra dig
+          från att buda som du vill (Spela-läget är spel, inte facit-tvång). */}
+      {selected && recBid && selected !== recBid && (
+        <p className="flex items-center gap-1 px-1 text-[11px] leading-snug text-emerald-50/70">
+          Motorn hade valt <BidChip bid={recBid} className="scale-90" />
         </p>
       )}
 

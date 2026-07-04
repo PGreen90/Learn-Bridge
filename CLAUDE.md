@@ -11,27 +11,26 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — R2 (arkitektur) KLAR: fynd #1–#4 åtgärdade (MERGAT + LIVE)
-> **NÄSTA GÅNG börjar vi med: R3 — UI/UX & Quality of Life** (nästa revisionssteg,
-> `AUDIT_PROMPTS.md`). Full bild av R2: **`docs/audit/r2-arkitektur.md`**.
+### 🔵 NU — R3 (UI/UX & QoL) KLAR: fynd #1–#7 åtgärdade (MERGAT + LIVE)
+> **NÄSTA GÅNG börjar vi med: R4 — Dokumentation & AI-förvaltningsbarhet** (nästa
+> revisionssteg, `AUDIT_PROMPTS.md`). Full bild av R3: **`docs/audit/r3-uiux-qol.md`**.
 >
 > **Delbit 3 (Mathe mot stark 1♣) är PARKERAD (ägarbeslut 2026-07-04)** — sparad
 > som framtidsidé, se 🅿️ PARKERAT nedan.
 >
-> **Läget (2026-07-04, audit session 5):** R1 klar (fynd #1/#3/#4/#5 lagade;
-> Fynd #2 delbit 1/2/4/5 byggda; delbit 3 parkerad). **R2 (arkitektur) klar och
-> LIVE:** inga KRITISK/HÖG-fynd — grunden är sund (rena funktioner, EN
-> kontraktskälla, tät motor↔UI-gräns, budgeterat kortspel). **Fynd #1–#4
-> åtgärdade beteendebevarande** (ägaren valde förslag, ett fynd i taget):
-> #1 = `decideCall` gjord datadriven (två ordnade, namngivna detektorlistor +
-> `answered`-helper i stället för 17 ordningsberoende if-block; #4 löstes inuti);
-> #2 = gränsen motor↔`interpretCall`-heuristik dokumenterad + skyddsnät-test;
-> #3 = `buildAuction` memoiserad (WeakMap per giv) + `useMemo` i `Play.tsx`.
-> #5 = notering utan åtgärd. **1676 tester gröna + `tsc` rent**, spelskärmen
-> rök-verifierad, mergat + live.
-> **Kvar (efter revisionen):** den GENERELLA flerronds-konkurrensen bortom Case A
-> (Fynd #2) — medvetet uppskjuten så vi inte staplar fler detektorer. Ägaren valde
-> "bygg hela #2, delbit för delbit".
+> **Läget (2026-07-04, audit session 6):** R1 klar. R2 (arkitektur) klar + live.
+> **R3 (UI/UX & QoL) klar och LIVE:** inga KRITISK/HÖG-fynd — gränssnittet är sunt
+> (EN Felt-källa, bra a11y, respekt för minskad rörelse). 8 fynd, alla MEDIUM/LÅG,
+> hanterade ett i taget (ägaren valde omfång per fynd): #1 ruter-orange → orange-700
+> (mätt 2.80→5.18:1); #2 "Hålfinnare" gömd i produktion (`import.meta.env.DEV`);
+> #3 budhint "Motorn hade valt X" (del 1) — **del 2 (auto-facit) → SENARE** efter
+> mätning (helgivs-DDS för tung: 79/80 gav upp); #4 facit som direktknapp på bordet;
+> #5 modaler `fixed` mot skärmen; #6 klick-utanför stänger menyer; #7 route
+> `/spela`→`/budvisning` + 2×2 lägeskort på Home; **#8 (Förra sticket 75→85 %)
+> provades men BACKADES** — 375px-överlappet gick inte att verifiera (extern server
+> blockerade preview). **1676 tester gröna + `tsc` rent**, mergat + live.
+> **Kvar sedan tidigare:** den GENERELLA flerronds-konkurrensen bortom Case A
+> (R1 Fynd #2) — medvetet uppskjuten. Ägaren valde "bygg hela #2, delbit för delbit".
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
@@ -72,6 +71,16 @@ Läs den här filen först varje session.
 1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **Auto-facit på hela given i webworker (R3 fynd #3 del 2):** visa spelförarens
+  double-dummy-optimum automatiskt i resultatdialogen. Byggdes synkront men
+  backades — helgivs-DDS från utspelet är för tung (probe: 79/80 kontrakt gav upp
+  efter ~1,7 s, spränger 2M-nodbudgeten → skulle frysa + nästan alltid "för tung").
+  Kräver bakgrundstråd (mc-worker) med möjliga långa väntetider, eller snabbare
+  lösare. Del 1 (budhint "Motorn hade valt X") är redan gjord + live.
+- **"Förra sticket"-panelen 75 %→85 % (R3 fynd #8):** liten läsbarhets-bump ägaren
+  ville ha. Backad tills 375px-överlappet mot pågående sticket kan ögonkollas
+  (mobil-preview var blockerad). Ändra `scale-75`→`scale-[0.85]` i `Play.tsx` och
+  verifiera på 375 px; krockar den → åter till 75 % eller justera ankringen.
 - **Kanoniska linjen passar ut ostörda tvåfärgsinkliv** (fynd felrapport #7,
   2026-07-03): `buildAuction` (`auction.ts`) kan stänga en linje som
   1♠–2NT–P–P–P — advancern ska aldrig passa ostört (ägarbeslut FAS 10).
