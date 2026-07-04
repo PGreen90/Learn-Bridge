@@ -42,10 +42,17 @@ och NT-buggen kan lagas i en liten, säker fix (facit först).
   #2 nu, delbit för delbit"), en delbit i taget med exempelhänder + ja.
   - **Delbit 1 KLAR** (`+ DONT`): DONT mot deras 1NT inkopplad (direkt golv
     8 hp / balansering 6 hp; advancer-relä + X-rättelse). 1635 gröna.
-  - Delbit 2 (takeout/Lebensohl mot deras svaga tvåor/spärrar), delbit 3 (Mathe
-    mot deras 1♣), delbit 4 (konkurrens efter VÅRA 1NT/2♣/svaga/spärr), delbit 5
-    (fortsättningar bortom en rond) – kvarstår.
-Baslinje efter fixarna + delbit 1: **1635 tester gröna**.
+  - **Delbit 2 KLAR** (`+ takeout/Lebensohl mot svaga/spärr`): `defendWeakTwo`/
+    `defendPreempt` inkopplade i `buildAuction` på samma två ställen som DONT
+    (direkt + balansering). Ägargolv: takeout-X mot svag tvåa 12 hp ej sårbar /
+    13 sårbar direkt, 10 hp balansering; spärr-X kvar på 14 (medvetet stramare,
+    bevakas). Svaret på partnerns takeout-X rider på Fynd #5:s level-medvetna
+    `answerTakeoutDouble`. Mathe/Multi träddes INTE in (bottarna öppnar aldrig
+    stark 1♣/Multi 2♦ → utanför omfånget). 1639 gröna.
+  - Delbit 3 (Mathe mot deras 1♣ – troligen inaktuell, se ovan), delbit 4
+    (konkurrens efter VÅRA 1NT/2♣/svaga/spärr), delbit 5 (fortsättningar bortom
+    en rond) – kvarstår.
+Baslinje efter fixarna + delbit 1 + delbit 2: **1639 tester gröna**.
 
 ---
 

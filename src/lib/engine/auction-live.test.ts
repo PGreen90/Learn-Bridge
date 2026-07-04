@@ -816,14 +816,11 @@ describe('R1-fynd #3 – Jacoby-2NT-fit sätter trumf inför off-book essfråga'
   })
 })
 
-// R1-fynd #4 (testfläck): de "färdiga men oanropade" §7-konventionerna (DONT mot
-// deras 1NT, takeout/Lebensohl mot deras svaga/spärr, Mathe) har egna
-// enhetstester men NÅS aldrig i en levande auktion (Fynd #2 – konkurrensen är
-// inte inkopplad efter deras icke-1-färgs-öppningar). Dessa KARAKTERISERINGS-
-// tester låser dagens lucka: boten passar i stället för att bjuda konventionen.
-// När Fynd #2 kopplar in §7 ska de här smälla till → uppdatera dem till FACIT
-// för det verkliga budet (2♠/X respektive X). Se docs/audit/r1-budsystem.md.
-describe('R1-fynd #4 – dokumenterad §7-inkopplingslucka (flippar när Fynd #2 byggs)', () => {
+// R1-fynd #4 (testfläck): de "färdiga men oanropade" §7-konventionerna hade egna
+// enhetstester men NÅDDES aldrig i en levande auktion. Delbit 1 kopplade in DONT
+// mot deras 1NT; delbit 2 (nedan) kopplar in takeout/Lebensohl mot deras svaga
+// tvåor/spärrar. Detta test låser kvarvarande DONT-golv-gräns (delbit 1).
+describe('R1-fynd #4 – §7-golv (DONT delbit 1)', () => {
   it('under DONT-golvet: 6-hp-hand passar mot deras 1NT (sund standard, delbit 1)', () => {
     // Delbit 1 av Fynd #2 kopplade in DONT MEN med ägarens golv 8 hp (direkt).
     // En 6-hp-hand passar därför korrekt – detta låser den gränsen.
@@ -836,16 +833,75 @@ describe('R1-fynd #4 – dokumenterad §7-inkopplingslucka (flippar när Fynd #2
     expect(buildAuction(deal)?.turns[0].call).toBe('1NT')
     expect(decideCall(deal, [call('E', '1NT')], 'S').bid).toBe('P') // under 8-hp-golvet
   })
+})
 
-  it('mot deras svaga 2♠: takeout-hand passar i dag (borde bli X – delbit 2)', () => {
+// Fynd #2 delbit 2 – takeout/Lebensohl mot deras SVAGA TVÅOR (2♦/2♥/2♠) och
+// SPÄRRAR (3-läget+), systembok §7.6, inkopplad i budlådan (`buildAuction`).
+// Ägarbeslut 2026-07-04: upplysningsdubblingens golv = 12 hp ej sårbar / 13 hp
+// sårbar i direkt sits, 10 hp i balansering (lättare, jfr DONT 8→6). Verktygen
+// (defendWeakTwo/defendPreempt) fanns men nåddes aldrig – nu modelleras inklivet
+// och svaret på ett takeout-X (level-medvetet, Fynd #5) bjuds levande.
+describe('Fynd #2 delbit 2 – försvar mot deras svaga tvåor/spärrar', () => {
+  it('direkt takeout-X mot svag 2♠ (17 hp, kort spader, stöd i övriga)', () => {
     const deal = dealOf('E', {
       E: 'S:KQ9832 H:54 D:K3 C:762',   // 6-korts spader ~8 hp → svag 2♠
       S: 'S:2 H:AKJ3 D:AQ84 C:KJ32',   // kort spader, 17 hp, stöd i övriga = takeout
       N: 'S:AJ765 H:Q62 D:95 C:A85',
       W: 'S:T4 H:T987 D:JT76 C:QT9',
     })
-    expect(buildAuction(deal)?.turns[0].call).toBe('2S') // förutsättning: de öppnar svag 2♠
-    expect(decideCall(deal, [call('E', '2S')], 'S').bid).toBe('P') // LUCKA: ingen takeout-X
+    expect(buildAuction(deal)?.turns[0].call).toBe('2S')
+    expect(decideCall(deal, [call('E', '2S')], 'S')).toMatchObject({ bid: 'X', rule: 'upplysningsdubbling' })
+  })
+
+  it('direkt takeout-X mot svag 2♥ + advancern svarar på X:et (hela loopen)', () => {
+    // Återanvänder Fynd #5-given: E öppnar svag 2♥, S har 19 hp takeout. Nu bjuder
+    // boten X själv, och advancern (N) svarar tvunget på 2-läget (level-medvetet).
+    const deal = dealOf('E', {
+      E: 'S:5 H:KQ9832 D:K3 C:9762',   // svag 2♥
+      S: 'S:AQ2 H:5 D:AQ84 C:AKJ3',    // kort hjärter, 19 hp → X (takeout)
+      N: 'S:QJ92 H:64 D:8732 C:642',   // ~3 hp, 4 spader → tvingas svara 2♠
+      W: 'S:KT8743 H:JT7 D:JT C:QT',
+    })
+    expect(decideCall(deal, [call('E', '2H')], 'S')).toMatchObject({ bid: 'X', rule: 'upplysningsdubbling' })
+    expect(decideCall(deal, [call('E', '2H'), call('S', 'X'), call('W', 'P')], 'N').bid).toBe('2S')
+  })
+
+  it('sårbarhets-golvet: 12 hp dubblar ej sårbar men PASSAR sårbar (13 krävs)', () => {
+    const hands = {
+      E: 'S:KQ8543 H:Q2 D:765 C:43',   // svag 2♠
+      S: 'S:76 H:K54 D:KJ83 C:AJ92',   // exakt 12 hp, 2-3-4-4, takeout-form
+      N: 'S:AJT H:AJ98 D:QT4 C:K76',
+      W: 'S:92 H:T763 D:A92 C:QT85',
+    }
+    const nonVul = dealOf('E', hands)                         // NS ej sårbar
+    expect(buildAuction(nonVul)?.turns[0].call).toBe('2S')
+    expect(decideCall(nonVul, [call('E', '2S')], 'S').bid).toBe('X') // 12 ≥ golv 12
+
+    const vul: Deal = { ...dealOf('E', hands), vulnerability: 'ns' } // S sårbar
+    expect(decideCall(vul, [call('E', '2S')], 'S').bid).toBe('P')    // 12 < golv 13 → pass
+  })
+
+  it('balansering: svag 2♥ passas runt, fjärde hand dubblar på 10 hp', () => {
+    const deal = dealOf('E', {
+      E: 'S:K5 H:AQ9832 D:764 C:98',   // svag 2♥
+      S: 'S:QT9 H:KJ5 D:AJ3 C:KT76',   // 3 hjärter → ingen direkt aktion, passar
+      W: 'S:7642 H:T4 D:QT85 C:AJ3',   // 7 hp, 2 hjärter → passar öppningen
+      N: 'S:AJ83 H:76 D:K92 C:Q542',   // 10 hp, kort hjärter, stöd → balansering-X
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('2H')
+    const bid = decideCall(deal, [call('E', '2H'), call('S', 'P'), call('W', 'P')], 'N')
+    expect(bid.bid).toBe('X')
+  })
+
+  it('direkt takeout-X mot deras spärr (3♦, 15 hp kort ruter)', () => {
+    const deal = dealOf('E', {
+      E: 'S:542 H:86 D:KQJ9832 C:7',   // 7-korts ruter ~6 hp → spärr 3♦
+      S: 'S:AQ83 H:KJ92 D:5 C:AJ84',   // 15 hp, singel ruter, stöd = takeout
+      N: 'S:KJT H:AQ7 D:AT7 C:K965',
+      W: 'S:976 H:T543 D:64 C:QT32',
+    })
+    expect(buildAuction(deal)?.turns[0].call).toBe('3D')
+    expect(decideCall(deal, [call('E', '3D')], 'S')).toMatchObject({ bid: 'X', rule: 'upplysningsdubbling' })
   })
 })
 

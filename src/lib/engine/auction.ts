@@ -24,6 +24,7 @@ import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
 import { gerberInvestigation, gerber2NTInvestigation } from './nt-slam'
 import { dontOvercall } from './dont'
+import { conventionalDefense } from './defense-conventional'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -310,6 +311,24 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
     }
   }
 
+  // §7.6 Försvar mot deras SVAGA TVÅA (2♦/2♥/2♠) eller SPÄRR (3-läget+) — Fynd #2
+  // delbit 2. LHO stör direkt (takeout-X/2NT/cue/naturligt/3NT). Ägarbeslut
+  // 2026-07-04: takeout-golv 12 hp ej sårbar / 13 sårbar i direkt sits. Vi
+  // modellerar bara själva inklivet (en rond) och lämnar auktionen öppen –
+  // svaret på ett takeout-X (level-medvetet, Fynd #5) och övriga fortsättningar
+  // bjuds levande i budlådan (`decideCall`). 2♣/1NT hanteras inte här.
+  {
+    const lhoSeat = seatAt(deal.dealer, (openerIndex + 1) % 4)
+    const def = conventionalDefense(deal.hands[lhoSeat], opening.call, {
+      vulnerable: isVulnerable(lhoSeat, deal.vulnerability),
+      balancing: false,
+    })
+    if (def && def.call !== 'P') {
+      turns.push({ seat: lhoSeat, role: 'motståndare', call: def.call, rule: def.rule, explanation: def.explanation })
+      return finish(true)
+    }
+  }
+
   // NT-slam (Steg 4): över en naturlig 1NT kan svararen med en slamsäker
   // balanserad hand fråga ess med Gerber 4♣ (i stället för kvantitativ 4NT).
   if (opening.call === '1NT') {
@@ -373,6 +392,20 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
           turns.push({ seat: balancerSeat, role: 'motståndare', call: d.call, rule: d.rule, explanation: `${d.explanation} (balansering)` })
           return finish(true)
         }
+      }
+    }
+    // §7.6 balansering mot deras svaga tvåa/spärr (Fynd #2 delbit 2): passas
+    // öppningen runt till fjärde hand får den ett lättare försvar – ägarbeslut:
+    // takeout-golv 10 hp i balansering. Alla försvarsbud ligger över öppningen.
+    {
+      const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+      const def = conventionalDefense(deal.hands[balancerSeat], opening.call, {
+        vulnerable: isVulnerable(balancerSeat, deal.vulnerability),
+        balancing: true,
+      })
+      if (def && def.call !== 'P') {
+        turns.push({ seat: balancerSeat, role: 'motståndare', call: def.call, rule: def.rule, explanation: `${def.explanation} (balansering)` })
+        return finish(true)
       }
     }
     return finish(false)

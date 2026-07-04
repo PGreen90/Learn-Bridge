@@ -11,6 +11,7 @@ import type { ResponseResult } from './responses'
 import { hasStopper } from './overcalls'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
@@ -50,8 +51,13 @@ export function defendStrongClub(hand: Hand): ResponseResult {
   return { call: 'P', rule: 'pass', explanation: 'ingen Mathe-hand → pass.' }
 }
 
-/** Mot motståndarnas svaga tvåöppning (`theirSuit` på 2-läget). §7.6. */
-export function defendWeakTwo(hand: Hand, theirSuit: Suit): ResponseResult {
+/**
+ * Mot motståndarnas svaga tvåöppning (`theirSuit` på 2-läget). §7.6.
+ * `takeoutFloor` = HP-golvet för upplysningsdubblingen (ägarbeslut 2026-07-04:
+ * 12 ej sårbar / 13 sårbar direkt, 10 i balansering). Övriga bud (cue/2NT/
+ * naturligt) är oförändrade.
+ */
+export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
 
@@ -65,7 +71,7 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit): ResponseResult {
     return { call: '2NT', rule: '2NT-inkliv (15–18)', explanation: `${p} hp balanserad med stopp → 2NT-inkliv.` }
   }
   // Upplysningsdubbling (takeout).
-  if (isTakeout(hand, theirSuit, 12)) {
+  if (isTakeout(hand, theirSuit, takeoutFloor)) {
     return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[theirSuit]}, stöd i övriga → X.` }
   }
   // Naturligt inkliv med en 5+ färg.
@@ -116,4 +122,30 @@ export function defendPreempt(hand: Hand, theirSuit: Suit, level: number): Respo
     return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]}.` }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass (spärren tar plats).' }
+}
+
+/**
+ * §7.6-försvar mot EN av motståndarnas svaga/spärr-öppningar (Fynd #2 delbit 2).
+ * Dispatchar på öppningsbudet:
+ *   2♦/2♥/2♠  → svag tvåa → `defendWeakTwo` (2♣ = stark/konstgjord, ej försvar här),
+ *   3-läget+  → spärr     → `defendPreempt`.
+ * `vulnerable`/`balancing` styr BARA upplysningsdubblingens golv mot svaga tvåor
+ * (ägarbeslut 2026-07-04): direkt 12 hp ej sårbar / 13 sårbar, balansering 10 hp.
+ * Returnerar null om `openingCall` inte är en svag tvåa/spärr (1-läget, 1NT, 2♣…).
+ */
+export function conventionalDefense(
+  hand: Hand,
+  openingCall: string,
+  opts: { vulnerable: boolean; balancing: boolean },
+): ResponseResult | null {
+  const m = /^([234])([CDHS])$/.exec(openingCall)
+  if (!m) return null
+  const level = Number(m[1])
+  const their = SUIT_OF_LETTER[m[2]]
+  if (level === 2) {
+    if (their === 'clubs') return null // 2♣ = stark/konstgjord – ingen §7.6-takeout
+    const floor = opts.balancing ? 10 : opts.vulnerable ? 13 : 12
+    return defendWeakTwo(hand, their, floor)
+  }
+  return defendPreempt(hand, their, level)
 }
