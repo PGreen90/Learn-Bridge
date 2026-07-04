@@ -31,11 +31,36 @@ mergade audit-grenar och en gammal worktree ligger kvar lokalt.
 
 | # | Fynd | Prioritet | Lagat nu? |
 |---|------|-----------|-----------|
-| 1 | **Publiceringen kör inte tester och kontrollerar inte typer.** Workflowen kör `npm ci` + `vite build`; `vite build` typkollar inte (ingen `tsc`), och testsviten körs aldrig i CI → rött test eller typfel kan gå live utan att märkas | **MEDIUM** (→ HÖG i "6 mån utan granskning") | ❌ Nej – kräver ägarens ja (processändring) |
-| 2 | **Vite `base`-pathen skyddas bara av en kommentar.** Inget test låser `base === '/Learn-Bridge/'`; en session som rör `vite.config.ts` kan bryta den → blank live-sida | **MEDIUM** | ❌ Nej – förslag nedan |
-| 3 | **Mergade audit-grenar + en gammal worktree ligger kvar lokalt** (`audit/r1-budsystem`, `audit/r1-fynd2-delbit2`, `audit/r2-arkitektur`, `audit/r4-dok-ai`, worktree `clever-ishizaka-dc7abb`) → växande brus i `git branch` över tid | **LÅG** | ❌ Nej – städförslag nedan |
-| 4 | **Ingen markör för "senast gröna live".** Rollback via mergepunkter är bra, men inget tag/en-radsnotering pekar ut vilken commit som just nu är publicerad → återställning kräver att man läser Actions-historiken | **LÅG** | ❌ Nej |
-| 5 | **`concurrency: cancel-in-progress: true`** — snabba pushar i rad avbryter en pågående deploy (matchar den kända `deployment_queued`-racen i `MEMORY.md`). Korrekt beteende, men värt att känna till | **LÅG** (observation) | — Ingen åtgärd |
+| 1 | **Publiceringen kör inte tester och kontrollerar inte typer.** Workflowen kör `npm ci` + `vite build`; `vite build` typkollar inte (ingen `tsc`), och testsviten körs aldrig i CI → rött test eller typfel kan gå live utan att märkas | **MEDIUM** (→ HÖG i "6 mån utan granskning") | ✅ Ja (`a8f22af`) – `test`-jobb (tsc + npm test) som build/deploy beror på |
+| 2 | **Vite `base`-pathen skyddas bara av en kommentar.** Inget test låser `base === '/Learn-Bridge/'`; en session som rör `vite.config.ts` kan bryta den → blank live-sida | **MEDIUM** | ✅ Ja (`a8f22af`) – vaktest `src/deploy-config.test.ts` |
+| 3 | **Mergade audit-grenar + en gammal worktree ligger kvar lokalt** (`audit/r1-budsystem`, `audit/r1-fynd2-delbit2`, `audit/r2-arkitektur`, `audit/r4-dok-ai`, worktree `clever-ishizaka-dc7abb`) → växande brus i `git branch` över tid | **LÅG** | ✅ Ja – mergade grenar rensade; `.claude/worktrees` uteslutet ur testkörningen (`636ca8b`) |
+| 4 | **Ingen markör för "senast gröna live".** Rollback via mergepunkter är bra, men inget tag/en-radsnotering pekar ut vilken commit som just nu är publicerad → återställning kräver att man läser Actions-historiken | **LÅG** | ✅ Ja (`37ad532`) – rollback/live-facit dokumenterat i CLAUDE.md |
+| 5 | **`concurrency: cancel-in-progress: true`** — snabba pushar i rad avbryter en pågående deploy (matchar den kända `deployment_queued`-racen i `MEMORY.md`). Korrekt beteende, men värt att känna till | **LÅG** (observation) | — Ingen åtgärd (korrekt beteende, dokumenterat) |
+
+### Åtgärdslogg (ägaren valde "laga alla 1–5", audit session 8)
+
+- **#1 (`a8f22af`):** `deploy.yml` fick ett `test`-jobb (`npx tsc` + `npm test`) som
+  `build`/`deploy` beror på. Rött test eller typfel stoppar nu publiceringen.
+- **#2 (`a8f22af`):** `src/deploy-config.test.ts` låser `base: '/Learn-Bridge/'`
+  (läser configen via Vites `?raw` → inget `@types/node` behövdes).
+- **#3 (`636ca8b`):** `vite.config.ts` utesluter `.claude/**` ur testkörningen
+  (vitest scannade in parallella worktrees och körde deras tester dubbelt, mot en
+  äldre giv). Mergade lokala audit-grenar rensade med `git branch -d`.
+  **Bonusfynd under fixen:** DDS-testet "100 slumpgivar (3 kort/hand)" låg kvar på
+  standardgränsen 5 s och sprack under full-suite-last (CPU-strid) fastän det
+  passerar isolerat — samma flake som djuptesten redan fått egen timeout för. Gav
+  det 30 s explicit timeout (robusthet, ingen logikändring) så CI-grinden inte blir
+  spuriöst röd. **Detta betyder att sviten var latent flaky redan på main** — grinden
+  i #1 hade annars kunnat blockera en giltig deploy. Nu grön och robust.
+- **#4 (`37ad532`):** rollback (`git revert -m 1 <merge>`) + "senast gröna live =
+  senaste gröna Actions-körningen" dokumenterat i CLAUDE.md:s deploy-avsnitt.
+- **#5:** ingen åtgärd (korrekt beteende), men noterat i CLAUDE.md.
+
+> **Notis om testantal:** efter att `.claude/worktrees` uteslutits rapporterar
+> `npm test` **50 filer / 948 tester gröna** — den *verkliga* siffran. Tidigare
+> full-suite-körningar i denna arbetskopia blåstes upp av worktree-dubbletterna
+> (~94 filer). Enda sanningen om testläget = kör `npm test` (se
+> `docs/arbetsrutiner.md`).
 
 Inga fynd är KRITISK eller HÖG. (Per definitionen kräver KRITISK/HÖG ett felaktigt/
 olagligt **bud** eller krasch i **Spela-läget** — R5 rör processen runt koden, inte
