@@ -12,6 +12,35 @@
 
 ## 2026-07-04
 
+**🎉 Felrapport #14–#19 LAGADE & LIVE (2026-07-04, commits `6aa110d` +
+`513ebb3`, testsvit 1668 grön, issues #14–#19 stängda):** sex rapporter från
+Spela kort, var och en facit-låst (testet föll före, grönt efter), inga
+on-book-lås rörda.
+**#14** ovanlig 2NT/Michaels passades ut — linjebygget (`auction.ts`) ger nu
+advancern preferens, så tvåfärgsinkliv stängs inte längre för tidigt (den kända
+SENARE-punkten "kanoniska linjen passar ut ostörda tvåfärgsinkliv" åtgärdad i
+roten). **#15** inklivaren passade advancerns NYA färg — gör nu en enkel
+stödhöjning (3-korts fit mot en 5+ färg, `overcallerRaiseAdvance` i
+`auction-live.ts`). **#16** öppnaren passade partnerns cue-höjning i
+motståndarfärg — svarar nu (minimum = billigaste återbud, 15+ = utgång;
+`partnerCueRaiseToAnswer`). **#17 (bud)** 2♣-öppnaren gömde 6-korts hjärter
+bakom 3NT — visar nu en egen 5+ färg naturligt över ett 2NT-positivt svar
+(`openerRebidAfter2C` i `responses-2c.ts`; ägarbeslut: 5-korts räcker, inget
+hopp). **#17 (spel)** spelboten ledde ♠K rakt in i träkarlens singel-♠A →
+avblockningsregel `unblockLead` (`play-bot.ts`): leder spelförarsidan en färg
+där den synliga medspelaren har en högre singel spelas lågt i stället; gäller
+både tumregel-boten och bot-hjärnans DDS-val. **#18** tvåfärgs-cuen mot deras
+svaga tvåa cue-bjöd på 6 hp och spelades i deras färg → golv 15 hp
+(`defense-conventional.ts`) + advancern måste svara en äkta stark cue
+(`partnerWeakTwoCueToAnswer`). **#19** svararen passade en REBJUDEN 6-korts
+högfärg — 2-korts stöd räcker nu som fit mot en färg partnern bjudit två gånger
+(`fitLengthNeeded`), så dubbletonen höjs till utgång 4♥.
+**Bevaka i spel (kortlivat):** advancern besvarar nu ovanlig 2NT/Michaels och
+tvåfärgs-cue; inklivaren stöttar advancerns nya färg; öppnaren svarar
+cue-höjningar; 2♣-öppnaren visar 5+ färg före 3NT; svararen höjer dubbletonen
+mot en rebjuden högfärg; spelboten avblockerar (leder inte honnör in i
+medspelarens singel). Säg till om något känns fel vid bordet.
+
 **🎉 POÄNGSYSTEMET KLART & LIVE (2026-07-04, testsvit 1626 grön, bygget ok,
 verifierat i webbläsaren — resultatdialog "8 bet (1 stick). Ö/V +800";
 committat/pushat av parallellsessionen i `0864224` + `26b4267`):**
