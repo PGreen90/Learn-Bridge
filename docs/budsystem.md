@@ -505,8 +505,7 @@ placera kontraktet. Tre styrkenivåer styr valet:
   Svararen får **aldrig passa** ett hoppskift: hon placerar kontraktet
   (4M med 3-korts stöd / 3NT med stopp i fjärde färgen / 5m med fit).
   Källa: bridgebum.com ("16+ points", inte strikt HCP).
-- **1x–1y–2NT** = 18–19 hp balanserad (för svag för 1NT-öppning, för stark för
-  att bara rebjuda 1NT).
+- **1x–1y–2NT** = 18–19 hp balanserad (för stark för 1NT-öppning).
 - I en **2/1 GF-budgivning** är paret redan bundet till utgång – öppnaren bjuder
   då naturligt och i lugn takt (visar form först, sparar styrkebeskedet).
 
