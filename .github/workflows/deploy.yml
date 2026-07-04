@@ -18,7 +18,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # R5-fynd #1: grind före publicering. Kör typkontroll + hela testsviten så att
+  # rött test eller typfel ALDRIG kan gå live obemärkt. build/deploy beror på detta.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx tsc          # typkontroll (tsconfig har noEmit)
+      - run: npm test         # vitest run – hela sviten
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
