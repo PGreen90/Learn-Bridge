@@ -1,7 +1,11 @@
 # Arbetslista — fullända budmotorn
 
-> 🔺 **NÄSTA SESSIONS PRIO:** systematisk felsökning enligt
-> `BUDSYSTEM – PRIORITERAD FELSÖKNINGS.txt` (repo-roten).
+> ⚠️ **HISTORIK-NOT (2026-07-04):** hela felsökningsplanen `BUDSYSTEM – PRIORITERAD
+> FELSÖKNINGS.txt` (FAS 0–12) är **genomförd**. Denna fil är därmed i huvudsak ett
+> ARKIV över byggordningen. **Vad som är NU/NÄST styrs numera av projektkartan i
+> `CLAUDE.md`** (och revisionen R1–R6, se `AUDIT_PROMPTS.md`) — inte av "NÄSTA
+> SESSIONS PRIO"-rader här. Läs kartan först.
+>
 > - ✅ **FAS 0 klar (2026-06-30):** inventeringen ligger i `docs/sanningskarta.md`
 >   (systembok mot faktisk kod).
 > - ✅ **FAS 1 klar (2026-06-30):** regelregister `src/lib/engine/rules.ts` –
