@@ -60,6 +60,34 @@ describe('utspel – topp av sekvens, annars lågt från längsta', () => {
   })
 })
 
+// Felrapport #17 (github.com/PGreen90/Learn-Bridge/issues/17): bricka 16, 3NT
+// av Öst. Öst (spelförare) hade ♠KQ53 mittemot träkarlens SINGEL-♠A. Inne mitt
+// i given ledde Öst ♠K rakt in i singel-essen → båda honnörerna dog på ETT
+// stick (ett spaderstick bortslarvat). Avblockningsregeln: leder jag en färg där
+// den synliga medspelaren har en högre singel, spelar jag LÅGT i stället (♠3),
+// så mina honnörer sparas och singeln vinner sticket ändå.
+describe('felrapport #17 – avblockning: led inte honnör in i medspelarens singel', () => {
+  it('Öst (spelförare, ♠KQ53) leder LÅGT när träkarlen har singel-♠A, ej ♠K', () => {
+    const east: Hand = [
+      C('spades', 'K'), C('spades', 'Q'), C('spades', '5'), C('spades', '3'),
+      C('hearts', 'J'), C('hearts', '9'), C('hearts', '8'), C('hearts', '4'),
+      C('diamonds', '7'), C('clubs', '10'),
+    ]
+    const dummy: Hand = [
+      C('spades', 'A'),
+      C('hearts', 'A'), C('hearts', 'K'), C('hearts', 'Q'), C('hearts', '10'), C('hearts', '6'), C('hearts', '2'),
+      C('diamonds', '8'), C('clubs', 'A'), C('clubs', '8'),
+    ]
+    const st = state({
+      hand: east, seat: 'E', declarer: 'E', leader: 'E',
+      otherHands: { W: dummy }, completedTricks: [doneTrick('E')],
+    })
+    const card = botCard(st, 'E')
+    expect(card.suit).toBe('spades')
+    expect(card.rank).toBe('3') // lägsta spadern – aldrig K/Q in i singel-essen
+  })
+})
+
 describe('Steg 1 – ärlig stickföring: cash:a säkra vinnare på lead', () => {
   it('sang, inne mitt i given: cashar HA i stället för lågt ur längsta färgen', () => {
     // Längsta färg = spader (S7654, ingen honnör) → gamla botten ledde lågt spader.

@@ -44,6 +44,29 @@ function lowAvoidRuff(legal: Hand, trump: Suit | null): Card {
 }
 
 /**
+ * Avblockning på lead (felrapport #17): leder jag en färg där min ÄRLIGT synliga
+ * medspelare (spelförarsidan – Öst+Träkarlen ser varandra) har en SINGEL som är
+ * HÖGRE än kortet jag tänkte leda, spelar jag i stället LÅGT i färgen. Singeln
+ * tvingas ändå på och vinner sticket – men mina honnörer sparas i stället för att
+ * krossas under den (Öst ledde ♠K rakt in i träkarlens singel-♠A → båda
+ * honnörerna dog på ETT stick, ett spaderstick bortslarvat). Att leda lågt är
+ * aldrig sämre: samma stick vinns (singeln spelas oavsett), men mina toppar blir
+ * kvar. Gäller bara när partnerns hand syns ärligt (spelförarsidan); en
+ * motspelare (dold partner) ändrar inget.
+ */
+function unblockLead(state: PlayState, seat: Seat, card: Card): Card {
+  const declarer = state.contract.declarer
+  const dummy = dummyOf(state.contract)
+  if (seat !== declarer && seat !== dummy) return card // motspelare: partnern är dold
+  const partner = seat === declarer ? dummy : declarer
+  const partnerInSuit = state.hands[partner].filter((c) => c.suit === card.suit)
+  if (partnerInSuit.length !== 1) return card // ingen singel att krocka med
+  if (rankVal(partnerInSuit[0].rank) <= rankVal(card.rank)) return card // singeln är inte högre → ingen krock
+  const mineInSuit = state.hands[seat].filter((c) => c.suit === card.suit)
+  return lowest(mineInSuit) // led lågt – spara honnörerna, avblockera
+}
+
+/**
  * Kast-vakt (Steg B1, docs/bot-hjarna.md): när SPELFÖRARSIDAN sakar (kan inte
  * följa färg) väljs kortet med minst framtida värde – inte blint "lägst rank".
  * Tumregelns gamla val (lägsta kortet) kastar annars bort hotkort: en femma
@@ -196,7 +219,7 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
         )
       : cashable
     if (safeCash.length > 0) {
-      return { card: highest(safeCash), reason: 'Jag är inne och cashar en säker vinnare – inget högre kort är kvar i färgen.' }
+      return { card: unblockLead(state, seat, highest(safeCash)), reason: 'Jag är inne och cashar en säker vinnare – inget högre kort är kvar i färgen.' }
     }
     // Motspelets utspelfärg (trick 1, om den leddes av vår sida) fortsätts före
     // allt annat – partnerns honnörer sitter ofta bakom den.
@@ -205,11 +228,11 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
     const attack = attackSuit !== null ? legal.filter((c) => c.suit === attackSuit) : []
     if (attack.length > 0) {
       return {
-        card: leadFromSuit(attack),
+        card: unblockLead(state, seat, leadFromSuit(attack)),
         reason: 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.',
       }
     }
-    return { card: openingLead(legal), reason: 'Jag är inne och spelar ut ur min längsta färg.' }
+    return { card: unblockLead(state, seat, openingLead(legal)), reason: 'Jag är inne och spelar ut ur min längsta färg.' }
   }
 
   const led = state.currentTrick[0].card.suit
@@ -351,8 +374,11 @@ export function botCardSmartReasoned(
     maxNodes: opts.maxNodes ?? budget.maxNodes,
   })
   if (!choice) return botCardReasoned(state, seat)
+  // Avblockning gäller även bot-hjärnans val: på lead får ett stickekvivalent
+  // DDS-kort aldrig krossa en synlig singel-honnör hos medspelaren (felrapport #17).
+  const card = state.currentTrick.length === 0 ? unblockLead(state, seat, choice.card) : choice.card
   return {
-    card: choice.card,
+    card,
     reason:
       `Bot-hjärnan tänkte som en expert: jag delade ut ${choice.samples} troliga lägen (utifrån ` +
       `budgivningen och korten som fallit) och spelade igenom dem – det här kortet gav flest stick i snitt.`,
