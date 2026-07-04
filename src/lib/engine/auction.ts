@@ -178,7 +178,11 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
     // hoppinkliv på 3-läget vore 2NT OLAGLIGT (under deras bud) och 3NT
     // osunt på bara 8+ → då passar svararen i stället (FAS 1 punkt 3).
     if (ovLevel <= 2 && isBalanced(hand) && hasStopper(hand, ovSuit) && p >= 8) {
-      const L = cheapestLevelAbove('clubs', ovLevel, ovSuit) <= 1 ? 1 : 2
+      // Billigaste NT över ett FÄRGinkliv på nivå `ovLevel` är exakt `ovLevel`:
+      // sang rankar över alla färger, så 1NT är lagligt över (1♠), 2NT över (2♣)
+      // osv. (Tidigare beräknades nivån via klöver som proxy → alltid en nivå
+      // för högt: 1♥–(1♠)–2NT i stället för naturligt 1NT. R1-fynd #1.)
+      const L = ovLevel
       return { call: `${L}NT`, rule: 'NT med stopp', explanation: `${p} hp balanserad med stopp → ${L}NT.` }
     }
     return { call: 'P', rule: 'pass', explanation: `${p} hp – inget lämpligt i konkurrens → pass.` }
