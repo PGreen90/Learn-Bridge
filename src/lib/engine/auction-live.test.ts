@@ -734,6 +734,143 @@ describe('felrapport #13 – öppnaren väljer utgång efter transfer + 3NT', ()
   })
 })
 
+// Felrapport #14 (github.com/PGreen90/Learn-Bridge/issues/14): bricka 4,
+// V öppnar 1♠, Nord kliver in ovanlig 2NT (båda minorfärgerna), Öst passar och
+// Syd – med ♠3 ♥AT6 ♦K86543 ♣QT2 (8 hp, 6-korts ruter) – FÖRESLOGS PASS av
+// motorn i stället för att ge preferens. Roten: buildAuction stängde linjen
+// 1♠–2NT–P (built.open=false) med advancern passande, så decideCall följde
+// linjen och nådde ALDRIG advanceTwoSuiter (den låg bakom offBook/-open-grinden).
+// Preferenssvaret är en TVINGAD konventionell fråga (som upplysnings-/negativ
+// dubbling och fjärde färg) och får aldrig passas – flyttat till den ogrindade
+// must-answer-sektionen. Syd ger preferens till sin längsta visade färg: 3♦.
+describe('felrapport #14 – ovanlig 2NT måste besvaras även när linjen stängts', () => {
+  const deal = dealOf('W', {
+    N: 'S:65 H:3 D:QJT97 C:A8643',
+    E: 'S:AJT2 H:KJ872 D:A2 C:J9',
+    S: 'S:3 H:AT6 D:K86543 C:QT2',
+    W: 'S:KQ9874 H:Q954 D:- C:K75',
+  })
+
+  it('1♠–2NT–P: Syd ger preferens 3♦ (6-korts ruter), aldrig pass', () => {
+    const history = [call('W', '1S'), call('N', '2NT'), call('E', 'P')]
+    const c = decideCall(deal, history, 'S')
+    expect(c.bid).toBe('3D')
+  })
+})
+
+// Felrapport #15 (github.com/PGreen90/Learn-Bridge/issues/15): bricka 12,
+// V öppnar 1♥, Nord kliver in 2♣, Öst passar, Syd avancerar med NY färg 2♦
+// (6-korts ruter). Nord – ♠T97 ♥96 ♦KQ9 ♣AJ972, 3-korts stöd KQ9 – PASSADE.
+// En ny färg från advancern på 2-läget lovar 5+, så 3-korts stöd = 8-korts fit;
+// det generella off-book-svaret krävde dock 4-korts stöd för en minor och
+// passade därför fiten. Ägarbeslut 2026-07-04: inklivaren gör en ENKEL
+// stödhöjning (ej hopp – advancern är begränsad) → Nord bjuder 3♦.
+describe('felrapport #15 – inklivaren stöttar advancerns nya färg', () => {
+  const deal = dealOf('W', {
+    N: 'S:T97 H:96 D:KQ9 C:AJ972',
+    E: 'S:J8432 H:K3 D:JT86 C:54',
+    S: 'S:Q5 H:QJ42 D:A75432 C:Q',
+    W: 'S:AK6 H:AT875 D:- C:KT863',
+  })
+
+  it('1♥–2♣–P–2♦–P: Nord höjer till 3♦ (3-korts stöd), aldrig pass', () => {
+    const history = [
+      call('W', '1H'), call('N', '2C'), call('E', 'P'), call('S', '2D'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('3D')
+  })
+})
+
+// Felrapport #16 (github.com/PGreen90/Learn-Bridge/issues/16): bricka 14,
+// Öst öppnar 1♦, Syd kliver in 1♠, Väst cue-bjuder 2♠ (= minst limithöjning i
+// ruter, krav). Öst – ♠85 ♥AK6 ♦KJT863 ♣Q9, 13 hp – PASSADE cuet. Ett cue-bud i
+// motståndarnas färg är konstgjort krav och får aldrig passas (jfr #11). Öst är
+// ett minimum (13 hp) → återgår billigast i ruter (3♦); ägarbeslut 2026-07-04
+// (accepterar utgång först med 15+ hp).
+describe('felrapport #16 – öppnaren måste svara partnerns cue-höjning', () => {
+  const deal = dealOf('E', {
+    N: 'S:QJ97 H:JT972 D:52 C:J2',
+    E: 'S:85 H:AK6 D:KJT863 C:Q9',
+    S: 'S:AKT632 H:Q543 D:7 C:64',
+    W: 'S:4 H:8 D:AQ94 C:AKT8753',
+  })
+
+  it('1♦–1♠–2♠–P: Öst svarar 3♦ (minimum), passar aldrig cuet', () => {
+    const history = [call('E', '1D'), call('S', '1S'), call('W', '2S'), call('N', 'P')]
+    const c = decideCall(deal, history, 'E')
+    expect(c.bid).toBe('3D')
+  })
+})
+
+// Felrapport #18 (github.com/PGreen90/Learn-Bridge/issues/18): bricka 15,
+// Syd öppnar svag 2♠. Väst (♠T9 ♥AJT64 ♦T ♣J9752, 6 hp) cue-bjöd 3♠ som "stark
+// tvåfärg" (5-5) UTAN poänggolv och spelade sedan cuet i deras färg (6 bet).
+// Två delar: (1) cue-golv 15 hp (defense-conventional) → Väst passar och Nord
+// (Syds partner, 12 hp + fit) får agera (2NT Ogust); (2) när en ÄKTA stark
+// tvåfärgs-cue görs måste advancern ge preferens (aldrig passa cuet).
+describe('felrapport #18 – tvåfärgs-cue över svag tvåa: golv + advancern svarar', () => {
+  const deal = dealOf('S', {
+    N: 'S:KQJ3 H:52 D:74 C:AKT86',
+    E: 'S:4 H:KQ98 D:AJ9832 C:Q3',
+    S: 'S:A87652 H:73 D:KQ65 C:4',
+    W: 'S:T9 H:AJT64 D:T C:J9752',
+  })
+
+  it('Väst (6 hp) cue-bjuder inte längre – passar över 2♠', () => {
+    expect(decideCall(deal, [call('S', '2S')], 'W').bid).toBe('P')
+  })
+
+  it('Nord (Syds partner, 12 hp + fit) får då agera: 2NT Ogust, inte pass', () => {
+    const c = decideCall(deal, [call('S', '2S'), call('W', 'P')], 'N')
+    expect(c.bid).toBe('2NT')
+  })
+
+  // Konstruerad giv: Väst har 18 hp 5-5 (hjärter+klöver) → äkta stark cue 3♠.
+  // Advancern Öst (♦KJ9765 längst) måste ge preferens, inte passa cuet.
+  const strong = dealOf('S', {
+    N: 'S:T8 H:T32 D:AQ83 C:JT75',
+    E: 'S:A43 H:J96 D:KJ9765 C:4',
+    S: 'S:KQJ976 H:84 D:T2 C:863',
+    W: 'S:52 H:AKQ75 D:4 C:AKQ92',
+  })
+
+  it('Väst cue-bjuder 3♠ med den starka 5-5-handen', () => {
+    expect(decideCall(strong, [call('S', '2S')], 'W').bid).toBe('3S')
+  })
+
+  it('2♠–3♠–P: advancern Öst ger preferens (4♦), passar aldrig tvåfärgs-cuet', () => {
+    const c = decideCall(strong, [call('S', '2S'), call('W', '3S'), call('N', 'P')], 'E')
+    expect(c.bid).toBe('4D')
+  })
+})
+
+// Felrapport #19 (github.com/PGreen90/Learn-Bridge/issues/19): bricka 11,
+// 1♥(S) – P – 1♠(N) – 2♣(E) – X(S, stöddubbling = 3 spader) – P – 2♦(N) – P –
+// 2♥(S) – P: Nord PASSADE 2♥ med ♠AJ86 ♥KT ♦QJ95 ♣J76 (12 hp). Syd öppnade OCH
+// rebjöd hjärter → 6+ kort, så Nords KT-dubbleton är en 8-korts fit. Off-book-
+// svaret krävde dock 3-korts stöd för en högfärg och passade fiten. När partnern
+// bjudit färgen två gånger (6+) räcker nu 2-korts stöd → Nord höjer till utgång
+// 4♥ (ägaren: "4 hjärter utgång solklar").
+describe('felrapport #19 – 2-korts stöd räcker mot en rebjuden 6-korts högfärg', () => {
+  const deal = dealOf('S', {
+    N: 'S:AJ86 H:KT D:QJ95 C:J76',
+    E: 'S:3 H:95 D:AKT2 C:AT8543',
+    S: 'S:KQ4 H:AQJ643 D:4 C:Q92',
+    W: 'S:T9752 H:872 D:8763 C:K',
+  })
+
+  it('1♥…2♥ (rebjuden hjärter): Nord höjer KT-dubbletonen till 4♥, aldrig pass', () => {
+    const history = [
+      call('S', '1H'), call('W', 'P'), call('N', '1S'), call('E', '2C'),
+      call('S', 'X'), call('W', 'P'), call('N', '2D'), call('E', 'P'),
+      call('S', '2H'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('4H')
+  })
+})
+
 // Felrapport #10 (github.com/PGreen90/Learn-Bridge/issues/10): bricka 12,
 // P (V) – 3♠ (N) – P – 4NT (S) – och Nord PASSADE: 4NT spelades som kontrakt
 // (13 stick togs – lillslammen missades). Ägaren: "partner svarar inte på min

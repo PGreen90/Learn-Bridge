@@ -588,6 +588,14 @@ function partnerJumpOvercalled(
  */
 function fitLengthNeeded(history: ResolvedCall[], seat: Seat, partnerSuit: { strain: string; level: number }): number {
   if (partnerJumpOvercalled(history, seat, partnerSuit)) return 3
+  // Har partnern BJUDIT färgen minst två gånger (öppnat + rebjudit) lovar den 6+
+  // → 2-korts stöd räcker för fit (8-korts fit). Utan detta passade svararen en
+  // dubbelton mot en rebjuden 6-korts högfärg (felrapport #19: 1♥ … 2♥ passades
+  // med KT doubleton, 8-korts fit + utgångsvärden).
+  const partnerBidsInSuit = history.filter(
+    (c) => c.seat === PARTNER[seat] && parseContractBid(c.bid)?.strain === partnerSuit.strain,
+  ).length
+  if (partnerBidsInSuit >= 2) return 2
   const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
   const open = openingBid(history)
   const partnerOpenedMajor =
@@ -725,6 +733,97 @@ function offBookResponse(deal: Deal, history: ResolvedCall[], seat: Seat): Resol
   const partnerSuit = partnerLastSuit(history, seat)
   if (!partnerSuit) return null // partnern har inte visat en färg → vi hittar inte på något
   return raiseWithFit(deal, history, seat, partnerSuit) ?? respondWithoutFit(deal, history, seat, partnerSuit)
+}
+
+/**
+ * Har PARTNERN cue-bjudit motståndarnas färg som en LIMITHÖJNING+ av VÅR
+ * öppning, så att jag (öppnaren) måste svara i stället för att passa
+ * (felrapport #16)? Ett cue-bud i motståndarnas färg är konstgjort och krav –
+ * öppnaren får aldrig lämnas att passa det. Mönstret: VÅR färgöppning, exakt två
+ * kontraktsbud från vår sida (öppningen + partnerns cue), partnerns cue ligger i
+ * en färg motståndarna bjudit, cuet är senaste kontraktsbudet (bara pass efter),
+ * och `seat` är öppnaren. Returnerar den överenskomna färgen (vår öppningsfärg).
+ */
+function partnerCueRaiseToAnswer(history: ResolvedCall[], seat: Seat): { agreedStrain: string } | null {
+  const open = openingBid(history)
+  if (!open || open.strain === 'NT') return null
+  if (side(open.seat) !== side(seat) || seat !== open.seat) return null // vår öppning, öppnaren svarar
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2) return null
+  if (ourBids[0].seat !== seat || ourBids[1].seat !== PARTNER[seat]) return null // öppning + partnerns bud
+  const cue = ourBids[1]
+  const cueStrain = parseContractBid(cue.bid)!.strain
+  if (cueStrain === 'NT') return null
+  const oppStrains = new Set(
+    history
+      .filter((c) => side(c.seat) !== side(seat))
+      .map((c) => parseContractBid(c.bid)?.strain)
+      .filter((st): st is string => !!st),
+  )
+  if (!oppStrains.has(cueStrain)) return null // cuet måste ligga i motståndarnas färg
+  const cueIdx = history.indexOf(cue)
+  if (history.slice(cueIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter cuet
+  return { agreedStrain: open.strain }
+}
+
+/**
+ * Har PARTNERN cue-bjudit motståndarnas SVAGA TVÅA som en stark tvåfärgshand
+ * (§7.6 "cue (stark tvåfärg)", 15+ 5-5), så att jag (advancern) måste ge
+ * preferens i stället för att passa (felrapport #18)? Ett tvåfärgs-cue är krav
+ * och får aldrig passas – annars spelas cuet i motståndarnas färg. Mönstret:
+ * motståndarnas svaga tvåa (2♦/2♥/2♠, ej 2♣), partnerns bud = 3-i-deras-färg
+ * (cuet), det är vår sidas ENDA kontraktsbud och senaste (bara pass efter).
+ * Returnerar deras (svaga-tvåa-)färg, annars null.
+ */
+function partnerWeakTwoCueToAnswer(history: ResolvedCall[], seat: Seat): { theirStrain: string } | null {
+  const open = openingBid(history)
+  if (!open || open.level !== 2 || open.strain === 'C' || open.strain === 'NT') return null
+  if (side(open.seat) === side(seat)) return null // motståndarnas svaga tvåa
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1 || ourBids[0].seat !== PARTNER[seat]) return null
+  const cue = ourBids[0]
+  const cb = parseContractBid(cue.bid)!
+  if (cb.level !== 3 || cb.strain !== open.strain) return null // cue = 3 i deras färg
+  const cueIdx = history.indexOf(cue)
+  if (history.slice(cueIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter
+  return { theirStrain: open.strain }
+}
+
+/**
+ * Har PARTNERN (advancern) avancerat MITT inkliv med en NY färg, så att jag
+ * (inklivaren) ska visa stöd i stället för att passa (felrapport #15)? En ny
+ * färg från advancern på 2-läget lovar en verklig 5+ färg, så mina 3-korts stöd
+ * = 8-korts fit. Med stöd + lite extra (dummyPoints ≥ 10) höjer jag ETT steg –
+ * enkel stödhöjning, ej krav (advancern är redan begränsad till ~8–11, så ett
+ * hopp vore fel; ägarbeslut felrapport #15). Ett dött minimuminkliv passar.
+ * Mönstret: motståndarna öppnade, vår sida har bjudit exakt två kontraktsbud —
+ * MITT naturliga inkliv och partnerns NYA färg (≠ min färg, ≠ deras färg, ≠ NT),
+ * och den nya färgen är senaste kontraktsbudet (bara pass efter).
+ */
+function overcallerRaiseAdvance(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat)) return null // motståndarna öppnade
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2) return null
+  const [mine, adv] = ourBids
+  if (mine.seat !== seat || adv.seat !== PARTNER[seat]) return null // jag klev in, partnern avancerade
+  const mineCb = parseContractBid(mine.bid)!
+  const advCb = parseContractBid(adv.bid)!
+  if (mineCb.strain === open.strain || mineCb.strain === 'NT') return null // mitt bud var ett naturligt färginkliv, ej cue/1NT
+  if (advCb.strain === 'NT' || advCb.strain === mineCb.strain || advCb.strain === open.strain) return null // partnerns bud = NY naturlig färg
+  if (advCb.level < 2) return null // ny färg på 2-läget+ (fri budgivning → 5+)
+  const advIdx = history.indexOf(adv)
+  if (history.slice(advIdx + 1).some((c) => parseContractBid(c.bid))) return null // ingen har bjudit över
+
+  const suit = SUIT_OF_LETTER[advCb.strain]
+  if (lengths(deal.hands[seat])[suit] < 3) return null // inget stöd
+  if (dummyPoints(deal.hands[seat], suit).dummyPoints < 10) return null // dött minimum → passa
+  const bid = `${advCb.level + 1}${advCb.strain}` as Bid
+  if (!legalCalls(history, seat).includes(bid)) return null
+  return {
+    seat, bid, rule: 'stöd åt advancern',
+    explanation: `Partnern avancerade mitt inkliv med en ny färg (${SWE_NAME[advCb.strain]}, lovar 5+) och jag har 3+ stöd → enkel höjning som bekräftar fiten (ej krav).`,
+  }
 }
 
 // ---- Off-book: motståndarnas riktiga inkliv (§7-försvaret in i budlådan) -----
@@ -1126,6 +1225,58 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
         return { seat, bid: ans.call as Bid, rule: ans.rule, explanation: ans.explanation }
       }
     }
+
+    // Öppnaren svarar partnerns CUE-HÖJNING i motståndarnas färg (felrapport
+    // #16): ett cue-bud är konstgjort krav och får aldrig passas. Minimum
+    // (öppningsstyrka, ≤14 hp) → billigaste återbud i vår färg; maximum (15+ hp)
+    // → accepterar utgång. Måste ligga FÖRE off-book-svaret, som annars läser
+    // cuet som en naturlig färg och passar.
+    const cueRaise = partnerCueRaiseToAnswer(history, seat)
+    if (cueRaise) {
+      const strain = cueRaise.agreedStrain
+      const isMajor = strain === 'H' || strain === 'S'
+      const signoff = cheapestBidIn(history, seat, strain)
+      const gameBid = `${isMajor ? 4 : 5}${strain}` as Bid
+      const legal = legalCalls(history, seat)
+      const acceptGame = hcp(deal.hands[seat]) >= 15 && legal.includes(gameBid)
+      const bid = (acceptGame ? gameBid : signoff) as Bid | null
+      if (bid && legal.includes(bid)) {
+        return {
+          seat, bid, rule: 'svar på cue-höjning',
+          explanation: acceptGame
+            ? `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jag är maximum → accepterar utgång ${bid}.`
+            : `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]} och är krav; med ett minimum återgår jag billigast i vår färg (${bid}).`,
+        }
+      }
+    }
+
+    // Advancern svarar partnerns TVÅFÄRGS-CUE över motståndarnas svaga tvåa
+    // (felrapport #18): cuet är krav och får aldrig passas (annars spelas det i
+    // deras färg). Jag ger preferens till min längsta sidofärg (≠ deras) på
+    // billigaste lagliga läge. Måste ligga FÖRE off-book-svaret.
+    const wtCue = partnerWeakTwoCueToAnswer(history, seat)
+    if (wtCue) {
+      const len = lengths(deal.hands[seat])
+      const sideStrains = SUIT_STRAINS.filter((st) => st !== wtCue.theirStrain)
+      let best = sideStrains[0]
+      for (const st of sideStrains) {
+        if (len[SUIT_OF_LETTER[st]] > len[SUIT_OF_LETTER[best]]) best = st
+      }
+      const bid = cheapestBidIn(history, seat, best)
+      if (bid && legalCalls(history, seat).includes(bid)) {
+        return {
+          seat, bid, rule: 'svar på tvåfärgs-cue',
+          explanation: `Partnerns cue lovar en stark tvåfärgshand (krav) – jag ger preferens till min längsta sidofärg ${SWE_NAME[best]} (${bid}), passar aldrig cuet.`,
+        }
+      }
+    }
+
+    // Inklivaren stöttar advancerns NYA färg (felrapport #15): en enkel
+    // stödhöjning i stället för att passa preferensbudet. Måste ligga FÖRE det
+    // generella off-book-svaret, som annars kräver 4-korts stöd för en minor och
+    // därmed passar en klar 3-korts fit mot advancerns 5+ färg.
+    const raiseAdvance = overcallerRaiseAdvance(deal, history, seat)
+    if (raiseAdvance) return raiseAdvance
 
     const response = offBookResponse(deal, history, seat)
     if (response) return response

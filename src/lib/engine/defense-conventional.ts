@@ -61,10 +61,14 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12): R
   const p = hcp(hand)
   const len = lengths(hand)
 
-  // Cue (stark/Michaels-aktig): 5-5 i objudna färger.
+  // Cue (stark/Michaels-aktig): 5-5 i två sidofärger OCH en genuint stark hand.
+  // Ägarbeslut 2026-07-04 (felrapport #18): golv 15 hp – budet är krav och tvingar
+  // partnern upp på 3-läget, så en svag 5-5-hand (som förr cue-bjöd på 6 hp och
+  // sedan spelade cuet dubblat) får aldrig göra det. Svaga tvåfärgshänder passar
+  // eller inkliver naturligt i stället.
   const twoLongOther = RANK_ORDER.filter((s) => s !== theirSuit && len[s] >= 5)
-  if (twoLongOther.length >= 2) {
-    return { call: `3${BID[theirSuit]}`, rule: 'cue (stark tvåfärg)', explanation: `5-5 i objudna färger → cue ${SYM[theirSuit]} (stark).` }
+  if (twoLongOther.length >= 2 && p >= 15) {
+    return { call: `3${BID[theirSuit]}`, rule: 'cue (stark tvåfärg)', explanation: `${p} hp, 5-5 i ${NAME[twoLongOther[0]]}+${NAME[twoLongOther[1]]} → cue ${SYM[theirSuit]} (stark tvåfärg, krav).` }
   }
   // 2NT-inkliv: 15–18 balanserad med stopp.
   if (isBalanced(hand) && p >= 15 && p <= 18 && hasStopper(hand, theirSuit)) {

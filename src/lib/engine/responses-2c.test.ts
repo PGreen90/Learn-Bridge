@@ -58,6 +58,24 @@ describe('openerRebidAfter2C – öppnarens återbud', () => {
   it('höjer svararens positiva färg med stöd (GF)', () => {
     expect(open('S:AK32 H:AK4 D:AKQ C:432', r('2H', '2♣-positivt'))).toBe('3H') // 23 hp, 3 stöd
   })
+
+  // Felrapport #17 (github.com/PGreen90/Learn-Bridge/issues/17): bricka 16,
+  // 2♣ – 2NT (Östs positiva balanserade svar): öppnaren ♠A ♥AKQT62 ♦86 ♣A852
+  // rebjöd 3NT och gömde sin 6-korts hjärter. Efter ett färglöst 2NT-svar
+  // hoppade koden över hela färgvisningen (2NT har ingen färg) och föll rakt på
+  // 3NT. Ägarbeslut 2026-07-04: en egen 5+ färg visas naturligt (krav, GF) före
+  // 3NT – inget hopp, cue-bud kommer sedan. Här → 3♥.
+  it('visar egen 5+ färg (6-korts hjärter) över 2NT-positivt, ej 3NT (felrapport #17)', () => {
+    expect(open('S:A H:AKQT62 D:86 C:A852', r('2NT', '2♣-positivt'))).toBe('3H')
+  })
+
+  it('en 5-korts högfärg räcker för att visas över 2NT-positivt', () => {
+    expect(open('S:AKJ42 H:AK D:AKQ4 C:32', r('2NT', '2♣-positivt'))).toBe('3S') // 5-korts spader
+  })
+
+  it('genuint balanserad utan 5-färg bjuder fortfarande 3NT över 2NT-positivt', () => {
+    expect(open('S:AKQ4 H:AKJ D:KQ4 C:AJ3', r('2NT', '2♣-positivt'))).toBe('3NT') // 4-3-3-3
+  })
 })
 
 describe('responderSecondBidAfter2C – svararens andra bud', () => {

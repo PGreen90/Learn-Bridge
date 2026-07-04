@@ -15,8 +15,16 @@ describe('defendStrongClub – Mathe (§7.6)', () => {
 })
 
 describe('defendWeakTwo (§7.6)', () => {
-  it('5-5 objudna → cue (stark)', () => {
-    expect(defendWeakTwo(parseHand('S:KQ543 H:2 D:KQ543 C:32'), 'hearts').call).toBe('3H')
+  // Felrapport #18 (github.com/PGreen90/Learn-Bridge/issues/18): cue-budet är
+  // krav och tvingar partnern upp på 3-läget – golv 15 hp (ägarbeslut
+  // 2026-07-04). En STARK 5-5-hand cue-bjuder …
+  it('stark 5-5 (15+) → cue (stark tvåfärg)', () => {
+    expect(defendWeakTwo(parseHand('S:AKQ43 H:2 D:AKQ43 C:32'), 'hearts').call).toBe('3H') // 18 hp
+  })
+  // … men en SVAG 5-5 (10 hp) får inte längre cue-bjuda (förr blev det 3-läges-
+  // cue på skräp som sedan spelades i deras färg) – den inkliver naturligt.
+  it('svag 5-5 (<15) cue-bjuder ej – naturligt inkliv i stället', () => {
+    expect(defendWeakTwo(parseHand('S:KQ543 H:2 D:KQ543 C:32'), 'hearts').call).toBe('2S') // 10 hp
   })
   it('15–18 balanserad med stopp → 2NT-inkliv', () => {
     expect(defendWeakTwo(parseHand('S:K43 H:KQ4 D:KQ32 C:KJ2'), 'spades').call).toBe('2NT')

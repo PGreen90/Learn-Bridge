@@ -104,8 +104,17 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
       return { call: `${lvl}${BID[own]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, GF).` }
     }
   }
-  // Balanserat positivt (2NT) eller inget tydligt trumfbud → 3NT.
-  return { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: `${p} hp – ingen tydlig trumf → 3NT.`, uncertain: !bal }
+  // Efter 2NT-positivt (färglöst svar): jättehandens egen 5+ färg får aldrig
+  // gömmas bakom 3NT (felrapport #17). Ägarbeslut 2026-07-04: 5-korts räcker för
+  // att visa färgen naturligt (krav, GF) – inget hopp behövs, cue-bud kommer
+  // sedan. Bara en genuint balanserad hand utan 5-färg bjuder 3NT.
+  const ownSuit = longestSuit(len, 5)
+  if (ownSuit) {
+    const lvl = levelAbove(ownSuit, response.call)
+    return { call: `${lvl}${BID[ownSuit]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[ownSuit]}-korts ${NAME[ownSuit]} → ${lvl}${SYM[ownSuit]} (naturlig, GF – visar färgen före 3NT).` }
+  }
+  // Balanserat positivt (2NT) utan 5-färg → 3NT.
+  return { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: `${p} hp – ingen egen 5-färg → 3NT.`, uncertain: !bal }
 }
 
 // === 3. Svararens andra bud (andra negativa) ===============================

@@ -13,7 +13,7 @@ import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { respondToPreempt, preemptOf } from './responses-preempt'
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { respondToMajorPassed } from './responses-drury'
-import { overcall, advanceOvercall } from './overcalls'
+import { overcall, advanceOvercall, advanceTwoSuiter } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
@@ -289,6 +289,19 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
           turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
           return finish(adv.call !== 'P')
         }
+      }
+      // Advancer-logik för TVÅFÄRGSINKLIV (§7.2, Michaels / ovanlig 2NT): efter
+      // partnerns tvåfärgsbud och svararens pass ger advancern preferens till sin
+      // längsta av partnerns visade färger – i en OSTÖRD budgivning aldrig pass
+      // (felrapport #14: linjen 1♠–2NT–P stängdes med advancern passande, så
+      // advanceTwoSuiter nåddes aldrig och Syd fick pass som förslag). Utan denna
+      // gren föll tvåfärgsinklivet till finish(false) och auktionen dog en rond
+      // för tidigt.
+      if ((ov.rule === 'Michaels' || ov.rule === 'ovanlig 2NT') && action.call === 'P') {
+        const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+        const adv = advanceTwoSuiter(deal.hands[advancerSeat], ov.call, openerSuit, false)
+        turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
+        return finish(adv.call !== 'P')
       }
       return finish(action.call !== 'P')
     }
