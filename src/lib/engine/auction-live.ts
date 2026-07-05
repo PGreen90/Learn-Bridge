@@ -1163,8 +1163,11 @@ function isGameOrHigher(bid: Bid): boolean {
 function auctionForce(history: ResolvedCall[], seat: Seat): { kind: 'round' | 'game' } | null {
   const contractBids = history.filter((c) => parseContractBid(c.bid))
   if (contractBids.length < 2) return null // öppning + minst ett svar krävs
-  // Ostört: alla kontraktsbud måste vara vår sidas (steg 1 tar inte konkurrens).
-  if (contractBids.some((c) => side(c.seat) !== side(seat))) return null
+  // Störd budgivning har EGEN kravsemantik (ett inkliv "lånar" utrymme → ett 2/1
+  // lovar värden men ej garanterad utgång). Egen gren; koden nedan är OSTÖRT.
+  if (contractBids.some((c) => side(c.seat) !== side(seat))) {
+    return competitionForce(history, seat, contractBids)
+  }
 
   const opener = contractBids[0].seat
   const open = parseContractBid(contractBids[0].bid)!
@@ -1220,6 +1223,102 @@ function auctionForce(history: ResolvedCall[], seat: Seat): { kind: 'round' | 'g
   }
 
   return null
+}
+
+/**
+ * Är VÅR sida i krav i en STÖRD auktion (motståndarna har klivit in)?
+ * Ägarbeslut 2026-07-05: ett inkliv "lånar" utrymme, så ett fritt 2-över-1 lovar
+ * värden men INTE garanterad utgång. Därför finns bara RONDKRAV här (aldrig
+ * 'game'): partnern får inte passa, men budgivningen får stanna UNDER utgång.
+ * Två klassiska krav honoreras — och bara när VÅR sida öppnade:
+ *   (a) svararens FRIA nya färg (ej hopp, ej cue i deras färg) → öppnaren måste
+ *       rebjuda,
+ *   (b) öppnarens REVERSE → svararen måste svara.
+ * Allt annat (deras öppning + våra inkliv, sang-öppning, hopp, passad svarare) →
+ * null. Störd semantik skiljer sig alltså från ostört: inget game-krav här.
+ */
+function competitionForce(
+  history: ResolvedCall[],
+  seat: Seat,
+  contractBids: ResolvedCall[],
+): { kind: 'round' } | null {
+  const first = contractBids[0]
+  if (side(first.seat) !== side(seat)) return null // VÅR sida måste ha öppnat
+  const open = parseContractBid(first.bid)!
+  if (open.strain === 'NT') return null // sang-öppning: annan struktur
+  const opener = first.seat
+  const responderSeat = PARTNER[opener]
+
+  // Ett OBESVARAT krav: senaste kontraktsbudet är VÅRT och bara pass har följt.
+  const highest = contractBids[contractBids.length - 1]
+  if (side(highest.seat) !== side(seat)) return null
+  const highestIdx = history.indexOf(highest)
+  if (history.slice(highestIdx + 1).some((c) => c.bid !== 'P')) return null
+
+  const openerBids = contractBids.filter((c) => c.seat === opener)
+  const responderBids = contractBids.filter((c) => c.seat === responderSeat)
+  const oppStrains = new Set(
+    contractBids
+      .filter((c) => side(c.seat) !== side(seat))
+      .map((c) => parseContractBid(c.bid)!.strain),
+  )
+  // Passad svarare skapar inget krav: en ny färg efter en inledande pass är fri
+  // men icke-krav (svararen är redan begränsad).
+  const responderPassedFirst =
+    !!responderBids[0] &&
+    history
+      .slice(0, history.indexOf(responderBids[0]))
+      .some((c) => c.seat === responderSeat && c.bid === 'P')
+
+  // (a) Svararens FRIA nya färg → öppnaren måste rebjuda.
+  if (seat === opener && highest.seat === responderSeat && !responderPassedFirst) {
+    const bid = parseContractBid(highest.bid)!
+    const timesInStrain = responderBids.filter(
+      (c) => parseContractBid(c.bid)!.strain === bid.strain,
+    ).length
+    const isNewSuit =
+      bid.strain !== 'NT' &&
+      bid.strain !== open.strain &&
+      timesInStrain === 1 &&
+      !oppStrains.has(bid.strain) // ett cue i deras färg är en höjning, ej ny färg
+    if (isNewSuit && !isJumpBid(history, highestIdx)) return { kind: 'round' }
+  }
+
+  // (b) Öppnarens REVERSE → svararen måste svara.
+  if (seat === responderSeat && highest.seat === opener && openerBids.length >= 2) {
+    const firstOpen = parseContractBid(openerBids[0].bid)!
+    const second = parseContractBid(highest.bid)!
+    const firstResp = responderBids[0] ? parseContractBid(responderBids[0].bid)! : null
+    const isReverse =
+      firstResp?.level === 1 &&
+      second.level === 2 && second.strain !== 'NT' &&
+      second.strain !== firstOpen.strain &&
+      strainRank(second.strain) > strainRank(firstOpen.strain)
+    if (isReverse) return { kind: 'round' }
+  }
+
+  return null
+}
+
+/**
+ * Är kontraktsbudet vid `idx` ett HOPP (högre nivå än billigaste möjliga för dess
+ * färg givet auktionen dittills)? Ett fritt icke-hopp är entydigt krav; ett hopp
+ * i konkurrens kan vara svagt/spärrartat (systemberoende) → honoreras ej som krav.
+ */
+function isJumpBid(history: ResolvedCall[], idx: number): boolean {
+  const cb = parseContractBid(history[idx].bid)
+  if (!cb) return false
+  let prevLevel = 0
+  let prevRank = -1
+  for (let i = 0; i < idx; i++) {
+    const p = parseContractBid(history[i].bid)
+    if (!p) continue
+    prevLevel = p.level
+    prevRank = p.strain === 'NT' ? SUIT_STRAINS.length : strainRank(p.strain)
+  }
+  const targetRank = cb.strain === 'NT' ? SUIT_STRAINS.length : strainRank(cb.strain)
+  const minLevel = targetRank > prevRank ? prevLevel : prevLevel + 1
+  return cb.level > minLevel
 }
 
 /**

@@ -632,8 +632,23 @@ naturligt minimibud i stället för att passa:
 | **Reverse = rondkrav** | 1♣–1♥–2♦ | svararen måste svara |
 
 Minimibudet väljs naturligt: rebjud en egen 5+ färg → stöd partnern (3+ kort) →
-ny färg → billigaste sang. Är auktionen redan **störd** (motståndarna har bjudit)
-gäller detta *ännu inte* – störd budgivning har egen kravsemantik och byggs senare.
+ny färg → billigaste sang.
+
+**I konkurrens (motståndarna har klivit in) gäller krav också — men mildare.**
+Ett inkliv "lånar" utrymme, så ett fritt 2-över-1 lovar värden **utan att lova
+utgång**. Därför är alla krav i störd budgivning **rondkrav** (partnern får inte
+passa, men budgivningen får stanna *under* utgång), aldrig utgångskrav:
+
+| Krav i konkurrens | Exempel | Vem får inte passa |
+|---|---|---|
+| **Fritt bud (ny färg)** | 1♦–(1♠)–2♣ | öppnaren måste rebjuda |
+| **Fritt bud på 1-läget** | 1♣–(1♦)–1♠ | öppnaren måste rebjuda |
+| **Reverse** | 1♣–1♥–(1♠)–2♦ | svararen måste svara |
+
+Ett fritt bud = en **ny egen färg** som du fritt väljer att bjuda över inklivet
+(du kunde ha passat). Det lovar riktiga värden och är rondkrav. Undantag som
+*inte* är detta krav: ett **hopp** (kan vara svagt/spärrartat), ett **cue i deras
+färg** (= stödhöjning, sköts separat), och en **passad hand** (redan begränsad).
 
 ### 5.6 Rätt nivå med fit — minorutgång blåses ut vid utgångsvärden
 Har du **fit i partnerns lågfärg** och **utgångsvärden** (13+ stödpoäng) ska ni nå
