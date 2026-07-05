@@ -2,10 +2,12 @@ import { defineConfig, configDefaults } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// VIKTIGT: base måste matcha repo-namnet på GitHub, annars blir sidan blank
-// på GitHub Pages. Repo-namn = "Learn-Bridge"  ->  base = "/Learn-Bridge/".
+// VIKTIGT: hostas nu på Vercel, som serverar appen från roten på domänen.
+// Därför base = "/" (inte längre "/Learn-Bridge/" som på GitHub Pages, där
+// sidan låg under repo-namnet). Fel base här = blank sida. Låst av vaktestet
+// src/deploy-config.test.ts.
 export default defineConfig({
-  base: '/Learn-Bridge/',
+  base: '/',
   plugins: [react(), tailwindcss()],
   test: {
     // R5-fynd #3: .claude/worktrees/ innehåller parallella Claude Code-worktrees
