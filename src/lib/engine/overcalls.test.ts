@@ -33,7 +33,7 @@ describe('overcall – inkliv över deras 1-läges öppning (§7.1–7.2)', () =
   // Felrapport #23 (bricka 5): 17+ hp med en lång egen färg är för stark för ett
   // enkelt inkliv (kapat 8–16) och saknar stöd i alla objudna → föll förr till
   // pass. Ägarregel: starta med X (upplysning), visa egen färg på nästa varv.
-  it('17+ monster (7 solida spader) → X (för stark för inkliv, ej pass)', () => {
+  it('17+ stark enfärgshand (7 solida spader) → X (för stark för inkliv, ej pass)', () => {
     const res = overcall(parseHand('S:AKQ7653 H:Q4 D:Q54 C:A'), '1C') // 17 hp, 7 spader
     expect(res.call).toBe('X')
     expect(res.rule).toBe('upplysningsdubbling (stark)')

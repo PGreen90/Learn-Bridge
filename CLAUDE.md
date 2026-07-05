@@ -11,7 +11,15 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — inget aktivt bygge. Ägaren väljer nästa delbit av R1 #2 (eller annat spår).
+### 🔵 NU — inget aktivt bygge. Ägaren väljer nästa spår.
+> **Senast klart (2026-07-05, ännu INTE committat – väntar på ägarens OK för
+> commit+push):** starka upplysningsdubblingens **flerronds-fortsättning** byggd &
+> test-låst (`auction-live.ts`: `strongDoubleContext` + `advanceStrongDoubleRebid`
+> + `strongDoublerSecondRebid` + `answerStrongDoubleGameForce`). Game-hoppet
+> borttaget; partnern tvångssvarar; TP-tröskel **22** för 3-läges-hopp (ägarval
+> efter 6 exempelhänder). Ordet "monster" bannlyst. 976 tester gröna, tsc rent.
+> Kvar att finslipa (ägaren, i spel): den starka handens dom EFTER en stödhöjning
+> = konservativ default, se 👀 Bevaka.
 > **NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln). Bra
 > kandidater: **nästa delbit av R1 #2** (se "Kvar" nedan) eller en punkt ur R6:s
 > handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
@@ -20,7 +28,7 @@ Läs den här filen först varje session.
 > ägarmandat *"all ändring i Budsystemet ska gå att läsa på hemsidan."* Budsystem-
 > sidan läser `docs/budsystem.md` direkt (§9 Ändringslogg är dold), så live-regler
 > som förr bara låg i kod/ändringslogg skrevs nu in i läsbara sektioner: **§7.3
-> Takeout Double** (egen sektion, ordet "monster" borttaget på ägarens begäran),
+> Takeout Double** (egen sektion; ordet för den starka 17+-handen borttaget på ägarens begäran – skriv "bra/stark hand"),
 > **§5.4** öppnarens rond-2 i inklämt läge (delbit 6), **§7.8** när motståndarna
 > stör vår öppning (delbit 4+5). Ingen kodändring – bottarna bjuder som förut.
 >
@@ -56,13 +64,21 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **Takeout-doublingar (felrapport #23 + tvåfärgs-X, 2026-07-05, NYTT):** (1) en
-  **17+ enfärgs-monster** upplysningsdubblar nu en öppning och visar sedan sin färg
-  via ett **monster-återbud** som hoppar till utgång (t.ex. (1♣)–X–…–4♠) — säg till
-  om det känns för aggressivt att jumpa hela vägen till game. (2) När motståndarna
-  bjudit **två färger** (1♦–P–1♥) dubblar en **4-4-hand (10+)** de objudna
-  färgerna; advancern svarar aldrig längre i deras egen färg. Regler i
-  `docs/budsystem.md` §7.3.
+- **Takeout-doublingar (felrapport #23 + stark-hand-fortsättning + tvåfärgs-X,
+  2026-07-05, NYTT):** (1) en **17+ stark enfärgshand** upplysningsdubblar en öppning
+  och visar sedan sin färg via ett **starkt återbud** — färgen **billigast (rondkrav,
+  inget hopp)**; hopp-till-utgång är borttaget (kan bli katastrof mot 0 hp). Hela
+  **flerronds-fortsättningen är nu byggd & test-låst**: partnern tvångssvarar
+  (stödstege m. 3-korts stöd: enkel/hopp/utgång/cue efter hp — annars egen 5+ /
+  näst längsta objudna färg), den starka handen dömer game på TP (**6+ färg & 22+ TP
+  → hopp till 3-läget = utgångskrav**, annars lägsta nivå), partnern svarar 3-hoppet
+  (utgång m. 1–2 stöd / 3NT nekar). **⚠️ Bevaka särskilt:** den starka handens dom
+  EFTER en **stödhöjning** (partnern visade fit) körs på en medvetet **konservativ
+  default** (accepterar utgång med tydligt tillägg: hopphöjning→18+ hp, enkel
+  höjning→21+; cue→utgång som minimum; slam-utforskning ej byggd) — ägaren ville
+  finslipa detta i spel, säg till om trösklarna känns fel. (2) När motståndarna
+  bjudit **två färger** (1♦–P–1♥) dubblar en **4-4-hand (10+)** de objudna färgerna;
+  advancern svarar aldrig i deras egen färg. Regler i `docs/budsystem.md` §7.3.
 - **Öppnarens rond-2 i inklämt konkurrensläge (R1 Fynd #2 delbit 6, NYTT):** efter
   `1M–(inkliv)–2M–(deras inklämda bud)` passar öppnaren inte längre blint. Med
   minimum + 6:e trumf konkurrerar den 3M; med utgångsintresse (~15–17) dubblar den
@@ -105,11 +121,11 @@ Läs den här filen först varje session.
 1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
-- **17+ enfärgs-monster EFTER två bjudna färger (takeout, 2026-07-05):** en 17+
+- **17+ stark enfärgshand EFTER två bjudna färger (takeout, 2026-07-05):** en 17+
   enfärgshand som borde upplysningsdubbla när motståndarna redan bjudit två färger
   (t.ex. 1♦–P–1♥) gör det INTE — där följer `decideCall` en färdig buildAuction-
   linje som passar handen, så live-hanteraren (`maybeTakeoutOfResponse`, som bara
-  gör 4-4) når aldrig fram. Att tvinga monster-dubbling där kräver att den
+  gör 4-4) når aldrig fram. Att tvinga den starka dubblingen där kräver att den
   generativa linjen i `auction.ts` (`buildAuction`) modellerar inklivet — ett
   grundläggande ingrepp. Öppningsfallet + 4-4-fallet är klara & live (felrapport
   #23, §7.3). Plockas upp om en giv bevisar att luckan svider.
