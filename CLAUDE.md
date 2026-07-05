@@ -12,8 +12,19 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — ägaren pekar ut nästa sak (järnregeln: exakt en).
-> Föregående NU ("låna en kung" i balansering, §7.1) är **KLAR & LIVE**. Välj nästa
-> ur 🟢 NÄST / ⚪ SENARE nedan, eller peka ut en ny grundregel som känns opålitlig.
+> **NÄSTA NU (ägarbeslut 2026-07-05, för NÄSTA session): bredare flerronds-
+> konkurrens.** Sista kvarvarande delbiten av R1 Fynd #2. Störda auktioner ska leva
+> förnuftigt över FLERA budronder, inte bara den/de första. Idag hanterar motorn
+> störd budgivning ganska grunt bortom ett par ronder (`buildAuction` modellerar
+> EN konkurrensrond; `decideCall` fortsätter historiedrivet men lutar sig på en
+> kedja av punktdetektorer). **Startpunkt nästa gång:** fråga ägaren vilka konkreta
+> fleronds-konkurrenslägen som känns opålitliga i spel (t.ex. båda sidor budar upp
+> färg-mot-färg över 2–3 ronder), bygg FACIT-givar som blottar mönstret FÖRE något
+> byggs om — precis som §5.8 / "låna en kung". Väg också in R2:s förslag att göra
+> detektorkedjan i `decideCall` datadriven innan fler konkurrenslägen staplas på
+> (se `docs/status.md` "Budmotorns tre auktionslager").
+>
+> Föregående NU ("låna en kung" i balansering, §7.1) är **KLAR & LIVE**.
 >
 > **Senast klart & LIVE (2026-07-05, commit `f36d058`, deploy grön):
 > "Låna en kung" i balanseringssits (§7.1).** I utpassningsläget (deras
