@@ -41,8 +41,12 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-club-50 text-slate-900 dark:bg-club-950 dark:text-slate-100">
-      {/* Guldlinjen under sidhuvudet följer med på VARJE flik = klubbtemat. */}
-      <header className="border-b border-gold-400/40 bg-emerald-900 text-white shadow dark:bg-club-900">
+      {/* Guldlinjen under sidhuvudet följer med på VARJE flik = klubbtemat.
+          Toppmarginalen = safe-area-inset-top: i PWA-helskärm på iPhone ligger
+          innehållet annars under statusraden (klocka/batteri) – marginalen skjuter
+          ner sidhuvudet och låter det emerald-gröna fylla ut bakom statusraden.
+          Blir 0 i vanlig webbläsare, så inget ändras där. */}
+      <header className="border-b border-gold-400/40 bg-emerald-900 text-white shadow dark:bg-club-900 pt-[env(safe-area-inset-top)]">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Logotypen + inramade ordmärket (guldserif, spader-prick på i:et). */}
           <NavLink to="/" className="flex items-center gap-2 whitespace-nowrap">
