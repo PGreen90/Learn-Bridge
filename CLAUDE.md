@@ -70,6 +70,16 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Motspelarens kast-vakt + 1NT-återbudsförklaring (felrapport #24 + #25,
+  2026-07-05, NYTT):** (1) **spelfel #25** – en försvarare som sakar blottar inte
+  längre en honnör i onödan: ny "motspelarens kast-vakt" (`play-bot.ts`
+  `defenderGuardDiscard`) sakar hellre ur en färg UTAN skyddsvärd honnör (en J+
+  som ännu kan slås av ett högre ospelat kort), ärligt räknat ur egen hand +
+  träkarl. Löser bara honnörs-blottning; bredare försvarsinferens (kasta rätt när
+  partnerns hand är okänd) är fortsatt SENARE. Säg till om vakten någon gång
+  behåller fel kort. (2) **budförklaring #24** – öppnarens 1NT-återbud efter
+  färgöppning beskrivs nu som "balanserad minimihand ~12–14 hp" (ej "svag");
+  ingen ändrad budgivning, bara texten (`auction-interpret.ts`).
 - **Takeout-doublingar (felrapport #23 + stark-hand-fortsättning + tvåfärgs-X,
   2026-07-05, NYTT):** (1) en **17+ stark enfärgshand** upplysningsdubblar en öppning
   och visar sedan sin färg via ett **starkt återbud** — färgen **billigast (rondkrav,
@@ -158,8 +168,11 @@ Läs den här filen först varje session.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
 - **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade:
   byggs bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).
-- **Motspelarnas kast-vakt** — B1 gäller bara spelförarsidan; försvarets
-  sakningar kräver inferens om partnerns hand (eget arbete).
+- **Motspelarnas kast-vakt (honnörs-blottning KLAR 2026-07-05, felrapport #25):**
+  försvaret sakar inte längre bort en honnörs gardering (`defenderGuardDiscard`).
+  KVAR: bredare försvarsinferens (kasta rätt när partnerns hand är okänd —
+  längdparitet, signalering, skvis-försvar) kräver inferens om partnerns hand
+  (eget arbete). Plockas upp om en facit-giv bevisar behovet.
 - FAS 9 Passad hand, FAS 10 Försvarsbud, FAS 11 Kortspel = **KLARA & pushade**
   (bara kvar här som historik — behandla dem inte som återstående arbete).
 
