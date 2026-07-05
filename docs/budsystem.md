@@ -597,8 +597,8 @@ game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, *
 2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
 Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber**, **Exclusion Blackwood**, **fjärde färg krav** och **Drury**
 (tvåvägs Reverse) (§6), samt försvar/konkurrens (§7): **DONT** mot 1NT,
-**negativa/responsiva/stöddubblingar**, **Lebensohl**, **Michaels + ovanlig
-2NT** och **Mathe** – beslutade 2026-06-26. Källor: bridgebum.com,
+**Takeout Double**, **negativa/responsiva/stöddubblingar**, **Lebensohl**,
+**Michaels + ovanlig 2NT** och **Mathe** – beslutade 2026-06-26. Källor: bridgebum.com,
 svenskbridge.se.
 
 ### 6.1 1430 RKC Blackwood
@@ -769,22 +769,43 @@ finns **spelrum för pass**, och partnern kan bjuda igen för att visa sin
 **ospecificerade** färg (t.ex. Michaels över deras högfärg, där ena färgen är en
 okänd minor – utan högfärgsfit bjuder advancern då ostört 3♣ pass-eller-rätta).
 
-### 7.3 Dubblingar
-- **Upplysningsdubbling:** dubbling av deras öppning = kort i deras färg (max 2),
-  stöd i övriga + öppningsstyrka (eller en stark hand). Partnern bjuder sin bästa
-  färg. **Aggressiv standard (ägarbeslut 2026-07-03):** golvet är **10–11 hp** när
-  formen är perfekt – max 2 i deras färg, stöd i alla objudna och **ingen egen
-  5-korts färg** (då inkliver vi hellre). Jämna händer utan korthet dubblar aldrig
-  under öppningsstyrka.
-  - **17+ monster (ägarbeslut 2026-07-05, felrapport #23):** en hand med **17+ hp
-    och en egen lång färg** är för stark för ett enkelt inkliv (partnern kan passa
-    inklivet → kall utgång missas). Den **dubblar först** (upplysning, valfri form)
-    och "överröstar" sedan partnern genom att **bjuda/hoppa i sin egen färg** — då
-    är den starka enfärgshanden signalerad. *Ex:* (1♣)–X–(P)–1♥–(P)–4♠.
-  - **Två färger redan bjudna (ägarbeslut 2026-07-05):** när motståndarna bjudit
-    öppning + svar i **två** färger (t.ex. 1♦–(P)–1♥) lovar X **4+ 4+ i de två
-    objudna färgerna** (äkta 4-4 – partnern har bara två färger att välja mellan),
-    10+ hp. Advancern svarar aldrig i en av deras bjudna färger.
+### 7.3 Takeout Double
+Upplysningsdubbling (takeout) – vår viktigaste dubbling. Den ber partnern **bjuda
+sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kraven
+ändras med hur många färger motståndarna redan har bjudit.
+
+**Efter en bjuden färg (deras öppning, t.ex. (1♣)):**
+- Kort i deras färg (**max 2**), **3+ kort i var och en av de tre objudna
+  färgerna**, från **10 hp**.
+- Har du en egen bra **5-korts färg** inkliver du hellre naturligt – då är det
+  inget takeout-läge. Jämna händer utan korthet i deras färg dubblar aldrig.
+
+**Den starka handen (17+ hp) – dubbla först, visa färgen sedan:**
+- En hand med **17+ hp** är **för stark för ett enkelt inkliv**: partnern kan
+  passa inklivet, och en kall utgång missas. Därför **dubblar** den först
+  (upplysning, **oavsett fördelning**) och **bjuder sedan sin egen färg** på nästa
+  varv – gärna med ett hopp. Det visar en **stark enfärgshand** som partnern inte
+  får passa. *Ex:* (1♣)–X–(P)–1♥–(P)–**4♠**.
+
+**Efter två bjudna färger (öppning + svar, t.ex. (1♦)–(P)–(1♥)):**
+- När motståndarna redan bjudit **två** färger lovar X **4-4 i de två objudna
+  färgerna** (här ♠ + ♣), från **10 hp**. Partnern har bara två färger att välja
+  mellan, så **exakt 4-4** krävs (en 5-korts objuden färg inkliver du hellre).
+- Advancern svarar **aldrig i en av deras bjudna färger**.
+
+**Mot deras svaga tvåor och spärrar (samma verktyg, starkare krav):**
+- Aktionen är farligare på högre nivå, så golvet är högre. **Mot en svag tvåa:**
+  **12 hp** (ej sårbar) / **13 hp** (sårbar) direkt, **10 hp** i balansering.
+  **Mot en spärr** på 3-läget eller högre: **14+ hp**. Formen är densamma – kort i
+  deras färg, stöd i de objudna.
+
+**Advancerns svar (partnern som blivit dubblad *till*):**
+- Passar **aldrig** dubblingen. Bjuder sin **längsta objudna färg**, billigast; vid
+  lika längd väljs högfärgen / den högre färgen.
+- Med egen styrka **hoppar** hon i sin färg (inbjudande+) eller **cue-budar** deras
+  färg (utgångskrav, frågar efter partnerns bästa färg).
+
+### 7.4 Övriga dubblingar (negativ, responsiv, stöd)
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
   upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
   ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Öppnaren svarar som på en upplysningsdubbling.
@@ -794,7 +815,7 @@ okänd minor – utan högfärgsfit bjuder advancern då ostört 3♣ pass-eller
   3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
   längdinfo i konkurrens.
 
-### 7.4 Lebensohl
+### 7.5 Lebensohl
 Verktyg för att skilja **svaga** händer från **utgångsvilliga** i två lägen:
 (a) efter partnerns **upplysningsdubbling av en svag tvåa**, och (b) efter att
 motståndaren **stört vårt 1NT-inkliv/öppning** på 2-läget.
@@ -809,7 +830,7 @@ motståndaren **stört vårt 1NT-inkliv/öppning** på 2-läget.
 **visar stopp** i deras färg; **direkt 3NT** förnekar stopp (ber partnern bjuda
 3NT med eget stopp).
 
-### 7.5 Mot motståndarnas 1NT — DONT
+### 7.6 Mot motståndarnas 1NT — DONT
 DONT (Disturb Opponents' NoTrump): visa alla en- och tvåfärgshänder på 2-läget
 och kunna stanna lågt.
 
@@ -825,15 +846,17 @@ och kunna stanna lågt.
 man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer tillåtna
 – ännu lättare i återbudsläge (balansering).
 
-### 7.6 Mot konventionella och svaga öppningar
+### 7.7 Mot konventionella och svaga öppningar
+> **Takeout-dubblingen** mot deras svaga tvåor och spärrar beskrivs i sin helhet i
+> §7.3 (Takeout Double) – här listas bara de övriga verktygen.
 - **Mot stark 1♣ (Mathe):** X = **båda högfärgerna**, 1NT = **båda minorerna**,
   färgbud naturliga.
-- **Mot svaga tvåor:** upplysningsdubbling (takeout) + **Lebensohl** (§7.4);
-  2NT-inkliv = 15–18 balanserad med stopp; cue-bud = stark/Michaels-aktig.
-- **Mot Multi 2♦** (svag tvåa i okänd högfärg): X = stark/takeout-aktig hand
-  (~13+); 2NT = 15–18 balanserad; 2♥/2♠ = naturligt inkliv.
-- **Mot spärrar (3-läget+):** upplysningsdubbling (takeout); 3NT = till spel
-  (stopp + stick); cue-bud = stoppfråga/stark; färgbud naturliga.
+- **Mot svaga tvåor:** **Lebensohl** (§7.5) efter partnerns takeout; 2NT-inkliv =
+  15–18 balanserad med stopp; cue-bud = stark/Michaels-aktig.
+- **Mot Multi 2♦** (svag tvåa i okänd högfärg): 2NT = 15–18 balanserad; 2♥/2♠ =
+  naturligt inkliv. (Takeout-dubblingen: §7.3.)
+- **Mot spärrar (3-läget+):** 3NT = till spel (stopp + stick); cue-bud =
+  stoppfråga/stark; färgbud naturliga. (Takeout-dubblingen: §7.3.)
 
 ## 8. Markeringar & utspel
 > Försvarsspelets signaler. Vi spelar räkningstunga, lågtvetydiga metoder som
@@ -886,6 +909,17 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-05** – **Takeout Double fick en egen sektion (§7.3).** Redaktionell
+  omstrukturering (ägarbeslut) – **ingen kodändring, inget ändrat botbeteende**.
+  All upplysningsdubbling (takeout) samlas nu i **§7.3 Takeout Double**: grundfallet
+  efter en bjuden färg (max 2 i deras, 3+ i var och en av de tre objudna, 10+), den
+  starka 17+-handen (dubbla först, visa egen färg sedan – tidigare kallad "monster",
+  ordet borttaget på ägarens begäran), fallet efter två bjudna färger (4-4 i de två
+  objudna, 10+) och takeout mot svaga tvåor (12/13/10) och spärrar (14+). Övriga
+  dubblingar (negativ, responsiv, stöd) flyttades till **§7.4**; Lebensohl→§7.5,
+  DONT→§7.6, konventionella öppningar→§7.7 (takeout-raderna där ersatta med en
+  hänvisning till §7.3). Sidan "Budsystem" läser boken direkt, så sektionen syns
+  live efter push.
 - **2026-07-05** – **Felrapporter #20/#22/#23 + takeout-utbyggnad (live).** Fyra
   felrapporter avklarade: **#20** DONT-advancern relä:ar 2♦ (pass-eller-rätta) i
   stället för att passa singel-klöver, och inklivaren rättar till sin högre färg;
