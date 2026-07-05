@@ -21,11 +21,26 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
-> **NÄSTA GÅNG BÖRJAR VI MED (ägarbeslut 2026-07-05): `/felrapporter` på issue #31.**
-> Ägaren skickade #31 skarpt via det nya direktskicket (se nedan) — en äkta bugg:
-> `1♦(S)–P–2♥(N)` — Nord hoppar till 2♥ med ♠7 ♥KT6432 ♦Q4 ♣A986 (~9 hp, 6-korts
-> hjärter) men ska svara **1♥** (nytt färgsvar, rondkrav); ett hopp till 2♥ lovar en
-> mycket starkare hand. FACIT FÖRE FIX via `/felrapporter`.
+> **Senast klart & LIVE (2026-07-06): `/felrapporter` — #31 + #30 lagade & stängda.**
+> - **#31 (svagt hoppskift avskaffat):** Nord hoppade till 2♥ på 1♦ med ♠7 ♥KT6432
+>   ♦Q4 ♣A986 (9 hp). Ägarprincip: **när partnern öppnat håller svararen budgivningen
+>   LÅG** — bjud nya färgen billigast (1♥, rondkrav), ett hopp berövar partnern
+>   utrymme (t.ex. 1NT). `respondToMajor`/`respondToMinor` (`responses.ts`) faller nu
+>   till 1-lägessvaret; öppnarens hantering av ett MANUELLT hoppskift orörd.
+>   Mergepunkt `86a295c`. Docs: budsystem.md §4.1/§4.2/§9.
+> - **#30 (stark jämn hand når utgång efter minorhöjning i konkurrens):** Väst (19 hp
+>   jämnt) nådde bara 2♥ efter `1♦–(1♠)–2♦`. Två fixar (ägarbeslut, båda vägarna):
+>   (1) **öppnings-uppgradering** — jämn 19 med startpoäng ≥20 öppnar **2NT**
+>   (`openings.ts`); fixar den rapporterade given (2NT→3NT). (2) **återbudsfix** —
+>   `openerStrongNTAfterMinorRaise` + `answerOpenerNTInvite` (`auction-live.ts`): 3NT
+>   (20+) / 2NT-inbjudan (18–19) med stopp, höjaren accepterar med maximum. Mergepunkt
+>   `603f86c`. Docs: budsystem.md §3, §5.10, §9. Se 👀 Bevaka.
+> - **1071 test gröna, tsc rent, båda deployerna gröna.**
+>
+> **KVAR ÖPPNA FELRAPPORTER (ägaren sköt upp 2026-07-06 — ta en i taget vid
+> `/felrapporter`):** **#28** ("aggressivt av syd, analysera" — Syd bjöd 4♠ med
+> renons + 5-5; bedömningsfråga) och **#29** ("Annat — hur hittar vi slammen?" i N/S;
+> förbättringsfråga). Båda är analys/bedömning snarare än tydliga buggar.
 >
 > **Senast klart & LIVE (2026-07-05, mergepunkt `1a2da2e`): felrapport skickas
 > DIREKT utan att öppna GitHub** (var SENARE-punkten "PAT-i-localStorage"). Ägaren
@@ -269,6 +284,18 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Inget svagt hoppskift längre (#31, 2026-07-06, NYTT & LIVE):** svarar du på
+  partnerns öppning med en svag 6-korts högfärg bjuder boten nu **1♥/1♠** (lågt,
+  rondkrav), aldrig 2♥/2♠. **Bevaka:** håller boten budgivningen lagom låg, eller
+  borde en riktigt svag spärrig hand ibland fått hoppa? (Ägarprincip: håll låg när
+  partnern öppnat.) Öppnaren förklarar fortfarande ett MANUELLT hoppskift rätt om du
+  själv hoppar.
+- **Stark jämn hand efter minorhöjning i konkurrens (#30, 2026-07-06, NYTT & LIVE):**
+  (a) en jämn 19 med extra kvalitet (ess/kvalitetsfärger, startpoäng ≥20) öppnar nu
+  **2NT** i stället för 1 i färg — **bevaka** att den inte blåser upp platta 19:or.
+  (b) När din minor höjs i konkurrens visar öppnaren styrka i sang (3NT 20+ /
+  2NT-inbjudan 18–19 med stopp); höjaren accepterar 3NT från **8 hp**. **Bevaka:** når
+  paret 3NT lagom ofta, eller för lätt/tungt? Säg till om accept-golvet (8) känns fel.
 - **Flerronds-konkurrens A+B+C (§5.9 + §7.1, 2026-07-05, NYTT — EJ PUSHAT):** störda
   auktioner säljs inte längre billigt i rond 2+. (A) Öppnar du 1 i färg, de kliver in,
   partnern PASSAR och de konkurrerar (`1♣–(1♠)–P–(2♠)`) → du tävlar nu (egen 6+ färg,
