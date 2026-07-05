@@ -3,6 +3,7 @@ import type { Card, Deal, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { parseHand } from '../bidding'
 import { botCard, botCardReasoned } from './play-bot'
 import { playCard, startPlay, type Contract, type PlayedCard, type PlayState, type Trick } from './play'
+import { doubleDummyDeclarerRemaining } from './dds'
 
 const C = (suit: Suit, rank: Rank): Card => ({ suit, rank })
 
@@ -379,4 +380,65 @@ describe('botCardReasoned – kort + förklaring (Varför?-knappen)', () => {
     expect(r.card).toEqual(C('clubs', '3'))
     expect(r.reason).toContain('vaktar')
   })
+})
+
+// Felrapport #25 (github.com/PGreen90/Learn-Bridge/issues/25): 3NT av Syd. I
+// stick 3 sakade Väst (motspelet, void i ruter) sitt LÄGSTA kort = ♣2 ur ♣Q92,
+// vilket började blotta klöverdamen → damen föll senare under AK och Syd tog 11
+// stick. DDS-facit på ställningen: ett KLÖVERkast ger spelföraren 11 stick, en
+// låg SPADER eller HJÄRTER håller honom till 9. Fixen: motspelarens kast-vakt
+// sakar ur en färg UTAN skyddsvärd honnör i stället för att blotta damen.
+describe('felrapport #25 – motspelaren blottar inte en honnör vid sakning', () => {
+  const HANDS: Record<Seat, string> = {
+    N: 'S:K5 H:Q8 D:KJ8642 C:K86',
+    E: 'S:QJ2 H:KT92 D:Q73 C:T75',
+    S: 'S:8764 H:AJ D:AT5 C:AJ43',
+    W: 'S:AT93 H:76543 D:9 C:Q92',
+  }
+  const SUIT: Record<string, Suit> = { S: 'spades', H: 'hearts', D: 'diamonds', C: 'clubs' }
+  const c = (code: string): Card => ({ suit: SUIT[code[0]], rank: (code.slice(1) === 'T' ? '10' : code.slice(1)) as Rank })
+
+  function atTrick3WestToDiscard(): PlayState {
+    const deal: Deal = {
+      id: 'fr25', dealer: 'N', vulnerability: 'all', board: 13,
+      hands: { N: parseHand(HANDS.N), E: parseHand(HANDS.E), S: parseHand(HANDS.S), W: parseHand(HANDS.W) },
+    }
+    let st = startPlay(deal, { declarer: 'S', strain: 'NT', level: 3 })
+    for (const code of ['H3', 'H8', 'H9', 'HJ', 'DA', 'D9', 'D2', 'D3', 'DT']) st = playCard(st, c(code))
+    return st
+  }
+
+  it('Väst är på tur att saka i stick 3 (void i ruter)', () => {
+    const st = atTrick3WestToDiscard()
+    expect(st.toAct).toBe('W')
+    expect(st.currentTrick.map((p) => p.card.suit)).toEqual(['diamonds'])
+    expect(st.hands.W.some((x) => x.suit === 'diamonds')).toBe(false)
+  })
+
+  it('sakar INTE en klöver (blottar aldrig ♣Q) – väljer en färg utan skyddsvärd honnör', () => {
+    const st = atTrick3WestToDiscard()
+    const r = botCardReasoned(st, 'W')
+    expect(r.card.suit).not.toBe('clubs')
+    // Klöverdamen förblir garderad: minst två klöver kvar efter kastet.
+    const clubsLeft = st.hands.W.filter((x) => x.suit === 'clubs').length
+    expect(clubsLeft).toBe(3) // kastet rörde inte klöver
+    expect(r.reason).toMatch(/vaktar|honnör|blotta/i)
+  })
+
+  it('DDS-facit: det valda kastet håller Syd till 9, ett klöverkast ger 11', () => {
+    const st = atTrick3WestToDiscard()
+    const declTricksAfter = (wc: Card): number => {
+      const after = playCard(st, wc)
+      const dd = doubleDummyDeclarerRemaining(
+        after.hands, 'NT', 'S', after.currentTrick.map((p) => ({ seat: p.seat, card: p.card })), after.toAct, 5_000_000,
+      )
+      expect(dd).not.toBeNull()
+      return (dd as number) + after.tricksNS
+    }
+    // Botens val (låg spader): optimalt försvar, Syd hålls till 9 (jämnt hem i 3NT).
+    const chosen = botCardReasoned(st, 'W').card
+    expect(declTricksAfter(chosen)).toBe(9)
+    // Det rapporterade felet: ett klöverkast blottar damen → Syd tar 11 (+2).
+    expect(declTricksAfter(c('C2'))).toBe(11)
+  }, 30_000)
 })

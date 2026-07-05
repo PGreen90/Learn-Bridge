@@ -175,6 +175,41 @@ describe('felrapport #10 – 4NT på partnerns spärröppning tolkas som essfrå
   })
 })
 
+// Felrapport #24 (github.com/PGreen90/Learn-Bridge/issues/24): "gillar inte hur
+// 1NT förklaras." Given: E dealer, W öppnar 1♣, N kliver in 1♠, E negativ X,
+// W återbjuder 1NT. Heuristiken kallade det "svag balanserad hand" – fel: ett
+// 1NT-ÅTERBUD av öppnaren (efter öppning i färg) visar en balanserad MINIMIHAND
+// ~12–14 hp (15–17 hade öppnat 1NT), stopp i motståndarnas färg. Facit i
+// budsystem.md §5.2 ("1NT (1♣–1♥–1NT) | 12–14, balanserad").
+describe('felrapport #24 – öppnarens 1NT-återbud beskrivs som 12–14, inte "svag"', () => {
+  // P – P – 1♣(W) – 1♠(N) – X(E) – P – 1NT(W) – P – P – P. W:s 1NT = index 6.
+  const hist = h(
+    ['E', 'P'], ['S', 'P'], ['W', '1C'], ['N', '1S'],
+    ['E', 'X'], ['S', 'P'], ['W', '1NT'],
+  )
+
+  it('kallar det ett återbud och sätter rätt styrka (12–14), inte "svag"', () => {
+    const r = interpretCall(hist, 6)
+    expect(r.text).not.toMatch(/svag/i)
+    expect(r.text).toMatch(/återbud/i)
+    expect(r.text).toMatch(/12–14/)
+    expect(r.text).toMatch(/balanserad/i)
+    expect(r.confidence).toBe('trolig')
+  })
+
+  it('nämner stopp i motståndarnas färg (konkurrens)', () => {
+    const r = interpretCall(hist, 6)
+    expect(r.text).toMatch(/stopp/i)
+  })
+
+  it('svararens egna 1NT-svar (ostört) beskrivs fortfarande som begränsat, ej "svag balanserad"', () => {
+    // 1♣(N) – 1♥(S)? nej: rent svarsfall 1♦(N) – P – ... enklast: N öppnar 1♦, S svarar 1NT.
+    const r = interpretCall(h(['N', '1D'], ['S', '1NT']), 1)
+    expect(r.text).toMatch(/6–1[01]|balanserad/i)
+    expect(r.text).not.toMatch(/återbud/i)
+  })
+})
+
 describe('motorns egen regel går före heuristiken (säker)', () => {
   it('använder budets explanation och kravnivå ur registret', () => {
     const hist = h(['N', '1H'], ['S', '2C', '2-över-1 GF', 'Tvåöver ett: utgångskrav, naturligt klöver'])

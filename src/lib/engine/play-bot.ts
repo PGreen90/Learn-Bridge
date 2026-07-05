@@ -130,6 +130,51 @@ function guardedDiscard(state: PlayState, seat: Seat, legal: Hand): Card | null 
   return best
 }
 
+/**
+ * Motspelarens kast-vakt (docs/bot-hjarna.md, Steg B1 utvidgad till FÖRSVARET –
+ * felrapport #25). En försvarare som sakar ska inte BLOTTA en honnör i onödan.
+ * Ärlig syn: egen hand + träkarlen (`visibleSeats`) – partnern och spelföraren är
+ * dolda. En färg är "skyddsvärd" om jag har en honnör (J+) i den som ännu kan
+ * SLÅS: något högre kort i färgen är ospelat och ligger inte på min egen hand
+ * (det sitter alltså hos spelföraren/träkarlen och kan fälla honnören). Att saka
+ * ur en sådan färg riskerar att blotta honnören (♣Q92 → sakar ♣2 → ♣9 tvingas →
+ * bar dam faller under AK). Väljer i stället lägsta kortet ur en färg UTAN
+ * skyddsvärd honnör.
+ *
+ * Returnerar `null` när vakten inte gäller (spelförarsidan, utspel, följer färg,
+ * bara trumf, ingen skyddsvärd färg) ELLER när det naiva lägsta kortet redan är
+ * ofarligt (ligger i en färg utan skyddsvärd honnör) – då står den gamla
+ * tumregeln (`lowAvoidRuff`) kvar oförändrad, med sin egen förklaring.
+ */
+function defenderGuardDiscard(state: PlayState, seat: Seat, legal: Hand): Card | null {
+  if (side(seat) === side(state.contract.declarer)) return null // bara motspelet
+  if (state.currentTrick.length === 0) return null // utspel, ingen sakning
+  const led = state.currentTrick[0].card.suit
+  if (legal.some((c) => c.suit === led)) return null // följer färg → ingen sakning
+  const candidates = state.trump === null ? legal : legal.filter((c) => c.suit !== state.trump)
+  if (candidates.length === 0) return null // bara trumf kvar → gamla regeln
+
+  const played = playedCards(state)
+  const HONOR = rankVal('J')
+  const myHand = state.hands[seat]
+  const myHas = (suit: Suit, rank: Rank) => myHand.some((c) => c.suit === suit && c.rank === rank)
+  // Har jag en honnör (J+) i färgen som ännu kan slås av ett HÖGRE, ospelat kort
+  // som inte ligger på min egen hand?
+  const beatableHonorSuit = (suit: Suit) =>
+    myHand.some((c) => {
+      if (c.suit !== suit || rankVal(c.rank) < HONOR) return false
+      return RANK_LOW_TO_HIGH.slice(rankVal(c.rank) + 1).some(
+        (r) => !played.some((p) => p.suit === suit && p.rank === r) && !myHas(suit, r),
+      )
+    })
+
+  const safe = candidates.filter((c) => !beatableHonorSuit(c.suit))
+  if (safe.length === 0) return null // allt är skyddsvärt → kan inte göra bättre
+  const naive = lowAvoidRuff(legal, state.trump)
+  if (!beatableHonorSuit(naive.suit)) return null // naiva lägsta rör ingen honnör → låt gamla regeln stå
+  return lowest(safe)
+}
+
 /** Korten i den längsta färgen (vid lika: första i kortordningen). */
 function longestSuit(cards: Hand): Hand {
   const bySuit = new Map<Suit, Card[]>()
@@ -243,11 +288,15 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   // (Steg B1, kast-vakten) – annars gäller gamla "kasta lågt".
   const guardReason =
     'Jag vaktar mina hotkort: sakar ur färgen där vår sida har störst överskott och behåller kort som kan växa till stick.'
+  const defenderGuardReason =
+    'Jag vaktar min honnör: sakar ur en färg utan skyddsvärd honnör i stället för att blotta t.ex. en dam under motståndarnas ess-kung.'
 
   // Partnern leder redan sticket → slösa inte, kasta lågt (ruffa aldrig partnern).
   if (side(bestSeat) === side(seat)) {
     const guarded = guardedDiscard(state, seat, legal)
     if (guarded) return { card: guarded, reason: guardReason }
+    const defGuard = defenderGuardDiscard(state, seat, legal)
+    if (defGuard) return { card: defGuard, reason: defenderGuardReason }
     return { card: lowAvoidRuff(legal, state.trump), reason: 'Partnern vinner redan sticket – jag kastar lågt och ruffar aldrig partnerns stick.' }
   }
 
@@ -276,6 +325,8 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
     }
     const guarded = guardedDiscard(state, seat, legal)
     if (guarded) return { card: guarded, reason: guardReason }
+    const defGuard = defenderGuardDiscard(state, seat, legal)
+    if (defGuard) return { card: defGuard, reason: defenderGuardReason }
     return { card: lowAvoidRuff(legal, state.trump), reason: 'Andra hand lågt – jag sparar honnörerna till senare.' }
   }
 
@@ -305,6 +356,8 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   }
   const guarded = guardedDiscard(state, seat, legal)
   if (guarded) return { card: guarded, reason: guardReason }
+  const defGuard = defenderGuardDiscard(state, seat, legal)
+  if (defGuard) return { card: defGuard, reason: defenderGuardReason }
   return { card: lowAvoidRuff(legal, state.trump), reason: 'Inget av mina kort vinner sticket – jag kastar lågt.' }
 }
 

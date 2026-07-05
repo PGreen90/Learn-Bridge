@@ -379,8 +379,28 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
     if (cb.level >= 3) {
       return { text: `${cb.level} sang — till spel, balanserad hand${stopp}.`, confidence: 'trolig', forcing: 'avslut' }
     }
-    const range = cb.level === 1 ? 'svag balanserad hand' : 'inbjudande balanserad hand'
-    return { text: `${cb.level} sang — ${range}${stopp}.`, confidence: 'trolig' }
+    // Öppnarens EGET sangåterbud efter att ha öppnat i FÄRG beskriver styrka/form
+    // (budsystem.md §5.2), inte en svag hand: 1NT = balanserad minimihand
+    // (~12–14 hp; 15–17 hade öppnat 1NT), 2NT = stark balanserad (~18–19 hp).
+    // Felrapport #24: 1NT-återbudet kallades felaktigt "svag balanserad hand".
+    const open = opening(prior)
+    if (open && open.seat === seat && open.cb.strain !== 'NT') {
+      if (cb.level === 1) {
+        return {
+          text: `Återbud 1 sang — balanserad minimihand (~12–14 hp; 15–17 hade öppnat 1 sang)${stopp}.`,
+          confidence: 'trolig',
+        }
+      }
+      // 2NT-återbud (hopp) = 18–19 hp, för stark för 1NT-öppning, inbjuder utgång.
+      return {
+        text: `Återbud 2 sang — stark balanserad hand (~18–19 hp), inbjuder utgång${stopp}.`,
+        confidence: 'trolig',
+        forcing: 'inbjudan',
+      }
+    }
+    // Övriga sangbud (svararens/advancerns): begränsat svar, inte en spärr.
+    const range = cb.level === 1 ? '6–11 hp, balanserad, saknar stöd och bättre bud' : 'inbjudande balanserad hand (~11–12 hp)'
+    return { text: `${cb.level} sang — ${range}${stopp}.`, confidence: 'trolig', forcing: cb.level === 2 ? 'inbjudan' : undefined }
   }
 
   // Ny färg med hopp = svagt hoppskift: lång egen färg, begränsad styrka.
