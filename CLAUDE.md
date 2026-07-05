@@ -29,6 +29,11 @@ Läs den här filen först varje session.
 > bygget (SW registrerad scope `/`, manifest laddat, inga konsolfel). 1052 test
 > gröna. Mergepunkt `565bbc8`. Ikonerna genererades ur `public/favicon.svg`-designen
 > (engångsskript m. `sharp`, borttaget efteråt; `sharp` ej kvar i deps).
+> **Uppföljning (2026-07-05, mergepunkt `43640e2`):** sidhuvudet fick
+> `pt-[env(safe-area-inset-top)]` (`Layout.tsx`) – i PWA-helskärm på iPhone låg
+> toppen annars under statusraden (klocka/batteri). Marginal = enhetens statusrad
+> (0 i vanlig webbläsare). Bekräftat lagom av ägaren på hans iPhone. `<main>` hade
+> redan motsvarande safe-area i botten.
 >
 > **Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
 > Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
