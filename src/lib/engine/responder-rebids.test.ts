@@ -321,8 +321,16 @@ describe('FAS 6 punkt 27 – svararens fortsättning efter inverterad minor (1�
     expect(inv('S:AQ4 H:KJ7 D:K842 C:Q3', '3D', 'inverterad: minimum')?.call).toBe('3NT') // 15 hp
   })
 
-  it('öppnaren minimum utan stopp (3♦) + saknar spaderstopp → pass', () => {
-    expect(inv('S:432 H:KJ7 D:KQ42 C:AQ3', '3D', 'inverterad: minimum')?.call).toBe('P') // 14 hp, ingen ♠-stopp
+  it('öppnaren minimum utan stopp (3♦) + utgångsvärden men saknar spaderstopp → 5♦ (minorutgång)', () => {
+    // Ägarregel 2026-07-05: en utgångskravshand (13+) som inte kan hålla en
+    // högfärg för sang chansar inte 3NT över öppnarens minimum – den spelar 5m.
+    const r = inv('S:432 H:KJ7 D:KQ42 C:AQ3', '3D', 'inverterad: minimum') // 15 hp, ingen ♠-stopp
+    expect(r?.call).toBe('5D')
+    expect(r?.uncertain).toBe(true)
+  })
+
+  it('öppnaren minimum utan stopp (3♦) + bara inbjudan (12) utan stopp → pass (delkontrakt)', () => {
+    expect(inv('S:432 H:J72 D:KQ42 C:AQ3', '3D', 'inverterad: minimum')?.call).toBe('P') // 12 hp
   })
 
   it('öppnaren stopp-visning (2♥) + övriga sidofärger täckta → 3NT', () => {

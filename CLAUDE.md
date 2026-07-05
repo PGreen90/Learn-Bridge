@@ -11,8 +11,32 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — inget aktivt bygge. Ägaren väljer nästa spår.
-> **NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln), ELLER
+### 🔵 NU — Kontraktväljaren (träningsmål i "Spela kort").
+> **En sidogren i "Spela kort" där ägaren väljer ett MÅL-kontrakt att bjuda fram**
+> (utgång i högfärg / lågfärg / 3NT / lillslam / storslam / med störning) i stället
+> för en ren slumpad giv. Metod: slumpa givar och behåll dem vars **simulerade
+> auktion** (motorns budgivning för alla fyra platser) landar i ett NS-kontrakt som
+> matchar målet. Ägarval (2026-07-05): mål = "motorn skulle nå kontraktet"; du
+> sitter alltid Syd i sidan som äger målet; slam = enkelt "Lillslam/Storslam".
+>
+> **ALLA TRE DELSTEG BYGGDA & VERIFIERADE (2026-07-05, ej pushat):**
+> - **(1) Filtret + motor-fix.** `contract-target.ts` (`matchesTarget` +
+>   `simulateAuction`). **Under bygget upptäcktes att motorn ALDRIG nådde 5♣/5♦**
+>   (0 av 30 000) – äkta lucka, inte att kontraktet är ovanligt. **Lagat**
+>   (ägarregel: utforska bara med en svag färg): svararen med lågfärgsfit + en
+>   osparrad färg går inverterad 2m i stället för att chansa 3NT och landar i 5m
+>   (`responses.ts` `hasWeakSideSuit`, `responder-rebids.ts` inverterad-minimum →
+>   5m). Nu nås 5♣/5♦ ~1 per 54. `budsystem.md` §4.2 uppdaterad.
+> - **(2) Sökaren.** `dealForTarget` (slumpa tills match, tak 60 000, null-fallback).
+> - **(3) Menyn i `Play.tsx`.** "Mål:"-pill → `ScenarioPicker` (7 scenariokort),
+>   batchad sökning (300/tick, setTimeout → fryser aldrig) med `SearchOverlay`
+>   ("Söker … N prövade" + Avbryt + ge-upp-väg), målet sparas i localStorage
+>   (`play-target`), "Ny giv" letar på samma mål. Random = som förr.
+>
+> 996 tester gröna, tsc rent, verifierat i webbläsaren (pill, väljare, sökning för
+> lågfärg + storslam, ren konsol). **KVAR: ägaren provbjuder + godkänner PCD.**
+>
+> **NÄSTA GÅNG (parkerat under Kontraktväljaren):** ägaren pekar ut nästa NU, ELLER
 > finslipar den starka dubblingens dom-efter-stödhöjning om den känts fel i spel.
 >
 > **Senast klart & LIVE (2026-07-05, mergepunkt `1bec779`):** starka
@@ -70,6 +94,14 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Lågfärgsutgång 5♣/5♦ nu nåbar (Kontraktväljaren delsteg 1, 2026-07-05, NYTT):**
+  motorn kunde förr aldrig bjuda 5♣/5♦ (valde alltid 3NT). Nu, efter inverterad
+  minor: en svarare med lågfärgsfit + en **osparrad färg** utforskar via 2m och
+  landar i **5m** när paret inte kan hålla alla färger (i stället för att chansa
+  3NT). Ägarregel: utforska bara med en **riktigt svag** färg (♠xx/♥xxx utan
+  honnör). **Bevaka:** (a) drar boten till 5m när 3NT egentligen var säkert? (b)
+  chansar den fortfarande 3NT med en helt öppen färg? Trösklar i `responses.ts`
+  (`hasWeakSideSuit`) + `responder-rebids.ts` (inverterad-minimum → 5m).
 - **Motspelarens kast-vakt + 1NT-återbudsförklaring (felrapport #24 + #25,
   2026-07-05, NYTT):** (1) **spelfel #25** – en försvarare som sakar blottar inte
   längre en honnör i onödan: ny "motspelarens kast-vakt" (`play-bot.ts`

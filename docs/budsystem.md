@@ -265,6 +265,20 @@ Svararen fortsätter mot 3NT (visar stopp i objudna färger), drar till utgång 
 lf, eller visar slamintresse via nya färger. Den **svaga höjningen** (1m–3m)
 är avslutande – öppnaren passar utan extra styrka.
 
+**3NT eller 5 i lf? (stopp-utbytet, ägarregel 2026-07-05).** Ett 2/1-par
+föredrar 3NT (färre stick), men bara när paret tillsammans kan **hålla alla fyra
+färger**. Räcker inte stoppen spelar paret **lågfärgsutgången 5♣/5♦** i stället
+för att chansa en sang som faller på första utspel:
+- **Svararens första val:** en balanserad utgångshand (13–15) med lågfärgsfit men
+  en **riktigt svag färg** (t.ex. ♠xx eller ♥xxx utan honnör) bjuder **inte 3NT
+  direkt** – den går den inverterade 2m-vägen och utforskar stoppen. Är alla
+  färger hållna bjuds 3NT som förr.
+- **Efter öppnarens minimum (3 i lf, ingen stopp):** med utgångsstyrka (13+) och
+  en **osparrad högfärg** drar svararen till **5 i lf** (3NT är osäker); kan båda
+  högfärgerna hållas bjuds 3NT. Med bara inbjudan (10–12) passas 3 i lf.
+- **Efter öppnarens stopp-visning:** är de återstående sidofärgerna täckta → 3NT,
+  annars **5 i lf**.
+
 ### 4.3 Svar på 1NT (15–17 hp, balanserad)
 *(Ingen störning. Konkurrens tas senare.)*
 
