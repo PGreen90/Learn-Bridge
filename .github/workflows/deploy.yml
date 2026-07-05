@@ -1,11 +1,14 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages (INAKTIV – hosting flyttad till Vercel)
 
-# Bygger och publicerar sidan automatiskt vid varje push till main.
-# Ägaren kör aldrig bygg-kommandon själv – push räcker.
+# INAKTIVERAD 2026-07-05: hostingen flyttades till Vercel (Steg A Del 1).
+# Auto-deploy sker nu på Vercel vid varje push till main. Den här workflowen
+# körs INTE längre automatiskt (push-triggern borttagen) – annars skulle den
+# publicera en BLANK sida på pgreen90.github.io/Learn-Bridge/ eftersom Vite
+# base numera är "/" (matchar Vercel-roten, inte /Learn-Bridge/-subpathen).
+# Filen behålls som referens och kan köras manuellt (workflow_dispatch) om vi
+# någon gång vill återgå till Pages – men då måste base ändras tillbaka först.
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
