@@ -82,8 +82,12 @@ Källa: bridgebum.com (Pearson points; third seat openings).
   Visar singleton *eller* renons; öppnaren frågar med ett relä och svararen
   avslöjar den korta färgen (se nedan). Direkt hopp till 4♣/4♦ i ny färg
   används inte längre som splinter.
-- **Svagt hoppskift** finns bara som **1♥–2♠**. Över 1♠ finns inget svagt
-  hoppskift; bjud i stället 1NT (se fortsättningsnoten nedan).
+- **Svagt hoppskift avskaffat** (ägarbeslut 2026-07-06, felrapport #31). När
+  partnern har öppnat håller svararen **budgivningen låg**: en svag 6-korts
+  spader över 1♥ svarar **1♠** (rondkrav), inte 2♠. Grundregeln – bjud den nya
+  färgen billigast så partnern får utrymme att beskriva sin hand (ett hopp
+  berövar t.ex. 1NT). Med en riktigt svag hand rebjuder svararen sedan sin
+  färg billigt / passar.
 
 #### Svar på 1♥
 | Svar | Betydelse | Kravnivå | Konvention |
@@ -92,7 +96,6 @@ Källa: bridgebum.com (Pearson points; third seat openings).
 | 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts limithöjning) | Semi-krav | Semi-forcing 1NT ● |
 | 2♣ / 2♦ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
 | 2♥ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
-| 2♠ | 6-korts ♠, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
 | 2NT | 4+ stöd, 13+ hp, balanserad (ingen kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
 | 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
@@ -217,11 +220,14 @@ trumf → 3 i trumf):
 - **Höjningar är inverterade:** 1m–2m = **stark** (10+ hp, krav, 4+ stöd, ingen
   4-korts hf); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
   spärrar direkt, den starka hålls låg för att få plats att utforska.
-- Ny färg på 2-läget utan hopp = **2-över-1 GF**. **Hoppskift i ny HÖGFÄRG**
-  (t.ex. 1♣–2♥, 1♣–2♠, 1♦–2♥, 1♦–2♠) = **svaga** (6-korts färg, ~6–10 hp), som i
-  hf. **Inget svagt hoppskift i den andra minorn** (ägarbeslut 2026-07-01): 1♦–3♣
-  spelas EJ som svag hoppskift – en svag 6-korts klöverhand över 1♦ bjuder **1NT**
-  (följer detaljtabellen nedan).
+- Ny färg på 2-läget utan hopp = **2-över-1 GF**.
+- **Svagt hoppskift avskaffat** (ägarbeslut 2026-07-06, felrapport #31). En svag
+  6-korts högfärg **hoppar inte** till 2♥/2♠ – när partnern har öppnat håller
+  svararen budgivningen låg och bjuder högfärgen billigast på **1-läget** (1♥/1♠,
+  rondkrav) så partnern får utrymme att beskriva sin hand (ett hopp berövar t.ex.
+  1NT). Med en riktigt svag hand rebjuder svararen sedan sin färg billigt / passar.
+  (Sedan tidigare fanns inget svagt hoppskift i den andra minorn heller – en svag
+  6-korts klöver över 1♦ bjuder 1NT.)
 - "Gap-handen" 7–9 hp med stöd men utan hf: bjud **1NT** (inverterad
   höjning kräver 10+).
 
@@ -233,7 +239,6 @@ trumf → 3 i trumf):
 | 1NT | 6–10 hp, balanserad, ingen 4-korts hf | Ej krav | naturligt |
 | 2♣ | 4+ ♣, 10+ hp, ingen 4-korts hf | Krav (1 rond) | Inverterad minor ● |
 | 2♦ | 4+ (oftast 5+) ♦, 12+ hp | Utgångskrav | 2-över-1 GF |
-| 2♥ / 2♠ | 6-korts färg, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
 | 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♣ | 5+ ♣, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
 | 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
@@ -245,7 +250,6 @@ trumf → 3 i trumf):
 | 1NT | 6–10 hp, balanserad, ingen 4-korts hf | Ej krav | naturligt |
 | 2♣ | 4+ (oftast 5+) ♣, 12+ hp | Utgångskrav | 2-över-1 GF |
 | 2♦ | 4+ ♦, 10+ hp, ingen 4-korts hf | Krav (1 rond) | Inverterad minor ● |
-| 2♥ / 2♠ | 6-korts färg, svag (~6–10 hp) | Avslut/spärr | Svagt hoppskift ● |
 | 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♦ | 5+ ♦, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
 | 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
@@ -1133,6 +1137,15 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-06** – **Svagt hoppskift avskaffat (kod + §4.1/§4.2, felrapport #31).**
+  Ägarbeslut. Svararen hoppade förr till 2♥/2♠ med en svag 6-korts högfärg (t.ex.
+  1♦–2♥). Ny grundregel: när partnern har öppnat håller svararen budgivningen LÅG
+  och bjuder den nya färgen billigast på 1-läget (1♥/1♠, rondkrav) så partnern får
+  utrymme att beskriva sin hand – ett hopp berövar t.ex. 1NT. `respondToMajor` +
+  `respondToMinor` (`responses.ts`) faller nu ned till 1-lägessvaret; öppnarens
+  hantering av ett MANUELLT hoppskift (om ägaren själv hoppar) lämnas orörd i
+  `rebids.ts`/`auction-interpret.ts`. Facit: `responses.test.ts` (svaga 6-korts-
+  händerna + #31-handen ♠7 ♥KT6432 ♦Q4 ♣A986 över 1♦ → 1♥). 1062 test gröna.
 - **2026-07-05** – **Starka upplysningsdubblingen: game-hopp borttaget + flerronds-
   fortsättning byggd (kod, live).** Ägarbeslut. (1) Det starka återbudet hoppar inte
   längre rakt till utgång – det bjuder färgen **lägst** (rondkrav); ett game-hopp mot
