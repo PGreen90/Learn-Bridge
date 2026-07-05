@@ -12,8 +12,20 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — ägaren pekar ut nästa sak (järnregeln: exakt en).
-> Föregående NU (störda krav) är **KLAR & LIVE**. Välj nästa ur 🟢 NÄST / ⚪ SENARE
-> nedan, eller peka ut en ny grundregel som känns opålitlig i spel.
+> **BYGGD & VERIFIERAD LOKALT (2026-07-05, EJ PUSHAD — inväntar ägarens provbjud +
+> PCD-godkännande): Öppnarens rond-2 i störd auktion efter partnerns NYA FÄRG / 1NT
+> (§5.8).** Systerfallet till delbit 6 (§5.4, som gällde partnerns *höjning*). Roten
+> (bevisad i utforskning): så snart motståndarna bjöd om över partnerns fria svar
+> passade öppnaren bort ÄVEN starka händer (rondkravet är tekniskt av då). Ny
+> detektor `openerRondTwoInCompetition` (`auction-live.ts`, före `maybePenaltyDouble`
+> + off-book-svaret). Ägarbeslut 2026-07-05: **visa extra med CUE i deras färg +
+> naturliga hopp**; trösklar speglar delbit 6 (**15+ = extra, 18+ = utgång, 6:e
+> kortet = tävla**). 18+ högfärgsfit → 4M; 18+ jämn m. stopp → 3NT; 15–17 högfärgsfit
+> → inbjudande hopphöjning; 15+ i övrigt → **cue** (hitta rätt utgång); minimum m.
+> egen 6+ färg/fit → tävla; annars pass. Styrka = stödpoäng med fit, annars ren hp
+> (så en lång svag färg inte blåser upp handen). Facit
+> `auction-opener-competition-response.test.ts` (9, röda före fixen). 1037 tester
+> gröna, tsc rent. Se 👀 Bevaka. **KVAR: ägaren provbjuder + godkänner PCD.**
 >
 > **Senast klart & LIVE (2026-07-05, commit `a989a08`, deploy grön): Störda krav
 > (§5.5).** Steg 1 hedrade krav bara OSTÖRT; nu även i KONKURRENS. `auctionForce`
@@ -121,9 +133,10 @@ Läs den här filen först varje session.
 > med valfri bud-specifik text ("Rapportera fel i budgivningen" +
 > `BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
 >
-> **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** öppnarens rond-2 när partnern
-> bjöd NY färg / 1NT (ej höjning); balanseringens "låna en kung"-lättnad; bredare
-> flerronds-konkurrens. Delbit 3 (Mathe mot stark 1♣) förblir PARKERAD.
+> **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 när partnern
+> bjöd NY färg / 1NT~~ (BYGGD 2026-07-05, §5.8, se 🔵 NU – inväntar PCD);
+> balanseringens "låna en kung"-lättnad; bredare flerronds-konkurrens. Delbit 3
+> (Mathe mot stark 1♣) förblir PARKERAD.
 >
 > **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
 > kräver webworker), R3 #8 ("Förra sticket" 85 % — 375px-koll utestående). Se
@@ -133,6 +146,16 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Öppnarens rond-2 i konkurrens efter partnerns ny färg / 1NT (§5.8, 2026-07-05,
+  NYTT – EJ PUSHAD ÄNNU):** öppnar du 1 i färg, partnern svarar en fri ny färg / 1NT
+  och motståndarna bjuder om (t.ex. `1♥–(1♠)–2♣–(2♠)`), passar öppnaren inte längre
+  bort en stark hand. Extra visas med **cue i deras färg** (15+, hitta rätt utgång),
+  18+ med högfärgsfit → 4M, 18+ jämn m. stopp → 3NT, 15–17 m. högfärgsfit →
+  inbjudande hopphöjning; minimum tävlar med en egen 6+ färg eller en fit, annars
+  pass. **Bevaka:** (a) cue:ar boten lagom ofta (inte varje 15-poängare som borde
+  passat)? (b) hittar den rätt utgång efter cuet, eller överbjuder den? (c) medvetet
+  bortval: i det här läget väljs **cue framför straffdubbling** på extra-händer –
+  säg till om en straffdubbling av deras bud borde ha varit rätt i stället.
 - **Störda krav = RONDKRAV (§5.5, 2026-07-05, NYTT):** klev en motståndare in och du
   gjorde ett **fritt bud** (ny färg, t.ex. `1♦–(1♠)–2♣`) eller öppnaren **reverse:ade**
   (`1♣–1♥–(1♠)–2♦`), så passar din partner inte längre — hen tvingas svara med ett

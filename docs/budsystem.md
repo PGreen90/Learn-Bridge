@@ -685,6 +685,31 @@ naturliga svaga 2-budet i NMF-lågfärgen.
 → `3NT` med utgångsvärden, annars pass. Kort sagt: 13+ når alltid utgång; 11–12
 når utgång bara när öppnaren visat maximum.
 
+### 5.8 Öppnarens rond-2 i konkurrens efter partnerns nya färg / 1NT
+Systerfallet till §5.4 (som gällde partnerns *höjning*). Du öppnar **1 i färg**, en
+motståndare kliver in, partnern svarar med en **fri ny färg** eller **1NT** (inte en
+höjning), och motståndarna **konkurrerar över svaret** (t.ex. **1♣–(1♦)–1♥–(2♦)**,
+**1♥–(1♠)–2♣–(2♠)** eller **1♣–(1♦)–1NT–(2♦)**). Nu är rondkravet tekniskt av –
+motståndarna har "lånat" utrymmet – så du får själv välja. Passa inte bort en stark
+hand:
+
+| Öppnarens bud | Betydelse |
+|---|---|
+| **4M** | 18+ totalpoäng **med högfärgsfit** → utgång |
+| **3NT** | 18+, jämn hand med **stopp i deras färg** |
+| **cue i deras färg** | 15+ utan klar naturlig utgång → **extra / (utgångs)krav** – hjälp mig välja rätt utgång |
+| **inbjudande hopphöjning** (t.ex. 3♥) | 15–17 **med högfärgsfit** → naturlig inbjudan |
+| **3M / bjud om egen färg** | minimum men **egen 6+ färg** → tävla (lagen om totala stick) |
+| **enkel höjning** | minimum **med fit** → tävla |
+| Pass | minimum utan lång färg eller fit → sälj inte, men höj inte heller |
+
+**Trösklarna speglar delbit 6 / §5.4:** ~15 = visa extra, 18 = driv utgång, en egen
+6:e färg tävlar på minimum. **Cue-budet i motståndarnas färg** är verktyget för att
+visa extra utan ett klart naturligt bud (t.ex. 17 hp med en lång färg men utan stopp
+i deras färg → cue och fråga efter stopp för 3NT). Styrkan mäts som **stödpoäng när
+det finns en fit** (form lyfter), annars ren hp – så en lång svag färg aldrig blåser
+upp handen till ett falskt utgångskrav.
+
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
 Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit

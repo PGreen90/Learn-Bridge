@@ -2160,6 +2160,130 @@ function answerOpenerMaximal(deal: Deal, history: ResolvedCall[], seat: Seat): R
   return null
 }
 
+/**
+ * Öppnarens ROND-2 i en STÖRD auktion när partnern svarat med en FRI NY FÄRG
+ * eller 1NT (INTE en höjning) och motståndarna KONKURRERAT över svaret
+ * (R1 Fynd #2). Utan detta passade öppnaren bort ÄVEN starka händer så snart
+ * motståndarna bjöd om över partnerns fria svar (rondkravet är tekniskt av då –
+ * de har lånat utrymme). Systerfallet till delbit 6 (som gällde partnerns
+ * HÖJNING); här bjöd partnern en ny färg / 1NT.
+ *
+ * Ägarbeslut 2026-07-05: visa extra med CUE i deras färg + naturliga hopp;
+ * trösklar speglar delbit 6 (15+ = extra, 18+ = utgång, 6:e kortet = tävla).
+ * Strykan mäts som Bergenpoäng när det finns en fit (form lyfter), annars ren hp
+ * (så en lång svag färg inte blåser upp handen till ett falskt utgångskrav).
+ *   - 18+ & högfärgsfit → utgång 4M.
+ *   - 18+ & jämn hand med stopp i deras färg → 3NT.
+ *   - 15–17 med högfärgsfit → inbjudande hopphöjning (naturligt).
+ *   - 15+ i övrigt → CUE i deras färg (game try / utgångskrav – hitta rätt utgång).
+ *   - minimum & egen 6+ färg → bjud om den (tävlar, lagen om totala stick).
+ *   - minimum & fit → enkel höjning (tävlar).
+ *   - annars null → faller igenom till pass.
+ * Bara mönstret matchas (senaste kontraktsbudet är motståndarnas); den ostörda
+ * rondkravs-varianten (motståndarna passade svaret) sköts av honorForce.
+ */
+function openerRondTwoInCompetition(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.strain === 'NT' || open.level !== 1) return null
+  if (open.seat !== seat) return null // VÅR färgöppning, ÖPPNAREN själv agerar
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+  // Vår sida ska ha bjudit exakt öppning + partnerns svar (öppnaren har ej rebjudit).
+  const ourBids = contractBids.filter((c) => side(c.seat) === side(seat))
+  if (ourBids.length !== 2 || ourBids[0].seat !== seat || ourBids[1].seat !== PARTNER[seat]) return null
+  const resp = parseContractBid(ourBids[1].bid)!
+
+  // Motståndarna ska ha gjort SENASTE kontraktsbudet (konkurrerat) + bara pass efter.
+  const last = contractBids[contractBids.length - 1]
+  if (side(last.seat) === side(seat)) return null
+  const theirStrain = parseContractBid(last.bid)!.strain
+  if (theirStrain === 'NT') return null
+  const lastIdx = history.indexOf(last)
+  if (history.slice(lastIdx + 1).some((c) => c.bid !== 'P')) return null
+
+  // Klassa partnerns svar: en HÖJNING är delbit 6:s (ej detta); annars 1NT eller
+  // en FRI ny färg (ej cue i motståndarnas färg).
+  if (resp.strain === open.strain) return null // höjning → delbit 6
+  let respStrain: string | null = null
+  if (resp.strain === 'NT') {
+    if (ourBids[1].bid !== '1NT') return null // bara 1NT-svaret (ej 2NT/3NT-hopp)
+  } else {
+    const oppStrains = new Set(
+      contractBids.filter((c) => side(c.seat) !== side(seat)).map((c) => parseContractBid(c.bid)!.strain),
+    )
+    if (oppStrains.has(resp.strain)) return null // cue i deras färg är ingen ny färg
+    respStrain = resp.strain
+  }
+
+  const hand = deal.hands[seat]
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  const theirSuit = SUIT_OF_LETTER[theirStrain]
+  const cue = cheapestBidIn(history, seat, theirStrain)
+
+  // Fit i partnerns nya färg? 1-lägessvar lovar 4+ (öppnaren behöver 4), ett
+  // 2/1-svar lovar 5+ (öppnaren behöver 3). Bergen bara med fit; annars ren hp.
+  let fitStrain: string | null = null
+  if (respStrain && len[SUIT_OF_LETTER[respStrain]] >= (resp.level >= 2 ? 3 : 4)) fitStrain = respStrain
+  const tp = fitStrain ? pointsWithFloor(hand, SUIT_OF_LETTER[fitStrain], 'bergen').points : hcp(hand)
+  const isMajorFit = fitStrain === 'H' || fitStrain === 'S'
+
+  // --- 18+ utgångshand -------------------------------------------------------
+  if (tp >= 18) {
+    if (isMajorFit && legal.includes(`4${fitStrain}` as Bid)) return {
+      seat, bid: `4${fitStrain}` as Bid, rule: 'öppnaren bjuder utgång i konkurrens',
+      explanation: `~${tp} totalpoäng med ${SWE_NAME[fitStrain!]}fit → utgång 4${SWE_NAME[fitStrain!]}.`,
+    }
+    if (isBalanced(hand) && hasStopper(hand, theirSuit) && legal.includes('3NT' as Bid)) return {
+      seat, bid: '3NT', rule: 'öppnaren bjuder 3NT i konkurrens',
+      explanation: `~${tp} hp, jämn hand med stopp i ${SWE_NAME[theirStrain]} → 3NT.`,
+    }
+    if (cue) return {
+      seat, bid: cue, rule: 'öppnarens cue (utgångskrav i konkurrens)',
+      explanation: `~${tp} hp – för starkt för att sälja given: cue i ${SWE_NAME[theirStrain]} = utgångskrav, hjälp mig välja utgång.`,
+    }
+  }
+
+  // --- 15–17 extra -----------------------------------------------------------
+  if (tp >= 15) {
+    if (isMajorFit) {
+      const simple = cheapestBidIn(history, seat, fitStrain!)
+      if (simple) {
+        const cb = parseContractBid(simple)!
+        const jump = `${cb.level + 1}${fitStrain}` as Bid
+        if (legal.includes(jump)) return {
+          seat, bid: jump, rule: 'öppnarens inbjudande höjning (konkurrens)',
+          explanation: `~${tp} stödpoäng med ${SWE_NAME[fitStrain!]}fit → inbjudande hopphöjning ${jump}.`,
+        }
+        if (legal.includes(simple)) return {
+          seat, bid: simple, rule: 'öppnarens höjning (konkurrens)',
+          explanation: `~${tp} stödpoäng med ${SWE_NAME[fitStrain!]}fit → ${simple}.`,
+        }
+      }
+    }
+    if (cue) return {
+      seat, bid: cue, rule: 'öppnarens cue (extra i konkurrens)',
+      explanation: `~${tp} hp – för bra för ett minimibud: cue i ${SWE_NAME[theirStrain]} visar extra och letar rätt utgång.`,
+    }
+  }
+
+  // --- Minimum: tävla med egen 6+ färg eller en fit, annars pass (null) -------
+  if (len[SUIT_OF_LETTER[open.strain]] >= 6) {
+    const rebid = cheapestBidIn(history, seat, open.strain)
+    if (rebid) return {
+      seat, bid: rebid, rule: 'öppnaren tävlar (egen 6+ färg)',
+      explanation: `Minimum men 6+ ${SWE_NAME[open.strain]} → ${rebid} (tävlar på lagen om totala stick, ej krav).`,
+    }
+  }
+  if (fitStrain) {
+    const raise = cheapestBidIn(history, seat, fitStrain)
+    if (raise) return {
+      seat, bid: raise, rule: 'öppnaren tävlar (stödjer partnern)',
+      explanation: `Minimum med ${SWE_NAME[fitStrain]}fit → ${raise} (tävlar).`,
+    }
+  }
+  return null
+}
+
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
   const built = buildAuction(deal)
@@ -2251,6 +2375,12 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // specifika mönstret matchas; annars faller det igenom orört.
       () => answerOpenerMaximal(deal, history, seat),
       () => openerCompetesAfterRaise(deal, history, seat),
+      // Systerfallet: öppnarens rond-2 i konkurrens när partnern bjöd NY FÄRG /
+      // 1NT (ej höjning) och motståndarna konkurrerat (R1 Fynd #2). Extra visas
+      // med cue i deras färg + naturliga hopp; minimum tävlar med 6+ färg/fit.
+      // Ligger FÖRE maybePenaltyDouble (extra → cue, inte straffdubbling) och
+      // FÖRE off-book-svaret (som annars säljer given genom att passa).
+      () => openerRondTwoInCompetition(deal, history, seat),
       // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
       // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp.
       () => maybePenaltyDouble(deal, history, seat),
