@@ -11,30 +11,33 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — New Minor Forcing (NMF) bygga konventionen.
-> **NMF saknas helt** (varken i motor eller systembok, bekräftat 2026-07-05). Efter
-> `1m–1M(1-läget)–1NT` (öppnarens 1NT-rebud = 12–14 bal) hoppar svararen idag rakt
-> till sang-stegen (`responder-rebids.ts` `responderRebidColorAuction` case
-> `'1NT (12–14)' → ntLadder`) → en dold **5-3-högfärgsfit går förlorad**. NMF fixar
-> det: svararen bjuder den **oanvända lågfärgen** (2♣/2♦) konstgjort & tvingande och
-> frågar efter öppnarens dolda högfärgspassning.
+### 🔵 NU — Störda krav (krav får aldrig passas i KONKURRENS).
+> **Steg 1 av "budsystemets grunder" (LIVE) täcker bara OSTÖRDA krav.** I konkurrens
+> faller de fortfarande. Bevisat 2026-07-05: `1♦–(1♠)–2♣–(P)` → öppnaren passar det
+> fria kravbudet; `1♣–1♥–(1♠)–2♦` → svararen passar reversen. `auctionForce`
+> (`auction-live.ts`) spärrar AV på konkurrens med flit — här ska den utvidgas.
 >
-> **Ägarval (2026-07-05, "först mer om NMF" → godkänt bygge):** bara ostört; bara
-> efter en **högfärgssvar** (1♥/1♠, ej 1♦-svar); NMF-budet = oanvänd lågfärg (efter
-> `1♥–1♠–1NT` båda lediga → bjud starkare, antyder stopp); golv **11+ hp**
-> (inbjudan+, 13+ tvingar utgång); vi ger upp naturligt svagt 2-bud i NMF-lågfärgen.
-> Öppnarens svarsprioritet: 4-korts andra högfärg → 3-korts stöd (2M/hopp 3M) →
-> NT m. stopp (2NT 12–13 / 3NT 13–14) → höj lågfärgen (4 kort) → rebjud färg.
+> **Ägarbeslut (2026-07-05):** `1♦–(1♠)–2♣` = **RONDKRAV** i konkurrens (partnern får
+> inte passa, men budgivningen får stanna UNDER utgång — ett inkliv "lånar" utrymme,
+> så ett 2/1 lovar värden men ej garanterad utgång). Bygg: fria bud (ny färg) +
+> reverse i störd auktion honoreras som rondkrav. Facit-givar: störda A/B/C.
 >
-> **Bygg i test-låsta steg (facit före fix):** (1) svararens NMF-bud, (2) öppnarens
-> svar, (3) svararens placering + `docs/budsystem.md`.
+> **Metod (som alltid):** facit före fix, test-låsta steg. Störd semantik skiljer
+> sig från ostört → inte bara ta bort ostört-spärren i `auctionForce`.
 >
-> **Senast klart & LIVE (2026-07-05, commit `eca5ff0`, deploy grön): budsystemets
-> grunder steg 1.** `auctionForce`/`honorForce` (auction-live.ts) → krav får aldrig
-> passas OSTÖRT (2/1, ny färg, reverse); `raiseWithFit` → minorfit + utgångsvärden
-> når utgång (3NT/5m). Facit `foundation-forcing.test.ts` A–D regressionslås.
-> budsystem.md §5.5+§5.6. **Störda krav = NÄST #1** (ägarbeslut: `1♦–(1♠)–2♣` =
-> RONDKRAV i konkurrens; ej byggt, auctionForce spärrar av på konkurrens med flit).
+> **Senast klart & LIVE (2026-07-05, commit `ca04175`, deploy grön): New Minor
+> Forcing (§5.7).** Efter `1m–1M–1NT` bjuder svararen (5-korts högfärg + 11+) den
+> oanvända lågfärgen (2♣/2♦, konstgjort krav); öppnaren svarar (5 prioriteringar,
+> passar aldrig); svararen placerar (13+ når alltid utgång). `responder-rebids.ts`
+> (`newMinorForcingBid`, `responderPlaceAfterNMF`), `rebids.ts` (`openerAnswerNMF`),
+> `auction-live.ts` (`nmfToAnswer` + `nmfPlacementToAnswer` tvångssvarare). Facit
+> `new-minor-forcing.test.ts` (21). End-to-end: `1♣–1♥–1NT–2♦–3♥–4♥` hittar 5-3-fit.
+>
+> **Senast klart & LIVE (2026-07-05, commit `eca5ff0`): budsystemets grunder steg 1.**
+> `auctionForce`/`honorForce` → krav passas aldrig OSTÖRT (2/1, ny färg, reverse);
+> `raiseWithFit` → minorfit + utgångsvärden når utgång (3NT/5m). Facit
+> `foundation-forcing.test.ts` A–D. budsystem.md §5.5+§5.6. **Detta NU utvidgar det
+> till konkurrens.**
 >
 > ---
 > **HISTORIK nedan (tidigare sessioner, KLARA & LIVE — behandla ej som pågående):**
@@ -213,14 +216,7 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Krav i STÖRDA auktioner (måste-fix, ägaren flaggade 2026-07-05).** Steg 1 av
-   "budsystemets grunder" (`auctionForce`/`honorForce` i `auction-live.ts`) gör att
-   krav aldrig passas OSTÖRT — men i konkurrens faller de fortfarande. Bevisat:
-   `1♦–(1♠)–2♣–(P)` → öppnaren passar det fria kravbudet; `1♣–1♥–(1♠)–2♦` →
-   svararen passar reversen. Kräver eget omtänk (störd semantik: 2/1 ej självklart
-   100 % utgångskrav i konkurrens, fria bud är krav på annat sätt) — inte bara att
-   ta bort ostört-spärren i `auctionForce`. Facit-givar att bygga: störda A/B/C.
-2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
+1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - **17+ stark enfärgshand EFTER två bjudna färger (takeout, 2026-07-05):** en 17+
