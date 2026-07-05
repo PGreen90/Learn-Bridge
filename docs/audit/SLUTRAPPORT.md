@@ -82,7 +82,8 @@ lagade (se respektive delrapports åtgärdslogg). De enda oåtgärdade icke-HÖG
 
 - **R3 #3 (del 2)** — auto-facit på hela given: MEDIUM, backad (för tung för
   TS-lösaren, kräver webworker). → SENARE.
-- **R3 #8** — "Förra sticket" 85 %: LÅG, 375px-kollen utestående. → SENARE.
+- **R3 #8** — "Förra sticket" 85 %: LÅG. **OK/STÄNGD (ägarbeslut 2026-07-05 —
+  panelen är bra som den är; ingen 375px-koll behövs).**
 - **R2 #5** — `responses.ts` bred nav: LÅG, medveten notering (behandla som
   publikt kontrakt). Ingen åtgärd.
 - **R5 #5** — `cancel-in-progress`: LÅG, korrekt beteende. Ingen åtgärd.
@@ -100,9 +101,9 @@ lagade (se respektive delrapports åtgärdslogg). De enda oåtgärdade icke-HÖG
    MERGE" — R5 är mergad. Sätt NU till nästa riktiga sak (se nedan) och notera att
    R1–R6 är klar.
 
-### Denna månad (en liten, avgränsad SENARE-post om ägaren vill)
-3. **R3 #8 — 375px-kollen** på "Förra sticket"-panelen (85 %). Kräver bara att
-   mobil-preview funkar; annars åter till 75 %. Litet, isolerat.
+### Denna månad
+3. ~~**R3 #8 — 375px-kollen** på "Förra sticket"-panelen.~~ **OK/STÄNGD
+   (ägarbeslut 2026-07-05) — panelen är bra som den är.**
 
 ### Detta kvartal (det enda stora — ägarstyrt, delbit för delbit)
 4. **R1 #2 — bredda den störda budgivningen** (generell flerronds-konkurrens

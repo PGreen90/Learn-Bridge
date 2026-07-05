@@ -124,7 +124,8 @@ Läs den här filen först varje session.
 >   (`play-target`), "Ny giv" letar på samma mål. Random = som förr.
 >
 > 996 tester gröna, tsc rent, verifierat i webbläsaren (pill, väljare, sökning för
-> lågfärg + storslam, ren konsol). **KVAR: ägaren provbjuder + godkänner PCD.**
+> lågfärg + storslam, ren konsol). **Kontraktväljaren = KLAR & LIVE, inga öppna
+> punkter (ägaren godkände 2026-07-05).**
 >
 > **NÄSTA GÅNG (ägarbeslut 2026-07-05): 🔵 NU blir "Budsystemets grunder — varför
 > de faller".** Ägaren vill gräva i budsystemets FUNDAMENT och förstå varför de
@@ -133,8 +134,8 @@ Läs den här filen först varje session.
 > utgångskrav/rondkrav i sin FÖRPLANERADE linje men tappar dem OFF-BOOK (när
 > ägaren öppnar/bjuder en annan hand än motorn valt). Fråga ägaren vilka
 > grundregler som känts opålitliga i spel och bygg facit-givar som blottar
-> mönstret innan något byggs om. (Kontraktväljaren = KLAR & LIVE, se nedan; dess
-> enda kvarvarande punkt "ägaren provbjuder + godkänner PCD" är parkerad.)
+> mönstret innan något byggs om. (Kontraktväljaren = KLAR & LIVE, se nedan — inga
+> öppna punkter kvar.)
 >
 > **Senast klart & LIVE (2026-07-05):** felrapport #26 + #27 lagade, pushade,
 > deploy grön (commit `f9531b2`). Båda samma rot: utgångskrav passades OFF-BOOK.
@@ -193,8 +194,8 @@ Läs den här filen först varje session.
 > PARKERAD (irrelevant tills vi lägger till fler budsystem).
 >
 > **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
-> kräver webworker), R3 #8 ("Förra sticket" 85 % — 375px-koll utestående). Se
-> ⚪ SENARE nedan.
+> kräver webworker). (R3 #8 "Förra sticket" = OK/klar, ägarbeslut 2026-07-05 —
+> struken.) Se ⚪ SENARE nedan.
 >
 > Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
@@ -353,10 +354,6 @@ Läs den här filen först varje session.
   efter ~1,7 s, spränger 2M-nodbudgeten → skulle frysa + nästan alltid "för tung").
   Kräver bakgrundstråd (mc-worker) med möjliga långa väntetider, eller snabbare
   lösare. Del 1 (budhint "Motorn hade valt X") är redan gjord + live.
-- **"Förra sticket"-panelen 75 %→85 % (R3 fynd #8):** liten läsbarhets-bump ägaren
-  ville ha. Backad tills 375px-överlappet mot pågående sticket kan ögonkollas
-  (mobil-preview var blockerad). Ändra `scale-75`→`scale-[0.85]` i `Play.tsx` och
-  verifiera på 375 px; krockar den → åter till 75 % eller justera ankringen.
 - **Kanoniska linjen passar ut ostörda tvåfärgsinkliv** (fynd felrapport #7,
   2026-07-03): `buildAuction` (`auction.ts`) kan stänga en linje som
   1♠–2NT–P–P–P — advancern ska aldrig passa ostört (ägarbeslut FAS 10).
