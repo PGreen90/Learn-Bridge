@@ -11,25 +11,32 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Steg A, Del 2: köp + koppla `rebidz`-domän (järnregeln: exakt en).
-> **Del 1 (Vercel-flytt) är KLAR & LIVE (2026-07-05).** NU = nästa delsteg i Steg A:
-> köpa domänen `rebidz` (~100–150 kr/år) och koppla den till Vercel-projektet, så
-> appen når `rebidz.se`/`.com` i stället för `learn-bridge-topaz.vercel.app`. Del 3
-> (PWA) tas separat efteråt. **Bekräfta med ägaren att domänen/valen står innan du
-> rör något.** Fullt beslutsunderlag: `docs/framtid-multiplayer-plattform.md` +
-> minnet `future-multiplayer-platform`. Ägaren köper + godkänner själv (kort, DNS)
-> — guida exakt var han klickar, kör inget åt honom. Följ [[ask-before-pcd]].
+### 🔵 NU — Steg A, Del 3: PWA (järnregeln: exakt en).
+> **Del 1 (Vercel-flytt) + Del 2 (`rebidz.com`-domän) är KLARA & LIVE (2026-07-05).**
+> NU = sista delsteget i Steg A: göra appen till en **PWA** (manifest.json + enkel
+> service worker + ikoner) så den kan "Läggas till på hemskärmen" på iPhone/Android
+> — egen ikon, känns som en app, ingen App Store, ingen avgift. **Bekräfta med
+> ägaren att han vill ta Del 3 innan du rör något.** Beslutsunderlag:
+> `docs/framtid-multiplayer-plattform.md` ("Mobil-vägen i tre steg", PWA först) +
+> minnet `future-multiplayer-platform`. Behåll test-/typgrinden. Följ [[ask-before-pcd]].
+> Efter Del 3 är hela Steg A klart (Beslut A i framtidsdoket) — Beslut B
+> (konton/multiplayer/tävlingar) är ett separat, större spår, ej automatiskt näst.
 >
-> **Del 1 KLAR & LIVE (2026-07-05, ägarbeslut + genomfört):** hosting flyttad från
-> GitHub Pages till **Vercel**. Publik adress nu **https://learn-bridge-topaz.vercel.app/**
-> (repo & felrapport-URL stannar `Learn-Bridge` på GitHub). Konkret gjort: Vite
-> `base` `/Learn-Bridge/` → `/` (`vite.config.ts`); vakttestet
+> **Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
+> Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
+> learn-bridge-projektet (Production). `rebidz.com` = huvudadress (visar appen,
+> HTTPS ✅); `www.rebidz.com` → 308 till rebidz.com. Ren Vercel-konfig, ingen
+> kodändring. **Nya publika adressen att dela = https://rebidz.com** (gamla
+> `learn-bridge-topaz.vercel.app` lever kvar som reserv).
+>
+> **Del 1 KLAR & LIVE (2026-07-05):** hosting flyttad från GitHub Pages till
+> **Vercel** (repo & felrapport-URL stannar `Learn-Bridge` på GitHub). Konkret
+> gjort: Vite `base` `/Learn-Bridge/` → `/` (`vite.config.ts`); vakttestet
 > `src/deploy-config.test.ts` låser nu `/`; ny `vercel.json` kör test-/typgrinden
 > (`npx tsc && npm test && npm run build`) så trasig kod aldrig går live — samma
 > skydd som förr; gamla Pages-workflowen (`deploy.yml`) INAKTIVERAD (push-triggern
 > borttagen, `workflow_dispatch`-endast, filen kvar som referens). 1052 tester
-> gröna. Vercel-bygget verifierat grönt + sidan publikt nåbar. Mergepunkter
-> `79fd1d0` (flytten) + `18efe8b` (Pages av). Se 👀 Bevaka.
+> gröna. Mergepunkter `79fd1d0` (flytten) + `18efe8b` (Pages av).
 >
 > **⚠️ Två ärliga varningar (upprepa för ägaren):** (1) Steg A förbättrar INTE
 > boten — bara var appen bor; bot-utvecklingen är ett SEPARAT framtida NU. (2)
@@ -536,9 +543,9 @@ Allt körs i webbläsaren, gratis-hostat på Vercel (flyttat från GitHub Pages
 
 ## Konkreta fakta om detta projekt (för deploy)
 - GitHub-repo: **PGreen90/Learn-Bridge** (publikt). Repo-namnet byts INTE.
-- Live-URL (Vercel): **https://learn-bridge-topaz.vercel.app/** (egen `rebidz`-
-  domän planerad = Steg A Del 2). Gamla `pgreen90.github.io/Learn-Bridge/` är
-  ur bruk (blir blank, base=`/`).
+- Live-URL: **https://rebidz.com** (egen domän, Steg A Del 2 klar 2026-07-05;
+  `www.rebidz.com` → 308 hit). Reserv: `learn-bridge-topaz.vercel.app`. Gamla
+  `pgreen90.github.io/Learn-Bridge/` är ur bruk (blir blank, base=`/`).
 - Vite `base` = **"/"** (Vercel serverar från roten).
 - Hosting: **Vercel**, projekt `learn-bridge`, team `rebidz` (Hobby/gratis),
   kopplat till GitHub-repot via Vercels GitHub-app → auto-deploy vid push till main.
