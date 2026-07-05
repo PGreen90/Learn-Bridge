@@ -11,16 +11,31 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Steg A, Del 3: PWA (järnregeln: exakt en).
-> **Del 1 (Vercel-flytt) + Del 2 (`rebidz.com`-domän) är KLARA & LIVE (2026-07-05).**
-> NU = sista delsteget i Steg A: göra appen till en **PWA** (manifest.json + enkel
-> service worker + ikoner) så den kan "Läggas till på hemskärmen" på iPhone/Android
-> — egen ikon, känns som en app, ingen App Store, ingen avgift. **Bekräfta med
-> ägaren att han vill ta Del 3 innan du rör något.** Beslutsunderlag:
-> `docs/framtid-multiplayer-plattform.md` ("Mobil-vägen i tre steg", PWA först) +
-> minnet `future-multiplayer-platform`. Behåll test-/typgrinden. Följ [[ask-before-pcd]].
-> Efter Del 3 är hela Steg A klart (Beslut A i framtidsdoket) — Beslut B
-> (konton/multiplayer/tävlingar) är ett separat, större spår, ej automatiskt näst.
+### 🔵 NU — ägaren pekar ut nästa NU (Steg A helt klart; järnregeln: exakt en).
+> **HELA STEG A ÄR KLART & LIVE (2026-07-05):** Del 1 (Vercel-flytt) + Del 2
+> (`rebidz.com`-domän) + Del 3 (PWA). Därmed är **Beslut A** i framtidsdoket
+> avklarat. **NU är öppet — ägaren väljer nästa sak** (presentera återstående
+> punkter ur `docs/arbetslista.md` + NÄST-listan, en väljs, järnregeln). **Beslut B**
+> (konton/multiplayer/tävlingar) är ett separat, STORT spår — inte automatiskt näst;
+> börja det bara på uttryckligt ägarbeslut (`docs/framtid-multiplayer-plattform.md`).
+> Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
+> R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
+>
+> **Del 3 (PWA) KLAR & LIVE (2026-07-05):** appen är nu installerbar ("Lägg till på
+> hemskärmen" på iPhone/Android, egen guld-spader-ikon på emerald) + fungerar
+> offline. `vite-plugin-pwa` (autoUpdate) genererar service worker + `manifest.webmanifest`
+> vid Vercel-bygget; `index.html` har apple-touch-icon + iPhone-taggar; ikoner i
+> `public/` (192/512/maskable/apple-touch). Verifierat i webbläsaren mot skarpa
+> bygget (SW registrerad scope `/`, manifest laddat, inga konsolfel). 1052 test
+> gröna. Mergepunkt `565bbc8`. Ikonerna genererades ur `public/favicon.svg`-designen
+> (engångsskript m. `sharp`, borttaget efteråt; `sharp` ej kvar i deps).
+>
+> **Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
+> Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
+> learn-bridge-projektet (Production). `rebidz.com` = huvudadress (visar appen,
+> HTTPS ✅); `www.rebidz.com` → 308 till rebidz.com. Ren Vercel-konfig, ingen
+> kodändring. **Nya publika adressen att dela = https://rebidz.com** (gamla
+> `learn-bridge-topaz.vercel.app` lever kvar som reserv).
 >
 > **Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
 > Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
