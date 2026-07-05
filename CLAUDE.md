@@ -21,6 +21,23 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
+> **NÄSTA GÅNG BÖRJAR VI MED (ägarbeslut 2026-07-05): `/felrapporter` på issue #31.**
+> Ägaren skickade #31 skarpt via det nya direktskicket (se nedan) — en äkta bugg:
+> `1♦(S)–P–2♥(N)` — Nord hoppar till 2♥ med ♠7 ♥KT6432 ♦Q4 ♣A986 (~9 hp, 6-korts
+> hjärter) men ska svara **1♥** (nytt färgsvar, rondkrav); ett hopp till 2♥ lovar en
+> mycket starkare hand. FACIT FÖRE FIX via `/felrapporter`.
+>
+> **Senast klart & LIVE (2026-07-05, mergepunkt `1a2da2e`): felrapport skickas
+> DIREKT utan att öppna GitHub** (var SENARE-punkten "PAT-i-localStorage"). Ägaren
+> sparar en snäv fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN
+> gång i Inställningar; då POST:ar `FelrapportDialog` rapporten direkt via GitHubs API
+> (`submitFelrapport` i `src/lib/felrapport.ts`), knappen blir "Skicka rapport ✓" +
+> kvitto. Utan nyckel = oförändrat (öppnar förifylld GitHub-sida). Nyckeln lagras i
+> `src/lib/github-token.ts` under egen nyckel `rebidz:felrapport-token` (utanför
+> `learnbridge:`-prefixet → "Nollställ framsteg" rör den ej); samma nyckel funkar på
+> flera enheter. Fel → svenskt meddelande + reservknapp "Öppna på GitHub →". 1061
+> test gröna, tsc rent, deploy grön, **bevisat skarpt av ägaren (issue #31)**.
+>
 > **Del 3 (PWA) KLAR & LIVE (2026-07-05):** appen är nu installerbar ("Lägg till på
 > hemskärmen" på iPhone/Android, egen guld-spader-ikon på emerald) + fungerar
 > offline. `vite-plugin-pwa` (autoUpdate) genererar service worker + `manifest.webmanifest`
