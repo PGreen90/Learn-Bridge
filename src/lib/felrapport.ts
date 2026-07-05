@@ -165,6 +165,7 @@ export function buildIssueBody(input: FelrapportInput): string {
 }
 
 const ISSUES_NEW_URL = 'https://github.com/PGreen90/Learn-Bridge/issues/new'
+const ISSUES_API_URL = 'https://api.github.com/repos/PGreen90/Learn-Bridge/issues'
 
 /** Adressen till en förifylld GitHub-issue med hela rapporten. */
 export function felrapportUrl(input: FelrapportInput): string {
@@ -174,4 +175,57 @@ export function felrapportUrl(input: FelrapportInput): string {
     labels: 'felrapport',
   })
   return `${ISSUES_NEW_URL}?${params.toString()}`
+}
+
+/** Resultatet av ett direktskick: adressen till den skapade issuen. */
+export interface SubmitResult {
+  issueUrl: string
+}
+
+/**
+ * Skickar rapporten DIREKT till GitHub via API:t (ingen GitHub-sida öppnas).
+ * Kräver en nyckel (fine-grained PAT med Issues: read/write på Learn-Bridge)
+ * som ägaren skapat en gång; se Inställningar. Kastar ett Error med ett
+ * begripligt svenskt meddelande om något går fel, så dialogen kan visa det
+ * och falla tillbaka på att öppna GitHub-sidan.
+ */
+export async function submitFelrapport(
+  input: FelrapportInput,
+  token: string,
+): Promise<SubmitResult> {
+  let res: Response
+  try {
+    res = await fetch(ISSUES_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: buildIssueTitle(input),
+        body: buildIssueBody(input),
+        labels: ['felrapport'],
+      }),
+    })
+  } catch {
+    // Nätverksfel (offline, blockerad begäran) – fetch kastade innan svar.
+    throw new Error('Kunde inte nå GitHub – kontrollera din internetanslutning.')
+  }
+
+  if (res.status === 201) {
+    const data = (await res.json()) as { html_url?: string }
+    return { issueUrl: data.html_url ?? ISSUES_API_URL }
+  }
+
+  if (res.status === 401) {
+    throw new Error('Nyckeln godtogs inte (kan ha gått ut). Skapa en ny i Inställningar.')
+  }
+  if (res.status === 403 || res.status === 404) {
+    throw new Error(
+      'Nyckeln saknar behörighet till Learn-Bridge. Kontrollera att den gäller repot och har Issues: läs och skriv.',
+    )
+  }
+  throw new Error(`GitHub svarade oväntat (felkod ${res.status}).`)
 }

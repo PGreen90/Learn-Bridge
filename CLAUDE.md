@@ -413,8 +413,16 @@ Läs den här filen först varje session.
 - ~~**Dubblingar (X/XX) in i slutkontraktet**~~ **KLAR 2026-07-04** (commit
   `0864224`, parallellsession): X/XX följer med genom `contractFromCalls` och
   poängräkningen (`scoring.ts` enligt ägarens poängguide) är byggd.
-- **Felrapportering: PAT-i-localStorage-varianten** (skicka issuen direkt från
-  appen utan att öppna GitHub) — grundvarianten (förifylld issue-länk) = 🔵 NU.
+- ~~**Felrapportering: PAT-i-localStorage-varianten**~~ **KLAR & LIVE 2026-07-05**
+  (skicka issuen direkt från appen utan att öppna GitHub). Ägaren sparar en snäv
+  fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN gång i
+  Inställningar (`src/lib/github-token.ts`, egen lagringsnyckel `rebidz:felrapport-token`
+  utanför `learnbridge:`-prefixet → överlever "Nollställ framsteg"). Finns nyckel →
+  `FelrapportDialog` skickar direkt via GitHubs API (`submitFelrapport` i
+  `felrapport.ts`, POST `.../issues`), knappen blir "Skicka rapport ✓" + kvitto;
+  saknas nyckel → oförändrat (öppnar förifylld GitHub-sida). Fel → svenskt
+  meddelande + reservknapp "Öppna på GitHub →". Samma nyckel kan användas på flera
+  enheter. 1061 test gröna.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
 - **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade:
   byggs bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).
