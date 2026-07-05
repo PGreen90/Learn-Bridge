@@ -1214,33 +1214,48 @@ describe('Fynd #2 delbit 1 – DONT mot deras 1NT', () => {
 // Felrapport #23 (bricka 5): Syd (17 hp, 7 solida spader) passade motståndarens
 // 1♣ – för stark för ett kapat inkliv, för lite stöd för en formstark X.
 // Ägarregel: X (upplysning, 17+ valfri form), sedan "överrösta" partnern genom
-// att bjuda egen färg = signalerar monstret → paret når kall utgång 4♠.
-describe('Felrapport #23 – 17+ monster: upplysningsdubbling + monster-återbud', () => {
+// att bjuda egen färg = signalerar den starka enfärgshanden.
+describe('Felrapport #23 – 17+ stark enfärgshand: upplysningsdubbling + starkt återbud', () => {
   const deal = dealOf('N', {
     N: 'S:84 H:J973 D:KJ62 C:T94',
     E: 'S:9 H:A5 D:973 C:KQJ8753',      // 10 hp, 7 klöver → öppnar 1♣
-    S: 'S:AKQ7653 H:Q4 D:Q54 C:A',      // 17 hp, 7 solida spader → monster
+    S: 'S:AKQ7653 H:Q4 D:Q54 C:A',      // 17 hp, 7 solida spader → stark hand
     W: 'S:JT2 H:KT862 D:AT8 C:62',
   })
 
-  it('Syd upplysningsdubblar 1♣ i stället för att passa monstret', () => {
+  it('Syd upplysningsdubblar 1♣ i stället för att passa den starka handen', () => {
     const s = decideCall(deal, [call('N', 'P'), call('E', '1C')], 'S')
     expect(s.bid).toBe('X')
     expect(s.rule).toBe('upplysningsdubbling (stark)')
   })
 
-  it('Syd bjuder monster-återbudet 4♠ efter partnerns påtvingade svar', () => {
+  it('Syd bjuder det starka återbudet 1♠ (billigast, rondkrav) efter partnerns påtvingade svar', () => {
     // N P, E 1C, S X, W P, N 1H (tvunget svar), E P → Syd igen.
+    // Ägarbeslut 2026-07-05: hoppa ALDRIG rakt till utgång – partnerns 1♥ var
+    // framtvingat (kan vara 0 hp). X + egen färg är redan rondkrav och visar
+    // den starka handen; game avgörs på nästa varv. Alltså billigaste egna spader = 1♠.
     const s = decideCall(
       deal,
       [call('N', 'P'), call('E', '1C'), call('S', 'X'), call('W', 'P'), call('N', '1H'), call('E', 'P')],
       'S',
     )
-    expect(s.bid).toBe('4S')
-    expect(s.rule).toBe('monster-återbud (utgång)')
+    expect(s.bid).toBe('1S')
+    expect(s.rule).toBe('starkt återbud')
   })
 
-  it('hela auktionen landar i 4♠ av Syd', () => {
+  it('Nord tvångssvarar 2♦ (utan spaderstöd, näst längsta objudna) på 1♠', () => {
+    // … 1♠ (starkt återbud) P → Nord igen. Nord: 2 spader (inget stöd), ingen
+    // 5-färg (H/D är 4-4), klöver är deras → näst längsta objudna = ruter (tvång).
+    const n = decideCall(
+      deal,
+      [call('N', 'P'), call('E', '1C'), call('S', 'X'), call('W', 'P'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'P')],
+      'N',
+    )
+    expect(n.bid).toBe('2D')
+    expect(n.rule).toBe('tvångssvar (utan stöd)')
+  })
+
+  it('hela auktionen landar i 2♠ av Syd (17 hp / 20 TP < 22 → lägsta nivå, ej 4♠)', () => {
     const order: Seat[] = ['N', 'E', 'S', 'W']
     let h: ResolvedCall[] = [call('N', 'P')]
     let idx = order.indexOf('E')
@@ -1254,8 +1269,98 @@ describe('Felrapport #23 – 17+ monster: upplysningsdubbling + monster-återbud
     }
     const contractBids = h.filter((c) => /^[1-7](C|D|H|S|NT)$/.test(c.bid))
     const last = contractBids[contractBids.length - 1]
-    expect(last.bid).toBe('4S')
+    expect(last.bid).toBe('2S')
     expect(last.seat).toBe('S')
+  })
+})
+
+// Den starka dubblingens FLERRONDS-fortsättning (ägarbeslut 2026-07-05): den starka
+// handen visar färg lågt, partnern tvångssvarar, den starka handen dömer game på TP
+// (6+ & 22+ TP = hopp till 3-läget = utgångskrav), partnern svarar 3-hoppet.
+describe('Stark upplysningsdubbling – flerronds-fortsättning', () => {
+  // Syd: 6 spader, 24 TP (≥22) → ska HOPPA till 3♠ (utgångskrav) på andra återbudet.
+  const bigDeal = dealOf('N', {
+    N: 'S:84 H:J973 D:Q762 C:T94',    // svag, inget spaderstöd
+    E: 'S:9 H:A5 D:K93 C:KQJ875',      // öppnar 1♣
+    S: 'S:AKQJ97 H:AK D:KJ32 C:5',     // 21 hp, 6 spader, 24 TP
+    W: 'S:T652 H:QT642 D:A4 C:62',
+  })
+
+  it('Syd bjuder starkt återbud 1♠ (rond 1)', () => {
+    const s = decideCall(bigDeal, [call('N', 'P'), call('E', '1C')], 'S')
+    expect(s.bid).toBe('X')
+    const s2 = decideCall(
+      bigDeal,
+      [call('N', 'P'), call('E', '1C'), call('S', 'X'), call('W', 'P'), call('N', '1H'), call('E', 'P')],
+      'S',
+    )
+    expect(s2.bid).toBe('1S')
+  })
+
+  it('Syd HOPPAR till 3♠ (utgångskrav) med 24 TP efter Nords tvångssvar', () => {
+    const s = decideCall(
+      bigDeal,
+      [
+        call('N', 'P'), call('E', '1C'), call('S', 'X'), call('W', 'P'), call('N', '1H'),
+        call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2D'), call('E', 'P'),
+      ],
+      'S',
+    )
+    expect(s.bid).toBe('3S')
+    expect(s.rule).toBe('starkt återbud (utgångskrav)')
+  })
+
+  it('Nord svarar 3-hoppet: 4♠ med 1–2 korts stöd', () => {
+    const n = decideCall(
+      bigDeal,
+      [
+        call('N', 'P'), call('E', '1C'), call('S', 'X'), call('W', 'P'), call('N', '1H'),
+        call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2D'), call('E', 'P'),
+        call('S', '3S'), call('W', 'P'),
+      ],
+      'N',
+    )
+    expect(n.bid).toBe('4S')
+    expect(n.rule).toBe('utgång (1–2 korts stöd)')
+  })
+
+  it('Nord nekar helt stöd (0 spader) → 3NT på 3-hoppet', () => {
+    // Nord utan en enda spader (rebjuder egen hjärter på återbudet) svarar 3NT när
+    // Syd hoppar till 3♠. Starka återbudet på 1-läget (1♠) så 3♠ är ett äkta hopp.
+    const noSupport = dealOf('N', {
+      N: 'S:- H:J9732 D:Q7654 C:T42',   // 0 spader, 6-korts hjärter
+      E: 'S:92 H:A5 D:K93 C:KQJ85',      // öppnar 1♣
+      S: 'S:AKQJ97 H:AK D:KJ32 C:5',
+      W: 'S:T86543 H:QT64 D:A4 C:6',
+    })
+    const n = decideCall(
+      noSupport,
+      [
+        call('N', 'P'), call('E', '1C'), call('S', 'X'), call('W', 'P'), call('N', '1H'),
+        call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2H'), call('E', 'P'),
+        call('S', '3S'), call('W', 'P'),
+      ],
+      'N',
+    )
+    expect(n.bid).toBe('3NT')
+    expect(n.rule).toBe('nekar stöd (3NT)')
+  })
+
+  // Med 3-korts stöd svarar advancern på stödstegen i stället för en egen färg.
+  it('advancern höjer på stödstegen: 7–9 hp + 3 stöd → 4♠ (utgång)', () => {
+    const fitDeal = dealOf('N', {
+      N: 'S:T84 H:KQ5 D:K762 C:942',    // 3 spader, 8 hp (♥KQ + ♦K)
+      E: 'S:9 H:A5 D:AKJ93 C:KQ85',      // öppnar 1♦
+      S: 'S:AKQJ97 H:Q4 D:5 C:A632',     // 6 spader, upplysningsdubblar 1♦
+      W: 'S:652 H:JT862 D:QT4 C:J7',
+    })
+    const n = decideCall(
+      fitDeal,
+      [call('N', 'P'), call('E', '1D'), call('S', 'X'), call('W', 'P'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'P')],
+      'N',
+    )
+    expect(n.bid).toBe('4S')
+    expect(n.rule).toContain('utgång')
   })
 })
 

@@ -803,8 +803,27 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
 - En hand med **17+ hp** är **för stark för ett enkelt inkliv**: partnern kan
   passa inklivet, och en kall utgång missas. Därför **dubblar** den först
   (upplysning, **oavsett fördelning**) och **bjuder sedan sin egen färg** på nästa
-  varv – gärna med ett hopp. Det visar en **stark enfärgshand** som partnern inte
-  får passa. *Ex:* (1♣)–X–(P)–1♥–(P)–**4♠**.
+  varv. Själva ordningen – dubbla först och färga sedan – visar redan en **stark
+  enfärgshand** som partnern inte får passa; man behöver **inget hopp** för att
+  visa styrkan. *Ex:* (1♣)–X–(P)–1♥–(P)–**1♠**.
+
+*Fortsättningen – vi tar det långsamt (partnerns svar var framtvingat, kan vara
+0 hp):*
+- **Partnern (advancern) måste svara** på den starka handens färg – ett tvunget
+  bud som **lovar inga poäng**:
+  - Med **3-korts stöd** i färgen: **enkel höjning** (0–3 hp) · **hopphöjning**
+    (4–6 hp, inbjudan) · **utgång** (7–9 hp) · **cue i deras färg** (10+ hp,
+    utgång + slamintresse).
+  - **Utan stöd:** bjud om **egen färg** (5+ lång), annars **näst längsta objudna
+    färg**.
+- **Den starka handen dömer sedan** (efter ett svar utan stöd): med **5-korts
+  färg**, eller 6+ men **under 22 totalpoäng (TP)**, bjuder den om färgen **lägst**
+  (delkontrakt – aldrig utgång mot en tom partner). Med **6+ korts färg och 22+
+  TP** **hoppar** den till **3-läget = utgångskrav**.
+- **Partnern på 3-hoppet:** **utgång i färgen** med 1–2 korts stöd, annars **3NT**
+  (nekar helt stöd).
+- **Fri-bud-regeln:** ett *tvunget* bud lovar inget, men bjuder partnern **frivilligt
+  igen** (nästa varv, eller trots att motståndarna stör) visar det **värden**.
 
 **Efter två bjudna färger (öppning + svar, t.ex. (1♦)–(P)–(1♥)):**
 - När motståndarna redan bjudit **två** färger lovar X **4-4 i de två objudna
@@ -951,6 +970,17 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-05** – **Starka upplysningsdubblingen: game-hopp borttaget + flerronds-
+  fortsättning byggd (kod, live).** Ägarbeslut. (1) Det starka återbudet hoppar inte
+  längre rakt till utgång – det bjuder färgen **lägst** (rondkrav); ett game-hopp mot
+  en partner med 0 hp kan bli katastrof. (2) Ny KONTROLLERAD fortsättning i
+  `auction-live.ts`: partnern **tvångssvarar** återbudet (stödstege med 3-korts stöd,
+  annars egen/näst längsta objudna färg), den starka handen **dömer game på TP**
+  (6+ färg & **22+ TP** = hopp till 3-läget = utgångskrav, annars lägsta nivå),
+  partnern svarar 3-hoppet (utgång m. 1–2 stöd / 3NT nekar). Regler i §7.3. Ordet
+  "monster" bannlyst genomgående (ägarbeslut) → "stark hand". *Öppen finslipning:*
+  den starka handens dom **efter en stödhöjning** (partnern visade fit) körs på en
+  medvetet konservativ default – se 👀 Bevaka i CLAUDE.md.
 - **2026-07-05** – **Störd budgivning nedskriven i läsbara sektioner (§5.4, §7.8).**
   Redaktionellt (ägarmandat: allt som bottarna gör ska gå att läsa på sidan) –
   **ingen kodändring**. Tre live-beteenden som förr bara låg i koden/ändringsloggen
@@ -962,8 +992,7 @@ Det avslöjar längd/räkning direkt för partnern.
   omstrukturering (ägarbeslut) – **ingen kodändring, inget ändrat botbeteende**.
   All upplysningsdubbling (takeout) samlas nu i **§7.3 Takeout Double**: grundfallet
   efter en bjuden färg (max 2 i deras, 3+ i var och en av de tre objudna, 10+), den
-  starka 17+-handen (dubbla först, visa egen färg sedan – tidigare kallad "monster",
-  ordet borttaget på ägarens begäran), fallet efter två bjudna färger (4-4 i de två
+  starka 17+-handen (dubbla först, visa egen färg sedan), fallet efter två bjudna färger (4-4 i de två
   objudna, 10+) och takeout mot svaga tvåor (12/13/10) och spärrar (14+). Övriga
   dubblingar (negativ, responsiv, stöd) flyttades till **§7.4**; Lebensohl→§7.5,
   DONT→§7.6, konventionella öppningar→§7.7 (takeout-raderna där ersatta med en
@@ -974,12 +1003,12 @@ Det avslöjar längd/räkning direkt för partnern.
   stället för att passa singel-klöver, och inklivaren rättar till sin högre färg;
   **#22** stark svarare (19+ hp) tar utgång även mittemot en minimum-Ogust (4M med
   fit, annars 3NT); **#21** stängd som "inget fel" (botens pass var sund bridge);
-  **#23** 17+ enfärgs-monster upplysningsdubblar och visar sedan sin färg via ett
-  **monster-återbud** → når 4♠ (se §7.3). Samtidigt byggd **tvåfärgs-takeout**
+  **#23** en 17+ stark enfärgshand upplysningsdubblar och visar sedan sin färg via
+  ett **starkt återbud** (se §7.3). Samtidigt byggd **tvåfärgs-takeout**
   (1♦–P–1♥–X = 4+4+ i objudna, §7.3) och en takeout-bugg lagad: advancern kunde
   förr svara i motståndarnas egen färg – nu utesluts alla bjudna färger. **Medvetet
-  EJ byggt:** den rena 17+-enfärgsmonstern *efter två bjudna färger* (kräver ändring
-  i buildAuction-linjen – framtida jobb). Hela sviten grön, tsc rent.
+  EJ byggt:** den rena starka 17+-enfärgshanden *efter två bjudna färger* (kräver
+  ändring i buildAuction-linjen – framtida jobb). Hela sviten grön, tsc rent.
 - **2026-07-04** – **Felrapportering i Budvisningen (mergepunkt `213d90e`, live).**
   Samma `FelrapportDialog` som i Spela kort är nu inkopplad i Budvisningen
   (`Spela.tsx`): knappen "Rapportera fel →" dyker upp så snart auktionen budats

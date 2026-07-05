@@ -21,7 +21,7 @@ import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from '
 import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { openerAnswerFourthSuit } from './rebids'
-import { dummyPoints, pointsWithFloor } from './evaluation'
+import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import { advanceTwoSuiter, openingSuit, overcall } from './overcalls'
 import { side } from './play'
@@ -353,13 +353,14 @@ function ownDoubledTwoSuiterRescue(
 }
 
 /**
- * Står `seat`s egen 17+ UPPLYSNINGSDUBBLING och väntar på monster-återbudet?
+ * Står `seat`s egen 17+ UPPLYSNINGSDUBBLING och väntar på det starka återbudet?
  * Mönstret (ägarregel, felrapport #23): motståndaren öppnade 1 i färg, VÅR X är
  * mitt enda egna bud hittills (jag har ännu inte visat färg), och nu är det min
  * tur igen. Med 17+ hp och en lång egen färg "överröstar" jag partnern och bjuder
  * min färg – det är signalen för den starka enfärgshanden som var för stark för
- * ett enkelt inkliv. Är färgen självförsörjande (6+ med 2+ topphonnörer) hoppar
- * jag direkt till utgång; annars visar jag färgen billigast (krav).
+ * ett enkelt inkliv. Jag visar färgen BILLIGAST (rondkrav) och hoppar aldrig rakt
+ * till utgång: partnerns svar var framtvingat och kan vara 0 hp (ägarbeslut
+ * 2026-07-05). Game/delkontrakt avgörs på nästa varv utifrån partnerns svar.
  */
 function ownStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
   const open = openingBid(history)
@@ -369,8 +370,8 @@ function ownStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Seat): 
   if (myActions.length !== 1 || myActions[0].bid !== 'X') return null
 
   // ALLA färger motståndarna bjudit (öppning + ev. svarsfärg) – vår färg måste
-  // vara en OBJUDEN (annars "återbjuder" monstret deras egen färg, t.ex. hjärter
-  // efter 1♦–1♥–X).
+  // vara en OBJUDEN (annars "återbjuder" den starka handen deras egen färg, t.ex.
+  // hjärter efter 1♦–1♥–X).
   const theirSuits = new Set<Suit>()
   for (const c of history) {
     const cb = parseContractBid(c.bid)
@@ -392,34 +393,255 @@ function ownStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Seat): 
   }
   if (!suit) return null
 
-  const tops = hand.filter((c) => c.suit === suit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length
-  const selfSufficient = len[suit] >= 6 && tops >= 2
-  const isMajor = suit === 'hearts' || suit === 'spades'
   const letter = letterOfSuit(suit)
   const legal = legalCalls(history, seat)
 
-  // Självförsörjande → hoppa till utgång (4M / 5m).
-  if (selfSufficient) {
-    const game = (isMajor ? `4${letter}` : `5${letter}`) as Bid
-    if (legal.includes(game)) {
-      return {
-        seat, bid: game, rule: 'monster-återbud (utgång)',
-        explanation: `17+ hp med självförsörjande ${SWE_NAME[letter]} – för stark för ett enkelt inkliv → utgång ${game} (upplysningsdubblingen visade monstret).`,
-      }
-    }
-  }
-  // Annars visa färgen billigast (krav; jag "överröstar" partnern).
+  // Visa färgen BILLIGAST (rondkrav; jag "överröstar" partnern). Ägarbeslut
+  // 2026-07-05: hoppa ALDRIG rakt till utgång här – partnerns svar var
+  // framtvingat och kan vara 0 hp, så ett game-hopp kan bli katastrof. Grunden i
+  // systemet är att ta det långsamt: X + egen färg är redan rondkrav och visar
+  // den starka handen; game/delkontrakt avgörs på nästa varv utifrån partnerns svar.
   const bid = cheapestBidIn(history, seat, letter)
   if (!bid || !legal.includes(bid)) return null
   return {
-    seat, bid, rule: 'monster-återbud',
-    explanation: `17+ hp – jag bjuder min egna ${SWE_NAME[letter]} över dubblingen (för stark för ett enkelt inkliv, krav).`,
+    seat, bid, rule: 'starkt återbud',
+    explanation: `17+ hp – jag bjuder min egna ${SWE_NAME[letter]} över dubblingen (för stark för ett enkelt inkliv, rondkrav – game avgörs nästa varv).`,
   }
 }
 
 /** Färgbokstaven ('C'/'D'/'H'/'S') för en Suit (omvänd SUIT_OF_LETTER). */
 function letterOfSuit(suit: Suit): (typeof SUIT_STRAINS)[number] {
   return SUIT_STRAINS.find((st) => SUIT_OF_LETTER[st] === suit)!
+}
+
+// ---- Den starka upplysningsdubblingens fortsättning (flerronds, ägarbeslut
+//      2026-07-05) ----------------------------------------------------------
+// Efter (1x)–X–(P)–svar–(P)–egen färg (det starka återbudet, se
+// `ownStrongDoubleRebid`) fortsätter auktionen KONTROLLERAT i stället för att dö:
+//   • partnern (advancern) MÅSTE svara på återbudet (stöd-stege eller, utan stöd,
+//     eget/näst längsta objudna – tvång, lovar inga poäng),
+//   • den starka handen dömer på nästa varv (5-korts / <22 TP = lägsta nivå;
+//     6+ & 22+ TP = hopp till 3-läget = utgångskrav),
+//   • advancern svarar 3-hoppet (3NT nekar / 4M med 1–2 korts stöd).
+// TP = startpoäng (`startingPoints`). Rena, historiedrivna detektorer.
+
+interface StrongDoubleCtx {
+  role: 'doubler' | 'advancer'
+  doubler: Seat
+  advancer: Seat
+  openStrain: string
+  theirSuits: Set<Suit>
+  /** Det starka återbudets färg (dubblarens första egna färg efter X). */
+  doublerSuit: Suit
+  /** Dubblarens kontraktsbud EFTER X, i ordning (återbud, ev. andra återbud). */
+  doublerBids: { level: number; strain: string }[]
+  /** Advancerns kontraktsbud, i ordning (tvångssvar, ev. svar på återbudet). */
+  advancerBids: { level: number; strain: string }[]
+}
+
+/**
+ * Läser en "stark upplysningsdubbling"-auktion sett från `seat`: motståndarna
+ * öppnade 1 i färg, vår sida dubblade (takeout) och dubblaren har sedan
+ * "överröstat" partnern med en EGEN objuden färg (det starka återbudet). Returnerar
+ * rollerna + budhistoriken, eller null om mönstret inte gäller ännu.
+ */
+function strongDoubleContext(history: ResolvedCall[], seat: Seat): StrongDoubleCtx | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat) || open.level !== 1) return null
+
+  // Vem på vår sida dubblade? Dubblarens FÖRSTA icke-pass-bud måste vara X.
+  const nonPass = (s: Seat) => history.filter((c) => c.seat === s && c.bid !== 'P')
+  let doubler: Seat | null = null
+  for (const s of [seat, PARTNER[seat]] as Seat[]) {
+    const acts = nonPass(s)
+    if (acts.length >= 1 && acts[0].bid === 'X') doubler = s
+  }
+  if (!doubler) return null
+  const advancer = PARTNER[doubler]
+
+  // Motståndarnas färger + dubblarens/advancerns kontraktsbud i ordning.
+  const theirSuits = new Set<Suit>()
+  for (const c of history) {
+    const cb = parseContractBid(c.bid)
+    if (cb && side(c.seat) !== side(seat)) {
+      const s = SUIT_OF_LETTER[cb.strain]
+      if (s) theirSuits.add(s)
+    }
+  }
+  const contractBidsOf = (s: Seat) =>
+    history.filter((c) => c.seat === s).map((c) => parseContractBid(c.bid)).filter((b): b is { level: number; strain: string } => b !== null)
+  const doublerBids = contractBidsOf(doubler)
+  const advancerBids = contractBidsOf(advancer)
+
+  // Dubblaren måste ha gjort sitt starka återbud (bjudit en egen OBJUDEN färg).
+  if (doublerBids.length < 1) return null
+  const doublerSuit = SUIT_OF_LETTER[doublerBids[0].strain]
+  if (!doublerSuit || theirSuits.has(doublerSuit)) return null
+
+  return {
+    role: seat === doubler ? 'doubler' : 'advancer',
+    doubler, advancer, openStrain: open.strain, theirSuits, doublerSuit, doublerBids, advancerBids,
+  }
+}
+
+/**
+ * ADVANCERN svarar på det starka återbudet (tvång – får aldrig passa). Med 3-korts
+ * stöd en stödstege graderad efter hp (0–3 = enkel höjning, 4–6 = hopphöjning,
+ * 7–9 = utgång, 10+ = cue m. slamintresse); utan stöd bjuder advancern om sin egen
+ * färg (5+) eller näst längsta objudna färg – lovar då INGA poäng. Ägarbeslut
+ * 2026-07-05. Kör bara på advancerns FÖRSTA svar på återbudet (Part 2).
+ */
+function advanceStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = strongDoubleContext(history, seat)
+  if (!ctx || ctx.role !== 'advancer') return null
+  // Part 2: dubblaren har gjort ETT återbud, advancern har svarat X:et EN gång
+  // (tvångssvaret) och ska nu svara själva återbudet.
+  if (ctx.doublerBids.length !== 1 || ctx.advancerBids.length !== 1) return null
+
+  const hand = deal.hands[seat]
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const suit = ctx.doublerSuit
+  const letter = letterOfSuit(suit)
+  const support = len[suit]
+  const legal = legalCalls(history, seat)
+  const shownLevel = ctx.doublerBids[0].level
+  const isMajor = suit === 'hearts' || suit === 'spades'
+  const gameLevel = isMajor ? 4 : 5
+
+  const bidAt = (level: number): Bid | null => {
+    const b = `${level}${letter}` as Bid
+    return legal.includes(b) ? b : null
+  }
+
+  if (support >= 3) {
+    // Stödstege (hp): 0–3 enkel höjning, 4–6 hopphöjning, 7–9 utgång, 10+ cue.
+    if (p >= 10) {
+      const cue = cheapestBidIn(history, seat, ctx.openStrain)
+      if (cue && legal.includes(cue)) {
+        return { seat, bid: cue, rule: 'stöd-cue (slamintresse)', explanation: `${p} hp med ${support} korts stöd i ${SWE_NAME[letter]} → cue i deras färg = utgång + slamintresse.` }
+      }
+    }
+    const target = p >= 7 ? gameLevel : p >= 4 ? Math.min(shownLevel + 2, gameLevel) : Math.min(shownLevel + 1, gameLevel)
+    const bid = bidAt(target) ?? bidAt(shownLevel + 1)
+    if (bid) {
+      const label = target >= gameLevel ? 'utgång' : p >= 4 ? 'hopphöjning (inbjudan)' : 'enkel höjning (minimum)'
+      return { seat, bid, rule: `stödhöjning – ${label}`, explanation: `${p} hp med ${support} korts stöd → ${bid} (${label}; tvunget svar på det starka återbudet).` }
+    }
+  }
+
+  // Utan 3-korts stöd: bjud om egen färg (5+), annars näst längsta OBJUDNA färg.
+  // Tvång – lovar inga poäng. (Fri-bud senare = värden, hanteras av andra varv.)
+  const firstSuit = SUIT_OF_LETTER[ctx.advancerBids[0].strain]
+  const unbid = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st])
+    .filter((s) => !ctx.theirSuits.has(s) && s !== suit)
+    .sort((a, b) => len[b] - len[a] || SUIT_STRAINS.indexOf(letterOfSuit(b)) - SUIT_STRAINS.indexOf(letterOfSuit(a)))
+  let chosen: Suit | null = null
+  if (firstSuit && len[firstSuit] >= 5) chosen = firstSuit
+  else chosen = unbid.find((s) => s !== firstSuit) ?? unbid[0] ?? firstSuit ?? null
+  if (chosen) {
+    const bid = cheapestBidIn(history, seat, letterOfSuit(chosen))
+    if (bid && legal.includes(bid)) {
+      const same = chosen === firstSuit
+      return { seat, bid, rule: 'tvångssvar (utan stöd)', explanation: `Utan stöd i ${SWE_NAME[letter]} → ${same ? `bjuder om min ${SWE_NAME[letterOfSuit(chosen)]} (5+)` : `näst längsta objudna (${SWE_NAME[letterOfSuit(chosen)]})`} = tvång, lovar inga poäng.` }
+    }
+  }
+  // Nödfall (ingen färg att visa): ge minsta stöd i dubblarens färg (fortsatt tvång).
+  const fallback = cheapestBidIn(history, seat, letter)
+  if (fallback && legal.includes(fallback)) {
+    return { seat, bid: fallback, rule: 'tvångssvar (preferens)', explanation: `Inget eget bud → minsta preferens i ${SWE_NAME[letter]} (tvunget svar).` }
+  }
+  return null
+}
+
+/**
+ * Den STARKA HANDEN (dubblaren) dömer på sitt andra återbud efter advancerns svar.
+ * Höjde advancern dubblarens färg (stöd) hanteras det längre ned; visade advancern
+ * INGET stöd (bjöd egen/annan färg) gäller ägarbeslutet 2026-07-05: bjud om färgen
+ * på LÄGSTA nivå (5-korts, eller 6+ men < 22 TP), eller HOPPA till 3-läget =
+ * utgångskrav (6+ korts färg OCH ≥ 22 TP). TP = startpoäng.
+ */
+function strongDoublerSecondRebid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = strongDoubleContext(history, seat)
+  if (!ctx || ctx.role !== 'doubler') return null
+  // Part 3: dubblaren har gjort ETT återbud, advancern har svarat på det (2 bud).
+  if (ctx.doublerBids.length !== 1 || ctx.advancerBids.length !== 2) return null
+
+  const hand = deal.hands[seat]
+  const len = lengths(hand)
+  const suit = ctx.doublerSuit
+  const letter = letterOfSuit(suit)
+  const legal = legalCalls(history, seat)
+  const isMajor = suit === 'hearts' || suit === 'spades'
+  const gameLevel = isMajor ? 4 : 5
+  const shownLevel = ctx.doublerBids[0].level
+
+  // Höjde advancern VÅR färg? (stöd visat) → döm game efter partnerns visade spann.
+  const advancerRaised = SUIT_OF_LETTER[ctx.advancerBids[1].strain] === suit
+  const advancerCued = ctx.theirSuits.has(SUIT_OF_LETTER[ctx.advancerBids[1].strain] ?? ('' as Suit))
+  if (advancerRaised || advancerCued) {
+    // ⚠️ KONSERVATIV DEFAULT (ägaren ska finslipa i spel, se 👀 Bevaka): en cue
+    // (slamintresse) eller redan nådd utgång får aldrig passas – annars stannar vi.
+    const raiseLevel = advancerRaised ? ctx.advancerBids[1].level : 0
+    if (raiseLevel >= gameLevel) return null // partnern bjöd redan utgång → passa (annan logik/pass)
+    const game = `${gameLevel}${letter}` as Bid
+    if (advancerCued && legal.includes(game)) {
+      return { seat, bid: game, rule: 'accepterar (minimum)', explanation: `Partnerns cue visade slamintresse; med minimum stannar jag i utgång ${game}.` }
+    }
+    // Höjning under utgång (2M minimum / 3M inbjudan): acceptera utgång med tillägg.
+    const p = hcp(hand)
+    const accept = raiseLevel >= shownLevel + 2 ? p >= 18 : p >= 21
+    if (accept && legal.includes(game)) {
+      return { seat, bid: game, rule: 'accepterar utgång', explanation: `${p} hp mittemot partnerns stödhöjning → utgång ${game}.` }
+    }
+    return null // minimum → passa höjningen (delkontrakt)
+  }
+
+  // Advancern visade INGET stöd (bjöd egen/annan färg). Ägarbeslut 2026-07-05:
+  const tp = startingPoints(hand).startingPoints
+  const sixPlus = len[suit] >= 6
+  if (sixPlus && tp >= 22 && shownLevel === 1) {
+    const jump = `3${letter}` as Bid
+    if (legal.includes(jump)) {
+      return { seat, bid: jump, rule: 'starkt återbud (utgångskrav)', explanation: `${len[suit]} korts ${SWE_NAME[letter]}, ${tp} TP (≥22) → hopp till ${jump} = utgångskrav.` }
+    }
+  }
+  // Annars: bjud om färgen på lägsta nivå (ej krav; delkontrakt mot en tom partner).
+  const low = cheapestBidIn(history, seat, letter)
+  if (low && legal.includes(low)) {
+    return { seat, bid: low, rule: 'starkt återbud (lägsta)', explanation: `${len[suit]} korts ${SWE_NAME[letter]}, ${tp} TP – bjuder om färgen lägst (${low}); ej utgångskrav mot ett tvångssvar.` }
+  }
+  return null
+}
+
+/**
+ * ADVANCERN svarar den starka handens 3-hopp (utgångskrav). Ägarbeslut 2026-07-05:
+ * nekar helt stöd och är svagast möjliga → 3NT; med 1–2 korts stöd i färgen → bjud
+ * utgång i färgen (minimum men utgång). Kör bara efter ett 3-läges-hopp i dubblarens
+ * färg (Part 4).
+ */
+function answerStrongDoubleGameForce(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = strongDoubleContext(history, seat)
+  if (!ctx || ctx.role !== 'advancer') return null
+  // Part 4: dubblaren har gjort TVÅ återbud, advancern svarat EN gång på återbudet.
+  if (ctx.doublerBids.length !== 2 || ctx.advancerBids.length !== 2) return null
+  const suit = ctx.doublerSuit
+  const letter = letterOfSuit(suit)
+  const second = ctx.doublerBids[1]
+  // Måste vara ett HOPP till 3-läget i dubblarens färg (från ett 1-läges återbud).
+  if (second.strain !== letter || second.level !== 3 || ctx.doublerBids[0].level !== 1) return null
+
+  const hand = deal.hands[seat]
+  const support = lengths(hand)[suit]
+  const legal = legalCalls(history, seat)
+  const game = `${suit === 'hearts' || suit === 'spades' ? 4 : 5}${letter}` as Bid
+  if (support >= 1 && legal.includes(game)) {
+    return { seat, bid: game, rule: 'utgång (1–2 korts stöd)', explanation: `Utgångskravet accepteras: ${support} korts stöd i ${SWE_NAME[letter]} → ${game} (minimum men utgång).` }
+  }
+  if (legal.includes('3NT')) {
+    return { seat, bid: '3NT', rule: 'nekar stöd (3NT)', explanation: `Nekar helt stöd i ${SWE_NAME[letter]}, svagast möjliga → 3NT.` }
+  }
+  return null
 }
 
 // ---- Essfrågan 4NT (1430 RKC) i den levande auktionen -----------------------
@@ -946,8 +1168,8 @@ function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): Resolve
  * (2026-07-05): X är fortfarande takeout, men lovar då **4+ 4+ i de två OBJUDNA
  * färgerna** (äkta 4-4 – partnern har bara två färger att välja mellan), 10+ hp.
  * En 5-korts objuden färg inkliver vi hellre (sköts av on-book-linjen), så här
- * krävs exakt 4-4. (17+-monstret hanteras i öppningsfallet, se `overcall` +
- * `ownStrongDoubleRebid`.) null = ingen sådan dubbling.
+ * krävs exakt 4-4. (Den starka 17+-enfärgshanden hanteras i öppningsfallet, se
+ * `overcall` + `ownStrongDoubleRebid`.) null = ingen sådan dubbling.
  */
 function maybeTakeoutOfResponse(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
   const contractBids = history.filter((c) => parseContractBid(c.bid))
@@ -1475,7 +1697,7 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // Motståndarna kliver in på riktigt (direkt sits eller balansering).
       () => maybeOvercall(deal, history, seat),
       // Upplysningsdubbling när de bjudit TVÅ 1-lägesfärger (1♦–P–1♥–X): 4-4 i de
-      // objudna färgerna (eller 17+ monster). Ägarregel 2026-07-05.
+      // objudna färgerna (eller 17+ stark enfärgshand). Ägarregel 2026-07-05.
       () => maybeTakeoutOfResponse(deal, history, seat),
       // Partnerns DONT-bud mot deras 1NT besvaras (§7.5, Fynd #2 delbit 1) …
       () => answered(partnerDONTToAnswer(history, seat),
@@ -1492,9 +1714,16 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // Ett EGET dubblat tvåfärgsinkliv får aldrig passas ut (felrapport #7):
       // konstgjort – utan preferens flyr vi till den längsta visade färgen.
       () => ownDoubledTwoSuiterRescue(deal, history, seat),
-      // Vår egen 17+ upplysningsdubbling får sitt monster-återbud (felrapport #23):
-      // vi bjuder/hoppar i egen färg för att visa den för starka enfärgshanden.
+      // Vår egen 17+ upplysningsdubbling får sitt starka återbud (felrapport #23):
+      // vi bjuder egen färg (billigast, rondkrav) för att visa den starka enfärgshanden.
       () => ownStrongDoubleRebid(deal, history, seat),
+      // Den starka dubblingens FORTSÄTTNING (ägarbeslut 2026-07-05): advancern
+      // svarar återbudet (Part 2), dubblaren dömer game (Part 3), advancern svarar
+      // 3-hoppet (Part 4). Måste ligga FÖRE off-book-svaret så tvångssvaren inte
+      // passas ut. Ordningen sinbördes spelar ingen roll (ömsesidigt uteslutande).
+      () => advanceStrongDoubleRebid(deal, history, seat),
+      () => strongDoublerSecondRebid(deal, history, seat),
+      () => answerStrongDoubleGameForce(deal, history, seat),
       // Partnerns 4NT med trumf = ESSFRÅGAN (1430 RKC, §6.1); 5NT = kungfrågan
       // (Sjöberg, §6.3). Får aldrig passas (felrapport #9).
       () => answered(rkcToAnswer(history, seat),
