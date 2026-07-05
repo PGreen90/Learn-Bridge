@@ -710,6 +710,35 @@ i deras färg → cue och fråga efter stopp för 3NT). Styrkan mäts som **stö
 det finns en fit** (form lyfter), annars ren hp – så en lång svag färg aldrig blåser
 upp handen till ett falskt utgångskrav.
 
+### 5.9 Öppnarens återöppning när partnern PASSADE inklivet
+Systerfallet till §5.8: här sa partnern **inget** (passade inklivet), så öppnaren
+riskerar att **sälja given** i rond 2. Två lägen, beroende på vad RHO gjorde:
+
+**A) RHO konkurrerade** (t.ex. **1♣–(1♠)–P–(2♠)**). Partnern passade, men motståndarna
+budade vidare. Öppnaren säljer inte en bra hand:
+
+| Öppnarens bud | Betydelse |
+|---|---|
+| **bjud om egen färg** (t.ex. 3♣) | **egen 6+ färg** → tävla (lagen om totala stick) |
+| **X (återöppning)** | 15+ hp och **kort (≤2) i deras färg** → takeout, välj färg partner |
+| Pass | minimum utan lång färg / utan kort i deras färg |
+
+**B) RHO passade också** – inklivet är passat runt till öppnaren i **utpassningssitsen**
+(t.ex. **1♠–(2♥)–P–P**). Partnern gör ofta en **trap pass** (hen sitter med inkliparens
+färg bakom sig och väntar på att du ska återöppna). Öppnaren återöppnar villigt:
+
+| Öppnarens bud | Betydelse |
+|---|---|
+| **X (återöppning)** | **kort (singel/renons) i deras färg** → takeout; partnern kan **konvertera till straff** genom att passa |
+| **bjud om egen färg** (t.ex. 2♠) | **egen 6+ färg** → tävla, sälj inte med en 6-korts färg |
+| **X (återöppning)** | 15+ hp (extra) även utan kort i deras färg |
+| Pass | jämn minimum, längd i deras färg, ingen 6-korts färg → sälj (partnern hade en chans) |
+
+**Balanseringsfilosofi:** i utpassningssitsen är partnern **markerad med värden**
+(annars hade motståndarna budat vidare), så en återöppning på **kort i deras färg** är
+billig – och en trap pass hos partnern (längd + honnörer i deras färg) blir en **straff**
+när hen konverterar din takeout-dubbling.
+
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
 Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit
@@ -889,6 +918,21 @@ Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam)
 | ny färg | naturlig, konstruktiv, ej krav |
 | 1NT / 2NT | naturlig, stopp i deras färg, lämplig styrka |
 | fit-jump (hopp i ny färg) | bra stöd + egen sidofärg, inbjudande+ |
+
+**Advancern tävlar upp till fiten (lagen om totala stick, 2026-07-05):** klev partnern
+in på **2-läget** lovar det en bra **6+ färg**, så **3-korts stöd = 9-korts fit**. Hittar
+motståndarna sedan sin egen fit (t.ex. **1♠–(2♥)–2♠**) ska advancern **inte sälja given**
+utan tävla:
+
+| Advancerns bud | Betydelse |
+|---|---|
+| **3 i partnerns färg** (t.ex. 3♥) | 3-korts stöd (9-korts fit) → tävla på lagen om totala stick (ej krav) |
+| **utgång** (4M) | 3-korts stöd + genuina utgångsvärden (13+ stödpoäng) |
+| Pass | för svag (< ~8 stödpoäng) – tävla inte på en bust; eller konkurrensen redan tryckt upp budet till 4-läget utan utgångsvärden |
+
+Lagen: med **9 gemensamma trumf** är 3-läget säkert att tävla till (om det betas var
+deras kontrakt oftast att gå hem). Ett **1-läges** inkliv (bara 5+ lovad) kräver
+fortfarande **4-korts** stöd för samma fit.
 
 ### 7.2 Tvåfärgsinkliv (Michaels + ovanlig 2NT)
 Två sätt att visa **5-5** (eller bättre) direkt:

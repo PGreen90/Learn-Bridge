@@ -25,7 +25,7 @@ import { responderPlaceAfterNMF } from './responder-rebids'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import { advanceTwoSuiter, hasStopper, openingSuit, overcall } from './overcalls'
-import { side } from './play'
+import { side, NEXT_SEAT } from './play'
 import { respondToKingAsk, respondToRKC } from './slam'
 
 // ---- Bud-tolkning ----------------------------------------------------------
@@ -2285,6 +2285,179 @@ function openerRondTwoInCompetition(deal: Deal, history: ResolvedCall[], seat: S
   return null
 }
 
+// R1 Fynd #2 (flerronds-konkurrens, del A): öppnarens ROND-2 när partnern PASSAT
+// inklivet och motståndarna konkurrerat. Syskonet till openerRondTwoInCompetition
+// (som kräver att partnern BJÖD) – här sa partnern INGET, så given föll förut
+// igenom och öppnaren sålde den (proben, giv #159). Ägarregel: eftersom partnern
+// passade ett inkliv (= sannolikt svag) tävlar öppnaren FÖRSIKTIGT: egen 6+ färg →
+// rebjud (lagen om totala stick); 15+ hp + kort (≤2) i deras färg → återöppnings-
+// dubbling (takeout, låt partnern välja); annars pass. Aldrig utgång blint mittemot
+// en passad partner.
+function openerReopensAfterPartnerPass(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.strain === 'NT' || open.level !== 1) return null
+  if (open.seat !== seat) return null // VÅR färgöppning, ÖPPNAREN själv agerar
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+
+  // Vår sida ska ha bjudit EXAKT öppningen (partnern passade, öppnaren ej rebjudit).
+  const ourBids = contractBids.filter((c) => side(c.seat) === side(seat))
+  if (ourBids.length !== 1 || ourBids[0].seat !== seat) return null
+
+  // Ingen motståndardubbling i bilden – då är det den starka-dubblings-/straff-
+  // världen (felrapport #23), INTE en naturlig inklivskonkurrens.
+  if (history.some((c) => (c.bid === 'X' || c.bid === 'XX') && side(c.seat) !== side(seat))) return null
+  // Motståndarna ska ha gjort MINST två kontraktsbud: LHO-inkliv + RHO-konkurrens
+  // (annars är det inte det här mönstret – t.ex. bara ett svar på en dubbling).
+  const theirBids = contractBids.filter((c) => side(c.seat) !== side(seat))
+  if (theirBids.length < 2) return null
+
+  // Motståndarna ska ha gjort SENASTE kontraktsbudet (konkurrerat) + bara pass efter.
+  const last = contractBids[contractBids.length - 1]
+  if (side(last.seat) === side(seat)) return null
+  const theirStrain = parseContractBid(last.bid)!.strain
+  if (theirStrain === 'NT') return null // svårt att döma mot NT här → passa
+  const lastIdx = history.indexOf(last)
+  if (history.slice(lastIdx + 1).some((c) => c.bid !== 'P')) return null
+
+  const hand = deal.hands[seat]
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  const theirSuit = SUIT_OF_LETTER[theirStrain]
+
+  // 1) Egen 6+ färg → tävla genom att rebjuda den (lagen om totala stick).
+  if (len[SUIT_OF_LETTER[open.strain]] >= 6) {
+    const rebid = cheapestBidIn(history, seat, open.strain)
+    if (rebid && legal.includes(rebid)) return {
+      seat, bid: rebid, rule: 'öppnaren tävlar efter partnerns pass (egen 6+ färg)',
+      explanation: `Partnern passade inklivet, men 6+ ${SWE_NAME[open.strain]} → ${rebid} (tävlar på lagen om totala stick, ej krav).`,
+    }
+  }
+
+  // 2) Extra (15+ hp) + kort i deras färg → återöppningsdubbling (takeout).
+  if (hcp(hand) >= 15 && len[theirSuit] <= 2 && legal.includes('X' as Bid)) return {
+    seat, bid: 'X', rule: 'öppnarens återöppningsdubbling (partnern passade)',
+    explanation: `~${hcp(hand)} hp och kort i ${SWE_NAME[theirStrain]} – för bra för att sälja given: återöppningsdubbling (takeout, välj färg partner).`,
+  }
+
+  return null
+}
+
+// R1 Fynd #2 (flerronds-konkurrens, del B): öppnarens ÅTERÖPPNING i utpassnings-
+// sitsen. Systerfallet till del A – här passade RHO inklivet (1M–(inkliv)–P–P), så
+// auktionen DÖR om öppnaren passar. Partnern gjorde ofta en "trap pass" (sitter med
+// inkliparens färg bakom sig), och öppnaren sålde given (proben, giv #56 + #552).
+// Balanseringssits: partnern är markerad med värden (annars hade motståndarna budat
+// vidare) → öppnaren återöppnar villigt när han är KORT i deras färg. Ägarregel: kort
+// (≤1) i deras färg → återöppningsdubbling (partnern konverterar ofta till straff);
+// egen 6+ färg → rebjud (tävla); 15+ hp → X; annars pass.
+function openerReopensBalancing(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.strain === 'NT' || open.level !== 1) return null
+  if (open.seat !== seat) return null // VÅR färgöppning, ÖPPNAREN själv agerar
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+
+  // Vår sida ska ha bjudit EXAKT öppningen (partnern passade, öppnaren ej rebjudit).
+  const ourBids = contractBids.filter((c) => side(c.seat) === side(seat))
+  if (ourBids.length !== 1 || ourBids[0].seat !== seat) return null
+
+  // Ingen motståndardubbling i bilden (då är det en annan värld – straff/starkt X).
+  if (history.some((c) => (c.bid === 'X' || c.bid === 'XX') && side(c.seat) !== side(seat))) return null
+
+  // Motståndarna ska ha gjort EXAKT ETT kontraktsbud: LHO:s inkliv, nu passat runt
+  // till öppnaren i utpassningssitsen (RHO passade). Öppnarens LHO = NEXT_SEAT[seat].
+  const theirBids = contractBids.filter((c) => side(c.seat) !== side(seat))
+  if (theirBids.length !== 1) return null
+  const overcall = theirBids[0]
+  if (overcall.seat !== NEXT_SEAT[seat]) return null // inklivet ska vara LHO:s
+  const theirStrain = parseContractBid(overcall.bid)!.strain
+  if (theirStrain === 'NT') return null // svårt att döma mot NT här → passa
+
+  // Utpassningssits: inklivet är sista kontraktsbudet + bara pass efter (öppnaren
+  // sitter på utpassningen – passar han dör given).
+  const overIdx = history.indexOf(overcall)
+  if (history.slice(overIdx + 1).some((c) => c.bid !== 'P')) return null
+
+  const hand = deal.hands[seat]
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  const theirSuit = SUIT_OF_LETTER[theirStrain]
+
+  // 1) Kort (singel/renons) i deras färg → återöppningsdubbling (takeout).
+  //    Partnern har ofta längd/värden i deras färg (trap pass) → konverterar straff.
+  if (len[theirSuit] <= 1 && legal.includes('X' as Bid)) return {
+    seat, bid: 'X', rule: 'öppnarens återöppningsdubbling (utpassningssits)',
+    explanation: `Kort i ${SWE_NAME[theirStrain]} – sälj inte given: återöppningsdubbling (takeout; partnern kan konvertera till straff).`,
+  }
+
+  // 2) Egen 6+ färg → tävla genom att rebjuda den.
+  if (len[SUIT_OF_LETTER[open.strain]] >= 6) {
+    const rebid = cheapestBidIn(history, seat, open.strain)
+    if (rebid && legal.includes(rebid)) return {
+      seat, bid: rebid, rule: 'öppnaren tävlar i utpassningssits (egen 6+ färg)',
+      explanation: `6+ ${SWE_NAME[open.strain]} → ${rebid} (sälj inte given med en 6-korts färg).`,
+    }
+  }
+
+  // 3) Extra (15+ hp) → återöppningsdubbling även utan kort i deras färg.
+  if (hcp(hand) >= 15 && legal.includes('X' as Bid)) return {
+    seat, bid: 'X', rule: 'öppnarens återöppningsdubbling (extra, utpassningssits)',
+    explanation: `~${hcp(hand)} hp – för bra för att sälja given: återöppningsdubbling.`,
+  }
+
+  return null
+}
+
+// R1 Fynd #2 (flerronds-konkurrens, del C): advancern TÄVLAR upp till fiten på
+// 3-läget efter motståndarnas fitvisande höjning. Roten (proben, giv #263): partnern
+// klev in 2♥ (bra 6+ färg), motståndarna hittade sin fit (1♠–…–2♠), men advancern med
+// 3-korts stöd (= 9-korts fit) PASSADE. Lagen om totala stick: 9 trumf → tävla till
+// 3-läget. Skilt från raiseWithFit (som kräver 4-korts stöd för ett 2-läges inkliv och
+// hade bjudit 4♥ inbjudande = överbud). Ägarregel: 3-korts stöd + motståndarna har
+// hittat sin fit → tävla 3M; genuina utgångsvärden (13+ stödpoäng) → utgång; svag → pass.
+function advancerCompetesToFit(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat)) return null // motståndarna ska ha ÖPPNAT
+  // Motståndarna ska ha KONKURRERAT (öppnat + höjt/bjudit igen = de har hittat sin fit).
+  const theirBids = history.filter((c) => parseContractBid(c.bid) && side(c.seat) !== side(seat))
+  if (theirBids.length < 2) return null
+
+  const partnerSuit = partnerLastSuit(history, seat)
+  if (!partnerSuit) return null
+  // Partnern ska ha KLIVIT IN på 2-läget (icke-hopp lovar en bra 6+ färg → 3-korts
+  // stöd = 9-korts fit). 1-läges inkliv (5+ lovad) sköts av raiseWithFit (4+ krävs).
+  if (partnerSuit.level < 2) return null
+  // Ingen upptrappning: vi får inte redan ha bjudit partnerns färg själva.
+  if (history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === partnerSuit.strain)) return null
+
+  const hand = deal.hands[seat]
+  const suit = SUIT_OF_LETTER[partnerSuit.strain]
+  if (lengths(hand)[suit] < 3) return null // 9-korts fit mot ett 2-läges inkliv
+  const sp = dummyPoints(hand, suit).dummyPoints
+  if (sp < 8) return null // för svag → passa (tävla inte på en bust in i deras kontrakt)
+
+  const legal = legalCalls(history, seat)
+  const cheapest = cheapestBidIn(history, seat, partnerSuit.strain)
+  if (!cheapest) return null
+  const level = parseContractBid(cheapest)!.level
+  const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
+
+  // Genuina utgångsvärden (13+ stödpoäng) + högfärg → utgång.
+  if (sp >= 13 && isMajor) {
+    const game = `4${partnerSuit.strain}` as Bid
+    if (legal.includes(game)) return {
+      seat, bid: game, rule: 'advancern bjuder utgång med fit (konkurrens)',
+      explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]} + utgångsvärden (${sp} stödpoäng) → utgång ${game}.`,
+    }
+  }
+  // Tävla till lagens nivå (9 trumf → 3-läget). Har konkurrensen redan tryckt upp
+  // billigaste höjning till 4-läget saknar vi värden att tävla dit → passa.
+  if (level <= 3) return {
+    seat, bid: cheapest, rule: 'advancern tävlar till fiten (lagen om totala stick)',
+    explanation: `3-korts stöd = 9-korts fit → ${cheapest} (tävlar på lagen om totala stick; ej krav).`,
+  }
+  return null
+}
+
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
   const built = buildAuction(deal)
@@ -2382,6 +2555,15 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // Ligger FÖRE maybePenaltyDouble (extra → cue, inte straffdubbling) och
       // FÖRE off-book-svaret (som annars säljer given genom att passa).
       () => openerRondTwoInCompetition(deal, history, seat),
+      // Del A (flerronds): samma rond-2 MEN partnern PASSADE inklivet (sa inget).
+      // Öppnaren tävlar försiktigt (egen 6+ färg / återöppnings-X) i stället för
+      // att sälja given. Ligger EFTER openerRondTwoInCompetition (som kräver att
+      // partnern bjöd) och FÖRE maybePenaltyDouble/off-book-svaret.
+      () => openerReopensAfterPartnerPass(deal, history, seat),
+      // Del B (flerronds): samma men RHO PASSADE inklivet (1M–(inkliv)–P–P) →
+      // öppnaren sitter på utpassningen. Återöppnar (X med kort i deras färg /
+      // egen 6+ färg) i stället för att sälja given. Partnern gör ofta trap pass.
+      () => openerReopensBalancing(deal, history, seat),
       // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
       // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp.
       () => maybePenaltyDouble(deal, history, seat),
@@ -2422,6 +2604,11 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // högfärg och passar en klar 5-3-fit).
       () => answered(nmfPlacementToAnswer(history, seat),
         (n) => responderPlaceAfterNMF(hand, n.responderMajor, n.otherMajor, n.nmfMinor, n.opened, n.unbidSuit, n.answer), history, seat),
+      // Del C (flerronds): advancern tävlar upp till en 9-korts fit efter motstånd-
+      // arnas fitvisande höjning (partnern klev in 2-läges → 3-korts stöd räcker).
+      // Måste ligga FÖRE off-book-svaret (som kräver 4-korts stöd för ett 2-läges
+      // inkliv och därför passar den 3-korts fiten).
+      () => advancerCompetesToFit(deal, history, seat),
       // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
       () => offBookResponse(deal, history, seat),
       // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett

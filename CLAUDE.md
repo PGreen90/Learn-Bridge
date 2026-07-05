@@ -12,18 +12,42 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — ägaren pekar ut nästa sak (järnregeln: exakt en).
-> **NÄSTA NU (ägarbeslut 2026-07-05, för NÄSTA session): bredare flerronds-
-> konkurrens.** Sista kvarvarande delbiten av R1 Fynd #2. Störda auktioner ska leva
-> förnuftigt över FLERA budronder, inte bara den/de första. Idag hanterar motorn
-> störd budgivning ganska grunt bortom ett par ronder (`buildAuction` modellerar
-> EN konkurrensrond; `decideCall` fortsätter historiedrivet men lutar sig på en
-> kedja av punktdetektorer). **Startpunkt nästa gång:** fråga ägaren vilka konkreta
-> fleronds-konkurrenslägen som känns opålitliga i spel (t.ex. båda sidor budar upp
-> färg-mot-färg över 2–3 ronder), bygg FACIT-givar som blottar mönstret FÖRE något
-> byggs om — precis som §5.8 / "låna en kung". Väg också in R2:s förslag att göra
-> detektorkedjan i `decideCall` datadriven innan fler konkurrenslägen staplas på
-> (se `docs/status.md` "Budmotorns tre auktionslager").
+> **NU är TOM — ägaren pekar ut nästa sak.** Föregående NU (bredare flerronds-
+> konkurrens, R1 Fynd #2 sista delbit) är **KLAR (ej pushat än — ägaren godkänner
+> PCD)**. Ägaren **överrörde järnregeln** medvetet och bad om alla tre bekräftade
+> fel i EN session.
 >
+> **Senast klart (2026-07-05, EJ PUSHAT — inväntar PCD): bredare flerronds-
+> konkurrens (A+B+C).** Metod: en utforskningsprob körde 4000 slumpgivar genom hela
+> den levande auktionen, plockade ut äkta flerronds-konkurrenser och blottade tre
+> bekräftade fel (verkliga händer lästa som facit). Alla tre byggda facit-först:
+> - **A — öppnaren säljer i rond 2 när partnern PASSADE inklivet + RHO konkurrerade**
+>   (`1♣–(1♠)–P–(2♠)`): ny `openerReopensAfterPartnerPass` (`auction-live.ts`) – egen
+>   6+ färg → tävla; 15+ & kort i deras färg → återöppnings-X. Vakt: ingen
+>   motståndar-X + motståndarna ≥2 kontraktsbud (skiljer från felrapport #23).
+> - **B — öppnaren säljer i utpassningssitsen** (`1♠–(2♥)–P–P`): partnern trap-passar,
+>   öppnaren återöppnar. `openerReopensBalancing` (`auction-live.ts`) – kort i deras
+>   färg → X (partnern konverterar till straff), egen 6+ → rebjud, 15+ → X. **Kärnfix
+>   i `auction.ts`:** `buildAuction` STÄNGDE linjen (`open=false`) så snart svararen
+>   passade ett inkliv → contested-blocket hoppades över. Nu `finish(true)` (öppen,
+>   som takeout-X/Michaels-grenarna) → decideCall äger fortsättningen. Invariant-testen
+>   hoppar över öppna linjer → inget on-book-brott.
+> - **C — advancern tävlar upp till fiten** (`1♠–(2♥)–2♠–?`): ett 2-läges inkliv lovar
+>   6+ → 3-korts stöd = 9-korts fit. `advancerCompetesToFit` (`auction-live.ts`, före
+>   off-book-svaret) – tävla 3M (lagen om totala stick), 13+ stödpoäng → utgång, svag
+>   → pass. (Skilt från `raiseWithFit` som krävde 4-korts stöd och hade bjudit 4M.)
+>
+> Facit: `auction-opener-reopen-passed.test.ts` (A, 3), `auction-opener-reopen-
+> balancing.test.ts` (B, 4), `auction-advancer-compete-fit.test.ts` (C, 2) – alla röda
+> före fixen. **1052 tester gröna, tsc rent.** budsystem.md §5.9 + §7.1. Verifierat
+> end-to-end i proben: #159→3♣, #56/#552→2♥ dubblat (straff), #263→3♥. Se 👀 Bevaka.
+>
+> **Kvar/öppet efter detta:** R2:s förslag att göra detektorkedjan i `decideCall`
+> datadriven (~28 steg nu) står kvar som ett EGET framtida NU – väg in det innan fler
+> konkurrenslägen staplas på (`docs/status.md` "Budmotorns tre auktionslager").
+>
+> ---
+> **Föregående NU-historik (KLARA & LIVE):**
 > Föregående NU ("låna en kung" i balansering, §7.1) är **KLAR & LIVE**.
 >
 > **Senast klart & LIVE (2026-07-05, commit `f36d058`, deploy grön):
@@ -163,9 +187,10 @@ Läs den här filen först varje session.
 > `BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
 >
 > **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 (§5.8)~~ +
-> ~~balanseringens "låna en kung"~~ (BÅDA KLARA & LIVE 2026-07-05, §5.8 + §7.1);
-> kvar: bredare flerronds-konkurrens. Delbit 3 (Mathe mot stark 1♣) förblir
-> PARKERAD.
+> ~~balanseringens "låna en kung"~~ + ~~bredare flerronds-konkurrens (A+B+C, §5.9 +
+> §7.1)~~ (ALLA KLARA 2026-07-05; A+B+C ej pushat än). **R1 Fynd #2 är därmed i
+> praktiken helt genomarbetat** — bara delbit 3 (Mathe mot stark 1♣) förblir medvetet
+> PARKERAD (irrelevant tills vi lägger till fler budsystem).
 >
 > **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
 > kräver webworker), R3 #8 ("Förra sticket" 85 % — 375px-koll utestående). Se
@@ -175,6 +200,19 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Flerronds-konkurrens A+B+C (§5.9 + §7.1, 2026-07-05, NYTT — EJ PUSHAT):** störda
+  auktioner säljs inte längre billigt i rond 2+. (A) Öppnar du 1 i färg, de kliver in,
+  partnern PASSAR och de konkurrerar (`1♣–(1♠)–P–(2♠)`) → du tävlar nu (egen 6+ färg,
+  eller X med kort i deras färg) i stället för att passa. (B) Samma men de passar också
+  (`1♠–(2♥)–P–P`) → du återöppnar i utpassningssitsen (X med kort i deras färg → **din
+  partner kan konvertera till straff**; egen 6+ → rebjud). (C) Din partner klev in på
+  2-läget och de hittade sin fit (`1♠–(2♥)–2♠`) → du (advancern) tävlar nu **3♥** med
+  3-korts stöd (9-korts fit, lagen om totala stick). **Bevaka:** (a) återöppnar/tävlar
+  boten lagom ofta, eller väcker den given för lätt? (b) C:s golv är **~8 stödpoäng** –
+  en riktigt svag hand med 9-korts fit passar (medvetet, tävlar inte på en bust); vill
+  du ha renodlad "lag om totala stick" (tävla nästan alltid med fiten) → säg till, det
+  är en trösklsjustering. (c) B:s partner som trap-passar och konverterar till straff –
+  slår det rätt (blir det verkligen en straff, inte en flykt som får spela billigt)?
 - **"Låna en kung" i balansering (§7.1, 2026-07-05, NYTT & LIVE):** i
   utpassningsläget (deras 1-lägesöppning + två pass) kliver boten nu in ~3 hp
   lättare — enkelt inkliv från 5 hp, upplysnings-X från 9 (form 7), återöppnings-1NT
