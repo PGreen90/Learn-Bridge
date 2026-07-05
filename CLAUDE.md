@@ -192,7 +192,14 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
+1. **Krav i STÖRDA auktioner (måste-fix, ägaren flaggade 2026-07-05).** Steg 1 av
+   "budsystemets grunder" (`auctionForce`/`honorForce` i `auction-live.ts`) gör att
+   krav aldrig passas OSTÖRT — men i konkurrens faller de fortfarande. Bevisat:
+   `1♦–(1♠)–2♣–(P)` → öppnaren passar det fria kravbudet; `1♣–1♥–(1♠)–2♦` →
+   svararen passar reversen. Kräver eget omtänk (störd semantik: 2/1 ej självklart
+   100 % utgångskrav i konkurrens, fria bud är krav på annat sätt) — inte bara att
+   ta bort ostört-spärren i `auctionForce`. Facit-givar att bygga: störda A/B/C.
+2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - **17+ stark enfärgshand EFTER två bjudna färger (takeout, 2026-07-05):** en 17+

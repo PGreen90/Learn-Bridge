@@ -341,8 +341,17 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
       expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('2NT')
     })
 
-    it('minorfit blåses inte ut: 13+ med 5-korts ruter → 3♦, inte 5♦', () => {
-      const deal = dealWithN('S:A2 H:K3 D:KQ982 C:Q832') // 14 hp, 5-korts ruterfit
+    // "Rätt nivå med fit" (2026-07-05): en minorfit med UTGÅNGSVÄRDEN (13+ stöd-
+    // poäng) ska nå utgång, inte kapas vid en inbjudan. Obalanserad (5-4-2-2) →
+    // minorutgång 5♦. (Förr stannade motorn medvetet på 3♦ – det taket var buggen.)
+    it('minorfit + utgångsvärden: 14 hp, 5-korts ruter, obalanserad → 5♦', () => {
+      const deal = dealWithN('S:A2 H:K3 D:KQ982 C:Q832') // 14 hp, 5-4-2-2
+      expect(decideCall(deal, [call('S', '1D'), call('W', 'P')], 'N').bid).toBe('5D')
+    })
+
+    // …men en INBJUDANDE minorfit (11–12 stödpoäng) får aldrig blåsas till utgång.
+    it('minorfit, bara inbjudan (11 hp) → 3♦, inte 5♦', () => {
+      const deal = dealWithN('S:A2 H:83 D:KQ982 C:9832') // 11 hp, 5-korts ruterfit
       expect(decideCall(deal, [call('S', '1D'), call('W', 'P')], 'N').bid).toBe('3D')
     })
 

@@ -618,6 +618,29 @@ Partnern (som höjde) dömer: **4M** med ett **maximum** av höjningen (8+ stöd
 annars tillbaka till **3M** (avböjer). Golven speglar den ostörda accepten (§5.2):
 15+ = game try, 18+ = utgång.
 
+### 5.5 Krav får aldrig passas — även när du bjuder en egen väg
+Ett **krav** betyder att partnern lovat bjuda igen: du får inte passa. Motorn
+hedrar detta i sin planerade linje, men tidigare kunde den tappa kravet när *du*
+bjöd en annan hand än den räknat med ("off-book"). Nu läser motorn kravet direkt
+ur de **faktiskt spelade buden** i ostörda auktioner och tvingar fram ett
+naturligt minimibud i stället för att passa:
+
+| Krav | Exempel | Vem får inte passa |
+|---|---|---|
+| **2/1 = utgångskrav** | 1♠–2♦ … 2♠ | båda – tills utgång är nådd |
+| **Ny färg = rondkrav** | 1♦–1♠ | öppnaren måste rebjuda |
+| **Reverse = rondkrav** | 1♣–1♥–2♦ | svararen måste svara |
+
+Minimibudet väljs naturligt: rebjud en egen 5+ färg → stöd partnern (3+ kort) →
+ny färg → billigaste sang. Är auktionen redan **störd** (motståndarna har bjudit)
+gäller detta *ännu inte* – störd budgivning har egen kravsemantik och byggs senare.
+
+### 5.6 Rätt nivå med fit — minorutgång blåses ut vid utgångsvärden
+Har du **fit i partnerns lågfärg** och **utgångsvärden** (13+ stödpoäng) ska ni nå
+utgång, inte stanna på ett inbjudande hopp. Balanserad hand → **3NT**; annars
+**5 i lågfärgen**. (En bara *inbjudande* fit, 11–12 stödpoäng, höjer fortfarande
+lugnt till 3-läget – den blåses aldrig till utgång.)
+
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
 Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit

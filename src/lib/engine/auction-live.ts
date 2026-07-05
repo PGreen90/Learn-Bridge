@@ -933,8 +933,30 @@ function raiseWithFit(
   }
 
   const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
-  // Önskad nivå efter styrka. Utgång bara i högfärg (4-läget); minorutgång (5-läget)
-  // blåser vi inte ut här – då stannar vi på inbjudande hopp.
+
+  // Minorfit med UTGÅNGSVÄRDEN (13+ stödpoäng): nå utgång i stället för att kapa
+  // vid en inbjudan (grunden "rätt nivå med fit", 2026-07-05). Balanserad hand →
+  // 3NT (enklare utgång med 25 stick); annars minorutgången 5m. (Förr stannade
+  // motorn alltid på ett inbjudande hopp för minor – aldrig utgång.)
+  if (!isMajor && sp >= 13) {
+    const legal = legalCalls(history, seat)
+    if (isBalanced(hand) && legal.includes('3NT' as Bid)) {
+      return {
+        seat, bid: '3NT' as Bid,
+        explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]} + utgångsvärden (${sp} stödpoäng), balanserad → 3NT.`,
+      }
+    }
+    const gameBid = `5${partnerSuit.strain}` as Bid
+    if (legal.includes(gameBid)) {
+      return {
+        seat, bid: gameBid,
+        explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]} + utgångsvärden (${sp} stödpoäng) → minorutgång ${gameBid}.`,
+      }
+    }
+    // Varken 3NT eller 5m lagligt (konkurrensen tryckte upp budet) → fall vidare.
+  }
+
+  // Önskad nivå efter styrka. Högfärgsutgång = 4-läget; minorutgång sköts ovan.
   let wantLevel: number
   let label: string
   if (sp >= 13 && isMajor) {
@@ -1027,6 +1049,176 @@ function offBookResponse(deal: Deal, history: ResolvedCall[], seat: Seat): Resol
   const partnerSuit = partnerLastSuit(history, seat)
   if (!partnerSuit) return null // partnern har inte visat en färg → vi hittar inte på något
   return raiseWithFit(deal, history, seat, partnerSuit) ?? respondWithoutFit(deal, history, seat, partnerSuit)
+}
+
+// ---- Auktionstillstånd: "är vi i krav?" (grunden bakom "krav får aldrig passas") ----
+//
+// Off-book-lagret hade förut inget minne av auktionens tillstånd: varje bud
+// avgjordes från den egna handens poäng, och säkert standardval var pass. Krav
+// låg bara UNDERFÖRSTÅTT i den kanoniska linjen, så varje ny kravsituation
+// krävde en egen detektor (en per felrapport). `auctionForce` läser i stället
+// kravet direkt ur de SPELADE buden, så "passa aldrig ett krav" blir EN regel.
+
+/** Rang inom en färg (C<D<H<S) – skiljer ett 2/1 från ett hoppskift/reverse. */
+function strainRank(strain: string): number {
+  return SUIT_STRAINS.indexOf(strain as (typeof SUIT_STRAINS)[number])
+}
+
+/** Är budet minst utgång (3NT, 4 i högfärg, 5 i lågfärg, eller slam)? */
+function isGameOrHigher(bid: Bid): boolean {
+  const cb = parseContractBid(bid)
+  if (!cb) return false
+  if (cb.strain === 'NT') return cb.level >= 3
+  if (cb.strain === 'H' || cb.strain === 'S') return cb.level >= 4
+  return cb.level >= 5 // lågfärg
+}
+
+/**
+ * Är VÅR sida i krav just nu (och av vilket slag), läst ur de SPELADE buden?
+ * STEG 1 (grunder) täcker bara OSTÖRDA auktioner (motståndarna har inte gjort
+ * något kontraktsbud) och tre klassiska krav – annars null:
+ *   - 'game':  ett 2-över-1-svar har etablerat utgångskrav och utgång är EJ nådd.
+ *   - 'round': ett OBESVARAT rondkrav ligger på bordet och det är vår tur att
+ *      svara det – (a) partnerns nya färg (öppnaren måste rebjuda) eller
+ *      (b) öppnarens reverse (svararen måste svara).
+ * Konkurrens och fler kravtyper (fjärde färg, hoppskift, slamkrav) ligger utanför
+ * steg 1 med flit – de täcks redan av egna detektorer eller tas i senare steg.
+ */
+function auctionForce(history: ResolvedCall[], seat: Seat): { kind: 'round' | 'game' } | null {
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+  if (contractBids.length < 2) return null // öppning + minst ett svar krävs
+  // Ostört: alla kontraktsbud måste vara vår sidas (steg 1 tar inte konkurrens).
+  if (contractBids.some((c) => side(c.seat) !== side(seat))) return null
+
+  const opener = contractBids[0].seat
+  const open = parseContractBid(contractBids[0].bid)!
+  const responderSeat = PARTNER[opener]
+  const openerBids = contractBids.filter((c) => c.seat === opener)
+  const responderBids = contractBids.filter((c) => c.seat === responderSeat)
+  const firstResp = responderBids[0] ? parseContractBid(responderBids[0].bid)! : null
+
+  // Passade svararen INNAN sitt första bud? Då är ett 2/1 inte utgångskrav.
+  const responderPassedFirst =
+    !!responderBids[0] &&
+    history
+      .slice(0, history.indexOf(responderBids[0]))
+      .some((c) => c.seat === responderSeat && c.bid === 'P')
+
+  const highest = contractBids[contractBids.length - 1]
+  const gameReached = isGameOrHigher(highest.bid)
+
+  // ---- 2/1 = utgångskrav (gäller tills utgång nåtts, även mitt i sekvensen) ----
+  const isTwoOverOne =
+    !!firstResp &&
+    open.level === 1 && open.strain !== 'NT' &&
+    firstResp.level === 2 && firstResp.strain !== 'NT' &&
+    strainRank(firstResp.strain) < strainRank(open.strain) &&
+    !responderPassedFirst
+  if (isTwoOverOne && !gameReached) return { kind: 'game' }
+
+  // ---- Obesvarat rondkrav: bara pass efter vår sidas senaste kontraktsbud ----
+  const onlyPassAfter = history
+    .slice(history.indexOf(highest) + 1)
+    .every((c) => c.bid === 'P')
+  if (!onlyPassAfter) return null
+
+  // (a) Partnerns NYA färg → öppnaren måste rebjuda (rondkrav).
+  if (seat === opener && highest.seat === responderSeat) {
+    const bid = parseContractBid(highest.bid)!
+    const responderTimesInSuit = responderBids.filter(
+      (c) => parseContractBid(c.bid)!.strain === bid.strain,
+    ).length
+    const isNewSuit = bid.strain !== 'NT' && bid.strain !== open.strain && responderTimesInSuit === 1
+    if (isNewSuit) return { kind: 'round' }
+  }
+
+  // (b) Öppnarens REVERSE → svararen måste svara (rondkrav).
+  if (seat === responderSeat && highest.seat === opener && openerBids.length >= 2 && firstResp?.level === 1) {
+    const first = parseContractBid(openerBids[0].bid)!
+    const second = parseContractBid(highest.bid)!
+    const isReverse =
+      second.level === 2 && second.strain !== 'NT' &&
+      second.strain !== first.strain &&
+      strainRank(second.strain) > strainRank(first.strain)
+    if (isReverse) return { kind: 'round' }
+  }
+
+  return null
+}
+
+/**
+ * Ett naturligt MINIMIBUD som hedrar ett krav (aldrig pass). Prioritet:
+ *   1. rebjud en egen 5+ färg vi redan visat (visar verklig längd),
+ *   2. stöd en färg partnern visat (3+ kort), billigast,
+ *   3. en ny 4+ färg, billigast (längst, sedan lägst),
+ *   4. billigaste sang,
+ *   5. sista utväg: billigaste lagliga kontraktsbud (kravet får aldrig brytas).
+ */
+function forcedMinimumBid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const hand = deal.hands[seat]
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+
+  // 1) Rebjud egen 5+ färg vi redan bjudit.
+  for (const st of SUIT_STRAINS) {
+    if (len[SUIT_OF_LETTER[st]] < 5) continue
+    if (!history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === st)) continue
+    const bid = cheapestBidIn(history, seat, st)
+    if (bid) return {
+      seat, bid, rule: 'krav – rebjuder egen färg',
+      explanation: `Auktionen är krav – jag får inte passa. Rebjuder min egna ${SWE_NAME[st]} (5+ kort).`,
+    }
+  }
+
+  // 2) Stöd partnerns visade färg (3+ kort).
+  const ps = partnerLastSuit(history, seat)
+  if (ps && len[SUIT_OF_LETTER[ps.strain]] >= 3) {
+    const bid = cheapestBidIn(history, seat, ps.strain)
+    if (bid) return {
+      seat, bid, rule: 'krav – stödjer partnern',
+      explanation: `Auktionen är krav – jag får inte passa. Stöder partnerns ${SWE_NAME[ps.strain]} (3+ kort).`,
+    }
+  }
+
+  // 3) En ny 4+ färg (längst först, sedan billigast).
+  const newSuits = SUIT_STRAINS
+    .filter((st) =>
+      len[SUIT_OF_LETTER[st]] >= 4 &&
+      !opponentsBidStrain(history, seat, st) &&
+      !history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === st))
+    .sort((a, b) => len[SUIT_OF_LETTER[b]] - len[SUIT_OF_LETTER[a]] || strainRank(a) - strainRank(b))
+  for (const st of newSuits) {
+    const bid = cheapestBidIn(history, seat, st)
+    if (bid) return {
+      seat, bid, rule: 'krav – ny färg',
+      explanation: `Auktionen är krav – jag får inte passa. Visar en ny färg (${SWE_NAME[st]}, 4+ kort).`,
+    }
+  }
+
+  // 4) Billigaste sang.
+  const nt = (['1NT', '2NT', '3NT'] as Bid[]).find((b) => legal.includes(b))
+  if (nt) return {
+    seat, bid: nt, rule: 'krav – sang',
+    explanation: `Auktionen är krav – jag får inte passa. Billigaste sang.`,
+  }
+
+  // 5) Sista utväg: billigaste lagliga kontraktsbud.
+  const anyBid = allContractBids().find((b) => legal.includes(b))
+  if (anyBid) return {
+    seat, bid: anyBid, rule: 'krav – billigaste bud',
+    explanation: `Auktionen är krav – jag får inte passa; billigaste möjliga bud.`,
+  }
+  return null
+}
+
+/**
+ * Vakten som binder ihop det: är vår sida i krav och skulle annars passa, tvinga
+ * fram ett naturligt minimibud i stället. Placeras SIST i off-book-kedjan (efter
+ * offBookResponse) så den bara fångar det som annars blivit ett förbjudet pass.
+ */
+function honorForce(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  if (!auctionForce(history, seat)) return null
+  return forcedMinimumBid(deal, history, seat)
 }
 
 /**
@@ -1916,8 +2108,12 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // i stället för att passa. Måste ligga FÖRE off-book-svaret (som annars
       // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).
       () => overcallerRaiseAdvance(deal, history, seat),
-      // Generellt historiedrivet off-book-svar (sist – fångar övrigt).
+      // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
       () => offBookResponse(deal, history, seat),
+      // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett
+      // naturligt minimibud (grunden bakom "krav får aldrig passas"). Ostörda 2/1,
+      // ny färg och reverse; ersätter behovet av en detektor per felrapport.
+      () => honorForce(deal, history, seat),
     ]
     for (const run of contestedAnswers) {
       const call = run()
