@@ -390,14 +390,14 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // Svararen passade → given är på väg att passas ut till öppningsbudet.
   // BALANSERING (felrapport #5): innan kontraktet sätts får fjärde hand
   // (utpassningsläget) en riktig §7-chans – given ska inte dö när balanserings-
-  // sitsen har ett klart inkliv/X på handen. Samma krav som direkt sits
-  // (medvetet konservativt – "låna en kung"-lättnaden är en senare förfining).
+  // sitsen har ett klart inkliv/X på handen. "Låna en kung" (2026-07-05):
+  // `balancing=true` sänker §7-golven med 3 hp (partnern är markerad med värden).
   // Fortsättningen (advancerns höjning m.m.) bjuds levande i budlådan
   // (`decideCall`), därför lämnas auktionen öppen.
   if (response.call === 'P') {
     if (openerSuit) {
       const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-      const bal = overcall(deal.hands[balancerSeat], opening.call)
+      const bal = overcall(deal.hands[balancerSeat], opening.call, true)
       if (bal.call !== 'P') {
         turns.push({
           seat: balancerSeat,

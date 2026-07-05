@@ -865,8 +865,21 @@ Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam)
   en 1NT-öppning** (Stayman, transfers m.m., §4.3), fast med 15–18 hp.
 - **Balansering (utpassningsläget, felrapport #5):** efter deras 1-lägesöppning
   och två pass får fjärde hand hela §7-arsenalen (inkliv/X/Michaels/ovanlig 2NT)
-  – given passas inte ut med en klar aktion på handen. Samma krav som direkt
-  sits (medvetet konservativt; "låna en kung"-lättnaden är en senare förfining).
+  – given passas inte ut med en klar aktion på handen.
+- **"Låna en kung" i balansering (2026-07-05):** i utpassningsläget är partnern
+  markerad med värden (motståndarna stannade lågt), så du får agera **~3 hp
+  lättare** än i direkt sits. Golven sänks med en kung:
+
+  | Aktion | Direkt sits | Balansering |
+  |---|---|---|
+  | Enkelt inkliv (5+ färg) | 8 hp | **5 hp** |
+  | Upplysnings-X (kort i deras färg, stöd i övriga) | 12 (perfekt 4-korts form 10) | **9** (form **7**) |
+  | 1NT-inkliv (jämn m. stopp) | 15–18 | **11–14** (klassisk återöppnings-1NT) |
+
+  Michaels / ovanlig 2NT (formbud, 5-5) och den starka 17+-X:en är oförändrade –
+  de vilar på form/styrka, inte på det lånade kunga-utrymmet. Färgkvalitet och
+  korthet i deras färg krävs fortfarande; kungen sänker bara HP-tröskeln ovanpå
+  formkraven.
 
 **Svar på partnerns enkla inkliv:**
 | Svar | Betydelse |

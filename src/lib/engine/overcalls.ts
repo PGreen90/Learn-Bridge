@@ -56,8 +56,18 @@ function bestOvercallSuit(len: Record<Suit, number>, their: Suit): Suit | null {
   return best
 }
 
-/** Vad bjuder vi över motståndarens 1-läges färgöppning? §7.1–7.2. */
-export function overcall(hand: Hand, theirCall: string): ResponseResult {
+/**
+ * Vad bjuder vi över motståndarens 1-läges färgöppning? §7.1–7.2.
+ *
+ * `balancing` = sitter vi i BALANSERINGSSITS (deras öppning har följts av två
+ * pass, given är på väg att passas ut)? Då "lånar vi en kung": partnern är
+ * markerad med värden, så §7-golven sänks med 3 hp (ägarbeslut 2026-07-05).
+ * Flat HP-lättnad – lagret räknar fortfarande rå HP (TP i §7 = separat SENARE).
+ * Sänks: enkelt inkliv 8→5, upplysnings-X 12→9 (perfekt form 10→7), och
+ * 1NT-inklivet flyttas 15–18 → 11–14 (klassisk återöppnings-1NT). Michaels/
+ * ovanlig 2NT (formbud) och den starka 17+-X:en rörs inte.
+ */
+export function overcall(hand: Hand, theirCall: string, balancing = false): ResponseResult {
   const their = openingSuit(theirCall)
   const pass: ResponseResult = { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass.' }
   if (!their) return pass
@@ -65,6 +75,7 @@ export function overcall(hand: Hand, theirCall: string): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   const unbid = RANK_ORDER.filter((s) => s !== their)
+  const relief = balancing ? 3 : 0 // "låna en kung" – sänk HP-golven i balansering
 
   // 1) Ovanlig 2NT: 5-5 i de två lägsta objudna färgerna.
   const twoLowest = unbid.slice(0, 2)
@@ -85,8 +96,11 @@ export function overcall(hand: Hand, theirCall: string): ResponseResult {
     }
   }
 
-  // 3) 1NT-inkliv: 15–18 balanserad med stopp.
-  if (isBalanced(hand) && p >= 15 && p <= 18 && hasStopper(hand, their)) {
+  // 3) 1NT-inkliv: 15–18 balanserad med stopp (direkt); 11–14 i balansering
+  // (klassisk återöppnings-1NT – den starka 15–18-handen dubblar först där).
+  const ntLow = balancing ? 11 : 15
+  const ntHigh = balancing ? 14 : 18
+  if (isBalanced(hand) && p >= ntLow && p <= ntHigh && hasStopper(hand, their)) {
     return { call: '1NT', rule: '1NT-inkliv', explanation: `${p} hp balanserad med stopp i ${NAME[their]} → 1NT-inkliv (kör 1NT-systemet).` }
   }
 
@@ -111,13 +125,13 @@ export function overcall(hand: Hand, theirCall: string): ResponseResult {
   const shortTheirs = len[their] <= 2
   const supportUnbid = unbid.every((s) => len[s] >= 3)
   const longestUnbid = Math.max(...unbid.map((s) => len[s]))
-  if (shortTheirs && supportUnbid && ((p >= 12 && longestUnbid <= 5) || (p >= 10 && longestUnbid <= 4))) {
+  if (shortTheirs && supportUnbid && ((p >= 12 - relief && longestUnbid <= 5) || (p >= 10 - relief && longestUnbid <= 4))) {
     return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[their]}, stöd i övriga → X (upplysning).` }
   }
 
-  // 5) Enkelt inkliv: bra 5+ färg, 8–16 hp.
+  // 5) Enkelt inkliv: bra 5+ färg, 8–16 hp (golv 8→5 i balansering).
   const ov = bestOvercallSuit(len, their)
-  if (ov && p >= 8 && p <= 16) {
+  if (ov && p >= 8 - relief && p <= 16) {
     const lvl = overcallLevel(ov, their)
     // Svagt hoppinkliv: 6-korts färg, 6–10 hp som annars hade krävt 2-läget.
     return { call: `${lvl}${BID[ov]}`, rule: 'enkelt inkliv', explanation: `${p} hp med ${len[ov]}-korts ${NAME[ov]} → ${lvl}${SYM[ov]} (inkliv).` }

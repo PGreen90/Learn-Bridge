@@ -1505,8 +1505,9 @@ function overcallerRaiseAdvance(deal: Deal, history: ResolvedCall[], seat: Seat)
  *  - budet är auktionens senaste (direkt sits) ELLER följt av exakt två pass
  *    (balanseringssits – utpassningsläget, felrapport #5).
  * Returnerar inklivet (eller X/Michaels/ovanlig 2NT) ur `overcall`, annars null.
- * Balanseringen använder samma §7-krav som direkt sits (medvetet konservativt –
- * "låna en kung"-lättnaden är en senare förfining).
+ * I balansering skickas `balancing=true` till `overcall` → HP-golven sänks med en
+ * kung ("låna en kung", 2026-07-05): partnern är markerad med värden i utpassnings-
+ * läget, så inkliv/X/1NT får bjudas ~3 hp lättare än i direkt sits.
  */
 function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
   const openIdx = history.findIndex((c) => parseContractBid(c.bid))
@@ -1522,10 +1523,10 @@ function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): Resolve
   const balancing = after.length === 2 && after.every((c) => c.bid === 'P')
   if (!direct && !balancing) return null
 
-  const res = overcall(deal.hands[seat], open.bid)
+  const res = overcall(deal.hands[seat], open.bid, balancing)
   if (res.call === 'P') return null
   if (!legalCalls(history, seat).includes(res.call as Bid)) return null
-  const note = balancing ? ' (balansering – utpassningsläget)' : ''
+  const note = balancing ? ' (balansering – utpassningsläget: lättare krav, "låna en kung")' : ''
   return { seat, bid: res.call as Bid, rule: res.rule, explanation: res.explanation + note }
 }
 

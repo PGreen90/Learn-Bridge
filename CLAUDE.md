@@ -12,8 +12,20 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — ägaren pekar ut nästa sak (järnregeln: exakt en).
-> Föregående NU (öppnarens rond-2 i konkurrens, §5.8) är **KLAR & LIVE**. Välj nästa
-> ur 🟢 NÄST / ⚪ SENARE nedan, eller peka ut en ny grundregel som känns opålitlig.
+> **BYGGD & VERIFIERAD LOKALT (2026-07-05, EJ PUSHAD — inväntar ägarens PCD):
+> "Låna en kung" i balanseringssits (§7.1).** I utpassningsläget (deras
+> 1-lägesöppning + två pass) är partnern markerad med värden, så §7-inklivets
+> HP-golv sänks med **en kung (−3)**: enkelt inkliv 8→5, upplysnings-X 12→9 (form
+> 10→7), 1NT-inkliv 15–18 → **11–14** (klassisk återöppnings-1NT). **Flat HP-lättnad
+> — §7-lagret behåller rå HP; TP-i-§7 avvisades medvetet (ortogonalt: TP=formspak,
+> kung=sitsspak, och TP lyfter inte de PLATTA händer balansering finns till för).**
+> `overcall` (`overcalls.ts`) fick en `balancing`-flagga; trådad från BÅDE
+> `maybeOvercall` (`auction-live.ts`, live) OCH `buildAuction` (`auction.ts`,
+> on-book balanseringsgren — annars passades given ut med open=false och nådde
+> aldrig live). Direkt sits **exakt oförändrad** (relief=0). Facit
+> `overcall-balancing.test.ts` (6: enhet + integration; direkt-sits-kontroller
+> bevisar seat-specificiteten). 1043 tester gröna, tsc rent. budsystem.md §7.1.
+> Se 👀 Bevaka. **KVAR: ägaren godkänner PCD.**
 >
 > **Senast klart & LIVE (2026-07-05, commit `112f0fc`, deploy grön): Öppnarens
 > rond-2 i störd auktion efter partnerns NYA FÄRG / 1NT (§5.8).** Systerfallet till
@@ -136,10 +148,10 @@ Läs den här filen först varje session.
 > med valfri bud-specifik text ("Rapportera fel i budgivningen" +
 > `BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
 >
-> **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 när partnern
-> bjöd NY färg / 1NT~~ (KLAR & LIVE 2026-07-05, §5.8); balanseringens "låna en
-> kung"-lättnad; bredare flerronds-konkurrens. Delbit 3 (Mathe mot stark 1♣) förblir
-> PARKERAD.
+> **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 (§5.8)~~ +
+> ~~balanseringens "låna en kung"~~ (BÅDA KLARA 2026-07-05, §5.8 live / §7.1
+> inväntar PCD); kvar: bredare flerronds-konkurrens. Delbit 3 (Mathe mot stark 1♣)
+> förblir PARKERAD.
 >
 > **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
 > kräver webworker), R3 #8 ("Förra sticket" 85 % — 375px-koll utestående). Se
@@ -149,6 +161,16 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **"Låna en kung" i balansering (§7.1, 2026-07-05, NYTT – EJ PUSHAD ÄNNU):** i
+  utpassningsläget (deras 1-lägesöppning + två pass) kliver boten nu in ~3 hp
+  lättare — enkelt inkliv från 5 hp, upplysnings-X från 9 (form 7), återöppnings-1NT
+  11–14. **Bevaka:** (a) balanserar boten lagom ofta, eller väcker den given på för
+  skräpiga händer? (b) 2-läges-inkliv på ~5 hp kan bli aggressivt (lättnaden gäller
+  även där) — säg till om det svider. (c) advancern (som svarar balanseringen) vet
+  ännu INTE att partnern kan vara en kung lättare → kan övervärdera tillbaka; en
+  "advancer-rabatt" är en möjlig uppföljning. (d) den starka 15–18 jämna handen i
+  balansering dubblar först (om form) i stället för 1NT; saknar den form (lång i
+  deras färg) kan den passa — ovanlig kant, säg till om den dyker upp.
 - **Öppnarens rond-2 i konkurrens efter partnerns ny färg / 1NT (§5.8, 2026-07-05,
   NYTT & LIVE):** öppnar du 1 i färg, partnern svarar en fri ny färg / 1NT
   och motståndarna bjuder om (t.ex. `1♥–(1♠)–2♣–(2♠)`), passar öppnaren inte längre
@@ -255,6 +277,16 @@ Läs den här filen först varje session.
 1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **TP till §7-inkliven (2026-07-05, ägarbeslut vid "låna en kung"):** §7-lagret
+  (`overcall`, `advanceOvercall`, DONT, försvar mot svaga tvåor) räknar fortfarande
+  **rå HP** — TP (form/fördelning) har aldrig nått dit. Att låta balanserings- OCH
+  direkt-inkliv räkna TP är en riktig förbättring (en formstark 8:a kliver in), men
+  **additiv** ovanpå "låna en kung" (som är sits-spaken), inte en ersättare. Eget
+  test-låst steg (som TP-stegen A–F). Plockas upp när ägaren vill bredda TP till §7.
+- **Advancer-rabatt efter balansering (2026-07-05):** partnern som SVARAR en
+  balansering vet ännu inte att balanseraren kan vara en kung lättare → kan
+  övervärdera tillbaka och driva för högt. En symmetrisk "räkna en kung mindre när
+  du svarar en balansering" saknas. Plockas upp om en giv visar att paret överbjuder.
 - **17+ stark enfärgshand EFTER två bjudna färger (takeout, 2026-07-05):** en 17+
   enfärgshand som borde upplysningsdubbla när motståndarna redan bjudit två färger
   (t.ex. 1♦–P–1♥) gör det INTE — där följer `decideCall` en färdig buildAuction-
