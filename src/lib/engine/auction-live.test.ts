@@ -1392,3 +1392,53 @@ describe('Två-färgs upplysningsdubbling – 1♦–P–1♥–X (4-4 i objudna
     expect(e.bid).not.toBe('2D') // öppnarens färg – aldrig
   })
 })
+
+// Felrapport #27 (github.com/PGreen90/Learn-Bridge/issues/27): bricka 3,
+// Syd öppnade 1♠, Nord svarade 2♥ (2-över-1 = utgångskrav), Syd höjde 3♥ – och
+// Nord PASSADE med 17 hp och 8-korts hjärterfit. Roten: given är off-book (Syd
+// öppnade den svagare handen; motorns kanoniska linje hade Nord som öppnare), så
+// den on-book 2/1-fortsättningen (responderRebidIn2over1Auction) fyrar aldrig.
+// Off-book-lagret saknade begreppet "2/1 = utgångskrav när öppnaren höjer min
+// färg" → pass. Facit: Nord sätter utgång 4♥ (pass förbjudet i utgångskravet).
+describe('felrapport #27 – 2-över-1 utgångskrav: svararen sätter utgång när öppnaren höjer (off-book)', () => {
+  const deal = dealOf('S', {
+    N: 'S:A H:KQT94 D:KT7 C:KQ32',
+    E: 'S:T6532 H:A D:865 C:AT65',
+    S: 'S:QJ874 H:J83 D:AQJ C:74',
+    W: 'S:K9 H:7652 D:9432 C:J98',
+  })
+
+  it('1♠–P–2♥(2/1)–P–3♥–P: Nord bjuder 4♥ (utgång), aldrig pass', () => {
+    const history = [
+      call('S', '1S'), call('W', 'P'), call('N', '2H'), call('E', 'P'),
+      call('S', '3H'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('4H')
+  })
+})
+
+// Felrapport #26 (github.com/PGreen90/Learn-Bridge/issues/26): bricka 6,
+// Syd öppnade 1♣, Väst klev in 2♥ (svagt hoppinkliv), Nord cue-bjöd 3♥
+// (limithöjning+ i klöver, utgångskrav), Syd visade spaderstopp med 3♠ – och
+// Nord PASSADE 3♠. Cue-höjningen är krav; öppnarens svar får inte passas.
+// answerCueRaise hanterar bara ÖPPNAREN som svarar cuet – det fanns ingen
+// hanterare för CUE-BJUDAREN som fullföljer efter öppnarens svar. Facit: Nord
+// har hjärterstopp (♥AQ8) → 3NT (utgång), aldrig pass.
+describe('felrapport #26 – cue-bjudaren fullföljer utgångskravet efter öppnarens svar', () => {
+  const deal = dealOf('E', {
+    N: 'S:9 H:AQ8 D:Q952 C:KJ862',
+    E: 'S:86542 H:T D:JT C:AQ943',
+    S: 'S:AKJ7 H:K42 D:K74 C:T75',
+    W: 'S:QT3 H:J97653 D:A863 C:-',
+  })
+
+  it('P–1♣–2♥–3♥(cue)–P–3♠–P: Nord bjuder 3NT (hjärterstopp), aldrig pass', () => {
+    const history = [
+      call('E', 'P'), call('S', '1C'), call('W', '2H'), call('N', '3H'),
+      call('E', 'P'), call('S', '3S'), call('W', 'P'),
+    ]
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('3NT')
+  })
+})

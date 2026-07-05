@@ -23,7 +23,7 @@ import { answerNTInterference, answerPreemptInterference } from './contested-ope
 import { openerAnswerFourthSuit } from './rebids'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
-import { advanceTwoSuiter, openingSuit, overcall } from './overcalls'
+import { advanceTwoSuiter, hasStopper, openingSuit, overcall } from './overcalls'
 import { side } from './play'
 import { respondToKingAsk, respondToRKC } from './slam'
 
@@ -1534,6 +1534,150 @@ function answerWeakTwoCue(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
 }
 
 /**
+ * Har VÅR 2-över-1-svarare (utgångskrav) fått sin färg HÖJD av öppnaren, så att
+ * svararen nu måste placera minst utgång i stället för att passa (felrapport #27)?
+ * Ett 2-över-1-svar (ny lägre färg på 2-läget, ostört) är utgångskrav i hela
+ * systemet – svararen får ALDRIG passa under utgång. Uppstår off-book när Syd
+ * öppnade den svagare handen (motorns linje hade partnern som öppnare), så den
+ * on-book-fortsättningen aldrig fyrar. Mönster: motståndarna helt tysta (ostört),
+ * VÅR 1-färgsöppning, partnerns svar = ny lägre färg på 2-läget (äkta 2/1),
+ * öppnaren höjde den färgen, det är svararens tur (bara pass efter höjningen) och
+ * höjningen ligger under utgång. Returnerar den överenskomna färgen, annars null.
+ */
+function twoOverOneRaiseToAnswer(history: ResolvedCall[], seat: Seat): { strain: string } | null {
+  // Ostört: motståndarna får inte ha gjort något kontraktsbud (då gäller ej rent 2/1).
+  if (history.some((c) => side(c.seat) !== side(seat) && parseContractBid(c.bid))) return null
+  const open = openingBid(history)
+  if (!open || open.level !== 1 || open.strain === 'NT') return null
+  if (side(open.seat) !== side(seat)) return null // VÅR öppning
+  const opener = open.seat
+  const responder = PARTNER[opener]
+  if (seat !== responder) return null // svararen (2/1-budaren) själv placerar
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 3) return null
+  const [openC, respC, raiseC] = ourBids
+  if (openC.seat !== opener || respC.seat !== responder || raiseC.seat !== opener) return null
+  const rb = parseContractBid(respC.bid)!
+  // Äkta 2/1: ny färg (≠ öppningsfärgen), 2-läget, LÄGRE rang än öppningen.
+  if (rb.strain === 'NT' || rb.level !== 2 || rb.strain === open.strain) return null
+  const openRank = SUIT_STRAINS.indexOf(open.strain as (typeof SUIT_STRAINS)[number])
+  const respRank = SUIT_STRAINS.indexOf(rb.strain as (typeof SUIT_STRAINS)[number])
+  if (openRank < 0 || respRank < 0 || respRank >= openRank) return null
+  // Öppnaren HÖJDE svararens färg (samma strain, högre nivå).
+  const raiseBid = parseContractBid(raiseC.bid)!
+  if (raiseBid.strain !== rb.strain || raiseBid.level <= rb.level) return null
+  const raiseIdx = history.indexOf(raiseC)
+  if (history.slice(raiseIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter höjningen
+  const isMajor = rb.strain === 'H' || rb.strain === 'S'
+  const gameLevel = isMajor ? 4 : 5
+  if (raiseBid.level >= gameLevel) return null // redan utgång/över → inget att tvinga
+  return { strain: rb.strain }
+}
+
+/**
+ * Svararen sätter utgång efter att öppnaren höjt vår 2/1-färg (felrapport #27):
+ * högfärg → 4M; lågfärg → 3NT med stopp i de objudna färgerna, annars 5m.
+ * Utgångskravet får aldrig passas.
+ */
+function answerTwoOverOneRaise(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const info = twoOverOneRaiseToAnswer(history, seat)
+  if (!info) return null
+  const hand = deal.hands[seat]
+  const legal = legalCalls(history, seat)
+  const isMajor = info.strain === 'H' || info.strain === 'S'
+  if (isMajor) {
+    const bid = `4${info.strain}` as Bid
+    if (!legal.includes(bid)) return null
+    return {
+      seat, bid, rule: '2/1 utgångskrav',
+      explanation: `Vårt 2-över-1-svar var utgångskrav och partnern höjde min ${SWE_NAME[info.strain]} → jag sätter utgång ${bid} (pass förbjudet).`,
+    }
+  }
+  // Lågfärgs-2/1: 3NT om vi stoppar de objudna färgerna, annars 5m.
+  const open = openingBid(history)!
+  const bidStrains = new Set<string>([open.strain, info.strain])
+  const unbid = SUIT_STRAINS.filter((st) => !bidStrains.has(st))
+  if (unbid.every((st) => hasStopper(hand, SUIT_OF_LETTER[st])) && legal.includes('3NT' as Bid)) {
+    return {
+      seat, bid: '3NT', rule: '2/1 utgångskrav',
+      explanation: `Vårt 2-över-1 var utgångskrav; med stopp i de objudna färgerna → 3NT (pass förbjudet).`,
+    }
+  }
+  const bid = `5${info.strain}` as Bid
+  if (!legal.includes(bid)) return null
+  return {
+    seat, bid, rule: '2/1 utgångskrav',
+    explanation: `Vårt 2-över-1 var utgångskrav och partnern höjde min ${SWE_NAME[info.strain]} → utgång ${bid} (pass förbjudet).`,
+  }
+}
+
+/**
+ * Har JAG (cue-bjudaren) fått öppnarens svar på min cue-höjning, så att jag måste
+ * fullfölja utgångskravet i stället för att passa (felrapport #26)? Ett cue-bud i
+ * motståndarnas färg är en limithöjning+ (krav) av partnerns öppning – när
+ * öppnaren svarat (t.ex. visat stopp med 3♠) får jag aldrig passa under utgång.
+ * `answerCueRaise` sköter ÖPPNARENS svar på cuet; detta är CUE-BJUDARENS svar på
+ * öppnarens svar. Mönster: partnern öppnade 1-i-färg, JAG cue-bjöd deras färg,
+ * partnern svarade (senaste kontraktsbudet, bara pass efter), och svaret ligger
+ * under utgång. Returnerar den överenskomna färgen + deras (cuade) färg.
+ */
+function cueBidderRebidToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { agreedStrain: string; theirStrain: string } | null {
+  const open = openingBid(history)
+  if (!open || open.strain === 'NT') return null
+  if (side(open.seat) !== side(seat)) return null // VÅR öppning
+  if (open.seat !== PARTNER[seat]) return null // partnern öppnade, JAG cue-bjöd
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 3) return null
+  const [openC, cueC, answerC] = ourBids
+  if (openC.seat !== open.seat || cueC.seat !== seat || answerC.seat !== open.seat) return null
+  const cb = parseContractBid(cueC.bid)!
+  if (cb.strain === 'NT') return null
+  // Cuet måste ligga i en färg motståndarna bjudit.
+  const theyBidCue = history.some(
+    (c) => side(c.seat) !== side(seat) && parseContractBid(c.bid)?.strain === cb.strain,
+  )
+  if (!theyBidCue) return null
+  // Öppnarens svar = senaste kontraktsbudet, bara pass efter.
+  const ansIdx = history.indexOf(answerC)
+  if (history.slice(ansIdx + 1).some((c) => parseContractBid(c.bid))) return null
+  const ans = parseContractBid(answerC.bid)!
+  const isMajor = open.strain === 'H' || open.strain === 'S'
+  const gameLevel = isMajor ? 4 : 5
+  if (ans.strain === 'NT' && ans.level >= 3) return null // redan 3NT (utgång nådd)
+  if (bidValue(ans.level, ans.strain) >= bidValue(gameLevel, open.strain)) return null // redan utgång/över
+  return { agreedStrain: open.strain, theirStrain: cb.strain }
+}
+
+/**
+ * Cue-bjudaren fullföljer utgångskravet efter öppnarens svar (felrapport #26):
+ * med stopp i motståndarnas färg → 3NT, annars utgång i den överenskomna färgen
+ * (4M/5m). Får aldrig passas.
+ */
+function answerCueBidderRebid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const info = cueBidderRebidToAnswer(history, seat)
+  if (!info) return null
+  const hand = deal.hands[seat]
+  const legal = legalCalls(history, seat)
+  const theirSuit = SUIT_OF_LETTER[info.theirStrain]
+  if (hasStopper(hand, theirSuit) && legal.includes('3NT' as Bid)) {
+    return {
+      seat, bid: '3NT', rule: 'cue-höjningens fortsättning',
+      explanation: `Min cue-höjning var utgångskrav; jag stoppar deras ${SWE_NAME[info.theirStrain]} → 3NT (pass förbjudet).`,
+    }
+  }
+  const isMajor = info.agreedStrain === 'H' || info.agreedStrain === 'S'
+  const bid = `${isMajor ? 4 : 5}${info.agreedStrain}` as Bid
+  if (!legal.includes(bid)) return null
+  return {
+    seat, bid, rule: 'cue-höjningens fortsättning',
+    explanation: `Min cue-höjning var utgångskrav – utan säkert stopp i deras ${SWE_NAME[info.theirStrain]} sätter jag utgång i vår ${SWE_NAME[info.agreedStrain]} (${bid}); pass förbjudet.`,
+  }
+}
+
+/**
  * Öppnarens ROND-2-beslut i det INKLÄMDA konkurrensläget efter partnerns enkla
  * högfärgshöjning (R1 Fynd #2, delbit 6). Mönster: VÅR 1-högfärgsöppning (1♥/1♠),
  * ett inkliv, partnern höjde till 2M (enkel höjning, 6–9), och motståndarna
@@ -1759,6 +1903,15 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // Advancern svarar partnerns TVÅFÄRGS-CUE över deras svaga tvåa (felrapport
       // #18): krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
       () => answerWeakTwoCue(deal, history, seat),
+      // Cue-BJUDAREN fullföljer utgångskravet efter öppnarens svar (felrapport
+      // #26): krav, får aldrig passas. answerCueRaise sköter öppnarens svar på
+      // cuet; detta är cue-bjudarens svar på det svaret. FÖRE off-book-svaret.
+      () => answerCueBidderRebid(deal, history, seat),
+      // Vårt 2-över-1 var utgångskrav och öppnaren höjde vår färg (felrapport
+      // #27): svararen sätter minst utgång, passar aldrig. Uppstår off-book (Syd
+      // öppnade svagare handen). Måste ligga FÖRE off-book-svaret (som annars
+      // vägrar höja en redan bjuden färg och passar).
+      () => answerTwoOverOneRaise(deal, history, seat),
       // Inklivaren stöttar advancerns NYA färg (felrapport #15): enkel stödhöjning
       // i stället för att passa. Måste ligga FÖRE off-book-svaret (som annars
       // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).
