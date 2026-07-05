@@ -11,19 +11,20 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Störda krav (krav får aldrig passas i KONKURRENS).
-> **Steg 1 av "budsystemets grunder" (LIVE) täcker bara OSTÖRDA krav.** I konkurrens
-> faller de fortfarande. Bevisat 2026-07-05: `1♦–(1♠)–2♣–(P)` → öppnaren passar det
-> fria kravbudet; `1♣–1♥–(1♠)–2♦` → svararen passar reversen. `auctionForce`
-> (`auction-live.ts`) spärrar AV på konkurrens med flit — här ska den utvidgas.
+### 🔵 NU — ägaren pekar ut nästa sak (järnregeln: exakt en).
+> Föregående NU (störda krav) är **KLAR & LIVE**. Välj nästa ur 🟢 NÄST / ⚪ SENARE
+> nedan, eller peka ut en ny grundregel som känns opålitlig i spel.
 >
-> **Ägarbeslut (2026-07-05):** `1♦–(1♠)–2♣` = **RONDKRAV** i konkurrens (partnern får
-> inte passa, men budgivningen får stanna UNDER utgång — ett inkliv "lånar" utrymme,
-> så ett 2/1 lovar värden men ej garanterad utgång). Bygg: fria bud (ny färg) +
-> reverse i störd auktion honoreras som rondkrav. Facit-givar: störda A/B/C.
->
-> **Metod (som alltid):** facit före fix, test-låsta steg. Störd semantik skiljer
-> sig från ostört → inte bara ta bort ostört-spärren i `auctionForce`.
+> **Senast klart & LIVE (2026-07-05, commit `a989a08`, deploy grön): Störda krav
+> (§5.5).** Steg 1 hedrade krav bara OSTÖRT; nu även i KONKURRENS. `auctionForce`
+> (`auction-live.ts`) fick en egen gren (`competitionForce` + `isJumpBid`): ett
+> **fritt bud (ny färg, ej hopp, ej cue)** och en **reverse** i störd auktion är
+> **RONDKRAV** — partnern tvingas svara via `honorForce` i stället för att passa.
+> Aldrig utgångskrav i konkurrens (ägarbeslut: ett inkliv "lånar" utrymme → 2/1
+> lovar värden men ej garanterad utgång). Passad svarare / hopp / cue undantas.
+> Facit: `foundation-forcing-competition.test.ts` (störda A/B/C, röda före fixen) +
+> `.stress.test.ts` (10 000 seedade givar; rondkravet utlöstes 146 ggr, passades
+> aldrig). Se 👀 Bevaka.
 >
 > **Senast klart & LIVE (2026-07-05, commit `ca04175`, deploy grön): New Minor
 > Forcing (§5.7).** Efter `1m–1M–1NT` bjuder svararen (5-korts högfärg + 11+) den
@@ -132,6 +133,15 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Störda krav = RONDKRAV (§5.5, 2026-07-05, NYTT):** klev en motståndare in och du
+  gjorde ett **fritt bud** (ny färg, t.ex. `1♦–(1♠)–2♣`) eller öppnaren **reverse:ade**
+  (`1♣–1♥–(1♠)–2♦`), så passar din partner inte längre — hen tvingas svara med ett
+  naturligt minimibud (`competitionForce`/`honorForce`). Men bara **rondkrav**: buden
+  får stanna UNDER utgång (ett inkliv "lånar" utrymme). **Bevaka:** (a) svarar boten
+  förnuftigt (rätt naturligt bud, inte ett tvångsbud som låter konstigt)? (b) driver
+  den ALDRIG till utgång i onödan här (2/1 i konkurrens lovar värden men ej utgång)?
+  Hopp, cue i deras färg och en passad svarare undantas medvetet — säg till om ett av
+  dem borde ha tvingat fram ett svar ändå.
 - **Utgångskrav får aldrig passas OFF-BOOK (felrapport #26 + #27, 2026-07-05,
   NYTT):** två luckor där boten passade en KRAV-auktion när du bjudit off-book
   (motorn hade planerat en annan linje). (1) **#26** – efter din cue-höjning
