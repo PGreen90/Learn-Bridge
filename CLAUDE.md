@@ -12,14 +12,20 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — inget aktivt bygge. Ägaren väljer nästa spår.
-> **Senast klart (2026-07-05, ännu INTE committat – väntar på ägarens OK för
-> commit+push):** starka upplysningsdubblingens **flerronds-fortsättning** byggd &
-> test-låst (`auction-live.ts`: `strongDoubleContext` + `advanceStrongDoubleRebid`
-> + `strongDoublerSecondRebid` + `answerStrongDoubleGameForce`). Game-hoppet
-> borttaget; partnern tvångssvarar; TP-tröskel **22** för 3-läges-hopp (ägarval
-> efter 6 exempelhänder). Ordet "monster" bannlyst. 976 tester gröna, tsc rent.
-> Kvar att finslipa (ägaren, i spel): den starka handens dom EFTER en stödhöjning
-> = konservativ default, se 👀 Bevaka.
+> **NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln), ELLER
+> finslipar den starka dubblingens dom-efter-stödhöjning om den känts fel i spel.
+>
+> **Senast klart & LIVE (2026-07-05, mergepunkt `1bec779`):** starka
+> upplysningsdubblingens **flerronds-fortsättning** byggd, test-låst & pushad
+> (`auction-live.ts`: `strongDoubleContext` + `advanceStrongDoubleRebid` +
+> `strongDoublerSecondRebid` + `answerStrongDoubleGameForce`). Game-hoppet borttaget
+> (kan bli katastrof mot 0 hp); partnern tvångssvarar (stödstege / utan stöd egen
+> färg); den starka handen dömer game på TP (**6+ & 22+ TP → hopp till 3-läget**,
+> annars lägsta nivå); partnern svarar 3-hoppet (utgång m. 1–2 stöd / 3NT nekar).
+> TP-tröskel 22 = ägarval efter 6 exempelhänder. Ordet "monster" bannlyst. 976
+> tester gröna, tsc rent, deploy grön. **Öppen finslipning (ägaren, i spel):** den
+> starka handens dom EFTER en stödhöjning körs på en konservativ default – se
+> 👀 Bevaka.
 > **NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln). Bra
 > kandidater: **nästa delbit av R1 #2** (se "Kvar" nedan) eller en punkt ur R6:s
 > handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
