@@ -103,8 +103,11 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   }
 
   // ---- Ny färg på 1-läget: bara spader över 1♥ ----
+  // Ägarbeslut 2026-07-06 (felrapport #31): INGET svagt hoppskift till 2♠.
+  // När partnern har öppnat håller svararen budgivningen LÅG och bjuder den nya
+  // färgen billigast (rondkrav) → partnern får utrymme att beskriva sin hand
+  // (ett hopp berövar t.ex. 1NT). En svag 6-korts spader svarar alltså 1♠, inte 2♠.
   if (opened === 'hearts') {
-    if (len.spades >= 6 && p <= 10) return { call: '2S', rule: 'svagt hoppskift', explanation: `${p} hp, 6-korts spader → 2♠ (svagt hoppskift).` }
     if (len.spades >= 4) return { call: '1S', rule: 'ny färg (1-läget)', explanation: `${p} hp, 4+ spader → 1♠ (krav 1 rond).` }
   }
 
@@ -157,14 +160,12 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
 
   if (p < 6) return { call: 'P', rule: 'pass', explanation: `${p} hp – för svagt för att svara → pass.` }
 
-  // ---- Svagt hoppskift: 6-korts högfärg, 6–10 hp ----
-  {
-    const major: Major | null = len.spades >= 6 ? 'spades' : len.hearts >= 6 ? 'hearts' : null
-    if (major && p <= 10) {
-      const sym = major === 'spades' ? '♠' : '♥'
-      return { call: `2${BID[major]}`, rule: 'svagt hoppskift', explanation: `${p} hp med 6-korts ${NAME[major]} → 2${sym} (svagt hoppskift).` }
-    }
-  }
+  // ---- Svagt hoppskift AVSKAFFAT (ägarbeslut 2026-07-06, felrapport #31) ----
+  // Tidigare hoppade svararen till 2♥/2♠ med en svag 6-korts högfärg. Men när
+  // partnern har öppnat håller vi budgivningen LÅG: bjud den nya färgen billigast
+  // på 1-läget (rondkrav) så partnern får utrymme att beskriva sin hand vidare –
+  // ett hopp berövar t.ex. 1NT. En svag 6-korts högfärg faller därför direkt ned
+  // till 1-lägessvaret nedan (1♥/1♠).
 
   // ---- 4-korts högfärg på 1-läget (längst först, lika → hjärter billigast), 6+ hp ----
   {

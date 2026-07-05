@@ -61,8 +61,10 @@ describe('respondToMajor', () => {
     expect(resp('S:KQ85 H:73 D:Q842 C:K53', 'hearts')).toBe('1S') // 10 hp, ingen fit
   })
 
-  it('svagt hoppskift 2♠ med 6 spader, svag', () => {
-    expect(resp('S:KQ9742 H:3 D:Q842 C:53', 'hearts')).toBe('2S') // 7 hp, 6 spader
+  // Ägarbeslut 2026-07-06 (felrapport #31): INGET svagt hoppskift. När partnern
+  // öppnat håller svararen budgivningen låg → 6-korts spader svarar 1♠, inte 2♠.
+  it('svag 6-korts spader över 1♥ → 1♠ (INTE 2♠ hoppskift)', () => {
+    expect(resp('S:KQ9742 H:3 D:Q842 C:53', 'hearts')).toBe('1S') // 7 hp, 6 spader
   })
 
   it('2-över-1 (2♦) med 12+ och 5-korts färg över 1♠', () => {
@@ -142,12 +144,23 @@ describe('respondToMinor', () => {
     expect(respM('S:KJ85 H:73 D:Q842 C:953', 'clubs')).toBe('1S') // 6 hp, 4 spader
   })
 
-  it('svagt hoppskift 2♥ med 6 hjärter över 1♣', () => {
-    expect(respM('S:73 H:KQ9742 D:K63 C:95', 'clubs')).toBe('2H') // 8 hp, 6 hjärter
+  // ---- Ägarbeslut 2026-07-06 (felrapport #31): svagt hoppskift avskaffat. ----
+  // När partnern har öppnat håller svararen budgivningen LÅG och bjuder den nya
+  // högfärgen billigast på 1-läget (rondkrav) – ett hopp berövar partnern utrymme
+  // (t.ex. 1NT). En svag 6-korts högfärg svarar därför 1♥/1♠, inte 2♥/2♠.
+  it('svag 6-korts hjärter över 1♣ → 1♥ (INTE 2♥ hoppskift)', () => {
+    expect(respM('S:73 H:KQ9742 D:K63 C:95', 'clubs')).toBe('1H') // 8 hp, 6 hjärter
   })
 
-  it('svagt hoppskift 2♠ med 6 spader över 1♦', () => {
-    expect(respM('S:KQ9742 H:3 D:863 C:K95', 'diamonds')).toBe('2S') // 8 hp, 6 spader
+  it('svag 6-korts spader över 1♦ → 1♠ (INTE 2♠ hoppskift)', () => {
+    expect(respM('S:KQ9742 H:3 D:863 C:K95', 'diamonds')).toBe('1S') // 8 hp, 6 spader
+  })
+
+  // Felrapport #31 (facit): ♠7 ♥KT6432 ♦Q4 ♣A986, 9 hp + 6-korts hjärter över
+  // 1♦. Motorn hoppade förr till 2♥ (för starkt/tvåfärgat för spärr och berövar
+  // partnern utrymme). Rätt: 1♥ (ny färg, rondkrav) – håll budgivningen låg.
+  it('felrapport #31: 6-korts hjärter + ess utanför över 1♦ → 1♥ (INTE 2♥)', () => {
+    expect(respM('S:7 H:KT6432 D:Q4 C:A986', 'diamonds')).toBe('1H') // 9 hp, 6 hjärter
   })
 
   it('stark inverterad höjning (2♣) med 4+ stöd och 10+', () => {
