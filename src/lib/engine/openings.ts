@@ -50,6 +50,18 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
   if (bal) {
     if (p >= 15 && p <= 17) return { call: '1NT', rule: '1NT', explanation: `Balanserad ${p} hp (15–17) → 1NT.` }
     if (p >= 20 && p <= 21) return { call: '2NT', rule: '2NT', explanation: `Balanserad ${p} hp (20–21) → 2NT.` }
+    // Uppgradering "bra 19" (ägarbeslut 2026-07-06, felrapport #30): en jämn
+    // 19-hand med hög kvalitet/kontroller (startpoäng ≥ 20 – många ess/kvalitets-
+    // färger) spelar som 20–21 och öppnar 2NT i stället för att öppna 1 i färg och
+    // riskera att bli passad billigt (t.ex. ♠AJ84 ♥AQJ9 ♦986 ♣AK, 3 ess + AK).
+    // Kräver ingen 5-korts färg (då visar vi hellre färgen på 1-läget). Samma
+    // regel-id '2NT' → svararen tolkar det som en vanlig 2NT-öppning.
+    {
+      const noFive = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).every((s) => len[s] < 5)
+      if (p === 19 && tp >= 20 && noFive) {
+        return { call: '2NT', rule: '2NT', explanation: `Balanserad bra 19 (${p} hp / ${tp} startp.) → 2NT (uppvärderad, spelar som 20–21).` }
+      }
+    }
     if (p >= 25 && p <= 27) return { call: '3NT', rule: '3NT', explanation: `Balanserad ${p} hp (25–27) → 3NT.` }
     if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `Balanserad ${p} hp (22+) → 2♣ (konstgjord, krav).` }
 

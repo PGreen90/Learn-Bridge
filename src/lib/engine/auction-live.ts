@@ -2162,6 +2162,98 @@ function answerOpenerMaximal(deal: Deal, history: ResolvedCall[], seat: Seat): R
 }
 
 /**
+ * Höjaren svarar öppnarens 2NT-INBJUDAN efter en minorhöjning i konkurrens
+ * (felrapport #30, syskon till openerStrongNTAfterMinorRaise). Mönster: partnern
+ * (öppnaren) öppnade 1m, JAG höjde till 2m i konkurrens, öppnaren bjöd 2NT
+ * (inbjudan, 18–19). Jag dömer i sang: med ett MAXIMUM av höjningen (8+ hp) →
+ * 3NT (utgång), annars pass (stannar i inbjudan). Får inte passas bort tyst av
+ * off-book-svaret. Returnerar bud, annars null.
+ */
+function answerOpenerNTInvite(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || (open.strain !== 'C' && open.strain !== 'D') || open.level !== 1) return null
+  if (open.seat !== PARTNER[seat]) return null // partnern (öppnaren) bjöd inbjudan; JAG svarar
+  // Vår sida: öppning(partner) + min höjning(jag) + 2NT-inbjudan(partner) = 3 kontraktsbud.
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 3) return null
+  if (ourBids[0].seat !== PARTNER[seat] || ourBids[1].seat !== seat || ourBids[2].seat !== PARTNER[seat]) return null
+  if (parseContractBid(ourBids[0].bid)!.strain !== open.strain) return null
+  const raise = parseContractBid(ourBids[1].bid)!
+  if (raise.strain !== open.strain || raise.level !== 2) return null // min ENKLA minorhöjning
+  if (ourBids[2].bid !== '2NT') return null // öppnarens inbjudan
+  // Öppnarens SENASTE icke-pass-call måste vara just 2NT-inbjudan (ingen ny konkurrens sedan).
+  const lastCall = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastCall || lastCall.seat !== PARTNER[seat] || lastCall.bid !== '2NT') return null
+  const p = hcp(deal.hands[seat])
+  const legal = legalCalls(history, seat)
+  if (p >= 8 && legal.includes('3NT' as Bid)) {
+    return {
+      seat, bid: '3NT', rule: 'accepterar sanginbjudan',
+      explanation: `Partnerns 2NT är en inbjudan (18–19); med ett maximum av min höjning (${p} hp) → 3NT (utgång).`,
+    }
+  }
+  return {
+    seat, bid: 'P', rule: 'avböjer sanginbjudan',
+    explanation: `Partnerns 2NT är en inbjudan; med ett minimum av min höjning (${p} hp) passar jag (stannar i 2NT).`,
+  }
+}
+
+/**
+ * Öppnarens ROND-2 när VÅR MINOR-öppning HÖJTS i en STÖRD auktion och öppnaren
+ * har en stark, sangduglig hand (ägarbeslut 2026-07-06, felrapport #30). Mönster:
+ * vår 1♣/1♦, en motståndare klev in, partnern HÖJDE vår minor, och det är vår tur
+ * igen. Utan detta föll en stark jämn hand igenom till ett tyst naturligt
+ * färgbud och blev passad (Väst nådde bara 2♥ med 19 hp). Med HÅLL i motståndarens
+ * färg visar öppnaren nu styrkan i sang:
+ *   • 20+ hp → 3NT (utgång, spela).
+ *   • 18–19 hp → 2NT (inbjudan; partnern höjer till 3NT med maximum av höjningen).
+ * Formkrav: jämn hand ELLER en egen 6+ minor (sangduglig). (En jämn 19 med
+ * startpoäng ≥20 uppgraderade redan sin ÖPPNING till 2NT, så balanserade händer
+ * här är 18–19 utan den kvaliteten samt fördelningshänder.) Systerfallet till
+ * delbit 6 (majoröppning, openerCompetesAfterRaise) och openerRondTwoInCompetition
+ * (partnern bjöd ny färg). Bara mönstret matchas; annars null.
+ */
+function openerStrongNTAfterMinorRaise(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || (open.strain !== 'C' && open.strain !== 'D') || open.level !== 1) return null
+  if (open.seat !== seat) return null // VÅR minoröppning, ÖPPNAREN själv agerar
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+  // Vår sida: EXAKT öppning + partnerns höjning av samma minor (öppnaren ej rebjudit).
+  const ourBids = contractBids.filter((c) => side(c.seat) === side(seat))
+  if (ourBids.length !== 2 || ourBids[0].seat !== seat || ourBids[1].seat !== PARTNER[seat]) return null
+  const raise = parseContractBid(ourBids[1].bid)!
+  if (raise.strain !== open.strain) return null // partnerns bud måste vara en HÖJNING av vår minor
+  // Konkurrens: motståndarna ska ha klivit in med en NATURLIG FÄRG att hålla i.
+  const theirBids = contractBids.filter((c) => side(c.seat) !== side(seat) && parseContractBid(c.bid)!.strain !== 'NT')
+  if (theirBids.length === 0) return null
+  const theirStrain = parseContractBid(theirBids[theirBids.length - 1].bid)!.strain
+  const theirSuit = SUIT_OF_LETTER[theirStrain]
+
+  const hand = deal.hands[seat]
+  const len = lengths(hand)
+  // Sangduglig hand med stopp i deras färg (annars ingen NT-visning här).
+  if (!hasStopper(hand, theirSuit)) return null
+  if (!isBalanced(hand) && len[SUIT_OF_LETTER[open.strain]] < 6) return null
+
+  const p = hcp(hand)
+  const legal = legalCalls(history, seat)
+  // 20+ → utgång direkt (spela); 18–19 → 2NT inbjudan (partnern dömer).
+  if (p >= 20 && legal.includes('3NT' as Bid)) {
+    return {
+      seat, bid: '3NT', rule: 'öppnarens 3NT i konkurrens',
+      explanation: `~${p} hp, jämn/sangduglig hand med stopp i ${SWE_NAME[theirStrain]} mittemot partnerns höjning → 3NT (utgång).`,
+    }
+  }
+  if (p >= 18 && legal.includes('2NT' as Bid)) {
+    return {
+      seat, bid: '2NT', rule: 'öppnarens 2NT-inbjudan i konkurrens',
+      explanation: `~${p} hp, jämn hand med stopp i ${SWE_NAME[theirStrain]} – för starkt för ett tyst färgbud → 2NT (inbjudan; partnern bjuder 3NT med ett maximum).`,
+    }
+  }
+  return null
+}
+
+/**
  * Öppnarens ROND-2 i en STÖRD auktion när partnern svarat med en FRI NY FÄRG
  * eller 1NT (INTE en höjning) och motståndarna KONKURRERAT över svaret
  * (R1 Fynd #2). Utan detta passade öppnaren bort ÄVEN starka händer så snart
@@ -2549,6 +2641,15 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // specifika mönstret matchas; annars faller det igenom orört.
       () => answerOpenerMaximal(deal, history, seat),
       () => openerCompetesAfterRaise(deal, history, seat),
+      // Öppnarens rond-2 när VÅR MINOR höjts i konkurrens och öppnaren har en
+      // stark sangduglig hand (felrapport #30): visa styrkan i sang (3NT med 20+,
+      // 2NT-inbjudan med 18–19) i stället för ett tyst färgbud som passas ut.
+      // Ligger FÖRE openerRondTwoInCompetition (som utesluter höjningar) och FÖRE
+      // maybePenaltyDouble/off-book-svaret.
+      () => openerStrongNTAfterMinorRaise(deal, history, seat),
+      // Höjaren svarar öppnarens 2NT-inbjudan (felrapport #30): accepterar 3NT
+      // med ett maximum, annars pass. FÖRE off-book-svaret (som annars passar).
+      () => answerOpenerNTInvite(deal, history, seat),
       // Systerfallet: öppnarens rond-2 i konkurrens när partnern bjöd NY FÄRG /
       // 1NT (ej höjning) och motståndarna konkurrerat (R1 Fynd #2). Extra visas
       // med cue i deras färg + naturliga hopp; minimum tävlar med 6+ färg/fit.

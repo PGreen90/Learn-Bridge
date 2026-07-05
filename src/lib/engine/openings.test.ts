@@ -81,6 +81,23 @@ describe('classifyOpening', () => {
     })
   })
 
+  // ---- Uppgradering "bra 19" → 2NT (ägarbeslut 2026-07-06, felrapport #30) ----
+  describe('uppgradering: bra 19 → 2NT (utan 5-korts färg)', () => {
+    it('felrapport #30: ♠AJ84 ♥AQJ9 ♦986 ♣AK (19 hp, 3 ess + AK, startp. 20) → 2NT', () => {
+      expect(call('S:AJ84 H:AQJ9 D:986 C:AK')).toBe('2NT')
+    })
+
+    it('platt 19 utan extra kvalitet (startp. <20) öppnar 1 i färg – ej uppgraderad', () => {
+      // ♠KQ2 ♥KQ2 ♦KQJ3 ♣KJ: 19 hp men bara kungar/damer, inga ess → startp. 19 → minor.
+      expect(call('S:KQ2 H:KQ2 D:KQJ3 C:KJ')).not.toBe('2NT')
+    })
+
+    it('18 balanserat uppgraderas ALDRIG (under golvet) → 1 i färg', () => {
+      // ♠AK4 ♥AQ9 ♦9862 ♣AK: 18 hp, jämn → öppnar 1♦ (ingen 2NT-uppgradering).
+      expect(call('S:AK4 H:AQ9 D:9862 C:AK')).not.toBe('2NT')
+    })
+  })
+
   // ---- FAS 4 steg D-vulnerabilitet: ej sårbar aggressiv (≥15), sårbar passiv (≥16) ----
   describe('TP-nudge modulerad av sårbarhet', () => {
     it('startpoäng 15: nudgas EJ sårbar (→1NT), men INTE sårbar (→minor)', () => {
