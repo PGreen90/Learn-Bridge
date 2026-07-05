@@ -11,20 +11,25 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Steg A, Del 1: flytta hosting till Vercel (järnregeln: exakt en).
-> **NU = "Framtidsplan Steg A, Del 1 — flytta hosting från GitHub Pages till
-> Vercel" (ägarbeslut 2026-07-05).** Detta är FÖRSTA av tre små delsteg i Steg A
-> (Del 1 = Vercel-flytt · Del 2 = köp + koppla `rebidz`-domän · Del 3 = PWA). Ta
-> ETT delsteg i taget, eget facit per steg. **Fullt beslutsunderlag + kritisk
-> genomgång: `docs/framtid-multiplayer-plattform.md`** (Beslut A vs B) + minnet
-> `future-multiplayer-platform`. **Läs det doket + bekräfta med ägaren att valen
-> står innan du rör något.**
+### 🔵 NU — Steg A, Del 2: köp + koppla `rebidz`-domän (järnregeln: exakt en).
+> **Del 1 (Vercel-flytt) är KLAR & LIVE (2026-07-05).** NU = nästa delsteg i Steg A:
+> köpa domänen `rebidz` (~100–150 kr/år) och koppla den till Vercel-projektet, så
+> appen når `rebidz.se`/`.com` i stället för `learn-bridge-topaz.vercel.app`. Del 3
+> (PWA) tas separat efteråt. **Bekräfta med ägaren att domänen/valen står innan du
+> rör något.** Fullt beslutsunderlag: `docs/framtid-multiplayer-plattform.md` +
+> minnet `future-multiplayer-platform`. Ägaren köper + godkänner själv (kort, DNS)
+> — guida exakt var han klickar, kör inget åt honom. Följ [[ask-before-pcd]].
 >
-> **Del 1 konkret:** koppla repot till Vercel; ändra Vite `base` `/Learn-Bridge/`
-> → `/` OCH uppdatera vakttestet `src/deploy-config.test.ts` (annars failar sviten);
-> behåll test-/typgrinden (tsc + npm test) i det nya bygget så trasig kod aldrig
-> går live. Ägaren måste själv skapa Vercel-konto + godkänna — guida exakt var han
-> klickar, kör inget åt honom. Följ [[ask-before-pcd]].
+> **Del 1 KLAR & LIVE (2026-07-05, ägarbeslut + genomfört):** hosting flyttad från
+> GitHub Pages till **Vercel**. Publik adress nu **https://learn-bridge-topaz.vercel.app/**
+> (repo & felrapport-URL stannar `Learn-Bridge` på GitHub). Konkret gjort: Vite
+> `base` `/Learn-Bridge/` → `/` (`vite.config.ts`); vakttestet
+> `src/deploy-config.test.ts` låser nu `/`; ny `vercel.json` kör test-/typgrinden
+> (`npx tsc && npm test && npm run build`) så trasig kod aldrig går live — samma
+> skydd som förr; gamla Pages-workflowen (`deploy.yml`) INAKTIVERAD (push-triggern
+> borttagen, `workflow_dispatch`-endast, filen kvar som referens). 1052 tester
+> gröna. Vercel-bygget verifierat grönt + sidan publikt nåbar. Mergepunkter
+> `79fd1d0` (flytten) + `18efe8b` (Pages av). Se 👀 Bevaka.
 >
 > **⚠️ Två ärliga varningar (upprepa för ägaren):** (1) Steg A förbättrar INTE
 > boten — bara var appen bor; bot-utvecklingen är ett SEPARAT framtida NU. (2)
@@ -421,7 +426,8 @@ Läs den här filen först varje session.
 ## Vad det här är
 Interaktiv webbapp för att lära sig och spela bridge (kortspelet).
 Användaren ska kunna spela olika händer och lära sig olika budsystem.
-Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
+Allt körs i webbläsaren, gratis-hostat på Vercel (flyttat från GitHub Pages
+2026-07-05, Steg A Del 1).
 - **Appen heter `RebidZ`** i gränssnittet (ägarens eget namn, beslut 2026-07-02).
   **Repo och URL förblir `Learn-Bridge`** (medvetet – byt inte). Ser du "RebidZ" i
   koden och "Bridge-app" i äldre text är RebidZ det rätta produktnamnet.
@@ -443,22 +449,26 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
 - Tailwind CSS för styling
 - Ingen backend. Allt client-side.
 ## Hosting & deploy (viktiga låsningar)
-- GitHub Pages = ENDAST statiska filer. Ingen server, databas eller
-  backend-kod är möjlig.
-- Auto-deploy: en GitHub Actions-workflow (`deploy.yml`) publicerar sidan vid
-  varje push till main. Ägaren kör ALDRIG bygg-kommandon själv – push räcker.
-- **Test-/typgrind före live (R5-fynd #1):** workflowen kör ett `test`-jobb
-  (`npx tsc` + `npm test`) som `build`/`deploy` BEROR på. Rött test eller typfel
-  → ingen publicering. Ändra aldrig bort den grinden – den är enda automatiska
-  skyddet mellan koden och det som blir live.
-- Vite `base` MÅSTE sättas till "/<repo-namn>/" (= `/Learn-Bridge/`), annars blir
-  sidan blank på Pages. Det är det vanligaste deploy-felet. **Låst av ett vaktest**
-  (`src/deploy-config.test.ts`, R5-fynd #2) – bryter du base failar testsviten.
+> **HOSTING FLYTTAD TILL VERCEL 2026-07-05 (Steg A Del 1).** Gamla GitHub Pages-
+> workflowen (`deploy.yml`) är INAKTIVERAD (`workflow_dispatch`-endast, filen kvar
+> som referens). Fortfarande ENDAST statiska filer / client-side – ingen backend
+> (det kommer i ett senare, separat steg enligt `docs/framtid-multiplayer-plattform.md`).
+- Statisk/client-side hosting. Ingen server, databas eller backend-kod (än).
+- Auto-deploy: **Vercel** bygger & publicerar automatiskt vid varje push till main
+  (kopplat via Vercels GitHub-app). Ägaren kör ALDRIG bygg-kommandon själv – push
+  räcker. Vercel-projekt: `learn-bridge` under teamet `rebidz` (Hobby/gratis).
+- **Test-/typgrind före live (R5-fynd #1, nu i `vercel.json`):** Vercel-bygget kör
+  `npx tsc && npm test && npm run build` (buildCommand i `vercel.json`). Rött test
+  eller typfel → bygget failar → ingen publicering. Ändra aldrig bort den grinden –
+  den är enda automatiska skyddet mellan koden och det som blir live.
+- Vite `base` MÅSTE vara `/` (Vercel serverar från domänens rot), annars blir sidan
+  blank. **Låst av ett vaktest** (`src/deploy-config.test.ts`, R5-fynd #2) – bryter
+  du base failar testsviten. (På gamla Pages var det `/Learn-Bridge/`.)
 - **Rollback & "senast gröna live" (R5-fynd #4):** varje funktion mergas med en
   egen `--no-ff`-mergepunkt → backa en hel funktion med
   `git revert -m 1 <merge-sha>`. Vilken commit som just nu ligger publicerad =
-  den senaste **gröna** körningen i Actions (`gh run list`). Det finns ingen
-  separat tag/markör i repot; Actions-historiken är facit.
+  den senaste **Ready**-deployen i Vercel-dashboardens "Deployments"-flik (märkt
+  Production). Det finns ingen separat tag/markör i repot; Vercel-historiken är facit.
 - Användarens framsteg sparas i localStorage (ingen databas).
 ## Bridge-specifikt
 - "Rätt svar"-feedback via en double-dummy solver i WebAssembly
@@ -525,14 +535,18 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   FAS-ordningen i felsökningsplanen).
 
 ## Konkreta fakta om detta projekt (för deploy)
-- GitHub-repo: **PGreen90/Learn-Bridge** (publikt).
-- Live-URL: **https://pgreen90.github.io/Learn-Bridge/**
-- Vite `base` = **"/Learn-Bridge/"** (måste matcha repo-namnet exakt).
+- GitHub-repo: **PGreen90/Learn-Bridge** (publikt). Repo-namnet byts INTE.
+- Live-URL (Vercel): **https://learn-bridge-topaz.vercel.app/** (egen `rebidz`-
+  domän planerad = Steg A Del 2). Gamla `pgreen90.github.io/Learn-Bridge/` är
+  ur bruk (blir blank, base=`/`).
+- Vite `base` = **"/"** (Vercel serverar från roten).
+- Hosting: **Vercel**, projekt `learn-bridge`, team `rebidz` (Hobby/gratis),
+  kopplat till GitHub-repot via Vercels GitHub-app → auto-deploy vid push till main.
+  Build-grinden ligger i `vercel.json`.
 - Auth: gh CLI är inloggad som PGreen90 (device-flow) och är git
   credential helper. Pusha via `git push`. Scopes inkl. `workflow`.
 - Node.js ligger i `C:\Program Files\nodejs\` (lägg den först i PATH
   i nya shells: npm/node finns inte alltid på PATH automatiskt).
-- Pages-källa = "GitHub Actions" (build_type=workflow), redan aktiverat.
 
 ## Projektstruktur
 - `index.html` – sidans skal, laddar src/main.tsx
@@ -552,8 +566,9 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
 
 ## Navigering (router)
 - HashRouter används (adresser med #, t.ex. .../#/budtraning) eftersom
-  det fungerar på GitHub Pages utan serverinställningar. Byt INTE till
-  BrowserRouter utan att lägga till en 404-fallback för Pages.
+  det fungerar på statisk hosting utan serverinställningar. Byt INTE till
+  BrowserRouter utan att lägga till SPA-rewrites (på Vercel: en rewrite av alla
+  vägar till index.html i `vercel.json`).
 - Lägg till ny skärm: skapa `src/pages/Xxx.tsx`, lägg till en
   `<Route>` i `App.tsx` och en länk i `NAV`-listan i `Layout.tsx`.
 
@@ -574,9 +589,10 @@ Allt körs i webbläsaren, gratis-hostat på GitHub Pages.
   Ett tema hör till ett läge via fältet `scope` i themes.json.
 ## Kommandon
 - `npm run dev` – lokal förhandsvisning under utveckling
-- `npm run build` – byggs automatiskt av GitHub Actions, sällan manuellt
+- `npm run build` – byggs automatiskt av Vercel vid push, sällan manuellt
 ## Vad man INTE gör
-- Lägg aldrig till backend/server/databas – Pages kan inte köra det.
-- Glöm aldrig Vite `base`-pathen vid deploy.
+- Lägg aldrig till backend/server/databas i nuläget – hostingen är statisk
+  (backend planeras i ett separat, senare steg, se framtidsdoket).
+- Glöm aldrig Vite `base` = `/` (Vercel serverar från roten; låst av vaktestet).
 - Bygg inte alla budsystem på en gång – ett i taget.
 - Lämna aldrig ägaren med ett tekniskt fel utan förklaring + nästa steg.
