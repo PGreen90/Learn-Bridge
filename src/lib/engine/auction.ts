@@ -319,6 +319,16 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
         turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
         return finish(adv.call !== 'P')
       }
+      // Svararen PASSADE ett naturligt inkliv (2-läges, eller ett 1-läges inkliv
+      // som inte är "enkelt inkliv"): buildAuction stängde förr given här och
+      // öppnaren SÅLDE den (flerronds del B, proben giv #56 + #552). Men auktionen
+      // är inte slut – advancern (RHO) och öppnarens ÅTERÖPPNING i utpassningssitsen
+      // bjuds levande i budlådan (decideCall), precis som takeout-X/Michaels-
+      // grenarna ovan. Lämna öppen. (Ett äkta pass-ut faller ändå ut live – samma
+      // slutkontrakt – medan en återöppningshand nu tävlar i stället för att sälja.)
+      if (action.call === 'P' && parseBid(ov.call).suit) {
+        return finish(true)
+      }
       return finish(action.call !== 'P')
     }
   }
