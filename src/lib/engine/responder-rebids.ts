@@ -211,13 +211,16 @@ export function responderRebidAfterInvertedMinor(hand: Hand, m: Suit, rebid: Res
         : pass('minimumhöjning mittemot 12–14 – 2NT räcker')
 
     case 'inverterad: minimum': {
-      // Öppnaren rebjöd minorn (3m): minimum UTAN stopp att visa. Svararen stannar
-      // om inte stark; med utgångsvärden + stopp i BÅDA högfärgerna vågar vi 3NT
-      // (öppnaren saknade en stopp → svararen måste själv täcka sidofärgerna).
+      // Öppnaren rebjöd minorn (3m): minimum UTAN stopp att visa. Med bara
+      // inbjudan (10–12) stannar svararen i delkontrakt. Med utgångsvärden (13+)
+      // MÅSTE vi till game: 3NT om vi själva kan hålla båda högfärgerna, annars
+      // 5m (öppnaren saknar stopp → 3NT är osäker). Ägarregel 2026-07-05: chansa
+      // inte 3NT med en osparrad högfärg – spela minorutgången.
       const majorsStopped = hasStopper(hand, 'hearts') && hasStopper(hand, 'spades')
-      return p >= 13 && majorsStopped
+      if (p < 13) return pass('öppnaren minimum – inbjudan, stannar i delkontrakt')
+      return majorsStopped
         ? { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i båda högfärgerna → 3NT (till spel).` }
-        : pass('öppnaren minimum utan stopp – stannar i delkontrakt')
+        : { call: `5${mBid}`, rule: 'höjning till utgång', explanation: `${p} hp utgångskrav utan stopp i högfärgerna → 5${mSym} (minorutgång; 3NT osäker).`, uncertain: true }
     }
 
     case 'inverterad: stopp-visning': {

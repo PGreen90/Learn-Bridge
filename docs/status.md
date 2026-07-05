@@ -231,6 +231,17 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 - **Två-klicks fan-ut** för att spela kort.
 - **Klickbara bud + ALERT-märke** i auktionsvyn – `alerts.ts` (blått A på konstgjorda bud, klick visar betydelsen).
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
+- **Kontraktväljaren (träningsmål, 2026-07-05, ej pushat):** en "Mål:"-pill i
+  budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,
+  utgång hf/lf, 3NT, lillslam, storslam, med störning). `contract-target.ts`
+  (`matchesTarget`, `simulateAuction`, `dealForTarget`) slumpar givar och behåller
+  dem vars SIMULERADE auktion (motorn budar alla fyra platser via `decideCall`,
+  precis som "Spela kort") landar i ett NS-kontrakt som matchar målet. Viktig
+  insikt: filtret kan INTE använda `finalContract` – den `open`-gatar bort
+  svararens placeringsbud (3NT/5m). Sökningen körs batchad i `Play.tsx`
+  (setTimeout → ingen frys) med `SearchOverlay`. Målet sparas i localStorage.
+  **Sidoeffekt-fix i budmotorn:** motorn nådde aldrig 5♣/5♦ – lagat (se §4.2 i
+  budsystem.md + `hasWeakSideSuit` i `responses.ts`).
 
 ## Budmotorns tre auktionslager + `open`-handoff (ARKITEKTURKONTRAKT — läs före budarbete)
 

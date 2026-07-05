@@ -178,6 +178,18 @@ describe('respondToMinor', () => {
     expect(respM('S:KJ3 H:KQ2 D:KQ42 C:953', 'clubs')).toBe('3NT') // 14 hp
   })
 
+  // ---- Ägarregel 2026-07-05: balanserad utgångshand med lågfärgsfit chansar
+  // inte 3NT med en riktigt svag färg – utforskar via inverterad 2m (→ 5m). ----
+  it('balanserad 13–15 med 4+ fit och ALLA färger hållna → 3NT direkt', () => {
+    expect(respM('S:K5 H:KJ7 D:A982 C:KJ32', 'diamonds')).toBe('3NT') // 15 hp, allt täckt
+  })
+
+  it('balanserad 13–15 med 4+ fit men en osparrad högfärg → inverterad 2♦ (utforska)', () => {
+    // Spader 83 + hjärter 952 = två öppna färger → 3NT vore en gissning; gå via
+    // 2♦ i stället så paret kan landa i 5♦ när färgerna inte kan hållas.
+    expect(respM('S:83 H:952 D:AQ92 C:AK32', 'diamonds')).toBe('2D') // 13 hp
+  })
+
   it('gap-handen → 1NT med 7–9 och stöd men utan högfärg', () => {
     expect(respM('S:K3 H:972 D:KJ42 C:9532', 'diamonds')).toBe('1NT') // 7 hp, 4 stöd
   })

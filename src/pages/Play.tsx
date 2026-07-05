@@ -18,6 +18,7 @@ import {
 import { adjudicateClaim, autoClaimAvailable, declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { loadValue, saveValue } from '../lib/storage'
 import { dealRandom } from '../lib/engine/deal'
+import { describeTarget, matchesTarget, type ContractTarget } from '../lib/engine/contract-target'
 import {
   auctionComplete,
   contractFromCalls,
@@ -85,6 +86,17 @@ function CardLabel({ card }: { card: Card }) {
 
 export function Play() {
   const [game, setGame] = useState<Game>(newGame)
+  // Kontraktväljaren: ett valt träningsmål (sparas mellan givar). `random` =
+  // dagens vanliga slumpgiv. När ett mål är valt letar vi fram en giv vars
+  // simulerade auktion landar där (`matchesTarget`), i småbatchar så sidan
+  // aldrig fryser vid ett sällsynt mål.
+  const [target, setTarget] = useState<ContractTarget>(() => loadValue<ContractTarget>('play-target', 'random'))
+  const [picking, setPicking] = useState(false)
+  const [search, setSearch] = useState<{ tried: number; gaveUp: boolean } | null>(null)
+  const searchCancel = useRef(false)
+
+  // Avbryt en pågående sökning om komponenten lämnas.
+  useEffect(() => () => { searchCancel.current = true }, [])
 
   const complete = auctionComplete(game.history)
 
@@ -137,26 +149,89 @@ export function Play() {
     })
   }
 
-  if (game.phase === 'play' && game.contract) {
-    return (
+  // Starta en ny giv för målet `t`. Slumpmål = direkt; annars sök i batchar
+  // (setTimeout mellan batcharna → sidan ritar "Söker …" och fryser aldrig).
+  function startNewGame(t: ContractTarget) {
+    searchCancel.current = true // stoppa ev. tidigare sökning
+    if (t === 'random') {
+      setSearch(null)
+      setGame(newGame())
+      return
+    }
+    searchCancel.current = false
+    setSearch({ tried: 0, gaveUp: false })
+    let tried = 0
+    const CAP = 60000 // taket räcker för storslam (~1 per 1500) med marginal
+    const BATCH = 300 // ~12 ms/batch → under en bildruta
+    const step = () => {
+      if (searchCancel.current) return
+      for (let i = 0; i < BATCH; i++) {
+        tried++
+        const deal = dealRandom()
+        if (matchesTarget(deal, t)) {
+          setSearch(null)
+          setGame({ deal, history: [], phase: 'bidding', contract: null })
+          return
+        }
+      }
+      if (tried >= CAP) {
+        setSearch({ tried, gaveUp: true })
+        return
+      }
+      setSearch({ tried, gaveUp: false })
+      setTimeout(step, 0)
+    }
+    setTimeout(step, 0)
+  }
+
+  function pickTarget(t: ContractTarget) {
+    setTarget(t)
+    saveValue('play-target', t)
+    setPicking(false)
+    startNewGame(t)
+  }
+
+  const content =
+    game.phase === 'play' && game.contract ? (
       <PlayTable
         key={game.deal.id}
         deal={game.deal}
         contract={game.contract}
         calls={game.history}
-        onNewGame={() => setGame(newGame())}
+        onNewGame={() => startNewGame(target)}
+      />
+    ) : (
+      <BiddingPhase
+        game={game}
+        complete={complete}
+        onBid={onBid}
+        onConfirm={confirmContract}
+        onNewGame={() => startNewGame(target)}
+        targetLabel={describeTarget(target)}
+        onOpenPicker={() => setPicking(true)}
       />
     )
-  }
 
   return (
-    <BiddingPhase
-      game={game}
-      complete={complete}
-      onBid={onBid}
-      onConfirm={confirmContract}
-      onNewGame={() => setGame(newGame())}
-    />
+    <>
+      {content}
+      {picking && (
+        <ScenarioPicker current={target} onPick={pickTarget} onClose={() => setPicking(false)} />
+      )}
+      {search && (
+        <SearchOverlay
+          tried={search.tried}
+          gaveUp={search.gaveUp}
+          label={describeTarget(target)}
+          onCancel={() => {
+            searchCancel.current = true
+            setSearch(null)
+          }}
+          onRetry={() => startNewGame(target)}
+          onRandom={() => pickTarget('random')}
+        />
+      )}
+    </>
   )
 }
 
@@ -171,12 +246,16 @@ function BiddingPhase({
   onBid,
   onConfirm,
   onNewGame,
+  targetLabel,
+  onOpenPicker,
 }: {
   game: Game
   complete: boolean
   onBid: (bid: Bid) => void
   onConfirm: () => void
   onNewGame: () => void
+  targetLabel: string
+  onOpenPicker: () => void
 }) {
   const [showMenu, setShowMenu] = useState(false)
   const [reporting, setReporting] = useState(false)
@@ -209,6 +288,19 @@ function BiddingPhase({
           klicka ett bud i budlådan och bekräfta med <strong>OK</strong>. Datorn sköter
           Väst, Nord och Öst. Klicka ett lagt bud för att se vad det betyder.
         </TableMenu>
+      </div>
+
+      {/* Träningsmål (Kontraktväljaren): klicka för att byta scenario. */}
+      <div className="-mt-1 px-2.5 pb-1">
+        <button
+          type="button"
+          onClick={onOpenPicker}
+          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-900/50 px-2.5 py-1 text-[11px] font-semibold text-emerald-50 ring-1 ring-emerald-100/15 hover:bg-emerald-900/75"
+        >
+          <span className="opacity-70">Mål:</span>
+          {targetLabel}
+          <span className="opacity-60">▾</span>
+        </button>
       </div>
 
       {/* Budlådan – alltid synlig; otillåtna/inte-din-tur tonas ner. */}
@@ -330,6 +422,119 @@ function TableMenu({
   )
 }
 
+// ===========================================================================
+// Kontraktväljaren: menyn där ägaren väljer ett träningsmål + sök-overlayen.
+// ===========================================================================
+
+// Scenariokorten (ordning = menyn). `hint` är den korta undertexten.
+const SCENARIOS: { target: ContractTarget; hint: string }[] = [
+  { target: 'random', hint: 'Vad som helst, som vanligt.' },
+  { target: 'major-game', hint: 'Bjud fram 4♥ eller 4♠.' },
+  { target: 'minor-game', hint: 'Bjud fram 5♣ eller 5♦.' },
+  { target: 'nt-game', hint: 'Bjud fram 3NT.' },
+  { target: 'small-slam', hint: 'Utred och nå 6-läget.' },
+  { target: 'grand-slam', hint: 'Nå 7-läget (ovanligt – tar en stund att hitta).' },
+  { target: 'competitive', hint: 'Motståndarna lägger sig i budgivningen.' },
+]
+
+/** Modal där ägaren väljer träningsmål. Klick på ett kort → sök + ny giv. */
+function ScenarioPicker({
+  current,
+  onPick,
+  onClose,
+}: {
+  current: ContractTarget
+  onPick: (t: ContractTarget) => void
+  onClose: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-1 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-slate-800">Vad vill du träna på?</h2>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600" aria-label="Stäng">
+            ✕
+          </button>
+        </div>
+        <p className="mb-3 text-xs text-slate-500">
+          Appen letar fram en giv där ni med god budgivning ska nå målet. Sen budar du själv.
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {SCENARIOS.map(({ target, hint }) => {
+            const selected = target === current
+            return (
+              <button
+                key={target}
+                type="button"
+                onClick={() => onPick(target)}
+                className={`rounded-xl border p-2.5 text-left transition ${
+                  selected
+                    ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                <div className="text-sm font-semibold text-slate-800">{describeTarget(target)}</div>
+                <div className="mt-0.5 text-[11px] leading-snug text-slate-500">{hint}</div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Overlay medan sökaren letar (eller gav upp). */
+function SearchOverlay({
+  tried,
+  gaveUp,
+  label,
+  onCancel,
+  onRetry,
+  onRandom,
+}: {
+  tried: number
+  gaveUp: boolean
+  label: string
+  onCancel: () => void
+  onRetry: () => void
+  onRandom: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-xl">
+        {gaveUp ? (
+          <>
+            <p className="mb-1 text-sm font-semibold text-slate-800">Hittade ingen sådan giv</p>
+            <p className="mb-4 text-xs text-slate-500">
+              {label} är ovanligt och dök inte upp bland {tried.toLocaleString('sv-SE')} givar. Försök igen
+              eller ta en slumpad giv.
+            </p>
+            <div className="flex justify-center gap-2">
+              <Button variant="secondary" onClick={onRandom}>
+                Slumpad giv
+              </Button>
+              <Button onClick={onRetry}>Försök igen →</Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="mb-1 text-sm font-semibold text-slate-800">Söker en giv …</p>
+            <p className="mb-4 text-xs text-slate-500">
+              {label} · {tried.toLocaleString('sv-SE')} givar prövade
+            </p>
+            <Button variant="secondary" onClick={onCancel}>
+              Avbryt
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ===========================================================================
 // Spelfasen: det gröna bordet, korten, facit och omspelningen. Egen komponent så

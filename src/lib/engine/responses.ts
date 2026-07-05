@@ -31,6 +31,26 @@ function otherMajor(m: Major): Major {
   return m === 'hearts' ? 'spades' : 'hearts'
 }
 
+const ALL_SUITS: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+
+/**
+ * Har svararen en "riktigt svag" sidofärg (≤3 kort utan A/Kx/Qxx-stopp) vid
+ * sidan av fitfärgen? Då är en direkt 3NT en gissning på att partnern håller
+ * färgen – vi utforskar hellre via inverterad 2m och kan landa i 5m om paret
+ * inte kan hålla alla färger. Ägarregel 2026-07-05: gå den inverterade vägen
+ * bara med en svag färg (annars 3NT som förr).
+ */
+function hasWeakSideSuit(hand: Hand, fit: Suit): boolean {
+  return ALL_SUITS.some((s) => {
+    if (s === fit) return false
+    const cs = hand.filter((c) => c.suit === s)
+    if (cs.length > 3) return false
+    const has = (r: string) => cs.some((c) => c.rank === r)
+    const stops = has('A') || (has('K') && cs.length >= 2) || (has('Q') && cs.length >= 3)
+    return !stops
+  })
+}
+
 /** Vad svarar man på partnerns 1♥/1♠ (ostörd, ohöjd hand)? */
 export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   const p = hcp(hand)
@@ -159,8 +179,11 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
 
   // ---- Stark inverterad höjning: 4+ stöd, 10+ TP (längd/sidofärg lyfter) ----
   if (support >= 4 && mp >= 10) {
-    if (bal && p >= 13 && p <= 15) {
-      return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad utan högfärg → 3NT (till spel).` }
+    // Balanserad utgångshand → 3NT direkt BARA om vi själva kan hålla alla
+    // sidofärger. Har vi en riktigt svag färg utforskar vi via inverterad 2m i
+    // stället (kan landa i 5m när 3NT inte är säkert). Ägarregel 2026-07-05.
+    if (bal && p >= 13 && p <= 15 && !hasWeakSideSuit(hand, opened)) {
+      return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad, alla färger hållna → 3NT (till spel).` }
     }
     const lift = mp > p ? ` (${p} hp / ${mp} TP)` : ''
     return { call: `2${m}`, rule: 'inverterad minor', explanation: `${p} hp, ${support} stöd, ingen högfärg → 2${msym} (inverterad minor, krav)${lift}.` }
