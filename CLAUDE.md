@@ -16,6 +16,14 @@ Läs den här filen först varje session.
 > kandidater: **nästa delbit av R1 #2** (se "Kvar" nedan) eller en punkt ur R6:s
 > handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
 >
+> **Senast klart & live (2026-07-05, dok-synk – commits `8d2d413` + `70660fb`):**
+> ägarmandat *"all ändring i Budsystemet ska gå att läsa på hemsidan."* Budsystem-
+> sidan läser `docs/budsystem.md` direkt (§9 Ändringslogg är dold), så live-regler
+> som förr bara låg i kod/ändringslogg skrevs nu in i läsbara sektioner: **§7.3
+> Takeout Double** (egen sektion, ordet "monster" borttaget på ägarens begäran),
+> **§5.4** öppnarens rond-2 i inklämt läge (delbit 6), **§7.8** när motståndarna
+> stör vår öppning (delbit 4+5). Ingen kodändring – bottarna bjuder som förut.
+>
 > **Läget (2026-07-04, audit session 9 avslutad):** Hela revisionen R1–R6 KLAR +
 > live (0 KRITISK, 2 HÖG båda i R1, 27/32 fynd lagade; slutrapport
 > `docs/audit/SLUTRAPPORT.md`). Därefter startade R1 Fynd #2 (bredda störd
