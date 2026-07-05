@@ -11,11 +11,30 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — ägaren pekar ut nästa sak (järnregeln: exakt en).
-> **NU är TOM — ägaren pekar ut nästa sak.** Föregående NU (bredare flerronds-
-> konkurrens, R1 Fynd #2 sista delbit) är **KLAR (ej pushat än — ägaren godkänner
-> PCD)**. Ägaren **överrörde järnregeln** medvetet och bad om alla tre bekräftade
-> fel i EN session.
+### 🔵 NU — Steg A, Del 1: flytta hosting till Vercel (järnregeln: exakt en).
+> **NU = "Framtidsplan Steg A, Del 1 — flytta hosting från GitHub Pages till
+> Vercel" (ägarbeslut 2026-07-05).** Detta är FÖRSTA av tre små delsteg i Steg A
+> (Del 1 = Vercel-flytt · Del 2 = köp + koppla `rebidz`-domän · Del 3 = PWA). Ta
+> ETT delsteg i taget, eget facit per steg. **Fullt beslutsunderlag + kritisk
+> genomgång: `docs/framtid-multiplayer-plattform.md`** (Beslut A vs B) + minnet
+> `future-multiplayer-platform`. **Läs det doket + bekräfta med ägaren att valen
+> står innan du rör något.**
+>
+> **Del 1 konkret:** koppla repot till Vercel; ändra Vite `base` `/Learn-Bridge/`
+> → `/` OCH uppdatera vakttestet `src/deploy-config.test.ts` (annars failar sviten);
+> behåll test-/typgrinden (tsc + npm test) i det nya bygget så trasig kod aldrig
+> går live. Ägaren måste själv skapa Vercel-konto + godkänna — guida exakt var han
+> klickar, kör inget åt honom. Följ [[ask-before-pcd]].
+>
+> **⚠️ Två ärliga varningar (upprepa för ägaren):** (1) Steg A förbättrar INTE
+> boten — bara var appen bor; bot-utvecklingen är ett SEPARAT framtida NU. (2)
+> `/felrapporter` överlever flytten OFÖRÄNDRAT (`src/lib/felrapport.ts` bygger bara
+> en länk till `github.com/PGreen90/Learn-Bridge/issues/new`; repot stannar).
+>
+> **Föregående NU (bredare flerronds-konkurrens A+B+C, R1 Fynd #2 sista delbit) är
+> KLAR, PUSHAD & i synk med origin** (git verifierat 2026-07-05 — den gamla "EJ
+> PUSHAT"-noten nedan är inaktuell). Ägaren överrörde järnregeln medvetet och bad
+> om alla tre bekräftade fel i EN session.
 >
 > **Senast klart (2026-07-05, EJ PUSHAT — inväntar PCD): bredare flerronds-
 > konkurrens (A+B+C).** Metod: en utforskningsprob körde 4000 slumpgivar genom hela
