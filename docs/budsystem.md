@@ -585,6 +585,25 @@ Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gälle
   **stöd i svararens färg** = fit.
 - **Hopp / splinter** = kortfärg och slamintresse.
 
+### 5.4 Öppnarens återbud i konkurrens (efter partnerns enkla höjning)
+Öppnar du **1♥/1♠**, en motståndare kliver in, partnern höjer till **2M** och den
+andra motståndaren klämmer in ett bud (t.ex. **1♥–(1♠)–2♥–(2♠)** eller
+**1♠–(2♥)–2♠–(3♥)**). Nu måste öppnaren välja – passa inte blint:
+
+| Öppnarens bud | Betydelse |
+|---|---|
+| Pass | dött minimum – försvara deras kontrakt |
+| **3M** | minimum men **6:e trumfen** (9+ trumf ihop) → konkurrera på lagen om totala stick (ej krav) |
+| **X** | **maximal dubbling = game try** (~15–17 totalpoäng, utgångsintresse) |
+| **4M** | utgång (18+ totalpoäng) |
+
+**Varför X = game try och inte straff här?** Motståndarnas inklämda bud tar bort
+utrymmet för cue-budet (den vanliga game try-vägen). I *just det läget* betyder
+öppnarens X därför **game try**, inte straff – straffdubblingen ges medvetet upp.
+Partnern (som höjde) dömer: **4M** med ett **maximum** av höjningen (8+ stödpoäng),
+annars tillbaka till **3M** (avböjer). Golven speglar den ostörda accepten (§5.2):
+15+ = game try, 18+ = utgång.
+
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
 Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit
@@ -858,6 +877,29 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
 - **Mot spärrar (3-läget+):** 3NT = till spel (stopp + stick); cue-bud =
   stoppfråga/stark; färgbud naturliga. (Takeout-dubblingen: §7.3.)
 
+### 7.8 När motståndarna stör vår egen öppning
+Konkurrensen går åt båda håll: bjuder *vi* konstgjort/spärrartat och en
+motståndare stör, svarar partnern med ett riktigt beslut i stället för att passa.
+
+**(a) De stör vårt 1NT med DONT** (deras X-relä eller ett 2-lägesbud):
+- **X / XX = straff/värden** (8+ hp utan egen långfärg). Vi äger ofta handen mitt
+  emot 15–17, så vi dubblar dem hellre än flyr. Deras X-relä bemöts med **XX**, ett
+  färgbud med **X**.
+- **Egen 5+ färg = naturligt "to play"** (konkurrerar). Ett 3-lägesbud kräver 6+ kort.
+- Annars **pass**.
+
+**(b) De stör vår svaga tvåa / spärr** (takeout-X eller ett inkliv):
+- Deras **upplysningsdubbling → XX = värden/straffintresse** (10+ hp).
+- Annars **fortsatt spärr**: höj vår färg ett steg med fit (svag tvåa kräver
+  3-korts stöd, en spärr räcker med 2) – lagen om totala stick.
+- Annars **pass**.
+
+**(c) Straffdubbla deras flykt efter vår XX.** Öppnar vi 1NT, de stör med DONT och
+partnern **redubblar** (XX = *vi äger handen*), så **straffdubblar** vår sida varje
+flyktbud när de smiter undan till en färg – steg för steg, tills de får spela
+dubblat. Gäller **bara** efter vårt 1NT + XX (där vi bevisligen äger handen), inte
+efter våra svaga tvåor/spärrar.
+
 ## 8. Markeringar & utspel
 > Försvarsspelets signaler. Vi spelar räkningstunga, lågtvetydiga metoder som
 > passar 2/1:s precisionsfilosofi.
@@ -909,6 +951,13 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-05** – **Störd budgivning nedskriven i läsbara sektioner (§5.4, §7.8).**
+  Redaktionellt (ägarmandat: allt som bottarna gör ska gå att läsa på sidan) –
+  **ingen kodändring**. Tre live-beteenden som förr bara låg i koden/ändringsloggen
+  fick nu egna sektioner: **§5.4** öppnarens rond-2 i inklämt konkurrensläge
+  (delbit 6: pass / 3M / X=game try / 4M + partnerns svar), **§7.8 (a+b)** svar när
+  motståndarna stör vårt 1NT (DONT) eller vår svaga tvåa/spärr (delbit 4), och
+  **§7.8 (c)** straffdubbla deras flykt efter vårt 1NT + XX (delbit 5).
 - **2026-07-05** – **Takeout Double fick en egen sektion (§7.3).** Redaktionell
   omstrukturering (ägarbeslut) – **ingen kodändring, inget ändrat botbeteende**.
   All upplysningsdubbling (takeout) samlas nu i **§7.3 Takeout Double**: grundfallet
