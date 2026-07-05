@@ -562,3 +562,55 @@ export function openerAnswerFourthSuit(
   const call = `${cheap(opened)}${BID[opened]}`
   return { call, rule, explanation: `${p} hp, inget stopp och ingen extra form – ${pretty(call)} (fjärde färgen är krav, pass förbjudet).` }
 }
+
+// === Svar på New Minor Forcing (§5.7) ========================================
+// Öppnaren rebjöd 1NT (12–14 bal) och hör NMF (svararens konstgjorda 2♣/2♦).
+// Prioritet (Root/Pavlicek): 1) 4-korts ANDRA högfärg (jagar 4-4) · 2) 3-korts
+// stöd i svararens högfärg (minimum enkel / maximum hopp) · 3) NT med stopp i den
+// OBJUDNA färgen · 4) höj NMF-lågfärgen med 4 kort · 5) rebjud egen färg (nödutväg
+// – NMF är krav, pass förbjudet). max = 14 hp (öppnaren visade redan 12–14).
+export function openerAnswerNMF(
+  hand: Hand,
+  opened: Suit,
+  responderMajor: Suit,
+  nmfMinor: Suit,
+  unbidSuit: Suit,
+): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const rule = 'svar på New Minor Forcing'
+  const max = p >= 14
+  const styrka = max ? 'maximum' : 'minimum'
+  // Billigaste nivån över NMF-budet (som ligger på 2-läget).
+  const cheap = (s: Suit) => (rankOf(s) > rankOf(nmfMinor) ? 2 : 3)
+  const otherMajor: Suit = responderMajor === 'hearts' ? 'spades' : 'hearts'
+
+  // 1) 4-korts ANDRA högfärg (ej öppningsfärgen – den är redan visad).
+  if (otherMajor !== opened && len[otherMajor] >= 4) {
+    const call = `${cheap(otherMajor)}${BID[otherMajor]}`
+    return { call, rule, explanation: `${p} hp, 4-korts ${NAME[otherMajor]} → ${pretty(call)} (visar den andra högfärgen på NMF).` }
+  }
+
+  // 2) 3-korts stöd i svararens högfärg: minimum enkel, maximum hopp.
+  if (len[responderMajor] >= 3) {
+    const level = max ? 3 : cheap(responderMajor)
+    const call = `${level}${BID[responderMajor]}`
+    return { call, rule, explanation: `${p} hp, 3-korts stöd i ${NAME[responderMajor]} (${styrka}) → ${pretty(call)} (5-3-fit hittad).` }
+  }
+
+  // 3) Sang med stopp i den objudna färgen: minimum 2NT, maximum 3NT.
+  if (stopperIn(hand, unbidSuit)) {
+    const call = max ? '3NT' : '2NT'
+    return { call, rule, explanation: `${p} hp, stopp i ${NAME[unbidSuit]} (${styrka}) → ${call} (ingen dold högfärgspassning).` }
+  }
+
+  // 4) Höj NMF-lågfärgen med 4 kort (naturligt, förnekar allt ovan).
+  if (len[nmfMinor] >= 4) {
+    const call = `3${BID[nmfMinor]}`
+    return { call, rule, explanation: `${p} hp, 4-korts ${NAME[nmfMinor]} → ${pretty(call)} (ingen högfärgspassning eller stopp – naturlig höjning).` }
+  }
+
+  // 5) Nödutväg: rebjud öppningsfärgen (NMF är krav – pass förbjudet).
+  const call = `${cheap(opened)}${BID[opened]}`
+  return { call, rule, explanation: `${p} hp, inget av ovan – ${pretty(call)} (NMF är krav, pass förbjudet).` }
+}

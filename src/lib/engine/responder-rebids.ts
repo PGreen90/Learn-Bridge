@@ -482,6 +482,82 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
   }
 }
 
+// === New Minor Forcing (§5.7) ================================================
+// Efter 1m–1M(1-läget)–1NT kan öppnarens 1NT dölja 3-korts stöd i svararens
+// högfärg (eller en egen 4-korts högfärg). Med en 5-korts högfärg + inbjudande+
+// värden (11+) bjuder svararen den OANVÄNDA lågfärgen konstgjort & tvingande och
+// frågar efter den dolda passningen, i stället för att gissa sang och tappa en
+// 5-3-fit. Efter 1♥–1♠–1NT är båda lågfärgerna lediga → bjud den starkare
+// (mest hp, antyder stopp); vid lika den billigaste (klöver). Ägarbeslut 2026-07-05.
+function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: number): ResponseResult | null {
+  if (responderSuit !== 'hearts' && responderSuit !== 'spades') return null // NMF jagar en HÖGfärgsfit
+  if (lengths(hand)[responderSuit] < 5) return null // 5-3-fit kräver 5-korts högfärg
+  if (p < 11) return null // inbjudande+ värden
+
+  const freeMinors = (['clubs', 'diamonds'] as Suit[]).filter((m) => m !== opened && m !== responderSuit)
+  if (freeMinors.length === 0) return null
+  const nmfMinor = freeMinors.length === 1
+    ? freeMinors[0]
+    : suitHcp(hand, 'diamonds') > suitHcp(hand, 'clubs') ? 'diamonds' : 'clubs'
+
+  const call = `2${BID[nmfMinor]}`
+  return {
+    call,
+    rule: 'New Minor Forcing',
+    explanation: `${p} hp, 5-korts ${NAME[responderSuit]} – ${pretty(call)} = New Minor Forcing (konstgjort, tvingande): frågar efter dold ${NAME[responderSuit]}-passning eller 4-korts högfärg hos öppnaren.`,
+  }
+}
+
+// Svararens PLACERING efter öppnarens NMF-svar (§5.7, steg 3). Svararen visade
+// 11+ via NMF: 13+ = utgångskrav, 11–12 = inbjudan. Öppnarens svar visade min/max
+// (hopp/3NT = maximum). Terminala bud: stöd → 4M (utgång) / pass (inbjudan mot
+// minimum); sang → 3NT / pass; annars 3NT med utgångsvärden, annars pass.
+export function responderPlaceAfterNMF(
+  hand: Hand,
+  responderMajor: Suit,
+  otherMajor: Suit,
+  _nmfMinor: Suit,
+  opened: Suit,
+  _unbidSuit: Suit,
+  answer: { level: number; strain: string },
+): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const rule = 'placering efter NMF'
+  const game = p >= 13 // 13+ = utgångskrav; 11–12 = inbjudan
+  const openerMax = answer.level >= 3 // hopp / 3NT = maximum
+  const toGame = game || openerMax
+  const rM = BID[responderMajor]
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule, explanation: `${p} hp – ${why} → pass.` })
+
+  // 1) Öppnaren visade STÖD i din högfärg → 5-3-fit.
+  if (answer.strain === rM) {
+    if (toGame) return { call: `4${rM}`, rule, explanation: `${p} hp, 5-3-fit i ${NAME[responderMajor]}${openerMax ? ' + öppnarens maximum' : ''} → utgång 4${SYM[responderMajor]}.` }
+    return pass(`inbjudan mittemot öppnarens minimum – ${NAME[responderMajor]}-delkontrakt räcker`)
+  }
+
+  // 2) Öppnaren visade den ANDRA högfärgen (4 kort, minimum).
+  if (otherMajor !== opened && answer.strain === BID[otherMajor]) {
+    if (len[otherMajor] >= 4) {
+      if (toGame) return { call: `4${BID[otherMajor]}`, rule, explanation: `${p} hp, 4-4-fit i ${NAME[otherMajor]} → utgång.` }
+      return pass(`4-4-fit men bara inbjudan mittemot minimum`)
+    }
+    if (game) return { call: '3NT', rule, explanation: `${p} hp, ingen högfärgsfit → 3NT (utgång).` }
+    return pass('ingen fit, bara inbjudan')
+  }
+
+  // 3) Öppnaren bjöd sang (2NT minimum / 3NT maximum).
+  if (answer.strain === 'NT') {
+    if (answer.level >= 3) return pass('öppnaren bjöd redan 3NT')
+    if (game) return { call: '3NT', rule, explanation: `${p} hp → 3NT (utgång).` }
+    return pass('inbjudan mittemot minimum')
+  }
+
+  // 4) Öppnaren höjde NMF-lågfärgen / rebjöd egen färg (ingen högfärgspassning).
+  if (game) return { call: '3NT', rule, explanation: `${p} hp, ingen högfärgsfit → 3NT (utgång).` }
+  return pass('ingen fit, bara inbjudan')
+}
+
 // === Punkt 12: svararens andra bud i färgauktioner (fjärde färg krav), §6.6 ==
 
 export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSuit: Suit, rebid: ResponseResult): ResponseResult | null {
@@ -515,8 +591,12 @@ export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSu
     // Öppnaren visade balanserat eller egen färg.
     case '2NT (18–19)':
       return { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot 18–19 → 3NT.` }
-    case '1NT (12–14)':
+    case '1NT (12–14)': {
+      // New Minor Forcing först (5-korts högfärg + 11+), annars sang-stegen.
+      const nmf = newMinorForcingBid(hand, opened, y, p)
+      if (nmf) return nmf
       return ntLadder()
+    }
     case 'rebjuden färg':
       if (len[opened] >= 2 && p <= 10) return pass(`preferens ${NAME[opened]}`)
       return ntLadder()

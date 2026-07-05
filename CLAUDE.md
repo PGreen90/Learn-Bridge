@@ -11,13 +11,34 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Kontraktväljaren (träningsmål i "Spela kort").
-> **En sidogren i "Spela kort" där ägaren väljer ett MÅL-kontrakt att bjuda fram**
-> (utgång i högfärg / lågfärg / 3NT / lillslam / storslam / med störning) i stället
-> för en ren slumpad giv. Metod: slumpa givar och behåll dem vars **simulerade
-> auktion** (motorns budgivning för alla fyra platser) landar i ett NS-kontrakt som
-> matchar målet. Ägarval (2026-07-05): mål = "motorn skulle nå kontraktet"; du
-> sitter alltid Syd i sidan som äger målet; slam = enkelt "Lillslam/Storslam".
+### 🔵 NU — New Minor Forcing (NMF) bygga konventionen.
+> **NMF saknas helt** (varken i motor eller systembok, bekräftat 2026-07-05). Efter
+> `1m–1M(1-läget)–1NT` (öppnarens 1NT-rebud = 12–14 bal) hoppar svararen idag rakt
+> till sang-stegen (`responder-rebids.ts` `responderRebidColorAuction` case
+> `'1NT (12–14)' → ntLadder`) → en dold **5-3-högfärgsfit går förlorad**. NMF fixar
+> det: svararen bjuder den **oanvända lågfärgen** (2♣/2♦) konstgjort & tvingande och
+> frågar efter öppnarens dolda högfärgspassning.
+>
+> **Ägarval (2026-07-05, "först mer om NMF" → godkänt bygge):** bara ostört; bara
+> efter en **högfärgssvar** (1♥/1♠, ej 1♦-svar); NMF-budet = oanvänd lågfärg (efter
+> `1♥–1♠–1NT` båda lediga → bjud starkare, antyder stopp); golv **11+ hp**
+> (inbjudan+, 13+ tvingar utgång); vi ger upp naturligt svagt 2-bud i NMF-lågfärgen.
+> Öppnarens svarsprioritet: 4-korts andra högfärg → 3-korts stöd (2M/hopp 3M) →
+> NT m. stopp (2NT 12–13 / 3NT 13–14) → höj lågfärgen (4 kort) → rebjud färg.
+>
+> **Bygg i test-låsta steg (facit före fix):** (1) svararens NMF-bud, (2) öppnarens
+> svar, (3) svararens placering + `docs/budsystem.md`.
+>
+> **Senast klart & LIVE (2026-07-05, commit `eca5ff0`, deploy grön): budsystemets
+> grunder steg 1.** `auctionForce`/`honorForce` (auction-live.ts) → krav får aldrig
+> passas OSTÖRT (2/1, ny färg, reverse); `raiseWithFit` → minorfit + utgångsvärden
+> når utgång (3NT/5m). Facit `foundation-forcing.test.ts` A–D regressionslås.
+> budsystem.md §5.5+§5.6. **Störda krav = NÄST #1** (ägarbeslut: `1♦–(1♠)–2♣` =
+> RONDKRAV i konkurrens; ej byggt, auctionForce spärrar av på konkurrens med flit).
+>
+> ---
+> **HISTORIK nedan (tidigare sessioner, KLARA & LIVE — behandla ej som pågående):**
+> Kontraktväljaren (KLAR & LIVE):
 >
 > **ALLA TRE DELSTEG BYGGDA & VERIFIERADE (2026-07-05, ej pushat):**
 > - **(1) Filtret + motor-fix.** `contract-target.ts` (`matchesTarget` +

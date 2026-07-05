@@ -292,8 +292,11 @@ describe('punkt 12 – svararens andra bud i färgauktioner (fjärde färg krav)
     expect(r12('S:KJ3 H:KQ842 D:Q5 C:952', 'clubs', 'hearts', '2H', 'enkel höjning')).toBe('3H') // 11 hp
   })
 
-  it('öppnaren rebjöd 1NT (12–14) – game → 3NT', () => {
-    expect(r12('S:K3 H:AQ842 D:KJ2 C:Q52', 'clubs', 'hearts', '1NT', '1NT (12–14)')).toBe('3NT') // 15 hp
+  // Med en 5-korts högfärg utlöses nu New Minor Forcing (§5.7): fråga efter en
+  // dold 5-3-fit via oanvänd lågfärg FÖRE 3NT. (4-korts högfärg → 3NT, se
+  // new-minor-forcing.test.ts.)
+  it('öppnaren rebjöd 1NT (12–14), 5-korts hjärter → 2♦ (New Minor Forcing)', () => {
+    expect(r12('S:K3 H:AQ842 D:KJ2 C:Q52', 'clubs', 'hearts', '1NT', '1NT (12–14)')).toBe('2D') // 15 hp, 5 ♥
   })
 
   it('öppnaren rebjöd sin färg, svag preferens → pass', () => {

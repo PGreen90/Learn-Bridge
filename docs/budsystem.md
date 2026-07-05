@@ -641,6 +641,35 @@ utgång, inte stanna på ett inbjudande hopp. Balanserad hand → **3NT**; annar
 **5 i lågfärgen**. (En bara *inbjudande* fit, 11–12 stödpoäng, höjer fortfarande
 lugnt till 3-läget – den blåses aldrig till utgång.)
 
+### 5.7 New Minor Forcing (NMF)
+När du svarat en **högfärg på 1-läget** och öppnaren rebjuder **1NT** (12–14 bal)
+kan hens hand dölja **3 kort i din högfärg** (en 5-3-fit) eller en egen 4-korts
+högfärg. NMF hittar den: du bjuder den **oanvända lågfärgen** (2♣/2♦) som ett
+**konstgjort, tvingande** frågebud — det säger inget om lågfärgen, bara *"beskriv
+din hand"*.
+
+| Auktion | NMF-budet |
+|---|---|
+| 1♣–1♥–1NT | **2♦** |
+| 1♦–1♥–1NT | **2♣** |
+| 1♥–1♠–1NT | **2♣ / 2♦** (bjud den starkare = antyder stopp) |
+
+**Krav:** 5-korts högfärg + inbjudande eller mer (**11+ hp**; 13+ = utgångskrav).
+Ostört läge; störs 1NT-rebudet gäller andra verktyg. Priset: du ger upp det
+naturliga svaga 2-budet i NMF-lågfärgen.
+
+**Öppnarens svar** (prioritetsordning):
+1. **4-korts andra högfärg** → bjud den (jagar 4-4).
+2. **3-korts stöd** i din högfärg → `2M` (minimum) / hopp `3M` (maximum).
+3. **Stopp i den objudna färgen** → `2NT` (min) / `3NT` (max).
+4. **4 kort i NMF-lågfärgen** → höj den (`3m`).
+5. Inget av ovan → **rebjud egen färg** (nödutväg – NMF är krav, pass förbjudet).
+
+**Din placering:** har öppnaren visat **stöd** → `4M` med utgångsvärden (eller mot
+öppnarens maximum), annars pass i delkontrakt. Visade öppnaren **sang/ingen fit**
+→ `3NT` med utgångsvärden, annars pass. Kort sagt: 13+ når alltid utgång; 11–12
+når utgång bara när öppnaren visat maximum.
+
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
 Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit

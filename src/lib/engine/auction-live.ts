@@ -20,7 +20,8 @@ import { turnsToCalls } from './auction-contract'
 import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from './doubles'
 import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
-import { openerAnswerFourthSuit } from './rebids'
+import { openerAnswerFourthSuit, openerAnswerNMF } from './rebids'
+import { responderPlaceAfterNMF } from './responder-rebids'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import { advanceTwoSuiter, hasStopper, openingSuit, overcall } from './overcalls'
@@ -236,6 +237,81 @@ function fourthSuitToAnswer(
     responderSuit: SUIT_OF_LETTER[strains[1]],
     fourth: SUIT_OF_LETTER[strains[3]],
   }
+}
+
+/**
+ * Har partnern just bjudit NEW MINOR FORCING (§5.7) som `seat` (öppnaren) måste
+ * svara på? Mönstret (ostört): vår 1-läges färgöppning – partnerns 1-läges
+ * HÖGfärgssvar – vårt 1NT-återbud – partnerns 2-läges LÅGfärg som INTE är
+ * öppningsfärgen (den oanvända lågfärgen = konstgjort, tvingande). Kravet får
+ * aldrig passas. Returnerar färgerna (inkl. den objudna färgen för stopp-koll),
+ * annars null.
+ */
+function nmfToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { opened: Suit; responderMajor: Suit; nmfMinor: Suit; unbidSuit: Suit } | null {
+  if (opponentsHaveBid(history, seat)) return null // stört → NMF gäller inte
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
+
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length !== 4 || bids[3] !== lastNonPass) return null
+  if (bids[0].seat !== seat || bids[1].seat !== PARTNER[seat] || bids[2].seat !== seat || bids[3].seat !== PARTNER[seat]) return null
+  const cbs = bids.map((c) => parseContractBid(c.bid)!)
+  if (cbs[0].level !== 1 || cbs[0].strain === 'NT') return null // vår öppning: 1-läges färg
+  if (cbs[1].level !== 1 || (cbs[1].strain !== 'H' && cbs[1].strain !== 'S')) return null // 1-läges HÖGfärgssvar
+  if (cbs[2].level !== 1 || cbs[2].strain !== 'NT') return null // vårt återbud: exakt 1NT
+  if (cbs[3].level !== 2 || (cbs[3].strain !== 'C' && cbs[3].strain !== 'D')) return null // 2-läges lågfärg
+  if (cbs[3].strain === cbs[0].strain) return null // 2 i ÖPPNAD lågfärg = naturligt, ej NMF
+
+  // Passad hand: passade partnern innan sitt första bud gäller NMF inte.
+  const firstPartnerBid = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
+  if (history.slice(0, firstPartnerBid).some((c) => c.seat === PARTNER[seat])) return null
+
+  const opened = SUIT_OF_LETTER[cbs[0].strain]
+  const responderMajor = SUIT_OF_LETTER[cbs[1].strain]
+  const nmfMinor = SUIT_OF_LETTER[cbs[3].strain]
+  const unbidSuit = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[])
+    .find((s) => s !== opened && s !== responderMajor && s !== nmfMinor)!
+  return { opened, responderMajor, nmfMinor, unbidSuit }
+}
+
+/**
+ * Har öppnaren just SVARAT på vår NMF (§5.7, steg 3) så att `seat` (svararen, som
+ * bjöd NMF) ska placera kontraktet? Mönstret (ostört): 1m–1M–1NT–2m(NMF)–[öppnarens
+ * svar], bara pass efter svaret, och `seat` är NMF-bjudaren. Returnerar färgerna +
+ * öppnarens svar (nivå/färg → min/max) för `responderPlaceAfterNMF`, annars null.
+ */
+function nmfPlacementToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { opened: Suit; responderMajor: Suit; otherMajor: Suit; nmfMinor: Suit; unbidSuit: Suit; answer: { level: number; strain: string } } | null {
+  if (opponentsHaveBid(history, seat)) return null
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length !== 5) return null // öppning, svar, 1NT, NMF, öppnarens svar
+  const opener = bids[0].seat
+  if (seat !== PARTNER[opener]) return null // vi är svararen (NMF-bjudaren)
+  if (bids[1].seat !== seat || bids[2].seat !== opener || bids[3].seat !== seat || bids[4].seat !== opener) return null
+  const cbs = bids.map((c) => parseContractBid(c.bid)!)
+  if (cbs[0].level !== 1 || cbs[0].strain === 'NT') return null
+  if (cbs[1].level !== 1 || (cbs[1].strain !== 'H' && cbs[1].strain !== 'S')) return null
+  if (cbs[2].level !== 1 || cbs[2].strain !== 'NT') return null
+  if (cbs[3].level !== 2 || (cbs[3].strain !== 'C' && cbs[3].strain !== 'D')) return null
+  if (cbs[3].strain === cbs[0].strain) return null
+  // Bara pass efter öppnarens svar (senaste kontraktsbudet).
+  if (history.slice(history.indexOf(bids[4]) + 1).some((c) => c.bid !== 'P')) return null
+  // Passad hand-undantag.
+  const firstOurBid = history.findIndex((c) => c.seat === seat && c.bid !== 'P')
+  if (history.slice(0, firstOurBid).some((c) => c.seat === seat)) return null
+
+  const opened = SUIT_OF_LETTER[cbs[0].strain]
+  const responderMajor = SUIT_OF_LETTER[cbs[1].strain]
+  const nmfMinor = SUIT_OF_LETTER[cbs[3].strain]
+  const otherMajor: Suit = responderMajor === 'hearts' ? 'spades' : 'hearts'
+  const unbidSuit = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[])
+    .find((s) => s !== opened && s !== responderMajor && s !== nmfMinor)!
+  return { opened, responderMajor, otherMajor, nmfMinor, unbidSuit, answer: { level: cbs[4].level, strain: cbs[4].strain } }
 }
 
 // ---- Tvåfärgsinkliv (Michaels / ovanlig 2NT, §7.2) i den levande auktionen --
@@ -2015,6 +2091,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // Partnerns FJÄRDE FÄRG (§6.6, utgångskrav): öppnaren svarar alltid.
     () => answered(fourthSuitToAnswer(history, seat),
       (f) => openerAnswerFourthSuit(hand, f.opened, f.second, f.responderSuit, f.fourth), history, seat),
+    // Partnerns NEW MINOR FORCING (§5.7, krav): öppnaren svarar alltid.
+    () => answered(nmfToAnswer(history, seat),
+      (n) => openerAnswerNMF(hand, n.opened, n.responderMajor, n.nmfMinor, n.unbidSuit), history, seat),
   ]
   for (const run of forcedAnswers) {
     const call = run()
@@ -2108,6 +2187,11 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // i stället för att passa. Måste ligga FÖRE off-book-svaret (som annars
       // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).
       () => overcallerRaiseAdvance(deal, history, seat),
+      // Svararen PLACERAR kontraktet efter öppnarens NMF-svar (§5.7, steg 3).
+      // Måste ligga FÖRE off-book-svaret (som annars vägrar re-höja svararens egen
+      // högfärg och passar en klar 5-3-fit).
+      () => answered(nmfPlacementToAnswer(history, seat),
+        (n) => responderPlaceAfterNMF(hand, n.responderMajor, n.otherMajor, n.nmfMinor, n.opened, n.unbidSuit, n.answer), history, seat),
       // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
       () => offBookResponse(deal, history, seat),
       // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett
