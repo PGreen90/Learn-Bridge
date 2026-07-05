@@ -39,6 +39,15 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force) ·
 | **4♣ / 4♦** | lång färg | spärr | Naturlig spärröppning |
 | **4♥ / 4♠** | lång färg | spärr (~7+ spelstick) | Spärr till utgång |
 
+**Kvalitetsuppgraderingar av sangöppningarna (TP).** En jämn hand som är
+*bättre än poängen antyder* (många ess/kontroller, kvalitetsfärger, tior –
+mätt som **startpoäng**) öppnas en nivå högre:
+- **Bra 14 → 1NT** (startpoäng ≥15 ej sårbar / ≥16 sårbar, ingen 5-korts färg).
+- **Bra 19 → 2NT** (ägarbeslut 2026-07-06, felrapport #30): en jämn 19-hand med
+  **startpoäng ≥20** (t.ex. ♠AJ84 ♥AQJ9 ♦986 ♣AK – 3 ess + AK) spelar som 20–21
+  och öppnar **2NT** i stället för 1 i färg (där den annars kan bli passad billigt).
+  Kräver ingen 5-korts färg (då visas färgen hellre på 1-läget).
+
 ### Minor-regeln (1♣ vs 1♦, båda 3+)
 | Fördelning i minorerna | Öppna |
 |---|---|
@@ -743,6 +752,23 @@ färg bakom sig och väntar på att du ska återöppna). Öppnaren återöppnar 
 billig – och en trap pass hos partnern (längd + honnörer i deras färg) blir en **straff**
 när hen konverterar din takeout-dubbling.
 
+### 5.10 Öppnarens sang-återbud när vår MINOR höjts i konkurrens
+Du öppnar **1♣/1♦**, en motståndare kliver in med en färg, och partnern **höjer din
+minor** (t.ex. **1♦–(1♠)–2♦**). Med en **stark, sangduglig hand** (jämn eller egen 6+
+minor) och **stopp i motståndarens färg** visar du styrkan i sang i stället för ett
+tyst färgbud som säljs billigt (annars nådde en 19-hand bara 2 i en färg):
+
+| Öppnarens bud | Betydelse |
+|---|---|
+| **3NT** | 20+ hp, stopp i deras färg → utgång (spela) |
+| **2NT** | 18–19 hp, stopp i deras färg → **inbjudan** |
+| (annat) | under 18 → som förr (tävla / pass) |
+
+Efter **2NT-inbjudan** dömer **höjaren**: med ett **maximum av höjningen (8+ hp)**
+höjer hon till **3NT**, annars **pass** (stannar i 2NT). En jämn 19-hand med extra
+kvalitet (startpoäng ≥20) uppgraderade oftast redan sin **öppning** till 2NT (§3), så
+den här grenen fångar 18–19 utan den kvaliteten samt starka fördelningshänder.
+
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
 Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit
@@ -1137,6 +1163,16 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-06** – **Stark jämn hand når utgång efter minorhöjning i konkurrens
+  (kod + §3/§5.10, felrapport #30).** Ägarbeslut (båda vägarna). (1) **Öppnings-
+  uppgradering:** en jämn 19-hand med startpoäng ≥20 (många ess/kvalitetsfärger)
+  öppnar **2NT** i stället för 1 i färg (`openings.ts`; facit i `openings.test.ts`).
+  Fixade den rapporterade given: ♠AJ84 ♥AQJ9 ♦986 ♣AK öppnar nu 2NT → 3NT.
+  (2) **Återbudsfix:** när vår minor höjs i konkurrens visar öppnaren en stark
+  sangduglig hand med stopp – **3NT** (20+) / **2NT-inbjudan** (18–19), och höjaren
+  accepterar 3NT med ett maximum (`openerStrongNTAfterMinorRaise` +
+  `answerOpenerNTInvite` i `auction-live.ts`; facit i
+  `auction-opener-minor-raise-nt.test.ts`). 1071 test gröna, tsc rent.
 - **2026-07-06** – **Svagt hoppskift avskaffat (kod + §4.1/§4.2, felrapport #31).**
   Ägarbeslut. Svararen hoppade förr till 2♥/2♠ med en svag 6-korts högfärg (t.ex.
   1♦–2♥). Ny grundregel: när partnern har öppnat håller svararen budgivningen LÅG
