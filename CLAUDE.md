@@ -94,6 +94,18 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Utgångskrav får aldrig passas OFF-BOOK (felrapport #26 + #27, 2026-07-05,
+  NYTT):** två luckor där boten passade en KRAV-auktion när du bjudit off-book
+  (motorn hade planerat en annan linje). (1) **#26** – efter din cue-höjning
+  (1♣–2♥–3♥) fullföljer din partner nu utgångskravet efter öppnarens svar
+  (`answerCueBidderRebid`): 3NT med stopp i deras färg, annars utgång i den
+  överenskomna färgen. (2) **#27** – efter ett äkta 2-över-1 (utgångskrav) som
+  öppnaren höjer sätter svararen nu minst utgång även off-book
+  (`answerTwoOverOneRaise`) – uppstod när Syd öppnade den svagare handen så
+  motorns on-book 2/1-fortsättning aldrig fyrade. Bara off-book berörs; on-book
+  orört. **Bevaka:** når boten rätt utgång (4M/3NT/5m) och blåser den aldrig för
+  högt? Säg till om den t.ex. borde utforskat slam i stället för att bara sätta
+  utgång.
 - **Lågfärgsutgång 5♣/5♦ nu nåbar (Kontraktväljaren delsteg 1, 2026-07-05, NYTT):**
   motorn kunde förr aldrig bjuda 5♣/5♦ (valde alltid 3NT). Nu, efter inverterad
   minor: en svarare med lågfärgsfit + en **osparrad färg** utforskar via 2m och
