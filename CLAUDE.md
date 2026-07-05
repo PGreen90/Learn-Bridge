@@ -36,8 +36,22 @@ Läs den här filen först varje session.
 > 996 tester gröna, tsc rent, verifierat i webbläsaren (pill, väljare, sökning för
 > lågfärg + storslam, ren konsol). **KVAR: ägaren provbjuder + godkänner PCD.**
 >
-> **NÄSTA GÅNG (parkerat under Kontraktväljaren):** ägaren pekar ut nästa NU, ELLER
-> finslipar den starka dubblingens dom-efter-stödhöjning om den känts fel i spel.
+> **NÄSTA GÅNG (ägarbeslut 2026-07-05): 🔵 NU blir "Budsystemets grunder — varför
+> de faller".** Ägaren vill gräva i budsystemets FUNDAMENT och förstå varför de
+> brister (inte laga en rapport i taget utan hitta rot-mönstren). Startpunkt:
+> felrapport #26 + #27 (nyss lagade) visade samma rot — motorn hedrar
+> utgångskrav/rondkrav i sin FÖRPLANERADE linje men tappar dem OFF-BOOK (när
+> ägaren öppnar/bjuder en annan hand än motorn valt). Fråga ägaren vilka
+> grundregler som känts opålitliga i spel och bygg facit-givar som blottar
+> mönstret innan något byggs om. (Kontraktväljaren = KLAR & LIVE, se nedan; dess
+> enda kvarvarande punkt "ägaren provbjuder + godkänner PCD" är parkerad.)
+>
+> **Senast klart & LIVE (2026-07-05):** felrapport #26 + #27 lagade, pushade,
+> deploy grön (commit `f9531b2`). Båda samma rot: utgångskrav passades OFF-BOOK.
+> #26 → `answerCueBidderRebid` (cue-bjudaren fullföljer efter öppnarens svar);
+> #27 → `answerTwoOverOneRaise` (svararen sätter utgång efter 2/1 som öppnaren
+> höjt). 998 tester gröna. Se 👀 Bevaka. **Detta är den direkta ingången till
+> nästa NU** (off-book-krav = ett grund-mönster som faller).
 >
 > **Senast klart & LIVE (2026-07-05, mergepunkt `1bec779`):** starka
 > upplysningsdubblingens **flerronds-fortsättning** byggd, test-låst & pushad
