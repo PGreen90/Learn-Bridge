@@ -12,9 +12,12 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — ägaren pekar ut nästa sak (järnregeln: exakt en).
-> **BYGGD & VERIFIERAD LOKALT (2026-07-05, EJ PUSHAD — inväntar ägarens provbjud +
-> PCD-godkännande): Öppnarens rond-2 i störd auktion efter partnerns NYA FÄRG / 1NT
-> (§5.8).** Systerfallet till delbit 6 (§5.4, som gällde partnerns *höjning*). Roten
+> Föregående NU (öppnarens rond-2 i konkurrens, §5.8) är **KLAR & LIVE**. Välj nästa
+> ur 🟢 NÄST / ⚪ SENARE nedan, eller peka ut en ny grundregel som känns opålitlig.
+>
+> **Senast klart & LIVE (2026-07-05, commit `112f0fc`, deploy grön): Öppnarens
+> rond-2 i störd auktion efter partnerns NYA FÄRG / 1NT (§5.8).** Systerfallet till
+> delbit 6 (§5.4, som gällde partnerns *höjning*). Roten
 > (bevisad i utforskning): så snart motståndarna bjöd om över partnerns fria svar
 > passade öppnaren bort ÄVEN starka händer (rondkravet är tekniskt av då). Ny
 > detektor `openerRondTwoInCompetition` (`auction-live.ts`, före `maybePenaltyDouble`
@@ -25,7 +28,7 @@ Läs den här filen först varje session.
 > egen 6+ färg/fit → tävla; annars pass. Styrka = stödpoäng med fit, annars ren hp
 > (så en lång svag färg inte blåser upp handen). Facit
 > `auction-opener-competition-response.test.ts` (9, röda före fixen). 1037 tester
-> gröna, tsc rent. Se 👀 Bevaka. **KVAR: ägaren provbjuder + godkänner PCD.**
+> gröna, tsc rent, deploy grön. Se 👀 Bevaka.
 >
 > **Senast klart & LIVE (2026-07-05, commit `a989a08`, deploy grön): Störda krav
 > (§5.5).** Steg 1 hedrade krav bara OSTÖRT; nu även i KONKURRENS. `auctionForce`
@@ -134,9 +137,9 @@ Läs den här filen först varje session.
 > `BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
 >
 > **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 när partnern
-> bjöd NY färg / 1NT~~ (BYGGD 2026-07-05, §5.8, se 🔵 NU – inväntar PCD);
-> balanseringens "låna en kung"-lättnad; bredare flerronds-konkurrens. Delbit 3
-> (Mathe mot stark 1♣) förblir PARKERAD.
+> bjöd NY färg / 1NT~~ (KLAR & LIVE 2026-07-05, §5.8); balanseringens "låna en
+> kung"-lättnad; bredare flerronds-konkurrens. Delbit 3 (Mathe mot stark 1♣) förblir
+> PARKERAD.
 >
 > **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
 > kräver webworker), R3 #8 ("Förra sticket" 85 % — 375px-koll utestående). Se
@@ -147,7 +150,7 @@ Läs den här filen först varje session.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
 - **Öppnarens rond-2 i konkurrens efter partnerns ny färg / 1NT (§5.8, 2026-07-05,
-  NYTT – EJ PUSHAD ÄNNU):** öppnar du 1 i färg, partnern svarar en fri ny färg / 1NT
+  NYTT & LIVE):** öppnar du 1 i färg, partnern svarar en fri ny färg / 1NT
   och motståndarna bjuder om (t.ex. `1♥–(1♠)–2♣–(2♠)`), passar öppnaren inte längre
   bort en stark hand. Extra visas med **cue i deras färg** (15+, hitta rätt utgång),
   18+ med högfärgsfit → 4M, 18+ jämn m. stopp → 3NT, 15–17 m. högfärgsfit →
