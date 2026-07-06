@@ -782,8 +782,8 @@ function PlayTable({
       <div className="relative">
         <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
         {!resultSeen && !reporting ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="rounded-xl bg-white p-5 text-center shadow-xl">
+          <div className="overlay-in fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            <div className="dialog-in rounded-xl bg-white p-5 text-center shadow-xl">
               <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
                 {result.made
                   ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
