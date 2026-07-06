@@ -113,10 +113,21 @@
 }
 .page-in { animation: page-in 220ms ease-out; }
 
+/* Resultat-/claimrutan tonar mjukt in ovanpå bordet – mjukare Auto-Claim
+   (rutan poppade förr upp blixtsnabbt). Bakgrunden tonar, kortet lyfts en
+   aning på plats. */
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; }
+}
+.overlay-in { animation: overlay-in 200ms ease-out; }
+.dialog-in { animation: dialog-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1); }
+
 /* Användare som bett systemet om minskad rörelse får allt utan animation. */
 @media (prefers-reduced-motion: reduce) {
   .card-in-n, .card-in-s, .card-in-w, .card-in-e,
-  .deal-in, .page-in {
+  .deal-in, .page-in, .overlay-in, .dialog-in {
     animation: none;
   }
 }

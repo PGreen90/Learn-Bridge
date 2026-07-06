@@ -57,7 +57,10 @@ export function PlayingCard({
   style,
 }: Props) {
   const s = SIZES[size]
-  const base = `${s.box} shrink-0 select-none transition-all`
+  // Tunn 1px-ram runt varje kort → luftig separation mellan korten. Svart med
+  // låg opacitet (läser som mjuk grå, inte hård linje).
+  // Ägarbeslut 2026-07-06, ersätter det ramfria beslutet 2026-07-03.
+  const base = `${s.box} shrink-0 select-none transition-all border border-black/20`
 
   if (faceDown || !card) {
     // RebidZ-baksidan: vit kortram, mörk smaragdpanel med guldram + rutmönster.
@@ -115,8 +118,8 @@ export function PlayingCard({
   )
 
   // Framsidan: svag lodrät gradient (vit → ljusgrå) ger korten "papperskänsla".
-  // Inga ramar runt korten (ägarbeslut 2026-07-03) — spelbarhet syns genom att
-  // ospelbara kort tonas ner, inte genom en grön ring.
+  // Ramen sätts på `base` (tunn svart 1px); spelbarhet syns genom att ospelbara
+  // kort tonas ner, inte genom en grön ring.
   const face = 'bg-gradient-to-b from-white to-slate-100'
   const look = playable
     ? `${face} shadow-md z-0 hover:-translate-y-2 hover:shadow-lg hover:z-20 cursor-pointer`
