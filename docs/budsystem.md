@@ -1163,6 +1163,19 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **2♣-öppningen håller sitt utgångskrav i live-lagret (kod, §4.4).**
+  En utforskningsprob (300 000 givar) visade att **~64 % av alla ostörda 2♣-
+  öppningar dog i DELKONTRAKT** trots att 2♣ är ovillkorligt utgångskrav (82 % av
+  stoppen hade 23+ hp = rena kravbrott). Roten: `auctionForce` (`auction-live.ts`)
+  kände igen 2/1 och rondkrav men **inte den starka 2♣-öppningens game-force** –
+  `buildAuction` bygger bara ett par bud av 2♣-linjen och överlämnar resten, som
+  passades bort. Fix: (1) ny 2♣-gren i `auctionForce` (game-krav tills utgång;
+  undantag `2♣–2♦–2NT` = inbjudande) → `honorForce` driver vidare i stället för
+  pass. (2) `respondToStrong2NTRebid`: efter `2♣–2♦–2NT` (22–24) bjuder svararen
+  **3NT med 3+ hp** (22+3 = utgång), passar bara med 0–2. Delkontrakt-andelen föll
+  **63,9 % → 1,7 %** (resten legitima bustar / korrekta 23–24-stopp). Full systems-
+  on (Stayman/transfer över 2NT-återbudet) medvetet uppskjuten. Facit:
+  `auction-2c-gameforce.test.ts` (6 givar, röda före). 1077 test gröna, tsc rent.
 - **2026-07-06** – **Stark jämn hand når utgång efter minorhöjning i konkurrens
   (kod + §3/§5.10, felrapport #30).** Ägarbeslut (båda vägarna). (1) **Öppnings-
   uppgradering:** en jämn 19-hand med startpoäng ≥20 (många ess/kvalitetsfärger)

@@ -1186,6 +1186,19 @@ function auctionForce(history: ResolvedCall[], seat: Seat): { kind: 'round' | 'g
   const highest = contractBids[contractBids.length - 1]
   const gameReached = isGameOrHigher(highest.bid)
 
+  // ---- Stark 2♣-öppning = utgångskrav (tills utgång nåtts) ----
+  // 2♣ är ovillkorligt game-krav: auktionen får aldrig dö i delkontrakt. Enda
+  // undantaget (som i standard 2/1): 2♣–2♦–2NT — öppnarens 22–24 balanserade
+  // återbud är INBJUDANDE, inte krav, så svararen får passa. `buildAuction`
+  // bygger bara ett par bud av 2♣-linjen och lämnar över resten hit; utan denna
+  // gren spårades kravet aldrig och ~64 % av alla 2♣ dog under utgång.
+  if (open.level === 2 && open.strain === 'C') {
+    const openerRebid = openerBids[1] ? parseContractBid(openerBids[1].bid) : null
+    const twoNoTrumpRebid = openerRebid?.level === 2 && openerRebid.strain === 'NT'
+    if (twoNoTrumpRebid || gameReached) return null // inbjudan (2♦–2NT) eller redan i utgång
+    return { kind: 'game' }
+  }
+
   // ---- 2/1 = utgångskrav (gäller tills utgång nåtts, även mitt i sekvensen) ----
   const isTwoOverOne =
     !!firstResp &&
@@ -1394,6 +1407,33 @@ function forcedMinimumBid(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
 function honorForce(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
   if (!auctionForce(history, seat)) return null
   return forcedMinimumBid(deal, history, seat)
+}
+
+/**
+ * Svararens svar på öppnarens 2NT-återbud efter 2♣–2♦ (öppnaren visade 22–24
+ * balanserad). `auctionForce` släpper kravet där (2NT är inbjudande, inte game),
+ * men enkel matte (ägarbeslut 2026-07-07): 22–24 mittemot 3+ hp = utgång
+ * (22+3 = 25). Svararen får aldrig passa bort utgångsvärden → 3NT med 3+ hp;
+ * 0–2 = pass (null, korrekt: 24 max är under utgång). Full systems-on (Stayman/
+ * transfer över 2NT-återbudet) är medvetet uppskjutet – här räcker "nå utgång".
+ * Matchar bara den exakta ostörda sekvensen 2♣–2♦–2NT med svararen i tur.
+ */
+function respondToStrong2NTRebid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+  if (contractBids.length !== 3) return null
+  if (contractBids.some((c) => side(c.seat) !== side(seat))) return null // ostört
+  const [o1, r1, o2] = contractBids
+  const opener = o1.seat
+  const responder = PARTNER[opener]
+  if (seat !== responder) return null
+  if (o1.bid !== '2C' || r1.seat !== responder || r1.bid !== '2D' || o2.seat !== opener || o2.bid !== '2NT') return null
+  if (history.slice(history.indexOf(o2) + 1).some((c) => c.bid !== 'P')) return null // bara pass efter 2NT
+  const p = hcp(deal.hands[seat])
+  if (p < 3) return null // 0–2: passa 2NT (under utgång, korrekt)
+  return {
+    seat, bid: '3NT', rule: '2♣–2♦–2NT: utgång',
+    explanation: `Partnern visade 22–24 balanserad; ${p} hp räcker till utgång (22+3 = 25) → 3NT.`,
+  }
 }
 
 /**
@@ -2710,6 +2750,10 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // Måste ligga FÖRE off-book-svaret (som kräver 4-korts stöd för ett 2-läges
       // inkliv och därför passar den 3-korts fiten).
       () => advancerCompetesToFit(deal, history, seat),
+      // Svararens svar på 2♣–2♦–2NT (öppnarens 22–24): 3+ hp = utgång → 3NT,
+      // passar aldrig bort utgångsvärden. Måste ligga FÖRE off-book-svaret (som
+      // annars passar en svag hand som ändå har utgång mittemot 22–24).
+      () => respondToStrong2NTRebid(deal, history, seat),
       // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
       () => offBookResponse(deal, history, seat),
       // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett

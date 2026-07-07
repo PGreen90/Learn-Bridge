@@ -21,6 +21,47 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
+> **Senast klart & LIVE (2026-07-07): 2♣-öppningen håller sitt utgångskrav.**
+> Kom ur `/felrapporter` #29 ("hur hittar vi slammen?"): en utforskningsprob
+> (300 000 givar) visade att **~64 % av alla ostörda 2♣-öppningar dog i
+> DELKONTRAKT** (82 % av stoppen hade 23+ hp = rena kravbrott) — större fynd än
+> #29. Roten: `auctionForce` (`auction-live.ts`) spårade 2/1 + rondkrav men INTE
+> 2♣-öppningens game-force (`buildAuction` bygger bara ett par bud av 2♣-linjen
+> och överlämnar resten, som passades bort). Fix (facit-först): (1) ny 2♣-gren i
+> `auctionForce` (game-krav tills utgång; undantag `2♣–2♦–2NT` = inbjudande);
+> (2) `respondToStrong2NTRebid` — efter `2♣–2♦–2NT` (22–24) bjuder svararen 3NT
+> med 3+ hp (ägarmatte: 22+3 = utgång), passar bara 0–2. Delkontrakt-andelen föll
+> **63,9 % → 1,7 %** (resten legitima). Facit `auction-2c-gameforce.test.ts` (6
+> givar). budsystem.md §9. **1077 test gröna, tsc rent.** Se 👀 Bevaka.
+> **Uppskjutet (nästa naturliga steg):** full systems-on (Stayman/transfer över
+> 2NT-återbudet) — svararen blastar 3NT nu, hittar ej 5-3-högfärgsfit den vägen;
+> knyter an till slam-letningen i #29.
+>
+> **Öppna felrapporter efter detta:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
+> 4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — ägaren tog
+> 2♣-fixen (ett symptom) först; slam-letningen efter starkt hopp-återbud väntar på
+> ägarbeslut om riktning. **#32/#33/#34** (spelfel/budgivning) ännu ej lästa.
+> **NU är åter öppet — ägaren väljer nästa sak** (järnregeln: exakt en).
+>
+> **Senast klart & LIVE (2026-07-06, mergepunkt `b1fdd6c`): två UI-fixar.**
+> (1) **Tunn kortram** — 1px svart med **20 % opacitet** (`border-black/20` på
+> `base` i `PlayingCard.tsx`) → mjuk grå separation mellan korten. Ägarbeslut som
+> ersätter det ramfria beslutet 2026-07-03; opaciteten valdes efter att ägaren såg
+> helsvart och bad om "gråare, inte lika solid". (2) **Mjukare Auto-Claim** —
+> resultat-/claimrutan poppade förr upp blixtsnabbt; nu tonar bakgrunden in
+> (`overlay-in` 200ms) och rutan tonar in + lyfts en aning (`dialog-in` 260ms),
+> nya keyframes i `index.css`, klasser på overlayn i `Play.tsx`; respekterar
+> `prefers-reduced-motion`. Rena className/CSS-ändringar, ingen budlogik rörd.
+> 1071 test gröna, tsc rent, Vercel-deploy grön.
+>
+> **KVAR av ägarens 4-punktslista (2026-07-06 — han bad förbereda alla fyra, tog
+> punkt 2+4 nu):** **Punkt 1** = fler budträningsgivar + en "Vill du träna något
+> speciellt?"-dropdown (data i `src/data/exercises/*.json` + `EXERCISES_BY_THEME`
+> i `bidding.ts`; facit bör knytas till motorns egna svar så det aldrig lär ut fel).
+> **Punkt 3** = sondera budsystemet på djupet (STORT eget spår: håller reglerna,
+> off-book-tolkning "vad kan detta bud betyda", R2:s datadrivna detektorkedja).
+> Ägaren väljer vilken som blir nästa 🔵 NU.
+>
 > **Senast klart & LIVE (2026-07-06): `/felrapporter` — #31 + #30 lagade & stängda.**
 > - **#31 (svagt hoppskift avskaffat):** Nord hoppade till 2♥ på 1♦ med ♠7 ♥KT6432
 >   ♦Q4 ♣A986 (9 hp). Ägarprincip: **när partnern öppnat håller svararen budgivningen
@@ -284,6 +325,14 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **2♣ dör inte längre i delkontrakt (2026-07-07, NYTT & LIVE):** öppnar din
+  bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång (förr dog
+  ~64 % i delkontrakt). **Bevaka:** (a) når paret rätt STRÄNG, eller landar det
+  ibland trubbigt (t.ex. 5♣ där 4♠/3NT var bättre)? Kravlogiken garanterar utgång
+  men den forcerade minimi-stegen väljer inte alltid finaste färgen. (b) Efter
+  `2♣–2♦–2NT` bjuder svararen 3NT med 3+ hp — men *bara* 3NT (ingen Stayman/
+  transfer ännu), så en 5-3-högfärgsfit missas där. (c) 0–2 hp mittemot 2NT-
+  återbudet passar (rätt). Säg till om boten driver för högt på en riktig bust.
 - **Inget svagt hoppskift längre (#31, 2026-07-06, NYTT & LIVE):** svarar du på
   partnerns öppning med en svag 6-korts högfärg bjuder boten nu **1♥/1♠** (lågt,
   rondkrav), aldrig 2♥/2♠. **Bevaka:** håller boten budgivningen lagom låg, eller
