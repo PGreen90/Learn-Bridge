@@ -42,6 +42,7 @@ import { CompassPanel } from '../components/CompassPanel'
 import { BiddingBox } from '../components/BiddingBox'
 import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
+import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
 import { HandFan } from '../components/HandFan'
 import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
@@ -321,10 +322,9 @@ function BiddingPhase({
         </div>
       </div>
 
-      {/* Kontrakt bjudet: vit bekräftelsedialog (Synreys "Declared by South"). */}
+      {/* Kontrakt bjudet: bekräftelsedialog (Synreys "Declared by South"). */}
       {finalContract && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="min-w-60 rounded-xl bg-panel p-4 text-center shadow-xl">
+        <Dialog className="min-w-60 p-4 text-center">
             <div className="flex items-center justify-center gap-2 pb-3">
               <BidChip bid={`${finalContract.level}${STRAIN_CODE[finalContract.strain]}`} />
               {finalContract.doubled && (
@@ -341,14 +341,12 @@ function BiddingPhase({
             >
               Bekräfta
             </button>
-          </div>
-        </div>
+        </Dialog>
       )}
 
-      {/* Passades given ut: vit dialog (Synrey-stil) med ny giv. */}
+      {/* Passades given ut: dialog med ny giv. */}
       {passedOut && !reporting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="rounded-xl bg-panel p-4 text-center shadow-xl">
+        <Dialog className="p-4 text-center">
             <p className="mb-3 text-sm text-ink-soft">Ingen öppnade – given passades ut.</p>
             <Button onClick={onNewGame}>Ny giv →</Button>
             <div>
@@ -360,8 +358,7 @@ function BiddingPhase({
                 Kändes något fel? Rapportera given
               </button>
             </div>
-          </div>
-        </div>
+        </Dialog>
       )}
 
       {/* Felrapporten: hela given + auktionen skickas som förifylld GitHub-issue. */}
@@ -402,14 +399,7 @@ function TableMenu({
       </button>
       {open && (
         <>
-          {/* Klick utanför stänger menyn (R3-fynd #6). */}
-          <button
-            type="button"
-            aria-hidden
-            tabIndex={-1}
-            className="fixed inset-0 z-30 cursor-default"
-            onClick={onToggle}
-          />
+          <ClickAway onClose={onToggle} />
           <div className="absolute right-0 top-11 z-40 w-64 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
             <Button className="w-full" onClick={onNewGame}>
               Ny giv →
@@ -448,11 +438,7 @@ function ScenarioPicker({
   onClose: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div
-        className="w-full max-w-md rounded-2xl bg-panel p-4 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog onClose={onClose} className="w-full max-w-md p-4">
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-base font-semibold text-ink">Vad vill du träna på?</h2>
           <button type="button" onClick={onClose} className="text-ink-faint hover:text-ink" aria-label="Stäng">
@@ -482,8 +468,7 @@ function ScenarioPicker({
             )
           })}
         </div>
-      </div>
-    </div>
+    </Dialog>
   )
 }
 
@@ -504,8 +489,7 @@ function SearchOverlay({
   onRandom: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-xs rounded-2xl bg-panel p-5 text-center shadow-xl">
+    <Dialog className="w-full max-w-xs p-5 text-center">
         {gaveUp ? (
           <>
             <p className="mb-1 text-sm font-semibold text-ink">Hittade ingen sådan giv</p>
@@ -531,8 +515,7 @@ function SearchOverlay({
             </Button>
           </>
         )}
-      </div>
-    </div>
+    </Dialog>
   )
 }
 
@@ -782,8 +765,7 @@ function PlayTable({
       <div className="relative">
         <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
         {!resultSeen && !reporting ? (
-          <div className="overlay-in fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="dialog-in rounded-xl bg-panel p-5 text-center shadow-xl">
+          <Dialog className="p-5 text-center">
               <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
                 {result.made
                   ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
@@ -814,8 +796,7 @@ function PlayTable({
               >
                 Kändes något fel? Rapportera given
               </button>
-            </div>
-          </div>
+          </Dialog>
         ) : resultSeen ? (
           <div className="mt-3 flex justify-center gap-2">
             <Button variant="secondary" onClick={() => setReporting(true)}>
@@ -873,15 +854,10 @@ function PlayTable({
         </button>
       </div>
 
-      {/* Klick utanför stänger ⋮/ⓘ (R3-fynd #6): en osynlig heltäckande yta bakom
-          panelerna fångar klicket i stället för att man måste trycka knappen igen. */}
+      {/* Klick utanför stänger ⋮/ⓘ (R3-fynd #6). */}
       {(showMenu || showInfo) && (
-        <button
-          type="button"
-          aria-hidden
-          tabIndex={-1}
-          className="fixed inset-0 z-30 cursor-default"
-          onClick={() => {
+        <ClickAway
+          onClose={() => {
             setShowMenu(false)
             setShowInfo(false)
           }}
@@ -1315,8 +1291,7 @@ function ClaimDialog({
   for (let t = won; t <= won + remaining; t++) totals.push(t)
   const diffLabel = (t: number) => (t === needed ? 'kontrakt' : t > needed ? `+${t - needed}` : `${t - needed}`)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-3">
-      <div className="w-full max-w-sm rounded-xl bg-panel p-4 text-center shadow-xl">
+    <Dialog onClose={onClose} className="w-full max-w-sm p-4 text-center">
         <p className="text-sm font-bold text-ink">Claim tricks</p>
         <p className="mt-1 text-xs leading-relaxed text-ink-soft">
           Din sida har <strong>{won}</strong> stick och <strong>{remaining}</strong> återstår.
@@ -1349,8 +1324,7 @@ function ClaimDialog({
         >
           Avbryt — spela vidare
         </button>
-      </div>
-    </div>
+    </Dialog>
   )
 }
 

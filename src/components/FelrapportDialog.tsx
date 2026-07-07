@@ -5,6 +5,7 @@ import type { Contract, Trick } from '../lib/engine/play'
 import { REPORT_CATEGORIES, felrapportUrl, submitFelrapport } from '../lib/felrapport'
 import { loadGithubToken } from '../lib/github-token'
 import { Button } from './Button'
+import { Dialog } from './Dialog'
 
 /** Standardtexten (Spela kort): hela given inklusive sticken följer med. */
 const DEFAULT_INTRO = 'Hela given (händerna, budgivningen och sticken) följer med automatiskt.'
@@ -71,25 +72,24 @@ export function FelrapportDialog({
   // Kvitto efter lyckat direktskick.
   if (status === 'sent') {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
-        <div className="w-full max-w-sm rounded-xl bg-panel p-4 text-left shadow-xl">
-          <h2 className="text-sm font-bold text-accent">✓ Tack – rapporten är skickad!</h2>
-          <p className="mt-2 text-xs leading-relaxed text-ink-muted">
-            Hela given följde med. Du behöver inte göra något mer.
-          </p>
-          <div className="mt-3 flex justify-end">
-            <Button onClick={onClose}>Stäng</Button>
-          </div>
+      <Dialog onClose={onClose} className="w-full max-w-sm p-4 text-left">
+        <h2 className="text-sm font-bold text-accent">✓ Tack – rapporten är skickad!</h2>
+        <p className="mt-2 text-xs leading-relaxed text-ink-muted">
+          Hela given följde med. Du behöver inte göra något mer.
+        </p>
+        <div className="mt-3 flex justify-end">
+          <Button onClick={onClose}>Stäng</Button>
         </div>
-      </div>
+      </Dialog>
     )
   }
 
   const sending = status === 'sending'
 
+  // Ingen onClose: en halvskriven rapport ska inte försvinna på ett klick
+  // utanför rutan — bara Avbryt-knappen stänger.
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
-      <div className="w-full max-w-sm rounded-xl bg-panel p-4 text-left shadow-xl">
+    <Dialog className="w-full max-w-sm p-4 text-left">
         <h2 className="text-sm font-bold text-ink">{title}</h2>
         <p className="mt-1 text-xs leading-relaxed text-ink-muted">{intro}</p>
 
@@ -155,7 +155,6 @@ export function FelrapportDialog({
             <Button onClick={openIssue}>Öppna rapporten →</Button>
           )}
         </div>
-      </div>
-    </div>
+    </Dialog>
   )
 }

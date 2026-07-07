@@ -11,6 +11,7 @@ import { SEAT_LABEL } from '../lib/bidding'
 import { FORCING_LABEL, ruleInfo } from '../lib/engine/rules'
 import { BidChip } from './BidChip'
 import { BidLabel } from './BidLabel'
+import { ClickAway } from './Dialog'
 import { SuitText } from './SuitText'
 
 // Kolumnordning V N Ö S (medurs), så Syd – din plats – står längst till höger.
@@ -93,13 +94,8 @@ export function AuctionGrid({
       {/* Vit förklarings-popup (Synreys "Instruction"): budet + kravnivå + ALERT + text. */}
       {chosen && (
         <>
-          {/* Genomskinlig bakgrund över hela skärmen: tryck var som helst utanför
-              bubblan för att stänga den. */}
-          <div
-            className="fixed inset-0 z-30"
-            aria-hidden
-            onClick={() => setSelected(null)}
-          />
+          {/* Tryck var som helst utanför bubblan stänger den. */}
+          <ClickAway onClose={() => setSelected(null)} />
           <div className="absolute inset-x-1 top-8 z-40 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
             {/* Stäng-kryss: förankrat i övre högra hörnet så det ALDRIG kan
                 knuffas utanför bild. iPhone-glas: frostad genomskinlig cirkel
