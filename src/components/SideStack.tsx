@@ -14,14 +14,17 @@ export function SideStack({ cards, side }: { cards: Card[]; side: 'W' | 'E' }) {
   // diagonal, det ändrar ingen rotation) – rätt för Väst, fel för Öst. Östs
   // kort får därför indexen SPEGLADE till andra diagonalen (mirrorCorners) så
   // valören hamnar i vänstra änden = mot mitten.
+  // Kortet är större på mobil (`smPlus` = 40×56 → vridet 56×40) och krymper till
+  // `sm` (28×40 → vridet 40×28) från `sm:`-brytpunkten. Wrapper-måtten och
+  // överlappet (-mt) följer med responsivt så indexremsan blir lika bred.
   return (
-    <div className="flex w-10 shrink-0 flex-col items-center">
+    <div className="flex w-14 shrink-0 flex-col items-center sm:w-10">
       {cards.map((c, i) => (
         <div
           key={`${c.suit}${c.rank}`}
-          className={`flex h-7 w-10 items-center justify-center ${i > 0 ? '-mt-4' : ''}`}
+          className={`flex h-10 w-14 items-center justify-center sm:h-7 sm:w-10 ${i > 0 ? '-mt-7 sm:-mt-4' : ''}`}
         >
-          <PlayingCard card={c} size="sm" mirrorCorners={side === 'E'} className="rotate-90" />
+          <PlayingCard card={c} size="smPlus" mirrorCorners={side === 'E'} className="rotate-90" />
         </div>
       ))}
     </div>

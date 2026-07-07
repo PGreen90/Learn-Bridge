@@ -994,7 +994,7 @@ function PlayTable({
 
       {/* Mittraden: ev. V/Ö-träkarl på sin sida + sticket i mitten. */}
       <div className="flex items-center justify-between gap-1 px-2 py-2">
-        <div className="w-10 shrink-0">
+        <div className="w-14 shrink-0 sm:w-10">
           {westOpen && <SideStack cards={sideCards(play.hands.W, contract)} side="W" />}
         </div>
         <TrickCenterLive
@@ -1003,7 +1003,7 @@ function PlayTable({
           onCardClick={onPlayedCardClick}
           hasReason={(pc) => !!reasonFor(pc)}
         />
-        <div className="w-10 shrink-0">
+        <div className="w-14 shrink-0 sm:w-10">
           {eastOpen && <SideStack cards={sideCards(play.hands.E, contract)} side="E" />}
         </div>
       </div>
@@ -1142,11 +1142,11 @@ function SuitColumns({
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
                   card={c}
-                  size="sm"
+                  size="smPlus"
                   playable={playable}
                   dimmed={myTurn && !playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
-                  className={i > 0 ? (spread ? '-mt-3' : '-mt-7') : ''}
+                  className={i > 0 ? (spread ? '-mt-7 sm:-mt-3' : '-mt-8 sm:-mt-7') : ''}
                 />
               )
             })}
@@ -1188,10 +1188,15 @@ function SouthFan({
         return (
           <div
             key={suit}
-            className={`flex transition-all ${spread ? 'gap-1 -translate-y-1.5 z-10 mx-1' : ''} ${dim ? 'opacity-50' : ''}`}
+            className={`flex transition-all ${spread ? '-translate-y-1.5 z-10 sm:gap-1 sm:mx-1' : ''} ${dim ? 'opacity-50' : ''}`}
           >
             {cards.map((c, i) => {
               const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
+              // Mobil: de större korten (48px) gör att en utfälld färg annars
+              // knuffar ytterkorten utanför kanten. Håll allt på skärmen genom att
+              // fälla ut MED måttlig överlappning och samtidigt PRESSA ihop de
+              // nedtonade färgerna. Desktop oförändrat (container-gap + full utfällning).
+              const ml = i === 0 ? '' : spread ? '-ml-4 sm:ml-0' : dim ? '-ml-10 sm:-ml-6' : '-ml-8 sm:-ml-6'
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
@@ -1200,7 +1205,7 @@ function SouthFan({
                   playable={playable}
                   dimmed={myTurn && !playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
-                  className={`deal-in ${!spread && i > 0 ? '-ml-6' : ''}`}
+                  className={`deal-in ${ml}`}
                   style={{ animationDelay: `${dealt++ * 35}ms` }}
                 />
               )
