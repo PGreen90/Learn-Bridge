@@ -135,3 +135,40 @@ describe('FACIT: 2♣–2♦–2NT – svararen med 3+ hp når utgång, passar i
     expect(isGame(contract!)).toBe(true)
   })
 })
+
+// -----------------------------------------------------------------------------
+// SYSTEMS-ON över 2♣–2♦–2NT (2026-07-07): svararen använder samma konventioner
+// som mot en naturlig 2NT-öppning (Stayman/transfer), fast med 22–24 mittemot.
+// Svararen bjöd 2♦ = 0–7 hp, så poänggränserna sänks 2 steg (utgång från 3 hp).
+// Mål: hitta 4-4- och 5-3-högfärgsfit i stället för att blint blåsa 3NT.
+function isMajorGame(c: Contract): boolean {
+  return c.level === 4 && (c.strain === 'hearts' || c.strain === 'spades')
+}
+describe('FACIT: systems-on över 2♣–2♦–2NT hittar högfärgsfit', () => {
+  // 4-4 hjärterfit: öppnaren ♥KJ72 (22), svararen ♥A543 (7) → Stayman → 4♥.
+  it('4-4 hjärterfit via Stayman → 4♥, inte 3NT', () => {
+    const deal = dealOf('S', {
+      W: 'S:J2A H:7J2K D:83A C:QKA',
+      E: 'S:T H:5A34 D:K6 C:586479',
+      N: 'S:57KQ6 H:6TQ D:5TJ C:3T',
+      S: 'S:4839 H:89 D:2Q974 C:J2',
+    })
+    const { contract } = finalContract(deal)
+    expect(contract).not.toBeNull()
+    expect(isMajorGame(contract!)).toBe(true)
+  })
+
+  // Svararen 5-4 i högfärgerna (♠QT982 ♥Q543, 4 hp) mittemot 24 balanserad med
+  // 4-4 i högfärgerna → Stayman hittar en 4+-korts högfärgsfit → 4-läges högfärg.
+  it('svararens 5-4 högfärger mittemot 24 → högfärgsutgång, inte 3NT', () => {
+    const deal = dealOf('W', {
+      W: 'S:7KAJ H:76JA D:AT C:KA6',
+      E: 'S:Q9T82 H:43Q5 D:2765 C:-',
+      N: 'S:35 H:89 D:K9J8 C:79J2Q',
+      S: 'S:64 H:2KT D:Q34 C:8534T',
+    })
+    const { contract } = finalContract(deal)
+    expect(contract).not.toBeNull()
+    expect(isMajorGame(contract!)).toBe(true)
+  })
+})

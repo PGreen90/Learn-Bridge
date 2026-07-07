@@ -30,15 +30,22 @@ const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥'
  *  - 3♠ minorfråga (5-4+ minorer, slamintresse)
  *  - 3NT till spel; 4♦/4♥ Texas (6+ högfärg, ren utgång); 4NT kvantitativ; 6NT
  */
-export function respondTo2NT(hand: Hand): ResponseResult {
+export function respondTo2NT(hand: Hand, openerMin = 20): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   const sp = len.spades
   const he = len.hearts
+  // Poänggränser härledda ur öppnarens minsta styrka (20 för 2NT-öppning; 22 för
+  // öppnarens 2NT-återbud efter 2♣–2♦). Utgång ≈ 25, slaminbjudan ≈ 31, slam ≈ 33
+  // tillsammans → tröskeln = (total) − openerMin. Med openerMin=20 blir det exakt
+  // de gamla 5/11/13 (naturlig 2NT oförändrad).
+  const game = 25 - openerMin
+  const slamInvite = 31 - openerMin
+  const slam = 33 - openerMin
 
   // ---- 5-4 i högfärgerna, utgångsvärden → Stayman (hittar 4-4 och 5-3) ----
   const fiveFourMajors = (sp === 5 && he === 4) || (he === 5 && sp === 4)
-  if (fiveFourMajors && p >= 5) {
+  if (fiveFourMajors && p >= game) {
     return { call: '3C', rule: 'Stayman (2NT)', explanation: `${p} hp, 5-4 i högfärgerna → 3♣ (Stayman; visar sedan 5-färgen om fit saknas).` }
   }
 
@@ -47,19 +54,19 @@ export function respondTo2NT(hand: Hand): ResponseResult {
   if (major) {
     const L = len[major]
     const sym = SYM[major]
-    // Texas: 6+ kort, ren utgång (5–10 hp utan slamintresse) → sätt färgen direkt.
-    if (L >= 6 && p >= 5 && p <= 10) {
+    // Texas: 6+ kort, ren utgång (utgångsstyrka utan slamintresse) → sätt direkt.
+    if (L >= 6 && p >= game && p < slamInvite) {
       const call = major === 'hearts' ? '4D' : '4H'
       return { call, rule: 'Texas (2NT)', explanation: `${p} hp med 6-korts ${sym} → ${call} (Texas, utgång utan slamiver).` }
     }
-    // Transfer på 3-läget: 3♦ → ♥, 3♥ → ♠. Svag = signoff i delkontrakt, 11+ = slam.
+    // Transfer på 3-läget: 3♦ → ♥, 3♥ → ♠. Svag = signoff i delkontrakt, slam = 11+.
     const call = major === 'hearts' ? '3D' : '3H'
-    const strength = p < 5 ? 'signoff i delkontrakt' : p >= 11 ? 'slamintresse' : 'utgång'
+    const strength = p < game ? 'signoff i delkontrakt' : p >= slamInvite ? 'slamintresse' : 'utgång'
     return { call, rule: 'transfer (2NT)', explanation: `${p} hp med ${L}-korts ${sym} → ${call} (transfer, ${strength}).` }
   }
 
   // ---- 4-korts högfärg, utgångsvärden → Stayman ----
-  if ((sp >= 4 || he >= 4) && p >= 5) {
+  if ((sp >= 4 || he >= 4) && p >= game) {
     return { call: '3C', rule: 'Stayman (2NT)', explanation: `${p} hp med 4-korts högfärg → 3♣ (Stayman).` }
   }
 
@@ -67,25 +74,27 @@ export function respondTo2NT(hand: Hand): ResponseResult {
 
   // ---- Minorfråga: 5-4+ i minorerna med slamintresse → 3♠ ----
   const minors = (len.clubs >= 5 && len.diamonds >= 4) || (len.diamonds >= 5 && len.clubs >= 4)
-  if (minors && p >= 11) {
+  if (minors && p >= slamInvite) {
     return { call: '3S', rule: 'minorfråga (2NT)', explanation: `${p} hp, 5-4+ i minorerna med slamvärden → 3♠ (frågar efter minorfit).` }
   }
 
   // ---- NT-stegen ----
-  if (p >= 13) {
+  if (p >= slam) {
     return { call: '6NT', rule: '6NT till spel', explanation: `${p} hp balanserad (≈33+ tillsammans) → 6NT.` }
   }
-  if (p >= 11) {
+  if (p >= slamInvite) {
     return { call: '4NT', rule: '4NT kvantitativ', explanation: `${p} hp balanserad → 4NT (kvantitativ, inbjuder 6NT).` }
   }
-  if (p >= 5) {
+  if (p >= game) {
     return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp utan högfärg → 3NT (till spel).` }
   }
   return { call: 'P', rule: 'pass', explanation: `${p} hp – för svagt för utgång → pass.` }
 }
 
-/** Öppnaren fullföljer svararens 2NT-svar (Stayman/transfer/Texas/minorfråga). */
-export function openerRebidAfter2NTResponse(response: ResponseResult, hand: Hand): ResponseResult | null {
+/** Öppnaren fullföljer svararens 2NT-svar (Stayman/transfer/Texas/minorfråga).
+ * `openerMax` = övre gränsen på öppnarens styrka (21 för 2NT-öppning, 24 för
+ * 2♣–2♦–2NT-återbudet) → styr acceptansen av en kvantitativ 4NT. */
+export function openerRebidAfter2NTResponse(response: ResponseResult, hand: Hand, openerMax = 21): ResponseResult | null {
   const p = hcp(hand)
   const len = lengths(hand)
 
@@ -109,7 +118,7 @@ export function openerRebidAfter2NTResponse(response: ResponseResult, hand: Hand
     case '3NT till spel':
       return { call: 'P', rule: 'rebid: pass', explanation: 'till spel → pass.' }
     case '4NT kvantitativ':
-      return p >= 21 ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `${p} hp (max) → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp (minimum) → pass.` }
+      return p >= openerMax ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `${p} hp (max) → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp (minimum) → pass.` }
     case '6NT till spel':
       return { call: 'P', rule: 'rebid: pass', explanation: 'slam satt → pass.' }
     default:
