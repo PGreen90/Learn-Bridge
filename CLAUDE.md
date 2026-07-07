@@ -21,6 +21,20 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
+> **🔵 PÅGÅENDE NU (2026-07-07): F1 — bredda slam-utforskningen.** Kom ur ägarens
+> budsystem-djupdykning (två färgkodade listor, se chatt): slam var bara inkopplat
+> i fem auktionsformer; hela GF-familjer (2♣, hoppskift/reverse, 1NT-återbud, 2/1
+> med fit) saknade slam-drivning. En probe (40 000 givar, DD-lösta) delade upp
+> missarna i **fyra familjer: A** (efter 1NT-återbud), **B** (efter stark 2♣),
+> **C** (efter öppnaren visat extra: hoppskift/hopphöjning/reverse — störst), **D**
+> (Jacoby 2NT-läcka: hängande cue). Byggs facit-först, en familj i taget.
+> **Familj A JÄMN DELMÄNGD KLAR & LIVE:** `1m–1M–1NT` + jämn svarare med ≥33 hp ihop
+> → Gerber 4♣ → 6NT (`gerberRebidInvestigation` i `nt-slam.ts`, inkopplad i
+> `buildAuction`). Facit `auction-slam-1nt-rebid.test.ts`. budsystem.md §5.7 + §9.
+> **1085 test gröna, tsc rent, deploy grön.** **KVAR i F1:** Familj A *obalanserade*
+> slamhänder (färgkontrakt, t.ex. facit-given ♠A ♥AKJT ♦KQT8 ♣J854 = 4-4-4-1) +
+> Familj B/C/D. Se 👀 Bevaka.
+>
 > **Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
 > **#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
 > på 28 hp) — `raiseWithFit` (`auction-live.ts`) räknade "inbjudande hopp" = partnerns
@@ -361,6 +375,14 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Slam efter 1NT-återbud (F1 familj A, 2026-07-07, NYTT & LIVE):** öppnar din
+  bot-partner 1 i minor/högfärg, du svarar en ny färg på 1-läget och hen rebjuder
+  **1NT** (12–14), driver paret nu **6NT** (via Gerber 4♣) i stället för 3NT när du
+  har en **jämn** hand med slamvärden (≥33 hp ihop). **Bevaka:** (a) når det slam
+  lagom ofta, eller blåser det 6NT som betar? (Gaten kräver ≥33 hp OCH tillräckligt
+  med ess — Gerber stannar i 4NT om två ess saknas.) (b) **Bara JÄMNA händer täcks
+  ännu** — en obalanserad slamhand (t.ex. 4-4-4-1) stannar fortfarande för lågt;
+  det är nästa F1-delsteg. (c) En 5-korts högfärg går NMF-vägen (oförändrat).
 - **Advancern hoppar inte förbi utgång (#33, 2026-07-07, NYTT & LIVE):** när du och
   din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
   längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦
