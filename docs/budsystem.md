@@ -56,6 +56,16 @@ mätt som **startpoäng**) öppnas en nivå högre:
 | 5–5 | **1♦** (för att kunna bjuda klöver naturligt nästa vända) |
 | Olika längd | Den **längsta** minorn |
 
+### 6-5 (6-korts lågfärg + 5-korts högfärg) — ägarregel 2026-07-07, felrapport #32
+Målet är att hinna visa **båda** färgerna utan att tvingas till en reverse man inte
+har styrka för:
+- **Minimum (12–15 hp): öppna HÖGfärgen** (den 5-korts). Med en minimihand går det
+  inte att öppna lågfärgen och sedan reverse:a in högfärgen (reverse lovar extra).
+- **16+ hp: öppna LÅGfärgen** (den 6-korts) och **reverse:a** in högfärgen sedan –
+  då visas 6-5 med extra styrka.
+- En riktigt stark 6-5 med **~8½+ spelstick** öppnar **2♣** (nära utgång på egen
+  hand), oavsett ovanstående.
+
 ### Lättöppningar i 3:e och 4:e hand (TP-steg F, ägarbeslut 2026-07-03)
 När partnern redan passat är öppningskraven lägre (svaret är begränsat och
 **Drury** §6.7 skyddar mot att paret hamnar för högt):
@@ -1163,6 +1173,16 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **Felrapport #33 + #32-budgivning.** (1) **#33 – advancern hoppar
+  inte förbi utgång:** i `raiseWithFit` (`auction-live.ts`) räknades en "inbjudande
+  hopp" som partnerns nivå + 2, så över partnerns 5♦ blåste boten **7♦** (grand slam
+  på 28 hp). Nu kapas inbjudande/enkla höjningar vid utgångsnivån (högfärg 4, lågfärg
+  5) och advancern **passar** när partnern redan nått utgång (slamvärden sköts av
+  sp≥13-grenarna). Facit `auction-advancer-cap.test.ts`. (2) **#32 – 6-5-öppning
+  (§3):** ägarregel — 6-korts lågfärg + 5-korts högfärg öppnar HÖGfärgen med 12–15,
+  LÅGfärgen med 16+ (kan reverse:a in högfärgen). `openings.ts`; facit i
+  `openings.test.ts`. (#32:s spelfel + #34:s försvar = uppskjutet spelmotor-spår.)
+  1084 test gröna, tsc rent.
 - **2026-07-07** – **Slam efter hopp-återbud i egen minor (kod, §6, felrapport #29).**
   #29: N ♣AQJT94 (19) öppnade 1♣, S svarade 1♠, N hoppade 3♣ (16–18, 6+ klöver);
   boten stannade i 3NT trots en KALL slam (6♣/6NT/7 = 13 stick DD). Nu driver paret
