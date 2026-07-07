@@ -206,6 +206,25 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
   return { call: 'P', rule: 'pass', explanation: `${p} hp – pass.` }
 }
 
+/**
+ * Har paret FÖRSTA-rondskontroll (ess eller korthet) i VARJE sidofärg (ej trumf)?
+ * Utan en cue-rond kan RKC-frågan inte upptäcka två snabba förlorare i en objuden
+ * sidofärg (felrapport #29-probe: slam bet med ♠J-high / öppen ♥). Kräver för varje
+ * sidofärg att paret håller esset ELLER att en hand är kort (singel/renons = ruff-
+ * kontroll). Konservativt (missar hellre en slam än bjuder en bet).
+ */
+function pairControlsSideSuits(openerHand: Deal['hands'][Seat], responderHand: Deal['hands'][Seat], trump: Suit): boolean {
+  const oLen = lengths(openerHand)
+  const rLen = lengths(responderHand)
+  for (const s of RANK_ORDER) {
+    if (s === trump) continue
+    const hasAce = openerHand.some((c) => c.suit === s && c.rank === 'A') || responderHand.some((c) => c.suit === s && c.rank === 'A')
+    const short = oLen[s] <= 1 || rLen[s] <= 1
+    if (!hasAce && !short) return false
+  }
+  return true
+}
+
 /** Bygger en (ev. störd) auktion för första öppningen. */
 // Minne per giv (R2-fynd #3): `buildAuction` är en ren funktion av given, och
 // samma giv byggs om vid VARJE bot-tur (`decideCall` anropar den varje gång) och
@@ -495,6 +514,34 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
         turns.push({ seat, role: st.role, call: st.call, rule: st.rule, explanation: st.explanation })
       }
       return finish(so.open)
+    }
+  }
+
+  // Slamutredning efter öppnarens HOPP-ÅTERBUD i egen minor (1m–1M–3m, 16–18 med
+  // 6+ färg, felrapport #29): har svararen en fit i minoren OCH slamvärden driver
+  // paret mot slam via cue-rond + 1430 RKC (samma verktyg som Jacoby/inverterad
+  // minor). `slamInvestigation` returnerar null utanför slamzon (≥33 stödpoäng)
+  // eller om två nyckelkort saknas → då står den vanliga auktionen (3NT/5m).
+  if (
+    (opening.call === '1C' || opening.call === '1D') &&
+    response.rule === 'ny färg (1-läget)' &&
+    rebid.rule === 'hopp i egen färg (inbjudan)' &&
+    openerSuit && parseBid(rebid.call).suit === openerSuit &&
+    lengths(deal.hands[responderSeat])[openerSuit] >= 3 &&
+    // Utan cue-rond fångar RKC inte två snabba förlorare i en objuden sidofärg
+    // (bevisat i probe: slam bet med ♠J-high resp. öppen ♥). Kräv därför FÖRSTA-
+    // rondskontroll (ess eller korthet) i varje sidofärg innan slam-blasten.
+    pairControlsSideSuits(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit)
+  ) {
+    // skipCueRound=true: ingen explicit trumf-överenskommelse före frågan → gå
+    // direkt på 4NT RKC (en cue skulle kunna bli olaglig, se slamInvestigation).
+    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit, rebid.call, undefined, true)
+    if (slam) {
+      for (const t of slam) {
+        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+      }
+      return finish(false)
     }
   }
 

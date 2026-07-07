@@ -1163,6 +1163,18 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **Slam efter hopp-återbud i egen minor (kod, §6, felrapport #29).**
+  #29: N ♣AQJT94 (19) öppnade 1♣, S svarade 1♠, N hoppade 3♣ (16–18, 6+ klöver);
+  boten stannade i 3NT trots en KALL slam (6♣/6NT/7 = 13 stick DD). Nu driver paret
+  mot slam: efter `1m–1M–3m` med svararens fit (3+ i minoren) kopplar `buildAuction`
+  in `slamInvestigation` (minoren som trumf) → 4NT 1430 RKC → placering (6♣ på #29).
+  Cue-ronden hoppas medvetet över här (`skipCueRound` – ingen explicit trumf-
+  överenskommelse före frågan, en cue kunde bli olaglig). I stället en **kontroll-
+  gate** (`pairControlsSideSuits`): paret måste ha ess eller korthet i VARJE sidofärg
+  innan slam-blasten, annars kunde RKC bjuda slam med två snabba förlorare i en
+  objuden färg (bevisat i probe). Slamzon-porten (≥33 stödpoäng) + nyckelkortsporten
+  (≥4/5) hindrar överbud på icke-slamhänder. Probe: av lästa DD-lösta går ~85 %+ hem.
+  Facit `auction-slam-jumprebid.test.ts` (#29 → 6♣). 1080 test gröna, tsc rent.
 - **2026-07-07** – **Systems-on över 2♣–2♦–2NT (kod, §4.4).** Efter öppnarens
   2NT-återbud (22–24) använder svararen nu samma konventioner som mot en naturlig
   2NT-öppning – **Stayman (3♣) och transfers (3♦/3♥) + Texas** – för att hitta

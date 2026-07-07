@@ -21,7 +21,20 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
-> **Senast klart & LIVE (2026-07-07): systems-on över 2♣–2♦–2NT.**
+> **Senast klart & LIVE (2026-07-07): slam efter hopp-återbud i minor (STÄNGER #29).**
+> `/felrapporter` #29 ("hur hittar vi slammen?"): N ♣AQJT94 öppnade 1♣, S svarade
+> 1♠, N hoppade 3♣ (16–18, 6+ klöver) → boten stannade i **3NT** trots en **KALL
+> slam** (6♣/6NT/7 = 13 stick DD). Nu driver paret slam: efter `1m–1M–3m` med
+> svararens fit (3+ i minoren) kopplar `buildAuction` in `slamInvestigation`
+> (minoren trumf, `skipCueRound`) → 4NT RKC → 6♣. Cue-ronden hoppas över (ingen
+> explicit trumf-överenskommelse före frågan), i stället en **kontroll-gate**
+> (`pairControlsSideSuits`: ess eller korthet i varje sidofärg) som hindrar
+> RKC-blast med två snabba förlorare i en objuden färg (bevisat i probe: sänkte
+> nådda slam 85→63, tog bort de grova bet-slammen). Slamzon (≥33) + nyckelkort
+> (≥4/5) hindrar överbud på icke-slamhänder. Facit `auction-slam-jumprebid.test.ts`.
+> budsystem.md §9. **1080 test gröna, tsc rent.** #29 stängd. Se 👀 Bevaka.
+>
+> **Föregående (2026-07-07): systems-on över 2♣–2♦–2NT.**
 > Efter öppnarens 2NT-återbud (22–24) använder svararen nu **Stayman (3♣) +
 > transfers (3♦/3♥) + Texas** precis som mot en naturlig 2NT-öppning, för att
 > hitta 4-4- och 5-3-högfärgsfit i stället för att blint bjuda 3NT. Svararen bjöd
@@ -44,11 +57,11 @@ Läs den här filen först varje session.
 > (2) `respondToStrong2NTRebid` (off-book-fallback) + systems-on on-book (ovan).
 > Delkontrakt-andelen föll **63,9 % → 1,7 %** (resten legitima). Mergepunkt `b20d81f`.
 >
-> **Öppna felrapporter:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
-> 4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — 2♣-fixen + systems-on
-> avklarade (ett symptom + dess uppföljning); slam-letningen efter starkt hopp-
-> återbud väntar på ägarbeslut om riktning. **#32/#33/#34** (spelfel/budgivning) ännu
-> ej lästa. **NU är åter öppet — ägaren väljer nästa sak** (järnregeln: exakt en).
+> **Öppna felrapporter:** **#28** analyserad & STÄNGD 2026-07-07 (Syds 4♠ var
+> korrekt offensivt bud, ej bugg). **#29** STÄNGD 2026-07-07 (slam efter hopp-
+> återbud byggd, ovan). **#32/#33/#34** (spelfel bricka 15 & 3, budgivning bricka 2)
+> ännu ej lästa — bra kandidater för nästa `/felrapporter`. **NU är åter öppet —
+> ägaren väljer nästa sak** (järnregeln: exakt en).
 >
 > **Öppna felrapporter efter detta:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
 > 4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — ägaren tog
@@ -338,6 +351,15 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Slam efter hopp-återbud i minor (#29, 2026-07-07, NYTT & LIVE):** öppnar din
+  bot-partner 1♣/1♦, du svarar en ny färg och hen HOPPAR till 3♣/3♦ (stark 6-färg,
+  16–18), driver paret nu mot **slam** (4NT RKC → 6-läget) när du har fit + värden,
+  i stället för att stanna i 3NT. **Bevaka:** (a) når paret slammen lagom ofta, eller
+  bjuder det slam som går bet? (Gaten kräver ess/korthet i varje sidofärg + ≥33
+  stödpoäng + ≥4 nyckelkort; probe visade ~85 %+ hemgång, men enstaka finess-slammar
+  kan bet — det är normalt.) (b) Missar det tvärtom en slam ibland (gaten är medvetet
+  konservativ — hellre missa än bet)? (c) Bara minorfit efter just hopp-återbudet
+  täcks; annan slam-utforskning efter 2♣/positiva svar är fortsatt tunn.
 - **2♣ dör inte längre i delkontrakt + systems-on (2026-07-07, NYTT & LIVE):**
   öppnar din bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång
   (förr dog ~64 % i delkontrakt). **Efter `2♣–2♦–2NT`** (öppnaren 22–24) använder

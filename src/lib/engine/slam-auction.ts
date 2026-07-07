@@ -53,6 +53,7 @@ export function slamInvestigation(
   trump: Suit,
   lastCall?: string,
   partnerShortSuit?: Suit,
+  skipCueRound = false,
 ): SlamTurn[] | null {
   const raw = bergenPoints(openerHand, trump).bergenPoints + dummyPoints(responderHand, trump).dummyPoints
   // FAS 4 punkt 18: har öppnaren visat korthet i en sidofärg (Jacoby-kortfärg)
@@ -76,10 +77,14 @@ export function slamInvestigation(
   // billigaste kontroll ovanför. Buden måste vara LAGLIGA (högre än öppnarens
   // återbud `lastCall`): har öppnaren redan rebjudit på 4-läget i en färg (t.ex.
   // Jacoby-sidofärg 4♦) måste cue-budet ligga ovanför – annars hoppas ronden över.
+  // `skipCueRound` (felrapport #29): i lägen UTAN en explicit trumf-överenskommelse
+  // före slamfrågan (öppnarens hopp-återbud i egen minor) skulle svararens cue
+  // kunna bli det HÖGSTA lagliga budet utan att öppnaren kan cue:a tillbaka → två
+  // svararbud i rad (olaglig följd). Där hoppar vi cue-ronden och går direkt på RKC.
   const lastRank = lastCall ? bidRank(lastCall) : -1
   const m4 = lastCall ? lastCall.match(/^4(C|D|H|S)$/) : null
   const cueAbove: Suit | null = m4 ? SUIT_OF_LETTER[m4[1]] : null
-  const respCue = lastRank < bidRank('4NT') ? cheapestCueBid(responderHand, trump, cueAbove) : null
+  const respCue = !skipCueRound && lastRank < bidRank('4NT') ? cheapestCueBid(responderHand, trump, cueAbove) : null
   if (respCue && bidRank(respCue.call) > lastRank) {
     turns.push({ role: 'svarare', call: respCue.call, rule: respCue.rule, explanation: respCue.explanation })
     const openCue = cheapestCueBid(openerHand, trump, SUIT_OF_LETTER[respCue.call[1]])
