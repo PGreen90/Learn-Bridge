@@ -28,12 +28,14 @@ Läs den här filen först varje session.
 > missarna i **fyra familjer: A** (efter 1NT-återbud), **B** (efter stark 2♣),
 > **C** (efter öppnaren visat extra: hoppskift/hopphöjning/reverse — störst), **D**
 > (Jacoby 2NT-läcka: hängande cue). Byggs facit-först, en familj i taget.
-> **Familj A JÄMN DELMÄNGD KLAR & LIVE:** `1m–1M–1NT` + jämn svarare med ≥33 hp ihop
-> → Gerber 4♣ → 6NT (`gerberRebidInvestigation` i `nt-slam.ts`, inkopplad i
-> `buildAuction`). Facit `auction-slam-1nt-rebid.test.ts`. budsystem.md §5.7 + §9.
-> **1085 test gröna, tsc rent, deploy grön.** **KVAR i F1:** Familj A *obalanserade*
-> slamhänder (färgkontrakt, t.ex. facit-given ♠A ♥AKJT ♦KQT8 ♣J854 = 4-4-4-1) +
-> Familj B/C/D. Se 👀 Bevaka.
+> **Familj A HELT KLAR** (jämn del LIVE, obalanserad del byggd & testad — se PCD-status):
+> efter `1m–1M–1NT` driver svararen med slamvärden (≥33 stödpoäng): **jämn** →
+> Gerber 4♣ → 6NT (`gerberRebidInvestigation`); **obalanserad med färgfit** (6+ egen
+> hf / 8+ korts fit) → trumf via `familyAFitTrump` → `slamInvestigation` (skipCueRound
+> + kontroll-gate) → 6 i färgen. Båda i `buildAuction`; `nt-slam.ts` + `slam-auction.ts`.
+> Facit `auction-slam-1nt-rebid.test.ts` (2 givar: 6NT + 6♣, DD-verifierade). budsystem.md
+> §5.7 + §9. **1086 test gröna, tsc rent.** **KVAR i F1:** Familj B (2♣), C (hoppskift/
+> hopphöjning/reverse — störst), D (Jacoby 2NT-läcka). Se 👀 Bevaka.
 >
 > **Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
 > **#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
@@ -375,14 +377,16 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **Slam efter 1NT-återbud (F1 familj A, 2026-07-07, NYTT & LIVE):** öppnar din
-  bot-partner 1 i minor/högfärg, du svarar en ny färg på 1-läget och hen rebjuder
-  **1NT** (12–14), driver paret nu **6NT** (via Gerber 4♣) i stället för 3NT när du
-  har en **jämn** hand med slamvärden (≥33 hp ihop). **Bevaka:** (a) når det slam
-  lagom ofta, eller blåser det 6NT som betar? (Gaten kräver ≥33 hp OCH tillräckligt
-  med ess — Gerber stannar i 4NT om två ess saknas.) (b) **Bara JÄMNA händer täcks
-  ännu** — en obalanserad slamhand (t.ex. 4-4-4-1) stannar fortfarande för lågt;
-  det är nästa F1-delsteg. (c) En 5-korts högfärg går NMF-vägen (oförändrat).
+- **Slam efter 1NT-återbud (F1 familj A, 2026-07-07, NYTT):** öppnar din bot-partner
+  1 i minor/högfärg, du svarar en ny färg på 1-läget och hen rebjuder **1NT** (12–14),
+  driver paret nu **slam** i stället för 3NT när du har slamvärden (≥33 stödpoäng):
+  **jämn hand → 6NT** (Gerber 4♣); **obalanserad med färgfit** (6+ egen hf / 8+ korts
+  fit) **→ 6 i färgen** (4NT RKC + kontroll-gate). **Bevaka:** (a) når det slam lagom
+  ofta, eller blåser det en slam som betar? (Gates: ≥33 stödpoäng, ≥4 nyckelkort,
+  kontroll i varje sidofärg; Gerber stannar i 4NT om två ess saknas.) (b) väljer det
+  rätt trumf/strain (6NT när jämnt, rätt färg när fit)? (c) missar det tvärtom en slam
+  (gaten är medvetet konservativ)? Full-givs färg-DDS gick inte att massvalidera
+  (känd tung gräns) — facit-givarna (6NT + 6♣) är DD-verifierade, gates speglar #29.
 - **Advancern hoppar inte förbi utgång (#33, 2026-07-07, NYTT & LIVE):** när du och
   din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
   längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦

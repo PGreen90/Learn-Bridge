@@ -41,4 +41,22 @@ describe('FACIT: slam efter 1NT-återbud (F1 familj A)', () => {
     // DD-lösningen av en full sang-giv är för tung för sviten (känd gräns), så vi
     // låser här bara att paret NÅR slammen – att den håller är bekräftat.
   })
+
+  it('1♣–1♥–1NT: OBALANSERAD svarare med klöverfit når 6♣ (RKC), inte 3NT', () => {
+    // Probe-givan (F1 familj A, obalanserad): S är 4-4-4-1 (singel spader) med 18 hp
+    // och en 9-korts klöverfit mot öppnaren. Balanserad-vägen (Gerber → 6NT) gäller
+    // inte; paret ska hitta FÄRGSLAM 6♣ via 4NT RKC. DD 13 (kall). Boten stannade
+    // förr i 3NT. E/V passiva (8 hp, ingen 5-korts färg med värden) → ostört.
+    const deal = dealOf('N', {
+      N: 'S:T98 H:Q9 D:AJ9 C:AKT96',
+      E: 'S:KQ54 H:8765 D:765 C:73',
+      S: 'S:A H:AKJT D:KQT8 C:J854',
+      W: 'S:J7632 H:432 D:432 C:Q2',
+    })
+    const calls = simulateAuction(deal)
+    const contract = contractFromCalls(calls)
+    expect(contract).not.toBeNull()
+    expect(contract!.level).toBeGreaterThanOrEqual(6) // slam, inte 3NT
+    expect(contract!.strain).toBe('clubs') // 6♣ (9-korts klöverfit)
+  })
 })

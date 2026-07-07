@@ -708,12 +708,19 @@ naturliga svaga 2-budet i NMF-lågfärgen.
 → `3NT` med utgångsvärden, annars pass. Kort sagt: 13+ når alltid utgång; 11–12
 når utgång bara när öppnaren visat maximum.
 
-**Slam efter 1NT-återbudet (jämn hand).** Har du i stället **slamvärden** mittemot
-öppnarens 12–14 (ihop **≥33 hp**) och är **jämn utan 5-korts färg**, blåser du inte
-3NT – du frågar ess med **Gerber 4♣** (§6.4: 4♣ är Gerber även över ett NT-*återbud*)
-och placerar **6NT** (eller stannar i 4NT om två ess saknas; 7NT i storslamszon efter
-kungfråga). En **5-korts högfärg** går i stället NMF-vägen ovan (jagar 5-3-fit); en
-**obalanserad** slamhand siktar på ett färgkontrakt (byggs vidare i senare steg).
+**Slam efter 1NT-återbudet.** Har du i stället **slamvärden** mittemot öppnarens
+12–14 (slamzon **≥33 stödpoäng**) driver paret slam i stället för att blåsa 3NT –
+med rätt verktyg för handtypen:
+- **Jämn hand utan 5-korts färg → NT-slam via Gerber 4♣** (§6.4: 4♣ är Gerber även
+  över ett NT-*återbud*): frågar ess, placerar **6NT** (stannar i 4NT om två ess
+  saknas; 7NT i storslamszon efter kungfråga).
+- **Obalanserad hand med en färgfit → färgslam via 4NT RKC:** har du en **6+ egen
+  högfärg** eller paret en **8+ korts fit** (5-3/4-4 högfärg, eller 8+ i en minor)
+  blir den färgen trumf och paret frågar nyckelkort (1430 RKC) → **6 i färgen**.
+  Samma kontroll-gate som hopp-återbudet (§6/#29): paret måste ha ess eller korthet
+  i varje sidofärg, annars stannar auktionen (ingen RKC-blast med två snabba
+  förlorare i en objuden färg).
+Utanför slamzonen står den vanliga vägen kvar (New Minor Forcing / sang-stegen).
 
 ### 5.8 Öppnarens rond-2 i konkurrens efter partnerns nya färg / 1NT
 Systerfallet till §5.4 (som gällde partnerns *höjning*). Du öppnar **1 i färg**, en
@@ -1180,6 +1187,17 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **Slam efter 1NT-återbud, OBALANSERAD del (kod, §5.7, F1 familj
+  A).** Fortsättning på jämn-delen nedan: en obalanserad svarare med en **färgfit**
+  mittemot 1NT-återbudet driver nu **färgslam** i stället för 3NT. `familyAFitTrump`
+  (`slam-auction.ts`) väljer trumf (6+ egen hf → den; annars 8+ korts hf-fit; annars
+  8+ korts minorfit, öppnarens minor först); `buildAuction` kör då `slamInvestigation`
+  (skipCueRound + `pairControlsSideSuits`-gate, som #29) → 4NT RKC → 6 i färgen.
+  Self-limitar (≥33 stödpoäng, ≥4 nyckelkort). Facit: probe-givan ♠A ♥AKJT ♦KQT8
+  ♣J854 (4-4-4-1, 9-korts klöverfit) → **6♣**, DD-verifierat 12 stick (`auction-slam-
+  1nt-rebid.test.ts`). Make-rate-probe: färgslammarna som DD-löstes gick hem. 1086
+  test gröna, tsc rent. **Kvar i F1:** familj B (2♣), C (hoppskift/reverse), D (Jacoby-
+  läcka).
 - **2026-07-07** – **Slam efter 1NT-återbud (kod, §5.7, F1 familj A).** En
   utforskningsprob (40 000 givar, DD-lösta) för att **bredda slam-utforskningen**
   visade att en svarare med slamvärden mittemot öppnarens 12–14 1NT-återbud bara
