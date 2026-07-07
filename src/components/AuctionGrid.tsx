@@ -92,43 +92,59 @@ export function AuctionGrid({
 
       {/* Vit förklarings-popup (Synreys "Instruction"): budet + kravnivå + ALERT + text. */}
       {chosen && (
-        <div className="absolute inset-x-1 top-8 z-20 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-            <BidChip bid={chosen.bid} />
-            <span className="text-sm font-semibold text-slate-700">
-              Förklaring · {SEAT_LABEL[chosen.seat]}
-            </span>
-            {chosenInfo?.forcing && (
-              <span
-                className={`rounded px-1.5 text-[10px] font-semibold ${FORCING_BADGE[chosenInfo.forcing]}`}
-                title="Kravnivå: vad budet kräver av partnern"
-              >
-                {FORCING_LABEL[chosenInfo.forcing]}
-              </span>
-            )}
-            {chosenInfo?.alert && (
-              <span className="rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>
-            )}
-            {/* Stort tryckvänligt kryss (minst ~40 px träffyta för tummen). */}
+        <>
+          {/* Genomskinlig bakgrund över hela skärmen: tryck var som helst utanför
+              bubblan för att stänga den. */}
+          <div
+            className="fixed inset-0 z-30"
+            aria-hidden
+            onClick={() => setSelected(null)}
+          />
+          <div className="absolute inset-x-1 top-8 z-40 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+            {/* Stäng-kryss: förankrat i övre högra hörnet så det ALDRIG kan
+                knuffas utanför bild. iPhone-glas: frostad genomskinlig cirkel
+                (backdrop-blur), ljus kant + glansdager på övre halvan. */}
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="-my-2 -mr-2 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+              className="absolute right-1.5 top-1.5 z-10 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-900/45 text-xl leading-none text-white shadow-lg ring-1 ring-white/40 backdrop-blur-md transition-colors hover:bg-slate-900/60"
               aria-label="Stäng"
             >
-              ✕
+              {/* Glansdager: ljus topp som tonar ut → blank glas-look. */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/60 to-transparent"
+              />
+              <span className="relative drop-shadow-sm">✕</span>
             </button>
-          </div>
-          <p className="pt-2 text-sm text-slate-700">
-            {chosen.explanation ? (
-              <SuitText>{chosen.explanation}</SuitText>
-            ) : (
-              <span className="text-slate-400">
-                Ingen förklaring för <BidLabel bid={chosen.bid} />.
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2 pr-12">
+              <BidChip bid={chosen.bid} />
+              <span className="text-sm font-semibold text-slate-700">
+                Förklaring · {SEAT_LABEL[chosen.seat]}
               </span>
-            )}
-          </p>
-        </div>
+              {chosenInfo?.forcing && (
+                <span
+                  className={`rounded px-1.5 text-[10px] font-semibold ${FORCING_BADGE[chosenInfo.forcing]}`}
+                  title="Kravnivå: vad budet kräver av partnern"
+                >
+                  {FORCING_LABEL[chosenInfo.forcing]}
+                </span>
+              )}
+              {chosenInfo?.alert && (
+                <span className="rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>
+              )}
+            </div>
+            <p className="pt-2 text-sm text-slate-700">
+              {chosen.explanation ? (
+                <SuitText>{chosen.explanation}</SuitText>
+              ) : (
+                <span className="text-slate-400">
+                  Ingen förklaring för <BidLabel bid={chosen.bid} />.
+                </span>
+              )}
+            </p>
+          </div>
+        </>
       )}
     </div>
   )
