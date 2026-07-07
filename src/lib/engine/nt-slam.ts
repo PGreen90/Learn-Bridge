@@ -1,18 +1,19 @@
-// Slamutredning över en naturlig sangöppning: Gerber 4♣ (§6.4).
+// Slamutredning över en naturlig sangöppning: Gerber 4♣ (§6.4) — ÄRLIGT.
 //
-// Över 1NT (15–17): kvantitativ 4NT (16–17 hp → inbjuder 6NT) finns redan i den
-// vanliga svars-/återbudskedjan. När svararen är balanserad och SLAMSÄKER (18+
-// hp mittemot 15–17 ≈ 33+) frågar hon i stället ess med Gerber 4♣ för att inte
-// hamna i slam med två ess ute.
+// ÄGARBESLUT 2026-07-07 ("ärliga slamportar"): kaptenen (svararen) beslutar på
+// SIN hand + partnerns VISADE intervall, aldrig på partnerns faktiska kort.
+// Gerber-/kungsvaren är ärliga (svararens egen hand); kaptenen HÄRLEDER
+// partnerns ess/kungar ur svaret + sin egen hand. Tvetydigheten i 4♦/5♦
+// (0 eller 4) löses med egen hand (har jag ett ess kan partnern inte ha fyra),
+// annars antas det låga (pessimistiskt → stannar hellre än chansar).
 //
-// Över 2NT (20–21): kvantitativ 4NT (11–12 hp → inbjuder 6NT) finns i
-// `respondTo2NT`. Är svararen balanserad och SLAMSÄKER (13+ hp mittemot 20–21 ≈
-// 33+) frågar hon ess med Gerber 4♣ i stället för att blint blåsa 6NT.
-//
-// Båda funktionerna växer hela sekvensen (4♣ → ess-svar → placering, ev. 5♣
-// kungfråga i storslamszon ≈37+) och returnerar null för icke-slamhänder, så
-// den vanliga auktionen då fortsätter precis som förut. Den delade
-// `buildGerberSequence` bygger själva bud-för-bud-dialogen (samma över 1NT/2NT).
+// Portarna (redan ärliga sedan tidigare):
+//  • över 1NT (15–17): egen 18+ hp → Gerber (33+ mot minimum). 16–17 = den
+//    kvantitativa 4NT-inbjudan i den vanliga svarskedjan.
+//  • över 2NT (20–21): egen 13+ hp → Gerber. 11–12 = kvantitativ 4NT.
+//  • över 1NT-ÅTERBUDET (1m–1M–1NT, 12–14; F1 familj A): egen 21+ hp → Gerber;
+//    egen 19–20 hp → NY kvantitativ 4NT-inbjudan (öppnaren accepterar 6NT med
+//    13–14, passar med 12). Förr räknade porten parets FAKTISKA hp — borttaget.
 
 import type { Hand } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
@@ -34,74 +35,105 @@ function qualifiesForGerber(responderHand: Hand): boolean {
   return true
 }
 
-/** Gerber-slamutredning över partnerns 1NT. null = ingen slamhand (vanlig auktion). */
+/** Gerber-slamutredning över partnerns 1NT (visade 15–17). null = ingen slamhand. */
 export function gerberInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
   if (!qualifiesForGerber(responderHand)) return null
   const p = hcp(responderHand)
   if (p < 18) return null // 16–17 stannar som kvantitativ 4NT (inbjudan)
-  return buildGerberSequence(openerHand, responderHand, p)
+  return buildGerberSequence(openerHand, responderHand, p, 15)
 }
 
 /**
- * Gerber-slamutredning över partnerns 2NT (20–21). null = ingen slamhand → den
- * vanliga 2NT-kedjan (respondTo2NT) fortsätter. 13+ hp ger slamzon (≈33+); under
- * det stannar 11–12 som kvantitativ 4NT (inbjudan) i respondTo2NT.
+ * Gerber-slamutredning över partnerns 2NT (visade 20–21). null = ingen slamhand →
+ * den vanliga 2NT-kedjan (respondTo2NT) fortsätter; 11–12 stannar som
+ * kvantitativ 4NT (inbjudan) där.
  */
 export function gerber2NTInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
   if (!qualifiesForGerber(responderHand)) return null
   const p = hcp(responderHand)
   if (p < 13) return null
-  return buildGerberSequence(openerHand, responderHand, p)
+  return buildGerberSequence(openerHand, responderHand, p, 20)
 }
 
 /**
- * Gerber-slamutredning över öppnarens 1NT-ÅTERBUD (1m–1M–1NT, öppnaren 12–14 bal).
- * null = ingen slamhand → den vanliga svars-kedjan (NMF / sang-stegen) fortsätter.
- *
- * Till skillnad från 1NT/2NT-öppningen är öppnaren här ett SPANN (12–14), så vi kan
- * inte gata på svararens hp ensam – vi räknar FAKTISK kombinerad hp (båda händerna
- * finns i buildAuction) mot slamzonen ≥33. Svararen måste vara jämn UTAN 5-korts
- * färg: en 5-korts högfärg jagar en 5-3-fit via New Minor Forcing (färgslam sköts
- * separat), och en obalanserad hand vill åt ett färgkontrakt, inte NT-slam.
+ * Slamutredning över öppnarens 1NT-ÅTERBUD (1m–1M–1NT, visade 12–14 bal; F1
+ * familj A, jämn svarare). Kaptenen räknar SIN hp mot det visade intervallet:
+ *  • 21+ (33 även mot minimum)  → driv: Gerber 4♣.
+ *  • 19–20 (33 bara mot maximum) → kvantitativ 4NT-inbjudan; öppnaren dömer på
+ *    SIN hand (13–14 → 6NT, 12 → pass).
+ * null = under kanske-zonen → den vanliga kedjan (NMF / sang-stegen) står kvar.
+ * Svararen måste vara jämn UTAN 5-korts färg (5-korts högfärg jagar 5-3-fit via
+ * NMF; obalanserat vill åt färgkontrakt — se familyAFitTrump).
  */
 export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
   if (!isBalanced(responderHand)) return null
   const len = lengths(responderHand)
   if (Math.max(len.clubs, len.diamonds, len.hearts, len.spades) >= 5) return null
-  const combined = hcp(openerHand) + hcp(responderHand)
-  if (combined < 33) return null
-  return buildGerberSequence(openerHand, responderHand, hcp(responderHand))
+  const p = hcp(responderHand)
+  if (p >= 21) return buildGerberSequence(openerHand, responderHand, p, 12)
+  if (p >= 19) {
+    // Kanske-zonen: kvantitativ 4NT — partnern med mer än minimum accepterar.
+    const turns: SlamTurn[] = []
+    turns.push({
+      role: 'svarare',
+      call: '4NT',
+      rule: 'kvantitativ 4NT',
+      explanation: `${p} hp jämnt mot visade 12–14 → 4NT (inbjuder 6NT; partnern går vidare med mer än minimum).`,
+    })
+    const op = hcp(openerHand)
+    if (op >= 13) {
+      turns.push({ role: 'öppnare', call: '6NT', rule: 'kvantitativ 4NT: accept', explanation: `${op} hp — mer än minimum → accepterar, 6NT.` })
+    } else {
+      turns.push({ role: 'öppnare', call: 'P', rule: 'kvantitativ 4NT: avböjer', explanation: `${op} hp — blott minimum → passar 4NT.` })
+    }
+    return turns
+  }
+  return null
 }
 
-/** Bygger 4♣ Gerber-dialogen bud för bud (ess-svar → ev. kungfråga → placering). */
-function buildGerberSequence(openerHand: Hand, responderHand: Hand, p: number): SlamTurn[] {
+/**
+ * Bygger 4♣ Gerber-dialogen bud för bud. Ess-/kungsvaren är öppnarens egna;
+ * kaptenen härleder antalet ur SVARET + sin egen hand (aldrig partnerns kort).
+ * `partnerMin` = undre gränsen i partnerns visade intervall (storslamszonen
+ * räknas alltid mot minimum — aldrig hopp om maximum).
+ */
+function buildGerberSequence(openerHand: Hand, responderHand: Hand, p: number, partnerMin: number): SlamTurn[] {
   const turns: SlamTurn[] = []
   turns.push({ role: 'svarare', call: '4C', rule: 'Gerber', explanation: `${p} hp balanserad, slamläge → 4♣ (Gerber, frågar ess).` })
 
   const aceAnswer = respondToGerber(openerHand)
   turns.push({ role: 'öppnare', call: aceAnswer.call, rule: aceAnswer.rule, explanation: aceAnswer.explanation })
 
-  // Vi har båda händerna → räkna exakt (svaret 4♦ = 0 ELLER 4 är annars tvetydigt).
-  const totalAces = countAces(openerHand) + countAces(responderHand)
-  const missing = 4 - totalAces
+  // Härled partnerns ess ur svaret + egen hand. 4♦ = 0 ELLER 4: har kaptenen
+  // själv ett ess är 4 omöjligt (bara 4 finns) → 0; med 0 egna ess antas det
+  // låga (pessimistiskt — hellre missa en extrem slam än chansa).
+  const ownAces = countAces(responderHand)
+  const partnerAces =
+    aceAnswer.call === '4H' ? 1 : aceAnswer.call === '4S' ? 2 : aceAnswer.call === '4NT' ? 3 : 0
+  const aceCertain = aceAnswer.call !== '4D' || ownAces >= 1
+  const missing = 4 - ownAces - partnerAces
+
   if (missing >= 2) {
     turns.push({ role: 'svarare', call: '4NT', rule: 'Gerber: stannar', explanation: 'två ess saknas → stannar i 4NT.' })
     return turns
   }
 
-  const combined = hcp(openerHand) + hcp(responderHand)
-  if (missing === 0 && combined >= 37) {
-    // Alla ess + storslamszon → kungfråga 5♣, placera sedan 6NT/7NT.
-    turns.push({ role: 'svarare', call: '5C', rule: 'Gerber kungfråga', explanation: `alla ess + storslamszon (~${combined} hp) → 5♣ (frågar kungar).` })
+  const floor = p + partnerMin
+  if (missing === 0 && aceCertain && floor >= 37) {
+    // Alla ess + storslamszon mot visat minimum → kungfråga 5♣, placera 6NT/7NT.
+    turns.push({ role: 'svarare', call: '5C', rule: 'Gerber kungfråga', explanation: `alla ess + storslamszon (~${floor}+) → 5♣ (frågar kungar).` })
     const kingAnswer = respondToGerberKingAsk(openerHand)
     turns.push({ role: 'öppnare', call: kingAnswer.call, rule: kingAnswer.rule, explanation: kingAnswer.explanation })
-    const totalKings = countKings(openerHand) + countKings(responderHand)
-    const grand = totalKings >= 3
+    // Härled kungarna ur svaret + egen hand (5♦ = 0 eller 4 → egen kung avgör).
+    const ownKings = countKings(responderHand)
+    const partnerKings =
+      kingAnswer.call === '5H' ? 1 : kingAnswer.call === '5S' ? 2 : kingAnswer.call === '5NT' ? 3 : 0
+    const grand = ownKings + partnerKings >= 3
     turns.push({
       role: 'svarare',
       call: grand ? '7NT' : '6NT',
       rule: 'slamavslut',
-      explanation: grand ? `${totalKings} kungar + alla ess → storslam 7NT.` : 'alla ess men för få kungar → 6NT.',
+      explanation: grand ? `${ownKings + partnerKings} kungar + alla ess → storslam 7NT.` : 'alla ess men för få kungar → 6NT.',
     })
     return turns
   }

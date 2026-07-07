@@ -4,212 +4,190 @@ import { parseHand } from '../bidding'
 import { buildAuction } from './auction'
 import { exclusionInvestigation, mssMinorFitContinuation, slamInvestigation } from './slam-auction'
 
-describe('FAS 4 punkt 18 – slamvärdering nedvärderar honnörer mot partnerns kortfärg', () => {
-  // Öppnaren visade singel hjärter (Jacoby-kortfärg); svararens KQ i hjärter är
-  // dött. Rått ligger paret i slamzon (36), men efter nedvärderingen (−4) faller
-  // det till 32 → RKC ska INTE startas (annars strandar man över utgång).
-  const opener = parseHand('S:AKQ54 H:5 D:AQ54 C:KJ4')  // 5 spader, singel ♥
-  const responder = parseHand('S:JT86 H:KQ2 D:K32 C:A32') // 4 spader, KQ ♥ (dött mot singeln)
+// =============================================================================
+// ÄRLIGA SLAMPORTAR (ägarbeslut 2026-07-07): kaptenen beslutar på SIN hand +
+// partnerns VISADE minimum (SlamContext.partnerMin) — aldrig partnerns kort.
+// Testerna här låser den ärliga mekaniken: driv (33+), inbjudan (31–32),
+// härledning ur 1430-svaret, mänsklig inferens (visad 15+ → anta högt),
+// partner-rättelsen (visad <15 → anta lågt, partnern med högt lyfter själv).
+// =============================================================================
 
-  it('utan kortfärgs-info: rått i slamzon → slam utreds', () => {
-    expect(slamInvestigation(opener, responder, 'spades', '3H')).not.toBeNull()
+describe('FAS 4 punkt 18 – kaptenen nedvärderar egna honnörer mot partnerns VISADE kortfärg', () => {
+  // Öppnaren visade singel hjärter (Jacoby-kortfärg, visat minimum 16 i testet);
+  // svararens KQ i hjärter är dött. Rått ligger kaptenen i slamzon (18+16=34),
+  // efter nedvärderingen faller det under → ingen RKC.
+  const opener = parseHand('S:AKQ54 H:5 D:AQ54 C:KJ4')
+  const responder = parseHand('S:QJ86 H:KQ2 D:KQ2 C:AJ2') // 18 hp jämnt
+
+  it('utan kortfärgs-info: egen hand + visat minimum i slamzon → slam utreds', () => {
+    expect(slamInvestigation(opener, responder, 'spades', '3H', { partnerMin: 16 })).not.toBeNull()
   })
-  it('med öppnarens korta hjärter: nedvärderas under zonen → ingen slam (null)', () => {
-    expect(slamInvestigation(opener, responder, 'spades', '3H', 'hearts')).toBeNull()
+  it('med öppnarens visade korta hjärter: nedvärderas under zonen → ingen slam (null)', () => {
+    expect(slamInvestigation(opener, responder, 'spades', '3H', { partnerMin: 16 }, 'hearts')).toBeNull()
   })
 })
 
-describe('slamInvestigation – RKC efter högfärgsfit', () => {
-  it('lillslam: cue-rond före RKC, 4 nyckelkort → 6 i trumf', () => {
-    const opener = parseHand('S:AKQ85 H:A43 D:KJ7 C:82') // 3 nyckelkort, hjärteress
-    const responder = parseHand('S:J762 H:KQ5 D:AQ64 C:K3') // 1 nyckelkort, ruteress
-    const turns = slamInvestigation(opener, responder, 'spades')!
-    // svararen cue:ar 4♦ (ruteress), öppnaren cue:ar 4♥ (hjärteress), sedan 4NT RKC
-    expect(turns.map((t) => t.call)).toEqual(['4D', '4H', '4NT', '5D', '6S'])
-    expect(turns[0].rule).toBe('cue-bid')
-    expect(turns[1].rule).toBe('cue-bid')
-    expect(turns[2].rule).toBe('1430 RKC')
+describe('slamInvestigation – ärlig RKC (driv-zonen: egen hand + visat minimum ≥ 33)', () => {
+  it('visad 16+: tvetydigt svar (0 eller 3) antas HÖGT (mänsklig inferens) → 6 i trumf', () => {
+    const opener = parseHand('S:AKQ85 H:A43 D:KJ7 C:82') // 3 nyckelkort → svarar 5♦ (0/3)
+    const responder = parseHand('S:J762 H:AQ5 D:AQ64 C:K3') // 17 hp, 2 egna nyckelkort
+    const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })!
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '6S'])
+    expect(turns[0].rule).toBe('1430 RKC')
+    expect(turns[2].rule).toBe('slamavslut')
   })
 
-  it('ingen kontroll att visa → ingen cue-rond, rakt på 4NT', () => {
-    const opener = parseHand('S:AKQ85 H:A43 D:A52 C:A2') // 5 nyckelkort
-    const responder = parseHand('S:J7642 H:KQ5 D:KQ C:KQ4') // inget ess/renons → ingen cue
-    const turns = slamInvestigation(opener, responder, 'spades')!
-    expect(turns[0].call).toBe('4NT')
+  it('visad <15: tvetydigt svar antas LÅGT → kaptenen stannar 5-trumf; partnern med det HÖGA antalet RÄTTAR till 6', () => {
+    const opener = parseHand('S:AKQ85 H:A43 D:KJ7 C:82') // 3 nyckelkort (det HÖGA av 0/3)
+    const responder = parseHand('S:A762 H:AKQ D:KQJ C:K32') // 22 hp, 2 egna nyckelkort
+    const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 12 })!
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5S', '6S'])
+    expect(turns[2].rule).toBe('RKC: stopp')
+    expect(turns[3].rule).toBe('RKC: rättelse') // öppnaren vet: jag visade 0 ELLER 3, jag har 3
   })
 
-  it('storslamszon, alla 5 nyckelkort + trumfdam → 5NT kungfråga; ingen sidokung → stannar i 6', () => {
-    const opener = parseHand('S:AKQ85 H:A43 D:A52 C:A2') // 5 nyckelkort, inga sidokungar
-    const responder = parseHand('S:J7642 H:KQ5 D:KQ C:KQ4')
-    const turns = slamInvestigation(opener, responder, 'spades')!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5S', '5NT', '6S'])
-    expect(turns[2].rule).toBe('Sjöberg 5NT') // kaptenen frågar kungar
+  it('entydigt svar (5♠ = 2 med dam; egen hand utesluter 5) → direkt 6 i trumf', () => {
+    const opener = parseHand('S:AKQ85 H:K43 D:QJ7 C:Q2') // 2 nyckelkort + trumfdam → 5♠
+    const responder = parseHand('S:J762 H:AQ5 D:AK4 C:K53') // 17 hp, 2 egna nyckelkort
+    const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })!
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5S', '6S'])
   })
 
-  it('storslamszon, kungfråga visar en sidokung → kaptenen lyfter till storslam (7)', () => {
-    const opener = parseHand('S:AKQ85 H:AK3 D:A52 C:A2') // 5 nyckelkort + hjärterkung
-    const responder = parseHand('S:J7642 H:Q5 D:KQ C:KQ43')
-    const turns = slamInvestigation(opener, responder, 'spades')!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5S', '5NT', '6H', '7S'])
-    expect(turns[4].rule).toBe('slamavslut')
+  it('storslam kräver VISSHET: entydigt alla fem + dam + storslamszon mot visat minimum → 5NT-kungfråga → 7', () => {
+    const opener = parseHand('S:KJ985 H:K43 D:52 C:K62') // 1 nyckelkort (♠K), två sidokungar
+    const responder = parseHand('S:AQ76 H:A5 D:AKQ3 C:A53') // 23 hp, 4 egna nyckelkort + ♠Q
+    const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })!
+    // eget 4 + svar 5♣ (1 eller 4; 4 omöjligt) = entydigt 5 → kungfråga; 2 sidokungar → 7♠ direkt av öppnaren
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5C', '5NT', '7S'])
+    expect(turns[2].rule).toBe('Sjöberg 5NT')
   })
 
-  it('under slamzon → null (ingen slamutredning, vanlig auktion fortsätter)', () => {
+  it('under kanske-zonen → null (ingen slamutredning, vanlig auktion fortsätter)', () => {
     const opener = parseHand('S:AKQ85 H:A43 D:A52 C:A2')
     const responder = parseHand('S:J7642 H:Q86 D:Q3 C:Q42') // svag
-    expect(slamInvestigation(opener, responder, 'spades')).toBeNull()
+    expect(slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })).toBeNull()
   })
 })
 
-describe('buildAuction – slam växer fram via Jacoby 2NT', () => {
-  it('1S–2NT–3S–4NT–5D–6S i en hel auktion', () => {
+describe('slamInvestigation – kanske-zonen (31–32): inbjudan, partnern dömer på SIN hand', () => {
+  const responder = parseHand('S:J762 H:KQ5 D:AQ6 C:K84') // 16 hp jämnt → 16+16 = 32
+
+  it('partnern över blott minimum → accepterar 6', () => {
+    const opener = parseHand('S:AKQ85 H:A43 D:K72 C:92') // 17 – mer än visat minimum 16
+    const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16, inviteCall: '5S' })!
+    expect(turns.map((t) => t.call)).toEqual(['5S', '6S'])
+    expect(turns[0].rule).toBe('slaminbjudan')
+    expect(turns[1].rule).toBe('slaminbjudan: accept')
+  })
+
+  it('ingen inbjudningsväg i läget (inviteCall saknas) → null', () => {
+    const opener = parseHand('S:AKQ85 H:A43 D:K72 C:92')
+    expect(slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })).toBeNull()
+  })
+})
+
+describe('buildAuction – slam växer fram via Jacoby 2NT (ärligt: 3♠ visade 16+)', () => {
+  it('1S–2NT–3S–4NT–5D–6S i en hel auktion (ingen cue-rond längre)', () => {
     const deal: Deal = {
       id: 'slam-jacoby',
       dealer: 'N',
       vulnerability: 'none',
       board: 1,
       hands: {
-        N: parseHand('S:AKQ85 H:A432 D:K2 C:32'), // obalanserad 5-4-2-2 → 1S
+        N: parseHand('S:AKQ85 H:A432 D:K2 C:32'), // 16 hp → 1S, Jacoby-svar → 3S (slamintresse, 16+)
         E: parseHand('S:T943 H:876 D:T43 C:765'), // svag → inget inkliv
-        S: parseHand('S:J762 H:KQ5 D:AQ6 C:K84'),
-        W: parseHand('S:- H:JT9 D:J9875 C:AQJT9'),
+        S: parseHand('S:J762 H:KQ5 D:AQ6 C:KQ4'), // 17 hp + visade 16 = 33 → driv
+        W: parseHand('S:- H:JT9 D:J9875 C:AJT98'),
       },
     }
     const a = buildAuction(deal)!
-    expect(a.turns.map((t) => t.call)).toEqual(['1S', '2NT', '3S', '4D', '4H', '4NT', '5D', '6S'])
+    expect(a.turns.map((t) => t.call)).toEqual(['1S', '2NT', '3S', '4NT', '5D', '6S'])
     expect(a.open).toBe(false)
   })
 })
 
-describe('slamInvestigation – cue-budet måste vara lagligt (regression)', () => {
-  // Bugg funnen i appen: efter 1♥–2NT–4♦ (Jacoby-sidofärg) gav cue-ronden ett
-  // olagligt 4♣ (lägre än 4♦). Cue-budet ska antingen ligga lagligt ovanför
-  // öppnarens återbud OCH få ett cue-svar av öppnaren (komplett par), eller hoppas
-  // över. Familj D-fixen: svararens cue får aldrig bli HÄNGANDE (två svararbud i
-  // rad) – kan öppnaren inte cue:a tillbaka hoppas hela ronden över → rakt på 4NT.
-  it('öppnaren rebjöd 4♦, svararens enda cue (4♠) saknar cue-svar → rakt på 4NT (inget hängande 4♠, inget 4♣)', () => {
-    const opener = parseHand('S:K4 H:AKQ85 D:AQ764 C:2') // ♠K4 – ingen kontroll ovanför ♠ att cue:a tillbaka
-    const responder = parseHand('S:A53 H:JT72 D:K5 C:AQ86') // ♠-kontroll (4♠) men öppnaren kan ej svara
-    const turns = slamInvestigation(opener, responder, 'hearts', '4D')!
-    expect(turns[0].call).toBe('4NT') // cue-ronden hoppas över → RKC direkt
-    expect(turns.some((t) => t.call === '4C')).toBe(false) // aldrig olagligt 4♣
-    expect(turns.some((t) => t.call === '4S')).toBe(false) // aldrig hängande 4♠
-  })
-
-  it('öppnaren rebjöd 4♦, ingen laglig cue → rakt på 4NT', () => {
-    const opener = parseHand('S:KQ H:AKQ85 D:AQ764 C:2')
-    const responder = parseHand('S:Q53 H:JT72 D:K5 C:AQ86') // bara ♣-kontroll → ryms ej lagligt
-    const turns = slamInvestigation(opener, responder, 'hearts', '4D')!
-    expect(turns[0].call).toBe('4NT')
-    expect(turns.some((t) => t.call === '4C')).toBe(false)
-  })
-})
-
-describe('slamInvestigation – RKC efter minorfit (Steg 3)', () => {
-  it('klöverfit i slamzon, 4 nyckelkort → 4NT, svar, 6♣', () => {
-    const opener = parseHand('S:K3 H:AQ D:A43 C:KJT742') // 3 nyckelkort, 6-korts klöver
-    const responder = parseHand('S:Q97 H:KJ D:KQ65 C:AQ85') // 1 nyckelkort (klöveress)
-    const turns = slamInvestigation(opener, responder, 'clubs')!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '6C'])
-  })
-})
-
-describe('buildAuction – minorfit-slam via inverterad minor (Steg 3)', () => {
-  it('1C–2C–3C–4NT–5D–6C i en hel auktion', () => {
-    const deal: Deal = {
-      id: 'slam-minor',
-      dealer: 'N',
-      vulnerability: 'none',
-      board: 1,
-      hands: {
-        N: parseHand('S:K3 H:AQ D:A43 C:KJT742'), // 17 hp, 6 klöver → 1C
-        E: parseHand('S:JT8 H:9876 D:987 C:963'), // svag → inget inkliv
-        S: parseHand('S:Q97 H:KJ D:KQ65 C:AQ85'), // 17 hp, 4 klöver, ingen högfärg → inverterad minor
-        W: parseHand('S:A6542 H:T5432 D:JT2 C:-'),
-      },
-    }
-    const a = buildAuction(deal)!
-    expect(a.turns.map((t) => t.call)).toEqual(['1C', '2C', '3C', '4NT', '5D', '6C'])
-    expect(a.open).toBe(false)
-  })
-})
-
-describe('exclusionInvestigation – voidwood efter splinter (Steg 5)', () => {
-  it('renons under trumf, alla nyckelkort utom renons-esset → storslam', () => {
-    const opener = parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6') // spaderfit, 1 sidoess (♠A)
-    const responder = parseHand('S:KJ43 H:A752 D:AQ876 C:-') // klöverrenons, ♥A+♦A+♠K
-    const turns = exclusionInvestigation(opener, responder, 'spades')!
-    // svararen frågar 5♣ (Exclusion, klöveress borträknat), öppnaren svarar, 7♠
+describe('exclusionInvestigation – ärlig voidwood efter splinter (visat minimum 15)', () => {
+  it('renons under trumf, entydigt inga saknade nyckelkort → storslam', () => {
+    const opener = parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6')
+    const responder = parseHand('S:KJ43 H:A752 D:AQ876 C:-') // klöverrenons; egen hand + visade 15 = slamzon
+    const turns = exclusionInvestigation(opener, responder, 'spades', 15)!
     expect(turns.map((t) => t.call)).toEqual(['5C', '5D', '7S'])
     expect(turns[0].rule).toBe('Exclusion')
   })
 
-  it('renons som rankar ÖVER trumf (spader över hjärter) → 5♠, alla nyckelkort → storslam', () => {
-    const opener = parseHand('S:- H:AKQ52 D:KQ4 C:AQ52') // hjärterfit, ♥A+♣A + trumfkung = 3
-    const responder = parseHand('S:- H:JT983 D:A765 C:K43') // spaderrenons, ♦A → totalt 4 nyckelkort
-    const turns = exclusionInvestigation(opener, responder, 'hearts')!
-    expect(turns.map((t) => t.call)).toEqual(['5S', '6C', '7H']) // 5♠ Exclusion, 6♣ svar, 7♥ storslam
+  it('renons som rankar ÖVER trumf (spader över hjärter) → 5♠, entydigt komplett → storslam', () => {
+    const opener = parseHand('S:- H:AQ752 D:KQ43 C:A542') // ♥A+♣A → steg 4 (2 m. dam) = 6♥
+    const responder = parseHand('S:- H:KJT98 D:A765 C:KQJ3') // ♦A+♥K = 2 egna → 4 av 4
+    const turns = exclusionInvestigation(opener, responder, 'hearts', 15)!
+    expect(turns.map((t) => t.call)).toEqual(['5S', '6H', '7H'])
     expect(turns[0].rule).toBe('Exclusion')
   })
 
-  it('renons över trumf, öppnarens steg 4 = 6 i trumf → svararen passar (lillslam)', () => {
-    const opener = parseHand('S:32 H:AQJ42 D:KQJ C:AK6') // ♥A+♣A + trumfdam, ingen trumfkung → 2 nyckelkort + dam
-    const responder = parseHand('S:- H:T9843 D:AK76 C:KQ42') // spaderrenons, ♦A → 1 nyckelkort (totalt 3, ett saknas)
-    const turns = exclusionInvestigation(opener, responder, 'hearts')!
-    // öppnarens steg 4 (2 nyckelkort + dam) = 6♥; svararen kan inte bjuda om 6♥ → passar
+  it('svaret satte redan nivån (steg 4 = 6 i trumf, ett nyckelkort saknas) → kaptenen passar', () => {
+    const opener = parseHand('S:32 H:AQJ42 D:QJ9 C:A65') // 2 nyckelkort + trumfdam → steg 4 = 6♥
+    const responder = parseHand('S:- H:T9843 D:AK76 C:KQJ2') // 1 eget → totalt 3, ett saknas → mål 6♥ = redan bjudet
+    const turns = exclusionInvestigation(opener, responder, 'hearts', 15)!
     expect(turns.map((t) => t.call)).toEqual(['5S', '6H', 'P'])
     expect(turns[2].rule).toBe('slamavslut')
   })
 
-  it('ingen sidorenons → null', () => {
-    const opener = parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6')
-    const responder = parseHand('S:KJ43 H:A75 D:AQ87 C:62') // singel ingenstans, ingen renons
-    expect(exclusionInvestigation(opener, responder, 'spades')).toBeNull()
+  it('två+ nyckelkort saknas (entydigt ur svaret) → stannar ärligt i 5-trumf efter frågan', () => {
+    const opener = parseHand('S:QJ43 H:KJ6 D:K84 C:KQ87') // 0 nyckelkort → steg 2 (0/3)
+    const responder = parseHand('S:AT762 H:AQ2 D:QJ43 C:-') // 2 egna; 0/3 + egna 2 → 3 omöjligt (pool 4) → entydigt 0
+    const turns = exclusionInvestigation(opener, responder, 'spades', 15)!
+    expect(turns.map((t) => t.call)).toEqual(['5C', '5H', '5S'])
+    expect(turns[2].rule).toBe('Exclusion: stopp')
   })
 
-  it('två+ nyckelkort saknas → null (ej slamsäkert)', () => {
-    const opener = parseHand('S:QJ43 H:KQ6 D:KQ4 C:KQ8') // 0 ess, ingen trumfkung
-    const responder = parseHand('S:QJ762 H:KQ52 D:KQ43 C:-') // klöverrenons, 0 ess, ingen trumfkung
-    expect(exclusionInvestigation(opener, responder, 'spades')).toBeNull()
+  it('ingen sidorenons → null', () => {
+    const opener = parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6')
+    const responder = parseHand('S:KJ43 H:A75 D:AQ87 C:62')
+    expect(exclusionInvestigation(opener, responder, 'spades', 15)).toBeNull()
+  })
+
+  it('egen hand + visat minimum under slamzon → null (frågar aldrig)', () => {
+    const opener = parseHand('S:AQ752 H:KQ4 D:KJ3 C:K6')
+    const responder = parseHand('S:KJ43 H:9752 D:98762 C:-') // renons men bara ~5 hp
+    expect(exclusionInvestigation(opener, responder, 'spades', 15)).toBeNull()
   })
 })
 
-describe('mssMinorFitContinuation – MSS-slam (FAS 8, NT om säkert annars minor)', () => {
-  it('NT-säker slamzon → 4NT RKC, svar, 6NT (inte 6-minor)', () => {
-    const opener = parseHand('S:AJ3 H:AQ3 D:K32 C:K654') // 17, balanserad, 4 klöver, 3 nyckelkort
-    const responder = parseHand('S:K2 H:K2 D:AQJ54 C:AQ32') // 19, 5-4 minorer, 2 nyckelkort
+describe('mssMinorFitContinuation – MSS-slam (ärligt: egen hand mot visade 15–17)', () => {
+  it('NT-säker slamzon → 4NT RKC, svar antas högt (visad 15+) → 6NT', () => {
+    const opener = parseHand('S:AJ3 H:AQ3 D:K32 C:K654') // 17, 3 nyckelkort → 5♦ (0/3)
+    const responder = parseHand('S:K2 H:K2 D:AQJ54 C:AQ32') // 19 hp + visade 15 = 34
     const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
     expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '6NT'])
     expect(turns[2].rule).toBe('slamavslut')
   })
 
-  it('NT-säker storslamszon, alla nyckelkort + dam → 5NT kungfråga, kung visad → 7NT', () => {
-    const opener = parseHand('S:AJ3 H:A32 D:K32 C:K654') // 15, 3 nyckelkort, rutervkung
-    const responder = parseHand('S:KQ5 H:KQ D:AQ42 C:AQJ8') // 22, 4-4 minorer, 2 nyckelkort + klöverdam
+  it('storslam kräver visshet: entydigt alla fem + dam + storslamszon → 5NT-kungfråga → 7NT', () => {
+    const opener = parseHand('S:QJ4 H:AQ2 D:KJ3 C:K965') // 16, 2 nyckelkort utan trumfdam → 5♥ (entydigt)
+    const responder = parseHand('S:AK8 H:KJ D:AQ42 C:AQJ8') // 24 hp, 3 egna nyckelkort + ♣Q
     const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '6D', '7NT'])
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5H', '5NT', '6D', '7NT'])
     expect(turns[2].rule).toBe('Sjöberg 5NT')
   })
 
-  it('NT-säkert men under slamzon → 3NT (ingen fråga)', () => {
-    const opener = parseHand('S:Q32 H:AKQ D:K32 C:J542') // 15, alla hf täckta
-    const responder = parseHand('S:AK2 H:J2 D:AQ842 C:Q83') // 5-4, för lite ihop för slam
+  it('NT-säkert men egen hand + visade 15 under slamzon → 3NT (ingen fråga)', () => {
+    const opener = parseHand('S:Q32 H:AKQ D:K32 C:J542')
+    const responder = parseHand('S:AK2 H:Q2 D:AQ842 C:Q83') // 17 + 15 = 32 → ej slamzon
     const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
     expect(turns.map((t) => t.call)).toEqual(['3NT'])
   })
 
-  it('gapande högfärg (ingen A/K/Q i hjärter) → minor-spåret (klöverkontrakt, inte NT)', () => {
-    const opener = parseHand('S:AKQ H:432 D:K3 C:AJ642') // hjärterhål, 5 klöver
-    const responder = parseHand('S:J2 H:65 D:AKQ54 C:KQ83') // hjärterhål också, slamvärden
+  it('högfärgslucka på EGEN hand (xx i hjärter) → minor-spåret (klövermål, aldrig NT)', () => {
+    const opener = parseHand('S:AKQ H:432 D:K3 C:AJ642')
+    const responder = parseHand('S:J2 H:65 D:AKQ54 C:KQ83') // ♥65 utan topphonnör → NT osäkert
     const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
     const last = turns[turns.length - 1].call
-    expect(last.endsWith('C')).toBe(true) // klövermål (6♣ eller 5♣), aldrig NT
+    expect(last.endsWith('C')).toBe(true) // klövermål (6♣/5♣/4♣-inbjudan), aldrig NT
     expect(turns.some((t) => t.call.includes('NT') && t.call !== '4NT')).toBe(false)
   })
 
-  it('gapande högfärg + för svagt → minorutgång 5♣ (inte 3NT)', () => {
-    const opener = parseHand('S:AKQ H:432 D:K32 C:J542') // hjärterhål, 4 klöver, 12
-    const responder = parseHand('S:J2 H:65 D:KQ654 C:KQ83') // hjärterhål, ~11, för svagt
+  it('högfärgslucka + för svagt → minorutgång 5♣ (inte 3NT)', () => {
+    const opener = parseHand('S:AKQ H:432 D:K32 C:J542')
+    const responder = parseHand('S:J2 H:65 D:KQ654 C:KQ83')
     const turns = mssMinorFitContinuation(opener, responder, 'clubs', '3C')
     expect(turns.map((t) => t.call)).toEqual(['5C'])
     expect(turns[0].rule).toBe('MSS: minorutgång')

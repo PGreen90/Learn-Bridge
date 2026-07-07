@@ -42,11 +42,11 @@ describe('FACIT: slam efter 1NT-återbud (F1 familj A)', () => {
     // låser här bara att paret NÅR slammen – att den håller är bekräftat.
   })
 
-  it('1♣–1♥–1NT: OBALANSERAD svarare med klöverfit når 6♣ (RKC), inte 3NT', () => {
-    // Probe-givan (F1 familj A, obalanserad): S är 4-4-4-1 (singel spader) med 18 hp
-    // och en 9-korts klöverfit mot öppnaren. Balanserad-vägen (Gerber → 6NT) gäller
-    // inte; paret ska hitta FÄRGSLAM 6♣ via 4NT RKC. DD 13 (kall). Boten stannade
-    // förr i 3NT. E/V passiva (8 hp, ingen 5-korts färg med värden) → ostört.
+  it('1♣–1♥–1NT: 4-korts klöverfit går inte att VETA → ÄRLIG MISS, paret stannar i utgång', () => {
+    // Ärliga slamportar (ägarbeslut 2026-07-07): S har bara 4 klöver — öppningen
+    // 1♣ lovar 3+, så en 8-korts fit är INTE säker på egen hand. Förr hittade
+    // motorn 9-korts fiten (6♣, DD 13) genom att läsa N:s hand — det var kik.
+    // Nu följer paret systemet och stannar i utgång. Medveten, dokumenterad miss.
     const deal = dealOf('N', {
       N: 'S:T98 H:Q9 D:AJ9 C:AKT96',
       E: 'S:KQ54 H:8765 D:765 C:73',
@@ -56,7 +56,23 @@ describe('FACIT: slam efter 1NT-återbud (F1 familj A)', () => {
     const calls = simulateAuction(deal)
     const contract = contractFromCalls(calls)
     expect(contract).not.toBeNull()
-    expect(contract!.level).toBeGreaterThanOrEqual(6) // slam, inte 3NT
-    expect(contract!.strain).toBe('clubs') // 6♣ (9-korts klöverfit)
+    expect(contract!.level).toBeLessThan(6) // utgång, ingen slamblast på kik
+  })
+
+  it('1♣–1♠–1NT: OBALANSERAD svarare med EGEN 6-korts spader + slamvärden → 6♠ (RKC)', () => {
+    // Ärlig färgslam-väg: S:s egen 6-korts spader är en säker trumf på egen hand
+    // (ingen kik behövs). 21 hp + form mot visade 12–14 → driv: 4NT RKC; N:s svar
+    // 5♥ (2 utan trumfdam) är entydigt (S har 2 själv, 5 omöjligt) → 4 av 5 → 6♠.
+    const deal = dealOf('N', {
+      N: 'S:32 H:A54 D:A65 C:KJT94', // 12 hp balanserad → 1♣, 1NT-återbud
+      E: 'S:8654 H:8763 D:872 C:76',
+      S: 'S:AKQJ97 H:KQ D:KQJ C:32', // 21 hp, 6 spader → driv färgslam
+      W: 'S:T H:JT92 D:T943 C:AQ85',
+    })
+    const calls = simulateAuction(deal)
+    const contract = contractFromCalls(calls)
+    expect(contract).not.toBeNull()
+    expect(contract!.level).toBeGreaterThanOrEqual(6) // slam
+    expect(contract!.strain).toBe('spades')
   })
 })

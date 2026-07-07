@@ -612,14 +612,21 @@ Svararen har visat 4+ kort och 6+ hp (krav 1 rond). Öppnaren letar främst
 Öppnaren kan även **splintra** (hopp i ny färg, t.ex. 1♣–1♥–3♠/4♦) för att visa
 4 stöd + kortfärg + extra styrka, på samma sätt som svararen gör i §4.1.
 
-**Slam efter öppnarens hopphöjning (F1 familj C).** Öppnaren hopphöjde din
-högfärg (**1x–1M–3M**, 16–18 med 4-korts stöd) → trumfen är redan bestämd. Har du
-**slamvärden** (paret i slamzon, **≥33 stödpoäng**) stannar du inte i 4M utan
-driver slam: du blir kapten och frågar nyckelkort (**1430 RKC**) via en cue-rond,
-och placerar **6 i högfärgen** (7 i storslamszon). Samma portar som de andra
-slam-vägarna skyddar mot överbud: minst **4 av 5 nyckelkort** och **kontroll**
-(ess eller korthet) i varje sidofärg, annars står den vanliga vägen kvar
-(acceptera 4M med utgångsvärden, annars pass i delkontrakt).
+**Slam efter öppnarens hopphöjning (F1 familj C — ärliga portar).** Öppnaren
+hopphöjde din högfärg (**1x–1M–3M**, visar **16–18** med 4-korts stöd) → trumfen
+är redan bestämd. Du (kaptenen) räknar **din egen hand mot det visade
+minimumet 16** — aldrig partnerns faktiska kort:
+- **17+ stödpoäng** (17+16 ≥ 33) → **driv**: fråga nyckelkort (**1430 RKC**) och
+  placera **6 i högfärgen** (7 bara med *visshet*: entydigt alla fem nyckelkort +
+  trumfdam + storslamszon även mot minimum).
+- **15–16 stödpoäng** (slam bara om partnern har extra) → **inbjudan 5M**:
+  öppnaren accepterar 6M med mer än blott minimum (17–18), passar annars.
+- Under det → vanlig väg (acceptera 4M med utgångsvärden, annars pass).
+Visar nyckelkortssvaret att **två nyckelkort saknas** stannar kaptenen i **5M**.
+Svarets inbyggda tvetydighet (0 eller 3 / 1 eller 4) löses med egen hand; går det
+inte antas det höga mot en visad 15+-hand (en stark hand är i praktiken aldrig
+nyckelkortslös), annars det låga — då **rättar partnern med det höga antalet
+själv upp till 6** (klassisk mekanik: "med 3, bjud vidare över stoppbudet").
 
 ### 5.3 I en 2/1 GF-budgivning
 Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gäller:
@@ -717,19 +724,22 @@ naturliga svaga 2-budet i NMF-lågfärgen.
 → `3NT` med utgångsvärden, annars pass. Kort sagt: 13+ når alltid utgång; 11–12
 når utgång bara när öppnaren visat maximum.
 
-**Slam efter 1NT-återbudet.** Har du i stället **slamvärden** mittemot öppnarens
-12–14 (slamzon **≥33 stödpoäng**) driver paret slam i stället för att blåsa 3NT –
-med rätt verktyg för handtypen:
-- **Jämn hand utan 5-korts färg → NT-slam via Gerber 4♣** (§6.4: 4♣ är Gerber även
-  över ett NT-*återbud*): frågar ess, placerar **6NT** (stannar i 4NT om två ess
-  saknas; 7NT i storslamszon efter kungfråga).
-- **Obalanserad hand med en färgfit → färgslam via 4NT RKC:** har du en **6+ egen
-  högfärg** eller paret en **8+ korts fit** (5-3/4-4 högfärg, eller 8+ i en minor)
-  blir den färgen trumf och paret frågar nyckelkort (1430 RKC) → **6 i färgen**.
-  Samma kontroll-gate som hopp-återbudet (§6/#29): paret måste ha ess eller korthet
-  i varje sidofärg, annars stannar auktionen (ingen RKC-blast med två snabba
-  förlorare i en objuden färg).
-Utanför slamzonen står den vanliga vägen kvar (New Minor Forcing / sang-stegen).
+**Slam efter 1NT-återbudet (ärliga portar).** Öppnarens 1NT-återbud visar
+**12–14**. Du (kaptenen) räknar **din egen hand mot det visade intervallet** —
+aldrig partnerns faktiska kort:
+- **Jämn hand utan 5-korts färg:** **21+ hp** (21+12 ≥ 33) → **Gerber 4♣** (§6.4:
+  4♣ är Gerber även över ett NT-*återbud*): frågar ess, placerar **6NT** (stannar
+  i 4NT om två ess saknas; 7NT bara med alla ess + storslamszon mot minimum).
+  **19–20 hp** (slam bara om öppnaren har max) → **kvantitativ 4NT-inbjudan**:
+  öppnaren bjuder 6NT med 13–14, passar med 12.
+- **Obalanserad hand med en SÄKER fit på egen hand:** en **6+ egen högfärg**,
+  eller **5+ kort i öppnarens minor** (1♣/1♦ lovade 3+ → minst 8 ihop) blir
+  trumf → **4NT RKC** → **6 i färgen** (inbjudan i kanske-zonen: 5M/4m).
+  En gömd 4-4-fit går inte att *veta* utan att kika → den jagas inte här
+  (5-korts högfärg letar 5-3-fit via New Minor Forcing som vanligt).
+Utanför zonerna står den vanliga vägen kvar (New Minor Forcing / sang-stegen).
+Bottarna följer samma regler som en människa: de kan **missa** en slam som råkar
+sitta (t.ex. med bara 4-korts stöd i öppnarens minor) — det är systemriktigt.
 
 ### 5.8 Öppnarens rond-2 i konkurrens efter partnerns nya färg / 1NT
 Systerfallet till §5.4 (som gällde partnerns *höjning*). Du öppnar **1 i färg**, en
@@ -818,6 +828,24 @@ Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber**, **Exclusion Blackwood**
 **Michaels + ovanlig 2NT** och **Mathe** – beslutade 2026-06-26. Källor: bridgebum.com,
 svenskbridge.se.
 
+**Ärliga slamportar (grundprincip, ägarbeslut 2026-07-07).** All slamutredning
+följer samma mänskliga regel — varje beslut fattas på **egen hand + vad partnern
+VISAT via buden**, aldrig på partnerns faktiska kort:
+- **Kaptensregeln:** egen hand + partnerns visade **minimum** ≥ 33 → **driv**
+  (fråga nyckelkort/ess). 31–32 (slam bara om partnern har extra) → **inbjudan**
+  (kvantitativ 4NT över sang; 5M/4m med trumf) — partnern accepterar med **mer än
+  blott minimum**. Under det: nöj dig med utgång.
+  *Exempel:* efter hopp-återbudet **1m–1M–3m** (visar 16–18, 6+ färg) driver
+  svararen med 3+ stöd från **17** stödpoäng och bjuder in med 4m på **15–16**.
+- **Härledning:** ess-/nyckelkortssvaren läses mot egen hand (5♣ = "1 eller 4":
+  har jag redan 2 är det 1). Går tvetydigheten inte att lösa antas det **höga**
+  mot en visad 15+-hand, annars det **låga** — och då **rättar partnern med det
+  höga antalet själv upp till 6** över stoppbudet.
+- **Storslam kräver visshet:** entydigt alla fem nyckelkort + trumfdam +
+  storslamszon **även mot partnerns minimum**.
+- **Konsekvens:** bottarna bjuder som människor — de kan missa en slam som råkar
+  sitta, och någon enstaka gång bjuda en som betar. Det är systemriktigt.
+
 ### 6.1 1430 RKC Blackwood
 Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
 **nyckelkorten** = de 4 essen + **trumfkungen**.
@@ -849,6 +877,11 @@ naturligt utan visar en **kontroll**:
 Cue-bids används för att leta slam **innan** 1430 RKC: när båda visat kontroller
 i sidofärgerna och inget hål syns, frågar 4NT efter nyckelkorten.
 *Exempel:* 1♠–2♣–2♠ (fit) –4♣ (cue ♣-kontroll) –4♦ (cue ♦) –4NT (1430 RKC).
+
+*Motoranmärkning (2026-07-07):* bottarna cue-bjuder inte längre automatiskt i
+sina egna slamutredningar (cue-ronden bar bara en kontrollkoll som avskaffades
+med de ärliga slamportarna — de litar på poängen + nyckelkortssvaret). Bjuder
+**du** ett cue förstår och förklarar tolkningen det som vanligt enligt ovan.
 
 ### 6.3 Sjöbergs 5NT (kungfråga)
 Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
@@ -1196,6 +1229,24 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07 (kväll)** – **ÄRLIGA SLAMPORTAR (kod, §5.2, §5.7, §6, §6.2).**
+  Ägarbeslut efter total-granskning: all slamutredning "tjuvkikade" — portarna
+  räknade parets FAKTISKA sammanlagda poäng, nyckelkort och kontroller ur båda
+  händerna. Nu beslutar varje hand ärligt: **kaptensregeln** (egen hand + visat
+  minimum: ≥33 driv, 31–32 inbjudan — kvantitativ 4NT över sang, 5M/4m i trumf;
+  partnern accepterar över blott minimum), **härledning** av nyckelkort/ess ur
+  svaret + egen hand (tvetydighet: anta högt mot visad 15+, annars lågt +
+  partner-rättelse), **storslam kräver visshet**, **kontroll-gaten och den
+  automatiska cue-ronden borttagna** (ägarval: lita på poängen; §6.2 gäller
+  fortfarande som konvention för manuella cue). `familyAFitTrump` läser bara
+  svararens hand (6+ egen hf / 5+ i öppnarens minor; gömda 4-4-fits jagas ej).
+  Berör `slam-auction.ts`, `nt-slam.ts`, `auction.ts` (`pairControlsSideSuits`
+  borttagen). **Kända ärliga misser** (medvetna, test-låsta): #29-originalgiven
+  stannar nu i 3NT (13 hp mot visade 16–18 = under zonen) och familj A-givens
+  4-korts minorfit drivs inte (fiten går inte att veta). Slamfrekvens efter
+  ändringen (probe 60 000 givar): lillslam ~1/120, storslam ~1/4300 — mänskligt.
+  Facit: `slam-auction.test.ts` (omskriven, ärlig mekanik inkl. inbjudan +
+  rättelse), `auction-slam-*.test.ts`, `nt-slam.test.ts`. 1090 test gröna.
 - **2026-07-07** – **Slam efter öppnarens hopphöjning (kod, §5.2, F1 familj C).** En
   probe (300 000 givar, DD-lösta) visade att paret ofta stannade i **4M** trots
   slamvärden efter **1x–1M–3M** (öppnaren hopphöjer svararens högfärg, 16–18 + 4

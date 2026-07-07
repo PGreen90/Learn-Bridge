@@ -22,8 +22,10 @@ describe('gerberInvestigation – Gerber 4♣ över 1NT (Steg 4)', () => {
   })
 
   it('alla ess + storslamszon → kungfråga 5♣ → 7NT', () => {
+    // Ärliga portar: storslamszonen räknas mot 1NT-öppningens visade MINIMUM (15)
+    // → kaptenen behöver 22 hp själv (22+15=37), inte "veta" partnerns faktiska 17.
     const opener = parseHand('S:AQ5 H:KJ4 D:A532 C:K83') // 17 hp, ♠A+♦A, ♥K+♣K
-    const responder = parseHand('S:K32 H:AQ4 D:KQ7 C:AQ76') // 20 hp, ♥A+♣A, ♠K+♦K
+    const responder = parseHand('S:K32 H:AQ4 D:KQJ C:AQJ6') // 22 hp, ♥A+♣A, ♠K+♦K
     const turns = gerberInvestigation(opener, responder)!
     expect(turns.map((t) => t.call)).toEqual(['4C', '4S', '5C', '5S', '7NT'])
   })
@@ -113,8 +115,8 @@ describe('buildAuction – Gerber växer fram över 1NT (Steg 4)', () => {
       board: 1,
       hands: {
         N: parseHand('S:AQ5 H:KJ4 D:K532 C:A87'), // 17 hp balanserad → 1NT
-        E: parseHand('S:JT9 H:T98 D:JT8 C:JT96'), // svag → inget inkliv
-        S: parseHand('S:K83 H:AQ3 D:AQ7 C:KQ32'), // 20 hp balanserad, ingen högfärg → Gerber
+        E: parseHand('S:T93 H:T98 D:JT8 C:T963'), // svag → inget inkliv
+        S: parseHand('S:KJ8 H:AQ3 D:AQ7 C:KQJ2'), // 22 hp balanserad (37 mot visade 15) → Gerber
         W: parseHand('S:7642 H:7652 D:964 C:54'),
       },
     }
