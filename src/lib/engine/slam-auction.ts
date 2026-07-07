@@ -140,6 +140,33 @@ export function slamInvestigation(
 }
 
 /**
+ * Trumfval för en OBALANSERAD slamhand efter öppnarens 1NT-återbud (F1 familj A).
+ * Returnerar den färg paret ska spela slam i, eller null om ingen tydlig färgfit
+ * finns (då står NT-vägen / vanlig auktion). Prioritet:
+ *  1. svararens egen 6+ högfärg (självförsörjande trumf),
+ *  2. en 8+ korts högfärgsfit (5-3 / 4-4),
+ *  3. en 8+ korts minorfit (öppnarens öppnade minor först).
+ * Slam-portarna (≥33 stödpoäng, ≥4 nyckelkort, kontroller) sköts av
+ * `slamInvestigation` – här väljs bara trumfen.
+ */
+export function familyAFitTrump(
+  opener: Hand,
+  responder: Hand,
+  openedSuit: Suit | null,
+  responderSuit: Suit | null,
+): Suit | null {
+  const lo = lengths(opener)
+  const lr = lengths(responder)
+  if (responderSuit && (responderSuit === 'hearts' || responderSuit === 'spades') && lr[responderSuit] >= 6) {
+    return responderSuit
+  }
+  for (const m of MAJORS) if (lo[m] + lr[m] >= 8) return m
+  const minors: Suit[] = openedSuit === 'diamonds' ? ['diamonds', 'clubs'] : ['clubs', 'diamonds']
+  for (const mi of minors) if (lo[mi] + lr[mi] >= 8) return mi
+  return null
+}
+
+/**
  * Exclusion Blackwood (§6.5) efter en splinter där öppnaren visat slamintresse
  * (splinter-relä). Svararen, som har en sidorenons, hoppar till 5 i renonsfärgen
  * och frågar nyckelkort UTOM esset där; öppnaren svarar i steg; svararen placerar

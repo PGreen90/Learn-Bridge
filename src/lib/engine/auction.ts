@@ -21,7 +21,7 @@ import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
-import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
+import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
 import { gerberInvestigation, gerber2NTInvestigation, gerberRebidInvestigation } from './nt-slam'
 import { dontOvercall } from './dont'
@@ -592,16 +592,26 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     return finish(false)
   }
 
-  // Slamutredning efter öppnarens 1NT-ÅTERBUD (1m–1M–1NT, F1 familj A): en jämn
-  // svarare med slamvärden mittemot 12–14 letar NT-slam via Gerber 4♣ i stället
-  // för att blåsa 3NT. `gerberRebidInvestigation` returnerar null utanför slamzon
-  // (<33 hp ihop), för obalans eller 5-korts färg → då står den vanliga kedjan
-  // (NMF / sang-stegen) kvar. Behöver BÅDA händerna → ligger här, inte i
-  // responderSecondBid.
+  // Slamutredning efter öppnarens 1NT-ÅTERBUD (1m–1M–1NT, F1 familj A). Svararen
+  // har slamvärden mittemot 12–14 men blåste förr bara 3NT. Två vägar (behöver
+  // BÅDA händerna → ligger här, inte i responderSecondBid):
+  //  • JÄMN svarare (ingen 5-korts färg) → NT-slam via Gerber 4♣.
+  //  • OBALANSERAD med en färgfit (6+ egen hf / 8+ korts fit) → FÄRGSLAM via
+  //    4NT RKC (skipCueRound + kontroll-gate, precis som hopp-återbudet #29).
+  // Båda self-limitar (slamzon ≥33 stödpoäng, ≥4 nyckelkort) → utanför slam står
+  // den vanliga kedjan (NMF / sang-stegen) kvar.
   if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
-    const g = gerberRebidInvestigation(deal.hands[openerSeat], deal.hands[responderSeat])
-    if (g) {
-      for (const t of g) {
+    const oh = deal.hands[openerSeat]
+    const rh = deal.hands[responderSeat]
+    let slam: SlamTurn[] | null = gerberRebidInvestigation(oh, rh)
+    if (!slam) {
+      const trump = familyAFitTrump(oh, rh, openerSuit, parseBid(response.call).suit)
+      if (trump && pairControlsSideSuits(oh, rh, trump)) {
+        slam = slamInvestigation(oh, rh, trump, rebid.call, undefined, true)
+      }
+    }
+    if (slam) {
+      for (const t of slam) {
         const seat = t.role === 'öppnare' ? openerSeat : responderSeat
         turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
       }
