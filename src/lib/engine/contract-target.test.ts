@@ -49,6 +49,8 @@ describe('matchesTarget – kontraktväljarens filter', () => {
   ]
 
   for (const { target, seed, check } of cases) {
+    // Egen timeout: ärliga slamportar (2026-07-07) gör slam ovanligare (storslam
+    // ~1 per 4300 giv, som i verklig bridge) → sökningen kan behöva ~17k försök.
     it(`${target}: hittar en giv vars slutkontrakt matchar och ägs av NS`, () => {
       const deal = findDeal(target, seed)
       expect(deal, `ingen ${target}-giv hittad inom budgeten`).not.toBeNull()
@@ -57,7 +59,7 @@ describe('matchesTarget – kontraktväljarens filter', () => {
       expect(contract).not.toBeNull()
       expect(side(contract.declarer)).toBe('NS')
       expect(check(contract.level, contract.strain)).toBe(true)
-    })
+    }, 60000)
   }
 
   it('competitive: NS äger kontraktet OCH Ö/V har stört med ett riktigt bud', () => {

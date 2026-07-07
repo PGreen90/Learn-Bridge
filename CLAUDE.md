@@ -21,7 +21,55 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
-> **🔵 PÅGÅENDE NU (2026-07-07): F1 — bredda slam-utforskningen.** Kom ur ägarens
+> **🔵 PÅGÅENDE NU (2026-07-07 kväll): ÄRLIGA SLAMPORTAR — städa bort tjuvkiken.**
+> Ägarbeslut efter Fables totalgranskning: bottarna ska bjuda som MÄNNISKOR — varje
+> budbeslut fattas på EGEN hand + vad partnern VISAT (budens intervall/löften),
+> ALDRIG på partnerns faktiska kort. De får hellre missa eller felbedöma en slam
+> än kika. Detta gäller även facit-linjen/Budvisningen (samma `buildAuction`):
+> "facit" = vad ett korrekt mänskligt par bjuder, inte double-dummy-perfektion.
+> **Tjuvkiks-inventering (Fable 2026-07-07, komplett):**
+> (1) `slamInvestigation` (`slam-auction.ts:50`) — slamzon på parets FAKTISKA
+> poäng, nyckelkortsport FÖRE frågan, trumfdam ur båda händer, cue-rondens
+> "komplett par"-koll läser öppnarens hand. (2) `pairControlsSideSuits`
+> (`auction.ts:216`) — kontroller ur båda händer (3 anropsställen). (3)
+> `gerberRebidInvestigation` + `buildGerberSequence` (`nt-slam.ts`) — faktisk
+> kombinerad hp + faktiska ess/kungar ur båda händer (svaren är ärliga; det är
+> RÄKNINGEN hos kaptenen som kikar). (4) `familyAFitTrump` (`slam-auction.ts:159`)
+> — läser öppnarens färglängder för fit (ärlig väg = NMF som redan finns). (5)
+> `mssMinorFitContinuation`/`ntUnsafe` — båda händer. (6) `exclusionInvestigation`
+> — kombinerade poäng + nyckelkort FÖRE frågan. **Ärlig mall finns redan i repot:**
+> `strong-2nt-systemson.ts` (egen hand mot visat intervall OPENER_MIN/MAX) och
+> `gerberInvestigation`/`gerber2NTInvestigation`-portarna (egen hp mot visat
+> 15–17/20–21). Ess-/kungfråge-SVAREN (`respondToRKC`, `respondToGerber` m.fl.)
+> är redan ärliga (svararens egen hand).
+> **STATUS: BYGGT & TESTAT (2026-07-07 kväll, EJ PUSHAT — inväntar PCD-beslut).**
+> Ägarens två systemval (via frågor): (1) **inbjudningar i kanske-zonen** (31–32
+> mot visat minimum; kvantitativ 4NT över sang, 5M/4m i trumf; partnern
+> accepterar över blott minimum), (2) **ingen kontrollkoll** (lita på poängen +
+> nyckelkortssvaret; `pairControlsSideSuits` BORTTAGEN, motorns auto-cue-rond
+> BORTTAGEN — den bar bara kontrollgaten och orsakade gamla slam-quirken).
+> Byggt: `slam-auction.ts` omskriven (kaptensregeln: egen hand + visat minimum
+> ≥33 driv / 31–32 inbjudan; härledning av nyckelkort ur svaret + egen hand;
+> tvetydighet → anta högt mot visad 15+, annars lågt + PARTNER-RÄTTELSE till 6;
+> storslam kräver visshet), `nt-slam.ts` (Gerber härleder ur svaren; NY
+> kvantitativ 4NT-inbjudan 19–20 i familj A), `auction.ts` (visade intervall per
+> återbudsregel: 1NT-återbud 12, hopphöjning/hopp-återbud 16, Jacoby per rebid,
+> inverterad per rebid, splinter-relä 15, MSS 15). `familyAFitTrump` läser BARA
+> svararens hand (6+ egen hf / 5+ i öppnarens minor; gömda 4-4-fits jagas ej).
+> **Kända ÄRLIGA MISSER (medvetna, test-låsta):** #29-originalgiven stannar i
+> 3NT (13 hp mot visade 16–18 < zonen — slammen krävde kik); familj A-givens
+> 4-korts minorfit drivs ej (fit ej vetbar). Slamfrekvens (probe 60 000):
+> lillslam ~1/120, storslam ~1/4300 (mänskligt; kontraktväljar-testet fick egen
+> timeout). **Blottad systemlucka → B13 i revisionen:** inverterad minor-återbud
+> är grova (17 hp + 6m visas som "minimum") → ärliga misser där; eget framtida
+> arbete. Docs: budsystem.md §5.2/§5.7/§6 (ärliga slamportar-principen)/§6.2-
+> motoranmärkning/§9; budsystem-revision.md B8–B13. Två gamla testgivar med
+> OMÖJLIGA kort (samma kort i två händer) lagades i förbifarten.
+> **1090 test gröna, tsc rent. PCD återstår (fråga ägaren).**
+> **F1 (familj B + C:s reverse/hoppskift) PAUSAD → NÄST** tills portarna
+> bekräftats i spel — nya familjer byggs sedan på det ärliga mönstret.
+>
+> **F1 — bredda slam-utforskningen (PAUSAD 2026-07-07 kväll, se NU ovan).** Kom ur ägarens
 > budsystem-djupdykning (två färgkodade listor, se chatt): slam var bara inkopplat
 > i fem auktionsformer; hela GF-familjer (2♣, hoppskift/reverse, 1NT-återbud, 2/1
 > med fit) saknade slam-drivning. En probe (40 000 givar, DD-lösta) delade upp
@@ -410,6 +458,18 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **ÄRLIGA SLAMPORTAR (2026-07-07 kväll, NYTT — ersätter kik-varianterna nedan):**
+  all slamutredning beslutar nu på egen hand + partnerns VISADE intervall.
+  **Bevaka:** (a) **missar** boten slammar du tycker den borde bjudit? (Medvetet:
+  hellre systemriktig miss än kik — men säg till om en misstyp återkommer, t.ex.
+  inverterad minor-fallet B13.) (b) **Inbjudningarna** (5M/4m/kvantitativ 4NT):
+  accepterar partnern lagom ofta? (Accept = över blott minimum, dvs. min+1.)
+  (c) **Partner-rättelsen** (kaptenen stannar 5-trumf, partnern lyfter till 6 med
+  det höga antalet) — ser den rätt ut vid bordet? (d) Utan kontrollkoll kan en
+  slam någon gång åka på två snabba ess — det är ägarens medvetna val, men säg
+  till om det svider för ofta. (e) Motorn cue-bjuder inte längre själv (§6.2
+  gäller manuella cue). (f) Storslam kräver visshet → 7-läget är nu ovanligt
+  (~1/4300 giv) — kontraktväljarens storslam-sökning kan ta längre tid.
 - **Slam efter öppnarens hopphöjning (F1 familj C, 2026-07-07, NYTT & LIVE):** öppnar
   din bot-partner 1 i färg, du svarar en högfärg på 1-läget och hen **hopphöjer** den
   (`1♦–1♥–3♥`, visar 16–18 + 4 stöd), driver paret nu **slam** (6 i högfärgen via 1430
@@ -605,7 +665,9 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
+1. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs med ÄRLIGA
+   portar först när NU (tjuvkiks-städningen) är klar.
+2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - **Spelmotor-kvalitet: spelföring + försvar (felrapport #32 + #34, uppskjutet

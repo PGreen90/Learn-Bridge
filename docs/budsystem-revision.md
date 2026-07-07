@@ -8,11 +8,14 @@
 
 **Färgkoder:** 🟢 byggt/testat/live · 🟡 fungerar men känd gräns/bevakning · 🔴 lucka/uppskjutet.
 
-**Hälsobild:** systemet är komplett och vältestat (1087 gröna test, facit-först,
-boken = enda sanningskälla). Grunder och konventioner solida. Svagheterna är
-koncentrerade till: (1) slam-utforskning utanför byggda vägar (**åtgärdas av F1 —
-pågår**), (2) underhållbarheten i off-book-detektorkedjan, (3) att försvarslagret
-(§7) inte räknar fördelning (TP).
+**Hälsobild:** systemet är komplett och vältestat (1090 gröna test, facit-först,
+boken = enda sanningskälla). Grunder och konventioner solida. **2026-07-07 kväll:
+ÄRLIGA SLAMPORTAR byggda** (ägarbeslut: inga budbeslut på partnerns faktiska kort
+— egen hand + visade intervall; inbjudningar i kanske-zonen; fel tillåtna).
+Svagheterna är koncentrerade till: (1) slam-utforskning utanför byggda vägar
+(**F1 — pausad tills ärliga portar bekräftats i spel**), (2) underhållbarheten i
+off-book-detektorkedjan, (3) att försvarslagret (§7) inte räknar fördelning (TP),
+(4) grova återbud efter inverterad minor (B13, blottad av ärliga portar).
 
 ---
 
@@ -45,10 +48,12 @@ pågår**), (2) underhållbarheten i off-book-detektorkedjan, (3) att försvarsl
 | B5 | Fjärde färg krav | 🟢 | — |
 | B6 | Drury | 🟢 | — |
 | B7 | 1430 RKC + trumfdam/kungfråga | 🟢 | — |
-| B8 | Cue-bid, Sjöberg 5NT, Gerber, Exclusion | 🟢 | — |
-| B9 | Slam efter hopp-återbud i minor (#29) | 🟡 | Bevaka make-rate |
-| B10 | **Slam-utforskning i övrigt** | 🟡 | **F1 pågår:** familj A+D KLARA; B (2♣) + C (extra/hoppskift) kvar |
-| B11 | ~~Slam-quirken (hängande cue)~~ | 🟢 | **LÖST 2026-07-07 (F1 D)** — 0/200 000 i probe |
+| B8 | Cue-bid, Sjöberg 5NT, Gerber, Exclusion | 🟢 | Motorns auto-cue-rond borttagen (ärliga portar); §6.2 kvar för manuella cue |
+| B9 | Slam efter hopp-återbud i minor (#29) | 🟡 | **Ärliga portar 2026-07-07:** driv 17+/inbjudan 15–16 mot visade 16–18; #29-originalgiven = medveten ärlig miss (3NT) |
+| B10 | **Slam-utforskning i övrigt** | 🟡 | **F1 pausad → NÄST** tills ärliga portar bekräftade i spel; familj B (2♣) + C (reverse/hoppskift) byggs sedan ÄRLIGT |
+| B11 | ~~Slam-quirken (hängande cue)~~ | 🟢 | LÖST; cue-ronden numera helt borttagen ur motorn (ärliga portar) |
+| B12 | **Ärliga slamportar** (egen hand + visat intervall; inbjudningar; härledning + rättelse) | 🟢 | **BYGGT 2026-07-07 kväll** — bevaka i spel: missar/inbjudningsfrekvens |
+| B13 | Inverterad minor-återbuden är grova (17 hp + 6m visas som "minimum 3m" → ärliga misser) | 🔴 | Förfina öppnarens återbud efter inverterad höjning (stopp-visning kräver 4+ kort i dag) |
 
 ## C. FÖRSVAR & KONKURRENS (§7)
 
@@ -112,8 +117,10 @@ kravminnet löst.
 | **B** | efter stark 2♣ (positiva svar / 2NT-rebud) | 🔴 **kvar** |
 | **C** | efter öppnaren visat extra (hoppskift/hopphöjning/reverse) — **störst** | 🟡 **hopphöjning KLAR** (1x–1M–3M → 6M via RKC, `auction-slam-jumpraise.test.ts`); **reverse + hoppskift kvar** |
 
-**Nästa gång:** ta F1 familj **C** (störst bucket, mest värde) eller **B** (2♣, knyter
-an till 2♣-arbetet). Bygg facit-först: probe → röd giv → fix → grön → DD-verifiera →
+**Nästa gång:** F1 är PAUSAD (ägarbeslut 2026-07-07 kväll) tills de ÄRLIGA
+slamportarna bekräftats i spel. Familj B (2♣) + C:s reverse/hoppskift byggs
+sedan med samma ärliga mönster (kaptensregeln mot visade intervall — aldrig
+partnerns kort). Bygg facit-först: probe → röd giv → fix → grön → DD-verifiera →
 full svit → PCD (fråga ägaren).
 
 **Medvetet PARKERAT (väg inte in):** Mathe (C13), LTC (D8).
