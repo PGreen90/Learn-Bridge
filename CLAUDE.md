@@ -55,6 +55,21 @@ Läs den här filen först varje session.
 > (`1♦–1♠–3♣`) — störst men rörigare (ingen överenskommen trumf; vissa reverse-
 > auktioner kollapsar t.o.m. under utgång, eget problem). Se 👀 Bevaka.
 >
+> **Senast klart & LIVE (2026-07-07): tre mobil-UI-fixar (ägarstyrt SIDOSPÅR, INTE F1).**
+> Ingen budlogik rörd; desktop helt oförändrat via `sm:`-brytpunkten (≥640px).
+> (1) **Större spelkort på mobil** (mergepunkt `1760ea3`): Syds hand större (48×64);
+> ny responsiv `smPlus`-storlek i `PlayingCard.tsx` (40×56 mobil / 28×40 desktop)
+> för **träkarlen** (norr, `SuitColumns` i `Play.tsx`) + **sidohänderna Ö/V**
+> (`SideStack.tsx`, både spelvyn och Budvisningen). Träkarlens kolumner glesare på
+> höjden (24px syns/kort mot 12 förr, ägarbegäran). Syds utfällning pressar ihop
+> nedtonade färger på mobil så inga kort klipps utanför kanten. (2) **Budförklaringens
+> kryss** (`AuctionGrid.tsx`, mergepunkt `642ab36`): krysset kunde knuffas utanför
+> bild (rubrikraden överflödade) → förankrat absolut i bubblans övre högra hörn +
+> rubriken radbryter; **tryck var som helst utanför bubblan stänger** (genomskinlig
+> helskärmsyta); krysset 36×36 med **iPhone-glaskänsla** (backdrop-blur, ljus kant,
+> glansdager). Gäller även ⓘ-rutan under kortspelet (samma komponent). Hela sviten
+> grön, tsc rent, båda Vercel-deployerna gröna.
+>
 > **Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
 > **#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
 > på 28 hp) — `raiseWithFit` (`auction-live.ts`) räknade "inbjudande hopp" = partnerns
