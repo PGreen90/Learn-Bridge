@@ -42,7 +42,7 @@ Läs den här filen först varje session.
 > `gerberInvestigation`/`gerber2NTInvestigation`-portarna (egen hp mot visat
 > 15–17/20–21). Ess-/kungfråge-SVAREN (`respondToRKC`, `respondToGerber` m.fl.)
 > är redan ärliga (svararens egen hand).
-> **STATUS: BYGGT & TESTAT (2026-07-07 kväll, EJ PUSHAT — inväntar PCD-beslut).**
+> **STATUS: KLAR & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, Vercel-deploy grön).**
 > Ägarens två systemval (via frågor): (1) **inbjudningar i kanske-zonen** (31–32
 > mot visat minimum; kvantitativ 4NT över sang, 5M/4m i trumf; partnern
 > accepterar över blott minimum), (2) **ingen kontrollkoll** (lita på poängen +
@@ -65,7 +65,9 @@ Läs den här filen först varje session.
 > arbete. Docs: budsystem.md §5.2/§5.7/§6 (ärliga slamportar-principen)/§6.2-
 > motoranmärkning/§9; budsystem-revision.md B8–B13. Två gamla testgivar med
 > OMÖJLIGA kort (samma kort i två händer) lagades i förbifarten.
-> **1090 test gröna, tsc rent. PCD återstår (fråga ägaren).**
+> **1090 test gröna, tsc rent, pushat & deploy grön (PCD 2026-07-07 kväll).**
+> **NU är därmed åter ÖPPET — ägaren väljer nästa sak** (bra kandidat: spela och
+> bevaka de ärliga portarna; därefter F1 familj B/C-rest från NÄST).
 > **F1 (familj B + C:s reverse/hoppskift) PAUSAD → NÄST** tills portarna
 > bekräftats i spel — nya familjer byggs sedan på det ärliga mönstret.
 >
