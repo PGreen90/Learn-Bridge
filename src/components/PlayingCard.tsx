@@ -9,13 +9,30 @@ const SYMBOL: Record<Suit, string> = {
   clubs: '♣',
 }
 
-type Size = 'sm' | 'md' | 'lg'
+type Size = 'sm' | 'smPlus' | 'md' | 'lg'
 
 // Mått per storlek: [bredd, höjd, valör-text, mitt-symbol, ess-symbol].
 // Esset får en större mittsymbol – som i en riktig kortlek.
+// `md` (spelarens egen hand) är STÖRRE på mobil och krymper till sitt vanliga
+// mått från `sm:`-brytpunkten (≥640 px) och uppåt – lättare att träffa på telefon
+// (ägarbeslut 2026-07-07), oförändrad på desktop.
 const SIZES: Record<Size, { box: string; rank: string; pip: string; acePip: string }> = {
   sm: { box: 'w-7 h-10 rounded', rank: 'text-[10px]', pip: 'text-sm', acePip: 'text-base' },
-  md: { box: 'w-10 h-14 rounded-md', rank: 'text-xs', pip: 'text-xl', acePip: 'text-2xl' },
+  // `smPlus` = träkarlen + sidostaplarna (Ö/V/N): större på mobil (som `md` på
+  // desktop, 40×56) men krymper till vanligt `sm` (28×40) från `sm:` och uppåt.
+  // Ägarbeslut 2026-07-07: dessa var för små att läsa på telefon.
+  smPlus: {
+    box: 'w-10 h-14 rounded-md sm:w-7 sm:h-10 sm:rounded',
+    rank: 'text-xs sm:text-[10px]',
+    pip: 'text-xl sm:text-sm',
+    acePip: 'text-2xl sm:text-base',
+  },
+  md: {
+    box: 'w-12 h-16 rounded-md sm:w-10 sm:h-14',
+    rank: 'text-sm sm:text-xs',
+    pip: 'text-2xl sm:text-xl',
+    acePip: 'text-3xl sm:text-2xl',
+  },
   lg: { box: 'w-12 h-16 rounded-md', rank: 'text-sm', pip: 'text-2xl', acePip: 'text-3xl' },
 }
 
