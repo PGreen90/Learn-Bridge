@@ -34,8 +34,14 @@ Läs den här filen först varje session.
 > hf / 8+ korts fit) → trumf via `familyAFitTrump` → `slamInvestigation` (skipCueRound
 > + kontroll-gate) → 6 i färgen. Båda i `buildAuction`; `nt-slam.ts` + `slam-auction.ts`.
 > Facit `auction-slam-1nt-rebid.test.ts` (2 givar: 6NT + 6♣, DD-verifierade). budsystem.md
-> §5.7 + §9. **1086 test gröna, tsc rent.** **KVAR i F1:** Familj B (2♣), C (hoppskift/
-> hopphöjning/reverse — störst), D (Jacoby 2NT-läcka). Se 👀 Bevaka.
+> §5.7 + §9.
+> **Familj D KLAR (slam-quirken stängd):** den hängande cuen (Jacoby 2NT → cue → RKC
+> lade två svararbud i rad → live-lagret passade delkontraktet) är lagad i
+> `slamInvestigation` (`slam-auction.ts`): cue-ronden läggs bara som ett KOMPLETT par
+> (svarare + öppnare), annars rakt på 4NT. Probe: **0 "två-i-rad" i 200 000 auktioner**
+> (var >0). Facit `auction-slam-jacoby-cue.test.ts` (1♥–2NT → 7♥). Den parkerade
+> slam-quirken är därmed LÖST. **1087 test gröna, tsc rent.**
+> **KVAR i F1:** Familj B (2♣), C (hoppskift/hopphöjning/reverse — störst). Se 👀 Bevaka.
 >
 > **Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
 > **#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
@@ -387,6 +393,11 @@ Läs den här filen först varje session.
   rätt trumf/strain (6NT när jämnt, rätt färg när fit)? (c) missar det tvärtom en slam
   (gaten är medvetet konservativ)? Full-givs färg-DDS gick inte att massvalidera
   (känd tung gräns) — facit-givarna (6NT + 6♣) är DD-verifierade, gates speglar #29.
+- **Slam-quirken stängd (F1 familj D, 2026-07-07, NYTT):** slamlinjer via Jacoby 2NT
+  (och alla andra cue→RKC-vägar) dog förr ibland i ett för lågt kontrakt för att en
+  hängande cue gjorde auktionen olaglig. Nu spelas de upp hela vägen. **Bevaka:** når
+  slamlinjer efter Jacoby 2NT rätt slutbud (6/7 i färgen) i stället för att fastna
+  runt 4-läget? Facit-givan `1♥–2NT` når nu **7♥** (kall storslam).
 - **Advancern hoppar inte förbi utgång (#33, 2026-07-07, NYTT & LIVE):** när du och
   din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
   längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦
@@ -624,8 +635,10 @@ Läs den här filen först varje session.
   (bara kvar här som historik — behandla dem inte som återstående arbete).
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
-- **Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC): känd gräns, stängs lagligt.
-  Bekräfta bara att den fortfarande stängs — jaga den aldrig som bugg.
+- ~~**Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC)~~ **LÖST 2026-07-07** (F1 familj D):
+  den hängande cuen är lagad i `slamInvestigation` (cue-ronden läggs bara som ett
+  komplett par, annars rakt på 4NT). Probe: 0 "två-i-rad" i 200 000 auktioner. Facit
+  `auction-slam-jacoby-cue.test.ts`. Behandla inte längre som parkerad.
 - **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.
 - **Off-book §7 bredd** (inkliv över 1NT/svaga tvåor/spärrar; balansering
   BYGGD 2026-07-03 via felrapport #5 — kvar här: "låna en kung"-lättnaden,

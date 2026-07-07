@@ -1187,6 +1187,17 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **Slam-quirken stängd: hängande cue (kod, F1 familj D).** Probe-
+  given `1♥–2NT–4♥` (paret har alla fem nyckelkort + trumfdam, 7♥ kall/DD 13) dog
+  förr i **4♠**: `slamInvestigation`s cue-rond lade svararens cue (4♠) UTAN att
+  öppnaren kunde cue:a tillbaka (ingen kontroll ovanför spader) → två svararbud i rad
+  = olaglig auktion → live-lagret föll av linjen och passade delkontraktet (den kända
+  ~0,25 %-slam-quirken). Fix: cue-ronden läggs nu bara som ett **komplett par**
+  (svarare + öppnare); saknas öppnarens cue-svar hoppas hela ronden över → rakt på
+  4NT RKC. Nyckelkortsporten (≥4) skyddar ändå mot slam med två snabba förlorare.
+  Probe (200 000 byggda auktioner): **0 kvarvarande "två-i-rad"** (var >0 före).
+  Facit `auction-slam-jacoby-cue.test.ts` (→ 7♥) + uppdaterad regression i
+  `slam-auction.test.ts`. 1087 test gröna, tsc rent.
 - **2026-07-07** – **Slam efter 1NT-återbud, OBALANSERAD del (kod, §5.7, F1 familj
   A).** Fortsättning på jämn-delen nedan: en obalanserad svarare med en **färgfit**
   mittemot 1NT-återbudet driver nu **färgslam** i stället för 3NT. `familyAFitTrump`
