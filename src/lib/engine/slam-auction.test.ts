@@ -83,15 +83,17 @@ describe('buildAuction – slam växer fram via Jacoby 2NT', () => {
 
 describe('slamInvestigation – cue-budet måste vara lagligt (regression)', () => {
   // Bugg funnen i appen: efter 1♥–2NT–4♦ (Jacoby-sidofärg) gav cue-ronden ett
-  // olagligt 4♣ (lägre än 4♦). Cue-budet ska nu antingen ligga lagligt ovanför
-  // öppnarens återbud, eller hoppas över.
-  it('öppnaren rebjöd 4♦ → svararen cue:ar lagligt 4♠ (aldrig 4♣)', () => {
-    const opener = parseHand('S:K4 H:AKQ85 D:AQ764 C:2') // 5 ruter → 4♦-rebud
-    const responder = parseHand('S:A53 H:JT72 D:K5 C:AQ86') // ♠-kontroll + ♣-kontroll
+  // olagligt 4♣ (lägre än 4♦). Cue-budet ska antingen ligga lagligt ovanför
+  // öppnarens återbud OCH få ett cue-svar av öppnaren (komplett par), eller hoppas
+  // över. Familj D-fixen: svararens cue får aldrig bli HÄNGANDE (två svararbud i
+  // rad) – kan öppnaren inte cue:a tillbaka hoppas hela ronden över → rakt på 4NT.
+  it('öppnaren rebjöd 4♦, svararens enda cue (4♠) saknar cue-svar → rakt på 4NT (inget hängande 4♠, inget 4♣)', () => {
+    const opener = parseHand('S:K4 H:AKQ85 D:AQ764 C:2') // ♠K4 – ingen kontroll ovanför ♠ att cue:a tillbaka
+    const responder = parseHand('S:A53 H:JT72 D:K5 C:AQ86') // ♠-kontroll (4♠) men öppnaren kan ej svara
     const turns = slamInvestigation(opener, responder, 'hearts', '4D')!
-    expect(turns[0].call).toBe('4S') // lagligt cue ovanför 4♦, inte 4♣
-    expect(turns.some((t) => t.call === '4C')).toBe(false)
-    expect(turns.some((t) => t.call === '4NT')).toBe(true)
+    expect(turns[0].call).toBe('4NT') // cue-ronden hoppas över → RKC direkt
+    expect(turns.some((t) => t.call === '4C')).toBe(false) // aldrig olagligt 4♣
+    expect(turns.some((t) => t.call === '4S')).toBe(false) // aldrig hängande 4♠
   })
 
   it('öppnaren rebjöd 4♦, ingen laglig cue → rakt på 4NT', () => {

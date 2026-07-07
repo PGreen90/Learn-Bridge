@@ -86,9 +86,16 @@ export function slamInvestigation(
   const cueAbove: Suit | null = m4 ? SUIT_OF_LETTER[m4[1]] : null
   const respCue = !skipCueRound && lastRank < bidRank('4NT') ? cheapestCueBid(responderHand, trump, cueAbove) : null
   if (respCue && bidRank(respCue.call) > lastRank) {
-    turns.push({ role: 'svarare', call: respCue.call, rule: respCue.rule, explanation: respCue.explanation })
+    // Cue-ronden får bara läggas som ett KOMPLETT par (svarare + öppnare) så att
+    // auktionen alternerar medurs. Kan öppnaren inte cue:a tillbaka lagligt (ingen
+    // kontroll ovanför svararens cue) hoppar vi över HELA cue-ronden och går direkt
+    // på 4NT RKC – annars blir svararens cue "hängande" (två svararbud i rad =
+    // olaglig auktion; live-lagret föll då av linjen och passade delkontraktet, den
+    // gamla slam-quirken). Nyckelkortsporten (≥4) hindrar ändå slam med två snabba
+    // förlorare (≤1 nyckelkort saknas → ≤1 snabb förlorare), så inget skydd tappas.
     const openCue = cheapestCueBid(openerHand, trump, SUIT_OF_LETTER[respCue.call[1]])
     if (openCue && bidRank(openCue.call) > bidRank(respCue.call)) {
+      turns.push({ role: 'svarare', call: respCue.call, rule: respCue.rule, explanation: respCue.explanation })
       turns.push({ role: 'öppnare', call: openCue.call, rule: openCue.rule, explanation: openCue.explanation })
     }
   }
