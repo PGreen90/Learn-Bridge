@@ -612,6 +612,15 @@ Svararen har visat 4+ kort och 6+ hp (krav 1 rond). Öppnaren letar främst
 Öppnaren kan även **splintra** (hopp i ny färg, t.ex. 1♣–1♥–3♠/4♦) för att visa
 4 stöd + kortfärg + extra styrka, på samma sätt som svararen gör i §4.1.
 
+**Slam efter öppnarens hopphöjning (F1 familj C).** Öppnaren hopphöjde din
+högfärg (**1x–1M–3M**, 16–18 med 4-korts stöd) → trumfen är redan bestämd. Har du
+**slamvärden** (paret i slamzon, **≥33 stödpoäng**) stannar du inte i 4M utan
+driver slam: du blir kapten och frågar nyckelkort (**1430 RKC**) via en cue-rond,
+och placerar **6 i högfärgen** (7 i storslamszon). Samma portar som de andra
+slam-vägarna skyddar mot överbud: minst **4 av 5 nyckelkort** och **kontroll**
+(ess eller korthet) i varje sidofärg, annars står den vanliga vägen kvar
+(acceptera 4M med utgångsvärden, annars pass i delkontrakt).
+
 ### 5.3 I en 2/1 GF-budgivning
 Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gäller:
 - **Bjud naturligt och lugnt** – öppnaren behöver inte hoppa för att visa styrka.
@@ -1187,6 +1196,22 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **Slam efter öppnarens hopphöjning (kod, §5.2, F1 familj C).** En
+  probe (300 000 givar, DD-lösta) visade att paret ofta stannade i **4M** trots
+  slamvärden efter **1x–1M–3M** (öppnaren hopphöjer svararens högfärg, 16–18 + 4
+  stöd) – slam-arsenalen var inte inkopplad i den formen (41 slamzon-stopp av 1 563
+  hopphöjningar, många DD-verifierat kalla slammar). Trumfen är redan överenskommen,
+  så `buildAuction` kopplar nu in `slamInvestigation` (svararens högfärg trumf, med
+  cue-rond som Jacoby-fiten – INTE skipCueRound) efter hopphöjningen. Portar mot
+  överbud: slamzon (**≥33 stödpoäng**), **≥4 nyckelkort** och `pairControlsSideSuits`
+  (ess/korthet i varje sidofärg – motorn går deterministiskt vidare till 4NT, så
+  gaten krävs som i #29). Utanför portarna står den vanliga kedjan kvar (svararen
+  4M / pass). Facit `auction-slam-jumpraise.test.ts` (2 DD-verifierade givar:
+  1♥–1♠–3♠ → 6♠ och 1♣–1♠–3♠ → 6♠, båda DD 13). Make-rate-probe (250 000 givar):
+  hooken drev slam 328 ggr; av de DD-lösta (18 – resten för tunga att lösa) höll 16,
+  2 bet med exakt ett stick (finess-slam) = **88,9 %**, i linje med #29-hooken.
+  1089 test gröna, tsc rent. **Kvar i F1:** familj B (2♣), C:s systerfall reverse +
+  hoppskift (störst men rörigare – ingen överenskommen trumf).
 - **2026-07-07** – **Slam-quirken stängd: hängande cue (kod, F1 familj D).** Probe-
   given `1♥–2NT–4♥` (paret har alla fem nyckelkort + trumfdam, 7♥ kall/DD 13) dog
   förr i **4♠**: `slamInvestigation`s cue-rond lade svararens cue (4♠) UTAN att
