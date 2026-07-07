@@ -445,11 +445,12 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
 // svararen kontraktet på utgångsnivå: höj funnen fit → utgång, ingen fit → 3NT,
 // 5-4 i högfärgerna efter 3♦ → Smolen (speglar 1NT-varianten: bjud 4-korts hf,
 // visa 5 i den andra – starka handen blir spelförare). Minorfråga/slam = §6.
-export function responderRebidIn2NTAuction(response: ResponseResult, rebid: ResponseResult, hand: Hand): ResponseResult | null {
+export function responderRebidIn2NTAuction(response: ResponseResult, rebid: ResponseResult, hand: Hand, openerMin = 20): ResponseResult | null {
   const p = hcp(hand)
   const len = lengths(hand)
   const sp = len.spades
   const he = len.hearts
+  const game = 25 - openerMin // svag transfer (signoff) under utgångsstyrka
   const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${p} hp – ${why} → pass.` })
 
   switch (response.rule) {
@@ -471,7 +472,7 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
     case 'transfer (2NT)': {
       const target: Suit = response.call === '3D' ? 'hearts' : 'spades'
       // Svag (signoff i delkontrakt) → passa den fullföljda transfern.
-      if (p < 5) return pass('svag – transfern var ett signoff i delkontrakt')
+      if (p < game) return pass('svag – transfern var ett signoff i delkontrakt')
       if (len[target] >= 6) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `${p} hp, 6+ ${NAME[target]} → 4${SYM[target]}.` }
       // Exakt 5-korts högfärg, GF → 3NT (öppnaren väljer 3NT eller 4 i färgen).
       return { call: '3NT', rule: 'till spel', explanation: `${p} hp, 5 ${NAME[target]} → 3NT (öppnaren väljer 3NT/4 i färgen).` }

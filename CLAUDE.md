@@ -21,7 +21,19 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
-> **Senast klart & LIVE (2026-07-07): 2♣-öppningen håller sitt utgångskrav.**
+> **Senast klart & LIVE (2026-07-07): systems-on över 2♣–2♦–2NT.**
+> Efter öppnarens 2NT-återbud (22–24) använder svararen nu **Stayman (3♣) +
+> transfers (3♦/3♥) + Texas** precis som mot en naturlig 2NT-öppning, för att
+> hitta 4-4- och 5-3-högfärgsfit i stället för att blint bjuda 3NT. Svararen bjöd
+> 2♦ (0–7 hp) → poänggränserna sänks två steg (utgång från 3 hp). Återanvänder
+> 2NT-svarsmaskineriet via en `openerMin`-param (default 20 → naturlig 2NT
+> byte-identisk): `respondTo2NT`/`openerRebidAfter2NTResponse`/
+> `responderRebidIn2NTAuction`, hopbyggt i `strong-2nt-systemson.ts`, inkopplat i
+> `buildAuction`. Effekt: **~30 % av alla 2♣–2♦–2NT når nu 4♥/4♠** (förr 3NT); svaga
+> 5-färger signar av 3♥/3♠. Facit i `auction-2c-gameforce.test.ts`. budsystem.md §9.
+> **1079 test gröna, tsc rent.** Se 👀 Bevaka.
+>
+> **Föregående (2026-07-07): 2♣-öppningen håller sitt utgångskrav.**
 > Kom ur `/felrapporter` #29 ("hur hittar vi slammen?"): en utforskningsprob
 > (300 000 givar) visade att **~64 % av alla ostörda 2♣-öppningar dog i
 > DELKONTRAKT** (82 % av stoppen hade 23+ hp = rena kravbrott) — större fynd än
@@ -29,13 +41,14 @@ Läs den här filen först varje session.
 > 2♣-öppningens game-force (`buildAuction` bygger bara ett par bud av 2♣-linjen
 > och överlämnar resten, som passades bort). Fix (facit-först): (1) ny 2♣-gren i
 > `auctionForce` (game-krav tills utgång; undantag `2♣–2♦–2NT` = inbjudande);
-> (2) `respondToStrong2NTRebid` — efter `2♣–2♦–2NT` (22–24) bjuder svararen 3NT
-> med 3+ hp (ägarmatte: 22+3 = utgång), passar bara 0–2. Delkontrakt-andelen föll
-> **63,9 % → 1,7 %** (resten legitima). Facit `auction-2c-gameforce.test.ts` (6
-> givar). budsystem.md §9. **1077 test gröna, tsc rent.** Se 👀 Bevaka.
-> **Uppskjutet (nästa naturliga steg):** full systems-on (Stayman/transfer över
-> 2NT-återbudet) — svararen blastar 3NT nu, hittar ej 5-3-högfärgsfit den vägen;
-> knyter an till slam-letningen i #29.
+> (2) `respondToStrong2NTRebid` (off-book-fallback) + systems-on on-book (ovan).
+> Delkontrakt-andelen föll **63,9 % → 1,7 %** (resten legitima). Mergepunkt `b20d81f`.
+>
+> **Öppna felrapporter:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
+> 4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — 2♣-fixen + systems-on
+> avklarade (ett symptom + dess uppföljning); slam-letningen efter starkt hopp-
+> återbud väntar på ägarbeslut om riktning. **#32/#33/#34** (spelfel/budgivning) ännu
+> ej lästa. **NU är åter öppet — ägaren väljer nästa sak** (järnregeln: exakt en).
 >
 > **Öppna felrapporter efter detta:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
 > 4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — ägaren tog
@@ -325,14 +338,17 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **2♣ dör inte längre i delkontrakt (2026-07-07, NYTT & LIVE):** öppnar din
-  bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång (förr dog
-  ~64 % i delkontrakt). **Bevaka:** (a) når paret rätt STRÄNG, eller landar det
-  ibland trubbigt (t.ex. 5♣ där 4♠/3NT var bättre)? Kravlogiken garanterar utgång
-  men den forcerade minimi-stegen väljer inte alltid finaste färgen. (b) Efter
-  `2♣–2♦–2NT` bjuder svararen 3NT med 3+ hp — men *bara* 3NT (ingen Stayman/
-  transfer ännu), så en 5-3-högfärgsfit missas där. (c) 0–2 hp mittemot 2NT-
-  återbudet passar (rätt). Säg till om boten driver för högt på en riktig bust.
+- **2♣ dör inte längre i delkontrakt + systems-on (2026-07-07, NYTT & LIVE):**
+  öppnar din bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång
+  (förr dog ~64 % i delkontrakt). **Efter `2♣–2♦–2NT`** (öppnaren 22–24) använder
+  svararen nu **Stayman/transfer** som mot en 2NT-öppning → hittar 4♥/4♠-fit i
+  stället för att blint bjuda 3NT. **Bevaka:** (a) hittar paret rätt högfärgsfit
+  lagom ofta, och landar det inte i fel strng? (b) svaga händer med 5-korts högfärg
+  signar av i 3♥/3♠ (rätt), 0–2 hp passar 2NT (rätt) — säg till om något känns fel.
+  (c) I ANDRA 2♣-auktioner (positivt svar, färgrebud) garanterar kravlogiken utgång
+  men den forcerade minimi-stegen väljer inte alltid finaste färgen (t.ex. 5♣ där
+  4♠ var bättre) — säg till om en sådan känns trubbig. (d) Slam-utforskning efter
+  2♣ är fortfarande tunn (uppföljning knyter an till #29).
 - **Inget svagt hoppskift längre (#31, 2026-07-06, NYTT & LIVE):** svarar du på
   partnerns öppning med en svag 6-korts högfärg bjuder boten nu **1♥/1♠** (lågt,
   rondkrav), aldrig 2♥/2♠. **Bevaka:** håller boten budgivningen lagom låg, eller

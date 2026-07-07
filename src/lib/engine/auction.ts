@@ -22,6 +22,7 @@ import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
 import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
+import { strong2NTSystemsOn } from './strong-2nt-systemson'
 import { gerberInvestigation, gerber2NTInvestigation } from './nt-slam'
 import { dontOvercall } from './dont'
 import { conventionalDefense } from './defense-conventional'
@@ -481,6 +482,21 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
 
   // Öppnaren passade svararens bud → kontraktet är satt.
   if (rebid.call === 'P') return finish(false)
+
+  // Systems-on efter 2♣–2♦–2NT (öppnarens 22–24): svararen använder Stayman/
+  // transfer precis som mot en 2NT-öppning (fast 22–24 mittemot). Bygger hela
+  // sekvensen deterministiskt. null = svararen för svag (0–2) → faller igenom och
+  // passar 2NT via det vanliga flödet.
+  if (opening.call === '2C' && response.call === '2D' && rebid.call === '2NT') {
+    const so = strong2NTSystemsOn(deal.hands[openerSeat], deal.hands[responderSeat])
+    if (so) {
+      for (const st of so.turns) {
+        const seat = st.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: st.role, call: st.call, rule: st.rule, explanation: st.explanation })
+      }
+      return finish(so.open)
+    }
+  }
 
   // Slamutredning: efter en överenskommen trumf i slamzon växer 1430 RKC (med
   // cue-rond + ev. Sjöbergs 5NT) auktionen vidare. Högfärgsfit via Jacoby 2NT

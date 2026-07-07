@@ -1163,6 +1163,19 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **Systems-on över 2♣–2♦–2NT (kod, §4.4).** Efter öppnarens
+  2NT-återbud (22–24) använder svararen nu samma konventioner som mot en naturlig
+  2NT-öppning – **Stayman (3♣) och transfers (3♦/3♥) + Texas** – för att hitta
+  4-4- och 5-3-högfärgsfit i stället för att blint bjuda 3NT (samma dags tidigare fix).
+  Svararen bjöd väntebudet 2♦ (0–7 hp), så poänggränserna sänks två steg (utgång
+  redan från 3 hp; 22+3 = 25). Återanvänder det befintliga 2NT-svarsmaskineriet
+  via en `openerMin`-parameter (default 20 → naturlig 2NT-öppning byte-identisk):
+  `respondTo2NT` / `openerRebidAfter2NTResponse` / `responderRebidIn2NTAuction`
+  (`responses-2nt.ts` + `responder-rebids.ts`), hopbyggda i `strong-2nt-systemson.ts`
+  och inkopplade i `buildAuction`. Effekt: ~30 % av alla 2♣–2♦–2NT-auktioner når
+  nu en högfärgsutgång (4♥/4♠) som förr blev 3NT; svaga 5-färger signar av i 3♥/3♠
+  i stället för 2NT. Facit `auction-2c-gameforce.test.ts` (4-4 Stayman → 4♥, 5-4 →
+  högfärgsutgång). 1079 test gröna, tsc rent.
 - **2026-07-07** – **2♣-öppningen håller sitt utgångskrav i live-lagret (kod, §4.4).**
   En utforskningsprob (300 000 givar) visade att **~64 % av alla ostörda 2♣-
   öppningar dog i DELKONTRAKT** trots att 2♣ är ovillkorligt utgångskrav (82 % av
