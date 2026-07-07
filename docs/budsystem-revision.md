@@ -110,7 +110,7 @@ kravminnet löst.
 | **A** | efter 1NT-återbud (`1m–1M–1NT`) | 🟢 **KLAR & LIVE** — jämn → 6NT (Gerber); obal. m. fit → 6 i färg (RKC) |
 | **D** | Jacoby 2NT-läcka (hängande cue = slam-quirken) | 🟢 **KLAR & LIVE** — → 7♥; quirk stängd i alla vägar |
 | **B** | efter stark 2♣ (positiva svar / 2NT-rebud) | 🔴 **kvar** |
-| **C** | efter öppnaren visat extra (hoppskift/hopphöjning/reverse) — **störst** | 🔴 **kvar** |
+| **C** | efter öppnaren visat extra (hoppskift/hopphöjning/reverse) — **störst** | 🟡 **hopphöjning KLAR** (1x–1M–3M → 6M via RKC, `auction-slam-jumpraise.test.ts`); **reverse + hoppskift kvar** |
 
 **Nästa gång:** ta F1 familj **C** (störst bucket, mest värde) eller **B** (2♣, knyter
 an till 2♣-arbetet). Bygg facit-först: probe → röd giv → fix → grön → DD-verifiera →

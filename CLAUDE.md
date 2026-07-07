@@ -41,7 +41,19 @@ Läs den här filen först varje session.
 > (svarare + öppnare), annars rakt på 4NT. Probe: **0 "två-i-rad" i 200 000 auktioner**
 > (var >0). Facit `auction-slam-jacoby-cue.test.ts` (1♥–2NT → 7♥). Den parkerade
 > slam-quirken är därmed LÖST. **1087 test gröna, tsc rent.**
-> **KVAR i F1:** Familj B (2♣), C (hoppskift/hopphöjning/reverse — störst). Se 👀 Bevaka.
+> **Familj C — HOPPHÖJNING KLAR (2026-07-07):** efter `1x–1M–3M` (öppnaren
+> hopphöjer svararens högfärg, 16–18 + 4 stöd) är trumfen redan överenskommen →
+> `buildAuction` kopplar in `slamInvestigation` (svararens hf trumf, cue-rond som
+> Jacoby-fiten, INTE skipCueRound) efter hopphöjningen. Portar: slamzon (≥33
+> stödpoäng), ≥4 nyckelkort, `pairControlsSideSuits` (motorn går ändå
+> deterministiskt vidare till 4NT → gaten krävs som #29). Probe (300 000 givar,
+> DD): 41 slamzon-stopp av 1 563 hopphöjningar. Make-rate-probe (250 000): drev slam
+> 328 ggr, 16/18 DD-lösta höll (2 bet på exakt ett stick, finess) = 88,9 %. Facit
+> `auction-slam-jumpraise.test.ts` (1♥–1♠–3♠ → 6♠, 1♣–1♠–3♠ → 6♠, båda DD 13).
+> budsystem.md §5.2 + §9. **1089 test gröna, tsc rent.**
+> **KVAR i F1:** Familj B (2♣), C:s systerfall **reverse** (`1♣–1♥–2♦`) + **hoppskift**
+> (`1♦–1♠–3♣`) — störst men rörigare (ingen överenskommen trumf; vissa reverse-
+> auktioner kollapsar t.o.m. under utgång, eget problem). Se 👀 Bevaka.
 >
 > **Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
 > **#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
@@ -383,6 +395,16 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Slam efter öppnarens hopphöjning (F1 familj C, 2026-07-07, NYTT & LIVE):** öppnar
+  din bot-partner 1 i färg, du svarar en högfärg på 1-läget och hen **hopphöjer** den
+  (`1♦–1♥–3♥`, visar 16–18 + 4 stöd), driver paret nu **slam** (6 i högfärgen via 1430
+  RKC) i stället för att stanna i 4M när du har slamvärden. **Bevaka:** (a) når det
+  slam lagom ofta eller blåser det slam som betar? (Portar: ≥33 stödpoäng, ≥4
+  nyckelkort, kontroll i varje sidofärg; make-rate-probe ~89 %, de få bet gick ner
+  exakt ett stick = finess-slam.) (b) Missar det tvärtom en slam (porten är medvetet
+  konservativ)? (c) Bara hopphöjningen av din högfärg täcks — familj C:s systerfall
+  **reverse** (`1♣–1♥–2♦`) + **hoppskift** (`1♦–1♠–3♣`) driver ännu INTE slam (nästa
+  steg).
 - **Slam efter 1NT-återbud (F1 familj A, 2026-07-07, NYTT):** öppnar din bot-partner
   1 i minor/högfärg, du svarar en ny färg på 1-läget och hen rebjuder **1NT** (12–14),
   driver paret nu **slam** i stället för 3NT när du har slamvärden (≥33 stödpoäng):

@@ -545,6 +545,30 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
+  // Slamutredning efter öppnarens HOPPHÖJNING av svararens högfärg (1x–1M–3M,
+  // 16–18 med 4-korts stöd, F1 familj C). Trumfen (svararens högfärg) är redan
+  // överenskommen, så svararen (kaptenen) driver slam via cue-rond + 1430 RKC –
+  // samma maskineri som Jacoby-fiten (INTE skipCueRound: en cue ligger lagligt
+  // över 3M). `slamInvestigation` returnerar null utanför slamzon (≥33 stödpoäng)
+  // eller om två nyckelkort saknas → då står den vanliga kedjan kvar (svararen
+  // accepterar 4M / passar). Kontroll-gaten (`pairControlsSideSuits`) krävs som i
+  // #29: motorn går ändå deterministiskt vidare till 4NT efter cue-ronden, så
+  // utan gaten kan RKC blåsa slam med två snabba förlorare i en objuden sidofärg.
+  if (
+    rebid.rule === 'hopphöjning (inbjudan)' &&
+    respMajor && parseBid(rebid.call).suit === respMajor &&
+    pairControlsSideSuits(deal.hands[openerSeat], deal.hands[responderSeat], respMajor)
+  ) {
+    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], respMajor, rebid.call)
+    if (slam) {
+      for (const t of slam) {
+        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+      }
+      return finish(false)
+    }
+  }
+
   // Slamutredning: efter en överenskommen trumf i slamzon växer 1430 RKC (med
   // cue-rond + ev. Sjöbergs 5NT) auktionen vidare. Högfärgsfit via Jacoby 2NT
   // (Steg 1–2) eller minorfit via inverterad minor (Steg 3).
