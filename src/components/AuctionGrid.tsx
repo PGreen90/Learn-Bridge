@@ -100,7 +100,7 @@ export function AuctionGrid({
             aria-hidden
             onClick={() => setSelected(null)}
           />
-          <div className="absolute inset-x-1 top-8 z-40 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+          <div className="absolute inset-x-1 top-8 z-40 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
             {/* Stäng-kryss: förankrat i övre högra hörnet så det ALDRIG kan
                 knuffas utanför bild. iPhone-glas: frostad genomskinlig cirkel
                 (backdrop-blur), ljus kant + glansdager på övre halvan. */}
@@ -117,9 +117,9 @@ export function AuctionGrid({
               />
               <span className="relative drop-shadow-sm">✕</span>
             </button>
-            <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2 pr-12">
+            <div className="flex flex-wrap items-center gap-2 border-b border-line pb-2 pr-12">
               <BidChip bid={chosen.bid} />
-              <span className="text-sm font-semibold text-slate-700">
+              <span className="text-sm font-semibold text-ink-soft">
                 Förklaring · {SEAT_LABEL[chosen.seat]}
               </span>
               {chosenInfo?.forcing && (
@@ -134,11 +134,11 @@ export function AuctionGrid({
                 <span className="rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>
               )}
             </div>
-            <p className="pt-2 text-sm text-slate-700">
+            <p className="pt-2 text-sm text-ink-soft">
               {chosen.explanation ? (
                 <SuitText>{chosen.explanation}</SuitText>
               ) : (
-                <span className="text-slate-400">
+                <span className="text-ink-faint">
                   Ingen förklaring för <BidLabel bid={chosen.bid} />.
                 </span>
               )}

@@ -324,20 +324,20 @@ function BiddingPhase({
       {/* Kontrakt bjudet: vit bekräftelsedialog (Synreys "Declared by South"). */}
       {finalContract && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="min-w-60 rounded-xl bg-white p-4 text-center shadow-xl">
+          <div className="min-w-60 rounded-xl bg-panel p-4 text-center shadow-xl">
             <div className="flex items-center justify-center gap-2 pb-3">
               <BidChip bid={`${finalContract.level}${STRAIN_CODE[finalContract.strain]}`} />
               {finalContract.doubled && (
                 <span className="text-sm font-bold text-red-600">{finalContract.doubled}</span>
               )}
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-ink-soft">
                 spelas av {SEAT_LABEL[finalContract.declarer]}
               </span>
             </div>
             <button
               type="button"
               onClick={onConfirm}
-              className="w-full border-t border-slate-200 pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
+              className="w-full border-t border-line pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
             >
               Bekräfta
             </button>
@@ -348,14 +348,14 @@ function BiddingPhase({
       {/* Passades given ut: vit dialog (Synrey-stil) med ny giv. */}
       {passedOut && !reporting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="rounded-xl bg-white p-4 text-center shadow-xl">
-            <p className="mb-3 text-sm text-slate-700">Ingen öppnade – given passades ut.</p>
+          <div className="rounded-xl bg-panel p-4 text-center shadow-xl">
+            <p className="mb-3 text-sm text-ink-soft">Ingen öppnade – given passades ut.</p>
             <Button onClick={onNewGame}>Ny giv →</Button>
             <div>
               <button
                 type="button"
                 onClick={() => setReporting(true)}
-                className="mt-3 text-xs font-medium text-slate-500 underline hover:text-slate-700"
+                className="mt-3 text-xs font-medium text-ink-muted underline hover:text-ink"
               >
                 Kändes något fel? Rapportera given
               </button>
@@ -410,11 +410,11 @@ function TableMenu({
             className="fixed inset-0 z-30 cursor-default"
             onClick={onToggle}
           />
-          <div className="absolute right-0 top-11 z-40 w-64 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+          <div className="absolute right-0 top-11 z-40 w-64 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
             <Button className="w-full" onClick={onNewGame}>
               Ny giv →
             </Button>
-            <p className="mt-3 text-xs leading-relaxed text-slate-600">{children}</p>
+            <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
           </div>
         </>
       )}
@@ -450,16 +450,16 @@ function ScenarioPicker({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl"
+        className="w-full max-w-md rounded-2xl bg-panel p-4 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-slate-800">Vad vill du träna på?</h2>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600" aria-label="Stäng">
+          <h2 className="text-base font-semibold text-ink">Vad vill du träna på?</h2>
+          <button type="button" onClick={onClose} className="text-ink-faint hover:text-ink" aria-label="Stäng">
             ✕
           </button>
         </div>
-        <p className="mb-3 text-xs text-slate-500">
+        <p className="mb-3 text-xs text-ink-muted">
           Appen letar fram en giv där ni med god budgivning ska nå målet. Sen budar du själv.
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -473,11 +473,11 @@ function ScenarioPicker({
                 className={`rounded-xl border p-2.5 text-left transition ${
                   selected
                     ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                    : 'border-line bg-panel hover:border-line-strong hover:bg-panel-2'
                 }`}
               >
-                <div className="text-sm font-semibold text-slate-800">{describeTarget(target)}</div>
-                <div className="mt-0.5 text-[11px] leading-snug text-slate-500">{hint}</div>
+                <div className="text-sm font-semibold text-ink">{describeTarget(target)}</div>
+                <div className="mt-0.5 text-[11px] leading-snug text-ink-muted">{hint}</div>
               </button>
             )
           })}
@@ -505,11 +505,11 @@ function SearchOverlay({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-xl">
+      <div className="w-full max-w-xs rounded-2xl bg-panel p-5 text-center shadow-xl">
         {gaveUp ? (
           <>
-            <p className="mb-1 text-sm font-semibold text-slate-800">Hittade ingen sådan giv</p>
-            <p className="mb-4 text-xs text-slate-500">
+            <p className="mb-1 text-sm font-semibold text-ink">Hittade ingen sådan giv</p>
+            <p className="mb-4 text-xs text-ink-muted">
               {label} är ovanligt och dök inte upp bland {tried.toLocaleString('sv-SE')} givar. Försök igen
               eller ta en slumpad giv.
             </p>
@@ -522,8 +522,8 @@ function SearchOverlay({
           </>
         ) : (
           <>
-            <p className="mb-1 text-sm font-semibold text-slate-800">Söker en giv …</p>
-            <p className="mb-4 text-xs text-slate-500">
+            <p className="mb-1 text-sm font-semibold text-ink">Söker en giv …</p>
+            <p className="mb-4 text-xs text-ink-muted">
               {label} · {tried.toLocaleString('sv-SE')} givar prövade
             </p>
             <Button variant="secondary" onClick={onCancel}>
@@ -783,19 +783,19 @@ function PlayTable({
         <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
         {!resultSeen && !reporting ? (
           <div className="overlay-in fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="dialog-in rounded-xl bg-white p-5 text-center shadow-xl">
+            <div className="dialog-in rounded-xl bg-panel p-5 text-center shadow-xl">
               <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
                 {result.made
                   ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
                   : `${-result.diff} bet (${result.declarerTricks} stick).`}
               </p>
               {score && (
-                <p className={`${claimed ? 'mb-1' : 'mb-4'} text-base font-bold text-slate-800`}>
+                <p className={`${claimed ? 'mb-1' : 'mb-4'} text-base font-bold text-ink`}>
                   {score.label}
                 </p>
               )}
               {claimed && (
-                <p className="mb-4 text-xs text-slate-500">
+                <p className="mb-4 text-xs text-ink-muted">
                   {claimed.auto
                     ? 'Auto Claim: resten av sticken var 100 % säkra för spelföraren.'
                     : 'Claim godkänd — resten av sticken bokfördes utan spel.'}
@@ -810,7 +810,7 @@ function PlayTable({
               <button
                 type="button"
                 onClick={() => setReporting(true)}
-                className="mt-3 text-xs font-medium text-slate-500 underline hover:text-slate-700"
+                className="mt-3 text-xs font-medium text-ink-muted underline hover:text-ink"
               >
                 Kändes något fel? Rapportera given
               </button>
@@ -890,7 +890,7 @@ function PlayTable({
 
       {/* Meny-overlay: ny giv, facit och hjälp – inget av det stör bordet annars. */}
       {showMenu && (
-        <div className="absolute right-2.5 top-13 z-40 w-72 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+        <div className="absolute right-2.5 top-13 z-40 w-72 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
           {/* Facit finns nu som direktknapp på bordet (R3-fynd #4); menyn har
               bara ny giv, claim och hjälp. */}
           <Button className="w-full" onClick={onNewGame}>
@@ -911,9 +911,9 @@ function PlayTable({
             </Button>
           )}
           {/* Auto Claim av/på: gäller både dig och datorn som spelförare. */}
-          <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-100 px-2.5 py-1.5">
-            <span className="text-xs font-medium text-slate-600">
-              Auto Claim <span className="text-slate-400">(säkra stick tas automatiskt)</span>
+          <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
+            <span className="text-xs font-medium text-ink-soft">
+              Auto Claim <span className="text-ink-faint">(säkra stick tas automatiskt)</span>
             </span>
             <button
               type="button"
@@ -925,7 +925,7 @@ function PlayTable({
               {autoClaim ? 'På' : 'Av'}
             </button>
           </div>
-          <p className="mt-3 text-xs leading-relaxed text-slate-600">
+          <p className="mt-3 text-xs leading-relaxed text-ink-soft">
             Kontraktet är <strong>{contract.level}{STRAIN_CODE[contract.strain] === 'NT' ? 'NT' : ''}</strong>
             {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}
             {SEAT_LABEL[contract.declarer]} (behöver {result.needed} stick). Ljuskäglan visar vems tur det är.
@@ -953,7 +953,7 @@ function PlayTable({
       {/* ⓘ-overlay: budgivningen som ledde till kontraktet (klickbara förklaringar). */}
       {showInfo && (
         <div className="absolute left-1/2 top-13 z-40 w-full max-w-sm -translate-x-1/2 px-3">
-          <div className="rounded-xl bg-white p-2 shadow-xl ring-1 ring-slate-200">
+          <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
             <AuctionGrid calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
           </div>
         </div>
@@ -1023,7 +1023,7 @@ function PlayTable({
           <span className="text-sm font-semibold text-white">
             NS:{play.tricksNS} ÖV:{play.tricksEW}
           </span>
-          <span className="text-xs text-slate-400">mål {result.needed}</span>
+          <span className="text-xs text-ink-faint">mål {result.needed}</span>
         </div>
         <button
           type="button"
@@ -1316,9 +1316,9 @@ function ClaimDialog({
   const diffLabel = (t: number) => (t === needed ? 'kontrakt' : t > needed ? `+${t - needed}` : `${t - needed}`)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-3">
-      <div className="w-full max-w-sm rounded-xl bg-white p-4 text-center shadow-xl">
-        <p className="text-sm font-bold text-slate-800">Claim tricks</p>
-        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+      <div className="w-full max-w-sm rounded-xl bg-panel p-4 text-center shadow-xl">
+        <p className="text-sm font-bold text-ink">Claim tricks</p>
+        <p className="mt-1 text-xs leading-relaxed text-ink-soft">
           Din sida har <strong>{won}</strong> stick och <strong>{remaining}</strong> återstår.
           Hur många stick tar ni <strong>totalt</strong> i given?
         </p>
@@ -1331,11 +1331,11 @@ function ClaimDialog({
               className={`min-w-12 rounded-lg px-2 py-1.5 ring-1 transition-colors ${
                 t >= needed
                   ? 'bg-emerald-50 ring-emerald-200 hover:bg-emerald-100'
-                  : 'bg-slate-50 ring-slate-200 hover:bg-slate-100'
+                  : 'bg-panel-2 ring-line hover:bg-panel'
               }`}
             >
-              <span className="block text-sm font-bold text-slate-800">{t}</span>
-              <span className={`block text-[10px] font-medium ${t >= needed ? 'text-emerald-700' : 'text-slate-500'}`}>
+              <span className="block text-sm font-bold text-ink">{t}</span>
+              <span className={`block text-[10px] font-medium ${t >= needed ? 'text-emerald-700' : 'text-ink-muted'}`}>
                 {diffLabel(t)}
               </span>
             </button>
@@ -1345,7 +1345,7 @@ function ClaimDialog({
         <button
           type="button"
           onClick={onClose}
-          className="mt-3 w-full border-t border-slate-200 pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
+          className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
         >
           Avbryt — spela vidare
         </button>

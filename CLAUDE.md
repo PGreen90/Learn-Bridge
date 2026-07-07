@@ -12,17 +12,27 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — ÖPPET (ägaren väljer nästa sak; järnregeln: exakt en)
-> **Läget (2026-07-07 kväll):** inga öppna felrapporter (#1–#34 stängda eller
-> medvetet uppskjutna, se ⚪ SENARE). Steg A (Vercel + rebidz.com + PWA) är
-> KLART & LIVE sedan 2026-07-05 → **Beslut A avklarat**. **Beslut B**
-> (konton/multiplayer/tävlingar) är ett separat STORT spår — startas bara på
-> uttryckligt ägarbeslut (`docs/framtid-multiplayer-plattform.md`). När ägaren
-> ska välja: presentera återstående punkter ur `docs/arbetslista.md` +
-> NÄST-listan. Bra kandidater: spela & bevaka de ärliga slamportarna, F1-resten
-> (NÄST 1), F2 datadriven detektorkedja + systemrevisor
-> (`docs/budsystem-revision.md` körordning F1–F6), UI-förfining, eller fler
-> budträningsgivar (⚪ SENARE).
+### 🔵 NU — UI-OVERHAUL steg 1 av 5: semantiska färg-tokens (ägarbeslut 2026-07-07)
+> **NU (2026-07-07 kväll):** ägaren valde UI-overhaul efter Fables
+> arkitektur-diagnos av UI-lagret. Diagnosens friska delar: motor/UI-
+> separationen är ren (overhaulen kan inte skada bridge-logiken), `Felt.tsx`/
+> `cardLayout.ts` är rätt sanningskällor, tokens-grunden finns i `index.css`.
+> Fyra problem: (a) `Play.tsx` 1431 rader = hela spelet i en fil (PlayTable
+> ~15 useState + worker), (b) färger utspridda — råa `slate-*` 235 + `emerald-*`
+> 143 träffar i 18 UI-filer mot ~41 token-användningar, (c) mörkt läge ojämnt
+> (`Play.tsx` 0 dark-varianter, 17/19 komponenter 0 → vita rutor på mörkt bord),
+> (d) 11 handrullade overlay/dialog-byggen utan gemensamt beteende; plus 0
+> UI-test (alla 1090 vaktar motorn). **Femstegsplan, ett steg i taget:**
+> (1) **semantiska tokens** (yta/text/dämpad/kant/accent i `index.css`, migrera
+> UI-filerna) ← NU, (2) delad `<Dialog>`-komponent, (3) splittra `Play.tsx`
+> (logik-hooks + fas-filer), (4) mörkt läge jämnt (mest gratis av steg 1),
+> (5) röktester på nyckelflödena. Steg 2–5 ligger i NÄST.
+>
+> **Bakgrundsläget:** inga öppna felrapporter (#1–#34 stängda eller medvetet
+> uppskjutna, se ⚪ SENARE). Steg A (Vercel + rebidz.com + PWA) KLART & LIVE
+> sedan 2026-07-05 → **Beslut A avklarat**. **Beslut B** (konton/multiplayer/
+> tävlingar) är ett separat STORT spår — startas bara på uttryckligt ägarbeslut
+> (`docs/framtid-multiplayer-plattform.md`).
 >
 > **Senast klart & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, deploy grön):
 > ÄRLIGA SLAMPORTAR — tjuvkiken borttagen.** Ägarbeslut efter Fables
@@ -253,10 +263,13 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs på de
+1. **UI-overhaul steg 2–5** — (2) delad `<Dialog>`, (3) splittra `Play.tsx`,
+   (4) mörkt läge jämnt, (5) röktester på nyckelflödena. Ett steg i taget;
+   flyttas upp till NU ett och ett när föregående steg är klart. Därefter:
+   själva den visuella omgörningen, bit för bit.
+2. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs på de
    ärliga slamportarnas mönster (kaptensregeln mot visade intervall). Gärna
    efter att ägaren spelat ett tag och bekräftat portarna i spel.
-2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - **Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (ägarens
