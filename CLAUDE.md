@@ -11,456 +11,69 @@ Läs den här filen först varje session.
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — ägaren pekar ut nästa NU (Steg A helt klart; järnregeln: exakt en).
-> **HELA STEG A ÄR KLART & LIVE (2026-07-05):** Del 1 (Vercel-flytt) + Del 2
-> (`rebidz.com`-domän) + Del 3 (PWA). Därmed är **Beslut A** i framtidsdoket
-> avklarat. **NU är öppet — ägaren väljer nästa sak** (presentera återstående
-> punkter ur `docs/arbetslista.md` + NÄST-listan, en väljs, järnregeln). **Beslut B**
-> (konton/multiplayer/tävlingar) är ett separat, STORT spår — inte automatiskt näst;
-> börja det bara på uttryckligt ägarbeslut (`docs/framtid-multiplayer-plattform.md`).
-> Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
-> R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
+
+### 🔵 NU — ÖPPET (ägaren väljer nästa sak; järnregeln: exakt en)
+> **Läget (2026-07-07 kväll):** inga öppna felrapporter (#1–#34 stängda eller
+> medvetet uppskjutna, se ⚪ SENARE). Steg A (Vercel + rebidz.com + PWA) är
+> KLART & LIVE sedan 2026-07-05 → **Beslut A avklarat**. **Beslut B**
+> (konton/multiplayer/tävlingar) är ett separat STORT spår — startas bara på
+> uttryckligt ägarbeslut (`docs/framtid-multiplayer-plattform.md`). När ägaren
+> ska välja: presentera återstående punkter ur `docs/arbetslista.md` +
+> NÄST-listan. Bra kandidater: spela & bevaka de ärliga slamportarna, F1-resten
+> (NÄST 1), F2 datadriven detektorkedja + systemrevisor
+> (`docs/budsystem-revision.md` körordning F1–F6), UI-förfining, eller fler
+> budträningsgivar (⚪ SENARE).
 >
-> **🔵 PÅGÅENDE NU (2026-07-07 kväll): ÄRLIGA SLAMPORTAR — städa bort tjuvkiken.**
-> Ägarbeslut efter Fables totalgranskning: bottarna ska bjuda som MÄNNISKOR — varje
-> budbeslut fattas på EGEN hand + vad partnern VISAT (budens intervall/löften),
-> ALDRIG på partnerns faktiska kort. De får hellre missa eller felbedöma en slam
-> än kika. Detta gäller även facit-linjen/Budvisningen (samma `buildAuction`):
-> "facit" = vad ett korrekt mänskligt par bjuder, inte double-dummy-perfektion.
-> **Tjuvkiks-inventering (Fable 2026-07-07, komplett):**
-> (1) `slamInvestigation` (`slam-auction.ts:50`) — slamzon på parets FAKTISKA
-> poäng, nyckelkortsport FÖRE frågan, trumfdam ur båda händer, cue-rondens
-> "komplett par"-koll läser öppnarens hand. (2) `pairControlsSideSuits`
-> (`auction.ts:216`) — kontroller ur båda händer (3 anropsställen). (3)
-> `gerberRebidInvestigation` + `buildGerberSequence` (`nt-slam.ts`) — faktisk
-> kombinerad hp + faktiska ess/kungar ur båda händer (svaren är ärliga; det är
-> RÄKNINGEN hos kaptenen som kikar). (4) `familyAFitTrump` (`slam-auction.ts:159`)
-> — läser öppnarens färglängder för fit (ärlig väg = NMF som redan finns). (5)
-> `mssMinorFitContinuation`/`ntUnsafe` — båda händer. (6) `exclusionInvestigation`
-> — kombinerade poäng + nyckelkort FÖRE frågan. **Ärlig mall finns redan i repot:**
-> `strong-2nt-systemson.ts` (egen hand mot visat intervall OPENER_MIN/MAX) och
-> `gerberInvestigation`/`gerber2NTInvestigation`-portarna (egen hp mot visat
-> 15–17/20–21). Ess-/kungfråge-SVAREN (`respondToRKC`, `respondToGerber` m.fl.)
-> är redan ärliga (svararens egen hand).
-> **STATUS: KLAR & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, Vercel-deploy grön).**
-> Ägarens två systemval (via frågor): (1) **inbjudningar i kanske-zonen** (31–32
-> mot visat minimum; kvantitativ 4NT över sang, 5M/4m i trumf; partnern
-> accepterar över blott minimum), (2) **ingen kontrollkoll** (lita på poängen +
-> nyckelkortssvaret; `pairControlsSideSuits` BORTTAGEN, motorns auto-cue-rond
-> BORTTAGEN — den bar bara kontrollgaten och orsakade gamla slam-quirken).
-> Byggt: `slam-auction.ts` omskriven (kaptensregeln: egen hand + visat minimum
-> ≥33 driv / 31–32 inbjudan; härledning av nyckelkort ur svaret + egen hand;
-> tvetydighet → anta högt mot visad 15+, annars lågt + PARTNER-RÄTTELSE till 6;
-> storslam kräver visshet), `nt-slam.ts` (Gerber härleder ur svaren; NY
-> kvantitativ 4NT-inbjudan 19–20 i familj A), `auction.ts` (visade intervall per
-> återbudsregel: 1NT-återbud 12, hopphöjning/hopp-återbud 16, Jacoby per rebid,
-> inverterad per rebid, splinter-relä 15, MSS 15). `familyAFitTrump` läser BARA
-> svararens hand (6+ egen hf / 5+ i öppnarens minor; gömda 4-4-fits jagas ej).
-> **Kända ÄRLIGA MISSER (medvetna, test-låsta):** #29-originalgiven stannar i
-> 3NT (13 hp mot visade 16–18 < zonen — slammen krävde kik); familj A-givens
-> 4-korts minorfit drivs ej (fit ej vetbar). Slamfrekvens (probe 60 000):
-> lillslam ~1/120, storslam ~1/4300 (mänskligt; kontraktväljar-testet fick egen
-> timeout). **Blottad systemlucka → B13 i revisionen:** inverterad minor-återbud
-> är grova (17 hp + 6m visas som "minimum") → ärliga misser där; eget framtida
-> arbete. Docs: budsystem.md §5.2/§5.7/§6 (ärliga slamportar-principen)/§6.2-
-> motoranmärkning/§9; budsystem-revision.md B8–B13. Två gamla testgivar med
-> OMÖJLIGA kort (samma kort i två händer) lagades i förbifarten.
-> **1090 test gröna, tsc rent, pushat & deploy grön (PCD 2026-07-07 kväll).**
-> **NU är därmed åter ÖPPET — ägaren väljer nästa sak** (bra kandidat: spela och
-> bevaka de ärliga portarna; därefter F1 familj B/C-rest från NÄST).
-> **F1 (familj B + C:s reverse/hoppskift) PAUSAD → NÄST** tills portarna
-> bekräftats i spel — nya familjer byggs sedan på det ärliga mönstret.
+> **Senast klart & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, deploy grön):
+> ÄRLIGA SLAMPORTAR — tjuvkiken borttagen.** Ägarbeslut efter Fables
+> totalgranskning: bottarna bjuder som MÄNNISKOR — varje budbeslut fattas på
+> EGEN hand + vad partnern VISAT via buden (intervall/löften), ALDRIG på
+> partnerns faktiska kort; hellre missa en slam än kika. Gäller även
+> facit-linjen/Budvisningen (samma `buildAuction`). Ägarens två systemval:
+> (1) **inbjudningar i kanske-zonen** (31–32 mot visat minimum; kvantitativ 4NT
+> över sang, 5M/4m i trumf; partnern accepterar över blott minimum),
+> (2) **ingen kontrollkoll** (lita på poängen + nyckelkortssvaret;
+> `pairControlsSideSuits` och motorns auto-cue-rond BORTTAGNA — cue-ronden bar
+> bara gaten och orsakade gamla slam-quirken). Byggt: `slam-auction.ts`
+> omskriven (**kaptensregeln**: egen hand + visat minimum ≥33 driv / 31–32
+> inbjudan; nyckelkort HÄRLEDS ur svaret + egen hand; tvetydighet → anta högt
+> mot visad 15+, annars lågt + PARTNER-RÄTTELSE till 6; storslam kräver
+> visshet), `nt-slam.ts` (Gerber härleder ur svaren; ny kvantitativ
+> 4NT-inbjudan 19–20 mot 1NT-återbudet), `auction.ts` (visade intervall per
+> återbudsregel: 1NT-återbud 12, hopphöjning/hopp-återbud 16, Jacoby/inverterad
+> per rebid, splinter-relä 15, MSS 15); `familyAFitTrump` läser BARA svararens
+> hand (6+ egen hf / 5+ i öppnarens minor; gömda 4-4-fits jagas ej). **Kända
+> ÄRLIGA MISSER (medvetna, test-låsta):** #29-originalgiven stannar i 3NT
+> (13 hp mot visade 16–18 < zonen); familj A-givens 4-korts minorfit drivs ej.
+> Slamfrekvens (probe 60 000 givar): lillslam ~1/120, storslam ~1/4300 —
+> mänskligt. **Blottad systemlucka → B13 i revisionen:** inverterad
+> minor-återbud är grova (17 hp + 6m visas som "minimum") → ärliga misser där.
+> Docs: budsystem.md §5.2/§5.7/§6 (principen)/§6.2-motoranmärkning/§9;
+> budsystem-revision.md B8–B13. **1090 test gröna, tsc rent, deploy grön.**
+> Se 👀 Bevaka (översta posten).
 >
-> **F1 — bredda slam-utforskningen (PAUSAD 2026-07-07 kväll, se NU ovan).** Kom ur ägarens
-> budsystem-djupdykning (två färgkodade listor, se chatt): slam var bara inkopplat
-> i fem auktionsformer; hela GF-familjer (2♣, hoppskift/reverse, 1NT-återbud, 2/1
-> med fit) saknade slam-drivning. En probe (40 000 givar, DD-lösta) delade upp
-> missarna i **fyra familjer: A** (efter 1NT-återbud), **B** (efter stark 2♣),
-> **C** (efter öppnaren visat extra: hoppskift/hopphöjning/reverse — störst), **D**
-> (Jacoby 2NT-läcka: hängande cue). Byggs facit-först, en familj i taget.
-> **Familj A HELT KLAR** (jämn del LIVE, obalanserad del byggd & testad — se PCD-status):
-> efter `1m–1M–1NT` driver svararen med slamvärden (≥33 stödpoäng): **jämn** →
-> Gerber 4♣ → 6NT (`gerberRebidInvestigation`); **obalanserad med färgfit** (6+ egen
-> hf / 8+ korts fit) → trumf via `familyAFitTrump` → `slamInvestigation` (skipCueRound
-> + kontroll-gate) → 6 i färgen. Båda i `buildAuction`; `nt-slam.ts` + `slam-auction.ts`.
-> Facit `auction-slam-1nt-rebid.test.ts` (2 givar: 6NT + 6♣, DD-verifierade). budsystem.md
-> §5.7 + §9.
-> **Familj D KLAR (slam-quirken stängd):** den hängande cuen (Jacoby 2NT → cue → RKC
-> lade två svararbud i rad → live-lagret passade delkontraktet) är lagad i
-> `slamInvestigation` (`slam-auction.ts`): cue-ronden läggs bara som ett KOMPLETT par
-> (svarare + öppnare), annars rakt på 4NT. Probe: **0 "två-i-rad" i 200 000 auktioner**
-> (var >0). Facit `auction-slam-jacoby-cue.test.ts` (1♥–2NT → 7♥). Den parkerade
-> slam-quirken är därmed LÖST. **1087 test gröna, tsc rent.**
-> **Familj C — HOPPHÖJNING KLAR (2026-07-07):** efter `1x–1M–3M` (öppnaren
-> hopphöjer svararens högfärg, 16–18 + 4 stöd) är trumfen redan överenskommen →
-> `buildAuction` kopplar in `slamInvestigation` (svararens hf trumf, cue-rond som
-> Jacoby-fiten, INTE skipCueRound) efter hopphöjningen. Portar: slamzon (≥33
-> stödpoäng), ≥4 nyckelkort, `pairControlsSideSuits` (motorn går ändå
-> deterministiskt vidare till 4NT → gaten krävs som #29). Probe (300 000 givar,
-> DD): 41 slamzon-stopp av 1 563 hopphöjningar. Make-rate-probe (250 000): drev slam
-> 328 ggr, 16/18 DD-lösta höll (2 bet på exakt ett stick, finess) = 88,9 %. Facit
-> `auction-slam-jumpraise.test.ts` (1♥–1♠–3♠ → 6♠, 1♣–1♠–3♠ → 6♠, båda DD 13).
-> budsystem.md §5.2 + §9. **1089 test gröna, tsc rent.**
-> **KVAR i F1:** Familj B (2♣), C:s systerfall **reverse** (`1♣–1♥–2♦`) + **hoppskift**
-> (`1♦–1♠–3♣`) — störst men rörigare (ingen överenskommen trumf; vissa reverse-
-> auktioner kollapsar t.o.m. under utgång, eget problem). Se 👀 Bevaka.
+> **F1 — bredda slam-utforskningen (PAUSAD → NÄST 1).** En probe (40 000 givar,
+> DD-lösta) delade slam-missarna i fyra familjer. **KLARA & LIVE:** **A** (efter
+> `1m–1M–1NT`: jämn → Gerber 21+/kvantitativ 4NT 19–20; obalanserad med säker
+> fit på egen hand → 4NT RKC), **C:s hopphöjning** (`1x–1M–3M` → driv 17+/
+> inbjudan 5M 15–16), **D** (hängande cue-quirken stängd — auto-cue-ronden är
+> numera helt borttagen). Alla styrs av de ärliga portarna ovan (äldre
+> beskrivningar i historiken med kontroll-gates/parets faktiska poäng =
+> kik-eran, gäller inte längre). **KVAR (= NÄST 1):** familj **B** (2♣) +
+> C:s systerfall **reverse** (`1♣–1♥–2♦`) och **hoppskift** (`1♦–1♠–3♣`) —
+> störst men rörigast (ingen överenskommen trumf; vissa reverse-auktioner
+> kollapsar t.o.m. under utgång, eget problem). Byggs på det ärliga mönstret.
 >
-> **Senast klart & LIVE (2026-07-07): tre mobil-UI-fixar (ägarstyrt SIDOSPÅR, INTE F1).**
-> Ingen budlogik rörd; desktop helt oförändrat via `sm:`-brytpunkten (≥640px).
-> (1) **Större spelkort på mobil** (mergepunkt `1760ea3`): Syds hand större (48×64);
-> ny responsiv `smPlus`-storlek i `PlayingCard.tsx` (40×56 mobil / 28×40 desktop)
-> för **träkarlen** (norr, `SuitColumns` i `Play.tsx`) + **sidohänderna Ö/V**
-> (`SideStack.tsx`, både spelvyn och Budvisningen). Träkarlens kolumner glesare på
-> höjden (24px syns/kort mot 12 förr, ägarbegäran). Syds utfällning pressar ihop
-> nedtonade färger på mobil så inga kort klipps utanför kanten. (2) **Budförklaringens
-> kryss** (`AuctionGrid.tsx`, mergepunkt `642ab36`): krysset kunde knuffas utanför
-> bild (rubrikraden överflödade) → förankrat absolut i bubblans övre högra hörn +
-> rubriken radbryter; **tryck var som helst utanför bubblan stänger** (genomskinlig
-> helskärmsyta); krysset 36×36 med **iPhone-glaskänsla** (backdrop-blur, ljus kant,
-> glansdager). Gäller även ⓘ-rutan under kortspelet (samma komponent). Hela sviten
-> grön, tsc rent, båda Vercel-deployerna gröna.
->
-> **Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
-> **#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
-> på 28 hp) — `raiseWithFit` (`auction-live.ts`) räknade "inbjudande hopp" = partnerns
-> nivå +2. Nu kapas inbjudande/enkla höjningar vid utgångsnivån och advancern passar
-> när partnern nått utgång. Facit `auction-advancer-cap.test.ts`. **#32 (budgivning):**
-> ägarregel för **6-5** (6-korts lågfärg + 5-korts högfärg) — 12–15 öppnar högfärgen,
-> 16+ öppnar lågfärgen (reverse:ar in högfärgen); `openings.ts`, facit i
-> `openings.test.ts`, budsystem.md §3. **#32-spelfelet + #34-försvaret = UPPSKJUTNA**
-> (spelmotor-kvalitet, se ⚪ SENARE + `docs/bot-hjarna.md`; ägarbeslut 2026-07-07).
-> **1084 test gröna, tsc rent.** #32/#33/#34 stängda. Se 👀 Bevaka.
->
-> **Föregående (2026-07-07): slam efter hopp-återbud i minor (STÄNGER #29).**
-> `/felrapporter` #29 ("hur hittar vi slammen?"): N ♣AQJT94 öppnade 1♣, S svarade
-> 1♠, N hoppade 3♣ (16–18, 6+ klöver) → boten stannade i **3NT** trots en **KALL
-> slam** (6♣/6NT/7 = 13 stick DD). Nu driver paret slam: efter `1m–1M–3m` med
-> svararens fit (3+ i minoren) kopplar `buildAuction` in `slamInvestigation`
-> (minoren trumf, `skipCueRound`) → 4NT RKC → 6♣. Cue-ronden hoppas över (ingen
-> explicit trumf-överenskommelse före frågan), i stället en **kontroll-gate**
-> (`pairControlsSideSuits`: ess eller korthet i varje sidofärg) som hindrar
-> RKC-blast med två snabba förlorare i en objuden färg (bevisat i probe: sänkte
-> nådda slam 85→63, tog bort de grova bet-slammen). Slamzon (≥33) + nyckelkort
-> (≥4/5) hindrar överbud på icke-slamhänder. Facit `auction-slam-jumprebid.test.ts`.
-> budsystem.md §9. **1080 test gröna, tsc rent.** #29 stängd. Se 👀 Bevaka.
->
-> **Föregående (2026-07-07): systems-on över 2♣–2♦–2NT.**
-> Efter öppnarens 2NT-återbud (22–24) använder svararen nu **Stayman (3♣) +
-> transfers (3♦/3♥) + Texas** precis som mot en naturlig 2NT-öppning, för att
-> hitta 4-4- och 5-3-högfärgsfit i stället för att blint bjuda 3NT. Svararen bjöd
-> 2♦ (0–7 hp) → poänggränserna sänks två steg (utgång från 3 hp). Återanvänder
-> 2NT-svarsmaskineriet via en `openerMin`-param (default 20 → naturlig 2NT
-> byte-identisk): `respondTo2NT`/`openerRebidAfter2NTResponse`/
-> `responderRebidIn2NTAuction`, hopbyggt i `strong-2nt-systemson.ts`, inkopplat i
-> `buildAuction`. Effekt: **~30 % av alla 2♣–2♦–2NT når nu 4♥/4♠** (förr 3NT); svaga
-> 5-färger signar av 3♥/3♠. Facit i `auction-2c-gameforce.test.ts`. budsystem.md §9.
-> **1079 test gröna, tsc rent.** Se 👀 Bevaka.
->
-> **Föregående (2026-07-07): 2♣-öppningen håller sitt utgångskrav.**
-> Kom ur `/felrapporter` #29 ("hur hittar vi slammen?"): en utforskningsprob
-> (300 000 givar) visade att **~64 % av alla ostörda 2♣-öppningar dog i
-> DELKONTRAKT** (82 % av stoppen hade 23+ hp = rena kravbrott) — större fynd än
-> #29. Roten: `auctionForce` (`auction-live.ts`) spårade 2/1 + rondkrav men INTE
-> 2♣-öppningens game-force (`buildAuction` bygger bara ett par bud av 2♣-linjen
-> och överlämnar resten, som passades bort). Fix (facit-först): (1) ny 2♣-gren i
-> `auctionForce` (game-krav tills utgång; undantag `2♣–2♦–2NT` = inbjudande);
-> (2) `respondToStrong2NTRebid` (off-book-fallback) + systems-on on-book (ovan).
-> Delkontrakt-andelen föll **63,9 % → 1,7 %** (resten legitima). Mergepunkt `b20d81f`.
->
-> **Öppna felrapporter: INGA.** #28 (4♠ ej bugg), #29 (slam efter hopp-återbud),
-> #32 (6-5-öppning byggd; spelfel uppskjutet), #33 (7♦-hoppet kapat), #34 (försvar
-> uppskjutet) — alla STÄNGDA 2026-07-07. **NU är åter öppet — ägaren väljer nästa
-> sak** (järnregeln: exakt en).
->
-> **Öppna felrapporter efter detta:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
-> 4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — ägaren tog
-> 2♣-fixen (ett symptom) först; slam-letningen efter starkt hopp-återbud väntar på
-> ägarbeslut om riktning. **#32/#33/#34** (spelfel/budgivning) ännu ej lästa.
-> **NU är åter öppet — ägaren väljer nästa sak** (järnregeln: exakt en).
->
-> **Senast klart & LIVE (2026-07-06, mergepunkt `b1fdd6c`): två UI-fixar.**
-> (1) **Tunn kortram** — 1px svart med **20 % opacitet** (`border-black/20` på
-> `base` i `PlayingCard.tsx`) → mjuk grå separation mellan korten. Ägarbeslut som
-> ersätter det ramfria beslutet 2026-07-03; opaciteten valdes efter att ägaren såg
-> helsvart och bad om "gråare, inte lika solid". (2) **Mjukare Auto-Claim** —
-> resultat-/claimrutan poppade förr upp blixtsnabbt; nu tonar bakgrunden in
-> (`overlay-in` 200ms) och rutan tonar in + lyfts en aning (`dialog-in` 260ms),
-> nya keyframes i `index.css`, klasser på overlayn i `Play.tsx`; respekterar
-> `prefers-reduced-motion`. Rena className/CSS-ändringar, ingen budlogik rörd.
-> 1071 test gröna, tsc rent, Vercel-deploy grön.
->
-> **KVAR av ägarens 4-punktslista (2026-07-06 — han bad förbereda alla fyra, tog
-> punkt 2+4 nu):** **Punkt 1** = fler budträningsgivar + en "Vill du träna något
-> speciellt?"-dropdown (data i `src/data/exercises/*.json` + `EXERCISES_BY_THEME`
-> i `bidding.ts`; facit bör knytas till motorns egna svar så det aldrig lär ut fel).
-> **Punkt 3** = sondera budsystemet på djupet (STORT eget spår: håller reglerna,
-> off-book-tolkning "vad kan detta bud betyda", R2:s datadrivna detektorkedja).
-> Ägaren väljer vilken som blir nästa 🔵 NU.
->
-> **Senast klart & LIVE (2026-07-06): `/felrapporter` — #31 + #30 lagade & stängda.**
-> - **#31 (svagt hoppskift avskaffat):** Nord hoppade till 2♥ på 1♦ med ♠7 ♥KT6432
->   ♦Q4 ♣A986 (9 hp). Ägarprincip: **när partnern öppnat håller svararen budgivningen
->   LÅG** — bjud nya färgen billigast (1♥, rondkrav), ett hopp berövar partnern
->   utrymme (t.ex. 1NT). `respondToMajor`/`respondToMinor` (`responses.ts`) faller nu
->   till 1-lägessvaret; öppnarens hantering av ett MANUELLT hoppskift orörd.
->   Mergepunkt `86a295c`. Docs: budsystem.md §4.1/§4.2/§9.
-> - **#30 (stark jämn hand når utgång efter minorhöjning i konkurrens):** Väst (19 hp
->   jämnt) nådde bara 2♥ efter `1♦–(1♠)–2♦`. Två fixar (ägarbeslut, båda vägarna):
->   (1) **öppnings-uppgradering** — jämn 19 med startpoäng ≥20 öppnar **2NT**
->   (`openings.ts`); fixar den rapporterade given (2NT→3NT). (2) **återbudsfix** —
->   `openerStrongNTAfterMinorRaise` + `answerOpenerNTInvite` (`auction-live.ts`): 3NT
->   (20+) / 2NT-inbjudan (18–19) med stopp, höjaren accepterar med maximum. Mergepunkt
->   `603f86c`. Docs: budsystem.md §3, §5.10, §9. Se 👀 Bevaka.
-> - **1071 test gröna, tsc rent, båda deployerna gröna.**
->
-> **KVAR ÖPPNA FELRAPPORTER (ägaren sköt upp 2026-07-06 — ta en i taget vid
-> `/felrapporter`):** **#28** ("aggressivt av syd, analysera" — Syd bjöd 4♠ med
-> renons + 5-5; bedömningsfråga) och **#29** ("Annat — hur hittar vi slammen?" i N/S;
-> förbättringsfråga). Båda är analys/bedömning snarare än tydliga buggar.
->
-> **Senast klart & LIVE (2026-07-05, mergepunkt `1a2da2e`): felrapport skickas
-> DIREKT utan att öppna GitHub** (var SENARE-punkten "PAT-i-localStorage"). Ägaren
-> sparar en snäv fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN
-> gång i Inställningar; då POST:ar `FelrapportDialog` rapporten direkt via GitHubs API
-> (`submitFelrapport` i `src/lib/felrapport.ts`), knappen blir "Skicka rapport ✓" +
-> kvitto. Utan nyckel = oförändrat (öppnar förifylld GitHub-sida). Nyckeln lagras i
-> `src/lib/github-token.ts` under egen nyckel `rebidz:felrapport-token` (utanför
-> `learnbridge:`-prefixet → "Nollställ framsteg" rör den ej); samma nyckel funkar på
-> flera enheter. Fel → svenskt meddelande + reservknapp "Öppna på GitHub →". 1061
-> test gröna, tsc rent, deploy grön, **bevisat skarpt av ägaren (issue #31)**.
->
-> **Del 3 (PWA) KLAR & LIVE (2026-07-05):** appen är nu installerbar ("Lägg till på
-> hemskärmen" på iPhone/Android, egen guld-spader-ikon på emerald) + fungerar
-> offline. `vite-plugin-pwa` (autoUpdate) genererar service worker + `manifest.webmanifest`
-> vid Vercel-bygget; `index.html` har apple-touch-icon + iPhone-taggar; ikoner i
-> `public/` (192/512/maskable/apple-touch). Verifierat i webbläsaren mot skarpa
-> bygget (SW registrerad scope `/`, manifest laddat, inga konsolfel). 1052 test
-> gröna. Mergepunkt `565bbc8`. Ikonerna genererades ur `public/favicon.svg`-designen
-> (engångsskript m. `sharp`, borttaget efteråt; `sharp` ej kvar i deps).
-> **Uppföljning (2026-07-05, mergepunkt `43640e2`):** sidhuvudet fick
-> `pt-[env(safe-area-inset-top)]` (`Layout.tsx`) – i PWA-helskärm på iPhone låg
-> toppen annars under statusraden (klocka/batteri). Marginal = enhetens statusrad
-> (0 i vanlig webbläsare). Bekräftat lagom av ägaren på hans iPhone. `<main>` hade
-> redan motsvarande safe-area i botten.
->
-> **Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
-> Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
-> learn-bridge-projektet (Production). `rebidz.com` = huvudadress (visar appen,
-> HTTPS ✅); `www.rebidz.com` → 308 till rebidz.com. Ren Vercel-konfig, ingen
-> kodändring. **Nya publika adressen att dela = https://rebidz.com** (gamla
-> `learn-bridge-topaz.vercel.app` lever kvar som reserv).
->
-> **Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
-> Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
-> learn-bridge-projektet (Production). `rebidz.com` = huvudadress (visar appen,
-> HTTPS ✅); `www.rebidz.com` → 308 till rebidz.com. Ren Vercel-konfig, ingen
-> kodändring. **Nya publika adressen att dela = https://rebidz.com** (gamla
-> `learn-bridge-topaz.vercel.app` lever kvar som reserv).
->
-> **Del 1 KLAR & LIVE (2026-07-05):** hosting flyttad från GitHub Pages till
-> **Vercel** (repo & felrapport-URL stannar `Learn-Bridge` på GitHub). Konkret
-> gjort: Vite `base` `/Learn-Bridge/` → `/` (`vite.config.ts`); vakttestet
-> `src/deploy-config.test.ts` låser nu `/`; ny `vercel.json` kör test-/typgrinden
-> (`npx tsc && npm test && npm run build`) så trasig kod aldrig går live — samma
-> skydd som förr; gamla Pages-workflowen (`deploy.yml`) INAKTIVERAD (push-triggern
-> borttagen, `workflow_dispatch`-endast, filen kvar som referens). 1052 tester
-> gröna. Mergepunkter `79fd1d0` (flytten) + `18efe8b` (Pages av).
->
-> **⚠️ Två ärliga varningar (upprepa för ägaren):** (1) Steg A förbättrar INTE
-> boten — bara var appen bor; bot-utvecklingen är ett SEPARAT framtida NU. (2)
-> `/felrapporter` överlever flytten OFÖRÄNDRAT (`src/lib/felrapport.ts` bygger bara
-> en länk till `github.com/PGreen90/Learn-Bridge/issues/new`; repot stannar).
->
-> **Föregående NU (bredare flerronds-konkurrens A+B+C, R1 Fynd #2 sista delbit) är
-> KLAR, PUSHAD & i synk med origin** (git verifierat 2026-07-05 — den gamla "EJ
-> PUSHAT"-noten nedan är inaktuell). Ägaren överrörde järnregeln medvetet och bad
-> om alla tre bekräftade fel i EN session.
->
-> **Senast klart (2026-07-05, EJ PUSHAT — inväntar PCD): bredare flerronds-
-> konkurrens (A+B+C).** Metod: en utforskningsprob körde 4000 slumpgivar genom hela
-> den levande auktionen, plockade ut äkta flerronds-konkurrenser och blottade tre
-> bekräftade fel (verkliga händer lästa som facit). Alla tre byggda facit-först:
-> - **A — öppnaren säljer i rond 2 när partnern PASSADE inklivet + RHO konkurrerade**
->   (`1♣–(1♠)–P–(2♠)`): ny `openerReopensAfterPartnerPass` (`auction-live.ts`) – egen
->   6+ färg → tävla; 15+ & kort i deras färg → återöppnings-X. Vakt: ingen
->   motståndar-X + motståndarna ≥2 kontraktsbud (skiljer från felrapport #23).
-> - **B — öppnaren säljer i utpassningssitsen** (`1♠–(2♥)–P–P`): partnern trap-passar,
->   öppnaren återöppnar. `openerReopensBalancing` (`auction-live.ts`) – kort i deras
->   färg → X (partnern konverterar till straff), egen 6+ → rebjud, 15+ → X. **Kärnfix
->   i `auction.ts`:** `buildAuction` STÄNGDE linjen (`open=false`) så snart svararen
->   passade ett inkliv → contested-blocket hoppades över. Nu `finish(true)` (öppen,
->   som takeout-X/Michaels-grenarna) → decideCall äger fortsättningen. Invariant-testen
->   hoppar över öppna linjer → inget on-book-brott.
-> - **C — advancern tävlar upp till fiten** (`1♠–(2♥)–2♠–?`): ett 2-läges inkliv lovar
->   6+ → 3-korts stöd = 9-korts fit. `advancerCompetesToFit` (`auction-live.ts`, före
->   off-book-svaret) – tävla 3M (lagen om totala stick), 13+ stödpoäng → utgång, svag
->   → pass. (Skilt från `raiseWithFit` som krävde 4-korts stöd och hade bjudit 4M.)
->
-> Facit: `auction-opener-reopen-passed.test.ts` (A, 3), `auction-opener-reopen-
-> balancing.test.ts` (B, 4), `auction-advancer-compete-fit.test.ts` (C, 2) – alla röda
-> före fixen. **1052 tester gröna, tsc rent.** budsystem.md §5.9 + §7.1. Verifierat
-> end-to-end i proben: #159→3♣, #56/#552→2♥ dubblat (straff), #263→3♥. Se 👀 Bevaka.
->
-> **Kvar/öppet efter detta:** R2:s förslag att göra detektorkedjan i `decideCall`
-> datadriven (~28 steg nu) står kvar som ett EGET framtida NU – väg in det innan fler
-> konkurrenslägen staplas på (`docs/status.md` "Budmotorns tre auktionslager").
->
-> ---
-> **Föregående NU-historik (KLARA & LIVE):**
-> Föregående NU ("låna en kung" i balansering, §7.1) är **KLAR & LIVE**.
->
-> **Senast klart & LIVE (2026-07-05, commit `f36d058`, deploy grön):
-> "Låna en kung" i balanseringssits (§7.1).** I utpassningsläget (deras
-> 1-lägesöppning + två pass) är partnern markerad med värden, så §7-inklivets
-> HP-golv sänks med **en kung (−3)**: enkelt inkliv 8→5, upplysnings-X 12→9 (form
-> 10→7), 1NT-inkliv 15–18 → **11–14** (klassisk återöppnings-1NT). **Flat HP-lättnad
-> — §7-lagret behåller rå HP; TP-i-§7 avvisades medvetet (ortogonalt: TP=formspak,
-> kung=sitsspak, och TP lyfter inte de PLATTA händer balansering finns till för).**
-> `overcall` (`overcalls.ts`) fick en `balancing`-flagga; trådad från BÅDE
-> `maybeOvercall` (`auction-live.ts`, live) OCH `buildAuction` (`auction.ts`,
-> on-book balanseringsgren — annars passades given ut med open=false och nådde
-> aldrig live). Direkt sits **exakt oförändrad** (relief=0). Facit
-> `overcall-balancing.test.ts` (6: enhet + integration; direkt-sits-kontroller
-> bevisar seat-specificiteten). 1043 tester gröna, tsc rent, deploy grön.
-> budsystem.md §7.1. Se 👀 Bevaka.
->
-> **Senast klart & LIVE (2026-07-05, commit `112f0fc`, deploy grön): Öppnarens
-> rond-2 i störd auktion efter partnerns NYA FÄRG / 1NT (§5.8).** Systerfallet till
-> delbit 6 (§5.4, som gällde partnerns *höjning*). Roten
-> (bevisad i utforskning): så snart motståndarna bjöd om över partnerns fria svar
-> passade öppnaren bort ÄVEN starka händer (rondkravet är tekniskt av då). Ny
-> detektor `openerRondTwoInCompetition` (`auction-live.ts`, före `maybePenaltyDouble`
-> + off-book-svaret). Ägarbeslut 2026-07-05: **visa extra med CUE i deras färg +
-> naturliga hopp**; trösklar speglar delbit 6 (**15+ = extra, 18+ = utgång, 6:e
-> kortet = tävla**). 18+ högfärgsfit → 4M; 18+ jämn m. stopp → 3NT; 15–17 högfärgsfit
-> → inbjudande hopphöjning; 15+ i övrigt → **cue** (hitta rätt utgång); minimum m.
-> egen 6+ färg/fit → tävla; annars pass. Styrka = stödpoäng med fit, annars ren hp
-> (så en lång svag färg inte blåser upp handen). Facit
-> `auction-opener-competition-response.test.ts` (9, röda före fixen). 1037 tester
-> gröna, tsc rent, deploy grön. Se 👀 Bevaka.
->
-> **Senast klart & LIVE (2026-07-05, commit `a989a08`, deploy grön): Störda krav
-> (§5.5).** Steg 1 hedrade krav bara OSTÖRT; nu även i KONKURRENS. `auctionForce`
-> (`auction-live.ts`) fick en egen gren (`competitionForce` + `isJumpBid`): ett
-> **fritt bud (ny färg, ej hopp, ej cue)** och en **reverse** i störd auktion är
-> **RONDKRAV** — partnern tvingas svara via `honorForce` i stället för att passa.
-> Aldrig utgångskrav i konkurrens (ägarbeslut: ett inkliv "lånar" utrymme → 2/1
-> lovar värden men ej garanterad utgång). Passad svarare / hopp / cue undantas.
-> Facit: `foundation-forcing-competition.test.ts` (störda A/B/C, röda före fixen) +
-> `.stress.test.ts` (10 000 seedade givar; rondkravet utlöstes 146 ggr, passades
-> aldrig). Se 👀 Bevaka.
->
-> **Senast klart & LIVE (2026-07-05, commit `ca04175`, deploy grön): New Minor
-> Forcing (§5.7).** Efter `1m–1M–1NT` bjuder svararen (5-korts högfärg + 11+) den
-> oanvända lågfärgen (2♣/2♦, konstgjort krav); öppnaren svarar (5 prioriteringar,
-> passar aldrig); svararen placerar (13+ når alltid utgång). `responder-rebids.ts`
-> (`newMinorForcingBid`, `responderPlaceAfterNMF`), `rebids.ts` (`openerAnswerNMF`),
-> `auction-live.ts` (`nmfToAnswer` + `nmfPlacementToAnswer` tvångssvarare). Facit
-> `new-minor-forcing.test.ts` (21). End-to-end: `1♣–1♥–1NT–2♦–3♥–4♥` hittar 5-3-fit.
->
-> **Senast klart & LIVE (2026-07-05, commit `eca5ff0`): budsystemets grunder steg 1.**
-> `auctionForce`/`honorForce` → krav passas aldrig OSTÖRT (2/1, ny färg, reverse);
-> `raiseWithFit` → minorfit + utgångsvärden når utgång (3NT/5m). Facit
-> `foundation-forcing.test.ts` A–D. budsystem.md §5.5+§5.6. **Detta NU utvidgar det
-> till konkurrens.**
->
-> ---
-> **HISTORIK nedan (tidigare sessioner, KLARA & LIVE — behandla ej som pågående):**
-> Kontraktväljaren (KLAR & LIVE):
->
-> **ALLA TRE DELSTEG BYGGDA & VERIFIERADE (2026-07-05, ej pushat):**
-> - **(1) Filtret + motor-fix.** `contract-target.ts` (`matchesTarget` +
->   `simulateAuction`). **Under bygget upptäcktes att motorn ALDRIG nådde 5♣/5♦**
->   (0 av 30 000) – äkta lucka, inte att kontraktet är ovanligt. **Lagat**
->   (ägarregel: utforska bara med en svag färg): svararen med lågfärgsfit + en
->   osparrad färg går inverterad 2m i stället för att chansa 3NT och landar i 5m
->   (`responses.ts` `hasWeakSideSuit`, `responder-rebids.ts` inverterad-minimum →
->   5m). Nu nås 5♣/5♦ ~1 per 54. `budsystem.md` §4.2 uppdaterad.
-> - **(2) Sökaren.** `dealForTarget` (slumpa tills match, tak 60 000, null-fallback).
-> - **(3) Menyn i `Play.tsx`.** "Mål:"-pill → `ScenarioPicker` (7 scenariokort),
->   batchad sökning (300/tick, setTimeout → fryser aldrig) med `SearchOverlay`
->   ("Söker … N prövade" + Avbryt + ge-upp-väg), målet sparas i localStorage
->   (`play-target`), "Ny giv" letar på samma mål. Random = som förr.
->
-> 996 tester gröna, tsc rent, verifierat i webbläsaren (pill, väljare, sökning för
-> lågfärg + storslam, ren konsol). **Kontraktväljaren = KLAR & LIVE, inga öppna
-> punkter (ägaren godkände 2026-07-05).**
->
-> **NÄSTA GÅNG (ägarbeslut 2026-07-05): 🔵 NU blir "Budsystemets grunder — varför
-> de faller".** Ägaren vill gräva i budsystemets FUNDAMENT och förstå varför de
-> brister (inte laga en rapport i taget utan hitta rot-mönstren). Startpunkt:
-> felrapport #26 + #27 (nyss lagade) visade samma rot — motorn hedrar
-> utgångskrav/rondkrav i sin FÖRPLANERADE linje men tappar dem OFF-BOOK (när
-> ägaren öppnar/bjuder en annan hand än motorn valt). Fråga ägaren vilka
-> grundregler som känts opålitliga i spel och bygg facit-givar som blottar
-> mönstret innan något byggs om. (Kontraktväljaren = KLAR & LIVE, se nedan — inga
-> öppna punkter kvar.)
->
-> **Senast klart & LIVE (2026-07-05):** felrapport #26 + #27 lagade, pushade,
-> deploy grön (commit `f9531b2`). Båda samma rot: utgångskrav passades OFF-BOOK.
-> #26 → `answerCueBidderRebid` (cue-bjudaren fullföljer efter öppnarens svar);
-> #27 → `answerTwoOverOneRaise` (svararen sätter utgång efter 2/1 som öppnaren
-> höjt). 998 tester gröna. Se 👀 Bevaka. **Detta är den direkta ingången till
-> nästa NU** (off-book-krav = ett grund-mönster som faller).
->
-> **Senast klart & LIVE (2026-07-05, mergepunkt `1bec779`):** starka
-> upplysningsdubblingens **flerronds-fortsättning** byggd, test-låst & pushad
-> (`auction-live.ts`: `strongDoubleContext` + `advanceStrongDoubleRebid` +
-> `strongDoublerSecondRebid` + `answerStrongDoubleGameForce`). Game-hoppet borttaget
-> (kan bli katastrof mot 0 hp); partnern tvångssvarar (stödstege / utan stöd egen
-> färg); den starka handen dömer game på TP (**6+ & 22+ TP → hopp till 3-läget**,
-> annars lägsta nivå); partnern svarar 3-hoppet (utgång m. 1–2 stöd / 3NT nekar).
-> TP-tröskel 22 = ägarval efter 6 exempelhänder. Ordet "monster" bannlyst. 976
-> tester gröna, tsc rent, deploy grön. **Öppen finslipning (ägaren, i spel):** den
-> starka handens dom EFTER en stödhöjning körs på en konservativ default – se
-> 👀 Bevaka.
-> **NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln). Bra
-> kandidater: **nästa delbit av R1 #2** (se "Kvar" nedan) eller en punkt ur R6:s
-> handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
->
-> **Senast klart & live (2026-07-05, dok-synk – commits `8d2d413` + `70660fb`):**
-> ägarmandat *"all ändring i Budsystemet ska gå att läsa på hemsidan."* Budsystem-
-> sidan läser `docs/budsystem.md` direkt (§9 Ändringslogg är dold), så live-regler
-> som förr bara låg i kod/ändringslogg skrevs nu in i läsbara sektioner: **§7.3
-> Takeout Double** (egen sektion; ordet för den starka 17+-handen borttaget på ägarens begäran – skriv "bra/stark hand"),
-> **§5.4** öppnarens rond-2 i inklämt läge (delbit 6), **§7.8** när motståndarna
-> stör vår öppning (delbit 4+5). Ingen kodändring – bottarna bjuder som förut.
->
-> **Läget (2026-07-04, audit session 9 avslutad):** Hela revisionen R1–R6 KLAR +
-> live (0 KRITISK, 2 HÖG båda i R1, 27/32 fynd lagade; slutrapport
-> `docs/audit/SLUTRAPPORT.md`). Därefter startade R1 Fynd #2 (bredda störd
-> budgivning) och **delbit 6 är byggd, mergad (`ce7f1cd`) och LIVE.**
->
-> **Delbit 6 (LIVE):** öppnarens rond-2 i det INKLÄMDA konkurrensläget efter
-> partnerns enkla högfärgshöjning (`1M–(inkliv)–2M–(deras inklämda bud)`): pass
-> (minimum) · 3M (6:e trumf, lagen om totala stick) · **X = MAXIMAL DUBBLING (game
-> try, 15–17)** · 4M (utgång, 18+); partnern svarar X:et 4M (accept, 8+ stöd) /
-> 3M (avböj). Två detektorer i `decideCall`, FÖRE `maybePenaltyDouble` (X reserverat
-> för game try där — konventionens kända avvägning). Facit:
-> `auction-opener-competition.test.ts` (7 integrationstester). Se 👀 Bevaka nedan.
->
-> **Sidospår klart & live (2026-07-04, mergepunkt `213d90e`):** felrapportering
-> inkopplad i **Budvisningen** (`Spela.tsx`) — knappen "Rapportera fel →" dyker upp
-> så snart auktionen budats färdigt (korten spelas aldrig där, så inga stick följer
-> med; kontraktet härleds ur buden). Samma `FelrapportDialog` som i Spela kort, men
-> med valfri bud-specifik text ("Rapportera fel i budgivningen" +
-> `BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
->
-> **Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 (§5.8)~~ +
-> ~~balanseringens "låna en kung"~~ + ~~bredare flerronds-konkurrens (A+B+C, §5.9 +
-> §7.1)~~ (ALLA KLARA 2026-07-05; A+B+C ej pushat än). **R1 Fynd #2 är därmed i
-> praktiken helt genomarbetat** — bara delbit 3 (Mathe mot stark 1♣) förblir medvetet
-> PARKERAD (irrelevant tills vi lägger till fler budsystem).
->
-> **Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
-> kräver webworker). (R3 #8 "Förra sticket" = OK/klar, ägarbeslut 2026-07-05 —
-> struken.) Se ⚪ SENARE nedan.
->
-> Färdigt & pushat arbete (alla "🎉 KLART"-block + FAS-historiken) bor nu i
-> **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
+> **Historik:** alla äldre lägesrapporter (mobil-UI-fixar, felrapporter
+> #23–#34, 2♣-utgångskravet, systems-on, Steg A-detaljerna Del 1–3, R1 Fynd
+> #2-delbitarna, kontraktväljaren m.m.) är flyttade till **`docs/historik.md`**
+> (2026-07-07 — de innehöll inaktuella ögonblicksrader som "EJ PUSHAT"/"#29
+> kvar öppen"; facit är: allt live, alla felrapporter stängda/uppskjutna).
+> Detaljerad status: `docs/status.md`. Budsystemets hälsobild + körordning
+> F1–F6: `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **ÄRLIGA SLAMPORTAR (2026-07-07 kväll, NYTT — ersätter kik-varianterna nedan):**
+- **ÄRLIGA SLAMPORTAR (2026-07-07 kväll, NYTT — styr ALLA slam-vägar):**
   all slamutredning beslutar nu på egen hand + partnerns VISADE intervall.
   **Bevaka:** (a) **missar** boten slammar du tycker den borde bjudit? (Medvetet:
   hellre systemriktig miss än kik — men säg till om en misstyp återkommer, t.ex.
@@ -472,31 +85,13 @@ Läs den här filen först varje session.
   till om det svider för ofta. (e) Motorn cue-bjuder inte längre själv (§6.2
   gäller manuella cue). (f) Storslam kräver visshet → 7-läget är nu ovanligt
   (~1/4300 giv) — kontraktväljarens storslam-sökning kan ta längre tid.
-- **Slam efter öppnarens hopphöjning (F1 familj C, 2026-07-07, NYTT & LIVE):** öppnar
-  din bot-partner 1 i färg, du svarar en högfärg på 1-läget och hen **hopphöjer** den
-  (`1♦–1♥–3♥`, visar 16–18 + 4 stöd), driver paret nu **slam** (6 i högfärgen via 1430
-  RKC) i stället för att stanna i 4M när du har slamvärden. **Bevaka:** (a) når det
-  slam lagom ofta eller blåser det slam som betar? (Portar: ≥33 stödpoäng, ≥4
-  nyckelkort, kontroll i varje sidofärg; make-rate-probe ~89 %, de få bet gick ner
-  exakt ett stick = finess-slam.) (b) Missar det tvärtom en slam (porten är medvetet
-  konservativ)? (c) Bara hopphöjningen av din högfärg täcks — familj C:s systerfall
-  **reverse** (`1♣–1♥–2♦`) + **hoppskift** (`1♦–1♠–3♣`) driver ännu INTE slam (nästa
-  steg).
-- **Slam efter 1NT-återbud (F1 familj A, 2026-07-07, NYTT):** öppnar din bot-partner
-  1 i minor/högfärg, du svarar en ny färg på 1-läget och hen rebjuder **1NT** (12–14),
-  driver paret nu **slam** i stället för 3NT när du har slamvärden (≥33 stödpoäng):
-  **jämn hand → 6NT** (Gerber 4♣); **obalanserad med färgfit** (6+ egen hf / 8+ korts
-  fit) **→ 6 i färgen** (4NT RKC + kontroll-gate). **Bevaka:** (a) når det slam lagom
-  ofta, eller blåser det en slam som betar? (Gates: ≥33 stödpoäng, ≥4 nyckelkort,
-  kontroll i varje sidofärg; Gerber stannar i 4NT om två ess saknas.) (b) väljer det
-  rätt trumf/strain (6NT när jämnt, rätt färg när fit)? (c) missar det tvärtom en slam
-  (gaten är medvetet konservativ)? Full-givs färg-DDS gick inte att massvalidera
-  (känd tung gräns) — facit-givarna (6NT + 6♣) är DD-verifierade, gates speglar #29.
-- **Slam-quirken stängd (F1 familj D, 2026-07-07, NYTT):** slamlinjer via Jacoby 2NT
-  (och alla andra cue→RKC-vägar) dog förr ibland i ett för lågt kontrakt för att en
-  hängande cue gjorde auktionen olaglig. Nu spelas de upp hela vägen. **Bevaka:** når
-  slamlinjer efter Jacoby 2NT rätt slutbud (6/7 i färgen) i stället för att fastna
-  runt 4-läget? Facit-givan `1♥–2NT` når nu **7♥** (kall storslam).
+- **Slam-vägarna i spel (var täcks slam i dag?):** Jacoby 2NT, inverterad minor,
+  öppnarens hopphöjning (`1x–1M–3M`), hopp-återbud i minor (`1m–1M–3m`),
+  1NT-återbudet (`1m–1M–1NT`), MSS, Gerber över 1NT/2NT, Exclusion efter
+  splinter — alla via kaptensregeln ovan. Jacoby-quirken (hängande cue som förr
+  dödade slamlinjer) är borta i och med att auto-cue-ronden togs bort. TÄCKS
+  ÄNNU INTE: slam efter stark 2♣ (familj B) samt efter reverse/hoppskift
+  (C-resten) — se NÄST 1; advancer-slam efter upplysningsdubbling saknas också.
 - **Advancern hoppar inte förbi utgång (#33, 2026-07-07, NYTT & LIVE):** när du och
   din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
   längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦
@@ -509,15 +104,6 @@ Läs den här filen först varje session.
   6-5, 1♠/1♥ på minimum)? (b) *återbudet* efter en 16+ 1♦-öppning — visar den 6-5:an
   begripligt (reverse in i högfärgen), eller blir fortsättningen konstig? Säg till om
   6-5:an tappas bort i rond 2.
-- **Slam efter hopp-återbud i minor (#29, 2026-07-07, NYTT & LIVE):** öppnar din
-  bot-partner 1♣/1♦, du svarar en ny färg och hen HOPPAR till 3♣/3♦ (stark 6-färg,
-  16–18), driver paret nu mot **slam** (4NT RKC → 6-läget) när du har fit + värden,
-  i stället för att stanna i 3NT. **Bevaka:** (a) når paret slammen lagom ofta, eller
-  bjuder det slam som går bet? (Gaten kräver ess/korthet i varje sidofärg + ≥33
-  stödpoäng + ≥4 nyckelkort; probe visade ~85 %+ hemgång, men enstaka finess-slammar
-  kan bet — det är normalt.) (b) Missar det tvärtom en slam ibland (gaten är medvetet
-  konservativ — hellre missa än bet)? (c) Bara minorfit efter just hopp-återbudet
-  täcks; annan slam-utforskning efter 2♣/positiva svar är fortsatt tunn.
 - **2♣ dör inte längre i delkontrakt + systems-on (2026-07-07, NYTT & LIVE):**
   öppnar din bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång
   (förr dog ~64 % i delkontrakt). **Efter `2♣–2♦–2NT`** (öppnaren 22–24) använder
@@ -541,7 +127,7 @@ Läs den här filen först varje session.
   (b) När din minor höjs i konkurrens visar öppnaren styrka i sang (3NT 20+ /
   2NT-inbjudan 18–19 med stopp); höjaren accepterar 3NT från **8 hp**. **Bevaka:** når
   paret 3NT lagom ofta, eller för lätt/tungt? Säg till om accept-golvet (8) känns fel.
-- **Flerronds-konkurrens A+B+C (§5.9 + §7.1, 2026-07-05, NYTT — EJ PUSHAT):** störda
+- **Flerronds-konkurrens A+B+C (§5.9 + §7.1, 2026-07-05, LIVE):** störda
   auktioner säljs inte längre billigt i rond 2+. (A) Öppnar du 1 i färg, de kliver in,
   partnern PASSAR och de konkurrerar (`1♣–(1♠)–P–(2♠)`) → du tävlar nu (egen 6+ färg,
   eller X med kort i deras färg) i stället för att passa. (B) Samma men de passar också
@@ -667,11 +253,21 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs med ÄRLIGA
-   portar först när NU (tjuvkiks-städningen) är klar.
+1. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs på de
+   ärliga slamportarnas mönster (kaptensregeln mot visade intervall). Gärna
+   efter att ägaren spelat ett tag och bekräftat portarna i spel.
 2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (ägarens
+  4-punktslista punkt 1, 2026-07-06):** data i `src/data/exercises/*.json` +
+  `EXERCISES_BY_THEME` i `bidding.ts`; facit bör knytas till motorns egna svar
+  så det aldrig lär ut fel. (Punkt 2+4 = klara; punkt 3 "sondera budsystemet på
+  djupet" = gjord 2026-07-07 via budsystem-revisionen + F1.)
+- **B13 — förfina öppnarens återbud efter inverterad minorhöjning (2026-07-07):**
+  dagens återbud är grova (stopp-visning kräver 4+ kort i färgen → en 17 hp med
+  6-korts minor visas som "minimum 3m") → ärliga slam-misser. Se
+  `docs/budsystem-revision.md` B13.
 - **Spelmotor-kvalitet: spelföring + försvar (felrapport #32 + #34, uppskjutet
   2026-07-07):** två kortspels-kvalitetsluckor, ägarbeslut att skjuta upp till ett
   dedikerat spelmotor-spår (`docs/bot-hjarna.md`). (1) **#32 – spelföraren etablerar
@@ -736,10 +332,10 @@ Läs den här filen först varje session.
   (bara kvar här som historik — behandla dem inte som återstående arbete).
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
-- ~~**Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC)~~ **LÖST 2026-07-07** (F1 familj D):
-  den hängande cuen är lagad i `slamInvestigation` (cue-ronden läggs bara som ett
-  komplett par, annars rakt på 4NT). Probe: 0 "två-i-rad" i 200 000 auktioner. Facit
-  `auction-slam-jacoby-cue.test.ts`. Behandla inte längre som parkerad.
+- ~~**Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC)~~ **LÖST 2026-07-07** (F1 familj
+  D; slutgiltigt genom att motorns auto-cue-rond togs bort helt med de ärliga
+  slamportarna samma kväll). Facit `auction-slam-jacoby-cue.test.ts`. Behandla
+  inte längre som parkerad.
 - **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.
 - **Off-book §7 bredd** (inkliv över 1NT/svaga tvåor/spärrar; balansering
   BYGGD 2026-07-03 via felrapport #5 — kvar här: "låna en kung"-lättnaden,
@@ -862,8 +458,8 @@ Allt körs i webbläsaren, gratis-hostat på Vercel (flyttat från GitHub Pages
   `auction-live.ts`) i stället för att tystna – men bara DIREKT sits (motståndaren
   öppnade nyss 1 i färg, vår sida har inte sagt något). Inkliv/X/Michaels/ovanlig
   2NT ur §7-motorn. *(Balansering + inkliv över 1NT/svaga tvåor/spärrar byggdes
-  senare – R1 Fynd #2 delbit 1–2, live. Slam-quirken är en känd, laglig gräns, se
-  🅿️ PARKERAT. Vad som är NÄST styrs av projektkartan högst upp, inte av denna rad.)*
+  senare – R1 Fynd #2 delbit 1–2, live. Slam-quirken är LÖST 2026-07-07. Vad som
+  är NÄST styrs av projektkartan högst upp, inte av denna rad.)*
 - Budmotor byggs i `src/lib/engine/`, test-drivet (`npm test`).
 - **Innan du rör budlogik:** läs "Budmotorns tre auktionslager + `open`-handoff"
   i `docs/status.md` — det avgör om ny logik hör hemma i `auction.ts` (on-book),
