@@ -1045,7 +1045,14 @@ function raiseWithFit(
     wantLevel = partnerSuit.level + 1
     label = `enkel höjning`
   }
-  wantLevel = Math.max(wantLevel, partnerSuit.level + 1) // alltid minst ett steg upp
+  // En inbjudande/enkel höjning får ALDRIG gå förbi utgång (felrapport #33: en
+  // "inbjudande hopp" = level+2 blåste 7♦ över partnerns 5♦). Kapa vid utgångs-
+  // nivån (högfärg 4, lågfärg 5). Har partnern REDAN nått utgång och vi bara har
+  // inbjudningsvärden (slamvärden sköts ovan via sp≥13-grenarna) → passa i stället
+  // för att pressa upp i slam.
+  const gameLevel = isMajor ? 4 : 5
+  wantLevel = Math.min(wantLevel, gameLevel)
+  if (wantLevel < partnerSuit.level + 1) return null
 
   const legal = legalCalls(history, seat)
   // Sänk till lägsta lagliga höjning om önskenivån inte går (konkurrensen tryckt upp budet).

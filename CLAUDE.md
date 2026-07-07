@@ -21,7 +21,18 @@ Läs den här filen först varje session.
 > Bra kandidater om ägaren är osäker: göra boten bättre (spela + felrapportera),
 > R2:s datadrivna detektorkedja (`docs/status.md`), eller UI-förfining.
 >
-> **Senast klart & LIVE (2026-07-07): slam efter hopp-återbud i minor (STÄNGER #29).**
+> **Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
+> **#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
+> på 28 hp) — `raiseWithFit` (`auction-live.ts`) räknade "inbjudande hopp" = partnerns
+> nivå +2. Nu kapas inbjudande/enkla höjningar vid utgångsnivån och advancern passar
+> när partnern nått utgång. Facit `auction-advancer-cap.test.ts`. **#32 (budgivning):**
+> ägarregel för **6-5** (6-korts lågfärg + 5-korts högfärg) — 12–15 öppnar högfärgen,
+> 16+ öppnar lågfärgen (reverse:ar in högfärgen); `openings.ts`, facit i
+> `openings.test.ts`, budsystem.md §3. **#32-spelfelet + #34-försvaret = UPPSKJUTNA**
+> (spelmotor-kvalitet, se ⚪ SENARE + `docs/bot-hjarna.md`; ägarbeslut 2026-07-07).
+> **1084 test gröna, tsc rent.** #32/#33/#34 stängda. Se 👀 Bevaka.
+>
+> **Föregående (2026-07-07): slam efter hopp-återbud i minor (STÄNGER #29).**
 > `/felrapporter` #29 ("hur hittar vi slammen?"): N ♣AQJT94 öppnade 1♣, S svarade
 > 1♠, N hoppade 3♣ (16–18, 6+ klöver) → boten stannade i **3NT** trots en **KALL
 > slam** (6♣/6NT/7 = 13 stick DD). Nu driver paret slam: efter `1m–1M–3m` med
@@ -57,11 +68,10 @@ Läs den här filen först varje session.
 > (2) `respondToStrong2NTRebid` (off-book-fallback) + systems-on on-book (ovan).
 > Delkontrakt-andelen föll **63,9 % → 1,7 %** (resten legitima). Mergepunkt `b20d81f`.
 >
-> **Öppna felrapporter:** **#28** analyserad & STÄNGD 2026-07-07 (Syds 4♠ var
-> korrekt offensivt bud, ej bugg). **#29** STÄNGD 2026-07-07 (slam efter hopp-
-> återbud byggd, ovan). **#32/#33/#34** (spelfel bricka 15 & 3, budgivning bricka 2)
-> ännu ej lästa — bra kandidater för nästa `/felrapporter`. **NU är åter öppet —
-> ägaren väljer nästa sak** (järnregeln: exakt en).
+> **Öppna felrapporter: INGA.** #28 (4♠ ej bugg), #29 (slam efter hopp-återbud),
+> #32 (6-5-öppning byggd; spelfel uppskjutet), #33 (7♦-hoppet kapat), #34 (försvar
+> uppskjutet) — alla STÄNGDA 2026-07-07. **NU är åter öppet — ägaren väljer nästa
+> sak** (järnregeln: exakt en).
 >
 > **Öppna felrapporter efter detta:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
 > 4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — ägaren tog
@@ -351,6 +361,18 @@ Läs den här filen först varje session.
 > **`docs/historik.md`** — inte här. Detaljerad status: `docs/status.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Advancern hoppar inte förbi utgång (#33, 2026-07-07, NYTT & LIVE):** när du och
+  din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
+  längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦
+  över partnerns 5♦). **Bevaka:** passar boten lagom (den saknar ännu slam-drivning
+  som advancer — med äkta slamvärden kan den nöja sig med utgång; säg till om den
+  borde utforskat slam).
+- **6-5-öppning (#32, 2026-07-07, NYTT & LIVE):** med 6-korts lågfärg + 5-korts
+  högfärg öppnar boten nu **högfärgen med 12–15**, men **lågfärgen med 16+** (för att
+  reverse:a in högfärgen). **Bevaka:** (a) väljer den rätt (öppnar 1♦ på rätt starka
+  6-5, 1♠/1♥ på minimum)? (b) *återbudet* efter en 16+ 1♦-öppning — visar den 6-5:an
+  begripligt (reverse in i högfärgen), eller blir fortsättningen konstig? Säg till om
+  6-5:an tappas bort i rond 2.
 - **Slam efter hopp-återbud i minor (#29, 2026-07-07, NYTT & LIVE):** öppnar din
   bot-partner 1♣/1♦, du svarar en ny färg och hen HOPPAR till 3♣/3♦ (stark 6-färg,
   16–18), driver paret nu mot **slam** (4NT RKC → 6-läget) när du har fit + värden,
@@ -512,6 +534,16 @@ Läs den här filen först varje session.
 1. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **Spelmotor-kvalitet: spelföring + försvar (felrapport #32 + #34, uppskjutet
+  2026-07-07):** två kortspels-kvalitetsluckor, ägarbeslut att skjuta upp till ett
+  dedikerat spelmotor-spår (`docs/bot-hjarna.md`). (1) **#32 – spelföraren etablerar
+  inte lång färg:** i 3NT drog boten (Öst) ♥AKT och krossade träkarlens ♥QJ i stället
+  för att sätta upp den långa rutern (♦KJT863) medan hållen fanns kvar → 3 bet. Kräver
+  spelplanering (räkna stick, etablera lång färg före honnörer). (2) **#34 – slarvigt
+  försvar mot 1NT ("allt"):** försvaret duckade billigt i trick 1 (Nord ♥5 under
+  partnerns utspel i stället för tredje-hand-högt). Kräver bättre motspels-heuristik
+  (tredje-hand-högt, honnörsspel). Båda i `play-bot.ts` (heuristik + Monte-Carlo).
+  Plockas upp när ägaren vill investera i spelkvalitet.
 - **TP till §7-inkliven (2026-07-05, ägarbeslut vid "låna en kung"):** §7-lagret
   (`overcall`, `advanceOvercall`, DONT, försvar mot svaga tvåor) räknar fortfarande
   **rå HP** — TP (form/fördelning) har aldrig nått dit. Att låta balanserings- OCH

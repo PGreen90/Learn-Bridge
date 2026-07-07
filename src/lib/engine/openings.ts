@@ -109,6 +109,22 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     const pts = tp > p ? `${p} hp / ${tp} TP` : `${p} hp`
     // Möjligt missat distributionellt 2♣ (stark obalanserad med lång färg) – flaggas.
     const uncertain = p >= 19 && !bal && Object.values(len).some((l) => l >= 6)
+    // 6-5 (6-korts LÅGfärg + 5-korts HÖGfärg), ägarregel 2026-07-07 (felrapport
+    // #32): med 16+ hp öppna LÅGfärgen (6-korten) så man kan reverse:a in högfärgen
+    // och visa 6-5 med extra styrka; med minimum (12–15) öppna högfärgen (kan inte
+    // reverse:a med minimum). Gäller bara HÖGfärg EXAKT 5 + en LÅGfärg 6+ (annars
+    // faller det till den vanliga 5-korts-högfärg/minor-regeln nedan). Starka 6-5
+    // med 8½+ spelstick har redan öppnat 2♣ ovan.
+    const fiveMajor: Suit | null = len.spades === 5 ? 'spades' : len.hearts === 5 ? 'hearts' : null
+    const sixMinor: Suit | null = len.diamonds >= 6 ? 'diamonds' : len.clubs >= 6 ? 'clubs' : null
+    if (fiveMajor && sixMinor && p >= 16) {
+      return {
+        call: `1${BID[sixMinor]}`,
+        rule: 'minor-regeln',
+        explanation: `${pts} med 6-5 (6-korts ${NAME[sixMinor]} + 5-korts ${NAME[fiveMajor]}) → 1${BID[sixMinor]} (öppnar lågfärgen; 16+ räcker för att visa 6-5 via reverse).`,
+        uncertain,
+      }
+    }
     if (len.spades >= 5 || len.hearts >= 5) {
       const suit: Suit = len.spades >= len.hearts ? 'spades' : 'hearts' // lika längd → spader (högre)
       return {

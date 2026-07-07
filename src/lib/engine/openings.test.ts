@@ -35,6 +35,18 @@ describe('classifyOpening', () => {
     expect(call('S:KQ5 H:A8 D:KT62 C:QT43')).toBe('1D') // 14 hp, minorer 4-4
   })
 
+  // Felrapport #32 (ägarregel 2026-07-07): 6-5 (6-korts lågfärg + 5-korts högfärg).
+  // 12–15 → öppna högfärgen (kan inte reverse:a). 16+ → öppna lågfärgen (kan visa
+  // 6-5 via reverse). Starka 6-5 med 8½+ spelstick öppnar 2♣ (redan täckt).
+  describe('6-5 (6-korts lågfärg + 5-korts högfärg), felrapport #32', () => {
+    it('12–15 hp → öppna 5-korts högfärgen', () => {
+      expect(call('S:KJ432 H:A5 D:KQ8762 C:-')).toBe('1S') // 13 hp, 5♠-6♦
+    })
+    it('16+ hp (men < 8½ spelstick) → öppna 6-korts lågfärgen', () => {
+      expect(call('S:AQJ32 H:KQ D:KJ8752 C:-')).toBe('1D') // 16 hp, 5♠-6♦
+    })
+  })
+
   // ---- FAS 7 punkt 26: minor-regeln 3-3 / 4-4 / 5-5 / olika längd (§3) -------
   describe('minor-regeln (facit: 3-3♣ / 4-4♦ / 5-5♦ / längsta minorn)', () => {
     it('3-3 minorer → 1♣ (billigast)', () => {
