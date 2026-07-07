@@ -708,6 +708,13 @@ naturliga svaga 2-budet i NMF-lågfärgen.
 → `3NT` med utgångsvärden, annars pass. Kort sagt: 13+ når alltid utgång; 11–12
 når utgång bara när öppnaren visat maximum.
 
+**Slam efter 1NT-återbudet (jämn hand).** Har du i stället **slamvärden** mittemot
+öppnarens 12–14 (ihop **≥33 hp**) och är **jämn utan 5-korts färg**, blåser du inte
+3NT – du frågar ess med **Gerber 4♣** (§6.4: 4♣ är Gerber även över ett NT-*återbud*)
+och placerar **6NT** (eller stannar i 4NT om två ess saknas; 7NT i storslamszon efter
+kungfråga). En **5-korts högfärg** går i stället NMF-vägen ovan (jagar 5-3-fit); en
+**obalanserad** slamhand siktar på ett färgkontrakt (byggs vidare i senare steg).
+
 ### 5.8 Öppnarens rond-2 i konkurrens efter partnerns nya färg / 1NT
 Systerfallet till §5.4 (som gällde partnerns *höjning*). Du öppnar **1 i färg**, en
 motståndare kliver in, partnern svarar med en **fri ny färg** eller **1NT** (inte en
@@ -1173,6 +1180,18 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-07** – **Slam efter 1NT-återbud (kod, §5.7, F1 familj A).** En
+  utforskningsprob (40 000 givar, DD-lösta) för att **bredda slam-utforskningen**
+  visade att en svarare med slamvärden mittemot öppnarens 12–14 1NT-återbud bara
+  blåste **3NT** – slam-arsenalen var inte inkopplad i den auktionsformen (den fanns
+  bara för Jacoby 2NT, inverterad minor, hopp-återbud i minor, MSS och Gerber-över-
+  2NT). Nu kopplar `buildAuction` in `gerberRebidInvestigation` (`nt-slam.ts`) efter
+  `1m–1M–1NT`: en **jämn** svarare (ingen 5-korts färg) med **≥33 hp ihop** frågar
+  ess med **Gerber 4♣** och placerar 6NT/7NT i stället för 3NT. Räknar FAKTISK
+  kombinerad hp (öppnaren är ett spann 12–14) och stannar i 4NT om två ess saknas
+  (återanvänder `buildGerberSequence`). 5-korts högfärg → NMF-vägen; obalans →
+  färgslam (senare steg i F1). Facit `auction-slam-1nt-rebid.test.ts` (1♣–1♥–1NT
+  → 6NT, DD-verifierat 12 stick). 1085 test gröna, tsc rent.
 - **2026-07-07** – **Felrapport #33 + #32-budgivning.** (1) **#33 – advancern hoppar
   inte förbi utgång:** i `raiseWithFit` (`auction-live.ts`) räknades en "inbjudande
   hopp" som partnerns nivå + 2, så över partnerns 5♦ blåste boten **7♦** (grand slam

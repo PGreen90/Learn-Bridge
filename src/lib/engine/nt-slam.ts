@@ -54,6 +54,25 @@ export function gerber2NTInvestigation(openerHand: Hand, responderHand: Hand): S
   return buildGerberSequence(openerHand, responderHand, p)
 }
 
+/**
+ * Gerber-slamutredning över öppnarens 1NT-ÅTERBUD (1m–1M–1NT, öppnaren 12–14 bal).
+ * null = ingen slamhand → den vanliga svars-kedjan (NMF / sang-stegen) fortsätter.
+ *
+ * Till skillnad från 1NT/2NT-öppningen är öppnaren här ett SPANN (12–14), så vi kan
+ * inte gata på svararens hp ensam – vi räknar FAKTISK kombinerad hp (båda händerna
+ * finns i buildAuction) mot slamzonen ≥33. Svararen måste vara jämn UTAN 5-korts
+ * färg: en 5-korts högfärg jagar en 5-3-fit via New Minor Forcing (färgslam sköts
+ * separat), och en obalanserad hand vill åt ett färgkontrakt, inte NT-slam.
+ */
+export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
+  if (!isBalanced(responderHand)) return null
+  const len = lengths(responderHand)
+  if (Math.max(len.clubs, len.diamonds, len.hearts, len.spades) >= 5) return null
+  const combined = hcp(openerHand) + hcp(responderHand)
+  if (combined < 33) return null
+  return buildGerberSequence(openerHand, responderHand, hcp(responderHand))
+}
+
 /** Bygger 4♣ Gerber-dialogen bud för bud (ess-svar → ev. kungfråga → placering). */
 function buildGerberSequence(openerHand: Hand, responderHand: Hand, p: number): SlamTurn[] {
   const turns: SlamTurn[] = []

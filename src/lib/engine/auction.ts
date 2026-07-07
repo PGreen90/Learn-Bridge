@@ -23,7 +23,7 @@ import { openerSecondBid } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
-import { gerberInvestigation, gerber2NTInvestigation } from './nt-slam'
+import { gerberInvestigation, gerber2NTInvestigation, gerberRebidInvestigation } from './nt-slam'
 import { dontOvercall } from './dont'
 import { conventionalDefense } from './defense-conventional'
 
@@ -590,6 +590,23 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
     }
     return finish(false)
+  }
+
+  // Slamutredning efter öppnarens 1NT-ÅTERBUD (1m–1M–1NT, F1 familj A): en jämn
+  // svarare med slamvärden mittemot 12–14 letar NT-slam via Gerber 4♣ i stället
+  // för att blåsa 3NT. `gerberRebidInvestigation` returnerar null utanför slamzon
+  // (<33 hp ihop), för obalans eller 5-korts färg → då står den vanliga kedjan
+  // (NMF / sang-stegen) kvar. Behöver BÅDA händerna → ligger här, inte i
+  // responderSecondBid.
+  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
+    const g = gerberRebidInvestigation(deal.hands[openerSeat], deal.hands[responderSeat])
+    if (g) {
+      for (const t of g) {
+        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+      }
+      return finish(false)
+    }
   }
 
   // Svararens andra bud (dispatchas på hela sekvensen).
