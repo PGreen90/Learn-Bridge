@@ -12,20 +12,23 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — UI-OVERHAUL, PAUSAD mitt i steg 3 (sessionen avbruten 2026-07-08)
-> **LÄGE VID PAUSEN (2026-07-08, allt på grenen `ui-overhaul` — INGET pushat,
-> main/live orört):** Steg 1 (semantiska tokens, commit `b87f74b`) och steg 2
-> (delad `<Dialog>` + `ClickAway`, commit `c4c50ac`) är KLARA — 1090 test gröna,
-> tsc rent, browser-verifierade i ljust + mörkt läge. Steg 3 (splittra
-> `Play.tsx`) är HALVVÄGS: alla nya filer under `src/pages/play/` är skrivna
-> och kompilerar (WIP-commit `6796dfe`) men `Play.tsx` är ÄNNU INTE omkopplad
-> till dem — appen beter sig exakt som efter steg 2. **Nästa session:** skriv
-> om `src/pages/Play.tsx` till att komponera play/-filerna (ta bort
-> dubbletterna), kör tsc + test + browser, committa; sedan steg 4–5, merge
-> `--no-ff` till main + push (ägaren har förhandsgodkänt PCD för overhaulen),
-> verifiera Vercel-deploy. Därefter: facelift-FÖRSLAG (mockup) till ägaren —
-> ägaren vill ha ett modernare, mer eget uttryck (mindre lånat från andra
-> bridgesidor), beslut tas på mockupen innan något byggs.
+### 🔵 NU — FACELIFT-FÖRSLAG (mockup) till ägaren
+> **UI-overhaulen steg 1–5 är KLAR & mergad till main (2026-07-08):**
+> (1) semantiska tokens `b87f74b`, (2) delad `<Dialog>` + `ClickAway`
+> `c4c50ac`, (3) `Play.tsx` splittrad 1328→412 rader — spellogiken i hookarna
+> `useGame`/`usePlayTable` + presentationsbitar under `src/pages/play/`
+> (`8116837`), (4) mörkt läge jämnt — sista ljus-läge-hårdkodade färgerna på
+> panelytor → accent/danger-tokens + dark-varianter (`40d2605`), (5) första
+> UI-röktesterna — 11 st i jsdom (per-fil `@vitest-environment`): delade
+> Dialog-kontraktet, budlådans två-stegsval, hela Spela kort-flödet
+> budfas→kontrakt→spelbord (`02343d8`). 1101 test gröna, tsc rent,
+> browser-verifierat i ljust + mörkt läge.
+>
+> **NU = facelift-FÖRSLAGET:** ägaren vill ha ett modernare, mer eget uttryck
+> (mindre lånat från andra bridgesidor). Claude tar fram en MOCKUP (skiss,
+> inget byggs i appen) och ägaren beslutar på den innan något implementeras.
+> Overhaulen gjorde det billigt: utseendet bor i tokens (`index.css`) + små
+> presentationskomponenter.
 >
 > **Ursprungsbeslutet (2026-07-07 kväll):** ägaren valde UI-overhaul efter Fables
 > arkitektur-diagnos av UI-lagret. Diagnosens friska delar: motor/UI-
@@ -36,11 +39,8 @@ Läs den här filen först varje session.
 > 143 träffar i 18 UI-filer mot ~41 token-användningar, (c) mörkt läge ojämnt
 > (`Play.tsx` 0 dark-varianter, 17/19 komponenter 0 → vita rutor på mörkt bord),
 > (d) 11 handrullade overlay/dialog-byggen utan gemensamt beteende; plus 0
-> UI-test (alla 1090 vaktar motorn). **Femstegsplan, ett steg i taget:**
-> (1) **semantiska tokens** (yta/text/dämpad/kant/accent i `index.css`, migrera
-> UI-filerna) ← NU, (2) delad `<Dialog>`-komponent, (3) splittra `Play.tsx`
-> (logik-hooks + fas-filer), (4) mörkt läge jämnt (mest gratis av steg 1),
-> (5) röktester på nyckelflödena. Steg 2–5 ligger i NÄST.
+> UI-test (alla 1090 vaktar motorn). Femstegsplanen som svarade på detta är
+> nu GENOMFÖRD (se ovan) — alla fyra problemen + UI-testluckan är stängda.
 >
 > **Bakgrundsläget:** inga öppna felrapporter (#1–#34 stängda eller medvetet
 > uppskjutna, se ⚪ SENARE). Steg A (Vercel + rebidz.com + PWA) KLART & LIVE
@@ -277,10 +277,8 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **UI-overhaul steg 2–5** — (2) delad `<Dialog>`, (3) splittra `Play.tsx`,
-   (4) mörkt läge jämnt, (5) röktester på nyckelflödena. Ett steg i taget;
-   flyttas upp till NU ett och ett när föregående steg är klart. Därefter:
-   själva den visuella omgörningen, bit för bit.
+1. **Den visuella omgörningen, bit för bit** — byggs EFTER att ägaren godkänt
+   facelift-mockupen (NU ovan). Tokens + komponentstrukturen är redo.
 2. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs på de
    ärliga slamportarnas mönster (kaptensregeln mot visade intervall). Gärna
    efter att ägaren spelat ett tag och bekräftat portarna i spel.
