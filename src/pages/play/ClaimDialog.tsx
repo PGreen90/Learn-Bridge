@@ -38,22 +38,22 @@ export function ClaimDialog({
               onClick={() => onClaim(t)}
               className={`min-w-12 rounded-lg px-2 py-1.5 ring-1 transition-colors ${
                 t >= needed
-                  ? 'bg-emerald-50 ring-emerald-200 hover:bg-emerald-100'
+                  ? 'bg-accent-soft ring-accent-line hover:ring-accent'
                   : 'bg-panel-2 ring-line hover:bg-panel'
               }`}
             >
               <span className="block text-sm font-bold text-ink">{t}</span>
-              <span className={`block text-[10px] font-medium ${t >= needed ? 'text-emerald-700' : 'text-ink-muted'}`}>
+              <span className={`block text-[10px] font-medium ${t >= needed ? 'text-accent' : 'text-ink-muted'}`}>
                 {diffLabel(t)}
               </span>
             </button>
           ))}
         </div>
-        {message && <p className="mt-3 text-xs font-semibold text-red-600">{message}</p>}
+        {message && <p className="mt-3 text-xs font-semibold text-danger">{message}</p>}
         <button
           type="button"
           onClick={onClose}
-          className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
+          className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
         >
           Avbryt — spela vidare
         </button>

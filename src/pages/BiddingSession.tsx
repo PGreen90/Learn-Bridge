@@ -161,7 +161,7 @@ function Session({ themeId }: { themeId: string }) {
 
             {answered && (
               <div className="mx-auto mt-4 max-w-md rounded-xl bg-panel p-3 text-left shadow-xl ring-1 ring-line">
-                <p className={`mb-1 font-semibold ${isCorrect ? 'text-emerald-700' : 'text-red-600'}`}>
+                <p className={`mb-1 font-semibold ${isCorrect ? 'text-accent' : 'text-danger'}`}>
                   {isCorrect ? '✓ Rätt!' : '✗ Inte riktigt.'}
                 </p>
                 <p className="text-sm text-ink-soft">

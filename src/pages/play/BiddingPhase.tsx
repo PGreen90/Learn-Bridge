@@ -106,7 +106,7 @@ export function BiddingPhase({
             <div className="flex items-center justify-center gap-2 pb-3">
               <BidChip bid={`${finalContract.level}${STRAIN_CODE[finalContract.strain]}`} />
               {finalContract.doubled && (
-                <span className="text-sm font-bold text-red-600">{finalContract.doubled}</span>
+                <span className="text-sm font-bold text-danger">{finalContract.doubled}</span>
               )}
               <span className="text-sm font-medium text-ink-soft">
                 spelas av {SEAT_LABEL[finalContract.declarer]}
@@ -115,7 +115,7 @@ export function BiddingPhase({
             <button
               type="button"
               onClick={onConfirm}
-              className="w-full border-t border-line pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500"
+              className="w-full border-t border-line pt-2.5 text-sm font-semibold text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
             >
               Bekräfta
             </button>

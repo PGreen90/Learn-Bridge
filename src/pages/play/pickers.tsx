@@ -46,7 +46,7 @@ export function ScenarioPicker({
                 onClick={() => onPick(target)}
                 className={`rounded-xl border p-2.5 text-left transition ${
                   selected
-                    ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400'
+                    ? 'border-accent bg-accent-soft ring-1 ring-accent'
                     : 'border-line bg-panel hover:border-line-strong hover:bg-panel-2'
                 }`}
               >

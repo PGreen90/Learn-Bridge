@@ -25,14 +25,16 @@ function vulnerable(seat: Seat, v: Vulnerability): boolean {
   return false
 }
 
+// Kravnivå-badges i förklarings-popupen (bg-panel) — behöver dark-varianter,
+// annars blir de bländande ljusa plåster på den mörka panelen.
 const FORCING_BADGE: Record<Forcing, string> = {
-  avslut: 'bg-slate-200 text-slate-700',
-  'ej-krav': 'bg-slate-200 text-slate-700',
-  'semi-krav': 'bg-amber-100 text-amber-800',
-  inbjudan: 'bg-amber-100 text-amber-800',
-  'krav-1-rond': 'bg-orange-100 text-orange-800',
-  utgangskrav: 'bg-red-100 text-red-800',
-  slamintresse: 'bg-purple-100 text-purple-800',
+  avslut: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+  'ej-krav': 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+  'semi-krav': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+  inbjudan: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+  'krav-1-rond': 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
+  utgangskrav: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+  slamintresse: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
 }
 
 export function AuctionGrid({

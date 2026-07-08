@@ -143,7 +143,7 @@ function PlayTable({
         <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
         {!resultSeen && !reporting ? (
           <Dialog className="p-5 text-center">
-              <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-emerald-700' : 'text-red-600'}`}>
+              <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-accent' : 'text-danger'}`}>
                 {result.made
                   ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
                   : `${-result.diff} bet (${result.declarerTricks} stick).`}
@@ -272,7 +272,7 @@ function PlayTable({
               type="button"
               onClick={toggleAutoClaim}
               className={`rounded-full px-3 py-0.5 text-xs font-bold ${
-                autoClaim ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-600'
+                autoClaim ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
               }`}
             >
               {autoClaim ? 'På' : 'Av'}

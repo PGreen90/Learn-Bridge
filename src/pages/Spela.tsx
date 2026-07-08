@@ -323,7 +323,7 @@ function SeatDetails({
             <span className="ml-2 text-xs text-accent">öppnare</span>
           )}
           {isResponder && (
-            <span className="ml-2 text-xs text-sky-600">svarare</span>
+            <span className="ml-2 text-xs text-sky-600 dark:text-sky-400">svarare</span>
           )}
         </span>
         <BidChip bid={r.call} />
@@ -332,7 +332,7 @@ function SeatDetails({
       <p className="mt-2 text-sm text-ink-soft">
         <SuitText>{r.explanation}</SuitText>
         {r.uncertain && (
-          <span className="ml-1 text-amber-600">
+          <span className="ml-1 text-amber-600 dark:text-amber-400">
             <SuitText>⚑ osäker – kan vara stark 2♣</SuitText>
           </span>
         )}

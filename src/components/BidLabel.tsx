@@ -11,9 +11,9 @@ const STRAIN: Record<string, { sym: string; suit: Suit }> = {
 /** Visar ett bud snyggt: "1H" -> 1♥, "P" -> Pass. Fyrfärgslek via suitColors.ts.
  *  Pass = grön, dubbling = röd, redubbling = blå (samma färger som budlådan). */
 export function BidLabel({ bid }: { bid: Bid }) {
-  if (bid === 'P') return <span className="text-emerald-600">Pass</span>
-  if (bid === 'X') return <span className="text-red-600">Dbl</span>
-  if (bid === 'XX') return <span className="text-blue-600">Redbl</span>
+  if (bid === 'P') return <span className="text-accent">Pass</span>
+  if (bid === 'X') return <span className="text-danger">Dbl</span>
+  if (bid === 'XX') return <span className="text-blue-600 dark:text-blue-400">Redbl</span>
 
   const level = bid[0]
   const strain = bid.slice(1)
