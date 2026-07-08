@@ -2,7 +2,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import bookRaw from '../../docs/budsystem.md?raw'
-import { SUIT_TEXT, SUIT_TEXT_DARK } from '../lib/suitColors'
+import { SUIT_INK } from '../lib/suitColors'
 import { CHAR_SUIT, SuitText } from '../components/SuitText'
 
 // Sidan läser systemboken (docs/budsystem.md) direkt och visar den i utfällbara
@@ -73,7 +73,7 @@ function rehypeSuitColors() {
             return {
               type: 'element',
               tagName: 'span',
-              properties: { className: [SUIT_TEXT[suit], SUIT_TEXT_DARK[suit]] },
+              properties: { className: [SUIT_INK[suit]] },
               children: [{ type: 'text', value: s }],
             }
           })
@@ -134,7 +134,7 @@ export function BudSystem() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold mb-1">Budsystem</h1>
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-ink-soft">
           Vårt 2-över-1-system i sin helhet – öppningar, svar, återbud, slam,
           försvar och markeringar. Klicka på en rubrik för att fälla ut, eller sök.
         </p>
@@ -143,7 +143,7 @@ export function BudSystem() {
       {/* Sökfältet: filtrerar sektionerna medan man skriver. */}
       <div>
         <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint">
             🔍
           </span>
           <input
@@ -151,16 +151,16 @@ export function BudSystem() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Sök i systemet, t.ex. Stayman, spärr, 1NT …"
-            className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm
-              placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2
-              focus:ring-emerald-200 dark:border-emerald-100/10 dark:bg-club-900 dark:placeholder:text-slate-500
-              dark:focus:ring-emerald-900"
+            className="w-full rounded-xl border border-line-strong bg-control py-2.5 pl-10 pr-10 text-sm
+              placeholder:text-ink-faint focus:border-emerald-500 focus:outline-none focus:ring-2
+              
+              "
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-club-800 dark:hover:text-slate-300"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 text-ink-faint hover:bg-panel-2 hover:text-ink-soft"
               aria-label="Rensa sökningen"
             >
               ✕
@@ -168,7 +168,7 @@ export function BudSystem() {
           )}
         </div>
         {q && (
-          <p className="mt-1.5 px-1 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-1.5 px-1 text-xs text-ink-muted">
             {hits === 0
               ? 'Inga träffar – prova ett annat ord.'
               : `${hits} träff${hits === 1 ? '' : 'ar'} i ${visible.length} sektion${visible.length === 1 ? '' : 'er'}.`}
@@ -181,17 +181,17 @@ export function BudSystem() {
           <details
             key={s.title}
             open={q ? true : undefined}
-            className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900"
+            className="group rounded-xl border border-line bg-panel shadow-sm"
           >
-            <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-semibold text-emerald-900 dark:text-emerald-200 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-semibold text-accent-strong [&::-webkit-details-marker]:hidden">
               <span>
                 <Highlight text={s.title} q={q} />
               </span>
-              <span className="text-slate-400 transition-transform group-open:rotate-180">
+              <span className="text-ink-faint transition-transform group-open:rotate-180">
                 ▾
               </span>
             </summary>
-            <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-2">
+            <div className="border-t border-line px-4 pb-4 pt-2">
               {s.intro && <Markdown>{s.intro}</Markdown>}
               {s.subs.length > 0 && (
                 <div className="mt-3 space-y-2">
@@ -199,13 +199,13 @@ export function BudSystem() {
                     <details
                       key={sub.title}
                       open={q ? true : undefined}
-                      className="group/sub rounded-lg border border-emerald-950/10 bg-club-50 dark:border-emerald-100/10 dark:bg-club-800/60"
+                      className="group/sub rounded-lg border border-line bg-panel-2"
                     >
-                      <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
+                      <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
                         <span>
                           <Highlight text={sub.title} q={q} />
                         </span>
-                        <span className="text-slate-400 transition-transform group-open/sub:rotate-180">
+                        <span className="text-ink-faint transition-transform group-open/sub:rotate-180">
                           ▾
                         </span>
                       </summary>
@@ -220,7 +220,7 @@ export function BudSystem() {
           </details>
         ))}
         {q && visible.length === 0 && (
-          <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          <p className="rounded-xl border border-dashed border-line-strong p-6 text-center text-sm text-ink-muted">
             Inget i systemboken matchar &quot;{query}&quot;.
           </p>
         )}

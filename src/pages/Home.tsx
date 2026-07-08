@@ -18,8 +18,8 @@ const HERO_CARDS: Card[] = [
 const HERO_TILT = ['-rotate-12 translate-y-2', '-rotate-4', 'rotate-4', 'rotate-12 translate-y-2']
 
 const CARD =
-  'block rounded-2xl bg-white p-5 shadow-md ring-1 ring-emerald-950/5 transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] ' +
-  'dark:bg-club-900 dark:shadow-none dark:ring-emerald-100/10 dark:hover:bg-club-800'
+  'block rounded-2xl bg-panel p-5 shadow-md ring-1 ring-panel-ring transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] ' +
+  'dark:shadow-none dark:hover:bg-club-800'
 
 /** Emoji-ikon i en tonad ruta, så korten känns igen blixtsnabbt. */
 function CardIcon({ children }: { children: string }) {
@@ -49,8 +49,8 @@ function ModeCard({
       <div className="flex items-center gap-3">
         <CardIcon>{icon}</CardIcon>
         <div>
-          <div className="font-semibold text-slate-900 dark:text-slate-100">{title}</div>
-          <div className="text-sm text-slate-500 dark:text-slate-400">{description}</div>
+          <div className="font-semibold text-ink">{title}</div>
+          <div className="text-sm text-ink-muted">{description}</div>
         </div>
       </div>
     </Link>

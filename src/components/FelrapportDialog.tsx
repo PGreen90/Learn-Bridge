@@ -5,6 +5,7 @@ import type { Contract, Trick } from '../lib/engine/play'
 import { REPORT_CATEGORIES, felrapportUrl, submitFelrapport } from '../lib/felrapport'
 import { loadGithubToken } from '../lib/github-token'
 import { Button } from './Button'
+import { Dialog } from './Dialog'
 
 /** Standardtexten (Spela kort): hela given inklusive sticken följer med. */
 const DEFAULT_INTRO = 'Hela given (händerna, budgivningen och sticken) följer med automatiskt.'
@@ -71,32 +72,31 @@ export function FelrapportDialog({
   // Kvitto efter lyckat direktskick.
   if (status === 'sent') {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
-        <div className="w-full max-w-sm rounded-xl bg-white p-4 text-left shadow-xl">
-          <h2 className="text-sm font-bold text-emerald-700">✓ Tack – rapporten är skickad!</h2>
-          <p className="mt-2 text-xs leading-relaxed text-slate-500">
-            Hela given följde med. Du behöver inte göra något mer.
-          </p>
-          <div className="mt-3 flex justify-end">
-            <Button onClick={onClose}>Stäng</Button>
-          </div>
+      <Dialog onClose={onClose} className="w-full max-w-sm p-4 text-left">
+        <h2 className="text-sm font-bold text-accent">✓ Tack – rapporten är skickad!</h2>
+        <p className="mt-2 text-xs leading-relaxed text-ink-muted">
+          Hela given följde med. Du behöver inte göra något mer.
+        </p>
+        <div className="mt-3 flex justify-end">
+          <Button onClick={onClose}>Stäng</Button>
         </div>
-      </div>
+      </Dialog>
     )
   }
 
   const sending = status === 'sending'
 
+  // Ingen onClose: en halvskriven rapport ska inte försvinna på ett klick
+  // utanför rutan — bara Avbryt-knappen stänger.
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
-      <div className="w-full max-w-sm rounded-xl bg-white p-4 text-left shadow-xl">
-        <h2 className="text-sm font-bold text-slate-800">{title}</h2>
-        <p className="mt-1 text-xs leading-relaxed text-slate-500">{intro}</p>
+    <Dialog className="w-full max-w-sm p-4 text-left">
+        <h2 className="text-sm font-bold text-ink">{title}</h2>
+        <p className="mt-1 text-xs leading-relaxed text-ink-muted">{intro}</p>
 
         <fieldset className="mt-3 space-y-1.5" disabled={sending}>
           <legend className="sr-only">Vad kändes fel?</legend>
           {categories.map((c) => (
-            <label key={c} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+            <label key={c} className="flex cursor-pointer items-center gap-2 text-sm text-ink-soft">
               <input
                 type="radio"
                 name="felkategori"
@@ -115,7 +115,7 @@ export function FelrapportDialog({
           rows={3}
           disabled={sending}
           placeholder="Beskriv gärna med egna ord vad som kändes fel …"
-          className="mt-3 w-full rounded-lg border border-slate-300 p-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none disabled:opacity-60"
+          className="mt-3 w-full rounded-lg border border-line-strong p-2 text-sm text-ink focus:border-emerald-500 focus:outline-none disabled:opacity-60"
         />
 
         {status === 'error' && (
@@ -125,11 +125,11 @@ export function FelrapportDialog({
         )}
 
         {token ? (
-          <p className="mt-2 text-xs leading-relaxed text-slate-500">
+          <p className="mt-2 text-xs leading-relaxed text-ink-muted">
             Rapporten skickas direkt till GitHub – inget mer du behöver göra.
           </p>
         ) : (
-          <p className="mt-2 text-xs leading-relaxed text-slate-500">
+          <p className="mt-2 text-xs leading-relaxed text-ink-muted">
             Rapporten öppnas som en förifylld sida på GitHub – klicka{' '}
             <strong>Submit new issue</strong> där för att skicka den. (Vill du slippa det
             steget? Aktivera direktskick under <strong>Inställningar</strong>.)
@@ -155,7 +155,6 @@ export function FelrapportDialog({
             <Button onClick={openIssue}>Öppna rapporten →</Button>
           )}
         </div>
-      </div>
-    </div>
+    </Dialog>
   )
 }

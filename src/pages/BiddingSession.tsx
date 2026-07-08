@@ -33,8 +33,8 @@ function Session({ themeId }: { themeId: string }) {
   if (!theme || exercises.length === 0) {
     return (
       <Panel>
-        <p className="text-slate-600 dark:text-slate-400">Temat hittades inte.</p>
-        <Link to="/budtraning" className="text-emerald-700 dark:text-emerald-400 underline">
+        <p className="text-ink-soft">Temat hittades inte.</p>
+        <Link to="/budtraning" className="text-accent underline">
           Tillbaka till budträning
         </Link>
       </Panel>
@@ -46,10 +46,10 @@ function Session({ themeId }: { themeId: string }) {
       <div className="space-y-6">
         <Panel className="text-center">
           <h1 className="text-2xl font-bold mb-2">Klart! 🎉</h1>
-          <p className="text-lg text-slate-700 dark:text-slate-300 mb-1">
+          <p className="text-lg text-ink-soft mb-1">
             Du fick <b>{score.correct}</b> av <b>{score.total}</b> rätt
           </p>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">Temat: {theme.title}</p>
+          <p className="text-ink-muted mb-6">Temat: {theme.title}</p>
           <div className="flex flex-wrap gap-2 justify-center">
             <Button onClick={restart}>Träna igen</Button>
             <Link to="/budtraning">
@@ -128,11 +128,11 @@ function Session({ themeId }: { themeId: string }) {
       <div className="flex items-center justify-between gap-3 px-1">
         <div>
           <h1 className="text-lg font-bold leading-tight">{theme.title}</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-ink-muted">
             Fråga {exIndex + 1} av {exercises.length}
           </p>
         </div>
-        <Link to="/budtraning" className="shrink-0 text-sm text-emerald-700 dark:text-emerald-400 underline">
+        <Link to="/budtraning" className="shrink-0 text-sm text-accent underline">
           Avbryt
         </Link>
       </div>
@@ -160,11 +160,11 @@ function Session({ themeId }: { themeId: string }) {
             />
 
             {answered && (
-              <div className="mx-auto mt-4 max-w-md rounded-xl bg-white p-3 text-left shadow-xl ring-1 ring-slate-200">
-                <p className={`mb-1 font-semibold ${isCorrect ? 'text-emerald-700' : 'text-red-600'}`}>
+              <div className="mx-auto mt-4 max-w-md rounded-xl bg-panel p-3 text-left shadow-xl ring-1 ring-line">
+                <p className={`mb-1 font-semibold ${isCorrect ? 'text-accent' : 'text-danger'}`}>
                   {isCorrect ? '✓ Rätt!' : '✗ Inte riktigt.'}
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-ink-soft">
                   <SuitText>{decision.explanation}</SuitText>
                 </p>
                 <div className="mt-3">

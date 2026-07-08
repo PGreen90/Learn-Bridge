@@ -11,6 +11,7 @@ import { SEAT_LABEL } from '../lib/bidding'
 import { FORCING_LABEL, ruleInfo } from '../lib/engine/rules'
 import { BidChip } from './BidChip'
 import { BidLabel } from './BidLabel'
+import { ClickAway } from './Dialog'
 import { SuitText } from './SuitText'
 
 // Kolumnordning V N Ö S (medurs), så Syd – din plats – står längst till höger.
@@ -24,14 +25,16 @@ function vulnerable(seat: Seat, v: Vulnerability): boolean {
   return false
 }
 
+// Kravnivå-badges i förklarings-popupen (bg-panel) — behöver dark-varianter,
+// annars blir de bländande ljusa plåster på den mörka panelen.
 const FORCING_BADGE: Record<Forcing, string> = {
-  avslut: 'bg-slate-200 text-slate-700',
-  'ej-krav': 'bg-slate-200 text-slate-700',
-  'semi-krav': 'bg-amber-100 text-amber-800',
-  inbjudan: 'bg-amber-100 text-amber-800',
-  'krav-1-rond': 'bg-orange-100 text-orange-800',
-  utgangskrav: 'bg-red-100 text-red-800',
-  slamintresse: 'bg-purple-100 text-purple-800',
+  avslut: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+  'ej-krav': 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+  'semi-krav': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+  inbjudan: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+  'krav-1-rond': 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
+  utgangskrav: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+  slamintresse: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
 }
 
 export function AuctionGrid({
@@ -93,14 +96,9 @@ export function AuctionGrid({
       {/* Vit förklarings-popup (Synreys "Instruction"): budet + kravnivå + ALERT + text. */}
       {chosen && (
         <>
-          {/* Genomskinlig bakgrund över hela skärmen: tryck var som helst utanför
-              bubblan för att stänga den. */}
-          <div
-            className="fixed inset-0 z-30"
-            aria-hidden
-            onClick={() => setSelected(null)}
-          />
-          <div className="absolute inset-x-1 top-8 z-40 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
+          {/* Tryck var som helst utanför bubblan stänger den. */}
+          <ClickAway onClose={() => setSelected(null)} />
+          <div className="absolute inset-x-1 top-8 z-40 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
             {/* Stäng-kryss: förankrat i övre högra hörnet så det ALDRIG kan
                 knuffas utanför bild. iPhone-glas: frostad genomskinlig cirkel
                 (backdrop-blur), ljus kant + glansdager på övre halvan. */}
@@ -117,9 +115,9 @@ export function AuctionGrid({
               />
               <span className="relative drop-shadow-sm">✕</span>
             </button>
-            <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2 pr-12">
+            <div className="flex flex-wrap items-center gap-2 border-b border-line pb-2 pr-12">
               <BidChip bid={chosen.bid} />
-              <span className="text-sm font-semibold text-slate-700">
+              <span className="text-sm font-semibold text-ink-soft">
                 Förklaring · {SEAT_LABEL[chosen.seat]}
               </span>
               {chosenInfo?.forcing && (
@@ -134,11 +132,11 @@ export function AuctionGrid({
                 <span className="rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>
               )}
             </div>
-            <p className="pt-2 text-sm text-slate-700">
+            <p className="pt-2 text-sm text-ink-soft">
               {chosen.explanation ? (
                 <SuitText>{chosen.explanation}</SuitText>
               ) : (
-                <span className="text-slate-400">
+                <span className="text-ink-faint">
                   Ingen förklaring för <BidLabel bid={chosen.bid} />.
                 </span>
               )}

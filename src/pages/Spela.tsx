@@ -97,7 +97,7 @@ export function Spela() {
     <div className="space-y-4">
       <header>
         <h1 className="text-2xl font-bold mb-1">Budvisning</h1>
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-ink-soft">
           Titta-läge: motorn delar ut en giv och budar alla fyra händerna enligt
           systemboken. Klicka på ett lagt bud för att se vad det betyder.
         </p>
@@ -201,12 +201,12 @@ export function Spela() {
       )}
 
       {/* Fördjupningen: poänguträkningar + alla budförklaringar i läsform. */}
-      <details className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900">
-        <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
+      <details className="group rounded-xl border border-line bg-panel shadow-sm">
+        <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-ink-soft [&::-webkit-details-marker]:hidden">
           <span>🔎 Händernas poäng & alla budförklaringar</span>
-          <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
+          <span className="text-ink-faint transition-transform group-open:rotate-180">▾</span>
         </summary>
-        <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-3">
+        <div className="border-t border-line px-4 pb-4 pt-3">
           <div className="grid gap-3 sm:grid-cols-2">
             {(['N', 'W', 'E', 'S'] as Seat[]).map((seat) => (
               <SeatDetails
@@ -220,7 +220,7 @@ export function Spela() {
           </div>
           {calls.length > 0 && (
             <>
-              <h3 className="mb-2 mt-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <h3 className="mb-2 mt-4 text-sm font-semibold text-ink-soft">
                 Budgivningen steg för steg
               </h3>
               <ol className="space-y-2">
@@ -232,7 +232,7 @@ export function Spela() {
                     <span className="w-14 shrink-0">
                       <BidChip bid={call.bid} />
                     </span>
-                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <span className="text-sm text-ink-soft">
                       {call.explanation ? <SuitText>{call.explanation}</SuitText> : '—'}
                     </span>
                   </li>
@@ -247,13 +247,13 @@ export function Spela() {
           utvecklingsläge (import.meta.env.DEV). I den byggda appen som ägaren
           och andra använder göms de helt – de var förr synliga för alla. */}
       {import.meta.env.DEV && (
-        <details className="group rounded-xl border border-emerald-950/10 bg-white shadow-sm dark:border-emerald-100/10 dark:bg-club-900">
-          <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
+        <details className="group rounded-xl border border-line bg-panel shadow-sm">
+          <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 text-sm font-semibold text-ink-soft [&::-webkit-details-marker]:hidden">
             <span>🛠 Hålfinnare – testverktyg för budmotorn (bara i dev)</span>
-            <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
+            <span className="text-ink-faint transition-transform group-open:rotate-180">▾</span>
           </summary>
-          <div className="border-t border-emerald-950/5 dark:border-emerald-100/10 px-4 pb-4 pt-3">
-            <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
+          <div className="border-t border-line px-4 pb-4 pt-3">
+            <p className="mb-3 text-sm text-ink-muted">
               Kör tusentals slumphänder genom motorn och visar hur ofta varje regel
               träffar – bra för att hitta hål i systemet.
             </p>
@@ -312,15 +312,15 @@ function SeatDetails({
   const isOpener = openerSeat === seat
   const isResponder = responderSeat === seat
   return (
-    <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+    <div className="rounded-xl border border-line p-3">
       <div className="mb-2 flex items-baseline justify-between">
         <span className="text-sm font-semibold">
           {SEAT_LABEL[seat]}
           {deal.dealer === seat && (
-            <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">(giv)</span>
+            <span className="ml-2 text-xs text-ink-muted">(giv)</span>
           )}
           {isOpener && (
-            <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">öppnare</span>
+            <span className="ml-2 text-xs text-accent">öppnare</span>
           )}
           {isResponder && (
             <span className="ml-2 text-xs text-sky-600 dark:text-sky-400">svarare</span>
@@ -329,10 +329,10 @@ function SeatDetails({
         <BidChip bid={r.call} />
       </div>
       <HandView hand={hand} showPoints />
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-2 text-sm text-ink-soft">
         <SuitText>{r.explanation}</SuitText>
         {r.uncertain && (
-          <span className="ml-1 text-amber-600">
+          <span className="ml-1 text-amber-600 dark:text-amber-400">
             <SuitText>⚑ osäker – kan vara stark 2♣</SuitText>
           </span>
         )}
@@ -351,11 +351,11 @@ function SurveyTable({
   uncertain: { notation: string; result: { call: string } }[]
 }) {
   return (
-    <Panel className="!p-4 !shadow-none border border-slate-200 dark:border-slate-700">
+    <Panel className="!p-4 !shadow-none border border-line">
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       <table className="w-full text-sm mb-4">
         <thead>
-          <tr className="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+          <tr className="text-left text-ink-muted border-b border-line">
             <th className="py-1">Regel</th>
             <th className="py-1 text-right">Antal</th>
             <th className="py-1 text-right">Andel</th>
@@ -363,7 +363,7 @@ function SurveyTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.rule} className="border-b border-slate-100 dark:border-slate-800">
+            <tr key={row.rule} className="border-b border-line">
               <td className="py-1">{row.rule}</td>
               <td className="py-1 text-right tabular-nums">{row.count.toLocaleString('sv-SE')}</td>
               <td className="py-1 text-right tabular-nums">{row.pct} %</td>
@@ -373,12 +373,12 @@ function SurveyTable({
       </table>
       <h3 className="font-medium mb-1">Osäkra händer ({uncertain.length} exempel)</h3>
       {uncertain.length === 0 ? (
-        <p className="text-sm text-slate-600 dark:text-slate-400">Inga osäkra händer i den här körningen.</p>
+        <p className="text-sm text-ink-soft">Inga osäkra händer i den här körningen.</p>
       ) : (
         <ul className="space-y-1 text-sm">
           {uncertain.map((u, i) => (
-            <li key={i} className="text-slate-700 dark:text-slate-300">
-              <span className="font-mono text-slate-500 dark:text-slate-400">{u.notation}</span> →{' '}
+            <li key={i} className="text-ink-soft">
+              <span className="font-mono text-ink-muted">{u.notation}</span> →{' '}
               <BidChip bid={u.result.call} />
             </li>
           ))}

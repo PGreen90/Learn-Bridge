@@ -12,17 +12,41 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — ÖPPET (ägaren väljer nästa sak; järnregeln: exakt en)
-> **Läget (2026-07-07 kväll):** inga öppna felrapporter (#1–#34 stängda eller
-> medvetet uppskjutna, se ⚪ SENARE). Steg A (Vercel + rebidz.com + PWA) är
-> KLART & LIVE sedan 2026-07-05 → **Beslut A avklarat**. **Beslut B**
-> (konton/multiplayer/tävlingar) är ett separat STORT spår — startas bara på
-> uttryckligt ägarbeslut (`docs/framtid-multiplayer-plattform.md`). När ägaren
-> ska välja: presentera återstående punkter ur `docs/arbetslista.md` +
-> NÄST-listan. Bra kandidater: spela & bevaka de ärliga slamportarna, F1-resten
-> (NÄST 1), F2 datadriven detektorkedja + systemrevisor
-> (`docs/budsystem-revision.md` körordning F1–F6), UI-förfining, eller fler
-> budträningsgivar (⚪ SENARE).
+### 🔵 NU — FACELIFT-FÖRSLAG (mockup) till ägaren
+> **UI-overhaulen steg 1–5 är KLAR & mergad till main (2026-07-08):**
+> (1) semantiska tokens `b87f74b`, (2) delad `<Dialog>` + `ClickAway`
+> `c4c50ac`, (3) `Play.tsx` splittrad 1328→412 rader — spellogiken i hookarna
+> `useGame`/`usePlayTable` + presentationsbitar under `src/pages/play/`
+> (`8116837`), (4) mörkt läge jämnt — sista ljus-läge-hårdkodade färgerna på
+> panelytor → accent/danger-tokens + dark-varianter (`40d2605`), (5) första
+> UI-röktesterna — 11 st i jsdom (per-fil `@vitest-environment`): delade
+> Dialog-kontraktet, budlådans två-stegsval, hela Spela kort-flödet
+> budfas→kontrakt→spelbord (`02343d8`). 1101 test gröna, tsc rent,
+> browser-verifierat i ljust + mörkt läge.
+>
+> **NU = facelift-FÖRSLAGET:** ägaren vill ha ett modernare, mer eget uttryck
+> (mindre lånat från andra bridgesidor). Claude tar fram en MOCKUP (skiss,
+> inget byggs i appen) och ägaren beslutar på den innan något implementeras.
+> Overhaulen gjorde det billigt: utseendet bor i tokens (`index.css`) + små
+> presentationskomponenter.
+>
+> **Ursprungsbeslutet (2026-07-07 kväll):** ägaren valde UI-overhaul efter Fables
+> arkitektur-diagnos av UI-lagret. Diagnosens friska delar: motor/UI-
+> separationen är ren (overhaulen kan inte skada bridge-logiken), `Felt.tsx`/
+> `cardLayout.ts` är rätt sanningskällor, tokens-grunden finns i `index.css`.
+> Fyra problem: (a) `Play.tsx` 1431 rader = hela spelet i en fil (PlayTable
+> ~15 useState + worker), (b) färger utspridda — råa `slate-*` 235 + `emerald-*`
+> 143 träffar i 18 UI-filer mot ~41 token-användningar, (c) mörkt läge ojämnt
+> (`Play.tsx` 0 dark-varianter, 17/19 komponenter 0 → vita rutor på mörkt bord),
+> (d) 11 handrullade overlay/dialog-byggen utan gemensamt beteende; plus 0
+> UI-test (alla 1090 vaktar motorn). Femstegsplanen som svarade på detta är
+> nu GENOMFÖRD (se ovan) — alla fyra problemen + UI-testluckan är stängda.
+>
+> **Bakgrundsläget:** inga öppna felrapporter (#1–#34 stängda eller medvetet
+> uppskjutna, se ⚪ SENARE). Steg A (Vercel + rebidz.com + PWA) KLART & LIVE
+> sedan 2026-07-05 → **Beslut A avklarat**. **Beslut B** (konton/multiplayer/
+> tävlingar) är ett separat STORT spår — startas bara på uttryckligt ägarbeslut
+> (`docs/framtid-multiplayer-plattform.md`).
 >
 > **Senast klart & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, deploy grön):
 > ÄRLIGA SLAMPORTAR — tjuvkiken borttagen.** Ägarbeslut efter Fables
@@ -253,10 +277,11 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs på de
+1. **Den visuella omgörningen, bit för bit** — byggs EFTER att ägaren godkänt
+   facelift-mockupen (NU ovan). Tokens + komponentstrukturen är redo.
+2. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs på de
    ärliga slamportarnas mönster (kaptensregeln mot visade intervall). Gärna
    efter att ägaren spelat ett tag och bekräftat portarna i spel.
-2. **Mer UI-förfining** — ägaren pekar ut vad när det blir aktuellt.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - **Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (ägarens

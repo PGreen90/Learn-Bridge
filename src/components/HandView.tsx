@@ -30,13 +30,13 @@ function fmtTricks(t: number): string {
  */
 export function HandView({ hand, showPoints = false }: { hand: Hand; showPoints?: boolean }) {
   return (
-    <div className="w-full bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3">
+    <div className="w-full bg-accent-soft rounded-xl p-3">
       {SUIT_ORDER.map((suit) => {
         const ranks = sortRanks(hand.filter((c) => c.suit === suit).map((c) => c.rank))
         return (
           <div key={suit} className="flex items-center gap-2 text-xl leading-relaxed whitespace-nowrap">
             <SuitSymbol suit={suit} className="w-5 shrink-0 text-center" />
-            <span className="font-mono tracking-normal text-slate-800 dark:text-slate-200">
+            <span className="font-mono tracking-normal text-ink">
               {ranks.length ? ranks.join(' ') : '—'}
             </span>
           </div>
@@ -63,15 +63,15 @@ function PointsLine({ hand }: { hand: Hand }) {
   if (e.flatness !== 0) rows.push({ label: 'Flathet', value: e.flatness })
 
   return (
-    <details className="mt-2 border-t border-emerald-200 dark:border-emerald-900 pt-2 text-sm">
-      <summary className="cursor-pointer text-slate-700 dark:text-slate-300 marker:text-emerald-500">
-        <span className="font-semibold text-slate-900 dark:text-slate-100">{hp} HP</span>{' '}
-        <span className="text-emerald-700 dark:text-emerald-400">
+    <details className="mt-2 border-t border-accent-line pt-2 text-sm">
+      <summary className="cursor-pointer text-ink-soft marker:text-emerald-500">
+        <span className="font-semibold text-ink">{hp} HP</span>{' '}
+        <span className="text-accent">
           ({e.startingPoints} TP · {fmtTricks(tricks)} spelstick)
         </span>
-        <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">– så räknas TP</span>
+        <span className="ml-2 text-xs text-ink-faint">– så räknas TP</span>
       </summary>
-      <table className="mt-2 w-full max-w-xs text-slate-600 dark:text-slate-400">
+      <table className="mt-2 w-full max-w-xs text-ink-muted">
         <tbody>
           {rows.map((r) => (
             <tr key={r.label}>
@@ -81,12 +81,12 @@ function PointsLine({ hand }: { hand: Hand }) {
               </td>
             </tr>
           ))}
-          <tr className="border-t border-emerald-200 dark:border-emerald-900 font-semibold text-slate-900 dark:text-slate-100">
+          <tr className="border-t border-accent-line font-semibold text-ink">
             <td className="py-0.5 pr-3">Totalpoäng (TP)</td>
             <td className="py-0.5 text-right font-mono tabular-nums">{e.startingPoints}</td>
           </tr>
           {shortness > 0 && (
-            <tr className="text-slate-400 dark:text-slate-500 italic">
+            <tr className="text-ink-faint italic">
               <td className="py-0.5 pr-3">Kortfärg (räknas först vid fit)</td>
               <td className="py-0.5 text-right font-mono tabular-nums">({signed(shortness)})</td>
             </tr>
@@ -94,7 +94,7 @@ function PointsLine({ hand }: { hand: Hand }) {
         </tbody>
       </table>
       {shortness > 0 && (
-        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+        <p className="mt-1 text-xs text-ink-faint">
           Singel/dubbel/renons ger poäng först när en trumffärg är hittad – då
           blir handen värd ungefär {e.startingPoints + shortness} TP.
         </p>
