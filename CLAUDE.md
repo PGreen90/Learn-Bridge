@@ -12,8 +12,22 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — UI-OVERHAUL steg 1 av 5: semantiska färg-tokens (ägarbeslut 2026-07-07)
-> **NU (2026-07-07 kväll):** ägaren valde UI-overhaul efter Fables
+### 🔵 NU — UI-OVERHAUL, PAUSAD mitt i steg 3 (sessionen avbruten 2026-07-08)
+> **LÄGE VID PAUSEN (2026-07-08, allt på grenen `ui-overhaul` — INGET pushat,
+> main/live orört):** Steg 1 (semantiska tokens, commit `b87f74b`) och steg 2
+> (delad `<Dialog>` + `ClickAway`, commit `c4c50ac`) är KLARA — 1090 test gröna,
+> tsc rent, browser-verifierade i ljust + mörkt läge. Steg 3 (splittra
+> `Play.tsx`) är HALVVÄGS: alla nya filer under `src/pages/play/` är skrivna
+> och kompilerar (WIP-commit `6796dfe`) men `Play.tsx` är ÄNNU INTE omkopplad
+> till dem — appen beter sig exakt som efter steg 2. **Nästa session:** skriv
+> om `src/pages/Play.tsx` till att komponera play/-filerna (ta bort
+> dubbletterna), kör tsc + test + browser, committa; sedan steg 4–5, merge
+> `--no-ff` till main + push (ägaren har förhandsgodkänt PCD för overhaulen),
+> verifiera Vercel-deploy. Därefter: facelift-FÖRSLAG (mockup) till ägaren —
+> ägaren vill ha ett modernare, mer eget uttryck (mindre lånat från andra
+> bridgesidor), beslut tas på mockupen innan något byggs.
+>
+> **Ursprungsbeslutet (2026-07-07 kväll):** ägaren valde UI-overhaul efter Fables
 > arkitektur-diagnos av UI-lagret. Diagnosens friska delar: motor/UI-
 > separationen är ren (overhaulen kan inte skada bridge-logiken), `Felt.tsx`/
 > `cardLayout.ts` är rätt sanningskällor, tokens-grunden finns i `index.css`.
