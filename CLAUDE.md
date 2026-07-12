@@ -24,11 +24,18 @@ Läs den här filen först varje session.
 > budfas→kontrakt→spelbord (`02343d8`). 1101 test gröna, tsc rent,
 > browser-verifierat i ljust + mörkt läge.
 >
-> **NU = facelift-FÖRSLAGET:** ägaren vill ha ett modernare, mer eget uttryck
-> (mindre lånat från andra bridgesidor). Claude tar fram en MOCKUP (skiss,
-> inget byggs i appen) och ägaren beslutar på den innan något implementeras.
-> Overhaulen gjorde det billigt: utseendet bor i tokens (`index.css`) + små
-> presentationskomponenter.
+> **NU = facelift-beslutet — ägaren utforskar designen SJÄLV i Claude Design
+> (läge 2026-07-13):** Claudes mockup är LEVERERAD (konceptet "Klubbrummet":
+> tre material — filt/papper/mässing; skisser av startsida + budgivning +
+> spelbord + ljust läge + 6 beslutsfrågor; privat artifact
+> `claude.ai/code/artifact/5b9f5e2a-fe71-4dbc-aaeb-188a5a2376b9`). Ägaren
+> valde att i stället ta fram designen i **Claude Design** och fick färdiga
+> promptar (grundprompt med låsta hex-koder + en skärm i taget + ljust läge
+> sist). **Nästa steg = ägaren visar sitt designresultat → beslut → Claude
+> bygger om appen efter det, bit för bit med vanliga testrutinen. INGET byggs
+> i appen förrän ägaren sagt OK.** Låsta ramar gäller alltid: emerald,
+> svarta spader, guldserifen. Overhaulen gjorde bygget billigt: utseendet
+> bor i tokens (`index.css`) + små presentationskomponenter.
 >
 > **Ursprungsbeslutet (2026-07-07 kväll):** ägaren valde UI-overhaul efter Fables
 > arkitektur-diagnos av UI-lagret. Diagnosens friska delar: motor/UI-
