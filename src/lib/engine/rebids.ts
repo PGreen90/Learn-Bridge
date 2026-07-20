@@ -614,3 +614,79 @@ export function openerAnswerNMF(
   const call = `${cheap(opened)}${BID[opened]}`
   return { call, rule, explanation: `${p} hp, inget av ovan – ${pretty(call)} (NMF är krav, pass förbjudet).` }
 }
+
+// === Öppnarens TREDJE bud: svara svararens inbjudan i en 1NT-auktion ========
+// (felrapport #37). Efter 1NT–2♣ (Stayman) eller 1NT–2♦/2♥ (transfer) kan
+// svararens ANDRA bud vara en inbjudan (3M med fit, 2NT utan, 3M med 6+ färg).
+// Den kanoniska linjen slutade förr vid svararens andra bud → öppnarens svar
+// föll till det generella off-book-svaret, som bjöd 3NT "utan stöd" mitt i en
+// Stayman-hittad fit. Ägarprincip (ärliga portar): accept = ÖVER blott minimum
+// (1NT = 15–17 → accept 16–17); en 15:a med FEMTE trumf uppgraderar (extra
+// trumf + stöldvärde). Returnerar null för inbjudningsformer som inte hanteras
+// än (5-4-naturliga 2M-inbjudan m.fl.) → auktionen lämnas öppen som förut.
+
+export function openerThirdBidIn1NTAuction(
+  response: ResponseResult,
+  rebid: ResponseResult,
+  second: ResponseResult,
+  hand: Hand,
+): ResponseResult | null {
+  const p = hcp(hand)
+  const len = lengths(hand)
+
+  /** Accepterar öppnaren en inbjudan mot trumffärgen `trump` (null = sang)? */
+  const accepts = (trump: Suit | null): boolean =>
+    p >= 16 || (p === 15 && trump !== null && len[trump] >= 5)
+
+  const acceptGame = (call: string, why: string): ResponseResult =>
+    ({ call, rule: 'accepterar inbjudan', explanation: `${p} hp (maximum av 15–17) – ${why} → ${pretty(call)}.` })
+  const decline = (why: string): ResponseResult =>
+    ({ call: 'P', rule: 'pass', explanation: `${p} hp (minimum av 15–17) – ${why} → passar inbjudan.` })
+
+  // ---- Stayman (1NT–2♣) ----------------------------------------------------
+  if (response.rule === 'Stayman') {
+    const shown = suitOfCall(rebid.call) // vår visade högfärg (2♥/2♠), null vid 2♦
+    // Svararen höjde vår högfärg till 3-läget = inbjudan MED fit (4-4+).
+    if (shown && second.call === `3${BID[shown]}`) {
+      return accepts(shown)
+        ? acceptGame(`4${BID[shown]}`, `accepterar inbjudan med den hittade ${NAME[shown]}fiten`)
+        : decline(`fiten i ${NAME[shown]} räcker inte utan extra styrka`)
+    }
+    // 2NT = inbjudan UTAN fit (vår högfärg passade inte / vi svarade 2♦).
+    if (second.call === '2NT') {
+      return accepts(null)
+        ? acceptGame('3NT', 'accepterar den balanserade inbjudan')
+        : decline('ingen fit och ingen extra styrka')
+    }
+    return null
+  }
+
+  // ---- Jacoby-transfer (1NT–2♦/2♥) -----------------------------------------
+  if (response.rule === 'Jacoby-transfer') {
+    const target: Suit = response.call === '2D' ? 'hearts' : 'spades'
+    // 3M = inbjudan med 6+ korts högfärg (8–9): 2-korts stöd = säkrad 8-korts fit.
+    if (second.call === `3${BID[target]}`) {
+      return accepts(target)
+        ? acceptGame(`4${BID[target]}`, `accepterar inbjudan mot partnerns 6-korts ${NAME[target]}`)
+        : decline(`partnerns 6-korts ${NAME[target]} till trots – inget extra`)
+    }
+    // 2NT = inbjudan med exakt 5-korts högfärg, balanserad: välj färg efter fit.
+    if (second.call === '2NT') {
+      const fit = len[target] >= 3
+      if (accepts(null)) {
+        return fit
+          ? acceptGame(`4${BID[target]}`, `accepterar inbjudan och väljer 5-3-fiten i ${NAME[target]}`)
+          : acceptGame('3NT', `accepterar inbjudan utan trekorts ${NAME[target]}`)
+      }
+      // Minimum MED fit: rätta till 3M (5-3-fiten spelar bättre än 2NT).
+      if (fit) {
+        return { call: `3${BID[target]}`, rule: 'preferens',
+          explanation: `${p} hp (minimum av 15–17) – avböjer men rättar till 5-3-fiten i ${NAME[target]} → 3${SYM[target]}.` }
+      }
+      return decline('ingen fit och ingen extra styrka')
+    }
+    return null
+  }
+
+  return null
+}

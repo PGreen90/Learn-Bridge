@@ -74,3 +74,30 @@ describe('answerPreemptInterference – störning av vår svaga tvåa / spärr',
     expect(answerPreemptInterference(hand, 'diamonds', 'X', 3)).toMatchObject({ call: '4D', rule: 'spärrhöjning' })
   })
 })
+
+// FACIT (felrapport #39): ägaren rapporterade "Ö/V missar 3NT" när ägarens
+// naturliga 2♥-inkliv över 1NT dubblades och passades runt. DD-facit friar
+// bottarna: 3NT går 2 BET (7 stick) medan 2♥X ger 2 bet = +500 i zonen —
+// straffen är rätt och bäst. Låser det korrekta beteendet: Väst X (värden),
+// Öst passar (konverterar till straff med jämn hand utan sangstick att hämta).
+describe('FACIT felrapport #39 – straffen på 2♥X är rätt (3NT går bet)', () => {
+  it('Väst dubblar (värden) och Öst passar ut 2♥X', async () => {
+    const { decideCall } = await import('./auction-live')
+    const deal = {
+      id: 't', dealer: 'N', vulnerability: 'ns', board: 5,
+      hands: {
+        N: parseHand('S:98654 H:A7 D:95 C:7542'),
+        E: parseHand('S:KQ H:J92 D:KT3 C:KQJ96'),
+        S: parseHand('S:AT32 H:T8543 D:Q62 C:A'),
+        W: parseHand('S:J7 H:KQ6 D:AJ874 C:T83'),
+      },
+    } as const
+    type RC = { seat: 'N' | 'E' | 'S' | 'W'; bid: string }
+    const h1: RC[] = [
+      { seat: 'N', bid: 'P' }, { seat: 'E', bid: '1NT' }, { seat: 'S', bid: '2H' },
+    ]
+    expect(decideCall(deal as never, h1 as never, 'W').bid).toBe('X')
+    const h2: RC[] = [...h1, { seat: 'W', bid: 'X' }, { seat: 'N', bid: 'P' }]
+    expect(decideCall(deal as never, h2 as never, 'E').bid).toBe('P')
+  })
+})

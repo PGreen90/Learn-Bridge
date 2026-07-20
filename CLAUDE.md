@@ -12,48 +12,48 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — FACELIFT-FÖRSLAG (mockup) till ägaren
-> **UI-overhaulen steg 1–5 är KLAR & mergad till main (2026-07-08):**
-> (1) semantiska tokens `b87f74b`, (2) delad `<Dialog>` + `ClickAway`
-> `c4c50ac`, (3) `Play.tsx` splittrad 1328→412 rader — spellogiken i hookarna
-> `useGame`/`usePlayTable` + presentationsbitar under `src/pages/play/`
-> (`8116837`), (4) mörkt läge jämnt — sista ljus-läge-hårdkodade färgerna på
-> panelytor → accent/danger-tokens + dark-varianter (`40d2605`), (5) första
-> UI-röktesterna — 11 st i jsdom (per-fil `@vitest-environment`): delade
-> Dialog-kontraktet, budlådans två-stegsval, hela Spela kort-flödet
-> budfas→kontrakt→spelbord (`02343d8`). 1101 test gröna, tsc rent,
-> browser-verifierat i ljust + mörkt läge.
+### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 1: beta av felrapporterna
+> **Ägarbeslut 2026-07-20: designen läggs HELT åt sidan.** Facelift-spåret
+> (Claude Design-utforskningen + Claudes "Klubbrummet"-mockup) är flyttat till
+> 🅿️ PARKERAT — rörs inte förrän ägaren uttryckligen återupptar det. Fullt
+> fokus i stället: **budgivningen så nära perfekt som möjligt.**
 >
-> **NU = facelift-beslutet — ägaren utforskar designen SJÄLV i Claude Design
-> (läge 2026-07-13):** Claudes mockup är LEVERERAD (konceptet "Klubbrummet":
-> tre material — filt/papper/mässing; skisser av startsida + budgivning +
-> spelbord + ljust läge + 6 beslutsfrågor; privat artifact
-> `claude.ai/code/artifact/5b9f5e2a-fe71-4dbc-aaeb-188a5a2376b9`). Ägaren
-> valde att i stället ta fram designen i **Claude Design** och fick färdiga
-> promptar (grundprompt med låsta hex-koder + en skärm i taget + ljust läge
-> sist). **Nästa steg = ägaren visar sitt designresultat → beslut → Claude
-> bygger om appen efter det, bit för bit med vanliga testrutinen. INGET byggs
-> i appen förrän ägaren sagt OK.** Låsta ramar gäller alltid: emerald,
-> svarta spader, guldserifen. Overhaulen gjorde bygget billigt: utseendet
-> bor i tokens (`index.css`) + små presentationskomponenter.
+> **Planen (etapper i ordning — NU = exakt en etapp i taget):**
+> 1. **✅ Etapp 1 KLAR 2026-07-20: felrapporterna betade.** #35 (fel dubblare
+>    utsedd → 5♠-blåsan), #37 (öppnarens svar på sang-inbjudan byggt, §4.3),
+>    #38 (återöppning även efter 1-läges inkliv) lagade + test-låsta; #39 =
+>    inget fel (DD-facit: straffen +500 slår 3NT som går 2 bet) — test-låst.
+>    Issues stängda. Detaljer §9 i budsystem.md. Ägaren väljer nästa etapp:
+>    - **#35** — Öst höjer partnerns 4♠ till 5♠ på en redan begränsad
+>      minimihand (balanserings-X + 1♠ var redan hela handen) → 3 bet.
+>    - **#37** — 1NT-öppnaren (17 hp, FEM hjärter) avvisar 3♥-inbjudan efter
+>      Stayman-hittad fit och bjuder 3NT i st.f. 4♥; dessutom felaktig
+>      beskrivning av 3NT-budet.
+>    - **#38** — passad svarare (11 hp, ♦KQ864 + ♠KJ42) passar ut `1♣–(1♠)`
+>      → Ö/V säljer given i 1♠ trots ~25 hp och Västs solida klöver.
+>    - **#39** — efter vår 1NT + deras 2♥-inkliv blir W:s X ståendes som
+>      straff → Ö/V (25 hp) missar 3NT.
+>    - **#36** (större kort på mobil) är UI, inte bud → ⚪ SENARE.
+> 2. **Systemrevisorn — mätverktyget för "hur nära perfekt?"** (E3 + del av
+>    F2): återanvändbar probe-rigg som genererar tusentals givar, låter motorn
+>    bjuda alla fyra händerna, DD-löser och jämför slutkontraktet mot optimum
+>    → objektiv missprocent + topplista över värsta misstyperna. Perfektion
+>    kräver ett mått; riggen styr sedan prioriteringen av allt nedan.
+> 3. **F1-resten: familj B (2♣-slam) + C:s reverse/hoppskift** — byggs på de
+>    ärliga portarnas mönster (kaptensregeln mot visade intervall).
+> 4. **Revisorns topplista i tur och ordning** — kända kandidater: B13
+>    (inverterad minor-återbud för grova), F3 (advancer-rabatt efter
+>    balansering), F4 (TP till §7-inkliven), F6 (C5 stark 17+ efter två
+>    bjudna färger + C14 tvåfärgsinkliv i prebuilt-linjer).
+> 5. **F2: datadriven detektorkedja** (E1) — underhållbarhet så fler
+>    konkurrenskonventioner inte gör `decideCall`-kedjan skör.
 >
-> **Ursprungsbeslutet (2026-07-07 kväll):** ägaren valde UI-overhaul efter Fables
-> arkitektur-diagnos av UI-lagret. Diagnosens friska delar: motor/UI-
-> separationen är ren (overhaulen kan inte skada bridge-logiken), `Felt.tsx`/
-> `cardLayout.ts` är rätt sanningskällor, tokens-grunden finns i `index.css`.
-> Fyra problem: (a) `Play.tsx` 1431 rader = hela spelet i en fil (PlayTable
-> ~15 useState + worker), (b) färger utspridda — råa `slate-*` 235 + `emerald-*`
-> 143 träffar i 18 UI-filer mot ~41 token-användningar, (c) mörkt läge ojämnt
-> (`Play.tsx` 0 dark-varianter, 17/19 komponenter 0 → vita rutor på mörkt bord),
-> (d) 11 handrullade overlay/dialog-byggen utan gemensamt beteende; plus 0
-> UI-test (alla 1090 vaktar motorn). Femstegsplanen som svarade på detta är
-> nu GENOMFÖRD (se ovan) — alla fyra problemen + UI-testluckan är stängda.
->
-> **Bakgrundsläget:** inga öppna felrapporter (#1–#34 stängda eller medvetet
-> uppskjutna, se ⚪ SENARE). Steg A (Vercel + rebidz.com + PWA) KLART & LIVE
-> sedan 2026-07-05 → **Beslut A avklarat**. **Beslut B** (konton/multiplayer/
-> tävlingar) är ett separat STORT spår — startas bara på uttryckligt ägarbeslut
-> (`docs/framtid-multiplayer-plattform.md`).
+> **Bakgrundsläget:** UI-overhaulen steg 1–5 KLAR & mergad till main
+> (2026-07-08): tokens, delad `<Dialog>`, `Play.tsx`-splitten, jämnt mörkt
+> läge, första UI-röktesterna — detaljer i `docs/historik.md`. Steg A
+> (Vercel + rebidz.com + PWA) KLART & LIVE sedan 2026-07-05. **Beslut B**
+> (konton/multiplayer/tävlingar) är ett separat STORT spår — startas bara på
+> uttryckligt ägarbeslut (`docs/framtid-multiplayer-plattform.md`).
 >
 > **Senast klart & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, deploy grön):
 > ÄRLIGA SLAMPORTAR — tjuvkiken borttagen.** Ägarbeslut efter Fables
@@ -83,14 +83,14 @@ Läs den här filen först varje session.
 > budsystem-revision.md B8–B13. **1090 test gröna, tsc rent, deploy grön.**
 > Se 👀 Bevaka (översta posten).
 >
-> **F1 — bredda slam-utforskningen (PAUSAD → NÄST 1).** En probe (40 000 givar,
+> **F1 — bredda slam-utforskningen (PAUSAD → etapp 3 i NU-planen).** En probe (40 000 givar,
 > DD-lösta) delade slam-missarna i fyra familjer. **KLARA & LIVE:** **A** (efter
 > `1m–1M–1NT`: jämn → Gerber 21+/kvantitativ 4NT 19–20; obalanserad med säker
 > fit på egen hand → 4NT RKC), **C:s hopphöjning** (`1x–1M–3M` → driv 17+/
 > inbjudan 5M 15–16), **D** (hängande cue-quirken stängd — auto-cue-ronden är
 > numera helt borttagen). Alla styrs av de ärliga portarna ovan (äldre
 > beskrivningar i historiken med kontroll-gates/parets faktiska poäng =
-> kik-eran, gäller inte längre). **KVAR (= NÄST 1):** familj **B** (2♣) +
+> kik-eran, gäller inte längre). **KVAR (= etapp 3):** familj **B** (2♣) +
 > C:s systerfall **reverse** (`1♣–1♥–2♦`) och **hoppskift** (`1♦–1♠–3♣`) —
 > störst men rörigast (ingen överenskommen trumf; vissa reverse-auktioner
 > kollapsar t.o.m. under utgång, eget problem). Byggs på det ärliga mönstret.
@@ -284,13 +284,19 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Den visuella omgörningen, bit för bit** — byggs EFTER att ägaren godkänt
-   facelift-mockupen (NU ovan). Tokens + komponentstrukturen är redo.
-2. **F1 fortsättning: familj B (2♣) + C:s reverse/hoppskift** — byggs på de
-   ärliga slamportarnas mönster (kaptensregeln mot visade intervall). Gärna
-   efter att ägaren spelat ett tag och bekräftat portarna i spel.
+1. **Etapp 2: Systemrevisorn** — probe-riggen som mäter motorns slutkontrakt
+   mot DD-optimum över tusentals givar (se NU-planen punkt 2).
+2. **Etapp 3: F1-resten — familj B (2♣) + C:s reverse/hoppskift** — byggs på
+   de ärliga slamportarnas mönster (kaptensregeln mot visade intervall).
+3. **Etapp 4 start: B13 — förfina öppnarens återbud efter inverterad
+   minorhöjning** (eller det revisorn visar svider mest — ägaren väljer).
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
+- **Felrapport #36 — större kort på mobil (2026-07-07):** ägaren har stora
+  fingrar och vill ha större tryckytor för korten i Spela kort på mobilen.
+  Ren UI-justering (kortstorlek/tryckyta i `cardLayout.ts`/`Felt.tsx`) —
+  hanteras när budgivningsspåret tillåter, eller ihop med faceliften.
+  Issuen hålls öppen tills fixad.
 - **Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (ägarens
   4-punktslista punkt 1, 2026-07-06):** data i `src/data/exercises/*.json` +
   `EXERCISES_BY_THEME` i `bidding.ts`; facit bör knytas till motorns egna svar
@@ -364,6 +370,14 @@ Läs den här filen först varje session.
   (bara kvar här som historik — behandla dem inte som återstående arbete).
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
+- **FACELIFTEN / den visuella omgörningen (parkerad 2026-07-20 på ägarbeslut):**
+  hela designspåret vilar — Claudes "Klubbrummet"-mockup (privat artifact
+  `claude.ai/code/artifact/5b9f5e2a-fe71-4dbc-aaeb-188a5a2376b9`), ägarens
+  Claude Design-utforskning med de färdiga promptarna, och ombyggnaden av
+  appen efter godkänd design. Återupptas BARA när ägaren säger till. Låsta
+  ramar gäller fortfarande då: emerald, svarta spader, guldserifen. Tokens +
+  komponentstrukturen (UI-overhaulen) är redo, så bygget är billigt när det
+  återupptas.
 - ~~**Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC)~~ **LÖST 2026-07-07** (F1 familj
   D; slutgiltigt genom att motorns auto-cue-rond togs bort helt med de ärliga
   slamportarna samma kväll). Facit `auction-slam-jacoby-cue.test.ts`. Behandla

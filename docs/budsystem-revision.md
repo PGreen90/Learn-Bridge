@@ -2,9 +2,11 @@
 
 > **Vad detta är.** Resultatet av en komplett djupdykning i budmotorn (2026-07-07):
 > grunder, konventioner, försvar, fördelning, styrkor/svagheter — färgkodat med
-> åtgärdsförslag. **Detta är arbetsunderlaget för det pågående 🔵 NU "F1 — bredda
-> slam-utforskningen"** och för framtida budförbättringar. Uppdatera statusarna här
-> när punkter byggs. Projektkartan i `CLAUDE.md` styr ordningen; detta är detaljen.
+> åtgärdsförslag. **2026-07-20: detta är arbetsunderlaget för 🔵 NU-spåret
+> "BUDGIVNINGEN MOT PERFEKT"** (etapp 1 felrapporter #35/#37/#38/#39 → etapp 2
+> systemrevisorn → etapp 3 F1-resten → etapp 4 topplistan → etapp 5 F2; hela
+> planen i `CLAUDE.md`). Uppdatera statusarna här när punkter byggs.
+> Projektkartan i `CLAUDE.md` styr ordningen; detta är detaljen.
 
 **Färgkoder:** 🟢 byggt/testat/live · 🟡 fungerar men känd gräns/bevakning · 🔴 lucka/uppskjutet.
 

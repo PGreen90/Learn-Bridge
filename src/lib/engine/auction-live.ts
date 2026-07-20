@@ -526,11 +526,18 @@ function strongDoubleContext(history: ResolvedCall[], seat: Seat): StrongDoubleC
   if (!open || side(open.seat) === side(seat) || open.level !== 1) return null
 
   // Vem på vår sida dubblade? Dubblarens FÖRSTA icke-pass-bud måste vara X.
-  const nonPass = (s: Seat) => history.filter((c) => c.seat === s && c.bid !== 'P')
+  // Har BÅDA i paret X som första bud (upplysnings-X följd av partnerns
+  // RESPONSIVA X, felrapport #35) är det den FÖRSTA dubblingen i tid som är
+  // upplysningsdubblingen — den senare är responsiv och får inte utse en
+  // "stark dubblare" vars fitvisande höjning sedan läses som starkt återbud.
   let doubler: Seat | null = null
+  let doublerIdx = Number.POSITIVE_INFINITY
   for (const s of [seat, PARTNER[seat]] as Seat[]) {
-    const acts = nonPass(s)
-    if (acts.length >= 1 && acts[0].bid === 'X') doubler = s
+    const idx = history.findIndex((c) => c.seat === s && c.bid !== 'P')
+    if (idx !== -1 && history[idx].bid === 'X' && idx < doublerIdx) {
+      doubler = s
+      doublerIdx = idx
+    }
   }
   if (!doubler) return null
   const advancer = PARTNER[doubler]
@@ -584,6 +591,11 @@ function advanceStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Sea
   const shownLevel = ctx.doublerBids[0].level
   const isMajor = suit === 'hearts' || suit === 'spades'
   const gameLevel = isMajor ? 4 : 5
+
+  // Partnerns återbud nådde redan utgång → tvånget är uppfyllt. Höj ALDRIG
+  // förbi utgång på stödstege/tvångssvar (samma princip som felrapport #33);
+  // slamutredning hör inte hemma i det här tvångsläget.
+  if (shownLevel >= gameLevel) return null
 
   const bidAt = (level: number): Bid | null => {
     const b = `${level}${letter}` as Bid
