@@ -12,18 +12,24 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 1: beta av felrapporterna
+### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 2: Systemrevisorn
 > **Ägarbeslut 2026-07-20: designen läggs HELT åt sidan.** Facelift-spåret
 > (Claude Design-utforskningen + Claudes "Klubbrummet"-mockup) är flyttat till
 > 🅿️ PARKERAT — rörs inte förrän ägaren uttryckligen återupptar det. Fullt
 > fokus i stället: **budgivningen så nära perfekt som möjligt.**
 >
+> **🔵 NU = Etapp 2: bygg Systemrevisorn.** FÖRBEREDD — hela byggplanen
+> (pipeline, körform utanför deploygrinden, acceptanskriterier, kända fällor)
+> ligger i **`docs/systemrevisorn.md`**. Målet: objektiv missprocent +
+> topplista över värsta misstyperna, omkörbar efter varje förbättring, med en
+> första BASLINJEMÄTNING som resultat.
+>
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
-> 1. **✅ Etapp 1 KLAR 2026-07-20: felrapporterna betade.** #35 (fel dubblare
->    utsedd → 5♠-blåsan), #37 (öppnarens svar på sang-inbjudan byggt, §4.3),
->    #38 (återöppning även efter 1-läges inkliv) lagade + test-låsta; #39 =
->    inget fel (DD-facit: straffen +500 slår 3NT som går 2 bet) — test-låst.
->    Issues stängda. Detaljer §9 i budsystem.md. Ägaren väljer nästa etapp:
+> 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade.** #35 (fel
+>    dubblare utsedd → 5♠-blåsan), #37 (öppnarens svar på sang-inbjudan byggt,
+>    §4.3), #38 (återöppning även efter 1-läges inkliv) lagade + test-låsta;
+>    #39 = inget fel (DD-facit: straffen +500 slår 3NT som går 2 bet) —
+>    test-låst. Issues stängda, mergepunkt `da7bdc5`, deploy grön, 1106 test.
 >    - **#35** — Öst höjer partnerns 4♠ till 5♠ på en redan begränsad
 >      minimihand (balanserings-X + 1♠ var redan hela handen) → 3 bet.
 >    - **#37** — 1NT-öppnaren (17 hp, FEM hjärter) avvisar 3♥-inbjudan efter
@@ -284,12 +290,13 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Etapp 2: Systemrevisorn** — probe-riggen som mäter motorns slutkontrakt
-   mot DD-optimum över tusentals givar (se NU-planen punkt 2).
-2. **Etapp 3: F1-resten — familj B (2♣) + C:s reverse/hoppskift** — byggs på
+1. **Etapp 3: F1-resten — familj B (2♣) + C:s reverse/hoppskift** — byggs på
    de ärliga slamportarnas mönster (kaptensregeln mot visade intervall).
-3. **Etapp 4 start: B13 — förfina öppnarens återbud efter inverterad
-   minorhöjning** (eller det revisorn visar svider mest — ägaren väljer).
+2. **Etapp 4 start: B13 — förfina öppnarens återbud efter inverterad
+   minorhöjning** (eller det revisorns topplista visar svider mest — ägaren
+   väljer när baslinjemätningen finns).
+3. **Etapp 5: F2 — datadriven detektorkedja** (E1) — underhållbarhet innan
+   fler konkurrenskonventioner läggs på `decideCall`-kedjan.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
 - **Felrapport #36 — större kort på mobil (2026-07-07):** ägaren har stora

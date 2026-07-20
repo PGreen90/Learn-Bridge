@@ -96,7 +96,7 @@ kravminnet löst.
 |---|---------|:---:|--------|
 | E1 | Detektorkedjan i `decideCall` (~28 steg) — tung att underhålla, ordningskänslig | 🔴 | R2: gör kedjan **datadriven** innan fler konkurrenskonventioner (**F2**) |
 | E2 | Forcerad minimi-stege i 2♣ väljer inte alltid finaste färg (5♣ där 4♠ bättre) | 🟡 | Förbättra strain-val i `honorForce` |
-| E3 | Ingen kvarvarande probe-rigg i repot | 🟡 | Bygg återanvändbar systemrevisor (knyter an till **F2**) |
+| E3 | Ingen kvarvarande probe-rigg i repot | 🟡 | Bygg återanvändbar systemrevisor (knyter an till **F2**) — **FÖRBEREDD 2026-07-20: byggplan i `docs/systemrevisorn.md`, byggs i etapp 2 (NU)** |
 
 ---
 
