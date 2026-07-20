@@ -63,6 +63,24 @@ describe('Öppnarens återöppning i utpassningssits (1M–(inkliv)–P–P)', (
     expect(decideCall(deal, H, 'S').bid).toBe('2S')
   })
 
+  // ---- FACIT (felrapport #38): 1-LÄGES inkliv passat runt → samma återöppning.
+  // Roten: buildAuction modellerade advancerns pass på ett 1-läges enkelt inkliv
+  // och STÄNGDE auktionen (finish(false)) — öppnaren i utpassningssitsen fick
+  // aldrig frågan, och Väst sålde given i 1♠ med 15 hp + 6-korts topp-klöver.
+  it('15 hp, 6-korts klöver, deras 1♠ passat runt → tävlar 2♣ (felrapport #38)', () => {
+    const H = [
+      call('N', 'P'), call('E', 'P'), call('S', 'P'), call('W', '1C'),
+      call('N', '1S'), call('E', 'P'), call('S', 'P'),
+    ]
+    const deal = dealOf('N', {
+      N: 'S:AT653 H:962 D:AJ7 C:32',
+      E: 'S:KJ42 H:J75 D:KQ864 C:9',   // trap-pass med KJ42 bakom inkliparen
+      S: 'S:98 H:AQT3 D:T95 C:8765',
+      W: 'S:Q7 H:K84 D:32 C:AKQJT4',   // 15 hp, 6-korts klöver → sälj inte given
+    })
+    expect(decideCall(deal, H, 'W').bid).toBe('2C')
+  })
+
   // ---- Kontroll: jämn minimum, 3 kort i deras färg, ingen 6-färg → pass ------
   it('13 hp, jämn, 3 kort i deras färg, 5 spader → passar (faller igenom)', () => {
     const H = [call('S', '1S'), call('W', '2H'), call('N', 'P'), call('E', 'P')]

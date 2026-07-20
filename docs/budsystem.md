@@ -385,6 +385,20 @@ Spader-transfern (2♥→♠) fungerar spegelvänt.
 | inbjudan (8–9) | 2♦ (transfer ♥) | 2♠ (visar 5-5, inbjudan) |
 | GF (10+) | 2♥ (transfer ♠) | 3♥ (visar 5-5, öppnaren väljer högfärg) |
 
+#### Öppnarens svar på svararens inbjudan (efter Stayman/transfer)
+Principen är samma som för alla inbjudningar (ärliga portar): **accept = över
+blott minimum.** 1NT = 15–17 → **16–17 accepterar, 15 avböjer** — men en 15:a
+med **femte trumf** i en hittad fit uppgraderar och accepterar (extra trumf +
+stöldvärde). (Byggt via felrapport #37: öppnaren bjöd förr 3NT "utan stöd"
+mitt i en Stayman-hittad hjärterfit.)
+
+| Inbjudan | Minimum (15) | Maximum (16–17) |
+|---|---|---|
+| Stayman-fit: höjning till 3♥/3♠ | pass *(15 med 5-korts trumf → 4M)* | 4♥/4♠ |
+| Stayman utan fit: 2NT | pass | 3NT |
+| Transfer + 3♥/3♠ (6+ färg) | pass | 4♥/4♠ |
+| Transfer + 2NT (5-korts hf, jämn) | pass; med 3-korts stöd → 3M (preferens, 5-3-fiten spelar bättre) | 4M med 3-korts stöd, annars 3NT |
+
 #### Texas-transfer (4♦ / 4♥)
 För en lång hf med **utgångsstyrka men utan slamintresse**:
 
@@ -781,7 +795,9 @@ budade vidare. Öppnaren säljer inte en bra hand:
 
 **B) RHO passade också** – inklivet är passat runt till öppnaren i **utpassningssitsen**
 (t.ex. **1♠–(2♥)–P–P**). Partnern gör ofta en **trap pass** (hen sitter med inkliparens
-färg bakom sig och väntar på att du ska återöppna). Öppnaren återöppnar villigt:
+färg bakom sig och väntar på att du ska återöppna). Gäller **även 1-läges inkliv**
+(t.ex. **1♣–(1♠)–P–P**, lagat via felrapport #38 – förr såldes de). Öppnaren
+återöppnar villigt:
 
 | Öppnarens bud | Betydelse |
 |---|---|
@@ -1941,3 +1957,29 @@ Det avslöjar längd/räkning direkt för partnern.
   4:e hand under golvet). `classifyOpening` fick `seatOrder`, positionen trådad
   i `buildAuction`. +16 tester, facit FÖRE fix (13 låsta fel bevisade), on-book
   orört (1528 gröna).
+- **2026-07-20** – **Felrapporterna #35–#39 betade (nya spåret "budgivningen mot
+  perfekt", etapp 1).** **#35 (fix):** `strongDoubleContext` pekade ut FEL
+  dubblare när BÅDA i paret hade X som första bud (upplysnings-X + responsiv X)
+  – den sista vann, så partnerns fitvisande 4♠ lästes som "starkt återbud" och
+  den redan begränsade handen tvingades "stödhöja" till 5♠. Nu utser den FÖRSTA
+  dubblingen i tid dubblaren, och stödstegen i `advanceStrongDoubleRebid` går
+  ALDRIG förbi utgång (samma princip som #33). Facit
+  `auction-balancer-respects-game.test.ts`. **#37 (SYSTEMBYGGE, nytt §4.3-
+  avsnitt):** öppnarens svar på svararens INBJUDAN i en 1NT-auktion fanns inte
+  i den kanoniska linjen → föll till off-book-svaret som bjöd 3NT ("utan stöd")
+  mitt i en Stayman-hittad hjärterfit, med fel förklaring. Ny
+  `openerThirdBidIn1NTAuction` (`rebids.ts`, inkopplad i `auction.ts`): accept
+  = över blott minimum (16–17; en 15:a med femte trumf uppgraderar), täcker
+  Stayman-fit 3M / Stayman 2NT / transfer 3M / transfer 2NT (med 3-korts
+  preferensrättelse till 3M på minimum). Facit `auction-nt-invite.test.ts`.
+  **#38 (fix):** `buildAuction` STÄNGDE auktionen när advancern passade ett
+  1-läges enkelt inkliv → öppnaren i utpassningssitsen fick aldrig
+  återöppningsfrågan och sålde given i 1♠ med 15 hp + 6-korts topp-klöver. Nu
+  lämnas auktionen öppen (finish(true)) så `openerReopensBalancing` (§7.1
+  flerronds del B) tävlar 2♣. Facit i `auction-opener-reopen-balancing.test.ts`.
+  **#39 (INGET FEL – bottarna friade av DD-facit):** ägaren trodde Ö/V missade
+  3NT när ägarens 2♥-inkliv över 1NT dubblades (värden) och passades ut som
+  straff – men DD säger 3NT = 2 BET (7 stick) medan 2♥X = 2 bet = **+500 i
+  zonen**; straffen var rätt och bäst. Beteendet test-låst i
+  `contested-openings.test.ts`. (#36 = mobil-UI, ligger kvar öppen i SENARE.)
+  tsc rent, hela sviten grön.

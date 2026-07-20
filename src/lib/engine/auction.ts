@@ -19,7 +19,7 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerSecondBid } from './rebids'
+import { openerSecondBid, openerThirdBidIn1NTAuction } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -309,7 +309,10 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
           const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
           const adv = advanceOvercall(deal.hands[advancerSeat], partnerSuit, openerSuit, 1)
           turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
-          return finish(adv.call !== 'P')
+          // Auktionen är INTE död när advancern passar (felrapport #38): öppnaren
+          // sitter då i utpassningssitsen och ska få återöppningsfrågan
+          // (openerReopensBalancing i decideCall) — annars säljs given i 1-läget.
+          return finish(true)
         }
       }
       // Advancer-logik för TVÅFÄRGSINKLIV (§7.2, Michaels / ovanlig 2NT): efter
@@ -652,6 +655,17 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   const second = responderSecondBid(opening.call, response, rebid, deal.hands[responderSeat])
   if (second) {
     turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
+    // Öppnarens TREDJE bud (felrapport #37): en INBJUDAN i en 1NT-auktion
+    // besvaras on-book (accept med maximum / pass med minimum) i stället för
+    // att falla igenom till off-book-svaret (som bjöd 3NT "utan stöd" mitt i
+    // en Stayman-hittad hjärterfit).
+    if (opening.call === '1NT' && second.rule === 'inbjudan') {
+      const third = openerThirdBidIn1NTAuction(response, rebid, second, deal.hands[openerSeat])
+      if (third) {
+        turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+        return finish(false)
+      }
+    }
     return finish(second.call !== 'P')
   }
 
