@@ -709,6 +709,14 @@ utgång, inte stanna på ett inbjudande hopp. Balanserad hand → **3NT**; annar
 **5 i lågfärgen**. (En bara *inbjudande* fit, 11–12 stödpoäng, höjer fortfarande
 lugnt till 3-läget – den blåses aldrig till utgång.)
 
+Två självklarheter som motorn nu också följer (fel färg-spåret fix 1,
+2026-07-21 — "5♣-ryckaren"): **konstgjorda bud är ingen färg att stödja**
+(partnerns Stayman-2♣/3♣ eller överföring direkt över egen sidas sang lovar
+inte färgen, §4.3), och **partnerns färdiga utgångsbud respekteras** — står
+partnerns 3NT/4♥/4♠/5-minor obestritt hittar boten inte på en "höjning" till
+en annan strain (förr kunde 1NT–2♣–2♦–3NT ryckas till 5♣ på en 4-korts
+klöver → bet i stället för hemspelad utgång).
+
 ### 5.7 New Minor Forcing (NMF)
 När du svarat en **högfärg på 1-läget** och öppnaren rebjuder **1NT** (12–14 bal)
 kan hens hand dölja **3 kort i din högfärg** (en 5-3-fit) eller en egen 4-korts
@@ -1994,3 +2002,16 @@ Det avslöjar längd/räkning direkt för partnern.
   (körningen, REVISOR-gated så deploygrinden aldrig kör den). Körinstruktion +
   baslinjemätningen ("Mätning #1") i `docs/systemrevisorn.md`. tsc rent, hela
   sviten grön.
+- **2026-07-21** – **Fel färg-spåret fix 1: "5♣-ryckaren" lagad (§5.6,
+  live-lagret).** Revisorns största misstyp analyserad (alla 148 "fel färg
+  med bet"-givar, mönstertabell i `docs/systemrevisorn.md`); värsta buggen:
+  öppnaren DROG partnerns 3NT-avslut till 5♣ efter Stayman (t.ex.
+  1NT–2♣–2♦–3NT–5♣ på Q985) — live-lagrets `partnerLastSuit` läste
+  konstgjorda Stayman-2♣/3♣ och överföringar som naturliga färger, och
+  `raiseWithFit`s minorutgångsgren kunde inte bjuda 3NT (upptaget) → 5♣.
+  Två vakter i `auction-live.ts`: (1) `isArtificialNTResponse` — 2♣/3♣/
+  överföringar direkt över egen sidas 1NT/2NT är ingen färg att stödja,
+  (2) `partnerGameBidStandsUnopposed` — offBookResponse rör aldrig partnerns
+  obestridda utgångsbud. Facit-test FÖRE fix (3 revisorsfrön låsta bet-5♣):
+  `auction-stayman-not-natural.test.ts`. On-book orört; hela sviten grön.
+  Mätning efter fix: se `docs/systemrevisorn.md`.

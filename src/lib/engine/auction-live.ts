@@ -895,7 +895,7 @@ function openingBid(history: ResolvedCall[]): { seat: Seat; level: number; strai
  */
 function partnerLastSuit(history: ResolvedCall[], seat: Seat): { strain: string; level: number } | null {
   let found: { strain: string; level: number } | null = null
-  for (const c of history) {
+  for (const [idx, c] of history.entries()) {
     if (c.seat !== PARTNER[seat]) continue
     const cb = parseContractBid(c.bid)
     if (!cb || cb.strain === 'NT') continue
@@ -905,9 +905,36 @@ function partnerLastSuit(history: ResolvedCall[], seat: Seat): { strain: string;
       return xb && xb.strain === cb.strain && side(x.seat) !== side(seat)
     })
     if (isTheirSuit) continue
+    // Konstgjorda sang-svar är ingen färg: 2♣/3♣ (Stayman) och 2♦/2♥ resp.
+    // 3♦/3♥ (överföringar) direkt över egen sidas 1NT/2NT lovar INTE färgen —
+    // 5♣-ryckaren (fel färg-spåret fix 1) uppstod när Stayman-2♣ lästes som
+    // klöver och "höjdes" till 5♣ över partnerns färdiga 3NT.
+    if (isArtificialNTResponse(history, idx)) continue
     found = { strain: cb.strain, level: cb.level }
   }
   return found
+}
+
+/**
+ * Är budet på plats `idx` ett KONSTGJORT svar på egen sidas sangbud (Stayman
+ * 2♣/3♣ eller överföring 2♦/2♥/3♦/3♥)? Sant när närmast föregående
+ * kontraktsbud är 1NT/2NT från SAMMA sida och budet ligger exakt en nivå upp
+ * i klöver/ruter/hjärter (systemets sangkonventioner, systems on efter 2♣).
+ */
+function isArtificialNTResponse(history: ResolvedCall[], idx: number): boolean {
+  const cb = parseContractBid(history[idx].bid)
+  if (!cb || !['C', 'D', 'H'].includes(cb.strain)) return false
+  for (let i = idx - 1; i >= 0; i--) {
+    const prev = parseContractBid(history[i].bid)
+    if (!prev) continue
+    return (
+      prev.strain === 'NT' &&
+      prev.level <= 2 &&
+      cb.level === prev.level + 1 &&
+      side(history[i].seat) === side(history[idx].seat)
+    )
+  }
+  return false
 }
 
 /** Har motståndarsidan (sett från `seat`) gjort ett kontraktsbud? (konkurrens) */
@@ -1141,9 +1168,28 @@ function respondWithoutFit(
  * inte är tydligt nog – då passar boten (som förut).
  */
 function offBookResponse(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  // Respektera partnerns AVSLUT: står partnerns eget utgångsbud (3NT/4M/5m+)
+  // obestritt ska vi inte hitta på en "höjning"/flykt till en annan strain —
+  // 5♣-ryckaren (fel färg-spåret fix 1) drog partnerns 3NT till 5♣. Slamsvar
+  // (essfrågor m.m.) ligger i egna detektorer FÖRE denna och berörs inte.
+  if (partnerGameBidStandsUnopposed(history, seat)) return null
   const partnerSuit = partnerLastSuit(history, seat)
   if (!partnerSuit) return null // partnern har inte visat en färg → vi hittar inte på något
   return raiseWithFit(deal, history, seat, partnerSuit) ?? respondWithoutFit(deal, history, seat, partnerSuit)
+}
+
+/** Är partnerns SENASTE kontraktsbud utgång eller högre, utan att någon motståndare bjudit över det? */
+function partnerGameBidStandsUnopposed(history: ResolvedCall[], seat: Seat): boolean {
+  let partnerGameAt = -1
+  for (const [idx, c] of history.entries()) {
+    if (c.seat !== PARTNER[seat]) continue
+    const cb = parseContractBid(c.bid)
+    if (!cb) continue
+    const trickScore = cb.level * (cb.strain === 'C' || cb.strain === 'D' ? 20 : 30) + (cb.strain === 'NT' ? 10 : 0)
+    partnerGameAt = trickScore >= 100 ? idx : -1 // senaste budet räknas
+  }
+  if (partnerGameAt < 0) return false
+  return !history.some((c, idx) => idx > partnerGameAt && side(c.seat) !== side(seat) && parseContractBid(c.bid))
 }
 
 // ---- Auktionstillstånd: "är vi i krav?" (grunden bakom "krav får aldrig passas") ----
