@@ -169,6 +169,18 @@ frö 20260958 flyttade medvetet till "för högt": 4♥−100 är bästa möjlig
 inom 2♣-utgångskravet, tapp 200 i st.f. 500)
 ```
 
+## Mätning #4 — 2026-07-21, efter fel färg-fix 3 (cue-höjning → 3NT före 5m)
+Samma frö 20260721, 1 000 givar, efter 3NT-grenen i `answerCueRaise`
+(`auction-live.ts`), budsystem.md §5.11/§9:
+
+```
+Rätt kontrakt (exakt par): 17,0 %   (M3: 16,8 % · baslinje 15,9 %)
+Genomsnittligt poängtapp: 291 p/giv (M3: 293 · baslinje 300)
+Fel färg (bet): 136 givar, 57 020 p (M3: 138/58 530 · baslinje 148/65 110)
+Övriga poster: ±1 giv mot M3 (frö 20260769 → exakt par; 20260805 → "över
+par" 600 — par 500 kräver att Ö/V offrar 4♠X, bästa möjliga för vår sida)
+```
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
@@ -202,9 +214,15 @@ grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
    för att rebjuda egen 6-korts spader (frö 20260737: 5♣ bet fast 4♠+1 = par
    650, nu exakt par) → dubbelton-vakt i `raiseWithFit`. Facit-test FÖRE fix:
    `auction-2c-finest-suit.test.ts`. Effekt: Mätning #3 ovan.
-3. **Cue-höjning/inverterad minor → 5m fast 3NT var säkert** (kända
-   bevaka-risken från kontraktväljaren): frön 20260805, 20260769 — 5m-vägen
-   väljs trots stopp/jämn hand hos paret.
+3. **✅ FIX 3 KLAR 2026-07-21 — cue-höjning i minor → 3NT före 5m (§5.11):**
+   öppnaren återgick alltid billigast i färgen på minimum och cue-bjudaren
+   utan eget stopp blåste 5m — fast stoppet (♣K2/♦KT) satt hos ÖPPNAREN och
+   3NT var hemma (600). Nu bjuder `answerCueRaise` 3NT med jämn hand + stopp
+   i deras färg (bara minorfit; gäller även maximum). Frö 20260769 → exakt
+   par; 20260805 → 600 ("över par" — par 500 kräver att Ö/V offrar, bästa
+   möjliga för vår sida). Facit-test FÖRE fix: `auction-cueraise-3nt.test.ts`.
+   Effekt: Mätning #4 nedan. OBS: inverterad minor-delen av mönstret (ostört)
+   är B13-släktingen — kvar i topplistan (etapp 5).
 4. **Konkurrens-fortsättningar** (blandade): advancerns svar på tvåfärgs-cue
    (frö 20260733), öppnarens 2NT-återbud efter negativ dubbling på minimum
    (frö 20260763), höjning av partnerns svaga 2:a på dubbelton (frö 20260774).

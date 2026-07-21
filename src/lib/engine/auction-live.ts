@@ -1523,7 +1523,10 @@ function respondToStrong2NTRebid(deal: Deal, history: ResolvedCall[], seat: Seat
  * en färg motståndarna bjudit, cuet är senaste kontraktsbudet (bara pass efter),
  * och `seat` är öppnaren. Returnerar den överenskomna färgen (vår öppningsfärg).
  */
-function partnerCueRaiseToAnswer(history: ResolvedCall[], seat: Seat): { agreedStrain: string } | null {
+function partnerCueRaiseToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { agreedStrain: string; theirStrain: string } | null {
   const open = openingBid(history)
   if (!open || open.strain === 'NT') return null
   if (side(open.seat) !== side(seat) || seat !== open.seat) return null // vår öppning, öppnaren svarar
@@ -1542,7 +1545,7 @@ function partnerCueRaiseToAnswer(history: ResolvedCall[], seat: Seat): { agreedS
   if (!oppStrains.has(cueStrain)) return null // cuet måste ligga i motståndarnas färg
   const cueIdx = history.indexOf(cue)
   if (history.slice(cueIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter cuet
-  return { agreedStrain: open.strain }
+  return { agreedStrain: open.strain, theirStrain: cueStrain }
 }
 
 /**
@@ -1983,6 +1986,23 @@ function answerCueRaise(deal: Deal, history: ResolvedCall[], seat: Seat): Resolv
   const signoff = cheapestBidIn(history, seat, strain)
   const gameBid = `${isMajor ? 4 : 5}${strain}` as Bid
   const legal = legalCalls(history, seat)
+  // MINORFIT: 3NT (9 stick) är den naturliga utgången, inte 5m (fel färg-spåret
+  // fix 3, frön 20260805/20260769). Öppnaren med JÄMN hand + STOPP i deras
+  // (cuade) färg föreslår 3NT direkt — oavsett min/max (cue-höjningen driver
+  // ändå alltid till utgång; det här väljer den BÄTTRE utgången). Minimi-
+  // återgången 3m betyder därmed ärligt "inget stopp/ojämn hand", så cue-
+  // bjudarens 5m i fortsättningen blir ett informerat val. Högfärg orörd (4M).
+  if (
+    !isMajor &&
+    isBalanced(deal.hands[seat]) &&
+    hasStopper(deal.hands[seat], SUIT_OF_LETTER[cueRaise.theirStrain]) &&
+    legal.includes('3NT' as Bid)
+  ) {
+    return {
+      seat, bid: '3NT', rule: 'svar på cue-höjning',
+      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jämn hand med stopp i deras ${SWE_NAME[cueRaise.theirStrain]} → 3NT (rätt utgång före 5${SWE_NAME[strain]}).`,
+    }
+  }
   const acceptGame = hcp(deal.hands[seat]) >= 15 && legal.includes(gameBid)
   const bid = (acceptGame ? gameBid : signoff) as Bid | null
   if (bid && legal.includes(bid)) {
