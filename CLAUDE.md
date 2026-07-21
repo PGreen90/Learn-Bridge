@@ -26,6 +26,15 @@ Läs den här filen först varje session.
 > enskilda givar), laga mönster för mönster test-låst, kör om mätningen med
 > samma frö och se posten krympa utan att andra poster växer.
 >
+> **✅ Fix 1 KLAR 2026-07-21: "5♣-ryckaren"** (mönsteranalys av alla 148
+> givar + fix, se `docs/systemrevisorn.md` + budsystem.md §5.6/§9): live-
+> lagret läste Stayman-2♣ som klöverfärg och drog partnerns 3NT till 5♣.
+> Facit-test `auction-stayman-not-natural.test.ts`. **KVAR i spåret (fix 2+,
+> identifierade buggfamiljer):** 2♣-kravets minimi-steg väljer inte finaste
+> färgen (frö 20260958: 3NT på 0 hp när 4-4 hjärter fanns), 5m fast 3NT var
+> säkert efter cue-höjning/inverterad minor (frö 20260805), konkurrens-
+> fortsättningar (frön 20260733/20260763/20260774).
+>
 > **Etapp 2 KLAR 2026-07-21** — Systemrevisorn byggd (`revisor.ts` +
 > `revisor-dds.ts` + REVISOR-gated probe; DD-facit via npm-paketet
 > `bridge-dds` = Bo Haglunds lösare i WASM som dev-beroende, med RIKTIG
@@ -124,6 +133,13 @@ Läs den här filen först varje session.
 > F1–F6: `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **"5♣-ryckaren" lagad (fel färg-spåret fix 1, 2026-07-21, NYTT & LIVE):**
+  boten läser inte längre partnerns Stayman/överföring som en äkta färg, och
+  rör ALDRIG partnerns obestridda utgångsbud off-book (förr kunde
+  1NT–2♣–2♦–3NT ryckas till 5♣ → bet). **Bevaka:** (a) står partnerns
+  3NT/4M/5m nu alltid kvar som det ska? (b) passar boten någon gång FÖR
+  snällt i ett läge där den borde tävlat vidare (vakten gäller bara när
+  motståndarna INTE bjudit över) — säg till.
 - **ÄRLIGA SLAMPORTAR (2026-07-07 kväll, NYTT — styr ALLA slam-vägar):**
   all slamutredning beslutar nu på egen hand + partnerns VISADE intervall.
   **Bevaka:** (a) **missar** boten slammar du tycker den borde bjudit? (Medvetet:

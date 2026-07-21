@@ -142,3 +142,52 @@ Topplista (mest tappade poäng först):
 - **Fel strain/nivå med bara 25 p snitt** är mest övertricksbrus (420 mot 430).
 - "Exakt par 15,9 %" är det HÅRDA måttet — följ hellre snitt-tappet (300)
   och topplistans rörelser över tid.
+
+## Mätning #2 — 2026-07-21, efter fel färg-fix 1 ("5♣-ryckaren")
+Samma frö 20260721, 1 000 givar, efter vakterna i `auction-live.ts`
+(`isArtificialNTResponse` + `partnerGameBidStandsUnopposed`, budsystem.md
+§5.6/§9):
+
+```
+Rätt kontrakt (exakt par): 16,7 %   (baslinje 15,9 %)
+Genomsnittligt poängtapp: 294 p/giv (baslinje 300)
+Fel färg (bet): 141 givar, 60 380 p (baslinje 148 givar, 65 110 p)
+Övriga poster: ±1–3 givar (brusnivå — ingen post växte nämnvärt)
+```
+
+## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
+Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
+grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
+
+| Mönster | Givar | Poäng |
+|---|---|---|
+| Lågfärg spelas, sang var facit | 25 | 15 540 |
+| Sang spelas, högfärgsfit var facit | 37 | 13 010 |
+| Lågfärg spelas, högfärg var facit | 26 | 10 920 |
+| Högfärg spelas, sang var facit | 20 | 9 520 |
+| Sang spelas, lågfärg var facit | 18 | 6 560 |
+| Fel högfärg av två | 12 | 5 230 |
+| Övrigt (fel minor av två, högfärg→lågfärg) | 10 | 4 330 |
+
+**Identifierade buggfamiljer (djupdykning i exempelgivarna):**
+1. **✅ FIX 1 KLAR 2026-07-21 — "5♣-ryckaren" (ren bugg, ostört):** öppnaren
+   DROG partnerns 3NT-avslut till 5♣ efter Stayman (frön 20260752, 20260896,
+   20260965). Rot: när linjen lämnades öppen läste live-lagrets
+   `partnerLastSuit` partnerns ARTIFICIELLA Stayman-2♣/3♣ som en naturlig
+   klöverfärg → `raiseWithFit` "minorfit + utgångsvärden" → 3NT redan bjudet
+   → 5♣. Lagat med två vakter i `auction-live.ts` (`isArtificialNTResponse`,
+   `partnerGameBidStandsUnopposed`); facit-test FÖRE fix i
+   `auction-stayman-not-natural.test.ts`. Effekt: Mätning #2 ovan.
+   (Svararhoppet 1♣–1♠–1NT–5♣, frö 20260878, är familj 3-släkting — kvar.)
+2. **2♣-kravets minimi-steg väljer inte finaste färgen** (känd svaghet, nu
+   kvantifierad): 3NT på 0 hp när en 4-4 hjärterfit fanns (frö 20260958),
+   5♣ när 5♠/4♠ var rätt (frö 20260737).
+3. **Cue-höjning/inverterad minor → 5m fast 3NT var säkert** (kända
+   bevaka-risken från kontraktväljaren): frön 20260805, 20260769 — 5m-vägen
+   väljs trots stopp/jämn hand hos paret.
+4. **Konkurrens-fortsättningar** (blandade): advancerns svar på tvåfärgs-cue
+   (frö 20260733), öppnarens 2NT-återbud efter negativ dubbling på minimum
+   (frö 20260763), höjning av partnerns svaga 2:a på dubbelton (frö 20260774).
+5. **Ofrånkomligt DD-brus:** normala sangauktioner (1NT–2NT–3NT, 1NT–3NT) där
+   DD råkar göra en 4-3-högfärgsdelkontrakt (frön 20260801, 20261062) — par
+   är hårt; dessa jagas INTE.

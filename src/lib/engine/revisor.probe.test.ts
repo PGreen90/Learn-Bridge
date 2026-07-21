@@ -5,8 +5,10 @@
 //   Bash:        REVISOR=1 npx vitest run src/lib/engine/revisor.probe.test.ts
 //
 // Valfria rattar (miljövariabler):
-//   REVISOR_DEALS  antal givar (standard 1000)
-//   REVISOR_SEED   basfrö (standard 20260721 — behåll för jämförbara mätningar!)
+//   REVISOR_DEALS     antal givar (standard 1000)
+//   REVISOR_SEED      basfrö (standard 20260721 — behåll för jämförbara mätningar!)
+//   REVISOR_EXAMPLES  max sparade exempelgivar per kategori (standard 8;
+//                     sätt högt, t.ex. 500, för mönsterjakt i en misstyp)
 //
 // DD-facit: bridge-dds (Bo Haglunds lösare i WASM, via revisor-dds.ts) — hela
 // 20-tabellen + riktig par-poäng per giv på tiotals millisekunder.
@@ -23,6 +25,7 @@ import { computeOracle, getDds } from './revisor-dds'
 
 const DEALS = Number(process.env.REVISOR_DEALS ?? 1000)
 const SEED = Number(process.env.REVISOR_SEED ?? 20260721)
+const EXAMPLES = Number(process.env.REVISOR_EXAMPLES ?? 8)
 
 it.skipIf(!process.env.REVISOR)(
   `systemrevisorn: ${DEALS} givar, frö ${SEED}`,
@@ -33,7 +36,7 @@ it.skipIf(!process.env.REVISOR)(
       deals: DEALS,
       baseSeed: SEED,
       oracle: (deal) => computeOracle(dds, deal),
-      examplesPerCategory: 8,
+      examplesPerCategory: EXAMPLES,
       onProgress: (done, total) => {
         if (done % 100 === 0 || done === total) console.log(`  ...${done}/${total} givar`)
       },
