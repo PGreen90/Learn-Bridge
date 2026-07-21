@@ -451,6 +451,15 @@ med hf, 10+ med lf – en stick från utgång). Krav. Balanserade ranger: 22–2
   m.m.) precis som över 1NT, fast med 22–24 hp mittemot.
 - Efter en **naturlig färgrebud** är utgång påtvingad (utom andra negativa);
   svararen visar stöd, ny färg (5+) eller NT naturligt.
+- **Finaste färgen före 3NT:** efter öppnarens **minor-rebud** (2♣–2♦–3♣/3♦)
+  visar svararen utan stöd och utan egen 5-korts färg en **4-korts högfärg**
+  under 3NT (billigast först: hjärter före spader). Så hittas en 4-4-högfärgsfit
+  — och utan fit bjuder ÖPPNAREN sangen, så 3NT spelas från den starka handen i
+  stället för från svararens tomma. Först utan 4-korts högfärg blir det 3NT.
+- **Höj aldrig ombudet på dubbelton med egen visad 6-korts färg:** öppnarens
+  andra bud i sin egen färg i kravet är ofta TVINGAT (lovar bara 5+). Svararen
+  med bara två kort där och en egen redan visad 6-korts färg **rebjuder sin
+  färg** i stället för att höja (2♣–2♦–3♣–3♠–4♣ → **4♠**, inte 5♣ på ♣85).
 
 **Andra negativa:** efter öppnarens kravbud (färgrebud) visar svararens
 **billigaste minor** 0–3 hp (riktig bottenhand). Alla andra bud bekräftar minst
@@ -2015,3 +2024,18 @@ Det avslöjar längd/räkning direkt för partnern.
   obestridda utgångsbud. Facit-test FÖRE fix (3 revisorsfrön låsta bet-5♣):
   `auction-stayman-not-natural.test.ts`. On-book orört; hela sviten grön.
   Mätning efter fix: se `docs/systemrevisorn.md`.
+- **2026-07-21** – **Fel färg-spåret fix 2: 2♣-kravets minimi-steg väljer
+  finaste färgen (§4.4).** Två delfel ur revisorns buggfamilj 2: **(a)**
+  efter `2♣–2♦–3♣/3♦` bjöd svararen utan stöd/5-korts färg blint **3NT** —
+  även på 0–1 hp med 4-korts högfärg(er) → sang från FEL (tomma) hand och
+  4-4-högfärgsfits hittades aldrig (frö 20260958: 3NT −400 fast 4♥ bara går
+  en bet). Nu visar `responderSecondBidAfter2C` (`responses-2c.ts`) billigaste
+  **4-korts högfärg under 3NT** (hjärter före spader); utan fit bjuder
+  öppnaren sangen = rätt hand. **(b)** svararen höjde öppnarens TVINGADE
+  klöver-ombud (kravets "rebjuder egen färg" lovar bara 5+) på **dubbelton**
+  i stället för att rebjuda sin egen 6-korts spader (frö 20260737:
+  2♣–2♦–3♣–3♠–4♣–**5♣** bet, fast 4♠+1 = par 650). Ny vakt i `raiseWithFit`
+  (`auction-live.ts`): dubbelton-"fit" slår aldrig en egen redan visad 6+
+  färg → kravlogiken rebjuder den (4♠). Facit-test FÖRE fix (båda frön +
+  enhetsfall): `auction-2c-finest-suit.test.ts`. tsc rent, hela sviten grön.
+  Mätning efter fix: se `docs/systemrevisorn.md` (Mätning #3).

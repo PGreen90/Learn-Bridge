@@ -1030,6 +1030,19 @@ function raiseWithFit(
   // Har vi redan bjudit färgen själva höjer vi inte upp den igen (ingen upptrappning).
   if (history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === partnerSuit.strain)) return null
 
+  // Dubbelton-"fit" (partnern har rebjudit sin färg — i ett krav ofta TVINGAT,
+  // så ombudet lovar bara 5+) slår aldrig en EGEN redan visad 6+ färg: den egna
+  // färgen är trumfen (fel färg-spåret fix 2: 2♣–2♦–3♣–3♠–4♣ → rebjud 4♠, höj
+  // inte 5♣ på ♣85). Returnerar null → kravlogiken rebjuder den egna färgen.
+  if (
+    lengths(hand)[suit] === 2 &&
+    SUIT_STRAINS.some(
+      (st) =>
+        lengths(hand)[SUIT_OF_LETTER[st]] >= 6 &&
+        history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === st),
+    )
+  ) return null
+
   const sp = dummyPoints(hand, suit).dummyPoints
   if (sp < 6) return null // för svagt för att höja
 
