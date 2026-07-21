@@ -150,6 +150,19 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
     return { call: `${lvl}${BID[own]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, GF).` }
   }
 
+  // Efter öppnarens MINOR-rebud: visa en 4-korts högfärg under 3NT (fel färg-
+  // spåret fix 2). En 4-4-högfärgsfit hittas bara om svararen visar färgen —
+  // och utan fit hos öppnaren spelas sangen dessutom från den STARKA handen
+  // (öppnaren bjuder 3NT) i stället för från svararens tomma. Billigast först
+  // (hjärter före spader: spaderfiten kan fortfarande hittas i nästa steg).
+  if (!isMajor(rs)) {
+    for (const m of ['hearts', 'spades'] as Suit[]) {
+      if (len[m] >= 4 && levelAbove(m, rebid.call) === 3) {
+        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT, GF – hittar 4-4-fiten).` }
+      }
+    }
+  }
+
   // Inget bättre → 3NT till spel.
   return { call: '3NT', rule: 'till spel', explanation: `${p} hp – ingen fit → 3NT.` }
 }

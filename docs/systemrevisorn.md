@@ -155,6 +155,20 @@ Fel färg (bet): 141 givar, 60 380 p (baslinje 148 givar, 65 110 p)
 Övriga poster: ±1–3 givar (brusnivå — ingen post växte nämnvärt)
 ```
 
+## Mätning #3 — 2026-07-21, efter fel färg-fix 2 (2♣-kravets finaste färg)
+Samma frö 20260721, 1 000 givar, efter `responderSecondBidAfter2C`-högfärgs-
+visningen (`responses-2c.ts`) + dubbelton-vakten i `raiseWithFit`
+(`auction-live.ts`), budsystem.md §4.4/§9:
+
+```
+Rätt kontrakt (exakt par): 16,8 %   (M2: 16,7 % · baslinje 15,9 %)
+Genomsnittligt poängtapp: 293 p/giv (M2: 294 · baslinje 300)
+Fel färg (bet): 138 givar, 58 530 p (M2: 141/60 380 · baslinje 148/65 110)
+Övriga poster: ±1–3 givar mot M2 (brusnivå — ingen post växte nämnvärt;
+frö 20260958 flyttade medvetet till "för högt": 4♥−100 är bästa möjliga
+inom 2♣-utgångskravet, tapp 200 i st.f. 500)
+```
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
@@ -179,9 +193,15 @@ grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
    `partnerGameBidStandsUnopposed`); facit-test FÖRE fix i
    `auction-stayman-not-natural.test.ts`. Effekt: Mätning #2 ovan.
    (Svararhoppet 1♣–1♠–1NT–5♣, frö 20260878, är familj 3-släkting — kvar.)
-2. **2♣-kravets minimi-steg väljer inte finaste färgen** (känd svaghet, nu
-   kvantifierad): 3NT på 0 hp när en 4-4 hjärterfit fanns (frö 20260958),
-   5♣ när 5♠/4♠ var rätt (frö 20260737).
+2. **✅ FIX 2 KLAR 2026-07-21 — 2♣-kravets minimi-steg väljer finaste färgen:**
+   (a) svararen bjöd blint 3NT utan att visa 4-korts högfärg (frö 20260958:
+   3NT −400 från fel hand, fast 4♥ bara går en bet — DD visade f.ö. att INGEN
+   utgång går där; 4♥ −100 är bästa möjliga inom 2♣-utgångskravet) →
+   `responderSecondBidAfter2C` visar nu billigaste 4-korts högfärg under 3NT;
+   (b) svararen höjde öppnarens TVINGADE klöver-ombud på dubbelton i stället
+   för att rebjuda egen 6-korts spader (frö 20260737: 5♣ bet fast 4♠+1 = par
+   650, nu exakt par) → dubbelton-vakt i `raiseWithFit`. Facit-test FÖRE fix:
+   `auction-2c-finest-suit.test.ts`. Effekt: Mätning #3 ovan.
 3. **Cue-höjning/inverterad minor → 5m fast 3NT var säkert** (kända
    bevaka-risken från kontraktväljaren): frön 20260805, 20260769 — 5m-vägen
    väljs trots stopp/jämn hand hos paret.

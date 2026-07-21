@@ -29,11 +29,18 @@ Läs den här filen först varje session.
 > **✅ Fix 1 KLAR 2026-07-21: "5♣-ryckaren"** (mönsteranalys av alla 148
 > givar + fix, se `docs/systemrevisorn.md` + budsystem.md §5.6/§9): live-
 > lagret läste Stayman-2♣ som klöverfärg och drog partnerns 3NT till 5♣.
-> Facit-test `auction-stayman-not-natural.test.ts`. **KVAR i spåret (fix 2+,
-> identifierade buggfamiljer):** 2♣-kravets minimi-steg väljer inte finaste
-> färgen (frö 20260958: 3NT på 0 hp när 4-4 hjärter fanns), 5m fast 3NT var
-> säkert efter cue-höjning/inverterad minor (frö 20260805), konkurrens-
-> fortsättningar (frön 20260733/20260763/20260774).
+> Facit-test `auction-stayman-not-natural.test.ts`.
+>
+> **✅ Fix 2 KLAR 2026-07-21: "2♣-kravets finaste färg"** (budsystem.md
+> §4.4/§9 + `docs/systemrevisorn.md` Mätning #3): (a) svararen efter
+> `2♣–2♦–3m` visar nu billigaste 4-korts högfärg under 3NT i st.f. blint 3NT
+> från fel hand (`responses-2c.ts`); (b) dubbelton-"fit" mot partnerns
+> tvingade ombud slår aldrig en egen visad 6+ färg (`raiseWithFit`-vakt,
+> frö 20260737 når nu exakt par). Facit-test `auction-2c-finest-suit.test.ts`.
+> Mätning #3: exakt par 16,8 %, fel färg-bet 138 givar/58 530 p (baslinje
+> 148/65 110). **KVAR i spåret (fix 3+, identifierade buggfamiljer):** 5m
+> fast 3NT var säkert efter cue-höjning/inverterad minor (frön 20260805/
+> 20260769), konkurrens-fortsättningar (frön 20260733/20260763/20260774).
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
