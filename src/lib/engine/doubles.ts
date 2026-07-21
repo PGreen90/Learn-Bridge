@@ -62,9 +62,11 @@ export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): Re
  * (felrapport #2: auktionen dog när öppnaren lämnades att passa). Prioritet:
  *   1. den objudna högfärg dubblingen visar (4+ hos öppnaren) – billigast med
  *      minimum (12–15), hoppande med 16+,
- *   2. sang med stopp i deras färg (balanserat alternativ),
+ *   2. sang med stopp i deras färg (på 1-läget alltid; på 2-läget+ kräver ~15+),
  *   3. återbud av egen 6+ färg,
- *   4. annan objuden 4+ färg (billigast),
+ *   4. utan nivåhöjning i tur och ordning: annan objuden 4+ färg → eget
+ *      5-korts återbud → sang-med-stopp (minimums sista utvägar),
+ *   5. annan objuden 4+ färg (billigast, även en nivå upp),
  *   5. nödutväg: återbud av öppningsfärgen (svara MÅSTE man).
  */
 export function openerAnswerNegativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): ResponseResult {
@@ -90,8 +92,12 @@ export function openerAnswerNegativeDouble(hand: Hand, ourOpen: Suit, theirCall:
     }
   }
 
-  // 2. Sang med stopp i deras färg.
-  if (hasStopper(hand, their)) {
+  // 2. Sang med stopp i deras färg. På 1-läget (1NT) räcker minimum, men på
+  //    2-läget+ kräver sangen extra (~15+): en minimiöppnare som lyfter till
+  //    2NT bara för stoppet spelar sang utan värdena (frö 20260763: 11 hp →
+  //    2NT två bet fast 2♦ fanns). Minimum utan billigt färgåterbud får sang
+  //    som SISTA utväg i steg 3c nedan.
+  if (hasStopper(hand, their) && (theirLevel === 1 || p >= 15)) {
     const ntLevel = theirLevel // NT rankar över alla färger → alltid samma nivå
     return {
       call: `${ntLevel}NT`,
@@ -106,6 +112,41 @@ export function openerAnswerNegativeDouble(hand: Hand, ourOpen: Suit, theirCall:
       call: `${cheapLevel(ourOpen)}${BID[ourOpen]}`,
       rule: 'svar på negativ dubbling',
       explanation: `Ingen passande färg att visa – återbud av ${NAME[ourOpen]} (6+ kort, ${p} hp).`,
+    }
+  }
+
+  // 4. Annan objuden 4+ färg som kan bjudas på SAMMA nivå som deras inkliv —
+  //    mer konstruktivt än ett rebud (dubblingen bad om objudna färger, och en
+  //    4-4-fit kan gömma sig där; frö 20261351: 5♥+4♦ visar 2♦, inte 2♥).
+  const cheapOthers = RANK_ORDER.filter(
+    (s) => s !== ourOpen && s !== their && len[s] >= 4 && cheapLevel(s) === theirLevel,
+  )
+  if (cheapOthers.length > 0) {
+    const s = cheapOthers[0]
+    return {
+      call: `${theirLevel}${BID[s]}`,
+      rule: 'svar på negativ dubbling',
+      explanation: `Näst bästa färgen ${NAME[s]} (4+ kort, ${p} hp) – dubblingen måste besvaras.`,
+    }
+  }
+
+  // 4b. Minimum: rebjud 5-korts öppningsfärg när det går UTAN nivåhöjning
+  //     (billigare besked än sang utan värdena; frö 20260763).
+  if (len[ourOpen] >= 5 && cheapLevel(ourOpen) === theirLevel) {
+    return {
+      call: `${theirLevel}${BID[ourOpen]}`,
+      rule: 'svar på negativ dubbling',
+      explanation: `Minimum utan fjärde högfärg – billigt återbud av ${NAME[ourOpen]} (5+ kort, ${p} hp).`,
+    }
+  }
+
+  // 4c. Minimum med stopp men inget billigt färgåterbud → sang ändå (bättre än
+  //     en ny färg en nivå upp).
+  if (hasStopper(hand, their)) {
+    return {
+      call: `${theirLevel}NT`,
+      rule: 'svar på negativ dubbling',
+      explanation: `Ingen fjärde högfärg men stopp i deras färg → ${theirLevel} sang (${p} hp).`,
     }
   }
 

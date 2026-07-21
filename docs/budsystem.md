@@ -497,9 +497,9 @@ nästan inget mittemot.
 
 | Svar | Betydelse | Konvention |
 |---|---|---|
-| Pass | ingen utgångschans | naturligt |
+| Pass | ingen utgångschans — **även 11–14 utan fit** som saknar billig egen färg | naturligt |
 | höjning (t.ex. 2♥–3♥) | spärrhöjning, höjer trycket (ej inbjudan) | naturligt |
-| ny färg | naturlig, 5+ färg, krav 1 rond | naturligt |
+| ny färg | naturlig, 5+ färg, krav 1 rond — **på 2-läget från 11 hp, på 3-läget krävs ~15+** | naturligt |
 | 2NT | konstgjord fråga om styrka + färgkvalitet | Ogust ● |
 | 3NT / 4-läget | till spel | naturligt |
 
@@ -518,7 +518,11 @@ topphonnörer följer 1-2-1-2-3). Topphonnörer = ess/kung/dam i trumffärgen.
 Svararen placerar sedan kontraktet utifrån min/max och färgkvalitet.
 
 **Ny färg som krav:** efter t.ex. 2♥–2♠ (krav) visar öppnaren stöd, rebjuder sin
-färg (minimum) eller visar en sidofärg. *(Konkurrens och passad hand tas
+färg (minimum) eller visar en sidofärg. **Nivågräns (fel färg-spåret fix 4):**
+kravet tvingar öppnarens svaga hand (6–11 hp) att bjuda vidare — en ny färg som
+måste bjudas på **3-läget** (t.ex. 2♥–3♣) kräver därför en riktigt bra hand
+(~15+). Med 11–14 utan fit och utan billig egen färg **passar** svararen i
+stället — partnerns spärr står bäst själv. *(Konkurrens och passad hand tas
 senare.)*
 
 ### 4.6 Svar på spärröppningar (3-/4-läget)
@@ -1160,6 +1164,16 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
   upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
   ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Öppnaren svarar som på en upplysningsdubbling.
+  **Öppnarens sang-svar (fel färg-spåret fix 4):** sang på **1-läget** (1NT) går
+  bra på minimum med stopp, men på **2-läget+** kräver sangen **extra (~15+)** —
+  en minimiöppnare visar hellre (utan nivåhöjning, i ordning) en **annan objuden
+  4+ färg**, sedan sitt **5-korts återbud** (t.ex. 1♦–(2♣)–X–P–**2♦**), och tar
+  sang-med-stopp först som sista utväg. **Höjningsregeln för dubblaren:** ett
+  billigt tvingat ombud i en icke-1M-färg lovar bara 5 kort → ingen
+  dubbelton-höjning alls; visade ombudet 6+ (fick gå upp en nivå) eller lovade
+  1♥/1♠-öppningen redan 5+ får dubbelton höjas — men bara med
+  **utgångsvärden** (13+ stödpoäng). En enkel/inbjudande höjning på dubbelton
+  pressar bara upp partnerns minimum.
 - **Responsiv dubbling:** när de bjudit *och höjt* en färg (t.ex.
   (1♥)–X–(2♥)–X) = vår dubbling är upplysning, oftast de två objudna färgerna.
 - **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
@@ -1203,7 +1217,11 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
 - **Mot stark 1♣ (Mathe):** X = **båda högfärgerna**, 1NT = **båda minorerna**,
   färgbud naturliga.
 - **Mot svaga tvåor:** **Lebensohl** (§7.5) efter partnerns takeout; 2NT-inkliv =
-  15–18 balanserad med stopp; cue-bud = stark/Michaels-aktig.
+  15–18 balanserad med stopp; cue-bud = stark/Michaels-aktig (5-5 i två
+  sidofärger, 15+, krav). **Advancerns svar på cuet (fel färg-spåret fix 4):**
+  preferens till längsta sidofärgen, men **lika långa färger avgörs av
+  billigaste nivån** — med 3-3 väljs färgen som kan bjudas en nivå lägre (t.ex.
+  3♥ före 4♣ efter (2♦)–3♦), aldrig en onödig nivåhöjning på hackor.
 - **Mot Multi 2♦** (svag tvåa i okänd högfärg): 2NT = 15–18 balanserad; 2♥/2♠ =
   naturligt inkliv. (Takeout-dubblingen: §7.3.)
 - **Mot spärrar (3-läget+):** 3NT = till spel (stopp + stick); cue-bud =
@@ -2073,3 +2091,27 @@ Det avslöjar längd/räkning direkt för partnern.
   informerat val. Facit-test FÖRE fix (båda frön + stopp/max-enhetsfall):
   `auction-cueraise-3nt.test.ts`. tsc rent, hela sviten grön. Mätning efter
   fix: se `docs/systemrevisorn.md` (Mätning #4).
+- **2026-07-21** – **Fel färg-spåret fix 4: tre konkurrens-fortsättningar
+  (§4.5/§7.4/§7.7).** Revisorns buggfamilj 4, tre delfel: **(a)** advancerns
+  svar på partnerns tvåfärgs-cue över deras svaga tvåa valde längsta sidofärg
+  med klöver som lika-vinnare → **4♣ på tre hackor** fast 3♥ fanns en nivå
+  lägre (frö 20260733: 4♣ tre bet, 5♥ hemma). Nu avgör **billigaste nivån**
+  vid lika längd (`answerWeakTwoCue`, `auction-live.ts`) → exakt par. **(b)**
+  öppnaren svarade partnerns negativa dubbling med **sang på minimum** bara
+  för att stoppet fanns (frö 20260763: 11 hp → 2NT två bet). Nu kräver sangen
+  på 2-läget+ ~15+; utan nivåhöjning föredras i ordning **annan objuden 4+
+  färg** (4-4-fiten hittas, frö 20261351) → **eget 5-korts återbud** (2♦) →
+  sang-med-stopp som sista utväg (`openerAnswerNegativeDouble`, `doubles.ts`).
+  Följdbuggar (kalibrerade i tre mät-iterationer med frö-diff): ett TVINGAT
+  billigt ombud i en färg som inte 1M-öppnats lovar bara 5 → ingen
+  dubbelton-fit (`fitLengthNeeded`, `auction-live.ts`; gick ombudet UPP en
+  nivå = 6+, eller lovade 1♥/1♠-öppningen redan 5+, räknas dubbelton som
+  fit), och en dubbelton-höjning av ett tvingat ombud kräver **utgångsvärden**
+  (13+ sp, `raiseWithFit`) — enkla/inbjudande dubbelton-höjningar pressade
+  bara upp partnerns minimum en nivå (frön 20260847/20261251). **(c)** svararen krävde med **ny färg på 3-läget på 13 hp** mot partnerns
+  svaga 2♥ (frö 20260774: tvingat 3♥ en bet fast 2♥ stod). Nu kräver ny färg
+  på 3-läget ~15+ (2-läget kvar från 11); 11–14 utan fit och utan billig färg
+  **passar** (`respondToWeakTwo`, `responses-weak2.ts`) — given slutar i Ö/V:s
+  4♠-offring två bet = exakt par. Facit-test FÖRE fix (alla tre frön +
+  enhetsfall): `auction-konkurrens-fortsattning.test.ts`. tsc rent, hela
+  sviten grön. Mätning efter fix: se `docs/systemrevisorn.md` (Mätning #5).
