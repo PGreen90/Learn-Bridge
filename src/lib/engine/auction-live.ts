@@ -1000,10 +1000,38 @@ function fitLengthNeeded(history: ResolvedCall[], seat: Seat, partnerSuit: { str
   // Har partnern BJUDIT färgen minst två gånger (öppnat + rebjudit) lovar den 6+
   // → 2-korts stöd räcker för fit (8-korts fit). Utan detta passade svararen en
   // dubbelton mot en rebjuden 6-korts högfärg (felrapport #19: 1♥ … 2♥ passades
-  // med KT doubleton, 8-korts fit + utgångsvärden).
-  const partnerBidsInSuit = history.filter(
-    (c) => c.seat === PARTNER[seat] && parseContractBid(c.bid)?.strain === partnerSuit.strain,
-  ).length
+  // med KT doubleton, 8-korts fit + utgångsvärden). UNDANTAG (fel färg-spåret
+  // fix 4, frö 20260763): ett BILLIGT ombud som svarar på MIN egen dubbling
+  // (samma nivå som deras inkliv — kunde vara 5-korts nödrebuden i
+  // `openerAnswerNegativeDouble`) lovar ingen extralängd och räknas inte —
+  // UTOM när partnern öppnade färgen med 1♥/1♠ (öppningen lovade redan 5+, så
+  // dubbelton = 7-korts fit). Ett tvingat ombud som fick gå UPP en nivå kommer
+  // däremot ur 6+-steget och räknas som vanligt (frö 20260771: 1♣–(1♦)–X–P–2♣
+  // = 6 klöver, dubbelhöjning på dubbelton är rätt).
+  const opening = openingBid(history)
+  const partnerOpened1Major =
+    !!opening &&
+    opening.seat === PARTNER[seat] &&
+    opening.level === 1 &&
+    opening.strain === partnerSuit.strain &&
+    (opening.strain === 'H' || opening.strain === 'S')
+  const partnerBidsInSuit = history.filter((c, idx) => {
+    const cb = parseContractBid(c.bid)
+    if (c.seat !== PARTNER[seat] || cb?.strain !== partnerSuit.strain) return false
+    for (let i = idx - 1; i >= 0; i--) {
+      if (history[i].bid === 'P') continue
+      const forcedByMyX = history[i].seat === seat && history[i].bid === 'X'
+      if (!forcedByMyX) return true
+      if (partnerOpened1Major) return true
+      // Nivån på senaste kontraktsbudet före ombudet: samma nivå = billigt (5-korts möjligt).
+      for (let j = i - 1; j >= 0; j--) {
+        const prev = parseContractBid(history[j].bid)
+        if (prev) return cb!.level > prev.level
+      }
+      return true
+    }
+    return true
+  }).length
   if (partnerBidsInSuit >= 2) return 2
   const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
   const open = openingBid(history)
@@ -1045,6 +1073,24 @@ function raiseWithFit(
 
   const sp = dummyPoints(hand, suit).dummyPoints
   if (sp < 6) return null // för svagt för att höja
+
+  // En dubbelton-fit som bygger på ett TVINGAT ombud (partnerns svar på min
+  // egen dubbling) höjs bara med UTGÅNGSVÄRDEN (13+ stödpoäng, då jagar
+  // höjningen en utgång som 4M/5m). En enkel/inbjudande höjning på dubbelton
+  // pressar bara upp partnerns MINIMUM en nivå utan syfte (fel färg-spåret
+  // fix 4, frön 20260847/20261251: 2♦/2♥ → 3♦/3♥ bet, fast ombudet stod).
+  if (lengths(hand)[suit] === 2 && sp < 13) {
+    const partnerForcedRebidInSuit = history.some((c, idx) => {
+      const cb = parseContractBid(c.bid)
+      if (c.seat !== PARTNER[seat] || cb?.strain !== partnerSuit.strain) return false
+      for (let i = idx - 1; i >= 0; i--) {
+        if (history[i].bid === 'P') continue
+        return history[i].seat === seat && history[i].bid === 'X'
+      }
+      return false
+    })
+    if (partnerForcedRebidInSuit) return null
+  }
 
   // Partnern hoppinklev (svagt, 6+ kort) → höjningen är SPÄRR: en nivå upp,
   // aldrig styrkegraderad (partnern har max ~9 hp – utgångsblås vore fel).
@@ -2025,12 +2071,28 @@ function answerWeakTwoCue(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
   if (!wtCue) return null
   const len = lengths(deal.hands[seat])
   const sideStrains = SUIT_STRAINS.filter((st) => st !== wtCue.theirStrain)
-  let best = sideStrains[0]
+  // Cuet lovar 5-5 i TVÅ av de tre sidofärgerna — vilka två vet advancern inte.
+  // Preferens på längd, men LIKA långa färger avgörs av billigaste nivån (frö
+  // 20260733: 3-3 i klöver/hjärter valde förr 4♣ på tre hackor fast 3♥ fanns).
+  let best: string | null = null
+  let bestBid: Bid | null = null
+  const legal = legalCalls(history, seat)
   for (const st of sideStrains) {
-    if (len[SUIT_OF_LETTER[st]] > len[SUIT_OF_LETTER[best]]) best = st
+    const stBid = cheapestBidIn(history, seat, st)
+    if (!stBid || !legal.includes(stBid)) continue
+    const cb = parseContractBid(stBid)!
+    const better =
+      best === null ||
+      len[SUIT_OF_LETTER[st]] > len[SUIT_OF_LETTER[best]] ||
+      (len[SUIT_OF_LETTER[st]] === len[SUIT_OF_LETTER[best]] &&
+        bidValue(cb.level, cb.strain) < bidValue(parseContractBid(bestBid!)!.level, parseContractBid(bestBid!)!.strain))
+    if (better) {
+      best = st
+      bestBid = stBid
+    }
   }
-  const bid = cheapestBidIn(history, seat, best)
-  if (bid && legalCalls(history, seat).includes(bid)) {
+  const bid = bestBid
+  if (bid && best) {
     return {
       seat, bid, rule: 'svar på tvåfärgs-cue',
       explanation: `Partnerns cue lovar en stark tvåfärgshand (krav) – jag ger preferens till min längsta sidofärg ${SWE_NAME[best]} (${bid}), passar aldrig cuet.`,

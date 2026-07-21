@@ -47,9 +47,24 @@ Läs den här filen först varje session.
 > fast 3NT var hemma). Frö 20260769 → exakt par; 20260805 → 600 (över par —
 > Ö/V:s offring uteblev). Facit-test `auction-cueraise-3nt.test.ts`.
 > Mätning #4: exakt par 17,0 %, snitt 291 p/giv, fel färg-bet 136/57 020.
-> **KVAR i spåret (fix 4+):** konkurrens-fortsättningar (frön 20260733/
-> 20260763/20260774); därefter ny mönsterjakt i kvarvarande 136 givar eller
-> vidare till etapp 4/topplistan (ägarval).
+>
+> **✅ Fix 4 KLAR 2026-07-21: "tre konkurrens-fortsättningar"** (budsystem.md
+> §4.5/§7.4/§7.7 + §9): (a) advancerns cue-svar väljer billigaste nivån vid
+> lika långa färger (3♥ före 4♣); (b) öppnaren svarar inte negativ dubbling
+> med sang på minimum — objuden 4+ färg / 5-korts återbud billigt först —
+> och dubbelton-höjningar av tvingade ombud kräver längdbevis + utgångsvärden
+> (kalibrerat i tre mät-iterationer med frö-diff); (c) ny färg som krav på
+> 3-läget mot svag tvåa kräver 15+ (11–14 utan fit passar). Facit +
+> regressionsvakter: `auction-konkurrens-fortsattning.test.ts` (15 fall).
+> Mätning #5: exakt par 17,2 %, fel färg-bet 130/54 880 (M4: 136/57 020;
+> baslinje 148/65 110). Snitt-tapp oförändrat 291 — fixen EXPONERADE två
+> kända luckor som förr maskerades av fel som råkade trilla rätt:
+> **balansering över deras svaga tvåor saknas** (2♥–P–P–P säljs) och
+> **negativ-dubblarens invit-fortsättning saknas** (10–12-handen passar
+> öppnarens färgsvar) — se `docs/systemrevisorn.md` buggfamilj 4.
+> **KVAR i spåret (fix 5+, ägarval):** de två exponerade luckorna ovan;
+> därefter ny mönsterjakt i kvarvarande 130 givar eller vidare till etapp
+> 4/topplistan.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -98,6 +113,18 @@ Läs den här filen först varje session.
 > `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Fel färg-spåret fix 4 (2026-07-21, NYAST):** (a) svarar din partner på en
+  stark tvåfärgs-cue över deras svaga tvåa väljs nu färgen som kan bjudas
+  billigast vid lika längd — **bevaka:** känns preferensen rätt? (b) öppnaren
+  bjuder inte längre 2NT på minimum efter din negativa dubbling — du får en
+  billig färg i stället (kan vara bara 5 kort, eller en 4-korts sidofärg) —
+  **bevaka:** saknar du sangen någon gång med 13–14 hp? Och höjningar av det
+  tvingade svaret på dubbelton görs bara med utgångsvärden — **bevaka:** står
+  vi för lågt någon gång? (c) med 11–14 hp utan fit mot partnerns svaga tvåa
+  passar boten nu (krav på 3-läget = 15+) — **bevaka:** missas utgångar du
+  hade bjudit? KÄND kostnad: motståndarna balanserar inte över svaga tvåor
+  ännu, så 2♥–P–P–P kan "säljas" — det är fix 5-kandidaten, säg till om det
+  stör i spel.
 - **Fel färg-spåret fix 2+3 (2026-07-21, NYTT):** (a) efter en stark
   2♣-auktion `2♣–2♦–3♣/3♦` visar svararen nu sin billigaste 4-korts högfärg
   under 3NT i stället för att blint bjuda 3NT — **bevaka:** hittar paret

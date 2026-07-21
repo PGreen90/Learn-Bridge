@@ -69,16 +69,25 @@ export function respondToWeakTwo(hand: Hand, opened: Suit): ResponseResult {
     return { call: '2NT', rule: 'Ogust', explanation: `${p} hp, ${support} stöd – utgångsintresse → 2NT (Ogust, frågar min/max + kvalitet).` }
   }
 
-  // 11+ utan fit: egen 5+ färg (krav), annars 3NT eller Ogust.
+  // 11+ utan fit: egen 5+ färg (krav) — på 2-läget från 11 hp, men på 3-LÄGET
+  // krävs ~15+ (budet tvingar öppnarens 6–11 hp att bjuda vidare på 3-läget;
+  // frö 20260774: 13 hp krävde 3♣ → tvingat 3♥ en bet, fast 2♥ stod).
   const side = longestSide(len, opened, 5)
   if (side) {
     const level = levelAbove(side, opened, 2)
-    return { call: `${level}${BID[side]}`, rule: 'ny färg (krav)', explanation: `${p} hp med ${len[side]}-korts ${NAME[side]} → ${level}${SYM[side]} (naturlig, krav 1 rond).` }
+    if (level === 2 || p >= 15) {
+      return { call: `${level}${BID[side]}`, rule: 'ny färg (krav)', explanation: `${p} hp med ${len[side]}-korts ${NAME[side]} → ${level}${SYM[side]} (naturlig, krav 1 rond).` }
+    }
   }
   if (isBalanced(hand) && p >= 15) {
     return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad utan fit → 3NT (till spel).` }
   }
-  return { call: '2NT', rule: 'Ogust', explanation: `${p} hp – utgångsintresse → 2NT (Ogust, värderar öppnarens färg).` }
+  // 15+ utan billig färg/sang: Ogust värderar öppnarens hand. 11–14 utan fit
+  // som inte kan kräva billigt PASSAR — partnerns svaga tvåa står bäst själv.
+  if (p >= 15) {
+    return { call: '2NT', rule: 'Ogust', explanation: `${p} hp – utgångsintresse → 2NT (Ogust, värderar öppnarens färg).` }
+  }
+  return { call: 'P', rule: 'pass', explanation: `${p} hp utan fit och utan billig egen färg → pass (partnerns spärr står bäst själv).` }
 }
 
 // === 2. Öppnarens Ogust-svar (steg) =======================================

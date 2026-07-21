@@ -181,6 +181,23 @@ Fel färg (bet): 136 givar, 57 020 p (M3: 138/58 530 · baslinje 148/65 110)
 par" 600 — par 500 kräver att Ö/V offrar 4♠X, bästa möjliga för vår sida)
 ```
 
+## Mätning #5 — 2026-07-21, efter fel färg-fix 4 (konkurrens-fortsättningar)
+Samma frö 20260721, 1 000 givar, efter fix 4-paketet (§4.5/§7.4/§7.7; tre
+buggar + höjningsvakter, se buggfamilj 4 nedan):
+
+```
+Rätt kontrakt (exakt par): 17,2 %   (M4: 17,0 % · baslinje 15,9 %)
+Genomsnittligt poängtapp: 291 p/giv (M4: 291 · baslinje 300)
+Fel färg (bet): 130 givar, 54 880 p (M4: 136/57 020 · baslinje 148/65 110)
+Övriga poster: missad utgång +2, såld giv +3, lillslam +1 040 p (samma antal)
+— hela ökningen sitter i de två EXPONERADE luckorna (balansering över svaga
+tvåor + negativ-dubblarens invit-fortsättning, se buggfamilj 4): förr nådde
+de givarna rätt slutkontrakt via FELBETEENDEN som råkade trilla rätt (2NT
+utan värden som partnern lyfte till utgång, 13 hp-krav som pressade fram
+spel). Snitt-tappet är därför oförändrat medan exakt par steg — de riktiga
+felen är lagade och test-låsta, luckorna är namngivna för fix 5.
+```
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
@@ -223,9 +240,32 @@ grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
    möjliga för vår sida). Facit-test FÖRE fix: `auction-cueraise-3nt.test.ts`.
    Effekt: Mätning #4 nedan. OBS: inverterad minor-delen av mönstret (ostört)
    är B13-släktingen — kvar i topplistan (etapp 5).
-4. **Konkurrens-fortsättningar** (blandade): advancerns svar på tvåfärgs-cue
-   (frö 20260733), öppnarens 2NT-återbud efter negativ dubbling på minimum
-   (frö 20260763), höjning av partnerns svaga 2:a på dubbelton (frö 20260774).
+4. **✅ FIX 4 KLAR 2026-07-21 — tre konkurrens-fortsättningar (§4.5/§7.4/§7.7):**
+   (a) advancerns svar på tvåfärgs-cue över deras svaga tvåa valde längsta
+   sidofärg med klöver som lika-vinnare → 4♣ på tre hackor fast 3♥ fanns en
+   nivå lägre (frö 20260733: 4♣ tre bet, 5♥ hemma) → lika längd avgörs nu av
+   billigaste nivån (`answerWeakTwoCue`) → exakt par. (b) öppnaren svarade
+   negativ dubbling med sang på minimum (frö 20260763: 11 hp → 2NT två bet)
+   → sang på 2-läget+ kräver ~15+; utan nivåhöjning föredras i ordning: annan
+   objuden 4+ färg (4-4-fiten, frö 20261351) → eget 5-korts återbud → sang
+   (`openerAnswerNegativeDouble`). 2♦ en bet är praktiskt optimum (par 1♠
+   onåbart efter 2♣-inklivet; resttapp 130). (c) ny färg som krav på 3-LÄGET
+   kräver nu ~15+ mot partnerns svaga tvåa; 11–14 utan fit och utan billig
+   färg passar (`respondToWeakTwo`; frö 20260774: förr tvingat 3♥ bet — nu
+   pass, Ö/V balanserar till 4♠ två bet = exakt par). **Höjningsvakterna
+   (kalibrerade i tre mät-iterationer med frö-diff):** ett TVINGAT ombud
+   (svar på egen X) som var billigt och inte är en 1M-öppnad färg lovar bara
+   5 → ingen dubbelton-fit (`fitLengthNeeded`); gick ombudet UPP en nivå
+   (= 6+) eller lovade öppningen 1♥/1♠ redan 5+ räknas dubbelton som fit —
+   men höjs då bara med UTGÅNGSVÄRDEN (13+ sp, `raiseWithFit`): enkla/
+   inbjudande dubbelton-höjningar av ett tvingat minimum pressade bara upp
+   partnern en nivå (frön 20260847/20261251). Facit + regressionsvakter
+   (15 fall, skrivna FÖRE fix): `auction-konkurrens-fortsattning.test.ts`.
+   Effekt: Mätning #5 nedan. **Exponerade kända luckor** (förr maskerade av
+   fel som råkade trilla rätt): N/S **balanserar inte över deras svaga tvåor**
+   (2♥–P–P–P säljs: frön 20260770/20261248/20261342) och **negativ-dubblaren
+   saknar invit-fortsättning** över öppnarens färgsvar (10–12-handen passar:
+   frön 20261354/20261139/20261179) — kandidater för fix 5.
 5. **Ofrånkomligt DD-brus:** normala sangauktioner (1NT–2NT–3NT, 1NT–3NT) där
    DD råkar göra en 4-3-högfärgsdelkontrakt (frön 20260801, 20261062) — par
    är hårt; dessa jagas INTE.
