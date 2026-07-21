@@ -11,3 +11,6 @@ dist-ssr
 
 # Källmaterial (PDF:er) hör inte hemma i kod-repot – för stora/onödiga
 *.pdf
+
+# Systemrevisorns mätrapporter (docs/systemrevisorn.md) – genererade, ej kod
+revisor-output/

@@ -1983,3 +1983,14 @@ Det avslöjar längd/räkning direkt för partnern.
   zonen**; straffen var rätt och bäst. Beteendet test-låst i
   `contested-openings.test.ts`. (#36 = mobil-UI, ligger kvar öppen i SENARE.)
   tsc rent, hela sviten grön.
+- **2026-07-21** – **SYSTEMREVISORN byggd (etapp 2 i "budgivningen mot
+  perfekt"; ingen budregel ändrad).** Mätrigg som slumpar givar, låter motorn
+  bjuda ALLA fyra händerna, DD-löser och jämför slutkontraktet mot riktig
+  par-poäng → objektiv missprocent + topplista över misstyper, omkörbar efter
+  varje förbättring (samma frö = samma givar). Kod: `revisor.ts` (logik,
+  enhetstestad med fejkad DD), `revisor-dds.ts` (orakel: npm-paketet
+  `bridge-dds` = Bo Haglunds riktiga lösare i WASM som rent dev-beroende —
+  egna TS-lösaren klarar inte helgivar i volym), `revisor.probe.test.ts`
+  (körningen, REVISOR-gated så deploygrinden aldrig kör den). Körinstruktion +
+  baslinjemätningen ("Mätning #1") i `docs/systemrevisorn.md`. tsc rent, hela
+  sviten grön.
