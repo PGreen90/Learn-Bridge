@@ -18,11 +18,21 @@ Läs den här filen först varje session.
 > 🅿️ PARKERAT — rörs inte förrän ägaren uttryckligen återupptar det. Fullt
 > fokus i stället: **budgivningen så nära perfekt som möjligt.**
 >
-> **🔵 NU = Etapp 2: bygg Systemrevisorn.** FÖRBEREDD — hela byggplanen
-> (pipeline, körform utanför deploygrinden, acceptanskriterier, kända fällor)
-> ligger i **`docs/systemrevisorn.md`**. Målet: objektiv missprocent +
-> topplista över värsta misstyperna, omkörbar efter varje förbättring, med en
-> första BASLINJEMÄTNING som resultat.
+> **🔵 NU = Etapp 3: FEL FÄRG-SPÅRET (ägarbeslut 2026-07-21).** Ägaren valde
+> att låta revisorns topplista styra: största posten **"fel färg — bet fast
+> facit fanns i annan strain" (148/1000 givar, 65 110 p)** angrips FÖRE
+> F1-resten och slam-familjerna. Arbetssätt: hämta fel färg-exemplen ur
+> `revisor-output/` (frö 20260721 återskapar dem), hitta MÖNSTREN (inte
+> enskilda givar), laga mönster för mönster test-låst, kör om mätningen med
+> samma frö och se posten krympa utan att andra poster växer.
+>
+> **Etapp 2 KLAR 2026-07-21** — Systemrevisorn byggd (`revisor.ts` +
+> `revisor-dds.ts` + REVISOR-gated probe; DD-facit via npm-paketet
+> `bridge-dds` = Bo Haglunds lösare i WASM som dev-beroende, med RIKTIG
+> par-poäng) och **baslinjen mätt** (1 000 givar, frö 20260721): **exakt par
+> 15,9 %, snitt-tapp 300 p/giv; topplista: fel färg-bet 65k p > missad
+> lillslam 56k > missad utgång 46k > missad storslam 38k > billig offring
+> 35k** — hela mätningen + läsanvisning i `docs/systemrevisorn.md`.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade.** #35 (fel
@@ -40,18 +50,22 @@ Läs den här filen först varje session.
 >    - **#39** — efter vår 1NT + deras 2♥-inkliv blir W:s X ståendes som
 >      straff → Ö/V (25 hp) missar 3NT.
 >    - **#36** (större kort på mobil) är UI, inte bud → ⚪ SENARE.
-> 2. **Systemrevisorn — mätverktyget för "hur nära perfekt?"** (E3 + del av
->    F2): återanvändbar probe-rigg som genererar tusentals givar, låter motorn
->    bjuda alla fyra händerna, DD-löser och jämför slutkontraktet mot optimum
->    → objektiv missprocent + topplista över värsta misstyperna. Perfektion
->    kräver ett mått; riggen styr sedan prioriteringen av allt nedan.
-> 3. **F1-resten: familj B (2♣-slam) + C:s reverse/hoppskift** — byggs på de
+> 2. **✅ Etapp 2 KLAR 2026-07-21: Systemrevisorn byggd + baslinje mätt.**
+>    Återanvändbar rigg (samma frö = samma givar): motorn bjuder alla fyra
+>    händerna, `bridge-dds` (WASM, dev-beroende) ger DD-tabell + riktig
+>    par-poäng, `judgeDeal` kategoriserar. Kör:
+>    `$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts`.
+>    Baslinje: exakt par 15,9 %, snitt 300 p/giv — allt i `docs/systemrevisorn.md`.
+> 3. **Fel färg-spåret (NU — ägarbeslut 2026-07-21, ur revisorns topplista):**
+>    beta av misstypen "fel färg med bet", mönster för mönster, mätt mot
+>    baslinjen med samma frö.
+> 4. **F1-resten: familj B (2♣-slam) + C:s reverse/hoppskift** — byggs på de
 >    ärliga portarnas mönster (kaptensregeln mot visade intervall).
-> 4. **Revisorns topplista i tur och ordning** — kända kandidater: B13
->    (inverterad minor-återbud för grova), F3 (advancer-rabatt efter
->    balansering), F4 (TP till §7-inkliven), F6 (C5 stark 17+ efter två
->    bjudna färger + C14 tvåfärgsinkliv i prebuilt-linjer).
-> 5. **F2: datadriven detektorkedja** (E1) — underhållbarhet så fler
+> 5. **Revisorns topplista vidare** — kända kandidater: missad utgång (näst
+>    största äkta posten), B13 (inverterad minor-återbud för grova), F3
+>    (advancer-rabatt efter balansering), F4 (TP till §7-inkliven), F6 (C5
+>    stark 17+ efter två bjudna färger + C14 tvåfärgsinkliv i prebuilt-linjer).
+> 6. **F2: datadriven detektorkedja** (E1) — underhållbarhet så fler
 >    konkurrenskonventioner inte gör `decideCall`-kedjan skör.
 >
 > **Bakgrundsläget:** UI-overhaulen steg 1–5 KLAR & mergad till main
@@ -290,12 +304,12 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Etapp 3: F1-resten — familj B (2♣) + C:s reverse/hoppskift** — byggs på
+1. **Etapp 4: F1-resten — familj B (2♣) + C:s reverse/hoppskift** — byggs på
    de ärliga slamportarnas mönster (kaptensregeln mot visade intervall).
-2. **Etapp 4 start: B13 — förfina öppnarens återbud efter inverterad
-   minorhöjning** (eller det revisorns topplista visar svider mest — ägaren
-   väljer när baslinjemätningen finns).
-3. **Etapp 5: F2 — datadriven detektorkedja** (E1) — underhållbarhet innan
+2. **Etapp 5: revisorns topplista vidare** — missad utgång (näst största äkta
+   posten) och/eller B13 — förfina öppnarens återbud efter inverterad
+   minorhöjning; ägaren väljer utifrån ny mätning.
+3. **Etapp 6: F2 — datadriven detektorkedja** (E1) — underhållbarhet innan
    fler konkurrenskonventioner läggs på `decideCall`-kedjan.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
