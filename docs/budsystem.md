@@ -845,6 +845,27 @@ höjer hon till **3NT**, annars **pass** (stannar i 2NT). En jämn 19-hand med e
 kvalitet (startpoäng ≥20) uppgraderade oftast redan sin **öppning** till 2NT (§3), så
 den här grenen fångar 18–19 utan den kvaliteten samt starka fördelningshänder.
 
+### 5.11 Öppnarens svar på partnerns CUE-höjning — 3NT före 5m
+Du öppnar 1 i färg, en motståndare kliver in, och partnern **cue-bjuder deras
+färg** (= limithöjning eller bättre av din färg, krav). Öppnarens svar:
+
+| Öppnarens bud | Betydelse |
+|---|---|
+| **3NT** | **jämn hand + stopp i deras färg** (minorfit) → rätt utgång är 9 stick, inte 11 |
+| utgång i vår färg (4M/5m) | maximum (15+) utan sang-alternativet |
+| billigaste återbud i vår färg | minimum, **ojämn hand eller inget stopp** |
+
+- **Poängen (fel färg-spåret fix 3):** med **minorfit** är 3NT den naturliga
+  utgången. Förr återgick öppnaren ALLTID billigast på minimum, och cue-bjudaren
+  utan eget stopp satte 5m — fast stoppet satt hos öppnaren (t.ex. ♣K2 bakom
+  inklivaren) och 3NT var hemma. Nu bjuder öppnaren 3NT direkt med jämn hand +
+  stopp, oavsett min/max (cuet driver ändå till utgång — det här väljer den
+  BÄTTRE utgången).
+- Minimiåtergången betyder därmed ärligt **"ojämn hand eller inget stopp"** —
+  cue-bjudarens fortsättning (3NT med eget stopp, annars 5m) blir ett informerat
+  val i stället för en chansning.
+- **Högfärgsfit rörs inte:** där är 4M rätt utgång som förr.
+
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
 Planerade enligt systemkortet: Stayman, Smolen, Jacoby-transfer, Minor Suit
@@ -2039,3 +2060,16 @@ Det avslöjar längd/räkning direkt för partnern.
   färg → kravlogiken rebjuder den (4♠). Facit-test FÖRE fix (båda frön +
   enhetsfall): `auction-2c-finest-suit.test.ts`. tsc rent, hela sviten grön.
   Mätning efter fix: se `docs/systemrevisorn.md` (Mätning #3).
+- **2026-07-21** – **Fel färg-spåret fix 3: cue-höjning i minor → 3NT före 5m
+  (NY §5.11).** Revisorns buggfamilj 3 (frön 20260805/20260769): efter
+  partnerns cue-höjning av vår minoröppning återgick öppnaren ALLTID
+  billigast i färgen på minimum — även med jämn hand OCH stopp i deras färg
+  — och cue-bjudaren utan eget stopp blåste 5m (en/två bet), fast 3NT från
+  öppnarens sida var hemma (9 stick, 600; stoppet ♣K2/♦KT satt hos öppnaren).
+  Nu bjuder `answerCueRaise` (`auction-live.ts`) **3NT med jämn hand + stopp
+  i deras cuade färg** (bara minorfit — 4M orörd; gäller även maximum: cuet
+  driver ändå till utgång, det här väljer den bättre). Minimiåtergången 3m
+  betyder därmed ärligt "ojämn/inget stopp" → cue-bjudarens 5m är ett
+  informerat val. Facit-test FÖRE fix (båda frön + stopp/max-enhetsfall):
+  `auction-cueraise-3nt.test.ts`. tsc rent, hela sviten grön. Mätning efter
+  fix: se `docs/systemrevisorn.md` (Mätning #4).

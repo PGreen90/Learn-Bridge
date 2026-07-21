@@ -38,9 +38,18 @@ Läs den här filen först varje session.
 > tvingade ombud slår aldrig en egen visad 6+ färg (`raiseWithFit`-vakt,
 > frö 20260737 når nu exakt par). Facit-test `auction-2c-finest-suit.test.ts`.
 > Mätning #3: exakt par 16,8 %, fel färg-bet 138 givar/58 530 p (baslinje
-> 148/65 110). **KVAR i spåret (fix 3+, identifierade buggfamiljer):** 5m
-> fast 3NT var säkert efter cue-höjning/inverterad minor (frön 20260805/
-> 20260769), konkurrens-fortsättningar (frön 20260733/20260763/20260774).
+> 148/65 110).
+>
+> **✅ Fix 3 KLAR 2026-07-21: "cue-höjning i minor → 3NT före 5m"** (NY
+> budsystem.md §5.11 + §9; `answerCueRaise` i `auction-live.ts`): öppnaren
+> med jämn hand + stopp i deras cuade färg bjuder 3NT direkt i st.f. att
+> alltid återgå billigast (varpå cue-bjudaren utan eget stopp blåste 5m bet
+> fast 3NT var hemma). Frö 20260769 → exakt par; 20260805 → 600 (över par —
+> Ö/V:s offring uteblev). Facit-test `auction-cueraise-3nt.test.ts`.
+> Mätning #4: exakt par 17,0 %, snitt 291 p/giv, fel färg-bet 136/57 020.
+> **KVAR i spåret (fix 4+):** konkurrens-fortsättningar (frön 20260733/
+> 20260763/20260774); därefter ny mönsterjakt i kvarvarande 136 givar eller
+> vidare till etapp 4/topplistan (ägarval).
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -89,6 +98,16 @@ Läs den här filen först varje session.
 > `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
+- **Fel färg-spåret fix 2+3 (2026-07-21, NYTT):** (a) efter en stark
+  2♣-auktion `2♣–2♦–3♣/3♦` visar svararen nu sin billigaste 4-korts högfärg
+  under 3NT i stället för att blint bjuda 3NT — **bevaka:** hittar paret
+  4-4-fiten lagom ofta, och hamnar sangen nu på ÖPPNARENS (starka) hand?
+  (b) svararen höjer inte längre öppnarens tvingade färg-ombud på dubbelton
+  när hen har en egen visad 6-korts färg — den rebjuds i stället. (c) När din
+  partner cue-höjer din minoröppning i konkurrens svarar öppnaren nu **3NT
+  med jämn hand + stopp i deras färg** (i st.f. att alltid återgå billigast
+  varpå 5m blåstes) — **bevaka:** står 3NT lagom ofta, eller bjuds det på för
+  tunna stopp (Kx räknas)? Säg till om 5m hade varit rätt i ett konkret läge.
 - **"5♣-ryckaren" lagad (fel färg-spåret fix 1, 2026-07-21, NYTT & LIVE):**
   boten läser inte längre partnerns Stayman/överföring som en äkta färg, och
   rör ALDRIG partnerns obestridda utgångsbud off-book (förr kunde
