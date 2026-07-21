@@ -12,7 +12,7 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 2: Systemrevisorn
+### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 3: Fel färg-spåret
 > **Ägarbeslut 2026-07-20: designen läggs HELT åt sidan.** Facelift-spåret
 > (Claude Design-utforskningen + Claudes "Klubbrummet"-mockup) är flyttat till
 > 🅿️ PARKERAT — rörs inte förrän ägaren uttryckligen återupptar det. Fullt
@@ -35,36 +35,19 @@ Läs den här filen först varje session.
 > säkert efter cue-höjning/inverterad minor (frö 20260805), konkurrens-
 > fortsättningar (frön 20260733/20260763/20260774).
 >
-> **Etapp 2 KLAR 2026-07-21** — Systemrevisorn byggd (`revisor.ts` +
-> `revisor-dds.ts` + REVISOR-gated probe; DD-facit via npm-paketet
-> `bridge-dds` = Bo Haglunds lösare i WASM som dev-beroende, med RIKTIG
-> par-poäng) och **baslinjen mätt** (1 000 givar, frö 20260721): **exakt par
-> 15,9 %, snitt-tapp 300 p/giv; topplista: fel färg-bet 65k p > missad
-> lillslam 56k > missad utgång 46k > missad storslam 38k > billig offring
-> 35k** — hela mätningen + läsanvisning i `docs/systemrevisorn.md`.
->
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
-> 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade.** #35 (fel
->    dubblare utsedd → 5♠-blåsan), #37 (öppnarens svar på sang-inbjudan byggt,
->    §4.3), #38 (återöppning även efter 1-läges inkliv) lagade + test-låsta;
->    #39 = inget fel (DD-facit: straffen +500 slår 3NT som går 2 bet) —
->    test-låst. Issues stängda, mergepunkt `da7bdc5`, deploy grön, 1106 test.
->    - **#35** — Öst höjer partnerns 4♠ till 5♠ på en redan begränsad
->      minimihand (balanserings-X + 1♠ var redan hela handen) → 3 bet.
->    - **#37** — 1NT-öppnaren (17 hp, FEM hjärter) avvisar 3♥-inbjudan efter
->      Stayman-hittad fit och bjuder 3NT i st.f. 4♥; dessutom felaktig
->      beskrivning av 3NT-budet.
->    - **#38** — passad svarare (11 hp, ♦KQ864 + ♠KJ42) passar ut `1♣–(1♠)`
->      → Ö/V säljer given i 1♠ trots ~25 hp och Västs solida klöver.
->    - **#39** — efter vår 1NT + deras 2♥-inkliv blir W:s X ståendes som
->      straff → Ö/V (25 hp) missar 3NT.
->    - **#36** (större kort på mobil) är UI, inte bud → ⚪ SENARE.
+> 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
+>    lagade + test-låsta, #39 = inget fel (test-låst), #36 (UI) → ⚪ SENARE.
+>    Mergepunkt `da7bdc5`, 1106 test. Givdetaljerna i `docs/historik.md`.
 > 2. **✅ Etapp 2 KLAR 2026-07-21: Systemrevisorn byggd + baslinje mätt.**
 >    Återanvändbar rigg (samma frö = samma givar): motorn bjuder alla fyra
 >    händerna, `bridge-dds` (WASM, dev-beroende) ger DD-tabell + riktig
 >    par-poäng, `judgeDeal` kategoriserar. Kör:
 >    `$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts`.
->    Baslinje: exakt par 15,9 %, snitt 300 p/giv — allt i `docs/systemrevisorn.md`.
+>    Baslinje (1 000 givar, frö 20260721): exakt par 15,9 %, snitt-tapp
+>    300 p/giv; topplista: fel färg-bet 65k p > missad lillslam 56k > missad
+>    utgång 46k > missad storslam 38k > billig offring 35k — hela mätningen +
+>    läsanvisning i `docs/systemrevisorn.md`.
 > 3. **Fel färg-spåret (NU — ägarbeslut 2026-07-21, ur revisorns topplista):**
 >    beta av misstypen "fel färg med bet", mönster för mönster, mätt mot
 >    baslinjen med samma frö.
@@ -84,53 +67,19 @@ Läs den här filen först varje session.
 > (konton/multiplayer/tävlingar) är ett separat STORT spår — startas bara på
 > uttryckligt ägarbeslut (`docs/framtid-multiplayer-plattform.md`).
 >
-> **Senast klart & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, deploy grön):
-> ÄRLIGA SLAMPORTAR — tjuvkiken borttagen.** Ägarbeslut efter Fables
-> totalgranskning: bottarna bjuder som MÄNNISKOR — varje budbeslut fattas på
-> EGEN hand + vad partnern VISAT via buden (intervall/löften), ALDRIG på
-> partnerns faktiska kort; hellre missa en slam än kika. Gäller även
-> facit-linjen/Budvisningen (samma `buildAuction`). Ägarens två systemval:
-> (1) **inbjudningar i kanske-zonen** (31–32 mot visat minimum; kvantitativ 4NT
-> över sang, 5M/4m i trumf; partnern accepterar över blott minimum),
-> (2) **ingen kontrollkoll** (lita på poängen + nyckelkortssvaret;
-> `pairControlsSideSuits` och motorns auto-cue-rond BORTTAGNA — cue-ronden bar
-> bara gaten och orsakade gamla slam-quirken). Byggt: `slam-auction.ts`
-> omskriven (**kaptensregeln**: egen hand + visat minimum ≥33 driv / 31–32
-> inbjudan; nyckelkort HÄRLEDS ur svaret + egen hand; tvetydighet → anta högt
-> mot visad 15+, annars lågt + PARTNER-RÄTTELSE till 6; storslam kräver
-> visshet), `nt-slam.ts` (Gerber härleder ur svaren; ny kvantitativ
-> 4NT-inbjudan 19–20 mot 1NT-återbudet), `auction.ts` (visade intervall per
-> återbudsregel: 1NT-återbud 12, hopphöjning/hopp-återbud 16, Jacoby/inverterad
-> per rebid, splinter-relä 15, MSS 15); `familyAFitTrump` läser BARA svararens
-> hand (6+ egen hf / 5+ i öppnarens minor; gömda 4-4-fits jagas ej). **Kända
-> ÄRLIGA MISSER (medvetna, test-låsta):** #29-originalgiven stannar i 3NT
-> (13 hp mot visade 16–18 < zonen); familj A-givens 4-korts minorfit drivs ej.
-> Slamfrekvens (probe 60 000 givar): lillslam ~1/120, storslam ~1/4300 —
-> mänskligt. **Blottad systemlucka → B13 i revisionen:** inverterad
-> minor-återbud är grova (17 hp + 6m visas som "minimum") → ärliga misser där.
-> Docs: budsystem.md §5.2/§5.7/§6 (principen)/§6.2-motoranmärkning/§9;
-> budsystem-revision.md B8–B13. **1090 test gröna, tsc rent, deploy grön.**
-> Se 👀 Bevaka (översta posten).
+> **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
+> bottarna bjuder som människor — egen hand + partnerns VISADE intervall, aldrig
+> partnerns faktiska kort; hellre systemriktig miss än kik. Kaptensregeln: ≥33
+> driv / 31–32 inbjudan mot visat minimum; ingen kontrollkoll (ägarbeslut);
+> storslam kräver visshet. Fullständig beskrivning: `docs/historik.md` +
+> budsystem.md §5.2/§5.7/§6. Se 👀 Bevaka (andra posten).
 >
-> **F1 — bredda slam-utforskningen (PAUSAD → etapp 3 i NU-planen).** En probe (40 000 givar,
-> DD-lösta) delade slam-missarna i fyra familjer. **KLARA & LIVE:** **A** (efter
-> `1m–1M–1NT`: jämn → Gerber 21+/kvantitativ 4NT 19–20; obalanserad med säker
-> fit på egen hand → 4NT RKC), **C:s hopphöjning** (`1x–1M–3M` → driv 17+/
-> inbjudan 5M 15–16), **D** (hängande cue-quirken stängd — auto-cue-ronden är
-> numera helt borttagen). Alla styrs av de ärliga portarna ovan (äldre
-> beskrivningar i historiken med kontroll-gates/parets faktiska poäng =
-> kik-eran, gäller inte längre). **KVAR (= etapp 3):** familj **B** (2♣) +
-> C:s systerfall **reverse** (`1♣–1♥–2♦`) och **hoppskift** (`1♦–1♠–3♣`) —
-> störst men rörigast (ingen överenskommen trumf; vissa reverse-auktioner
-> kollapsar t.o.m. under utgång, eget problem). Byggs på det ärliga mönstret.
->
-> **Historik:** alla äldre lägesrapporter (mobil-UI-fixar, felrapporter
-> #23–#34, 2♣-utgångskravet, systems-on, Steg A-detaljerna Del 1–3, R1 Fynd
-> #2-delbitarna, kontraktväljaren m.m.) är flyttade till **`docs/historik.md`**
-> (2026-07-07 — de innehöll inaktuella ögonblicksrader som "EJ PUSHAT"/"#29
-> kvar öppen"; facit är: allt live, alla felrapporter stängda/uppskjutna).
-> Detaljerad status: `docs/status.md`. Budsystemets hälsobild + körordning
-> F1–F6: `docs/budsystem-revision.md`.
+> **Historik:** alla äldre lägesrapporter (ÄRLIGA SLAMPORTAR-bygget, F1-familjerna,
+> etapp 1-givarna, mobil-UI-fixar, felrapporter #23–#34, 2♣-utgångskravet,
+> systems-on, Steg A-detaljerna, R1 Fynd #2-delbitarna, kontraktväljaren m.m.)
+> är flyttade till **`docs/historik.md`** (senast 2026-07-21). Detaljerad
+> status: `docs/status.md`. Budsystemets hälsobild + körordning F1–F6:
+> `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
 - **"5♣-ryckaren" lagad (fel färg-spåret fix 1, 2026-07-21, NYTT & LIVE):**
@@ -159,155 +108,43 @@ Läs den här filen först varje session.
   dödade slamlinjer) är borta i och med att auto-cue-ronden togs bort. TÄCKS
   ÄNNU INTE: slam efter stark 2♣ (familj B) samt efter reverse/hoppskift
   (C-resten) — se NÄST 1; advancer-slam efter upplysningsdubbling saknas också.
-- **Advancern hoppar inte förbi utgång (#33, 2026-07-07, NYTT & LIVE):** när du och
-  din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
-  längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦
-  över partnerns 5♦). **Bevaka:** passar boten lagom (den saknar ännu slam-drivning
-  som advancer — med äkta slamvärden kan den nöja sig med utgång; säg till om den
-  borde utforskat slam).
-- **6-5-öppning (#32, 2026-07-07, NYTT & LIVE):** med 6-korts lågfärg + 5-korts
-  högfärg öppnar boten nu **högfärgen med 12–15**, men **lågfärgen med 16+** (för att
-  reverse:a in högfärgen). **Bevaka:** (a) väljer den rätt (öppnar 1♦ på rätt starka
-  6-5, 1♠/1♥ på minimum)? (b) *återbudet* efter en 16+ 1♦-öppning — visar den 6-5:an
-  begripligt (reverse in i högfärgen), eller blir fortsättningen konstig? Säg till om
-  6-5:an tappas bort i rond 2.
-- **2♣ dör inte längre i delkontrakt + systems-on (2026-07-07, NYTT & LIVE):**
-  öppnar din bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång
-  (förr dog ~64 % i delkontrakt). **Efter `2♣–2♦–2NT`** (öppnaren 22–24) använder
-  svararen nu **Stayman/transfer** som mot en 2NT-öppning → hittar 4♥/4♠-fit i
-  stället för att blint bjuda 3NT. **Bevaka:** (a) hittar paret rätt högfärgsfit
-  lagom ofta, och landar det inte i fel strng? (b) svaga händer med 5-korts högfärg
-  signar av i 3♥/3♠ (rätt), 0–2 hp passar 2NT (rätt) — säg till om något känns fel.
-  (c) I ANDRA 2♣-auktioner (positivt svar, färgrebud) garanterar kravlogiken utgång
-  men den forcerade minimi-stegen väljer inte alltid finaste färgen (t.ex. 5♣ där
-  4♠ var bättre) — säg till om en sådan känns trubbig. (d) Slam-utforskning efter
-  2♣ är fortfarande tunn (uppföljning knyter an till #29).
-- **Inget svagt hoppskift längre (#31, 2026-07-06, NYTT & LIVE):** svarar du på
-  partnerns öppning med en svag 6-korts högfärg bjuder boten nu **1♥/1♠** (lågt,
-  rondkrav), aldrig 2♥/2♠. **Bevaka:** håller boten budgivningen lagom låg, eller
-  borde en riktigt svag spärrig hand ibland fått hoppa? (Ägarprincip: håll låg när
-  partnern öppnat.) Öppnaren förklarar fortfarande ett MANUELLT hoppskift rätt om du
-  själv hoppar.
-- **Stark jämn hand efter minorhöjning i konkurrens (#30, 2026-07-06, NYTT & LIVE):**
-  (a) en jämn 19 med extra kvalitet (ess/kvalitetsfärger, startpoäng ≥20) öppnar nu
-  **2NT** i stället för 1 i färg — **bevaka** att den inte blåser upp platta 19:or.
-  (b) När din minor höjs i konkurrens visar öppnaren styrka i sang (3NT 20+ /
-  2NT-inbjudan 18–19 med stopp); höjaren accepterar 3NT från **8 hp**. **Bevaka:** når
-  paret 3NT lagom ofta, eller för lätt/tungt? Säg till om accept-golvet (8) känns fel.
-- **Flerronds-konkurrens A+B+C (§5.9 + §7.1, 2026-07-05, LIVE):** störda
-  auktioner säljs inte längre billigt i rond 2+. (A) Öppnar du 1 i färg, de kliver in,
-  partnern PASSAR och de konkurrerar (`1♣–(1♠)–P–(2♠)`) → du tävlar nu (egen 6+ färg,
-  eller X med kort i deras färg) i stället för att passa. (B) Samma men de passar också
-  (`1♠–(2♥)–P–P`) → du återöppnar i utpassningssitsen (X med kort i deras färg → **din
-  partner kan konvertera till straff**; egen 6+ → rebjud). (C) Din partner klev in på
-  2-läget och de hittade sin fit (`1♠–(2♥)–2♠`) → du (advancern) tävlar nu **3♥** med
-  3-korts stöd (9-korts fit, lagen om totala stick). **Bevaka:** (a) återöppnar/tävlar
-  boten lagom ofta, eller väcker den given för lätt? (b) C:s golv är **~8 stödpoäng** –
-  en riktigt svag hand med 9-korts fit passar (medvetet, tävlar inte på en bust); vill
-  du ha renodlad "lag om totala stick" (tävla nästan alltid med fiten) → säg till, det
-  är en trösklsjustering. (c) B:s partner som trap-passar och konverterar till straff –
-  slår det rätt (blir det verkligen en straff, inte en flykt som får spela billigt)?
-- **"Låna en kung" i balansering (§7.1, 2026-07-05, NYTT & LIVE):** i
-  utpassningsläget (deras 1-lägesöppning + två pass) kliver boten nu in ~3 hp
-  lättare — enkelt inkliv från 5 hp, upplysnings-X från 9 (form 7), återöppnings-1NT
-  11–14. **Bevaka:** (a) balanserar boten lagom ofta, eller väcker den given på för
-  skräpiga händer? (b) 2-läges-inkliv på ~5 hp kan bli aggressivt (lättnaden gäller
-  även där) — säg till om det svider. (c) advancern (som svarar balanseringen) vet
-  ännu INTE att partnern kan vara en kung lättare → kan övervärdera tillbaka; en
-  "advancer-rabatt" är en möjlig uppföljning. (d) den starka 15–18 jämna handen i
-  balansering dubblar först (om form) i stället för 1NT; saknar den form (lång i
-  deras färg) kan den passa — ovanlig kant, säg till om den dyker upp.
-- **Öppnarens rond-2 i konkurrens efter partnerns ny färg / 1NT (§5.8, 2026-07-05,
-  NYTT & LIVE):** öppnar du 1 i färg, partnern svarar en fri ny färg / 1NT
-  och motståndarna bjuder om (t.ex. `1♥–(1♠)–2♣–(2♠)`), passar öppnaren inte längre
-  bort en stark hand. Extra visas med **cue i deras färg** (15+, hitta rätt utgång),
-  18+ med högfärgsfit → 4M, 18+ jämn m. stopp → 3NT, 15–17 m. högfärgsfit →
-  inbjudande hopphöjning; minimum tävlar med en egen 6+ färg eller en fit, annars
-  pass. **Bevaka:** (a) cue:ar boten lagom ofta (inte varje 15-poängare som borde
-  passat)? (b) hittar den rätt utgång efter cuet, eller överbjuder den? (c) medvetet
-  bortval: i det här läget väljs **cue framför straffdubbling** på extra-händer –
-  säg till om en straffdubbling av deras bud borde ha varit rätt i stället.
-- **Störda krav = RONDKRAV (§5.5, 2026-07-05, NYTT):** klev en motståndare in och du
-  gjorde ett **fritt bud** (ny färg, t.ex. `1♦–(1♠)–2♣`) eller öppnaren **reverse:ade**
-  (`1♣–1♥–(1♠)–2♦`), så passar din partner inte längre — hen tvingas svara med ett
-  naturligt minimibud (`competitionForce`/`honorForce`). Men bara **rondkrav**: buden
-  får stanna UNDER utgång (ett inkliv "lånar" utrymme). **Bevaka:** (a) svarar boten
-  förnuftigt (rätt naturligt bud, inte ett tvångsbud som låter konstigt)? (b) driver
-  den ALDRIG till utgång i onödan här (2/1 i konkurrens lovar värden men ej utgång)?
-  Hopp, cue i deras färg och en passad svarare undantas medvetet — säg till om ett av
-  dem borde ha tvingat fram ett svar ändå.
-- **Utgångskrav får aldrig passas OFF-BOOK (felrapport #26 + #27, 2026-07-05,
-  NYTT):** två luckor där boten passade en KRAV-auktion när du bjudit off-book
-  (motorn hade planerat en annan linje). (1) **#26** – efter din cue-höjning
-  (1♣–2♥–3♥) fullföljer din partner nu utgångskravet efter öppnarens svar
-  (`answerCueBidderRebid`): 3NT med stopp i deras färg, annars utgång i den
-  överenskomna färgen. (2) **#27** – efter ett äkta 2-över-1 (utgångskrav) som
-  öppnaren höjer sätter svararen nu minst utgång även off-book
-  (`answerTwoOverOneRaise`) – uppstod när Syd öppnade den svagare handen så
-  motorns on-book 2/1-fortsättning aldrig fyrade. Bara off-book berörs; on-book
-  orört. **Bevaka:** når boten rätt utgång (4M/3NT/5m) och blåser den aldrig för
-  högt? Säg till om den t.ex. borde utforskat slam i stället för att bara sätta
-  utgång.
-- **Lågfärgsutgång 5♣/5♦ nu nåbar (Kontraktväljaren delsteg 1, 2026-07-05, NYTT):**
-  motorn kunde förr aldrig bjuda 5♣/5♦ (valde alltid 3NT). Nu, efter inverterad
-  minor: en svarare med lågfärgsfit + en **osparrad färg** utforskar via 2m och
-  landar i **5m** när paret inte kan hålla alla färger (i stället för att chansa
-  3NT). Ägarregel: utforska bara med en **riktigt svag** färg (♠xx/♥xxx utan
-  honnör). **Bevaka:** (a) drar boten till 5m när 3NT egentligen var säkert? (b)
-  chansar den fortfarande 3NT med en helt öppen färg? Trösklar i `responses.ts`
-  (`hasWeakSideSuit`) + `responder-rebids.ts` (inverterad-minimum → 5m).
-- **Motspelarens kast-vakt + 1NT-återbudsförklaring (felrapport #24 + #25,
-  2026-07-05, NYTT):** (1) **spelfel #25** – en försvarare som sakar blottar inte
-  längre en honnör i onödan: ny "motspelarens kast-vakt" (`play-bot.ts`
-  `defenderGuardDiscard`) sakar hellre ur en färg UTAN skyddsvärd honnör (en J+
-  som ännu kan slås av ett högre ospelat kort), ärligt räknat ur egen hand +
-  träkarl. Löser bara honnörs-blottning; bredare försvarsinferens (kasta rätt när
-  partnerns hand är okänd) är fortsatt SENARE. Säg till om vakten någon gång
-  behåller fel kort. (2) **budförklaring #24** – öppnarens 1NT-återbud efter
-  färgöppning beskrivs nu som "balanserad minimihand ~12–14 hp" (ej "svag");
-  ingen ändrad budgivning, bara texten (`auction-interpret.ts`).
-- **Takeout-doublingar (felrapport #23 + stark-hand-fortsättning + tvåfärgs-X,
-  2026-07-05, NYTT):** (1) en **17+ stark enfärgshand** upplysningsdubblar en öppning
-  och visar sedan sin färg via ett **starkt återbud** — färgen **billigast (rondkrav,
-  inget hopp)**; hopp-till-utgång är borttaget (kan bli katastrof mot 0 hp). Hela
-  **flerronds-fortsättningen är nu byggd & test-låst**: partnern tvångssvarar
-  (stödstege m. 3-korts stöd: enkel/hopp/utgång/cue efter hp — annars egen 5+ /
-  näst längsta objudna färg), den starka handen dömer game på TP (**6+ färg & 22+ TP
-  → hopp till 3-läget = utgångskrav**, annars lägsta nivå), partnern svarar 3-hoppet
-  (utgång m. 1–2 stöd / 3NT nekar). **⚠️ Bevaka särskilt:** den starka handens dom
-  EFTER en **stödhöjning** (partnern visade fit) körs på en medvetet **konservativ
-  default** (accepterar utgång med tydligt tillägg: hopphöjning→18+ hp, enkel
-  höjning→21+; cue→utgång som minimum; slam-utforskning ej byggd) — ägaren ville
-  finslipa detta i spel, säg till om trösklarna känns fel. (2) När motståndarna
-  bjudit **två färger** (1♦–P–1♥) dubblar en **4-4-hand (10+)** de objudna färgerna;
-  advancern svarar aldrig i deras egen färg. Regler i `docs/budsystem.md` §7.3.
-- **Öppnarens rond-2 i inklämt konkurrensläge (R1 Fynd #2 delbit 6, NYTT):** efter
-  `1M–(inkliv)–2M–(deras inklämda bud)` passar öppnaren inte längre blint. Med
-  minimum + 6:e trumf konkurrerar den 3M; med utgångsintresse (~15–17) dubblar den
-  (**X = maximal dubbling = game try**, INTE straff i det läget); med 18+ bjuder den
-  4M. Partnern svarar X:et 4M (max) / 3M (min). Golv: 15+ = game try, 18+ = utgång
-  (speglar den ostörda openerRebidAfterSimpleRaise). Säg till om X-som-game-try
-  känns fel, eller om golven bör justeras.
-- **DONT mot deras 1NT (R1 Fynd #2 delbit 1):** bottarna stör nu deras
-  1NT-öppning med DONT (X/2-läget) — golv 8 hp direkt, 6 hp balansering. Säg till
-  om det känns för aggressivt/passivt.
-- **Försvar mot deras svaga tvåor/spärrar (R1 Fynd #2 delbit 2, NYTT):** bottarna
-  kliver nu in mot motståndarnas svaga 2♦/2♥/2♠ och spärrar (3-läget+) — takeout-X,
-  2NT (15–18), cue, naturligt, 3NT. Golv för takeout-X: 12 hp ej sårbar / 13 sårbar
-  direkt, 10 hp balansering; mot spärr 14 hp (medvetet stramare — säg till om du
-  vill lätta även spärr-balanseringen).
-- **Svar när motståndaren stör VÅR öppning (R1 Fynd #2 delbit 4, NYTT):** när du
-  öppnar 1NT och en motståndare stör med DONT svarar din bot-partner nu (X/XX =
-  straff/värden från 8 hp, egen 5+ färg = naturligt, annars pass) i stället för att
-  passa. När du öppnar en svag tvåa/spärr och de takeout-dubblar redubblar partnern
-  med 10+ (värden) eller höjer spärrartat med fit. Säg till om golven (8 / 10)
-  känns fel.
-- **Straffdubbla flykten efter vår XX (R1 Fynd #2 delbit 5, NYTT):** öppnar du
-  1NT, de stör med DONT och din bot-partner redubblar (XX = vi äger handen), så
-  flyr motståndarna undan till en färg STRAFFDUBBLAR din sida dem nu — varje steg,
-  tills de får spela dubblat — i stället för att passa flykten. Utlöses bara efter
-  vårt 1NT + XX (inte efter svaga tvåor/spärrar — där äger vi inte handen). Säg
-  till om det känns för aggressivt att dubbla varje flyktbud.
+- **#33 Advancern hoppar inte förbi utgång** efter upplysningsdubbling — säg
+  till om den borde utforskat slam i stället för att nöja sig med utgång.
+- **#32 6-5-öppning:** högfärgen 12–15, lågfärgen 16+ — bevaka öppningsvalet
+  och att 6-5:an visas begripligt i rond 2 (reverse in i högfärgen).
+- **2♣ dör inte i delkontrakt + systems-on efter `2♣–2♦–2NT`** — bevaka
+  fit-sökningen; kravstegen kan välja trubbig färg (= fel färg-spåret, NU);
+  slam efter 2♣ ännu tunn.
+- **#31 Inget svagt hoppskift:** svag 6-korts hf svarar 1♥/1♠ — säg till om en
+  spärrig hand borde fått hoppa.
+- **#30 Stark jämn 19+ öppnar 2NT** (kvalitet, startpoäng ≥20) + sang-visning
+  efter minorhöjning i konkurrens (3NT-accept från 8 hp) — bevaka golven.
+- **Flerronds-konkurrens A+B+C (§5.9/§7.1):** tävlar/återöppnar i rond 2+;
+  C-golvet ~8 stödpoäng; trap-pass kan konverteras till straff — bevaka alla tre.
+- **"Låna en kung" i balansering (§7.1):** inkliv från 5 hp, X från 9, 1NT
+  11–14 — säg till om boten väcker givar för lätt.
+- **Öppnarens rond-2 i konkurrens efter ny färg/1NT (§5.8):** cue = 15+,
+  18+ = utgång; cue väljs medvetet före straffdubbling — bevaka.
+- **Störda krav = RONDKRAV (§5.5):** fria bud/reverse i konkurrens tvingar ett
+  svar men aldrig utgång i onödan — bevaka båda hållen.
+- **#26/#27 Utgångskrav passas aldrig off-book** (cue-höjning + höjd 2/1) —
+  bevaka att rätt utgång nås, inte för högt.
+- **5♣/5♦-utgång nåbar efter inverterad minor** (svag sidofärg-regeln) —
+  bevaka 5m-mot-3NT-valet åt båda hållen.
+- **#24/#25 Motspelarens kast-vakt** (sakar inte bort garderande honnör) +
+  1NT-återbudets nya förklaringstext.
+- **#23 Takeout-X:** 17+ enfärgshand X→färg billigast med flerronds-
+  fortsättning; ⚠️ konservativ game-dom efter stödhöjning (18+/21+-golv,
+  ägaren ville finslipa i spel); tvåfärgs-X 4-4 (10+) — se budsystem.md §7.3.
+- **Inklämt konkurrensläge (delbit 6):** öppnarens X = game try (ej straff),
+  18+ = 4M — säg till om golven känns fel.
+- **DONT mot deras 1NT** (golv 8 hp direkt / 6 balansering).
+- **Försvar mot svaga tvåor/spärrar** (takeout-X 12–13 hp; mot spärr 14 —
+  medvetet stramare).
+- **Svar när de stör VÅR öppning (delbit 4):** X/XX från 8 hp mot DONT;
+  XX 10+ efter deras takeout-X — bevaka golven.
+- **Straffdubbla flykten efter vår XX (delbit 5)** — varje flyktbud dubblas;
+  säg till om det känns för aggressivt.
 - **Straffdubbling mot ägaren:** bottarna kan nu straffdubbla ÄGAREN vid
   offringar på 3-läget+ (poängsystemet). Säg till om det känns för aggressivt.
 - **Essfrågor utan formell trumf / toppsekvenser andra hand / 4M-pass efter
@@ -382,19 +219,6 @@ Läs den här filen först varje session.
   1♠–2NT–P–P–P — advancern ska aldrig passa ostört (ägarbeslut FAS 10).
   Live-budlådan är lagad; luckan finns bara i förbyggda linjer (Budvisningen
   m.m.). Trä in `advanceTwoSuiter` i linjens konkurrensrond.
-- ~~**Dubblingar (X/XX) in i slutkontraktet**~~ **KLAR 2026-07-04** (commit
-  `0864224`, parallellsession): X/XX följer med genom `contractFromCalls` och
-  poängräkningen (`scoring.ts` enligt ägarens poängguide) är byggd.
-- ~~**Felrapportering: PAT-i-localStorage-varianten**~~ **KLAR & LIVE 2026-07-05**
-  (skicka issuen direkt från appen utan att öppna GitHub). Ägaren sparar en snäv
-  fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN gång i
-  Inställningar (`src/lib/github-token.ts`, egen lagringsnyckel `rebidz:felrapport-token`
-  utanför `learnbridge:`-prefixet → överlever "Nollställ framsteg"). Finns nyckel →
-  `FelrapportDialog` skickar direkt via GitHubs API (`submitFelrapport` i
-  `felrapport.ts`, POST `.../issues`), knappen blir "Skicka rapport ✓" + kvitto;
-  saknas nyckel → oförändrat (öppnar förifylld GitHub-sida). Fel → svenskt
-  meddelande + reservknapp "Öppna på GitHub →". Samma nyckel kan användas på flera
-  enheter. 1061 test gröna.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
 - **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade:
   byggs bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).
@@ -403,8 +227,6 @@ Läs den här filen först varje session.
   KVAR: bredare försvarsinferens (kasta rätt när partnerns hand är okänd —
   längdparitet, signalering, skvis-försvar) kräver inferens om partnerns hand
   (eget arbete). Plockas upp om en facit-giv bevisar behovet.
-- FAS 9 Passad hand, FAS 10 Försvarsbud, FAS 11 Kortspel = **KLARA & pushade**
-  (bara kvar här som historik — behandla dem inte som återstående arbete).
 
 ### 🅿️ PARKERAT (medvetet INTE nu — sluta väga in i beslut)
 - **FACELIFTEN / den visuella omgörningen (parkerad 2026-07-20 på ägarbeslut):**
@@ -415,10 +237,6 @@ Läs den här filen först varje session.
   ramar gäller fortfarande då: emerald, svarta spader, guldserifen. Tokens +
   komponentstrukturen (UI-overhaulen) är redo, så bygget är billigt när det
   återupptas.
-- ~~**Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC)~~ **LÖST 2026-07-07** (F1 familj
-  D; slutgiltigt genom att motorns auto-cue-rond togs bort helt med de ärliga
-  slamportarna samma kväll). Facit `auction-slam-jacoby-cue.test.ts`. Behandla
-  inte längre som parkerad.
 - **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.
 - **Off-book §7 bredd** (inkliv över 1NT/svaga tvåor/spärrar; balansering
   BYGGD 2026-07-03 via felrapport #5 — kvar här: "låna en kung"-lättnaden,
