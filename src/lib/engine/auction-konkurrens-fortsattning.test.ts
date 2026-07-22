@@ -194,12 +194,14 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
     expect(contractFromCalls(history!)).toMatchObject({ strain: 'diamonds', declarer: 'E' })
   })
 
-  it('frö 20260774: N passar 2♥ — och Ö/V:s balansering till 4♠ ger exakt par', () => {
-    // Efter N:s pass balanserar Väst (kort hjärter), Ö/V når 4♠ som går två bet
-    // (−100 = precis par för given enligt DD — bättre än gamla 3♥ bet av N/S).
+  it('frö 20260774: N passar 2♥ — Ö/V balanserar till spader och stannar lågt', () => {
+    // Efter N:s pass balanserar Öst 2♠ (utpassningsläget). Före fix 5a höjde
+    // Väst till 4♠ (två bet, −100 = par); med advancer-rabatten (kungen är
+    // redan lånad av balanseraren) stannar höjningen på 3♠ (en bet, −50) —
+    // en BILLIGARE offring än par. Fortfarande bättre än gamla 3♥ bet av N/S.
     const d = deal('felfarg-20260774', 'E', 'none', HANDS_774)
     const history = botAuction(d)
     expect(history).not.toBeNull()
-    expect(contractFromCalls(history!)).toMatchObject({ level: 4, strain: 'spades', declarer: 'E' })
+    expect(contractFromCalls(history!)).toMatchObject({ level: 3, strain: 'spades', declarer: 'E' })
   })
 })

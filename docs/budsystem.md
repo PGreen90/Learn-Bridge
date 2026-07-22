@@ -1153,6 +1153,10 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
   **12 hp** (ej sårbar) / **13 hp** (sårbar) direkt, **10 hp** i balansering.
   **Mot en spärr** på 3-läget eller högre: **14+ hp**. Formen är densamma – kort i
   deras färg, stöd i de objudna.
+- **I balansering mot en svag tvåa (fel färg-spåret fix 5a)** får X:et dessutom
+  vara *offshape* med **upp till 3 kort i deras färg** (i direkt sits max 2) –
+  i utpassningsläget är ett X med tre hackor i deras färg standard. HP-golvet
+  10 står kvar.
 
 **Advancerns svar (partnern som blivit dubblad *till*):**
 - Passar **aldrig** dubblingen. Bjuder sin **längsta objudna färg**, billigast; vid
@@ -1174,6 +1178,16 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
   1♥/1♠-öppningen redan 5+ får dubbelton höjas — men bara med
   **utgångsvärden** (13+ stödpoäng). En enkel/inbjudande höjning på dubbelton
   pressar bara upp partnerns minimum.
+  **Dubblarens invit-fortsättning (fel färg-spåret fix 5b):** öppnarens svar är
+  *tvingat* och kan vara ett nödrebud — men dubblaren i **invitzonen (~9–12 hp)**
+  passar det inte längre. I ordning: **invit-preferens** med 3-korts stöd för
+  partnerns *öppnade* färg (från 11 hp ett steg upp, t.ex. 3♥), **egen 5+ färg
+  billigast** (en 6-korts räcker redan från 9 hp), eller **2NT** med jämn hand
+  och stopp i deras färg. Har dubblaren i stället **fit för den svarade färgen**
+  höjer hen som vanligt (höjningsreglerna ovan går före). **X + egen färg är
+  EJ krav** (det är svagare än att bjuda färgen direkt) — öppnaren får passa
+  på minimum och höjer/accepterar bara med extra. Under 9 hp: pass som förr;
+  13+ bjuder krav-artat som förr.
 - **Responsiv dubbling:** när de bjudit *och höjt* en färg (t.ex.
   (1♥)–X–(2♥)–X) = vår dubbling är upplysning, oftast de två objudna färgerna.
 - **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
@@ -1222,6 +1236,19 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
   preferens till längsta sidofärgen, men **lika långa färger avgörs av
   billigaste nivån** — med 3-3 väljs färgen som kan bjudas en nivå lägre (t.ex.
   3♥ före 4♣ efter (2♦)–3♦), aldrig en onödig nivåhöjning på hackor.
+- **Balansering mot svaga tvåor (fel färg-spåret fix 5a):** passas den svaga
+  tvåan runt till utpassningsläget (t.ex. 2♥–P–P–?) gäller **"låna en kung"**
+  (§7.1) även här — förr fanns bara takeout-X:et där och 2♥–P–P–P såldes:
+  | Aktion | Direkt sits | Balansering |
+  |---|---|---|
+  | Naturligt inkliv (5+ färg) som ryms på **2-läget** | 10 hp | **7 hp** |
+  | Naturligt inkliv som kräver **3-läget** | 10 hp | 10 hp |
+  | Upplysnings-X | 12/13 hp, max 2 kort i deras färg | **10 hp, max 3 kort** (offshape ok) |
+  | 2NT (jämn med stopp) | 15–18 | **12–15** |
+  **Advancer-rabatten:** den som svarar på ett *balansinkliv* över deras svaga
+  tvåa vet att kungen redan är lånad → höjningar räknar **stödpoäng −3** och
+  kapas vid **3-läget** utan äkta utgångsvärden efter rabatten (annars värderas
+  samma kung två gånger och 2♠-balanseringen blåses till 4♠ bet).
 - **Mot Multi 2♦** (svag tvåa i okänd högfärg): 2NT = 15–18 balanserad; 2♥/2♠ =
   naturligt inkliv. (Takeout-dubblingen: §7.3.)
 - **Mot spärrar (3-läget+):** 3NT = till spel (stopp + stick); cue-bud =
@@ -2115,3 +2142,32 @@ Det avslöjar längd/räkning direkt för partnern.
   4♠-offring två bet = exakt par. Facit-test FÖRE fix (alla tre frön +
   enhetsfall): `auction-konkurrens-fortsattning.test.ts`. tsc rent, hela
   sviten grön. Mätning efter fix: se `docs/systemrevisorn.md` (Mätning #5).
+- **2026-07-22** – **Fel färg-spåret fix 5: de två exponerade luckorna
+  (§7.3/§7.4/§7.7).** Revisorns buggfamilj 4 pekade ut två kända luckor som fix
+  4 exponerade. **(5a) Balansering över deras svaga tvåor** (§7.3/§7.7): i
+  utpassningsläget (2♥–P–P–?) fanns förr bara takeout-X:et (golv 10, max 2 kort
+  i deras färg) → 2♥–P–P–P såldes. Nu gäller "låna en kung" fullt ut:
+  naturligt inkliv som ryms på 2-läget från **7 hp** (frö 20260770: 2♠ på 8 hp
+  → 3♠ = par 140), offshape-X med **upp till 3 kort** i deras färg (frö
+  20261342: X på 10 hp jämn), 2NT = **12–15** med stopp
+  (`defendWeakTwo`/`conventionalDefense`, `defense-conventional.ts`). Plus
+  **advancer-rabatten**: den som höjer ett balansinkliv över deras 2-läges+
+  öppning räknar stödpoäng **−3** och kapas vid 3-läget utan äkta
+  utgångsvärden (`partnerBalancedOverPreempt`/`raiseWithFit`,
+  `auction-live.ts`) — utan den blåstes 2♠-balanseringen till 4♠ bet (och
+  fix 4-fröet 20260774 offrar nu billigare: 3♠ en bet i st.f. 4♠ två).
+  Regressionsvakt: 8 hp med perfekt form balanserar fortfarande INTE (frö
+  20261248 — N/S:s DD-smickrade 4♥ jagas inte). **(5b) Negativ-dubblarens
+  invit-fortsättning** (§7.4): 9–12-handen passade öppnarens tvingade färgsvar
+  (frö 20261354: 2♠ stod fast 5♦ 600 var hemma). Ny detektor
+  `negativeDoublerContinues` (`auction-live.ts`): invit-preferens med 3-korts
+  stöd för öppningsfärgen (frö 20261139: 3♥ → 4♥-fiten), egen 5+ färg
+  billigast (frö 20261354: 3♦ → öppnaren höjer 5♦ = par; 6-korts från 9 hp,
+  frö 20261179: 2♥ i st.f. 2♦ bet), eller 2NT med stopp; fit för den svarade
+  färgen → höjningslogiken går före. **Kravsemantik justerad:** X + egen färg
+  är EJ krav (dubblarens ombud) — `competitionForce` tvingar inte längre
+  öppnaren att rebjuda över det (stresstestets orakel speglat; tröskeln för
+  täckningsbeviset 20 → 5). Facit-test FÖRE fix:
+  `auction-balansering-svag2.test.ts` + `auction-negx-invit.test.ts`. tsc
+  rent, hela sviten grön. Mätningar: se `docs/systemrevisorn.md` (Mätning
+  #6 + #7).
