@@ -714,7 +714,11 @@ passa, men budgivningen får stanna *under* utgång), aldrig utgångskrav:
 Ett fritt bud = en **ny egen färg** som du fritt väljer att bjuda över inklivet
 (du kunde ha passat). Det lovar riktiga värden och är rondkrav. Undantag som
 *inte* är detta krav: ett **hopp** (kan vara svagt/spärrartat), ett **cue i deras
-färg** (= stödhöjning, sköts separat), och en **passad hand** (redan begränsad).
+färg** (= stödhöjning, sköts separat), en **passad hand** (redan begränsad),
+**X + egen färg** (dubblarens ombud = invit, ej krav — fel färg-spåret fix 5b),
+en färg **öppnaren själv redan bjudit** (= höjning, ingen ny färg — fix 6) och
+ett bud på **utgångsnivå** (utgången är målet, inget rondkrav hänger kvar —
+fix 6: förr "tvingades" öppnaren dra partnerns 4♥ till 5♦ bet).
 
 ### 5.6 Rätt nivå med fit — minorutgång blåses ut vid utgångsvärden
 Har du **fit i partnerns lågfärg** och **utgångsvärden** (13+ stödpoäng) ska ni nå
@@ -812,7 +816,7 @@ budade vidare. Öppnaren säljer inte en bra hand:
 |---|---|
 | **bjud om egen färg** (t.ex. 3♣) | **egen 6+ färg** → tävla (lagen om totala stick) |
 | **X (återöppning)** | 15+ hp och **kort (≤2) i deras färg** → takeout, välj färg partner |
-| Pass | minimum utan lång färg / utan kort i deras färg |
+| Pass | minimum utan lång färg / utan kort i deras färg — **och ALLTID när deras senaste bud är utgång** (fel färg-spåret fix 6: lagen gäller delkontraktsnivåer; 5♥ på 6-korts färg över deras 4♠ mittemot en passad partner är en gåva) |
 
 **B) RHO passade också** – inklivet är passat runt till öppnaren i **utpassningssitsen**
 (t.ex. **1♠–(2♥)–P–P**). Partnern gör ofta en **trap pass** (hen sitter med inkliparens
@@ -869,6 +873,11 @@ färg** (= limithöjning eller bättre av din färg, krav). Öppnarens svar:
   cue-bjudarens fortsättning (3NT med eget stopp, annars 5m) blir ett informerat
   val i stället för en chansning.
 - **Högfärgsfit rörs inte:** där är 4M rätt utgång som förr.
+- **Cue-bjudarens fortsättning på limit-värden (fel färg-spåret fix 6):** cuet
+  lovar "limithöjning ELLER BÄTTRE". Återgår öppnaren **billigast** (minimum)
+  och cue-bjudaren bara har **limit (under 13 stödpoäng)** stannar budgivningen
+  där — kravet var en rond, inte utgång (förr blåstes 5m bet på 11 hp mot
+  minimum). Med äkta utgångsvärden (13+) drivs till utgång som förr.
 
 ## 6. Konventioner
 *(Ett eget avsnitt per konvention, tillagda en i taget.)*
@@ -1087,6 +1096,13 @@ utan tävla:
 Lagen: med **9 gemensamma trumf** är 3-läget säkert att tävla till (om det betas var
 deras kontrakt oftast att gå hem). Ett **1-läges** inkliv (bara 5+ lovad) kräver
 fortfarande **4-korts** stöd för samma fit.
+
+**Höjning mot en partner som just PASSAT (fel färg-spåret fix 6):** har partnern
+senast **passat** i en störd auktion har hen visat minimum utan utgångsintresse.
+Alla höjningar av partnerns färg är då bara **tävlande** — billigaste nivån,
+aldrig invit-hopp eller utgångsblås, och aldrig upp på utgångsnivå (förr blåste
+en negativ-dubblare 5♣ på 13 stödpoäng fast öppnaren just passat — 2♣ tävlar
+lagom och partnern får bjuda vidare med extra).
 
 ### 7.2 Tvåfärgsinkliv (Michaels + ovanlig 2NT)
 Två sätt att visa **5-5** (eller bättre) direkt:
@@ -2171,3 +2187,22 @@ Det avslöjar längd/räkning direkt för partnern.
   `auction-balansering-svag2.test.ts` + `auction-negx-invit.test.ts`. tsc
   rent, hela sviten grön. Mätningar: se `docs/systemrevisorn.md` (Mätning
   #6 + #7).
+- **2026-07-22** – **Fel färg-spåret fix 6: fyra mönster ur mönsterjakten
+  (§5.5/§5.9/§5.11/§7.1).** Ny mönsterjakt i M7:s 130 kvarvarande fel
+  färg-givar (`REVISOR_EXAMPLES=500`) gav fyra rotorsaker: **(1) 5♣-utgångs-
+  blåsen mot passad partner** (frön 20261090/20261409/20261459): `raiseWithFit`
+  blåste minorutgång på 13–16 stödpoäng fast partnern (öppnaren) just PASSAT i
+  konkurrensen → nu tävlande höjning billigast, aldrig invit/utgång mot en
+  partner som senast passade (§7.1). **(2) Höjning lästes som ny färg** (frö
+  20261112): svararens 4♥ i en färg öppnaren redan bjudit tolkades som "ny
+  färg = rondkrav" → öppnaren drog partnerns utgång till 5♦ bet; nu är en
+  färg vår sida bjudit en HÖJNING och utgångsbud lämnar inget rondkrav
+  (`auctionForce`/`competitionForce` + stress-oraklet, §5.5). **(3) Tävlade
+  över deras utgång** (frö 20261375): "öppnaren tävlar efter partnerns pass"
+  bjöd 5♥ på 6-korts färg över deras 4♠ (−500) → återöppningen går aldrig
+  över deras utgång (§5.9). **(4) Cue-höjaren blåste 5m på limit-värden**
+  (frö 20260906): cuet lovar limit+; med under 13 stödpoäng mot öppnarens
+  minimum-återgång passas nu (§5.11) — med utgångsvärden drivs som förr.
+  Facit-test FÖRE fix (alla frön + starkare motexempel):
+  `auction-felfarg-fix6.test.ts`. tsc rent, hela sviten grön. Mätning #8:
+  se `docs/systemrevisorn.md`.

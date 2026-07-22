@@ -1122,6 +1122,23 @@ function raiseWithFit(
     if (partnerForcedRebidInSuit) return null
   }
 
+  // FIX 6 mönster 1: har partnern just PASSAT i konkurrensen har hen visat
+  // minimum utan utgångsintresse — höjningen är då bara TÄVLANDE: billigaste
+  // nivån, aldrig invit/utgångsblås (frön 20261090/20261409/20261459: negativ-
+  // dubblaren blåste 5♣ på 13–16 stödpoäng fast öppnaren passat; 2♣/3♣ räcker).
+  const partnerLastCall = [...history].reverse().find((c) => c.seat === PARTNER[seat])
+  if (partnerLastCall?.bid === 'P' && opponentsHaveBid(history, seat)) {
+    const bid = cheapestBidIn(history, seat, partnerSuit.strain)
+    if (!bid) return null
+    const cb = parseContractBid(bid)!
+    const game = partnerSuit.strain === 'H' || partnerSuit.strain === 'S' ? 4 : 5
+    if (cb.level >= game) return null // tävla inte till utgångsnivå mot en passad partner
+    return {
+      seat, bid,
+      explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]}, men partnern har passat (minimum) → ${bid} (tävlande höjning, ej invit).`,
+    }
+  }
+
   // Partnern hoppinklev (svagt, 6+ kort) → höjningen är SPÄRR: en nivå upp,
   // aldrig styrkegraderad (partnern har max ~9 hp – utgångsblås vore fel).
   if (partnerJumpOvercalled(history, seat, partnerSuit)) {
@@ -1372,13 +1389,19 @@ function auctionForce(history: ResolvedCall[], seat: Seat): { kind: 'round' | 'g
     .every((c) => c.bid === 'P')
   if (!onlyPassAfter) return null
 
-  // (a) Partnerns NYA färg → öppnaren måste rebjuda (rondkrav).
-  if (seat === opener && highest.seat === responderSeat) {
+  // (a) Partnerns NYA färg → öppnaren måste rebjuda (rondkrav). En färg som
+  // ÖPPNAREN redan bjudit är en HÖJNING (ingen ny färg), och ett bud på
+  // utgångsnivå lämnar inget rondkrav hängande (fix 6, frö 20261112: svararens
+  // 4♥ i öppnarens hjärter lästes som ny färg → öppnaren "tvingades" dra
+  // partnerns utgång till 5♦ bet).
+  if (seat === opener && highest.seat === responderSeat && !isGameOrHigher(highest.bid as Bid)) {
     const bid = parseContractBid(highest.bid)!
     const responderTimesInSuit = responderBids.filter(
       (c) => parseContractBid(c.bid)!.strain === bid.strain,
     ).length
-    const isNewSuit = bid.strain !== 'NT' && bid.strain !== open.strain && responderTimesInSuit === 1
+    const openerBidSuit = openerBids.some((c) => parseContractBid(c.bid)!.strain === bid.strain)
+    const isNewSuit =
+      bid.strain !== 'NT' && bid.strain !== open.strain && responderTimesInSuit === 1 && !openerBidSuit
     if (isNewSuit) return { kind: 'round' }
   }
 
@@ -1449,7 +1472,10 @@ function competitionForce(
   const responderDoubledEarlier = history.some(
     (c, i) => i < highestIdx && c.seat === responderSeat && c.bid === 'X',
   )
-  if (seat === opener && highest.seat === responderSeat && !responderPassedFirst && !responderDoubledEarlier) {
+  if (
+    seat === opener && highest.seat === responderSeat && !responderPassedFirst &&
+    !responderDoubledEarlier && !isGameOrHigher(highest.bid as Bid) // utgång = inget hängande rondkrav (fix 6)
+  ) {
     const bid = parseContractBid(highest.bid)!
     const timesInStrain = responderBids.filter(
       (c) => parseContractBid(c.bid)!.strain === bid.strain,
@@ -1458,7 +1484,8 @@ function competitionForce(
       bid.strain !== 'NT' &&
       bid.strain !== open.strain &&
       timesInStrain === 1 &&
-      !oppStrains.has(bid.strain) // ett cue i deras färg är en höjning, ej ny färg
+      !oppStrains.has(bid.strain) && // ett cue i deras färg är en höjning, ej ny färg
+      !openerBids.some((c) => parseContractBid(c.bid)!.strain === bid.strain) // öppnarens färg = höjning (fix 6)
     if (isNewSuit && !isJumpBid(history, highestIdx)) return { kind: 'round' }
   }
 
@@ -2271,6 +2298,20 @@ function answerCueBidderRebid(deal: Deal, history: ResolvedCall[], seat: Seat): 
   const hand = deal.hands[seat]
   const legal = legalCalls(history, seat)
   const theirSuit = SUIT_OF_LETTER[info.theirStrain]
+
+  // FIX 6 mönster 4: cuet lovar "limithöjning ELLER BÄTTRE" (§7.1). Återgick
+  // öppnaren BILLIGAST i vår färg (= minimum) och jag bara har limit-värden
+  // (<13 stödpoäng) stannar vi där — kravet var en rond, inte utgång (frö
+  // 20260906: 11 hp blåste 5♦ två bet fast 3♦ var taket). Med utgångsvärden
+  // drivs som förr.
+  const lastContract = [...history].reverse().find((c) => parseContractBid(c.bid))!
+  if (parseContractBid(lastContract.bid)!.strain === info.agreedStrain) {
+    const sp = dummyPoints(hand, SUIT_OF_LETTER[info.agreedStrain]).dummyPoints
+    if (sp < 13) return {
+      seat, bid: 'P', rule: 'cue-höjningens fortsättning (limit stannar)',
+      explanation: `Min cue lovade limithöjning eller bättre; öppnaren återgick billigast (minimum) och jag har bara limit-värden (${sp} stödpoäng) → pass.`,
+    }
+  }
   if (hasStopper(hand, theirSuit) && legal.includes('3NT' as Bid)) {
     return {
       seat, bid: '3NT', rule: 'cue-höjningens fortsättning',
@@ -2649,6 +2690,10 @@ function openerReopensAfterPartnerPass(deal: Deal, history: ResolvedCall[], seat
   if (side(last.seat) === side(seat)) return null
   const theirStrain = parseContractBid(last.bid)!.strain
   if (theirStrain === 'NT') return null // svårt att döma mot NT här → passa
+  // FIX 6 mönster 3: tävla ALDRIG över deras UTGÅNG mittemot en passad partner
+  // (frö 20261375: 5♥ på 6-korts färg över deras 4♠ → sex stick, −500; lagen
+  // om totala stick gäller delkontraktsnivåer, inte 5-läget på egen hand).
+  if (isGameOrHigher(last.bid as Bid)) return null
   const lastIdx = history.indexOf(last)
   if (history.slice(lastIdx + 1).some((c) => c.bid !== 'P')) return null
 

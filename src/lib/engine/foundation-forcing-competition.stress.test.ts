@@ -92,10 +92,15 @@ function oracleCompetitionForce(history: ResolvedCall[], seat: Seat): boolean {
   )
   if (seat === opener && highest.seat === responder && !responderPassedFirst && !responderDoubledEarlier) {
     const b = parseBid(highest.bid)!
+    // Fix 6 (speglar competitionForce): utgångsbud lämnar inget rondkrav, och en
+    // färg öppnaren redan bjudit är en HÖJNING, inte en ny färg.
+    const isGame =
+      b.strain === 'NT' ? b.level >= 3 : b.strain === 'H' || b.strain === 'S' ? b.level >= 4 : b.level >= 5
     const timesInStrain = responderBids.filter((c) => parseBid(c.bid)!.strain === b.strain).length
     const isNewSuit =
-      b.strain !== 'NT' && b.strain !== open.strain && timesInStrain === 1 && !oppStrains.has(b.strain)
-    if (isNewSuit && !oracleIsJump(history, highestIdx)) return true
+      b.strain !== 'NT' && b.strain !== open.strain && timesInStrain === 1 && !oppStrains.has(b.strain) &&
+      !openerBids.some((c) => parseBid(c.bid)!.strain === b.strain)
+    if (isNewSuit && !isGame && !oracleIsJump(history, highestIdx)) return true
   }
   // (b) öppnarens reverse → svararen måste svara
   if (seat === responder && highest.seat === opener && openerBids.length >= 2) {

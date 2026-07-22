@@ -77,8 +77,21 @@ Läs den här filen först varje session.
 > totalt −0,5 p/giv), fel färg-bet 130/53 450, exakt par 16,9 % (−0,3 pe:
 > flytt från "bet i fel färg" till "hemspelat under utgång", missad utgång
 > +4 — nästa etapps post). Detaljer i `docs/systemrevisorn.md`.
-> **KVAR i spåret (ägarval):** ny mönsterjakt i kvarvarande fel färg-givar
-> eller vidare till etapp 4/topplistan.
+> **✅ Fix 6 KLAR 2026-07-22: fyra mönster ur mönsterjakt #2** (budsystem.md
+> §5.5/§5.9/§5.11/§7.1 + §9; hela jakten i `docs/systemrevisorn.md`):
+> (1) höjning mot partner som just PASSAT = bara tävlande billigast (5♣-
+> blåsen på 13 sp borta); (2) svararens bud i öppnarens färg är en HÖJNING,
+> inte "ny färg = rondkrav" (4♥ rycktes till 5♦); (3) öppnaren tävlar
+> aldrig över deras UTGÅNG efter partnerns pass; (4) cue-höjaren med bara
+> limit-värden passar öppnarens minimum-återgång. Facit-test
+> `auction-felfarg-fix6.test.ts`. **Mätning #8: snitt-tapp 289,5 p/giv
+> (M7: 290,8 — största klivet sedan fix 1), fel färg-bet 121/47 590 =
+> −27 % sedan baslinjen, nu TREDJE posten.** Topplistan toppas nu av missad
+> lillslam (59 000) och missad utgång (53 050).
+>
+> **KVAR i spåret:** fel färg-resten är mest DD-brus + etapp 4/5-material
+> (2♣-släktingar, B13) — spåret är i praktiken uttömt som egen etapp.
+> Nästa: missad utgång (topplistans äkta mål) och/eller etapp 4.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -127,7 +140,15 @@ Läs den här filen först varje session.
 > `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **Fel färg-spåret fix 5 (2026-07-22, NYAST):** (a) fjärde hand **balanserar
+- **Fel färg-spåret fix 6 (2026-07-22, NYAST):** fyra nya domslutsvakter i
+  konkurrens: (a) har din partner just passat höjer boten dig bara TÄVLANDE
+  (billigast) — **bevaka:** missas utgångar när partnern smygpassat med bra
+  hand? (b) bot-öppnaren tävlar inte över deras utgång efter din pass —
+  **bevaka:** borde den offrat någon gång? (c) cue-höjer boten din öppning
+  och du återgår billigast stannar den nu med limit-värden (under 13 sp) —
+  **bevaka:** står ni för lågt när du var maximal? (d) ditt utgångsbud dras
+  aldrig längre till en "tvingad" färg av öppnaren.
+- **Fel färg-spåret fix 5 (2026-07-22):** (a) fjärde hand **balanserar
   nu över deras svaga tvåor** — inkliv på 8–9 hp, X med tre hackor i deras
   färg och 2NT på 12–15 kan dyka upp i utpassningsläget — **bevaka:** väcker
   boten givar för lätt där pass var bäst? Och höjer din partner ditt
