@@ -257,6 +257,42 @@ etapp 4/5-material (se Mönsterjakt #2). **Nästa attack enligt topplistan:
 missad utgång** (äkta förbättringsmål; slam-posterna är delvis medvetna via
 kaptensregeln).
 
+## Etapp 5 FÖRSKANNAD (2026-07-22): missad utgång — familjer + ägarfrågor
+M8:s alla 158 "missad utgång"-givar grupperade efter var auktionen stannade
+(`REVISOR_EXAMPLES=500`, frön i `revisor-output/`):
+
+| Familj | Givar | Poäng |
+|---|---|---|
+| Ostört: lågt färgstopp (1–2 i färg) | 51 | 17 450 |
+| Konkurrens: lågt färgstopp | 21 | 7 190 |
+| Ostört: stannade på 3M (invit-kedja) | 20 | 6 710 |
+| Ostört: 1NT-stopp | 18 | 5 730 |
+| Ostört: stannade på 2NT | 16 | 5 690 |
+| Konkurrens: 3M/2NT/3m-stopp | 22 | 7 530 |
+| Övrigt (3m/4m-stopp m.m.) | 10 | 2 750 |
+
+**Två MEKANISKA fix-kandidater (först i tur, inget ägarbeslut krävs):**
+1. **Svararens höjning av öppnarens ANDRA färg graderas inte** (frö
+   20260748: `1♣–1♥–1♠–2♠` på **13 hp + 4 stöd** — enkel höjning oavsett
+   styrka; borde vara invit-hopp/utgång enligt samma stege som andra
+   höjningar). Största familjen (ostört lågt färgstopp) har flera sådana.
+2. **Öppnaren passar 2NT-inviten med 6-korts högfärg** (frö 20260843:
+   `1♠–1NT–2♠–2NT–P` med 14 hp och AQT863 — konvertering till 3♠/accept 4♠
+   saknas; 4♠ = 620 fanns).
+
+**Värderings-golv som kräver ÄGARENS input (fråga, gissa inte):**
+- Öppnarens accept av 3M-invit på 12 hp minimum (frö 20260942: 3♥–P med
+  10 stick på DD — ärligt avböjt idag; flyttas golvet ned bjuds fler
+  utgångar OCH fler bet).
+- 1NT-öppnarens accept av 2NT-invit på 15 hp (frö 20260744 — ärligt
+  minimum-pass idag).
+- Generellt: stora delar av 1NT-/2NT-stopp-familjerna är DD-smickrade tunna
+  utgångar (20–23 hp där maskarna sitter rätt) — jaga INTE dem blint.
+
+**Nästa steg (i ordning):** facit-test + fix för kandidat 1 → mät (M9) →
+kandidat 2 → mät → presentera golvfrågorna för ägaren med exempelhänderna
+ovan.
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):

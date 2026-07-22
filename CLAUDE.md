@@ -12,7 +12,7 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 3: Fel färg-spåret
+### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 5: Missad utgång (etapp 3 KLAR)
 > **Ägarbeslut 2026-07-20: designen läggs HELT åt sidan.** Facelift-spåret
 > (Claude Design-utforskningen + Claudes "Klubbrummet"-mockup) är flyttat till
 > 🅿️ PARKERAT — rörs inte förrän ägaren uttryckligen återupptar det. Fullt
@@ -89,9 +89,21 @@ Läs den här filen först varje session.
 > −27 % sedan baslinjen, nu TREDJE posten.** Topplistan toppas nu av missad
 > lillslam (59 000) och missad utgång (53 050).
 >
-> **KVAR i spåret:** fel färg-resten är mest DD-brus + etapp 4/5-material
-> (2♣-släktingar, B13) — spåret är i praktiken uttömt som egen etapp.
-> Nästa: missad utgång (topplistans äkta mål) och/eller etapp 4.
+> **✅ ETAPP 3 DÄRMED KLAR (2026-07-22):** fel färg-bet 148→121 givar,
+> 65 110→47 590 p (−27 %) över sex fixar; resten är DD-brus + etapp 4/5-
+> material (2♣-släktingar, B13). Snitt-tapp totalt 300→289,5 p/giv.
+>
+> **🔵 NU = ETAPP 5: MISSAD UTGÅNG (startad 2026-07-22, vald ur topplistan
+> per ägarens uppdrag "vidare enligt planen: etapp 4 eller 5").** Nu näst
+> största posten (158 givar/53 050 p) och det äkta målet (lillslam-posten är
+> delvis medveten via kaptensregeln). **Förskanningen är KLAR** — familjer +
+> fix-kandidater i `docs/systemrevisorn.md` ("Etapp 5 FÖRSKANNAD"):
+> två mekaniska kandidater först (svararens höjning av öppnarens ANDRA färg
+> graderas inte — 2♠ på 13 hp; öppnaren passar 2NT-invit med 6-korts
+> högfärg), därefter VÄRDERINGS-GOLVEN som kräver ägarens input
+> (accept-golv för 3M-invit på minimum, 1NT-öppnarens 2NT-accept på 15 —
+> exempelhänder i dokumentet; fråga, gissa inte).
+> **Nästa session börjar med:** facit-test + fix för kandidat 1, mät M9.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
