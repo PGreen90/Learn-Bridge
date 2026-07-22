@@ -62,9 +62,23 @@ Läs den här filen först varje session.
 > **balansering över deras svaga tvåor saknas** (2♥–P–P–P säljs) och
 > **negativ-dubblarens invit-fortsättning saknas** (10–12-handen passar
 > öppnarens färgsvar) — se `docs/systemrevisorn.md` buggfamilj 4.
-> **KVAR i spåret (fix 5+, ägarval):** de två exponerade luckorna ovan;
-> därefter ny mönsterjakt i kvarvarande 130 givar eller vidare till etapp
-> 4/topplistan.
+>
+> **✅ Fix 5 KLAR 2026-07-22: de två exponerade luckorna** (budsystem.md
+> §7.3/§7.4/§7.7 + §9): **(5a)** balansering över deras svaga tvåor byggd —
+> "låna en kung" fullt ut i utpassningsläget (naturligt 2-lägesinkliv från
+> 7 hp, offshape-X ≤3 kort i deras färg, 2NT 12–15) + **advancer-rabatt**
+> (−3 sp, 3-lägestak) mot balansinkliv så kungen inte värderas två gånger.
+> Facit-test `auction-balansering-svag2.test.ts`. **(5b)** ny detektor
+> `negativeDoublerContinues`: dubblaren i 9–12-zonen bjuder vidare över
+> öppnarens tvingade svar (invit-preferens/egen färg/2NT); X + egen färg =
+> EJ krav (`competitionForce` justerad). Facit-test
+> `auction-negx-invit.test.ts`. Mätning #6 (efter 5a): såld giv 56→54,
+> snitt 291,0. Mätning #7 (efter 5b): snitt-tapp 290,8 (M5: 291,3 — fix 5
+> totalt −0,5 p/giv), fel färg-bet 130/53 450, exakt par 16,9 % (−0,3 pe:
+> flytt från "bet i fel färg" till "hemspelat under utgång", missad utgång
+> +4 — nästa etapps post). Detaljer i `docs/systemrevisorn.md`.
+> **KVAR i spåret (ägarval):** ny mönsterjakt i kvarvarande fel färg-givar
+> eller vidare till etapp 4/topplistan.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -113,7 +127,17 @@ Läs den här filen först varje session.
 > `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **Fel färg-spåret fix 4 (2026-07-21, NYAST):** (a) svarar din partner på en
+- **Fel färg-spåret fix 5 (2026-07-22, NYAST):** (a) fjärde hand **balanserar
+  nu över deras svaga tvåor** — inkliv på 8–9 hp, X med tre hackor i deras
+  färg och 2NT på 12–15 kan dyka upp i utpassningsläget — **bevaka:** väcker
+  boten givar för lätt där pass var bäst? Och höjer din partner ditt
+  balansinkliv för snålt (rabatten −3 + tak på 3-läget är medveten)?
+  (b) efter din **negativa dubbling** passar boten inte längre öppnarens
+  tvingade färgsvar med 9–12 hp: den prefererar öppningsfärgen (ev. med
+  hopp), rebjuder egen färg eller bjuder 2NT — och öppnaren FÅR passa det
+  (X + färg = ej krav) — **bevaka:** står vi för lågt när dubblaren faktiskt
+  var stark, eller drivs delkontrakt en nivå för högt?
+- **Fel färg-spåret fix 4 (2026-07-21):** (a) svarar din partner på en
   stark tvåfärgs-cue över deras svaga tvåa väljs nu färgen som kan bjudas
   billigast vid lika längd — **bevaka:** känns preferensen rätt? (b) öppnaren
   bjuder inte längre 2NT på minimum efter din negativa dubbling — du får en

@@ -989,6 +989,30 @@ function partnerJumpOvercalled(
 }
 
 /**
+ * Var partnerns färg ett BALANSINKLIV över motståndarnas svaga tvåa/spärr
+ * (öppning på 2-läget+, två pass, partnerns bud i utpassningsläget)? Då är
+ * "kungen redan lånad" av balanseraren (fix 5a) — advancern ska räkna av den
+ * i sin höjning i stället för att värdera samma styrka två gånger.
+ */
+function partnerBalancedOverPreempt(
+  history: ResolvedCall[],
+  seat: Seat,
+  partnerSuit: { strain: string },
+): boolean {
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  if (openIdx === -1 || openIdx + 3 >= history.length) return false
+  const open = parseContractBid(history[openIdx].bid)!
+  if (open.level < 2 || side(history[openIdx].seat) === side(seat)) return false
+  const entry = history[openIdx + 3]
+  return (
+    history[openIdx + 1].bid === 'P' &&
+    history[openIdx + 2].bid === 'P' &&
+    entry.seat === PARTNER[seat] &&
+    parseContractBid(entry.bid)?.strain === partnerSuit.strain
+  )
+}
+
+/**
  * Hur många trumf vi kräver för att kalla det fit i partnerns färg. Öppnade
  * partnern den HÖGfärgen på 1-läget lovar den 5+ → 3-korts stöd räcker (8-korts
  * fit). Samma sak när partnern HOPPINKLIVIT (6+ kort lovade). I alla andra fall
@@ -1071,7 +1095,13 @@ function raiseWithFit(
     )
   ) return null
 
-  const sp = dummyPoints(hand, suit).dummyPoints
+  // Advancer-rabatt (fix 5a): partnerns färgbud var en BALANSERING över deras
+  // svaga tvåa/spärr (öppning på 2-läget+, två pass, partnerns bud). Kungen är
+  // redan lånad av balanseraren (golven sänkta ~3 hp) — räkna av den här, annars
+  // värderas samma kung två gånger och höjningen blåser utgång på delkontrakts-
+  // värden (frö 20260770: 2♠-balanseringen höjdes till 4♠ bet fast 3♠ = par).
+  const balancedOverPreempt = partnerBalancedOverPreempt(history, seat, partnerSuit)
+  const sp = dummyPoints(hand, suit).dummyPoints - (balancedOverPreempt ? 3 : 0)
   if (sp < 6) return null // för svagt för att höja
 
   // En dubbelton-fit som bygger på ett TVINGAT ombud (partnerns svar på min
@@ -1143,6 +1173,10 @@ function raiseWithFit(
     wantLevel = partnerSuit.level + 1
     label = `enkel höjning`
   }
+  // Mot en balansering över deras svaga tvåa kapas dessutom vid 3-LÄGET utan
+  // äkta utgångsvärden efter rabatten (fix 5a): ett inbjudande hopp över ett
+  // 2-läges balansinkliv vore redan utgångsnivån.
+  if (balancedOverPreempt && sp < 13) wantLevel = Math.min(wantLevel, 3)
   // En inbjudande/enkel höjning får ALDRIG gå förbi utgång (felrapport #33: en
   // "inbjudande hopp" = level+2 blåste 7♦ över partnerns 5♦). Kapa vid utgångs-
   // nivån (högfärg 4, lågfärg 5). Har partnern REDAN nått utgång och vi bara har
@@ -1407,8 +1441,15 @@ function competitionForce(
       .slice(0, history.indexOf(responderBids[0]))
       .some((c) => c.seat === responderSeat && c.bid === 'P')
 
-  // (a) Svararens FRIA nya färg → öppnaren måste rebjuda.
-  if (seat === opener && highest.seat === responderSeat && !responderPassedFirst) {
+  // (a) Svararens FRIA nya färg → öppnaren måste rebjuda. UNDANTAG (fix 5b):
+  // dubblade svararen tidigare (negativ dubbling) är den senare färgen
+  // DUBBLARENS OMBUD — X + egen färg är svagare än att bjuda färgen direkt
+  // (invit, ej krav), så öppnaren får passa på minimum (frö 20261179: 2♥ efter
+  // X ska stå, inte tvinga fram ett 2♠-rebud).
+  const responderDoubledEarlier = history.some(
+    (c, i) => i < highestIdx && c.seat === responderSeat && c.bid === 'X',
+  )
+  if (seat === opener && highest.seat === responderSeat && !responderPassedFirst && !responderDoubledEarlier) {
     const bid = parseContractBid(highest.bid)!
     const timesInStrain = responderBids.filter(
       (c) => parseContractBid(c.bid)!.strain === bid.strain,
@@ -2750,6 +2791,100 @@ function advancerCompetesToFit(deal: Deal, history: ResolvedCall[], seat: Seat):
   return null
 }
 
+/**
+ * FIX 5b (fel färg-spåret, docs/systemrevisorn.md buggfamilj 4): negativ-
+ * dubblarens INVIT-FORTSÄTTNING. Mönstret: partnern öppnade 1 i färg, de klev
+ * in i färg, jag negativ-dubblade, partnern svarade BILLIGT i färg (tvingat —
+ * kan vara ett minimum-nödrebud) och bara pass har följt. Förr passade
+ * dubblaren allt under utgångsvärden, så 10–12-handen (invitzonen) lämnade
+ * nödrebudet stående (frö 20261354: 2♠ stod fast 5♦ var hemma). Nu, i ordning:
+ *   1. invit-preferens: 3+ stöd i partnerns ÖPPNINGSFÄRG → preferens, från
+ *      11 hp ett steg upp (frö 20261139: 3♥ före en egen 4-korts spader),
+ *   2. egen 5+ färg (en 6-korts räcker redan från 9 hp) → billigast, ej krav
+ *      (frö 20261354: 3♦ · frö 20261179: 2♥),
+ *   3. jämn hand med stopp i deras färg → 2NT (invit).
+ * 13+ (utgångsvärden) och svagare händer lämnas till befintlig logik. Hoppade
+ * partnern i svaret (16+) eller har motståndarna bjudit vidare gäller
+ * kravlogiken/konkurrensdetektorerna i stället.
+ */
+function negativeDoublerContinues(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
+  const answer = parseContractBid(lastNonPass.bid)
+  if (!answer || answer.strain === 'NT') return null
+
+  const open = openingBid(history)
+  if (!open || open.seat !== PARTNER[seat] || open.level !== 1) return null
+  if (!SUIT_OF_LETTER[open.strain]) return null // 1NT-öppning → X:et var inte negativt
+
+  // Mitt enda besked hittills ska vara X:et (den negativa dubblingen).
+  const myCalls = history.filter((c) => c.seat === seat && c.bid !== 'P')
+  if (myCalls.length !== 1 || myCalls[0].bid !== 'X') return null
+
+  // Vår sida: exakt öppningen + svaret. Deras sida: exakt inklivet (ostört sedan).
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2 || ourBids[1] !== lastNonPass) return null
+  const theirBids = history.filter((c) => side(c.seat) !== side(seat) && parseContractBid(c.bid))
+  if (theirBids.length !== 1) return null
+  const theirCb = parseContractBid(theirBids[0].bid)!
+  const theirSuit = SUIT_OF_LETTER[theirCb.strain]
+  if (!theirSuit) return null
+
+  // Bara partnerns BILLIGA svar (ett HOPP visar 16+ och sköts av kravlogiken).
+  let minLevel = 1
+  while (bidValue(minLevel, answer.strain) <= bidValue(theirCb.level, theirCb.strain)) minLevel++
+  if (answer.level > minLevel) return null
+
+  const hand = deal.hands[seat]
+  const p = hcp(hand)
+  const len = lengths(hand)
+  // Skulle höjningslogiken höja den svarade färgen (fit + tillräckliga stöd-
+  // poäng) går den före: detektorn får inte dra en egen sidofärg förbi en
+  // höjning (regressionsvakter 20261621/20261351: dubbelton-höjning av rebjuden
+  // 1M resp. 5-korts ruterstöd). raiseWithFit är ren → säkert att provfråga.
+  if (raiseWithFit(deal, history, seat, answer)) return null
+  if (p > 12) return null // utgångsvärden → befintlig kravlogik tar hand om det
+  const hasSix = SUIT_STRAINS.some((st) => st !== theirCb.strain && len[SUIT_OF_LETTER[st]] >= 6)
+  if (p < 10 && !(p >= 9 && hasSix)) return null // under invitzonen → pass som förr
+  const legal = legalCalls(history, seat)
+
+  // 1. Invit-preferens: 3+ stöd i partnerns ÖPPNINGSFÄRG när svaret var en annan.
+  if (answer.strain !== open.strain && len[SUIT_OF_LETTER[open.strain]] >= 3) {
+    const cheapest = cheapestBidIn(history, seat, open.strain)
+    if (cheapest) {
+      const lvl = Math.min(Number(cheapest[0]) + (p >= 11 ? 1 : 0), 3)
+      const bid = `${lvl}${open.strain}` as Bid
+      if (legal.includes(bid)) return {
+        seat, bid, rule: 'negativ-dubblarens invit-fortsättning',
+        explanation: `${p} hp med 3-korts stöd för partnerns öppnade ${SWE_NAME[open.strain]} → ${lvl === Number(cheapest[0]) ? 'preferens' : 'invit-preferens'} ${bid} (ej krav).`,
+      }
+    }
+  }
+
+  // 2. Egen 5+ färg (9 hp kräver 6+): längsta först, billigast — ej krav.
+  const own = SUIT_STRAINS.filter(
+    (st) =>
+      st !== theirCb.strain && st !== open.strain && st !== answer.strain &&
+      len[SUIT_OF_LETTER[st]] >= (p >= 10 ? 5 : 6),
+  ).sort((a, b) => len[SUIT_OF_LETTER[b]] - len[SUIT_OF_LETTER[a]])
+  for (const st of own) {
+    const bid = cheapestBidIn(history, seat, st)
+    if (bid && Number(bid[0]) <= 3 && legal.includes(bid)) return {
+      seat, bid, rule: 'negativ-dubblarens invit-fortsättning',
+      explanation: `${p} hp med ${len[SUIT_OF_LETTER[st]]}-korts ${SWE_NAME[st]} — rebjuder färgen billigast (invit, ej krav) i stället för att passa partnerns tvingade svar.`,
+    }
+  }
+
+  // 3. Jämn hand med stopp i deras färg → 2NT (invit).
+  if (isBalanced(hand) && hasStopper(hand, theirSuit) && legal.includes('2NT' as Bid)) {
+    return {
+      seat, bid: '2NT' as Bid, rule: 'negativ-dubblarens invit-fortsättning',
+      explanation: `${p} hp jämn med stopp i deras ${SWE_NAME[theirCb.strain]} → 2NT (invit, ej krav).`,
+    }
+  }
+  return null
+}
+
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
   const built = buildAuction(deal)
@@ -2914,6 +3049,11 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // passar aldrig bort utgångsvärden. Måste ligga FÖRE off-book-svaret (som
       // annars passar en svag hand som ändå har utgång mittemot 22–24).
       () => respondToStrong2NTRebid(deal, history, seat),
+      // Negativ-dubblarens invit-fortsättning (fel färg-spåret fix 5b):
+      // 9–12-handen bjuder vidare över öppnarens tvingade svar (preferens/egen
+      // färg/2NT) i stället för att passa. Måste ligga FÖRE off-book-svaret
+      // (som annars kräver 12+ för en ny färg på 2-läget och passar).
+      () => negativeDoublerContinues(deal, history, seat),
       // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
       () => offBookResponse(deal, history, seat),
       // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett

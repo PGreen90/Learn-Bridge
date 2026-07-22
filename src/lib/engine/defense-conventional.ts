@@ -26,11 +26,13 @@ function longestOther(len: Record<Suit, number>, their: Suit, min: number): Suit
   return best
 }
 
-/** Är handen en upplysningsdubbling mot deras färg (`their`)? kort + stöd + styrka. */
-function isTakeout(hand: Hand, their: Suit, minHcp: number): boolean {
+/** Är handen en upplysningsdubbling mot deras färg (`their`)? kort + stöd + styrka.
+ *  `maxTheir` = max antal kort i deras färg (2 i direkt sits; 3 i balansering
+ *  mot en svag tvåa — offshape-X i utpassningsläget, fix 5a). */
+function isTakeout(hand: Hand, their: Suit, minHcp: number, maxTheir = 2): boolean {
   const len = lengths(hand)
   const unbid = RANK_ORDER.filter((s) => s !== their)
-  return len[their] <= 2 && unbid.every((s) => len[s] >= 3) && hcp(hand) >= minHcp
+  return len[their] <= maxTheir && unbid.every((s) => len[s] >= 3) && hcp(hand) >= minHcp
 }
 
 /** Mathe mot stark (konstgjord) 1♣. §7.6. */
@@ -54,10 +56,14 @@ export function defendStrongClub(hand: Hand): ResponseResult {
 /**
  * Mot motståndarnas svaga tvåöppning (`theirSuit` på 2-läget). §7.6.
  * `takeoutFloor` = HP-golvet för upplysningsdubblingen (ägarbeslut 2026-07-04:
- * 12 ej sårbar / 13 sårbar direkt, 10 i balansering). Övriga bud (cue/2NT/
- * naturligt) är oförändrade.
+ * 12 ej sårbar / 13 sårbar direkt, 10 i balansering).
+ * `balancing` (fix 5a, "låna en kung" i utpassningsläget — 2♥–P–P–P såldes):
+ *   - takeout-X tillåter 3 kort i deras färg (offshape-X; golvet 10 står kvar),
+ *   - naturligt inkliv som ryms på 2-LÄGET från 7 hp (10 − lånad kung),
+ *   - 2NT = 12–15 med stopp (lånad kung från direkta 15–18).
+ * Cue-kravet (15+, 5-5) är oförändrat — det vilar på form, inte lånat utrymme.
  */
-export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12): ResponseResult {
+export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12, balancing = false): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
 
@@ -70,19 +76,24 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12): R
   if (twoLongOther.length >= 2 && p >= 15) {
     return { call: `3${BID[theirSuit]}`, rule: 'cue (stark tvåfärg)', explanation: `${p} hp, 5-5 i ${NAME[twoLongOther[0]]}+${NAME[twoLongOther[1]]} → cue ${SYM[theirSuit]} (stark tvåfärg, krav).` }
   }
-  // 2NT-inkliv: 15–18 balanserad med stopp.
-  if (isBalanced(hand) && p >= 15 && p <= 18 && hasStopper(hand, theirSuit)) {
-    return { call: '2NT', rule: '2NT-inkliv (15–18)', explanation: `${p} hp balanserad med stopp → 2NT-inkliv.` }
+  // 2NT-inkliv: 15–18 balanserad med stopp (balansering: 12–15 — lånad kung).
+  const ntFloor = balancing ? 12 : 15
+  const ntCeil = balancing ? 15 : 18
+  if (isBalanced(hand) && p >= ntFloor && p <= ntCeil && hasStopper(hand, theirSuit)) {
+    return { call: '2NT', rule: `2NT-inkliv (${ntFloor}–${ntCeil})`, explanation: `${p} hp balanserad med stopp → 2NT-inkliv.` }
   }
-  // Upplysningsdubbling (takeout).
-  if (isTakeout(hand, theirSuit, takeoutFloor)) {
+  // Upplysningsdubbling (takeout). I balansering räcker ≤3 kort i deras färg.
+  if (isTakeout(hand, theirSuit, takeoutFloor, balancing ? 3 : 2)) {
     return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[theirSuit]}, stöd i övriga → X.` }
   }
-  // Naturligt inkliv med en 5+ färg.
+  // Naturligt inkliv med en 5+ färg (balansering: 2-lägesbud redan från 7 hp).
   const suit = longestOther(len, theirSuit, 5)
-  if (suit && p >= 10 && p <= 16) {
+  if (suit) {
     const lvl = rankIdx(suit) > rankIdx(theirSuit) ? 2 : 3
-    return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]}.` }
+    const floor = balancing && lvl === 2 ? 7 : 10
+    if (p >= floor && p <= 16) {
+      return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]}.` }
+    }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass.' }
 }
@@ -149,7 +160,7 @@ export function conventionalDefense(
   if (level === 2) {
     if (their === 'clubs') return null // 2♣ = stark/konstgjord – ingen §7.6-takeout
     const floor = opts.balancing ? 10 : opts.vulnerable ? 13 : 12
-    return defendWeakTwo(hand, their, floor)
+    return defendWeakTwo(hand, their, floor, opts.balancing)
   }
   return defendPreempt(hand, their, level)
 }

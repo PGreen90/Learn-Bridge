@@ -198,6 +198,41 @@ spel). Snitt-tappet är därför oförändrat medan exakt par steg — de riktig
 felen är lagade och test-låsta, luckorna är namngivna för fix 5.
 ```
 
+## Mätning #6 — 2026-07-22, efter fel färg-fix 5a (balansering över svaga tvåor)
+Samma frö 20260721, 1 000 givar, efter balanserings-utbyggnaden i
+`defendWeakTwo` + advancer-rabatten i `raiseWithFit` (budsystem.md
+§7.3/§7.7/§9):
+
+```
+Rätt kontrakt (exakt par): 17,1 %   (M5: 17,2 % · baslinje 15,9 %)
+Genomsnittligt poängtapp: 291,0 p/giv (M5: 291,3 · baslinje 300)
+Såld giv: 54 givar, 19 840 p (M5: 56/20 320)
+Fel färg (bet): 131 givar, 55 050 p (M5: 130/54 880)
+Övriga poster: missad utgång +2 (givar som nu balanseras men stannar under
+utgång — bättre än att säljas, men inte hela vägen), billig offring −650 p,
+lillslam −70 p. Nettot −0,3 p/giv: liten men äkta vinst, inga regressioner.
+```
+
+## Mätning #7 — 2026-07-22, efter fel färg-fix 5b (negativ-dubblarens invit)
+Samma frö 20260721, 1 000 givar, efter `negativeDoublerContinues` +
+kravsemantiken "X + egen färg är ej krav" (budsystem.md §7.4/§9):
+
+```
+Rätt kontrakt (exakt par): 16,9 %   (M6: 17,1 % · M5: 17,2 % · baslinje 15,9 %)
+Genomsnittligt poängtapp: 290,8 p/giv (M6: 291,0 · M5: 291,3 · baslinje 300)
+Fel färg (bet): 130 givar, 53 450 p (M6: 131/55 050 · baslinje 148/65 110)
+Missad utgång: 149 givar, 49 590 p (M6: 145/48 190)
+Övriga poster: ±0–1 giv (lillslam −140 p, billig offring −110, över par −100).
+```
+
+**Läsning:** snitt-tappet (huvudmåttet) fortsätter nedåt — fix 5 gav totalt
+−0,5 p/giv mot M5. "Exakt par" sjönk 0,3 pe: flytten går från **bet i fel
+färg/såld giv** till **hemspelat men under utgång** (missad utgång +4 givar,
++1 400 p) — givar där dubblarens invit nu köper ett hemspelat delkontrakt i
+rätt strain men paret stannar under den DD-utgång som par kräver. Det är
+mindre tapp per giv (därav bättre snitt) men inte exakt par. Missad utgång är
+redan nästa post på topplistan (etapp 5-kandidat).
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
@@ -266,6 +301,17 @@ grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
    (2♥–P–P–P säljs: frön 20260770/20261248/20261342) och **negativ-dubblaren
    saknar invit-fortsättning** över öppnarens färgsvar (10–12-handen passar:
    frön 20261354/20261139/20261179) — kandidater för fix 5.
-5. **Ofrånkomligt DD-brus:** normala sangauktioner (1NT–2NT–3NT, 1NT–3NT) där
+5. **✅ FIX 5 KLAR 2026-07-22 — de två exponerade luckorna (§7.3/§7.4/§7.7):**
+   **(5a)** balansering över svaga tvåor byggd ("låna en kung" fullt ut:
+   naturligt 2-läge från 7 hp, offshape-X ≤3 kort i deras färg, 2NT 12–15) +
+   **advancer-rabatt** −3 med 3-lägestak mot balansinkliv (frön 20260770 →
+   3♠ = par 140, 20261342 → spaderkontrakt i st.f. såld; 20261248 medvetet
+   orörd — DD-smickrad utgång, golv 10 står). Facit-test:
+   `auction-balansering-svag2.test.ts`. **(5b)** `negativeDoublerContinues`:
+   invit-preferens/egen färg/2NT i 9–12-zonen över öppnarens tvingade svar
+   (frön 20261354 → 5♦ = par 600, 20261139 → hjärterfiten, 20261179 → 2♥ i
+   st.f. 2♦ bet); X + egen färg = EJ krav (`competitionForce`). Facit-test:
+   `auction-negx-invit.test.ts`. Effekt: Mätning #6 + #7 ovan.
+6. **Ofrånkomligt DD-brus:** normala sangauktioner (1NT–2NT–3NT, 1NT–3NT) där
    DD råkar göra en 4-3-högfärgsdelkontrakt (frön 20260801, 20261062) — par
    är hårt; dessa jagas INTE.

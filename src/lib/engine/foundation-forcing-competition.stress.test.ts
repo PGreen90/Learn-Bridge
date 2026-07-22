@@ -84,8 +84,13 @@ function oracleCompetitionForce(history: ResolvedCall[], seat: Seat): boolean {
     !!responderBids[0] &&
     history.slice(0, history.indexOf(responderBids[0])).some((c) => c.seat === responder && c.bid === 'P')
 
-  // (a) svararens fria nya färg → öppnaren måste rebjuda
-  if (seat === opener && highest.seat === responder && !responderPassedFirst) {
+  // (a) svararens fria nya färg → öppnaren måste rebjuda. UNDANTAG (fix 5b,
+  // speglar competitionForce): dubblade svararen tidigare är den senare färgen
+  // dubblarens ombud (X + färg = invit, ej krav) → inget rondkrav.
+  const responderDoubledEarlier = history.some(
+    (c, i) => i < highestIdx && c.seat === responder && c.bid === 'X',
+  )
+  if (seat === opener && highest.seat === responder && !responderPassedFirst && !responderDoubledEarlier) {
     const b = parseBid(highest.bid)!
     const timesInStrain = responderBids.filter((c) => parseBid(c.bid)!.strain === b.strain).length
     const isNewSuit =
@@ -136,6 +141,9 @@ describe('STRESS (10 000 givar): störda krav honoreras alltid', () => {
     }
     // Täckningsbevis: kravet ska ha utlösts en icke-trivial mängd gånger, annars
     // provar testet ingenting (skydd mot att oraklet slutar matcha efter en fix).
-    expect(forcedHits, `konkurrens-rondkravet utlöstes bara ${forcedHits} gånger`).toBeGreaterThan(20)
+    // (Tröskeln sänkt 20 → 5 i och med fix 5b: dubblarens ombud efter negativ
+    // dubbling räknas inte längre som rondkrav, vilket var majoriteten av
+    // träffarna. De kvarvarande är äkta fria bud/reverse i konkurrens.)
+    expect(forcedHits, `konkurrens-rondkravet utlöstes bara ${forcedHits} gånger`).toBeGreaterThan(5)
   }, 240000)
 })
