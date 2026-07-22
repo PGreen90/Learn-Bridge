@@ -233,6 +233,30 @@ rätt strain men paret stannar under den DD-utgång som par kräver. Det är
 mindre tapp per giv (därav bättre snitt) men inte exakt par. Missad utgång är
 redan nästa post på topplistan (etapp 5-kandidat).
 
+## Mätning #8 — 2026-07-22, efter fel färg-fix 6 (fyra mönster ur mönsterjakt #2)
+Samma frö 20260721, 1 000 givar, efter fix 6-vakterna (§5.5/§5.9/§5.11/§7.1):
+
+```
+Rätt kontrakt (exakt par): 16,8 %   (M7: 16,9 % · baslinje 15,9 %)
+Genomsnittligt poängtapp: 289,5 p/giv (M7: 290,8 · baslinje 300)
+Fel färg (bet): 121 givar, 47 590 p (M7: 130/53 450 · baslinje 148/65 110)
+Missad utgång: 158 givar, 53 050 p (M7: 149/49 590)
+Missad lillslam: 87 givar, 59 000 p (M7: 85/57 230)
+Billig offring: 125 givar, 34 300 p (M7: 118/33 070)
+Övriga poster: ±1–3 givar (för högt −3, över par −5).
+```
+
+**Läsning:** största enskilda fix-klivet sedan fix 1 (−1,3 p/giv). Fel färg-
+posten har fallit −27 % sedan baslinjen (148→121 givar, 65 110→47 590 p) och
+är nu **tredje** posten — topplistan toppas av **missad lillslam (59 000)**
+och **missad utgång (53 050)**. Flytten är förväntad: givar som förr blev bet
+i fel strain spelas nu hem för lågt (missad utgång +9) eller låter
+motståndarna spela (billig offring +7) — mindre tapp per giv, men inte par.
+Fel färg-spårets mönsterjakt har nått gränsen där resten mest är DD-brus +
+etapp 4/5-material (se Mönsterjakt #2). **Nästa attack enligt topplistan:
+missad utgång** (äkta förbättringsmål; slam-posterna är delvis medvetna via
+kaptensregeln).
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
@@ -315,3 +339,35 @@ grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
 6. **Ofrånkomligt DD-brus:** normala sangauktioner (1NT–2NT–3NT, 1NT–3NT) där
    DD råkar göra en 4-3-högfärgsdelkontrakt (frön 20260801, 20261062) — par
    är hårt; dessa jagas INTE.
+
+## Mönsterjakt #2 (2026-07-22, i M7:s 130 kvarvarande fel färg-givar)
+Alla 130 exempel hämtade (`REVISOR_EXAMPLES=500`), grovgrupperade
+(nådd strain-klass → facit-klass):
+
+| Mönster | Givar | Poäng |
+|---|---|---|
+| Sang spelas, högfärg var facit | 34 | 10 830 |
+| Lågfärg spelas, sang var facit | 15 | 9 500 |
+| Lågfärg spelas, högfärg var facit | 24 | 9 310 |
+| Högfärg spelas, sang var facit | 18 | 7 410 |
+| Sang spelas, lågfärg var facit | 18 | 6 740 |
+| Fel högfärg av två | 10 | 4 470 |
+| Högfärg spelas, lågfärg var facit | 7 | 2 910 |
+| Fel minor av två | 4 | 2 280 |
+
+**✅ FIX 6 KLAR 2026-07-22 — fyra rotorsaker ur djupdykningen (§5.5/§5.9/
+§5.11/§7.1 + §9):** (1) 5♣-utgångsblåsen mot passad partner (frön 20261090/
+20261409/20261459 → tävlande höjning billigast); (2) svararens höjning av
+öppnarens färg lästes som "ny färg = rondkrav" → öppnaren drog partnerns 4♥
+till 5♦ (frö 20261112 → 4♥ står = par 620); (3) öppnaren tävlade 5♥ över
+deras 4♠ efter partnerns pass (frö 20261375 → pass); (4) cue-höjaren blåste
+5♦ på limit-värden mot minimum-återgång (frö 20260906 → pass på 3♦).
+Facit-test FÖRE fix: `auction-felfarg-fix6.test.ts`. Effekt: Mätning #8.
+
+**Kvar i de 130 (bedömt, per grupp):** toppgruppen "sang → högfärg" är till
+stor del DD-brus (tunna 5-3/4-3-partials som DD spelar hem) + äkta luckor i
+högfärgsvisning efter sang-sekvenser; "lågfärg → sang"-resten är
+2♣-släktingar (frön 20261040/20261247/20261414 = etapp 4-mat) och
+B13-släktingar (minor-återbud, etapp 5). Nästa stora poster på topplistan är
+dock **missad utgång** (49 590 p) och slam-familjerna — mönsterjakten har
+nått gränsen där fel färg-resten mest är brus + etapp 4/5-material.
