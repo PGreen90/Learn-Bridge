@@ -136,6 +136,18 @@ Läs den här filen först varje session.
 > post: missad lillslam (87 givar/59 000 p i M11). Se
 > `docs/budsystem-revision.md` F1.
 >
+> **✅ Familj B fix 1 KLAR 2026-07-24: kaptensmatte + RKC efter positivt svar
+> på 2♣** (budsystem.md §4.4 + §9): när trumf är funnen (öppnaren stödjer
+> svararens färg, eller svararen har 3+ i öppnarens färgrebud) räknar
+> svararen sin hand mot visade 22 → driv 33+ (4NT RKC), inbjudan 31–32
+> (öppnaren accepterar på egna Bergenpoäng), annars utgång. Facit-test
+> `auction-2c-slam.test.ts` (11 fall). **Mätning #12: snitt-tapp 287,9
+> (M11: 288,0), missad lillslam 87→83 givar (59 000→56 400), storslam
+> −750 p.** Känd ärlig kostnad: två 33-poängsslammar med facit enbart i
+> sang går DD-bet i färgen (fel färg +2 680) — ärligt bjudna, ev. senare
+> finslipning (6NT från starka handen). Kvar i familj B: NT-lägena utan
+> trumf. Sedan C-resten (reverse/hoppskift).
+>
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
 >    lagade + test-låsta, #39 = inget fel (test-låst), #36 (UI) → ⚪ SENARE.
@@ -183,7 +195,14 @@ Läs den här filen först varje session.
 > `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **Missad utgång fix 1+2 (2026-07-24, NYAST):** (a) har du 4 kort i den färg
+- **Etapp 4 familj B fix 1 (2026-07-24, NYAST): slam efter stark 2♣.** Svarar
+  du positivt på botens 2♣ (eller boten på din) och en trumf hittas, kör
+  kaptenen nu RKC mot visade 22 (driv 33+, inbjudan 5M/stödhöjning 31–32).
+  **Bevaka:** (a) bjuds slam för OFTA på 2♣-givar (tunna 33-ihop kan åka på
+  en mask — medvetet ärligt)? (b) känns 5M-inbjudan begriplig vid bordet?
+  (c) spelstick-2♣:or (färre hp, lång färg) — hamnar de för högt när
+  svararen räknar med 22?
+- **Missad utgång fix 1+2 (2026-07-24):** (a) har du 4 kort i den färg
   boten visade i sin ANDRA rond (1♣–1♥–1♠) höjer boten nu graderat — 2♠ svagt,
   3♠ inbjudan, 4♠ med utgångsvärden — **bevaka:** hamnar ni för högt någon gång
   (posten "för högt" växte två givar i mätningen)? (b) inbjuder du efter ditt

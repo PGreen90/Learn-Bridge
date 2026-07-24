@@ -481,9 +481,15 @@ lite på fötterna och håller utgångskravet.
 #### Följdbud — vid träff och vid miss
 
 **Vid träff** (positivt svar – styrka/fit hos svararen): paret är i GF.
-- Hitta gemensam trumf och **värdera slam**. När trumf är överenskommen:
-  **cue-bid** kontroller uppåt (billigaste första-rondskontroll först), därefter
-  **1430 RKC Blackwood** för ess + trumfdam (detaljer i §6).
+- Hitta gemensam trumf och **värdera slam** med kaptensregeln: när trumf är
+  funnen (öppnaren stödjer svararens färg, eller svararen har 3+ kort i
+  öppnarens naturliga färgrebud) räknar **svararen (kaptenen)** sin egen hand
+  mot 2♣-öppningens **visade minimum 22** (22+ hp balanserad eller ~9+
+  spelstick ≈ samma spelvärde): **33+ → driv** med **1430 RKC Blackwood**
+  (ess + trumfdam, detaljer i §6); **31–32 → slaminbjudan** (5M i högfärg,
+  stödhöjningen i minor) som öppnaren accepterar med mer än blott minimum
+  (dömt på egna Bergenpoäng); annars sätts utgången. Manuella **cue-bid**
+  enligt §6.2 tolkas som vanligt.
 - Svararens **enkla stödhöjning** efter sitt positiva svar = slamintresse;
   **dubbelhöjning direkt till utgång** = minimum utan slamintresse.
 - Balanserat: efter 2NT-rebud (22–24) sätter svararen nivån med NT-stegen
@@ -1388,6 +1394,21 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-24** – **Slam efter stark 2♣ + positivt svar (kod, §4.4, ETAPP 4
+  F1 familj B fix 1).** Efter 2♣ och ett positivt svar fanns ingen on-book-
+  fortsättning när en trumf hittats — linjen tog slut och live-lagret höjde
+  bara till utgång eller blastade 5m (revisorns frön 20261101: `2♣–2♥–3♥–4♥`
+  med 24+11 hp och 6♥ hemma; 20261050/20261469/20260830: blast till 5m förbi
+  RKC). Nu kör `buildAuction` **kaptensmatten** (ärliga slamportar) när trumf
+  är funnen — B1: öppnaren stödde svararens positiva färg; B2: svararen har
+  3+ kort i öppnarens naturliga färgrebud (lovade 5+): svararen (kaptenen)
+  räknar sin hand mot 2♣-öppningens **visade minimum 22** (stark balanserad
+  22+ hp eller ~9+ spelstick ≈ samma spelvärde) → **driv 33+** (4NT RKC),
+  **inbjudan 31–32** (5M respektive stödhöjningen 4m/5m; öppnaren dömer
+  accepten på sina EGNA Bergenpoäng så spelstick-händernas längd räknas
+  ärligt), annars sätts utgången (GF). Storslam kräver visshet som förut.
+  Facit-test FÖRE fix: `auction-2c-slam.test.ts` (11 fall, inkl. inbjudan
+  accept/avböj). Hela sviten grön, tsc rent.
 - **2026-07-07 (kväll)** – **ÄRLIGA SLAMPORTAR (kod, §5.2, §5.7, §6, §6.2).**
   Ägarbeslut efter total-granskning: all slamutredning "tjuvkikade" — portarna
   räknade parets FAKTISKA sammanlagda poäng, nyckelkort och kontroller ur båda
