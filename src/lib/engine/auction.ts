@@ -131,6 +131,11 @@ function computeResponse(openCall: string, responderHand: Deal['hands'][Seat], r
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SUIT_SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+
+// Vad den starka 2♣-öppningen VISADE som minimum (§4.4): 22+ hp balanserad
+// eller ~9+ spelstick ("en stick från utgång" ≈ samma spelvärde). Kaptenens
+// slammatte efter positivt svar räknar mot detta — aldrig öppnarens kort.
+const STRONG_2C_SHOWN_MIN = 22
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 
 /** Tolkar ett inkliv ("1S"/"2H"/"X"/"2NT") → nivå + ev. färg. */
@@ -503,6 +508,58 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
         turns.push({ seat, role: st.role, call: st.call, rule: st.rule, explanation: st.explanation })
       }
       return finish(so.open)
+    }
+  }
+
+  // Slamutredning efter stark 2♣ + POSITIVT svar (ETAPP 4, F1 familj B fix 1).
+  // 2♣ VISADE ~22+ (stark balanserad 22+ hp eller ~9+ spelstick — "en stick
+  // från utgång", §4.4); det positiva svaret visade 8+. När en trumf är funnen
+  // räknar SVARAREN (kaptenen) sin egen hand mot det visade minimumet (ärliga
+  // slamportar): driv 33+ (4NT RKC), inbjudan 31–32 (öppnaren dömer accepten
+  // på sina EGNA Bergenpoäng — så räknas spelstick-händernas längd ärligt),
+  // annars sätts utgången (GF). Aldrig partnerns kort.
+  if (opening.call === '2C' && response.rule === '2♣-positivt') {
+    const respSuit = parseBid(response.call).suit
+    const rebidSuit = parseBid(rebid.call).suit
+    // Trumfen: öppnaren stödde svararens färg (B1), eller svararen har 3+ kort
+    // i öppnarens naturliga färgrebud som lovade 5+ (B2).
+    const trump2C =
+      rebid.rule === 'rebid: stöd (GF)' && respSuit
+        ? respSuit
+        : rebid.rule === 'rebid: egen färg (GF)' && rebidSuit && lengths(deal.hands[responderSeat])[rebidSuit] >= 3
+          ? rebidSuit
+          : null
+    if (trump2C) {
+      const majorTrump = trump2C === 'hearts' || trump2C === 'spades'
+      const gameCall = majorTrump ? `4${LETTER[trump2C]}` : `5${LETTER[trump2C]}`
+      // Inbjudan: höjningen till 5M, respektive stödhöjningen 4m ("enkel
+      // stödhöjning efter positivt svar = slamintresse", §4.4) — men aldrig
+      // under öppnarens sista bud (stöd-återbudet i minor står redan på 4m).
+      const inviteCall = majorTrump
+        ? `5${LETTER[trump2C]}`
+        : rebid.call === `4${LETTER[trump2C]}`
+          ? `5${LETTER[trump2C]}`
+          : `4${LETTER[trump2C]}`
+      const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trump2C, rebid.call, {
+        partnerMin: STRONG_2C_SHOWN_MIN,
+        inviteCall,
+      })
+      if (slam) {
+        for (const t of slam) {
+          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+        }
+        return finish(false)
+      }
+      // Under slamzonen: kaptenen sätter utgången (GF) i den funna trumfen.
+      turns.push({
+        seat: responderSeat,
+        role: 'svarare',
+        call: gameCall,
+        rule: rebid.rule === 'rebid: stöd (GF)' ? 'till spel' : 'höjning (GF)',
+        explanation: `under slamzonen mot partnerns visade ${STRONG_2C_SHOWN_MIN}+ → ${gameCall[0]}${SUIT_SYM[trump2C]} (utgång).`,
+      })
+      return finish(false)
     }
   }
 

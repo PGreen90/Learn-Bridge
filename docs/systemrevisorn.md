@@ -389,6 +389,32 @@ intervall):** B först (störst + helt otäckt: koppla slamzon ≥33/inbjudan
 C-resten (öppnarens reverse/hoppskift = visade 17+/19+ → svararen blir
 kapten med samma matte). Mät om (M12) efter varje familj med samma frö.
 
+## Mätning #12 — 2026-07-24, etapp 4 familj B fix 1
+Samma frö 20260721, 1 000 givar. Fix: kaptensmatte + RKC efter positivt svar
+på stark 2♣ (`auction-2c-slam.test.ts`, budsystem.md §4.4/§9).
+
+```
+                        M11 (före)   M12 (fix B1)
+Rätt kontrakt (exakt par)  17,1 %       17,1 %
+Genomsnittligt poängtapp   288,0        287,9
+Missad lillslam         87/59 000     83/56 400
+Missad storslam         32/37 720     32/36 970
+Fel färg (bet)         121/47 600    123/50 280
+För högt                33/7 040      34/7 560
+Övriga poster: oförändrade (missad utgång 151/50 640, billig offring
+125/34 300, såld giv 54/20 550).
+```
+
+**Läsning:** slamvägen efter 2♣ finns nu — fyra av familj B-givarna bjuder
+slam (frö 20261469 = exakt par 6♦; 20260830 6♦ i st.f. 5♦). **Känd ärlig
+kostnad:** två 33-poängsslammar (frön 20261101, 20261050) går en DD-bet i
+färgen — facit stod bara i SANG från den starka handen — och flyttar från
+"missad lillslam" till "fel färg-bet" (+2 680 p). Det är ärligt bjudna
+slammar (kaptensmatte utan kik); strain-valet 6NT-från-starka-handen är en
+möjlig senare finslipning, inte ett fel. Nettot −0,1 p/giv. Kvar i familj B:
+NT-lägena utan trumf (frö 20261372: positivt svar utan fit → 4♥ för lågt;
+20261573: 2♦-väntebudets NT-kedja stannar på 3NT med 23+5).
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):
