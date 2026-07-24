@@ -647,6 +647,42 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
+  // Slamutredning efter öppnarens REVERSE (visade 16+) eller HOPPSKIFT i ny
+  // färg (visade 19+) — ETAPP 4, F1 familj C-resten. Svararen (kaptenen,
+  // obegränsad efter sitt svar) räknar SIN hand mot det visade minimumet när
+  // en trumf är säkrad på EGEN kunskap: öppnarens ANDRA färg med 4+ egna
+  // (4 lovade där), eller öppnarens FÖRSTA färg med 3+ — en reverse lovar 5+
+  // där (längre första färg), liksom en högfärgsöppning; bara hoppskiftets
+  // MINOR-öppning (kan vara 4) kräver 4+ egna. Driv 33+ (4NT RKC), inbjudan
+  // 31–32 (öppnaren accepterar på egna Bergenpoäng), annars står dagens
+  // flöde (fourthSuit-graderingen m.m.) kvar.
+  if (rebid.rule === 'reverse' || rebid.rule === 'hoppskift') {
+    const secondSuit = parseBid(rebid.call).suit
+    const rl = lengths(deal.hands[responderSeat])
+    const firstSuitMin =
+      rebid.rule === 'reverse' || openerSuit === 'hearts' || openerSuit === 'spades' ? 3 : 4
+    const trumpC =
+      secondSuit && rl[secondSuit] >= 4
+        ? secondSuit
+        : openerSuit && rl[openerSuit] >= firstSuitMin
+          ? openerSuit
+          : null
+    if (trumpC) {
+      const majorT = trumpC === 'hearts' || trumpC === 'spades'
+      const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trumpC, rebid.call, {
+        partnerMin: rebid.rule === 'hoppskift' ? 19 : 16,
+        inviteCall: majorT ? `5${LETTER[trumpC]}` : `4${LETTER[trumpC]}`,
+      })
+      if (slam) {
+        for (const t of slam) {
+          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+        }
+        return finish(false)
+      }
+    }
+  }
+
   // Slamutredning: efter en överenskommen trumf växer 1430 RKC (+ ev. Sjöbergs
   // 5NT) auktionen vidare. Högfärgsfit via Jacoby 2NT (Steg 1–2) eller minorfit
   // via inverterad minor (Steg 3). Ärliga slamportar 2026-07-07: kaptenen räknar

@@ -597,6 +597,14 @@ placera kontraktet. Tre styrkenivåer styr valet:
   Svararen får **aldrig passa** ett hoppskift: hon placerar kontraktet
   (4M med 3-korts stöd / 3NT med stopp i fjärde färgen / 5m med fit).
   Källa: bridgebum.com ("16+ points", inte strikt HCP).
+- **Slamport efter reverse/hoppskift (etapp 4, familj C):** svararen
+  (kaptenen) räknar sin hand mot det **visade minimumet** (reverse 16,
+  hoppskift 19) när en trumf är säkrad på egen kunskap — 4+ egna kort i
+  öppnarens andra färg, eller 3+ i öppnarens första (som lovar 5+ vid
+  reverse och högfärgsöppning; 4+ krävs mot hoppskiftets minoröppning):
+  **33+ → driv** (4NT RKC), **31–32 → slaminbjudan** (öppnaren accepterar
+  med mer än blott minimum, dömt på egna Bergenpoäng), annars vanliga
+  utgångsflödet.
 - **1x–1y–2NT** = 18–19 hp balanserad (för stark för 1NT-öppning).
 - I en **2/1 GF-budgivning** är paret redan bundet till utgång – öppnaren bjuder
   då naturligt och i lugn takt (visar form först, sparar styrkebeskedet).
@@ -616,6 +624,14 @@ utan bra återbud. Annars beskriver hon hand och styrka:
 | 3♣ / 3♦ | hoppskift, 16+ hp, 5-4+, krav |
 | 3♥ | 6+ ♥, 16–18 hp, inbjudan |
 | 4♥ | 6+ ♥, ~19+ hp, till spel |
+
+**Svararens svar på hoppskiftet (etapp 4, familj C):** svararen PLACERAR —
+fit i **hoppskiftets färg** går före preferensen: med 4+ stöd och ~8+
+stödpoäng sätts utgången i fiten (4♥ efter 1♠–1NT–3♥; efter ett minorhopp
+3NT bara med håll i de objudna färgerna, annars 5m). En 3-korts preferens
+till öppnarens högfärg med utgångsvärden lyfts till **4M** — aldrig ett
+3M-stopp under kravet. Svaga händer (under ~8 stödpoäng) prefererar
+billigast som förut.
 
 *Efter 1♠–1NT:*
 | Återbud | Betydelse |
@@ -1403,6 +1419,22 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-24 (kväll)** – **Familj C-resten: hoppskift-fortsättningen + slamport
+  efter reverse/hoppskift (kod, §5/§5.1, ETAPP 4).** Två delar. **(1)**
+  Semi-forcing-hoppskiftets svar (`rebid: hoppskift`, visade 16+) prefererade
+  blint 3M under utgång (öppnaren passade kravet) och kollade aldrig fit i
+  hoppskiftets egen färg — revisorns frön 20260799 (`1♠–1NT–3♥–3♠–P` med
+  K942 i hjärter, 4♥ fanns, tapp 1200), 20260765 (AJ974 → 3NT i st.f. 4♥)
+  och 20261334 (KJ982 → 3NT utan spaderstopp). Nu: 4+ i hoppskiftets färg +
+  ~8 stödpoäng → utgång i fiten (4♥ / minor: 3NT bara med håll i objudna,
+  annars 5m); 3-korts M-preferens med utgångsvärden → 4M; svaga händer
+  prefererar billigast som förut. **(2)** Ny slamport efter 1-lägessvarens
+  REVERSE (visade 16) och HOPPSKIFT (visade 19) i `buildAuction`: kaptenen
+  räknar sin hand mot visat minimum när trumf är säkrad på egen kunskap
+  (4+ i andrafärgen / 3+ i förstafärgen som lovar 5+; 4+ mot hoppskiftets
+  minoröppning) → driv 33+ (4NT RKC), inbjudan 31–32, annars dagens flöde.
+  Facit-test FÖRE fix: `auction-hoppskift-slam.test.ts` (10 fall; syntetiska
+  slamgivar DD-verifierade, 6♣ = 12 stick). Hela sviten grön, tsc rent.
 - **2026-07-24** – **Slamzon utan trumf efter 2♣ + positivt svar (kod, §4.4,
   ETAPP 4 F1 familj B fix 2).** Kaptenen i slamzon (33+ mot visade 22) utan
   funnen trumf gjorde förr ingenting — linjen dog och live-lagret rebjöd

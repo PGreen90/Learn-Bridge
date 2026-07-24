@@ -442,6 +442,35 @@ DD-straffar i färgen, facit enbart i sang). Slamvägar efter 2♣ som återstå
 inga kända mekaniska — resten av familj B-posten är ärliga missar under
 zonen. **Nästa: familj C-resten (reverse/hoppskift).**
 
+## Mätning #14 — 2026-07-25, etapp 4 familj C-resten (ETAPP 4 KLAR)
+Samma frö 20260721, 1 000 givar. Fix: hoppskift-fortsättningen efter
+semi-forcing 1NT (utgångsplacering, fit i hoppskiftets färg) + ny slamport
+efter 1-lägessvarens reverse (visade 16) och hoppskift (visade 19).
+
+```
+                        M13 (före)   M14 (familj C)
+Rätt kontrakt (exakt par)  17,1 %       17,1 %
+Genomsnittligt poängtapp   287,4        287,2
+Missad utgång          151/50 640    149/50 140
+Missad lillslam         82/55 860     82/55 410
+Missad storslam         32/36 970     32/36 470
+Fel färg (bet)         123/50 280    124/51 040
+För högt                34/7 560      35/8 060
+Övriga poster: oförändrade.
+```
+
+**Läsning:** hoppskift-fröna nås nu rätt (20260799: 4♥ i st.f. 3♠-pass,
+tapp 1200→750; 20260765: 4♥ i st.f. 3NT; 20261334: ruterfiten sätts), och
+reverse-porten hittade en slam förskanningen missbedömt (frö 20260937:
+`1♣–1♠–2♥` → 6♣ med TRETTON stick, förr 5♣). Ärlig kostnad: två tunna
+33-visade slammar går exakt en DD-bet (frön 20261238, 20261451 — fel färg
++760, för högt +500). DD-skanning av ALLA 18 slamkontrakt i mätfröna:
+10 står, 6 går en bet (tunna men ärligt bjudna), 2 är familj B:s kända
+frisits-fall. **ETAPP 4 DÄRMED KLAR: snitt-tapp 288,0 → 287,2 (M11→M14),
+missad lillslam 87→82 givar (59 000→55 410), missad utgång 151→149,
+storslam −1 250 p.** Facit-låst i `auction-2c-slam.test.ts` (18) +
+`auction-hoppskift-slam.test.ts` (10).
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):

@@ -157,8 +157,23 @@ Läs den här filen först varje session.
 > (18 fall). **Mätning #13: snitt-tapp 287,4 (M12: 287,9). Etapp 4
 > hittills: 288,0 → 287,4, missad lillslam 87→82 (59 000→55 860).**
 > **FAMILJ B DÄRMED KLAR** (resten = ärliga missar under zonen).
-> **Nästa: familj C-resten** — slam efter reverse (17+) och hoppskift
-> (19+), samma kaptensmatte mot visade intervall.
+>
+> **✅ Familj C-resten KLAR 2026-07-25 → HELA ETAPP 4 KLAR** (budsystem.md
+> §5/§5.1 + §9): **(1)** semi-forcing-hoppskiftets svar placerar nu utgång —
+> fit i hoppskiftets färg går före preferensen (4♥ på K942, frö 20260799
+> som förr dog i 3♠-pass under kravet; minorfit → 3NT bara med håll,
+> annars 5m), 3-korts M-preferens med utgångsvärden lyfts till 4M;
+> **(2)** ny slamport efter 1-lägessvarens reverse (visade 16) och
+> hoppskift (visade 19): kaptensmatte när trumf är säkrad på egen kunskap
+> → driv 33+/inbjudan 31–32 (frö 20260937: `1♣–1♠–2♥` → 6♣ med 13 stick).
+> Facit `auction-hoppskift-slam.test.ts` (10 fall, syntetiska slamgivar
+> DD-verifierade). **Mätning #14: snitt-tapp 287,2 (M13: 287,4), missad
+> utgång 151→149. ETAPP 4 TOTALT (M11→M14): snitt-tapp 288,0 → 287,2,
+> missad lillslam 87→82 (59 000→55 410), storslam −1 250 p; ärlig kostnad
+> ~4 tunna 33-slammar som går en DD-bet.** DD-skanning av alla 18 slam i
+> mätfröna: 10 står, resten tunna-men-ärliga + 2 kända frisits-fall.
+> **Nästa session: ägaren väljer ur NÄST** (mönsterjakt billig offring /
+> B13, eller F2 detektorkedjan).
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -207,7 +222,15 @@ Läs den här filen först varje session.
 > `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **Etapp 4 familj B fix 1 (2026-07-24, NYAST): slam efter stark 2♣.** Svarar
+- **Etapp 4 familj C (2026-07-25, NYAST): reverse/hoppskift-fortsättningen.**
+  (a) Efter botens hoppskift (t.ex. 1♠–1NT–3♥) sätter svararen nu UTGÅNGEN:
+  4♥ med fyrkortsfit i hoppfärgen, 4M-lyft av preferensen med utgångsvärden,
+  5m när sanghåll saknas — **bevaka:** hamnar ni i tunna utgångar när boten
+  hoppskiftat på lätta 16? (b) Reverserar/hoppskiftar boten och du har fit
+  kan den nu driva RKC mot visade 16/19 — **bevaka:** bjuds tunna slammar
+  för ofta (två DD-bet per 1000 givar är medvetet ärligt), och känns
+  4m-slaminbjudan efter reverse begriplig?
+- **Etapp 4 familj B fix 1 (2026-07-24): slam efter stark 2♣.** Svarar
   du positivt på botens 2♣ (eller boten på din) och en trumf hittas, kör
   kaptenen nu RKC mot visade 22 (driv 33+, inbjudan 5M/stödhöjning 31–32).
   **Bevaka:** (a) bjuds slam för OFTA på 2♣-givar (tunna 33-ihop kan åka på
