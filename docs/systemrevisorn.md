@@ -343,6 +343,52 @@ presentera golvfrågorna för ägaren med exempelhänderna nedan.**
   *Claudes rekommendation: bara som kvalitetsuppgradering (täta honnörer/
   femkortsfärg), inte som ett generellt sänkt golv.*
 
+## Etapp 4 FÖRSKANNAD (2026-07-24): F1-resten — familj B (2♣) + C (reverse/hoppskift)
+Ny körning samma frö 20260721 (`REVISOR_EXAMPLES=500`, siffrorna = M11-läget).
+Slamposternas alla exempel (missad lillslam 87/59 000 + missad storslam
+32/37 720) grupperade efter auktionsfamilj (handgranskade — auto-grupperingen
+räknade först höjningar som `1♣–1♠–2♠` som reverse):
+
+| Familj | Lillslam | Storslam | Poäng ca |
+|---|---|---|---|
+| **B: stark 2♣-öppning** | 8 givar | 1 giv | ~5 900 |
+| **C-rest: reverse** | 3 givar | 2 givar | ~4 000 |
+| **C-rest: hoppskift** | 1 giv | 2 giv | ~3 500 |
+| Övrigt (ärliga kaptensmissar + DD-smickrat) | ~75 | ~27 | ~83 000 |
+
+**Övrigt-klumpen bekräftar förväntan:** slamposterna är till största delen
+medvetna (kaptensregeln: hellre ärlig miss än kik) eller DD-smickrade (6NT
+på 28 hp där maskarna sitter). De jagas INTE. Etapp 4-materialet är de
+~17 givar (~13 000 p) där slammen var bjudbar MOT VISADE INTERVALL men
+auktionsvägen saknas.
+
+**Familj B-mönstren (stark 2♣ — slamutredning saknas helt):**
+1. **Kaptensmatte ignoreras efter positivt svar** (frö 20261101:
+   `2♣–2♥–3♥–4♥–P` med 24 hp mot positivt svar 8+ och hjärterfit — visat
+   32+ men ingen RKC; 6NT/6♥ fanns). Samma frö 20261050 (`…4♣–5♣`, 21 hp
+   mot 3♣-positivt med klöverfit).
+2. **Blast till 5m i stället för utredning** (frö 20261469: `2♣–2♠–3♦–5♦`
+   — svararen med positivt svar hoppar förbi både cue och RKC; frö 20260830
+   storslam: `2♣–2♥–3♦–5♦`, 6♦/7♦ fanns).
+3. **Spelstick-2♣:ans visade bild** (frö 20261372: 2♣ på 15 hp/8½ spelstick
+   → svararen med 14 hp läser "22+" — kaptensmatten mot spelstick-öppningar
+   behöver en ärlig definition innan den får driva slam).
+
+**Familj C-mönstren (öppnaren visade extra — fortsättningen dör):**
+4. **Efter reverse (17+) blastas eller stannas det** (frö 20260941:
+   `1♣–1♥–2♦–2♠–3♣–5♣` med 17+14 — ingen RKC, 6NT fanns; frö 20260937
+   storslam: `1♣–1♠–2♥–3♦–4♣–5♣`, 6/7 fanns; frö 20261111: reverse följt av
+   preferens 3♣ passas med 18 hp mot 10).
+5. **Efter hoppskift (19+) tas ingen ny sats** (frö 20260799:
+   `1♠–1NT–3♥–3♠–P` — öppnaren 17–19 med 5-4, preferensen passas, 6♥ fanns
+   med 1200 i tapp; frö 20260765: `1♠–1NT–3♥–3NT–P`, 7♥ på DD).
+
+**Fix-plan (facit-först, en familj i taget, kaptensregeln mot visade
+intervall):** B först (störst + helt otäckt: koppla slamzon ≥33/inbjudan
+31–32 + RKC in i 2♣-fortsättningarna i `responses-2c.ts`-flödet), sedan
+C-resten (öppnarens reverse/hoppskift = visade 17+/19+ → svararen blir
+kapten med samma matte). Mät om (M12) efter varje familj med samma frö.
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):

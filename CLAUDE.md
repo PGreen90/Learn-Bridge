@@ -12,7 +12,7 @@ Läs den här filen först varje session.
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 
-### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 5: Missad utgång (etapp 3 KLAR)
+### 🔵 NU — BUDGIVNINGEN MOT PERFEKT · Etapp 4: F1-resten (etapp 5 KLAR)
 > **Ägarbeslut 2026-07-20: designen läggs HELT åt sidan.** Facelift-spåret
 > (Claude Design-utforskningen + Claudes "Klubbrummet"-mockup) är flyttat till
 > 🅿️ PARKERAT — rörs inte förrän ägaren uttryckligen återupptar det. Fullt
@@ -121,11 +121,20 @@ Läs den här filen först varje session.
 > Platt quack-15 avböjer fortfarande. **Mätning #11: snitt-tapp 288,0 p/giv,
 > missad utgång 151/50 640, exakt par 17,1 %** (baslinje 300 / 15,9 %).
 >
-> **🔵 ETAPP 5 DÄRMED KLAR i sin mekaniska+golv-del** (158→151 givar,
+> **✅ ETAPP 5 KLAR i sin mekaniska+golv-del** (158→151 givar,
 > 53 050→50 640 p). Resten av posten är DD-smickrade tunna utgångar som
-> medvetet INTE jagas. **Nästa session börjar med:** ägaren väljer nästa etapp
-> — etapp 4 (F1-resten: familj B efter stark 2♣ + C:s reverse/hoppskift) eller
-> en ny mönsterjakt i topplistans nästa post.
+> medvetet INTE jagas.
+>
+> **🔵 NU = ETAPP 4: F1-RESTEN (ägarbeslut 2026-07-24).** Ägaren valde etapp 4
+> före mönsterjakt i billig offring, B13 och F2. Innehåll: **familj B** =
+> slamutredning efter stark 2♣ (positiva svar / 2NT-återbud — täcks inte alls
+> i dag) + **familj C-resten** = slam efter reverse och hoppskift
+> (hopphöjningen är redan klar, `auction-slam-jumpraise.test.ts`). Byggs på
+> de ärliga slamportarnas mönster: kaptensregeln mot VISADE intervall, aldrig
+> partnerns kort. Arbetssätt facit-först: probe → röd giv → fix → grön →
+> DD-verifiera → full svit → PCD (fråga ägaren). Angriper topplistans största
+> post: missad lillslam (87 givar/59 000 p i M11). Se
+> `docs/budsystem-revision.md` F1.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -299,12 +308,10 @@ Läs den här filen först varje session.
   frivilligt läge, boten passar — ägarbeslut om det känns fel (felrapport #1–4).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Etapp 4: F1-resten — familj B (2♣) + C:s reverse/hoppskift** — byggs på
-   de ärliga slamportarnas mönster (kaptensregeln mot visade intervall).
-2. **Etapp 5: revisorns topplista vidare** — missad utgång (näst största äkta
-   posten) och/eller B13 — förfina öppnarens återbud efter inverterad
+1. **Revisorns topplista vidare** — mönsterjakt i billig offring (125 givar/
+   34 300 p) och/eller B13 — förfina öppnarens återbud efter inverterad
    minorhöjning; ägaren väljer utifrån ny mätning.
-3. **Etapp 6: F2 — datadriven detektorkedja** (E1) — underhållbarhet innan
+2. **Etapp 6: F2 — datadriven detektorkedja** (E1) — underhållbarhet innan
    fler konkurrenskonventioner läggs på `decideCall`-kedjan.
 
 ### ⚪ SENARE (oordnat — hämtas upp till NÄST en i taget)
