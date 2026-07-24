@@ -145,8 +145,20 @@ Läs den här filen först varje session.
 > (M11: 288,0), missad lillslam 87→83 givar (59 000→56 400), storslam
 > −750 p.** Känd ärlig kostnad: två 33-poängsslammar med facit enbart i
 > sang går DD-bet i färgen (fel färg +2 680) — ärligt bjudna, ev. senare
-> finslipning (6NT från starka handen). Kvar i familj B: NT-lägena utan
-> trumf. Sedan C-resten (reverse/hoppskift).
+> finslipning (6NT från starka handen).
+>
+> **✅ Familj B fix 2 KLAR 2026-07-24: slamzon utan trumf** (budsystem.md
+> §4.4 + §9): kaptenen med 33+ mot visade 22 utan fit frågar RKC i egen
+> självbärande 6+ färg (två topphonnörer — nyckelkortsvakt mot spelstick-
+> öppningar); **6NT direkt bara efter 3NT-återbudet** (visad balans).
+> Första utkastet blåste 6NT efter färg-återbud — DD-skanning av alla
+> 2♣-slammar fångade frö 20261107 (13 hp spelstick → 6NT fyra bet) och
+> regeln stramades åt med fröet som vakt. Facit `auction-2c-slam.test.ts`
+> (18 fall). **Mätning #13: snitt-tapp 287,4 (M12: 287,9). Etapp 4
+> hittills: 288,0 → 287,4, missad lillslam 87→82 (59 000→55 860).**
+> **FAMILJ B DÄRMED KLAR** (resten = ärliga missar under zonen).
+> **Nästa: familj C-resten** — slam efter reverse (17+) och hoppskift
+> (19+), samma kaptensmatte mot visade intervall.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -201,7 +213,8 @@ Läs den här filen först varje session.
   **Bevaka:** (a) bjuds slam för OFTA på 2♣-givar (tunna 33-ihop kan åka på
   en mask — medvetet ärligt)? (b) känns 5M-inbjudan begriplig vid bordet?
   (c) spelstick-2♣:or (färre hp, lång färg) — hamnar de för högt när
-  svararen räknar med 22?
+  svararen räknar med 22? (d) utan fit: RKC bara med egen solid 6+ färg och
+  6NT bara efter botens 3NT-återbud — saknar du en sangslam någon gång?
 - **Missad utgång fix 1+2 (2026-07-24):** (a) har du 4 kort i den färg
   boten visade i sin ANDRA rond (1♣–1♥–1♠) höjer boten nu graderat — 2♠ svagt,
   3♠ inbjudan, 4♠ med utgångsvärden — **bevaka:** hamnar ni för högt någon gång

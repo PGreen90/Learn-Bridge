@@ -490,6 +490,15 @@ lite på fötterna och håller utgångskravet.
   stödhöjningen i minor) som öppnaren accepterar med mer än blott minimum
   (dömt på egna Bergenpoäng); annars sätts utgången. Manuella **cue-bid**
   enligt §6.2 tolkas som vanligt.
+- **Utan trumf** gäller samma kaptensmatte: med **33+** mot visade 22 frågar
+  svararen RKC med sin egen redan visade färg som trumf om den är
+  **självbärande** (6+ kort med minst två av A/K/Q — nyckelkortssvaret vaktar
+  mot en spelstick-öppning utan essen). **6NT direkt** bjuds bara när
+  öppnarens återbud var **3NT** (styrkan visad balanserad = riktiga hp);
+  efter ett **färg-återbud** utan fit kan "22:an" vara en spelstick-hand vars
+  längd inte ger sangstick utan fit → auktionen fortsätter naturligt. I
+  31–32 utan trumf står den vanliga utgångsauktionen (ingen kvantitativ
+  inbjudan där ännu).
 - Svararens **enkla stödhöjning** efter sitt positiva svar = slamintresse;
   **dubbelhöjning direkt till utgång** = minimum utan slamintresse.
 - Balanserat: efter 2NT-rebud (22–24) sätter svararen nivån med NT-stegen
@@ -1394,6 +1403,21 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-24** – **Slamzon utan trumf efter 2♣ + positivt svar (kod, §4.4,
+  ETAPP 4 F1 familj B fix 2).** Kaptenen i slamzon (33+ mot visade 22) utan
+  funnen trumf gjorde förr ingenting — linjen dog och live-lagret rebjöd
+  färger tills auktionen stannade i utgång (revisorns frö 20261372:
+  `2♣–3♣–3♥–4♣–4♥` med 14 hp + AKQJT3 hos svararen; 6♣/6NT hemma, DD 12
+  stick). Nu: egen redan visad **6+ färg med minst två topphonnörer** =
+  självbärande trumf → **4NT RKC** i den (nyckelkortsvakt mot spelstick-
+  öppningar); **6NT direkt bara efter öppnarens 3NT-återbud** (styrkan visad
+  BALANSERAD). Första utkastet bjöd 6NT även efter färg-återbud — DD-skannen
+  av alla 2♣-slammar fångade frö 20261107 (öppnaren 13 hp spelstick-6-5 →
+  6NT åtta stick, fyra bet) och regeln stramades åt med det fröet som vakt.
+  Under 33 utan trumf: oförändrat flöde (avgränsning: ingen kvantitativ
+  inbjudan i 31–32 utan trumf). Facit-test FÖRE fix: `auction-2c-slam.test.ts`
+  utökad till 18 fall (frö 20261372 → 6♣, 3NT-återbudets 6NT-väg,
+  under-zonen + 20261107-vakten). Hela sviten grön, tsc rent.
 - **2026-07-24** – **Slam efter stark 2♣ + positivt svar (kod, §4.4, ETAPP 4
   F1 familj B fix 1).** Efter 2♣ och ett positivt svar fanns ingen on-book-
   fortsättning när en trumf hittats — linjen tog slut och live-lagret höjde

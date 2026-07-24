@@ -412,8 +412,35 @@ färgen — facit stod bara i SANG från den starka handen — och flyttar från
 "missad lillslam" till "fel färg-bet" (+2 680 p). Det är ärligt bjudna
 slammar (kaptensmatte utan kik); strain-valet 6NT-från-starka-handen är en
 möjlig senare finslipning, inte ett fel. Nettot −0,1 p/giv. Kvar i familj B:
-NT-lägena utan trumf (frö 20261372: positivt svar utan fit → 4♥ för lågt;
-20261573: 2♦-väntebudets NT-kedja stannar på 3NT med 23+5).
+NT-lägena utan trumf (frö 20261372: positivt svar utan fit → 4♥ för lågt).
+(Frö 20261573 omprövat: 23+7 hp = 30 ihop → ÄRLIG miss under zonen, jagas ej.)
+
+## Mätning #13 — 2026-07-24, etapp 4 familj B fix 2
+Samma frö 20260721, 1 000 givar. Fix: slamzon utan trumf efter positivt svar
+(RKC i egen självbärande färg; 6NT direkt BARA efter 3NT-återbud).
+
+```
+                        M12 (före)   M13 (fix B2)
+Rätt kontrakt (exakt par)  17,1 %       17,1 %
+Genomsnittligt poängtapp   287,9        287,4
+Missad lillslam         83/56 400     82/55 860
+Fel färg (bet)         123/50 280    123/50 280
+Fel strain              89/2 120      90/2 190
+Övriga poster: oförändrade.
+```
+
+**Läsning:** frö 20261372 spelar nu 6♣ (tapp 70 i st.f. 540). **Viktig lärdom
+under bygget:** första utkastet bjöd 6NT direkt även efter öppnarens
+FÄRG-återbud — en DD-skanning av ALLA 2♣-slamauktioner i mätfröna (snabb:
+`botAuction` på 1 000 frön + DD bara på slammen) fångade frö 20261107 där
+"visade 22" var en spelstick-hand med 13 hp och 6NT gick FYRA bet. Regeln
+stramades åt (6NT kräver 3NT-återbudets visade balans; färg-återbud utan
+fit → naturligt vidare) med fröet som facit-vakt. **Etapp 4 hittills (M11→
+M13): snitt-tapp 288,0 → 287,4, missad lillslam 87→82 givar (59 000→55 860),
+storslam −750 p; ärlig kostnad fel färg +2 680** (två 33-poängsslammar som
+DD-straffar i färgen, facit enbart i sang). Slamvägar efter 2♣ som återstår:
+inga kända mekaniska — resten av familj B-posten är ärliga missar under
+zonen. **Nästa: familj C-resten (reverse/hoppskift).**
 
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
