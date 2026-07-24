@@ -19,7 +19,7 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerSecondBid, openerThirdBidIn1NTAuction } from './rebids'
+import { openerSecondBid, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -661,6 +661,21 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     // en Stayman-hittad hjärterfit).
     if (opening.call === '1NT' && second.rule === 'inbjudan') {
       const third = openerThirdBidIn1NTAuction(response, rebid, second, deal.hands[openerSeat])
+      if (third) {
+        turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+        return finish(false)
+      }
+    }
+    // ETAPP 5 fix 2: samma sak efter semi-forcing 1NT (1♥/1♠–1NT–…). Öppnaren
+    // svarade förr inte alls på svararens inbjudan → off-book-lagret passade
+    // och utgången försvann (frö 20260843: 2NT med AQT863 + 14 hp, 4♠ hemma).
+    if ((opening.call === '1H' || opening.call === '1S') && response.rule === 'semi-forcing 1NT' && second.rule.startsWith('inbjudan')) {
+      const third = openerThirdBidAfterSemiForcing1NT(
+        deal.hands[openerSeat],
+        opening.call === '1H' ? 'hearts' : 'spades',
+        rebid,
+        second,
+      )
       if (third) {
         turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
         return finish(false)

@@ -98,6 +98,29 @@ function flatnessPoints(hand: Hand): number {
   return s === '4333' || s === '5332' || s === '6322' || s === '7222' ? -1 : 0
 }
 
+/**
+ * SANGVÄRDERING — "bra 15" (ägarbeslut 2026-07-24, etapp 5 missad utgång).
+ * En 1NT-öppnare med 15 hp passar normalt partnerns 2NT-inbjudan, MEN en 15:a
+ * med **kvalitet** spelar som en 16:a och ska acceptera. Två skillnader mot
+ * startpoängen:
+ *  • **täta honnörsklumpar** (A-K-D i samma färg) ger +1 — tre säkra stick är
+ *    sticktillverkare i sang även när färgen bara är tre kort lång, vilket
+ *    kvalitetsfärgs-regeln (4+ kort) missar;
+ *  • **flathets-avdraget räknas inte** — det är ett avdrag för FÄRGkontrakt
+ *    (ingen ruff-potential) och ska inte straffa en sanghand två gånger.
+ * Golvas aldrig under hp av anropande kod (`Math.max(hp, …)`).
+ */
+export function notrumpPoints(hand: Hand): number {
+  const base = startingPoints(hand)
+  const bySuit = ranksBySuit(hand)
+  let clumps = 0
+  for (const s of SUITS) {
+    const ranks = bySuit[s]
+    if (ranks.includes('A') && ranks.includes('K') && ranks.includes('Q')) clumps = 1
+  }
+  return base.startingPoints - base.flatness + clumps
+}
+
 /** Nivå 1: startpoäng (TP utan känd fit). Returnerar hela uträkningen. */
 export function startingPoints(hand: Hand): Evaluation {
   const hp = hcp(hand)

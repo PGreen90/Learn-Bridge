@@ -257,6 +257,36 @@ etapp 4/5-material (se Mönsterjakt #2). **Nästa attack enligt topplistan:
 missad utgång** (äkta förbättringsmål; slam-posterna är delvis medvetna via
 kaptensregeln).
 
+## Mätning #9–#11 — 2026-07-24, etapp 5 fix 1 + fix 2 + fix 3
+Samma frö 20260721, 1 000 givar.
+
+```
+                        M8 (före)   M9 (fix 1)   M10 (+fix 2)   M11 (+fix 3)
+Rätt kontrakt (exakt par)  16,8 %      16,9 %        17,0 %         17,1 %
+Genomsnittligt poängtapp   289,5       288,6         288,1          288,0
+Missad utgång          158/53 050   156/52 140    153/51 040     151/50 640
+För högt                31/6 460     31/6 460      33/7 040       33/7 040
+Övriga poster: oförändrade (fel färg 121/47 600, lillslam 87/59 000,
+billig offring 125/34 300, såld giv 54/20 550).
+```
+
+**Läsning:** båda fixarna gav rena vinster utan sidoeffekter — den enda post
+som växte är **för högt** (+2 givar/580 p), vilket är det väntade priset för
+att inbjudningarna nu faktiskt besvaras. Missad utgång är fortfarande andra
+posten (51 040 p) men de MEKANISKA luckorna i förskanningen är nu betade;
+resten av posten sitter i **värderings-golven** (se ägarfrågorna nedan) och i
+DD-smickrade tunna utgångar som medvetet inte jagas.
+
+**Fix 1 (§6.6):** svararens höjning av öppnarens andra färg graderas efter
+stödpoäng (frön 20260748/20261646 → 4♠ i stället för 2♠).
+**Fix 2 (§5.1):** öppnarens tredje bud efter semi-forcing 1NT besvarar
+svararens inbjudan (frö 20260843 → 4♠ i stället för pass på 2NT).
+**Fix 3 (§4.3, ägarbeslut):** 1NT-öppnarens accept av en 2NT-inbjudan räknar
+`notrumpPoints` — "bra 15" (tät A-K-D-klump, femkortsfärg, ess/tior; inget
+flathets-avdrag i sang) accepterar, platt quack-15 avböjer (frö 20260744 →
+3NT). 3M-invitens golv på platt 12 hp BEHÖLLS (ägarbeslut, ingen kodändring).
+Facit-test för alla tre: `auction-missad-utgang.test.ts` (22 fall).
+
 ## Etapp 5 FÖRSKANNAD (2026-07-22): missad utgång — familjer + ägarfrågor
 M8:s alla 158 "missad utgång"-givar grupperade efter var auktionen stannade
 (`REVISOR_EXAMPLES=500`, frön i `revisor-output/`):
@@ -289,9 +319,29 @@ M8:s alla 158 "missad utgång"-givar grupperade efter var auktionen stannade
 - Generellt: stora delar av 1NT-/2NT-stopp-familjerna är DD-smickrade tunna
   utgångar (20–23 hp där maskarna sitter rätt) — jaga INTE dem blint.
 
-**Nästa steg (i ordning):** facit-test + fix för kandidat 1 → mät (M9) →
-kandidat 2 → mät → presentera golvfrågorna för ägaren med exempelhänderna
-ovan.
+**Nästa steg (i ordning):** ~~facit-test + fix för kandidat 1 → mät (M9) →
+kandidat 2 → mät~~ **KLART 2026-07-24** (se Mätning #9+#10 ovan) → **kvar:
+presentera golvfrågorna för ägaren med exempelhänderna nedan.**
+
+**ÄGARENS SVAR 2026-07-24 (golvfrågorna avgjorda):**
+- **3M-inviten på platt 12 hp: golvet BEHÅLLS** ("Nej — behåll golvet"). Ingen
+  kodändring; givarna i den familjen räknas som DD-brus.
+- **1NT-öppnarens 2NT-accept på 15: "bara som kvalitets-15"** → `notrumpPoints`
+  byggd (fix 3, se Mätning #11 ovan). Golvet 16 står kvar — det är värderingen
+  som blev ärligare.
+
+**Golvfrågornas exempelhänder (regenererade 2026-07-24 med `dealFromSeed`):**
+- **Frö 20260942** (`1♦–1♥–2♥–3♥–P`): öppnaren S har ♠86 ♥AQ75 ♦AQ72 ♣875 =
+  12 hp, helt platt (4-4-3-2, inga extravärden). Svararen N inbjuder med 12 hp
+  (♠AJT ♥KT864 ♦T43 ♣A6). DD ger tio stick i hjärter (maskarna sitter rätt) →
+  4♥ = 620 fanns. **Frågan: ska en platt 12-hand acceptera inbjudan?**
+  *Claudes rekommendation: NEJ — 12+12 platt är under utgångszonen; att sänka
+  golvet köper några utgångar och betalar med fler bet ("för högt" växer).*
+- **Frö 20260744** (`1NT–2NT–P`): 1NT-öppnaren N har ♠T72 ♥A83 ♦QT97 ♣AKQ =
+  15 hp (minimum av 15–17). Svararen S inbjuder med 8 hp. **Frågan: ska 15 hp
+  med en tät honnörsklump (AKQ) accepteras som "bra 15"?**
+  *Claudes rekommendation: bara som kvalitetsuppgradering (täta honnörer/
+  femkortsfärg), inte som ett generellt sänkt golv.*
 
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
