@@ -319,9 +319,34 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
   // Öppnaren bjöd 2NT (18–19).
   if (call === '2NT') return p >= 7 ? { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot 18–19 → 3NT.` } : pass('minimum balanserad')
 
-  // Hoppskift (3♣/3♦, GF) – krav: preferens med stöd, annars 3NT.
+  // Hoppskift (3♣/3♦, eller 3♥ över 1♠) – krav, öppnaren visade 16+. Svararen
+  // PLACERAR (familj C, frön 20260799/20260765/20261334): fit i HOPPSKIFTETS
+  // färg går före preferensen — med 4+ stöd och utgångsvärden på stödpoäng
+  // sätts utgången i fiten (4♥; minor: 3NT bara med håll i de objudna
+  // färgerna, annars 5m). En 3-korts högfärgspreferens med utgångsvärden
+  // lyfts till 4M — förr stannade 3M-preferensen under utgång och öppnaren
+  // passade kravet. Svaga händer prefererar billigast som förut.
   if (rebid.rule === 'rebid: hoppskift') {
-    if (len[M] >= 3) return { call: `3${mBid}`, rule: 'preferens (GF)', explanation: `${p} hp, ${len[M]} stöd → 3${mSym} (preferens, GF).` }
+    if (rs && len[rs] >= 4) {
+      const sp = pointsWithFloor(hand, rs, 'support')
+      if (sp.points >= 8) {
+        if (rs === 'hearts') {
+          return { call: '4H', rule: 'utgång', explanation: `${sp.text}, ${len[rs]} stöd i hjärter → 4♥ (utgång i hoppskiftets färg).` }
+        }
+        const unbid = RANK.filter((s) => s !== M && s !== rs)
+        if (unbid.every((s) => hasStopper(hand, s))) {
+          return { call: '3NT', rule: 'till spel', explanation: `${sp.text}, ${len[rs]} stöd i ${NAME[rs]} men håll runtom → 3NT.` }
+        }
+        return { call: `5${BID[rs]}`, rule: 'utgång', explanation: `${sp.text}, ${len[rs]} stöd i ${NAME[rs]}, håll saknas för sang → 5${SYM[rs]} (utgång).` }
+      }
+    }
+    if (len[M] >= 3) {
+      const spM = pointsWithFloor(hand, M, 'support')
+      if (spM.points >= 8) {
+        return { call: `4${mBid}`, rule: 'utgång', explanation: `${spM.text}, ${len[M]} stöd → 4${mSym} (utgång mot hoppskiftet).` }
+      }
+      return { call: `3${mBid}`, rule: 'preferens (GF)', explanation: `${p} hp, ${len[M]} stöd → 3${mSym} (preferens, GF).` }
+    }
     return { call: '3NT', rule: 'till spel', explanation: `${p} hp – ingen fit → 3NT.` }
   }
   // Reverse (2♠ över 1♥) – krav.
