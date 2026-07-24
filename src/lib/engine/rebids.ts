@@ -7,7 +7,7 @@
 // auktionen vid två bud tills vidare.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { pointsWithFloor, startingPoints } from './evaluation'
+import { notrumpPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
@@ -362,10 +362,12 @@ export function openerRebidAfter1NTResponse(response: ResponseResult, hand: Hand
       return p >= 17 ? { call: '3NT', rule: 'MSS-svar', explanation: 'ingen 4-korts minor, max → 3NT.' } : { call: '2NT', rule: 'MSS-svar', explanation: 'ingen 4-korts minor → 2NT.' }
     case '2NT inbjudan': {
       // TP-steg C-3: 1NT-öppning (15–17), svararen inbjuder kvantitativt med 2NT.
-      // Acceptera på startpoäng – en 15:a med 5-korts färg/bra ess/tior spelar som
-      // en 16:a och accepterar; en platt quack-15:a avböjer. Golvat vid HP.
-      const ntp = Math.max(p, startingPoints(hand).startingPoints)
-      const lift = ntp > p ? ` (${p} hp / ${ntp} startp.)` : ''
+      // Acceptera på SANGPOÄNG (ägarbeslut 2026-07-24: "bara som kvalitets-15") –
+      // en 15:a med 5-korts färg, bra ess/tior eller en tät honnörsklump (AKQ)
+      // spelar som en 16:a och accepterar; en platt quack-15:a avböjer. Golvat
+      // vid HP. Frö 20260744: ♠T72 ♥A83 ♦QT97 ♣AKQ = 15 hp → 3NT (600 fanns).
+      const ntp = Math.max(p, notrumpPoints(hand))
+      const lift = ntp > p ? ` (${p} hp / ${ntp} sangp.)` : ''
       return ntp >= 16 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT${lift}.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp minimum → pass.` }
     }
     case '3NT till spel':
@@ -625,6 +627,58 @@ export function openerAnswerNMF(
 // trumf + stöldvärde). Returnerar null för inbjudningsformer som inte hanteras
 // än (5-4-naturliga 2M-inbjudan m.fl.) → auktionen lämnas öppen som förut.
 
+// === ETAPP 5 FIX 2: öppnarens TREDJE bud efter semi-forcing 1NT, §5.1 ========
+//
+// Sekvensen 1♥/1♠–1NT–<återbud>–<svararens inbjudan> slutade förr i den
+// kanoniska linjen → öppnarens svar föll till off-book-lagret, som PASSADE.
+// En 14-hand med AQT863 sålde alltså given i 2NT fast 4♠ var hemma
+// (frö 20260843, docs/systemrevisorn.md etapp 5).
+//
+// Stegen (ägarprincipen "accept = över blott minimum"): 2♠-återbudet lovade
+// 6+ kort och 12–15 (16–18 hoppar, 19+ bjuder utgång), svararens inbjudan
+// visar 10–12 → utgång kräver ~15 BERGENPOÄNG (samma mått som övriga
+// högfärgsaccepter, `pointsWithFloor(..., 'bergen')`; jfr 18 mot en enkel
+// höjning som är fyra poäng svagare).
+//
+// 2NT-inbjudan mot ett 6-korts återbud rättas ALLTID till högfärgen: 1NT-
+// svararen har högst två kort i färgen, men 6-2 spelar bättre än sang på en
+// hand utan sidostyrka. Efter en NY FÄRG (5-4-handen) är 2NT-inbjudan äkta
+// sang: accept = 14+ hp → 3NT, annars pass.
+export function openerThirdBidAfterSemiForcing1NT(
+  hand: Hand,
+  M: Major,
+  rebid: ResponseResult,
+  second: ResponseResult,
+): ResponseResult | null {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const mBid = BID[M]
+  const mSym = SYM[M]
+  const { points: bp, text: txt } = pointsWithFloor(hand, M, 'bergen')
+
+  // 3M = svararens limithöjning (3-korts stöd, 10–12).
+  if (second.call === `3${mBid}`) {
+    if (bp >= 15) return { call: `4${mBid}`, rule: 'accepterar inbjudan', explanation: `${txt} mittemot limithöjningen → 4${mSym}.` }
+    return { call: 'P', rule: 'pass', explanation: `${txt} minimum → passar inbjudan (3${mSym}).` }
+  }
+
+  if (second.call !== '2NT') return null
+
+  // 2NT efter vårt 2M-återbud (6+ kort): rätta alltid till färgen.
+  if (rebid.call === `2${mBid}` && len[M] >= 6) {
+    if (bp >= 15) return { call: `4${mBid}`, rule: 'accepterar inbjudan', explanation: `${txt} med 6+ ${NAME[M]} → 4${mSym} (utgång).` }
+    return { call: `3${mBid}`, rule: 'rebid: egen färg', explanation: `${txt} minimum – 6-korts ${NAME[M]} spelar bättre än sang → 3${mSym}.` }
+  }
+
+  // 2NT efter en ny färg (5-4-handen): äkta sanginbjudan.
+  if (suitOfCall(rebid.call) && rebid.call !== `2${mBid}`) {
+    if (p >= 14) return { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp (maximum) → 3NT.` }
+    return { call: 'P', rule: 'pass', explanation: `${p} hp minimum → passar sanginbjudan.` }
+  }
+
+  return null
+}
+
 export function openerThirdBidIn1NTAuction(
   response: ResponseResult,
   rebid: ResponseResult,
@@ -634,9 +688,13 @@ export function openerThirdBidIn1NTAuction(
   const p = hcp(hand)
   const len = lengths(hand)
 
-  /** Accepterar öppnaren en inbjudan mot trumffärgen `trump` (null = sang)? */
+  /**
+   * Accepterar öppnaren en inbjudan mot trumffärgen `trump` (null = sang)?
+   * Sangaccepten räknar SANGPOÄNG (ägarbeslut 2026-07-24, samma "bra 15"-regel
+   * som den direkta 2NT-inbjudan i `openerRebidAfter1NTResponse`).
+   */
   const accepts = (trump: Suit | null): boolean =>
-    p >= 16 || (p === 15 && trump !== null && len[trump] >= 5)
+    p >= 16 || (p === 15 && trump !== null && len[trump] >= 5) || (trump === null && notrumpPoints(hand) >= 16)
 
   const acceptGame = (call: string, why: string): ResponseResult =>
     ({ call, rule: 'accepterar inbjudan', explanation: `${p} hp (maximum av 15–17) – ${why} → ${pretty(call)}.` })

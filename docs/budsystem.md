@@ -399,6 +399,19 @@ mitt i en Stayman-hittad hjärterfit.)
 | Transfer + 3♥/3♠ (6+ färg) | pass | 4♥/4♠ |
 | Transfer + 2NT (5-korts hf, jämn) | pass; med 3-korts stöd → 3M (preferens, 5-3-fiten spelar bättre) | 4M med 3-korts stöd, annars 3NT |
 
+**"Bra 15" i SANG** (ägarbeslut 2026-07-24): mot en **sanginbjudan** (2NT, med
+eller utan Stayman/transfer före) räknar öppnaren **sangpoäng** i stället för rå
+hp — en 15:a med kvalitet spelar som en 16:a och accepterar:
+- **tät honnörsklump** (A-K-D i samma färg) = +1 — tre säkra stick är
+  sticktillverkare även i en trekortsfärg,
+- **femkortsfärg** (längdpoängen) och **ess/tior över damer/knektar** lyfter som
+  förut,
+- **flathets-avdraget räknas inte** i sang (det är till för färgkontrakt).
+
+En **platt quack-15** (damer och knektar, ingen färg att sätta upp) avböjer
+fortfarande. Golvet 16 är alltså oförändrat — det är *värderingen* av handen som
+blev ärligare (frö 20260744: ♠T72 ♥A83 ♦QT97 ♣AKQ → 3NT, 600 fanns).
+
 #### Texas-transfer (4♦ / 4♥)
 För en lång hf med **utgångsstyrka men utan slamintresse**:
 
@@ -604,6 +617,20 @@ utan bra återbud. Annars beskriver hon hand och styrka:
 **Svararens andra bud:** preferens till öppnarens färg (svag), pass på en
 naturlig minorrebid med stöd, eller höjning/NT som visar 11–12 (inbjudan). En
 ny färg av svararen efter 1NT lovar 5+ kort och förnekar stöd (se §4.1-noten).
+
+**Öppnarens TREDJE bud — inbjudan ska alltid besvaras** (etapp 5, 2026-07-24):
+en inbjudan från svararen får aldrig lämnas obesvarad. Öppnaren dömer på
+**Bergenpoäng** (form räknas, aldrig under hp) mot det svararen visat (10–12):
+
+| Svararens inbjudan | Öppnarens svar |
+|---|---|
+| 3♥/3♠ (limithöjning, 3-korts stöd) | 15+ Bergenp. → **4M** · annars pass |
+| 2NT efter vårt **2M-återbud** (6+ kort) | 15+ Bergenp. → **4M** · annars **3M** — sang spelas aldrig när vi lovat sex kort |
+| 2NT efter en **ny färg** (5-4-handen) | 14+ hp → **3NT** · annars pass |
+
+Att 2NT-inbjudan *alltid* rättas till högfärgen med ett 6-korts återbud är
+poängen: 1NT-svararen kan ha bara två kort i färgen, men 6-2 spelar bättre än
+sang på en hand utan sidostyrka.
 
 ### 5.2 Efter ett 1-läges färgsvar (1x–1y)
 Svararen har visat 4+ kort och 6+ hp (krav 1 rond). Öppnaren letar främst
@@ -1026,6 +1053,23 @@ inbjudningsstyrka 10+ – kan ändras senare.)*
 **När fjärde färg INTE gäller:** passad hand, motståndarna stör, alla fyra färger
 bjudna på 1-läget, öppnaren har reverserat, eller svararen redan gjort hoppskift
 / 2-över-1.
+
+**Fit i öppnarens ANDRA färg = vanlig höjningsstege** (etapp 5, 2026-07-24).
+Har svararen 4+ kort i den färg öppnaren visade i rond 2 (t.ex. 1♣–1♥–1♠) höjer
+hon **efter stödpoäng**, precis som alla andra höjningar i systemet — förr blev
+det alltid den billigaste höjningen, så en 13-hand sa samma 2♠ som en 6-hand och
+utgången försvann:
+
+| Stödpoäng | Höjning av öppnarens högfärg |
+|---|---|
+| under 10 | billigaste höjning (2♠) |
+| 10–12 | hopphöjning = inbjudan (3♠) |
+| 13+ | utgång (4♠) |
+
+Två undantag: (a) efter en **reverse** har öppnaren 17+ och den billigaste
+höjningen är redan krav — där tas inget utrymme; (b) en **minorhöjning** ligger
+redan på 3-läget och graderas inte uppåt (utgång i minor kräver elva stick —
+vägen går via 3NT eller fjärde färg).
 
 ### 6.7 Drury (tvåvägs Reverse)
 Gäller när **svararen är passad hand** och partnern öppnar **1♥/1♠ i 3:e/4:e
@@ -2206,3 +2250,37 @@ Det avslöjar längd/räkning direkt för partnern.
   Facit-test FÖRE fix (alla frön + starkare motexempel):
   `auction-felfarg-fix6.test.ts`. tsc rent, hela sviten grön. Mätning #8:
   se `docs/systemrevisorn.md`.
+- **2026-07-24** – **Etapp 5 (missad utgång) fix 1+2: två mekaniska luckor
+  (§6.6, §5.1).** Revisorns näst största post angripen. **(1) Svararens höjning
+  av öppnarens ANDRA färg graderades inte** (frön 20260748/20261646): `fourthSuit`
+  returnerade alltid den BILLIGASTE höjningen så snart svararen hade 4+ kort i
+  öppnarens rond-2-färg, så `1♣–1♥–1♠–2♠` bjöds både på 6 hp och på 13 — öppnaren
+  passade på minimum och utgången försvann. Nu gäller systemets vanliga stege på
+  **stödpoäng** (`pointsWithFloor(..., 'support')`): under 10 = billigaste höjning,
+  10–12 = hopphöjning (inbjudan), 13+ = utgång. Gäller HÖGFÄRGS-fit i icke-reverse-
+  sekvenser; minorhöjningen (redan på 3-läget) och höjningen efter en reverse
+  (öppnaren 17+, billigaste höjning redan krav) är oförändrade (§6.6). **(2) Öppnaren
+  besvarade inte svararens inbjudan efter semi-forcing 1NT** (frö 20260843): den
+  kanoniska linjen slutade vid svararens 2NT/3M → off-book-lagret PASSADE, så en
+  14-hand med AQT863 sålde given i 2NT fast 4♠ var hemma. Ny `openerThirdBidAfter
+  SemiForcing1NT` (§5.1): 15+ Bergenpoäng accepterar utgång, 2NT rättas ALLTID till
+  högfärgen när återbudet lovat sex kort (6-2 spelar bättre än sang), och 2NT efter
+  en ny färg (5-4-handen) är äkta sanginbjudan (14+ hp → 3NT). Facit-test FÖRE fix:
+  `auction-missad-utgang.test.ts` (18 fall). tsc rent, hela sviten grön.
+  **Mätning #9+#10:** snitt-tapp 289,5 → **288,1 p/giv**, missad utgång
+  158 givar/53 050 p → **153/51 040**, exakt par 16,8 % → **17,0 %**; enda posten
+  som växte är "för högt" (+2 givar/580 p — priset för de nya inbjudningarna).
+  Detaljer i `docs/systemrevisorn.md`.
+- **2026-07-24** – **Etapp 5 fix 3: "bra 15" i sang (§4.3, ÄGARBESLUT).** Ägaren
+  fick de två värderings-golven ur förskanningen som frågor. **(a) 3M-inviten på
+  platt 12 hp: golvet BEHÅLLS** (frö 20260942 = DD-smickrad; att sänka köper
+  utgångar och betalar med bet) — ingen kodändring. **(b) 1NT-öppnarens
+  2NT-accept på 15: accepteras som "kvalitets-15"**, inte som generellt sänkt
+  golv. Ny `notrumpPoints` (`evaluation.ts`): startpoäng **+1 för tät
+  honnörsklump (A-K-D i samma färg)** och **utan flathets-avdraget** (det gäller
+  färgkontrakt). Används av 1NT-öppnarens accept både på den direkta 2NT-inbjudan
+  (`openerRebidAfter1NTResponse`) och efter Stayman/transfer
+  (`openerThirdBidIn1NTAuction`, sangfallet). Platt quack-15 avböjer fortfarande.
+  Facit: fyra fall i `auction-missad-utgang.test.ts` (frö 20260744 → 3NT).
+  **Mätning #11:** snitt-tapp **288,0**, missad utgång **151/50 640**, exakt par
+  **17,1 %**.

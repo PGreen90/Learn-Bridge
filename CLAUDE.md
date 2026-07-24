@@ -95,15 +95,37 @@ Läs den här filen först varje session.
 >
 > **🔵 NU = ETAPP 5: MISSAD UTGÅNG (startad 2026-07-22, vald ur topplistan
 > per ägarens uppdrag "vidare enligt planen: etapp 4 eller 5").** Nu näst
-> största posten (158 givar/53 050 p) och det äkta målet (lillslam-posten är
-> delvis medveten via kaptensregeln). **Förskanningen är KLAR** — familjer +
-> fix-kandidater i `docs/systemrevisorn.md` ("Etapp 5 FÖRSKANNAD"):
-> två mekaniska kandidater först (svararens höjning av öppnarens ANDRA färg
-> graderas inte — 2♠ på 13 hp; öppnaren passar 2NT-invit med 6-korts
-> högfärg), därefter VÄRDERINGS-GOLVEN som kräver ägarens input
-> (accept-golv för 3M-invit på minimum, 1NT-öppnarens 2NT-accept på 15 —
-> exempelhänder i dokumentet; fråga, gissa inte).
-> **Nästa session börjar med:** facit-test + fix för kandidat 1, mät M9.
+> största posten och det äkta målet (lillslam-posten är delvis medveten via
+> kaptensregeln). **Förskanningen KLAR** (familjer i `docs/systemrevisorn.md`).
+>
+> **✅ Fix 1+2 KLARA 2026-07-24 — de två MEKANISKA kandidaterna** (budsystem.md
+> §6.6/§5.1 + §9): **(1)** svararens höjning av öppnarens ANDRA färg graderas
+> nu efter stödpoäng (under 10 = billigast, 10–12 = hopphöjning/inbjudan,
+> 13+ = utgång) — förr sa en 13-hand samma 2♠ som en 6-hand (frön 20260748/
+> 20261646). Minorhöjning + höjning efter reverse oförändrade. **(2)** öppnaren
+> BESVARAR nu svararens inbjudan efter semi-forcing 1NT (ny
+> `openerThirdBidAfterSemiForcing1NT`): 15+ Bergenpoäng → utgång, 2NT rättas
+> alltid till högfärgen när återbudet lovat sex kort, 2NT efter ny färg =
+> äkta sanginbjudan (14+ → 3NT) — förr passade off-book-lagret och 4♠ försvann
+> (frö 20260843). Facit-test FÖRE fix: `auction-missad-utgang.test.ts` (18 fall).
+> **Mätning #9+#10: snitt-tapp 289,5 → 288,1 p/giv, missad utgång 158/53 050 →
+> 153/51 040, exakt par 16,8 → 17,0 %.** Enda posten som växte: "för högt"
+> (+2 givar) — priset för att inbjudningar nu besvaras.
+>
+> **✅ Fix 3 KLAR 2026-07-24 — ÄGARENS svar på värderings-golven** (budsystem.md
+> §4.3 + §9): (a) **3M-invitens golv på platt 12 hp BEHÅLLS** (ägarval "behåll
+> golvet" — de givarna är DD-smickrade; ingen kodändring); (b) **1NT-öppnarens
+> 2NT-accept på 15 = "kvalitets-15"**: ny `notrumpPoints` (`evaluation.ts`) =
+> startpoäng +1 för tät A-K-D-klump och UTAN flathets-avdraget (som hör till
+> färgkontrakt); används av accepten både direkt och efter Stayman/transfer.
+> Platt quack-15 avböjer fortfarande. **Mätning #11: snitt-tapp 288,0 p/giv,
+> missad utgång 151/50 640, exakt par 17,1 %** (baslinje 300 / 15,9 %).
+>
+> **🔵 ETAPP 5 DÄRMED KLAR i sin mekaniska+golv-del** (158→151 givar,
+> 53 050→50 640 p). Resten av posten är DD-smickrade tunna utgångar som
+> medvetet INTE jagas. **Nästa session börjar med:** ägaren väljer nästa etapp
+> — etapp 4 (F1-resten: familj B efter stark 2♣ + C:s reverse/hoppskift) eller
+> en ny mönsterjakt i topplistans nästa post.
 >
 > **Planen (etapper i ordning — NU = exakt en etapp i taget):**
 > 1. **✅ Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38
@@ -152,7 +174,17 @@ Läs den här filen först varje session.
 > `docs/budsystem-revision.md`.
 
 ### 👀 Bevaka i spel (aktiva noteringar från nyligen byggt — säg till om det känns fel)
-- **Fel färg-spåret fix 6 (2026-07-22, NYAST):** fyra nya domslutsvakter i
+- **Missad utgång fix 1+2 (2026-07-24, NYAST):** (a) har du 4 kort i den färg
+  boten visade i sin ANDRA rond (1♣–1♥–1♠) höjer boten nu graderat — 2♠ svagt,
+  3♠ inbjudan, 4♠ med utgångsvärden — **bevaka:** hamnar ni för högt någon gång
+  (posten "för högt" växte två givar i mätningen)? (b) inbjuder du efter ditt
+  1NT-svar (1♠–1NT–2♠–2NT) svarar boten nu alltid: 3♠ med minimum, 4♠ med
+  utgångsvärden — sang spelas aldrig när boten lovat sex kort — **bevaka:**
+  känns 3♠-rättelsen rätt, eller saknar du 2NT som slutkontrakt? (c) 1NT-boten
+  accepterar nu din 2NT-inbjudan med en **"bra 15"** (tät A-K-D-klump eller
+  femkortsfärg) — **bevaka:** hamnar ni i tunna 3NT för ofta? Platt 15 med bara
+  damer/knektar passar fortfarande.
+- **Fel färg-spåret fix 6 (2026-07-22):** fyra nya domslutsvakter i
   konkurrens: (a) har din partner just passat höjer boten dig bara TÄVLANDE
   (billigast) — **bevaka:** missas utgångar när partnern smygpassat med bra
   hand? (b) bot-öppnaren tävlar inte över deras utgång efter din pass —

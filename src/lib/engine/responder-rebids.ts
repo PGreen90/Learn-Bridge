@@ -645,9 +645,36 @@ function fourthSuit(hand: Hand, x: Suit, y: Suit, second: Suit, rebid: ResponseR
   const bal = isBalanced(hand)
   const fourth = RANK.find((s) => s !== x && s !== y && s !== second)!
 
-  // 1. Fit i öppnarens andra färg.
+  // 1. Fit i öppnarens andra färg — GRADERAD efter stödpoäng (etapp 5 fix 1,
+  // §6.6): under 10 = billigaste höjning, 10–12 = hopphöjning (inbjudan),
+  // 13+ = utgång. Förr sa en 13-hand samma 2♠ som en 6-hand → öppnaren passade
+  // på minimum och utgången försvann (frön 20260748/20261646).
+  // Undantag (oförändrat): efter en REVERSE har öppnaren 17+ och den billigaste
+  // höjningen är redan krav — då tas inget utrymme; och en MINORhöjning ligger
+  // redan på 3-läget, så den graderas inte uppåt (utgång i minor kräver 11 stick;
+  // med utgångsvärden går vägen via 3NT/fjärde färg nedan).
   if (len[second] >= 4) {
     const call = bidAbove(second, rebid.call)
+    const secondIsMajor = second === 'hearts' || second === 'spades'
+    if (secondIsMajor && rebid.rule !== 'reverse') {
+      const sp = pointsWithFloor(hand, second, 'support')
+      const level = parseInt(call[0], 10)
+      if (sp.points >= 13 && level < 4) {
+        return {
+          call: `4${BID[second]}`,
+          rule: 'utgång',
+          explanation: `${sp.text}, ${len[second]} stöd i ${NAME[second]} → 4${SYM[second]} (utgång).`,
+        }
+      }
+      if (sp.points >= 10 && level + 1 < 4) {
+        const jump = `${level + 1}${BID[second]}`
+        return {
+          call: jump,
+          rule: 'hopphöjning (inbjudan)',
+          explanation: `${sp.text}, ${len[second]} stöd i ${NAME[second]} → ${pretty(jump)} (inbjudan).`,
+        }
+      }
+    }
     return { call, rule: 'höjning', explanation: `${p} hp, ${len[second]} stöd i ${NAME[second]} → ${pretty(call)}.` }
   }
   // 2. Egen 6-korts färg.
