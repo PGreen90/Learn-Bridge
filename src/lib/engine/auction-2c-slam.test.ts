@@ -152,6 +152,111 @@ describe('etapp 4 familj B fix 1: kaptensmatte + RKC efter positivt svar på 2�
   })
 })
 
+// ---- FIX 2: slamzon UTAN trumf (frö 20261372 + syntetiska vakter) -----------
+
+// Frö 20261372: `2♣–3♣–3♥–4♣–4♥–P` — svararen W (14 hp, AKQJT3 i klöver) har
+// ingen hjärterfit men står i slamzon (14 + visade 22 = 36) med en egen
+// SJÄLVBÄRANDE färg. Live-lagret rebjöd bara 4♣ och auktionen dog i 4♥.
+// Facit: RKC med egen färg som trumf → 6♣ (DD-verifierat 12 stick av W;
+// 6NT står också men 6♣ är den ärliga trumfen).
+const HANDS_1372 = {
+  N: 'S:63 H:73 D:J762 C:97654',
+  E: 'S:K8 H:AKJT64 D:KQ943 C:-',
+  S: 'S:AJT9742 H:Q95 D:8 C:82',
+  W: 'S:Q5 H:82 D:AT5 C:AKQJT3',
+}
+const HISTORY_1372: ResolvedCall[] = [
+  call('E', '2C'), call('S', 'P'), call('W', '3C'), call('N', 'P'),
+  call('E', '3H'), call('S', 'P'),
+]
+
+// Syntetisk: svararen 11 hp (2♥-positivt), öppnaren BALANSERAD 24 utan fit →
+// 3NT-återbud → 33 ihop utan trumf → 6NT (spelas från den starka handen).
+const HANDS_NOFIT_NT = {
+  N: 'S:T98 H:AJT9 D:T87 C:T53',
+  E: 'S:AK4 H:87 D:AKQJ C:AK98',
+  S: 'S:7652 H:32 D:9643 C:762',
+  W: 'S:QJ3 H:KQ654 D:52 C:QJ4',
+}
+const HISTORY_NOFIT: ResolvedCall[] = [
+  call('E', '2C'), call('S', 'P'), call('W', '2H'), call('N', 'P'),
+  call('E', '3NT'), call('S', 'P'),
+]
+
+// Samma läge men svararen 9 hp → 31 ihop = under driv-zonen utan trumf
+// (avgränsning: ingen kvantitativ inbjudan här) → ingen slam blåses.
+const HANDS_NOFIT_LOW = {
+  N: 'S:T98 H:AJT9 D:T87 C:T53',
+  E: 'S:AK4 H:87 D:AKQJ C:AK98',
+  S: 'S:Q762 H:32 D:9643 C:762',
+  W: 'S:J53 H:KQ654 D:52 C:QJ4',
+}
+
+// Frö 20261107 — VAKTEN mot 6NT-blasten: öppnaren E har bara 13 hp
+// (spelstick-2♣, 6-5) och rebjuder 2♠. Svararen W (12 hp, ingen spaderfit,
+// ingen egen solid färg) får INTE räkna "12 + 22 = 34 → 6NT" — spelstickens
+// längd ger inga sangstick utan fit (6NT = åtta stick på DD). Auktionen ska
+// vidare naturligt och stanna under slam.
+const HANDS_1107 = {
+  N: 'S:A95 H:J8 D:J98 C:AT764',
+  E: 'S:KJT872 H:9 D:AKQ64 C:5',
+  S: 'S:Q6 H:Q7632 D:T C:J9832',
+  W: 'S:43 H:AKT54 D:7532 C:KQ',
+}
+const HISTORY_1107: ResolvedCall[] = [
+  call('E', '2C'), call('S', 'P'), call('W', '2H'), call('N', 'P'),
+  call('E', '2S'), call('S', 'P'),
+]
+
+describe('etapp 4 familj B fix 2: slamzon utan trumf', () => {
+  it('frö 20261372-läget: W (14 hp, AKQJT3) frågar 4NT med egen färg som trumf', () => {
+    const d = deal('2cslam-20261372-pos', 'E', 'ns', HANDS_1372)
+    expect(decideCall(d, HISTORY_1372, 'W').bid).toBe('4NT')
+  })
+
+  it('frö 20261372 hela auktionen: lillslam 6♣ nås', () => {
+    const d = deal('2cslam-20261372', 'E', 'ns', HANDS_1372)
+    const history = botAuction(d)
+    expect(history).not.toBeNull()
+    expect(contractFromCalls(history!)).toMatchObject({ level: 6, strain: 'clubs' })
+  })
+
+  it('utan fit mot BALANSERAT 3NT-återbud: 33 ihop → 6NT', () => {
+    const d = deal('2cslam-nofit-nt-pos', 'E', 'none', HANDS_NOFIT_NT)
+    expect(decideCall(d, HISTORY_NOFIT, 'W').bid).toBe('6NT')
+  })
+
+  it('utan fit, 6NT-vägen, hela auktionen: 6NT nås', () => {
+    const d = deal('2cslam-nofit-nt', 'E', 'none', HANDS_NOFIT_NT)
+    const history = botAuction(d)
+    expect(history).not.toBeNull()
+    expect(contractFromCalls(history!)).toMatchObject({ level: 6, strain: 'NT' })
+  })
+
+  it('under driv-zonen utan trumf (31 ihop): ingen slam blåses', () => {
+    const d = deal('2cslam-nofit-low', 'E', 'none', HANDS_NOFIT_LOW)
+    const history = botAuction(d)
+    expect(history).not.toBeNull()
+    const contract = contractFromCalls(history!)
+    expect(contract).not.toBeNull()
+    expect(contract!.level).toBeLessThan(6)
+  })
+
+  it('frö 20261107-läget: efter öppnarens FÄRG-återbud utan fit blåses inte 6NT', () => {
+    const d = deal('2cslam-20261107-pos', 'E', 'none', HANDS_1107)
+    expect(decideCall(d, HISTORY_1107, 'W').bid).not.toBe('6NT')
+  })
+
+  it('frö 20261107 hela auktionen: stannar under slam', () => {
+    const d = deal('2cslam-20261107', 'E', 'none', HANDS_1107)
+    const history = botAuction(d)
+    expect(history).not.toBeNull()
+    const contract = contractFromCalls(history!)
+    expect(contract).not.toBeNull()
+    expect(contract!.level).toBeLessThan(6)
+  })
+})
+
 // ---- Vakter: inbjudningszonen (31–32) och accepten på egna Bergenpoäng ------
 
 // Konstruerad giv: öppnaren 23 hp balanserad (2♣ → stöd), svararen 8 hp med

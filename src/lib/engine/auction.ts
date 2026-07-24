@@ -561,6 +561,44 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       })
       return finish(false)
     }
+
+    // FIX 2: INGEN trumf funnen — kaptenen kan ändå stå i slamzon (33+ mot
+    // visade 22). Egen redan VISAD 6+ färg med minst två topphonnörer (A/K/Q)
+    // är en självbärande trumf → RKC i den (nyckelkortssvaret vaktar mot att
+    // en spelstick-öppning saknar essen). 6NT direkt bjuds BARA när öppnarens
+    // återbud var 3NT — då är styrkan visad BALANSERAD (riktiga hp); efter ett
+    // FÄRG-återbud kan "22:an" vara en spelstick-hand vars längd inte ger
+    // sangstick utan fit (frö 20261107: 13 hp 6-5 → 6NT åtta stick), så där
+    // fortsätter auktionen naturligt. Under 33 → vanliga flödet står kvar
+    // (avgränsning: ingen kvantitativ inbjudan i 31–32 utan trumf).
+    const rh = deal.hands[responderSeat]
+    if (hcp(rh) + STRONG_2C_SHOWN_MIN >= 33) {
+      const topHonors = respSuit
+        ? rh.filter((c) => c.suit === respSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length
+        : 0
+      const ownSolid = respSuit && lengths(rh)[respSuit] >= 6 && topHonors >= 2 ? respSuit : null
+      const slam = ownSolid
+        ? slamInvestigation(deal.hands[openerSeat], rh, ownSolid, rebid.call, { partnerMin: STRONG_2C_SHOWN_MIN })
+        : null
+      if (slam) {
+        for (const t of slam) {
+          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+        }
+        return finish(false)
+      }
+      if (rebid.rule === 'rebid: 3NT (GF)') {
+        turns.push({
+          seat: responderSeat,
+          role: 'svarare',
+          call: '6NT',
+          rule: 'slamavslut',
+          explanation: `${hcp(rh)} hp mot visad balanserad ${STRONG_2C_SHOWN_MIN}+ → 6NT (slamzon, sang behöver ingen fit).`,
+        })
+        return finish(false)
+      }
+      // Färg-återbud utan fit och utan egen solid färg: ingen blast — vidare.
+    }
   }
 
   // Slamutredning efter öppnarens HOPP-ÅTERBUD i egen minor (1m–1M–3m, felrapport
