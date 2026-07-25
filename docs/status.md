@@ -1,8 +1,17 @@
 # Projektstatus — vad som är byggt
 
-> Läs denna fil när du vill veta exakt vad som implementerats.
-> Uppdateras i takt med att funktioner landar.
-> Detaljerad byggordning framåt finns i `docs/arbetslista.md`.
+> **Senast genomgången 2026-07-25** (hela filen faktakollad mot koden; sex
+> inaktuella påståenden rättade — se "Rättat vid genomgången" sist i filen).
+>
+> **Så läser du filen:**
+> - **Viktigast:** §"Budmotorns tre auktionslager + `open`-handoff" (längre ner) =
+>   **arkitekturkontraktet**. Läs ALLTID den före budarbete. Den är verifierad
+>   aktuell.
+> - Resten är **byggnoteringar per FAS**, skrivna när respektive del landade. De
+>   säger vad som finns och i vilken fil — men de beskriver läget *då*. Är en
+>   detalj avgörande: kolla koden.
+> - Vad vi gör NU står i `CLAUDE.md`, inte här. Vad som hänt sedan: `docs/historik.md`.
+> - Index över all dokumentation: `docs/README.md`.
 
 ## Budmotor (`src/lib/engine/`)
 
@@ -146,14 +155,32 @@
   nedgraderar aldrig under HP.
 - **TP-steg C-1:** öppnarens högfärgs-accepter (enkel höjning, Bergen, splinter)
   räknar Bergenpoäng = `max(HP, bergenPoints)` (`rebids.ts`) – form lyfter mot
-  game try/utgång/slamintresse, aldrig under HP. Kvar: minorhöjningar + sang-
-  accepter (C-2/C-3) + sang-nudge för öppning (D).
+  game try/utgång/slamintresse, aldrig under HP.
+- ⚠️ **Rättat 2026-07-25:** här stod tidigare "Kvar: C-2/C-3/D". **Alla TP-steg
+  A–F är klara sedan 2026-07-03** (se avsnittet Värdering ovan och
+  `docs/tp-arbetslista.md`).
 - Spec: `docs/handvardering.md`
 
 ## Slamverktyg (`slam.ts`, `slam-auction.ts`, `nt-slam.ts`)
 
+> ⚠️ **VIKTIGT (rättat 2026-07-25):** avsnittet nedan beskrev slammotorn som den
+> såg ut FÖRE de **ärliga slamportarna** (2026-07-07). Två saker gäller inte längre:
+> **(1) motorn cue-bjuder inte längre själv** — den automatiska cue-ronden är
+> BORTTAGEN (den byggde på `pairControlsSideSuits`, som tjuvkikade på partnerns
+> kort, och orsakade den hängande-cue-quirken; se kommentaren överst i
+> `slam-auction.ts`). §6.2 finns kvar i boken som konvention, och tolkningslagret
+> förstår manuella cue-bud. **(2) Slamzonen räknas mot partnerns VISADE intervall**,
+> aldrig hens faktiska kort. Kaptensregeln: ≥33 driv / 31–32 inbjudan mot visat
+> minimum; storslam kräver visshet. Beskrivningar med "cue-rond" eller
+> "parets samlade poäng" nedan är alltså **kik-erans** text.
+
 - 1430 RKC, cue-bid, Sjöbergs 5NT, Gerber, Exclusion — testade motorfunktioner.
-- Inkopplade i växande auktioner: Jacoby 2NT-fit (1430 RKC vid slamzon ≥ 33), Sjöbergs 5NT i RKC-grenen, cue-bid-rond före RKC, minor-fit-RKC (inverterad minor), NT-slam med Gerber 4♣ över **1NT och 2NT** (`gerberInvestigation`/`gerber2NTInvestigation` i `nt-slam.ts`), Exclusion efter splinter.
+- Inkopplade i växande auktioner: Jacoby 2NT-fit, Sjöbergs 5NT i RKC-grenen,
+  minor-fit-RKC (inverterad minor), NT-slam med Gerber 4♣ över **1NT och 2NT**
+  (`gerberInvestigation`/`gerber2NTInvestigation` i `nt-slam.ts`), Exclusion efter
+  splinter. **Tillkommit senare:** öppnarens hopphöjning, hopp-återbud i minor,
+  1NT-återbudet, MSS, **stark 2♣** (etapp 4 familj B) och **reverse/hoppskift**
+  (familj C) — alla via kaptensregeln. Full lista: `docs/bevaka.md`.
 - **Gerber över 2NT (FAS 8, 2026-07-01):** en balanserad slamsäker svarare (13+ hp mittemot 20–21 ≈ 33+) frågar ess med 4♣ i stället för att blint blåsa 6NT (kan nu stanna i 4NT om två ess saknas, driva storslam via 5♣-kungfrågan ≈37+). Delad sekvensbyggare med 1NT-Gerber. Facit i `nt-slam.test.ts`.
 - **Exclusion när renons rankar över trumf (FAS 8, 2026-07-01):** `exclusionInvestigation` (`slam-auction.ts`) hanterar nu även hjärter trumf + spaderrenons (5♠ Exclusion, lagligt över 3NT-relät). Öppnarens högsta stegsvar (steg 4) landar på exakt 6♥; vill svararen bara ha lillslam passar hon (i stället för att olagligt bjuda om 6♥). Nivåbailen borttagen. Facit i `slam-auction.test.ts`. **FAS 8 (Slamsystem) därmed helt klar (testsvit 630).**
 
@@ -231,7 +258,7 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 - **Två-klicks fan-ut** för att spela kort.
 - **Klickbara bud + ALERT-märke** i auktionsvyn – `alerts.ts` (blått A på konstgjorda bud, klick visar betydelsen).
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
-- **Kontraktväljaren (träningsmål, 2026-07-05, ej pushat):** en "Mål:"-pill i
+- **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,
   utgång hf/lf, 3NT, lillslam, storslam, med störning). `contract-target.ts`
   (`matchesTarget`, `simulateAuction`, `dealForTarget`) slumpar givar och behåller
@@ -300,11 +327,9 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   (förut härleddes ett felaktigt "passat ut"-kontrakt), och `decideCall` tvingar
   via `takeoutDoubleToAnswer` fram advancerns svar (`answerTakeoutDouble`: längsta
   objudna färg, 12+ = cue). Historiedriven → robust även när Syd bjuder off-book.
-- **Känd gräns:** ~0,25 % av färdiga auktioner är slamlinjer (Jacoby 2NT → cue
-  → 1430 RKC) där `buildAuction` lägger två bud i rad på samma plats (öppnarens
-  cue hoppas över utan kontroll) → ingen laglig medurs-auktion. decideCall
-  stänger dem lagligt på sista budet. Fixas när slamverktygen kopplas in i
-  budlådan (se arbetslistan).
+- ~~**Känd gräns:** slam-quirken (två bud i rad på samma plats i Jacoby 2NT → cue
+  → RKC)~~ **LÖST 2026-07-07** i och med att den automatiska cue-ronden togs bort
+  (ärliga slamportar). Budlådan stannar inte längre under slam.
 
 ## Budlådan – UI:t (`BiddingBox.tsx` + budfas i `Play.tsx`)
 
@@ -347,8 +372,9 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
 - Ny regel **"Jordan 2NT"** i `rules.ts` (kravnivå inbjudan, alertas).
 - Facit: `auction-competitive-raises.test.ts` (planens testmatris 1♥(X)/1♥(1♠)/
   1♥(2♣)/1♥(2♦)/1♠(2♥)). Hela sviten 440 grön.
-- **Avgränsning:** öppnarens fortsättning i konkurrens (acceptera/avböja
-  inbjudan) modelleras fortfarande en rond – hör till resten av FAS 2.
+- ~~**Avgränsning:** öppnarens fortsättning i konkurrens modelleras en rond~~
+  **BYGGD senare** (§5.8 + flerronds-konkurrens A+B+C i §5.9/§7.1): öppnaren
+  tävlar/återöppnar i rond 2+, cue = 15+, 18+ = utgång.
 
 ### Negativa dubblingar verifierade (FAS 2 punkt 7)
 
@@ -462,8 +488,11 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
   bevisbart korrekt – bara **direkt sits** (RHO öppnade nyss). Facit:
   `auction-live.test.ts` (Väst kliver in 1♠ / X över Syds off-book 1♥; svag hand
   passar; ingen falsk balansering efter en passrunda). On-book bevisat oförändrat.
-- **Avgränsning (nästa steg):** balansering (inkliv efter en passrunda) och inkliv
-  över andra öppningar (1NT, svaga tvåor, hoppöppningar) återstår.
+- ~~**Avgränsning (nästa steg):** balansering och inkliv över andra öppningar
+  återstår.~~ **BYGGT** (R1 Fynd #2 delbit 1–2, live 2026-07-03): balansering
+  ("låna en kung": inkliv från 5 hp, X från 9, 1NT 11–14) + inkliv över 1NT
+  (DONT), svaga tvåor och spärrar. Balansering **över deras svaga tvåor** i
+  utpassningsläget tillkom 2026-07-22 (etapp 3 fix 5a).
 
 ## Felrapportering i Spela kort (2026-07-02, testsvit 1481)
 
@@ -495,14 +524,35 @@ generativa (hand → kanonisk rad). Mål: budgivningen ska aldrig kännas tom.
   till `string`.
 - **Kvar (SENARE):** PAT-i-localStorage-varianten (skicka utan att öppna GitHub).
 
-## Nästa steg (ur arbetslistan)
+## Byggt EFTER 2026-07-05 (sammanfattning — detaljerna i `docs/historik.md`)
 
-- **Slam-quirk**: slamlinjer (Jacoby 2NT → cue → RKC) kan ge två bud i rad på
-  samma plats → ingen laglig medurs-auktion; budlådan stannar där. Fixas i
-  `slam-auction.ts` (öppnaren fyller luckan lagligt). Ovanligt (~0,25 %).
-- **Off-book Syd – grunden klar:** datorpartnern hänger nu med och svarar på Syds
-  egna bud (stöd m. fit graderat efter styrka, annars egen färg/sang – se
-  "Tolkande budmotor – steg 3" ovan). Kvar att bredda: off-book-svar i
-  konkurrens och vidare ronder.
-- "Framkalla slutbud"-väljare (ägarens idé, se `docs/arbetslista.md`).
-- Ev. webworker för DDS-facit på utspelet.
+Den här filen skrevs i huvudsak fram till 2026-07-05. Detta har landat sedan dess
+och är **live**:
+
+- **ÄRLIGA SLAMPORTAR (2026-07-07)** — grundprincipen som styr alla slam-vägar:
+  egen hand + partnerns VISADE intervall, aldrig hens kort. Auto-cue-ronden
+  borttagen, kaptensregeln (≥33 driv / 31–32 inbjudan) införd. Se varningen i
+  Slamverktyg ovan.
+- **Poängsystemet (`scoring.ts`)** — riktig bridgepoäng mot ägarens tabell, X/XX i
+  kontraktet, "Ö/V +420" i resultatdialogen; bottarna straffdubblar.
+- **Steg A: hosting** — flytt till Vercel, egen domän **rebidz.com**, PWA
+  (2026-07-05). Testgrind i `vercel.json` (`tsc && npm test && build`).
+- **UI-overhaul steg 1–5 (2026-07-08)** — designtokens, delad `<Dialog>`,
+  `Play.tsx`-splitten, jämnt mörkt läge, UI-röktester.
+- **Felrapporter #1–#39** betade och test-låsta (`/felrapporter`-kommandot).
+- **Systemrevisorn (2026-07-21)** — mätrigg som bjuder 1 000 givar med samma frö,
+  DD-facit via `bridge-dds` (WASM, dev-beroende) och kategoriserar tappet.
+  `docs/systemrevisorn.md`.
+- **"Budgivningen mot perfekt" etapp 3/5/4 (2026-07-21 → 07-25)** — fel färg
+  (6 fixar), missad utgång (3 fixar), F1-resten: slam efter 2♣ + reverse/hoppskift.
+  Snitt-tapp 300 → 287,2 p/giv.
+
+**Vad som är nästa steg står i `CLAUDE.md`s projektkarta** — inte här.
+
+## Rättat vid genomgången 2026-07-25
+1. Slamverktyg beskrev den borttagna auto-cue-ronden (kik-eran) → varning tillagd.
+2. Slam-quirken stod som känd gräns på två ställen → löst 2026-07-07.
+3. TP-steg sa "Kvar: C-2/C-3/D" → alla A–F klara sedan 2026-07-03.
+4. Kontraktväljaren stod som "ej pushat" → live sedan commit `6b07cad`.
+5. FAS 2-avgränsningen (öppnarens fortsättning i konkurrens) → byggd.
+6. "Balansering återstår" → byggd 2026-07-03, utökad 2026-07-22.
