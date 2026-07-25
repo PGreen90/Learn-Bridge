@@ -1,0 +1,111 @@
+# ⚪ SENARE & 🅿️ PARKERAT — full beskrivning
+
+> **Vad detta är:** idéer och kända luckor som medvetet INTE byggs nu.
+> CLAUDE.md listar bara rubrikerna i projektkartan — hela motiveringen bor här
+> (flyttat 2026-07-25 för att hålla kartan kort).
+>
+> **SENARE** = oordnat, hämtas upp till NÄST en i taget när ägaren väljer.
+> **PARKERAT** = medvetet avstängt, ska inte vägas in i beslut alls.
+
+## ⚪ SENARE
+
+### Felrapport #36 — större kort på mobil (2026-07-07)
+Ägaren har stora fingrar och vill ha större tryckytor för korten i Spela kort på
+mobilen. Ren UI-justering (kortstorlek/tryckyta i `cardLayout.ts`/`Felt.tsx`) —
+hanteras när budgivningsspåret tillåter, eller ihop med faceliften. Issuen hålls
+öppen tills fixad.
+
+### Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (2026-07-06)
+Ägarens 4-punktslista punkt 1. Data i `src/data/exercises/*.json` +
+`EXERCISES_BY_THEME` i `bidding.ts`; facit bör knytas till motorns egna svar så det
+aldrig lär ut fel. (Punkt 2+4 = klara; punkt 3 "sondera budsystemet på djupet" =
+gjord 2026-07-07 via budsystem-revisionen + F1.)
+
+### B13 — öppnarens återbud efter inverterad minorhöjning (2026-07-07)
+Dagens återbud är grova (stopp-visning kräver 4+ kort i färgen → en 17 hp med
+6-korts minor visas som "minimum 3m") → ärliga slam-misser. Se
+`docs/budsystem-revision.md` B13.
+
+### Spelmotor-kvalitet: spelföring + försvar (felrapport #32 + #34, 2026-07-07)
+Två kortspels-kvalitetsluckor, ägarbeslut att skjuta upp till ett dedikerat
+spelmotor-spår (`docs/bot-hjarna.md`).
+1. **#32 – spelföraren etablerar inte lång färg:** i 3NT drog boten (Öst) ♥AKT och
+   krossade träkarlens ♥QJ i stället för att sätta upp den långa rutern (♦KJT863)
+   medan hållen fanns kvar → 3 bet. Kräver spelplanering (räkna stick, etablera lång
+   färg före honnörer).
+2. **#34 – slarvigt försvar mot 1NT:** försvaret duckade billigt i trick 1 (Nord ♥5
+   under partnerns utspel i stället för tredje-hand-högt). Kräver bättre
+   motspels-heuristik (tredje-hand-högt, honnörsspel).
+
+Båda i `play-bot.ts` (heuristik + Monte-Carlo). Plockas upp när ägaren vill
+investera i spelkvalitet.
+
+### TP till §7-inkliven (2026-07-05, ägarbeslut vid "låna en kung")
+§7-lagret (`overcall`, `advanceOvercall`, DONT, försvar mot svaga tvåor) räknar
+fortfarande **rå HP** — TP (form/fördelning) har aldrig nått dit. Att låta
+balanserings- OCH direkt-inkliv räkna TP är en riktig förbättring (en formstark 8:a
+kliver in), men **additiv** ovanpå "låna en kung" (som är sits-spaken), inte en
+ersättare. Eget test-låst steg (som TP-stegen A–F).
+
+### Advancer-rabatt efter balansering (2026-07-05)
+Partnern som SVARAR en balansering vet ännu inte att balanseraren kan vara en kung
+lättare → kan övervärdera tillbaka och driva för högt. En symmetrisk "räkna en kung
+mindre när du svarar en balansering" saknas. (Delvis byggd för svaga tvåor i etapp 3
+fix 5a; det generella fallet återstår.) Plockas upp om en giv visar att paret
+överbjuder.
+
+### 17+ stark enfärgshand EFTER två bjudna färger (takeout, 2026-07-05)
+En 17+ enfärgshand som borde upplysningsdubbla när motståndarna redan bjudit två
+färger (t.ex. 1♦–P–1♥) gör det INTE — där följer `decideCall` en färdig
+buildAuction-linje som passar handen, så live-hanteraren (`maybeTakeoutOfResponse`,
+som bara gör 4-4) når aldrig fram. Att tvinga den starka dubblingen där kräver att
+den generativa linjen i `auction.ts` (`buildAuction`) modellerar inklivet — ett
+grundläggande ingrepp. Öppningsfallet + 4-4-fallet är klara & live (felrapport #23,
+§7.3).
+
+### Auto-facit på hela given i webworker (R3 fynd #3 del 2)
+Visa spelförarens double-dummy-optimum automatiskt i resultatdialogen. Byggdes
+synkront men backades — helgivs-DDS från utspelet är för tung (probe: 79/80 kontrakt
+gav upp efter ~1,7 s, spränger 2M-nodbudgeten → skulle frysa + nästan alltid "för
+tung"). Kräver bakgrundstråd (mc-worker) med möjliga långa väntetider, eller
+snabbare lösare. Del 1 (budhint "Motorn hade valt X") är redan gjord + live.
+
+### Kanoniska linjen passar ut ostörda tvåfärgsinkliv (felrapport #7, 2026-07-03)
+`buildAuction` (`auction.ts`) kan stänga en linje som 1♠–2NT–P–P–P — advancern ska
+aldrig passa ostört (ägarbeslut FAS 10). Live-budlådan är lagad; luckan finns bara i
+förbyggda linjer (Budvisningen m.m.). Trä in `advanceTwoSuiter` i linjens
+konkurrensrond.
+
+### Övrigt
+- **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
+- **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade: byggs
+  bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).
+- **Motspelarnas bredare försvarsinferens:** honnörs-blottningsvakten är KLAR
+  (2026-07-05, `defenderGuardDiscard`). KVAR: kasta rätt när partnerns hand är okänd
+  (längdparitet, signalering, skvis-försvar) — kräver inferens om partnerns hand.
+
+## 🅿️ PARKERAT
+
+### FACELIFTEN / den visuella omgörningen (parkerad 2026-07-20 på ägarbeslut)
+Hela designspåret vilar — Claudes "Klubbrummet"-mockup (privat artifact
+`claude.ai/code/artifact/5b9f5e2a-fe71-4dbc-aaeb-188a5a2376b9`), ägarens Claude
+Design-utforskning med de färdiga promptarna, och ombyggnaden av appen efter godkänd
+design. **Återupptas BARA när ägaren säger till.** Låsta ramar gäller fortfarande
+då: emerald, svarta spader, guldserifen. Tokens + komponentstrukturen
+(UI-overhaulen) är redo, så bygget är billigt när det återupptas.
+
+### Övrigt parkerat
+- **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.
+- **Off-book §7 bredd** (inkliv över 1NT/svaga tvåor/spärrar; balansering BYGGD
+  2026-07-03 — kvar här: "låna en kung"-lättnaden i generell mening).
+- **"Framkalla slutbud"-väljaren** (ägaridé) + **webworker för DDS-facit**.
+
+### Mathe mot stark konstgjord 1♣ (ägarbeslut 2026-07-04)
+Funktionen `defendStrongClub` (`defense-conventional.ts`) är färdig + enhetstestad
+men medvetet EJ inkopplad: i vårt 2/1-system är 1♣ en NATURLIG öppning (den starka
+handen öppnar 2♣) → en stark konstgjord 1♣ kan aldrig dyka upp, så Mathe har inget
+läge att utlösas i. Mot naturlig 1♣ räcker vanliga inkliv/upplysningsdubbling
+(redan inkopplat via `maybeOvercall`). **Plockas upp först den dag vi lägger till
+FLER budsystem** (t.ex. stark klöver/Precision) — då kopplas den in på samma sätt
+som DONT/svaga-två-försvaret (detektor i `buildAuction`). Se
+`docs/audit/r1-budsystem.md` (Fynd #2, delbit 3).
