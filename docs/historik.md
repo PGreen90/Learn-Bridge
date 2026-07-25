@@ -1139,3 +1139,117 @@ kollapsar t.o.m. under utgång, eget problem). Byggs på det ärliga mönstret.
   tills de får spela dubblat — i stället för att passa flykten. Utlöses bara efter
   vårt 1NT + XX (inte efter svaga tvåor/spärrar — där äger vi inte handen). Säg
   till om det känns för aggressivt att dubbla varje flyktbud.
+
+## 2026-07-21 → 2026-07-25 — "Budgivningen mot perfekt" etapp 3/5/4 (flyttat från CLAUDE.md 2026-07-25)
+
+> Detta är NU-loggen som växte fram i CLAUDE.md under de tre etapperna. Mätsiffrorna
+> och mönsteranalyserna i full detalj: `docs/systemrevisorn.md` (Mätning #1–#14).
+> Alla regeländringar är dessutom skrivna i `docs/budsystem.md` (§9 = ändringslogg).
+
+**Ägarbeslut 2026-07-20:** designen lades HELT åt sidan (facelift-spåret → PARKERAT).
+Fullt fokus på budgivningen.
+
+### Etapp 3 — FEL FÄRG-SPÅRET (ägarbeslut 2026-07-21, KLAR 2026-07-22)
+Största posten i revisorns baslinje: "fel färg — bet fast facit fanns i annan
+strain" (148/1000 givar, 65 110 p). Arbetssätt: hämta exemplen ur `revisor-output/`
+(frö 20260721 återskapar dem), hitta MÖNSTREN (inte enskilda givar), laga mönster
+för mönster test-låst, kör om mätningen med samma frö.
+
+- **Fix 1 (2026-07-21) "5♣-ryckaren"** (budsystem.md §5.6/§9): live-lagret läste
+  Stayman-2♣ som klöverfärg och drog partnerns 3NT till 5♣. Facit-test
+  `auction-stayman-not-natural.test.ts`.
+- **Fix 2 (2026-07-21) "2♣-kravets finaste färg"** (§4.4/§9): (a) svararen efter
+  `2♣–2♦–3m` visar billigaste 4-korts högfärg under 3NT i st.f. blint 3NT från fel
+  hand (`responses-2c.ts`); (b) dubbelton-"fit" mot partnerns tvingade ombud slår
+  aldrig en egen visad 6+ färg (`raiseWithFit`-vakt). Facit-test
+  `auction-2c-finest-suit.test.ts`. Mätning #3: exakt par 16,8 %, fel färg-bet
+  138/58 530.
+- **Fix 3 (2026-07-21) "cue-höjning i minor → 3NT före 5m"** (NY §5.11 + §9;
+  `answerCueRaise` i `auction-live.ts`): öppnaren med jämn hand + stopp i deras
+  cuade färg bjuder 3NT direkt i st.f. att alltid återgå billigast. Facit-test
+  `auction-cueraise-3nt.test.ts`. Mätning #4: 17,0 %, snitt 291, fel färg 136/57 020.
+- **Fix 4 (2026-07-21) "tre konkurrens-fortsättningar"** (§4.5/§7.4/§7.7 + §9):
+  (a) advancerns cue-svar väljer billigaste nivån vid lika långa färger; (b) öppnaren
+  svarar inte negativ dubbling med sang på minimum, och dubbelton-höjningar av
+  tvingade ombud kräver längdbevis + utgångsvärden; (c) ny färg som krav på 3-läget
+  mot svag tvåa kräver 15+. Facit: `auction-konkurrens-fortsattning.test.ts` (15 fall).
+  Mätning #5: 17,2 %, fel färg 130/54 880. Fixen EXPONERADE två luckor som förr
+  maskerades av fel som råkade trilla rätt (balansering över deras svaga tvåor +
+  negativ-dubblarens invit-fortsättning).
+- **Fix 5 (2026-07-22) de två exponerade luckorna** (§7.3/§7.4/§7.7 + §9):
+  **(5a)** balansering över deras svaga tvåor byggd — "låna en kung" fullt ut i
+  utpassningsläget (naturligt 2-lägesinkliv från 7 hp, offshape-X ≤3 kort i deras
+  färg, 2NT 12–15) + advancer-rabatt (−3 sp, 3-lägestak). Facit-test
+  `auction-balansering-svag2.test.ts`. **(5b)** ny detektor `negativeDoublerContinues`:
+  dubblaren i 9–12-zonen bjuder vidare över öppnarens tvingade svar; X + egen färg =
+  EJ krav (`competitionForce` justerad). Facit-test `auction-negx-invit.test.ts`.
+  Mätning #6/#7: snitt-tapp 290,8, fel färg 130/53 450, exakt par 16,9 %.
+- **Fix 6 (2026-07-22) fyra mönster ur mönsterjakt #2** (§5.5/§5.9/§5.11/§7.1 + §9):
+  (1) höjning mot partner som just PASSAT = bara tävlande billigast; (2) svararens
+  bud i öppnarens färg är en HÖJNING, inte "ny färg = rondkrav"; (3) öppnaren tävlar
+  aldrig över deras UTGÅNG efter partnerns pass; (4) cue-höjaren med bara limit-värden
+  passar öppnarens minimum-återgång. Facit-test `auction-felfarg-fix6.test.ts`.
+  **Mätning #8: snitt-tapp 289,5 (M7: 290,8 — största klivet), fel färg 121/47 590.**
+
+**ETAPP 3 KLAR (2026-07-22):** fel färg-bet 148→121 givar, 65 110→47 590 p (−27 %)
+över sex fixar; resten är DD-brus + etapp 4/5-material. Snitt-tapp 300→289,5.
+
+### Etapp 5 — MISSAD UTGÅNG (startad 2026-07-22, KLAR 2026-07-24)
+- **Fix 1+2 (2026-07-24) de två MEKANISKA kandidaterna** (§6.6/§5.1 + §9):
+  **(1)** svararens höjning av öppnarens ANDRA färg graderas efter stödpoäng
+  (under 10 = billigast, 10–12 = hopphöjning/inbjudan, 13+ = utgång) — förr sa en
+  13-hand samma 2♠ som en 6-hand (frön 20260748/20261646). **(2)** öppnaren BESVARAR
+  svararens inbjudan efter semi-forcing 1NT (ny `openerThirdBidAfterSemiForcing1NT`):
+  15+ Bergenpoäng → utgång, 2NT rättas alltid till högfärgen när återbudet lovat sex
+  kort, 2NT efter ny färg = äkta sanginbjudan (frö 20260843). Facit-test FÖRE fix:
+  `auction-missad-utgang.test.ts` (18 fall). **Mätning #9+#10: 289,5 → 288,1 p/giv,
+  missad utgång 158/53 050 → 153/51 040.** Enda posten som växte: "för högt" (+2).
+- **Fix 3 (2026-07-24) ÄGARENS svar på värderings-golven** (§4.3 + §9):
+  (a) 3M-invitens golv på platt 12 hp BEHÅLLS (ägarval — de givarna är DD-smickrade);
+  (b) 1NT-öppnarens 2NT-accept på 15 = "kvalitets-15": ny `notrumpPoints`
+  (`evaluation.ts`) = startpoäng +1 för tät A-K-D-klump och UTAN flathets-avdraget;
+  används både direkt och efter Stayman/transfer. Platt quack-15 avböjer.
+  **Mätning #11: 288,0 p/giv, missad utgång 151/50 640, exakt par 17,1 %.**
+
+**ETAPP 5 KLAR i sin mekaniska+golv-del** (158→151 givar). Resten av posten är
+DD-smickrade tunna utgångar som medvetet INTE jagas.
+
+### Etapp 4 — F1-RESTEN: slam efter 2♣ + reverse/hoppskift (ägarbeslut 2026-07-24, KLAR 2026-07-25)
+Byggd på de ärliga slamportarnas mönster: kaptensregeln mot VISADE intervall,
+aldrig partnerns kort. Angrep topplistans största post (missad lillslam).
+
+- **Familj B fix 1 (2026-07-24) kaptensmatte + RKC efter positivt svar på 2♣**
+  (§4.4 + §9): när trumf är funnen (öppnaren stödjer svararens färg, eller svararen
+  har 3+ i öppnarens färgrebud) räknar svararen sin hand mot visade 22 → driv 33+
+  (4NT RKC), inbjudan 31–32, annars utgång. Facit `auction-2c-slam.test.ts` (11 fall).
+  **Mätning #12: 287,9, missad lillslam 87→83 (59 000→56 400).** Känd ärlig kostnad:
+  två 33-poängsslammar med facit enbart i sang går DD-bet i färgen.
+- **Familj B fix 2 (2026-07-24) slamzon utan trumf** (§4.4 + §9): kaptenen med 33+
+  mot visade 22 utan fit frågar RKC i egen självbärande 6+ färg (två topphonnörer);
+  6NT direkt bara efter 3NT-återbudet (visad balans). Första utkastet blåste 6NT
+  efter färg-återbud — DD-skanning fångade frö 20261107 (13 hp spelstick → 6NT fyra
+  bet) och regeln stramades åt med fröet som vakt. Facit (18 fall).
+  **Mätning #13: 287,4, missad lillslam 87→82. FAMILJ B KLAR.**
+- **Familj C-resten (2026-07-25)** (§5/§5.1 + §9): **(1)** semi-forcing-hoppskiftets
+  svar placerar utgång — fit i hoppskiftets färg går före preferensen (4♥ på K942,
+  frö 20260799 som förr dog i 3♠-pass under kravet; minorfit → 3NT bara med håll,
+  annars 5m), 3-korts M-preferens med utgångsvärden lyfts till 4M; **(2)** ny slamport
+  efter 1-lägessvarens reverse (visade 16) och hoppskift (visade 19): kaptensmatte när
+  trumf är säkrad på egen kunskap → driv 33+/inbjudan 31–32 (frö 20260937: `1♣–1♠–2♥`
+  → 6♣ med 13 stick). Facit `auction-hoppskift-slam.test.ts` (10 fall, syntetiska
+  slamgivar DD-verifierade). **Mätning #14: 287,2, missad utgång 151→149.**
+
+**ETAPP 4 KLAR (M11→M14): snitt-tapp 288,0 → 287,2, missad lillslam 87→82
+(59 000→55 410), storslam −1 250 p; ärlig kostnad ~4 tunna 33-slammar som går en
+DD-bet.** DD-skanning av alla 18 slam i mätfröna: 10 står, resten tunna-men-ärliga
++ 2 kända frisits-fall.
+
+### Etapp 1 + 2 (bakgrund till spåret)
+- **Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38 lagade +
+  test-låsta, #39 = inget fel (test-låst), #36 (UI) → SENARE. Mergepunkt `da7bdc5`.
+- **Etapp 2 KLAR 2026-07-21: Systemrevisorn byggd + baslinje mätt.** Återanvändbar
+  rigg (samma frö = samma givar): motorn bjuder alla fyra händerna, `bridge-dds`
+  (WASM, dev-beroende) ger DD-tabell + riktig par-poäng, `judgeDeal` kategoriserar.
+  Baslinje (1 000 givar, frö 20260721): exakt par 15,9 %, snitt-tapp 300 p/giv;
+  topplista fel färg 65k > missad lillslam 56k > missad utgång 46k > missad storslam
+  38k > billig offring 35k.

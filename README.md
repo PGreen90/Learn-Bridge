@@ -2,9 +2,9 @@
 
 En interaktiv webbapp för att **lära sig och spela bridge** (kortspelet) — bjuda,
 träna budsystem och spela ut korten mot datorbottar. Allt körs i webbläsaren,
-ingen backend, gratis-hostat på GitHub Pages.
+ingen backend, gratis-hostat på Vercel.
 
-**🔗 Live:** https://pgreen90.github.io/Learn-Bridge/
+**🔗 Live:** https://rebidz.com
 
 > Appen heter **RebidZ** i gränssnittet. Repo och URL heter fortfarande
 > **Learn-Bridge** (medvetet – byts inte).
@@ -22,8 +22,9 @@ ingen backend, gratis-hostat på GitHub Pages.
 ## Teknisk stack
 
 React + Vite + TypeScript + Tailwind CSS v4. Ingen server, allt client-side.
-Framsteg sparas i `localStorage`. Auto-deploy till GitHub Pages via GitHub Actions
-vid varje push till `main`.
+Framsteg sparas i `localStorage`. Auto-deploy till Vercel vid varje push till
+`main` — bygget kör `tsc && npm test && npm run build`, så ett rött test stoppar
+publiceringen.
 
 ## Utveckling
 
@@ -43,8 +44,10 @@ Detta projekt drivs med **Claude Code**. Läs **[`CLAUDE.md`](CLAUDE.md) först*
 den innehåller arbetssätt, låsta beslut och projektkartan (NU/NÄST/SENARE). Övrig
 dokumentation ligger i [`docs/`](docs/):
 
+- **[`docs/README.md`](docs/README.md) — index över all dokumentation.** Säger
+  vilken fil som svarar på vad, så du slipper leta i 150 kB systembok.
+- [`docs/budsystem.md`](docs/budsystem.md) — systemboken (sanningskällan; appens
+  Budsystem-sida renderar den live).
 - [`docs/status.md`](docs/status.md) — vad som är byggt (inkl. budmotorns tre
   auktionslager).
-- [`docs/budsystem.md`](docs/budsystem.md) — systemboken (sanningskällan).
-- [`docs/sanningskarta.md`](docs/sanningskarta.md) — systembok mot kod, rad för rad.
 - [`docs/arbetsrutiner.md`](docs/arbetsrutiner.md) — sessionsrutiner.
