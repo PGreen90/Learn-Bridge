@@ -1286,6 +1286,13 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
   längdinfo i konkurrens.
 
 ### 7.5 Lebensohl
+> ⚠️ **Beskrivet men ännu inte inkopplat (upptäckt 2026-07-25).** Reglerna nedan
+> är systemets — men datorn *spelar* dem inte än: koden finns färdig och testad,
+> men den är inte inkopplad i den levande budgivningen, och ett svep över 3 000
+> bjudna givar gav noll Lebensohl-bud. Räkna alltså inte med att partnern förstår
+> ett Lebensohl-2NT vid bordet förrän den här rutan är borta. Inkopplingen är ett
+> eget jobb på listan.
+
 Verktyg för att skilja **svaga** händer från **utgångsvilliga** i två lägen:
 (a) efter partnerns **upplysningsdubbling av en svag tvåa**, och (b) efter att
 motståndaren **stört vårt 1NT-inkliv/öppning** på 2-läget.
@@ -1419,6 +1426,14 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-25 (genomgång)** – **Lebensohl markerad som ej inkopplad (§7.5, ingen
+  regeländring).** En full genomgång av repot visade att `lebensohl.ts` är byggd
+  och enhetstestad men aldrig importeras av produktionskoden: ett svep där motorn
+  bjöd 3 000 givar gav 0 Lebensohl-bud, medan t.ex. Ogust gav 29 och Drury 12.
+  Boken beskrev alltså ett verktyg bordet inte kan. §7.5 har fått en tydlig ruta
+  om det tills inkopplingen görs. Samtidigt: en **kopplingsvakt** i
+  `src/docs-vakt.test.ts` gör att en budmodul aldrig mer kan tappa kontakten med
+  appen utan att testsviten blir röd.
 - **2026-07-24 (kväll)** – **Familj C-resten: hoppskift-fortsättningen + slamport
   efter reverse/hoppskift (kod, §5/§5.1, ETAPP 4).** Två delar. **(1)**
   Semi-forcing-hoppskiftets svar (`rebid: hoppskift`, visade 16+) prefererade

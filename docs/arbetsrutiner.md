@@ -3,11 +3,18 @@
 Fasta rutiner för varje arbetssession, så att vi alltid börjar och slutar
 metodiskt. Claude följer dessa; ägaren behöver inte göra något själv.
 
-> 📌 **Konvention om testantal (R4):** siffror som "testsvit 1626" i docs och
-> `MEMORY.md` är **historiska tidsstämplar** för när något byggdes — inte
-> live-status. De driver naturligt isär (varje nytt test ändrar totalen), så jaga
-> INTE synk mellan dem. **Enda sanningen om testläget just nu = kör `npm test`.**
-> Skriv gärna "hela sviten grön" i stället för en absolut siffra i nya noter.
+> 📌 **Sifferregeln (ersatte R4:s konvention 2026-07-25).** En siffra får skrivas
+> i ett levande dokument **bara om kommandot som återskapar den står bredvid**.
+> Går den inte att reproducera ska den inte stå där — skriv "hela sviten grön".
+>
+> **Varför regeln byttes:** den gamla konventionen sa att testantal var
+> historiska tidsstämplar som inte skulle synkas. Genomgången 2026-07-25 visade
+> vad det kostade: baslinjen "1626 tester gröna (92 filer)" i revisionen R1 gick <!-- vakt-ok: citerar den felaktiga siffran som varnande exempel -->
+> inte att reproducera — repot hade **48 testfiler** den dagen. Siffran var
+> aldrig körd, men den spreds till fem filer och fick en regel som gjorde det
+> *otillåtet att upptäcka felet*. En regel som förbjuder kontroll skyddar inte
+> dokumentationen, den skyddar felet. Vakten `src/docs-vakt.test.ts` gör numera
+> testsviten röd om ett odaterat testantal skrivs in i ett levande dokument.
 
 ## 🟢 Sessionsstart (starta metodiskt)
 > Mål: snabbt veta *var vi är* och *vad vi gör idag* innan något ändras.
@@ -25,9 +32,12 @@ metodiskt. Claude följer dessa; ägaren behöver inte göra något själv.
 
 ## 📋 Regel: visa alltid återstående punkter när ett jobb är klart
 När ett jobb precis avslutats och Claude frågar ägaren *vad vi ska göra härnäst*,
-ska Claude **alltid** presentera listan med återstående punkter ur
-`docs/arbetslista.md` (med status), så ägaren väljer nästa steg ur helheten i
-stället för ur minnet. Gäller varje sådant tillfälle, inte bara vid sessionsslut.
+ska Claude **alltid** presentera de återstående punkterna — 🟢 NÄST, ⚪ SENARE och
+🅿️ PARKERAT ur **projektkartan i `CLAUDE.md`** (full beskrivning i
+`docs/senare.md`) — så ägaren väljer nästa steg ur helheten i stället för ur
+minnet. Gäller varje sådant tillfälle, inte bara vid sessionsslut.
+*(Rättat 2026-07-25: regeln pekade på `docs/arbetslista.md`, som är arkiv sedan
+kartan flyttade till CLAUDE.md — två dokument gav motstridiga besked.)*
 
 ## 🔴 Sessionsavslut (avsluta smart & noggrant)
 > Mål: inget lämnas trasigt, allt är sparat, och nästa start blir lätt.

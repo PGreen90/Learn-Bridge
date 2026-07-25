@@ -9,6 +9,15 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Känd skuld — verktyg som boken lovar men bordet inte kan
+- **Lebensohl är INTE inkopplad (upptäckt vid genomgången 2026-07-25).**
+  `lebensohl.ts` är byggd och enhetstestad, men ingen produktionsfil importerar
+  den: i ett svep där motorn bjöd 3 000 givar föll 0 Lebensohl-bud. **Bevaka:**
+  säger du 2NT efter partnerns upplysningsdubbling av en svag tvåa förstår
+  partnern det INTE som Lebensohl-relä. §7.5 i boken är märkt tills vidare;
+  inkopplingen ligger som eget jobb. Kopplingsvakten i `src/docs-vakt.test.ts`
+  ser till att ingen annan modul tappar kontakten på samma tysta sätt.
+
 ## Etapp 4 (2026-07-24 → 2026-07-25) — slam efter 2♣, reverse och hoppskift
 - **Familj C: reverse/hoppskift-fortsättningen (2026-07-25, NYAST).**
   (a) Efter botens hoppskift (t.ex. 1♠–1NT–3♥) sätter svararen nu UTGÅNGEN:

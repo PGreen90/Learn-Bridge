@@ -35,7 +35,12 @@ efter 2♣ + reverse/hoppskift). Full logg: `docs/historik.md`. Alla mätningar 
 mönsteranalyser: `docs/systemrevisorn.md`.
 
 **Senast klart 2026-07-25:** dokumentstädningen (denna fil bantad, `docs/README.md`
-+ `docs/bevaka.md` + `docs/senare.md` nya).
++ `docs/bevaka.md` + `docs/senare.md` nya) och därefter **den stora genomgången**:
+hela repot faktakollat mot koden i stället för mot andra dokument. Fynd: en
+baslinjesiffra som aldrig gick att reproducera hade blivit en arbetsregel, ett
+dokument beskrev en raderad komponent, och **Lebensohl visade sig aldrig ha varit
+inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
+(`src/docs-vakt.test.ts` + regelsvepet). Detalj: `docs/historik.md`.
 
 > **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
 > bottarna bjuder som människor — egen hand + partnerns **VISADE** intervall, aldrig
@@ -44,7 +49,7 @@ mönsteranalyser: `docs/systemrevisorn.md`.
 > visshet. Detalj: budsystem.md §5.2/§5.7/§6 + `docs/historik.md`.
 
 ### 👀 Bevaka i spel — de tre senaste
-> Hela listan (30 punkter, nyast först): **`docs/bevaka.md`**. Läs den när ägaren
+> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
 - **Reverse/hoppskift (2026-07-25):** boten sätter utgången efter hoppskift och kan
   driva RKC mot visade 16/19 — bjuds tunna slammar för ofta?
@@ -60,6 +65,7 @@ mönsteranalyser: `docs/systemrevisorn.md`.
    konkurrenskonventioner läggs på `decideCall`-kedjan.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
+**Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
 Felrapport #36 större kort på mobil · fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32 spelföring + #34 försvar) · TP till §7-inkliven ·
 advancer-rabatt efter balansering (generella fallet) · 17+ enfärgshand efter två
@@ -77,8 +83,10 @@ plattform.md`, startas bara på uttryckligt ägarbeslut).
 ## Arbetsrutiner (följ varje gång)
 - **Vid sessionsstart:** följ 🟢-checklistan i `docs/arbetsrutiner.md`.
 - **Vid sessionsslut:** följ 🔴-checklistan i `docs/arbetsrutiner.md`.
-- **Testantal i docs** ("testsvit 1626") är historiska tidsstämplar, inte
-  live-status — jaga inte synk. Enda sanningen om testläget: kör `npm test`.
+- **Sifferregeln:** en siffra får stå i ett levande dokument bara om kommandot
+  som återskapar den står bredvid. Enda sanningen om testläget: kör `npm test`.
+  Bakgrunden (och varför den gamla regeln var farlig) står i
+  `docs/arbetsrutiner.md`. Vakten `src/docs-vakt.test.ts` kör i deploygrinden.
 
 ## Vad det här är
 Interaktiv webbapp för att lära sig och spela bridge. Allt körs i webbläsaren,

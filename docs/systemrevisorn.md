@@ -90,6 +90,23 @@ par-tecken) är låsta av `revisor-dds.test.ts`.
 3. ✅ Körinstruktion ovan + rad i §9-ändringsloggen.
 4. ✅ Mätning #1 (baslinjen) körd — se nedan.
 
+## Regelsvepet — vilka regler använder motorn FAKTISKT? (2026-07-25)
+Revisorn mäter *resultatet* (poängtapp). Svepet mäter *repertoaren*: det låter
+motorn bjuda tusentals givar och räknar vilka regelnamn som faller ut.
+
+```
+$env:SVEP='1'; npx vitest run src/lib/engine/regelsvep.probe.test.ts
+```
+
+Resultatet hamnar i `revisor-output/regelsvep.txt`. **Varför det finns:**
+`lebensohl.ts` var byggd, enhetstestad och beskriven i systemboken — men ingen
+produktionsfil importerade den, så bordet spelade den aldrig. Enhetstester kan
+inte upptäcka sådant (de anropar modulen direkt); svepet kan. Första körningen
+(3 000 givar, frö 20260721): 209 olika regler användes, Lebensohl **0** gånger,
+medan t.ex. Ogust 29, Drury 12, Bergen 10, Smolen 5 och Gerber 2 föll ut normalt.
+Kör svepet när en ny konvention kopplas in — syns den inte i listan är den inte
+inkopplad, hur gröna enhetstesterna än är.
+
 ## Kända fällor (läs siffrorna med detta i bakhuvudet)
 - **Ärliga missar är medvetna:** kaptensregeln missar slammar med vilje
   (hellre miss än kik). Revisorn RÄKNAR dem, men kategorin "missad slam"

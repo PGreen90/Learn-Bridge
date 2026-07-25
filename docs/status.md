@@ -22,7 +22,8 @@
 - **Spärröppningar 3X/4X** – `responses-preempt.ts`
 - **2NT/3NT-öppningar** – `responses-2nt.ts`
 - **Drury** för passad hand – `responses-drury.ts`
-- **Försvarsbud §7** (punkt 21–27): inkliv/Michaels/ovanlig 2NT (`overcalls.ts`), dubblingar (`doubles.ts`), Lebensohl (`lebensohl.ts`), DONT (`dont.ts`), försvar mot konventionella öppningar (`defense-conventional.ts`) — störd budgivning inkopplad i `buildAuction` (LHO kliver in på riktigt).
+- **Försvarsbud §7** (punkt 21–27): inkliv/Michaels/ovanlig 2NT (`overcalls.ts`), dubblingar (`doubles.ts`), DONT (`dont.ts`), försvar mot konventionella öppningar (`defense-conventional.ts`) — störd budgivning inkopplad i `buildAuction` (LHO kliver in på riktigt).
+- ⚠️ **Lebensohl (`lebensohl.ts`) är byggd och testad men INTE inkopplad** — ingen produktionsfil importerar den, och ett svep där motorn bjöd 3 000 givar (2026-07-25) gav 0 träffar. Systemboken §7.5 beskriver den ändå. Känd skuld, se `docs/bevaka.md`; låst av kopplingsvakten i `src/docs-vakt.test.ts`.
 
 ## Stödsystem (FAS 3, klar 2026-07-01)
 
@@ -184,7 +185,7 @@
 - **Gerber över 2NT (FAS 8, 2026-07-01):** en balanserad slamsäker svarare (13+ hp mittemot 20–21 ≈ 33+) frågar ess med 4♣ i stället för att blint blåsa 6NT (kan nu stanna i 4NT om två ess saknas, driva storslam via 5♣-kungfrågan ≈37+). Delad sekvensbyggare med 1NT-Gerber. Facit i `nt-slam.test.ts`.
 - **Exclusion när renons rankar över trumf (FAS 8, 2026-07-01):** `exclusionInvestigation` (`slam-auction.ts`) hanterar nu även hjärter trumf + spaderrenons (5♠ Exclusion, lagligt över 3NT-relät). Öppnarens högsta stegsvar (steg 4) landar på exakt 6♥; vill svararen bara ha lillslam passar hon (i stället för att olagligt bjuda om 6♥). Nivåbailen borttagen. Facit i `slam-auction.test.ts`. **FAS 8 (Slamsystem) därmed helt klar (testsvit 630).**
 
-## Bot-hjärnan – Monte-Carlo-DDS (FAS 11 Steg 1–3 KLAR, testsvit 697)
+## Bot-hjärnan – Monte-Carlo-DDS (FAS 11 Steg 1–3 KLAR 2026-07-02)
 
 Färdplan i `docs/bot-hjarna.md`. Bottarna spelar nu "läsa bordet"-spel utan
 tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
@@ -232,9 +233,13 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 - Trumfen alltid på spelförarens högra hand sett från Syd.
 - Färgordningen alternerar svart/röd (cykeln ♠ ♦ ♣ ♥ roteras med trumfen – `orderedSuits` i `Play.tsx`).
 
-## Auktionsvyn (`src/components/AuctionView.tsx`)
+## Auktionsvyn (`src/components/AuctionGrid.tsx`)
 
-- Rutnät V N Ö S med zon/sårbarhet, giv-markör, färgkodade bud (Pass/Dbl/Redbl), inramat slutkontrakt.
+> Hette `AuctionView` fram till FAS 12 — den filen är **borttagen**, allt går via
+> `AuctionGrid`. (Rättat 2026-07-25: rubriken pekade ut en raderad fil.)
+
+- Kolumner V N Ö S i Synrey-stil, zon/sårbarhet, färgkodade budchip, rutan för nästa bud markerad.
+- Klick på ett chip visar betydelse + kravnivå + ev. ALERT ur `ruleInfo` (samma regel som budvalet).
 - Inkopplad i budträningen + Spela-fliken.
 - På "Spela kort": kontraktet härleds ur en FÄRDIG auktion (`auction-contract.ts`: `dealForPlay` + `finalContract`).
 - Ligger i hopfällbar panel ("Visa hur kontraktet bjöds").
@@ -399,7 +404,7 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   exakt 3 stöd) → inga ostörda auktioner trunkeras (icke-regressivt). Öppnarens
   övriga konkurrenssvar (utan exakt 3 stöd) hör till en senare punkt.
 - Facit: `doubles.test.ts` (enhet) + `auction-support-double.test.ts` (hela
-  sekvensen `1♦–(P)–1♥–(1♠)–X`). Testsvit 499 grön.
+  sekvensen `1♦–(P)–1♥–(1♠)–X`). Hela sviten grön vid bygget.
 
 ### Responsiv dubbling inkopplad (FAS 2 punkt 9)
 
@@ -407,7 +412,7 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   konkurrenshöjning) svarar advancern (dubblarens partner) med en **responsiv X**
   (`responsiveDouble`: 7+ hp, stöd i de objudna färgerna, ingen lång egen).
   Bara efter en enkel höjning av öppnarens färg. Facit:
-  `auction-responsive-double.test.ts`. Testsvit 500 grön.
+  `auction-responsive-double.test.ts`. Hela sviten grön vid bygget.
 
 ### Advancer-logik inkopplad + fit-jump (FAS 2 punkt 10)
 
@@ -421,7 +426,7 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   5+ sidofärg, inbjudande+ → HOPP i sidofärgen (visar fit + trickkälla). Hoppnivån
   räknas ur partnerns inklivsnivå (ny `overcallLevel`-param, default 1).
 - Facit: `overcalls.test.ts` (fit-jump enhet) + `auction-advancer.test.ts`
-  (hela sekvensen, fit-jump + cue). Testsvit 503 grön.
+  (hela sekvensen, fit-jump + cue). Hela sviten grön vid bygget.
 
 ## Klickbara bud med betydelse (valideringsstöd)
 
