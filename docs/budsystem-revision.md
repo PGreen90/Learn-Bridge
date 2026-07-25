@@ -87,7 +87,7 @@ off-book-detektorkedjan, (3) att försvarslagret (§7) inte räknar fördelning 
 
 ## E. ARKITEKTUR & SYSTEMHÄLSA
 
-**Styrkor 🟢:** facit-först-disciplin (1087 test); boken = enda sanningskälla (sidan
+**Styrkor 🟢:** facit-först-disciplin (varje fix låst av ett facit-test); boken = enda sanningskälla (sidan
 renderar live); tre-lagers-arkitektur dokumenterad (`auction.ts`/`auction-live.ts`/
 `auction-interpret.ts` med `open`-handoff); kontraktshärledning single-sourced;
 kravminnet löst.

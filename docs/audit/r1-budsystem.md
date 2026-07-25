@@ -4,6 +4,15 @@
 > Bygger vidare på `docs/sanningskarta.md` (FAS 0) och `docs/budsystem.md` –
 > letar det de **inte** redan fångar. Genomförd 2026-07-04.
 > Baslinje: **1626 tester gröna** (92 filer, `npm test`, 20 s).
+>
+> ⚠️ **RÄTTELSE 2026-07-25:** baslinjesiffran ovan går inte att reproducera. Vid
+> den här commiten (`b0a5a0d`) innehöll repot **48 testfiler** med ca 841
+> test-block — 92 filer kan inte ha rapporterats. Siffran var med all sannolikhet
+> aldrig körd, men den spreds till `historik.md`, `MEMORY.md`, `CLAUDE.md`,
+> `docs/README.md` och `arbetsrutiner.md` och fick en egen arbetsregel ("jaga inte
+> synk") som gjorde felet omöjligt att upptäcka. Rapportens FYND står kvar — de är
+> kontrollerade mot koden och flera är åtgärdade — men **siffran ska inte citeras**.
+> Se sifferregeln i `docs/arbetsrutiner.md` och vakten `src/docs-vakt.test.ts`.
 
 ## Så här ligger det till (för ägaren)
 

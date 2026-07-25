@@ -12,7 +12,7 @@
 | Fil | 🟢/📘/📦 | Öppna den när … |
 |---|---|---|
 | **budsystem.md** (151 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
-| **status.md** (35 kB) | 📘 | du ska röra **budmotorns kod**. Särskilt §"Budmotorns tre auktionslager + `open`-handoff" (rad ~246) = arkitekturkontraktet: hör logiken hemma i `auction.ts` (on-book), `auction-live.ts` (off-book/konkurrens) eller `auction-interpret.ts` (förklaring)? |
+| **status.md** (38 kB) | 📘 | du ska röra **budmotorns kod**. Sök rubriken "Budmotorns tre auktionslager + `open`-handoff" = arkitekturkontraktet: hör logiken hemma i `auction.ts` (on-book), `auction-live.ts` (off-book/konkurrens) eller `auction-interpret.ts` (förklaring)? |
 | **systemrevisorn.md** (35 kB) | 🟢 | du jobbar i mätspåret. Riggen, hur man kör den, **alla mätningar #1–#14** och mönsteranalyserna bakom varje fix. |
 | **bevaka.md** | 🟢 | ägaren säger att något känns fel i spel, en felrapport kommer in, eller en ny fix ska läggas till bevakningslistan. |
 
@@ -40,7 +40,7 @@
 
 | Fil | | Innehåll |
 |---|---|---|
-| **historik.md** (79 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
+| **historik.md** (89 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
 | **arbetslista.md** | 📦 | Byggordningen FAS 0–12 (genomförd). Punkt 28 = bakgrunden till vår egen DDS-lösare. Kvar som arkiv; NU/NÄST styrs av CLAUDE.md. |
 | **tp-arbetslista.md** | 📦 | TP-stegen A–F. **Alla klara 2026-07-03** — filen innehåller gamla "⬜ Kvar att bygga"-rubriker som är överspelade av notisen högst upp. |
 | **audit/** (5 filer + SLUTRAPPORT) | 📦 | Revisionen R1–R5 (2026-07-04): budsystem, arkitektur, UI/UX, dokumentation, git/deploy. Alla fynd är antingen åtgärdade eller upplyfta till SENARE. |
@@ -52,5 +52,10 @@
   När NU blir klart: flytta loggen till `historik.md`, behåll en rad i kartan.
 - **budsystem.md är en produktyta**, inte bara dokumentation — ägaren läser den i
   appen. Skriv läsbar svenska i paragrafform, inte kodtermer.
-- **Testantal i docs** ("testsvit 1626") är historiska tidsstämplar, inte
-  live-status. Jaga inte synk mellan dem — kör `npm test` i stället.
+- **Sifferregeln:** en siffra får stå i ett levande dokument bara om kommandot som
+  återskapar den står bredvid (`docs/arbetsrutiner.md` förklarar varför). Kör
+  `npm test` för testläget.
+- **Vakten:** `src/docs-vakt.test.ts` kontrollerar automatiskt att docs pekar på
+  kod som finns, att inga oreproducerbara testantal smyger in, att indexet här är
+  komplett och att ingen motormodul tyst tappar kontakten med appen. Den kör i
+  `npm test` — alltså i Vercels deploygrind före varje publicering.

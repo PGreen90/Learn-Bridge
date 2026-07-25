@@ -9,6 +9,17 @@
 
 ## ⚪ SENARE
 
+### Koppla in Lebensohl i den levande budgivningen (2026-07-25)
+`lebensohl.ts` är färdigbyggd och enhetstestad, men **ingen produktionsfil
+importerar den** — regelsvepet (3 000 bjudna givar) gav 0 Lebensohl-bud, medan
+Ogust gav 29 och Drury 12. Boken §7.5 beskriver alltså ett verktyg bordet inte
+kan; §7.5 och `docs/bevaka.md` är märkta tills det är löst. Jobbet: koppla in
+modulen i `auction-live.ts` (och/eller `auction.ts`) för de två lägena — efter
+partnerns upplysningsdubbling av en svag tvåa, och när motståndaren stör vårt
+1NT på 2-läget — facit-test först, sedan svep + mätning med samma frö för att se
+att konkurrensposterna inte växer. Ta bort raden ur `MEDVETET_EJ_INKOPPLAD` i
+`src/docs-vakt.test.ts` när det är gjort (vakten kräver det).
+
 ### Felrapport #36 — större kort på mobil (2026-07-07)
 Ägaren har stora fingrar och vill ha större tryckytor för korten i Spela kort på
 mobilen. Ren UI-justering (kortstorlek/tryckyta i `cardLayout.ts`/`Felt.tsx`) —

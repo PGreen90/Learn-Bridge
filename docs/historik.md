@@ -1253,3 +1253,41 @@ DD-bet.** DD-skanning av alla 18 slam i mätfröna: 10 står, resten tunna-men-�
   Baslinje (1 000 givar, frö 20260721): exakt par 15,9 %, snitt-tapp 300 p/giv;
   topplista fel färg 65k > missad lillslam 56k > missad utgång 46k > missad storslam
   38k > billig offring 35k.
+
+## Den stora genomgången + dokumentvakten (2026-07-25)
+**Varför:** ägaren sa *"något känns fel"* och bad om en genomgång av alla filer —
+dagen efter att `status.md` faktakollats. Den här gången kontrollerades inget
+dokument mot ett annat dokument, bara mot koden, git-historiken och körningar.
+
+**Tre fynd som betydde något:**
+1. **Siffran som aldrig var sann.** Revisionen R1 (2026-07-04) angav baslinjen
+   "1626 tester gröna (92 filer)". Vid exakt den commiten (`b0a5a0d`) hade repot
+   **48 testfiler** med ca 841 test-block. Siffran spreds till fem filer — och när
+   nästa revision (R4) upptäckte att siffrorna inte gick ihop blev slutsatsen en
+   *arbetsregel* om att testantal är historiska tidsstämplar som inte ska synkas.
+   Felet förklarades alltså bort med en regel som förbjöd kontroll. Regeln är nu
+   ersatt av **sifferregeln**: en siffra får stå i ett levande dokument bara om
+   kommandot som återskapar den står bredvid. Rättelse inskriven i R1-rapporten.
+2. **`status.md` beskrev en raderad komponent.** Rubriken "Auktionsvyn
+   (`src/components/AuctionView.tsx`)" pekade på en fil som togs bort i FAS 12 —
+   `historik.md` sa det själv. Överlevde flera manuella genomgångar.
+3. **Lebensohl hade aldrig varit inkopplad.** `lebensohl.ts` är byggd,
+   enhetstestad och beskriven i systemboken §7.5 — men ingen produktionsfil
+   importerar den. Ett nytt **regelsvep** (motorn bjuder 3 000 givar, räknar
+   regelnamn) gav 0 Lebensohl-bud medan Ogust gav 29 och Drury 12. Boken lovade
+   ett verktyg bordet inte kan. §7.5 + `bevaka.md` märkta; inkopplingen ligger i
+   SENARE.
+
+**Vad som höll för granskning:** mätspåret är exakt (Mätning #14 stämde rad för
+rad mot rå-datan i `revisor-output/`), deploygrinden kör verkligen
+`npx tsc && npm test && npm run build`, `base: '/'` är låst, Pages-workflowen
+avstängd, inga TODO:s i koden, inga oavsiktligt skippade tester.
+
+**Skyddet som byggdes (`src/docs-vakt.test.ts`, kör i deploygrinden):** docs får
+inte peka på kod som saknas · inga oreproducerbara testantal i levande dokument ·
+CLAUDE.md får inte växa förbi 16 kB · kB-siffrorna i docs-indexet kontrolleras
+mot filerna · indexet måste vara komplett · **kopplingsvakten**: en motormodul
+som ingen produktionsfil importerar ger rött test, och undantagslistan måste
+stämma i BÅDA riktningar (en modul som kopplats in måste bort ur listan). Båda
+larmen provkördes skarpt innan de godkändes. Dessutom `regelsvep.probe.test.ts`
+(SVEP-gated) som svar på frågan "vilka regler använder motorn faktiskt?".
