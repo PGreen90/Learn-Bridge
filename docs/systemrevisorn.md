@@ -488,6 +488,51 @@ missad lillslam 87→82 givar (59 000→55 410), missad utgång 151→149,
 storslam −1 250 p.** Facit-låst i `auction-2c-slam.test.ts` (18) +
 `auction-hoppskift-slam.test.ts` (10).
 
+## Etapp 6 FÖRSKANNAD (2026-07-25): billig offring — fyra hål, alla kodverifierade
+Alla 125 givar i posten hämtade med samma frö som mätningarna:
+
+```
+$env:REVISOR='1'; $env:REVISOR_EXAMPLES='500'; npx vitest run src/lib/engine/revisor.probe.test.ts
+$env:DUMP_CAT='billig-offring'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
+```
+
+Det andra kommandot är nytt (`auktionsdump.probe.test.ts`, miljöstyrt som
+regelsvepet): det låter motorn bjuda om varje frö och skriver ut auktionen med
+**regelnamn + förklaring** per bud, så att mönstren kan grupperas efter vilken
+regel som faktiskt föll ut i stället för efter budsträngen.
+
+**Kategorins namn är missvisande.** Posten ser ut att handla om missade
+straffdubblingar. Den gör den nästan inte alls: av 34 300 p fanns bara **280 p**
+där sitsen som fick chansen att dubbla höll `penaltyDouble`-kraven (10+ hp,
+2+ säkra trumfstick) och stoppades av grinden i `maybePenaltyDouble`. I resten
+var handen ingen dubblingshand. Den riktiga fördelningen:
+
+| Vad ägarsidan ägde | Givar | Tapp |
+|---|---|---|
+| **Utgång** som aldrig bjöds | 65 | 19 000 |
+| **Slam** som aldrig bjöds | 12 | 13 070 |
+| Bara delkontraktsstrid | 48 | 2 230 |
+
+93 % av posten är alltså missade utgångar/slammar som gömt sig bakom att
+motståndarna köpte kontraktet och gick bet — den lilla straffen dolde att vi
+själva hade mer. Fyra hål bakom det, alla spårade till rad i koden:
+
+| # | Hål | Storlek | Var |
+|---|---|---|---|
+| 1 | **Stöddubblingen besvaras aldrig** — `1♦–(P)–1♠–(2♥)–X` passas ut av svararen; 2♥X blir kontraktet | 5 givar, 1 470 p | `auction-live.ts` `takeoutDoubleToAnswer`: svarstvånget stängs av så fort vår sida bjudit ett kontraktsbud, och stöddubblingen har ingen egen svarsväg |
+| 2 | **Svaret på upplysnings-X försvinner när RHO bjuder över** — `1♣–(X)–2♣` → advancern passade med 15 hp | ≥ 580 p | samma funktion: kräver att partnerns X är auktionens senaste icke-pass |
+| 3 | **Taket i §7.6-försvaret mot svaga tvåor** — 2NT-fönstret (15–18 direkt / 12–15 balansering) och det naturliga inklivet (10–16) har inget utlopp uppåt; en balanserad **20-poängare passade ut 2♦** (frö 20260767) | ca 1 000 p | `defense-conventional.ts` `defendWeakTwo` — jfr `defendPreempt` som HAR "3NT till spel" med 16+ |
+| 4 | **Deras spärrbud stänger auktionen** — i 16 givar där vi ägde utgång/slam sa vår sida inte ett ord (9 av dem över en svag tvåa). Efter deras spärrhöjning (`2♠–P–3♠–P`) finns inget försvar alls | 16 givar, 5 720 p | `auction-live.ts` `maybeOvercall` kräver 1-lägesöppning + exakt ETT kontraktsbud i historiken; kommentaren ovanför säger uttryckligen att svaga tvåor/spärrar "hör till senare utbyggnad" |
+
+**Hål 1, 2 och 3 kräver inget ägarbeslut** (rena buggar: en dubbling som ingen
+svarar på, ett fönster utan tak). **Hål 4 gör det** — hur aggressivt bottarna ska
+tävla mot spärrbud är en avvägning: mer tävlande köper utgångar och betalar med
+fler egna bet.
+
+**Nästa steg:** ägaren väljer vilket hål som lagas först. Facit-först som vanligt:
+rött test på fröet → fix → grönt → DD-verifiera → hela sviten → mätning #15 med
+samma frö 20260721.
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):

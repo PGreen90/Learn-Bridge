@@ -24,6 +24,18 @@ fråga ägaren om PCD (push/commit/deploy).
 $env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
 ```
 
+**FÖRSKANNINGEN KLAR 2026-07-25 — ägaren väljer vilket hål som lagas först.**
+Alla 125 givar hämtade och ombjudna med regelnamn (nytt verktyg:
+`src/lib/engine/auktionsdump.probe.test.ts`, miljöstyrt som regelsvepet). Fyndet:
+posten handlar **inte** om missade straffdubblingar (bara 280 p av 34 300 hade en
+dubblingshand) utan om **utgångar och slammar vi aldrig bjöd** — 77 av 125 givar,
+32 070 p. Fyra hål, alla spårade till rad i koden (full tabell:
+`docs/systemrevisorn.md`, "Etapp 6 FÖRSKANNAD"):
+1. stöddubblingen besvaras aldrig (5 givar, 1 470 p) — ren bugg
+2. svaret på upplysnings-X försvinner när RHO bjuder över (≥ 580 p) — ren bugg
+3. taket i försvaret mot svaga tvåor: balanserad 20-poängare passar ut 2♦ (~1 000 p)
+4. deras spärrbud stänger auktionen (16 givar, 5 720 p) — **kräver ägarens omdöme**
+
 **Läget i spåret (Mätning #14, frö 20260721, 1 000 givar):** snitt-tapp
 **300 → 287,2 p/giv**, rätt kontrakt **15,9 % → 17,1 %**. Topplista nu: missad
 lillslam 55 410 > fel färg 51 040 > missad utgång 50 140 > missad storslam 36 470
