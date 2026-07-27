@@ -62,6 +62,11 @@ export function defendStrongClub(hand: Hand): ResponseResult {
  *   - naturligt inkliv som ryms på 2-LÄGET från 7 hp (10 − lånad kung),
  *   - 2NT = 12–15 med stopp (lånad kung från direkta 15–18).
  * Cue-kravet (15+, 5-5) är oförändrat — det vilar på form, inte lånat utrymme.
+ * TAKET (etapp 6 hål 3, 2026-07-27): fönstren hade inget utlopp uppåt — en
+ * balanserad 21-poängare passade ut 2♦ (frö 20260767). Nu:
+ *   - 3NT till spel: balanserad 19+ (balansering 16+, lånad kung) med stopp,
+ *     eller stark 6+ minor (två av topp-3-honnörerna) med stopp från 15,
+ *   - 17+ som inte ryms i något fönster → X (sälj aldrig given).
  */
 export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12, balancing = false): ResponseResult {
   const p = hcp(hand)
@@ -83,8 +88,25 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12, ba
     return { call: '2NT', rule: `2NT-inkliv (${ntFloor}–${ntCeil})`, explanation: `${p} hp balanserad med stopp → 2NT-inkliv.` }
   }
   // Upplysningsdubbling (takeout). I balansering räcker ≤3 kort i deras färg.
+  // Ligger FÖRE 3NT-taket: kan handen dubbla (kort i deras färg) är X:et mer
+  // flexibelt även med 19+ — 3NT är utloppet för händer med LÄNGD i deras färg.
   if (isTakeout(hand, theirSuit, takeoutFloor, balancing ? 3 : 2)) {
     return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[theirSuit]}, stöd i övriga → X.` }
+  }
+  // 3NT till spel (TAKET, etapp 6 hål 3): balanserad över 2NT-fönstret med
+  // stopp, eller en stark 6+ minor (två topphonnörer = spelkälla) med stopp.
+  const ntGameFloor = balancing ? 16 : 19
+  const strongMinor = (['clubs', 'diamonds'] as Suit[]).find(
+    (s) =>
+      s !== theirSuit &&
+      len[s] >= 6 &&
+      hand.filter((c) => c.suit === s && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length >= 2,
+  )
+  if (hasStopper(hand, theirSuit) && ((isBalanced(hand) && p >= ntGameFloor) || (strongMinor && p >= 15))) {
+    const why = strongMinor && !(isBalanced(hand) && p >= ntGameFloor)
+      ? `${p} hp med stark ${len[strongMinor]}-korts ${NAME[strongMinor]} (spelkälla) och stopp i ${NAME[theirSuit]}`
+      : `${p} hp balanserad med stopp i ${NAME[theirSuit]}`
+    return { call: '3NT', rule: '3NT till spel', explanation: `${why} → 3NT till spel.` }
   }
   // Naturligt inkliv med en 5+ färg (balansering: 2-lägesbud redan från 7 hp).
   const suit = longestOther(len, theirSuit, 5)
@@ -94,6 +116,11 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12, ba
     if (p >= floor && p <= 16) {
       return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]}.` }
     }
+  }
+  // 17+ som inte fick plats i något fönster: sälj ALDRIG given — X (upplysning;
+  // partnern svarar, och den starka handen får beskriva sig på nästa varv).
+  if (p >= 17) {
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp – för stark för att sälja given → X (upplysning).` }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass.' }
 }

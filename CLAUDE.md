@@ -36,13 +36,16 @@ slammar vi aldrig bjöd**:
    över (≥ 580 p): fri svarsväg + cue-svar + dubblarvakt
    (`advancerFreeBidAfterDouble`/`doublerAnswersCue`/`doublerRaisesAdvance`),
    facit-test `auction-upplysningsx-svar.test.ts`, Mätning #16
-3. taket i försvaret mot svaga tvåor: balanserad 20-poängare passar ut 2♦ (~1 000 p) — **NÄSTA**
-4. deras spärrbud stänger auktionen (16 givar, 5 720 p) — **kräver ägarens omdöme**
+3. ✅ **KLAR 2026-07-27** — taket i försvaret mot svaga tvåor (3 givar, 910 p):
+   `defendWeakTwo` fick 3NT till spel + stark X (17+),
+   facit-test `auction-svagtva-tak.test.ts`, Mätning #17
+4. deras spärrbud stänger auktionen (16 givar, 5 720 p) — **kräver ägarens
+   omdöme, NÄSTA: exempelhänder framtagna, väntar på ägaren**
 
-**Läget i spåret (Mätning #16, frö 20260721, 1 000 givar):** par-avvikelse
-**300 → 278,7 p/giv**, rätt kontrakt **15,9 % → 17,8 %**. Topplista nu: missad
+**Läget i spåret (Mätning #17, frö 20260721, 1 000 givar):** par-avvikelse
+**300 → 277,8 p/giv**, rätt kontrakt **15,9 % → 18,0 %**. Topplista nu: missad
 lillslam 56 920 > fel färg 51 840 > missad utgång 49 850 > missad storslam 36 470
-> billig offring 32 390.
+> billig offring 31 480.
 
 **Klart i spåret:** etapp 1 (felrapporter), etapp 2 (revisorn + baslinje), etapp 3
 (fel färg, 6 fixar), etapp 5 (missad utgång, 3 fixar), etapp 4 (F1-resten: slam
@@ -66,14 +69,15 @@ inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **Taket mot svaga tvåor (2026-07-27):** starka händer säljer inte längre —
+  3NT till spel (bal. 19+/16+ balansering, stark minor 15+) — hamnar ni i 3NT
+  på tunna håll?
 - **Advancern talar över deras höjning (2026-07-27):** när de bjuder över
   partnerns upplysnings-X svarar boten nu fritt (form får bjuda utan poäng, XX
   flys alltid) — väcker den för lätt, och känns dubblarens utgångströsklar rätt?
 - **Stöddubblingen besvaras (2026-07-27):** svararen svarar nu alltid på stöd-X
   (pass = medvetet straffpass) — hamnar ni för högt på 4-3-utgångar, och känns
   straffpasset lagom vanligt?
-- **Reverse/hoppskift (2026-07-25):** boten sätter utgången efter hoppskift och kan
-  driva RKC mot visade 16/19 — bjuds tunna slammar för ofta?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är

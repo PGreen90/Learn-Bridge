@@ -1391,6 +1391,15 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
   tvåa vet att kungen redan är lånad → höjningar räknar **stödpoäng −3** och
   kapas vid **3-läget** utan äkta utgångsvärden efter rabatten (annars värderas
   samma kung två gånger och 2♠-balanseringen blåses till 4♠ bet).
+- **Taket — starka händer mot svaga tvåor (etapp 6 i mätspåret, 2026-07-27):**
+  fönstren ovan hade inget utlopp uppåt — en balanserad 21-poängare *passade ut*
+  2♦. Nu gäller: **3NT = till spel** med stopp i deras färg och antingen
+  **balanserad över 2NT-fönstret** (19+ direkt / **16+ i balansering**, lånad
+  kung) eller en **stark 6+ lågfärg** (minst två av E-K-D = spelkälla) från
+  **15 hp**. Kan handen i stället dubbla (kort i deras färg) väljs **X:et före
+  3NT** även med 19+ — dubblingen är flexiblare och den starka handen beskriver
+  sig på nästa varv. Och en hand med **17+** som inte ryms i något fönster
+  **säljer aldrig given**: den dubblar (upplysning) hellre än passar.
 - **Mot Multi 2♦** (svag tvåa i okänd högfärg): 2NT = 15–18 balanserad; 2♥/2♠ =
   naturligt inkliv. (Takeout-dubblingen: §7.3.)
 - **Mot spärrar (3-läget+):** 3NT = till spel (stopp + stick); cue-bud =
@@ -1470,6 +1479,19 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-27 (kväll, del 2)** – **Taket i försvaret mot svaga tvåor (kod,
+  §7.7, ETAPP 6 hål 3).** `defendWeakTwo` hade cue (15+ 5-5), 2NT-fönstret
+  (15–18/12–15), takeout-X och naturligt inkliv (10–16) — men inget utlopp
+  uppåt: frö 20260767 (balanserad 21-poängare i balansering), 20261571 (17 hp
+  med stark 6-korts klöver) och 20261582 (17 hp balanserad i balansering, ÖVER
+  12–15-fönstret) passade alla ut deras svaga tvåa. Nu: **3NT till spel**
+  (balanserad 19+ direkt / 16+ balansering, eller stark 6+ minor med två
+  topphonnörer + stopp från 15) och **stark X (17+)** som sista utlopp — men
+  X:et behåller prioritet när handen har kort i deras färg (flexiblare; på frö
+  20260811 var X-vägen 250 p bättre än 3NT). Alla tre målen DD-verifierade:
+  3NT ger 10 stick (430/430/630 ≈ par). Facit-test FÖRE fix:
+  `auction-svagtva-tak.test.ts` + enhetstester i defense-conventional.test.ts.
+  Hela sviten grön.
 - **2026-07-27 (kväll)** – **Advancern svarar när de bjuder över upplysnings-X
   (kod, §7.3, ETAPP 6 hål 2).** Förskanningens andra hål: `takeoutDoubleToAnswer`
   kräver att partnerns X är senaste icke-pass — höjde motståndarna (1♣–X–2♣)

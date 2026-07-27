@@ -35,6 +35,24 @@ describe('defendWeakTwo (§7.6)', () => {
   it('5-färg utan takeout-form → naturligt inkliv (2♠)', () => {
     expect(defendWeakTwo(parseHand('S:KQ543 H:K32 D:K32 C:32'), 'hearts').call).toBe('2S')
   })
+
+  // Etapp 6 hål 3 (billig offring): TAKET. Fönstren (2NT 15–18/12–15, inkliv
+  // 10–16) hade inget utlopp uppåt — starka händer passade ut svaga tvåor.
+  it('balanserad 19+ med stopp DIREKT → 3NT till spel (frö 20260767-handen)', () => {
+    expect(defendWeakTwo(parseHand('S:AK65 H:Q43 D:AKQJ C:Q2'), 'diamonds').call).toBe('3NT')
+  })
+  it('balanserad 16+ med stopp i BALANSERING (över 2NT-fönstret 12–15) → 3NT (frö 20261582)', () => {
+    expect(defendWeakTwo(parseHand('S:94 H:AKT85 D:AQ7 C:A98'), 'hearts', 10, true).call).toBe('3NT')
+  })
+  it('stark 6+ minor (två topphonnörer) med stopp från 15 → 3NT till spel (frö 20261571)', () => {
+    expect(defendWeakTwo(parseHand('S:62 H:K97 D:AK C:AQJT94'), 'hearts').call).toBe('3NT')
+  })
+  it('17+ utan stopp och utan takeout-form → X (sälj aldrig given)', () => {
+    expect(defendWeakTwo(parseHand('S:AKQ4 H:432 D:AKQ4 C:432'), 'hearts').call).toBe('X')
+  })
+  it('17 balanserad med stopp DIREKT ligger kvar i 2NT-fönstret (taket rör inte 15–18)', () => {
+    expect(defendWeakTwo(parseHand('S:K43 H:KQ4 D:KQ32 C:KJ2'), 'spades').call).toBe('2NT')
+  })
 })
 
 describe('defendMulti – mot Multi 2♦ (§7.6)', () => {
