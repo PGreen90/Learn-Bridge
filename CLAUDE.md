@@ -24,22 +24,25 @@ fråga ägaren om PCD (push/commit/deploy).
 $env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
 ```
 
-**FÖRSKANNINGEN KLAR 2026-07-25 — ägaren väljer vilket hål som lagas först.**
-Alla 125 givar hämtade och ombjudna med regelnamn (nytt verktyg:
-`src/lib/engine/auktionsdump.probe.test.ts`, miljöstyrt som regelsvepet). Fyndet:
-posten handlar **inte** om missade straffdubblingar (bara 280 p av 34 300 hade en
-dubblingshand) utan om **utgångar och slammar vi aldrig bjöd** — 77 av 125 givar,
-32 070 p. Fyra hål, alla spårade till rad i koden (full tabell:
-`docs/systemrevisorn.md`, "Etapp 6 FÖRSKANNAD"):
-1. stöddubblingen besvaras aldrig (5 givar, 1 470 p) — ren bugg
-2. svaret på upplysnings-X försvinner när RHO bjuder över (≥ 580 p) — ren bugg
-3. taket i försvaret mot svaga tvåor: balanserad 20-poängare passar ut 2♦ (~1 000 p)
+**Ägarbeslut 2026-07-27: ordningen är hål 1 → 2 → 3 → mätning → hål 4** (hål 4
+kräver ägarens omdöme och tas med exempelhänder). Förskanningen (2026-07-25)
+hittade fyra hål — full tabell: `docs/systemrevisorn.md`, "Etapp 6 FÖRSKANNAD";
+posten handlar **inte** om missade straffdubblingar utan om **utgångar och
+slammar vi aldrig bjöd**:
+1. ✅ **KLAR 2026-07-27** — stöddubblingen besvaras aldrig (5 givar, 1 470 p):
+   svarsväg byggd (`answerSupportDouble`/`supportDoublerRebid` i doubles.ts),
+   facit-test `auction-stoddubbling-svar.test.ts`, Mätning #15
+2. ✅ **KLAR 2026-07-27** — svaret på upplysnings-X försvinner när RHO bjuder
+   över (≥ 580 p): fri svarsväg + cue-svar + dubblarvakt
+   (`advancerFreeBidAfterDouble`/`doublerAnswersCue`/`doublerRaisesAdvance`),
+   facit-test `auction-upplysningsx-svar.test.ts`, Mätning #16
+3. taket i försvaret mot svaga tvåor: balanserad 20-poängare passar ut 2♦ (~1 000 p) — **NÄSTA**
 4. deras spärrbud stänger auktionen (16 givar, 5 720 p) — **kräver ägarens omdöme**
 
-**Läget i spåret (Mätning #14, frö 20260721, 1 000 givar):** snitt-tapp
-**300 → 287,2 p/giv**, rätt kontrakt **15,9 % → 17,1 %**. Topplista nu: missad
-lillslam 55 410 > fel färg 51 040 > missad utgång 50 140 > missad storslam 36 470
-> billig offring ~34 300.
+**Läget i spåret (Mätning #16, frö 20260721, 1 000 givar):** par-avvikelse
+**300 → 278,7 p/giv**, rätt kontrakt **15,9 % → 17,8 %**. Topplista nu: missad
+lillslam 56 920 > fel färg 51 840 > missad utgång 49 850 > missad storslam 36 470
+> billig offring 32 390.
 
 **Klart i spåret:** etapp 1 (felrapporter), etapp 2 (revisorn + baslinje), etapp 3
 (fel färg, 6 fixar), etapp 5 (missad utgång, 3 fixar), etapp 4 (F1-resten: slam
@@ -63,12 +66,14 @@ inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **Advancern talar över deras höjning (2026-07-27):** när de bjuder över
+  partnerns upplysnings-X svarar boten nu fritt (form får bjuda utan poäng, XX
+  flys alltid) — väcker den för lätt, och känns dubblarens utgångströsklar rätt?
+- **Stöddubblingen besvaras (2026-07-27):** svararen svarar nu alltid på stöd-X
+  (pass = medvetet straffpass) — hamnar ni för högt på 4-3-utgångar, och känns
+  straffpasset lagom vanligt?
 - **Reverse/hoppskift (2026-07-25):** boten sätter utgången efter hoppskift och kan
   driva RKC mot visade 16/19 — bjuds tunna slammar för ofta?
-- **Slam efter stark 2♣ (2026-07-24):** kaptenen räknar mot visade 22 — bjuds slam
-  för ofta, och känns 5M-inbjudan begriplig?
-- **Missad utgång (2026-07-24):** graderad höjning av öppnarens andra färg,
-  inbjudan efter 1NT-svar besvaras alltid, "bra 15" accepterar 2NT — för högt?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är

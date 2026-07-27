@@ -17,7 +17,7 @@ import type { Bid, Deal, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
-import { answerTakeoutDouble, openerAnswerNegativeDouble, penaltyDouble } from './doubles'
+import { advancerFreeBidAfterDouble, answerSupportDouble, answerTakeoutDouble, doublerAnswersCue, openerAnswerNegativeDouble, penaltyDouble, supportDoublerRebid } from './doubles'
 import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { openerAnswerFourthSuit, openerAnswerNMF } from './rebids'
@@ -155,6 +155,287 @@ function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Sui
     }
   }
   return their ? { suit: their, level, bidSuits } : null
+}
+
+/**
+ * Har motståndarna BJUDIT ÖVER partnerns upplysningsdubbling (etapp 6 hål 2)?
+ * Mönstret: de öppnar i färg (1–2-läget) – partnern X (upplysning) – RHO
+ * höjer/bjuder nytt/redubblar – `seat`. `takeoutDoubleToAnswer` kräver att X:et
+ * är senaste icke-pass, så här försvann svaret helt förr. Läget är FRITT (utom
+ * över XX = tvångsflykt) — advancern talar värde-/formstyrt via
+ * `advancerFreeBidAfterDouble`. Kraven:
+ *  - vår sida har inga kontraktsbud; vårt enda icke-pass är partnerns X,
+ *  - efter X:et har de gjort EXAKT en aktion (bud eller XX) = senaste icke-pass,
+ *  - deras öppning är i färg på 1–2-läget (3+ = spärr, hål 4 — rörs inte här).
+ */
+function takeoutDoubleOverbidToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { doubledSuit: Suit; openLevel: number; theirSuits: Suit[]; lastBid: string } | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
+  if (lastNonPass.bid !== 'XX' && !parseContractBid(lastNonPass.bid)) return null
+
+  // Vår sida: exakt ETT icke-pass, och det är partnerns X (inga egna kontraktsbud).
+  const ourNonPass = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourNonPass.length !== 1 || ourNonPass[0].bid !== 'X' || ourNonPass[0].seat !== PARTNER[seat]) return null
+  const xIdx = history.indexOf(ourNonPass[0])
+
+  // Efter X:et: exakt EN motståndaraktion (den senaste icke-passen).
+  const afterX = history.slice(xIdx + 1).filter((c) => c.bid !== 'P')
+  if (afterX.length !== 1 || afterX[0] !== lastNonPass) return null
+
+  // Deras öppning: auktionens första kontraktsbud, i färg, 1–2-läget.
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length === 0 || side(bids[0].seat) === side(seat)) return null
+  const openCb = parseContractBid(bids[0].bid)!
+  const doubledSuit = SUIT_OF_LETTER[openCb.strain]
+  if (!doubledSuit || openCb.level > 2) return null
+
+  const theirSuits: Suit[] = []
+  let openLevel = openCb.level
+  for (const c of bids) {
+    if (side(c.seat) === side(seat)) return null // (paranoia: inga egna kontraktsbud)
+    const cb = parseContractBid(c.bid)!
+    const s = SUIT_OF_LETTER[cb.strain]
+    if (s && !theirSuits.includes(s)) theirSuits.push(s)
+    if (c !== lastNonPass) openLevel = Math.max(openLevel, cb.level)
+  }
+  return { doubledSuit, openLevel, theirSuits, lastBid: lastNonPass.bid }
+}
+
+/**
+ * Har advancern CUE-BJUDIT deras färg efter `seat`s egen upplysningsdubbling?
+ * Cuet är utgångskrav och får aldrig passas — `doublerAnswersCue` svarar (3NT
+ * med stopp, annars billigaste högfärg). Kraven: deras 1-lägesöppning i färg
+ * (svaga tvåor har egen cue-väg, `partnerWeakTwoCueToAnswer`), mitt X är vårt
+ * enda icke-pass före partnerns cue, partnerns ENDA kontraktsbud = cuet i en av
+ * deras färger = auktionens senaste icke-pass.
+ */
+function advancerCueToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { theirSuits: Suit[]; cueBid: string } | null {
+  // Min sida: mitt X + partnerns cue är våra enda icke-pass. Efter cuet får
+  // bara pass och motståndarnas straff-X förekomma (deras X tar ingen budyta
+  // och friar mig inte från kravet).
+  const ourNonPass = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourNonPass.length !== 2) return null
+  if (ourNonPass[0].seat !== seat || ourNonPass[0].bid !== 'X') return null
+  const cueCall = ourNonPass[1]
+  if (cueCall.seat !== PARTNER[seat] || !parseContractBid(cueCall.bid)) return null
+  const cueIdx = history.indexOf(cueCall)
+  if (history.slice(cueIdx + 1).some((c) => c.bid !== 'P' && !(c.bid === 'X' && side(c.seat) !== side(seat)))) return null
+
+  // Deras öppning: första kontraktsbudet, i färg, 1-läget.
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length === 0 || side(bids[0].seat) === side(seat)) return null
+  const openCb = parseContractBid(bids[0].bid)!
+  if (openCb.level !== 1 || !SUIT_OF_LETTER[openCb.strain]) return null
+
+  const theirSuits: Suit[] = []
+  for (const c of bids) {
+    if (side(c.seat) === side(seat)) continue
+    const s = SUIT_OF_LETTER[parseContractBid(c.bid)!.strain]
+    if (s && !theirSuits.includes(s)) theirSuits.push(s)
+  }
+  // Partnerns bud måste vara ett CUE (i en av deras färger).
+  const cueSuit = SUIT_OF_LETTER[parseContractBid(cueCall.bid)!.strain]
+  if (!cueSuit || !theirSuits.includes(cueSuit)) return null
+
+  return { theirSuits, cueBid: cueCall.bid }
+}
+
+/**
+ * DUBBLAREN väger höjningen av advancerns färgsvar (etapp 6 hål 2, del 2).
+ * Utan den här vakten läste `advancerCompetesToFit` partnerns svar på min
+ * upplysningsdubbling som ett tvåläges-INKLIV ("bra 6+ färg") och blastade
+ * utgång på 13+ stödpoäng — men svaret lovar bara ~6–9 (fritt icke-hopp),
+ * 9–11 (hoppet) eller 0+ (tvångsflykt över deras XX). Skalan:
+ *  - flykt över XX → höj aldrig (svaret lovar inga poäng),
+ *  - partnerns HOPP (9–11): utgång i högfärg med 15+ stödpoäng, annars pass,
+ *  - fritt icke-hopp (~6–9): utgång med 19+ (högfärg) / 21+ (lågfärg),
+ *    enkel höjning (inbjudan) med 16–18, annars pass,
+ *  - 17+ hp släpps vidare till det starka X-flödet (`ownStrongDoubleRebid`).
+ * Explicit pass (inte null) när vakten avböjer — annars tar blastern över.
+ */
+function doublerRaisesAdvance(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  // Vår sida: exakt två icke-pass — mitt X (först) och partnerns färgbud.
+  const ourNonPass = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourNonPass.length !== 2) return null
+  if (ourNonPass[0].seat !== seat || ourNonPass[0].bid !== 'X') return null
+  const advCall = ourNonPass[1]
+  if (advCall.seat !== PARTNER[seat] || !parseContractBid(advCall.bid)) return null
+
+  // Turen: senaste icke-pass är partnerns svar, eller deras bud EFTER svaret.
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass) return null
+  const advIdx = history.indexOf(advCall)
+  if (lastNonPass !== advCall && !(side(lastNonPass.seat) !== side(seat) && history.indexOf(lastNonPass) > advIdx)) return null
+
+  // Deras färgöppning på 1–2-läget (3+ = spärr, hål 4 — rörs inte här).
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (side(bids[0].seat) === side(seat)) return null
+  const openCb = parseContractBid(bids[0].bid)!
+  if (!SUIT_OF_LETTER[openCb.strain] || openCb.level > 2) return null
+
+  // Partnerns färg måste vara OBJUDEN av dem (cue har egen väg).
+  const theirSuits = new Set<Suit>()
+  for (const c of bids) {
+    if (side(c.seat) === side(seat)) continue
+    const s = SUIT_OF_LETTER[parseContractBid(c.bid)!.strain]
+    if (s) theirSuits.add(s)
+  }
+  const advSuit = SUIT_OF_LETTER[parseContractBid(advCall.bid)!.strain]
+  if (!advSuit || theirSuits.has(advSuit)) return null
+
+  const hand = deal.hands[seat]
+  if (hcp(hand) >= 17) return null // starka X-flödet tar över
+
+  const decline = (why: string): ResolvedCall => ({ seat, bid: 'P', rule: 'dubblaren nöjer sig', explanation: why })
+
+  // Flykt över deras XX lovar INGA poäng → höj aldrig.
+  const xxEscape = history.some((c, i) => i < advIdx && c.bid === 'XX' && side(c.seat) !== side(seat))
+  if (xxEscape) return decline('Partnerns flykt över redubblingen var tvingad (lovar inga poäng) – pass.')
+
+  const support = lengths(hand)[advSuit]
+  if (support < 3) return decline(`Utan stöd i partnerns ${SWE_NAME[letterOfSuit(advSuit)]} – pass.`)
+
+  // Hopp eller ej: partnerns svar mot billigaste möjliga nivån vid den punkten.
+  let prevLevel = 0
+  let prevRank = -1
+  for (let i = 0; i < advIdx; i++) {
+    const cb = parseContractBid(history[i].bid)
+    if (!cb) continue
+    prevLevel = cb.level
+    prevRank = SUIT_STRAINS.indexOf(cb.strain as (typeof SUIT_STRAINS)[number])
+  }
+  const advCb = parseContractBid(advCall.bid)!
+  const advRank = SUIT_STRAINS.indexOf(advCb.strain as (typeof SUIT_STRAINS)[number])
+  const minLevel = advRank > prevRank ? Math.max(prevLevel, 1) : prevLevel + 1
+  const wasJump = advCb.level > minLevel
+
+  const sp = dummyPoints(hand, advSuit).dummyPoints
+  const isMajor = advSuit === 'hearts' || advSuit === 'spades'
+  const legal = legalCalls(history, seat)
+  const gameBid = `${isMajor ? 4 : 5}${letterOfSuit(advSuit)}` as Bid
+
+  if (wasJump) {
+    // Partnerns hopp = 9–11 (inbjudan): acceptera i högfärg med 15+.
+    if (sp >= 15 && isMajor && legal.includes(gameBid)) {
+      return { seat, bid: gameBid, rule: 'dubblaren accepterar inbjudan', explanation: `${sp} stödpoäng mot partnerns hoppbud (9–11) → utgång ${gameBid}.` }
+    }
+    return decline(`${sp} stödpoäng – avböjer partnerns inbjudan (accept kräver 15+).`)
+  }
+
+  // Fritt icke-hopp = ~6–9.
+  if (sp >= (isMajor ? 19 : 21) && legal.includes(gameBid)) {
+    return { seat, bid: gameBid, rule: 'dubblaren bjuder utgång', explanation: `${sp} stödpoäng mot partnerns fria svar (~6–9) → utgång ${gameBid}.` }
+  }
+  if (sp >= 16) {
+    const raise = cheapestBidIn(history, seat, letterOfSuit(advSuit))
+    if (raise && parseContractBid(raise)!.level < (isMajor ? 4 : 5) && legal.includes(raise)) {
+      return { seat, bid: raise, rule: 'dubblaren höjer (inbjudan)', explanation: `${sp} stödpoäng med ${support}-korts stöd → ${raise} (inbjudan mot partnerns fria svar).` }
+    }
+  }
+  return decline(`${sp} stödpoäng – partnerns fria svar lovar ~6–9, utgång kräver mer.`)
+}
+
+/**
+ * Har partnern (öppnaren) just STÖDDUBBLAT som `seat` (svararen) måste svara på?
+ * Mönstret (§7.3): partnerns 1-läges färgöppning – (pass) – vårt 1M-svar –
+ * (RHO:s färginkliv) – partnerns X – (pass) – vi. X:et visar exakt 3 stöd och är
+ * upplysande — svararen får aldrig lämnas att passa bort det (etapp 6 hål 1:
+ * `takeoutDoubleToAnswer` stänger av tvånget så fort vår sida bjudit, så
+ * stöddubblingen behöver en egen väg). Kraven:
+ *  - partnerns senaste icke-pass är ett X (bjuder RHO över är läget fritt),
+ *  - kontraktsbuden är exakt tre: partnerns 1-i-färg, vårt 1♥/1♠, deras inkliv
+ *    (i en annan färg än öppningens, efter vårt svar),
+ *  - "2 i vår högfärg" gick fortfarande att bjuda (annars betyder X något annat
+ *    — samma fönster som `supportDouble` i doubles.ts).
+ */
+function supportDoubleToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { myMajor: Suit; openerSuit: Suit; theirBid: string } | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
+
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length !== 3) return null
+  const [open, resp, over] = bids
+
+  const openCb = parseContractBid(open.bid)!
+  if (open.seat !== PARTNER[seat] || openCb.level !== 1) return null
+  const openerSuit = SUIT_OF_LETTER[openCb.strain]
+  if (!openerSuit) return null // 1NT-öppning → X är något annat
+
+  const respCb = parseContractBid(resp.bid)!
+  if (resp.seat !== seat || respCb.level !== 1) return null
+  const myMajor = SUIT_OF_LETTER[respCb.strain]
+  if (myMajor !== 'hearts' && myMajor !== 'spades') return null
+
+  const overCb = parseContractBid(over.bid)!
+  if (side(over.seat) === side(seat)) return null
+  const theirSuit = SUIT_OF_LETTER[overCb.strain]
+  if (!theirSuit || theirSuit === openerSuit) return null
+  // X:et måste ligga efter inklivet (öppnarens andra tur).
+  if (history.indexOf(lastNonPass) < history.indexOf(over)) return null
+  // Stöd-X-fönstret: 2M måste ha varit bjudbart över inklivet.
+  const RANKS: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+  const twoMajorAvailable =
+    overCb.level < 2 || (overCb.level === 2 && RANKS.indexOf(myMajor) > RANKS.indexOf(theirSuit))
+  if (!twoMajorAvailable) return null
+
+  return { myMajor, openerSuit, theirBid: over.bid }
+}
+
+/**
+ * Har `seat` (öppnaren) själv STÖDDUBBLAT och fått partnerns svar som nu ska
+ * vägas (acceptera inbjudan med 15+, annars pass)? Kraven speglar
+ * `supportDoubleToAnswer` — plus: vårt eget X ligger mellan inklivet och
+ * partnerns svar, svaret är auktionens senaste icke-pass (stör motståndarna
+ * efter svaret är läget fritt → generell konkurrenslogik).
+ */
+function supportDoubleFollowUpToAnswer(
+  history: ResolvedCall[],
+  seat: Seat,
+): { myOpenedSuit: Suit; partnerMajor: Suit; theirSuit: Suit; partnerAnswer: string } | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
+  if (!parseContractBid(lastNonPass.bid)) return null
+
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length !== 4) return null
+  const [open, resp, over, answer] = bids
+  if (answer !== lastNonPass) return null
+
+  const openCb = parseContractBid(open.bid)!
+  if (open.seat !== seat || openCb.level !== 1) return null
+  const myOpenedSuit = SUIT_OF_LETTER[openCb.strain]
+  if (!myOpenedSuit) return null
+
+  const respCb = parseContractBid(resp.bid)!
+  if (resp.seat !== PARTNER[seat] || respCb.level !== 1) return null
+  const partnerMajor = SUIT_OF_LETTER[respCb.strain]
+  if (partnerMajor !== 'hearts' && partnerMajor !== 'spades') return null
+
+  const overCb = parseContractBid(over.bid)!
+  if (side(over.seat) === side(seat)) return null
+  const theirSuit = SUIT_OF_LETTER[overCb.strain]
+  if (!theirSuit || theirSuit === myOpenedSuit) return null
+
+  // Mitt X = stöddubblingen, mellan deras inkliv och partnerns svar.
+  const myX = history.find(
+    (c) =>
+      c.seat === seat &&
+      c.bid === 'X' &&
+      history.indexOf(c) > history.indexOf(over) &&
+      history.indexOf(c) < history.indexOf(answer),
+  )
+  if (!myX) return null
+
+  return { myOpenedSuit, partnerMajor, theirSuit, partnerAnswer: answer.bid }
 }
 
 /**
@@ -560,6 +841,14 @@ function strongDoubleContext(history: ResolvedCall[], seat: Seat): StrongDoubleC
   if (doublerBids.length < 1) return null
   const doublerSuit = SUIT_OF_LETTER[doublerBids[0].strain]
   if (!doublerSuit || theirSuits.has(doublerSuit)) return null
+  // … och en HÖJNING av en färg advancern själv bjudit FÖRE dubblarens bud är
+  // inget starkt återbud (etapp 6 hål 2: dubblarens invithöjning av det fria
+  // svaret lästes som "X + egen färg" → advancern blastade utgång på 8 hp).
+  const doublerFirstIdx = history.findIndex((c) => c.seat === doubler && parseContractBid(c.bid))
+  const advancerBidItFirst = history.some(
+    (c, i) => i < doublerFirstIdx && c.seat === advancer && parseContractBid(c.bid)?.strain === doublerBids[0].strain,
+  )
+  if (advancerBidItFirst) return null
 
   return {
     role: seat === doubler ? 'doubler' : 'advancer',
@@ -2954,6 +3243,29 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // Upplysningsdubbling från partnern (§7): svara, passa aldrig bort den.
     () => answered(takeoutDoubleToAnswer(history, seat),
       (t) => answerTakeoutDouble(hand, t.suit, t.level, t.bidSuits), history, seat),
+    // Partnerns STÖDDUBBLING (§7.3, etapp 6 hål 1): svararen svarar alltid
+    // (pass bara som medvetet straffpass med trumfstack).
+    () => answered(supportDoubleToAnswer(history, seat),
+      (s) => answerSupportDouble(hand, s.myMajor, s.openerSuit, s.theirBid), history, seat),
+    // ... och stöddubblarens EGEN fortsättning: väg partnerns inbjudan (15+
+    // accepterar), och låt partnerns utgångsbud stå.
+    () => answered(supportDoubleFollowUpToAnswer(history, seat),
+      (f) => supportDoublerRebid(hand, f.myOpenedSuit, f.partnerMajor, f.theirSuit, f.partnerAnswer), history, seat),
+    // De bjuder ÖVER partnerns upplysningsdubbling (§7.3, etapp 6 hål 2):
+    // advancern talar fritt med värden/form (XX = tvångsflykt). Ger schemat
+    // inget bud faller vi VIDARE (null) så t.ex. straffdubblingen kan pröva.
+    () => {
+      const t = takeoutDoubleOverbidToAnswer(history, seat)
+      if (!t) return null
+      const ans = advancerFreeBidAfterDouble(hand, t.doubledSuit, t.openLevel, t.theirSuits, t.lastBid)
+      return ans ? answered(t, () => ans, history, seat) : null
+    },
+    // ... och advancerns CUE efter min upplysningsdubbling är krav: svara alltid.
+    () => answered(advancerCueToAnswer(history, seat),
+      (a) => doublerAnswersCue(hand, a.theirSuits, a.cueBid), history, seat),
+    // Dubblaren väger höjningen av advancerns färgsvar mot vad svaret VISADE
+    // (hopp 9–11, fritt ~6–9, XX-flykt 0+) — före den generella fit-blastern.
+    () => doublerRaisesAdvance(deal, history, seat),
     // Partnerns NEGATIVA dubbling (§7.3, rondkrav): öppnaren svarar alltid.
     () => answered(negativeDoubleToAnswer(history, seat),
       (n) => openerAnswerNegativeDouble(hand, n.ourOpen, n.theirCall), history, seat),

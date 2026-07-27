@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
-import { negativeDouble, openerAnswerNegativeDouble, penaltyDouble, responsiveDouble, supportDouble, answerTakeoutDouble } from './doubles'
+import { advancerFreeBidAfterDouble, answerSupportDouble, doublerAnswersCue, negativeDouble, openerAnswerNegativeDouble, penaltyDouble, responsiveDouble, supportDouble, supportDoublerRebid, answerTakeoutDouble } from './doubles'
 
 describe('negativeDouble (§7.3)', () => {
   it('1♦–(1♠)–X med 4+ hjärter', () => {
@@ -119,5 +119,151 @@ describe('penaltyDouble (straffdubbling)', () => {
   })
   it('trumfstack men bara 9 hp → null (för lite sidostyrka)', () => {
     expect(penaltyDouble(parseHand('S:AK5 H:J954 D:752 C:983'), 'spades')).toBeNull()
+  })
+})
+
+// Etapp 6 hål 1 (billig offring): SVARARENS svar på öppnarens stöddubbling.
+// Sekvensen är 1x–(P)–1M–(inkliv)–X–(P)–? Dubblingen visade exakt 3 stöd —
+// svararen får aldrig passa bort den (utom som medvetet straffpass).
+describe('answerSupportDouble (svar på stöddubblingen, etapp 6 hål 1)', () => {
+  // Kontext om inget annat sägs: 1♦–(P)–1♠–(2♥)–X.
+  it('straffpass: ≤12 hp med 2+ säkra trumfstick i deras färg → P (medvetet)', () => {
+    // 1♣–(P)–1♠–(2♦)–X med AQT98 i deras ruter, 11 hp.
+    const r = answerSupportDouble(parseHand('S:KQ54 H:65 D:AQT98 C:82'), 'spades', 'clubs', '2D')
+    expect(r.call).toBe('P')
+    expect(r.rule).toBe('straffpass på stöddubbling')
+  })
+  it('utgångsvärden + 5-korts högfärg → 4M (5-3-fiten är känd)', () => {
+    expect(answerSupportDouble(parseHand('S:AQJ85 H:74 D:K52 C:AJ4'), 'spades', 'diamonds', '2H').call).toBe('4S')
+  })
+  it('utgångsvärden, jämnt med stopp i deras färg → 3NT (frö 20261005)', () => {
+    // 1♣–(P)–1♥–(2♦)–X: 15 hp, AKJT i deras ruter.
+    expect(answerSupportDouble(parseHand('S:A65 H:8632 D:AKJT C:QJ'), 'hearts', 'clubs', '2D').call).toBe('3NT')
+  })
+  it('utgångsvärden med SINGEL i partnerns färg → 4M på 4-3 (Moysian), inte 3NT (frö 20261274)', () => {
+    expect(answerSupportDouble(parseHand('S:KJ73 H:A83 D:8 C:KQJ52'), 'spades', 'diamonds', '2H').call).toBe('4S')
+  })
+  it('inbjudan (10–12) med 5-korts högfärg → 3M', () => {
+    // 1♦–(P)–1♥–(1♠)–X: 10 hp, 5 hjärter.
+    expect(answerSupportDouble(parseHand('S:743 H:KQ852 D:96 C:A82'), 'hearts', 'diamonds', '1S').call).toBe('3H')
+  })
+  it('inbjudan med egen 6-korts sidofärg → färgen billigast (frö 20261658)', () => {
+    expect(answerSupportDouble(parseHand('S:AQ74 H:K6 D:J C:T98752'), 'spades', 'diamonds', '2H').call).toBe('3C')
+  })
+  it('inbjudan med honnörsstöd (3 kort) i öppnarens färg → invithöjning 3m (frö 20260884)', () => {
+    expect(answerSupportDouble(parseHand('S:A854 H:932 D:KT8 C:K72'), 'spades', 'diamonds', '2H').call).toBe('3D')
+  })
+  it('inbjudan, jämnt med stopp (utan trumfstack) → 2NT', () => {
+    // Hjärter E32 = stopp men bara ETT trumfstick → inget straffpass.
+    expect(answerSupportDouble(parseHand('S:Q854 H:A32 D:962 C:KQ3'), 'spades', 'diamonds', '2H').call).toBe('2NT')
+  })
+  it('inbjudan med trumfstack (KQx + 11 hp) → straffpass går före 2NT', () => {
+    expect(answerSupportDouble(parseHand('S:Q854 H:KQ2 D:962 C:A73'), 'spades', 'diamonds', '2H').rule).toBe('straffpass på stöddubbling')
+  })
+  it('minimum med 5-korts högfärg → 2M', () => {
+    expect(answerSupportDouble(parseHand('S:J8542 H:963 D:Q4 C:K72'), 'spades', 'diamonds', '2H').call).toBe('2S')
+  })
+  it('minimum med stöd → billig preferens 2m', () => {
+    // 1♦–(P)–1♠–(2♣)–X: 5 hp, 4-korts ruter, 2♦ finns kvar.
+    expect(answerSupportDouble(parseHand('S:9854 H:762 D:Q543 C:K2'), 'spades', 'diamonds', '2C').call).toBe('2D')
+  })
+  it('minimum utan stöd → 2M på 4-3 (påtvingat, billigast)', () => {
+    expect(answerSupportDouble(parseHand('S:9854 H:762 D:53 C:KQ42'), 'spades', 'diamonds', '2H').call).toBe('2S')
+  })
+})
+
+// Öppnarens FORTSÄTTNING efter egen stöddubbling: partnerns svar är inbjudan
+// (ej krav) — öppnaren accepterar med 15+, annars pass. Partnerns utgångsbud står.
+describe('supportDoublerRebid (stöddubblarens fortsättning)', () => {
+  it('partnerns invithöjning 3♦, 16 hp obalanserad med 6 ruter → 5♦ (frö 20260884)', () => {
+    const r = supportDoublerRebid(parseHand('S:KQ3 H:AK D:QJ9742 C:J5'), 'diamonds', 'spades', 'hearts', '3D')
+    expect(r?.call).toBe('5D')
+    expect(r?.rule).toBe('stöddubblarens fortsättning')
+  })
+  it('partnerns invithöjning 3♦, jämn hand 15 hp med stopp i deras färg → 3NT', () => {
+    expect(supportDoublerRebid(parseHand('S:KQ3 H:AK2 D:QJ97 C:J52'), 'diamonds', 'spades', 'hearts', '3D')?.call).toBe('3NT')
+  })
+  it('partnerns invithöjning 3♦, minimum → pass', () => {
+    expect(supportDoublerRebid(parseHand('S:Q73 H:K4 D:AQ8742 C:J5'), 'diamonds', 'spades', 'hearts', '3D')?.call).toBe('P')
+  })
+  it('partnerns 3♣ (naturligt 6+), 4-korts stöd och 15 hp → 5♣ (frö 20261658)', () => {
+    expect(supportDoublerRebid(parseHand('S:KJ2 H:4 D:AQ932 C:AJ43'), 'diamonds', 'spades', 'hearts', '3C')?.call).toBe('5C')
+  })
+  it('partnerns 3♣ (naturligt 6+) är RONDKRAV: minimum med 3-korts stöd → enkel höjning 4♣', () => {
+    expect(supportDoublerRebid(parseHand('S:Q52 H:84 D:AKJ32 C:Q43'), 'diamonds', 'spades', 'hearts', '3C')?.call).toBe('4C')
+  })
+  it('partnerns 3♣ utan stöd men med stopp i deras färg → 3NT (rondkravet passas aldrig)', () => {
+    expect(supportDoublerRebid(parseHand('S:Q752 H:A4 D:AKJ32 C:43'), 'diamonds', 'spades', 'hearts', '3C')?.call).toBe('3NT')
+  })
+  it('partnerns 3♣ utan stöd, stopp eller egen 6+ färg → preferens till partnerns högfärg', () => {
+    expect(supportDoublerRebid(parseHand('S:Q752 H:84 D:AKJ32 C:43'), 'diamonds', 'spades', 'hearts', '3C')?.call).toBe('3S')
+  })
+  it('även ett 2-läges nytt färgsvar (2♦) är rondkrav: minimum med stöd → höjning 3♦, aldrig pass', () => {
+    // 1♣–(P)–1♥–(1♠)–X–(P)–2♦: öppnaren har 12 hp och 3-korts ruter.
+    expect(supportDoublerRebid(parseHand('S:432 H:A32 D:Q54 C:AQ432'), 'clubs', 'hearts', 'spades', '2D')?.call).toBe('3D')
+  })
+  it('partnerns 2♥ (minimum i egen högfärg) får däremot passas', () => {
+    expect(supportDoublerRebid(parseHand('S:432 H:A32 D:Q54 C:AQ432'), 'clubs', 'hearts', 'spades', '2H')?.call).toBe('P')
+  })
+  it('partnerns 2NT-inbjudan, 16 hp → 3NT', () => {
+    expect(supportDoublerRebid(parseHand('S:KQ3 H:A5 D:AQJ42 C:432'), 'diamonds', 'spades', 'hearts', '2NT')?.call).toBe('3NT')
+  })
+  it('partnerns 3M-inbjudan (5-3-fit), 16 hp → 4M', () => {
+    expect(supportDoublerRebid(parseHand('S:A4 H:KQ2 D:65 C:AQJ752'), 'clubs', 'hearts', 'diamonds', '3H')?.call).toBe('4H')
+  })
+  it('partnerns utgångsbud (3NT) står → pass', () => {
+    expect(supportDoublerRebid(parseHand('S:KQ3 H:A5 D:AQJ42 C:432'), 'diamonds', 'spades', 'hearts', '3NT')?.call).toBe('P')
+  })
+})
+
+// Etapp 6 hål 2 (billig offring): ADVANCERNS svar när motståndarna bjuder ÖVER
+// partnerns upplysningsdubbling — (1♣)–X–(2♣)–? Svarstvånget är borta (fritt
+// läge), men med värden/form ska advancern ändå tala.
+describe('advancerFreeBidAfterDouble (fritt svar på upplysningsdubbling, etapp 6 hål 2)', () => {
+  it('deras XX → tvångsflykt som över pass (frö 20260934: 3♥ billigast)', () => {
+    // (2♠)–X–(XX): 8 hp, hjärter och klöver 4-4 → högfärgen billigast.
+    expect(advancerFreeBidAfterDouble(parseHand('S:73 H:JT53 D:764 C:AK82'), 'spades', 2, ['spades'], 'XX')?.call).toBe('3H')
+  })
+  it('6–8 hp med 5-korts färg → billigaste färgbud (frö 20261521: 2♥ över 2♣)', () => {
+    expect(advancerFreeBidAfterDouble(parseHand('S:52 H:A9753 D:QJ62 C:J6'), 'clubs', 1, ['clubs'], '2C')?.call).toBe('2H')
+  })
+  it('9 hp med 5-korts spader → hoppbud 3♠ (frö 20260759)', () => {
+    expect(advancerFreeBidAfterDouble(parseHand('S:J9743 H:K76 D:T3 C:AJ9'), 'clubs', 1, ['clubs'], '2C')?.call).toBe('3S')
+  })
+  it('6–8 hp med 5-korts spader → 2♠ (billigast, ej hopp)', () => {
+    expect(advancerFreeBidAfterDouble(parseHand('S:J9743 H:Q76 D:T3 C:QJ9'), 'clubs', 1, ['clubs'], '2C')?.call).toBe('2S')
+  })
+  it('9–11 hp med 5-korts färg → hoppbud (inbjudan)', () => {
+    expect(advancerFreeBidAfterDouble(parseHand('S:KQJ85 H:A4 D:962 C:743'), 'clubs', 1, ['clubs'], '2C')?.call).toBe('3S')
+  })
+  it('12+ utan stopp i deras färg → cue (krav) (frö 20261519: 3♣)', () => {
+    const r = advancerFreeBidAfterDouble(parseHand('S:K52 H:A65 D:AQJ74 C:J8'), 'clubs', 1, ['clubs'], '2C')
+    expect(r?.call).toBe('3C')
+    expect(r?.rule).toBe('cue (krav)')
+  })
+  it('12+ med stopp i deras färg → 3NT', () => {
+    expect(advancerFreeBidAfterDouble(parseHand('S:K5 H:A65 D:AQJ74 C:KJ8'), 'clubs', 1, ['clubs'], '2C')?.call).toBe('3NT')
+  })
+  it('extrem form (6+ färg) får bjuda även utan poäng (frö 20260811: 3♠ på 1 hp)', () => {
+    expect(advancerFreeBidAfterDouble(parseHand('S:T98762 H:KT854 D:8 C:3'), 'diamonds', 2, ['diamonds'], '3D')?.call).toBe('3S')
+  })
+  it('svag jämn hand utan femkortsfärg → null (fritt läge, pass är rätt)', () => {
+    expect(advancerFreeBidAfterDouble(parseHand('S:9843 H:J53 D:764 C:Q82'), 'clubs', 1, ['clubs'], '2C')).toBeNull()
+  })
+})
+
+// Dubblarens svar på advancerns cue (utgångskrav — får aldrig passas).
+// Högfärgen FÖRST (cuet jagar 4-4-fiten, felrapport #11), sang med stopp sedan.
+describe('doublerAnswersCue (dubblarens svar på advancerns cue)', () => {
+  it('4-korts högfärg visas före sang (frö 20261519: hjärter billigast)', () => {
+    const r = doublerAnswersCue(parseHand('S:AJ93 H:J932 D:T83 C:A7'), ['clubs'], '3C')
+    expect(r.call).toBe('3H')
+    expect(r.rule).toBe('dubblarens svar på cue')
+  })
+  it('utan stopp → också billigaste 4-korts högfärg', () => {
+    expect(doublerAnswersCue(parseHand('S:AJ93 H:J932 D:QT83 C:7'), ['clubs'], '3C').call).toBe('3H')
+  })
+  it('ingen 4-korts högfärg men stopp i deras färg → 3NT', () => {
+    expect(doublerAnswersCue(parseHand('S:AJ9 H:K93 D:QT83 C:A73'), ['clubs'], '3C').call).toBe('3NT')
   })
 })
