@@ -10,7 +10,13 @@
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
 ## Etapp 6 (2026-07-27) — billig offring
-- **Hål 2: advancern talar när de bjuder över partnerns X (2026-07-27, NYAST).**
+- **Hål 3: taket mot svaga tvåor (2026-07-27, NYAST).** Starka händer passar
+  inte längre ut deras svaga tvåor: 3NT till spel bjuds med balanserade 19+
+  (16+ i balansering) eller stark 6+ minor med stopp, och 17+ utan fönster
+  dubblar hellre än säljer. **Bevaka:** (a) hamnar ni i 3NT på tunna håll
+  (Kxx räknas som stopp)? (b) känns 16+-golvet i balansering för lätt —
+  straffas 3NT när skörden inte fanns?
+- **Hål 2: advancern talar när de bjuder över partnerns X (2026-07-27).**
   Höjer motståndarna över botens upplysningsdubbling — (1♣)–X–(2♣) — tiger
   advancern inte längre: 12+ bjuder 3NT/cue, 9–11 hoppar, 6–8 bjuder billigast,
   extrem form (6+ färg/5-5) bjuder oavsett poäng, och deras XX flys ALLTID.

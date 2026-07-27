@@ -525,7 +525,7 @@ själva hade mer. Fyra hål bakom det, alla spårade till rad i koden:
 |---|---|---|---|
 | 1 | ✅ **LAGAT 2026-07-27** (Mätning #15): **Stöddubblingen besvaras aldrig** — `1♦–(P)–1♠–(2♥)–X` passas ut av svararen; 2♥X blir kontraktet | 5 givar, 1 470 p | `auction-live.ts` `takeoutDoubleToAnswer`: svarstvånget stängs av så fort vår sida bjudit ett kontraktsbud, och stöddubblingen hade ingen egen svarsväg — nu `answerSupportDouble`/`supportDoublerRebid` |
 | 2 | ✅ **LAGAT 2026-07-27** (Mätning #16): **Svaret på upplysnings-X försvinner när RHO bjuder över** — `1♣–(X)–2♣` → advancern passade med 15 hp | ≥ 580 p | samma funktion: krävde att partnerns X var auktionens senaste icke-pass — nu `advancerFreeBidAfterDouble`/`doublerAnswersCue` + vakten `doublerRaisesAdvance` |
-| 3 | **Taket i §7.6-försvaret mot svaga tvåor** — 2NT-fönstret (15–18 direkt / 12–15 balansering) och det naturliga inklivet (10–16) har inget utlopp uppåt; en balanserad **20-poängare passade ut 2♦** (frö 20260767) | ca 1 000 p | `defense-conventional.ts` `defendWeakTwo` — jfr `defendPreempt` som HAR "3NT till spel" med 16+ |
+| 3 | ✅ **LAGAT 2026-07-27** (Mätning #17): **Taket i §7.6-försvaret mot svaga tvåor** — 2NT-fönstret (15–18 direkt / 12–15 balansering) och det naturliga inklivet (10–16) hade inget utlopp uppåt; en balanserad **21-poängare passade ut 2♦** (frö 20260767) | 3 givar, 910 p | `defense-conventional.ts` `defendWeakTwo` — nu "3NT till spel" (bal. 19+/16+ i balansering, eller stark 6+ minor + stopp från 15) och stark X (17+); X:et behåller prioritet med kort i deras färg |
 | 4 | **Deras spärrbud stänger auktionen** — i 16 givar där vi ägde utgång/slam sa vår sida inte ett ord (9 av dem över en svag tvåa). Efter deras spärrhöjning (`2♠–P–3♠–P`) finns inget försvar alls | 16 givar, 5 720 p | `auction-live.ts` `maybeOvercall` kräver 1-lägesöppning + exakt ETT kontraktsbud i historiken; kommentaren ovanför säger uttryckligen att svaga tvåor/spärrar "hör till senare utbyggnad" |
 
 **Hål 1, 2 och 3 kräver inget ägarbeslut** (rena buggar: en dubbling som ingen
@@ -534,8 +534,9 @@ tävla mot spärrbud är en avvägning: mer tävlande köper utgångar och betal
 fler egna bet.
 
 **Ägarbeslut 2026-07-27:** ordningen är hål 1 → 2 → 3 → mätning → hål 4 (med
-exempelhänder till ägaren). **Hål 1 + 2 LAGADE 2026-07-27** (Mätning #15 + #16
-nedan). PCD efter hål 2 (ägarbeslut samma dag).
+exempelhänder till ägaren). **Hål 1 + 2 + 3 LAGADE 2026-07-27** (Mätning #15–#17
+nedan). Hål 1+2 PCD:ade samma dag (mergepunkt `a62ff37`, deploy verifierad).
+**Kvar: hål 4 (ägarbeslut om spärrförsvaret).**
 
 ## Mätning #15 — 2026-07-27, etapp 6 hål 1 (stöddubblingen besvaras)
 Samma frö 20260721, 1 000 givar. Fix: svarsväg för stöddubblingen
@@ -609,6 +610,29 @@ en 0-poängsflykt vore kik). Ärlig kostnad: lillslam +760, fel färg +800 —
 omkategoriseringar när tigande givar börjar bjuda. Under bygget föll också en
 gammal facit-låsning (felrapport #11) och styrde cue-svaret rätt: **högfärgen
 före 3NT**. **Nästa: hål 3 (taket i försvaret mot svaga tvåor).**
+
+## Mätning #17 — 2026-07-27, etapp 6 hål 3 (taket mot svaga tvåor)
+Samma frö 20260721, 1 000 givar. Fix: `defendWeakTwo` fick ett utlopp uppåt —
+**3NT till spel** (balanserad 19+ direkt / 16+ i balansering med stopp, eller
+stark 6+ minor med två topphonnörer + stopp från 15) och **stark X (17+)** som
+sista utväg; X:et behåller prioritet när handen har kort i deras färg
+(flexiblare — frö 20260811 visade att X-vägen slog 3NT med 250 p).
+
+```
+                        M16 (före)   M17 (hål 3)
+Rätt kontrakt (exakt par)  17,8 %       18,0 %
+Genomsnittlig par-avvikelse 278,7       277,8
+Billig offring         120/32 390    117/31 480
+Fel strain              95/2 330      96/2 350
+Övriga poster: oförändrade.
+```
+
+**Läsning:** kliniskt ren — posten krymper med exakt de tre fröna (20260767 →
+3NT-W 430, 20261571 → 3NT-N 430, 20261582 → 3NT-N 630, alla ≈ par och
+DD-verifierade före fixen), och den enda motposten är +20 p fel strain.
+**Etapp 6 hittills (M14→M17): billig offring 125/34 300 → 117/31 480, par-
+avvikelse 287,2 → 277,8, rätt kontrakt 17,1 → 18,0 %. Kvar: hål 4
+(spärrförsvaret, ägarbeslut med exempelhänder).**
 
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
