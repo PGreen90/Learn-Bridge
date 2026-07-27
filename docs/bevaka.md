@@ -9,6 +9,26 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Etapp 6 (2026-07-27) — billig offring
+- **Hål 2: advancern talar när de bjuder över partnerns X (2026-07-27, NYAST).**
+  Höjer motståndarna över botens upplysningsdubbling — (1♣)–X–(2♣) — tiger
+  advancern inte längre: 12+ bjuder 3NT/cue, 9–11 hoppar, 6–8 bjuder billigast,
+  extrem form (6+ färg/5-5) bjuder oavsett poäng, och deras XX flys ALLTID.
+  Dubblaren höjer svaret skalat (hopp accepteras med 15+, fritt svar kräver 19+
+  för utgång). **Bevaka:** (a) väcker advancern för lätt — kliver boten in på
+  form och åker på straff? (b) känns dubblarens utgångströsklar rätt, eller
+  missas utgångar när dubblaren har en bra 17–18? (c) cue-svaret visar
+  högfärgen före 3NT — hamnar ni i 4-3-utgångar där sang var rätt?
+- **Hål 1: stöddubblingen besvaras nu (2026-07-27).** Dubblar partnern
+  (boten) som öppnare efter ditt 1♥/1♠-svar och deras inkliv, svarar boten som
+  svarare nu ALLTID: 13+ sätter utgången (4M med femkortsfärg / 3NT med stopp /
+  4M på 4-3), 10–12 inbjuder (3M, egen 6+ färg, invithöjning, 2NT), minimum
+  bjuder billigast — och pass är numera ett MEDVETET straffpass (trumfstack,
+  max 12 hp). **Bevaka:** (a) hamnar ni för högt när svararen väljer 4M på
+  4-3-fiten? (b) känns straffpasset lagom vanligt — straffar boten när den
+  borde bjuda, eller tvärtom? (c) öppnaren accepterar inbjudan med 15+ —
+  står ni fel när öppnaren är en bra 14?
+
 ## Känd skuld — verktyg som boken lovar men bordet inte kan
 - **Lebensohl är INTE inkopplad (upptäckt vid genomgången 2026-07-25).**
   `lebensohl.ts` är byggd och enhetstestad, men ingen produktionsfil importerar

@@ -9,7 +9,8 @@
 // Upplysningsdubblingen SJÄLV (när motståndaren öppnat) bor i `overcalls.ts`.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { hcp, lengths } from './hand'
+import { hcp, isBalanced, lengths } from './hand'
+import { pointsWithFloor } from './evaluation'
 import { hasStopper } from './overcalls'
 import type { ResponseResult } from './responses'
 
@@ -273,4 +274,336 @@ export function penaltyDouble(hand: Hand, theirSuit: Suit): ResponseResult | nul
       `${trumpTricks} säkra trumfstick i deras ${NAME[theirSuit]} och ${p} hp – ` +
       `kontraktet ska betas, X (straffdubbling).`,
   }
+}
+
+/**
+ * ADVANCERNS svar när motståndarna bjuder ÖVER partnerns upplysningsdubbling
+ * (etapp 6 hål 2, billig offring): (1♣)–X–(2♣)–? Svarstvånget är borta (RHO
+ * "räddade" oss), men upplysningen gäller fortfarande — partnern visade 10+
+ * med form (eller 17+). Fritt läge, värde-/formstyrt:
+ *  - deras XX: tvångsflykt — svara som om RHO passat (`answerTakeoutDouble`);
+ *    att sitta kvar i deras redubblade kontrakt är aldrig planen,
+ *  - 12+: 3NT med stopp i alla deras bjudna färger, annars cue i den dubblade
+ *    färgen (utgångskrav),
+ *  - 9–11: hoppbud i egen 5+ färg (inbjudan), annars 2NT med stopp,
+ *  - 6–8: billigaste bud i egen 5+ färg (på 2-läget),
+ *  - extrem form (6+ färg eller 5-5) får bjuda billigast oavsett poäng (upp
+ *    till 3-läget),
+ *  - annars null = passa (fritt läge, tunna händer tiger).
+ */
+export function advancerFreeBidAfterDouble(
+  hand: Hand,
+  doubledSuit: Suit,
+  openLevel: number,
+  theirSuits: Suit[],
+  lastBid: string,
+): ResponseResult | null {
+  // Deras XX: flykten är tvingad — samma svar som om RHO passat.
+  if (lastBid === 'XX') return answerTakeoutDouble(hand, doubledSuit, openLevel, theirSuits)
+
+  const RULE = 'fritt svar på upplysningsdubbling'
+  const lastCb = lastBid.match(/^([1-7])(C|D|H|S)$/)
+  if (!lastCb) return null
+  const lastLevel = Number(lastCb[1])
+  const lastSuit = SUIT_OF_LETTER[lastCb[2]]
+  const p = hcp(hand)
+  const len = lengths(hand)
+  /** Billigaste nivån för `suit` ÖVER deras senaste bud. */
+  const cheapLevel = (suit: Suit) => (rankIdx(suit) > rankIdx(lastSuit) ? lastLevel : lastLevel + 1)
+
+  // Längsta egna färg utanför deras bjudna.
+  const unbid = RANK_ORDER.filter((s) => !theirSuits.includes(s))
+  let best = unbid[0]
+  for (const s of unbid) {
+    if (len[s] > len[best] || (len[s] === len[best] && rankIdx(s) > rankIdx(best))) best = s
+  }
+
+  // 12+: utgångszon mot partnerns visade 10+.
+  if (p >= 12) {
+    if (theirSuits.every((s) => hasStopper(hand, s)) && lastLevel <= 3) {
+      return { call: '3NT', rule: RULE, explanation: `${p} hp med stopp i deras färg mot partnerns upplysningsdubbling → 3NT.` }
+    }
+    const cueLvl = cheapLevel(doubledSuit)
+    return { call: `${cueLvl}${BID[doubledSuit]}`, rule: 'cue (krav)', explanation: `${p} hp – för starkt för ett fritt färgbud → cue ${SYM[doubledSuit]} (krav).` }
+  }
+
+  // 9–11: inbjudan.
+  if (p >= 9) {
+    if (len[best] >= 5) {
+      const jumpLvl = cheapLevel(best) + 1
+      if (jumpLvl <= 3) {
+        return { call: `${jumpLvl}${BID[best]}`, rule: RULE, explanation: `${p} hp med ${len[best]}-korts ${NAME[best]} → hoppbud ${jumpLvl}${SYM[best]} (inbjudande, fritt).` }
+      }
+    }
+    if (theirSuits.every((s) => hasStopper(hand, s)) && lastLevel <= 2) {
+      return { call: '2NT', rule: RULE, explanation: `${p} hp jämnt med stopp i deras färg → 2NT (inbjudan, fritt).` }
+    }
+  }
+
+  // Extrem form talar oavsett poäng (partnern lovade stöd för objudna färger).
+  const secondLongest = Math.max(...unbid.filter((s) => s !== best).map((s) => len[s]), 0)
+  const bigShape = len[best] >= 6 || (len[best] >= 5 && secondLongest >= 5)
+  if (bigShape && cheapLevel(best) <= 3) {
+    return {
+      call: `${cheapLevel(best)}${BID[best]}`,
+      rule: RULE,
+      explanation: `${len[best]}-korts ${NAME[best]}${secondLongest >= 5 ? ' (tvåfärgshand)' : ''} mot partnerns upplysning – formen bjuder (${p} hp).`,
+    }
+  }
+
+  // 6–8: billigaste egna 5+ färg på 2-läget.
+  if (p >= 6 && len[best] >= 5 && cheapLevel(best) <= 2) {
+    return { call: `${cheapLevel(best)}${BID[best]}`, rule: RULE, explanation: `${p} hp med ${len[best]}-korts ${NAME[best]} → ${cheapLevel(best)}${SYM[best]} (fritt, ej krav).` }
+  }
+
+  return null // tunt och fritt → pass
+}
+
+/**
+ * DUBBLARENS svar på advancerns cue efter upplysningsdubblingen (utgångskrav —
+ * får aldrig passas): cuet jagar i första hand högfärgsfiten, så billigaste
+ * objudna 4+ högfärg visas FÖRST (felrapport #11: preferens 3♠ med KJ53, inte
+ * 3NT på Kx). Utan 4-korts högfärg: 3NT med stopp i deras färg, annars längsta
+ * objudna färg billigast.
+ */
+export function doublerAnswersCue(hand: Hand, theirSuits: Suit[], cueBid: string): ResponseResult {
+  const RULE = 'dubblarens svar på cue'
+  const cueLevel = Number(cueBid[0]) || 2
+  const cueSuit = suitOfBid(cueBid) ?? theirSuits[0]
+  const len = lengths(hand)
+  const cheapLevel = (suit: Suit) => (rankIdx(suit) > rankIdx(cueSuit) ? cueLevel : cueLevel + 1)
+
+  const unbid = RANK_ORDER.filter((s) => !theirSuits.includes(s))
+  const majors = unbid.filter((s) => (s === 'hearts' || s === 'spades') && len[s] >= 4).sort((a, b) => cheapLevel(a) - cheapLevel(b) || rankIdx(a) - rankIdx(b))
+  if (majors[0]) {
+    return {
+      call: `${cheapLevel(majors[0])}${BID[majors[0]]}`,
+      rule: RULE,
+      explanation: `Partnerns cue är krav – visar ${len[majors[0]]}-korts ${NAME[majors[0]]} (högfärgen först).`,
+    }
+  }
+  if (theirSuits.every((s) => hasStopper(hand, s)) && cueLevel <= 3) {
+    return { call: '3NT', rule: RULE, explanation: `Ingen 4-korts högfärg men stopp i deras ${theirSuits.map((s) => NAME[s]).join(' och ')} → 3NT på partnerns cue (krav).` }
+  }
+  const pick = [...unbid].sort((a, b) => len[b] - len[a] || rankIdx(b) - rankIdx(a))[0]
+  return {
+    call: `${cheapLevel(pick)}${BID[pick]}`,
+    rule: RULE,
+    explanation: `Partnerns cue är krav – visar ${len[pick]}-korts ${NAME[pick]} billigast.`,
+  }
+}
+
+/**
+ * SVARARENS svar på öppnarens stöddubbling (etapp 6 hål 1, billig offring):
+ * 1x–(P)–1M–(inkliv)–X–(P)–? X:et visade exakt 3 stöd — svararen får aldrig
+ * passa bort upplysningen (utom som MEDVETET straffpass med trumfstack).
+ * Svaren är naturliga och nivåstyrda av handstyrkan:
+ *  - straffpass: ≤12 hp med straffdubblingskraven i deras färg (2+ trumfstick),
+ *  - 13+ (stödpoäng vid 5+ trumf): 4M med 5-korts högfärg (5-3-fiten är känd);
+ *    3NT med stopp och 2+ kort i partnerns färg; annars 4M på 4-3 (Moysian —
+ *    kort färg ger stölder på den korta handen),
+ *  - 10–12: 3M med 5-korts högfärg; egen 6+ sidofärg billigast; invithöjning 3
+ *    i öppnarens färg (4+ stöd, eller 3 med honnör); 2NT med stopp,
+ *  - annars (påtvingat): 2M med 5-korts, billig preferens till öppnarens färg,
+ *    sista utväg 2M på 4-3. Stöd-X-fönstret garanterar att 2M är lagligt.
+ */
+export function answerSupportDouble(hand: Hand, myMajor: Suit, openerSuit: Suit, theirBid: string): ResponseResult {
+  const theirSuit = suitOfBid(theirBid) ?? openerSuit // stöd-X finns bara över färginkliv
+  const theirLevel = Number(theirBid[0]) || 1
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const cheapLevel = (suit: Suit) => (rankIdx(suit) > rankIdx(theirSuit) ? theirLevel : theirLevel + 1)
+
+  // Medvetet straffpass: trumfstacken gör deras dubblade kontrakt till bästa affär.
+  const pen = penaltyDouble(hand, theirSuit)
+  if (pen && p <= 12) {
+    return {
+      call: 'P',
+      rule: 'straffpass på stöddubbling',
+      explanation: `Trumfstack i deras ${NAME[theirSuit]} (${p} hp) – passar MEDVETET och gör partnerns stöddubbling till straff.`,
+    }
+  }
+
+  // Stödpoäng räknas bara med äkta 8-kortsfit (5+ egna trumf mot visade 3).
+  const fp = len[myMajor] >= 5 ? pointsWithFloor(hand, myMajor, 'support') : null
+  const points = fp ? fp.points : p
+  const pText = fp ? fp.text : `${p} hp`
+
+  // Utgångsvärden (13+): kaptenen sätter utgången mot visat minimum.
+  if (points >= 13) {
+    if (len[myMajor] >= 5) {
+      return {
+        call: `4${BID[myMajor]}`,
+        rule: 'svar på stöddubbling',
+        explanation: `${pText} med ${len[myMajor]}-korts ${NAME[myMajor]} mot visade 3 stöd → 4${SYM[myMajor]} (utgång i 5-3-fiten).`,
+      }
+    }
+    if (hasStopper(hand, theirSuit) && len[openerSuit] >= 2) {
+      return {
+        call: '3NT',
+        rule: 'svar på stöddubbling',
+        explanation: `${pText} med stopp i deras ${NAME[theirSuit]} och bara 4-korts ${NAME[myMajor]} (fiten är 4-3) → 3NT.`,
+      }
+    }
+    return {
+      call: `4${BID[myMajor]}`,
+      rule: 'svar på stöddubbling',
+      explanation: `${pText} utan sangalternativ – 4${SYM[myMajor]} på den kända 4-3-fiten (kort sidofärg ger stölder).`,
+    }
+  }
+
+  // Inbjudande (10–12): visa handtypen en nivå under utgång.
+  if (points >= 10) {
+    if (len[myMajor] >= 5) {
+      return {
+        call: `3${BID[myMajor]}`,
+        rule: 'svar på stöddubbling',
+        explanation: `${pText} med ${len[myMajor]}-korts ${NAME[myMajor]} mot visade 3 stöd → 3${SYM[myMajor]} (inbjudan).`,
+      }
+    }
+    const side = RANK_ORDER.filter((s) => s !== myMajor && s !== openerSuit && s !== theirSuit && len[s] >= 6)
+    if (side.length > 0 && cheapLevel(side[0]) <= 3) {
+      const s = side[0]
+      return {
+        call: `${cheapLevel(s)}${BID[s]}`,
+        rule: 'svar på stöddubbling',
+        explanation: `${pText} med ${len[s]}-korts egen ${NAME[s]} → ${cheapLevel(s)}${SYM[s]} (naturligt, inbjudande).`,
+      }
+    }
+    const honorSupport = hand.some((c) => c.suit === openerSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q'))
+    if (len[openerSuit] >= 4 || (len[openerSuit] === 3 && honorSupport)) {
+      return {
+        call: `3${BID[openerSuit]}`,
+        rule: 'svar på stöddubbling',
+        explanation: `${pText} med stöd för partnerns ${NAME[openerSuit]} → 3${SYM[openerSuit]} (invithöjning).`,
+      }
+    }
+    if (hasStopper(hand, theirSuit)) {
+      return {
+        call: '2NT',
+        rule: 'svar på stöddubbling',
+        explanation: `${pText} jämnt med stopp i deras ${NAME[theirSuit]} → 2NT (inbjudan).`,
+      }
+    }
+  }
+
+  // Minimum (påtvingat svar — dubblingen får inte dö).
+  if (len[myMajor] >= 5) {
+    return {
+      call: `2${BID[myMajor]}`,
+      rule: 'svar på stöddubbling',
+      explanation: `${pText} med ${len[myMajor]}-korts ${NAME[myMajor]} mot visade 3 stöd → 2${SYM[myMajor]} (minimum).`,
+    }
+  }
+  if (len[openerSuit] >= 3 && cheapLevel(openerSuit) <= 2) {
+    return {
+      call: `${cheapLevel(openerSuit)}${BID[openerSuit]}`,
+      rule: 'svar på stöddubbling',
+      explanation: `${pText} – billig preferens till partnerns ${NAME[openerSuit]} (dubblingen måste besvaras).`,
+    }
+  }
+  return {
+    call: `2${BID[myMajor]}`,
+    rule: 'svar på stöddubbling',
+    explanation: `${pText} – 2${SYM[myMajor]} på den kända 4-3-fiten (påtvingat svar, dubblingen får inte dö).`,
+  }
+}
+
+/**
+ * Öppnarens FORTSÄTTNING efter egen stöddubbling: partnerns svar är naturligt
+ * och inbjudande (aldrig krav) — öppnaren accepterar med 15+ (Bergenpoäng när
+ * fit finns), annars pass. Partnerns utgångsbud står alltid. Nivåerna:
+ *  - 2-lägessvar (minimum/preferens) → pass,
+ *  - 2NT → 3NT med 15+,
+ *  - 3M (5-3-fit) → 4M med 15+,
+ *  - höjning av öppningsfärgen till 3 → med 15+: 3NT om jämn med stopp i deras
+ *    färg (minoröppning), annars utgång i färgen,
+ *  - ny färg (naturlig 6+) är ett FRITT BUD i konkurrens = RONDKRAV (§5.5) och
+ *    får ALDRIG passas: med 3+ stöd (partnern lovar 6) → utgång med 15+, annars
+ *    enkel höjning; utan stöd → sang med stopp, egen 6+ färg, eller preferens
+ *    till partnerns högfärg som sista utväg.
+ */
+export function supportDoublerRebid(
+  hand: Hand,
+  myOpenedSuit: Suit,
+  partnerMajor: Suit,
+  theirSuit: Suit,
+  partnerAnswer: string,
+): ResponseResult {
+  const RULE = 'stöddubblarens fortsättning'
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: RULE, explanation: why })
+  const m = partnerAnswer.match(/^([1-7])(NT|C|D|H|S)$/)
+  if (!m) return pass('Inget att tillägga.')
+  const level = Number(m[1])
+  const strain = m[2]
+  const answerSuit = strain === 'NT' ? null : SUIT_OF_LETTER[strain]
+
+  // Partnerns utgångsbud står — dra det ALDRIG någon annanstans.
+  const isGame =
+    (strain === 'NT' && level >= 3) ||
+    (answerSuit && (answerSuit === 'hearts' || answerSuit === 'spades') && level >= 4) ||
+    (answerSuit && (answerSuit === 'clubs' || answerSuit === 'diamonds') && level >= 5)
+  if (isGame) return pass('Partnerns utgångsbud står.')
+
+  const p = hcp(hand)
+  const len = lengths(hand)
+
+  // 2NT-inbjudan: acceptera med 15+.
+  if (strain === 'NT') {
+    if (p >= 15) return { call: '3NT', rule: RULE, explanation: `${p} hp mot partnerns 2NT-inbjudan → 3NT.` }
+    return pass(`${p} hp – avböjer 2NT-inbjudan.`)
+  }
+
+  // Partnerns egen högfärg: 2M = minimum (passbart), 3M = inbjudan i 5-3-fiten.
+  if (answerSuit === partnerMajor) {
+    if (level <= 2) return pass(`Partnerns 2${SYM[partnerMajor]} är minimum – pass.`)
+    const fp = pointsWithFloor(hand, partnerMajor, 'bergen')
+    if (fp.points >= 15) {
+      return { call: `4${BID[partnerMajor]}`, rule: RULE, explanation: `${fp.text} med 3-korts stöd i 5-3-fiten → 4${SYM[partnerMajor]}.` }
+    }
+    return pass(`${fp.text} – avböjer inbjudan i ${NAME[partnerMajor]}.`)
+  }
+
+  // Min öppningsfärg: 2-läget = påtvingad preferens (passbart), 3-läget = invit.
+  if (answerSuit === myOpenedSuit) {
+    if (level <= 2) return pass(`Partnerns preferens ${level}${SYM[myOpenedSuit]} är minimum – pass.`)
+    const fp = pointsWithFloor(hand, myOpenedSuit, 'bergen')
+    if (fp.points >= 15) {
+      const minorOpen = myOpenedSuit === 'clubs' || myOpenedSuit === 'diamonds'
+      if (minorOpen && isBalanced(hand) && hasStopper(hand, theirSuit)) {
+        return { call: '3NT', rule: RULE, explanation: `${fp.text}, jämn hand med stopp i deras ${NAME[theirSuit]} → 3NT framför 5${SYM[myOpenedSuit]}.` }
+      }
+      const gameLevel = minorOpen ? 5 : 4
+      return { call: `${gameLevel}${BID[myOpenedSuit]}`, rule: RULE, explanation: `${fp.text} – accepterar invithöjningen → ${gameLevel}${SYM[myOpenedSuit]}.` }
+    }
+    return pass(`${fp.text} – avböjer invithöjningen.`)
+  }
+
+  // Ny färg (på VILKEN nivå som helst) = naturlig 6+ OCH ett fritt bud i
+  // konkurrens = RONDKRAV (§5.5): öppnaren får aldrig passa.
+  if (answerSuit) {
+    if (len[answerSuit] >= 3) {
+      // Partnern lovar 6+ → 3 kort är en äkta fit (9+ kort ihop).
+      const fp = pointsWithFloor(hand, answerSuit, 'bergen')
+      const gameLevel = answerSuit === 'hearts' || answerSuit === 'spades' ? 4 : 5
+      if (fp.points >= 15) {
+        return { call: `${gameLevel}${BID[answerSuit]}`, rule: RULE, explanation: `${fp.text} med ${len[answerSuit]}-korts stöd för partnerns 6+ ${NAME[answerSuit]} → ${gameLevel}${SYM[answerSuit]}.` }
+      }
+      return {
+        call: `${Math.min(level + 1, gameLevel)}${BID[answerSuit]}`,
+        rule: RULE,
+        explanation: `${fp.text} – enkel höjning av partnerns ${NAME[answerSuit]} (rondkravet får inte passas, utgångsaccept kräver 15+).`,
+      }
+    }
+    if (hasStopper(hand, theirSuit)) {
+      return { call: `${level}NT`, rule: RULE, explanation: `Utan stöd för partnerns ${NAME[answerSuit]} men stopp i deras ${NAME[theirSuit]} → ${level}NT (rondkravet får inte passas).` }
+    }
+    if (len[myOpenedSuit] >= 6) {
+      const lvl = rankIdx(myOpenedSuit) > rankIdx(answerSuit) ? level : level + 1
+      return { call: `${lvl}${BID[myOpenedSuit]}`, rule: RULE, explanation: `Utan stöd och utan stopp – återbud av egen 6+ ${NAME[myOpenedSuit]} (rondkravet får inte passas).` }
+    }
+    const prefLvl = rankIdx(partnerMajor) > rankIdx(answerSuit) ? level : level + 1
+    return { call: `${prefLvl}${BID[partnerMajor]}`, rule: RULE, explanation: `Rondkravet får inte passas – preferens till partnerns ${NAME[partnerMajor]} (mina visade 3 stöd).` }
+  }
+  return pass('Inget att tillägga.')
 }

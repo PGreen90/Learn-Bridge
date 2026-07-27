@@ -144,11 +144,16 @@ describe('STRESS (10 000 givar): störda krav honoreras alltid', () => {
       }
       expect(auctionComplete(history), `giv ${i} blev aldrig klar: ${handsStr(deal)}`).toBe(true) // 2. terminering
     }
-    // Täckningsbevis: kravet ska ha utlösts en icke-trivial mängd gånger, annars
-    // provar testet ingenting (skydd mot att oraklet slutar matcha efter en fix).
+    // Täckningsbevis: kravet ska ha utlösts, annars provar testet ingenting
+    // (skydd mot att oraklet slutar matcha efter en fix).
     // (Tröskeln sänkt 20 → 5 i och med fix 5b: dubblarens ombud efter negativ
     // dubbling räknas inte längre som rondkrav, vilket var majoriteten av
-    // träffarna. De kvarvarande är äkta fria bud/reverse i konkurrens.)
-    expect(forcedHits, `konkurrens-rondkravet utlöstes bara ${forcedHits} gånger`).toBeGreaterThan(5)
+    // träffarna. Sänkt 5 → 1 i och med etapp 6 hål 1: åtta av nio kvarvarande
+    // träffar var svarare som PASSATS FÖRBI sin stöddubbling och först senare
+    // hittade en fri färg via generiska handläggare — med den riktiga
+    // stöddubblingssvarsvägen blir de höjningar/preferenser i stället, och de
+    // äkta fria buden i dessa auktioner honoreras nu direkt av
+    // `stöddubblarens fortsättning`.)
+    expect(forcedHits, `konkurrens-rondkravet utlöstes bara ${forcedHits} gånger`).toBeGreaterThan(1)
   }, 240000)
 })

@@ -499,7 +499,11 @@ $env:DUMP_CAT='billig-offring'; npx vitest run src/lib/engine/auktionsdump.probe
 Det andra kommandot är nytt (`auktionsdump.probe.test.ts`, miljöstyrt som
 regelsvepet): det låter motorn bjuda om varje frö och skriver ut auktionen med
 **regelnamn + förklaring** per bud, så att mönstren kan grupperas efter vilken
-regel som faktiskt föll ut i stället för efter budsträngen.
+regel som faktiskt föll ut i stället för efter budsträngen. Systerverktyget
+`dd-tabell.probe.test.ts` (nytt vid hål 1) skriver ut **hela DD-tabellen** för
+givna frön (`$env:DDTAB='frö1,frö2'; npx vitest run
+src/lib/engine/dd-tabell.probe.test.ts` → `revisor-output/dd-tabell.txt`) så
+facit-testets målkontrakt kan väljas på riktiga stick före fixen.
 
 **Kategorins namn är missvisande.** Posten ser ut att handla om missade
 straffdubblingar. Den gör den nästan inte alls: av 34 300 p fanns bara **280 p**
@@ -519,8 +523,8 @@ själva hade mer. Fyra hål bakom det, alla spårade till rad i koden:
 
 | # | Hål | Storlek | Var |
 |---|---|---|---|
-| 1 | **Stöddubblingen besvaras aldrig** — `1♦–(P)–1♠–(2♥)–X` passas ut av svararen; 2♥X blir kontraktet | 5 givar, 1 470 p | `auction-live.ts` `takeoutDoubleToAnswer`: svarstvånget stängs av så fort vår sida bjudit ett kontraktsbud, och stöddubblingen har ingen egen svarsväg |
-| 2 | **Svaret på upplysnings-X försvinner när RHO bjuder över** — `1♣–(X)–2♣` → advancern passade med 15 hp | ≥ 580 p | samma funktion: kräver att partnerns X är auktionens senaste icke-pass |
+| 1 | ✅ **LAGAT 2026-07-27** (Mätning #15): **Stöddubblingen besvaras aldrig** — `1♦–(P)–1♠–(2♥)–X` passas ut av svararen; 2♥X blir kontraktet | 5 givar, 1 470 p | `auction-live.ts` `takeoutDoubleToAnswer`: svarstvånget stängs av så fort vår sida bjudit ett kontraktsbud, och stöddubblingen hade ingen egen svarsväg — nu `answerSupportDouble`/`supportDoublerRebid` |
+| 2 | ✅ **LAGAT 2026-07-27** (Mätning #16): **Svaret på upplysnings-X försvinner när RHO bjuder över** — `1♣–(X)–2♣` → advancern passade med 15 hp | ≥ 580 p | samma funktion: krävde att partnerns X var auktionens senaste icke-pass — nu `advancerFreeBidAfterDouble`/`doublerAnswersCue` + vakten `doublerRaisesAdvance` |
 | 3 | **Taket i §7.6-försvaret mot svaga tvåor** — 2NT-fönstret (15–18 direkt / 12–15 balansering) och det naturliga inklivet (10–16) har inget utlopp uppåt; en balanserad **20-poängare passade ut 2♦** (frö 20260767) | ca 1 000 p | `defense-conventional.ts` `defendWeakTwo` — jfr `defendPreempt` som HAR "3NT till spel" med 16+ |
 | 4 | **Deras spärrbud stänger auktionen** — i 16 givar där vi ägde utgång/slam sa vår sida inte ett ord (9 av dem över en svag tvåa). Efter deras spärrhöjning (`2♠–P–3♠–P`) finns inget försvar alls | 16 givar, 5 720 p | `auction-live.ts` `maybeOvercall` kräver 1-lägesöppning + exakt ETT kontraktsbud i historiken; kommentaren ovanför säger uttryckligen att svaga tvåor/spärrar "hör till senare utbyggnad" |
 
@@ -529,9 +533,82 @@ svarar på, ett fönster utan tak). **Hål 4 gör det** — hur aggressivt botta
 tävla mot spärrbud är en avvägning: mer tävlande köper utgångar och betalar med
 fler egna bet.
 
-**Nästa steg:** ägaren väljer vilket hål som lagas först. Facit-först som vanligt:
-rött test på fröet → fix → grönt → DD-verifiera → hela sviten → mätning #15 med
-samma frö 20260721.
+**Ägarbeslut 2026-07-27:** ordningen är hål 1 → 2 → 3 → mätning → hål 4 (med
+exempelhänder till ägaren). **Hål 1 + 2 LAGADE 2026-07-27** (Mätning #15 + #16
+nedan). PCD efter hål 2 (ägarbeslut samma dag).
+
+## Mätning #15 — 2026-07-27, etapp 6 hål 1 (stöddubblingen besvaras)
+Samma frö 20260721, 1 000 givar. Fix: svarsväg för stöddubblingen
+(`answerSupportDouble` + `supportDoublerRebid` i doubles.ts, detektorer i
+auction-live.ts) — svararen passar aldrig bort öppnarens stöd-X (pass = bara
+medvetet straffpass), öppnaren väger inbjudan med 15+ och respekterar
+rondkravet i svararens nya färg.
+
+```
+                        M14 (före)   M15 (hål 1)
+Rätt kontrakt (exakt par)  17,1 %       17,4 %
+Genomsnittligt poängtapp   287,2        286,0
+Billig offring         125/34 300    120/32 830
+Missad utgång          149/50 140    148/49 700
+Såld giv                54/20 550     53/19 810
+Bättre än facit        135/28 250    133/28 130
+Missad lillslam         82/55 410     83/56 160
+För högt                35/8 060      37/8 740
+Fel strain              90/2 190      93/2 270
+Övriga poster: oförändrade.
+```
+
+**Läsning:** posten krymper med EXAKT förskanningens fem frön (−5 givar,
+−1 470 p). Alla fem bjuder nu: 20260884 → 5♦ (hem), 20261005 → 3NT (hem),
+20261658 → 5♣ (hem), 20261433 → 4♥ (en DD-bet — ärligt bjuden 24-poängsutgång),
+20261274 → 4♠+2 (680; DD-par är 6♠ på 4-3-fiten, obiddbar ärligt). De två sista
+FLYTTAR alltså till "för högt" resp. "missad lillslam" — det är de lagade
+givarna som byter kategori, inte nya fel: i baslinjen råkade just de två få
+slumpvinster på 800 (motståndarna spelade dubblat och gick djupt bet fast vi
+ägde mer). Ärlig bridge bjuder utgången där. Netto över hela mätningen:
+snitt-tapp −1,3 p/giv, och dessutom −440 p missad utgång, −740 p såld giv
+(andra stöddubblingsgivar som nu tävlar rätt). Extra vinst under bygget:
+rondkravs-stresstestet avslöjade att svararens fria färg EFTER stöddubblingen
+tidigare kunde passas av öppnaren — nu honoreras §5.5 även där (tröskeljustering
+dokumenterad i `foundation-forcing-competition.stress.test.ts`).
+
+## Mätning #16 — 2026-07-27, etapp 6 hål 2 (svaret när de bjuder över upplysnings-X)
+Samma frö 20260721, 1 000 givar. Fix: fri svarsväg för advancern när
+motståndarna höjer/redubblar över partnerns upplysningsdubbling
+(`advancerFreeBidAfterDouble`, `doublerAnswersCue`, `doublerRaisesAdvance` i
+doubles.ts/auction-live.ts) + två strukturvakter (dubblarens höjning av
+advancerns färg är inget "starkt återbud"; straff-X på vårt cue friar inte
+dubblaren).
+
+```
+                        M15 (före)   M16 (hål 2)
+Rätt kontrakt (exakt par)  17,4 %       17,8 %
+Genomsnittlig par-avvikelse 286,0       278,7
+Billig offring         120/32 830    120/32 390
+Bättre än facit        133/28 130    124/20 440
+Såld giv                53/19 810     55/18 700
+Missad lillslam         83/56 160     84/56 920
+Fel färg (bet)         124/51 040    122/51 840
+För högt                37/8 740      38/8 930
+Fel strain              93/2 270      95/2 330
+Missad utgång          148/49 700    149/49 850
+Övriga poster: oförändrade.
+```
+
+**Läsning:** största enskilda klivet i hela spåret (−7,3 p/giv). Det mesta
+kommer från posten "bättre än facit" (−7 690 p): advancern FLYR nu alltid
+deras redubbling och svarar på höjda dubblingar — bottarna skördar färre
+slumpvinster från motståndarnas XX-katastrofer och landar närmare par åt BÅDA
+hållen (det är exakt vad mätaren ska belöna: par-avvikelsen räknar
+|par − uppnått|, även övervinster). Exempelfrönas resa: 20261519 (advancern
+teg med 15 hp) cue-bjuder nu och paret når 4♥ (en DD-bet — ärlig 25-poängs-
+utgång; par-3NT:n kräver stoppkunskap ingen har), 20260759 → 3♠ = exakt par,
+20261521 → 3♥ = exakt par, 20260811 → 4♠ 680 (par-slammen 6♠ är obiddbar på
+1 hp-handen), 20260934 → flykt 3♥ och sedan försvar mot deras 3♠ (blast på
+en 0-poängsflykt vore kik). Ärlig kostnad: lillslam +760, fel färg +800 —
+omkategoriseringar när tigande givar börjar bjuda. Under bygget föll också en
+gammal facit-låsning (felrapport #11) och styrde cue-svaret rätt: **högfärgen
+före 3NT**. **Nästa: hål 3 (taket i försvaret mot svaga tvåor).**
 
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och

@@ -1254,6 +1254,30 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
   lika längd väljs högfärgen / den högre färgen.
 - Med egen styrka **hoppar** hon i sin färg (inbjudande+) eller **cue-budar** deras
   färg (utgångskrav, frågar efter partnerns bästa färg).
+- **Dubblarens svar på cuet (etapp 6, 2026-07-27):** cuet jagar i första hand
+  högfärgsfiten — dubblaren visar sin **billigaste 4-korts högfärg först**
+  (felrapport #11); utan 4-korts högfärg bjuds **3NT med stopp** i deras färg,
+  annars längsta objudna färg billigast. Cuet får **aldrig** passas — inte ens
+  när motståndarna straffdubblar det.
+
+**När motståndarna bjuder ÖVER dubblingen (etapp 6 i mätspåret, 2026-07-27):**
+Höjer öppnarens sida — (1♣)–X–(2♣) — är advancern inte längre *tvungen* att
+svara, men upplysningen gäller: partnern har visat 10+ med form. Advancern
+talar **fritt efter värden och form**:
+- **12+:** **3NT** med stopp i deras färg(er), annars **cue** (utgångskrav).
+- **9–11:** **hoppbud** i egen 5+ färg (inbjudan), annars **2NT** med stopp.
+- **6–8:** **billigaste bud** i egen 5+ färg på 2-läget.
+- **Extrem form** (6+ färg eller 5-5) får bjuda billigast **oavsett poäng** —
+  partnern lovade ju stöd för de objudna färgerna.
+- Efter deras **redubbling (XX)** gäller tvånget igen: advancern **flyr alltid**
+  till sin bästa färg (att sitta kvar i deras redubblade kontrakt är aldrig
+  planen).
+**Dubblarens höjning av svaret** skalar efter vad svaret visade: partnerns
+**hopp (9–11)** accepteras till högfärgsutgång med **15+ stödpoäng**; det **fria
+icke-hoppet (~6–9)** höjs till utgång först med **19+** (högfärg) / 21+
+(lågfärg) och får en **enkel höjning (inbjudan)** med 16–18; **flykten över XX
+höjs aldrig** (den lovar inga poäng). Med 17+ hp gäller som förut den starka
+dubblarens eget flöde (X + egen färg).
 
 ### 7.4 Övriga dubblingar (negativ, responsiv, stöd)
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
@@ -1284,6 +1308,26 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
 - **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
   3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
   längdinfo i konkurrens.
+  **Svararens svar (etapp 6 i mätspåret, 2026-07-27):** dubblingen är en
+  upplysning och får **aldrig passas bort** — pass är tillåtet bara som
+  **medvetet straffpass** (högst 12 hp och straffdubblingskraven i deras färg:
+  2+ säkra trumfstick). Annars bjuder svararen naturligt efter styrka:
+  - **Utgångsvärden (13+, stödpoäng med 5+ trumf):** **4M** med femkorts
+    högfärg (5-3-fiten är känd); **3NT** med stopp i deras färg och minst
+    dubbelton i öppnarens färg; annars **4M på 4-3-fiten** (kort sidofärg ger
+    stölder på den korta handen).
+  - **Inbjudande (10–12):** **3M** med femkorts högfärg; egen **6+ sidofärg**
+    billigast (naturligt); **invithöjning 3 i öppnarens färg** med stöd
+    (4+ kort, eller 3 med honnör); **2NT** med stopp i deras färg.
+  - **Minimum:** **2M** med femkorts högfärg, annars **billig preferens** till
+    öppnarens färg, sista utväg 2M på 4-3-fiten.
+  **Öppnarens fortsättning:** svararens 2-lägessvar och preferenser är minimum
+  och får passas; **2NT/3M/invithöjning accepteras med 15+** (Bergenpoäng när
+  fit finns — jämn hand med stopp väljer 3NT framför 5m). Svararens **nya färg
+  är ett fritt bud i konkurrens = rondkrav** (§5.5) och passas aldrig: med
+  3-korts stöd (färgen lovar 6+) höjs den — till utgång med 15+ — och utan stöd
+  bjuds sang med stopp, egen 6+ färg eller preferens till svararens högfärg.
+  Svararens **utgångsbud står alltid**.
 
 ### 7.5 Lebensohl
 > ⚠️ **Beskrivet men ännu inte inkopplat (upptäckt 2026-07-25).** Reglerna nedan
@@ -1426,6 +1470,36 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-27 (kväll)** – **Advancern svarar när de bjuder över upplysnings-X
+  (kod, §7.3, ETAPP 6 hål 2).** Förskanningens andra hål: `takeoutDoubleToAnswer`
+  kräver att partnerns X är senaste icke-pass — höjde motståndarna (1♣–X–2♣)
+  eller redubblade de försvann svaret HELT (frö 20261519: advancern teg med 15
+  hp; fem frön totalt: 20260759, 20260811, 20260934, 20261519, 20261521). Nu:
+  `advancerFreeBidAfterDouble` (fritt värde-/formstyrt svar; XX = tvångsflykt
+  via `answerTakeoutDouble`) + `doublerAnswersCue` (cue besvaras alltid,
+  högfärgen först — felrapport #11:s facit styrde prioriteten) + vakten
+  `doublerRaisesAdvance` (dubblarens höjning skalar mot vad svaret visade:
+  hopp 9–11 → accept 15+, fritt ~6–9 → utgång 19+/invit 16–18, XX-flykt höjs
+  aldrig) + två strukturvakter: dubblarens höjning av advancerns färg läses
+  inte längre som "X + egen stark färg" (blastade utgång på 8 hp), och
+  motståndarnas straff-X på vårt cue friar inte dubblaren från svarsplikten.
+  Facit-test FÖRE fix: `auction-upplysningsx-svar.test.ts` + enhetstester i
+  doubles.test.ts. Hela sviten grön.
+- **2026-07-27** – **Stöddubblingen har fått en svarsväg (kod, §7.4, ETAPP 6
+  hål 1).** Systemrevisorns förskanning av "billig offring" visade att svararen
+  ALDRIG svarade på öppnarens stöddubbling: svarstvånget efter partnerns X
+  stängdes av så fort vår sida bjudit ett kontraktsbud, och stöddubblingen hade
+  ingen egen väg. Fem frön (20260884, 20261005, 20261274, 20261433, 20261658,
+  1 470 p) lämnade motståndarna i 2-läget dubblat fast vår sida ägde utgång.
+  Nu: `answerSupportDouble` + `supportDoublerRebid` (doubles.ts) med detektorer
+  i auction-live.ts — svararen svarar naturligt efter styrka (13+ sätter
+  utgången, 10–12 inbjuder, minimum bjuder billigast; pass BARA som medvetet
+  straffpass med trumfstack), öppnaren accepterar inbjudan med 15+ och
+  respekterar att svararens nya färg är rondkrav (§5.5). På de fem fröna nås nu
+  5♦, 3NT, 4♠, 4♥ och 5♣ — alla DD-verifierade spelbara. Facit-test FÖRE fix:
+  `auction-stoddubbling-svar.test.ts` + enhetstester i doubles.test.ts.
+  Rondkravs-stresstestets täckningströskel sänkt 5 → 1 (åtta av nio träffar
+  var symptom på just det här hålet). Hela sviten grön.
 - **2026-07-25 (genomgång)** – **Lebensohl markerad som ej inkopplad (§7.5, ingen
   regeländring).** En full genomgång av repot visade att `lebensohl.ts` är byggd
   och enhetstestad men aldrig importeras av produktionskoden: ett svep där motorn
