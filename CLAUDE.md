@@ -31,15 +31,24 @@ Vercels långsammare byggare föll ändå → generösa tidsgränser (60 s globa
 120 s för DDS-svepen) — en tidsgräns ska fånga hängningar, inte straffa
 långsamma maskiner. Detalj: `docs/historik.md`.
 
-**✅ ETAPP 2 BYGGD 2026-07-28 (ej pushad — väntar ägargranskning + PCD):**
-sticksvepet — färdigt stick ligger kvar med pulserande vinnarglow, sveps sedan
-mot vinnarens sida; botarna/auto-claim/resultatet väntar ut svepet, klick
-hoppar över det; mittens "förra sticket ligger kvar"-fallback borta (panelen i
-hörnet är historiken). Facit: `sticksvep.test.tsx`. Verifierad i dev-servern
-(fasloggen: glow → sweep mot vinnaren → rensat). Detalj: `docs/historik.md`.
+**✅ ETAPP 2 KLAR & LIVE 2026-07-28 (mergepunkt `1fed694`, Vercel Ready,
+svep-koden verifierad i livepaketet):** sticksvepet — färdigt stick ligger kvar
+med pulserande vinnarglow, sveps sedan mot vinnarens sida; botarna/auto-claim/
+resultatet väntar ut svepet, klick hoppar över det; mittens "förra sticket
+ligger kvar"-fallback borta (panelen i hörnet är historiken). Facit:
+`sticksvep.test.tsx`. Detalj: `docs/historik.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren tittar på etapp 2 live → PCD → sedan etapp 3
-(kortflygningen, största etappen).
+**➡️ NÄSTA GÅNG BÖRJAR VI MED: etapp 3 — kortflygningen** (största etappen,
+levereras ensam). Designen är färdigtänkt (godkänd plan 2026-07-28, fil:
+`~/.claude/plans/jag-skulle-vilja-ha-magical-stroustrup.md` på ägarens dator):
+`PlayingCard` får `ref`-prop (React 19 = vanlig prop) → ref-register
+(`registerCardEl`) i `SouthFan`/`SuitColumns`/`SideStack` → källrect mäts
+SYNKRONT före `setPlay` (i `onPlay`/botens `apply`) → ett nytt flyglager
+(overlay i Felt, byggs i etappen) animerar en WAAPI-klon till stickplatsen
+(`data-flight-target`, riktiga kortet göms via wrapper-style, INTE via kortets
+klass — `transition-all` tonar annars); dolda händer (Ö/V) startar från sätets
+bordskant; fallback (jsdom/reduced motion/nollrect) = dagens `card-in-*`.
+Rotationer per säte: V→90°, Ö→−90°, öppen SideStack-källa är redan roterad.
 
 **Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
 På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
