@@ -1553,3 +1553,39 @@ Mergepunkt `3762481`. Livekontroll i dev-servern före pushen (instrumenterade `
 armeringen), sedan exakt rätt sekvens — knäpp (Västs utspel) → tre tick (given
 klar) → tre knäppar (N/Ö/S) → svisch (svepet); med ljudet Av rullade spelet
 vidare med tom ljudlogg. Inga konsolfel.
+
+## Känsla i kortspelet — etapp 5: claim-reveal + resultatövergång + guldglow (2026-07-28, natt) · SPÅRET KLART
+
+Sista etappen — avsluten. Tre delar, allt UI-fas ovanpå motorn (`claim.ts` orörd):
+
+- **Claim-revealen** (`pendingClaim` i `usePlayTable.ts`): en godkänd claim
+  (manuell `onClaim` eller auto-claim-effekten) committas inte direkt — alla
+  händer läggs upp öppna (`isFaceUp` → true för alla säten) med panel
+  "Claim godkänd/Auto Claim — korten ligger uppe" + knappen "Visa resultatet →".
+  **Ägarbeslut under bygget (samma kväll):** ursprungsplanens timer
+  (`claimReveal` 2500 ms) VÄCKTES och togs bort — vyn ska ligga kvar precis
+  som vid ett riktigt bord tills spelaren själv går vidare
+  (`finishClaimReveal`, enda vägen framåt). `BASE.claimReveal` utgick ur
+  `tempo.ts`. Botarna, auto-claim, `onPlay` OCH `onCardClick` är låsta under
+  revealen — inget kan röras av misstag.
+- **Resultatövergången:** `done` byter inte längre träd direkt — bordet får
+  `felt-fade-out` (bastid 500 ms = `BASE.resultOutro`, temposkalad) och först
+  när `showResult`-timern gått tar resultatvyn över. Inget hårt klipp.
+- **Guldglowen:** `result-made-glow` på resultatdialogen vid `result.made` —
+  engångs guldsvällning + diagonalt skimmer, lagt på `::before`/`::after` så
+  dialogens egen `dialog-in`-animation inte skrivs över; statiskt
+  bakgrundsläge parkerar skimret osynligt vid reduced motion. Bet = sobert
+  (ägarbeslut: inget konfetti). Allt i reduced-motion-listan.
+- **Facit:** `src/pages/play/claimreveal.test.tsx` — claim-domen mockad
+  (DDS-domen har egna tester i `claim.test.ts`): revealen ligger kvar långt
+  förbi alla speltimers, botarna gateade, bara knappen avslutar, auto-claim
+  går via revealen, resultatvyn väntar ut uttoningen.
+
+Livekontroll i dev-servern före pushen (händelselogg + autospelare): bet-giv
+gav reveal → uttoning → sobert resultat utan glow; hemgångsgiv gav reveal
+(låg kvar 69 s tills knappen trycktes, ställningen frusen, 9 öppna sidokort) →
+uttoning → "Hemma! 11 stick (+2)" MED guldglow. Inga konsolfel.
+
+**Därmed är hela "känsla i kortspelet"-spåret (etapp 1–5) klart och NU-platsen
+ledig — ägaren väljer nästa NU ur NÄST/SENARE.** Samlad beskrivning av spåret:
+`docs/kortspel.md` avsnittet "Tempo, animationer och ljud".

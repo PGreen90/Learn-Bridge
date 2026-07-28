@@ -10,42 +10,19 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — KÄNSLA I KORTSPELET (ägarbeslut 2026-07-28) · ETAPP 1–4 BYGGDA
-Kortspelet kändes stelt och robotaktiskt — spåret ger det liv i **fem etapper**,
-allt i UI-lagret (spelmotorn rörs INTE), inga nya beroenden. Ägarbesluten från
-frågerundan 2026-07-28: full kortflygning hand→bord, sticksvep till vinnaren
-(paus + vinnarglow), jämnt men justerbart tempo, claim-reveal (händerna visas
-öppet), diskreta syntetiserade ljud (standard PÅ, toggle), ingen
-utdelningsanimation, guldglow vid hemgång (inget konfetti).
+### 🔵 NU — LEDIGT (2026-07-28): ägaren väljer nästa ur NÄST/SENARE
+**KÄNSLA I KORTSPELET-spåret (etapp 1–5) är KLART & LIVE 2026-07-28** —
+kortspelet har tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow,
+kortflygning hand→bord, diskreta syntetiserade ljud (På/Av) och claim-reveal
+där korten ligger kvar tills spelaren trycker "Visa resultatet" (ägarbeslut:
+ingen timer — som i verkligheten), följt av mjuk uttoning och guldglow vid
+hemgång. Allt i UI-lagret, spelmotorn orörd, inga nya beroenden.
+Mergepunkter: `e67fb31`+`9de46f9` · `1fed694` · `e602a01` · `3762481` ·
+etapp 5 se `docs/historik.md`. Samlad bild: `docs/kortspel.md` avsnittet
+"Tempo, animationer och ljud"; nuläge per funktion: `docs/status.md`.
 
-**Etapperna:** 1) tempogrunden + key-fixen · 2) sticksvep + vinnarpaus ·
-3) kortflygningen (FLIP) · 4) ljud · 5) claim-reveal + resultatövergång +
-guldglow. Varje etapp: bygg → grind grön → ägaren tittar live → docs → nästa.
-
-**✅ ETAPP 1–4 KLARA 2026-07-28** (full beskrivning per etapp:
-`docs/historik.md` + `docs/status.md`):
-- **1 · tempogrunden** (mergepunkt `e67fb31` + grindfix `9de46f9`): `tempo.ts`,
-  temporad i ⋮-menyn, `--motion-scale`, MC-golv, key-fixen. Facit:
-  `tempo.test.tsx`. Grindläxa: tidsgränser ska fånga hängningar, inte straffa
-  långsamma maskiner (`maxWorkers: 4` + generösa timeouts).
-- **2 · sticksvepet** (`1fed694`): vinnarglow-paus → svep mot vinnaren; botar/
-  auto-claim/resultat väntar, klick hoppar över. Facit: `sticksvep.test.tsx`.
-- **3 · kortflygningen** (`e602a01`): WAAPI-klon hand→stickplats
-  (`useCardFlight.ts` + `FlightLayer.tsx`), källan mäts före `setPlay`, dolda
-  händer startar från bordskanten, fallback = `card-in-*` (jsdom/reduced
-  motion). Facit: `kortflygning.test.tsx`.
-- **4 · ljuden** (`3762481`): tre syntetiserade Web Audio-ljud i `src/lib/sound.ts` (knäpp/
-  svisch/giv-klar, inga ljudfiler), `armSound()` på pointerdown, "Ljud"-rad i
-  ⋮-menyn (`learnbridge:sound`, standard PÅ). Facit: `ljud.test.tsx`.
-
-**➡️ NÄSTA GÅNG BÖRJAR VI MED: etapp 5 — claim-reveal + resultatövergång +
-guldglow** (sista etappen i spåret): `pendingClaim` i `usePlayTable.ts` (alla
-händer visas öppet `ms('claimReveal')` innan resultatet, skipbar), mjuk
-utfasning av bordet före resultatdialogen, engångs guldglow på dialogen vid
-hemgång (sobert vid bet — inget konfetti). Detaljerna står i planen:
-`~/.claude/plans/jag-skulle-vilja-ha-magical-stroustrup.md` på ägarens dator.
-Efter etapp 5: kort avsnitt "Tempo, animationer och ljud" i `docs/kortspel.md`
-+ spåret stängs — då väljer ägaren nästa NU ur NÄST/SENARE.
+**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU — närmast till hands ligger 🟢 NÄST
+punkt 1 (Etapp 7 missad lillslam, förskannad, ägaren väljer hål 2).
 
 **Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
 På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
