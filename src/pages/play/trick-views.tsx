@@ -1,11 +1,12 @@
 // Sticken på bordet: sticket i mitten (med ljuskäglan), förra sticket i
 // miniatyr och det klickbara spelade kortet (botens motivering).
 
-import type { Seat } from '../../types/bridge'
+import type { Card, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { isComplete, type PlayedCard, type PlayState, type Trick } from '../../lib/engine/play'
 import { PlayingCard } from '../../components/PlayingCard'
-import { CARD_IN, SWEEP_OUT, type Sweep } from './common'
+import { CARD_IN, sameCard, SWEEP_OUT, type Sweep } from './common'
+import type { Flight } from './useCardFlight'
 
 /** Ett spelat kort på bordet: klickbart när boten har en motivering —
  *  trycket visar förklaringen i raden under listen. `glow` = vinnarkortet
@@ -92,6 +93,8 @@ export function TrickCenterLive({
   play,
   thinking,
   sweep,
+  flight = null,
+  wasFlown = () => false,
   onSkipSweep,
   onCardClick,
   hasReason,
@@ -99,6 +102,11 @@ export function TrickCenterLive({
   play: PlayState
   thinking: boolean
   sweep: Sweep | null
+  /** Kortet som är i luften just nu (etapp 3) — dess plats i sticket hålls dold
+   *  tills klonen i FlightLayer landat. */
+  flight?: Flight | null
+  /** Har kortet flugit hit? Då ska det INTE få card-in-glidningen ovanpå. */
+  wasFlown?: (card: Card) => boolean
   onSkipSweep: () => void
   onCardClick: (pc: PlayedCard) => void
   hasReason: (pc: PlayedCard) => boolean
@@ -114,10 +122,19 @@ export function TrickCenterLive({
   const card = (seat: Seat, pos: string, rotate = '') => {
     const pc = at(seat)
     if (!pc) return null
+    // Är just detta kort i luften? Wrappern (INTE kortets egen klass —
+    // PlayingCards transition-all skulle annars tona fram det) hålls osynlig
+    // tills klonen landat; data-flight-target är klonens landningsplats.
+    const flying = flight !== null && sameCard(flight.card, pc.card)
     return (
       // key på KORTET (inte platsen): när ett nytt kort landar på samma plats i
       // nästa stick måste DOM-noden bytas, annars tänds inte inglidningen om.
-      <div key={`${pc.card.suit}${pc.card.rank}`} className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
+      <div
+        key={`${pc.card.suit}${pc.card.rank}`}
+        data-flight-target={seat}
+        className={`absolute ${pos} ${rotate} ${wasFlown(pc.card) ? '' : CARD_IN[seat]}`}
+        style={flying ? { opacity: 0, transition: 'none' } : undefined}
+      >
         <PlayedCardView
           pc={pc}
           winner={winner === seat}

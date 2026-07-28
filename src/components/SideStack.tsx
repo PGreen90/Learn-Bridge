@@ -5,8 +5,19 @@
 
 import type { Card } from '../types/bridge'
 import { PlayingCard } from './PlayingCard'
+import type { RegisterCardEl } from '../pages/play/useCardFlight'
 
-export function SideStack({ cards, side }: { cards: Card[]; side: 'W' | 'E' }) {
+export function SideStack({
+  cards,
+  side,
+  registerCardEl,
+}: {
+  cards: Card[]
+  side: 'W' | 'E'
+  /** Kortflygningens ref-register (etapp 3) — bara spelvyn skickar den;
+   *  omspelningen och budträningen flyger inga kort. */
+  registerCardEl?: RegisterCardEl
+}) {
   // sm-kortet är 28×40 px; vridet tar det 40×28. Varje kort får en wrapper med
   // de vridna måtten så överlappningen (-mt) räknar på rätt höjd.
   // Valören ska peka IN mot mitten på båda sidor (ägarbeslut 2026-07-02). Ett
@@ -24,7 +35,13 @@ export function SideStack({ cards, side }: { cards: Card[]; side: 'W' | 'E' }) {
           key={`${c.suit}${c.rank}`}
           className={`flex h-10 w-14 items-center justify-center sm:h-7 sm:w-10 ${i > 0 ? '-mt-7 sm:-mt-4' : ''}`}
         >
-          <PlayingCard card={c} size="smPlus" mirrorCorners={side === 'E'} className="rotate-90" />
+          <PlayingCard
+            ref={registerCardEl?.(`${c.suit}${c.rank}`)}
+            card={c}
+            size="smPlus"
+            mirrorCorners={side === 'E'}
+            className="rotate-90"
+          />
         </div>
       ))}
     </div>

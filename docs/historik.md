@@ -1476,3 +1476,47 @@ mot vinnarens sida ('slide') och försvinner. Allt UI-fas ovanpå motorn
 Mergepunkt `1fed694`, Vercel-deployen Ready, svep-koden verifierad i livesidans
 JS-paket. Livekontroll i dev-servern före pushen: fasloggen visade glow →
 `trick-sweep-w` (Väst vann sticket) → rensat → Förra sticket-panelen framme.
+
+## Känsla i kortspelet — etapp 3: kortflygningen (2026-07-28, natt)
+
+Största etappen, levererad ensam: spelade kort teleporterar inte längre — en
+klon FLYGER från handen till kortets plats i sticket (WAAPI, `el.animate`),
+och det riktiga kortet står dolt på plats tills klonen landat. Spelmotorn
+orörd, inga nya beroenden:
+
+- **`src/pages/play/useCardFlight.ts` (ny):** flygtillståndet. Ref-register
+  (kortnyckel → DOM-element, stabil callback per nyckel), `beginFlight(seat,
+  card)` som mäter källkortets `getBoundingClientRect()` SYNKRONT före
+  `setPlay` (efteråt är kortet borta ur handen), `flown`-mängden som stoppar
+  dubbel inglidning efter landning. `canFly`-vakten (WAAPI finns + inte
+  reduced motion) gör att jsdom och rörelsekänsliga får fallbacken `card-in-*`
+  — fallback-vägen ÄR testvägen.
+- **`src/pages/play/FlightLayer.tsx` (ny):** overlay i Felt (`z-30`,
+  pointer-events-none) som ställer klonen i mål (`data-flight-target`-wrappern
+  i stickmitten) och animerar från källan: mittpunktsmatematik (rotationssäker),
+  skala källstorlek→sm (Syds md-kort 1.4→1), statisk rotation per säte (V 90°,
+  Ö −90°), husets easing, tid `ms('flight', speed)` = temposkalad. Dold hand →
+  start strax utanför sätets bordskant, redan slutvriden.
+- **Fjärde kortet (kluringen):** när sticket fullbordas är mitten tom EN
+  commit (svepet sätts i effekt efteråt) → landningsplatsen saknas när
+  FlightLayer mäter. Löst med två delar: sveputkiket i `usePlayTable.ts` blev
+  `useLayoutEffect` (svepet ritas före paint — tog samtidigt bort en gammal
+  enrutersblinkning) och FlightLayer väntar + mäter om när `targetsKey`
+  (stickmittens innehåll) ändras.
+- **Kopplingarna:** `PlayingCard` fick `ref`-prop (React 19 = vanlig prop);
+  `SouthFan`/`SuitColumns`/`SideStack` registrerar sina kort; `TrickCenterLive`
+  märker landningsplatserna, gömmer kortet i luften via wrapper-style (INTE
+  kortets klass — `transition-all` hade tonat) och hoppar över `card-in` för
+  flugna kort; flygstart i `usePlayTable` före `setPlay` i både `onPlay`
+  (människan) och botens `apply`.
+- **Facit:** `src/pages/play/kortflygning.test.tsx` — seedad giv, WAAPI stubbat
+  (jsdom saknar det): fallbacken utan stub, flygstart för bot + människa,
+  stale-id-skydd, dolt/visat kort i stickmitten, FlightLayer-animationens tid
+  från `tempo.ts` och vänta-mät-om-vägen för fjärde kortet.
+
+Livekontroll i dev-servern före pushen (instrumenterad `Element.prototype.animate`):
+alla fyra källtyperna flög rätt — Väst från vänsterkanten (rot 90°), träkarlen
+Nord från kolumnerna (mätt källa), Öst från högerkanten (rot −90°), Syd från
+solfjädern (skala 1.4) — fjärde kortet fick sin flygning via svep-omritningen,
+landade kort synliga utan `card-in`, inga konsolfel, temposkalningen bekräftad
+(sparat Snabb-val gav 154 ms = 280 × 0,55).
