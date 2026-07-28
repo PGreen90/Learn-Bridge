@@ -1,4 +1,4 @@
-# RebidZ
+# rebidz
 
 En interaktiv webbapp för att **lära sig och spela bridge** (kortspelet) — bjuda,
 träna budsystem och spela ut korten mot datorbottar. Allt körs i webbläsaren,
@@ -6,8 +6,8 @@ ingen backend, gratis-hostat på Vercel.
 
 **🔗 Live:** https://rebidz.com
 
-> Appen heter **RebidZ** i gränssnittet. Repo och URL heter fortfarande
-> **Learn-Bridge** (medvetet – byts inte).
+> Appen heter **rebidz** i gränssnittet — alltid gemener (ägarbeslut). Repo och
+> URL heter fortfarande **Learn-Bridge** (medvetet – byts inte).
 
 ## Vad appen gör
 

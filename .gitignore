@@ -8,6 +8,7 @@ dist-ssr
 !.vscode/extensions.json
 .claude/*
 !.claude/commands/
+!.claude/skills/
 
 # Källmaterial (PDF:er) hör inte hemma i kod-repot – för stora/onödiga
 *.pdf
