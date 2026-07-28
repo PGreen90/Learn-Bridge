@@ -277,6 +277,13 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   golv (`mcFloor`) så snabba workersvar inte teleporterar in. Delade menyrader:
   `MenuToggleRow`/`MenuTempoRow` i `play/common.tsx`. Test:
   `src/pages/play/tempo.test.tsx` (seedad giv).
+- **Sticksvepet (2026-07-28, "känsla i kortspelet" etapp 2):** färdigt stick =
+  paus med pulserande vinnarglow → alla fyra korten sveps mot vinnarens sida →
+  borta. UI-fas `sweep` i `usePlayTable.ts` (hold/slide, tider från `tempo.ts`);
+  botarna, auto-claim och `done` väntar ut svepet; klick hoppar över det.
+  Mittens gamla "förra sticket ligger kvar"-fallback borttagen — historiken bor
+  i Förra sticket-panelen (döljs under svepet). CSS: `trick-sweep-*` +
+  `winner-glow` i `index.css`. Test: `src/pages/play/sticksvep.test.tsx`.
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,

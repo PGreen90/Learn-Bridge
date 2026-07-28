@@ -22,17 +22,24 @@ utdelningsanimation, guldglow vid hemgång (inget konfetti).
 3) kortflygningen (FLIP) · 4) ljud · 5) claim-reveal + resultatövergång +
 guldglow. Varje etapp: bygg → grind grön → ägaren tittar live → docs → nästa.
 
-**✅ ETAPP 1 BYGGD 2026-07-28 (ej pushad — väntar ägargranskning + PCD):**
-`src/pages/play/tempo.ts` (alla spelfasens tider + `ms()`-skalning),
-temporad Lugn/Normal/Snabb i ⋮-menyn (`learnbridge:playSpeed`), CSS-skalning
-via `--motion-scale` på spelbordet, MC-golv (snabba workersvar teleporterar
-inte längre), key-fixen i sticket (förutsättning för etapp 2–3), delade
-menyrader `MenuToggleRow`/`MenuTempoRow`. Facit: `src/pages/play/tempo.test.tsx`
-(seedad). **Grindfynd:** hela sviten föll slumpvis av CPU-svält (även orörd
-main) → `maxWorkers: 4` i `vite.config.ts`. Detalj: `docs/historik.md`.
+**✅ ETAPP 1 KLAR & LIVE 2026-07-28 (mergepunkt `e67fb31` + grindfix
+`9de46f9`):** `src/pages/play/tempo.ts` (alla spelfasens tider), temporad
+Lugn/Normal/Snabb i ⋮-menyn (`learnbridge:playSpeed`), `--motion-scale`,
+MC-golv, key-fixen i sticket. Facit: `tempo.test.tsx`. **Två grindfynd på
+vägen:** CPU-svält gav slumpvisa timeouts (även orörd main) → `maxWorkers: 4`;
+Vercels långsammare byggare föll ändå → generösa tidsgränser (60 s globalt,
+120 s för DDS-svepen) — en tidsgräns ska fånga hängningar, inte straffa
+långsamma maskiner. Detalj: `docs/historik.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren tittar på etapp 1 live (tempot i ⋮-menyn) → PCD →
-sedan etapp 2 (sticksvepet).
+**✅ ETAPP 2 BYGGD 2026-07-28 (ej pushad — väntar ägargranskning + PCD):**
+sticksvepet — färdigt stick ligger kvar med pulserande vinnarglow, sveps sedan
+mot vinnarens sida; botarna/auto-claim/resultatet väntar ut svepet, klick
+hoppar över det; mittens "förra sticket ligger kvar"-fallback borta (panelen i
+hörnet är historiken). Facit: `sticksvep.test.tsx`. Verifierad i dev-servern
+(fasloggen: glow → sweep mot vinnaren → rensat). Detalj: `docs/historik.md`.
+
+**➡️ NÄSTA GÅNG:** ägaren tittar på etapp 2 live → PCD → sedan etapp 3
+(kortflygningen, största etappen).
 
 **Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
 På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
