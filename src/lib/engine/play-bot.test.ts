@@ -440,5 +440,5 @@ describe('felrapport #25 – motspelaren blottar inte en honnör vid sakning', (
     expect(declTricksAfter(chosen)).toBe(9)
     // Det rapporterade felet: ett klöverkast blottar damen → Syd tar 11 (+2).
     expect(declTricksAfter(c('C2'))).toBe(11)
-  }, 30_000)
+  }, 120_000) // hängningsdetektor, inte prestandakrav — Vercels byggare är långsam (2026-07-28)
 })

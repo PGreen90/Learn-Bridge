@@ -53,5 +53,10 @@ export default defineConfig({
     // maskin: obegränsat = rött, 50 % = rött, 4 arbetare = grönt. Fast tak 4
     // gör `npm test` deterministiskt igen (verifiera med: npm test).
     maxWorkers: 4,
+    // Samma dag, del 2: Vercels byggare har färre kärnor än ägarens dator och
+    // föll ÄNDÅ på timeouts (deploy dpl_9nYKc…). En tidsgräns ska fånga
+    // HÄNGNINGAR, inte straffa långsamma maskiner — därför generös global
+    // gräns; de tyngsta DDS-testerna har egna, ännu högre, i sina filer.
+    testTimeout: 60_000,
   },
 })

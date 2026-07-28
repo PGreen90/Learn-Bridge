@@ -62,5 +62,5 @@ describe('TP-princip: nedgradera aldrig (pointsWithFloor ≥ HP, globalt svep)',
     // Inte vakuöst: formen MÅSTE ha lyft minst en hand över HP i svepet, annars
     // bevisar golvtestet ingenting (mått === HP överallt vore en regression).
     expect(liftedCount).toBeGreaterThan(0)
-  }, 30000)
+  }, 120_000) // hängningsdetektor, inte prestandakrav — Vercels byggare är långsam (2026-07-28)
 })
