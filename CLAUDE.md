@@ -10,13 +10,47 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — (tomt) · etapp 6 KLAR 2026-07-28, ägaren väljer nästa
-**Etapp 6 "billig offring" är KLAR** — alla fyra hål lagade (hål 4 2026-07-28:
-försvaret väcker över deras höjda spärr, `raisedPreemptToDefend` +
-`defendPreempt` med raised/balansering, facit-test
-`auction-sparrhojning-svar.test.ts`, Mätning #18). Nästa NU väljs av ägaren —
-kandidaterna står i 🟢 NÄST, och topplistan pekar på **missad lillslam**
-(56 170 p) som största post.
+### 🔵 NU — ETAPP 7: MISSAD LILLSLAM (ägarbeslut 2026-07-28) · FÖRSKANNAD
+**Topplistans största post: 83 givar / 56 170 p.** Förskanningen är KLAR — hela
+mönsteranalysen står i `docs/systemrevisorn.md` ("ETAPP 7 FÖRSKANNAD").
+**Nästa steg: ägaren väljer vilket hål vi bygger först** (ordningsförslaget står
+sist i det avsnittet).
+
+**✅ HÅL 1 KLART 2026-07-28 (Mätning #20): minimum-märkningen.**
+`openerRebidAfter1LevelResponse` steg 5 hade två fel — inget tak (19+ föll
+igenom 16–18-fönstret ned i minimibudet) och rå hp i stället för startpoäng
+(grannreglerna reverse/hoppskift vägde redan TP). Nu: stegen väger startpoäng
+golvade vid hp, 19+ i högfärg sätter utgången, minor stannar på 3-läget.
+**Par-avvikelse 276,49 → 271,38, rätt kontrakt 18,2 → 18,7 %, netto −5 110 p.
+11 givar flyttade, ALLA till det bättre, noll regressioner** (fem blev exakt
+par). Facit: `auction-lillslam-aterbudsstyrka.test.ts`. **Nästa hål: ägaren
+väljer** — de fem krympta givarna flyttade in i hål B ("stannade i 3NT"), som
+därmed vuxit till ~15 givar.
+
+**Tre fynd som styr etappen:**
+1. **75 av 83 pass saknar regel** — motorn tar slut på maskineri och faller till
+   det nakna `{ bid: 'P' }`. Bara 8 stopp är domslut. Samma klass som #41/#42.
+2. **57 givar (39 310 p) når systemets EGEN slamport** (33+ driv / 31–32
+   inbjudan, mätt med startpoäng + stödpoäng). Resten är DD-smicker och jagas
+   inte. OBS: stödpoängen räknas i *facit*-trumfen → siffran är ett **tak**,
+   inte en prognos (frö 20260745 får 39 p på 24 hp och är ändå ren smicker).
+3. **En rent mekanisk bugg finns redan (7 givar / 6 810 p):** ett bud som säger
+   "minimum 12–15" bjuds av en hand med 17+ TP — `rebjuden färg` i rebids.ts
+   graderar inte efter styrka. Frö 20261020: 20 hp / 23 TP rebjuder 2♣ märkt
+   "minimum", svararen passar korrekt. **Kräver inget ägarbeslut.**
+
+**➡️ NÄSTA GÅNG BÖRJAR VI MED:** ägaren väljer hål 2. Närmast till hands är
+**hål B — 3NT-stoppen** (~15 givar): de fem givar hål 1 lyfte till utgång
+flyttade in där, så posten har vuxit. Det är systerfallet till felrapport #42,
+fast från den sida som *bjuder* 3NT i stället för den som höjer. Alternativen
+(hål C utgångsstoppen i 4M, hål D konkurrensfallen) står i ordningsförslaget i
+`docs/systemrevisorn.md`.
+
+Verktyg (båda gated, körs inte i `npm test`):
+```
+$env:DUMP_CAT='missad-lillslam'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
+$env:FORSKAN='1'; npx vitest run src/lib/engine/lillslam-forskan.probe.test.ts
+```
 
 **Arbetssätt när nästa mätspårs-etapp startar (facit-först):** hämta
 exempelgivarna ur revisorn → hitta **MÖNSTREN**, inte enskilda givar → skriv

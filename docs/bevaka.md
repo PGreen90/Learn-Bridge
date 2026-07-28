@@ -9,6 +9,17 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Etapp 7 (2026-07-28) — missad lillslam
+- **Öppnarens suutrebid graderas nu efter styrka (hål 1, NYAST).** Har du öppnat
+  med en 6-korts färg och partnern svarat på 1-läget rebjuder du inte längre
+  billigast med allt: **16+ startpoäng hoppar** (1♥–1♠–3♥), och **19+ i högfärg
+  sätter utgången** (4♥). En minor stannar på 3-läget även med 19+. Måttet är
+  startpoäng, inte råa hp — en 15:a med `AQT983` hoppar. **Bevaka:** (a) hamnar
+  ni för högt när hoppet bygger på LÄNGDpoäng och partnern har en bottenhand?
+  (b) 4♥-hoppet med 19+ ger upp slamutredningen — missas slam där i stället?
+  (c) känns 3♣/3♦-hoppet passat för ofta av partnern (det är en inbjudan, inte
+  krav)?
+
 ## Felrapporter #40/#41/#42 (2026-07-28, kväll)
 - **17+ säljer aldrig given över deras 1-lägesöppning (#40, NYAST).** Ryms en
   17+-hand inte i något fönster — för stark för det kapade inklivet (tak 16),

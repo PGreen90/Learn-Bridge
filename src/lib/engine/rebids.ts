@@ -104,9 +104,30 @@ export function openerRebidAfter1LevelResponse(hand: Hand, opened: Suit, respond
     if (best) return { call: `3${BID[best]}`, rule: 'hoppskift', explanation: `${sp.text}, 4+ ${NAME[best]} → 3${SYM[best]} (hoppskift, utgångskrav).` }
   }
 
-  // 5. Rebjuda egen 6-korts färg.
+  // 5. Rebjuda egen 6-korts färg. ETAPP 7 hål 1 (missad lillslam): steget hade
+  // TVÅ fel som båda fick öppnaren att kalla en stark hand för minimum.
+  //  (a) TAKET SAKNADES: fönstret var `p >= 16 && p <= 18`, så en 19+-hand föll
+  //      IGENOM det ned i minimibudet. Frö 20261020: 20 hp / 23 TP rebjöd
+  //      "2♣ (minimum 12–15)" och svararen passade korrekt med 10 hp — 6NT
+  //      fanns. Systerfunktionen `openerRebidAfterSemiForcing1NT` har haft
+  //      19+-rungen hela tiden; det var ett glapp mellan två syskonstegar.
+  //  (b) STEGET RÄKNADE RÅ HP: grannreglerna i samma funktion (reversen i
+  //      steg 3, hoppskiftet i steg 4b) väger med `sp` = startpoäng golvade
+  //      vid hp — bara suutrebidet räknade `hcp`. En 15 hp-hand med 18–19 TP
+  //      (6-korts färg ger längdpoäng) kallade sig därför minimum: frön
+  //      20261279, 20261661, 20261136. `pointsWithFloor` golvar vid hp, så den
+  //      låsta regeln (TP får bara UPPGRADERA, aldrig nedgradera) hålls.
+  // Högfärg på 19+ sätter utgången som hos syskonfunktionen; en minor stannar
+  // på 3-läget — 5m är för högt att blåsa på en hand partnern inte hört om än.
   if (len[opened] >= 6) {
-    if (p >= 16 && p <= 18) return { call: `3${BID[opened]}`, rule: 'hopp i egen färg (inbjudan)', explanation: `${p} hp med 6+ ${NAME[opened]} → 3${SYM[opened]} (16–18, inbjudan).` }
+    const isMajor = opened === 'hearts' || opened === 'spades'
+    if (sp.points >= 19 && isMajor) {
+      return { call: `4${BID[opened]}`, rule: 'rebid: utgång', explanation: `${sp.text} med 6+ ${NAME[opened]} → 4${SYM[opened]} (till spel).` }
+    }
+    if (sp.points >= 16) {
+      const zon = sp.points >= 19 ? '19+, extra styrka' : '16–18'
+      return { call: `3${BID[opened]}`, rule: 'hopp i egen färg (inbjudan)', explanation: `${sp.text} med 6+ ${NAME[opened]} → 3${SYM[opened]} (${zon}, inbjudan).` }
+    }
     return { call: `2${BID[opened]}`, rule: 'rebjuden färg', explanation: `${p} hp med 6+ ${NAME[opened]} → 2${SYM[opened]} (minimum 12–15).` }
   }
 

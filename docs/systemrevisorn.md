@@ -680,6 +680,114 @@ par-avvikelse 287,2 → 276,3, rätt kontrakt 17,1 → 18,2 %. Topplista nu:
 missad lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad
 storslam 36 470 > billig offring 30 570.**
 
+## ETAPP 7 FÖRSKANNAD — missad lillslam (2026-07-28, ägarbeslut: detta är NU)
+Alla 83 givarna ur Mätning #19 (`REVISOR_EXAMPLES=500`), grupperade efter
+**vilken regel som föll ut** — inte efter kategorinamnet (metodlärdomen från
+etapp 6). Återskapa hela analysen med:
+
+```
+$env:DUMP_CAT='missad-lillslam'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
+$env:FORSKAN='1'; npx vitest run src/lib/engine/lillslam-forskan.probe.test.ts
+```
+
+### Fynd 1 — 90 % av passen är INTE ett domslut, de är frånvaron av ett
+**75 av 83 givar (50 610 p) slutar med ett pass som saknar regel** — motorns
+`decideCall` tog slut på maskineri och föll till det nakna `{ bid: 'P' }`. Bara
+8 givar stoppades av en regel som faktiskt sa "stanna". Samma klass av hål som
+felrapport #41/#42: kaptenen har inget bud, inte fel bud.
+
+### Fynd 2 — hur mycket är ÄRLIGT bjudbart?
+Rå hp ger en missvisande bild (bara 8 givar har 31+ hp). Mätt med systemets
+**egen** värdering (startpoäng för den ena handen + stödpoäng i facit-trumfen
+för den andra):
+
+| Zon (systempoäng) | Givar | Poäng | varav regellöst pass |
+|---|---|---|---|
+| **DRIV (33+)** | 31 | 22 170 | 26 |
+| **INBJUDAN (31–32)** | 26 | 17 140 | 24 |
+| under porten (DD-smicker) | 26 | 16 860 | 25 |
+| | **57 når porten** | **39 310** | |
+
+**Ärlig brasklapp om siffran:** stödpoängen räknas i *facit*-trumfen, alltså med
+efterklokhet om vilken färg som var rätt. Det överskattar vilda tvåfärgs-
+och misspassningshänder — frö 20260745 får 39 systempoäng på 24 hp (7-korts
+ruter mitt emot 6-korts spader, renons) men är i praktiken ren DD-smicker.
+39 310 p är alltså ett **tak**, inte en prognos.
+
+### Fynd 3 — mönstren bland de 57 som når porten
+| Mönster | Givar | Poäng | Exempelfrön |
+|---|---|---|---|
+| **E. konkurrens (motståndarna inne)** | 19 | 11 330 | 20260846, 20260877, 20260947, 20261201, 20261272 |
+| **A. auktionen dog på 1–2-läget** | 9 | 8 770 | 20261279, 20261587, 20261020, 20260743, 20261323 |
+| **D. stannade i utgång (4M/4m)** | 14 | 8 010 | 20260799, 20260834, 20260999, 20261389, 20261539 |
+| **B. stannade i 3NT** | 10 | 7 010 | 20260824, 20260925, 20261134, 20261144, 20261199 |
+| **F. stannade i 5m** | 3 | 2 160 | 20260941, 20261008, 20261531 |
+| **C. stannade på 3-läget i färg** | 2 | 2 030 | 20261111, 20261317 |
+
+### Fynd 4 — den ENDA rent mekaniska buggen hittills (7 givar / 6 810 p)
+Ett bud som säger **"minimum"** bjuds av en hand med **17+ TP**. Motorn skriver
+ut sin egen bugg i frö 20261020:
+
+```
+N 1C  [minor-regeln]    20 hp / 23 TP → 1♣
+N 2C  [rebjuden färg]   20 hp med 6+ klöver → 2♣ (minimum 12–15)   ← 20 hp!
+S P   [svararens pass]  10 hp – preferens klöver → pass
+```
+
+`rebjuden färg` (rebids.ts) graderar inte efter styrka: en 20-poängare rebjuder
+sin färg billigast och beskriver sig som 12–15, varpå svararen helt korrekt
+passar. Fördelning per regel: `rebjuden färg` 2♣ 3 givar/2 760 p (20261020,
+20261136, 20261661), `rebjuden färg` 2♦ 1/1 280 (20261279), `svar på
+cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst 4♦
+1/1 200. **Detta är den enda gruppen som inte kräver ägarbeslut** — att kalla
+20 hp för minimum är fel oavsett hur aggressivt vi vill bjuda slam.
+
+### Ordningsförslag (ägaren väljer)
+1. ✅ **KLART 2026-07-28 (Mätning #20): Fynd 4 — minimum-märkningen.** Netto
+   −5 110 p, noll regressioner. **OBS:** de fem krympta givarna flyttade in i
+   hål B nedan — de når nu 3NT men saknar väg vidare till slam.
+2. **Hål B — 3NT-stoppen** (10 givar + 5 nyinflyttade): systerfallet till felrapport #42, fast
+   från den sida som *bjuder* 3NT i stället för den som höjer.
+3. **Hål C — utgångsstoppen 4M** (14 givar): kräver ägarbeslut, här ligger
+   gränsen mellan ärlig slamjakt och blåsning.
+4. **Hål D — konkurrensfallen** (19 givar): störst post men svårast; slam efter
+   motståndarnas inkliv är där mänskligt omdöme väger tyngst.
+
+## Mätning #20 — 2026-07-28 (kväll), ETAPP 7 hål 1 (minimum-märkningen)
+Samma frö 20260721, 1 000 givar. Fix: `openerRebidAfter1LevelResponse` steg 5
+(rebids.ts) — suutrebidet vägde rå hp och saknade tak, se §5.2 + ändringsloggen.
+
+```
+                        M19 (före)   M20 (hål 1)
+Rätt kontrakt (exakt par)  18,2 %       18,7 %
+Genomsnittlig par-avvikelse 276,49      271,38
+Missad lillslam         83/56 170     82/53 030
+Missad utgång          150/50 100    146/48 710
+Fel färg (bet)         123/52 160    122/51 560
+Fel strain              99/2 420     100/2 440
+Övriga poster: oförändrade.
+```
+
+**Läsning (alla 11 flyttar spårade per frö):** netto **−5 110 p**, och det
+ovanliga är att **varenda flytt går åt rätt håll — noll regressioner**. Fem
+givar blev **exakt par**: 20260745 (2NT→par), 20261265, 20261526, 20261623,
+20261636. Fem lillslam-givar krympte men når bara 3NT: 20261020 (820→500),
+20261136 (780→530), 20261279 (1 280→830), 20261587 (1 250→800), 20261661
+(1 160→710). Den elfte, 20260803, gick missad utgång 270 → fel strain 20.
+
+**Två observationer inför nästa hål:**
+1. Fixen hjälpte **missad utgång mer i antal givar** (−4) än lillslam (−1). Att
+   lyfta ett delkontrakt till utgång rättar båda posterna — kategorierna
+   överlappar mer än topplistan antyder.
+2. De fem krympta lillslam-givarna **flyttade in i hål B** ("stannade i 3NT").
+   Nästa hål ligger alltså direkt nedströms det vi just lagade: paret når nu
+   utgång men har fortfarande ingen väg från 3NT till slam.
+
+**Ärlig avgränsning:** 20260745 fick 39 "systempoäng" i förskanningen och
+flaggades av mig som trolig DD-smicker — den blev exakt par ändå. Måttet
+(stödpoäng i facit-trumfen) är alltså trubbigt åt båda hållen; använd det för
+att sortera, inte för att döma ut enskilda givar.
+
 ## Mätning #19 — 2026-07-28 (kväll), felrapport #40/#41/#42 (INGEN etapp)
 Samma frö 20260721, 1 000 givar. Kör om med:
 
