@@ -20,6 +20,7 @@ import { turnsToCalls } from './auction-contract'
 import { advancerFreeBidAfterDouble, answerSupportDouble, answerTakeoutDouble, doublerAnswersCue, openerAnswerNegativeDouble, penaltyDouble, supportDoublerRebid } from './doubles'
 import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
+import { defendPreempt } from './defense-conventional'
 import { openerAnswerFourthSuit, openerAnswerNMF } from './rebids'
 import { responderPlaceAfterNMF } from './responder-rebids'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
@@ -2096,6 +2097,38 @@ function maybeTakeoutOfResponse(deal: Deal, history: ResolvedCall[], seat: Seat)
 }
 
 /**
+ * Har motståndarna ÖPPNAT och SPÄRRHÖJT till 3-läget (etapp 6 hål 4)? Mönstret:
+ * deras färgöppning + partnerns höjning i SAMMA färg till 3-läget (2♠–P–3♠
+ * eller 1♣–P–3♣), och vår sida har inte sagt ett ljud. `maybeOvercall` kräver
+ * exakt ETT kontraktsbud i historiken, så här stängdes auktionen helt förr —
+ * en 21-poängare passade ut 2♦–P–3♦ (frö 20261477). Sitsen är direkt
+ * (höjningen är senaste icke-pass) eller balansering (höjningen följd av exakt
+ * två pass → "låna en kung"). Höjningar förbi 3-läget (2♠–P–4♠) lämnas
+ * medvetet tysta — att väcka på 4-läget lovar mer än §7.6-fönstren har.
+ */
+function raisedPreemptToDefend(
+  history: ResolvedCall[],
+  seat: Seat,
+): { suit: Suit; balancing: boolean } | null {
+  // Vår sida har aldrig gjort något annat än pass.
+  if (history.some((c) => side(c.seat) === side(seat) && c.bid !== 'P')) return null
+  // Deras aktioner: exakt två kontraktsbud (öppning + höjning i samma färg,
+  // höjningen av PARTNERN till 3-läget), inga X/XX.
+  const theirs = history.filter((c) => c.bid !== 'P')
+  if (theirs.length !== 2) return null
+  const open = parseContractBid(theirs[0].bid)
+  const raise = parseContractBid(theirs[1].bid)
+  if (!open || !raise) return null
+  if (theirs[1].seat !== PARTNER[theirs[0].seat]) return null
+  const suit = SUIT_OF_LETTER[open.strain]
+  if (!suit || open.strain !== raise.strain || raise.level !== 3) return null
+  // Sits: direkt över höjningen, eller balansering efter exakt två pass.
+  const after = history.slice(history.indexOf(theirs[1]) + 1)
+  if (after.length !== 0 && after.length !== 2) return null
+  return { suit, balancing: after.length === 2 }
+}
+
+/**
  * Får `seat` STRAFFDUBBLA här (ägarbeslut 2026-07-04, poängarbetet)? Kraven —
  * medvetet stränga, så X:et aldrig kan förväxlas med en konventionell dubbling:
  *  - senaste icke-pass är motståndarnas FÄRGKONTRAKT på 3-läget eller högre
@@ -3226,14 +3259,33 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
 
   const line = turnsToCalls(built.turns, deal.dealer)
   const offBook = divergedFromLine(history, line)
+  const hand = deal.hands[seat]
 
-  // Följ linjen så länge den verkliga budföljden inte motsagt den.
+  // §7.6-väckningen över deras öppning + spärrhöjning (etapp 6 hål 4): linjen
+  // modellerar bara direktsitsen över själva ÖPPNINGEN, så försvarssidans pass
+  // efter höjningen (2♠–P–3♠ / 1♣–P–3♣) ligger INBAKADE i linjen — en
+  // 21-poängare passade ut 2♦–P–3♦ (frö 20261477). Prövas därför både som
+  // överstyrning av linjens pass och som tvingande svar bortom en stängd linje.
+  const defendRaisedPreempt = () => answered(raisedPreemptToDefend(history, seat), (r) => {
+    const def = defendPreempt(hand, r.suit, 3, r.balancing, true)
+    if (def.call === 'P') return def
+    return r.balancing
+      ? { ...def, explanation: `${def.explanation} (balansering – "låna en kung")` }
+      : def
+  }, history, seat)
+
+  // Följ linjen så länge den verkliga budföljden inte motsagt den — men ett
+  // inbakat försvarspass efter deras spärrhöjning får inte tysta väckningen.
   if (!offBook) {
     const next = line[history.length]
-    if (next && next.seat === seat) return next
+    if (next && next.seat === seat) {
+      if (next.bid === 'P') {
+        const wake = defendRaisedPreempt()
+        if (wake && wake.bid !== 'P') return wake
+      }
+      return next
+    }
   }
-
-  const hand = deal.hands[seat]
 
   // ---- Tvingande svar (gäller ÄVEN on-book) --------------------------------
   // Linjen gav inget bud för oss här. Vissa lägen är ändå rondkrav: partnern får
@@ -3275,6 +3327,13 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // Partnerns NEW MINOR FORCING (§5.7, krav): öppnaren svarar alltid.
     () => answered(nmfToAnswer(history, seat),
       (n) => openerAnswerNMF(hand, n.opened, n.responderMajor, n.nmfMinor, n.unbidSuit), history, seat),
+    // §7.6-väckningen över deras spärrhöjning (etapp 6 hål 4) — täcker
+    // balanseringssitsen när linjen är STÄNGD (built.open === false) och
+    // kedjan nedan därför aldrig nås. Pass faller vidare (null).
+    () => {
+      const wake = defendRaisedPreempt()
+      return wake && wake.bid !== 'P' ? wake : null
+    },
   ]
   for (const run of forcedAnswers) {
     const call = run()

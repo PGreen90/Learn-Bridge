@@ -194,6 +194,26 @@ function playOut(deal: Deal): ResolvedCall[] {
   return history
 }
 
+// SANKTIONERAT undantag från "budlådan följer linjen" (etapp 6 hål 4): linjen
+// bakar in försvarssidans pass efter öppning + spärrhöjning (2♠–P–3♠ /
+// 1♣–P–3♣), men budlådan väcker där med §7.6-fönstren. Den uppspelade
+// auktionen får alltså divergera från linjen EXAKT så: vid första skillnaden
+// står linjen på pass och budlådan har väckt med X/3NT/naturligt inkliv efter
+// deras två kontraktsbud (öppning + höjning i samma färg till 3-läget).
+function divergesOnlyByPreemptWake(line: ResolvedCall[], played: ResolvedCall[]): boolean {
+  const overlap = Math.min(line.length, played.length)
+  for (let i = 0; i < overlap; i++) {
+    if (line[i].bid === played[i].bid) continue
+    if (line[i].bid !== 'P') return false
+    const before = played.slice(0, i).filter((c) => c.bid !== 'P')
+    if (before.length !== 2) return false
+    const open = /^([1-3])([CDHS])$/.exec(before[0].bid)
+    const raise = /^3([CDHS])$/.exec(before[1].bid)
+    return !!open && !!raise && open[2] === raise[1]
+  }
+  return false
+}
+
 describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
   it('varje bud är lagligt och ligger på rätt plats', () => {
     for (let i = 0; i < 200; i++) {
@@ -220,6 +240,7 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
       const expected = finalContract(built)
       if (!expected) continue
       const history = playOut(deal)
+      if (divergesOnlyByPreemptWake(turnsToCalls(built.turns, deal.dealer), history)) continue
       expect(contractFromCalls(history)).toEqual(expected)
       checked++
     }
@@ -233,10 +254,13 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
       const built = buildAuction(deal)
       if (!built || built.open) continue
       if (!isLegalMedurs(built.turns)) continue // hoppa över slam-quirken (se ovan)
-      const lineBids = turnsToCalls(built.turns, deal.dealer)
+      const line = turnsToCalls(built.turns, deal.dealer)
+      const played = playOut(deal)
+      if (divergesOnlyByPreemptWake(line, played)) continue // §7.6-väckningen (hål 4)
+      const lineBids = line
         .filter((c) => c.bid !== 'P')
         .map((c) => `${c.seat}:${c.bid}`)
-      const playedBids = playOut(deal)
+      const playedBids = played
         .filter((c) => c.bid !== 'P')
         .map((c) => `${c.seat}:${c.bid}`)
       expect(playedBids).toEqual(lineBids)
@@ -362,6 +386,8 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     })
 
     // ---- Säkerhet: on-book-auktioner är HELT oförändrade --------------------
+    // (enda sanktionerade undantaget: §7.6-väckningen över deras spärrhöjning,
+    // etapp 6 hål 4 — se divergesOnlyByPreemptWake ovan.)
     it('on-book budgivning är oförändrad (off-book-svaret triggar aldrig)', () => {
       for (let i = 0; i < 150; i++) {
         const d = dealRandom()
@@ -370,7 +396,9 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
         if (!isLegalMedurs(built.turns)) continue
         const expected = finalContract(built)
         if (!expected) continue
-        expect(contractFromCalls(playOut(d))).toEqual(expected)
+        const played = playOut(d)
+        if (divergesOnlyByPreemptWake(turnsToCalls(built.turns, d.dealer), played)) continue
+        expect(contractFromCalls(played)).toEqual(expected)
       }
     })
   })

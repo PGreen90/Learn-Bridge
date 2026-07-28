@@ -94,6 +94,20 @@ describe('answerTakeoutDouble (§7.3)', () => {
     const h = parseHand('S:KJ85 H:3 D:T9752 C:Q63') // 4 spader, 3 klöver, lång ruter
     expect(answerTakeoutDouble(h, 'hearts', 1, ['diamonds', 'hearts']).call).toBe('1S')
   })
+
+  // Etapp 6 hål 4 (Mätning #18): svar när partnern dubblat deras SPÄRR (3-läget).
+  it('12+ över dubblad spärr: 3NT med stopp — ALDRIG cue (frö 20260825 passades ut i 4♥)', () => {
+    const h = parseHand('S:A43 H:KJ8 D:Q432 C:A32') // 13 hp, hjärterstopp
+    expect(answerTakeoutDouble(h, 'hearts', 3).call).toBe('3NT')
+  })
+  it('12+ över dubblad spärr utan stopp: bästa färg (inte cue)', () => {
+    const h = parseHand('S:AQ43 H:432 D:AQ42 C:32') // 12 hp, inget hjärterstopp
+    expect(answerTakeoutDouble(h, 'hearts', 3).call).toBe('3S')
+  })
+  it('tvingat svar på 3-läget+: honnörsstarkare färg vinner på lika längd (frö 20261680)', () => {
+    const h = parseHand('S:J9 H:J982 D:T93 C:A832') // 4-4: A832 klöver > J982 hjärter
+    expect(answerTakeoutDouble(h, 'spades', 3).call).toBe('4C')
+  })
 })
 
 // Straffdubblingen (ägarbeslut 2026-07-04, poängarbetet): 2+ säkra trumfstick

@@ -1402,8 +1402,29 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
   **säljer aldrig given**: den dubblar (upplysning) hellre än passar.
 - **Mot Multi 2♦** (svag tvåa i okänd högfärg): 2NT = 15–18 balanserad; 2♥/2♠ =
   naturligt inkliv. (Takeout-dubblingen: §7.3.)
-- **Mot spärrar (3-läget+):** 3NT = till spel (stopp + stick); cue-bud =
-  stoppfråga/stark; färgbud naturliga. (Takeout-dubblingen: §7.3.)
+- **Mot spärrar (3-läget+):** 3NT = till spel (stopp + stick, balanserad 16+);
+  färgbud naturliga (**13–16** — starkare händer dubblar först och visar färgen
+  sedan); en hand med **17+** som inte ryms i något fönster **säljer aldrig
+  given** — den dubblar (upplysning), precis som mot svaga tvåor.
+  (Takeout-dubblingen, 14+: §7.3.)
+- **Mot deras höjda spärr (etapp 6 hål 4, 2026-07-28):** spärrfönstren gäller
+  även när motståndarna hunnit bjuda **öppning + spärrhöjning i samma färg till
+  3-läget** — `2♠–P–3♠–?` eller `1♣–P–3♣–?`. Förr fanns här ingen väg in alls
+  (en 21-poängare passade ut `2♦–P–3♦`); nu väcker försvaret både **direkt
+  över höjningen** och **i balansering** när höjningen passas ut. Två saker
+  skiljer mot en ren spärröppning:
+  - **3NT till spel kräver mer** — de har visat öppning + fit, så golvet är
+    **19 direkt / 16 i balansering** (samma som mot en svag tvåa). Under det
+    är X:et bättre: 16 balanserad med Kx-håll dubblar i stället för att stå
+    i ett tunt 3NT.
+  - **Balanseringen lånar en kung på X och färg:** X från **11 hp** (max 3
+    kort i deras färg, offshape ok), naturligt inkliv från **10**. Lånet
+    gäller **bara 3-läget** — mot deras 4-lägesöppningar står de fulla golven
+    kvar (en lånad kung på 4-läget köpte bara dyra uppoffringar).
+  Tvingas partnern svara på dubblingen på **3-läget eller högre** väljs på lika
+  färglängd den **honnörsstarkare** färgen (A832 före J982) — på 1–2-läget
+  gäller som förr högfärg först. Höjningar *förbi* 3-läget (t.ex. `2♠–P–4♠`)
+  lämnas medvetet tysta — att väcka på 4-läget lovar mer än fönstren har.
 
 ### 7.8 När motståndarna stör vår egen öppning
 Konkurrensen går åt båda håll: bjuder *vi* konstgjort/spärrartat och en
@@ -1479,6 +1500,27 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-28** – **Försvaret mot deras höjda spärr (kod, §7.7, ETAPP 6
+  hål 4, ägarbeslut).** Förskanningens sista hål: budlådan krävde exakt ETT
+  kontraktsbud i historiken för ett inkliv, och §7.6/§7.7-försvaret modellerades
+  bara direkt över själva öppningen — efter deras öppning + spärrhöjning
+  (`2♠–P–3♠` / `1♣–P–3♣`) fanns ingen väg in alls. En 21-poängare passade ut
+  `2♦–P–3♦` (frö 20261477), en 18-poängare `2♥–P–3♥` (frö 20261449). Nu väcker
+  försvaret med spärrfönstren (`defendPreempt`) både direkt över höjningen och
+  i balansering ("låna en kung": X 14→11, färg 13→10, offshape-X med 3 kort i
+  deras färg — bara på 3-läget). Samtidigt fick `defendPreempt` taket 16 på
+  naturliga inklivet och 17+-utloppet "sälj aldrig given → X" (samma som
+  `defendWeakTwo` fick i hål 3). Tre justeringar efter första mätvarvet
+  (Mätning #18): 3NT över den höjda spärren kräver 19 direkt / 16 balansering
+  (16 direkt stod på Kx-håll och gick djupt bet — X:et tar över och landar på
+  par, frö 20261045); kungen lånas INTE mot 4-lägesöppningar (frö 20261533);
+  och advancerns tvingade svar på 3-läget+ väljer honnörsstarkare färg på lika
+  längd (4♣ på A832 före 4♥ på J982, frö 20261680). Ägarbeslut: höjningar
+  förbi 3-läget lämnas, och tunna fördelningsutgångar (6♣ på 19 hp, frö
+  20260858) jagas INTE — gränsvakterna ligger i facit-testet. Målkontrakten
+  DD-verifierade före fixen. Facit-test FÖRE fix:
+  `auction-sparrhojning-svar.test.ts` + enhetstester i
+  defense-conventional.test.ts. Hela sviten grön.
 - **2026-07-27 (kväll, del 2)** – **Taket i försvaret mot svaga tvåor (kod,
   §7.7, ETAPP 6 hål 3).** `defendWeakTwo` hade cue (15+ 5-5), 2NT-fönstret
   (15–18/12–15), takeout-X och naturligt inkliv (10–16) — men inget utlopp

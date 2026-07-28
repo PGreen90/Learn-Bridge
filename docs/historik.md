@@ -1291,3 +1291,36 @@ som ingen produktionsfil importerar ger rött test, och undantagslistan måste
 stämma i BÅDA riktningar (en modul som kopplats in måste bort ur listan). Båda
 larmen provkördes skarpt innan de godkändes. Dessutom `regelsvep.probe.test.ts`
 (SVEP-gated) som svar på frågan "vilka regler använder motorn faktiskt?".
+
+## Etapp 6 — billig offring, fyra hål (2026-07-27 → 2026-07-28)
+**🎉 ETAPP 6 KLAR & LIVE.** Posten "billig offring" (baslinje ~125 givar,
+~34 300 p) visade sig till 93 % vara **utgångar och slammar vi aldrig bjöd**
+bakom motståndarnas köpta kontrakt — inte missade straffdubblingar.
+Förskanningen (2026-07-25) fann fyra hål; ägarordning 1 → 2 → 3 → mätning → 4.
+Allt facit-först, alla mål DD-verifierade före fix, samma frö 20260721:
+- **Hål 1 (2026-07-27, Mätning #15):** stöddubblingen besvarades aldrig →
+  `answerSupportDouble`/`supportDoublerRebid`, facit
+  `auction-stoddubbling-svar.test.ts`. Pass på stöd-X = medvetet straffpass.
+- **Hål 2 (2026-07-27, Mätning #16):** svaret på upplysnings-X försvann när
+  RHO bjöd över → `advancerFreeBidAfterDouble`/`doublerAnswersCue`/
+  `doublerRaisesAdvance`, facit `auction-upplysningsx-svar.test.ts`. Största
+  enskilda klivet i spåret (−7,3 p/giv).
+- **Hål 3 (2026-07-27, Mätning #17):** taket i försvaret mot svaga tvåor →
+  `defendWeakTwo` fick 3NT till spel (19 direkt/16 balansering, stark minor
+  15+) och 17+-X:et som aldrig säljer given, facit
+  `auction-svagtva-tak.test.ts`.
+- **Hål 4 (2026-07-28, Mätning #18, ägarbeslut med exempelhänder):** deras
+  öppning + spärrhöjning (`2♠–P–3♠`/`1♣–P–3♣`) stängde auktionen helt (en
+  21-poängare passade ut `2♦–P–3♦`) → `raisedPreemptToDefend` i budlådan
+  överstyr linjens inbakade försvarspass; `defendPreempt` fick
+  balansering ("låna en kung", bara 3-läget) och `raised` (3NT 19/16);
+  `answerTakeoutDouble` cue-bjuder aldrig över dubblad spärr (3NT med stopp)
+  och väljer honnörsstarkare färg på lika längd vid tvingade 3-lägessvar.
+  Ägarbeslut: tunna fördelningsutgångar (6♣ på 19 hp) jagas INTE —
+  gränsvakter i facit-testet `auction-sparrhojning-svar.test.ts`.
+  Mätvarvet fångade tre följdfel (tunna direkta 3NT, lånad kung på 4-läget,
+  utpassat cue) som lagades innan något gick live.
+**Facit för etappen (M14 → M18):** billig offring 125/34 300 → 113/30 570,
+par-avvikelse 287,2 → 276,3 p/giv, rätt kontrakt 17,1 → 18,2 %. Hela spåret
+sedan baslinjen: 300 → 276,3 p/giv, 15,9 → 18,2 %. Detalj + alla mätningar:
+`docs/systemrevisorn.md`.

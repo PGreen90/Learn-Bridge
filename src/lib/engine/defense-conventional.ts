@@ -144,24 +144,46 @@ export function defendMulti(hand: Hand): ResponseResult {
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass.' }
 }
 
-/** Mot deras spärröppning på 3-läget eller högre. §7.6. */
-export function defendPreempt(hand: Hand, theirSuit: Suit, level: number): ResponseResult {
+/**
+ * Mot deras spärr på 3-läget eller högre — öppning ELLER öppning+spärrhöjning
+ * (etapp 6 hål 4: 2♠–P–3♠ / 1♣–P–3♣ stängde auktionen helt förr). §7.6.
+ * `balancing` (ägarbeslut 2026-07-28, "låna en kung" som mot svaga tvåor):
+ * X 14→11 (off-shape med 3 kort i deras färg ok) och färg 13→10 — men BARA på
+ * 3-läget (Mätning #18: rabatten mot en 4-lägesöppning väckte på 11 hp och
+ * köpte en dyr uppoffring, frö 20261533). 3NT-fönstret rabatteras via sitt
+ * EGET golv nedan, inte med kungen.
+ * `raised` = deras öppning + spärrhöjning (hål 4-mönstret): mer visat hos dem
+ * → 3NT till spel kräver samma som mot en svag tvåa (19 direkt / 16
+ * balansering, Mätning #18: 16 direkt över höjningen stod på Kx-håll och gick
+ * djupt bet, frö 20261045 — X:et är bättre där och tar nu över).
+ * Naturliga inklivet har taket 16 (som mot svaga tvåor) och 17+ utan fönster
+ * dubblar — sälj aldrig given (samma utlopp som hål 3 gav `defendWeakTwo`).
+ */
+export function defendPreempt(hand: Hand, theirSuit: Suit, level: number, balancing = false, raised = false): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
+  const borrow = balancing && level === 3 // "låna en kung" gäller bara 3-läget
 
   // 3NT till spel: stopp i deras färg + utgångsvärden, balanserad.
-  if (level === 3 && isBalanced(hand) && p >= 16 && hasStopper(hand, theirSuit)) {
+  const ntFloor = raised ? (balancing ? 16 : 19) : 16
+  if (level === 3 && isBalanced(hand) && p >= ntFloor && hasStopper(hand, theirSuit)) {
     return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i ${NAME[theirSuit]} → 3NT.` }
   }
   // Upplysningsdubbling (takeout): kort i deras färg, stöd i övriga, 14+ (högre nivå).
-  if (isTakeout(hand, theirSuit, 14)) {
+  if (isTakeout(hand, theirSuit, borrow ? 11 : 14, borrow ? 3 : 2)) {
     return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[theirSuit]}, stöd i övriga → X (takeout).` }
   }
-  // Naturligt inkliv med en bra 5+ färg (på nivån ovanför).
+  // Naturligt inkliv med en bra 5+ färg (på nivån ovanför). Tak 16 — starkare
+  // händer dubblar först och visar färgen sedan (§7.2-principen).
   const suit = longestOther(len, theirSuit, 5)
-  if (suit && p >= 13) {
+  if (suit && p >= (borrow ? 10 : 13) && p <= 16) {
     const lvl = rankIdx(suit) > rankIdx(theirSuit) ? level : level + 1
     return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]}.` }
+  }
+  // 17+ som inte fick plats i något fönster: sälj ALDRIG given → X (upplysning;
+  // partnern svarar, och den starka handen får beskriva sig på nästa varv).
+  if (p >= 17) {
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp – för stark för att sälja given → X (upplysning).` }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass (spärren tar plats).' }
 }
@@ -171,8 +193,10 @@ export function defendPreempt(hand: Hand, theirSuit: Suit, level: number): Respo
  * Dispatchar på öppningsbudet:
  *   2♦/2♥/2♠  → svag tvåa → `defendWeakTwo` (2♣ = stark/konstgjord, ej försvar här),
  *   3-läget+  → spärr     → `defendPreempt`.
- * `vulnerable`/`balancing` styr BARA upplysningsdubblingens golv mot svaga tvåor
- * (ägarbeslut 2026-07-04): direkt 12 hp ej sårbar / 13 sårbar, balansering 10 hp.
+ * `vulnerable` styr upplysningsdubblingens golv mot svaga tvåor (ägarbeslut
+ * 2026-07-04): direkt 12 hp ej sårbar / 13 sårbar, balansering 10 hp.
+ * `balancing` lånar en kung i BÅDA försvaren (svag tvåa sedan fix 5a, spärr
+ * sedan etapp 6 hål 4, ägarbeslut 2026-07-28).
  * Returnerar null om `openingCall` inte är en svag tvåa/spärr (1-läget, 1NT, 2♣…).
  */
 export function conventionalDefense(
@@ -189,5 +213,5 @@ export function conventionalDefense(
     const floor = opts.balancing ? 10 : opts.vulnerable ? 13 : 12
     return defendWeakTwo(hand, their, floor, opts.balancing)
   }
-  return defendPreempt(hand, their, level)
+  return defendPreempt(hand, their, level, opts.balancing)
 }
