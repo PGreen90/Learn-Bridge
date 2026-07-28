@@ -2,6 +2,7 @@
 // bitarna under `play/`. All spellogik bor i hookarna useGame/usePlayTable —
 // den här filen och komponenterna den använder är bara presentation.
 
+import type { CSSProperties } from 'react'
 import type { Deal, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
@@ -19,7 +20,8 @@ import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
 import { useGame } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
-import { CardLabel, STRAIN_CODE, VUL_TEXT } from './play/common'
+import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
+import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, sideCards } from './play/hands'
 import { LastTrickPanel, TrickCenterLive } from './play/trick-views'
 import { ScenarioPicker, SearchOverlay } from './play/pickers'
@@ -133,6 +135,8 @@ function PlayTable({
     setClaimMsg,
     autoClaim,
     toggleAutoClaim,
+    speed,
+    setSpeed,
     explain,
     botReasons,
     reasonFor,
@@ -222,7 +226,9 @@ function PlayTable({
   const eastOpen = isFaceUp('E')
 
   return (
-    <Felt>
+    // --motion-scale: tempovalet skalar spelfasens CSS-animationer (index.css
+    // räknar calc(bastid * var(--motion-scale))). JS-pauserna skalas i tempo.ts.
+    <Felt style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}>
       {/* ⓘ (budgivningen) + ⋮ (meny) uppe till höger. */}
       <div className="absolute right-2.5 top-2.5 z-20 flex gap-1.5">
         <button
@@ -282,37 +288,22 @@ function PlayTable({
             </Button>
           )}
           {/* Auto Claim av/på: gäller både dig och datorn som spelförare. */}
-          <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
-            <span className="text-xs font-medium text-ink-soft">
-              Auto Claim <span className="text-ink-faint">(säkra stick tas automatiskt)</span>
-            </span>
-            <button
-              type="button"
-              onClick={toggleAutoClaim}
-              className={`rounded-full px-3 py-0.5 text-xs font-bold ${
-                autoClaim ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
-              }`}
-            >
-              {autoClaim ? 'På' : 'Av'}
-            </button>
-          </div>
+          <MenuToggleRow
+            label="Auto Claim"
+            hint="säkra stick tas automatiskt"
+            on={autoClaim}
+            onToggle={toggleAutoClaim}
+          />
           {/* Budstöd av/på (ägarbeslut 2026-07-28): styr hintarna i budfasen och
               hur mycket förklaring auktionsvyerna (ⓘ + omspelningen) visar. */}
-          <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
-            <span className="text-xs font-medium text-ink-soft">
-              Budstöd <span className="text-ink-faint">(motorns hintar och förklaringar)</span>
-            </span>
-            <button
-              type="button"
-              onClick={onToggleBidHelp}
-              aria-label="Budstöd"
-              className={`rounded-full px-3 py-0.5 text-xs font-bold ${
-                bidHelp ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
-              }`}
-            >
-              {bidHelp ? 'På' : 'Av'}
-            </button>
-          </div>
+          <MenuToggleRow
+            label="Budstöd"
+            hint="motorns hintar och förklaringar"
+            on={bidHelp}
+            onToggle={onToggleBidHelp}
+          />
+          {/* Tempot (ägarbeslut 2026-07-28): skalar botpauser + animationer. */}
+          <MenuTempoRow speed={speed} onChange={setSpeed} />
           <p className="mt-3 text-xs leading-relaxed text-ink-soft">
             Kontraktet är <strong>{contract.level}{STRAIN_CODE[contract.strain] === 'NT' ? 'NT' : ''}</strong>
             {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}

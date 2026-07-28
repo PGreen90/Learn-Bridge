@@ -269,6 +269,14 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   även via ⓘ-overlayen och `PlayReplay.tsx`) visar minimal förklaring: chip +
   kort regelnamn + ALERT — kravmärket och långtexten döljs. ALERT visas alltid
   (som vid riktigt bord). Träningssidorna (Spela, Budträning) påverkas inte.
+- **Tempo Lugn/Normal/Snabb (2026-07-28, "känsla i kortspelet" etapp 1):** rad i
+  spelfasens ⋮-meny, sparas som `learnbridge:playSpeed` (state i
+  `usePlayTable.ts`). Alla spelfasens tider bor i `src/pages/play/tempo.ts`
+  (`BASE` + `ms()`); CSS-animationerna skalas via `--motion-scale` som
+  spelbordets Felt sätter (fallback 1 utanför bordet). Monte-Carlo-svar har ett
+  golv (`mcFloor`) så snabba workersvar inte teleporterar in. Delade menyrader:
+  `MenuToggleRow`/`MenuTempoRow` i `play/common.tsx`. Test:
+  `src/pages/play/tempo.test.tsx` (seedad giv).
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,

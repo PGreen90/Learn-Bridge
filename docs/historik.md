@@ -1403,3 +1403,39 @@ och behåller alltid full förklaring.
 Facit-test skrevs före koden: åtta nya (budlådans av-läge, ny
 `auction-grid.test.tsx` för full/minimal/fallback utan regel/"Eget bud",
 persistens i `play-smoke.test.tsx`). Hela sviten grön (`npm test`).
+
+## Känsla i kortspelet — etapp 1: tempogrunden (2026-07-28, sen kväll)
+
+Nytt NU på ägarbeslut 2026-07-28 (Etapp 7 missad lillslam pausad → överst i
+NÄST med läget bevarat). Hela spåret planerades i en frågerunda samma kväll:
+full kortflygning, sticksvep till vinnaren, justerbart tempo, claim-reveal,
+diskreta ljud, guldglow vid hemgång — fem etapper, UI-lagret enbart, inga nya
+beroenden. Etapp 1 = skelettet:
+
+- **`src/pages/play/tempo.ts` (ny):** enda sanningen om spelfasens tider —
+  `BASE` (botDelay 750, mcFloor 500, + kommande etappers tider) och `ms(key,
+  speed)` som skalar med `SPEED_FACTOR` (Lugn 1.45 / Normal 1 / Snabb 0.55).
+- **Temporad i ⋮-menyn** (spelfasen): Lugn/Normal/Snabb, sparas som
+  `learnbridge:playSpeed` (autoClaim-mönstret i `usePlayTable.ts`). Menyradernas
+  markup fanns i tre kopior → delade `MenuToggleRow`/`MenuTempoRow` i
+  `play/common.tsx` (Play.tsx + BiddingPhase.tsx använder dem nu).
+- **CSS-skalning:** spelbordets Felt sätter `--motion-scale`; `card-in-*` och
+  `deal-in` i `index.css` kör `calc(bastid * var(--motion-scale, 1))` —
+  fallback 1 gör att alla vyer utanför bordet behåller sin bastid.
+- **MC-golvet:** Monte-Carlo-svar från webworkern läggs tidigast efter
+  `ms('mcFloor', speed)` — blixtsnabba svar teleporterade tidigare in kortet.
+  Watchdogen (15 s) skalas inte.
+- **Key-fixen (förutsättning för etapp 2–3):** seat-wrapprarna i
+  `TrickCenterLive` och `PlayReplay`s `TrickCenter` saknade React-keys → DOM-
+  noden återanvändes mellan stick och inglidningen tändes inte om. Nu key på
+  kortet (`suit+rank`).
+- **Facit:** `src/pages/play/tempo.test.tsx` — seedad giv (`dealFromSeed(1)`),
+  skalningen, persistensen och att botens paus faktiskt följer tempovalet.
+  Alla tider importeras från `tempo.ts` (sifferregeln).
+
+**Grindfynd på köpet:** hela sviten föll slumpvis på DEN HÄR maskinen — även på
+orörd `main` (verifierat med stash). Full parallellism svälte de tunga DDS-
+testerna på CPU så deras timeouts small (samma klass av myntkast-grind som
+lagades tidigare samma dag, fast CPU-svält i stället för slumpgivar). Fix:
+`maxWorkers: 4` i `vite.config.ts` (obegränsat = rött, 50 % = rött, 4 = grönt,
+provat i tur och ordning). Verifiera med: `npm test`.

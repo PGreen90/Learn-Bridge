@@ -100,7 +100,9 @@ export function TrickCenterLive({
     const pc = at(seat)
     if (!pc) return null
     return (
-      <div className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
+      // key på KORTET (inte platsen): när ett nytt kort landar på samma plats i
+      // nästa stick måste DOM-noden bytas, annars tänds inte inglidningen om.
+      <div key={`${pc.card.suit}${pc.card.rank}`} className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
         <PlayedCardView
           pc={pc}
           winner={winner === seat}

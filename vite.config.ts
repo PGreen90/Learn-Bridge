@@ -47,5 +47,11 @@ export default defineConfig({
     // med egna kopior av testerna – uteslut dem så `npm test` bara kör DENNA
     // arbetskopia (annars körs samma test dubbelt och kan flagga fel giv).
     exclude: [...configDefaults.exclude, '.claude/**'],
+    // 2026-07-28: full parallellism svälte de tunga DDS-testerna på CPU så att
+    // deras timeouts small slumpvis (samma klass av myntkast-grind som lagades
+    // 2026-07-28 — fast CPU-svält i stället för slumpgivar). Provat på ägarens
+    // maskin: obegränsat = rött, 50 % = rött, 4 arbetare = grönt. Fast tak 4
+    // gör `npm test` deterministiskt igen (verifiera med: npm test).
+    maxWorkers: 4,
   },
 })

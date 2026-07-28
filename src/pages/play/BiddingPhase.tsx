@@ -16,7 +16,7 @@ import { CompassPanel } from '../../components/CompassPanel'
 import { Felt } from '../../components/Felt'
 import { FelrapportDialog } from '../../components/FelrapportDialog'
 import { HandFan } from '../../components/HandFan'
-import { STRAIN_CODE } from './common'
+import { MenuToggleRow, STRAIN_CODE } from './common'
 import type { Game } from './useGame'
 
 export function BiddingPhase({
@@ -201,21 +201,12 @@ function TableMenu({
               Ny giv →
             </Button>
             {/* Budstöd av/på (ägarbeslut 2026-07-28): samma radmönster som Auto Claim. */}
-            <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
-              <span className="text-xs font-medium text-ink-soft">
-                Budstöd <span className="text-ink-faint">(motorns hintar och förklaringar)</span>
-              </span>
-              <button
-                type="button"
-                onClick={onToggleBidHelp}
-                aria-label="Budstöd"
-                className={`rounded-full px-3 py-0.5 text-xs font-bold ${
-                  bidHelp ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
-                }`}
-              >
-                {bidHelp ? 'På' : 'Av'}
-              </button>
-            </div>
+            <MenuToggleRow
+              label="Budstöd"
+              hint="motorns hintar och förklaringar"
+              on={bidHelp}
+              onToggle={onToggleBidHelp}
+            />
             <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
           </div>
         </>

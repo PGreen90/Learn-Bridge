@@ -139,10 +139,13 @@
 @keyframes card-in-s { from { opacity: 0; transform: translateY(16px) scale(0.9); } to { opacity: 1; } }
 @keyframes card-in-w { from { opacity: 0; transform: translateX(-16px) scale(0.9); } to { opacity: 1; } }
 @keyframes card-in-e { from { opacity: 0; transform: translateX(16px) scale(0.9); } to { opacity: 1; } }
-.card-in-n { animation: card-in-n 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
-.card-in-s { animation: card-in-s 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
-.card-in-w { animation: card-in-w 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
-.card-in-e { animation: card-in-e 300ms cubic-bezier(0.2, 0.8, 0.3, 1); }
+/* Tiderna skalas av tempovalet i ⋮-menyn: spelbordet sätter --motion-scale
+   (Lugn 1.45 / Normal 1 / Snabb 0.55, se tempo.ts). Utanför bordet gäller
+   fallbacken 1 → alla andra vyer behåller sin bastid. */
+.card-in-n { animation: card-in-n calc(300ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0.8, 0.3, 1); }
+.card-in-s { animation: card-in-s calc(300ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0.8, 0.3, 1); }
+.card-in-w { animation: card-in-w calc(300ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0.8, 0.3, 1); }
+.card-in-e { animation: card-in-e calc(300ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0.8, 0.3, 1); }
 
 /* Utdelningen: handens kort kaskadar in ett i taget. Fördröjningen per kort
    sätts inline (animationDelay) – "both" håller kortet osynligt tills dess. */
@@ -150,7 +153,7 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; }
 }
-.deal-in { animation: deal-in 300ms ease-out both; }
+.deal-in { animation: deal-in calc(300ms * var(--motion-scale, 1)) ease-out both; }
 
 /* Sidbyte: nya sidans innehåll tonar in med en liten lyftning. */
 @keyframes page-in {
