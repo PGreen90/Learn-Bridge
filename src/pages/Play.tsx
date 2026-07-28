@@ -2,7 +2,7 @@
 // bitarna under `play/`. All spellogik bor i hookarna useGame/usePlayTable —
 // den här filen och komponenterna den använder är bara presentation.
 
-import type { CSSProperties } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import type { Deal, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
@@ -28,6 +28,7 @@ import { ScenarioPicker, SearchOverlay } from './play/pickers'
 import { BiddingPhase } from './play/BiddingPhase'
 import { ClaimDialog } from './play/ClaimDialog'
 import { FlightLayer } from './play/FlightLayer'
+import { armSound } from '../lib/sound'
 
 // ===========================================================================
 // Fas-styrning: budgivning → spel. Tillståndet bor i useGame.
@@ -49,6 +50,14 @@ export function Play() {
     pickTarget,
     cancelSearch,
   } = useGame()
+
+  // Ljudmotorn får bara starta i en riktig användargest (autoplay-policyn).
+  // Registreras på SIDNIVÅ så redan budfasens klick armerar den — då hörs
+  // giv-klar-ticken direkt när första spelbordet dukas. armSound är idempotent.
+  useEffect(() => {
+    window.addEventListener('pointerdown', armSound)
+    return () => window.removeEventListener('pointerdown', armSound)
+  }, [])
 
   const content =
     game.phase === 'play' && game.contract ? (
@@ -138,6 +147,8 @@ function PlayTable({
     toggleAutoClaim,
     speed,
     setSpeed,
+    sound,
+    toggleSound,
     sweep,
     skipSweep,
     flight,
@@ -308,6 +319,13 @@ function PlayTable({
             hint="motorns hintar och förklaringar"
             on={bidHelp}
             onToggle={onToggleBidHelp}
+          />
+          {/* Ljuden (etapp 4): diskreta syntetiserade kortljud, standard PÅ. */}
+          <MenuToggleRow
+            label="Ljud"
+            hint="diskreta kortljud"
+            on={sound}
+            onToggle={toggleSound}
           />
           {/* Tempot (ägarbeslut 2026-07-28): skalar botpauser + animationer. */}
           <MenuTempoRow speed={speed} onChange={setSpeed} />

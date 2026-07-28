@@ -32,6 +32,7 @@ import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib
 import { controls, sameCard } from './common'
 import { ms, type PlaySpeed } from './tempo'
 import { useCardFlight } from './useCardFlight'
+import { isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 
 // Nodbudget för facit-lösaren: ~2 milj. noder (≈ 1–2 s i värsta fall) så
 // gränssnittet aldrig fryser. Sena ställningar (få kort kvar) löses direkt;
@@ -64,6 +65,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // Tempot (ägarbeslut 2026-07-28): Lugn/Normal/Snabb i ⋮-menyn skalar alla
   // botpauser och animationslängder (via tempo.ts + --motion-scale). Sparas.
   const [speed, setSpeedState] = useState<PlaySpeed>(() => loadValue('playSpeed', 'normal'))
+  // Ljuden (etapp 4, "känsla i kortspelet"): diskreta syntetiserade kortljud,
+  // standard PÅ, toggle i ⋮-menyn. Sparas under learnbridge:sound.
+  const [sound, setSoundState] = useState<boolean>(() => isSoundEnabled())
   // Sticksvepet (etapp 2, "känsla i kortspelet"): när ett stick blir klart
   // ligger korten kvar med vinnarglow ('hold'), sveps sedan mot vinnaren
   // ('slide') och försvinner. Botarna och auto-claim VÄNTAR under svepet;
@@ -133,6 +137,38 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   function skipSweep() {
     setSweep(null)
   }
+
+  // Kortknäppen: EN krok som fångar både människans och botens kort — totala
+  // antalet spelade kort växer med varje lagt kort (även fjärde: 3 → 4 när
+  // sticket bokförs). Ref-jämförelsen gör den StrictMode-säker och tyst vid
+  // tempo-/ljudväxlingar (antalet är då oförändrat).
+  const heardCount = useRef(0)
+  useEffect(() => {
+    const n = play.completedTricks.length * 4 + play.currentTrick.length
+    if (n > heardCount.current && sound) playSound('card')
+    heardCount.current = n
+  }, [play, sound])
+
+  // Svischet: när svepet går in i slide-fasen. Ref på sticket (inte fasen) så
+  // StrictMode-dubbelkörningen inte dubblar ljudet.
+  const sweptSoundFor = useRef<unknown>(null)
+  useEffect(() => {
+    if (sweep?.phase !== 'slide') return
+    if (sweptSoundFor.current === sweep.trick) return
+    sweptSoundFor.current = sweep.trick
+    if (sound) playSound('sweep')
+  }, [sweep, sound])
+
+  // Giv-klar-ticken: när utdelningskaskaden lagt sista kortet (bara vid mount —
+  // brickan delas ut en gång). Ljudvalet läses via ref så av-slag hinner verka.
+  const soundRef = useRef(sound)
+  soundRef.current = sound
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (soundRef.current) playSound('deal')
+    }, ms('dealSoundDelay', speed))
+    return () => clearTimeout(id)
+  }, []) // avsiktligt mount-only: given delas ut en gång per bord
 
   function showFacit() {
     const rem = doubleDummyDeclarerRemaining(
@@ -283,6 +319,12 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     saveValue('playSpeed', next)
   }
 
+  function toggleSound() {
+    const next = !sound
+    setSoundState(next)
+    setSoundEnabled(next)
+  }
+
   // Två-klicks: första klicket på ett kort väljer (och fanar ut) dess färg;
   // klick på ett kort i den redan valda färgen spelar kortet. Ett klick under
   // sticksvepet hoppar dessutom över svepet (otåliga blockeras aldrig).
@@ -355,6 +397,8 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     toggleAutoClaim,
     speed,
     setSpeed,
+    sound,
+    toggleSound,
     sweep,
     skipSweep,
     flight,

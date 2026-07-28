@@ -1521,3 +1521,35 @@ Nord från kolumnerna (mätt källa), Öst från högerkanten (rot −90°), Syd
 solfjädern (skala 1.4) — fjärde kortet fick sin flygning via svep-omritningen,
 landade kort synliga utan `card-in`, inga konsolfel, temposkalningen bekräftad
 (sparat Snabb-val gav 154 ms = 280 × 0,55).
+
+## Känsla i kortspelet — etapp 4: ljuden (2026-07-28, natt)
+
+Kortspelet är inte längre stumt: tre diskreta, SYNTETISERADE ljud via Web
+Audio — inga ljudfiler, inga nya beroenden, ingen PWA-ändring. Standard PÅ,
+"Ljud"-rad i spelfasens ⋮-meny (sparas som `learnbridge:sound`):
+
+- **`src/lib/sound.ts` (ny):** recepten (allt gain ≤ 0.15) — **card** 50 ms
+  brusknäpp genom lågpass 1,8 kHz (kort mot filtduk), **sweep** 200 ms brus
+  genom bandpass som glider 400→1200 Hz (svischet), **deal** tre tick med
+  stigande ton. `armSound()` skapar/väcker AudioContext — får bara ske i en
+  användargest (autoplay-policyn), därför kopplad till `pointerdown` på HELA
+  Play-sidan: budfasens klick armerar motorn så giv-klar-ticken hörs redan
+  när första bordet dukas. Utan Web Audio (jsdom) no-op:ar allt tyst — ett
+  ljud får aldrig kunna krascha spelet.
+- **Hook-punkterna i `usePlayTable.ts` (en per ljud, alla ref-jämförda =
+  StrictMode-säkra):** *card* — en enda krok som räknar totalt lagda kort
+  (`completedTricks.length*4 + currentTrick.length`) och därmed fångar både
+  människans och botens kort, även det fjärde (3 → 4 när sticket bokförs);
+  *sweep* — när svepet går in i slide-fasen (ref på sticket);
+  *deal* — `setTimeout(ms('dealSoundDelay'))` vid bordets mount (kaskadens
+  slut), ljudvalet läses via ref så av-slag hinner verka.
+- **Facit:** `src/pages/play/ljud.test.tsx` — seedad giv, `playSound` mockad
+  (jsdom kan inte spela ändå) men persistensen äkta: standard PÅ, toggle
+  sparas och överlever omladdning, kortknäpp+giv-klar+svisch i rätt ordning,
+  fyra knäppar för ett helt stick, och total tystnad med ljudet Av.
+
+Livekontroll i dev-servern före pushen (instrumenterade `AudioBufferSourceNode`/
+`OscillatorNode.start`): ljudmotorn `running` redan i budfasen (pointerdown-
+armeringen), sedan exakt rätt sekvens — knäpp (Västs utspel) → tre tick (given
+klar) → tre knäppar (N/Ö/S) → svisch (svepet); med ljudet Av rullade spelet
+vidare med tom ljudlogg. Inga konsolfel.
