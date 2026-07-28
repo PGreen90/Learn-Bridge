@@ -17,7 +17,14 @@
   kung på X (11+) och färg (10+) med offshape-X ok, 3NT från 16. Tvingade
   svar på 3-läget+ väljer honnörsstarkare färg på lika längd. **Bevaka:**
   (a) tvingas partnern svara på 4-läget på luft och åker på dubbel straff —
-  känns X-golven för lätta? (b) höjningar förbi 3-läget lämnas medvetet
+  känns X-golven för lätta? Ett genomgånget exempel (2026-07-28, hittat när
+  deploygrinden felsöktes) talar snarare FÖR golven: frö 1781, Öst balanserar
+  X på 14 hp över deras `1♣–P–3♣` och Väst svarar `3♦` på 10 hp med
+  `♦AQ62` — 24 hp tillsammans på 3-läget, alltså sunt. Formen att leta efter
+  är alltså inte tvångssvaret i sig utan svar där advancern har **under ~8 hp**
+  och ingen färg att gå till. Dumpa vilken giv som helst med
+  `$env:DUMP='1781'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`
+  (auktionen med förklaring per bud hamnar i `revisor-output/auktionsdump.txt`). (b) höjningar förbi 3-läget lämnas medvetet
   tysta — säljs för många 4♠-höjningar? (c) 19-golvet för direkta 3NT — står
   ni kvar i X-svar när 3NT var enda utgången?
 - **Hål 3: taket mot svaga tvåor (2026-07-27).** Starka händer passar

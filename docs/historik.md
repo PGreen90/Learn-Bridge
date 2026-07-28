@@ -1324,3 +1324,58 @@ Allt facit-först, alla mål DD-verifierade före fix, samma frö 20260721:
 par-avvikelse 287,2 → 276,3 p/giv, rätt kontrakt 17,1 → 18,2 %. Hela spåret
 sedan baslinjen: 300 → 276,3 p/giv, 15,9 → 18,2 %. Detalj + alla mätningar:
 `docs/systemrevisorn.md`.
+
+## Underhåll: hälsokoll av uppsättningen + deploygrinden lagad (2026-07-28)
+
+Inget budrelaterat — men två fynd som påverkade allt annat arbete. Mergepunkter
+`ebdb958` (städning + namnregel) och `4b9fa66` (deploygrinden).
+
+**1. Namnet är gemener.** Ägaren bekräftade 2026-07-28: *"endast små bokstäver
+är korrekt"*. Logotypen (`BrandMark.tsx`) och `<title>` var redan rätt, men fyra
+ställen som användaren ser bröt mot regeln: `index.html`s
+`apple-mobile-web-app-title` (ikonnamnet på iPhones hemskärm), PWA-manifestets
+`name` + `short_name` i `vite.config.ts` (installationsdialogen), en löptextrad
+i `src/pages/Settings.tsx` och `README.md`s rubrik. Alla rättade och verifierade
+live (`https://rebidz.com/manifest.webmanifest` svarar `"short_name":"rebidz"`).
+Kodkommentarer och arkivfiler lämnades medvetet. Regeln står nu utskriven i
+`CLAUDE.md` ("ALLTID GEMENER … skriv aldrig 'RebidZ'").
+
+**2. DEPLOYGRINDEN VAR ETT MYNTKAST — viktigaste fyndet.** Deployen av `ebdb958`
+föll utan att något var fel med koden. Två oberoende orsaker, båda i testerna:
+
+- `divergesOnlyByPreemptWake` (undantaget hål 4 införde) jämförde bara det
+  **överlappande prefixet** av linjen och den uppspelade auktionen. Linjen
+  slutar med de inbakade försvarspassen och stannar där — så när väckningen kom
+  EFTER linjens sista bud var prefixen identiska, loopen hittade ingen skillnad
+  och svarade "verklig avvikelse". Träffade 7 av 4 000 givar. Nu godtas båda
+  formerna (väckning inne i linjen + väckning i svansen) med villkoren kvar
+  hårda. Mätt efter fixen: av 965 kvalificerade givar undantas 14, kontrolleras
+  951, slipper 0 igenom.
+- Konsistenstesterna körde på `dealRandom()`, alltså färska slumpgivar varje
+  körning → slumpvis rött ungefär var tredje körning, oavsett vad som pushades.
+  Nu seedade givar (frö 1–4 000), samma mönster som `legality.test.ts` och
+  `tp-invariant.test.ts`. Ett rött test återskapas med `dealFromSeed(<frö>)`.
+- Dessutom timeoutade `docs-vakt.test.ts` ("varje motormodul är inkopplad")
+  slumpvis: `readFileSync` låg inne i filter-loopen, ~90 moduler × ~150 filer =
+  över 13 000 läsningar av samma innehåll, knappt under 5-sekundersgränsen.
+  Läser varje fil en gång i stället — 5 000 ms (timeout) → 24 ms.
+
+**Lärdomen:** ett sanktionerat undantag i ett test måste täcka HELA formen av det
+som sanktionerats, annars blir grinden opålitlig — och en grind man inte kan lita
+på slutar man läsa. Volymtester i det här repot ska vara seedade, aldrig
+`dealRandom()`, just för att ett rött test ska gå att återskapa.
+
+**3. Sessionskontexten bantad.** `CLAUDE.md` 13,3 → 11,7 kB (bort med det som går
+att läsa ur koden: teknisk stack = `package.json`, projektstruktur = `ls`,
+kommandon = scripts; övningsreceptet flyttat till färdigheten
+`.claude/skills/lagga-till-ovningar/`, som `.gitignore` nu släpper igenom).
+Utanför repot: nio minnesfiler som upprepade `CLAUDE.md` raderade, och minnet om
+deployverifiering rättat från GitHub Pages till Vercel.
+
+**Öppen bridgefråga (ägarens bedömning, ej fel):** har den väckande dubblingen
+rätt golv när advancern tvingas svara? Det genomgångna exemplet talar FÖR
+dagens golv: frö 1781, Öst balanserar X på 14 hp över `1♣–P–3♣`, Väst svarar 3♦
+på 10 hp med `♦AQ62` — 24 hp tillsammans, sunt. (Första bedömningen sa 12 respektive
+5 hp; det var felräknat och rättades samma dag när dumpen lästes — påminnelse om
+att läsa siffran ur körningen, aldrig ur minnet.) Se hål 4-punkten i
+`docs/bevaka.md` för vilken form som faktiskt är värd att leta efter.
