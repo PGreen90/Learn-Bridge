@@ -688,7 +688,22 @@ Svararen har visat 4+ kort och 6+ hp (krav 1 rond). Öppnaren letar främst
 | ny färg "billigt" (1♣–1♦–1♥, 1♣–1♥–1♠) | 4+ ny färg (4-korts upp), 12+, krav 1 rond |
 | ny lägre färg på 2-läget (1♥–1♠–2♣/2♦) | naturlig 4+ (2♣ ibland 3), 12+, ej krav |
 | rebjuda egen färg (1♥–1♠–2♥) | 6+ kort, minimum 12–15 |
-| hopp i egen färg (1♥–1♠–3♥) | 6+ kort, 16–18, inbjudan |
+| hopp i egen färg (1♥–1♠–3♥) | 6+ kort, **16+** startpoäng, inbjudan |
+| hopp till utgång i egen HÖGfärg (1♥–1♠–4♥) | 6+ kort, **19+** startpoäng |
+
+**Stegen väger STARTPOÄNG, inte råa hp (etapp 7 hål 1, 2026-07-28).** Samma mått
+som reversen och hoppskiftet i samma återbudsläge — en 6-korts färg ger
+längdpoäng, så en 15-poängare med `AQT983` är i praktiken en 18:a och ska hoppa.
+`pointsWithFloor` golvar vid hp, så den låsta regeln gäller: **TP får bara
+uppgradera, aldrig nedgradera** — en platt 15:a rebjuder fortfarande 2 i färgen.
+En **minor** stannar på 3-läget även med 19+ (5m är för högt att blåsa på en
+hand partnern ännu inte hört om); bara högfärgen sätts i utgång.
+
+*Bakgrund: förr var hoppfönstret `16–18` och räknade rå hp, så en 19+-hand föll
+**igenom taket** ned i minimibudet. Frö 20261020: en hand med 20 hp / 23 TP
+rebjöd `2♣` beskrivet som "minimum 12–15", och svararen passade — helt korrekt
+mot vad budet sa. Fyra sådana givar i mätfröna; alla nådde bara delkontrakt när
+utgång eller slam fanns.*
 
 **Balanserade händer (NT-stegen):**
 | Återbud | Betydelse |
@@ -1542,6 +1557,24 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-28 (kväll, etapp 7 hål 1)** – **Öppnarens suutrebid sa "minimum"
+  med extra styrka (kod, §5.2, mätspåret).** Förskanningen av "missad lillslam"
+  hittade två fel i SAMMA regel (`openerRebidAfter1LevelResponse` steg 5,
+  rebids.ts): (a) **taket saknades** — fönstret var `p >= 16 && p <= 18`, så en
+  19+-hand föll IGENOM det ned i minimibudet (frö 20261020: 20 hp / 23 TP
+  rebjöd "2♣ minimum 12–15" och svararen passade korrekt med 10 hp; 6NT fanns),
+  medan syskonfunktionen `openerRebidAfterSemiForcing1NT` haft 19+-rungen hela
+  tiden; (b) **steget räknade rå hp** medan grannreglerna i samma funktion
+  (reversen steg 3, hoppskiftet steg 4b) väger med `pointsWithFloor(...,
+  'starting')` — en 15 hp-hand med 18–19 TP kallade sig därför minimum (frön
+  20261279, 20261661, 20261136). Nu väger stegen startpoäng (golvade vid hp, så
+  TP bara uppgraderar) och 19+ i HÖGfärg sätter utgången; en minor stannar på
+  3-läget. Mätning #20 (samma frö): par-avvikelse **276,49 → 271,38**, rätt
+  kontrakt **18,2 → 18,7 %**, missad lillslam −3 140, missad utgång −1 390,
+  fel färg −600, netto **−5 110 p**. 11 givar flyttade, **alla till det bättre,
+  noll regressioner** — fem blev exakt par. Facit-test FÖRE fix:
+  `auction-lillslam-aterbudsstyrka.test.ts` (inkl. gränsvakter för äkta minimum
+  och för att TP aldrig nedgraderar). Hela sviten grön.
 - **2026-07-28 (kväll)** – **Kvantitativ höjning av partnerns naturliga 3NT
   (kod, §6.8, felrapport #42, ägarbeslut).** Auktionen
   `1♣–1♥–1♠–2♦–2♥–3♦–3NT` passades ut med **21 hp** mittemot öppningshanden
