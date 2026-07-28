@@ -10,67 +10,29 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — ETAPP 7: MISSAD LILLSLAM (ägarbeslut 2026-07-28) · FÖRSKANNAD
-**Topplistans största post: 83 givar / 56 170 p.** Förskanningen är KLAR — hela
-mönsteranalysen står i `docs/systemrevisorn.md` ("ETAPP 7 FÖRSKANNAD").
-**Nästa steg: ägaren väljer vilket hål vi bygger först** (ordningsförslaget står
-sist i det avsnittet).
+### 🔵 NU — KÄNSLA I KORTSPELET (ägarbeslut 2026-07-28) · ETAPP 1 BYGGD
+Kortspelet kändes stelt och robotaktiskt — spåret ger det liv i **fem etapper**,
+allt i UI-lagret (spelmotorn rörs INTE), inga nya beroenden. Ägarbesluten från
+frågerundan 2026-07-28: full kortflygning hand→bord, sticksvep till vinnaren
+(paus + vinnarglow), jämnt men justerbart tempo, claim-reveal (händerna visas
+öppet), diskreta syntetiserade ljud (standard PÅ, toggle), ingen
+utdelningsanimation, guldglow vid hemgång (inget konfetti).
 
-**✅ HÅL 1 KLART 2026-07-28 (Mätning #20): minimum-märkningen.**
-`openerRebidAfter1LevelResponse` steg 5 hade två fel — inget tak (19+ föll
-igenom 16–18-fönstret ned i minimibudet) och rå hp i stället för startpoäng
-(grannreglerna reverse/hoppskift vägde redan TP). Nu: stegen väger startpoäng
-golvade vid hp, 19+ i högfärg sätter utgången, minor stannar på 3-läget.
-**Par-avvikelse 276,49 → 271,38, rätt kontrakt 18,2 → 18,7 %, netto −5 110 p.
-11 givar flyttade, ALLA till det bättre, noll regressioner** (fem blev exakt
-par). Facit: `auction-lillslam-aterbudsstyrka.test.ts`. **Nästa hål: ägaren
-väljer** — de fem krympta givarna flyttade in i hål B ("stannade i 3NT"), som
-därmed vuxit till ~15 givar.
+**Etapperna:** 1) tempogrunden + key-fixen · 2) sticksvep + vinnarpaus ·
+3) kortflygningen (FLIP) · 4) ljud · 5) claim-reveal + resultatövergång +
+guldglow. Varje etapp: bygg → grind grön → ägaren tittar live → docs → nästa.
 
-**Tre fynd som styr etappen:**
-1. **75 av 83 pass saknar regel** — motorn tar slut på maskineri och faller till
-   det nakna `{ bid: 'P' }`. Bara 8 stopp är domslut. Samma klass som #41/#42.
-2. **57 givar (39 310 p) når systemets EGEN slamport** (33+ driv / 31–32
-   inbjudan, mätt med startpoäng + stödpoäng). Resten är DD-smicker och jagas
-   inte. OBS: stödpoängen räknas i *facit*-trumfen → siffran är ett **tak**,
-   inte en prognos (frö 20260745 får 39 p på 24 hp och är ändå ren smicker).
-3. **En rent mekanisk bugg finns redan (7 givar / 6 810 p):** ett bud som säger
-   "minimum 12–15" bjuds av en hand med 17+ TP — `rebjuden färg` i rebids.ts
-   graderar inte efter styrka. Frö 20261020: 20 hp / 23 TP rebjuder 2♣ märkt
-   "minimum", svararen passar korrekt. **Kräver inget ägarbeslut.**
+**✅ ETAPP 1 BYGGD 2026-07-28 (ej pushad — väntar ägargranskning + PCD):**
+`src/pages/play/tempo.ts` (alla spelfasens tider + `ms()`-skalning),
+temporad Lugn/Normal/Snabb i ⋮-menyn (`learnbridge:playSpeed`), CSS-skalning
+via `--motion-scale` på spelbordet, MC-golv (snabba workersvar teleporterar
+inte längre), key-fixen i sticket (förutsättning för etapp 2–3), delade
+menyrader `MenuToggleRow`/`MenuTempoRow`. Facit: `src/pages/play/tempo.test.tsx`
+(seedad). **Grindfynd:** hela sviten föll slumpvis av CPU-svält (även orörd
+main) → `maxWorkers: 4` i `vite.config.ts`. Detalj: `docs/historik.md`.
 
-**➡️ NÄSTA GÅNG BÖRJAR VI MED:** ägaren väljer hål 2. Närmast till hands är
-**hål B — 3NT-stoppen** (~15 givar): de fem givar hål 1 lyfte till utgång
-flyttade in där, så posten har vuxit. Det är systerfallet till felrapport #42,
-fast från den sida som *bjuder* 3NT i stället för den som höjer. Alternativen
-(hål C utgångsstoppen i 4M, hål D konkurrensfallen) står i ordningsförslaget i
-`docs/systemrevisorn.md`.
-
-Verktyg (båda gated, körs inte i `npm test`):
-```
-$env:DUMP_CAT='missad-lillslam'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
-$env:FORSKAN='1'; npx vitest run src/lib/engine/lillslam-forskan.probe.test.ts
-```
-
-**Arbetssätt när nästa mätspårs-etapp startar (facit-först):** hämta
-exempelgivarna ur revisorn → hitta **MÖNSTREN**, inte enskilda givar → skriv
-facit-test som är RÖTT före fixen → laga → grönt → DD-verifiera → hela sviten →
-kör om mätningen med **samma frö** och kontrollera att posten krymper *utan*
-att andra poster växer omotiverat → fråga ägaren om PCD (push/commit/deploy).
-
-```
-$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
-```
-
-**Läget i spåret (Mätning #18, frö 20260721, 1 000 givar):** par-avvikelse
-**300 → 276,3 p/giv**, rätt kontrakt **15,9 % → 18,2 %**. Topplista nu: missad
-lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad storslam
-36 470 > billig offring 30 570.
-
-**Klart i spåret:** etapp 1 (felrapporter), etapp 2 (revisorn + baslinje), etapp 3
-(fel färg, 6 fixar), etapp 5 (missad utgång, 3 fixar), etapp 4 (F1-resten: slam
-efter 2♣ + reverse/hoppskift), etapp 6 (billig offring, 4 hål). Full logg:
-`docs/historik.md`. Alla mätningar + mönsteranalyser: `docs/systemrevisorn.md`.
+**➡️ NÄSTA GÅNG:** ägaren tittar på etapp 1 live (tempot i ⋮-menyn) → PCD →
+sedan etapp 2 (sticksvepet).
 
 **Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
 På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
@@ -124,9 +86,25 @@ inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
   placerat 3NT höjer kaptenen till 6NT med 21+ hp — hamnar ni i 6NT som går bet?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är
+1. **ETAPP 7: MISSAD LILLSLAM (pausad 2026-07-28 för känslo-spåret, läget
+   bevarat):** topplistans största post, 83 givar / 56 170 p, FÖRSKANNAD (hela
+   mönsteranalysen + ordningsförslaget: `docs/systemrevisorn.md` "ETAPP 7
+   FÖRSKANNAD"). Hål 1 (minimum-märkningen) KLART — Mätning #20: par-avvikelse
+   276,49 → 271,38, rätt kontrakt 18,2 → 18,7 %, −5 110 p, noll regressioner
+   (facit: `auction-lillslam-aterbudsstyrka.test.ts`). **Återupptas med: ägaren
+   väljer hål 2** — närmast till hands hål B "3NT-stoppen" (~15 givar, vuxen
+   sedan hål 1 lyfte fem givar dit; systerfallet till felrapport #42). Kända
+   fynd: 75 av 83 pass saknar regel (nakna `{ bid: 'P' }`); 57 givar når
+   systemets egen slamport (taksiffra, ej prognos); mekanisk bugg i rebids.ts
+   ("rebjuden färg" graderar inte styrka, 7 givar / 6 810 p, kräver inget
+   ägarbeslut). Verktyg (gated): `$env:DUMP_CAT='missad-lillslam'` resp.
+   `$env:FORSKAN='1'` + probe-testerna; mätningen: `$env:REVISOR='1'; npx
+   vitest run src/lib/engine/revisor.probe.test.ts` (samma frö 20260721).
+   Arbetssättet (facit-först, mönster inte enskilda givar) + hela
+   mätspårsloggen: `docs/historik.md` + `docs/systemrevisorn.md`.
+2. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är
    grova → ärliga slam-misser (`docs/budsystem-revision.md` B13).
-2. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
+3. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
    konkurrenskonventioner läggs på `decideCall`-kedjan.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)

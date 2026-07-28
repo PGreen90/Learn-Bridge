@@ -10,6 +10,7 @@ import {
   type Contract,
   type PlayState,
 } from '../../lib/engine/play'
+import { SPEED_LABEL, type PlaySpeed } from './tempo'
 
 /** Spelar ägaren (Syd) den här platsen? Vi spelar = både N och S; vi försvarar = bara S. */
 export function controls(contract: Contract, seat: Seat): boolean {
@@ -58,4 +59,67 @@ export function turnInfo(play: PlayState, contract: Contract, seat: Seat) {
   const myTurn = play.toAct === seat && controls(contract, seat) && !isComplete(play)
   const legal = myTurn ? legalCards(play, seat) : []
   return { myTurn, legalSet: new Set(legal.map((c) => `${c.suit}${c.rank}`)) }
+}
+
+/** En På/Av-rad i ⋮-menyn (Auto Claim, Budstöd, Ljud …) — samma radmönster
+ *  överallt så menyerna ser likadana ut i bud- och spelfasen. */
+export function MenuToggleRow({
+  label,
+  hint,
+  on,
+  onToggle,
+}: {
+  label: string
+  hint: string
+  on: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
+      <span className="text-xs font-medium text-ink-soft">
+        {label} <span className="text-ink-faint">({hint})</span>
+      </span>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={label}
+        className={`rounded-full px-3 py-0.5 text-xs font-bold ${
+          on ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
+        }`}
+      >
+        {on ? 'På' : 'Av'}
+      </button>
+    </div>
+  )
+}
+
+/** Temporaden i ⋮-menyn: Lugn/Normal/Snabb (ägarbeslut 2026-07-28). Skalar
+ *  botpauser och animationslängder via tempo.ts + --motion-scale. */
+export function MenuTempoRow({
+  speed,
+  onChange,
+}: {
+  speed: PlaySpeed
+  onChange: (next: PlaySpeed) => void
+}) {
+  return (
+    <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
+      <span className="text-xs font-medium text-ink-soft">Tempo</span>
+      <div className="flex gap-1">
+        {(Object.keys(SPEED_LABEL) as PlaySpeed[]).map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => onChange(s)}
+            aria-label={`Tempo ${SPEED_LABEL[s]}`}
+            className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+              speed === s ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
+            }`}
+          >
+            {SPEED_LABEL[s]}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 }

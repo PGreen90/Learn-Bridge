@@ -29,6 +29,7 @@ import { scoreLine } from '../../lib/engine/scoring'
 import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib/engine/play-bot'
 import { controls, sameCard } from './common'
+import { ms, type PlaySpeed } from './tempo'
 
 // Nodbudget för facit-lösaren: ~2 milj. noder (≈ 1–2 s i värsta fall) så
 // gränssnittet aldrig fryser. Sena ställningar (få kort kvar) löses direkt;
@@ -58,6 +59,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   const [claiming, setClaiming] = useState(false)
   const [claimMsg, setClaimMsg] = useState<string | null>(null)
   const [autoClaim, setAutoClaim] = useState<boolean>(() => loadValue('autoClaim', true))
+  // Tempot (ägarbeslut 2026-07-28): Lugn/Normal/Snabb i ⋮-menyn skalar alla
+  // botpauser och animationslängder (via tempo.ts + --motion-scale). Sparas.
+  const [speed, setSpeedState] = useState<PlaySpeed>(() => loadValue('playSpeed', 'normal'))
   // Bottarnas motiveringar per spelat kort (kortnyckel → plats + varför).
   // Tryck på ett spelat kort på bordet visar förklaringen i raden under listen.
   const [botReasons, setBotReasons] = useState<Record<string, { seat: Seat; reason: string }>>({})
@@ -135,7 +139,7 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     // Snabb tumregel (öppningsutspel / ett kort / över MC-fönstret), eller ingen
     // worker tillgänglig → räkna inline efter en kort paus.
     if (!worker || !usesMonteCarlo(play, seat)) {
-      const id = setTimeout(() => apply(botCardSmartReasoned(play, seat, calls)), 750)
+      const id = setTimeout(() => apply(botCardSmartReasoned(play, seat, calls)), ms('botDelay', speed))
       return () => {
         cancelled = true
         clearTimeout(id)
@@ -143,16 +147,24 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     }
 
     // Tungt slutspelsbeslut → webworkern. Gränssnittet visar "tänker …".
+    // Golvet (mcFloor): ett blixtsnabbt worker-svar hålls tillbaka så kortet
+    // inte teleporterar in — svaret läggs tidigast efter golvtiden.
     setThinking(true)
+    const t0 = Date.now()
+    let floorId: ReturnType<typeof setTimeout> | undefined
     const reqId = ++reqCounter.current
     const onMessage = (e: MessageEvent) => {
       if (e.data?.reqId !== reqId) return
       worker.removeEventListener('message', onMessage)
       clearTimeout(timeoutId)
-      if (e.data.error || !e.data.card) apply(botCardReasoned(play, seat)) // fallback: tumregel
-      else apply({ card: e.data.card as Card, reason: e.data.reason as string })
+      const wait = Math.max(0, ms('mcFloor', speed) - (Date.now() - t0))
+      floorId = setTimeout(() => {
+        if (e.data.error || !e.data.card) apply(botCardReasoned(play, seat)) // fallback: tumregel
+        else apply({ card: e.data.card as Card, reason: e.data.reason as string })
+      }, wait)
     }
     // Skydd: om workern skulle hänga orimligt länge, falla tillbaka på tumregeln.
+    // Skalas INTE av tempot — det är en nödbroms, inte en paus.
     const timeoutId = setTimeout(() => {
       worker.removeEventListener('message', onMessage)
       apply(botCardReasoned(play, seat))
@@ -164,9 +176,10 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
       cancelled = true
       worker.removeEventListener('message', onMessage)
       clearTimeout(timeoutId)
+      clearTimeout(floorId)
       setThinking(false)
     }
-  }, [contract, play, calls, claimed, claiming])
+  }, [contract, play, calls, claimed, claiming, speed])
 
   // Auto Claim: när ett nytt stick ska börja och spelförarsidan OMÖJLIGT kan
   // förlora fler stick (oavsett spelsätt) stängs given automatiskt – gäller både
@@ -206,6 +219,11 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     const next = !autoClaim
     setAutoClaim(next)
     saveValue('autoClaim', next)
+  }
+
+  function setSpeed(next: PlaySpeed) {
+    setSpeedState(next)
+    saveValue('playSpeed', next)
   }
 
   // Två-klicks: första klicket på ett kort väljer (och fanar ut) dess färg;
@@ -275,6 +293,8 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     setClaimMsg,
     autoClaim,
     toggleAutoClaim,
+    speed,
+    setSpeed,
     explain,
     botReasons,
     reasonFor,

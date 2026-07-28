@@ -195,7 +195,9 @@ function TrickCenter({ cards, winner }: { cards: PlayedCard[]; winner: Seat | nu
     const pc = at(seat)
     if (!pc) return null
     return (
-      <div className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
+      // key på KORTET (inte platsen): när ett nytt kort landar på samma plats i
+      // nästa stick måste DOM-noden bytas, annars tänds inte inglidningen om.
+      <div key={key(pc.card)} className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
         <PlayingCard card={pc.card} size="sm" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
       </div>
     )

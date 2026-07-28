@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 // Det gröna bordsfiltet — EN sanningskälla för bordets utseende. Justera
 // gradienten/ramen här så ändras ALLA bord samtidigt: spelet (bud- + spelfas),
@@ -16,16 +16,19 @@ export function Felt({
   children,
   className = '',
   rounded = 'rounded-3xl',
+  style,
 }: {
   children: ReactNode
   className?: string
   /** Hörnradie – budvisningens lilla auktionsfilt använder rounded-2xl. */
   rounded?: string
+  /** Extra inline-stil (spelbordet sätter --motion-scale för tempot här). */
+  style?: CSSProperties
 }) {
   return (
     <div
       className={`relative overflow-hidden border border-emerald-950/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.09),inset_0_0_60px_rgba(0,0,0,0.30),0_10px_30px_-15px_rgba(0,0,0,0.6)] ${rounded} ${className}`}
-      style={{ background: FELT_BACKGROUND }}
+      style={{ background: FELT_BACKGROUND, ...style }}
     >
       {children}
     </div>
