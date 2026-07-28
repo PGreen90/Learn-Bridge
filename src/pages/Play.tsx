@@ -145,6 +145,9 @@ function PlayTable({
     setClaimMsg,
     autoClaim,
     toggleAutoClaim,
+    pendingClaim,
+    finishClaimReveal,
+    showResult,
     speed,
     setSpeed,
     sound,
@@ -169,8 +172,9 @@ function PlayTable({
     isFaceUp,
   } = usePlayTable(deal, contract, calls)
 
-  // Färdigspelad giv: resultatdialog ovanpå, sedan omspelningen (Synrey-stil).
-  if (done) {
+  // Färdigspelad giv: bordet hinner tona ut (felt-fade-out under resultOutro,
+  // showResult väntar ut den) → resultatdialog ovanpå omspelningen (Synrey-stil).
+  if (done && showResult) {
     return (
       <div className="relative">
         <PlayReplay
@@ -182,7 +186,9 @@ function PlayTable({
           explanations={bidHelp ? 'full' : 'minimal'}
         />
         {!resultSeen && !reporting ? (
-          <Dialog className="p-5 text-center">
+          // Guldglow vid hemgång (etapp 5, ägarbeslut: inget konfetti) —
+          // engångs guldsvällning + skimmer på dialogkortet. Bet = sobert.
+          <Dialog className={`p-5 text-center ${result.made ? 'result-made-glow' : ''}`}>
               <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-accent' : 'text-danger'}`}>
                 {result.made
                   ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
@@ -246,7 +252,12 @@ function PlayTable({
   return (
     // --motion-scale: tempovalet skalar spelfasens CSS-animationer (index.css
     // räknar calc(bastid * var(--motion-scale))). JS-pauserna skalas i tempo.ts.
-    <Felt style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}>
+    // felt-fade-out: när given är klar tonar hela bordet ut under resultOutro
+    // innan trädet byts till resultatvyn (showResult).
+    <Felt
+      className={done ? 'felt-fade-out' : ''}
+      style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}
+    >
       {/* ⓘ (budgivningen) + ⋮ (meny) uppe till höger. */}
       <div className="absolute right-2.5 top-2.5 z-20 flex gap-1.5">
         <button
@@ -506,6 +517,18 @@ function PlayTable({
         targetsKey={sweep ? 'svep' : String(play.currentTrick.length)}
         onDone={endFlight}
       />
+
+      {/* Claim-revealen (etapp 5, ägarbeslut 2026-07-28): alla händer ligger
+          öppna och STANNAR KVAR — precis som vid ett riktigt bord — tills
+          spelaren själv går vidare med knappen. Ingen timer, inget klipp. */}
+      {pendingClaim && (
+        <div className="overlay-in absolute left-1/2 top-1/3 z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-slate-900/85 px-4 py-3 shadow-xl ring-1 ring-emerald-100/10">
+          <span className="whitespace-nowrap text-xs font-semibold text-white">
+            {pendingClaim.auto ? 'Auto Claim' : 'Claim godkänd'} — korten ligger uppe
+          </span>
+          <Button onClick={finishClaimReveal}>Visa resultatet →</Button>
+        </div>
+      )}
     </Felt>
   )
 }

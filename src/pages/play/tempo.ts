@@ -32,9 +32,8 @@ export const BASE = {
   sweepHold: 900,
   /** Själva svepet mot vinnarens sida (etapp 2). */
   sweepSlide: 450,
-  /** Claim: hur länge alla händer ligger uppe innan resultatet (etapp 5). */
-  claimReveal: 2500,
-  /** Bordets uttoning innan resultatdialogen (etapp 5). */
+  /** Bordets uttoning innan resultatdialogen (etapp 5). Claim-revealen har
+   *  INGEN tid — korten ligger kvar tills spelaren går vidare (ägarbeslut). */
   resultOutro: 500,
   /** Giv-klar-ljudet: efter deal-in-kaskadens slut (13 kort × 35 ms + 300 ms). */
   dealSoundDelay: 760,
