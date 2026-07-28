@@ -72,6 +72,11 @@ lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad storslam
 efter 2♣ + reverse/hoppskift), etapp 6 (billig offring, 4 hål). Full logg:
 `docs/historik.md`. Alla mätningar + mönsteranalyser: `docs/systemrevisorn.md`.
 
+**Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
+På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
+i budlådan + minimal förklaring (chip + regelnamn + ALERT) i auktionsvyerna.
+Mergepunkt `3d43655`, live. Detalj: `docs/status.md` + `docs/historik.md`.
+
 **Senast klart 2026-07-28 (kväll, felrapporter — inget NU):** #40 (17+ säljer
 aldrig given över deras 1-lägesöppning, §7.1), #41 (sangsystemet inkopplat
 off-book, §4.3) och #42 (kvantitativ höjning av partnerns naturliga 3NT, §6.8).

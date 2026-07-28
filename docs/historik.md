@@ -1379,3 +1379,27 @@ på 10 hp med `♦AQ62` — 24 hp tillsammans, sunt. (Första bedömningen sa 12
 5 hp; det var felräknat och rättades samma dag när dumpen lästes — påminnelse om
 att läsa siffran ur körningen, aldrig ur minnet.) Se hål 4-punkten i
 `docs/bevaka.md` för vilken form som faktiskt är värd att leta efter.
+
+## Budstöd På/Av i Spela kort (2026-07-28, kväll)
+
+Ägarönskemål, ren UI-funktion (inga budregler rörda). Mergepunkt `3d43655`,
+deploy grön, verifierad live.
+
+En **"Budstöd"-rad i bordets ⋮-meny** (både budfasen och spelfasen), På/Av-
+pillerknapp enligt Auto Claim-mönstret, sparas som `learnbridge:bidHelp`
+(state i `useGame.ts` så båda faserna + omspelningen läser samma val).
+
+**Av-läget (tre ägarbeslut samma kväll):** (1) budlådan döljer ALL hjälp —
+pricken, "MOTORNS BUD"-förklaringen och "Motorn hade valt"-raden (`showHelp`-
+prop i `BiddingBox.tsx`; rekommendationen beräknas inte ens, den var
+display-only). (2) Förklarings-popupen i auktionsvyn blir minimal: chip +
+kort regelnamn (versaliserad `rule`) + **ALERT-märket behålls** — som vid
+riktigt bord där konstlade bud alltid alerteras; kravmärke och långtext döljs
+(`explanations: 'full' | 'minimal'` i `AuctionGrid.tsx`, trådas genom
+ⓘ-overlayen och `PlayReplay.tsx`). (3) Knappen bor i ⋮-menyn, inte på
+Inställningar-sidan. Träningssidorna (Spela, Budträning) skickar ingen prop
+och behåller alltid full förklaring.
+
+Facit-test skrevs före koden: åtta nya (budlådans av-läge, ny
+`auction-grid.test.tsx` för full/minimal/fallback utan regel/"Eget bud",
+persistens i `play-smoke.test.tsx`). Hela sviten grön (`npm test`).
