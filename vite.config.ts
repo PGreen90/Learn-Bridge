@@ -20,8 +20,8 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'RebidZ – spela och lär dig bridge',
-        short_name: 'RebidZ',
+        name: 'rebidz – spela och lär dig bridge',
+        short_name: 'rebidz',
         description: 'Spela och lär dig bridge (2/1-systemet) direkt i webbläsaren.',
         lang: 'sv',
         theme_color: '#064e3b',

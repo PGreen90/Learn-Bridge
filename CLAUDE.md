@@ -1,4 +1,4 @@
-# CLAUDE.md — RebidZ (bridge-appen)
+# CLAUDE.md — rebidz (bridge-appen)
 Läs den här filen först varje session. **Detta är kartan, inte detaljen** — all
 detalj bor i `docs/` (börja i **`docs/README.md`**, som säger vilken fil som
 svarar på vad).
@@ -98,8 +98,9 @@ plattform.md`, startas bara på uttryckligt ägarbeslut).
 
 ## Vad det här är
 Interaktiv webbapp för att lära sig och spela bridge. Allt körs i webbläsaren,
-gratis-hostat på Vercel. **Appen heter `RebidZ`** i gränssnittet (ägarens namn,
-2026-07-02) — **repo och URL förblir `Learn-Bridge`** (medvetet, byt inte).
+gratis-hostat på Vercel. **Appen heter `rebidz` i gränssnittet — ALLTID GEMENER**
+(ägarens namn 2026-07-02, bekräftat 2026-07-28: "gemener rakt igenom"; skriv
+aldrig "RebidZ") — **repo och URL förblir `Learn-Bridge`** (medvetet, byt inte).
 - **Designriktning (låst):** Synrey-inspirerat uttryck, **emerald-palett**, egen
   stil tillåten bortom Synrey. **Spader är SVARTA** (ägaröverride — ändra INTE
   tillbaka till konventionell färg). Läs de verkliga färgerna i `src/index.css`,
@@ -116,10 +117,6 @@ gratis-hostat på Vercel. **Appen heter `RebidZ`** i gränssnittet (ägarens nam
 - Ägaren vill ge **mänsklig input i konkreta budsituationer** — fråga hellre än
   gissa.
 - Säg aldrig "monster" om en bra hand (ägarbeslut 2026-07-05) — skriv "stark hand".
-
-## Teknisk stack
-React + Vite + TypeScript + Tailwind v4. Ingen backend, allt client-side.
-Framsteg sparas i localStorage.
 
 ## Hosting & deploy (viktiga låsningar)
 - **Vercel**, projekt `learn-bridge`, team `rebidz` (Hobby/gratis), kopplat till
@@ -142,6 +139,8 @@ Framsteg sparas i localStorage.
 - **Målgrupp (2026-06-30): erfaren spelare** — en pålitlig, robust 2/1-partner och
   motståndare (inte nybörjarträning först).
 - Givar och övningar ligger som **JSON i repot**, aldrig hårdkodade i komponenter.
+- **Utgå alltid från typerna** i `src/types/bridge.ts` (Card, Hand, Deal,
+  BiddingQuestion) — hitta inte på egna parallella former.
 - **Double-dummy:** appens facit körs av vår **egen lösare i ren TypeScript**
   (`src/lib/engine/dds.ts`, inga beroenden — de utvärderade npm-paketen var
   trasiga i webbläsaren). Systemrevisorn använder däremot `bridge-dds` (WASM) som
@@ -176,39 +175,10 @@ Framsteg sparas i localStorage.
 - Node.js ligger i `C:\Program Files\nodejs\` (lägg först i PATH i nya shells —
   npm/node finns inte alltid på PATH automatiskt).
 
-## Projektstruktur
-- `src/main.tsx` startpunkt · `src/App.tsx` router (HashRouter) ·
-  `src/index.css` (`@import "tailwindcss";`)
-- `src/types/bridge.ts` — typerna (Card, Hand, Deal, BiddingQuestion), utgå alltid
-  från dem · `src/lib/storage.ts` — localStorage
-- `src/lib/engine/` — budmotorn + spelmotorn (störst: `auction*.ts`, `responses*.ts`,
-  `rebids.ts`, `slam*.ts`, `overcalls.ts`, `play*.ts`, `dds.ts`, `revisor*.ts`)
-- `src/components/` — `Layout`, `Panel`, `Button`, `SuitSymbol`, `HandView`, `Dialog`
-- `src/pages/` — en fil per skärm (`Home`, `BiddingPractice`, `Learn`, `Play`,
-  `Settings` m.fl.)
-- `src/data/exercises/*.json` — övningar · `src/data/themes.json` — teman
-
 ## Navigering (router)
 HashRouter (adresser med `#`) eftersom det fungerar på statisk hosting. **Byt INTE
 till BrowserRouter** utan SPA-rewrites i `vercel.json`. Ny skärm = ny fil i
 `src/pages/` + `<Route>` i `App.tsx` + länk i `NAV` i `Layout.tsx`.
-
-## Hur man lägger till övningar
-- JSON i `src/data/exercises/<tema>.json`; ny temafil måste importeras och läggas
-  till i registret `EXERCISES_BY_THEME` (`src/lib/bidding.ts`).
-- Hand som text: `"S:AK974 H:K83 D:Q6 C:J52"` (tian = `T`, tom färg = `-`, parsas av
-  `parseHand`).
-- En övning = `auction`: lista med steg — manus-bud `{ "bid": "1H" }` eller ditt
-  beslut `{ "decision": { "options": [...], "answer": "1S", "explanation": "..." } }`.
-  Vem som bjuder räknas ut från `dealer` + medurs N→E→S→W.
-- Bud skrivs `"1C"/"1D"/"1H"/"1S"/"1NT"` samt `"P"`, `"X"`, `"XX"`.
-- Lägen (scope): `opening`, `opening-response`, `full-auction` — sätts i
-  themes.json.
-
-## Kommandon
-- `npm test` — hela testsviten (enda sanningen om testläget)
-- `npm run dev` — lokal förhandsvisning
-- `npm run build` — körs automatiskt av Vercel vid push, sällan manuellt
 
 ## Vad man INTE gör
 - Lägg aldrig till backend/server/databas i nuläget — hostingen är statisk.

@@ -63,7 +63,7 @@ export function Settings() {
             </a>{' '}
             (du måste vara inloggad som PGreen90).
           </li>
-          <li>Ge den ett namn, t.ex. ”RebidZ felrapporter”, och sätt ett utgångsdatum.</li>
+          <li>Ge den ett namn, t.ex. ”rebidz felrapporter”, och sätt ett utgångsdatum.</li>
           <li>
             Under <strong>Repository access</strong>: välj <strong>Only select repositories</strong>{' '}
             → <strong>Learn-Bridge</strong>.
