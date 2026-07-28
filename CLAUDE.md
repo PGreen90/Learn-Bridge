@@ -34,7 +34,7 @@ guldglow. Varje etapp: bygg → grind grön → ägaren tittar live → docs →
   (`useCardFlight.ts` + `FlightLayer.tsx`), källan mäts före `setPlay`, dolda
   händer startar från bordskanten, fallback = `card-in-*` (jsdom/reduced
   motion). Facit: `kortflygning.test.tsx`.
-- **4 · ljuden:** tre syntetiserade Web Audio-ljud i `src/lib/sound.ts` (knäpp/
+- **4 · ljuden** (`3762481`): tre syntetiserade Web Audio-ljud i `src/lib/sound.ts` (knäpp/
   svisch/giv-klar, inga ljudfiler), `armSound()` på pointerdown, "Ljud"-rad i
   ⋮-menyn (`learnbridge:sound`, standard PÅ). Facit: `ljud.test.tsx`.
 

@@ -1548,7 +1548,7 @@ Audio — inga ljudfiler, inga nya beroenden, ingen PWA-ändring. Standard PÅ,
   sparas och överlever omladdning, kortknäpp+giv-klar+svisch i rätt ordning,
   fyra knäppar för ett helt stick, och total tystnad med ljudet Av.
 
-Livekontroll i dev-servern före pushen (instrumenterade `AudioBufferSourceNode`/
+Mergepunkt `3762481`. Livekontroll i dev-servern före pushen (instrumenterade `AudioBufferSourceNode`/
 `OscillatorNode.start`): ljudmotorn `running` redan i budfasen (pointerdown-
 armeringen), sedan exakt rätt sekvens — knäpp (Västs utspel) → tre tick (given
 klar) → tre knäppar (N/Ö/S) → svisch (svepet); med ljudet Av rullade spelet
