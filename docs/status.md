@@ -284,6 +284,17 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   Mittens gamla "förra sticket ligger kvar"-fallback borttagen — historiken bor
   i Förra sticket-panelen (döljs under svepet). CSS: `trick-sweep-*` +
   `winner-glow` i `index.css`. Test: `src/pages/play/sticksvep.test.tsx`.
+- **Kortflygningen (2026-07-28, "känsla i kortspelet" etapp 3):** spelade kort
+  flyger som WAAPI-klon från handen (källan mäts synkront FÖRE `setPlay`) eller
+  från dold hands bordskant till sin plats i sticket; det riktiga kortet står
+  dolt tills klonen landat. `useCardFlight.ts` (tillstånd + ref-register +
+  mätning) och `FlightLayer.tsx` (overlay-klonen) under `src/pages/play/`;
+  landningsplatser via `data-flight-target` i `TrickCenterLive`; tid
+  `ms('flight', speed)` = temposkalad. Utan WAAPI (jsdom) eller med reduced
+  motion gäller fallbacken `card-in-*` — flugna kort får den ALDRIG (annars
+  dubbel inglidning). Sveputkiket i `usePlayTable.ts` är en layout-effekt så
+  fjärde kortet hittar sin landningsplats i svepets vy. Test:
+  `src/pages/play/kortflygning.test.tsx`.
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,

@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — KÄNSLA I KORTSPELET (ägarbeslut 2026-07-28) · ETAPP 1 BYGGD
+### 🔵 NU — KÄNSLA I KORTSPELET (ägarbeslut 2026-07-28) · ETAPP 1–3 BYGGDA
 Kortspelet kändes stelt och robotaktiskt — spåret ger det liv i **fem etapper**,
 allt i UI-lagret (spelmotorn rörs INTE), inga nya beroenden. Ägarbesluten från
 frågerundan 2026-07-28: full kortflygning hand→bord, sticksvep till vinnaren
@@ -38,17 +38,19 @@ resultatet väntar ut svepet, klick hoppar över det; mittens "förra sticket
 ligger kvar"-fallback borta (panelen i hörnet är historiken). Facit:
 `sticksvep.test.tsx`. Detalj: `docs/historik.md`.
 
-**➡️ NÄSTA GÅNG BÖRJAR VI MED: etapp 3 — kortflygningen** (största etappen,
-levereras ensam). Designen är färdigtänkt (godkänd plan 2026-07-28, fil:
-`~/.claude/plans/jag-skulle-vilja-ha-magical-stroustrup.md` på ägarens dator):
-`PlayingCard` får `ref`-prop (React 19 = vanlig prop) → ref-register
-(`registerCardEl`) i `SouthFan`/`SuitColumns`/`SideStack` → källrect mäts
-SYNKRONT före `setPlay` (i `onPlay`/botens `apply`) → ett nytt flyglager
-(overlay i Felt, byggs i etappen) animerar en WAAPI-klon till stickplatsen
-(`data-flight-target`, riktiga kortet göms via wrapper-style, INTE via kortets
-klass — `transition-all` tonar annars); dolda händer (Ö/V) startar från sätets
-bordskant; fallback (jsdom/reduced motion/nollrect) = dagens `card-in-*`.
-Rotationer per säte: V→90°, Ö→−90°, öppen SideStack-källa är redan roterad.
+**✅ ETAPP 3 KLAR 2026-07-28 (kortflygningen):** spelade kort flyger som
+WAAPI-klon från handen (källan mäts synkront före `setPlay`) eller dold hands
+bordskant till stickplatsen; `useCardFlight.ts` + `FlightLayer.tsx`,
+`data-flight-target` i stickmitten, sveputkiket blev layout-effekt så fjärde
+kortet hittar sin landningsplats; fallback (jsdom/reduced motion) = `card-in-*`.
+Facit: `kortflygning.test.tsx`. Alla fyra källtyperna verifierade live i
+dev-servern. Detalj: `docs/historik.md`.
+
+**➡️ NÄSTA GÅNG BÖRJAR VI MED: etapp 4 — ljud** (ny ljudmodul under `src/lib/`:
+Web Audio-syntetiserade ljud, inga ljudfiler — `armSound()` i första pointerdown,
+`playSound('card'|'sweep'|'deal')`, toggle `learnbridge:sound` i ⋮-menyn,
+no-op i jsdom; recepten och hook-punkterna står i planen:
+`~/.claude/plans/jag-skulle-vilja-ha-magical-stroustrup.md` på ägarens dator).
 
 **Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
 På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
