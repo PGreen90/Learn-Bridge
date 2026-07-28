@@ -3,6 +3,7 @@ import type { Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseHand } from '../bidding'
 import { dealRandom } from './deal'
+import { dealFromSeed } from './revisor'
 import { buildAuction } from './auction'
 import { finalContract, turnsToCalls } from './auction-contract'
 import {
@@ -181,6 +182,15 @@ function isLegalMedurs(turns: { seat: Seat }[]): boolean {
   return turns.every((t, k) => k === 0 || t.seat !== turns[k - 1].seat)
 }
 
+// Konsistenstesterna (linjen mot budlådan) körde tidigare på dealRandom(), alltså
+// FÄRSKA slumpgivar varje körning. Ett sällsynt fall (0,18 % av givarna) gjorde
+// dem därför slumpvis röda — och eftersom Vercels deploygrind kör `npm test`
+// föll ungefär var tredje deploy utan att något ändrats i koden. Seedade givar
+// i stället: samma givar varje körning, ett rött test går att återskapa med
+// `dealFromSeed(<frö>)`, och grinden blir förutsägbar. Samma mönster som
+// legality.test.ts och tp-invariant.test.ts redan använder.
+const KONSISTENS_FRÖN = 4000
+
 // Spelar upp en hel budgivning genom att fråga decideCall plats för plats
 // (precis som budlådan gör när alla tre datorplatser bjuder). Stannar när
 // auktionen är slut eller efter en säkerhetsgräns.
@@ -197,21 +207,43 @@ function playOut(deal: Deal): ResolvedCall[] {
 // SANKTIONERAT undantag från "budlådan följer linjen" (etapp 6 hål 4): linjen
 // bakar in försvarssidans pass efter öppning + spärrhöjning (2♠–P–3♠ /
 // 1♣–P–3♣), men budlådan väcker där med §7.6-fönstren. Den uppspelade
-// auktionen får alltså divergera från linjen EXAKT så: vid första skillnaden
-// står linjen på pass och budlådan har väckt med X/3NT/naturligt inkliv efter
+// auktionen får alltså divergera från linjen EXAKT så: där linjen står på pass
+// (eller har tagit slut) har budlådan väckt med X/3NT/naturligt inkliv efter
 // deras två kontraktsbud (öppning + höjning i samma färg till 3-läget).
+//
+// TVÅ FORMER, båda måste godtas (2026-07-28): väckningen kan ligga *inne i*
+// linjens sekvens ELLER efter dess slut. Linjen slutar nämligen med de inbakade
+// försvarspassen och stannar där, så när väckningen kommer efter linjens sista
+// bud är prefixen identiska och skillnaden ligger helt i svansen. Första
+// versionen jämförde bara överlappet och missade den formen — den föll igenom
+// som "verklig avvikelse" på ~0,18 % av givarna, vilket fällde var tredje
+// deploy slumpvis (Vercel-bygget 2026-07-28, commit ebdb958). Håll villkoren
+// tighta: bara väckningsbud, och bara efter öppning + höjning i SAMMA färg.
 function divergesOnlyByPreemptWake(line: ResolvedCall[], played: ResolvedCall[]): boolean {
   const overlap = Math.min(line.length, played.length)
-  for (let i = 0; i < overlap; i++) {
-    if (line[i].bid === played[i].bid) continue
-    if (line[i].bid !== 'P') return false
-    const before = played.slice(0, i).filter((c) => c.bid !== 'P')
+  // Är deras två första kontraktsbud öppning + höjning i samma färg till 3-läget?
+  const efterSpärrhöjning = (calls: ResolvedCall[]): boolean => {
+    const before = calls.filter((c) => c.bid !== 'P')
     if (before.length !== 2) return false
     const open = /^([1-3])([CDHS])$/.exec(before[0].bid)
     const raise = /^3([CDHS])$/.exec(before[1].bid)
     return !!open && !!raise && open[2] === raise[1]
   }
-  return false
+  const ärVäckning = (bid: string | undefined): boolean =>
+    bid === 'X' || bid === '3NT' || /^[1-4][CDHS]$/.test(bid ?? '')
+
+  for (let i = 0; i < overlap; i++) {
+    if (line[i].bid === played[i].bid) continue
+    // Form 1: väckningen ligger inne i linjens sekvens (linjen står på pass).
+    if (line[i].bid !== 'P') return false
+    return efterSpärrhöjning(played.slice(0, i))
+  }
+  // Form 2: prefixen är identiska och budlådan fortsätter efter linjens slut.
+  return (
+    played.length > line.length &&
+    efterSpärrhöjning(played.slice(0, overlap)) &&
+    ärVäckning(played[overlap]?.bid)
+  )
 }
 
 describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
@@ -232,8 +264,8 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
 
   it('kontraktet matchar buildAuctions slutkontrakt (när motorn budat klart)', () => {
     let checked = 0
-    for (let i = 0; i < 300 && checked < 120; i++) {
-      const deal = dealRandom()
+    for (let seed = 1; seed <= KONSISTENS_FRÖN; seed++) {
+      const deal = dealFromSeed(seed)
       const built = buildAuction(deal)
       if (!built || built.open) continue // bara fullständiga linjer jämförs
       if (!isLegalMedurs(built.turns)) continue // hoppa över slam-quirken (se ovan)
@@ -249,8 +281,8 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
 
   it('budföljdens kontraktsbud = buildAuctions turer (samma linje)', () => {
     let checked = 0
-    for (let i = 0; i < 300 && checked < 120; i++) {
-      const deal = dealRandom()
+    for (let seed = 1; seed <= KONSISTENS_FRÖN; seed++) {
+      const deal = dealFromSeed(seed)
       const built = buildAuction(deal)
       if (!built || built.open) continue
       if (!isLegalMedurs(built.turns)) continue // hoppa över slam-quirken (se ovan)
@@ -389,8 +421,8 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     // (enda sanktionerade undantaget: §7.6-väckningen över deras spärrhöjning,
     // etapp 6 hål 4 — se divergesOnlyByPreemptWake ovan.)
     it('on-book budgivning är oförändrad (off-book-svaret triggar aldrig)', () => {
-      for (let i = 0; i < 150; i++) {
-        const d = dealRandom()
+      for (let seed = 1; seed <= KONSISTENS_FRÖN; seed++) {
+        const d = dealFromSeed(seed)
         const built = buildAuction(d)
         if (!built || built.open) continue
         if (!isLegalMedurs(built.turns)) continue
