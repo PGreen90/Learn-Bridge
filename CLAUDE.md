@@ -18,7 +18,7 @@ där korten ligger kvar tills spelaren trycker "Visa resultatet" (ägarbeslut:
 ingen timer — som i verkligheten), följt av mjuk uttoning och guldglow vid
 hemgång. Allt i UI-lagret, spelmotorn orörd, inga nya beroenden.
 Mergepunkter: `e67fb31`+`9de46f9` · `1fed694` · `e602a01` · `3762481` ·
-etapp 5 se `docs/historik.md`. Samlad bild: `docs/kortspel.md` avsnittet
+`5f29949`. Samlad bild: `docs/kortspel.md` avsnittet
 "Tempo, animationer och ljud"; nuläge per funktion: `docs/status.md`.
 
 **➡️ NÄSTA GÅNG:** ägaren väljer nytt NU — närmast till hands ligger 🟢 NÄST

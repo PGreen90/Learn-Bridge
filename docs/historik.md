@@ -1581,7 +1581,8 @@ Sista etappen — avsluten. Tre delar, allt UI-fas ovanpå motorn (`claim.ts` or
   förbi alla speltimers, botarna gateade, bara knappen avslutar, auto-claim
   går via revealen, resultatvyn väntar ut uttoningen.
 
-Livekontroll i dev-servern före pushen (händelselogg + autospelare): bet-giv
+Mergepunkt `5f29949`. Livekontroll i dev-servern före pushen (händelselogg +
+autospelare): bet-giv
 gav reveal → uttoning → sobert resultat utan glow; hemgångsgiv gav reveal
 (låg kvar 69 s tills knappen trycktes, ställningen frusen, 9 öppna sidokort) →
 uttoning → "Hemma! 11 stick (+2)" MED guldglow. Inga konsolfel.
