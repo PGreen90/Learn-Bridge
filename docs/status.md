@@ -295,6 +295,15 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   dubbel inglidning). Sveputkiket i `usePlayTable.ts` är en layout-effekt så
   fjärde kortet hittar sin landningsplats i svepets vy. Test:
   `src/pages/play/kortflygning.test.tsx`.
+- **Ljuden (2026-07-28, "känsla i kortspelet" etapp 4):** tre diskreta
+  Web Audio-syntetiserade ljud i `src/lib/sound.ts` (inga ljudfiler) —
+  kortknäpp per lagt kort (en ref-jämförd krok i `usePlayTable.ts` fångar
+  människa och bot), svisch när svepet går in i slide, tre stigande tick när
+  utdelningskaskaden är klar (`ms('dealSoundDelay')`). `armSound()` kopplas
+  till pointerdown på Play-sidan (autoplay-policyn — budfasens klick armerar
+  ljudmotorn); allt no-op:ar tyst utan Web Audio (jsdom). "Ljud"-rad i
+  spelfasens ⋮-meny, standard PÅ, sparas som `learnbridge:sound`. Test:
+  `src/pages/play/ljud.test.tsx`.
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,
