@@ -93,7 +93,7 @@ describe('double-dummy solver – stämmer mot oraklet (ren minimax) på små gi
       }
     }
     expect(checked).toBe(100 * 5 * 4)
-  }, 30000)
+  }, 120_000) // hängningsdetektor, inte prestandakrav — Vercels byggare är långsam (2026-07-28)
 
   // Tung men korrekt: djupare DDS-träd som passerar isolerat (~7 s) men kan
   // spräcka standardgränsen 5 s under full-suite-last → egen timeout (ej logik).
@@ -109,7 +109,7 @@ describe('double-dummy solver – stämmer mot oraklet (ren minimax) på små gi
         }
       }
     }
-  }, 30000)
+  }, 120_000) // hängningsdetektor, inte prestandakrav — Vercels byggare är långsam (2026-07-28)
 
   it('position-mitt-i-spelet (delvis spelat stick) stämmer mot oraklet', () => {
     const rng = mulberry32(2024)
