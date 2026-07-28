@@ -166,12 +166,18 @@ it('dokumentvakten: varje motormodul är inkopplad i produktionskoden', () => {
   const dir = 'src/lib/engine'
   const moduler = readdirSync(dir).filter((f) => /\.tsx?$/.test(f) && !/\.test\.tsx?$/.test(f))
 
-  const prodkod: string[] = []
+  // Läs varje produktionsfil EN gång. Tidigare låg readFileSync inne i
+  // filter-loopen, alltså ~90 moduler × ~150 filer = över 13 000 läsningar av
+  // samma innehåll. Det tog nästan 5 sekunder och timeoutade slumpvis under
+  // last (sett 2026-07-28), vilket gör deploygrinden opålitlig — och en grind
+  // man inte kan lita på slutar man läsa.
+  const prodkod: { fil: string; text: string }[] = []
   const gå = (d: string) => {
     for (const e of readdirSync(d, { withFileTypes: true })) {
       const p = join(d, e.name)
       if (e.isDirectory()) gå(p)
-      else if (/\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name)) prodkod.push(p)
+      else if (/\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name))
+        prodkod.push({ fil: p, text: readFileSync(p, 'utf8') })
     }
   }
   gå('src')
@@ -179,7 +185,7 @@ it('dokumentvakten: varje motormodul är inkopplad i produktionskoden', () => {
   const bortkopplade = moduler.filter((m) => {
     const bas = m.replace(/\.tsx?$/, '')
     const importeras = new RegExp(`from\\s+['"][^'"]*/${bas}['"]|from\\s+['"]\\./${bas}['"]`)
-    return !prodkod.some((f) => !f.endsWith(m) && importeras.test(readFileSync(f, 'utf8')))
+    return !prodkod.some((f) => !f.fil.endsWith(m) && importeras.test(f.text))
   })
 
   const nya = bortkopplade.filter((m) => !(m in MEDVETET_EJ_INKOPPLAD))
