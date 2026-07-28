@@ -38,6 +38,14 @@ lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad storslam
 efter 2♣ + reverse/hoppskift), etapp 6 (billig offring, 4 hål). Full logg:
 `docs/historik.md`. Alla mätningar + mönsteranalyser: `docs/systemrevisorn.md`.
 
+**Senast klart 2026-07-28 (underhåll, inget NU):** hälsokoll av uppsättningen →
+namnet `rebidz` rättat på de fyra ställen användaren ser det, sessionskontexten
+bantad, och **deploygrinden lagad — den var ett myntkast**: konsistenstesterna
+körde på slumpgivar och hål 4:s undantag hade ett hål, så ungefär var tredje
+deploy föll slumpvis oavsett vad som pushades (`ebdb958` föll så). Nu seedade
+givar + `docs-vakt` 200× snabbare. Volymtester i det här repot ska ALLTID vara
+seedade. Detalj: `docs/historik.md`.
+
 **Senast klart 2026-07-25:** dokumentstädningen (denna fil bantad, `docs/README.md`
 + `docs/bevaka.md` + `docs/senare.md` nya) och därefter **den stora genomgången**:
 hela repot faktakollat mot koden i stället för mot andra dokument. Fynd: en
