@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, Ref } from 'react'
 import type { Card, Suit } from '../types/bridge'
 import { SUIT_TEXT } from '../lib/suitColors'
 
@@ -55,6 +55,9 @@ interface Props {
   className?: string
   /** Inline-stil, t.ex. animationDelay för utdelningskaskaden. */
   style?: CSSProperties
+  /** Ref till kortets rot-element (React 19: vanlig prop). Kortflygningen
+   *  mäter källkortets läge härifrån innan kortet spelas. */
+  ref?: Ref<HTMLElement>
 }
 
 /**
@@ -72,6 +75,7 @@ export function PlayingCard({
   onClick,
   className = '',
   style,
+  ref,
 }: Props) {
   const s = SIZES[size]
   // Tunn 1px-ram runt varje kort → luftig separation mellan korten. Svart med
@@ -83,6 +87,7 @@ export function PlayingCard({
     // RebidZ-baksidan: vit kortram, mörk smaragdpanel med guldram + rutmönster.
     return (
       <div
+        ref={ref as Ref<HTMLDivElement>}
         aria-hidden
         className={`${base} relative bg-white shadow-sm ${className}`}
         style={style}
@@ -148,10 +153,10 @@ export function PlayingCard({
 
   if (onClick && playable) {
     return (
-      <button type="button" onClick={onClick} className={cls} style={style}>
+      <button ref={ref as Ref<HTMLButtonElement>} type="button" onClick={onClick} className={cls} style={style}>
         {inner}
       </button>
     )
   }
-  return <div className={cls} style={style}>{inner}</div>
+  return <div ref={ref as Ref<HTMLDivElement>} className={cls} style={style}>{inner}</div>
 }

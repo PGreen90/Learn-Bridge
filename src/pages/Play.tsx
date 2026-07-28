@@ -27,6 +27,7 @@ import { LastTrickPanel, TrickCenterLive } from './play/trick-views'
 import { ScenarioPicker, SearchOverlay } from './play/pickers'
 import { BiddingPhase } from './play/BiddingPhase'
 import { ClaimDialog } from './play/ClaimDialog'
+import { FlightLayer } from './play/FlightLayer'
 
 // ===========================================================================
 // Fas-styrning: budgivning → spel. Tillståndet bor i useGame.
@@ -139,6 +140,10 @@ function PlayTable({
     setSpeed,
     sweep,
     skipSweep,
+    flight,
+    endFlight,
+    registerCardEl,
+    wasFlown,
     explain,
     botReasons,
     reasonFor,
@@ -355,6 +360,7 @@ function PlayTable({
             seat="N"
             onCardClick={onCardClick}
             selectedSuit={selectedSuit}
+            registerCardEl={registerCardEl}
           />
         )}
       </div>
@@ -383,18 +389,24 @@ function PlayTable({
       {/* Mittraden: ev. V/Ö-träkarl på sin sida + sticket i mitten. */}
       <div className="flex items-center justify-between gap-1 px-2 py-2">
         <div className="w-14 shrink-0 sm:w-10">
-          {westOpen && <SideStack cards={sideCards(play.hands.W, contract)} side="W" />}
+          {westOpen && (
+            <SideStack cards={sideCards(play.hands.W, contract)} side="W" registerCardEl={registerCardEl} />
+          )}
         </div>
         <TrickCenterLive
           play={play}
           thinking={thinking}
           sweep={sweep}
+          flight={flight}
+          wasFlown={wasFlown}
           onSkipSweep={skipSweep}
           onCardClick={onPlayedCardClick}
           hasReason={(pc) => !!reasonFor(pc)}
         />
         <div className="w-14 shrink-0 sm:w-10">
-          {eastOpen && <SideStack cards={sideCards(play.hands.E, contract)} side="E" />}
+          {eastOpen && (
+            <SideStack cards={sideCards(play.hands.E, contract)} side="E" registerCardEl={registerCardEl} />
+          )}
         </div>
       </div>
 
@@ -464,8 +476,18 @@ function PlayTable({
           play={play}
           onCardClick={onCardClick}
           selectedSuit={selectedSuit}
+          registerCardEl={registerCardEl}
         />
       </div>
+
+      {/* Flyglagret (etapp 3): klonen som flyger hand → stickmitten. Ovanpå
+          korten (z-30) men under menyerna (z-40); släpper igenom alla klick. */}
+      <FlightLayer
+        flight={flight}
+        speed={speed}
+        targetsKey={sweep ? 'svep' : String(play.currentTrick.length)}
+        onDone={endFlight}
+      />
     </Felt>
   )
 }

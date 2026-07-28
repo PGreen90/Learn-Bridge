@@ -2,7 +2,7 @@
 // Monte-Carlo-webworkern), claim/auto-claim, facit och två-klicks-valet.
 // PlayTable-komponenten är bara presentation ovanpå det här.
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Card, Deal, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../../lib/bidding'
 import {
@@ -31,6 +31,7 @@ import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib/engine/play-bot'
 import { controls, sameCard } from './common'
 import { ms, type PlaySpeed } from './tempo'
+import { useCardFlight } from './useCardFlight'
 
 // Nodbudget för facit-lösaren: ~2 milj. noder (≈ 1–2 s i värsta fall) så
 // gränssnittet aldrig fryser. Sena ställningar (få kort kvar) löses direkt;
@@ -71,6 +72,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // Ref-jämförelse (inte effekt-på-play rakt av) så StrictMode-dubbelkörningen
   // i dev inte startar svepet två gånger.
   const sweptCount = useRef(0)
+  // Kortflygningen (etapp 3): var kortet startade + vilket kort som är i luften.
+  // Källan MÅSTE mätas synkront innan setPlay — efteråt är kortet borta ur handen.
+  const { flight, beginFlight, endFlight, registerCardEl, wasFlown } = useCardFlight()
   // Bottarnas motiveringar per spelat kort (kortnyckel → plats + varför).
   // Tryck på ett spelat kort på bordet visar förklaringen i raden under listen.
   const [botReasons, setBotReasons] = useState<Record<string, { seat: Seat; reason: string }>>({})
@@ -103,7 +107,10 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
 
   // Sticksvepet startar när ett NYTT stick blivit klart (motorn har redan tömt
   // currentTrick och bokfört sticket — svepet är ren UI-fas ovanpå).
-  useEffect(() => {
+  // Layout-effekt (inte vanlig effekt): svepet ska stå i mitten redan i samma
+  // bildruta som fjärde kortet bokförs — annars blinkar mitten tom en ruta och
+  // fjärde kortets flygning hittar aldrig sin landningsplats.
+  useLayoutEffect(() => {
     const n = play.completedTricks.length
     if (n <= sweptCount.current) return
     sweptCount.current = n
@@ -164,6 +171,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
       const legal = legalCards(play, seat)
       const card = legal.some((c) => sameCard(c, choice.card)) ? choice.card : legal[0]
       setBotReasons((m) => ({ ...m, [`${card.suit}${card.rank}`]: { seat, reason: choice.reason } }))
+      // Flygningen mäts FÖRE setPlay: en öppen träkarl (SideStack/kolumnerna)
+      // ger källrutan, en dold hand startar från bordskanten.
+      beginFlight(seat, card)
       setPlay((p) => {
         if (isComplete(p) || controls(contract, p.toAct)) return p
         const stillLegal = legalCards(p, p.toAct).some((c) => sameCard(c, card))
@@ -229,6 +239,16 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   }, [play, autoClaim, claimed, claiming, sweep])
 
   function onPlay(card: Card) {
+    // Samma villkor som uppdateraren nedan — flygningen ska bara starta när
+    // kortet faktiskt kommer att spelas, och källan måste mätas före setPlay.
+    if (
+      !claimed &&
+      !isComplete(play) &&
+      controls(contract, play.toAct) &&
+      legalCards(play, play.toAct).some((c) => sameCard(c, card))
+    ) {
+      beginFlight(play.toAct, card)
+    }
     setPlay((p) => {
       if (claimed || isComplete(p) || !controls(contract, p.toAct)) return p
       if (!legalCards(p, p.toAct).some((c) => sameCard(c, card))) return p
@@ -337,6 +357,10 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     setSpeed,
     sweep,
     skipSweep,
+    flight,
+    endFlight,
+    registerCardEl,
+    wasFlown,
     explain,
     botReasons,
     reasonFor,

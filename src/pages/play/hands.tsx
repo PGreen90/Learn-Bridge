@@ -7,6 +7,7 @@ import type { Contract, PlayState } from '../../lib/engine/play'
 import { bySuit, handSuitsTrumpFirst } from '../../lib/cardLayout'
 import { PlayingCard } from '../../components/PlayingCard'
 import { turnInfo } from './common'
+import type { RegisterCardEl } from './useCardFlight'
 
 /**
  * En öppen hand som färgkolumner (Synrey-träkarlen): en lodrät kolumn per färg,
@@ -21,6 +22,7 @@ export function SuitColumns({
   seat,
   onCardClick,
   selectedSuit,
+  registerCardEl,
 }: {
   hand: Hand
   contract: Contract
@@ -28,6 +30,8 @@ export function SuitColumns({
   seat: Seat
   onCardClick: (c: Card) => void
   selectedSuit: Suit | null
+  /** Kortflygningens ref-register (etapp 3): källkortets läge mäts härifrån. */
+  registerCardEl?: RegisterCardEl
 }) {
   const { myTurn, legalSet } = turnInfo(play, contract, seat)
   return (
@@ -47,6 +51,7 @@ export function SuitColumns({
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
+                  ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
                   size="smPlus"
                   playable={playable}
@@ -75,12 +80,15 @@ export function SouthFan({
   play,
   onCardClick,
   selectedSuit,
+  registerCardEl,
 }: {
   hand: Hand
   contract: Contract
   play: PlayState
   onCardClick: (c: Card) => void
   selectedSuit: Suit | null
+  /** Kortflygningens ref-register (etapp 3): källkortets läge mäts härifrån. */
+  registerCardEl?: RegisterCardEl
 }) {
   const { myTurn, legalSet } = turnInfo(play, contract, 'S')
   let dealt = 0 // löpande kortindex över alla färggrupper → utdelningskaskaden
@@ -106,6 +114,7 @@ export function SouthFan({
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
+                  ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
                   size="md"
                   playable={playable}
