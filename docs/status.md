@@ -262,6 +262,13 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 
 - **Två-klicks fan-ut** för att spela kort.
 - **Klickbara bud + ALERT-märke** i auktionsvyn – `alerts.ts` (blått A på konstgjorda bud, klick visar betydelsen).
+- **Budstöd På/Av (2026-07-28, ägarbeslut):** rad i bordets ⋮-meny (både budfas
+  och spelfas), sparas som `learnbridge:bidHelp` (state i `useGame.ts`). Av =
+  budlådan döljer ALL hjälp (`showHelp` i `BiddingBox.tsx`: pricken, "MOTORNS
+  BUD"-förklaringen, "Motorn hade valt") och auktionsvyerna (`AuctionGrid.tsx`,
+  även via ⓘ-overlayen och `PlayReplay.tsx`) visar minimal förklaring: chip +
+  kort regelnamn + ALERT — kravmärket och långtexten döljs. ALERT visas alltid
+  (som vid riktigt bord). Träningssidorna (Spela, Budträning) påverkas inte.
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,

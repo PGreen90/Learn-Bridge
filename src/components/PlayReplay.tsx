@@ -38,11 +38,14 @@ export function PlayReplay({
   contract,
   tricks,
   calls,
+  explanations = 'full',
 }: {
   deal: Deal
   contract: Contract
   tricks: Trick[]
   calls: ResolvedCall[]
+  /** Budstöd av → 'minimal': auktionsvyn visar bara chip + regelnamn + ALERT. */
+  explanations?: 'full' | 'minimal'
 }) {
   // `played` = antal färdigvisade stick. `anim` = hur många kort i NÄSTA stick
   // som hittills lagts på bordet (1–4 under uppspelningen, 0 = ingen uppspelning).
@@ -118,7 +121,12 @@ export function PlayReplay({
             <TrickCenter cards={shownCards} winner={shownWinner} />
           ) : (
             <div className="w-full max-w-xs">
-              <AuctionGrid calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
+              <AuctionGrid
+                calls={calls}
+                dealer={deal.dealer}
+                vulnerability={deal.vulnerability}
+                explanations={explanations}
+              />
             </div>
           )}
         </div>

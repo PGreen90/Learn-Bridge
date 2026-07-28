@@ -63,4 +63,34 @@ describe('BiddingBox', () => {
     expect(screen.queryByText('MOTORNS BUD')).not.toBeInTheDocument()
     expect(screen.getByText(/Motorn hade valt/)).toBeInTheDocument()
   })
+
+  // Budstöd AV (ägarbeslut 2026-07-28): ALL hjälp döljs — pricken, motorns
+  // förklaring och "Motorn hade valt". Man bjuder helt utan facit.
+  it('showHelp av: pricken, MOTORNS BUD och förklaringen döljs', () => {
+    render(
+      <BiddingBox
+        legal={['P', '1C']}
+        onBid={() => {}}
+        recommendation={{ seat: 'S', bid: '1C', rule: 'öppning', explanation: 'Testförklaringen.' }}
+        showHelp={false}
+      />,
+    )
+    expect(screen.queryByTitle('Motorns rekommenderade bud')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '1♣' }))
+    expect(screen.queryByText('MOTORNS BUD')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Testförklaringen/)).not.toBeInTheDocument()
+  })
+
+  it('showHelp av: "Motorn hade valt" visas inte vid eget bud', () => {
+    render(
+      <BiddingBox
+        legal={['P', '1C', '1H']}
+        onBid={() => {}}
+        recommendation={{ seat: 'S', bid: '1C', rule: 'öppning', explanation: 'Testförklaringen.' }}
+        showHelp={false}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: '1♥' }))
+    expect(screen.queryByText(/Motorn hade valt/)).not.toBeInTheDocument()
+  })
 })

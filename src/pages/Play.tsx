@@ -38,6 +38,8 @@ export function Play() {
     picking,
     setPicking,
     search,
+    bidHelp,
+    toggleBidHelp,
     onBid,
     confirmContract,
     startNewGame,
@@ -53,6 +55,8 @@ export function Play() {
         contract={game.contract}
         calls={game.history}
         onNewGame={() => startNewGame(target)}
+        bidHelp={bidHelp}
+        onToggleBidHelp={toggleBidHelp}
       />
     ) : (
       <BiddingPhase
@@ -63,6 +67,8 @@ export function Play() {
         onNewGame={() => startNewGame(target)}
         targetLabel={describeTarget(target)}
         onOpenPicker={() => setPicking(true)}
+        bidHelp={bidHelp}
+        onToggleBidHelp={toggleBidHelp}
       />
     )
 
@@ -96,11 +102,16 @@ function PlayTable({
   contract,
   calls,
   onNewGame,
+  bidHelp,
+  onToggleBidHelp,
 }: {
   deal: Deal
   contract: Contract
   calls: ResolvedCall[]
   onNewGame: () => void
+  /** Budstöd på/av (ägarbeslut 2026-07-28): av → minimal förklaring i auktionsvyerna. */
+  bidHelp: boolean
+  onToggleBidHelp: () => void
 }) {
   const {
     play,
@@ -140,7 +151,14 @@ function PlayTable({
   if (done) {
     return (
       <div className="relative">
-        <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={play.completedTricks} calls={calls} />
+        <PlayReplay
+          key={deal.id}
+          deal={deal}
+          contract={contract}
+          tricks={play.completedTricks}
+          calls={calls}
+          explanations={bidHelp ? 'full' : 'minimal'}
+        />
         {!resultSeen && !reporting ? (
           <Dialog className="p-5 text-center">
               <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-accent' : 'text-danger'}`}>
@@ -278,6 +296,23 @@ function PlayTable({
               {autoClaim ? 'På' : 'Av'}
             </button>
           </div>
+          {/* Budstöd av/på (ägarbeslut 2026-07-28): styr hintarna i budfasen och
+              hur mycket förklaring auktionsvyerna (ⓘ + omspelningen) visar. */}
+          <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
+            <span className="text-xs font-medium text-ink-soft">
+              Budstöd <span className="text-ink-faint">(motorns hintar och förklaringar)</span>
+            </span>
+            <button
+              type="button"
+              onClick={onToggleBidHelp}
+              aria-label="Budstöd"
+              className={`rounded-full px-3 py-0.5 text-xs font-bold ${
+                bidHelp ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
+              }`}
+            >
+              {bidHelp ? 'På' : 'Av'}
+            </button>
+          </div>
           <p className="mt-3 text-xs leading-relaxed text-ink-soft">
             Kontraktet är <strong>{contract.level}{STRAIN_CODE[contract.strain] === 'NT' ? 'NT' : ''}</strong>
             {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}
@@ -307,7 +342,12 @@ function PlayTable({
       {showInfo && (
         <div className="absolute left-1/2 top-13 z-40 w-full max-w-sm -translate-x-1/2 px-3">
           <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
-            <AuctionGrid calls={calls} dealer={deal.dealer} vulnerability={deal.vulnerability} />
+            <AuctionGrid
+              calls={calls}
+              dealer={deal.dealer}
+              vulnerability={deal.vulnerability}
+              explanations={bidHelp ? 'full' : 'minimal'}
+            />
           </div>
         </div>
       )}

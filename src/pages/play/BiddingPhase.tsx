@@ -27,6 +27,8 @@ export function BiddingPhase({
   onNewGame,
   targetLabel,
   onOpenPicker,
+  bidHelp,
+  onToggleBidHelp,
 }: {
   game: Game
   complete: boolean
@@ -35,6 +37,9 @@ export function BiddingPhase({
   onNewGame: () => void
   targetLabel: string
   onOpenPicker: () => void
+  /** Budstöd på/av (ägarbeslut 2026-07-28): av döljer motorns hjälp helt. */
+  bidHelp: boolean
+  onToggleBidHelp: () => void
 }) {
   const [showMenu, setShowMenu] = useState(false)
   const [reporting, setReporting] = useState(false)
@@ -46,9 +51,10 @@ export function BiddingPhase({
   // och ger den äkta förklaringen för det budet). useMemo (R2-fynd #3) så den bara
   // räknas om när given eller budhistoriken ändras – inte vid orelaterade
   // omritningar (t.ex. när menyn eller felrapport-dialogen öppnas).
+  // Budstöd av → beräknas inte alls (display-only; onBid gör sin egen decideCall).
   const recommendation = useMemo(
-    () => (yourTurn ? decideCall(game.deal, game.history, 'S') : null),
-    [yourTurn, game.deal, game.history],
+    () => (yourTurn && bidHelp ? decideCall(game.deal, game.history, 'S') : null),
+    [yourTurn, bidHelp, game.deal, game.history],
   )
 
   return (
@@ -61,8 +67,15 @@ export function BiddingPhase({
           dealer={game.deal.dealer}
           vulnerability={game.deal.vulnerability}
           activeSeat={toAct}
+          explanations={bidHelp ? 'full' : 'minimal'}
         />
-        <TableMenu open={showMenu} onToggle={() => setShowMenu((v) => !v)} onNewGame={onNewGame}>
+        <TableMenu
+          open={showMenu}
+          onToggle={() => setShowMenu((v) => !v)}
+          onNewGame={onNewGame}
+          bidHelp={bidHelp}
+          onToggleBidHelp={onToggleBidHelp}
+        >
           Du sitter <strong>Syd</strong>. När din ruta i auktionen lyser är det din tur:
           klicka ett bud i budlådan och bekräfta med <strong>OK</strong>. Datorn sköter
           Väst, Nord och Öst. Klicka ett lagt bud för att se vad det betyder.
@@ -89,6 +102,7 @@ export function BiddingPhase({
           onBid={onBid}
           recommendation={recommendation}
           history={game.history}
+          showHelp={bidHelp}
         />
       </div>
 
@@ -153,16 +167,20 @@ export function BiddingPhase({
   )
 }
 
-/** Menyknappen (⋮) uppe till höger: expanderar i en overlay med ny giv + hjälp. */
+/** Menyknappen (⋮) uppe till höger: expanderar i en overlay med ny giv + budstöd + hjälp. */
 function TableMenu({
   open,
   onToggle,
   onNewGame,
+  bidHelp,
+  onToggleBidHelp,
   children,
 }: {
   open: boolean
   onToggle: () => void
   onNewGame: () => void
+  bidHelp: boolean
+  onToggleBidHelp: () => void
   children: ReactNode
 }) {
   return (
@@ -182,6 +200,22 @@ function TableMenu({
             <Button className="w-full" onClick={onNewGame}>
               Ny giv →
             </Button>
+            {/* Budstöd av/på (ägarbeslut 2026-07-28): samma radmönster som Auto Claim. */}
+            <div className="mt-2 flex items-center justify-between rounded-lg bg-panel-2 px-2.5 py-1.5">
+              <span className="text-xs font-medium text-ink-soft">
+                Budstöd <span className="text-ink-faint">(motorns hintar och förklaringar)</span>
+              </span>
+              <button
+                type="button"
+                onClick={onToggleBidHelp}
+                aria-label="Budstöd"
+                className={`rounded-full px-3 py-0.5 text-xs font-bold ${
+                  bidHelp ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
+                }`}
+              >
+                {bidHelp ? 'På' : 'Av'}
+              </button>
+            </div>
             <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
           </div>
         </>

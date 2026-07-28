@@ -17,6 +17,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
+  localStorage.removeItem('learnbridge:bidHelp')
 })
 
 /** Låt datorbuden (700 ms-timern) ticka fram ett steg. */
@@ -73,5 +74,23 @@ describe('Spela kort — nyckelflödet budgivning → kortspel', () => {
     expect(screen.getByText(/NS:0 ÖV:0/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Facit' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Budgivningen' })).toBeInTheDocument()
+  })
+
+  // Budstöd-toggeln (ägarbeslut 2026-07-28): sitter i ⋮-menyn, sparas i
+  // localStorage och överlever en omladdning (ny render).
+  it('Budstöd kan stängas av i ⋮-menyn och valet minns', () => {
+    render(<Play />)
+    fireEvent.click(screen.getByRole('button', { name: 'Meny' }))
+    const toggle = screen.getByRole('button', { name: 'Budstöd' })
+    expect(toggle).toHaveTextContent('På')
+    fireEvent.click(toggle)
+    expect(toggle).toHaveTextContent('Av')
+    expect(localStorage.getItem('learnbridge:bidHelp')).toBe('false')
+
+    // "Omladdad sida": ny render läser valet ur lagringen.
+    cleanup()
+    render(<Play />)
+    fireEvent.click(screen.getByRole('button', { name: 'Meny' }))
+    expect(screen.getByRole('button', { name: 'Budstöd' })).toHaveTextContent('Av')
   })
 })
