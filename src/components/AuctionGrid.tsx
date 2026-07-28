@@ -37,19 +37,32 @@ const FORCING_BADGE: Record<Forcing, string> = {
   slamintresse: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
 }
 
+/** Kort namn på ett bud i minimal-läget: regelnamnet med stor bokstav. */
+function shortLabel(rule: string | undefined): string | null {
+  return rule ? rule.charAt(0).toUpperCase() + rule.slice(1) : null
+}
+
 export function AuctionGrid({
   calls,
   dealer,
   vulnerability = 'none',
   activeSeat = null,
+  explanations = 'full',
 }: {
   calls: ResolvedCall[]
   dealer: Seat
   vulnerability?: Vulnerability
   /** Platsen som ska bjuda härnäst (dess tomma ruta markeras), eller null. */
   activeSeat?: Seat | null
+  /**
+   * Budstöd av (ägarbeslut 2026-07-28) → 'minimal': popupen visar bara chip +
+   * kort regelnamn + ALERT (alerter finns även vid riktigt bord); kravmärket
+   * och den långa förklaringen döljs. 'full' = dagens hela panel.
+   */
+  explanations?: 'full' | 'minimal'
 }) {
   const [selected, setSelected] = useState<number | null>(null)
+  const full = explanations === 'full'
 
   // Buden ligger medurs från given: tomma rutor före första budet ställer varje
   // bud under rätt kolumn.
@@ -115,12 +128,19 @@ export function AuctionGrid({
               />
               <span className="relative drop-shadow-sm">✕</span>
             </button>
-            <div className="flex flex-wrap items-center gap-2 border-b border-line pb-2 pr-12">
+            <div
+              className={`flex flex-wrap items-center gap-2 pr-12 ${full ? 'border-b border-line pb-2' : ''}`}
+            >
               <BidChip bid={chosen.bid} />
               <span className="text-sm font-semibold text-ink-soft">
-                Förklaring · {SEAT_LABEL[chosen.seat]}
+                {full ? (
+                  <>Förklaring · {SEAT_LABEL[chosen.seat]}</>
+                ) : (
+                  // Minimal: bara det korta regelnamnet (sitsen om regel saknas).
+                  shortLabel(chosen.rule) ?? SEAT_LABEL[chosen.seat]
+                )}
               </span>
-              {chosenInfo?.forcing && (
+              {full && chosenInfo?.forcing && (
                 <span
                   className={`rounded px-1.5 text-[10px] font-semibold ${FORCING_BADGE[chosenInfo.forcing]}`}
                   title="Kravnivå: vad budet kräver av partnern"
@@ -128,19 +148,23 @@ export function AuctionGrid({
                   {FORCING_LABEL[chosenInfo.forcing]}
                 </span>
               )}
+              {/* ALERT visas ALLTID — vid riktigt bord alertas konstgjorda bud
+                  oavsett hur mycket förklaring man ber om (ägarbeslut). */}
               {chosenInfo?.alert && (
                 <span className="rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>
               )}
             </div>
-            <p className="pt-2 text-sm text-ink-soft">
-              {chosen.explanation ? (
-                <SuitText>{chosen.explanation}</SuitText>
-              ) : (
-                <span className="text-ink-faint">
-                  Ingen förklaring för <BidLabel bid={chosen.bid} />.
-                </span>
-              )}
-            </p>
+            {full && (
+              <p className="pt-2 text-sm text-ink-soft">
+                {chosen.explanation ? (
+                  <SuitText>{chosen.explanation}</SuitText>
+                ) : (
+                  <span className="text-ink-faint">
+                    Ingen förklaring för <BidLabel bid={chosen.bid} />.
+                  </span>
+                )}
+              </p>
+            )}
           </div>
         </>
       )}

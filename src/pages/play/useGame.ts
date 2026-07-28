@@ -50,6 +50,18 @@ export function useGame() {
   const [picking, setPicking] = useState(false)
   const [search, setSearch] = useState<SearchState | null>(null)
   const searchCancel = useRef(false)
+  // Budstöd (ägarbeslut 2026-07-28): På = motorns prick + förklaringar som
+  // vanligt; Av = inga hintar i budlådan och minimal förklaring i auktionsvyn.
+  // Ligger här (inte i usePlayTable) så både budfasen, spelfasen och
+  // omspelningen läser SAMMA val. Sparas mellan givar, som play-target.
+  const [bidHelp, setBidHelp] = useState<boolean>(() => loadValue('bidHelp', true))
+
+  function toggleBidHelp() {
+    setBidHelp((v) => {
+      saveValue('bidHelp', !v)
+      return !v
+    })
+  }
 
   // Avbryt en pågående sökning om komponenten lämnas.
   useEffect(() => () => { searchCancel.current = true }, [])
@@ -159,6 +171,8 @@ export function useGame() {
     picking,
     setPicking,
     search,
+    bidHelp,
+    toggleBidHelp,
     onBid,
     confirmContract,
     startNewGame,

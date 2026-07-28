@@ -56,6 +56,7 @@ export function BiddingBox({
   onBid,
   recommendation = null,
   history = [],
+  showHelp = true,
 }: {
   legal: Bid[]
   onBid: (bid: Bid) => void
@@ -63,10 +64,13 @@ export function BiddingBox({
   recommendation?: ResolvedCall | null
   /** Budföljden så här långt – så även egna bud kan tolkas (alltid en förklaring). */
   history?: ResolvedCall[]
+  /** Budstöd av (false) döljer ALL hjälp: pricken, förklaringen och "Motorn hade valt". */
+  showHelp?: boolean
 }) {
   const allowed = new Set(legal)
   const [selected, setSelected] = useState<Bid | null>(null)
-  const recBid = recommendation && allowed.has(recommendation.bid) ? recommendation.bid : null
+  const recBid =
+    showHelp && recommendation && allowed.has(recommendation.bid) ? recommendation.bid : null
 
   const choose = (bid: Bid) => {
     if (allowed.has(bid)) setSelected((s) => (s === bid ? null : bid))
@@ -109,8 +113,8 @@ export function BiddingBox({
         )}
       </div>
 
-      {/* Betydelse-raden: kort och diskret, bara när ett bud är valt. */}
-      {selected && (
+      {/* Betydelse-raden: kort och diskret, bara när ett bud är valt (och budstödet är på). */}
+      {showHelp && selected && (
         <p className="px-1 text-xs leading-snug text-emerald-50/90">
           {isRec && <span className="mr-1 rounded bg-emerald-600 px-1 text-[10px] font-bold text-white">MOTORNS BUD</span>}
           {selAlert && <span className="mr-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>}
