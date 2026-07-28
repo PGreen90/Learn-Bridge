@@ -222,19 +222,38 @@ export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1,
   // (felrapport-uppföljning: advancern bjöd deras egen färg).
   const unbid = RANK_ORDER.filter((s) => !bidSuits.includes(s))
 
-  // Längsta objudna färg; lika längd → högfärg/högre rankad.
+  // Längsta objudna färg; lika längd → högfärg/högre rankad — utom när svaret
+  // tvingas upp över en dubblad spärr/spärrhöjning (theirLevel 3+): där väljer
+  // en människa den HONNÖRSSTARKARE färgen på lika längd (A832 före J982 —
+  // Mätning #18, frö 20261680: 4♥ på hackorna gick två bet när 4♣ stod).
+  const HONOR: Record<string, number> = { A: 4, K: 3, Q: 2, J: 1 }
+  const suitHcp = (s: Suit) => hand.filter((c) => c.suit === s).reduce((sum, c) => sum + (HONOR[c.rank] ?? 0), 0)
   let best = unbid[0]
   for (const s of unbid) {
-    if (len[s] > len[best] || (len[s] === len[best] && rankIdx(s) > rankIdx(best))) best = s
+    if (len[s] > len[best]) { best = s; continue }
+    if (len[s] !== len[best]) continue
+    const tiebreak = theirLevel >= 3
+      ? suitHcp(s) > suitHcp(best) || (suitHcp(s) === suitHcp(best) && rankIdx(s) > rankIdx(best))
+      : rankIdx(s) > rankIdx(best)
+    if (tiebreak) best = s
   }
   // Billigaste nivån att bjuda `best` på ÖVER deras öppning: en färg som rankar
   // över deras kan bjudas på samma nivå, annars ett steg upp.
   const lvl = rankIdx(best) > rankIdx(theirSuit) ? theirLevel : theirLevel + 1
   const cueLevel = theirLevel + 1 // cue i deras färg = ett steg upp över öppningen
 
-  // 12+ → cue deras färg (utgångskrav, låter partnern beskriva vidare).
+  // 12+ → cue deras färg (utgångskrav, låter partnern beskriva vidare) — men
+  // BARA medan det finns rum (deras öppning på 1–2-läget). Över en dubblad
+  // spärr/spärrhöjning (3-läget) är ett cue på 4-läget meningslöst och kan
+  // passas ut i DERAS färg (Mätning #18, frö 20260825: 3♥–P–P–X–P–4♥ blev
+  // slutbudet, 4-1-fit). Där väljs 3NT med stopp, annars bästa färg nedan.
   if (p >= 12) {
-    return { call: `${cueLevel}${BID[theirSuit]}`, rule: 'cue (krav)', explanation: `${p} hp – för starkt för bara ett färgbud → cue ${SYM[theirSuit]} (krav).` }
+    if (theirLevel <= 2) {
+      return { call: `${cueLevel}${BID[theirSuit]}`, rule: 'cue (krav)', explanation: `${p} hp – för starkt för bara ett färgbud → cue ${SYM[theirSuit]} (krav).` }
+    }
+    if (hasStopper(hand, theirSuit)) {
+      return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i ${NAME[theirSuit]} mot partnerns upplysnings-X → 3NT till spel.` }
+    }
   }
   // 9–11 → hoppbud (inbjudande) – bara meningsfullt över en 1-lägesöppning; över
   // en svag tvåa har öppningen redan ätit utrymmet, så vi bjuder naturligt.

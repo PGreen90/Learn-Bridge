@@ -9,8 +9,18 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
-## Etapp 6 (2026-07-27) — billig offring
-- **Hål 3: taket mot svaga tvåor (2026-07-27, NYAST).** Starka händer passar
+## Etapp 6 (2026-07-27/28) — billig offring
+- **Hål 4: försvaret väcker över deras höjda spärr (2026-07-28, NYAST).**
+  Efter deras öppning + spärrhöjning (`2♠–P–3♠` / `1♣–P–3♣`) tiger bottarna
+  inte längre: direkt över höjningen gäller spärrfönstren (X 14+, färg 13–16,
+  17+ dubblar alltid, 3NT till spel först från 19), i balansering lånas en
+  kung på X (11+) och färg (10+) med offshape-X ok, 3NT från 16. Tvingade
+  svar på 3-läget+ väljer honnörsstarkare färg på lika längd. **Bevaka:**
+  (a) tvingas partnern svara på 4-läget på luft och åker på dubbel straff —
+  känns X-golven för lätta? (b) höjningar förbi 3-läget lämnas medvetet
+  tysta — säljs för många 4♠-höjningar? (c) 19-golvet för direkta 3NT — står
+  ni kvar i X-svar när 3NT var enda utgången?
+- **Hål 3: taket mot svaga tvåor (2026-07-27).** Starka händer passar
   inte längre ut deras svaga tvåor: 3NT till spel bjuds med balanserade 19+
   (16+ i balansering) eller stark 6+ minor med stopp, och 17+ utan fönster
   dubblar hellre än säljer. **Bevaka:** (a) hamnar ni i 3NT på tunna håll

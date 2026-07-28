@@ -526,7 +526,7 @@ själva hade mer. Fyra hål bakom det, alla spårade till rad i koden:
 | 1 | ✅ **LAGAT 2026-07-27** (Mätning #15): **Stöddubblingen besvaras aldrig** — `1♦–(P)–1♠–(2♥)–X` passas ut av svararen; 2♥X blir kontraktet | 5 givar, 1 470 p | `auction-live.ts` `takeoutDoubleToAnswer`: svarstvånget stängs av så fort vår sida bjudit ett kontraktsbud, och stöddubblingen hade ingen egen svarsväg — nu `answerSupportDouble`/`supportDoublerRebid` |
 | 2 | ✅ **LAGAT 2026-07-27** (Mätning #16): **Svaret på upplysnings-X försvinner när RHO bjuder över** — `1♣–(X)–2♣` → advancern passade med 15 hp | ≥ 580 p | samma funktion: krävde att partnerns X var auktionens senaste icke-pass — nu `advancerFreeBidAfterDouble`/`doublerAnswersCue` + vakten `doublerRaisesAdvance` |
 | 3 | ✅ **LAGAT 2026-07-27** (Mätning #17): **Taket i §7.6-försvaret mot svaga tvåor** — 2NT-fönstret (15–18 direkt / 12–15 balansering) och det naturliga inklivet (10–16) hade inget utlopp uppåt; en balanserad **21-poängare passade ut 2♦** (frö 20260767) | 3 givar, 910 p | `defense-conventional.ts` `defendWeakTwo` — nu "3NT till spel" (bal. 19+/16+ i balansering, eller stark 6+ minor + stopp från 15) och stark X (17+); X:et behåller prioritet med kort i deras färg |
-| 4 | **Deras spärrbud stänger auktionen** — i 16 givar där vi ägde utgång/slam sa vår sida inte ett ord (9 av dem över en svag tvåa). Efter deras spärrhöjning (`2♠–P–3♠–P`) finns inget försvar alls | 16 givar, 5 720 p | `auction-live.ts` `maybeOvercall` kräver 1-lägesöppning + exakt ETT kontraktsbud i historiken; kommentaren ovanför säger uttryckligen att svaga tvåor/spärrar "hör till senare utbyggnad" |
+| 4 | ✅ **LAGAT 2026-07-28** (Mätning #18): **Deras spärrbud stänger auktionen** — i 16 givar där vi ägde utgång/slam sa vår sida inte ett ord (9 av dem över en svag tvåa). Efter deras spärrhöjning (`2♠–P–3♠–P`) fanns inget försvar alls | 16 givar, 5 720 p | `auction-live.ts` `maybeOvercall` kräver 1-lägesöppning + exakt ETT kontraktsbud i historiken, och linjen bakar in försvarspassen — nu `raisedPreemptToDefend` + `defendPreempt` med `raised`/`balancing` |
 
 **Hål 1, 2 och 3 kräver inget ägarbeslut** (rena buggar: en dubbling som ingen
 svarar på, ett fönster utan tak). **Hål 4 gör det** — hur aggressivt bottarna ska
@@ -536,7 +536,9 @@ fler egna bet.
 **Ägarbeslut 2026-07-27:** ordningen är hål 1 → 2 → 3 → mätning → hål 4 (med
 exempelhänder till ägaren). **Hål 1 + 2 + 3 LAGADE 2026-07-27** (Mätning #15–#17
 nedan). Hål 1+2 PCD:ade samma dag (mergepunkt `a62ff37`, deploy verifierad).
-**Kvar: hål 4 (ägarbeslut om spärrförsvaret).**
+**Hål 4 LAGAT 2026-07-28** (Mätning #18 nedan; ägarbeslut: spärrfönstren direkt,
+lånad kung i balansering, tunna fördelningsutgångar jagas inte). **ETAPP 6
+DÄRMED KLAR.**
 
 ## Mätning #15 — 2026-07-27, etapp 6 hål 1 (stöddubblingen besvaras)
 Samma frö 20260721, 1 000 givar. Fix: svarsväg för stöddubblingen
@@ -633,6 +635,50 @@ DD-verifierade före fixen), och den enda motposten är +20 p fel strain.
 **Etapp 6 hittills (M14→M17): billig offring 125/34 300 → 117/31 480, par-
 avvikelse 287,2 → 277,8, rätt kontrakt 17,1 → 18,0 %. Kvar: hål 4
 (spärrförsvaret, ägarbeslut med exempelhänder).**
+
+## Mätning #18 — 2026-07-28, etapp 6 hål 4 (deras spärrbud stänger auktionen) — ETAPP 6 KLAR
+Samma frö 20260721, 1 000 givar. Fix: `raisedPreemptToDefend` (auction-live.ts)
+väcker §7.6-försvaret efter deras öppning + spärrhöjning (`2♠–P–3♠`/`1♣–P–3♣`) —
+både direkt (linjens inbakade pass överstyrs) och i balansering (även när
+linjen är stängd). `defendPreempt` fick `balancing` ("låna en kung": X 11+,
+färg 10+, offshape-X — bara 3-läget) och `raised` (3NT till spel 19 direkt/16
+balansering), tak 16 på naturligt inkliv + 17+-X:et som aldrig säljer given.
+`answerTakeoutDouble`: över dubblad spärr (3-läget) cue-bjuds ALDRIG (3NT med
+stopp i stället), och tvingade svar väljer honnörsstarkare färg på lika längd.
+Ägarbeslut 2026-07-28: spärrfönstren direkt, lånad kung i balansering, tunna
+fördelningsutgångar (6♣ på 19 hp) jagas inte.
+
+```
+                        M17 (före)   M18 (hål 4)
+Rätt kontrakt (exakt par)  18,0 %       18,2 %
+Genomsnittlig par-avvikelse 277,8       276,3
+Billig offring         117/31 480    113/30 570
+Fel färg (bet)         122/51 840    124/52 430
+Missad utgång          149/49 850    150/50 100
+Missad lillslam         84/56 920     83/56 170
+Såld giv                55/18 700     53/18 010
+Bättre än facit        124/20 440    124/20 440
+Fel strain              96/2 350      98/2 410
+Övriga poster: oförändrade.
+```
+
+**Läsning (alla flyttar spårade per frö):** vinsterna: 20261680 → X + 4♣-svar
+till 5♣ = **exakt par** (500→0), 20261045 → X + 3♠-svar = **exakt par** (60→0),
+20261449 → X → 5♣ (350→50), 20260825 → cue-buggen lagad, 3♠-svar + 4♠ i
+konkurrens (480→10), 20260728 → 3NT efter X av höjd 1♦-spärr (250→60),
+20260729 → 3♥-inkliv (370→250), 20261197 → X, 4♦-svar (440→400). Ärliga
+kostnader: 20261477 → 21-poängarens X, svaret 3♠ går en bet (90→190 — hellre
+det än en 21-poängare som tiger) och 20261171 → 4♦-inkliv på deras höjning
+straffas (750→880). Mätvarvet avslöjade och lagade också tre följdfel: 16-golvet
+för direkta 3NT stod på Kx och gick djupt bet (20261045), lånade kungen mot en
+4-lägesöppning köpte en dyr uppoffring (20261533) och advancerns cue på 12+
+passades ut i DERAS färg (20260825, `3♥–P–P–X–P–4♥` blev slutbudet!). Facit:
+`auction-sparrhojning-svar.test.ts` (7 givar inkl. två gränsvakter) +
+enhetstester i defense-conventional.test.ts och doubles.test.ts.
+**ETAPP 6 KLAR (M14→M18): billig offring 125/34 300 → 113/30 570,
+par-avvikelse 287,2 → 276,3, rätt kontrakt 17,1 → 18,2 %. Topplista nu:
+missad lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad
+storslam 36 470 > billig offring 30 570.**
 
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och

@@ -10,47 +10,33 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Budgivningen mot perfekt · mönsterjakt i "billig offring"
-**Ägarbeslut 2026-07-25.** Nästa post ur revisorns topplista: motståndarna får
-offra för billigt / vi offrar själva fel (~125 givar, ~34 300 p i baslinjen).
+### 🔵 NU — (tomt) · etapp 6 KLAR 2026-07-28, ägaren väljer nästa
+**Etapp 6 "billig offring" är KLAR** — alla fyra hål lagade (hål 4 2026-07-28:
+försvaret väcker över deras höjda spärr, `raisedPreemptToDefend` +
+`defendPreempt` med raised/balansering, facit-test
+`auction-sparrhojning-svar.test.ts`, Mätning #18). Nästa NU väljs av ägaren —
+kandidaterna står i 🟢 NÄST, och topplistan pekar på **missad lillslam**
+(56 170 p) som största post.
 
-**Arbetssätt (samma som etapp 3–5, facit-först):** hämta exempelgivarna ur
-revisorn → hitta **MÖNSTREN**, inte enskilda givar → skriv facit-test som är RÖTT
-före fixen → laga → grönt → DD-verifiera → hela sviten → kör om mätningen med
-**samma frö** och kontrollera att posten krymper *utan* att andra poster växer →
-fråga ägaren om PCD (push/commit/deploy).
+**Arbetssätt när nästa mätspårs-etapp startar (facit-först):** hämta
+exempelgivarna ur revisorn → hitta **MÖNSTREN**, inte enskilda givar → skriv
+facit-test som är RÖTT före fixen → laga → grönt → DD-verifiera → hela sviten →
+kör om mätningen med **samma frö** och kontrollera att posten krymper *utan*
+att andra poster växer omotiverat → fråga ägaren om PCD (push/commit/deploy).
 
 ```
 $env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
 ```
 
-**Ägarbeslut 2026-07-27: ordningen är hål 1 → 2 → 3 → mätning → hål 4** (hål 4
-kräver ägarens omdöme och tas med exempelhänder). Förskanningen (2026-07-25)
-hittade fyra hål — full tabell: `docs/systemrevisorn.md`, "Etapp 6 FÖRSKANNAD";
-posten handlar **inte** om missade straffdubblingar utan om **utgångar och
-slammar vi aldrig bjöd**:
-1. ✅ **KLAR 2026-07-27** — stöddubblingen besvaras aldrig (5 givar, 1 470 p):
-   svarsväg byggd (`answerSupportDouble`/`supportDoublerRebid` i doubles.ts),
-   facit-test `auction-stoddubbling-svar.test.ts`, Mätning #15
-2. ✅ **KLAR 2026-07-27** — svaret på upplysnings-X försvinner när RHO bjuder
-   över (≥ 580 p): fri svarsväg + cue-svar + dubblarvakt
-   (`advancerFreeBidAfterDouble`/`doublerAnswersCue`/`doublerRaisesAdvance`),
-   facit-test `auction-upplysningsx-svar.test.ts`, Mätning #16
-3. ✅ **KLAR 2026-07-27** — taket i försvaret mot svaga tvåor (3 givar, 910 p):
-   `defendWeakTwo` fick 3NT till spel + stark X (17+),
-   facit-test `auction-svagtva-tak.test.ts`, Mätning #17
-4. deras spärrbud stänger auktionen (16 givar, 5 720 p) — **kräver ägarens
-   omdöme, NÄSTA: exempelhänder framtagna, väntar på ägaren**
-
-**Läget i spåret (Mätning #17, frö 20260721, 1 000 givar):** par-avvikelse
-**300 → 277,8 p/giv**, rätt kontrakt **15,9 % → 18,0 %**. Topplista nu: missad
-lillslam 56 920 > fel färg 51 840 > missad utgång 49 850 > missad storslam 36 470
-> billig offring 31 480.
+**Läget i spåret (Mätning #18, frö 20260721, 1 000 givar):** par-avvikelse
+**300 → 276,3 p/giv**, rätt kontrakt **15,9 % → 18,2 %**. Topplista nu: missad
+lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad storslam
+36 470 > billig offring 30 570.
 
 **Klart i spåret:** etapp 1 (felrapporter), etapp 2 (revisorn + baslinje), etapp 3
 (fel färg, 6 fixar), etapp 5 (missad utgång, 3 fixar), etapp 4 (F1-resten: slam
-efter 2♣ + reverse/hoppskift). Full logg: `docs/historik.md`. Alla mätningar +
-mönsteranalyser: `docs/systemrevisorn.md`.
+efter 2♣ + reverse/hoppskift), etapp 6 (billig offring, 4 hål). Full logg:
+`docs/historik.md`. Alla mätningar + mönsteranalyser: `docs/systemrevisorn.md`.
 
 **Senast klart 2026-07-25:** dokumentstädningen (denna fil bantad, `docs/README.md`
 + `docs/bevaka.md` + `docs/senare.md` nya) och därefter **den stora genomgången**:
@@ -69,15 +55,16 @@ inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **Försvaret väcker över deras höjda spärr (2026-07-28):** efter `2♠–P–3♠` /
+  `1♣–P–3♣` tiger bottarna inte längre (X 14+, 3NT 19+, 17+ dubblar alltid;
+  balansering lånar en kung på X/färg) — tvingas partnern svara på 4-läget på
+  luft?
 - **Taket mot svaga tvåor (2026-07-27):** starka händer säljer inte längre —
   3NT till spel (bal. 19+/16+ balansering, stark minor 15+) — hamnar ni i 3NT
   på tunna håll?
 - **Advancern talar över deras höjning (2026-07-27):** när de bjuder över
   partnerns upplysnings-X svarar boten nu fritt (form får bjuda utan poäng, XX
   flys alltid) — väcker den för lätt, och känns dubblarens utgångströsklar rätt?
-- **Stöddubblingen besvaras (2026-07-27):** svararen svarar nu alltid på stöd-X
-  (pass = medvetet straffpass) — hamnar ni för högt på 4-3-utgångar, och känns
-  straffpasset lagom vanligt?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är

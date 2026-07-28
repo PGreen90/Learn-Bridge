@@ -80,4 +80,28 @@ describe('defendPreempt – mot deras spärr 3-läget (§7.6)', () => {
   it('svag hand → pass', () => {
     expect(defendPreempt(parseHand('S:Q432 H:Q32 D:Q32 C:432'), 'clubs', 3).call).toBe('P')
   })
+
+  // Etapp 6 hål 4 (ägarbeslut 2026-07-28): tak 16 på naturliga inklivet,
+  // 17+ utan fönster dubblar (sälj aldrig given), balansering lånar en kung.
+  it('17+ med fel form för allt (2-4-2-5, 21 hp) → X i stället för pass (frö 20261477)', () => {
+    expect(defendPreempt(parseHand('S:AK H:AK92 D:T5 C:AQJT2'), 'diamonds', 3).call).toBe('X')
+  })
+  it('17+ med lång färg utan stopp dubblar först (tak 16 på naturliga inklivet)', () => {
+    expect(defendPreempt(parseHand('S:AKQJ43 H:A2 D:K32 C:32'), 'clubs', 3).call).toBe('X')
+  })
+  it('balansering lånar en kung: takeout-X redan från 11 hp (och 3 kort i deras färg ok)', () => {
+    const hand = parseHand('S:KJ43 H:KQ43 D:Q32 C:32')
+    expect(defendPreempt(hand, 'clubs', 3).call).toBe('P') // 11 hp direkt: under golvet 14
+    expect(defendPreempt(hand, 'clubs', 3, true).call).toBe('X')
+  })
+  it('kungen lånas INTE mot en 4-lägesöppning (Mätning #18, frö 20261533)', () => {
+    const hand = parseHand('S:82 H:KQT972 D:6 C:AQ32') // 11 hp, 6-korts hjärter
+    expect(defendPreempt(hand, 'diamonds', 4, true).call).toBe('P') // ingen rabatt på 4-läget
+  })
+  it('över deras HÖJDA spärr kräver direkta 3NT 19 (X:et tar över under det)', () => {
+    const hand = parseHand('S:KT84 H:K9 D:AK82 C:K85') // 16 hp bal, Kx-stopp (frö 20261045)
+    expect(defendPreempt(hand, 'hearts', 3, false, true).call).toBe('X') // inte 3NT på 16
+    const twenty = parseHand('S:KT84 H:AK9 D:AK82 C:K8') // 20 hp bal (4-3-4-2)
+    expect(defendPreempt(twenty, 'hearts', 3, false, true).call).toBe('3NT')
+  })
 })
