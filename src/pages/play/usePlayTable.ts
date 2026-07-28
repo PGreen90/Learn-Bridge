@@ -61,6 +61,15 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   const [claimed, setClaimed] = useState<{ total: number; auto: boolean } | null>(null)
   const [claiming, setClaiming] = useState(false)
   const [claimMsg, setClaimMsg] = useState<string | null>(null)
+  // Claim-reveal (etapp 5, "känsla i kortspelet", ägarbeslut 2026-07-28): en
+  // godkänd claim (manuell eller auto) landar FÖRST här — alla händer läggs
+  // upp öppet och LIGGER KVAR, precis som vid ett riktigt bord, tills spelaren
+  // själv går vidare med knappen (finishClaimReveal). Ingen timer. Botarna
+  // pausar under revealen.
+  const [pendingClaim, setPendingClaim] = useState<{ total: number; auto: boolean } | null>(null)
+  // Resultatövergången (etapp 5): när given är klar tonar bordet ut i
+  // ms('resultOutro') innan resultatvyn tar över — inget hårt klipp.
+  const [showResult, setShowResult] = useState(false)
   const [autoClaim, setAutoClaim] = useState<boolean>(() => loadValue('autoClaim', true))
   // Tempot (ägarbeslut 2026-07-28): Lugn/Normal/Snabb i ⋮-menyn skalar alla
   // botpauser och animationslängder (via tempo.ts + --motion-scale). Sparas.
@@ -138,6 +147,14 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     setSweep(null)
   }
 
+  /** Gå vidare från claim-revealen (knappen på bordet): committa claimen och
+   *  avsluta given. Enda vägen framåt — korten ligger kvar tills spelaren valt. */
+  function finishClaimReveal() {
+    if (!pendingClaim) return
+    setClaimed(pendingClaim)
+    setPendingClaim(null)
+  }
+
   // Kortknäppen: EN krok som fångar både människans och botens kort — totala
   // antalet spelade kort växer med varje lagt kort (även fjärde: 3 → 4 när
   // sticket bokförs). Ref-jämförelsen gör den StrictMode-säker och tyst vid
@@ -191,10 +208,11 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // (slutspelet) räknas i webworkern så gränssnittet inte fryser; snabba tumregler
   // körs inline med en liten paus för känsla.
   useEffect(() => {
-    // Bottarna pausar när en claim är lagd (given är slut), medan claim-dialogen
+    // Bottarna pausar när en claim är lagd (given är slut), under claim-
+    // revealen (händerna ligger uppe — inget får ändras), medan claim-dialogen
     // är öppen (ställningen får inte ändras under bedömningen) och under
     // sticksvepet (nästa kort får inte landa mitt i insamlingen).
-    if (claimed || claiming || sweep || isComplete(play) || controls(contract, play.toAct)) return
+    if (claimed || pendingClaim || claiming || sweep || isComplete(play) || controls(contract, play.toAct)) return
     const seat = play.toAct
     let cancelled = false
 
@@ -261,24 +279,26 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
       clearTimeout(floorId)
       setThinking(false)
     }
-  }, [contract, play, calls, claimed, claiming, speed, sweep])
+  }, [contract, play, calls, claimed, pendingClaim, claiming, speed, sweep])
 
   // Auto Claim: när ett nytt stick ska börja och spelförarsidan OMÖJLIGT kan
   // förlora fler stick (oavsett spelsätt) stängs given automatiskt – gäller både
   // när du är spelförare och när datorn är det. Slås av/på i ⋮-menyn.
   useEffect(() => {
     // Väntar även ut sticksvepet — resultatet ska inte dyka upp mitt i svepet.
-    if (!autoClaim || claimed || claiming || sweep || isComplete(play)) return
+    if (!autoClaim || claimed || pendingClaim || claiming || sweep || isComplete(play)) return
     if (play.currentTrick.length > 0) return
     if (!autoClaimAvailable(play)) return
-    setClaimed({ total: declarerTricksWon(play) + remainingTricks(play), auto: true })
-  }, [play, autoClaim, claimed, claiming, sweep])
+    // Via claim-revealen (etapp 5): händerna visas öppet innan given avslutas.
+    setPendingClaim({ total: declarerTricksWon(play) + remainingTricks(play), auto: true })
+  }, [play, autoClaim, claimed, pendingClaim, claiming, sweep])
 
   function onPlay(card: Card) {
     // Samma villkor som uppdateraren nedan — flygningen ska bara starta när
     // kortet faktiskt kommer att spelas, och källan måste mätas före setPlay.
     if (
       !claimed &&
+      !pendingClaim &&
       !isComplete(play) &&
       controls(contract, play.toAct) &&
       legalCards(play, play.toAct).some((c) => sameCard(c, card))
@@ -286,7 +306,7 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
       beginFlight(play.toAct, card)
     }
     setPlay((p) => {
-      if (claimed || isComplete(p) || !controls(contract, p.toAct)) return p
+      if (claimed || pendingClaim || isComplete(p) || !controls(contract, p.toAct)) return p
       if (!legalCards(p, p.toAct).some((c) => sameCard(c, card))) return p
       return playCard(p, card)
     })
@@ -298,7 +318,8 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   function onClaim(total: number) {
     const v = adjudicateClaim(play, total, FACIT_BUDGET)
     if (v.verdict === 'godkänd') {
-      setClaimed({ total, auto: false })
+      // Via claim-revealen (etapp 5): händerna visas öppet innan given avslutas.
+      setPendingClaim({ total, auto: false })
       setClaiming(false)
       setClaimMsg(null)
     } else if (v.verdict === 'nekad') {
@@ -329,6 +350,8 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // klick på ett kort i den redan valda färgen spelar kortet. Ett klick under
   // sticksvepet hoppar dessutom över svepet (otåliga blockeras aldrig).
   function onCardClick(card: Card) {
+    // Under claim-revealen ligger korten stilla — bara Gå vidare-knappen verkar.
+    if (pendingClaim) return
     skipSweep()
     if (selectedSuit !== card.suit) {
       setSelectedSuit(card.suit)
@@ -351,8 +374,18 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
 
   // En godkänd claim (manuell eller auto) avslutar given med det claimade
   // resultatet — de ospelade sticken bokförs enligt claimen. Sista sticket får
-  // sitt svep innan resultatet visas (done väntar ut sweep).
+  // sitt svep innan resultatet visas (done väntar ut sweep), och claim-revealen
+  // hålls öppen tills den committat (pendingClaim → claimed).
   const done = (isComplete(play) || claimed !== null) && sweep === null
+
+  // Resultatövergången: när done slår till tonar bordet ut (felt-fade-out i
+  // Play.tsx) och först efter ms('resultOutro') byts trädet till resultatvyn.
+  // (Effekten ligger här för att done beräknas strax ovanför.)
+  useEffect(() => {
+    if (!done) return
+    const id = setTimeout(() => setShowResult(true), ms('resultOutro', speed))
+    return () => clearTimeout(id)
+  }, [done, speed])
   const needed = 6 + contract.level
   const result: PlayResult = claimed
     ? {
@@ -370,6 +403,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   const openingLeadMade = play.completedTricks.length > 0 || play.currentTrick.length > 0
 
   function isFaceUp(seat: Seat): boolean {
+    // Claim-reveal (och bordets uttoning direkt efter): ALLA händer ligger
+    // öppna — som när korten läggs upp vid ett riktigt bord.
+    if (pendingClaim || claimed) return true
     if (seat === 'S') return true
     if (declSide === 'NS') return seat === 'N' // vi spelar → se även träkarlen Nord
     return seat === dummy && openingLeadMade // vi försvarar → träkarlen visas efter utspel
@@ -395,6 +431,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     setClaimMsg,
     autoClaim,
     toggleAutoClaim,
+    pendingClaim,
+    finishClaimReveal,
+    showResult,
     speed,
     setSpeed,
     sound,

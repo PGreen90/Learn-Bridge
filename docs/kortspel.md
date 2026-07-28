@@ -89,3 +89,29 @@
 - Minorkontrakt via heuristik: ersatt av kontrakt ur riktig auktion.
 - ~~DDS-facit/poängsättning + markeringar/utspel~~ → inkopplade.
 - ~~Koppla spelläget till en riktig auktion~~ → gjort (`auction-contract.ts`).
+
+## Tempo, animationer och ljud ("känsla i kortspelet", 2026-07-28 — AKTUELLT)
+
+Spåret som gav kortspelet liv, byggt i fem etapper helt i UI-lagret (spelmotorn
+`play.ts`/`claim.ts` orörd, inga nya beroenden). Full etapplogg:
+`docs/historik.md`; nuläget per funktion: `docs/status.md`.
+
+- **En sanning om tiderna:** alla spelfasens tider bor i `src/pages/play/tempo.ts`
+  (`BASE` + `ms(key, speed)`). Temporaden Lugn/Normal/Snabb i ⋮-menyn skalar
+  både JS-pauser och CSS-animationer (`--motion-scale` på bordets Felt).
+- **Sticksvepet:** färdigt stick ligger kvar med vinnarglow, sveps sedan mot
+  vinnarens sida; botarna väntar, klick hoppar över.
+- **Kortflygningen:** spelade kort flyger som WAAPI-klon från handen (eller dold
+  hands bordskant) till stickplatsen (`useCardFlight.ts` + `FlightLayer.tsx`).
+- **Ljuden:** tre diskreta Web Audio-syntetiserade ljud i `src/lib/sound.ts` —
+  kortknäpp, sticksvisch, giv-klar-tick. På/Av i ⋮-menyn (`learnbridge:sound`).
+- **Claim-reveal:** godkänd claim (manuell/auto) lägger upp ALLA händer och vyn
+  ligger kvar utan timer tills spelaren trycker "Visa resultatet" (ägarbeslut —
+  som vid ett riktigt bord). Sedan tonar bordet ut och resultatdialogen får
+  guldglow vid hemgång (sobert vid bet).
+- **Tillgänglighet:** allt visuellt respekterar `prefers-reduced-motion`
+  (reduced-motion-listan i `src/index.css`); JS-pacingen körs alltid så spelet
+  förblir spelbart.
+- **Facit-tester:** `tempo.test.tsx`, `sticksvep.test.tsx`,
+  `kortflygning.test.tsx`, `ljud.test.tsx`, `claimreveal.test.tsx` (alla under
+  `src/pages/play/`, seedade givar, tider från `tempo.ts`).

@@ -304,6 +304,17 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   ljudmotorn); allt no-op:ar tyst utan Web Audio (jsdom). "Ljud"-rad i
   spelfasens ⋮-meny, standard PÅ, sparas som `learnbridge:sound`. Test:
   `src/pages/play/ljud.test.tsx`.
+- **Claim-reveal + resultatövergång + guldglow (2026-07-28, "känsla i
+  kortspelet" etapp 5):** godkänd claim (manuell eller auto) sätter
+  `pendingClaim` i `usePlayTable.ts` — ALLA händer läggs upp öppna
+  (`isFaceUp` → true) och vyn LIGGER KVAR utan timer tills spelaren trycker
+  "Visa resultatet →" (`finishClaimReveal`; ägarbeslut 2026-07-28 — som vid
+  ett riktigt bord). Botarna, auto-claim och kortspel är låsta under revealen.
+  När given är klar (`done`) tonar bordet ut (`felt-fade-out`,
+  `ms('resultOutro')`) innan resultatvyn tar över (`showResult`);
+  resultatdialogen får engångs guldglow + skimmer vid hemgång
+  (`result-made-glow`, pseudo-element så `dialog-in` inte skrivs över) — bet
+  är sobert. Test: `src/pages/play/claimreveal.test.tsx`.
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,

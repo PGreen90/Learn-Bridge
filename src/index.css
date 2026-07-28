@@ -168,6 +168,54 @@
 }
 .winner-glow { animation: winner-glow calc(1200ms * var(--motion-scale, 1)) ease-in-out infinite; }
 
+/* Resultatövergången (etapp 5): hela bordet tonar ut innan resultatvyn tar
+   över. Bastiden 500 ms MÅSTE matcha BASE.resultOutro i tempo.ts — JS-timern
+   (showResult) och uttoningen löper parallellt och ska sluta samtidigt.
+   "both" håller slutläget (osynligt) om timern släpar en bildruta efter. */
+@keyframes felt-fade-out { to { opacity: 0; } }
+.felt-fade-out { animation: felt-fade-out calc(500ms * var(--motion-scale, 1)) ease-out both; }
+
+/* Guldglow vid hemgång (etapp 5, ägarbeslut: inget konfetti): en engångs mjuk
+   guldsvällning + diagonalt skimmer över resultatdialogen. Ligger på
+   pseudo-element så dialogens egen dialog-in-animation inte skrivs över.
+   Bet lämnas helt utan glow (sobert). */
+@keyframes result-made-glow {
+  0% { box-shadow: 0 0 0 0 rgba(217, 181, 86, 0); }
+  40% { box-shadow: 0 0 34px 10px rgba(217, 181, 86, 0.55); }
+  100% { box-shadow: 0 0 16px 4px rgba(217, 181, 86, 0.22); }
+}
+@keyframes result-made-skimmer {
+  from { background-position: 130% 0; }
+  to { background-position: -30% 0; }
+}
+.result-made-glow { position: relative; }
+.result-made-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: result-made-glow 1200ms ease-out both;
+}
+.result-made-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: linear-gradient(
+    115deg,
+    transparent 42%,
+    rgba(243, 228, 179, 0.22) 50%,
+    transparent 58%
+  );
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  /* Startläget = utanför bandet: utan animation (reduced motion) syns inget. */
+  background-position: 130% 0;
+  animation: result-made-skimmer 1200ms ease-out both;
+}
+
 /* Utdelningen: handens kort kaskadar in ett i taget. Fördröjningen per kort
    sätts inline (animationDelay) – "both" håller kortet osynligt tills dess. */
 @keyframes deal-in {
@@ -201,6 +249,7 @@
   .card-in-n, .card-in-s, .card-in-w, .card-in-e,
   .trick-sweep-n, .trick-sweep-s, .trick-sweep-w, .trick-sweep-e,
   .winner-glow,
+  .felt-fade-out, .result-made-glow::before, .result-made-glow::after,
   .deal-in, .page-in, .overlay-in, .dialog-in {
     animation: none;
   }
