@@ -38,6 +38,16 @@ lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad storslam
 efter 2♣ + reverse/hoppskift), etapp 6 (billig offring, 4 hål). Full logg:
 `docs/historik.md`. Alla mätningar + mönsteranalyser: `docs/systemrevisorn.md`.
 
+**Senast klart 2026-07-28 (kväll, felrapporter — inget NU):** #40 (17+ säljer
+aldrig given över deras 1-lägesöppning, §7.1), #41 (sangsystemet inkopplat
+off-book, §4.3) och #42 (kvantitativ höjning av partnerns naturliga 3NT, §6.8).
+Kontrollmätning #19 (samma frö): par-avvikelse 276,34 → 276,49, rätt kontrakt
+oförändrat 18,2 % — praktiskt taget platt. **Två fynd:** fix #42 träffade INTE
+en enda botgiv (missad lillslam står stilla på 56 170 — posten är fortfarande
+obearbetad), och fix #40 blottade ett nytt hål: den starka dubblaren säljer
+given i rond 2 när hen saknar egen färg (frö 20260952, ÖV missade 7NT). Detalj:
+`docs/systemrevisorn.md` Mätning #19 + `docs/bevaka.md`.
+
 **Senast klart 2026-07-28 (underhåll, inget NU):** hälsokoll av uppsättningen →
 namnet `rebidz` rättat på de fyra ställen användaren ser det, sessionskontexten
 bantad, och **deploygrinden lagad — den var ett myntkast**: konsistenstesterna
@@ -63,16 +73,16 @@ inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
-- **Försvaret väcker över deras höjda spärr (2026-07-28):** efter `2♠–P–3♠` /
-  `1♣–P–3♣` tiger bottarna inte längre (X 14+, 3NT 19+, 17+ dubblar alltid;
-  balansering lånar en kung på X/färg) — tvingas partnern svara på 4-läget på
-  luft?
-- **Taket mot svaga tvåor (2026-07-27):** starka händer säljer inte längre —
-  3NT till spel (bal. 19+/16+ balansering, stark minor 15+) — hamnar ni i 3NT
-  på tunna håll?
-- **Advancern talar över deras höjning (2026-07-27):** när de bjuder över
-  partnerns upplysnings-X svarar boten nu fritt (form får bjuda utan poäng, XX
-  flys alltid) — väcker den för lätt, och känns dubblarens utgångströsklar rätt?
+- **17+ säljer aldrig given över deras 1-lägesöppning (#40, 2026-07-28):** en
+  17+-hand utan fönster dubblar i stället för att passa (typfall: enda
+  långfärgen är öppnarens egen) — dubblar bottarna för ofta med LÄNGD i deras
+  färg? **Känt hål i rond 2:** den starka dubblaren kan sälja given i nästa
+  rond (M19, frö 20260952) — detaljer i `docs/bevaka.md`.
+- **Sangsystemet gäller även off-book (#41, 2026-07-28):** bjuder du 1NT själv i
+  budlådan svarar partnern nu enligt §4.3 (2♠ = Minor Suit Stayman, aldrig
+  naturligt) — läser motorn dina bud som du menade dem?
+- **Kvantitativ höjning av 3NT (#42, 2026-07-28):** har partnern öppnat och
+  placerat 3NT höjer kaptenen till 6NT med 21+ hp — hamnar ni i 6NT som går bet?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är

@@ -74,6 +74,19 @@ den generativa linjen i `auction.ts` (`buildAuction`) modellerar inklivet — et
 grundläggande ingrepp. Öppningsfallet + 4-4-fallet är klara & live (felrapport #23,
 §7.3).
 
+### Den starka dubblaren säljer given i ROND 2 (2026-07-28, funnen i Mätning #19)
+"17+ säljer aldrig given" gäller i dag bara **första** ronden (§7.1, felrapport
+#40). I rond 2 kräver `ownStrongDoubleRebid` (auction-live.ts) en egen **5+
+objuden** färg för det starka återbudet — en jämn 17–19-poängare har ingen, och
+då finns ingen väg vidare alls. Frö 20260952: `1♦–X–P–3♣–P–P–P`, Väst dubblar med
+19 hp, Öst hoppar 3♣, Väst **passar** — ÖV kunde ta 7NT (par 1520). Kostade
++330 p i M19 och är den enskilda post som gjorde kontrollmätningen minus.
+**Vad som saknas:** ett återbud för den starka dubblaren utan egen färg — cue i
+deras färg (krav) eller sang med stopp, graderat efter vad partnerns svar visade
+(hoppet 3♣ visade ju 9–11, alltså ~28+ ihop). Kräver ägarbeslut om hur högt den
+jämna 19-poängaren ska driva. Reproducera med
+`$env:DUMP='20260952'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`.
+
 ### Auto-facit på hela given i webworker (R3 fynd #3 del 2)
 Visa spelförarens double-dummy-optimum automatiskt i resultatdialogen. Byggdes
 synkront men backades — helgivs-DDS från utspelet är för tung (probe: 79/80 kontrakt

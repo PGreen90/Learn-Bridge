@@ -680,6 +680,63 @@ par-avvikelse 287,2 → 276,3, rätt kontrakt 17,1 → 18,2 %. Topplista nu:
 missad lillslam 56 170 > fel färg 52 430 > missad utgång 50 100 > missad
 storslam 36 470 > billig offring 30 570.**
 
+## Mätning #19 — 2026-07-28 (kväll), felrapport #40/#41/#42 (INGEN etapp)
+Samma frö 20260721, 1 000 givar. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+Detta är **ingen mätspårs-etapp** — det är en kontrollmätning efter tre lagade
+felrapporter, för att se att inget rasade. Fixarna: 17+ säljer aldrig given över
+deras 1-lägesöppning (§7.1, #40), sangsystemet inkopplat off-book (§4.3, #41)
+och kvantitativ höjning av partnerns naturliga 3NT (§6.8, #42).
+
+```
+                        M18 (före)   M19 (nu)
+Rätt kontrakt (exakt par)  18,2 %       18,2 %
+Genomsnittlig par-avvikelse 276,34      276,49
+Missad lillslam         83/56 170     83/56 170
+Fel färg (bet)         124/52 430    123/52 160
+Missad utgång          150/50 100    150/50 100
+Missad storslam         32/36 470     33/37 820
+Billig offring         113/30 570    112/29 550
+Bättre än facit        124/20 440    124/20 580
+Såld giv                53/18 010     54/18 290
+För högt                38/8 930      37/8 590
+Fel strain              98/2 410      99/2 420
+Utpassad                 3/810         3/810
+```
+
+**Läsning (alla fem flyttar spårade per frö, `REVISOR_EXAMPLES=500`):** netto
+**+150 p** över 1 000 givar (+0,15 p/giv) — praktiskt taget oförändrat, men
+mätningen är deterministisk så det är en verklig liten försämring, inte brus.
+
+**Två fynd som är viktigare än siffran:**
+
+1. **Fix #42 syntes INTE alls.** "Missad lillslam" står stilla på exakt
+   83/56 170. Regelns villkor (partnern har öppnat på 1-läget, hens naturliga
+   3NT är senaste budet, egen hand 21+ utan renons, motståndarna tysta) träffade
+   inte en enda av de 1 000 botgivarna. Fixen löser den rapporterade given —
+   facit-testet bevisar det — men den rör inte topposten. **Missad lillslam är
+   fortfarande obearbetad som mätspår.**
+2. **Alla fem flyttade givar kommer från fix #40**, och fyra av dem är plus
+   eller platt: 20260907 (X → 2♦, −110), 20261243 (X → deras 3♥, −60),
+   20261500 (balanserings-X → 1♥, −70), 20261056 (balanserings-X → 3♠, +60).
+   Den femte dominerar hela försämringen:
+
+   **Frö 20260952 (+330) — nytt hål: den starka dubblaren SÄLJER GIVEN i rond 2.**
+   `1♦–X–P–3♣–P–P–P`. Väst dubblar 1♦ med **19 hp** (4-4-3-2, för stark för
+   1NT-inklivet, fel form för takeout — precis den hand #40 släppte in), Öst
+   hoppar 3♣ (9–11), och **Väst passar 3♣ med 19 hp**. ÖV kan ta **7NT** (par
+   1520). Principen "17+ säljer aldrig given" håller alltså i rond 1 men brister
+   i rond 2: `ownStrongDoubleRebid` kräver en egen 5+ objuden färg, och Väst har
+   ingen — då finns ingen väg vidare alls. I M18 föll samma giv i "billig
+   offring" (NS spelade 3♦X, −1020); båda utfallen missar ÖV:s storslam grovt.
+
+**Nästa steg om posten ska tas:** hålet i rond 2 (den starka dubblarens
+fortsättning utan egen färg) är en kandidat i sin egen rätt — se `docs/bevaka.md`.
+
 ## Fel färg-spåret: mönsteranalys av topposten (2026-07-21, etapp 3 NU)
 Alla 148 "fel färg med bet"-givar hämtade (`REVISOR_EXAMPLES=500`) och
 grovgrupperade efter nådd strain-klass → facit-klass (poäng = totalt tapp):

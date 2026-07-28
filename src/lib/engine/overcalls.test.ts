@@ -38,6 +38,20 @@ describe('overcall – inkliv över deras 1-läges öppning (§7.1–7.2)', () =
     expect(res.call).toBe('X')
     expect(res.rule).toBe('upplysningsdubbling (stark)')
   })
+  // Felrapport #40 (bricka 1): 20 hp där den enda långfärgen är ÖPPNARENS färg
+  // (KQJ964 hjärter över 1♥). Regel 3.5 kräver en EGEN 5+ färg, upplysnings-X:et
+  // kräver korthet i deras färg → handen föll rakt igenom till pass och 1♥ såldes.
+  // Ägarbeslut: sälj ALDRIG given med 17+ — samma utlopp som §7.6-försvaret
+  // redan har mot svaga tvåor och spärrar (defendWeakTwo/defendPreempt).
+  it('17+ utan fönster (långfärgen är deras egen) → X, inte pass', () => {
+    const res = overcall(parseHand('S:A H:KQJ964 D:Q4 C:AKJ3'), '1H') // 20 hp, 6 hjärter
+    expect(res.call).toBe('X')
+    expect(res.rule).toBe('upplysningsdubbling (stark)')
+  })
+  it('16 hp utan fönster passar fortfarande (taket rörs inte)', () => {
+    expect(o('S:A4 H:KQJ964 D:Q4 C:KJ3', '1H')).toBe('P') // 16 hp → under 17+-utloppet
+  })
+
   it('inget inkliv mot deras 1NT (hanteras av DONT)', () => {
     expect(o('S:KQ542 H:K32 D:32 C:432', '1NT')).toBe('P')
   })

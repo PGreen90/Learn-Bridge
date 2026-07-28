@@ -21,7 +21,9 @@ import { advancerFreeBidAfterDouble, answerSupportDouble, answerTakeoutDouble, d
 import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { defendPreempt } from './defense-conventional'
-import { openerAnswerFourthSuit, openerAnswerNMF } from './rebids'
+import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse } from './rebids'
+import { respondTo1NT } from './responses-nt'
+import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
 import { responderPlaceAfterNMF } from './responder-rebids'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
@@ -1155,6 +1157,158 @@ function kingAskToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '5NT') return null
   if (!history.some((c) => c.seat === PARTNER[seat] && c.bid === '4NT')) return null
   return slamAskTrump(history, seat)
+}
+
+// ---- Kvantitativ höjning av partnerns naturliga 3NT (felrapport #42) --------
+//
+// Systemets slamportar satt bara i den kanoniska linjens NAMNGIVNA mönster
+// (Jacoby 2NT, inverterad minor, 1NT-återbudet, MSS …). Placerade partnern
+// kontraktet i ett naturligt 3NT i en vanlig färgauktion fanns ingen kvantitativ
+// höjning alls — kaptenen hade inget bud och passade bort lillslammen
+// (felrapport #42: 21 hp mittemot en öppningshand, 12 stick i 3NT).
+//
+// Regeln är systemets EGEN kaptensregel (§5.2, ärliga slamportar 2026-07-07):
+// egen hand + partnerns VISADE minimum ≥ 33 → driv. Partnern har ÖPPNAT på
+// 1-läget i en färg, och den låsta regeln är att en 12-poängshand alltid öppnar
+// → visat minimum = 12, alltså tröskeln 21 hp på egen hand. Ingen kontrollkoll
+// (ägarbeslut), och storslam kräver visshet → taket är 6NT.
+
+/** Partnerns visade minimum när hen öppnat på 1-läget i en färg (låst regel). */
+const SUIT_OPENING_SHOWN_MIN = 12
+
+/**
+ * Höjer partnerns naturliga 3NT till 6NT när kaptenens egen hand + partnerns
+ * visade minimum når slamzonen (33). Smal med flit:
+ *  - partnerns 3NT ska vara auktionens SENASTE bud (ingen har bjudit över),
+ *  - partnern ska ha ÖPPNAT på 1-läget i en FÄRG (då är 12-golvet ärligt;
+ *    sangöppningar har sina egna portar i `respondTo1NT`/`respondTo2NT`),
+ *  - motståndarna ska ha varit tysta (deras bud kan göra 3NT till ett
+ *    tävlingsbud i stället för en styrkevisning),
+ *  - egen hand utan renons — vild fördelning hör inte hemma i 6NT.
+ */
+function raisePartnerThreeNTToSlam(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '3NT') return null
+
+  const open = openingBid(history)
+  if (!open || open.seat !== PARTNER[seat]) return null
+  if (open.level !== 1 || open.strain === 'NT') return null
+  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null
+
+  const hand = deal.hands[seat]
+  const p = hcp(hand)
+  if (p + SUIT_OPENING_SHOWN_MIN < 33) return null
+  const len = lengths(hand)
+  if ((['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).some((s) => len[s] === 0)) return null
+  if (!legalCalls(history, seat).includes('6NT')) return null
+
+  return {
+    seat,
+    bid: '6NT',
+    rule: 'slamhöjning av 3NT',
+    explanation:
+      `${p} hp mot partnerns visade ${SUIT_OPENING_SHOWN_MIN}+ (öppningen) = minst ${p + SUIT_OPENING_SHOWN_MIN} ihop ` +
+      `→ 6NT. Slamzonen nås redan mot partnerns minimum, så jag placerar lillslammen i stället för att passa 3NT.`,
+  }
+}
+
+// ---- Sangsystemet off-book (§4.3–4.4, felrapport #41) -----------------------
+//
+// `respondTo1NT`/`respondTo2NT` och öppnarens återbud var BARA inkopplade i den
+// kanoniska linjen (`auction.ts`). Bjöds sangöppningen off-book — t.ex. när
+// ägaren tar budet själv i budlådan — fanns ingen väg in: `offBookResponse`
+// kräver att partnern visat en FÄRG, och en sangöppning visar ingen. Resultatet
+// var att 1NT passades ut även med en stark hand mittemot (felrapport #41).
+//
+// Båda sidor av bordet behövs för att auktionen ska bli hel: svararen får sitt
+// systemsvar, öppnaren sitt återbud. Betydelsen av svarsbudet läses ur BUDET,
+// aldrig ur partnerns kort (ärliga slamportar).
+
+/** Är auktionen ostörd med sangöppningen som enda kontraktsbud från vår sida? */
+function cleanNTOpening(history: ResolvedCall[], seat: Seat): { seat: Seat; level: number } | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level > 2) return null
+  if (side(open.seat) !== side(seat)) return null
+  // Motståndarna ska ha varit HELT tysta – stör de äger `ntInterferenceToAnswer`
+  // och DONT-detektorerna läget, inte sangsystemet.
+  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null
+  return { seat: open.seat, level: open.level }
+}
+
+/**
+ * PARTNERN öppnade 1NT/2NT off-book och det är `seat`s tur att svara första
+ * gången → kör sangsystemet (§4.3/§4.4): Stayman, transfers, Texas, Minor Suit
+ * Stayman/minorfråga och NT-stegen. Kräver att öppningen är auktionens enda
+ * kontraktsbud och att `seat` inte redan bjudit något själv (bara pass tillåts,
+ * t.ex. när partnern öppnat i tredje hand).
+ */
+function answerPartnerNTOpening(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = cleanNTOpening(history, seat)
+  if (!open || open.seat !== PARTNER[seat]) return null
+  if (history.filter((c) => parseContractBid(c.bid)).length !== 1) return null
+  if (history.some((c) => c.seat === seat && c.bid !== 'P')) return null
+
+  const hand = deal.hands[seat]
+  const res = open.level === 1 ? respondTo1NT(hand) : respondTo2NT(hand)
+  const bid = res.call as Bid
+  if (bid !== 'P' && !legalCalls(history, seat).includes(bid)) return null
+  return { seat, bid, rule: res.rule, explanation: res.explanation }
+}
+
+/**
+ * Betydelsen av partnerns svar på VÅR sangöppning, läst ur BUDET (aldrig ur
+ * partnerns kort). Returnerar `ResponseResult.rule`-strängen som
+ * `openerRebidAfter1NTResponse`/`openerRebidAfter2NTResponse` dispatchar på,
+ * eller null när budet inte är ett systemsvar (då lämnas läget åt övriga
+ * detektorer).
+ */
+function ntResponseRule(openLevel: number, bid: string): string | null {
+  if (openLevel === 1) {
+    switch (bid) {
+      case '2C': return 'Stayman'
+      case '2D': case '2H': return 'Jacoby-transfer'
+      case '2S': return 'Minor Suit Stayman'
+      case '2NT': return '2NT inbjudan'
+      case '3NT': return '3NT till spel'
+      case '4D': case '4H': return 'Texas'
+      case '4NT': return '4NT kvantitativ'
+      default: return null
+    }
+  }
+  switch (bid) {
+    case '3C': return 'Stayman (2NT)'
+    case '3D': case '3H': return 'transfer (2NT)'
+    case '3S': return 'minorfråga (2NT)'
+    case '4D': case '4H': return 'Texas (2NT)'
+    case '4NT': return '4NT kvantitativ'
+    case '6NT': return '6NT till spel'
+    default: return null
+  }
+}
+
+/**
+ * `seat` öppnade 1NT/2NT off-book och partnern har svarat med ett systemsvar som
+ * väntar på öppnarens återbud (Stayman-svar, fullföljd transfer/Texas, MSS-svar,
+ * accept/avböj av inbjudan). Exakt två kontraktsbud i historiken: vår öppning +
+ * partnerns svar.
+ */
+function openerAnswersNTResponse(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = cleanNTOpening(history, seat)
+  if (!open || open.seat !== seat) return null
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (bids.length !== 2 || bids[1].seat !== PARTNER[seat]) return null
+
+  const rule = ntResponseRule(open.level, bids[1].bid)
+  if (!rule) return null
+  const response = { call: bids[1].bid, rule, explanation: '' }
+  const hand = deal.hands[seat]
+  const res = open.level === 1
+    ? openerRebidAfter1NTResponse(response, hand)
+    : openerRebidAfter2NTResponse(response, hand)
+  if (!res) return null
+  const bid = res.call as Bid
+  if (bid !== 'P' && !legalCalls(history, seat).includes(bid)) return null
+  return { seat, bid, rule: res.rule, explanation: res.explanation }
 }
 
 // ---- Off-book: svara historiedrivet på Syds egna bud (pivotens kärna) -------
@@ -3470,6 +3624,16 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // färg/2NT) i stället för att passa. Måste ligga FÖRE off-book-svaret
       // (som annars kräver 12+ för en ny färg på 2-läget och passar).
       () => negativeDoublerContinues(deal, history, seat),
+      // Kaptenen höjer partnerns naturliga 3NT till 6NT när slamzonen nås redan
+      // mot partnerns visade minimum (felrapport #42). Måste ligga FÖRE
+      // off-book-svaret, som skyddar partnerns utgångsbud och därmed passar.
+      () => raisePartnerThreeNTToSlam(deal, history, seat),
+      // Sangsystemet när sangöppningen bjudits OFF-BOOK (felrapport #41):
+      // svararen får §4.3/§4.4-svaret, öppnaren sitt återbud. Måste ligga FÖRE
+      // off-book-svaret (som kräver en visad FÄRG och därför passade ut 1NT)
+      // och före honorForce (som läste Stayman-2♣ som "krav – ny färg").
+      () => answerPartnerNTOpening(deal, history, seat),
+      () => openerAnswersNTResponse(deal, history, seat),
       // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
       () => offBookResponse(deal, history, seat),
       // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett
