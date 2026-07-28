@@ -305,6 +305,14 @@ för att chansa en sang som faller på första utspel:
 ### 4.3 Svar på 1NT (15–17 hp, balanserad)
 *(Ingen störning. Konkurrens tas senare.)*
 
+> **Sangsystemet gäller alltid — även när 1NT bjudits för hand (felrapport #41).**
+> Tar du sangöppningen själv i budlådan, i stället för det bud motorn hade valt,
+> gäller ändå hela §4.3/§4.4: partnern svarar med Stayman/transfer/Texas/Minor
+> Suit Stayman eller NT-stegen, och öppnaren ger sitt vanliga återbud. Betydelsen
+> av svaret läses ur **budet**, aldrig ur partnerns kort. Stör motståndarna tar
+> §7.8 över i stället. Tidigare dog en sådan auktion på fläcken: 1NT passades ut
+> med 15 hp och 5-4 i minorerna mittemot.
+
 #### Översikt
 | Svar | Betydelse | Konvention |
 |---|---|---|
@@ -1119,6 +1127,31 @@ för högt.
 
 Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam).
 
+### 6.8 Kvantitativ höjning av partnerns naturliga 3NT
+Placerar partnern kontraktet i ett **naturligt 3NT** i en vanlig färgauktion är
+det inte automatiskt sista ordet. Kaptensregeln (§5.2, ärliga slamportar) gäller
+även här: **egen hand + partnerns VISADE minimum ≥ 33 → driv.**
+
+Har partnern **öppnat på 1-läget i en färg** är det visade minimet **12 hp** (den
+låsta regeln: en 12-poängshand öppnar alltid). Tröskeln blir därmed:
+
+| Egen hand | Aktion över partnerns 3NT |
+|---|---|
+| **21+ hp** | **6NT** — slamzonen (33) nås redan mot partnerns minimum |
+| 20 eller mindre | pass — 3NT står (hellre systemriktig miss än gambling) |
+
+Villkoren är medvetet smala: partnerns 3NT ska vara auktionens **senaste bud**,
+motståndarna ska ha varit **tysta** (deras bud kan göra 3NT till ett tävlingsbud
+i stället för en styrkevisning), och den egna handen får inte ha **renons** —
+vild fördelning hör inte hemma i 6NT. Sangöppningar har sina egna portar
+(kvantitativ 4NT och Gerber, §4.3/§6.4). **Ingen kontrollkoll** (ägarbeslut) och
+**storslam kräver visshet** → taket är 6NT.
+
+*Bakgrund (felrapport #42): auktionen 1♣–1♥–1♠–2♦–2♥–3♦–3NT passades ut med 21 hp
+mittemot öppningshanden. Slamportarna satt bara i den kanoniska linjens namngivna
+mönster (Jacoby 2NT, inverterad minor, 1NT-återbudet, MSS) — en vanlig färgauktion
+som slutade i 3NT hade ingen port alls. Given gav 12 stick.*
+
 ## 7. Försvarsbud
 > Budgivning när motståndarna öppnat (inkliv, dubblingar) och i konkurrens efter
 > vår egen öppning. Markeringar och utspel: §8.
@@ -1142,6 +1175,15 @@ Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam)
   | Enkelt inkliv (5+ färg) | 8 hp | **5 hp** |
   | Upplysnings-X (kort i deras färg, stöd i övriga) | 12 (perfekt 4-korts form 10) | **9** (form **7**) |
   | 1NT-inkliv (jämn m. stopp) | 15–18 | **11–14** (klassisk återöppnings-1NT) |
+
+- **17+ säljer aldrig given (felrapport #40).** Ryms en 17+-hand inte i något
+  fönster – för stark för det kapade inklivet (tak 16), fel form för
+  upplysnings-X:et (kräver korthet i deras färg), och utan egen 5+ färg att visa
+  – **dubblar den ändå** i stället för att passa. Utloppet är detsamma som
+  §7.7-försvaret redan har mot svaga tvåor och spärrar. Typfallet: en 20-poängare
+  vars enda långfärg är **öppnarens egen** (KQJ964 hjärter över deras 1♥) – förr
+  passade den och 1♥ såldes på fläcken. X:et är upplysning: partnern måste svara,
+  och den starka handen beskriver sig på nästa varv.
 
   Michaels / ovanlig 2NT (formbud, 5-5) och den starka 17+-X:en är oförändrade –
   de vilar på form/styrka, inte på det lånade kunga-utrymmet. Färgkvalitet och
@@ -1500,6 +1542,46 @@ Det avslöjar längd/räkning direkt för partnern.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ## 9. Ändringslogg
+- **2026-07-28 (kväll)** – **Kvantitativ höjning av partnerns naturliga 3NT
+  (kod, §6.8, felrapport #42, ägarbeslut).** Auktionen
+  `1♣–1♥–1♠–2♦–2♥–3♦–3NT` passades ut med **21 hp** mittemot öppningshanden
+  (bricka 7; given gav 12 stick). Roten: slamportarna var inkopplade bara i den
+  kanoniska linjens NAMNGIVNA mönster (Jacoby 2NT, inverterad minor,
+  1NT-återbudet, MSS) — placerade partnern kontraktet i ett naturligt 3NT i en
+  vanlig färgauktion fanns ingen kvantitativ höjning alls, så kaptenen passade.
+  Nu gäller systemets egen kaptensregel även där: egen hand + partnerns visade
+  minimum ≥ 33 → driv. Partnern har öppnat på 1-läget i en färg → visat minimum
+  12 → tröskeln **21 hp → 6NT**; 20 eller mindre passar. Smal med flit: 3NT ska
+  vara senaste budet, motståndarna tysta, ingen renons på egen hand.
+  Sangöppningar behåller sina egna portar. Ingen kontrollkoll och storslam
+  kräver visshet → taket är 6NT. Facit-test FÖRE fix:
+  `auction-3nt-slamhojning.test.ts` (inkl. gränsvakterna 20 hp, ej-öppnande
+  partner och renonshanden). Hela sviten grön.
+- **2026-07-28 (kväll)** – **Sangsystemet gäller även off-book (kod, §4.3,
+  felrapport #41).** Ägaren bjöd 1NT själv i budlådan och auktionen dog på
+  fläcken (`1NT–P–P–P`) trots att partnern satt med 15 hp och 5-4 i minorerna
+  (bricka 11). Roten: `respondTo1NT`/`respondTo2NT` och öppnarens återbud var
+  BARA inkopplade i den kanoniska linjen — off-book gick svaret till det
+  generella `offBookResponse`, som kräver att partnern visat en **färg**, och en
+  sangöppning visar ingen. Samma hål åt andra hållet: öppnaren kunde inte
+  besvara Stayman/transfer/MSS off-book (Stayman-2♣ lästes till och med som
+  "krav – ny färg"). Nu kopplas §4.3/§4.4 in på båda sidor av bordet när
+  sangöppningen är auktionens enda kontraktsbud och motståndarna är tysta
+  (stör de äger §7.8 läget). Svarets betydelse läses ur **budet**, aldrig ur
+  partnerns kort. Rapportens giv landar nu i 5♦ via Minor Suit Stayman i stället
+  för 1NT. Facit-test FÖRE fix: `auction-sang-offbook.test.ts`. Hela sviten grön.
+- **2026-07-28 (kväll)** – **17+ säljer aldrig given över deras 1-lägesöppning
+  (kod, §7.1, felrapport #40, ägarbeslut).** Öst passade med **20 hp** över
+  Nords 1♥ och given såldes på fläcken (bricka 1). Roten: `overcall` hade inget
+  utlopp för 17+ när den enda långfärgen är **öppnarens egen** — den starka
+  17+-regeln kräver en EGEN 5+ färg, upplysnings-X:et kräver korthet i deras
+  färg, och naturliga inklivet är kapat vid 16. Handen föll rakt igenom till
+  pass. Nu dubblar 17+ som sista utlopp, precis som §7.7-försvaret redan gör mot
+  svaga tvåor och spärrar. Taket 16 på det naturliga inklivet är oförändrat.
+  Ägarens formulering i rapporten: "jag ser hellre en dubbling". Facit-test FÖRE
+  fix: `Felrapport #40` i `auction-live.test.ts` + enhetstester i
+  `overcalls.test.ts` (inkl. gränsvakten att 16 hp fortfarande passar). Hela
+  sviten grön.
 - **2026-07-28** – **Försvaret mot deras höjda spärr (kod, §7.7, ETAPP 6
   hål 4, ägarbeslut).** Förskanningens sista hål: budlådan krävde exakt ETT
   kontraktsbud i historiken för ett inkliv, och §7.6/§7.7-försvaret modellerades

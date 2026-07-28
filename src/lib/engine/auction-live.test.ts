@@ -1343,6 +1343,45 @@ describe('Felrapport #23 – 17+ stark enfärgshand: upplysningsdubbling + stark
   })
 })
 
+// Felrapport #40 (bricka 1): Nord öppnade 1♥ och Öst — 20 hp med KQJ964 i
+// HJÄRTER, alltså öppnarens egen färg — passade, så 1♥ såldes på fläcken.
+// Roten: `overcall` hade inget utlopp för 17+ när långfärgen är deras (regel 3.5
+// kräver en EGEN 5+ färg) och handen inte är kort i deras färg (upplysnings-X:et).
+// Ägarbeslut (rapportens fritext): "jag ser hellre en dubbling" — 17+ säljer
+// aldrig given, precis som §7.6-försvaret mot svaga tvåor/spärrar.
+describe('Felrapport #40 – 17+ säljer aldrig given över deras 1-lägesöppning', () => {
+  const deal = dealOf('N', {
+    N: 'S:KJ87 H:AT852 D:A95 C:8',      // 12 hp, 5 hjärter → öppnar 1♥
+    E: 'S:A H:KQJ964 D:Q4 C:AKJ3',      // 20 hp, långfärgen = deras hjärter
+    S: 'S:T943 H:73 D:KJ63 C:T96',
+    W: 'S:Q652 H:- D:T872 C:Q7542',
+  })
+
+  it('Öst dubblar 1♥ i stället för att passa med 20 hp', () => {
+    const e = decideCall(deal, [call('N', '1H')], 'E')
+    expect(e.bid).toBe('X')
+    expect(e.rule).toBe('upplysningsdubbling (stark)')
+  })
+
+  it('given passas inte ut i 1♥ — Öst-Väst kommer in i auktionen', () => {
+    const order: Seat[] = ['N', 'E', 'S', 'W']
+    let h: ResolvedCall[] = [call('N', '1H')]
+    let idx = order.indexOf('E')
+    let passes = 0
+    while (passes < 3 && h.length < 20) {
+      const seat = order[idx % 4]
+      const c = decideCall(deal, h, seat)
+      h = [...h, call(seat, c.bid)]
+      passes = c.bid === 'P' ? passes + 1 : 0
+      idx++
+    }
+    expect(h.filter((c) => c.seat === 'E').map((c) => c.bid)).toContain('X')
+    const contractBids = h.filter((c) => /^[1-7](C|D|H|S|NT)$/.test(c.bid))
+    const last = contractBids[contractBids.length - 1]
+    expect(last.bid).not.toBe('1H')
+  })
+})
+
 // Den starka dubblingens FLERRONDS-fortsättning (ägarbeslut 2026-07-05): den starka
 // handen visar färg lågt, partnern tvångssvarar, den starka handen dömer game på TP
 // (6+ & 22+ TP = hopp till 3-läget = utgångskrav), partnern svarar 3-hoppet.

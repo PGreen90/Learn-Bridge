@@ -9,6 +9,34 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Felrapporter #40/#41/#42 (2026-07-28, kväll)
+- **17+ säljer aldrig given över deras 1-lägesöppning (#40, NYAST).** Ryms en
+  17+-hand inte i något fönster — för stark för det kapade inklivet (tak 16),
+  fel form för upplysnings-X:et, och utan egen 5+ färg — dubblar den ändå.
+  Typfallet är en hand vars enda långfärg är öppnarens egen. **Bevaka:** (a)
+  dubblar bottarna nu på händer där pass kändes bättre — särskilt med LÄNGD i
+  deras färg (X:et är ju upplysning, inte straff)? (b) tvingas partnern svara
+  på luft och åka på straff?
+  **KÄNT HÅL I ROND 2 (kontrollmätning M19, frö 20260952):** den starka
+  dubblaren kan **sälja given i nästa rond**. `1♦–X–P–3♣–P–P–P`: Väst dubblar
+  med 19 hp, Öst hoppar 3♣, och Väst **passar** — ÖV kunde ta 7NT.
+  `ownStrongDoubleRebid` kräver en egen 5+ **objuden** färg för det starka
+  återbudet, och en jämn 19-poängare har ingen → ingen väg vidare alls.
+  Principen "17+ säljer aldrig given" gäller alltså bara rond 1 i dag. Är detta
+  kandidat till ett eget jobb står det i `docs/senare.md`.
+- **Sangsystemet gäller även off-book (#41).** Bjuder du 1NT/2NT själv i
+  budlådan svarar partnern nu med Stayman/transfer/Texas/Minor Suit Stayman och
+  öppnaren ger sitt vanliga återbud. **Bevaka:** (a) läser motorn ditt bud som
+  du menade det — 2♠ över 1NT är alltid Minor Suit Stayman, aldrig naturligt?
+  (b) stör motståndarna lämnar sangsystemet över till §7.8; känns det bytet
+  rätt? Rör INTE botgivarna (bottarna bjuder alltid on-book) — bara dina egna.
+- **Kvantitativ höjning av partnerns naturliga 3NT (#42).** Har partnern öppnat
+  på 1-läget i en färg och placerat kontraktet i 3NT höjer kaptenen till 6NT med
+  **21+ hp**. **Bevaka:** (a) hamnar ni i 6NT som går bet — 21 mot visade 12 är
+  golvet, inte ett säkert bud? (b) regeln är smal (tyst motstånd, ingen renons)
+  — missas slam i lägen som känns identiska? M19 visar att den nästan aldrig
+  träffar i botgivar, så det är dina egna givar som ger svaret.
+
 ## Etapp 6 (2026-07-27/28) — billig offring
 - **Hål 4: försvaret väcker över deras höjda spärr (2026-07-28, NYAST).**
   Efter deras öppning + spärrhöjning (`2♠–P–3♠` / `1♣–P–3♣`) tiger bottarna

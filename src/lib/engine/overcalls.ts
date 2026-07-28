@@ -143,6 +143,18 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
     return { call: `${lvl}${BID[ov]}`, rule: 'hoppinkliv', explanation: `${p} hp med 6-korts ${NAME[ov]} → ${lvl}${SYM[ov]} (svagt hoppinkliv, spärr).` }
   }
 
+  // 7) 17+ SOM INTE FICK PLATS I NÅGOT FÖNSTER: sälj ALDRIG given → X.
+  // Felrapport #40: en 20-poängare vars enda långfärg var ÖPPNARENS färg
+  // (KQJ964 hjärter över 1♥) hade ingen väg in — regel 3.5 kräver en EGEN 5+
+  // färg, upplysnings-X:et (regel 4) kräver korthet i deras färg, och det
+  // naturliga inklivet är kapat vid 16. Handen passade och 1♥ såldes på fläcken.
+  // Samma utlopp som §7.6-försvaret redan har mot svaga tvåor och spärrar
+  // (`defendWeakTwo`/`defendPreempt`): partnern måste svara, och den starka
+  // handen får beskriva sig på nästa varv.
+  if (p >= 17) {
+    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `${p} hp – för stark för att sälja given → X (upplysning).` }
+  }
+
   return pass
 }
 
