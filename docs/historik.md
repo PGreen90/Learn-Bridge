@@ -1472,3 +1472,7 @@ mot vinnarens sida ('slide') och försvinner. Allt UI-fas ovanpå motorn
   i reduced-motion-listan.
 - **Facit:** `src/pages/play/sticksvep.test.tsx` — seedad giv, hela fasmaskinen
   + bot-gaten + skipSweep, alla tider från `tempo.ts`.
+
+Mergepunkt `1fed694`, Vercel-deployen Ready, svep-koden verifierad i livesidans
+JS-paket. Livekontroll i dev-servern före pushen: fasloggen visade glow →
+`trick-sweep-w` (Väst vann sticket) → rensat → Förra sticket-panelen framme.
