@@ -1514,7 +1514,8 @@ orörd, inga nya beroenden:
   stale-id-skydd, dolt/visat kort i stickmitten, FlightLayer-animationens tid
   från `tempo.ts` och vänta-mät-om-vägen för fjärde kortet.
 
-Livekontroll i dev-servern före pushen (instrumenterad `Element.prototype.animate`):
+Mergepunkt `e602a01`. Livekontroll i dev-servern före pushen (instrumenterad
+`Element.prototype.animate`):
 alla fyra källtyperna flög rätt — Väst från vänsterkanten (rot 90°), träkarlen
 Nord från kolumnerna (mätt källa), Öst från högerkanten (rot −90°), Syd från
 solfjädern (skala 1.4) — fjärde kortet fick sin flygning via svep-omritningen,

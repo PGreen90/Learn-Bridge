@@ -38,7 +38,7 @@ resultatet väntar ut svepet, klick hoppar över det; mittens "förra sticket
 ligger kvar"-fallback borta (panelen i hörnet är historiken). Facit:
 `sticksvep.test.tsx`. Detalj: `docs/historik.md`.
 
-**✅ ETAPP 3 KLAR 2026-07-28 (kortflygningen):** spelade kort flyger som
+**✅ ETAPP 3 KLAR 2026-07-28 (mergepunkt `e602a01`, kortflygningen):** spelade kort flyger som
 WAAPI-klon från handen (källan mäts synkront före `setPlay`) eller dold hands
 bordskant till stickplatsen; `useCardFlight.ts` + `FlightLayer.tsx`,
 `data-flight-target` i stickmitten, sveputkiket blev layout-effekt så fjärde
