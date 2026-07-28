@@ -137,6 +137,8 @@ function PlayTable({
     toggleAutoClaim,
     speed,
     setSpeed,
+    sweep,
+    skipSweep,
     explain,
     botReasons,
     reasonFor,
@@ -362,7 +364,9 @@ function PlayTable({
           flyttar till vänstra hörnet när Öst-träkarlen behöver högersidan.
           (R3-fynd #8: en 85%-bump provades men backades – 375px-överlappet
           kunde inte verifieras; tas om när mobil-preview är tillgänglig.) */}
-      {play.completedTricks.length > 0 && (
+      {/* Panelen döljs medan samma stick fortfarande sveps i mitten (etapp 2) —
+          den dyker upp som historik först när svepet är klart. */}
+      {play.completedTricks.length > 0 && !sweep && (
         <div
           className={`absolute z-10 scale-75 ${
             eastOpen ? 'left-2.5 top-2.5 origin-top-left' : 'right-2.5 top-13 origin-top-right'
@@ -384,6 +388,8 @@ function PlayTable({
         <TrickCenterLive
           play={play}
           thinking={thinking}
+          sweep={sweep}
+          onSkipSweep={skipSweep}
           onCardClick={onPlayedCardClick}
           hasReason={(pc) => !!reasonFor(pc)}
         />

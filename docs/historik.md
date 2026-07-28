@@ -1439,3 +1439,36 @@ testerna på CPU så deras timeouts small (samma klass av myntkast-grind som
 lagades tidigare samma dag, fast CPU-svält i stället för slumpgivar). Fix:
 `maxWorkers: 4` i `vite.config.ts` (obegränsat = rött, 50 % = rött, 4 = grönt,
 provat i tur och ordning). Verifiera med: `npm test`.
+
+**Efterspel (samma kväll):** etapp 1-deployen (`e67fb31`) föll ÄNDÅ på Vercel —
+molnbyggaren har färre kärnor än ägarens maskin och två tunga test slog i sina
+tidsgränser trots arbetartaket. Läxan: en tidsgräns ska fånga HÄNGNINGAR, inte
+straffa långsamma maskiner. Grindfix (`9de46f9`): global `testTimeout: 60_000`
+i `vite.config.ts` + de tunga DDS-svepens egna 30 s → 120 s (`play-bot`,
+`tp-invariant`, `legality`, `dds`). Deployen därefter grön — etapp 1 live.
+
+## Känsla i kortspelet — etapp 2: sticksvepet (2026-07-28, sen kväll)
+
+Största enskilda känslolyftet: ett färdigt stick försvinner inte längre pladask
+— det ligger kvar en stund med pulserande vinnarglow ('hold'), sveps sedan ihop
+mot vinnarens sida ('slide') och försvinner. Allt UI-fas ovanpå motorn
+(`play.ts` orörd):
+
+- **Fasmaskinen** (`usePlayTable.ts`): `sweep: { trick, phase: 'hold'|'slide' }
+  | null`. Nytt stick upptäcks med ref-jämförelse av `completedTricks.length`
+  (StrictMode-säker), hold `ms('sweepHold')` → slide `ms('sweepSlide')` → null.
+  Rena `setTimeout` — deterministiskt med fake timers.
+- **Gates:** botarna och auto-claim VÄNTAR medan `sweep !== null`; `done`
+  väntar också ut svepet så även SISTA sticket får sitt ögonblick innan
+  resultatdialogen. Klick (kort eller stickytan) hoppar över svepet
+  (`skipSweep`) — otåliga blockeras aldrig.
+- **Renderingen** (`trick-views.tsx`): gamla "förra sticket ligger kvar tills
+  nästa kort"-fallbacken är BORTA — mitten visar pågående stick, svepande stick
+  eller inget; historiken bor i Förra sticket-panelen (som nu döljs under
+  svepet och dyker upp efteråt). Korten sveps som grupp med
+  `trick-sweep-{n|s|w|e}` efter vinnarsäte; vinnarkortet får `winner-glow`.
+- **CSS** (`index.css`): fyra svep-keyframes (bastid 450 ms — MÅSTE matcha
+  `BASE.sweepSlide`) + `winner-glow`, alla skalade av `--motion-scale` och med
+  i reduced-motion-listan.
+- **Facit:** `src/pages/play/sticksvep.test.tsx` — seedad giv, hela fasmaskinen
+  + bot-gaten + skipSweep, alla tider från `tempo.ts`.

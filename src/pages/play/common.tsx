@@ -9,8 +9,13 @@ import {
   side,
   type Contract,
   type PlayState,
+  type Trick,
 } from '../../lib/engine/play'
 import { SPEED_LABEL, type PlaySpeed } from './tempo'
+
+/** Sticksvepet (etapp 2): 'hold' = korten ligger kvar med vinnarglow,
+ *  'slide' = alla fyra sveps mot vinnarens sida. null = inget svep. */
+export type Sweep = { trick: Trick; phase: 'hold' | 'slide' }
 
 /** Spelar ägaren (Syd) den här platsen? Vi spelar = både N och S; vi försvarar = bara S. */
 export function controls(contract: Contract, seat: Seat): boolean {
@@ -52,6 +57,14 @@ export const CARD_IN: Record<Seat, string> = {
   S: 'card-in-s',
   W: 'card-in-w',
   E: 'card-in-e',
+}
+
+/** Sticket sveps MOT VINNARENS sida (animationsklasserna i index.css). */
+export const SWEEP_OUT: Record<Seat, string> = {
+  N: 'trick-sweep-n',
+  S: 'trick-sweep-s',
+  W: 'trick-sweep-w',
+  E: 'trick-sweep-e',
 }
 
 /** Får platsen spela just nu, styrd av dig? (för klickbarhet + markering) */

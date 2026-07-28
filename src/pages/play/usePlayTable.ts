@@ -18,6 +18,7 @@ import {
   type PlayResult,
   type PlayState,
 } from '../../lib/engine/play'
+import type { Sweep } from './common'
 import {
   adjudicateClaim,
   autoClaimAvailable,
@@ -62,6 +63,14 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // Tempot (ägarbeslut 2026-07-28): Lugn/Normal/Snabb i ⋮-menyn skalar alla
   // botpauser och animationslängder (via tempo.ts + --motion-scale). Sparas.
   const [speed, setSpeedState] = useState<PlaySpeed>(() => loadValue('playSpeed', 'normal'))
+  // Sticksvepet (etapp 2, "känsla i kortspelet"): när ett stick blir klart
+  // ligger korten kvar med vinnarglow ('hold'), sveps sedan mot vinnaren
+  // ('slide') och försvinner. Botarna och auto-claim VÄNTAR under svepet;
+  // ett klick (kort eller stickytan) hoppar över det — otåliga blockeras aldrig.
+  const [sweep, setSweep] = useState<Sweep | null>(null)
+  // Ref-jämförelse (inte effekt-på-play rakt av) så StrictMode-dubbelkörningen
+  // i dev inte startar svepet två gånger.
+  const sweptCount = useRef(0)
   // Bottarnas motiveringar per spelat kort (kortnyckel → plats + varför).
   // Tryck på ett spelat kort på bordet visar förklaringen i raden under listen.
   const [botReasons, setBotReasons] = useState<Record<string, { seat: Seat; reason: string }>>({})
@@ -92,6 +101,32 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     setExplain(null)
   }, [play])
 
+  // Sticksvepet startar när ett NYTT stick blivit klart (motorn har redan tömt
+  // currentTrick och bokfört sticket — svepet är ren UI-fas ovanpå).
+  useEffect(() => {
+    const n = play.completedTricks.length
+    if (n <= sweptCount.current) return
+    sweptCount.current = n
+    setSweep({ trick: play.completedTricks[n - 1], phase: 'hold' })
+  }, [play])
+
+  // Svepets fasmaskin: hold (vinnarglow) → slide (svepet) → borta. Rena
+  // setTimeout (aldrig rAF) så fake timers i testerna styr den deterministiskt.
+  useEffect(() => {
+    if (!sweep) return
+    if (sweep.phase === 'hold') {
+      const id = setTimeout(() => setSweep({ trick: sweep.trick, phase: 'slide' }), ms('sweepHold', speed))
+      return () => clearTimeout(id)
+    }
+    const id = setTimeout(() => setSweep(null), ms('sweepSlide', speed))
+    return () => clearTimeout(id)
+  }, [sweep, speed])
+
+  /** Hoppa över svepet direkt (klick på kort eller stickytan). */
+  function skipSweep() {
+    setSweep(null)
+  }
+
   function showFacit() {
     const rem = doubleDummyDeclarerRemaining(
       play.hands,
@@ -113,9 +148,10 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // (slutspelet) räknas i webworkern så gränssnittet inte fryser; snabba tumregler
   // körs inline med en liten paus för känsla.
   useEffect(() => {
-    // Bottarna pausar när en claim är lagd (given är slut) eller medan
-    // claim-dialogen är öppen (ställningen får inte ändras under bedömningen).
-    if (claimed || claiming || isComplete(play) || controls(contract, play.toAct)) return
+    // Bottarna pausar när en claim är lagd (given är slut), medan claim-dialogen
+    // är öppen (ställningen får inte ändras under bedömningen) och under
+    // sticksvepet (nästa kort får inte landa mitt i insamlingen).
+    if (claimed || claiming || sweep || isComplete(play) || controls(contract, play.toAct)) return
     const seat = play.toAct
     let cancelled = false
 
@@ -179,17 +215,18 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
       clearTimeout(floorId)
       setThinking(false)
     }
-  }, [contract, play, calls, claimed, claiming, speed])
+  }, [contract, play, calls, claimed, claiming, speed, sweep])
 
   // Auto Claim: när ett nytt stick ska börja och spelförarsidan OMÖJLIGT kan
   // förlora fler stick (oavsett spelsätt) stängs given automatiskt – gäller både
   // när du är spelförare och när datorn är det. Slås av/på i ⋮-menyn.
   useEffect(() => {
-    if (!autoClaim || claimed || claiming || isComplete(play)) return
+    // Väntar även ut sticksvepet — resultatet ska inte dyka upp mitt i svepet.
+    if (!autoClaim || claimed || claiming || sweep || isComplete(play)) return
     if (play.currentTrick.length > 0) return
     if (!autoClaimAvailable(play)) return
     setClaimed({ total: declarerTricksWon(play) + remainingTricks(play), auto: true })
-  }, [play, autoClaim, claimed, claiming])
+  }, [play, autoClaim, claimed, claiming, sweep])
 
   function onPlay(card: Card) {
     setPlay((p) => {
@@ -227,8 +264,10 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   }
 
   // Två-klicks: första klicket på ett kort väljer (och fanar ut) dess färg;
-  // klick på ett kort i den redan valda färgen spelar kortet.
+  // klick på ett kort i den redan valda färgen spelar kortet. Ett klick under
+  // sticksvepet hoppar dessutom över svepet (otåliga blockeras aldrig).
   function onCardClick(card: Card) {
+    skipSweep()
     if (selectedSuit !== card.suit) {
       setSelectedSuit(card.suit)
       return
@@ -249,8 +288,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   }
 
   // En godkänd claim (manuell eller auto) avslutar given med det claimade
-  // resultatet — de ospelade sticken bokförs enligt claimen.
-  const done = isComplete(play) || claimed !== null
+  // resultatet — de ospelade sticken bokförs enligt claimen. Sista sticket får
+  // sitt svep innan resultatet visas (done väntar ut sweep).
+  const done = (isComplete(play) || claimed !== null) && sweep === null
   const needed = 6 + contract.level
   const result: PlayResult = claimed
     ? {
@@ -295,6 +335,8 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     toggleAutoClaim,
     speed,
     setSpeed,
+    sweep,
+    skipSweep,
     explain,
     botReasons,
     reasonFor,
