@@ -111,15 +111,24 @@ konkurrensrond.
   (tvetydig: dam+ eller kort färg). Samt bredare: skvis-försvar och längre
   inferens om partnerns hand.
 
-## 🅿️ PARKERAT
-
-### FACELIFTEN / den visuella omgörningen (parkerad 2026-07-20 på ägarbeslut)
-Hela designspåret vilar — Claudes "Klubbrummet"-mockup (privat artifact
+### FACELIFTEN / den visuella omgörningen (VÄCKT 2026-07-29 — Fas 1 i konkurrensplanen)
+Parkerad 2026-07-20, **väckt av ägaren 2026-07-29** som del av konkurrensspåret
+(`docs/konkurrensplan.md` Fas 1 — första intrycket görs bara en gång, före
+lanseringen av "Dagens givar"). Materialet som väntar: Claudes
+"Klubbrummet"-mockup (privat artifact
 `claude.ai/code/artifact/5b9f5e2a-fe71-4dbc-aaeb-188a5a2376b9`), ägarens Claude
-Design-utforskning med de färdiga promptarna, och ombyggnaden av appen efter godkänd
-design. **Återupptas BARA när ägaren säger till.** Låsta ramar gäller fortfarande
-då: emerald, svarta spader, guldserifen. Tokens + komponentstrukturen
-(UI-overhaulen) är redo, så bygget är billigt när det återupptas.
+Design-utforskning med de färdiga promptarna, och ombyggnaden av appen efter
+godkänd design. Låsta ramar: emerald, svarta spader, guldserifen. Tokens +
+komponentstrukturen (UI-overhaulen) är redo, så bygget är billigt.
+
+### Engelska som andra språk (2026-07-29, ägarbeslut — Fas 5 i konkurrensplanen)
+Ägaren vill ha appen på två språk: svenska först, engelska senare. Stort eget
+spår — hela gränssnittet plus budsystem-boken (appens största text) ska
+översättas. Tas när den svenska basen bär (`docs/konkurrensplan.md` Fas 5).
+Fram till dess: skriv ny UI-text så den är lätt att lyfta ut (hela meningar,
+inga hopklistrade fragment).
+
+## 🅿️ PARKERAT
 
 ### Övrigt parkerat
 - **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.

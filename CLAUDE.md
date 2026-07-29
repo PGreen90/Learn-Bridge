@@ -11,6 +11,14 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — LEDIGT (2026-07-29): ägaren väljer nästa ur NÄST/SENARE
+**KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
+rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
+modellen först** ("Dagens givar" — alla spelar samma givar mot bottarna,
+topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
+**två språk** (svenska först, engelska = Fas 5). Roadmap Fas 0–6 + hälsobilden:
+**`docs/konkurrensplan.md`**. Beslut B (backend, Fas 2+) byggs fortfarande bara
+på uttryckligt ägarbeslut.
+
 **RONDGENOMGÅNGEN (after action report) är KLAR & LIVE 2026-07-29** — efter
 färdigspelad giv i Spela kort öppnar "Rondgenomgång"-knappen tre hopfällbara
 kapitel: Budgivningen (varje bud förklarat), Spelföringen (varje stick som egen
@@ -33,10 +41,12 @@ spelmotorn orörd, inga nya beroenden. Ny mätrigg för SPELSTYRKA:
 `play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
 `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU — närmast till hands ligger 🟢 NÄST
-punkt 1 (Etapp 7 missad lillslam, förskannad, ägaren väljer hål 2). Kvar i
-signalspåret (⚪ SENARE, `docs/senare.md`): avkoda räkning (paritet, kräver
-paritetsstöd i `monte-carlo.ts`) och uppmuntran (tvetydig).
+**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU — antingen ur konkurrensplanens Fas 0
+(rekommendation: bottarnas kortspel #32/#34 — i Funbridge-modellen ÄR botspelet
+produkten; alternativ: mobil #36 eller faceliften) eller 🟢 NÄST punkt 1
+(Etapp 7 missad lillslam, förskannad, ägaren väljer hål 2). Kvar i signalspåret
+(⚪ SENARE, `docs/senare.md`): avkoda räkning (paritet, kräver paritetsstöd i
+`monte-carlo.ts`) och uppmuntran (tvetydig).
 
 **Senast klart 2026-07-28 — KÄNSLA I KORTSPELET-spåret (etapp 1–5), KLART & LIVE:**
 kortspelet har tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow,
@@ -71,12 +81,10 @@ deploy föll slumpvis oavsett vad som pushades (`ebdb958` föll så). Nu seedade
 givar + `docs-vakt` 200× snabbare. Volymtester i det här repot ska ALLTID vara
 seedade. Detalj: `docs/historik.md`.
 
-**Senast klart 2026-07-25:** dokumentstädningen (denna fil bantad, `docs/README.md`
-+ `docs/bevaka.md` + `docs/senare.md` nya) och därefter **den stora genomgången**:
-hela repot faktakollat mot koden i stället för mot andra dokument. Fynd: en
-baslinjesiffra som aldrig gick att reproducera hade blivit en arbetsregel, ett
-dokument beskrev en raderad komponent, och **Lebensohl visade sig aldrig ha varit
-inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
+**Senast klart 2026-07-25:** dokumentstädningen (`docs/README.md` +
+`docs/bevaka.md` + `docs/senare.md` nya) + den stora genomgången: hela repot
+faktakollat mot KODEN, inte mot andra dokument. Fynd bl.a. att **Lebensohl aldrig
+varit inkopplad**; skyddet mot upprepning ligger nu i testsviten
 (`src/docs-vakt.test.ts` + regelsvepet). Detalj: `docs/historik.md`.
 
 > **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
@@ -122,20 +130,20 @@ inkopplad**. Skyddet mot att det upprepas ligger nu i testsviten
    konkurrenskonventioner läggs på `decideCall`-kedjan.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
+**FACELIFTEN** (väckt 2026-07-29 ur parkeringen → Fas 1 i `docs/konkurrensplan.md`) ·
 **Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
-Felrapport #36 större kort på mobil · fler budträningsgivar + tema-dropdown ·
-spelmotor-kvalitet (#32 spelföring + #34 försvar) · TP till §7-inkliven ·
-advancer-rabatt efter balansering (generella fallet) · 17+ enfärgshand efter två
-bjudna färger · auto-facit på hela given i webworker · kanoniska linjen passar ut
-tvåfärgsinkliv · svårighetsnivåer på bottarna · bot-hjärnans B2/Steg C · bredare
-försvarsinferens.
+Felrapport #36 större kort på mobil (Fas 0) · fler budträningsgivar + tema-dropdown ·
+spelmotor-kvalitet (#32 spelföring + #34 försvar — Fas 0) · engelska som andra
+språk (Fas 5) · TP till §7-inkliven · advancer-rabatt efter balansering
+(generella fallet) · 17+ enfärgshand efter två bjudna färger · auto-facit på
+hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·
+svårighetsnivåer på bottarna · bot-hjärnans B2/Steg C · bredare försvarsinferens.
 
 ### 🅿️ PARKERAT (väg INTE in i beslut — full beskrivning i `docs/senare.md`)
-**FACELIFTEN / hela designspåret** (parkerad 2026-07-20 på ägarbeslut — återupptas
-bara när ägaren säger till) · DDS-facit på tunga fulla givar · off-book §7 bredd ·
-"framkalla slutbud"-väljaren · Mathe mot stark konstgjord 1♣ · **Beslut B**
-(konton/multiplayer/tävlingar — separat STORT spår, `docs/framtid-multiplayer-
-plattform.md`, startas bara på uttryckligt ägarbeslut).
+DDS-facit på tunga fulla givar · off-book §7 bredd · "framkalla slutbud"-väljaren ·
+Mathe mot stark konstgjord 1♣ · **Beslut B** (konton/multiplayer/tävlingar —
+separat STORT spår; roadmapen mot det: `docs/konkurrensplan.md` Fas 2–6, tekniken:
+`docs/framtid-multiplayer-plattform.md`; BYGGS bara på uttryckligt ägarbeslut).
 
 ## Arbetsrutiner (följ varje gång)
 - **Vid sessionsstart:** följ 🟢-checklistan i `docs/arbetsrutiner.md`.

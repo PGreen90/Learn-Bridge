@@ -7,6 +7,15 @@
 > **Vid uppstart av detta arbete:** läs hela dokumentet, bekräfta med ägaren att
 > valen nedan fortfarande gäller (särskilt databasvalet), och bygg i den
 > stegordning som står under "Stegordning". Bygg ALDRIG allt på en gång.
+>
+> **Uppdatering 2026-07-29 (konkurrensplanen, ägarbeslut):** vägen mot Beslut B
+> är nu planerad i **`docs/konkurrensplan.md`** (roadmap Fas 0–6). Ägarens
+> vägval: **Funbridge-modellen först** — asynkron "Dagens givar" med topplista
+> (Fas 3) FÖRE realtidsbord (Fas 6). Det betyder att stegordningens punkt 4
+> (lobby/realtid) skjuts bakom det asynkrona tävlingssteget. Övriga beslut:
+> två språk (svenska först, engelska senare) och faceliften väckt. Detta
+> dokument förblir teknik-underlaget (Supabase-valet, utbytbar backend,
+> GDPR, Capacitor); fortfarande ingen kod förrän ägaren säger "kör".
 
 ## Vad ägaren vill (visionen, ägarens egna ord 2026-07-03/04)
 

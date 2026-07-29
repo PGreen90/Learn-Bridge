@@ -30,6 +30,7 @@ const LEVANDE = [
   'docs/budsystem.md',
   'docs/framtid-multiplayer-plattform.md',
   'docs/handvardering.md',
+  'docs/konkurrensplan.md',
   'docs/kortspel.md',
   'docs/off-book-syd.md',
   'docs/oversikt.md',

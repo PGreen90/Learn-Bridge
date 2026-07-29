@@ -20,6 +20,7 @@
 
 | Fil | | Innehåll |
 |---|---|---|
+| **konkurrensplan.md** | 🟢 | Konkurrensplanen mot BBO/Funbridge/Synrey (ägarbeslut 2026-07-29): hälsobedömningen av appen + roadmapen Fas 0–6 (kvalitetsgrund → facelift → konton → "Dagens givar" → mobilappar → engelska → realtidsbord). |
 | **budsystem-revision.md** | 🟢 | Budsystemets hälsobild + körordningen F1–F6 och B-punkterna (t.ex. B13). Här står vad som är kvar att förbättra i systemet. |
 | **senare.md** | 🟢 | Full beskrivning av allt i ⚪ SENARE och 🅿️ PARKERAT (CLAUDE.md listar bara rubrikerna). |
 | **arbetsrutiner.md** | 🟢 | 🟢-checklistan vid sessionsstart och 🔴-checklistan vid sessionsslut. Följs varje gång. |
