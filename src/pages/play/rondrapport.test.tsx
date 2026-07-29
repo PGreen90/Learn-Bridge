@@ -26,9 +26,17 @@ vi.mock('../../lib/engine/claim', async (importOriginal) => {
   }
 })
 
+// DD-domen styrs per test (riktiga hooken testas i useDdAnalys.test.tsx —
+// vyfixturens stick är inte spelbara ur den seedade given).
+const ddMock = vi.hoisted(() => ({
+  value: { analys: null as import('../../lib/engine/rond-dd').DdAnalys | null, running: false },
+}))
+vi.mock('./useDdAnalys', () => ({ useDdAnalys: () => ddMock.value }))
+
 beforeEach(() => {
   vi.mocked(adjudicateClaim).mockClear()
   vi.mocked(autoClaimAvailable).mockReturnValue(false)
+  ddMock.value = { analys: null, running: false }
 })
 afterEach(() => {
   cleanup()
@@ -130,6 +138,28 @@ describe('rondgenomgången — vyn', () => {
     })
     expect(container.textContent).toContain('Resten av sticken spelades aldrig')
     expect(container.textContent).toContain('Claim godkänd efter stick 1')
+  })
+
+  it('DD-domen under beräkning: "beräknas"-raden syns, inga facitrader', () => {
+    ddMock.value = { analys: null, running: true }
+    const { container } = renderVyn()
+    expect(container.textContent).toContain('Facit-analysen beräknas')
+    expect(container.textContent).not.toContain('Facit:')
+  })
+
+  it('DD-domen klar: ⚠ på tappade sticket och facitrad i resultatet', () => {
+    ddMock.value = {
+      running: false,
+      analys: {
+        boundaries: [11, 10],
+        fromBoundary: 0,
+        tappade: [{ trick: 1, antal: 1 }],
+        vunna: [],
+      },
+    }
+    const { container } = renderVyn()
+    expect(container.textContent).toContain('⚠ Facit: här tappade er sida ett stick.')
+    expect(container.textContent).toContain('med perfekt spel fanns 11 stick')
   })
 
   it('Tillbaka och Ny giv anropar sina callbacks', () => {

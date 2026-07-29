@@ -159,6 +159,7 @@ const MEDVETET_EJ_INKOPPLAD: Record<string, string> = {
     'BYGGD MEN EJ INKOPPLAD (känd skuld, se docs/bevaka.md + docs/budsystem.md §7.5). ' +
     'Ingen produktionsfil importerar den; 0 träffar i 3 000 bjudna givar. Kopplas in som eget jobb.',
   'mc-worker.ts': 'Web worker — laddas via new Worker(new URL(...)) i usePlayTable.ts, inte via import.',
+  'rapport-worker.ts': 'Web worker — laddas via new Worker(new URL(...)) i useDdAnalys.ts, inte via import.',
   'revisor-dds.ts': 'Mätriggens DD-orakel (bridge-dds, dev-beroende) — körs bara av revisor.probe.test.ts.',
 }
 

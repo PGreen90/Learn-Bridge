@@ -322,11 +322,15 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   markering), Spelföringen (varje stick som nästlad dropdown: minikort med
   vinnarring, utspel/trumfningar/sakningar/löpande ställning, tryck på botkort
   visar `botReasons`-motiveringen) och Resultatet (öppet som default: utfall
-  med ton, claim-notis, poäng). All text ur rena motormodulen
+  med ton, claim-notis, poäng, DD-dom). All text ur rena motormodulen
   `src/lib/engine/rond-rapport.ts` (`buildRondRapport`); vyn
-  `src/pages/play/RondRapport.tsx` renderar bara. DD-domen ("ett stick till")
-  är planerad etapp 3. Test: `src/lib/engine/rond-rapport.test.ts` +
-  `src/pages/play/rondrapport.test.tsx`.
+  `src/pages/play/RondRapport.tsx` renderar bara. **DD-domen** ("ett stick
+  till"): `src/lib/engine/rond-dd.ts` (`analyzeDd` — facit per stickgräns
+  bakifrån, sprängd nodbudget avbryter ärligt) i webworkern
+  `rapport-worker.ts` via `useDdAnalys.ts` (inline-reserv utan Worker);
+  ⚠-rader på stick där facit rörde sig + dom i resultatkapitlet. Test:
+  `src/lib/engine/rond-rapport.test.ts`, `src/lib/engine/rond-dd.test.ts`,
+  `src/pages/play/rondrapport.test.tsx`, `src/pages/play/useDdAnalys.test.tsx`.
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,

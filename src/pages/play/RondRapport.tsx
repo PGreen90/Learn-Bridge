@@ -6,8 +6,9 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import type { Deal, Seat } from '../../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../../lib/bidding'
-import type { Contract, PlayResult, Trick } from '../../lib/engine/play'
+import { side, type Contract, type PlayResult, type Trick } from '../../lib/engine/play'
 import type { ScoreLine } from '../../lib/engine/scoring'
+import { ddForStick, ddResultatRader, type DdRad } from '../../lib/engine/rond-dd'
 import {
   buildRondRapport,
   type ResultatRad,
@@ -17,6 +18,7 @@ import { BidChip } from '../../components/BidChip'
 import { Button } from '../../components/Button'
 import { PlayingCard } from '../../components/PlayingCard'
 import { SuitText } from '../../components/SuitText'
+import { useDdAnalys } from './useDdAnalys'
 
 /** Ett kapitel = en hopfällbar <details> i samma stil som Spela-sidans fördjupning. */
 function Kapitel({
@@ -40,7 +42,7 @@ function Kapitel({
 }
 
 /** Ett stick som egen nästlad dropdown: rubrikrad + minikort + punkterna. */
-function StickRad({ stick }: { stick: StickPunkt }) {
+function StickRad({ stick, ddRad }: { stick: StickPunkt; ddRad: DdRad | null }) {
   // Tryck på ett kort med botmotivering visar den under korten (samma idé som
   // "tryck på spelat kort" på bordet). Samma kort igen stänger.
   const [visadNyckel, setVisadNyckel] = useState<string | null>(null)
@@ -50,6 +52,7 @@ function StickRad({ stick }: { stick: StickPunkt }) {
     <details className="group/stick rounded-lg border border-line bg-panel-2">
       <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm text-ink [&::-webkit-details-marker]:hidden">
         <span>
+          {ddRad && <span className="mr-1">⚠</span>}
           <SuitText>{stick.rubrik}</SuitText>
         </span>
         <span className="text-ink-faint transition-transform group-open/stick:rotate-180">▾</span>
@@ -91,6 +94,9 @@ function StickRad({ stick }: { stick: StickPunkt }) {
               • <SuitText>{rad}</SuitText>
             </li>
           ))}
+          {ddRad && (
+            <li className={`text-sm ${TON_KLASS[ddRad.ton]}`}>⚠ {ddRad.text}</li>
+          )}
         </ul>
       </div>
     </details>
@@ -130,6 +136,11 @@ export function RondRapportView({
     () => buildRondRapport({ deal, contract, calls, tricks, result, score, claimed, botReasons }),
     [deal, contract, calls, tricks, result, score, claimed, botReasons],
   )
+  // DD-domen (etapp 3): räknas i workern när vyn öppnas; tunga lägen blir
+  // ärligt "—" (analysen berättar själv var den når ifrån).
+  const { analys, running } = useDdAnalys(deal, contract, tricks, true)
+  const declSide = side(contract.declarer)
+  const ddRader = analys ? ddResultatRader(analys, declSide, result.declarerTricks, claimed) : []
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
@@ -171,7 +182,11 @@ export function RondRapportView({
       <Kapitel rubrik={`Spelföringen (${rapport.spelforing.length} stick)`}>
         <div className="space-y-2">
           {rapport.spelforing.map((stick) => (
-            <StickRad key={stick.index} stick={stick} />
+            <StickRad
+              key={stick.index}
+              stick={stick}
+              ddRad={analys ? ddForStick(analys, stick.index, declSide) : null}
+            />
           ))}
           {claimed && (
             <p className="pt-1 text-xs text-ink-muted">
@@ -185,6 +200,12 @@ export function RondRapportView({
         <ul className="space-y-1.5">
           {rapport.resultat.map((rad, i) => (
             <li key={i} className={`text-sm ${TON_KLASS[rad.ton]}`}>
+              • <SuitText>{rad.text}</SuitText>
+            </li>
+          ))}
+          {running && <li className="text-sm italic text-ink-faint">• Facit-analysen beräknas …</li>}
+          {ddRader.map((rad, i) => (
+            <li key={`dd-${i}`} className={`text-sm ${TON_KLASS[rad.ton]}`}>
               • <SuitText>{rad.text}</SuitText>
             </li>
           ))}
