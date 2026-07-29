@@ -27,6 +27,11 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
   öppningsutspel (§8.3) → skärper hand-modellen (längd ≥4 + touchérande honnör när
   entydig). Hand-modellen fick per-färg-HP-spann (`suitHcp`) som samplaren håller.
   Bara bottars utspel avkodas (ingen tjuvkik på människan).
+  - **Utvidgat 2026-07-29 (markeringar Steg 5, `applySignalReads`):** läser även
+    **attityd under spelet** — en avskräckning på partnerns färg (högt spotkort)
+    sätter ett HP-**tak** (`suitHcpCeil`) → samplaren undviker dam+ där. Räkning
+    (paritet) + uppmuntran (tvetydig) återstår. Mätt bot-mot-bot i
+    `play-quality.probe.test.ts` (gatad): netto bättre försvar, inom bruset.
 - **"Varför?"-knapp:** `botCardReasoned`/`botCardSmartReasoned` (`play-bot.ts`) ger
   klartextsmotivering per drag; `Play.tsx` visar "Öst spelade 3♣. Varför?".
 - **Tänj MC-fönstret + webworker:** MC körs i `mc-worker.ts` av huvudtråden (ingen

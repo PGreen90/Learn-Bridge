@@ -20,9 +20,9 @@
 
 import type { Card, Rank, Seat, Suit } from '../../types/bridge'
 import { playedCards, visibleSeats } from './card-counting'
-import type { PlayState } from './play'
+import { side, type PlayState } from './play'
 import type { HandModel } from './hand-model'
-import { lenMin, suitHcpFloor } from './hand-model'
+import { lenMin, suitHcpCeil, suitHcpFloor } from './hand-model'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
@@ -98,5 +98,55 @@ export function applyOpeningLeadSignal(
 function clampSeat(model: HandModel, seat: Seat, suit: Suit): void {
   const c = model[seat]
   if (c.length[suit].min > c.length[suit].max) c.length[suit].min = c.length[suit].max
+  // Konflikt HP-golv > tak: taket (signal/hård fakta) vinner, golvet sänks.
   if (c.suitHcp[suit].min > c.suitHcp[suit].max) c.suitHcp[suit].min = c.suitHcp[suit].max
+}
+
+/**
+ * Signalavkodning under spelets gång (markeringar Steg 5b, docs/budsystem.md §8.5).
+ * Läser botarnas ATTITYDMARKERINGAR och skärper hand-modellen så Monte-Carlo-
+ * samplaren delar ut de dolda händerna troligare.
+ *
+ * Just nu avkodas det ENTYDIGA, säkra fallet: en AVSKRÄCKANDE attityd på
+ * partnerns färg. En bot avskräcker (lägger ett högt spotkort) DETERMINISTISKT
+ * bara när den saknar dam+ i färgen (§8.5). Så ett högt spotkort (8/9/10) lagt
+ * i partnerns utspelsfärg, av en bot-motspelare som inte vann sticket, sätter
+ * ett HP-TAK i färgen (ingen dam+). Uppmuntran (lågt) är tvetydig (dam+ ELLER
+ * kort färg) och avkodas inte. Räkning (paritet) hör till samplar-arbetet och
+ * tas separat.
+ *
+ * Järnprincip (ingen tjuvkik): bara botarnas markeringar avkodas (deterministisk
+ * §8.5), aldrig människans (`opts.humanSeat`, default 'S'), och aldrig den
+ * agerande platsens egen hand (den samplas inte).
+ */
+export function applySignalReads(
+  model: HandModel,
+  state: PlayState,
+  seat: Seat,
+  opts: { humanSeat?: Seat } = {},
+): HandModel {
+  const humanSeat = opts.humanSeat ?? 'S'
+  const declarer = state.contract.declarer
+  const LO = rankVal('8')
+  const HI = rankVal('10')
+  for (const trick of state.completedTricks) {
+    if (trick.cards.length === 0) continue
+    const ledSuit = trick.cards[0].card.suit
+    const leader = trick.leader
+    for (const pc of trick.cards) {
+      const s = pc.seat
+      if (side(s) === side(declarer)) continue // bara motspelet markerar
+      if (s === humanSeat || s === seat) continue // aldrig människan/egen hand
+      if (s === leader || s === trick.winner) continue // utspel / vinnare markerar inte
+      if (pc.card.suit !== ledSuit) continue // bara när platsen följde färg
+      if (side(leader) !== side(s)) continue // attityd bara på PARTNERNS färg
+      const r = rankVal(pc.card.rank)
+      if (r >= LO && r <= HI) {
+        // Avskräckande högt spotkort → förnekar dam+ (max 1 hp = ev. knekt).
+        suitHcpCeil(model[s], ledSuit, 1)
+        clampSeat(model, s, ledSuit)
+      }
+    }
+  }
+  return model
 }

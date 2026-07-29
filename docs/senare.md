@@ -105,8 +105,11 @@ konkurrensrond.
 - **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade: byggs
   bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).
 - **Motspelarnas bredare försvarsinferens:** honnörs-blottningsvakten är KLAR
-  (2026-07-05, `defenderGuardDiscard`). KVAR: kasta rätt när partnerns hand är okänd
-  (längdparitet, signalering, skvis-försvar) — kräver inferens om partnerns hand.
+  (2026-07-05, `defenderGuardDiscard`) och **markeringar** (lägg + läs) landade
+  2026-07-29 (§8.5). KVAR i signalspåret: **avkoda räkning (längdparitet)** — kräver
+  paritetsstöd i Monte-Carlo-samplaren (`monte-carlo.ts`) — och **avkoda uppmuntran**
+  (tvetydig: dam+ eller kort färg). Samt bredare: skvis-försvar och längre
+  inferens om partnerns hand.
 
 ## 🅿️ PARKERAT
 

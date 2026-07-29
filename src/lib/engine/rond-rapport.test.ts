@@ -301,6 +301,133 @@ describe('rondgenomgång: utspelsregeln (§8.3)', () => {
   })
 })
 
+describe('rondgenomgång: markeringar (§8.1/§8.2)', () => {
+  it('attityd: partnern leder ♥, Väst följer lågt ur dubbelton → uppmuntrar', () => {
+    const d = deal({
+      hands: {
+        N: [c('hearts', '5')], S: [c('hearts', '2')],
+        E: [c('hearts', 'K')], W: [c('hearts', '8'), c('hearts', '3')],
+      },
+    })
+    const trick: Trick = {
+      leader: 'E',
+      cards: [
+        { seat: 'E', card: c('hearts', 'K') },
+        { seat: 'S', card: c('hearts', '2') },
+        { seat: 'W', card: c('hearts', '3') },
+        { seat: 'N', card: c('hearts', '5') },
+      ],
+      winner: 'E',
+    }
+    const r = buildRondRapport(
+      input({ deal: d, contract: { declarer: 'S', strain: 'NT', level: 3 }, tricks: [trick] }),
+    )
+    expect(r.spelforing[0].signalRader).toContain(
+      'Väst i hjärter: lågt — uppmuntrar färgen (attityd, §8.1).',
+    )
+  })
+
+  it('räkning: motståndaren leder ♥, Väst följer lågt → visar jämnt antal', () => {
+    const d = deal({
+      hands: {
+        N: [c('hearts', 'A')], S: [c('hearts', '4')],
+        E: [c('hearts', '2')], W: [c('hearts', '8'), c('hearts', '6'), c('hearts', '3')],
+      },
+    })
+    const trick: Trick = {
+      leader: 'N',
+      cards: [
+        { seat: 'N', card: c('hearts', 'A') },
+        { seat: 'E', card: c('hearts', '2') },
+        { seat: 'S', card: c('hearts', '4') },
+        { seat: 'W', card: c('hearts', '3') },
+      ],
+      winner: 'N',
+    }
+    const r = buildRondRapport(
+      input({ deal: d, contract: { declarer: 'S', strain: 'NT', level: 3 }, tricks: [trick] }),
+    )
+    expect(r.spelforing[0].signalRader).toContain(
+      'Väst i hjärter: lågt — visar jämnt antal (räkning, §8.1).',
+    )
+  })
+
+  it('Lavinthal: Väst sakar lågt klöver på första saket → ber om lägre färgen', () => {
+    const d = deal({
+      hands: {
+        N: [c('diamonds', '2')], S: [c('diamonds', 'K')],
+        E: [c('diamonds', '4')], W: [c('clubs', '8'), c('clubs', '3'), c('spades', '2')],
+      },
+    })
+    const trick: Trick = {
+      leader: 'S',
+      cards: [
+        { seat: 'S', card: c('diamonds', 'K') },
+        { seat: 'W', card: c('clubs', '3') },
+        { seat: 'N', card: c('diamonds', '2') },
+        { seat: 'E', card: c('diamonds', '4') },
+      ],
+      winner: 'S',
+    }
+    const r = buildRondRapport(
+      input({ deal: d, contract: { declarer: 'S', strain: 'spades', level: 4 }, tricks: [trick] }),
+    )
+    expect(r.spelforing[0].signalRader).toContain(
+      'Väst i klöver: lågt sak — ber om den lägre av de andra färgerna (Lavinthal, §8.2).',
+    )
+  })
+
+  it('förklarar även DINA egna kort (Syd) när du försvarar', () => {
+    const d = deal({
+      hands: {
+        N: [c('hearts', 'K')], E: [c('hearts', '5')], W: [c('hearts', '2')],
+        S: [c('hearts', '9'), c('hearts', '3')],
+      },
+    })
+    // ÖV spelför (deklarant Ö) → Syd försvarar, Nord är Syds partner som leder ♥.
+    const trick: Trick = {
+      leader: 'N',
+      cards: [
+        { seat: 'N', card: c('hearts', 'K') },
+        { seat: 'E', card: c('hearts', '5') },
+        { seat: 'S', card: c('hearts', '3') },
+        { seat: 'W', card: c('hearts', '2') },
+      ],
+      winner: 'N',
+    }
+    const r = buildRondRapport(
+      input({ deal: d, contract: { declarer: 'E', strain: 'NT', level: 3 }, tricks: [trick] }),
+    )
+    expect(r.spelforing[0].signalRader).toContain(
+      'Du i hjärter: lågt — uppmuntrar färgen (attityd, §8.1).',
+    )
+  })
+
+  it('spelförarsidan får ingen markering, och toppkort i 3+-färg är ingen markering', () => {
+    const d = deal({
+      hands: {
+        N: [c('hearts', '5')], S: [c('hearts', '2')],
+        E: [c('hearts', 'K')], W: [c('hearts', 'Q'), c('hearts', '8'), c('hearts', '3')],
+      },
+    })
+    // Väst följer med sitt HÖGSTA (♥Q) ur 3-korts → inget markeringspåstående.
+    const trick: Trick = {
+      leader: 'E',
+      cards: [
+        { seat: 'E', card: c('hearts', 'K') },
+        { seat: 'S', card: c('hearts', '2') },
+        { seat: 'W', card: c('hearts', 'Q') },
+        { seat: 'N', card: c('hearts', '5') },
+      ],
+      winner: 'E',
+    }
+    const r = buildRondRapport(
+      input({ deal: d, contract: { declarer: 'S', strain: 'NT', level: 3 }, tricks: [trick] }),
+    )
+    expect(r.spelforing[0].signalRader).toEqual([])
+  })
+})
+
 describe('rondgenomgång: resultatet', () => {
   it('hemma exakt: beröm + poängrad', () => {
     const contract: Contract = { declarer: 'S', strain: 'spades', level: 4 }

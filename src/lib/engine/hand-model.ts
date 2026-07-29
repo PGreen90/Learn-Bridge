@@ -216,6 +216,11 @@ export function lenMin(c: SeatConstraint, suit: Suit, min: number): void {
 export function suitHcpFloor(c: SeatConstraint, suit: Suit, min: number): void {
   c.suitHcp[suit].min = Math.max(c.suitHcp[suit].min, min)
 }
+/** Sänk honnörspoäng-TAKET i en färg (exporterad för signalavkodningen –
+ *  t.ex. en avskräckande attitydmarkering förnekar dam+ i färgen). */
+export function suitHcpCeil(c: SeatConstraint, suit: Suit, max: number): void {
+  c.suitHcp[suit].max = Math.min(c.suitHcp[suit].max, max)
+}
 function narrowLen(c: SeatConstraint, suit: Suit, min: number, max: number): void {
   c.length[suit].min = Math.max(c.length[suit].min, min)
   c.length[suit].max = Math.min(c.length[suit].max, max)

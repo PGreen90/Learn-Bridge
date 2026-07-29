@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { buildHandModel } from './hand-model'
 import type { Contract, PlayState, Trick } from './play'
-import { applyOpeningLeadSignal } from './signal-decode'
+import { applyOpeningLeadSignal, applySignalReads } from './signal-decode'
 import { sampleLayouts } from './monte-carlo'
 
 const C = (rank: Rank, suit: Suit): Card => ({ suit, rank })
@@ -121,5 +121,56 @@ describe('signalavkodning – e2e: samplaren placerar den avkodade honnören', (
       expect(hasCard(L.E, C('Q', 'hearts'))).toBe(true)
       expect(L.E.filter((c) => c.suit === 'hearts').length).toBeGreaterThanOrEqual(3)
     }
+  })
+})
+
+describe('signalavkodning – ATTITYD under spelet (Steg 5b): avskräckning → HP-tak', () => {
+  /** Läge med ett avslutat stick: Öst (motspelare) ledde färgen, Väst (partner)
+   *  följde med kortet `westCard`, spelföraren N vann. Aktör = N (läser Väst). */
+  function afterAttitude(westCard: Card, declarer: Seat = 'N'): PlayState {
+    const trick: Trick = {
+      leader: 'E',
+      cards: [
+        { seat: 'E', card: C('5', 'hearts') },
+        { seat: 'S', card: C('2', 'hearts') },
+        { seat: 'W', card: westCard },
+        { seat: 'N', card: C('K', 'hearts') },
+      ],
+      winner: 'N',
+    }
+    return {
+      contract: { declarer, strain: 'NT', level: 3 }, trump: null,
+      hands: { N: [], E: [], S: [], W: [] },
+      leader: 'E', toAct: 'N', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
+    }
+  }
+
+  it('högt spotkort (♥9) på partnerns färg → Väst förnekar dam+ (HP-tak 1)', () => {
+    const model = applySignalReads(buildHandModel([]), afterAttitude(C('9', 'hearts')), 'N')
+    expect(model.W.suitHcp.hearts.max).toBe(1)
+  })
+
+  it('lågt kort (♥3) är tvetydigt → ingen slutsats (taket orört)', () => {
+    const model = applySignalReads(buildHandModel([]), afterAttitude(C('3', 'hearts')), 'N')
+    expect(model.W.suitHcp.hearts.max).toBe(10)
+  })
+
+  it('människans (Syd) markering avkodas ALDRIG', () => {
+    // Ö/V spelför → N/S försvarar. Nord leder ♥, Syd (människan) följer ♥9.
+    const trick: Trick = {
+      leader: 'N',
+      cards: [
+        { seat: 'N', card: C('5', 'hearts') }, { seat: 'E', card: C('2', 'hearts') },
+        { seat: 'S', card: C('9', 'hearts') }, { seat: 'W', card: C('K', 'hearts') },
+      ],
+      winner: 'W',
+    }
+    const state: PlayState = {
+      contract: { declarer: 'W', strain: 'NT', level: 3 }, trump: null,
+      hands: { N: [], E: [], S: [], W: [] },
+      leader: 'N', toAct: 'E', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
+    }
+    const model = applySignalReads(buildHandModel([]), state, 'E')
+    expect(model.S.suitHcp.hearts.max).toBe(10) // orört
   })
 })

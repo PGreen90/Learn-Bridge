@@ -115,6 +115,11 @@ function StickRad({ stick, ddRad }: { stick: StickPunkt; ddRad: DdRad | null }) 
               • <SuitText>{rad}</SuitText>
             </li>
           ))}
+          {stick.signalRader.map((rad, i) => (
+            <li key={`sig-${i}`} className="text-sm text-accent">
+              ✦ <SuitText>{rad}</SuitText>
+            </li>
+          ))}
           {ddRad && (
             <li className={`text-sm ${TON_KLASS[ddRad.ton]}`}>
               <span className="text-danger">⚠</span> {ddRad.text}
