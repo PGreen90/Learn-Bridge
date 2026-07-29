@@ -12,8 +12,8 @@
 
 ## 2026-07-29
 
-**🎉 RONDGENOMGÅNGEN (after action report) BYGGD i tre etapper (2026-07-29,
-grenen `rondgenomgang-etapp1`, hela sviten grön via `npm test`):** efter en
+**🎉 RONDGENOMGÅNGEN (after action report) BYGGD i fyra etapper (2026-07-29,
+mergepunkt `a28ff5e`, hela sviten grön via `npm test`):** efter en
 färdigspelad giv i Spela kort kan spelaren öppna en komplett genomgång i tre
 hopfällbara kapitel (ägarkrav: dropdowns, ingen textvägg). **Etapp 1 —
 textmotorn:** ren modul `src/lib/engine/rond-rapport.ts` (`buildRondRapport`)
