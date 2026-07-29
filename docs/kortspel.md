@@ -115,3 +115,32 @@ Spåret som gav kortspelet liv, byggt i fem etapper helt i UI-lagret (spelmotorn
 - **Facit-tester:** `tempo.test.tsx`, `sticksvep.test.tsx`,
   `kortflygning.test.tsx`, `ljud.test.tsx`, `claimreveal.test.tsx` (alla under
   `src/pages/play/`, seedade givar, tider från `tempo.ts`).
+
+## Rondgenomgången (after action report, 2026-07-29 — AKTUELLT)
+
+Efter en färdigspelad giv kan spelaren öppna en **rondgenomgång**: hela given
+förklarad i tre hopfällbara kapitel (inga textväggar — ägarkrav). Nås via
+"Rondgenomgång"-knappen i resultatdialogen och i raden under omspelningen.
+
+- **Budgivningen:** varje bud på en egen rad — sits, chip och förklaring.
+  Motorns egen regelförklaring när den finns (säker); annars tolkningslagret
+  `interpretCall` (`auction-interpret.ts`), som alltid ger text även för nakna
+  pass, med ärlig osäkerhetsmarkering ("trolig/gissning tolkning"). ALERT
+  visas som i auktionsvyn. Syds rader markeras "(du)".
+- **Spelföringen:** varje stick är en egen nästlad dropdown med enradsrubrik
+  ("Stick 4 — Öst stal med 3♠"); öppnad visar den minikorten (vinnaren ringad)
+  och max 4 punkter: utspel, trumfningar/sakningar, löpande ställning. Tryck
+  på ett botkort visar botens motivering (samma `botReasons` som på bordet).
+- **Resultatet (öppet som default — domen först):** kontrakt/utfall/poäng med
+  ton (beröm vid egen hemgång och lyckat motspel, läxa vid egen bet, neutralt
+  när motståndarna går hem — utan facit vet vi inte om det gick att beta) +
+  claim-notis. DD-domen "du borde ha tagit ett stick till" är **etapp 3**
+  (planerad, ej byggd).
+- **Arkitektur:** all text byggs av den rena motormodulen
+  `src/lib/engine/rond-rapport.ts` (`buildRondRapport`: giv + auktion + stick +
+  resultat → rapportdata); vyn `src/pages/play/RondRapport.tsx` renderar bara.
+  Perspektivet följer `controls()`: Syd är alltid "du", Nord är "Nord (dina
+  kort)" när NS spelför och "Nord (din partner)" i försvar. Spelmotorn orörd,
+  inga nya beroenden.
+- **Facit-tester:** `src/lib/engine/rond-rapport.test.ts` (textmotorn) +
+  `src/pages/play/rondrapport.test.tsx` (vyn + reviewing-flödet).

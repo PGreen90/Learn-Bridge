@@ -49,6 +49,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   const [resultSeen, setResultSeen] = useState(false)
   // Felrapport-dialogen ("Kändes given rätt?") — nås från resultatdialogen.
   const [reporting, setReporting] = useState(false)
+  // Rondgenomgången (etapp 2): hela given förklarad i kapitel — nås från
+  // resultatdialogen och raden under omspelningen.
+  const [reviewing, setReviewing] = useState(false)
   // Facit (double-dummy) för NUVARANDE ställning: tal = spelförarens totala stick
   // med perfekt spel, 'toohard' = för tung just nu, 'idle' = ej beräknat.
   const [facit, setFacit] = useState<number | 'idle' | 'toohard'>('idle')
@@ -421,6 +424,8 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     setResultSeen,
     reporting,
     setReporting,
+    reviewing,
+    setReviewing,
     facit,
     showFacit,
     selectedSuit,

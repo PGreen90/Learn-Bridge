@@ -315,6 +315,18 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   resultatdialogen får engångs guldglow + skimmer vid hemgång
   (`result-made-glow`, pseudo-element så `dialog-in` inte skrivs över) — bet
   är sobert. Test: `src/pages/play/claimreveal.test.tsx`.
+- **Rondgenomgången (2026-07-29):** efter färdigspelad giv — "Rondgenomgång"-
+  knapp i resultatdialogen och under omspelningen (`reviewing` i
+  `usePlayTable.ts`) öppnar tre hopfällbara kapitel: Budgivningen (varje bud
+  förklarat via motorns regel eller `interpretCall`, ALERT + osäkerhets-
+  markering), Spelföringen (varje stick som nästlad dropdown: minikort med
+  vinnarring, utspel/trumfningar/sakningar/löpande ställning, tryck på botkort
+  visar `botReasons`-motiveringen) och Resultatet (öppet som default: utfall
+  med ton, claim-notis, poäng). All text ur rena motormodulen
+  `src/lib/engine/rond-rapport.ts` (`buildRondRapport`); vyn
+  `src/pages/play/RondRapport.tsx` renderar bara. DD-domen ("ett stick till")
+  är planerad etapp 3. Test: `src/lib/engine/rond-rapport.test.ts` +
+  `src/pages/play/rondrapport.test.tsx`.
 - **Stegbar omspelning** – `PlayReplay.tsx` (händer sorterade i färg, Väst/Öst som Fun Bridge-färgrader, träkarlen i färgkolumner; delad `src/lib/cardLayout.ts`).
 - **Kontraktväljaren (träningsmål, 2026-07-05, LIVE — commit `6b07cad`):** en "Mål:"-pill i
   budfasen öppnar `ScenarioPicker` där ägaren väljer scenario (slumpad giv,
