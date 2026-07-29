@@ -22,10 +22,21 @@ ren motormodul + UI-lager, spelmotorn orörd, inga nya beroenden.
 Mergepunkt: `a28ff5e`. Detalj: `docs/kortspel.md` "Rondgenomgången" +
 `docs/status.md`; etapplogg: `docs/historik.md`.
 
+**MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna LÄGGER
+UDCA-attityd/räkning + Lavinthal i motspelet (`defensiveSignalCard` + resolvers i
+`play-bot.ts`; gardregeln: behåll de två högsta korten så en markering aldrig blir
+en grov blunder; uppmätt encode-kostnad netto +10 stick/239 givar), rondgenomgången
+FÖRKLARAR allas markeringar (även dina egna kort, `signalRegel` i `rond-rapport.ts`
+— verifierat i browsern), och botarna LÄSER avskräckningsmarkeringar (`applySignalReads`
+→ HP-tak i Monte-Carlo, netto bättre försvar, ägaren behöll på). Sex etapper (0–5),
+spelmotorn orörd, inga nya beroenden. Ny mätrigg för SPELSTYRKA:
+`play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
+`docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
+
 **➡️ NÄSTA GÅNG:** ägaren väljer nytt NU — närmast till hands ligger 🟢 NÄST
-punkt 1 (Etapp 7 missad lillslam, förskannad, ägaren väljer hål 2). Möjlig ny
-SENARE-kandidat från rondgenomgången: botarna lägger inte UDCA-/Lavinthal-
-markeringar i spelet ännu (encoders finns i `signals.ts`).
+punkt 1 (Etapp 7 missad lillslam, förskannad, ägaren väljer hål 2). Kvar i
+signalspåret (⚪ SENARE, `docs/senare.md`): avkoda räkning (paritet, kräver
+paritetsstöd i `monte-carlo.ts`) och uppmuntran (tvetydig).
 
 **Senast klart 2026-07-28 — KÄNSLA I KORTSPELET-spåret (etapp 1–5), KLART & LIVE:**
 kortspelet har tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow,
