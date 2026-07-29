@@ -41,47 +41,68 @@ function Kapitel({
   )
 }
 
-/** Ett stick som egen nästlad dropdown: rubrikrad + minikort + punkterna. */
+/** Sätesbokstaven vid varje kort i väderstrecksvyn. */
+const SEAT_BOKSTAV: Record<Seat, string> = { N: 'N', E: 'Ö', S: 'S', W: 'V' }
+
+/** Ett stick som egen nästlad dropdown: rubrikrad + korten i väderstrecken + punkterna. */
 function StickRad({ stick, ddRad }: { stick: StickPunkt; ddRad: DdRad | null }) {
   // Tryck på ett kort med botmotivering visar den under korten (samma idé som
   // "tryck på spelat kort" på bordet). Samma kort igen stänger.
   const [visadNyckel, setVisadNyckel] = useState<string | null>(null)
   const visad = visadNyckel ? stick.botRadFor[visadNyckel] : undefined
 
+  // Korten läggs som vid bordet: Nord överst, Syd nederst, Väst/Öst på sidorna
+  // (ägarönskemål 2026-07-29 — inte på rad).
+  const cell = (seat: Seat) => {
+    const pc = stick.trick.cards.find((x) => x.seat === seat)
+    if (!pc) return <span />
+    const nyckel = `${pc.card.suit}${pc.card.rank}`
+    const inre = (
+      <span className="flex flex-col items-center gap-0.5">
+        <span className="text-[9px] font-semibold leading-none text-ink-faint">
+          {SEAT_BOKSTAV[seat]}
+        </span>
+        <PlayingCard
+          card={pc.card}
+          size="sm"
+          className={pc.seat === stick.trick.winner ? 'ring-2 ring-amber-400' : ''}
+        />
+      </span>
+    )
+    return stick.botRadFor[nyckel] ? (
+      <button
+        type="button"
+        className="cursor-pointer"
+        onClick={() => setVisadNyckel((n) => (n === nyckel ? null : nyckel))}
+        aria-label={`Varför ${pc.card.rank}?`}
+      >
+        {inre}
+      </button>
+    ) : (
+      <span>{inre}</span>
+    )
+  }
+
   return (
     <details className="group/stick rounded-lg border border-line bg-panel-2">
       <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm text-ink [&::-webkit-details-marker]:hidden">
         <span>
-          {ddRad && <span className="mr-1">⚠</span>}
+          {ddRad && <span className="mr-1 text-danger">⚠</span>}
           <SuitText>{stick.rubrik}</SuitText>
         </span>
         <span className="text-ink-faint transition-transform group-open/stick:rotate-180">▾</span>
       </summary>
       <div className="border-t border-line px-3 pb-3 pt-2">
-        <div className="mb-2 flex gap-1.5">
-          {stick.trick.cards.map((pc) => {
-            const nyckel = `${pc.card.suit}${pc.card.rank}`
-            const kort = (
-              <PlayingCard
-                card={pc.card}
-                size="sm"
-                className={pc.seat === stick.trick.winner ? 'ring-2 ring-amber-400' : ''}
-              />
-            )
-            return stick.botRadFor[nyckel] ? (
-              <button
-                key={nyckel}
-                type="button"
-                className="cursor-pointer"
-                onClick={() => setVisadNyckel((n) => (n === nyckel ? null : nyckel))}
-                aria-label={`Varför ${pc.card.rank}?`}
-              >
-                {kort}
-              </button>
-            ) : (
-              <span key={nyckel}>{kort}</span>
-            )
-          })}
+        <div className="mb-2 grid w-fit grid-cols-3 items-center justify-items-center gap-x-1.5 gap-y-1">
+          <span />
+          {cell('N')}
+          <span />
+          {cell('W')}
+          <span />
+          {cell('E')}
+          <span />
+          {cell('S')}
+          <span />
         </div>
         {visad && (
           <p className="mb-2 rounded-lg bg-panel px-2 py-1 text-xs text-ink-soft">
@@ -95,7 +116,9 @@ function StickRad({ stick, ddRad }: { stick: StickPunkt; ddRad: DdRad | null }) 
             </li>
           ))}
           {ddRad && (
-            <li className={`text-sm ${TON_KLASS[ddRad.ton]}`}>⚠ {ddRad.text}</li>
+            <li className={`text-sm ${TON_KLASS[ddRad.ton]}`}>
+              <span className="text-danger">⚠</span> {ddRad.text}
+            </li>
           )}
         </ul>
       </div>

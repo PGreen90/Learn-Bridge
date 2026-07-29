@@ -128,9 +128,20 @@ förklarad i tre hopfällbara kapitel (inga textväggar — ägarkrav). Nås via
   pass, med ärlig osäkerhetsmarkering ("trolig/gissning tolkning"). ALERT
   visas som i auktionsvyn. Syds rader markeras "(du)".
 - **Spelföringen:** varje stick är en egen nästlad dropdown med enradsrubrik
-  ("Stick 4 — Öst stal med 3♠"); öppnad visar den minikorten (vinnaren ringad)
-  och max 4 punkter: utspel, trumfningar/sakningar, löpande ställning. Tryck
-  på ett botkort visar botens motivering (samma `botReasons` som på bordet).
+  ("Stick 4 — Öst stal med 3♠"); öppnad visar den korten lagda **i väder-
+  strecken som vid bordet** (N överst, S nederst, V/Ö på sidorna, vinnaren
+  ringad; ägarönskemål 2026-07-29) och max 4 punkter: utspel, trumfningar/
+  sakningar, löpande ställning. **Utspelsregeln (§8.3) skrivs ut i utspels-
+  raden** när mönstret stämmer med utspelarens faktiska kort: topp av
+  honnörssekvens, singelutspel, och för motspelets öppningsutspel även
+  längdmarkeringarna (3:e bästa från jämn längd / lägsta från udda / topp av
+  dubbelton — "visar längden för partnern"). Spelförarsidans utspel får ALDRIG
+  längdbudskapet (markeringen är försvarets), och passar inget mönster påstås
+  ingenting. OBS: attityd-/räkningsmarkeringar (UDCA) och Lavinthal är byggda
+  som encoders i `signals.ts` men läggs inte av botarna i spelet ännu — därför
+  förklaras de inte heller i rapporten. Tryck på ett botkort visar botens
+  motivering (samma `botReasons` som på bordet). DD-flaggans ⚠ är röd
+  (`text-danger`) i både rubrik och rad.
 - **Resultatet (öppet som default — domen först):** kontrakt/utfall/poäng med
   ton (beröm vid egen hemgång och lyckat motspel, läxa vid egen bet, neutralt
   när motståndarna går hem) + claim-notis + **DD-domen**.

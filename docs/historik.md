@@ -35,8 +35,14 @@ jobbat") + upplysning när en manuell claim tog färre stick än facit säkrar.
 **Lärdom (StrictMode):** en kör-en-gång-ref i hooken lämnade analysen ostartad
 för alltid vid dev-ommonteringen — effekten gjordes omstartbar i stället.
 Spelmotorn orörd, inga nya beroenden. Verifierad i webbläsaren (två hela givar:
-ÖV-kontrakt med claim + NS-kontrakt med DD-dom). Detalj: `docs/kortspel.md`
-"Rondgenomgången" + `docs/status.md`.
+ÖV-kontrakt med claim + NS-kontrakt med DD-dom). **Etapp 4 (ägarens feedback
+efter eget test, samma dag):** utspelsregeln (§8.3) skrivs ut i utspelsraden
+läst ur utspelarens faktiska kort (topp av honnörssekvens/singel för alla;
+längdmarkeringarna 3:e/5:e/dubbelton BARA för motspelets öppningsutspel —
+UDCA/Lavinthal läggs inte av botarna ännu och förklaras därför inte); stickets
+kort läggs i väderstrecken som vid bordet (N/S/V/Ö med sätesbokstäver); ⚠ är
+röd i både rubrik och rad. Detalj: `docs/kortspel.md` "Rondgenomgången" +
+`docs/status.md`.
 
 ## 2026-07-04
 

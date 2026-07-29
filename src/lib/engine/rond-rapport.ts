@@ -9,12 +9,13 @@
 // till") är etapp 3 och läggs ovanpå — den här modulen säger bara sådant som
 // går att läsa rakt ur budgivningen och sticken.
 
-import type { Bid, Card, Deal, Seat, Suit, Vulnerability } from '../../types/bridge'
+import type { Bid, Card, Deal, Hand, Seat, Suit, Vulnerability } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { interpretCall, type Confidence } from './auction-interpret'
 import { side, type Contract, type PlayResult, type Trick } from './play'
 import { isAlertRule } from './rules'
 import type { ScoreLine } from './scoring'
+import { honorLead } from './signals'
 
 export interface RondRapportInput {
   deal: Deal
@@ -144,7 +145,37 @@ function buildBudgivning(calls: ResolvedCall[]): BudPunkt[] {
 /** Max antal rader per stick (ägarkrav: ingen textvägg). */
 const MAX_RADER = 4
 
+const RANK_ORDER = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+const rankVal = (r: string) => RANK_ORDER.indexOf(r)
+
+/**
+ * Vilken §8.3-regel utspelet följer, läst ur utspelarens FAKTISKA kort i färgen
+ * i utspelsögonblicket (given är slut — alla kort är kända). Returnerar null
+ * när inget mönster passar eller korten inte går att rekonstruera (då påstås
+ * ingenting). Längdbudskapen (3:e/5:e, dubbelton) är FÖRSVARETS markeringar —
+ * de sätts bara ut när utspelaren är motspelare; honnörssekvens och singel är
+ * neutral teknik och namnges för alla.
+ */
+function utspelsRegel(suitCards: Card[], card: Card, forsvarare: boolean): string | null {
+  if (!suitCards.some((c) => c.suit === card.suit && c.rank === card.rank)) return null
+  if (suitCards.length === 1) return 'singelutspel.'
+  const honnör = honorLead(suitCards)
+  if (honnör && honnör.rank === card.rank) return 'topp av honnörssekvens (§8.3).'
+  if (!forsvarare) return null
+  const sorterade = [...suitCards].sort((a, b) => rankVal(b.rank) - rankVal(a.rank))
+  const n = sorterade.length
+  if (n === 2 && card.rank === sorterade[0].rank) return 'topp av dubbelton (§8.3).'
+  if (n % 2 === 0 && n >= 4 && card.rank === sorterade[2].rank) {
+    return '3:e bästa från jämn längd (§8.3), visar längden för partnern.'
+  }
+  if (n % 2 === 1 && card.rank === sorterade[n - 1].rank) {
+    return 'lägsta från udda längd (§8.3), visar längden för partnern.'
+  }
+  return null
+}
+
 function buildSpelforing(
+  deal: Deal,
   tricks: Trick[],
   trump: Suit | null,
   declSide: 'NS' | 'EW',
@@ -152,6 +183,14 @@ function buildSpelforing(
 ): StickPunkt[] {
   let ns = 0
   let ew = 0
+  // Kvarvarande kort per plats, för utspelsregeln — given är slut så alla
+  // händer är kända; vi spolar bara tillbaka till respektive utspelsögonblick.
+  const kvar: Record<Seat, Hand> = {
+    N: [...deal.hands.N],
+    E: [...deal.hands.E],
+    S: [...deal.hands.S],
+    W: [...deal.hands.W],
+  }
   return tricks.map((trick, i) => {
     if (side(trick.winner) === 'NS') ns++
     else ew++
@@ -176,11 +215,23 @@ function buildSpelforing(
     }
     const handelser = [...trumfningar, ...sakningar].slice(0, MAX_RADER - 2)
 
-    const rader = [
-      `Utspel ${kortText(trick.cards[0].card)} från ${franForm(trick.leader, declSide)}.`,
-      ...handelser,
-      `Ställning: NS ${ns} – ÖV ${ew}.`,
-    ]
+    // Utspelsregeln bakas in i utspelsraden (radbudgeten hålls). Bara stick 1
+    // är ett äkta utspel i doktrinens mening; senare ledningar namnges bara
+    // när mönstret är otvetydigt (sekvens/singel — utspelsRegel avgör).
+    const ledCard = trick.cards[0].card
+    const ledSuitCards = kvar[trick.leader].filter((c) => c.suit === ledCard.suit)
+    const forsvarare = side(trick.leader) !== declSide
+    const regel = utspelsRegel(ledSuitCards, ledCard, forsvarare && i === 0)
+    const utspelsRad = regel
+      ? `Utspel ${kortText(ledCard)} från ${franForm(trick.leader, declSide)} — ${regel}`
+      : `Utspel ${kortText(ledCard)} från ${franForm(trick.leader, declSide)}.`
+    for (const pc of trick.cards) {
+      kvar[pc.seat] = kvar[pc.seat].filter(
+        (c) => !(c.suit === pc.card.suit && c.rank === pc.card.rank),
+      )
+    }
+
+    const rader = [utspelsRad, ...handelser, `Ställning: NS ${ns} – ÖV ${ew}.`]
 
     // Botmotiveringar för just det här stickets kort (nyckel + sits måste stämma).
     const botRadFor: Record<string, string> = {}
@@ -233,7 +284,7 @@ export function buildRondRapport(input: RondRapportInput): RondRapport {
   return {
     rubrik: buildRubrik(input.deal, input.contract, declSide),
     budgivning: buildBudgivning(input.calls),
-    spelforing: buildSpelforing(input.tricks, trump, declSide, input.botReasons),
+    spelforing: buildSpelforing(input.deal, input.tricks, trump, declSide, input.botReasons),
     resultat: buildResultat(input, declSide),
   }
 }

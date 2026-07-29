@@ -205,6 +205,102 @@ describe('rondgenomgång: spelföringen', () => {
   })
 })
 
+describe('rondgenomgång: utspelsregeln (§8.3)', () => {
+  // Given behöver bara vara konsistent i utspelarens hand — resten kan vara tom.
+  const spaderKontrakt: Contract = { declarer: 'S', strain: 'spades', level: 4 }
+  const trickLett = (ledCard: Card, rest: [Seat, Card][]): Trick => ({
+    leader: 'W',
+    cards: [
+      { seat: 'W', card: ledCard },
+      ...rest.map(([seat, card]) => ({ seat, card })),
+    ],
+    winner: 'N',
+  })
+
+  it('topp av honnörssekvens namnges', () => {
+    const d = deal({
+      hands: {
+        N: [], E: [], S: [],
+        W: [c('hearts', 'K'), c('hearts', 'Q'), c('hearts', 'J'), c('hearts', '5'), c('clubs', '2')],
+      },
+    })
+    const trick = trickLett(c('hearts', 'K'), [
+      ['N', c('hearts', 'A')], ['E', c('hearts', '2')], ['S', c('hearts', '3')],
+    ])
+    const r = buildRondRapport(input({ deal: d, contract: spaderKontrakt, tricks: [trick] }))
+    expect(r.spelforing[0].rader[0]).toBe(
+      'Utspel K♥ från Väst — topp av honnörssekvens (§8.3).',
+    )
+  })
+
+  it('3:e bästa från jämn längd namnges med längdbudskapet (motspelsutspel)', () => {
+    const d = deal({
+      hands: {
+        N: [], E: [], S: [],
+        W: [c('hearts', 'K'), c('hearts', 'J'), c('hearts', '7'), c('hearts', '5')],
+      },
+    })
+    const trick = trickLett(c('hearts', '7'), [
+      ['N', c('hearts', 'A')], ['E', c('hearts', '2')], ['S', c('hearts', '3')],
+    ])
+    const r = buildRondRapport(input({ deal: d, contract: spaderKontrakt, tricks: [trick] }))
+    expect(r.spelforing[0].rader[0]).toBe(
+      'Utspel 7♥ från Väst — 3:e bästa från jämn längd (§8.3), visar längden för partnern.',
+    )
+  })
+
+  it('lägsta från udda längd och singelutspel namnges', () => {
+    const udda = deal({
+      hands: {
+        N: [], E: [], S: [],
+        W: [c('hearts', 'K'), c('hearts', 'J'), c('hearts', '7'), c('hearts', '5'), c('hearts', '2')],
+      },
+    })
+    const r1 = buildRondRapport(
+      input({
+        deal: udda,
+        contract: spaderKontrakt,
+        tricks: [trickLett(c('hearts', '2'), [['N', c('hearts', 'A')], ['E', c('hearts', '3')], ['S', c('hearts', '4')]])],
+      }),
+    )
+    expect(r1.spelforing[0].rader[0]).toBe(
+      'Utspel 2♥ från Väst — lägsta från udda längd (§8.3), visar längden för partnern.',
+    )
+
+    const singel = deal({ hands: { N: [], E: [], S: [], W: [c('hearts', '5'), c('clubs', '2')] } })
+    const r2 = buildRondRapport(
+      input({
+        deal: singel,
+        contract: spaderKontrakt,
+        tricks: [trickLett(c('hearts', '5'), [['N', c('hearts', 'A')], ['E', c('hearts', '3')], ['S', c('hearts', '4')]])],
+      }),
+    )
+    expect(r2.spelforing[0].rader[0]).toBe('Utspel 5♥ från Väst — singelutspel.')
+  })
+
+  it('spelförarsidans utspel får INTE längdbudskapet (markeringen är försvarets)', () => {
+    // Öst spelför → Väst är träkarl på spelförarsidan; 3:e-bästa-mönstret ska tigas.
+    const d = deal({
+      hands: {
+        N: [], E: [], S: [],
+        W: [c('hearts', 'K'), c('hearts', 'J'), c('hearts', '7'), c('hearts', '5')],
+      },
+    })
+    const trick = trickLett(c('hearts', '7'), [
+      ['N', c('hearts', 'A')], ['E', c('hearts', '2')], ['S', c('hearts', '3')],
+    ])
+    const r = buildRondRapport(
+      input({ deal: d, contract: { declarer: 'E', strain: 'NT', level: 3 }, tricks: [trick] }),
+    )
+    expect(r.spelforing[0].rader[0]).toBe('Utspel 7♥ från Väst.')
+  })
+
+  it('okänd hand (fixtur utan kort) → ingen regel påstås', () => {
+    const r = buildRondRapport(input({ tricks: [TRICK_RUFF] }))
+    expect(r.spelforing[0].rader[0]).toBe('Utspel 5♥ från Väst.')
+  })
+})
+
 describe('rondgenomgång: resultatet', () => {
   it('hemma exakt: beröm + poängrad', () => {
     const contract: Contract = { declarer: 'S', strain: 'spades', level: 4 }
