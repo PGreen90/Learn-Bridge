@@ -12,12 +12,12 @@
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Rank } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { currentWinner, dummyOf, legalCards, side, type PlayState } from './play'
+import { currentWinner, dummyOf, legalCards, PARTNER_SEAT, side, type PlayState } from './play'
 import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats } from './card-counting'
 import { buildHandModel } from './hand-model'
-import { applyOpeningLeadSignal } from './signal-decode'
+import { applyOpeningLeadSignal, applySignalReads } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
-import { honorLead, leadFromSuit } from './signals'
+import { defensiveSignalCard, honorLead, leadFromSuit } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
@@ -175,6 +175,121 @@ function defenderGuardDiscard(state: PlayState, seat: Seat, legal: Hand): Card |
   return lowest(safe)
 }
 
+/**
+ * Behåll mina TVÅ högsta kort i färgen som gardar i längre färger (3+) och
+ * returnera resten (de jag kan markera med). Att markera med ett toppkort kan
+ * blotta en stoppare/ett längdstick (♣10 ur 10-8-2 släpper garden på spelförarens
+ * långa klöver; ♦8 ur ♦J82 släpper längden bakom knekten). "Riktiga markeringar"
+ * – men aldrig en grov blunder. Kortare färger (≤2) lämnas orörda.
+ */
+function spareAfterGuards(cards: Card[]): Card[] {
+  if (cards.length < 3) return cards
+  const desc = [...cards].sort((a, b) => rankVal(b.rank) - rankVal(a.rank))
+  const gardRanks = new Set([desc[0].rank, desc[1].rank])
+  return cards.filter((c) => !gardRanks.has(c.rank))
+}
+
+/**
+ * Försvarsmarkering när jag FÖLJER färg med ett värdelöst kort (markeringar
+ * Steg 1, docs/budsystem.md §8.1). Attityd på partnerns utspelsfärg: uppmuntra
+ * (lägg lågt, UDCA omvänt) med Q+ i färgen OCH/ELLER en kort färg (dubbel-/
+ * singelton att snart trumfa i trumfkontrakt); annars avskräck (lägg högt).
+ * Kortet väljs bland spare (`defensiveSignalCard` → kan aldrig kosta ett stick)
+ * och läggs alltid UNDER partnerns vinnande kort (tar aldrig över partnerns
+ * stick). Returnerar null när det inte gäller: spelförarsidan, jag leder/sakar,
+ * färgen redan spelad 2+ ggr, motståndaren ledde (räkning = Steg 2), eller för
+ * få kort att välja bland. Läser bara egen hand (ingen tjuvkik).
+ */
+function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+  if (side(seat) === side(state.contract.declarer)) return null // bara motspelet
+  if (state.currentTrick.length === 0) return null // jag leder, inte följer
+  const led = state.currentTrick[0].card.suit
+  let candidates = legal.filter((c) => c.suit === led)
+  if (candidates.length < 2) return null // sakar, eller inget val
+  // §8.1: markering bara de första ~2 gångerna färgen spelas.
+  const timesLedBefore = state.completedTricks.filter((t) => t.cards[0]?.card.suit === led).length
+  if (timesLedBefore >= 2) return null
+  // Vinner min sida redan sticket → lägg UNDER partnerns kort (ta aldrig över).
+  const winnerSeat = currentWinner(state.currentTrick, state.trump)
+  if (side(winnerSeat) === side(seat)) {
+    const winCard = state.currentTrick.find((pc) => pc.seat === winnerSeat)!.card
+    if (winCard.suit === led) candidates = candidates.filter((c) => rankVal(c.rank) < rankVal(winCard.rank))
+    if (candidates.length < 2) return null
+  }
+  candidates = spareAfterGuards(candidates)
+  if (candidates.length < 2) return null
+  const played = playedCards(state)
+  const myInLed = state.hands[seat].filter((c) => c.suit === led)
+
+  if (state.currentTrick[0].seat === PARTNER_SEAT[seat]) {
+    // Partnern ledde → ATTITYD: uppmuntra med styrka (Q+) och/eller kort färg
+    // (ruffvärde i trumfkontrakt). Läser bara egen hand.
+    const hasQ = myInLed.some((c) => rankVal(c.rank) >= rankVal('Q'))
+    const shortRuff = state.trump !== null && led !== state.trump && myInLed.length <= 2
+    const encourage = hasQ || shortRuff
+    const card = defensiveSignalCard(candidates, played, { kind: 'attitude', encourage })
+    const reason = encourage
+      ? 'Markering (§8.1): jag lägger lågt = jag uppmuntrar partnerns färg (jag har något där).'
+      : 'Markering (§8.1): jag lägger högt = jag avskräcker partnerns färg.'
+    return { card, reason }
+  }
+
+  // Motståndaren ledde → RÄKNING (§8.1, omvänt): jämnt antal = lågt (lågt-högt),
+  // udda antal = högt (högt-lågt). Läser bara antalet egna kort i färgen.
+  const even = myInLed.length % 2 === 0
+  const card = defensiveSignalCard(candidates, played, { kind: 'count', even })
+  const reason = even
+    ? 'Markering (§8.1): räkning – lågt kort visar JÄMNT antal i färgen för partnern.'
+    : 'Markering (§8.1): räkning – högt kort visar UDDA antal i färgen för partnern.'
+  return { card, reason }
+}
+
+const HCP_OF: Partial<Record<Rank, number>> = { A: 4, K: 3, Q: 2, J: 1 }
+const SUIT_RANK_LOW_TO_HIGH: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+
+/**
+ * Lavinthal-sak (markeringar Steg 3, docs/budsystem.md §8.2): FÖRSTA gången en
+ * motspelare SAKAR (inte kan följa färg) visar kortets storlek färgpreferens –
+ * högt kort ber om den rankHÖGRE av de övriga färgerna, lågt om den lägre.
+ * Komponeras med honnörsvakten: `defenderGuardDiscard` väljer en SÄKER sakfärg,
+ * Lavinthal väljer kortet inom den. Returnerar null när det inte gäller:
+ * spelförarsidan, utspel, följer färg, bara trumf, inte första saket, eller
+ * ingen frihet i den säkra färgen. Läser bara egen hand (ingen tjuvkik).
+ */
+function defenderFirstDiscardSignal(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+  if (side(seat) === side(state.contract.declarer)) return null // bara motspelet
+  if (state.currentTrick.length === 0) return null // utspel, inte sak
+  const led = state.currentTrick[0].card.suit
+  if (legal.some((c) => c.suit === led)) return null // följer färg → inte sak
+  const candidates = state.trump === null ? legal : legal.filter((c) => c.suit !== state.trump)
+  if (candidates.length === 0) return null // bara trumf → gamla regeln
+  // Bara FÖRSTA saket i given (§8.2): har jag redan sakat off-färg någon gång?
+  const sakatFore = state.completedTricks.some((t) => {
+    const ledS = t.cards[0]?.card.suit
+    return t.cards.some((pc) => pc.seat === seat && pc.card.suit !== ledS)
+  })
+  if (sakatFore) return null
+  // Säker sakfärg: honnörsvakten ger ett säkert kort → använd dess färg (annars
+  // den naiva lågt-utan-ruff-färgen).
+  const guardCard = defenderGuardDiscard(state, seat, legal)
+  const safeSuit = (guardCard ?? lowAvoidRuff(legal, state.trump)).suit
+  const inSuit = spareAfterGuards(candidates.filter((c) => c.suit === safeSuit))
+  if (inSuit.length < 2) return null // ingen frihet att signalera → låt vakten stå
+  // De TVÅ (eller tre i sang) övriga färgerna, rankordnade. Lavinthal pekar mot
+  // den jag har mest honnörsstyrka i (den jag vill att partnern spelar).
+  const others = SUIT_RANK_LOW_TO_HIGH.filter((s) => s !== safeSuit && s !== state.trump)
+  const strength = (s: Suit) =>
+    state.hands[seat].filter((c) => c.suit === s).reduce((n, c) => n + (HCP_OF[c.rank] ?? 0), 0)
+  const higher = others[others.length - 1]
+  const lower = others[0]
+  const wantHigher = strength(higher) >= strength(lower)
+  const card = defensiveSignalCard(inSuit, playedCards(state), { kind: 'lavinthal', wantHigher })
+  const reason = wantHigher
+    ? 'Markering (§8.2): Lavinthal-sak – högt kort ber om den högre av de andra färgerna.'
+    : 'Markering (§8.2): Lavinthal-sak – lågt kort ber om den lägre av de andra färgerna.'
+  return { card, reason }
+}
+
 /** Korten i den längsta färgen (vid lika: första i kortordningen). */
 function longestSuit(cards: Hand): Hand {
   const bySuit = new Map<Suit, Card[]>()
@@ -214,11 +329,18 @@ export interface CardChoice {
   reason: string
 }
 
+/** Tumregel-inställningar. `signals:false` stänger av försvarsmarkeringar (bara
+ * för stickneutralitets-mätningen: jämför spel MED vs UTAN markeringar). */
+export interface ReasonedOpts {
+  signals?: boolean
+}
+
 /**
  * Tumregel-valet MED förklaring. Samma logik som `botCard` men returnerar också
  * en klartextsmotivering ("Varför?"). Beskrivningarna följer nybörjardoktrinen.
  */
-export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
+export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts = {}): CardChoice {
+  const signalsOn = opts.signals !== false
   const legal = legalCards(state, seat)
   if (legal.length === 1) return { card: legal[0], reason: 'Bara ett lagligt kort att spela.' }
 
@@ -295,8 +417,12 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   if (side(bestSeat) === side(seat)) {
     const guarded = guardedDiscard(state, seat, legal)
     if (guarded) return { card: guarded, reason: guardReason }
+    const lav = signalsOn ? defenderFirstDiscardSignal(state, seat, legal) : null
+    if (lav) return lav
     const defGuard = defenderGuardDiscard(state, seat, legal)
     if (defGuard) return { card: defGuard, reason: defenderGuardReason }
+    const signal = signalsOn ? defensiveFollowSignal(state, seat, legal) : null
+    if (signal) return signal
     return { card: lowAvoidRuff(legal, state.trump), reason: 'Partnern vinner redan sticket – jag kastar lågt och ruffar aldrig partnerns stick.' }
   }
 
@@ -325,8 +451,12 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
     }
     const guarded = guardedDiscard(state, seat, legal)
     if (guarded) return { card: guarded, reason: guardReason }
+    const lav = signalsOn ? defenderFirstDiscardSignal(state, seat, legal) : null
+    if (lav) return lav
     const defGuard = defenderGuardDiscard(state, seat, legal)
     if (defGuard) return { card: defGuard, reason: defenderGuardReason }
+    const signal = signalsOn ? defensiveFollowSignal(state, seat, legal) : null
+    if (signal) return signal
     return { card: lowAvoidRuff(legal, state.trump), reason: 'Andra hand lågt – jag sparar honnörerna till senare.' }
   }
 
@@ -356,8 +486,12 @@ export function botCardReasoned(state: PlayState, seat: Seat): CardChoice {
   }
   const guarded = guardedDiscard(state, seat, legal)
   if (guarded) return { card: guarded, reason: guardReason }
+  const lav = signalsOn ? defenderFirstDiscardSignal(state, seat, legal) : null
+  if (lav) return lav
   const defGuard = defenderGuardDiscard(state, seat, legal)
   if (defGuard) return { card: defGuard, reason: defenderGuardReason }
+  const signal = signalsOn ? defensiveFollowSignal(state, seat, legal) : null
+  if (signal) return signal
   return { card: lowAvoidRuff(legal, state.trump), reason: 'Inget av mina kort vinner sticket – jag kastar lågt.' }
 }
 
@@ -373,6 +507,8 @@ export interface SmartOpts {
   maxNodes?: number
   /** Max kort kvar i handen för att MC ska köras (annars tumregler). */
   maxCardsForMC?: number
+  /** Läs botarnas markeringar in i hand-modellen (markeringar Steg 5). Default på. */
+  decodeSignals?: boolean
 }
 
 /**
@@ -421,6 +557,8 @@ export function botCardSmartReasoned(
   // Signalavkodning (pt 50): skärp modellen med det öppningsutspelet avslöjar
   // (längd + ev. touchérande honnör), sett ur den agerande platsens synvinkel.
   applyOpeningLeadSignal(model, state, seat)
+  // Markeringar Steg 5: läs botarnas attitydmarkeringar under spelets gång.
+  if (opts.decodeSignals !== false) applySignalReads(model, state, seat)
   const budget = mcBudget(cardsLeft)
   const choice = chooseCardMonteCarlo(state, seat, model, {
     samples: opts.samples ?? budget.samples,

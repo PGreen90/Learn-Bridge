@@ -49,6 +49,9 @@ export interface StickPunkt {
   rubrik: string
   /** 2–4 korta punkter; ställningen är alltid sist. */
   rader: string[]
+  /** Försvarets markeringar i sticket, härledda ur korten (§8.1/§8.2). En rad
+   *  per tydlig markering, gäller både bottarna och Syd (dina egna kort). */
+  signalRader: string[]
   /** Botmotivering per kort i sticket (visas vid tap), nyckel `${suit}${rank}`. */
   botRadFor: Record<string, string>
 }
@@ -174,6 +177,42 @@ function utspelsRegel(suitCards: Card[], card: Card, forsvarare: boolean): strin
   return null
 }
 
+/**
+ * Läser en försvarares markering ur korten i efterhand (given är slut → allt
+ * känt), analogt med `utspelsRegel`. `holding` = spelarens kort i den spelade
+ * färgen VID ögonblicket (inkl. kortet självt). Markeringen läses som "lågt" om
+ * kortet var det lägsta i innehavet, annars "högt" (samma låg/hög-läsning som
+ * bottarna kodar med). Returnerar en förklaring eller null när det inte är ett
+ * tydligt markeringsläge (inget val, singelton). Konservativ som utspelsRegel.
+ */
+function signalRegel(
+  card: Card,
+  holding: Card[],
+  ctx: { partnerLed: boolean; isDiscard: boolean; firstDiscard: boolean },
+): string | null {
+  if (holding.length < 2) return null // inget val → ingen markering
+  const lagst = holding.reduce((lo, c) => (rankVal(c.rank) < rankVal(lo.rank) ? c : lo))
+  const hogst = holding.reduce((hi, c) => (rankVal(c.rank) > rankVal(hi.rank) ? c : hi))
+  // Toppkortet i en 3+-färg är aldrig en markering (gardregeln + det kan vara ett
+  // trickförsök) – matchar hur bottarna kodar. Dubbelton: båda korten kan bära.
+  if (holding.length >= 3 && card.rank === hogst.rank) return null
+  const lag = card.rank === lagst.rank
+  if (ctx.isDiscard) {
+    if (!ctx.firstDiscard) return null // Lavinthal bara på FÖRSTA saket (§8.2)
+    return lag
+      ? 'lågt sak — ber om den lägre av de andra färgerna (Lavinthal, §8.2)'
+      : 'högt sak — ber om den högre av de andra färgerna (Lavinthal, §8.2)'
+  }
+  if (ctx.partnerLed) {
+    return lag
+      ? 'lågt — uppmuntrar färgen (attityd, §8.1)'
+      : 'högt — avskräcker färgen (attityd, §8.1)'
+  }
+  return lag
+    ? 'lågt — visar jämnt antal (räkning, §8.1)'
+    : 'högt — visar udda antal (räkning, §8.1)'
+}
+
 function buildSpelforing(
   deal: Deal,
   tricks: Trick[],
@@ -181,6 +220,8 @@ function buildSpelforing(
   declSide: 'NS' | 'EW',
   botReasons: RondRapportInput['botReasons'],
 ): StickPunkt[] {
+  // Spelare som redan sakat (för "första saket"-regeln, §8.2), byggs upp löpande.
+  const harSakat = new Set<Seat>()
   let ns = 0
   let ew = 0
   // Kvarvarande kort per plats, för utspelsregeln — given är slut så alla
@@ -225,6 +266,30 @@ function buildSpelforing(
     const utspelsRad = regel
       ? `Utspel ${kortText(ledCard)} från ${franForm(trick.leader, declSide)} — ${regel}`
       : `Utspel ${kortText(ledCard)} från ${franForm(trick.leader, declSide)}.`
+
+    // Försvarets markeringar (§8.1/§8.2), lästa ur korten VID ögonblicket (kvar
+    // är ännu inte tömt på stickets kort). Bara motspelet, aldrig utspelaren
+    // (utspelet namnges av utspelsRad) och aldrig den som vann sticket.
+    const signalRader: string[] = []
+    for (const pc of trick.cards) {
+      const seat = pc.seat
+      if (side(seat) === declSide) continue // bara motspelet markerar
+      if (seat === trick.leader) continue // utspelaren – hanteras av utspelsRad
+      if (seat === trick.winner) continue // vann sticket → markerade inte
+      const suit = pc.card.suit
+      const followed = suit === ledSuit
+      const isDiscard = !followed && (trump === null || suit !== trump)
+      if (!followed && !isDiscard) continue // trumfning är ingen markering
+      const holding = kvar[seat].filter((c) => c.suit === suit)
+      const partnerLed = side(trick.leader) === side(seat)
+      const firstDiscard = isDiscard && !harSakat.has(seat)
+      const sig = signalRegel(pc.card, holding, { partnerLed, isDiscard, firstDiscard })
+      if (sig) {
+        signalRader.push(`${versal(subjekt(seat, declSide))} i ${SUIT_NAME[suit]}: ${sig}.`)
+      }
+      if (isDiscard) harSakat.add(seat)
+    }
+
     for (const pc of trick.cards) {
       kvar[pc.seat] = kvar[pc.seat].filter(
         (c) => !(c.suit === pc.card.suit && c.rank === pc.card.rank),
@@ -240,7 +305,7 @@ function buildSpelforing(
       if (info && info.seat === pc.seat) botRadFor[kortNyckel(pc.card)] = info.reason
     }
 
-    return { index: i + 1, trick, rubrik, rader, botRadFor }
+    return { index: i + 1, trick, rubrik, rader, signalRader, botRadFor }
   })
 }
 

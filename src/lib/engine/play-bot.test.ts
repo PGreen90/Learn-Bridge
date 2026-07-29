@@ -422,7 +422,10 @@ describe('felrapport #25 – motspelaren blottar inte en honnör vid sakning', (
     // Klöverdamen förblir garderad: minst två klöver kvar efter kastet.
     const clubsLeft = st.hands.W.filter((x) => x.suit === 'clubs').length
     expect(clubsLeft).toBe(3) // kastet rörde inte klöver
-    expect(r.reason).toMatch(/vaktar|honnör|blotta/i)
+    // Kastet är säkert (rör inte ♣Q) OCH bär numera en Lavinthal-markering på
+    // första saket (markeringar Steg 3): honnörsvakten väljer den säkra färgen,
+    // Lavinthal väljer kortet i den. Endera förklaringen är korrekt.
+    expect(r.reason).toMatch(/vaktar|honnör|blotta|Lavinthal/i)
   })
 
   it('DDS-facit: det valda kastet håller Syd till 9, ett klöverkast ger 11', () => {

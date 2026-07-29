@@ -7,9 +7,11 @@
 //   • Utspel: honnörsutspel = topp av sekvens (AK→A, KQ→K, QJ→Q, JT→J),
 //     annars spotkort 3:e bästa (jämn längd) / 5:e=lägsta (udda längd) (§8.3).
 //
-// Det här är encoders: de väljer VILKET kort som bär en viss signal. Att läsa
-// motpartens signaler (full försvarsstrategi) hör ihop med DDS (punkt 28) och
-// tas separat – bottarna använder tills vidare honnörs-/spotutspelet nedan.
+// Det här är encoders: de väljer VILKET kort som bär en viss signal.
+// `defensiveSignalCard` längst ned kapslar encoders + en konservativ SPARE-
+// beräkning (säkerhet) så bottarna kan lägga markeringar utan att en signal
+// någonsin kostar ett stick. Att LÄSA motpartens signaler (decode) hör ihop med
+// DDS (punkt 28, signal-decode.ts).
 
 import type { Card, Rank } from '../../types/bridge'
 
@@ -84,4 +86,90 @@ export function countCard(spare: Card[], evenLength: boolean): Card {
  */
 export function lavinthalDiscard(discardSuitCards: Card[], wantHigher: boolean): Card {
   return wantHigher ? highest(discardSuitCards) : lowest(discardSuitCards)
+}
+
+// --- Säkerhetskärnan: spare-beräkning + encoder-val (markeringar Steg 0) ------
+//
+// En markering får ALDRIG kosta ett stick. Idag lägger botten lägsta kortet; en
+// markering kan lägga ett HÖGRE spotkort (avskräck/udda/Lavinthal-hög). Därför
+// väljer encodern bara bland SPARE – kort jag ärligt kan avvara, som bevisligen
+// aldrig kan bli/kosta ett stick. Säkerhet och signal är ortogonala: den anropande
+// koden (play-bot) har redan valt en SÄKER färg; här väljs kortet inom den.
+
+/** Honnörsgräns för skyddssyfte: knekt eller högre (J+) skyddas alltid. */
+const HONOR = rankVal('J')
+
+/** Alla ranker i färgen strikt högre än `rank`. */
+function higherRanks(rank: Rank): Rank[] {
+  return RANK_LOW_TO_HIGH.slice(rankVal(rank) + 1)
+}
+
+/**
+ * Säker vinnare i färgen (ärlig räkning): inget HÖGRE kort är ospelat och utanför
+ * min egen hand. `mine` = mina kort i färgen, `played` = alla spelade kort.
+ */
+function sureWinnerInSuit(card: Card, mine: Card[], played: Card[]): boolean {
+  for (const r of higherRanks(card.rank)) {
+    const seen =
+      played.some((c) => c.suit === card.suit && c.rank === r) || mine.some((c) => c.rank === r)
+    if (!seen) return false
+  }
+  return true
+}
+
+/**
+ * Spare = kort jag kan avvara utan att riskera ett stick. Ett kort SKYDDAS (är
+ * inte spare) om det är: en honnör (J+), en säker vinnare, eller ingår i den
+ * sammanhängande topp-sekvensen ledd av en honnör (J-10-9 kan promoveras). Allt
+ * annat (rena små spotkort) är spare. Konservativt med flit – hellre färre
+ * signaler än ett tappat stick.
+ */
+function spareCards(mine: Card[], played: Card[]): Card[] {
+  const desc = highToLow(mine)
+  const protectedRanks = new Set<Rank>()
+  // Honnörsledd topp-sekvens (kan promoveras till stick): skydda hela löpan.
+  if (desc.length > 0 && rankVal(desc[0].rank) >= HONOR) {
+    protectedRanks.add(desc[0].rank)
+    for (let i = 1; i < desc.length; i++) {
+      if (rankVal(desc[i - 1].rank) - rankVal(desc[i].rank) === 1) protectedRanks.add(desc[i].rank)
+      else break
+    }
+  }
+  return mine.filter((c) => {
+    if (rankVal(c.rank) >= HONOR) return false // honnör skyddas
+    if (protectedRanks.has(c.rank)) return false // honnörsledd sekvens skyddas
+    if (sureWinnerInSuit(c, mine, played)) return false // säker vinnare skyddas
+    return true
+  })
+}
+
+/** En försvarssignal att bära: attityd, räkning eller Lavinthal-färgpreferens. */
+export type DefensiveSignal =
+  | { kind: 'attitude'; encourage: boolean }
+  | { kind: 'count'; even: boolean }
+  | { kind: 'lavinthal'; wantHigher: boolean }
+
+/**
+ * Väljer vilket kort i EN (redan säkert vald) färg som ska bära `signal`.
+ * Encodern får bara röra spare-kort (se `spareCards`), så valet är bevisbart
+ * stickneutralt. Har spare 0 kort finns ingen frihet → lägsta (ingen signal); 1
+ * kort → det kortet (tvingat). `played` = alla spelade kort (skärper spare).
+ */
+export function defensiveSignalCard(
+  candidatesInSuit: Card[],
+  played: Card[],
+  signal: DefensiveSignal,
+): Card {
+  if (candidatesInSuit.length === 1) return candidatesInSuit[0]
+  const spare = spareCards(candidatesInSuit, played)
+  if (spare.length === 0) return lowest(candidatesInSuit)
+  if (spare.length === 1) return spare[0]
+  switch (signal.kind) {
+    case 'attitude':
+      return attitudeCard(spare, signal.encourage)
+    case 'count':
+      return countCard(spare, signal.even)
+    case 'lavinthal':
+      return lavinthalDiscard(spare, signal.wantHigher)
+  }
 }

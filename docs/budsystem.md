@@ -1556,7 +1556,59 @@ Det avslöjar längd/räkning direkt för partnern.
   sangförsvar.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
+### 8.5 Hur bottarna lägger markeringar (2026-07-29)
+Bottarna (motspelarna) lägger nu §8-markeringarna i spelet, inte bara i teorin.
+Reglerna för *vilket* kort de väljer:
+
+- **Attityd** (jag följer partnerns färg utan att vinna): jag **uppmuntrar**
+  (lägger lågt) om jag har **dam eller högre** i färgen **och/eller** – i ett
+  trumfkontrakt – en **kort färg** (dubbel-/singelton att snart trumfa). Endera
+  räcker. Annars **avskräcker** jag (lägger högt).
+- **Räkning** (jag följer motståndarens färg utan att vinna): **jämnt** antal =
+  lågt kort (lågt-högt), **udda** antal = högt kort (högt-lågt).
+- **Lavinthal** (jag sakar första gången): honnörsvakten väljer en **säker** färg
+  att saka ur, och kortets storlek pekar mot den färg jag vill att partnern
+  spelar – **högt** = den högre av de andra färgerna, **lågt** = den lägre.
+
+**Gardregeln (viktig, ägarbeslut):** en markering får aldrig vara en grov
+blunder. Därför behåller boten sina **två högsta kort** i en färg (3+ kort) som
+gardar och markerar bland resten – att markera med ett toppkort kan annars blotta
+en stoppare eller ett längdstick. En markering läser bara den egna handen (aldrig
+partnerns dolda kort), så den kan i sällsynta fall ändå kosta ett stick när
+partnerns kort gör spotkortet värdefullt; det är ärlig bridge och vinner in sig
+när partnern *läser* markeringen. I korta färger där varje kort behövs lägger
+boten hellre lågt utan markering. Bottarna på **spelförarsidan** markerar aldrig
+(markeringar är försvarets språk).
+
+**Bottarna LÄSER också markeringar (Steg 5).** Bot-hjärnan (Monte-Carlo) tolkar
+det entydiga, säkra fallet: en **avskräckande** attityd på partnerns färg (ett
+högt spotkort) betyder att markeraren saknar dam+ i färgen, så samplaren slutar
+lägga dam/kung där. Bara bottarnas markeringar avkodas (aldrig människans, vars
+metod vi inte känner). Uppmuntran (tvetydig: dam+ *eller* kort färg) och räkning
+(paritet) avkodas inte ännu. Uppmätt spelstyrka (bot-mot-bot, 20 seedade givar):
+avkodningen sänkte spelförarens stick netto (bättre försvar), inom bruset –
+`play-quality.probe.test.ts` (gatad).
+
 ## 9. Ändringslogg
+- **2026-07-29 (Steg 5)** – **Bottarna LÄSER markeringar (§8.5).** `signal-decode.ts`
+  fick `applySignalReads`: en avskräckande attityd på partnerns färg (högt
+  spotkort 8/9/10, bot-motspelare som inte vann) sätter ett HP-tak (`suitHcpCeil`,
+  ny i `hand-model.ts`) → samplaren undviker dam+ där. Inkopplat i
+  `botCardSmartReasoned` (`opts.decodeSignals`, default på). Bara bottars
+  markeringar (aldrig Syd). A/B-mätning (`play-quality.probe.test.ts`, gatad, 20
+  seedade givar): netto −1 spelförarstick (bättre försvar), inom bruset –
+  ägarbeslut att behålla på. Facit: `signal-decode.test.ts`.
+- **2026-07-29** – **Bottarna LÄGGER markeringar i motspelet (§8.5, ny).**
+  Encoders i `signals.ts` (UDCA attityd/räkning, Lavinthal) kopplades in i
+  `play-bot.ts` via `defensiveSignalCard` (spare-/gardberäkning) + resolvern
+  `defensiveFollowSignal`/`defenderFirstDiscardSignal`. Attityd på partnerns färg
+  (uppmuntra: dam+ och/eller kort färg), räkning på motståndarens, Lavinthal på
+  första saket. Gardregeln behåller de två högsta korten i 3+-färger. Uppmätt
+  encode-kostnad (rena tumregler, 239 seedade givar): ~1190 markeringar,
+  netto +10 stick åt spelföraren (~0,04/giv), värst +4 på en giv, inga grova
+  blundrar – vaktat av `play-bot-signals-neutral.test.ts`. Facit:
+  `signals-defense.test.ts` + `play-bot-signals.test.ts`. Att bottarna även
+  **läser** markeringar (och att rondgenomgången förklarar dem) byggs separat.
 - **2026-07-28 (kväll, etapp 7 hål 1)** – **Öppnarens suutrebid sa "minimum"
   med extra styrka (kod, §5.2, mätspåret).** Förskanningen av "missad lillslam"
   hittade två fel i SAMMA regel (`openerRebidAfter1LevelResponse` steg 5,
