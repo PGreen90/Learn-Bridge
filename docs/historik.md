@@ -10,6 +10,40 @@
 
 ---
 
+## 2026-07-29
+
+**🎉 RONDGENOMGÅNGEN (after action report) BYGGD i tre etapper (2026-07-29,
+grenen `rondgenomgang-etapp1`, hela sviten grön via `npm test`):** efter en
+färdigspelad giv i Spela kort kan spelaren öppna en komplett genomgång i tre
+hopfällbara kapitel (ägarkrav: dropdowns, ingen textvägg). **Etapp 1 —
+textmotorn:** ren modul `src/lib/engine/rond-rapport.ts` (`buildRondRapport`)
+bygger hela rapporten som data: varje bud förklarat (motorns regel när den
+finns, annars `interpretCall` med ärlig osäkerhetsgradering — även nakna pass),
+varje stick berättat (utspel, trumfningar/sakningar, löpande ställning, max 4
+rader) och resultatet med ton (beröm/läxa/neutral). Perspektivet följer
+`controls()`: Syd = "du", Nord = "Nord (dina kort)" när NS spelför, "Nord (din
+partner)" i försvar. **Etapp 2 — vyn:** `src/pages/play/RondRapport.tsx`
+(native `<details>`-kapitel som Spela-sidans fördjupning; Resultatet öppet som
+default; tryck på botkort visar `botReasons`-motiveringen), `reviewing`-state i
+`usePlayTable`, knappar i resultatdialogen + under omspelningen. **Etapp 3 —
+DD-domen:** `src/lib/engine/rond-dd.ts` (`analyzeDd`) räknar facit per
+stickgräns BAKIFRÅN med vår egen lösare (sprängd nodbudget avbryter ärligt →
+"analysen når från stick X"), i webworkern `rapport-worker.ts` via
+`useDdAnalys` (inline-reserv). ⚠-rader på stick där facit rörde sig + dom i
+resultatet ("med perfekt spel fanns N stick…"/"ni tog fler än facit — bra
+jobbat") + upplysning när en manuell claim tog färre stick än facit säkrar.
+**Lärdom (StrictMode):** en kör-en-gång-ref i hooken lämnade analysen ostartad
+för alltid vid dev-ommonteringen — effekten gjordes omstartbar i stället.
+Spelmotorn orörd, inga nya beroenden. Verifierad i webbläsaren (två hela givar:
+ÖV-kontrakt med claim + NS-kontrakt med DD-dom). **Etapp 4 (ägarens feedback
+efter eget test, samma dag):** utspelsregeln (§8.3) skrivs ut i utspelsraden
+läst ur utspelarens faktiska kort (topp av honnörssekvens/singel för alla;
+längdmarkeringarna 3:e/5:e/dubbelton BARA för motspelets öppningsutspel —
+UDCA/Lavinthal läggs inte av botarna ännu och förklaras därför inte); stickets
+kort läggs i väderstrecken som vid bordet (N/S/V/Ö med sätesbokstäver); ⚠ är
+röd i både rubrik och rad. Detalj: `docs/kortspel.md` "Rondgenomgången" +
+`docs/status.md`.
+
 ## 2026-07-04
 
 **🎉 Felrapport #14–#19 LAGADE & LIVE (2026-07-04, commits `6aa110d` +

@@ -10,8 +10,22 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LEDIGT (2026-07-28): ägaren väljer nästa ur NÄST/SENARE
-**KÄNSLA I KORTSPELET-spåret (etapp 1–5) är KLART & LIVE 2026-07-28** —
+### 🔵 NU — RONDGENOMGÅNGEN (after action report): BYGGD 2026-07-29, väntar på ägarens OK för merge + deploy
+**Alla tre etapper klara på grenen `rondgenomgang-etapp1`** (inte mergad, inget
+pushat — ägaren bestämmer): efter färdigspelad giv i Spela kort öppnar
+"Rondgenomgång"-knappen tre hopfällbara kapitel — Budgivningen (varje bud
+förklarat), Spelföringen (varje stick som egen dropdown, botkort visar
+motivering vid tryck) och Resultatet (öppet först: utfall, poäng, claim-notis
+och DD-domen "med perfekt spel fanns N stick", räknad i webworker med ärlig
+budgetdegradering). Ren motormodul + UI-lager, spelmotorn orörd, inga nya
+beroenden. Hela sviten grön (`npm test`). Detalj: `docs/kortspel.md`
+"Rondgenomgången" + `docs/status.md`; etapplogg: `docs/historik.md`.
+
+**➡️ NÄSTA GÅNG:** ägaren säger OK → merge `--no-ff` + push + vänta på grön
+Ready-deploy; därefter väljs nytt NU (närmast: 🟢 NÄST punkt 1, Etapp 7 missad
+lillslam).
+
+**Senast klart 2026-07-28 — KÄNSLA I KORTSPELET-spåret (etapp 1–5), KLART & LIVE:**
 kortspelet har tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow,
 kortflygning hand→bord, diskreta syntetiserade ljud (På/Av) och claim-reveal
 där korten ligger kvar tills spelaren trycker "Visa resultatet" (ägarbeslut:
@@ -20,9 +34,6 @@ hemgång. Allt i UI-lagret, spelmotorn orörd, inga nya beroenden.
 Mergepunkter: `e67fb31`+`9de46f9` · `1fed694` · `e602a01` · `3762481` ·
 `5f29949`. Samlad bild: `docs/kortspel.md` avsnittet
 "Tempo, animationer och ljud"; nuläge per funktion: `docs/status.md`.
-
-**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU — närmast till hands ligger 🟢 NÄST
-punkt 1 (Etapp 7 missad lillslam, förskannad, ägaren väljer hål 2).
 
 **Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
 På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar

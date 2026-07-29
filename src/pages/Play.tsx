@@ -27,6 +27,7 @@ import { LastTrickPanel, TrickCenterLive } from './play/trick-views'
 import { ScenarioPicker, SearchOverlay } from './play/pickers'
 import { BiddingPhase } from './play/BiddingPhase'
 import { ClaimDialog } from './play/ClaimDialog'
+import { RondRapportView } from './play/RondRapport'
 import { FlightLayer } from './play/FlightLayer'
 import { armSound } from '../lib/sound'
 
@@ -135,6 +136,8 @@ function PlayTable({
     setResultSeen,
     reporting,
     setReporting,
+    reviewing,
+    setReviewing,
     facit,
     showFacit,
     selectedSuit,
@@ -175,6 +178,24 @@ function PlayTable({
   // Färdigspelad giv: bordet hinner tona ut (felt-fade-out under resultOutro,
   // showResult väntar ut den) → resultatdialog ovanpå omspelningen (Synrey-stil).
   if (done && showResult) {
+    // Rondgenomgången (etapp 2): hela given förklarad i kapitel. "Tillbaka"
+    // går till omspelningen (resultSeen sattes när genomgången öppnades).
+    if (reviewing) {
+      return (
+        <RondRapportView
+          deal={deal}
+          contract={contract}
+          calls={calls}
+          tricks={play.completedTricks}
+          result={result}
+          score={score}
+          claimed={claimed}
+          botReasons={botReasons}
+          onBack={() => setReviewing(false)}
+          onNewGame={onNewGame}
+        />
+      )
+    }
     return (
       <div className="relative">
         <PlayReplay
@@ -206,10 +227,21 @@ function PlayTable({
                     : 'Claim godkänd — resten av sticken bokfördes utan spel.'}
                 </p>
               )}
-              <div className="flex justify-center gap-2">
-                <Button variant="secondary" onClick={() => setResultSeen(true)}>
-                  Se omspelningen
-                </Button>
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex justify-center gap-2">
+                  <Button variant="secondary" onClick={() => setResultSeen(true)}>
+                    Se omspelningen
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setResultSeen(true)
+                      setReviewing(true)
+                    }}
+                  >
+                    Rondgenomgång
+                  </Button>
+                </div>
                 <Button onClick={onNewGame}>Ny giv →</Button>
               </div>
               <button
@@ -224,6 +256,9 @@ function PlayTable({
           <div className="mt-3 flex justify-center gap-2">
             <Button variant="secondary" onClick={() => setReporting(true)}>
               Rapportera fel
+            </Button>
+            <Button variant="secondary" onClick={() => setReviewing(true)}>
+              Rondgenomgång
             </Button>
             <Button onClick={onNewGame}>Ny giv →</Button>
           </div>
