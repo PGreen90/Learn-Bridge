@@ -12,6 +12,24 @@
 
 ## 2026-07-30
 
+**🎉 KONSEKVENT KORTRAD I ALLA VYER (Fas 0 b, KLART & live, merge `347d2c3`):**
+handen ritas nu likadant överallt. **Bakgrund:** felrapport #36 bad om "större kort"
+på mobil (stora fingrar). Vi mätte i DOM:en: 13 kort à 48 px fyller en 375 px-rad
+nästan helt (~336 px) — man får inte plats med ~44 px tryckyta per kort på en rad
+utan två rader (ägaren avvisade) eller bredare skärm. Ägaren tyckte storleken vid
+bordet känns bra på max; den **verkliga** smärtan var att handens kortrad var mer
+ihoptryckt i **budgivningen** (`HandFan`: tät solfjäder, `-ml-7`, ~288 px) och sedan
+*expanderade* när kortspelet började (`SouthFan`: färggrupperad, ~336 px) — den
+skillnaden mellan vyer "känns budget". **Fix:** `HandFan` ritar nu samma
+färggrupperade kortrad som `SouthFan` (färgerna i grupper med luft emellan, samma
+`md`-storlek), och överlappet bor i en delad konstant `REST_OVERLAP` (`cardLayout.ts`)
+som båda läser → kan aldrig glida isär igen. Påverkar budgivning, budträning och
+budvisning (alla använde `HandFan`); spelbordet oförändrat. Verifierat i webbläsaren
+i alla fyra vyerna (inga konsolfel), hela sviten grön. **Felrapport #36 stängd**
+"löst på annat sätt" (korten gjordes alltså inte större — upplevelsen blev konsekvent).
+Kvar i Fas 0 b: mobilsvep + säkra zoner vid bordet. Ägarbeslut: samma look överallt =
+proffskänsla. Detalj: `docs/konkurrensplan.md` Fas 0 b + `docs/senare.md`.
+
 **🎉 KONKURRENSPLANEN FAS 0 c — TEKNISK HÄRDNING (KLART & live):** två småfixar
 som gör grunden redo för främmande ögon. **(1) 404-sida:** `NotFound.tsx`
 (varumärkt: grönt filt, guldknapp "← Till start") + en catch-all-route

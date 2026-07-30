@@ -28,11 +28,15 @@ Facit: `lebensohl.test.ts` + `auction-lebensohl-1nt.test.ts`.
   advancern svarar i dag nivåmedvetet via `answerTakeoutDouble`, inte Lebensohl;
   §7.7 är märkt. Kräver egen omgång (det generiska svaret duger tills vidare).
 
-### Felrapport #36 — större kort på mobil (2026-07-07)
-Ägaren har stora fingrar och vill ha större tryckytor för korten i Spela kort på
-mobilen. Ren UI-justering (kortstorlek/tryckyta i `cardLayout.ts`/`Felt.tsx`) —
-hanteras när budgivningsspåret tillåter, eller ihop med faceliften. Issuen hålls
-öppen tills fixad.
+### Felrapport #36 — större kort på mobil — STÄNGD 2026-07-30 ("löst på annat sätt")
+Ägaren har stora fingrar och ville ha större tryckytor. **Utfall:** vi mätte att
+13 kort à 48 px fyller en 375 px-rad nästan helt (~336 px) — man får inte plats med
+~44 px tryckyta per kort utan två rader (avvisat) eller bredare skärm. Ägaren tyckte
+storleken vid bordet känns bra på max; den verkliga smärtan var att kortraden var
+mer ihoptryckt i budgivningen och expanderade i spelet. **Åtgärd (merge `347d2c3`):**
+`HandFan` ritar nu samma färggrupperade kortrad som spelbordets `SouthFan` (delat
+`REST_OVERLAP`) → likadant i alla vyer. Issue #36 stängd. **Kvar i Fas 0 b (⚪):**
+mobilsvep (svep över alla sidor på liten skärm) + säkra zoner vid spelbordet.
 
 ### Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (2026-07-06)
 Ägarens 4-punktslista punkt 1. Data i `src/data/exercises/*.json` +

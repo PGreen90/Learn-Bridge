@@ -53,10 +53,10 @@
    Funbridge-modellen ÄR botspelet produkten: det man tävlar i är att spela
    samma givar mot samma bottar bättre än andra. Mätriggen finns redan:
    `play-quality.probe.test.ts` (gatad, `PLAYQ=1`).
-3. **Mobilupplevelsen är tunn.** Felrapport #36 (för små kort/tryckytor),
-   få mobilbrytpunkter, och ingen hantering av mobilens "säkra zoner"
-   (urtag/hemindikator) trots att `index.html` begär det. Konkurrenterna är
-   mobilappar i grunden.
+3. **Mobilupplevelsen är tunn.** Få mobilbrytpunkter och ofullständig hantering
+   av mobilens "säkra zoner" (urtag/hemindikator). Delvis åtgärdat 2026-07-30:
+   handens kortrad ser nu likadan ut i alla vyer (Fas 0 b, se nedan; #36 stängd).
+   Kvar: mobilsvep + säkra zoner vid bordet. Konkurrenterna är mobilappar i grunden.
 4. **Designen har legat parkerad** medan Synrey konkurrerar på polish.
    (Åtgärdas: faceliften är nu väckt = Fas 1.)
 5. **Tekniska småsaker** som märks först med fler besökare: ~~hela appen laddas
@@ -89,8 +89,13 @@ Innan vi bjuder in världen ska det världen möter hålla måttet.
 - **a) Bottarnas kortspel:** felrapport #32 (spelplanering: etablera lång färg)
   + #34 (motspelsheuristik). Bor i `play-bot.ts`; mäts med
   `play-quality.probe.test.ts` så förbättringen bevisas, inte antas.
-- **b) Mobilen:** felrapport #36 (större kort/tryckytor, `cardLayout.ts` +
-  `Felt.tsx`), säkra zoner, ett svep över alla sidor på liten skärm.
+- **b) Mobilen:** **påbörjad.** Konsekvent kortrad KLAR 2026-07-30 (`HandFan` gör
+  nu samma färggrupperade kortrad som spelbordets `SouthFan`, delat `REST_OVERLAP`
+  — handen ser likadan ut i alla vyer; merge `347d2c3`). Felrapport #36 (större
+  kort) STÄNGD "löst på annat sätt": 13 kort får inte plats à 44 px på en 375 px
+  rad, ägaren nöjd med storleken vid bordet — inkonsekvensen mellan vyer var den
+  verkliga smärtan. **Kvar:** mobilsvep (svep över alla sidor på liten skärm) +
+  säkra zoner vid spelbordet (`Felt.tsx`).
 - **c) Tekniska småfixar:** ✅ **KLART & live 2026-07-30.** 404-sida
   (`NotFound.tsx` + catch-all-route i `App.tsx`, facit `not-found.test.tsx`) så
   felskrivna/döda adresser landar mjukt i stället för på tom sida. Route-baserad

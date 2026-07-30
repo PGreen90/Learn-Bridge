@@ -30,8 +30,12 @@ i `play-bot.ts`, netto neutralt, given DDS-lagad). Detalj: `docs/budsystem.md §
 (`NotFound.tsx` + catch-all i `App.tsx`, facit `not-found.test.tsx`) så döda
 adresser landar mjukt, + route-baserad kod-uppdelning (`React.lazy` per sida, Home
 direkt-laddad, Suspense i `Layout.tsx`): entry-JS ~889 → 247 kB, tunga sidor lazy
-(`npm run build`). Fas 0 a+c klara; kvar i Fas 0: **b) mobilen #36**. Detalj:
-`docs/konkurrensplan.md` Fas 0 c.
+(`npm run build`). Detalj: `docs/konkurrensplan.md` Fas 0 c.
+
+**KONSEKVENT KORTRAD (Fas 0 b): KLAR & LIVE 2026-07-30** (merge `347d2c3`) — handen
+ritas likadant i alla vyer (`HandFan` = spelbordets färggrupperade kortrad, delat
+`REST_OVERLAP`). Felrapport **#36 STÄNGD** "löst på annat sätt". Kvar i Fas 0 b:
+mobilsvep + säkra zoner. Detalj: `docs/historik.md`.
 
 **KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
 rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
@@ -62,7 +66,7 @@ förklarar / läser UDCA-attityd/räkning + Lavinthal (gardregeln). Mätrigg
 **➡️ NÄSTA GÅNG:** ägaren väljer nästa NU. Alternativ:
 **Lebensohl nästa lager** (takeout-X / slow-shows / cue-Stayman, `docs/senare.md`),
 **faceliften (Fas 1)** (mockup-runda gjordes 2026-07-30, ägaren gillade inte
-riktningen — pausad), **mobilen #36 (Fas 0 b)**, eller 🟢 NÄST punkt 1 (Etapp 7,
+riktningen — pausad), **Fas 0 b** (mobilsvep/säkra zoner), eller 🟢 NÄST punkt 1 (Etapp 7,
 hål 2). ⚪ SENARE (spelkvalitet): tredje hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet
@@ -122,7 +126,7 @@ i rond 2 utan egen färg (frö 20260952, M19). Detalj: `docs/bevaka.md`.
 **Fler skills + smal subagent-användning** (påbörjat 2026-07-30, deploy-verifiering
 klar; kvar: probe-ritualerna + session-checklistorna) ·
 **Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
-Felrapport #36 större kort på mobil (Fas 0) · fler budträningsgivar + tema-dropdown ·
+mobilsvep + säkra zoner (Fas 0 b) · fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32 + #34 KLARA; kvar: tredje hand högt i trumf + nyanser) · engelska som andra
 språk (Fas 5) · TP till §7-inkliven · advancer-rabatt efter balansering
 (generella fallet) · 17+ enfärgshand efter två bjudna färger · auto-facit på
