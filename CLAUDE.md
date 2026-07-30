@@ -119,6 +119,8 @@ i rond 2 utan egen färg (frö 20260952, M19). Detalj: `docs/bevaka.md`.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 **FACELIFTEN** (väckt 2026-07-29 ur parkeringen → Fas 1 i `docs/konkurrensplan.md`) ·
+**Fler skills + smal subagent-användning** (påbörjat 2026-07-30, deploy-verifiering
+klar; kvar: probe-ritualerna + session-checklistorna) ·
 **Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
 Felrapport #36 större kort på mobil (Fas 0) · fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32 + #34 KLARA; kvar: tredje hand högt i trumf + nyanser) · engelska som andra
