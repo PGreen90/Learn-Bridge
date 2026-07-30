@@ -10,8 +10,8 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR 2026-07-30, väntar på push
-**LEBENSOHL EFTER VÅRT 1NT: KLAR 2026-07-30 (ännu ej pushad).** Skulden "byggd men
+### 🔵 NU — LEDIGT (2026-07-30): ägaren väljer nästa ur NÄST/SENARE
+**LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR & LIVE 2026-07-30.** Skulden "byggd men
 ej inkopplad" (§7.5) stängd. **Steg noll:** motståndaren klivar in **naturligt** över
 1NT med stark enfärgshand (6+, 11–15) — annars DONT (symmetriskt, så vårt eget
 1NT-försvar fick samma uppdelning, ägarbeslut 2026-07-30). Svararen spelar
@@ -59,7 +59,7 @@ och botarna LÄSER avskräckningsmarkeringar (HP-tak i Monte-Carlo). Sex etapper
 spelmotorn orörd. Mätrigg `play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt
 `b66c6ee`. Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** pusha Lebensohl (väntar), sedan väljer ägaren nytt NU. Alternativ:
+**➡️ NÄSTA GÅNG:** ägaren väljer nästa NU. Alternativ:
 **Lebensohl nästa lager** (takeout-X / slow-shows / cue-Stayman, `docs/senare.md`),
 **faceliften (Fas 1)** (mockup-runda gjordes 2026-07-30, ägaren gillade inte
 riktningen — pausad), **mobilen #36 (Fas 0 b)**, eller 🟢 NÄST punkt 1 (Etapp 7,

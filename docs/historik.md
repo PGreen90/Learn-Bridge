@@ -12,6 +12,24 @@
 
 ## 2026-07-30
 
+**🎉 DEPLOYGRINDEN FLYTTAD TILL GITHUB ACTIONS (KLART, deployen verifierad grön +
+aliasad rebidz.com):** de återkommande "myntkast"-röda deployerna knäckta vid roten.
+**Orsaken:** `vercel.json` körde hela testsviten (`npx tsc && npm test && npm run
+build`) som byggkommando på Vercels CPU-svultna byggare → tidskänsliga DDS-tester
+slog slumpvis i sina tidsgränser. Band-aids i `b777abb`/`2b6934a` (seedning + höjda
+gränser) räckte inte — fel MILJÖ, inte fel kod: samma bygge (`81456df`) gick Ready
+på 1m44 medan mitt `67e59f9` föll på 2m7 med identisk workload. **Fixen:** ny
+workflow `.github/workflows/ci-deploy.yml` kör `tsc + npm test` på `ubuntu-latest`
+och deployar till Vercel-produktion (`vercel deploy --prebuilt --prod` via
+`VERCEL_TOKEN`-hemlighet) BARA om allt är grönt; Vercels egen Git-auto-deploy
+frånkopplad; `vercel.json` bygger nu bara (`npm run build`). Garantin "rött test →
+ingen publicering" bevarad, på en maskin som inte slumpfäller; CRLF-fällan i
+docs-vakt försvann (körs på Linux/LF nu). Verifierat två gånger: grön Actions →
+"Aliased … Ready", andra körningen 1m9s (dubbelkörningen borta). Commits `81083a5`
++ `cb5fe13`. Tre GitHub-hemligheter: `VERCEL_TOKEN`/`VERCEL_ORG_ID`/
+`VERCEL_PROJECT_ID`. Levande docs + `deploy-verifiering`-skillen + minnet
+uppdaterade; historik/audit orörd. Detalj: CLAUDE.md "Hosting & deploy".
+
 **🎉 FELRAPPORT #34 – FÖRSVARET SPELAR TREDJE HAND HÖGT (KLART, konkurrensplanens
 Fas 0 a, hela sviten grön via `npm test`, tsc rent):** motpolen till #32 –
 spelförar-planen blev en motspels-plan. **Buggen:** tredje/fjärde-hand-grenen i
