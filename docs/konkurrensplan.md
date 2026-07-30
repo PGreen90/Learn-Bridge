@@ -84,8 +84,9 @@ fortfarande: **ett NU i taget** — en fas är inte ett NU, den bryts ner i
 NU-stora bitar när den startas. Budmotorns mätspår (etapp 7 osv.) rullar
 parallellt genom alltihop, precis som förut.
 
-### Fas 0 — grunden håller för främmande ögon (ingen backend)
-Innan vi bjuder in världen ska det världen möter hålla måttet.
+### Fas 0 — grunden håller för främmande ögon (ingen backend) — ✅ KLAR 2026-07-30
+Innan vi bjuder in världen ska det världen möter hålla måttet. Alla tre delarna
+(a bottarnas kortspel, b mobilen, c teknisk härdning) är klara & live.
 - **a) Bottarnas kortspel:** felrapport #32 (spelplanering: etablera lång färg)
   + #34 (motspelsheuristik). Bor i `play-bot.ts`; mäts med
   `play-quality.probe.test.ts` så förbättringen bevisas, inte antas.
@@ -100,7 +101,11 @@ Innan vi bjuder in världen ska det världen möter hålla måttet.
   i den botten-paddade ytan och når inte skärmkanten, så kort göms inte. Kvarvarande
   lucka (vänster/höger i liggande läge / sidourtag) tillagd via
   `max(1rem, env(safe-area-inset-left/right))`. Verifieras slutgiltigt på riktig
-  iPhone. **Kvar i Fas 0 b:** mobilsvep (svep över alla sidor på liten skärm).
+  iPhone. **Mobilsvep KLART 2026-07-30:** alla sidor genomgångna i 375 px med
+  overflow-detektor — inga trasiga layouter (appen var redan mobil-ren). Enda
+  putsen: breda budsystem-tabeller fick en scroll-toningshint (skugga vid
+  högerkanten som visas bara när tabellen går att svepa, `ScrollTable` +
+  `ResizeObserver`). **→ Fas 0 b KLAR.**
 - **c) Tekniska småfixar:** ✅ **KLART & live 2026-07-30.** 404-sida
   (`NotFound.tsx` + catch-all-route i `App.tsx`, facit `not-found.test.tsx`) så
   felskrivna/döda adresser landar mjukt i stället för på tom sida. Route-baserad

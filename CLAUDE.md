@@ -34,9 +34,9 @@ direkt-laddad, Suspense i `Layout.tsx`): entry-JS ~889 → 247 kB, tunga sidor l
 
 **KONSEKVENT KORTRAD (Fas 0 b): KLAR & LIVE 2026-07-30** (merge `347d2c3`) — handen
 ritas likadant i alla vyer (`HandFan` = spelbordets färggrupperade kortrad, delat
-`REST_OVERLAP`). Felrapport **#36 STÄNGD** "löst på annat sätt". **Säkra zoner KLAR
-2026-07-30** (topp/botten fanns redan; la till vänster/höger). Kvar i Fas 0 b:
-**mobilsvep**. Detalj: `docs/historik.md`.
+`REST_OVERLAP`). Felrapport **#36 STÄNGD** "löst på annat sätt". Säkra zoner +
+mobilsvep KLARA 2026-07-30 (alla sidor mobil-rena; breda budsystem-tabeller fick
+en scroll-toningshint) → **HELA FAS 0 KLAR (a+b+c).** Detalj: `docs/historik.md`.
 
 **KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
 rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
@@ -67,7 +67,7 @@ förklarar / läser UDCA-attityd/räkning + Lavinthal (gardregeln). Mätrigg
 **➡️ NÄSTA GÅNG:** ägaren väljer nästa NU. Alternativ:
 **Lebensohl nästa lager** (takeout-X / slow-shows / cue-Stayman, `docs/senare.md`),
 **faceliften (Fas 1)** (mockup-runda gjordes 2026-07-30, ägaren gillade inte
-riktningen — pausad), **Fas 0 b** (mobilsvep), eller 🟢 NÄST punkt 1 (Etapp 7,
+riktningen — pausad, näst i tur nu när Fas 0 är klar), eller 🟢 NÄST punkt 1 (Etapp 7,
 hål 2). ⚪ SENARE (spelkvalitet): tredje hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet
@@ -127,7 +127,7 @@ i rond 2 utan egen färg (frö 20260952, M19). Detalj: `docs/bevaka.md`.
 **Fler skills + smal subagent-användning** (påbörjat 2026-07-30, deploy-verifiering
 klar; kvar: probe-ritualerna + session-checklistorna) ·
 **Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
-mobilsvep över alla sidor (Fas 0 b) · fler budträningsgivar + tema-dropdown ·
+fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32 + #34 KLARA; kvar: tredje hand högt i trumf + nyanser) · engelska som andra
 språk (Fas 5) · TP till §7-inkliven · advancer-rabatt efter balansering
 (generella fallet) · 17+ enfärgshand efter två bjudna färger · auto-facit på

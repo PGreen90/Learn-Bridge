@@ -38,7 +38,8 @@ mer ihoptryckt i budgivningen och expanderade i spelet. **Åtgärd (merge `347d2
 `REST_OVERLAP`) → likadant i alla vyer. Issue #36 stängd. **Säkra zoner KLAR
 2026-07-30:** topp/botten fanns redan i `Layout.tsx`, vänster/höger tillagt
 (`max(1rem, env(safe-area-inset-left/right))`); verifieras på riktig iPhone.
-**Kvar i Fas 0 b (⚪):** mobilsvep (svep över alla sidor på liten skärm).
+**Mobilsvep KLART 2026-07-30:** alla sidor mobil-rena; breda budsystem-tabeller
+fick en scroll-toningshint. **→ Fas 0 b KLAR, hela Fas 0 klar.**
 
 ### Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (2026-07-06)
 Ägarens 4-punktslista punkt 1. Data i `src/data/exercises/*.json` +
