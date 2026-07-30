@@ -169,12 +169,16 @@ aldrig "RebidZ") — **repo och URL förblir `Learn-Bridge`** (medvetet, byt int
   säg lika tydligt när ägaren har rätt. Ingen kritik för sakens skull.
 
 ## Hosting & deploy (viktiga låsningar)
-- **Vercel**, projekt `learn-bridge`, team `rebidz` (Hobby/gratis), kopplat till
-  GitHub via Vercels app → **auto-deploy vid varje push till main**. Ägaren kör
-  ALDRIG bygg-kommandon själv. Live: **https://rebidz.com**.
-- **Test-/typgrind före live:** `vercel.json` kör `npx tsc && npm test && npm run
-  build`. Rött test → bygget failar → ingen publicering. **Ändra aldrig bort den
-  grinden** — den är enda automatiska skyddet mellan koden och det som blir live.
+- **Vercel**, projekt `learn-bridge`, team `rebidz` (Hobby/gratis). Publicering
+  sker via **GitHub Actions** (`.github/workflows/ci-deploy.yml`); Vercels egen
+  Git-auto-deploy är **frånkopplad** (2026-07-30). Ägaren kör ALDRIG
+  bygg-kommandon själv. Live: **https://rebidz.com**.
+- **Test-/typgrind före live (i GitHub Actions, inte `vercel.json`):** varje push
+  till main kör `npx tsc && npm test` på ubuntu-latest och deployar till Vercel-
+  produktion bara om allt är grönt. Rött test → ingen publicering. **Ändra aldrig
+  bort grinden** — enda automatiska skyddet mellan kod och live. Flyttad hit
+  2026-07-30 för att Vercels CPU-svultna byggare gav "myntkast"-röda deployer;
+  `vercel.json` bygger nu bara (`npm run build`).
 - **Vite `base` MÅSTE vara `/`** (Vercel serverar från roten), annars blir sidan
   blank. Låst av vaktestet `src/deploy-config.test.ts`.
 - **Rollback:** varje funktion mergas med egen `--no-ff`-mergepunkt → backa med

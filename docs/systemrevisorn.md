@@ -75,7 +75,7 @@ par-tecken) är låsta av `revisor-dds.test.ts`.
 
 ## Körform (viktigt — deploygrinden!)
 - **Ligger INTE i `npm test`:** `revisor.probe.test.ts` har
-  `it.skipIf(!process.env.REVISOR)` — i vanliga sviten (och Vercel-grinden)
+  `it.skipIf(!process.env.REVISOR)` — i vanliga sviten (och CI-grinden)
   skippas den på millisekunder. Enhetstesterna (`revisor.test.ts` med fejkad
   DD-tabell + `revisor-dds.test.ts` med en trivial giv) körs alltid.
 - **Utdata:** sammanfattning i konsolen (missprocent + topplista) + JSON i

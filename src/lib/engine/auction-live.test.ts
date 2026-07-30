@@ -184,7 +184,7 @@ function isLegalMedurs(turns: { seat: Seat }[]): boolean {
 
 // Konsistenstesterna (linjen mot budlådan) körde tidigare på dealRandom(), alltså
 // FÄRSKA slumpgivar varje körning. Ett sällsynt fall (0,18 % av givarna) gjorde
-// dem därför slumpvis röda — och eftersom Vercels deploygrind kör `npm test`
+// dem därför slumpvis röda — och eftersom CI-deploygrinden kör `npm test`
 // föll ungefär var tredje deploy utan att något ändrats i koden. Seedade givar
 // i stället: samma givar varje körning, ett rött test går att återskapa med
 // `dealFromSeed(<frö>)`, och grinden blir förutsägbar. Samma mönster som

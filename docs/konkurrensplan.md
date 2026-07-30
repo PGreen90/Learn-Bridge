@@ -25,8 +25,8 @@
 
 ### Det som är friskt
 
-- **Testkulturen är i toppklass.** Hela testsviten är deploygrind — `vercel.json`
-  kör `npx tsc && npm test && npm run build` före varje publicering, så rött
+- **Testkulturen är i toppklass.** Hela testsviten är deploygrind — GitHub Actions
+  (`ci-deploy.yml`) kör `npx tsc && npm test` före varje publicering, så rött
   test betyder att inget trasigt når rebidz.com. Koden är strikt TypeScript
   utan undantag och beroendelistan är minimal (kontrolleras med `npm test`
   respektive en titt i `package.json`).

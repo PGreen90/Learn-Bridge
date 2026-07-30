@@ -59,4 +59,4 @@
 - **Vakten:** `src/docs-vakt.test.ts` kontrollerar automatiskt att docs pekar på
   kod som finns, att inga oreproducerbara testantal smyger in, att indexet här är
   komplett och att ingen motormodul tyst tappar kontakten med appen. Den kör i
-  `npm test` — alltså i Vercels deploygrind före varje publicering.
+  `npm test` — alltså i GitHub Actions deploygrind före varje publicering.

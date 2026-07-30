@@ -22,9 +22,9 @@ ingen backend, gratis-hostat på Vercel.
 ## Teknisk stack
 
 React + Vite + TypeScript + Tailwind CSS v4. Ingen server, allt client-side.
-Framsteg sparas i `localStorage`. Auto-deploy till Vercel vid varje push till
-`main` — bygget kör `tsc && npm test && npm run build`, så ett rött test stoppar
-publiceringen.
+Framsteg sparas i `localStorage`. Deploy till Vercel sker via GitHub Actions vid
+varje push till `main` — workflowen kör `tsc && npm test` och publicerar bara om
+allt är grönt, så ett rött test stoppar publiceringen.
 
 ## Utveckling
 
