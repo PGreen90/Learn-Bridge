@@ -25,6 +25,7 @@ import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, fam
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
 import { gerberInvestigation, gerber2NTInvestigation, gerberRebidInvestigation } from './nt-slam'
 import { dontOvercall } from './dont'
+import { naturalNTOvercall } from './lebensohl'
 import { conventionalDefense } from './defense-conventional'
 
 export interface MajorAuction {
@@ -355,6 +356,13 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // två pass) hanteras också i `decideCall`.
   if (opening.call === '1NT') {
     const lhoSeat = seatAt(deal.dealer, (openerIndex + 1) % 4)
+    // §7.5 (Lebensohl): en stark enfärgshand (6+, 11–15) klivar in NATURELLT –
+    // då spelar svararen Lebensohl (decideCall). Tvåfärgade/svaga händer tar DONT.
+    const nat = naturalNTOvercall(deal.hands[lhoSeat])
+    if (nat.call !== 'P') {
+      turns.push({ seat: lhoSeat, role: 'motståndare', call: nat.call, rule: nat.rule, explanation: nat.explanation })
+      return finish(true)
+    }
     if (hcp(deal.hands[lhoSeat]) >= 8) {
       const d = dontOvercall(deal.hands[lhoSeat])
       if (d.call !== 'P') {

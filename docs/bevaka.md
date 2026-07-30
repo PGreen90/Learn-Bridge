@@ -9,6 +9,21 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Budgivning (2026-07-30) — Lebensohl efter vårt 1NT (§7.5)
+- **Motståndaren klivar nu in NATURELLT över 1NT (NYAST).** En stark enfärgshand
+  (6+ kort, 11–15 hp) bjuder sin färg naturligt på 2-läget över ett 1NT — förut
+  störde de alltid med DONT. Detta gäller symmetriskt: även vårt eget försvar mot
+  deras 1NT bjuder en stark enfärgshand naturligt (svaga/tvåfärgade → DONT som
+  förr). **Bevaka:** (a) klivar boten in på för klena eller sneda händer (11–15
+  ska vara en riktig enfärgshand)? (b) Missar vi ibland en DONT-tvåfärgshand som
+  blev naturligt inkliv i stället?
+- **Svararen spelar Lebensohl efter inklivet.** 2NT = relä (svag, öppnaren tvingas
+  3♣, sedan pass/rätta lågt); direkt 3-läge = utgångskrav; direkt 3NT = jämn
+  utgång; naturligt 2-läge = svag högre högfärg; pass = försvara. **Bevaka:** (a)
+  hamnar boten i rätt delkontrakt med de svaga händerna (stannar den lågt), och
+  (b) bjuder den utgång på för lite? Kärnan är byggd — takeout-dubbling, "slow
+  shows" och cue-Stayman är ännu INTE inkopplade, så förvänta dig inte dem.
+
 ## Spelkvalitet (2026-07-30) — försvaret spelar tredje hand högt (#34)
 - **Bottarna lägger nu en HONNÖR tredje hand i sang (NYAST).** Ledde din partner
   och en motståndare vann just nu (t.ex. träkarlen slog partnerns låga utspel),
