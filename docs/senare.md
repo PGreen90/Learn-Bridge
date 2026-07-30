@@ -35,8 +35,10 @@ Facit: `lebensohl.test.ts` + `auction-lebensohl-1nt.test.ts`.
 storleken vid bordet känns bra på max; den verkliga smärtan var att kortraden var
 mer ihoptryckt i budgivningen och expanderade i spelet. **Åtgärd (merge `347d2c3`):**
 `HandFan` ritar nu samma färggrupperade kortrad som spelbordets `SouthFan` (delat
-`REST_OVERLAP`) → likadant i alla vyer. Issue #36 stängd. **Kvar i Fas 0 b (⚪):**
-mobilsvep (svep över alla sidor på liten skärm) + säkra zoner vid spelbordet.
+`REST_OVERLAP`) → likadant i alla vyer. Issue #36 stängd. **Säkra zoner KLAR
+2026-07-30:** topp/botten fanns redan i `Layout.tsx`, vänster/höger tillagt
+(`max(1rem, env(safe-area-inset-left/right))`); verifieras på riktig iPhone.
+**Kvar i Fas 0 b (⚪):** mobilsvep (svep över alla sidor på liten skärm).
 
 ### Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (2026-07-06)
 Ägarens 4-punktslista punkt 1. Data i `src/data/exercises/*.json` +

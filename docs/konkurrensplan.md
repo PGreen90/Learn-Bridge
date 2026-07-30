@@ -94,8 +94,13 @@ Innan vi bjuder in världen ska det världen möter hålla måttet.
   — handen ser likadan ut i alla vyer; merge `347d2c3`). Felrapport #36 (större
   kort) STÄNGD "löst på annat sätt": 13 kort får inte plats à 44 px på en 375 px
   rad, ägaren nöjd med storleken vid bordet — inkonsekvensen mellan vyer var den
-  verkliga smärtan. **Kvar:** mobilsvep (svep över alla sidor på liten skärm) +
-  säkra zoner vid spelbordet (`Felt.tsx`).
+  verkliga smärtan. **Säkra zoner KLAR 2026-07-30:** topp + botten var redan
+  hanterade i `Layout.tsx` (`env(safe-area-inset-top/bottom)`) och `index.html` har
+  `viewport-fit=cover` — planens "ingen hantering" var inaktuell; spelbordet ligger
+  i den botten-paddade ytan och når inte skärmkanten, så kort göms inte. Kvarvarande
+  lucka (vänster/höger i liggande läge / sidourtag) tillagd via
+  `max(1rem, env(safe-area-inset-left/right))`. Verifieras slutgiltigt på riktig
+  iPhone. **Kvar i Fas 0 b:** mobilsvep (svep över alla sidor på liten skärm).
 - **c) Tekniska småfixar:** ✅ **KLART & live 2026-07-30.** 404-sida
   (`NotFound.tsx` + catch-all-route i `App.tsx`, facit `not-found.test.tsx`) så
   felskrivna/döda adresser landar mjukt i stället för på tom sida. Route-baserad

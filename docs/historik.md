@@ -12,6 +12,19 @@
 
 ## 2026-07-30
 
+**🎉 SÄKRA ZONER VID BORDET (Fas 0 b, KLART):** utredningen visade att planens
+"ingen hantering av säkra zoner" var **inaktuell** — `index.html` har redan
+`viewport-fit=cover` + `black-translucent` statusrad, och `Layout.tsx` skjuter redan
+in topp (`env(safe-area-inset-top)` på sidhuvudet) och botten
+(`env(safe-area-inset-bottom)` på innehållsytan). Spelbordet ligger inuti den
+botten-paddade ytan och når inte ens skärmkanten på mobil, så kortraden kan inte
+gömmas under hemindikatorn. Enda faktiska luckan: **vänster/höger** (liggande läge /
+sidourtag), nu tillagt på `<main>` via `pl/pr-[max(1rem,env(safe-area-inset-left/right))]`
+— aldrig mindre än 1rem i stående, växer med insättningen på riktig telefon.
+Verifierat: stående mobil oförändrad (computed padding 16 px, botten 24 px), tsc rent,
+hela sviten grön. Slutverifiering görs på ägarens iPhone. Ärlig kalibrering: liten
+komplettering, inte ett stort hål.
+
 **🎉 KONSEKVENT KORTRAD I ALLA VYER (Fas 0 b, KLART & live, merge `347d2c3`):**
 handen ritas nu likadant överallt. **Bakgrund:** felrapport #36 bad om "större kort"
 på mobil (stora fingrar). Vi mätte i DOM:en: 13 kort à 48 px fyller en 375 px-rad
