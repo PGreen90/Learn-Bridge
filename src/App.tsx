@@ -1,12 +1,23 @@
+import { lazy } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
-import { BiddingPractice } from './pages/BiddingPractice'
-import { BiddingSession } from './pages/BiddingSession'
-import { BudSystem } from './pages/BudSystem'
-import { Spela } from './pages/Spela'
-import { Play } from './pages/Play'
-import { Settings } from './pages/Settings'
+
+// Route-baserad kod-uppdelning (konkurrensplanen Fas 0 c): varje sida blir en
+// egen JS-chunk som hämtas först när man går dit, så första laddningen av
+// startsidan blir mindre. Home är EJ lat — den är landningssidan och ska ritas
+// direkt. Suspense-gränsen + fallbacken ligger i Layout (runt <Outlet/>).
+const BiddingPractice = lazy(() =>
+  import('./pages/BiddingPractice').then((m) => ({ default: m.BiddingPractice })),
+)
+const BiddingSession = lazy(() =>
+  import('./pages/BiddingSession').then((m) => ({ default: m.BiddingSession })),
+)
+const BudSystem = lazy(() => import('./pages/BudSystem').then((m) => ({ default: m.BudSystem })))
+const Spela = lazy(() => import('./pages/Spela').then((m) => ({ default: m.Spela })))
+const Play = lazy(() => import('./pages/Play').then((m) => ({ default: m.Play })))
+const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
+const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })))
 
 // HashRouter används med flit: det fungerar felfritt på GitHub Pages utan
 // extra serverinställningar (adresserna får ett #, t.ex. .../#/budtraning).
@@ -26,6 +37,10 @@ export default function App() {
           <Route path="spela" element={<Navigate to="/budvisning" replace />} />
           <Route path="spela-kort" element={<Play />} />
           <Route path="installningar" element={<Settings />} />
+          {/* Catch-all: alla adresser utanför tabellen (felskrivning, död
+              länk) landar mjukt på 404-sidan i stället för på en tom sida
+              (konkurrensplanen Fas 0 c). Facit: not-found.test.tsx. */}
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </HashRouter>

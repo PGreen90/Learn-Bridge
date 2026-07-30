@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
 import { BrandMark, Wordmark } from './BrandMark'
@@ -11,6 +11,16 @@ const NAV = [
   { to: '/budsystem', label: 'Budsystem', end: false },
   { to: '/installningar', label: 'Inställningar', end: false },
 ]
+
+/** Diskret laddningsindikator medan en lat-laddad sida hämtas. En snurrande
+ *  emerald-ring, centrerad i innehållsytan. */
+function PageLoading() {
+  return (
+    <div className="flex justify-center py-24" role="status" aria-label="Laddar sidan">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-300/30 border-t-emerald-500" />
+    </div>
+  )
+}
 
 /** Appens ram: topbar med meny + ytan där varje sida visas (Outlet).
  *  På mobil (< 640 px) döljs länkraden bakom en ☰-knapp som fäller ut menyn;
@@ -106,7 +116,13 @@ export function Layout() {
       <main className="max-w-3xl mx-auto px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8">
         {/* key per adress → innehållet tonar in vid varje sidbyte (page-in). */}
         <div key={location.pathname} className="page-in">
-          <Outlet />
+          {/* Sidorna laddas lat (route-baserad kod-uppdelning, konkurrensplanen
+              Fas 0 c): varje sida är en egen JS-chunk som hämtas först när man
+              går dit. Fallbacken visas de bråkdelar av en sekund det tar första
+              gången — menyramen ovanför står kvar hela tiden. */}
+          <Suspense fallback={<PageLoading />}>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
     </div>

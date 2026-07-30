@@ -12,6 +12,22 @@
 
 ## 2026-07-30
 
+**🎉 KONKURRENSPLANEN FAS 0 c — TEKNISK HÄRDNING (KLART & live):** två småfixar
+som gör grunden redo för främmande ögon. **(1) 404-sida:** `NotFound.tsx`
+(varumärkt: grönt filt, guldknapp "← Till start") + en catch-all-route
+`<Route path="*">` sist i `App.tsx`, så felskrivna/döda adresser landar mjukt i
+stället för på en tom sida. Facit `not-found.test.tsx` renderar hela `App` mot en
+påhittad hash och mot en riktig (Budträning, liten lat-chunk — vald för att
+Budsystem-bokens 345 kB-chunk gav falsk CPU-svält-timeout i full svit). **(2)
+Route-baserad kod-uppdelning:** sidorna importeras nu med `React.lazy` (Home direkt-
+laddad — landningssidan; resten lazy), Suspense-gräns + snurr-fallback runt
+`<Outlet/>` i `Layout.tsx`. Första-laddningens JS gick från en enda ~889 kB-fil
+till en 247 kB-entry (gzip 276 → 79 kB); Budsystem-boken (345 kB) och Spela kort
+(88 kB) laddas först när man går dit. Siffror från `npm run build` (läs
+`dist/assets/`). Verifierat i webbläsaren: alla rutter laddar sina chunkar utan
+konsolfel; hela sviten grön. Fas 0 a (#32/#34) + c klara; kvar i Fas 0: **b)
+mobilen #36**. Detalj: `docs/konkurrensplan.md` Fas 0.
+
 **🎉 DEPLOYGRINDEN FLYTTAD TILL GITHUB ACTIONS (KLART, deployen verifierad grön +
 aliasad rebidz.com):** de återkommande "myntkast"-röda deployerna knäckta vid roten.
 **Orsaken:** `vercel.json` körde hela testsviten (`npx tsc && npm test && npm run
