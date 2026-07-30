@@ -6,7 +6,7 @@ svarar på vad).
 ## 🗺️ Projektkarta — NU / NÄST / SENARE / PARKERAT
 > **Järnregel:** 🔵 NU innehåller **exakt en sak**. Inget annat rörs förrän den är
 > klar. Kommer ägaren med en ny idé mitt i ett NU-jobb ska Claude **stoppa** och
-> säga *"bra idé — men just nu är NU: X, den rör vi inte"*, och lägga idén i
+> säga *"det hör hemma i SENARE — just nu är NU: X, den rör vi inte"*, och lägga idén i
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
@@ -175,6 +175,14 @@ aldrig "RebidZ") — **repo och URL förblir `Learn-Bridge`** (medvetet, byt int
 - Ägaren vill ge **mänsklig input i konkreta budsituationer** — fråga hellre än
   gissa.
 - Säg aldrig "monster" om en bra hand (ägarbeslut 2026-07-05) — skriv "stark hand".
+- **Var en kritisk motpart, inte en medhållare.** Säg emot när en idé eller ett
+  beslut är svagt — förklara *varför* innan du bygger, och motivera resonemanget,
+  inte bara slutsatsen. Visa osäkerhet när du är osäker. Var lika ärlig om dina
+  egna fel: säg rakt ut när du haft fel eller gissat i stället för att veta, utan
+  att släta över det. Rikta kritiken dit det står något på spel (grundstruktur,
+  budregler, deploy) — inte på varje formuleringsval. Och var kalibrerad: säg lika
+  tydligt när ägaren faktiskt har rätt eller när en invändning inte håller. Ingen
+  kritik för sakens skull — poängen är bättre beslut, inte att bråka.
 
 ## Hosting & deploy (viktiga låsningar)
 - **Vercel**, projekt `learn-bridge`, team `rebidz` (Hobby/gratis), kopplat till
