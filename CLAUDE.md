@@ -19,18 +19,13 @@ topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
 **`docs/konkurrensplan.md`**. Beslut B (backend, Fas 2+) byggs fortfarande bara
 på uttryckligt ägarbeslut.
 
-**⚠️ FELRAPPORT #32 — SPELFÖRAREN ETABLERAR LÅNG FÄRG: BYGGD & TESTAD 2026-07-29,
-EJ PUSHAD ÄN (väntar på ägarens deploy-ok).** Konkurrensplanens Fas 0 a, första
-spelförar-planen i bot-hjärnan. I SANG etablerar boten nu sin långa färg (knäcker
-motståndarnas spärr) FÖRE den cashar sidoessen — förr brändes stoppen/entréerna
-och boten tog 3 där 7 fanns. `establishLongSuit` + `suitTricks` i `play-bot.ts`,
-i tumregelns on-lead-gren (ovanför MC-fönstret ≤8, där felet uppstod). **Bara
-sang med flit** (trumf etablerar via ruff → stopp-gaten osund; uppmätt tapp i
-4♠-givar). Facit `play-bot-establish.test.ts` (DDS-låst 3→7); netto
-`play-establish.probe.test.ts` (gatad `ESTABLISH=1`): +8 stick/40 seedade givar,
-noll trumf-regressioner. Hela sviten grön (`npm test`), tsc rent, spelmotorn
-(`play.ts`) orörd, inga nya beroenden. **STATUS: väntar på commit → push →
-grön Vercel-deploy.** Detalj: `docs/historik.md` + `docs/bot-hjarna.md`.
+**FELRAPPORT #32 — SPELFÖRAREN ETABLERAR LÅNG FÄRG i sang: KLAR & LIVE 2026-07-29**
+(konkurrensplanens Fas 0 a, mergepunkt `b5c2913`). Boten knäcker motståndarnas
+spärr i sin långa färg FÖRE den cashar sidoessen (`establishLongSuit` i
+`play-bot.ts`, bara sang — i trumf etableras färg via ruff). Facit
+`play-bot-establish.test.ts` (DDS-låst 3→7); netto +8 stick/40 givar
+(`play-establish.probe`, `ESTABLISH=1`). Detalj: `docs/historik.md` +
+`docs/bot-hjarna.md`.
 
 **RONDGENOMGÅNGEN (after action report) är KLAR & LIVE 2026-07-29** — efter
 färdigspelad giv i Spela kort öppnar "Rondgenomgång"-knappen tre hopfällbara
@@ -54,24 +49,16 @@ spelmotorn orörd, inga nya beroenden. Ny mätrigg för SPELSTYRKA:
 `play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
 `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** FÖRST — pusha #32 (fråga ägaren, bygg → commit → push → vänta
-grön Vercel-deploy → verifiera live → flippa #32-blocket ovan till "KLAR & LIVE"
-+ mergepunkt). SEDAN väljer ägaren nytt NU. Rekommendation i samma Fas 0 a-spår:
+**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU. Rekommendation i samma Fas 0 a-spår:
 **#34 (försvaret, tredje-hand-högt)** — samma facit-först-metod som #32
 (reproducera DDS-låst giv → bygg heuristik → mät netto med `play-establish.probe`).
-Alternativ: mobil #36 eller faceliften (Fas 1), eller 🟢 NÄST punkt 1 (Etapp 7
-missad lillslam, förskannad, hål 2). Kvar i signalspåret (⚪ SENARE): avkoda
-räkning (paritet) och uppmuntran (tvetydig).
+Alternativ: mobil #36 eller faceliften (Fas 1), eller 🟢 NÄST punkt 1 (Etapp 7,
+hål 2). Kvar i signalspåret (⚪ SENARE): avkoda räkning (paritet) + uppmuntran.
 
-**Senast klart 2026-07-28 — KÄNSLA I KORTSPELET-spåret (etapp 1–5), KLART & LIVE:**
-kortspelet har tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow,
-kortflygning hand→bord, diskreta syntetiserade ljud (På/Av) och claim-reveal
-där korten ligger kvar tills spelaren trycker "Visa resultatet" (ägarbeslut:
-ingen timer — som i verkligheten), följt av mjuk uttoning och guldglow vid
-hemgång. Allt i UI-lagret, spelmotorn orörd, inga nya beroenden.
-Mergepunkter: `e67fb31`+`9de46f9` · `1fed694` · `e602a01` · `3762481` ·
-`5f29949`. Samlad bild: `docs/kortspel.md` avsnittet
-"Tempo, animationer och ljud"; nuläge per funktion: `docs/status.md`.
+**Senast klart 2026-07-28 — KÄNSLA I KORTSPELET (etapp 1–5), KLART & LIVE:**
+tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow, kortflygning hand→bord,
+syntetiserade ljud (På/Av) och claim-reveal utan timer. Allt i UI-lagret,
+spelmotorn orörd. Detalj: `docs/kortspel.md` "Tempo, animationer och ljud".
 
 **Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
 På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
@@ -79,14 +66,10 @@ i budlådan + minimal förklaring (chip + regelnamn + ALERT) i auktionsvyerna.
 Mergepunkt `3d43655`, live. Detalj: `docs/status.md` + `docs/historik.md`.
 
 **Senast klart 2026-07-28 (kväll, felrapporter — inget NU):** #40 (17+ säljer
-aldrig given över deras 1-lägesöppning, §7.1), #41 (sangsystemet inkopplat
-off-book, §4.3) och #42 (kvantitativ höjning av partnerns naturliga 3NT, §6.8).
-Kontrollmätning #19 (samma frö): par-avvikelse 276,34 → 276,49, rätt kontrakt
-oförändrat 18,2 % — praktiskt taget platt. **Två fynd:** fix #42 träffade INTE
-en enda botgiv (missad lillslam står stilla på 56 170 — posten är fortfarande
-obearbetad), och fix #40 blottade ett nytt hål: den starka dubblaren säljer
-given i rond 2 när hen saknar egen färg (frö 20260952, ÖV missade 7NT). Detalj:
-`docs/systemrevisorn.md` Mätning #19 + `docs/bevaka.md`.
+aldrig given, §7.1), #41 (sangsystemet off-book, §4.3), #42 (kvantitativ
+3NT-höjning, §6.8). Kontrollmätning #19 platt; känt hål kvar: starka dubblaren
+säljer given i rond 2 utan egen färg (frö 20260952). Detalj:
+`docs/systemrevisorn.md` M19 + `docs/bevaka.md`.
 
 **Senast klart 2026-07-28 (underhåll, inget NU):** hälsokoll av uppsättningen →
 namnet `rebidz` rättat på de fyra ställen användaren ser det, sessionskontexten
