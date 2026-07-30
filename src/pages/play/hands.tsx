@@ -4,7 +4,7 @@
 
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Contract, PlayState } from '../../lib/engine/play'
-import { bySuit, handSuitsTrumpFirst } from '../../lib/cardLayout'
+import { bySuit, handSuitsTrumpFirst, REST_OVERLAP } from '../../lib/cardLayout'
 import { PlayingCard } from '../../components/PlayingCard'
 import { turnInfo } from './common'
 import type { RegisterCardEl } from './useCardFlight'
@@ -110,7 +110,9 @@ export function SouthFan({
               // knuffar ytterkorten utanför kanten. Håll allt på skärmen genom att
               // fälla ut MED måttlig överlappning och samtidigt PRESSA ihop de
               // nedtonade färgerna. Desktop oförändrat (container-gap + full utfällning).
-              const ml = i === 0 ? '' : spread ? '-ml-4 sm:ml-0' : dim ? '-ml-10 sm:-ml-6' : '-ml-8 sm:-ml-6'
+              // Vilande = REST_OVERLAP (delas med HandFan så budgivning→spel inte
+              // hoppar). Spread/dim är spelbordets egna tur-lägen.
+              const ml = i === 0 ? '' : spread ? '-ml-4 sm:ml-0' : dim ? '-ml-10 sm:-ml-6' : REST_OVERLAP
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}

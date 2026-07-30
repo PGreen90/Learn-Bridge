@@ -13,6 +13,13 @@ export const DISPLAY_SUITS: Suit[] = ['spades', 'diamonds', 'clubs', 'hearts']
 // Ingen trumf ännu — med fyra kulörer behövs ingen svart/röd-alternering.
 export const HAND_SUITS: Suit[] = ['spades', 'hearts', 'clubs', 'diamonds']
 
+// Överlappet inom en färg för den VILANDE kortraden (handen inte i tur att spela).
+// DELAS av budgivningen/budträningen/budvisningen (`HandFan`) och spelbordets
+// vilande hand (`SouthFan`) så handen ser IDENTISK ut i alla vyer — ingen
+// "hopp"-känsla när man går från budgivning till spel (ägarbeslut 2026-07-30:
+// samma look överallt = proffskänsla). Ändra på ETT ställe, ändras överallt.
+export const REST_OVERLAP = '-ml-8 sm:-ml-6'
+
 /**
  * Färgordningen när trumfen är känd (ägarbeslut 2026-07-02, som Synrey):
  * trumfen längst till VÄNSTER, sedan övriga färger i Synrey-ordningen.
