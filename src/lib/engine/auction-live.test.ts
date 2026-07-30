@@ -1230,11 +1230,13 @@ describe('Fynd #2 delbit 1 – DONT mot deras 1NT', () => {
   })
 
   it('direkt enfärg: E 1NT – S X – (P) – N 2♣ (relä) – (P) – S 2♥ (rättelse)', () => {
+    // SVAG enfärg (10 hp): under naturgränsen (11–15) → DONT-X-reläet som förut.
+    // En STARK enfärg (11–15) klivar numera naturligt i stället (§7.5/§7.6).
     const deal = dealOf('E', {
       E: 'S:A5 H:KQ4 D:Q432 C:KJ32',   // 15 → 1NT
-      S: 'S:3 H:AKJ1098 D:K32 C:432',  // 6-korts hjärter ~12 hp → X (enfärg)
-      W: 'S:KT8742 H:762 D:J54 C:7',
-      N: 'S:QJ96 H:5 D:T98 C:T9865',
+      S: 'S:32 H:AJT987 D:K5 C:Q98',   // 6-korts hjärter, 10 hp → X (enfärg, svag)
+      W: 'S:KQ976 H:65 D:J87 C:T54',
+      N: 'S:JT84 H:32 D:AT96 C:A76',
     })
     expect(decideCall(deal, [call('E', '1NT')], 'S')).toMatchObject({ bid: 'X', rule: 'DONT X (enfärg)' })
     expect(decideCall(deal, [call('E', '1NT'), call('S', 'X'), call('W', 'P')], 'N').bid).toBe('2C')

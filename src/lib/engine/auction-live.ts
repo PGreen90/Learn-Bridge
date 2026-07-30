@@ -13,13 +13,14 @@
 // alla följer systemet stämmer historiken med linjen. (Udda Syd-bud "off-book"
 // hanteras senare – tills dess passar datorn för att stänga rond.)
 
-import type { Bid, Deal, Seat, Suit } from '../../types/bridge'
+import type { Bid, Deal, Hand, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { turnsToCalls } from './auction-contract'
 import { advancerFreeBidAfterDouble, answerSupportDouble, answerTakeoutDouble, doublerAnswersCue, openerAnswerNegativeDouble, penaltyDouble, supportDoublerRebid } from './doubles'
 import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
+import { lebensohlAfter1NT, lebensohlAfter1NTRebid } from './lebensohl'
 import { defendPreempt } from './defense-conventional'
 import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse } from './rebids'
 import { respondTo1NT } from './responses-nt'
@@ -2416,6 +2417,90 @@ function ntInterferenceToAnswer(history: ResolvedCall[], seat: Seat): string | n
   return lastNonPass.bid
 }
 
+// ---- Lebensohl efter VÅRT 1NT (§7.5, Lager 1) ------------------------------
+// Motståndaren har klivit in NATURELLT över vårt 1NT (rule = 'naturligt inkliv
+// (1NT)', modelleras i auction.ts). Svararen spelar Lebensohl; öppnaren fullföljer
+// 2NT-reläet med tvunget 3♣. Ett DONT-inkliv saknar den naturliga rule-etiketten
+// och faller därför på gamla vägen (answerNTInterference) – diskriminatorn.
+
+/** Motståndarens naturliga inkliv över VÅRT 1NT (färg + budarens plats), annars null. */
+function naturalOvercallOf1NT(history: ResolvedCall[], seat: Seat): { suit: Suit; seat: Seat } | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1) return null
+  if (side(open.seat) !== side(seat)) return null // måste vara VÅRT 1NT
+  const over = history.find((c) => c.rule === 'naturligt inkliv (1NT)' && side(c.seat) !== side(seat))
+  if (!over) return null
+  const m = /^2([CDHS])$/.exec(over.bid)
+  if (!m) return null
+  return { suit: SUIT_OF_LETTER[m[1]], seat: over.seat }
+}
+
+/** Svararens FÖRSTA Lebensohl-bud (deras naturliga inkliv ligger kvar). */
+function lebensohl1NTFirstToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+  const open = openingBid(history)
+  if (!open || seat !== PARTNER[open.seat]) return null // svararen (öppnarens partner)
+  const nat = naturalOvercallOf1NT(history, seat)
+  if (!nat) return null
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1) return null // bara 1NT bjudet av oss
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== nat.seat) return null // deras inkliv är senast
+  return nat.suit
+}
+
+/** Öppnaren tvingas 3♣ över svararens 2NT-relä. */
+function lebensohl1NTRelayComplete(history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.seat !== seat) return null // öppnaren själv
+  if (!naturalOvercallOf1NT(history, seat)) return null
+  const partnerBids = history.filter((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
+  if (partnerBids.length === 0 || partnerBids[partnerBids.length - 1].bid !== '2NT') return null
+  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
+  if (ourBids.length !== 1) return null // bara 1NT hittills
+  if (!legalCalls(history, seat).includes('3C' as Bid)) return null
+  return { seat, bid: '3C' as Bid, rule: 'Lebensohl 3♣ (tvunget relä-svar)', explanation: 'partnerns 2NT var Lebensohl-relä → jag måste bjuda 3♣.' }
+}
+
+/** Svararens rättelse (pass/ny färg) efter öppnarens tvungna 3♣. */
+function lebensohl1NTRebidToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+  const open = openingBid(history)
+  if (!open || seat !== PARTNER[open.seat]) return null
+  const nat = naturalOvercallOf1NT(history, seat)
+  if (!nat) return null
+  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
+  if (ourBids.length !== 1 || ourBids[0].bid !== '2NT') return null // vi bjöd 2NT
+  const openerBids = history.filter((c) => c.seat === open.seat && parseContractBid(c.bid))
+  if (openerBids[openerBids.length - 1]?.bid !== '3C') return null // öppnaren svarade 3♣
+  return nat.suit
+}
+
+/** Öppnarens fortsättning efter svararens DIREKTA 3-läges krav (GF): major-fit → utgång, annars 3NT. */
+function lebensohl1NTGFToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
+  const open = openingBid(history)
+  if (!open || open.seat !== seat) return null // öppnaren
+  if (!naturalOvercallOf1NT(history, seat)) return null
+  const partnerBids = history.filter((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
+  if (partnerBids.length !== 1) return null
+  const m = /^3([CDHS])$/.exec(partnerBids[0].bid) // ett direkt 3-läges färgbud (ej 2NT-relä)
+  if (!m) return null
+  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
+  if (ourBids.length !== 1) return null // bara 1NT
+  return SUIT_OF_LETTER[m[1]]
+}
+
+function lebensohl1NTOpenerAnswerGF(hand: Hand, gfSuit: Suit): { call: string; rule: string; explanation: string } {
+  const len = lengths(hand)
+  const isMajor = gfSuit === 'hearts' || gfSuit === 'spades'
+  if (isMajor && len[gfSuit] >= 3) {
+    return {
+      call: `4${letterOfSuit(gfSuit)}`,
+      rule: 'Lebensohl höjer krav till utgång',
+      explanation: `${len[gfSuit]}-korts stöd i partnerns ${SWE_NAME[letterOfSuit(gfSuit)]} → 4${letterOfSuit(gfSuit)}.`,
+    }
+  }
+  return { call: '3NT', rule: 'Lebensohl 3NT (öppnaren väljer utgång)', explanation: 'inget bättre än 3NT över partnerns krav.' }
+}
+
 /**
  * Har motståndaren stört VÅR svaga tvåa/spärr, så att svararen ska svara?
  * Mönstret: vår öppning är en svag tvåa (2♦/2♥/2♠) eller spärr (3-läget+ i färg),
@@ -3580,6 +3665,16 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       // handen – straffdubbla flykten. Måste ligga FÖRE delbit 4-detektorerna
       // (ntInterference) och off-book-svaret.
       () => answerRunout(history, seat),
+      // Lebensohl efter VÅRT 1NT (§7.5): motståndaren klev in NATURELLT. Måste
+      // ligga FÖRE ntInterference (DONT) – annars läses det naturliga inklivet
+      // som DONT. Diskriminatorn = 'naturligt inkliv (1NT)'-rule på deras bud.
+      () => answered(lebensohl1NTFirstToAnswer(history, seat),
+        (their) => lebensohlAfter1NT(hand, their), history, seat),
+      () => lebensohl1NTRelayComplete(history, seat),
+      () => answered(lebensohl1NTRebidToAnswer(history, seat),
+        (their) => lebensohlAfter1NTRebid(hand, their), history, seat),
+      () => answered(lebensohl1NTGFToAnswer(history, seat),
+        (gf) => lebensohl1NTOpenerAnswerGF(hand, gf), history, seat),
       // Motståndaren störde VÅR icke-1-färgs-öppning (Fynd #2 delbit 4):
       // svararen svarar. Måste ligga FÖRE off-book-svaret.
       () => answered(ntInterferenceToAnswer(history, seat),

@@ -10,15 +10,21 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LEDIGT (2026-07-30): ägaren väljer nästa ur NÄST/SENARE
-**FELRAPPORT #34 — FÖRSVARET SPELAR TREDJE HAND HÖGT i sang: KLAR 2026-07-30**
-(Fas 0 a, ännu ej pushad). Motpolen till #32: la förr billigaste vinnaren även när
-den DOLDA spelföraren spelade efter (Nord ♥5 ur ♥KJ1065 → Öst vann gratis på ♥9).
-Ny gren `thirdHandHonor` (`play-bot.ts`): försvarare i sang, partnern ledde, bara
-spelföraren bakom → lägg din **lägsta honnör** (spar gaffeln över hans kung). Bara
-sang (trumf-regression bortmätt). Facit `play-bot-third-hand.test.ts` (DDS-låst
-högt=1/lågt=2); netto neutralt 374→374/40 givar, given DDS-bevisat lagad. Detalj:
-`docs/historik.md` + `docs/bot-hjarna.md` + `docs/budsystem.md §8.6`.
+### 🔵 NU — LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR 2026-07-30, väntar på push
+**LEBENSOHL EFTER VÅRT 1NT: KLAR 2026-07-30 (ännu ej pushad).** Skulden "byggd men
+ej inkopplad" (§7.5) stängd. **Steg noll:** motståndaren klivar in **naturligt** över
+1NT med stark enfärgshand (6+, 11–15) — annars DONT (symmetriskt, så vårt eget
+1NT-försvar fick samma uppdelning, ägarbeslut 2026-07-30). Svararen spelar
+Lebensohl-kärnan (pass / naturligt 2-läge / 2NT-relä / direkt 3-lägeskrav / direkt
+3NT), öppnaren fullföljer med tvunget 3♣. Facit `lebensohl.test.ts` +
+`auction-lebensohl-1nt.test.ts`; regelsvepet (frö 20260721) gick 0 → 18 naturliga
+inkliv + hela konversationen, DONT-posterna växte ej. `lebensohl.ts` bortlyft ur
+`MEDVETET_EJ_INKOPPLAD`. Kvar (senare lager, ej byggt): takeout-X, slow-shows,
+cue-Stayman, Lebensohl mot konstgjorda inkliv. Detalj: `docs/budsystem.md §7.5/§9`
++ `docs/senare.md` + `docs/bevaka.md`.
+
+**#34 FÖRSVARET TREDJE HAND HÖGT (sang): KLAR & LIVE 2026-07-30** (`thirdHandHonor`
+i `play-bot.ts`, netto neutralt, given DDS-lagad). Detalj: `docs/budsystem.md §8.6`.
 
 **KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
 rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
@@ -53,36 +59,17 @@ och botarna LÄSER avskräckningsmarkeringar (HP-tak i Monte-Carlo). Sex etapper
 spelmotorn orörd. Mätrigg `play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt
 `b66c6ee`. Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU. Fas 0 a (botspelet) har nu båda kända
-felrapporterna lagade (#32 spelföring + #34 försvar), så rekommendationen flyttar:
-**faceliften (Fas 1)** eller **mobilen #36 (Fas 0 b)** — första intrycket inför
-Dagens givar — eller 🟢 NÄST punkt 1 (Etapp 7, hål 2). Kvar i spelkvalitetsspåret
-(⚪ SENARE): tredje hand högt även i **trumf**, tredje-hand-nyanser bortom lägsta
-honnören, samt signalspåret (avkoda räkning/paritet + uppmuntran).
+**➡️ NÄSTA GÅNG:** pusha Lebensohl (väntar), sedan väljer ägaren nytt NU. Alternativ:
+**Lebensohl nästa lager** (takeout-X / slow-shows / cue-Stayman, `docs/senare.md`),
+**faceliften (Fas 1)** (mockup-runda gjordes 2026-07-30, ägaren gillade inte
+riktningen — pausad), **mobilen #36 (Fas 0 b)**, eller 🟢 NÄST punkt 1 (Etapp 7,
+hål 2). ⚪ SENARE (spelkvalitet): tredje hand högt i **trumf** + signalspåret.
 
-**Senast klart 2026-07-28 — KÄNSLA I KORTSPELET (etapp 1–5), KLART & LIVE:**
-tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow, kortflygning hand→bord,
-syntetiserade ljud (På/Av) och claim-reveal utan timer. Allt i UI-lagret,
-spelmotorn orörd. Detalj: `docs/kortspel.md` "Tempo, animationer och ljud".
-
-**Senast klart 2026-07-28 (sen kväll, ägarönskemål — inget NU):** Budstöd
-På/Av-toggle i Spela korts ⋮-meny (`learnbridge:bidHelp`). Av = inga motorhintar
-i budlådan + minimal förklaring (chip + regelnamn + ALERT) i auktionsvyerna.
-Mergepunkt `3d43655`, live. Detalj: `docs/status.md` + `docs/historik.md`.
-
-**Senast klart 2026-07-28 (kväll, felrapporter — inget NU):** #40 (17+ säljer
-aldrig given, §7.1), #41 (sangsystemet off-book, §4.3), #42 (kvantitativ
-3NT-höjning, §6.8). Kontrollmätning #19 platt; känt hål kvar: starka dubblaren
-säljer given i rond 2 utan egen färg (frö 20260952). Detalj:
-`docs/systemrevisorn.md` M19 + `docs/bevaka.md`.
-
-**Senast klart 2026-07-28 (underhåll, inget NU):** hälsokoll av uppsättningen →
-namnet `rebidz` rättat på de fyra ställen användaren ser det, sessionskontexten
-bantad, och **deploygrinden lagad — den var ett myntkast**: konsistenstesterna
-körde på slumpgivar och hål 4:s undantag hade ett hål, så ungefär var tredje
-deploy föll slumpvis oavsett vad som pushades (`ebdb958` föll så). Nu seedade
-givar + `docs-vakt` 200× snabbare. Volymtester i det här repot ska ALLTID vara
-seedade. Detalj: `docs/historik.md`.
+**Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet
+(tempo/animationer/ljud), budstöd På/Av-toggle, felrapporter #40/#41/#42, samt
+underhåll (namnet `rebidz` rättat, deploygrinden seedad + 200× snabbare —
+volymtester ska ALLTID vara seedade). Känt hål kvar: starka dubblaren säljer given
+i rond 2 utan egen färg (frö 20260952, M19). Detalj: `docs/bevaka.md`.
 
 > **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
 > bottarna bjuder som människor — egen hand + partnerns **VISADE** intervall, aldrig

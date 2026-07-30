@@ -9,16 +9,24 @@
 
 ## ⚪ SENARE
 
-### Koppla in Lebensohl i den levande budgivningen (2026-07-25)
-`lebensohl.ts` är färdigbyggd och enhetstestad, men **ingen produktionsfil
-importerar den** — regelsvepet (3 000 bjudna givar) gav 0 Lebensohl-bud, medan
-Ogust gav 29 och Drury 12. Boken §7.5 beskriver alltså ett verktyg bordet inte
-kan; §7.5 och `docs/bevaka.md` är märkta tills det är löst. Jobbet: koppla in
-modulen i `auction-live.ts` (och/eller `auction.ts`) för de två lägena — efter
-partnerns upplysningsdubbling av en svag tvåa, och när motståndaren stör vårt
-1NT på 2-läget — facit-test först, sedan svep + mätning med samma frö för att se
-att konkurrensposterna inte växer. Ta bort raden ur `MEDVETET_EJ_INKOPPLAD` i
-`src/docs-vakt.test.ts` när det är gjort (vakten kräver det).
+### Lebensohl — nästa lager (kärnan KLAR 2026-07-30)
+**KLART (Lager 1, §7.5):** Lebensohl efter vårt 1NT är inkopplad och live —
+skulden "byggd men ej inkopplad" är stängd (regelsvepet gick 0 → hela
+konversationen, `lebensohl.ts` bortlyft ur `MEDVETET_EJ_INKOPPLAD`). Steg noll
+(motståndarens naturliga inkliv över 1NT) + svararens kärna + öppnarens 3♣-relä.
+Facit: `lebensohl.test.ts` + `auction-lebensohl-1nt.test.ts`.
+
+**KVAR (senare lager, avgränsade bort ur Lager 1 — spelas ej än):**
+- **Takeout-dubblingen** i läget (ägarbeslut 2026-07-30: X = takeout) — kräver att
+  öppnaren svarar dubblingen.
+- **"Slow shows"** för stopp i jämna händer (2NT→3NT visar stopp, direkt 3NT
+  förnekar) + **cue-bud som Stayman** efter en fyrkorts högfärg — kräver att
+  öppnaren svarar cuet.
+- **Lebensohl mot konstgjorda inkliv** (vår DONT / Landy / Multi-Landy) —
+  bridgebums sista avsnitt; överlappar dagens `answerNTInterference`.
+- **Lebensohl efter partnerns takeout av en svag tvåa** (det gamla läge (a)) —
+  advancern svarar i dag nivåmedvetet via `answerTakeoutDouble`, inte Lebensohl;
+  §7.7 är märkt. Kräver egen omgång (det generiska svaret duger tills vidare).
 
 ### Felrapport #36 — större kort på mobil (2026-07-07)
 Ägaren har stora fingrar och vill ha större tryckytor för korten i Spela kort på

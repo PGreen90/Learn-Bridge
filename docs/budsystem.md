@@ -1386,31 +1386,40 @@ dubblarens eget flöde (X + egen färg).
   bjuds sang med stopp, egen 6+ färg eller preferens till svararens högfärg.
   Svararens **utgångsbud står alltid**.
 
-### 7.5 Lebensohl
-> ⚠️ **Beskrivet men ännu inte inkopplat (upptäckt 2026-07-25).** Reglerna nedan
-> är systemets — men datorn *spelar* dem inte än: koden finns färdig och testad,
-> men den är inte inkopplad i den levande budgivningen, och ett svep över 3 000
-> bjudna givar gav noll Lebensohl-bud. Räkna alltså inte med att partnern förstår
-> ett Lebensohl-2NT vid bordet förrän den här rutan är borta. Inkopplingen är ett
-> eget jobb på listan.
+### 7.5 Lebensohl efter vårt 1NT
+När partnern öppnat 1NT (15–17) och **högerhand kliver in naturligt** på 2-läget
+(t.ex. 2♠ = spader) skiljer svararen svaga tävlingshänder från utgångsvilliga med
+**2NT-reläet**.
 
-Verktyg för att skilja **svaga** händer från **utgångsvilliga** i två lägen:
-(a) efter partnerns **upplysningsdubbling av en svag tvåa**, och (b) efter att
-motståndaren **stört vårt 1NT-inkliv/öppning** på 2-läget.
+Motståndaren klivar in naturligt med en **stark enfärgshand** (6+ kort, 11–15 hp).
+Svagare och tvåfärgade händer stör i stället med **DONT** (§7.6) — och samma
+uppdelning gäller vårt eget försvar mot deras 1NT: en stark enfärgshand bjuds
+naturligt, resten med DONT.
 
-**Grundmekanik:**
-- **2NT = relä till 3♣** (puppet). Svararen passar 3♣ eller rättar till sin färg
-  på 3-läget = **svagt** (vill bara spela lågt).
-- **Direkt bud på 3-läget** (utan att gå via 2NT) = **utgångskrav** (starkare).
-- **Cue-bud i deras färg** = Stayman-aktigt / frågar efter högfärg, utgångskrav.
+**Svararens svar:**
+- **Pass** — svag hand utan egen färg: vi försvarar deras inkliv (lagligt, det är
+  motpartens bud).
+- **Naturligt 2-läge** (t.ex. 2♠ över deras 2♥) — svag hand med en högre högfärg
+  som ryms på 2-läget; vi tävlar om delkontraktet.
+- **2NT = relä** — svag hand vars färg kräver 3-läget. Reläet tvingar öppnaren att
+  bjuda **3♣**; sedan **passar** vi (om färgen är klöver) eller **rättar** till vår
+  färg på 3-läget, och öppnaren lägger upp. Så stannar vi lågt utan att lova värden.
+- **Direkt bud på 3-läget** (utan att gå via 2NT) — **utgångskrav** med egen 5+ färg.
+- **Direkt 3NT** — jämn utgångshand; öppnaren har 15–17 med stopp i deras färg.
 
-**Stoppregel för 3NT ("slow shows"):** den **långsamma** vägen (2NT → sedan 3NT)
-**visar stopp** i deras färg; **direkt 3NT** förnekar stopp (ber partnern bjuda
-3NT med eget stopp).
+**Öppnaren** bjuder tvunget **3♣** över reläet, och höjer partnerns direkta
+3-lägeskrav till utgång (fyra i högfärgen med stöd, annars 3NT).
+
+> Detta är **kärnan** (första steget). Finare behandlingar planeras och spelas
+> ännu **inte**: upplysningsdubbling (takeout) i läget, "slow shows" för stopp i
+> jämna händer, cue-bud som Stayman efter en fyrkorts högfärg, och Lebensohl mot
+> *konstgjorda* inkliv (DONT/Landy). Räkna alltså bara med kärnan ovan vid bordet.
 
 ### 7.6 Mot motståndarnas 1NT — DONT
 DONT (Disturb Opponents' NoTrump): visa alla en- och tvåfärgshänder på 2-läget
-och kunna stanna lågt.
+och kunna stanna lågt. **Undantag (§7.5):** en **stark enfärgshand** (6+ kort,
+11–15 hp) klivar in **naturligt** i stället för via DONT-X. DONT hanterar alltså
+tvåfärgshänder och svagare enfärgshänder; den starka enfärgshanden bjuder sin färg.
 
 | Bud | Betydelse |
 |---|---|
@@ -1429,8 +1438,9 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
 > §7.3 (Takeout Double) – här listas bara de övriga verktygen.
 - **Mot stark 1♣ (Mathe):** X = **båda högfärgerna**, 1NT = **båda minorerna**,
   färgbud naturliga.
-- **Mot svaga tvåor:** **Lebensohl** (§7.5) efter partnerns takeout; 2NT-inkliv =
-  15–18 balanserad med stopp; cue-bud = stark/Michaels-aktig (5-5 i två
+- **Mot svaga tvåor:** efter partnerns takeout svarar advancern nivåmedvetet
+  (§7.3) — Lebensohl i det läget är en planerad förfining, ännu ej byggd; 2NT-inkliv
+  = 15–18 balanserad med stopp; cue-bud = stark/Michaels-aktig (5-5 i två
   sidofärger, 15+, krav). **Advancerns svar på cuet (fel färg-spåret fix 4):**
   preferens till längsta sidofärgen, men **lika långa färger avgörs av
   billigaste nivån** — med 3-3 väljs färgen som kan bjudas en nivå lägre (t.ex.
@@ -1617,6 +1627,18 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-07-30** – **LEBENSOHL EFTER VÅRT 1NT inkopplad (§7.5, Lager 1).** Den
+  gamla skulden ("byggd men ej inkopplad", 0 träffar i svepet) är stängd: modulen
+  `lebensohl.ts` skrevs om för det klassiska efter-1NT-läget och kopplades in i
+  den levande budgivningen. **Steg noll:** motståndaren klivar nu in **naturligt**
+  över 1NT med en stark enfärgshand (6+, 11–15) — annars DONT som förr (§7.6).
+  Symmetriskt, så vårt eget DONT-försvar mot deras 1NT fick samma uppdelning
+  (ägarbeslut 2026-07-30). Svararen spelar Lebensohl-kärnan (pass / naturligt
+  2-läge / 2NT-relä / direkt 3-lägeskrav / direkt 3NT) och öppnaren fullföljer
+  reläet med tvunget 3♣. Facit: `lebensohl.test.ts` + `auction-lebensohl-1nt.test.ts`;
+  regelsvepet (frö 20260721) gick från 0 → 18 naturliga inkliv + hela
+  Lebensohl-konversationen, DONT-posterna växte inte. Takeout-dubbling, slow-shows,
+  cue-Stayman och Lebensohl mot konstgjorda inkliv är planerade nästa lager.
 - **2026-07-30** – **Försvaret spelar TREDJE HAND HÖGT (§8.6, felrapport #34).**
   Tredje/fjärde-hand-grenen i `play-bot.ts` la förr billigaste vinnaren även när
   den DOLDA spelföraren spelade efter försvararen (Nord ♥5 → Öst tog billigt på
