@@ -1,0 +1,58 @@
+name: CI + Deploy (Vercel)
+
+# Test-GRINDEN bor HÄR sedan 2026-07-30, inte längre i vercel.json.
+#
+# Bakgrund: vercel.json körde `npx tsc && npm test && npm run build` som
+# byggkommando, dvs hela 1500-test-sviten på Vercels byggare. Den byggaren är
+# CPU-svulten, så de tunga double-dummy-testerna slog slumpvis i sina
+# tidsgränser → "myntkast"-röda deployer på helt frisk kod (se historiken:
+# b777abb, 2b6934a). Band-aids (seedning + höjda tidsgränser) räckte inte, för
+# felkällan var att testerna kördes i FEL MILJÖ.
+#
+# Nu körs tsc + hela testsviten på ubuntu-latest (pålitlig CPU), och sidan
+# deployas till Vercel-produktion BARA om allt är grönt. Garantin "rött test →
+# ingen publicering" är exakt bevarad, men på en maskin som inte slumpfäller.
+# Bonus: docs-vaktens CLAUDE.md-mätning görs nu på Linux (LF), så CRLF-fällan
+# på Windows försvinner.
+
+on:
+  push:
+    branches: [main]
+
+# Aldrig två produktionsdeployer samtidigt. Kör klart en pågående i stället för
+# att kapa den mitt i (cancel-in-progress: false).
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  ci-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci
+
+      # ---- GRINDEN: allt måste vara grönt innan deploy ----
+      - name: Typkontroll (tsc)
+        run: npx tsc
+      - name: Hela testsviten (vitest)
+        run: npm test
+
+      # ---- Deploy till Vercel-produktion (körs bara om grinden gick igenom) ----
+      - name: Installera Vercel CLI
+        run: npm i -g vercel@latest
+      - name: Hämta Vercel-projektinställningar
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Bygg sidan (Vercel prebuilt)
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Publicera till produktion
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
