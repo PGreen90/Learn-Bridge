@@ -1589,7 +1589,48 @@ metod vi inte känner). Uppmuntran (tvetydig: dam+ *eller* kort färg) och räkn
 avkodningen sänkte spelförarens stick netto (bättre försvar), inom bruset –
 `play-quality.probe.test.ts` (gatad).
 
+### 8.6 Motspelsteknik — tredje hand högt (2026-07-30, felrapport #34)
+Klassisk försvarsdoktrin: **är jag tredje hand** (min partner ledde sticket) och
+en motståndare vinner just nu, spelar jag en **honnör** för att pressa fram
+spelförarens – aldrig ett lågt spotkort. Det billiga kortet skänker bort sticket:
+den **dolda spelföraren** bakom mig går över det lika billigt (i felrapporten satt
+Nord med ♥KJ1065, partnern ledde ♥3, träkarlen la ♥4 – Nord la ♥5 och Öst vann på
+♥9 där en honnör hade tvingat fram Östs ess).
+
+Kortvalet: **den LÄGSTA honnören (10+)** bland mina vinnande kort. Det tvingar
+fram spelförarens honnör men slösar aldrig en högre än nödvändigt:
+- **Sammanhängande topp** (K-D-kn) → lägsta av sekvensen (**kn**), sparar K och D.
+- **Gaffel/tenass** (A-D-10 över spelförarens kn/K) → den **lägsta honnören (10)**,
+  så esset ligger kvar ÖVER hans kung. Att spela esset "tredje hand högt" krossar
+  det på partnerns låga utspel och gör spelförarens kung/knekt goda (uppmätt −1
+  stick, seed 20260732).
+- **Ensam honnör** bland hackor (K bland smått) → den (**K**), tvingar esset.
+- **Bara hackor** (ingen honnör att promovera) → tredje-hand-högt hoppas över, den
+  gamla regeln (billigaste vinnaren) står kvar.
+
+Regeln gäller **bara mot den dolda spelföraren**. Ligger den öppna **träkarlen**
+bakom mig sköts kortvalet av den vanliga regeln (billigaste vinnaren som bordet
+inte går över, §ovan) – och kan bordets ess ta allt jag har är honnören ändå död,
+så då sparar jag den och lägger lågt. I trumfkontrakt hoppar regeln över om en
+kvarvarande motståndare visat renons i färgen (han kan ruffa – ett bortkastat
+toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
+(DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
+
 ## 9. Ändringslogg
+- **2026-07-30** – **Försvaret spelar TREDJE HAND HÖGT (§8.6, felrapport #34).**
+  Tredje/fjärde-hand-grenen i `play-bot.ts` la förr billigaste vinnaren även när
+  den DOLDA spelföraren spelade efter försvararen (Nord ♥5 → Öst tog billigt på
+  ♥9). Ny gren (`thirdHandHonor`): är jag försvarare, partnern ledde och bara
+  spelföraren (ej den öppna träkarlen) står bakom mig lägger jag min LÄGSTA honnör
+  (10+) – snålar med sekvensen och behåller en gaffel över spelföraren (att spela
+  esset "högt" krossar det på partnerns låga utspel). Saknar jag honnör står gamla
+  regeln kvar. Guardat mot ruff i trumf (visad renons hos kvarvarande motståndare).
+  Facit FÖRE fix: `play-bot-third-hand.test.ts` (DDS-låst klassisk finess: tredje
+  hand lågt släpper spelföraren +1 stick + själva felrapportens giv). Netto
+  (`play-establish.probe`, ESTABLISH=1, 40 seedade givar, frö 20260729):
+  spelförarstick 374 → 374 (oförändrat, ingen giv bytte utfall), noll
+  regressioner i hela sviten – mönstret är sällsynt i slumpgivar, men den
+  rapporterade given är DDS-bevisat lagad. Detalj: `docs/bot-hjarna.md`.
 - **2026-07-29 (Steg 5)** – **Bottarna LÄSER markeringar (§8.5).** `signal-decode.ts`
   fick `applySignalReads`: en avskräckande attityd på partnerns färg (högt
   spotkort 8/9/10, bot-motspelare som inte vann) sätter ett HP-tak (`suitHcpCeil`,

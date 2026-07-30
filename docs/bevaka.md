@@ -9,6 +9,19 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Spelkvalitet (2026-07-30) — försvaret spelar tredje hand högt (#34)
+- **Bottarna lägger nu en HONNÖR tredje hand i sang (NYAST).** Ledde din partner
+  och en motståndare vann just nu (t.ex. träkarlen slog partnerns låga utspel),
+  och bara den dolda spelföraren står bakom boten, lägger den sin **lägsta
+  honnör** för att tvinga fram spelförarens – i stället för det gamla billiga
+  spotkortet som spelföraren gick över gratis. **Bevaka:** (a) lägger boten en
+  honnör där ett lågt kort hade varit bättre – t.ex. med en gaffel den borde ha
+  behållit hel? (Regeln väljer *lägsta* honnören just för att spara esset över
+  spelförarens kung, men säg till om den känns fel.) (b) Gäller **bara sang** –
+  i trumfkontrakt lägger boten lågt som förr (tredje-hand-högt hjälpte inte där,
+  det satte försvararen på lead in i ruffhanden). Känns det rätt att den bara gör
+  detta i sang?
+
 ## Spelkvalitet (2026-07-29) — spelföraren etablerar lång färg (#32)
 - **Bottarna etablerar nu lång färg i SANG (NYAST).** Är boten spelförare i sang
   och sitter med en lång färg som behöver en spärr utknackad (t.ex. ♦KQJT9 mot

@@ -7,7 +7,9 @@
 //   • Partnern leder redan sticket: kasta lågt och trumfa ALDRIG partnerns
 //     vinnande stick.
 //   • Tredje/fjärde hand mot motståndaren: vinn så billigt som möjligt, annars
-//     kasta lågt (ruffa bara när det vinner sticket).
+//     kasta lågt (ruffa bara när det vinner sticket). Undantag – tredje hand i
+//     SANG med partnerns utspel och bara dold spelförare bakom: lägsta honnören
+//     (tredje hand högt, §8.6/felrapport #34).
 
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Rank } from '../../types/bridge'
@@ -30,6 +32,26 @@ function lowest(cards: Hand): Card {
 /** Högsta kortet (efter valör) i en lista. */
 function highest(cards: Hand): Card {
   return cards.reduce((hi, c) => (rankVal(c.rank) > rankVal(hi.rank) ? c : hi))
+}
+
+const HONOR_MIN = rankVal('10') // 10 (=T) och uppåt räknas som honnör i tredje-hand-valet
+
+/**
+ * Tredje-hand-honnören (§8.6, felrapport #34) ur mina vinnande kort i
+ * utspelsfärgen: den LÄGSTA honnören (10+). Det pressar fram spelförarens honnör
+ * men slösar aldrig en högre än nödvändigt:
+ *  • Sammanhängande topp (KDkn) → lägsta av sekvensen (kn), sparar K/D.
+ *  • Gaffel/tenass (A-D-10 över spelförarens kn/K) → den LÄGSTA honnören (10),
+ *    så esset ligger kvar ÖVER hans kung – att spela esset "tredje hand högt"
+ *    krossar det på partnerns låga utspel och gör spelförarens K/kn goda
+ *    (uppmätt −1 stick, seed 20260732).
+ *  • Ensam honnör (K bland hackor) → den (K), tvingar esset.
+ * Returnerar null när jag saknar honnör bland vinnarna – då finns inget att
+ * promovera och den gamla regeln (billigaste vinnaren) står kvar.
+ */
+function thirdHandHonor(cardsInLed: Hand): Card | null {
+  const honors = cardsInLed.filter((c) => rankVal(c.rank) >= HONOR_MIN)
+  return honors.length > 0 ? lowest(honors) : null
 }
 
 /**
@@ -572,10 +594,9 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // "billigast" måste hålla även mot bordets bästa svar, annars går bordets
     // hacka över vår (felrapport #1: V slog ♥3 med ♥4, bordets ♥5 vann).
     // Toppar bordet allt vi har gäller gamla regeln (billigaste vinnaren).
+    const iAmDefender = side(seat) !== side(state.contract.declarer)
     const dummy = dummyOf(state.contract)
-    const dummyPlaysAfterUs =
-      side(seat) !== side(state.contract.declarer) &&
-      !state.currentTrick.some((pc) => pc.seat === dummy)
+    const dummyPlaysAfterUs = iAmDefender && !state.currentTrick.some((pc) => pc.seat === dummy)
     if (dummyPlaysAfterUs) {
       const dummyInLed = state.hands[dummy].filter((c) => c.suit === led)
       const dummyLegal = dummyInLed.length > 0 ? dummyInLed : state.hands[dummy]
@@ -584,6 +605,28 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
         return {
           card: lowest(holding),
           reason: 'Jag vinner sticket så billigt som möjligt – men högt nog att bordet inte går över.',
+        }
+      }
+    }
+    // TREDJE HAND HÖGT (§8.6, felrapport #34): partnern ledde och en DOLD
+    // motståndare (spelföraren) spelar EFTER mig. Då duger inte den billigaste
+    // vinnaren – han går över den lika billigt (Nord ♥5 → Öst ♥9). Jag pressar
+    // fram hans honnör med min LÄGSTA honnör (`thirdHandHonor` – snålar med
+    // sekvensen och behåller en gaffel över honom). Bara den DOLDA spelföraren
+    // (inte den öppna träkarlen) bakom mig: syns bordet sköts finessvalet av
+    // grenen ovan. **Bara i sang** (som spelförarplanen #32): i trumfkontrakt är
+    // honnörstvånget osunt – att vinna ett sidostick tidigt sätter försvararen på
+    // lead rakt in i spelförarens ruffhand (uppmätt −1 i 5♦, seed 20260761).
+    const partnerLed = side(state.currentTrick[0].seat) === side(seat)
+    if (state.trump === null && iAmDefender && partnerLed && !dummyPlaysAfterUs && state.currentTrick.length === 2) {
+      const honor = thirdHandHonor(winners.filter((c) => c.suit === led))
+      if (honor) {
+        return {
+          card: honor,
+          reason:
+            'Tredje hand högt (§8.6): partnern ledde och spelföraren spelar efter mig – jag ' +
+            'lägger min lägsta honnör och pressar fram hans, i stället för att ge honom ' +
+            'sticket billigt med ett spotkort (men slösar aldrig en honnör högre än nödvändigt).',
         }
       }
     }

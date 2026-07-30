@@ -10,6 +10,34 @@
 
 ---
 
+## 2026-07-30
+
+**🎉 FELRAPPORT #34 – FÖRSVARET SPELAR TREDJE HAND HÖGT (KLART, konkurrensplanens
+Fas 0 a, hela sviten grön via `npm test`, tsc rent):** motpolen till #32 –
+spelförar-planen blev en motspels-plan. **Buggen:** tredje/fjärde-hand-grenen i
+`play-bot.ts` la billigaste vinnaren även när den DOLDA spelföraren spelade efter
+försvararen; i felrapportens giv (1NT av Öst) satt Nord med ♥KJ1065, partnern
+ledde ♥3, träkarlen la ♥4 – Nord la ♥5 och Öst vann gratis på ♥9 där en honnör
+hade tvingat fram Östs ess. Felet sker redan i trick 1 (13 kort), långt över
+Monte-Carlo-fönstret (≤8), så tumregel-lagret måste kunna det. **Facit före fix**
+(`play-bot-third-hand.test.ts`): en DDS-låst klassisk finess (träkarl lågt,
+spelföraren håller finess-knekten, försvarets K/D delade) där tredje hand LÅGT
+släpper spelföraren ett extra stick (DDS: högt = 1, lågt = 2) + själva
+felrapportens giv. **Fixen:** `thirdHandHonor` – är jag försvarare i **sang**,
+ledde partnern och står bara spelföraren (ej den öppna träkarlen) bakom mig,
+lägger jag min **lägsta** honnör (10+). Att välja lägsta är hela poängen: ur en
+gaffel (A-D-10) ska esset ligga kvar över spelförarens kung, inte krossas på
+partnerns låga utspel. **Två fällor upptäckta och lagade under bygget** (via
+enskild-giv-spårning mot mätriggen): (1) första versionen spelade *högsta* kortet
+och krossade ett ess på en tenass → −1 (seed 20260732); rättat till lägsta
+honnören. (2) I trumfkontrakt satte ett vunnet sidostick försvararen på lead in i
+ruffhanden → −1 (5♦, seed 20260761); regeln begränsades till sang, precis som #32.
+**Netto** (`play-establish.probe`, `ESTABLISH=1`, 40 seedade givar frö 20260729,
+A/B via `git stash`): 374 → 374, oförändrad summa (ingen giv bytte utfall) – noll
+regressioner, men den rapporterade given DDS-bevisat lagad. Mönstret (försvarare
+tredje hand med honnör i sang, bara dold spelförare bakom) är sällsynt i
+slumpgivar. Ren tumregelmodul, spelmotorn (`play.ts`) orörd, inga nya beroenden.
+
 ## 2026-07-29
 
 **🎉 FELRAPPORT #32 – SPELFÖRAREN ETABLERAR LÅNG FÄRG (KLART, konkurrensplanens

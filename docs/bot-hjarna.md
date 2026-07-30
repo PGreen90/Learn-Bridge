@@ -55,7 +55,30 @@ bara med full kontroll (varje annan färg stoppad) och ≥2 stick att vinna.
 tappade stick i 4♠-givar men vann i sang). Facit `play-bot-establish.test.ts`
 (DDS-låst 3NT-slutläge: 3 → 7 stick). Netto-mätning: `play-establish.probe.test.ts`
 (gatad, `ESTABLISH=1`) – 40 seedade givar, baslinje 366 → 374 (+8), noll
-trumf-regressioner. **Kvar (⚪ SENARE):** #34 (försvaret, tredje-hand-högt).
+trumf-regressioner.
+
+## Motspelsplan (2026-07-30): tredje hand högt (felrapport #34)
+Försvarets motpol till spelförarplanen ovan. Tumregelns tredje/fjärde-hand-gren
+la förr **billigaste vinnaren** även när den DOLDA spelföraren spelade efter
+försvararen – ett spotkort som spelföraren gick över lika billigt (Nord ♥5 ur
+♥KJ1065 → Öst vann på ♥9). `thirdHandHonor` i `play-bot.ts` fyller luckan: är jag
+försvarare, ledde partnern och står bara spelföraren (ej den öppna träkarlen)
+bakom mig, lägger jag min **lägsta honnör (10+)** för att tvinga fram hans. Att
+välja *lägsta* honnören är hela poängen – ur en gaffel (A-D-10 över hans kn/K) ska
+esset ligga kvar ÖVER hans kung, inte krossas på partnerns låga utspel (annars
+promoveras spelförarens honnörer, uppmätt −1 stick). Saknar jag honnör att
+promovera står gamla regeln kvar. Guardat mot ruff i trumf (visad renons hos
+kvarvarande motståndare) och mot den öppna träkarlen (finessvalet mot bordet
+sköts av den vanliga öppen-information-grenen). Ligger i tumregel-lagret
+(ovanför MC-fönstret ≤8, där felet uppstår redan i trick 1 = 13 kort). Facit
+`play-bot-third-hand.test.ts` (DDS-låst klassisk finess: tredje hand lågt släpper
+spelföraren +1 stick, plus felrapportens egen giv). Netto-mätning samma rigg som
+#32 (`ESTABLISH=1`, 40 seedade givar, frö 20260729): 374 → 374, oförändrad summa
+(ingen av de 40 givarna bytte utfall). Mönstret – en försvarare tredje hand med
+honnör i sang där bara den dolda spelföraren står bakom – är sällsynt i
+slumpgivar, men den rapporterade given är DDS-bevisat lagad och regeln är korrekt
+doktrin. NT-begränsad efter en uppmätt trumf-regression (5♦, seed 20260761: att
+vinna ett sidostick tredje hand satte försvararen på lead in i ruffhanden, −1).
 
 ## Trappan (byggs i ordning, test-låst — FACIT FÖRE FIX)
 
