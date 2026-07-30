@@ -40,6 +40,23 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
 
 Se `docs/status.md` för detaljer.
 
+## Spelförarplan (2026-07-29): etablera lång färg FÖRE cashandet (felrapport #32)
+Den kända luckan "förberedelsen vid 9–13 kort" (nedan) fick sin första
+spelförar-plan: när spelförarsidan är inne i **sang** och har en lång färg som
+behöver en spärr utknackad (t.ex. ♦KQJT9 mot deras ♦A) etableras den FÖRST,
+medan sidoessen ännu håller motståndarnas honnörer – i stället för att casha
+topparna och bränna stoppen/entréerna. `establishLongSuit` + `suitTricks` i
+`play-bot.ts`, anropad i tumregelns on-lead-gren (ovanför MC-fönstret, ≤8 kort,
+där MC annars aldrig hinner laga en redan förstörd position). Ärlig räkning
+(spelförare + träkarl via `visibleSeats`, inget tjuvkik); fyrar konservativt –
+bara med full kontroll (varje annan färg stoppad) och ≥2 stick att vinna.
+**Begränsad till sang med flit:** i trumfkontrakt etableras färg genom RUFF och
+"säkra vinnare" kan ruffas bort → stopp-gaten är osund där (uppmätt: heuristiken
+tappade stick i 4♠-givar men vann i sang). Facit `play-bot-establish.test.ts`
+(DDS-låst 3NT-slutläge: 3 → 7 stick). Netto-mätning: `play-establish.probe.test.ts`
+(gatad, `ESTABLISH=1`) – 40 seedade givar, baslinje 366 → 374 (+8), noll
+trumf-regressioner. **Kvar (⚪ SENARE):** #34 (försvaret, tredje-hand-högt).
+
 ## Trappan (byggs i ordning, test-låst — FACIT FÖRE FIX)
 
 ### Steg 1 — Ärlig stickföring (stoppa blödningen)

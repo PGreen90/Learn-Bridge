@@ -336,6 +336,106 @@ export interface ReasonedOpts {
 }
 
 /**
+ * Ungefärligt antal stick en färg ger vår sida om vi leder den upprepat (med
+ * entré, motståndarna följer, okänd sits → neutral räkning): gå uppifrån – vårt
+ * toppkort vinner om det slår motståndarnas bästa kvarvarande, annars offras vårt
+ * lägsta för att knäcka deras spärr; när de är slut är resten längdstick. Ärlig
+ * (bara rank-multimängderna, ingen tjuvkik). Ex: ♦KQJT9-32 mot ♦A-876 → 6 stick.
+ */
+function suitTricks(ourDesc: Rank[], oppDesc: Rank[]): number {
+  const o = [...ourDesc]
+  const p = [...oppDesc]
+  let tricks = 0
+  while (o.length > 0) {
+    if (p.length === 0) {
+      tricks += o.length // motståndarna slut → rena längdstick
+      break
+    }
+    if (rankVal(o[0]) > rankVal(p[0])) {
+      tricks++ // vårt toppkort vinner
+      o.shift()
+      p.pop() // de följer med sitt lägsta
+    } else {
+      o.pop() // offra vårt lägsta …
+      p.shift() // … och knäck deras spärr (deras topp vinner sticket)
+    }
+  }
+  return tricks
+}
+
+/**
+ * Spelförarplan FÖRE cashandet (felrapport #32, docs/bot-hjarna.md
+ * "förberedelsen vid 9–13 kort"): är spelförarsidan inne och har en LÅNG färg som
+ * behöver etableras – en near-solid längd där motståndarna håller en spärr (t.ex.
+ * ♦KQJT9 mot deras ♦A) – knäcks spärren FÖRST, medan sidoessen ännu håller
+ * motståndarnas honnörer. Cashar man sidovinnarna först bränns stoppen/entréerna,
+ * och när spärren väl knäcks är motståndarnas honnörer goda (boten tog 3 där 7
+ * fanns). Felet sker vid 9–13 kort, ovanför Monte-Carlo-fönstret (≤8), så
+ * tumregel-lagret måste kunna planera – MC hinner inte laga en förstörd position.
+ *
+ * Ärlig räkning (ingen tjuvkik): ser bara egen sida (spelförare + träkarl via
+ * `visibleSeats`) och spelade kort. Attackerar färg S nu bara när ALLA villkor
+ * håller (konservativt – fyrar bara med full kontroll):
+ *  1. Kombinerad längd ≥ 4 och den ledande handen har färgen att leda.
+ *  2. Etablering ger ≥ 2 stick mer än de omedelbara säkra vinnarna i S (det finns
+ *     en spärr att knäcka OCH längd bakom den; redan cashande färger ger 0).
+ *  3. Varje ANNAN färg är stoppad av vår sida (säker vinnare där, eller
+ *     motståndarna renons) – annars kan de rulla en egen färg när vi släpper dem in.
+ *  4. Vi kan inte redan casha hem alla återstående stick (då behövs ingen färg).
+ * Returnerar kortet att leda (högsta ur den ledande handen, avblockat) eller null.
+ */
+function establishLongSuit(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+  if (side(seat) !== side(state.contract.declarer)) return null // bara spelförarsidan
+  if (state.trump !== null) return null // bara sang: i trumfkontrakt etableras färg
+  //                                       genom RUFF, och "säkra vinnare" kan ruffas
+  //                                       bort – då är stopp-gaten osund (felrapport #32
+  //                                       är ett sang-koncept). Uppmätt: heuristiken
+  //                                       tappade stick i 4♠-givar men vann i sang.
+  if (state.currentTrick.length !== 0) return null // bara när jag är inne (på lead)
+  const played = playedCards(state)
+  const visible = visibleSeats(state, seat)
+  const ourCards = visible.flatMap((v) => state.hands[v])
+  const suitsAll: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
+  const oursIn = (s: Suit) => ourCards.filter((c) => c.suit === s)
+  const immediate = (s: Suit) => oursIn(s).filter((c) => isSureWinner(c, ourCards, played)).length
+
+  // Guard 4: kan vi redan casha hem alla återstående stick? Då behövs ingen färg.
+  if (suitsAll.reduce((n, s) => n + immediate(s), 0) >= state.hands[seat].length) return null
+
+  const oppUnseen = (s: Suit): Rank[] => {
+    const ourRanks = new Set(oursIn(s).map((c) => c.rank))
+    const playedRanks = new Set(played.filter((c) => c.suit === s).map((c) => c.rank))
+    return RANK_LOW_TO_HIGH.filter((r) => !ourRanks.has(r) && !playedRanks.has(r))
+  }
+  const stopped = (s: Suit) => immediate(s) > 0 || oppUnseen(s).length === 0
+
+  let best: { suit: Suit; gain: number; tricks: number } | null = null
+  for (const s of suitsAll) {
+    const ours = oursIn(s)
+    if (ours.length < 4) continue // för kort för att vara etablerbar längd
+    if (!legal.some((c) => c.suit === s)) continue // ledande handen måste ha färgen att leda
+    const ourDesc = ours.map((c) => c.rank).sort((a, b) => rankVal(b) - rankVal(a))
+    const oppDesc = oppUnseen(s).sort((a, b) => rankVal(b) - rankVal(a))
+    const tricks = suitTricks(ourDesc, oppDesc)
+    const gain = tricks - immediate(s)
+    if (gain < 2) continue // ingen/för liten etableringsvinst
+    if (!suitsAll.every((t) => t === s || stopped(t))) continue // ge inte ledningen om annat är öppet
+    if (!best || gain > best.gain || (gain === best.gain && tricks > best.tricks)) {
+      best = { suit: s, gain, tricks }
+    }
+  }
+  if (!best) return null
+  const mine = legal.filter((c) => c.suit === best.suit)
+  return {
+    card: unblockLead(state, seat, highest(mine)),
+    reason:
+      'Spelförarplan (felrapport #32): jag etablerar min långa färg – knäcker ' +
+      'motståndarnas spärr först, medan mina sidoess håller deras honnörer, i ' +
+      'stället för att casha topparna och bränna stoppen.',
+  }
+}
+
+/**
  * Tumregel-valet MED förklaring. Samma logik som `botCard` men returnerar också
  * en klartextsmotivering ("Varför?"). Beskrivningarna följer nybörjardoktrinen.
  */
@@ -356,6 +456,11 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
         : 'Utspel (§8.3): jag spelar ut min längsta färg med 3:e/5:e bästa kort så partnern ser längden.'
       return { card, reason }
     }
+    // Spelförarsidan: etablera en lång färg (knäck motståndarnas spärr) FÖRE du
+    // cashar sidovinnarna – annars bränns stoppen/entréerna (felrapport #32).
+    const establish = establishLongSuit(state, seat, legal)
+    if (establish) return establish
+
     // Mitt i given och inne: cash:a säkra vinnare uppifrån i stället för att leda
     // lågt ur längsta färgen (annars tas 10 stick där 13 var kalla).
     // Sang eller räknad trumf (ingen dold hand kan ruffa) → även sidofärgs­-

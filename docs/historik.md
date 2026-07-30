@@ -12,6 +12,30 @@
 
 ## 2026-07-29
 
+**🎉 FELRAPPORT #32 – SPELFÖRAREN ETABLERAR LÅNG FÄRG (KLART, konkurrensplanens
+Fas 0 a, hela sviten grön via `npm test`, tsc rent):** första spelförar-planen i
+bot-hjärnan. Buggen: i sang cashade boten sina sidoess (stopp + entréer) FÖRE den
+knäckte spärren i sin långa färg – när spärren väl föll var motståndarnas honnörer
+goda och försvaret rullade hem. Felet sker vid 9–13 kort, OVANFÖR
+Monte-Carlo-fönstret (≤8), så MC hann aldrig laga en redan förstörd position; det
+är därför tumregel-lagret måste kunna planera. **Facit före fix:** ett DDS-låst
+3NT-slutläge (`play-bot-establish.test.ts`) där perfekt spel ger 7 av 11 men både
+tumregeln och den skarpa boten tog 3 (mekanism-lås: varje cashat sidoess före
+rutern degraderade DDS-facit 7 → 6 → 4). **Fixen:** `establishLongSuit` +
+`suitTricks` i `play-bot.ts`, anropad i on-lead-grenen före cashandet – etablerar
+den långa färgen (knäcker spärren) när spelförarsidan har full kontroll (varje
+annan färg stoppad, ≥2 stick att vinna). Ärlig räkning (spelförare + träkarl,
+inget tjuvkik). Boten tar nu 7 på facit-given. **Begränsad till sang med flit:**
+en första A/B-mätning fyrade även i trumfkontrakt och tappade då stick (4♠-givar)
+eftersom "säkra vinnare" kan ruffas och färg etableras genom ruff – guarden
+`state.trump !== null → return null` löste det. **Netto-mätning** (deterministisk,
+`play-establish.probe.test.ts` gatad `ESTABLISH=1`, 40 seedade givar frö 20260729,
+A/B via `git stash` av play-bot.ts): baslinje 366 → med fixen 374, **netto +8
+spelförarstick, noll trumf-regressioner** (enda −1 kvar är en 3NT-giv, inom
+MC-samplingsbruset). Ren motor-/tumregelmodul, spelmotorn (`play.ts`) orörd, inga
+nya beroenden. **Kvar i spåret:** #34 (försvaret, tredje-hand-högt) – nästa
+naturliga NU i Fas 0 a.
+
 **🎉 RONDGENOMGÅNGEN (after action report) BYGGD i fyra etapper (2026-07-29,
 mergepunkt `a28ff5e`, hela sviten grön via `npm test`):** efter en
 färdigspelad giv i Spela kort kan spelaren öppna en komplett genomgång i tre

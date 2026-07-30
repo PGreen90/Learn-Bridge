@@ -9,6 +9,16 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Spelkvalitet (2026-07-29) — spelföraren etablerar lång färg (#32)
+- **Bottarna etablerar nu lång färg i SANG (NYAST).** Är boten spelförare i sang
+  och sitter med en lång färg som behöver en spärr utknackad (t.ex. ♦KQJT9 mot
+  motståndarnas ♦A) knäcker den spärren FÖRST, medan sidoessen håller, i stället
+  för att casha topparna. **Bevaka:** (a) ger boten ibland ifrån sig ledningen i
+  fel läge – attackerar den långfärgen när den i stället borde casha hem
+  kontraktet direkt? (b) känns det rätt att den bara gör detta i sang (i
+  trumfkontrakt ruffar den fram färgen som förr)? Gäller bara spelföraren; #34
+  (försvarets tredje-hand-högt) är ännu inte byggt.
+
 ## Etapp 7 (2026-07-28) — missad lillslam
 - **Öppnarens suutrebid graderas nu efter styrka (hål 1, NYAST).** Har du öppnat
   med en 6-korts färg och partnern svarat på 1-läget rebjuder du inte längre
