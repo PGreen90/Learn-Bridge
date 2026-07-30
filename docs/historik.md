@@ -12,6 +12,30 @@
 
 ## 2026-07-30
 
+**🎉 MOBILSVEP ÖVER ALLA SIDOR (Fas 0 b, KLART) → HELA FAS 0 KLAR:** varje sida
+(Hem, Budträning + övning, Budvisning, Budsystem, Inställningar, Spela kort:
+budfas + bord) gicks igenom i 375 px-bredd med en overflow-detektor (JS som mäter
+element bredare än skärmen) + skärmbild. **Resultat: appen var redan mobil-ren** —
+ingen sidled-overflow, inga avklippta knappar, god luft och stora tryckytor. Enda
+fyndet: de breda svarstabellerna på Budsystem (Svar/Betydelse/Kravnivå/Konvention)
+är bredare än en telefon. De var INTE trasiga — `.md table` scrollar redan i sidled
+— men den 4:e kolumnen saknade visuell antydan (kändes "budget", ägarord). **Fix:**
+`ScrollTable` (react-markdown `table`-override) wrappar tabellen i en scroll-behållare
+och en `ResizeObserver` sätter klassen `is-scrollable` BARA när innehållet är bredare
+än rutan → CSS ritar en mjuk toningsskugga vid högerkanten ("det finns mer →").
+Verifierat: mobil 46/56 tabeller får skuggan (smala slipper), svep visar Konvention;
+desktop 0 skuggor (allt får plats). tsc rent, hela sviten grön. En teständring på
+vägen (redundant wrapper) backades. **Med detta är Fas 0 (a bottarnas kortspel, b
+mobilen, c teknisk härdning) helt klar** — grunden håller för främmande ögon; näst
+i konkurrensplanen: Fas 1 (faceliften) eller ett budmotor-NU.
+
+**Budsystem — "fäll ihop"-pil (ägarönskemål 2026-07-30, samma push):** varje
+dropdown (både sektioner och undersektioner, 50 st) fick en ▲-knapp längst ner till
+höger som stänger sektionen och tar rubriken i vy igen — så man slipper scrolla upp
+till rubriken efter en lång sektion. `CollapseButton` i `BudSystem.tsx`; stänger sin
+närmaste `<details>` via `closest('details').open = false`. Verifierat i ljust + mörkt
+läge.
+
 **🎉 SÄKRA ZONER VID BORDET (Fas 0 b, KLART):** utredningen visade att planens
 "ingen hantering av säkra zoner" var **inaktuell** — `index.html` har redan
 `viewport-fit=cover` + `black-translucent` statusrad, och `Layout.tsx` skjuter redan

@@ -1,5 +1,5 @@
-﻿import { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
+﻿import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import bookRaw from '../../docs/budsystem.md?raw'
 import { SUIT_INK } from '../lib/suitColors'
@@ -88,12 +88,73 @@ function rehypeSuitColors() {
   }
 }
 
+/**
+ * Breda tabeller (t.ex. svarstabellerna) är bredare än en telefon. De ligger i en
+ * behållare som scrollar i sidled; en diskret toningsskugga vid högerkanten visas
+ * BARA när det finns mer att svepa fram (`ResizeObserver` mäter om innehållet är
+ * bredare än rutan), så ingen kolumn känns dold på mobil (mobilsvep 2026-07-30).
+ * Skuggan försvinner av sig själv på desktop där tabellen får plats.
+ */
+function ScrollTable({ children }: { children?: ReactNode }) {
+  const inner = useRef<HTMLDivElement>(null)
+  const [scrollable, setScrollable] = useState(false)
+  useLayoutEffect(() => {
+    const el = inner.current
+    if (!el) return
+    const check = () => setScrollable(el.scrollWidth > el.clientWidth + 1)
+    check()
+    const ro = new ResizeObserver(check)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div className={`md-table-scroll${scrollable ? ' is-scrollable' : ''}`}>
+      <div ref={inner} className="md-table-scroll__inner">
+        <table>{children}</table>
+      </div>
+    </div>
+  )
+}
+
+const MD_COMPONENTS: Components = { table: ScrollTable }
+
 function Markdown({ children }: { children: string }) {
   return (
     <div className="md">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSuitColors]}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeSuitColors]}
+        components={MD_COMPONENTS}
+      >
         {children}
       </ReactMarkdown>
+    </div>
+  )
+}
+
+/**
+ * "Fäll ihop"-pil längst ner till höger i en öppen sektion (ägarönskemål
+ * 2026-07-30): efter en lång sektion slipper man scrolla hela vägen upp till
+ * rubriken för att stänga. Stänger sin närmaste <details> och tar rubriken i vy
+ * igen. Finns på SAMTLIGA dropdowns (både sektioner och undersektioner).
+ */
+function CollapseButton({ label }: { label: string }) {
+  return (
+    <div className="mt-2 flex justify-end">
+      <button
+        type="button"
+        aria-label={`Fäll ihop ${label}`}
+        title="Fäll ihop"
+        onClick={(e) => {
+          const d = e.currentTarget.closest('details')
+          if (!d) return
+          d.open = false
+          d.querySelector('summary')?.scrollIntoView({ block: 'nearest' })
+        }}
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-white/5 hover:text-ink"
+      >
+        ▲
+      </button>
     </div>
   )
 }
@@ -211,11 +272,13 @@ export function BudSystem() {
                       </summary>
                       <div className="px-3 pb-3 pt-1">
                         <Markdown>{sub.body}</Markdown>
+                        <CollapseButton label={sub.title} />
                       </div>
                     </details>
                   ))}
                 </div>
               )}
+              <CollapseButton label={s.title} />
             </div>
           </details>
         ))}

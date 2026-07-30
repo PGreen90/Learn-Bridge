@@ -270,6 +270,17 @@
 .md a { color: var(--color-accent); text-decoration: underline; }
 .md code { background: var(--color-panel-2); padding: 0.1rem 0.3rem; border-radius: 0.25rem; font-size: 0.85em; }
 .md blockquote { border-left: 3px solid #10b981; padding-left: 0.75rem; margin: 0.5rem 0; color: var(--color-ink-soft); font-style: italic; }
-.md table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; margin: 0.6rem 0; font-size: 0.85rem; }
+/* Tabellen växer till sitt innehåll (min 100 %); behållaren .md-table-scroll__inner
+   sköter sidled-scrollen så breda tabeller kan svepas i stället för att kapas. */
+.md-table-scroll { position: relative; margin: 0.6rem 0; }
+.md-table-scroll__inner { overflow-x: auto; }
+.md table { min-width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+/* "Det finns mer åt höger"-signalen: en mjuk skugga vid högerkanten, bara när
+   tabellen faktiskt är bredare än rutan (klassen sätts av ScrollTable). */
+.md-table-scroll.is-scrollable::after {
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 1.75rem;
+  pointer-events: none; border-radius: 0 0.25rem 0.25rem 0;
+  background: linear-gradient(to right, transparent, rgb(0 0 0 / 0.22));
+}
 .md th, .md td { border: 1px solid var(--color-line); padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
 .md th { background: var(--color-panel-2); font-weight: 600; color: var(--color-ink); white-space: nowrap; }
