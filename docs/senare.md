@@ -37,19 +37,17 @@ Dagens återbud är grova (stopp-visning kräver 4+ kort i färgen → en 17 hp 
 6-korts minor visas som "minimum 3m") → ärliga slam-misser. Se
 `docs/budsystem-revision.md` B13.
 
-### Spelmotor-kvalitet: spelföring + försvar (felrapport #32 + #34, 2026-07-07)
-Två kortspels-kvalitetsluckor, ägarbeslut att skjuta upp till ett dedikerat
-spelmotor-spår (`docs/bot-hjarna.md`).
-1. **#32 – spelföraren etablerar inte lång färg:** i 3NT drog boten (Öst) ♥AKT och
-   krossade träkarlens ♥QJ i stället för att sätta upp den långa rutern (♦KJT863)
-   medan hållen fanns kvar → 3 bet. Kräver spelplanering (räkna stick, etablera lång
-   färg före honnörer).
-2. **#34 – slarvigt försvar mot 1NT:** försvaret duckade billigt i trick 1 (Nord ♥5
-   under partnerns utspel i stället för tredje-hand-högt). Kräver bättre
-   motspels-heuristik (tredje-hand-högt, honnörsspel).
+### Spelmotor-kvalitet: försvar (felrapport #34, 2026-07-07)
+**#32 (spelföraren etablerar lång färg) är KLART 2026-07-29** (byggt & testat,
+live efter deploy) – se `docs/historik.md` och `docs/bot-hjarna.md`. Kvar i spåret:
 
-Båda i `play-bot.ts` (heuristik + Monte-Carlo). Plockas upp när ägaren vill
-investera i spelkvalitet.
+**#34 – slarvigt försvar mot 1NT:** försvaret duckade billigt i trick 1 (Nord ♥5
+under partnerns utspel i stället för tredje-hand-högt). Kräver bättre
+motspels-heuristik (tredje-hand-högt, honnörsspel). I `play-bot.ts` (heuristik +
+Monte-Carlo). Plockas upp när ägaren vill fortsätta på spelkvaliteten – nästa
+naturliga NU i konkurrensplanens Fas 0 a). Facit-först (som #32): reproducera
+given som DDS-låst test, bygg heuristiken, mät netto med
+`play-establish.probe.test.ts` (gatad, `ESTABLISH=1`).
 
 ### TP till §7-inkliven (2026-07-05, ägarbeslut vid "låna en kung")
 §7-lagret (`overcall`, `advanceOvercall`, DONT, försvar mot svaga tvåor) räknar

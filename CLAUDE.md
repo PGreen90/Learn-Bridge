@@ -19,6 +19,19 @@ topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
 **`docs/konkurrensplan.md`**. Beslut B (backend, Fas 2+) byggs fortfarande bara
 på uttryckligt ägarbeslut.
 
+**⚠️ FELRAPPORT #32 — SPELFÖRAREN ETABLERAR LÅNG FÄRG: BYGGD & TESTAD 2026-07-29,
+EJ PUSHAD ÄN (väntar på ägarens deploy-ok).** Konkurrensplanens Fas 0 a, första
+spelförar-planen i bot-hjärnan. I SANG etablerar boten nu sin långa färg (knäcker
+motståndarnas spärr) FÖRE den cashar sidoessen — förr brändes stoppen/entréerna
+och boten tog 3 där 7 fanns. `establishLongSuit` + `suitTricks` i `play-bot.ts`,
+i tumregelns on-lead-gren (ovanför MC-fönstret ≤8, där felet uppstod). **Bara
+sang med flit** (trumf etablerar via ruff → stopp-gaten osund; uppmätt tapp i
+4♠-givar). Facit `play-bot-establish.test.ts` (DDS-låst 3→7); netto
+`play-establish.probe.test.ts` (gatad `ESTABLISH=1`): +8 stick/40 seedade givar,
+noll trumf-regressioner. Hela sviten grön (`npm test`), tsc rent, spelmotorn
+(`play.ts`) orörd, inga nya beroenden. **STATUS: väntar på commit → push →
+grön Vercel-deploy.** Detalj: `docs/historik.md` + `docs/bot-hjarna.md`.
+
 **RONDGENOMGÅNGEN (after action report) är KLAR & LIVE 2026-07-29** — efter
 färdigspelad giv i Spela kort öppnar "Rondgenomgång"-knappen tre hopfällbara
 kapitel: Budgivningen (varje bud förklarat), Spelföringen (varje stick som egen
@@ -41,12 +54,14 @@ spelmotorn orörd, inga nya beroenden. Ny mätrigg för SPELSTYRKA:
 `play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
 `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU — antingen ur konkurrensplanens Fas 0
-(rekommendation: bottarnas kortspel #32/#34 — i Funbridge-modellen ÄR botspelet
-produkten; alternativ: mobil #36 eller faceliften) eller 🟢 NÄST punkt 1
-(Etapp 7 missad lillslam, förskannad, ägaren väljer hål 2). Kvar i signalspåret
-(⚪ SENARE, `docs/senare.md`): avkoda räkning (paritet, kräver paritetsstöd i
-`monte-carlo.ts`) och uppmuntran (tvetydig).
+**➡️ NÄSTA GÅNG:** FÖRST — pusha #32 (fråga ägaren, bygg → commit → push → vänta
+grön Vercel-deploy → verifiera live → flippa #32-blocket ovan till "KLAR & LIVE"
++ mergepunkt). SEDAN väljer ägaren nytt NU. Rekommendation i samma Fas 0 a-spår:
+**#34 (försvaret, tredje-hand-högt)** — samma facit-först-metod som #32
+(reproducera DDS-låst giv → bygg heuristik → mät netto med `play-establish.probe`).
+Alternativ: mobil #36 eller faceliften (Fas 1), eller 🟢 NÄST punkt 1 (Etapp 7
+missad lillslam, förskannad, hål 2). Kvar i signalspåret (⚪ SENARE): avkoda
+räkning (paritet) och uppmuntran (tvetydig).
 
 **Senast klart 2026-07-28 — KÄNSLA I KORTSPELET-spåret (etapp 1–5), KLART & LIVE:**
 kortspelet har tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow,
@@ -96,6 +111,10 @@ varit inkopplad**; skyddet mot upprepning ligger nu i testsviten
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **Spelföraren etablerar lång färg i sang (#32, 2026-07-29):** boten knäcker nu
+  motståndarnas spärr i sin långa färg FÖRE den cashar sidoessen. Ger den ibland
+  ifrån sig ledningen i fel läge — attackerar långfärgen när den borde casha hem
+  kontraktet direkt? (Bara sang; i trumf ruffar den fram färgen som förr.)
 - **17+ säljer aldrig given över deras 1-lägesöppning (#40, 2026-07-28):** en
   17+-hand utan fönster dubblar i stället för att passa (typfall: enda
   långfärgen är öppnarens egen) — dubblar bottarna för ofta med LÄNGD i deras
@@ -104,8 +123,6 @@ varit inkopplad**; skyddet mot upprepning ligger nu i testsviten
 - **Sangsystemet gäller även off-book (#41, 2026-07-28):** bjuder du 1NT själv i
   budlådan svarar partnern nu enligt §4.3 (2♠ = Minor Suit Stayman, aldrig
   naturligt) — läser motorn dina bud som du menade dem?
-- **Kvantitativ höjning av 3NT (#42, 2026-07-28):** har partnern öppnat och
-  placerat 3NT höjer kaptenen till 6NT med 21+ hp — hamnar ni i 6NT som går bet?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **ETAPP 7: MISSAD LILLSLAM (pausad 2026-07-28 för känslo-spåret, läget
