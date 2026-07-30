@@ -59,10 +59,11 @@
    mobilappar i grunden.
 4. **Designen har legat parkerad** medan Synrey konkurrerar på polish.
    (Åtgärdas: faceliften är nu väckt = Fas 1.)
-5. **Tekniska småsaker** som märks först med fler besökare: hela appen laddas
-   som en enda stor JS-fil (~880 kB, ingen uppdelning per sida; kommando:
-   `npm run build` och läs storleken i `dist/assets/`, uppmätt 2026-07-29),
-   ingen 404-sida för felskrivna adresser.
+5. **Tekniska småsaker** som märks först med fler besökare: ~~hela appen laddas
+   som en enda stor JS-fil, ingen 404-sida~~ → **åtgärdat 2026-07-30 (Fas 0 c):**
+   route-baserad kod-uppdelning (entry-JS ~889 → 247 kB) + 404-sida. Kvar i
+   spåret: finare bild-/typsnittsoptimering vid behov (kommando för storleken:
+   `npm run build`, läs `dist/assets/`).
 
 ## Konkurrenterna — och var rebidz slår dem
 
@@ -90,8 +91,13 @@ Innan vi bjuder in världen ska det världen möter hålla måttet.
   `play-quality.probe.test.ts` så förbättringen bevisas, inte antas.
 - **b) Mobilen:** felrapport #36 (större kort/tryckytor, `cardLayout.ts` +
   `Felt.tsx`), säkra zoner, ett svep över alla sidor på liten skärm.
-- **c) Tekniska småfixar:** dela upp JS-bygget per sida (snabbare första
-  laddning), 404-sida i `App.tsx`.
+- **c) Tekniska småfixar:** ✅ **KLART & live 2026-07-30.** 404-sida
+  (`NotFound.tsx` + catch-all-route i `App.tsx`, facit `not-found.test.tsx`) så
+  felskrivna/döda adresser landar mjukt i stället för på tom sida. Route-baserad
+  kod-uppdelning (`React.lazy` per sida, Home direkt-laddad, Suspense-gräns i
+  `Layout.tsx`): första-laddningens JS gick från en enda ~889 kB-fil till en
+  247 kB-entry — den tunga Budsystem-boken (345 kB) och Spela kort laddas först
+  när man går dit (siffror från `npm run build`, läs `dist/assets/`).
 
 ### Fas 1 — Faceliften (väckt 2026-07-29)
 Designspåret återupptas: Klubbrummet-mockupen och ägarens Claude

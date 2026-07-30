@@ -26,6 +26,13 @@ cue-Stayman, Lebensohl mot konstgjorda inkliv. Detalj: `docs/budsystem.md §7.5/
 **#34 FÖRSVARET TREDJE HAND HÖGT (sang): KLAR & LIVE 2026-07-30** (`thirdHandHonor`
 i `play-bot.ts`, netto neutralt, given DDS-lagad). Detalj: `docs/budsystem.md §8.6`.
 
+**FAS 0 c TEKNISK HÄRDNING (konkurrensplanen): KLAR & LIVE 2026-07-30.** 404-sida
+(`NotFound.tsx` + catch-all i `App.tsx`, facit `not-found.test.tsx`) så döda
+adresser landar mjukt, + route-baserad kod-uppdelning (`React.lazy` per sida, Home
+direkt-laddad, Suspense i `Layout.tsx`): entry-JS ~889 → 247 kB, tunga sidor lazy
+(`npm run build`). Fas 0 a+c klara; kvar i Fas 0: **b) mobilen #36**. Detalj:
+`docs/konkurrensplan.md` Fas 0 c.
+
 **KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
 rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
 modellen först** ("Dagens givar" — alla spelar samma givar mot bottarna,
@@ -42,22 +49,15 @@ spärr i sin långa färg FÖRE den cashar sidoessen (`establishLongSuit` i
 (`play-establish.probe`, `ESTABLISH=1`). Detalj: `docs/historik.md` +
 `docs/bot-hjarna.md`.
 
-**RONDGENOMGÅNGEN (after action report) är KLAR & LIVE 2026-07-29** — efter
-färdigspelad giv i Spela kort öppnar "Rondgenomgång"-knappen tre hopfällbara
-kapitel: Budgivningen (varje bud förklarat), Spelföringen (varje stick som egen
-dropdown med korten i väderstrecken, utspelsregler §8.3 och botmotiveringar vid
-tryck) och Resultatet (öppet först: utfall, poäng, claim-notis och DD-domen
-"med perfekt spel fanns N stick", räknad i webworker med ärlig
-budgetdegradering). Fyra etapper, ren motormodul + UI-lager, spelmotorn orörd.
-Mergepunkt: `a28ff5e`. Detalj: `docs/kortspel.md` "Rondgenomgången" +
-`docs/status.md`; etapplogg: `docs/historik.md`.
+**RONDGENOMGÅNGEN (after action report) KLAR & LIVE 2026-07-29** — efter
+färdigspelad giv öppnar "Rondgenomgång" tre kapitel (Budgivningen /
+Spelföringen / Resultatet med DD-dom "med perfekt spel fanns N stick").
+Mergepunkt `a28ff5e`. Detalj: `docs/kortspel.md` + `docs/historik.md`.
 
-**MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna LÄGGER
-UDCA-attityd/räkning + Lavinthal i motspelet (gardregeln: behåll de två högsta så
-en markering aldrig blir en blunder), rondgenomgången FÖRKLARAR allas markeringar,
-och botarna LÄSER avskräckningsmarkeringar (HP-tak i Monte-Carlo). Sex etapper,
-spelmotorn orörd. Mätrigg `play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt
-`b66c6ee`. Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
+**MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna lägger /
+förklarar / läser UDCA-attityd/räkning + Lavinthal (gardregeln). Mätrigg
+`play-quality.probe` (`PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
+`docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
 **➡️ NÄSTA GÅNG:** ägaren väljer nästa NU. Alternativ:
 **Lebensohl nästa lager** (takeout-X / slow-shows / cue-Stayman, `docs/senare.md`),
