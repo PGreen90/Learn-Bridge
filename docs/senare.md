@@ -37,17 +37,21 @@ Dagens återbud är grova (stopp-visning kräver 4+ kort i färgen → en 17 hp 
 6-korts minor visas som "minimum 3m") → ärliga slam-misser. Se
 `docs/budsystem-revision.md` B13.
 
-### Spelmotor-kvalitet: försvar (felrapport #34, 2026-07-07)
-**#32 (spelföraren etablerar lång färg) är KLART 2026-07-29** (byggt & testat,
-live efter deploy) – se `docs/historik.md` och `docs/bot-hjarna.md`. Kvar i spåret:
+### Spelmotor-kvalitet: försvar (felrapport #34) — KLART 2026-07-30
+**#32 (spelföraren etablerar lång färg) KLART 2026-07-29; #34 (tredje hand högt)
+KLART 2026-07-30** – båda byggda, testade & live. Se `docs/historik.md` och
+`docs/bot-hjarna.md`.
 
-**#34 – slarvigt försvar mot 1NT:** försvaret duckade billigt i trick 1 (Nord ♥5
-under partnerns utspel i stället för tredje-hand-högt). Kräver bättre
-motspels-heuristik (tredje-hand-högt, honnörsspel). I `play-bot.ts` (heuristik +
-Monte-Carlo). Plockas upp när ägaren vill fortsätta på spelkvaliteten – nästa
-naturliga NU i konkurrensplanens Fas 0 a). Facit-först (som #32): reproducera
-given som DDS-låst test, bygg heuristiken, mät netto med
-`play-establish.probe.test.ts` (gatad, `ESTABLISH=1`).
+**#34 – tredje hand högt (KLART):** försvaret duckade billigt i trick 1 (Nord ♥5
+under partnerns utspel). Ny gren `thirdHandHonor` i `play-bot.ts`: är jag
+försvarare i **sang**, ledde partnern och står bara spelföraren bakom mig, lägger
+jag min lägsta honnör och tvingar fram hans. Facit (DDS-låst):
+`play-bot-third-hand.test.ts`. Netto neutralt (374→374, 40 seedade givar,
+`ESTABLISH=1`) – mönstret sällsynt i slumpgivar men den rapporterade given
+DDS-bevisat lagad. **Kvar i spåret (⚪ SENARE):** tredje hand högt även i
+**trumfkontrakt** (avgränsades bort efter en uppmätt ruff-regression) samt
+tredje-hand-nyanser bortom lägsta honnören (t.ex. ducka med tenass mot bordets
+honnör).
 
 ### TP till §7-inkliven (2026-07-05, ägarbeslut vid "låna en kung")
 §7-lagret (`overcall`, `advanceOvercall`, DONT, försvar mot svaga tvåor) räknar

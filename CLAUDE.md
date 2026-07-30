@@ -10,7 +10,16 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LEDIGT (2026-07-29): ägaren väljer nästa ur NÄST/SENARE
+### 🔵 NU — LEDIGT (2026-07-30): ägaren väljer nästa ur NÄST/SENARE
+**FELRAPPORT #34 — FÖRSVARET SPELAR TREDJE HAND HÖGT i sang: KLAR 2026-07-30**
+(Fas 0 a, ännu ej pushad). Motpolen till #32: la förr billigaste vinnaren även när
+den DOLDA spelföraren spelade efter (Nord ♥5 ur ♥KJ1065 → Öst vann gratis på ♥9).
+Ny gren `thirdHandHonor` (`play-bot.ts`): försvarare i sang, partnern ledde, bara
+spelföraren bakom → lägg din **lägsta honnör** (spar gaffeln över hans kung). Bara
+sang (trumf-regression bortmätt). Facit `play-bot-third-hand.test.ts` (DDS-låst
+högt=1/lågt=2); netto neutralt 374→374/40 givar, given DDS-bevisat lagad. Detalj:
+`docs/historik.md` + `docs/bot-hjarna.md` + `docs/budsystem.md §8.6`.
+
 **KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
 rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
 modellen först** ("Dagens givar" — alla spelar samma givar mot bottarna,
@@ -33,27 +42,23 @@ kapitel: Budgivningen (varje bud förklarat), Spelföringen (varje stick som ege
 dropdown med korten i väderstrecken, utspelsregler §8.3 och botmotiveringar vid
 tryck) och Resultatet (öppet först: utfall, poäng, claim-notis och DD-domen
 "med perfekt spel fanns N stick", räknad i webworker med ärlig
-budgetdegradering). Fyra etapper (etapp 4 = ägarens feedback efter eget test),
-ren motormodul + UI-lager, spelmotorn orörd, inga nya beroenden.
+budgetdegradering). Fyra etapper, ren motormodul + UI-lager, spelmotorn orörd.
 Mergepunkt: `a28ff5e`. Detalj: `docs/kortspel.md` "Rondgenomgången" +
 `docs/status.md`; etapplogg: `docs/historik.md`.
 
 **MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna LÄGGER
-UDCA-attityd/räkning + Lavinthal i motspelet (`defensiveSignalCard` + resolvers i
-`play-bot.ts`; gardregeln: behåll de två högsta korten så en markering aldrig blir
-en grov blunder; uppmätt encode-kostnad netto +10 stick/239 givar), rondgenomgången
-FÖRKLARAR allas markeringar (även dina egna kort, `signalRegel` i `rond-rapport.ts`
-— verifierat i browsern), och botarna LÄSER avskräckningsmarkeringar (`applySignalReads`
-→ HP-tak i Monte-Carlo, netto bättre försvar, ägaren behöll på). Sex etapper (0–5),
-spelmotorn orörd, inga nya beroenden. Ny mätrigg för SPELSTYRKA:
-`play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
-`docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
+UDCA-attityd/räkning + Lavinthal i motspelet (gardregeln: behåll de två högsta så
+en markering aldrig blir en blunder), rondgenomgången FÖRKLARAR allas markeringar,
+och botarna LÄSER avskräckningsmarkeringar (HP-tak i Monte-Carlo). Sex etapper,
+spelmotorn orörd. Mätrigg `play-quality.probe` (gatad, `PLAYQ=1`). Mergepunkt
+`b66c6ee`. Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU. Rekommendation i samma Fas 0 a-spår:
-**#34 (försvaret, tredje-hand-högt)** — samma facit-först-metod som #32
-(reproducera DDS-låst giv → bygg heuristik → mät netto med `play-establish.probe`).
-Alternativ: mobil #36 eller faceliften (Fas 1), eller 🟢 NÄST punkt 1 (Etapp 7,
-hål 2). Kvar i signalspåret (⚪ SENARE): avkoda räkning (paritet) + uppmuntran.
+**➡️ NÄSTA GÅNG:** ägaren väljer nytt NU. Fas 0 a (botspelet) har nu båda kända
+felrapporterna lagade (#32 spelföring + #34 försvar), så rekommendationen flyttar:
+**faceliften (Fas 1)** eller **mobilen #36 (Fas 0 b)** — första intrycket inför
+Dagens givar — eller 🟢 NÄST punkt 1 (Etapp 7, hål 2). Kvar i spelkvalitetsspåret
+(⚪ SENARE): tredje hand högt även i **trumf**, tredje-hand-nyanser bortom lägsta
+honnören, samt signalspåret (avkoda räkning/paritet + uppmuntran).
 
 **Senast klart 2026-07-28 — KÄNSLA I KORTSPELET (etapp 1–5), KLART & LIVE:**
 tempoval (Lugn/Normal/Snabb), sticksvep med vinnarglow, kortflygning hand→bord,
@@ -79,12 +84,6 @@ deploy föll slumpvis oavsett vad som pushades (`ebdb958` föll så). Nu seedade
 givar + `docs-vakt` 200× snabbare. Volymtester i det här repot ska ALLTID vara
 seedade. Detalj: `docs/historik.md`.
 
-**Senast klart 2026-07-25:** dokumentstädningen (`docs/README.md` +
-`docs/bevaka.md` + `docs/senare.md` nya) + den stora genomgången: hela repot
-faktakollat mot KODEN, inte mot andra dokument. Fynd bl.a. att **Lebensohl aldrig
-varit inkopplad**; skyddet mot upprepning ligger nu i testsviten
-(`src/docs-vakt.test.ts` + regelsvepet). Detalj: `docs/historik.md`.
-
 > **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
 > bottarna bjuder som människor — egen hand + partnerns **VISADE** intervall, aldrig
 > partnerns faktiska kort; hellre systemriktig miss än kik. Kaptensregeln: ≥33 driv /
@@ -94,6 +93,11 @@ varit inkopplad**; skyddet mot upprepning ligger nu i testsviten
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **Försvaret spelar tredje hand högt i sang (#34, 2026-07-30):** ledde partnern
+  och en motståndare vann just nu, lägger boten sin LÄGSTA honnör (tvingar fram
+  spelförarens) i stället för ett lågt spotkort. Lägger den honnör där lågt var
+  bättre — t.ex. med en gaffel den borde behållit hel? (Bara sang; i trumf lågt
+  som förr.)
 - **Spelföraren etablerar lång färg i sang (#32, 2026-07-29):** boten knäcker nu
   motståndarnas spärr i sin långa färg FÖRE den cashar sidoessen. Ger den ibland
   ifrån sig ledningen i fel läge — attackerar långfärgen när den borde casha hem
@@ -103,9 +107,6 @@ varit inkopplad**; skyddet mot upprepning ligger nu i testsviten
   långfärgen är öppnarens egen) — dubblar bottarna för ofta med LÄNGD i deras
   färg? **Känt hål i rond 2:** den starka dubblaren kan sälja given i nästa
   rond (M19, frö 20260952) — detaljer i `docs/bevaka.md`.
-- **Sangsystemet gäller även off-book (#41, 2026-07-28):** bjuder du 1NT själv i
-  budlådan svarar partnern nu enligt §4.3 (2♠ = Minor Suit Stayman, aldrig
-  naturligt) — läser motorn dina bud som du menade dem?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **ETAPP 7: MISSAD LILLSLAM (pausad 2026-07-28 för känslo-spåret, läget
@@ -133,7 +134,7 @@ varit inkopplad**; skyddet mot upprepning ligger nu i testsviten
 **FACELIFTEN** (väckt 2026-07-29 ur parkeringen → Fas 1 i `docs/konkurrensplan.md`) ·
 **Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
 Felrapport #36 större kort på mobil (Fas 0) · fler budträningsgivar + tema-dropdown ·
-spelmotor-kvalitet (#32 spelföring + #34 försvar — Fas 0) · engelska som andra
+spelmotor-kvalitet (#32 + #34 KLARA; kvar: tredje hand högt i trumf + nyanser) · engelska som andra
 språk (Fas 5) · TP till §7-inkliven · advancer-rabatt efter balansering
 (generella fallet) · 17+ enfärgshand efter två bjudna färger · auto-facit på
 hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·
