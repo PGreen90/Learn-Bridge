@@ -113,7 +113,11 @@ export function Layout() {
       </header>
       {/* Mobil: mindre luft + safe-area-marginal i botten så iPhones egna
           gränssnitt (verktygsfältet/hemindikatorn) aldrig täcker korten. */}
-      <main className="max-w-3xl mx-auto px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8">
+      {/* Säkra zoner: topp-insättningen ligger på sidhuvudet, botten här. Vänster/
+          höger via max(1rem, inset) så innehållet aldrig hamnar under ett sidourtag
+          eller rundat hörn i liggande läge — och aldrig mindre än den vanliga
+          1rem-marginalen i stående (där sidoinsättningen är 0). */}
+      <main className="max-w-3xl mx-auto pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8">
         {/* key per adress → innehållet tonar in vid varje sidbyte (page-in). */}
         <div key={location.pathname} className="page-in">
           {/* Sidorna laddas lat (route-baserad kod-uppdelning, konkurrensplanen
