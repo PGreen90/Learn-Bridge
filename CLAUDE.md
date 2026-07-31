@@ -10,7 +10,12 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LEDIGT (2026-07-31): ägaren väljer nästa ur NÄST/SENARE
+### 🔵 NU — FAS 1 FACELIFTEN (2026-07-31): en yta i taget
+**STARTSIDAN (yta 1): KLAR & deployad 2026-07-31.** Lägeskortens emoji → egna
+guld-linjeikoner i logotypens språk (`Home.tsx`); "Spela kort" = flaggskepp
+(guldton + "Börja här"), guld-hårlinje vid hover. Ägarbeslut: en yta i taget,
+**nästa väljs av ägaren**. Detalj: `docs/konkurrensplan.md` Fas 1.
+
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR (byggd + grön, EJ deployad ännu 2026-07-31).**
 Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
 från sidan som SJÄLV har extra): efter `1m–1X–3m(invit-hopp)–3NT` trevar öppnaren
@@ -59,26 +64,22 @@ spärr i sin långa färg FÖRE den cashar sidoessen (`establishLongSuit` i
 (`play-establish.probe`, `ESTABLISH=1`). Detalj: `docs/historik.md` +
 `docs/bot-hjarna.md`.
 
-**RONDGENOMGÅNGEN (after action report) KLAR & LIVE 2026-07-29** — efter
-färdigspelad giv öppnar "Rondgenomgång" tre kapitel (Budgivningen /
-Spelföringen / Resultatet med DD-dom "med perfekt spel fanns N stick").
-Mergepunkt `a28ff5e`. Detalj: `docs/kortspel.md` + `docs/historik.md`.
+**RONDGENOMGÅNGEN (after action report) KLAR & LIVE 2026-07-29** — efter en giv
+öppnar "Rondgenomgång" tre kapitel (bud / spel / resultat med DD-dom "med perfekt
+spel fanns N stick"). Detalj: `docs/kortspel.md` + `docs/historik.md`.
 
-**MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna lägger /
-förklarar / läser UDCA-attityd/räkning + Lavinthal (gardregeln). Mätrigg
-`play-quality.probe` (`PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
-`docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
+**MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna lägger/förklarar/
+läser UDCA + Lavinthal (gardregeln); mätrigg `play-quality.probe` (`PLAYQ=1`).
+Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** deploya hål 2 (fråga ägaren först), sedan väljer ägaren nästa NU.
-Alternativ: 🟢 NÄST punkt 1 (Etapp 7 **hål C** — 4M, ägarbeslut), **Lebensohl nästa
-lager** (`docs/senare.md`), **faceliften (Fas 1)** (pausad). ⚪ SENARE: tredje hand
-högt i **trumf** + signalspåret.
+**➡️ NÄSTA GÅNG:** ägaren väljer nästa facelift-yta (spelbordet/sidhuvudet), eller
+byter spår: deploya etapp 7 hål 2, 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl nästa
+lager (`docs/senare.md`). ⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
 
-**Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet
-(tempo/animationer/ljud), budstöd På/Av-toggle, felrapporter #40/#41/#42, samt
-underhåll (namnet `rebidz` rättat, deploygrinden seedad + 200× snabbare —
-volymtester ska ALLTID vara seedade). Känt hål kvar: starka dubblaren säljer given
-i rond 2 utan egen färg (frö 20260952, M19). Detalj: `docs/bevaka.md`.
+**Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet,
+budstöd På/Av-toggle, felrapporter #40/#41/#42, underhåll (deploygrinden seedad +
+200× snabbare — volymtester ska ALLTID vara seedade). Känt hål kvar: starka
+dubblaren säljer given i rond 2 utan egen färg (frö 20260952, M19, `docs/bevaka.md`).
 
 > **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
 > bottarna bjuder som människor — egen hand + partnerns **VISADE** intervall, aldrig

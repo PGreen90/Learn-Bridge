@@ -131,7 +131,10 @@ konkurrensrond.
 ### FACELIFTEN / den visuella omgörningen (VÄCKT 2026-07-29 — Fas 1 i konkurrensplanen)
 Parkerad 2026-07-20, **väckt av ägaren 2026-07-29** som del av konkurrensspåret
 (`docs/konkurrensplan.md` Fas 1 — första intrycket görs bara en gång, före
-lanseringen av "Dagens givar"). Materialet som väntar: Claudes
+lanseringen av "Dagens givar"). **PÅBÖRJAD 2026-07-31, en yta i taget** (ägarbeslut):
+**startsidan (yta 1) KLAR & deployad** — emoji-ikonerna på lägeskorten byttes mot
+egna guld-linjeikoner, "Spela kort" blev flaggskepp; full logg i
+`docs/konkurrensplan.md` Fas 1. Materialet som väntar (nästa ytor): Claudes
 "Klubbrummet"-mockup (privat artifact
 `claude.ai/code/artifact/5b9f5e2a-fe71-4dbc-aaeb-188a5a2376b9`), ägarens Claude
 Design-utforskning med de färdiga promptarna, och ombyggnaden av appen efter
