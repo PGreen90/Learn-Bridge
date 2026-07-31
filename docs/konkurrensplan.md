@@ -114,12 +114,23 @@ Innan vi bjuder in världen ska det världen möter hålla måttet. Alla tre del
   247 kB-entry — den tunga Budsystem-boken (345 kB) och Spela kort laddas först
   när man går dit (siffror från `npm run build`, läs `dist/assets/`).
 
-### Fas 1 — Faceliften (väckt 2026-07-29)
-Designspåret återupptas: Klubbrummet-mockupen och ägarens Claude
-Design-utforskning plockas fram igen. Låsta ramar gäller: emerald, svarta
-spader, guldserifen, Synrey-inspirerat uttryck (färgerna läses i
-`src/index.css`). Ligger FÖRE lanseringen av Dagens givar — första intrycket
-görs bara en gång. Detalj: `docs/senare.md` (faceliftposten).
+### Fas 1 — Faceliften (väckt 2026-07-29, PÅBÖRJAD 2026-07-31)
+Designspåret återupptas **en yta i taget** (ägarbeslut 2026-07-31: "börja smått &
+konkret" — ett skarpt förslag per yta, se först, rulla sedan språket vidare).
+Låsta ramar gäller: emerald, svarta spader, guldserifen, Synrey-inspirerat uttryck
+(färgerna läses i `src/index.css`). Ligger FÖRE lanseringen av Dagens givar —
+första intrycket görs bara en gång.
+
+- **Yta 1 — startsidan: KLAR 2026-07-31.** De fyra lägeskortens emoji-ikoner
+  (🃏🎯👁️📖) byttes mot **egna guld-linjeikoner** ritade i logotypens språk
+  (inline-SVG i `Home.tsx`: spelkort med brandens guldspader, måltavla, öga,
+  uppslagen bok) — emoji bröt mot guldserifen intill. "Spela kort" lyftes till
+  flaggskepp (varm guldton + guldring + "Börja här"-markering) och alla kort fick
+  en guld-hårlinje vid hover (samma guldram-motiv som runt ordmärket). Heron rördes
+  ej. Verifierat i ljust + mörkt läge, inga konsolfel. Nästa yta väljs av ägaren
+  (t.ex. spelbordet eller sidhuvudet).
+
+Detalj/väntande material: `docs/senare.md` (faceliftposten).
 
 ### Fas 2 — Konton + sparade framsteg (Beslut B steg 2–3)
 Första backend-bygget: Supabase (databasvalet bekräftas med ägaren vid start),
