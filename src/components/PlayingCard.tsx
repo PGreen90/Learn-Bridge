@@ -9,7 +9,7 @@ const SYMBOL: Record<Suit, string> = {
   clubs: '♣',
 }
 
-type Size = 'sm' | 'smPlus' | 'md' | 'lg'
+type Size = 'sm' | 'smPlus' | 'md' | 'lg' | 'xl'
 
 // Mått per storlek: [bredd, höjd, valör-text, mitt-symbol, ess-symbol].
 // Esset får en större mittsymbol – som i en riktig kortlek.
@@ -22,16 +22,24 @@ const SIZES: Record<Size, { box: string; rank: string; pip: string; acePip: stri
   // desktop, 40×56) men krymper till vanligt `sm` (28×40) från `sm:` och uppåt.
   // Ägarbeslut 2026-07-07: dessa var för små att läsa på telefon.
   smPlus: {
-    box: 'w-10 h-14 rounded-md sm:w-7 sm:h-10 sm:rounded',
-    rank: 'text-xs sm:text-[10px]',
-    pip: 'text-xl sm:text-sm',
-    acePip: 'text-2xl sm:text-base',
+    box: 'w-12 h-16 rounded-md sm:w-7 sm:h-10 sm:rounded',
+    rank: 'text-sm sm:text-[10px]',
+    pip: 'text-2xl sm:text-sm',
+    acePip: 'text-3xl sm:text-base',
   },
   md: {
-    box: 'w-12 h-16 rounded-md sm:w-10 sm:h-14',
-    rank: 'text-sm sm:text-xs',
-    pip: 'text-2xl sm:text-xl',
-    acePip: 'text-3xl sm:text-2xl',
+    box: 'w-14 h-20 rounded-md sm:w-10 sm:h-14',
+    rank: 'text-base sm:text-xs',
+    pip: 'text-3xl sm:text-xl',
+    acePip: 'text-4xl sm:text-2xl',
+  },
+  // `xl` = spelarens egen hand vid bordet (Synrey-känsla, ägarbeslut 2026-07-31):
+  // rejält stora kort på mobil, krymper till vanligt `sm` på desktop.
+  xl: {
+    box: 'w-16 h-24 rounded-lg sm:w-10 sm:h-14 sm:rounded-md',
+    rank: 'text-lg sm:text-xs',
+    pip: 'text-4xl sm:text-xl',
+    acePip: 'text-5xl sm:text-2xl',
   },
   lg: { box: 'w-12 h-16 rounded-md', rank: 'text-sm', pip: 'text-2xl', acePip: 'text-3xl' },
 }

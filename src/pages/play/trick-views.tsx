@@ -10,24 +10,27 @@ import type { Flight } from './useCardFlight'
 
 /** Ett spelat kort på bordet: klickbart när boten har en motivering —
  *  trycket visar förklaringen i raden under listen. `glow` = vinnarkortet
- *  pulserar under sticksvepets paus (etapp 2). */
+ *  pulserar under sticksvepets paus (etapp 2). `size` = 'md' på det stora
+ *  mittbordet (Synrey-känsla, 2026-07-31), 'sm' i "Förra sticket"-miniatyren. */
 export function PlayedCardView({
   pc,
   winner,
   canExplain,
   onClick,
   glow = false,
+  size = 'sm',
 }: {
   pc: PlayedCard
   winner: boolean
   canExplain: boolean
   onClick: () => void
   glow?: boolean
+  size?: 'sm' | 'smPlus' | 'md'
 }) {
   const face = (
     <PlayingCard
       card={pc.card}
-      size="sm"
+      size={size}
       className={`${winner ? 'ring-2 ring-amber-400' : ''} ${glow ? 'winner-glow' : ''}`}
     />
   )
@@ -141,22 +144,32 @@ export function TrickCenterLive({
           canExplain={hasReason(pc)}
           onClick={() => onCardClick(pc)}
           glow={winner === seat}
+          size="smPlus"
         />
       </div>
     )
   }
-  const letter = (seat: Seat, label: string, pos: string) => {
+  // Platsetikett som färgpiller (Synrey-känsla, 2026-07-31): S guld (du), N grön
+  // (partner), V/Ö mörka (motståndare). Turljuskäglan lyser kvar bakom den aktiva
+  // platsen (den som ska spela); pillret får en gul ring när det är dess tur.
+  const seatPill = (seat: Seat, label: string, pos: string) => {
     const active = toAct === seat
+    const role =
+      seat === 'S'
+        ? 'bg-gold-400 text-emerald-950'
+        : seat === 'N'
+          ? 'bg-emerald-600 text-white'
+          : 'bg-emerald-950/80 text-emerald-100 ring-1 ring-emerald-100/15'
     return (
       <span
-        className={`absolute ${pos} flex items-center justify-center text-sm font-semibold text-yellow-300`}
+        className={`absolute ${pos} flex items-center justify-center`}
         title={active ? (thinking ? 'Bot-hjärnan räknar …' : 'Ska spela') : undefined}
       >
         {/* Ljuskäglan: vitt radiellt ljus som tonar ut mot kanterna. mix-blend-mode
             screen ljusar bara UPP det som ligger under — färgerna ändras inte. */}
         <span
           aria-hidden
-          className={`pointer-events-none absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full transition-opacity duration-700 ${
+          className={`pointer-events-none absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full transition-opacity duration-700 ${
             active ? (thinking ? 'animate-pulse' : 'opacity-100') : 'opacity-0'
           }`}
           style={{
@@ -165,19 +178,26 @@ export function TrickCenterLive({
             mixBlendMode: 'screen',
           }}
         />
-        <span className="relative">{label}</span>
+        <span
+          className={`relative rounded-full px-2 py-0.5 text-xs font-bold shadow ${role} ${
+            active ? 'ring-2 ring-yellow-300' : ''
+          }`}
+        >
+          {label}
+        </span>
       </span>
     )
   }
 
   return (
-    // Klick var som helst på stickytan under svepet hoppar över det.
-    <div className="relative h-44 w-40 shrink-0" onClick={sweep ? onSkipSweep : undefined}>
-      <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-emerald-950/50 ring-1 ring-emerald-100/10" />
-      {letter('N', 'N', 'top-4 left-1/2 -translate-x-1/2')}
-      {letter('S', 'S', 'bottom-4 left-1/2 -translate-x-1/2')}
-      {letter('W', 'V', 'left-4 top-1/2 -translate-y-1/2')}
-      {letter('E', 'Ö', 'right-4 top-1/2 -translate-y-1/2')}
+    // Klick var som helst på stickytan under svepet hoppar över det. Större
+    // mittbord (Synrey-känsla, 2026-07-31) så korten landar stort och luftigt.
+    <div className="relative h-48 w-48 shrink-0" onClick={sweep ? onSkipSweep : undefined}>
+      <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-emerald-950/50 ring-1 ring-emerald-100/10" />
+      {seatPill('N', 'N', 'top-1 left-1/2 -translate-x-1/2')}
+      {seatPill('S', 'S', 'bottom-1 left-1/2 -translate-x-1/2')}
+      {seatPill('W', 'V', 'left-0 top-1/2 -translate-y-1/2')}
+      {seatPill('E', 'Ö', 'right-0 top-1/2 -translate-y-1/2')}
       {/* Korten i en egen grupp: under 'slide' får hela gruppen svep-klassen
           och alla fyra glider ihop mot vinnarens sida medan de tonar ut. */}
       <div
@@ -185,10 +205,10 @@ export function TrickCenterLive({
           sweep?.phase === 'slide' && winner ? SWEEP_OUT[winner] : ''
         }`}
       >
-        {card('N', 'top-0 left-1/2 -translate-x-1/2')}
-        {card('S', 'bottom-0 left-1/2 -translate-x-1/2')}
-        {card('W', 'left-0 top-1/2 -translate-y-1/2', 'rotate-90')}
-        {card('E', 'right-0 top-1/2 -translate-y-1/2', '-rotate-90')}
+        {card('N', 'top-4 left-1/2 -translate-x-1/2')}
+        {card('S', 'bottom-4 left-1/2 -translate-x-1/2')}
+        {card('W', 'left-3 top-1/2 -translate-y-1/2', 'rotate-90')}
+        {card('E', 'right-3 top-1/2 -translate-y-1/2', '-rotate-90')}
       </div>
     </div>
   )

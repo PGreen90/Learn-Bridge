@@ -11,11 +11,17 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — FAS 1 FACELIFTEN (2026-07-31): en yta i taget
-**STARTSIDAN (yta 1): KLAR & deployad 2026-07-31 (base44-inspirerad omgörning).**
-Samlad hero: allt i EN grön yta (varumärke + fyra likvärdiga menyknappar), inga
-dubbletter. Tvåfärgat "re**bid**z" med guld-skimmer, frameless guldspader,
-roterande guldram på knapparna (hover), diskret guldflik i sidhuvudet. Ägarbeslut:
-en yta i taget, **nästa väljs av ägaren**. Detalj: `docs/konkurrensplan.md` Fas 1.
+**STARTSIDAN (yta 1): KLAR & deployad 2026-07-31.** Samlad hero, tvåfärgat
+"re**bid**z" med guld-skimmer, frameless guldspader, roterande guldram (hover),
+diskret guldflik i sidhuvudet.
+
+**SPELBORDET (yta 2): KLAR (byggd + tsc grön, EJ deployad ännu 2026-07-31).**
+Synrey-modellen, telefon-först: full-bleed duk (headern dold i spelvyn, röd
+"Avsluta spel" → start), stora `xl`-handkort, träkarlen alltid upptill, tomma sidor,
+tryck-färg-visar-bara-den, färgpiller + guld-bar (slate borta), ⋮+ⓘ staplade uppe
+till höger, ⓘ-popupen rymmer auktion/förra sticket/utspel. Sticksvepet orört.
+Ägarbeslut: en yta i taget, **nästa väljs av ägaren**. Detalj:
+`docs/konkurrensplan.md` Fas 1.
 
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR (byggd + grön, EJ deployad ännu 2026-07-31).**
 Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
@@ -26,17 +32,10 @@ med **19+ hp**, svararen lyfter 6NT med maximum/fittande minorhonnör. Smal med 
 `auction-3nt-stopp.test.ts`. Detalj: `docs/budsystem.md §6.9/§9` +
 `docs/systemrevisorn.md` #21. **Kvar i etapp 7: hål C + hål D.**
 
-**LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR & LIVE 2026-07-30.** Skulden "byggd men
-ej inkopplad" (§7.5) stängd. **Steg noll:** motståndaren klivar in **naturligt** över
-1NT med stark enfärgshand (6+, 11–15) — annars DONT (symmetriskt, så vårt eget
-1NT-försvar fick samma uppdelning, ägarbeslut 2026-07-30). Svararen spelar
-Lebensohl-kärnan (pass / naturligt 2-läge / 2NT-relä / direkt 3-lägeskrav / direkt
-3NT), öppnaren fullföljer med tvunget 3♣. Facit `lebensohl.test.ts` +
-`auction-lebensohl-1nt.test.ts`; regelsvepet (frö 20260721) gick 0 → 18 naturliga
-inkliv + hela konversationen, DONT-posterna växte ej. `lebensohl.ts` bortlyft ur
-`MEDVETET_EJ_INKOPPLAD`. Kvar (senare lager, ej byggt): takeout-X, slow-shows,
-cue-Stayman, Lebensohl mot konstgjorda inkliv. Detalj: `docs/budsystem.md §7.5/§9`
-+ `docs/senare.md` + `docs/bevaka.md`.
+**LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR & LIVE 2026-07-30.** Naturligt inkliv
+över 1NT (6+, 11–15) annars DONT; svararen spelar Lebensohl-kärnan (pass / 2-läge /
+2NT-relä / 3-lägeskrav / 3NT). Kvar (ej byggt): takeout-X, slow-shows, cue-Stayman.
+Detalj: `docs/budsystem.md §7.5/§9` + `docs/senare.md` + `docs/bevaka.md`.
 
 **#34 FÖRSVARET TREDJE HAND HÖGT (sang): KLAR & LIVE 2026-07-30** (`thirdHandHonor`,
 netto neutralt). Detalj: `docs/budsystem.md §8.6`.

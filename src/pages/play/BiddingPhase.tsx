@@ -58,9 +58,10 @@ export function BiddingPhase({
   )
 
   return (
-    <Felt>
-      {/* Överst: kompass (giv + bricka + zon), auktionen och menyknappen. */}
-      <div className="flex items-stretch gap-2 p-2.5">
+    <Felt className="flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none">
+      {/* Överst: kompass (giv + bricka + zon), auktionen och menyknappen. Säker
+          topp-marginal för urtaget (headern är dold i den immersiva spelvyn). */}
+      <div className="flex items-stretch gap-2 p-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
         <CompassPanel dealer={game.deal.dealer} board={game.deal.board} vulnerability={game.deal.vulnerability} />
         <AuctionGrid
           calls={game.history}
@@ -106,10 +107,11 @@ export function BiddingPhase({
         />
       </div>
 
-      {/* Din hand som solfjäder + HCP-bricka (Synrey). */}
-      <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-2 pb-2.5 pt-3">
+      {/* Din hand som solfjäder + HCP-bricka (Synrey). mt-auto trycker handen till
+          botten när duken fyller hela skärmen; säker botten-marginal (hemindikator). */}
+      <div className="relative mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-3 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
         <HandFan hand={game.deal.hands.S} />
-        <div className="absolute bottom-2 right-2 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-semibold text-white">
+        <div className="absolute bottom-2 right-2 rounded-md bg-emerald-950/80 px-2 py-0.5 text-xs font-semibold text-white ring-1 ring-gold-400/25">
           HCP {hcp(game.deal.hands.S)}
         </div>
       </div>
@@ -208,6 +210,16 @@ function TableMenu({
               onToggle={onToggleBidHelp}
             />
             <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
+            {/* Enda vägen ut ur den immersiva vyn (headern är dold) → startsidan. */}
+            <button
+              type="button"
+              onClick={() => {
+                window.location.hash = '#/'
+              }}
+              className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
+            >
+              ← Avsluta spel
+            </button>
           </div>
         </>
       )}

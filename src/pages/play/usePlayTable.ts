@@ -364,6 +364,11 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     setSelectedSuit(null)
   }
 
+  /** Gå tillbaka till alla färger (Synrey: när bara vald färg visas). */
+  function deselectSuit() {
+    setSelectedSuit(null)
+  }
+
   // Tryck på ett SPELAT kort på bordet (sticket i mitten eller förra sticket):
   // botens motivering visas i raden under listen; samma kort igen stänger.
   const reasonFor = (pc: PlayedCard) => botReasons[`${pc.card.suit}${pc.card.rank}`]
@@ -461,5 +466,7 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     score,
     declSide,
     isFaceUp,
+    dummy,
+    deselectSuit,
   }
 }

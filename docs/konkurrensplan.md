@@ -140,8 +140,31 @@ första intrycket görs bara en gång.
     - **Sidhuvudet:** diskret guldmarkering på aktiv flik (mjuk guldton + guldkant)
       i stället för den vita pillen; guldton vid hover; frameless brandmärke.
   "Levande guld" (skimmer + roterande ram) respekterar `prefers-reduced-motion`.
-  Verifierat ljust + mörkt, inga konsolfel. Nästa yta väljs av ägaren (t.ex.
-  spelbordet).
+  Verifierat ljust + mörkt, inga konsolfel.
+
+- **Yta 2 — spelbordet: KLAR 2026-07-31 (Synrey-modellen, telefon-först).** Bedömt
+  i mobilvyn (375 px) mot ägarens Synrey/Funbridge-referenser. Filer: `Play.tsx`,
+  `play/BiddingPhase.tsx`, `play/hands.tsx`, `play/trick-views.tsx`,
+  `play/usePlayTable.ts`, `components/PlayingCard.tsx`, `components/BiddingBox.tsx`,
+  `components/Layout.tsx`, `lib/cardLayout.ts`.
+    - **Full-bleed duk:** spelrutten (`/spela-kort`) går edge-to-edge, hela
+      skärmen, inga rundade hörn/ram — appens menyrad (header) är **dold** i
+      spelvyn (immersivt). Man tar sig ut via röd **"Avsluta spel"** → startsidan,
+      i budfas, spelvy och resultatvy.
+    - **Synrey-layout:** din hand nederst (stora `xl`-kort), **träkarlen alltid
+      upptill** (även när den sitter i Öst/Väst), **tomma sidor** (dolda händer
+      visas inte → öppen yta), kompakt mittbord centrerat.
+    - **Tryck-färg-visar-bara-den:** tryck på en färg i handen → bara den färgen
+      visas, stor och luftig; "◀ Alla färger" tillbaka.
+    - **Mittbordet:** färgpiller (S guld / N grön / V,Ö mörka) med väderstrecken
+      UNDER de spelade korten; träkarlen utan transparenta kort.
+    - **Guldspråket in på bordet:** guld-bar i stället för blågrå slate, guld-hover
+      på chromet; ⋮ + ⓘ staplade uppe till höger (25 % mindre). Större tap-mål
+      (budknappar 48 px).
+    - **ⓘ-popupen** rymmer auktion + förra sticket + utspel (som Synrey), inte
+      flytande på bordet.
+  Sticksvepet (etapp 2) lämnades orört (ägarbeslut). Verifierat på telefon, tsc
+  grön. Nästa yta väljs av ägaren (t.ex. sidhuvudet på övriga sidor).
 
 Detalj/väntande material: `docs/senare.md` (faceliftposten).
 

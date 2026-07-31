@@ -4,7 +4,7 @@
 
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Contract, PlayState } from '../../lib/engine/play'
-import { bySuit, handSuitsTrumpFirst, REST_OVERLAP } from '../../lib/cardLayout'
+import { bySuit, handSuitsTrumpFirst } from '../../lib/cardLayout'
 import { PlayingCard } from '../../components/PlayingCard'
 import { turnInfo } from './common'
 import type { RegisterCardEl } from './useCardFlight'
@@ -40,22 +40,22 @@ export function SuitColumns({
         const cards = bySuit(hand, suit)
         if (cards.length === 0) return null
         const spread = myTurn && suit === selectedSuit
-        const dim = myTurn && selectedSuit !== null && !spread
         return (
           <div
             key={suit}
-            className={`flex flex-col transition-all ${spread ? '-translate-y-1 z-10' : ''} ${dim ? 'opacity-50' : ''}`}
+            className={`flex flex-col transition-all ${spread ? '-translate-y-1 z-10' : ''}`}
           >
             {cards.map((c, i) => {
               const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
               return (
+                // Träkarlen: aldrig transparenta kort (ägarbeslut 2026-07-31) —
+                // dimning borttagen, korten alltid fullt synliga.
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
                   ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
                   size="smPlus"
                   playable={playable}
-                  dimmed={myTurn && !playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
                   className={i > 0 ? (spread ? '-mt-7 sm:-mt-3' : '-mt-8 sm:-mt-7') : ''}
                 />
@@ -71,6 +71,30 @@ export function SuitColumns({
 /** En Ö/V-träkarls kort i visningsordning (trumf överst) för SideStack. */
 export function sideCards(hand: Hand, contract: Contract): Card[] {
   return handSuitsTrumpFirst(contract.strain).flatMap((suit) => bySuit(hand, suit))
+}
+
+/**
+ * Nedåtvänd solfjäder för en DOLD hand (spelföraren/din partner) — fyller
+ * plats-zonen med rebidz guld-baksidor så bordet blir balanserat och den tomma
+ * gröna ytan försvinner (ägarbeslut 2026-07-31, som Synrey/BBO). Visar bara
+ * kortantalet (krymper i takt med given), avslöjar ingenting.
+ * `orientation` 'h' = topp (Nord, vågrätt), 'v' = sida (Öst/Väst, lodrätt).
+ */
+export function FaceDownFan({ count, orientation }: { count: number; orientation: 'h' | 'v' }) {
+  if (count <= 0) return null
+  const horizontal = orientation === 'h'
+  return (
+    <div className={horizontal ? 'flex justify-center' : 'flex flex-col items-center'}>
+      {Array.from({ length: count }).map((_, i) => (
+        <PlayingCard
+          key={i}
+          faceDown
+          size="smPlus"
+          className={i > 0 ? (horizontal ? '-ml-8' : '-mt-12') : ''}
+        />
+      ))}
+    </div>
+  )
 }
 
 /** Din hand som solfjäder (Syd): färggrupper, vald färg lyfts, trumf vänster. */
@@ -98,27 +122,26 @@ export function SouthFan({
         const cards = bySuit(hand, suit)
         if (cards.length === 0) return null
         const spread = myTurn && suit === selectedSuit
-        const dim = myTurn && selectedSuit !== null && !spread
+        // Tryck på en färg → visa BARA den färgen (Synrey, ägarbeslut 2026-07-31):
+        // övriga färger göms helt (inte nedtonade) tills man går tillbaka.
+        if (myTurn && selectedSuit !== null && !spread) return null
         return (
           <div
             key={suit}
-            className={`flex transition-all ${spread ? '-translate-y-1.5 z-10 sm:gap-1 sm:mx-1' : ''} ${dim ? 'opacity-50' : ''}`}
+            className={`flex transition-all ${spread ? '-translate-y-1.5 z-10 sm:gap-1 sm:mx-1' : ''}`}
           >
             {cards.map((c, i) => {
               const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
-              // Mobil: de större korten (48px) gör att en utfälld färg annars
-              // knuffar ytterkorten utanför kanten. Håll allt på skärmen genom att
-              // fälla ut MED måttlig överlappning och samtidigt PRESSA ihop de
-              // nedtonade färgerna. Desktop oförändrat (container-gap + full utfällning).
-              // Vilande = REST_OVERLAP (delas med HandFan så budgivning→spel inte
-              // hoppar). Spread/dim är spelbordets egna tur-lägen.
-              const ml = i === 0 ? '' : spread ? '-ml-4 sm:ml-0' : dim ? '-ml-10 sm:-ml-6' : REST_OVERLAP
+              // Stora kort (xl). Vilande: eget större överlapp (SouthFan är nu
+              // större än budgivningens HandFan). Vald färg (spread): visas ensam
+              // → luftig utfällning så korten blir rejält stora och lättträffade.
+              const ml = i === 0 ? '' : spread ? '-ml-2 sm:ml-0' : '-ml-12 sm:-ml-6'
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
                   ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
-                  size="md"
+                  size="xl"
                   playable={playable}
                   dimmed={myTurn && !playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
