@@ -44,8 +44,13 @@ export function Layout() {
   )
 
   function navLinkClass(isActive: boolean): string {
+    // Aktiv flik: diskret guldmarkering (mjuk guldton + guldtext + fin guldkant)
+    // i stället för den skrikiga vita pillen (ägarbeslut 2026-07-31). Inaktiva
+    // länkar något dämpade så den aktiva sticker ut lugnt; guldton vid hover.
     return `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-      isActive ? 'bg-white text-emerald-800' : 'hover:bg-white/10'
+      isActive
+        ? 'bg-gold-400/15 text-gold-100 ring-1 ring-inset ring-gold-400/30'
+        : 'text-white/80 hover:bg-white/10 hover:text-gold-100'
     }`
   }
 
@@ -58,10 +63,11 @@ export function Layout() {
           Blir 0 i vanlig webbläsare, så inget ändras där. */}
       <header className="border-b border-gold-400/40 bg-brand-bar text-white shadow pt-[env(safe-area-inset-top)]">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          {/* Logotypen + inramade ordmärket (guldserif, spader-prick på i:et). */}
+          {/* Logotypen + ordmärket (tvåfärgat guldserif-skimmer, spader-prick på
+              i:et, frameless). "re"/"z" ärver text-white från baren. */}
           <NavLink to="/" className="flex items-center gap-2 whitespace-nowrap">
-            <BrandMark className="h-7 w-7" />
-            <Wordmark framed className="text-xl" />
+            <BrandMark bare className="h-7 w-7" />
+            <Wordmark className="text-xl" />
           </NavLink>
 
           {/* Större skärmar: alla länkar i rad. */}

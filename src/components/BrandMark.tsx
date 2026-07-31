@@ -4,51 +4,44 @@
 // formen här ska favicon uppdateras i takt.
 
 /**
- * Ordmärket "rebidz" (ägarens vision 2026-07-02): gemener i varumärkesserifen
- * Fraunces med guldgradient — och SPADERN SOM PRICK över i:et. Tricket: ett
- * prickfritt i (ı, U+0131) med ♠ positionerad ovanför, allt i em-mått så det
- * skalar med textstorleken (sidhuvud som hero).
+ * Ordmärket "rebidz" (tvåfärgad + skimmer, 2026-07-31).
+ * **Tvåfärgat** (base44-inspirerat, ägarbeslut): "re" och "z" i den omgivande
+ * textfärgen (`currentColor` — vit på emerald-baren, gräddvit på filtet), "bid"
+ * i guld med animerat **skimmer** så guldet ser ut att flyta ("levande guld").
+ * Bridge-ordet *bid* lyfts alltså ur namnet. i:ets prick är en **vanlig
+ * guldprick** (ingår i guld-texten) — den gamla spader-pricken togs bort
+ * 2026-07-31: med den frameless spadern ovanför loggan + vattenstämpeln bakom
+ * blev det för många spader ("för mycket av samma sak", ägarbeslut). Ramen
+ * borttagen (ägaren gillar frameless).
  */
-export function Wordmark({
-  className = '',
-  framed = false,
-}: {
-  className?: string
-  /** Tunn guldram runt ordmärket (ägarens logo-vision, bild 2). Ramen och
-   *  luften runt om mäts i em → skalar med textstorleken. */
-  framed?: boolean
-}) {
-  const mark = (
-    <span role="img" aria-label="rebidz" className="font-brand font-semibold tracking-tight">
-      {/* Gradienten sätts PER SEGMENT: background-clip: text målar inte in i
-          positionerade barn, så i-segmentet (relative) behöver sin egen. Den
-          lodräta gradienten är identisk i alla segment → skarven syns inte. */}
+export function Wordmark({ className = '' }: { className?: string }) {
+  return (
+    <span
+      role="img"
+      aria-label="rebidz"
+      className={`font-brand font-semibold tracking-tight ${className}`}
+    >
       <span aria-hidden>
-        <span className="text-gold-gradient">reb</span>
-        <span className="text-gold-gradient relative">
-          ı
-          {/* Spader-pricken: 5 px över i:ets topp vid herostorlek (ägarbeslut
-              2026-07-02), skalar med texten. OBS: top i em räknas på spaderns
-              EGEN font-size (0.4em av ordmärket). */}
-          <span className="absolute left-1/2 top-[0.04em] -translate-x-1/2 text-[0.4em] leading-none text-gold-400">
-            ♠
-          </span>
-        </span>
-        <span className="text-gold-gradient">dz</span>
+        <span>re</span>
+        {/* Hela "bid" i ETT skimmer-segment → guldranden sveper genom bid som en
+            enhet (inte per bokstav). i:ets naturliga prick blir en guldprick. */}
+        <span className="text-gold-shimmer">bid</span>
+        <span>z</span>
       </span>
     </span>
   )
-
-  if (!framed) return <span className={className}>{mark}</span>
-  return (
-    <span
-      className={`inline-block rounded-[0.22em] border border-gold-400/60 px-[0.4em] pb-0 pt-[0.2em] leading-none ${className}`}
-    >
-      {mark}
-    </span>
-  )
 }
-export function BrandMark({ className = '' }: { className?: string }) {
+export function BrandMark({
+  className = '',
+  bare = false,
+}: {
+  className?: string
+  /** `bare` = bara den rena guldspadern, utan emerald-plattan + guldramen
+   *  (ägaren tyckte den inramade rutan kändes avig ovanför den frameless
+   *  loggan, 2026-07-31). Används i heron (stor spader + vattenstämpel);
+   *  sidhuvudet + faviconen behåller den inramade plattan. */
+  bare?: boolean
+}) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden focusable="false">
       <defs>
@@ -61,18 +54,22 @@ export function BrandMark({ className = '' }: { className?: string }) {
           <stop offset="1" stopColor="#c39a33" />
         </linearGradient>
       </defs>
-      <rect width="64" height="64" rx="14" fill="url(#rbz-bg)" />
-      <rect
-        x="1.5"
-        y="1.5"
-        width="61"
-        height="61"
-        rx="12.5"
-        fill="none"
-        stroke="#e8cf85"
-        strokeOpacity="0.35"
-        strokeWidth="1.5"
-      />
+      {!bare && (
+        <>
+          <rect width="64" height="64" rx="14" fill="url(#rbz-bg)" />
+          <rect
+            x="1.5"
+            y="1.5"
+            width="61"
+            height="61"
+            rx="12.5"
+            fill="none"
+            stroke="#e8cf85"
+            strokeOpacity="0.35"
+            strokeWidth="1.5"
+          />
+        </>
+      )}
       <path
         d="M32 7
            C 26 15, 11 26, 11 37

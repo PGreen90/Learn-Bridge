@@ -2,26 +2,16 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
-import { PlayingCard } from '../components/PlayingCard'
-import type { Card } from '../types/bridge'
 
-// Startsidan är RebidZ ansikte utåt: en hero på det gröna filtet (logotyp,
-// tagline, kortsolfjäder, tydlig "Spela"-knapp) och därunder ett lägeskort per
-// del av appen. Sidan ÄR förklaringen av produkten.
-
-// Dekorativ solfjäder i heron – visar upp kortdesignen (fyrfärgslek).
-const HERO_CARDS: Card[] = [
-  { suit: 'spades', rank: 'A' },
-  { suit: 'hearts', rank: 'K' },
-  { suit: 'diamonds', rank: 'Q' },
-  { suit: 'clubs', rank: 'J' },
-]
-const HERO_TILT = ['-rotate-12 translate-y-2', '-rotate-4', 'rotate-4', 'rotate-12 translate-y-2']
+// Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
+// oss för mycket"): varumärkesblocket överst (frameless guldspader + tvåfärgat
+// skimmer-ordmärke + tagline), och därunder de fyra MENYKNAPPARNA som leder in i
+// appen — allt inne i samma gröna yta. Ingen dubblering längre: de gamla
+// CTA-knapparna "Spela kort"/"Öva budgivning" var samma mål som mode-korten
+// (Spela kort resp. Budträning), så de togs bort tillsammans med kortsolfjädern.
 
 // Egna linje-ikoner i guld, ritade i samma språk som logotypen (BrandMark):
-// inline-SVG → knivskarpa i alla storlekar och alltid på varumärket. Ersatte
-// emoji 2026-07-31 (faceliften, Fas 1) — emoji bröt mot guldserifen intill och
-// drog ner "anrik kortklubb"-intrycket. currentColor = guld sätts av plattan.
+// inline-SVG → knivskarpa i alla storlekar och alltid på varumärket.
 const ICON_SVG = 'h-6 w-6'
 const MODE_ICONS: Record<string, ReactNode> = {
   // Spela kort: ett spelkort med brandens egen guldspader som filled pip.
@@ -59,27 +49,19 @@ const MODE_ICONS: Record<string, ReactNode> = {
   ),
 }
 
-// Kortet lyfts en aning och tänder en guld-hårlinje vid hover — samma
-// guldram-motiv som runt ordmärket i heron, så hela sidan hänger ihop.
-const CARD_BASE =
-  'group block rounded-2xl p-5 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] dark:shadow-none'
-const CARD_NEUTRAL = 'bg-panel ring-1 ring-panel-ring hover:ring-gold-400/50 dark:hover:bg-club-800'
-// Flaggskeppet "Spela kort": ligger på en varm guldton med guldring redan i
-// vila, så ögat vet var det ska börja.
-const CARD_FEATURED =
-  'bg-gold-400/[0.07] ring-1 ring-gold-400/40 hover:ring-gold-400/70 dark:bg-gold-400/10'
+// Menyknapp PÅ det gröna filtet: halvgenomskinlig mörkgrön platta med ljus text
+// och guld-linjeikon. Den roterande guldramen tänds vid hover (gold-frame-hover).
+// Alla fyra knappar är likvärdiga (ägarbeslut 2026-07-31: ingen förmarkering av
+// "Spela kort", ingen "Börja här"-markering).
+const CARD =
+  'group relative block rounded-2xl bg-emerald-950/30 p-4 text-left ring-1 ring-emerald-50/10 gold-frame-hover transition-all hover:-translate-y-0.5 hover:bg-emerald-950/45 active:scale-[0.99]'
 
-/** Guld linje-ikon i en tonad ruta, så korten känns igen blixtsnabbt. */
-function ModeIcon({ icon, featured }: { icon: string; featured?: boolean }) {
+/** Guld linje-ikon i en tonad ruta (mot det gröna filtet). */
+function ModeIcon({ icon }: { icon: string }) {
   return (
     <span
       aria-hidden
-      className={
-        'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-gold-600 dark:text-gold-400 ' +
-        (featured
-          ? 'bg-gold-400/15 ring-1 ring-gold-400/30'
-          : 'bg-emerald-100 dark:bg-emerald-950/60')
-      }
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50/10 text-gold-300"
     >
       {MODE_ICONS[icon]}
     </span>
@@ -91,28 +73,19 @@ function ModeCard({
   icon,
   title,
   description,
-  featured,
 }: {
   to: string
   icon: string
   title: string
   description: string
-  featured?: boolean
 }) {
   return (
-    <Link to={to} className={`${CARD_BASE} ${featured ? CARD_FEATURED : CARD_NEUTRAL}`}>
-      <div className="flex items-center gap-3.5">
-        <ModeIcon icon={icon} featured={featured} />
+    <Link to={to} className={CARD}>
+      <div className="flex items-center gap-3">
+        <ModeIcon icon={icon} />
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-ink">{title}</span>
-            {featured && (
-              <span className="rounded-full bg-gold-400/20 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-300">
-                Börja här
-              </span>
-            )}
-          </div>
-          <div className="text-sm text-ink-muted">{description}</div>
+          <div className="font-semibold text-emerald-50">{title}</div>
+          <div className="text-sm text-emerald-100/70">{description}</div>
         </div>
       </div>
     </Link>
@@ -121,81 +94,55 @@ function ModeCard({
 
 export function Home() {
   return (
-    <div className="space-y-4">
-      {/* Heron: varumärket + vägen in i spelet. Tunn guldram som i ägarens
-          logo-vision (bild 3): en inre border på filtet. */}
-      <Felt className="px-6 py-10 sm:px-10">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-3 rounded-2xl border border-gold-400/40"
-        />
-        <div className="flex flex-col items-center gap-4 text-center">
-          <BrandMark className="h-14 w-14 drop-shadow-md" />
-          <h1 className="text-5xl sm:text-6xl">
-            <Wordmark framed />
-          </h1>
-          <p className="max-w-md text-emerald-50/90">
-            Spela och lär dig bridge mot en partner som kan 2/1-systemet — direkt i
-            webbläsaren.
-          </p>
+    // ETT samlat grönt hero. Avboxat (frameless, mjuk kant via felt-melt) med luft.
+    <Felt
+      rounded="rounded-[2.75rem]"
+      className="felt-melt border-transparent px-5 py-14 shadow-[0_30px_80px_-45px_rgba(0,0,0,0.5)] sm:px-10 sm:py-20"
+    >
+      {/* Svag stor spader-vattenstämpel bakom = öppen grön yta (base44-idén). */}
+      <BrandMark
+        bare
+        className="pointer-events-none absolute left-1/2 top-40 h-72 w-72 -translate-x-1/2 opacity-[0.07] sm:top-48"
+      />
+      <div className="relative flex flex-col items-center gap-6 text-center text-emerald-50">
+        {/* Varumärkesblocket (den stora "ramen"): spader + ordmärke + tagline. */}
+        <BrandMark bare className="h-16 w-16 drop-shadow-md" />
+        <h1 className="text-5xl sm:text-6xl">
+          <Wordmark />
+        </h1>
+        <p className="max-w-md text-emerald-50/90">
+          Spela och lär dig bridge mot en partner som kan 2/1-systemet — direkt i
+          webbläsaren.
+        </p>
 
-          {/* Solfjädern: ren dekoration, delas ut med kaskadanimationen. */}
-          <div aria-hidden className="flex justify-center pt-1">
-            {HERO_CARDS.map((c, i) => (
-              <PlayingCard
-                key={c.suit}
-                card={c}
-                size="lg"
-                className={`deal-in origin-bottom shadow-md ${i > 0 ? '-ml-4' : ''} ${HERO_TILT[i]}`}
-                style={{ animationDelay: `${i * 90}ms` }}
-              />
-            ))}
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-3 pt-2">
-            <Link
-              to="/spela-kort"
-              className="rounded-xl bg-gold-400 px-6 py-3 font-display font-bold text-emerald-950 shadow-md transition-all hover:-translate-y-0.5 hover:bg-gold-300 active:scale-[0.98]"
-            >
-              Spela kort →
-            </Link>
-            <Link
-              to="/budtraning"
-              className="rounded-xl bg-white/10 px-6 py-3 font-medium text-white ring-1 ring-white/25 transition-all hover:bg-white/20 active:scale-[0.98]"
-            >
-              Öva budgivning
-            </Link>
-          </div>
+        {/* Menyknapparna: vägen in i appen, en per del. */}
+        <div className="grid w-full max-w-xl grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
+          <ModeCard
+            to="/spela-kort"
+            icon="cards"
+            title="Spela kort"
+            description="Spela en hel giv mot datorn – bud och kortspel."
+          />
+          <ModeCard
+            to="/budtraning"
+            icon="target"
+            title="Budträning"
+            description="Öva på att hitta rätt bud, tema för tema."
+          />
+          <ModeCard
+            to="/budvisning"
+            icon="eye"
+            title="Budvisning"
+            description="Titta när datorn budar alla fyra händerna."
+          />
+          <ModeCard
+            to="/budsystem"
+            icon="book"
+            title="Budsystem"
+            description="Hela 2/1-systemet att läsa, sektion för sektion."
+          />
         </div>
-      </Felt>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ModeCard
-          to="/spela-kort"
-          icon="cards"
-          title="Spela kort"
-          description="Spela en hel giv mot datorn – bud och kortspel."
-          featured
-        />
-        <ModeCard
-          to="/budtraning"
-          icon="target"
-          title="Budträning"
-          description="Öva på att hitta rätt bud, tema för tema."
-        />
-        <ModeCard
-          to="/budvisning"
-          icon="eye"
-          title="Budvisning"
-          description="Titta när datorn budar alla fyra händerna."
-        />
-        <ModeCard
-          to="/budsystem"
-          icon="book"
-          title="Budsystem"
-          description="Hela 2/1-systemet att läsa, sektion för sektion."
-        />
       </div>
-    </div>
+    </Felt>
   )
 }
