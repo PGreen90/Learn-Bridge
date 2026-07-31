@@ -8,12 +8,12 @@ import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget } from '../lib/engine/contract-target'
+import { PlayingCard } from '../components/PlayingCard'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { SuitText } from '../components/SuitText'
 import { PlayReplay } from '../components/PlayReplay'
 import { AuctionGrid } from '../components/AuctionGrid'
 import { BidChip } from '../components/BidChip'
-import { SideStack } from '../components/SideStack'
 import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
 import { ClickAway, Dialog } from '../components/Dialog'
@@ -22,7 +22,7 @@ import { useGame } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
-import { SouthFan, SuitColumns, sideCards } from './play/hands'
+import { SouthFan, SuitColumns } from './play/hands'
 import { LastTrickPanel, TrickCenterLive } from './play/trick-views'
 import { ScenarioPicker, SearchOverlay } from './play/pickers'
 import { BiddingPhase } from './play/BiddingPhase'
@@ -173,7 +173,13 @@ function PlayTable({
     score,
     declSide,
     isFaceUp,
+    dummy,
+    deselectSuit,
   } = usePlayTable(deal, contract, calls)
+  // HashRouter → navigera hem via hash (funkar utan Router-kontext i tester).
+  const goHome = () => {
+    window.location.hash = '#/'
+  }
 
   // Färdigspelad giv: bordet hinner tona ut (felt-fade-out under resultOutro,
   // showResult väntar ut den) → resultatdialog ovanpå omspelningen (Synrey-stil).
@@ -243,6 +249,13 @@ function PlayTable({
                   </Button>
                 </div>
                 <Button onClick={onNewGame}>Ny giv →</Button>
+                <button
+                  type="button"
+                  onClick={goHome}
+                  className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
+                >
+                  ← Avsluta spel
+                </button>
               </div>
               <button
                 type="button"
@@ -253,14 +266,23 @@ function PlayTable({
               </button>
           </Dialog>
         ) : resultSeen ? (
-          <div className="mt-3 flex justify-center gap-2">
-            <Button variant="secondary" onClick={() => setReporting(true)}>
-              Rapportera fel
-            </Button>
-            <Button variant="secondary" onClick={() => setReviewing(true)}>
-              Rondgenomgång
-            </Button>
-            <Button onClick={onNewGame}>Ny giv →</Button>
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <div className="flex justify-center gap-2">
+              <Button variant="secondary" onClick={() => setReporting(true)}>
+                Rapportera fel
+              </Button>
+              <Button variant="secondary" onClick={() => setReviewing(true)}>
+                Rondgenomgång
+              </Button>
+              <Button onClick={onNewGame}>Ny giv →</Button>
+            </div>
+            <button
+              type="button"
+              onClick={goHome}
+              className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
+            >
+              ← Avsluta spel
+            </button>
           </div>
         ) : null}
         {/* Felrapporten: hela given + auktionen + sticken → förifylld GitHub-issue. */}
@@ -277,45 +299,41 @@ function PlayTable({
     )
   }
 
-  // Vem ligger öppen var? Nord-sidans öppna hand visas som färgkolumner uppe
-  // (träkarlen när du spelar, eller spelföraren Nord när Syd är träkarl); en
-  // Ö/V-träkarl som lodrät stapel på sin sida. Dolda händer visas INTE alls.
-  const northOpen = isFaceUp('N')
-  const westOpen = isFaceUp('W')
-  const eastOpen = isFaceUp('E')
-
+  // Träkarlen visas alltid upptill (se toppzonen nedan); dolda händer visas inte.
   return (
     // --motion-scale: tempovalet skalar spelfasens CSS-animationer (index.css
     // räknar calc(bastid * var(--motion-scale))). JS-pauserna skalas i tempo.ts.
     // felt-fade-out: när given är klar tonar hela bordet ut under resultOutro
     // innan trädet byts till resultatvyn (showResult).
     <Felt
-      className={done ? 'felt-fade-out' : ''}
+      className={`flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none ${done ? 'felt-fade-out' : ''}`}
       style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}
     >
-      {/* ⓘ (budgivningen) + ⋮ (meny) uppe till höger. */}
-      <div className="absolute right-2.5 top-2.5 z-20 flex gap-1.5">
-        <button
-          type="button"
-          onClick={() => {
-            setShowInfo((v) => !v)
-            setShowMenu(false)
-          }}
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950/60 text-sm font-bold text-emerald-50 ring-1 ring-emerald-100/10 hover:bg-emerald-950/80"
-          aria-label="Budgivningen"
-        >
-          i
-        </button>
+      {/* ⋮ (meny) överst, ⓘ (budgivningen) under den — staplade i appens övre
+          högra hörn (ägarbeslut 2026-07-31). Säker marginal för urtaget nu när
+          headern är borta (immersiv spelvy). */}
+      <div className="absolute right-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20 flex flex-col gap-1.5">
         <button
           type="button"
           onClick={() => {
             setShowMenu((v) => !v)
             setShowInfo(false)
           }}
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950/60 text-lg font-bold text-emerald-50 ring-1 ring-emerald-100/10 hover:bg-emerald-950/80"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-950/60 text-lg font-bold text-emerald-50 ring-1 ring-emerald-100/10 transition-colors hover:bg-emerald-950/80 hover:ring-gold-400/40"
           aria-label="Meny"
         >
           ⋮
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setShowInfo((v) => !v)
+            setShowMenu(false)
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-950/60 text-sm font-bold text-emerald-50 ring-1 ring-emerald-100/10 transition-colors hover:bg-emerald-950/80 hover:ring-gold-400/40"
+          aria-label="Budgivningen"
+        >
+          i
         </button>
       </div>
 
@@ -331,7 +349,7 @@ function PlayTable({
 
       {/* Meny-overlay: ny giv, facit och hjälp – inget av det stör bordet annars. */}
       {showMenu && (
-        <div className="absolute right-2.5 top-13 z-40 w-72 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
+        <div className="absolute right-2.5 top-[calc(3rem+env(safe-area-inset-top))] z-40 w-72 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
           {/* Facit finns nu som direktknapp på bordet (R3-fynd #4); menyn har
               bara ny giv, claim och hjälp. */}
           <Button className="w-full" onClick={onNewGame}>
@@ -382,6 +400,14 @@ function PlayTable({
             När det är din tur: tryck en färg så lyfts den – klicka sedan kortet du vill spela.
             Tryck på ett spelat kort på bordet för att se varför datorn valde det.
           </p>
+          {/* Enda vägen ut ur den immersiva spelvyn (headern är dold) → startsidan. */}
+          <button
+            type="button"
+            onClick={goHome}
+            className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
+          >
+            ← Avsluta spel
+          </button>
         </div>
       )}
 
@@ -400,9 +426,10 @@ function PlayTable({
         />
       )}
 
-      {/* ⓘ-overlay: budgivningen som ledde till kontraktet (klickbara förklaringar). */}
+      {/* ⓘ-overlay: budgivningen som ledde till kontraktet + förra sticket i
+          miniatyr (som Synrey — bor här i stället för flytande på bordet). */}
       {showInfo && (
-        <div className="absolute left-1/2 top-13 z-40 w-full max-w-sm -translate-x-1/2 px-3">
+        <div className="absolute left-1/2 top-[calc(3rem+env(safe-area-inset-top))] z-40 w-full max-w-sm -translate-x-1/2 space-y-2 px-3">
           <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
             <AuctionGrid
               calls={calls}
@@ -411,17 +438,40 @@ function PlayTable({
               explanations={bidHelp ? 'full' : 'minimal'}
             />
           </div>
+          {play.completedTricks.length > 0 && (
+            <div className="flex justify-center rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+              <LastTrickPanel
+                trick={play.completedTricks[play.completedTricks.length - 1]}
+                onCardClick={onPlayedCardClick}
+                hasReason={(pc) => !!reasonFor(pc)}
+              />
+            </div>
+          )}
+          {/* Utspel (Synrey): det allra första kortet i given + vem som spelade det. */}
+          {(() => {
+            const openingLead = (play.completedTricks[0] ?? { cards: play.currentTrick }).cards[0]
+            if (!openingLead) return null
+            return (
+              <div className="flex items-center justify-center gap-2 rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+                <span className="text-xs font-medium text-ink-muted">Utspel:</span>
+                <PlayingCard card={openingLead.card} size="sm" />
+                <span className="text-xs text-ink-soft">av {SEAT_LABEL[openingLead.seat]}</span>
+              </div>
+            )
+          })()}
         </div>
       )}
 
-      {/* Nord-sidans öppna hand som färgkolumner (trumf längst till vänster). */}
-      <div className="flex min-h-16 justify-center pt-3">
-        {northOpen && (
+      {/* Toppzonen: träkarlen (den öppna handen) visas ALLTID här — även när den
+          sitter i Öst/Väst — så sidorna hålls tomma (Synrey, ägarbeslut 2026-07-31:
+          öppnar ytan). Dolda motståndarhänder visas inte alls. */}
+      <div className="flex min-h-16 justify-center pt-[calc(0.75rem+env(safe-area-inset-top))]">
+        {isFaceUp(dummy) && dummy !== 'S' && (
           <SuitColumns
-            hand={play.hands.N}
+            hand={play.hands[dummy]}
             contract={contract}
             play={play}
-            seat="N"
+            seat={dummy}
             onCardClick={onCardClick}
             selectedSuit={selectedSuit}
             registerCardEl={registerCardEl}
@@ -429,34 +479,12 @@ function PlayTable({
         )}
       </div>
 
-      {/* Förra sticket i miniatyr uppe i hörnet — förminskad (75 %) och ankrad
-          så den går fri från det pågående stickets V/Ö-kort även på 375 px;
-          flyttar till vänstra hörnet när Öst-träkarlen behöver högersidan.
-          (R3-fynd #8: en 85%-bump provades men backades – 375px-överlappet
-          kunde inte verifieras; tas om när mobil-preview är tillgänglig.) */}
-      {/* Panelen döljs medan samma stick fortfarande sveps i mitten (etapp 2) —
-          den dyker upp som historik först när svepet är klart. */}
-      {play.completedTricks.length > 0 && !sweep && (
-        <div
-          className={`absolute z-10 scale-75 ${
-            eastOpen ? 'left-2.5 top-2.5 origin-top-left' : 'right-2.5 top-13 origin-top-right'
-          }`}
-        >
-          <LastTrickPanel
-            trick={play.completedTricks[play.completedTricks.length - 1]}
-            onCardClick={onPlayedCardClick}
-            hasReason={(pc) => !!reasonFor(pc)}
-          />
-        </div>
-      )}
+      {/* Förra sticket bor numera inne i ⓘ-overlayen (som Synrey), inte flytande
+          på bordet — se showInfo nedan. */}
 
-      {/* Mittraden: ev. V/Ö-träkarl på sin sida + sticket i mitten. */}
-      <div className="flex items-center justify-between gap-1 px-2 py-2">
-        <div className="w-14 shrink-0 sm:w-10">
-          {westOpen && (
-            <SideStack cards={sideCards(play.hands.W, contract)} side="W" registerCardEl={registerCardEl} />
-          )}
-        </div>
+      {/* Mittraden: bara sticket i mitten, centrerat. Sidorna är tomma (Synrey) —
+          flex-1 växer och centrerar bordet vertikalt. */}
+      <div className="flex flex-1 items-center justify-center px-2 py-2">
         <TrickCenterLive
           play={play}
           thinking={thinking}
@@ -467,11 +495,6 @@ function PlayTable({
           onCardClick={onPlayedCardClick}
           hasReason={(pc) => !!reasonFor(pc)}
         />
-        <div className="w-14 shrink-0 sm:w-10">
-          {eastOpen && (
-            <SideStack cards={sideCards(play.hands.E, contract)} side="E" registerCardEl={registerCardEl} />
-          )}
-        </div>
       </div>
 
       {/* Bricka + zon nere till vänster. */}
@@ -483,18 +506,18 @@ function PlayTable({
       {/* Svarta listen: kontraktet + ställningen + facit-knapp (R3-fynd #4:
           facit ett klick bort på bordet i stället för begravd i ⋮-menyn). */}
       <div className="flex items-center justify-center gap-2 pb-1.5">
-        <div className="flex items-center gap-2 rounded-lg bg-slate-900/85 px-3 py-1 shadow">
+        <div className="flex items-center gap-2 rounded-lg bg-emerald-950/80 px-3 py-1 shadow ring-1 ring-gold-400/25">
           <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
           {contract.doubled && <span className="text-sm font-bold text-red-400">{contract.doubled}</span>}
-          <span className="text-sm font-semibold text-white">
+          <span className="text-sm font-semibold text-emerald-50">
             NS:{play.tricksNS} ÖV:{play.tricksEW}
           </span>
-          <span className="text-xs text-ink-faint">mål {result.needed}</span>
+          <span className="text-xs text-emerald-100/55">mål {result.needed}</span>
         </div>
         <button
           type="button"
           onClick={showFacit}
-          className="rounded-lg bg-emerald-950/60 px-2.5 py-1 text-xs font-semibold text-emerald-50 ring-1 ring-emerald-100/10 hover:bg-emerald-950/80"
+          className="rounded-lg bg-emerald-950/60 px-2.5 py-1 text-xs font-semibold text-emerald-50 ring-1 ring-emerald-100/10 transition-colors hover:bg-emerald-950/80 hover:ring-gold-400/40"
         >
           Facit
         </button>
@@ -532,8 +555,21 @@ function PlayTable({
         )
       )}
 
-      {/* Din hand som solfjäder längst ner (trumf längst till vänster). */}
-      <div className="border-t border-emerald-100/10 bg-emerald-950/25 px-2 pb-2.5 pt-3">
+      {/* Din hand som solfjäder längst ner (trumf längst till vänster). Säker
+          botten-marginal (hemindikatorn) nu när duken går edge-to-edge. */}
+      <div className="border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+        {/* När bara en vald färg visas: väg tillbaka till alla färger (Synrey). */}
+        {selectedSuit && (
+          <div className="flex justify-center pb-1.5">
+            <button
+              type="button"
+              onClick={deselectSuit}
+              className="rounded-full bg-emerald-950/60 px-3 py-1 text-xs font-semibold text-emerald-50 ring-1 ring-gold-400/30 transition-colors hover:bg-emerald-950/80"
+            >
+              ◀ Alla färger
+            </button>
+          </div>
+        )}
         <SouthFan
           hand={play.hands.S}
           contract={contract}
@@ -557,7 +593,7 @@ function PlayTable({
           öppna och STANNAR KVAR — precis som vid ett riktigt bord — tills
           spelaren själv går vidare med knappen. Ingen timer, inget klipp. */}
       {pendingClaim && (
-        <div className="overlay-in absolute left-1/2 top-1/3 z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-slate-900/85 px-4 py-3 shadow-xl ring-1 ring-emerald-100/10">
+        <div className="overlay-in absolute left-1/2 top-1/3 z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-emerald-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25">
           <span className="whitespace-nowrap text-xs font-semibold text-white">
             {pendingClaim.auto ? 'Auto Claim' : 'Claim godkänd'} — korten ligger uppe
           </span>

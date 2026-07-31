@@ -36,7 +36,7 @@ function BoxChip({
       type="button"
       disabled={!ok}
       onClick={onClick}
-      className={`relative flex h-10 items-center justify-center rounded-lg text-lg font-bold shadow-sm transition-all active:scale-95 ${bidChipTone(bid)} ${
+      className={`relative flex h-12 items-center justify-center rounded-lg text-lg font-bold shadow-sm transition-all active:scale-95 ${bidChipTone(bid)} ${
         selected ? 'ring-2 ring-white brightness-105 -translate-y-0.5' : ''
       } disabled:opacity-25 disabled:shadow-none ${ok ? 'cursor-pointer hover:brightness-105' : ''}`}
     >
@@ -139,7 +139,7 @@ export function BiddingBox({
           type="button"
           disabled={!selected}
           onClick={confirm}
-          className="flex h-10 items-center justify-center rounded-lg bg-sky-500 text-lg font-bold text-white shadow-sm transition-all hover:bg-sky-400 active:scale-95 disabled:opacity-30 disabled:shadow-none"
+          className="flex h-12 items-center justify-center rounded-lg bg-sky-500 text-lg font-bold text-white shadow-sm transition-all hover:bg-sky-400 active:scale-95 disabled:opacity-30 disabled:shadow-none"
         >
           OK
         </button>

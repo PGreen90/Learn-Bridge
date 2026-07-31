@@ -29,6 +29,10 @@ export function Layout() {
   const [theme, setTheme] = useState(currentTheme)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  // Spelbordet går "full-bleed": duken fyller hela skärmen edge-to-edge utan ram
+  // eller marginal (ägarbeslut 2026-07-31). Övriga sidor behåller den centrerade,
+  // paddade spalten.
+  const immersive = location.pathname === '/spela-kort'
 
   // Ljust/mörkt läge: månen tänder mörkret, solen släcker det.
   const themeButton = (
@@ -61,6 +65,9 @@ export function Layout() {
           innehållet annars under statusraden (klocka/batteri) – marginalen skjuter
           ner sidhuvudet och låter det emerald-gröna fylla ut bakom statusraden.
           Blir 0 i vanlig webbläsare, så inget ändras där. */}
+      {/* Spelbordet är helt immersivt (ägarbeslut 2026-07-31): ingen menyrad —
+          man tar sig ut via "Avsluta spel" i ⋮-menyn. Övriga sidor har headern. */}
+      {!immersive && (
       <header className="border-b border-gold-400/40 bg-brand-bar text-white shadow pt-[env(safe-area-inset-top)]">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Logotypen + ordmärket (tvåfärgat guldserif-skimmer, spader-prick på
@@ -117,13 +124,20 @@ export function Layout() {
           </nav>
         )}
       </header>
+      )}
       {/* Mobil: mindre luft + safe-area-marginal i botten så iPhones egna
           gränssnitt (verktygsfältet/hemindikatorn) aldrig täcker korten. */}
       {/* Säkra zoner: topp-insättningen ligger på sidhuvudet, botten här. Vänster/
           höger via max(1rem, inset) så innehållet aldrig hamnar under ett sidourtag
           eller rundat hörn i liggande läge — och aldrig mindre än den vanliga
           1rem-marginalen i stående (där sidoinsättningen är 0). */}
-      <main className="max-w-3xl mx-auto pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8">
+      <main
+        className={
+          immersive
+            ? 'w-full'
+            : 'max-w-3xl mx-auto pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8'
+        }
+      >
         {/* key per adress → innehållet tonar in vid varje sidbyte (page-in). */}
         <div key={location.pathname} className="page-in">
           {/* Sidorna laddas lat (route-baserad kod-uppdelning, konkurrensplanen

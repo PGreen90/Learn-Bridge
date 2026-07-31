@@ -27,11 +27,12 @@ async function tick() {
   })
 }
 
-/** Budlådans PASS-chip (h-10-rutan) — INTE auktionsrutnätets PASS-chips. */
+/** Budlådans PASS-chip (h-12-rutan) — INTE auktionsrutnätets PASS-chips.
+ *  (Budknapparna förstorades 40 → 48 px = h-12 i faceliften 2026-07-31.) */
 function boxPassChip(): HTMLButtonElement {
   const chip = screen
     .getAllByRole('button', { name: 'PASS' })
-    .find((b) => b.className.includes('h-10'))
+    .find((b) => b.className.includes('h-12'))
   if (!chip) throw new Error('Budlådans PASS-chip saknas')
   return chip as HTMLButtonElement
 }

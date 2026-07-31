@@ -132,9 +132,11 @@ konkurrensrond.
 Parkerad 2026-07-20, **väckt av ägaren 2026-07-29** som del av konkurrensspåret
 (`docs/konkurrensplan.md` Fas 1 — första intrycket görs bara en gång, före
 lanseringen av "Dagens givar"). **PÅBÖRJAD 2026-07-31, en yta i taget** (ägarbeslut):
-**startsidan (yta 1) KLAR & deployad** — emoji-ikonerna på lägeskorten byttes mot
-egna guld-linjeikoner, "Spela kort" blev flaggskepp; full logg i
-`docs/konkurrensplan.md` Fas 1. Materialet som väntar (nästa ytor): Claudes
+**startsidan (yta 1) + spelbordet (yta 2) KLARA** — yta 1: samlad hero, tvåfärgat
+skimmer-ordmärke, frameless guldspader, roterande guldram; yta 2: Synrey-modellen
+(full-bleed duk, träkarl upptill, tomma sidor, stora kort, tryck-färg-visar-bara-den,
+"Avsluta spel"). Full logg för båda i `docs/konkurrensplan.md` Fas 1. Materialet som
+väntar (nästa ytor, t.ex. sidhuvudet på övriga sidor): Claudes
 "Klubbrummet"-mockup (privat artifact
 `claude.ai/code/artifact/5b9f5e2a-fe71-4dbc-aaeb-188a5a2376b9`), ägarens Claude
 Design-utforskning med de färdiga promptarna, och ombyggnaden av appen efter

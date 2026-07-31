@@ -18,7 +18,7 @@ export const HAND_SUITS: Suit[] = ['spades', 'hearts', 'clubs', 'diamonds']
 // vilande hand (`SouthFan`) så handen ser IDENTISK ut i alla vyer — ingen
 // "hopp"-känsla när man går från budgivning till spel (ägarbeslut 2026-07-30:
 // samma look överallt = proffskänsla). Ändra på ETT ställe, ändras överallt.
-export const REST_OVERLAP = '-ml-8 sm:-ml-6'
+export const REST_OVERLAP = '-ml-10 sm:-ml-6'
 
 /**
  * Färgordningen när trumfen är känd (ägarbeslut 2026-07-02, som Synrey):
