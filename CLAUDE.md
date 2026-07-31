@@ -10,7 +10,16 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LEDIGT (2026-07-30): ägaren väljer nästa ur NÄST/SENARE
+### 🔵 NU — LEDIGT (2026-07-31): ägaren väljer nästa ur NÄST/SENARE
+**ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR (byggd + grön, EJ deployad ännu 2026-07-31).**
+Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
+från sidan som SJÄLV har extra): efter `1m–1X–3m(invit-hopp)–3NT` trevar öppnaren
+med **19+ hp**, svararen lyfter 6NT med maximum/fittande minorhonnör. Smal med flit
+(ägarbeslut 2026-07-31 "bara äkta extra"). Mätning #21: par-avvikelse 271,24 →
+270,74, noll regressioner, 1 giv (20261020) → exakt par 6NT. Facit
+`auction-3nt-stopp.test.ts`. Detalj: `docs/budsystem.md §6.9/§9` +
+`docs/systemrevisorn.md` #21. **Kvar i etapp 7: hål C + hål D.**
+
 **LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR & LIVE 2026-07-30.** Skulden "byggd men
 ej inkopplad" (§7.5) stängd. **Steg noll:** motståndaren klivar in **naturligt** över
 1NT med stark enfärgshand (6+, 11–15) — annars DONT (symmetriskt, så vårt eget
@@ -23,20 +32,16 @@ inkliv + hela konversationen, DONT-posterna växte ej. `lebensohl.ts` bortlyft u
 cue-Stayman, Lebensohl mot konstgjorda inkliv. Detalj: `docs/budsystem.md §7.5/§9`
 + `docs/senare.md` + `docs/bevaka.md`.
 
-**#34 FÖRSVARET TREDJE HAND HÖGT (sang): KLAR & LIVE 2026-07-30** (`thirdHandHonor`
-i `play-bot.ts`, netto neutralt, given DDS-lagad). Detalj: `docs/budsystem.md §8.6`.
+**#34 FÖRSVARET TREDJE HAND HÖGT (sang): KLAR & LIVE 2026-07-30** (`thirdHandHonor`,
+netto neutralt). Detalj: `docs/budsystem.md §8.6`.
 
 **FAS 0 c TEKNISK HÄRDNING (konkurrensplanen): KLAR & LIVE 2026-07-30.** 404-sida
-(`NotFound.tsx` + catch-all i `App.tsx`, facit `not-found.test.tsx`) så döda
-adresser landar mjukt, + route-baserad kod-uppdelning (`React.lazy` per sida, Home
-direkt-laddad, Suspense i `Layout.tsx`): entry-JS ~889 → 247 kB, tunga sidor lazy
-(`npm run build`). Detalj: `docs/konkurrensplan.md` Fas 0 c.
++ route-baserad kod-uppdelning (`React.lazy`, entry-JS ~889 → 247 kB). Detalj:
+`docs/konkurrensplan.md` Fas 0 c.
 
-**KONSEKVENT KORTRAD (Fas 0 b): KLAR & LIVE 2026-07-30** (merge `347d2c3`) — handen
-ritas likadant i alla vyer (`HandFan` = spelbordets färggrupperade kortrad, delat
-`REST_OVERLAP`). Felrapport **#36 STÄNGD** "löst på annat sätt". Säkra zoner +
-mobilsvep KLARA 2026-07-30 (alla sidor mobil-rena; breda budsystem-tabeller fick
-en scroll-toningshint) → **HELA FAS 0 KLAR (a+b+c).** Detalj: `docs/historik.md`.
+**KONSEKVENT KORTRAD (Fas 0 b): KLAR & LIVE 2026-07-30** — handen ritas likadant i
+alla vyer (`HandFan`). Felrapport **#36 STÄNGD**. Säkra zoner + mobilsvep KLARA →
+**HELA FAS 0 KLAR (a+b+c).** Detalj: `docs/historik.md`.
 
 **KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
 rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
@@ -64,11 +69,10 @@ förklarar / läser UDCA-attityd/räkning + Lavinthal (gardregeln). Mätrigg
 `play-quality.probe` (`PLAYQ=1`). Mergepunkt `b66c6ee`. Detalj:
 `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer nästa NU. Alternativ:
-**Lebensohl nästa lager** (takeout-X / slow-shows / cue-Stayman, `docs/senare.md`),
-**faceliften (Fas 1)** (mockup-runda gjordes 2026-07-30, ägaren gillade inte
-riktningen — pausad, näst i tur nu när Fas 0 är klar), eller 🟢 NÄST punkt 1 (Etapp 7,
-hål 2). ⚪ SENARE (spelkvalitet): tredje hand högt i **trumf** + signalspåret.
+**➡️ NÄSTA GÅNG:** deploya hål 2 (fråga ägaren först), sedan väljer ägaren nästa NU.
+Alternativ: 🟢 NÄST punkt 1 (Etapp 7 **hål C** — 4M, ägarbeslut), **Lebensohl nästa
+lager** (`docs/senare.md`), **faceliften (Fas 1)** (pausad). ⚪ SENARE: tredje hand
+högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet
 (tempo/animationer/ljud), budstöd På/Av-toggle, felrapporter #40/#41/#42, samt
@@ -101,22 +105,20 @@ i rond 2 utan egen färg (frö 20260952, M19). Detalj: `docs/bevaka.md`.
   rond (M19, frö 20260952) — detaljer i `docs/bevaka.md`.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **ETAPP 7: MISSAD LILLSLAM (pausad 2026-07-28 för känslo-spåret, läget
-   bevarat):** topplistans största post, 83 givar / 56 170 p, FÖRSKANNAD (hela
+1. **ETAPP 7: MISSAD LILLSLAM (topplistans största post, FÖRSKANNAD):** hela
    mönsteranalysen + ordningsförslaget: `docs/systemrevisorn.md` "ETAPP 7
-   FÖRSKANNAD"). Hål 1 (minimum-märkningen) KLART — Mätning #20: par-avvikelse
-   276,49 → 271,38, rätt kontrakt 18,2 → 18,7 %, −5 110 p, noll regressioner
-   (facit: `auction-lillslam-aterbudsstyrka.test.ts`). **Återupptas med: ägaren
-   väljer hål 2** — närmast till hands hål B "3NT-stoppen" (~15 givar, vuxen
-   sedan hål 1 lyfte fem givar dit; systerfallet till felrapport #42). Kända
-   fynd: 75 av 83 pass saknar regel (nakna `{ bid: 'P' }`); 57 givar når
-   systemets egen slamport (taksiffra, ej prognos); mekanisk bugg i rebids.ts
-   ("rebjuden färg" graderar inte styrka, 7 givar / 6 810 p, kräver inget
-   ägarbeslut). Verktyg (gated): `$env:DUMP_CAT='missad-lillslam'` resp.
-   `$env:FORSKAN='1'` + probe-testerna; mätningen: `$env:REVISOR='1'; npx
-   vitest run src/lib/engine/revisor.probe.test.ts` (samma frö 20260721).
-   Arbetssättet (facit-först, mönster inte enskilda givar) + hela
-   mätspårsloggen: `docs/historik.md` + `docs/systemrevisorn.md`.
+   FÖRSKANNAD". **Hål 1 (minimum-märkningen) KLART** (Mätning #20). **Hål 2
+   ("3NT-stoppen") KLART 2026-07-31** (Mätning #21: öppnarens 4NT-slamtrevare,
+   par-avvikelse 271,24 → 270,74, noll regressioner, `auction-3nt-stopp.test.ts`;
+   förskanningen visade att posten är 24 givar men mest DD-smicker — bara 19+-delen
+   är ärligt bjudbar). **Återupptas med: ägaren väljer hål C** (utgångsstoppen 4M,
+   14 givar, KRÄVER ägarbeslut — gränsen ärlig slamjakt/blåsning) eller **hål D**
+   (konkurrensfallen, 19 givar, svårast). Verktyg (gated):
+   `$env:DUMP_CAT='missad-lillslam'` resp. `$env:FORSKAN='1'` + probe-testerna;
+   mätningen: `$env:REVISOR='1'; npx vitest run
+   src/lib/engine/revisor.probe.test.ts` (samma frö 20260721). Arbetssättet
+   (facit-först, mönster inte enskilda givar): `docs/historik.md` +
+   `docs/systemrevisorn.md`.
 2. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är
    grova → ärliga slam-misser (`docs/budsystem-revision.md` B13).
 3. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
