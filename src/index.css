@@ -87,6 +87,95 @@
   color: transparent;
 }
 
+/* Heron (hybrid, ägarbeslut 2026-07-31 "grönt smälter mot sidan"): mjukar upp
+   filtets kant så det gröna tonar ut mot kanterna i stället för att sluta i en
+   skarp rektangel. Radial mask = ogenomskinlig i mitten, transparent vid kanten.
+   Innehållet ligger långt innanför (stor padding) så bara tom grön yta tonas. */
+.felt-melt {
+  -webkit-mask-image: radial-gradient(140% 130% at 50% 42%, #000 84%, transparent 100%);
+  mask-image: radial-gradient(140% 130% at 50% 42%, #000 84%, transparent 100%);
+}
+
+/* Animerat guld-skimmer på text — "bid" i ordmärket (ägarbeslut 2026-07-31,
+   base44-inspirerat). En ljus guldrand glider långsamt genom bokstäverna OVANPÅ
+   basguldet (samma gradient som .text-gold-gradient), så guldet ser ut att flyta
+   ("levande guld"). Två bakgrundslager clippade till texten: (1) rörlig
+   högdager-rand, (2) statiskt basguld. Bara lager 1:s position animeras; randen
+   ligger utanför bild i båda ändlägena → loop-återställningen syns inte. Med
+   "minskad rörelse" stannar den vid startläget = rent basguld, som förr. */
+.text-gold-shimmer {
+  background:
+    linear-gradient(115deg, transparent 36%, rgba(255, 247, 224, 0.9) 50%, transparent 64%),
+    linear-gradient(180deg, #e8cf85 0%, #d9b556 55%, #c39a33 100%);
+  background-size: 250% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: 210% 0, 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gold-shimmer 6s linear infinite;
+}
+@keyframes gold-shimmer {
+  from { background-position: 210% 0, 0 0; }
+  to { background-position: -90% 0, 0 0; }
+}
+
+/* Roterande guldram (base44-inspirerat, ägarbeslut 2026-07-31: "guldet rör sig
+   runt kanten", samma "levande guld"-familj som skimret). En guldbåge löper runt
+   kortets kant. Tekniken: ett ::before med en conic-gradient som roteras via den
+   registrerade vinkel-variabeln --rbz-angle, maskad till bara kant-ringen
+   (padding-box exkluderad). @property krävs för att vinkeln ska KUNNA animeras
+   mjukt; äldre webbläsare visar en stilla guldbåge (fin fallback). */
+@property --rbz-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.gold-frame::before,
+.gold-frame-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--rbz-angle),
+    transparent 0deg,
+    transparent 170deg,
+    #c39a33 220deg,
+    #f7ecc8 285deg,
+    #ffffff 300deg,
+    #f3e4b3 315deg,
+    #c39a33 345deg,
+    transparent 360deg
+  );
+  /* Mjukt guldsken som följer bågen så rörelsen syns tydligt. */
+  filter: drop-shadow(0 0 4px rgba(233, 207, 133, 0.55));
+  /* Visa bara kant-ringen: fyll content-box och hela boxen, exkludera mitten. */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: rbz-rotate 6s linear infinite;
+  pointer-events: none;
+}
+@keyframes rbz-rotate {
+  to { --rbz-angle: 360deg; }
+}
+/* Flaggskeppet (.gold-frame) visar ramen jämt; övriga kort (.gold-frame-hover)
+   tänder den bara vid hover. */
+.gold-frame-hover::before {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.gold-frame-hover:hover::before {
+  opacity: 1;
+}
+
 /* Rubriker sätts i display-typsnittet; lite tightare spärrning ser dyrare ut. */
 @layer base {
   html {
@@ -250,7 +339,9 @@
   .trick-sweep-n, .trick-sweep-s, .trick-sweep-w, .trick-sweep-e,
   .winner-glow,
   .felt-fade-out, .result-made-glow::before, .result-made-glow::after,
-  .deal-in, .page-in, .overlay-in, .dialog-in {
+  .deal-in, .page-in, .overlay-in, .dialog-in,
+  .text-gold-shimmer,
+  .gold-frame::before, .gold-frame-hover::before {
     animation: none;
   }
 }

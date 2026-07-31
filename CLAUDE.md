@@ -11,10 +11,11 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — FAS 1 FACELIFTEN (2026-07-31): en yta i taget
-**STARTSIDAN (yta 1): KLAR & deployad 2026-07-31.** Lägeskortens emoji → egna
-guld-linjeikoner i logotypens språk (`Home.tsx`); "Spela kort" = flaggskepp
-(guldton + "Börja här"), guld-hårlinje vid hover. Ägarbeslut: en yta i taget,
-**nästa väljs av ägaren**. Detalj: `docs/konkurrensplan.md` Fas 1.
+**STARTSIDAN (yta 1): KLAR & deployad 2026-07-31 (base44-inspirerad omgörning).**
+Samlad hero: allt i EN grön yta (varumärke + fyra likvärdiga menyknappar), inga
+dubbletter. Tvåfärgat "re**bid**z" med guld-skimmer, frameless guldspader,
+roterande guldram på knapparna (hover), diskret guldflik i sidhuvudet. Ägarbeslut:
+en yta i taget, **nästa väljs av ägaren**. Detalj: `docs/konkurrensplan.md` Fas 1.
 
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR (byggd + grön, EJ deployad ännu 2026-07-31).**
 Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
@@ -57,12 +58,8 @@ topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
 på uttryckligt ägarbeslut.
 
 **FELRAPPORT #32 — SPELFÖRAREN ETABLERAR LÅNG FÄRG i sang: KLAR & LIVE 2026-07-29**
-(konkurrensplanens Fas 0 a, mergepunkt `b5c2913`). Boten knäcker motståndarnas
-spärr i sin långa färg FÖRE den cashar sidoessen (`establishLongSuit` i
-`play-bot.ts`, bara sang — i trumf etableras färg via ruff). Facit
-`play-bot-establish.test.ts` (DDS-låst 3→7); netto +8 stick/40 givar
-(`play-establish.probe`, `ESTABLISH=1`). Detalj: `docs/historik.md` +
-`docs/bot-hjarna.md`.
+(`establishLongSuit`, bara sang; netto +8 stick/40 givar). Detalj: `docs/historik.md`
++ `docs/bot-hjarna.md`.
 
 **RONDGENOMGÅNGEN (after action report) KLAR & LIVE 2026-07-29** — efter en giv
 öppnar "Rondgenomgång" tre kapitel (bud / spel / resultat med DD-dom "med perfekt

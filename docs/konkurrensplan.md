@@ -121,14 +121,27 @@ Låsta ramar gäller: emerald, svarta spader, guldserifen, Synrey-inspirerat utt
 (färgerna läses i `src/index.css`). Ligger FÖRE lanseringen av Dagens givar —
 första intrycket görs bara en gång.
 
-- **Yta 1 — startsidan: KLAR 2026-07-31.** De fyra lägeskortens emoji-ikoner
-  (🃏🎯👁️📖) byttes mot **egna guld-linjeikoner** ritade i logotypens språk
-  (inline-SVG i `Home.tsx`: spelkort med brandens guldspader, måltavla, öga,
-  uppslagen bok) — emoji bröt mot guldserifen intill. "Spela kort" lyftes till
-  flaggskepp (varm guldton + guldring + "Börja här"-markering) och alla kort fick
-  en guld-hårlinje vid hover (samma guldram-motiv som runt ordmärket). Heron rördes
-  ej. Verifierat i ljust + mörkt läge, inga konsolfel. Nästa yta väljs av ägaren
-  (t.ex. spelbordet eller sidhuvudet).
+- **Yta 1 — startsidan: KLAR 2026-07-31 (två pass).** Först: de fyra lägeskortens
+  emoji (🃏🎯👁️📖) → **egna guld-linjeikoner** i logotypens språk (inline-SVG i
+  `Home.tsx`: spelkort med brandens guldspader, måltavla, öga, bok). Sedan en
+  **base44-inspirerad omgörning** (ägarens egna referenser, `BrandMark.tsx` +
+  `Home.tsx` + `Layout.tsx` + `index.css`):
+    - **Tvåfärgat ordmärke** "re**bid**z" — "re"/"z" i currentColor, "bid" i guld
+      med animerat **skimmer** (bridge-ordet *bid* lyft ur namnet). Spader-pricken
+      på i:et ersatt av vanlig guldprick (för många spader annars).
+    - **Frameless guldspader** — den inramade emerald-rutan borttagen (hero +
+      sidhuvud); `BrandMark bare`-läge. Faviconen behåller den inramade.
+    - **Samlad hero:** allt i EN grön yta — varumärkesblocket överst + de fyra
+      **likvärdiga menyknapparna** (2×2) inne i det gröna. De gamla dubblett-CTA:na
+      ("Spela kort →"/"Öva budgivning") och kortsolfjädern borttagna (spretigt).
+      Avboxat: borttonande kant (`felt-melt`) + luft + svag spader-vattenstämpel.
+    - **Roterande guldram** på menyknapparna (`gold-frame-hover`, conic-gradient +
+      `@property --rbz-angle`) som tänds vid hover — "guldet rör sig runt".
+    - **Sidhuvudet:** diskret guldmarkering på aktiv flik (mjuk guldton + guldkant)
+      i stället för den vita pillen; guldton vid hover; frameless brandmärke.
+  "Levande guld" (skimmer + roterande ram) respekterar `prefers-reduced-motion`.
+  Verifierat ljust + mörkt, inga konsolfel. Nästa yta väljs av ägaren (t.ex.
+  spelbordet).
 
 Detalj/väntande material: `docs/senare.md` (faceliftposten).
 
