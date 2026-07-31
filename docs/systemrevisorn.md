@@ -746,12 +746,53 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
 1. ✅ **KLART 2026-07-28 (Mätning #20): Fynd 4 — minimum-märkningen.** Netto
    −5 110 p, noll regressioner. **OBS:** de fem krympta givarna flyttade in i
    hål B nedan — de når nu 3NT men saknar väg vidare till slam.
-2. **Hål B — 3NT-stoppen** (10 givar + 5 nyinflyttade): systerfallet till felrapport #42, fast
-   från den sida som *bjuder* 3NT i stället för den som höjer.
+2. ✅ **KLART 2026-07-31 (Mätning #21): Hål B — 3NT-stoppen.** Systerfallet till
+   felrapport #42, från öppnaren som *bjuder* 3NT-utgången i stället för den som
+   höjer. Förskanningen visade att posten "landade i 3NT" är **24 givar / 15 610 p**
+   (ej gamla "10+5") men heterogen över ~5 familjer och mest DD-smicker; den enda
+   ärligt bjudbara delen (öppnarens minor-invit-hopp → 3NT med 19+ hp) fick en smal
+   kvantitativ 4NT-port (ägarbeslut "bara äkta extra"). Netto −500 p, noll
+   regressioner, 1 giv (20261020) → exakt par 6NT. §6.9.
 3. **Hål C — utgångsstoppen 4M** (14 givar): kräver ägarbeslut, här ligger
    gränsen mellan ärlig slamjakt och blåsning.
 4. **Hål D — konkurrensfallen** (19 givar): störst post men svårast; slam efter
    motståndarnas inkliv är där mänskligt omdöme väger tyngst.
+
+## Mätning #21 — 2026-07-31, ETAPP 7 hål 2 (3NT-stoppen)
+Samma frö 20260721, 1 000 givar. Fix: öppnarens kvantitativa slamtrevare (4NT)
+efter svararens 3NT, `openerTriesSlamAfter3NT` + `answerOpenerSlamTry`
+(auction-live.ts), se budsystem.md §6.9 + ändringsloggen. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        baslinje (pre)   M21 (hål 2)
+Rätt kontrakt (exakt par)  18,7 %          18,8 %
+Genomsnittlig par-avvikelse 271,24         270,74
+Missad lillslam         82               81
+Övriga poster: OFÖRÄNDRADE (fel färg 121, missad utgång 146, missad storslam
+33, billig offring 113, bättre än facit 123, såld giv 54, för högt 37, fel
+strain 101, utpassad 3).
+```
+
+**Läsning:** kliniskt ren — **noll regressioner**, exakt EN giv (**frö 20261020**)
+flyttade från missad lillslam till rätt kontrakt (3NT → 6NT = exakt par, −500 p).
+Den smala 19+-porten (ägarbeslut: "bara äkta extra")
+fyrade på precis den given öppnaren SJÄLV vet är stark nog och passade alla 16–18-
+hopp — spegelbilden av att #42 själv nästan aldrig faller ut men stänger ett
+verkligt hål (det nakna passet, Fynd 1). Facit-test FÖRE fix:
+`auction-3nt-stopp.test.ts` (huvudfall + tröskeln 19, svararens avböjande minimum,
+renonsvakten). Hela sviten grön.
+
+**Ärlig avgränsning (förskanningen visade):** posten "landade i 3NT" är egentligen
+**24 givar / 15 610 p**, inte docs gamla "10+5" — men den är heterogen över ~5
+auktionsfamiljer, och de flesta är 26–28 hp-slammar som bara går på DD (löpande
+färg / perfekt sits). Från öppnarens/kaptenens stol går de inte att skilja från
+händer där slam INTE finns, så att jaga dem blint blåser tunna slammar. Den enda
+ärligt bjudbara delen av familj 1 (öppnarens minor-invit-hopp → 3NT) var handen
+där öppnaren har 19+ hp. Resten av de 24 lämnas medvetet (hål C/D + DD-brus).
 
 ## Mätning #20 — 2026-07-28 (kväll), ETAPP 7 hål 1 (minimum-märkningen)
 Samma frö 20260721, 1 000 givar. Fix: `openerRebidAfter1LevelResponse` steg 5

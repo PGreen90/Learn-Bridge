@@ -27,7 +27,7 @@ import { respondTo1NT } from './responses-nt'
 import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
 import { responderPlaceAfterNMF } from './responder-rebids'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
-import { hcp, isBalanced, lengths } from './hand'
+import { hcp, isBalanced, lengths, suitHcp } from './hand'
 import { advanceTwoSuiter, hasStopper, openingSuit, overcall } from './overcalls'
 import { side, NEXT_SEAT } from './play'
 import { respondToKingAsk, respondToRKC } from './slam'
@@ -1211,6 +1211,92 @@ function raisePartnerThreeNTToSlam(deal: Deal, history: ResolvedCall[], seat: Se
       `${p} hp mot partnerns visade ${SUIT_OPENING_SHOWN_MIN}+ (öppningen) = minst ${p + SUIT_OPENING_SHOWN_MIN} ihop ` +
       `→ 6NT. Slamzonen nås redan mot partnerns minimum, så jag placerar lillslammen i stället för att passa 3NT.`,
   }
+}
+
+// ---- Etapp 7 hål 2: öppnarens slamtrevare efter svararens 3NT ("3NT-stoppen")
+//
+// Systerfallet till felrapport #42 (`raisePartnerThreeNTToSlam` ovan), fast från
+// den sida som SJÄLV har extra: öppnaren invit-hoppade i sin minor (1m–1X–3m), och
+// svararen accepterade utgången med 3NT. Öppnaren saknade en väg vidare och föll
+// till det nakna passet (Fynd 1) — lillslammen försvann fast öppnaren hade en
+// stark hand med löpande färg. Med genuint slamvärde hen SJÄLV vet om gör öppnaren
+// nu EN kvantitativ slamtrevare (4NT); svararen accepterar 6NT med ett maximum av
+// sin acceptans (topp av intervallet, eller en fittande topphonnör i minoren).
+//
+// Smal med flit (ägarbeslut 2026-07-31, "bara äkta extra"): från öppnarens stol är
+// en 16–18-hand med löpande minor OSKILJBAR från en tunn 26-hp-slam som bara går
+// på DD, så bara 19+ får treva. Ingen kontrollkoll (ägarbeslut), taket är 6NT.
+
+const MINOR_SUIT: Record<string, Suit> = { C: 'clubs', D: 'diamonds' }
+const ALL_SUITS: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+
+/** Öppnarens invit-hopp 1m–1X–3m följt av svararens 3NT (senaste budet, ostört)? */
+function openerJumpMinorThenResponder3NT(history: ResolvedCall[], seat: Seat): { minor: string } | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '3NT') return null
+  const open = openingBid(history)
+  if (!open || open.seat !== seat) return null // seat = öppnaren själv
+  if (open.level !== 1 || (open.strain !== 'C' && open.strain !== 'D')) return null
+  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null // ostört
+  // Öppnarens ANDRA kontraktsbud ska vara hoppet 3m i öppningsfärgen.
+  const ourBids = history.filter((c) => c.seat === seat).map((c) => parseContractBid(c.bid)).filter((b): b is { level: number; strain: string } => b !== null)
+  if (ourBids.length < 2) return null
+  const rebid = ourBids[1]
+  if (rebid.level !== 3 || rebid.strain !== open.strain) return null
+  return { minor: open.strain }
+}
+
+/** Öppnaren (19+ hp, 6+ i minoren) trevar 4NT efter svararens 3NT. */
+function openerTriesSlamAfter3NT(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const m = openerJumpMinorThenResponder3NT(history, seat)
+  if (!m) return null
+  const hand = deal.hands[seat]
+  const p = hcp(hand)
+  if (p < 19) return null // bara äkta extra öppnaren SJÄLV vet om
+  const len = lengths(hand)
+  if (len[MINOR_SUIT[m.minor]] < 6) return null
+  if (ALL_SUITS.some((s) => len[s] === 0)) return null // ingen renons – NT är målet
+  if (!legalCalls(history, seat).includes('4NT')) return null
+  return {
+    seat,
+    bid: '4NT',
+    rule: 'slamtrevare efter 3NT',
+    explanation:
+      `${p} hp med löpande ${SWE_NAME[m.minor]} – för starkt för att bara passa partnerns 3NT ` +
+      `→ 4NT (kvantitativ slamtrevare; partnern lyfter till 6NT med ett maximum).`,
+  }
+}
+
+/** Öppnarens kvantitativa 4NT efter 1m–1X–3m–3NT (senaste budet, ostört)? */
+function openerSlamTryToAnswer(history: ResolvedCall[], seat: Seat): { minor: string } | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '4NT') return null
+  const open = openingBid(history)
+  if (!open || open.seat !== PARTNER[seat]) return null // partnern = öppnaren
+  if (open.level !== 1 || (open.strain !== 'C' && open.strain !== 'D')) return null
+  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null // ostört
+  // Sekvensen ska vara 1m–1X–3m–3NT–4NT: partnern hoppade 3m, VI bjöd 3NT.
+  const partnerBids = history.filter((c) => c.seat === PARTNER[seat]).map((c) => parseContractBid(c.bid)).filter((b): b is { level: number; strain: string } => b !== null)
+  if (partnerBids.length < 3) return null
+  if (partnerBids[1].level !== 3 || partnerBids[1].strain !== open.strain) return null
+  const ourBids = history.filter((c) => c.seat === seat).map((c) => parseContractBid(c.bid)).filter((b): b is { level: number; strain: string } => b !== null)
+  if (!ourBids.some((b) => b.level === 3 && b.strain === 'NT')) return null
+  return { minor: open.strain }
+}
+
+/** Svararen accepterar öppnarens slamtrevare med ett maximum, annars pass. */
+function answerOpenerSlamTry(hand: Hand, minor: string): { call: Bid; rule: string; explanation: string } {
+  const p = hcp(hand)
+  const fitHonor = suitHcp(hand, MINOR_SUIT[minor]) >= 3 // K/A i partnerns 6-korts minor
+  const accept = p >= 12 || (p >= 9 && fitHonor)
+  return accept
+    ? {
+        call: '6NT',
+        rule: 'accepterar slamtrevare',
+        explanation:
+          `${p} hp${fitHonor ? ` med topphonnör i ${SWE_NAME[minor]}` : ''} – maximum av min acceptans → 6NT.`,
+      }
+    : { call: 'P', rule: 'avböjer slamtrevare', explanation: `${p} hp – minimum, avböjer trevaren → 4NT står.` }
 }
 
 // ---- Sangsystemet off-book (§4.3–4.4, felrapport #41) -----------------------
@@ -3618,6 +3704,13 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       () => advanceStrongDoubleRebid(deal, history, seat),
       () => strongDoublerSecondRebid(deal, history, seat),
       () => answerStrongDoubleGameForce(deal, history, seat),
+      // Etapp 7 hål 2 ("3NT-stoppen"): öppnaren trevar 4NT efter svararens 3NT,
+      // och svararen accepterar/avböjer. Måste ligga FÖRE rkcToAnswer så den
+      // kvantitativa 4NT:n (ingen trumf agreed) inte läses som essfråga, och
+      // FÖRE off-book-svaret som annars passar bort trevaren.
+      () => openerTriesSlamAfter3NT(deal, history, seat),
+      () => answered(openerSlamTryToAnswer(history, seat),
+        (s) => answerOpenerSlamTry(hand, s.minor), history, seat),
       // Partnerns 4NT med trumf = ESSFRÅGAN (1430 RKC, §6.1); 5NT = kungfrågan
       // (Sjöberg, §6.3). Får aldrig passas (felrapport #9).
       () => answered(rkcToAnswer(history, seat),

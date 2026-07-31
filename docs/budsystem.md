@@ -1167,6 +1167,29 @@ mittemot öppningshanden. Slamportarna satt bara i den kanoniska linjens namngiv
 mönster (Jacoby 2NT, inverterad minor, 1NT-återbudet, MSS) — en vanlig färgauktion
 som slutade i 3NT hade ingen port alls. Given gav 12 stick.*
 
+### 6.9 Öppnarens slamtrevare efter svararens 3NT (systerfallet)
+§6.8 gäller kaptenen som **hör** partnerns naturliga 3NT. Spegelbilden är öppnaren
+som **själv** har extra: hen har invit-hoppat i sin minor och svararen har
+accepterat utgången med 3NT.
+
+Auktionen **1m–1X–3m(invit-hopp)–3NT**. Öppnarens hopp visade 16+ med 6+ i
+minoren, och svararens 3NT accepterade utgången. Har öppnaren **genuint slamvärde
+hen själv vet om — 19+ hp med den löpande 6-korts minoren, ingen renons** — gör
+hen **en kvantitativ slamtrevare: 4NT**. Svararen lyfter till **6NT med ett
+maximum** av sin acceptans (topp av intervallet, eller en fittande topphonnör K/A
+i öppnarens minor), annars **passar** hen och 4NT står.
+
+Smal med flit (ägarbeslut 2026-07-31, "bara äkta extra"): från öppnarens stol är
+en 16–18-hand med löpande minor **oskiljbar** från en tunn 26-hp-slam som bara går
+på double-dummy, så bara 19+ trevar — annars pass (hellre systemriktig miss än
+blåsning). Ingen kontrollkoll (ägarbeslut) och storslam kräver visshet → taket är
+6NT.
+
+*Bakgrund (etapp 7 hål 2, "3NT-stoppen"): frö 20261020 ur mätningen — Nord
+♠K ♥AK3 ♦AT5 ♣AQT843 (20 hp) öppnade 1♣, hoppade 3♣, och passade svararens 3NT
+fast ♣K92 mittemot fick 6NT att ge 12 stick. Öppnaren saknade helt en väg vidare
+(det nakna passet, Fynd 1).*
+
 ## 7. Försvarsbud
 > Budgivning när motståndarna öppnat (inkliv, dubblingar) och i konkurrens efter
 > vår egen öppning. Markeringar och utspel: §8.
@@ -1627,6 +1650,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-07-31 (etapp 7 hål 2)** – **Öppnarens slamtrevare efter svararens 3NT
+  (kod, §6.9, mätspåret, ägarbeslut).** Systerfallet till felrapport #42, från den
+  sida som SJÄLV har extra: efter `1m–1X–3m(invit-hopp)–3NT` saknade öppnaren en
+  väg vidare och föll till det nakna passet (Fynd 1) — lillslammen försvann fast
+  öppnaren hade en stark hand med löpande minor. Nu gör öppnaren med **19+ hp** en
+  kvantitativ slamtrevare **4NT** (`openerTriesSlamAfter3NT`), och svararen lyfter
+  till 6NT med ett maximum / fittande topphonnör i minoren, annars pass
+  (`answerOpenerSlamTry`). Smal med flit (ägarbeslut 2026-07-31, "bara äkta extra"):
+  en 16–18-hand går från öppnarens stol inte att skilja från en tunn 26-hp-slam
+  som bara går på DD, så bara 19+ trevar. Ingen kontrollkoll, taket är 6NT.
+  Förskanningen: posten "landade i 3NT" är 24 givar / 15 610 p men heterogen över
+  ~5 familjer och mest DD-smicker — bara den 19+-delen är ärligt bjudbar. Mätning
+  #21 (frö 20260721): par-avvikelse **271,24 → 270,74**, rätt kontrakt
+  **18,7 → 18,8 %**, missad lillslam 82 → 81, **alla andra poster oförändrade, noll
+  regressioner** (1 giv, frö 20261020, → exakt par 6NT). Facit-test FÖRE fix:
+  `auction-3nt-stopp.test.ts` (huvudfall + tröskeln 19, svararens minimum-avböjande,
+  renonsvakten). Hela sviten grön.
 - **2026-07-30** – **LEBENSOHL EFTER VÅRT 1NT inkopplad (§7.5, Lager 1).** Den
   gamla skulden ("byggd men ej inkopplad", 0 träffar i svepet) är stängd: modulen
   `lebensohl.ts` skrevs om för det klassiska efter-1NT-läget och kopplades in i
