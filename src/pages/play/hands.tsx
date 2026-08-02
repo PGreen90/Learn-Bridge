@@ -4,7 +4,7 @@
 
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Contract, PlayState } from '../../lib/engine/play'
-import { bySuit, handSuitsTrumpFirst } from '../../lib/cardLayout'
+import { bySuit, FLAT_OVERLAP, handSuitsTrumpFirst } from '../../lib/cardLayout'
 import { PlayingCard } from '../../components/PlayingCard'
 import { turnInfo } from './common'
 import type { RegisterCardEl } from './useCardFlight'
@@ -198,15 +198,11 @@ export function SouthFan({
             {cards.map((c, i) => {
               const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
               const idx = dealt++
-              // Fasta xl-kort (64×96, samma på mobil och desktop). Vilande:
-              // SAMMA överlapp över HELA raden — även över färggränsen
-              // (ägarbeslut 2026-08-02: inget glapp mellan färgerna;
-              // fyrfärgsleken skiljer dem åt). Remsan är exakt 23,75 px
-              // (kort 64 − överlapp 40,25) så 13 kort spänner 64 + 12×23,75 =
-              // 349 px — 5 px marginal per sida i den ~359 px breda ytan på
-              // mobil (ägarbeslut 2026-08-02: så breda kort som möjligt).
-              // Vald färg (spread): visas ensam → luftig utfällning.
-              const ml = spread ? (i === 0 ? '' : '-ml-2') : idx === 0 ? '' : '-ml-[40.25px]'
+              // Fasta xl-kort (64×96). Vilande: det delade FLAT_OVERLAP —
+              // samma överlapp över hela raden, inga färgglapp (måtten och
+              // ägarbesluten står i cardLayout.ts). Vald färg (spread): visas
+              // ensam → luftig utfällning.
+              const ml = spread ? (i === 0 ? '' : '-ml-2') : idx === 0 ? '' : FLAT_OVERLAP
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}

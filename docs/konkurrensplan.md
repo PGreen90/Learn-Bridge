@@ -188,6 +188,23 @@ första intrycket görs bara en gång.
       etikett (såg ut som partnerns).
     - **SideStack spegelfix** (budvisningen/omspelningen): Öst roteras åt motsatt
       håll mot Väst = äkta spegelbild; `mirrorCorners`-tricket ur bruk.
+
+- **Yta 3 — budlådan: KLAR 2026-08-02 (kväll).** Ägarens iterationer i tur och
+  ordning under sessionen (detalj: `docs/historik.md` 2026-08-02):
+    - **Budfasens kortrad = spelfasens** (`HandFan flat` + delade `FLAT_OVERLAP`
+      i `cardLayout.ts`): fasta 64×96-kort, ETT jämnt överlapp utan färgglapp,
+      13 kort = 349 px — skulden från pass 4 ("tas med budlådans storlek") inlöst.
+    - **Mål-knappen bor i kompassrutan** (Bricka/zon uppflyttade under rosen),
+      med korta måletiketter (`describeTargetShort`); fulltext i väljaren.
+    - **Hjälpen under knapparna:** betydelse-raden + "Motorn hade valt" på EN
+      rad UNDER X/XX/PASS/OK — knapparna flyttar sig aldrig.
+    - **Valt bud:** guldring INUTI knappen (`ring-inset`, chipet växer inte)
+      + startsidans roterande guldbåge (`gold-frame`, 6 s/varv). OK förblev
+      himmelsblå (ägarbeslut efter guldtest). Luft i rutnätet: 4 px.
+    - **Raden ovanför låst till max 576 px** (centrerad) på stora skärmar.
+    - Ryms på 812 px-mobil även i värsta fallet; breddgolv 352 px.
+    - Buggfix på köpet: budvalet nollställs vid ny giv (två-tryck-OK kunde
+      annars bjuda ett gammalt val med ETT tryck).
   Nästa yta väljs av ägaren (t.ex. sidhuvudet på övriga sidor).
 
 Detalj/väntande material: `docs/senare.md` (faceliftposten).

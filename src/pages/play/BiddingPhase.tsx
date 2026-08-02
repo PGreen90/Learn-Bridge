@@ -61,8 +61,28 @@ export function BiddingPhase({
     <Felt className="flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none">
       {/* Överst: kompass (giv + bricka + zon), auktionen och menyknappen. Säker
           topp-marginal för urtaget (headern är dold i den immersiva spelvyn). */}
-      <div className="flex items-stretch gap-2 p-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
-        <CompassPanel dealer={game.deal.dealer} board={game.deal.board} vulnerability={game.deal.vulnerability} />
+      {/* pb-1 (inte 2.5): kompenserar den ökade luften i budlådan (gap-1.5)
+          så helheten fortfarande ryms på en 812 px-mobil. max-w-xl (576 px,
+          ägarbeslut 2026-08-02): på stora skärmar ska raden inte breddas ut
+          över hela duken — mobilen (< 576 px) påverkas inte. */}
+      <div className="mx-auto w-full max-w-xl flex items-stretch gap-2 px-2.5 pb-1 pt-[calc(0.625rem+env(safe-area-inset-top))]">
+        <CompassPanel
+          dealer={game.deal.dealer}
+          board={game.deal.board}
+          vulnerability={game.deal.vulnerability}
+          footer={
+            /* Träningsmålet (Kontraktväljaren) bor i panelen (ägarbeslut
+               2026-08-02) — klick byter scenario. */
+            <button
+              type="button"
+              onClick={onOpenPicker}
+              className="w-full rounded-md bg-emerald-900/60 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-emerald-50 ring-1 ring-emerald-100/15 hover:bg-emerald-900/85"
+            >
+              <span className="opacity-70">Mål:</span> {targetLabel}{' '}
+              <span className="opacity-60">▾</span>
+            </button>
+          }
+        />
         <AuctionGrid
           calls={game.history}
           dealer={game.deal.dealer}
@@ -83,21 +103,8 @@ export function BiddingPhase({
         </TableMenu>
       </div>
 
-      {/* Träningsmål (Kontraktväljaren): klicka för att byta scenario. */}
-      <div className="-mt-1 px-2.5 pb-1">
-        <button
-          type="button"
-          onClick={onOpenPicker}
-          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-900/50 px-2.5 py-1 text-[11px] font-semibold text-emerald-50 ring-1 ring-emerald-100/15 hover:bg-emerald-900/75"
-        >
-          <span className="opacity-70">Mål:</span>
-          {targetLabel}
-          <span className="opacity-60">▾</span>
-        </button>
-      </div>
-
       {/* Budlådan – alltid synlig; otillåtna/inte-din-tur tonas ner. */}
-      <div className="px-2.5 pb-3">
+      <div className="px-2.5 pb-1.5">
         <BiddingBox
           legal={yourTurn ? legalCalls(game.history, 'S') : []}
           onBid={onBid}
@@ -109,9 +116,11 @@ export function BiddingPhase({
 
       {/* Din hand som solfjäder + HCP-bricka (Synrey). mt-auto trycker handen till
           botten när duken fyller hela skärmen; säker botten-marginal (hemindikator). */}
-      <div className="relative mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-3 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
-        <HandFan hand={game.deal.hands.S} spread />
-        <div className="absolute bottom-2 right-2 rounded-md bg-emerald-950/80 px-2 py-0.5 text-xs font-semibold text-white ring-1 ring-gold-400/25">
+      <div className="relative mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+        <HandFan hand={game.deal.hands.S} flat />
+        {/* Kortraden fyller nästan hela bredden (349 px) → brickan svävar på
+            avdelarlinjen i stället för att krocka med sista kortet. */}
+        <div className="absolute -top-3 right-2 rounded-md bg-emerald-950/80 px-2 py-0.5 text-xs font-semibold text-white ring-1 ring-gold-400/25">
           HCP {hcp(game.deal.hands.S)}
         </div>
       </div>

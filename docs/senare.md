@@ -9,13 +9,6 @@
 
 ## ⚪ SENARE
 
-### Budfasens kortrad utan färgglapp — tas med budlådans storlek (2026-08-02)
-Spelbordets vilande kortrad (`SouthFan`) fick 2026-08-02 ETT jämnt överlapp utan
-glapp mellan färgerna (349 px-spann på mobil). Budfasens kortrad (`HandFan`,
-spread-läget = budlådans bredd) behåller sina färgglapp tills vidare —
-**ägarbeslut 2026-08-02: justeras i samma veva som budlådans storlek ses över,
-inte separat.**
-
 ### Lebensohl — nästa lager (kärnan KLAR 2026-07-30)
 **KLART (Lager 1, §7.5):** Lebensohl efter vårt 1NT är inkopplad och live —
 skulden "byggd men ej inkopplad" är stängd (regelsvepet gick 0 → hela

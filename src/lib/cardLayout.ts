@@ -20,6 +20,14 @@ export const HAND_SUITS: Suit[] = ['spades', 'hearts', 'clubs', 'diamonds']
 // samma look överallt = proffskänsla). Ändra på ETT ställe, ändras överallt.
 export const REST_OVERLAP = '-ml-10 sm:-ml-6'
 
+// Överlappet för den SAMMANHÄNGANDE kortraden (fasta xl-kort 64×96): SAMMA
+// överlapp över hela raden, även över färggränsen — inget glapp mellan färgerna,
+// fyrfärgsleken skiljer dem åt (ägarbeslut 2026-08-02). Remsan är exakt 23,75 px
+// (kort 64 − överlapp 40,25) så 13 kort spänner 64 + 12×23,75 = 349 px — 5 px
+// marginal per sida i den ~359 px breda ytan på mobil. Delas av spelbordets
+// vilande hand (`SouthFan`) och budfasens kortrad (`HandFan flat`).
+export const FLAT_OVERLAP = '-ml-[40.25px]'
+
 /**
  * Färgordningen när trumfen är känd (ägarbeslut 2026-07-02, som Synrey):
  * trumfen längst till VÄNSTER, sedan övriga färger i Synrey-ordningen.
