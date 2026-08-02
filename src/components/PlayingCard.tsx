@@ -33,14 +33,18 @@ const SIZES: Record<Size, { box: string; rank: string; pip: string; acePip: stri
     pip: 'text-3xl sm:text-xl',
     acePip: 'text-4xl sm:text-2xl',
   },
-  // `xl` = spelarens egen hand vid bordet (Synrey-känsla, ägarbeslut 2026-07-31):
-  // rejält stora kort på mobil, krymper till vanligt `sm` på desktop.
+  // `xl` = HÄNDERNAS kort på spelbordet (Syd, Nord och V/Ö-högarna) — FAST
+  // 64×96 i alla vyer och på alla skärmbredder (ägarbeslut 2026-08-02: en fast
+  // storlek oavsett vy och väderstreck; 2:3-proportionen ligger närmast ett
+  // riktigt bridgekort, ~0,64). Krymper INTE på desktop.
   xl: {
-    box: 'w-16 h-24 rounded-lg sm:w-10 sm:h-14 sm:rounded-md',
-    rank: 'text-lg sm:text-xs',
-    pip: 'text-4xl sm:text-xl',
-    acePip: 'text-5xl sm:text-2xl',
+    box: 'w-16 h-24 rounded-lg',
+    rank: 'text-lg',
+    pip: 'text-4xl',
+    acePip: 'text-5xl',
   },
+  // `lg` = sticket i mitten (stickhögen): FAST 48×64 på alla skärmbredder
+  // (ägarbeslut 2026-08-02) så 25 %-överlappet i högen stämmer överallt.
   lg: { box: 'w-12 h-16 rounded-md', rank: 'text-sm', pip: 'text-2xl', acePip: 'text-3xl' },
 }
 
@@ -53,12 +57,6 @@ interface Props {
   playable?: boolean
   /** Spelbart kort men inte lagligt just nu: nedtonat. */
   dimmed?: boolean
-  /**
-   * Hörnindexen på ANDRA diagonalen (nere-vänster + uppe-höger i stället för
-   * uppe-vänster + nere-höger). Behövs när ett vridet kort ska visa valören mot
-   * bordets mitt (Östs sidostapel) – rotation ensam kan aldrig byta diagonal.
-   */
-  mirrorCorners?: boolean
   onClick?: () => void
   className?: string
   /** Inline-stil, t.ex. animationDelay för utdelningskaskaden. */
@@ -79,7 +77,6 @@ export function PlayingCard({
   size = 'md',
   playable = false,
   dimmed = false,
-  mirrorCorners = false,
   onClick,
   className = '',
   style,
@@ -125,25 +122,18 @@ export function PlayingCard({
     </div>
   )
 
-  // ETT hörnindex per kort (det andra flöt ihop med mittsymbolen på små,
-  // fullt synliga kort). Mittsymbolen knuffas en aning diagonalt BORT från
-  // hörnet så de aldrig nuddar varandra.
-  const inner = mirrorCorners ? (
-    // Hörnet på andra diagonalen OCH 180-vridet: när kortet sedan roteras 90°
-    // blir texten läsbar åt motsatt håll mot ett vanligt vridet kort (Öst
-    // speglar Väst).
-    <>
-      <div className="absolute bottom-0.5 left-0.5 rotate-180">{corner}</div>
-      <div className={`${pip} ${ink} leading-none translate-x-[2px] -translate-y-[2px]`}>
-        {SYMBOL[card.suit]}
-      </div>
-    </>
-  ) : (
+  // Hörnindex i BÅDA hörnen på diagonalen — uppe till vänster rättvänt och
+  // nere till höger UPP-OCH-NER, som på ett riktigt spelkort (ägarbeslut
+  // 2026-08-02; ersätter gamla "ETT hörnindex"-beslutet). Mittsymbolen är nu
+  // symmetriskt centrerad — den gamla diagonalknuffen bort från ensamhörnet
+  // behövs inte när hörnen är spegellika. Vridna kort (V/Ö-högarna) får
+  // automatiskt ett läsbart index i den synliga remsan åt BÅDA håll, så det
+  // gamla mirrorCorners-läget är borttaget.
+  const inner = (
     <>
       <div className="absolute top-0.5 left-0.5">{corner}</div>
-      <div className={`${pip} ${ink} leading-none translate-x-[2px] translate-y-[2px]`}>
-        {SYMBOL[card.suit]}
-      </div>
+      <div className="absolute bottom-0.5 right-0.5 rotate-180">{corner}</div>
+      <div className={`${pip} ${ink} leading-none`}>{SYMBOL[card.suit]}</div>
     </>
   )
 

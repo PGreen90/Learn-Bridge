@@ -25,7 +25,7 @@ export function PlayedCardView({
   canExplain: boolean
   onClick: () => void
   glow?: boolean
-  size?: 'sm' | 'smPlus' | 'md'
+  size?: 'sm' | 'smPlus' | 'md' | 'lg'
 }) {
   const face = (
     <PlayingCard
@@ -129,6 +129,9 @@ export function TrickCenterLive({
     // PlayingCards transition-all skulle annars tona fram det) hålls osynlig
     // tills klonen landat; data-flight-target är klonens landningsplats.
     const flying = flight !== null && sameCard(flight.card, pc.card)
+    // Stickhögen (ägarbeslut 2026-08-02): korten överlappar 25 % → senare
+    // spelat kort ligger ÖVER tidigare, precis som vid ett riktigt bord.
+    const order = trick.findIndex((p) => p === pc)
     return (
       // key på KORTET (inte platsen): när ett nytt kort landar på samma plats i
       // nästa stick måste DOM-noden bytas, annars tänds inte inglidningen om.
@@ -136,7 +139,7 @@ export function TrickCenterLive({
         key={`${pc.card.suit}${pc.card.rank}`}
         data-flight-target={seat}
         className={`absolute ${pos} ${rotate} ${wasFlown(pc.card) ? '' : CARD_IN[seat]}`}
-        style={flying ? { opacity: 0, transition: 'none' } : undefined}
+        style={flying ? { opacity: 0, transition: 'none', zIndex: order + 1 } : { zIndex: order + 1 }}
       >
         <PlayedCardView
           pc={pc}
@@ -144,7 +147,7 @@ export function TrickCenterLive({
           canExplain={hasReason(pc)}
           onClick={() => onCardClick(pc)}
           glow={winner === seat}
-          size="smPlus"
+          size="lg"
         />
       </div>
     )
@@ -190,9 +193,14 @@ export function TrickCenterLive({
   }
 
   return (
-    // Klick var som helst på stickytan under svepet hoppar över det. Större
-    // mittbord (Synrey-känsla, 2026-07-31) så korten landar stort och luftigt.
-    <div className="relative h-48 w-48 shrink-0" onClick={sweep ? onSkipSweep : undefined}>
+    // Klick var som helst på stickytan under svepet hoppar över det. Kompakt
+    // stickHÖG (ägarbeslut 2026-08-02, ersätter det stora luftiga mittbordet):
+    // ytan krympt 192 → 160 px och korten samlade i mitten så att grannkorten
+    // överlappar varandra med 25 %. Fasta lg-kort (48×64, samma alla skärmar):
+    // N/S centrerade ±24 px från mitten (topp-/bottenkant 24 px in → 16 px =
+    // 25 % av 64 i N/S-överlapp), V/Ö vridna med boxvänsterkant 32 px in →
+    // samma 25 % av den vridna bredden. Spelordningen styr z-index i card().
+    <div className="relative h-40 w-40 shrink-0" onClick={sweep ? onSkipSweep : undefined}>
       <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-emerald-950/50 ring-1 ring-emerald-100/10" />
       {seatPill('N', 'N', 'top-1 left-1/2 -translate-x-1/2')}
       {seatPill('S', 'S', 'bottom-1 left-1/2 -translate-x-1/2')}
@@ -205,10 +213,10 @@ export function TrickCenterLive({
           sweep?.phase === 'slide' && winner ? SWEEP_OUT[winner] : ''
         }`}
       >
-        {card('N', 'top-4 left-1/2 -translate-x-1/2')}
-        {card('S', 'bottom-4 left-1/2 -translate-x-1/2')}
-        {card('W', 'left-3 top-1/2 -translate-y-1/2', 'rotate-90')}
-        {card('E', 'right-3 top-1/2 -translate-y-1/2', '-rotate-90')}
+        {card('N', 'top-6 left-1/2 -translate-x-1/2')}
+        {card('S', 'bottom-6 left-1/2 -translate-x-1/2')}
+        {card('W', 'left-8 top-1/2 -translate-y-1/2', 'rotate-90')}
+        {card('E', 'right-8 top-1/2 -translate-y-1/2', '-rotate-90')}
       </div>
     </div>
   )

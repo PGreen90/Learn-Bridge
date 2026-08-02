@@ -10,7 +10,37 @@
 
 ---
 
-## 2026-07-30
+## 2026-08-02
+
+**🐛 SYD SOM TRÄKARL — REGRESSION FRÅN FACELIFTEN, LAGAD & LIVE (merge `b6279c6`):**
+när NORD vann budgivningen (Syd träkarl) ritades Nords öppna hand aldrig — pass 2
+bytte `northOpen=isFaceUp('N')` mot `dummyAtTop = dummy==='N'` och tappade fallet.
+Eftersom du styr båda NS-händerna (`controls`) och ingen bot spelar åt Nord frös
+given för evigt på Nords tur. Samma refaktorering hade tappat claim-revealens
+"alla händer läggs upp" (bara träkarlens hög ritades). Fix: toppzonen ritar Nords
+hand så fort den är öppen (träkarl ELLER spelförare Nord) och V/Ö-högarna ritas
+via `isFaceUp` → claim-revealen visar åter alla fyra. Facit-test FÖRE fixen:
+`syd-trakarl.test.tsx`. Verifierat live i dev-browsern (2♥/2♣ av Nord, sticket
+bokfördes där det förr frös).
+
+**🎨 SPELBORDET PASS 4 — kortraden + fasta kortstorlekar + stickhögen + dubbla
+hörnindex (ägarbeslut i tur och ordning under sessionen):**
+- **Syds kortrad utan färgglapp:** ETT jämnt överlapp över hela raden (förr la
+  varje ny färg ett helt kort → 400 px och overflow på mobil). Remsan exakt
+  23,75 px → 13 kort spänner 349 px (5 px marginal per sida, ägarens tal).
+- **Fast kortstorlek "C" för alla händer:** `xl` = 64×96 på ALLA skärmbredder
+  (2:3 ≈ riktigt bridgekort; ägaren valde C ur tre uppritade alternativ). Nords
+  kolumner: xl med fast 60 px-remsa (täckta kort läste som stubbar vid gamla
+  50 %-överlappet). V/Ö-högarna: xl vridna (96×64), remsa 16 px.
+- **Stickhögen:** mittytan 192 → 160 px, korten samlade med 25 % överlapp och
+  z-index i spelordning (senast spelat överst, som vid riktigt bord). Stickkorten
+  fick den förut oanvända `lg` (fast 48×64) så överlappet stämmer på desktop.
+- **Dubbla hörnindex:** valör + symbol även upp-och-ner i nedre högra hörnet på
+  ALLA kort (riktig kortlek). Mittsymbolen åter centrerad; döda `mirrorCorners`
+  borttagen — vridna kort får nu index i synliga remsan åt båda håll. Gamla
+  "ETT hörnindex"-beslutet hävt: kollisionsrisken på småkort finns inte längre.
+- Parkerat till budlåde-passet: budfasens kortrad (`HandFan`) behåller färgglapp
+  tills budlådans storlek ses över (ägarbeslut, se `docs/senare.md`).
 
 **🎉 MOBILSVEP ÖVER ALLA SIDOR (Fas 0 b, KLART) → HELA FAS 0 KLAR:** varje sida
 (Hem, Budträning + övning, Budvisning, Budsystem, Inställningar, Spela kort:
