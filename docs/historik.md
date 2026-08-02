@@ -33,8 +33,16 @@ under sessionen, kväll):**
   samma 2 px-band; "minskad rörelse" respekteras via samma CSS). OK-knappen
   förblev himmelsblå (ägarbeslut efter guldtest). Luften i rutnätet trimmades
   i två varv (4 → 6 → 4 px) — 4 px funkar när inget sticker ut ur knappen.
-- **Raden ovanför (kompass + auktion + meny) låst till max 576 px**
-  (`max-w-xl`, centrerad) — sträcktes förr ut över hela duken på stor skärm.
+- **Symmetrin (ägarfeedback efter första deployen samma kväll):** raden
+  ovanför är exakt budlådans bredd (`max-w-md`) — kompassens vänsterkant och
+  auktionens högerkant går i LINJE med budlådan (först låstes den till 576 px;
+  ägaren ville ha kanterna i linje). ⋮-menyn ligger i radflödet på mobil men
+  hängs UTANFÖR kolumnen till höger från `sm:` (kringflytande chrome som i
+  spelfasen) så den inte stjäl bredd från auktionen; en mellanvariant med ⋮ i
+  kompassrutans hörn underkändes. HCP-brickan är låst till samma kolumn
+  (högerkant = budlådans högerkant) i stället för skärmhörnet. På vägen lagades
+  ett 10 px-linjeringsfel (dubbel padding: `px` låg innanför `max-w-md` i raden
+  men utanför i budlådan).
 - **Höjd/bredd-budgeten:** hela vyn (rutnät, förklaring, kortrad) ryms på
   exakt 812 px-mobil även i värsta fallet (3-raders förklaring); breddgolvet
   är 352 px (kortraden 349) — moderna telefoner är ≥ 360.

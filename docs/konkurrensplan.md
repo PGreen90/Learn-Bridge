@@ -201,7 +201,10 @@ första intrycket görs bara en gång.
     - **Valt bud:** guldring INUTI knappen (`ring-inset`, chipet växer inte)
       + startsidans roterande guldbåge (`gold-frame`, 6 s/varv). OK förblev
       himmelsblå (ägarbeslut efter guldtest). Luft i rutnätet: 4 px.
-    - **Raden ovanför låst till max 576 px** (centrerad) på stora skärmar.
+    - **Raden ovanför = budlådans bredd** (`max-w-md`): kompassens vänsterkant
+      och auktionens högerkant i LINJE med budlådan (ägarens symmetrikrav);
+      ⋮-menyn i radflödet på mobil, utanför kolumnen från `sm:`. HCP-brickan
+      låst till samma kolumn.
     - Ryms på 812 px-mobil även i värsta fallet; breddgolv 352 px.
     - Buggfix på köpet: budvalet nollställs vid ny giv (två-tryck-OK kunde
       annars bjuda ett gammalt val med ETT tryck).

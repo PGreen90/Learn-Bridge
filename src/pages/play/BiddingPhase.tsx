@@ -62,45 +62,52 @@ export function BiddingPhase({
       {/* Överst: kompass (giv + bricka + zon), auktionen och menyknappen. Säker
           topp-marginal för urtaget (headern är dold i den immersiva spelvyn). */}
       {/* pb-1 (inte 2.5): kompenserar den ökade luften i budlådan (gap-1.5)
-          så helheten fortfarande ryms på en 812 px-mobil. max-w-xl (576 px,
-          ägarbeslut 2026-08-02): på stora skärmar ska raden inte breddas ut
-          över hela duken — mobilen (< 576 px) påverkas inte. */}
-      <div className="mx-auto w-full max-w-xl flex items-stretch gap-2 px-2.5 pb-1 pt-[calc(0.625rem+env(safe-area-inset-top))]">
-        <CompassPanel
-          dealer={game.deal.dealer}
-          board={game.deal.board}
-          vulnerability={game.deal.vulnerability}
-          footer={
-            /* Träningsmålet (Kontraktväljaren) bor i panelen (ägarbeslut
-               2026-08-02) — klick byter scenario. */
-            <button
-              type="button"
-              onClick={onOpenPicker}
-              className="w-full rounded-md bg-emerald-900/60 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-emerald-50 ring-1 ring-emerald-100/15 hover:bg-emerald-900/85"
+          så helheten fortfarande ryms på en 812 px-mobil. Innerkolumnen är
+          max-w-md = budlådans bredd (ägarbeslut 2026-08-02, symmetri):
+          kompassens vänsterkant och auktionens högerkant går i linje med
+          budlådan. ⋮-menyn ligger i radflödet på mobil (godkända mobilvyn) men
+          hängs UTANFÖR kolumnen till höger från sm: — kringflytande chrome som
+          i spelfasen, så den inte stjäl bredd från auktionen. */}
+      <div className="px-2.5 pb-1 pt-[calc(0.625rem+env(safe-area-inset-top))]">
+        <div className="relative mx-auto flex w-full max-w-md items-stretch gap-2">
+          <CompassPanel
+            dealer={game.deal.dealer}
+            board={game.deal.board}
+            vulnerability={game.deal.vulnerability}
+            footer={
+              /* Träningsmålet (Kontraktväljaren) bor i panelen (ägarbeslut
+                 2026-08-02) — klick byter scenario. */
+              <button
+                type="button"
+                onClick={onOpenPicker}
+                className="w-full rounded-md bg-emerald-900/60 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-emerald-50 ring-1 ring-emerald-100/15 hover:bg-emerald-900/85"
+              >
+                <span className="opacity-70">Mål:</span> {targetLabel}{' '}
+                <span className="opacity-60">▾</span>
+              </button>
+            }
+          />
+          <AuctionGrid
+            calls={game.history}
+            dealer={game.deal.dealer}
+            vulnerability={game.deal.vulnerability}
+            activeSeat={toAct}
+            explanations={bidHelp ? 'full' : 'minimal'}
+          />
+          <div className="shrink-0 sm:absolute sm:-right-11 sm:top-0">
+            <TableMenu
+              open={showMenu}
+              onToggle={() => setShowMenu((v) => !v)}
+              onNewGame={onNewGame}
+              bidHelp={bidHelp}
+              onToggleBidHelp={onToggleBidHelp}
             >
-              <span className="opacity-70">Mål:</span> {targetLabel}{' '}
-              <span className="opacity-60">▾</span>
-            </button>
-          }
-        />
-        <AuctionGrid
-          calls={game.history}
-          dealer={game.deal.dealer}
-          vulnerability={game.deal.vulnerability}
-          activeSeat={toAct}
-          explanations={bidHelp ? 'full' : 'minimal'}
-        />
-        <TableMenu
-          open={showMenu}
-          onToggle={() => setShowMenu((v) => !v)}
-          onNewGame={onNewGame}
-          bidHelp={bidHelp}
-          onToggleBidHelp={onToggleBidHelp}
-        >
-          Du sitter <strong>Syd</strong>. När din ruta i auktionen lyser är det din tur:
-          klicka ett bud i budlådan och bekräfta med <strong>OK</strong>. Datorn sköter
-          Väst, Nord och Öst. Klicka ett lagt bud för att se vad det betyder.
-        </TableMenu>
+              Du sitter <strong>Syd</strong>. När din ruta i auktionen lyser är det din tur:
+              klicka ett bud i budlådan och bekräfta med <strong>OK</strong>. Datorn sköter
+              Väst, Nord och Öst. Klicka ett lagt bud för att se vad det betyder.
+            </TableMenu>
+          </div>
+        </div>
       </div>
 
       {/* Budlådan – alltid synlig; otillåtna/inte-din-tur tonas ner. */}
@@ -116,13 +123,17 @@ export function BiddingPhase({
 
       {/* Din hand som solfjäder + HCP-bricka (Synrey). mt-auto trycker handen till
           botten när duken fyller hela skärmen; säker botten-marginal (hemindikator). */}
-      <div className="relative mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
-        <HandFan hand={game.deal.hands.S} flat />
-        {/* Kortraden fyller nästan hela bredden (349 px) → brickan svävar på
-            avdelarlinjen i stället för att krocka med sista kortet. */}
-        <div className="absolute -top-3 right-2 rounded-md bg-emerald-950/80 px-2 py-0.5 text-xs font-semibold text-white ring-1 ring-gold-400/25">
-          HCP {hcp(game.deal.hands.S)}
+      <div className="mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+        {/* HCP-brickan är LÅST till budlådans kolumn (max-w-md, ägarbeslut
+            2026-08-02) — den följer budlådans högerkant på stor skärm i stället
+            för att driva ut till skärmhörnet, och svävar på avdelarlinjen strax
+            ovanför kortraden (349 px) så den aldrig täcker ett kort. */}
+        <div className="relative mx-auto w-full max-w-md">
+          <div className="absolute -top-4 right-0 z-10 rounded-md bg-emerald-950/80 px-2 py-0.5 text-xs font-semibold text-white ring-1 ring-gold-400/25">
+            HCP {hcp(game.deal.hands.S)}
+          </div>
         </div>
+        <HandFan hand={game.deal.hands.S} flat />
       </div>
 
       {/* Kontrakt bjudet: bekräftelsedialog (Synreys "Declared by South"). */}
