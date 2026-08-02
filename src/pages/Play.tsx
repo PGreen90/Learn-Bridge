@@ -108,9 +108,10 @@ export function Play() {
 // ===========================================================================
 // Spelfasen: det gröna bordet, korten, facit och omspelningen. Egen komponent så
 // att spelfasens hooks bara körs när kontrakt + spelläge finns på riktigt.
+// Exporterad för testerna (syd-trakarl.test.tsx) — appen når den bara via Play.
 // ===========================================================================
 
-function PlayTable({
+export function PlayTable({
   deal,
   contract,
   calls,
@@ -173,7 +174,6 @@ function PlayTable({
     score,
     declSide,
     isFaceUp,
-    dummy,
     deselectSuit,
   } = usePlayTable(deal, contract, calls)
   // HashRouter → navigera hem via hash (funkar utan Router-kontext i tester).
@@ -181,15 +181,18 @@ function PlayTable({
     window.location.hash = '#/'
   }
 
-  // Träkarlens placering (ägarbeslut 2026-07-31, reviderat): din partner Nord
-  // ligger UPPTILL när du själv spelar, men när du FÖRSVARAR sitter motståndarnas
-  // träkarl på sin RIKTIGA sida — spelförare Öst → träkarl Väst till vänster,
-  // spelförare Väst → träkarl Öst till höger — precis som vid ett riktigt bord
-  // (som Synrey). Så ser man direkt vems hand det är i stället för att förväxla
-  // den med partnern.
-  const dummyUp = isFaceUp(dummy)
-  const dummyAtTop = dummyUp && dummy === 'N'
-  const sideDummy: 'W' | 'E' | null = dummyUp && (dummy === 'W' || dummy === 'E') ? dummy : null
+  // Vem ligger öppen var? Nord-sidans öppna hand ritas UPPTILL som färgkolumner:
+  // träkarlen Nord när du spelar, ELLER spelföraren Nord när SYD är träkarl —
+  // i båda fallen är det din sidas öppna hand och DU spelar dess kort (controls
+  // i common.tsx: NS-kontrakt → du styr både N och S; buggfix 2026-08-02, fallet
+  // tappades i faceliften pass 2). När du FÖRSVARAR sitter motståndarnas träkarl
+  // på sin RIKTIGA sida som Synrey-högar (ägarbeslut 2026-07-31) — spelförare
+  // Öst → träkarl Väst till vänster och vice versa. Claim-revealen öppnar ALLA
+  // händer via isFaceUp → Nord upptill + BÅDA sidohögarna. Dolda händer ritas
+  // inte alls.
+  const northUp = isFaceUp('N')
+  const westUp = isFaceUp('W')
+  const eastUp = isFaceUp('E')
 
   // Färdigspelad giv: bordet hinner tona ut (felt-fade-out under resultOutro,
   // showResult väntar ut den) → resultatdialog ovanpå omspelningen (Synrey-stil).
@@ -473,17 +476,18 @@ function PlayTable({
         </div>
       )}
 
-      {/* Toppzonen: din partner Nords träkarl visas här när DU spelar (då är den
-          din egen sidas öppna hand). När du försvarar sitter motståndarnas träkarl
-          i stället på sin riktiga sida (se mittraden nedan) så man aldrig förväxlar
-          den med partnern. Dolda motståndarhänder visas inte alls. */}
+      {/* Toppzonen: Nord-sidans öppna hand — träkarlen Nord när DU spelar, eller
+          spelföraren Nord när Syd är träkarl (du spelar Nords kort i båda fallen).
+          När du försvarar sitter motståndarnas träkarl i stället på sin riktiga
+          sida (se mittraden nedan) så man aldrig förväxlar den med partnern.
+          Dolda motståndarhänder visas inte alls. */}
       <div className="flex min-h-16 justify-center pt-[calc(0.75rem+env(safe-area-inset-top))]">
-        {dummyAtTop && (
+        {northUp && (
           <SuitColumns
-            hand={play.hands[dummy]}
+            hand={play.hands.N}
             contract={contract}
             play={play}
-            seat={dummy}
+            seat="N"
             onCardClick={onCardClick}
             selectedSuit={selectedSuit}
             registerCardEl={registerCardEl}
@@ -500,7 +504,7 @@ function PlayTable({
           (träkarlen Nord upptill) står sticket kvar i mitten som förr.
           flex-1 centrerar vertikalt. */}
       <div className="flex flex-1 items-center gap-1 px-2 py-2">
-        {sideDummy === 'W' && (
+        {westUp && (
           <SideDummyPiles hand={play.hands.W} contract={contract} side="W" registerCardEl={registerCardEl} />
         )}
         <div className="flex flex-1 justify-center">
@@ -515,7 +519,7 @@ function PlayTable({
             hasReason={(pc) => !!reasonFor(pc)}
           />
         </div>
-        {sideDummy === 'E' && (
+        {eastUp && (
           <SideDummyPiles hand={play.hands.E} contract={contract} side="E" registerCardEl={registerCardEl} />
         )}
       </div>
