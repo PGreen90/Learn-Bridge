@@ -17,6 +17,24 @@
       name="description"
       content="rebidz – spela och lär dig bridge (2/1-systemet) direkt i webbläsaren."
     />
+    <!-- Länkförhandsvisningen (Etapp A 2026-08-02): utan de här taggarna visar
+         Messenger/WhatsApp/Discord bara en tom grå ruta när någon delar en
+         rebidz-länk — och Dagens giv bygger på att delningen ser lockande ut.
+         Adresserna MÅSTE vara absoluta (skraporna hämtar utan bas-URL).
+         Bilden genereras av scripts/generate-og-image.ps1. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="rebidz" />
+    <meta property="og:title" content="rebidz – spela och lär dig bridge" />
+    <meta
+      property="og:description"
+      content="Träna, spela, tävla. Dagens giv – samma giv för alla, varje dag."
+    />
+    <meta property="og:url" content="https://rebidz.com/" />
+    <meta property="og:image" content="https://rebidz.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="sv_SE" />
+    <meta name="twitter:card" content="summary_large_image" />
     <script>
       // Sätt mörkt läge FÖRE appen laddar, annars blinkar sidan vit en stund.
       // Sparat val vinner; utan sparat val följer vi systemets läge.

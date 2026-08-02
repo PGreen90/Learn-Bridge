@@ -12,6 +12,43 @@
 
 ## 2026-08-02
 
+**🛡️ STORA GRANSKNINGEN + ETAPP A "SKYDDSNÄTET" — BYGGD (natten mot 3/8, gren
+`etapp-a-skyddsnatet`):** Ägaren bad om en kritisk helhetsgranskning
+(funktionellt + visuellt). Claude spelade igenom Dagens giv i webbläsaren,
+skärmdumpade alla sidor och lät två kodgranskare gå igenom repot. Rapporten
+(26 numrerade fynd + beslutad körordning Etapp A–D) ligger i planfilen
+`~/.claude/plans/hidden-questing-creek.md`; kärnfynden i korthet:
+appen *glömmer allt* (ingen streak/historik/spara pågående giv), *saknar
+skyddsnät* (ingen felfångare; deploy kunde ge vit sida i öppna flikar),
+delningslänken visades som tom ruta (inga og:-taggar), och **en
+informationsläcka**: klick på motståndarbud i historiken visar deras FAKTISKA
+hp (`doubles.ts` m.fl. bygger förklaringen av handen, inte intervallet).
+Ägaren godkände körordningen; **Etapp A byggdes direkt:**
+- **Felfångaren** `ErrorBoundary.tsx` ytterst i `main.tsx`: felskärm med
+  "Ladda om"-knapp + väg hem; chunk-fel (trasig lat-laddning efter deploy)
+  laddar om automatiskt EN gång (vaktflagga i sessionStorage; rensas i
+  componentDidMount — inte render, React kan göra om en misslyckad rendering).
+  Facit: `error-boundary.test.tsx`.
+- **PWA-uppdateringen** bytte `autoUpdate` → `prompt`: ny version tar inte
+  längre över tyst mitt i en session (det kunde utlösa chunk-felen). I stället
+  visar Layout en diskret glaspill "Ny version finns — Uppdatera"
+  (`pwa-update.ts` registrerar och skickar window-händelsen i
+  `lib/sw-events.ts`; pwa-update importeras BARA från main.tsx så testerna
+  slipper den virtuella modulen).
+- **Länkförhandsvisningen:** og:-/twitter-taggar i `index.html` +
+  `public/og-image.jpg` (1200×630, genereras repeterbart av
+  `scripts/generate-og-image.ps1` — smaragd, guldspader, ordmärket, taglinen).
+- **woff2 i precachen** (`globPatterns`): guldserifen överlever offline.
+  Manifestet fick `id: '/'` (stabil identitet för hemskärmsinstallationer).
+- **Falska "✓ Kopierat"-kvittot** i `Play.tsx`: sätts nu bara när
+  urklippsskrivningen faktiskt lyckades.
+- Vakttester: `deploy-config.test.ts` låser og:-taggarna + bildfilen + woff2.
+**Kvar ur granskningen (ägaren väljer ordning):** Etapp B "appen som minns"
+(streak, resultatlogg, spara pågående giv, giv-frö i URL, spoilerfri delning),
+Etapp C "spelbordets förtroende" (informationsläckan, ångra, ge upp som
+motspelare, resultat ur spelarens perspektiv, ~7 px höjdbudget), Etapp D
+"vägen in" (onboarding, Inställningar-städning, par-poäng i resultatet).
+
 **🎨 FACELIFT YTA 4 + EXKLUSIVITETSSVEPET + DAGENS GIV — KLART (sen kväll;
 ägaren godkände hela förslagslistan "kör på helt autonomt, visa innan PCD"):**
 - **Sidhuvudena på de inre sidorna** (Budträning/Budvisning/Budsystem/

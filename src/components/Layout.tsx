@@ -1,6 +1,7 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
+import { NY_VERSION_EVENT, type NyVersionDetail } from '../lib/sw-events'
 import { BrandMark, Wordmark } from './BrandMark'
 // Versionsnumret i sidfoten läses ur package.json — EN sanning, aldrig
 // hårdkodat i UI:t (ägarbeslut 2026-08-02: © + grundår + version i sidfoten).
@@ -32,6 +33,16 @@ function PageLoading() {
 export function Layout() {
   const [theme, setTheme] = useState(currentTheme)
   const [menuOpen, setMenuOpen] = useState(false)
+  // "Ny version finns"-raden (Etapp A 2026-08-02): pwa-update.ts skickar en
+  // window-händelse när en ny version av appen väntar. null = ingen rad.
+  const [nyVersion, setNyVersion] = useState<NyVersionDetail | null>(null)
+  useEffect(() => {
+    const onNyVersion = (e: Event) => {
+      setNyVersion((e as CustomEvent<NyVersionDetail>).detail)
+    }
+    window.addEventListener(NY_VERSION_EVENT, onNyVersion)
+    return () => window.removeEventListener(NY_VERSION_EVENT, onNyVersion)
+  }, [])
   const location = useLocation()
   // Spelbordet går "full-bleed": duken fyller hela skärmen edge-to-edge utan ram
   // eller marginal (ägarbeslut 2026-07-31). Övriga sidor behåller den centrerade,
@@ -187,6 +198,33 @@ export function Layout() {
       {/* Sidfoten (faceliften 2026-08-02): klubbsignaturen ger varje sida ett
           golv — guldhårlinje + ordmärket i serifen, som kolofonen i en bok.
           Inte i spelvyn (immersiv) — där finns inget att scrolla förbi. */}
+      {/* "Ny version finns"-raden: en diskret glaspill i nederkant, samma
+          material som mobilmenyn. Visas på ALLA sidor (även spelbordet — där
+          är den extra viktig: gamla versionens sidor kan sluta gå att ladda).
+          Ingen auto-omladdning: användaren väljer själv när (en pågående giv
+          ska aldrig kastas av en uppdatering). ✕ döljer raden för sessionen. */}
+      {nyVersion !== null && (
+        <div className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 flex justify-center px-4">
+          <div className="flex items-center gap-3 rounded-2xl bg-white/75 px-4 py-2 shadow-xl ring-1 ring-gold-400/40 backdrop-blur-2xl backdrop-saturate-150 dark:bg-club-900/70">
+            <span className="text-sm text-ink">Ny version finns</span>
+            <button
+              type="button"
+              onClick={() => nyVersion.update()}
+              className="rounded-lg bg-emerald-700 px-3 py-1 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+            >
+              Uppdatera
+            </button>
+            <button
+              type="button"
+              onClick={() => setNyVersion(null)}
+              aria-label="Dölj uppdateringsraden"
+              className="text-sm text-ink-faint hover:text-ink"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       {!immersive && (
         <footer className="pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-2">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 px-4">
