@@ -151,9 +151,11 @@ första intrycket görs bara en gång.
       skärmen, inga rundade hörn/ram — appens menyrad (header) är **dold** i
       spelvyn (immersivt). Man tar sig ut via röd **"Avsluta spel"** → startsidan,
       i budfas, spelvy och resultatvy.
-    - **Synrey-layout:** din hand nederst (stora `xl`-kort), **träkarlen alltid
-      upptill** (även när den sitter i Öst/Väst), **tomma sidor** (dolda händer
-      visas inte → öppen yta), kompakt mittbord centrerat.
+    - **Synrey-layout:** din hand nederst (stora `xl`-kort), träkarlen Nord
+      upptill när DU spelar, dolda händer visas inte → öppen yta, kompakt
+      mittbord. *(Pass 3 ändrade träkarlens plats vid försvar — se nedan;
+      ursprungsbeslutet "alltid upptill" visade sig förvirra: handen upptill
+      lästes som partnerns fast den var motståndarnas.)*
     - **Tryck-färg-visar-bara-den:** tryck på en färg i handen → bara den färgen
       visas, stor och luftig; "◀ Alla färger" tillbaka.
     - **Mittbordet:** färgpiller (S guld / N grön / V,Ö mörka) med väderstrecken
@@ -164,7 +166,29 @@ första intrycket görs bara en gång.
     - **ⓘ-popupen** rymmer auktion + förra sticket + utspel (som Synrey), inte
       flytande på bordet.
   Sticksvepet (etapp 2) lämnades orört (ägarbeslut). Verifierat på telefon, tsc
-  grön. Nästa yta väljs av ägaren (t.ex. sidhuvudet på övriga sidor).
+  grön.
+
+  **Pass 3 (2026-08-02, LIVE):** iterationer efter ägarens speltest mot
+  Synrey-referensbilder. Filer: `components/HandFan.tsx`, `components/BiddingBox.tsx`,
+  `components/SideStack.tsx`, `pages/Play.tsx`, `play/BiddingPhase.tsx`,
+  `play/hands.tsx`, `play/usePlayTable.ts`.
+    - **Kortraden i budfasen = budlådans bredd** (`HandFan spread`): färggrupperna
+      sprids med `justify-between` inom samma `max-w-md` som budlådan → tydligare.
+    - **Två tryck på samma bud = OK** (inget dubbelklick-intervall); annat bud
+      byter val, OK-knappen kvar som förr.
+    - **Singelton spelas på ETT tryck** — färgvalssteget hoppas över när färgen
+      bara har ett kort.
+    - **Träkarlen på sin RIKTIGA sida vid försvar** (`SideDummyPiles`): spelförare
+      Öst → träkarl Väst till vänster (och tvärtom), som Synrey-högar — en hög
+      per färg staplade lodrätt, korten roterade 90°, HÖGSTA kortet underst mot
+      bordets utkant (bara valörremsan ute), lägsta överst fullt synligt, trumfen
+      "till vänster" ur träkarlens perspektiv (Öst → överst, Väst → nederst).
+      Sticket flyttar samtidigt mot spelförarens sida → stor yta, större kort
+      (`md`). Motorn hade hela tiden RÄTT hand — felet var placeringen utan
+      etikett (såg ut som partnerns).
+    - **SideStack spegelfix** (budvisningen/omspelningen): Öst roteras åt motsatt
+      håll mot Väst = äkta spegelbild; `mirrorCorners`-tricket ur bruk.
+  Nästa yta väljs av ägaren (t.ex. sidhuvudet på övriga sidor).
 
 Detalj/väntande material: `docs/senare.md` (faceliftposten).
 
