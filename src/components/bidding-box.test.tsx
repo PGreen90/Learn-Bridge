@@ -29,12 +29,13 @@ describe('BiddingBox', () => {
     expect(onBid).toHaveBeenCalledWith('1C')
   })
 
-  it('ett valt bud kan väljas bort igen (toggle) → OK stängs av', () => {
-    render(<BiddingBox legal={['P', '1C']} onBid={() => {}} />)
+  it('andra trycket på samma bud bekräftar det (två tryck = OK)', () => {
+    const onBid = vi.fn()
+    render(<BiddingBox legal={['P', '1C']} onBid={onBid} />)
     const chip = screen.getByRole('button', { name: '1♣' })
-    fireEvent.click(chip)
-    fireEvent.click(chip)
-    expect(screen.getByRole('button', { name: 'OK' })).toBeDisabled()
+    fireEvent.click(chip) // tryck 1: väljer
+    fireEvent.click(chip) // tryck 2: bekräftar
+    expect(onBid).toHaveBeenCalledWith('1C')
   })
 
   it('motorns rekommendation får märket MOTORNS BUD + sin äkta förklaring', () => {

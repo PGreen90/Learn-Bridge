@@ -68,9 +68,68 @@ export function SuitColumns({
   )
 }
 
-/** En Ö/V-träkarls kort i visningsordning (trumf överst) för SideStack. */
-export function sideCards(hand: Hand, contract: Contract): Card[] {
-  return handSuitsTrumpFirst(contract.strain).flatMap((suit) => bySuit(hand, suit))
+/**
+ * Motståndarnas träkarl på sin RIKTIGA sida, som Synrey (ägarbeslut 2026-08-02):
+ * en HÖG per färg, högarna staplade lodrätt, korten ROTERADE 90°. HÖGSTA kortet
+ * ligger UNDERST i högen mot bordets utkant (bara valörremsan sticker ut); de
+ * lägre läggs ovanpå inåt så det LÄGSTA kortet ligger överst, fullt synligt,
+ * närmast mitten. Sticket flyttar samtidigt mot spelförarens sida (se Play.tsx)
+ * så högarna får en stor yta → större kort än gamla sidostapeln. Trumfen ligger
+ * "till vänster" ur träkarlens EGET perspektiv: Öst (höger sida) → trumfen
+ * ÖVERST i bild, Väst → NEDERST. Bara visning — spelföraren (boten) spelar
+ * träkarlens kort; ref:arna registreras så kortflygningen hittar startläget.
+ */
+export function SideDummyPiles({
+  hand,
+  contract,
+  side,
+  registerCardEl,
+}: {
+  hand: Hand
+  contract: Contract
+  side: 'W' | 'E'
+  registerCardEl?: RegisterCardEl
+}) {
+  const suits = handSuitsTrumpFirst(contract.strain)
+  const rows = side === 'E' ? suits : [...suits].reverse()
+  return (
+    <div className={`flex flex-col gap-1 ${side === 'E' ? 'items-end' : 'items-start'}`}>
+      {rows.map((suit) => {
+        const cards = bySuit(hand, suit) // högst → lägst
+        if (cards.length === 0) return null
+        // Högsta UNDERST mot utkanten, lägsta ÖVERST närmast mitten:
+        //  - Öst (höger): stigande vänster→höger; OMVÄND målordning (z-index) så
+        //    det vänstra (lägsta) kortet ligger överst → varje täckt korts
+        //    HÖGERremsa sticker ut mot utkanten. Rotation +90° lägger valören
+        //    ytterst i den remsan.
+        //  - Väst (vänster): spegelvänt — fallande vänster→höger, vanlig
+        //    målordning (sista/lägsta överst) → VÄNSTERremsorna syns, och
+        //    rotation −90° lägger valören ytterst.
+        const ordered = side === 'E' ? [...cards].reverse() : cards
+        return (
+          <div key={suit} className="flex">
+            {ordered.map((c, i) => (
+              // md-kortet är 56×80 (mobil) / 40×56 (desktop); vridet tar det
+              // 80×56 resp. 56×40 — wrappern har de vridna måtten så
+              // överlappet (-ml) räknar på rätt bredd.
+              <div
+                key={`${c.suit}${c.rank}`}
+                className={`relative flex h-14 w-20 items-center justify-center sm:h-10 sm:w-14 ${i > 0 ? '-ml-16 sm:-ml-11' : ''}`}
+                style={side === 'E' ? { zIndex: cards.length - i } : undefined}
+              >
+                <PlayingCard
+                  ref={registerCardEl?.(`${c.suit}${c.rank}`)}
+                  card={c}
+                  size="md"
+                  className={side === 'E' ? 'rotate-90' : '-rotate-90'}
+                />
+              </div>
+            ))}
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 /**

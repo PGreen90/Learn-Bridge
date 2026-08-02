@@ -22,7 +22,7 @@ import { useGame } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
-import { SouthFan, SuitColumns } from './play/hands'
+import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
 import { LastTrickPanel, TrickCenterLive } from './play/trick-views'
 import { ScenarioPicker, SearchOverlay } from './play/pickers'
 import { BiddingPhase } from './play/BiddingPhase'
@@ -181,6 +181,16 @@ function PlayTable({
     window.location.hash = '#/'
   }
 
+  // Träkarlens placering (ägarbeslut 2026-07-31, reviderat): din partner Nord
+  // ligger UPPTILL när du själv spelar, men när du FÖRSVARAR sitter motståndarnas
+  // träkarl på sin RIKTIGA sida — spelförare Öst → träkarl Väst till vänster,
+  // spelförare Väst → träkarl Öst till höger — precis som vid ett riktigt bord
+  // (som Synrey). Så ser man direkt vems hand det är i stället för att förväxla
+  // den med partnern.
+  const dummyUp = isFaceUp(dummy)
+  const dummyAtTop = dummyUp && dummy === 'N'
+  const sideDummy: 'W' | 'E' | null = dummyUp && (dummy === 'W' || dummy === 'E') ? dummy : null
+
   // Färdigspelad giv: bordet hinner tona ut (felt-fade-out under resultOutro,
   // showResult väntar ut den) → resultatdialog ovanpå omspelningen (Synrey-stil).
   if (done && showResult) {
@@ -299,7 +309,8 @@ function PlayTable({
     )
   }
 
-  // Träkarlen visas alltid upptill (se toppzonen nedan); dolda händer visas inte.
+  // Träkarlen: partnern Nord upptill när du spelar, annars motståndarnas träkarl
+  // på sin riktiga sida (se toppzonen + mittraden nedan); dolda händer visas inte.
   return (
     // --motion-scale: tempovalet skalar spelfasens CSS-animationer (index.css
     // räknar calc(bastid * var(--motion-scale))). JS-pauserna skalas i tempo.ts.
@@ -462,11 +473,12 @@ function PlayTable({
         </div>
       )}
 
-      {/* Toppzonen: träkarlen (den öppna handen) visas ALLTID här — även när den
-          sitter i Öst/Väst — så sidorna hålls tomma (Synrey, ägarbeslut 2026-07-31:
-          öppnar ytan). Dolda motståndarhänder visas inte alls. */}
+      {/* Toppzonen: din partner Nords träkarl visas här när DU spelar (då är den
+          din egen sidas öppna hand). När du försvarar sitter motståndarnas träkarl
+          i stället på sin riktiga sida (se mittraden nedan) så man aldrig förväxlar
+          den med partnern. Dolda motståndarhänder visas inte alls. */}
       <div className="flex min-h-16 justify-center pt-[calc(0.75rem+env(safe-area-inset-top))]">
-        {isFaceUp(dummy) && dummy !== 'S' && (
+        {dummyAtTop && (
           <SuitColumns
             hand={play.hands[dummy]}
             contract={contract}
@@ -482,19 +494,30 @@ function PlayTable({
       {/* Förra sticket bor numera inne i ⓘ-overlayen (som Synrey), inte flytande
           på bordet — se showInfo nedan. */}
 
-      {/* Mittraden: bara sticket i mitten, centrerat. Sidorna är tomma (Synrey) —
-          flex-1 växer och centrerar bordet vertikalt. */}
-      <div className="flex flex-1 items-center justify-center px-2 py-2">
-        <TrickCenterLive
-          play={play}
-          thinking={thinking}
-          sweep={sweep}
-          flight={flight}
-          wasFlown={wasFlown}
-          onSkipSweep={skipSweep}
-          onCardClick={onPlayedCardClick}
-          hasReason={(pc) => !!reasonFor(pc)}
-        />
+      {/* Mittraden (Synrey, ägarbeslut 2026-08-02): när du försvarar flyttar
+          STICKET mot spelförarens sida och träkarlen brer ut sig som färghögar på
+          sin egen sida — den öppnade ytan ger större kort. Spelar du själv
+          (träkarlen Nord upptill) står sticket kvar i mitten som förr.
+          flex-1 centrerar vertikalt. */}
+      <div className="flex flex-1 items-center gap-1 px-2 py-2">
+        {sideDummy === 'W' && (
+          <SideDummyPiles hand={play.hands.W} contract={contract} side="W" registerCardEl={registerCardEl} />
+        )}
+        <div className="flex flex-1 justify-center">
+          <TrickCenterLive
+            play={play}
+            thinking={thinking}
+            sweep={sweep}
+            flight={flight}
+            wasFlown={wasFlown}
+            onSkipSweep={skipSweep}
+            onCardClick={onPlayedCardClick}
+            hasReason={(pc) => !!reasonFor(pc)}
+          />
+        </div>
+        {sideDummy === 'E' && (
+          <SideDummyPiles hand={play.hands.E} contract={contract} side="E" registerCardEl={registerCardEl} />
+        )}
       </div>
 
       {/* Bricka + zon nere till vänster. */}
