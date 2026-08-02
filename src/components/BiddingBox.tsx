@@ -73,7 +73,17 @@ export function BiddingBox({
     showHelp && recommendation && allowed.has(recommendation.bid) ? recommendation.bid : null
 
   const choose = (bid: Bid) => {
-    if (allowed.has(bid)) setSelected((s) => (s === bid ? null : bid))
+    if (!allowed.has(bid)) return
+    // Två tryck = OK (ägarbeslut): första trycket väljer budet (markerar + visar
+    // betydelsen), andra trycket på SAMMA bud bekräftar det direkt. Inget
+    // tidsintervall som ett dubbelklick – bara samma bud igen. Ett annat bud
+    // byter val i stället, och OK-knappen fungerar precis som förr.
+    if (selected === bid) {
+      onBid(bid)
+      setSelected(null)
+    } else {
+      setSelected(bid)
+    }
   }
   const confirm = () => {
     if (selected) {

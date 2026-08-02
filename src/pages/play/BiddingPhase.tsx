@@ -110,7 +110,7 @@ export function BiddingPhase({
       {/* Din hand som solfjäder + HCP-bricka (Synrey). mt-auto trycker handen till
           botten när duken fyller hela skärmen; säker botten-marginal (hemindikator). */}
       <div className="relative mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-3 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
-        <HandFan hand={game.deal.hands.S} />
+        <HandFan hand={game.deal.hands.S} spread />
         <div className="absolute bottom-2 right-2 rounded-md bg-emerald-950/80 px-2 py-0.5 text-xs font-semibold text-white ring-1 ring-gold-400/25">
           HCP {hcp(game.deal.hands.S)}
         </div>

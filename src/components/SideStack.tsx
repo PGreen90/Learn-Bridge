@@ -20,11 +20,13 @@ export function SideStack({
 }) {
   // sm-kortet är 28×40 px; vridet tar det 40×28. Varje kort får en wrapper med
   // de vridna måtten så överlappningen (-mt) räknar på rätt höjd.
-  // Valören ska peka IN mot mitten på båda sidor (ägarbeslut 2026-07-02). Ett
-  // vridet kort visar indexet i remsans HÖGRA ände (indexen sitter på kortets
-  // diagonal, det ändrar ingen rotation) – rätt för Väst, fel för Öst. Östs
-  // kort får därför indexen SPEGLADE till andra diagonalen (mirrorCorners) så
-  // valören hamnar i vänstra änden = mot mitten.
+  // Väst och Öst är SPEGELBILDER (ägarbeslut 2026-08-02 — förr roterades båda
+  // åt samma håll och Öst fick hörnen speglade, vilket gav fel orientering):
+  //  - Väst (+90°, medurs): indexremsan hamnar i kortets ÖVERKANT med valören i
+  //    högra änden = mot bordets mitt. Senare kort målas ovanpå → överkanterna syns.
+  //  - Öst (−90°, moturs): indexremsan hamnar i UNDERKANTEN med valören i vänstra
+  //    änden = mot mitten. Därför målas Östs kort i OMVÄND ordning (z-index:
+  //    första kortet överst) så det är underkanterna som syns.
   // Kortet är större på mobil (`smPlus` = 40×56 → vridet 56×40) och krymper till
   // `sm` (28×40 → vridet 40×28) från `sm:`-brytpunkten. Wrapper-måtten och
   // överlappet (-mt) följer med responsivt så indexremsan blir lika bred.
@@ -33,14 +35,14 @@ export function SideStack({
       {cards.map((c, i) => (
         <div
           key={`${c.suit}${c.rank}`}
-          className={`flex h-10 w-14 items-center justify-center sm:h-7 sm:w-10 ${i > 0 ? '-mt-7 sm:-mt-4' : ''}`}
+          className={`relative flex h-10 w-14 items-center justify-center sm:h-7 sm:w-10 ${i > 0 ? '-mt-7 sm:-mt-4' : ''}`}
+          style={side === 'E' ? { zIndex: cards.length - i } : undefined}
         >
           <PlayingCard
             ref={registerCardEl?.(`${c.suit}${c.rank}`)}
             card={c}
             size="smPlus"
-            mirrorCorners={side === 'E'}
-            className="rotate-90"
+            className={side === 'E' ? '-rotate-90' : 'rotate-90'}
           />
         </div>
       ))}

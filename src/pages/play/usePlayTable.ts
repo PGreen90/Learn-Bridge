@@ -356,7 +356,11 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
     // Under claim-revealen ligger korten stilla — bara Gå vidare-knappen verkar.
     if (pendingClaim) return
     skipSweep()
-    if (selectedSuit !== card.suit) {
+    // Singelton (enda kortet i sin färg) spelas direkt på ETT tryck — det finns
+    // inget att välja mellan, så färgvalssteget hoppas över (ägarönskemål).
+    // Korten görs bara klickbara på egen tur, så play.toAct äger alltid kortet.
+    const suitCount = play.hands[play.toAct].filter((c) => c.suit === card.suit).length
+    if (suitCount > 1 && selectedSuit !== card.suit) {
       setSelectedSuit(card.suit)
       return
     }

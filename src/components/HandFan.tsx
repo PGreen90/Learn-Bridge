@@ -9,10 +9,27 @@ import type { Hand } from '../types/bridge'
 import { bySuit, HAND_SUITS, REST_OVERLAP } from '../lib/cardLayout'
 import { PlayingCard } from './PlayingCard'
 
-export function HandFan({ hand, size = 'md' }: { hand: Hand; size?: 'sm' | 'md' | 'lg' }) {
+export function HandFan({
+  hand,
+  size = 'md',
+  spread = false,
+}: {
+  hand: Hand
+  size?: 'sm' | 'md' | 'lg'
+  /** `spread` breddar raden till budlådans bredd (max-w-md) och sprider ut
+   *  färggrupperna med justify-between → luftigare, tydligare hand (ägarbeslut).
+   *  Överlappet inom en färg är oförändrat, så mobilen aldrig svämmar över. */
+  spread?: boolean
+}) {
   let dealt = 0 // löpande kortindex över alla färggrupper → utdelningskaskaden
   return (
-    <div className="flex items-end justify-center">
+    <div
+      className={
+        spread
+          ? 'mx-auto flex w-full max-w-md items-end justify-between'
+          : 'flex items-end justify-center'
+      }
+    >
       {HAND_SUITS.map((suit) => {
         const cards = bySuit(hand, suit)
         if (cards.length === 0) return null
