@@ -1,7 +1,10 @@
 // Kompasspanelen (Synrey-stil): mörkgrön platta med en kompassros (fyruddig
 // stjärna med ♠ i mitten), väderstrecken N/Ö/S/V runt om — given markerad med
-// gul understrykning — och "Bricka X / zon" längst ner.
+// gul understrykning — och "Bricka X / zon" direkt under rosen. Längst ner
+// finns en valfri `footer`-plats (ägarbeslut 2026-08-02: Mål-knappen bor där
+// i budfasen i stället för på en egen rad under panelen).
 
+import type { ReactNode } from 'react'
 import type { Seat, Vulnerability } from '../types/bridge'
 
 const VUL_TEXT: Record<Vulnerability, string> = {
@@ -30,13 +33,16 @@ export function CompassPanel({
   dealer,
   board,
   vulnerability,
+  footer,
 }: {
   dealer: Seat
   board: number
   vulnerability: Vulnerability
+  /** Valfritt innehåll längst ner i panelen (budfasens Mål-knapp). */
+  footer?: ReactNode
 }) {
   return (
-    <div className="flex w-24 shrink-0 flex-col justify-between rounded-lg bg-emerald-950/60 p-2 ring-1 ring-emerald-100/10 sm:w-32 sm:p-2.5">
+    <div className="flex w-24 shrink-0 flex-col rounded-lg bg-emerald-950/60 p-2 ring-1 ring-emerald-100/10 sm:w-32 sm:p-2.5">
       {/* Kompassrosen med väderstrecken runt om. */}
       <div className="grid grid-cols-3 grid-rows-3 place-items-center">
         <div />
@@ -60,10 +66,13 @@ export function CompassPanel({
         <CompassLetter letter="S" dealer={dealer} />
         <div />
       </div>
-      <div className="mt-2 text-[10px] leading-tight text-emerald-50/90 sm:text-[11px]">
+      {/* Bricka/zon direkt under rosen (uppflyttade 2026-08-02) → botten fri
+          för footern. */}
+      <div className="mt-1 text-[10px] leading-tight text-emerald-50/90 sm:text-[11px]">
         <div>Bricka {board}</div>
         <div>{VUL_TEXT[vulnerability]}</div>
       </div>
+      {footer && <div className="mt-auto pt-1.5">{footer}</div>}
     </div>
   )
 }

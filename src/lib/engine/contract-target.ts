@@ -47,6 +47,31 @@ export function describeTarget(target: ContractTarget): string {
   }
 }
 
+/**
+ * Kortversionen av rubriken för trånga ytor — kompasspanelens Mål-knapp
+ * (ägarbeslut 2026-08-02: målet bor i panelen). Max ~2 korta ord, så texten
+ * aldrig blir fler än två rader i den smala panelen; fulltexten syns i
+ * kontraktväljaren (describeTarget ovan).
+ */
+export function describeTargetShort(target: ContractTarget): string {
+  switch (target) {
+    case 'random':
+      return 'Slumpad giv'
+    case 'major-game':
+      return 'Utgång 4♥/4♠'
+    case 'minor-game':
+      return 'Utgång 5♣/5♦'
+    case 'nt-game':
+      return 'Sang (3NT)'
+    case 'small-slam':
+      return 'Lillslam'
+    case 'grand-slam':
+      return 'Storslam'
+    case 'competitive':
+      return 'Med störning'
+  }
+}
+
 /** Matchar ett FÄRDIGT NS-kontrakt en av de kontraktsbestämda måltyperna? */
 function contractMatches(contract: Contract, target: ContractTarget): boolean {
   const { strain, level } = contract

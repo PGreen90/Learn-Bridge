@@ -1,49 +1,48 @@
-// En hand som färggrupperad kortrad: färgerna i Synrey-ordning ♠ ♥ ♣ ♦, luft
-// mellan färgerna, korten överlappar med det delade REST_OVERLAP inom varje färg.
-// Delad look i budgivningen, budträningen och budvisningen (ägarbeslut
-// 2026-07-30). Spelbordets vilande hand (`SouthFan` i pages/play/hands.tsx)
-// avviker sedan 2026-08-02: ETT jämnt överlapp utan färgglapp, så 13 kort
-// alltid ryms på mobilen. Bara presentation.
+// En hand som färggrupperad kortrad: färgerna i Synrey-ordning ♠ ♥ ♣ ♦, korten
+// överlappar med det delade REST_OVERLAP inom varje färg. Delad look i
+// budträningen och budvisningen (ägarbeslut 2026-07-30). Med `flat` ritas i
+// stället spelbordets sammanhängande rad (ägarbeslut 2026-08-02, samma som
+// `SouthFan` i vila): fasta xl-kort 64×96 och ETT jämnt överlapp utan färgglapp
+// (FLAT_OVERLAP → 13 kort = 349 px), så budfas och spelfas ser identiska ut.
+// Bara presentation.
 
 import type { Hand } from '../types/bridge'
-import { bySuit, HAND_SUITS, REST_OVERLAP } from '../lib/cardLayout'
+import { bySuit, FLAT_OVERLAP, HAND_SUITS, REST_OVERLAP } from '../lib/cardLayout'
 import { PlayingCard } from './PlayingCard'
 
 export function HandFan({
   hand,
   size = 'md',
-  spread = false,
+  flat = false,
 }: {
   hand: Hand
   size?: 'sm' | 'md' | 'lg'
-  /** `spread` breddar raden till budlådans bredd (max-w-md) och sprider ut
-   *  färggrupperna med justify-between → luftigare, tydligare hand (ägarbeslut).
-   *  Överlappet inom en färg är oförändrat, så mobilen aldrig svämmar över. */
-  spread?: boolean
+  /** `flat` ritar spelbordets sammanhängande rad: fasta xl-kort med samma
+   *  överlapp över hela raden, inga färgglapp (`size` ignoreras). Används av
+   *  budfasen så handen ser likadan ut där som i spelfasen. */
+  flat?: boolean
 }) {
   let dealt = 0 // löpande kortindex över alla färggrupper → utdelningskaskaden
   return (
-    <div
-      className={
-        spread
-          ? 'mx-auto flex w-full max-w-md items-end justify-between'
-          : 'flex items-end justify-center'
-      }
-    >
+    <div className="flex items-end justify-center">
       {HAND_SUITS.map((suit) => {
         const cards = bySuit(hand, suit)
         if (cards.length === 0) return null
         return (
           <div key={suit} className="flex">
-            {cards.map((c, i) => (
-              <PlayingCard
-                key={`${c.suit}${c.rank}`}
-                card={c}
-                size={size}
-                className={`deal-in ${i > 0 ? REST_OVERLAP : ''}`}
-                style={{ animationDelay: `${dealt++ * 35}ms` }}
-              />
-            ))}
+            {cards.map((c, i) => {
+              const idx = dealt++
+              const ml = flat ? (idx === 0 ? '' : FLAT_OVERLAP) : i === 0 ? '' : REST_OVERLAP
+              return (
+                <PlayingCard
+                  key={`${c.suit}${c.rank}`}
+                  card={c}
+                  size={flat ? 'xl' : size}
+                  className={`deal-in ${ml}`}
+                  style={{ animationDelay: `${idx * 35}ms` }}
+                />
+              )
+            })}
           </div>
         )
       })}

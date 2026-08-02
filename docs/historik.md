@@ -12,6 +12,38 @@
 
 ## 2026-08-02
 
+**🎨 BUDLÅDAN (FACELIFT FAS 1 YTA 3) — KLAR (ägarbeslut i tur och ordning
+under sessionen, kväll):**
+- **Budfasens kortrad = spelfasens** (skulden från pass 4 inlöst): `HandFan`
+  fick ett `flat`-läge som ritar samma sammanhängande rad som `SouthFan` i
+  vila — fasta xl-kort 64×96, ETT jämnt överlapp utan färgglapp. Måtten bor i
+  delade `FLAT_OVERLAP` (`cardLayout.ts`, 13 kort = 349 px) som båda läser.
+  Budträning/budvisning behåller färggrupperingen. HCP-brickan svävar nu på
+  avdelarlinjen (hade annars krockat med den bredare raden).
+- **Mål-knappen bor i kompassrutan** (ny `footer`-plats i `CompassPanel`;
+  Bricka/zon uppflyttade direkt under rosen). Nya KORTA måletiketter
+  (`describeTargetShort` i `contract-target.ts`) så texten aldrig blir fler än
+  två rader i den smala rutan — fulltexterna kvar i kontraktväljaren.
+- **Betydelse-raden + "Motorn hade valt" på EN rad UNDER X/XX/PASS/OK**
+  (ägaren ville ha hjälpen under knapparna; sammanslagningen sparar en rad
+  på höjden och knapparna flyttar sig aldrig när hjälpen dyker upp).
+- **Valt bud: guldring INUTI knappen** (`ring-inset` — chipet växer inte och
+  lyfts inte; mätt i DOM: valt och ovalt chip båda 66×48) **+ startsidans
+  roterande guldbåge** (`gold-frame`, 6 s/varv — ringen och bågen ligger i
+  samma 2 px-band; "minskad rörelse" respekteras via samma CSS). OK-knappen
+  förblev himmelsblå (ägarbeslut efter guldtest). Luften i rutnätet trimmades
+  i två varv (4 → 6 → 4 px) — 4 px funkar när inget sticker ut ur knappen.
+- **Raden ovanför (kompass + auktion + meny) låst till max 576 px**
+  (`max-w-xl`, centrerad) — sträcktes förr ut över hela duken på stor skärm.
+- **Höjd/bredd-budgeten:** hela vyn (rutnät, förklaring, kortrad) ryms på
+  exakt 812 px-mobil även i värsta fallet (3-raders förklaring); breddgolvet
+  är 352 px (kortraden 349) — moderna telefoner är ≥ 360.
+- **🐛 På köpet:** budvalet nollställs vid ny giv (`useEffect` på
+  `history.length` i `BiddingBox.tsx`) — förr överlevde markeringen in i nästa
+  giv, och med två-tryck-OK kunde ETT tryck bjuda det gamla valet.
+Verifierat i dev-browsern (mobil 375/352 px + desktop, konsolen ren), tsc +
+hela sviten grön (`npm test`).
+
 **🐛 SYD SOM TRÄKARL — REGRESSION FRÅN FACELIFTEN, LAGAD & LIVE (merge `b6279c6`):**
 när NORD vann budgivningen (Syd träkarl) ritades Nords öppna hand aldrig — pass 2
 bytte `northOpen=isFaceUp('N')` mot `dummyAtTop = dummy==='N'` och tappade fallet.

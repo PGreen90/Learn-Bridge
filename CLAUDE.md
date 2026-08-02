@@ -15,26 +15,29 @@ svarar på vad).
 "re**bid**z" med guld-skimmer, frameless guldspader, roterande guldram (hover),
 diskret guldflik i sidhuvudet.
 
-**SPELBORDET (yta 2): KLAR & LIVE 2026-07-31, poleringspass 2026-08-02 (två).**
+**SPELBORDET (yta 2): KLAR & LIVE 2026-07-31, pass 2–4 t.o.m. 2026-08-02.**
 Synrey-modellen, telefon-först: full-bleed duk (headern dold i spelvyn, röd
 "Avsluta spel" → start), tryck-färg-visar-bara-den, färgpiller + guld-bar,
 ⋮+ⓘ uppe till höger, två tryck på samma bud = OK, singelton på ETT tryck, vid
-FÖRSVAR träkarlen på sin RIKTIGA sida som Synrey-högar (`SideDummyPiles`),
-spelar DU är träkarlen Nord upptill. **Pass 4 (2026-08-02 em):** Syd-träkarl-
-regressionen lagad (Nords spelförarhand ritades aldrig → frös; facit
-`syd-trakarl.test.tsx`), Syds kortrad utan färgglapp (13 kort = 349 px),
-FASTA kortstorlekar (händer `xl` 64×96 överallt, stickhögen kompakt med 25 %
-överlapp och `lg` 48×64) och dubbla hörnindex på alla kort. Ägarbeslut: en
-yta i taget, **nästa väljs av ägaren**. Detalj: `docs/historik.md` 2026-08-02
-+ `docs/konkurrensplan.md` Fas 1.
+FÖRSVAR träkarlen på sin RIKTIGA sida som Synrey-högar (`SideDummyPiles`).
+**Pass 4:** Syd-träkarl-regressionen lagad (`syd-trakarl.test.tsx`), kortraden
+utan färgglapp, fasta kortstorlekar (`xl`/`lg`), dubbla hörnindex. Detalj:
+`docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1.
+
+**BUDLÅDAN (yta 3): KLAR 2026-08-02.** Budfasens kortrad = spelfasens
+(`HandFan flat`, delade `FLAT_OVERLAP` — pass 4-skulden inlöst), Mål-knappen i
+kompassrutan med korta etiketter (`describeTargetShort`), betydelse-raden +
+"Motorn hade valt" på EN rad UNDER X/XX/PASS/OK, valt bud = guldring INUTI
+knappen (växer inte) + startsidans roterande guldbåge (6 s/varv), raden
+ovanför låst till max 576 px. Buggfix: budvalet nollställs vid ny giv.
+Detalj: `docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1.
 
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (deployad 2026-07-31).**
 Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
 från sidan som SJÄLV har extra): efter `1m–1X–3m(invit-hopp)–3NT` trevar öppnaren
 med **19+ hp**, svararen lyfter 6NT med maximum/fittande minorhonnör. Smal med flit
-(ägarbeslut 2026-07-31 "bara äkta extra"). Mätning #21: par-avvikelse 271,24 →
-270,74, noll regressioner, 1 giv (20261020) → exakt par 6NT. Facit
-`auction-3nt-stopp.test.ts`. Detalj: `docs/budsystem.md §6.9/§9` +
+(ägarbeslut 2026-07-31 "bara äkta extra"). Mätning #21: noll regressioner.
+Facit `auction-3nt-stopp.test.ts`. Detalj: `docs/budsystem.md §6.9/§9` +
 `docs/systemrevisorn.md` #21. **Kvar i etapp 7: hål C + hål D.**
 
 **LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR & LIVE 2026-07-30.** Naturligt inkliv
@@ -62,25 +65,25 @@ topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
 på uttryckligt ägarbeslut.
 
 **FELRAPPORT #32 — SPELFÖRAREN ETABLERAR LÅNG FÄRG i sang: KLAR & LIVE 2026-07-29**
-(`establishLongSuit`, bara sang; netto +8 stick/40 givar). Detalj: `docs/historik.md`
-+ `docs/bot-hjarna.md`.
+(`establishLongSuit`, bara sang). Detalj: `docs/historik.md` +
+`docs/bot-hjarna.md`.
 
-**RONDGENOMGÅNGEN (after action report) KLAR & LIVE 2026-07-29** — efter en giv
-öppnar "Rondgenomgång" tre kapitel (bud / spel / resultat med DD-dom "med perfekt
-spel fanns N stick"). Detalj: `docs/kortspel.md` + `docs/historik.md`.
+**RONDGENOMGÅNGEN (after action report) KLAR & LIVE 2026-07-29** — efter en
+giv öppnas tre kapitel (bud/spel/resultat med DD-dom). Detalj:
+`docs/kortspel.md` + `docs/historik.md`.
 
 **MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna lägger/förklarar/
 läser UDCA + Lavinthal (gardregeln); mätrigg `play-quality.probe` (`PLAYQ=1`).
 Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer nästa facelift-yta (budlådan — då tas även
-budfasens kortrad, se `docs/senare.md` — eller sidhuvudet/fler), eller byter
-spår: 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl nästa lager (`docs/senare.md`).
-⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
+**➡️ NÄSTA GÅNG:** ägaren väljer nästa facelift-yta (t.ex. sidhuvudet på
+övriga sidor), eller byter spår: 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl
+nästa lager (`docs/senare.md`). ⚪ SENARE: tredje hand högt i **trumf** +
+signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet,
-budstöd På/Av-toggle, felrapporter #40/#41/#42, underhåll (deploygrinden seedad +
-200× snabbare — volymtester ska ALLTID vara seedade). Känt hål kvar: starka
+budstöd På/Av-toggle, felrapporter #40/#41/#42, underhåll (volymtester ska
+ALLTID vara seedade). Känt hål kvar: starka
 dubblaren säljer given i rond 2 utan egen färg (frö 20260952, M19, `docs/bevaka.md`).
 
 > **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**

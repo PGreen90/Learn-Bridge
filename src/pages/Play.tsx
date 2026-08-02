@@ -7,7 +7,7 @@ import type { Deal, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
-import { describeTarget } from '../lib/engine/contract-target'
+import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
 import { PlayingCard } from '../components/PlayingCard'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { SuitText } from '../components/SuitText'
@@ -78,7 +78,7 @@ export function Play() {
         onBid={onBid}
         onConfirm={confirmContract}
         onNewGame={() => startNewGame(target)}
-        targetLabel={describeTarget(target)}
+        targetLabel={describeTargetShort(target)}
         onOpenPicker={() => setPicking(true)}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}

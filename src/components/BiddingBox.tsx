@@ -1,12 +1,13 @@
 // Budlådan i Synrey-stil (FAS 12): rutnät med kolumnerna 1NT/1♠/1♥/1♦/1♣ och
 // raderna 1–7, färgkodade chips (NT lila, ♠ svart, ♥ röd, ♦ orange, ♣ grön) och
-// nedersta raden X / XX / PASS / OK. Ett klick VÄLJER budet (chipet markeras och
-// en kort betydelse-rad visas), OK bekräftar. Otillåtna bud tonas ner.
+// nedersta raden X / XX / PASS / OK. Ett klick VÄLJER budet (chipet lyfts med
+// guldring), OK bekräftar. Betydelse-raden visas UNDER X/XX/PASS/OK-raden
+// (ägarbeslut 2026-08-02) så knapparna aldrig flyttar sig. Otillåtna bud tonas ner.
 //
 // Motorns rekommenderade bud markeras med en liten grön prick och får sin äkta
 // förklaring; egna bud tolkas ur auktionen (tolkande lagret) så raden aldrig är tom.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Bid } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import { isAlertRule } from '../lib/engine/alerts'
@@ -37,7 +38,12 @@ function BoxChip({
       disabled={!ok}
       onClick={onClick}
       className={`relative flex h-12 items-center justify-center rounded-lg text-lg font-bold shadow-sm transition-all active:scale-95 ${bidChipTone(bid)} ${
-        selected ? 'ring-2 ring-white brightness-105 -translate-y-0.5' : ''
+        /* Valt bud: guldring + startsidans roterande guldbåge (gold-frame,
+           6 s/varv — ägarbeslut 2026-08-02: samma "levande guld" som hero-korten).
+           Ringen ligger INUTI knappen (ring-inset, ägarbeslut 2026-08-02: chipet
+           får inte växa när det är valt) — samma 2 px-band som bågen löper i.
+           Respekterar "minskad rörelse" via samma CSS som startsidan. */
+        selected ? 'ring-2 ring-inset ring-gold-400 brightness-105 gold-frame' : ''
       } disabled:opacity-25 disabled:shadow-none ${ok ? 'cursor-pointer hover:brightness-105' : ''}`}
     >
       {recommended && !selected && (
@@ -69,6 +75,13 @@ export function BiddingBox({
 }) {
   const allowed = new Set(legal)
   const [selected, setSelected] = useState<Bid | null>(null)
+  // Nollställ valet när auktionen ändras (2026-08-02): utan detta överlever ett
+  // markerat bud in i NÄSTA giv, och eftersom två tryck på samma bud = OK kunde
+  // ett gammalt val råka bjudas med ett enda tryck. Under motståndarnas bud kan
+  // inget väljas (legal är tom), så i praktiken slår detta bara vid ny giv.
+  useEffect(() => {
+    setSelected(null)
+  }, [history.length])
   const recBid =
     showHelp && recommendation && allowed.has(recommendation.bid) ? recommendation.bid : null
 
@@ -104,8 +117,11 @@ export function BiddingBox({
   const selAlert = isRec ? isAlertRule(recommendation?.rule) : false
 
   return (
-    <div className="mx-auto w-full max-w-md space-y-1.5">
-      <div className="grid grid-cols-5 gap-1.5">
+    <div className="mx-auto w-full max-w-md space-y-1">
+      {/* gap-1 (ägarbeslut 2026-08-02): tätt mellanrum funkar igen eftersom
+          guldringen numera ligger INUTI knappen (ring-inset) och inget växer
+          eller lyfts vid val — inget går in på grannknapparna. */}
+      <div className="grid grid-cols-5 gap-1">
         {LEVELS.map((level) =>
           STRAINS.map((code) => {
             const bid = `${level}${code}`
@@ -123,25 +139,7 @@ export function BiddingBox({
         )}
       </div>
 
-      {/* Betydelse-raden: kort och diskret, bara när ett bud är valt (och budstödet är på). */}
-      {showHelp && selected && (
-        <p className="px-1 text-xs leading-snug text-emerald-50/90">
-          {isRec && <span className="mr-1 rounded bg-emerald-600 px-1 text-[10px] font-bold text-white">MOTORNS BUD</span>}
-          {selAlert && <span className="mr-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>}
-          <SuitText>{selExpl}</SuitText>
-        </p>
-      )}
-
-      {/* R3-fynd #3: väljer du ett annat bud än motorns rekommendation visas det
-          diskret så du vet vad partnern/systemet hade valt – utan att hindra dig
-          från att buda som du vill (Spela-läget är spel, inte facit-tvång). */}
-      {selected && recBid && selected !== recBid && (
-        <p className="flex items-center gap-1 px-1 text-[11px] leading-snug text-emerald-50/70">
-          Motorn hade valt <BidChip bid={recBid} className="scale-90" />
-        </p>
-      )}
-
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-4 gap-1">
         <BoxChip bid="X" ok={allowed.has('X')} selected={selected === 'X'} recommended={recBid === 'X'} onClick={() => choose('X')} />
         <BoxChip bid="XX" ok={allowed.has('XX')} selected={selected === 'XX'} recommended={recBid === 'XX'} onClick={() => choose('XX')} />
         <BoxChip bid="P" ok={allowed.has('P')} selected={selected === 'P'} recommended={recBid === 'P'} onClick={() => choose('P')} />
@@ -154,6 +152,26 @@ export function BiddingBox({
           OK
         </button>
       </div>
+
+      {/* Betydelse-raden UNDER knapparna (ägarbeslut 2026-08-02): kort och
+          diskret, bara när ett bud är valt (och budstödet är på). "Motorn hade
+          valt" (R3-fynd #3) ligger i SAMMA stycke — en rad mindre, så handen
+          inte knuffas under skärmkanten på mobil. Facit-tvång är det inte:
+          du ser motorns val men bjuder som du vill. */}
+      {showHelp && selected && (
+        <p className="px-1 text-xs leading-snug text-emerald-50/90">
+          {isRec && <span className="mr-1 rounded bg-emerald-600 px-1 text-[10px] font-bold text-white">MOTORNS BUD</span>}
+          {selAlert && <span className="mr-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>}
+          <SuitText>{selExpl}</SuitText>
+          {recBid && selected !== recBid && (
+            <>
+              {' '}
+              <span className="text-emerald-50/70">— Motorn hade valt</span>{' '}
+              <BidChip bid={recBid} className="scale-90" />
+            </>
+          )}
+        </p>
+      )}
     </div>
   )
 }
