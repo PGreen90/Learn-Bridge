@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import bookRaw from '../../docs/budsystem.md?raw'
 import { SUIT_INK } from '../lib/suitColors'
 import { CHAR_SUIT, SuitText } from '../components/SuitText'
+import { PageHeader } from '../components/PageHeader'
 
 // Sidan läser systemboken (docs/budsystem.md) direkt och visar den i utfällbara
 // sektioner. Boken är sanningskällan – ändra där, så uppdateras sidan automatiskt.
@@ -193,13 +194,10 @@ export function BudSystem() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold mb-1">Budsystem</h1>
-        <p className="text-ink-soft">
-          Vårt 2-över-1-system i sin helhet – öppningar, svar, återbud, slam,
-          försvar och markeringar. Klicka på en rubrik för att fälla ut, eller sök.
-        </p>
-      </header>
+      <PageHeader title="Budsystem">
+        Vårt 2-över-1-system i sin helhet – öppningar, svar, återbud, slam,
+        försvar och markeringar. Klicka på en rubrik för att fälla ut, eller sök.
+      </PageHeader>
 
       {/* Sökfältet: filtrerar sektionerna medan man skriver. */}
       <div>
@@ -238,22 +236,39 @@ export function BudSystem() {
       </div>
 
       <div className="space-y-3">
-        {visible.map((s) => (
+        {visible.map((s) => {
+          // Klubbok-känslan (faceliften 2026-08-02): kapitelnumret ("3." i
+          // rubriken) lyfts ut och sätts som §-numrering i guldserif.
+          const kap = s.title.match(/^(\d+)\.\s*(.*)$/)
+          return (
           <details
             key={s.title}
             open={q ? true : undefined}
             className="group rounded-xl border border-line bg-panel shadow-sm"
           >
             <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-semibold text-accent-strong [&::-webkit-details-marker]:hidden">
-              <span>
-                <Highlight text={s.title} q={q} />
+              <span className="flex items-baseline gap-2">
+                {kap && (
+                  <span className="font-brand text-lg font-semibold leading-none text-gold-600 dark:text-gold-300">
+                    §{kap[1]}
+                  </span>
+                )}
+                <span>
+                  <Highlight text={kap ? kap[2] : s.title} q={q} />
+                </span>
               </span>
               <span className="text-ink-faint transition-transform group-open:rotate-180">
                 ▾
               </span>
             </summary>
-            <div className="border-t border-line px-4 pb-4 pt-2">
-              {s.intro && <Markdown>{s.intro}</Markdown>}
+            {/* Guldhårlinjen under den öppnade kapitelrubriken = samma linje
+                som sidhuvudena (PageHeader) — klubbtemat genom hela boken. */}
+            <div className="border-t border-gold-400/30 px-4 pb-4 pt-2">
+              {s.intro && (
+                <div className="md-anfang">
+                  <Markdown>{s.intro}</Markdown>
+                </div>
+              )}
               {s.subs.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {s.subs.map((sub) => (
@@ -281,7 +296,8 @@ export function BudSystem() {
               <CollapseButton label={s.title} />
             </div>
           </details>
-        ))}
+          )
+        })}
         {q && visible.length === 0 && (
           <p className="rounded-xl border border-dashed border-line-strong p-6 text-center text-sm text-ink-muted">
             Inget i systemboken matchar &quot;{query}&quot;.

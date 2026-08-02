@@ -27,6 +27,20 @@ function fullDeck(): Card[] {
   return deck
 }
 
+/** Mulberry32 — liten deterministisk RNG så en giv kan återskapas ur sitt frö.
+ *  Bor här (flyttad från revisor.ts 2026-08-02) så lätta moduler (Dagens giv)
+ *  kan seeda utan att dra in hela revisorn; revisorn återexporterar den. */
+export function mulberry32(seed: number): () => number {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
 /** Blandar och delar ut. Standard: äkta slump (Math.random). */
 export function dealRandom(rng: () => number = Math.random): Deal {
   const deck = fullDeck()

@@ -1,6 +1,7 @@
 import type { CSSProperties, Ref } from 'react'
 import type { Card, Suit } from '../types/bridge'
 import { SUIT_TEXT } from '../lib/suitColors'
+import { BrandMark } from './BrandMark'
 
 const SYMBOL: Record<Suit, string> = {
   spades: '♠',
@@ -89,7 +90,9 @@ export function PlayingCard({
   const base = `${s.box} shrink-0 select-none transition-all border border-black/20`
 
   if (faceDown || !card) {
-    // RebidZ-baksidan: vit kortram, mörk smaragdpanel med guldram + rutmönster.
+    // RebidZ-baksidan: vit kortram, mörk smaragdpanel med guldram + rutmönster,
+    // och brandens guldspader som MONOGRAM i mitten (faceliften 2026-08-02,
+    // "klubbtrycket") — samma spader som logotypen, så baksidan bär varumärket.
     return (
       <div
         ref={ref as Ref<HTMLDivElement>}
@@ -98,14 +101,16 @@ export function PlayingCard({
         style={style}
       >
         <div
-          className="absolute inset-[3px] rounded-[3px] ring-1 ring-inset ring-gold-400/50"
+          className="absolute inset-[3px] flex items-center justify-center rounded-[3px] ring-1 ring-inset ring-gold-400/50"
           style={{
             background:
               'repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 2px, transparent 2px 6px), ' +
               'repeating-linear-gradient(-45deg, rgba(255,255,255,.07) 0 2px, transparent 2px 6px), ' +
               'linear-gradient(135deg, #047857 0%, #065f46 55%, #022c22 100%)',
           }}
-        />
+        >
+          <BrandMark bare className="h-1/2 w-1/2 opacity-90" />
+        </div>
       </div>
     )
   }

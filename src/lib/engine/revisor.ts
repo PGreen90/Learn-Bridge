@@ -15,7 +15,7 @@
 
 import type { Deal, Seat } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
-import { dealRandom } from './deal'
+import { dealRandom, mulberry32 } from './deal'
 import { auctionComplete, decideCall } from './auction-live'
 import { contractFromCalls } from './auction-contract'
 import { duplicateScore, sideVulnerable } from './scoring'
@@ -27,17 +27,9 @@ const SIDE_SEATS: Record<'NS' | 'EW', [Seat, Seat]> = { NS: ['N', 'S'], EW: ['E'
 
 // ---- Reproducerbar slump ---------------------------------------------------
 
-/** Mulberry32 — liten deterministisk RNG så varje giv kan återskapas ur sitt frö. */
-export function mulberry32(seed: number): () => number {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+/** Mulberry32 bor numera i deal.ts (2026-08-02, så Dagens giv slipper dra in
+ *  hela revisorn) — återexporteras här så alla gamla importvägar står kvar. */
+export { mulberry32 }
 
 /** Given för ett frö — samma frö ger alltid exakt samma giv (repro av en miss). */
 export function dealFromSeed(seed: number): Deal {

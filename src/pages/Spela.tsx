@@ -14,6 +14,7 @@ import { BidChip } from '../components/BidChip'
 import { Felt } from '../components/Felt'
 import { HandFan } from '../components/HandFan'
 import { SideStack } from '../components/SideStack'
+import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 import { SuitText } from '../components/SuitText'
@@ -95,13 +96,10 @@ export function Spela() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-2xl font-bold mb-1">Budvisning</h1>
-        <p className="text-ink-soft">
-          Titta-läge: motorn delar ut en giv och budar alla fyra händerna enligt
-          systemboken. Klicka på ett lagt bud för att se vad det betyder.
-        </p>
-      </header>
+      <PageHeader title="Budvisning">
+        Titta-läge: motorn delar ut en giv och budar alla fyra händerna enligt
+        systemboken. Klicka på ett lagt bud för att se vad det betyder.
+      </PageHeader>
 
       <div className="flex flex-wrap gap-3">
         <Button onClick={() => loadDeal(dealRandom())}>Ny giv →</Button>

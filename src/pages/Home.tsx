@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
+import { dailyNumber } from '../lib/engine/daily'
+import { loadValue } from '../lib/storage'
 
 // Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
 // oss för mycket"): varumärkesblocket överst (frameless guldspader + tvåfärgat
@@ -38,6 +40,15 @@ const MODE_ICONS: Record<string, ReactNode> = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={ICON_SVG}>
       <path d="M2.5 12 C 6 7, 18 7, 21.5 12 C 18 17, 6 17, 2.5 12 Z" />
       <circle cx="12" cy="12" r="3" />
+    </svg>
+  ),
+  // Dagens giv: en kalender med guldpricken på dagens datum.
+  calendar: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={ICON_SVG}>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+      <path d="M3.5 9.5 L 20.5 9.5" />
+      <path d="M8 3 L 8 6.5 M16 3 L 16 6.5" />
+      <circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none" />
     </svg>
   ),
   // Budsystem: en uppslagen bok.
@@ -92,6 +103,37 @@ function ModeCard({
   )
 }
 
+/** Dagens giv-kortet: brett flaggskepp ovanför menyknapparna, med löpnumret
+ *  och en "Spelad ✓"-bricka när dagens giv redan är avklarad (localStorage,
+ *  skrivs av resultatvyn i Play). */
+function DailyCard() {
+  const n = dailyNumber()
+  const played = loadValue<number | null>('daily-played', null) === n
+  return (
+    <Link
+      to="/spela-kort/dagens"
+      className="gold-frame group relative block w-full max-w-xl rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
+    >
+      <div className="flex items-center gap-3">
+        <ModeIcon icon="calendar" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 font-semibold text-emerald-50">
+            Dagens giv <span className="text-gold-300">#{n}</span>
+            {played && (
+              <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
+                Spelad ✓
+              </span>
+            )}
+          </div>
+          <div className="text-sm text-emerald-100/70">
+            Samma giv för alla i dag — spela den och dela ditt resultat.
+          </div>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
 export function Home() {
   return (
     // ETT samlat grönt hero. Avboxat (frameless, mjuk kant via felt-melt) med luft.
@@ -110,13 +152,16 @@ export function Home() {
         <h1 className="text-5xl sm:text-6xl">
           <Wordmark />
         </h1>
-        <p className="max-w-md text-emerald-50/90">
-          Spela och lär dig bridge mot en partner som kan 2/1-systemet — direkt i
-          webbläsaren.
-        </p>
+        {/* Taglinen (ägarbeslut 2026-08-02): kort och koncis — tre ord. */}
+        <p className="max-w-md text-lg text-emerald-50/90">Träna, spela, tävla</p>
+
+        {/* Dagens giv — FLAGGSKEPPET (2026-08-02, Wordle-mekaniken): samma giv
+            för alla varje dag, delbart resultat. Enda kortet med den ständigt
+            roterande guldramen (gold-frame) — det unika ska synas. */}
+        <DailyCard />
 
         {/* Menyknapparna: vägen in i appen, en per del. */}
-        <div className="grid w-full max-w-xl grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
+        <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
           <ModeCard
             to="/spela-kort"
             icon="cards"

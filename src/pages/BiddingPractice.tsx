@@ -1,5 +1,7 @@
 ﻿import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { BrandMark } from '../components/BrandMark'
+import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
 import { getExercises, getThemesByScope, SCOPES } from '../lib/bidding'
 import { loadValue } from '../lib/storage'
@@ -16,10 +18,9 @@ export function BiddingPractice() {
 
   return (
     <div className="space-y-6">
-      <Panel>
-        <h1 className="text-2xl font-bold mb-1">Budträning</h1>
-        <p className="text-ink-soft">Välj först ett läge, sedan ett tema att träna på.</p>
-      </Panel>
+      <PageHeader title="Budträning">
+        Välj först ett läge, sedan ett tema att träna på.
+      </PageHeader>
 
       <Panel>
         <p className="text-sm font-semibold text-ink-muted mb-3">1. Välj läge</p>
@@ -54,14 +55,28 @@ export function BiddingPractice() {
                 className="flex items-center justify-between rounded-xl border border-line p-4 hover:bg-control-hover transition-colors"
               >
                 <div>
-                  <div className="font-semibold text-ink">{t.title}</div>
+                  <div className="flex items-center gap-1.5 font-semibold text-ink">
+                    {t.title}
+                    {/* Guldmärket (faceliften 2026-08-02): alla rätt senaste
+                        rundan → temat bär en guldspader (guld = belöning). */}
+                    {result && result.total > 0 && result.correct === result.total && (
+                      <span title="Alla rätt — guldspader!">
+                        <BrandMark bare className="h-4 w-4" />
+                      </span>
+                    )}
+                  </div>
                   <div className="text-sm text-ink-muted">{t.description}</div>
                 </div>
                 <div className="text-right shrink-0 ml-3">
                   <div className="text-xs text-ink-faint">{count} frågor</div>
                   {result && (
-                    <div className="text-sm font-semibold text-accent">
-                      Senast: {result.correct}/{result.total}
+                    /* Guld = belöning (faceliften 2026-08-02): poängen i
+                       guldserifen, som en graverad plakett. */
+                    <div className="text-sm font-semibold text-ink-muted">
+                      Senast:{' '}
+                      <span className="font-brand text-base text-gold-600 dark:text-gold-300">
+                        {result.correct}/{result.total}
+                      </span>
                     </div>
                   )}
                 </div>

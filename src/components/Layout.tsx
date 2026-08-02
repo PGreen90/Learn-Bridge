@@ -2,6 +2,9 @@ import { Suspense, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
 import { BrandMark, Wordmark } from './BrandMark'
+// Versionsnumret i sidfoten läses ur package.json — EN sanning, aldrig
+// hårdkodat i UI:t (ägarbeslut 2026-08-02: © + grundår + version i sidfoten).
+import pkg from '../../package.json'
 
 const NAV = [
   { to: '/', label: 'Hem', end: true },
@@ -12,12 +15,13 @@ const NAV = [
   { to: '/installningar', label: 'Inställningar', end: false },
 ]
 
-/** Diskret laddningsindikator medan en lat-laddad sida hämtas. En snurrande
- *  emerald-ring, centrerad i innehållsytan. */
+/** Diskret laddningsindikator medan en lat-laddad sida hämtas: guldspadern
+ *  som andas mjukt (faceliften 2026-08-02 — ersatte den generiska snurrande
+ *  ringen; sådana detaljer gör "app" av en webbsida). */
 function PageLoading() {
   return (
     <div className="flex justify-center py-24" role="status" aria-label="Laddar sidan">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-300/30 border-t-emerald-500" />
+      <BrandMark bare className="gold-pulse h-10 w-10" />
     </div>
   )
 }
@@ -32,7 +36,8 @@ export function Layout() {
   // Spelbordet går "full-bleed": duken fyller hela skärmen edge-to-edge utan ram
   // eller marginal (ägarbeslut 2026-07-31). Övriga sidor behåller den centrerade,
   // paddade spalten.
-  const immersive = location.pathname === '/spela-kort'
+  // startsWith: även Dagens giv (/spela-kort/dagens) spelas i helskärm.
+  const immersive = location.pathname.startsWith('/spela-kort')
 
   // Ljust/mörkt läge: månen tänder mörkret, solen släcker det.
   const themeButton = (
@@ -58,6 +63,17 @@ export function Layout() {
     }`
   }
 
+  function menuLinkClass(isActive: boolean): string {
+    // Glasmenyns länkar (2026-08-02): EGEN färgsättning skild från emerald-
+    // barens vita — iOS-materialens grej är mörk text på ljust glas (ljust
+    // läge) resp. ljus text på mörkt glas. text-ink följer läget via tokens.
+    return `block rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+      isActive
+        ? 'bg-gold-400/20 text-gold-700 ring-1 ring-inset ring-gold-400/30 dark:text-gold-200'
+        : 'text-ink hover:bg-hover-veil'
+    }`
+  }
+
   return (
     <div className="min-h-screen bg-surface text-ink">
       {/* Guldlinjen under sidhuvudet följer med på VARJE flik = klubbtemat.
@@ -68,7 +84,7 @@ export function Layout() {
       {/* Spelbordet är helt immersivt (ägarbeslut 2026-07-31): ingen menyrad —
           man tar sig ut via "Avsluta spel" i ⋮-menyn. Övriga sidor har headern. */}
       {!immersive && (
-      <header className="border-b border-gold-400/40 bg-brand-bar text-white shadow pt-[env(safe-area-inset-top)]">
+      <header className="relative border-b border-gold-400/40 bg-brand-bar text-white shadow pt-[env(safe-area-inset-top)]">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Logotypen + ordmärket (tvåfärgat guldserif-skimmer, spader-prick på
               i:et, frameless). "re"/"z" ärver text-white från baren. */}
@@ -107,21 +123,40 @@ export function Layout() {
           </div>
         </div>
 
-        {/* Mobil: den utfällda menyn – stängs när man valt en sida. */}
+        {/* Mobil: den utfällda menyn (faceliften 2026-08-02, "iphone glass"):
+            en frostad glaslista som SVÄVAR över sidinnehållet (absolut position
+            — trycker aldrig ner sidan) och glider ner mjukt ur ☰-knappen
+            (menu-drop). Glaset: halvgenomskinlig brand-bar + backdrop-blur, så
+            innehållet bakom skymtar suddigt igenom. Guldhårlinje i ramen.
+            Klick utanför (det osynliga heltäckande lagret) stänger; val av
+            sida stänger som förr. */}
         {menuOpen && (
-          <nav className="sm:hidden border-t border-white/15 px-4 pb-3 pt-2 flex flex-col gap-1">
-            {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `block ${navLinkClass(isActive)}`}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+          <>
+            <button
+              type="button"
+              aria-label="Stäng menyn"
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 z-30 cursor-default sm:hidden"
+            />
+            {/* iOS-materialen (ägarfeedback 2026-08-02 "får inte iphone-
+                känslan"): ljust läge = LJUST glas (vit/65) med mörk text —
+                som iOS:s egna menyer — mörkt läge = mörkt glas (club-900/55)
+                med ljus text. Då kan glaset vara riktigt genomskinligt utan
+                att texten blir oläslig, och blur-2xl ger ordentlig frost. */}
+            <nav className="menu-drop absolute right-3 top-full z-40 mt-2 flex w-60 flex-col gap-1 rounded-2xl bg-white/65 p-2 shadow-xl ring-1 ring-gold-400/30 backdrop-blur-2xl backdrop-saturate-150 dark:bg-club-900/55 sm:hidden">
+              {NAV.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) => menuLinkClass(isActive)}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+          </>
         )}
       </header>
       )}
@@ -149,6 +184,23 @@ export function Layout() {
           </Suspense>
         </div>
       </main>
+      {/* Sidfoten (faceliften 2026-08-02): klubbsignaturen ger varje sida ett
+          golv — guldhårlinje + ordmärket i serifen, som kolofonen i en bok.
+          Inte i spelvyn (immersiv) — där finns inget att scrolla förbi. */}
+      {!immersive && (
+        <footer className="pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-2">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 px-4">
+            <div className="h-px w-16 bg-gradient-to-r from-transparent via-gold-400/60 to-transparent" />
+            {/* "Est." (ägarbeslut 2026-08-02, valt framför "grundat"/"sedan"):
+                klubbskyltarnas graverade stämpel — och behöver aldrig
+                översättas när engelskan kommer (Fas 5). */}
+            <p className="text-xs text-ink-faint">
+              © <span className="font-brand text-sm">rebidz</span> · Est. 2026 ·
+              v{pkg.version}
+            </p>
+          </div>
+        </footer>
+      )}
     </div>
   )
 }

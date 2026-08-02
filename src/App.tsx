@@ -35,7 +35,11 @@ export default function App() {
               (R3-fynd #7). Gamla /spela-länkar redirectar hit. */}
           <Route path="budvisning" element={<Spela />} />
           <Route path="spela" element={<Navigate to="/budvisning" replace />} />
-          <Route path="spela-kort" element={<Play />} />
+          <Route path="spela-kort" element={<Play key="fri" />} />
+          {/* Dagens giv (2026-08-02): samma sida, men given kommer ur datumfröet.
+              Egna key:ar → React monterar om Play vid byte mellan lägena (annars
+              behålls gamla givens state eftersom komponenten är densamma). */}
+          <Route path="spela-kort/dagens" element={<Play key="dagens" daily />} />
           <Route path="installningar" element={<Settings />} />
           {/* Catch-all: alla adresser utanför tabellen (felskrivning, död
               länk) landar mjukt på 404-sidan i stället för på en tom sida

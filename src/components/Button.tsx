@@ -3,7 +3,9 @@
 type Variant = 'primary' | 'secondary' | 'ghost'
 
 const STYLES: Record<Variant, string> = {
-  primary: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+  // btn-shimmer (faceliften 2026-08-02): guldranden sveper genom knappen vid
+  // hover — "levande guld"-familjen (samma som ordmärket). Bara primärknappen.
+  primary: 'bg-emerald-600 hover:bg-emerald-700 text-white btn-shimmer',
   secondary: 'bg-control hover:bg-control-hover text-ink border border-control-line',
   ghost: 'bg-transparent hover:bg-hover-veil text-ink',
 }

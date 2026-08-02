@@ -210,6 +210,18 @@ första intrycket görs bara en gång.
       annars bjuda ett gammalt val med ETT tryck).
   Nästa yta väljs av ägaren (t.ex. sidhuvudet på övriga sidor).
 
+- **Yta 4 — de inre sidorna + exklusivitetssvepet: KLAR 2026-08-02 (sen
+  kväll).** Ägaren godkände hela förslagslistan ("mer exklusivt + något
+  unikt"): gemensam `PageHeader` (klubbserif + guldhårlinje) på Budträning/
+  Budvisning/Budsystem/Inställningar, guldmonogram på kortbaksidan,
+  Budsystem-boken som klubbok (§-nummer i guldserif, anfang, guldhårlinjer),
+  guldserif på poäng/utmärkelser + guldspader-märke på fullklarade teman,
+  laddspader, knapp-skimmer, mobilmenyn som frostad glas-dropdown över
+  innehållet, sidfot (© rebidz · Est. 2026 · version ur
+  `package.json`), heron-taglinen "Träna, spela, tävla" (ägarbeslut; ersatte
+  den underkända vallgravsraden) — och **Dagens giv** (se Fas 3-noten).
+  Detalj: `docs/historik.md` 2026-08-02.
+
 Detalj/väntande material: `docs/senare.md` (faceliftposten).
 
 ### Fas 2 — Konton + sparade framsteg (Beslut B steg 2–3)
@@ -220,6 +232,13 @@ rätt från början. Tekniken och principerna (utbytbar backend, fuskkontroll p�
 servern): `docs/framtid-multiplayer-plattform.md`.
 
 ### Fas 3 — "Dagens givar" (Funbridge-modellen — konkurrenssteget)
+> **Förtitt LIVE-byggd 2026-08-02 (utan backend):** "Dagens giv" —
+> datumet som frö (`src/lib/engine/daily.ts`) ger ALLA samma giv varje dag,
+> med delbart textresultat (Wordle-mekaniken) och flaggskeppskort på
+> startsidan. Ingen topplista ännu — den kräver Fas 2 (konton). Fas 3 bygger
+> vidare på exakt den här mekaniken: servern tar över fröet, resultatet
+> valideras och jämförs.
+
 Kärnan i hela planen: varje dag serveras samma seedade givar till alla.
 Du spelar dem mot bottarna, lämnar in resultatet och jämförs med alla andra
 (MP-räkning, topplista, din historik). Asynkront — ingen realtid behövs.

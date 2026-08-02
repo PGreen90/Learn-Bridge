@@ -29,6 +29,7 @@ export function BiddingPhase({
   onOpenPicker,
   bidHelp,
   onToggleBidHelp,
+  dailyBadge,
 }: {
   game: Game
   complete: boolean
@@ -40,6 +41,9 @@ export function BiddingPhase({
   /** Budstöd på/av (ägarbeslut 2026-07-28): av döljer motorns hjälp helt. */
   bidHelp: boolean
   onToggleBidHelp: () => void
+  /** Dagens giv: guldbricka ("Dagens giv #N") i stället för Mål-knappen —
+   *  målväljaren är avstängd, alla spelar samma giv. */
+  dailyBadge?: string
 }) {
   const [showMenu, setShowMenu] = useState(false)
   const [reporting, setReporting] = useState(false)
@@ -75,16 +79,24 @@ export function BiddingPhase({
             board={game.deal.board}
             vulnerability={game.deal.vulnerability}
             footer={
-              /* Träningsmålet (Kontraktväljaren) bor i panelen (ägarbeslut
-                 2026-08-02) — klick byter scenario. */
-              <button
-                type="button"
-                onClick={onOpenPicker}
-                className="w-full rounded-md bg-emerald-900/60 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-emerald-50 ring-1 ring-emerald-100/15 hover:bg-emerald-900/85"
-              >
-                <span className="opacity-70">Mål:</span> {targetLabel}{' '}
-                <span className="opacity-60">▾</span>
-              </button>
+              dailyBadge ? (
+                /* Dagens giv: guldbrickan ersätter Mål-knappen — given är
+                   låst till datumfröet, alla spelar samma. */
+                <div className="w-full rounded-md bg-gold-400/15 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-gold-200 ring-1 ring-inset ring-gold-400/30">
+                  {dailyBadge}
+                </div>
+              ) : (
+                /* Träningsmålet (Kontraktväljaren) bor i panelen (ägarbeslut
+                   2026-08-02) — klick byter scenario. */
+                <button
+                  type="button"
+                  onClick={onOpenPicker}
+                  className="w-full rounded-md bg-emerald-900/60 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-emerald-50 ring-1 ring-emerald-100/15 hover:bg-emerald-900/85"
+                >
+                  <span className="opacity-70">Mål:</span> {targetLabel}{' '}
+                  <span className="opacity-60">▾</span>
+                </button>
+              )
             }
           />
           <AuctionGrid
