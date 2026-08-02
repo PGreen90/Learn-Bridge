@@ -15,16 +15,18 @@ svarar på vad).
 "re**bid**z" med guld-skimmer, frameless guldspader, roterande guldram (hover),
 diskret guldflik i sidhuvudet.
 
-**SPELBORDET (yta 2): KLAR & LIVE 2026-07-31, poleringspass 2026-08-02.**
+**SPELBORDET (yta 2): KLAR & LIVE 2026-07-31, poleringspass 2026-08-02 (två).**
 Synrey-modellen, telefon-först: full-bleed duk (headern dold i spelvyn, röd
-"Avsluta spel" → start), stora `xl`-handkort, tryck-färg-visar-bara-den,
-färgpiller + guld-bar, ⋮+ⓘ uppe till höger. Pass 2026-08-02: kortraden i
-budfasen = budlådans bredd, två tryck på samma bud = OK, singelton spelas på
-ETT tryck, och vid FÖRSVAR sitter träkarlen på sin RIKTIGA sida som Synrey-
-högar (`SideDummyPiles`: en hög per färg, roterade kort, högsta underst mot
-utkanten, trumf överst för Öst/nederst för Väst) medan sticket flyttar mot
-spelförarens sida. Spelar DU är träkarlen Nord upptill som förr. Ägarbeslut:
-en yta i taget, **nästa väljs av ägaren**. Detalj: `docs/konkurrensplan.md` Fas 1.
+"Avsluta spel" → start), tryck-färg-visar-bara-den, färgpiller + guld-bar,
+⋮+ⓘ uppe till höger, två tryck på samma bud = OK, singelton på ETT tryck, vid
+FÖRSVAR träkarlen på sin RIKTIGA sida som Synrey-högar (`SideDummyPiles`),
+spelar DU är träkarlen Nord upptill. **Pass 4 (2026-08-02 em):** Syd-träkarl-
+regressionen lagad (Nords spelförarhand ritades aldrig → frös; facit
+`syd-trakarl.test.tsx`), Syds kortrad utan färgglapp (13 kort = 349 px),
+FASTA kortstorlekar (händer `xl` 64×96 överallt, stickhögen kompakt med 25 %
+överlapp och `lg` 48×64) och dubbla hörnindex på alla kort. Ägarbeslut: en
+yta i taget, **nästa väljs av ägaren**. Detalj: `docs/historik.md` 2026-08-02
++ `docs/konkurrensplan.md` Fas 1.
 
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (deployad 2026-07-31).**
 Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
@@ -71,9 +73,10 @@ spel fanns N stick"). Detalj: `docs/kortspel.md` + `docs/historik.md`.
 läser UDCA + Lavinthal (gardregeln); mätrigg `play-quality.probe` (`PLAYQ=1`).
 Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer nästa facelift-yta (sidhuvudet/fler), eller
-byter spår: 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl nästa lager
-(`docs/senare.md`). ⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
+**➡️ NÄSTA GÅNG:** ägaren väljer nästa facelift-yta (budlådan — då tas även
+budfasens kortrad, se `docs/senare.md` — eller sidhuvudet/fler), eller byter
+spår: 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl nästa lager (`docs/senare.md`).
+⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet,
 budstöd På/Av-toggle, felrapporter #40/#41/#42, underhåll (deploygrinden seedad +

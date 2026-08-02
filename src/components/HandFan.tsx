@@ -1,9 +1,9 @@
-// En hand som färggrupperad kortrad — SAMMA layout som spelbordets vilande hand
-// (`SouthFan` i pages/play/hands.tsx): färgerna i Synrey-ordning ♠ ♥ ♣ ♦, luft
+// En hand som färggrupperad kortrad: färgerna i Synrey-ordning ♠ ♥ ♣ ♦, luft
 // mellan färgerna, korten överlappar med det delade REST_OVERLAP inom varje färg.
-// Delad look så handen ser IDENTISK ut i budgivningen, budträningen, budvisningen
-// och vid spelbordet — ingen "hopp"-känsla mellan vyer (ägarbeslut 2026-07-30).
-// Bara presentation.
+// Delad look i budgivningen, budträningen och budvisningen (ägarbeslut
+// 2026-07-30). Spelbordets vilande hand (`SouthFan` i pages/play/hands.tsx)
+// avviker sedan 2026-08-02: ETT jämnt överlapp utan färgglapp, så 13 kort
+// alltid ryms på mobilen. Bara presentation.
 
 import type { Hand } from '../types/bridge'
 import { bySuit, HAND_SUITS, REST_OVERLAP } from '../lib/cardLayout'

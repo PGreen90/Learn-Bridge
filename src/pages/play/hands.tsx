@@ -49,15 +49,19 @@ export function SuitColumns({
               const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
               return (
                 // Träkarlen: aldrig transparenta kort (ägarbeslut 2026-07-31) —
-                // dimning borttagen, korten alltid fullt synliga.
+                // dimning borttagen, korten alltid fullt synliga. Fasta xl-kort
+                // (64×96) med FAST 60 px synlig remsa per täckt kort (-mt-9 =
+                // 36 px överlapp; ägarbeslut 2026-08-02 "C, fast" — remsan gör
+                // att täckta kort läser som kort, inte stubbar). Vald färg
+                // (spread) visar 68 px.
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
                   ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
-                  size="smPlus"
+                  size="xl"
                   playable={playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
-                  className={i > 0 ? (spread ? '-mt-7 sm:-mt-3' : '-mt-8 sm:-mt-7') : ''}
+                  className={i > 0 ? (spread ? '-mt-7' : '-mt-9') : ''}
                 />
               )
             })}
@@ -109,18 +113,18 @@ export function SideDummyPiles({
         return (
           <div key={suit} className="flex">
             {ordered.map((c, i) => (
-              // md-kortet är 56×80 (mobil) / 40×56 (desktop); vridet tar det
-              // 80×56 resp. 56×40 — wrappern har de vridna måtten så
-              // överlappet (-ml) räknar på rätt bredd.
+              // Fasta xl-kort 64×96 (ägarbeslut 2026-08-02 "C, fast"); vridet
+              // tar kortet 96×64 — wrappern har de vridna måtten så överlappet
+              // (-ml-20 = 80 px → 16 px synlig valörremsa) räknar på rätt bredd.
               <div
                 key={`${c.suit}${c.rank}`}
-                className={`relative flex h-14 w-20 items-center justify-center sm:h-10 sm:w-14 ${i > 0 ? '-ml-16 sm:-ml-11' : ''}`}
+                className={`relative flex h-16 w-24 items-center justify-center ${i > 0 ? '-ml-20' : ''}`}
                 style={side === 'E' ? { zIndex: cards.length - i } : undefined}
               >
                 <PlayingCard
                   ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
-                  size="md"
+                  size="xl"
                   className={side === 'E' ? 'rotate-90' : '-rotate-90'}
                 />
               </div>
@@ -156,7 +160,9 @@ export function FaceDownFan({ count, orientation }: { count: number; orientation
   )
 }
 
-/** Din hand som solfjäder (Syd): färggrupper, vald färg lyfts, trumf vänster. */
+/** Din hand som kortrad (Syd): färgsorterad med trumf längst till vänster,
+ *  ETT jämnt överlapp över hela raden (inget glapp mellan färgerna), vald färg
+ *  visas ensam och utfälld. */
 export function SouthFan({
   hand,
   contract,
@@ -187,14 +193,20 @@ export function SouthFan({
         return (
           <div
             key={suit}
-            className={`flex transition-all ${spread ? '-translate-y-1.5 z-10 sm:gap-1 sm:mx-1' : ''}`}
+            className={`flex transition-all ${spread ? '-translate-y-1.5 z-10' : ''}`}
           >
             {cards.map((c, i) => {
               const playable = myTurn && legalSet.has(`${c.suit}${c.rank}`)
-              // Stora kort (xl). Vilande: eget större överlapp (SouthFan är nu
-              // större än budgivningens HandFan). Vald färg (spread): visas ensam
-              // → luftig utfällning så korten blir rejält stora och lättträffade.
-              const ml = i === 0 ? '' : spread ? '-ml-2 sm:ml-0' : '-ml-12 sm:-ml-6'
+              const idx = dealt++
+              // Fasta xl-kort (64×96, samma på mobil och desktop). Vilande:
+              // SAMMA överlapp över HELA raden — även över färggränsen
+              // (ägarbeslut 2026-08-02: inget glapp mellan färgerna;
+              // fyrfärgsleken skiljer dem åt). Remsan är exakt 23,75 px
+              // (kort 64 − överlapp 40,25) så 13 kort spänner 64 + 12×23,75 =
+              // 349 px — 5 px marginal per sida i den ~359 px breda ytan på
+              // mobil (ägarbeslut 2026-08-02: så breda kort som möjligt).
+              // Vald färg (spread): visas ensam → luftig utfällning.
+              const ml = spread ? (i === 0 ? '' : '-ml-2') : idx === 0 ? '' : '-ml-[40.25px]'
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
@@ -205,7 +217,7 @@ export function SouthFan({
                   dimmed={myTurn && !playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
                   className={`deal-in ${ml}`}
-                  style={{ animationDelay: `${dealt++ * 35}ms` }}
+                  style={{ animationDelay: `${idx * 35}ms` }}
                 />
               )
             })}
