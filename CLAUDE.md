@@ -25,11 +25,12 @@ utan färgglapp, fasta kortstorlekar (`xl`/`lg`), dubbla hörnindex. Detalj:
 `docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1.
 
 **BUDLÅDAN (yta 3): KLAR 2026-08-02.** Budfasens kortrad = spelfasens
-(`HandFan flat`, delade `FLAT_OVERLAP` — pass 4-skulden inlöst), Mål-knappen i
-kompassrutan med korta etiketter (`describeTargetShort`), betydelse-raden +
+(`HandFan flat`, delade `FLAT_OVERLAP` — pass 4-skulden inlöst), Mål-knappen
+med kort etikett i kompassrutan, betydelse-raden +
 "Motorn hade valt" på EN rad UNDER X/XX/PASS/OK, valt bud = guldring INUTI
 knappen (växer inte) + startsidans roterande guldbåge (6 s/varv), raden
-ovanför låst till max 576 px. Buggfix: budvalet nollställs vid ny giv.
+ovanför + HCP-brickan i linje med budlådans kolumn (`max-w-md`).
+Buggfix: budvalet nollställs vid ny giv.
 Detalj: `docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1.
 
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (deployad 2026-07-31).**
