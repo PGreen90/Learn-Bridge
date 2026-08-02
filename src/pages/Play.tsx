@@ -2,12 +2,14 @@
 // bitarna under `play/`. All spellogik bor i hookarna useGame/usePlayTable —
 // den här filen och komponenterna den använder är bara presentation.
 
-import { useEffect, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import type { Deal, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
+import { dailyNumber, shareText } from '../lib/engine/daily'
+import { saveValue } from '../lib/storage'
 import { PlayingCard } from '../components/PlayingCard'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { SuitText } from '../components/SuitText'
@@ -35,7 +37,7 @@ import { armSound } from '../lib/sound'
 // Fas-styrning: budgivning → spel. Tillståndet bor i useGame.
 // ===========================================================================
 
-export function Play() {
+export function Play({ daily = false }: { daily?: boolean }) {
   const {
     game,
     complete,
@@ -50,7 +52,15 @@ export function Play() {
     startNewGame,
     pickTarget,
     cancelSearch,
-  } = useGame()
+  } = useGame(daily)
+
+  // Dagens giv: "Ny giv" lämnar dagens giv och går till frispelet (routen byts
+  // → Play monteras om med ny slumpgiv; key:arna i App.tsx garanterar det).
+  const onNewGame = daily
+    ? () => {
+        window.location.hash = '#/spela-kort'
+      }
+    : () => startNewGame(target)
 
   // Ljudmotorn får bara starta i en riktig användargest (autoplay-policyn).
   // Registreras på SIDNIVÅ så redan budfasens klick armerar den — då hörs
@@ -67,9 +77,10 @@ export function Play() {
         deal={game.deal}
         contract={game.contract}
         calls={game.history}
-        onNewGame={() => startNewGame(target)}
+        onNewGame={onNewGame}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}
+        daily={daily}
       />
     ) : (
       <BiddingPhase
@@ -77,11 +88,12 @@ export function Play() {
         complete={complete}
         onBid={onBid}
         onConfirm={confirmContract}
-        onNewGame={() => startNewGame(target)}
+        onNewGame={onNewGame}
         targetLabel={describeTargetShort(target)}
         onOpenPicker={() => setPicking(true)}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}
+        dailyBadge={daily ? `Dagens giv #${dailyNumber()}` : undefined}
       />
     )
 
@@ -118,6 +130,7 @@ export function PlayTable({
   onNewGame,
   bidHelp,
   onToggleBidHelp,
+  daily = false,
 }: {
   deal: Deal
   contract: Contract
@@ -126,6 +139,8 @@ export function PlayTable({
   /** Budstöd på/av (ägarbeslut 2026-07-28): av → minimal förklaring i auktionsvyerna. */
   bidHelp: boolean
   onToggleBidHelp: () => void
+  /** Dagens giv-läget: resultatdialogen får en delningsknapp (Wordle-mekaniken). */
+  daily?: boolean
 }) {
   const {
     play,
@@ -181,6 +196,29 @@ export function PlayTable({
     window.location.hash = '#/'
   }
 
+  // Dagens giv: det delbara resultatet (Wordle-mekaniken). Telefoner får
+  // delningsarket (navigator.share), datorer kopierar till urklipp.
+  const [copied, setCopied] = useState(false)
+  const onShare = () => {
+    if (!score) return
+    const text = shareText({
+      number: dailyNumber(),
+      contract,
+      declarerTricks: result.declarerTricks,
+      scoreLabel: score.label,
+    })
+    if (navigator.share) {
+      navigator.share({ text }).catch(() => {})
+    } else {
+      void navigator.clipboard?.writeText(text)
+      setCopied(true)
+    }
+  }
+  // Kom ihåg att dagens giv är spelad (startsidans "Spelad ✓"-bricka).
+  useEffect(() => {
+    if (daily && done) saveValue('daily-played', dailyNumber())
+  }, [daily, done])
+
   // Vem ligger öppen var? Nord-sidans öppna hand ritas UPPTILL som färgkolumner:
   // träkarlen Nord när du spelar, ELLER spelföraren Nord när SYD är träkarl —
   // i båda fallen är det din sidas öppna hand och DU spelar dess kort (controls
@@ -235,7 +273,15 @@ export function PlayTable({
                   : `${-result.diff} bet (${result.declarerTricks} stick).`}
               </p>
               {score && (
-                <p className={`${claimed ? 'mb-1' : 'mb-4'} text-base font-bold text-ink`}>
+                /* Guld = belöning (faceliften 2026-08-02): poängraden i guldserif
+                   när DIN sida (N/S) fick poängen; motståndarnas poäng sobert. */
+                <p
+                  className={`${claimed ? 'mb-1' : 'mb-4'} text-base font-bold ${
+                    score.side === 'NS'
+                      ? 'font-brand text-lg text-gold-600 dark:text-gold-300'
+                      : 'text-ink'
+                  }`}
+                >
                   {score.label}
                 </p>
               )}
@@ -247,6 +293,18 @@ export function PlayTable({
                 </p>
               )}
               <div className="flex flex-col items-center gap-2">
+                {/* Dagens giv: delningen är huvudhandlingen — varje inklistrat
+                    resultat i en chatt är en inbjudan att spela samma giv. */}
+                {daily && (
+                  <div className="flex flex-col items-center gap-1">
+                    <Button onClick={onShare}>Dela resultatet</Button>
+                    {copied && (
+                      <p className="text-xs text-accent">
+                        ✓ Kopierat — klistra in i valfri chatt.
+                      </p>
+                    )}
+                  </div>
+                )}
                 <div className="flex justify-center gap-2">
                   <Button variant="secondary" onClick={() => setResultSeen(true)}>
                     Se omspelningen
@@ -261,7 +319,9 @@ export function PlayTable({
                     Rondgenomgång
                   </Button>
                 </div>
-                <Button onClick={onNewGame}>Ny giv →</Button>
+                <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
+                  {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
+                </Button>
                 <button
                   type="button"
                   onClick={goHome}
@@ -280,15 +340,21 @@ export function PlayTable({
           </Dialog>
         ) : resultSeen ? (
           <div className="mt-3 flex flex-col items-center gap-2">
-            <div className="flex justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
+              {daily && <Button onClick={onShare}>Dela resultatet</Button>}
               <Button variant="secondary" onClick={() => setReporting(true)}>
                 Rapportera fel
               </Button>
               <Button variant="secondary" onClick={() => setReviewing(true)}>
                 Rondgenomgång
               </Button>
-              <Button onClick={onNewGame}>Ny giv →</Button>
+              <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
+                {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
+              </Button>
             </div>
+            {copied && (
+              <p className="text-xs text-accent">✓ Kopierat — klistra in i valfri chatt.</p>
+            )}
             <button
               type="button"
               onClick={goHome}

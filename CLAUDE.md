@@ -11,27 +11,24 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — FAS 1 FACELIFTEN (2026-07-31): en yta i taget
-**STARTSIDAN (yta 1): KLAR & deployad 2026-07-31.** Samlad hero, tvåfärgat
-"re**bid**z" med guld-skimmer, frameless guldspader, roterande guldram (hover),
-diskret guldflik i sidhuvudet.
+**YTA 1–3 KLARA (startsidan 2026-07-31 · spelbordet 2026-07-31 med pass 2–4
+t.o.m. 2026-08-02 · budlådan 2026-08-02).** Hero + guldspråket, Synrey-bordet
+telefon-först (full-bleed, träkarlen på rätt sida vid försvar), budlådan med
+kortrad = spelfasens och guldring på valt bud. All detalj:
+`docs/konkurrensplan.md` Fas 1 + `docs/historik.md`.
 
-**SPELBORDET (yta 2): KLAR & LIVE 2026-07-31, pass 2–4 t.o.m. 2026-08-02.**
-Synrey-modellen, telefon-först: full-bleed duk (headern dold i spelvyn, röd
-"Avsluta spel" → start), tryck-färg-visar-bara-den, färgpiller + guld-bar,
-⋮+ⓘ uppe till höger, två tryck på samma bud = OK, singelton på ETT tryck, vid
-FÖRSVAR träkarlen på sin RIKTIGA sida som Synrey-högar (`SideDummyPiles`).
-**Pass 4:** Syd-träkarl-regressionen lagad (`syd-trakarl.test.tsx`), kortraden
-utan färgglapp, fasta kortstorlekar (`xl`/`lg`), dubbla hörnindex. Detalj:
-`docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1.
-
-**BUDLÅDAN (yta 3): KLAR 2026-08-02.** Budfasens kortrad = spelfasens
-(`HandFan flat`, delade `FLAT_OVERLAP` — pass 4-skulden inlöst), Mål-knappen
-med kort etikett i kompassrutan, betydelse-raden +
-"Motorn hade valt" på EN rad UNDER X/XX/PASS/OK, valt bud = guldring INUTI
-knappen (växer inte) + startsidans roterande guldbåge (6 s/varv), raden
-ovanför + HCP-brickan i linje med budlådans kolumn (`max-w-md`).
-Buggfix: budvalet nollställs vid ny giv.
-Detalj: `docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1.
+**DE INRE SIDORNA + EXKLUSIVITETSSVEPET + DAGENS GIV (yta 4): KLART 2026-08-02
+(sen kväll).** Ägaren godkände hela förslagslistan: gemensam `PageHeader`
+(klubbserif + guldhårlinje) på de fyra inre sidorna, guldmonogram på
+kortbaksidan, boken som klubbok (§-guldsiffror + anfang), guld på utmärkelser
+(poäng i guldserif, guldspader på fullklarade teman), laddspader, knapp-skimmer,
+sidfot (© rebidz · Est. 2026 · version ur `package.json`, nu 1.0.0),
+heron-taglinen "Träna, spela, tävla" — och
+**DAGENS GIV**: datumfrö (`daily.ts`, facit `daily.test.ts`) ger alla samma giv
+varje dag, rutt `/spela-kort/dagens`, delbart textresultat (Wordle-mekaniken),
+flaggskeppskort med roterande guldram på startsidan. Förtitt på Fas 3 UTAN
+backend — topplistan kräver Fas 2. Detalj: `docs/historik.md` 2026-08-02 +
+`docs/konkurrensplan.md` Fas 1/Fas 3.
 
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (deployad 2026-07-31).**
 Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
@@ -65,22 +62,17 @@ topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
 **`docs/konkurrensplan.md`**. Beslut B (backend, Fas 2+) byggs fortfarande bara
 på uttryckligt ägarbeslut.
 
-**FELRAPPORT #32 — SPELFÖRAREN ETABLERAR LÅNG FÄRG i sang: KLAR & LIVE 2026-07-29**
-(`establishLongSuit`, bara sang). Detalj: `docs/historik.md` +
-`docs/bot-hjarna.md`.
+**Klart 2026-07-29 (detalj i `docs/historik.md`):** felrapport #32
+(spelföraren etablerar lång färg i sang, `docs/bot-hjarna.md`),
+rondgenomgången (tre kapitel med DD-dom, `docs/kortspel.md`) och markeringarna
+(UDCA + Lavinthal, `docs/budsystem.md §8.5`; mätrigg `play-quality.probe`,
+`PLAYQ=1`).
 
-**RONDGENOMGÅNGEN (after action report) KLAR & LIVE 2026-07-29** — efter en
-giv öppnas tre kapitel (bud/spel/resultat med DD-dom). Detalj:
-`docs/kortspel.md` + `docs/historik.md`.
-
-**MARKERINGAR (försvarssignaler) KLAR & LIVE 2026-07-29** — botarna lägger/förklarar/
-läser UDCA + Lavinthal (gardregeln); mätrigg `play-quality.probe` (`PLAYQ=1`).
-Detalj: `docs/budsystem.md §8.5` + `docs/bot-hjarna.md`.
-
-**➡️ NÄSTA GÅNG:** ägaren väljer nästa facelift-yta (t.ex. sidhuvudet på
-övriga sidor), eller byter spår: 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl
+**➡️ NÄSTA GÅNG:** ägaren väljer — mer facelift-puts (t.ex. sticksvepet,
+mörkt läge-finish), eller byter spår: 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl
 nästa lager (`docs/senare.md`). ⚪ SENARE: tredje hand högt i **trumf** +
-signalspåret.
+signalspåret. Idé att bevaka: berätta om Dagens giv för folk först när den
+känns stabil.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet,
 budstöd På/Av-toggle, felrapporter #40/#41/#42, underhåll (volymtester ska

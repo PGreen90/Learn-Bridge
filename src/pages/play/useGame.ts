@@ -14,6 +14,7 @@ import {
 } from '../../lib/engine/auction-live'
 import { interpretCall } from '../../lib/engine/auction-interpret'
 import { dealRandom } from '../../lib/engine/deal'
+import { dailyDeal } from '../../lib/engine/daily'
 import { matchesTarget, type ContractTarget } from '../../lib/engine/contract-target'
 import { loadValue, saveValue } from '../../lib/storage'
 import type { Contract } from '../../lib/engine/play'
@@ -33,13 +34,20 @@ function newGame(): Game {
   return { deal: dealRandom(), history: [], phase: 'bidding', contract: null }
 }
 
+/** Dagens giv: given kommer ur datumfröet i stället för slumpen (daily.ts). */
+function newDailyGame(): Game {
+  return { deal: dailyDeal(), history: [], phase: 'bidding', contract: null }
+}
+
 export interface SearchState {
   tried: number
   gaveUp: boolean
 }
 
-export function useGame() {
-  const [game, setGame] = useState<Game>(newGame)
+/** `daily` = Dagens giv-läget: startgiven är dagens deterministiska giv.
+ *  "Ny giv" i det läget hanteras av sidan (navigerar till frispelet). */
+export function useGame(daily = false) {
+  const [game, setGame] = useState<Game>(daily ? newDailyGame : newGame)
   // Kontraktväljaren: ett valt träningsmål (sparas mellan givar). `random` =
   // dagens vanliga slumpgiv. När ett mål är valt letar vi fram en giv vars
   // simulerade auktion landar där (`matchesTarget`), i småbatchar så sidan

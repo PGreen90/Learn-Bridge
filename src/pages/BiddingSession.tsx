@@ -47,7 +47,12 @@ function Session({ themeId }: { themeId: string }) {
         <Panel className="text-center">
           <h1 className="text-2xl font-bold mb-2">Klart! 🎉</h1>
           <p className="text-lg text-ink-soft mb-1">
-            Du fick <b>{score.correct}</b> av <b>{score.total}</b> rätt
+            {/* Guld = belöning (faceliften 2026-08-02): slutpoängen i guldserifen. */}
+            Du fick{' '}
+            <b className="font-brand text-2xl text-gold-600 dark:text-gold-300">
+              {score.correct}
+            </b>{' '}
+            av <b>{score.total}</b> rätt
           </p>
           <p className="text-ink-muted mb-6">Temat: {theme.title}</p>
           <div className="flex flex-wrap gap-2 justify-center">

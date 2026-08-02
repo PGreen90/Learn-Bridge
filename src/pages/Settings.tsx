@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 import { clearAllProgress } from '../lib/storage'
@@ -37,10 +38,9 @@ export function Settings() {
 
   return (
     <div className="space-y-6">
-      <Panel>
-        <h1 className="text-2xl font-bold mb-2">Inställningar</h1>
-        <p className="text-ink-soft">Här hanterar du appen och dina framsteg.</p>
-      </Panel>
+      <PageHeader title="Inställningar">
+        Här hanterar du appen och dina framsteg.
+      </PageHeader>
 
       <Panel>
         <h2 className="text-lg font-semibold mb-2">Skicka felrapporter direkt</h2>

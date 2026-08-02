@@ -313,6 +313,56 @@
 }
 .deal-in { animation: deal-in calc(300ms * var(--motion-scale, 1)) ease-out both; }
 
+/* Laddspadern (faceliften 2026-08-02): guldspadern andas mjukt medan en lat
+   sida hämtas — i stället för den generiska snurrande ringen. */
+@keyframes gold-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.94); }
+  50% { opacity: 0.9; transform: scale(1); }
+}
+.gold-pulse { animation: gold-pulse 1.4s ease-in-out infinite; }
+
+/* Knapp-skimmer (faceliften 2026-08-02, "levande guld"-familjen): en mjuk
+   guldrand sveper EN gång genom primärknappen vid hover — samma språk som
+   ordmärkets skimmer. Ligger på ::after så knappens egna färger står orörda. */
+@keyframes btn-shimmer {
+  from { background-position: 130% 0; }
+  to { background-position: -30% 0; }
+}
+.btn-shimmer { position: relative; overflow: hidden; }
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(243, 228, 179, 0.35) 50%,
+    transparent 60%
+  );
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  /* Startläget = utanför bandet: utan hover (och med minskad rörelse) syns inget. */
+  background-position: 130% 0;
+}
+.btn-shimmer:hover::after { animation: btn-shimmer 600ms ease-out; }
+
+/* Mobilmenyn (faceliften 2026-08-02, ägarens önskan "iphone glass"): listan
+   glider ner FÖRSIKTIGT från menyknappen (tonar in + liten glidning + nästan
+   omärklig skalning, origo uppe till höger = den växer ur knappen). Själva
+   glaset görs med Tailwind (bg-brand-bar/75 + backdrop-blur) på elementet. */
+@keyframes menu-drop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.99); }
+  to { opacity: 1; }
+}
+.menu-drop {
+  /* 360 ms + flackare kurva (ägarjustering "mjukare" 2026-08-02): landar
+     lugnt utan studs — mer som iOS:s egna ark. */
+  animation: menu-drop 360ms cubic-bezier(0.25, 0.6, 0.2, 1);
+  transform-origin: top right;
+}
+
 /* Sidbyte: nya sidans innehåll tonar in med en liten lyftning. */
 @keyframes page-in {
   from { opacity: 0; transform: translateY(6px); }
@@ -341,9 +391,24 @@
   .felt-fade-out, .result-made-glow::before, .result-made-glow::after,
   .deal-in, .page-in, .overlay-in, .dialog-in,
   .text-gold-shimmer,
+  .gold-pulse, .btn-shimmer:hover::after, .menu-drop,
   .gold-frame::before, .gold-frame-hover::before {
     animation: none;
   }
+}
+
+/* Anfang (klubbok-känslan, faceliften 2026-08-02): sektionsintrons FÖRSTA
+   bokstav sätts stor i varumärkesserifen och guld — som en inbunden systembok.
+   Bara sektionsintron (klassen sätts i BudSystem.tsx), inte undersektionerna.
+   light-dark(): mörkare guld på ljus panel för kontrast, ljust guld i mörkt. */
+.md-anfang .md > p:first-child::first-letter {
+  font-family: var(--font-brand);
+  font-weight: 600;
+  float: left;
+  font-size: 2.6em;
+  line-height: 0.9;
+  padding-right: 0.09em;
+  color: light-dark(#a17c24, #e8cf85);
 }
 
 /* Stil för renderad markdown från systemboken (Budsystem-sidan).

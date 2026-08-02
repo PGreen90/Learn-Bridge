@@ -12,6 +12,56 @@
 
 ## 2026-08-02
 
+**🎨 FACELIFT YTA 4 + EXKLUSIVITETSSVEPET + DAGENS GIV — KLART (sen kväll;
+ägaren godkände hela förslagslistan "kör på helt autonomt, visa innan PCD"):**
+- **Sidhuvudena på de inre sidorna** (Budträning/Budvisning/Budsystem/
+  Inställningar): gemensam `PageHeader` — rubrik i klubbserifen (30 px) +
+  kort guldhårlinje som ekar menyradens guldlinje. De vita rubrikpanelerna
+  borta; alla fyra sidor ser likadana ut.
+- **Kortbaksidan bär monogrammet:** brandens guldspader (`BrandMark bare`) i
+  mitten av den befintliga emerald-baksidan (`PlayingCard`).
+- **Dagens giv (Wordle-mekaniken, förtitt på Fas 3 — ingen backend):**
+  datumet är fröet (`daily.ts`: `dailySeed` = ååååmmdd lokal tid,
+  `mulberry32` flyttad till `deal.ts` så modulen är lätt nog för startsidans
+  chunk; revisorn återexporterar). Alla spelar SAMMA giv varje dag; premiären
+  2026-08-02 = #1. Rutt `/spela-kort/dagens` (egna React-key:ar så Play
+  monteras om vid lägesbyte), guldbricka "Dagens giv #N" ersätter Mål-knappen
+  i kompassrutan, resultatdialogen får **"Dela resultatet"** (navigator.share
+  på telefon, urklipp på dator) med delbar text + länk. Startsidan har
+  flaggskeppskortet med den ständigt roterande guldramen + "Spelad ✓"-bricka
+  (localStorage `daily-played`). Facit: `daily.test.ts` (determinism, frö,
+  löpnummer, deltext).
+- **Boken som klubbok:** kapitelnumren som §-numrering i guldserif,
+  anfang (`.md-anfang`, CSS `::first-letter`) på sektionsintron,
+  guldhårlinje under öppnad kapitelrubrik.
+- **Guld = belöning:** Budträningens "Senast"-poäng, sessionens slutpoäng och
+  spelets poängrad (bara när N/S fick poängen) i guldserif; tema med alla rätt
+  får en liten guldspader i temalistan.
+- **Småsakerna:** laddindikatorn är nu guldspadern som andas (`gold-pulse`),
+  primärknappar får ett engångs guld-skimmer vid hover (`btn-shimmer`,
+  "levande guld"-familjen), och alla icke-immersiva sidor har en sidfot med
+  klubbsignatur (guldhårlinje + "rebidz" i serifen). Allt respekterar
+  "minskad rörelse".
+- **Mobilmenyn som iPhone-glas (ägarens önskan samma kväll):** ☰-listan är
+  nu en frostad glas-dropdown med ÄKTA iOS-material (tre ägariterationer:
+  "50 %" → "ljust läge inte bra" → "får inte iphone-känslan"; lärdomen: mörk
+  emerald-platta + vit text tvingar upp opaciteten och dödar glaset — iOS
+  kör LJUST glas med MÖRK text i ljust läge): ljust = `bg-white/65` + mörk
+  `text-ink`, mörkt = `bg-club-900/55` + ljus text (egen `menuLinkClass`,
+  skild från emerald-barens vita), `backdrop-blur-2xl` + mättnad + guld-
+  hårlinje, glid 360 ms (ägargodkänt)) som SVÄVAR över sidinnehållet (absolut position — sidan
+  trycks inte längre ner) och glider ner mjukt ur knappen (`menu-drop`,
+  respekterar minskad rörelse). Osynligt heltäckande lager bakom → klick
+  utanför stänger. Verifierat i 375 px-vyn: innehållet flyttas 0 px.
+- **Taglinen:** först byggdes vallgravsraden ("Bridgeappen som förklarar
+  **varje bud**" i guld) — ägaren underkände den samma kväll: heron säger nu
+  kort och koncist **"Träna, spela, tävla"**. Sidfoten blev på ägarens begäran
+  "© rebidz · Est. 2026 · v-nummer" (ägaren valde "Est." framför
+  "grundat"/"sedan" — klubbskyltarnas stämpel), där versionen läses ur
+  `package.json` (bumpad 0.0.0 → 1.0.0 — appen är i drift; låsfilen synkad
+  med `npm install --package-lock-only` så `npm ci` i deploygrinden inte
+  bryter). Inga regressioner: hela sviten grön (`npm test`).
+
 **🎨 BUDLÅDAN (FACELIFT FAS 1 YTA 3) — KLAR (ägarbeslut i tur och ordning
 under sessionen, kväll):**
 - **Budfasens kortrad = spelfasens** (skulden från pass 4 inlöst): `HandFan`
