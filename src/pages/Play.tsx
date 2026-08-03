@@ -8,8 +8,10 @@ import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
-import { dailyNumber, shareText } from '../lib/engine/daily'
-import { saveValue } from '../lib/storage'
+import { dailyNumber, dailyStreak, shareText, type DailyLog } from '../lib/engine/daily'
+import { contractFromCalls } from '../lib/engine/auction-live'
+import { playsFrom, validSavedGame, type SavedGame } from '../lib/engine/resume'
+import { loadValue, saveValue } from '../lib/storage'
 import { PlayingCard } from '../components/PlayingCard'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { SuitText } from '../components/SuitText'
@@ -20,7 +22,7 @@ import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
 import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
-import { useGame } from './play/useGame'
+import { gameFromSeed, useGame, type Game } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
@@ -37,7 +39,48 @@ import { armSound } from '../lib/sound'
 // Fas-styrning: budgivning → spel. Tillståndet bor i useGame.
 // ===========================================================================
 
+/** Fröet ur adressen (#/spela-kort?giv=123): en delad/bokmärkt giv. */
+function parseUrlSeed(): number | null {
+  const m = window.location.hash.match(/[?&]giv=(\d+)/)
+  if (!m) return null
+  const n = Number(m[1])
+  return Number.isInteger(n) && n >= 0 && n < 4294967296 ? n : null
+}
+
+/** Startläget vid montering (Etapp B), i prioritetsordning: en sparad
+ *  pågående giv (om den hör till DETTA läge — och till dagens nummer resp.
+ *  adressens frö), annars adressens frö, annars null (= ny slumpgiv). */
+function initialGame(daily: boolean): { game: Game | null; plays: SavedGame['plays'] } {
+  const urlSeed = daily ? null : parseUrlSeed()
+  const saved = loadValue<unknown>('pagaende-giv', null)
+  if (
+    validSavedGame(saved) &&
+    saved.daily === daily &&
+    (!daily || saved.number === dailyNumber()) &&
+    (urlSeed === null || saved.seed === urlSeed)
+  ) {
+    const contract = saved.phase === 'play' ? contractFromCalls(saved.history) : null
+    if (saved.phase === 'bidding' || contract) {
+      return {
+        game: {
+          deal: saved.deal,
+          history: saved.history,
+          phase: saved.phase,
+          contract,
+          seed: saved.seed,
+          round: 0,
+        },
+        plays: saved.plays,
+      }
+    }
+  }
+  if (urlSeed !== null) return { game: gameFromSeed(urlSeed), plays: [] }
+  return { game: null, plays: [] }
+}
+
 export function Play({ daily = false }: { daily?: boolean }) {
+  // Läses EN gång vid montering — därefter äger useGame tillståndet.
+  const [restored] = useState(() => initialGame(daily))
   const {
     game,
     complete,
@@ -50,9 +93,34 @@ export function Play({ daily = false }: { daily?: boolean }) {
     onBid,
     confirmContract,
     startNewGame,
+    startSameGame,
     pickTarget,
     cancelSearch,
-  } = useGame(daily)
+  } = useGame(daily, restored.game)
+
+  // Fröet i adressen håller jämna steg med given (Etapp B): då överlever en
+  // omladdning även utan sparning, och adressen går att dela/bokmärka.
+  // replaceState — inget hashchange-event, så routern störs inte.
+  useEffect(() => {
+    if (daily || game.seed === null) return
+    const base = window.location.href.split('#')[0]
+    window.history.replaceState(null, '', `${base}#/spela-kort?giv=${game.seed}`)
+  }, [daily, game.seed])
+
+  // Budfasen sparas löpande (spelfasen sparas i PlayTable som har spelläget).
+  useEffect(() => {
+    if (game.phase !== 'bidding') return
+    saveValue('pagaende-giv', {
+      v: 1,
+      daily,
+      number: daily ? dailyNumber() : null,
+      seed: game.seed,
+      deal: game.deal,
+      history: game.history,
+      phase: 'bidding',
+      plays: [],
+    } satisfies SavedGame)
+  }, [game, daily])
 
   // Dagens giv: "Ny giv" lämnar dagens giv och går till frispelet (routen byts
   // → Play monteras om med ny slumpgiv; key:arna i App.tsx garanterar det).
@@ -70,17 +138,27 @@ export function Play({ daily = false }: { daily?: boolean }) {
     return () => window.removeEventListener('pointerdown', armSound)
   }, [])
 
+  // Återupptagna kort hör BARA till den ursprungligen sparade given — en ny
+  // giv eller "Spela om given" (round > 0) börjar alltid tomt.
+  const restoredPlays =
+    restored.game && game.deal.id === restored.game.deal.id && game.round === 0
+      ? restored.plays
+      : undefined
+
   const content =
     game.phase === 'play' && game.contract ? (
       <PlayTable
-        key={game.deal.id}
+        key={`${game.deal.id}:${game.round}`}
         deal={game.deal}
         contract={game.contract}
         calls={game.history}
         onNewGame={onNewGame}
+        onPlayAgain={startSameGame}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}
         daily={daily}
+        seed={game.seed}
+        restoredPlays={restoredPlays}
       />
     ) : (
       <BiddingPhase
@@ -128,19 +206,29 @@ export function PlayTable({
   contract,
   calls,
   onNewGame,
+  onPlayAgain,
   bidHelp,
   onToggleBidHelp,
   daily = false,
+  seed = null,
+  restoredPlays,
 }: {
   deal: Deal
   contract: Contract
   calls: ResolvedCall[]
   onNewGame: () => void
+  /** "Spela om given" (Etapp B): samma giv från början. Frivillig — testerna
+   *  som monterar PlayTable direkt behöver inte skicka den. */
+  onPlayAgain?: () => void
   /** Budstöd på/av (ägarbeslut 2026-07-28): av → minimal förklaring i auktionsvyerna. */
   bidHelp: boolean
   onToggleBidHelp: () => void
   /** Dagens giv-läget: resultatdialogen får en delningsknapp (Wordle-mekaniken). */
   daily?: boolean
+  /** Givens frö (Etapp B) — följer med i sparningen av pågående giv. */
+  seed?: number | null
+  /** Spelade kort ur en sparad pågående giv — bordet börjar mitt i given. */
+  restoredPlays?: SavedGame['plays']
 }) {
   const {
     play,
@@ -190,23 +278,41 @@ export function PlayTable({
     declSide,
     isFaceUp,
     deselectSuit,
-  } = usePlayTable(deal, contract, calls)
+  } = usePlayTable(deal, contract, calls, restoredPlays)
+
+  // Spelfasen sparas löpande (Etapp B) — och rensas när given är klar, så en
+  // färdigspelad giv inte "återupptas" vid nästa besök. null känns igen som
+  // "ingen sparning" av validSavedGame.
+  useEffect(() => {
+    if (done) {
+      saveValue('pagaende-giv', null)
+      return
+    }
+    saveValue('pagaende-giv', {
+      v: 1,
+      daily,
+      number: daily ? dailyNumber() : null,
+      seed,
+      deal,
+      history: calls,
+      phase: 'play',
+      plays: playsFrom(play),
+    } satisfies SavedGame)
+  }, [play, done, daily, seed, deal, calls])
   // HashRouter → navigera hem via hash (funkar utan Router-kontext i tester).
   const goHome = () => {
     window.location.hash = '#/'
   }
 
+  // Dina stick = din sidas (N/S) stick, oavsett vem som var spelförare.
+  const myTricks = declSide === 'NS' ? result.declarerTricks : 13 - result.declarerTricks
+
   // Dagens giv: det delbara resultatet (Wordle-mekaniken). Telefoner får
   // delningsarket (navigator.share), datorer kopierar till urklipp.
+  // Texten är SPOILERFRI sedan Etapp B — bara dina stick, aldrig kontraktet.
   const [copied, setCopied] = useState(false)
   const onShare = () => {
-    if (!score) return
-    const text = shareText({
-      number: dailyNumber(),
-      contract,
-      declarerTricks: result.declarerTricks,
-      scoreLabel: score.label,
-    })
+    const text = shareText({ number: dailyNumber(), myTricks })
     if (navigator.share) {
       navigator.share({ text }).catch(() => {})
     } else {
@@ -219,10 +325,21 @@ export function PlayTable({
         .catch(() => {})
     }
   }
-  // Kom ihåg att dagens giv är spelad (startsidans "Spelad ✓"-bricka).
+  // Resultatloggen (Etapp B): dagens resultat bokförs under givnumret →
+  // streaken kan räknas och startsidan vet vad som är spelat. Den gamla
+  // nyckeln `daily-played` skrivs också, så en äldre flik inte blir förvirrad.
+  const [streak, setStreak] = useState(0)
   useEffect(() => {
-    if (daily && done) saveValue('daily-played', dailyNumber())
-  }, [daily, done])
+    if (!daily || !done) return
+    const n = dailyNumber()
+    const log = loadValue<DailyLog>('daily-log', {})
+    // Första resultatet för dagen står sig — ett omspel skriver inte över det.
+    if (log[n] === undefined) {
+      saveValue('daily-log', { ...log, [n]: { myTricks } })
+    }
+    saveValue('daily-played', n)
+    setStreak(dailyStreak(loadValue<DailyLog>('daily-log', {}), n))
+  }, [daily, done, myTricks])
 
   // Vem ligger öppen var? Nord-sidans öppna hand ritas UPPTILL som färgkolumner:
   // träkarlen Nord när du spelar, ELLER spelföraren Nord när SYD är träkarl —
@@ -302,6 +419,13 @@ export function PlayTable({
                     resultat i en chatt är en inbjudan att spela samma giv. */}
                 {daily && (
                   <div className="flex flex-col items-center gap-1">
+                    {/* Streaken (Etapp B): anledningen att komma tillbaka i
+                        morgon — visas från två dagar i rad. */}
+                    {streak >= 2 && (
+                      <p className="font-brand text-sm text-gold-600 dark:text-gold-300">
+                        🔥 {streak} dagar i rad
+                      </p>
+                    )}
                     <Button onClick={onShare}>Dela resultatet</Button>
                     {copied && (
                       <p className="text-xs text-accent">
@@ -324,9 +448,18 @@ export function PlayTable({
                     Rondgenomgång
                   </Button>
                 </div>
-                <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
-                  {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
-                </Button>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {/* Spela om given (Etapp B): samma frö, nytt försök —
+                      dagens giv-loggen skrivs aldrig över av ett omspel. */}
+                  {onPlayAgain && (
+                    <Button variant="secondary" onClick={onPlayAgain}>
+                      Spela om given
+                    </Button>
+                  )}
+                  <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
+                    {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
+                  </Button>
+                </div>
                 <button
                   type="button"
                   onClick={goHome}

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
-import { dailyNumber } from '../lib/engine/daily'
+import { dailyNumber, dailyStreak, type DailyLog } from '../lib/engine/daily'
 import { loadValue } from '../lib/storage'
 
 // Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
@@ -108,7 +108,11 @@ function ModeCard({
  *  skrivs av resultatvyn i Play). */
 function DailyCard() {
   const n = dailyNumber()
-  const played = loadValue<number | null>('daily-played', null) === n
+  // Loggen (Etapp B) är sanningen; gamla `daily-played` läses som reserv för
+  // den som spelade före loggen fanns.
+  const log = loadValue<DailyLog>('daily-log', {})
+  const played = log[n] !== undefined || loadValue<number | null>('daily-played', null) === n
+  const streak = dailyStreak(log, n)
   return (
     <Link
       to="/spela-kort/dagens"
@@ -122,6 +126,13 @@ function DailyCard() {
             {played && (
               <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
                 Spelad ✓
+              </span>
+            )}
+            {/* Streaken (Etapp B): syns från två dagar i rad — skälet att
+                komma tillbaka i morgon ska synas redan på startsidan. */}
+            {streak >= 2 && (
+              <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
+                🔥 {streak} dagar
               </span>
             )}
           </div>

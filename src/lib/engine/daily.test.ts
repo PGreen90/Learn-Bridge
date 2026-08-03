@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dailyDeal, dailyNumber, dailySeed, shareText } from './daily'
+import { dailyDeal, dailyNumber, dailySeed, dailyStreak, shareText } from './daily'
 
 // Dagens giv (faceliften/konkurrensspåret 2026-08-02): samma datum ska ALLTID ge
 // samma giv — det är hela poängen (alla spelar samma giv och kan jämföra sig).
@@ -39,34 +39,49 @@ describe('dagens giv', () => {
     }
   })
 
-  it('deltexten: hemgång med övertrick', () => {
-    const text = shareText({
-      number: 1,
-      contract: { declarer: 'S', strain: 'spades', level: 4 },
-      declarerTricks: 11,
-      scoreLabel: 'N/S +450',
-    })
+  // Deltexten gjordes SPOILERFRI i Etapp B (granskningen 2026-08-02): den
+  // gamla texten skrev ut kontrakt + resultat i klartext, så mottagaren fick
+  // facit INNAN hen spelat given. Nu delas bara dina egna stick (Wordle-
+  // mekanikens spoilerfria rutor) — kontraktet förblir en överraskning.
+  it('deltexten: rutraden visar mina stick, inget kontrakt och inget facit', () => {
+    const text = shareText({ number: 1, myTricks: 8 })
     expect(text).toBe(
-      'rebidz · Dagens giv #1\n4♠ av Syd — hemma +1\nN/S +450\nhttps://rebidz.com/#/spela-kort/dagens',
+      'rebidz · Dagens giv #1\n' +
+        '🟩🟩🟩🟩🟩🟩🟩🟩⬛⬛⬛⬛⬛\n' +
+        'Jag tog 8 av 13 stick — klarar du fler?\n' +
+        'https://rebidz.com/#/spela-kort/dagens',
     )
   })
 
-  it('deltexten: straff, dubblat kontrakt och jämn hemgång', () => {
-    expect(
-      shareText({
-        number: 7,
-        contract: { declarer: 'E', strain: 'NT', level: 3, doubled: 'X' },
-        declarerTricks: 7,
-        scoreLabel: 'N/S +500',
-      }),
-    ).toContain('3NTX av Öst — 2 bet')
-    expect(
-      shareText({
-        number: 7,
-        contract: { declarer: 'N', strain: 'hearts', level: 4 },
-        declarerTricks: 10,
-        scoreLabel: 'N/S +420',
-      }),
-    ).toContain('4♥ av Nord — hemma')
+  it('deltexten: 0 och 13 stick ger hela rader', () => {
+    expect(shareText({ number: 3, myTricks: 0 })).toContain('⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛')
+    expect(shareText({ number: 3, myTricks: 13 })).toContain('🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩')
+    // Inga spoilers någonstans i texten.
+    expect(shareText({ number: 3, myTricks: 13 })).not.toMatch(/hemma|bet|[1-7](NT|♠|♥|♦|♣)/)
+  })
+})
+
+// Streaken (Etapp B): resultatloggen är en karta givnummer → resultat.
+// Streaken = obruten svit som slutar i dag — eller i går, om dagens giv inte
+// spelats ännu (streaken "lever" tills en hel dag missats, som i Wordle).
+describe('streaken', () => {
+  it('obruten svit till och med i dag räknas', () => {
+    const log = { 1: { myTricks: 7 }, 2: { myTricks: 8 }, 3: { myTricks: 5 } }
+    expect(dailyStreak(log, 3)).toBe(3)
+  })
+
+  it('dagens giv ospelad → gårdagens svit lever fortfarande', () => {
+    const log = { 1: { myTricks: 7 }, 2: { myTricks: 8 } }
+    expect(dailyStreak(log, 3)).toBe(2)
+  })
+
+  it('ett hål i sviten nollställer', () => {
+    const log = { 1: { myTricks: 7 }, 3: { myTricks: 8 } }
+    expect(dailyStreak(log, 3)).toBe(1) // bara dagens
+    expect(dailyStreak({ 1: { myTricks: 7 } }, 3)).toBe(0) // två dagar gammalt
+  })
+
+  it('tom logg → ingen streak', () => {
+    expect(dailyStreak({}, 5)).toBe(0)
   })
 })
