@@ -74,3 +74,37 @@ describe('AuctionGrid — förklarings-popupen', () => {
     expect(screen.queryByText(/Naturligt/)).not.toBeInTheDocument()
   })
 })
+
+// Informationsläckan (granskningen 2026-08-02, lagad i Etapp C): motorns
+// lagrade förklaring byggs av handens FAKTISKA värden ("8 hp, 4+ spader").
+// Under en LEVANDE giv (hiddenHands) får bara Syds egna bud visa den — andras
+// bud förklaras av tolkningslagret, som läser enbart auktionen (intervall,
+// aldrig korten). I efterhandsvyerna (utan hiddenHands) är korten öppna och
+// den äkta förklaringen är poängen — där ändras inget.
+describe('AuctionGrid — dolda händer läcker inte (Etapp C)', () => {
+  const LEAK: ResolvedCall[] = [
+    { seat: 'E', bid: '1C', rule: 'öppning', explanation: '14 hp, 4 klöver → 1♣.' },
+    { seat: 'S', bid: '1H', rule: 'inkliv', explanation: '9 hp med 5-korts hjärter → 1♥ (inkliv).' },
+    { seat: 'W', bid: 'X', rule: 'negativ dubbling', explanation: '8 hp, 4+ spader → X (negativ dubbling, visar objuden högfärg).' },
+  ]
+
+  it('hiddenHands: motståndarens bud visar ALDRIG handens faktiska hp', () => {
+    render(<AuctionGrid calls={LEAK} dealer="E" hiddenHands />)
+    openPopup('X')
+    expect(screen.queryByText(/8 hp/)).not.toBeInTheDocument()
+    // ALERT och kravnivån är systemiska och ska finnas kvar.
+    expect(screen.getByText(/Förklaring · Väst/)).toBeInTheDocument()
+  })
+
+  it('hiddenHands: ditt EGET bud får fortfarande sin äkta förklaring', () => {
+    render(<AuctionGrid calls={LEAK} dealer="E" hiddenHands />)
+    openPopup('1♥')
+    expect(screen.getByText(/9 hp med 5-korts hjärter/)).toBeInTheDocument()
+  })
+
+  it('utan hiddenHands (budvisningen/efterhand): äkta förklaringen som förr', () => {
+    render(<AuctionGrid calls={LEAK} dealer="E" />)
+    openPopup('X')
+    expect(screen.getByText(/8 hp, 4\+ spader/)).toBeInTheDocument()
+  })
+})

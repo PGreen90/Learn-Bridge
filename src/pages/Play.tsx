@@ -10,6 +10,7 @@ import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
 import { dailyNumber, dailyStreak, shareText, type DailyLog } from '../lib/engine/daily'
 import { contractFromCalls } from '../lib/engine/auction-live'
+import { resultHeadline } from '../lib/engine/scoring'
 import { playsFrom, validSavedGame, type SavedGame } from '../lib/engine/resume'
 import { loadValue, saveValue } from '../lib/storage'
 import { PlayingCard } from '../components/PlayingCard'
@@ -270,6 +271,9 @@ export function PlayTable({
     reasonFor,
     thinking,
     onClaim,
+    onConcede,
+    undoable,
+    onUndo,
     onCardClick,
     onPlayedCardClick,
     done,
@@ -306,6 +310,8 @@ export function PlayTable({
 
   // Dina stick = din sidas (N/S) stick, oavsett vem som var spelförare.
   const myTricks = declSide === 'NS' ? result.declarerTricks : 13 - result.declarerTricks
+  // Resultatrubriken ur ditt perspektiv (Etapp C, facit i scoring.test.ts).
+  const headline = resultHeadline(declSide, result)
 
   // Dagens giv: det delbara resultatet (Wordle-mekaniken). Telefoner får
   // delningsarket (navigator.share), datorer kopierar till urklipp.
@@ -388,11 +394,11 @@ export function PlayTable({
         {!resultSeen && !reporting ? (
           // Guldglow vid hemgång (etapp 5, ägarbeslut: inget konfetti) —
           // engångs guldsvällning + skimmer på dialogkortet. Bet = sobert.
-          <Dialog className={`p-5 text-center ${result.made ? 'result-made-glow' : ''}`}>
-              <p className={`mb-1 text-lg font-semibold ${result.made ? 'text-accent' : 'text-danger'}`}>
-                {result.made
-                  ? `Hemma! ${result.declarerTricks} stick${result.diff > 0 ? ` (+${result.diff})` : ''}.`
-                  : `${-result.diff} bet (${result.declarerTricks} stick).`}
+          <Dialog className={`p-5 text-center ${headline.win ? 'result-made-glow' : ''}`}>
+              {/* Rubriken ur DITT perspektiv (Etapp C): att sätta deras
+                  kontrakt är en vinst — inte "1 bet" i rött. */}
+              <p className={`mb-1 text-lg font-semibold ${headline.win ? 'text-accent' : 'text-danger'}`}>
+                {headline.text}
               </p>
               {score && (
                 /* Guld = belöning (faceliften 2026-08-02): poängraden i guldserif
@@ -409,9 +415,11 @@ export function PlayTable({
               )}
               {claimed && (
                 <p className="mb-4 text-xs text-ink-muted">
-                  {claimed.auto
-                    ? 'Auto Claim: resten av sticken var 100 % säkra för spelföraren.'
-                    : 'Claim godkänd — resten av sticken bokfördes utan spel.'}
+                  {claimed.conceded
+                    ? 'Ni gav upp — resten av sticken gick till spelföraren.'
+                    : claimed.auto
+                      ? 'Auto Claim: resten av sticken var 100 % säkra för spelföraren.'
+                      : 'Claim godkänd — resten av sticken bokfördes utan spel.'}
                 </p>
               )}
               <div className="flex flex-col items-center gap-2">
@@ -573,8 +581,10 @@ export function PlayTable({
           <Button className="w-full" onClick={onNewGame}>
             Ny giv →
           </Button>
-          {/* Claim: bara när DIN sida är spelförare (motspelare claimar inte). */}
-          {declSide === 'NS' && (
+          {/* Claim: bara när DIN sida är spelförare (motspelare claimar inte).
+              Som motspelare finns i stället Ge upp (Etapp C) — en hopplös giv
+              ska inte behöva klickas klart i 13 stick. */}
+          {declSide === 'NS' ? (
             <Button
               variant="secondary"
               className="mt-2 w-full"
@@ -585,6 +595,24 @@ export function PlayTable({
               }}
             >
               Claim tricks
+            </Button>
+          ) : (
+            <Button variant="secondary" className="mt-2 w-full" onClick={onConcede}>
+              Ge upp — resten till spelföraren
+            </Button>
+          )}
+          {/* Ångra (Etapp C): backa till före ditt senaste kort — feltryck ska
+              aldrig kosta given. Bottarnas svar efteråt ospelas också. */}
+          {undoable && (
+            <Button
+              variant="secondary"
+              className="mt-2 w-full"
+              onClick={() => {
+                onUndo()
+                setShowMenu(false)
+              }}
+            >
+              ↩ Ångra mitt senaste kort
             </Button>
           )}
           {/* Auto Claim av/på: gäller både dig och datorn som spelförare. */}
@@ -649,11 +677,14 @@ export function PlayTable({
       {showInfo && (
         <div className="absolute left-1/2 top-[calc(3rem+env(safe-area-inset-top))] z-40 w-full max-w-sm -translate-x-1/2 space-y-2 px-3">
           <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+            {/* hiddenHands (Etapp C): under spelet är händerna dolda — andras
+                bud förklaras systemiskt, aldrig ur deras faktiska kort. */}
             <AuctionGrid
               calls={calls}
               dealer={deal.dealer}
               vulnerability={deal.vulnerability}
               explanations={bidHelp ? 'full' : 'minimal'}
+              hiddenHands
             />
           </div>
           {play.completedTricks.length > 0 && (
@@ -826,7 +857,12 @@ export function PlayTable({
       {pendingClaim && (
         <div className="overlay-in absolute left-1/2 top-1/3 z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-emerald-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25">
           <span className="whitespace-nowrap text-xs font-semibold text-white">
-            {pendingClaim.auto ? 'Auto Claim' : 'Claim godkänd'} — korten ligger uppe
+            {pendingClaim.conceded
+              ? 'Ni gav upp'
+              : pendingClaim.auto
+                ? 'Auto Claim'
+                : 'Claim godkänd'}{' '}
+            — korten ligger uppe
           </span>
           <Button onClick={finishClaimReveal}>Visa resultatet →</Button>
         </div>
