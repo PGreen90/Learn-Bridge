@@ -3,17 +3,16 @@ import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
 import { clearAllProgress, loadValue, saveValue } from '../lib/storage'
-import { clearGithubToken, loadGithubToken, saveGithubToken } from '../lib/github-token'
 import { setThemeChoice, themeChoice, type ThemeChoice } from '../lib/theme'
 import { isSoundEnabled, setSoundEnabled } from '../lib/sound'
 import { SPEED_LABEL, type PlaySpeed } from './play/tempo'
 
-/**
- * Länken till GitHubs sida för att skapa en fine-grained token, förifylld med
- * ett namn och den snävaste behörigheten (Issues) redan påslagen. Ägaren
- * behöver bara välja repot Learn-Bridge, sätta utgångsdatum och generera.
- */
-const TOKEN_CREATE_URL = 'https://github.com/settings/personal-access-tokens/new'
+// OBS (ägarbeslut 2026-08-03): panelen för GitHub-nyckeln (felrapporter direkt
+// till GitHub) är helt BORTTAGEN ur gränssnittet — funktionen finns kvar i
+// bakgrunden (lib/github-token.ts läses av FelrapportDialog, nyckeln ligger
+// kvar i localStorage). Behöver nyckeln bytas när den gått ut: be Claude
+// plocka fram panelen igen, eller kör i webbläsarkonsolen (rå sträng, ej JSON):
+//   localStorage.setItem('rebidz:felrapport-token', 'github_pat_…')
 
 /** En rad med av/på-knapp — Inställningssidans motsvarighet till spelmenyns
  *  toggles (egen, lätt variant: sidan ska inte dra in spelbordets moduler). */
@@ -100,24 +99,10 @@ export function Settings() {
   const [speed, setSpeed] = useState<PlaySpeed>(() => loadValue<PlaySpeed>('playSpeed', 'normal'))
 
   const [done, setDone] = useState(false)
-  const [token, setToken] = useState(() => loadGithubToken() ?? '')
-  const [saved, setSaved] = useState(false)
-  const hasToken = loadGithubToken() !== null
 
   function handleReset() {
     clearAllProgress()
     setDone(true)
-  }
-
-  function handleSaveToken() {
-    saveGithubToken(token)
-    setSaved(true)
-  }
-
-  function handleClearToken() {
-    clearGithubToken()
-    setToken('')
-    setSaved(false)
   }
 
   return (
@@ -196,8 +181,7 @@ export function Settings() {
         <h2 className="text-lg font-semibold mb-2">Nollställ framsteg</h2>
         <p className="text-ink-soft mb-4">
           Raderar allt appen sparat i den här webbläsaren (t.ex. vilka frågor du
-          klarat och din Dagens giv-svit). Går inte att ångra. (GitHub-nyckeln
-          nedan påverkas inte.)
+          klarat och din Dagens giv-svit). Går inte att ångra.
         </p>
         <Button variant="secondary" onClick={handleReset}>
           Nollställ mina framsteg
@@ -209,84 +193,6 @@ export function Settings() {
         )}
       </Panel>
 
-      {/* Ägarverktyget (Etapp D): hopfällt längst ner — en vanlig besökare
-          möttes förr av GitHub-instruktioner som första (och enda) innehåll. */}
-      <Panel>
-        <details>
-          <summary className="cursor-pointer text-sm font-semibold text-ink-soft">
-            För appens ägare: skicka felrapporter direkt till GitHub
-          </summary>
-          <div className="pt-3">
-            <p className="text-ink-soft mb-3">
-              Slå på det här så skickas felrapporter direkt med ett klick – du slipper
-              gå in på GitHub. Klistra in en GitHub-nyckel nedan (skapas en gång).
-              Nyckeln sparas bara i den här webbläsaren.
-            </p>
-
-            <ol className="list-decimal space-y-1 pl-5 text-sm text-ink-soft mb-3">
-              <li>
-                Öppna{' '}
-                <a
-                  href={TOKEN_CREATE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent underline"
-                >
-                  GitHubs sida för att skapa en nyckel
-                </a>{' '}
-                (du måste vara inloggad som PGreen90).
-              </li>
-              <li>Ge den ett namn, t.ex. ”rebidz felrapporter”, och sätt ett utgångsdatum.</li>
-              <li>
-                Under <strong>Repository access</strong>: välj <strong>Only select repositories</strong>{' '}
-                → <strong>Learn-Bridge</strong>.
-              </li>
-              <li>
-                Under <strong>Permissions → Repository permissions → Issues</strong>: välj{' '}
-                <strong>Read and write</strong>.
-              </li>
-              <li>
-                Klicka <strong>Generate token</strong>, kopiera nyckeln och klistra in den här nedanför.
-              </li>
-            </ol>
-
-            <input
-              type="password"
-              value={token}
-              onChange={(e) => {
-                setToken(e.target.value)
-                setSaved(false)
-              }}
-              placeholder="github_pat_…"
-              autoComplete="off"
-              spellCheck={false}
-              className="w-full rounded-lg border border-line-strong bg-control p-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
-            />
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button onClick={handleSaveToken} disabled={!token.trim()}>
-                Spara nyckel
-              </Button>
-              {hasToken && (
-                <Button variant="secondary" onClick={handleClearToken}>
-                  Ta bort nyckel
-                </Button>
-              )}
-              {saved && (
-                <span className="text-accent text-sm">
-                  ✓ Sparad – felrapporter skickas nu direkt.
-                </span>
-              )}
-            </div>
-
-            <p className="mt-3 text-xs leading-relaxed text-ink-muted">
-              Nyckeln lämnar aldrig den här webbläsaren och ligger inte i appens kod.
-              Den kan bara skapa felrapporter i Learn-Bridge – inget annat. Har du inte
-              sparat någon nyckel öppnas rapporten som förr på GitHub.
-            </p>
-          </div>
-        </details>
-      </Panel>
     </div>
   )
 }
