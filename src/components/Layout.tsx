@@ -234,7 +234,10 @@ export function Layout() {
                 översättas när engelskan kommer (Fas 5). */}
             <p className="text-xs text-ink-faint">
               © <span className="font-brand text-sm">rebidz</span> · Est. 2026 ·
-              v{pkg.version}
+              v{pkg.version} ·{' '}
+              <NavLink to="/om" className="underline underline-offset-2 hover:text-ink">
+                Om rebidz
+              </NavLink>
             </p>
           </div>
         </footer>

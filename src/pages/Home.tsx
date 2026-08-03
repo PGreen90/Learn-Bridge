@@ -198,6 +198,15 @@ export function Home() {
             description="Hela 2/1-systemet att läsa, sektion för sektion."
           />
         </div>
+
+        {/* Vägen in för nya ögon (Etapp D): en diskret rad under korten —
+            korten förblir likvärdiga (ägarbeslut: ingen "Börja här"-markering). */}
+        <p className="text-sm text-emerald-100/70">
+          Ny här?{' '}
+          <Link to="/om" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+            Så funkar rebidz →
+          </Link>
+        </p>
       </div>
     </Felt>
   )
