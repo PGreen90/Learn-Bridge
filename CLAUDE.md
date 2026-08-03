@@ -66,16 +66,16 @@ på uttryckligt ägarbeslut.
 rondgenomgången (DD-dom, `docs/kortspel.md`), markeringarna (UDCA + Lavinthal,
 `docs/budsystem.md §8.5`; mätrigg `play-quality.probe`, `PLAYQ=1`).
 
-**STORA GRANSKNINGEN + ETAPP A "SKYDDSNÄTET": BYGGD (gren
-`etapp-a-skyddsnatet`, EJ pushad).** 26 fynd + körordning A–D:
-`docs/historik.md` 2026-08-02. Etapp A: felfångare + chunkfel-omladdning,
-PWA `prompt` + "Ny version"-rad, og:-taggar + delningsbild, woff2 i precachen,
-"Kopierat"-fixen. **Buggfynd kvar (Etapp C):** motståndarbud i historiken
-visar deras FAKTISKA hp — ska byggas av intervallet.
+**STORA GRANSKNINGEN (26 fynd) + ETAPP A–D: KLARA.** A "Skyddsnätet"
+DEPLOYAD 2026-08-03 (felfångare, PWA-prompt, og-taggar, woff2, Kopierat-fix).
+B "Appen som minns" + C "Spelbordets förtroende" (informationsläckan LAGAD,
+ångra, ge upp, resultat ur ditt perspektiv, 812-budgeten) + D "Vägen in"
+(/om, Inställningar städad) byggda på grenar, webbläsarverifierade — se
+`docs/historik.md` 2026-08-03. Skjutet ur granskningen: par-poäng
+(auto-facit-spåret, `docs/senare.md`).
 
-**➡️ NÄSTA GÅNG:** 1) pusha Etapp A vid PCD; 2) ägaren väljer spår —
-granskningens Etapp B (streak/historik/spara giv/frö i URL), Etapp C
-(informationsläckan, ångra, ge upp, resultatperspektivet), facelift-puts,
+**➡️ NÄSTA GÅNG:** ägaren väljer — mer granskningsputs (kalenderarkiv för
+Dagens giv, resultathistorik för frispelet, tangentbord), facelift-puts,
 eller 🟢 NÄST punkt 1 (hål C — 4M). ⚪ SENARE: tredje hand högt i **trumf** +
 signalspåret. Idé att bevaka: berätta om Dagens giv först när den känns stabil.
 

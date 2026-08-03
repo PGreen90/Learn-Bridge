@@ -10,6 +10,54 @@
 
 ---
 
+## 2026-08-03
+
+**🧠 ETAPP B+C+D UR GRANSKNINGEN — BYGGDA (morgonen, gren per etapp, ägarens
+"PCD, sen kör vi Etapp B + C + D"):** Etapp A deployades först (Actions grön,
+rebidz.com verifierad med og-taggar + bild). Sedan:
+- **ETAPP B "Appen som minns":** resultatloggen `daily-log` (givnummer →
+  {myTricks}) + `dailyStreak` (Wordle-regeln: streaken lever tills en hel dag
+  missats) — 🔥-bricka på startsidans kort + i resultatdialogen. Delnings-
+  texten SPOILERFRI (🟩/⬛-rutrad med dina stick; kontrakt/facit avslöjas
+  aldrig — facit i `daily.test.ts`). **Giv-frö**: alla fria givar (även
+  målsökta) får ett mulberry32-frö synligt i adressen
+  (`#/spela-kort?giv=…`) — delbart/bokmärkbart/återskapbart (verifierat:
+  samma hand ur enbart adressen). **"Spela om given"** i resultatdialogen
+  (samma frö, round-räknare i bordets nyckel; loggen skrivs aldrig över av
+  omspel). **Pågående giv sparas löpande** (`pagaende-giv`, schemaversion
+  v:1, `lib/engine/resume.ts` + `resume.test.ts`) och återupptas vid
+  omladdning/telefonlås — motorn bygger upp läget via playCard-replay;
+  korrupt/gammal sparning ignoreras tyst; rensas när given är klar.
+- **ETAPP C "Spelbordets förtroende":** **Informationsläckan LAGAD**
+  (granskningens buggfynd): under levande giv förklaras andras bud av
+  tolkningslagret med regel/förklaring bortskalade — tolkningen läser enbart
+  auktionen, aldrig korten (`hiddenHands` i AuctionGrid, på i budfasen +
+  spelets ⓘ; egna bud, budvisningen och efterhandsvyerna oförändrade; facit
+  i `auction-grid.test.tsx`). OBS: tolkningens regeletikett kan i sällsynta
+  lägen avvika från motorns interna regelnamn — den beskriver vad auktionen
+  VISAR. Kortspelets "varför"-förklaringar behölls medvetet (pedagogiken är
+  poängen; omprövas om det känns som kik). **Ångra** (`play-undo.ts` +
+  facit): backa till före ditt senaste kort, bottarnas svar ospelas,
+  ⋮-menyknapp. **Ge upp** som motspelare (resten till spelföraren, via
+  claim-revealen med egen text). **Resultatrubriken ur ditt perspektiv**
+  (`resultHeadline` i scoring.ts + facit): "Ni satte kontraktet! 1 bet" i
+  guld i stället för rött. **Höjdbudgeten**: budfasens fot −6 px luft →
+  uppmätt exakt 812 px på 375×812 (även med förklaringsraden öppen).
+- **ETAPP D "Vägen in":** **Om rebidz** (`/om`): du sitter alltid Syd, 2/1,
+  lägena, tipsen — nås via "Ny här? Så funkar rebidz →" på startsidan
+  (diskret rad UNDER korten; ägarbeslutet om likvärdiga menykort orört) och
+  sidfotens "Om rebidz". **Inställningar-sidan städad**: Utseende
+  (Ljust/Mörkt/**Följ systemet** — gick inte att återfå förr, `themeChoice`/
+  `setThemeChoice` i theme.ts) + Spelet (Budstöd/Ljud/Auto Claim/Tempo, samma
+  lagringsnycklar som ⋮-menyn) + Nollställ; ägarens GitHub-verktyg hopfällt
+  längst ner. **Par-poäng i resultatet SKJUTS** medvetet (kräver DD-tabell i
+  webworker — hör ihop med auto-facit-spåret i `docs/senare.md`).
+Allt verifierat i webbläsaren (375×812): spara/återuppta genom omladdning,
+ångra 7→0 kort, ge upp-flödet, spoilerfri delning, streak-brickan, adress-
+fröets determinism, Inställningar, inga konsolfel. Läraren: teckenkodnings-
+fällan i PowerShell (Get/Set-Content förstör åäö) bet två gånger —
+dokumentfixar görs med Edit-verktyget, punkt.
+
 ## 2026-08-02
 
 **🛡️ STORA GRANSKNINGEN + ETAPP A "SKYDDSNÄTET" — BYGGD (natten mot 3/8, gren

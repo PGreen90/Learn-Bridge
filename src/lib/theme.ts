@@ -19,6 +19,24 @@ export function applyTheme(theme: Theme): void {
   document.documentElement.classList.toggle('dark', theme === 'dark')
 }
 
+// Inställningssidans tre-val (Etapp D): Ljust / Mörkt / Följ systemet.
+// "Följ systemet" = inget sparat val (null i lagringen) → currentTheme faller
+// tillbaka på systemets läge, precis som före första knapptrycket. Granskningen
+// 2026-08-02 fann att valet annars låstes för alltid vid första växlingen.
+export type ThemeChoice = Theme | 'system'
+
+/** Det SPARADE valet (inte det visade läget): 'system' om inget sparats. */
+export function themeChoice(): ThemeChoice {
+  const saved = loadValue<Theme | null>('theme', null)
+  return saved === 'light' || saved === 'dark' ? saved : 'system'
+}
+
+/** Sätt valet från inställningssidan och applicera direkt. */
+export function setThemeChoice(choice: ThemeChoice): void {
+  saveValue('theme', choice === 'system' ? null : choice)
+  applyTheme(currentTheme())
+}
+
 // Timer som plockar bort toningsklassen när övergången är klar (hålls i en
 // modulvariabel så snabba dubbelklick inte lämnar klassen kvar för evigt).
 let fadeTimer: number | undefined

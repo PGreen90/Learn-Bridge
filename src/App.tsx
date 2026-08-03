@@ -17,6 +17,7 @@ const BudSystem = lazy(() => import('./pages/BudSystem').then((m) => ({ default:
 const Spela = lazy(() => import('./pages/Spela').then((m) => ({ default: m.Spela })))
 const Play = lazy(() => import('./pages/Play').then((m) => ({ default: m.Play })))
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
+const Om = lazy(() => import('./pages/Om').then((m) => ({ default: m.Om })))
 const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })))
 
 // HashRouter används med flit: det fungerar felfritt på GitHub Pages utan
@@ -41,6 +42,8 @@ export default function App() {
               behålls gamla givens state eftersom komponenten är densamma). */}
           <Route path="spela-kort/dagens" element={<Play key="dagens" daily />} />
           <Route path="installningar" element={<Settings />} />
+          {/* Om rebidz (Etapp D): onboardingen — nås från startsidan + sidfoten. */}
+          <Route path="om" element={<Om />} />
           {/* Catch-all: alla adresser utanför tabellen (felskrivning, död
               länk) landar mjukt på 404-sidan i stället för på en tom sida
               (konkurrensplanen Fas 0 c). Facit: not-found.test.tsx. */}
