@@ -13,7 +13,7 @@ import {
   seatToAct,
 } from '../../lib/engine/auction-live'
 import { interpretCall } from '../../lib/engine/auction-interpret'
-import { dealRandom } from '../../lib/engine/deal'
+import { dealRandom, mulberry32 } from '../../lib/engine/deal'
 import { dailyDeal } from '../../lib/engine/daily'
 import { matchesTarget, type ContractTarget } from '../../lib/engine/contract-target'
 import { loadValue, saveValue } from '../../lib/storage'
@@ -28,15 +28,30 @@ export interface Game {
   history: ResolvedCall[]
   phase: 'bidding' | 'play'
   contract: Contract | null
+  /** Slumpfröet som återskapar given (Etapp B) — null för dagens giv. */
+  seed: number | null
+  /** Omgångsräknare: "Spela om given" ger samma frö men monterar om bordet
+   *  (spelbordet är key:at på deal.id + round). */
+  round: number
+}
+
+function randomSeed(): number {
+  return Math.floor(Math.random() * 4294967296)
+}
+
+/** En giv ur ett frö — id:t bär fröet så given kan pekas ut och återskapas. */
+export function gameFromSeed(seed: number, round = 0): Game {
+  const deal = { ...dealRandom(mulberry32(seed)), id: `giv-${seed}` }
+  return { deal, history: [], phase: 'bidding', contract: null, seed, round }
 }
 
 function newGame(): Game {
-  return { deal: dealRandom(), history: [], phase: 'bidding', contract: null }
+  return gameFromSeed(randomSeed())
 }
 
 /** Dagens giv: given kommer ur datumfröet i stället för slumpen (daily.ts). */
-function newDailyGame(): Game {
-  return { deal: dailyDeal(), history: [], phase: 'bidding', contract: null }
+function newDailyGame(round = 0): Game {
+  return { deal: dailyDeal(), history: [], phase: 'bidding', contract: null, seed: null, round }
 }
 
 export interface SearchState {
@@ -45,9 +60,11 @@ export interface SearchState {
 }
 
 /** `daily` = Dagens giv-läget: startgiven är dagens deterministiska giv.
- *  "Ny giv" i det läget hanteras av sidan (navigerar till frispelet). */
-export function useGame(daily = false) {
-  const [game, setGame] = useState<Game>(daily ? newDailyGame : newGame)
+ *  "Ny giv" i det läget hanteras av sidan (navigerar till frispelet).
+ *  `initial` (Etapp B): ett färdigt startläge — en återupptagen sparad giv
+ *  eller en giv ur ett delat ?giv=frö — i stället för en ny slumpgiv. */
+export function useGame(daily = false, initial?: Game | null) {
+  const [game, setGame] = useState<Game>(() => initial ?? (daily ? newDailyGame() : newGame()))
   // Kontraktväljaren: ett valt träningsmål (sparas mellan givar). `random` =
   // dagens vanliga slumpgiv. När ett mål är valt letar vi fram en giv vars
   // simulerade auktion landar där (`matchesTarget`), i småbatchar så sidan
@@ -143,10 +160,13 @@ export function useGame(daily = false) {
       if (searchCancel.current) return
       for (let i = 0; i < BATCH; i++) {
         tried++
-        const deal = dealRandom()
+        // Även målsökta givar får ett frö (Etapp B) → "Spela om given" och
+        // sparad pågående giv fungerar likadant för dem.
+        const seed = randomSeed()
+        const deal = dealRandom(mulberry32(seed))
         if (matchesTarget(deal, t)) {
           setSearch(null)
-          setGame({ deal, history: [], phase: 'bidding', contract: null })
+          setGame(gameFromSeed(seed))
           return
         }
       }
@@ -172,6 +192,12 @@ export function useGame(daily = false) {
     setSearch(null)
   }
 
+  /** Spela om SAMMA giv från början (Etapp B): samma frö (eller dagens giv),
+   *  ny omgång → spelbordet monteras om via round i nyckeln. */
+  function startSameGame() {
+    setGame((g) => (g.seed === null ? newDailyGame(g.round + 1) : gameFromSeed(g.seed, g.round + 1)))
+  }
+
   return {
     game,
     complete,
@@ -184,6 +210,7 @@ export function useGame(daily = false) {
     onBid,
     confirmContract,
     startNewGame,
+    startSameGame,
     pickTarget,
     cancelSearch,
   }

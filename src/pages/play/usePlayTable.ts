@@ -25,6 +25,7 @@ import {
   declarerTricksWon,
   remainingTricks,
 } from '../../lib/engine/claim'
+import { rebuildPlay } from '../../lib/engine/resume'
 import { loadValue, saveValue } from '../../lib/storage'
 import { scoreLine } from '../../lib/engine/scoring'
 import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
@@ -39,8 +40,21 @@ import { isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 // tidiga, tunga ställningar kan returnera null → vi visar ett vänligt meddelande.
 const FACIT_BUDGET = 2_000_000
 
-export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall[]) {
-  const [play, setPlay] = useState<PlayState>(() => startPlay(deal, contract))
+/** `restoredPlays` (Etapp B): spelade kort ur en sparad pågående giv — bordet
+ *  börjar då mitt i given i stället för från utspelet. Tom/ogiltig → från start. */
+export function usePlayTable(
+  deal: Deal,
+  contract: Contract,
+  calls: ResolvedCall[],
+  restoredPlays?: Card[],
+) {
+  const [play, setPlay] = useState<PlayState>(() => {
+    if (restoredPlays && restoredPlays.length > 0) {
+      const rebuilt = rebuildPlay(deal, contract, restoredPlays)
+      if (rebuilt) return rebuilt
+    }
+    return startPlay(deal, contract)
+  })
   const [showMenu, setShowMenu] = useState(false)
   // ⓘ-knappen: budgivningen som overlay (Synrey-minimalism – inget syns
   // förrän man ber om det).
@@ -86,8 +100,10 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // ett klick (kort eller stickytan) hoppar över det — otåliga blockeras aldrig.
   const [sweep, setSweep] = useState<Sweep | null>(null)
   // Ref-jämförelse (inte effekt-på-play rakt av) så StrictMode-dubbelkörningen
-  // i dev inte startar svepet två gånger.
-  const sweptCount = useRef(0)
+  // i dev inte startar svepet två gånger. Startar på ANTALET redan spelade
+  // stick (Etapp B): en återupptagen giv ska inte svepa sitt senaste stick
+  // en gång till vid monteringen.
+  const sweptCount = useRef(play.completedTricks.length)
   // Kortflygningen (etapp 3): var kortet startade + vilket kort som är i luften.
   // Källan MÅSTE mätas synkront innan setPlay — efteråt är kortet borta ur handen.
   const { flight, beginFlight, endFlight, registerCardEl, wasFlown } = useCardFlight()
@@ -162,7 +178,9 @@ export function usePlayTable(deal: Deal, contract: Contract, calls: ResolvedCall
   // antalet spelade kort växer med varje lagt kort (även fjärde: 3 → 4 när
   // sticket bokförs). Ref-jämförelsen gör den StrictMode-säker och tyst vid
   // tempo-/ljudväxlingar (antalet är då oförändrat).
-  const heardCount = useRef(0)
+  // Startar på antalet redan lagda kort (Etapp B) — annars knäpper det till
+  // vid monteringen av en återupptagen giv.
+  const heardCount = useRef(play.completedTricks.length * 4 + play.currentTrick.length)
   useEffect(() => {
     const n = play.completedTricks.length * 4 + play.currentTrick.length
     if (n > heardCount.current && sound) playSound('card')
