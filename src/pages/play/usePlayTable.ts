@@ -26,6 +26,7 @@ import {
   remainingTricks,
 } from '../../lib/engine/claim'
 import { rebuildPlay } from '../../lib/engine/resume'
+import { canUndo as canUndoState, undoLastHumanCard } from '../../lib/engine/play-undo'
 import { loadValue, saveValue } from '../../lib/storage'
 import { scoreLine } from '../../lib/engine/scoring'
 import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
@@ -75,7 +76,11 @@ export function usePlayTable(
   // Claim (ägarönskemål 2026-07-03): `claimed` avslutar given med det claimade
   // resultatet i stället för att spela ut resten. `claiming` = dialogen öppen,
   // `claimMsg` = "Claim nekad"-beskedet, `autoClaim` = av/på-valet (sparas).
-  const [claimed, setClaimed] = useState<{ total: number; auto: boolean } | null>(null)
+  const [claimed, setClaimed] = useState<{
+    total: number
+    auto: boolean
+    conceded?: boolean
+  } | null>(null)
   const [claiming, setClaiming] = useState(false)
   const [claimMsg, setClaimMsg] = useState<string | null>(null)
   // Claim-reveal (etapp 5, "känsla i kortspelet", ägarbeslut 2026-07-28): en
@@ -83,7 +88,12 @@ export function usePlayTable(
   // upp öppet och LIGGER KVAR, precis som vid ett riktigt bord, tills spelaren
   // själv går vidare med knappen (finishClaimReveal). Ingen timer. Botarna
   // pausar under revealen.
-  const [pendingClaim, setPendingClaim] = useState<{ total: number; auto: boolean } | null>(null)
+  const [pendingClaim, setPendingClaim] = useState<{
+    total: number
+    auto: boolean
+    /** Ge upp (Etapp C): motspelaren skänkte resten — annan text än claim. */
+    conceded?: boolean
+  } | null>(null)
   // Resultatövergången (etapp 5): när given är klar tonar bordet ut i
   // ms('resultOutro') innan resultatvyn tar över — inget hårt klipp.
   const [showResult, setShowResult] = useState(false)
@@ -333,6 +343,40 @@ export function usePlayTable(
     })
   }
 
+  // Ångra (Etapp C): backa till läget före ditt senaste kort — feltryck ska
+  // aldrig kosta hela given. Bottarnas svar efter ditt kort ospelas också
+  // (replay via motorn), och deras väntande drag avbryts av att play byts
+  // (bot-effektens städfunktion). Ljud-/svep-räknarna backas i takt, annars
+  // tror de att gamla stick är nya när de spelas om.
+  const humanSeats = (['N', 'E', 'S', 'W'] as Seat[]).filter((s) => controls(contract, s))
+  const undoable =
+    !claimed && !pendingClaim && !isComplete(play) && canUndoState(play, humanSeats)
+  function onUndo() {
+    if (!undoable) return
+    const prev = undoLastHumanCard(deal, contract, play, humanSeats)
+    if (!prev) return
+    sweptCount.current = prev.completedTricks.length
+    heardCount.current = prev.completedTricks.length * 4 + prev.currentTrick.length
+    setSweep(null)
+    setSelectedSuit(null)
+    setExplain(null)
+    setPlay(prev)
+  }
+
+  // Ge upp (Etapp C): som MOTSPELARE kan du inte claima — men en hopplös giv
+  // ska inte behöva klickas klart i 13 stick. Att ge upp skänker resten av
+  // sticken till spelföraren (standardbetydelsen av "jag ger mig" vid bordet)
+  // och går via claim-revealen så korten läggs upp precis som vid en claim.
+  function onConcede() {
+    if (claimed || pendingClaim || isComplete(play)) return
+    setPendingClaim({
+      total: declarerTricksWon(play) + remainingTricks(play),
+      auto: false,
+      conceded: true,
+    })
+    setShowMenu(false)
+  }
+
   // Manuell claim: du anger sidans TOTALA stick i given; DDS-lösaren dömer om
   // de går att säkra mot bästa motspel. Godkänd → given avslutas. Nekad → spela
   // vidare. "Oavgjord" = ställningen är för tung att räkna just nu.
@@ -481,6 +525,9 @@ export function usePlayTable(
     reasonFor,
     thinking,
     onClaim,
+    onConcede,
+    undoable,
+    onUndo,
     onCardClick,
     onPlayedCardClick,
     done,

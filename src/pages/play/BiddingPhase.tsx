@@ -105,6 +105,7 @@ export function BiddingPhase({
             vulnerability={game.deal.vulnerability}
             activeSeat={toAct}
             explanations={bidHelp ? 'full' : 'minimal'}
+            hiddenHands
           />
           <div className="shrink-0 sm:absolute sm:-right-11 sm:top-0">
             <TableMenu
@@ -135,7 +136,11 @@ export function BiddingPhase({
 
       {/* Din hand som solfjäder + HCP-bricka (Synrey). mt-auto trycker handen till
           botten när duken fyller hela skärmen; säker botten-marginal (hemindikator). */}
-      <div className="mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+      {/* pt-1.5 + pb 0.25rem (Etapp C, uppmätt i granskningen): med pt-2 +
+          pb 0.5rem slutade kortraden på 819 px mot skärmens 812 (iPhone-målet)
+          → 6 px skvalpig scroll i budfasen. Verifiera med granskningens mått:
+          document.documentElement.scrollHeight ≤ 812 på 375×812. */}
+      <div className="mt-auto border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
         {/* HCP-brickan är LÅST till budlådans kolumn (max-w-md, ägarbeslut
             2026-08-02) — den följer budlådans högerkant på stor skärm i stället
             för att driva ut till skärmhörnet, och svävar på avdelarlinjen strax

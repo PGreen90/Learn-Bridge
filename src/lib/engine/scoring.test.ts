@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Vulnerability } from '../../types/bridge'
 import type { Contract, Strain } from './play'
-import { duplicateScore, scoreLine, sideVulnerable } from './scoring'
+import { duplicateScore, resultHeadline, scoreLine, sideVulnerable } from './scoring'
 
 const c = (level: number, strain: Strain, doubled?: 'X' | 'XX'): Contract => ({
   declarer: 'S',
@@ -147,5 +147,41 @@ describe('scoreLine — texten i resultatdialogen', () => {
     // Syd går 2 bet dubblat i zon → Ö/V +500.
     const line = scoreLine(c(2, 'spades', 'X'), 6, 'ns')
     expect(line).toEqual({ side: 'EW', points: 500, label: 'Ö/V +500' })
+  })
+})
+
+// Resultatrubriken ur spelarens perspektiv (Etapp C, granskningen 2026-08-02):
+// att sätta motståndarnas kontrakt är en VINST och ska läsas som en.
+describe('resultHeadline — spelarens perspektiv', () => {
+  it('vi spelar hem: vinst med sticken (och övertricken)', () => {
+    expect(resultHeadline('NS', { declarerTricks: 10, made: true, diff: 0 })).toEqual({
+      text: 'Hemma! 10 stick.',
+      win: true,
+    })
+    expect(resultHeadline('NS', { declarerTricks: 11, made: true, diff: 1 })).toEqual({
+      text: 'Hemma! 11 stick (+1).',
+      win: true,
+    })
+  })
+
+  it('vi går bet: förlust', () => {
+    expect(resultHeadline('NS', { declarerTricks: 7, made: false, diff: -1 })).toEqual({
+      text: '1 bet (7 stick).',
+      win: false,
+    })
+  })
+
+  it('vi FÄLLER deras kontrakt: vinst — inte "bet" i rött', () => {
+    expect(resultHeadline('EW', { declarerTricks: 7, made: false, diff: -1 })).toEqual({
+      text: 'Ni satte kontraktet! 1 bet.',
+      win: true,
+    })
+  })
+
+  it('de går hem mot oss: förlust', () => {
+    expect(resultHeadline('EW', { declarerTricks: 9, made: true, diff: 1 })).toEqual({
+      text: 'De gick hem — 9 stick (+1).',
+      win: false,
+    })
   })
 })

@@ -92,6 +92,25 @@ function undertrickPenalty(down: number, vulnerable: boolean, doubled?: 'X' | 'X
   return doubled === 'XX' ? total * 2 : total
 }
 
+/** Resultatrubriken ur SPELARENS perspektiv (Etapp C, granskningen
+ *  2026-08-02): förr sa rubriken alltid spelförarens sanning — "1 bet" i rött
+ *  fastän DU som motspelare just satt kontraktet (en vinst!). `win` styr
+ *  färgen (guld/grönt mot rött), texten säger vad som hände för DIG. */
+export function resultHeadline(
+  declSide: 'NS' | 'EW',
+  result: { declarerTricks: number; made: boolean; diff: number },
+): { text: string; win: boolean } {
+  const over = result.diff > 0 ? ` (+${result.diff})` : ''
+  if (declSide === 'NS') {
+    return result.made
+      ? { text: `Hemma! ${result.declarerTricks} stick${over}.`, win: true }
+      : { text: `${-result.diff} bet (${result.declarerTricks} stick).`, win: false }
+  }
+  return result.made
+    ? { text: `De gick hem — ${result.declarerTricks} stick${over}.`, win: false }
+    : { text: `Ni satte kontraktet! ${-result.diff} bet.`, win: true }
+}
+
 export interface ScoreLine {
   /** Sidan som fick pluspoängen. */
   side: 'NS' | 'EW'

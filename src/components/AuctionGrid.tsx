@@ -9,6 +9,7 @@ import type { Forcing, Seat, Vulnerability } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import { SEAT_LABEL } from '../lib/bidding'
 import { FORCING_LABEL, ruleInfo } from '../lib/engine/rules'
+import { interpretCall } from '../lib/engine/auction-interpret'
 import { BidChip } from './BidChip'
 import { BidLabel } from './BidLabel'
 import { ClickAway } from './Dialog'
@@ -42,12 +43,24 @@ function shortLabel(rule: string | undefined): string | null {
   return rule ? rule.charAt(0).toUpperCase() + rule.slice(1) : null
 }
 
+/** Budets SYSTEMISKA betydelse (Etapp C, informationsläckan): motorns lagrade
+ *  förklaring byggs av spelarens faktiska hand — den får bara ägaren av handen
+ *  se under en levande giv. Här tolkas budet i stället av tolkningslagret med
+ *  regel + förklaring BORTSKALADE, så tolkningen läser enbart auktionen:
+ *  intervall och färglöften, aldrig korten. */
+function systemicText(calls: ResolvedCall[], index: number): string {
+  const stripped = calls.map((c, i) => (i === index ? { seat: c.seat, bid: c.bid } : c))
+  const interp = interpretCall(stripped, index)
+  return interp.confidence === 'gissning' ? `${interp.text} (osäker tolkning)` : interp.text
+}
+
 export function AuctionGrid({
   calls,
   dealer,
   vulnerability = 'none',
   activeSeat = null,
   explanations = 'full',
+  hiddenHands = false,
 }: {
   calls: ResolvedCall[]
   dealer: Seat
@@ -60,6 +73,12 @@ export function AuctionGrid({
    * och den långa förklaringen döljs. 'full' = dagens hela panel.
    */
   explanations?: 'full' | 'minimal'
+  /**
+   * Levande giv med dolda händer (Etapp C): andras bud förklaras systemiskt
+   * (tolkningslagret, bara auktionen) — aldrig med deras faktiska hp. Av i
+   * budvisningen och efterhandsvyerna, där korten är öppna med flit.
+   */
+  hiddenHands?: boolean
 }) {
   const [selected, setSelected] = useState<number | null>(null)
   const full = explanations === 'full'
@@ -73,6 +92,14 @@ export function AuctionGrid({
 
   const chosen = selected !== null ? cells[selected] : null
   const chosenInfo = chosen ? ruleInfo(chosen.rule) : null
+  // Läckvakten: under levande giv får bara Syds egna bud visa den lagrade
+  // (hand-byggda) förklaringen — andras bud tolkas systemiskt ur auktionen.
+  const masked = hiddenHands && chosen !== null && chosen.seat !== 'S'
+  const explanationText = chosen
+    ? masked
+      ? systemicText(calls, selected! - lead)
+      : chosen.explanation
+    : null
 
   return (
     <div className="relative flex-1 rounded-lg bg-emerald-950/60 p-2 ring-1 ring-emerald-100/10">
@@ -156,8 +183,8 @@ export function AuctionGrid({
             </div>
             {full && (
               <p className="pt-2 text-sm text-ink-soft">
-                {chosen.explanation ? (
-                  <SuitText>{chosen.explanation}</SuitText>
+                {explanationText ? (
+                  <SuitText>{explanationText}</SuitText>
                 ) : (
                   <span className="text-ink-faint">
                     Ingen förklaring för <BidLabel bid={chosen.bid} />.
