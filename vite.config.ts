@@ -13,13 +13,20 @@ export default defineConfig({
     react(),
     tailwindcss(),
     // PWA (Steg A Del 3): gör appen installerbar ("Lägg till på hemskärmen") +
-    // offline. Service worker + manifest genereras vid bygget. autoUpdate =
-    // ny version tas i bruk automatiskt vid nästa öppning (ingen "uppdatera"-knapp).
+    // offline. Service worker + manifest genereras vid bygget.
+    // 2026-08-02 (granskningens Etapp A): "autoUpdate" → "prompt". autoUpdate
+    // lät en ny version ta över TYST mitt i en session, vilket kunde ge
+    // chunk-fel (vit sida) i öppna flikar. Nu visar appen en diskret
+    // "Ny version finns"-rad i stället (registreringen: src/pwa-update.ts,
+    // därför injectRegister: false — vi anropar registerSW själva).
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
+        // Stabil identitet: utan id räknas ett framtida byte av start_url som
+        // en HELT NY app för alla som redan lagt rebidz på hemskärmen.
+        id: '/',
         name: 'rebidz – spela och lär dig bridge',
         short_name: 'rebidz',
         description: 'Spela och lär dig bridge (2/1-systemet) direkt i webbläsaren.',
@@ -37,7 +44,9 @@ export default defineConfig({
       },
       workbox: {
         // Precacha app-skalet + alla byggda tillgångar → funkar offline.
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm}'],
+        // woff2 (granskningen 2026-08-02): utan den precachades inte
+        // typsnitten, så guldserifen föll tillbaka på systemtypsnitt offline.
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm,woff2}'],
         cleanupOutdatedCaches: true,
       },
     }),

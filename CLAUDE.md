@@ -62,22 +62,26 @@ topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
 **`docs/konkurrensplan.md`**. Beslut B (backend, Fas 2+) byggs fortfarande bara
 på uttryckligt ägarbeslut.
 
-**Klart 2026-07-29 (detalj i `docs/historik.md`):** felrapport #32
-(spelföraren etablerar lång färg i sang, `docs/bot-hjarna.md`),
-rondgenomgången (tre kapitel med DD-dom, `docs/kortspel.md`) och markeringarna
-(UDCA + Lavinthal, `docs/budsystem.md §8.5`; mätrigg `play-quality.probe`,
-`PLAYQ=1`).
+**Klart 2026-07-29 (detalj i `docs/historik.md`):** felrapport #32,
+rondgenomgången (DD-dom, `docs/kortspel.md`), markeringarna (UDCA + Lavinthal,
+`docs/budsystem.md §8.5`; mätrigg `play-quality.probe`, `PLAYQ=1`).
 
-**➡️ NÄSTA GÅNG:** ägaren väljer — mer facelift-puts (t.ex. sticksvepet,
-mörkt läge-finish), eller byter spår: 🟢 NÄST punkt 1 (hål C — 4M), Lebensohl
-nästa lager (`docs/senare.md`). ⚪ SENARE: tredje hand högt i **trumf** +
-signalspåret. Idé att bevaka: berätta om Dagens giv för folk först när den
-känns stabil.
+**STORA GRANSKNINGEN + ETAPP A "SKYDDSNÄTET": BYGGD (gren
+`etapp-a-skyddsnatet`, EJ pushad).** 26 fynd + körordning A–D:
+`docs/historik.md` 2026-08-02. Etapp A: felfångare + chunkfel-omladdning,
+PWA `prompt` + "Ny version"-rad, og:-taggar + delningsbild, woff2 i precachen,
+"Kopierat"-fixen. **Buggfynd kvar (Etapp C):** motståndarbud i historiken
+visar deras FAKTISKA hp — ska byggas av intervallet.
 
-**Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i kortspelet,
-budstöd På/Av-toggle, felrapporter #40/#41/#42, underhåll (volymtester ska
-ALLTID vara seedade). Känt hål kvar: starka
-dubblaren säljer given i rond 2 utan egen färg (frö 20260952, M19, `docs/bevaka.md`).
+**➡️ NÄSTA GÅNG:** 1) pusha Etapp A vid PCD; 2) ägaren väljer spår —
+granskningens Etapp B (streak/historik/spara giv/frö i URL), Etapp C
+(informationsläckan, ångra, ge upp, resultatperspektivet), facelift-puts,
+eller 🟢 NÄST punkt 1 (hål C — 4M). ⚪ SENARE: tredje hand högt i **trumf** +
+signalspåret. Idé att bevaka: berätta om Dagens giv först när den känns stabil.
+
+**Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
+kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
+seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 
 > **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
 > bottarna bjuder som människor — egen hand + partnerns **VISADE** intervall, aldrig

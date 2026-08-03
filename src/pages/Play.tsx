@@ -210,8 +210,13 @@ export function PlayTable({
     if (navigator.share) {
       navigator.share({ text }).catch(() => {})
     } else {
-      void navigator.clipboard?.writeText(text)
-      setCopied(true)
+      // Kvittot "✓ Kopierat" får bara visas när kopieringen faktiskt lyckades
+      // (granskningen 2026-08-02: förr sattes det ovillkorligt — även när
+      // urklippet var blockerat och förblev tomt).
+      navigator.clipboard
+        ?.writeText(text)
+        .then(() => setCopied(true))
+        .catch(() => {})
     }
   }
   // Kom ihåg att dagens giv är spelad (startsidans "Spelad ✓"-bricka).
