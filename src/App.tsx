@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate, useSearchParams } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 
@@ -17,8 +17,22 @@ const BudSystem = lazy(() => import('./pages/BudSystem').then((m) => ({ default:
 const Spela = lazy(() => import('./pages/Spela').then((m) => ({ default: m.Spela })))
 const Play = lazy(() => import('./pages/Play').then((m) => ({ default: m.Play })))
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
+const DagensArkiv = lazy(() =>
+  import('./pages/DagensArkiv').then((m) => ({ default: m.DagensArkiv })),
+)
+const SpelHistorik = lazy(() =>
+  import('./pages/SpelHistorik').then((m) => ({ default: m.SpelHistorik })),
+)
 const Om = lazy(() => import('./pages/Om').then((m) => ({ default: m.Om })))
 const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })))
+
+/** Dagens giv-rutten: `?dag=N` (kalenderarkivet 2026-08-03) spelar en tidigare
+ *  dags giv. Dagen ingår i React-nyckeln så ett dagbyte i arkivet monterar om
+ *  Play — annars satt gårdagens giv kvar när man valde en ny dag. */
+function PlayDagens() {
+  const [params] = useSearchParams()
+  return <Play key={`dagens-${params.get('dag') ?? 'idag'}`} daily />
+}
 
 // HashRouter används med flit: det fungerar felfritt på GitHub Pages utan
 // extra serverinställningar (adresserna får ett #, t.ex. .../#/budtraning).
@@ -40,7 +54,13 @@ export default function App() {
           {/* Dagens giv (2026-08-02): samma sida, men given kommer ur datumfröet.
               Egna key:ar → React monterar om Play vid byte mellan lägena (annars
               behålls gamla givens state eftersom komponenten är densamma). */}
-          <Route path="spela-kort/dagens" element={<Play key="dagens" daily />} />
+          <Route path="spela-kort/dagens" element={<PlayDagens />} />
+          {/* Kalenderarkivet (2026-08-03): alla dagars givar sedan premiären —
+              spelade dagar visar resultatet, missade går att spela i efterhand. */}
+          <Route path="spela-kort/dagens/arkiv" element={<DagensArkiv />} />
+          {/* Frispelets resultathistorik (2026-08-03): senaste givarna, alla
+              omspelbara via sitt frö. */}
+          <Route path="spela-kort/historik" element={<SpelHistorik />} />
           <Route path="installningar" element={<Settings />} />
           {/* Om rebidz (Etapp D): onboardingen — nås från startsidan + sidfoten. */}
           <Route path="om" element={<Om />} />

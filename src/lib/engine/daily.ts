@@ -28,6 +28,17 @@ export function dailyDeal(date: Date = new Date()): Deal {
   return { ...deal, id: `dagens-${dailyNumber(date)}` }
 }
 
+/** Datumet för giv #n — dailyNumbers motsats (kalenderarkivet 2026-08-03).
+ *  Date-konstruktorn rullar själv över månads-/årsskiften. */
+export function dailyDateFromNumber(n: number): Date {
+  return new Date(EPOCH.getFullYear(), EPOCH.getMonth(), EPOCH.getDate() + (n - 1))
+}
+
+/** Giv #n ur arkivet: exakt samma giv som alla fick den dagen. */
+export function dailyDealByNumber(n: number): Deal {
+  return dailyDeal(dailyDateFromNumber(n))
+}
+
 /**
  * Det delbara resultatet (Wordle-mekaniken): en kort text att klistra in i en
  * gruppchatt — varje delning är en inbjudan att spela samma giv själv.
@@ -43,7 +54,9 @@ export function shareText({ number, myTricks }: { number: number; myTricks: numb
     `rebidz · Dagens giv #${number}`,
     row,
     `Jag tog ${myTricks} av 13 stick — klarar du fler?`,
-    'https://rebidz.com/#/spela-kort/dagens',
+    // ?dag=N (kalenderarkivet 2026-08-03): den som klickar länken i morgon ska
+    // hamna på SAMMA giv som resultatet gällde, inte på morgondagens.
+    `https://rebidz.com/#/spela-kort/dagens?dag=${number}`,
   ].join('\n')
 }
 
@@ -51,9 +64,12 @@ export function shareText({ number, myTricks }: { number: number; myTricks: numb
 // Loggen bor i localStorage (nyckeln `daily-log` via lib/storage) men FORMEN
 // och beräkningarna bor här — ren logik utan I/O, som resten av modulen.
 
-/** Ett spelat dagens giv-resultat. `myTricks` = stick till DIN sida (N/S). */
+/** Ett spelat dagens giv-resultat. `myTricks` = stick till DIN sida (N/S).
+ *  `late` (kalenderarkivet 2026-08-03) = given spelades i EFTERHAND, en senare
+ *  dag än sin egen — syns i kalendern men räknas inte in i streaken. */
 export interface DailyEntry {
   myTricks: number
+  late?: boolean
 }
 
 /** Givnummer → resultat. Nycklarna blir strängar i JSON — därför string|number. */
@@ -62,11 +78,13 @@ export type DailyLog = Record<string | number, DailyEntry>
 /**
  * Streaken: hur många dagar i rad har du spelat, räknat bakåt från i dag?
  * Dagens giv ospelad → gårdagens svit lever fortfarande (som i Wordle bryts
- * streaken först när en HEL dag missats).
+ * streaken först när en HEL dag missats). Efterhandsspel ur kalenderarkivet
+ * (`late`) räknas INTE — ett igenfyllt hål väcker inte en bruten svit.
  */
 export function dailyStreak(log: DailyLog, todayNumber: number): number {
-  const start = log[todayNumber] !== undefined ? todayNumber : todayNumber - 1
+  const onTime = (n: number) => log[n] !== undefined && log[n].late !== true
+  const start = onTime(todayNumber) ? todayNumber : todayNumber - 1
   let n = 0
-  while (log[start - n] !== undefined) n++
+  while (onTime(start - n)) n++
   return n
 }

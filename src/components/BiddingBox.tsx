@@ -75,12 +75,16 @@ export function BiddingBox({
 }) {
   const allowed = new Set(legal)
   const [selected, setSelected] = useState<Bid | null>(null)
+  // Tangentbordets halvskrivna bud: en tryckt siffra (1–7) som väntar på sin
+  // färgbokstav (tangentbordsstyrningen, fynd #21 i granskningen).
+  const [pendingLevel, setPendingLevel] = useState<number | null>(null)
   // Nollställ valet när auktionen ändras (2026-08-02): utan detta överlever ett
   // markerat bud in i NÄSTA giv, och eftersom två tryck på samma bud = OK kunde
   // ett gammalt val råka bjudas med ett enda tryck. Under motståndarnas bud kan
   // inget väljas (legal är tom), så i praktiken slår detta bara vid ny giv.
   useEffect(() => {
     setSelected(null)
+    setPendingLevel(null)
   }, [history.length])
   const recBid =
     showHelp && recommendation && allowed.has(recommendation.bid) ? recommendation.bid : null
@@ -104,6 +108,57 @@ export function BiddingBox({
       setSelected(null)
     }
   }
+
+  // Tangentbordsstyrning på dator (granskningsputsen 2026-08-03, fynd #21:
+  // "tangentbord på desktop saknas helt"): siffran väljer nivån, bokstaven
+  // färgen — N = sang, S = spader, H = hjärter, R/D = ruter, K/C = klöver;
+  // P = pass, X = dubbelt/redubbelt, Enter = OK, Esc rensar valet. Samma
+  // två-stegsflöde som klicken: budet markeras och förklaras först, Enter
+  // (eller samma bud igen) bekräftar. Registreras utan deps-lista med flit —
+  // billigt, och lyssnaren läser alltid färskt state (inga inaktuella stängningar).
+  useEffect(() => {
+    if (legal.length === 0) return // inte din tur — inga tangenter
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return
+      const t = e.target as HTMLElement | null
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return // skriv i fred
+      const k = e.key.toLowerCase()
+      if (/^[1-7]$/.test(k)) {
+        setPendingLevel(Number(k))
+        return
+      }
+      const strain =
+        k === 'n' ? 'NT'
+        : k === 's' ? 'S'
+        : k === 'h' ? 'H'
+        : k === 'r' || k === 'd' ? 'D'
+        : k === 'k' || k === 'c' ? 'C'
+        : null
+      if (strain !== null && pendingLevel !== null) {
+        choose(`${pendingLevel}${strain}`)
+        return
+      }
+      if (k === 'p') {
+        choose('P')
+        return
+      }
+      if (k === 'x') {
+        choose(allowed.has('X') ? 'X' : 'XX')
+        return
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault() // stoppa fokuserad knapps egna Enter-klick (dubbelbud)
+        confirm()
+        return
+      }
+      if (e.key === 'Escape') {
+        setSelected(null)
+        setPendingLevel(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
 
   const isRec = selected !== null && selected === recBid
   // Egna bud (ej motorns rekommendation) tolkas ur auktionen – aldrig tomt.

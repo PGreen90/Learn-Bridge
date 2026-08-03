@@ -17,7 +17,8 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
-  localStorage.removeItem('learnbridge:bidHelp')
+  localStorage.clear()
+  window.location.hash = ''
 })
 
 /** Låt datorbuden (700 ms-timern) ticka fram ett steg. */
@@ -75,6 +76,41 @@ describe('Spela kort — nyckelflödet budgivning → kortspel', () => {
     expect(screen.getByText(/NS:0 ÖV:0/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Facit' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Budgivningen' })).toBeInTheDocument()
+  })
+
+  // Rundpass (ägarönskemål 2026-08-03): när given passas ut ska "Spela om
+  // given" finnas där bredvid "Ny giv" — så man kan testa samma giv igen (t.ex.
+  // öppna budgivningen själv). Frö 705 passas ut deterministiskt (dealer Syd).
+  it('rundpass: "Spela om given" finns och startar om samma giv', async () => {
+    window.location.hash = '#/spela-kort?giv=705'
+    render(<Play />)
+
+    // Kör auktionen till slut — Syd passar, datorbuden tickar. Given passas ut.
+    let ended = false
+    for (let i = 0; i < 60 && !ended; i++) {
+      if (screen.queryByText(/passades ut/)) {
+        ended = true
+        break
+      }
+      const pass = boxPassChip()
+      if (!pass.disabled) {
+        fireEvent.click(pass)
+        fireEvent.click(screen.getByRole('button', { name: 'OK' }))
+      } else {
+        await tick()
+      }
+    }
+    expect(screen.getByText(/passades ut/)).toBeInTheDocument()
+
+    // BÅDE omspel OCH ny giv erbjuds nu (förr fanns bara "Ny giv").
+    expect(screen.getByRole('button', { name: 'Spela om given' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Ny giv/ })).toBeInTheDocument()
+
+    // Klick på "Spela om given" → samma giv från början: budfasen igen
+    // (OK-knappen synlig) och passades-ut-dialogen är borta.
+    fireEvent.click(screen.getByRole('button', { name: 'Spela om given' }))
+    expect(screen.getByRole('button', { name: 'OK' })).toBeInTheDocument()
+    expect(screen.queryByText(/passades ut/)).not.toBeInTheDocument()
   })
 
   // Budstöd-toggeln (ägarbeslut 2026-07-28): sitter i ⋮-menyn, sparas i

@@ -171,6 +171,15 @@ export function Home() {
             roterande guldramen (gold-frame) — det unika ska synas. */}
         <DailyCard />
 
+        {/* Kalenderarkivet (2026-08-03): diskret rad under flaggskeppet — alla
+            dagars givar sedan premiären, missade dagar spelbara i efterhand. */}
+        <Link
+          to="/spela-kort/dagens/arkiv"
+          className="-mt-3 text-xs font-medium text-emerald-100/70 underline underline-offset-2 hover:text-gold-200"
+        >
+          Missat en dag? Kalenderarkivet →
+        </Link>
+
         {/* Menyknapparna: vägen in i appen, en per del. */}
         <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
           <ModeCard

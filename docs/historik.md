@@ -12,6 +12,47 @@
 
 ## 2026-08-03
 
+**🧰 GRANSKNINGSPUTSEN: KALENDERARKIV + RESULTATHISTORIK + TANGENTBORD —
+BYGGDA (förmiddagen; pushas först på ägarens PCD):** ägaren valde putsen ur
+"NÄSTA GÅNG"-listan. Tre delar, alla testdrivna (facit före fix) och
+webbläsarverifierade:
+- **Kalenderarkivet för Dagens giv** (`/spela-kort/dagens/arkiv`,
+  `DagensArkiv.tsx`): månadskalender från premiären 2026-08-02 — spelade dagar
+  visar dina stick i guldserif, missade dagar spelas i EFTERHAND via
+  `#/spela-kort/dagens?dag=N` (dagen ingår i Plays React-nyckel i `App.tsx` så
+  ett dagbyte monterar om sidan), framtida dagar är låsta. **Ärlighetsregeln:**
+  efterhandsspel bokförs med `late` i `daily-log` och räknas ALDRIG in i
+  streaken — ett igenfyllt hål väcker inte en bruten svit (facit
+  `daily.test.ts` + `dagens-arkiv.test.tsx`). Delningstexten bär nu `?dag=N`
+  så en delad länk öppnar RÄTT giv även i morgon (förr fick mottagaren
+  morgondagens giv). Diskret länk på startsidan under flaggskeppskortet.
+- **Resultathistoriken för frispelet** (granskningens fynd #4 "fritt spel
+  sparar ingenting alls"): varje färdigspelad FRI giv bokförs i
+  `spel-historik` (`spel-historik.ts`: nyast först, tak 50, strukturvakten
+  `validHistorik`; facit `spel-historik.test.ts`) med frö, kontrakt och
+  resultat ur ditt perspektiv → sidan `/spela-kort/historik`
+  (`SpelHistorik.tsx`) listar dem med "Spela om →" (`?giv=frö` ger exakt samma
+  kort). Länk i resultatdialogen. Verifierad end-to-end i webbläsaren med
+  autospelaren (riktig giv spelades klart och bokfördes korrekt).
+- **Tangentbordsstyrning på dator** (fynd #21 "tangentbord på desktop saknas
+  helt"): budlådan styrs med siffra + färgbokstav (N = sang, S = spader,
+  H = hjärter, R/D = ruter, K/C = klöver), P = pass, X = dubbelt, Enter = OK,
+  Esc rensar — samma tvåstegsflöde som klicken (facit
+  `bidding-box-keyboard.test.tsx`); Enter bekräftar även kontraktdialogen.
+  Spelfasen: ←/→ (och ↑/↓) flyttar fokus mellan de spelbara korten
+  (`data-spelbart` + guld fokusring i `PlayingCard`), Enter spelar det
+  fokuserade kortet. Hjälptexterna i båda ⋮-menyerna beskriver tangenterna.
+Lärdom vid verifieringen: React 18 batchar setState från vanliga
+window-lyssnare — läs av DOM:en efter en timeout, inte synkront efter
+`dispatchEvent`, annars ser verifieringen falskt rött.
+
+**🎁 SMÅÖNSKEMÅL SAMMA FÖRMIDDAG (parallella sessioner, pushade ihop med
+putsen):** rundpass ger nu **"Spela om given"** bredvid "Ny giv" (samma frö —
+man kan öppna budgivningen själv den här gången; facit i
+`play-smoke.test.tsx`), och claim-revealen **namnger vem som tar resten**
+("Nord tar resten (13 stick)" i stället för bara "korten ligger uppe"; facit i
+`syd-trakarl.test.tsx`).
+
 **🧠 ETAPP B+C+D UR GRANSKNINGEN — BYGGDA (morgonen, gren per etapp, ägarens
 "PCD, sen kör vi Etapp B + C + D"):** Etapp A deployades först (Actions grön,
 rebidz.com verifierad med og-taggar + bild). Sedan:

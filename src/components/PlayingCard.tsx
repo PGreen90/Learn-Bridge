@@ -156,7 +156,18 @@ export function PlayingCard({
 
   if (onClick && playable) {
     return (
-      <button ref={ref as Ref<HTMLButtonElement>} type="button" onClick={onClick} className={cls} style={style}>
+      // data-spelbart: tangentbordsstyrningen på bordet (granskningsputsen
+      // 2026-08-03, fynd #21) hittar de spelbara korten via attributet —
+      // ←/→ flyttar fokus mellan dem (Play.tsx), Enter är knappens vanliga
+      // klick. Guldringen visas bara vid tangentbordsfokus (focus-visible).
+      <button
+        ref={ref as Ref<HTMLButtonElement>}
+        type="button"
+        data-spelbart
+        onClick={onClick}
+        className={`${cls} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:-translate-y-2 focus-visible:z-20`}
+        style={style}
+      >
         {inner}
       </button>
     )
