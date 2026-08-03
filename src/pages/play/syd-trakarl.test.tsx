@@ -109,6 +109,9 @@ describe('Syd träkarl — Nord spelförare styrs av dig och given fastnar inte'
     await advance(0)
 
     expect(screen.getByText(/korten ligger uppe/)).toBeInTheDocument()
+    // Vem tar resten + hur många skrivs ut (ägarönskemål 2026-08-03): Nord är
+    // spelförare och inget stick är spelat än → hela resten (13 stick).
+    expect(screen.getByText(/Nord tar resten \(13 stick\)/)).toBeInTheDocument()
     expect(container.querySelectorAll('.rotate-90, .-rotate-90').length).toBe(26)
   })
 })

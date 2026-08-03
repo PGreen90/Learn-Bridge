@@ -17,18 +17,13 @@ telefon-först (full-bleed, träkarlen på rätt sida vid försvar), budlådan m
 kortrad = spelfasens och guldring på valt bud. All detalj:
 `docs/konkurrensplan.md` Fas 1 + `docs/historik.md`.
 
-**DE INRE SIDORNA + EXKLUSIVITETSSVEPET + DAGENS GIV (yta 4): KLART 2026-08-02
-(sen kväll).** Ägaren godkände hela förslagslistan: gemensam `PageHeader`
-(klubbserif + guldhårlinje) på de fyra inre sidorna, guldmonogram på
-kortbaksidan, boken som klubbok (§-guldsiffror + anfang), guld på utmärkelser
-(poäng i guldserif, guldspader på fullklarade teman), laddspader, knapp-skimmer,
-sidfot (© rebidz · Est. 2026 · version ur `package.json`, nu 1.0.0),
-heron-taglinen "Träna, spela, tävla" — och
-**DAGENS GIV**: datumfrö (`daily.ts`, facit `daily.test.ts`) ger alla samma giv
-varje dag, rutt `/spela-kort/dagens`, delbart textresultat (Wordle-mekaniken),
-flaggskeppskort med roterande guldram på startsidan. Förtitt på Fas 3 UTAN
-backend — topplistan kräver Fas 2. Detalj: `docs/historik.md` 2026-08-02 +
-`docs/konkurrensplan.md` Fas 1/Fas 3.
+**DE INRE SIDORNA + EXKLUSIVITETSSVEPET + DAGENS GIV (yta 4): KLART
+2026-08-02.** Gemensam `PageHeader`, guldmonogram på kortbaksidan, klubbok,
+guld på utmärkelser, laddspader, knapp-skimmer, sidfot, taglinen "Träna, spela,
+tävla" — och **DAGENS GIV**: datumfröet (`daily.ts`) ger alla samma giv varje
+dag, rutt `/spela-kort/dagens`, delbart textresultat (Wordle-mekaniken),
+flaggskeppskort på startsidan. Förtitt på Fas 3 UTAN backend. Detalj:
+`docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1/Fas 3.
 
 **ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (deployad 2026-07-31).**
 Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
@@ -74,10 +69,16 @@ B "Appen som minns" + C "Spelbordets förtroende" (informationsläckan LAGAD,
 `docs/historik.md` 2026-08-03. Skjutet ur granskningen: par-poäng
 (auto-facit-spåret, `docs/senare.md`).
 
-**➡️ NÄSTA GÅNG:** ägaren väljer — mer granskningsputs (kalenderarkiv för
-Dagens giv, resultathistorik för frispelet, tangentbord), facelift-puts,
-eller 🟢 NÄST punkt 1 (hål C — 4M). ⚪ SENARE: tredje hand högt i **trumf** +
-signalspåret. Idé att bevaka: berätta om Dagens giv först när den känns stabil.
+**GRANSKNINGSPUTSEN + SMÅÖNSKEMÅLEN (2026-08-03): KLARA, PCD-ade IHOP.**
+Kalenderarkiv för Dagens giv (efterhandsspel räknas ej i streaken; dellänken
+bär `?dag=N`), resultathistorik för frispelet (omspelbar via fröet),
+tangentbord på dator (budlådan + bordet), "Spela om given" vid rundpass och
+claim-revealen namnger vem som tar resten. Detalj: `docs/historik.md`.
+
+**➡️ NÄSTA GÅNG:** ägaren väljer — facelift-puts, kvarvarande granskningsfynd
+(a11y, par-poäng) eller 🟢 NÄST punkt 1 (hål C — 4M). ⚪ SENARE: tredje hand
+högt i **trumf** + signalspåret. Idé att bevaka: berätta om Dagens giv först
+när den känns stabil.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { dailyDeal, dailyNumber, dailySeed, dailyStreak, shareText } from './daily'
+import {
+  dailyDateFromNumber,
+  dailyDeal,
+  dailyDealByNumber,
+  dailyNumber,
+  dailySeed,
+  dailyStreak,
+  shareText,
+} from './daily'
 
 // Dagens giv (faceliften/konkurrensspåret 2026-08-02): samma datum ska ALLTID ge
 // samma giv — det är hela poängen (alla spelar samma giv och kan jämföra sig).
@@ -39,17 +47,34 @@ describe('dagens giv', () => {
     }
   })
 
+  // Kalenderarkivet (granskningsputsen 2026-08-03): varje giv ska gå att nå i
+  // efterhand via sitt löpnummer — samma giv som alla fick den dagen.
+  it('arkivet: löpnumret pekar ut exakt den dagens giv', () => {
+    // #1 = premiärdagen 2026-08-02; #31 = 2026-09-01 (månadsskiftet räknas rätt).
+    expect(dailyDateFromNumber(1)).toEqual(new Date(2026, 7, 2))
+    expect(dailyDateFromNumber(31)).toEqual(new Date(2026, 8, 1))
+    // Numret och datumet är varandras motsatser.
+    expect(dailyNumber(dailyDateFromNumber(200))).toBe(200)
+    // Given ur numret = given ur datumet, med samma id.
+    const viaNumber = dailyDealByNumber(2)
+    const viaDate = dailyDeal(new Date(2026, 7, 3))
+    expect(viaNumber.hands).toEqual(viaDate.hands)
+    expect(viaNumber.id).toBe('dagens-2')
+  })
+
   // Deltexten gjordes SPOILERFRI i Etapp B (granskningen 2026-08-02): den
   // gamla texten skrev ut kontrakt + resultat i klartext, så mottagaren fick
   // facit INNAN hen spelat given. Nu delas bara dina egna stick (Wordle-
   // mekanikens spoilerfria rutor) — kontraktet förblir en överraskning.
+  // Länken bär givens dag (?dag=N) sedan kalenderarkivet 2026-08-03: den som
+  // klickar i morgon ska hamna på SAMMA giv som resultatet gällde.
   it('deltexten: rutraden visar mina stick, inget kontrakt och inget facit', () => {
     const text = shareText({ number: 1, myTricks: 8 })
     expect(text).toBe(
       'rebidz · Dagens giv #1\n' +
         '🟩🟩🟩🟩🟩🟩🟩🟩⬛⬛⬛⬛⬛\n' +
         'Jag tog 8 av 13 stick — klarar du fler?\n' +
-        'https://rebidz.com/#/spela-kort/dagens',
+        'https://rebidz.com/#/spela-kort/dagens?dag=1',
     )
   })
 
@@ -83,5 +108,19 @@ describe('streaken', () => {
 
   it('tom logg → ingen streak', () => {
     expect(dailyStreak({}, 5)).toBe(0)
+  })
+
+  // Ärlighetsregeln (kalenderarkivet 2026-08-03): en giv spelad i EFTERHAND
+  // bokförs i loggen (syns i kalendern) men räknas inte in i streaken — annars
+  // ginge det att fylla igen hål och "fuska ihop" en svit dagar senare.
+  it('efterhandsspel ur arkivet räknas inte in i streaken', () => {
+    const log = { 1: { myTricks: 7 }, 2: { myTricks: 8, late: true }, 3: { myTricks: 5 } }
+    expect(dailyStreak(log, 3)).toBe(1) // bara dagens — 2:an var ett efterhandsspel
+  })
+
+  it('att fylla igen gårdagens hål i efterhand väcker inte den brutna sviten', () => {
+    // Dag 1–2 spelade i tid, dag 3 missades och fylldes igen ur arkivet på dag 4.
+    const log = { 1: { myTricks: 7 }, 2: { myTricks: 8 }, 3: { myTricks: 5, late: true } }
+    expect(dailyStreak(log, 4)).toBe(0) // dag 3 missades i TID → sviten är bruten
   })
 })

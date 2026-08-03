@@ -2,7 +2,7 @@
 // din hand som solfjäder längst ner. Motståndarnas kort visas inte alls.
 // Bara presentation — spellogiken bor i useGame.
 
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Bid } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { decideCall, legalCalls, seatToAct, contractFromCalls } from '../../lib/engine/auction-live'
@@ -25,6 +25,7 @@ export function BiddingPhase({
   onBid,
   onConfirm,
   onNewGame,
+  onPlayAgain,
   targetLabel,
   onOpenPicker,
   bidHelp,
@@ -36,6 +37,9 @@ export function BiddingPhase({
   onBid: (bid: Bid) => void
   onConfirm: () => void
   onNewGame: () => void
+  /** "Spela om given": samma giv från början — även när given passades ut, så
+   *  man kan testa att öppna budgivningen själv den här gången. Frivillig. */
+  onPlayAgain?: () => void
   targetLabel: string
   onOpenPicker: () => void
   /** Budstöd på/av (ägarbeslut 2026-07-28): av döljer motorns hjälp helt. */
@@ -60,6 +64,20 @@ export function BiddingPhase({
     () => (yourTurn && bidHelp ? decideCall(game.deal, game.history, 'S') : null),
     [yourTurn, bidHelp, game.deal, game.history],
   )
+
+  // Tangentbord (fynd #21): Enter bekräftar kontraktdialogen — budlådans egna
+  // tangenter bor i BiddingBox (dess lyssnare är avstängd när auktionen är klar).
+  useEffect(() => {
+    if (!finalContract) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        onConfirm()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [finalContract, onConfirm])
 
   return (
     <Felt className="flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none">
@@ -117,7 +135,10 @@ export function BiddingPhase({
             >
               Du sitter <strong>Syd</strong>. När din ruta i auktionen lyser är det din tur:
               klicka ett bud i budlådan och bekräfta med <strong>OK</strong>. Datorn sköter
-              Väst, Nord och Öst. Klicka ett lagt bud för att se vad det betyder.
+              Väst, Nord och Öst. Klicka ett lagt bud för att se vad det betyder. På dator
+              funkar tangentbordet: siffra + färgbokstav väljer budet (t.ex. <strong>1</strong>{' '}
+              och <strong>S</strong> för 1♠; N = sang, R = ruter, K = klöver), <strong>P</strong>{' '}
+              = pass, <strong>X</strong> = dubbelt, <strong>Enter</strong> = OK.
             </TableMenu>
           </div>
         </div>
@@ -179,7 +200,17 @@ export function BiddingPhase({
       {passedOut && !reporting && (
         <Dialog className="p-4 text-center">
             <p className="mb-3 text-sm text-ink-soft">Ingen öppnade – given passades ut.</p>
-            <Button onClick={onNewGame}>Ny giv →</Button>
+            {/* Spela om given: samma giv en gång till (du kan öppna själv den här
+                gången) — vid rundpass fanns förr bara "Ny giv" (ägarönskemål
+                2026-08-03). */}
+            <div className="flex flex-wrap justify-center gap-2">
+              {onPlayAgain && (
+                <Button variant="secondary" onClick={onPlayAgain}>
+                  Spela om given
+                </Button>
+              )}
+              <Button onClick={onNewGame}>Ny giv →</Button>
+            </div>
             <div>
               <button
                 type="button"
