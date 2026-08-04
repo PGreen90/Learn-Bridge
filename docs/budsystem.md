@@ -1372,7 +1372,10 @@ dubblarens eget flöde (X + egen färg).
 ### 7.4 Övriga dubblingar (negativ, responsiv, stöd)
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
   upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
-  ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Öppnaren svarar som på en upplysningsdubbling.
+  ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Klev de in i en **lågfärg** så att **båda**
+  högfärgerna är objudna (t.ex. 1♣–(2♦)–X), visar X:et **båda** högfärgerna,
+  minst 4-4 — förklaringen nämner då bägge (felrapport #45). Öppnaren svarar som
+  på en upplysningsdubbling.
   **Öppnarens sang-svar (fel färg-spåret fix 4):** sang på **1-läget** (1NT) går
   bra på minimum med stopp, men på **2-läget+** kräver sangen **extra (~15+)** —
   en minimiöppnare visar hellre (utan nivåhöjning, i ordning) en **annan objuden
@@ -1536,6 +1539,15 @@ motståndare stör, svarar partnern med ett riktigt beslut i stället för att p
   färgbud med **X**.
 - **Egen 5+ färg = naturligt "to play"** (konkurrerar). Ett 3-lägesbud kräver 6+ kort.
 - Annars **pass**.
+- **Öppnarens fortsättning efter partnerns värde-X (2NT-relä, felrapport #43).**
+  Värde-X:et har en bred range (8+), så öppnaren kan inte blint bjuda utgång
+  (15+8 = 23 räcker inte). Mot ett **DONT-tvåfärgsinkliv** (konstgjort, som de flyr
+  ifrån) säljer öppnaren inte given med pass utan **beskriver**: en **5-korts färg**
+  visas (naturligt), annars **2NT** (förnekar 5-kort). Svararen **placerar**:
+  **pass med 8–10**, **3NT med 11+** (över en visad färg: höj med fit, annars 3NT/pass).
+  Så når paret utgången när svararen låg i toppen av sitt X. Mot ett **naturligt**
+  inkliv står i stället försvaret/passen kvar (felrapport #39: 2♥X är rätt straff,
+  3NT går bet) – reläet firar bara mot DONT.
 
 **(b) De stör vår svaga tvåa / spärr** (takeout-X eller ett inkliv):
 - Deras **upplysningsdubbling → XX = värden/straffintresse** (10+ hp).
@@ -1660,6 +1672,21 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-04 (felrapport #43)** – **Öppnarens 2NT-relä efter partnerns värde-X
+  över stört 1NT (kod §7.8 a, ägarbeslut).** Motorn saknade all logik för öppnarens
+  fortsättning efter partnerns straff/värde-X → off-book-reservbud (bar pass) →
+  missad utgång fast paret hade 28 hp. Ny logik (`answerNTValueDoubleOpener` +
+  `answerNTValueDoubleDoubler`, `auction-live.ts`): mot ett **DONT**-inkliv beskriver
+  öppnaren (5-korts färg, annars 2NT som förnekar 5-kort) och svararen placerar
+  (pass 8–10 / 3NT 11+). **Enbart mot DONT** – mot ett naturligt inkliv står försvaret
+  kvar (felrapport #39-facit skyddat, egen diskriminator-test). Facit:
+  `auction-1nt-value-double.test.ts`.
+- **2026-08-04 (felrapport #45)** – **Negativ dubbling som visar BÅDA högfärgerna
+  (kod §7.4, bara förklaringstext).** När motståndaren klev in i en lågfärg så att
+  båda högfärgerna är objudna (1♣–(2♦)–X) och svararen har 4+ i båda, fastnade
+  förklaringen på den första högfärgen ("4+ hjärter") fast handen visade båda.
+  `negativeDouble` (`doubles.ts`) nämner nu **båda** högfärgerna (minst 4-4) i det
+  läget. **Budet (X) oförändrat — bara texten** rättad. Facit: `doubles.test.ts`.
 - **2026-08-03 (cue-bud återinförda, river 2026-07-07)** – **Kontrollbud i motorns
   slamutredning (kod §6.2, ägarbeslut).** 2026-07-07-beslutet att ta bort cue-ronden
   ("ingen kontrollkoll — lita på poängen") revs: cue-bud är expertspelets främsta

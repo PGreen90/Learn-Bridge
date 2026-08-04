@@ -2503,6 +2503,121 @@ function ntInterferenceToAnswer(history: ResolvedCall[], seat: Seat): string | n
   return lastNonPass.bid
 }
 
+// ---- Öppnarens fortsättning efter partnerns VÄRDE-DUBBEL (felrapport #43) ----
+// Läge: vi öppnade 1NT (15–17), motståndaren störde med ett 2-lägesinkliv (DONT),
+// partnern (svararen) dubblade = straff/värden (8+ – answerNTInterference). X:et
+// har en BRED range (8 upp till 15+), så öppnaren kan inte blint bjuda utgång
+// (15+8 = 23 räcker inte). Ägarbeslut 2026-08-04: ett 2NT-RELÄ där öppnaren
+// beskriver — VISAR en 5-korts färg om den finns, annars 2NT (förnekar 5-kort) —
+// och svararen PLACERAR (pass 8–10 / 3NT 11+). Öppnaren säljer inte given med pass
+// (det var det gamla off-book-reservbudet som missade utgången).
+
+/** Öppnarens tur efter partnerns värde-X över deras 2-lägesstörning av vårt 1NT? */
+function ntValueDoubleOpenerToAnswer(history: ResolvedCall[], seat: Seat): { theirStrain: string } | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1) return null
+  if (open.seat !== seat) return null // öppnaren själv
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 1) return null // vi har bara bjudit 1NT
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
+  // Färgen partnern dubblade = motståndarnas senaste kontraktsbud, ett 2-lägesinkliv.
+  let doubled: { level: number; strain: string; call: ResolvedCall } | null = null
+  for (let i = history.length - 1; i >= 0; i--) {
+    const cb = parseContractBid(history[i].bid)
+    if (cb) { doubled = { level: cb.level, strain: cb.strain, call: history[i] }; break }
+  }
+  if (!doubled || side(doubled.call.seat) === side(seat) || doubled.level !== 2) return null
+  // ENBART mot ett DONT-inkliv (konstgjort tvåfärg som de flyr från) beskriver
+  // öppnaren mot utgång. Mot ett NATURLIGT inkliv står försvaret/passen kvar
+  // (felrapport #39: 2♥X är rätt straff, 3NT går bet) – där firar detektorn inte.
+  if (!doubled.call.rule?.startsWith('DONT')) return null
+  return { theirStrain: doubled.strain }
+}
+
+/** Öppnarens beskrivande svar: 5-korts färg om den finns, annars 2NT (förnekar 5-kort). */
+function answerNTValueDoubleOpener(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = ntValueDoubleOpenerToAnswer(history, seat)
+  if (!ctx) return null
+  const hand = deal.hands[seat]
+  const len = lengths(hand)
+  const theirSuit = SUIT_OF_LETTER[ctx.theirStrain]
+  // Egen 5-korts färg (högst rankad, ej deras) → visa den naturligt.
+  let five: Suit | null = null
+  for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
+    if (s !== theirSuit && len[s] >= 5) { five = s; break }
+  }
+  if (five) {
+    const bid = cheapestBidIn(history, seat, letterOfSuit(five))
+    if (bid) {
+      return {
+        seat, bid, rule: 'öppnarens svar på värde-X',
+        explanation: `${len[five]}-korts ${SWE_NAME[letterOfSuit(five)]} → ${bid} (visar färgen; 2NT hade förnekat 5-kort).`,
+      }
+    }
+  }
+  const nt = '2NT' as Bid
+  if (!legalCalls(history, seat).includes(nt)) return null
+  return {
+    seat, bid: nt, rule: 'öppnarens svar på värde-X',
+    explanation: 'balanserad 15–17 utan 5-korts färg → 2NT (förnekar 5-kort; partnern placerar: pass 8–10, 3NT 11+).',
+  }
+}
+
+/** Dubblarens (svararens) tur efter att öppnaren beskrivit med 2NT eller en 5-korts färg? */
+function ntValueDoubleDoublerToAnswer(history: ResolvedCall[], seat: Seat): { openerBid: string } | null {
+  const open = openingBid(history)
+  if (!open || open.strain !== 'NT' || open.level !== 1) return null
+  if (side(open.seat) !== side(seat) || seat !== PARTNER[open.seat]) return null // dubblaren
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2) return null // 1NT + öppnarens beskrivande bud
+  const myLastNonPass = [...history.filter((c) => c.seat === seat)].reverse().find((c) => c.bid !== 'P')
+  if (!myLastNonPass || myLastNonPass.bid !== 'X') return null // jag dubblade
+  const openerBids = history.filter((c) => c.seat === open.seat && parseContractBid(c.bid))
+  if (openerBids.length !== 2) return null
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== open.seat) return null // öppnarens svar är senast (LHO passade)
+  return { openerBid: openerBids[1].bid }
+}
+
+/** Svararen placerar: 3NT med 11+, annars pass; över en visad färg — fit → höj, annars 3NT/pass. */
+function answerNTValueDoubleDoubler(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = ntValueDoubleDoublerToAnswer(history, seat)
+  if (!ctx) return null
+  const hand = deal.hands[seat]
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  const strong = p >= 11
+  const openerCb = parseContractBid(ctx.openerBid as Bid)
+  if (!openerCb) return null
+
+  // Öppnaren visade en 5-korts FÄRG (inte 2NT).
+  if (openerCb.strain !== 'NT') {
+    const openerSuit = SUIT_OF_LETTER[openerCb.strain]
+    const isMajor = openerSuit === 'hearts' || openerSuit === 'spades'
+    if (isMajor && len[openerSuit] >= 3) {
+      const bid = `${strong ? 4 : 3}${openerCb.strain}` as Bid
+      if (legal.includes(bid)) {
+        return {
+          seat, bid, rule: 'svar på öppnarens värde-X-fortsättning',
+          explanation: `${len[openerSuit]}-korts stöd i ${SWE_NAME[openerCb.strain]} → ${bid} (${strong ? 'utgång' : 'inbjudan'}).`,
+        }
+      }
+    }
+    if (strong && legal.includes('3NT' as Bid)) {
+      return { seat, bid: '3NT', rule: 'svar på öppnarens värde-X-fortsättning', explanation: `${p} hp utan fit → 3NT.` }
+    }
+    return { seat, bid: 'P', rule: 'pass', explanation: `${p} hp, inget bättre → pass (${ctx.openerBid} står).` }
+  }
+
+  // Öppnaren bjöd 2NT (förnekade 5-kort): placera utgång.
+  if (strong && legal.includes('3NT' as Bid)) {
+    return { seat, bid: '3NT', rule: 'placerar utgång efter öppnarens 2NT', explanation: `${p} hp mitt emot öppnarens 15–17 → 3NT.` }
+  }
+  return { seat, bid: 'P', rule: 'pass', explanation: `${p} hp (8–10) → pass, 2NT står.` }
+}
+
 // ---- Lebensohl efter VÅRT 1NT (§7.5, Lager 1) ------------------------------
 // Motståndaren har klivit in NATURELLT över vårt 1NT (rule = 'naturligt inkliv
 // (1NT)', modelleras i auction.ts). Svararen spelar Lebensohl; öppnaren fullföljer
@@ -3774,6 +3889,12 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
         (i) => answerNTInterference(hand, i), history, seat),
       () => answered(ownPreemptInterferenceToAnswer(history, seat),
         (p) => answerPreemptInterference(hand, p.ourSuit, p.theirCall, p.ourLevel), history, seat),
+      // Öppnarens fortsättning efter partnerns VÄRDE-DUBBEL över vårt störda 1NT
+      // (felrapport #43): 2NT-relä (förnekar 5-kort) eller visa 5-korts färg, och
+      // svararens placering över det. FÖRE off-book-svaret (som gav bar pass →
+      // missad utgång eftersom öppnaren saknade all logik här).
+      () => answerNTValueDoubleOpener(deal, history, seat),
+      () => answerNTValueDoubleDoubler(deal, history, seat),
       // Öppnaren svarar partnerns CUE-HÖJNING i motståndarnas färg (felrapport
       // #16): cue = krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
       () => answerCueRaise(deal, history, seat),

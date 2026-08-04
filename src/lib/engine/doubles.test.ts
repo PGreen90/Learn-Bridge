@@ -12,6 +12,15 @@ describe('negativeDouble (§7.3)', () => {
   it('gäller även inkliv på 2-läget: 1♦–(2♣)–X med 4 hjärter', () => {
     expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '2C')?.call).toBe('X')
   })
+  // Felrapport #45 (bricka 3): 1♣–(2♦)–X med BÅDA objudna högfärgerna 4+
+  // (Syd 5-4 i spader–hjärter). X:et visar båda högfärgerna – förklaringen
+  // fick INTE nämna bara hjärter (loopen returnerade på första 4-färgen).
+  it('1♣–(2♦)–X med båda högfärgerna → förklaringen nämner BÅDA', () => {
+    const r = negativeDouble(parseHand('S:K9876 H:KT86 D:4 C:KJ5'), 'clubs', '2D')
+    expect(r?.call).toBe('X')
+    expect(r?.explanation).toMatch(/spader/)
+    expect(r?.explanation).toMatch(/hjärter/)
+  })
 })
 
 // Öppnarens svar på partnerns negativa dubbling – rondkrav, aldrig pass.
