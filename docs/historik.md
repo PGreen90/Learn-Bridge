@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-08-04
+
+**🃏 UTSPELSBUGGEN (♣AQJxx mot slam): LAGAD (pushas på ägarens PCD).** Ägaren
+rapporterade att boten underledde sitt ess på utspelet mot slam. Orsak: utspelet
+gick via ren längsta-färg-doktrin (`openingLead` → `leadFromSuit`), så ♣AQJxx
+(udda 5-korts utan sekvens) föll till spotkortsutspel (5:e bästa) och ledde LÅGT
+under esset — mot ett trumfkontrakt förödande (spelförarens singel-kung blir
+gratis, esset dör oanvänt). Kommentaren i `botCardReasoned` lovade "man underleder
+inte ess på utspelet" men koden gjorde ändå det. Ny `openingLeadChoice` i
+`play-bot.ts`: mot **färgkontrakt** väljs den längsta färg som INTE kräver ett
+ess-underspel (en ♠KQJ2-sekvens vinner över att underleda ♣AQJxx); har varje färg
+ett oskyddat ess **cashas** esset i längsta färgen. **NT oförändrat** (klassisk
+längsta-färg-doktrin — ess-underspel/4:e bästa är normalt i sang). Facit FÖRE fix:
+`play-bot.test.ts` ("utspel mot trumfkontrakt – underled aldrig ett ess", 3 fall:
+byte till sekvens, forced-ess-cash, NT-vakten). Hela sviten grön (`npm test`,
+0 regressioner), `tsc` ren. Regel införd i `docs/budsystem.md §8.3` + §9-loggen.
+
 ## 2026-08-03
 
 **🧰 GRANSKNINGSPUTSEN: KALENDERARKIV + RESULTATHISTORIK + TANGENTBORD —

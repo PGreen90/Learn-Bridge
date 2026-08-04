@@ -66,11 +66,15 @@ högfärgsstöd** (= hål C, når 6♥ på frö 20260932). Reverse/hoppskift/2�
 Play. **Kvar (eget beslut):** fler agreed-trumf-lägen (inverterad minor, 2♣);
 off-book-igenkänning av din cue i icke-standardordning; öppnarens 18–19 i Jacoby.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer — utspelsbuggen (♣AQJxx-utspel mot slam,
-`play-bot.ts`), fler cue-lägen (ovan), 🟢 NÄST punkt 1-rest (hål D — konkurrens-
-fallen) eller kvarvarande granskningsfynd (a11y, par-poäng). Faceliten
-PARKERAD (ägarbeslut 2026-08-03). ⚪ SENARE: tredje hand högt i **trumf** +
-signalspåret.
+**UTSPELET (2026-08-04): ess-buggen (♣AQJxx mot slam) LAGAD + FULL DIAGNOS.**
+`openingLeadChoice` (`play-bot.ts`) underleder aldrig ess mot färg (§8.3/§9).
+Diagnosen: hela utspelet är budblint/rudimentärt — byggordning A–G i
+`docs/utspel-diagnos.md`.
+
+**➡️ NÄSTA GÅNG:** ägaren väljer — fler cue-lägen (ovan), 🟢 NÄST punkt 1-rest
+(hål D — konkurrensfallen) eller kvarvarande granskningsfynd (a11y, par-poäng).
+Faceliten PARKERAD (ägarbeslut 2026-08-03). ⚪ SENARE: tredje hand högt i
+**trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
@@ -128,7 +132,8 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 klar; kvar: probe-ritualerna + session-checklistorna) ·
 **Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
 fler budträningsgivar + tema-dropdown ·
-spelmotor-kvalitet (#32 + #34 KLARA; kvar: tredje hand högt i trumf + nyanser) · engelska som andra
+spelmotor-kvalitet (#32/#34 KLARA; kvar: tredje hand högt i trumf) ·
+**UTSPELET** (diagnos klar → `docs/utspel-diagnos.md`; börja hål B) · engelska som andra
 språk (Fas 5) · TP till §7-inkliven · advancer-rabatt efter balansering
 (generella fallet) · 17+ enfärgshand efter två bjudna färger · auto-facit på
 hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·

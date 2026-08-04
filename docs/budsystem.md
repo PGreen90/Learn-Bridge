@@ -1606,6 +1606,13 @@ Det avslöjar längd/räkning direkt för partnern.
 > **Notis:** vi leder *top of sequence* – ess från A-K. Rusinow (näst högsta)
 > finns kvar som möjlig framtida variant (se §8.4).
 
+**Underled aldrig ett ess mot ett trumfkontrakt.** Mot färgkontrakt (extra dyrt
+mot slam – spelförarens singel-kung blir gratis och esset dör oanvänt) väljer
+botten på utspelet den **längsta färg som inte kräver ett ess-underspel** i
+stället för att leda lågt under esset i sin längsta färg. Har varje färg ett
+oskyddat ess **cashar** den esset i längsta färgen. Mot **NT** gäller klassisk
+längsta-färg-doktrin oförändrat (ess-underspel/4:e bästa är då normalt).
+
 ### 8.4 Vad vi (medvetet) inte spelar
 - **Smith Echo** – nej; vi använder vanlig (omvänd) attityd på utspelsfärgen i
   sangförsvar.
@@ -1672,6 +1679,16 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-04 (utspelsbugg)** – **Underled aldrig ett ess på utspelet mot ett
+  trumfkontrakt (kod §8.3, ägarrapport).** Boten valde utspel via ren
+  längsta-färg-doktrin: ♣AQJxx (5-korts) föll till spotkortsutspel (5:e bästa) och
+  ledde LÅGT under esset — förödande mot slam (spelförarens singel-kung blir gratis,
+  esset dör oanvänt). Ny `openingLeadChoice` (`play-bot.ts`): mot färgkontrakt väljs
+  den **längsta färg som inte kräver ett ess-underspel** (så en ♠KQJ2-sekvens vinner
+  över att underleda ♣AQJxx); har varje färg ett oskyddat ess **cashas** esset i
+  längsta färgen. **NT oförändrat** (klassisk längsta-färg-doktrin, ess-underspel OK).
+  Facit FÖRE fix: `play-bot.test.ts` ("utspel mot trumfkontrakt – underled aldrig ett
+  ess", 3 fall inkl. NT-vakten). Hela sviten grön (0 regressioner).
 - **2026-08-04 (felrapport #43)** – **Öppnarens 2NT-relä efter partnerns värde-X
   över stört 1NT (kod §7.8 a, ägarbeslut).** Motorn saknade all logik för öppnarens
   fortsättning efter partnerns straff/värde-X → off-book-reservbud (bar pass) →
