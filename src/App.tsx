@@ -34,6 +34,15 @@ function PlayDagens() {
   return <Play key={`dagens-${params.get('dag') ?? 'idag'}`} daily />
 }
 
+/** Frispelet: nyckeln bär fröet + dev-stolen (?giv=&sitt=), så att BYTA giv via
+ *  adressen monterar om Play och läser den nya given (annars satt förra given
+ *  kvar — konstant nyckel). Internt "Ny giv" byter inte adressen via routern
+ *  (replaceState), så slumpgivar remountar inte i onödan. */
+function PlayFri() {
+  const [params] = useSearchParams()
+  return <Play key={`fri-${params.get('giv') ?? 'x'}-${params.get('sitt') ?? 'S'}`} />
+}
+
 // HashRouter används med flit: det fungerar felfritt på GitHub Pages utan
 // extra serverinställningar (adresserna får ett #, t.ex. .../#/budtraning).
 export default function App() {
@@ -50,7 +59,7 @@ export default function App() {
               (R3-fynd #7). Gamla /spela-länkar redirectar hit. */}
           <Route path="budvisning" element={<Spela />} />
           <Route path="spela" element={<Navigate to="/budvisning" replace />} />
-          <Route path="spela-kort" element={<Play key="fri" />} />
+          <Route path="spela-kort" element={<PlayFri />} />
           {/* Dagens giv (2026-08-02): samma sida, men given kommer ur datumfröet.
               Egna key:ar → React monterar om Play vid byte mellan lägena (annars
               behålls gamla givens state eftersom komponenten är densamma). */}

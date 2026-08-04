@@ -19,7 +19,7 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerSecondBid, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAnswerNMF, openerSecondBid, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -551,6 +551,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trump2C, rebid.call, {
         partnerMin: STRONG_2C_SHOWN_MIN,
         inviteCall,
+        // Cue-bud håller tills trumf-agreementet i 2♣-grenen analyserats separat.
       })
       if (slam) {
         for (const t of slam) {
@@ -680,6 +681,9 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trumpC, rebid.call, {
         partnerMin: rebid.rule === 'hoppskift' ? 19 : 16,
         inviteCall: majorT ? `5${LETTER[trumpC]}` : `4${LETTER[trumpC]}`,
+        // Ingen cue-flagga: trumfen här är INFERRERAD (svararens längd), inte
+        // agreed via buden → ett cue skulle läsas som naturligt. Cue-bud kräver
+        // överenskommen trumf (§6.2). Återkoms i ett senare steg.
       })
       if (slam) {
         for (const t of slam) {
@@ -719,6 +723,9 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trumpS, rebid.call, {
       partnerMin: SHOWN_MIN[rebid.rule] ?? 12,
       inviteCall: majorFit ? `5${LETTER[trumpS]}` : `4${LETTER[trumpS]}`,
+      // Jacoby 2NT = utgångskravande högfärgshöjning → cue-bud fritt under utgång
+      // (§6.2, ägarbeslut 2026-08-03). Inverterad minor lämnas oflaggad tills vidare.
+      gameForcing: majorFit,
     }, openerShort)
     if (slam) {
       for (const t of slam) {
@@ -794,6 +801,40 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   const second = responderSecondBid(opening.call, response, rebid, deal.hands[responderSeat])
   if (second) {
     turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
+
+    // NMF-SLAM (hål C, cue-bud 2026-08-03): efter 1m–1M–1NT–2m(NMF) svarar
+    // öppnaren, och visar hen fördröjt 3-korts stöd i svararens högfärg är en
+    // 5-3-fit AGREED → trumf klar → cue-ronden (§6.2) körs. Tas on-book BARA när
+    // det faktiskt når slam (6/7); annars lämnas auktionen öppen och live-lagret
+    // placerar utgången via responderPlaceAfterNMF precis som förut.
+    if (second.rule === 'New Minor Forcing' && openerSuit) {
+      const oh = deal.hands[openerSeat]
+      const rh = deal.hands[responderSeat]
+      const responderMajor = parseBid(response.call).suit
+      const nmfMinor = parseBid(second.call).suit
+      if (responderMajor && nmfMinor) {
+        const unbid = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).find(
+          (s) => s !== openerSuit && s !== responderMajor && s !== nmfMinor,
+        )!
+        const ans = openerAnswerNMF(oh, openerSuit, responderMajor, nmfMinor, unbid)
+        if (parseBid(ans.call).suit === responderMajor && lengths(rh)[responderMajor] >= 5) {
+          const slam = slamInvestigation(oh, rh, responderMajor, ans.call, {
+            partnerMin: ans.call.startsWith('3') ? 14 : 12, // öppnarens hopp = maximum
+            inviteCall: `5${LETTER[responderMajor]}`,
+            gameForcing: true,
+          })
+          if (slam && Number(slam[slam.length - 1].call[0]) >= 6) {
+            turns.push({ seat: openerSeat, role: 'öppnare', call: ans.call, rule: ans.rule, explanation: ans.explanation })
+            for (const t of slam) {
+              const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+              turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+            }
+            return finish(false)
+          }
+        }
+      }
+    }
+
     // Öppnarens TREDJE bud (felrapport #37): en INBJUDAN i en 1NT-auktion
     // besvaras on-book (accept med maximum / pass med minimum) i stället för
     // att falla igenom till off-book-svaret (som bjöd 3NT "utan stöd" mitt i

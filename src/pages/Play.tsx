@@ -3,7 +3,7 @@
 // den här filen och komponenterna den använder är bara presentation.
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import type { Deal, Suit } from '../types/bridge'
+import type { Deal, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
@@ -49,6 +49,13 @@ function parseUrlSeed(): number | null {
   return Number.isInteger(n) && n >= 0 && n < 4294967296 ? n : null
 }
 
+/** Stolen ur adressen (#/spela-kort?giv=123&sitt=E): rotera given så den stolen
+ *  sitter i Syd (dev-verktyg — bjud en utpekad hand ur revisorn i sin helhet). */
+function parseUrlSeat(): Seat | null {
+  const m = window.location.hash.match(/[?&]sitt=([NESW])/)
+  return m ? (m[1] as Seat) : null
+}
+
 /** Dagen ur adressen (#/spela-kort/dagens?dag=3): en arkivgiv ur kalendern
  *  (kalenderarkivet 2026-08-03). Bara dagar som funnits (1 … i dag) godtas —
  *  allt annat faller tillbaka på dagens giv. */
@@ -63,8 +70,11 @@ function parseUrlDay(): number | null {
  *  pågående giv (om den hör till DETTA läge — och till det aktiva givnumret
  *  resp. adressens frö), annars adressens frö, annars null (= ny slumpgiv).
  *  `nr` = det aktiva givnumret i dagens giv-läget (arkivdag eller i dag). */
-function initialGame(daily: boolean, nr: number | null): { game: Game | null; plays: SavedGame['plays'] } {
+function initialGame(daily: boolean, nr: number | null, sitt: Seat | null): { game: Game | null; plays: SavedGame['plays'] } {
   const urlSeed = daily ? null : parseUrlSeed()
+  // Dev: en roterad giv (?sitt=) startar ALLTID färskt ur fröet — den sparade
+  // pågående given är oroterad och hör inte hit.
+  if (!daily && sitt && urlSeed !== null) return { game: gameFromSeed(urlSeed, 0, sitt), plays: [] }
   const saved = loadValue<unknown>('pagaende-giv', null)
   if (
     validSavedGame(saved) &&
@@ -96,8 +106,10 @@ export function Play({ daily = false }: { daily?: boolean }) {
   // kalenderarkivet) eller dagens. Läses EN gång — rutten i App.tsx bär dagen
   // i React-nyckeln, så ett dagbyte monterar om hela sidan.
   const [dailyNr] = useState(() => (daily ? (parseUrlDay() ?? dailyNumber()) : null))
+  // Dev-stolen (?sitt=): läses en gång, styr rotationen + adress-synken nedan.
+  const [sitt] = useState(() => (daily ? null : parseUrlSeat()))
   // Läses EN gång vid montering — därefter äger useGame tillståndet.
-  const [restored] = useState(() => initialGame(daily, dailyNr))
+  const [restored] = useState(() => initialGame(daily, dailyNr, sitt))
   const {
     game,
     complete,
@@ -121,8 +133,9 @@ export function Play({ daily = false }: { daily?: boolean }) {
   useEffect(() => {
     if (daily || game.seed === null) return
     const base = window.location.href.split('#')[0]
-    window.history.replaceState(null, '', `${base}#/spela-kort?giv=${game.seed}`)
-  }, [daily, game.seed])
+    const rot = sitt && sitt !== 'S' ? `&sitt=${sitt}` : ''
+    window.history.replaceState(null, '', `${base}#/spela-kort?giv=${game.seed}${rot}`)
+  }, [daily, game.seed, sitt])
 
   // Budfasen sparas löpande (spelfasen sparas i PlayTable som har spelläget).
   useEffect(() => {

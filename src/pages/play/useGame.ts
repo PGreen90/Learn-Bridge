@@ -3,7 +3,7 @@
 // bor här — komponenterna i BiddingPhase/PlayTable är bara presentation.
 
 import { useEffect, useRef, useState } from 'react'
-import type { Bid, Deal } from '../../types/bridge'
+import type { Bid, Deal, Hand, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../../lib/bidding'
 import {
   auctionComplete,
@@ -39,10 +39,38 @@ function randomSeed(): number {
   return Math.floor(Math.random() * 4294967296)
 }
 
-/** En giv ur ett frö — id:t bär fröet så given kan pekas ut och återskapas. */
-export function gameFromSeed(seed: number, round = 0): Game {
-  const deal = { ...dealRandom(mulberry32(seed)), id: `giv-${seed}` }
-  return { deal, history: [], phase: 'bidding', contract: null, seed, round }
+const SEAT_ORDER: Seat[] = ['N', 'E', 'S', 'W']
+
+/** Rotera en giv så att den ursprungliga stolen `sitt` hamnar i SYD (spelaren
+ *  budar alltid Syd). Händer, given och zonen roteras konsekvent → en EXAKT
+ *  motsvarande auktion, bara speglad till din sida. Dev-verktyg (#/spela-kort?
+ *  giv=frö&sitt=E) för att kunna bjuda en utpekad hand i sin helhet från rätt
+ *  stol — t.ex. en E/V-slam ur systemrevisorn. */
+export function seatDealSouth(deal: Deal, sitt: Seat): Deal {
+  const shift = (2 - SEAT_ORDER.indexOf(sitt) + 4) % 4
+  if (shift === 0) return deal
+  const hands = {} as Record<Seat, Hand>
+  SEAT_ORDER.forEach((seat, i) => {
+    hands[seat] = deal.hands[SEAT_ORDER[(i - shift + 4) % 4]]
+  })
+  const dealer = SEAT_ORDER[(SEAT_ORDER.indexOf(deal.dealer) + shift) % 4]
+  // Udda rotation byter partnerskap → zonen för N/S och Ö/V byter plats.
+  const vul =
+    shift % 2 === 0
+      ? deal.vulnerability
+      : deal.vulnerability === 'ns'
+        ? 'ew'
+        : deal.vulnerability === 'ew'
+          ? 'ns'
+          : deal.vulnerability
+  return { ...deal, hands, dealer, vulnerability: vul }
+}
+
+/** En giv ur ett frö — id:t bär fröet så given kan pekas ut och återskapas.
+ *  `sitt` (dev): rotera så den stolen sitter i Syd (standard S = ingen rotation). */
+export function gameFromSeed(seed: number, round = 0, sitt: Seat = 'S'): Game {
+  const base = { ...dealRandom(mulberry32(seed)), id: `giv-${seed}${sitt === 'S' ? '' : '-' + sitt}` }
+  return { deal: seatDealSouth(base, sitt), history: [], phase: 'bidding', contract: null, seed, round }
 }
 
 function newGame(): Game {

@@ -1026,10 +1026,20 @@ Cue-bids används för att leta slam **innan** 1430 RKC: när båda visat kontro
 i sidofärgerna och inget hål syns, frågar 4NT efter nyckelkorten.
 *Exempel:* 1♠–2♣–2♠ (fit) –4♣ (cue ♣-kontroll) –4♦ (cue ♦) –4NT (1430 RKC).
 
-*Motoranmärkning (2026-07-07):* bottarna cue-bjuder inte längre automatiskt i
-sina egna slamutredningar (cue-ronden bar bara en kontrollkoll som avskaffades
-med de ärliga slamportarna — de litar på poängen + nyckelkortssvaret). Bjuder
-**du** ett cue förstår och förklarar tolkningen det som vanligt enligt ovan.
+*Motoranmärkning (2026-08-03, river 2026-07-07):* bottarna cue-bjuder nu igen i
+sina egna slamutredningar när **utgång är etablerad (GF) och trumf är
+överenskommen**. Principen: en cue under utgång är **gratis** — visar en hand en
+kontroll och partnern har inget extra sjunker paret bara tillbaka till utgången.
+Därför finns **ingen poänggräns för att cue:a**; omdömet ligger i stället på
+beslutet att gå **förbi** utgången (4NT RKC / slam), som kräver både kontroller
+(högst en sidofärg utan första-rondskontroll) och trickvärden. Cue-bud
+**tillkommer bara** — saknar den drivande handen en gratis cue står de gamla
+vägarna (driv 33+ / inbjudan 31–32) kvar oförändrade. Inkopplat hittills:
+**Jacoby 2NT** och **New Minor Forcing → öppnarens fördröjda högfärgsstöd**
+(bägge äkta agreed trumf). Reverse/hoppskift/2♣ väntar på egen trumf-agreement-
+analys (där är trumfen inferrerad, inte bjuden — ett cue skulle läsas naturligt).
+Bjuder **du** själv ett cue i standardordning (billigaste först) följer boten
+med; en cue i annan ordning hamnar tills vidare off-book.
 
 ### 6.3 Sjöbergs 5NT (kungfråga)
 Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
@@ -1650,6 +1660,28 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-03 (cue-bud återinförda, river 2026-07-07)** – **Kontrollbud i motorns
+  slamutredning (kod §6.2, ägarbeslut).** 2026-07-07-beslutet att ta bort cue-ronden
+  ("ingen kontrollkoll — lita på poängen") revs: cue-bud är expertspelets främsta
+  slamverktyg och ren poängräkning missar kontrollberoende slam. Nya principen —
+  när **utgång är etablerad (GF) + trumf agreed** cue:ar motorn fritt under utgång
+  (en cue är gratis där), och flyttar poängomdömet till beslutet att gå **förbi**
+  utgången (`cueSlamAuction` i `slam-auction.ts`, gated på `SlamContext.gameForcing`).
+  Ärligt: varje hand cue:ar sina EGNA kontroller (billigaste första-rondskontroll
+  uppåt, hoppa över = förneka) och läser partnerns visade. Stoppregel: högst en
+  sidofärg utan första-rondskontroll + floor ≥ 31 → 4NT RKC (befintlig svans);
+  annars avslut i utgång. Cue-bud **tillkommer bara** — saknas en gratis cue står de
+  gamla portarna (driv 33+ / inbjudan 31–32) kvar. Inkopplat: **Jacoby 2NT** (on-book)
+  + **New Minor Forcing → öppnarens fördröjda högfärgsstöd** (hål C, on-book, når 6♥
+  på frö 20260932: `1♣–1♥–1NT–2♦–3♥–3♠–4♦–4NT–5♣–6♥`). Reverse/hoppskift/2♣ HÅLLS
+  (inferrerad, ej agreed trumf → cue skulle läsas naturligt). En bugg fångad av
+  facit-testerna: `cheapestFreeCue` re-cue:ade redan visad färg (6♣ blev 5♣) — fixad.
+  Facit FÖRE fix: `auction-slam-cue.test.ts` + uppdaterat Jacoby-fall i
+  `slam-auction.test.ts`. Mätning (`REVISOR=1 npx vitest run
+  src/lib/engine/revisor.probe.test.ts`, frö 20260721, 1000 givar): par-avvikelse
+  **270,74 → 270,69**, rätt kontrakt 18,8 % oförändrat, missad lillslam 81 → 80,
+  **"för högt" oförändrat (37) — inga blåsta slammar**. Litet men rent netto; det
+  mesta av posten ligger i ännu ej wire:ade lägen. Hela sviten grön.
 - **2026-07-31 (etapp 7 hål 2)** – **Öppnarens slamtrevare efter svararens 3NT
   (kod, §6.9, mätspåret, ägarbeslut).** Systerfallet till felrapport #42, från den
   sida som SJÄLV har extra: efter `1m–1X–3m(invit-hopp)–3NT` saknade öppnaren en
