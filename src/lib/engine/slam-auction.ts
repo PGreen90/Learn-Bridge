@@ -21,16 +21,20 @@
 //      faktiskt satt med det höga antalet RÄTTAR då själv upp till 6
 //      (klassisk mänsklig mekanik: "med 3, bjud vidare över stoppbudet").
 //
-// Cue-ronden (§6.2) är BORTTAGEN ur motorns slamutredning (ägarbeslut: ingen
-// kontrollkoll — lita på poängen). Ronden bar bara den avskaffade tjuvkiks-
-// gaten (`pairControlsSideSuits`) och orsakade den gamla hängande-cue-quirken.
-// §6.2 finns kvar i boken som konvention (tolkningen förstår manuella cue-bud).
+// Cue-ronden (§6.2) är ÅTERINFÖRD (ägarbeslut 2026-08-03, river 2026-07-07):
+// när UTGÅNG är etablerad (`SlamContext.gameForcing`) cue-bjuder motorn kontroller
+// under utgång FRITT (gratis — inget att förlora), och flyttar poängomdömet till
+// beslutet att gå FÖRBI utgången (4NT RKC). Ärligt: varje hand cue:ar sina EGNA
+// kontroller och läser partnerns visade (ingen tjuvkiks-gate). Se cueSlamAuction.
+// Cue-bud TILLKOMMER bara — saknar kaptenen en gratis cue står de gamla vägarna
+// (driv 33+ / inbjudan 31–32) kvar oförändrade.
 
 import type { Hand, Suit } from '../../types/bridge'
 import { bergenPoints, dummyPoints, wastedHonorsOppositeShortness } from './evaluation'
 import { hcp, lengths } from './hand'
 import {
   exclusionKeycards,
+  firstRoundControl,
   hasTrumpQueen,
   keycards,
   respondToExclusion,
@@ -65,6 +69,11 @@ export interface SlamContext {
   partnerMin: number
   /** Inbjudningsbudet i kanske-zonen (t.ex. '5H' eller '4C'). Utelämnas = ingen inbjudan möjlig i läget. */
   inviteCall?: string | null
+  /** Är UTGÅNG redan etablerad (GF)? Då är cue-bud under utgång GRATIS (§6.2) —
+   *  motorn cue:ar kontroller utan poänggräns och flyttar omdömet till beslutet
+   *  att gå FÖRBI utgången (ägarbeslut 2026-08-03). Utelämnat/false = gammalt
+   *  beteende (inbjudan/driv på poäng, ingen cue). */
+  gameForcing?: boolean
 }
 
 /**
@@ -113,6 +122,14 @@ export function slamInvestigation(
   const floor = captain + ctx.partnerMin
   const lastRank = lastCall ? bidRank(lastCall) : -1
 
+  // GF + trumf klar: cue-ronden (§6.2) körs FRITT under utgång när slam är
+  // aritmetiskt möjlig (floor ≥ 30). Har kaptenen ingen gratis cue faller det
+  // igenom till den gamla porten nedan (oförändrat). Ägarbeslut 2026-08-03.
+  if (ctx.gameForcing && floor >= 30) {
+    const cued = cueSlamAuction(openerHand, responderHand, trump, lastCall, ctx, floor)
+    if (cued) return cued
+  }
+
   if (floor >= 33 && bidRank('4NT') > lastRank) {
     return driveRKC(openerHand, responderHand, trump, ctx, floor)
   }
@@ -120,6 +137,119 @@ export function slamInvestigation(
     return inviteSlam(openerHand, trump, ctx, floor)
   }
   return null
+}
+
+// === §6.2 Cue-ronden — kontrollbud FÖRE 1430 RKC (GF-lägen) ==================
+//
+// När utgång är etablerad är en cue under utgång GRATIS: visar en hand en
+// kontroll och partnern har inget extra sjunker paret bara tillbaka till
+// utgången. Därför ingen poänggräns för att cue:a — grinden ligger på beslutet
+// att gå FÖRBI utgången (4NT). Ärligt: varje hand cue:ar sina EGNA kontroller
+// (billigaste första-rondskontroll uppåt) och läser partnerns VISADE — aldrig
+// partnerns kort. Att hoppa över en sidofärg förnekar första-rondskontroll där.
+
+const gameLevelFor = (trump: Suit) => (trump === 'hearts' || trump === 'spades' ? 4 : 5)
+const gameCallFor = (trump: Suit) => `${gameLevelFor(trump)}${LETTER[trump]}`
+
+/** Billigaste lagliga bud i en färg strikt över `lastRank` (spader över 3H → 3S). */
+function cheapestBidInSuit(suit: Suit, lastRank: number): string | null {
+  for (let lvl = 1; lvl <= 7; lvl++) {
+    const call = `${lvl}${LETTER[suit]}`
+    if (bidRank(call) > lastRank) return call
+  }
+  return null
+}
+
+/** Billigaste GRATIS cue: första-rondskontroll i en sidofärg vars bud ligger
+ *  över `lastRank` men UNDER utgång (`gameRank`). Redan visade färger (`shown`)
+ *  hoppas över — ingen re-cue:ar en kontroll. null = ingen gratis cue. */
+function cheapestFreeCue(
+  hand: Hand,
+  trump: Suit,
+  lastRank: number,
+  gameRank: number,
+  shown: Set<Suit>,
+): { call: string; suit: Suit } | null {
+  let best: { call: string; suit: Suit } | null = null
+  for (const s of RANK_ORDER) {
+    if (s === trump || shown.has(s)) continue
+    if (!firstRoundControl(hand, s)) continue
+    const call = cheapestBidInSuit(s, lastRank)
+    if (!call || bidRank(call) >= gameRank) continue // saknas eller når/passerar utgång
+    if (!best || bidRank(call) < bidRank(best.call)) best = { call, suit: s }
+  }
+  return best
+}
+
+/**
+ * Cue-ronden: kaptenen (svararen) och partnern (öppnaren) visar i tur och ordning
+ * billigaste NYA första-rondskontroll under utgång. När en hand inte har fler
+ * gratis-cue:ar avgör kaptenen: högst EN sidofärg utan första-rondskontroll +
+ * värden (floor ≥ 31) → 4NT RKC (befintlig svans); annars avslut i utgång.
+ * Returnerar null om kaptenen inte ens har en gratis cue (då tar den gamla porten
+ * över) — så cue-bud bara TILLKOMMER, aldrig ändrar de gamla vägarna.
+ */
+function cueSlamAuction(
+  openerHand: Hand,
+  responderHand: Hand,
+  trump: Suit,
+  lastCall: string | undefined,
+  ctx: SlamContext,
+  floor: number,
+): SlamTurn[] | null {
+  const gameRank = bidRank(gameCallFor(trump))
+  let lastRank = lastCall ? bidRank(lastCall) : -1
+  const controlled = new Set<Suit>()
+  if (!cheapestFreeCue(responderHand, trump, lastRank, gameRank, controlled)) return null
+
+  const turns: SlamTurn[] = []
+  let captainTurn = true
+
+  for (let guard = 0; guard < 8; guard++) {
+    const hand = captainTurn ? responderHand : openerHand
+    const cue = cheapestFreeCue(hand, trump, lastRank, gameRank, controlled)
+    if (cue) {
+      controlled.add(cue.suit)
+      const why = lengths(hand)[cue.suit] === 0 ? 'renons' : 'ess'
+      turns.push({
+        role: captainTurn ? 'svarare' : 'öppnare',
+        call: cue.call,
+        rule: 'cue-bid',
+        explanation: `första-rondskontroll (${why}) i ${NAME[cue.suit]} → ${cue.call[0]}${SYM[cue.suit]}.`,
+      })
+      lastRank = bidRank(cue.call)
+      captainTurn = !captainTurn
+      continue
+    }
+
+    if (captainTurn) {
+      // Kaptenen avgör: driv förbi utgången eller avslut. Okontrollerad sidofärg
+      // = varken visad (av någon) eller kontrollerad på kaptenens EGEN hand.
+      const uncontrolled = RANK_ORDER.filter(
+        (s) => s !== trump && !controlled.has(s) && !firstRoundControl(responderHand, s),
+      )
+      if (floor >= 31 && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) {
+        return [...turns, ...driveRKC(openerHand, responderHand, trump, ctx, floor)]
+      }
+      const game = gameCallFor(trump)
+      turns.push(
+        bidRank(game) > lastRank
+          ? { role: 'svarare', call: game, rule: 'cue: avslut', explanation: `otillräckligt för slam → utgång (${game[0]}${SYM[trump]}).` }
+          : { role: 'svarare', call: 'P', rule: 'cue: avslut', explanation: `otillräckligt för slam → passar (${gameCallFor(trump)} står).` },
+      )
+      return turns
+    }
+
+    // Partnern (öppnaren) har inga fler kontroller under utgång → avslutar i
+    // utgång; kaptenen får ordet igen och kan ändå driva 4NT över det.
+    const game = gameCallFor(trump)
+    if (bidRank(game) > lastRank) {
+      turns.push({ role: 'öppnare', call: game, rule: 'cue: avslut', explanation: `inga fler kontroller under utgång → ${game[0]}${SYM[trump]}.` })
+      lastRank = bidRank(game)
+    }
+    captainTurn = true
+  }
+  return turns
 }
 
 /** Driv-vägen: 4NT RKC → ärligt svar → kaptenen placerar på svaret + egen hand. */

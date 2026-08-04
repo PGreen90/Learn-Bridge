@@ -86,22 +86,25 @@ describe('slamInvestigation – kanske-zonen (31–32): inbjudan, partnern döme
   })
 })
 
-describe('buildAuction – slam växer fram via Jacoby 2NT (ärligt: 3♠ visade 16+)', () => {
-  it('1S–2NT–3S–4NT–5D–6S i en hel auktion (ingen cue-rond längre)', () => {
+describe('buildAuction – slam växer fram via Jacoby 2NT (cue-bud återinförda 2026-08-03)', () => {
+  it('1S–2NT–3S–4D–4H–4NT–5D–6S: cue-ronden (♦A, ♥A) före RKC, samma 6S', () => {
     const deal: Deal = {
       id: 'slam-jacoby',
       dealer: 'N',
       vulnerability: 'none',
       board: 1,
       hands: {
-        N: parseHand('S:AKQ85 H:A432 D:K2 C:32'), // 16 hp → 1S, Jacoby-svar → 3S (slamintresse, 16+)
+        N: parseHand('S:AKQ85 H:A432 D:K2 C:32'), // 16 hp → 1S, Jacoby-svar → 3S (slamintresse, 16+); ♥A-cue
         E: parseHand('S:T943 H:876 D:T43 C:765'), // svag → inget inkliv
-        S: parseHand('S:J762 H:KQ5 D:AQ6 C:KQ4'), // 17 hp + visade 16 = 33 → driv
+        S: parseHand('S:J762 H:KQ5 D:AQ6 C:KQ4'), // 17 hp + visade 16 = 33 → GF, ♦A-cue → driv
         W: parseHand('S:- H:JT9 D:J9875 C:AJT98'),
       },
     }
     const a = buildAuction(deal)!
-    expect(a.turns.map((t) => t.call)).toEqual(['1S', '2NT', '3S', '4NT', '5D', '6S'])
+    // GF (Jacoby 2NT): cue fritt under utgång — Syd ♦A (4♦), Nord ♥A (4♥), bara
+    // klöver saknar första-rondskontroll → 4NT RKC → 6♠ (samma slutbud som förr).
+    expect(a.turns.map((t) => t.call)).toEqual(['1S', '2NT', '3S', '4D', '4H', '4NT', '5D', '6S'])
+    expect(a.turns.filter((t) => t.rule === 'cue-bid').map((t) => t.call)).toEqual(['4D', '4H'])
     expect(a.open).toBe(false)
   })
 })

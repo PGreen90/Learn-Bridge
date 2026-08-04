@@ -25,60 +25,52 @@ dag, rutt `/spela-kort/dagens`, delbart textresultat (Wordle-mekaniken),
 flaggskeppskort på startsidan. Förtitt på Fas 3 UTAN backend. Detalj:
 `docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1/Fas 3.
 
-**ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (deployad 2026-07-31).**
-Öppnarens kvantitativa 4NT-slamtrevare efter svararens 3NT (systerfallet till #42,
-från sidan som SJÄLV har extra): efter `1m–1X–3m(invit-hopp)–3NT` trevar öppnaren
-med **19+ hp**, svararen lyfter 6NT med maximum/fittande minorhonnör. Smal med flit
-(ägarbeslut 2026-07-31 "bara äkta extra"). Mätning #21: noll regressioner.
-Facit `auction-3nt-stopp.test.ts`. Detalj: `docs/budsystem.md §6.9/§9` +
-`docs/systemrevisorn.md` #21. **Kvar i etapp 7: hål C + hål D.**
+**ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (2026-07-31).** Öppnarens kvantitativa
+4NT-slamtrevare efter svararens 3NT (19+ hp, "bara äkta extra"). Mätning #21: noll
+regressioner. Facit `auction-3nt-stopp.test.ts`. Detalj: `docs/budsystem.md §6.9/§9`.
 
 **LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR & LIVE 2026-07-30.** Naturligt inkliv
-över 1NT (6+, 11–15) annars DONT; svararen spelar Lebensohl-kärnan (pass / 2-läge /
-2NT-relä / 3-lägeskrav / 3NT). Kvar (ej byggt): takeout-X, slow-shows, cue-Stayman.
-Detalj: `docs/budsystem.md §7.5/§9` + `docs/senare.md` + `docs/bevaka.md`.
+över 1NT (6+, 11–15) annars DONT + Lebensohl-kärnan. Kvar: takeout-X, slow-shows,
+cue-Stayman. Detalj: `docs/budsystem.md §7.5/§9` + `docs/bevaka.md`.
 
-**#34 FÖRSVARET TREDJE HAND HÖGT (sang): KLAR & LIVE 2026-07-30** (`thirdHandHonor`,
-netto neutralt). Detalj: `docs/budsystem.md §8.6`.
+**KLART 2026-07-30 (detalj i `docs/historik.md`):** #34 försvaret tredje hand högt
+i sang (`thirdHandHonor`, §8.6) · **HELA FAS 0 (a+b+c)** — 404-sida + route-kod-
+uppdelning (entry-JS 889→247 kB), konsekvent kortrad (`HandFan`, felrapport #36
+stängd), säkra zoner + mobilsvep.
 
-**FAS 0 c TEKNISK HÄRDNING (konkurrensplanen): KLAR & LIVE 2026-07-30.** 404-sida
-+ route-baserad kod-uppdelning (`React.lazy`, entry-JS ~889 → 247 kB). Detalj:
-`docs/konkurrensplan.md` Fas 0 c.
-
-**KONSEKVENT KORTRAD (Fas 0 b): KLAR & LIVE 2026-07-30** — handen ritas likadant i
-alla vyer (`HandFan`). Felrapport **#36 STÄNGD**. Säkra zoner + mobilsvep KLARA →
-**HELA FAS 0 KLAR (a+b+c).** Detalj: `docs/historik.md`.
-
-**KONKURRENSPLANEN SKRIVEN 2026-07-29 (ägarbeslut — planering, inget bygge):**
-rebidz ska på sikt konkurrera med BBO/Funbridge/Synrey. Vägval: **Funbridge-
-modellen först** ("Dagens givar" — alla spelar samma givar mot bottarna,
-topplista; realtidsbord sist), **faceliften VÄCKT** ur parkeringen (= Fas 1),
-**två språk** (svenska först, engelska = Fas 5). Roadmap Fas 0–6 + hälsobilden:
-**`docs/konkurrensplan.md`**. Beslut B (backend, Fas 2+) byggs fortfarande bara
-på uttryckligt ägarbeslut.
+**KONKURRENSPLANEN (2026-07-29, ägarbeslut — planering):** rebidz ska konkurrera
+med BBO/Funbridge/Synrey. Funbridge-modellen först ("Dagens givar"), sv→en (Fas 5).
+Roadmap Fas 0–6 + hälsobilden: **`docs/konkurrensplan.md`**. Beslut B (backend)
+byggs bara på uttryckligt ägarbeslut.
 
 **Klart 2026-07-29 (detalj i `docs/historik.md`):** felrapport #32,
-rondgenomgången (DD-dom, `docs/kortspel.md`), markeringarna (UDCA + Lavinthal,
-`docs/budsystem.md §8.5`; mätrigg `play-quality.probe`, `PLAYQ=1`).
+rondgenomgången, markeringarna (UDCA + Lavinthal, `docs/budsystem.md §8.5`).
 
-**STORA GRANSKNINGEN (26 fynd) + ETAPP A–D: KLARA.** A "Skyddsnätet"
-DEPLOYAD 2026-08-03 (felfångare, PWA-prompt, og-taggar, woff2, Kopierat-fix).
-B "Appen som minns" + C "Spelbordets förtroende" (informationsläckan LAGAD,
-ångra, ge upp, resultat ur ditt perspektiv, 812-budgeten) + D "Vägen in"
-(/om, Inställningar städad) byggda på grenar, webbläsarverifierade — se
-`docs/historik.md` 2026-08-03. Skjutet ur granskningen: par-poäng
-(auto-facit-spåret, `docs/senare.md`).
+**STORA GRANSKNINGEN (26 fynd) + ETAPP A–D + GRANSKNINGSPUTSEN: KLARA & DEPLOYADE
+2026-08-03** (detalj `docs/historik.md`). A skyddsnät, B "minns", C spelbordets
+förtroende (informationsläckan lagad, ångra/ge upp, 812-budgeten), D "Vägen in"
+(/om, Inställningar). Putsen: kalenderarkiv Dagens giv (`?dag=N`), spelhistorik,
+tangentbord, "Spela om given", claim-revealens namn. Skjutet: par-poäng
+(`docs/senare.md`).
 
-**GRANSKNINGSPUTSEN + SMÅÖNSKEMÅLEN (2026-08-03): KLARA, PCD-ade IHOP.**
-Kalenderarkiv för Dagens giv (efterhandsspel räknas ej i streaken; dellänken
-bär `?dag=N`), resultathistorik för frispelet (omspelbar via fröet),
-tangentbord på dator (budlådan + bordet), "Spela om given" vid rundpass och
-claim-revealen namnger vem som tar resten. Detalj: `docs/historik.md`.
+**CUE-BUD ÅTERINFÖRDA (2026-08-03, river 2026-07-07): KLAR ETAPP.** Ägaren rev
+det gamla "ingen kontrollkoll"-beslutet — kontrollbud (cue) ska ALLTID finnas
+(minnet [[cue-bids-reinstated]]). Ny princip: när **utgång etablerad (GF) +
+trumf agreed** cue:ar motorn fritt under utgång (gratis), poängomdömet ligger på
+att gå FÖRBI utgången. `cueSlamAuction` i `slam-auction.ts` (gated på
+`gameForcing`). Inkopplat: **Jacoby 2NT** + **NMF → öppnarens fördröjda
+högfärgsstöd** (= hål C, når 6♥ på frö 20260932). Reverse/hoppskift/2♣ HÅLLS
+(inferrerad, ej agreed trumf). Mätning ren (par-avvikelse 270,74 → 270,69,
+"för högt" oförändrat, noll regressioner) men liten. Facit
+`auction-slam-cue.test.ts`, boken §6.2/§9. Dev-verktyg kvar: `?sitt=`-rotation i
+Play. **Kvar (eget beslut):** fler agreed-trumf-lägen (inverterad minor, 2♣);
+off-book-igenkänning av din cue i icke-standardordning; öppnarens 18–19 i Jacoby.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer — facelift-puts, kvarvarande granskningsfynd
-(a11y, par-poäng) eller 🟢 NÄST punkt 1 (hål C — 4M). ⚪ SENARE: tredje hand
-högt i **trumf** + signalspåret. Idé att bevaka: berätta om Dagens giv först
-när den känns stabil.
+**➡️ NÄSTA GÅNG:** ägaren väljer — utspelsbuggen (♣AQJxx-utspel mot slam,
+`play-bot.ts`), fler cue-lägen (ovan), 🟢 NÄST punkt 1-rest (hål D — konkurrens-
+fallen) eller kvarvarande granskningsfynd (a11y, par-poäng). Faceliten
+PARKERAD (ägarbeslut 2026-08-03). ⚪ SENARE: tredje hand högt i **trumf** +
+signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
@@ -115,9 +107,11 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
    ("3NT-stoppen") KLART 2026-07-31** (Mätning #21: öppnarens 4NT-slamtrevare,
    par-avvikelse 271,24 → 270,74, noll regressioner, `auction-3nt-stopp.test.ts`;
    förskanningen visade att posten är 24 givar men mest DD-smicker — bara 19+-delen
-   är ärligt bjudbar). **Återupptas med: ägaren väljer hål C** (utgångsstoppen 4M,
-   14 givar, KRÄVER ägarbeslut — gränsen ärlig slamjakt/blåsning) eller **hål D**
-   (konkurrensfallen, 19 givar, svårast). Verktyg (gated):
+   är ärligt bjudbar). **Hål C (utgångsstoppen 4M) HANTERAD 2026-08-03 via
+   CUE-BUDEN** (se NU-blocket + [[cue-bids-reinstated]]): den ärliga kärnan var
+   ~5 givar med agreed trumf, löst av cue-ronden (NMF-support on-book). **Återupptas
+   med hål D** (konkurrensfallen, 19 givar, svårast) ELLER att wire fler
+   cue-lägen (inverterad minor / 2♣). Verktyg (gated):
    `$env:DUMP_CAT='missad-lillslam'` resp. `$env:FORSKAN='1'` + probe-testerna;
    mätningen: `$env:REVISOR='1'; npx vitest run
    src/lib/engine/revisor.probe.test.ts` (samma frö 20260721). Arbetssättet
