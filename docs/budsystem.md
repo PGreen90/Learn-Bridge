@@ -1598,6 +1598,16 @@ Det avslöjar längd/räkning direkt för partnern.
 | kn-T-x(+) | **kn** |
 | A-K (dubbelton) | **A**, sedan K |
 
+**Inre/brutna sekvenser** (en hög honnör med ett glapp ner till en sammanhängande
+löpa) – led toppen av den **inre** löpan, inte den höga honnören:
+| Innehav | Spela ut |
+|---|---|
+| K-kn-T(-x) | **kn** |
+| K-T-9(-x) | **T** |
+| D-T-9(-x) | **T** |
+| A-kn-T(-x) | **kn** (mot NT; mot färg leds esset – underled aldrig ess) |
+| A-D-kn(-T) | **D** (mot NT; mot färg esset) |
+
 - **Entydig topp:** esset leds från A-K (top of sequence), så **A = A-K** och
   **K = K-D** – ingen tvetydighet på toppen.
 - Mot **NT** spelas samma honnörstoppar; man väljer oftast sin **längsta/bästa**
@@ -1611,7 +1621,9 @@ mot slam – spelförarens singel-kung blir gratis och esset dör oanvänt) väl
 botten på utspelet den **längsta färg som inte kräver ett ess-underspel** i
 stället för att leda lågt under esset i sin längsta färg. Har varje färg ett
 oskyddat ess **cashar** den esset i längsta färgen. Mot **NT** gäller klassisk
-längsta-färg-doktrin oförändrat (ess-underspel/4:e bästa är då normalt).
+längsta-färg-doktrin oförändrat (ess-underspel/4:e bästa är då normalt). **Samma
+ess-regel gäller även när boten kommer in mitt i given** och leder ur längsta
+färgen (inte bara på själva utspelet).
 
 ### 8.4 Vad vi (medvetet) inte spelar
 - **Smith Echo** – nej; vi använder vanlig (omvänd) attityd på utspelsfärgen i
@@ -1679,6 +1691,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-04 (utspel hål B + F)** – **Inre sekvenser + ess-regeln överallt (kod
+  §8.3).** Byggt mot den källförankrade teorin (`docs/utspel-teori.md`). **Hål B:**
+  `honorLead` (`signals.ts`) kände förr bara igen topp-sekvenser (touch från högsta
+  kortet) → K-kn-T-x föll till lågt spotkort. Nu känns även **inre/brutna sekvenser**
+  igen: en hög honnör (kn+) med ett glapp ner till en sammanhängande löpa (≥2 kort,
+  topp 10+) → led toppen av den inre löpan (Kkn10→kn, K109→10, D109→10, Akn10→kn,
+  ADkn10→D, ADkn→D). **Hål F:** ess-regeln (underled aldrig ett ess mot trumf) gällde
+  bara trick 1; kortvalet bröts ut till en gemensam `chooseLeadCard` som nu även
+  mitt-i-given-utspelet ("jag är inne och leder ur längsta färgen") använder. Död
+  `openingLead`-funktion borttagen. Facit FÖRE fix: `signals.test.ts` (inre sekvenser
+  + negativa fall) och `play-bot.test.ts` (hål F mitt-i-given + NT-vakt). Hela sviten
+  grön (`npm test`), 0 regressioner. Nästa: hål E (skilj NT-färgval) → hål A+G
+  (budgivningen + tenass-undvikande).
 - **2026-08-04 (utspelsbugg)** – **Underled aldrig ett ess på utspelet mot ett
   trumfkontrakt (kod §8.3, ägarrapport).** Boten valde utspel via ren
   längsta-färg-doktrin: ♣AQJxx (5-korts) föll till spotkortsutspel (5:e bästa) och

@@ -91,13 +91,33 @@ describe('utspel mot trumfkontrakt – underled aldrig ett ess', () => {
     expect(botCard(state({ trump: 'hearts', level: 6, hand }), 'S')).toEqual(C('spades', 'A'))
   })
 
-  it('SANG oförändrat: ♣AQJ98 underleder esset som förr (4:e/5:e bästa, §8.3)', () => {
+  it('SANG oförändrat: ♣A8765 underleder esset som förr (5:e bästa, §8.3)', () => {
     const hand: Hand = [
-      C('clubs', 'A'), C('clubs', 'Q'), C('clubs', 'J'), C('clubs', '9'), C('clubs', '8'),
+      C('clubs', 'A'), C('clubs', '8'), C('clubs', '7'), C('clubs', '6'), C('clubs', '5'),
       C('spades', 'K'), C('spades', '2'),
     ]
-    // Utan trumf gäller klassisk längsta-färg-doktrin (ess-underspel OK i sang).
-    expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '8'))
+    // Utan trumf gäller klassisk längsta-färg-doktrin (ess-underspel OK i sang):
+    // ingen sekvens → 5:e bästa = ♣5.
+    expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '5'))
+  })
+
+  // Hål F: mitt-i-given (jag är inne och leder ur längsta färgen) fick förr underleda
+  // ett ess mot trumf – ess-regeln gällde bara trick 1. Nu samma regel överallt.
+  it('hål F – mitt-i-given: leder INTE lågt under esset ur längsta färgen mot trumf', () => {
+    const hand: Hand = [
+      C('spades', 'K'), C('spades', 'Q'), C('spades', 'J'), C('spades', '2'),
+      C('hearts', '4'), C('hearts', '3'),
+      C('diamonds', '4'), C('diamonds', '3'),
+      C('clubs', 'A'), C('clubs', '9'), C('clubs', '8'), C('clubs', '7'), C('clubs', '6'),
+    ]
+    // Försvarare S är inne mitt i given (spelförare Öst), inga säkra vinnare att
+    // casha → leder ur längsta färgen. ♣A9876 skulle underleda esset → byt till
+    // ♠KQJ-sekvensen.
+    const st = state({
+      trump: 'hearts', level: 4, hand, declarer: 'E',
+      completedTricks: [doneTrick('S')], leader: 'S',
+    })
+    expect(botCard(st, 'S')).toEqual(C('spades', 'K'))
   })
 })
 
