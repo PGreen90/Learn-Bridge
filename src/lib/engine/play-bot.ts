@@ -332,6 +332,62 @@ function openingLead(cards: Hand): Card {
   return leadFromSuit(longestSuit(cards))
 }
 
+/** Handens färger grupperade, längsta först (stabil ordning → längst, sedan handordning). */
+function suitGroups(cards: Hand): Card[][] {
+  const bySuit = new Map<Suit, Card[]>()
+  for (const c of cards) (bySuit.get(c.suit) ?? bySuit.set(c.suit, []).get(c.suit)!).push(c)
+  return [...bySuit.values()].sort((a, b) => b.length - a.length)
+}
+
+/**
+ * Sant om ett utspel ur färgen skulle UNDERLEDA ett ess: vi håller esset men
+ * `leadFromSuit` väljer ett spotkort under det (ingen topp-sekvens ledd av esset).
+ */
+function underleadsAce(suitCards: Card[]): boolean {
+  if (!suitCards.some((c) => c.rank === 'A')) return false
+  return leadFromSuit(suitCards).rank !== 'A'
+}
+
+/**
+ * Utspelsval (trick 1) med kontraktshänsyn. SANG: klassisk längsta-färg-doktrin
+ * (§8.3), ess-underspel tillåtet. TRUMFKONTRAKT: underled ALDRIG ett ess (extra
+ * dyrt mot slam – spelförarens singel-kung blir gratis och esset dör oanvänt).
+ * Välj då längsta färgen som inte kräver ett ess-underspel; finns ingen sådan
+ * (varje färg har ett oskyddat ess) cash:a esset i längsta färgen i stället.
+ */
+function openingLeadChoice(cards: Hand, trump: Suit | null): CardChoice {
+  const honorReason = 'Utspel (§8.3): jag spelar ut min längsta färg och toppar honnörssekvensen.'
+  const spotReason =
+    'Utspel (§8.3): jag spelar ut min längsta färg med 3:e/5:e bästa kort så partnern ser längden.'
+
+  if (trump === null) {
+    const suit = longestSuit(cards)
+    const card = leadFromSuit(suit)
+    return { card, reason: honorLead(suit) !== null ? honorReason : spotReason }
+  }
+
+  const groups = suitGroups(cards)
+  const safe = groups.filter((g) => !underleadsAce(g))
+  if (safe.length > 0) {
+    const suit = safe[0]
+    const isHonor = honorLead(suit) !== null
+    return {
+      card: leadFromSuit(suit),
+      reason: isHonor
+        ? honorReason
+        : spotReason + ' Mot ett trumfkontrakt underleder jag aldrig ett ess.',
+    }
+  }
+  // Varje färg skulle underleda ett ess → led esset i längsta färgen i stället.
+  const ace = groups[0].find((c) => c.rank === 'A')!
+  return {
+    card: ace,
+    reason:
+      'Utspel mot trumfkontrakt: jag underleder aldrig ett ess (mot slam blir ' +
+      'spelförarens kung gratis) – jag cashar esset i stället.',
+  }
+}
+
 /** Sant om `card` slår `against` givet utspelsfärg och trumf (samma regel som motorn). */
 function beats(card: Card, against: Card, led: Suit, trump: Suit | null): boolean {
   const cT = trump !== null && card.suit === trump
@@ -469,14 +525,10 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
   // På lead:
   if (state.currentTrick.length === 0) {
     // Äkta utspel (trick 1, inga avslutade stick): utspelsdoktrin, inte cash-out
-    // – man underleder inte ess/vinnare på utspelet.
+    // – man underleder inte ess/vinnare på utspelet. Mot trumfkontrakt underleds
+    // ess ALDRIG (openingLeadChoice byter färg / cashar esset).
     if (state.completedTricks.length === 0) {
-      const card = openingLead(legal)
-      const isHonor = honorLead(longestSuit(legal)) !== null
-      const reason = isHonor
-        ? 'Utspel (§8.3): jag spelar ut min längsta färg och toppar honnörssekvensen.'
-        : 'Utspel (§8.3): jag spelar ut min längsta färg med 3:e/5:e bästa kort så partnern ser längden.'
-      return { card, reason }
+      return openingLeadChoice(legal, state.trump)
     }
     // Spelförarsidan: etablera en lång färg (knäck motståndarnas spärr) FÖRE du
     // cashar sidovinnarna – annars bränns stoppen/entréerna (felrapport #32).

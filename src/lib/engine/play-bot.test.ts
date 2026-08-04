@@ -20,10 +20,11 @@ function state(opts: {
   completedTricks?: Trick[] // avslutade stick (för att skilja mitt-i-given från utspel)
   declarer?: Seat // spelförare (default N)
   otherHands?: Partial<Record<Seat, Hand>> // t.ex. träkarlens kort
+  level?: number // kontraktsnivå (default 3; sätt 6 för slam-tester)
 }): PlayState {
   const seat = opts.seat ?? 'S'
   const trump = opts.trump === undefined ? null : opts.trump
-  const contract: Contract = { declarer: opts.declarer ?? 'N', strain: trump ?? 'NT', level: 3 }
+  const contract: Contract = { declarer: opts.declarer ?? 'N', strain: trump ?? 'NT', level: opts.level ?? 3 }
   const hands: Record<Seat, Hand> = { N: [], E: [], S: [], W: [], ...opts.otherHands }
   hands[seat] = opts.hand
   return {
@@ -58,6 +59,45 @@ describe('utspel – topp av sekvens, annars lågt från längsta', () => {
   it('jämn 4-korts utan honnör (7654) → 3:e bästa (§8.3), ej honnörssekvens', () => {
     const hand: Hand = [C('clubs', '7'), C('clubs', '6'), C('clubs', '5'), C('clubs', '4'), C('diamonds', 'A')]
     expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '5'))
+  })
+})
+
+// Utspelsbugg (ägaren, 2026-08): mot ett TRUMFKONTRAKT (extra dyrt mot slam)
+// underledde boten sitt ess – längsta färgen ♣AQJxx föll till spotkort (5:e bästa)
+// och ledde lågt UNDER esset. Doktrin: underled aldrig ett ess mot ett
+// trumfkontrakt. Facit FÖRE fix.
+describe('utspel mot trumfkontrakt – underled aldrig ett ess', () => {
+  it('♣AQJ98 längst mot slam → leder INTE lågt under esset (byter till ♠KQJ2-sekvensen)', () => {
+    const hand: Hand = [
+      C('spades', 'K'), C('spades', 'Q'), C('spades', 'J'), C('spades', '2'),
+      C('hearts', '4'), C('hearts', '3'),
+      C('diamonds', '4'), C('diamonds', '3'),
+      C('clubs', 'A'), C('clubs', 'Q'), C('clubs', 'J'), C('clubs', '9'), C('clubs', '8'),
+    ]
+    // Längsta färgen (♣AQJ98) skulle underleda esset → byt till längsta SÄKRA
+    // färgen ♠KQJ2 och toppa sekvensen (♠K).
+    expect(botCard(state({ trump: 'hearts', level: 6, hand }), 'S')).toEqual(C('spades', 'K'))
+  })
+
+  it('alla färger har ett oskyddat ess → cashar esset i längsta färgen, underleder inte', () => {
+    const hand: Hand = [
+      C('spades', 'A'), C('spades', '4'), C('spades', '3'), C('spades', '2'),
+      C('hearts', 'A'), C('hearts', '3'), C('hearts', '2'),
+      C('diamonds', 'A'), C('diamonds', '3'), C('diamonds', '2'),
+      C('clubs', 'A'), C('clubs', '3'), C('clubs', '2'),
+    ]
+    // Var färg (alla 3+ kort, inga dubbelton-ess) skulle underleda ett ess → led
+    // esset i längsta färgen (♠A) i stället.
+    expect(botCard(state({ trump: 'hearts', level: 6, hand }), 'S')).toEqual(C('spades', 'A'))
+  })
+
+  it('SANG oförändrat: ♣AQJ98 underleder esset som förr (4:e/5:e bästa, §8.3)', () => {
+    const hand: Hand = [
+      C('clubs', 'A'), C('clubs', 'Q'), C('clubs', 'J'), C('clubs', '9'), C('clubs', '8'),
+      C('spades', 'K'), C('spades', '2'),
+    ]
+    // Utan trumf gäller klassisk längsta-färg-doktrin (ess-underspel OK i sang).
+    expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '8'))
   })
 })
 

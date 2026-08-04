@@ -11,7 +11,7 @@
 
 | Fil | 🟢/📘/📦 | Öppna den när … |
 |---|---|---|
-| **budsystem.md** (182 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
+| **budsystem.md** (188 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
 | **status.md** (43 kB) | 📘 | du ska röra **budmotorns kod**. Sök rubriken "Budmotorns tre auktionslager + `open`-handoff" = arkitekturkontraktet: hör logiken hemma i `auction.ts` (on-book), `auction-live.ts` (off-book/konkurrens) eller `auction-interpret.ts` (förklaring)? |
 | **systemrevisorn.md** (59 kB) | 🟢 | du jobbar i mätspåret. Riggen, hur man kör den, **alla mätningar #1–#20**, förskanningarna (etapp 6 + **etapp 7 missad lillslam**) och mönsteranalyserna bakom varje fix. |
 | **bevaka.md** | 🟢 | ägaren säger att något känns fel i spel, en felrapport kommer in, eller en ny fix ska läggas till bevakningslistan. |
@@ -23,6 +23,8 @@
 | **konkurrensplan.md** | 🟢 | Konkurrensplanen mot BBO/Funbridge/Synrey (ägarbeslut 2026-07-29): hälsobedömningen av appen + roadmapen Fas 0–6 (kvalitetsgrund → facelift → konton → "Dagens givar" → mobilappar → engelska → realtidsbord). |
 | **budsystem-revision.md** | 🟢 | Budsystemets hälsobild + körordningen F1–F6 och B-punkterna (t.ex. B13). Här står vad som är kvar att förbättra i systemet. |
 | **senare.md** | 🟢 | Full beskrivning av allt i ⚪ SENARE och 🅿️ PARKERAT (CLAUDE.md listar bara rubrikerna). |
+| **utspel-diagnos.md** | 🟢 | Komplett diagnos av bottarnas **utspel** (trick 1 + mitt-i-given): vilka regler som finns, att utspelet ignorerar budgivningen, hålen mot doktrin (A–G) och den beslutade byggordningen. Öppna den när utspelsspåret återupptas. |
+| **utspel-teori.md** | 📘 | Den källförankrade bridgeteorin bakom utspelet (Pavlicek/Walker/Cohen/bridgebum): holdings→utspel-tabeller (färg + NT), tenass-principen, aktiv/passiv, budgivningens roll, Lightner, slam + konventionsvalen. VAD som är rätt bridge — bygg utspelskoden mot den här. |
 | **arbetsrutiner.md** | 🟢 | 🟢-checklistan vid sessionsstart och 🔴-checklistan vid sessionsslut. Följs varje gång. |
 | **framtid-multiplayer-plattform.md** | 📘 | Beslut A (klart: Vercel + domän + PWA) vs **Beslut B** (konton/multiplayer/tävlingar) — parkerat stort spår, startas bara på uttryckligt ägarbeslut. |
 | **bot-hjarna.md** | 📘 | Roadmap för bottarnas *spelstyrka* (inferens, Monte-Carlo). Spelmotor-spåret, inte budgivningen. |
