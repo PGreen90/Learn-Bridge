@@ -40,6 +40,17 @@ export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): Re
   if (p < 6) return null
 
   const unbidMajors = (['hearts', 'spades'] as Suit[]).filter((s) => s !== ourOpen && s !== their)
+  const fourPlus = unbidMajors.filter((m) => len[m] >= 4)
+  // Är BÅDA högfärgerna objudna (inklivet i en lågfärg) och båda 4+ hos oss, visar
+  // X:et BÅDA högfärgerna (minst 4-4) – förklaringen får inte fastna på bara den
+  // ena (felrapport #45: 1♣–(2♦)–X med 5-4 lästes som "4+ hjärter").
+  if (unbidMajors.length === 2 && fourPlus.length === 2) {
+    return {
+      call: 'X',
+      rule: 'negativ dubbling',
+      explanation: `${p} hp, ${len.spades}-${len.hearts} i spader–hjärter → X (negativ dubbling, visar BÅDA de objudna högfärgerna, minst 4-4).`,
+    }
+  }
   for (const m of unbidMajors) {
     if (len[m] >= 4) {
       return { call: 'X', rule: 'negativ dubbling', explanation: `${p} hp, 4+ ${NAME[m]} → X (negativ dubbling, visar objuden högfärg).` }

@@ -835,11 +835,17 @@ export function PlayTable({
           sin egen sida — den öppnade ytan ger större kort. Spelar du själv
           (träkarlen Nord upptill) står sticket kvar i mitten som förr.
           flex-1 centrerar vertikalt. */}
-      <div className="flex flex-1 items-center gap-1 px-2 py-2">
+      {/* När BÅDA sidohögarna visas samtidigt (claim-/auto-claim-revealen) får
+          de tillsammans inte plats med en full mittzon → Öst trycktes förr av
+          skärmkanten (felrapport #44). Mittzonen får min-w-0 så den krymper och
+          lämnar plats; sidohögarna shrink-0 så deras kort aldrig kläms bort. */}
+      <div className="flex flex-1 items-center gap-1 px-1 py-2">
         {westUp && (
-          <SideDummyPiles hand={play.hands.W} contract={contract} side="W" registerCardEl={registerCardEl} />
+          <div className="shrink-0">
+            <SideDummyPiles hand={play.hands.W} contract={contract} side="W" registerCardEl={registerCardEl} />
+          </div>
         )}
-        <div className="flex flex-1 justify-center">
+        <div className="flex min-w-0 flex-1 justify-center">
           <TrickCenterLive
             play={play}
             thinking={thinking}
@@ -852,7 +858,9 @@ export function PlayTable({
           />
         </div>
         {eastUp && (
-          <SideDummyPiles hand={play.hands.E} contract={contract} side="E" registerCardEl={registerCardEl} />
+          <div className="shrink-0">
+            <SideDummyPiles hand={play.hands.E} contract={contract} side="E" registerCardEl={registerCardEl} />
+          </div>
         )}
       </div>
 
@@ -952,7 +960,7 @@ export function PlayTable({
           öppna och STANNAR KVAR — precis som vid ett riktigt bord — tills
           spelaren själv går vidare med knappen. Ingen timer, inget klipp. */}
       {pendingClaim && (
-        <div className="overlay-in absolute left-1/2 top-1/3 z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-emerald-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25">
+        <div className="overlay-in absolute left-1/2 bottom-[16%] z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-emerald-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25">
           <span className="whitespace-nowrap text-xs font-semibold text-white">
             {pendingClaim.conceded
               ? 'Ni gav upp'
