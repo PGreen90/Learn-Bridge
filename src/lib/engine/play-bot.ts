@@ -323,14 +323,6 @@ function longestSuit(cards: Hand): Hand {
   return best!
 }
 
-/**
- * Utspel (§8.3): välj längsta färgen och spela ut rätt kort i den – topp av en
- * honnörssekvens (KQJ→K, QJ10→Q, AK→A), annars spotkort 3:e bästa (jämn längd)
- * / 5:e=lägsta (udda längd). Kortvalet ligger i `signals.leadFromSuit`.
- */
-function openingLead(cards: Hand): Card {
-  return leadFromSuit(longestSuit(cards))
-}
 
 /** Handens färger grupperade, längsta först (stabil ordning → längst, sedan handordning). */
 function suitGroups(cards: Hand): Card[][] {
@@ -355,37 +347,45 @@ function underleadsAce(suitCards: Card[]): boolean {
  * Välj då längsta färgen som inte kräver ett ess-underspel; finns ingen sådan
  * (varje färg har ett oskyddat ess) cash:a esset i längsta färgen i stället.
  */
+/**
+ * Kortvalet för ett utspel (en sanning – delas av trick 1 och mitt-i-given, hål F).
+ * SANG: klassisk längsta-färg-doktrin (§8.3), ess-underspel tillåtet. TRUMF:
+ * underled ALDRIG ett ess (extra dyrt mot slam) – välj längsta färgen som inte
+ * kräver ett ess-underspel; finns ingen (varje färg har ett oskyddat ess) cash:a
+ * esset i längsta färgen i stället.
+ */
+function chooseLeadCard(cards: Hand, trump: Suit | null): Card {
+  if (trump === null) return leadFromSuit(longestSuit(cards))
+  const groups = suitGroups(cards)
+  const safe = groups.filter((g) => !underleadsAce(g))
+  if (safe.length > 0) return leadFromSuit(safe[0])
+  return groups[0].find((c) => c.rank === 'A')! // alla färger underleder → cash:a esset
+}
+
 function openingLeadChoice(cards: Hand, trump: Suit | null): CardChoice {
   const honorReason = 'Utspel (§8.3): jag spelar ut min längsta färg och toppar honnörssekvensen.'
   const spotReason =
     'Utspel (§8.3): jag spelar ut min längsta färg med 3:e/5:e bästa kort så partnern ser längden.'
 
-  if (trump === null) {
-    const suit = longestSuit(cards)
-    const card = leadFromSuit(suit)
-    return { card, reason: honorLead(suit) !== null ? honorReason : spotReason }
-  }
-
-  const groups = suitGroups(cards)
-  const safe = groups.filter((g) => !underleadsAce(g))
-  if (safe.length > 0) {
-    const suit = safe[0]
-    const isHonor = honorLead(suit) !== null
+  const card = chooseLeadCard(cards, trump)
+  const suit = cards.filter((c) => c.suit === card.suit)
+  // Tvingad ess-cash (trumf + kortet är ett ess i en färg som skulle underlett).
+  if (trump !== null && card.rank === 'A' && underleadsAce(suit)) {
     return {
-      card: leadFromSuit(suit),
-      reason: isHonor
-        ? honorReason
-        : spotReason + ' Mot ett trumfkontrakt underleder jag aldrig ett ess.',
+      card,
+      reason:
+        'Utspel mot trumfkontrakt: jag underleder aldrig ett ess (mot slam blir ' +
+        'spelförarens kung gratis) – jag cashar esset i stället.',
     }
   }
-  // Varje färg skulle underleda ett ess → led esset i längsta färgen i stället.
-  const ace = groups[0].find((c) => c.rank === 'A')!
-  return {
-    card: ace,
-    reason:
-      'Utspel mot trumfkontrakt: jag underleder aldrig ett ess (mot slam blir ' +
-      'spelförarens kung gratis) – jag cashar esset i stället.',
-  }
+  const isHonor = honorLead(suit) !== null
+  const reason =
+    trump !== null && !isHonor
+      ? spotReason + ' Mot ett trumfkontrakt underleder jag aldrig ett ess.'
+      : isHonor
+        ? honorReason
+        : spotReason
+  return { card, reason }
 }
 
 /** Sant om `card` slår `against` givet utspelsfärg och trumf (samma regel som motorn). */
@@ -578,7 +578,11 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
         reason: 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.',
       }
     }
-    return { card: unblockLead(state, seat, openingLead(legal)), reason: 'Jag är inne och spelar ut ur min längsta färg.' }
+    return {
+      card: unblockLead(state, seat, chooseLeadCard(legal, state.trump)),
+      reason:
+        'Jag är inne och spelar ut ur min längsta färg – men underleder aldrig ett ess mot ett trumfkontrakt.',
+    }
   }
 
   const led = state.currentTrick[0].card.suit

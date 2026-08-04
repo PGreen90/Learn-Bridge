@@ -13,11 +13,38 @@ describe('§8.3 honnörsutspel – topp av sekvens', () => {
   it('A-K dubbelton → A', () => expect(honorLead(cards('A', 'K'))).toEqual(C('A')))
   it('K-Q-J → K (längre sekvens, fortfarande toppen)', () =>
     expect(honorLead(cards('K', 'Q', 'J', '2'))).toEqual(C('K')))
-  it('ingen topp-sekvens (A-Q-J, glapp) → null', () =>
-    expect(honorLead(cards('A', 'Q', 'J'))).toBeNull())
   it('spotkort i rad (8-7-6, ingen honnör) → null', () =>
     expect(honorLead(cards('8', '7', '6'))).toBeNull())
   it('singelton → null', () => expect(honorLead(cards('K'))).toBeNull())
+})
+
+// Hål B (docs/utspel-teori.md §3a): inre/brutna sekvenser. En hög honnör med ett
+// glapp ner till en sammanhängande löpa (≥2 kort, topp 10+) → led toppen av den
+// INRE löpan, inte den höga honnören. Facit FÖRE fix.
+describe('§8.3 honnörsutspel – inre sekvenser (hål B)', () => {
+  it('K-J-10-x → J (inre sekvens under kungen)', () =>
+    expect(honorLead(cards('K', 'J', '10', '4'))).toEqual(C('J')))
+  it('K-10-9-x → 10', () =>
+    expect(honorLead(cards('K', '10', '9', '4'))).toEqual(C('10')))
+  it('Q-10-9-x → 10', () =>
+    expect(honorLead(cards('Q', '10', '9', '4'))).toEqual(C('10')))
+  it('A-J-10-x → J (inre sekvens under esset)', () =>
+    expect(honorLead(cards('A', 'J', '10', '4'))).toEqual(C('J')))
+  it('A-Q-J-10 → Q (inre sekvens Q-J-10 under esset)', () =>
+    expect(honorLead(cards('A', 'Q', 'J', '10'))).toEqual(C('Q')))
+  it('A-Q-J (glapp mot esset) → Q', () =>
+    expect(honorLead(cards('A', 'Q', 'J'))).toEqual(C('Q')))
+  it('K-J-10-9 → J', () =>
+    expect(honorLead(cards('K', 'J', '10', '9'))).toEqual(C('J')))
+  // Negativa: ingen sammanhängande inre löpa → ingen honnörsutspel (led lågt).
+  it('K-J-x (bara gaffel, ingen löpa) → null', () =>
+    expect(honorLead(cards('K', 'J', '5'))).toBeNull())
+  it('K-J-9 (J och 9 ej i följd) → null', () =>
+    expect(honorLead(cards('K', 'J', '9'))).toBeNull())
+  it('K-J-9-8 (inre löpa 9-8 är inga honnörer) → null', () =>
+    expect(honorLead(cards('K', 'J', '9', '8'))).toBeNull())
+  it('A-8-7-6-5 (löpa utan honnörstopp) → null', () =>
+    expect(honorLead(cards('A', '8', '7', '6', '5'))).toBeNull())
 })
 
 describe('§8.3 spotkortsutspel – 3:e/5:e bästa', () => {
@@ -55,8 +82,8 @@ describe('§8.3 honnörsutspel – facit-lås (inre/längre sekvenser)', () => {
     expect(honorLead(cards('J', '10', '9', '2'))).toEqual(C('J')))
   it('10-9-8 → null (topp under knekt är ingen honnörssekvens)', () =>
     expect(honorLead(cards('10', '9', '8'))).toBeNull())
-  it('A-J-10-9 → null (esset rör inte knekten → topp är ingen sekvens)', () =>
-    expect(honorLead(cards('A', 'J', '10', '9'))).toBeNull())
+  it('A-J-10-9 → J (inre sekvens J-10-9 under esset, hål B)', () =>
+    expect(honorLead(cards('A', 'J', '10', '9'))).toEqual(C('J')))
 })
 
 describe('§8.3 spotkortsutspel – facit-lås (längre färger)', () => {
@@ -67,11 +94,11 @@ describe('§8.3 spotkortsutspel – facit-lås (längre färger)', () => {
   it('singelton → kortet självt', () => expect(spotLead(cards('7'))).toEqual(C('7')))
 })
 
-describe('§8.3 leadFromSuit – facit-lås (topp-utan-sekvens faller till spot)', () => {
-  it('A-J-10-9 (ingen topp-sekvens, jämn) → 3:e bästa spot', () =>
-    expect(leadFromSuit(cards('A', 'J', '10', '9'))).toEqual(C('10')))
-  it('A-Q-J-x (glapp-topp, jämn) → 3:e bästa spot', () =>
-    expect(leadFromSuit(cards('A', 'Q', 'J', '4'))).toEqual(C('J')))
+describe('§8.3 leadFromSuit – inre sekvens före spot (hål B)', () => {
+  it('A-J-10-9 → J (inre sekvens, inte spot)', () =>
+    expect(leadFromSuit(cards('A', 'J', '10', '9'))).toEqual(C('J')))
+  it('A-Q-J-x → Q (inre sekvens Q-J, inte spot)', () =>
+    expect(leadFromSuit(cards('A', 'Q', 'J', '4'))).toEqual(C('Q')))
 })
 
 describe('§8.1/§8.2 markeringar – facit-lås (dubbelton/singel spare)', () => {

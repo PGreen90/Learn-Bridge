@@ -10,6 +10,24 @@
 
 ---
 
+## 2026-08-04 (kväll — utspel hål B + F)
+
+**🃏 UTSPEL HÅL B (inre sekvenser) + HÅL F (ess-regeln överallt): KLARA (pushas på
+PCD).** Först stegen i den beslutade byggordningen ur `docs/utspel-diagnos.md`, byggda
+mot den källförankrade teorin (`docs/utspel-teori.md`). **Hål B:** `honorLead`
+(`signals.ts`) kände bara igen topp-sekvenser (touch från högsta kortet), så
+K-kn-10-x föll till lågt spotkort. Nu känns även **inre/brutna sekvenser** igen — en
+hög honnör (kn+) med ett glapp ner till en sammanhängande löpa (≥2 kort, topp 10+) →
+led toppen av den inre löpan (Kkn10→kn, K109→10, D109→10, Akn10→kn, ADkn10→D, ADkn→D).
+Ren mekanik i `signals.ts` (ny hjälpare `runLengthFrom`). **Hål F:** ess-regeln
+(underled aldrig ett ess mot trumf) gällde bara trick 1; kortvalet bröts ut till en
+gemensam `chooseLeadCard` som nu även mitt-i-given-utspelet använder. Död
+`openingLead`-funktion borttagen. Facit FÖRE fix i `signals.test.ts` (inre sekvenser +
+negativa fall som KknX/Kkn9 → null) och `play-bot.test.ts` (hål F mitt-i-given +
+NT-vakt). Hela sviten grön (`npm test`), 0 regressioner. **Kvar (byggordningen):** hål
+E (skilj NT-färgvalet), sedan hål A+G (budgivningen + tenass-undvikande, där ägarens
+KJxxx-poäng hör hemma).
+
 ## 2026-08-04
 
 **🃏 UTSPELSBUGGEN (♣AQJxx mot slam): LAGAD (pushas på ägarens PCD).** Ägaren

@@ -89,12 +89,12 @@ Ordningen är vald efter **kostnad/risk-kvot**: störst nytta med lägst
 regressionsrisk först, och grundstenar före sådant som bygger på dem. Varje steg
 är sin egen 🔵 NU med eget facit-test och (där relevant) en netto-mätning.
 
-1. **Hål B — inre/brutna sekvenser** (liten, låg risk, ren vinst). Lär `honorLead`
-   känna igen inre sekvens (KJT9→J, KQ10→10, QJ9→J) och två-korts-toppar med gap.
-   Isolerad i `signals.ts`, väl testbar, ingen budgivning behövs.
-2. **Hål F — täpp mitt-i-given ess-underspelet** (liten, låg risk). Låt
-   `openingLeadChoice`-principen gälla även "jag är inne och leder ny färg", inte
-   bara trick 1. Städar upp samma buggklass överallt.
+1. **Hål B — inre/brutna sekvenser — KLART 2026-08-04.** `honorLead` (`signals.ts`)
+   känner nu igen inre sekvens (Kkn10→kn, K109→10, D109→10, Akn10→kn, ADkn→D).
+   Facit `signals.test.ts`. Detalj: `budsystem.md §8.3/§9`.
+2. **Hål F — mitt-i-given ess-underspelet — KLART 2026-08-04.** Kortvalet bröts ut
+   till `chooseLeadCard` (`play-bot.ts`) som nu även mitt-i-given-utspelet använder;
+   ess-regeln gäller överallt, inte bara trick 1. Facit `play-bot.test.ts`.
 3. **Hål E — skilj NT-utspel från färgutspel** (medel). Mot NT: längsta OCH
    starkaste färgen, 4:e bästa som spotdoktrin. Fortfarande budblint, men rätt
    *inom* handen. Förbereder steg 4.

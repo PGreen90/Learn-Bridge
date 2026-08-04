@@ -28,21 +28,41 @@ function highest(cards: Card[]): Card {
   return cards.reduce((hi, c) => (rankVal(c.rank) > rankVal(hi.rank) ? c : hi))
 }
 
+/** Längden på den sammanhängande löpan (kort i följd) som startar på index `i`. */
+function runLengthFrom(sorted: Card[], i: number): number {
+  let run = 1
+  while (i + run < sorted.length && rankVal(sorted[i + run - 1].rank) - rankVal(sorted[i + run].rank) === 1) {
+    run++
+  }
+  return run
+}
+
 /**
- * §8.3 Honnörsutspel – högsta kortet i en sammanhängande topp-sekvens på minst
- * två kort med toppkort knekt eller högre (AK→A, KQ→K, QJ→Q, JT→J, AK
- * dubbelton→A). Returnerar kortet att spela ut, eller `null` om färgen saknar
- * en sådan topp-sekvens.
+ * §8.3 Honnörsutspel. Returnerar kortet att spela ut, eller `null` om färgen
+ * saknar en ledbar sekvens (då tar spotkortsutspelet över).
+ *
+ * Två fall (hål B, docs/utspel-teori.md §3a):
+ *  1. **Topp-sekvens** – sammanhängande löpa på ≥2 kort från högsta kortet, med
+ *     toppen knekt eller högre → led toppen (AK→A, KQ→K, QJ→Q, JT→J, KQJ→K).
+ *  2. **Inre/bruten sekvens** – en hög honnör (J+) med ett glapp ner till en
+ *     sammanhängande löpa på ≥2 kort vars topp är en honnör (10+) → led toppen av
+ *     den INRE löpan (KJ10→J, K109→10, Q109→10, AJ10→J, AQJ10→Q, AQJ→Q). Detta
+ *     är den klassiska inre-sekvens-doktrinen: den höga honnören ligger kvar och
+ *     fångar/finessar senare medan den inre löpan pressar fram motståndarnas kort.
  */
 export function honorLead(suitCards: Card[]): Card | null {
   if (suitCards.length < 2) return null
   const sorted = highToLow(suitCards)
-  let run = 1
-  while (run < sorted.length && rankVal(sorted[run - 1].rank) - rankVal(sorted[run].rank) === 1) {
-    run++
+  // 1. Topp-sekvens.
+  if (runLengthFrom(sorted, 0) >= 2 && rankVal(sorted[0].rank) >= rankVal('J')) return sorted[0]
+  // 2. Inre sekvens: kräver en hög honnör överst och en honnörsledd inre löpa.
+  if (rankVal(sorted[0].rank) < rankVal('J')) return null
+  for (let i = 1; i < sorted.length; ) {
+    const run = runLengthFrom(sorted, i)
+    if (run >= 2 && rankVal(sorted[i].rank) >= rankVal('10')) return sorted[i]
+    i += run
   }
-  const top = sorted[0]
-  return run >= 2 && rankVal(top.rank) >= rankVal('J') ? top : null
+  return null
 }
 
 /**
