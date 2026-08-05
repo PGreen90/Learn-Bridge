@@ -66,10 +66,10 @@ högfärgsstöd** (= hål C, når 6♥ på frö 20260932). Reverse/hoppskift/2�
 Play. **Kvar (eget beslut):** fler agreed-trumf-lägen (inverterad minor, 2♣);
 off-book-igenkänning av din cue i icke-standardordning; öppnarens 18–19 i Jacoby.
 
-**UTSPELET (2026-08-04): ess-bugg + HÅL B & F KLARA (§8.3/§9).**
-`chooseLeadCard` (`play-bot.ts`) underleder aldrig ess mot färg (trick 1 + mitt-i-
-given); `honorLead` känner inre sekvenser. Teori: `docs/utspel-teori.md`.
-Byggordning/status: `docs/utspel-diagnos.md` (kvar: E → A+G).
+**UTSPELET (2026-08-04): HÅL A–G KLARA (§8.3/§9).** Budstyrt utspel i `botCardSmart`
+(`openingLeadWithAuction`): partnerns färg, undvik deras, passivt + tenass/ess-skydd
+mot trumf, inre sekvenser, trumf/singel. Teori `docs/utspel-teori.md`; kvar =
+förfining `docs/utspel-diagnos.md`.
 
 **➡️ NÄSTA GÅNG:** ägaren väljer — fler cue-lägen (ovan), 🟢 NÄST punkt 1-rest
 (hål D — konkurrensfallen) eller kvarvarande granskningsfynd (a11y, par-poäng).
@@ -133,7 +133,7 @@ klar; kvar: probe-ritualerna + session-checklistorna) ·
 **Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
 fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32/#34 KLARA; kvar: tredje hand högt i trumf) ·
-**UTSPELET** (hål B+F klara; nästa E → A+G) · engelska som andra
+**UTSPELET** (hål A–G klara; kvar: förfining) · engelska som andra
 språk (Fas 5) · TP till §7-inkliven · advancer-rabatt efter balansering
 (generella fallet) · 17+ enfärgshand efter två bjudna färger · auto-facit på
 hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·

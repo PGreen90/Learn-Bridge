@@ -1625,6 +1625,24 @@ längsta-färg-doktrin oförändrat (ess-underspel/4:e bästa är då normalt). 
 ess-regel gäller även när boten kommer in mitt i given** och leder ur längsta
 färgen (inte bara på själva utspelet).
 
+**Mot NT väljs "längst OCH starkast".** Längden är primär (sang är ett lopp att
+etablera en lång färg); vid lika längd väljs störst honnörsstyrka, och vid lika
+styrka en **högfärg** (motståndarna stannar oftare för att kolla högfärgerna).
+
+**Budgivningen styr utspelet.** När boten leder ut mot ett kontrakt som budats
+(motspelaren, trick 1) väger den in auktionen — i prioritet:
+1. **Partnerns bjudna färg** leds gärna ("kan vara fel men är sällan fel").
+2. Mot **NT**: längsta/starkaste färgen som motståndarna **inte** bjudit.
+3. Mot **trumfkontrakt** leds **passivt**: boten undviker att leda *bort från* en
+   honnörsgaffel (tenass som K-kn-x-x-x, A-D-x-x-x) eller in i motståndarnas
+   färger. Har den korta trumf och en **singel** leds singeln för en **ruff**;
+   bjöd motståndarna 3+ färger (korsruff-läge) leds **trumf**; annars den säkraste
+   objudna färgen. Trumfutspel: två/fyra små → lägsta, tre små → mitten.
+
+Detta är den doktrin som ligger bakom att t.ex. ♠K-kn-8-4-3 leds passivt undan mot
+4♥ (led inte bort från gaffeln) men attackeras som längsta färg mot 3NT. Full
+källförankrad teori: `docs/utspel-teori.md`.
+
 ### 8.4 Vad vi (medvetet) inte spelar
 - **Smith Echo** – nej; vi använder vanlig (omvänd) attityd på utspelsfärgen i
   sangförsvar.
@@ -1691,6 +1709,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-04 (utspel hål E + A + G + C + D)** – **Budstyrt utspel (kod §8.3).**
+  Byggt mot `docs/utspel-teori.md`. **Hål E:** NT-färgvalet blev "längst OCH
+  starkast" (`bestNtSuit`/`bestByLenStrengthMajor` i `play-bot.ts`) – längd primärt,
+  vid lika styrka, vid lika högfärg. **Hål A:** utspelet var förr helt budblint
+  (`botCardSmartReasoned` slängde `calls` på trick 1). Nu läser motspelarens utspel
+  auktionen (`analyzeAuctionForLead` + `openingLeadWithAuction`): leder partnerns
+  bjudna färg, undviker motståndarnas, och mot trumf **passivt**. **Hål G:** ess-
+  regeln generaliserad till alla honnörsgafflar/tenasser (`unsafeToLead`) – boten
+  leder inte bort från K-kn-x-x-x / A-D-x-x-x mot trumf (ägarens ursprungliga poäng).
+  **Hål C:** trumfutspel (`trumpLeadCard`, 2/4→lägsta, 3→mitten) i korsruff-läge
+  (3+ bjudna motståndarfärger) och som passiv utväg framför att bryta en tenass.
+  **Hål D:** singel-för-ruff med korta trumf. Facit FÖRE fix: `play-bot.test.ts`
+  ("utspel hål A+G – budgivningen styr", inkl. ägarens ♠KJ843 → ♦3 mot 4♥ men ♠3
+  mot 3NT) + `signals.test.ts`. Budvägen gäller BARA `botCardSmart` (appens väg);
+  `botCard`/`botCardReasoned` är budblinda som förr. Hela sviten grön (`npm test`),
+  0 regressioner. Rekommenderad uppföljning: netto-A/B (`PLAYQ`-proben, git-stash)
+  för aggregerad stickeffekt.
 - **2026-08-04 (utspel hål B + F)** – **Inre sekvenser + ess-regeln överallt (kod
   §8.3).** Byggt mot den källförankrade teorin (`docs/utspel-teori.md`). **Hål B:**
   `honorLead` (`signals.ts`) kände förr bara igen topp-sekvenser (touch från högsta

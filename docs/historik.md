@@ -10,6 +10,28 @@
 
 ---
 
+## 2026-08-04 (sen kväll — utspel hål E + A + G + C + D)
+
+**🃏 BUDSTYRT UTSPEL: HÅL E, A, G, C, D KLARA (pushas på PCD) — HELA UTSPELS-
+BYGGET A–G FÄRDIGT.** Resten av byggordningen ur `docs/utspel-diagnos.md`, mot
+teorin i `docs/utspel-teori.md`. **Hål E:** NT-färgvalet blev "längst OCH starkast"
+(`bestByLenStrengthMajor`). **Hål A (störst):** utspelet var helt budblint —
+`botCardSmartReasoned` slängde `calls` på trick 1. Nu läser motspelarens utspel
+auktionen (`analyzeAuctionForLead` + `openingLeadWithAuction`): partnerns bjudna
+färg först, mot NT längsta objudna, mot trumf passivt. **Hål G:** ess-regeln
+generaliserad till alla tenasser (`unsafeToLead`) — ägarens ursprungliga poäng:
+♠KJ843 leds inte bort mot 4♥ (→ passivt ♦3) men attackeras mot 3NT (→ ♠3). Byggt
+med A eftersom det kräver aktiv/passiv-kontext. **Hål C:** trumfutspel
+(`trumpLeadCard`, 2/4→lägsta, 3→mitten) i korsruff-läge (3+ bjudna motståndarfärger)
++ passiv utväg framför att bryta en tenass. **Hål D:** singel-för-ruff med korta
+trumf. Budvägen gäller BARA `botCardSmart` (appens väg); `botCard`/`botCardReasoned`
+är budblinda som förr. Facit FÖRE fix i `play-bot.test.ts` (ägarens giv + partner-
+färg + undvik-deras + C/D) och `signals.test.ts`. Hela sviten grön (`npm test`), 0
+regressioner. **Kvar att FÖRFINA (ej hål):** aggregerad netto-A/B (`PLAYQ`-proben,
+git-stash); aktiv/passiv idag passivt-som-default mot trumf (aktivt-när-bordet-har-
+lång-sidofärg ej detekterat); Lightner-dubblingar; artificiella bud skiljs ej från
+naturliga i budläsningen (första passet, ofarligt i vanliga 2/1-auktioner).
+
 ## 2026-08-04 (kväll — utspel hål B + F)
 
 **🃏 UTSPEL HÅL B (inre sekvenser) + HÅL F (ess-regeln överallt): KLARA (pushas på
