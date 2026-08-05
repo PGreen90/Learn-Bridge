@@ -10,6 +10,34 @@
 
 ---
 
+## 2026-08-05 (netto-A/B-mätning av det budstyrda utspelet)
+
+**📏 UTSPELET GER ETT LITET MEN STATISTISKT SÄKERSTÄLLT FÖRSVARSLYFT — mätt, inte
+gissat.** Den aggregerade stickeffekten av hål A–G (`openingLeadWithAuction`) mättes
+mot det gamla budblinda utspelet med en ny gated probe,
+`src/lib/engine/lead-quality.probe.test.ts` (`LEADAB=1`). Riggen isolerar EXAKT
+utspelskortet: varje giv spelas ut av bot-hjärnan två gånger, identiskt i allt utom
+trick 1 (budstyrt vs budblindt), under samma nollställda slump; givar där
+utspelskortet inte ändras hoppas över (bidrar 0). Reproducera (en process, ~3 h)
+eller parallellt i fyra fröskivor (LEADAB_SEED + LEADAB_OUT), ~1,5 h väggklocka:
+```
+LEADAB=1 LEADAB_DEALS=1000 npx vitest run src/lib/engine/lead-quality.probe.test.ts
+```
+**Resultat (frö 20260729, 997 spelbara givar):** 525 fick ändrat utspel; spelförar-
+stick budstyrt 4636 vs budblindt 4727, **netto −91** (negativt = färre
+spelförarstick = bättre försvar), snitt −0,17/ändrad giv. Riktning: 190 bättre, 170
+sämre, 165 lika. **t = −2,54, 95 %-KI för snittet [−0,31, −0,04] och för totalen
+[−161, −21] — noll uteslutet.** Vinsten sitter mest i sang (led partnerns/lång färg
+i stället för blint spotkort: `20261305` 3NT ♠A→♦3, `20261492` 2NT ♠Q→♥J, båda −6);
+värsta förlusten kvar `20260805` 3NT ♣8→♥5 (+4). **VIKTIG RÄTTELSE:** en tidigare
+120-givarskörning gav netto −5 och tolkades som "stickneutralt" — det var
+underpowered. Med ~1000 givar framträder en liten, verklig, FÖRDELAKTIG effekt.
+Förbehåll: effekten är liten och mätningen är INTERN (vår bot som spelförare mot vår
+egen försvarsmotor), inte mot expertfacit. **Ägarbeslut 2026-08-05:** vi nöjer oss
+med utspelet tillsvidare — ingen förfining nu (resultatet bekräftar att det förtjänar
+sin plats). Förfiningsspåret (NT-färgvalet, "led partnerns färg"-ivern, aktiv/passiv
+mot trumf) ligger kvar i `docs/senare.md`.
+
 ## 2026-08-04 (sen kväll — utspel hål E + A + G + C + D)
 
 **🃏 BUDSTYRT UTSPEL: HÅL E, A, G, C, D KLARA (pushas på PCD) — HELA UTSPELS-
