@@ -312,18 +312,6 @@ function defenderFirstDiscardSignal(state: PlayState, seat: Seat, legal: Hand): 
   return { card, reason }
 }
 
-/** Korten i den längsta färgen (vid lika: första i kortordningen). */
-function longestSuit(cards: Hand): Hand {
-  const bySuit = new Map<Suit, Card[]>()
-  for (const c of cards) (bySuit.get(c.suit) ?? bySuit.set(c.suit, []).get(c.suit)!).push(c)
-  let best: Card[] | null = null
-  for (const group of bySuit.values()) {
-    if (!best || group.length > best.length) best = group
-  }
-  return best!
-}
-
-
 /** Handens färger grupperade, längsta först (stabil ordning → längst, sedan handordning). */
 function suitGroups(cards: Hand): Card[][] {
   const bySuit = new Map<Suit, Card[]>()
@@ -340,22 +328,43 @@ function underleadsAce(suitCards: Card[]): boolean {
   return leadFromSuit(suitCards).rank !== 'A'
 }
 
+/** Honnörsstyrka i en färg (kn=1, D=2, K=3, E=4) – för "längst OCH starkast". */
+function honorScore(suitCards: Card[]): number {
+  return suitCards.reduce((s, c) => s + Math.max(0, rankVal(c.rank) - rankVal('10')), 0)
+}
+
+const isMajorSuit = (suitCards: Card[]): boolean =>
+  suitCards[0]?.suit === 'spades' || suitCards[0]?.suit === 'hearts'
+
 /**
- * Utspelsval (trick 1) med kontraktshänsyn. SANG: klassisk längsta-färg-doktrin
- * (§8.3), ess-underspel tillåtet. TRUMFKONTRAKT: underled ALDRIG ett ess (extra
- * dyrt mot slam – spelförarens singel-kung blir gratis och esset dör oanvänt).
- * Välj då längsta färgen som inte kräver ett ess-underspel; finns ingen sådan
- * (varje färg har ett oskyddat ess) cash:a esset i längsta färgen i stället.
+ * Hål E: färgval mot SANG – "längst OCH starkast". Längd är primärt (sang är ett
+ * lopp att etablera en lång färg); vid lika längd väljs störst honnörsstyrka, och
+ * vid lika styrka föredras en HÖGfärg (motståndarna stannar oftare för att kolla
+ * högfärgerna → en objuden minor är mer sällan ledd). docs/utspel-teori.md §2/§3a.
  */
+function bestByLenStrengthMajor(groups: Card[][]): Card[] {
+  const maxLen = Math.max(...groups.map((g) => g.length))
+  const longest = groups.filter((g) => g.length === maxLen)
+  return [...longest].sort((a, b) => {
+    const byHonor = honorScore(b) - honorScore(a)
+    if (byHonor !== 0) return byHonor
+    return (isMajorSuit(b) ? 1 : 0) - (isMajorSuit(a) ? 1 : 0)
+  })[0]
+}
+
+function bestNtSuit(cards: Hand): Card[] {
+  return bestByLenStrengthMajor(suitGroups(cards))
+}
+
 /**
  * Kortvalet för ett utspel (en sanning – delas av trick 1 och mitt-i-given, hål F).
- * SANG: klassisk längsta-färg-doktrin (§8.3), ess-underspel tillåtet. TRUMF:
+ * SANG: längst OCH starkast (hål E, `bestNtSuit`), ess-underspel tillåtet. TRUMF:
  * underled ALDRIG ett ess (extra dyrt mot slam) – välj längsta färgen som inte
  * kräver ett ess-underspel; finns ingen (varje färg har ett oskyddat ess) cash:a
  * esset i längsta färgen i stället.
  */
 function chooseLeadCard(cards: Hand, trump: Suit | null): Card {
-  if (trump === null) return leadFromSuit(longestSuit(cards))
+  if (trump === null) return leadFromSuit(bestNtSuit(cards))
   const groups = suitGroups(cards)
   const safe = groups.filter((g) => !underleadsAce(g))
   if (safe.length > 0) return leadFromSuit(safe[0])
@@ -386,6 +395,159 @@ function openingLeadChoice(cards: Hand, trump: Suit | null): CardChoice {
         ? honorReason
         : spotReason
   return { card, reason }
+}
+
+// --- Hål A+G: budgivningen styr utspelet (docs/utspel-teori.md §1/§2/§4) ---------
+
+const CONTRACT_BID_RE = /^([1-7])(C|D|H|S|NT)$/
+const STRAIN_TO_SUIT: Record<string, Suit | undefined> = {
+  C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades', NT: undefined,
+}
+
+/** Vad auktionen säger om VILKA färger som är partnerns resp. motståndarnas. */
+interface AuctionLeadInfo {
+  partnerSuits: Suit[] // färger partnern bjudit (led gärna)
+  oppSuits: Suit[] // färger någon motståndare bjudit (undvik)
+}
+
+/**
+ * Plockar ut partnerns och motståndarnas bjudna färger ur auktionen, sett från
+ * `seat`. Naturligt/konstgjort skiljs inte (första passet) – för de vanliga 2/1-
+ * auktionerna räcker det, och att undvika en konstgjord färg (t.ex. Stayman-klöver)
+ * skadar sällan.
+ */
+function analyzeAuctionForLead(calls: ResolvedCall[], seat: Seat): AuctionLeadInfo {
+  const partner = PARTNER_SEAT[seat]
+  const partnerSuits: Suit[] = []
+  const oppSuits: Suit[] = []
+  for (const c of calls) {
+    const m = CONTRACT_BID_RE.exec(c.bid)
+    if (!m) continue
+    const suit = STRAIN_TO_SUIT[m[2]]
+    if (!suit) continue
+    if (c.seat === partner) {
+      if (!partnerSuits.includes(suit)) partnerSuits.push(suit)
+    } else if (c.seat !== seat) {
+      if (!oppSuits.includes(suit)) oppSuits.push(suit)
+    }
+  }
+  return { partnerSuits, oppSuits }
+}
+
+/**
+ * Osäker (tenass-)färg att bryta mot ett TRUMFKONTRAKT: en honnör (D+) i toppen
+ * utan en ledbar sekvens → att leda lågt leder BORT från honnörsgaffeln (KJxxx,
+ * AQxxx, Kxxx…). Grundprincipen bakom ess-regeln, generaliserad (hål G).
+ */
+function unsafeToLead(suitCards: Card[]): boolean {
+  if (honorLead(suitCards) !== null) return false // sekvens → säker att leda
+  return rankVal(highest(suitCards).rank) >= rankVal('Q')
+}
+
+/** Trumfutspel-kort: 3 små → mitten, annars (2/4) → lägsta (så partnern läser TRUMF). */
+function trumpLeadCard(trumps: Card[]): Card {
+  const desc = [...trumps].sort((a, b) => rankVal(b.rank) - rankVal(a.rank))
+  return desc.length === 3 ? desc[1] : lowest(trumps)
+}
+
+/** Bland säkra färger: föredra en sekvens, sedan längd, sedan högfärg. */
+function pickSafeSuit(groups: Card[][]): Card[] {
+  return [...groups].sort((a, b) => {
+    const seq = (honorLead(b) ? 1 : 0) - (honorLead(a) ? 1 : 0)
+    if (seq !== 0) return seq
+    if (a.length !== b.length) return b.length - a.length
+    return (isMajorSuit(b) ? 1 : 0) - (isMajorSuit(a) ? 1 : 0)
+  })[0]
+}
+
+/**
+ * Budstyrt utspel (trick 1). Prioritet (docs/utspel-teori.md §1):
+ *  1. Partnerns bjudna färg (om vi håller den) – "kan vara fel, aldrig fel".
+ *  2. Mot NT: längst & starkast, men undvik motståndarnas bjudna färg om alternativ.
+ *  3. Mot trumf: PASSIVT – undvik ess-underspel, tenasser (hål G) och deras färger;
+ *     släpp kraven i tur och ordning om ingen färg klarar alla, cash:a ess sist.
+ */
+function openingLeadWithAuction(cards: Hand, trump: Suit | null, info: AuctionLeadInfo): CardChoice {
+  const groups = suitGroups(cards)
+  const isOpp = (g: Card[]) => info.oppSuits.includes(g[0].suit)
+
+  // 1. Partnerns färg.
+  const held = info.partnerSuits.map((s) => cards.filter((c) => c.suit === s)).filter((g) => g.length > 0)
+  if (held.length > 0) {
+    const suit = [...held].sort((a, b) => b.length - a.length)[0]
+    return {
+      card: leadFromSuit(suit),
+      reason: 'Utspel: jag leder partnerns bjudna färg (budgivningen) – den kan vara fel men är sällan fel.',
+    }
+  }
+
+  if (trump === null) {
+    const nonOpp = groups.filter((g) => !isOpp(g))
+    const pool = nonOpp.length > 0 ? nonOpp : groups
+    const avoided = nonOpp.length > 0 && nonOpp.length < groups.length
+    return {
+      card: leadFromSuit(bestByLenStrengthMajor(pool)),
+      reason: avoided
+        ? 'Utspel mot NT: min längsta/starkaste färg som motståndarna INTE bjudit.'
+        : 'Utspel mot NT: min längsta och starkaste färg.',
+    }
+  }
+
+  // Trumfkontrakt: passivt färgval + trumf-/singelutspel (hål C+D). Trumffärgen
+  // hanteras separat (egna kortregler) och utesluts ur sidofärgsvalet.
+  const trumps = cards.filter((c) => c.suit === trump)
+  const sideGroups = groups.filter((g) => g[0].suit !== trump)
+  const canRuff = trumps.length >= 2 && trumps.length <= 3 && honorLead(trumps) === null
+  const safeTrump = trumps.length >= 2 && rankVal(highest(trumps).rank) < rankVal('Q')
+  const passiveReason =
+    'Utspel mot trumfkontrakt (budstyrt): jag leder passivt och undviker att leda bort ' +
+    'från en honnörsgaffel eller in i motståndarnas färg.'
+
+  // Hål D: singelutspel för ruff – korta trumf (kan ruffa, ingen trumfkontroll) +
+  // en singel i en sidofärg.
+  if (canRuff) {
+    const stiff = sideGroups.filter((g) => g.length === 1 && !isOpp(g))
+    if (stiff.length > 0) {
+      return {
+        card: stiff[0][0],
+        reason: 'Utspel: jag leder min singel och siktar på en ruff (jag har korta trumf att ruffa med).',
+      }
+    }
+  }
+  // Hål C: trumfutspel när motståndarna bjudit 3+ färger (korsruff-läge) → klipp ruffar.
+  if (safeTrump && info.oppSuits.length >= 3) {
+    return {
+      card: trumpLeadCard(trumps),
+      reason: 'Utspel: trumf – motståndarna bjöd flera färger (korsruff-läge), jag drar trumf för att klippa deras ruffar.',
+    }
+  }
+
+  const safe = sideGroups.filter((g) => !underleadsAce(g) && !unsafeToLead(g) && !isOpp(g))
+  if (safe.length > 0) return { card: leadFromSuit(pickSafeSuit(safe)), reason: passiveReason }
+  const safeAny = sideGroups.filter((g) => !underleadsAce(g) && !unsafeToLead(g))
+  if (safeAny.length > 0) return { card: leadFromSuit(pickSafeSuit(safeAny)), reason: passiveReason }
+  // Hål C: hellre ett säkert trumfutspel än att bryta en tenass.
+  if (safeTrump) {
+    return {
+      card: trumpLeadCard(trumps),
+      reason: 'Utspel: ett säkert trumfutspel – jag ger inget genom att bryta en honnörsgaffel.',
+    }
+  }
+  const notUnderlead = sideGroups.filter((g) => !underleadsAce(g))
+  if (notUnderlead.length > 0) {
+    return {
+      card: leadFromSuit(pickSafeSuit(notUnderlead)),
+      reason: 'Utspel mot trumfkontrakt: ingen helt säker färg – jag väljer den minst riskabla utan ess-underspel.',
+    }
+  }
+  const aceSuit = sideGroups.find((g) => g.some((c) => c.rank === 'A'))
+  if (aceSuit) {
+    return {
+      card: aceSuit.find((c) => c.rank === 'A')!,
+      reason: 'Utspel mot trumfkontrakt: varje färg skulle underleda ett ess – jag cashar esset i stället.',
+    }
+  }
+  return { card: leadFromSuit(sideGroups[0] ?? trumps), reason: passiveReason }
 }
 
 /** Sant om `card` slår `against` givet utspelsfärg och trumf (samma regel som motorn). */
@@ -755,7 +917,20 @@ export function botCardSmartReasoned(
   const openingLead = state.completedTricks.length === 0 && state.currentTrick.length === 0
   const cardsLeft = state.hands[seat].length
   const maxCards = opts.maxCardsForMC ?? 8
-  if (openingLead || cardsLeft > maxCards) return botCardReasoned(state, seat)
+  if (openingLead) {
+    // Hål A+G: budstyrt utspel (bara här – botCardReasoned/botCard är budblinda).
+    // Bara motspelaren leder ut; och bara när auktionen faktiskt visar någon färg.
+    const defender = side(seat) !== side(state.contract.declarer)
+    if (defender && calls.length > 0) {
+      const info = analyzeAuctionForLead(calls, seat)
+      if (info.partnerSuits.length > 0 || info.oppSuits.length > 0) {
+        const choice = openingLeadWithAuction(legal, state.trump, info)
+        return { card: unblockLead(state, seat, choice.card), reason: choice.reason }
+      }
+    }
+    return botCardReasoned(state, seat)
+  }
+  if (cardsLeft > maxCards) return botCardReasoned(state, seat)
 
   const model = buildHandModel(calls, { voids: shownVoids(state) })
   // Signalavkodning (pt 50): skärp modellen med det öppningsutspelet avslöjar

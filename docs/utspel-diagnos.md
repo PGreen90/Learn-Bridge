@@ -95,18 +95,25 @@ regressionsrisk först, och grundstenar före sådant som bygger på dem. Varje 
 2. **Hål F — mitt-i-given ess-underspelet — KLART 2026-08-04.** Kortvalet bröts ut
    till `chooseLeadCard` (`play-bot.ts`) som nu även mitt-i-given-utspelet använder;
    ess-regeln gäller överallt, inte bara trick 1. Facit `play-bot.test.ts`.
-3. **Hål E — skilj NT-utspel från färgutspel** (medel). Mot NT: längsta OCH
-   starkaste färgen, 4:e bästa som spotdoktrin. Fortfarande budblint, men rätt
-   *inom* handen. Förbereder steg 4.
-4. **Hål A — koppla in budgivningen (störst).** Ge utspelet `calls` (ändra
-   trick-1-grenen så den skickar auktionen vidare) och bygg en riktig
-   prioritetsordning: partnerns bjudna färg → sekvenslead → undvik motståndarnas
-   färg → passivt/aggressivt efter kontraktsstyrka. Störst jobb, störst effekt;
-   görs sist av de stora eftersom steg 1–3 lägger grunden.
-5. **Hål C + D — trumf-/singelutspel** (kräver A:s budkontext för att vara
-   meningsfulla). Passivt trumfutspel mot slam; singel-för-ruff mot färgkontrakt.
-6. **Hål G — underleda kung mot slam** (litet, diskutabelt, sist). Utvärdera om
-   det ens ska byggas; kan hamna i ⚪ SENARE.
+3. **Hål E — NT-färgvalet "längst OCH starkast" — KLART 2026-08-04.**
+   `bestByLenStrengthMajor` (`play-bot.ts`): längd primärt, vid lika styrka, vid
+   lika högfärg. Facit `play-bot.test.ts`.
+4. **Hål A — budgivningen inkopplad — KLART 2026-08-04.** `analyzeAuctionForLead` +
+   `openingLeadWithAuction` i `play-bot.ts`, inkopplat i `botCardSmartReasoned`
+   (motspelarens trick-1-utspel). Prioritet: partnerns färg → mot NT längsta objudna
+   → mot trumf passivt. Facit `play-bot.test.ts`.
+5. **Hål G — tenass-undvikande — KLART 2026-08-04.** `unsafeToLead` generaliserar
+   ess-regeln: led inte bort från K/D-gafflar mot trumf (ägarens ♠KJ843 → ♦3 mot
+   4♥, men ♠3 mot 3NT). Byggt tillsammans med hål A (kräver aktiv/passiv-kontext).
+6. **Hål C + D — trumf-/singelutspel — KLART 2026-08-04.** `trumpLeadCard` (2/4→
+   lägsta, 3→mitten): trumf i korsruff-läge (3+ bjudna motståndarfärger) + passiv
+   utväg; singel-för-ruff med korta trumf. Facit `play-bot.test.ts`.
+
+**Alla hål A–G klara.** Rekommenderad uppföljning: en aggregerad netto-A/B
+(`PLAYQ`-proben med git-stash) för att bekräfta stickeffekten, samt att förfina
+aktiv/passiv-läsningen (idag passivt som default mot trumf; aktivt-när-bordet-har-
+lång-sidofärg är ännu ej detekterat) och Lightner-dubblingar (`docs/utspel-teori.md`
+§8). Kvar-att-förfina snarare än hål.
 
 ### Arbetsregler för spåret
 - **Facit-testet skrivs FÖRE fixen** (`play-bot.test.ts` / `signals.test.ts`).

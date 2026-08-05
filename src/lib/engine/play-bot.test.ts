@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Card, Deal, Hand, Rank, Seat, Suit } from '../../types/bridge'
-import { parseHand } from '../bidding'
-import { botCard, botCardReasoned } from './play-bot'
+import { parseHand, type ResolvedCall } from '../bidding'
+import { botCard, botCardReasoned, botCardSmart } from './play-bot'
 import { playCard, startPlay, type Contract, type PlayedCard, type PlayState, type Trick } from './play'
 import { doubleDummyDeclarerRemaining } from './dds'
 
@@ -101,6 +101,39 @@ describe('utspel mot trumfkontrakt – underled aldrig ett ess', () => {
     expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '5'))
   })
 
+  // Hål E (docs/utspel-teori.md §2): mot SANG väljs längsta OCH starkaste färgen
+  // (längd primärt; vid lika längd starkast; vid lika styrka högfärg).
+  it('hål E – SANG: två 5-korts, leder den STARKARE (♥KQJ54, inte ♣87654)', () => {
+    const hand: Hand = [
+      C('clubs', '8'), C('clubs', '7'), C('clubs', '6'), C('clubs', '5'), C('clubs', '4'),
+      C('hearts', 'K'), C('hearts', 'Q'), C('hearts', 'J'), C('hearts', '5'), C('hearts', '3'),
+      C('diamonds', 'A'), C('diamonds', '3'), C('diamonds', '2'),
+    ]
+    expect(botCard(state({ hand }), 'S')).toEqual(C('hearts', 'K'))
+  })
+
+  it('hål E – SANG: lika längd & styrka → HÖGfärg (♠, inte ♣)', () => {
+    const hand: Hand = [
+      C('clubs', '9'), C('clubs', '6'), C('clubs', '5'), C('clubs', '4'),
+      C('spades', '9'), C('spades', '6'), C('spades', '5'), C('spades', '4'),
+      C('diamonds', 'A'), C('diamonds', '3'), C('diamonds', '2'),
+      C('hearts', 'A'), C('hearts', '2'),
+    ]
+    // Båda 4-korts utan honnör → föredra spader (högfärg). 3:e bästa = ♠5.
+    expect(botCard(state({ hand }), 'S')).toEqual(C('spades', '5'))
+  })
+
+  it('hål E – SANG: längd slår styrka (5-korts svag ♣ före 4-korts stark ♠KQJ2)', () => {
+    const hand: Hand = [
+      C('spades', 'K'), C('spades', 'Q'), C('spades', 'J'), C('spades', '2'),
+      C('clubs', '8'), C('clubs', '7'), C('clubs', '6'), C('clubs', '5'), C('clubs', '4'),
+      C('diamonds', 'A'), C('diamonds', '3'),
+      C('hearts', 'A'), C('hearts', '2'),
+    ]
+    // Längsta färgen (♣ 5 kort) leds trots att ♠KQJ2 är starkare. 5:e bästa = ♣4.
+    expect(botCard(state({ hand }), 'S')).toEqual(C('clubs', '4'))
+  })
+
   // Hål F: mitt-i-given (jag är inne och leder ur längsta färgen) fick förr underleda
   // ett ess mot trumf – ess-regeln gällde bara trick 1. Nu samma regel överallt.
   it('hål F – mitt-i-given: leder INTE lågt under esset ur längsta färgen mot trumf', () => {
@@ -118,6 +151,98 @@ describe('utspel mot trumfkontrakt – underled aldrig ett ess', () => {
       completedTricks: [doneTrick('S')], leader: 'S',
     })
     expect(botCard(st, 'S')).toEqual(C('spades', 'K'))
+  })
+})
+
+// Hål A+G (docs/utspel-teori.md §1/§2/§4): budgivningen styr utspelet. Går bara via
+// botCardSmart (som får `calls`); botCard/botCardReasoned är budblinda som förr.
+// Kort-notation för bud: "1H", "3NT", "pass". Facit FÖRE fix.
+describe('utspel hål A+G – budgivningen styr', () => {
+  const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
+
+  // Ägarens giv: ♠KJ843 ♥Q10 ♦1083 ♣A82.
+  const ownerHand: Hand = [
+    C('spades', 'K'), C('spades', 'J'), C('spades', '8'), C('spades', '4'), C('spades', '3'),
+    C('hearts', 'Q'), C('hearts', '10'),
+    C('diamonds', '10'), C('diamonds', '8'), C('diamonds', '3'),
+    C('clubs', 'A'), C('clubs', '8'), C('clubs', '2'),
+  ]
+
+  it('KJ843 mot 4♥: leder INTE bort från KJ-tenassen → passivt ♦3 (hål G)', () => {
+    // Syd bjöd hjärter (trumf/motståndarfärg), Nord höjde. Väst leder.
+    const calls = [call('S', '1H'), call('W', 'pass'), call('N', '4H'), call('E', 'pass')]
+    const st = state({ trump: 'hearts', level: 4, declarer: 'S', seat: 'W', leader: 'W', hand: ownerHand })
+    // Safe passiv färg = ♦1083 (ingen honnör att leda bort från). Inte ♠ (KJ-tenass),
+    // inte ♣ (ess-underspel), inte ♥ (deras trumf).
+    expect(botCardSmart(st, 'W', calls)).toEqual(C('diamonds', '3'))
+  })
+
+  it('samma hand mot 3NT (ingen färg visad): längst & starkast → ♠3', () => {
+    const calls = [call('S', '1NT'), call('W', 'pass'), call('N', '3NT'), call('E', 'pass')]
+    const st = state({ trump: null, level: 3, declarer: 'S', seat: 'W', leader: 'W', hand: ownerHand })
+    expect(botCardSmart(st, 'W', calls)).toEqual(C('spades', '3'))
+  })
+
+  it('leder partnerns bjudna färg (♦) före sin egen längre färg', () => {
+    // Spelförare Syd 4♠. Partner (Öst) klev in 2♦. Väst leder.
+    const hand: Hand = [
+      C('spades', '3'), C('spades', '2'),
+      C('hearts', 'A'), C('hearts', '7'), C('hearts', '6'), C('hearts', '5'),
+      C('diamonds', 'K'), C('diamonds', '8'), C('diamonds', '3'),
+      C('clubs', '9'), C('clubs', '7'), C('clubs', '6'), C('clubs', '4'),
+    ]
+    const calls = [
+      call('S', '1S'), call('W', 'pass'), call('N', '2S'), call('E', '2D'),
+      call('S', '4S'), call('W', 'pass'), call('N', 'pass'), call('E', 'pass'),
+    ]
+    const st = state({ trump: 'spades', level: 4, declarer: 'S', seat: 'W', leader: 'W', hand })
+    // Partnerns färg ♦ (låg från K83 = ♦3) före egna ♥/♣.
+    expect(botCardSmart(st, 'W', calls)).toEqual(C('diamonds', '3'))
+  })
+
+  it('mot NT: undviker motståndarnas bjudna färg när ett alternativ finns', () => {
+    // Syd öppnade 1♠ (visar spader), auktionen landar i 3NT. Väst leder.
+    const hand: Hand = [
+      C('spades', 'K'), C('spades', 'J'), C('spades', '8'), C('spades', '4'), C('spades', '3'),
+      C('hearts', 'Q'), C('hearts', '9'), C('hearts', '5'),
+      C('diamonds', '10'), C('diamonds', '8'),
+      C('clubs', '7'), C('clubs', '6'), C('clubs', '4'),
+    ]
+    const calls = [call('S', '1S'), call('W', 'pass'), call('N', '2NT'), call('E', 'pass'), call('S', '3NT'), call('E', 'pass')]
+    const st = state({ trump: null, level: 3, declarer: 'S', seat: 'W', leader: 'W', hand })
+    // Längsta är ♠ (5) men Syd bjöd spader → undvik den; näst bästa objudna = ♥Q95 (3).
+    const card = botCardSmart(st, 'W', calls)
+    expect(card.suit).not.toBe('spades')
+  })
+
+  // Hål D: singel för ruff när trumfen är kort (kan ruffa, ingen trumfkontroll).
+  it('hål D – leder singeln för ruff (korta trumf) före en säker lång färg', () => {
+    const hand: Hand = [
+      C('spades', '7'), C('spades', '6'), C('spades', '5'), // 3 små trumf → kan ruffa
+      C('hearts', '4'), // singel
+      C('diamonds', 'J'), C('diamonds', '8'), C('diamonds', '7'), C('diamonds', '3'), C('diamonds', '2'),
+      C('clubs', '8'), C('clubs', '6'), C('clubs', '4'), C('clubs', '2'),
+    ]
+    const calls = [call('S', '1S'), call('W', 'pass'), call('N', '4S'), call('E', 'pass')]
+    const st = state({ trump: 'spades', level: 4, declarer: 'S', seat: 'W', leader: 'W', hand })
+    expect(botCardSmart(st, 'W', calls)).toEqual(C('hearts', '4'))
+  })
+
+  // Hål C: trumfutspel i korsruff-läge (motståndarna bjöd 3+ färger) – mitten av 3 små.
+  it('hål C – trumf i korsruff-läge (3 bjudna motståndarfärger) → mitten av 3 små', () => {
+    const hand: Hand = [
+      C('hearts', '7'), C('hearts', '6'), C('hearts', '5'), // 3 små trumf
+      C('spades', 'J'), C('spades', '8'), C('spades', '4'),
+      C('diamonds', 'Q'), C('diamonds', '9'), C('diamonds', '3'),
+      C('clubs', '8'), C('clubs', '6'), C('clubs', '4'), C('clubs', '2'),
+    ]
+    // S–N bjöd klöver, spader OCH hjärter (3 färger) → korsruff-signal.
+    const calls = [
+      call('S', '1C'), call('W', 'pass'), call('N', '1S'), call('E', 'pass'),
+      call('S', '2H'), call('W', 'pass'), call('N', '4H'), call('E', 'pass'),
+    ]
+    const st = state({ trump: 'hearts', level: 4, declarer: 'S', seat: 'W', leader: 'W', hand })
+    expect(botCardSmart(st, 'W', calls)).toEqual(C('hearts', '6')) // mitten av 7-6-5
   })
 })
 
