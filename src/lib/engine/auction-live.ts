@@ -2123,6 +2123,49 @@ function forcedMinimumBid(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
 }
 
 /**
+ * Svararens fortsättning efter att FJÄRDE FÄRG (krav, §6.6) besvarats. Fjärde
+ * färg lovar utgångsvärden, så svararen får ALDRIG passa öppnarens svar under
+ * utgång (systemrevisorns fynd, frö 20260743: 33 hp dog i 2NT). Placerar utgång:
+ * höjde öppnaren min högfärg → 4 i den (fit), annars 3NT (standardresolutionen –
+ * alla fyra färger är nämnda och GF-värdena redan lovade). `auctionForce` täcker
+ * medvetet inte fjärde färg; detta är dess motsvarighet för just den sekvensen.
+ */
+function placeGameAfterFourthSuit(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const contractBids = history.filter((c) => parseContractBid(c.bid))
+  if (contractBids.some((c) => side(c.seat) !== side(seat))) return null // ostört
+  const fourth = [...contractBids].reverse().find((c) => c.seat === seat && c.rule === 'fjärde färg krav')
+  if (!fourth) return null // det var JAG som bjöd fjärde färg
+  const last = contractBids[contractBids.length - 1]
+  if (last.seat !== PARTNER[seat]) return null // partnern (öppnaren) svarade sist
+  if (contractBids.indexOf(last) <= contractBids.indexOf(fourth)) return null // svaret kom EFTER mitt bud
+  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null // bara pass efter → min tur
+  if (isGameOrHigher(last.bid as Bid)) return null // redan i/över utgång
+
+  // Bara MODESTA utgångshänder placeras här. En stark hand (18+) har slamintresse
+  // och fortsätter utreda via slam-/beskrivningsmaskineriet (t.ex. felrapport #42:
+  // svararen har 21 hp och driver till 6NT — den får inte kapas i 3NT).
+  if (hcp(deal.hands[seat]) >= 18) return null
+
+  const legal = legalCalls(history, seat)
+  const myFirst = contractBids.find((c) => c.seat === seat)!
+  const myStrain = parseContractBid(myFirst.bid)!.strain
+  const lastStrain = parseContractBid(last.bid)!.strain
+  // Höjde öppnaren MIN första högfärg? → utgång i fiten.
+  if ((myStrain === 'H' || myStrain === 'S') && lastStrain === myStrain) {
+    const gameBid = `4${myStrain}` as Bid
+    if (legal.includes(gameBid)) return {
+      seat, bid: gameBid, rule: 'fjärde färg: utgång i fit',
+      explanation: `Fjärde färg var krav; partnern höjde min ${SWE_NAME[myStrain]} → utgång ${gameBid}.`,
+    }
+  }
+  if (legal.includes('3NT')) return {
+    seat, bid: '3NT', rule: 'fjärde färg: placerar utgång',
+    explanation: `Fjärde färg var krav (utgångsvärden); partnern har beskrivit sin hand → placerar 3NT.`,
+  }
+  return null
+}
+
+/**
  * Vakten som binder ihop det: är vår sida i krav och skulle annars passa, tvinga
  * fram ett naturligt minimibud i stället. Placeras SIST i off-book-kedjan (efter
  * offBookResponse) så den bara fångar det som annars blivit ett förbjudet pass.
@@ -3764,6 +3807,8 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // Partnerns FJÄRDE FÄRG (§6.6, utgångskrav): öppnaren svarar alltid.
     () => answered(fourthSuitToAnswer(history, seat),
       (f) => openerAnswerFourthSuit(hand, f.opened, f.second, f.responderSuit, f.fourth), history, seat),
+    // Min EGEN fjärde färg har besvarats — placera utgång, passa aldrig kravet.
+    () => placeGameAfterFourthSuit(deal, history, seat),
     // Partnerns NEW MINOR FORCING (§5.7, krav): öppnaren svarar alltid.
     () => answered(nmfToAnswer(history, seat),
       (n) => openerAnswerNMF(hand, n.opened, n.responderMajor, n.nmfMinor, n.unbidSuit), history, seat),
