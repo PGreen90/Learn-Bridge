@@ -1709,6 +1709,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-05 (etablerad högfärgsfit → kontrollbud, ägarrapport)** – **4-läges
+  sidobud läses som cue när trumf redan är bestämd (kod §6.2, bara förklaringstext).**
+  I hål D-arbetet (giv 20261272) tolkade tolkningslagret ett mänskligt 4♣ som "stark
+  höjning av partnerns **ruter**" (via cue-i-deras-färg-grenen) fast en 8-korts
+  spaderfit redan fanns (min negativa dubbling visade båda högfärgerna, partnern
+  valde 3♠). Med en **etablerad 8-korts högfärgsfit** är trumf bestämd, så ett nytt
+  färgbud under utgång (4♣/4♦/4♥ när spader är trumf) är ett **kontrollbud** (cue) som
+  visar första-rondskontroll + slamintresse — inte en färghöjning. Ny
+  `establishedMajorFit` (`auction-interpret.ts`; högfärg båda bjudit naturligt ELLER
+  vald efter egen negativ dubbling) → cue-gren före höjnings-/cue-i-deras-färg-grenarna.
+  **Bara förklaringstexten** (tolkningslagret) — motorns budval oförändrat. Facit FÖRE
+  fix: `auction-interpret.test.ts` ("etablerad högfärgsfit: 4-läges sidobud =
+  kontrollbud"). Hela sviten grön, 0 regressioner.
 - **2026-08-04 (utspel hål E + A + G + C + D)** – **Budstyrt utspel (kod §8.3).**
   Byggt mot `docs/utspel-teori.md`. **Hål E:** NT-färgvalet blev "längst OCH
   starkast" (`bestNtSuit`/`bestByLenStrengthMajor` i `play-bot.ts`) – längd primärt,
