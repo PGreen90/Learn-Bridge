@@ -167,6 +167,29 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
   // ett hopp berövar t.ex. 1NT. En svag 6-korts högfärg faller därför direkt ned
   // till 1-lägessvaret nedan (1♥/1♠).
 
+  // ---- 2-över-1 GF FÖRE 4-korts högfärg (ägarbeslut 2026-08-06, giv 20261274) ----
+  // Grundpelaren i 2/1 = kortaste vägen till game force. Med UTGÅNGSKRAVSHAND
+  // (12+) och 5+ i den ANDRA minorn sätts GF direkt med 2/1-minorn (2♣/2♦) i
+  // stället för att först bjuda en 4-korts högfärg på 1-läget (bara rondkrav).
+  // Villkoret `maxMajor === 4` gör att en 5-korts högfärg fortfarande går på
+  // 1-läget, och att hela grenen bara rör just "4-korts högfärg mot längre minor"
+  // (händer utan 4-korts högfärg når 2/1-minorn längre ned som förr). En senare
+  // 4-4-högfärgsfit är fortfarande nåbar via partnerns återbud.
+  {
+    // GÄLLER BARA ÖVER 1♦: klövern kan bara visas på 2-läget (2♣), så valet står
+    // mellan 4-korts högfärg (1-läget) och 5-korts klöver (2-läget) — och med 12+
+    // väljer man 5-kortsfärgen (källa: standard 2/1, se §9). Över 1♣ visas den
+    // längre RUTERN billigt på 1-läget (1♦), så regeln gäller inte där.
+    const maxMajor = Math.max(len.hearts, len.spades)
+    if (opened === 'diamonds' && p >= 12 && len[otherMinor] >= 5 && maxMajor === 4) {
+      return {
+        call: `2${oBID}`,
+        rule: '2-över-1 GF',
+        explanation: `${p} hp, utgångskrav med ${len[otherMinor]}-korts ${NAME[otherMinor]} → 2${osym} (2-över-1, sätter GF direkt före 4-korts högfärgen).`,
+      }
+    }
+  }
+
   // ---- 4-korts högfärg på 1-läget (längst först, lika → hjärter billigast), 6+ hp ----
   {
     const major = pickMajorToBid(len)

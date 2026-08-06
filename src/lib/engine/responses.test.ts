@@ -179,6 +179,22 @@ describe('respondToMinor', () => {
     expect(respM('S:K3 H:A4 D:KQJ862 C:543', 'clubs')).toBe('2D') // 13 hp
   })
 
+  // Ägarbeslut 2026-08-06 (giv 20261274): grundpelaren i 2/1 = kortaste vägen
+  // till game force. Med UTGÅNGSKRAVSHAND (12+) och 5+ i den ANDRA minorn bjuds
+  // 2/1-minorn (2♣/2♦) DIREKT, före en 4-korts högfärg på 1-läget. En 5-korts
+  // högfärg visas fortfarande på 1-läget.
+  it('2/1 GF (2♣) före 4-korts spader: 14 hp, 4 spader + 5 klöver över 1♦', () => {
+    expect(respM('S:KJ73 H:A83 D:8 C:KQJ52', 'diamonds')).toBe('2C') // giv 20261274 Syd
+  })
+
+  it('5-korts högfärg går fortfarande på 1-läget (1♠), inte 2/1-minorn', () => {
+    expect(respM('S:KJ973 H:A3 D:8 C:KQJ52', 'diamonds')).toBe('1S') // 14 hp, 5-5, major upp
+  })
+
+  it('4-korts högfärg + 5 klöver men bara 9 hp (ej GF) → 1♠ som förr', () => {
+    expect(respM('S:KJ85 H:73 D:84 C:KQ952', 'diamonds')).toBe('1S') // 9 hp, inte GF
+  })
+
   it('1NT naturlig med 6–10 utan högfärg', () => {
     expect(respM('S:K83 H:Q72 D:Q642 C:953', 'clubs')).toBe('1NT') // 7 hp
   })

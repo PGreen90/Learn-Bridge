@@ -234,7 +234,16 @@ trumf → 3 i trumf):
 Öppningen lovar 3+ kort (ibland "kort" via minor-regeln) och 12+ hp.
 
 **Principer:**
-- Bjud **4-korts hf först** på 1-läget, billigast först (krav 1 rond).
+- **Bjud längsta färgen först.** Med bara 4-korts färger (eller en 5-korts
+  HÖGfärg) bjuds en 4-korts högfärg billigast på 1-läget (krav 1 rond) — "4-korts
+  upp".
+- **Över 1♦ med utgångskrav (12+): en 5-korts klöver går FÖRE en 4-korts högfärg.**
+  12+ hp + 5-korts klöver + 4-korts högfärg → **2♣** (2-över-1 GF) som sätter game
+  force direkt; högfärgen visas i nästa rond. Valet står mellan en 4-korts färg på
+  1-läget och en 5-korts färg på 2-läget: **9–11 hp** väljer 1-läget (håll lågt),
+  **12+ hp** väljer 5-kortsfärgen. Gäller **bara över 1♦** — över 1♣ visas den
+  längre rutern billigt på 1-läget (1♦), så där bjuds högfärgen upp som vanligt.
+  (Källa: standard 2/1, se §9-noten 2026-08-06.)
 - **1NT** är naturlig och **inte** krav (6–10 hp), förnekar 4-korts hf.
 - **Höjningar är inverterade:** 1m–2m = **stark** (10+ hp, krav, 4+ stöd, ingen
   4-korts hf); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
@@ -267,7 +276,7 @@ trumf → 3 i trumf):
 |---|---|---|---|
 | 1♥ / 1♠ | 4+ färg, 6+ hp | Krav (1 rond) | naturligt (4-korts upp) |
 | 1NT | 6–10 hp, balanserad, ingen 4-korts hf | Ej krav | naturligt |
-| 2♣ | 4+ (oftast 5+) ♣, 12+ hp | Utgångskrav | 2-över-1 GF |
+| 2♣ | 4+ (oftast 5+) ♣, 12+ hp — **går före 4-korts hf** | Utgångskrav | 2-över-1 GF |
 | 2♦ | 4+ ♦, 10+ hp, ingen 4-korts hf | Krav (1 rond) | Inverterad minor ● |
 | 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♦ | 5+ ♦, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
@@ -1709,6 +1718,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-06 (2/1 före 4-korts högfärg över 1♦, ägarbeslut + källa)** – **Utgångs-
+  kravshand med 5-korts klöver + 4-korts högfärg bjuder 2♣ före högfärgen (kod §4.2).**
+  Grundpelaren i 2/1 = kortaste vägen till game force. Med 12+ och en 5-korts klöver
+  bjuder svararen **2♣** (2-över-1 GF) i stället för 4-korts högfärgen på 1-läget.
+  Valet 4-korts färg (1-läget) vs 5-korts färg (2-läget) avgörs av styrkan: 9–11 →
+  1-läget, 12+ → 5-kortsfärgen. Källor: Couchman (2/1 – GF bjuder längsta först) +
+  Porthcawl-tutorialen (uttrycklig 12+-tröskel). **Gäller bara över 1♦** (klövern
+  måste till 2-läget); över 1♣ visas den längre rutern billigt på 1♦. Ny gren i
+  `respondToMinor` (`responses.ts`, gated `opened==='diamonds'` + `maxMajor===4`).
+  Motoranmärkning: den GAMLA texten "Bjud 4-korts hf först" var en förenkling som
+  saknade längd/styrka-distinktionen — nu rättad. Facit FÖRE fix: `responses.test.ts`
+  ("2/1 GF (2♣) före 4-korts spader"). Svararens ÅTERBUD efter 2♣ (visa högfärgen)
+  tas separat. Hela sviten grön (utom pågående WIP-facit), 0 regressioner.
 - **2026-08-05 (etablerad högfärgsfit → kontrollbud, ägarrapport)** – **4-läges
   sidobud läses som cue när trumf redan är bestämd (kod §6.2, bara förklaringstext).**
   I hål D-arbetet (giv 20261272) tolkade tolkningslagret ett mänskligt 4♣ som "stark

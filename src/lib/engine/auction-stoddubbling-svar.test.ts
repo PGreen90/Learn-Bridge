@@ -71,11 +71,19 @@ describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
     expect(contract).toMatchObject({ level: 3, strain: 'NT' })
   })
 
-  it('frö 20261274: 1♦–(P)–1♠–(2♥)–X → svararen (14 hp, singel ruter) väljer 4♠ på 4-3-fiten, inte 3NT', () => {
-    const d = deal('offring-20261274', 'W', 'all', {
+  // OMRIKTAD 2026-08-06: den gamla given här (frö 20261274) hade Syd
+  // ♠KJ73 ♥A83 ♦8 ♣KQJ52 — 14 hp med 5-korts klöver som med den nya 2/1-regeln
+  // (§4.2) bjuder 2♣ över 1♦, inte 1♠. Då uppstår stöddubblingsauktionen aldrig.
+  // Dessutom var det gamla 4♠ (4-3 Moisian) resultat-smicker: 3NT är systemriktigt
+  // på en 4-3-fit utan tvingande korthet (bekräftat: motorn väljer 3NT med enbart
+  // dubbelton). Testet visar samma FUNKTION — stöddubblingen besvaras och paret når
+  // högfärgsutgången — men nu på en giv där Syd verkligen ska bjuda 1♠ (5-korts
+  // spader, ingen 5-korts GF-klöver) och fiten är en ren 5-3.
+  it('stöddubbling → 8-korts spaderfit: 1♦–(P)–1♠–(2♥)–X → svararen (14 hp, 5 spader, singel ruter) → 4♠', () => {
+    const d = deal('stoddubbel-5-3-fit', 'W', 'all', {
       N: 'S:AQ9 H:2 D:AQ6432 C:963',
-      E: 'S:T52 H:QJ54 D:T75 C:T84',
-      S: 'S:KJ73 H:A83 D:8 C:KQJ52',
+      E: 'S:32 H:QJ54 D:T75 C:T842',
+      S: 'S:KJT75 H:A83 D:8 C:KQJ5',
       W: 'S:864 H:KT976 D:KJ9 C:A7',
     })
     const { contract, bids } = finalOf(d)
