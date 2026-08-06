@@ -196,6 +196,49 @@ function agreedSuit(seat: Seat, prior: ResolvedCall[]): string | null {
   return agreed[0]
 }
 
+const STRAIN_RANK: Record<string, number> = { C: 0, D: 1, H: 2, S: 3, NT: 4 }
+/** Rangordning av ett kontraktsbud (nivå + färg) för "under utgång"-jämförelser. */
+function bidRank(cb: ParsedBid): number {
+  return cb.level * 5 + STRAIN_RANK[cb.strain]
+}
+
+/**
+ * Högfärgerna som `seat`s EGNA negativa dubbling lovade (4+ i de objudna
+ * högfärgerna), eller tom mängd. Mönstret: partnern öppnade 1 i färg, mot-
+ * ståndarna klev in i färg, och `seat`s första aktion var X. (Skiljer sig från
+ * `negativeDoubleShown`, som ser det från ÖPPNARENS sida när hen väljer färg.)
+ */
+function negDoubleMajorsBy(seat: Seat, prior: ResolvedCall[]): Set<string> {
+  const none = new Set<string>()
+  const open = opening(prior)
+  if (!open || open.seat !== PARTNER[seat] || open.cb.level !== 1 || open.cb.strain === 'NT') return none
+  const myFirst = prior.find((c) => c.seat === seat && c.bid !== 'P')
+  if (!myFirst || myFirst.bid !== 'X') return none
+  const overcall = prior.find((c) => SIDE[c.seat] !== SIDE[seat] && parseBid(c.bid))
+  if (!overcall) return none
+  const oc = parseBid(overcall.bid)!
+  const shown = new Set<string>()
+  for (const m of ['H', 'S']) if (m !== open.cb.strain && m !== oc.strain) shown.add(m)
+  return shown
+}
+
+/**
+ * En ETABLERAD 8-korts HÖGFÄRGSFIT sett från `seat`: antingen en högfärg BÅDA
+ * bjudit naturligt, eller en högfärg partnern valt som svar på `seat`s negativa
+ * dubbling (dubblingen lovade 4+ i den → 4+4 = fit). Med en sådan fit är trumf
+ * redan bestämd, så nya färgbud under utgång blir kontrollbud (cue). null = ingen.
+ */
+function establishedMajorFit(seat: Seat, prior: ResolvedCall[]): string | null {
+  const agreed = agreedSuit(seat, prior)
+  if (agreed === 'H' || agreed === 'S') return agreed
+  const negMajors = negDoubleMajorsBy(seat, prior)
+  if (negMajors.size) {
+    const partner = suitsShown(PARTNER[seat], prior)
+    for (const m of ['S', 'H']) if (negMajors.has(m) && partner.has(m)) return m
+  }
+  return null
+}
+
 /**
  * Trumfen 4NT-essfrågan gäller när ingen färg är ÖVERENSKOMMEN: sidans senaste
  * naturliga färgbud före frågan (felrapport #10 – 4NT på partnerns spärr).
@@ -310,6 +353,26 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
     return {
       text: `Svar på partnerns negativa dubbling — ${cb.level}${sym} väljer ${name} (partnern visade 4+ kort) med minimihand.`,
       confidence: 'trolig',
+    }
+  }
+
+  // Med en ETABLERAD 8-korts högfärgsfit är trumf redan bestämd. Ett nytt
+  // FÄRGBUD under utgång (4♣/4♦/4♥ när spader är trumf) är då ett KONTROLLBUD
+  // (cue) som visar första-rondskontroll och slamintresse – inte en färghöjning
+  // och inte en höjning av partnerns andra färg. (Ägarrapport 2026-08-05, giv
+  // 20261272: 4♣ lästes felaktigt som "stark höjning av partnerns ruter".)
+  const majorFit = establishedMajorFit(seat, prior)
+  if (
+    majorFit &&
+    cb.strain !== 'NT' &&
+    cb.strain !== majorFit &&
+    cb.level === 4 &&
+    bidRank(cb) < bidRank({ level: 4, strain: majorFit })
+  ) {
+    return {
+      text: `Kontrollbud (${cb.level}${sym}) — ${NAME[majorFit]} är redan trumf (8-korts fit), så ${cb.level}${sym} visar första-rondskontroll (ess eller renons) i ${name} och slamintresse. Partnern cue:ar tillbaka en egen kontroll eller stannar i 4${SYMBOL[majorFit]}.`,
+      confidence: 'trolig',
+      forcing: 'krav-1-rond',
     }
   }
 

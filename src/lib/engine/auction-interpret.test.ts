@@ -152,6 +152,41 @@ describe('felrapport #9 – svar på negativ dubbling + 4NT-essfrågan', () => {
   })
 })
 
+// Ägarrapport 2026-08-05 (giv 20261272, hål D-arbetet): med en ETABLERAD 8-korts
+// högfärgsfit är trumf redan bestämd. Ett 4-läges FÄRGBUD som inte är trumfen är
+// då ett rent KONTROLLBUD (cue), inte en färghöjning. Motorn läste 4♣ som "stark
+// höjning av partnerns RUTER" (via cue-i-deras-färg-grenen) – fel, spader var trumf.
+describe('etablerad högfärgsfit: 4-läges sidobud = kontrollbud (ej färghöjning)', () => {
+  // S öppnade 1♦, V hoppinkliv 3♣, N X (neg. dbl → båda högfärgerna), S valde
+  // spader (3♠) → 8-korts spaderfit. Nu cue:ar N på 4-läget. (Sett från N-sätet
+  // roterat till Syd i appen: partnern öppnade 1♦, jag dubblade, partnern bjöd 3♠.)
+  const base: Array<[ResolvedCall['seat'], string]> = [
+    ['W', 'P'], ['N', '1D'], ['E', '3C'], ['S', 'X'], ['W', 'P'], ['N', '3S'], ['E', 'P'],
+  ]
+
+  it('4♣ läses som kontrollbud i klöver med spader som trumf – INTE ruterhöjning', () => {
+    const r = interpretCall(h(...base, ['S', '4C']), 7)
+    expect(r.text).toMatch(/kontrollbud/i)
+    expect(r.text).toMatch(/spader/i)
+    expect(r.text).not.toMatch(/ruter/i)
+    expect(r.text).not.toMatch(/höjning/i)
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+
+  it('4♦ (äkta kontroll) läses också som kontrollbud, inte höjning', () => {
+    const r = interpretCall(h(...base, ['S', '4D']), 7)
+    expect(r.text).toMatch(/kontrollbud/i)
+    expect(r.text).toMatch(/spader/i)
+    expect(r.text).not.toMatch(/höjning/i)
+  })
+
+  it('4♠ förblir en vanlig utgångshöjning (trumfen själv, inte ett cue)', () => {
+    const r = interpretCall(h(...base, ['S', '4S']), 7)
+    expect(r.text).not.toMatch(/kontrollbud/i)
+    expect(r.text).toMatch(/spader/i)
+  })
+})
+
 // Felrapport #10 (github.com/PGreen90/Learn-Bridge/issues/10): 4NT direkt på
 // partnerns 3♠-spärr tolkades som "till spel" (ingen ÖVERENSKOMMEN trumf –
 // bara Nord hade bjudit spader). Standardregeln: 4NT är essfråga när sidans
