@@ -1718,6 +1718,16 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-06 (fjärde färg: svararen placerar utgång, systemrevisorns fynd)** –
+  **Svararen passar aldrig sin egen fjärde färg (krav) (kod §6.6).** Spanar-agenten
+  hittade frö 20260743 (33 hp): svararen bjöd fjärde färg (2♦, utgångskrav) och
+  PASSADE sedan öppnarens svar (2NT) → 33 hp dog i 2NT. `auctionForce` täcker
+  medvetet inte fjärde färg, och det fanns ingen fortsättningsregel efter att fjärde
+  färgen besvarats. Ny `placeGameAfterFourthSuit` (`auction-live.ts`): svararen
+  placerar utgång — **3NT**, eller **4 i sin högfärg** om öppnaren höjde den. Grindad
+  till MODESTA händer (<18 hp) — en stark hand (t.ex. felrapport #42:s 21 hp → 6NT)
+  fortsätter slamvägen. Tänder på 7/1000 givar, alla → 3NT. Facit:
+  `auction-fjarde-farg-fortsattning.test.ts`. Hela sviten grön, 0 regressioner.
 - **2026-08-06 (2/1 före 4-korts högfärg över 1♦, ägarbeslut + källa)** – **Utgångs-
   kravshand med 5-korts klöver + 4-korts högfärg bjuder 2♣ före högfärgen (kod §4.2).**
   Grundpelaren i 2/1 = kortaste vägen till game force. Med 12+ och en 5-korts klöver
