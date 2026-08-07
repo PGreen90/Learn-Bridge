@@ -9,6 +9,20 @@
 
 ## ⚪ SENARE
 
+### Hål D steg 2 — cue-frontend i konkurrenslagret (PARKERAD 2026-08-07)
+Steg 1 (kontroll-komplett 4NT, budsystem.md §6.10) landade 2026-08-07: kaptenen
+med äkta extra + förstarundskontroll i ALLA sidofärger frågar 4NT direkt.
+**Steg 2** skulle täcka de kontroll-OFULLSTÄNDIGA händerna — kaptenen har äkta
+extra men saknar kontroll i en sidofärg och behöver en **cue-rond i konkurrens**
+för att hitta partnerns kontroll innan 4NT. Bedömdes redan 2026-08-05 som stort
+och regressionsbenäget; efter facitstädningen (20260947 → splinterspåret,
+20261274 stale) är den kvarvarande ärliga kärnan **~1–2 givar** (exempel:
+**20261272** — Nord ♠A752 ♥AKJ65 ♦A2 ♣96, 16 hp + tre ess, spaderfit efter
+3♣-hoppinkliv + negativ dubbling, saknar ♣-kontroll och stannar i 4♠ fast 6♠
+står). Ägarbeslut 2026-08-07: för liten vinst för risken — parkerad tills
+mätspåret pekar hit igen. Återupptas den: facit-först med 20261272, och tänk på
+att cue i konkurrens läcker utspelsinfo (samma princip som §6.10).
+
 ### Lebensohl — nästa lager (kärnan KLAR 2026-07-30)
 **KLART (Lager 1, §7.5):** Lebensohl efter vårt 1NT är inkopplad och live —
 skulden "byggd men ej inkopplad" är stängd (regelsvepet gick 0 → hela

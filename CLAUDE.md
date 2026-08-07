@@ -46,35 +46,35 @@ byggs bara på uttryckligt ägarbeslut.
 **Klart 2026-07-29 (detalj i `docs/historik.md`):** felrapport #32,
 rondgenomgången, markeringarna (UDCA + Lavinthal, `docs/budsystem.md §8.5`).
 
-**STORA GRANSKNINGEN (26 fynd) + ETAPP A–D + GRANSKNINGSPUTSEN: KLARA & DEPLOYADE
-2026-08-03** (detalj `docs/historik.md`). A skyddsnät, B "minns", C spelbordets
-förtroende (informationsläckan lagad, ångra/ge upp, 812-budgeten), D "Vägen in"
-(/om, Inställningar). Putsen: kalenderarkiv Dagens giv (`?dag=N`), spelhistorik,
-tangentbord, "Spela om given", claim-revealens namn. Skjutet: par-poäng
-(`docs/senare.md`).
+**STORA GRANSKNINGEN (26 fynd) + ETAPP A–D + PUTSEN: KLARA & DEPLOYADE
+2026-08-03** (detalj `docs/historik.md`). Skjutet: par-poäng (`docs/senare.md`).
 
-**CUE-BUD ÅTERINFÖRDA (2026-08-03, river 2026-07-07): KLAR ETAPP.** Ägaren rev
-det gamla "ingen kontrollkoll"-beslutet — kontrollbud (cue) ska ALLTID finnas
-(minnet [[cue-bids-reinstated]]). Ny princip: när **utgång etablerad (GF) +
-trumf agreed** cue:ar motorn fritt under utgång (gratis), poängomdömet ligger på
-att gå FÖRBI utgången. `cueSlamAuction` i `slam-auction.ts` (gated på
-`gameForcing`). Inkopplat: **Jacoby 2NT** + **NMF → öppnarens fördröjda
-högfärgsstöd** (= hål C, når 6♥ på frö 20260932). Reverse/hoppskift/2♣ HÅLLS
-(inferrerad, ej agreed trumf). Mätning ren (par-avvikelse 270,74 → 270,69,
-"för högt" oförändrat, noll regressioner) men liten. Facit
-`auction-slam-cue.test.ts`, boken §6.2/§9. Dev-verktyg kvar: `?sitt=`-rotation i
-Play. **Kvar (eget beslut):** fler agreed-trumf-lägen (inverterad minor, 2♣);
-off-book-igenkänning av din cue i icke-standardordning; öppnarens 18–19 i Jacoby.
+**CUE-BUD ÅTERINFÖRDA (2026-08-03, river 2026-07-07): KLAR ETAPP.** Kontrollbud
+ska ALLTID finnas ([[cue-bids-reinstated]]): vid **utgång etablerad (GF) + agreed
+trumf** cue:ar motorn fritt under utgång; poängomdömet ligger på att gå FÖRBI
+utgången. `cueSlamAuction` (`slam-auction.ts`), inkopplat Jacoby 2NT + NMF
+(= hål C). Reverse/hoppskift/2♣ HÅLLS (inferrerad trumf). Mätning ren
+(par-avvikelse 270,74 → 270,69). Facit `auction-slam-cue.test.ts`, boken
+§6.2/§9, detalj `docs/historik.md`. **Kvar (eget beslut):** fler
+agreed-trumf-lägen (inverterad minor, 2♣); off-book-igenkänning av din cue;
+öppnarens 18–19 i Jacoby.
 
 **UTSPELET (2026-08-04): HÅL A–G KLARA (§8.3/§9).** Budstyrt utspel i `botCardSmart`
 (`openingLeadWithAuction`): partnerns färg, undvik deras, passivt + tenass/ess-skydd
 mot trumf, inre sekvenser, trumf/singel. Teori `docs/utspel-teori.md`; kvar =
 förfining `docs/utspel-diagnos.md`.
 
-**➡️ NÄSTA GÅNG:** ägaren väljer — fler cue-lägen (ovan), 🟢 NÄST punkt 1-rest
-(hål D — konkurrensfallen) eller kvarvarande granskningsfynd (a11y, par-poäng).
-Faceliten PARKERAD (ägarbeslut 2026-08-03). ⚪ SENARE: tredje hand högt i
-**trumf** + signalspåret.
+**HÅL D STEG 1 (2026-08-07): KLAR.** Kontroll-komplett 4NT i konkurrenslagret
+(`auction-live.ts`, boken **§6.10**; facit `auction-slam-competition.test.ts`,
+20260877 → 6♠; revisor-mätning noll regressioner). **Steg 2 PARKERAD** +
+facitstädning (947 → splinterspåret, 1274 stale, 1272 parkerad):
+`docs/senare.md` + §9.
+
+**➡️ NÄSTA GÅNG — godkänd etappordning 2026-08-07:** **E2 splinterregeln** (singel
+A/K → Jacoby 2NT, fixar 947) → **E3 Jordan-fortsättningen** (20260739) →
+**E4 starka återbud** (#3) → **E5 2♣-återbudet** → **E6 oklart-översynen**
+(#2) → **E7 doc-svepet**. Faceliten PARKERAD (2026-08-03). ⚪ SENARE: tredje
+hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
@@ -113,9 +113,10 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
    förskanningen visade att posten är 24 givar men mest DD-smicker — bara 19+-delen
    är ärligt bjudbar). **Hål C (utgångsstoppen 4M) HANTERAD 2026-08-03 via
    CUE-BUDEN** (se NU-blocket + [[cue-bids-reinstated]]): den ärliga kärnan var
-   ~5 givar med agreed trumf, löst av cue-ronden (NMF-support on-book). **Återupptas
-   med hål D** (konkurrensfallen, 19 givar, svårast) ELLER att wire fler
-   cue-lägen (inverterad minor / 2♣). Verktyg (gated):
+   ~5 givar med agreed trumf, löst av cue-ronden (NMF-support on-book). **Hål D
+   steg 1 KLAR 2026-08-07** (kontroll-komplett 4NT, se NU-blocket; steg 2
+   PARKERAD i `docs/senare.md`) — etappen är därmed i praktiken stängd; kvar som
+   eget beslut: fler cue-lägen (inverterad minor / 2♣). Verktyg (gated):
    `$env:DUMP_CAT='missad-lillslam'` resp. `$env:FORSKAN='1'` + probe-testerna;
    mätningen: `$env:REVISOR='1'; npx vitest run
    src/lib/engine/revisor.probe.test.ts` (samma frö 20260721). Arbetssättet

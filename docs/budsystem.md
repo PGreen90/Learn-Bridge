@@ -1209,6 +1209,36 @@ blåsning). Ingen kontrollkoll (ägarbeslut) och storslam kräver visshet → ta
 fast ♣K92 mittemot fick 6NT att ge 12 stick. Öppnaren saknade helt en väg vidare
 (det nakna passet, Fynd 1).*
 
+### 6.10 Slaminvit i konkurrens (kontroll-komplett 4NT)
+Cue-maskineriet i §6.2 lever i den kanoniska linjen (Jacoby 2NT / NMF). Men en
+fit kan också uppstå **genom konkurrens** — negativ/upplysningsdubbling +
+höjning, fritt svar — och där fanns tidigare ingen slamväg alls: den starka
+kaptenen passade naket i utgången.
+
+I konkurrens gäller en extra försiktighetsprincip: **cue-bud läcker information
+till motståndarna** (styr deras utspel och försvar). Därför cue:ar kaptenen inte
+när hen inte behöver. Regeln (steg 1, "kontroll-komplett 4NT"):
+
+Har kaptenen, efter att en **högfärgsfit etablerats i konkurrens**, allt detta —
+- **äkta extra**: 17+ startpoäng, eller 16+ med **3 kontroller** (A=1 per ess,
+  K räknas via A+K-summan ≥3),
+- **förstarundskontroll (ess eller renons) i ALLA tre sidofärger** — hen behöver
+  inte fråga efter kontroller, bara efter essen,
+- och partnern har **visat extra genom ett hopp** (inte bara svarat på tvång) —
+
+då frågar hen **direkt 4NT (RKC)** utan cue-rond. Placeringen efter svaret är
+konservativ: **6M bara när essvaret är entydigt** och summan nyckelkort ≥4,
+annars stopp i 5M. **Storslam bjuds aldrig** från konkurrensläget.
+
+Händer med äkta extra men **ofullständiga** kontroller (de skulle behöva en
+cue-rond för att hitta partnerns kontroll) täcks INTE av steg 1 — den
+cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
+
+*Bakgrund (etapp 7 hål D): frö 20260877 ur mätningen — Syd ♠KJT ♥A73 ♦AK97 ♣A95
+(19 bal) dubblade starkt över 1♥, partnern svarade FRITT 3♠, och Syd höjde till
+4♠ och passade fast 6♠ stod. Kontroll i allt, 19 hp, partnern visade extra —
+ändå fanns ingen väg att fråga.*
+
 ## 7. Försvarsbud
 > Budgivning när motståndarna öppnat (inkliv, dubblingar) och i konkurrens efter
 > vår egen öppning. Markeringar och utspel: §8.
@@ -1718,6 +1748,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (etapp 7 hål D steg 1: slaminvit i konkurrens, ägarbeslut)** –
+  **Kontroll-komplett 4NT i konkurrenslagret (kod §6.10).** Förskanningens mönster
+  E (19 givar): fit funnen genom konkurrens, utgång nådd, sedan naket pass av den
+  starka kaptenen. Nya `competitiveSlamTry` + `competitiveRKCPlace`
+  (`auction-live.ts`): 17+ (eller 16+ med 3 kontroller) + högfärgsfit i konkurrens
+  + förstarundskontroll i ALLA sidofärger + partnern har hoppat → 4NT (RKC); 6M
+  bara vid entydigt svar, aldrig storslam. Ett tidigare v0-försök (poängtröskel
+  utan kontrollkrav) blåste 8 utgångshänder till slam och revertades — poäng kan
+  inte skilja kontroll-slam från utgångshand, därav den tighta grinden. Facit:
+  `auction-slam-competition.test.ts` (frö 20260877 → 6♠). Facitstädning
+  (ägarbeslut): 20260947 flyttad till splinterspåret (Jacoby-hand, motorn
+  splintrade en singel-kung — lagas där), 20261274 struken (premiss stale efter
+  2/1-regeln 2026-08-06), 20261272 parkerad med steg 2 (cue-frontend för
+  kontroll-ofullständiga händer — kvarvarande ärlig kärna för liten för
+  regressionsrisken, `docs/senare.md`). Revisor-mätning 2026-08-05 på exakt denna
+  kod: noll regressioner (`$env:REVISOR='1'; npx vitest run
+  src/lib/engine/revisor.probe.test.ts`, frö 20260721). Hela sviten grön.
 - **2026-08-06 (fjärde färg: svararen placerar utgång, systemrevisorns fynd)** –
   **Svararen passar aldrig sin egen fjärde färg (krav) (kod §6.6).** Spanar-agenten
   hittade frö 20260743 (33 hp): svararen bjöd fjärde färg (2♦, utgångskrav) och
