@@ -224,9 +224,15 @@ export function supportDouble(hand: Hand, partnerMajor: Suit, rhoCall: string): 
  * Default 1 (bakåtkompatibelt). Dubblas en SVAG TVÅA måste svaret hamna över
  * 2-läget – annars räknar motorn fram olagliga 1-lägesbud och budet släpps av
  * anroparens laglighetsvakt → påtvingat svar tappas (R1-fynd #5).
+ * `balancing` = X:et var en BALANSERING (utpassningsläget, §7.6): golvet är
+ * sänkt ~3 hp ("låna en kung") så advancern räknar av den lånade kungen i
+ * graderingen (−3 på trösklarna för cue/hopp) — annars värderas samma kung två
+ * gånger och svaret drivs en nivå för högt (F3/C12, 2026-08-07).
  */
-export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1, bidSuits: Suit[] = [theirSuit]): ResponseResult {
+export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1, bidSuits: Suit[] = [theirSuit], balancing = false): ResponseResult {
   const p = hcp(hand)
+  const graded = p - (balancing ? 3 : 0) // rabatten: kungen är redan lånad av balanseraren
+  const rabatt = balancing ? ` (rabatt −3: partnerns balanserings-X lånade en kung)` : ''
   const len = lengths(hand)
   // Uteslut ALLA färger motståndarna bjudit (inte bara den dubblade). När två
   // färger är bjudna – t.ex. 1♦–1♥–X – får svaret aldrig hamna i öppnarens ruter
@@ -258,21 +264,21 @@ export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1,
   // spärr/spärrhöjning (3-läget) är ett cue på 4-läget meningslöst och kan
   // passas ut i DERAS färg (Mätning #18, frö 20260825: 3♥–P–P–X–P–4♥ blev
   // slutbudet, 4-1-fit). Där väljs 3NT med stopp, annars bästa färg nedan.
-  if (p >= 12) {
+  if (graded >= 12) {
     if (theirLevel <= 2) {
-      return { call: `${cueLevel}${BID[theirSuit]}`, rule: 'cue (krav)', explanation: `${p} hp – för starkt för bara ett färgbud → cue ${SYM[theirSuit]} (krav).` }
+      return { call: `${cueLevel}${BID[theirSuit]}`, rule: 'cue (krav)', explanation: `${p} hp – för starkt för bara ett färgbud → cue ${SYM[theirSuit]} (krav).${rabatt}` }
     }
     if (hasStopper(hand, theirSuit)) {
-      return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i ${NAME[theirSuit]} mot partnerns upplysnings-X → 3NT till spel.` }
+      return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i ${NAME[theirSuit]} mot partnerns upplysnings-X → 3NT till spel.${rabatt}` }
     }
   }
   // 9–11 → hoppbud (inbjudande) – bara meningsfullt över en 1-lägesöppning; över
   // en svag tvåa har öppningen redan ätit utrymmet, så vi bjuder naturligt.
-  if (p >= 9 && theirLevel === 1) {
-    return { call: `${lvl + 1}${BID[best]}`, rule: 'hoppbud (inbjudan)', explanation: `${p} hp med ${len[best]}-korts ${NAME[best]} → ${lvl + 1}${SYM[best]} (inbjudande).` }
+  if (graded >= 9 && theirLevel === 1) {
+    return { call: `${lvl + 1}${BID[best]}`, rule: 'hoppbud (inbjudan)', explanation: `${p} hp med ${len[best]}-korts ${NAME[best]} → ${lvl + 1}${SYM[best]} (inbjudande).${rabatt}` }
   }
   // 0–8 (och 9–11 över en högre öppning) → billigaste färgbud (påtvingat svar).
-  return { call: `${lvl}${BID[best]}`, rule: 'färgbud', explanation: `${p} hp – bjuder bästa färg ${NAME[best]} → ${lvl}${SYM[best]}.` }
+  return { call: `${lvl}${BID[best]}`, rule: 'färgbud', explanation: `${p} hp – bjuder bästa färg ${NAME[best]} → ${lvl}${SYM[best]}.${rabatt}` }
 }
 
 /**

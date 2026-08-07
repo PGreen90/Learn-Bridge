@@ -372,8 +372,11 @@ och fortsätter live. **Regel för framtida arbete:**
 - Ny **on-book**-fortsättning (ostörd systemlinje, en ny konvention i vårt system)
   → byggs i **`auction.ts`** (eller dess `responses*/rebids*`-filer).
 - Ny **konkurrens/off-book**-hantering (svar på motståndarnas bud bortom en rond,
-  svar på Syds egna bud) → byggs i **`auction-live.ts`** som en detektor i kedjan;
-  ordningen är korrekthetskritisk (kommentarerna "Måste ligga FÖRE …" i filen).
+  svar på Syds egna bud) → byggs i **`auction-live.ts`** som en detektor i kedjan
+  (`FORCED_DETECTORS`/`CONTESTED_DETECTORS`, F2 2026-08-07): ett objekt
+  `{ id, before?, run }` där `before` anger vilka detektorer som måste ligga
+  senare. Ordningen är korrekthetskritisk men numera MASKINVAKTAD —
+  `detector-chain.test.ts` gör sviten röd om placeringen bryter ett före-krav.
 - Ny **budförklaring** för människans off-book-bud → **`auction-interpret.ts`**.
 
 Detektorkedjan i `decideCall` är den del som blir tung att underhålla först när

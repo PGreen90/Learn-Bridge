@@ -9,6 +9,15 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Budgivning (2026-08-07) — F3: advancer-rabatten generaliserad
+- **Advancer-rabatten över ALLA balanserade öppningar (NYAST, §7.1):** den som
+  svarar på partnerns balansering (1♥–P–P–1♠ eller 1♥–P–P–X) räknar av den
+  lånade kungen: höjningar −3 stödpoäng med tak på 3-läget, X-svar graderar
+  cue/hopp på hp −3. **Bevaka:** (a) står ni för LÅGT när balanseraren faktiskt
+  var maximal (14–16) — missade utgångar där rabatten åt upp inviten? (b)
+  balanseringens NT-svar och nya färger (respondWithoutFit) räknar ännu INTE
+  rabatten — säg till om de driver för högt, så byggs de på.
+
 ## Budgivning (2026-08-07) — B13: inverterad minor-återbuden + cue-lägena
 - **Graderade återbud efter 1m–2m (NYAST, §4.2):** äkta honnörsstopp, 3m
   strikt 12–14, 15+ bjuder alltid krav ("fantomstopp" utan äkta stopp),

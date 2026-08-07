@@ -771,6 +771,41 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #28 — 2026-08-07, F3: advancer-rabatten generaliserad
+Samma frö 20260721, 1 000 givar. Fix: den som svarar på partnerns balansering
+räknar av den lånade kungen över ALLA öppningsnivåer (höjningar −3 sp +
+3-lägestak via `partnerBalanced`/`raiseWithFit`; X-svar graderar cue/hopp på
+hp −3 via `answerTakeoutDouble`). Budsystem.md §7.1/§7.7 + §9. Baslinje = M27.
+Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M27 (baslinje)   M28 (F3)
+Rätt kontrakt (exakt par)  19,8 %          19,6 %
+Genomsnittlig par-avvikelse 264,72         266,18
+Fel färg (bet)          118 / 49 940     118 / 49 800
+Missad lillslam          79 / 50 130      79 / 50 130
+Missad utgång           143 / 47 860     146 / 49 130
+Fel strain              102 / 2 460      101 / 2 450
+Övriga poster: i nivå med M27.
+```
+
+**Läsning:** netto **+1,46 p/giv** — rabattens ärliga pris, och det är
+medvetet betalt. Hela skiftet sitter i **+3 missade utgångar**: när
+balanseraren råkar vara MAXIMAL (14–16) dör utgången nu i den mätta
+höjningen, i utbyte mot att advancern inte längre blåser utgång varje gång
+balanseraren lånat kungen på ett minimum (frö 20261375: W:s 4♠ på 13 sp mot
+8 hp-balanseringen — själva felet F3 lagar; DD-paret råkade stå på blåsens
+sida där). Samma avvägning som ärliga portar: systemriktighet går före
+DD-poäng på enskilda givar (`docs/bevaka.md`-princip 2026-08-06).
+**Uppföljningen om spel visar tappet:** balanserarens ANDRA växel — med max
+(14–16) ska balanseraren själv driva över advancerns mätta höjning; den
+byggs om utgångar dör vid bordet (bevakning i `docs/bevaka.md`). Facit FÖRE
+fix: `auction-advancer-rabatt.test.ts`. Hela sviten grön.
+
 ## Mätning #27 — 2026-08-07, B13: inverterad minor-återbuden + cue-lägena
 Samma frö 20260721, 1 000 givar. Fix: graderade återbud efter 1m–2m (äkta
 honnörsstopp, 3m strikt 12–14, 15+ alltid krav, svararens broms + öppnarens

@@ -11,7 +11,7 @@
 
 | Fil | 🟢/📘/📦 | Öppna den när … |
 |---|---|---|
-| **budsystem.md** (208 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
+| **budsystem.md** (215 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
 | **status.md** (43 kB) | 📘 | du ska röra **budmotorns kod**. Sök rubriken "Budmotorns tre auktionslager + `open`-handoff" = arkitekturkontraktet: hör logiken hemma i `auction.ts` (on-book), `auction-live.ts` (off-book/konkurrens) eller `auction-interpret.ts` (förklaring)? |
 | **systemrevisorn.md** (65 kB) | 🟢 | du jobbar i mätspåret. Riggen, hur man kör den, **alla mätningar #1–#25**, förskanningarna (etapp 6 + **etapp 7 missad lillslam**) och mönsteranalyserna bakom varje fix. |
 | **bevaka.md** | 🟢 | ägaren säger att något känns fel i spel, en felrapport kommer in, eller en ny fix ska läggas till bevakningslistan. |
@@ -43,7 +43,7 @@
 
 | Fil | | Innehåll |
 |---|---|---|
-| **historik.md** (147 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
+| **historik.md** (156 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
 | **arbetslista.md** | 📦 | Byggordningen FAS 0–12 (genomförd). Punkt 28 = bakgrunden till vår egen DDS-lösare. Kvar som arkiv; NU/NÄST styrs av CLAUDE.md. |
 | **tp-arbetslista.md** | 📦 | TP-stegen A–F. **Alla klara 2026-07-03** — filen innehåller gamla "⬜ Kvar att bygga"-rubriker som är överspelade av notisen högst upp. |
 | **audit/** (5 filer + SLUTRAPPORT) | 📦 | Revisionen R1–R5 (2026-07-04): budsystem, arkitektur, UI/UX, dokumentation, git/deploy. Alla fynd är antingen åtgärdade eller upplyfta till SENARE. |

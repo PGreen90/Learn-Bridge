@@ -10,6 +10,55 @@
 
 ---
 
+## 2026-08-07 sen kväll (F3 — advancer-rabatten generaliserad, C12 stängd)
+
+**F3 KLAR** (körordningens nästa steg direkt efter F2). Fix 5a byggde
+advancer-rabatten enbart för balanseringar över svaga tvåor/spärrar; över deras
+1-lägesöppning värderade advancern fortfarande partnerns balansering som ett
+direktinkliv — samma lånade kung räknades två gånger och delkontraktsvärden
+blåstes till utgång.
+
+- **Höjningen:** `partnerBalancedOverPreempt` generaliserad till
+  `partnerBalanced` (kravet "öppning på 2-läget+" borttaget) — höjningar av
+  balansinklivet räknar stödpoäng −3 med tak på 3-läget utan äkta
+  utgångsvärden efter rabatten (`raiseWithFit`).
+- **X-svaret:** `takeoutDoubleToAnswer` flaggar utpassningsmönstret (öppning,
+  P, P, partnerns X) och `answerTakeoutDouble` graderar cue (12+) och hopp
+  (9–11) på hp −3. Direkt sits orörd (regressionsvakt i facitet).
+- **Facit FÖRE fix** (`auction-advancer-rabatt.test.ts`): 11 sp höjde
+  invit-3♠ där 2♠ räcker, 14 sp blåste 4♠, 10 hp hoppade på X:et, 13 hp
+  cue:ade — alla fyra överbuden bevisade röda, sedan gröna. Ett gammalt facit
+  uppdaterat i linje med nya systemet (frö 20261375: W:s 4♠ på 13 sp mot en
+  8 hp-balansering var själva felet — nu 2♠, given köps i 3♥; B13-prejudikatet).
+- Boken §7.1 (generella regeln) + §7.7-hänvisning + §9; bevakning: NT-svar och
+  nya färger efter balansering räknar ännu inte rabatten (`docs/bevaka.md`).
+  Mätning M28 (`docs/systemrevisorn.md`).
+
+## 2026-08-07 sen kväll (F2 — datadriven detektorkedja, E1 stängd)
+
+**F2 KLAR** (🟢 NÄST punkt 1; R2 Fynd #1, körordningens sista arkitekturpunkt
+före fler konkurrenskonventioner). Ren beteendebevarande refaktor — inga
+budändringar, hela sviten grön före/efter (`npm test`).
+
+- **Kedjan är DATA nu:** `decideCall`:s två listor (tvingande svar +
+  konkurrenskedjan) är modul-nivå-konstanter `FORCED_DETECTORS` /
+  `CONTESTED_DETECTORS` i `auction-live.ts`. Varje detektor är ett objekt
+  `{ id, before?, run }` där `before` = id:n som måste ligga senare i kedjan.
+  Ordningskraven som förut bara fanns i "Måste ligga FÖRE …"-kommentarer är
+  alltså maskinläsbara fält (kommentarerna står kvar som förklaring).
+- **Kedjevakten** (`src/lib/engine/detector-chain.test.ts`): sviten blir röd om
+  ett id dubbleras, ett före-krav pekar på en detektor som inte finns, eller
+  listordningen bryter ett före-krav — plus att `offBookResponse` alltid ligger
+  näst sist och `honorForce` sist. En felplacerad ny konvention fångas nu i
+  deploygrinden i stället för i spel.
+- **Delad kontext:** detektorerna får `DetectorCtx` (deal/history/seat/hand)
+  i stället för att varje closure fångar sina egna variabler. R2:s "på
+  sikt"-steg 2 (ett `auctionFacts`-lager som förberäknar öppnare/roller/trumf
+  så detektorerna slipper re-skanna history) är MEDVETET inte byggt — det görs
+  när behovet uppstår, inte spekulativt.
+- E1 i `docs/budsystem-revision.md` 🔴→🟢; E3 (systemrevisorn) var redan byggd
+  sedan etapp 2 → F2 som helhet KLAR.
+
 ## 2026-08-07 kväll (B13 — inverterad minor-återbuden + cue-lägena, M27)
 
 **B13 STÄNGD** (🟢 NÄST punkt 1, blottad av ärliga portar): öppnarens återbud
