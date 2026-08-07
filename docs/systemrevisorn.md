@@ -771,6 +771,39 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #22 — 2026-08-07, splinterregeln (singel A/K → Jacoby 2NT)
+Samma frö 20260721, 1 000 givar. Fix: `splinterShortSuits` (responses.ts) — en
+singel A/K räknas inte som splinterfärg, handen svarar Jacoby 2NT (ägarregel
+2026-08-06, källa bridgebum; budsystem.md §4.1 + §9). Baslinjen är
+2026-08-05-körningen (hål D steg 1-koden). Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        baslinje (08-05)   M22 (splinterregeln)
+Rätt kontrakt (exakt par)  19,0 %            19,2 %
+Genomsnittlig par-avvikelse 269,67           268,50
+För högt                 40 / 10 460       36 / 8 430
+Missad lillslam          79 / 51 460       78 / 50 390
+Fel färg (bet)          119 / 50 840      121 / 52 570
+Missad utgång           146 / 48 710      147 / 48 960
+Fel strain              101 / 2 430       101 / 2 460
+Övriga poster (storslam −80, offring, bättre än facit, såld giv, utpassad):
+i praktiken oförändrade.
+```
+
+**Läsning:** netto **−1 170 p** över tusen givar. Vinsten kommer där teorin
+säger att den ska: "för högt" tappar 4 givar (splinterhänder med singelhonnör
+som förr blåste förbi rätt nivå) och en lillslam till hittas. Motvikt: 2 givar
+in i "fel färg (bet)" + 1 i "missad utgång" — händer där splinterns exakta
+kortfärgsinfo hade styrt bättre än Jacobys balansbesked. Flyttarna ligger
+utanför exempelurvalet (8/kategori) och jagas inte per giv (ägarprincipen:
+buden bedöms på systemriktighet, inte enskild givs DD-poäng) — bevakas i
+nästa mätning. Facit FÖRE fix: `auction-splinter-block.test.ts`. Hela sviten
+grön (1 614).
+
 ## Mätning #21 — 2026-07-31, ETAPP 7 hål 2 (3NT-stoppen)
 Samma frö 20260721, 1 000 givar. Fix: öppnarens kvantitativa slamtrevare (4NT)
 efter svararens 3NT, `openerTriesSlamAfter3NT` + `answerOpenerSlamTry`
