@@ -700,6 +700,12 @@ Svararen har visat 4+ kort och 6+ hp (krav 1 rond). Öppnaren letar främst
 | hopphöjning (1♣–1♥–3♥) | 4 stöd, 16–18, inbjudan |
 | höjning till utgång (1♣–1♥–4♥) | 4 stöd, ~19+, ojämn/distributionell |
 
+**Öppnarens tredje bud när svararen inviterar (1m–1M–2M–3M, systemfel #3
+delfix 4b, 2026-08-07):** öppnaren svarar **alltid** på inviten — **14+
+stödpoäng** räknat mot den kända fiten accepterar (**4M**), annars pass.
+*Bakgrund frö 20260982: öppnaren passade 3♥-inviten med 15 hp + 4 trumf +
+singel spader (≈18 stödpoäng) — 26 hp på 9-korts fit stannade i 3♥.*
+
 **Egen eller ny färg (ingen 4-korts hf-fit):**
 | Återbud | Betydelse |
 |---|---|
@@ -734,6 +740,14 @@ utgång eller slam fanns.*
 |---|---|
 | reverse (1♣–1♥–2♦) | 16+ hp, längre första färg, krav 1 rond |
 | hoppskift ny färg (1♦–1♥–3♣) | 19+ hp, utgångskrav |
+
+**Efter reversen, när svararen PREFERERAR tillbaka (1♣–1♥–2♦–3♣, systemfel #3
+delfix 4c, 2026-08-07):** reversen är rondkrav men inte utgångskrav, så
+**17-minimum får passa preferensen**. Med **18+** driver öppnaren till utgång:
+**3NT** med håll i den objudna färgen *och* minst dubbelton i partnerns färg,
+annars **utgång i den prefererade fiten** (5m/4M). *Bakgrund frö 20261111:
+öppnaren passade 3♣ med 18 hp (♠K72 ♥6 ♦AKQ4 ♣AQ973) — 28 hp ihop dog i 3♣.
+Singel hjärter → inget NT → 5♣.*
 
 Öppnaren kan även **splintra** (hopp i ny färg, t.ex. 1♣–1♥–3♠/4♦) för att visa
 4 stöd + kortfärg + extra styrka, på samma sätt som svararen gör i §4.1.
@@ -1152,6 +1166,20 @@ Två undantag: (a) efter en **reverse** har öppnaren 17+ och den billigaste
 höjningen är redan krav — där tas inget utrymme; (b) en **minorhöjning** ligger
 redan på 3-läget och graderas inte uppåt (utgång i minor kräver elva stick —
 vägen går via 3NT eller fjärde färg).
+
+**Svararens rebjudna EGEN färg graderas likadant (2026-08-07, systemfel #3
+delfix 4a).** Med 6+ kort i egen färg och ingen fit i öppnarens färger:
+
+| Styrka (hp) | Svararens andra bud |
+|---|---|
+| ≤ 10 | billigaste rebud (minimum, öppnaren får passa) |
+| 11–12 | **hoppinvit** i färgen (t.ex. 1♦–1♥–1♠–3♥) |
+| 13+ | **fjärde färg (GF)** — kravet placerar utgången |
+
+Förr sa en 16-poängare samma billiga 2♥ som en 6-poängare, och öppnaren
+passade helt korrekt mot vad budet sa. *Bakgrund frö 20261323: ♠73 ♥AKT743
+♦KT7 ♣AQ (16 hp) rebjöd 2♥ efter 1♦–1♥–1♠ — 30 hp ihop dog i 2♥. Nu går
+handen fjärde färg-vägen och paret når 3NT.*
 
 ### 6.7 Drury (tvåvägs Reverse)
 Gäller när **svararen är passad hand** och partnern öppnar **1♥/1♠ i 3:e/4:e
@@ -1780,6 +1808,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (starka återbud, systemfel #3: tre delfixar 4a/4b/4c)** –
+  **Starka händer dör inte längre i delkontrakt i tre återbudslägen.**
+  **(4a, kod §6.6)** Svararens 6-korts-rebud graderas: ≤10 billigast, 11–12
+  hoppinvit, 13+ → fjärde färg (GF) så kravet placerar utgången (`fourthSuit`
+  steg 2, `responder-rebids.ts`; frö 20261323: 16 hp + 6 hjärter rebjöd 2♥ →
+  pass, 30 hp i 2♥ — nu 3NT). **(4b, kod §5.2)** Öppnarens tredje bud efter
+  egen enkel höjning + svararens 3M-invit fanns inte (bara 1NT-auktionerna
+  hade ett): ny `openerThirdBidAfterOwnRaise` (`rebids.ts`), 14+ stödpoäng
+  accepterar (ägarbeslut 2026-08-07, aggressivare valet framför 15+; frö
+  20260982: 15 hp + 4 trumf passade 3♥ — nu 4♥). **(4c, kod §5.2)** Öppnarens
+  fortsättning efter egen reverse + partnerns preferens: ny
+  `openerThirdBidAfterReverse` (`rebids.ts`), 17-minimum passar, 18+ driver
+  (3NT med håll i objudna färgen + 2+ kort i partnerns färg, annars utgång i
+  fiten; frö 20261111: 18 hp passade 3♣ — nu 5♣). Wiring i `auction.ts`
+  (kanoniska linjens tredjebudsslot). Facit FÖRE fix:
+  `auction-starka-aterbud.test.ts` (tre seedfall + tröskel-unitfall). Hela
+  sviten grön; mätning M24 i systemrevisorn.md.
 - **2026-08-07 (Jordan 2NT: öppnarens fortsättning, systemfel #4)** – **Öppnaren
   passar aldrig partnerns Jordan 2NT (kod §7.8d).** Spanar-agentens frö 20260739:
   `1♥–(X)–2NT[Jordan]` och öppnaren PASSADE med 14 hp (15 stödpoäng) och 9-korts
