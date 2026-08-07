@@ -15,10 +15,10 @@ enda sanningen om testläget: kör `npm test`; facit-först, boken = enda
 sanningskälla). Grunder och konventioner solida. **2026-07-07 kväll: ÄRLIGA
 SLAMPORTAR byggda** (ägarbeslut: inga budbeslut på partnerns faktiska kort
 — egen hand + visade intervall; inbjudningar i kanske-zonen; fel tillåtna).
-Svagheterna är koncentrerade till: (1) underhållbarheten i
-off-book-detektorkedjan (F2/E1), (2) att försvarslagret (§7) inte räknar
-fördelning (TP). *(B13, grova återbud efter inverterad minor, LAGAD
-2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)*
+Kvarvarande svaghet: att försvarslagret (§7) inte räknar fördelning (TP) —
+F4 i körordningen. *(F2/E1, detektorkedjans underhållbarhet, LAGAD 2026-08-07:
+kedjan är datadriven med kedjevakt. B13, grova återbud efter inverterad minor,
+LAGAD 2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)*
 
 ---
 
@@ -73,7 +73,7 @@ fördelning (TP). *(B13, grova återbud efter inverterad minor, LAGAD
 | C9 | Försvar mot svaga tvåor/spärrar | 🟢 | — |
 | C10 | Balansering "låna en kung" | 🟢 | — |
 | C11 | Flerronds-konkurrens A+B+C | 🟢 | — |
-| C12 | **Advancer-rabatt efter balansering** | 🔴 | **F3** i körordningen |
+| C12 | **Advancer-rabatt efter balansering** | 🟢 | **BYGGD 2026-08-07 (F3):** rabatten −3 generell över alla balanserade öppningar (höjningar via `partnerBalanced`/`raiseWithFit` + X-svar via `answerTakeoutDouble`); facit `auction-advancer-rabatt.test.ts`, boken §7.1/§9, mätning M28. Kvar (bevaka): NT-svar/nya färger utan rabatt |
 | C13 | Mathe mot stark 1♣ | 🟡 | PARKERAT (irrelevant i 2/1) |
 | C14 | Kanoniska linjen passar ut ostörda tvåfärgsinkliv (Budvisningen) | 🔴 | Trä in `advanceTwoSuiter` i linjens konkurrensrond |
 
@@ -95,9 +95,9 @@ kravminnet löst.
 
 | # | Svaghet | Status | Åtgärd |
 |---|---------|:---:|--------|
-| E1 | Detektorkedjan i `decideCall` (~28 steg) — tung att underhålla, ordningskänslig | 🔴 | R2: gör kedjan **datadriven** innan fler konkurrenskonventioner (**F2**) |
+| E1 | Detektorkedjan i `decideCall` — tung att underhålla, ordningskänslig | 🟢 | **BYGGD 2026-08-07 (F2):** kedjan är data (`FORCED_DETECTORS`/`CONTESTED_DETECTORS`, varje detektor `{ id, before?, run }`); före-kraven vaktas av `detector-chain.test.ts` i deploygrinden. `auctionFacts`-lagret (R2 steg 2) medvetet ej byggt — vid behov |
 | E2 | Forcerad minimi-stege i 2♣ väljer inte alltid finaste färg (5♣ där 4♠ bättre) | 🟡 | Förbättra strain-val i `honorForce` |
-| E3 | Ingen kvarvarande probe-rigg i repot | 🟡 | Bygg återanvändbar systemrevisor (knyter an till **F2**) — **FÖRBEREDD 2026-07-20: byggplan i `docs/systemrevisorn.md`, byggs i etapp 2 (NU)** |
+| E3 | Ingen kvarvarande probe-rigg i repot | 🟢 | Systemrevisorn BYGGD (etapp 2, `docs/systemrevisorn.md`, mätserien M1→M27); denna rad var stale tills 2026-08-07-svepet |
 
 ---
 
@@ -106,8 +106,8 @@ kravminnet löst.
 | Ordn. | Åtgärd | Adresserar | Status |
 |:---:|--------|-----------|:---:|
 | **F1** | Bredda slam-utforskningen (facit-först, en familj i taget) | B10, B9, A13, E2 | 🟢 **KLAR** (alla fyra familjer, etapp 4 2026-07-24→25) |
-| **F2** | Datadriven detektorkedja + återanvändbar systemrevisor | E1, E3 | 🔴 kvar |
-| **F3** | Advancer-rabatt efter balansering | C12 | 🔴 kvar |
+| **F2** | Datadriven detektorkedja + återanvändbar systemrevisor | E1, E3 | 🟢 **KLAR** (revisorn etapp 2; kedjan 2026-08-07) |
+| **F3** | Advancer-rabatt efter balansering | C12 | 🟢 **KLAR** (2026-08-07) |
 | **F4** | TP till §7-inkliven | D9 | 🔴 kvar |
 | **F5** | Verifiera 6-5-återbudet + 2♣-strain-valet i spel | A3, E2 | 🔴 kvar |
 | **F6** | Stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i prebuilt-linjer | C5, C14 | 🔴 kvar |

@@ -180,12 +180,16 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
     expect(contract!.level).toBeLessThanOrEqual(3)
   })
 
-  it('frö 20261375: given dör i deras spaderkontrakt — N/S offrar inte 5♥', () => {
+  it('frö 20261375: ingen blås, ingen offring — W höjer mätt och 3♥ köps billigt', () => {
+    // FACIT UPPDATERAT för F3 (advancer-rabatten, 2026-08-07): E balanserade 1♠
+    // på 8 hp ("lånad kung"), och W (13 stödpoäng) blåste förr direkt 4♠ — exakt
+    // den dubbelräknade kung rabatten stoppar. Nu: W höjer 2♠ (13−3=10 → enkel),
+    // E avböjer på minimum, S tävlar 3♥ (egen 6+ färg) och alla passar. Mönster 3
+    // (offra aldrig 5♥ över deras utgång) vaktas av positionstestet ovan.
     const d = deal('felfarg-20261375', 'E', 'ns', HANDS_1375)
     const history = botAuction(d)
     expect(history).not.toBeNull()
-    const contract = contractFromCalls(history!)
-    expect(contract?.strain).toBe('spades')
+    expect(contractFromCalls(history!)).toMatchObject({ level: 3, strain: 'hearts', declarer: 'S' })
   })
 
   it('frö 20260906: ruterdelkontrakt på 3-läget, inte 5♦ bet', () => {

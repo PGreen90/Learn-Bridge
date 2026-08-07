@@ -1347,6 +1347,21 @@ cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
   | Upplysnings-X (kort i deras färg, stöd i övriga) | 12 (perfekt 4-korts form 10) | **9** (form **7**) |
   | 1NT-inkliv (jämn m. stopp) | 15–18 | **11–14** (klassisk återöppnings-1NT) |
 
+- **Advancer-rabatten (F3, 2026-08-07):** den som SVARAR på partnerns
+  balansering vet att kungen redan är lånad — annars värderas samma kung två
+  gånger och delkontraktsvärden blåses till utgång. Därför gäller generellt,
+  över ALLA balanserade öppningar (1-läget hit; svaga tvåor/spärrar sedan
+  fix 5a, §7.7):
+  - **Höjning av partnerns balansinkliv:** stödpoäng **−3**, och utan äkta
+    utgångsvärden *efter* rabatten kapas höjningen vid **3-läget**. Exempel:
+    1♥–P–P–1♠–P — 11 stödpoäng höjer 2♠ (inte invit-3♠), 14 bjuder invit-3♠
+    (inte 4♠).
+  - **Svar på partnerns balanserings-X:** trösklarna för hopp (9–11) och cue
+    (12+) räknas på **hp −3**. Exempel: 1♥–P–P–X–P — 10 hp svarar billigast
+    1♠ (inte hoppet 2♠), 13 hp hoppar 2♠ (inte cue).
+  Direkt sits är orörd. Balanseraren själv driver vidare med äkta extra —
+  rabatten flyttar bara VEM som bär styrkevisningen till den som faktiskt
+  har den.
 - **17+ säljer aldrig given (felrapport #40).** Ryms en 17+-hand inte i något
   fönster – för stark för det kapade inklivet (tak 16), fel form för
   upplysnings-X:et (kräver korthet i deras färg), och utan egen 5+ färg att visa
@@ -1616,7 +1631,9 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
   **Advancer-rabatten:** den som svarar på ett *balansinkliv* över deras svaga
   tvåa vet att kungen redan är lånad → höjningar räknar **stödpoäng −3** och
   kapas vid **3-läget** utan äkta utgångsvärden efter rabatten (annars värderas
-  samma kung två gånger och 2♠-balanseringen blåses till 4♠ bet).
+  samma kung två gånger och 2♠-balanseringen blåses till 4♠ bet). *Sedan F3
+  (2026-08-07) är rabatten GENERELL — den gäller alla balanserade öppningar,
+  även 1-läget, och även svaret på partnerns balanserings-X. Hela regeln: §7.1.*
 - **Taket — starka händer mot svaga tvåor (etapp 6 i mätspåret, 2026-07-27):**
   fönstren ovan hade inget utlopp uppåt — en balanserad 21-poängare *passade ut*
   2♦. Nu gäller: **3NT = till spel** med stopp i deras färg och antingen
@@ -1855,6 +1872,22 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (F3: advancer-rabatten generaliserad, C12)** – **Rabatt −3 för
+  den som svarar på partnerns balansering — nu över ALLA öppningsnivåer (kod
+  §7.1).** Fix 5a byggde rabatten enbart för svaga tvåor/spärrar; över deras
+  1-lägesöppning värderade advancern fortfarande balanseringen som ett
+  direktinkliv och räknade den lånade kungen en gång till. Två vägar lagade:
+  **(1) höjningen av partnerns balansinkliv** (`partnerBalanced`/`raiseWithFit`,
+  `auction-live.ts` — generaliserad från `partnerBalancedOverPreempt`, kravet
+  "öppning på 2-läget+" borttaget): stödpoäng −3 + tak på 3-läget utan äkta
+  utgångsvärden efter rabatten; **(2) svaret på partnerns balanserings-X**
+  (`takeoutDoubleToAnswer` flaggar utpassningsmönstret, `answerTakeoutDouble`
+  i `doubles.ts` graderar cue/hopp på hp −3). Direkt sits orörd
+  (regressionsvakt i facitet). Ett gammalt facit uppdaterat i linje med nya
+  systemet (frö 20261375: W:s 4♠-blås på 13 sp mot en 8 hp-balansering var
+  själva felet — nu 2♠, given köps i 3♥). Facit FÖRE fix:
+  `auction-advancer-rabatt.test.ts`. Hela sviten grön; mätning M28 i
+  systemrevisorn.md.
 - **2026-08-07 (B13: öppnarens återbud efter inverterad minorhöjning +
   cue-lägena)** – **Graderade återbud efter 1m–2m (kod §4.2).** Tre hål lagade:
   (1) "stopp" var 4+ korts LÄNGD utan honnörskrav (♠9642 visades som
@@ -3141,7 +3174,8 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   **advancer-rabatten**: den som höjer ett balansinkliv över deras 2-läges+
   öppning räknar stödpoäng **−3** och kapas vid 3-läget utan äkta
   utgångsvärden (`partnerBalancedOverPreempt`/`raiseWithFit`,
-  `auction-live.ts`) — utan den blåstes 2♠-balanseringen till 4♠ bet (och
+  `auction-live.ts`; detektorn heter sedan F3 2026-08-07 `partnerBalanced`
+  och gäller alla öppningsnivåer) — utan den blåstes 2♠-balanseringen till 4♠ bet (och
   fix 4-fröet 20260774 offrar nu billigare: 3♠ en bet i st.f. 4♠ två).
   Regressionsvakt: 8 hp med perfekt form balanserar fortfarande INTE (frö
   20261248 — N/S:s DD-smickrade 4♥ jagas inte). **(5b) Negativ-dubblarens

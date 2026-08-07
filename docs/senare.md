@@ -89,12 +89,11 @@ balanserings- OCH direkt-inkliv räkna TP är en riktig förbättring (en formst
 kliver in), men **additiv** ovanpå "låna en kung" (som är sits-spaken), inte en
 ersättare. Eget test-låst steg (som TP-stegen A–F).
 
-### Advancer-rabatt efter balansering (2026-07-05)
-Partnern som SVARAR en balansering vet ännu inte att balanseraren kan vara en kung
-lättare → kan övervärdera tillbaka och driva för högt. En symmetrisk "räkna en kung
-mindre när du svarar en balansering" saknas. (Delvis byggd för svaga tvåor i etapp 3
-fix 5a; det generella fallet återstår.) Plockas upp om en giv visar att paret
-överbjuder.
+### ~~Advancer-rabatt efter balansering~~ (BYGGD 2026-08-07 via F3)
+Det generella fallet stängt: rabatten −3 gäller nu alla balanserade öppningar
+(höjningar + X-svar, boken §7.1). Kvar som bevakning, inte byggpunkt:
+balanseringens NT-svar och nya färger (`respondWithoutFit`) räknar ännu inte
+rabatten — byggs på om spel visar att de driver för högt (`docs/bevaka.md`).
 
 ### 17+ stark enfärgshand EFTER två bjudna färger (takeout, 2026-07-05)
 En 17+ enfärgshand som borde upplysningsdubbla när motståndarna redan bjudit två
@@ -163,6 +162,14 @@ spår — hela gränssnittet plus budsystem-boken (appens största text) ska
 översättas. Tas när den svenska basen bär (`docs/konkurrensplan.md` Fas 5).
 Fram till dess: skriv ny UI-text så den är lätt att lyfta ut (hela meningar,
 inga hopklistrade fragment).
+
+### `auctionFacts`-lagret (R2 steg 2, noterat 2026-08-07 vid F2-bygget)
+F2 gjorde detektorkedjan i `decideCall` datadriven (`FORCED_DETECTORS`/
+`CONTESTED_DETECTORS` med maskinvaktade före-krav). R2:s andra steg är kvar
+som idé: ett tunt lager som räknar ut de fakta detektorerna delar (öppnare/
+svarare, senaste konventionella budet, trumföverenskommelse, "äger vi handen?")
+EN gång per beslut, så detektorerna slutar re-skanna `history` var för sig.
+Byggs först när en konkret detektor behöver det — inte spekulativt.
 
 ## 🅿️ PARKERAT
 

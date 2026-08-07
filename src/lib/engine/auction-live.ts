@@ -135,7 +135,7 @@ const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'he
  *  - motståndarna har öppnat i en färg (den dubblade färgen).
  * Returnerar deras (dubblade) färg, annars null (= ingen påtvingad svarsplikt).
  */
-function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Suit; level: number; bidSuits: Suit[] } | null {
+function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Suit; level: number; bidSuits: Suit[]; balancing: boolean } | null {
   const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
   // Senaste icke-pass måste vara PARTNERNS dubbling (annars: RHO bjöd → ej tvång).
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
@@ -159,7 +159,17 @@ function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Sui
       }
     }
   }
-  return their ? { suit: their, level, bidSuits } : null
+  if (!their) return null
+  // Var X:et en BALANSERING (deras öppning, två pass, partnerns X i utpassnings-
+  // läget)? Då är golvet sänkt ~3 hp (§7.6 "låna en kung") och advancern ska
+  // räkna av den lånade kungen i sitt svar (F3/C12, 2026-08-07).
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  const balancing =
+    history[openIdx + 1]?.bid === 'P' &&
+    history[openIdx + 2]?.bid === 'P' &&
+    history[openIdx + 3]?.seat === PARTNER[seat] &&
+    history[openIdx + 3]?.bid === 'X'
+  return { suit: their, level, bidSuits, balancing }
 }
 
 /**
@@ -1722,20 +1732,21 @@ function partnerJumpOvercalled(
 }
 
 /**
- * Var partnerns färg ett BALANSINKLIV över motståndarnas svaga tvåa/spärr
- * (öppning på 2-läget+, två pass, partnerns bud i utpassningsläget)? Då är
- * "kungen redan lånad" av balanseraren (fix 5a) — advancern ska räkna av den
- * i sin höjning i stället för att värdera samma styrka två gånger.
+ * Var partnerns färg ett BALANSINKLIV över motståndarnas öppning (deras
+ * öppning, två pass, partnerns bud i utpassningsläget)? Då är "kungen redan
+ * lånad" av balanseraren (§7.6: golven sänkta ~3 hp) — advancern ska räkna av
+ * den i sin höjning i stället för att värdera samma styrka två gånger.
+ * Byggd för svaga tvåor i fix 5a; generaliserad till ALLA öppningsnivåer
+ * (även 1-läget) i F3 (C12, 2026-08-07).
  */
-function partnerBalancedOverPreempt(
+function partnerBalanced(
   history: ResolvedCall[],
   seat: Seat,
   partnerSuit: { strain: string },
 ): boolean {
   const openIdx = history.findIndex((c) => parseContractBid(c.bid))
   if (openIdx === -1 || openIdx + 3 >= history.length) return false
-  const open = parseContractBid(history[openIdx].bid)!
-  if (open.level < 2 || side(history[openIdx].seat) === side(seat)) return false
+  if (side(history[openIdx].seat) === side(seat)) return false
   const entry = history[openIdx + 3]
   return (
     history[openIdx + 1].bid === 'P' &&
@@ -1828,13 +1839,14 @@ function raiseWithFit(
     )
   ) return null
 
-  // Advancer-rabatt (fix 5a): partnerns färgbud var en BALANSERING över deras
-  // svaga tvåa/spärr (öppning på 2-läget+, två pass, partnerns bud). Kungen är
+  // Advancer-rabatt (fix 5a, generaliserad i F3): partnerns färgbud var en
+  // BALANSERING över deras öppning (öppning, två pass, partnerns bud). Kungen är
   // redan lånad av balanseraren (golven sänkta ~3 hp) — räkna av den här, annars
   // värderas samma kung två gånger och höjningen blåser utgång på delkontrakts-
-  // värden (frö 20260770: 2♠-balanseringen höjdes till 4♠ bet fast 3♠ = par).
-  const balancedOverPreempt = partnerBalancedOverPreempt(history, seat, partnerSuit)
-  const sp = dummyPoints(hand, suit).dummyPoints - (balancedOverPreempt ? 3 : 0)
+  // värden (frö 20260770: 2♠-balanseringen höjdes till 4♠ bet fast 3♠ = par;
+  // F3-facit: 1♥–P–P–1♠ med 11 sp höjdes till invit-3♠ där 2♠ räcker).
+  const balanced = partnerBalanced(history, seat, partnerSuit)
+  const sp = dummyPoints(hand, suit).dummyPoints - (balanced ? 3 : 0)
   if (sp < 6) return null // för svagt för att höja
 
   // En dubbelton-fit som bygger på ett TVINGAT ombud (partnerns svar på min
@@ -1923,10 +1935,10 @@ function raiseWithFit(
     wantLevel = partnerSuit.level + 1
     label = `enkel höjning`
   }
-  // Mot en balansering över deras svaga tvåa kapas dessutom vid 3-LÄGET utan
-  // äkta utgångsvärden efter rabatten (fix 5a): ett inbjudande hopp över ett
-  // 2-läges balansinkliv vore redan utgångsnivån.
-  if (balancedOverPreempt && sp < 13) wantLevel = Math.min(wantLevel, 3)
+  // Mot en balansering kapas dessutom vid 3-LÄGET utan äkta utgångsvärden
+  // efter rabatten (fix 5a): ett inbjudande hopp över ett 2-läges balansinkliv
+  // vore redan utgångsnivån.
+  if (balanced && sp < 13) wantLevel = Math.min(wantLevel, 3)
   // En inbjudande/enkel höjning får ALDRIG gå förbi utgång (felrapport #33: en
   // "inbjudande hopp" = level+2 blåste 7♦ över partnerns 5♦). Kapa vid utgångs-
   // nivån (högfärg 4, lågfärg 5). Har partnern REDAN nått utgång och vi bara har
@@ -3988,7 +4000,7 @@ export const FORCED_DETECTORS: readonly LiveDetector[] = [
   // Upplysningsdubbling från partnern (§7): svara, passa aldrig bort den.
   { id: 'takeoutDoubleToAnswer',
     run: (c) => answered(takeoutDoubleToAnswer(c.history, c.seat),
-      (t) => answerTakeoutDouble(c.hand, t.suit, t.level, t.bidSuits), c.history, c.seat) },
+      (t) => answerTakeoutDouble(c.hand, t.suit, t.level, t.bidSuits, t.balancing), c.history, c.seat) },
   // Partnerns STÖDDUBBLING (§7.3, etapp 6 hål 1): svararen svarar alltid
   // (pass bara som medvetet straffpass med trumfstack).
   { id: 'supportDoubleToAnswer',

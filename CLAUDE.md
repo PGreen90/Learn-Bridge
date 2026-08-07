@@ -25,29 +25,16 @@ dag, rutt `/spela-kort/dagens`, delbart textresultat (Wordle-mekaniken),
 flaggskeppskort på startsidan. Förtitt på Fas 3 UTAN backend. Detalj:
 `docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1/Fas 3.
 
-**ETAPP 7 HÅL 2 "3NT-STOPPEN": KLAR & LIVE (2026-07-31).** Öppnarens kvantitativa
-4NT-slamtrevare efter svararens 3NT (19+ hp, "bara äkta extra"). Mätning #21: noll
-regressioner. Facit `auction-3nt-stopp.test.ts`. Detalj: `docs/budsystem.md §6.9/§9`.
-
-**LEBENSOHL EFTER VÅRT 1NT (Lager 1): KLAR & LIVE 2026-07-30.** Naturligt inkliv
-över 1NT (6+, 11–15) annars DONT + Lebensohl-kärnan. Kvar: takeout-X, slow-shows,
-cue-Stayman. Detalj: `docs/budsystem.md §7.5/§9` + `docs/bevaka.md`.
-
-**KLART 2026-07-30 (detalj i `docs/historik.md`):** #34 försvaret tredje hand högt
-i sang (`thirdHandHonor`, §8.6) · **HELA FAS 0 (a+b+c)** — 404-sida + route-kod-
-uppdelning (entry-JS 889→247 kB), konsekvent kortrad (`HandFan`, felrapport #36
-stängd), säkra zoner + mobilsvep.
-
 **KONKURRENSPLANEN (2026-07-29, ägarbeslut — planering):** rebidz ska konkurrera
 med BBO/Funbridge/Synrey. Funbridge-modellen först ("Dagens givar"), sv→en (Fas 5).
 Roadmap Fas 0–6 + hälsobilden: **`docs/konkurrensplan.md`**. Beslut B (backend)
 byggs bara på uttryckligt ägarbeslut.
 
-**Klart 2026-07-29 (detalj i `docs/historik.md`):** felrapport #32,
-rondgenomgången, markeringarna (UDCA + Lavinthal, `docs/budsystem.md §8.5`).
-
-**STORA GRANSKNINGEN (26 fynd) + ETAPP A–D + PUTSEN: KLARA & DEPLOYADE
-2026-08-03** (detalj `docs/historik.md`). Skjutet: par-poäng (`docs/senare.md`).
+**Klart 2026-07-29→08-03 (detalj i `docs/historik.md`):** etapp 7 hål 2
+"3NT-stoppen" (§6.9) · Lebensohl efter vårt 1NT lager 1 (§7.5; kvar: takeout-X,
+slow shows, cue-Stayman) · #34 tredje hand högt i sang (§8.6) · hela FAS 0
+(404, route-split, kortrad, säkra zoner) · felrapport #32 + markeringarna
+(§8.5) · stora granskningen 26 fynd + etapp A–D (skjutet: par-poäng).
 
 **CUE-BUD ÅTERINFÖRDA (2026-08-03, river 2026-07-07): KLAR ETAPP.** Kontrollbud
 ska ALLTID finnas ([[cue-bids-reinstated]]): vid **utgång etablerad (GF) + agreed
@@ -80,7 +67,22 @@ E5 2/1-högfärgen (§5.3) · E6 oklart-fixarna (§5.2/§5.7) · E7 doc-svepet.
 Facit `auction-inverterad-rebud.test.ts`, boken §4.2/§6.2/§9, mätning M27
 (`docs/systemrevisorn.md`).
 
-**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F2). Faceliten PARKERAD (2026-08-03).
+**F2 — DATADRIVEN DETEKTORKEDJA (2026-08-07): KLAR.** `decideCall`-kedjan är
+data: `FORCED_DETECTORS`/`CONTESTED_DETECTORS` i `auction-live.ts`, varje
+detektor `{ id, before?, run }` där `before` = ordningskraven (förut bara
+kommentarer). Kedjevakten `detector-chain.test.ts` gör sviten röd vid
+felplacering. Ren refaktor, inga budändringar; E1+E3 🟢 → hela F2 stängd
+(`docs/budsystem-revision.md`). Detalj: `docs/historik.md` 2026-08-07.
+
+**F3 — ADVANCER-RABATTEN GENERALISERAD (2026-08-07): KLAR.** Den som svarar
+partnerns balansering räknar av den lånade kungen över ALLA öppningsnivåer
+(förr bara svaga tvåor): höjningar −3 stödpoäng + 3-lägestak
+(`partnerBalanced`/`raiseWithFit`), X-svar graderar cue/hopp på hp −3
+(`answerTakeoutDouble`). Direkt sits orörd. Facit
+`auction-advancer-rabatt.test.ts`, boken §7.1/§7.7/§9, mätning M28. Kvar som
+bevakning: NT-svar/nya färger efter balansering. Detalj: `docs/historik.md`.
+
+**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F4). Faceliten PARKERAD (2026-08-03).
 ⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
@@ -96,21 +98,24 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **F3 advancer-rabatten (2026-08-07):** svaret på partnerns balansering
+  räknar −3 (höjningar + X-svar). Står ni för lågt när balanseraren faktiskt
+  var maximal? NT-svar/nya färger räknar ännu inte rabatten — driver de högt?
 - **B13-återbuden (2026-08-07):** graderade återbud efter 1m–2m med svararens
   broms 10–12. Stannar ni för ofta i 3m min-mot-min där 3NT stod? Känns
   fantomstoppen begriplig när 3NT faller på öppnarens "visade" färg?
 - **Cue i minorfit + 2♣ (2026-08-07):** kontrollbud över 3NT i minorfit,
   direkt-4NT i drivzon. Cue:ar bottarna i 2♣-auktioner där du väntat
   direkt-RKC?
-- **Splinterregeln (2026-08-07):** singel A/K splintras aldrig — Jacoby 2NT i
-  stället. Saknar du splinterns exakta kortfärgsinfo i något läge (mätningen
-  visade +2 "fel färg"-givar som motvikt)?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
-   konkurrenskonventioner läggs på `decideCall`-kedjan.
+1. **F4 — TP till §7-inkliven (D9):** försvarslagret räknar rå HP, inte
+   fördelning — additivt ovanpå "låna en kung" (sits-spaken), inte ersättare.
+2. **F5 — verifiera i spel:** 6-5-återbudet efter 16+ 1♦ (A3) +
+   2♣-strain-valet (E2).
 
-*(B13 + cue-lägena STÄNGDA 2026-08-07 — se 🔵 NU-blocket.)*
+*(F2 + F3 STÄNGDA 2026-08-07 — se 🔵 NU-blocket. Ordningen = körordningen i
+`docs/budsystem-revision.md`.)*
 
 *(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C
 via cue-buden, hål D steg 1 klar / steg 2 parkerad — hela resan + verktygen i
@@ -125,10 +130,12 @@ cue-Stayman, efter takeout av svag tvåa) ·
 fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32/#34 KLARA; kvar: tredje hand högt i trumf) ·
 **UTSPELET** (hål A–G klara; kvar: förfining) · engelska som andra
-språk (Fas 5) · TP till §7-inkliven · advancer-rabatt efter balansering
-(generella fallet) · 17+ enfärgshand efter två bjudna färger · auto-facit på
+språk (Fas 5) · 17+ enfärgshand efter två bjudna färger *(TP till §7-inkliven +
+advancer-rabatten flyttade till 🟢 NÄST 2026-08-07)* · auto-facit på
 hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·
-svårighetsnivåer på bottarna · bot-hjärnans B2/Steg C · bredare försvarsinferens.
+svårighetsnivåer på bottarna · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
+`auctionFacts`-lagret (R2 steg 2 — förberäknade auktionsfakta åt detektorerna,
+byggs vid behov).
 
 ### 🅿️ PARKERAT (väg INTE in i beslut — full beskrivning i `docs/senare.md`)
 DDS-facit på tunga fulla givar · off-book §7 bredd · "framkalla slutbud"-väljaren ·
