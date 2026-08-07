@@ -9,6 +9,42 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Budgivning (2026-08-07) — dagens sex etapper (splinter, Jordan, starka återbud, 2/1, oklart)
+- **Splinterregeln (NYAST): en singel A/K splintras aldrig — handen svarar
+  Jacoby 2NT (§4.1).** **Bevaka:** (a) saknar du splinterns exakta kortfärgsinfo
+  i lägen där partnern behövde den (mätningen visade +2 "fel färg"-givar som
+  motvikt)? (b) känns Jacoby-vägen rätt med singel-kungen?
+- **Jordan 2NT besvaras alltid (§7.8d):** öppnaren 3M med ≤14 stödpoäng, 4M
+  med 15+; Jordan-bjudaren höjer 3M-avslutet med 13+. **Bevaka:** hamnar ni i
+  tunna 4M när öppnaren räknat upp sig på form?
+- **Starka återbud (§5.2/§6.6):** svararens 6-korts-rebud graderat (hoppinvit
+  11–12, 13+ → fjärde färg), öppnaren accepterar 3M-invit med 14+ stödpoäng,
+  reverse-handen med 18+ driver över preferensen. **Bevaka:** (a) för många
+  tunna 25-utgångar via 14+-accepten? (b) 5m-utgångarna efter reverse — står de?
+- **2/1: egen 4-korts högfärg visas i återbudet (§5.3)** när den är tredje
+  färgen. **Bevaka:** förvirrar det när samma bud i fjärde färg-läget är
+  konventionellt?
+- **Oklart-1NT:an routas till NMF + öppnaren rebjuder 5-korts färg med singel
+  i din färg (§5.2/§5.7).** **Bevaka:** saknar du 1NT-återbudet på de skeva
+  händerna (2m-rebudet kan spela sämre än 1NT någon gång)?
+
+## Budgivning (2026-08-07) — hål D steg 1: slaminvit i konkurrens (§6.10)
+- **Kontroll-komplett 4NT:** med 17+ (eller 16+ och 3 kontroller), fit funnen i
+  konkurrens, förstarundskontroll i ALLA sidofärger och en partner som hoppat
+  frågar kaptenen 4NT direkt — 6M bara på entydigt svar, aldrig storslam.
+  **Bevaka:** (a) känns 4NT-frågorna lagom sällsynta (tänder ~1/1000)? (b)
+  läcker vi i lägen där pass var bättre? Steg 2 (cue-frontend) är PARKERAD.
+
+## Budgivning (2026-08-03→04) — cue-buden återinförda + budstyrt utspel
+- **Cue-ronden (§6.2):** vid GF + agreed trumf (Jacoby 2NT / NMF-stöd) cue-bjuds
+  kontroller fritt under utgång; poängomdömet ligger på att gå FÖRBI utgången.
+  **Bevaka:** begriper du partnerns cue-bud vid bordet (förklaringarna ska
+  hjälpa), och bjuds tunna slammar efter cue-rundor?
+- **Utspelet (§8.3, hål A–G):** budstyrt — partnerns färg, undvik deras,
+  passivt mot trumf, tenass-/ess-skydd, inre sekvenser, trumf/singel i rätt
+  lägen. Netto-A/B 2026-08-05: litet men säkerställt försvarslyft. **Bevaka:**
+  utspel som känns "boken fel" vid bordet — notera given (frö visas i appen).
+
 ## Budgivning (2026-07-30) — Lebensohl efter vårt 1NT (§7.5)
 - **Motståndaren klivar nu in NATURELLT över 1NT (NYAST).** En stark enfärgshand
   (6+ kort, 11–15 hp) bjuder sin färg naturligt på 2-läget över ett 1NT — förut
@@ -130,13 +166,13 @@
   står ni fel när öppnaren är en bra 14?
 
 ## Känd skuld — verktyg som boken lovar men bordet inte kan
-- **Lebensohl är INTE inkopplad (upptäckt vid genomgången 2026-07-25).**
-  `lebensohl.ts` är byggd och enhetstestad, men ingen produktionsfil importerar
-  den: i ett svep där motorn bjöd 3 000 givar föll 0 Lebensohl-bud. **Bevaka:**
-  säger du 2NT efter partnerns upplysningsdubbling av en svag tvåa förstår
-  partnern det INTE som Lebensohl-relä. §7.5 i boken är märkt tills vidare;
-  inkopplingen ligger som eget jobb. Kopplingsvakten i `src/docs-vakt.test.ts`
-  ser till att ingen annan modul tappar kontakten på samma tysta sätt.
+- **Lebensohl: kärnan INKOPPLAD 2026-07-30 (Lager 1, §7.5) — skulden krympt,
+  inte stängd.** `lebensohl.ts` importeras nu av `auction-live.ts` och spelas
+  efter naturliga inkliv över VÅRT 1NT (se 2026-07-30-posten överst).
+  **Kvar (spelas EJ):** Lebensohl efter partnerns takeout-dubbling av en svag
+  tvåa (det gamla typexemplet — 2NT där är fortfarande INTE relä), takeout-X i
+  1NT-läget, "slow shows" och cue-Stayman. Detalj: `docs/senare.md`.
+  Kopplingsvakten i `src/docs-vakt.test.ts` vaktar fortfarande mot tysta tapp.
 
 ## Etapp 4 (2026-07-24 → 2026-07-25) — slam efter 2♣, reverse och hoppskift
 - **Familj C: reverse/hoppskift-fortsättningen (2026-07-25, NYAST).**

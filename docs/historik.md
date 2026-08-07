@@ -10,6 +10,63 @@
 
 ---
 
+## 2026-08-07 (sex etapper på en dag — hål D landad + fem systemfixar, M22–M26)
+
+**🏗️ GODKÄND ETAPPLAN KÖRD E1→E7** (planfil `vi-jobbar-vidare-med-dreamy-
+salamander.md`; alla ägarbeslut togs löpande i sessionen). Varje etapp:
+facit-test FÖRE fix, hela sviten grön, egen `--no-ff`-merge, revisor-mätning
+(frö 20260721) — **dagens serie M22–M26: par-avvikelse 269,67 → 264,77
+(≈ −4 900 p per 1 000 givar), rätt kontrakt 19,0 → 19,7 %** (detalj per mätning
+i `docs/systemrevisorn.md`).
+
+- **E1 — hål D steg 1 LANDAD** (låg ocommittad sedan 2026-08-05): kontroll-
+  komplett 4NT i konkurrenslagret (§6.10). Facitstädning per ägarbeslut: 947 →
+  splinterspåret, 1274 struken (stale premiss), 1272 parkerad med **steg 2
+  (cue-frontend) — PARKERAD** (`docs/senare.md`).
+- **E2 — splinterregeln:** singel A/K → Jacoby 2NT (§4.1, källor bridgebum +
+  BBO-konsensus; dam FÅR splintras — ägarbeslut efter källdykning). Fixar frö
+  20260947. M22: −1 170 p.
+- **E3 — Jordan 2NT-fortsättningen** (systemfel #4): öppnaren passar aldrig;
+  3M/4M på stödpoäng ≤14/15+, bjudaren höjer avslutet med 13+ (§7.8d, frö
+  20260739 → 4♥). M23: −740 p.
+- **E4 — starka återbud** (systemfel #3): graderat 6-korts-rebud (11–12 hopp,
+  13+ fjärde färg), öppnarens invit-accept 14+ stödpoäng, reverse-handen 18+
+  driver (§5.2/§6.6; frön 20261323 → 3NT, 20260982 → 4♥, 20261111 → 5♣).
+  M24: −1 480 p, rätt kontrakt +0,4 %-enheter.
+- **E5 — 2/1: högfärgen visas i återbudet** (§4.2/§5.3, §9-löftet 2026-08-06
+  infriat): egen 4-korts högfärg som TREDJE färg bjuds naturligt under 3NT;
+  som fjärde färg förblir budet konventionellt (lärdom ur facit felrapport #4).
+  M25: −710 p.
+- **E6 — oklart-återbudet** (systemfel #2, översyn med ägargodkänd klassning):
+  'oklart'-1NT routas till NMF-maskineriet (frö 20261317: begravd hjärterfit →
+  4♥) + öppnaren rebjuder 5-korts färg i stället för skev 1NT med singel i
+  partnerns färg (frö 20260878). 1155/1492/1228 klassade rätt/medvetet-OK.
+  M26: −800 p.
+- **E7 — dokumentationssvepet:** denna post + bevaka.md (nya poster + Lebensohl-
+  skulden rättad mot koden), budsystem-revision.md (F1-tabellen var stale — alla
+  fyra familjer byggda sedan etapp 4), utspel-diagnos.md (netto-A/B klar),
+  CLAUDE.md-kartan.
+
+Ej pushat vid sessionens slut — väntar på ägarens PCD-klartecken.
+
+## 2026-08-06 (fjärde färg-fortsättningen + 2/1-regeln — spanarens fynd #1)
+
+**🧭 SVARAREN PASSAR ALDRIG SIN EGEN FJÄRDE FÄRG (mergepunkter `3bee0e9` +
+`015e6bf`).** Spanar-agentens största fynd (frö 20260743: 33 hp dog i 2NT när
+fjärde färg-kravet passades). Ny `placeGameAfterFourthSuit` (`auction-live.ts`):
+svararen placerar utgång efter besvarad fjärde färg — 3NT eller 4M om öppnaren
+höjt högfärgen; gated till modesta händer (<18 hp) så starka händer fortsätter
+slamvägen. Tänder på 7/1000 givar. Facit
+`auction-fjarde-farg-fortsattning.test.ts`; boken §6.6 + §9.
+
+**📚 2/1 GF MED 5-KORTS KLÖVER FÖRE 4-KORTS HÖGFÄRG ÖVER 1♦ (mergepunkt
+`36c7541`, källbelagt).** Kortaste vägen till game force: 12+ med 5♣ + 4-korts
+högfärg svarar 2♣ över 1♦ (9–11 väljer 1-läget). Källor: Couchman +
+Porthcawl-tutorialen. Ny gren i `respondToMinor`; boken §4.2 + §9. Återbudet
+(visa högfärgen) togs separat — byggt 2026-08-07 (E5 ovan). Samma dag
+noterades ägarregeln "splintra ej singelhonnör" (byggd 2026-08-07, E2) och
+947-korrigeringen (hör hemma i Jacoby-spåret, inte konkurrenslagret).
+
 ## 2026-08-05 (netto-A/B-mätning av det budstyrda utspelet)
 
 **📏 UTSPELET GER ETT LITET MEN STATISTISKT SÄKERSTÄLLT FÖRSVARSLYFT — mätt, inte

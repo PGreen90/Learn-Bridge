@@ -10,14 +10,15 @@
 
 **Färgkoder:** 🟢 byggt/testat/live · 🟡 fungerar men känd gräns/bevakning · 🔴 lucka/uppskjutet.
 
-**Hälsobild:** systemet är komplett och vältestat (1090 gröna test, facit-först,
-boken = enda sanningskälla). Grunder och konventioner solida. **2026-07-07 kväll:
-ÄRLIGA SLAMPORTAR byggda** (ägarbeslut: inga budbeslut på partnerns faktiska kort
+**Hälsobild:** systemet är komplett och vältestat (grön svit i deploygrinden —
+enda sanningen om testläget: kör `npm test`; facit-först, boken = enda
+sanningskälla). Grunder och konventioner solida. **2026-07-07 kväll: ÄRLIGA
+SLAMPORTAR byggda** (ägarbeslut: inga budbeslut på partnerns faktiska kort
 — egen hand + visade intervall; inbjudningar i kanske-zonen; fel tillåtna).
-Svagheterna är koncentrerade till: (1) slam-utforskning utanför byggda vägar
-(**F1 — pausad tills ärliga portar bekräftats i spel**), (2) underhållbarheten i
-off-book-detektorkedjan, (3) att försvarslagret (§7) inte räknar fördelning (TP),
-(4) grova återbud efter inverterad minor (B13, blottad av ärliga portar).
+Svagheterna är koncentrerade till: (1) underhållbarheten i
+off-book-detektorkedjan (F2/E1), (2) att försvarslagret (§7) inte räknar
+fördelning (TP), (3) grova återbud efter inverterad minor (B13, blottad av
+ärliga portar). *(F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)*
 
 ---
 
@@ -104,7 +105,7 @@ kravminnet löst.
 
 | Ordn. | Åtgärd | Adresserar | Status |
 |:---:|--------|-----------|:---:|
-| **F1** | Bredda slam-utforskningen (facit-först, en familj i taget) | B10, B9, A13, E2 | 🟡 **PÅGÅR** |
+| **F1** | Bredda slam-utforskningen (facit-först, en familj i taget) | B10, B9, A13, E2 | 🟢 **KLAR** (alla fyra familjer, etapp 4 2026-07-24→25) |
 | **F2** | Datadriven detektorkedja + återanvändbar systemrevisor | E1, E3 | 🔴 kvar |
 | **F3** | Advancer-rabatt efter balansering | C12 | 🔴 kvar |
 | **F4** | TP till §7-inkliven | D9 | 🔴 kvar |
@@ -116,14 +117,14 @@ kravminnet löst.
 |--------|------|:---:|
 | **A** | efter 1NT-återbud (`1m–1M–1NT`) | 🟢 **KLAR & LIVE** — jämn → 6NT (Gerber); obal. m. fit → 6 i färg (RKC) |
 | **D** | Jacoby 2NT-läcka (hängande cue = slam-quirken) | 🟢 **KLAR & LIVE** — → 7♥; quirk stängd i alla vägar |
-| **B** | efter stark 2♣ (positiva svar / 2NT-rebud) | 🔴 **kvar** |
-| **C** | efter öppnaren visat extra (hoppskift/hopphöjning/reverse) — **störst** | 🟡 **hopphöjning KLAR** (1x–1M–3M → 6M via RKC, `auction-slam-jumpraise.test.ts`); **reverse + hoppskift kvar** |
+| **B** | efter stark 2♣ (positiva svar / 2NT-rebud) | 🟢 **KLAR & LIVE** (etapp 4 fix 1+2, mätning #12–#13 i `docs/systemrevisorn.md`) |
+| **C** | efter öppnaren visat extra (hoppskift/hopphöjning/reverse) — **störst** | 🟢 **KLAR & LIVE** (hopphöjning `auction-slam-jumpraise.test.ts`; reverse + hoppskift etapp 4-resten, mätning #14) |
 
-**Nästa gång:** F1 är PAUSAD (ägarbeslut 2026-07-07 kväll) tills de ÄRLIGA
-slamportarna bekräftats i spel. Familj B (2♣) + C:s reverse/hoppskift byggs
-sedan med samma ärliga mönster (kaptensregeln mot visade intervall — aldrig
-partnerns kort). Bygg facit-först: probe → röd giv → fix → grön → DD-verifiera →
-full svit → PCD (fråga ägaren).
+**Status 2026-08-07 (svepet):** F1 är KLAR — alla fyra familjerna byggdes i
+etapp 4 (2026-07-24→25, mätning #12–#14 i `docs/systemrevisorn.md`) med de
+ärliga portarnas mönster (kaptensregeln mot visade intervall — aldrig partnerns
+kort). Den gamla "PAUSAD"-texten här var stale (dokumentet uppdaterades inte
+när etapp 4 landade).
 
 **Medvetet PARKERAT (väg inte in):** Mathe (C13), LTC (D8).
 **Utanför denna revision (eget spelmotor-spår):** kortspels-kvalitet #32/#34 i `play-bot.ts`.
