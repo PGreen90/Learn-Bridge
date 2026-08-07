@@ -22,10 +22,11 @@ import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { lebensohlAfter1NT, lebensohlAfter1NTRebid } from './lebensohl'
 import { defendPreempt } from './defense-conventional'
-import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse } from './rebids'
+import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfterJordan2NT } from './rebids'
 import { respondTo1NT } from './responses-nt'
 import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
-import { responderPlaceAfterNMF } from './responder-rebids'
+import { jordanRaiseAfterSignoff, responderPlaceAfterNMF } from './responder-rebids'
+import type { Major } from './responses'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths, suitHcp } from './hand'
 import { advanceTwoSuiter, hasStopper, openingSuit, overcall } from './overcalls'
@@ -1074,6 +1075,58 @@ function jacobyFitTrump(history: ResolvedCall[], seat: Seat): Suit | null {
     return history[i].bid === '2NT' ? major : null // svararens första svar
   }
   return null
+}
+
+/**
+ * Grundmönstret för Jordan/Truscott (§7.3): vår 1M-öppning, DIREKT X från
+ * motståndaren, partnerns 2NT som sidans första svar. Positionsexakt läsning
+ * (öppning → X → 2NT) så en försenad 2NT eller sang i annan sits aldrig
+ * feltolkas. Delas av öppnarens svarsplikt och Jordan-bjudarens fortsättning.
+ */
+function jordanBase(history: ResolvedCall[]): { openerSeat: Seat; major: Major; ntIdx: number } | null {
+  const open = openingBid(history)
+  if (!open || open.level !== 1) return null
+  const major = SUIT_OF_LETTER[open.strain]
+  if (major !== 'hearts' && major !== 'spades') return null
+  const openIdx = history.findIndex((c) => parseContractBid(c.bid))
+  const dbl = history[openIdx + 1]
+  if (!dbl || dbl.bid !== 'X') return null
+  const nt = history[openIdx + 2]
+  if (!nt || nt.bid !== '2NT' || nt.seat !== PARTNER[open.seat]) return null
+  return { openerSeat: open.seat, major, ntIdx: openIdx + 2 }
+}
+
+/**
+ * Partnerns Jordan 2NT väntar på mitt (öppnarens) svar — jag passar ALDRIG
+ * (systemfel #4, frö 20260739). Bjuder advancern vidare över 2NT lämnas läget
+ * till det ordinarie konkurrensmaskineriet (Jordan är inbjudan, inte rondkrav
+ * i störd fortsättning).
+ */
+function jordanToAnswer(history: ResolvedCall[], seat: Seat): { major: Major } | null {
+  const j = jordanBase(history)
+  if (!j || j.openerSeat !== seat) return null
+  for (let i = j.ntIdx + 1; i < history.length; i++) {
+    if (history[i].bid !== 'P') return null
+  }
+  return { major: j.major }
+}
+
+/**
+ * Öppnaren avslutade 3M på min Jordan 2NT — med utgångsstyrka (13+) går jag
+ * vidare, med ren limithöjning står avslutet.
+ */
+function jordanSignoffToAnswer(history: ResolvedCall[], seat: Seat): { major: Major } | null {
+  const j = jordanBase(history)
+  if (!j || PARTNER[j.openerSeat] !== seat) return null
+  let i = j.ntIdx + 1
+  while (i < history.length && history[i].bid === 'P') i++
+  const signoff = history[i]
+  const letter = j.major === 'hearts' ? 'H' : 'S'
+  if (!signoff || signoff.seat !== j.openerSeat || signoff.bid !== `3${letter}`) return null
+  for (let k = i + 1; k < history.length; k++) {
+    if (history[k].bid !== 'P') return null
+  }
+  return { major: j.major }
 }
 
 /**
@@ -3955,6 +4008,13 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     // Dubblaren väger höjningen av advancerns färgsvar mot vad svaret VISADE
     // (hopp 9–11, fritt ~6–9, XX-flykt 0+) — före den generella fit-blastern.
     () => doublerRaisesAdvance(deal, history, seat),
+    // Partnerns JORDAN 2NT över deras X (§7.3): öppnaren svarar alltid —
+    // 3M minimum/avslut, 4M med 15+ stödpoäng (systemfel #4, frö 20260739).
+    () => answered(jordanToAnswer(history, seat),
+      (j) => openerRebidAfterJordan2NT(hand, j.major), history, seat),
+    // ... och Jordan-bjudaren väger öppnarens 3M-avslut: 13+ höjer till utgång.
+    () => answered(jordanSignoffToAnswer(history, seat),
+      (j) => jordanRaiseAfterSignoff(hand, j.major), history, seat),
     // Partnerns NEGATIVA dubbling (§7.3, rondkrav): öppnaren svarar alltid.
     () => answered(negativeDoubleToAnswer(history, seat),
       (n) => openerAnswerNegativeDouble(hand, n.ourOpen, n.theirCall), history, seat),

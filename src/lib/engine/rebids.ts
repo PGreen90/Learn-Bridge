@@ -290,6 +290,22 @@ export function openerRebidAfterJacoby2NT(hand: Hand, M: Major): ResponseResult 
   return { call: `4${mBid}`, rule: 'Jacoby: minimum', explanation: `${p} hp minimum balanserad → 4${mSym} (signoff).` }
 }
 
+// === Jordan 2NT: öppnarens fortsättning, §7.3 ===============================
+// 1M–(X)–2NT är limithöjning eller bättre (10+, 4+ stöd) — öppnaren passar
+// ALDRIG (systemfel #4, frö 20260739: pass med 9-korts fit och 28 hp ihop).
+// Ägarbeslut 2026-08-07: bara 3M/4M (inget ny färg-utgångsförsök), tröskeln i
+// STÖDPOÄNG mot den kända fiten: ≤14 → 3M (avslut), 15+ → 4M.
+
+export function openerRebidAfterJordan2NT(hand: Hand, M: Major): ResponseResult {
+  const { points: sp, text: txt } = pointsWithFloor(hand, M, 'support')
+  const mBid = BID[M]
+  const mSym = SYM[M]
+  if (sp >= 15) {
+    return { call: `4${mBid}`, rule: 'Jordan: utgång', explanation: `${txt} mot partnerns limithöjning+ (Jordan) → 4${mSym}.` }
+  }
+  return { call: `3${mBid}`, rule: 'Jordan: minimum', explanation: `${txt} – minimum → 3${mSym} (avslut; partnern går vidare med 13+).` }
+}
+
 // === Punkt 7: återbud efter inverterade minorhöjningar, §4.2 ================
 
 export function openerRebidAfterInvertedMinor(hand: Hand, m: Suit, strong: boolean): ResponseResult {
