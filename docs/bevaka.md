@@ -9,6 +9,16 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Budgivning (2026-08-07) — B13: inverterad minor-återbuden + cue-lägena
+- **Graderade återbud efter 1m–2m (NYAST, §4.2):** äkta honnörsstopp, 3m
+  strikt 12–14, 15+ bjuder alltid krav ("fantomstopp" utan äkta stopp),
+  svararens broms 10–12 + öppnarens driv med 15+. **Bevaka:** (a) stannar ni
+  för ofta i 3m min-mot-min där 3NT ändå stod (bromsen kan vara feg)? (b)
+  känns fantomstoppen begriplig när 3NT faller på öppnarens "visade" färg?
+- **Cue i minorfit + 2♣-grenen (§6.2):** kontrollbud över 3NT i minorfit; i
+  klar drivzon (33+) direkt-4NT i minortrumf. **Bevaka:** cue:ar bottarna
+  i 2♣-auktioner där du väntat direkt-RKC (4♣/4♦-cuen kan kännas främmande)?
+
 ## Budgivning (2026-08-07) — dagens sex etapper (splinter, Jordan, starka återbud, 2/1, oklart)
 - **Splinterregeln (NYAST): en singel A/K splintras aldrig — handen svarar
   Jacoby 2NT (§4.1).** **Bevaka:** (a) saknar du splinterns exakta kortfärgsinfo

@@ -244,9 +244,14 @@ export function responderRebidAfterInvertedMinor(hand: Hand, m: Suit, rebid: Res
     }
 
     case 'inverterad: stopp-visning': {
-      // Öppnaren visade en stopp i en sidofärg (krav, letar 3NT). Svararen bjuder
-      // 3NT när de ÖVRIGA sidofärgerna är täckta; annars höjer minorn mot
-      // minorutgång (5m). Fortsatt stopp-letande upp-the-line = FAS 8 (flaggas).
+      // Öppnaren visade en stopp i en sidofärg (krav, letar 3NT). B13
+      // (2026-08-07): stopp-visningen lovar bara 12+ — med minimumhöjningen
+      // (10–12) BROMSAR svararen med 3m ("bara minimum"); öppnaren passar med
+      // 12–14 och driver med 15+ (öppnarens tredje bud). Med 13+ bjuder
+      // svararen 3NT när de ÖVRIGA sidofärgerna är täckta; annars minorutgång.
+      if (p <= 12) {
+        return { call: `3${mBid}`, rule: 'inverterad: broms', explanation: `${p} hp – bara minimumhöjning (10–12) → 3${mSym} (broms; öppnaren driver med 15+).` }
+      }
       const shown = suitOfCall(rebid.call)
       const remaining = sideSuits.filter((s) => s !== shown)
       if (remaining.every((s) => hasStopper(hand, s))) {

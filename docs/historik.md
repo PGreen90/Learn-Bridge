@@ -10,6 +10,36 @@
 
 ---
 
+## 2026-08-07 kväll (B13 — inverterad minor-återbuden + cue-lägena, M27)
+
+**B13 STÄNGD** (🟢 NÄST punkt 1, blottad av ärliga portar): öppnarens återbud
+efter den starka inverterade höjningen 1m–2m var grova. Facit FÖRE fix
+(`auction-inverterad-rebud.test.ts`, 11 tester), källa bridgebum (inverted
+minors), boken §4.2/§6.2/§9, mätning M27 (`docs/systemrevisorn.md`).
+
+- **Äkta stopp:** stopp-visningen krävde 4+ KORT utan honnörskrav (♠9642
+  "visade spaderstopp" → 3NT föll på utspelet). Nu motorns honnörsstopp
+  (A/Kx/Qxx/J10xx), billigaste först.
+- **Graderingen:** 3m är strikt 12–14; en hand med 15+ bjuder ALLTID krav.
+  Utan äkta sidostopp bjuds bästa sidofärgen som "fantomstopp" — SAMMA bud och
+  regel som stopp-visningen (ärliga portar: partnern kan inte och ska inte
+  kunna skilja dem åt); styrkan visas i nästa bud. Kärnfallet 17 hp + 6m som
+  dog i "3m minimum" (28 hp ihop utan utgång) är borta.
+- **Bromsen + andra växeln:** svararen med 10–12 svarar 3m ("bara minimum") på
+  stopp-visningen; öppnaren passar 12–14 och driver 15+ (3NT vid full täckning
+  / andra stoppen under 3NT / 5m). Min-mot-min-överbuden (tvingad utgång på
+  22–26) och de passade 27+-utgångarna försvann samtidigt.
+- **Cue-lägena (kvar sedan 2026-08-03):** cue-ronden inkopplad för minorfiten
+  och 2♣-grenen (agreed trumf). Två minorregler: cue först ÖVER 3NT (under =
+  stopp-letande, §4.2), och i klar drivzon (33+) direkt-4NT — frö 20261469
+  visade hur cue-ronden annars åt upp 4NT-utrymmet (5♦ i stället för 6♦).
+  Under bygget hittades och stoppades även en design-miss: en separat regel
+  "stark sidofärg" hade gett samma BUD två avläsbara betydelser (dold info via
+  regelnamnet) — den slogs ihop med stopp-visningen före leverans.
+- Tre gamla facit uppdaterade i linje med nya systemet (billigaste äkta stopp
+  2♥ före längd-2♠; broms i stället för tvingad 5♦; 2♣-grenens kaptener cue:ar
+  på vägen mot 6♥/6♦).
+
 ## 2026-08-07 (sex etapper på en dag — hål D landad + fem systemfixar, M22–M26)
 
 **🏗️ GODKÄND ETAPPLAN KÖRD E1→E7** (planfil `vi-jobbar-vidare-med-dreamy-

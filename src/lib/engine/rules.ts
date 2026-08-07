@@ -191,6 +191,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'inverterad: 2NT': 'ej-krav',
   'inverterad: 3NT': 'avslut',
   'inverterad: minimum': 'ej-krav',
+  'inverterad: broms': 'ej-krav', // B13: svararens 3m = "bara minimum 10–12"
 
   // ---- NT-konventioner (§4.3) ----
   Stayman: 'krav-1-rond',

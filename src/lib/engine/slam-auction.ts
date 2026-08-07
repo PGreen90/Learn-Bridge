@@ -74,6 +74,11 @@ export interface SlamContext {
    *  att gå FÖRBI utgången (ägarbeslut 2026-08-03). Utelämnat/false = gammalt
    *  beteende (inbjudan/driv på poäng, ingen cue). */
   gameForcing?: boolean
+  /** Golv för cue-ronden (B13, 2026-08-07): cue-bud läggs bara STRIKT ÖVER det
+   *  här budet. I minorfit-lägen är golvet '3NT' — under 3NT betyder nya färger
+   *  STOPP-letande (§4.2), över 3NT kontrollbud — så budspråken aldrig krockar.
+   *  Utelämnat = cue direkt över senaste budet (högfärgslägena). */
+  cueFloor?: string
 }
 
 /**
@@ -125,9 +130,17 @@ export function slamInvestigation(
   // GF + trumf klar: cue-ronden (§6.2) körs FRITT under utgång när slam är
   // aritmetiskt möjlig (floor ≥ 30). Har kaptenen ingen gratis cue faller det
   // igenom till den gamla porten nedan (oförändrat). Ägarbeslut 2026-08-03.
+  // B13-undantag (2026-08-07): i MINORTRUMF ligger utgången (5m) ÖVER 4NT —
+  // cue-utrymmet är trångt. I klar drivzon (33+) går kaptenen därför direkt på
+  // 4NT RKC i stället för att cue:a bort frågeutrymmet (frö 20261469: cue-ronden
+  // åt upp 4NT → 5♦, lillslammen tappad). Kanske-zonen 30–32 cue:ar som vanligt.
   if (ctx.gameForcing && floor >= 30) {
-    const cued = cueSlamAuction(openerHand, responderHand, trump, lastCall, ctx, floor)
-    if (cued) return cued
+    const tightSpace = bidRank(gameCallFor(trump)) > bidRank('4NT')
+    const clearDrive = tightSpace && floor >= 33 && bidRank('4NT') > lastRank
+    if (!clearDrive) {
+      const cued = cueSlamAuction(openerHand, responderHand, trump, lastCall, ctx, floor)
+      if (cued) return cued
+    }
   }
 
   if (floor >= 33 && bidRank('4NT') > lastRank) {
@@ -199,6 +212,9 @@ function cueSlamAuction(
 ): SlamTurn[] | null {
   const gameRank = bidRank(gameCallFor(trump))
   let lastRank = lastCall ? bidRank(lastCall) : -1
+  // Cue-golvet (B13): i minorfit börjar cue-ronden först ÖVER golvet (3NT) så
+  // den aldrig kolliderar med stopp-letandets färgbud under 3NT.
+  if (ctx.cueFloor) lastRank = Math.max(lastRank, bidRank(ctx.cueFloor))
   const controlled = new Set<Suit>()
   if (!cheapestFreeCue(responderHand, trump, lastRank, gameRank, controlled)) return null
 

@@ -17,8 +17,8 @@ SLAMPORTAR byggda** (ägarbeslut: inga budbeslut på partnerns faktiska kort
 — egen hand + visade intervall; inbjudningar i kanske-zonen; fel tillåtna).
 Svagheterna är koncentrerade till: (1) underhållbarheten i
 off-book-detektorkedjan (F2/E1), (2) att försvarslagret (§7) inte räknar
-fördelning (TP), (3) grova återbud efter inverterad minor (B13, blottad av
-ärliga portar). *(F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)*
+fördelning (TP). *(B13, grova återbud efter inverterad minor, LAGAD
+2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)*
 
 ---
 
@@ -56,7 +56,7 @@ fördelning (TP), (3) grova återbud efter inverterad minor (B13, blottad av
 | B10 | **Slam-utforskning i övrigt** | 🟡 | **F1 pausad → NÄST** tills ärliga portar bekräftade i spel; familj B (2♣) + C (reverse/hoppskift) byggs sedan ÄRLIGT |
 | B11 | ~~Slam-quirken (hängande cue)~~ | 🟢 | LÖST; cue-ronden numera helt borttagen ur motorn (ärliga portar) |
 | B12 | **Ärliga slamportar** (egen hand + visat intervall; inbjudningar; härledning + rättelse) | 🟢 | **BYGGT 2026-07-07 kväll** — bevaka i spel: missar/inbjudningsfrekvens |
-| B13 | Inverterad minor-återbuden är grova (17 hp + 6m visas som "minimum 3m" → ärliga misser) | 🔴 | Förfina öppnarens återbud efter inverterad höjning (stopp-visning kräver 4+ kort i dag) |
+| B13 | Inverterad minor-återbuden | 🟢 | **BYGGD 2026-08-07:** äkta honnörsstopp (inte 4+ längd), 3m strikt 12–14, 15+ bjuder alltid krav, svararens broms 10–12 + öppnarens driv, cue-ronden i minorfit (över 3NT) + 2♣-grenen. Facit `auction-inverterad-rebud.test.ts`, boken §4.2/§6.2/§9, mätning M27 |
 
 ## C. FÖRSVAR & KONKURRENS (§7)
 

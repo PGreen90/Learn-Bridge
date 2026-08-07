@@ -55,26 +55,33 @@ trumf** cue:ar motorn fritt under utgång; poängomdömet ligger på att gå FÖ
 utgången. `cueSlamAuction` (`slam-auction.ts`), inkopplat Jacoby 2NT + NMF
 (= hål C). Reverse/hoppskift/2♣ HÅLLS (inferrerad trumf). Mätning ren
 (par-avvikelse 270,74 → 270,69). Facit `auction-slam-cue.test.ts`, boken
-§6.2/§9, detalj `docs/historik.md`. **Kvar (eget beslut):** fler
-agreed-trumf-lägen (inverterad minor, 2♣); off-book-igenkänning av din cue;
-öppnarens 18–19 i Jacoby.
+§6.2/§9, detalj `docs/historik.md`. **Kvar (eget beslut):** off-book-
+igenkänning av din cue; öppnarens 18–19 i Jacoby. *(Agreed-trumf-lägena
+inverterad minor + 2♣: BYGGDA 2026-08-07 via B13.)*
 
 **UTSPELET (2026-08-04): HÅL A–G KLARA (§8.3/§9).** Budstyrt utspel i `botCardSmart`
 (`openingLeadWithAuction`): partnerns färg, undvik deras, passivt + tenass/ess-skydd
 mot trumf, inre sekvenser, trumf/singel. Teori `docs/utspel-teori.md`; kvar =
 förfining `docs/utspel-diagnos.md`.
 
-**ETAPPERNA E1–E7 (2026-08-07): ALLA KLARA — EJ PUSHADE.** E1 hål D steg 1
-landad (§6.10, steg 2 PARKERAD i `docs/senare.md`) · E2 splinterregeln singel
-A/K → Jacoby (§4.1, källbelagd, fixar 947) · E3 Jordan-fortsättningen (§7.8d) ·
-E4 starka återbud 4a/4b/4c (§5.2/§6.6) · E5 2/1-högfärgen i återbudet (§5.3) ·
-E6 oklart-fixarna (§5.2/§5.7) · E7 doc-svepet. **Mätserien M22–M26:
-par-avvikelse 269,67 → 264,77 (≈ −4 900 p/1 000 givar), rätt kontrakt 19,0 →
+**ETAPPERNA E1–E7 (2026-08-07): ALLA KLARA, PUSHADE & DEPLOYADE** (grön
+Actions-körning 2026-08-07). E1 hål D steg 1 (§6.10, steg 2 PARKERAD) · E2
+splinterregeln (§4.1) · E3 Jordan (§7.8d) · E4 starka återbud (§5.2/§6.6) ·
+E5 2/1-högfärgen (§5.3) · E6 oklart-fixarna (§5.2/§5.7) · E7 doc-svepet.
+**Mätserien M22–M26: par-avvikelse 269,67 → 264,77, rätt kontrakt 19,0 →
 19,7 %** (`docs/systemrevisorn.md`; detalj `docs/historik.md` 2026-08-07).
 
-**➡️ NÄSTA GÅNG:** PCD-beslut på dagens commits (fråga ägaren) → sedan 🟢 NÄST
-punkt 1. Faceliten PARKERAD (2026-08-03). ⚪ SENARE: tredje hand högt i
-**trumf** + signalspåret.
+**B13 — ÖPPNARENS ÅTERBUD EFTER INVERTERAD MINORHÖJNING + CUE-LÄGENA
+(2026-08-07): KLAR.** Graderade återbud efter 1m–2m (§4.2): äkta honnörsstopp
+(inte 4+ längd), 3m strikt 12–14, 15+ bjuder ALLTID krav ("fantomstopp" utan
+äkta stopp — samma bud, styrkan visas i nästa bud), svararens broms 10–12 +
+öppnarens driv med 15+. Cue-ronden (§6.2) inkopplad i minorfiten (först ÖVER
+3NT; i drivzon 33+ direkt-4NT så 5m-utrymmet inte äts upp) och 2♣-grenen.
+Facit `auction-inverterad-rebud.test.ts`, boken §4.2/§6.2/§9, mätning M27
+(`docs/systemrevisorn.md`).
+
+**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F2). Faceliten PARKERAD (2026-08-03).
+⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
@@ -89,22 +96,21 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **B13-återbuden (2026-08-07):** graderade återbud efter 1m–2m med svararens
+  broms 10–12. Stannar ni för ofta i 3m min-mot-min där 3NT stod? Känns
+  fantomstoppen begriplig när 3NT faller på öppnarens "visade" färg?
+- **Cue i minorfit + 2♣ (2026-08-07):** kontrollbud över 3NT i minorfit,
+  direkt-4NT i drivzon. Cue:ar bottarna i 2♣-auktioner där du väntat
+  direkt-RKC?
 - **Splinterregeln (2026-08-07):** singel A/K splintras aldrig — Jacoby 2NT i
   stället. Saknar du splinterns exakta kortfärgsinfo i något läge (mätningen
   visade +2 "fel färg"-givar som motvikt)?
-- **Starka återbud (2026-08-07):** graderat 6-korts-rebud, invit-accept på 14+
-  stödpoäng, reverse-handen driver med 18+. För många tunna 25-utgångar? Står
-  5m-utgångarna efter reverse?
-- **Hål D steg 1 (2026-08-07):** kontroll-komplett 4NT i konkurrens (§6.10) —
-  känns frågorna lagom sällsynta (~1/1000), eller läcker vi där pass var
-  bättre?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är
-   grova → ärliga slam-misser (`docs/budsystem-revision.md` B13). Cue-lägena
-   "fler agreed-trumf" (inverterad minor, 2♣) hör naturligt ihop med denna.
-2. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
+1. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
    konkurrenskonventioner läggs på `decideCall`-kedjan.
+
+*(B13 + cue-lägena STÄNGDA 2026-08-07 — se 🔵 NU-blocket.)*
 
 *(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C
 via cue-buden, hål D steg 1 klar / steg 2 parkerad — hela resan + verktygen i

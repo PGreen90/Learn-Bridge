@@ -19,7 +19,7 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerAnswerNMF, openerSecondBid, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -551,7 +551,11 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trump2C, rebid.call, {
         partnerMin: STRONG_2C_SHOWN_MIN,
         inviteCall,
-        // Cue-bud håller tills trumf-agreementet i 2♣-grenen analyserats separat.
+        // B13 (2026-08-07): trumfen är AGREED (stöd-återbudet/3+ stöd) och 2♣-
+        // auktionen är GF per system → cue-ronden (§6.2) körs. I minortrumf
+        // först ÖVER 3NT (sangen kan fortfarande vara rätt kontrakt under den).
+        gameForcing: true,
+        cueFloor: majorTrump ? undefined : '3NT',
       })
       if (slam) {
         for (const t of slam) {
@@ -724,8 +728,11 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       partnerMin: SHOWN_MIN[rebid.rule] ?? 12,
       inviteCall: majorFit ? `5${LETTER[trumpS]}` : `4${LETTER[trumpS]}`,
       // Jacoby 2NT = utgångskravande högfärgshöjning → cue-bud fritt under utgång
-      // (§6.2, ägarbeslut 2026-08-03). Inverterad minor lämnas oflaggad tills vidare.
-      gameForcing: majorFit,
+      // (§6.2, ägarbeslut 2026-08-03). B13 (2026-08-07): även minorfiten cue:ar —
+      // men först ÖVER 3NT (under 3NT betyder nya färger STOPP, §4.2), så de två
+      // budspråken aldrig krockar. cueFloor sätter den gränsen.
+      gameForcing: true,
+      cueFloor: minorFit ? '3NT' : undefined,
     }, openerShort)
     if (slam) {
       for (const t of slam) {
@@ -874,6 +881,28 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       const M4b = response.call === '1H' ? ('hearts' as const) : ('spades' as const)
       const third = openerThirdBidAfterOwnRaise(deal.hands[openerSeat], M4b)
       turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+      return finish(false)
+    }
+    // B13 (2026-08-07): svararens BROMS efter öppnarens stopp-visning i den
+    // inverterade minorn (1m–2m–ny färg–3m = "bara minimum, 10–12"). Öppnaren
+    // svarar alltid: pass med 12–14, driv med 15+ (3NT / andra stoppen / 5m).
+    // Efter en andra stopp-visning täcker svararen resten eller tar 5m.
+    if (second.rule === 'inverterad: broms' && openerSuit && (openerSuit === 'clubs' || openerSuit === 'diamonds')) {
+      const third = openerThirdBidAfterInvertedBrake(deal.hands[openerSeat], openerSuit, parseBid(rebid.call).suit)
+      turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+      if (third.rule === 'inverterad: stopp-visning') {
+        const shown1 = parseBid(rebid.call).suit
+        const shown2 = parseBid(third.call).suit
+        const rh = deal.hands[responderSeat]
+        const rest = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter(
+          (s) => s !== openerSuit && s !== shown1 && s !== shown2,
+        )
+        const rp = hcp(rh)
+        const fourth = rest.every((s) => hasStopper(rh, s))
+          ? { call: '3NT', rule: '3NT till spel', explanation: `${rp} hp – öppnaren driver (15+) och resten är täckt → 3NT (till spel).` }
+          : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `${rp} hp – öppnaren driver (15+) men 3NT är otäckt → 5${SUIT_SYM[openerSuit]} (minorutgång).` }
+        turns.push({ seat: responderSeat, role: 'svarare', call: fourth.call, rule: fourth.rule, explanation: fourth.explanation })
+      }
       return finish(false)
     }
     // Delfix 4c: öppnarens reverse + svararens preferens tillbaka — reversens

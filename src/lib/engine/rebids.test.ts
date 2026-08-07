@@ -226,8 +226,10 @@ describe('punkt 7 – återbud efter inverterade minorhöjningar', () => {
     expect(invMinor('S:K3 H:Q42 D:KQ842 C:Q42', 'diamonds', true)).toBe('2NT') // 12 hp
   })
 
-  it('stark, obalanserad → stopp-visning i ny färg', () => {
-    expect(invMinor('S:KQ85 H:A2 D:KQ842 C:Q2', 'diamonds', true)).toBe('2S') // 16 hp, 5-4
+  it('stark, obalanserad → stopp-visning i BILLIGASTE färg med äkta stopp', () => {
+    // B13 (2026-08-07): "stopp" är honnörsstopp, inte 4+ längd — ♥A2 är ett
+    // stopp och bjuds före spadern (upp-the-line). Förr: 2♠ på längden.
+    expect(invMinor('S:KQ85 H:A2 D:KQ842 C:Q2', 'diamonds', true)).toBe('2H') // 16 hp, 5-4
   })
 
   it('svag spärrhöjning, minimum → pass', () => {

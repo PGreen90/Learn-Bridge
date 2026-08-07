@@ -103,9 +103,12 @@ const HISTORY_830: ResolvedCall[] = [
 ]
 
 describe('etapp 4 familj B fix 1: kaptensmatte + RKC efter positivt svar på 2♣', () => {
-  it('frö 20261101-läget: W (11 hp, hjärtertrumf satt) frågar 4NT, höjer inte bara 4♥', () => {
+  it('frö 20261101-läget: W (11 hp, hjärtertrumf satt) cue:ar ♣A på vägen (B13)', () => {
+    // B13 (2026-08-07): 2♣-grenen har nu cue-ronden (§6.2) — i högfärgstrumf
+    // finns utrymme, så W visar ♣A gratis under 4♥ i stället för direkt-4NT.
+    // Hela auktionen når fortfarande 6♥ (testet nedan).
     const d = deal('2cslam-20261101-pos', 'E', 'ew', HANDS_1101)
-    expect(decideCall(d, HISTORY_1101, 'W').bid).toBe('4NT')
+    expect(decideCall(d, HISTORY_1101, 'W').bid).toBe('4C')
   })
 
   it('frö 20261101 hela auktionen: lillslam 6♥ nås', () => {
