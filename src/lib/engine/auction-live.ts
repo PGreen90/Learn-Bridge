@@ -3937,6 +3937,338 @@ function negativeDoublerContinues(deal: Deal, history: ResolvedCall[], seat: Sea
   return null
 }
 
+// ---- F2: den datadrivna detektorkedjan -------------------------------------
+// Kedjan i decideCall var tidigare två listor av anonyma funktioner där
+// ordningskraven ("måste ligga FÖRE …") bara fanns i kommentarer. Nu är varje
+// detektor DATA med ett unikt `id` och sina före-krav i `before`; kedjevakten
+// `detector-chain.test.ts` gör sviten röd om en omflyttning bryter ett krav.
+// Själva budlogiken är oförändrad — run-funktionerna är samma anrop som förr.
+
+/** Allt en detektor behöver veta om läget — räknas fram EN gång per beslut. */
+export interface DetectorCtx {
+  deal: Deal
+  history: ResolvedCall[]
+  seat: Seat
+  /** Egen hand (`deal.hands[seat]`), förberäknad. */
+  hand: Hand
+}
+
+/** Ett steg i detektorkedjan: namn + ordningskrav + själva logiken. */
+export interface LiveDetector {
+  /** Unikt namn, normalt = detektorfunktionens namn. Används i före-kraven. */
+  id: string
+  /** Id:n som måste ligga SENARE i kedjan än den här (vaktas av kedjevakten). */
+  before?: readonly string[]
+  run: (c: DetectorCtx) => ResolvedCall | null
+}
+
+/**
+ * §7.6-väckningen över deras öppning + spärrhöjning (etapp 6 hål 4): linjen
+ * modellerar bara direktsitsen över själva ÖPPNINGEN, så försvarssidans pass
+ * efter höjningen (2♠–P–3♠ / 1♣–P–3♣) ligger INBAKADE i linjen — en
+ * 21-poängare passade ut 2♦–P–3♦ (frö 20261477). Prövas därför både som
+ * överstyrning av linjens pass (i decideCall) och som tvingande svar bortom
+ * en stängd linje (sist i FORCED_DETECTORS).
+ */
+function defendRaisedPreemptCall(c: DetectorCtx): ResolvedCall | null {
+  return answered(raisedPreemptToDefend(c.history, c.seat), (r) => {
+    const def = defendPreempt(c.hand, r.suit, 3, r.balancing, true)
+    if (def.call === 'P') return def
+    return r.balancing
+      ? { ...def, explanation: `${def.explanation} (balansering – "låna en kung")` }
+      : def
+  }, c.history, c.seat)
+}
+
+// ---- Tvingande svar (gäller ÄVEN on-book) ----------------------------------
+// Linjen gav inget bud för oss här. Vissa lägen är ändå rondkrav: partnern får
+// ALDRIG lämnas att passa bort en upplysning/fjärde färg. Prövas i ordning;
+// första detektorn som ger ett lagligt bud vinner.
+export const FORCED_DETECTORS: readonly LiveDetector[] = [
+  // Upplysningsdubbling från partnern (§7): svara, passa aldrig bort den.
+  { id: 'takeoutDoubleToAnswer',
+    run: (c) => answered(takeoutDoubleToAnswer(c.history, c.seat),
+      (t) => answerTakeoutDouble(c.hand, t.suit, t.level, t.bidSuits), c.history, c.seat) },
+  // Partnerns STÖDDUBBLING (§7.3, etapp 6 hål 1): svararen svarar alltid
+  // (pass bara som medvetet straffpass med trumfstack).
+  { id: 'supportDoubleToAnswer',
+    run: (c) => answered(supportDoubleToAnswer(c.history, c.seat),
+      (s) => answerSupportDouble(c.hand, s.myMajor, s.openerSuit, s.theirBid), c.history, c.seat) },
+  // ... och stöddubblarens EGEN fortsättning: väg partnerns inbjudan (15+
+  // accepterar), och låt partnerns utgångsbud stå.
+  { id: 'supportDoubleFollowUpToAnswer',
+    run: (c) => answered(supportDoubleFollowUpToAnswer(c.history, c.seat),
+      (f) => supportDoublerRebid(c.hand, f.myOpenedSuit, f.partnerMajor, f.theirSuit, f.partnerAnswer), c.history, c.seat) },
+  // De bjuder ÖVER partnerns upplysningsdubbling (§7.3, etapp 6 hål 2):
+  // advancern talar fritt med värden/form (XX = tvångsflykt). Ger schemat
+  // inget bud faller vi VIDARE (null) så t.ex. straffdubblingen kan pröva.
+  { id: 'takeoutDoubleOverbidToAnswer',
+    run: (c) => {
+      const t = takeoutDoubleOverbidToAnswer(c.history, c.seat)
+      if (!t) return null
+      const ans = advancerFreeBidAfterDouble(c.hand, t.doubledSuit, t.openLevel, t.theirSuits, t.lastBid)
+      return ans ? answered(t, () => ans, c.history, c.seat) : null
+    } },
+  // ... och advancerns CUE efter min upplysningsdubbling är krav: svara alltid.
+  { id: 'advancerCueToAnswer',
+    run: (c) => answered(advancerCueToAnswer(c.history, c.seat),
+      (a) => doublerAnswersCue(c.hand, a.theirSuits, a.cueBid), c.history, c.seat) },
+  // Dubblaren väger höjningen av advancerns färgsvar mot vad svaret VISADE
+  // (hopp 9–11, fritt ~6–9, XX-flykt 0+) — före den generella fit-blastern
+  // (offBookResponse i konkurrenskedjan, som körs efter denna lista).
+  { id: 'doublerRaisesAdvance',
+    run: (c) => doublerRaisesAdvance(c.deal, c.history, c.seat) },
+  // Partnerns JORDAN 2NT över deras X (§7.3): öppnaren svarar alltid —
+  // 3M minimum/avslut, 4M med 15+ stödpoäng (systemfel #4, frö 20260739).
+  { id: 'jordanToAnswer',
+    run: (c) => answered(jordanToAnswer(c.history, c.seat),
+      (j) => openerRebidAfterJordan2NT(c.hand, j.major), c.history, c.seat) },
+  // ... och Jordan-bjudaren väger öppnarens 3M-avslut: 13+ höjer till utgång.
+  { id: 'jordanSignoffToAnswer',
+    run: (c) => answered(jordanSignoffToAnswer(c.history, c.seat),
+      (j) => jordanRaiseAfterSignoff(c.hand, j.major), c.history, c.seat) },
+  // Partnerns NEGATIVA dubbling (§7.3, rondkrav): öppnaren svarar alltid.
+  { id: 'negativeDoubleToAnswer',
+    run: (c) => answered(negativeDoubleToAnswer(c.history, c.seat),
+      (n) => openerAnswerNegativeDouble(c.hand, n.ourOpen, n.theirCall), c.history, c.seat) },
+  // Partnerns FJÄRDE FÄRG (§6.6, utgångskrav): öppnaren svarar alltid.
+  { id: 'fourthSuitToAnswer',
+    run: (c) => answered(fourthSuitToAnswer(c.history, c.seat),
+      (f) => openerAnswerFourthSuit(c.hand, f.opened, f.second, f.responderSuit, f.fourth), c.history, c.seat) },
+  // Min EGEN fjärde färg har besvarats — placera utgång, passa aldrig kravet.
+  { id: 'placeGameAfterFourthSuit',
+    run: (c) => placeGameAfterFourthSuit(c.deal, c.history, c.seat) },
+  // Partnerns NEW MINOR FORCING (§5.7, krav): öppnaren svarar alltid.
+  { id: 'nmfToAnswer',
+    run: (c) => answered(nmfToAnswer(c.history, c.seat),
+      (n) => openerAnswerNMF(c.hand, n.opened, n.responderMajor, n.nmfMinor, n.unbidSuit), c.history, c.seat) },
+  // §7.6-väckningen över deras spärrhöjning (etapp 6 hål 4) — täcker
+  // balanseringssitsen när linjen är STÄNGD (built.open === false) och
+  // konkurrenskedjan därför aldrig nås. Pass faller vidare (null).
+  { id: 'defendRaisedPreempt',
+    run: (c) => {
+      const wake = defendRaisedPreemptCall(c)
+      return wake && wake.bid !== 'P' ? wake : null
+    } },
+]
+
+// ---- Historiedrivna svar när linjen inte styr längre -----------------------
+// Off-book (Syd bjöd eget) eller en öppen konkurrensauktion som linjen bara
+// modellerat en rond av. ORDNINGEN ÄR BETYDELSEFULL: flera steg måste ligga
+// FÖRE det generella off-book-svaret näst sist (annars läser det ett konstgjort
+// relä/cue som en naturlig färg och stöder/passar fel). Ordningskraven står som
+// DATA i `before` och vaktas av kedjevakten — en ny konvention läggs på rätt
+// plats i listan MED sina före-krav ifyllda, inte sist av bekvämlighet.
+export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
+  // Motståndarna kliver in på riktigt (direkt sits eller balansering).
+  { id: 'maybeOvercall',
+    run: (c) => maybeOvercall(c.deal, c.history, c.seat) },
+  // Upplysningsdubbling när de bjudit TVÅ 1-lägesfärger (1♦–P–1♥–X): 4-4 i de
+  // objudna färgerna (eller 17+ stark enfärgshand). Ägarregel 2026-07-05.
+  { id: 'maybeTakeoutOfResponse',
+    run: (c) => maybeTakeoutOfResponse(c.deal, c.history, c.seat) },
+  // Partnerns DONT-bud mot deras 1NT besvaras (§7.5, Fynd #2 delbit 1) …
+  { id: 'partnerDONTToAnswer',
+    run: (c) => answered(partnerDONTToAnswer(c.history, c.seat),
+      (d) => advanceDONT(c.hand, d), c.history, c.seat) },
+  // … och vår egen DONT-X rättas till sin riktiga färg efter partnerns relä.
+  { id: 'ownDONTXToCorrect',
+    run: (c) => ownDONTXToCorrect(c.deal, c.history, c.seat) },
+  // … och vårt egna DONT-tvåfärgsbud (2♣/2♦) rättas till den högre färgen när
+  // partnern relä:at pass-eller-rätta (felrapport #20).
+  { id: 'ownDONTTwoSuiterToCorrect',
+    run: (c) => ownDONTTwoSuiterToCorrect(c.deal, c.history, c.seat) },
+  // Partnerns TVÅFÄRGSINKLIV (Michaels/ovanlig 2NT, §7.2): preferens via
+  // advanceTwoSuiter; även advancerns medvetna pass (felrapport #7).
+  { id: 'partnerTwoSuiterToAnswer',
+    run: (c) => answered(partnerTwoSuiterToAnswer(c.history, c.seat),
+      (t) => advanceTwoSuiter(c.hand, t.partnerCall, t.theirSuit, t.contested), c.history, c.seat) },
+  // Ett EGET dubblat tvåfärgsinkliv får aldrig passas ut (felrapport #7):
+  // konstgjort – utan preferens flyr vi till den längsta visade färgen.
+  { id: 'ownDoubledTwoSuiterRescue',
+    run: (c) => ownDoubledTwoSuiterRescue(c.deal, c.history, c.seat) },
+  // Vår egen 17+ upplysningsdubbling får sitt starka återbud (felrapport #23):
+  // vi bjuder egen färg (billigast, rondkrav) för att visa den starka enfärgshanden.
+  { id: 'ownStrongDoubleRebid',
+    run: (c) => ownStrongDoubleRebid(c.deal, c.history, c.seat) },
+  // Den starka dubblingens FORTSÄTTNING (ägarbeslut 2026-07-05): advancern
+  // svarar återbudet (Part 2), dubblaren dömer game (Part 3), advancern svarar
+  // 3-hoppet (Part 4). Måste ligga FÖRE off-book-svaret så tvångssvaren inte
+  // passas ut. Ordningen sinsemellan spelar ingen roll (ömsesidigt uteslutande).
+  { id: 'advanceStrongDoubleRebid', before: ['offBookResponse'],
+    run: (c) => advanceStrongDoubleRebid(c.deal, c.history, c.seat) },
+  { id: 'strongDoublerSecondRebid', before: ['offBookResponse'],
+    run: (c) => strongDoublerSecondRebid(c.deal, c.history, c.seat) },
+  { id: 'answerStrongDoubleGameForce', before: ['offBookResponse'],
+    run: (c) => answerStrongDoubleGameForce(c.deal, c.history, c.seat) },
+  // Etapp 7 hål 2 ("3NT-stoppen"): öppnaren trevar 4NT efter svararens 3NT,
+  // och svararen accepterar/avböjer. Måste ligga FÖRE rkcToAnswer så den
+  // kvantitativa 4NT:n (ingen trumf agreed) inte läses som essfråga, och
+  // FÖRE off-book-svaret som annars passar bort trevaren.
+  { id: 'openerTriesSlamAfter3NT', before: ['rkcToAnswer', 'offBookResponse'],
+    run: (c) => openerTriesSlamAfter3NT(c.deal, c.history, c.seat) },
+  { id: 'openerSlamTryToAnswer', before: ['rkcToAnswer', 'offBookResponse'],
+    run: (c) => answered(openerSlamTryToAnswer(c.history, c.seat),
+      (s) => answerOpenerSlamTry(c.hand, s.minor), c.history, c.seat) },
+  // Partnerns 4NT med trumf = ESSFRÅGAN (1430 RKC, §6.1); 5NT = kungfrågan
+  // (Sjöberg, §6.3). Får aldrig passas (felrapport #9).
+  { id: 'rkcToAnswer',
+    run: (c) => answered(rkcToAnswer(c.history, c.seat),
+      (trump) => respondToRKC(c.hand, trump), c.history, c.seat) },
+  { id: 'kingAskToAnswer',
+    run: (c) => answered(kingAskToAnswer(c.history, c.seat),
+      (trump) => respondToKingAsk(c.hand, trump), c.history, c.seat) },
+  // Öppnarens rond-2 i det INKLÄMDA konkurrensläget + partnerns svar på
+  // maximal-dubblingen (R1 Fynd #2 delbit 6). Måste ligga FÖRE
+  // maybePenaltyDouble: i det inklämda läget är X reserverat för game try
+  // (maximal dubbling) – vi ger medvetet upp straffdubblingen där. Bara det
+  // specifika mönstret matchas; annars faller det igenom orört.
+  { id: 'answerOpenerMaximal', before: ['maybePenaltyDouble'],
+    run: (c) => answerOpenerMaximal(c.deal, c.history, c.seat) },
+  { id: 'openerCompetesAfterRaise', before: ['maybePenaltyDouble'],
+    run: (c) => openerCompetesAfterRaise(c.deal, c.history, c.seat) },
+  // Öppnarens rond-2 när VÅR MINOR höjts i konkurrens och öppnaren har en
+  // stark sangduglig hand (felrapport #30): visa styrkan i sang (3NT med 20+,
+  // 2NT-inbjudan med 18–19) i stället för ett tyst färgbud som passas ut.
+  { id: 'openerStrongNTAfterMinorRaise',
+    before: ['openerRondTwoInCompetition', 'maybePenaltyDouble', 'offBookResponse'],
+    run: (c) => openerStrongNTAfterMinorRaise(c.deal, c.history, c.seat) },
+  // Höjaren svarar öppnarens 2NT-inbjudan (felrapport #30): accepterar 3NT
+  // med ett maximum, annars pass. FÖRE off-book-svaret (som annars passar).
+  { id: 'answerOpenerNTInvite', before: ['offBookResponse'],
+    run: (c) => answerOpenerNTInvite(c.deal, c.history, c.seat) },
+  // Systerfallet: öppnarens rond-2 i konkurrens när partnern bjöd NY FÄRG /
+  // 1NT (ej höjning) och motståndarna konkurrerat (R1 Fynd #2). Extra visas
+  // med cue i deras färg + naturliga hopp; minimum tävlar med 6+ färg/fit.
+  // FÖRE maybePenaltyDouble (extra → cue, inte straffdubbling), FÖRE
+  // off-book-svaret (som annars säljer given genom att passa) och FÖRE
+  // reopen-varianterna nedan (som kräver att partnern INTE bjöd).
+  { id: 'openerRondTwoInCompetition',
+    before: ['openerReopensAfterPartnerPass', 'maybePenaltyDouble', 'offBookResponse'],
+    run: (c) => openerRondTwoInCompetition(c.deal, c.history, c.seat) },
+  // Del A (flerronds): samma rond-2 MEN partnern PASSADE inklivet (sa inget).
+  // Öppnaren tävlar försiktigt (egen 6+ färg / återöppnings-X) i stället för
+  // att sälja given.
+  { id: 'openerReopensAfterPartnerPass', before: ['maybePenaltyDouble', 'offBookResponse'],
+    run: (c) => openerReopensAfterPartnerPass(c.deal, c.history, c.seat) },
+  // Del B (flerronds): samma men RHO PASSADE inklivet (1M–(inkliv)–P–P) →
+  // öppnaren sitter på utpassningen. Återöppnar (X med kort i deras färg /
+  // egen 6+ färg) i stället för att sälja given. Partnern gör ofta trap pass.
+  { id: 'openerReopensBalancing',
+    run: (c) => openerReopensBalancing(c.deal, c.history, c.seat) },
+  // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
+  // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp.
+  { id: 'maybePenaltyDouble',
+    run: (c) => maybePenaltyDouble(c.deal, c.history, c.seat) },
+  // Partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG (felrapport #13).
+  // Måste ligga FÖRE off-book-svaret (som annars stöder transferns relä).
+  { id: 'answerTransferGameChoice', before: ['offBookResponse'],
+    run: (c) => answerTransferGameChoice(c.deal, c.history, c.seat) },
+  // Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vi
+  // handen – straffdubbla flykten. Måste ligga FÖRE delbit 4-detektorerna
+  // (ntInterference) och off-book-svaret.
+  { id: 'answerRunout', before: ['ntInterferenceToAnswer', 'offBookResponse'],
+    run: (c) => answerRunout(c.history, c.seat) },
+  // Lebensohl efter VÅRT 1NT (§7.5): motståndaren klev in NATURELLT. Måste
+  // ligga FÖRE ntInterference (DONT) – annars läses det naturliga inklivet
+  // som DONT. Diskriminatorn = 'naturligt inkliv (1NT)'-rule på deras bud.
+  { id: 'lebensohl1NTFirstToAnswer', before: ['ntInterferenceToAnswer'],
+    run: (c) => answered(lebensohl1NTFirstToAnswer(c.history, c.seat),
+      (their) => lebensohlAfter1NT(c.hand, their), c.history, c.seat) },
+  { id: 'lebensohl1NTRelayComplete',
+    run: (c) => lebensohl1NTRelayComplete(c.history, c.seat) },
+  { id: 'lebensohl1NTRebidToAnswer',
+    run: (c) => answered(lebensohl1NTRebidToAnswer(c.history, c.seat),
+      (their) => lebensohlAfter1NTRebid(c.hand, their), c.history, c.seat) },
+  { id: 'lebensohl1NTGFToAnswer',
+    run: (c) => answered(lebensohl1NTGFToAnswer(c.history, c.seat),
+      (gf) => lebensohl1NTOpenerAnswerGF(c.hand, gf), c.history, c.seat) },
+  // Motståndaren störde VÅR icke-1-färgs-öppning (Fynd #2 delbit 4):
+  // svararen svarar. Måste ligga FÖRE off-book-svaret.
+  { id: 'ntInterferenceToAnswer', before: ['offBookResponse'],
+    run: (c) => answered(ntInterferenceToAnswer(c.history, c.seat),
+      (i) => answerNTInterference(c.hand, i), c.history, c.seat) },
+  { id: 'ownPreemptInterferenceToAnswer', before: ['offBookResponse'],
+    run: (c) => answered(ownPreemptInterferenceToAnswer(c.history, c.seat),
+      (p) => answerPreemptInterference(c.hand, p.ourSuit, p.theirCall, p.ourLevel), c.history, c.seat) },
+  // Öppnarens fortsättning efter partnerns VÄRDE-DUBBEL över vårt störda 1NT
+  // (felrapport #43): 2NT-relä (förnekar 5-kort) eller visa 5-korts färg, och
+  // svararens placering över det. FÖRE off-book-svaret (som gav bar pass →
+  // missad utgång eftersom öppnaren saknade all logik här).
+  { id: 'answerNTValueDoubleOpener', before: ['offBookResponse'],
+    run: (c) => answerNTValueDoubleOpener(c.deal, c.history, c.seat) },
+  { id: 'answerNTValueDoubleDoubler', before: ['offBookResponse'],
+    run: (c) => answerNTValueDoubleDoubler(c.deal, c.history, c.seat) },
+  // Öppnaren svarar partnerns CUE-HÖJNING i motståndarnas färg (felrapport
+  // #16): cue = krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
+  { id: 'answerCueRaise', before: ['offBookResponse'],
+    run: (c) => answerCueRaise(c.deal, c.history, c.seat) },
+  // Advancern svarar partnerns TVÅFÄRGS-CUE över deras svaga tvåa (felrapport
+  // #18): krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
+  { id: 'answerWeakTwoCue', before: ['offBookResponse'],
+    run: (c) => answerWeakTwoCue(c.deal, c.history, c.seat) },
+  // Cue-BJUDAREN fullföljer utgångskravet efter öppnarens svar (felrapport
+  // #26): krav, får aldrig passas. answerCueRaise sköter öppnarens svar på
+  // cuet; detta är cue-bjudarens svar på det svaret. FÖRE off-book-svaret.
+  { id: 'answerCueBidderRebid', before: ['offBookResponse'],
+    run: (c) => answerCueBidderRebid(c.deal, c.history, c.seat) },
+  // Vårt 2-över-1 var utgångskrav och öppnaren höjde vår färg (felrapport
+  // #27): svararen sätter minst utgång, passar aldrig. Uppstår off-book (Syd
+  // öppnade svagare handen). Måste ligga FÖRE off-book-svaret (som annars
+  // vägrar höja en redan bjuden färg och passar).
+  { id: 'answerTwoOverOneRaise', before: ['offBookResponse'],
+    run: (c) => answerTwoOverOneRaise(c.deal, c.history, c.seat) },
+  // Inklivaren stöttar advancerns NYA färg (felrapport #15): enkel stödhöjning
+  // i stället för att passa. Måste ligga FÖRE off-book-svaret (som annars
+  // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).
+  { id: 'overcallerRaiseAdvance', before: ['offBookResponse'],
+    run: (c) => overcallerRaiseAdvance(c.deal, c.history, c.seat) },
+  // Svararen PLACERAR kontraktet efter öppnarens NMF-svar (§5.7, steg 3).
+  // Måste ligga FÖRE off-book-svaret (som annars vägrar re-höja svararens egen
+  // högfärg och passar en klar 5-3-fit).
+  { id: 'nmfPlacementToAnswer', before: ['offBookResponse'],
+    run: (c) => answered(nmfPlacementToAnswer(c.history, c.seat),
+      (n) => responderPlaceAfterNMF(c.hand, n.responderMajor, n.otherMajor, n.nmfMinor, n.opened, n.unbidSuit, n.answer), c.history, c.seat) },
+  // Del C (flerronds): advancern tävlar upp till en 9-korts fit efter motstånd-
+  // arnas fitvisande höjning (partnern klev in 2-läges → 3-korts stöd räcker).
+  // Måste ligga FÖRE off-book-svaret (som kräver 4-korts stöd för ett 2-läges
+  // inkliv och därför passar den 3-korts fiten).
+  { id: 'advancerCompetesToFit', before: ['offBookResponse'],
+    run: (c) => advancerCompetesToFit(c.deal, c.history, c.seat) },
+  // Svararens svar på 2♣–2♦–2NT (öppnarens 22–24): 3+ hp = utgång → 3NT,
+  // passar aldrig bort utgångsvärden. Måste ligga FÖRE off-book-svaret (som
+  // annars passar en svag hand som ändå har utgång mittemot 22–24).
+  { id: 'respondToStrong2NTRebid', before: ['offBookResponse'],
+    run: (c) => respondToStrong2NTRebid(c.deal, c.history, c.seat) },
+  // Negativ-dubblarens invit-fortsättning (fel färg-spåret fix 5b):
+  // 9–12-handen bjuder vidare över öppnarens tvingade svar (preferens/egen
+  // färg/2NT) i stället för att passa. Måste ligga FÖRE off-book-svaret
+  // (som annars kräver 12+ för en ny färg på 2-läget och passar).
+  { id: 'negativeDoublerContinues', before: ['offBookResponse'],
+    run: (c) => negativeDoublerContinues(c.deal, c.history, c.seat) },
+  // Kaptenen höjer partnerns naturliga 3NT till 6NT när slamzonen nås redan
+  // mot partnerns visade minimum (felrapport #42). Måste ligga FÖRE
+  // off-book-svaret, som skyddar partnerns utgångsbud och därmed passar.
+  { id: 'raisePartnerThreeNTToSlam', before: ['offBookResponse'],
+    run: (c) => raisePartnerThreeNTToSlam(c.deal, c.history, c.seat) },
+  // Sangsystemet när sangöppningen bjudits OFF-BOOK (felrapport #41):
+  // svararen får §4.3/§4.4-svaret, öppnaren sitt återbud. Måste ligga FÖRE
+  // off-book-svaret (som kräver en visad FÄRG och därför passade ut 1NT)
+  // och före honorForce (som läste Stayman-2♣ som "krav – ny färg").
+  { id: 'answerPartnerNTOpening', before: ['offBookResponse', 'honorForce'],
+    run: (c) => answerPartnerNTOpening(c.deal, c.history, c.seat) },
+  { id: 'openerAnswersNTResponse', before: ['offBookResponse', 'honorForce'],
+    run: (c) => openerAnswersNTResponse(c.deal, c.history, c.seat) },
+  // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
+  { id: 'offBookResponse', before: ['honorForce'],
+    run: (c) => offBookResponse(c.deal, c.history, c.seat) },
+  // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett
+  // naturligt minimibud (grunden bakom "krav får aldrig passas"). Ostörda 2/1,
+  // ny färg och reverse; ersätter behovet av en detektor per felrapport.
+  { id: 'honorForce',
+    run: (c) => honorForce(c.deal, c.history, c.seat) },
+]
+
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
   const built = buildAuction(deal)
@@ -3944,28 +4276,16 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
 
   const line = turnsToCalls(built.turns, deal.dealer)
   const offBook = divergedFromLine(history, line)
-  const hand = deal.hands[seat]
-
-  // §7.6-väckningen över deras öppning + spärrhöjning (etapp 6 hål 4): linjen
-  // modellerar bara direktsitsen över själva ÖPPNINGEN, så försvarssidans pass
-  // efter höjningen (2♠–P–3♠ / 1♣–P–3♣) ligger INBAKADE i linjen — en
-  // 21-poängare passade ut 2♦–P–3♦ (frö 20261477). Prövas därför både som
-  // överstyrning av linjens pass och som tvingande svar bortom en stängd linje.
-  const defendRaisedPreempt = () => answered(raisedPreemptToDefend(history, seat), (r) => {
-    const def = defendPreempt(hand, r.suit, 3, r.balancing, true)
-    if (def.call === 'P') return def
-    return r.balancing
-      ? { ...def, explanation: `${def.explanation} (balansering – "låna en kung")` }
-      : def
-  }, history, seat)
+  const c: DetectorCtx = { deal, history, seat, hand: deal.hands[seat] }
 
   // Följ linjen så länge den verkliga budföljden inte motsagt den — men ett
-  // inbakat försvarspass efter deras spärrhöjning får inte tysta väckningen.
+  // inbakat försvarspass efter deras spärrhöjning får inte tysta väckningen
+  // (se defendRaisedPreemptCall ovan).
   if (!offBook) {
     const next = line[history.length]
     if (next && next.seat === seat) {
       if (next.bid === 'P') {
-        const wake = defendRaisedPreempt()
+        const wake = defendRaisedPreemptCall(c)
         if (wake && wake.bid !== 'P') return wake
       }
       return next
@@ -3977,240 +4297,18 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   const slamStep = competitiveRKCPlace(deal, history, seat) ?? competitiveSlamTry(deal, history, seat)
   if (slamStep) return slamStep
 
-  // ---- Tvingande svar (gäller ÄVEN on-book) --------------------------------
-  // Linjen gav inget bud för oss här. Vissa lägen är ändå rondkrav: partnern får
-  // ALDRIG lämnas att passa bort en upplysning/fjärde färg. Prövas i ordning;
-  // första steget som ger ett lagligt bud vinner.
-  const forcedAnswers: Array<() => ResolvedCall | null> = [
-    // Upplysningsdubbling från partnern (§7): svara, passa aldrig bort den.
-    () => answered(takeoutDoubleToAnswer(history, seat),
-      (t) => answerTakeoutDouble(hand, t.suit, t.level, t.bidSuits), history, seat),
-    // Partnerns STÖDDUBBLING (§7.3, etapp 6 hål 1): svararen svarar alltid
-    // (pass bara som medvetet straffpass med trumfstack).
-    () => answered(supportDoubleToAnswer(history, seat),
-      (s) => answerSupportDouble(hand, s.myMajor, s.openerSuit, s.theirBid), history, seat),
-    // ... och stöddubblarens EGEN fortsättning: väg partnerns inbjudan (15+
-    // accepterar), och låt partnerns utgångsbud stå.
-    () => answered(supportDoubleFollowUpToAnswer(history, seat),
-      (f) => supportDoublerRebid(hand, f.myOpenedSuit, f.partnerMajor, f.theirSuit, f.partnerAnswer), history, seat),
-    // De bjuder ÖVER partnerns upplysningsdubbling (§7.3, etapp 6 hål 2):
-    // advancern talar fritt med värden/form (XX = tvångsflykt). Ger schemat
-    // inget bud faller vi VIDARE (null) så t.ex. straffdubblingen kan pröva.
-    () => {
-      const t = takeoutDoubleOverbidToAnswer(history, seat)
-      if (!t) return null
-      const ans = advancerFreeBidAfterDouble(hand, t.doubledSuit, t.openLevel, t.theirSuits, t.lastBid)
-      return ans ? answered(t, () => ans, history, seat) : null
-    },
-    // ... och advancerns CUE efter min upplysningsdubbling är krav: svara alltid.
-    () => answered(advancerCueToAnswer(history, seat),
-      (a) => doublerAnswersCue(hand, a.theirSuits, a.cueBid), history, seat),
-    // Dubblaren väger höjningen av advancerns färgsvar mot vad svaret VISADE
-    // (hopp 9–11, fritt ~6–9, XX-flykt 0+) — före den generella fit-blastern.
-    () => doublerRaisesAdvance(deal, history, seat),
-    // Partnerns JORDAN 2NT över deras X (§7.3): öppnaren svarar alltid —
-    // 3M minimum/avslut, 4M med 15+ stödpoäng (systemfel #4, frö 20260739).
-    () => answered(jordanToAnswer(history, seat),
-      (j) => openerRebidAfterJordan2NT(hand, j.major), history, seat),
-    // ... och Jordan-bjudaren väger öppnarens 3M-avslut: 13+ höjer till utgång.
-    () => answered(jordanSignoffToAnswer(history, seat),
-      (j) => jordanRaiseAfterSignoff(hand, j.major), history, seat),
-    // Partnerns NEGATIVA dubbling (§7.3, rondkrav): öppnaren svarar alltid.
-    () => answered(negativeDoubleToAnswer(history, seat),
-      (n) => openerAnswerNegativeDouble(hand, n.ourOpen, n.theirCall), history, seat),
-    // Partnerns FJÄRDE FÄRG (§6.6, utgångskrav): öppnaren svarar alltid.
-    () => answered(fourthSuitToAnswer(history, seat),
-      (f) => openerAnswerFourthSuit(hand, f.opened, f.second, f.responderSuit, f.fourth), history, seat),
-    // Min EGEN fjärde färg har besvarats — placera utgång, passa aldrig kravet.
-    () => placeGameAfterFourthSuit(deal, history, seat),
-    // Partnerns NEW MINOR FORCING (§5.7, krav): öppnaren svarar alltid.
-    () => answered(nmfToAnswer(history, seat),
-      (n) => openerAnswerNMF(hand, n.opened, n.responderMajor, n.nmfMinor, n.unbidSuit), history, seat),
-    // §7.6-väckningen över deras spärrhöjning (etapp 6 hål 4) — täcker
-    // balanseringssitsen när linjen är STÄNGD (built.open === false) och
-    // kedjan nedan därför aldrig nås. Pass faller vidare (null).
-    () => {
-      const wake = defendRaisedPreempt()
-      return wake && wake.bid !== 'P' ? wake : null
-    },
-  ]
-  for (const run of forcedAnswers) {
-    const call = run()
+  // Tvingande svar — gäller ÄVEN on-book (kedjan FORCED_DETECTORS ovan).
+  for (const d of FORCED_DETECTORS) {
+    const call = d.run(c)
     if (call) return call
   }
 
-  // ---- Historiedrivna svar när linjen inte styr längre ---------------------
-  // Off-book (Syd bjöd eget) eller en öppen konkurrensauktion som linjen bara
-  // modellerat en rond av. ORDNINGEN I LISTAN ÄR BETYDELSEFULL: flera steg måste
-  // ligga FÖRE det generella off-book-svaret sist (annars läser det ett
-  // konstgjort relä/cue som en naturlig färg och stöder/passar fel). Lägg nya
-  // konventioner på rätt plats i listan – inte sist av bekvämlighet.
+  // Konkurrenskedjan CONTESTED_DETECTORS — bara när linjen inte styr längre:
+  // off-book, eller en ÖPPEN auktion som linjen bara modellerat en rond av.
   const lineExhaustedOpen = !offBook && history.length >= line.length && built.open
   if (offBook || lineExhaustedOpen) {
-    const contestedAnswers: Array<() => ResolvedCall | null> = [
-      // Motståndarna kliver in på riktigt (direkt sits eller balansering).
-      () => maybeOvercall(deal, history, seat),
-      // Upplysningsdubbling när de bjudit TVÅ 1-lägesfärger (1♦–P–1♥–X): 4-4 i de
-      // objudna färgerna (eller 17+ stark enfärgshand). Ägarregel 2026-07-05.
-      () => maybeTakeoutOfResponse(deal, history, seat),
-      // Partnerns DONT-bud mot deras 1NT besvaras (§7.5, Fynd #2 delbit 1) …
-      () => answered(partnerDONTToAnswer(history, seat),
-        (d) => advanceDONT(hand, d), history, seat),
-      // … och vår egen DONT-X rättas till sin riktiga färg efter partnerns relä.
-      () => ownDONTXToCorrect(deal, history, seat),
-      // … och vårt egna DONT-tvåfärgsbud (2♣/2♦) rättas till den högre färgen när
-      // partnern relä:at pass-eller-rätta (felrapport #20).
-      () => ownDONTTwoSuiterToCorrect(deal, history, seat),
-      // Partnerns TVÅFÄRGSINKLIV (Michaels/ovanlig 2NT, §7.2): preferens via
-      // advanceTwoSuiter; även advancerns medvetna pass (felrapport #7).
-      () => answered(partnerTwoSuiterToAnswer(history, seat),
-        (t) => advanceTwoSuiter(hand, t.partnerCall, t.theirSuit, t.contested), history, seat),
-      // Ett EGET dubblat tvåfärgsinkliv får aldrig passas ut (felrapport #7):
-      // konstgjort – utan preferens flyr vi till den längsta visade färgen.
-      () => ownDoubledTwoSuiterRescue(deal, history, seat),
-      // Vår egen 17+ upplysningsdubbling får sitt starka återbud (felrapport #23):
-      // vi bjuder egen färg (billigast, rondkrav) för att visa den starka enfärgshanden.
-      () => ownStrongDoubleRebid(deal, history, seat),
-      // Den starka dubblingens FORTSÄTTNING (ägarbeslut 2026-07-05): advancern
-      // svarar återbudet (Part 2), dubblaren dömer game (Part 3), advancern svarar
-      // 3-hoppet (Part 4). Måste ligga FÖRE off-book-svaret så tvångssvaren inte
-      // passas ut. Ordningen sinbördes spelar ingen roll (ömsesidigt uteslutande).
-      () => advanceStrongDoubleRebid(deal, history, seat),
-      () => strongDoublerSecondRebid(deal, history, seat),
-      () => answerStrongDoubleGameForce(deal, history, seat),
-      // Etapp 7 hål 2 ("3NT-stoppen"): öppnaren trevar 4NT efter svararens 3NT,
-      // och svararen accepterar/avböjer. Måste ligga FÖRE rkcToAnswer så den
-      // kvantitativa 4NT:n (ingen trumf agreed) inte läses som essfråga, och
-      // FÖRE off-book-svaret som annars passar bort trevaren.
-      () => openerTriesSlamAfter3NT(deal, history, seat),
-      () => answered(openerSlamTryToAnswer(history, seat),
-        (s) => answerOpenerSlamTry(hand, s.minor), history, seat),
-      // Partnerns 4NT med trumf = ESSFRÅGAN (1430 RKC, §6.1); 5NT = kungfrågan
-      // (Sjöberg, §6.3). Får aldrig passas (felrapport #9).
-      () => answered(rkcToAnswer(history, seat),
-        (trump) => respondToRKC(hand, trump), history, seat),
-      () => answered(kingAskToAnswer(history, seat),
-        (trump) => respondToKingAsk(hand, trump), history, seat),
-      // Öppnarens rond-2 i det INKLÄMDA konkurrensläget + partnerns svar på
-      // maximal-dubblingen (R1 Fynd #2 delbit 6). Måste ligga FÖRE
-      // maybePenaltyDouble: i det inklämda läget är X reserverat för game try
-      // (maximal dubbling) – vi ger medvetet upp straffdubblingen där. Bara det
-      // specifika mönstret matchas; annars faller det igenom orört.
-      () => answerOpenerMaximal(deal, history, seat),
-      () => openerCompetesAfterRaise(deal, history, seat),
-      // Öppnarens rond-2 när VÅR MINOR höjts i konkurrens och öppnaren har en
-      // stark sangduglig hand (felrapport #30): visa styrkan i sang (3NT med 20+,
-      // 2NT-inbjudan med 18–19) i stället för ett tyst färgbud som passas ut.
-      // Ligger FÖRE openerRondTwoInCompetition (som utesluter höjningar) och FÖRE
-      // maybePenaltyDouble/off-book-svaret.
-      () => openerStrongNTAfterMinorRaise(deal, history, seat),
-      // Höjaren svarar öppnarens 2NT-inbjudan (felrapport #30): accepterar 3NT
-      // med ett maximum, annars pass. FÖRE off-book-svaret (som annars passar).
-      () => answerOpenerNTInvite(deal, history, seat),
-      // Systerfallet: öppnarens rond-2 i konkurrens när partnern bjöd NY FÄRG /
-      // 1NT (ej höjning) och motståndarna konkurrerat (R1 Fynd #2). Extra visas
-      // med cue i deras färg + naturliga hopp; minimum tävlar med 6+ färg/fit.
-      // Ligger FÖRE maybePenaltyDouble (extra → cue, inte straffdubbling) och
-      // FÖRE off-book-svaret (som annars säljer given genom att passa).
-      () => openerRondTwoInCompetition(deal, history, seat),
-      // Del A (flerronds): samma rond-2 MEN partnern PASSADE inklivet (sa inget).
-      // Öppnaren tävlar försiktigt (egen 6+ färg / återöppnings-X) i stället för
-      // att sälja given. Ligger EFTER openerRondTwoInCompetition (som kräver att
-      // partnern bjöd) och FÖRE maybePenaltyDouble/off-book-svaret.
-      () => openerReopensAfterPartnerPass(deal, history, seat),
-      // Del B (flerronds): samma men RHO PASSADE inklivet (1M–(inkliv)–P–P) →
-      // öppnaren sitter på utpassningen. Återöppnar (X med kort i deras färg /
-      // egen 6+ färg) i stället för att sälja given. Partnern gör ofta trap pass.
-      () => openerReopensBalancing(deal, history, seat),
-      // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
-      // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp.
-      () => maybePenaltyDouble(deal, history, seat),
-      // Partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG (felrapport #13).
-      // Måste ligga FÖRE off-book-svaret (som annars stöder transferns relä).
-      () => answerTransferGameChoice(deal, history, seat),
-      // Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vi
-      // handen – straffdubbla flykten. Måste ligga FÖRE delbit 4-detektorerna
-      // (ntInterference) och off-book-svaret.
-      () => answerRunout(history, seat),
-      // Lebensohl efter VÅRT 1NT (§7.5): motståndaren klev in NATURELLT. Måste
-      // ligga FÖRE ntInterference (DONT) – annars läses det naturliga inklivet
-      // som DONT. Diskriminatorn = 'naturligt inkliv (1NT)'-rule på deras bud.
-      () => answered(lebensohl1NTFirstToAnswer(history, seat),
-        (their) => lebensohlAfter1NT(hand, their), history, seat),
-      () => lebensohl1NTRelayComplete(history, seat),
-      () => answered(lebensohl1NTRebidToAnswer(history, seat),
-        (their) => lebensohlAfter1NTRebid(hand, their), history, seat),
-      () => answered(lebensohl1NTGFToAnswer(history, seat),
-        (gf) => lebensohl1NTOpenerAnswerGF(hand, gf), history, seat),
-      // Motståndaren störde VÅR icke-1-färgs-öppning (Fynd #2 delbit 4):
-      // svararen svarar. Måste ligga FÖRE off-book-svaret.
-      () => answered(ntInterferenceToAnswer(history, seat),
-        (i) => answerNTInterference(hand, i), history, seat),
-      () => answered(ownPreemptInterferenceToAnswer(history, seat),
-        (p) => answerPreemptInterference(hand, p.ourSuit, p.theirCall, p.ourLevel), history, seat),
-      // Öppnarens fortsättning efter partnerns VÄRDE-DUBBEL över vårt störda 1NT
-      // (felrapport #43): 2NT-relä (förnekar 5-kort) eller visa 5-korts färg, och
-      // svararens placering över det. FÖRE off-book-svaret (som gav bar pass →
-      // missad utgång eftersom öppnaren saknade all logik här).
-      () => answerNTValueDoubleOpener(deal, history, seat),
-      () => answerNTValueDoubleDoubler(deal, history, seat),
-      // Öppnaren svarar partnerns CUE-HÖJNING i motståndarnas färg (felrapport
-      // #16): cue = krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
-      () => answerCueRaise(deal, history, seat),
-      // Advancern svarar partnerns TVÅFÄRGS-CUE över deras svaga tvåa (felrapport
-      // #18): krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
-      () => answerWeakTwoCue(deal, history, seat),
-      // Cue-BJUDAREN fullföljer utgångskravet efter öppnarens svar (felrapport
-      // #26): krav, får aldrig passas. answerCueRaise sköter öppnarens svar på
-      // cuet; detta är cue-bjudarens svar på det svaret. FÖRE off-book-svaret.
-      () => answerCueBidderRebid(deal, history, seat),
-      // Vårt 2-över-1 var utgångskrav och öppnaren höjde vår färg (felrapport
-      // #27): svararen sätter minst utgång, passar aldrig. Uppstår off-book (Syd
-      // öppnade svagare handen). Måste ligga FÖRE off-book-svaret (som annars
-      // vägrar höja en redan bjuden färg och passar).
-      () => answerTwoOverOneRaise(deal, history, seat),
-      // Inklivaren stöttar advancerns NYA färg (felrapport #15): enkel stödhöjning
-      // i stället för att passa. Måste ligga FÖRE off-book-svaret (som annars
-      // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).
-      () => overcallerRaiseAdvance(deal, history, seat),
-      // Svararen PLACERAR kontraktet efter öppnarens NMF-svar (§5.7, steg 3).
-      // Måste ligga FÖRE off-book-svaret (som annars vägrar re-höja svararens egen
-      // högfärg och passar en klar 5-3-fit).
-      () => answered(nmfPlacementToAnswer(history, seat),
-        (n) => responderPlaceAfterNMF(hand, n.responderMajor, n.otherMajor, n.nmfMinor, n.opened, n.unbidSuit, n.answer), history, seat),
-      // Del C (flerronds): advancern tävlar upp till en 9-korts fit efter motstånd-
-      // arnas fitvisande höjning (partnern klev in 2-läges → 3-korts stöd räcker).
-      // Måste ligga FÖRE off-book-svaret (som kräver 4-korts stöd för ett 2-läges
-      // inkliv och därför passar den 3-korts fiten).
-      () => advancerCompetesToFit(deal, history, seat),
-      // Svararens svar på 2♣–2♦–2NT (öppnarens 22–24): 3+ hp = utgång → 3NT,
-      // passar aldrig bort utgångsvärden. Måste ligga FÖRE off-book-svaret (som
-      // annars passar en svag hand som ändå har utgång mittemot 22–24).
-      () => respondToStrong2NTRebid(deal, history, seat),
-      // Negativ-dubblarens invit-fortsättning (fel färg-spåret fix 5b):
-      // 9–12-handen bjuder vidare över öppnarens tvingade svar (preferens/egen
-      // färg/2NT) i stället för att passa. Måste ligga FÖRE off-book-svaret
-      // (som annars kräver 12+ för en ny färg på 2-läget och passar).
-      () => negativeDoublerContinues(deal, history, seat),
-      // Kaptenen höjer partnerns naturliga 3NT till 6NT när slamzonen nås redan
-      // mot partnerns visade minimum (felrapport #42). Måste ligga FÖRE
-      // off-book-svaret, som skyddar partnerns utgångsbud och därmed passar.
-      () => raisePartnerThreeNTToSlam(deal, history, seat),
-      // Sangsystemet när sangöppningen bjudits OFF-BOOK (felrapport #41):
-      // svararen får §4.3/§4.4-svaret, öppnaren sitt återbud. Måste ligga FÖRE
-      // off-book-svaret (som kräver en visad FÄRG och därför passade ut 1NT)
-      // och före honorForce (som läste Stayman-2♣ som "krav – ny färg").
-      () => answerPartnerNTOpening(deal, history, seat),
-      () => openerAnswersNTResponse(deal, history, seat),
-      // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
-      () => offBookResponse(deal, history, seat),
-      // SISTA VAKTEN: är vår sida i krav och skulle annars passa → tvinga fram ett
-      // naturligt minimibud (grunden bakom "krav får aldrig passas"). Ostörda 2/1,
-      // ny färg och reverse; ersätter behovet av en detektor per felrapport.
-      () => honorForce(deal, history, seat),
-    ]
-    for (const run of contestedAnswers) {
-      const call = run()
+    for (const d of CONTESTED_DETECTORS) {
+      const call = d.run(c)
       if (call) return call
     }
   }
