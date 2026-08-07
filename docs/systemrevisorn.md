@@ -771,6 +771,34 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #25 — 2026-08-07, 2/1: högfärgen visas i återbudet
+Samma frö 20260721, 1 000 givar. Fix: svararens egen 4-korts högfärg bjuds
+naturligt under 3NT när den är auktionens tredje färg
+(`responderRebidIn2over1Auction` gren 3b, `responder-rebids.ts`), budsystem.md
+§4.2/§5.3 + §9. Baslinje = M24. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M24 (baslinje)   M25 (högfärgsåterbudet)
+Rätt kontrakt (exakt par)  19,7 %          19,7 %
+Genomsnittlig par-avvikelse 266,28         265,57
+Fel färg (bet)          119 / 52 070     119 / 50 540
+Missad lillslam          78 / 49 850      79 / 50 660
+Missad storslam          33 / 37 740      33 / 37 750
+Övriga poster: oförändrade.
+```
+
+**Läsning:** netto **−710 p**. En giv lämnar "fel färg (bet)" (−1 530 p —
+4-4-högfärgsfiten hittas i stället för fel strain) och landar som "missad
+lillslam" (+810 p): den bjuder nu rätt färg men stannar i utgång — den ärliga
+nivån mot visade intervall. Lärdomen ur facit felrapport #4 inbyggd: högfärgen
+visas BARA som tredje färg; som fjärde färg är budet konventionellt (§6.6).
+Facit FÖRE fix: `auction-2over1-hogfargsaterbud.test.ts`. Hela sviten grön
+(1 631).
+
 ## Mätning #24 — 2026-08-07, starka återbud (systemfel #3, delfix 4a/4b/4c)
 Samma frö 20260721, 1 000 givar. Fix: svararens graderade 6-korts-rebud
 (`fourthSuit` steg 2), öppnarens invit-svar efter egen höjning

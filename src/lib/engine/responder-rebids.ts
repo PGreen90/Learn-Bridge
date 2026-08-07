@@ -161,6 +161,26 @@ export function responderRebidIn2over1Auction(
     return { call, rule, explanation: `${p} hp med ${len[opened]}-korts stöd i ${NAME[opened]} → ${label}.` }
   }
 
+  // 3b. Egen 4-korts högfärg visas naturligt under 3NT (2026-08-07 — infriar
+  // §9-löftet från 2/1-regeln 2026-08-06: 2♣ före högfärgen, högfärgen i
+  // ÅTERBUDET). Efter det försenade stödet (känd 5-3-fit slår hypotetisk 4-4,
+  // ägarbeslut) men FÖRE 3NT, så en 4-4-högfärgsfit aldrig begravs i sang.
+  // BARA när högfärgen blir auktionens TREDJE färg (öppnaren rebjöd egen färg
+  // eller stödde min): har tre olika färger redan bjudits är högfärgsbudet
+  // FJÄRDE FÄRG med konventionell mening — då gäller 3NT-med-håll som förr.
+  // Öppnaren har dessutom redan nekat egen 4-korts högfärg när hen inte visade
+  // en (openerRebidAfter2over1 bjuder den före både 2NT och egen färg).
+  if (rebidSuit === null || rebidSuit === opened || rebidSuit === responderSuit) {
+    for (const maj of ['hearts', 'spades'] as Suit[]) {
+      if (maj !== opened && maj !== responderSuit && len[maj] >= 4) {
+        const call = bidAbove(maj, rebid.call)
+        if (parseInt(call[0], 10) <= 3) {
+          return { call, rule, explanation: `${p} hp, 4-korts ${NAME[maj]} → ${pretty(call)} (naturligt, GF – högfärgen visas i återbudet).` }
+        }
+      }
+    }
+  }
+
   // 4. Sang med stopp i de objudna färgerna.
   const bidSuits = new Set<Suit>([opened, responderSuit, ...(rebidSuit ? [rebidSuit] : [])])
   const unbid = RANK.filter((s) => !bidSuits.has(s))

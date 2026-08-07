@@ -252,7 +252,11 @@ trumf → 3 i trumf):
   1-läget och en 5-korts färg på 2-läget: **9–11 hp** väljer 1-läget (håll lågt),
   **12+ hp** väljer 5-kortsfärgen. Gäller **bara över 1♦** — över 1♣ visas den
   längre rutern billigt på 1-läget (1♦), så där bjuds högfärgen upp som vanligt.
-  (Källa: standard 2/1, se §9-noten 2026-08-06.)
+  (Källa: standard 2/1, se §9-noten 2026-08-06.) **Högfärgen visas sedan i
+  återbudet** (2026-08-07, §5.3): efter t.ex. 1♦–2♣–2♦ bjuder svararen sin
+  4-korts högfärg naturligt under 3NT, så en 4-4-fit aldrig begravs i sang —
+  men bara när högfärgen är auktionens *tredje* färg (är tre färger redan
+  bjudna är budet fjärde färg, §6.6, med konventionell mening).
 - **1NT** är naturlig och **inte** krav (6–10 hp), förnekar 4-korts hf.
 - **Höjningar är inverterade:** 1m–2m = **stark** (10+ hp, krav, 4+ stöd, ingen
   4-korts hf); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
@@ -777,6 +781,12 @@ Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gälle
 - **2NT** = balanserad utan extra form (~12–15); **rebjuden egen färg** = 6+;
   **stöd i svararens färg** = fit.
 - **Hopp / splinter** = kortfärg och slamintresse.
+- **Svararens återbud med egen 4-korts högfärg (2026-08-07):** visas naturligt
+  under 3NT när den är auktionens **tredje** färg (öppnaren rebjöd egen färg
+  eller stödde svararens) — infriar 2/1-regelns löfte om att högfärgen kommer i
+  återbudet (§4.2). Prioritet: **försenat stöd i öppnarens högfärg först**
+  (känd 5-3-fit slår hypotetisk 4-4, ägarbeslut 2026-08-07), högfärgen före
+  3NT. Är tre färger redan bjudna är högfärgsbudet i stället fjärde färg (§6.6).
 
 ### 5.4 Öppnarens återbud i konkurrens (efter partnerns enkla höjning)
 Öppnar du **1♥/1♠**, en motståndare kliver in, partnern höjer till **2M** och den
@@ -1808,6 +1818,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (2/1 GF: svararen visar högfärgen i återbudet, §9-löftet
+  2026-08-06 infriat)** – **Egen 4-korts högfärg bjuds naturligt under 3NT i
+  2/1-fortsättningen (kod §4.2/§5.3).** 2/1-regeln (5♣ före 4-korts högfärg
+  över 1♦) höll tillbaka högfärgen — men `responderRebidIn2over1Auction`
+  saknade grenen som visar den, så handen gick på 3NT/preferens och 4-4-fiten
+  begravdes. Ny gren 3b: högfärgen visas när den är auktionens TREDJE färg;
+  är tre färger bjudna är budet fjärde färg (§6.6) med konventionell mening
+  och 3NT-med-håll gäller som förr (regressionen som lärde oss det: facit
+  felrapport #4, 1♠–2♦–3♣ där 3♥ är fjärde färg). Prioritet (ägarbeslut
+  2026-08-07): försenat stöd i öppnarens högfärg FÖRE egen högfärg (känd
+  5-3-fit slår hypotetisk 4-4). Facit FÖRE fix:
+  `auction-2over1-hogfargsaterbud.test.ts` (2♠/2♥ visas, prioritetsfallet,
+  kanonisk giv når utgång). Hela sviten grön; mätning M25 i systemrevisorn.md.
 - **2026-08-07 (starka återbud, systemfel #3: tre delfixar 4a/4b/4c)** –
   **Starka händer dör inte längre i delkontrakt i tre återbudslägen.**
   **(4a, kod §6.6)** Svararens 6-korts-rebud graderas: ≤10 billigast, 11–12
