@@ -30,7 +30,7 @@ import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths, suitHcp } from './hand'
 import { advanceTwoSuiter, hasStopper, openingSuit, overcall } from './overcalls'
 import { side, NEXT_SEAT } from './play'
-import { respondToKingAsk, respondToRKC } from './slam'
+import { firstRoundControl, keycards, respondToKingAsk, respondToRKC } from './slam'
 
 // ---- Bud-tolkning ----------------------------------------------------------
 
@@ -1213,6 +1213,155 @@ function raisePartnerThreeNTToSlam(deal: Deal, history: ResolvedCall[], seat: Se
   }
 }
 
+// ---- Etapp 7 hål D: slaminvit efter en HÖGFÄRGSFIT funnen i KONKURRENS -------
+//
+// Systemrevisorns Fynd 3 (mönster E): vår sida hittar en högfärgsfit GENOM
+// konkurrens och når 4M — sedan passar den starka kaptenen naket (Fynd 1). Cue-/
+// RKC-maskineriet fanns bara i det kanoniska lagret.
+//
+// ÄGARBESLUT 2026-08-05 "bara äkta extra" + info-läckage: i konkurrens läcker
+// cue-bud kontroll-info till motståndarna som lyssnar. STEG 1 (detta) tar därför
+// bara det KONTROLL-KOMPLETTA fallet: har kaptenen första-rondskontroll (ess/
+// renons) i ALLA sidofärger behövs ingen cue — hen frågar nyckelkort direkt (4NT).
+// Det är samtidigt en tight grind: en vanlig utgångshand är nästan aldrig kontroll-
+// komplett, så trevaren tänds inte på den (v0-genvägen "17+ + fit → 4NT" blåste
+// 8 utgångshänder till slam; kontroll-kompletthet är det som skiljer). Cue-front-
+// enden för de kontroll-OFULLSTÄNDIGA fallen byggs som steg 2. Ingen kik: kaptenen
+// räknar sin EGEN hand + partnerns visade fit. Storslam bjuds aldrig blint.
+
+/** Antal kontrollkort (ess + kungar) på handen — ägarens "3 kontroller"-tröskel. */
+function controlCount(hand: Hand): number {
+  return hand.filter((c) => c.rank === 'A' || c.rank === 'K').length
+}
+
+/**
+ * Vår sidas agreed HÖGFÄRG i en konkurrensauktion, sedd från `seat`:
+ *  1. en högfärg BÅDA bjudit (`agreedTrump`), eller
+ *  2. en högfärg PARTNERN bjudit naturligt (ej cue av deras färg) som jag har 3+ i.
+ */
+function competitiveMajorFit(history: ResolvedCall[], seat: Seat, hand: Hand): Suit | null {
+  const agreed = agreedTrump(history, seat)
+  if (agreed === 'hearts' || agreed === 'spades') return agreed
+  for (let i = history.length - 1; i >= 0; i--) {
+    const c = history[i]
+    if (c.seat !== PARTNER[seat]) continue
+    const cb = parseContractBid(c.bid)
+    if (!cb) continue
+    const s = SUIT_OF_LETTER[cb.strain]
+    if ((s === 'hearts' || s === 'spades') && lengths(hand)[s] >= 3 && !opponentsBidStrain(history, seat, cb.strain)) {
+      return s
+    }
+  }
+  return null
+}
+
+/**
+ * Har PARTNERN någon gång HOPPAT (bjudit en färg högre än billigaste lagliga
+ * nivån vid den punkten)? Ett hopp visar extra värden på egen kraft (t.ex. en
+ * inbjudande hoppadvance 3♠), till skillnad från ett minimalt billigaste svar.
+ * Det skiljer den ärliga slamsidan (partnern har extra) från kaptenen som ensam
+ * är stark mittemot ett minimumsvar — den senare ledde till överbud (för högt).
+ */
+function partnerShowedJump(history: ResolvedCall[], seat: Seat): boolean {
+  const partner = PARTNER[seat]
+  const rankOf = (bid: string): number => {
+    const cb = parseContractBid(bid)
+    return cb ? (cb.level - 1) * 5 + STRAINS.indexOf(cb.strain as (typeof STRAINS)[number]) : -1
+  }
+  for (let i = 0; i < history.length; i++) {
+    const c = history[i]
+    if (c.seat !== partner) continue
+    const cb = parseContractBid(c.bid)
+    if (!cb) continue
+    let prevRank = -1
+    for (let j = 0; j < i; j++) prevRank = Math.max(prevRank, rankOf(history[j].bid))
+    const strainIdx = STRAINS.indexOf(cb.strain as (typeof STRAINS)[number])
+    let minLevel = 7
+    for (let lvl = 1; lvl <= 7; lvl++) {
+      if ((lvl - 1) * 5 + strainIdx > prevRank) { minLevel = lvl; break }
+    }
+    if (cb.level > minLevel) return true // partnern hoppade
+  }
+  return false
+}
+
+/** Har kaptenen första-rondskontroll (ess/renons) i ALLA sidofärger (≠ trumf)? */
+function controlComplete(hand: Hand, trump: Suit): boolean {
+  return (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[])
+    .filter((s) => s !== trump)
+    .every((s) => firstRoundControl(hand, s))
+}
+
+/**
+ * TRIGGERN (steg 1): den KONTROLL-KOMPLETTA starka kaptenen frågar 4NT (1430 RKC)
+ * i stället för att stanna i utgång, när en högfärgsfit hittats i konkurrens.
+ */
+function competitiveSlamTry(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const bids = history.filter((c) => parseContractBid(c.bid))
+  if (!bids.some((c) => side(c.seat) !== side(seat))) return null // ingen konkurrens
+  if (!legalCalls(history, seat).includes('4NT')) return null
+  if (history.some((c) => side(c.seat) === side(seat) && (c.bid === '4NT' || (parseContractBid(c.bid)?.level ?? 0) >= 5))) {
+    return null // vår sida redan i slamzonen på annan väg
+  }
+  const hand = deal.hands[seat]
+  const fit = competitiveMajorFit(history, seat, hand)
+  if (!fit) return null
+  const sp = startingPoints(hand).startingPoints
+  const honestExtra = sp >= 17 || (sp >= 16 && controlCount(hand) >= 3)
+  if (!honestExtra) return null
+  if (!controlComplete(hand, fit)) return null // steg 1: bara kontroll-komplett
+  if (!partnerShowedJump(history, seat)) return null // partnern måste ha visat extra (hopp)
+
+  return {
+    seat,
+    bid: '4NT',
+    rule: 'konkurrens-slaminvit (RKC)',
+    explanation:
+      `${sp} startpoäng + agreed ${SWE_NAME[letterOfSuit(fit)]} + första-rondskontroll i alla sidofärger → 4NT ` +
+      `(1430 RKC). Jag har kontrollerna själv, så jag frågar nyckelkort direkt i stället för att cue:a och läcka dem.`,
+  }
+}
+
+/**
+ * PLACERINGEN: jag frågade 4NT, partnern har svarat (5-steg). Räkna nyckelkort
+ * (egen hand + svarets härledda antal) och placera lillslam bara när summan är
+ * ENTYDIG och ≥4; annars stanna i 5 i trumf. Storslam bjuds aldrig här.
+ */
+function competitiveRKCPlace(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const askIdx = history.findIndex((c) => c.seat === seat && c.bid === '4NT' && c.rule === 'konkurrens-slaminvit (RKC)')
+  if (askIdx < 0) return null // placerar bara efter VÅR egen konkurrens-slaminvit
+  const after = history.slice(askIdx + 1)
+  if (after.some((c) => c.seat === seat && parseContractBid(c.bid))) return null // redan placerat
+  const answer = after.find((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
+  if (!answer) return null
+
+  const hand = deal.hands[seat]
+  const trump = competitiveMajorFit(history, seat, hand) ?? agreedTrump(history, seat)
+  if (!trump) return null
+
+  const own = keycards(hand, trump)
+  const opts: Record<string, number[]> = { '5C': [1, 4], '5D': [0, 3], '5H': [2, 5], '5S': [2, 5] }
+  const possible = (opts[answer.bid] ?? []).filter((o) => own + o <= 5)
+  if (possible.length === 0) return null
+  const legal = legalCalls(history, seat)
+  const slam = `6${letterOfSuit(trump)}` as Bid
+  const stop = `5${letterOfSuit(trump)}` as Bid
+
+  if (possible.length === 1 && own + possible[0] >= 4 && legal.includes(slam)) {
+    return {
+      seat, bid: slam, rule: 'konkurrens-slam: placering',
+      explanation: `essvaret ${answer.bid} + min hand = ${own + possible[0]} av 5 nyckelkort (högst ett saknas) → ${slam} (lillslam).`,
+    }
+  }
+  if (legal.includes(stop)) {
+    return {
+      seat, bid: stop, rule: 'konkurrens-slam: stopp',
+      explanation: `essvaret ${answer.bid} lämnar nyckelkortsläget osäkert → stannar i ${stop} (utgång).`,
+    }
+  }
+  return null
+}
+
 // ---- Etapp 7 hål 2: öppnarens slamtrevare efter svararens 3NT ("3NT-stoppen")
 //
 // Systerfallet till felrapport #42 (`raisePartnerThreeNTToSlam` ovan), fast från
@@ -2142,7 +2291,7 @@ function placeGameAfterFourthSuit(deal: Deal, history: ResolvedCall[], seat: Sea
   if (isGameOrHigher(last.bid as Bid)) return null // redan i/över utgång
 
   // Bara MODESTA utgångshänder placeras här. En stark hand (18+) har slamintresse
-  // och fortsätter utreda via slam-/beskrivningsmaskineriet (t.ex. felrapport #42:
+  // och fortsätter utreda via slam-/beskrivnings­maskineriet (t.ex. felrapport #42:
   // svararen har 21 hp och driver till 6NT — den får inte kapas i 3NT).
   if (hcp(deal.hands[seat]) >= 18) return null
 
@@ -3769,6 +3918,11 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
       return next
     }
   }
+
+  // Etapp 7 hål D: konkurrens-slaminvit (kontroll-komplett 4NT + placering) —
+  // FÖRE utgångshöjningarna och det nakna passet.
+  const slamStep = competitiveRKCPlace(deal, history, seat) ?? competitiveSlamTry(deal, history, seat)
+  if (slamStep) return slamStep
 
   // ---- Tvingande svar (gäller ÄVEN on-book) --------------------------------
   // Linjen gav inget bud för oss här. Vissa lägen är ändå rondkrav: partnern får

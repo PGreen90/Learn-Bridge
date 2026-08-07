@@ -753,10 +753,23 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    ärligt bjudbara delen (öppnarens minor-invit-hopp → 3NT med 19+ hp) fick en smal
    kvantitativ 4NT-port (ägarbeslut "bara äkta extra"). Netto −500 p, noll
    regressioner, 1 giv (20261020) → exakt par 6NT. §6.9.
-3. **Hål C — utgångsstoppen 4M** (14 givar): kräver ägarbeslut, här ligger
-   gränsen mellan ärlig slamjakt och blåsning.
+3. ✅ **HANTERAD 2026-08-03 via CUE-BUDEN: Hål C — utgångsstoppen 4M** (14 givar):
+   den ärliga kärnan var ~5 givar med agreed trumf, löst av cue-ronden
+   (`cueSlamAuction` i `slam-auction.ts`, inkopplad via Jacoby 2NT + NMF:s
+   fördröjda högfärgsstöd). Detalj: budsystem.md §6.2/§9 + `docs/historik.md`
+   2026-08-03.
 4. **Hål D — konkurrensfallen** (19 givar): störst post men svårast; slam efter
    motståndarnas inkliv är där mänskligt omdöme väger tyngst.
+   **STEG 1 KLAR 2026-08-07:** kontroll-komplett 4NT i konkurrenslagret
+   (`competitiveSlamTry`/`competitiveRKCPlace` i `auction-live.ts`, budsystem.md
+   §6.10). Tänder ärligt på 1 giv (20260877 → 6♠, hem); revisor-mätning
+   2026-08-05 noll regressioner. Ett v0-försök (poängtröskel utan kontrollkrav)
+   blåste 8 utgångshänder till slam och revertades. Facitstädning: 20260947
+   omklassad till splinterfel (Jacoby-hand — lagas i kanoniska lagret), 20261274
+   struken (premiss stale efter 2/1-regeln 2026-08-06), 20261272 parkerad.
+   **STEG 2 (cue-frontend för kontroll-ofullständiga händer) PARKERAD
+   2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
+   regressionsrisken. Se `docs/senare.md`.
 
 ## Mätning #21 — 2026-07-31, ETAPP 7 hål 2 (3NT-stoppen)
 Samma frö 20260721, 1 000 givar. Fix: öppnarens kvantitativa slamtrevare (4NT)
