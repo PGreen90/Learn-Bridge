@@ -82,12 +82,15 @@ DDS-bevisat lagad. **Kvar i spåret (⚪ SENARE):** tredje hand högt även i
 tredje-hand-nyanser bortom lägsta honnören (t.ex. ducka med tenass mot bordets
 honnör).
 
-### TP till §7-inkliven (2026-07-05, ägarbeslut vid "låna en kung")
-§7-lagret (`overcall`, `advanceOvercall`, DONT, försvar mot svaga tvåor) räknar
-fortfarande **rå HP** — TP (form/fördelning) har aldrig nått dit. Att låta
-balanserings- OCH direkt-inkliv räkna TP är en riktig förbättring (en formstark 8:a
-kliver in), men **additiv** ovanpå "låna en kung" (som är sits-spaken), inte en
-ersättare. Eget test-låst steg (som TP-stegen A–F).
+### ~~TP till §7-inkliven~~ (BYGGD 2026-08-07 via F4)
+Kärnan stängd: golven för enkelt inkliv + upplysnings-X läser `max(hp,
+startpoäng)` och advancerns fit-trösklar läser stödpoäng — additivt ovanpå
+"låna en kung", med kvalitetsvakt (lyft kräver 3+ av topp-5 i färgen) och
+spärrvakt (boken §7.1, facit `overcall-tp.test.ts`). Kvar som bevakning, inte
+byggpunkt: **DONT och försvaret mot svaga tvåor/spärrar**
+(`dont.ts`/`defense-conventional.ts`) samt **X-svararens trösklar**
+(`answerTakeoutDouble`) räknar fortfarande rå HP — byggs på om spel visar att
+formstarka händer säljs där (`docs/bevaka.md`).
 
 ### ~~Advancer-rabatt efter balansering~~ (BYGGD 2026-08-07 via F3)
 Det generella fallet stängt: rabatten −3 gäller nu alla balanserade öppningar

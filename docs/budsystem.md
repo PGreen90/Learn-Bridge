@@ -1375,6 +1375,24 @@ cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
   de vilar på form/styrka, inte på det lånade kunga-utrymmet. Färgkvalitet och
   korthet i deras färg krävs fortfarande; kungen sänker bara HP-tröskeln ovanpå
   formkraven.
+- **TP till inklivsgolven (F4, 2026-08-07):** golven för **enkelt inkliv** och
+  **upplysnings-X** läser numera **totalpoäng** — `max(hp, startpoäng)`
+  ("nedgradera aldrig", samma mått som resten av motorn) — så en formstark hand
+  kliver in ett golv tidigare (t.ex. 7 hp med KQJ109-femma = 9 startpoäng →
+  1♠ i direkt sits). **Additivt** ovanpå "låna en kung": TP är formspaken,
+  kungen är sitsspaken — i balansering gäller alltså t.ex. golvet 5 läst i TP.
+  Två vakter på lyftet:
+  - **Kvalitetsvakten:** lyftet kräver en **kvalitetsfärg** (3+ av topp-5 i
+    inklivsfärgen) — "färgkvalitet går före poäng". Två längdpoäng på
+    skräpfärger (5-5 med QJ975) räcker inte; utan kvalitetsfärg gäller de råa
+    HP-golven som förr.
+  - **Spärrvakten:** spärrmaterial (6+ färg med rå 6–10 hp) lyfts inte — det
+    ska förbli ett svagt hoppinkliv, inte förvandlas till ett "konstruktivt"
+    inkliv.
+  **Rå HP behålls** där form inte hör hemma: 1NT-fönstren (sangvärdering),
+  inklivstaket 16 och hela 17+-styrningen (X först). Advancerns fit-trösklar
+  (cue = limithöjning+ vid 11+, fit-jump vid 10+) läser **stödpoäng**
+  `max(hp, stödpoäng)` — samma mått som de levande höjningarna redan använde.
 
 **Svar på partnerns enkla inkliv:**
 | Svar | Betydelse |
@@ -1872,6 +1890,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (F4: TP till §7-inkliven, D9)** – **Inklivsgolven läser
+  totalpoäng.** §7-lagret räknade rå HP — form/fördelning nådde aldrig
+  försvarsbesluten (D9 i revisionen). Nu läser golven för enkelt inkliv
+  (8, bal. 5) och upplysnings-X (12/10, bal. 9/7) `max(hp, startpoäng)`, och
+  advancerns fit-trösklar (cue 11+, fit-jump 10+) läser stödpoäng — additivt
+  ovanpå "låna en kung" (TP = formspak, kungen = sitsspak). Två vakter:
+  kvalitetsvakten (lyftet kräver 3+ av topp-5 i färgen — längdpoäng på
+  skräpfärger räcker inte; frö 20261020) och spärrvakten (6+ färg med rå
+  6–10 hp förblir hoppinkliv). Rå HP behålls i 1NT-fönstren, taket 16 och
+  17+-styrningen. `overcalls.ts` (`overcall`/`advanceOvercall`), facit
+  `overcall-tp.test.ts`, mätning M29 (`docs/systemrevisorn.md`). §7.1.
 - **2026-08-07 (F3: advancer-rabatten generaliserad, C12)** – **Rabatt −3 för
   den som svarar på partnerns balansering — nu över ALLA öppningsnivåer (kod
   §7.1).** Fix 5a byggde rabatten enbart för svaga tvåor/spärrar; över deras

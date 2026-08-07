@@ -10,6 +10,32 @@
 
 ---
 
+## 2026-08-07 natt (F4 — TP till §7-inkliven, D9 stängd)
+
+**F4 KLAR** (körordningens nästa steg efter F3; ägarbeslutet från 2026-07-05
+vid "låna en kung" infriat). §7-lagret räknade rå HP — TP nådde aldrig
+försvarsbesluten. Nu läser inklivsgolven totalpoäng, additivt ovanpå
+kungalånet (TP = formspak, kungen = sitsspak, som beslutat).
+
+- **Enkelt inkliv + upplysnings-X** (`overcall`, `overcalls.ts`): golven
+  (8/12/10; −3 i balansering) läser `max(hp, startpoäng)` — en formstark
+  7:a med KQJ109-femma (9 startp.) kliver in, en 9:a med kvalitetsfärg och
+  perfekt X-form (10 startp.) dubblar.
+- **Två vakter på lyftet:** *kvalitetsvakten* — lyftet kräver 3+ av topp-5 i
+  inklivsfärgen ("färgkvalitet går före poäng"; utan den störde en 5-5-hand
+  med QJ975 på 6 hp sönder 6NT-facitgiven frö 20261020, upptäckt av
+  `auction-3nt-stopp.test.ts` i sviten). *Spärrvakten* — 6+ färg med rå
+  6–10 hp förblir svagt hoppinkliv. Rå HP behålls i 1NT-fönstren, taket 16
+  och 17+-styrningen.
+- **Advancern** (`advanceOvercall`): cue (11+) och fit-jump (10+) läser
+  stödpoäng `max(hp, dummyPoints)` — samma mått som live-höjningarna
+  (`raiseWithFit`) redan använde; on-book-linjen ikapp.
+- **Facit FÖRE fix** (`overcall-tp.test.ts`): fem lyft bevisade röda →
+  gröna; vakterna + rå-HP-lägena låsta. Hela sviten grön (`npm test`).
+- Boken §7.1 + §9; bevakning (a) straffas TP-inkliven, (b) X-svararen/DONT/
+  svaga tvåor räknar ännu rå HP (`docs/bevaka.md`). Kvar som bevakning i
+  `docs/senare.md`. Mätning M29 (`docs/systemrevisorn.md`).
+
 ## 2026-08-07 sen kväll (F3 — advancer-rabatten generaliserad, C12 stängd)
 
 **F3 KLAR** (körordningens nästa steg direkt efter F2). Fix 5a byggde
