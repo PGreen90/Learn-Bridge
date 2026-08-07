@@ -109,11 +109,13 @@ regressionsrisk först, och grundstenar före sådant som bygger på dem. Varje 
    lägsta, 3→mitten): trumf i korsruff-läge (3+ bjudna motståndarfärger) + passiv
    utväg; singel-för-ruff med korta trumf. Facit `play-bot.test.ts`.
 
-**Alla hål A–G klara.** Rekommenderad uppföljning: en aggregerad netto-A/B
-(`PLAYQ`-proben med git-stash) för att bekräfta stickeffekten, samt att förfina
-aktiv/passiv-läsningen (idag passivt som default mot trumf; aktivt-när-bordet-har-
-lång-sidofärg är ännu ej detekterat) och Lightner-dubblingar (`docs/utspel-teori.md`
-§8). Kvar-att-förfina snarare än hål.
+**Alla hål A–G klara.** **Netto-A/B: MÄTT & KLAR 2026-08-05** (`LEADAB=1`-proben,
+~1000 givar: netto −91 spelförarstick över 525 ändrade utspel, t = −2,54, KI
+utesluter noll — litet men verkligt försvarslyft; hela mätningen i
+`docs/historik.md` 2026-08-05). Ägarbeslut samma dag: vi nöjer oss med utspelet
+tillsvidare. Kvar-att-förfina (parkerat i `docs/senare.md`): aktiv/passiv-
+läsningen (idag passivt som default mot trumf; aktivt-när-bordet-har-lång-
+sidofärg ej detekterat) och Lightner-dubblingar (`docs/utspel-teori.md` §8).
 
 ### Arbetsregler för spåret
 - **Facit-testet skrivs FÖRE fixen** (`play-bot.test.ts` / `signals.test.ts`).

@@ -64,17 +64,17 @@ agreed-trumf-lägen (inverterad minor, 2♣); off-book-igenkänning av din cue;
 mot trumf, inre sekvenser, trumf/singel. Teori `docs/utspel-teori.md`; kvar =
 förfining `docs/utspel-diagnos.md`.
 
-**HÅL D STEG 1 (2026-08-07): KLAR.** Kontroll-komplett 4NT i konkurrenslagret
-(`auction-live.ts`, boken **§6.10**; facit `auction-slam-competition.test.ts`,
-20260877 → 6♠; revisor-mätning noll regressioner). **Steg 2 PARKERAD** +
-facitstädning (947 → splinterspåret, 1274 stale, 1272 parkerad):
-`docs/senare.md` + §9.
+**ETAPPERNA E1–E7 (2026-08-07): ALLA KLARA — EJ PUSHADE.** E1 hål D steg 1
+landad (§6.10, steg 2 PARKERAD i `docs/senare.md`) · E2 splinterregeln singel
+A/K → Jacoby (§4.1, källbelagd, fixar 947) · E3 Jordan-fortsättningen (§7.8d) ·
+E4 starka återbud 4a/4b/4c (§5.2/§6.6) · E5 2/1-högfärgen i återbudet (§5.3) ·
+E6 oklart-fixarna (§5.2/§5.7) · E7 doc-svepet. **Mätserien M22–M26:
+par-avvikelse 269,67 → 264,77 (≈ −4 900 p/1 000 givar), rätt kontrakt 19,0 →
+19,7 %** (`docs/systemrevisorn.md`; detalj `docs/historik.md` 2026-08-07).
 
-**➡️ NÄSTA GÅNG — godkänd etappordning 2026-08-07:** **E2 splinterregeln** (singel
-A/K → Jacoby 2NT, fixar 947) → **E3 Jordan-fortsättningen** (20260739) →
-**E4 starka återbud** (#3) → **E5 2♣-återbudet** → **E6 oklart-översynen**
-(#2) → **E7 doc-svepet**. Faceliten PARKERAD (2026-08-03). ⚪ SENARE: tredje
-hand högt i **trumf** + signalspåret.
+**➡️ NÄSTA GÅNG:** PCD-beslut på dagens commits (fråga ägaren) → sedan 🟢 NÄST
+punkt 1. Faceliten PARKERAD (2026-08-03). ⚪ SENARE: tredje hand högt i
+**trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
@@ -89,49 +89,33 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
-- **Försvaret spelar tredje hand högt i sang (#34, 2026-07-30):** ledde partnern
-  och en motståndare vann just nu, lägger boten sin LÄGSTA honnör (tvingar fram
-  spelförarens) i stället för ett lågt spotkort. Lägger den honnör där lågt var
-  bättre — t.ex. med en gaffel den borde behållit hel? (Bara sang; i trumf lågt
-  som förr.)
-- **Spelföraren etablerar lång färg i sang (#32, 2026-07-29):** boten knäcker nu
-  motståndarnas spärr i sin långa färg FÖRE den cashar sidoessen. Ger den ibland
-  ifrån sig ledningen i fel läge — attackerar långfärgen när den borde casha hem
-  kontraktet direkt? (Bara sang; i trumf ruffar den fram färgen som förr.)
-- **17+ säljer aldrig given över deras 1-lägesöppning (#40, 2026-07-28):** en
-  17+-hand utan fönster dubblar i stället för att passa (typfall: enda
-  långfärgen är öppnarens egen) — dubblar bottarna för ofta med LÄNGD i deras
-  färg? **Känt hål i rond 2:** den starka dubblaren kan sälja given i nästa
-  rond (M19, frö 20260952) — detaljer i `docs/bevaka.md`.
+- **Splinterregeln (2026-08-07):** singel A/K splintras aldrig — Jacoby 2NT i
+  stället. Saknar du splinterns exakta kortfärgsinfo i något läge (mätningen
+  visade +2 "fel färg"-givar som motvikt)?
+- **Starka återbud (2026-08-07):** graderat 6-korts-rebud, invit-accept på 14+
+  stödpoäng, reverse-handen driver med 18+. För många tunna 25-utgångar? Står
+  5m-utgångarna efter reverse?
+- **Hål D steg 1 (2026-08-07):** kontroll-komplett 4NT i konkurrens (§6.10) —
+  känns frågorna lagom sällsynta (~1/1000), eller läcker vi där pass var
+  bättre?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **ETAPP 7: MISSAD LILLSLAM (topplistans största post, FÖRSKANNAD):** hela
-   mönsteranalysen + ordningsförslaget: `docs/systemrevisorn.md` "ETAPP 7
-   FÖRSKANNAD". **Hål 1 (minimum-märkningen) KLART** (Mätning #20). **Hål 2
-   ("3NT-stoppen") KLART 2026-07-31** (Mätning #21: öppnarens 4NT-slamtrevare,
-   par-avvikelse 271,24 → 270,74, noll regressioner, `auction-3nt-stopp.test.ts`;
-   förskanningen visade att posten är 24 givar men mest DD-smicker — bara 19+-delen
-   är ärligt bjudbar). **Hål C (utgångsstoppen 4M) HANTERAD 2026-08-03 via
-   CUE-BUDEN** (se NU-blocket + [[cue-bids-reinstated]]): den ärliga kärnan var
-   ~5 givar med agreed trumf, löst av cue-ronden (NMF-support on-book). **Hål D
-   steg 1 KLAR 2026-08-07** (kontroll-komplett 4NT, se NU-blocket; steg 2
-   PARKERAD i `docs/senare.md`) — etappen är därmed i praktiken stängd; kvar som
-   eget beslut: fler cue-lägen (inverterad minor / 2♣). Verktyg (gated):
-   `$env:DUMP_CAT='missad-lillslam'` resp. `$env:FORSKAN='1'` + probe-testerna;
-   mätningen: `$env:REVISOR='1'; npx vitest run
-   src/lib/engine/revisor.probe.test.ts` (samma frö 20260721). Arbetssättet
-   (facit-först, mönster inte enskilda givar): `docs/historik.md` +
-   `docs/systemrevisorn.md`.
-2. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är
-   grova → ärliga slam-misser (`docs/budsystem-revision.md` B13).
-3. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
+1. **B13 — öppnarens återbud efter inverterad minorhöjning:** dagens återbud är
+   grova → ärliga slam-misser (`docs/budsystem-revision.md` B13). Cue-lägena
+   "fler agreed-trumf" (inverterad minor, 2♣) hör naturligt ihop med denna.
+2. **F2 — datadriven detektorkedja (E1):** underhållbarhet innan fler
    konkurrenskonventioner läggs på `decideCall`-kedjan.
+
+*(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C
+via cue-buden, hål D steg 1 klar / steg 2 parkerad — hela resan + verktygen i
+`docs/systemrevisorn.md`.)*
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 **FACELIFTEN** (väckt 2026-07-29 ur parkeringen → Fas 1 i `docs/konkurrensplan.md`) ·
 **Fler skills + smal subagent-användning** (påbörjat 2026-07-30, deploy-verifiering
 klar; kvar: probe-ritualerna + session-checklistorna) ·
-**Koppla in Lebensohl** (byggd men aldrig inkopplad, upptäckt 2026-07-25) ·
+**Lebensohl nästa lager** (kärnan live 2026-07-30; kvar: takeout-X, slow shows,
+cue-Stayman, efter takeout av svag tvåa) ·
 fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32/#34 KLARA; kvar: tredje hand högt i trumf) ·
 **UTSPELET** (hål A–G klara; kvar: förfining) · engelska som andra
