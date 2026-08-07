@@ -19,7 +19,7 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerAnswerNMF, openerSecondBid, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAnswerNMF, openerSecondBid, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -857,6 +857,33 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
         second,
       )
       if (third) {
+        turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+        return finish(false)
+      }
+    }
+    // Systemfel #3 delfix 4b (2026-08-07): öppnaren höjde svararens 1M till 2M
+    // (enkel höjning) och svararen inviterar 3M — öppnaren svarar ALLTID:
+    // 14+ stödpoäng mot fiten accepterar (4M), annars pass (frö 20260982:
+    // 15 hp + 4 trumf + singel passade inviten → 3♥ på 26 hp).
+    if (
+      (response.call === '1H' || response.call === '1S') &&
+      rebid.rule === 'enkel höjning' &&
+      second.rule === 'inbjudan' &&
+      second.call === `3${response.call[1]}`
+    ) {
+      const M4b = response.call === '1H' ? ('hearts' as const) : ('spades' as const)
+      const third = openerThirdBidAfterOwnRaise(deal.hands[openerSeat], M4b)
+      turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+      return finish(false)
+    }
+    // Delfix 4c: öppnarens reverse + svararens preferens tillbaka — reversens
+    // 17-minimum får passa, 18+ driver till utgång (3NT med håll i objudna
+    // färgen + 2+ kort i partnerns färg, annars fiten; frö 20261111 → 5♣).
+    if (rebid.rule === 'reverse' && second.rule === 'preferens' && openerSuit) {
+      const responderSuit4c = parseBid(response.call).suit
+      const reverseSuit4c = parseBid(rebid.call).suit
+      if (responderSuit4c && reverseSuit4c) {
+        const third = openerThirdBidAfterReverse(deal.hands[openerSeat], openerSuit, responderSuit4c, reverseSuit4c, second.call)
         turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
         return finish(false)
       }

@@ -9,6 +9,7 @@
 import type { Hand, Suit } from '../../types/bridge'
 import { notrumpPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
+import { hasStopper } from './overcalls'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
 import { openerRebidAfterOgust, openerRebidAfterNewSuit, suitOfWeakTwo } from './responses-weak2'
@@ -304,6 +305,51 @@ export function openerRebidAfterJordan2NT(hand: Hand, M: Major): ResponseResult 
     return { call: `4${mBid}`, rule: 'Jordan: utgång', explanation: `${txt} mot partnerns limithöjning+ (Jordan) → 4${mSym}.` }
   }
   return { call: `3${mBid}`, rule: 'Jordan: minimum', explanation: `${txt} – minimum → 3${mSym} (avslut; partnern går vidare med 13+).` }
+}
+
+// === Systemfel #3 delfix 4b: öppnarens svar på 3M-inviten efter egen enkel
+// höjning (1m–1M–2M–3M), §5.2. Öppnarens tredje bud saknades helt i
+// färgauktioner → 15 hp + 4 trumf passade inviten (frö 20260982). Ägarbeslut
+// 2026-08-07: 14+ stödpoäng mot fiten accepterar, annars pass.
+
+export function openerThirdBidAfterOwnRaise(hand: Hand, M: Major): ResponseResult {
+  const { points: sp, text: txt } = pointsWithFloor(hand, M, 'support')
+  if (sp >= 14) {
+    return { call: `4${BID[M]}`, rule: 'inbjudan antagen', explanation: `${txt} med fjärde trumfen → 4${SYM[M]} (accepterar inviten).` }
+  }
+  return { call: 'P', rule: 'inbjudan avböjd', explanation: `${txt} – minimum, inviten avböjs → pass.` }
+}
+
+// === Systemfel #3 delfix 4c: öppnarens fortsättning efter egen reverse när
+// partnern PREFERERAR tillbaka (t.ex. 1♣–1♥–2♦–3♣), §5.2. Reversen (17+) är
+// rondkrav men inte GF: 17-minimum får passa preferensen, 18+ driver till
+// utgång — 3NT bara med håll i den objudna färgen OCH 2+ kort i partnerns
+// färg, annars utgång i den prefererade fiten (frö 20261111: singel hjärter →
+// 5♣, inte 3NT). Ägarbeslut 2026-08-07.
+
+export function openerThirdBidAfterReverse(
+  hand: Hand,
+  first: Suit,
+  responderSuit: Suit,
+  reverseSuit: Suit,
+  preferenceCall: string,
+): ResponseResult {
+  const p = hcp(hand)
+  if (p <= 17) {
+    return { call: 'P', rule: 'reverse: minimum', explanation: `${p} hp – reversens minimum, preferensen står → pass.` }
+  }
+  const len = lengths(hand)
+  const fourth = RANK.find((s) => s !== first && s !== responderSuit && s !== reverseSuit)!
+  const prefLevel = parseInt(preferenceCall[0], 10)
+  if (hasStopper(hand, fourth) && len[responderSuit] >= 2 && prefLevel <= 3) {
+    return { call: '3NT', rule: 'reverse: 3NT', explanation: `${p} hp med håll i ${NAME[fourth]} → 3NT (utgång; reversen + extra).` }
+  }
+  const gameLevel = first === 'hearts' || first === 'spades' ? 4 : 5
+  if (gameLevel > prefLevel) {
+    const call = `${gameLevel}${BID[first]}`
+    return { call, rule: 'reverse: utgång i fiten', explanation: `${p} hp – för starkt för att passa preferensen → ${pretty(call)} (utgång).` }
+  }
+  return { call: 'P', rule: 'reverse: minimum', explanation: `${p} hp – ingen väg över preferensen → pass.` }
 }
 
 // === Punkt 7: återbud efter inverterade minorhöjningar, §4.2 ================

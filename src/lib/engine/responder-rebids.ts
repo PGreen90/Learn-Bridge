@@ -719,10 +719,26 @@ function fourthSuit(hand: Hand, x: Suit, y: Suit, second: Suit, rebid: ResponseR
     }
     return { call, rule: 'höjning', explanation: `${p} hp, ${len[second]} stöd i ${NAME[second]} → ${pretty(call)}.` }
   }
-  // 2. Egen 6-korts färg.
+  // 2. Egen 6-korts färg — GRADERAD (systemfel #3 delfix 4a, ägarbeslut
+  // 2026-08-07): ≤10 = billigaste rebud (minimum), 11–12 = hoppinvit, 13+
+  // faller VIDARE till steg 3 så fjärde färg-kravet placerar utgången. Förr
+  // sa en 16-poängare samma billiga 2♥ som en 6-poängare → öppnaren passade
+  // och 30 hp dog i 2♥ (frö 20261323).
   if (len[y] >= 6) {
     const call = bidAbove(y, rebid.call)
-    return { call, rule: 'rebjuden färg', explanation: `${p} hp med 6+ ${NAME[y]} → ${pretty(call)}.` }
+    if (p <= 10) {
+      return { call, rule: 'rebjuden färg', explanation: `${p} hp med 6+ ${NAME[y]} → ${pretty(call)}.` }
+    }
+    const level = parseInt(call[0], 10)
+    if (p <= 12) {
+      if (level + 1 <= 3) {
+        const jump = `${level + 1}${BID[y]}`
+        return { call: jump, rule: 'rebjuden färg (inbjudan)', explanation: `${p} hp med 6+ ${NAME[y]} → ${pretty(jump)} (hoppinvit).` }
+      }
+      return { call, rule: 'rebjuden färg', explanation: `${p} hp med 6+ ${NAME[y]} → ${pretty(call)} (utrymmet medger inget hopp).` }
+    }
+    // 13+: utgångsstyrka — gå fjärde färg-vägen (steg 3) i stället för att
+    // rebjuda billigt och riskera pass.
   }
   // 3. GF utan naturligt bud → 3NT med stopp, annars fjärde färg krav.
   if (p >= 12) {

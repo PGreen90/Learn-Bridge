@@ -771,6 +771,34 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #24 — 2026-08-07, starka återbud (systemfel #3, delfix 4a/4b/4c)
+Samma frö 20260721, 1 000 givar. Fix: svararens graderade 6-korts-rebud
+(`fourthSuit` steg 2), öppnarens invit-svar efter egen höjning
+(`openerThirdBidAfterOwnRaise`) och reverse-fortsättningen
+(`openerThirdBidAfterReverse`), budsystem.md §5.2/§6.6 + §9. Baslinje = M23.
+Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M23 (baslinje)   M24 (starka återbud)
+Rätt kontrakt (exakt par)  19,3 %          19,7 %
+Genomsnittlig par-avvikelse 267,76         266,28
+Missad utgång           146 / 48 710     142 / 47 490
+Missad lillslam          78 / 50 390      78 / 49 850
+Bättre än facit         123 / 19 980     123 / 20 230
+Fel strain              102 / 2 470      102 / 2 500
+Övriga poster: oförändrade.
+```
+
+**Läsning:** ren — netto **−1 480 p** och fyra givar flyttar från missad
+utgång till rätt kontrakt (20261323/20260982/20261111-familjerna). +250 p
+"bättre än facit" är ofarlig riktning (motorn slår facit oftare) och +30 p
+fel strain är brus. Facit FÖRE fix: `auction-starka-aterbud.test.ts` (tre
+seedfall + tröskel-unitfall). Hela sviten grön (1 627).
+
 ## Mätning #23 — 2026-08-07, Jordan 2NT-fortsättningen (systemfel #4)
 Samma frö 20260721, 1 000 givar. Fix: öppnaren passar aldrig partnerns Jordan
 2NT — `jordanToAnswer`/`jordanSignoffToAnswer` (auction-live.ts) +
