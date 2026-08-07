@@ -1609,6 +1609,29 @@ flyktbud när de smiter undan till en färg – steg för steg, tills de får sp
 dubblat. Gäller **bara** efter vårt 1NT + XX (där vi bevisligen äger handen), inte
 efter våra svaga tvåor/spärrar.
 
+**(d) De dubblar vår 1♥/1♠-öppning — Jordan 2NT och fortsättningen.**
+Efter **1M–(X)** är svararens **2NT Jordan/Truscott**: konstgjord
+**limithöjning eller bättre** (10+, 4+ trumf) — hopphöjningen direkt till 3M
+blir därmed ren spärr. Källa: bridgebum (jordan_2nt.php).
+
+**Öppnaren passar aldrig Jordan** (den visar tvåsidig styrka och väntar på
+besked). Fortsättningen (2026-08-07, "bara 3M/4M" — inget ny färg-utgångsförsök
+i nuläget): öppnaren räknar **stödpoäng** mot den kända 9-korts fiten,
+
+| Öppnarens återbud | Betydelse |
+|---|---|
+| 3M | minimum (≤14 stödpoäng) – avslut mot limitdelen |
+| 4M | utgångsvärden (15+ stödpoäng) |
+
+**Jordan-bjudaren efter öppnarens 3M-avslut:** med ren limithöjning (10–12)
+**passar** hen; med **13+ stödpoäng** (utgångsstyrka — "eller bättre"-delen)
+**höjer hen till 4M** — avslutet får aldrig dö med utgång på handen. Bjuder
+advancern vidare över 2NT gäller det vanliga konkurrensomdömet i stället.
+
+*Bakgrund (systemfel #4, frö 20260739): S öppnade 1♥ med ♠A73 ♥KQ542 ♦J72 ♣A7
+(14 hp = 15 stödpoäng), W dubblade, N bjöd Jordan 2NT med 14 hp — och S passade.
+2NT spelades med 9-korts hjärterfit och 28 hp ihop.*
+
 ## 8. Markeringar & utspel
 > Försvarsspelets signaler. Vi spelar räkningstunga, lågtvetydiga metoder som
 > passar 2/1:s precisionsfilosofi.
@@ -1757,6 +1780,20 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (Jordan 2NT: öppnarens fortsättning, systemfel #4)** – **Öppnaren
+  passar aldrig partnerns Jordan 2NT (kod §7.8d).** Spanar-agentens frö 20260739:
+  `1♥–(X)–2NT[Jordan]` och öppnaren PASSADE med 14 hp (15 stödpoäng) och 9-korts
+  fit — 28 hp ihop dog i 2NT. Jordan-igenkänningen fanns bara i tolkningslagret;
+  ingen svarsregel. Nya `jordanToAnswer`/`jordanSignoffToAnswer`
+  (`auction-live.ts`, forcedAnswers-kedjan, positionsexakt 1M→X→2NT) +
+  `openerRebidAfterJordan2NT` (`rebids.ts`: ≤14 stödpoäng → 3M avslut, 15+ →
+  4M; ägarbeslut 2026-08-07 "bara 3M/4M", stödpoängströskeln vald framför rå
+  hp) + `jordanRaiseAfterSignoff` (`responder-rebids.ts`: Jordan-bjudaren höjer
+  3M-avslutet till 4M med 13+, passar med ren limithöjning). Bjuder advancern
+  över 2NT lämnas läget till konkurrensmaskineriet (Jordan är inbjudan, inte
+  rondkrav i störd fortsättning). Källa: bridgebum jordan_2nt.php. Facit FÖRE
+  fix: `auction-jordan-fortsattning.test.ts` (frö 20260739 → 4♥ + trösklarna).
+  Hela sviten grön; mätning i systemrevisorn.md (M23).
 - **2026-08-07 (splinterregeln: singel A/K är ingen splinterfärg, ägarregel +
   källor)** – **Svararen splintrar aldrig en singel A/K — handen svarar Jacoby
   2NT (kod §4.1).** Motivgiven 20260947 (ur hål D-facitstädningen): Väst ♠K

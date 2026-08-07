@@ -268,6 +268,19 @@ export function responderRevealSplinterShortness(hand: Hand, M: Major): Response
   }
 }
 
+// === Jordan-bjudarens fortsättning efter öppnarens 3M-avslut, §7.3 ==========
+// Jordan 2NT visade "limithöjning eller bättre". Öppnarens 3M är ett avslut mot
+// limitdelen (10–12) — men en Jordan-bjudare med utgångsstyrka (13+ stödpoäng)
+// får aldrig låta 3M dö (annars återuppstår systemfel #4 en nivå upp).
+
+export function jordanRaiseAfterSignoff(hand: Hand, M: Major): ResponseResult {
+  const { points: sp, text: txt } = pointsWithFloor(hand, M, 'support')
+  if (sp >= 13) {
+    return { call: `4${BID[M]}`, rule: 'Jordan: höjning till utgång', explanation: `${txt} – mer än limithöjning → 4${SYM[M]}.` }
+  }
+  return { call: 'P', rule: 'Jordan: pass på avslut', explanation: `${txt} – ren limithöjning, öppnaren avböjde → pass.` }
+}
+
 // === FAS 3 punkt 15: svararens svar på Bergen game try (1M–2M–2NT) ==========
 // Öppnaren har frågat med 2NT (game try, 15–17 Bergenpoäng). Svararen gjorde en
 // enkel höjning (3 stöd, 6–9 stödpoäng) och beskriver nu enligt Bergens ÄKTA

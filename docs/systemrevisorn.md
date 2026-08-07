@@ -771,6 +771,31 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #23 — 2026-08-07, Jordan 2NT-fortsättningen (systemfel #4)
+Samma frö 20260721, 1 000 givar. Fix: öppnaren passar aldrig partnerns Jordan
+2NT — `jordanToAnswer`/`jordanSignoffToAnswer` (auction-live.ts) +
+`openerRebidAfterJordan2NT` (rebids.ts) + `jordanRaiseAfterSignoff`
+(responder-rebids.ts), budsystem.md §7.8d + §9. Baslinje = M22. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M22 (baslinje)   M23 (Jordan)
+Rätt kontrakt (exakt par)  19,2 %          19,3 %
+Genomsnittlig par-avvikelse 268,50         267,76
+Missad utgång           147 / 48 960     146 / 48 710
+Fel färg (bet)          121 / 52 570     120 / 52 070
+Fel strain              101 / 2 460      102 / 2 470
+Övriga poster: oförändrade.
+```
+
+**Läsning:** ren — netto **−740 p**, typfallet (20260739-familjen: Jordan
+passas) lämnar missad utgång, en fel färg-giv rättas på köpet, +10 p fel
+strain är brus. Facit FÖRE fix: `auction-jordan-fortsattning.test.ts`
+(frö 20260739 → 4♥ + tröskel-unitfall). Hela sviten grön (1 619).
+
 ## Mätning #22 — 2026-08-07, splinterregeln (singel A/K → Jacoby 2NT)
 Samma frö 20260721, 1 000 givar. Fix: `splinterShortSuits` (responses.ts) — en
 singel A/K räknas inte som splinterfärg, handen svarar Jacoby 2NT (ägarregel
