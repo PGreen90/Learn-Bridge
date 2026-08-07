@@ -771,6 +771,45 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #29 — 2026-08-07, F4: TP till §7-inkliven
+Samma frö 20260721, 1 000 givar. Fix: inklivsgolven (enkelt inkliv +
+upplysnings-X, `overcall`) läser `max(hp, startpoäng)` och advancerns
+cue/fit-jump läser stödpoäng (`advanceOvercall`) — additivt ovanpå "låna en
+kung", med kvalitetsvakt (lyft kräver 3+ av topp-5 i färgen) och spärrvakt
+(6+ färg, rå 6–10 hp förblir hoppinkliv). Budsystem.md §7.1 + §9. Baslinje =
+M28. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M28 (baslinje)   M29 (F4)
+Rätt kontrakt (exakt par)  19,6 %          19,6 %
+Genomsnittlig par-avvikelse 266,18         267,83
+Missad utgång           146 / 49 130     143 / 48 390
+Fel färg (bet)          118 / 49 800     119 / 50 500
+Såld giv                 56 / 18 860      58 / 19 760
+Billig offring          111 / 28 700     113 / 29 320
+Bättre än facit         122 / 20 350     120 / 19 870
+För högt                 35 / 8 200       36 / 8 410
+Missad lillslam          79 / 50 130      79 / 50 580
+Fel strain              101 / 2 450      100 / 2 440
+Övriga poster: oförändrade i antal.
+```
+
+**Läsning:** netto **+1,65 p/giv**, rätt kontrakt oförändrad. Vinsten syns
+där fixen siktar: **−3 missade utgångar** (formstarka händer kommer in i
+budgivningen och fiten hittas). Priset är spritt i småposter på störnings-
+sidan (+2 sålda givar, +2 billiga offringar, +1 fel färg, −2 bättre än
+facit): fler inkliv betyder fler störda auktioner åt BÅDA håll, och på
+enskilda givar råkar DD-paret stå på tigandets sida. Samma avvägning som
+M28: budet bedöms på systemriktighet, inte DD-poäng per giv (ägarprincip
+2026-08-06) — ett inkliv på 9 startpoäng med kvalitetsfärg är rätt bud även
+när just den given straffas. **Bevakning vid bordet:** straffas TP-inkliven
+med dubblingar (`docs/bevaka.md`)? Facit FÖRE fix: `overcall-tp.test.ts`.
+Hela sviten grön.
+
 ## Mätning #28 — 2026-08-07, F3: advancer-rabatten generaliserad
 Samma frö 20260721, 1 000 givar. Fix: den som svarar på partnerns balansering
 räknar av den lånade kungen över ALLA öppningsnivåer (höjningar −3 sp +

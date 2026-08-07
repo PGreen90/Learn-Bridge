@@ -84,7 +84,7 @@ LAGAD 2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)
 | D1–D6 | TP genom öppning/svar/accepter/nudge/reverse/3:e-4:e hand | 🟢 | — |
 | D7 | `wastedHonorsOppositeShortness` i slam | 🟢 | — |
 | D8 | LTC (förlorarräkning) | 🟢 | Medvetet ej infört |
-| D9 | **§7-inkliven räknar rå HP, inte TP** | 🟡 | **F4** i körordningen |
+| D9 | ~~§7-inkliven räknar rå HP, inte TP~~ | 🟢 | **F4 KLAR 2026-08-07:** golven läser TP med kvalitets-/spärrvakt |
 
 ## E. ARKITEKTUR & SYSTEMHÄLSA
 
@@ -108,7 +108,7 @@ kravminnet löst.
 | **F1** | Bredda slam-utforskningen (facit-först, en familj i taget) | B10, B9, A13, E2 | 🟢 **KLAR** (alla fyra familjer, etapp 4 2026-07-24→25) |
 | **F2** | Datadriven detektorkedja + återanvändbar systemrevisor | E1, E3 | 🟢 **KLAR** (revisorn etapp 2; kedjan 2026-08-07) |
 | **F3** | Advancer-rabatt efter balansering | C12 | 🟢 **KLAR** (2026-08-07) |
-| **F4** | TP till §7-inkliven | D9 | 🔴 kvar |
+| **F4** | TP till §7-inkliven | D9 | 🟢 **KLAR** (2026-08-07) |
 | **F5** | Verifiera 6-5-återbudet + 2♣-strain-valet i spel | A3, E2 | 🔴 kvar |
 | **F6** | Stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i prebuilt-linjer | C5, C14 | 🔴 kvar |
 

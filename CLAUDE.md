@@ -11,19 +11,12 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — FAS 1 FACELIFTEN (2026-07-31): en yta i taget
-**YTA 1–3 KLARA (startsidan 2026-07-31 · spelbordet 2026-07-31 med pass 2–4
-t.o.m. 2026-08-02 · budlådan 2026-08-02).** Hero + guldspråket, Synrey-bordet
-telefon-först (full-bleed, träkarlen på rätt sida vid försvar), budlådan med
-kortrad = spelfasens och guldring på valt bud. All detalj:
-`docs/konkurrensplan.md` Fas 1 + `docs/historik.md`.
-
-**DE INRE SIDORNA + EXKLUSIVITETSSVEPET + DAGENS GIV (yta 4): KLART
-2026-08-02.** Gemensam `PageHeader`, guldmonogram på kortbaksidan, klubbok,
-guld på utmärkelser, laddspader, knapp-skimmer, sidfot, taglinen "Träna, spela,
-tävla" — och **DAGENS GIV**: datumfröet (`daily.ts`) ger alla samma giv varje
-dag, rutt `/spela-kort/dagens`, delbart textresultat (Wordle-mekaniken),
-flaggskeppskort på startsidan. Förtitt på Fas 3 UTAN backend. Detalj:
-`docs/historik.md` 2026-08-02 + `docs/konkurrensplan.md` Fas 1/Fas 3.
+**YTA 1–4 KLARA (2026-07-31→08-02):** startsidan (hero + guldspråket),
+Synrey-bordet telefon-först, budlådan med kortrad + guldring, de inre sidorna
+(`PageHeader`, exklusivitetssvepet, sidfot) — och **DAGENS GIV**: datumfröet
+(`daily.ts`), rutt `/spela-kort/dagens`, delbart textresultat
+(Wordle-mekaniken), flaggskeppskort. Förtitt på Fas 3 UTAN backend. Detalj:
+`docs/historik.md` 2026-07-31→08-02 + `docs/konkurrensplan.md` Fas 1/Fas 3.
 
 **KONKURRENSPLANEN (2026-07-29, ägarbeslut — planering):** rebidz ska konkurrera
 med BBO/Funbridge/Synrey. Funbridge-modellen först ("Dagens givar"), sv→en (Fas 5).
@@ -39,40 +32,31 @@ slow shows, cue-Stayman) · #34 tredje hand högt i sang (§8.6) · hela FAS 0
 **CUE-BUD ÅTERINFÖRDA (2026-08-03, river 2026-07-07): KLAR ETAPP.** Kontrollbud
 ska ALLTID finnas ([[cue-bids-reinstated]]): vid **utgång etablerad (GF) + agreed
 trumf** cue:ar motorn fritt under utgång; poängomdömet ligger på att gå FÖRBI
-utgången. `cueSlamAuction` (`slam-auction.ts`), inkopplat Jacoby 2NT + NMF
-(= hål C). Reverse/hoppskift/2♣ HÅLLS (inferrerad trumf). Mätning ren
-(par-avvikelse 270,74 → 270,69). Facit `auction-slam-cue.test.ts`, boken
-§6.2/§9, detalj `docs/historik.md`. **Kvar (eget beslut):** off-book-
-igenkänning av din cue; öppnarens 18–19 i Jacoby. *(Agreed-trumf-lägena
-inverterad minor + 2♣: BYGGDA 2026-08-07 via B13.)*
+utgången. `cueSlamAuction` (`slam-auction.ts`), inkopplat Jacoby 2NT + NMF +
+(via B13) inverterad minor + 2♣. **Kvar (eget beslut):** off-book-igenkänning
+av din cue; öppnarens 18–19 i Jacoby. Detalj: `docs/historik.md` 2026-08-03.
 
 **UTSPELET (2026-08-04): HÅL A–G KLARA (§8.3/§9).** Budstyrt utspel i `botCardSmart`
 (`openingLeadWithAuction`): partnerns färg, undvik deras, passivt + tenass/ess-skydd
 mot trumf, inre sekvenser, trumf/singel. Teori `docs/utspel-teori.md`; kvar =
 förfining `docs/utspel-diagnos.md`.
 
-**ETAPPERNA E1–E7 (2026-08-07): ALLA KLARA, PUSHADE & DEPLOYADE** (grön
-Actions-körning 2026-08-07). E1 hål D steg 1 (§6.10, steg 2 PARKERAD) · E2
-splinterregeln (§4.1) · E3 Jordan (§7.8d) · E4 starka återbud (§5.2/§6.6) ·
-E5 2/1-högfärgen (§5.3) · E6 oklart-fixarna (§5.2/§5.7) · E7 doc-svepet.
-**Mätserien M22–M26: par-avvikelse 269,67 → 264,77, rätt kontrakt 19,0 →
-19,7 %** (`docs/systemrevisorn.md`; detalj `docs/historik.md` 2026-08-07).
+**Klart 2026-08-07 (detalj i `docs/historik.md` + `docs/systemrevisorn.md`):**
+etapperna **E1–E7** (hål D steg 1 §6.10 · splinterregeln §4.1 · Jordan §7.8d ·
+starka återbud §5.2/§6.6 · 2/1-högfärgen §5.3 · oklart-fixarna · doc-svepet;
+mätserien M22–M26) · **B13** graderade återbud efter 1m–2m + cue i
+minorfit/2♣-grenen (§4.2/§6.2, M27) · **F2** datadriven detektorkedja
+(`FORCED_DETECTORS`/`CONTESTED_DETECTORS` + kedjevakten
+`detector-chain.test.ts`; E1/E3 stängda).
 
-**B13 — ÖPPNARENS ÅTERBUD EFTER INVERTERAD MINORHÖJNING + CUE-LÄGENA
-(2026-08-07): KLAR.** Graderade återbud efter 1m–2m (§4.2): äkta honnörsstopp
-(inte 4+ längd), 3m strikt 12–14, 15+ bjuder ALLTID krav ("fantomstopp" utan
-äkta stopp — samma bud, styrkan visas i nästa bud), svararens broms 10–12 +
-öppnarens driv med 15+. Cue-ronden (§6.2) inkopplad i minorfiten (först ÖVER
-3NT; i drivzon 33+ direkt-4NT så 5m-utrymmet inte äts upp) och 2♣-grenen.
-Facit `auction-inverterad-rebud.test.ts`, boken §4.2/§6.2/§9, mätning M27
-(`docs/systemrevisorn.md`).
-
-**F2 — DATADRIVEN DETEKTORKEDJA (2026-08-07): KLAR.** `decideCall`-kedjan är
-data: `FORCED_DETECTORS`/`CONTESTED_DETECTORS` i `auction-live.ts`, varje
-detektor `{ id, before?, run }` där `before` = ordningskraven (förut bara
-kommentarer). Kedjevakten `detector-chain.test.ts` gör sviten röd vid
-felplacering. Ren refaktor, inga budändringar; E1+E3 🟢 → hela F2 stängd
-(`docs/budsystem-revision.md`). Detalj: `docs/historik.md` 2026-08-07.
+**F4 — TP TILL §7-INKLIVEN (2026-08-07): KLAR (D9 stängd).** Inklivsgolven
+(enkelt inkliv 8/bal. 5, upplysnings-X 12/10) läser `max(hp, startpoäng)` och
+advancerns cue/fit-jump stödpoäng — additivt ovanpå "låna en kung" (TP =
+formspak, kungen = sitsspak). Två vakter: kvalitetsvakten (lyft kräver 3+ av
+topp-5 i färgen) och spärrvakten (6+ färg, rå 6–10 → hoppinkliv som förr).
+Rå HP kvar i 1NT-fönstren, taket 16, 17+-styrningen. Facit
+`overcall-tp.test.ts`, boken §7.1/§9, mätning M29 (`docs/systemrevisorn.md`).
+Kvar som bevakning: X-svararen/DONT/svaga tvåor räknar rå HP (`docs/senare.md`).
 
 **F3 — ADVANCER-RABATTEN GENERALISERAD (2026-08-07): KLAR.** Den som svarar
 partnerns balansering räknar av den lånade kungen över ALLA öppningsnivåer
@@ -82,7 +66,7 @@ partnerns balansering räknar av den lånade kungen över ALLA öppningsnivåer
 `auction-advancer-rabatt.test.ts`, boken §7.1/§7.7/§9, mätning M28. Kvar som
 bevakning: NT-svar/nya färger efter balansering. Detalj: `docs/historik.md`.
 
-**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F4). Faceliten PARKERAD (2026-08-03).
+**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F5). Faceliten PARKERAD (2026-08-03).
 ⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
@@ -98,24 +82,24 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 ### 👀 Bevaka i spel — de tre senaste
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **F4 TP-inkliven (2026-08-07):** inklivsgolven läser TP (formstark 7:a
+  kliver in), advancern stödpoäng. Kliver bottarna in för lätt — straffas
+  TP-inkliven? X-svararen/DONT/svaga tvåor räknar ännu rå HP — säljs givar där?
 - **F3 advancer-rabatten (2026-08-07):** svaret på partnerns balansering
   räknar −3 (höjningar + X-svar). Står ni för lågt när balanseraren faktiskt
   var maximal? NT-svar/nya färger räknar ännu inte rabatten — driver de högt?
 - **B13-återbuden (2026-08-07):** graderade återbud efter 1m–2m med svararens
   broms 10–12. Stannar ni för ofta i 3m min-mot-min där 3NT stod? Känns
   fantomstoppen begriplig när 3NT faller på öppnarens "visade" färg?
-- **Cue i minorfit + 2♣ (2026-08-07):** kontrollbud över 3NT i minorfit,
-  direkt-4NT i drivzon. Cue:ar bottarna i 2♣-auktioner där du väntat
-  direkt-RKC?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **F4 — TP till §7-inkliven (D9):** försvarslagret räknar rå HP, inte
-   fördelning — additivt ovanpå "låna en kung" (sits-spaken), inte ersättare.
-2. **F5 — verifiera i spel:** 6-5-återbudet efter 16+ 1♦ (A3) +
+1. **F5 — verifiera i spel:** 6-5-återbudet efter 16+ 1♦ (A3) +
    2♣-strain-valet (E2).
+2. **F6 — stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i
+   prebuilt-linjer (C5, C14).**
 
-*(F2 + F3 STÄNGDA 2026-08-07 — se 🔵 NU-blocket. Ordningen = körordningen i
-`docs/budsystem-revision.md`.)*
+*(F2 + F3 + F4 STÄNGDA 2026-08-07 — se 🔵 NU-blocket. Ordningen = körordningen
+i `docs/budsystem-revision.md`.)*
 
 *(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C
 via cue-buden, hål D steg 1 klar / steg 2 parkerad — hela resan + verktygen i
@@ -130,8 +114,8 @@ cue-Stayman, efter takeout av svag tvåa) ·
 fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32/#34 KLARA; kvar: tredje hand högt i trumf) ·
 **UTSPELET** (hål A–G klara; kvar: förfining) · engelska som andra
-språk (Fas 5) · 17+ enfärgshand efter två bjudna färger *(TP till §7-inkliven +
-advancer-rabatten flyttade till 🟢 NÄST 2026-08-07)* · auto-facit på
+språk (Fas 5) *(17+ enfärgshand efter två bjudna färger flyttad till 🟢 NÄST
+som F6 2026-08-07)* · auto-facit på
 hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·
 svårighetsnivåer på bottarna · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
 `auctionFacts`-lagret (R2 steg 2 — förberäknade auktionsfakta åt detektorerna,

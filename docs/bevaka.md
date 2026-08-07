@@ -9,6 +9,16 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Budgivning (2026-08-07) — F4: TP till §7-inkliven
+- **Inklivsgolven läser TP (NYAST, §7.1):** enkelt inkliv + upplysnings-X
+  kliver in på `max(hp, startpoäng)` (t.ex. 7 hp med KQJ109-femma → 1♠),
+  advancerns cue/fit-jump på stödpoäng — additivt ovanpå "låna en kung".
+  Kvalitetsvakt: lyftet kräver 3+ av topp-5 i färgen. **Bevaka:** (a) kliver
+  bottarna in för lätt — straffas TP-inkliven med dubblingar/straffbet? (b)
+  X-svararen (`answerTakeoutDouble`), DONT och försvaret mot svaga tvåor
+  räknar ÄNNU rå HP — säg till om formstarka händer säljer given där, så
+  byggs de på.
+
 ## Budgivning (2026-08-07) — F3: advancer-rabatten generaliserad
 - **Advancer-rabatten över ALLA balanserade öppningar (NYAST, §7.1):** den som
   svarar på partnerns balansering (1♥–P–P–1♠ eller 1♥–P–P–X) räknar av den

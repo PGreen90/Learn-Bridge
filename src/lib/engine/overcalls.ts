@@ -12,6 +12,7 @@
 // VI öppnat (negativ/responsiv/stöd) i `doubles.ts`.
 
 import type { Hand, Rank, Suit } from '../../types/bridge'
+import { pointsWithFloor } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import type { ResponseResult } from './responses'
 
@@ -27,6 +28,13 @@ const isMinor = (s: Suit) => s === 'clubs' || s === 'diamonds'
 export function openingSuit(call: string): Suit | null {
   const m = call.match(/^1(C|D|H|S)$/)
   return m ? SUIT_OF_LETTER[m[1]] : null
+}
+
+const TOP5: Rank[] = ['A', 'K', 'Q', 'J', '10']
+
+/** Kvalitetsfärg (§7.1 "färgkvalitet går före poäng"): 3+ av topp-5 i färgen. */
+function goodSuit(hand: Hand, suit: Suit): boolean {
+  return hand.filter((c) => c.suit === suit && TOP5.includes(c.rank)).length >= 3
 }
 
 /** Grov stopp-koll för NT: A, Kx, Qxx eller J10xx. */
@@ -62,10 +70,15 @@ function bestOvercallSuit(len: Record<Suit, number>, their: Suit): Suit | null {
  * `balancing` = sitter vi i BALANSERINGSSITS (deras öppning har följts av två
  * pass, given är på väg att passas ut)? Då "lånar vi en kung": partnern är
  * markerad med värden, så §7-golven sänks med 3 hp (ägarbeslut 2026-07-05).
- * Flat HP-lättnad – lagret räknar fortfarande rå HP (TP i §7 = separat SENARE).
  * Sänks: enkelt inkliv 8→5, upplysnings-X 12→9 (perfekt form 10→7), och
  * 1NT-inklivet flyttas 15–18 → 11–14 (klassisk återöppnings-1NT). Michaels/
  * ovanlig 2NT (formbud) och den starka 17+-X:en rörs inte.
+ *
+ * F4 (D9, 2026-08-07): inklivsgolven (enkelt inkliv + upplysnings-X) läser
+ * TP = `max(hp, startpoäng)` — en formstark hand kliver in ett golv tidigare.
+ * ADDITIVT ovanpå kungalånet (TP = formspak, kungen = sitsspak). Rå HP behålls
+ * där form inte hör hemma: 1NT-fönstren (sang), inklivstaket 16, 17+-styrningen
+ * och hoppinklivet (spärrmaterial ska förbli spärr).
  */
 export function overcall(hand: Hand, theirCall: string, balancing = false): ResponseResult {
   const their = openingSuit(theirCall)
@@ -73,6 +86,7 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   if (!their) return pass
 
   const p = hcp(hand)
+  const fp = pointsWithFloor(hand, null, 'starting') // F4: golven läser max(hp, startpoäng)
   const len = lengths(hand)
   const unbid = RANK_ORDER.filter((s) => s !== their)
   const relief = balancing ? 3 : 0 // "låna en kung" – sänk HP-golven i balansering
@@ -125,16 +139,25 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   const shortTheirs = len[their] <= 2
   const supportUnbid = unbid.every((s) => len[s] >= 3)
   const longestUnbid = Math.max(...unbid.map((s) => len[s]))
-  if (shortTheirs && supportUnbid && ((p >= 12 - relief && longestUnbid <= 5) || (p >= 10 - relief && longestUnbid <= 4))) {
-    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[their]}, stöd i övriga → X (upplysning).` }
+  if (shortTheirs && supportUnbid && ((fp.points >= 12 - relief && longestUnbid <= 5) || (fp.points >= 10 - relief && longestUnbid <= 4))) {
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${fp.text}, kort i ${NAME[their]}, stöd i övriga → X (upplysning).` }
   }
 
-  // 5) Enkelt inkliv: bra 5+ färg, 8–16 hp (golv 8→5 i balansering).
+  // 5) Enkelt inkliv: bra 5+ färg, 8–16 hp (golv 8→5 i balansering; golvet
+  // läser TP). Två F4-VAKTER på TP-lyftet:
+  //   a) spärrmaterial (6+ färg, rå 6–10 hp) lyfts INTE — det ska förbli ett
+  //      svagt hoppinkliv (regel 6), inte bli "konstruktivt";
+  //   b) lyftet kräver KVALITETSFÄRG (3+ av topp-5) — "färgkvalitet går före
+  //      poäng": ett under-golvet-inkliv ska bäras av färgen, inte av
+  //      längdpoäng på skräpfärger (frö 20261020: 5-5 med QJ975 ska passa).
   const ov = bestOvercallSuit(len, their)
-  if (ov && p >= 8 - relief && p <= 16) {
+  const preemptMaterial = ov !== null && len[ov] >= 6 && p <= 10
+  const ovPts = ov && goodSuit(hand, ov) && !preemptMaterial ? fp.points : p
+  const ovText = ovPts > p ? fp.text : `${p} hp`
+  if (ov && ovPts >= 8 - relief && p <= 16) {
     const lvl = overcallLevel(ov, their)
     // Svagt hoppinkliv: 6-korts färg, 6–10 hp som annars hade krävt 2-läget.
-    return { call: `${lvl}${BID[ov]}`, rule: 'enkelt inkliv', explanation: `${p} hp med ${len[ov]}-korts ${NAME[ov]} → ${lvl}${SYM[ov]} (inkliv).` }
+    return { call: `${lvl}${BID[ov]}`, rule: 'enkelt inkliv', explanation: `${ovText} med ${len[ov]}-korts ${NAME[ov]} → ${lvl}${SYM[ov]} (inkliv).` }
   }
 
   // 6) Svagt hoppinkliv: 6-korts färg, 6–10 hp (spärr).
@@ -229,9 +252,14 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
 /**
  * Svar på partnerns enkla inkliv (advancer). §7.1. `overcallLevel` = nivån
  * partnerns inkliv låg på (styr hoppet i en fit-jump); default 1.
+ *
+ * F4 (D9): fit-trösklarna (fit-jump 10+, cue 11+) läser STÖDPOÄNG
+ * `max(hp, dummyPoints)` — samma mått som live-lagrets `raiseWithFit`.
+ * Ny färg och NT-svaren behåller rå HP (ingen fit etablerad resp. sang).
  */
 export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit, overcallLevel = 1): ResponseResult {
   const p = hcp(hand)
+  const sp = pointsWithFloor(hand, partnerSuit, 'support')
   const len = lengths(hand)
   const support = len[partnerSuit]
   const sym = SYM[partnerSuit]
@@ -242,7 +270,7 @@ export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit, 
   // Fit-jump (§7.1, rad 714): bra stöd (4+) + egen 5+ sidofärg, inbjudande+ →
   // HOPP i sidofärgen (visar fit + trickkälla). Går före cue när en klar
   // sidofärg finns. Hoppnivån = billigaste läget för färgen + 1.
-  if (support >= 4 && p >= 10) {
+  if (support >= 4 && sp.points >= 10) {
     let side: Suit | null = null
     for (const s of RANK_ORDER) {
       if (s === partnerSuit || s === theirSuit || len[s] < 5) continue
@@ -251,13 +279,13 @@ export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit, 
     if (side) {
       const cheapest = rankIdx(side) > rankIdx(partnerSuit) ? overcallLevel : overcallLevel + 1
       const jump = cheapest + 1
-      return { call: `${jump}${BID[side]}`, rule: 'fit-jump', explanation: `${p} hp, ${support} stöd + ${len[side]}-korts ${NAME[side]} → ${jump}${SYM[side]} (fit-jump, inbjudande+).` }
+      return { call: `${jump}${BID[side]}`, rule: 'fit-jump', explanation: `${sp.text}, ${support} stöd + ${len[side]}-korts ${NAME[side]} → ${jump}${SYM[side]} (fit-jump, inbjudande+).` }
     }
   }
 
   // Cue-bud i deras färg = limithöjning eller bättre (bra stöd, krav).
-  if (support >= 3 && p >= 11) {
-    return { call: `2${BID[theirSuit]}`, rule: 'cue (limithöjning+)', explanation: `${p} hp, ${support} stöd → cue ${SYM[theirSuit]} (limithöjning+, krav).` }
+  if (support >= 3 && sp.points >= 11) {
+    return { call: `2${BID[theirSuit]}`, rule: 'cue (limithöjning+)', explanation: `${sp.text}, ${support} stöd → cue ${SYM[theirSuit]} (limithöjning+, krav).` }
   }
 
   // Höjning: stöd, konkurrens (inte inbjudan i sig).
