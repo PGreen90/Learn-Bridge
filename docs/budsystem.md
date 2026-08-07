@@ -92,8 +92,9 @@ Källa: bridgebum.com (Pearson points; third seat openings).
 - Med **3-korts** stöd: enkel höjning till 2-läget (6–9 hp). En **3-korts
   limithöjning** (10–12 hp) går via semi-forcing 1NT och sedan hopp till 3 i
   hf nästa vända (Bergen kräver exakt 4 trumf).
-- **Jacoby 2NT** = balanserad GF-höjning, 4+ trumf, 13+ hp, ingen kortfärg
-  (oförändrad).
+- **Jacoby 2NT** = balanserad GF-höjning, 4+ trumf, 13+ hp, ingen
+  **splintervärdig** kortfärg. Hit hör även GF-händer vars enda korthet är en
+  **singel A/K** (se splinterregeln nedan).
 - **Balanserad inbjudan utan stöd** (≈11–12 hp, högst 3-korts trumf) går via
   semi-forcing 1NT och sedan 2NT nästa vända – direkt 2NT är Jacoby.
 - **Splinter** (4+ stöd + kort färg, ~12+ hp, GF) visas med den **tvetydiga
@@ -101,6 +102,12 @@ Källa: bridgebum.com (Pearson points; third seat openings).
   Visar singleton *eller* renons; öppnaren frågar med ett relä och svararen
   avslöjar den korta färgen (se nedan). Direkt hopp till 4♣/4♦ i ny färg
   används inte längre som splinter.
+- **Splintra aldrig en singel A/K** (ägarregel 2026-08-06, källa bridgebum):
+  splinterns budskap är "devalvera dina honnörer i min korta färg — räkna
+  ruffvärden". Med en singel-A/K är det falskt: honnören drar ett stick, och
+  partnerns värdering slår fel åt båda hållen. Sådana händer svarar **Jacoby
+  2NT** i stället. En singel **dam** får splintras (drar sällan ett stick
+  själv), och en **renons** splintras alltid.
 - **Svagt hoppskift avskaffat** (ägarbeslut 2026-07-06, felrapport #31). När
   partnern har öppnat håller svararen **budgivningen låg**: en svag 6-korts
   spader över 1♥ svarar **1♠** (rondkrav), inte 2♠. Grundregeln – bjud den nya
@@ -119,7 +126,7 @@ Källa: bridgebum.com (Pearson points; third seat openings).
 | 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
 | 3♥ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
-| 3♠ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
+| 3♠ | 4+ stöd, singel (ej A/K) el. renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
 | 3NT | 13–15 hp, balanserad, exakt 2 ♥, ingen sidofärg | Avslut | naturligt (till spel) |
 | 4♥ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
 
@@ -132,7 +139,7 @@ Källa: bridgebum.com (Pearson points; third seat openings).
 | 2NT | 4+ stöd, 13+ hp, balanserad | Utgångskrav, slamintresse | Jacoby 2NT ● |
 | 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
-| 3♥ | 4+ stöd, singleton/renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
+| 3♥ | 4+ stöd, singel (ej A/K) el. renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
 | 3♠ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
 | 3NT | 13–15 hp, balanserad, exakt 2 ♠, ingen sidofärg | Avslut | naturligt (till spel) |
 | 4♠ | 4+ stöd, max 10 hp – spärr till utgång | Avslut | naturligt |
@@ -169,7 +176,9 @@ värdet; honnörer mittemot svararens kortfärg är slöseri.
 #### Tvetydig splinter — relä och slamvärdering
 Svararens splinter visar 4+ trumf, kort färg (singleton el. renons) och ~12+ hp
 (GF). Öppnaren frågar efter den korta färgen med ett relä – eller hoppar direkt
-till utgång i trumf om handen är olämplig för slam (signoff).
+till utgång i trumf om handen är olämplig för slam (signoff). Den korta färgen
+är aldrig en singel A/K (splinterregeln ovan — de händerna svarar Jacoby 2NT),
+så öppnarens nedvärdering nedan står på säker grund.
 
 *Efter 1♥–3♠:* öppnaren bjuder **3NT (relä)**; svararen visar kort färg:
 
@@ -1748,6 +1757,24 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (splinterregeln: singel A/K är ingen splinterfärg, ägarregel +
+  källor)** – **Svararen splintrar aldrig en singel A/K — handen svarar Jacoby
+  2NT (kod §4.1).** Motivgiven 20260947 (ur hål D-facitstädningen): Väst ♠K
+  ♥AJ942 ♦A653 ♣KQ6 (17 hp, 5-korts stöd) splintrade 3♠ på singel-KUNGEN.
+  Splinterns budskap ("devalvera dina honnörer här, räkna ruffvärden") är
+  falskt med en singel-A/K — honnören drar ett stick. Källor: bridgebum
+  splinters.php ("avoid … if your singleton is a high honor", "a singleton
+  king is an even worse holding than a singleton ace" → föredra Jacoby 2NT) +
+  BBO-expertkonsensus. Singel-DAM får splintras (drar sällan ett stick själv;
+  ägarbeslut 2026-08-07 efter källgenomgång), renons alltid. Ny
+  `splinterShortSuits` (`responses.ts`) delas av splinterbeslutet OCH
+  kortfärgsvisningen efter relät (`responder-rebids.ts`) så reveal aldrig
+  pekar på en singel-K när en renons motiverade splintern. Fall-through:
+  en 12-poängshand med blockerad splinter faller systemriktigt till Bergen
+  limit (Jacoby är utgångskrav 13+). Facit FÖRE fix:
+  `auction-splinter-block.test.ts` (unit + kanonisk giv: blockerad splinter →
+  Jacoby → cue-rond → 6♠). Hela sviten grön; revisor-mätning frö 20260721 (se
+  systemrevisorn.md).
 - **2026-08-07 (etapp 7 hål D steg 1: slaminvit i konkurrens, ägarbeslut)** –
   **Kontroll-komplett 4NT i konkurrenslagret (kod §6.10).** Förskanningens mönster
   E (19 givar): fit funnen genom konkurrens, utgång nådd, sedan naket pass av den

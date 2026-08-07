@@ -7,7 +7,7 @@
 import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths, suitHcp } from './hand'
 import { pointsWithFloor } from './evaluation'
-import type { Major, ResponseResult } from './responses'
+import { splinterShortSuits, type Major, type ResponseResult } from './responses'
 import { responderSecondBidAfter2C } from './responses-2c'
 import { responderPlaceAfterOgust, suitOfWeakTwo } from './responses-weak2'
 import { responderAnswerDrury } from './responses-drury'
@@ -252,7 +252,11 @@ export function responderRebidAfterInvertedMinor(hand: Hand, m: Suit, rebid: Res
 export function responderRevealSplinterShortness(hand: Hand, M: Major): ResponseResult | null {
   const len = lengths(hand)
   const nonTrump = RANK.filter((s) => s !== M) // 3 färger, stigande rang
-  const shortSuit = nonTrump.find((s) => len[s] <= 1)
+  // SAMMA predikat som splinterbeslutet (splinterregeln 2026-08-07): en
+  // singel-A/K är ingen splinterfärg, så reveal får aldrig peka på den när
+  // en renons (eller splintervärdig singel) i annan färg motiverade splintern.
+  const worthy = splinterShortSuits(hand, M)
+  const shortSuit = nonTrump.find((s) => worthy.includes(s))
   if (!shortSuit) return null
   const stepCalls = ['4C', '4D', '4H']
   const call = stepCalls[nonTrump.indexOf(shortSuit)]

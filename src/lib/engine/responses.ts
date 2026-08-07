@@ -40,6 +40,26 @@ const ALL_SUITS: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
  * inte kan hålla alla färger. Ägarregel 2026-07-05: gå den inverterade vägen
  * bara med en svag färg (annars 3NT som förr).
  */
+/**
+ * Splintervärdiga kortfärger vid sidan av trumfen: renons alltid; singel bara
+ * om kortet INTE är A eller K (ägarregel 2026-08-06, källa bridgebum: en
+ * singel-A/K drar ett stick, så splinterns budskap "devalvera dina honnörer
+ * här, räkna ruffvärden" blir falskt — handen beskrivs via Jacoby 2NT i
+ * stället). Singel-DAM räknas som splintervärdig (drar sällan ett stick själv).
+ * Delas av splinterbeslutet (respondToMajor) och kortfärgsvisningen efter
+ * relät (responder-rebids.ts) så de aldrig pekar ut olika färger.
+ */
+export function splinterShortSuits(hand: Hand, trump: Suit): Suit[] {
+  const len = lengths(hand)
+  return ALL_SUITS.filter((s) => {
+    if (s === trump) return false
+    if (len[s] === 0) return true
+    if (len[s] !== 1) return false
+    const rank = hand.find((c) => c.suit === s)!.rank
+    return rank !== 'A' && rank !== 'K'
+  })
+}
+
 function hasWeakSideSuit(hand: Hand, fit: Suit): boolean {
   return ALL_SUITS.some((s) => {
     if (s === fit) return false
@@ -60,8 +80,7 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   const fit = classifyFit(hand, opened)
   const support = fit.trumps
   const other = otherMajor(opened)
-  const sideSuits = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter((s) => s !== opened)
-  const shortness = sideSuits.some((s) => len[s] <= 1)
+  const shortness = splinterShortSuits(hand, opened).length > 0
   const M = BID[opened]
   const MSYM = opened === 'hearts' ? '♥' : '♠'
 
@@ -83,7 +102,7 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
       return { call, rule: 'tvetydig splinter', explanation: `${spTxt}, ${support} stöd + kortfärg → ${sym} (tvetydig splinter, GF).` }
     }
     if (sp >= 13) {
-      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `${spTxt}, ${support} stöd, ingen kortfärg → 2NT (Jacoby, GF).` }
+      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `${spTxt}, ${support} stöd, ingen splintervärdig kortfärg → 2NT (Jacoby, GF).` }
     }
     if (support === 4) {
       if (sp >= 10) return { call: '3D', rule: 'Bergen limit', explanation: `${spTxt}, 4 stöd → 3♦ (Bergen, limithöjning).` }
