@@ -771,6 +771,37 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #27 — 2026-08-07, B13: inverterad minor-återbuden + cue-lägena
+Samma frö 20260721, 1 000 givar. Fix: graderade återbud efter 1m–2m (äkta
+honnörsstopp, 3m strikt 12–14, 15+ alltid krav, svararens broms + öppnarens
+driv, `rebids.ts`/`responder-rebids.ts`/`auction.ts`) samt cue-ronden
+inkopplad i minorfit (över 3NT; drivzon 33+ → direkt-4NT) och 2♣-grenen
+(`slam-auction.ts`). Budsystem.md §4.2/§6.2 + §9. Baslinje = M26. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M26 (baslinje)   M27 (B13)
+Rätt kontrakt (exakt par)  19,7 %          19,8 %
+Genomsnittlig par-avvikelse 264,77         264,72
+Fel färg (bet)          118 / 49 940     118 / 49 940
+Missad lillslam          79 / 50 130      79 / 50 130
+Missad utgång           143 / 47 860     143 / 47 860
+Fel strain              102 / 2 460      102 / 2 460
+Övriga poster: oförändrade i antal.
+```
+
+**Läsning:** netto **−50 p** och +0,1 %-enhet rätt kontrakt — liten men ren
+vinst, noll regressioner i storposterna. Väntat: den starka inverterade
+höjningen är sällsynt i slumpgivar, och huvudfelen (28 hp-utgångar passade i
+3m, 3NT på längdstopp utan honnör) är grova men lågfrekventa. Vinsten är
+systemriktighet vid bordet snarare än volympoäng; frö 20261469-skyddet
+(direkt-4NT i drivzon) höll lillslamsposten intakt när cue-ronden kopplades
+in i minorerna. Facit FÖRE fix: `auction-inverterad-rebud.test.ts`. Hela
+sviten grön.
+
 ## Mätning #26 — 2026-08-07, oklart-återbudet (systemfel #2: två fixar)
 Samma frö 20260721, 1 000 givar. Fix: (1) 'oklart'-1NT:an routas som
 1NT-återbud i svararens dispatcher → NMF nås (`responder-rebids.ts`), (2)

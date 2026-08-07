@@ -297,18 +297,40 @@ trumf → 3 i trumf):
 
 #### Inverterade minorhöjningar — öppnarens fortsättning
 Efter den **starka höjningen** (1m–2m, krav) söker paret oftast **3NT**.
-Öppnaren beskriver:
+Öppnaren beskriver (graderat, B13 2026-08-07):
 
 | Återbud | Betydelse |
 |---|---|
-| ny färg (2-läget) | **stopp** i färgen, krav – letar 3NT |
+| ny färg | **äkta stopp** (A, Kx, Qxx, J10xx) i färgen, 12+, krav – letar 3NT |
 | 2NT | balanserad 12–14 hp, ingen utgångsiver (ej krav) |
-| 3 i lf | minimum utan stopp att visa (ej krav) |
+| 3 i lf | **minimum 12–14** utan stopp att visa (ej krav) |
 | 3NT | balanserad 18–19 hp, till spel |
 
-Svararen fortsätter mot 3NT (visar stopp i objudna färger), drar till utgång i
-lf, eller visar slamintresse via nya färger. Den **svaga höjningen** (1m–3m)
-är avslutande – öppnaren passar utan extra styrka.
+Tre preciseringar (B13):
+- **"Stopp" är honnörsstopp**, aldrig bara längd — ♠9642 är inget spaderstopp.
+  Billigaste stoppfärgen bjuds först (upp-the-line).
+- **3 i lf är strikt 12–14.** En hand med **15+** bjuder ALLTID krav: finns
+  inget äkta sidostopp bjuds bästa sidofärgen ändå ("fantomstoppen",
+  standardpraxis — samma bud som stopp-visningen, partnern kan inte skilja dem
+  åt; styrkan visas i stället i nästa bud, se bromsen nedan). Så kan en stark
+  hand aldrig dö i 3m och utgångar på 25+ hp passas inte bort.
+- **Svararens broms:** stopp-visningen lovar bara 12+. Med minimumhöjningen
+  (10–12) svarar svararen **3m = "bara minimum"** (ej krav). Öppnaren passar
+  med 12–14 (delkontraktet står) men **driver med 15+**: 3NT när egna handen
+  täcker alla tre sidofärgerna, annars en andra stopp-visning under 3NT om en
+  ryms, annars 5 i lf. Efter en andra stopp-visning bjuder svararen 3NT när
+  resten är täckt, annars 5 i lf. Med 13+ bromsar svararen inte utan
+  fortsätter mot utgång direkt (3NT när övriga sidofärger är täckta, annars
+  5 i lf). Så visas styrkan ärligt i två steg — precis som riktiga par gör.
+
+**Slamzonen (cue-ronden, §6.2):** med minorfiten satt och slamaritmetik
+(kaptenens hand + öppnarens visade minimum ≥ 30) körs kontrollbuden — men
+**först ÖVER 3NT**: under 3NT betyder nya färger stopp-letande, över 3NT
+kontrollbud, så de två budspråken aldrig krockar. I **klar drivzon (33+)**
+hoppas cue-ronden över i minortrumf och kaptenen frågar 4NT direkt —
+lågfärgsutgången 5m ligger ÖVER 4NT, och cue-bud får inte äta upp
+frågeutrymmet. Den **svaga höjningen** (1m–3m) är avslutande – öppnaren
+passar utan extra styrka.
 
 **3NT eller 5 i lf? (stopp-utbytet, ägarregel 2026-07-05).** Ett 2/1-par
 föredrar 3NT (färre stick), men bara när paret tillsammans kan **hålla alla fyra
@@ -1079,12 +1101,18 @@ Därför finns **ingen poänggräns för att cue:a**; omdömet ligger i stället
 beslutet att gå **förbi** utgången (4NT RKC / slam), som kräver både kontroller
 (högst en sidofärg utan första-rondskontroll) och trickvärden. Cue-bud
 **tillkommer bara** — saknar den drivande handen en gratis cue står de gamla
-vägarna (driv 33+ / inbjudan 31–32) kvar oförändrade. Inkopplat hittills:
-**Jacoby 2NT** och **New Minor Forcing → öppnarens fördröjda högfärgsstöd**
-(bägge äkta agreed trumf). Reverse/hoppskift/2♣ väntar på egen trumf-agreement-
-analys (där är trumfen inferrerad, inte bjuden — ett cue skulle läsas naturligt).
-Bjuder **du** själv ett cue i standardordning (billigaste först) följer boten
-med; en cue i annan ordning hamnar tills vidare off-book.
+vägarna (driv 33+ / inbjudan 31–32) kvar oförändrade. Inkopplat:
+**Jacoby 2NT**, **New Minor Forcing → öppnarens fördröjda högfärgsstöd**, och
+sedan B13 (2026-08-07) även **inverterad minor** och **2♣-grenen efter
+positivt svar + satt trumf** (alla äkta agreed trumf). Två minorregler skyddar
+budspråken: (1) i minorfit cue:as **först ÖVER 3NT** — under 3NT betyder nya
+färger stopp-letande (§4.2); (2) i **klar drivzon (33+)** hoppas cue-ronden
+över i minortrumf och kaptenen frågar 4NT direkt, eftersom 5m ligger över 4NT
+och cue-buden annars kan äta upp frågeutrymmet. Reverse/hoppskift väntar på
+egen trumf-agreement-analys (där är trumfen inferrerad, inte bjuden — ett cue
+skulle läsas naturligt). Bjuder **du** själv ett cue i standardordning
+(billigaste först) följer boten med; en cue i annan ordning hamnar tills
+vidare off-book.
 
 ### 6.3 Sjöbergs 5NT (kungfråga)
 Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
@@ -1827,6 +1855,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (B13: öppnarens återbud efter inverterad minorhöjning +
+  cue-lägena)** – **Graderade återbud efter 1m–2m (kod §4.2).** Tre hål lagade:
+  (1) "stopp" var 4+ korts LÄNGD utan honnörskrav (♠9642 visades som
+  spaderstopp) — nu motorns äkta honnörsstopp, billigaste först; (2) en stark
+  hand utan 4-korts sidofärg dog i "3m minimum, ej krav" (17 hp + 6m →
+  utgångar på 27+ hp passades bort) — nu är 3m strikt 12–14 och 15+ bjuder
+  ALLTID krav (utan äkta stopp: bästa sidofärgen som "fantomstopp", samma bud
+  som stopp-visningen — styrkan visas i nästa bud); (3) svararen tvingades
+  alltid till utgång efter en stopp-visning — nu bromsar 10–12 med 3m ("bara
+  minimum"), öppnaren passar 12–14 och driver 15+ (3NT när egna handen täcker
+  alla sidofärger, annars andra stoppen under 3NT, annars 5m). Dessutom
+  **cue-ronden (§6.2) inkopplad i minorfiten och 2♣-grenen** (agreed trumf):
+  i minortrumf cue:as först ÖVER 3NT (under = stopp-letande) och i klar
+  drivzon (33+) frågas 4NT direkt (5m ligger över 4NT — cue-buden får inte äta
+  frågeutrymmet; frö 20261469 visade tappet). Källa: bridgebum (inverted
+  minors). Facit FÖRE fix: `auction-inverterad-rebud.test.ts`. Hela sviten
+  grön; mätning M27 i systemrevisorn.md.
 - **2026-08-07 (oklart-återbudet, systemfel #2: översyn + två fixar)** –
   Spanar-agentens fem frön KLASSADES före fix (ägarbeslut): 20261155 RÄTT
   (exakt par 3NT) · 20261492 RÄTT (systemriktigt pass, DD-smicker 4NT) ·

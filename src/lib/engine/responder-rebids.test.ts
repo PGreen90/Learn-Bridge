@@ -340,10 +340,13 @@ describe('FAS 6 punkt 27 – svararens fortsättning efter inverterad minor (1�
     expect(inv('S:AQ4 H:842 D:KQ42 C:KJ3', '2H', 'inverterad: stopp-visning')?.call).toBe('3NT')
   })
 
-  it('öppnaren stopp-visning (2♥) + ingen spaderstopp → 5♦ (minorutgång, flaggad)', () => {
+  it('öppnaren stopp-visning (2♥) + bara minimumhöjning → 3♦ (broms, B13)', () => {
+    // B13 (2026-08-07): stopp-visningen lovar bara 12+. Med 10–12 bromsar
+    // svararen med 3m; öppnaren passar 12–14 och driver 15+ (tredje budet).
+    // Förr tvingades handen till utgång (5♦) även min-mot-min.
     const r = inv('S:432 H:842 D:KQ42 C:KJ3', '2H', 'inverterad: stopp-visning')
-    expect(r?.call).toBe('5D')
-    expect(r?.uncertain).toBe(true)
+    expect(r?.call).toBe('3D')
+    expect(r?.rule).toBe('inverterad: broms')
   })
 
   it('svag höjning (1♦–3♦) + öppnaren 3NT → pass', () => {

@@ -373,17 +373,66 @@ export function openerRebidAfterInvertedMinor(hand: Hand, m: Suit, strong: boole
     return { call: 'P', rule: 'rebid: pass', explanation: `${p} hp mittemot svag höjning → pass.` }
   }
 
-  // Stark inverterad höjning (10+, krav) – paret söker 3NT.
+  // Stark inverterad höjning (10+, krav) – paret söker 3NT. B13 (2026-08-07):
+  // graderade återbud. "Stopp" är motorns ÄKTA honnörsstopp (A/Kx/Qxx/J10xx),
+  // inte 4+ korts längd som förr, och 3m är STRIKT minimum 12–14 — en hand med
+  // 15+ bjuder alltid krav så utgången aldrig passas bort (källa: bridgebum,
+  // inverted minors; öppnarens nya färger är krav).
   if (bal && p >= 18) return { call: '3NT', rule: 'inverterad: 3NT', explanation: `${p} hp balanserad → 3NT (18–19).` }
   if (bal) return { call: '2NT', rule: 'inverterad: 2NT', explanation: `${p} hp balanserad 12–14 → 2NT (ej krav).` }
-  // Visa stopp i en ny färg (billigast) – letar 3NT.
+  // Visa äkta stopp i en ny färg (billigast) – letar 3NT, krav.
   for (const s of RANK) {
-    if (s !== m && rankOf(s) > rankOf(m) && len[s] >= 4) return { call: `2${BID[s]}`, rule: 'inverterad: stopp-visning', explanation: `${p} hp, stopp i ${NAME[s]} → 2${SYM[s]} (letar 3NT, krav).` }
+    if (s !== m && rankOf(s) > rankOf(m) && hasStopper(hand, s)) return { call: `2${BID[s]}`, rule: 'inverterad: stopp-visning', explanation: `${p} hp, stopp i ${NAME[s]} → 2${SYM[s]} (letar 3NT, krav).` }
   }
   for (const s of RANK) {
-    if (s !== m && rankOf(s) < rankOf(m) && len[s] >= 4) return { call: `3${BID[s]}`, rule: 'inverterad: stopp-visning', explanation: `${p} hp, stopp i ${NAME[s]} → 3${SYM[s]} (letar 3NT, krav).` }
+    if (s !== m && rankOf(s) < rankOf(m) && hasStopper(hand, s)) return { call: `3${BID[s]}`, rule: 'inverterad: stopp-visning', explanation: `${p} hp, stopp i ${NAME[s]} → 3${SYM[s]} (letar 3NT, krav).` }
   }
-  return { call: `3${BID[m]}`, rule: 'inverterad: minimum', explanation: `${p} hp minimum utan stopp → 3${mSym} (ej krav).` }
+  if (p <= 14) return { call: `3${BID[m]}`, rule: 'inverterad: minimum', explanation: `${p} hp minimum utan stopp → 3${mSym} (ej krav).` }
+  // 15+ utan äkta sidostopp (sällsynt): tiger ALDRIG i 3m — bästa sidofärgen
+  // (längd, sedan honnörsstyrka) bjuds som en VANLIG stopp-visning ("fantom-
+  // stoppen", standardpraxis: ny färg är krav och kan undantagsvis sakna äkta
+  // stopp). SAMMA bud och SAMMA regel som med stopp — partnern kan inte skilja
+  // dem åt och ska inte kunna (ärliga portar); styrkan visas i NÄSTA bud
+  // (öppnaren driver förbi svararens broms med 15+).
+  let best: Suit | null = null
+  for (const s of RANK) {
+    if (s === m) continue
+    if (best === null || len[s] > len[best] || (len[s] === len[best] && suitHcp(hand, s) > suitHcp(hand, best))) best = s
+  }
+  const call = bidSuit(best!, m)
+  return { call, rule: 'inverterad: stopp-visning', explanation: `${p} hp, ingen äkta stopp att visa → ${pretty(call)} (bästa sidofärgen, letar 3NT, krav).` }
+}
+
+/** Honnörspoängen i EN färg (för valet av "stark sidofärg"-budet). */
+function suitHcp(hand: Hand, suit: Suit): number {
+  const pts: Record<string, number> = { A: 4, K: 3, Q: 2, J: 1 }
+  return hand.filter((c) => c.suit === suit).reduce((sum, c) => sum + (pts[c.rank] ?? 0), 0)
+}
+
+/**
+ * Öppnarens TREDJE bud efter svararens broms (1m–2m–ny färg–3m = "bara
+ * minimum, 10–12"). B13: med 12–14 passar öppnaren (22–26 ihop, delkontraktet
+ * står); med 15+ finns utgångsvärden (25+) och öppnaren driver — 3NT när egna
+ * handen täcker alla tre sidofärgerna, annars en ANDRA stopp-visning under 3NT
+ * om en finns, annars lågfärgsutgången 5m (3NT osäker utan täckning).
+ */
+export function openerThirdBidAfterInvertedBrake(hand: Hand, m: Suit, shownSuit: Suit | null): ResponseResult {
+  const p = hcp(hand)
+  const side = RANK.filter((s) => s !== m)
+  if (p <= 14) {
+    return { call: 'P', rule: 'rebid: pass', explanation: `${p} hp mot svararens broms (10–12) → pass, delkontraktet står.` }
+  }
+  if (side.every((s) => hasStopper(hand, s))) {
+    return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp, alla sidofärger täckta → 3NT (utgång trots bromsen).` }
+  }
+  // Andra stopp-visningen måste ligga ÖVER 3m och UNDER 3NT: bara färger med
+  // högre rang än trumffärgen ryms (3♥/3♠ …); redan visad färg re-visas inte.
+  for (const s of RANK) {
+    if (s !== m && s !== shownSuit && rankOf(s) > rankOf(m) && hasStopper(hand, s)) {
+      return { call: `3${BID[s]}`, rule: 'inverterad: stopp-visning', explanation: `${p} hp, stopp även i ${NAME[s]} → 3${SYM[s]} (driver mot 3NT, krav).` }
+    }
+  }
+  return { call: `5${BID[m]}`, rule: 'höjning till utgång', explanation: `${p} hp — utgångsvärden men 3NT otäckt → 5${SYM[m]} (lågfärgsutgång).` }
 }
 
 // === Punkt 8: återbud efter begränsade/avslutande svar ======================
