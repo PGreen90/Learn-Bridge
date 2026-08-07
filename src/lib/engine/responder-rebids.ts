@@ -654,6 +654,9 @@ export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSu
     // Öppnaren visade balanserat eller egen färg.
     case '2NT (18–19)':
       return { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot 18–19 → 3NT.` }
+    case 'oklart': // 1NT-reservfallet (§5.2 steg 7) — behandlas som 1NT-återbud
+    // (systemfel #2, frö 20261317: utan detta nåddes aldrig NMF och svararen
+    // lämnades att passa den framtvingade fortsättningen).
     case '1NT (12–14)': {
       // New Minor Forcing först (5-korts högfärg + 11+), annars sang-stegen.
       const nmf = newMinorForcingBid(hand, opened, y, p)

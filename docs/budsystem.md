@@ -872,7 +872,10 @@ din hand"*.
 
 **Krav:** 5-korts högfärg + inbjudande eller mer (**11+ hp**; 13+ = utgångskrav).
 Ostört läge; störs 1NT-rebudet gäller andra verktyg. Priset: du ger upp det
-naturliga svaga 2-budet i NMF-lågfärgen.
+naturliga svaga 2-budet i NMF-lågfärgen. NMF gäller **även när öppnarens 1NT
+var reservfallet** ("oklart", §5.2 steg 7) — det är fortfarande ett 1NT-återbud
+och svararen behandlar det likadant (systemfel #2, 2026-08-07; förr föll de
+auktionerna ur systemet och kravet kunde passas, frö 20261317).
 
 **Öppnarens svar** (prioritetsordning):
 1. **4-korts andra högfärg** → bjud den (jagar 4-4).
@@ -1176,6 +1179,12 @@ Två undantag: (a) efter en **reverse** har öppnaren 17+ och den billigaste
 höjningen är redan krav — där tas inget utrymme; (b) en **minorhöjning** ligger
 redan på 3-läget och graderas inte uppåt (utgång i minor kräver elva stick —
 vägen går via 3NT eller fjärde färg).
+
+**Öppnarens 1NT-reservfall snävas in (2026-08-07, systemfel #2):** med
+**singel/renons i svararens färg** och en egen **5-korts färg** rebjuder
+öppnaren färgen (2 i färgen, minimum) i stället för en skev 1NT — 1NT med
+singel i partnerns färg ljuger om formen. *Bakgrund frö 20260878: 1=4=3=5
+efter 1♣–1♠ rebjöd 1NT; nu 2♣.*
 
 **Svararens rebjudna EGEN färg graderas likadant (2026-08-07, systemfel #3
 delfix 4a).** Med 6+ kort i egen färg och ingen fit i öppnarens färger:
@@ -1818,6 +1827,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-07 (oklart-återbudet, systemfel #2: översyn + två fixar)** –
+  Spanar-agentens fem frön KLASSADES före fix (ägarbeslut): 20261155 RÄTT
+  (exakt par 3NT) · 20261492 RÄTT (systemriktigt pass, DD-smicker 4NT) ·
+  20261228 medvetet-OK (1=4=5=3 kan inte visa hjärtern utan reverse-styrka —
+  designen; par bara 3♥ EW). Två äkta fel lagade: **(1) 'oklart'-1NT:an
+  routas nu som 1NT-återbud** i svararens dispatcher (kod §5.7) — förr nådde
+  NMF-maskineriet aldrig dit, live-lagret improviserade och svararen PASSADE
+  den framtvingade fortsättningen (frö 20261317: 8-korts hjärterfit begravd i
+  3♣ med 27 hp — nu NMF → 4♥). **(2) Öppnaren rebjuder egen 5-korts färg i
+  stället för en skev 1NT** när hen har singel/renons i svararens färg (kod
+  §5.2 steg 6b; frö 20260878: 1=4=3=5 rebjöd 1NT med singel spader — nu 2♣).
+  Facit FÖRE fix: `auction-oklart-aterbud.test.ts`. Hela sviten grön;
+  mätning M26 i systemrevisorn.md.
 - **2026-08-07 (2/1 GF: svararen visar högfärgen i återbudet, §9-löftet
   2026-08-06 infriat)** – **Egen 4-korts högfärg bjuds naturligt under 3NT i
   2/1-fortsättningen (kod §4.2/§5.3).** 2/1-regeln (5♣ före 4-korts högfärg

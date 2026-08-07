@@ -143,6 +143,13 @@ export function openerRebidAfter1LevelResponse(hand: Hand, opened: Suit, respond
     if (best) return { call: `2${BID[best]}`, rule: 'ny färg (2-läget)', explanation: `${p} hp, naturlig 4+ ${NAME[best]} → 2${SYM[best]} (minimum, ej krav).` }
   }
 
+  // 6b. Rebjud egen 5-korts färg hellre än en skev 1NT (systemfel #2, frö
+  // 20260878): med singel/renons i SVARARENS färg ljuger 1NT om formen —
+  // den egna 5-kortsfärgen är det ärliga minimibudet.
+  if (len[opened] >= 5 && len[responderSuit] <= 1) {
+    return { call: `2${BID[opened]}`, rule: 'rebjuden färg', explanation: `${p} hp, ${len[opened]}-korts ${NAME[opened]} + kort i ${NAME[responderSuit]} → 2${SYM[opened]} (minimum; 1NT vore skev).` }
+  }
+
   // 7. Reservfall: stöd i svararens minor, annars 1NT (flaggas som förenkling).
   if (!rIsMajor && len[responderSuit] >= 4) {
     const lvl = p >= 16 ? 3 : 2

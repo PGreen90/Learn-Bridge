@@ -771,6 +771,41 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #26 — 2026-08-07, oklart-återbudet (systemfel #2: två fixar)
+Samma frö 20260721, 1 000 givar. Fix: (1) 'oklart'-1NT:an routas som
+1NT-återbud i svararens dispatcher → NMF nås (`responder-rebids.ts`), (2)
+öppnaren rebjuder egen 5-korts färg i stället för skev 1NT med singel i
+svararens färg (`rebids.ts` steg 6b). Budsystem.md §5.2/§5.7 + §9. Klassningen
+av spanarfröna (1155/1492 rätt, 1228 medvetet-OK) godkändes av ägaren FÖRE fix.
+Baslinje = M25. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M25 (baslinje)   M26 (oklart-fixarna)
+Rätt kontrakt (exakt par)  19,7 %          19,7 %
+Genomsnittlig par-avvikelse 265,57         264,77
+Fel färg (bet)          119 / 50 540     118 / 49 940
+Missad lillslam          79 / 50 660      79 / 50 130
+Missad utgång           142 / 47 490     143 / 47 860
+Fel strain              102 / 2 500      102 / 2 460
+Övriga poster: oförändrade.
+```
+
+**Läsning:** netto **−800 p**. Typfallet (20261317-familjen: begravd
+högfärgsfit) lämnar fel färg, lillslamsposten krymper 530 p. Motvikt +1 giv
+missad utgång (+370 p) — bevakas i nästa mätning, jagas inte per giv
+(ägarprincipen: systemriktighet, inte enskild givs DD-poäng). Facit FÖRE fix:
+`auction-oklart-aterbud.test.ts` (20261317 → 4♥ + unitfall). Hela sviten grön
+(1 635).
+
+**Dagens mätserie (M22–M26, 2026-08-07):** par-avvikelsen 269,67 → 264,77 =
+**−4,90/giv ≈ −4 900 p per 1 000 givar** över fem etapper (splinterregeln,
+Jordan, starka återbud, 2/1-högfärgen, oklart-fixarna), rätt kontrakt 19,0 →
+19,7 %. Varje etapp facit-först och separat uppmätt — se M22–M26 ovan.
+
 ## Mätning #25 — 2026-08-07, 2/1: högfärgen visas i återbudet
 Samma frö 20260721, 1 000 givar. Fix: svararens egen 4-korts högfärg bjuds
 naturligt under 3NT när den är auktionens tredje färg
