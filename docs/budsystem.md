@@ -65,6 +65,13 @@ har styrka för:
   då visas 6-5 med extra styrka.
 - En riktigt stark 6-5 med **~8½+ spelstick** öppnar **2♣** (nära utgång på egen
   hand), oavsett ovanstående.
+- **Återbudet verifierat (F5, 2026-08-08):** reversen kommer i alla tre
+  svarsvägar — efter svararens 1-lägesfärg (2♥/2♠, fanns), efter 2/1 GF
+  (högfärgen visas naturligt, fanns) och **efter 1NT-svaret** (byggdes i F5:
+  förr rebjöds 3m och högfärgen gömdes — men 1NT förnekar bara 4-korts
+  högfärg, så 5-3-fiten hittas just via reversen). Mönstret är sällsynt vid
+  bordet (de flesta 16+ 6-5 öppnar 2♣ på spelstick) — därför enhetsfacit i
+  `auction-65-rebid.test.ts`, inte volymmätning.
 
 ### Lättöppningar i 3:e och 4:e hand (TP-steg F, ägarbeslut 2026-07-03)
 När partnern redan passat är öppningskraven lägre (svaret är begränsat och
@@ -521,6 +528,17 @@ med hf, 10+ med lf – en stick från utgång). Krav. Balanserade ranger: 22–2
   under 3NT (billigast först: hjärter före spader). Så hittas en 4-4-högfärgsfit
   — och utan fit bjuder ÖPPNAREN sangen, så 3NT spelas från den starka handen i
   stället för från svararens tomma. Först utan 4-korts högfärg blir det 3NT.
+  **F5-skärpning (2026-08-08):** regeln gäller även med egen 5-korts **minor**
+  som skulle **spränga 3NT** (4♣/4♦) — högfärgen under 3NT går före (frö
+  20261040: 3♥ hittar 4-4-hjärterfiten i stället för 4♣ → 5♣). En egen 5-korts
+  högfärg, eller en minor som ryms under 3NT, visas naturligt som förr.
+- **2♣ är ingen klöverfärg (F5, 2026-08-08):** det konstgjorda öppningsbudet
+  räknas aldrig som en bjuden färg — varken när kravstegen letar en egen färg
+  att rebjuda (förr "rebjöds" klövern på 4-läget medan en äkta, redan visad
+  6-korts spader glömdes) eller när partnern räknar fit ("bjudit klöver två
+  gånger" kräver två ÄKTA klöverbud — annars höjdes 4♣→5♣ på dubbelton). I
+  kravstegen rebjuds dessutom **högfärger före minorer** (finaste färg). Facit
+  med revisorsfrön: `auction-2c-strain.test.ts`.
 - **Höj aldrig ombudet på dubbelton med egen visad 6-korts färg:** öppnarens
   andra bud i sin egen färg i kravet är ofta TVINGAT (lovar bara 5+). Svararen
   med bara två kort där och en egen redan visad 6-korts färg **rebjuder sin
@@ -1890,6 +1908,21 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-08 (F5: 6-5-återbudet + 2♣-strain-valet verifierade, A3/E2)** –
+  **Verifiering i spel med fyra fynd, alla lagade.** Probe över 4 000 seedade
+  givar + kodspårning. **(A3)** 16+ 6-5-mönstret är sällsynt vid bordet (10
+  händer/16 000, nästan alla öppnar 2♣ på spelstick); återbudsvägarna
+  enhetslåsta — reversen efter 1-lägessvar och 2/1 fanns, men efter **1NT-
+  svaret** gömdes högfärgen i 3m → ny reverse-gren i
+  `openerRebidAfterLimitedResponse` (§3). **(E2)** 2♣-auktioner dog i 5♣/6♣
+  trots 8+ högfärgsfit; tre rotorsaker: svararens egen minor sprängde 3NT
+  förbi 4-korts högfärgen (`responderSecondBidAfter2C`, frö 20261040);
+  kravstegen läste det konstgjorda 2♣ som bjuden klöver och valde billigast-
+  först (`forcedMinimumBid`, frön 20262070/20261885 — nu högfärg före minor
+  + 2♣ exkluderat); fit-räkningen räknade 2♣ som första klöverbudet så
+  dubbelton höjde 4♣→5♣ (`fitLengthNeeded`, frö 20261885). §4.4. Facit
+  `auction-65-rebid.test.ts` + `auction-2c-strain.test.ts`, mätning M30
+  (`docs/systemrevisorn.md`).
 - **2026-08-07 (F4: TP till §7-inkliven, D9)** – **Inklivsgolven läser
   totalpoäng.** §7-lagret räknade rå HP — form/fördelning nådde aldrig
   försvarsbesluten (D9 i revisionen). Nu läser golven för enkelt inkliv

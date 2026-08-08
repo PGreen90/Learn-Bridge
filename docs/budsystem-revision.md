@@ -28,7 +28,7 @@ LAGAD 2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)
 |---|--------|:---:|--------|
 | A1 | Öppningsbud 1-läget + minor-regeln | 🟢 | — |
 | A2 | Sangöppningar 1NT/2NT/3NT + TP-nudge | 🟢 | Bevaka platta 19:or → 2NT (#30) |
-| A3 | 6-5-öppning (#32) | 🟡 | Verifiera *återbudet* efter 16+ 1♦-öppning |
+| A3 | ~~6-5-öppning (#32)~~ | 🟢 | **F5 KLAR 2026-08-08:** alla tre svarsvägar låsta; 1NT-svarshålet lagat (reverse) |
 | A4 | Svar 1♥/1♠ (Bergen, splinter, Jacoby 2NT) | 🟢 | — |
 | A5 | Svagt hoppskift avskaffat (#31) | 🟢 | — |
 | A6 | Svar 1♣/1♦ (inverterade minorer, 2/1) | 🟢 | — |
@@ -96,7 +96,7 @@ kravminnet löst.
 | # | Svaghet | Status | Åtgärd |
 |---|---------|:---:|--------|
 | E1 | Detektorkedjan i `decideCall` — tung att underhålla, ordningskänslig | 🟢 | **BYGGD 2026-08-07 (F2):** kedjan är data (`FORCED_DETECTORS`/`CONTESTED_DETECTORS`, varje detektor `{ id, before?, run }`); före-kraven vaktas av `detector-chain.test.ts` i deploygrinden. `auctionFacts`-lagret (R2 steg 2) medvetet ej byggt — vid behov |
-| E2 | Forcerad minimi-stege i 2♣ väljer inte alltid finaste färg (5♣ där 4♠ bättre) | 🟡 | Förbättra strain-val i `honorForce` |
+| E2 | ~~Forcerad minimi-stege i 2♣ väljer inte alltid finaste färg~~ | 🟢 | **F5 KLAR 2026-08-08:** högfärg före minor + konstgjorda 2♣ exkluderat (`forcedMinimumBid`/`fitLengthNeeded`/`responderSecondBidAfter2C`) |
 | E3 | Ingen kvarvarande probe-rigg i repot | 🟢 | Systemrevisorn BYGGD (etapp 2, `docs/systemrevisorn.md`, mätserien M1→M27); denna rad var stale tills 2026-08-07-svepet |
 
 ---
@@ -109,7 +109,7 @@ kravminnet löst.
 | **F2** | Datadriven detektorkedja + återanvändbar systemrevisor | E1, E3 | 🟢 **KLAR** (revisorn etapp 2; kedjan 2026-08-07) |
 | **F3** | Advancer-rabatt efter balansering | C12 | 🟢 **KLAR** (2026-08-07) |
 | **F4** | TP till §7-inkliven | D9 | 🟢 **KLAR** (2026-08-07) |
-| **F5** | Verifiera 6-5-återbudet + 2♣-strain-valet i spel | A3, E2 | 🔴 kvar |
+| **F5** | Verifiera 6-5-återbudet + 2♣-strain-valet i spel | A3, E2 | 🟢 **KLAR** (2026-08-08, fyra fynd lagade) |
 | **F6** | Stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i prebuilt-linjer | C5, C14 | 🔴 kvar |
 
 ### F1 — slam-utforskningens delfamiljer (fyra, ur probe 40 000 givar DD-lösta)
