@@ -1501,6 +1501,12 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
 - När motståndarna redan bjudit **två** färger lovar X **4-4 i de två objudna
   färgerna** (här ♠ + ♣), från **10 hp**. Partnern har bara två färger att välja
   mellan, så **exakt 4-4** krävs (en 5-korts objuden färg inkliver du hellre).
+- **Den starka enfärgshanden dubblar även här (F6, 2026-08-08):** med **17+ hp
+  och en egen 5+ objuden färg** är ett inkliv som kan passas ut för riskabelt –
+  **dubbla först och visa färgen på nästa varv**, precis som över enbart
+  öppningen. Fortsättningen är densamma som ovan (tvunget svar, det starka
+  återbudet, stödstegen). *Ex:* (1♦)–(P)–(1♥)–**X**, sedan **2♠** över partnerns
+  framtvingade 2♣.
 - Advancern svarar **aldrig i en av deras bjudna färger**.
 
 **Mot deras svaga tvåor och spärrar (samma verktyg, starkare krav):**
@@ -1908,6 +1914,21 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-08 (F6: stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i
+  linjen, C5/C14)** – **Körordningens sista punkt.** **(C5)** Den starka
+  enfärgshanden (17+ hp, egen 5+ objuden färg) upplysningsdubblar nu även när
+  motståndarna bjudit TVÅ 1-lägesfärger (öppning + svar i ny färg, t.ex.
+  1♦–P–1♥) och visar färgen på nästa varv (§7.3 "efter två bjudna färger").
+  Hålet: den kanoniska linjen (`buildAuction`) modellerade aldrig ronden, så
+  spelarens pass låg inbakat i linjen och live-detektorn (som bara gjorde 4-4)
+  nåddes aldrig on-book. Handbedömningen delas nu av linjen och budlådan
+  (`takeoutOfResponse` i `overcalls.ts`); fortsättningen (tvångssvar + starkt
+  återbud) fanns redan och var tvåfärgsmedveten. 4-4-dubblingen förblir
+  MEDVETET live-only (eget beslut, `docs/senare.md`). **(C14)** Verifierat att
+  linjen aldrig passar ut ett ostört tvåfärgsinkliv — lagat i roten redan
+  2026-07-04 (felrapport #14), revisionstabellens 🔴 var stale; nu låst med
+  linjebyggstest. Facit `auction-stark-x-tva-farger.test.ts`, mätning M31
+  (`docs/systemrevisorn.md`).
 - **2026-08-08 (F5: 6-5-återbudet + 2♣-strain-valet verifierade, A3/E2)** –
   **Verifiering i spel med fyra fynd, alla lagade.** Probe över 4 000 seedade
   givar + kodspårning. **(A3)** 16+ 6-5-mönstret är sällsynt vid bordet (10

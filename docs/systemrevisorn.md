@@ -771,6 +771,37 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #31 — 2026-08-08, F6: stark 17+ enfärg efter två bjudna färger
+Samma frö 20260721, 1 000 givar. Fix: den starka 17+-enfärgshanden
+upplysningsdubblar även efter två bjudna 1-lägesfärger (1♦–P–1♥ → X, färgen
+nästa varv) — modellerad i kanoniska linjen (`buildAuction`) med delad
+handbedömning `takeoutOfResponse` (`overcalls.ts`); 4-4-X:et medvetet fortsatt
+live-only. Budsystem.md §7.3 + §9. Baslinje = M30. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M30 (baslinje)   M31 (F6)
+Rätt kontrakt (exakt par)  19,6 %          19,6 %
+Genomsnittlig par-avvikelse 267,80         267,72
+Såld giv                 58 / 19 760      57 / 19 180
+Fel färg (bet)          118 / 50 610     119 / 51 110
+Övriga poster: oförändrade i antal.
+```
+
+**Läsning:** netto svagt plus (−0,08 p/giv) och VÄNTAT litet: 17+ hp direkt
+över svararen efter just två bjudna 1-lägesfärger är ett sällsynt läge i
+tusengivarsnittet. Det som syns är rätt riktning — en såld giv färre (−580 p:
+den starka handen tävlar nu i stället för att passa ut), mot en fel färg-post
+mer (+500 p: samma sorts hand hamnar någon gång i fel kontrakt i stället för
+att sälja billigt — att TÄVLA är systemriktigt även när den enskilda given
+straffar det, se `bid-correctness-not-score`-principen). Fixens värde ligger i
+facit-fallen: `auction-stark-x-tva-farger.test.ts` (linjen modellerar X:et,
+on-book-passet borta, tvångssvar + starkt återbud, off-book-detektorn,
+4-4-vakten, C14-linjebygget). Hela sviten grön.
+
 ## Mätning #30 — 2026-08-08, F5: 6-5-återbudet + 2♣-strain-valet
 Samma frö 20260721, 1 000 givar. Fix: 6-5-reversen efter 1NT-svar
 (`openerRebidAfterLimitedResponse`), högfärg under 3NT före egen minor förbi

@@ -29,7 +29,7 @@ import { jordanRaiseAfterSignoff, responderPlaceAfterNMF } from './responder-reb
 import type { Major } from './responses'
 import { dummyPoints, pointsWithFloor, startingPoints } from './evaluation'
 import { hcp, isBalanced, lengths, suitHcp } from './hand'
-import { advanceTwoSuiter, hasStopper, openingSuit, overcall } from './overcalls'
+import { advanceTwoSuiter, hasStopper, openingSuit, overcall, takeoutOfResponse } from './overcalls'
 import { side, NEXT_SEAT } from './play'
 import { firstRoundControl, keycards, respondToKingAsk, respondToRKC } from './slam'
 
@@ -2572,8 +2572,10 @@ function maybeOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): Resolve
  * (2026-07-05): X är fortfarande takeout, men lovar då **4+ 4+ i de två OBJUDNA
  * färgerna** (äkta 4-4 – partnern har bara två färger att välja mellan), 10+ hp.
  * En 5-korts objuden färg inkliver vi hellre (sköts av on-book-linjen), så här
- * krävs exakt 4-4. (Den starka 17+-enfärgshanden hanteras i öppningsfallet, se
- * `overcall` + `ownStrongDoubleRebid`.) null = ingen sådan dubbling.
+ * krävs exakt 4-4. F6 (C5, 2026-08-08): även den STARKA 17+-enfärgshanden
+ * dubblar här (X + egen färg nästa varv, `ownStrongDoubleRebid`) – själva
+ * handbedömningen delas med den kanoniska linjen via `takeoutOfResponse`
+ * (`overcalls.ts`). null = ingen sådan dubbling.
  */
 function maybeTakeoutOfResponse(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
   const contractBids = history.filter((c) => parseContractBid(c.bid))
@@ -2591,20 +2593,11 @@ function maybeTakeoutOfResponse(deal: Deal, history: ResolvedCall[], seat: Seat)
   const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
   if (!lastNonPass || lastNonPass !== respBid) return null
 
-  const hand = deal.hands[seat]
-  const p = hcp(hand)
-  const len = lengths(hand)
-  const unbid = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter((s) => s !== openSuit && s !== respSuit)
-  const [u1, u2] = unbid
-  // Exakt 4-4 i de objudna (en 5-korts objuden färg inkliver vi hellre).
-  const fourFour = len[u1] >= 4 && len[u2] >= 4 && len[u1] < 5 && len[u2] < 5
-  if (p < 10 || !fourFour) return null
-  if (!legalCalls(history, seat).includes('X' as Bid)) return null
+  const res = takeoutOfResponse(deal.hands[seat], openSuit, respSuit)
+  if (res.call === 'P') return null
+  if (!legalCalls(history, seat).includes(res.call as Bid)) return null
 
-  return {
-    seat, bid: 'X', rule: 'upplysningsdubbling',
-    explanation: `${p} hp, 4-4 i ${SWE_NAME[letterOfSuit(u1)]}+${SWE_NAME[letterOfSuit(u2)]} (deras ${SWE_NAME[letterOfSuit(openSuit)]}+${SWE_NAME[letterOfSuit(respSuit)]} objudna) → X (upplysning).`,
-  }
+  return { seat, bid: res.call as Bid, rule: res.rule, explanation: res.explanation }
 }
 
 /**

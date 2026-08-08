@@ -49,6 +49,15 @@ minorfit/2♣-grenen (§4.2/§6.2, M27) · **F2** datadriven detektorkedja
 (`FORCED_DETECTORS`/`CONTESTED_DETECTORS` + kedjevakten
 `detector-chain.test.ts`; E1/E3 stängda).
 
+**F6 — STARK 17+ ENFÄRG EFTER TVÅ BJUDNA FÄRGER (2026-08-08): KLAR (C5/C14
+stängda — HELA KÖRORDNINGEN F1–F6 KLAR).** En 17+ hand med egen 5+ objuden
+färg dubblar nu även efter två bjudna färger (1♦–P–1♥ → X, färgen nästa varv):
+kanoniska linjen modellerar ronden (passet låg förr inbakat i linjen) och
+delar handbedömningen med budlådan (`takeoutOfResponse`). 4-4-X:et MEDVETET
+kvar live-only. C14 visade sig redan lagad 2026-07-04 (felrapport #14) —
+stale 🔴 rättad + linjebyggstest. Facit `auction-stark-x-tva-farger.test.ts`,
+boken §7.3/§9, mätning M31. Detalj: `docs/historik.md` 2026-08-08.
+
 **F5 — 6-5-ÅTERBUDET + 2♣-STRAIN-VALET VERIFIERADE (2026-08-08): KLAR
 (A3/E2 stängda).** Probe 4 000 givar + kodspårning, fyra fynd lagade:
 (1) 16+ 6-5 efter 1NT-svaret gömde högfärgen i 3m → reverse-gren (§3);
@@ -75,8 +84,9 @@ partnerns balansering räknar av den lånade kungen över ALLA öppningsnivåer
 `auction-advancer-rabatt.test.ts`, boken §7.1/§7.7/§9, mätning M28. Kvar som
 bevakning: NT-svar/nya färger efter balansering. Detalj: `docs/historik.md`.
 
-**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F6 — körordningens sista). Faceliten
-PARKERAD (2026-08-03). ⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
+**➡️ NÄSTA GÅNG:** körordningen F1–F6 är KLAR och 🟢 NÄST är tom — ägaren
+väljer nästa spår ur ⚪ SENARE/🅿️ PARKERAT (t.ex. faceliten Fas 1-resten,
+utspelsförfiningen, tredje hand högt i trumf, Lebensohl nästa lager).
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
@@ -89,24 +99,22 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 > visshet. Detalj: budsystem.md §5.2/§5.7/§6 + `docs/historik.md`.
 
 ### 👀 Bevaka i spel — de tre senaste
+- **F6 starka X:et efter två färger (2026-08-08):** 17+ med 5+ objuden färg
+  dubblar efter 1♦–P–1♥ och färgar nästa varv. Landar fortsättningen lagom
+  mot en tom advancer? 4-4-X:et är MEDVETET live-only — säljs givar där?
+> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
+> säger att något känns fel i spel, eller när en ny fix ska läggas till.
 - **F5 2♣-strain + 6-5 (2026-08-08):** 2♣-auktioner ska hitta högfärgsfiten
   (inte dö i 5♣); 16+ 6-5 reverserar även efter 1NT-svar. Känns 2♣-slutbuden
   rätt nu — och svarar partnern begripligt på den nya reversen?
-> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
-> säger att något känns fel i spel, eller när en ny fix ska läggas till.
 - **F4 TP-inkliven (2026-08-07):** inklivsgolven läser TP (formstark 7:a
   kliver in), advancern stödpoäng. Kliver bottarna in för lätt — straffas
   TP-inkliven? X-svararen/DONT/svaga tvåor räknar ännu rå HP — säljs givar där?
-- **F3 advancer-rabatten (2026-08-07):** svaret på partnerns balansering
-  räknar −3 (höjningar + X-svar). Står ni för lågt när balanseraren faktiskt
-  var maximal? NT-svar/nya färger räknar ännu inte rabatten — driver de högt?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **F6 — stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i
-   prebuilt-linjer (C5, C14).** Körordningens sista punkt.
-
-*(F2–F5 STÄNGDA 2026-08-07→08 — se 🔵 NU-blocket. Ordningen = körordningen
-i `docs/budsystem-revision.md`.)*
+*(TOM — hela körordningen F1–F6 stängdes 2026-08-08. Ägaren väljer nästa spår
+ur ⚪ SENARE/🅿️ PARKERAT; F2–F6 sammanfattas i 🔵 NU-blocket, detaljerna i
+`docs/budsystem-revision.md` + `docs/historik.md`.)*
 
 *(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C
 via cue-buden, hål D steg 1 klar / steg 2 parkerad — hela resan + verktygen i
@@ -121,8 +129,8 @@ cue-Stayman, efter takeout av svag tvåa) ·
 fler budträningsgivar + tema-dropdown ·
 spelmotor-kvalitet (#32/#34 KLARA; kvar: tredje hand högt i trumf) ·
 **UTSPELET** (hål A–G klara; kvar: förfining) · engelska som andra
-språk (Fas 5) *(17+ enfärgshand efter två bjudna färger flyttad till 🟢 NÄST
-som F6 2026-08-07)* · auto-facit på
+språk (Fas 5) *(17+ enfärgshand efter två bjudna färger BYGGD 2026-08-08 som
+F6)* · auto-facit på
 hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·
 svårighetsnivåer på bottarna · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
 `auctionFacts`-lagret (R2 steg 2 — förberäknade auktionsfakta åt detektorerna,

@@ -9,6 +9,16 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Budgivning (2026-08-08) — F6: stark 17+ enfärg efter två bjudna färger
+- **Den starka dubblingen efter två färger (NYAST, §7.3):** en 17+ hand med
+  egen 5+ objuden färg dubblar nu även efter t.ex. 1♦–P–1♥ (även i den
+  kanoniska linjen — passet är inte längre inbakat) och visar färgen på nästa
+  varv. **Bevaka:** (a) känns fortsättningen rätt — svarar partnern begripligt
+  på tvånget och landar ni på rimlig nivå mot en tom advancer? (b) den vanliga
+  **4-4-dubblingen är MEDVETET kvar som live-only** (fyras bara när auktionen
+  redan lämnat linjen) — säg till om bottarna säljer givar där ett vanligt
+  10–16-X efter två färger hade tävlat, så tas linje-beslutet då.
+
 ## Budgivning (2026-08-08) — F5: 6-5-återbudet + 2♣-strain-valet
 - **2♣-strain-valet (NYAST, §4.4):** kravstegen rebjuder högfärg före minor,
   konstgjorda 2♣ räknas aldrig som klöverfärg, och svararen visar 4-korts

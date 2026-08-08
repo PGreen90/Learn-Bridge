@@ -98,14 +98,13 @@ Det generella fallet stängt: rabatten −3 gäller nu alla balanserade öppning
 balanseringens NT-svar och nya färger (`respondWithoutFit`) räknar ännu inte
 rabatten — byggs på om spel visar att de driver för högt (`docs/bevaka.md`).
 
-### 17+ stark enfärgshand EFTER två bjudna färger (takeout, 2026-07-05)
-En 17+ enfärgshand som borde upplysningsdubbla när motståndarna redan bjudit två
-färger (t.ex. 1♦–P–1♥) gör det INTE — där följer `decideCall` en färdig
-buildAuction-linje som passar handen, så live-hanteraren (`maybeTakeoutOfResponse`,
-som bara gör 4-4) når aldrig fram. Att tvinga den starka dubblingen där kräver att
-den generativa linjen i `auction.ts` (`buildAuction`) modellerar inklivet — ett
-grundläggande ingrepp. Öppningsfallet + 4-4-fallet är klara & live (felrapport #23,
-§7.3).
+### ~~17+ stark enfärgshand EFTER två bjudna färger~~ (BYGGD 2026-08-08 via F6)
+Linjen (`buildAuction`) modellerar nu den starka dubblingen efter två bjudna
+1-lägesfärger; handbedömningen delas med budlådan (`takeoutOfResponse`, §7.3).
+Kvar som bevakning, inte byggpunkt: **den vanliga 4-4-dubblingen är MEDVETET
+fortsatt live-only** — att träda in den i linjen ändrar en stor andel ostörda
+linjer (Budvisningen, träningsgivar) och byggs bara på eget ägarbeslut om spel
+visar att bottarna säljer sådana givar (`docs/bevaka.md`).
 
 ### Den starka dubblaren säljer given i ROND 2 (2026-07-28, funnen i Mätning #19)
 "17+ säljer aldrig given" gäller i dag bara **första** ronden (§7.1, felrapport
@@ -127,11 +126,11 @@ gav upp efter ~1,7 s, spränger 2M-nodbudgeten → skulle frysa + nästan alltid
 tung"). Kräver bakgrundstråd (mc-worker) med möjliga långa väntetider, eller
 snabbare lösare. Del 1 (budhint "Motorn hade valt X") är redan gjord + live.
 
-### Kanoniska linjen passar ut ostörda tvåfärgsinkliv (felrapport #7, 2026-07-03)
-`buildAuction` (`auction.ts`) kan stänga en linje som 1♠–2NT–P–P–P — advancern ska
-aldrig passa ostört (ägarbeslut FAS 10). Live-budlådan är lagad; luckan finns bara i
-förbyggda linjer (Budvisningen m.m.). Trä in `advanceTwoSuiter` i linjens
-konkurrensrond.
+### ~~Kanoniska linjen passar ut ostörda tvåfärgsinkliv~~ (var redan lagad — verifierad 2026-08-08 via F6)
+Lagades i roten redan 2026-07-04 (felrapport #14: `advanceTwoSuiter` sitter i
+linjens konkurrensrond i `auction.ts`) — den här punkten och revisionens C14
+stod kvar som stale. Sedan 2026-08-08 låst med linjebyggstest
+(`auction-stark-x-tva-farger.test.ts`).
 
 ### Övrigt
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
