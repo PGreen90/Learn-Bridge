@@ -9,6 +9,17 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Budgivning (2026-08-08) — F5: 6-5-återbudet + 2♣-strain-valet
+- **2♣-strain-valet (NYAST, §4.4):** kravstegen rebjuder högfärg före minor,
+  konstgjorda 2♣ räknas aldrig som klöverfärg, och svararen visar 4-korts
+  högfärg under 3NT hellre än egen minor förbi 3NT. **Bevaka:** (a) hittar
+  2♣-auktionerna nu högfärgsfiten i stället för att dö i 5♣/6♣ — och känns
+  slutbuden rätt när INGEN fit finns? (b) höjs öppnarens äkta klöver
+  fortfarande lagom (fit kräver nu två äkta klöverbud för dubbelton-stöd)?
+- **6-5-reversen efter 1NT-svar (§3):** 16+ med 6m+5M reverserar nu 2M även
+  efter 1♦–1NT. **Bevaka:** svarar partnern begripligt på reversen (den är
+  rondkrav), och står ni lagom när svararen är minimal (6–7 hp)?
+
 ## Budgivning (2026-08-07) — F4: TP till §7-inkliven
 - **Inklivsgolven läser TP (NYAST, §7.1):** enkelt inkliv + upplysnings-X
   kliver in på `max(hp, startpoäng)` (t.ex. 7 hp med KQJ109-femma → 1♠),

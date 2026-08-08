@@ -49,6 +49,15 @@ minorfit/2♣-grenen (§4.2/§6.2, M27) · **F2** datadriven detektorkedja
 (`FORCED_DETECTORS`/`CONTESTED_DETECTORS` + kedjevakten
 `detector-chain.test.ts`; E1/E3 stängda).
 
+**F5 — 6-5-ÅTERBUDET + 2♣-STRAIN-VALET VERIFIERADE (2026-08-08): KLAR
+(A3/E2 stängda).** Probe 4 000 givar + kodspårning, fyra fynd lagade:
+(1) 16+ 6-5 efter 1NT-svaret gömde högfärgen i 3m → reverse-gren (§3);
+(2) svararens minor sprängde 3NT förbi 4-korts högfärgen (frö 20261040, §4.4);
+(3) kravstegen läste konstgjorda 2♣ som klöver + valde billigast-först →
+högfärg före minor (frön 20262070/20261885); (4) fit-räkningen räknade 2♣
+som klöverbud (dubbelton höjde 4♣→5♣). Facit `auction-65-rebid.test.ts` +
+`auction-2c-strain.test.ts`, boken §3/§4.4/§9, mätning M30.
+
 **F4 — TP TILL §7-INKLIVEN (2026-08-07): KLAR (D9 stängd).** Inklivsgolven
 (enkelt inkliv 8/bal. 5, upplysnings-X 12/10) läser `max(hp, startpoäng)` och
 advancerns cue/fit-jump stödpoäng — additivt ovanpå "låna en kung" (TP =
@@ -66,8 +75,8 @@ partnerns balansering räknar av den lånade kungen över ALLA öppningsnivåer
 `auction-advancer-rabatt.test.ts`, boken §7.1/§7.7/§9, mätning M28. Kvar som
 bevakning: NT-svar/nya färger efter balansering. Detalj: `docs/historik.md`.
 
-**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F5). Faceliten PARKERAD (2026-08-03).
-⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
+**➡️ NÄSTA GÅNG:** 🟢 NÄST punkt 1 (F6 — körordningens sista). Faceliten
+PARKERAD (2026-08-03). ⚪ SENARE: tredje hand högt i **trumf** + signalspåret.
 
 **Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
 kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
@@ -80,6 +89,9 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 > visshet. Detalj: budsystem.md §5.2/§5.7/§6 + `docs/historik.md`.
 
 ### 👀 Bevaka i spel — de tre senaste
+- **F5 2♣-strain + 6-5 (2026-08-08):** 2♣-auktioner ska hitta högfärgsfiten
+  (inte dö i 5♣); 16+ 6-5 reverserar även efter 1NT-svar. Känns 2♣-slutbuden
+  rätt nu — och svarar partnern begripligt på den nya reversen?
 > Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
 > säger att något känns fel i spel, eller när en ny fix ska läggas till.
 - **F4 TP-inkliven (2026-08-07):** inklivsgolven läser TP (formstark 7:a
@@ -88,17 +100,12 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 - **F3 advancer-rabatten (2026-08-07):** svaret på partnerns balansering
   räknar −3 (höjningar + X-svar). Står ni för lågt när balanseraren faktiskt
   var maximal? NT-svar/nya färger räknar ännu inte rabatten — driver de högt?
-- **B13-återbuden (2026-08-07):** graderade återbud efter 1m–2m med svararens
-  broms 10–12. Stannar ni för ofta i 3m min-mot-min där 3NT stod? Känns
-  fantomstoppen begriplig när 3NT faller på öppnarens "visade" färg?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **F5 — verifiera i spel:** 6-5-återbudet efter 16+ 1♦ (A3) +
-   2♣-strain-valet (E2).
-2. **F6 — stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i
-   prebuilt-linjer (C5, C14).**
+1. **F6 — stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i
+   prebuilt-linjer (C5, C14).** Körordningens sista punkt.
 
-*(F2 + F3 + F4 STÄNGDA 2026-08-07 — se 🔵 NU-blocket. Ordningen = körordningen
+*(F2–F5 STÄNGDA 2026-08-07→08 — se 🔵 NU-blocket. Ordningen = körordningen
 i `docs/budsystem-revision.md`.)*
 
 *(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C

@@ -10,6 +10,31 @@
 
 ---
 
+## 2026-08-08 (F5 — 6-5-återbudet + 2♣-strain-valet verifierade, A3/E2 stängda)
+
+**F5 KLAR** (körordningens näst sista punkt). Verifiering i spel: probe över
+4 000 seedade givar + kodspårning. Fyra fynd, alla facit-låsta FÖRE fix:
+
+- **A3 (6-5-återbudet):** mönstret 16+ 6m+5M är sällsynt vid bordet (10
+  händer/16 000 — nästan alla öppnar 2♣ på 8½+ spelstick, resten sitter i
+  konkurrens), så verifieringen är enhetsfacit (`auction-65-rebid.test.ts`):
+  reversen efter 1-lägessvar och 2/1 fanns och låstes; **efter 1NT-svaret
+  gömdes högfärgen i 3m-rebudet** → ny reverse-gren i
+  `openerRebidAfterLimitedResponse` (1NT förnekar bara 4-korts högfärg —
+  5-3-fiten hittas via reversen). Boken §3.
+- **E2 (2♣-strain-valet):** proben visade 2♣-auktioner som dog i 5♣/6♣ trots
+  8+ högfärgsfit. Tre rotorsaker (`auction-2c-strain.test.ts`, riktiga frön):
+  **(1)** svararens egen 5-korts minor sprängde 3NT förbi en 4-korts högfärg
+  som rymdes under (frö 20261040: nu 3♥, förr 4♣ → 5♣) —
+  `responderSecondBidAfter2C`; **(2)** forcerade stegen läste det KONSTGJORDA
+  2♣-öppningsbudet som "egen bjuden klöver" och rebjöd billigast-först — nu
+  exkluderas 2♣ och högfärger rebjuds före minorer (frön 20262070/20261885:
+  3♠ på den äkta 6-korts spadern) — `forcedMinimumBid`; **(3)** fit-räkningen
+  räknade 2♣ + ett senare klöverbud som "två klöverbud → 6+, dubbelton
+  räcker" och höjde 4♣→5♣ på ♣xx — `fitLengthNeeded`. Boken §4.4.
+- Mätning M30 (`docs/systemrevisorn.md`). Hela sviten grön (`npm test`).
+  Kvar i körordningen: bara F6.
+
 ## 2026-08-07 natt (F4 — TP till §7-inkliven, D9 stängd)
 
 **F4 KLAR** (körordningens nästa steg efter F3; ägarbeslutet från 2026-07-05

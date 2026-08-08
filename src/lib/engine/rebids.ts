@@ -456,10 +456,21 @@ export function openerRebidAfterLimitedResponse(hand: Hand, response: ResponseRe
       return ntp >= 14 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT${lift}.` } : pass
     }
     case '1NT':
-    case 'gap-hand 1NT':
+    case 'gap-hand 1NT': {
       if (p >= 18 && bal) return { call: '3NT', rule: 'rebid: 3NT', explanation: `${p} hp balanserad → 3NT.` }
+      // F5/A3 (6-5-regeln, felrapport #32): 16+ med 6-korts minor + 5-korts
+      // högfärg öppnade minorn JUST för att kunna reverse:a in högfärgen — den
+      // får inte gömmas i ett 3m-rebud (1NT förnekar 4-korts högfärg men kan
+      // hålla 3: 5-3-fiten hittas bara via reversen). Samma styrkemått som
+      // reversen efter 1-lägessvar (max(hp, startpoäng) ≥ 16).
+      const sp = pointsWithFloor(hand, null, 'starting')
+      const fiveMajor: Suit | null = len.spades === 5 ? 'spades' : len.hearts === 5 ? 'hearts' : null
+      if (sp.points >= 16 && (opened === 'clubs' || opened === 'diamonds') && len[opened] >= 6 && fiveMajor) {
+        return { call: `2${BID[fiveMajor]}`, rule: 'reverse', explanation: `${sp.text}, 6-korts ${NAME[opened]} + 5-korts ${NAME[fiveMajor]} → 2${SYM[fiveMajor]} (reverse, visar 6-5 med 16+).` }
+      }
       if (p >= 16 && len[opened] >= 6) return { call: `3${BID[opened]}`, rule: 'rebid: egen färg', explanation: `${p} hp med 6+ ${NAME[opened]} → 3${SYM[opened]} (inbjudan).` }
       return pass
+    }
     case 'svagt hoppskift': {
       const s = suitOfCall(response.call)
       if (s && len[s] >= 3 && p >= 16) {

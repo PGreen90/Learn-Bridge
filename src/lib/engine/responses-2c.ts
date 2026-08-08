@@ -143,8 +143,19 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
     return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `${p} hp, ${len[rs]} stöd i ${NAME[rs]} → 4${SYM[rs]} (GF, slamintresse).` }
   }
 
-  // Egen 5+ färg, naturlig (krav i GF).
+  // Egen 5+ färg, naturlig (krav i GF). F5/E2 "finaste färg" (frö 20261040):
+  // en egen MINOR som skulle SPRÄNGA 3NT (4♣/4♦) får inte gömma en 4-korts
+  // högfärg som ryms under 3NT — då går högfärgssteget nedan före (4-4-fiten
+  // i högfärgen är den finare utgången; minorn kan fortfarande visas senare).
   const own = longestSuit(len, 5)
+  const ownMinorPast3NT = own && !isMajor(own) && own !== rs && levelAbove(own, rebid.call) >= 4
+  if (ownMinorPast3NT && !isMajor(rs)) {
+    for (const m of ['hearts', 'spades'] as Suit[]) {
+      if (len[m] >= 4 && levelAbove(m, rebid.call) === 3) {
+        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT går före egen minor förbi 3NT, GF).` }
+      }
+    }
+  }
   if (own && own !== rs) {
     const lvl = levelAbove(own, rebid.call)
     return { call: `${lvl}${BID[own]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, GF).` }

@@ -1783,9 +1783,14 @@ function fitLengthNeeded(history: ResolvedCall[], seat: Seat, partnerSuit: { str
     opening.level === 1 &&
     opening.strain === partnerSuit.strain &&
     (opening.strain === 'H' || opening.strain === 'S')
+  // F5/E2 (frö 20261885): det KONSTGJORDA 2♣-öppningsbudet är ingen klöverfärg
+  // — utan detta räknades 2♣ + ett senare klöverbud som "bjudit klöver två
+  // gånger → 6+" och dubbelton-stöd höjde till 5♣.
+  const firstContractCall = history.find((c) => parseContractBid(c.bid))
   const partnerBidsInSuit = history.filter((c, idx) => {
     const cb = parseContractBid(c.bid)
     if (c.seat !== PARTNER[seat] || cb?.strain !== partnerSuit.strain) return false
+    if (c === firstContractCall && c.bid === '2C') return false // konstgjord stark 2♣
     for (let i = idx - 1; i >= 0; i--) {
       if (history[i].bid === 'P') continue
       const forcedByMyX = history[i].seat === seat && history[i].bid === 'X'
@@ -2284,10 +2289,18 @@ function forcedMinimumBid(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
   const len = lengths(hand)
   const legal = legalCalls(history, seat)
 
-  // 1) Rebjud egen 5+ färg vi redan bjudit.
-  for (const st of SUIT_STRAINS) {
+  // 1) Rebjud egen 5+ färg vi redan bjudit. F5/E2 (frön 20262070/20261885):
+  // det KONSTGJORDA 2♣-öppningsbudet räknas aldrig som bjuden klöver, och
+  // högfärger går före minorer ("finaste färg" — en äkta 6-korts spader ska
+  // rebjudas hellre än att "klövern" spränger 3NT).
+  const firstContract = history.find((c) => parseContractBid(c.bid))
+  const strong2C = firstContract?.bid === '2C' ? firstContract : null
+  const rebidOrder = [...SUIT_STRAINS].sort(
+    (a, b) => Number(b === 'H' || b === 'S') - Number(a === 'H' || a === 'S'),
+  )
+  for (const st of rebidOrder) {
     if (len[SUIT_OF_LETTER[st]] < 5) continue
-    if (!history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === st)) continue
+    if (!history.some((c) => c.seat === seat && c !== strong2C && parseContractBid(c.bid)?.strain === st)) continue
     const bid = cheapestBidIn(history, seat, st)
     if (bid) return {
       seat, bid, rule: 'krav – rebjuder egen färg',

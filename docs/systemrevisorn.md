@@ -771,6 +771,36 @@ cue-höjning` 3♣ 1/820, `svar på negativ dubbling` 2♥ 1/750, ett regellöst
    2026-08-07** (ägarbeslut): kvarvarande ärlig kärna ~1–2 givar — för liten för
    regressionsrisken. Se `docs/senare.md`.
 
+## Mätning #30 — 2026-08-08, F5: 6-5-återbudet + 2♣-strain-valet
+Samma frö 20260721, 1 000 givar. Fix: 6-5-reversen efter 1NT-svar
+(`openerRebidAfterLimitedResponse`), högfärg under 3NT före egen minor förbi
+3NT (`responderSecondBidAfter2C`), konstgjorda 2♣ exkluderat ur kravstegen +
+högfärg före minor (`forcedMinimumBid`) och ur fit-räkningen
+(`fitLengthNeeded`). Budsystem.md §3/§4.4 + §9. Baslinje = M29. Kör om med:
+
+```
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+```
+
+```
+                        M29 (baslinje)   M30 (F5)
+Rätt kontrakt (exakt par)  19,6 %          19,6 %
+Genomsnittlig par-avvikelse 267,83         267,80
+Fel färg (bet)          119 / 50 500     118 / 50 610
+För högt                 36 / 8 410       37 / 8 620
+Övriga poster: oförändrade i antal.
+```
+
+**Läsning:** netto neutralt (−0,03 p/giv) — och det är VÄNTAT, inte en
+besvikelse: 2♣-öppningar är ~3–4 % av givarna (139 st i F5-probens 4 000)
+och bara en delmängd hade felmönstret; 16+ 6-5-mönstret är nästan
+obefintligt i spel (10 händer/16 000 — nästan alla öppnar 2♣ på spelstick).
+Fixarnas värde syns i de låsta fröna, inte i tusengivarsnittet: frö 20261040
+(3♥ hittar 4-4-fiten i stället för 4♣→5♣), 20262070/20261885 (äkta 6-korts
+spader rebjuds i stället för "klövern" från det konstgjorda 2♣). Facit FÖRE
+fix: `auction-65-rebid.test.ts` + `auction-2c-strain.test.ts`. Hela sviten
+grön.
+
 ## Mätning #29 — 2026-08-07, F4: TP till §7-inkliven
 Samma frö 20260721, 1 000 givar. Fix: inklivsgolven (enkelt inkliv +
 upplysnings-X, `overcall`) läser `max(hp, startpoäng)` och advancerns
