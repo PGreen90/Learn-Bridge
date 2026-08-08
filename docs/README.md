@@ -11,7 +11,7 @@
 
 | Fil | ðŸŸ¢/ðŸ“˜/ðŸ“¦ | Ã–ppna den nÃ¤r â€¦ |
 |---|---|---|
-| **budsystem.md** (215 kB) | ðŸ“˜ | du ska Ã¤ndra eller slÃ¥ upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den hÃ¤r filen live fÃ¶r Ã¤garen** â€” varje regelÃ¤ndring MÃ…STE skrivas in hÃ¤r. Â§9 = Ã¤ndringslogg (visas inte pÃ¥ sidan). |
+| **budsystem.md** (222 kB) | ðŸ“˜ | du ska Ã¤ndra eller slÃ¥ upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den hÃ¤r filen live fÃ¶r Ã¤garen** â€” varje regelÃ¤ndring MÃ…STE skrivas in hÃ¤r. Â§9 = Ã¤ndringslogg (visas inte pÃ¥ sidan). |
 | **status.md** (43 kB) | ðŸ“˜ | du ska rÃ¶ra **budmotorns kod**. SÃ¶k rubriken "Budmotorns tre auktionslager + `open`-handoff" = arkitekturkontraktet: hÃ¶r logiken hemma i `auction.ts` (on-book), `auction-live.ts` (off-book/konkurrens) eller `auction-interpret.ts` (fÃ¶rklaring)? |
 | **systemrevisorn.md** (72 kB) | ðŸŸ¢ | du jobbar i mÃ¤tspÃ¥ret. Riggen, hur man kÃ¶r den, **alla mÃ¤tningar #1â€“#25**, fÃ¶rskanningarna (etapp 6 + **etapp 7 missad lillslam**) och mÃ¶nsteranalyserna bakom varje fix. |
 | **bevaka.md** | ðŸŸ¢ | Ã¤garen sÃ¤ger att nÃ¥got kÃ¤nns fel i spel, en felrapport kommer in, eller en ny fix ska lÃ¤ggas till bevakningslistan. |

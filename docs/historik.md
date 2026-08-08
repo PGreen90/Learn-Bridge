@@ -10,6 +10,35 @@
 
 ---
 
+## 2026-08-08 (F6 — stark 17+ enfärg efter två bjudna färger, C5/C14 stängda — KÖRORDNINGEN F1–F6 KLAR)
+
+**F6 KLAR** (körordningens sista punkt — därmed är hela F1–F6-serien ur
+`docs/budsystem-revision.md` stängd). Två delar:
+
+- **C5 (stark 17+ enfärg efter två bjudna färger):** en 17+ hand med egen 5+
+  objuden färg upplysningsdubblar nu även när motståndarna bjudit TVÅ
+  1-lägesfärger (t.ex. 1♦–P–1♥) och visar färgen på nästa varv. Roten till
+  hålet (senare.md 2026-07-05): den kanoniska linjen (`buildAuction`)
+  modellerade aldrig den ronden, så spelarens pass låg INBAKAT i linjen och
+  `decideCall` följde det — live-detektorn `maybeTakeoutOfResponse` (som bara
+  gjorde 4-4) nåddes aldrig on-book. Fixen: linjen modellerar den starka
+  dubblingen (rondkrav, linjen lämnas öppen) och handbedömningen delas mellan
+  linjen och budlådan via nya `takeoutOfResponse` (`overcalls.ts`).
+  Fortsättningen (tvångssvaret + `ownStrongDoubleRebid` + stödstegen) fanns
+  redan och var tvåfärgsmedveten — verifierad i facit. **Den vanliga
+  4-4-dubblingen är MEDVETET fortsatt live-only** (att träda in den ändrar en
+  stor andel ostörda linjer — eget ägarbeslut om spel kräver det; vaktad i
+  facit + `docs/bevaka.md`).
+- **C14 (linjen passar ut ostörda tvåfärgsinkliv):** visade sig **redan lagad
+  i roten 2026-07-04** (felrapport #14 trädde in `advanceTwoSuiter` i linjens
+  konkurrensrond) — revisionens 🔴 och senare.md-punkten var stale sedan dess.
+  Nu låst med linjebyggstest (buildAuction-nivå, inte bara decideCall).
+
+Facit `auction-stark-x-tva-farger.test.ts` (7 fall: linjen, on-book-X:et,
+tvångssvaret, det starka återbudet, off-book-detektorn, 4-4-vakten,
+C14-linjebygget). Boken §7.3 + §9. Mätning M31 (`docs/systemrevisorn.md`).
+Hela sviten grön (`npm test`).
+
 ## 2026-08-08 (F5 — 6-5-återbudet + 2♣-strain-valet verifierade, A3/E2 stängda)
 
 **F5 KLAR** (körordningens näst sista punkt). Verifiering i spel: probe över

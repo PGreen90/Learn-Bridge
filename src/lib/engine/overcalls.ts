@@ -181,6 +181,44 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   return pass
 }
 
+/**
+ * X när motståndarna bjudit TVÅ 1-lägesfärger (öppning + svar i ny färg), t.ex.
+ * 1♦–(P)–1♥ och vi sitter direkt över svararen. §7.3 "efter två bjudna färger".
+ *
+ * Ägarregel 2026-07-05: X lovar **4+4+ i de två OBJUDNA färgerna** (äkta 4-4 –
+ * partnern har bara två färger att välja mellan; en 5-korts objuden färg
+ * inkliver vi hellre), 10+ hp.
+ *
+ * F6 (C5, 2026-08-08): den STARKA ENFÄRGSHANDEN (17+ hp med egen 5+ OBJUDEN
+ * färg) dubblar också här – för stark för ett inkliv som kan passas ut, precis
+ * som över enbart öppningen (regel 3.5 i `overcall`, felrapport #23). Färgen
+ * visas på nästa varv (`ownStrongDoubleRebid` i budlådan) = stark enfärgshand,
+ * rondkrav. Färgen måste vara OBJUDEN – annars finns inget eget återbud.
+ */
+export function takeoutOfResponse(hand: Hand, openSuit: Suit, respSuit: Suit): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const unbid = RANK_ORDER.filter((s) => s !== openSuit && s !== respSuit)
+  const [u1, u2] = unbid
+
+  // Stark enfärgshand: 17+ med egen 5+ objuden färg (längst; lika → högst rankad).
+  let strong: Suit | null = null
+  for (const s of unbid) {
+    if (len[s] < 5) continue
+    if (!strong || len[s] > len[strong] || (len[s] === len[strong] && rankIdx(s) > rankIdx(strong))) strong = s
+  }
+  if (p >= 17 && strong) {
+    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `${p} hp – för starkt för ett inkliv som kan passas ut → X (upplysning; visar egna ${NAME[strong]} på nästa varv, stark enfärgshand).` }
+  }
+
+  // Exakt 4-4 i de objudna, 10+ hp (en 5-korts objuden färg inkliver vi hellre).
+  if (p >= 10 && len[u1] === 4 && len[u2] === 4) {
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, 4-4 i ${NAME[u1]}+${NAME[u2]} (deras ${NAME[openSuit]}+${NAME[respSuit]} objudna) → X (upplysning).` }
+  }
+
+  return { call: 'P', rule: 'pass', explanation: 'ingen aktion över deras två bjudna färger → pass.' }
+}
+
 /** Billigaste lagliga budet i `suit` STRIKT över partnerns tvåfärgsbud `refCall`. */
 function cheapestBid(suit: Suit, refCall: string): string {
   const m = refCall.match(/^(\d)(NT|C|D|H|S)$/)

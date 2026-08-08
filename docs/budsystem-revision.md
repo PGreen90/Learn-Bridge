@@ -15,10 +15,12 @@ enda sanningen om testläget: kör `npm test`; facit-först, boken = enda
 sanningskälla). Grunder och konventioner solida. **2026-07-07 kväll: ÄRLIGA
 SLAMPORTAR byggda** (ägarbeslut: inga budbeslut på partnerns faktiska kort
 — egen hand + visade intervall; inbjudningar i kanske-zonen; fel tillåtna).
-Kvarvarande svaghet: att försvarslagret (§7) inte räknar fördelning (TP) —
-F4 i körordningen. *(F2/E1, detektorkedjans underhållbarhet, LAGAD 2026-08-07:
-kedjan är datadriven med kedjevakt. B13, grova återbud efter inverterad minor,
-LAGAD 2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)*
+**2026-08-08: HELA KÖRORDNINGEN F1–F6 ÄR KLAR** — inga röda rader kvar i
+tabellerna nedan; det som återstår är 🟡-bevakningar (följs i `docs/bevaka.md`)
+och de medvetet parkerade punkterna. *(F4/D9 TP-inkliven LAGAD 2026-08-07.
+F2/E1, detektorkedjans underhållbarhet, LAGAD 2026-08-07: kedjan är datadriven
+med kedjevakt. B13, grova återbud efter inverterad minor, LAGAD 2026-08-07.
+F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)*
 
 ---
 
@@ -66,7 +68,7 @@ LAGAD 2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)
 | C2 | Michaels + ovanlig 2NT | 🟢 | — |
 | C3 | Takeout double (grund + stark 17+ + tvåfärgs-X) | 🟢 | — |
 | C4 | Stark 17+ enfärg dom efter stödhöjning | 🟡 | Finjustera trösklar vid behov |
-| C5 | Stark 17+ enfärg **efter två bjudna färger** | 🔴 | Kräver buildAuction-ändring |
+| C5 | Stark 17+ enfärg **efter två bjudna färger** | 🟢 | **BYGGD 2026-08-08 (F6):** linjen modellerar den starka X:en (delad bedömning `takeoutOfResponse`), 4-4-X:et medvetet live-only; facit `auction-stark-x-tva-farger.test.ts`, boken §7.3/§9, mätning M31 |
 | C6 | Negativ/responsiv/stöddubbling | 🟢 | — |
 | C7 | Lebensohl | 🟢 | — |
 | C8 | DONT mot deras 1NT | 🟢 | — |
@@ -75,7 +77,7 @@ LAGAD 2026-08-07. F1:s fyra slamfamiljer är byggda sedan etapp 4 — se nedan.)
 | C11 | Flerronds-konkurrens A+B+C | 🟢 | — |
 | C12 | **Advancer-rabatt efter balansering** | 🟢 | **BYGGD 2026-08-07 (F3):** rabatten −3 generell över alla balanserade öppningar (höjningar via `partnerBalanced`/`raiseWithFit` + X-svar via `answerTakeoutDouble`); facit `auction-advancer-rabatt.test.ts`, boken §7.1/§9, mätning M28. Kvar (bevaka): NT-svar/nya färger utan rabatt |
 | C13 | Mathe mot stark 1♣ | 🟡 | PARKERAT (irrelevant i 2/1) |
-| C14 | Kanoniska linjen passar ut ostörda tvåfärgsinkliv (Budvisningen) | 🔴 | Trä in `advanceTwoSuiter` i linjens konkurrensrond |
+| C14 | Kanoniska linjen passar ut ostörda tvåfärgsinkliv (Budvisningen) | 🟢 | **Var redan lagad i roten 2026-07-04 (felrapport #14)** — `advanceTwoSuiter` sitter i linjens konkurrensrond; raden här var stale. Låst med linjebyggstest 2026-08-08 (F6, `auction-stark-x-tva-farger.test.ts`) |
 
 ## D. FÖRDELNING & HANDVÄRDERING (TP)
 
@@ -110,7 +112,7 @@ kravminnet löst.
 | **F3** | Advancer-rabatt efter balansering | C12 | 🟢 **KLAR** (2026-08-07) |
 | **F4** | TP till §7-inkliven | D9 | 🟢 **KLAR** (2026-08-07) |
 | **F5** | Verifiera 6-5-återbudet + 2♣-strain-valet i spel | A3, E2 | 🟢 **KLAR** (2026-08-08, fyra fynd lagade) |
-| **F6** | Stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i prebuilt-linjer | C5, C14 | 🔴 kvar |
+| **F6** | Stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i prebuilt-linjer | C5, C14 | 🟢 **KLAR** (2026-08-08; C14 visade sig redan lagad sedan 2026-07-04) |
 
 ### F1 — slam-utforskningens delfamiljer (fyra, ur probe 40 000 givar DD-lösta)
 | Familj | Läge | Status |

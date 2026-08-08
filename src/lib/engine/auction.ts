@@ -13,7 +13,7 @@ import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { respondToPreempt, preemptOf } from './responses-preempt'
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { respondToMajorPassed } from './responses-drury'
-import { overcall, advanceOvercall, advanceTwoSuiter } from './overcalls'
+import { overcall, advanceOvercall, advanceTwoSuiter, takeoutOfResponse } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
@@ -470,6 +470,25 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       }
     }
     return finish(false)
+  }
+
+  // F6 (C5, §7.3 "efter två bjudna färger"): motståndarna har bjudit TVÅ
+  // 1-lägesfärger (öppning + svar i ny färg, t.ex. 1♦–P–1♥) och spelaren DIREKT
+  // ÖVER svararen sitter med den STARKA enfärgshanden (17+ hp, egen 5+ objuden
+  // färg). Utan den här ronden låg hennes pass INBAKAT i linjen och decideCall
+  // följde det – live-detektorn `maybeTakeoutOfResponse` nåddes aldrig on-book
+  // (senare.md-hålet 2026-07-05). Vi modellerar BARA den starka dubblingen
+  // (rondkrav; tvångssvaret + det starka återbudet bjuds levande i budlådan).
+  // Den vanliga 4-4-dubblingen förblir MEDVETET live-only – att träda in den
+  // ändrar en stor andel ostörda linjer och är ett eget beslut (`docs/senare.md`).
+  const respNew = parseBid(response.call)
+  if (openerSuit && respNew.level === 1 && respNew.suit && respNew.suit !== openerSuit) {
+    const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+    const takeout = takeoutOfResponse(deal.hands[rhoSeat], openerSuit, respNew.suit)
+    if (takeout.rule === 'upplysningsdubbling (stark)') {
+      turns.push({ seat: rhoSeat, role: 'motståndare', call: takeout.call, rule: takeout.rule, explanation: takeout.explanation })
+      return finish(true)
+    }
   }
 
   // Stöddubbling (punkt 8, §7.3): öppning 1 i färg – (LHO pass) – svararen 1♥/1♠
