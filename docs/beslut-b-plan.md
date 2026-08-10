@@ -152,11 +152,20 @@ ett delbeslut ska Claude fråga, inte välja själv. Identifierade grindar:
    automatiskt via Vercels bygge — ingen workflowändring; kontrollera att
    `api/` täcks av `tsc`.
 
-### Etapp 1 — konton (= konkurrensplanens Fas 2)
+### Etapp 1 — konton (= konkurrensplanens Fas 2) — KLAR & LIVE-VERIFIERAD 2026-08-10
 
 🚪 *Grind 0→1 PASSERAD 2026-08-10. Delbesluten tagna: ingen Google-login nu ·
 radera allt vid kontoradering · visningsnamn 4–10 tecken, låst, med
 ägaröverstyrning + blocklista (se "Beslutsgrindarna" ovan för full spec).*
+
+**SKARPT LIVE-PROV PASSERAT (2026-08-10) på rebidz.com:** hela kedjan bevisad i
+skarp drift — registrering (visningsnamn "Green" + validering) → bekräftelsemejl
+(same-device PKCE, Resend levererade) → inloggning → GDPR-export (exakt rätt data,
+inget extra) → kontoradering ("radera allt": kontot borta ur databasen, efterföljande
+inloggning misslyckas) → glömt-lösenord hela vägen (ny länk → nytt lösenord →
+inloggning med det nya). Alla fem godkända. **KVAR (städning):** de två gamla
+testkontona `rebidz.bridge+smoke@gmail.com` / `+test2@gmail.com` raderas i Supabase
+→ Authentication → Users. **NÄSTA = etapp 2-grinden** (delbesluten nedan tas med ägaren).
 
 **Byggt & verifierat 2026-08-10 (inget committat/deployat än):** Supabase-projekt
 i EU-Stockholm (ref `fpvuvlmnddgphprmyqmb`), DPA gäller automatiskt. Auth-konfig:

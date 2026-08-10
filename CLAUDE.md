@@ -20,12 +20,15 @@ kontoradering (mest GDPR-ärligt); (3) **visningsnamn** unikt/skiftlägesokänsl
 som slinker förbi kvar för evigt). Full spec + resten av etappen:
 `docs/beslut-b-plan.md`.
 
-**BYGGT hittills (2026-08-10, EJ committat till main/deployat):** Supabase-projekt
+**DEPLOYAD + LIVE-VERIFIERAD (2026-08-10, main `2b2e374`):** Supabase-projekt
 (EU-Stockholm) + egen SMTP via Resend (mejlleverans verifierad), auth-lager +
-auth-sidor + GDPR-sidor + kontohantering (radera via RPC / exportera) byggda och
-testade på grenen `beslut-b-etapp-1-konton`. Full status + nästa steg:
-`docs/beslut-b-plan.md` (+ minnet `beslut-b-etapp1-progress`). **KVAR:** kör
-migration `0003` i Supabase · deploy + skarpt live-prov · städa testkonton.
+auth-sidor + GDPR-sidor + kontohantering (radera via RPC / exportera) live på
+rebidz.com. **Skarpt live-prov PASSERAT (2026-08-10):** registrera → bekräfta mejl
+→ inloggning → exportera data → radera konto (borta ur DB, login misslyckas) →
+glömt-lösenord hela vägen. Alla fem godkända skarpt. Full status:
+`docs/beslut-b-plan.md` (+ minnet `beslut-b-etapp1-progress`). **KVAR i etappen:**
+städa de två gamla testkontona `rebidz.bridge+smoke@gmail.com` /
+`+test2@gmail.com` i Supabase → Authentication → Users. **NÄST = etapp 2-grinden.**
 
 ---
 
