@@ -21,15 +21,20 @@ import { genereraGivar } from './_lib/generera'
 
 const TÄVLINGSSTORLEK = 12
 
-/** Ett PostgREST-anrop mot en tabell med service-nyckeln. Kastar vid fel. */
+/** Ett PostgREST-anrop mot en tabell med service-nyckeln. Kastar vid fel.
+ *  onConflict = den unika kolumn(erna) upserten ska slå samman på (annars
+ *  antar PostgREST primärnyckeln, och vår upsert på comp_date/(set_id,board)
+ *  krockar i stället för att bli idempotent). */
 async function rest(
   base: string,
   key: string,
   table: string,
   body: unknown,
   prefer: string,
+  onConflict?: string,
 ): Promise<unknown> {
-  const r = await fetch(`${base}/rest/v1/${table}`, {
+  const q = onConflict ? `?on_conflict=${encodeURIComponent(onConflict)}` : ''
+  const r = await fetch(`${base}/rest/v1/${table}${q}`, {
     method: 'POST',
     headers: {
       apikey: key,
@@ -86,6 +91,7 @@ export default async function handler(
       'daily_sets',
       [{ comp_date: dateISO, size: TÄVLINGSSTORLEK, daily_number: nummer }],
       'resolution=merge-duplicates,return=representation',
+      'comp_date',
     )) as Array<{ id: string }>
     const setId = sets?.[0]?.id
     if (!setId) throw new Error('daily_sets gav inget id tillbaka')
@@ -103,6 +109,7 @@ export default async function handler(
         hands: d.hands,
       })),
       'resolution=ignore-duplicates,return=minimal',
+      'set_id,board',
     )
 
     // Svaret läcker ALDRIG händerna — bara att jobbet lyckades.

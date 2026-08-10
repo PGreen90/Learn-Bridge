@@ -45,3 +45,11 @@ create table if not exists public.daily_deals (
 -- vägen byggs i nästa delsteg.
 alter table public.daily_sets enable row level security;
 alter table public.daily_deals enable row level security;
+
+-- 4) Rättigheter till service-nyckeln --------------------------------------
+-- service_role kringgår RLS men behöver ändå TABELL-rättigheter (GRANT).
+-- Nyskapade tabeller via SQL-editorn får dem inte automatiskt → ge dem
+-- explicit. Bara service_role (serverns giv-generering) — anon/authenticated
+-- lämnas utan både policy och grant, alltså helt utestängda.
+grant select, insert, update, delete on public.daily_sets to service_role;
+grant select, insert, update, delete on public.daily_deals to service_role;
