@@ -10,7 +10,32 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BESLUT B ETAPP 0: förberedelser utan backend (2026-08-08)
+### 🔵 NU — BESLUT B ETAPP 1: konton (grind 0→1 passerad 2026-08-10)
+
+**GRIND 0→1 PASSERAD (2026-08-10, ägaren: "Grind 0→1").** Etapp 1-besluten tagna:
+(1) **ingen Google-login** nu — bara e-post + lösenord; (2) **radera allt** vid
+kontoradering (mest GDPR-ärligt); (3) **visningsnamn** unikt/skiftlägesokänsligt,
+**4–10 tecken**, teckenregler + blocklista, **LÅST** för användaren men med
+**ägaröverstyrning** (byt/spärra namn i efterhand — annars sitter ett fult namn
+som slinker förbi kvar för evigt). Full spec + resten av etappen:
+`docs/beslut-b-plan.md`.
+
+**BYGGT & VERIFIERAT hittills (2026-08-10, INGET committat/deployat än):**
+Supabase-projektet skapat (EU-Stockholm, `fpvuvlmnddgphprmyqmb`), DPA granskad
+(gäller automatiskt). Auth-inställningar satta (8 tecken, e-postbekräftelse på;
+läckt-lösenord-skydd = Pro-only → uppskjutet). `.env` med publika värden (anon-
+JWT; `sb_publishable`-nyckeln avvisades av gatewayen). Kod: `src/lib/backend/`
+(`supabase.ts` PKCE, `auth.ts`, `display-name.ts`+facit), `AuthProvider`-context,
+sidorna registrera/logga-in/glömt-/nytt-lösenord/auth-callback/konto + GDPR-
+sidorna integritet/villkor, topbar-inloggning. SQL i `supabase/migrations/`
+(`0001` profiles+RLS+trigger, `0002` grant). **Smoke-test PASSERAT:** registrering
+via appen skapade `profiles`-rad via triggern (bevisad kedja). 1706 tester gröna.
+**NÄSTA:** städa testkontot · Resend (mejl, kräver ägaren: konto+DNS) · konto-
+hantering (radera/exportera) + localStorage-import · deploy.
+
+---
+
+**BESLUT B ETAPP 0: förberedelser utan backend (2026-08-08) — KLAR, historik nedan**
 **MASTERPLANEN SATT (2026-08-08, ägarbeslut — "kör" på Beslut B-planeringen):**
 rebidz byggs mot konton → daglig 12-givarstävling → realtidsbord (valfri mix
 människor/bottar). HELA planen — etapper 0–4, beslutsgrindarna, GDPR/säkerhet

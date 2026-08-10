@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
 import { NY_VERSION_EVENT, type NyVersionDetail } from '../lib/sw-events'
 import { BrandMark, Wordmark } from './BrandMark'
+import { useAuth } from './AuthProvider'
 // Versionsnumret i sidfoten läses ur package.json — EN sanning, aldrig
 // hårdkodat i UI:t (ägarbeslut 2026-08-02: © + grundår + version i sidfoten).
 import pkg from '../../package.json'
@@ -43,6 +44,11 @@ export function Layout() {
     window.addEventListener(NY_VERSION_EVENT, onNyVersion)
     return () => window.removeEventListener(NY_VERSION_EVENT, onNyVersion)
   }, [])
+  // Kontot (Beslut B etapp 1): topbaren visar "Logga in" när man är utloggad,
+  // och visningsnamnet (→ Mitt konto) när man är inloggad. Under laddningen
+  // visas inget så det inte blinkar till fel läge.
+  const { loading: authLoading, signedIn, profile } = useAuth()
+
   const location = useLocation()
   // Spelbordet går "full-bleed": duken fyller hela skärmen edge-to-edge utan ram
   // eller marginal (ägarbeslut 2026-07-31). Övriga sidor behåller den centrerade,
@@ -85,6 +91,18 @@ export function Layout() {
     }`
   }
 
+  // Kontopillret i topbaren: guldkantad så det står lugnt skilt från de vita
+  // navlänkarna. Samma stil för "Logga in" och för visningsnamnet.
+  function accountPillClass(isActive: boolean): string {
+    return `ml-1 rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset ring-gold-400/40 transition-colors ${
+      isActive ? 'bg-gold-400/15 text-gold-100' : 'text-white/90 hover:bg-white/10 hover:text-gold-100'
+    }`
+  }
+
+  // Kontots mål + etikett beror på inloggningsläget.
+  const accountTo = signedIn ? '/konto' : '/logga-in'
+  const accountLabel = signedIn ? (profile?.display_name ?? 'Mitt konto') : 'Logga in'
+
   return (
     <div className="min-h-screen bg-surface text-ink">
       {/* Guldlinjen under sidhuvudet följer med på VARJE flik = klubbtemat.
@@ -116,6 +134,14 @@ export function Layout() {
                 {item.label}
               </NavLink>
             ))}
+            {!authLoading && (
+              <NavLink
+                to={accountTo}
+                className={({ isActive }) => accountPillClass(isActive)}
+              >
+                {accountLabel}
+              </NavLink>
+            )}
             {themeButton}
           </nav>
 
@@ -166,6 +192,15 @@ export function Layout() {
                   {item.label}
                 </NavLink>
               ))}
+              {!authLoading && (
+                <NavLink
+                  to={accountTo}
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) => menuLinkClass(isActive)}
+                >
+                  {accountLabel}
+                </NavLink>
+              )}
             </nav>
           </>
         )}
@@ -237,6 +272,14 @@ export function Layout() {
               v{pkg.version} ·{' '}
               <NavLink to="/om" className="underline underline-offset-2 hover:text-ink">
                 Om rebidz
+              </NavLink>{' '}
+              ·{' '}
+              <NavLink to="/integritet" className="underline underline-offset-2 hover:text-ink">
+                Integritet
+              </NavLink>{' '}
+              ·{' '}
+              <NavLink to="/villkor" className="underline underline-offset-2 hover:text-ink">
+                Villkor
               </NavLink>
             </p>
           </div>

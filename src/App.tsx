@@ -26,6 +26,26 @@ const SpelHistorik = lazy(() =>
 const Om = lazy(() => import('./pages/Om').then((m) => ({ default: m.Om })))
 const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })))
 
+// Konton (Beslut B etapp 1): inloggning, registrering och länklandningen.
+const LoggaIn = lazy(() => import('./pages/auth/LoggaIn').then((m) => ({ default: m.LoggaIn })))
+const Registrera = lazy(() =>
+  import('./pages/auth/Registrera').then((m) => ({ default: m.Registrera })),
+)
+const GlomtLosenord = lazy(() =>
+  import('./pages/auth/GlomtLosenord').then((m) => ({ default: m.GlomtLosenord })),
+)
+const NyttLosenord = lazy(() =>
+  import('./pages/auth/NyttLosenord').then((m) => ({ default: m.NyttLosenord })),
+)
+const AuthCallback = lazy(() =>
+  import('./pages/auth/AuthCallback').then((m) => ({ default: m.AuthCallback })),
+)
+const Konto = lazy(() => import('./pages/auth/Konto').then((m) => ({ default: m.Konto })))
+const Integritet = lazy(() =>
+  import('./pages/auth/Integritet').then((m) => ({ default: m.Integritet })),
+)
+const Villkor = lazy(() => import('./pages/auth/Villkor').then((m) => ({ default: m.Villkor })))
+
 /** Dagens giv-rutten: `?dag=N` (kalenderarkivet 2026-08-03) spelar en tidigare
  *  dags giv. Dagen ingår i React-nyckeln så ett dagbyte i arkivet monterar om
  *  Play — annars satt gårdagens giv kvar när man valde en ny dag. */
@@ -73,6 +93,17 @@ export default function App() {
           <Route path="installningar" element={<Settings />} />
           {/* Om rebidz (Etapp D): onboardingen — nås från startsidan + sidfoten. */}
           <Route path="om" element={<Om />} />
+          {/* Konton (Beslut B etapp 1): inloggning, registrering, kontosida och
+              inloggningslänkarnas landning (auth/callback). */}
+          <Route path="logga-in" element={<LoggaIn />} />
+          <Route path="registrera" element={<Registrera />} />
+          <Route path="glomt-losenord" element={<GlomtLosenord />} />
+          <Route path="nytt-losenord" element={<NyttLosenord />} />
+          <Route path="auth/callback" element={<AuthCallback />} />
+          <Route path="konto" element={<Konto />} />
+          {/* GDPR-sidorna (måste finnas före första registreringen). */}
+          <Route path="integritet" element={<Integritet />} />
+          <Route path="villkor" element={<Villkor />} />
           {/* Catch-all: alla adresser utanför tabellen (felskrivning, död
               länk) landar mjukt på 404-sidan i stället för på en tom sida
               (konkurrensplanen Fas 0 c). Facit: not-found.test.tsx. */}
