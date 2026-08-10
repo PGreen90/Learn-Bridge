@@ -10,7 +10,26 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BESLUT B ETAPP 0: förberedelser utan backend (2026-08-08)
+### 🔵 NU — BESLUT B ETAPP 1: konton (grind 0→1 passerad 2026-08-10)
+
+**GRIND 0→1 PASSERAD (2026-08-10, ägaren: "Grind 0→1").** Etapp 1-besluten tagna:
+(1) **ingen Google-login** nu — bara e-post + lösenord; (2) **radera allt** vid
+kontoradering (mest GDPR-ärligt); (3) **visningsnamn** unikt/skiftlägesokänsligt,
+**4–10 tecken**, teckenregler + blocklista, **LÅST** för användaren men med
+**ägaröverstyrning** (byt/spärra namn i efterhand — annars sitter ett fult namn
+som slinker förbi kvar för evigt). Full spec + resten av etappen:
+`docs/beslut-b-plan.md`.
+
+**BYGGT hittills (2026-08-10, EJ committat till main/deployat):** Supabase-projekt
+(EU-Stockholm) + egen SMTP via Resend (mejlleverans verifierad), auth-lager +
+auth-sidor + GDPR-sidor + kontohantering (radera via RPC / exportera) byggda och
+testade på grenen `beslut-b-etapp-1-konton`. Full status + nästa steg:
+`docs/beslut-b-plan.md` (+ minnet `beslut-b-etapp1-progress`). **KVAR:** kör
+migration `0003` i Supabase · deploy + skarpt live-prov · städa testkonton.
+
+---
+
+**BESLUT B ETAPP 0: förberedelser utan backend (2026-08-08) — KLAR, historik nedan**
 **MASTERPLANEN SATT (2026-08-08, ägarbeslut — "kör" på Beslut B-planeringen):**
 rebidz byggs mot konton → daglig 12-givarstävling → realtidsbord (valfri mix
 människor/bottar). HELA planen — etapper 0–4, beslutsgrindarna, GDPR/säkerhet

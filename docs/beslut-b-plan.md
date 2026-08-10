@@ -25,8 +25,11 @@
 3. **Inloggning: klassiska lösenord** (ägarval; Claudes lösenordsfria förslag
    avböjt). Supabase sköter lösenordshanteringen — vi ser aldrig lösenord i
    klartext. Valet medför att vi OCKSÅ bygger: e-postverifiering, "glömt
-   lösenord"-flödet, minst 8 tecken, och läckta-lösenord-skyddet påslaget i
-   Supabase.
+   lösenord"-flödet, minst 8 tecken. **OBS (fynd 2026-08-10):** läckta-lösenord-
+   skyddet (HaveIBeenPwned) är en **Pro-funktion** i Supabase och går INTE att
+   slå på på gratisplanen. Det är därför **uppskjutet till Pro-uppgraderingen**
+   (samma grind som borden/gratistaket) — tills dess skyddar vi med 8 tecken +
+   obligatorisk e-postbekräftelse.
 4. **Byggordning: tävlingarna först, borden sen** — bekräftar konkurrensplanens
    ordning (Fas 2 konton → Fas 3 tävlingen → Fas 6 borden).
 
@@ -97,10 +100,20 @@ ett delbeslut ska Claude fråga, inte välja själv. Identifierade grindar:
 
 - **Grind 0→1 (backendstarten):** uttryckligt "kör" innan Supabase-projektet
   skapas — första externa tjänstekontot, här börjar GDPR-ansvaret på riktigt.
-- **Etapp 1 (konton):** Google-inloggning som komplement till lösenord — ja/nej?
-  · Vad händer med resultaten när ett konto raderas: radera allt (enklast,
-  ärligast) eller anonymisera (topplistorna består)? · Regler för visningsnamn
-  (får man byta? hur ofta?).
+  **PASSERAD 2026-08-10** (ägaren: "Grind 0→1"); etapp 1-besluten tagna, se nedan.
+- **Etapp 1 (konton) — BESLUTAT 2026-08-10:**
+  · **Google-inloggning:** NEJ nu — bara e-post + lösenord. Google kan läggas
+    till senare utan ombyggnad om användarna vill ha det.
+  · **Radering av konto:** RADERA ALLT (enklast, mest GDPR-ärligt — rätten att
+    bli glömd uppfylls helt). Anonymisering kan omprövas senare om topplistornas
+    integritet växer i betydelse.
+  · **Visningsnamn:** unikt (databasgaranterat via unik, skiftlägesokänslig
+    regel — "Anna"="anna"), **4–10 tecken**, teckenregler (bokstäver/siffror/`_`/`-`,
+    inga osynliga tecken) + blocklista (svordomar/slurs + reserverade ord som
+    `admin`/`rebidz`) vid registrering. **LÅST för användaren** (inget
+    självbetjänat byte), men **ägaröverstyrning krävs**: en knapp bara ägaren
+    kommer åt för att byta/spärra ett enskilt namn i efterhand (annars sitter ett
+    fult namn som slinker förbi kvar för evigt). Anmäl-knapp läggs till senare.
 - **Etapp 2 (tävlingen):** Ska gratis "Dagens giv" (Wordle-delningen) leva kvar
   parallellt med tävlingen eller bakas in i den? · Syns provisorisk topplista
   under dagen eller först efter midnatt? · Får man pausa mitt i de 12 givarna
@@ -141,18 +154,40 @@ ett delbeslut ska Claude fråga, inte välja själv. Identifierade grindar:
 
 ### Etapp 1 — konton (= konkurrensplanens Fas 2)
 
-🚪 *Grind 0→1 först. Etappens öppna delbeslut (Google-login, radering vs
-anonymisering, namnregler) tas här.*
+🚪 *Grind 0→1 PASSERAD 2026-08-10. Delbesluten tagna: ingen Google-login nu ·
+radera allt vid kontoradering · visningsnamn 4–10 tecken, låst, med
+ägaröverstyrning + blocklista (se "Beslutsgrindarna" ovan för full spec).*
+
+**Byggt & verifierat 2026-08-10 (inget committat/deployat än):** Supabase-projekt
+i EU-Stockholm (ref `fpvuvlmnddgphprmyqmb`), DPA gäller automatiskt. Auth-konfig:
+8 tecken, e-postbekräftelse på, Site URL + redirect-URL:er satta. `.env` med
+publika värden (anon-JWT — `sb_publishable`-nyckeln avvisades av gatewayen på det
+färska projektet). Klientkod i `src/lib/backend/` (supabase.ts PKCE/detect-off,
+auth.ts, display-name.ts + facit), AuthProvider-context, sidor (registrera,
+logga-in, glömt/nytt lösenord, auth/callback, konto) + GDPR-sidor
+(integritet/villkor), inloggning i topbaren. SQL i `supabase/migrations/`:
+`0001` (profiles + RLS "läs egen" + trigger handle_new_user), `0002` (grant select
+till authenticated). **Smoke-test PASSERAT:** registrering via appen skapade
+profilrad via triggern — hela kedjan registrering→trigger→tabell→RLS bevisad.
+Testsviten grön (`npm test`). **Kvar i etappen:** städa testkontot · Resend (SPF/DKIM på
+rebidz.com) · kontohantering radera/exportera (radering kräver service_role i en
+serverfunktion → service-nyckeln in i Vercel redan här) · localStorage-import ·
+deploy + skarpt mejlprov. **Öppen fråga (fynd):** för mejllänkar som öppnas på
+annan enhet krävs token_hash-mallar i Supabase (verifyEmailOtp finns redan i
+koden) — sätts när Resend + mejlmallarna konfigureras.
 
 - Supabase-projekt i EU; DPA godkänns. Resend som egen SMTP (SPF/DKIM på
   rebidz.com).
-- E-post + lösenord: verifiering krävs, minst 8 tecken, läckta-lösenord-skydd
-  på, "glömt lösenord"-flöde. OBS HashRouter: en explicit `/#/auth/callback`-
+- E-post + lösenord: verifiering krävs, minst 8 tecken, "glömt lösenord"-flöde.
+  Läckta-lösenord-skydd är Pro-only → uppskjutet till Pro-uppgraderingen (se
+  besluten ovan, fynd 2026-08-10). OBS HashRouter: en explicit `/#/auth/callback`-
   rutt behövs och återställningslänken testas särskilt i iOS-PWA:n (länkar ur
   mejl öppnas i webbläsaren, inte i den installerade appen). Apple-inloggning
   först i Fas 4 (Apples krav gäller först när iOS-appen finns).
-- `profiles`-tabell: unikt visningsnamn 2–20 tecken (mejladressen visas aldrig
-  för andra), 13+-kryssruta vid registrering.
+- `profiles`-tabell: unikt visningsnamn **4–10 tecken** (skiftlägesokänslig unik
+  regel; mejladressen visas aldrig för andra), teckenregler + blocklista, **låst**
+  för användaren men med **ägaröverstyrning** (byt/spärra namn), 13+-kryssruta
+  vid registrering.
 - GDPR-sidorna `/#/integritet` + `/#/villkor` (enkel svenska) FÖRE första
   registreringen. Självbetjäning: radera konto och exportera min data (JSON).
 - Engångsimport av localStorage-historiken (dagens giv-loggen + spelhistoriken)
@@ -260,3 +295,9 @@ bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
   esbuild-bundlingssteg för api-funktionerna → sätts upp i etapp 2 (2a), där
   servern faktiskt ska generera givar och spela om resultat. NÄSTA = grind 0→1:
   Supabase-projektet skapas först på ägarens uttryckliga "kör".
+- **2026-08-10: GRIND 0→1 PASSERAD** (ägaren: "Grind 0→1"). Etapp 1-besluten
+  tagna med ägaren: (1) ingen Google-login nu, bara e-post + lösenord; (2)
+  kontoradering = radera allt; (3) visningsnamn unikt/skiftlägesokänsligt, 4–10
+  tecken, teckenregler + blocklista, LÅST för användaren med ägaröverstyrning
+  (byt/spärra). NÄSTA konkreta steg: ägaren skapar Supabase-projektet (EU-region,
+  helst Stockholm) — Claude guidar klick för klick.
