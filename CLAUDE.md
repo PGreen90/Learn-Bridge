@@ -23,8 +23,10 @@ etappslut stannar Claude, visar läget och tar grindbesluten med ägaren.
 slumpinjektion (`rng` genom Monte-Carlo i `monte-carlo.ts`/`play-bot.ts`, default
 Math.random), Europe/Stockholm-tidszon i `daily.ts` (DST-säker), backend-sömlagret
 `src/lib/backend/` (11 sidor omkopplade, synkront nu/async i etapp 1), PWA-vakt för
-`/api/*` (låst i `deploy-config.test.ts`), `api/health.ts` (motorn importeras
-server-side, `tsconfig` täcker `api/`). **NÄSTA = grind 0→1:** Supabase-projektet
+`/api/*` (låst i `deploy-config.test.ts`), `api/health.ts` (första Vercel-funktionen,
+live; `tsconfig` täcker `api/`). **Fynd:** motorn kan INTE importeras rått i en
+Vercel-funktion — dess extensionless-importer kräver bundling (esbuild) → görs i
+etapp 2. **NÄSTA = grind 0→1:** Supabase-projektet
 skapas först på ägarens uttryckliga "kör" (etapp 1 konton, `docs/beslut-b-plan.md`).
 
 **FAS 1 FACELIFTEN — YTA 1–4 KLARA (2026-07-31→08-02):** startsidan,

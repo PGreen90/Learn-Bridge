@@ -167,6 +167,10 @@ anonymisering, namnregler) tas här.*
 paus mitt i serien?) tas med ägaren.*
 
 **2a — givar + inskick:**
+- **Förarbete (fynd från etapp 0):** api-funktionerna som kör motorn måste
+  **buntas med esbuild** (motorns extensionless-importer resolvar inte i Node ESM
+  rått). Sätt upp bundling så `decideCall`/`rebuildPlay`/`botCardSmart`/`scoring`
+  kan köras server-side.
 - Ett schemalagt serverjobb (Vercel-cron 00:05 Europe/Stockholm) genererar
   dagens 12 givar med hemligt serverfrö (HMAC av datum + givnummer — går inte
   att förberäkna) och lagrar händerna i databasen. Gratis "Dagens giv" med
@@ -248,6 +252,11 @@ bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
   default Math.random), Europe/Stockholm-tidszon i `daily.ts` (DST-säker),
   backend-sömlagret `src/lib/backend/` (11 sidor omkopplade; synkront nu, konto-
   gruppen blir async i etapp 1), PWA-vakt som lämnar `/api/*` orört (låst i
-  `deploy-config.test.ts`), och `api/health.ts` som bevisar att motorn importeras
-  server-side (`tsconfig` täcker nu `api/`). NÄSTA = grind 0→1: Supabase-projektet
-  skapas först på ägarens uttryckliga "kör".
+  `deploy-config.test.ts`), och `api/health.ts` (första Vercel-funktionen, live;
+  `tsconfig` täcker nu `api/`). **Fynd under deployen:** motorn kan INTE importeras
+  rått i en Vercel Node-funktion — motorns filer importerar varandra utan
+  filändelse (`from './deal'`), och Node ESM på servern kräver explicit `.js`
+  (ERR_MODULE_NOT_FOUND). Att köra motorn server-side kräver därför ett
+  esbuild-bundlingssteg för api-funktionerna → sätts upp i etapp 2 (2a), där
+  servern faktiskt ska generera givar och spela om resultat. NÄSTA = grind 0→1:
+  Supabase-projektet skapas först på ägarens uttryckliga "kör".
