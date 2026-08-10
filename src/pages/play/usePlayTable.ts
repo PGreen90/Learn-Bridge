@@ -31,6 +31,8 @@ import { loadAutoClaim, loadPlaySpeed, saveAutoClaim, savePlaySpeed } from '../.
 import { scoreLine } from '../../lib/engine/scoring'
 import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib/engine/play-bot'
+import { mulberry32 } from '../../lib/engine/deal'
+import { botDecisionSeed, playIndexOf } from '../../lib/engine/play-seed'
 import { controls, sameCard } from './common'
 import { ms, type PlaySpeed } from './tempo'
 import { useCardFlight } from './useCardFlight'
@@ -48,6 +50,10 @@ export function usePlayTable(
   contract: Contract,
   calls: ResolvedCall[],
   restoredPlays?: Card[],
+  // Tävlingsspel (Beslut B etapp 2): fröet som gör bottarnas kortval
+  // deterministiskt så servern kan spela om given och validera. null/undefined
+  // (allt vanligt spel) = Math.random precis som förut.
+  playSeed?: number | null,
 ) {
   const [play, setPlay] = useState<PlayState>(() => {
     if (restoredPlays && restoredPlays.length > 0) {
@@ -247,6 +253,12 @@ export function usePlayTable(
     const seat = play.toAct
     let cancelled = false
 
+    // Tävlingsfröet för DET HÄR beslutet (null i vanligt spel → Math.random).
+    const botSeed =
+      playSeed != null
+        ? botDecisionSeed(playSeed, playIndexOf(play.completedTricks.length, play.currentTrick.length))
+        : undefined
+
     // Spela det bot-hjärnan valde (med skydd om ställningen hunnit ändras).
     const apply = (choice: { card: Card; reason: string }) => {
       if (cancelled) return
@@ -270,7 +282,8 @@ export function usePlayTable(
     // Snabb tumregel (öppningsutspel / ett kort / över MC-fönstret), eller ingen
     // worker tillgänglig → räkna inline efter en kort paus.
     if (!worker || !usesMonteCarlo(play, seat)) {
-      const id = setTimeout(() => apply(botCardSmartReasoned(play, seat, calls)), ms('botDelay', speed))
+      const opts = botSeed !== undefined ? { rng: mulberry32(botSeed) } : undefined
+      const id = setTimeout(() => apply(botCardSmartReasoned(play, seat, calls, opts)), ms('botDelay', speed))
       return () => {
         cancelled = true
         clearTimeout(id)
@@ -301,7 +314,7 @@ export function usePlayTable(
       apply(botCardReasoned(play, seat))
     }, 15000)
     worker.addEventListener('message', onMessage)
-    worker.postMessage({ reqId, state: play, seat, calls })
+    worker.postMessage({ reqId, state: play, seat, calls, seed: botSeed })
 
     return () => {
       cancelled = true
@@ -310,7 +323,7 @@ export function usePlayTable(
       clearTimeout(floorId)
       setThinking(false)
     }
-  }, [contract, play, calls, claimed, pendingClaim, claiming, speed, sweep])
+  }, [contract, play, calls, claimed, pendingClaim, claiming, speed, sweep, playSeed])
 
   // Auto Claim: när ett nytt stick ska börja och spelförarsidan OMÖJLIGT kan
   // förlora fler stick (oavsett spelsätt) stängs given automatiskt – gäller både
