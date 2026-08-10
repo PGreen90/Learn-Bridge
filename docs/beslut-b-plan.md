@@ -169,7 +169,7 @@ logga-in, glömt/nytt lösenord, auth/callback, konto) + GDPR-sidor
 `0001` (profiles + RLS "läs egen" + trigger handle_new_user), `0002` (grant select
 till authenticated). **Smoke-test PASSERAT:** registrering via appen skapade
 profilrad via triggern — hela kedjan registrering→trigger→tabell→RLS bevisad.
-1706 tester gröna. **Kvar i etappen:** städa testkontot · Resend (SPF/DKIM på
+Testsviten grön (`npm test`). **Kvar i etappen:** städa testkontot · Resend (SPF/DKIM på
 rebidz.com) · kontohantering radera/exportera (radering kräver service_role i en
 serverfunktion → service-nyckeln in i Vercel redan här) · localStorage-import ·
 deploy + skarpt mejlprov. **Öppen fråga (fynd):** för mejllänkar som öppnas på
