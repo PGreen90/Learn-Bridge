@@ -41,9 +41,11 @@ export async function buildApi({ write = true } = {}) {
     platform: 'node',
     format: 'esm',
     target: 'node22',
-    // Riktiga npm-beroenden ska INTE buntas in (Vercel installerar dem i
-    // funktionsmiljön). Motorn har inga; supabase-js kommer i steg 2.
-    external: ['@supabase/supabase-js'],
+    // Serverfunktionerna använder MEDVETET inga npm-beroenden (databasen nås
+    // via Supabase REST med global fetch), så bunten blir helt självständig —
+    // inget att lämna externt. node:-inbyggda moduler (t.ex. node:crypto)
+    // hanterar esbuild som externa av sig själv på platform:node.
+    external: [],
     write,
     logLevel: 'silent',
   })

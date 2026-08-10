@@ -41,8 +41,10 @@ export function mulberry32(seed: number): () => number {
   }
 }
 
-/** Blandar och delar ut. Standard: äkta slump (Math.random). */
-export function dealRandom(rng: () => number = Math.random): Deal {
+/** Blandar leken och delar ut 13 kort till varje plats. Delad kärna för både
+ *  slumpgiven och den frö-baserade tävlingsgiven — så exakt samma utdelnings-
+ *  logik gäller överallt. */
+function shuffledHands(rng: () => number): Record<Seat, Hand> {
   const deck = fullDeck()
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1))
@@ -52,6 +54,12 @@ export function dealRandom(rng: () => number = Math.random): Deal {
   }
   const hands: Record<Seat, Hand> = { N: [], E: [], S: [], W: [] }
   deck.forEach((card, i) => hands[SEATS[i % 4]].push(card))
+  return hands
+}
+
+/** Blandar och delar ut. Standard: äkta slump (Math.random). */
+export function dealRandom(rng: () => number = Math.random): Deal {
+  const hands = shuffledHands(rng)
   const board = 1 + Math.floor(rng() * 16)
   const { dealer, vulnerability } = boardInfo(board)
   return {
@@ -61,4 +69,19 @@ export function dealRandom(rng: () => number = Math.random): Deal {
     vulnerability,
     board,
   }
+}
+
+/**
+ * Delar ut en giv DETERMINISTISKT ur ett heltalsfrö, för ett bestämt
+ * bricknummer. Till skillnad från dealRandom slumpas varken bricka eller id:
+ * brickan (och därmed given + zonen) är exakt `board`, och id:t är stabilt.
+ *
+ * Används av serverns tävlingsgiv-generering (Beslut B etapp 2): samma
+ * hemliga frö → exakt samma giv, både när dagens givar skapas och när ett
+ * inskickat resultat spelas om vid valideringen. Ingen Math.random inblandad.
+ */
+export function dealFromSeed(seed: number, board: number): Deal {
+  const hands = shuffledHands(mulberry32(seed))
+  const { dealer, vulnerability } = boardInfo(board)
+  return { id: `giv-${board}`, hands, dealer, vulnerability, board }
 }

@@ -219,10 +219,15 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   8/16/24 kan läggas till utan ombyggnad; separata serier vs nästlade avgörs då.
 
 **2a — givar + inskick:**
-- **Förarbete (fynd från etapp 0):** api-funktionerna som kör motorn måste
-  **buntas med esbuild** (motorns extensionless-importer resolvar inte i Node ESM
-  rått). Sätt upp bundling så `decideCall`/`rebuildPlay`/`botCardSmart`/`scoring`
-  kan köras server-side.
+- **Förarbete (fynd från etapp 0) — KLART & LIVE-VERIFIERAT 2026-08-10.** api-
+  funktioner som kör motorn buntas nu med **esbuild** (`scripts/build-api.mjs`):
+  källor i `api-src/*.ts` → självständiga `api/*.js` utan kvarvarande relativa
+  importer. `npm run build` kör buntningen före vite (så Vercel återskapar
+  filerna; de gitignoras). Bevis: `api-src/motorprov.ts` kör motorn (giv-
+  generering) och svarar **HTTP 200 live på `https://rebidz.com/api/motorprov`** —
+  Vercel plockar upp den genererade funktionen. Facit: `api-src/build-bundling.test.ts`.
+  motorprov är TILLFÄLLIG och ersätts av den riktiga giv-genereringen nedan.
+  Kvar att bunta in när de behövs: `decideCall`/`rebuildPlay`/`botCardSmart`/`scoring`.
 - Ett schemalagt serverjobb (Vercel-cron 00:05 Europe/Stockholm) genererar
   dagens 12 givar med hemligt serverfrö (HMAC av datum + givnummer — går inte
   att förberäkna) och lagrar händerna i databasen. Gratis "Dagens giv" med

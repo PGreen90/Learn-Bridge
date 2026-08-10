@@ -39,6 +39,14 @@ export function dailySeed(date: Date = new Date()): number {
   return y * 10000 + m * 100 + d
 }
 
+/** Kalenderdagen i Europe/Stockholm som ISO-sträng "ÅÅÅÅ-MM-DD". Serverns
+ *  tävlingsgiv-generering (Beslut B etapp 2) använder den som tävlingsdagens
+ *  nyckel och som del av det hemliga HMAC-fröet — oavsett var funktionen kör. */
+export function stockholmDateISO(date: Date = new Date()): string {
+  const { y, m, d } = stockholmYMD(date)
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+}
+
 /** Givens löpnummer: premiärdagen = #1, dagen efter = #2 … (Stockholmsdygn).
  *  Båda dagarna ankras på UTC-mitt-på-dagen (kl 12) så sommartidens 23- och
  *  25-timmarsdygn aldrig får differensen att hamna fel vid heltalsdivisionen. */
