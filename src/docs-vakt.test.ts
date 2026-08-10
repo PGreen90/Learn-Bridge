@@ -24,6 +24,7 @@ const LEVANDE = [
   'README.md',
   'docs/README.md',
   'docs/arbetsrutiner.md',
+  'docs/beslut-b-plan.md',
   'docs/bevaka.md',
   'docs/bot-hjarna.md',
   'docs/budsystem-revision.md',

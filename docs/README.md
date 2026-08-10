@@ -26,7 +26,8 @@
 | **utspel-diagnos.md** | ðŸŸ¢ | Komplett diagnos av bottarnas **utspel** (trick 1 + mitt-i-given): vilka regler som finns, att utspelet ignorerar budgivningen, hÃ¥len mot doktrin (Aâ€“G) och den beslutade byggordningen. Ã–ppna den nÃ¤r utspelsspÃ¥ret Ã¥terupptas. |
 | **utspel-teori.md** | ðŸ“˜ | Den kÃ¤llfÃ¶rankrade bridgeteorin bakom utspelet (Pavlicek/Walker/Cohen/bridgebum): holdingsâ†’utspel-tabeller (fÃ¤rg + NT), tenass-principen, aktiv/passiv, budgivningens roll, Lightner, slam + konventionsvalen. VAD som Ã¤r rÃ¤tt bridge â€” bygg utspelskoden mot den hÃ¤r. |
 | **arbetsrutiner.md** | ðŸŸ¢ | ðŸŸ¢-checklistan vid sessionsstart och ðŸ”´-checklistan vid sessionsslut. FÃ¶ljs varje gÃ¥ng. |
-| **framtid-multiplayer-plattform.md** | ðŸ“˜ | Beslut A (klart: Vercel + domÃ¤n + PWA) vs **Beslut B** (konton/multiplayer/tÃ¤vlingar) â€” parkerat stort spÃ¥r, startas bara pÃ¥ uttryckligt Ã¤garbeslut. |
+| **beslut-b-plan.md** | 🟢 | **Masterplanen för Beslut B (ägarbeslut 2026-08-08):** konton → daglig 12-givarstävling → realtidsbord. Etapperna 0–4, besluten som är tagna (Supabase, lösenord, ordningen), beslutsgrindarna som återstår, GDPR/säkerhetsdetaljerna. Öppna den när Beslut B-arbetet fortsätter. |
+| **framtid-multiplayer-plattform.md** | ðŸ“˜ | Beslut A (klart: Vercel + domÃ¤n + PWA) vs **Beslut B** (konton/multiplayer/tÃ¤vlingar). Teknikunderlaget bakom Beslut B; sjÃ¤lva planen bor nu i `beslut-b-plan.md`. |
 | **bot-hjarna.md** | ðŸ“˜ | Roadmap fÃ¶r bottarnas *spelstyrka* (inferens, Monte-Carlo). Spelmotor-spÃ¥ret, inte budgivningen. |
 
 ## Referens (slÃ¥ upp, lÃ¤s inte rakt igenom)

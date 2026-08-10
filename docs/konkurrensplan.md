@@ -6,6 +6,12 @@
 > **Planen är skriven — men inget backend-bygge startar förrän ägaren
 > uttryckligen säger "kör"** (samma regel som alltid gällt Beslut B, se
 > `docs/framtid-multiplayer-plattform.md`).
+>
+> **Uppdatering 2026-08-08 (ägarbeslut): Beslut B-planeringen är GJORD.**
+> Masterplanen (etapper 0–4, beslutsgrindar, GDPR/säkerhet) bor i
+> **`docs/beslut-b-plan.md`** och styr Fas 2/3/6 härifrån. Beslut: Supabase
+> bekräftad, klassiska lösenord, EN daglig 12-givarstävling först (inte fyra
+> längder), tävlingarna före realtidsborden.
 
 ## Ägarens vägval (2026-07-29)
 
@@ -18,8 +24,9 @@
    konkurrenskraften, särskilt mot Synrey.
 3. **Två språk: svenska först, engelska senare** (Fas 5). Ingen konkurrent
    finns på svenska — det är en lucka, inte en begränsning.
-4. **Beslut B startas inte än.** Denna plan är planering; byggstarten är ett
-   eget, senare ägarbeslut.
+4. ~~**Beslut B startas inte än.**~~ **2026-08-08: ägaren sade "kör" på
+   Beslut B-planeringen** — masterplanen bor i `docs/beslut-b-plan.md`;
+   byggstart per etapp kräver fortfarande ägarens "kör" vid varje grind.
 
 ## Hälsobedömningen (2026-07-29)
 
@@ -225,11 +232,13 @@ första intrycket görs bara en gång.
 Detalj/väntande material: `docs/senare.md` (faceliftposten).
 
 ### Fas 2 — Konton + sparade framsteg (Beslut B steg 2–3)
-Första backend-bygget: Supabase (databasvalet bekräftas med ägaren vid start),
-registrering/inloggning inkl. Apple Sign In, och framsteg/resultat sparade per
-användare i stället för bara i webbläsaren. Här uppstår GDPR-ansvaret — görs
-rätt från början. Tekniken och principerna (utbytbar backend, fuskkontroll på
-servern): `docs/framtid-multiplayer-plattform.md`.
+Första backend-bygget: Supabase (**bekräftad av ägaren 2026-08-08**),
+registrering/inloggning med klassiska lösenord (ägarval 2026-08-08; Apple
+Sign In först i Fas 4), och framsteg/resultat sparade per användare i stället
+för bara i webbläsaren. Här uppstår GDPR-ansvaret — görs rätt från början.
+**Detaljplanen = etapp 1 i `docs/beslut-b-plan.md`**; tekniken och principerna
+(utbytbar backend, fuskkontroll på servern):
+`docs/framtid-multiplayer-plattform.md`.
 
 ### Fas 3 — "Dagens givar" (Funbridge-modellen — konkurrenssteget)
 > **Förtitt LIVE-byggd 2026-08-02 (utan backend):** "Dagens giv" —
@@ -245,6 +254,9 @@ Du spelar dem mot bottarna, lämnar in resultatet och jämförs med alla andra
 Kräver Fas 2 (konton) plus: given serveras från servern, facit och
 rondgenomgång låses upp först efter inlämning, resultatet valideras på
 servern. Detta är den första funktionen som gör rebidz till en *tävlings*-app.
+**Format beslutat 2026-08-08: EN daglig tävling på 12 givar** till att börja
+med (fler längder är en beslutsgrind senare). **Detaljplanen = etapp 2 i
+`docs/beslut-b-plan.md`.**
 
 ### Fas 4 — Mobilappar (App Store + Google Play)
 Capacitor wrappar den befintliga webbappen till riktiga appar. Hårda avgifter:

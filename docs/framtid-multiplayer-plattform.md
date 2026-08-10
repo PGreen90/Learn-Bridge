@@ -16,6 +16,13 @@
 > två språk (svenska först, engelska senare) och faceliften väckt. Detta
 > dokument förblir teknik-underlaget (Supabase-valet, utbytbar backend,
 > GDPR, Capacitor); fortfarande ingen kod förrän ägaren säger "kör".
+>
+> **Uppdatering 2026-08-08 (ägarbeslut): PLANEN ÄR SATT.** Ägaren sade "kör" på
+> planeringen av Beslut B. Masterplanen med etapper, beslutsgrindar och
+> GDPR/säkerhetsdetaljer bor i **`docs/beslut-b-plan.md`** — det är den som
+> styr bygget. Beslut tagna: **Supabase BEKRÄFTAD** (den öppna frågan nedan är
+> stängd), klassiska lösenord (ägarval), en daglig 12-givarstävling först,
+> tävlingarna före realtidsborden. Det här dokumentet är kvar som bakgrund.
 
 ## Vad ägaren vill (visionen, ägarens egna ord 2026-07-03/04)
 
@@ -89,8 +96,9 @@ förutsägbar kostnad för ett donationsfinansierat projekt. Firebases enda verk
 ägaren. **Firebase är inte fel** — bara ett annat dugligt val. Om ägaren ändrar
 sig till Firebase: helt okej, samma helhetsplan gäller.
 
-> **Öppen fråga att bekräfta med ägaren innan bygge:** Supabase eller Firebase?
-> (Preliminärt Supabase. Ägaren fick välja men ville spara beslutet till senare.)
+> ~~**Öppen fråga att bekräfta med ägaren innan bygge:** Supabase eller
+> Firebase?~~ **STÄNGD 2026-08-08: Supabase bekräftad av ägaren** (förbehållet
+> "funkar den världen över" besvarat: ja — EU-region, nås globalt).
 
 ## Den viktigaste principen: håll backend UTBYTBAR
 
