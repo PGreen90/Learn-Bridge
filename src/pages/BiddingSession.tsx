@@ -10,7 +10,7 @@ import { SuitText } from '../components/SuitText'
 import { getExercises, getTheme, resolveAuction, type ResolvedCall } from '../lib/bidding'
 import { hcp } from '../lib/engine/hand'
 import { startingPoints } from '../lib/engine/evaluation'
-import { saveValue } from '../lib/storage'
+import { saveThemeScore } from '../lib/backend'
 import type { Bid } from '../types/bridge'
 
 export function BiddingSession() {
@@ -104,7 +104,7 @@ function Session({ themeId }: { themeId: string }) {
       return
     }
     // Hela temat klart – spara resultatet.
-    saveValue(`theme:${themeId}`, score)
+    saveThemeScore(themeId, score)
     setFinished(true)
   }
 

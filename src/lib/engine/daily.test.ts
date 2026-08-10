@@ -11,11 +11,17 @@ import {
 
 // Dagens giv (faceliften/konkurrensspåret 2026-08-02): samma datum ska ALLTID ge
 // samma giv — det är hela poängen (alla spelar samma giv och kan jämföra sig).
+//
+// TIDSZON (Beslut B etapp 0, 2026-08-08): kalenderdagen räknas i Europe/Stockholm,
+// inte i körmiljöns lokala tid. CI kör på ubuntu i UTC, så testerna använder
+// entydiga UTC-instanter (…Z) och resonerar i Stockholmstid: sommartid = UTC+2,
+// alltså är t.ex. 2026-08-02T10:00Z = 12:00 den 2 aug i Stockholm.
 
 describe('dagens giv', () => {
-  it('samma datum ger exakt samma giv', () => {
-    const a = dailyDeal(new Date(2026, 7, 2, 9, 0))
-    const b = dailyDeal(new Date(2026, 7, 2, 23, 59)) // senare på samma dag
+  it('samma Stockholmsdygn ger exakt samma giv', () => {
+    // Båda instanterna ligger inom 2026-08-02 i Stockholm (10:00 resp 22:00).
+    const a = dailyDeal(new Date('2026-08-02T08:00:00Z'))
+    const b = dailyDeal(new Date('2026-08-02T20:00:00Z'))
     expect(a.hands).toEqual(b.hands)
     expect(a.board).toBe(b.board)
     expect(a.dealer).toBe(b.dealer)
@@ -24,24 +30,34 @@ describe('dagens giv', () => {
   })
 
   it('olika dagar ger olika givar', () => {
-    const a = dailyDeal(new Date(2026, 7, 2))
-    const b = dailyDeal(new Date(2026, 7, 3))
+    const a = dailyDeal(new Date('2026-08-02T10:00:00Z'))
+    const b = dailyDeal(new Date('2026-08-03T10:00:00Z'))
     expect(a.hands).not.toEqual(b.hands)
   })
 
-  it('fröet är datumet som åttasiffrigt tal (lokal tid)', () => {
-    expect(dailySeed(new Date(2026, 7, 2))).toBe(20260802)
-    expect(dailySeed(new Date(2026, 0, 15))).toBe(20260115)
+  it('fröet är datumet som åttasiffrigt tal (Stockholmstid)', () => {
+    expect(dailySeed(new Date('2026-08-02T10:00:00Z'))).toBe(20260802)
+    expect(dailySeed(new Date('2026-01-15T10:00:00Z'))).toBe(20260115)
   })
 
-  it('givnumret räknas från premiärdagen 2026-08-02 = #1', () => {
-    expect(dailyNumber(new Date(2026, 7, 2))).toBe(1)
-    expect(dailyNumber(new Date(2026, 7, 3, 8, 30))).toBe(2)
-    expect(dailyNumber(new Date(2026, 8, 1))).toBe(31)
+  it('givnumret räknas från premiärdagen 2026-08-02 = #1 (Stockholmsdygn)', () => {
+    expect(dailyNumber(new Date('2026-08-02T10:00:00Z'))).toBe(1)
+    expect(dailyNumber(new Date('2026-08-03T06:30:00Z'))).toBe(2)
+    expect(dailyNumber(new Date('2026-09-01T10:00:00Z'))).toBe(31)
+  })
+
+  // KÄRNAN i tidszonsbytet: en instant vars UTC-dygn och Stockholmsdygn skiljer
+  // sig ska följa STOCKHOLM. 2026-08-02T22:30Z = 3 aug 00:30 i Stockholm (UTC+2)
+  // → giv #2, inte #1. På en UTC-runner (där lokal = UTC) hade den gamla
+  // lokaltidslogiken svarat #1 och klient/server hamnat på olika giv.
+  it('instant nära midnatt följer Stockholmsdygnet, inte UTC-dygnet', () => {
+    const nearMidnight = new Date('2026-08-02T22:30:00Z') // 3 aug 00:30 i Stockholm
+    expect(dailySeed(nearMidnight)).toBe(20260803)
+    expect(dailyNumber(nearMidnight)).toBe(2)
   })
 
   it('en giv har 13 kort per hand', () => {
-    const deal = dailyDeal(new Date(2026, 7, 2))
+    const deal = dailyDeal(new Date('2026-08-02T10:00:00Z'))
     for (const seat of ['N', 'E', 'S', 'W'] as const) {
       expect(deal.hands[seat]).toHaveLength(13)
     }
@@ -51,13 +67,17 @@ describe('dagens giv', () => {
   // efterhand via sitt löpnummer — samma giv som alla fick den dagen.
   it('arkivet: löpnumret pekar ut exakt den dagens giv', () => {
     // #1 = premiärdagen 2026-08-02; #31 = 2026-09-01 (månadsskiftet räknas rätt).
-    expect(dailyDateFromNumber(1)).toEqual(new Date(2026, 7, 2))
-    expect(dailyDateFromNumber(31)).toEqual(new Date(2026, 8, 1))
-    // Numret och datumet är varandras motsatser.
+    // dailyDateFromNumber ger en instant INOM rätt Stockholmsdygn (ej midnatt
+    // lokal), så vi verifierar via fröet/numret i stället för exakt Date-likhet.
+    expect(dailySeed(dailyDateFromNumber(1))).toBe(20260802)
+    expect(dailySeed(dailyDateFromNumber(31))).toBe(20260901)
+    // Numret och datumet är varandras motsatser (round-trip, även långt fram).
+    expect(dailyNumber(dailyDateFromNumber(1))).toBe(1)
+    expect(dailyNumber(dailyDateFromNumber(31))).toBe(31)
     expect(dailyNumber(dailyDateFromNumber(200))).toBe(200)
     // Given ur numret = given ur datumet, med samma id.
     const viaNumber = dailyDealByNumber(2)
-    const viaDate = dailyDeal(new Date(2026, 7, 3))
+    const viaDate = dailyDeal(new Date('2026-08-03T10:00:00Z'))
     expect(viaNumber.hands).toEqual(viaDate.hands)
     expect(viaNumber.id).toBe('dagens-2')
   })

@@ -9,7 +9,7 @@ import { PageHeader } from '../components/PageHeader'
 import { BidChip } from '../components/BidChip'
 import { SEAT_LABEL } from '../lib/bidding'
 import { validHistorik, type SpelResultat } from '../lib/engine/spel-historik'
-import { loadValue } from '../lib/storage'
+import { loadSpelHistorik } from '../lib/backend'
 
 /** "3 aug 14:02" — kort nog för en rad, tydligt nog för att minnas kvällen. */
 function whenLabel(when: number): string {
@@ -48,7 +48,7 @@ function ResultRow({ r }: { r: SpelResultat }) {
 }
 
 export function SpelHistorik() {
-  const stored = loadValue<unknown>('spel-historik', [])
+  const stored = loadSpelHistorik()
   const list = validHistorik(stored) ? stored : []
 
   return (

@@ -27,7 +27,7 @@ import {
 } from '../../lib/engine/claim'
 import { rebuildPlay } from '../../lib/engine/resume'
 import { canUndo as canUndoState, undoLastHumanCard } from '../../lib/engine/play-undo'
-import { loadValue, saveValue } from '../../lib/storage'
+import { loadAutoClaim, loadPlaySpeed, saveAutoClaim, savePlaySpeed } from '../../lib/backend'
 import { scoreLine } from '../../lib/engine/scoring'
 import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib/engine/play-bot'
@@ -97,10 +97,10 @@ export function usePlayTable(
   // Resultatövergången (etapp 5): när given är klar tonar bordet ut i
   // ms('resultOutro') innan resultatvyn tar över — inget hårt klipp.
   const [showResult, setShowResult] = useState(false)
-  const [autoClaim, setAutoClaim] = useState<boolean>(() => loadValue('autoClaim', true))
+  const [autoClaim, setAutoClaim] = useState<boolean>(() => loadAutoClaim())
   // Tempot (ägarbeslut 2026-07-28): Lugn/Normal/Snabb i ⋮-menyn skalar alla
   // botpauser och animationslängder (via tempo.ts + --motion-scale). Sparas.
-  const [speed, setSpeedState] = useState<PlaySpeed>(() => loadValue('playSpeed', 'normal'))
+  const [speed, setSpeedState] = useState<PlaySpeed>(() => loadPlaySpeed())
   // Ljuden (etapp 4, "känsla i kortspelet"): diskreta syntetiserade kortljud,
   // standard PÅ, toggle i ⋮-menyn. Sparas under learnbridge:sound.
   const [sound, setSoundState] = useState<boolean>(() => isSoundEnabled())
@@ -397,12 +397,12 @@ export function usePlayTable(
   function toggleAutoClaim() {
     const next = !autoClaim
     setAutoClaim(next)
-    saveValue('autoClaim', next)
+    saveAutoClaim(next)
   }
 
   function setSpeed(next: PlaySpeed) {
     setSpeedState(next)
-    saveValue('playSpeed', next)
+    savePlaySpeed(next)
   }
 
   function toggleSound() {

@@ -48,6 +48,19 @@ export default defineConfig({
         // typsnitten, så guldserifen föll tillbaka på systemtypsnitt offline.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm,woff2}'],
         cleanupOutdatedCaches: true,
+        // Beslut B etapp 0 — PWA-vakten: service workern får ALDRIG röra
+        // /api/*. Utan detta skulle SPA:ns navigeringsfallback servera
+        // index.html för backend-adresser, och en cache kunde servera ett
+        // gammalt svar. Backend-anropen ska alltid gå till nätet. Låst av
+        // src/deploy-config.test.ts så en framtida workbox-refaktor inte tyst
+        // öppnar den igen.
+        navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: /\/api\//,
+            handler: 'NetworkOnly',
+          },
+        ],
       },
     }),
   ],

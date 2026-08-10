@@ -8,12 +8,20 @@ import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import type { Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
-import { dailyNumber, dailyStreak, shareText, type DailyLog } from '../lib/engine/daily'
+import { dailyNumber, dailyStreak, shareText } from '../lib/engine/daily'
 import { contractFromCalls } from '../lib/engine/auction-live'
 import { resultHeadline } from '../lib/engine/scoring'
 import { playsFrom, validSavedGame, type SavedGame } from '../lib/engine/resume'
 import { addResult, validHistorik } from '../lib/engine/spel-historik'
-import { loadValue, saveValue } from '../lib/storage'
+import {
+  loadDailyLog,
+  loadSavedGame,
+  loadSpelHistorik,
+  saveDailyLog,
+  saveDailyPlayed,
+  saveSavedGame,
+  saveSpelHistorik,
+} from '../lib/backend'
 import { PlayingCard } from '../components/PlayingCard'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { SuitText } from '../components/SuitText'
@@ -75,7 +83,7 @@ function initialGame(daily: boolean, nr: number | null, sitt: Seat | null): { ga
   // Dev: en roterad giv (?sitt=) startar ALLTID färskt ur fröet — den sparade
   // pågående given är oroterad och hör inte hit.
   if (!daily && sitt && urlSeed !== null) return { game: gameFromSeed(urlSeed, 0, sitt), plays: [] }
-  const saved = loadValue<unknown>('pagaende-giv', null)
+  const saved = loadSavedGame()
   if (
     validSavedGame(saved) &&
     saved.daily === daily &&
@@ -140,7 +148,7 @@ export function Play({ daily = false }: { daily?: boolean }) {
   // Budfasen sparas löpande (spelfasen sparas i PlayTable som har spelläget).
   useEffect(() => {
     if (game.phase !== 'bidding') return
-    saveValue('pagaende-giv', {
+    saveSavedGame({
       v: 1,
       daily,
       number: dailyNr,
@@ -324,10 +332,10 @@ export function PlayTable({
   // "ingen sparning" av validSavedGame.
   useEffect(() => {
     if (done) {
-      saveValue('pagaende-giv', null)
+      saveSavedGame(null)
       return
     }
-    saveValue('pagaende-giv', {
+    saveSavedGame({
       v: 1,
       daily,
       number: daily ? (dailyNr ?? dailyNumber()) : null,
@@ -400,9 +408,8 @@ export function PlayTable({
   useEffect(() => {
     if (daily || !done || seed === null || historikSaved.current) return
     historikSaved.current = true
-    const stored = loadValue<unknown>('spel-historik', [])
-    saveValue(
-      'spel-historik',
+    const stored = loadSpelHistorik()
+    saveSpelHistorik(
       addResult(validHistorik(stored) ? stored : [], {
         seed,
         when: Date.now(),
@@ -424,13 +431,13 @@ export function PlayTable({
     // Ett efterhandsspel ur kalenderarkivet bokförs med `late` — det syns i
     // kalendern men räknas aldrig in i streaken (ärlighetsregeln, daily.ts).
     const late = n !== dailyNumber()
-    const log = loadValue<DailyLog>('daily-log', {})
+    const log = loadDailyLog()
     // Första resultatet för dagen står sig — ett omspel skriver inte över det.
     if (log[n] === undefined) {
-      saveValue('daily-log', { ...log, [n]: late ? { myTricks, late: true } : { myTricks } })
+      saveDailyLog({ ...log, [n]: late ? { myTricks, late: true } : { myTricks } })
     }
-    if (!late) saveValue('daily-played', n)
-    setStreak(late ? 0 : dailyStreak(loadValue<DailyLog>('daily-log', {}), n))
+    if (!late) saveDailyPlayed(n)
+    setStreak(late ? 0 : dailyStreak(loadDailyLog(), n))
   }, [daily, dailyNr, done, myTricks])
 
   // Vem ligger öppen var? Nord-sidans öppna hand ritas UPPTILL som färgkolumner:

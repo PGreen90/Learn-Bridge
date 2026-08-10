@@ -3,13 +3,13 @@
 // (se @custom-variant i index.css). index.html sätter klassen redan före
 // laddning så sidan aldrig blinkar vit.
 
-import { loadValue, saveValue } from './storage'
+import { loadTheme, saveTheme } from './backend'
 
 export type Theme = 'light' | 'dark'
 
 /** Läget just nu: sparat val om det finns, annars systemets. */
 export function currentTheme(): Theme {
-  const saved = loadValue<Theme | null>('theme', null)
+  const saved = loadTheme()
   if (saved === 'light' || saved === 'dark') return saved
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
@@ -27,13 +27,13 @@ export type ThemeChoice = Theme | 'system'
 
 /** Det SPARADE valet (inte det visade läget): 'system' om inget sparats. */
 export function themeChoice(): ThemeChoice {
-  const saved = loadValue<Theme | null>('theme', null)
+  const saved = loadTheme()
   return saved === 'light' || saved === 'dark' ? saved : 'system'
 }
 
 /** Sätt valet från inställningssidan och applicera direkt. */
 export function setThemeChoice(choice: ThemeChoice): void {
-  saveValue('theme', choice === 'system' ? null : choice)
+  saveTheme(choice === 'system' ? null : choice)
   applyTheme(currentTheme())
 }
 
@@ -51,7 +51,7 @@ export function toggleTheme(): Theme {
   window.clearTimeout(fadeTimer)
   fadeTimer = window.setTimeout(() => root.classList.remove('theme-fade'), 1100)
 
-  saveValue('theme', next)
+  saveTheme(next)
   applyTheme(next)
   return next
 }

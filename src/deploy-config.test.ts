@@ -35,4 +35,14 @@ describe('deploy-konfiguration', () => {
   test('woff2 ingår i service workerns precache-mönster', () => {
     expect(viteConfigSource).toMatch(/globPatterns.*woff2/)
   })
+
+  // Beslut B etapp 0 — PWA-vakten: service workern får inte röra /api/*.
+  // Backend-anropen (kommer i etapp 1+) måste ALLTID nå nätet — aldrig SPA:ns
+  // navigeringsfallback (som annars serverar index.html) och aldrig en cache.
+  // Låser båda markörerna så en framtida workbox-refaktor inte tyst öppnar
+  // vakten igen; körs i deploygrinden före live.
+  test('service workern lämnar /api/* orört (denylist + NetworkOnly)', () => {
+    expect(viteConfigSource).toContain('navigateFallbackDenylist')
+    expect(viteConfigSource).toContain("handler: 'NetworkOnly'")
+  })
 })

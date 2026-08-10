@@ -875,6 +875,9 @@ export interface SmartOpts {
   maxCardsForMC?: number
   /** Läs botarnas markeringar in i hand-modellen (markeringar Steg 5). Default på. */
   decodeSignals?: boolean
+  /** Slumpkälla för Monte-Carlo-samplingen. Default = Math.random (oförändrat
+   *  beteende i appen). Seedas (t.ex. mulberry32) för att återskapa exakt kortval. */
+  rng?: () => number
 }
 
 /**
@@ -942,6 +945,7 @@ export function botCardSmartReasoned(
   const choice = chooseCardMonteCarlo(state, seat, model, {
     samples: opts.samples ?? budget.samples,
     maxNodes: opts.maxNodes ?? budget.maxNodes,
+    rng: opts.rng,
   })
   if (!choice) return botCardReasoned(state, seat)
   // Avblockning gäller även bot-hjärnans val: på lead får ett stickekvivalent

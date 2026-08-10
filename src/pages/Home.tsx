@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
-import { dailyNumber, dailyStreak, type DailyLog } from '../lib/engine/daily'
-import { loadValue } from '../lib/storage'
+import { dailyNumber, dailyStreak } from '../lib/engine/daily'
+import { loadDailyLog, loadDailyPlayed } from '../lib/backend'
 
 // Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
 // oss för mycket"): varumärkesblocket överst (frameless guldspader + tvåfärgat
@@ -110,8 +110,8 @@ function DailyCard() {
   const n = dailyNumber()
   // Loggen (Etapp B) är sanningen; gamla `daily-played` läses som reserv för
   // den som spelade före loggen fanns.
-  const log = loadValue<DailyLog>('daily-log', {})
-  const played = log[n] !== undefined || loadValue<number | null>('daily-played', null) === n
+  const log = loadDailyLog()
+  const played = log[n] !== undefined || loadDailyPlayed() === n
   const streak = dailyStreak(log, n)
   return (
     <Link

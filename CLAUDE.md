@@ -19,10 +19,13 @@ Beslut tagna: Supabase BEKRÄFTAD · klassiska lösenord (ägarval) · EN
 12-givarstävling först · tävlingarna före borden. Stående regel: vid varje
 etappslut stannar Claude, visar läget och tar grindbesluten med ägaren.
 
-**NU = etapp 0 (ingen backend, hostingen förblir statisk):** slumpinjektion i
-boten (`monte-carlo.ts`/`contract-target.ts`), Europe/Stockholm-tidszon i
-`daily.ts`, backend-lagret `src/lib/backend/`, PWA-vakt för `/api/*`,
-`api/`-skelett. Etapp 1 (Supabase-kontot skapas) kräver eget "kör" — grind 0→1.
+**ETAPP 0 KLAR (2026-08-09, ingen backend — beteendet oförändrat, +10 facit):**
+slumpinjektion (`rng` genom Monte-Carlo i `monte-carlo.ts`/`play-bot.ts`, default
+Math.random), Europe/Stockholm-tidszon i `daily.ts` (DST-säker), backend-sömlagret
+`src/lib/backend/` (11 sidor omkopplade, synkront nu/async i etapp 1), PWA-vakt för
+`/api/*` (låst i `deploy-config.test.ts`), `api/health.ts` (motorn importeras
+server-side, `tsconfig` täcker `api/`). **NÄSTA = grind 0→1:** Supabase-projektet
+skapas först på ägarens uttryckliga "kör" (etapp 1 konton, `docs/beslut-b-plan.md`).
 
 **FAS 1 FACELIFTEN — YTA 1–4 KLARA (2026-07-31→08-02):** startsidan,
 Synrey-bordet telefon-först, budlådan, de inre sidorna — och **DAGENS GIV**

@@ -16,7 +16,7 @@ import { interpretCall } from '../../lib/engine/auction-interpret'
 import { dealRandom, mulberry32 } from '../../lib/engine/deal'
 import { dailyDeal, dailyDealByNumber } from '../../lib/engine/daily'
 import { matchesTarget, type ContractTarget } from '../../lib/engine/contract-target'
-import { loadValue, saveValue } from '../../lib/storage'
+import { loadBidHelp, loadPlayTarget, savePlayTarget, saveBidHelp } from '../../lib/backend'
 import type { Contract } from '../../lib/engine/play'
 
 // En giv går genom två faser: först budgivningen (du klickar Syds bud i budlådan,
@@ -102,9 +102,7 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number) 
   // dagens vanliga slumpgiv. När ett mål är valt letar vi fram en giv vars
   // simulerade auktion landar där (`matchesTarget`), i småbatchar så sidan
   // aldrig fryser vid ett sällsynt mål.
-  const [target, setTarget] = useState<ContractTarget>(() =>
-    loadValue<ContractTarget>('play-target', 'random'),
-  )
+  const [target, setTarget] = useState<ContractTarget>(() => loadPlayTarget())
   const [picking, setPicking] = useState(false)
   const [search, setSearch] = useState<SearchState | null>(null)
   const searchCancel = useRef(false)
@@ -112,11 +110,11 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number) 
   // vanligt; Av = inga hintar i budlådan och minimal förklaring i auktionsvyn.
   // Ligger här (inte i usePlayTable) så både budfasen, spelfasen och
   // omspelningen läser SAMMA val. Sparas mellan givar, som play-target.
-  const [bidHelp, setBidHelp] = useState<boolean>(() => loadValue('bidHelp', true))
+  const [bidHelp, setBidHelp] = useState<boolean>(() => loadBidHelp())
 
   function toggleBidHelp() {
     setBidHelp((v) => {
-      saveValue('bidHelp', !v)
+      saveBidHelp(!v)
       return !v
     })
   }
@@ -215,7 +213,7 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number) 
 
   function pickTarget(t: ContractTarget) {
     setTarget(t)
-    saveValue('play-target', t)
+    savePlayTarget(t)
     setPicking(false)
     startNewGame(t)
   }

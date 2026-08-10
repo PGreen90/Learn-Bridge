@@ -12,7 +12,7 @@
 // är billig + idempotent. Allt no-op:ar tyst där Web Audio saknas (jsdom) —
 // ljudet får ALDRIG kunna krascha spelet.
 
-import { loadValue, saveValue } from './storage'
+import { loadSound, saveSound } from './backend'
 
 export type SoundKind = 'card' | 'sweep' | 'deal'
 
@@ -37,11 +37,11 @@ export function armSound(): void {
 
 /** Av/på-valet, sparat under learnbridge:sound (standard PÅ). */
 export function isSoundEnabled(): boolean {
-  return loadValue('sound', true)
+  return loadSound()
 }
 
 export function setSoundEnabled(on: boolean): void {
-  saveValue('sound', on)
+  saveSound(on)
 }
 
 /** En buffert med vitt brus — råvaran för knäppen och sveppet. */

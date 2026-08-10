@@ -50,11 +50,11 @@ function unseenPool(state: PlayState, visible: Seat[]): Card[] {
   return fullDeck().filter((c) => !seen.has(key(c)))
 }
 
-/** Fisher–Yates på en kopia (rör inte indata). */
-function shuffled<T>(arr: T[]): T[] {
+/** Fisher–Yates på en kopia (rör inte indata). `rng` default = äkta slump. */
+function shuffled<T>(arr: T[], rng: () => number = Math.random): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
+    const j = Math.floor(rng() * (i + 1))
     ;[a[i], a[j]] = [a[j], a[i]]
   }
   return a
@@ -94,6 +94,7 @@ export function sampleLayouts(
   model: HandModel,
   n: number,
   maxTriesPerSample = 400,
+  rng: () => number = Math.random,
 ): Record<Seat, Hand>[] {
   const visible = visibleSeats(state, seat)
   const hidden = SEATS.filter((s) => !visible.includes(s))
@@ -128,7 +129,7 @@ export function sampleLayouts(
   for (let s = 0; s < n; s++) {
     let found: Record<Seat, Hand> | null = null
     for (let t = 0; t < maxTriesPerSample; t++) {
-      const deck = shuffled(free)
+      const deck = shuffled(free, rng)
       const hand1 = [...forced1, ...deck.slice(0, rem1)]
       const hand2 = [...forced2, ...deck.slice(rem1)]
       if (satisfies(model[h1], hand1, played[h1]) && satisfies(model[h2], hand2, played[h2])) {
@@ -169,14 +170,15 @@ export function chooseCardMonteCarlo(
   state: PlayState,
   seat: Seat,
   model: HandModel,
-  opts: { samples?: number; maxNodes?: number } = {},
+  opts: { samples?: number; maxNodes?: number; rng?: () => number } = {},
 ): MonteCarloChoice | null {
   const samplesN = opts.samples ?? 20
   const maxNodes = opts.maxNodes ?? 50_000
+  const rng = opts.rng ?? Math.random
   const legal = legalCards(state, seat)
   if (legal.length === 0) return null
 
-  const layouts = sampleLayouts(state, seat, model, samplesN)
+  const layouts = sampleLayouts(state, seat, model, samplesN, undefined, rng)
   if (layouts.length === 0) return null
 
   const declSide = side(state.contract.declarer)

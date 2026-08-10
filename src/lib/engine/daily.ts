@@ -7,19 +7,46 @@
 import type { Deal } from '../../types/bridge'
 import { dealRandom, mulberry32 } from './deal'
 
-/** Premiärdagen — Dagens giv #1. Lokal tid (spelarens "i dag"). */
-const EPOCH = new Date(2026, 7, 2)
+/** Premiärdagen — Dagens giv #1 = 2026-08-02 i Europe/Stockholm. */
+const EPOCH_Y = 2026
+const EPOCH_M = 8 // augusti (1-baserad, som stockholmYMD ger)
+const EPOCH_D = 2
 
-/** Fröet = datumet som åttasiffrigt tal (20260802), i spelarens lokala tid.
- *  Samma dag → samma frö → samma giv, precis som revisorns reproducerbara frön. */
-export function dailySeed(date: Date = new Date()): number {
-  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
+/**
+ * Kalenderdagen (år/månad/dag) i Europe/Stockholm, oavsett var koden kör.
+ *
+ * Varför: fröet och givnumret MÅSTE vara samma för alla spelare (och en
+ * framtida server) samma dygn. Räknade vi i körmiljöns lokala tid skulle en
+ * server i UTC och en spelare i Sverige kunna hamna på olika giv runt midnatt.
+ * `Intl.DateTimeFormat` med `timeZone: 'Europe/Stockholm'` ger rätt kalenderdag
+ * i Stockholm för vilken instant som helst, med sommartid inräknad.
+ */
+function stockholmYMD(date: Date): { y: number; m: number; d: number } {
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Stockholm',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const get = (type: string) => Number(parts.find((p) => p.type === type)!.value)
+  return { y: get('year'), m: get('month'), d: get('day') }
 }
 
-/** Givens löpnummer: premiärdagen = #1, dagen efter = #2 … (lokala dygn). */
+/** Fröet = datumet som åttasiffrigt tal (20260802), i Europe/Stockholm.
+ *  Samma dag → samma frö → samma giv, precis som revisorns reproducerbara frön. */
+export function dailySeed(date: Date = new Date()): number {
+  const { y, m, d } = stockholmYMD(date)
+  return y * 10000 + m * 100 + d
+}
+
+/** Givens löpnummer: premiärdagen = #1, dagen efter = #2 … (Stockholmsdygn).
+ *  Båda dagarna ankras på UTC-mitt-på-dagen (kl 12) så sommartidens 23- och
+ *  25-timmarsdygn aldrig får differensen att hamna fel vid heltalsdivisionen. */
 export function dailyNumber(date: Date = new Date()): number {
-  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  return Math.round((day.getTime() - EPOCH.getTime()) / 86_400_000) + 1
+  const { y, m, d } = stockholmYMD(date)
+  const dayAnchor = Date.UTC(y, m - 1, d, 12)
+  const epochAnchor = Date.UTC(EPOCH_Y, EPOCH_M - 1, EPOCH_D, 12)
+  return Math.round((dayAnchor - epochAnchor) / 86_400_000) + 1
 }
 
 /** Dagens giv — deterministisk ur datumet, med stabilt id ("dagens-1"). */
@@ -29,9 +56,12 @@ export function dailyDeal(date: Date = new Date()): Deal {
 }
 
 /** Datumet för giv #n — dailyNumbers motsats (kalenderarkivet 2026-08-03).
- *  Date-konstruktorn rullar själv över månads-/årsskiften. */
+ *  Ankras på premiärdagens UTC-mitt-på-dagen + (n−1) dygn: instanten hamnar
+ *  kl 12 UTC = 13/14 i Stockholm, alltså tryggt inom rätt Stockholmsdygn, så
+ *  `dailyNumber(dailyDateFromNumber(n)) === n` gäller året runt (även DST). */
 export function dailyDateFromNumber(n: number): Date {
-  return new Date(EPOCH.getFullYear(), EPOCH.getMonth(), EPOCH.getDate() + (n - 1))
+  const epochAnchor = Date.UTC(EPOCH_Y, EPOCH_M - 1, EPOCH_D, 12)
+  return new Date(epochAnchor + (n - 1) * 86_400_000)
 }
 
 /** Giv #n ur arkivet: exakt samma giv som alla fick den dagen. */

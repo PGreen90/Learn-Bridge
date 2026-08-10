@@ -2,7 +2,15 @@ import { useState } from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
 import { Button } from '../components/Button'
-import { clearAllProgress, loadValue, saveValue } from '../lib/storage'
+import {
+  clearAllLocalData,
+  loadAutoClaim,
+  loadBidHelp,
+  loadPlaySpeed,
+  saveAutoClaim,
+  saveBidHelp,
+  savePlaySpeed,
+} from '../lib/backend'
 import { setThemeChoice, themeChoice, type ThemeChoice } from '../lib/theme'
 import { isSoundEnabled, setSoundEnabled } from '../lib/sound'
 import { SPEED_LABEL, type PlaySpeed } from './play/tempo'
@@ -94,14 +102,14 @@ export function Settings() {
   // En ändring här slår igenom när nästa giv/bord monteras.
   const [theme, setTheme] = useState<ThemeChoice>(() => themeChoice())
   const [sound, setSound] = useState(() => isSoundEnabled())
-  const [bidHelp, setBidHelp] = useState(() => loadValue('bidHelp', true))
-  const [autoClaim, setAutoClaim] = useState(() => loadValue('autoClaim', true))
-  const [speed, setSpeed] = useState<PlaySpeed>(() => loadValue<PlaySpeed>('playSpeed', 'normal'))
+  const [bidHelp, setBidHelp] = useState(() => loadBidHelp())
+  const [autoClaim, setAutoClaim] = useState(() => loadAutoClaim())
+  const [speed, setSpeed] = useState<PlaySpeed>(() => loadPlaySpeed())
 
   const [done, setDone] = useState(false)
 
   function handleReset() {
-    clearAllProgress()
+    clearAllLocalData()
     setDone(true)
   }
 
@@ -140,7 +148,7 @@ export function Settings() {
             hint="motorns hintar och förklaringar i budlådan"
             on={bidHelp}
             onToggle={() => {
-              saveValue('bidHelp', !bidHelp)
+              saveBidHelp(!bidHelp)
               setBidHelp(!bidHelp)
             }}
           />
@@ -158,7 +166,7 @@ export function Settings() {
             hint="säkra stick tas automatiskt i slutet av given"
             on={autoClaim}
             onToggle={() => {
-              saveValue('autoClaim', !autoClaim)
+              saveAutoClaim(!autoClaim)
               setAutoClaim(!autoClaim)
             }}
           />
@@ -170,7 +178,7 @@ export function Settings() {
               label: SPEED_LABEL[v],
             }))}
             onChange={(v) => {
-              saveValue('playSpeed', v)
+              savePlaySpeed(v)
               setSpeed(v)
             }}
           />

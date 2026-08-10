@@ -4,13 +4,8 @@ import { BrandMark } from '../components/BrandMark'
 import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
 import { getExercises, getThemesByScope, SCOPES } from '../lib/bidding'
-import { loadValue } from '../lib/storage'
+import { loadThemeScore } from '../lib/backend'
 import type { Scope } from '../types/bridge'
-
-interface ThemeResult {
-  correct: number
-  total: number
-}
 
 export function BiddingPractice() {
   const [scope, setScope] = useState<Scope>('opening')
@@ -47,7 +42,7 @@ export function BiddingPractice() {
         <div className="space-y-2">
           {themes.map((t) => {
             const count = getExercises(t.id).length
-            const result = loadValue<ThemeResult | null>(`theme:${t.id}`, null)
+            const result = loadThemeScore(t.id)
             return (
               <Link
                 key={t.id}

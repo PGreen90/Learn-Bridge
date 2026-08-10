@@ -243,3 +243,11 @@ bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
   tagna: Supabase bekräftad, en 12-givarstävling först, klassiska lösenord,
   tävlingarna före borden. Beslutsgrindar tillagda på ägarens begäran samma
   session.
+- **2026-08-09: ETAPP 0 KLAR & deployad** (ren kod, ingen backend, beteendet
+  oförändrat, +10 facit). Fem bitar: slumpinjektion i Monte-Carlo-boten (`rng`,
+  default Math.random), Europe/Stockholm-tidszon i `daily.ts` (DST-säker),
+  backend-sömlagret `src/lib/backend/` (11 sidor omkopplade; synkront nu, konto-
+  gruppen blir async i etapp 1), PWA-vakt som lämnar `/api/*` orört (låst i
+  `deploy-config.test.ts`), och `api/health.ts` som bevisar att motorn importeras
+  server-side (`tsconfig` täcker nu `api/`). NÄSTA = grind 0→1: Supabase-projektet
+  skapas först på ägarens uttryckliga "kör".
