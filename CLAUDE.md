@@ -10,25 +10,21 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BESLUT B ETAPP 1: konton (grind 0→1 passerad 2026-08-10)
+### 🔵 NU — BESLUT B ETAPP 2: dagliga 12-givarstävlingen
 
-**GRIND 0→1 PASSERAD (2026-08-10, ägaren: "Grind 0→1").** Etapp 1-besluten tagna:
-(1) **ingen Google-login** nu — bara e-post + lösenord; (2) **radera allt** vid
-kontoradering (mest GDPR-ärligt); (3) **visningsnamn** unikt/skiftlägesokänsligt,
-**4–10 tecken**, teckenregler + blocklista, **LÅST** för användaren men med
-**ägaröverstyrning** (byt/spärra namn i efterhand — annars sitter ett fult namn
-som slinker förbi kvar för evigt). Full spec + resten av etappen:
-`docs/beslut-b-plan.md`.
+**ETAPP 1 (konton) KLAR & live-verifierad** (rest: städa testkontona `+smoke`/
+`+test2@gmail.com` i Supabase → Authentication → Users). Detalj: minnet
+`beslut-b-etapp1-progress`.
 
-**DEPLOYAD + LIVE-VERIFIERAD (2026-08-10, main `2b2e374`):** Supabase-projekt
-(EU-Stockholm) + egen SMTP via Resend (mejlleverans verifierad), auth-lager +
-auth-sidor + GDPR-sidor + kontohantering (radera via RPC / exportera) live på
-rebidz.com. **Skarpt live-prov PASSERAT (2026-08-10):** registrera → bekräfta mejl
-→ inloggning → exportera data → radera konto (borta ur DB, login misslyckas) →
-glömt-lösenord hela vägen. Alla fem godkända skarpt. Full status:
-`docs/beslut-b-plan.md` (+ minnet `beslut-b-etapp1-progress`). **KVAR i etappen:**
-städa de två gamla testkontona `rebidz.bridge+smoke@gmail.com` /
-`+test2@gmail.com` i Supabase → Authentication → Users. **NÄST = etapp 2-grinden.**
+**ETAPP 2 SERVERSIDAN KLAR & LIVE (2026-08-10).** Grindbeslut: dölj Dagens giv,
+provisorisk topplista JA, paus JA, fler längder senare. Live-verifierat:
+esbuild-buntning (motorn körbar server-side, `scripts/build-api.mjs`), giv-
+generering (cron + HMAC-frö → DB, migration `0004`), hämtning
+(`/api/dagens-tavling`), fröad bot-slump (`play-seed.ts`, deterministiska bottar
+för validering, beteendebevarande). **NU KVAR = klientfasens stora UI-bit:** wira
+in tävlingen i appen (backend-hämtare, `Game`-fabrik + playSeed, peka om Dagens
+giv-ingången, yta med 12 givarna + paus), sedan inskick → validering → poäng/
+topplista. Full status: minnet `beslut-b-etapp2-progress` + `docs/beslut-b-plan.md`.
 
 ---
 
@@ -117,10 +113,10 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
   TP-inkliven? X-svararen/DONT/svaga tvåor räknar ännu rå HP — säljs givar där?
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Beslut B etapp 1 — konton** (Supabase EU, lösenordsinloggning, GDPR-sidor,
-   radera/exportera konto; grind 0→1 + grindbesluten först — `docs/beslut-b-plan.md`).
-2. **Beslut B etapp 2 — dagliga 12-givarstävlingen** (servergivar, validering,
-   MP-topplista; grindbesluten först — `docs/beslut-b-plan.md`).
+1. **Beslut B etapp 2 forts.** — klientfasen: wira in tävlingen i appen, inskick,
+   validering, poäng/topplista (serversidan klar; se NU — `docs/beslut-b-plan.md`).
+2. **Beslut B etapp 3 — härdning + drift** (arkiv/streaks på servern, rate limits,
+   ev. Nivå 2 dolda händer; grindbesluten först — `docs/beslut-b-plan.md`).
 
 *(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C
 via cue-buden, hål D steg 1 klar / steg 2 parkerad — hela resan + verktygen i
