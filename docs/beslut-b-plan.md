@@ -228,10 +228,20 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   Vercel plockar upp den genererade funktionen. Facit: `api-src/build-bundling.test.ts`.
   motorprov är TILLFÄLLIG och ersätts av den riktiga giv-genereringen nedan.
   Kvar att bunta in när de behövs: `decideCall`/`rebuildPlay`/`botCardSmart`/`scoring`.
-- Ett schemalagt serverjobb (Vercel-cron 00:05 Europe/Stockholm) genererar
-  dagens 12 givar med hemligt serverfrö (HMAC av datum + givnummer — går inte
-  att förberäkna) och lagrar händerna i databasen. Gratis "Dagens giv" med
-  Wordle-delningen berörs inte (om inte etapp 2-grinden beslutar annat).
+- **Giv-genereringen — KLAR & LIVE-VERIFIERAD 2026-08-10.** Ett schemalagt
+  serverjobb (`api-src/generera-dagens-givar.ts`, Vercel-cron `5 23 * * *` UTC =
+  strax efter midnatt svensk tid året runt, även DST) genererar dagens 12 givar
+  med hemligt serverfrö (HMAC-SHA256 av `datum:bricka` med `DAILY_SEED_SECRET` →
+  `dealFromSeed`, ren motorfunktion) och lagrar händerna i `daily_deals`.
+  Idempotent (upsert `on_conflict=comp_date` / ignore-duplicates
+  `on_conflict=set_id,board`). Skyddad av `CRON_SECRET`; skriver via Supabase
+  REST med service-nyckeln (miljövariabler i Vercel: `SUPABASE_URL`,
+  `SUPABASE_SERVICE_ROLE_KEY`, `DAILY_SEED_SECRET`, `CRON_SECRET`). Migration
+  `0004` (tabeller + RLS utan policys + service_role-GRANT). Live-prov: 200 med
+  12 givar, omkörning 200 (idempotent), 401 utan bevis. Facit: `dealFromSeed` +
+  `seedForBoard`/`genereraGivar`. Gratis "Dagens giv" berörs inte (döljs senare
+  per grindbeslutet). **KVAR i 2a:** hämtningsväg + inskick + validering (nedan);
+  motorprov-endpointen kan tas bort (ersatt).
 - Klienten hämtar given via API, spelar mot bottarna som idag och skickar in
   budhistorik + spelade kort (samma form som dagens sparade giv i `resume.ts`).
 - **Servern validerar asynkront:** inskicket sparas direkt som provisoriskt; en
