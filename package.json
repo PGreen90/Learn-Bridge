@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:api": "node scripts/build-api.mjs",
+    "build": "node scripts/build-api.mjs && vite build",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "bridge-dds": "^1.4.0",
+    "esbuild": "^0.28.2",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3",

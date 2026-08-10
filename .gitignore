@@ -15,3 +15,8 @@ dist-ssr
 
 # Systemrevisorns mätrapporter (docs/systemrevisorn.md) – genererade, ej kod
 revisor-output/
+
+# Beslut B etapp 2: buntade serverfunktioner (api-src/*.ts → api/*.js).
+# Genererade av scripts/build-api.mjs; Vercel återskapar dem via `npm run build`.
+# Handskrivna api/*.ts (t.ex. health.ts) versionshanteras som vanligt.
+/api/*.js

@@ -207,8 +207,16 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
 
 ### Etapp 2 — dagliga tävlingen, 12 givar (= konkurrensplanens Fas 3)
 
-🚪 *Innan bygget: etappens delbeslut (Dagens giv kvar?, provisorisk topplista?,
-paus mitt i serien?) tas med ägaren.*
+🚪 *Grindbesluten TAGNA 2026-08-10 (ägaren):*
+- **Gratis "Dagens giv" (Wordle-delningen):** tas bort/**döljs** — tävlingen
+  ersätter den. Claude-val: **dölj** (avlänka i menyn, behåll `daily.ts` +
+  delnings-koden) framför hård radering — återvändbart, kan återanvändas för en
+  ev. gratisvariant senare. Ägaren kan ändra till hård radering.
+- **Provisorisk topplista:** JA — syns live under dagen (uppdateras löpande;
+  slutlig efter midnatt + valideringssvep).
+- **Paus mitt i de 12 givarna:** JA — får pausa och fortsätta senare samma dag.
+- **Fler tävlingslängder:** SENARE — schemat byggs med storlek som kolumn så
+  8/16/24 kan läggas till utan ombyggnad; separata serier vs nästlade avgörs då.
 
 **2a — givar + inskick:**
 - **Förarbete (fynd från etapp 0):** api-funktionerna som kör motorn måste
@@ -304,6 +312,12 @@ bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
   esbuild-bundlingssteg för api-funktionerna → sätts upp i etapp 2 (2a), där
   servern faktiskt ska generera givar och spela om resultat. NÄSTA = grind 0→1:
   Supabase-projektet skapas först på ägarens uttryckliga "kör".
+- **2026-08-10: ETAPP 1 KLAR & LIVE-VERIFIERAD.** Skarpt live-prov på rebidz.com
+  passerat (registrera → bekräfta mejl → inloggning → export → radera allt →
+  glömt lösenord; alla fem godkända). Doc-fix committad/deployad (`ac81d3b`).
+  **Etapp 2-grindbesluten tagna samma dag** (se etapp 2-rubriken): dölj "Dagens
+  giv", provisorisk topplista JA, paus JA, fler längder senare. Byggstart väntar
+  på ägarens "kör".
 - **2026-08-10: GRIND 0→1 PASSERAD** (ägaren: "Grind 0→1"). Etapp 1-besluten
   tagna med ägaren: (1) ingen Google-login nu, bara e-post + lösenord; (2)
   kontoradering = radera allt; (3) visningsnamn unikt/skiftlägesokänsligt, 4–10
