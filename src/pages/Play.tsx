@@ -648,13 +648,17 @@ export function PlayTable({
                     Dina senaste givar →
                   </a>
                 )}
-                <button
-                  type="button"
-                  onClick={tavling ? tavling.onÖversikt : goHome}
-                  className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
-                >
-                  {tavling ? '← Till översikten' : '← Avsluta spel'}
-                </button>
+                {/* Tävling: den gröna "Till översikten →" är redan vägen ut —
+                    ingen extra länk. Vanligt spel: "Avsluta spel" → startsidan. */}
+                {!tavling && (
+                  <button
+                    type="button"
+                    onClick={goHome}
+                    className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
+                  >
+                    ← Avsluta spel
+                  </button>
+                )}
               </div>
               <button
                 type="button"
@@ -687,13 +691,15 @@ export function PlayTable({
             {copied && (
               <p className="text-xs text-accent">✓ Kopierat — klistra in i valfri chatt.</p>
             )}
-            <button
-              type="button"
-              onClick={tavling ? tavling.onÖversikt : goHome}
-              className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
-            >
-              {tavling ? '← Till översikten' : '← Avsluta spel'}
-            </button>
+            {!tavling && (
+              <button
+                type="button"
+                onClick={goHome}
+                className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
+              >
+                ← Avsluta spel
+              </button>
+            )}
           </div>
         ) : null}
         {/* Felrapporten: hela given + auktionen + sticken → förifylld GitHub-issue. */}
