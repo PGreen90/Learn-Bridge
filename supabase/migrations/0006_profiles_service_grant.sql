@@ -1,0 +1,12 @@
+-- Beslut B etapp 2, Led 3 (fix 2026-08-11): topplistan behöver läsa visningsnamn.
+--
+-- KÖR HELA filen i Supabase → SQL Editor → "New query" → klistra in → "Run".
+-- Idempotent (grant kan köras om utan effekt).
+--
+-- Topplist-endpointen (api-src/topplista.ts) kör med service-nyckeln och slår upp
+-- spelarnas visningsnamn i profiles för listan. profiles gav bara `authenticated`
+-- läsrätt (0002), inte service_role — så uppslaget gav 403 (permission denied).
+-- Visningsnamnen är avsedda att vara publika på topplistan, och service_role bor
+-- ENBART på servern (aldrig i klienten), så detta öppnar inget för vanliga
+-- klienter. Radskyddet (RLS) för klienter är oförändrat.
+grant select on public.profiles to service_role;
