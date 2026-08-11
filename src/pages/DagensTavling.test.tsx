@@ -88,8 +88,8 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     )
     // Inget spelat än → "Starta tävlingen". (Progress-stapeln + rutnätet borttagna.)
     expect(await screen.findByRole('button', { name: /Starta tävlingen/ })).toBeInTheDocument()
-    // Nedräkningen till nästa tävling syns på översikten.
-    expect(screen.getByText(/Nästa tävling om/)).toBeInTheDocument()
+    // Nedräkningen till nästa tävling syns på översikten (kompakt klock-pill).
+    expect(screen.getByTitle('Tid kvar till nästa tävling')).toBeInTheDocument()
   })
 
   it('ingen tävling idag: visar vänligt meddelande', async () => {

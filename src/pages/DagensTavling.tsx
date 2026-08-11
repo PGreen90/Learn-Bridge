@@ -293,13 +293,13 @@ export function DagensTavling() {
   return (
     <Skärm>
       <div className="w-full max-w-xl space-y-6">
-        <header className="space-y-2 text-center">
-          <h1 className="text-3xl font-semibold text-emerald-50">
+        {/* Kompakt topp (ägaren 2026-08-11): titel vänster, nedräkning höger — allt
+            på EN rad. Förklaringstexten ("12 givar — samma för alla …") borttagen
+            för att raden ska rymmas på telefon. */}
+        <header className="flex items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-emerald-50">
             Dagens tävling <span className="text-gold-300">#{tavling.nummer}</span>
           </h1>
-          <p className="text-emerald-100/75">
-            {tavling.storlek} givar — samma för alla i dag. Spela dem i tur och ordning.
-          </p>
           <Nedrakning />
         </header>
 
@@ -316,7 +316,7 @@ export function DagensTavling() {
         )}
 
         {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
-        <DinStällning resultat={topplista} />
+        <DinStällning resultat={topplista} total={tavling.storlek} />
         <Resultattabell klara={klara} topplista={topplista} onÖppna={setDetaljBoard} />
         <TopplistaVy resultat={topplista} />
 
@@ -367,9 +367,10 @@ function UppdateraIkon({ snurrar }: { snurrar: boolean }) {
   )
 }
 
-/** Nedräkning till nästa tävling (midnatt svensk tid) — så länge man har på sig
- *  att spela klart dagens. Tickar varje sekund och räknar om mot Sthlm-midnatt
- *  (aldrig ett lagrat värde som kan driva) så den stämmer i alla tidszoner. */
+/** Nedräkning till nästa tävling (midnatt svensk tid). Kompakt pill (klockikon +
+ *  tid) så toppraden ryms på EN rad; texten "Nästa tävling om" ligger som tooltip.
+ *  Tickar varje sekund och räknar ALLTID om mot Sthlm-midnatt (aldrig ett lagrat
+ *  värde som kan driva) så den stämmer i alla tidszoner. */
 function Nedrakning() {
   const [ms, setMs] = useState(() => msTillNastaTavling())
   useEffect(() => {
@@ -377,10 +378,25 @@ function Nedrakning() {
     return () => clearInterval(id)
   }, [])
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-950/50 px-3 py-1 text-sm text-emerald-100/80 ring-1 ring-emerald-100/10">
-      <span>Nästa tävling om</span>
+    <span
+      title="Tid kvar till nästa tävling"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-950/50 px-2.5 py-1 text-sm text-emerald-100/80 ring-1 ring-emerald-100/10"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className="h-3.5 w-3.5 text-emerald-100/55"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </svg>
       <span className="font-semibold tabular-nums text-gold-200">{formatNedrakning(ms)}</span>
-    </div>
+    </span>
   )
 }
 
@@ -389,7 +405,7 @@ function Nedrakning() {
  *  skickat in givar men ingen poängsatts än (ensam spelare). I det preliminära
  *  läget visas 1:a / 100 % tydligt märkt "preliminär" (samma grepp som per-giv-
  *  cellen). Har du inte skickat in något alls är kortet tyst. */
-function DinStällning({ resultat }: { resultat: TopplistaResultat | null }) {
+function DinStällning({ resultat, total }: { resultat: TopplistaResultat | null; total: number }) {
   if (!resultat || resultat.status !== 'ok') return null
   const { du, topplista } = resultat.data
   const dinaInskick = resultat.data.dinaInskick ?? []
@@ -423,14 +439,9 @@ function DinStällning({ resultat }: { resultat: TopplistaResultat | null }) {
             {snitt.toFixed(1)}<span className="text-2xl"> %</span>
           </span>
           <span className="mt-1 text-xs text-emerald-100/60">
-            {antalGivar}{' '}
             {prel
-              ? antalGivar === 1
-                ? 'giv inne'
-                : 'givar inne'
-              : antalGivar === 1
-                ? 'poängsatt giv'
-                : 'poängsatta givar'}
+              ? `${antalGivar} ${antalGivar === 1 ? 'giv inne' : 'givar inne'}`
+              : `${antalGivar}/${total} givar`}
           </span>
         </div>
       </div>

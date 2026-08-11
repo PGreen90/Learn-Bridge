@@ -167,10 +167,13 @@ giv finns) → DinStällning → Dina givar → Ställningen. Dessutom en **uppd
 (⟳)** fast i nederkant höger (`fixed`, säkra zoner) som hämtar om topplistan
 (placering/MP%/andras resultat + cross-device-framsteg via `uppdateraNonce` →
 `fetchTopplista`-effekten) utan full sidladdning. Facit uppdaterat i
-`DagensTavling.test.tsx` + `DagensTavling-flode.test.tsx`. **KVAR (om ägaren vill):**
-komprimera toppen (rubrik+klocka på en rad), kort topplista (topp 3 + din rad),
-ev. "Dina givar" → in i rutnätet med MP% (idén från planeringspasset). Låsta ramar:
-emerald, svarta spader, guldserifen, MP bara.
+`DagensTavling.test.tsx` + `DagensTavling-flode.test.tsx`. **RUNDA 2 (2026-08-11):**
+toppen komprimerad till EN rad (titel `text-xl` vänster + kompakt klock-pill höger;
+förklaringstexten borttagen; `Nedrakning` är nu en pill med klockikon + tooltip), och
+"N poängsatta givar" i `DinStällning` → **"N/12 givar"** (kortare + visar framsteget;
+totalen kommer via ny `total`-prop från `tavling.storlek`). **KVAR (om ägaren vill):**
+kort topplista (topp 3 + din rad), ev. "Dina givar" → in i rutnätet med MP%. Låsta
+ramar: emerald, svarta spader, guldserifen, MP bara.
 
 *(Ursprunglig notering:)* Efter UI-polishens steg 1–5 staplar `DagensTavling`-översikten mycket vertikalt:
 rubrik + nedräkningsklocka + progress + 12-rutnätet + huvudknapp + "Din ställning"-
@@ -182,6 +185,21 @@ fokuserat pass**, inte inklämt i data-fixarna. Idéer att väga: flikar
 topplistan bakom en knapp. Låsta ramar som vanligt: emerald, svarta spader,
 guldserifen, MP bara. Mät höjdbudgeten och svara med uppmätta px (facelift-mönstret
 [[facelift-mockup-rejected]]). Hör ihop med FACELIFTEN ovan.
+
+### Spela tävlingsgiv igen — övningsläge (2026-08-11, ägaren) — NÄSTA NU
+**Bestämt nästa steg (eget pass med facit FÖRE bygget).** I giv-detaljvyn
+(`GivDetalj`, travellern) ska det finnas en knapp **"🔄 Spela given igen — övning"**.
+Den öppnar givens `deal` i vanliga spelskärmen (`Play`) i ett **övningsläge**:
+spelaren spelar och får se resultat/poäng, men **KORREKTHETSKRAV (får aldrig brytas):**
+*inget skickas in till servern* (`submitTavlingGiv` anropas ej) och *det sparade
+framsteget rörs inte* (`saveTavlingFramsteg`/`framstegRef` orörda) → din ursprungliga
+MP% står kvar överallt (Dina givar, travellern, Din ställning). Tydlig "Övning —
+räknas inte"-märkning i vyn. **FÖRST:** läs `Play.tsx` + `play/tavling-mode.ts` för
+hur ett spel av en specifik giv kopplas in — dagens `TavlingSpel.onResultat` bokför +
+skickar in, så övningsläget behöver en variant som INTE gör det (ny prop/flagga eller
+eget läge). Facit: ett test som bevisar att omspel inte ändrar `learnbridge:tavling-
+framsteg` och inte anropar submit. Låsta ramar: emerald, svarta spader, guldserifen,
+MP bara.
 
 ### Rondgenomgång för tävlingsgiv — botarnas per-kort-motivering (2026-08-11)
 Steg 5:s genomgång (`byggGranskning` → `RondRapportView`) återskapar given ur

@@ -24,8 +24,9 @@ raderade** i Supabase (resultat kaskaderar bort). Detalj: [[beslut-b-etapp2-prog
 spelare). MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE. Detalj: [[tavling-ui-polish]].
 **MOBIL-STÄD (2026-08-11):** översikten rensad — progress-stapeln, 12-rutnätet och
 "allt klart"-kortet borttagna (i alla lägen) + uppdatera-knapp (⟳) nere höger som
-hämtar om ställningen. Detalj: [[tavling-ui-polish]]. **NÄSTA (ägaren väljer):**
-grind till **etapp 3 (härdning)**.
+hämtar om ställningen + topprad på en rad + "N/12 givar". Detalj: [[tavling-ui-polish]].
+**NÄSTA NU (bestämt med ägaren):** "spela given igen" i giv-detaljvyn — övningsläge,
+den riktiga MP%:en får ALDRIG skrivas över (plan + facit-krav i `docs/senare.md`).
 
 ---
 
