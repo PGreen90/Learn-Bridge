@@ -2,7 +2,7 @@
 // din hand som solfjäder längst ner. Motståndarnas kort visas inte alls.
 // Bara presentation — spellogiken bor i useGame.
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Bid } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { decideCall, legalCalls, seatToAct, contractFromCalls } from '../../lib/engine/auction-live'
@@ -60,6 +60,19 @@ export function BiddingPhase({
   const yourTurn = toAct === 'S'
   const finalContract = complete ? contractFromCalls(game.history) : null
   const passedOut = complete && !finalContract
+
+  // Tävlingsgiv som passas ut är ett giltigt (magert) resultat — bokför det i
+  // samma stund den passas ut, oavsett om spelaren sedan klickar "Nästa giv"
+  // eller går till översikten. Ref-vakten ger exakt en bokföring.
+  const tavlingBokford = useRef(false)
+  useEffect(() => {
+    if (!tavling || !passedOut || tavlingBokford.current) return
+    tavlingBokford.current = true
+    tavling.onResultat(
+      { board: tavling.board, myTricks: 0, win: false, headline: 'Given passades ut', scoreLabel: null },
+      { board: tavling.board, history: game.history, plays: [], declarerTricks: 0 },
+    )
+  }, [tavling, passedOut, game.history])
   // Motorns rekommenderade bud för din hand i det här läget (markeras i budlådan
   // och ger den äkta förklaringen för det budet). useMemo (R2-fynd #3) så den bara
   // räknas om när given eller budhistoriken ändras – inte vid orelaterade
@@ -213,21 +226,8 @@ export function BiddingPhase({
                 resultat — gå vidare i serien i stället för att slumpa en ny giv. */}
             <div className="flex flex-wrap justify-center gap-2">
               {tavling ? (
-                <Button
-                  onClick={() =>
-                    tavling.onKlar(
-                      {
-                        board: tavling.board,
-                        myTricks: 0,
-                        win: false,
-                        headline: 'Given passades ut',
-                        scoreLabel: null,
-                      },
-                      { board: tavling.board, history: game.history, plays: [], declarerTricks: 0 },
-                    )
-                  }
-                >
-                  {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
+                <Button onClick={tavling.onNästa}>
+                  {tavling.sista ? 'Se ställningen →' : 'Till översikten →'}
                 </Button>
               ) : (
                 <>

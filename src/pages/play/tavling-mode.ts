@@ -19,9 +19,13 @@ export interface TavlingSpel {
   total: number
   /** Sista given i serien → "Se ställningen" i stället för "Nästa giv". */
   sista: boolean
-  /** Given är klar (spelad eller passad) → registrera resultatet, skicka in det
-   *  (inskick) och gå vidare. `inskick` är råmaterialet servern validerar. */
-  onKlar: (resultat: GivResultat, inskick: TavlingInskick) => void
-  /** Lämna given utan att slutföra → tillbaka till översikten. */
+  /** Given är klar (spelad eller passad) → BOKFÖR resultatet + skicka in det.
+   *  Anropas EN gång i samma stund given slutförs, oavsett vilken knapp spelaren
+   *  sedan väljer — så framsteget aldrig tappas om man går till översikten i
+   *  stället för "Nästa giv". `inskick` är råmaterialet servern validerar. */
+  onResultat: (resultat: GivResultat, inskick: TavlingInskick) => void
+  /** Gå vidare till nästa ospelade giv (eller översikten när serien är klar). */
+  onNästa: () => void
+  /** Lämna given utan att gå vidare → tillbaka till översikten. */
   onÖversikt: () => void
 }

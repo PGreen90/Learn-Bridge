@@ -431,6 +431,18 @@ export function PlayTable({
     declarerTricks: result.declarerTricks,
   })
 
+  // Tävlingsgiv: BOKFÖR resultatet i samma stund given är klar (inte på
+  // "Nästa giv"-klicket) — annars tappas framsteget om spelaren i stället går
+  // till översikten. Ref-vakten ger exakt en bokföring per bord.
+  const tavlingBokford = useRef(false)
+  useEffect(() => {
+    if (!tavling || !done || tavlingBokford.current) return
+    tavlingBokford.current = true
+    tavling.onResultat(byggTavlingResultat(), byggInskick())
+    // byggTavling*/onResultat är stabila nog; vi vill BARA fyra på done-flanken.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tavling, done])
+
   // Dagens giv: det delbara resultatet (Wordle-mekaniken). Telefoner får
   // delningsarket (navigator.share), datorer kopierar till urklipp.
   // Texten är SPOILERFRI sedan Etapp B — bara dina stick, aldrig kontraktet.
@@ -608,8 +620,8 @@ export function PlayTable({
                     /* Tävling: den enda vägen framåt är nästa giv i serien (eller
                        ställningen om det var den sista). Inget omspel — man spelar
                        varje tävlingsgiv en gång. */
-                    <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat(), byggInskick())}>
-                      {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
+                    <Button variant="primary" onClick={tavling.onNästa}>
+                      {tavling.sista ? 'Se ställningen →' : 'Till översikten →'}
                     </Button>
                   ) : (
                     <>
@@ -663,8 +675,8 @@ export function PlayTable({
                 Rondgenomgång
               </Button>
               {tavling ? (
-                <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat(), byggInskick())}>
-                  {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
+                <Button variant="primary" onClick={tavling.onNästa}>
+                  {tavling.sista ? 'Se ställningen →' : 'Till översikten →'}
                 </Button>
               ) : (
                 <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>

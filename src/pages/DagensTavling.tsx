@@ -10,7 +10,7 @@
 // Framstegen sparas LOKALT i Led 1 (per enhet, backend-lagret). Led 2 flyttar
 // inskicket till kontot på servern och lägger till validering + topplista.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
@@ -47,6 +47,12 @@ export function DagensTavling() {
   const [spelIndex, setSpelIndex] = useState<number | null>(null)
   // Dagens topplista (hämtas på översikten).
   const [topplista, setTopplista] = useState<TopplistaResultat | null>(null)
+  // Alltid senaste framsteget (utan att fastna i en gammal closure) — så
+  // bokföring på färdig giv och "nästa giv"-navigeringen läser samma sanning.
+  const framstegRef = useRef<TavlingFramsteg | null>(null)
+  useEffect(() => {
+    framstegRef.current = framsteg
+  }, [framsteg])
 
   // Hämta dagens tävling när vi vet att användaren är inloggad.
   useEffect(() => {
@@ -161,16 +167,17 @@ export function DagensTavling() {
       board: giv.deal.board,
       total: tavling.storlek,
       sista: kvarEfterDenna === 0,
-      onKlar: (r, inskick) => {
-        // Bokför resultatet (ersätt ev. tidigare rad för samma bricka) och gå
-        // direkt vidare till nästa ospelade giv — eller till översikten
-        // (ställningen) när serien är klar.
-        const klara = [...framsteg.klara.filter((k) => k.board !== r.board), r]
+      onResultat: (r, inskick) => {
+        // BOKFÖR i samma stund given är klar (ersätt ev. tidigare rad för samma
+        // bricka). Läser/ skriver framstegRef så navigeringen efteråt ser den
+        // uppdaterade listan även om React ännu inte hunnit rendera om.
+        const base = framstegRef.current?.klara ?? []
+        const klara = [...base.filter((k) => k.board !== r.board), r]
         const nytt: TavlingFramsteg = { nummer: tavling.nummer, klara }
+        framstegRef.current = nytt
         saveTavlingFramsteg(nytt)
         setFramsteg(nytt)
-        setSpelIndex(förstaOspelade(tavling, klara))
-        // Skicka in given i bakgrunden; märk raden med serverns svar när det kommer.
+        // Skicka in i bakgrunden; märk raden med serverns svar när det kommer.
         submitTavlingGiv(inskick).then((svar) => {
           setFramsteg((f) => {
             if (!f || f.nummer !== tavling.nummer) return f
@@ -178,11 +185,15 @@ export function DagensTavling() {
               k.board === r.board ? { ...k, inskickStatus: svar.status } : k,
             )
             const nf: TavlingFramsteg = { ...f, klara: uppd }
+            framstegRef.current = nf
             saveTavlingFramsteg(nf)
             return nf
           })
         })
       },
+      // Efter en klar giv landar man på ÖVERSIKTEN (ägarbeslut 2026-08-11) — där
+      // ser man sina framsteg + ställningen och startar nästa giv med "Fortsätt".
+      onNästa: () => setSpelIndex(null),
       onÖversikt: () => setSpelIndex(null),
     }
     return <Play key={`tavling-${tavling.nummer}-${giv.deal.board}`} tavling={spel} />
