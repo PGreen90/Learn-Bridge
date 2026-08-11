@@ -32,6 +32,29 @@ function stockholmYMD(date: Date): { y: number; m: number; d: number } {
   return { y: get('year'), m: get('month'), d: get('day') }
 }
 
+/** Europe/Stockholms UTC-offset (i ms) vid en given instant — via IANA-zonen,
+ *  så sommartid räknas rätt. T.ex. +1h vintertid, +2h sommartid. */
+function stockholmOffsetMs(epoch: number): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Stockholm',
+    timeZoneName: 'shortOffset',
+  }).formatToParts(new Date(epoch))
+  const tz = parts.find((p) => p.type === 'timeZoneName')?.value ?? 'GMT+0'
+  const m = /GMT([+-]\d{1,2})(?::(\d{2}))?/.exec(tz)
+  if (!m) return 0
+  const h = Number(m[1])
+  const min = m[2] ? Number(m[2]) : 0
+  return (h * 60 + (h < 0 ? -min : min)) * 60_000
+}
+
+/** Epoch-ms för en väggklockstid (år/månad/dag/timme) i Europe/Stockholm,
+ *  DST-säkert. Midnatt (h=0) ligger aldrig på en DST-övergång (de sker 02–03
+ *  lokal tid), så offseten vid den instanten är stabil. */
+function stockholmWallToEpoch(y: number, m: number, d: number, h: number): number {
+  const somOmUTC = Date.UTC(y, m - 1, d, h)
+  return somOmUTC - stockholmOffsetMs(somOmUTC)
+}
+
 /** Fröet = datumet som åttasiffrigt tal (20260802), i Europe/Stockholm.
  *  Samma dag → samma frö → samma giv, precis som revisorns reproducerbara frön. */
 export function dailySeed(date: Date = new Date()): number {
@@ -96,6 +119,32 @@ export function shareText({ number, myTricks }: { number: number; myTricks: numb
     // hamna på SAMMA giv som resultatet gällde, inte på morgondagens.
     `https://rebidz.com/#/spela-kort/dagens?dag=${number}`,
   ].join('\n')
+}
+
+// === Nedräkning till nästa tävling (Beslut B etapp 2, UI) ====================
+
+/** Millisekunder tills nästa dagliga tävling börjar = nästa midnatt i
+ *  Europe/Stockholm (tävlingsdagen byts vid det svenska dygnsskiftet). Så länge
+ *  har man på sig att spela klart dagens. DST-säkert och OBEROENDE av spelarens
+ *  egen tidszon — samma nedräkning för alla, var i världen man än sitter. */
+export function msTillNastaTavling(now: Date = new Date()): number {
+  const { y, m, d } = stockholmYMD(now)
+  // Morgondagens kalenderdatum i Stockholm (noon-ankare undviker datumglidning).
+  const imorgon = new Date(Date.UTC(y, m - 1, d + 1, 12))
+  const midnatt = stockholmWallToEpoch(
+    imorgon.getUTCFullYear(),
+    imorgon.getUTCMonth() + 1,
+    imorgon.getUTCDate(),
+    0,
+  )
+  return midnatt - now.getTime()
+}
+
+/** "HH:MM:SS" ur ett millisekundintervall (nedräkningsklockan). Negativt/0 → 0. */
+export function formatNedrakning(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000))
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${p(Math.floor(s / 3600))}:${p(Math.floor((s % 3600) / 60))}:${p(s % 60)}`
 }
 
 // === Resultatloggen + streaken (Etapp B) ====================================

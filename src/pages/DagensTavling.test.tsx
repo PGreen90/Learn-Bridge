@@ -76,6 +76,8 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     )
     expect(await screen.findByText(/0 av 2 klara/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Starta tävlingen/ })).toBeInTheDocument()
+    // Nedräkningen till nästa tävling syns på översikten.
+    expect(screen.getByText(/Nästa tävling om/)).toBeInTheDocument()
   })
 
   it('ingen tävling idag: visar vänligt meddelande', async () => {

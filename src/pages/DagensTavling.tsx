@@ -16,6 +16,7 @@ import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
 import { Felt } from '../components/Felt'
 import { loadTavlingFramsteg, saveTavlingFramsteg } from '../lib/backend'
+import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
 import {
   fetchDagensTavling,
   fetchTopplista,
@@ -207,13 +208,14 @@ export function DagensTavling() {
   return (
     <Skärm>
       <div className="w-full max-w-xl space-y-6">
-        <header className="space-y-1 text-center">
+        <header className="space-y-2 text-center">
           <h1 className="text-3xl font-semibold text-emerald-50">
             Dagens tävling <span className="text-gold-300">#{tavling.nummer}</span>
           </h1>
           <p className="text-emerald-100/75">
             {tavling.storlek} givar — samma för alla i dag. Spela dem i tur och ordning.
           </p>
+          <Nedrakning />
         </header>
 
         {/* Progress */}
@@ -288,6 +290,23 @@ export function DagensTavling() {
         </div>
       </div>
     </Skärm>
+  )
+}
+
+/** Nedräkning till nästa tävling (midnatt svensk tid) — så länge man har på sig
+ *  att spela klart dagens. Tickar varje sekund och räknar om mot Sthlm-midnatt
+ *  (aldrig ett lagrat värde som kan driva) så den stämmer i alla tidszoner. */
+function Nedrakning() {
+  const [ms, setMs] = useState(() => msTillNastaTavling())
+  useEffect(() => {
+    const id = setInterval(() => setMs(msTillNastaTavling()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-950/50 px-3 py-1 text-sm text-emerald-100/80 ring-1 ring-emerald-100/10">
+      <span>Nästa tävling om</span>
+      <span className="font-semibold tabular-nums text-gold-200">{formatNedrakning(ms)}</span>
+    </div>
   )
 }
 

@@ -6,6 +6,8 @@ import {
   dailyNumber,
   dailySeed,
   dailyStreak,
+  formatNedrakning,
+  msTillNastaTavling,
   shareText,
 } from './daily'
 
@@ -142,5 +144,44 @@ describe('streaken', () => {
     // Dag 1–2 spelade i tid, dag 3 missades och fylldes igen ur arkivet på dag 4.
     const log = { 1: { myTricks: 7 }, 2: { myTricks: 8 }, 3: { myTricks: 5, late: true } }
     expect(dailyStreak(log, 4)).toBe(0) // dag 3 missades i TID → sviten är bruten
+  })
+})
+
+// Nedräkningen till nästa tävling = nästa midnatt i Europe/Stockholm, oavsett
+// spelarens tidszon och DST. Facit förankras i kända instanter (UTC in, ms ut).
+describe('msTillNastaTavling — nästa svenska midnatt', () => {
+  it('sommartid (CEST, +2): midnatt Sthlm = 22:00 UTC', () => {
+    // 2026-08-11 10:00 UTC = 12:00 i Sthlm. Nästa midnatt = 12 aug 00:00 CEST =
+    // 11 aug 22:00 UTC → 12 timmar kvar.
+    const ms = msTillNastaTavling(new Date('2026-08-11T10:00:00Z'))
+    expect(ms).toBe(12 * 3600_000)
+  })
+
+  it('vintertid (CET, +1): midnatt Sthlm = 23:00 UTC', () => {
+    // 2026-01-15 10:00 UTC = 11:00 i Sthlm. Nästa midnatt = 16 jan 00:00 CET =
+    // 15 jan 23:00 UTC → 13 timmar kvar.
+    const ms = msTillNastaTavling(new Date('2026-01-15T10:00:00Z'))
+    expect(ms).toBe(13 * 3600_000)
+  })
+
+  it('strax före midnatt Sthlm: bara någon minut kvar', () => {
+    // 2026-08-11 21:58 UTC = 23:58 i Sthlm → 2 minuter kvar till midnatt.
+    const ms = msTillNastaTavling(new Date('2026-08-11T21:58:00Z'))
+    expect(ms).toBe(2 * 60_000)
+  })
+
+  it('samma nedräkning oavsett var koden råkar köra (funktionen använder Sthlm-zonen)', () => {
+    // Två olika instanter som båda är 12:00 i Sthlm samma dag ger samma svar.
+    expect(msTillNastaTavling(new Date('2026-08-11T10:00:00Z'))).toBe(12 * 3600_000)
+  })
+})
+
+describe('formatNedrakning — HH:MM:SS', () => {
+  it('formaterar timmar/minuter/sekunder med nollor', () => {
+    expect(formatNedrakning(12 * 3600_000 + 5 * 60_000 + 9 * 1000)).toBe('12:05:09')
+  })
+  it('negativt/0 blir 00:00:00', () => {
+    expect(formatNedrakning(-1)).toBe('00:00:00')
+    expect(formatNedrakning(0)).toBe('00:00:00')
   })
 })
