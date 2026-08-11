@@ -47,14 +47,8 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
     const results = (await restGet(
       base,
       key,
-      `daily_results?set_id=eq.${set.id}&status=eq.godkand&select=board,user_id,ns_score,declarer_tricks,passed_out`,
-    )) as Array<{
-      board: number
-      user_id: string
-      ns_score: number | null
-      declarer_tricks: number | null
-      passed_out: boolean
-    }>
+      `daily_results?set_id=eq.${set.id}&status=eq.godkand&select=board,user_id,ns_score`,
+    )) as Array<{ board: number; user_id: string; ns_score: number | null }>
 
     // Matchpoäng per giv → summera procent per spelare (bara givar med ≥2 spelare).
     const perSpelare = new Map<string, { summa: number; antal: number }>()
@@ -97,18 +91,6 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
       }))
       .sort((a, b) => b.snitt - a.snitt)
 
-    // TILLFÄLLIG DIAGNOSTIK (2026-08-11): rå poäng per spelare/giv, för att
-    // bekräfta att två konton faktiskt fick olika poäng. TAS BORT efter kollen.
-    const _diag = results
-      .map((r) => ({
-        namn: namn.get(r.user_id) ?? r.user_id.slice(0, 8),
-        board: r.board,
-        nsScore: r.ns_score,
-        stick: r.declarer_tricks,
-        passad: r.passed_out,
-      }))
-      .sort((a, b) => a.board - b.board || a.namn.localeCompare(b.namn))
-
     return json(200, {
       ok: true,
       nummer: set.daily_number,
@@ -116,7 +98,6 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
       poängsattaGivar,
       minPerGiv: MIN_PER_GIV,
       topplista,
-      _diag,
     })
   } catch (err) {
     return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })
