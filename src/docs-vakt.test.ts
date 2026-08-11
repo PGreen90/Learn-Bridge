@@ -64,6 +64,7 @@ function källfiler(): Set<string> {
     }
   }
   gå('src')
+  gå('api-src') // serverfunktionerna är också källkod som docs refererar
   return namn
 }
 
@@ -181,6 +182,10 @@ it('dokumentvakten: varje motormodul är inkopplad i produktionskoden', () => {
     }
   }
   gå('src')
+  // api-src/ ÄR produktionskod (Vercel-serverfunktionerna, Beslut B) — motor-
+  // moduler som bara servern använder (t.ex. matchpoints.ts via topplista.ts)
+  // räknas därför som inkopplade, inte döda.
+  gå('api-src')
 
   const bortkopplade = moduler.filter((m) => {
     const bas = m.replace(/\.tsx?$/, '')

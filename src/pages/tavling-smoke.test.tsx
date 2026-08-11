@@ -93,8 +93,10 @@ describe('Spela kort — tävlingsläget', () => {
     // Klick → resultatet lämnas till onKlar (utpassad = 0 stick).
     fireEvent.click(screen.getByRole('button', { name: /Nästa giv/ }))
     expect(onKlar).toHaveBeenCalledTimes(1)
+    // Två argument: resultatet (för framsteget) + inskicket (för valideringen).
     expect(onKlar).toHaveBeenCalledWith(
       expect.objectContaining({ board, myTricks: 0, headline: 'Given passades ut' }),
+      expect.objectContaining({ board, plays: [] }),
     )
   })
 

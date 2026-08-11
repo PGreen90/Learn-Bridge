@@ -11,6 +11,8 @@
 // vilar på serverns omspelningsvalidering av inskicket, inte på att gömma given.
 
 import type { Card, Deal, Seat, Vulnerability } from '../../types/bridge'
+import type { ResolvedCall } from '../bidding'
+import { getCurrentSession } from './auth'
 
 /** En tävlingsgiv i klienten: given att spela + play-fröet som gör bottarna
  *  deterministiska (trås in i usePlayTable så servern kan spela om och validera). */
@@ -36,6 +38,9 @@ export interface GivResultat {
   win: boolean
   headline: string
   scoreLabel: string | null
+  /** Serverns valideringsutfall när given skickats in (Led 2). Odefinierat =
+   *  inskicket pågår/inte gjort. */
+  inskickStatus?: InskickStatus
 }
 
 /** Framstegen i dagens tävling — vilka givar som är klara, per tävlingsnummer.
@@ -136,6 +141,101 @@ export async function fetchDagensTavling(): Promise<TavlingsResultat> {
   if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
   try {
     return { status: 'ok', tavling: tavlingFromResponse(await res.json()) }
+  } catch (err) {
+    return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
+  }
+}
+
+// ===========================================================================
+// Led 2 — inskick av en spelad tävlingsgiv
+// ===========================================================================
+
+/** Det klienten skickar in för EN spelad giv. Servern regenererar given själv
+ *  ur fröet, så bara brickan + det spelaren gjorde skickas (inte händerna). */
+export interface TavlingInskick {
+  board: number
+  history: ResolvedCall[]
+  plays: Card[]
+  /** Spelförarens stick (contractResult) — verifieras mot serverns omspelning. */
+  declarerTricks: number
+}
+
+/** Serverns utfall: 'godkand'/'avvisad'/'granskning' (validering), 'redan'
+ *  (ominskick), 'fel' (nätverk/ej inloggad). */
+export type InskickStatus = 'godkand' | 'avvisad' | 'granskning' | 'redan' | 'fel'
+
+export interface InskickSvar {
+  status: InskickStatus
+  nsScore: number | null
+  skäl?: string
+}
+
+/** Skicka in en spelad tävlingsgiv för validering + poäng. Kräver inloggning
+ *  (access-token ur sessionen). Alla fel översätts till ett InskickSvar så
+ *  kallaren aldrig behöver try/catch. */
+export async function submitTavlingGiv(inskick: TavlingInskick): Promise<InskickSvar> {
+  const session = await getCurrentSession()
+  const token = session?.access_token
+  if (!token) return { status: 'fel', nsScore: null, skäl: 'Inte inloggad' }
+  let res: Response
+  try {
+    res = await fetch('/api/skicka-in', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(inskick),
+    })
+  } catch {
+    return { status: 'fel', nsScore: null, skäl: 'Kunde inte nå servern.' }
+  }
+  if (res.status === 409) return { status: 'redan', nsScore: null }
+  if (!res.ok) return { status: 'fel', nsScore: null, skäl: `Servern svarade ${res.status}.` }
+  const d = (await res.json().catch(() => null)) as
+    | { status?: string; nsScore?: number | null; skäl?: string }
+    | null
+  const s = d?.status
+  const status: InskickStatus =
+    s === 'godkand' || s === 'avvisad' || s === 'granskning' ? s : 'fel'
+  return { status, nsScore: d?.nsScore ?? null, skäl: d?.skäl }
+}
+
+// ===========================================================================
+// Led 3 — topplistan
+// ===========================================================================
+
+export interface TopplistaRad {
+  namn: string
+  /** Snittprocent över de poängsatta givarna (0–100). */
+  snitt: number
+  antalGivar: number
+}
+
+export interface Topplista {
+  nummer: number
+  storlek: number
+  /** Antal givar med minst `minPerGiv` spelare (de som ger poäng). */
+  poängsattaGivar: number
+  minPerGiv: number
+  topplista: TopplistaRad[]
+}
+
+export type TopplistaResultat =
+  | { status: 'ok'; data: Topplista }
+  | { status: 'ingen' }
+  | { status: 'fel'; fel: string }
+
+/** Hämta dagens topplista (provisorisk under dagen). Ingen inloggning krävs —
+ *  bara visningsnamn + procent lämnas ut. */
+export async function fetchTopplista(): Promise<TopplistaResultat> {
+  let res: Response
+  try {
+    res = await fetch('/api/topplista', { headers: { Accept: 'application/json' } })
+  } catch {
+    return { status: 'fel', fel: 'Kunde inte nå servern.' }
+  }
+  if (res.status === 404) return { status: 'ingen' }
+  if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
+  try {
+    return { status: 'ok', data: (await res.json()) as Topplista }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
   }

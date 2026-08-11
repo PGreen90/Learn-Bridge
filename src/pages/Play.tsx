@@ -35,7 +35,7 @@ import { FelrapportDialog } from '../components/FelrapportDialog'
 import { gameFromDeal, gameFromSeed, useGame, type Game } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
 import type { TavlingSpel } from './play/tavling-mode'
-import type { GivResultat } from '../lib/backend/tavling'
+import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
@@ -422,6 +422,15 @@ export function PlayTable({
     scoreLabel: score?.label ?? null,
   })
 
+  // Råmaterialet servern validerar: brickan + auktionen + de spelade korten +
+  // spelförarens stick. Servern regenererar given själv ur fröet.
+  const byggInskick = (): TavlingInskick => ({
+    board: tavling ? tavling.board : deal.board,
+    history: calls,
+    plays: playsFrom(play),
+    declarerTricks: result.declarerTricks,
+  })
+
   // Dagens giv: det delbara resultatet (Wordle-mekaniken). Telefoner får
   // delningsarket (navigator.share), datorer kopierar till urklipp.
   // Texten är SPOILERFRI sedan Etapp B — bara dina stick, aldrig kontraktet.
@@ -599,7 +608,7 @@ export function PlayTable({
                     /* Tävling: den enda vägen framåt är nästa giv i serien (eller
                        ställningen om det var den sista). Inget omspel — man spelar
                        varje tävlingsgiv en gång. */
-                    <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat())}>
+                    <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat(), byggInskick())}>
                       {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
                     </Button>
                   ) : (
@@ -654,7 +663,7 @@ export function PlayTable({
                 Rondgenomgång
               </Button>
               {tavling ? (
-                <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat())}>
+                <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat(), byggInskick())}>
                   {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
                 </Button>
               ) : (

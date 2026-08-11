@@ -18,10 +18,14 @@ import { Felt } from '../components/Felt'
 import { loadTavlingFramsteg, saveTavlingFramsteg } from '../lib/backend'
 import {
   fetchDagensTavling,
+  fetchTopplista,
+  submitTavlingGiv,
   type DagensTavling as TavlingData,
   type GivResultat,
+  type InskickStatus,
   type TavlingFramsteg,
   type TavlingsResultat,
+  type TopplistaResultat,
 } from '../lib/backend/tavling'
 import { Play } from './Play'
 import type { TavlingSpel } from './play/tavling-mode'
@@ -41,6 +45,8 @@ export function DagensTavling() {
   const [framsteg, setFramsteg] = useState<TavlingFramsteg | null>(null)
   // Index i givar-listan för given som spelas just nu (null = översikten visas).
   const [spelIndex, setSpelIndex] = useState<number | null>(null)
+  // Dagens topplista (hämtas på översikten).
+  const [topplista, setTopplista] = useState<TopplistaResultat | null>(null)
 
   // Hämta dagens tävling när vi vet att användaren är inloggad.
   useEffect(() => {
@@ -63,6 +69,19 @@ export function DagensTavling() {
     const sparat = loadTavlingFramsteg()
     setFramsteg(sparat && sparat.nummer === nummer ? sparat : { nummer, klara: [] })
   }, [resultat])
+
+  // Hämta topplistan när översikten visas (och efter varje giv man kommer
+  // tillbaka från) — den uppdateras löpande under dagen.
+  useEffect(() => {
+    if (!resultat || resultat.status !== 'ok' || spelIndex !== null) return
+    let active = true
+    fetchTopplista().then((t) => {
+      if (active) setTopplista(t)
+    })
+    return () => {
+      active = false
+    }
+  }, [resultat, spelIndex])
 
   // --- Grindar: konto krävs -------------------------------------------------
   if (authLoading) {
@@ -142,7 +161,7 @@ export function DagensTavling() {
       board: giv.deal.board,
       total: tavling.storlek,
       sista: kvarEfterDenna === 0,
-      onKlar: (r) => {
+      onKlar: (r, inskick) => {
         // Bokför resultatet (ersätt ev. tidigare rad för samma bricka) och gå
         // direkt vidare till nästa ospelade giv — eller till översikten
         // (ställningen) när serien är klar.
@@ -151,6 +170,18 @@ export function DagensTavling() {
         saveTavlingFramsteg(nytt)
         setFramsteg(nytt)
         setSpelIndex(förstaOspelade(tavling, klara))
+        // Skicka in given i bakgrunden; märk raden med serverns svar när det kommer.
+        submitTavlingGiv(inskick).then((svar) => {
+          setFramsteg((f) => {
+            if (!f || f.nummer !== tavling.nummer) return f
+            const uppd = f.klara.map((k) =>
+              k.board === r.board ? { ...k, inskickStatus: svar.status } : k,
+            )
+            const nf: TavlingFramsteg = { ...f, klara: uppd }
+            saveTavlingFramsteg(nf)
+            return nf
+          })
+        })
       },
       onÖversikt: () => setSpelIndex(null),
     }
@@ -195,20 +226,27 @@ export function DagensTavling() {
           {tavling.givar.map((g, i) => {
             const klar = framsteg.klara.find((k) => k.board === g.deal.board)
             const ärNästa = i === nästa
+            const avvisad = klar?.inskickStatus === 'avvisad'
             return (
               <div
                 key={g.deal.id}
                 className={`flex aspect-square flex-col items-center justify-center rounded-lg text-sm font-semibold ring-1 ${
-                  klar
-                    ? 'bg-gold-400/15 text-gold-200 ring-gold-400/40'
-                    : ärNästa
-                      ? 'bg-emerald-800/60 text-emerald-50 ring-gold-400/40'
-                      : 'bg-emerald-950/40 text-emerald-100/50 ring-emerald-100/10'
+                  avvisad
+                    ? 'bg-danger/15 text-danger ring-danger/40'
+                    : klar
+                      ? 'bg-gold-400/15 text-gold-200 ring-gold-400/40'
+                      : ärNästa
+                        ? 'bg-emerald-800/60 text-emerald-50 ring-gold-400/40'
+                        : 'bg-emerald-950/40 text-emerald-100/50 ring-emerald-100/10'
                 }`}
-                title={klar ? klar.headline : undefined}
+                title={
+                  klar
+                    ? `${klar.headline}${STATUS_TITEL[klar.inskickStatus ?? 'pending']}`
+                    : undefined
+                }
               >
                 <span>{g.deal.board}</span>
-                {klar && <span className="text-[10px] leading-none">✓</span>}
+                {klar && <span className="text-[10px] leading-none">{STATUS_GLYF[klar.inskickStatus ?? 'pending']}</span>}
               </div>
             )
           })}
@@ -217,11 +255,11 @@ export function DagensTavling() {
         {/* Huvudknapp */}
         <div className="flex flex-col items-center gap-3">
           {alltKlart ? (
-            <div className="w-full space-y-3 rounded-xl bg-emerald-950/45 p-4 text-center ring-1 ring-gold-400/25">
+            <div className="w-full rounded-xl bg-emerald-950/45 p-4 text-center ring-1 ring-gold-400/25">
               <p className="font-brand text-lg text-gold-200">🎉 Alla {tavling.storlek} givar spelade!</p>
               <p className="text-sm text-emerald-100/75">
-                Inskick till servern, validering och topplista kommer i nästa steg.
-                Så länge sparas ditt resultat på den här enheten.
+                Dina givar är inskickade och validerade. Ställningen nedan uppdateras
+                löpande under dagen och blir slutlig efter midnatt.
               </p>
             </div>
           ) : nästa !== null ? (
@@ -229,10 +267,76 @@ export function DagensTavling() {
               {antalKlara === 0 ? 'Starta tävlingen →' : `Fortsätt – giv ${tavling.givar[nästa].deal.board} →`}
             </Button>
           ) : null}
+        </div>
+
+        {/* Topplistan (Led 3) — provisorisk under dagen. */}
+        <TopplistaVy resultat={topplista} />
+
+        <div className="flex justify-center">
           <HemLänk />
         </div>
       </div>
     </Skärm>
+  )
+}
+
+/** Liten statusmarkör på en spelad giv-bricka (inskickets utfall). */
+const STATUS_GLYF: Record<InskickStatus | 'pending', string> = {
+  godkand: '✓',
+  avvisad: '✗',
+  granskning: '?',
+  redan: '✓',
+  fel: '⚠',
+  pending: '·',
+}
+const STATUS_TITEL: Record<InskickStatus | 'pending', string> = {
+  godkand: ' — inskickad ✓',
+  avvisad: ' — inskicket avvisades',
+  granskning: ' — under granskning',
+  redan: ' — redan inskickad',
+  fel: ' — nådde inte servern (spara lokalt)',
+  pending: ' — skickar in …',
+}
+
+/** Dagens topplista (provisorisk). Tyst medan den hämtas eller om servern inte
+ *  har någon tävling/svarar — översikten fungerar ändå. */
+function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
+  if (!resultat) {
+    return <p className="text-center text-xs text-emerald-100/50">Hämtar ställningen …</p>
+  }
+  if (resultat.status !== 'ok') return null
+  const { topplista, poängsattaGivar, minPerGiv } = resultat.data
+  return (
+    <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
+      <h2 className="text-center font-brand text-lg text-gold-200">Ställningen</h2>
+      {topplista.length === 0 ? (
+        <p className="text-center text-sm text-emerald-100/70">
+          Väntar på fler resultat — en giv ger poäng först när minst {minPerGiv} spelare
+          har spelat den.
+        </p>
+      ) : (
+        <>
+          <ol className="space-y-1">
+            {topplista.map((rad, i) => (
+              <li
+                key={`${rad.namn}-${i}`}
+                className="flex items-center justify-between rounded-lg bg-emerald-950/40 px-3 py-1.5 text-sm"
+              >
+                <span className="flex items-center gap-2 text-emerald-50">
+                  <span className="w-5 text-right text-emerald-100/60">{i + 1}.</span>
+                  {rad.namn}
+                </span>
+                <span className="font-semibold text-gold-200">{rad.snitt.toFixed(1)} %</span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-center text-[11px] text-emerald-100/50">
+            {poängsattaGivar} {poängsattaGivar === 1 ? 'giv' : 'givar'} med tillräckligt många
+            spelare · provisorisk
+          </p>
+        </>
+      )}
+    </div>
   )
 }
 

@@ -16,19 +16,17 @@ svarar på vad).
 `+test2@gmail.com` i Supabase → Authentication → Users). Detalj: minnet
 `beslut-b-etapp1-progress`.
 
-**ETAPP 2 SERVERSIDAN KLAR & LIVE (2026-08-10) + KLIENTFASEN LED 1 KLAR
+**ETAPP 2 SERVERSIDAN + LED 1 LIVE (2026-08-10/11); LED 2+3 BYGGDA & TESTADE
 (2026-08-11).** Grindbeslut: dölj Dagens giv, provisorisk topplista JA, paus JA,
-fler längder senare; klientgrind: **konto krävs** för hela tävlingen, **linjärt
-upplägg giv 1→12**. Serversidan live-verifierad (esbuild-buntning, cron-giv-
-generering HMAC→DB migration `0004`, hämtning `/api/dagens-tavling`, fröad
-bot-slump `play-seed.ts`). **LED 1 (spelbar tävling i appen) byggt & testat, ej
-live-verifierat:** `playSeed` per giv i hämtningsvägen, `fetchDagensTavling()` +
-`gameFromDeal()`, `playSeed` trådat till spelbordet, ny sida `DagensTavling.tsx`
-(`#/spela-kort/tavling`, grind + progress + paus), startsidan ompekad, fria
-"Dagens giv" avlänkad. **NU KVAR = LED 2:** inskick (budhistorik + kort, form som
-`SavedGame` i `resume.ts`) → asynkron omspelningsvalidering, sedan LED 3 (matchpoäng
-→ provisorisk topplista). Full status: minnet `beslut-b-etapp2-progress` +
-`docs/beslut-b-plan.md`.
+fler längder senare; **konto krävs**, **linjärt giv 1→12**; validering INLINE på
+"snabb" nivå (given/buden/poängen direkt; tung bot-kort-granskning → etapp 3).
+LED 1 live (`fe66195`): `playSeed`/`fetchDagensTavling()`/`gameFromDeal()`, sidan
+`DagensTavling.tsx` (`#/spela-kort/tavling`), startsidan ompekad. LED 2+3 byggt:
+migration `0005` (`daily_results`), `validera()` + `/api/skicka-in`, `matchpoints.ts`
++ `/api/topplista`, `submitTavlingGiv()`/`fetchTopplista()` + `TopplistaVy`.
+**NU KVAR:** (1) ägaren kör migration `0005` i Supabase, (2) deploy, (3) live-
+verifiera kedjan (två konton → topplista). Sedan = grind till **etapp 3 (härdning)**.
+Detalj: minnet `beslut-b-etapp2-progress` + `docs/beslut-b-plan.md`.
 
 ---
 

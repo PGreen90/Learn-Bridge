@@ -255,24 +255,38 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   pekar om till tävlingen; fria "Dagens giv" avlänkad (koden kvar). Facit:
   `playSeedForBoard`, `tavling.ts`-översättningen, `tavling-smoke.test.tsx`
   (tävlingsläget i spelskärmen inkl. `onKlar`), `DagensTavling.test.tsx` (grind +
-  hämtning + framsteg). **KVAR (Led 2):** klienten skickar in budhistorik + spelade
-  kort (samma form som `SavedGame` i `resume.ts`).
-- **Servern validerar asynkront:** inskicket sparas direkt som provisoriskt; en
-  kö spelar om given inom minuter och flippar till godkänt/avvisat. Omspelningen
-  kontrollerar: rätt giv, laglig auktion, varje botbud = motorns bud, spelet
-  omspelat drag för drag, varje botkort = motorns kort med fröad slump (från
-  etapp 0), poängen omräknad med `scoring.ts`. Vid botkorts-avvikelse (flyttal
-  kan skilja mellan webbläsare och server) → manuell granskning, inte
-  auto-avslag.
+  hämtning + framsteg).
+- **Inskick + validering (Led 2) — BYGGT & TESTAT (2026-08-11).** Klienten skickar
+  in en spelad giv (bricka + auktion + spelade kort + spelförarstick) med sin
+  inloggnings-token → `/api/skicka-in` (`api-src/skicka-in.ts`). **Validering körs
+  INLINE vid inskicket** (inte async kö): gratis-Vercel har inga täta bakgrundsjobb
+  (cron bara en gång/dygn), så en kö går inte — och inline ger direkt svar. **Nivå
+  "snabb" (ägarbeslut 2026-08-11):** `validera()` (`api-src/_lib/validera.ts`)
+  regenererar given ur fröet och kontrollerar det billiga + deterministiska som
+  fångar påhittade resultat: rätt giv, laglig auktion, varje BOT-bud = motorns bud,
+  varje kort lagligt (motorns `playCard`), stickantalet ryms i spelet, och POÄNGEN
+  räknas alltid om på servern. Den tunga bot-KORT-granskningen (Monte-Carlo) skjuts
+  till etapp 3-härdningen (då byggs dolda händer på servern ändå). Skriver
+  `daily_results` med service-nyckeln efter validering (migration `0005`, RLS "läs
+  egen"); ett inskick per giv, det första står (409 vid ominskick). Klient:
+  `submitTavlingGiv()` i bakgrunden när en giv är klar, brickan märks med utfallet.
+  Facit: `validera.test.ts` (ärligt inskick godkänns; bytt giv / manipulerat
+  bot-bud / påhittat stickantal / olagligt kort avvisas).
 
-**2b — poäng + topplista:**
-- Matchpoäng per giv, poolat över alla som spelat given; tävlingsresultatet är
-  snittet över de 12. Minst två spelare per giv krävs för poäng, annars "väntar
-  på fler resultat".
-- Rondrapporten/facit för en giv låses upp FÖRST efter eget inskick — tvingat i
-  databasens radskydd (RLS), inte bara i gränssnittet.
-- Ställningen provisorisk under dagen (om grindbeslutet säger så), slutlig
-  efter midnatt + valideringssvep.
+**2b — poäng + topplista — BYGGT & TESTAT (2026-08-11):**
+- Matchpoäng per giv (`src/lib/engine/matchpoints.ts`, ren funktion +
+  `matchpoints.test.ts`): N/S-poängen (`nsScore`) jämförs mot alla andra på given
+  (bättre = 1, lika = 0,5), toppen = antal spelare − 1, i procent.
+  Tävlingsresultatet = snittet över de poängsatta givarna. Minst **två spelare per
+  giv** krävs, annars "väntar på fler". `/api/topplista` (`api-src/topplista.ts`)
+  aggregerar dagens godkända inskick server-side (service-nyckeln) + hämtar
+  visningsnamn; `fetchTopplista()` + `TopplistaVy` på `DagensTavling`-sidan.
+- **Materialiserad `daily_standings`-vy behövs INTE** — topplistan räknas i den
+  testade TS-funktionen i endpointen (matchpoänglogiken bor inte i SQL).
+- **Facit-gate via RLS SKJUTS UPP:** under Nivå 1 har klienten redan alla händer
+  (hämtas i förväg), så en RLS-spärr på att se en givs facit före inskick är
+  verkningslös — den hör ihop med Nivå 2 (dolda händer, etapp 3-härdningen).
+- Ställningen provisorisk under dagen, slutlig efter midnatt + valideringssvep.
 - Schemat byggs för framtida längder (tävlingsserie med storlek som kolumn) så
   8/16/24 kan läggas till utan ombyggnad.
 
@@ -361,3 +375,14 @@ bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
   vakten pekar nu på de riktiga funktionerna). +9 facit, hela sviten grön, tsc
   rent. **KVAR:** Led 2 (inskick → validering), Led 3 (poäng → topplista). Det
   inloggade spelflödet live-verifieras efter deploy.
+- **2026-08-11: ETAPP 2 LED 2 + LED 3 BYGGDA & TESTADE** (inskick → validering →
+  poäng → topplista). Vägval (ägaren): validering körs INLINE vid inskicket på
+  "snabb" nivå (given/buden/poängen kontrolleras direkt; tung bot-kort-granskning
+  skjuts till etapp 3). Byggt: migration `0005` (`daily_results` + RLS "läs egen"),
+  `validera()` + `/api/skicka-in` (token-verifiering + inline-validering + skriv
+  med service-nyckeln), `matchpointsForBoard()`/`nsScore()` + `/api/topplista`,
+  klient `submitTavlingGiv()`/`fetchTopplista()` + inskicksstatus på brickorna +
+  `TopplistaVy`. Buntningsvakten skannar nu även `api-src/` (serverkod). +18 facit,
+  hela sviten grön, tsc rent. **ÄGARSTEG FÖRE DEPLOY:** kör migration `0005` i
+  Supabase (SQL Editor). Sedan live-verifieras hela kedjan (två konton → topplista)
+  med ägaren.

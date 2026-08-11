@@ -6,7 +6,7 @@
 // modul så att både spelskärmen och "Dagens tävling"-sidan kan importera typen
 // utan importcykel.
 
-import type { GivResultat, TavlingsGiv } from '../../lib/backend/tavling'
+import type { GivResultat, TavlingInskick, TavlingsGiv } from '../../lib/backend/tavling'
 
 export interface TavlingSpel {
   /** Given att spela + play-fröet (deterministiska bottar för valideringen). */
@@ -19,8 +19,9 @@ export interface TavlingSpel {
   total: number
   /** Sista given i serien → "Se ställningen" i stället för "Nästa giv". */
   sista: boolean
-  /** Given är klar (spelad eller passad) → registrera resultatet och gå vidare. */
-  onKlar: (resultat: GivResultat) => void
+  /** Given är klar (spelad eller passad) → registrera resultatet, skicka in det
+   *  (inskick) och gå vidare. `inskick` är råmaterialet servern validerar. */
+  onKlar: (resultat: GivResultat, inskick: TavlingInskick) => void
   /** Lämna given utan att slutföra → tillbaka till översikten. */
   onÖversikt: () => void
 }
