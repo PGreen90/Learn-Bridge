@@ -150,6 +150,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       namn: namn.get(p.spelare) ?? '—',
       snitt: p.snitt,
       antalGivar: p.antalGivar,
+      // Markera kallarens egen rad (steg 6) — klienten highlightar den.
+      jag: p.spelare === meId,
     }))
 
     return json(200, {

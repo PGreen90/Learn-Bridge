@@ -5,7 +5,7 @@
 // nätverket eller spelmotorn.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom/vitest'
 import type { DagensTavling as TavlingData, TavlingsResultat } from '../lib/backend/tavling'
@@ -20,9 +20,15 @@ vi.mock('../components/AuthProvider', () => ({
 // Hånad serverhämtning: testet bestämmer utfallet.
 const fetchMock = vi.hoisted(() => vi.fn())
 const topplistaMock = vi.hoisted(() => vi.fn())
+const givResultatMock = vi.hoisted(() => vi.fn())
 vi.mock('../lib/backend/tavling', async (importActual) => {
   const actual = await importActual<typeof import('../lib/backend/tavling')>()
-  return { ...actual, fetchDagensTavling: fetchMock, fetchTopplista: topplistaMock }
+  return {
+    ...actual,
+    fetchDagensTavling: fetchMock,
+    fetchTopplista: topplistaMock,
+    fetchGivResultat: givResultatMock,
+  }
 })
 
 import { DagensTavling } from './DagensTavling'
@@ -47,6 +53,8 @@ beforeEach(() => {
   // Standard: ingen topplistedata (som förr, då fetchTopplista gav 'fel' i jsdom).
   topplistaMock.mockReset()
   topplistaMock.mockResolvedValue({ status: 'fel', fel: 'ingen data i test' })
+  givResultatMock.mockReset()
+  givResultatMock.mockResolvedValue({ status: 'fel', fel: 'ingen data i test' })
 })
 afterEach(() => {
   cleanup()
@@ -151,44 +159,46 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(screen.getByText('väntar')).toBeInTheDocument()
   })
 
-  it('resultattabellen: en giv med sparad given (kontrakt+kort) är klickbar för genomgång', async () => {
+  it('resultattabellen: varje spelad giv är klickbar → fältets resultat (travellern)', async () => {
     localStorage.setItem(
       'learnbridge:tavling-framsteg',
       JSON.stringify({
         nummer: 9,
         klara: [
-          // Sparad given → klickbar.
-          {
-            board: 1,
-            myTricks: 10,
-            win: true,
-            headline: '',
-            scoreLabel: null,
-            kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 },
-            history: [],
-            plays: [],
-          },
-          // Äldre framsteg (kontrakt men inga sparade kort) → EJ klickbar.
-          {
-            board: 2,
-            myTricks: 8,
-            win: false,
-            headline: '',
-            scoreLabel: null,
-            kontrakt: { level: 3, strain: 'NT', declarer: 'E', diff: -1 },
-          },
+          { board: 1, myTricks: 10, win: true, headline: '', scoreLabel: null, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 }, history: [], plays: [] },
+          { board: 2, myTricks: 8, win: false, headline: '', scoreLabel: null, kontrakt: { level: 3, strain: 'NT', declarer: 'E', diff: -1 } },
         ],
       }),
     )
     fetchMock.mockResolvedValue(ok())
+    // Travellern för giv 1: två spelare, din rad markerad.
+    givResultatMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        board: 1,
+        resultat: [
+          { namn: 'Green', jag: true, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 }, nsScore: 420, procent: 100 },
+          { namn: 'Testkonto', jag: false, kontrakt: { level: 3, strain: 'NT', declarer: 'S', diff: 1 }, nsScore: 430, procent: 0 },
+        ],
+      },
+    })
     render(
       <MemoryRouter>
         <DagensTavling />
       </MemoryRouter>,
     )
     expect(await screen.findByText('Dina givar')).toBeInTheDocument()
-    // Exakt en rad (giv 1) exponerar genomgångs-affordansen.
-    expect(screen.getAllByTitle('Öppna rondgenomgången')).toHaveLength(1)
+    // Båda spelade givarna är klickbara.
+    const knappar = screen.getAllByTitle('Visa fältets resultat')
+    expect(knappar).toHaveLength(2)
+
+    // Klick på giv 1 → detaljvyn hämtar och visar travellern.
+    fireEvent.click(knappar[0])
+    expect(await screen.findByText('Hela fältets resultat')).toBeInTheDocument()
+    expect(givResultatMock).toHaveBeenCalledWith(1)
+    // Din rad markeras och motståndaren listas.
+    expect(screen.getByText('Testkonto')).toBeInTheDocument()
+    expect(screen.getByText(/\(du\)/)).toBeInTheDocument()
   })
 
   it('resultattabellen fyller kontrakt/resultat från SERVERN även utan lokalt kontrakt', async () => {

@@ -227,6 +227,9 @@ export interface TopplistaRad {
   /** Snittprocent över de poängsatta givarna (0–100). */
   snitt: number
   antalGivar: number
+  /** Sant för den inloggades egen rad (steg 6 — highlightas). Kan saknas i
+   *  äldre/anonyma svar. */
+  jag?: boolean
 }
 
 /** Kallarens egen placering + snitt (bara med när man är inloggad och har minst
@@ -297,6 +300,53 @@ export async function fetchTopplista(): Promise<TopplistaResultat> {
       dinaGivar: raw.dinaGivar ?? [],
     }
     return { status: 'ok', data }
+  } catch (err) {
+    return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
+  }
+}
+
+// ===========================================================================
+// Led 4 — travellern (hela fältets resultat på EN giv, steg 6)
+// ===========================================================================
+
+/** En spelares rad i travellern på en giv: kontrakt + N/S-poäng + MP%. */
+export interface BrickaRad {
+  namn: string
+  /** Din egen rad (highlightas). */
+  jag: boolean
+  /** Kontraktet spelaren nådde, eller null (utpassad giv). */
+  kontrakt: GivKontrakt | null
+  nsScore: number
+  procent: number
+}
+
+export interface GivResultatSvar {
+  board: number
+  /** Alla spelares resultat på brickan, bäst MP% först. */
+  resultat: BrickaRad[]
+}
+
+export type GivResultatUtfall =
+  | { status: 'ok'; data: GivResultatSvar }
+  | { status: 'fel'; fel: string }
+
+/** Hämta hela fältets resultat på en giv (travellern). Kräver inloggning OCH att
+ *  man själv spelat brickan (servern nekar annars — ingen tjuvkik). */
+export async function fetchGivResultat(board: number): Promise<GivResultatUtfall> {
+  const session = await getCurrentSession()
+  const token = session?.access_token
+  if (!token) return { status: 'fel', fel: 'Inte inloggad.' }
+  let res: Response
+  try {
+    res = await fetch(`/api/giv-resultat?board=${board}`, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+    })
+  } catch {
+    return { status: 'fel', fel: 'Kunde inte nå servern.' }
+  }
+  if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
+  try {
+    return { status: 'ok', data: (await res.json()) as GivResultatSvar }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
   }

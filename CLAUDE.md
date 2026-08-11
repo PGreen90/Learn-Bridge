@@ -10,24 +10,21 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — TÄVLINGS-UI-POLISH (6 förbättringar, en i taget live)
+### 🔵 NU — UI-POLISH KLAR, ägaren väljer nästa
 
 **ETAPP 2 KOMPLETT & LIVE-VERIFIERAD (2026-08-11):** två konton → topplista med
 matchpoäng, rätt live; migr. `0005`+`0006` körda; ETAPP 1 (konton) klar sedan förr.
 Rest: städa testkontona (`+smoke`/`+test2`/`+test3` i Supabase → Auth → Users).
 Detalj: [[beslut-b-etapp2-progress]] + `docs/beslut-b-plan.md`.
 
-**UI-POLISH (ägarbeslut 2026-08-11; Funbridge-inspirerat men EGEN emerald-stil —
-låna idéer, ALDRIG kopiera; MP bara, ingen IMP):**
-1. Nedräkningsklocka **KLAR & LIVE (`42fc1a8`)** — "Nästa tävling om HH:MM:SS" på
-   översikten mot midnatt svensk tid (`msTillNastaTavling`/`formatNedrakning` i
-   `daily.ts`, DST-säkert, alla tidszoner).
-2–5. **KLARA & DEPLOYADE** — `/api/topplista` (valfri token) → `du` + `dinaGivar`
-   (MP% + kontrakt·resultat ur serverns data, auktoritativt). Översikten:
-   `DinStällning`-kort + `Resultattabell` per giv (klick → rondgenomgången via
-   `byggGranskning`/`RondRapportView`). Detalj: [[tavling-ui-polish]].
-**NÄSTA = steg 6:** snyggare ranking-vy (highlighta DIN rad). Sedan grind till
-**etapp 3**. (Mobil-layout för översikten = för hög → ⚪ SENARE, ägaren 2026-08-11.)
+**TÄVLINGS-UI-POLISH KLAR & DEPLOYAD (2026-08-11) — alla 6 steg live** (egen
+emerald-stil, MP bara): 1) nedräkningsklocka · 2) server-MP-påbygg · 3)
+`DinStällning`-kort · 4) `Resultattabell` per giv · 5) klick→rondgenomgång
+(`byggGranskning`) · 6) traveller per giv (`/api/giv-resultat` → fältets
+kontrakt·resultat·MP%, din rad markerad) + highlightad topplisterad. Kontrakt/
+resultat är server-auktoritativt. Detalj: [[tavling-ui-polish]].
+**NÄSTA (ägaren väljer):** grind till **etapp 3 (härdning)** · ELLER mobil-layout
+för översikten (för hög → ⚪ SENARE) · städa testkontona.
 
 ---
 

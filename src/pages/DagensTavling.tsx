@@ -21,11 +21,14 @@ import { loadTavlingFramsteg, saveTavlingFramsteg } from '../lib/backend'
 import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
 import {
   fetchDagensTavling,
+  fetchGivResultat,
   fetchTopplista,
   submitTavlingGiv,
   type DagensTavling as TavlingData,
   type GivKontrakt,
   type GivResultat,
+  type GivResultatSvar,
+  type GivResultatUtfall,
   type InskickStatus,
   type TavlingFramsteg,
   type TavlingsResultat,
@@ -51,6 +54,8 @@ export function DagensTavling() {
   const [framsteg, setFramsteg] = useState<TavlingFramsteg | null>(null)
   // Index i givar-listan för given som spelas just nu (null = översikten visas).
   const [spelIndex, setSpelIndex] = useState<number | null>(null)
+  // Bricknummer för giv-detaljvyn (travellern, steg 6), null = ingen.
+  const [detaljBoard, setDetaljBoard] = useState<number | null>(null)
   // Bricknummer för given vars rondgenomgång visas (steg 5), null = ingen.
   const [granskaBoard, setGranskaBoard] = useState<number | null>(null)
   // Dagens topplista (hämtas på översikten).
@@ -251,6 +256,21 @@ export function DagensTavling() {
     )
   }
 
+  // --- Giv-detalj (steg 6): hela fältets traveller för EN spelad giv ---------
+  if (detaljBoard !== null) {
+    const rad = framsteg.klara.find((k) => k.board === detaljBoard)
+    // Din egen rondgenomgång kräver den lokalt sparade given (kort + auktion).
+    const kanGenomgang = !!(rad?.kontrakt && rad.history && rad.plays)
+    return (
+      <GivDetalj
+        board={detaljBoard}
+        kanGenomgang={kanGenomgang}
+        onBack={() => setDetaljBoard(null)}
+        onGenomgang={() => setGranskaBoard(detaljBoard)}
+      />
+    )
+  }
+
   // --- Översikten -----------------------------------------------------------
   const antalKlara = framsteg.klara.length
   const alltKlart = antalKlara >= tavling.storlek
@@ -335,7 +355,7 @@ export function DagensTavling() {
 
         {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
         <DinStällning resultat={topplista} />
-        <Resultattabell klara={framsteg.klara} topplista={topplista} onGranska={setGranskaBoard} />
+        <Resultattabell klara={framsteg.klara} topplista={topplista} onÖppna={setDetaljBoard} />
         <TopplistaVy resultat={topplista} />
 
         <div className="flex justify-center">
@@ -453,12 +473,12 @@ function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
 function Resultattabell({
   klara,
   topplista,
-  onGranska,
+  onÖppna,
 }: {
   klara: GivResultat[]
   topplista: TopplistaResultat | null
-  /** Klick på en giv → öppna dess rondgenomgång (steg 5). */
-  onGranska: (board: number) => void
+  /** Klick på en giv → öppna dess detaljvy (travellern, steg 6). */
+  onÖppna: (board: number) => void
 }) {
   if (klara.length === 0) return null
   const mpPerBricka = new Map<number, number>()
@@ -495,33 +515,26 @@ function Resultattabell({
               const kontrakt = kontraktPerBricka.has(r.board)
                 ? kontraktPerBricka.get(r.board)!
                 : r.kontrakt
-              // Genomgången kräver den LOKALT sparade given (kort + auktion).
-              const granskbar = kontrakt != null && r.history != null && r.plays != null
-              const öppna = granskbar ? () => onGranska(r.board) : undefined
+              // Varje spelad giv går att öppna → travellern (fältets resultat).
+              const öppna = () => onÖppna(r.board)
               return (
                 <tr
                   key={r.board}
-                  className={`border-t border-emerald-100/5 ${
-                    granskbar ? 'cursor-pointer hover:bg-emerald-900/30' : ''
-                  }`}
-                  {...(öppna
-                    ? {
-                        role: 'button',
-                        tabIndex: 0,
-                        title: 'Öppna rondgenomgången',
-                        onClick: öppna,
-                        onKeyDown: (e: React.KeyboardEvent) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            öppna()
-                          }
-                        },
-                      }
-                    : {})}
+                  className="cursor-pointer border-t border-emerald-100/5 hover:bg-emerald-900/30"
+                  role="button"
+                  tabIndex={0}
+                  title="Visa fältets resultat"
+                  onClick={öppna}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      öppna()
+                    }
+                  }}
                 >
                   <td className="py-1.5 pr-2 tabular-nums text-emerald-100/70">
                     {r.board}
-                    {granskbar && <span className="ml-1 text-gold-300/70">›</span>}
+                    <span className="ml-1 text-gold-300/70">›</span>
                   </td>
                   <td className="px-2 py-1.5">
                     <Kontraktscell k={kontrakt} />
@@ -544,7 +557,113 @@ function Resultattabell({
           </tbody>
         </table>
       </div>
-      <p className="text-center text-[11px] text-emerald-100/45">Tryck på en giv för genomgången.</p>
+      <p className="text-center text-[11px] text-emerald-100/45">Tryck på en giv för fältets resultat.</p>
+    </div>
+  )
+}
+
+/** Detaljvy för EN spelad giv (steg 6): hela fältets traveller (kontrakt ·
+ *  resultat · MP%, din rad markerad) + väg till din egen rondgenomgång. */
+function GivDetalj({
+  board,
+  kanGenomgang,
+  onBack,
+  onGenomgang,
+}: {
+  board: number
+  kanGenomgang: boolean
+  onBack: () => void
+  onGenomgang: () => void
+}) {
+  const [utfall, setUtfall] = useState<GivResultatUtfall | null>(null)
+  useEffect(() => {
+    let active = true
+    setUtfall(null)
+    fetchGivResultat(board).then((u) => {
+      if (active) setUtfall(u)
+    })
+    return () => {
+      active = false
+    }
+  }, [board])
+
+  return (
+    <Skärm>
+      <div className="w-full max-w-xl space-y-5">
+        <header className="text-center">
+          <h1 className="font-brand text-2xl text-emerald-50">Giv {board}</h1>
+          <p className="text-sm text-emerald-100/70">Hela fältets resultat</p>
+        </header>
+
+        {!utfall ? (
+          <p className="text-center text-sm text-emerald-100/60">Hämtar resultaten …</p>
+        ) : utfall.status !== 'ok' ? (
+          <p className="text-center text-sm text-emerald-100/70">{utfall.fel}</p>
+        ) : (
+          <TravellerTabell data={utfall.data} />
+        )}
+
+        <div className="flex flex-col items-center gap-3">
+          {kanGenomgang && <Button onClick={onGenomgang}>Se hela given (bud + spel) →</Button>}
+          <button
+            onClick={onBack}
+            className="text-sm font-semibold text-emerald-100/70 underline underline-offset-2 hover:text-emerald-50"
+          >
+            ← Tillbaka till översikten
+          </button>
+        </div>
+      </div>
+    </Skärm>
+  )
+}
+
+/** Travellern: en rad per spelare på brickan (bäst MP% först), din rad markerad. */
+function TravellerTabell({ data }: { data: GivResultatSvar }) {
+  if (data.resultat.length === 0) {
+    return <p className="text-center text-sm text-emerald-100/70">Inga resultat än.</p>
+  }
+  const ensam = data.resultat.length < 2
+  return (
+    <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-xs text-emerald-100/55">
+              <th className="py-1 pr-2 text-left font-medium">Spelare</th>
+              <th className="px-2 py-1 text-left font-medium">Kontrakt</th>
+              <th className="px-2 py-1 text-center font-medium">Resultat</th>
+              <th className="py-1 pl-2 text-right font-medium">MP%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.resultat.map((r, i) => (
+              <tr
+                key={i}
+                className={`border-t border-emerald-100/5 ${r.jag ? 'bg-gold-400/10' : ''}`}
+              >
+                <td className={`py-1.5 pr-2 ${r.jag ? 'font-semibold text-gold-200' : 'text-emerald-50'}`}>
+                  {r.namn}
+                  {r.jag && ' (du)'}
+                </td>
+                <td className="px-2 py-1.5">
+                  <Kontraktscell k={r.kontrakt} />
+                </td>
+                <td className="px-2 py-1.5 text-center tabular-nums text-emerald-50">
+                  {resultatText(r.kontrakt)}
+                </td>
+                <td className="py-1.5 pl-2 text-right font-semibold tabular-nums text-gold-200">
+                  {r.procent.toFixed(0)} %
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {ensam && (
+        <p className="text-center text-[11px] text-emerald-100/50">
+          Väntar på fler spelare på den här given.
+        </p>
+      )}
     </div>
   )
 }
@@ -568,18 +687,28 @@ function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
       ) : (
         <>
           <ol className="space-y-1">
-            {topplista.map((rad, i) => (
-              <li
-                key={`${rad.namn}-${i}`}
-                className="flex items-center justify-between rounded-lg bg-emerald-950/40 px-3 py-1.5 text-sm"
-              >
-                <span className="flex items-center gap-2 text-emerald-50">
-                  <span className="w-5 text-right text-emerald-100/60">{i + 1}.</span>
-                  {rad.namn}
-                </span>
-                <span className="font-semibold text-gold-200">{rad.snitt.toFixed(1)} %</span>
-              </li>
-            ))}
+            {topplista.map((rad, i) => {
+              const medalj = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null
+              return (
+                <li
+                  key={`${rad.namn}-${i}`}
+                  className={`flex items-center justify-between rounded-lg px-3 py-1.5 text-sm ${
+                    rad.jag
+                      ? 'bg-gold-400/15 ring-1 ring-gold-400/40'
+                      : 'bg-emerald-950/40'
+                  }`}
+                >
+                  <span className={`flex items-center gap-2 ${rad.jag ? 'font-semibold text-gold-100' : 'text-emerald-50'}`}>
+                    <span className="w-5 text-right tabular-nums text-emerald-100/60">
+                      {medalj ?? `${i + 1}.`}
+                    </span>
+                    {rad.namn}
+                    {rad.jag && <span className="text-xs text-gold-300/80">(du)</span>}
+                  </span>
+                  <span className="font-semibold text-gold-200">{rad.snitt.toFixed(1)} %</span>
+                </li>
+              )
+            })}
           </ol>
           <p className="text-center text-[11px] text-emerald-100/50">
             {poängsattaGivar} {poängsattaGivar === 1 ? 'giv' : 'givar'} med tillräckligt många
