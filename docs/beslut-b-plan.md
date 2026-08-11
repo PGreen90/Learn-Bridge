@@ -223,10 +223,11 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   funktioner som kör motorn buntas nu med **esbuild** (`scripts/build-api.mjs`):
   källor i `api-src/*.ts` → självständiga `api/*.js` utan kvarvarande relativa
   importer. `npm run build` kör buntningen före vite (så Vercel återskapar
-  filerna; de gitignoras). Bevis: `api-src/motorprov.ts` kör motorn (giv-
-  generering) och svarar **HTTP 200 live på `https://rebidz.com/api/motorprov`** —
-  Vercel plockar upp den genererade funktionen. Facit: `api-src/build-bundling.test.ts`.
-  motorprov är TILLFÄLLIG och ersätts av den riktiga giv-genereringen nedan.
+  filerna; de gitignoras). Facit: `api-src/build-bundling.test.ts` kör det riktiga
+  byggsteget och kontrollerar att `api/dagens-tavling.js` + `api/generera-dagens-
+  givar.js` importerar rent under Node utan kvarvarande relativa importer.
+  (En tillfällig motorprov-endpoint bevisade först buntningen live på
+  `https://rebidz.com/api/motorprov`; den togs bort när hämtningsvägen fanns.)
   Kvar att bunta in när de behövs: `decideCall`/`rebuildPlay`/`botCardSmart`/`scoring`.
 - **Giv-genereringen — KLAR & LIVE-VERIFIERAD 2026-08-10.** Ett schemalagt
   serverjobb (`api-src/generera-dagens-givar.ts`, Vercel-cron `5 23 * * *` UTC =
@@ -240,10 +241,22 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   `0004` (tabeller + RLS utan policys + service_role-GRANT). Live-prov: 200 med
   12 givar, omkörning 200 (idempotent), 401 utan bevis. Facit: `dealFromSeed` +
   `seedForBoard`/`genereraGivar`. Gratis "Dagens giv" berörs inte (döljs senare
-  per grindbeslutet). **KVAR i 2a:** hämtningsväg + inskick + validering (nedan);
-  motorprov-endpointen kan tas bort (ersatt).
-- Klienten hämtar given via API, spelar mot bottarna som idag och skickar in
-  budhistorik + spelade kort (samma form som dagens sparade giv i `resume.ts`).
+  per grindbeslutet). **KVAR i 2a:** inskick + validering (nedan).
+- **Klientfasen Led 1 — KLAR (2026-08-11, ej live-verifierad än).** Hämtningsväg
+  `/api/dagens-tavling` (`api-src/dagens-tavling.ts`) levererar nu även ett
+  `playSeed` per giv (`playSeedForBoard`, HMAC `datum:bricka:play`) så bottarna
+  spelar deterministiskt för valideringen. Backend-hämtaren `fetchDagensTavling()`
+  (`src/lib/backend/tavling.ts`) översätter serversvaret → `Deal[]`. Spelfabriken
+  `gameFromDeal()` bygger en `Game` ur en serverlevererad giv; `playSeed` trådas
+  `Play`→`PlayTable`→`usePlayTable` (bot-vägen fanns sedan `b84835c`). Ny sida
+  `src/pages/DagensTavling.tsx` (rutt `#/spela-kort/tavling`): **konto krävs**
+  (utloggad → logga-in-ruta), **linjärt upplägg giv 1→12** med progress + paus
+  (framsteg lokalt i backend-lagret, `tavling-framsteg`). Startsidans flaggskepp
+  pekar om till tävlingen; fria "Dagens giv" avlänkad (koden kvar). Facit:
+  `playSeedForBoard`, `tavling.ts`-översättningen, `tavling-smoke.test.tsx`
+  (tävlingsläget i spelskärmen inkl. `onKlar`), `DagensTavling.test.tsx` (grind +
+  hämtning + framsteg). **KVAR (Led 2):** klienten skickar in budhistorik + spelade
+  kort (samma form som `SavedGame` i `resume.ts`).
 - **Servern validerar asynkront:** inskicket sparas direkt som provisoriskt; en
   kö spelar om given inom minuter och flippar till godkänt/avvisat. Omspelningen
   kontrollerar: rätt giv, laglig auktion, varje botbud = motorns bud, spelet
@@ -339,3 +352,12 @@ bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
   tecken, teckenregler + blocklista, LÅST för användaren med ägaröverstyrning
   (byt/spärra). NÄSTA konkreta steg: ägaren skapar Supabase-projektet (EU-region,
   helst Stockholm) — Claude guidar klick för klick.
+- **2026-08-11: ETAPP 2 KLIENTFASEN LED 1 KLAR** (servergiv → spelbar tävling i
+  appen). Grindbeslut samma dag: konto krävs för hela tävlingen · linjärt upplägg
+  giv 1→12. Byggt (se 2a-rubriken): `playSeed` per giv i hämtningsvägen,
+  `fetchDagensTavling()` + `gameFromDeal()`, `playSeed` trådat till spelbordet,
+  ny `DagensTavling`-sida (grind + progress + paus), startsidan ompekad, fria
+  "Dagens giv" avlänkad. Tillfälliga motorprov-endpointen borttagen (buntnings-
+  vakten pekar nu på de riktiga funktionerna). +9 facit, hela sviten grön, tsc
+  rent. **KVAR:** Led 2 (inskick → validering), Led 3 (poäng → topplista). Det
+  inloggade spelflödet live-verifieras efter deploy.

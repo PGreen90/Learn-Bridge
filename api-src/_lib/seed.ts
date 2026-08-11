@@ -13,3 +13,14 @@ export function seedForBoard(secret: string, dateISO: string, board: number): nu
   const mac = createHmac('sha256', secret).update(`${dateISO}:${board}`).digest()
   return mac.readUInt32BE(0)
 }
+
+/** Fröet för BOTTARNAS spel i en tävlingsgiv (skilt från giv-fröet ovan). Med
+ *  det spelar bottarna deterministiskt (src/lib/engine/play-seed.ts) så servern
+ *  kan spela om ett inskickat resultat och validera det. Behöver inte vara
+ *  hemligt — klienten får det i svaret och servern re-härleder samma tal vid
+ *  valideringen — men vi härleder det ur samma hemlighet för EN sanningskälla.
+ *  ":play"-suffixet gör att play-fröet aldrig sammanfaller med giv-fröet. */
+export function playSeedForBoard(secret: string, dateISO: string, board: number): number {
+  const mac = createHmac('sha256', secret).update(`${dateISO}:${board}:play`).digest()
+  return mac.readUInt32BE(0)
+}

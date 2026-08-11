@@ -32,8 +32,10 @@ import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
 import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
-import { gameFromSeed, useGame, type Game } from './play/useGame'
+import { gameFromDeal, gameFromSeed, useGame, type Game } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
+import type { TavlingSpel } from './play/tavling-mode'
+import type { GivResultat } from '../lib/backend/tavling'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
@@ -109,15 +111,20 @@ function initialGame(daily: boolean, nr: number | null, sitt: Seat | null): { ga
   return { game: null, plays: [] }
 }
 
-export function Play({ daily = false }: { daily?: boolean }) {
+export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: TavlingSpel }) {
   // Det aktiva givnumret i dagens giv-läget: en arkivdag ur adressen (?dag=N,
   // kalenderarkivet) eller dagens. Läses EN gång — rutten i App.tsx bär dagen
   // i React-nyckeln, så ett dagbyte monterar om hela sidan.
   const [dailyNr] = useState(() => (daily ? (parseUrlDay() ?? dailyNumber()) : null))
   // Dev-stolen (?sitt=): läses en gång, styr rotationen + adress-synken nedan.
   const [sitt] = useState(() => (daily ? null : parseUrlSeat()))
-  // Läses EN gång vid montering — därefter äger useGame tillståndet.
-  const [restored] = useState(() => initialGame(daily, dailyNr, sitt))
+  // Läses EN gång vid montering — därefter äger useGame tillståndet. Tävlingsgiv
+  // (Beslut B etapp 2): given kommer FÄRDIGDELAD från servern, så vi startar
+  // direkt ur den (ingen sparad-giv-återupptagning — pausen är per giv i serien
+  // och sköts av "Dagens tävling"-sidan).
+  const [restored] = useState(() =>
+    tavling ? { game: gameFromDeal(tavling.giv.deal), plays: [] as SavedGame['plays'] } : initialGame(daily, dailyNr, sitt),
+  )
   const {
     game,
     complete,
@@ -146,8 +153,10 @@ export function Play({ daily = false }: { daily?: boolean }) {
   }, [daily, game.seed, sitt])
 
   // Budfasen sparas löpande (spelfasen sparas i PlayTable som har spelläget).
+  // Tävlingsgiv sparas ALDRIG i den fria giv-luckan (den skulle skriva över ett
+  // pågående frispel) — tävlingens paus är per giv i serien.
   useEffect(() => {
-    if (game.phase !== 'bidding') return
+    if (tavling || game.phase !== 'bidding') return
     saveSavedGame({
       v: 1,
       daily,
@@ -158,15 +167,19 @@ export function Play({ daily = false }: { daily?: boolean }) {
       phase: 'bidding',
       plays: [],
     } satisfies SavedGame)
-  }, [game, daily, dailyNr])
+  }, [game, daily, dailyNr, tavling])
 
   // Dagens giv: "Ny giv" lämnar dagens giv och går till frispelet (routen byts
   // → Play monteras om med ny slumpgiv; key:arna i App.tsx garanterar det).
-  const onNewGame = daily
-    ? () => {
-        window.location.hash = '#/spela-kort'
-      }
-    : () => startNewGame(target)
+  // Tävlingsgiv: det finns ingen "ny giv" i en tävling — knappen lämnar i
+  // stället till översikten (att slutföra given görs med "Nästa giv →").
+  const onNewGame = tavling
+    ? tavling.onÖversikt
+    : daily
+      ? () => {
+          window.location.hash = '#/spela-kort'
+        }
+      : () => startNewGame(target)
 
   // Ljudmotorn får bara starta i en riktig användargest (autoplay-policyn).
   // Registreras på SIDNIVÅ så redan budfasens klick armerar den — då hörs
@@ -191,13 +204,15 @@ export function Play({ daily = false }: { daily?: boolean }) {
         contract={game.contract}
         calls={game.history}
         onNewGame={onNewGame}
-        onPlayAgain={startSameGame}
+        onPlayAgain={tavling ? undefined : startSameGame}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}
         daily={daily}
         dailyNr={dailyNr ?? undefined}
         seed={game.seed}
         restoredPlays={restoredPlays}
+        tavling={tavling}
+        playSeed={tavling ? tavling.giv.playSeed : undefined}
       />
     ) : (
       <BiddingPhase
@@ -206,12 +221,19 @@ export function Play({ daily = false }: { daily?: boolean }) {
         onBid={onBid}
         onConfirm={confirmContract}
         onNewGame={onNewGame}
-        onPlayAgain={startSameGame}
+        onPlayAgain={tavling ? undefined : startSameGame}
         targetLabel={describeTargetShort(target)}
         onOpenPicker={() => setPicking(true)}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}
-        dailyBadge={daily ? `Dagens giv #${dailyNr}` : undefined}
+        dailyBadge={
+          tavling
+            ? `Tävling · Giv ${tavling.board}/${tavling.total}`
+            : daily
+              ? `Dagens giv #${dailyNr}`
+              : undefined
+        }
+        tavling={tavling}
       />
     )
 
@@ -253,6 +275,8 @@ export function PlayTable({
   dailyNr,
   seed = null,
   restoredPlays,
+  playSeed,
+  tavling,
 }: {
   deal: Deal
   contract: Contract
@@ -273,6 +297,13 @@ export function PlayTable({
   seed?: number | null
   /** Spelade kort ur en sparad pågående giv — bordet börjar mitt i given. */
   restoredPlays?: SavedGame['plays']
+  /** Tävlingsspel (Beslut B etapp 2): play-fröet som gör bottarna
+   *  deterministiska så servern kan spela om och validera. Odefinierat i allt
+   *  vanligt spel = Math.random precis som förut. */
+  playSeed?: number | null
+  /** Tävlingsläget (Beslut B etapp 2): resultatvyn byter ut "ny giv/dela" mot
+   *  "Nästa giv →"/"Se ställningen" och lämnar aldrig spår i den fria historiken. */
+  tavling?: TavlingSpel
 }) {
   const {
     play,
@@ -325,12 +356,14 @@ export function PlayTable({
     declSide,
     isFaceUp,
     deselectSuit,
-  } = usePlayTable(deal, contract, calls, restoredPlays)
+  } = usePlayTable(deal, contract, calls, restoredPlays, playSeed)
 
   // Spelfasen sparas löpande (Etapp B) — och rensas när given är klar, så en
   // färdigspelad giv inte "återupptas" vid nästa besök. null känns igen som
-  // "ingen sparning" av validSavedGame.
+  // "ingen sparning" av validSavedGame. Tävlingsgiv rör ALDRIG den fria
+  // giv-luckan (ett pågående frispel i luckan ska överleva ett tävlingspass).
   useEffect(() => {
+    if (tavling) return
     if (done) {
       saveSavedGame(null)
       return
@@ -345,7 +378,7 @@ export function PlayTable({
       phase: 'play',
       plays: playsFrom(play),
     } satisfies SavedGame)
-  }, [play, done, daily, dailyNr, seed, deal, calls])
+  }, [play, done, daily, dailyNr, seed, deal, calls, tavling])
   // HashRouter → navigera hem via hash (funkar utan Router-kontext i tester).
   const goHome = () => {
     window.location.hash = '#/'
@@ -379,6 +412,16 @@ export function PlayTable({
   // Resultatrubriken ur ditt perspektiv (Etapp C, facit i scoring.test.ts).
   const headline = resultHeadline(declSide, result)
 
+  // Tävlingsgiv: paketera resultatet ur DITT (N/S) perspektiv för "Nästa giv →".
+  // "Dagens tävling"-sidan tar emot det, bokför framsteget och går vidare.
+  const byggTavlingResultat = (): GivResultat => ({
+    board: tavling ? tavling.board : deal.board,
+    myTricks,
+    win: headline.win,
+    headline: headline.text,
+    scoreLabel: score?.label ?? null,
+  })
+
   // Dagens giv: det delbara resultatet (Wordle-mekaniken). Telefoner får
   // delningsarket (navigator.share), datorer kopierar till urklipp.
   // Texten är SPOILERFRI sedan Etapp B — bara dina stick, aldrig kontraktet.
@@ -406,7 +449,9 @@ export function PlayTable({
   // per bord; "Spela om given" monterar ett nytt bord och bokförs för sig.
   const historikSaved = useRef(false)
   useEffect(() => {
-    if (daily || !done || seed === null || historikSaved.current) return
+    // Tävlingsgiv loggas aldrig i den fria historiken (seed är ändå null, men
+    // vi är uttryckliga). Dess resultat bokförs av "Dagens tävling"-sidan.
+    if (daily || tavling || !done || seed === null || historikSaved.current) return
     historikSaved.current = true
     const stored = loadSpelHistorik()
     saveSpelHistorik(
@@ -550,20 +595,31 @@ export function PlayTable({
                   </Button>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {/* Spela om given (Etapp B): samma frö, nytt försök —
-                      dagens giv-loggen skrivs aldrig över av ett omspel. */}
-                  {onPlayAgain && (
-                    <Button variant="secondary" onClick={onPlayAgain}>
-                      Spela om given
+                  {tavling ? (
+                    /* Tävling: den enda vägen framåt är nästa giv i serien (eller
+                       ställningen om det var den sista). Inget omspel — man spelar
+                       varje tävlingsgiv en gång. */
+                    <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat())}>
+                      {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
                     </Button>
+                  ) : (
+                    <>
+                      {/* Spela om given (Etapp B): samma frö, nytt försök —
+                          dagens giv-loggen skrivs aldrig över av ett omspel. */}
+                      {onPlayAgain && (
+                        <Button variant="secondary" onClick={onPlayAgain}>
+                          Spela om given
+                        </Button>
+                      )}
+                      <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
+                        {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
+                      </Button>
+                    </>
                   )}
-                  <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
-                    {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
-                  </Button>
                 </div>
                 {/* Frispelets resultathistorik (2026-08-03): given är just
                     bokförd — vägen till listan ligger ett klick bort. */}
-                {!daily && (
+                {!daily && !tavling && (
                   <a
                     href="#/spela-kort/historik"
                     className="text-xs font-medium text-ink-muted underline hover:text-ink"
@@ -573,10 +629,10 @@ export function PlayTable({
                 )}
                 <button
                   type="button"
-                  onClick={goHome}
+                  onClick={tavling ? tavling.onÖversikt : goHome}
                   className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
                 >
-                  ← Avsluta spel
+                  {tavling ? '← Till översikten' : '← Avsluta spel'}
                 </button>
               </div>
               <button
@@ -597,19 +653,25 @@ export function PlayTable({
               <Button variant="secondary" onClick={() => setReviewing(true)}>
                 Rondgenomgång
               </Button>
-              <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
-                {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
-              </Button>
+              {tavling ? (
+                <Button variant="primary" onClick={() => tavling.onKlar(byggTavlingResultat())}>
+                  {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
+                </Button>
+              ) : (
+                <Button variant={daily ? 'secondary' : 'primary'} onClick={onNewGame}>
+                  {daily ? 'Ny slumpgiv →' : 'Ny giv →'}
+                </Button>
+              )}
             </div>
             {copied && (
               <p className="text-xs text-accent">✓ Kopierat — klistra in i valfri chatt.</p>
             )}
             <button
               type="button"
-              onClick={goHome}
+              onClick={tavling ? tavling.onÖversikt : goHome}
               className="text-xs font-semibold text-danger transition-opacity hover:opacity-80"
             >
-              ← Avsluta spel
+              {tavling ? '← Till översikten' : '← Avsluta spel'}
             </button>
           </div>
         ) : null}

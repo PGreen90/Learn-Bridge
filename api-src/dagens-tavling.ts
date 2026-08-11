@@ -12,6 +12,7 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
+import { playSeedForBoard } from './_lib/seed'
 
 async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
   const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
@@ -33,8 +34,12 @@ export default async function handler(
 
   const base = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!base || !key) {
-    return json(500, { ok: false, fel: 'Saknar SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY' })
+  const seedSecret = process.env.DAILY_SEED_SECRET
+  if (!base || !key || !seedSecret) {
+    return json(500, {
+      ok: false,
+      fel: 'Saknar SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / DAILY_SEED_SECRET',
+    })
   }
 
   try {
@@ -54,14 +59,22 @@ export default async function handler(
       base,
       key,
       `daily_deals?set_id=eq.${set.id}&select=board,dealer,vulnerability,hands&order=board.asc`,
-    )) as Array<unknown>
+    )) as Array<{ board: number; dealer: string; vulnerability: string; hands: unknown }>
+
+    // Ett play-frö per giv så bottarna spelar deterministiskt (klienten trär in
+    // det i spelet) och servern kan spela om inskicket med SAMMA frö vid
+    // valideringen. Härleds här ur hemligheten — behöver inte lagras.
+    const givar = deals.map((d) => ({
+      ...d,
+      playSeed: playSeedForBoard(seedSecret, today, d.board),
+    }))
 
     return json(200, {
       ok: true,
       nummer: set.daily_number,
       tävlingsdag: set.comp_date,
       storlek: set.size,
-      givar: deals,
+      givar,
     })
   } catch (err) {
     return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })

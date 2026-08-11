@@ -27,6 +27,7 @@ import type { ContractTarget } from '../engine/contract-target'
 import type { SavedGame } from '../engine/resume'
 import type { DailyLog } from '../engine/daily'
 import type { SpelResultat } from '../engine/spel-historik'
+import type { TavlingFramsteg } from './tavling'
 
 // ===========================================================================
 // ENHET — bor lokalt för alltid (även med konto i etapp 1).
@@ -122,6 +123,17 @@ export function loadSpelHistorik(): unknown {
 }
 export function saveSpelHistorik(list: SpelResultat[]): void {
   saveValue('spel-historik', list)
+}
+
+/** Dagens tävlings framsteg (Beslut B etapp 2, klientfasen): vilka givar man
+ *  klarat, per tävlingsnummer. Kallaren kontrollerar att `nummer` stämmer med
+ *  dagens tävling innan framstegen används (en ny dag börjar rent). LOKALT i
+ *  Led 1; Led 2 flyttar inskicket till servern. null = inget sparat. */
+export function loadTavlingFramsteg(): TavlingFramsteg | null {
+  return loadValue<TavlingFramsteg | null>('tavling-framsteg', null)
+}
+export function saveTavlingFramsteg(framsteg: TavlingFramsteg): void {
+  saveValue('tavling-framsteg', framsteg)
 }
 
 /** Ett budtemas senaste poäng ({correct, total}) — nyckeln `theme:<themeId>`. */

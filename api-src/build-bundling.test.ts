@@ -1,47 +1,50 @@
 // Facit för Beslut B etapp 2 steg 1: buntningen (scripts/build-api.mjs) ska ge
-// en SJÄLVSTÄNDIG api/*.js som Node kör direkt — dvs. exakt det fyndet från
-// etapp 0 sa krävdes (motorns extensionslösa importer måste buntas). Testet kör
-// det RIKTIGA byggsteget (samma som Vercel kör via `npm run build`) och kör sedan
-// den buntade funktionen precis som Vercels Node-körning gör.
+// SJÄLVSTÄNDIGA api/*.js som Node kör direkt — dvs. exakt det fyndet från
+// etapp 0 sa krävdes (motorns extensionslösa importer måste buntas, annars
+// ERR_MODULE_NOT_FOUND i Vercels Node-körning). Testet kör det RIKTIGA byggsteget
+// (samma som Vercel kör via `npm run build`) och kontrollerar de skarpa
+// funktionerna: att bunten importerar rent under Node och inte har kvar en enda
+// relativ import att resolva i körmiljön.
+//
+// (Tidigare provades detta via en tillfällig `motorprov`-endpoint som körde
+// motorn utan auth; den togs bort när hämtningsvägen fanns. Nu vaktar vi de
+// riktiga funktionerna i stället — de läser miljövariabler först INNE i handlern,
+// så själva importen är biverkningsfri och går att prova utan hemligheter.)
 
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect, beforeAll } from 'vitest'
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { join } from 'node:path'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+
+const FUNKTIONER = ['dagens-tavling', 'generera-dagens-givar']
 
 describe('api-buntning (Beslut B etapp 2 steg 1)', () => {
-  test('motorprov: byggsteget ger en självständig fil som kör motorn under Node', async () => {
+  beforeAll(() => {
     // Kör det riktiga byggskriptet. Kastar (och fäller testet) om buntningen
     // misslyckas — t.ex. om motorns importkedja inte går att resolva.
     execFileSync(process.execPath, ['scripts/build-api.mjs'], {
       cwd: process.cwd(),
       stdio: 'pipe',
     })
+  })
 
-    const out = join(process.cwd(), 'api', 'motorprov.js')
-    expect(existsSync(out), 'byggsteget ska ha skrivit api/motorprov.js').toBe(true)
+  test.each(FUNKTIONER)('%s: buntas till en självständig api/%s.js', (namn) => {
+    const out = join(process.cwd(), 'api', `${namn}.js`)
+    expect(existsSync(out), `byggsteget ska ha skrivit api/${namn}.js`).toBe(true)
 
-    // Importera och kör den buntade funktionen precis som Vercel gör.
-    // Cache-buster så watch-läge inte serverar en gammal import.
-    const mod: { default: (req: unknown, res: unknown) => void } = await import(
-      pathToFileURL(out).href + `?v=${Date.now()}`
-    )
+    // Kärnan i etapp 0-fyndet: ingen kvarvarande relativ import (`./`/`../`) —
+    // sådana kraschar Node ESM på servern. node:*/paket-importer är OK.
+    const kod = readFileSync(out, 'utf8')
+    const relativa = kod.match(/\bfrom\s+['"]\.\.?\//g)
+    expect(relativa, `api/${namn}.js har kvar relativa importer: ${relativa}`).toBeNull()
+  })
 
-    let body = ''
-    const res = {
-      statusCode: 0,
-      setHeader() {},
-      end(b: string) {
-        body = b
-      },
-    }
-    mod.default({}, res)
-
-    const data = JSON.parse(body)
-    expect(res.statusCode).toBe(200)
-    expect(data.ok).toBe(true)
-    // Motorn gav faktiskt en komplett giv: 13 kort per hand.
-    expect(data.kortPerHand).toEqual({ N: 13, E: 13, S: 13, W: 13 })
+  test.each(FUNKTIONER)('%s: bunten importerar rent under Node och exporterar en handler', async (namn) => {
+    const out = join(process.cwd(), 'api', `${namn}.js`)
+    // Cache-buster så watch-läge inte serverar en gammal import. Importen är
+    // biverkningsfri (miljövariabler läses först inne i handlern).
+    const mod: { default: unknown } = await import(pathToFileURL(out).href + `?v=${Date.now()}`)
+    expect(typeof mod.default).toBe('function')
   })
 })

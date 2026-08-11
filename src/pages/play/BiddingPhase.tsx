@@ -18,6 +18,7 @@ import { FelrapportDialog } from '../../components/FelrapportDialog'
 import { HandFan } from '../../components/HandFan'
 import { MenuToggleRow, STRAIN_CODE } from './common'
 import type { Game } from './useGame'
+import type { TavlingSpel } from './tavling-mode'
 
 export function BiddingPhase({
   game,
@@ -31,6 +32,7 @@ export function BiddingPhase({
   bidHelp,
   onToggleBidHelp,
   dailyBadge,
+  tavling,
 }: {
   game: Game
   complete: boolean
@@ -48,6 +50,9 @@ export function BiddingPhase({
   /** Dagens giv: guldbricka ("Dagens giv #N") i stället för Mål-knappen —
    *  målväljaren är avstängd, alla spelar samma giv. */
   dailyBadge?: string
+  /** Tävlingsläget (Beslut B etapp 2): en utpassad giv går vidare i serien i
+   *  stället för att ge en ny slumpgiv, och menyn lämnar till översikten. */
+  tavling?: TavlingSpel
 }) {
   const [showMenu, setShowMenu] = useState(false)
   const [reporting, setReporting] = useState(false)
@@ -130,6 +135,8 @@ export function BiddingPhase({
               open={showMenu}
               onToggle={() => setShowMenu((v) => !v)}
               onNewGame={onNewGame}
+              newGameLabel={tavling ? 'Till översikten' : undefined}
+              onExit={tavling ? tavling.onÖversikt : undefined}
               bidHelp={bidHelp}
               onToggleBidHelp={onToggleBidHelp}
             >
@@ -202,14 +209,33 @@ export function BiddingPhase({
             <p className="mb-3 text-sm text-ink-soft">Ingen öppnade – given passades ut.</p>
             {/* Spela om given: samma giv en gång till (du kan öppna själv den här
                 gången) — vid rundpass fanns förr bara "Ny giv" (ägarönskemål
-                2026-08-03). */}
+                2026-08-03). Tävling: en utpassad giv är ett giltigt (om än magert)
+                resultat — gå vidare i serien i stället för att slumpa en ny giv. */}
             <div className="flex flex-wrap justify-center gap-2">
-              {onPlayAgain && (
-                <Button variant="secondary" onClick={onPlayAgain}>
-                  Spela om given
+              {tavling ? (
+                <Button
+                  onClick={() =>
+                    tavling.onKlar({
+                      board: tavling.board,
+                      myTricks: 0,
+                      win: false,
+                      headline: 'Given passades ut',
+                      scoreLabel: null,
+                    })
+                  }
+                >
+                  {tavling.sista ? 'Se ställningen →' : 'Nästa giv →'}
                 </Button>
+              ) : (
+                <>
+                  {onPlayAgain && (
+                    <Button variant="secondary" onClick={onPlayAgain}>
+                      Spela om given
+                    </Button>
+                  )}
+                  <Button onClick={onNewGame}>Ny giv →</Button>
+                </>
               )}
-              <Button onClick={onNewGame}>Ny giv →</Button>
             </div>
             <div>
               <button
@@ -242,6 +268,8 @@ function TableMenu({
   open,
   onToggle,
   onNewGame,
+  newGameLabel = 'Ny giv →',
+  onExit,
   bidHelp,
   onToggleBidHelp,
   children,
@@ -249,6 +277,11 @@ function TableMenu({
   open: boolean
   onToggle: () => void
   onNewGame: () => void
+  /** Etikett på översta knappen — "Ny giv →" i vanligt spel, "Till översikten"
+   *  i tävling (ingen ny giv finns där). */
+  newGameLabel?: string
+  /** Vart "Avsluta spel" går — startsidan som standard, översikten i tävling. */
+  onExit?: () => void
   bidHelp: boolean
   onToggleBidHelp: () => void
   children: ReactNode
@@ -268,7 +301,7 @@ function TableMenu({
           <ClickAway onClose={onToggle} />
           <div className="absolute right-0 top-11 z-40 w-64 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
             <Button className="w-full" onClick={onNewGame}>
-              Ny giv →
+              {newGameLabel}
             </Button>
             {/* Budstöd av/på (ägarbeslut 2026-07-28): samma radmönster som Auto Claim. */}
             <MenuToggleRow
@@ -278,15 +311,17 @@ function TableMenu({
               onToggle={onToggleBidHelp}
             />
             <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
-            {/* Enda vägen ut ur den immersiva vyn (headern är dold) → startsidan. */}
+            {/* Enda vägen ut ur den immersiva vyn (headern är dold) → startsidan,
+                eller översikten i tävlingsläget. */}
             <button
               type="button"
               onClick={() => {
-                window.location.hash = '#/'
+                if (onExit) onExit()
+                else window.location.hash = '#/'
               }}
               className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
             >
-              ← Avsluta spel
+              {onExit ? '← Till översikten' : '← Avsluta spel'}
             </button>
           </div>
         </>

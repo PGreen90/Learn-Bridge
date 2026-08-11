@@ -2,8 +2,6 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
-import { dailyNumber, dailyStreak } from '../lib/engine/daily'
-import { loadDailyLog, loadDailyPlayed } from '../lib/backend'
 
 // Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
 // oss för mycket"): varumärkesblocket överst (frameless guldspader + tvåfärgat
@@ -103,41 +101,27 @@ function ModeCard({
   )
 }
 
-/** Dagens giv-kortet: brett flaggskepp ovanför menyknapparna, med löpnumret
- *  och en "Spelad ✓"-bricka när dagens giv redan är avklarad (localStorage,
- *  skrivs av resultatvyn i Play). */
-function DailyCard() {
-  const n = dailyNumber()
-  // Loggen (Etapp B) är sanningen; gamla `daily-played` läses som reserv för
-  // den som spelade före loggen fanns.
-  const log = loadDailyLog()
-  const played = log[n] !== undefined || loadDailyPlayed() === n
-  const streak = dailyStreak(log, n)
+/** Dagens tävling-kortet (Beslut B etapp 2): brett flaggskepp ovanför
+ *  menyknapparna. Den fria "Dagens giv" är dold sedan tävlingen ersatte den
+ *  (grindbeslut 2026-08-10 — daily.ts + delningskoden finns kvar, bara
+ *  avlänkad). Konto krävs; själva grinden sitter på tävlingssidan. */
+function TavlingCard() {
   return (
     <Link
-      to="/spela-kort/dagens"
+      to="/spela-kort/tavling"
       className="gold-frame group relative block w-full max-w-xl rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
     >
       <div className="flex items-center gap-3">
         <ModeIcon icon="calendar" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 font-semibold text-emerald-50">
-            Dagens giv <span className="text-gold-300">#{n}</span>
-            {played && (
-              <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
-                Spelad ✓
-              </span>
-            )}
-            {/* Streaken (Etapp B): syns från två dagar i rad — skälet att
-                komma tillbaka i morgon ska synas redan på startsidan. */}
-            {streak >= 2 && (
-              <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
-                🔥 {streak} dagar
-              </span>
-            )}
+            Dagens tävling
+            <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
+              12 givar
+            </span>
           </div>
           <div className="text-sm text-emerald-100/70">
-            Samma giv för alla i dag — spela den och dela ditt resultat.
+            Samma 12 givar för alla i dag — spela mot datorn och tävla på topplistan.
           </div>
         </div>
       </div>
@@ -166,19 +150,10 @@ export function Home() {
         {/* Taglinen (ägarbeslut 2026-08-02): kort och koncis — tre ord. */}
         <p className="max-w-md text-lg text-emerald-50/90">Träna, spela, tävla</p>
 
-        {/* Dagens giv — FLAGGSKEPPET (2026-08-02, Wordle-mekaniken): samma giv
-            för alla varje dag, delbart resultat. Enda kortet med den ständigt
-            roterande guldramen (gold-frame) — det unika ska synas. */}
-        <DailyCard />
-
-        {/* Kalenderarkivet (2026-08-03): diskret rad under flaggskeppet — alla
-            dagars givar sedan premiären, missade dagar spelbara i efterhand. */}
-        <Link
-          to="/spela-kort/dagens/arkiv"
-          className="-mt-3 text-xs font-medium text-emerald-100/70 underline underline-offset-2 hover:text-gold-200"
-        >
-          Missat en dag? Kalenderarkivet →
-        </Link>
+        {/* Dagens tävling — FLAGGSKEPPET (Beslut B etapp 2): 12 givar, samma för
+            alla, tävla på topplistan. Ersätter den fria "Dagens giv" (dold enligt
+            grindbeslutet). Enda kortet med den roterande guldramen (gold-frame). */}
+        <TavlingCard />
 
         {/* Menyknapparna: vägen in i appen, en per del. */}
         <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">

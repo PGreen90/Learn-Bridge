@@ -77,6 +77,13 @@ function newGame(): Game {
   return gameFromSeed(randomSeed())
 }
 
+/** En giv ur en FÄRDIGDELAD Deal (Beslut B etapp 2, tävlingen): given kommer
+ *  från servern (hemligt frö), inte ur ett klient-sifferfrö — därför `seed: null`
+ *  precis som dagens giv. Budfasen och kortspelet körs sedan som vanligt. */
+export function gameFromDeal(deal: Deal, round = 0): Game {
+  return { deal, history: [], phase: 'bidding', contract: null, seed: null, round }
+}
+
 /** Dagens giv: given kommer ur datumfröet i stället för slumpen (daily.ts).
  *  `nr` (kalenderarkivet): ett givnummer ur arkivet — annars dagens. */
 function newDailyGame(round = 0, nr?: number): Game {

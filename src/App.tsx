@@ -20,6 +20,9 @@ const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m
 const DagensArkiv = lazy(() =>
   import('./pages/DagensArkiv').then((m) => ({ default: m.DagensArkiv })),
 )
+const DagensTavling = lazy(() =>
+  import('./pages/DagensTavling').then((m) => ({ default: m.DagensTavling })),
+)
 const SpelHistorik = lazy(() =>
   import('./pages/SpelHistorik').then((m) => ({ default: m.SpelHistorik })),
 )
@@ -84,6 +87,9 @@ export default function App() {
               Egna key:ar → React monterar om Play vid byte mellan lägena (annars
               behålls gamla givens state eftersom komponenten är densamma). */}
           <Route path="spela-kort/dagens" element={<PlayDagens />} />
+          {/* Dagliga tävlingen (Beslut B etapp 2): 12 givar, konto krävs, spelas
+              linjärt. Under /spela-kort så vyn blir immersiv (dold header). */}
+          <Route path="spela-kort/tavling" element={<DagensTavling />} />
           {/* Kalenderarkivet (2026-08-03): alla dagars givar sedan premiären —
               spelade dagar visar resultatet, missade går att spela i efterhand. */}
           <Route path="spela-kort/dagens/arkiv" element={<DagensArkiv />} />
