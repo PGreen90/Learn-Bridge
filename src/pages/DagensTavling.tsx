@@ -411,37 +411,60 @@ const STATUS_TITEL: Record<InskickStatus | 'pending', string> = {
 }
 
 /** Ditt eget läge överst i ställningen (UI-polish steg 3): placering + snitt-MP%.
- *  Visas bara när servern gett dina siffror (inloggad + minst en poängsatt giv);
- *  annars tyst, så översikten ser lugn ut tills du faktiskt är rankad. */
+ *  Visas när servern rankat dig (≥1 poängsatt giv) ELLER — preliminärt — när du
+ *  skickat in givar men ingen poängsatts än (ensam spelare). I det preliminära
+ *  läget visas 1:a / 100 % tydligt märkt "preliminär" (samma grepp som per-giv-
+ *  cellen). Har du inte skickat in något alls är kortet tyst. */
 function DinStällning({ resultat }: { resultat: TopplistaResultat | null }) {
   if (!resultat || resultat.status !== 'ok') return null
   const { du, topplista } = resultat.data
-  if (!du) return null
+  const dinaInskick = resultat.data.dinaInskick ?? []
+  // Preliminärt: inga poängsatta givar än (du null) men du HAR inskick.
+  const prel = !du && dinaInskick.length > 0
+  if (!du && !prel) return null
+
+  const placering = du ? du.placering : 1
+  const snitt = du ? du.snitt : 100
+  const antalGivar = du ? du.antalGivar : dinaInskick.length
   const antalRankade = topplista.length
-  const medalj = du.placering === 1 ? '🥇' : du.placering === 2 ? '🥈' : du.placering === 3 ? '🥉' : null
+  const medalj = placering === 1 ? '🥇' : placering === 2 ? '🥈' : placering === 3 ? '🥉' : null
   return (
     <div className="w-full rounded-xl bg-gradient-to-br from-emerald-800/70 to-emerald-950/60 p-4 ring-1 ring-gold-400/30">
       <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-emerald-100/60">
-        Din ställning
+        Din ställning{prel && <span className="text-gold-300/70"> · preliminär</span>}
       </p>
       <div className="flex items-stretch justify-around gap-4 text-center">
         <div className="flex flex-col items-center justify-center">
           <span className="flex items-baseline gap-1">
             {medalj && <span className="text-2xl leading-none">{medalj}</span>}
-            <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">{du.placering}</span>
+            <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">{placering}</span>
           </span>
-          <span className="mt-1 text-xs text-emerald-100/60">av {antalRankade} spelare</span>
+          <span className="mt-1 text-xs text-emerald-100/60">
+            {prel ? 'preliminärt' : `av ${antalRankade} spelare`}
+          </span>
         </div>
         <div className="w-px self-stretch bg-emerald-100/10" />
         <div className="flex flex-col items-center justify-center">
           <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">
-            {du.snitt.toFixed(1)}<span className="text-2xl"> %</span>
+            {snitt.toFixed(1)}<span className="text-2xl"> %</span>
           </span>
           <span className="mt-1 text-xs text-emerald-100/60">
-            {du.antalGivar} {du.antalGivar === 1 ? 'poängsatt giv' : 'poängsatta givar'}
+            {antalGivar}{' '}
+            {prel
+              ? antalGivar === 1
+                ? 'giv inne'
+                : 'givar inne'
+              : antalGivar === 1
+                ? 'poängsatt giv'
+                : 'poängsatta givar'}
           </span>
         </div>
       </div>
+      {prel && (
+        <p className="mt-2 text-center text-[11px] text-emerald-100/50">
+          Preliminärt tills minst 2 spelat samma giv.
+        </p>
+      )}
     </div>
   )
 }
