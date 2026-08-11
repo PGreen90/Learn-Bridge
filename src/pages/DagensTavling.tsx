@@ -23,6 +23,7 @@ import {
   fetchDagensTavling,
   fetchGivResultat,
   fetchTopplista,
+  slåIhopFramsteg,
   submitTavlingGiv,
   type DagensTavling as TavlingData,
   type GivKontrakt,
@@ -167,12 +168,20 @@ export function DagensTavling() {
     return <Skärm><p className="text-emerald-100/80">Laddar framsteg …</p></Skärm>
   }
 
+  // Vad översikten VISAR = lokalt framsteg (den här enheten, bär rondgenomgången)
+  // hopslaget med serverns lista över dina inskickade givar (alla enheter). Så en
+  // ny enhet känner igen givar du redan spelat och börjar inte om på giv 1.
+  // OBS: bokföringen på färdig giv (nedan) skriver fortfarande bara det LOKALA
+  // framsteget via framstegRef — servern är källan, localStorage bara denna enhet.
+  const serverInskick = topplista?.status === 'ok' ? topplista.data.dinaInskick ?? [] : []
+  const klara = slåIhopFramsteg(framsteg.klara, serverInskick)
+
   // --- Spela en giv (tävlingsläge i den vanliga spelskärmen) ----------------
   if (spelIndex !== null) {
     const giv = tavling.givar[spelIndex]
     // Sista given? (att slutföra just den här fyller serien.)
     const kvarEfterDenna = tavling.givar.filter(
-      (g) => g.deal.board !== giv.deal.board && !framsteg.klara.some((k) => k.board === g.deal.board),
+      (g) => g.deal.board !== giv.deal.board && !klara.some((k) => k.board === g.deal.board),
     ).length
     const spel: TavlingSpel = {
       giv,
@@ -217,7 +226,7 @@ export function DagensTavling() {
   // --- Granska en klar giv (steg 5): rondgenomgången ur den sparade given ----
   if (granskaBoard !== null) {
     const giv = tavling.givar.find((g) => g.deal.board === granskaBoard)
-    const rad = framsteg.klara.find((k) => k.board === granskaBoard)
+    const rad = klara.find((k) => k.board === granskaBoard)
     const tillbaka = () => setGranskaBoard(null)
     // Genomgången kräver den sparade given (kontrakt + kort). Saknas den (äldre
     // framsteg / utpassad giv) → vänligt meddelande i stället för en krasch.
@@ -258,7 +267,7 @@ export function DagensTavling() {
 
   // --- Giv-detalj (steg 6): hela fältets traveller för EN spelad giv ---------
   if (detaljBoard !== null) {
-    const rad = framsteg.klara.find((k) => k.board === detaljBoard)
+    const rad = klara.find((k) => k.board === detaljBoard)
     // Din egen rondgenomgång kräver den lokalt sparade given (kort + auktion).
     const kanGenomgang = !!(rad?.kontrakt && rad.history && rad.plays)
     return (
@@ -272,9 +281,9 @@ export function DagensTavling() {
   }
 
   // --- Översikten -----------------------------------------------------------
-  const antalKlara = framsteg.klara.length
+  const antalKlara = klara.length
   const alltKlart = antalKlara >= tavling.storlek
-  const nästa = förstaOspelade(tavling, framsteg.klara)
+  const nästa = förstaOspelade(tavling, klara)
 
   return (
     <Skärm>
@@ -308,7 +317,7 @@ export function DagensTavling() {
         {/* De 12 givarna som brickor */}
         <div className="grid grid-cols-6 gap-2">
           {tavling.givar.map((g, i) => {
-            const klar = framsteg.klara.find((k) => k.board === g.deal.board)
+            const klar = klara.find((k) => k.board === g.deal.board)
             const ärNästa = i === nästa
             const avvisad = klar?.inskickStatus === 'avvisad'
             return (
@@ -355,7 +364,7 @@ export function DagensTavling() {
 
         {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
         <DinStällning resultat={topplista} />
-        <Resultattabell klara={framsteg.klara} topplista={topplista} onÖppna={setDetaljBoard} />
+        <Resultattabell klara={klara} topplista={topplista} onÖppna={setDetaljBoard} />
         <TopplistaVy resultat={topplista} />
 
         <div className="flex justify-center">

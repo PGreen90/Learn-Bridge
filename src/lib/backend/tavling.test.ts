@@ -4,7 +4,13 @@
 
 import { describe, test, expect } from 'vitest'
 import type { Card, Suit, Rank } from '../../types/bridge'
-import { tavlingFromResponse } from './tavling'
+import {
+  slåIhopFramsteg,
+  tavlingFromResponse,
+  type DinInskick,
+  type GivKontrakt,
+  type GivResultat,
+} from './tavling'
 
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
 const RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -83,5 +89,91 @@ describe('tavlingFromResponse — översätter serversvaret', () => {
     expect(() =>
       tavlingFromResponse(svar({ givar: [{ board: 1, dealer: 'N', vulnerability: 'none', hands: fyraHänder() }] })),
     ).toThrow()
+  })
+})
+
+// --- Hopslagning: lokalt framsteg + serverns inskick (cross-device-fixen) -----
+
+const KONTRAKT_4S: GivKontrakt = { level: 4, strain: 'spades', declarer: 'S', diff: 0 }
+const KONTRAKT_3NT: GivKontrakt = { level: 3, strain: 'NT', declarer: 'N', diff: 1 }
+
+/** En lokal, färdigspelad rad (som den sparas i framsteget). */
+function lokalRad(board: number, kontrakt?: GivKontrakt | null): GivResultat {
+  return {
+    board,
+    myTricks: 10,
+    win: true,
+    headline: `Giv ${board}`,
+    scoreLabel: '+420',
+    inskickStatus: 'godkand',
+    kontrakt,
+    history: [],
+    plays: [],
+  }
+}
+
+describe('slåIhopFramsteg — lokalt framsteg + serverns inskick', () => {
+  test('en server-giv som saknas lokalt läggs till som godkänd stub', () => {
+    const server: DinInskick[] = [{ board: 5, kontrakt: KONTRAKT_4S }]
+    const ut = slåIhopFramsteg([], server)
+    expect(ut).toHaveLength(1)
+    expect(ut[0].board).toBe(5)
+    expect(ut[0].inskickStatus).toBe('godkand')
+    expect(ut[0].kontrakt).toEqual(KONTRAKT_4S)
+    // Ingen rondgenomgång för en giv spelad på en annan enhet.
+    expect(ut[0].history).toBeUndefined()
+    expect(ut[0].plays).toBeUndefined()
+  })
+
+  test('backfillar kontrakt på en lokal rad som saknar det (äldre "—"-giv)', () => {
+    const lokala = [lokalRad(3, undefined)]
+    const server: DinInskick[] = [{ board: 3, kontrakt: KONTRAKT_3NT }]
+    const ut = slåIhopFramsteg(lokala, server)
+    expect(ut).toHaveLength(1)
+    expect(ut[0].kontrakt).toEqual(KONTRAKT_3NT)
+    // Lokala fält (auktion/kort) bevaras — bara kontraktet fylldes på.
+    expect(ut[0].history).toEqual([])
+    expect(ut[0].plays).toEqual([])
+  })
+
+  test('skriver ALDRIG över ett kontrakt som redan finns lokalt', () => {
+    const lokala = [lokalRad(3, KONTRAKT_4S)]
+    const server: DinInskick[] = [{ board: 3, kontrakt: KONTRAKT_3NT }]
+    const ut = slåIhopFramsteg(lokala, server)
+    expect(ut[0].kontrakt).toEqual(KONTRAKT_4S)
+  })
+
+  test('utpassad server-giv (kontrakt null) backfillas inte över befintligt, men sätts på stub', () => {
+    const ut = slåIhopFramsteg([], [{ board: 7, kontrakt: null }])
+    expect(ut[0].kontrakt).toBeNull()
+  })
+
+  test('server utan kontrakt-fält ger en stub utan kontrakt (visas "—")', () => {
+    const ut = slåIhopFramsteg([], [{ board: 8 }])
+    expect(ut[0].board).toBe(8)
+    expect('kontrakt' in ut[0]).toBe(false)
+  })
+
+  test('behåller lokal null (utpassad) och backfillar inte över den', () => {
+    const lokala = [lokalRad(2, null)]
+    const ut = slåIhopFramsteg(lokala, [{ board: 2, kontrakt: KONTRAKT_4S }])
+    expect(ut[0].kontrakt).toBeNull()
+  })
+
+  test('tomt serversvar → lokala rader oförändrade (bakåtkompatibelt)', () => {
+    const lokala = [lokalRad(1, KONTRAKT_4S), lokalRad(2, KONTRAKT_3NT)]
+    const ut = slåIhopFramsteg(lokala, [])
+    expect(ut.map((r) => r.board)).toEqual([1, 2])
+    expect(ut[0].kontrakt).toEqual(KONTRAKT_4S)
+  })
+
+  test('en giv i både lokalt och server dubbelräknas inte, och sorteras på bricka', () => {
+    const lokala = [lokalRad(4, KONTRAKT_4S), lokalRad(2, KONTRAKT_3NT)]
+    const server: DinInskick[] = [
+      { board: 4, kontrakt: KONTRAKT_4S }, // finns lokalt
+      { board: 1, kontrakt: KONTRAKT_3NT }, // ny från annan enhet
+    ]
+    const ut = slåIhopFramsteg(lokala, server)
+    expect(ut.map((r) => r.board)).toEqual([1, 2, 4])
   })
 })

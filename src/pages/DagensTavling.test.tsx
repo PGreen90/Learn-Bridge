@@ -128,6 +128,35 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(screen.getByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
   })
 
+  it('cross-device: serverns inskick känns igen även utan lokalt framsteg', async () => {
+    // Tomt localStorage (ny enhet) — men servern vet att giv 1 är inskickad.
+    fetchMock.mockResolvedValue(ok())
+    topplistaMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        nummer: 9,
+        storlek: 2,
+        poängsattaGivar: 0,
+        minPerGiv: 2,
+        topplista: [],
+        du: null,
+        dinaGivar: [],
+        dinaInskick: [{ board: 1, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 } }],
+      },
+    })
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    // Översikten börjar INTE om på giv 1 — den känner igen serverns inskick.
+    expect(await screen.findByText(/1 av 2 klara/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
+    // Given syns i "Dina givar" med kontraktet servern återskapade.
+    expect(screen.getByText('Dina givar')).toBeInTheDocument()
+    expect(screen.getByText('♠')).toBeInTheDocument()
+  })
+
   it('resultattabellen visar kontrakt, resultat och (i väntan på poäng) "väntar"', async () => {
     localStorage.setItem(
       'learnbridge:tavling-framsteg',

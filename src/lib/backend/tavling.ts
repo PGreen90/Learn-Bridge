@@ -252,6 +252,16 @@ export interface DinGiv {
   kontrakt?: GivKontrakt | null
 }
 
+/** EN av dina inskickade (godkända) givar denna tävling — bricka + kontrakt —
+ *  OAVSETT om given poängsatts än (dvs. även när du är ensam spelare på den).
+ *  Servern återskapar kontraktet ur den lagrade auktionen, så det här bär över
+ *  alla enheter. `kontrakt` saknas = kunde inte återskapas (visas "—"); `null` =
+ *  utpassad giv. */
+export interface DinInskick {
+  board: number
+  kontrakt?: GivKontrakt | null
+}
+
 export interface Topplista {
   nummer: number
   storlek: number
@@ -263,6 +273,10 @@ export interface Topplista {
   du: DinPlacering | null
   /** Din MP% per poängsatt giv (brickordning), annars tom (UI-polish steg 2). */
   dinaGivar: DinGiv[]
+  /** Alla dina inskickade givar (bricka + kontrakt), även opoängsatta och oavsett
+   *  enhet. Låter översikten känna igen givar du spelat på en annan enhet så den
+   *  inte börjar om på giv 1. Tom i äldre/anonyma svar (cross-device-fixen). */
+  dinaInskick: DinInskick[]
 }
 
 export type TopplistaResultat =
@@ -298,11 +312,47 @@ export async function fetchTopplista(): Promise<TopplistaResultat> {
       topplista: raw.topplista ?? [],
       du: raw.du ?? null,
       dinaGivar: raw.dinaGivar ?? [],
+      dinaInskick: raw.dinaInskick ?? [],
     }
     return { status: 'ok', data }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
   }
+}
+
+/** Slå ihop LOKALT framsteg (den här enheten — bär hela given, så
+ *  rondgenomgången kan visas) med serverns lista över dina inskickade givar
+ *  (`dinaInskick` — alla enheter, men bara bricka + kontrakt). Resultatet driver
+ *  översikten så en NY enhet känner igen givar du redan spelat (annars börjar den
+ *  om på giv 1) och kontraktet visas även för givar utan lokalt sparat sådant.
+ *
+ *  Regler: lokala rader vinner (de bär auktion + kort för genomgången); ett
+ *  saknat lokalt kontrakt fylls på från servern (fixar äldre "—"-rader); en
+ *  server-giv som saknas lokalt läggs till som en "stub" (godkänd, utan
+ *  rondgenomgång — den spelades på en annan enhet). Sorteras på bricka. */
+export function slåIhopFramsteg(lokala: GivResultat[], server: DinInskick[]): GivResultat[] {
+  const perBricka = new Map<number, GivResultat>()
+  for (const r of lokala) perBricka.set(r.board, { ...r })
+  for (const s of server) {
+    const fanns = perBricka.get(s.board)
+    if (fanns) {
+      // Fyll bara på ett kontrakt som saknas lokalt — skriv aldrig över ett eget.
+      if (fanns.kontrakt === undefined && 'kontrakt' in s) fanns.kontrakt = s.kontrakt
+      continue
+    }
+    perBricka.set(s.board, {
+      board: s.board,
+      myTricks: 0,
+      win: false,
+      headline: 'Inskickad',
+      scoreLabel: null,
+      inskickStatus: 'godkand',
+      // Bara kontraktet bär över enheter — history/plays saknas medvetet, så
+      // rondgenomgången faller tillbaka på "inte tillgänglig".
+      ...('kontrakt' in s ? { kontrakt: s.kontrakt } : {}),
+    })
+  }
+  return [...perBricka.values()].sort((a, b) => a.board - b.board)
 }
 
 // ===========================================================================

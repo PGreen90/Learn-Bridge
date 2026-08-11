@@ -98,8 +98,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     // auktoritativ: den läser `declarer_tricks` + auktionen ur den lagrade
     // payloaden, så resultattabellen fylls för ALLA dina givar — även sådana
     // som spelades innan kontraktssparningen fanns, och oavsett enhet.
+    // Körs för VARJE inloggad kallare (inte bara när en giv redan poängsatts) —
+    // annars vet inte översikten om dina givar på en ny enhet, och börjar om på
+    // giv 1 (cross-device-fixen). `mina` hämtar alla dina godkända brickor.
     const kontraktPerBricka = new Map<number, DinKontrakt | null>()
-    if (meId && agg.dinaGivar.length) {
+    const minaBrickor: number[] = []
+    if (meId) {
       const mina = (await restGet(
         base,
         key,
@@ -111,6 +115,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         payload: { history?: ResolvedCall[] } | null
       }>
       for (const rad of mina) {
+        minaBrickor.push(rad.board)
         if (rad.passed_out) {
           kontraktPerBricka.set(rad.board, null)
           continue
@@ -132,6 +137,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       ...g,
       kontrakt: kontraktPerBricka.get(g.board) ?? null,
     }))
+    // Alla dina inskickade givar (även opoängsatta) — bricka + kontrakt. En bricka
+    // vars kontrakt inte kunde återskapas lämnas UTAN kontrakt-fält (klienten
+    // visar "—"); en utpassad giv får kontrakt: null.
+    const dinaInskick = minaBrickor
+      .sort((a, b) => a - b)
+      .map((board) =>
+        kontraktPerBricka.has(board)
+          ? { board, kontrakt: kontraktPerBricka.get(board)! }
+          : { board },
+      )
 
     // Visningsnamn för spelarna på listan.
     const ids = agg.topplista.map((p) => p.spelare)
@@ -164,6 +179,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       // Personliga fält — bara med när en giltig token skickats (annars null/[]).
       du: agg.du,
       dinaGivar,
+      dinaInskick,
     })
   } catch (err) {
     return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })
