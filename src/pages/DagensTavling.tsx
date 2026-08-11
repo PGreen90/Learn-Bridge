@@ -30,7 +30,6 @@ import {
   type GivResultat,
   type GivResultatSvar,
   type GivResultatUtfall,
-  type InskickStatus,
   type TavlingFramsteg,
   type TavlingsResultat,
   type TopplistaResultat,
@@ -61,6 +60,10 @@ export function DagensTavling() {
   const [granskaBoard, setGranskaBoard] = useState<number | null>(null)
   // Dagens topplista (hämtas på översikten).
   const [topplista, setTopplista] = useState<TopplistaResultat | null>(null)
+  // Räknare som tvingar en ny hämtning av topplistan (uppdatera-knappen bumpar den);
+  // `uppdaterar` snurrar ikonen medan den nya hämtningen pågår.
+  const [uppdateraNonce, setUppdateraNonce] = useState(0)
+  const [uppdaterar, setUppdaterar] = useState(false)
   // Alltid senaste framsteget (utan att fastna i en gammal closure) — så
   // bokföring på färdig giv och "nästa giv"-navigeringen läser samma sanning.
   const framstegRef = useRef<TavlingFramsteg | null>(null)
@@ -96,12 +99,15 @@ export function DagensTavling() {
     if (!resultat || resultat.status !== 'ok' || spelIndex !== null) return
     let active = true
     fetchTopplista().then((t) => {
-      if (active) setTopplista(t)
+      if (active) {
+        setTopplista(t)
+        setUppdaterar(false)
+      }
     })
     return () => {
       active = false
     }
-  }, [resultat, spelIndex])
+  }, [resultat, spelIndex, uppdateraNonce])
 
   // --- Grindar: konto krävs -------------------------------------------------
   if (authLoading) {
@@ -282,7 +288,6 @@ export function DagensTavling() {
 
   // --- Översikten -----------------------------------------------------------
   const antalKlara = klara.length
-  const alltKlart = antalKlara >= tavling.storlek
   const nästa = förstaOspelade(tavling, klara)
 
   return (
@@ -298,69 +303,17 @@ export function DagensTavling() {
           <Nedrakning />
         </header>
 
-        {/* Progress */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm text-emerald-100/80">
-            <span>{antalKlara} av {tavling.storlek} klara</span>
-            {!alltKlart && nästa !== null && (
-              <span className="text-gold-200">Nästa: giv {tavling.givar[nästa].deal.board}</span>
-            )}
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-950/60 ring-1 ring-emerald-100/10">
-            <div
-              className="h-full rounded-full bg-gold-400 transition-all"
-              style={{ width: `${(antalKlara / tavling.storlek) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* De 12 givarna som brickor */}
-        <div className="grid grid-cols-6 gap-2">
-          {tavling.givar.map((g, i) => {
-            const klar = klara.find((k) => k.board === g.deal.board)
-            const ärNästa = i === nästa
-            const avvisad = klar?.inskickStatus === 'avvisad'
-            return (
-              <div
-                key={g.deal.id}
-                className={`flex aspect-square flex-col items-center justify-center rounded-lg text-sm font-semibold ring-1 ${
-                  avvisad
-                    ? 'bg-danger/15 text-danger ring-danger/40'
-                    : klar
-                      ? 'bg-gold-400/15 text-gold-200 ring-gold-400/40'
-                      : ärNästa
-                        ? 'bg-emerald-800/60 text-emerald-50 ring-gold-400/40'
-                        : 'bg-emerald-950/40 text-emerald-100/50 ring-emerald-100/10'
-                }`}
-                title={
-                  klar
-                    ? `${klar.headline}${STATUS_TITEL[klar.inskickStatus ?? 'pending']}`
-                    : undefined
-                }
-              >
-                <span>{g.deal.board}</span>
-                {klar && <span className="text-[10px] leading-none">{STATUS_GLYF[klar.inskickStatus ?? 'pending']}</span>}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Huvudknapp */}
-        <div className="flex flex-col items-center gap-3">
-          {alltKlart ? (
-            <div className="w-full rounded-xl bg-emerald-950/45 p-4 text-center ring-1 ring-gold-400/25">
-              <p className="font-brand text-lg text-gold-200">🎉 Alla {tavling.storlek} givar spelade!</p>
-              <p className="text-sm text-emerald-100/75">
-                Dina givar är inskickade och validerade. Ställningen nedan uppdateras
-                löpande under dagen och blir slutlig efter midnatt.
-              </p>
-            </div>
-          ) : nästa !== null ? (
+        {/* Spela nästa ospelade giv. Progress-stapeln + 12-rutnätet + "allt klart"-
+            kortet borttagna (ägaren 2026-08-11 — kändes onödiga i alla lägen). Är
+            allt spelat finns ingen ospelad giv → ingen knapp; sidan går direkt
+            vidare till ställningen nedan. */}
+        {nästa !== null && (
+          <div className="flex justify-center">
             <Button onClick={() => setSpelIndex(nästa)}>
               {antalKlara === 0 ? 'Starta tävlingen →' : `Fortsätt – giv ${tavling.givar[nästa].deal.board} →`}
             </Button>
-          ) : null}
-        </div>
+          </div>
+        )}
 
         {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
         <DinStällning resultat={topplista} />
@@ -371,7 +324,46 @@ export function DagensTavling() {
           <HemLänk />
         </div>
       </div>
+
+      {/* Uppdatera ställningen — liten knapp fast i nederkant höger. Hämtar
+          topplistan på nytt (din placering, MP% och andras resultat uppdateras
+          löpande under dagen) utan att ladda om hela sidan. */}
+      <button
+        type="button"
+        onClick={() => {
+          setUppdaterar(true)
+          setUppdateraNonce((n) => n + 1)
+        }}
+        aria-label="Uppdatera ställningen"
+        title="Uppdatera ställningen"
+        className="fixed z-20 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-900/85 text-gold-200 shadow-lg ring-1 ring-gold-400/30 backdrop-blur transition-colors hover:bg-emerald-800 active:scale-95"
+        style={{
+          bottom: 'max(1rem, env(safe-area-inset-bottom))',
+          right: 'max(1rem, env(safe-area-inset-right))',
+        }}
+      >
+        <UppdateraIkon snurrar={uppdaterar} />
+      </button>
     </Skärm>
+  )
+}
+
+/** Cirkelpil (uppdatera). Snurrar medan en ny hämtning pågår. */
+function UppdateraIkon({ snurrar }: { snurrar: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`h-5 w-5 ${snurrar ? 'animate-spin' : ''}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <path d="M21 3v6h-6" />
+    </svg>
   )
 }
 
@@ -390,24 +382,6 @@ function Nedrakning() {
       <span className="font-semibold tabular-nums text-gold-200">{formatNedrakning(ms)}</span>
     </div>
   )
-}
-
-/** Liten statusmarkör på en spelad giv-bricka (inskickets utfall). */
-const STATUS_GLYF: Record<InskickStatus | 'pending', string> = {
-  godkand: '✓',
-  avvisad: '✗',
-  granskning: '?',
-  redan: '✓',
-  fel: '⚠',
-  pending: '·',
-}
-const STATUS_TITEL: Record<InskickStatus | 'pending', string> = {
-  godkand: ' — inskickad ✓',
-  avvisad: ' — inskicket avvisades',
-  granskning: ' — under granskning',
-  redan: ' — redan inskickad',
-  fel: ' — nådde inte servern (spara lokalt)',
-  pending: ' — skickar in …',
 }
 
 /** Ditt eget läge överst i ställningen (UI-polish steg 3): placering + snitt-MP%.

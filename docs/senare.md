@@ -159,7 +159,20 @@ godkänd design. Låsta ramar: emerald, svarta spader, guldserifen. Tokens +
 komponentstrukturen (UI-overhaulen) är redo, så bygget är billigt.
 
 ### Tävlingsöversikten — mobil-layout (för hög) (2026-08-11, ägaren)
-Efter UI-polishens steg 1–5 staplar `DagensTavling`-översikten mycket vertikalt:
+**DELVIS ÅTGÄRDAT 2026-08-11 (ägarstyrt):** ägaren ringade in och bad ta bort
+progress-stapeln, 12-rutnätet och "🎉 Alla 12 spelade"-kortet — nu borttagna i
+ALLA lägen ur `DagensTavling.tsx` (rutnätet var inte klickbart, så inget tappas;
+travellern nås via "Dina givar"-raderna). Sidan går rubrik → knapp (bara om ospelad
+giv finns) → DinStällning → Dina givar → Ställningen. Dessutom en **uppdatera-knapp
+(⟳)** fast i nederkant höger (`fixed`, säkra zoner) som hämtar om topplistan
+(placering/MP%/andras resultat + cross-device-framsteg via `uppdateraNonce` →
+`fetchTopplista`-effekten) utan full sidladdning. Facit uppdaterat i
+`DagensTavling.test.tsx` + `DagensTavling-flode.test.tsx`. **KVAR (om ägaren vill):**
+komprimera toppen (rubrik+klocka på en rad), kort topplista (topp 3 + din rad),
+ev. "Dina givar" → in i rutnätet med MP% (idén från planeringspasset). Låsta ramar:
+emerald, svarta spader, guldserifen, MP bara.
+
+*(Ursprunglig notering:)* Efter UI-polishens steg 1–5 staplar `DagensTavling`-översikten mycket vertikalt:
 rubrik + nedräkningsklocka + progress + 12-rutnätet + huvudknapp + "Din ställning"-
 kort + "Dina givar"-tabell + "Ställningen"-topplista + hemlänk. På telefon (höjd­
 budget ~812 px) blir det lång scroll och inget ryms ovanför vecket. Ägaren

@@ -83,12 +83,13 @@ function starta() {
 }
 
 describe('Dagens tävling — framsteget bokförs när given blir klar', () => {
-  it('giv 1 klar → översikten visar "1 av 2 klara" även om man går dit direkt (inte via Nästa)', async () => {
+  it('giv 1 klar → framsteget syns på översikten (Fortsätt giv 2) även om man går dit direkt', async () => {
     starta()
     fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
     // giv 1 blir klar (stubbens onResultat), spelaren går till ÖVERSIKTEN.
     fireEvent.click(await screen.findByRole('button', { name: 'ÖVERSIKT-1' }))
-    expect(await screen.findByText(/1 av 2 klara/)).toBeInTheDocument()
+    // Bokförd direkt → nästa ospelade är giv 2 ("Fortsätt – giv 2").
+    expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
     expect(submitMock).toHaveBeenCalledTimes(1)
   })
 
@@ -97,18 +98,22 @@ describe('Dagens tävling — framsteget bokförs när given blir klar', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
     // giv 1 klar → "Nästa"-knappen tar till översikten, inte till giv 2.
     fireEvent.click(await screen.findByRole('button', { name: 'NÄSTA-1' }))
-    expect(await screen.findByText(/1 av 2 klara/)).toBeInTheDocument()
-    // Därifrån startar man nästa giv själv med "Fortsätt – giv 2".
-    expect(screen.getByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
+    // Man landar på översikten och startar nästa giv själv med "Fortsätt – giv 2".
+    expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
   })
 
-  it('spela båda givarna via översikten → allt-klart-vyn', async () => {
+  it('spela båda givarna → ingen knapp kvar, bara resultatet', async () => {
     starta()
     fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
     // giv 1 → översikt → Fortsätt giv 2 → giv 2 → översikt (allt klart).
     fireEvent.click(await screen.findByRole('button', { name: 'NÄSTA-1' }))
     fireEvent.click(await screen.findByRole('button', { name: /Fortsätt – giv 2/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'NÄSTA-2' }))
-    expect(await screen.findByText(/Alla 2 givar spelade/)).toBeInTheDocument()
+    // Allt spelat: ingen ospelad giv kvar → ingen Starta/Fortsätt-knapp; sidan
+    // visar bara resultatet ("Dina givar").
+    expect(await screen.findByText('Dina givar')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /Starta tävlingen|Fortsätt – giv/ }),
+    ).not.toBeInTheDocument()
   })
 })

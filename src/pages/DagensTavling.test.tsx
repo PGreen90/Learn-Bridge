@@ -79,15 +79,15 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     auth.signedIn = true
   })
 
-  it('ok: översikten visar progress och startknapp', async () => {
+  it('ok: översikten visar startknappen', async () => {
     fetchMock.mockResolvedValue(ok())
     render(
       <MemoryRouter>
         <DagensTavling />
       </MemoryRouter>,
     )
-    expect(await screen.findByText(/0 av 2 klara/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Starta tävlingen/ })).toBeInTheDocument()
+    // Inget spelat än → "Starta tävlingen". (Progress-stapeln + rutnätet borttagna.)
+    expect(await screen.findByRole('button', { name: /Starta tävlingen/ })).toBeInTheDocument()
     // Nedräkningen till nästa tävling syns på översikten.
     expect(screen.getByText(/Nästa tävling om/)).toBeInTheDocument()
   })
@@ -123,9 +123,8 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
         <DagensTavling />
       </MemoryRouter>,
     )
-    expect(await screen.findByText(/1 av 2 klara/)).toBeInTheDocument()
-    // Nästa ospelade är giv 2 → knappen "Fortsätt".
-    expect(screen.getByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
+    // Nästa ospelade är giv 2 → knappen "Fortsätt" (progress-texten borttagen).
+    expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
   })
 
   it('cross-device: serverns inskick känns igen även utan lokalt framsteg', async () => {
@@ -149,9 +148,9 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
         <DagensTavling />
       </MemoryRouter>,
     )
-    // Översikten börjar INTE om på giv 1 — den känner igen serverns inskick.
-    expect(await screen.findByText(/1 av 2 klara/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
+    // Översikten börjar INTE om på giv 1 — den känner igen serverns inskick
+    // (nästa ospelade = giv 2).
+    expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
     // Given syns i "Dina givar" med kontraktet servern återskapade.
     expect(screen.getByText('Dina givar')).toBeInTheDocument()
     expect(screen.getByText('♠')).toBeInTheDocument()
@@ -341,6 +340,7 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
         <DagensTavling />
       </MemoryRouter>,
     )
-    expect(await screen.findByText(/0 av 2 klara/)).toBeInTheDocument()
+    // Gårdagens framsteg ignoreras → börjar om: "Starta tävlingen".
+    expect(await screen.findByRole('button', { name: /Starta tävlingen/ })).toBeInTheDocument()
   })
 })
