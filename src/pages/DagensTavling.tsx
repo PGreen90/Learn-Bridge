@@ -519,6 +519,10 @@ function Resultattabell({
             {rader.map((r) => {
               const mp = mpPerBricka.get(r.board)
               const avvisad = r.inskickStatus === 'avvisad'
+              // Servern har tagit emot given (men den kanske inte poängsatts än
+              // för att du är ensam spelare). Då visas ett preliminärt 100 % i
+              // stället för "väntar" — tydligare att resultatet ÄR inne.
+              const inne = r.inskickStatus === 'godkand' || r.inskickStatus === 'redan'
               // Kontrakt/resultat: serverns värde vinner (fyller även äldre
               // givar); annars det lokalt sparade.
               const kontrakt = kontraktPerBricka.has(r.board)
@@ -554,10 +558,17 @@ function Resultattabell({
                   <td className="py-1.5 pl-2 text-right tabular-nums">
                     {avvisad ? (
                       <span className="text-danger" title="Inskicket avvisades">✗</span>
-                    ) : mp === undefined ? (
-                      <span className="text-emerald-100/40">väntar</span>
-                    ) : (
+                    ) : mp !== undefined ? (
                       <span className="font-semibold text-gold-200">{mp.toFixed(0)} %</span>
+                    ) : inne ? (
+                      <span
+                        className="font-semibold text-gold-200"
+                        title="Preliminärt 100 % — du är ensam på given än; siffran kan ändras när fler spelat den"
+                      >
+                        100 %
+                      </span>
+                    ) : (
+                      <span className="text-emerald-100/40">väntar</span>
                     )}
                   </td>
                 </tr>
@@ -690,8 +701,8 @@ function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
       <h2 className="text-center font-brand text-lg text-gold-200">Ställningen</h2>
       {topplista.length === 0 ? (
         <p className="text-center text-sm text-emerald-100/70">
-          Väntar på fler resultat — en giv ger poäng först när minst {minPerGiv} spelare
-          har spelat den.
+          Dina spelade givar är inne (se "Dina givar" ovan). Ställningen mot andra
+          spelare visas när minst {minPerGiv} spelare spelat samma giv.
         </p>
       ) : (
         <>

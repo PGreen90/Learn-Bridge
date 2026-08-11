@@ -184,8 +184,43 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(await screen.findByText('Dina givar')).toBeInTheDocument()
     expect(screen.getByText('♠')).toBeInTheDocument()
     expect(screen.getByText('+1')).toBeInTheDocument()
-    // Utan topplistedata (fetchTopplista hånas ej → 'fel') väntar MP%:et.
+    // Given saknar ännu serverbekräftelse (ingen inskickStatus) → MP%:et väntar.
     expect(screen.getByText('väntar')).toBeInTheDocument()
+  })
+
+  it('godkänd men opoängsatt giv (ensam spelare) visar preliminärt 100 %, inte "väntar"', async () => {
+    localStorage.setItem(
+      'learnbridge:tavling-framsteg',
+      JSON.stringify({
+        nummer: 9,
+        klara: [
+          {
+            board: 1,
+            myTricks: 11,
+            win: true,
+            headline: '',
+            scoreLabel: null,
+            inskickStatus: 'godkand',
+            kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 1 },
+          },
+        ],
+      }),
+    )
+    fetchMock.mockResolvedValue(ok())
+    // Topplistan har inga poängsatta givar än (du är ensam) → ingen mp för given.
+    topplistaMock.mockResolvedValue({
+      status: 'ok',
+      data: { nummer: 9, storlek: 2, poängsattaGivar: 0, minPerGiv: 2, topplista: [], du: null, dinaGivar: [], dinaInskick: [] },
+    })
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Dina givar')).toBeInTheDocument()
+    // Godkänd + opoängsatt → preliminärt 100 % (inte "väntar").
+    expect(screen.getByText('100 %')).toBeInTheDocument()
+    expect(screen.queryByText('väntar')).not.toBeInTheDocument()
   })
 
   it('resultattabellen: varje spelad giv är klickbar → fältets resultat (travellern)', async () => {
