@@ -13,7 +13,9 @@
 // utan token exakt som förr.
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { ResolvedCall } from '../src/lib/bidding'
 import { stockholmDateISO } from '../src/lib/engine/daily'
+import { contractFromCalls } from '../src/lib/engine/auction-live'
 import { aggregeraTopplista, type Tävlingsrad } from '../src/lib/engine/matchpoints'
 
 async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
@@ -43,6 +45,16 @@ async function kallarId(base: string, key: string, authz: string | undefined): P
 }
 
 const MIN_PER_GIV = 2
+
+/** Kompakt kontrakt + resultat för en av kallarens givar (matchar klientens
+ *  GivKontrakt). `diff` = spelförarens över-/understick mot kontraktet. */
+interface DinKontrakt {
+  level: number
+  strain: string
+  doubled?: 'X' | 'XX'
+  declarer: string
+  diff: number
+}
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const json = (status: number, data: unknown) => {
@@ -82,6 +94,45 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }))
     const agg = aggregeraTopplista(rader, MIN_PER_GIV, meId)
 
+    // Kontrakt + resultat per giv för kallaren (steg 4-fix). Servern är
+    // auktoritativ: den läser `declarer_tricks` + auktionen ur den lagrade
+    // payloaden, så resultattabellen fylls för ALLA dina givar — även sådana
+    // som spelades innan kontraktssparningen fanns, och oavsett enhet.
+    const kontraktPerBricka = new Map<number, DinKontrakt | null>()
+    if (meId && agg.dinaGivar.length) {
+      const mina = (await restGet(
+        base,
+        key,
+        `daily_results?set_id=eq.${set.id}&user_id=eq.${meId}&status=eq.godkand&select=board,declarer_tricks,passed_out,payload`,
+      )) as Array<{
+        board: number
+        declarer_tricks: number | null
+        passed_out: boolean
+        payload: { history?: ResolvedCall[] } | null
+      }>
+      for (const rad of mina) {
+        if (rad.passed_out) {
+          kontraktPerBricka.set(rad.board, null)
+          continue
+        }
+        const history = rad.payload?.history
+        const contract = Array.isArray(history) ? contractFromCalls(history) : null
+        if (contract && rad.declarer_tricks != null) {
+          kontraktPerBricka.set(rad.board, {
+            level: contract.level,
+            strain: contract.strain,
+            doubled: contract.doubled,
+            declarer: contract.declarer,
+            diff: rad.declarer_tricks - (6 + contract.level),
+          })
+        }
+      }
+    }
+    const dinaGivar = agg.dinaGivar.map((g) => ({
+      ...g,
+      kontrakt: kontraktPerBricka.get(g.board) ?? null,
+    }))
+
     // Visningsnamn för spelarna på listan.
     const ids = agg.topplista.map((p) => p.spelare)
     const namn = new Map<string, string>()
@@ -110,7 +161,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       topplista,
       // Personliga fält — bara med när en giltig token skickats (annars null/[]).
       du: agg.du,
-      dinaGivar: agg.dinaGivar,
+      dinaGivar,
     })
   } catch (err) {
     return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })

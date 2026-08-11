@@ -19,9 +19,10 @@ vi.mock('../components/AuthProvider', () => ({
 
 // Hånad serverhämtning: testet bestämmer utfallet.
 const fetchMock = vi.hoisted(() => vi.fn())
+const topplistaMock = vi.hoisted(() => vi.fn())
 vi.mock('../lib/backend/tavling', async (importActual) => {
   const actual = await importActual<typeof import('../lib/backend/tavling')>()
-  return { ...actual, fetchDagensTavling: fetchMock }
+  return { ...actual, fetchDagensTavling: fetchMock, fetchTopplista: topplistaMock }
 })
 
 import { DagensTavling } from './DagensTavling'
@@ -43,6 +44,9 @@ beforeEach(() => {
   auth.loading = false
   auth.signedIn = false
   fetchMock.mockReset()
+  // Standard: ingen topplistedata (som förr, då fetchTopplista gav 'fel' i jsdom).
+  topplistaMock.mockReset()
+  topplistaMock.mockResolvedValue({ status: 'fel', fel: 'ingen data i test' })
 })
 afterEach(() => {
   cleanup()
@@ -145,6 +149,81 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(screen.getByText('+1')).toBeInTheDocument()
     // Utan topplistedata (fetchTopplista hånas ej → 'fel') väntar MP%:et.
     expect(screen.getByText('väntar')).toBeInTheDocument()
+  })
+
+  it('resultattabellen: en giv med sparad given (kontrakt+kort) är klickbar för genomgång', async () => {
+    localStorage.setItem(
+      'learnbridge:tavling-framsteg',
+      JSON.stringify({
+        nummer: 9,
+        klara: [
+          // Sparad given → klickbar.
+          {
+            board: 1,
+            myTricks: 10,
+            win: true,
+            headline: '',
+            scoreLabel: null,
+            kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 },
+            history: [],
+            plays: [],
+          },
+          // Äldre framsteg (kontrakt men inga sparade kort) → EJ klickbar.
+          {
+            board: 2,
+            myTricks: 8,
+            win: false,
+            headline: '',
+            scoreLabel: null,
+            kontrakt: { level: 3, strain: 'NT', declarer: 'E', diff: -1 },
+          },
+        ],
+      }),
+    )
+    fetchMock.mockResolvedValue(ok())
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Dina givar')).toBeInTheDocument()
+    // Exakt en rad (giv 1) exponerar genomgångs-affordansen.
+    expect(screen.getAllByTitle('Öppna rondgenomgången')).toHaveLength(1)
+  })
+
+  it('resultattabellen fyller kontrakt/resultat från SERVERN även utan lokalt kontrakt', async () => {
+    // Lokalt framsteg UTAN kontraktsfält (spelad före kontraktssparningen).
+    localStorage.setItem(
+      'learnbridge:tavling-framsteg',
+      JSON.stringify({
+        nummer: 9,
+        klara: [{ board: 1, myTricks: 10, win: true, headline: '', scoreLabel: null }],
+      }),
+    )
+    fetchMock.mockResolvedValue(ok())
+    topplistaMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        nummer: 9,
+        storlek: 2,
+        poängsattaGivar: 1,
+        minPerGiv: 2,
+        topplista: [{ namn: 'Green', snitt: 100, antalGivar: 1 }],
+        du: { placering: 1, snitt: 100, antalGivar: 1 },
+        dinaGivar: [
+          { board: 1, mp: 1, max: 1, procent: 100, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 1 } },
+        ],
+      },
+    })
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Dina givar')).toBeInTheDocument()
+    // Kontraktet (♠) och resultatet (+1) kommer från serverns dinaGivar.
+    expect(await screen.findByText('♠')).toBeInTheDocument()
+    expect(screen.getByText('+1')).toBeInTheDocument()
   })
 
   it('gårdagens framsteg (annat nummer) återupptas inte', async () => {

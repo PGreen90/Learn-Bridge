@@ -158,7 +158,9 @@ export function RondRapportView({
   claimed: { total: number; auto: boolean } | null
   botReasons: Record<string, { seat: Seat; reason: string }>
   onBack: () => void
-  onNewGame: () => void
+  /** "Ny giv →". Utelämnad (tävlingsgenomgången) → knappen visas inte, bara
+   *  "← Tillbaka". */
+  onNewGame?: () => void
 }) {
   const rapport = useMemo(
     () => buildRondRapport({ deal, contract, calls, tricks, result, score, claimed, botReasons }),
@@ -244,7 +246,7 @@ export function RondRapportView({
         <Button variant="secondary" onClick={onBack}>
           ← Tillbaka
         </Button>
-        <Button onClick={onNewGame}>Ny giv →</Button>
+        {onNewGame && <Button onClick={onNewGame}>Ny giv →</Button>}
       </div>
     </div>
   )

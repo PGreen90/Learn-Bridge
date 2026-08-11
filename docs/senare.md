@@ -158,6 +158,24 @@ Design-utforskning med de färdiga promptarna, och ombyggnaden av appen efter
 godkänd design. Låsta ramar: emerald, svarta spader, guldserifen. Tokens +
 komponentstrukturen (UI-overhaulen) är redo, så bygget är billigt.
 
+### Tävlingsöversikten — mobil-layout (för hög) (2026-08-11, ägaren)
+Efter UI-polishens steg 1–5 staplar `DagensTavling`-översikten mycket vertikalt:
+rubrik + nedräkningsklocka + progress + 12-rutnätet + huvudknapp + "Din ställning"-
+kort + "Dina givar"-tabell + "Ställningen"-topplista + hemlänk. På telefon (höjd­
+budget ~812 px) blir det lång scroll och inget ryms ovanför vecket. Ägaren
+(2026-08-11): "vi behöver se över hela UI en gång till" — men som ett **eget,
+fokuserat pass**, inte inklämt i data-fixarna. Idéer att väga: flikar
+(Spela / Ställning / Dina givar), hopfällbara sektioner, kompaktare kort, flytta
+topplistan bakom en knapp. Låsta ramar som vanligt: emerald, svarta spader,
+guldserifen, MP bara. Mät höjdbudgeten och svara med uppmätta px (facelift-mönstret
+[[facelift-mockup-rejected]]). Hör ihop med FACELIFTEN ovan.
+
+### Rondgenomgång för tävlingsgiv — botarnas per-kort-motivering (2026-08-11)
+Steg 5:s genomgång (`byggGranskning` → `RondRapportView`) återskapar given ur
+sparad auktion + kort, men **utan** botarnas "varför la Öst ♥9?"-rader — de finns
+bara i stunden boten spelar live. Att återskapa dem = spela om med reason-motorn
+(tyngre). Bygg om ägaren vill ha dem även i efterhandsgenomgången.
+
 ### Engelska som andra språk (2026-07-29, ägarbeslut — Fas 5 i konkurrensplanen)
 Ägaren vill ha appen på två språk: svenska först, engelska senare. Stort eget
 spår — hela gränssnittet plus budsystem-boken (appens största text) ska

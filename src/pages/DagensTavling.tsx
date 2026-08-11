@@ -32,6 +32,8 @@ import {
   type TopplistaResultat,
 } from '../lib/backend/tavling'
 import { Play } from './Play'
+import { RondRapportView } from './play/RondRapport'
+import { byggGranskning } from './play/granska-tavling'
 import type { TavlingSpel } from './play/tavling-mode'
 
 /** Index i givar-listan för den första ospelade given, eller null om alla är
@@ -49,6 +51,8 @@ export function DagensTavling() {
   const [framsteg, setFramsteg] = useState<TavlingFramsteg | null>(null)
   // Index i givar-listan för given som spelas just nu (null = översikten visas).
   const [spelIndex, setSpelIndex] = useState<number | null>(null)
+  // Bricknummer för given vars rondgenomgång visas (steg 5), null = ingen.
+  const [granskaBoard, setGranskaBoard] = useState<number | null>(null)
   // Dagens topplista (hämtas på översikten).
   const [topplista, setTopplista] = useState<TopplistaResultat | null>(null)
   // Alltid senaste framsteget (utan att fastna i en gammal closure) — så
@@ -174,9 +178,11 @@ export function DagensTavling() {
       onResultat: (r, inskick) => {
         // BOKFÖR i samma stund given är klar (ersätt ev. tidigare rad för samma
         // bricka). Läser/ skriver framstegRef så navigeringen efteråt ser den
-        // uppdaterade listan även om React ännu inte hunnit rendera om.
+        // uppdaterade listan även om React ännu inte hunnit rendera om. Auktionen
+        // + korten sparas med (steg 5) så rondgenomgången kan återskapas.
+        const rad: GivResultat = { ...r, history: inskick.history, plays: inskick.plays }
         const base = framstegRef.current?.klara ?? []
-        const klara = [...base.filter((k) => k.board !== r.board), r]
+        const klara = [...base.filter((k) => k.board !== r.board), rad]
         const nytt: TavlingFramsteg = { nummer: tavling.nummer, klara }
         framstegRef.current = nytt
         saveTavlingFramsteg(nytt)
@@ -201,6 +207,48 @@ export function DagensTavling() {
       onÖversikt: () => setSpelIndex(null),
     }
     return <Play key={`tavling-${tavling.nummer}-${giv.deal.board}`} tavling={spel} />
+  }
+
+  // --- Granska en klar giv (steg 5): rondgenomgången ur den sparade given ----
+  if (granskaBoard !== null) {
+    const giv = tavling.givar.find((g) => g.deal.board === granskaBoard)
+    const rad = framsteg.klara.find((k) => k.board === granskaBoard)
+    const tillbaka = () => setGranskaBoard(null)
+    // Genomgången kräver den sparade given (kontrakt + kort). Saknas den (äldre
+    // framsteg / utpassad giv) → vänligt meddelande i stället för en krasch.
+    if (!giv || !rad || !rad.kontrakt || !rad.plays) {
+      return (
+        <Skärm>
+          <div className="max-w-sm space-y-3 text-center">
+            <p className="text-emerald-100/80">
+              Genomgången är inte tillgänglig för den här given.
+            </p>
+            <button
+              onClick={tillbaka}
+              className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
+            >
+              ← Till översikten
+            </button>
+          </div>
+        </Skärm>
+      )
+    }
+    const g = byggGranskning(giv.deal, rad.plays, rad.kontrakt)
+    return (
+      <div className="min-h-[100dvh] bg-surface px-4 py-6">
+        <RondRapportView
+          deal={giv.deal}
+          contract={g.contract}
+          calls={rad.history ?? []}
+          tricks={g.tricks}
+          result={g.result}
+          score={g.score}
+          claimed={g.claimed}
+          botReasons={{}}
+          onBack={tillbaka}
+        />
+      </div>
+    )
   }
 
   // --- Översikten -----------------------------------------------------------
@@ -287,7 +335,7 @@ export function DagensTavling() {
 
         {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
         <DinStällning resultat={topplista} />
-        <Resultattabell klara={framsteg.klara} topplista={topplista} />
+        <Resultattabell klara={framsteg.klara} topplista={topplista} onGranska={setGranskaBoard} />
         <TopplistaVy resultat={topplista} />
 
         <div className="flex justify-center">
@@ -405,14 +453,24 @@ function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
 function Resultattabell({
   klara,
   topplista,
+  onGranska,
 }: {
   klara: GivResultat[]
   topplista: TopplistaResultat | null
+  /** Klick på en giv → öppna dess rondgenomgång (steg 5). */
+  onGranska: (board: number) => void
 }) {
   if (klara.length === 0) return null
   const mpPerBricka = new Map<number, number>()
+  // Kontrakt/resultat från servern (auktoritativt) — fyller även givar spelade
+  // före kontraktssparningen. `undefined` i mappen = servern sa inget (då
+  // används det lokalt sparade kontraktet som reserv).
+  const kontraktPerBricka = new Map<number, GivKontrakt | null>()
   if (topplista?.status === 'ok') {
-    for (const g of topplista.data.dinaGivar) mpPerBricka.set(g.board, g.procent)
+    for (const g of topplista.data.dinaGivar) {
+      mpPerBricka.set(g.board, g.procent)
+      if (g.kontrakt !== undefined) kontraktPerBricka.set(g.board, g.kontrakt)
+    }
   }
   const rader = [...klara].sort((a, b) => a.board - b.board)
   return (
@@ -432,14 +490,44 @@ function Resultattabell({
             {rader.map((r) => {
               const mp = mpPerBricka.get(r.board)
               const avvisad = r.inskickStatus === 'avvisad'
+              // Kontrakt/resultat: serverns värde vinner (fyller även äldre
+              // givar); annars det lokalt sparade.
+              const kontrakt = kontraktPerBricka.has(r.board)
+                ? kontraktPerBricka.get(r.board)!
+                : r.kontrakt
+              // Genomgången kräver den LOKALT sparade given (kort + auktion).
+              const granskbar = kontrakt != null && r.history != null && r.plays != null
+              const öppna = granskbar ? () => onGranska(r.board) : undefined
               return (
-                <tr key={r.board} className="border-t border-emerald-100/5">
-                  <td className="py-1.5 pr-2 tabular-nums text-emerald-100/70">{r.board}</td>
+                <tr
+                  key={r.board}
+                  className={`border-t border-emerald-100/5 ${
+                    granskbar ? 'cursor-pointer hover:bg-emerald-900/30' : ''
+                  }`}
+                  {...(öppna
+                    ? {
+                        role: 'button',
+                        tabIndex: 0,
+                        title: 'Öppna rondgenomgången',
+                        onClick: öppna,
+                        onKeyDown: (e: React.KeyboardEvent) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            öppna()
+                          }
+                        },
+                      }
+                    : {})}
+                >
+                  <td className="py-1.5 pr-2 tabular-nums text-emerald-100/70">
+                    {r.board}
+                    {granskbar && <span className="ml-1 text-gold-300/70">›</span>}
+                  </td>
                   <td className="px-2 py-1.5">
-                    <Kontraktscell k={r.kontrakt} />
+                    <Kontraktscell k={kontrakt} />
                   </td>
                   <td className="px-2 py-1.5 text-center tabular-nums text-emerald-50">
-                    {resultatText(r.kontrakt)}
+                    {resultatText(kontrakt)}
                   </td>
                   <td className="py-1.5 pl-2 text-right tabular-nums">
                     {avvisad ? (
@@ -456,6 +544,7 @@ function Resultattabell({
           </tbody>
         </table>
       </div>
+      <p className="text-center text-[11px] text-emerald-100/45">Tryck på en giv för genomgången.</p>
     </div>
   )
 }

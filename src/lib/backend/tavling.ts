@@ -56,6 +56,11 @@ export interface GivResultat {
   /** Kompakt kontrakt + resultat för resultattabellen (steg 4). `null` = given
    *  passades ut; `undefined` = äldre sparat framsteg utan fältet. */
   kontrakt?: GivKontrakt | null
+  /** Auktionen + de spelade korten (steg 5) — sparas lokalt så rondgenomgången
+   *  kan återskapas ur en klar giv. `undefined` = äldre framsteg utan dem (då
+   *  är genomgången inte tillgänglig). */
+  history?: ResolvedCall[]
+  plays?: Card[]
 }
 
 /** Framstegen i dagens tävling — vilka givar som är klara, per tävlingsnummer.
@@ -238,6 +243,10 @@ export interface DinGiv {
   mp: number
   max: number
   procent: number
+  /** Kontrakt + resultat ur serverns data (auktoritativt — fylls även för givar
+   *  spelade före kontraktssparningen / på annan enhet). `null` = utpassad; kan
+   *  saknas i äldre svar. */
+  kontrakt?: GivKontrakt | null
 }
 
 export interface Topplista {
