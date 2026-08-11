@@ -12,27 +12,23 @@ svarar på vad).
 
 ### 🔵 NU — TÄVLINGS-UI-POLISH (6 förbättringar, en i taget live)
 
-**ETAPP 2 (dagliga tävlingen) KOMPLETT & LIVE-VERIFIERAD HELA KEDJAN (2026-08-11):**
-två konton → topplista med matchpoäng, rätt räknat live. Serverside + LED 1/2/3,
-migrationer `0005`+`0006` körda. ETAPP 1 (konton) klar & live sedan tidigare. Rest:
-städa testkontona (`+smoke`/`+test2`/`+test3` i Supabase → Auth → Users). Detalj:
-minnena `beslut-b-etapp2-progress`/`beslut-b-etapp1-progress` + `docs/beslut-b-plan.md`.
+**ETAPP 2 KOMPLETT & LIVE-VERIFIERAD (2026-08-11):** två konton → topplista med
+matchpoäng, rätt live; migr. `0005`+`0006` körda; ETAPP 1 (konton) klar sedan förr.
+Rest: städa testkontona (`+smoke`/`+test2`/`+test3` i Supabase → Auth → Users).
+Detalj: [[beslut-b-etapp2-progress]] + `docs/beslut-b-plan.md`.
 
 **UI-POLISH (ägarbeslut 2026-08-11; Funbridge-inspirerat men EGEN emerald-stil —
 låna idéer, ALDRIG kopiera; MP bara, ingen IMP):**
 1. Nedräkningsklocka **KLAR & LIVE (`42fc1a8`)** — "Nästa tävling om HH:MM:SS" på
    översikten mot midnatt svensk tid (`msTillNastaTavling`/`formatNedrakning` i
    `daily.ts`, DST-säkert, alla tidszoner).
-2. Server-påbygg **KLAR & DEPLOYAD** — `/api/topplista` läser valfri token och
-   svarar (inloggad) med `du` (placering, delad rang vid lika snitt, + snitt) och
-   `dinaGivar` (MP% per giv). Ren logik `aggregeraTopplista` i `matchpoints.ts`
-   (facit +6), klient-plumbing i `backend/tavling.ts`. Bakåtkompatibelt.
-3. Din placering + MP% överst **KLAR & DEPLOYAD** — `DinStällning`-kort överst i
-   ställningen på översikten (placering + 🥇/🥈/🥉 + snitt-MP%; tyst tills rankad).
-**NÄSTA SESSION = steg 4–6:** 4) resultattabell per giv (kontrakt · resultat · din
-MP% — `dinaGivar` finns nu på servern, wire in) · 5) klicka giv → rondgenomgången
-(finns, wire in) · 6) snyggare topplista/ranking-vy (highlighta DIN rad — servern
-kan märka den). Sedan = grind till **etapp 3 (härdning)**.
+2+3. **KLARA & DEPLOYADE** — `/api/topplista` läser valfri token → svarar
+   (inloggad) med `du` (placering+snitt) & `dinaGivar` (MP%/giv); ren
+   `aggregeraTopplista` i `matchpoints.ts`. `DinStällning`-kort överst på
+   översikten (placering+🥇🥈🥉+snitt-MP%). Detalj: [[tavling-ui-polish]].
+**NÄSTA SESSION = steg 4–6:** 4) resultattabell per giv (kontrakt · resultat ·
+din MP% — `dinaGivar` finns) · 5) klicka giv → rondgenomgången (wire in) · 6)
+snyggare ranking-vy (highlighta DIN rad). Sedan = grind till **etapp 3 (härdning)**.
 
 ---
 
