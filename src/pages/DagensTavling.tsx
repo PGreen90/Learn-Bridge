@@ -15,6 +15,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
 import { Felt } from '../components/Felt'
+import { SuitSymbol } from '../components/SuitSymbol'
+import type { Seat } from '../types/bridge'
 import { loadTavlingFramsteg, saveTavlingFramsteg } from '../lib/backend'
 import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
 import {
@@ -22,6 +24,7 @@ import {
   fetchTopplista,
   submitTavlingGiv,
   type DagensTavling as TavlingData,
+  type GivKontrakt,
   type GivResultat,
   type InskickStatus,
   type TavlingFramsteg,
@@ -282,8 +285,9 @@ export function DagensTavling() {
           ) : null}
         </div>
 
-        {/* Din ställning (steg 3) + topplistan (Led 3) — provisorisk under dagen. */}
+        {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
         <DinStällning resultat={topplista} />
+        <Resultattabell klara={framsteg.klara} topplista={topplista} />
         <TopplistaVy resultat={topplista} />
 
         <div className="flex justify-center">
@@ -360,6 +364,97 @@ function DinStällning({ resultat }: { resultat: TopplistaResultat | null }) {
             {du.antalGivar} {du.antalGivar === 1 ? 'poängsatt giv' : 'poängsatta givar'}
           </span>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/** Spelförarens säte på svenska (kompakt, till kontraktscellen). */
+const SÄTE_SV: Record<Seat, string> = { N: 'N', E: 'Ö', S: 'S', W: 'V' }
+
+/** Resultatet relativt kontraktet: "=", "+1", "−2" (ur spelförarens sikt). */
+function resultatText(k?: GivKontrakt | null): string {
+  if (!k) return '—'
+  if (k.diff === 0) return '='
+  return k.diff > 0 ? `+${k.diff}` : `−${-k.diff}`
+}
+
+/** Kontraktscellen: nivå + färgsymbol (spader svart) + ev. dubbling + säte.
+ *  `null` = utpassad giv; `undefined` = äldre framsteg utan kontraktsfält. */
+function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
+  if (k === null) return <span className="text-emerald-100/50">Passad</span>
+  if (!k) return <span className="text-emerald-100/40">—</span>
+  return (
+    <span className="inline-flex items-center gap-0.5 text-emerald-50">
+      <span className="tabular-nums">{k.level}</span>
+      {k.strain === 'NT' ? (
+        <span className="font-semibold">NT</span>
+      ) : (
+        <SuitSymbol suit={k.strain} />
+      )}
+      {k.doubled && <span className="font-semibold text-danger">{k.doubled}</span>}
+      <span className="ml-1 text-xs text-emerald-100/50">{SÄTE_SV[k.declarer]}</span>
+    </span>
+  )
+}
+
+/** Din resultattabell (UI-polish steg 4): en rad per spelad giv — kontrakt,
+ *  resultat och din MP%. MP% kommer från serverns `dinaGivar` (matchat på
+ *  bricka); en giv som ännu inte poängsatts (för få spelare) visar "väntar",
+ *  och en avvisad giv en röd markör i stället för procent. */
+function Resultattabell({
+  klara,
+  topplista,
+}: {
+  klara: GivResultat[]
+  topplista: TopplistaResultat | null
+}) {
+  if (klara.length === 0) return null
+  const mpPerBricka = new Map<number, number>()
+  if (topplista?.status === 'ok') {
+    for (const g of topplista.data.dinaGivar) mpPerBricka.set(g.board, g.procent)
+  }
+  const rader = [...klara].sort((a, b) => a.board - b.board)
+  return (
+    <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
+      <h2 className="text-center font-brand text-lg text-gold-200">Dina givar</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-xs text-emerald-100/55">
+              <th className="py-1 pr-2 text-left font-medium">Giv</th>
+              <th className="px-2 py-1 text-left font-medium">Kontrakt</th>
+              <th className="px-2 py-1 text-center font-medium">Resultat</th>
+              <th className="py-1 pl-2 text-right font-medium">Din MP%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rader.map((r) => {
+              const mp = mpPerBricka.get(r.board)
+              const avvisad = r.inskickStatus === 'avvisad'
+              return (
+                <tr key={r.board} className="border-t border-emerald-100/5">
+                  <td className="py-1.5 pr-2 tabular-nums text-emerald-100/70">{r.board}</td>
+                  <td className="px-2 py-1.5">
+                    <Kontraktscell k={r.kontrakt} />
+                  </td>
+                  <td className="px-2 py-1.5 text-center tabular-nums text-emerald-50">
+                    {resultatText(r.kontrakt)}
+                  </td>
+                  <td className="py-1.5 pl-2 text-right tabular-nums">
+                    {avvisad ? (
+                      <span className="text-danger" title="Inskicket avvisades">✗</span>
+                    ) : mp === undefined ? (
+                      <span className="text-emerald-100/40">väntar</span>
+                    ) : (
+                      <span className="font-semibold text-gold-200">{mp.toFixed(0)} %</span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   )

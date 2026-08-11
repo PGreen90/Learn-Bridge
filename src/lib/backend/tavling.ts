@@ -11,8 +11,20 @@
 // vilar på serverns omspelningsvalidering av inskicket, inte på att gömma given.
 
 import type { Card, Deal, Seat, Vulnerability } from '../../types/bridge'
+import type { Strain } from '../engine/play'
 import type { ResolvedCall } from '../bidding'
 import { getCurrentSession } from './auth'
+
+/** Kompakt kontrakt + resultat för resultattabellen (UI-polish steg 4). Räcker
+ *  för att rita "4♠Ö −1" utan att spara hela given. */
+export interface GivKontrakt {
+  level: number
+  strain: Strain
+  doubled?: 'X' | 'XX'
+  declarer: Seat
+  /** Spelförarens över-/understick relativt kontraktet: 0 = jämnt, +1, −2 … */
+  diff: number
+}
 
 /** En tävlingsgiv i klienten: given att spela + play-fröet som gör bottarna
  *  deterministiska (trås in i usePlayTable så servern kan spela om och validera). */
@@ -41,6 +53,9 @@ export interface GivResultat {
   /** Serverns valideringsutfall när given skickats in (Led 2). Odefinierat =
    *  inskicket pågår/inte gjort. */
   inskickStatus?: InskickStatus
+  /** Kompakt kontrakt + resultat för resultattabellen (steg 4). `null` = given
+   *  passades ut; `undefined` = äldre sparat framsteg utan fältet. */
+  kontrakt?: GivKontrakt | null
 }
 
 /** Framstegen i dagens tävling — vilka givar som är klara, per tävlingsnummer.

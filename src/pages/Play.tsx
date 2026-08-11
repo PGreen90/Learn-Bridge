@@ -420,6 +420,14 @@ export function PlayTable({
     win: headline.win,
     headline: headline.text,
     scoreLabel: score?.label ?? null,
+    // Kompakt kontrakt + resultat till resultattabellen (steg 4).
+    kontrakt: {
+      level: contract.level,
+      strain: contract.strain,
+      doubled: contract.doubled,
+      declarer: contract.declarer,
+      diff: result.diff,
+    },
   })
 
   // Råmaterialet servern validerar: brickan + auktionen + de spelade korten +

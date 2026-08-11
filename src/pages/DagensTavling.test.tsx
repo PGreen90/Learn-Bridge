@@ -116,6 +116,37 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(screen.getByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
   })
 
+  it('resultattabellen visar kontrakt, resultat och (i väntan på poäng) "väntar"', async () => {
+    localStorage.setItem(
+      'learnbridge:tavling-framsteg',
+      JSON.stringify({
+        nummer: 9,
+        klara: [
+          {
+            board: 1,
+            myTricks: 11,
+            win: true,
+            headline: '',
+            scoreLabel: null,
+            kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 1 },
+          },
+        ],
+      }),
+    )
+    fetchMock.mockResolvedValue(ok())
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    // Tabellrubriken + kontraktet (4♠) och resultatet (+1) för giv 1.
+    expect(await screen.findByText('Dina givar')).toBeInTheDocument()
+    expect(screen.getByText('♠')).toBeInTheDocument()
+    expect(screen.getByText('+1')).toBeInTheDocument()
+    // Utan topplistedata (fetchTopplista hånas ej → 'fel') väntar MP%:et.
+    expect(screen.getByText('väntar')).toBeInTheDocument()
+  })
+
   it('gårdagens framsteg (annat nummer) återupptas inte', async () => {
     localStorage.setItem(
       'learnbridge:tavling-framsteg',

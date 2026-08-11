@@ -22,13 +22,12 @@ låna idéer, ALDRIG kopiera; MP bara, ingen IMP):**
 1. Nedräkningsklocka **KLAR & LIVE (`42fc1a8`)** — "Nästa tävling om HH:MM:SS" på
    översikten mot midnatt svensk tid (`msTillNastaTavling`/`formatNedrakning` i
    `daily.ts`, DST-säkert, alla tidszoner).
-2+3. **KLARA & DEPLOYADE** — `/api/topplista` läser valfri token → svarar
-   (inloggad) med `du` (placering+snitt) & `dinaGivar` (MP%/giv); ren
-   `aggregeraTopplista` i `matchpoints.ts`. `DinStällning`-kort överst på
-   översikten (placering+🥇🥈🥉+snitt-MP%). Detalj: [[tavling-ui-polish]].
-**NÄSTA SESSION = steg 4–6:** 4) resultattabell per giv (kontrakt · resultat ·
-din MP% — `dinaGivar` finns) · 5) klicka giv → rondgenomgången (wire in) · 6)
-snyggare ranking-vy (highlighta DIN rad). Sedan = grind till **etapp 3 (härdning)**.
+2–4. **KLARA & DEPLOYADE** — `/api/topplista` läser valfri token → `du`
+   (placering+snitt) & `dinaGivar` (MP%/giv); ren `aggregeraTopplista`
+   (`matchpoints.ts`). Översikten: `DinStällning`-kort (placering+🥇🥈🥉+MP%) +
+   `Resultattabell` per giv (kontrakt·resultat·din MP%). [[tavling-ui-polish]].
+**NÄSTA = steg 5–6:** 5) klicka giv → rondgenomgången (wire in) · 6) snyggare
+ranking-vy (highlighta DIN rad). Sedan = grind till **etapp 3 (härdning)**.
 
 ---
 

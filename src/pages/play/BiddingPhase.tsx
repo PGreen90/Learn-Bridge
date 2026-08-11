@@ -69,7 +69,7 @@ export function BiddingPhase({
     if (!tavling || !passedOut || tavlingBokford.current) return
     tavlingBokford.current = true
     tavling.onResultat(
-      { board: tavling.board, myTricks: 0, win: false, headline: 'Given passades ut', scoreLabel: null },
+      { board: tavling.board, myTricks: 0, win: false, headline: 'Given passades ut', scoreLabel: null, kontrakt: null },
       { board: tavling.board, history: game.history, plays: [], declarerTricks: 0 },
     )
   }, [tavling, passedOut, game.history])
