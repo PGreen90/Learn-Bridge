@@ -10,23 +10,23 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BESLUT B ETAPP 2: dagliga 12-givarstävlingen
+### 🔵 NU — TÄVLINGS-UI-POLISH (6 förbättringar, en i taget live)
 
-**ETAPP 1 (konton) KLAR & live-verifierad** (rest: städa testkontona `+smoke`/
-`+test2@gmail.com` i Supabase → Authentication → Users). Detalj: minnet
-`beslut-b-etapp1-progress`.
+**ETAPP 2 (dagliga tävlingen) KOMPLETT & LIVE-VERIFIERAD HELA KEDJAN (2026-08-11):**
+två konton → topplista med matchpoäng, rätt räknat live. Serverside + LED 1/2/3,
+migrationer `0005`+`0006` körda. ETAPP 1 (konton) klar & live sedan tidigare. Rest:
+städa testkontona (`+smoke`/`+test2`/`+test3` i Supabase → Auth → Users). Detalj:
+minnena `beslut-b-etapp2-progress`/`beslut-b-etapp1-progress` + `docs/beslut-b-plan.md`.
 
-**ETAPP 2 SERVERSIDAN + LED 1 LIVE (2026-08-10/11); LED 2+3 BYGGDA & TESTADE
-(2026-08-11).** Grindbeslut: dölj Dagens giv, provisorisk topplista JA, paus JA,
-fler längder senare; **konto krävs**, **linjärt giv 1→12**; validering INLINE på
-"snabb" nivå (given/buden/poängen direkt; tung bot-kort-granskning → etapp 3).
-LED 1 live (`fe66195`): `playSeed`/`fetchDagensTavling()`/`gameFromDeal()`, sidan
-`DagensTavling.tsx` (`#/spela-kort/tavling`), startsidan ompekad. LED 2+3 byggt:
-migration `0005` (`daily_results`), `validera()` + `/api/skicka-in`, `matchpoints.ts`
-+ `/api/topplista`, `submitTavlingGiv()`/`fetchTopplista()` + `TopplistaVy`.
-**NU KVAR:** (1) ägaren kör migration `0005` i Supabase, (2) deploy, (3) live-
-verifiera kedjan (två konton → topplista). Sedan = grind till **etapp 3 (härdning)**.
-Detalj: minnet `beslut-b-etapp2-progress` + `docs/beslut-b-plan.md`.
+**UI-POLISH (ägarbeslut 2026-08-11; Funbridge-inspirerat men EGEN emerald-stil —
+låna idéer, ALDRIG kopiera; MP bara, ingen IMP):**
+1. Nedräkningsklocka **KLAR & LIVE (`42fc1a8`)** — "Nästa tävling om HH:MM:SS" på
+   översikten mot midnatt svensk tid (`msTillNastaTavling`/`formatNedrakning` i
+   `daily.ts`, DST-säkert, alla tidszoner).
+**NÄSTA SESSION = steg 2–6:** 2) server-påbygg (`/api/topplista` lämnar även DIN MP +
+placering + din MP per giv) · 3) din placering + MP% överst · 4) resultattabell per
+giv (kontrakt · resultat · din MP%) · 5) klicka giv → rondgenomgången (finns, wire
+in) · 6) snyggare topplista/ranking-vy. Sedan = grind till **etapp 3 (härdning)**.
 
 ---
 
