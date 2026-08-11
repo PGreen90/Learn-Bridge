@@ -7,11 +7,14 @@
 // midnatt + valideringssvep (docs/beslut-b-plan.md, 2b).
 //
 // Bara visningsnamn + procent lämnas ut — inga privata uppgifter — så endpointen
-// kräver ingen inloggning.
+// kräver ingen inloggning. UI-polish steg 2: skickas en giltig inloggnings-token
+// med (Authorization: Bearer …) svarar den DESSUTOM med kallarens egna siffror
+// (`du`: placering + snitt, `dinaGivar`: MP% per giv) — allt bakåtkompatibelt,
+// utan token exakt som förr.
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
-import { matchpointsForBoard, type GivPoäng } from '../src/lib/engine/matchpoints'
+import { aggregeraTopplista, type Tävlingsrad } from '../src/lib/engine/matchpoints'
 
 async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
   const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
@@ -21,9 +24,27 @@ async function restGet(base: string, key: string, pathWithQuery: string): Promis
   return r.json()
 }
 
+/** Vem kallar? Verifiera en valfri inloggnings-token mot Supabase och lämna
+ *  tillbaka user-id, eller null (ingen/ogiltig token = anonym — endpointen
+ *  fungerar ändå, bara utan de personliga fälten). Kastar aldrig. */
+async function kallarId(base: string, key: string, authz: string | undefined): Promise<string | null> {
+  const token = authz && authz.startsWith('Bearer ') ? authz.slice(7) : null
+  if (!token) return null
+  try {
+    const userRes = await fetch(`${base}/auth/v1/user`, {
+      headers: { apikey: key, Authorization: `Bearer ${token}` },
+    })
+    if (!userRes.ok) return null
+    const user = (await userRes.json()) as { id?: string }
+    return user.id ?? null
+  } catch {
+    return null
+  }
+}
+
 const MIN_PER_GIV = 2
 
-export default async function handler(_req: IncomingMessage, res: ServerResponse): Promise<void> {
+export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const json = (status: number, data: unknown) => {
     res.statusCode = status
     res.setHeader('content-type', 'application/json; charset=utf-8')
@@ -50,28 +71,19 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
       `daily_results?set_id=eq.${set.id}&status=eq.godkand&select=board,user_id,ns_score`,
     )) as Array<{ board: number; user_id: string; ns_score: number | null }>
 
-    // Matchpoäng per giv → summera procent per spelare (bara givar med ≥2 spelare).
-    const perSpelare = new Map<string, { summa: number; antal: number }>()
-    const brickor = new Map<number, GivPoäng[]>()
-    for (const r of results) {
-      const lista = brickor.get(r.board) ?? []
-      lista.push({ spelare: r.user_id, poäng: r.ns_score ?? 0 })
-      brickor.set(r.board, lista)
-    }
-    let poängsattaGivar = 0
-    for (const [, entries] of brickor) {
-      if (entries.length < MIN_PER_GIV) continue
-      poängsattaGivar++
-      for (const mp of matchpointsForBoard(entries)) {
-        const nu = perSpelare.get(mp.spelare) ?? { summa: 0, antal: 0 }
-        nu.summa += mp.procent
-        nu.antal += 1
-        perSpelare.set(mp.spelare, nu)
-      }
-    }
+    // Vem frågar? (valfritt — utan giltig token bara den anonyma listan)
+    const meId = await kallarId(base, key, req.headers.authorization)
+
+    // Räkna topplistan + kallarens egna siffror med den rena aggregatfunktionen.
+    const rader: Tävlingsrad[] = results.map((r) => ({
+      board: r.board,
+      spelare: r.user_id,
+      poäng: r.ns_score ?? 0,
+    }))
+    const agg = aggregeraTopplista(rader, MIN_PER_GIV, meId)
 
     // Visningsnamn för spelarna på listan.
-    const ids = [...perSpelare.keys()]
+    const ids = agg.topplista.map((p) => p.spelare)
     const namn = new Map<string, string>()
     if (ids.length) {
       const inList = ids.map((id) => `"${id}"`).join(',')
@@ -83,21 +95,22 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
       for (const p of profiler) namn.set(p.id, p.display_name)
     }
 
-    const topplista = [...perSpelare.entries()]
-      .map(([id, v]) => ({
-        namn: namn.get(id) ?? '—',
-        snitt: v.antal ? v.summa / v.antal : 0,
-        antalGivar: v.antal,
-      }))
-      .sort((a, b) => b.snitt - a.snitt)
+    const topplista = agg.topplista.map((p) => ({
+      namn: namn.get(p.spelare) ?? '—',
+      snitt: p.snitt,
+      antalGivar: p.antalGivar,
+    }))
 
     return json(200, {
       ok: true,
       nummer: set.daily_number,
       storlek: set.size,
-      poängsattaGivar,
+      poängsattaGivar: agg.poängsattaGivar,
       minPerGiv: MIN_PER_GIV,
       topplista,
+      // Personliga fält — bara med när en giltig token skickats (annars null/[]).
+      du: agg.du,
+      dinaGivar: agg.dinaGivar,
     })
   } catch (err) {
     return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })

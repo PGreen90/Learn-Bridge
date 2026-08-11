@@ -209,6 +209,22 @@ export interface TopplistaRad {
   antalGivar: number
 }
 
+/** Kallarens egen placering + snitt (bara med när man är inloggad och har minst
+ *  en poängsatt giv; annars null). */
+export interface DinPlacering {
+  placering: number
+  snitt: number
+  antalGivar: number
+}
+
+/** Kallarens matchpoäng på EN spelad, poängsatt giv (till resultattabellen). */
+export interface DinGiv {
+  board: number
+  mp: number
+  max: number
+  procent: number
+}
+
 export interface Topplista {
   nummer: number
   storlek: number
@@ -216,6 +232,10 @@ export interface Topplista {
   poängsattaGivar: number
   minPerGiv: number
   topplista: TopplistaRad[]
+  /** Din placering + snitt när inloggad, annars null (UI-polish steg 2). */
+  du: DinPlacering | null
+  /** Din MP% per poängsatt giv (brickordning), annars tom (UI-polish steg 2). */
+  dinaGivar: DinGiv[]
 }
 
 export type TopplistaResultat =
@@ -223,19 +243,36 @@ export type TopplistaResultat =
   | { status: 'ingen' }
   | { status: 'fel'; fel: string }
 
-/** Hämta dagens topplista (provisorisk under dagen). Ingen inloggning krävs —
- *  bara visningsnamn + procent lämnas ut. */
+/** Hämta dagens topplista (provisorisk under dagen). Ingen inloggning krävs för
+ *  själva listan (bara visningsnamn + procent lämnas ut), men skickar vi med
+ *  inloggnings-token svarar servern DESSUTOM med kallarens egna siffror
+ *  (`du` + `dinaGivar`, UI-polish steg 2). Är man utloggad förblir de null/tom. */
 export async function fetchTopplista(): Promise<TopplistaResultat> {
+  const session = await getCurrentSession()
+  const token = session?.access_token
+  const headers: Record<string, string> = { Accept: 'application/json' }
+  if (token) headers.Authorization = `Bearer ${token}`
   let res: Response
   try {
-    res = await fetch('/api/topplista', { headers: { Accept: 'application/json' } })
+    res = await fetch('/api/topplista', { headers })
   } catch {
     return { status: 'fel', fel: 'Kunde inte nå servern.' }
   }
   if (res.status === 404) return { status: 'ingen' }
   if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
   try {
-    return { status: 'ok', data: (await res.json()) as Topplista }
+    const raw = (await res.json()) as Partial<Topplista>
+    // Bakåtkompatibelt: äldre svar (eller anonyma) saknar de personliga fälten.
+    const data: Topplista = {
+      nummer: raw.nummer ?? 0,
+      storlek: raw.storlek ?? 0,
+      poängsattaGivar: raw.poängsattaGivar ?? 0,
+      minPerGiv: raw.minPerGiv ?? 2,
+      topplista: raw.topplista ?? [],
+      du: raw.du ?? null,
+      dinaGivar: raw.dinaGivar ?? [],
+    }
+    return { status: 'ok', data }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
   }

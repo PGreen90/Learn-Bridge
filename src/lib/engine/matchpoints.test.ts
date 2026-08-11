@@ -1,7 +1,13 @@
 // Facit för matchpoängen (Beslut B etapp 2, Led 3).
 
 import { describe, test, expect } from 'vitest'
-import { matchpointsForBoard, nsScore, type GivPoäng } from './matchpoints'
+import {
+  aggregeraTopplista,
+  matchpointsForBoard,
+  nsScore,
+  type GivPoäng,
+  type Tävlingsrad,
+} from './matchpoints'
 import type { Contract } from './play'
 
 describe('matchpointsForBoard', () => {
@@ -48,6 +54,77 @@ describe('matchpointsForBoard', () => {
     const mp = matchpointsForBoard([{ spelare: 'a', poäng: 620 }])
     expect(mp[0].max).toBe(0)
     expect(mp[0].procent).toBe(100)
+  })
+})
+
+describe('aggregeraTopplista', () => {
+  // Två spelare, två poängsatta givar:
+  //   giv 1: a=620 slår b=170 → a 100 %, b 0 %
+  //   giv 2: a=100, b=420    → a 0 %,   b 100 %
+  // Snitt: båda 50 %, delad förstaplats.
+  const rader: Tävlingsrad[] = [
+    { board: 1, spelare: 'a', poäng: 620 },
+    { board: 1, spelare: 'b', poäng: 170 },
+    { board: 2, spelare: 'a', poäng: 100 },
+    { board: 2, spelare: 'b', poäng: 420 },
+  ]
+
+  test('snitt per spelare + antal poängsatta givar', () => {
+    const agg = aggregeraTopplista(rader, 2)
+    expect(agg.poängsattaGivar).toBe(2)
+    const byId = Object.fromEntries(agg.topplista.map((p) => [p.spelare, p]))
+    expect(byId.a.snitt).toBe(50)
+    expect(byId.b.snitt).toBe(50)
+    expect(byId.a.antalGivar).toBe(2)
+  })
+
+  test('utan kallare: du = null, dinaGivar tom', () => {
+    const agg = aggregeraTopplista(rader, 2)
+    expect(agg.du).toBeNull()
+    expect(agg.dinaGivar).toEqual([])
+  })
+
+  test('kallare får placering (delad vid lika snitt), snitt och MP per giv', () => {
+    const agg = aggregeraTopplista(rader, 2, 'a')
+    expect(agg.du).toEqual({ placering: 1, snitt: 50, antalGivar: 2 })
+    // Per giv, i brickordning: giv 1 topp (100 %), giv 2 botten (0 %).
+    expect(agg.dinaGivar).toEqual([
+      { board: 1, mp: 1, max: 1, procent: 100 },
+      { board: 2, mp: 0, max: 1, procent: 0 },
+    ])
+  })
+
+  test('placering: den med högre snitt hamnar etta, den andre tvåa', () => {
+    // Ge a övertaget på giv 2 också (a=500 > b=420) → a 100 % båda, b 0 % båda.
+    const vassare: Tävlingsrad[] = [
+      { board: 1, spelare: 'a', poäng: 620 },
+      { board: 1, spelare: 'b', poäng: 170 },
+      { board: 2, spelare: 'a', poäng: 500 },
+      { board: 2, spelare: 'b', poäng: 420 },
+    ]
+    expect(aggregeraTopplista(vassare, 2, 'a').du?.placering).toBe(1)
+    expect(aggregeraTopplista(vassare, 2, 'b').du?.placering).toBe(2)
+    expect(aggregeraTopplista(vassare, 2, 'a').du?.snitt).toBe(100)
+  })
+
+  test('giv med för få spelare ger inga poäng (och räknas inte)', () => {
+    const glest: Tävlingsrad[] = [
+      { board: 1, spelare: 'a', poäng: 620 }, // ensam → ingen poäng
+      { board: 2, spelare: 'a', poäng: 100 },
+      { board: 2, spelare: 'b', poäng: 420 },
+    ]
+    const agg = aggregeraTopplista(glest, 2, 'a')
+    expect(agg.poängsattaGivar).toBe(1)
+    // Bara giv 2 räknas för a: 0 %.
+    expect(agg.du).toEqual({ placering: 2, snitt: 0, antalGivar: 1 })
+    expect(agg.dinaGivar).toEqual([{ board: 2, mp: 0, max: 1, procent: 0 }])
+  })
+
+  test('kallare utan någon poängsatt giv: du = null', () => {
+    const glest: Tävlingsrad[] = [
+      { board: 1, spelare: 'ensam', poäng: 620 }, // bara kallaren spelat giv 1
+    ]
+    expect(aggregeraTopplista(glest, 2, 'ensam').du).toBeNull()
   })
 })
 

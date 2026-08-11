@@ -282,7 +282,8 @@ export function DagensTavling() {
           ) : null}
         </div>
 
-        {/* Topplistan (Led 3) — provisorisk under dagen. */}
+        {/* Din ställning (steg 3) + topplistan (Led 3) — provisorisk under dagen. */}
+        <DinStällning resultat={topplista} />
         <TopplistaVy resultat={topplista} />
 
         <div className="flex justify-center">
@@ -326,6 +327,42 @@ const STATUS_TITEL: Record<InskickStatus | 'pending', string> = {
   redan: ' — redan inskickad',
   fel: ' — nådde inte servern (spara lokalt)',
   pending: ' — skickar in …',
+}
+
+/** Ditt eget läge överst i ställningen (UI-polish steg 3): placering + snitt-MP%.
+ *  Visas bara när servern gett dina siffror (inloggad + minst en poängsatt giv);
+ *  annars tyst, så översikten ser lugn ut tills du faktiskt är rankad. */
+function DinStällning({ resultat }: { resultat: TopplistaResultat | null }) {
+  if (!resultat || resultat.status !== 'ok') return null
+  const { du, topplista } = resultat.data
+  if (!du) return null
+  const antalRankade = topplista.length
+  const medalj = du.placering === 1 ? '🥇' : du.placering === 2 ? '🥈' : du.placering === 3 ? '🥉' : null
+  return (
+    <div className="w-full rounded-xl bg-gradient-to-br from-emerald-800/70 to-emerald-950/60 p-4 ring-1 ring-gold-400/30">
+      <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-emerald-100/60">
+        Din ställning
+      </p>
+      <div className="flex items-stretch justify-around gap-4 text-center">
+        <div className="flex flex-col items-center justify-center">
+          <span className="flex items-baseline gap-1">
+            {medalj && <span className="text-2xl leading-none">{medalj}</span>}
+            <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">{du.placering}</span>
+          </span>
+          <span className="mt-1 text-xs text-emerald-100/60">av {antalRankade} spelare</span>
+        </div>
+        <div className="w-px self-stretch bg-emerald-100/10" />
+        <div className="flex flex-col items-center justify-center">
+          <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">
+            {du.snitt.toFixed(1)}<span className="text-2xl"> %</span>
+          </span>
+          <span className="mt-1 text-xs text-emerald-100/60">
+            {du.antalGivar} {du.antalGivar === 1 ? 'poängsatt giv' : 'poängsatta givar'}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /** Dagens topplista (provisorisk). Tyst medan den hämtas eller om servern inte

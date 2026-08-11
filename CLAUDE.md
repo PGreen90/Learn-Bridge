@@ -23,10 +23,16 @@ låna idéer, ALDRIG kopiera; MP bara, ingen IMP):**
 1. Nedräkningsklocka **KLAR & LIVE (`42fc1a8`)** — "Nästa tävling om HH:MM:SS" på
    översikten mot midnatt svensk tid (`msTillNastaTavling`/`formatNedrakning` i
    `daily.ts`, DST-säkert, alla tidszoner).
-**NÄSTA SESSION = steg 2–6:** 2) server-påbygg (`/api/topplista` lämnar även DIN MP +
-placering + din MP per giv) · 3) din placering + MP% överst · 4) resultattabell per
-giv (kontrakt · resultat · din MP%) · 5) klicka giv → rondgenomgången (finns, wire
-in) · 6) snyggare topplista/ranking-vy. Sedan = grind till **etapp 3 (härdning)**.
+2. Server-påbygg **KLAR & DEPLOYAD** — `/api/topplista` läser valfri token och
+   svarar (inloggad) med `du` (placering, delad rang vid lika snitt, + snitt) och
+   `dinaGivar` (MP% per giv). Ren logik `aggregeraTopplista` i `matchpoints.ts`
+   (facit +6), klient-plumbing i `backend/tavling.ts`. Bakåtkompatibelt.
+3. Din placering + MP% överst **KLAR & DEPLOYAD** — `DinStällning`-kort överst i
+   ställningen på översikten (placering + 🥇/🥈/🥉 + snitt-MP%; tyst tills rankad).
+**NÄSTA SESSION = steg 4–6:** 4) resultattabell per giv (kontrakt · resultat · din
+MP% — `dinaGivar` finns nu på servern, wire in) · 5) klicka giv → rondgenomgången
+(finns, wire in) · 6) snyggare topplista/ranking-vy (highlighta DIN rad — servern
+kan märka den). Sedan = grind till **etapp 3 (härdning)**.
 
 ---
 
