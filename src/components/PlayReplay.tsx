@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import type { Card, Deal, Seat, Vulnerability } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import type { Contract, PlayedCard, Trick } from '../lib/engine/play'
-import { bySuit, handSuitsTrumpFirst } from '../lib/cardLayout'
+import { bySuit, FLAT_OVERLAP, handSuitsTrumpFirst } from '../lib/cardLayout'
 import { AuctionGrid } from './AuctionGrid'
 import { BidChip } from './BidChip'
 import { Felt } from './Felt'
@@ -107,30 +107,38 @@ export function PlayReplay({
   const tricksEW = played - tricksNS
 
   return (
-    <Felt>
-      {/* Nord: vågrät solfjäder överst. */}
-      <div className="flex justify-center pt-3">
-        <Fan cards={handCards('N')} size="sm" overlap="-ml-5" />
+    // Full skärm som spelbordet (mobil-fix 2026-08-12): duken fyller hela
+    // skärmen och Nord får notch-säker toppmarginal — förr låg Nords kort under
+    // urtaget på iPhone. Alla händer ritas med de FASTA xl-korten (64×96,
+    // kortstorleksregeln 2026-08-02) — omspelningen var sista vyn med småkort.
+    <Felt className="flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none">
+      {/* Nord: sammanhängande kortrad överst (samma look som Syd i spelfasen). */}
+      <div className="flex justify-center pt-[calc(0.75rem+env(safe-area-inset-top))]">
+        <Fan cards={handCards('N')} />
       </div>
 
-      {/* Mittraden: Väst | mitten (auktion/stick) | Öst. */}
-      <div className="flex items-center justify-between gap-1 px-2 py-3">
-        <SideStack cards={handCards('W')} side="W" />
-        <div className="flex min-h-44 flex-1 items-center justify-center">
+      {/* Mittraden: Väst | mitten (auktion/stick) | Öst. flex-1 centrerar
+          lodrätt så outnyttjad skärmhöjd fördelas runt mitten. Med xl-staplarna
+          (96 px per sida) får mitten ~170 px på en 375-mobil: stickytan (160)
+          och den täta auktionen (dense) är byggda att rymmas där. */}
+      <div className="flex flex-1 items-center justify-between gap-1 px-1 py-2">
+        <SideStack cards={handCards('W')} side="W" xl />
+        <div className="flex min-h-44 min-w-0 flex-1 items-center justify-center">
           {shownCards ? (
             <TrickCenter cards={shownCards} winner={shownWinner} />
           ) : (
-            <div className="w-full max-w-xs">
+            <div className="w-full max-w-56">
               <AuctionGrid
                 calls={calls}
                 dealer={deal.dealer}
                 vulnerability={deal.vulnerability}
                 explanations={explanations}
+                dense
               />
             </div>
           )}
         </div>
-        <SideStack cards={handCards('E')} side="E" />
+        <SideStack cards={handCards('E')} side="E" xl />
       </div>
 
       {/* Bricka + zon nere till vänster (Synrey). */}
@@ -150,9 +158,12 @@ export function PlayReplay({
         </div>
       </div>
 
-      {/* Syd: din hand + stegpilarna « » (Synrey). */}
-      <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-12 pb-2.5 pt-3">
-        <Fan cards={handCards('S')} size="md" overlap="-ml-6" />
+      {/* Syd: din hand + stegpilarna « » (Synrey). px-2 (inte px-12): den fulla
+          xl-raden är 349 px bred och behöver hela mobilbredden — pilarna svävar
+          i stället OVANPÅ radens hörn (z-10) tills handen krympt. Säker botten-
+          marginal (hemindikatorn) nu när duken går edge-to-edge. */}
+      <div className="relative border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-3 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
+        <Fan cards={handCards('S')} />
         {played > 0 && (
           <ArrowButton side="left" onClick={prev} label="Föregående stick">
             «
@@ -168,12 +179,15 @@ export function PlayReplay({
   )
 }
 
-/** En vågrät solfjäder av öppna kort (N/S). */
-function Fan({ cards, size, overlap }: { cards: Card[]; size: 'sm' | 'md'; overlap: string }) {
+/** En öppen hand (N/S) som spelbordets sammanhängande kortrad: fasta xl-kort
+ *  med det delade FLAT_OVERLAP — 13 kort = 349 px, samma mått som spelfasens
+ *  vilande hand (kortstorleksregeln 2026-08-02). min-h-24 = korthöjden, så
+ *  raden inte kollapsar när sista kortet spelats. */
+function Fan({ cards }: { cards: Card[] }) {
   return (
-    <div className="flex min-h-10 justify-center">
+    <div className="flex min-h-24 justify-center">
       {cards.map((c, i) => (
-        <PlayingCard key={key(c)} card={c} size={size} className={i > 0 ? overlap : ''} />
+        <PlayingCard key={key(c)} card={c} size="xl" className={i > 0 ? FLAT_OVERLAP : ''} />
       ))}
     </div>
   )
@@ -187,18 +201,26 @@ const CARD_IN: Record<Seat, string> = {
   E: 'card-in-e',
 }
 
-/** Sticket i mitten: mörk platta, väderstrecken runt om, korten lagda mot sin
- *  plats (V/Ö på tvären) — varje nytt kort glider in från sin spelare. */
+/** Sticket i mitten: samma kompakta stickHÖG som spelfasens TrickCenterLive
+ *  (fasta lg-kort 48×64, 160×160-yta, grannkorten överlappar 25 % och
+ *  spelordningen styr z-index) — förr sm-kort på en luftigare yta; nu följer
+ *  även omspelningen kortstorleksregeln. Varje nytt kort glider in från sin
+ *  spelare. */
 function TrickCenter({ cards, winner }: { cards: PlayedCard[]; winner: Seat | null }) {
   const at = (seat: Seat) => cards.find((pc) => pc.seat === seat)
   const card = (seat: Seat, pos: string, rotate = '') => {
     const pc = at(seat)
     if (!pc) return null
+    const order = cards.findIndex((p) => p === pc)
     return (
       // key på KORTET (inte platsen): när ett nytt kort landar på samma plats i
       // nästa stick måste DOM-noden bytas, annars tänds inte inglidningen om.
-      <div key={key(pc.card)} className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}>
-        <PlayingCard card={pc.card} size="sm" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
+      <div
+        key={key(pc.card)}
+        className={`absolute ${pos} ${rotate} ${CARD_IN[seat]}`}
+        style={{ zIndex: order + 1 }}
+      >
+        <PlayingCard card={pc.card} size="lg" className={winner === seat ? 'ring-2 ring-amber-400' : ''} />
       </div>
     )
   }
@@ -206,16 +228,16 @@ function TrickCenter({ cards, winner }: { cards: PlayedCard[]; winner: Seat | nu
     <span className={`absolute ${pos} text-sm font-semibold text-yellow-300`}>{label}</span>
   )
   return (
-    <div className="relative h-44 w-40">
-      <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-emerald-950/50 ring-1 ring-emerald-100/10" />
-      {letter('N', 'top-4 left-1/2 -translate-x-1/2')}
-      {letter('S', 'bottom-4 left-1/2 -translate-x-1/2')}
-      {letter('V', 'left-5 top-1/2 -translate-y-1/2')}
-      {letter('Ö', 'right-5 top-1/2 -translate-y-1/2')}
-      {card('N', 'top-0 left-1/2 -translate-x-1/2')}
-      {card('S', 'bottom-0 left-1/2 -translate-x-1/2')}
-      {card('W', 'left-1 top-1/2 -translate-y-1/2', 'rotate-90')}
-      {card('E', 'right-1 top-1/2 -translate-y-1/2', '-rotate-90')}
+    <div className="relative h-40 w-40 shrink-0">
+      <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-emerald-950/50 ring-1 ring-emerald-100/10" />
+      {letter('N', 'top-0 left-1/2 -translate-x-1/2')}
+      {letter('S', 'bottom-0 left-1/2 -translate-x-1/2')}
+      {letter('V', 'left-1 top-1/2 -translate-y-1/2')}
+      {letter('Ö', 'right-1 top-1/2 -translate-y-1/2')}
+      {card('N', 'top-6 left-1/2 -translate-x-1/2')}
+      {card('S', 'bottom-6 left-1/2 -translate-x-1/2')}
+      {card('W', 'left-8 top-1/2 -translate-y-1/2', 'rotate-90')}
+      {card('E', 'right-8 top-1/2 -translate-y-1/2', '-rotate-90')}
     </div>
   )
 }
@@ -237,7 +259,7 @@ function ArrowButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className={`absolute bottom-3 ${side === 'left' ? 'left-2' : 'right-2'} flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900/70 text-xl font-bold text-white shadow hover:bg-slate-900/90`}
+      className={`absolute bottom-[calc(0.625rem+env(safe-area-inset-bottom))] ${side === 'left' ? 'left-2' : 'right-2'} z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900/70 text-xl font-bold text-white shadow hover:bg-slate-900/90`}
     >
       {children}
     </button>

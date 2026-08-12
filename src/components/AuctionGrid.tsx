@@ -61,6 +61,7 @@ export function AuctionGrid({
   activeSeat = null,
   explanations = 'full',
   hiddenHands = false,
+  dense = false,
 }: {
   calls: ResolvedCall[]
   dealer: Seat
@@ -79,6 +80,13 @@ export function AuctionGrid({
    * budvisningen och efterhandsvyerna, där korten är öppna med flit.
    */
   hiddenHands?: boolean
+  /**
+   * Tätt läge (omspelningen, ägarönskemål 2026-08-12): mindre chip, lägre rader
+   * och mindre luft mellan buden — auktionen ska rymmas i mittspalten mellan
+   * V/Ö-staplarna på en telefon. Förklarings-popupen bryter sig då UT ur den
+   * smala spalten (centrerad, fast bredd) så texten förblir läsbar.
+   */
+  dense?: boolean
 }) {
   const [selected, setSelected] = useState<number | null>(null)
   const full = explanations === 'full'
@@ -102,12 +110,14 @@ export function AuctionGrid({
     : null
 
   return (
-    <div className="relative flex-1 rounded-lg bg-emerald-950/60 p-2 ring-1 ring-emerald-100/10">
-      <div className="grid grid-cols-4 gap-y-1">
+    <div
+      className={`relative flex-1 rounded-lg bg-emerald-950/60 ring-1 ring-emerald-100/10 ${dense ? 'p-1.5' : 'p-2'}`}
+    >
+      <div className={`grid grid-cols-4 ${dense ? 'gap-y-0.5' : 'gap-y-1'}`}>
         {ORDER.map((seat) => (
           <div
             key={seat}
-            className={`pb-0.5 text-center text-xs font-semibold sm:text-sm ${
+            className={`pb-0.5 text-center font-semibold ${dense ? 'text-[11px]' : 'text-xs sm:text-sm'} ${
               vulnerable(seat, vulnerability) ? 'text-red-300' : 'text-yellow-100/90'
             } ${dealer === seat ? 'underline underline-offset-4 decoration-yellow-300' : ''}`}
             title={dealer === seat ? 'Given (börjar buda)' : undefined}
@@ -116,18 +126,22 @@ export function AuctionGrid({
           </div>
         ))}
         {cells.map((cell, i) => (
-          <div key={i} className="flex h-6 items-center justify-center">
+          <div key={i} className={`flex items-center justify-center ${dense ? 'h-5' : 'h-6'}`}>
             {cell ? (
               <button type="button" onClick={() => setSelected((s) => (s === i ? null : i))}>
                 <BidChip
                   bid={cell.bid}
+                  small={dense}
                   className={`cursor-pointer hover:brightness-110 ${
                     selected === i ? 'ring-2 ring-sky-300' : ''
                   }`}
                 />
               </button>
             ) : i === activeCell ? (
-              <span className="h-6 w-10 animate-pulse rounded-md bg-teal-300/90 shadow" title="Väntar på bud" />
+              <span
+                className={`animate-pulse rounded-md bg-teal-300/90 shadow ${dense ? 'h-5 w-8' : 'h-6 w-10'}`}
+                title="Väntar på bud"
+              />
             ) : null}
           </div>
         ))}
@@ -138,7 +152,13 @@ export function AuctionGrid({
         <>
           {/* Tryck var som helst utanför bubblan stänger den. */}
           <ClickAway onClose={() => setSelected(null)} />
-          <div className="absolute inset-x-1 top-8 z-40 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
+          <div
+            className={`absolute top-8 z-40 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line ${
+              dense
+                ? 'left-1/2 w-72 max-w-[calc(100vw-1.5rem)] -translate-x-1/2'
+                : 'inset-x-1'
+            }`}
+          >
             {/* Stäng-kryss: förankrat i övre högra hörnet så det ALDRIG kan
                 knuffas utanför bild. iPhone-glas: frostad genomskinlig cirkel
                 (backdrop-blur), ljus kant + glansdager på övre halvan. */}
