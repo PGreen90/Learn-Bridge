@@ -19,11 +19,12 @@ universum) · repro-dumpen (`DUMP_SPEL`) · tävlingsförscreeningen
 (`TAVLING_DIAG`; `DAILY_SEED_SECRET` i `.env.local` — ALDRIG i spårade `.env`)
 · `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — larm
 klassas systemfel/ärlig miss/oklart i `/speldiagnos`; bara systemfel lagas,
-efter ägarens ja. **S0+S1 körda, tre fixar landade 2026-08-12** (S-serien i
-`docs/speldiagnos.md`; hemligheten verifierad). **NÄSTA GÅNG: rapportens
-punkt 4–6** (`revisor-output/speldiagnos-rapport-2026-08-12.md`): (4) trumf-
-dragningen (20260731/20260730) · (5) oklara trumfutspelet (20260807, ägarens
-omdöme) · (6) speldump för tävlingsbrickor. Bevakat: MC-urfallet (20260772).
+efter ägarens ja. **S0–S3 körda, sex fixar landade 2026-08-12** (S-serien i
+`docs/speldiagnos.md`): S2 = trumfled ej in i känd gaffel + tredje hand
+följer färgkombinationen; S3 = cue-bud räknas inte som bjuden färg i
+utspelet (§8.3); tävlingsspeldumpen byggd (`DUMP_TAVLING=<datum>:<bricka>`).
+**NÄSTA GÅNG: granska tävlingslarmen** (2026-08-11 bricka 8/1) med nya
+dumpen. Bevakat: MC-urfallet (20260772/20260731).
 
 ---
 
@@ -104,18 +105,19 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 > visshet. Detalj: budsystem.md §5.2/§5.7/§6 + `docs/historik.md`.
 
 ### 👀 Bevaka i spel — de tre senaste
+- **Speldiagnosen S2 (2026-08-12):** trumfled vägras in i känd gaffel (vägrar
+  den när ett trumfvarv ändå vore rätt?) · spelförarsidans tredje hand följer
+  färgkombinationen (offras honnörer där du spelat billigt? positionsneutral
+  → tvåvägsgissningar kan gå fel = ärliga missar).
+> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
+> säger att något känns fel i spel, eller när en ny fix ska läggas till.
 - **Speldiagnosen S1 (2026-08-12):** cue-svarets färg = exakt 4 (§7.3, ingen
   dubbeltonhöjning; cue-advancern dömer 3NT/utgång själv) · säkra vinnaren
   måste slå det som ligger · spelförarsidan ruffar i stället för att saka.
-  KÄND KVARSTÅENDE: MC föll ur i frö 20260772 (sampleLayouts 0 lägen).
-> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
-> säger att något känns fel i spel, eller när en ny fix ska läggas till.
+  KÄND KVARSTÅENDE: MC föll ur (sampleLayouts 0 lägen; 20260772/20260731).
 - **F6 starka X:et efter två färger (2026-08-08):** 17+ med 5+ objuden färg
   dubblar efter 1♦–P–1♥ och färgar nästa varv. Landar fortsättningen lagom
   mot en tom advancer? 4-4-X:et är MEDVETET live-only — säljs givar där?
-- **F5 2♣-strain + 6-5 (2026-08-08):** 2♣-auktioner ska hitta högfärgsfiten
-  (inte dö i 5♣); 16+ 6-5 reverserar även efter 1NT-svar. Känns 2♣-slutbuden
-  rätt nu — och svarar partnern begripligt på den nya reversen?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **Beslut B etapp 2 forts.** — klientfasen: wira in tävlingen i appen, inskick,

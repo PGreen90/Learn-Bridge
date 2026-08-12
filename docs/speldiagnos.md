@@ -56,6 +56,14 @@ sig — det agenten läser för att hitta regeln som felade):
 Bash:  DUMP_SPEL=<frö> npx vitest run src/lib/engine/speldump.probe.test.ts
 ```
 
+Samma dump för en **tävlingsbricka** (byggd 2026-08-12; kräver
+`DAILY_SEED_SECRET` i `.env.local`, precis som förscreeningen — hemligheten
+skrivs aldrig i utdata):
+
+```
+Bash:  DUMP_TAVLING=<YYYY-MM-DD>:<bricka> npx vitest run src/lib/engine/speldump.probe.test.ts
+```
+
 **Förscreening av tävlingsgivar** (spelar en tävlingsdags 12 brickor INNAN de
 går live; kräver `DAILY_SEED_SECRET` i `.env.local` — gitignorad via `*.local`,
 ALDRIG i `.env` som är spårad av git):
@@ -143,3 +151,47 @@ färg = 4 + cue-advancerns dom (§7.3, `auction-konkurrens-fortsattning.test.ts`
   verkliga lås är facit-testerna; aggregaten bekräftar främst att inget
   BLEV SÄMRE. MC-urfallet (sampleLayouts 0 lägen, frö 20260772) är
   fortfarande olagat och står i `docs/bevaka.md`.
+
+### S2 — trumfdragningen, rapportens fynd 4–5 (2026-08-12, ägarval "kör vi 4–6")
+
+Samma 200 givar och kommando som S0 (byt `s0` mot `s2` i OUT-namnen). S2 mäter
+TVÅ fixar ihop (byggda i följd samma pass, facit i `play-bot.test.ts`):
+**led inte trumf in i en känd gaffel** (`hopelessTrumpLead` — show-out har
+placerat all kvarvarande trumf hos EN motståndare, toppen över vår och minst
+lika lång som vår längsta trumfhand → sidofärg i stället; att driva ut en
+kortare mästartrumf är kvar) · **spelförarsidans tredje hand följer
+färgkombinationen** (`declarerThirdHandSuitCard` — simulerar sticket + resten
+av färgen med `suitTricks`, byter bara kort när det är strikt bättre än
+"billigaste vinnaren"; Q ur Q753 mot KJ982 i stället för 7:an).
+
+- **Bud:** 17,5 % rätt (35/200), snitt 259 poäng/giv — identiskt med S1
+  (väntat: inga budregler rördes).
+- **Spel:** flaggade stick spelförarsidan **338** (S1 349), försvaret **230**
+  (S1 238), utspelet 55 (55); rent spelade 21/200 (S1 20).
+- **Läsning (ärlig):** deltana pekar åt rätt håll men ligger inom
+  omtärningsbruset (dokumentets regel: jämför aldrig kort för kort mellan
+  versioner). Fixarnas verkliga lås är facit-testerna; på de dumpade fröna är
+  effekten konkret: 20260730 gick från 8 till 10 stick (4♥ jämnt hem) och
+  20260731 slapp −2-trumfvarvet. Samma runda byggdes **tävlingsspeldumpen**
+  (`DUMP_TAVLING`, se ovan) och fynd 6 (trumfutspelet 20260807) utreddes:
+  korsruff-regeln räknar CUE-BUD som bjudna färger — ägarbeslut väntar,
+  inget lagat.
+
+### S3 — cue-bud räknas inte som bjuden färg i utspelet (2026-08-12, ägarens ja på fynd 6)
+
+Samma 200 givar och kommando som S0 (byt `s0` mot `s3` i OUT-namnen). EN fix:
+`analyzeAuctionForLead` hoppar över bud vars regelnamn börjar på "cue" —
+kontrollbud visar ess/renons, ingen längd, så cue-färgen varken triggar
+korsruff-regeln ("3+ bjudna färger") eller undviks som "deras färg".
+Facit: `play-bot.test.ts` ("fynd 6"). Paragraf: `docs/budsystem.md` §8.3 + §9.
+
+- **Bud:** 17,5 % rätt (35/200), snitt 259 poäng/giv — identiskt med S1/S2
+  (inga budregler rörda).
+- **Spel:** flaggade stick spelförarsidan **342** (S2 338), försvaret **236**
+  (S2 230), utspelet **57** (S2 55); rent spelade 20/200 (S2 21).
+- **Läsning (ärlig):** aggregatet rörde sig marginellt ÅT FEL HÅLL men helt
+  inom omtärningsbruset (cue-auktioner är sällsynta; varje ändrat utspel ger
+  en ny genomspelning nedströms). Fixen är principiell — RÄTT, inte max
+  stick: regeln läste ett kontrollbud som färglöfte. På frö 20260807 leder
+  Syd nu passivt ♥10 (topp av inre sekvens) i stället för trumf; DD ogillar
+  även det (spelförarens ♥Q var singel — osynligt för Syd, ärlig miss).
