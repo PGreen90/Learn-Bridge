@@ -17,15 +17,13 @@ FÖRST): helgivsspelaren `spela-giv.ts` · per-kort-DD-facit (`analyseSpel`) ·
 speldomen `speldom.ts` · proben (`SPELDIAG=1`, frö 20260721 = M-seriens
 universum) · repro-dumpen (`DUMP_SPEL`) · tävlingsförscreeningen
 (`TAVLING_DIAG`; `DAILY_SEED_SECRET` i `.env.local` — ALDRIG i spårade `.env`)
-· `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — DD-larm
-är kandidater; klassningen systemfel/ärlig miss/oklart görs i `/speldiagnos`;
-bara systemfel lagas, efter ägarens ja. **S0+S1 KÖRDA, TRE FIXAR LANDADE
-2026-08-12** (ägarval 2→3→1; S-serien i `docs/speldiagnos.md`; hemligheten
-verifierad i `.env.local`). **NÄSTA GÅNG BÖRJAR VI MED rapportens punkt
-4–6** (`revisor-output/speldiagnos-rapport-2026-08-12.md`): (4) trumfdragnings-
-kandidaterna (frön 20260731/20260730) · (5) oklara trumfutspelet (20260807,
-ägarens bridgeomdöme) · (6) speldump för tävlingsbrickor (datum+bricka).
-Även bevakat: MC-urfallet (sampleLayouts 0 lägen, frö 20260772).
+· `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — larm
+klassas systemfel/ärlig miss/oklart i `/speldiagnos`; bara systemfel lagas,
+efter ägarens ja. **S0+S1 körda, tre fixar landade 2026-08-12** (S-serien i
+`docs/speldiagnos.md`; hemligheten verifierad). **NÄSTA GÅNG: rapportens
+punkt 4–6** (`revisor-output/speldiagnos-rapport-2026-08-12.md`): (4) trumf-
+dragningen (20260731/20260730) · (5) oklara trumfutspelet (20260807, ägarens
+omdöme) · (6) speldump för tävlingsbrickor. Bevakat: MC-urfallet (20260772).
 
 ---
 
@@ -47,15 +45,11 @@ Beslut tagna: Supabase BEKRÄFTAD · klassiska lösenord (ägarval) · EN
 12-givarstävling först · tävlingarna före borden. Stående regel: vid varje
 etappslut stannar Claude, visar läget och tar grindbesluten med ägaren.
 
-**ETAPP 0 KLAR (2026-08-09, ingen backend — beteendet oförändrat, +10 facit):**
-slumpinjektion (`rng` genom Monte-Carlo i `monte-carlo.ts`/`play-bot.ts`, default
-Math.random), Europe/Stockholm-tidszon i `daily.ts` (DST-säker), backend-sömlagret
-`src/lib/backend/` (11 sidor omkopplade, synkront nu/async i etapp 1), PWA-vakt för
-`/api/*` (låst i `deploy-config.test.ts`), `api/health.ts` (första Vercel-funktionen,
-live; `tsconfig` täcker `api/`). **Fynd:** motorn kan INTE importeras rått i en
-Vercel-funktion — dess extensionless-importer kräver bundling (esbuild) → görs i
-etapp 2. **NÄSTA = grind 0→1:** Supabase-projektet
-skapas först på ägarens uttryckliga "kör" (etapp 1 konton, `docs/beslut-b-plan.md`).
+**ETAPP 0 KLAR (2026-08-09):** slumpinjektion (`rng` i `monte-carlo.ts`/
+`play-bot.ts`), Europe/Stockholm i `daily.ts`, backend-sömlagret
+`src/lib/backend/`, PWA-vakt för `/api/*` (`deploy-config.test.ts`),
+`api/health.ts`. **Fynd:** motorn kräver bundling (esbuild) i
+Vercel-funktioner → gjort i etapp 2. Detalj: `docs/historik.md`.
 
 **FAS 1 FACELIFTEN — YTA 1–4 KLARA (2026-07-31→08-02):** startsidan,
 Synrey-bordet telefon-först, budlådan, de inre sidorna — och **DAGENS GIV**
