@@ -14,6 +14,7 @@
 | **budsystem.md** (222 kB) | ðŸ“˜ | du ska Ã¤ndra eller slÃ¥ upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den hÃ¤r filen live fÃ¶r Ã¤garen** â€” varje regelÃ¤ndring MÃ…STE skrivas in hÃ¤r. Â§9 = Ã¤ndringslogg (visas inte pÃ¥ sidan). |
 | **status.md** (43 kB) | ðŸ“˜ | du ska rÃ¶ra **budmotorns kod**. SÃ¶k rubriken "Budmotorns tre auktionslager + `open`-handoff" = arkitekturkontraktet: hÃ¶r logiken hemma i `auction.ts` (on-book), `auction-live.ts` (off-book/konkurrens) eller `auction-interpret.ts` (fÃ¶rklaring)? |
 | **systemrevisorn.md** (72 kB) | ðŸŸ¢ | du jobbar i mÃ¤tspÃ¥ret. Riggen, hur man kÃ¶r den, **alla mÃ¤tningar #1â€“#25**, fÃ¶rskanningarna (etapp 6 + **etapp 7 missad lillslam**) och mÃ¶nsteranalyserna bakom varje fix. |
+| **speldiagnos.md** | 🟢 | du jobbar i SPELDIAGNOSEN (byggd 2026-08-12): bottarna spelar hela givar, per-kort-DD-facit larmar, `/speldiagnos` klassar (systemfel/ärlig miss) och rapporterar till ägaren. Riggen, kommandona, principen "RÄTT — inte max stick", S-serien. |
 | **bevaka.md** | ðŸŸ¢ | Ã¤garen sÃ¤ger att nÃ¥got kÃ¤nns fel i spel, en felrapport kommer in, eller en ny fix ska lÃ¤ggas till bevakningslistan. |
 
 ## Planering & beslut
@@ -44,7 +45,7 @@
 
 | Fil | | InnehÃ¥ll |
 |---|---|---|
-| **historik.md** (156 kB) | ðŸ“¦ | **Allt fÃ¤rdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, Ã„RLIGA SLAMPORTAR-bygget, felrapporter #1â€“#39, UI-overhaulen, Steg A. SlÃ¥ upp hÃ¤r nÃ¤r du undrar *varfÃ¶r* nÃ¥got byggdes som det gjordes. |
+| **historik.md** (162 kB) | ðŸ“¦ | **Allt fÃ¤rdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, Ã„RLIGA SLAMPORTAR-bygget, felrapporter #1â€“#39, UI-overhaulen, Steg A. SlÃ¥ upp hÃ¤r nÃ¤r du undrar *varfÃ¶r* nÃ¥got byggdes som det gjordes. |
 | **arbetslista.md** | ðŸ“¦ | Byggordningen FAS 0â€“12 (genomfÃ¶rd). Punkt 28 = bakgrunden till vÃ¥r egen DDS-lÃ¶sare. Kvar som arkiv; NU/NÃ„ST styrs av CLAUDE.md. |
 | **tp-arbetslista.md** | ðŸ“¦ | TP-stegen Aâ€“F. **Alla klara 2026-07-03** â€” filen innehÃ¥ller gamla "â¬œ Kvar att bygga"-rubriker som Ã¤r Ã¶verspelade av notisen hÃ¶gst upp. |
 | **audit/** (5 filer + SLUTRAPPORT) | ðŸ“¦ | Revisionen R1â€“R5 (2026-07-04): budsystem, arkitektur, UI/UX, dokumentation, git/deploy. Alla fynd Ã¤r antingen Ã¥tgÃ¤rdade eller upplyfta till SENARE. |

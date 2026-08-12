@@ -36,6 +36,7 @@ const LEVANDE = [
   'docs/off-book-syd.md',
   'docs/oversikt.md',
   'docs/senare.md',
+  'docs/speldiagnos.md',
   'docs/status.md',
   'docs/systemrevisorn.md',
 ]
@@ -53,7 +54,7 @@ const läs = (f: string) => readFileSync(f, 'utf8')
 // === 1. Varje kodfil som ett levande dokument nämner måste finnas ===========
 
 // Filer som nämns men medvetet INTE finns i repot (genereras vid körning).
-const GENERERADE = new Set(['manifest.json', 'latest.json'])
+const GENERERADE = new Set(['manifest.json', 'latest.json', 'speldiagnos-latest.json'])
 
 function källfiler(): Set<string> {
   const namn = new Set<string>()
@@ -161,6 +162,8 @@ const MEDVETET_EJ_INKOPPLAD: Record<string, string> = {
   'mc-worker.ts': 'Web worker — laddas via new Worker(new URL(...)) i usePlayTable.ts, inte via import.',
   'rapport-worker.ts': 'Web worker — laddas via new Worker(new URL(...)) i useDdAnalys.ts, inte via import.',
   'revisor-dds.ts': 'Mätriggens DD-orakel (bridge-dds, dev-beroende) — körs bara av revisor.probe.test.ts.',
+  'spela-giv.ts': 'Speldiagnosens helgivsspelare (docs/speldiagnos.md) — körs bara av probes/facittester; appen spelar via usePlayTable.',
+  'speldiagnos.ts': 'Speldiagnosens aggregator (docs/speldiagnos.md) — körs bara av speldiagnos.probe.test.ts.',
 }
 
 it('dokumentvakten: varje motormodul är inkopplad i produktionskoden', () => {

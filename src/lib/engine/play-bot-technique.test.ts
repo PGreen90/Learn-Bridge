@@ -12,7 +12,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { botCard, botCardSmart } from './play-bot'
 import { doubleDummyDeclarerRemaining } from './dds'
-import { currentWinner, isComplete, playCard, side, type Contract, type PlayState, type Trick } from './play'
+import { currentWinner, playCard, side, type Contract, type PlayState, type Trick } from './play'
+import { spelaVidare } from './spela-giv'
 
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
 const RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -73,20 +74,17 @@ function mulberry32(seed: number): () => number {
 
 /** Spela ut hela given: NS-platserna med MC-hjärnan, ÖV med tumregler. */
 function playOutSmartNS(start: PlayState): number {
-  let s = start
-  while (!isComplete(s)) {
-    const seat = s.toAct
-    const card = side(seat) === 'NS' ? botCardSmart(s, seat, [], { samples: 100 }) : botCard(s, seat)
-    s = playCard(s, card)
-  }
-  return side(start.contract.declarer) === 'NS' ? s.tricksNS : s.tricksEW
+  const done = spelaVidare(start, [], {
+    cardFor: (s, seat) => (side(seat) === 'NS' ? null : botCard(s, seat)),
+    smart: { samples: 100 },
+  }).finalState
+  return side(start.contract.declarer) === 'NS' ? done.tricksNS : done.tricksEW
 }
 
 /** Spela ut hela given: alla fyra platser med tumregler (referenslinjen). */
 function playOutAllBasic(start: PlayState): number {
-  let s = start
-  while (!isComplete(s)) s = playCard(s, botCard(s, s.toAct))
-  return side(start.contract.declarer) === 'NS' ? s.tricksNS : s.tricksEW
+  const done = spelaVidare(start, [], { cardFor: (s, seat) => botCard(s, seat) }).finalState
+  return side(start.contract.declarer) === 'NS' ? done.tricksNS : done.tricksEW
 }
 
 describe('Steg A0 – korsruff med lönnkast: MC tar alla stick där tumregeln cashar rakt', () => {
