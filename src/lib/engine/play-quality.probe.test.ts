@@ -15,10 +15,11 @@
 
 import { it } from 'vitest'
 import { writeFileSync } from 'node:fs'
-import { botCardSmart, type SmartOpts } from './play-bot'
-import { contractResult, isComplete, playCard, startPlay, type Contract } from './play'
+import type { SmartOpts } from './play-bot'
+import type { Contract } from './play'
 import { contractFromCalls } from './auction-contract'
 import { botAuction, dealFromSeed } from './revisor'
+import { spelaHelGiv } from './spela-giv'
 import type { Deal } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 
@@ -27,12 +28,7 @@ const SEED = Number(process.env.PLAYQ_SEED ?? 20260729)
 
 /** Spela hela given med bot-hjärnan (Monte-Carlo) för alla fyra; spelförarens stick. */
 function declarerTricksSmart(deal: Deal, contract: Contract, calls: ResolvedCall[], opts: SmartOpts): number {
-  let st = startPlay(deal, contract)
-  let guard = 0
-  while (!isComplete(st) && guard++ < 60) {
-    st = playCard(st, botCardSmart(st, st.toAct, calls, opts))
-  }
-  return contractResult(st).declarerTricks
+  return spelaHelGiv(deal, contract, calls, { smart: opts }).declarerTricks
 }
 
 it.skipIf(!process.env.PLAYQ)(

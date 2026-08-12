@@ -10,23 +10,26 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — TÄVLINGEN KLAR & STÄDAD, ägaren väljer nästa stora bit
+### 🔵 NU — SPELDIAGNOSEN (ägarbeslut 2026-08-12): bottar som spelar, felsöker & rapporterar
 
-**ETAPP 2 (dagliga tävlingen) KOMPLETT, LIVE & STÄDAD (2026-08-11):** hela kedjan
-live (konton → topplista/matchpoäng); migr. `0005`+`0006` körda; **alla testkonton
-raderade** i Supabase (resultat kaskaderar bort). Detalj: [[beslut-b-etapp2-progress]].
+**RIGG STEG 1–7 BYGGD 2026-08-12** — allt i **`docs/speldiagnos.md`** (läs den
+FÖRST): helgivsspelaren `spela-giv.ts` · per-kort-DD-facit (`analyseSpel`) ·
+speldomen `speldom.ts` · proben (`SPELDIAG=1`, frö 20260721 = M-seriens
+universum) · repro-dumpen (`DUMP_SPEL`) · tävlingsförscreeningen
+(`TAVLING_DIAG`; `DAILY_SEED_SECRET` i `.env.local` — ALDRIG i spårade `.env`)
+· `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — DD-larm
+är kandidater; klassningen systemfel/ärlig miss/oklart görs i `/speldiagnos`;
+bara systemfel lagas, efter ägarens ja. **KVAR:** hemligheten till
+`.env.local` (ägarsteg) · S0-baslinjen · första diagnosrapporten.
 
-**TÄVLINGS-UI KLART & LIVE (2026-08-11):** 6 polishsteg (nedräkning · server-MP ·
-`DinStällning` · `Resultattabell` · rondgenomgång · traveller) + tre fixar idag:
-**server-driven framsteg** (`dinaInskick` i `/api/topplista` + ren `slåIhopFramsteg`
-→ samma bild på alla enheter, ingen "börja om på giv 1") och preliminärt **100 % /
-1:a** i tabell + `DinStällning` för ensam spelare (byts till riktiga siffror vid ≥2
-spelare). MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE. Detalj: [[tavling-ui-polish]].
-**MOBIL-STÄD (2026-08-11):** översikten rensad (progress/rutnät/allt-klart-kort bort,
-⟳-uppdatera-knapp, topprad på en rad, "N/12 givar"). Detalj: [[tavling-ui-polish]].
-**"SPELA GIVEN IGEN" (ÖVNING) KLAR & LIVE (2026-08-12, a24a369):** övningsläge i
-giv-detaljvyn (`övning`-flagga, `onResultat` no-op → MP% orört). Detalj + bugg-fix
-(`startSameGame`→`gameFromDeal`): [[spela-given-igen-ovningslage]].
+---
+
+**TÄVLINGEN KLAR & LIVE (2026-08-11/12):** etapp 2-kedjan komplett (konton →
+topplista/matchpoäng, testkonton städade) · tävlings-UI:s 6 polishsteg +
+server-driven framsteg + mobil-städ · "spela given igen" (övning, a24a369).
+**MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE.** Detalj:
+[[beslut-b-etapp2-progress]], [[tavling-ui-polish]],
+[[spela-given-igen-ovningslage]] + `docs/historik.md` 2026-08-11/12.
 
 ---
 

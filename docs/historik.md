@@ -2312,3 +2312,37 @@ uttoning → "Hemma! 11 stick (+2)" MED guldglow. Inga konsolfel.
 **Därmed är hela "känsla i kortspelet"-spåret (etapp 1–5) klart och NU-platsen
 ledig — ägaren väljer nästa NU ur NÄST/SENARE.** Samlad beskrivning av spåret:
 `docs/kortspel.md` avsnittet "Tempo, animationer och ljud".
+
+---
+
+## 2026-08-11/12 — Tävlingen klar & städad (flyttat från CLAUDE.md NU)
+
+- **Etapp 2 (dagliga tävlingen) komplett & live:** hela kedjan konton →
+  inskick → topplista/matchpoäng; migrationerna `0005`+`0006` körda; alla
+  testkonton raderade i Supabase (resultaten kaskaderar bort).
+- **Tävlings-UI:** 6 polishsteg (nedräkning · server-MP · `DinStällning` ·
+  `Resultattabell` · rondgenomgång · traveller) + server-driven framsteg
+  (`dinaInskick` i `/api/topplista` + `slåIhopFramsteg` → samma bild på alla
+  enheter) + preliminärt 100 %/1:a för ensam spelare. MP är STANDARD
+  (topp = 100 %, snitt 50 %).
+- **Mobil-städ:** översikten rensad (progress/rutnät/allt-klart-kort bort,
+  ⟳-uppdatera-knapp, topprad på en rad, "N/12 givar").
+- **"Spela given igen" (övning), a24a369:** omspel i giv-detaljvyn med
+  `övning`-flagga och `onResultat` som no-op → MP% orört; bugg lagad
+  (`startSameGame` → `gameFromDeal`).
+- Felrapporterna #46/#47/#48 lagade (27c6450).
+
+## 2026-08-12 — Speldiagnosen: riggen byggd (steg 1–7)
+
+Ägarbeslut efter första tävlingsdagen (3 fel på 12 givar hos 3 användare):
+bygg bottar som spelar, felsöker och rapporterar — ägaren bekräftar innan
+reparation. Plan + bygge samma dag; hela riggen i `docs/speldiagnos.md`.
+Bärande princip: **RÄTT, inte max antal stick** — DD-facit är larmklocka,
+klassningen (systemfel/ärlig miss/oklart) görs i `/speldiagnos`-agentsteget.
+Nyckelfynd under bygget: bridge-dds `AnalysePlayPBN` (oanvänt tills nu) ger
+DD-facit efter varje lagt kort; spåret har 49 värden (t.o.m. kort 48 — sista
+sticket är tvunget), låst i `revisor-dds-analyse.test.ts`. De fyra kopierade
+helgivslooparna ersattes av `spela-giv.ts` (per-beslut-frön via
+`botDecisionSeed` → körningar 100 % reproducerbara ur fröet). `.env` visade
+sig vara SPÅRAD av git → tävlingshemligheten ska alltid till `.env.local`
+(gitignorad via `*.local`).

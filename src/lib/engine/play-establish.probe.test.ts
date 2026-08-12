@@ -17,10 +17,10 @@
 
 import { afterEach, it, vi } from 'vitest'
 import { writeFileSync } from 'node:fs'
-import { botCardSmart } from './play-bot'
-import { contractResult, isComplete, playCard, startPlay, type Contract } from './play'
+import type { Contract } from './play'
 import { contractFromCalls } from './auction-contract'
 import { botAuction, dealFromSeed } from './revisor'
+import { spelaHelGiv } from './spela-giv'
 import type { Deal } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 
@@ -36,10 +36,7 @@ function mulberry32(seed: number): () => number {
 }
 
 function declarerTricks(deal: Deal, contract: Contract, calls: ResolvedCall[]): number {
-  let st = startPlay(deal, contract)
-  let guard = 0
-  while (!isComplete(st) && guard++ < 60) st = playCard(st, botCardSmart(st, st.toAct, calls, { samples: 30 }))
-  return contractResult(st).declarerTricks
+  return spelaHelGiv(deal, contract, calls, { smart: { samples: 30 } }).declarerTricks
 }
 
 const DEALS = Number(process.env.ESTABLISH_DEALS ?? 40)

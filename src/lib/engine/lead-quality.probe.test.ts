@@ -28,9 +28,10 @@
 import { afterEach, it, vi } from 'vitest'
 import { writeFileSync } from 'node:fs'
 import { botCardReasoned, botCardSmart } from './play-bot'
-import { contractResult, isComplete, playCard, startPlay, type Contract } from './play'
+import { startPlay, type Contract } from './play'
 import { contractFromCalls } from './auction-contract'
 import { botAuction, dealFromSeed } from './revisor'
+import { spelaHelGiv } from './spela-giv'
 import type { Card, Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 
@@ -55,15 +56,13 @@ const cardStr = (c: Card) => `${SUIT_GLYPH[c.suit]}${c.rank}`
  * botCardSmart(calls), så bara utspelskortet skiljer.
  */
 function declarerTricks(deal: Deal, contract: Contract, calls: ResolvedCall[], bidDriven: boolean): number {
-  let st = startPlay(deal, contract)
-  let guard = 0
-  while (!isComplete(st) && guard++ < 60) {
-    const seat = st.toAct
-    const opening = st.completedTricks.length === 0 && st.currentTrick.length === 0
-    const card = opening && !bidDriven ? botCardReasoned(st, seat).card : botCardSmart(st, seat, calls)
-    st = playCard(st, card)
-  }
-  return contractResult(st).declarerTricks
+  return spelaHelGiv(deal, contract, calls, {
+    // Kroken byter ENBART utspelet i budblint läge; alla andra kort = botens val.
+    cardFor: (st, seat) => {
+      const opening = st.completedTricks.length === 0 && st.currentTrick.length === 0
+      return opening && !bidDriven ? botCardReasoned(st, seat).card : null
+    },
+  }).declarerTricks
 }
 
 const DEALS = Number(process.env.LEADAB_DEALS ?? 120)
