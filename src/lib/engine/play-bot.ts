@@ -855,7 +855,12 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
   // kvarvarande spelare visat renons i färgen kan honnören ruffas → lågt.
   if (state.currentTrick.length === 1) {
     const sure = legal.filter((c) => c.suit === led && isSureWinner(c, legal, playedCards(state)))
-    if (sure.length >= 2) {
+    // Speldiagnosen S0 (frö 20260731): "säker vinnare" räknas mot UTESTÅENDE
+    // kort — men kortet som redan ligger i sticket måste också slås, annars
+    // slösas en honnör under motståndarens (♣Q föll under utspelad ♣K ur
+    // AQ42). Bara vinnare som faktiskt TAR sticket får väljas.
+    const tarSticket = sure.filter((c) => beats(c, state.currentTrick[0].card, led, state.trump))
+    if (sure.length >= 2 && tarSticket.length > 0) {
       const voids = shownVoids(state)
       const yetToPlay = (['N', 'E', 'S', 'W'] as Seat[]).filter(
         (s) => s !== seat && !state.currentTrick.some((pc) => pc.seat === s),
@@ -864,8 +869,23 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
         state.trump !== null && led !== state.trump && yetToPlay.some((s) => voids[s].has(led))
       if (!ruffRisk) {
         return {
-          card: lowest(sure),
+          card: lowest(tarSticket),
           reason: 'Löpande toppvinnare i färgen – jag går upp med den billigaste säkra vinnaren i stället för att maska bort sticket.',
+        }
+      }
+    }
+    // Speldiagnosen S0 (frö 20260772): SPELFÖRARSIDAN renons i den ledda
+    // sidofärgen med trumf kvar → RUFFA lågt i stället för att saka. En trumf
+    // vinner per definition sticket här (bara en annan trumf går över), så
+    // doktrinen "ruffa bara när det vinner sticket" är uppfylld — sakreglerna
+    // slösade i stället bort ess ("vaktar hotkorten") och tappade 5 stick.
+    // Försvarets andra hand ändras INTE (partnern kan fortfarande vinna sticket).
+    if (side(seat) === side(state.contract.declarer) && state.trump !== null && led !== state.trump) {
+      const myTrumps = legal.filter((c) => c.suit === state.trump)
+      if (myTrumps.length > 0 && !legal.some((c) => c.suit === led)) {
+        return {
+          card: lowest(myTrumps),
+          reason: 'Jag är renons i den ledda färgen och ruffar lågt – trumfen vinner sticket i stället för att jag sakar bort en vinnare.',
         }
       }
     }

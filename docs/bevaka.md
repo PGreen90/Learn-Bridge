@@ -9,6 +9,27 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Speldiagnosen S1 (2026-08-12) — tre fixar ur S0-baslinjen
+- **Cue-svarets färg = exakt fyra (§7.3, frö 20260772):** advancern höjer inte
+  längre dubbelton mot en cue-svars-färg, och cue-advancern dömer nu själv
+  efter dubblarens låga andra återbud (3-stöd → utgång; 12+ hp + stopp → 3NT).
+  **Bevaka:** (a) landar UD+cue-auktionerna i vettiga 3NT/utgångar — eller dör
+  de för ofta i delkontrakt nu? (b) den nya 3NT-grenen kräver stopp i ALLA
+  deras färger — säg till om den känns för feg.
+- **Säkra vinnaren måste slå det som ligger (frö 20260731):** träkarlen slösar
+  inte längre en honnör under ett kort som redan vinner sticket (♣Q under ♣K).
+  **Bevaka:** att "gå upp med billigaste vinnaren" fortfarande fyrar när den
+  SKA (felrapport #12-läget är facit-låst).
+- **Spelförarsidan ruffar i stället för att saka (frö 20260772):** renons i
+  ledd sidofärg + trumf kvar → ruffa lågt (andra hand). Försvarets beteende
+  orört. **Bevaka:** ruffar spelföraren nu NÄR DET ÄR DUMT (t.ex. trumfar
+  sönder egen trumfdragning)? MC-hjärnan ska normalt ta över i slutspelet —
+  se även nästa punkt.
+- **KÄND KVARSTÅENDE (ej lagad):** Monte-Carlo-hjärnan föll ur i frö 20260772
+  (`sampleLayouts` hittade 0 förenliga lägen → tumreglerna tog över hela
+  slutspelet). Behöver egen utredning — handmodellens krav kan bli
+  omöjliga att uppfylla sent i givar med extrema fördelningar.
+
 ## Budgivning (2026-08-08) — F6: stark 17+ enfärg efter två bjudna färger
 - **Den starka dubblingen efter två färger (NYAST, §7.3):** en 17+ hand med
   egen 5+ objuden färg dubblar nu även efter t.ex. 1♦–P–1♥ (även i den

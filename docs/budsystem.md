@@ -1541,6 +1541,17 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
   (felrapport #11); utan 4-korts högfärg bjuds **3NT med stopp** i deras färg,
   annars längsta objudna färg billigast. Cuet får **aldrig** passas — inte ens
   när motståndarna straffdubblar det.
+- **Cue-svarets färg lovar exakt FYRA (speldiagnosen S0, 2026-08-12):** färgen
+  dubblaren visar som svar på cuet är ett *fyrkorts*-besked, och att den sedan
+  **bjuds om** (t.ex. tvingad vidare av ett poänglöst mellansvar) gör den
+  **inte** längre. Cue-advancern höjer den därför aldrig till utgång på
+  dubbelton — en känd 4-2-"fit" är ingen fit (frö 20260772: 4♥ på A9 mot
+  visade fyra gick sex bet när 3NT stod jämnt hem).
+- **Cue-advancerns dom när dubblarens andra återbud är lågt (samma fix):**
+  advancern har redan visat sina värden med cuet och får varken höja regellöst
+  eller passa bort utgången. Med **3-korts stöd** sätts utgången i dubblarens
+  färg; utan fit men med **12+ hp och stopp i deras färg(er)** bjuds **3NT**;
+  först därefter får budgivningen dö i delkontraktet.
 
 **När motståndarna bjuder ÖVER dubblingen (etapp 6 i mätspåret, 2026-07-27):**
 Höjer öppnarens sida — (1♣)–X–(2♣) — är advancern inte längre *tvungen* att
@@ -3351,3 +3362,13 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   Facit: fyra fall i `auction-missad-utgang.test.ts` (frö 20260744 → 3NT).
   **Mätning #11:** snitt-tapp **288,0**, missad utgång **151/50 640**, exakt par
   **17,1 %**.
+
+- **2026-08-12 — Speldiagnosen S0, fynd 1 (frö 20260772):** cue-svarets färg
+  efter upplysningsdubbling lovar exakt FYRA kort — `fitLengthNeeded`
+  (`auction-live.ts`) räknar inte längre ett cue-svar mot "två bud = 6+", så
+  advancern höjer aldrig utgång på dubbelton mot visade fyra (4♥ på A9 gick
+  sex bet). Ny gren B i `answerStrongDoubleGameForce` (Part 4): cue-advancerns
+  dom efter dubblarens LÅGA andra återbud — 3-korts stöd → utgång i färgen;
+  annars 12+ hp med stopp i deras färg(er) → 3NT. Paragraf §7.3
+  ("Advancerns svar"). Facit: `auction-konkurrens-fortsattning.test.ts`
+  (20260772-läget + hela auktionen → 3NT).

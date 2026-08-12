@@ -1020,18 +1020,40 @@ function answerStrongDoubleGameForce(deal: Deal, history: ResolvedCall[], seat: 
   const suit = ctx.doublerSuit
   const letter = letterOfSuit(suit)
   const second = ctx.doublerBids[1]
-  // Måste vara ett HOPP till 3-läget i dubblarens färg (från ett 1-läges återbud).
-  if (second.strain !== letter || second.level !== 3 || ctx.doublerBids[0].level !== 1) return null
-
   const hand = deal.hands[seat]
   const support = lengths(hand)[suit]
   const legal = legalCalls(history, seat)
   const game = `${suit === 'hearts' || suit === 'spades' ? 4 : 5}${letter}` as Bid
-  if (support >= 1 && legal.includes(game)) {
-    return { seat, bid: game, rule: 'utgång (1–2 korts stöd)', explanation: `Utgångskravet accepteras: ${support} korts stöd i ${SWE_NAME[letter]} → ${game} (minimum men utgång).` }
+
+  // Gren A: HOPPET till 3-läget i dubblarens färg (från ett 1-läges återbud) = krav.
+  if (second.strain === letter && second.level === 3 && ctx.doublerBids[0].level === 1) {
+    if (support >= 1 && legal.includes(game)) {
+      return { seat, bid: game, rule: 'utgång (1–2 korts stöd)', explanation: `Utgångskravet accepteras: ${support} korts stöd i ${SWE_NAME[letter]} → ${game} (minimum men utgång).` }
+    }
+    if (legal.includes('3NT')) {
+      return { seat, bid: '3NT', rule: 'nekar stöd (3NT)', explanation: `Nekar helt stöd i ${SWE_NAME[letter]}, svagast möjliga → 3NT.` }
+    }
+    return null
   }
-  if (legal.includes('3NT')) {
-    return { seat, bid: '3NT', rule: 'nekar stöd (3NT)', explanation: `Nekar helt stöd i ${SWE_NAME[letter]}, svagast möjliga → 3NT.` }
+
+  // Gren B (Speldiagnosen S0, frö 20260772): dubblarens andra återbud var LÅGT
+  // (ej krav) — men en advancer som ÖPPNADE med CUE har redan visat värden och
+  // får inte lämna auktionen regellöst. Utan fixen höjde motorn i stället
+  // regellöst till 4♥ på A9 DUBBELTON mot visade fyra (4-2-utgång, 6 bet), och
+  // med enbart fit-vakten blev det regellös PASS på 14 hp. Domen: 3-korts stöd →
+  // utgång i färgen; annars 12+ hp med stopp i deras färg(er) → 3NT (facit på
+  // given: 3NT jämnt hem). I övrigt: lämna vidare (pass är rätt mot minimum).
+  const gameLevel = suit === 'hearts' || suit === 'spades' ? 4 : 5
+  const advancerFirst = SUIT_OF_LETTER[ctx.advancerBids[0].strain]
+  const advancerCuedFirst = !!advancerFirst && ctx.theirSuits.has(advancerFirst)
+  if (second.strain !== letter || second.level >= gameLevel || !advancerCuedFirst) return null
+  const p = hcp(hand)
+  if (support >= 3 && legal.includes(game)) {
+    return { seat, bid: game, rule: 'cue-advancerns dom (utgång)', explanation: `Cuen visade redan mina värden; med ${support} korts stöd i ${SWE_NAME[letter]} → utgång ${game}.` }
+  }
+  const stoppAlla = [...ctx.theirSuits].every((s) => hasStopper(hand, s))
+  if (p >= 12 && stoppAlla && legal.includes('3NT')) {
+    return { seat, bid: '3NT', rule: 'cue-advancerns dom (3NT)', explanation: `Cuen visade redan mina värden; utan fit i ${SWE_NAME[letter]} men med stopp i deras färg → 3NT.` }
   }
   return null
 }
@@ -1793,6 +1815,23 @@ function fitLengthNeeded(history: ResolvedCall[], seat: Seat, partnerSuit: { str
     if (c === firstContractCall && c.bid === '2C') return false // konstgjord stark 2♣
     for (let i = idx - 1; i >= 0; i--) {
       if (history[i].bid === 'P') continue
+      // Speldiagnosen S0 (frö 20260772): ett färgbud som SVARAR PÅ MIN CUE
+      // (mitt bud i en färg motståndarna bjudit) efter partnerns egen
+      // upplysningsdubbling visar exakt FYRA kort — det adderar ingen längd
+      // och får inte räknas mot "två bud = 6+" (E höjde 3♥→4♥ på A9
+      // dubbelton mot visade fyra; 4-2-utgången gick 6 bet).
+      const prevCb = parseContractBid(history[i].bid)
+      const svarPaMinCue =
+        history[i].seat === seat &&
+        !!prevCb &&
+        history
+          .slice(0, i)
+          .some((c2) => {
+            const cb2 = parseContractBid(c2.bid)
+            return !!cb2 && cb2.strain === prevCb.strain && c2.seat !== seat && c2.seat !== PARTNER[seat]
+          }) &&
+        history.slice(0, idx).some((c2) => c2.seat === PARTNER[seat] && c2.bid === 'X')
+      if (svarPaMinCue) return false
       const forcedByMyX = history[i].seat === seat && history[i].bid === 'X'
       if (!forcedByMyX) return true
       if (partnerOpened1Major) return true

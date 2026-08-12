@@ -134,6 +134,39 @@ describe('svar på svag tvåa: ny färg på 3-läget kräver 15+, annars pass ut
   })
 })
 
+// Speldiagnosen S0, frö 20260772: S 1♣ – W X (UD) – P – E 2♣ (cue, krav) – P –
+// W 2♥ (svar på cue = exakt FYRA hjärter) – P – E 2♠ (tvång) – P – W 3♥ – P – ?
+// Öst (14 hp, ♥A9 dubbelton, ♣KQ = dubbelstopp i deras färg) höjde REGELLÖST
+// till 4♥ på en känd 4-2-fit. Buggen: fitLengthNeeded räknade "partnern bjöd
+// hjärter två gånger → 6+ → dubbelton räcker", men BÅDA hjärterbuden kom ur
+// cue-maskineriet (svar på cue visar 4; ombudet efter tvångssvaret adderar
+// ingen längd). Rätt bud: 3NT (par: 3NT-EW jämnt hem +1). Facit FÖRE fix.
+describe('speldiagnos S0 – cue-svarets färg räknas som 4, inte 6+ (frö 20260772)', () => {
+  const HANDS_772 = {
+    N: 'S:KQ9 H:T532 D:98762 C:2',
+    E: 'S:JT862 H:A9 D:KJ53 C:KQ',
+    S: 'S:5 H:Q86 D:4 C:AJT97654',
+    W: 'S:A743 H:KJ74 D:AQT C:83',
+  }
+  const HISTORY_772: ResolvedCall[] = [
+    call('S', '1C'), call('W', 'X'), call('N', 'P'), call('E', '2C'),
+    call('S', 'P'), call('W', '2H'), call('N', 'P'), call('E', '2S'),
+    call('S', 'P'), call('W', '3H'), call('N', 'P'),
+  ]
+
+  it('läget: Öst bjuder 3NT — höjer aldrig till 4♥ på dubbelton mot visade fyra', () => {
+    const d = deal('speldiag-20260772-pos', 'S', 'all', HANDS_772)
+    expect(decideCall(d, HISTORY_772, 'E').bid).toBe('3NT')
+  })
+
+  it('hela auktionen: kontraktet blir 3NT av Ö/V, inte 4♥ på 4-2', () => {
+    const d = deal('speldiag-20260772', 'S', 'all', HANDS_772)
+    const history = botAuction(d)
+    expect(history).not.toBeNull()
+    expect(contractFromCalls(history!)).toMatchObject({ strain: 'NT', level: 3 })
+  })
+})
+
 describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () => {
   it('frö 20260733: cue-svaret hamnar i högfärgen, inte i 4♣ bet', () => {
     const d = deal('felfarg-20260733', 'N', 'ns', HANDS_733)
