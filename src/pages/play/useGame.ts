@@ -230,11 +230,14 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number) 
     setSearch(null)
   }
 
-  /** Spela om SAMMA giv från början (Etapp B): samma frö (eller dagens giv),
-   *  ny omgång → spelbordet monteras om via round i nyckeln. */
+  /** Spela om SAMMA giv från början (Etapp B): samma giv, ny omgång →
+   *  spelbordet monteras om via round i nyckeln. Frögiv (frispel) återskapas ur
+   *  fröet; en fröfri giv (dagens giv ELLER en tävlingsgiv i övningsläge) spelas
+   *  om ur den NUVARANDE given — inte en nygenererad dagsgiv (tidigare bugg:
+   *  `newDailyGame` gav dagens slumpgiv åt en tävlingsövning som saknar dailyNr). */
   function startSameGame() {
     setGame((g) =>
-      g.seed === null ? newDailyGame(g.round + 1, dailyNr) : gameFromSeed(g.seed, g.round + 1),
+      g.seed === null ? gameFromDeal(g.deal, g.round + 1) : gameFromSeed(g.seed, g.round + 1),
     )
   }
 

@@ -204,7 +204,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
         contract={game.contract}
         calls={game.history}
         onNewGame={onNewGame}
-        onPlayAgain={tavling ? undefined : startSameGame}
+        onPlayAgain={tavling && !tavling.övning ? undefined : startSameGame}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}
         daily={daily}
@@ -221,14 +221,16 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
         onBid={onBid}
         onConfirm={confirmContract}
         onNewGame={onNewGame}
-        onPlayAgain={tavling ? undefined : startSameGame}
+        onPlayAgain={tavling && !tavling.övning ? undefined : startSameGame}
         targetLabel={describeTargetShort(target)}
         onOpenPicker={() => setPicking(true)}
         bidHelp={bidHelp}
         onToggleBidHelp={toggleBidHelp}
         dailyBadge={
           tavling
-            ? `Tävling · Giv ${tavling.board}/${tavling.total}`
+            ? tavling.övning
+              ? `Övning · Giv ${tavling.board} — räknas inte`
+              : `Tävling · Giv ${tavling.board}/${tavling.total}`
             : daily
               ? `Dagens giv #${dailyNr}`
               : undefined
@@ -624,7 +626,20 @@ export function PlayTable({
                   </Button>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {tavling ? (
+                  {tavling?.övning ? (
+                    /* Övning: fritt att spela om igen; "Tillbaka" landar på giv-
+                       detaljvyn. Resultatet räknas ALDRIG (ingen inskickning). */
+                    <>
+                      {onPlayAgain && (
+                        <Button variant="secondary" onClick={onPlayAgain}>
+                          Spela igen
+                        </Button>
+                      )}
+                      <Button variant="primary" onClick={tavling.onNästa}>
+                        ← Tillbaka
+                      </Button>
+                    </>
+                  ) : tavling ? (
                     /* Tävling: den enda vägen framåt är nästa giv i serien (eller
                        ställningen om det var den sista). Inget omspel — man spelar
                        varje tävlingsgiv en gång. */
@@ -686,7 +701,18 @@ export function PlayTable({
               <Button variant="secondary" onClick={() => setReviewing(true)}>
                 Rondgenomgång
               </Button>
-              {tavling ? (
+              {tavling?.övning ? (
+                <>
+                  {onPlayAgain && (
+                    <Button variant="secondary" onClick={onPlayAgain}>
+                      Spela igen
+                    </Button>
+                  )}
+                  <Button variant="primary" onClick={tavling.onNästa}>
+                    ← Tillbaka
+                  </Button>
+                </>
+              ) : tavling ? (
                 <Button variant="primary" onClick={tavling.onNästa}>
                   {tavling.sista ? 'Se ställningen →' : 'Till översikten →'}
                 </Button>
@@ -735,6 +761,14 @@ export function PlayTable({
       className={`flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none ${done ? 'felt-fade-out' : ''}`}
       style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}
     >
+      {/* Övningsläge (2026-08-12): tydlig pille uppe till vänster — spelaren ska
+          aldrig tro att ett omspel räknas i tävlingen. */}
+      {tavling?.övning && (
+        <div className="absolute left-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20 rounded-full bg-emerald-950/70 px-2.5 py-1 text-[11px] font-semibold text-gold-200 ring-1 ring-gold-400/30">
+          Övning · räknas inte
+        </div>
+      )}
+
       {/* ⋮ (meny) överst, ⓘ (budgivningen) under den — staplade i appens övre
           högra hörn (ägarbeslut 2026-07-31). Säker marginal för urtaget nu när
           headern är borta (immersiv spelvy). */}

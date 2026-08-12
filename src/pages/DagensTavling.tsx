@@ -56,6 +56,9 @@ export function DagensTavling() {
   const [spelIndex, setSpelIndex] = useState<number | null>(null)
   // Bricknummer för giv-detaljvyn (travellern, steg 6), null = ingen.
   const [detaljBoard, setDetaljBoard] = useState<number | null>(null)
+  // Index i givar-listan för given som spelas om i ÖVNINGSLÄGE (2026-08-12) från
+  // giv-detaljvyn, null = ingen. Skilt från spelIndex: övningen bokför ALDRIG.
+  const [övningIndex, setÖvningIndex] = useState<number | null>(null)
   // Bricknummer för given vars rondgenomgång visas (steg 5), null = ingen.
   const [granskaBoard, setGranskaBoard] = useState<number | null>(null)
   // Dagens topplista (hämtas på översikten).
@@ -271,6 +274,32 @@ export function DagensTavling() {
     )
   }
 
+  // --- Spela given igen: ÖVNINGSLÄGE (2026-08-12) ---------------------------
+  // Öppnas ur giv-detaljvyn. Samma spelskärm, men KORREKTHETSKRAVET: onResultat
+  // är en REN no-op — inget skickas in (submitTavlingGiv), framsteget rörs inte
+  // (saveTavlingFramsteg/framstegRef orörda) → din riktiga MP% står kvar. Både
+  // "Tillbaka" och en klar övningsgiv landar på detaljvyn (detaljBoard står
+  // kvar bakom övningen). `övning: true` sätter märkning + knappar i Play.
+  if (övningIndex !== null) {
+    const giv = tavling.givar[övningIndex]
+    const övningsSpel: TavlingSpel = {
+      giv,
+      nummer: tavling.nummer,
+      board: giv.deal.board,
+      total: tavling.storlek,
+      sista: false,
+      övning: true,
+      onResultat: () => {
+        /* ÖVNING — räknas inte: bokför inget, skicka inget in. */
+      },
+      onNästa: () => setÖvningIndex(null),
+      onÖversikt: () => setÖvningIndex(null),
+    }
+    return (
+      <Play key={`ovning-${tavling.nummer}-${giv.deal.board}`} tavling={övningsSpel} />
+    )
+  }
+
   // --- Giv-detalj (steg 6): hela fältets traveller för EN spelad giv ---------
   if (detaljBoard !== null) {
     const rad = klara.find((k) => k.board === detaljBoard)
@@ -282,6 +311,10 @@ export function DagensTavling() {
         kanGenomgang={kanGenomgang}
         onBack={() => setDetaljBoard(null)}
         onGenomgang={() => setGranskaBoard(detaljBoard)}
+        onÖvning={() => {
+          const i = tavling.givar.findIndex((g) => g.deal.board === detaljBoard)
+          if (i >= 0) setÖvningIndex(i)
+        }}
       />
     )
   }
@@ -597,11 +630,14 @@ function GivDetalj({
   kanGenomgang,
   onBack,
   onGenomgang,
+  onÖvning,
 }: {
   board: number
   kanGenomgang: boolean
   onBack: () => void
   onGenomgang: () => void
+  /** Spela om given i övningsläge (räknas inte). */
+  onÖvning: () => void
 }) {
   const [utfall, setUtfall] = useState<GivResultatUtfall | null>(null)
   useEffect(() => {
@@ -633,6 +669,12 @@ function GivDetalj({
 
         <div className="flex flex-col items-center gap-3">
           {kanGenomgang && <Button onClick={onGenomgang}>Se hela given (bud + spel) →</Button>}
+          {/* Spela om given i övningsläge (2026-08-12). Tydligt märkt "räknas
+              inte" så det aldrig förväxlas med tävlingsresultatet. */}
+          <Button variant="secondary" onClick={onÖvning}>
+            🔄 Spela given igen — övning
+          </Button>
+          <p className="text-[11px] text-emerald-100/50">Övning räknas inte i tävlingen.</p>
           <button
             onClick={onBack}
             className="text-sm font-semibold text-emerald-100/70 underline underline-offset-2 hover:text-emerald-50"

@@ -19,6 +19,12 @@ export interface TavlingSpel {
   total: number
   /** Sista given i serien → "Se ställningen" i stället för "Nästa giv". */
   sista: boolean
+  /** ÖVNINGSLÄGE (2026-08-12): given spelas om från giv-detaljvyn bara för att
+   *  öva. KORREKTHETSKRAV: `onResultat` måste vara en no-op (inget skickas in,
+   *  framsteget rörs inte) → din riktiga MP% står kvar överallt. Sätter också
+   *  om resultatskärmen ("Spela igen"/"Tillbaka" i stället för "Nästa giv") och
+   *  märkningen "Övning — räknas inte". Odefinierat/false = riktig tävlingsgiv. */
+  övning?: boolean
   /** Given är klar (spelad eller passad) → BOKFÖR resultatet + skicka in det.
    *  Anropas EN gång i samma stund given slutförs, oavsett vilken knapp spelaren
    *  sedan väljer — så framsteget aldrig tappas om man går till översikten i
