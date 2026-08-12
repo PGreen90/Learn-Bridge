@@ -99,4 +99,47 @@ krascher, icke-terminerande auktioner, absurda kontrakt och botlarm på just de
 > facit-test som låser det, omkörningskommandot och en ärlig läsning av deltat.
 > Baslinjen S0 körs när ägaren godkänt riggen.
 
-*(Inga mätningar ännu — S0 = första fulla körningen.)*
+### S0 — baslinjen (2026-08-12)
+
+200 givar, frö 20260721, fyra parallella skivor. Omkörning:
+`SPELDIAG=1 SPELDIAG_DEALS=50 SPELDIAG_OFFSET=<0|50|100|150> SPELDIAG_OUT=speldiagnos-s0-<a|b|c|d>.json npx vitest run src/lib/engine/speldiagnos.probe.test.ts`
+
+- Alla 200 bedömda (0 auktionsfel, 0 olösbara).
+- **Bud:** 17,0 % rätt kontrakt (34/200), snittapp 263 poäng/giv — i nivå med
+  M-seriens baslinje (samma givuniversum).
+- **Spel:** 20/200 givar utan DD-rörelse. Flaggade stick: spelförarsidan 358
+  (151 givar), försvaret 257 (133), utspelet 54 (52). Netto spelförare mot DD:
+  −47 stick/200 givar ≈ −0,24/giv — sidorna tar nästan ut varandra (väntat
+  utan facitinsyn).
+- Första granskningsrundan (fyra dumpade givar) och klassningen: se
+  `revisor-output/speldiagnos-rapport-2026-08-12.md`. Fynd: regellös
+  4♥-höjning på 2-kortsstöd (frö 20260772, bud) · träkarlen lägger honnör
+  under ett kort som redan vinner (20260731, ren kodbugg) · spelföraren sakar
+  ess i stället för att ruffa + MC kopplas inte in (20260772) ·
+  trumfdragningen ser inte sitsen (20260731) · "vinn billigast" i stället för
+  mask i trumfdragning (20260730) · två ärliga missar (ingen åtgärd) · ett
+  oklart trumfutspel (20260807).
+
+*(Läsning: baslinjen är satt. Inga fixar ingår i S0 — nästa mätpunkt S1 körs
+efter första godkända fixen.)*
+
+### S1 — de tre första fixarna (2026-08-12, ägarval "2 → 3 → 1")
+
+Samma 200 givar och kommando som S0 (byt `s0` mot `s1` i OUT-namnen). S1 mäter
+de TRE fixarna ihop (en mätpunkt, inte tre — fixarna byggdes i följd samma
+pass): säkra-vinnaren-mot-liggande-kort (`play-bot.test.ts`) ·
+spelförarsidans ruff i stället för sak (`play-bot.test.ts`) · cue-svarets
+färg = 4 + cue-advancerns dom (§7.3, `auction-konkurrens-fortsattning.test.ts`).
+
+- **Bud:** 17,5 % rätt (35/200; S0 34), snitt **259 poäng/giv** (S0 263).
+  Lyftet bor nästan helt i skiva B där frö 20260772 gick från 4♥−6 till 3NT
+  (≈ 700 poäng på en giv).
+- **Spel:** flaggade stick spelförarsidan **349** (S0 358), försvaret **238**
+  (S0 257), utspelet 55 (S0 54); rent spelade 20/200 (oförändrat).
+- **Läsning (ärlig):** buddeltat är verkligt och spårbart till fixen.
+  Speldeltana ska läsas FÖRSIKTIGT — varje ändrat kort ger en helt ny
+  genomspelning nedströms (dokumentets regel: jämför aldrig kort för kort
+  mellan versioner), så −9/−19 ligger inom omtärningsbruset. Fixarnas
+  verkliga lås är facit-testerna; aggregaten bekräftar främst att inget
+  BLEV SÄMRE. MC-urfallet (sampleLayouts 0 lägen, frö 20260772) är
+  fortfarande olagat och står i `docs/bevaka.md`.

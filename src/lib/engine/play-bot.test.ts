@@ -396,6 +396,53 @@ describe('felrapport #12 – andra hand går upp med löpande toppvinnare', () =
   })
 })
 
+// Speldiagnosen S0 (frö 20260731, stick 1): Öst spelade ut ♣K mot 2♠ av N.
+// Träkarlen Syd höll ♣AQ42 och lade ♣Q — "billigaste säkra vinnaren" — UNDER
+// den redan utspelade kungen. Damen är "säker" mot utestående kort (kungen
+// ligger ju), men den VINNER INTE STICKET. Regeln måste kräva att kortet slår
+// det som redan ligger: rätt kort är ♣A (esset vinner, damen sitter kvar som
+// mask mot knekten). Facit FÖRE fix.
+describe('speldiagnos S0 – säkra vinnaren måste slå kortet som redan ligger', () => {
+  it('♣K utspelad, andra hand med AQ42 → esset (aldrig damen under kungen)', () => {
+    const s = state({
+      trump: 'spades', declarer: 'N', seat: 'S', leader: 'E',
+      trick: [{ seat: 'E', card: C('clubs', 'K') }],
+      hand: [
+        C('spades', '9'), C('spades', '5'),
+        C('hearts', 'J'), C('hearts', '10'), C('hearts', '9'), C('hearts', '3'),
+        C('diamonds', '7'), C('diamonds', '4'), C('diamonds', '3'),
+        C('clubs', 'A'), C('clubs', 'Q'), C('clubs', '4'), C('clubs', '2'),
+      ],
+    })
+    expect(botCard(s, 'S')).toEqual(C('clubs', 'A'))
+  })
+})
+
+// Speldiagnosen S0 (frö 20260772, stick 8–12): spelföraren Väst (4♥) var
+// renons i klöver med trumfsjuan KVAR på handen — och sakade ♦Q, ♦A och ♠A
+// medan Syd körde klöverfärgen. Sakreglerna ("vakta hotkorten") övervägde
+// aldrig att RUFFA, fast en trumf per definition vinner sticket när motståndaren
+// leder en sidofärg. Fem stick rann bort. Doktrin (rad 10): "ruffa bara när det
+// vinner sticket" — här VINNER ruffen. Facit FÖRE fix. Gäller spelförarsidan;
+// försvarets andra hand ändras inte (partnern kan fortfarande vinna sticket).
+describe('speldiagnos S0 – spelförarsidan ruffar i stället för att saka vinnare', () => {
+  it('renons i ledd färg + trumf kvar → ruffa lågt, saka inte esset', () => {
+    // Stick 8-läget ur frö 20260772: S leder ♣7, W (spelförare, hjärter trumf)
+    // renons i klöver med ♥7 + tre vinnare kvar.
+    const s = state({
+      trump: 'hearts', declarer: 'W', seat: 'W', leader: 'S',
+      trick: [{ seat: 'S', card: C('clubs', '7') }],
+      completedTricks: [doneTrick()],
+      hand: [
+        C('spades', 'A'), C('spades', '7'), C('spades', '4'),
+        C('diamonds', 'A'), C('diamonds', 'Q'),
+        C('hearts', '7'),
+      ],
+    })
+    expect(botCard(s, 'W')).toEqual(C('hearts', '7'))
+  })
+})
+
 describe('tredje hand – vinn billigast', () => {
   it('partnern leder, motståndaren övertar, 3:e hand vinner med billigaste vinnaren', () => {
     // S leder H4 (partner till N), V lägger H9 (övertar), N (3:e hand) på tur.

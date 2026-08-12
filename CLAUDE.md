@@ -19,8 +19,13 @@ universum) · repro-dumpen (`DUMP_SPEL`) · tävlingsförscreeningen
 (`TAVLING_DIAG`; `DAILY_SEED_SECRET` i `.env.local` — ALDRIG i spårade `.env`)
 · `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — DD-larm
 är kandidater; klassningen systemfel/ärlig miss/oklart görs i `/speldiagnos`;
-bara systemfel lagas, efter ägarens ja. **KVAR:** hemligheten till
-`.env.local` (ägarsteg) · S0-baslinjen · första diagnosrapporten.
+bara systemfel lagas, efter ägarens ja. **S0+S1 KÖRDA, TRE FIXAR LANDADE
+2026-08-12** (ägarval 2→3→1; S-serien i `docs/speldiagnos.md`; hemligheten
+verifierad i `.env.local`). **NÄSTA GÅNG BÖRJAR VI MED rapportens punkt
+4–6** (`revisor-output/speldiagnos-rapport-2026-08-12.md`): (4) trumfdragnings-
+kandidaterna (frön 20260731/20260730) · (5) oklara trumfutspelet (20260807,
+ägarens bridgeomdöme) · (6) speldump för tävlingsbrickor (datum+bricka).
+Även bevakat: MC-urfallet (sampleLayouts 0 lägen, frö 20260772).
 
 ---
 
@@ -105,17 +110,18 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 > visshet. Detalj: budsystem.md §5.2/§5.7/§6 + `docs/historik.md`.
 
 ### 👀 Bevaka i spel — de tre senaste
+- **Speldiagnosen S1 (2026-08-12):** cue-svarets färg = exakt 4 (§7.3, ingen
+  dubbeltonhöjning; cue-advancern dömer 3NT/utgång själv) · säkra vinnaren
+  måste slå det som ligger · spelförarsidan ruffar i stället för att saka.
+  KÄND KVARSTÅENDE: MC föll ur i frö 20260772 (sampleLayouts 0 lägen).
+> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
+> säger att något känns fel i spel, eller när en ny fix ska läggas till.
 - **F6 starka X:et efter två färger (2026-08-08):** 17+ med 5+ objuden färg
   dubblar efter 1♦–P–1♥ och färgar nästa varv. Landar fortsättningen lagom
   mot en tom advancer? 4-4-X:et är MEDVETET live-only — säljs givar där?
-> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
-> säger att något känns fel i spel, eller när en ny fix ska läggas till.
 - **F5 2♣-strain + 6-5 (2026-08-08):** 2♣-auktioner ska hitta högfärgsfiten
   (inte dö i 5♣); 16+ 6-5 reverserar även efter 1NT-svar. Känns 2♣-slutbuden
   rätt nu — och svarar partnern begripligt på den nya reversen?
-- **F4 TP-inkliven (2026-08-07):** inklivsgolven läser TP (formstark 7:a
-  kliver in), advancern stödpoäng. Kliver bottarna in för lätt — straffas
-  TP-inkliven? X-svararen/DONT/svaga tvåor räknar ännu rå HP — säljs givar där?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **Beslut B etapp 2 forts.** — klientfasen: wira in tävlingen i appen, inskick,
