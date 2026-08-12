@@ -186,20 +186,16 @@ topplistan bakom en knapp. Låsta ramar som vanligt: emerald, svarta spader,
 guldserifen, MP bara. Mät höjdbudgeten och svara med uppmätta px (facelift-mönstret
 [[facelift-mockup-rejected]]). Hör ihop med FACELIFTEN ovan.
 
-### Spela tävlingsgiv igen — övningsläge (2026-08-11, ägaren) — NÄSTA NU
-**Bestämt nästa steg (eget pass med facit FÖRE bygget).** I giv-detaljvyn
-(`GivDetalj`, travellern) ska det finnas en knapp **"🔄 Spela given igen — övning"**.
-Den öppnar givens `deal` i vanliga spelskärmen (`Play`) i ett **övningsläge**:
-spelaren spelar och får se resultat/poäng, men **KORREKTHETSKRAV (får aldrig brytas):**
-*inget skickas in till servern* (`submitTavlingGiv` anropas ej) och *det sparade
-framsteget rörs inte* (`saveTavlingFramsteg`/`framstegRef` orörda) → din ursprungliga
-MP% står kvar överallt (Dina givar, travellern, Din ställning). Tydlig "Övning —
-räknas inte"-märkning i vyn. **FÖRST:** läs `Play.tsx` + `play/tavling-mode.ts` för
-hur ett spel av en specifik giv kopplas in — dagens `TavlingSpel.onResultat` bokför +
-skickar in, så övningsläget behöver en variant som INTE gör det (ny prop/flagga eller
-eget läge). Facit: ett test som bevisar att omspel inte ändrar `learnbridge:tavling-
-framsteg` och inte anropar submit. Låsta ramar: emerald, svarta spader, guldserifen,
-MP bara.
+### Spela tävlingsgiv igen — övningsläge (2026-08-11, ägaren) — KLAR & LIVE 2026-08-12
+**Byggd, verifierad i dev, live (main a24a369).** Knappen **"🔄 Spela given igen —
+övning"** i `GivDetalj` öppnar givens `deal` i `Play` i övningsläge via en `övning`-
+flagga på `TavlingSpel`; dess `onResultat` är en no-op → *inget skickas in*
+(`submitTavlingGiv`) och *framsteget rörs inte* (`saveTavlingFramsteg`/`framstegRef`),
+så MP% står kvar överallt. Facit `DagensTavling-ovning.test.tsx`. Märkning "räknas
+inte" i budfas (badge), kortspel (pille) och resultat ("Spela igen" + "← Tillbaka").
+Bugg lagad på vägen: `startSameGame` gav en NY dagsgiv åt en fröfri giv (tävlings-
+övning utan `dailyNr`) → nu `gameFromDeal(g.deal)`, regressionstest
+`useGame-omspel.test.tsx`. Detalj: [[spela-given-igen-ovningslage]].
 
 ### Rondgenomgång för tävlingsgiv — botarnas per-kort-motivering (2026-08-11)
 Steg 5:s genomgång (`byggGranskning` → `RondRapportView`) återskapar given ur

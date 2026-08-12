@@ -22,11 +22,11 @@ raderade** i Supabase (resultat kaskaderar bort). Detalj: [[beslut-b-etapp2-prog
 → samma bild på alla enheter, ingen "börja om på giv 1") och preliminärt **100 % /
 1:a** i tabell + `DinStällning` för ensam spelare (byts till riktiga siffror vid ≥2
 spelare). MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE. Detalj: [[tavling-ui-polish]].
-**MOBIL-STÄD (2026-08-11):** översikten rensad — progress-stapeln, 12-rutnätet och
-"allt klart"-kortet borttagna (i alla lägen) + uppdatera-knapp (⟳) nere höger som
-hämtar om ställningen + topprad på en rad + "N/12 givar". Detalj: [[tavling-ui-polish]].
-**NÄSTA NU (bestämt med ägaren):** "spela given igen" i giv-detaljvyn — övningsläge,
-den riktiga MP%:en får ALDRIG skrivas över (plan + facit-krav i `docs/senare.md`).
+**MOBIL-STÄD (2026-08-11):** översikten rensad (progress/rutnät/allt-klart-kort bort,
+⟳-uppdatera-knapp, topprad på en rad, "N/12 givar"). Detalj: [[tavling-ui-polish]].
+**"SPELA GIVEN IGEN" (ÖVNING) KLAR & LIVE (2026-08-12, a24a369):** övningsläge i
+giv-detaljvyn (`övning`-flagga, `onResultat` no-op → MP% orört). Detalj + bugg-fix
+(`startSameGame`→`gameFromDeal`): [[spela-given-igen-ovningslage]].
 
 ---
 
