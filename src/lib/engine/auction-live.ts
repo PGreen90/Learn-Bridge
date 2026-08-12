@@ -2523,6 +2523,86 @@ function overcallerRaiseAdvance(deal: Deal, history: ResolvedCall[], seat: Seat)
   }
 }
 
+/**
+ * Har MITT inkliv fått en CUE-HÖJNING av partnern (advancern cue-bjöd deras färg =
+ * minst limithöjning i min färg), och sedan har motståndarna bjudit VIDARE så att
+ * jag (överklivaren) står inför att sälja given (felrapport #47)? `answerCueRaise`/
+ * `partnerCueRaiseToAnswer` täcker bara ÖPPNAREN i ett LUGNT läge (bara pass efter
+ * cuet); här är budaren överklivaren OCH motståndarna har konkurrerat över cuet, så
+ * ingen hanterare fanns → naket pass sålde en klar fit. Mönstret:
+ *  - MOTSTÅNDARNA öppnade (deras 1-läges färgöppning),
+ *  - vår sida har exakt två kontraktsbud: MITT inkliv (naturlig ny färg, ej deras,
+ *    ej NT) + partnerns cue i en av DERAS färger (= höjning av min färg),
+ *  - efter cuet har motståndarna bjudit minst ett kontraktsbud, vår sida inget,
+ *  - det är min tur.
+ * Returnerar min (fit-)färg, annars null.
+ */
+function overcallCueRaiseContested(
+  history: ResolvedCall[],
+  seat: Seat,
+): { ourStrain: string } | null {
+  const open = openingBid(history)
+  if (!open || open.strain === 'NT') return null
+  if (side(open.seat) === side(seat)) return null // MOTSTÅNDARNA öppnade
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2) return null
+  const [mine, cue] = ourBids
+  if (mine.seat !== seat || cue.seat !== PARTNER[seat]) return null // JAG klev in, partnern cue-höjde
+  const mineCb = parseContractBid(mine.bid)!
+  const cueCb = parseContractBid(cue.bid)!
+  if (mineCb.strain === 'NT' || mineCb.strain === open.strain) return null // mitt inkliv = naturlig ny färg
+  // Partnerns bud = cue i en av MOTSTÅNDARNAS färger (aldrig min egen).
+  const oppStrains = new Set(
+    history
+      .filter((c) => side(c.seat) !== side(seat))
+      .map((c) => parseContractBid(c.bid)?.strain)
+      .filter((st): st is string => !!st),
+  )
+  if (cueCb.strain === 'NT' || cueCb.strain === mineCb.strain || !oppStrains.has(cueCb.strain)) return null
+  // Efter cuet: motståndarna har bjudit vidare, vår sida ingenting, och det är min tur.
+  const cueIdx = history.indexOf(cue)
+  const afterCue = history.slice(cueIdx + 1)
+  if (!afterCue.some((c) => side(c.seat) !== side(seat) && parseContractBid(c.bid))) return null
+  if (afterCue.some((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))) return null
+  return { ourStrain: mineCb.strain }
+}
+
+/**
+ * Överklivaren tävlar efter partnerns cue-höjning när motståndarna bjudit vidare
+ * (felrapport #47). Cue-höjningen lovar minst en limithöjning i min färg → vår
+ * fit bär oss till minst 3-läget i färgen; jag säljer aldrig ut under den. Med
+ * EXTRA (6+ egen svit eller 14+ hp) sätter jag utgång i högfärg, annars tävlar
+ * jag billigast i vår färg (men klättrar inte till 4-läget utan utgångsvärden).
+ */
+function overcallerCompetesAfterCueRaise(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const info = overcallCueRaiseContested(history, seat)
+  if (!info) return null
+  const strain = info.ourStrain
+  const suit = SUIT_OF_LETTER[strain]
+  const hand = deal.hands[seat]
+  const isMajor = strain === 'H' || strain === 'S'
+  const legal = legalCalls(history, seat)
+  const cheapest = cheapestBidIn(history, seat, strain)
+  if (!cheapest || !legal.includes(cheapest)) return null
+  const cheapestLvl = parseContractBid(cheapest)!.level
+  const gameLvl = isMajor ? 4 : 5
+  const gameBid = `${gameLvl}${strain}` as Bid
+  const extra = lengths(hand)[suit] >= 6 || hcp(hand) >= 14
+  if (extra && cheapestLvl <= gameLvl && legal.includes(gameBid)) {
+    return {
+      seat, bid: gameBid, rule: 'överklivaren tävlar (cue-höjning)',
+      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; med en stark lång svit sätter jag utgång ${gameBid} i stället för att sälja given.`,
+    }
+  }
+  if (cheapestLvl <= 3) {
+    return {
+      seat, bid: cheapest, rule: 'överklivaren tävlar (cue-höjning)',
+      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jag tävlar ${cheapest} i vår fit i stället för att sälja given till motståndarna.`,
+    }
+  }
+  return null
+}
+
 // ---- Off-book: motståndarnas riktiga inkliv (§7-försvaret in i budlådan) -----
 //
 // När den kanoniska linjen inte modellerar motståndarnas konkurrens tystnade de
@@ -4241,6 +4321,12 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).
   { id: 'overcallerRaiseAdvance', before: ['offBookResponse'],
     run: (c) => overcallerRaiseAdvance(c.deal, c.history, c.seat) },
+  // Överklivaren tävlar efter partnerns CUE-HÖJNING när motståndarna bjudit
+  // vidare över cuet (felrapport #47): en cue-höjning i vår färg + egen svit
+  // säljs aldrig ut under fiten. answerCueRaise täcker bara öppnaren i lugnt
+  // läge. Måste ligga FÖRE off-book-svaret (som annars passar).
+  { id: 'overcallerCompetesAfterCueRaise', before: ['offBookResponse'],
+    run: (c) => overcallerCompetesAfterCueRaise(c.deal, c.history, c.seat) },
   // Svararen PLACERAR kontraktet efter öppnarens NMF-svar (§5.7, steg 3).
   // Måste ligga FÖRE off-book-svaret (som annars vägrar re-höja svararens egen
   // högfärg och passar en klar 5-3-fit).

@@ -215,6 +215,26 @@ describe('utspel hål A+G – budgivningen styr', () => {
     expect(card.suit).not.toBe('spades')
   })
 
+  // Felrapport #46 (github.com/PGreen90/Learn-Bridge/issues/46): bricka 6, 1NT av S.
+  // Väst ♠62 ♥A4 ♦KQ96532 ♣Q2 mot 1NT; Syd öppnade 1♦, Nord bjöd 1♠. Motorn ledde
+  // ♥A (från Ax) för att undvika Syds ruter — men en 7-korts KQ-svit ÄR utspelet mot
+  // sang även om spelföraren bjudit färgen. Facit FÖRE fix: ♦K (topp av KQ-sekvensen).
+  it('#46 – stark lång färg leds mot NT även om motståndaren bjudit den (♦K, ej ♥A)', () => {
+    const hand: Hand = [
+      C('spades', '6'), C('spades', '2'),
+      C('hearts', 'A'), C('hearts', '4'),
+      C('diamonds', 'K'), C('diamonds', 'Q'), C('diamonds', '9'), C('diamonds', '6'),
+      C('diamonds', '5'), C('diamonds', '3'), C('diamonds', '2'),
+      C('clubs', 'Q'), C('clubs', '2'),
+    ]
+    const calls = [
+      call('S', '1D'), call('W', 'pass'), call('N', '1S'), call('E', 'pass'),
+      call('S', '1NT'), call('W', 'pass'), call('N', 'pass'), call('E', 'pass'),
+    ]
+    const st = state({ trump: null, level: 1, declarer: 'S', seat: 'W', leader: 'W', hand })
+    expect(botCardSmart(st, 'W', calls)).toEqual(C('diamonds', 'K'))
+  })
+
   // Hål D: singel för ruff när trumfen är kort (kan ruffa, ingen trumfkontroll).
   it('hål D – leder singeln för ruff (korta trumf) före en säker lång färg', () => {
     const hand: Hand = [
@@ -507,6 +527,38 @@ describe('aldrig ruffa partnerns vinnande stick', () => {
       hand: [C('spades', '2'), C('clubs', '3')],
     })
     expect(botCard(s, 'N')).toEqual(C('clubs', '3'))
+  })
+})
+
+// Felrapport #48 (github.com/PGreen90/Learn-Bridge/issues/48): bricka 1, 3♥ av Ö.
+// Trumf hjärter: dummy V ♥AQJT5, spelföraren Ö ♥K86432 = ALLA honnörer, bara ♥97
+// ute (Nord). Ö ledde låg ♥6 i stick 3 och V (dummy) följde med låg ♥5 (tumregeln
+// "partnern vinner redan → kasta lågt") → Nords ♥7 vann ett trumfstick helt i
+// onödan. Spelförarsidan ser BÅDA sina händer och får inte gömma sig bakom
+// partnerns SLAGBARA kort: V går upp med ♥10 (billigaste kort som vinner över
+// Nords utestående 9/7) och trumfsticket räddas. FACIT FÖRE FIX.
+describe('felrapport #48 – spelförarsidan gömmer sig inte bakom partnerns slagbara kort', () => {
+  const deal: Deal = {
+    id: 'felrapport-48', board: 1, dealer: 'N', vulnerability: 'none',
+    hands: {
+      N: parseHand('S:QJ4 H:97 D:T9542 C:QJ8'),
+      E: parseHand('S:A5 H:K86432 D:87 C:K62'),
+      S: parseHand('S:KT98732 H:- D:KQ63 C:A3'),
+      W: parseHand('S:6 H:AQJT5 D:AJ C:T9754'),
+    },
+  }
+
+  it('stick 3: Ö leder ♥6, S sakar ♠2 → V (dummy) vinner med ♥10, inte ♥5', () => {
+    let s = startPlay(deal, { declarer: 'E', strain: 'hearts', level: 3 })
+    // Stick 1–2 + Ö:s ♥6 och S:s ♠2 i stick 3, exakt som i rapporten:
+    const pre: [Suit, Rank][] = [
+      ['diamonds', 'K'], ['diamonds', 'J'], ['diamonds', '5'], ['diamonds', '7'], // stick 1 (S vinner)
+      ['spades', '10'], ['spades', '6'], ['spades', '4'], ['spades', 'A'],         // stick 2 (Ö vinner)
+      ['hearts', '6'], ['spades', '2'],                                            // stick 3: Ö leder, S sakar
+    ]
+    for (const [su, r] of pre) s = playCard(s, { suit: su, rank: r })
+    expect(s.toAct).toBe('W')
+    expect(botCard(s, 'W')).toEqual(C('hearts', '10'))
   })
 })
 

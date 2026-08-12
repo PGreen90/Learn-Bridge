@@ -872,6 +872,30 @@ describe('felrapport #16 – öppnaren måste svara partnerns cue-höjning', () 
   })
 })
 
+// Felrapport #47 (github.com/PGreen90/Learn-Bridge/issues/47): bricka 9, giv N.
+// Syd öppnade 1♥, Väst klev in 1♠ (♠AKQ8654 – 7 solida spader), Öst cue-bjöd 2♥
+// (= minst limithöjning i spader). Syd konkurrerade 3♥ INNAN Väst hann svara på
+// cuet, och Väst PASSADE — sålde given. En cue-höjning i vår färg + egen stark
+// lång svit får aldrig säljas ut under fiten; Väst tävlar 4♠ (extra: 7-korts svit).
+// answerCueRaise/partnerCueRaiseToAnswer täcker bara ÖPPNAREN i lugnt läge — här
+// är budaren ÖVERKLIVAREN och motståndarna har bjudit vidare över cuet.
+describe('felrapport #47 – överklivaren tävlar efter cue-höjning + motståndarnas 3♥', () => {
+  const deal = dealOf('N', {
+    N: 'S:JT3 H:JT64 D:QJ73 C:83',
+    E: 'S:972 H:K D:64 C:AJ97654',
+    S: 'S:- H:A987532 D:A98 C:KQT',
+    W: 'S:AKQ8654 H:Q D:KT52 C:2',
+  })
+
+  it('P–P–1♥–1♠–P–2♥–3♥: Väst bjuder 4♠, säljer inte given', () => {
+    const history = [
+      call('N', 'P'), call('E', 'P'), call('S', '1H'), call('W', '1S'),
+      call('N', 'P'), call('E', '2H'), call('S', '3H'),
+    ]
+    expect(decideCall(deal, history, 'W').bid).toBe('4S')
+  })
+})
+
 // Felrapport #18 (github.com/PGreen90/Learn-Bridge/issues/18): bricka 15,
 // Syd öppnar svag 2♠. Väst (♠T9 ♥AJT64 ♦T ♣J9752, 6 hp) cue-bjöd 3♠ som "stark
 // tvåfärg" (5-5) UTAN poänggolv och spelade sedan cuet i deras färg (6 bet).

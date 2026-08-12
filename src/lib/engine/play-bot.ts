@@ -483,13 +483,24 @@ function openingLeadWithAuction(cards: Hand, trump: Suit | null, info: AuctionLe
 
   if (trump === null) {
     const nonOpp = groups.filter((g) => !isOpp(g))
-    const pool = nonOpp.length > 0 ? nonOpp : groups
-    const avoided = nonOpp.length > 0 && nonOpp.length < groups.length
+    const best = bestByLenStrengthMajor(groups)
+    const bestNonOpp = nonOpp.length > 0 ? bestByLenStrengthMajor(nonOpp) : best
+    // Att undvika motståndarnas bjudna färg är en TUMREGEL, inte en lag: en egen
+    // stark LÅNG färg (6+, eller 5+ med en ledbar honnörssekvens) är själva
+    // stickkällan mot sang och leds även om spelföraren bjudit den (felrapport
+    // #46: KQ96532 mot 1♦-öppnarens sang). Undvik-regeln gäller bara när den
+    // objudna färgen inte är klart sämre – annars slår längden/styrkan igenom.
+    const strongLong = best.length >= 6 || (best.length >= 5 && honorLead(best) !== null)
+    const överstyr = isOpp(best) && strongLong && best.length > bestNonOpp.length
+    const chosen = isOpp(best) && !överstyr ? bestNonOpp : best
+    const avoided = chosen !== best
     return {
-      card: leadFromSuit(bestByLenStrengthMajor(pool)),
-      reason: avoided
-        ? 'Utspel mot NT: min längsta/starkaste färg som motståndarna INTE bjudit.'
-        : 'Utspel mot NT: min längsta och starkaste färg.',
+      card: leadFromSuit(chosen),
+      reason: överstyr
+        ? 'Utspel mot NT: min långa, starka färg – den är min stickkälla, så jag leder den även om motståndarna bjudit den.'
+        : avoided
+          ? 'Utspel mot NT: min längsta/starkaste färg som motståndarna INTE bjudit.'
+          : 'Utspel mot NT: min längsta och starkaste färg.',
     }
   }
 
@@ -675,6 +686,65 @@ function establishLongSuit(state: PlayState, seat: Seat, legal: Hand): CardChoic
   }
 }
 
+const ALL_RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
+/**
+ * Spelförarsidan (som lagligt ser BÅDA sina händer) ska inte gömma sig bakom
+ * partnerns SLAGBARA kort (felrapport #48). När partnern "vinner" sticket men en
+ * motståndare som spelar EFTER mig kan gå över kortet, går jag själv upp med det
+ * billigaste kort som säkert vinner – i stället för att kasta lågt och skänka
+ * bort sticket. Bara spelförarsidan (dummy syns – ingen kik) och bara när det är
+ * BEVISBART att de slående korten ligger hos en motståndare som ännu inte spelat:
+ * varje motståndare som redan lagt till sticket måste vara renons i ledd färg
+ * (annars kan det höga kortet ligga hos dem och partnern vinner ändå). null =
+ * regeln gäller inte → den vanliga "kasta lågt bakom partnern" står kvar.
+ */
+function winOverBeatablePartner(
+  state: PlayState,
+  seat: Seat,
+  legal: Hand,
+  led: Suit,
+  bestCard: Card,
+): CardChoice | null {
+  if (side(seat) !== side(state.contract.declarer)) return null // bara spelförarsidan ser båda händer
+  const trump = state.trump
+  const SEATS_ALL: Seat[] = ['N', 'E', 'S', 'W']
+  const yetToPlayOpps = SEATS_ALL.filter(
+    (s) => side(s) !== side(seat) && !state.currentTrick.some((pc) => pc.seat === s),
+  )
+  if (yetToPlayOpps.length === 0) return null // ingen motståndare kvar → partnern vinner säkert
+  // Har en REDAN spelad motståndare följt ledd färg? Då kan ett slående kort ligga
+  // kvar hos dem (de kan ha maskat) och partnern vinner ändå → avstå (konservativt).
+  if (state.currentTrick.some((pc) => side(pc.seat) !== side(seat) && pc.card.suit === led)) return null
+  // Utestående kort i ledd färg = alla rangar minus dem spelförarsidan ser (båda
+  // egna händer + spelade kort). Med vakten ovan ligger de hos en kvarvarande
+  // motståndare.
+  const partner = PARTNER_SEAT[seat]
+  const seenLed = new Set<Rank>()
+  for (const c of playedCards(state)) if (c.suit === led) seenLed.add(c.rank)
+  for (const c of state.hands[seat]) if (c.suit === led) seenLed.add(c.rank)
+  for (const c of state.hands[partner]) if (c.suit === led) seenLed.add(c.rank)
+  const oppLed: Card[] = ALL_RANKS.filter((r) => !seenLed.has(r)).map((r) => ({ suit: led, rank: r }))
+  if (!oppLed.some((o) => beats(o, bestCard, led, trump))) return null // partnern vinner säkert
+  // Ruffrisk (trumfkontrakt, ledd ≠ trumf): en kvarvarande motståndare renons i
+  // ledd färg kan trumfa min vinnare → jag kan inte garantera sticket.
+  if (trump !== null && led !== trump) {
+    const voids = shownVoids(state)
+    if (yetToPlayOpps.some((s) => voids[s].has(led))) return null
+  }
+  // Billigaste egna kort som slår partnerns kort OCH alla utestående i ledd färg.
+  const mineWin = legal.filter(
+    (c) => beats(c, bestCard, led, trump) && oppLed.every((o) => beats(c, o, led, trump)),
+  )
+  if (mineWin.length === 0) return null
+  return {
+    card: lowest(mineWin),
+    reason:
+      'Partnerns kort kan slås av en motståndare som spelar efter mig – jag går själv ' +
+      'upp med det billigaste kort som säkert vinner sticket i stället för att släppa det.',
+  }
+}
+
 /**
  * Tumregel-valet MED förklaring. Samma logik som `botCard` men returnerar också
  * en klartextsmotivering ("Varför?"). Beskrivningarna följer nybörjardoktrinen.
@@ -760,6 +830,11 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
 
   // Partnern leder redan sticket → slösa inte, kasta lågt (ruffa aldrig partnern).
   if (side(bestSeat) === side(seat)) {
+    // …MEN spelförarsidan gömmer sig inte bakom partnerns SLAGBARA kort: kan en
+    // motståndare som spelar efter mig gå över, går jag själv upp och vinner
+    // billigast (felrapport #48).
+    const winOver = winOverBeatablePartner(state, seat, legal, led, bestCard)
+    if (winOver) return winOver
     const guarded = guardedDiscard(state, seat, legal)
     if (guarded) return { card: guarded, reason: guardReason }
     const lav = signalsOn ? defenderFirstDiscardSignal(state, seat, legal) : null
