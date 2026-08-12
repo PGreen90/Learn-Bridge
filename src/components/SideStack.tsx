@@ -10,10 +10,15 @@ import type { RegisterCardEl } from '../pages/play/useCardFlight'
 export function SideStack({
   cards,
   side,
+  xl = false,
   registerCardEl,
 }: {
   cards: Card[]
   side: 'W' | 'E'
+  /** Omspelningen: fasta xl-kort (64×96, kortstorleksregeln 2026-08-02) på ALLA
+   *  skärmbredder — vridet tar kortet 96×64, remsan 24 px. Budvisningen (Spela)
+   *  behåller default-storleken. */
+  xl?: boolean
   /** Kortflygningens ref-register (etapp 3) — bara spelvyn skickar den;
    *  omspelningen och budträningen flyger inga kort. */
   registerCardEl?: RegisterCardEl
@@ -30,18 +35,21 @@ export function SideStack({
   // Kortet är större på mobil (`smPlus` = 40×56 → vridet 56×40) och krymper till
   // `sm` (28×40 → vridet 40×28) från `sm:`-brytpunkten. Wrapper-måtten och
   // överlappet (-mt) följer med responsivt så indexremsan blir lika bred.
+  const kolumn = xl ? 'w-24' : 'w-14 sm:w-10'
+  const ruta = xl ? 'h-16 w-24' : 'h-10 w-14 sm:h-7 sm:w-10'
+  const överlapp = xl ? '-mt-10' : '-mt-7 sm:-mt-4'
   return (
-    <div className="flex w-14 shrink-0 flex-col items-center sm:w-10">
+    <div className={`flex shrink-0 flex-col items-center ${kolumn}`}>
       {cards.map((c, i) => (
         <div
           key={`${c.suit}${c.rank}`}
-          className={`relative flex h-10 w-14 items-center justify-center sm:h-7 sm:w-10 ${i > 0 ? '-mt-7 sm:-mt-4' : ''}`}
+          className={`relative flex items-center justify-center ${ruta} ${i > 0 ? överlapp : ''}`}
           style={side === 'E' ? { zIndex: cards.length - i } : undefined}
         >
           <PlayingCard
             ref={registerCardEl?.(`${c.suit}${c.rank}`)}
             card={c}
-            size="smPlus"
+            size={xl ? 'xl' : 'smPlus'}
             className={side === 'E' ? '-rotate-90' : 'rotate-90'}
           />
         </div>

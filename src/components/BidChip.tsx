@@ -30,14 +30,24 @@ export function BidChipContent({ bid }: { bid: Bid }) {
   )
 }
 
-/** Ett lagt bud som litet chip (auktionsrutnätet). */
-export function BidChip({ bid, className = '' }: { bid: Bid; className?: string }) {
+/** Ett lagt bud som litet chip (auktionsrutnätet). `small` = det täta läget i
+ *  omspelningens auktion (AuctionGrid dense): mindre platta + mindre text. */
+export function BidChip({
+  bid,
+  className = '',
+  small = false,
+}: {
+  bid: Bid
+  className?: string
+  small?: boolean
+}) {
   const isCall = bid === 'P' || bid === 'X' || bid === 'XX'
+  const mått = small
+    ? `min-w-7 px-1 py-0 ${isCall ? 'text-[10px]' : 'text-xs'}`
+    : `min-w-9 px-1.5 py-0.5 ${isCall ? 'text-xs' : 'text-sm'}`
   return (
     <span
-      className={`inline-flex min-w-9 items-center justify-center rounded-md px-1.5 py-0.5 font-bold shadow-sm ${
-        isCall ? 'text-xs' : 'text-sm'
-      } ${bidChipTone(bid)} ${className}`}
+      className={`inline-flex items-center justify-center rounded-md font-bold shadow-sm ${mått} ${bidChipTone(bid)} ${className}`}
     >
       <BidChipContent bid={bid} />
     </span>

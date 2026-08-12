@@ -34,10 +34,11 @@ const SIZES: Record<Size, { box: string; rank: string; pip: string; acePip: stri
     pip: 'text-3xl sm:text-xl',
     acePip: 'text-4xl sm:text-2xl',
   },
-  // `xl` = HÄNDERNAS kort på spelbordet (Syd, Nord och V/Ö-högarna) — FAST
-  // 64×96 i alla vyer och på alla skärmbredder (ägarbeslut 2026-08-02: en fast
-  // storlek oavsett vy och väderstreck; 2:3-proportionen ligger närmast ett
-  // riktigt bridgekort, ~0,64). Krymper INTE på desktop.
+  // `xl` = HÄNDERNAS kort på spelbordet OCH i omspelningen (Syd, Nord och
+  // V/Ö-högarna/staplarna) — FAST 64×96 i alla vyer och på alla skärmbredder
+  // (ägarbeslut 2026-08-02: en fast storlek oavsett vy och väderstreck;
+  // 2:3-proportionen ligger närmast ett riktigt bridgekort, ~0,64). Krymper
+  // INTE på desktop. Omspelningen följer regeln sedan 2026-08-12.
   xl: {
     box: 'w-16 h-24 rounded-lg',
     rank: 'text-lg',
