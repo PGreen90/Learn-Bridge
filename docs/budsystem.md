@@ -1436,6 +1436,18 @@ Lagen: med **9 gemensamma trumf** är 3-läget säkert att tävla till (om det b
 deras kontrakt oftast att gå hem). Ett **1-läges** inkliv (bara 5+ lovad) kräver
 fortfarande **4-korts** stöd för samma fit.
 
+**Överklivaren säljer inte heller ut efter partnerns cue-höjning (felrapport #47):**
+speglingen av regeln ovan. Cue-budade advancern deras färg (limithöjning eller
+bättre i din färg) och konkurrerade motståndarna sedan vidare **innan** du hann
+svara cuet — t.ex. **1♥–(1♠)–P–(2♥\*)–3♥** där 2♥\* är advancerns spaderhöjning — får
+du **aldrig passa** och lämna given: cue-höjningen har redan lovat fiten.
+
+| Överklivarens bud över deras konkurrens | Betydelse |
+|---|---|
+| **utgång** i din färg (t.ex. 4♠) | extra: **egen 6+ svit** eller **14+ hp** – sätt utgång i stället för att sälja |
+| **billigaste egna färg** (t.ex. 3♠) | minimuminkliv – tävla upp till fiten (ej krav), aldrig sälj ut under den |
+| Pass | bara om din färg redan pressats till 4-läget utan utgångsvärden |
+
 **Höjning mot en partner som just PASSAT (fel färg-spåret fix 6):** har partnern
 senast **passat** i en störd auktion har hen visat minimum utan utgångsintresse.
 Alla höjningar av partnerns färg är då bara **tävlande** — billigaste nivån,
@@ -1914,6 +1926,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-12 (felrapport #47)** – **Överklivaren säljer inte ut efter partnerns
+  cue-höjning (kod §7.1).** Väst klev in 1♠ (♠AKQ8654), Öst cue-höjde 2♥ (spaderstöd),
+  Syd konkurrerade 3♥ **innan** Väst hann svara cuet — och Väst **passade**, sålde
+  given. `answerCueRaise`/`partnerCueRaiseToAnswer` täckte bara ÖPPNAREN i lugnt läge
+  (bara pass efter cuet); det fanns ingen hanterare för **överklivaren** när
+  motståndarna bjudit vidare → naket pass. Ny detektor `overcallerCompetesAfterCueRaise`
+  (`auction-live.ts`): efter cue-höjning + konkurrens sätter överklivaren utgång med
+  extra (egen 6+ svit eller 14+ hp), annars tävlar hon billigast i fiten — aldrig sälj
+  ut under den (§7.1-tabellen "Överklivaren säljer inte heller ut …"). Facit FÖRE fix:
+  `auction-live.test.ts` ("#47 – överklivaren tävlar efter cue-höjning + motståndarnas
+  3♥", Väst → 4♠). Hela sviten grön (`npm test`), 0 regressioner.
 - **2026-08-08 (F6: stark 17+ enfärg efter två bjudna färger + tvåfärgsinkliv i
   linjen, C5/C14)** – **Körordningens sista punkt.** **(C5)** Den starka
   enfärgshanden (17+ hp, egen 5+ objuden färg) upplysningsdubblar nu även när
