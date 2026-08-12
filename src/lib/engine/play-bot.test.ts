@@ -248,6 +248,33 @@ describe('utspel hål A+G – budgivningen styr', () => {
     expect(botCardSmart(st, 'W', calls)).toEqual(C('hearts', '4'))
   })
 
+  // Speldiagnosen fynd 6 (frö 20260807): trumfutspelsregeln räknade
+  // motståndarnas CUE-BUD som en bjuden färg — "3+ färger = korsruff-läge"
+  // triggade på en vanlig Jacoby-höjning (1♠ … 4♦ sidofärg + 4♥ KONTROLLBUD).
+  // Ett cue-bud visar en kontroll, ingen egen längd, och försvararen hör det i
+  // budförklaringen → det räknas INTE som bjuden färg. Med bara två riktiga
+  // färger väljs det passiva sidofärgsutspelet. Facit FÖRE fix.
+  it('fynd 6 – cue-bud räknas inte som bjuden färg (ingen korsruff-trigger)', () => {
+    const hand: Hand = [
+      C('spades', '9'), C('spades', '7'), C('spades', '3'),
+      C('hearts', 'J'), C('hearts', '10'), C('hearts', '9'), C('hearts', '8'), C('hearts', '2'),
+      C('diamonds', '8'), C('diamonds', '6'), C('diamonds', '2'),
+      C('clubs', '5'), C('clubs', '4'),
+    ]
+    const calls: ResolvedCall[] = [
+      { seat: 'E', bid: '1S' }, { seat: 'S', bid: 'pass' },
+      { seat: 'W', bid: '2NT', rule: 'Jacoby 2NT' }, { seat: 'N', bid: 'pass' },
+      { seat: 'E', bid: '4D', rule: 'Jacoby: sidofärg' }, { seat: 'S', bid: 'pass' },
+      { seat: 'W', bid: '4H', rule: 'cue-bid' }, { seat: 'N', bid: 'pass' },
+      { seat: 'E', bid: '4S', rule: 'cue: avslut' }, { seat: 'S', bid: 'pass' },
+      { seat: 'W', bid: 'pass' }, { seat: 'N', bid: 'pass' },
+    ]
+    const st = state({ trump: 'spades', level: 4, declarer: 'E', seat: 'S', leader: 'S', hand })
+    // Utan cue-räkningen: bara ♠+♦ är bjudna → passivt utspel ur ♥J10982-
+    // sekvensen (inte trumf via korsruff-regeln).
+    expect(botCardSmart(st, 'S', calls)).toEqual(C('hearts', 'J'))
+  })
+
   // Hål C: trumfutspel i korsruff-läge (motståndarna bjöd 3+ färger) – mitten av 3 små.
   it('hål C – trumf i korsruff-läge (3 bjudna motståndarfärger) → mitten av 3 små', () => {
     const hand: Hand = [
@@ -440,6 +467,106 @@ describe('speldiagnos S0 – spelförarsidan ruffar i stället för att saka vin
       ],
     })
     expect(botCard(s, 'W')).toEqual(C('hearts', '7'))
+  })
+})
+
+// Speldiagnosen S2 (frö 20260731, stick 6): Nord (spelförare i 2♠) hade dragit
+// ♠A och ♠K när Öst sakade — all kvarvarande trumf (♠QT32) satt alltså
+// bevisligen hos Väst, ÖVER Nords ♠J76 och minst lika lång. Ändå ledde Nord
+// trumf ("längsta färgen") rakt in i den kända gaffeln och Väst vann billigt
+// två varv (−2 stick). En trumfled kan där aldrig dra ut mästartrumfen — boten
+// ska välja en sidofärg. Ärlig inferens: bara show-outen (shownVoids) + egna
+// sidans kort. Facit FÖRE fix.
+describe('speldiagnos S2 – led inte trumf in i en känd gaffel', () => {
+  const dragnaTrumfvarv: Trick[] = [
+    {
+      leader: 'N', winner: 'N',
+      cards: [
+        { seat: 'N', card: C('spades', 'A') }, { seat: 'E', card: C('spades', '4') },
+        { seat: 'S', card: C('spades', '5') }, { seat: 'W', card: C('spades', '8') },
+      ],
+    },
+    {
+      leader: 'N', winner: 'N',
+      cards: [
+        { seat: 'N', card: C('spades', 'K') }, { seat: 'E', card: C('hearts', '2') },
+        { seat: 'S', card: C('spades', '9') }, { seat: 'W', card: C('spades', '2') },
+      ],
+    },
+  ]
+
+  it('Öst sakade i trumf, ♠QT3 kvar bakom ♠J76 → leder INTE trumf', () => {
+    const s = state({
+      trump: 'spades', declarer: 'N', seat: 'N', leader: 'N',
+      completedTricks: dragnaTrumfvarv,
+      hand: [
+        C('spades', 'J'), C('spades', '7'), C('spades', '6'),
+        C('hearts', '7'), C('diamonds', 'K'), C('diamonds', '5'),
+        C('clubs', '8'), C('clubs', '5'),
+      ],
+      otherHands: {
+        S: [
+          C('hearts', 'J'), C('hearts', '10'), C('hearts', '9'),
+          C('diamonds', '7'), C('diamonds', '4'), C('diamonds', '3'),
+          C('clubs', 'Q'), C('clubs', '4'),
+        ],
+      },
+    })
+    expect(botCard(s, 'N').suit).not.toBe('spades')
+  })
+
+  it('KQJ76 mot kortare känd trumf (A98) → att driva ut mästartrumfen är fortfarande rätt', () => {
+    // Show-outen har placerat A98 hos Väst — men vår trumf är LÄNGRE, så att
+    // leda trumf (driva ut esset, sen dra resten) är sund teknik och ska bestå.
+    const s = state({
+      trump: 'spades', declarer: 'N', seat: 'N', leader: 'N',
+      completedTricks: [
+        {
+          leader: 'N', winner: 'W',
+          cards: [
+            { seat: 'N', card: C('spades', '2') }, { seat: 'E', card: C('hearts', '2') },
+            { seat: 'S', card: C('spades', '3') }, { seat: 'W', card: C('spades', '4') },
+          ],
+        },
+      ],
+      hand: [
+        C('spades', 'K'), C('spades', 'Q'), C('spades', 'J'), C('spades', '7'), C('spades', '6'),
+        C('hearts', '7'), C('diamonds', 'K'), C('diamonds', '5'),
+      ],
+      otherHands: { S: [C('spades', '10'), C('spades', '5'), C('diamonds', '7'), C('diamonds', '4'), C('diamonds', '3'), C('clubs', 'Q'), C('clubs', '4'), C('clubs', '2')] },
+    })
+    expect(botCard(s, 'N').suit).toBe('spades')
+  })
+})
+
+// Speldiagnosen S2 (frö 20260730, stick 2): spelföraren Väst (4♥, ♥KJ982 på
+// handen) ledde ♥2 mot träkarlens ♥Q753; Nord la sexan och träkarlen valde ♥7 —
+// "vinn billigast". Sjuan föll för Syds tia, och damen dog senare under esset:
+// −2 stick. Spelförarsidan SER båda sina händer och ska värdera hela
+// färgkombinationen: bara A-10-4 är ute, så DAMEN tvingar esset och promoverar
+// K-J-9-8 (tian faller sen under en mask). Facit FÖRE fix.
+describe('speldiagnos S2 – tredje hand på spelförarsidan följer färgkombinationen', () => {
+  it('♥2 mot Q753 (KJ98 kvar hos partnern, A-10-4 ute) → damen, inte sjuan', () => {
+    const s = state({
+      trump: 'hearts', declarer: 'W', seat: 'E', leader: 'W',
+      completedTricks: [doneTrick()],
+      trick: [
+        { seat: 'W', card: C('hearts', '2') },
+        { seat: 'N', card: C('hearts', '6') },
+      ],
+      hand: [
+        C('hearts', 'Q'), C('hearts', '7'), C('hearts', '5'), C('hearts', '3'),
+        C('spades', 'Q'), C('spades', '8'), C('clubs', 'J'), C('clubs', '9'),
+      ],
+      otherHands: {
+        W: [
+          C('hearts', 'K'), C('hearts', 'J'), C('hearts', '9'), C('hearts', '8'),
+          C('spades', 'A'), C('spades', 'J'), C('diamonds', '9'), C('diamonds', '8'),
+          C('clubs', 'A'), C('clubs', '5'),
+        ],
+      },
+    })
+    expect(botCard(s, 'E')).toEqual(C('hearts', 'Q'))
   })
 })
 

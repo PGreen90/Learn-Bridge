@@ -9,6 +9,30 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Speldiagnosen S3 (2026-08-12) — cue-bud räknas inte som bjuden färg i utspelet
+- **Utspelslogiken hoppar cue-bud (frö 20260807, §8.3):** kontrollbud (regelnamn
+  "cue…") räknas inte längre som bjudna färger — korsruff-regeln triggar inte
+  på en Jacoby-höjning med sidofärg + kontrollbud, och cue-färgen undviks inte
+  som "deras färg". **Bevaka:** (a) leder boten nu in i en färg där cue-budet
+  faktiskt lovade ESSET och det straffar sig? (b) övriga konstgjorda bud
+  (Stayman-klövern, transfers, Jacoby-kortfärg) räknas MEDVETET fortfarande —
+  säg till om ett utspel känns styrt av en färg som aldrig visades på riktigt.
+
+## Speldiagnosen S2 (2026-08-12) — trumfdragningen (rapportens fynd 4–5)
+- **Led inte trumf in i en känd gaffel (frö 20260731):** när en sakning visat
+  att EN motståndare har all kvarvarande trumf, med toppen över vår och minst
+  lika lång som vår längsta trumfhand, leder spelförarsidan en sidofärg i
+  stället för trumf. Att driva ut en kortare mästartrumf (t.ex. KQJ76 mot
+  känt A98) är kvar. **Bevaka:** vägrar boten trumf i lägen där ett trumfvarv
+  ändå vore rätt (t.ex. för att klippa en korsruff)?
+- **Spelförarsidans tredje hand följer färgkombinationen (frö 20260730):**
+  träkarlen lägger nu damen ur Q753 mot KJ982 (tvingar esset, promoverar
+  resten) i stället för "billigaste vinnaren". Kortet byts bara när
+  simuleringen är strikt bättre — vanliga lägen orörda. **Bevaka:** offrar
+  boten honnörer i lägen där du hade spelat billigt? Simuleringen är
+  positionsneutral (vet inte VAR de osedda korten sitter), så tvåvägsgissningar
+  kan fortfarande gå åt fel håll — det är ärliga missar, inte fel.
+
 ## Speldiagnosen S1 (2026-08-12) — tre fixar ur S0-baslinjen
 - **Cue-svarets färg = exakt fyra (§7.3, frö 20260772):** advancern höjer inte
   längre dubbelton mot en cue-svars-färg, och cue-advancern dömer nu själv

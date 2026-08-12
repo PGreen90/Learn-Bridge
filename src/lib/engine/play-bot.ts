@@ -421,6 +421,12 @@ function analyzeAuctionForLead(calls: ResolvedCall[], seat: Seat): AuctionLeadIn
   const partnerSuits: Suit[] = []
   const oppSuits: Suit[] = []
   for (const c of calls) {
+    // Speldiagnosen fynd 6 (frö 20260807): ett CUE-BUD visar en kontroll (ess/
+    // renons), ingen egen längd — och varje försvarare hör det i förklaringen.
+    // Räkna det inte som bjuden färg: korsruff-regeln triggade annars på en
+    // vanlig Jacoby-höjning med sidofärg + kontrollbud. (Regelnamnen för alla
+    // kontrollbud börjar på "cue".)
+    if (c.rule !== undefined && c.rule.startsWith('cue')) continue
     const m = CONTRACT_BID_RE.exec(c.bid)
     if (!m) continue
     const suit = STRAIN_TO_SUIT[m[2]]
@@ -746,6 +752,98 @@ function winOverBeatablePartner(
 }
 
 /**
+ * Speldiagnosen S2 (frö 20260731, stick 6): Nord ledde trumf ur ♠J76 EFTER att
+ * Öst sakat i trumf — all kvarvarande trumf (♠QT32) satt alltså bevisligen hos
+ * Väst, med toppen ÖVER vår topp och minst lika lång som vår längsta trumfhand.
+ * Då kan en trumfled aldrig dra ut deras mästartrumf: varje varv skänker ett
+ * stick rakt in i den kända gaffeln (−2 stick uppmätt). Ärlig inferens: bygger
+ * bara på show-outen (`shownVoids`) och egna sidans kort. Att driva ut EN hög
+ * trumf (t.ex. KQJ76 mot känt A98) är fortfarande sund teknik — spärren kräver
+ * att den kända handens trumf är minst lika lång som vår längsta.
+ */
+function hopelessTrumpLead(state: PlayState, seat: Seat): boolean {
+  const trump = state.trump
+  if (trump === null) return false
+  if (side(seat) !== side(state.contract.declarer)) return false // ser båda händer
+  const voids = shownVoids(state)
+  const opps = (['N', 'E', 'S', 'W'] as Seat[]).filter((s) => side(s) !== side(seat))
+  if (opps.filter((o) => voids[o].has(trump)).length !== 1) return false // ingen känd samlad sits
+  const ours = visibleSeats(state, seat).map((v) => state.hands[v].filter((c) => c.suit === trump))
+  const ourAll = ours.flat()
+  if (ourAll.length === 0) return false // ingen trumf att leda
+  const seen = new Set<Rank>(ourAll.map((c) => c.rank))
+  for (const c of playedCards(state)) if (c.suit === trump) seen.add(c.rank)
+  const unseen = ALL_RANKS.filter((r) => !seen.has(r))
+  if (unseen.length === 0) return false
+  const topUnseen = Math.max(...unseen.map(rankVal))
+  const topOurs = Math.max(...ourAll.map((c) => rankVal(c.rank)))
+  return topUnseen > topOurs && unseen.length >= Math.max(...ours.map((h) => h.length))
+}
+
+/**
+ * Speldiagnosen S2 (frö 20260730, stick 2): spelföraren ledde ♥2 mot träkarlens
+ * ♥Q753 — och träkarlen la ♥7, "vinn billigast". Sjuan föll för tian och damen
+ * dog senare under esset (−2 stick). Spelförarsidan SER båda sina händer och
+ * kan värdera färgkombinationen ärligt: för varje möjlig vinnare simuleras
+ * sticket (motståndaren bakom vinner billigast över eller lägger lägst av de
+ * osedda korten) och resten av färgen räknas med `suitTricks`. Bara tredje hand
+ * på spelförarsidan (egen sida ledde mot mig, exakt en motståndare kvar bakom),
+ * och kortet byts bara när simuleringen är STRIKT bättre än gamla "billigaste
+ * vinnaren" — annars null (ingen beteendedrift i vanliga lägen).
+ */
+function declarerThirdHandSuitCard(
+  state: PlayState,
+  seat: Seat,
+  winners: Hand,
+  led: Suit,
+): Card | null {
+  if (side(seat) !== side(state.contract.declarer)) return null
+  if (state.currentTrick.length !== 2) return null // bara tredje hand
+  const candidates = winners.filter((c) => c.suit === led)
+  if (candidates.length !== winners.length || candidates.length < 2) return null // ruff/annat → gamla regeln
+  const SEATS_ALL: Seat[] = ['N', 'E', 'S', 'W']
+  const fourth = SEATS_ALL.find((s) => s !== seat && !state.currentTrick.some((pc) => pc.seat === s))!
+  // Ruffvakt: sidofärg där motståndaren bakom visat renons → simuleringen ljuger.
+  if (state.trump !== null && led !== state.trump && shownVoids(state)[fourth].has(led)) return null
+  const played = playedCards(state)
+  const ourInLed = visibleSeats(state, seat).flatMap((v) =>
+    state.hands[v].filter((c) => c.suit === led),
+  )
+  const seen = new Set<Rank>(ourInLed.map((c) => c.rank))
+  for (const c of played) if (c.suit === led) seen.add(c.rank)
+  const unseen = ALL_RANKS.filter((r) => !seen.has(r))
+  if (unseen.length === 0) return null // inget kan slå oss → billigaste vinnaren är rätt
+
+  // Simulerad totalsumma för färgen om jag lägger `c`: vinner vi sticket nu +
+  // suitTricks på resten (våra kvarvarande kort i färgen mot de osedda).
+  const total = (c: Card): number => {
+    const beatable = unseen.filter((r) => rankVal(r) > rankVal(c.rank))
+    const oppPlays = beatable.length > 0 ? Math.min(...beatable.map(rankVal)) : Math.min(...unseen.map(rankVal))
+    const wonNow = beatable.length === 0 ? 1 : 0
+    const ourRest = ourInLed
+      .filter((o) => o.rank !== c.rank)
+      .map((o) => o.rank)
+      .sort((a, b) => rankVal(b) - rankVal(a))
+    const oppRest = unseen
+      .filter((r) => rankVal(r) !== oppPlays)
+      .sort((a, b) => rankVal(b) - rankVal(a))
+    return wonNow + suitTricks(ourRest, oppRest)
+  }
+  const old = lowest(candidates)
+  const oldTotal = total(old)
+  let best: Card | null = null
+  let bestTotal = oldTotal
+  for (const c of candidates) {
+    const t = total(c)
+    if (t > bestTotal || (t === bestTotal && best !== null && rankVal(c.rank) < rankVal(best.rank))) {
+      best = c
+      bestTotal = t
+    }
+  }
+  return best // null = inget kort strikt bättre än billigaste vinnaren
+}
+
+/**
  * Tumregel-valet MED förklaring. Samma logik som `botCard` men returnerar också
  * en klartextsmotivering ("Varför?"). Beskrivningarna följer nybörjardoktrinen.
  */
@@ -808,6 +906,19 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
       return {
         card: unblockLead(state, seat, leadFromSuit(attack)),
         reason: 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.',
+      }
+    }
+    // Speldiagnosen S2 (frö 20260731): trumfled in i en KÄND gaffel undviks —
+    // en show-out har placerat all kvarvarande trumf hos en motståndare, över
+    // vår topp och minst lika lång. Välj då bland sidofärgerna i stället.
+    const nonTrump = state.trump !== null ? legal.filter((c) => c.suit !== state.trump) : []
+    if (nonTrump.length > 0 && hopelessTrumpLead(state, seat)) {
+      return {
+        card: unblockLead(state, seat, chooseLeadCard(nonTrump, state.trump)),
+        reason:
+          'Jag leder INTE trumf: sakningen visade att all kvarvarande trumf sitter samlad ' +
+          'bakom oss med toppen över vår – varje trumfvarv skänker ett stick rakt in i den ' +
+          'kända gaffeln. Jag spelar en sidofärg i stället.',
       }
     }
     return {
@@ -941,6 +1052,18 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
             'lägger min lägsta honnör och pressar fram hans, i stället för att ge honom ' +
             'sticket billigt med ett spotkort (men slösar aldrig en honnör högre än nödvändigt).',
         }
+      }
+    }
+    // Speldiagnosen S2 (frö 20260730): spelförarsidans tredje hand ser båda
+    // händerna och följer FÄRGKOMBINATIONEN (t.ex. damen ur Q753 mot KJ982 —
+    // inte "billigaste vinnaren" sjuan) när simuleringen är strikt bättre.
+    const combo = declarerThirdHandSuitCard(state, seat, winners, led)
+    if (combo) {
+      return {
+        card: combo,
+        reason:
+          'Jag ser båda våra händer och spelar färgkombinationen: det här kortet ger flest ' +
+          'stick i färgen totalt – att vinna billigast skulle skänka bort en honnör senare.',
       }
     }
     return { card: lowest(winners), reason: 'Jag vinner sticket så billigt som möjligt.' }

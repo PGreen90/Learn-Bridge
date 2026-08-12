@@ -1866,6 +1866,9 @@ styrka en **högfärg** (motståndarna stannar oftare för att kolla högfärger
    färger. Har den korta trumf och en **singel** leds singeln för en **ruff**;
    bjöd motståndarna 3+ färger (korsruff-läge) leds **trumf**; annars den säkraste
    objudna färgen. Trumfutspel: två/fyra små → lägsta, tre små → mitten.
+   **Cue-bud räknas inte som bjudna färger** (2026-08-12): ett kontrollbud visar
+   ess/renons, ingen längd — det hörs i budförklaringen och varken triggar
+   korsruff-regeln eller "undvik deras färg".
 
 Detta är den doktrin som ligger bakom att t.ex. ♠K-kn-8-4-3 leds passivt undan mot
 4♥ (led inte bort från gaffeln) men attackeras som längsta färg mot 3NT. Full
@@ -1937,6 +1940,18 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-12 (speldiagnosen S3: cue-bud räknas inte som bjuden färg i
+  utspelslogiken, §8.3)** – Trumfutspelsregeln ("motståndarna bjöd 3+ färger =
+  korsruff-läge") triggade på frö 20260807 fast auktionen var en vanlig
+  Jacoby-höjning: tredje "färgen" var kontrollbudet 4♥ (visar hjärteresset,
+  ingen längd — och varje försvarare hör det i förklaringen).
+  `analyzeAuctionForLead` (`play-bot.ts`) hoppar nu över bud vars regelnamn
+  börjar på "cue" när partnerns/motståndarnas bjudna färger samlas — cue-färgen
+  varken triggar korsruff-regeln eller undviks som "deras färg". Övriga
+  konstgjorda bud (Stayman-klövern, transfers, Jacoby-kortfärg) räknas
+  MEDVETET fortfarande (ofarligt för undvik-regeln; egen genomgång i
+  `docs/senare.md` vid behov). Facit FÖRE fix: `play-bot.test.ts` ("fynd 6 –
+  cue-bud räknas inte som bjuden färg"). Mätpunkt S3 i `docs/speldiagnos.md`.
 - **2026-08-12 (felrapport #47)** – **Överklivaren säljer inte ut efter partnerns
   cue-höjning (kod §7.1).** Väst klev in 1♠ (♠AKQ8654), Öst cue-höjde 2♥ (spaderstöd),
   Syd konkurrerade 3♥ **innan** Väst hann svara cuet — och Väst **passade**, sålde
