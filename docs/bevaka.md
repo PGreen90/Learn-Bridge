@@ -9,6 +9,23 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Speldiagnosen S4 (2026-08-13) — tävlingslarmens tre fixar (runda 4, brickorna 8+1)
+- **Trumfdragningsplanen (NYAST, bricka 1):** spelförarsidan drar nu trumf när
+  den kombinerade trumfen vinner styrkeprovet mot de osedda korten (även vid
+  jämnt prov — dragningen stoppar ruffarna); svag trumf drar inte, och
+  gaffel-vakten har företräde. **Bevaka:** (a) drar boten trumf när den BORDE
+  ruffa först (korta trumfens ruffvärde offras)? (b) dragningen leder från
+  handen som är inne — masktekniken "leda MOT kombinationen" är en känd
+  förenkling (−1 kvar på bricka 1) — känns den dum för ofta?
+- **Andra hand täcker billigt mot partnerns boss (bricka 8):** träkarlen lägger
+  8:an ur J1084 på ledd 7:a när spelföraren har AK bakom — gratis chans, sparar
+  bossen. Kräver äkta billigt försök (osett kort över täckningen) + ingen känd
+  renons emellan. **Bevaka:** bränns mellankort i lägen där lågt var rätt?
+- **Ruffa inte partnerns säkra stick (bricka 1):** spelförarsidan sakar i
+  stället för att ruffa när synliga partnern bevisligen vinner sticket (slår
+  utspelet + alla osedda kort, ingen visad renons emellan). **Bevaka:** sakas
+  det nu i lägen där ruffen ändå var bättre (t.ex. sista trumfen värdelös)?
+
 ## Speldiagnosen S3 (2026-08-12) — cue-bud räknas inte som bjuden färg i utspelet
 - **Utspelslogiken hoppar cue-bud (frö 20260807, §8.3):** kontrollbud (regelnamn
   "cue…") räknas inte längre som bjudna färger — korsruff-regeln triggar inte
