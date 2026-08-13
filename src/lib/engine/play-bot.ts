@@ -781,6 +781,49 @@ function hopelessTrumpLead(state: PlayState, seat: Seat): boolean {
 }
 
 /**
+ * Speldiagnosen runda 4 (tävling 2026-08-11 bricka 1, stick 2+5): DRA TRUMF.
+ * Tumregel-lagret hade ingen trumfdragningsplan alls — cash-regeln kräver en
+ * SÄKER vinnare, så med t.ex. ♦AJ94 mot ♦Q86 (kungen ute) körde spelföraren
+ * sidofärger tills motståndarna ruffade vinnarna. Styrkeprovet räknas ärligt:
+ * kombinerad trumf (båda synliga händerna) mot de osedda korten, varv för varv
+ * med samma neutrala modell som `suitTricks` — vinner vår sida MINST lika
+ * många varv som motståndarna är trumfdragning rätt plan (även ett jämnt
+ * styrkeprov dras: varven de vinner var deras ändå, och dragningen stoppar
+ * ruffarna — tävling 2026-08-11 bricka 1 släppte trumfen vid 2–2 och fick
+ * ♣K ruffad). Svag trumf (fler förlustvarv) drar inte, och gaffel-vakten
+ * (`hopelessTrumpLead`) har alltid företräde.
+ */
+function shouldDrawTrumps(state: PlayState, seat: Seat): boolean {
+  const trump = state.trump
+  if (trump === null) return false
+  if (side(seat) !== side(state.contract.declarer)) return false
+  const ours = visibleSeats(state, seat).flatMap((v) =>
+    state.hands[v].filter((c) => c.suit === trump),
+  )
+  if (ours.length === 0) return false
+  const seen = new Set<Rank>(ours.map((c) => c.rank))
+  for (const c of playedCards(state)) if (c.suit === trump) seen.add(c.rank)
+  const unseen = ALL_RANKS.filter((r) => !seen.has(r))
+  if (unseen.length === 0) return false // trumfen är redan dragen
+  const o = ours.map((c) => c.rank).sort((a, b) => rankVal(b) - rankVal(a))
+  const p = [...unseen].sort((a, b) => rankVal(b) - rankVal(a))
+  let wins = 0
+  let losses = 0
+  while (o.length > 0 && p.length > 0) {
+    if (rankVal(o[0]) > rankVal(p[0])) {
+      wins++ // vårt toppkort vinner varvet, de följer med sitt lägsta
+      o.shift()
+      p.pop()
+    } else {
+      losses++ // deras topp vinner — vi offrar vårt lägsta för att knäcka den
+      o.pop()
+      p.shift()
+    }
+  }
+  return wins >= losses
+}
+
+/**
  * Speldiagnosen S2 (frö 20260730, stick 2): spelföraren ledde ♥2 mot träkarlens
  * ♥Q753 — och träkarlen la ♥7, "vinn billigast". Sjuan föll för tian och damen
  * dog senare under esset (−2 stick). Spelförarsidan SER båda sina händer och
@@ -921,6 +964,21 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
           'kända gaffeln. Jag spelar en sidofärg i stället.',
       }
     }
+    // Speldiagnosen runda 4: trumfdragningsplanen — vinner vår kombinerade
+    // trumf styrkeprovet mot de osedda korten leds trumf (topp av sekvens,
+    // annars lågt mot partnerns kombination) tills motståndarnas trumf är slut.
+    if (
+      state.trump !== null &&
+      legal.some((c) => c.suit === state.trump) &&
+      shouldDrawTrumps(state, seat)
+    ) {
+      return {
+        card: leadFromSuit(legal.filter((c) => c.suit === state.trump)),
+        reason:
+          'Jag drar trumf: vår samlade trumf vinner styrkeprovet, så motståndarnas trumf ' +
+          'ska bort innan de hinner ruffa våra vinnare.',
+      }
+    }
     return {
       card: unblockLead(state, seat, chooseLeadCard(legal, state.trump)),
       reason:
@@ -994,9 +1052,70 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     if (side(seat) === side(state.contract.declarer) && state.trump !== null && led !== state.trump) {
       const myTrumps = legal.filter((c) => c.suit === state.trump)
       if (myTrumps.length > 0 && !legal.some((c) => c.suit === led)) {
-        return {
-          card: lowest(myTrumps),
-          reason: 'Jag är renons i den ledda färgen och ruffar lågt – trumfen vinner sticket i stället för att jag sakar bort en vinnare.',
+        // Speldiagnosen runda 4 (tävling 2026-08-11 bricka 1, stick 10): ruffa
+        // INTE när den SYNLIGA partnern (fjärde hand) bevisligen vinner sticket
+        // ändå — "ruffa aldrig partnerns stick" gäller även spelförarsidan.
+        // Ärligt krav: partnerns kort slår utspelskortet OCH varje osett kort i
+        // färgen, och motståndaren emellan har inte visat renons (kan inte
+        // ruffa framför partnern). Då sakas i stället (vakterna nedan).
+        const partner = PARTNER_SEAT[seat]
+        const third = PARTNER_SEAT[state.currentTrick[0].seat]
+        const seenLed = new Set<Rank>()
+        for (const c of playedCards(state)) if (c.suit === led) seenLed.add(c.rank)
+        for (const c of state.hands[partner]) if (c.suit === led) seenLed.add(c.rank)
+        const unseenLed = ALL_RANKS.filter((r) => !seenLed.has(r))
+        const partnerWins =
+          !shownVoids(state)[third].has(led) &&
+          state.hands[partner].some(
+            (c) =>
+              c.suit === led &&
+              rankVal(c.rank) > rankVal(state.currentTrick[0].card.rank) &&
+              unseenLed.every((r) => rankVal(c.rank) > rankVal(r)),
+          )
+        if (!partnerWins) {
+          return {
+            card: lowest(myTrumps),
+            reason: 'Jag är renons i den ledda färgen och ruffar lågt – trumfen vinner sticket i stället för att jag sakar bort en vinnare.',
+          }
+        }
+      }
+    }
+    // Speldiagnosen runda 4 (tävling 2026-08-11 bricka 8, stick 1): ANDRA hand
+    // på spelförarsidan täcker BILLIGT när den synliga partnern (fjärde hand)
+    // har boss i den ledda färgen (♦J1084 lägger 8:an på ledd 7:a när partnern
+    // håller AK2). Insatsen är gratis: slås täckningen över vinner partnerns
+    // boss ändå; slås den inte är sticket vunnet OCH partnerns boss sparad.
+    // Vakter: bara ett ÄKTA billigt försök (minst ett osett kort över täckningen
+    // — ett ensamt säkert kort läggs fortfarande lågt, hold-up-doktrinen består)
+    // och ingen känd renons hos mellanliggande motståndaren (ruffrisk).
+    if (side(seat) === side(state.contract.declarer)) {
+      const myInLed = legal.filter((c) => c.suit === led)
+      const covers = myInLed.filter((c) => rankVal(c.rank) > rankVal(state.currentTrick[0].card.rank))
+      if (covers.length > 0) {
+        const partner = PARTNER_SEAT[seat]
+        const third = PARTNER_SEAT[state.currentTrick[0].seat]
+        const ruffRisk =
+          state.trump !== null && led !== state.trump && shownVoids(state)[third].has(led)
+        const seenLed = new Set<Rank>()
+        for (const c of playedCards(state)) if (c.suit === led) seenLed.add(c.rank)
+        for (const c of state.hands[seat]) if (c.suit === led) seenLed.add(c.rank)
+        for (const c of state.hands[partner]) if (c.suit === led) seenLed.add(c.rank)
+        const unseenLed = ALL_RANKS.filter((r) => !seenLed.has(r))
+        const cover = lowest(covers)
+        const genuineTry = unseenLed.some((r) => rankVal(r) > rankVal(cover.rank))
+        const partnerBoss = state.hands[partner].some(
+          (c) =>
+            c.suit === led &&
+            rankVal(c.rank) > rankVal(state.currentTrick[0].card.rank) &&
+            unseenLed.every((r) => rankVal(c.rank) > rankVal(r)),
+        )
+        if (!ruffRisk && genuineTry && partnerBoss) {
+          return {
+            card: cover,
+            reason:
+              'Andra hand på spelförarsidan: jag täcker billigt – partnern har ändå boss bakom, ' +
+              'så kortet kostar inget men kan vinna sticket gratis och sparar partnerns honnör.',
+          }
         }
       }
     }

@@ -19,12 +19,13 @@ universum) · repro-dumpen (`DUMP_SPEL`) · tävlingsförscreeningen
 (`TAVLING_DIAG`; `DAILY_SEED_SECRET` i `.env.local` — ALDRIG i spårade `.env`)
 · `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — larm
 klassas systemfel/ärlig miss/oklart i `/speldiagnos`; bara systemfel lagas,
-efter ägarens ja. **S0–S3 körda, sex fixar landade 2026-08-12** (S-serien i
-`docs/speldiagnos.md`): S2 = trumfled ej in i känd gaffel + tredje hand
-följer färgkombinationen; S3 = cue-bud räknas inte som bjuden färg i
-utspelet (§8.3); tävlingsspeldumpen byggd (`DUMP_TAVLING=<datum>:<bricka>`).
-**NÄSTA GÅNG: granska tävlingslarmen** (2026-08-11 bricka 8/1) med nya
-dumpen. Bevakat: MC-urfallet (20260772/20260731).
+efter ägarens ja. **S0–S4 körda, nio fixar landade 2026-08-12/13** (S-serien
+i `docs/speldiagnos.md`): senast S4 = tävlingslarmens tre (ruffvakten ·
+andra hand täcker billigt · trumfdragningsplanen; spelförarflaggorna
+342→307 = seriens största lyft; bricka 8: 6→4, bricka 1: 5→3).
+Tävlingsspeldumpen: `DUMP_TAVLING=<datum>:<bricka>`. **NÄSTA GÅNG: ägarens
+val** — kandidater: MC-urfallet (bevakat, 20260772/20260731) · masktekniken
+i trumfdragningen (SENARE) · förscreena nästa tävlingsdag.
 
 ---
 
@@ -105,19 +106,19 @@ seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 > visshet. Detalj: budsystem.md §5.2/§5.7/§6 + `docs/historik.md`.
 
 ### 👀 Bevaka i spel — de tre senaste
+- **Speldiagnosen S4 (2026-08-13):** trumfdragningsplanen (drar den när RUFF
+  var rätt plan? riktningen/masken är känd förenkling) · andra hand täcker
+  billigt mot partnerns boss (bränns mellankort i onödan?) · ruffvakten
+  (sakas det när ruffen ändå var bäst?).
+> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
+> säger att något känns fel i spel, eller när en ny fix ska läggas till.
+- **Speldiagnosen S3 (2026-08-12):** cue-bud räknas inte som bjuden färg i
+  utspelet (leds det nu in i en färg där cuet lovade ESSET och straffar sig?).
 - **Speldiagnosen S2 (2026-08-12):** trumfled vägras in i känd gaffel (vägrar
   den när ett trumfvarv ändå vore rätt?) · spelförarsidans tredje hand följer
   färgkombinationen (offras honnörer där du spelat billigt? positionsneutral
   → tvåvägsgissningar kan gå fel = ärliga missar).
-> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
-> säger att något känns fel i spel, eller när en ny fix ska läggas till.
-- **Speldiagnosen S1 (2026-08-12):** cue-svarets färg = exakt 4 (§7.3, ingen
-  dubbeltonhöjning; cue-advancern dömer 3NT/utgång själv) · säkra vinnaren
-  måste slå det som ligger · spelförarsidan ruffar i stället för att saka.
   KÄND KVARSTÅENDE: MC föll ur (sampleLayouts 0 lägen; 20260772/20260731).
-- **F6 starka X:et efter två färger (2026-08-08):** 17+ med 5+ objuden färg
-  dubblar efter 1♦–P–1♥ och färgar nästa varv. Landar fortsättningen lagom
-  mot en tom advancer? 4-4-X:et är MEDVETET live-only — säljs givar där?
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **Beslut B etapp 2 forts.** — klientfasen: wira in tävlingen i appen, inskick,

@@ -570,6 +570,180 @@ describe('speldiagnos S2 – tredje hand på spelförarsidan följer färgkombin
   })
 })
 
+// Speldiagnosen runda 4 (tävling 2026-08-11 bricka 1, stick 10): Syd ledde ♥6.
+// Väst (spelförare, renons i hjärter) RUFFADE med ♦9 — fast träkarlens ♥Q låg
+// SYNLIGT bakom och bevisligen vann sticket gratis (varje osedd hjärter var
+// lägre). S1-regeln "ruffa i stället för att saka" saknade vakten "synlig
+// partner vinner redan sticket" — doktrinen "ruffa aldrig partnerns stick"
+// gäller även här. Ärligt krav: partnerns kort slår utspelet OCH alla osedda
+// kort i färgen, och motståndaren emellan har inte visat renons. Facit FÖRE fix.
+describe('speldiagnos runda 4 – ruffa inte när synliga partnern redan vinner sticket', () => {
+  const hjarterBorta: Trick = {
+    leader: 'S', winner: 'N',
+    cards: [
+      { seat: 'S', card: C('hearts', '2') }, { seat: 'W', card: C('hearts', '10') },
+      { seat: 'N', card: C('hearts', 'A') }, { seat: 'E', card: C('hearts', 'K') },
+    ],
+  }
+
+  it('träkarlens ♥Q är boss bakom → spelföraren sakar i stället för att ruffa', () => {
+    const s = state({
+      trump: 'diamonds', declarer: 'W', seat: 'W', leader: 'S',
+      completedTricks: [hjarterBorta],
+      trick: [{ seat: 'S', card: C('hearts', '6') }],
+      hand: [C('spades', 'A'), C('spades', 'J'), C('spades', '8'), C('diamonds', '9'), C('diamonds', '4')],
+      otherHands: {
+        E: [C('hearts', 'Q'), C('hearts', '9'), C('clubs', 'J'), C('clubs', '8'), C('clubs', '6')],
+      },
+    })
+    expect(botCard(s, 'W').suit).not.toBe('diamonds')
+  })
+
+  it('utan boss hos partnern ruffas fortfarande lågt (S1-regeln består)', () => {
+    // Samma läge men träkarlen har bara småhjärter → ruffen är rätt.
+    const s = state({
+      trump: 'diamonds', declarer: 'W', seat: 'W', leader: 'S',
+      completedTricks: [hjarterBorta],
+      trick: [{ seat: 'S', card: C('hearts', '6') }],
+      hand: [C('spades', 'A'), C('spades', 'J'), C('spades', '8'), C('diamonds', '9'), C('diamonds', '4')],
+      otherHands: {
+        E: [C('hearts', '5'), C('hearts', '3'), C('clubs', 'J'), C('clubs', '8'), C('clubs', '6')],
+      },
+    })
+    expect(botCard(s, 'W')).toEqual(C('diamonds', '4'))
+  })
+})
+
+// Speldiagnosen runda 4 (tävling 2026-08-11 bricka 8, stick 1): Väst spelade ut
+// ♦7 mot 3NT. Träkarlen (♦J-10-8-4) lade ♦4 — "andra hand lågt" — fast
+// spelföraren satt SYNLIGT med ♦A-K-2 bakom. Åttan är gratis att prova: slås
+// den över vinner spelförarens kung ändå (precis som om 4:an lagts), och
+// vinner den är det ett rent extrastick — dessutom sparas partnerns boss.
+// Samma sjukdom som fynd 5 (tredje hand), fast i ANDRA hand: spelförarsidan
+// ser båda händerna och ska täcka billigt när partnern har boss i färgen.
+// Facit FÖRE fix.
+describe('speldiagnos runda 4 – andra hand på spelförarsidan täcker billigt mot partnerns boss', () => {
+  it('♦7 utspelad, träkarlen J1084 + spelföraren AK2 → åttan (inte fyran)', () => {
+    const s = state({
+      trump: null, level: 3, declarer: 'S', seat: 'N', leader: 'W',
+      trick: [{ seat: 'W', card: C('diamonds', '7') }],
+      hand: [
+        C('diamonds', 'J'), C('diamonds', '10'), C('diamonds', '8'), C('diamonds', '4'),
+        C('spades', '6'), C('spades', '4'), C('spades', '2'),
+        C('hearts', 'A'), C('hearts', 'Q'),
+        C('clubs', 'K'), C('clubs', 'J'), C('clubs', '8'), C('clubs', '7'),
+      ],
+      otherHands: {
+        S: [
+          C('diamonds', 'A'), C('diamonds', 'K'), C('diamonds', '2'),
+          C('spades', 'K'), C('spades', 'Q'), C('spades', '10'), C('spades', '5'),
+          C('hearts', '8'), C('hearts', '6'), C('hearts', '3'),
+          C('clubs', '9'), C('clubs', '5'), C('clubs', '2'),
+        ],
+      },
+    })
+    expect(botCard(s, 'N')).toEqual(C('diamonds', '8'))
+  })
+
+  it('utan boss hos partnern gäller fortfarande andra hand lågt', () => {
+    // Samma träkarl men spelföraren har bara småruter → 4:an (doktrinen består).
+    const s = state({
+      trump: null, level: 3, declarer: 'S', seat: 'N', leader: 'W',
+      trick: [{ seat: 'W', card: C('diamonds', '7') }],
+      hand: [
+        C('diamonds', 'J'), C('diamonds', '10'), C('diamonds', '8'), C('diamonds', '4'),
+        C('hearts', 'A'), C('hearts', 'Q'),
+        C('clubs', 'K'), C('clubs', 'J'),
+      ],
+      otherHands: {
+        S: [
+          C('diamonds', '6'), C('diamonds', '3'), C('diamonds', '2'),
+          C('spades', 'K'), C('spades', 'Q'), C('spades', '10'),
+          C('clubs', '9'), C('clubs', '5'),
+        ],
+      },
+    })
+    expect(botCard(s, 'N')).toEqual(C('diamonds', '4'))
+  })
+})
+
+// Speldiagnosen runda 4 (tävling 2026-08-11 bricka 1, stick 2+5): spelföraren
+// hade ♦A-J-9-4 mot träkarlens ♦Q-8-6 (bara kungen och småkort ute) men drog
+// ALDRIG trumf — cash-regeln kräver en säker vinnare, så tumregel-lagret hade
+// i praktiken ingen trumfdragning alls när den kräver att driva ut/maska bort
+// en honnör. Nord ruffade ♣K med sin sista hacka. Ny plan: på lead räknas
+// styrkeprovet i trumffärgen ärligt (kombinerad trumf mot de osedda korten) —
+// vinner vår sida fler trumfvarv än motståndarna leds trumf tills deras är
+// slut. Svag trumf drar fortfarande inte. Facit FÖRE fix.
+describe('speldiagnos runda 4 – spelföraren drar trumf när kombinationen vinner styrkeprovet', () => {
+  it('träkarlen Q86 mot spelförarens AJ94 (K ute) → leder trumf, inte sidofärgen', () => {
+    const s = state({
+      trump: 'diamonds', declarer: 'W', seat: 'E', leader: 'E',
+      completedTricks: [doneTrick()],
+      hand: [
+        C('diamonds', 'Q'), C('diamonds', '8'), C('diamonds', '6'),
+        C('clubs', 'Q'), C('clubs', 'J'), C('clubs', '8'), C('clubs', '6'), C('clubs', '3'),
+        C('hearts', 'K'), C('hearts', 'Q'), C('hearts', 'J'), C('hearts', '9'),
+      ],
+      otherHands: {
+        W: [
+          C('diamonds', 'A'), C('diamonds', 'J'), C('diamonds', '9'), C('diamonds', '4'),
+          C('spades', 'A'), C('spades', 'J'), C('spades', '8'), C('spades', '6'), C('spades', '4'), C('spades', '2'),
+          C('clubs', 'K'), C('clubs', '4'),
+        ],
+      },
+    })
+    expect(botCard(s, 'E').suit).toBe('diamonds')
+  })
+
+  it('jämnt styrkeprov (J94+Q8 mot K-10-7-5 ute) → fortsätter dra trumf', () => {
+    // Bricka 1-läget efter ♦A-varvet: 2 vinstvarv mot 2 förlustvarv. Släpps
+    // trumfen här ruffas sidovinnarna (♣K åkte) — jämnt prov ska fortsätta dra.
+    const s = state({
+      trump: 'diamonds', declarer: 'W', seat: 'W', leader: 'W',
+      completedTricks: [
+        {
+          leader: 'W', winner: 'W',
+          cards: [
+            { seat: 'W', card: C('diamonds', 'A') }, { seat: 'N', card: C('diamonds', '2') },
+            { seat: 'E', card: C('diamonds', '6') }, { seat: 'S', card: C('diamonds', '3') },
+          ],
+        },
+      ],
+      hand: [
+        C('diamonds', 'J'), C('diamonds', '9'), C('diamonds', '4'),
+        C('spades', 'J'), C('spades', '8'), C('spades', '6'), C('spades', '4'), C('spades', '2'),
+        C('clubs', '7'), C('clubs', '4'),
+      ],
+      otherHands: {
+        E: [
+          C('diamonds', 'Q'), C('diamonds', '8'),
+          C('hearts', 'Q'), C('hearts', 'J'), C('hearts', '9'),
+          C('clubs', 'J'), C('clubs', '8'), C('clubs', '6'), C('clubs', '3'), C('clubs', '2'),
+        ],
+      },
+    })
+    expect(botCard(s, 'W').suit).toBe('diamonds')
+  })
+
+  it('svag trumf (853 mot 97) drar inte – den långa sidofärgen leds som förut', () => {
+    const s = state({
+      trump: 'spades', declarer: 'W', seat: 'W', leader: 'W',
+      completedTricks: [doneTrick()],
+      hand: [
+        C('spades', '8'), C('spades', '5'), C('spades', '3'),
+        C('diamonds', 'K'), C('diamonds', 'Q'), C('diamonds', 'J'), C('diamonds', '10'), C('diamonds', '9'),
+        C('hearts', 'A'), C('hearts', '2'),
+        C('clubs', '4'), C('clubs', '2'),
+      ],
+      otherHands: {
+        E: [C('spades', '9'), C('spades', '7'), C('clubs', 'K'), C('clubs', '8'), C('clubs', '7'), C('clubs', '5')],
+      },
+    })
+    expect(botCard(s, 'W')).toEqual(C('diamonds', 'K'))
+  })
+})
+
 describe('tredje hand – vinn billigast', () => {
   it('partnern leder, motståndaren övertar, 3:e hand vinner med billigaste vinnaren', () => {
     // S leder H4 (partner till N), V lägger H9 (övertar), N (3:e hand) på tur.

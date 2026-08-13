@@ -195,3 +195,34 @@ Facit: `play-bot.test.ts` ("fynd 6"). Paragraf: `docs/budsystem.md` §8.3 + §9.
   stick: regeln läste ett kontrollbud som färglöfte. På frö 20260807 leder
   Syd nu passivt ♥10 (topp av inre sekvens) i stället för trumf; DD ogillar
   även det (spelförarens ♥Q var singel — osynligt för Syd, ärlig miss).
+
+### S4 — tävlingslarmens tre fixar (2026-08-13, ägarval "laga allt, en i taget")
+
+Samma 200 givar och kommando som S0 (byt `s0` mot `s4` i OUT-namnen). Runda 4
+granskade tävlingen 2026-08-11 (bricka 8 förartapp 6, bricka 1 förartapp 5)
+med nya tävlingsdumpen; TRE fixar byggdes i följd, var och en med facit-test
+FÖRE fix i `play-bot.test.ts`:
+
+1. **Ruffa inte partnerns säkra stick** — vakt i S1-ruffregeln: synlig partner
+   med boss i ledd färg (slår utspelet + alla osedda, ingen visad renons
+   emellan) → saka i stället (bricka 1, stick 10).
+2. **Andra hand täcker billigt mot partnerns boss** — träkarlen lägger 8:an ur
+   J1084 på ledd 7:a när spelföraren håller AK2 (gratis försök, sparar
+   bossen); kräver äkta billigt försök + ingen ruffrisk (bricka 8, stick 1).
+3. **Trumfdragningsplanen** (`shouldDrawTrumps`) — på lead räknas styrkeprovet
+   i trumffärgen (kombinerad trumf mot osedda, neutrala varvräkningen);
+   vinner vår sida MINST lika många varv dras trumf tills deras är slut.
+   Jämnt prov dras också (första versionen släppte vid 2–2 och fick ♣K
+   ruffad). Gaffel-vakten har företräde; svag trumf drar inte.
+
+- **Bud:** 17,5 % rätt (35/200), snitt 259 poäng/giv — identiskt (inga
+  budregler rörda).
+- **Spel:** flaggade stick spelförarsidan **307** (S3 342 — största lyftet i
+  serien; S0 358), försvaret **217** (S3 236), utspelet 57 (57); rent spelade
+  19/200 (20).
+- **Läsning (ärlig):** −35 på spelförarsidan är utanför det brus tidigare
+  mätpunkter rört sig i och bär trumfdragningsplanens signatur (den fyrar i
+  många trumfgivar). På tävlingsbrickorna: bricka 8 förartapp 6 → 4, bricka 1
+  5 → 3. Kvar på bricka 1 (−3) är dragningens RIKTNING (masktekniken "leda
+  MOT kombinationen" är en känd förenkling — planen leder från handen som är
+  inne) — SENARE-kandidat, liksom #32-grindens ♥A-cash på bricka 8.
