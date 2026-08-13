@@ -29,127 +29,63 @@ i trumfdragningen (SENARE) · förscreena nästa tävlingsdag.
 
 ---
 
-**TÄVLINGEN KLAR & LIVE (2026-08-11/12):** etapp 2-kedjan komplett (konton →
-topplista/matchpoäng, testkonton städade) · tävlings-UI:s 6 polishsteg +
-server-driven framsteg + mobil-städ · "spela given igen" (övning, a24a369).
-**MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE.** Detalj:
-[[beslut-b-etapp2-progress]], [[tavling-ui-polish]],
-[[spela-given-igen-ovningslage]] + `docs/historik.md` 2026-08-11/12.
+**Levande låsningar ur avslutade etapper** (hela historiken: `docs/historik.md`):
+- **Tävlingen är KLAR & LIVE** (2026-08-11/12): konton → daglig 12-givarstävling
+  → topplista. **MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE.**
+  "Spela given igen" finns som övningsläge (räknas inte i MP%).
+- **Beslut B-masterplanen** (ägarbeslut 2026-08-08): konton → daglig tävling →
+  realtidsbord (valfri mix människor/bottar). HELA planen — etapper 0–4,
+  grindarna, GDPR/säkerhet — bor i **`docs/beslut-b-plan.md`** (läs den FÖRST
+  vid allt Beslut B-arbete). Beslut tagna: Supabase · klassiska lösenord · EN
+  12-givarstävling först · tävlingarna före borden. Stående regel: vid varje
+  etappslut stannar Claude, visar läget och tar grindbesluten med ägaren.
+  Etapp 0–2 klara (etapp 2:s klientfas kvar — se NÄST).
+- **Konkurrensplanen** (ägarbeslut 2026-07-29): rebidz konkurrerar med
+  BBO/Funbridge/Synrey; Funbridge-modellen först, sv→en (Fas 5). Roadmap +
+  hälsobild: **`docs/konkurrensplan.md`** (Fas 1-faceliften yta 1–4 + DAGENS
+  GIV klara).
+- **Kontrollbud ska ALLTID finnas** i slamutredningen ([[cue-bids-reinstated]],
+  2026-08-03): vid utgång etablerad (GF) + agreed trumf cue:ar motorn fritt
+  under utgång; poängomdömet ligger på att gå FÖRBI utgången.
 
----
+**Klart tidigare — detaljerna bor i `docs/historik.md`, INTE här:** faceliften
+yta 1–4 · Lebensohl lager 1 · utspelet hål A–G (teori `docs/utspel-teori.md`,
+förfining `docs/utspel-diagnos.md`) · etapp 7 "missad lillslam"
+(`docs/systemrevisorn.md`) · mätetapperna E1–E7, B13, F1–F6
+(`docs/budsystem-revision.md`) · stora granskningen · Beslut B etapp 0–2 ·
+felrapporterna. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 
-**BESLUT B ETAPP 0: förberedelser utan backend (2026-08-08) — KLAR, historik nedan**
-**MASTERPLANEN SATT (2026-08-08, ägarbeslut — "kör" på Beslut B-planeringen):**
-rebidz byggs mot konton → daglig 12-givarstävling → realtidsbord (valfri mix
-människor/bottar). HELA planen — etapper 0–4, beslutsgrindarna, GDPR/säkerhet
-— bor i **`docs/beslut-b-plan.md`** (läs den FÖRST vid allt Beslut B-arbete).
-Beslut tagna: Supabase BEKRÄFTAD · klassiska lösenord (ägarval) · EN
-12-givarstävling först · tävlingarna före borden. Stående regel: vid varje
-etappslut stannar Claude, visar läget och tar grindbesluten med ägaren.
+> **ÄRLIG INFERENS (grundprincip, LIVE — styr ALLA bottbeslut, bud OCH spel):**
+> bottarna tänker som människor — egen hand + vad budgivningen och spelet
+> VISAT, aldrig dolda kort eller motorns facit; hellre systemriktig miss än
+> kik. Slamporten (2026-07-07): kaptensregeln ≥33 driv / 31–32 inbjudan mot
+> visat minimum; ingen kontrollkoll (ägarbeslut); storslam kräver visshet.
+> Detalj: `docs/budsystem.md` §5.2/§5.7/§6 + `docs/bot-hjarna.md`.
 
-**ETAPP 0 KLAR (2026-08-09):** slumpinjektion (`rng` i `monte-carlo.ts`/
-`play-bot.ts`), Europe/Stockholm i `daily.ts`, backend-sömlagret
-`src/lib/backend/`, PWA-vakt för `/api/*` (`deploy-config.test.ts`),
-`api/health.ts`. **Fynd:** motorn kräver bundling (esbuild) i
-Vercel-funktioner → gjort i etapp 2. Detalj: `docs/historik.md`.
-
-**FAS 1 FACELIFTEN — YTA 1–4 KLARA (2026-07-31→08-02):** startsidan,
-Synrey-bordet telefon-först, budlådan, de inre sidorna — och **DAGENS GIV**
-(datumfröet `daily.ts`, Wordle-delning; förtitt på Fas 3 utan backend). Nästa
-yta väljs av ägaren. Detalj: `docs/konkurrensplan.md` Fas 1/Fas 3.
-
-**KONKURRENSPLANEN (2026-07-29, ägarbeslut):** rebidz konkurrerar med
-BBO/Funbridge/Synrey; Funbridge-modellen först, sv→en (Fas 5). Roadmap +
-hälsobild: **`docs/konkurrensplan.md`**.
-
-**Klart 2026-07-29→08-03 (detalj i `docs/historik.md`):** etapp 7 hål 2
-"3NT-stoppen" (§6.9) · Lebensohl efter vårt 1NT lager 1 (§7.5; kvar: takeout-X,
-slow shows, cue-Stayman) · #34 tredje hand högt i sang (§8.6) · hela FAS 0
-(404, route-split, kortrad, säkra zoner) · felrapport #32 + markeringarna
-(§8.5) · stora granskningen 26 fynd + etapp A–D (skjutet: par-poäng).
-
-**CUE-BUD ÅTERINFÖRDA (2026-08-03, river 2026-07-07): KLAR ETAPP.** Kontrollbud
-ska ALLTID finnas ([[cue-bids-reinstated]]): vid **utgång etablerad (GF) + agreed
-trumf** cue:ar motorn fritt under utgång; poängomdömet ligger på att gå FÖRBI
-utgången. `cueSlamAuction` (`slam-auction.ts`), inkopplat Jacoby 2NT + NMF +
-(via B13) inverterad minor + 2♣. **Kvar (eget beslut):** off-book-igenkänning
-av din cue; öppnarens 18–19 i Jacoby. Detalj: `docs/historik.md` 2026-08-03.
-
-**UTSPELET (2026-08-04): HÅL A–G KLARA (§8.3/§9).** Budstyrt utspel i `botCardSmart`
-(`openingLeadWithAuction`): partnerns färg, undvik deras, passivt + tenass/ess-skydd
-mot trumf, inre sekvenser, trumf/singel. Teori `docs/utspel-teori.md`; kvar =
-förfining `docs/utspel-diagnos.md`.
-
-**Klart 2026-08-07 (detalj i `docs/historik.md` + `docs/systemrevisorn.md`):**
-etapperna **E1–E7** (hål D steg 1 §6.10 · splinterregeln §4.1 · Jordan §7.8d ·
-starka återbud §5.2/§6.6 · 2/1-högfärgen §5.3 · oklart-fixarna · doc-svepet;
-mätserien M22–M26) · **B13** graderade återbud efter 1m–2m + cue i
-minorfit/2♣-grenen (§4.2/§6.2, M27) · **F2** datadriven detektorkedja
-(`FORCED_DETECTORS`/`CONTESTED_DETECTORS` + kedjevakten
-`detector-chain.test.ts`; E1/E3 stängda).
-
-**Klart 2026-08-07→08-08 — HELA KÖRORDNINGEN F1–F6 KLAR (detalj i
-`docs/budsystem-revision.md` + `docs/historik.md` + `docs/systemrevisorn.md`):**
-F3 advancer-rabatten generaliserad (M28) · F4 TP till §7-inkliven (D9 stängd,
-M29; bevakning kvar: X-svararen/DONT/svaga tvåor räknar rå HP) · F5
-6-5-återbudet + 2♣-strain-valet (A3/E2 stängda, M30) · F6 stark 17+ enfärg
-efter två bjudna färger (C5/C14 stängda, M31; 4-4-X:et MEDVETET live-only).
-
-**Äldre klart (2026-07-28, detaljer i `docs/historik.md`):** känsla i
-kortspelet, budstöd-toggle, felrapporter #40/#41/#42, volymtester ALLTID
-seedade. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
-
-> **ÄRLIGA SLAMPORTAR (2026-07-07, LIVE — grundprincip som styr ALLA slam-vägar):**
-> bottarna bjuder som människor — egen hand + partnerns **VISADE** intervall, aldrig
-> partnerns faktiska kort; hellre systemriktig miss än kik. Kaptensregeln: ≥33 driv /
-> 31–32 inbjudan mot visat minimum; ingen kontrollkoll (ägarbeslut); storslam kräver
-> visshet. Detalj: budsystem.md §5.2/§5.7/§6 + `docs/historik.md`.
-
-### 👀 Bevaka i spel — de tre senaste
-- **Speldiagnosen S4 (2026-08-13):** trumfdragningsplanen (drar den när RUFF
-  var rätt plan? riktningen/masken är känd förenkling) · andra hand täcker
-  billigt mot partnerns boss (bränns mellankort i onödan?) · ruffvakten
-  (sakas det när ruffen ändå var bäst?).
-> Hela listan (nyast först): **`docs/bevaka.md`**. Läs den när ägaren
-> säger att något känns fel i spel, eller när en ny fix ska läggas till.
-- **Speldiagnosen S3 (2026-08-12):** cue-bud räknas inte som bjuden färg i
-  utspelet (leds det nu in i en färg där cuet lovade ESSET och straffar sig?).
-- **Speldiagnosen S2 (2026-08-12):** trumfled vägras in i känd gaffel (vägrar
-  den när ett trumfvarv ändå vore rätt?) · spelförarsidans tredje hand följer
-  färgkombinationen (offras honnörer där du spelat billigt? positionsneutral
-  → tvåvägsgissningar kan gå fel = ärliga missar).
-  KÄND KVARSTÅENDE: MC föll ur (sampleLayouts 0 lägen; 20260772/20260731).
+### 👀 Bevaka i spel
+Hela listan (nyast först): **`docs/bevaka.md`** — läs den när ägaren säger att
+något känns fel i spel, eller när en ny fix ska läggas till. Senast (S4,
+2026-08-13): trumfdragningsplanen · andra hand täcker billigt · ruffvakten.
+KÄND KVARSTÅENDE: MC föll ur (sampleLayouts 0 lägen; frön 20260772/20260731).
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **Beslut B etapp 2 forts.** — klientfasen: wira in tävlingen i appen, inskick,
-   validering, poäng/topplista (serversidan klar; se NU — `docs/beslut-b-plan.md`).
+   validering, poäng/topplista (serversidan klar — `docs/beslut-b-plan.md`).
 2. **Beslut B etapp 3 — härdning + drift** (arkiv/streaks på servern, rate limits,
    ev. Nivå 2 dolda händer; grindbesluten först — `docs/beslut-b-plan.md`).
 
-*(ETAPP 7 "missad lillslam" STÄNGD 2026-08-07: hål 1+2 klara M20/M21, hål C
-via cue-buden, hål D steg 1 klar / steg 2 parkerad — hela resan + verktygen i
-`docs/systemrevisorn.md`.)*
-
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
-**FACELIFTEN** (väckt 2026-07-29 ur parkeringen → Fas 1 i `docs/konkurrensplan.md`) ·
-**Fler skills + smal subagent-användning** (påbörjat 2026-07-30, deploy-verifiering
-klar; kvar: probe-ritualerna + session-checklistorna) ·
-**Lebensohl nästa lager** (kärnan live 2026-07-30; kvar: takeout-X, slow shows,
-cue-Stayman, efter takeout av svag tvåa) ·
-fler budträningsgivar + tema-dropdown ·
-spelmotor-kvalitet (#32/#34 KLARA; kvar: tredje hand högt i trumf) ·
-**UTSPELET** (hål A–G klara; kvar: förfining) · engelska som andra
-språk (Fas 5) *(17+ enfärgshand efter två bjudna färger BYGGD 2026-08-08 som
-F6)* · auto-facit på
-hela given i webworker · kanoniska linjen passar ut tvåfärgsinkliv ·
-svårighetsnivåer på bottarna · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
-`auctionFacts`-lagret (R2 steg 2 — förberäknade auktionsfakta åt detektorerna,
-byggs vid behov).
+FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
+subagent-användning · Lebensohl nästa lager · fler budträningsgivar +
+tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
+engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den
+starka dubblaren säljer given i rond 2 · svårighetsnivåer på bottarna ·
+bot-hjärnans B2/Steg C · bredare försvarsinferens · `auctionFacts`-lagret ·
+rondgenomgångens per-kort-motivering.
 
 ### 🅿️ PARKERAT (väg INTE in i beslut — full beskrivning i `docs/senare.md`)
 DDS-facit på tunga fulla givar · off-book §7 bredd · "framkalla slutbud"-väljaren ·
-Mathe mot stark konstgjord 1♣. *(Beslut B FLYTTAD till NU 2026-08-08 —
-planen: `docs/beslut-b-plan.md`.)*
+Mathe mot stark konstgjord 1♣ · hål D steg 2 (cue-frontend i konkurrens).
 
 ## Arbetsrutiner (följ varje gång)
 - **Vid sessionsstart:** följ 🟢-checklistan i `docs/arbetsrutiner.md`.
@@ -170,11 +106,12 @@ aldrig "RebidZ") — **repo och URL förblir `Learn-Bridge`** (medvetet, byt int
   anta dem inte.
 
 ## Vem jag bygger för
-Ägaren är nybörjare utan programmeringsbakgrund.
-- Förklara på enkel svenska. Inga tekniska termer utan förklaring.
-- Ett steg i taget. Vänta på bekräftelse innan du går vidare.
-- När ägaren måste göra något själv (klicka, logga in, godkänna): säg exakt var
-  och vad.
+Ägaren har ingen programmeringsbakgrund, men är inte längre novis: efter
+projektets resa erfaren & trygg (ägarens egna ord 2026-08-13).
+- Förklara **nya** begrepp när de dyker upp — känt stoff behöver inte förklaras
+  om. Större steg i taget är okej; stäm ändå av vid vägval.
+- Styrningen är OFÖRÄNDRAD: fråga före push/commit/deploy, stanna vid
+  grindbeslut, visa exempelhänder före ändringar i öppningsstrukturen.
 - Du skriver ALL kod. Ägaren läser den inte. Optimera för korrekthet och för att
   DU lätt ska kunna underhålla den över tid.
 - Ägaren vill ge **mänsklig input i konkreta budsituationer** — fråga hellre än
@@ -200,10 +137,13 @@ aldrig "RebidZ") — **repo och URL förblir `Learn-Bridge`** (medvetet, byt int
 - **Rollback:** varje funktion mergas med egen `--no-ff`-mergepunkt → backa med
   `git revert -m 1 <merge-sha>`. Vad som ligger live = senaste **Ready**-deployen i
   Vercel-dashboarden; det finns ingen tag i repot.
-- GitHub Pages-workflowen (`.github/workflows/deploy.yml`) är **inaktiverad**
-  (`workflow_dispatch`-endast, filen kvar som referens).
-- Ingen server/databas/backend i nuläget — ändras först i Beslut B etapp 1
-  (planen: `docs/beslut-b-plan.md`).
+- GitHub Pages-workflowen är **inaktiverad** (`workflow_dispatch`-endast, filen
+  kvar som referens).
+- **Backend FINNS sedan Beslut B etapp 1–2 (2026-08-10/11):** Supabase (konton +
+  tävlingsdata) + Vercel-serverfunktioner i `api-src/` (bundlas med esbuild).
+  Nya backend-delar byggs bara enligt planen + grindarna i
+  `docs/beslut-b-plan.md`. Hemligheter i `.env.local`/Vercels env — ALDRIG i
+  git-spårade filer.
 
 ## Bridge-specifikt
 - Budsystem: **2 över 1 (2/1)**, endast detta. Bygg inte flera system på en gång.
@@ -252,8 +192,8 @@ till BrowserRouter** utan SPA-rewrites i `vercel.json`. Ny skärm = ny fil i
 `src/pages/` + `<Route>` i `App.tsx` + länk i `NAV` i `Layout.tsx`.
 
 ## Vad man INTE gör
-- Lägg aldrig till backend/server/databas utan grindbeslutet 0→1 i
-  `docs/beslut-b-plan.md` — tills dess är hostingen statisk.
+- Bygg inga backend-delar utanför Beslut B-planens etapper och grindbeslut
+  (`docs/beslut-b-plan.md`).
 - Glöm aldrig Vite `base` = `/` (låst av vaktestet).
 - Bygg inte alla budsystem på en gång — ett i taget.
 - Lämna aldrig ägaren med ett tekniskt fel utan förklaring + nästa steg.
