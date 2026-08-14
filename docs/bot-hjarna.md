@@ -26,7 +26,9 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
 - **Signalavkodning (pt 50, `signal-decode.ts`):** motspelaren läser botens
   öppningsutspel (§8.3) → skärper hand-modellen (längd ≥4 + touchérande honnör när
   entydig). Hand-modellen fick per-färg-HP-spann (`suitHcp`) som samplaren håller.
-  Bara bottars utspel avkodas (ingen tjuvkik på människan).
+  Bara bottars utspel avkodas (ingen tjuvkik på människan). **Sedan MC-urfallet
+  fix 3 (2026-08-13, se nedan) gäller inferenserna bara i sang utan budstyrt
+  utspel, och honnörsgolvet aldrig när den touchérande honnören redan är sedd.**
   - **Utvidgat 2026-07-29 (markeringar Steg 5, `applySignalReads`):** läser även
     **attityd under spelet** — en avskräckning på partnerns färg (högt spotkort)
     sätter ett HP-**tak** (`suitHcpCeil`) → samplaren undviker dam+ där. Räkning
@@ -39,6 +41,34 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
 - **pt 47–49 (`signals.ts`):** facit-granskad mot §8, luckor låsta.
 
 Se `docs/status.md` för detaljer.
+
+## MC-urfallet lagat (2026-08-13, speldiagnosen runda 5 → mätpunkt S5)
+
+Den kända kvarstående punkten från S1 ("`sampleLayouts` 0 lägen → tumreglerna
+tog över slutspelet", frön 20260772/20260731) utreddes och lagades i fyra steg.
+Rotorsaken var inte samplern utan att **hand-modellen antog mer än vårt eget
+system lovar** — sanna, systemriktiga händer uteslöts och samplingen blev
+omöjlig. Utredningen + klassningen: `revisor-output/speldiagnos-rapport-2026-08-13.md`;
+repro-proben: `MC_URFALL=<frön> npx vitest run src/lib/engine/mc-urfall.probe.test.ts`.
+
+1. **Öppningslöftet i poäng (`hand-model.ts` → `minPoints`):** en 1-i-färg-
+   öppning lovar `max(hp, startpoäng) ≥ 12` (exakt öppningsvillkoret i
+   `openings.ts`) — inte rå hp ≥ 12. 3:e hand 10 (lättöppning), 4:e hand 9
+   (regeln om 15). Samplaren räknar samma `startingPoints` som budmotorn.
+   Facit: `hand-model.test.ts` + `monte-carlo.test.ts`.
+2. **Robusthetsnätet (`monte-carlo.ts`):** ger den fulla modellen 0 lägen
+   samplas om på enbart HÅRDA fakta (renonser/show-outs + kortantal) — mjuka
+   budinferenser och signalgolv släpps. En människa vars inferens motsägs av
+   korten släpper antagandet, inte analysen. MC kan inte längre dö helt.
+3. **Utspelsavkodningens vakter (`signal-decode.ts`):** längd/honnörs-
+   inferensen bara när "längsta färgen"-doktrinen faktiskt styrde utspelet
+   (sang + ej budstyrt, `budstyrtOpeningLead` i `play-bot.ts`), och aldrig
+   honnörsgolv när den touchérande honnören är sedd någon annanstans
+   (20260731: ♣K från K6 mot trumf pinnade en dam som låg i träkarlen).
+4. **Tvingade återbud (`hand-model.ts` → `forcedRebid`):** svar på negativ
+   dubbling, tvångssvar och cue-tvångets starka återbud räknas inte som
+   6-korts-löfte — de lovar bara vad det förra budet lovade (samma mönster
+   som S3:s cue-fix: regelnamnet avgör).
 
 ## Spelförarplan (2026-07-29): etablera lång färg FÖRE cashandet (felrapport #32)
 Den kända luckan "förberedelsen vid 9–13 kort" (nedan) fick sin första

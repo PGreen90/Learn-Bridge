@@ -5,6 +5,7 @@ import type { HandModel } from './hand-model'
 import type { Contract, PlayState } from './play'
 import { sampleLayouts } from './monte-carlo'
 import { hcp } from './hand'
+import { startingPoints } from './evaluation'
 
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
 const RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -135,6 +136,50 @@ describe('sampleLayouts – ärlig utdelning av de dolda korten (Steg 3a)', () =
       expect(L.E.length).toBe(hands.E.length)
       expect(L.S.length).toBe(hands.S.length)
     }
+  })
+})
+
+describe('sampleLayouts – minPoints: öppningslöftet i poäng (MC-urfallet fix 1)', () => {
+  it('varje samplad ursprungshand uppfyller max(hp, startpoäng) ≥ minPoints', () => {
+    const model = freshModel()
+    model.E.minPoints = 12
+    const state = mkState(dealAround(), 'N', 'NT')
+    const layouts = sampleLayouts(state, 'N', model, 15)
+    expect(layouts.length).toBeGreaterThan(0)
+    for (const L of layouts) {
+      expect(Math.max(hcp(L.E), startingPoints(L.E).startingPoints)).toBeGreaterThanOrEqual(12)
+    }
+  })
+})
+
+describe('sampleLayouts – robusthetsnätet: 0 lägen ⇒ sampla om på hårda fakta (MC-urfallet fix 2)', () => {
+  // En människa vars inferens inte går ihop med korten hon sett släpper
+  // antagandet, inte hela analysen. Mjuka inferenser (budhärledda hp/längd-golv,
+  // signalgolv) släpps; hårda fakta (renonser/show-outs, kortantal) består.
+  it('omöjligt mjukt krav (hp-golv poolen inte kan uppfylla) → lägen ändå, utan inferensen', () => {
+    const model = freshModel()
+    model.E.hcpMin = 30 // poolen (Ö+V:s 26 kort) rymmer inte 30 hp i en hand
+    const state = mkState(dealAround(), 'N', 'NT')
+    const layouts = sampleLayouts(state, 'N', model, 10)
+    expect(layouts.length).toBeGreaterThan(0)
+  })
+
+  it('nätet respekterar fortfarande renonsen när det mjuka släpps', () => {
+    const model = freshModel()
+    model.E.hcpMin = 30
+    model.E.voids.add('spades')
+    const state = mkState(dealAround(), 'N', 'NT')
+    const layouts = sampleLayouts(state, 'N', model, 10)
+    expect(layouts.length).toBeGreaterThan(0)
+    for (const L of layouts) expect(suitCount(L.E, 'spades')).toBe(0)
+  })
+
+  it('äkta omöjligt läge (hårda fakta motsäger poolen) ger fortfarande []', () => {
+    const model = freshModel()
+    model.E.voids.add('spades')
+    model.W.voids.add('spades')
+    const state = mkState(dealAround(), 'N', 'NT')
+    expect(sampleLayouts(state, 'N', model, 5)).toEqual([])
   })
 })
 

@@ -50,6 +50,12 @@ export interface SeatConstraint {
   suitHcp: Record<Suit, Range>
   /** Färger platsen bevisat sig sakna (t.ex. via show-out under spelet). */
   voids: Set<Suit>
+  /** Löfte i POÄNG för ursprungshanden: max(hp, startpoäng) ≥ detta. Systemet
+   *  öppnar 1 i färg på `hp ≥ 12 ELLER startpoäng ≥ 12` (openings.ts) — en bra
+   *  11:a och t.o.m. 7 hp / 12 TP öppnar, så ett rått hp-golv vore oärligt mot
+   *  vårt eget system (MC-urfallet fix 1, 2026-08-13). Sänkt i 3:e hand (10 —
+   *  lättöppning) och 4:e hand (9 — regeln om 15). */
+  minPoints?: number
 }
 
 export type HandModel = Record<Seat, SeatConstraint>
@@ -89,7 +95,9 @@ export function buildHandModel(
   if (openerIdx >= 0) {
     const opener = calls[openerIdx]
     const p = parse(opener.bid)!
-    applyOpening(model[opener.seat], p.level, p.strain)
+    // Alla bud före öppningen är per definition pass → openerIdx = antal pass
+    // före = öppnarens position i varvet minus ett (styr lättöppningsgolven).
+    applyOpening(model[opener.seat], p.level, p.strain, openerIdx + 1)
   }
 
   // Passad hand: första budet är pass UTAN kontraktsbud före → < 12 hp.
@@ -132,7 +140,11 @@ export function buildHandModel(
     if (!suit) return // sang säger inget om en enskild färg här
     const prior = calls.slice(0, i)
     if (bidSuitBefore(c.seat, suit, prior)) {
-      lenMin(model[c.seat], suit, 6) // rebjuden egen färg → extra längd
+      // MC-urfallet fix 4 (2026-08-13): ett TVINGAT/billigaste återbud lovar
+      // ingen sjätte kort — det lovar bara det förra budet lovade (svar på
+      // negativ X = öppningens 5+; cue-tvångets lägsta/hoppande återbud =
+      // cue-svarets 4). Samma mönster som S3:s cue-fix: läs regelnamnet.
+      if (!forcedRebid(c.rule)) lenMin(model[c.seat], suit, 6) // frivilligt rebud → extra längd
     } else if (partnerBidSuit(c.seat, suit, prior) || opponentBidSuit(c.seat, suit, prior)) {
       // höjning av partnerns färg / cue i motståndarnas → ingen egen längd-inferens
     } else {
@@ -154,8 +166,9 @@ export function buildHandModel(
   return model
 }
 
-/** Öppningsbudets HP-spann + form. Del 1/2: 1NT/2NT/1-i-färg (säkra). */
-function applyOpening(c: SeatConstraint, level: number, strain: string): void {
+/** Öppningsbudets HP-spann + form. Del 1/2: 1NT/2NT/1-i-färg (säkra).
+ *  `seatOrder` = öppnarens position i varvet (1–4). */
+function applyOpening(c: SeatConstraint, level: number, strain: string, seatOrder = 1): void {
   if (strain === 'NT') {
     if (level === 1) narrowHcp(c, 15, 17)
     else if (level === 2) narrowHcp(c, 20, 21)
@@ -165,7 +178,13 @@ function applyOpening(c: SeatConstraint, level: number, strain: string): void {
   }
   const suit = STRAIN_SUIT[strain]!
   if (level === 1) {
-    narrowHcp(c, 12, 21)
+    // Löftet är i POÄNG, inte rå hp (öppningsvillkoret i openings.ts är
+    // `hp ≥ 12 ELLER startpoäng ≥ 12`): ett rått hp-golv 12 uteslöt sanna,
+    // systemriktiga händer (7 hp / 12 TP, bra 11:or) och gjorde Monte-Carlo-
+    // samplingen omöjlig (MC-urfallet fix 1). 3:e hand kan lättöppna 1M på
+    // 10–11 hp, 4:e hand öppnar på regeln om 15 från 9 hp → lägre golv där.
+    c.hcpMax = Math.min(c.hcpMax, 21)
+    c.minPoints = Math.max(c.minPoints ?? 0, seatOrder === 3 ? 10 : seatOrder === 4 ? 9 : 12)
     // 2/1: högfärgsöppning 5+, minoröppning 3+ (better minor).
     lenMin(c, suit, suit === 'hearts' || suit === 'spades' ? 5 : 3)
     return
@@ -184,6 +203,20 @@ function applyOpening(c: SeatConstraint, level: number, strain: string): void {
     lenMin(c, suit, 6)
   }
   // 4-läget och högre: kan vara spärr ELLER stark → inget säkert golv (senare).
+}
+
+/** Regelnamn vars färg-återbud är TVINGADE/billigaste (lovar ingen extra längd):
+ *  svaret på negativ dubbling (5+ ur öppningen), tvångssvaren, och cue-tvångets
+ *  starka återbud med parentes-gradering (lägsta/utgångskrav — 4-kortsfärgen ur
+ *  cue-svaret). Det oparentesade "starkt återbud" (17+ X-then-bid, F6) är ett
+ *  FÖRSTA färgbud och når aldrig hit. */
+function forcedRebid(rule: string | undefined): boolean {
+  if (rule === undefined) return false
+  return (
+    rule.startsWith('svar på negativ dubbling') ||
+    rule.startsWith('tvångssvar') ||
+    rule.startsWith('starkt återbud (')
+  )
 }
 
 function bidSuitBefore(seat: Seat, suit: Suit, prior: ResolvedCall[]): boolean {

@@ -226,3 +226,36 @@ FÖRE fix i `play-bot.test.ts`:
   5 → 3. Kvar på bricka 1 (−3) är dragningens RIKTNING (masktekniken "leda
   MOT kombinationen" är en känd förenkling — planen leder från handen som är
   inne) — SENARE-kandidat, liksom #32-grindens ♥A-cash på bricka 8.
+
+### S5 — MC-urfallet lagat, fyra fixar (2026-08-13, ägarval "laga allt, en i taget")
+
+Samma 200 givar och kommando som S0 (byt `s0` mot `s5` i OUT-namnen). Runda 5
+utredde den kända kvarstående punkten från S1 (MC-urfallet: `sampleLayouts`
+0 lägen, frön 20260772/20260731) med en egen diagnosprobe
+(`MC_URFALL=20260772,20260731 npx vitest run src/lib/engine/mc-urfall.probe.test.ts`
+→ `revisor-output/mc-urfall.txt`: per MC-läge, vilket modellvillkor den SANNA
+dolda handen bryter mot). Rotorsak: **hand-modellen antog mer än vårt eget
+system lovar.** FYRA fixar i följd, var och en med facit-test FÖRE fix
+(`hand-model.test.ts`, `monte-carlo.test.ts`, `signal-decode.test.ts`);
+detaljbeskrivning i `docs/bot-hjarna.md` ("MC-urfallet lagat"):
+
+1. **Öppningslöftet i poäng** (`minPoints`): 1-i-färg lovar
+   `max(hp, startpoäng) ≥ 12` (3:e hand 10, 4:e hand 9) — inte rå hp 12.
+2. **Robusthetsnätet:** 0 lägen ⇒ sampla om på enbart hårda fakta
+   (renonser + kortantal); MC kan aldrig mer dö helt.
+3. **Utspelsavkodningens vakter:** längd/honnörsinferens bara i sang utan
+   budstyrt utspel; aldrig honnörsgolv när touchérande honnören är sedd.
+4. **Tvingade återbud ≠ 6+:** svar på negativ X / tvångssvar / cue-tvångets
+   återbud lovar bara vad förra budet lovade (regelnamnet avgör, som S3).
+
+- **Bud:** 17,5 % rätt (35/200), snitt 259 poäng/giv — identiskt med S1–S4
+  (inga budregler rörda; modellen styr bara spelet).
+- **Spel:** flaggade stick spelförarsidan **277** (S4 307; S0 358), försvaret
+  **193** (S4 217; S0 257), utspelet 57 (57 — väntat oförändrat, utspelsvalen
+  är orörda); rent spelade 19/200 (19).
+- **Läsning (ärlig):** −30 förare och −24 försvar samtidigt är seriens största
+  samlade kliv och har en tydlig mekanism: MC får nu köra slutspel där den
+  förut föll ur — på BÅDA sidor (det är därför båda rollerna förbättras, till
+  skillnad från S4 som bara flyttade förarsidan). Efter fixarna hittar
+  samplern lägen i alla 48 MC-beslut i de två utredda fröna (0 × "0 LÄGEN").
+  Som alltid: enskilda kortföljder är omtärnade — låsen är facit-testerna.

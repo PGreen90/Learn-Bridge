@@ -17,9 +17,10 @@ const hasCard = (hand: Hand, c: Card) => hand.some((x) => x.suit === c.suit && x
 function stateWithLead(
   leader: Seat,
   leadCard: Card,
-  opts: { declarer?: Seat; hands?: Partial<Record<Seat, Hand>> } = {},
+  opts: { declarer?: Seat; hands?: Partial<Record<Seat, Hand>>; strain?: Contract['strain'] } = {},
 ): PlayState {
   const declarer = opts.declarer ?? 'N'
+  const strain = opts.strain ?? 'NT'
   const order: Seat[] = ['N', 'E', 'S', 'W']
   const after = [...order.slice(order.indexOf(leader) + 1), ...order.slice(0, order.indexOf(leader))]
   const filler = ['2', '3', '4'] as Rank[]
@@ -33,9 +34,9 @@ function stateWithLead(
   }
   const hands: Record<Seat, Hand> = { N: [], E: [], S: [], W: [] }
   for (const s of order) hands[s] = opts.hands?.[s] ?? []
-  const contract: Contract = { declarer, strain: 'NT', level: 3 }
+  const contract: Contract = { declarer, strain, level: 3 }
   return {
-    contract, trump: null, hands, leader, toAct: leader,
+    contract, trump: strain === 'NT' ? null : strain, hands, leader, toAct: leader,
     currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
   }
 }
@@ -70,6 +71,31 @@ describe('signalavkodning – HONNÖR bara när entydig (utspelaren bevisligen h
     const model = applyOpeningLeadSignal(buildHandModel([]), state, 'W')
     expect(model.E.suitHcp.diamonds.min).toBe(0)
     expect(model.E.length.diamonds.min).toBe(4) // längden gäller ändå
+  })
+})
+
+describe('signalavkodning – inferens bara när "längsta färgen"-doktrinen gällde (MC-urfallet fix 3)', () => {
+  it('mot TRUMF: ingen längd- eller honnörsinferens (frö 20260731: ♣K "minst riskabla" från K-6)', () => {
+    // §8.3 mot trumf väljer minst riskabla färgen — kan vara topp av dubbelton.
+    const state = stateWithLead('E', C('K', 'clubs'), { declarer: 'N', strain: 'spades', hands: { S: H('clubs', 'A') } })
+    const model = applyOpeningLeadSignal(buildHandModel([]), state, 'W')
+    expect(model.E.length.clubs.min).toBe(0)
+    expect(model.E.suitHcp.clubs.min).toBe(0)
+  })
+
+  it('budstyrt utspel (auktionen visade färger) → ingen inferens', () => {
+    // Partnerns färg / undvik deras väljs av helt andra skäl än längd.
+    const state = stateWithLead('E', C('5', 'spades'))
+    const model = applyOpeningLeadSignal(buildHandModel([]), state, 'W', { budstyrt: true })
+    expect(model.E.length.spades.min).toBe(0)
+  })
+
+  it('touchérande honnören redan synlig någon annanstans → inget honnörsgolv (längden gäller)', () => {
+    // Ö leder K♥; både A♥ och D♥ ligger i träkarlen → K:et kan omöjligt lova D.
+    const state = stateWithLead('E', C('K', 'hearts'), { declarer: 'N', hands: { S: H('hearts', 'A', 'Q') } })
+    const model = applyOpeningLeadSignal(buildHandModel([]), state, 'W')
+    expect(model.E.suitHcp.hearts.min).toBe(0)
+    expect(model.E.length.hearts.min).toBe(4)
   })
 })
 
