@@ -16,6 +16,7 @@
 
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { playedCards, visibleSeats } from './card-counting'
+import { startingPoints } from './evaluation'
 import { hcp, suitHcp } from './hand'
 import { legalCards, playCard, side, type PlayState } from './play'
 import { doubleDummyDeclarerRemaining } from './dds'
@@ -78,7 +79,15 @@ function satisfies(c: SeatConstraint, assigned: Hand, played: Card[]): boolean {
     if (suitPts < c.suitHcp[s].min || suitPts > c.suitHcp[s].max) return false
   }
   const origHcp = hcp(assigned) + hcp(played)
-  return origHcp >= c.hcpMin && origHcp <= c.hcpMax
+  if (origHcp < c.hcpMin || origHcp > c.hcpMax) return false
+  // Poänglöftet (öppning 1 i färg lovar max(hp, startpoäng) ≥ minPoints — samma
+  // villkor som openings.ts): räknas på hela URSPRUNGSHANDEN (tilldelade +
+  // spelade = alltid 13 kort).
+  if (c.minPoints) {
+    const orig = [...assigned, ...played]
+    if (Math.max(origHcp, startingPoints(orig).startingPoints) < c.minPoints) return false
+  }
+  return true
 }
 
 /**
@@ -125,24 +134,54 @@ export function sampleLayouts(
   const rem2 = need2 - forced2.length
   if (rem1 < 0 || rem2 < 0 || rem1 + rem2 !== free.length) return [] // motstridigt
 
-  const out: Record<Seat, Hand>[] = []
-  for (let s = 0; s < n; s++) {
-    let found: Record<Seat, Hand> | null = null
-    for (let t = 0; t < maxTriesPerSample; t++) {
-      const deck = shuffled(free, rng)
-      const hand1 = [...forced1, ...deck.slice(0, rem1)]
-      const hand2 = [...forced2, ...deck.slice(rem1)]
-      if (satisfies(model[h1], hand1, played[h1]) && satisfies(model[h2], hand2, played[h2])) {
-        const hands: Record<Seat, Hand> = { N: [], E: [], S: [], W: [] }
-        for (const v of visible) hands[v] = state.hands[v]
-        hands[h1] = hand1
-        hands[h2] = hand2
-        found = hands
-        break
+  const sampla = (m: HandModel): Record<Seat, Hand>[] => {
+    const out: Record<Seat, Hand>[] = []
+    for (let s = 0; s < n; s++) {
+      let found: Record<Seat, Hand> | null = null
+      for (let t = 0; t < maxTriesPerSample; t++) {
+        const deck = shuffled(free, rng)
+        const hand1 = [...forced1, ...deck.slice(0, rem1)]
+        const hand2 = [...forced2, ...deck.slice(rem1)]
+        if (satisfies(m[h1], hand1, played[h1]) && satisfies(m[h2], hand2, played[h2])) {
+          const hands: Record<Seat, Hand> = { N: [], E: [], S: [], W: [] }
+          for (const v of visible) hands[v] = state.hands[v]
+          hands[h1] = hand1
+          hands[h2] = hand2
+          found = hands
+          break
+        }
       }
+      if (!found) break // gick inte att uppfylla constraints → sluta
+      out.push(found)
     }
-    if (!found) break // gick inte att uppfylla constraints → sluta (fallback)
-    out.push(found)
+    return out
+  }
+
+  const out = sampla(model)
+  if (out.length > 0) return out
+  // Robusthetsnätet (MC-urfallet fix 2, 2026-08-13): 0 lägen betyder att någon
+  // MJUK inferens (budhärlett hp/längd-golv, signalgolv) motsäger korten vi
+  // faktiskt sett. En människa släpper då antagandet — inte hela analysen.
+  // Sampla om på enbart HÅRDA fakta: renonser/show-outs + kortantal. Ärligt:
+  // ingen kik, bara mindre inbillad kunskap. (Är även de hårda fakta omöjliga
+  // har return-vägarna ovan redan gett tom lista.)
+  return sampla(hardFactsOnly(model))
+}
+
+/** Modellen skalad till hårda fakta: renonser består, alla mjuka inferenser
+ *  (hp-spann, längd-golv/tak ur buden, färg-hp-golv ur signaler, poänglöften)
+ *  nollställs till fria spann. */
+function hardFactsOnly(model: HandModel): HandModel {
+  const out = {} as HandModel
+  for (const seat of SEATS) {
+    const voids = new Set(model[seat].voids)
+    const length = {} as SeatConstraint['length']
+    const suitHcp = {} as SeatConstraint['suitHcp']
+    for (const s of SUITS) {
+      length[s] = voids.has(s) ? { min: 0, max: 0 } : { min: 0, max: 13 }
+      suitHcp[s] = { min: 0, max: 10 }
+    }
+    out[seat] = { hcpMin: 0, hcpMax: 37, length, suitHcp, voids }
   }
   return out
 }

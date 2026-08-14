@@ -19,13 +19,14 @@ universum) · repro-dumpen (`DUMP_SPEL`) · tävlingsförscreeningen
 (`TAVLING_DIAG`; `DAILY_SEED_SECRET` i `.env.local` — ALDRIG i spårade `.env`)
 · `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — larm
 klassas systemfel/ärlig miss/oklart i `/speldiagnos`; bara systemfel lagas,
-efter ägarens ja. **S0–S4 körda, nio fixar landade 2026-08-12/13** (S-serien
-i `docs/speldiagnos.md`): senast S4 = tävlingslarmens tre (ruffvakten ·
-andra hand täcker billigt · trumfdragningsplanen; spelförarflaggorna
-342→307 = seriens största lyft; bricka 8: 6→4, bricka 1: 5→3).
-Tävlingsspeldumpen: `DUMP_TAVLING=<datum>:<bricka>`. **NÄSTA GÅNG: ägarens
-val** — kandidater: MC-urfallet (bevakat, 20260772/20260731) · masktekniken
-i trumfdragningen (SENARE) · förscreena nästa tävlingsdag.
+efter ägarens ja. **S0–S5 körda, tretton fixar landade 2026-08-12/13**
+(S-serien i `docs/speldiagnos.md`): senast S5 = MC-urfallet LAGAT (fyra
+fixar: öppningslöftet i poäng · robusthetsnätet · utspelsavkodningens
+vakter · tvingade återbud ≠ 6+; spelförarflaggorna 307→277 och försvaret
+217→193 = seriens största samlade kliv — MC kör nu slutspel där den förut
+föll ur). Tävlingsspeldumpen: `DUMP_TAVLING=<datum>:<bricka>`. **NÄSTA
+GÅNG: ägarens val** — kandidater: masktekniken i trumfdragningen (SENARE) ·
+förscreena nästa tävlingsdag · ny granskningsrunda på S5-koden.
 
 ---
 
@@ -64,9 +65,9 @@ felrapporterna. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 
 ### 👀 Bevaka i spel
 Hela listan (nyast först): **`docs/bevaka.md`** — läs den när ägaren säger att
-något känns fel i spel, eller när en ny fix ska läggas till. Senast (S4,
-2026-08-13): trumfdragningsplanen · andra hand täcker billigt · ruffvakten.
-KÄND KVARSTÅENDE: MC föll ur (sampleLayouts 0 lägen; frön 20260772/20260731).
+något känns fel i spel, eller när en ny fix ska läggas till. Senast (S5,
+2026-08-13): öppningslöftet i poäng · robusthetsnätet · utspelsavkodningens
+vakter · tvingade återbud (MC-urfallet stängt — inga kända kvarstående).
 
 ### 🟢 NÄST (max 3, i ordning)
 1. **Beslut B etapp 2 forts.** — klientfasen: wira in tävlingen i appen, inskick,

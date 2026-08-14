@@ -9,6 +9,26 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Speldiagnosen S5 (2026-08-13) — MC-urfallet lagat (fyra fixar, frön 20260772/20260731)
+- **Öppningslöftet i poäng (NYAST):** hand-modellen kräver nu `max(hp, startpoäng)
+  ≥ 12` av en dold 1-i-färg-öppnare (10 i 3:e hand, 9 i 4:e) i stället för rå
+  12 hp — bottarna räknar alltså med att öppnaren kan vara en bra 11:a eller en
+  formstark 7 hp/12 TP. **Bevaka:** känns bottarnas slutspel dummare i vanliga
+  givar (samplerna rymmer nu fler svaga öppnarhänder — mindre skarp inferens är
+  priset för ärligheten)?
+- **Robusthetsnätet:** får samplern 0 lägen släpper den budinferenser/signalgolv
+  och samplar om på hårda fakta (renonser, kortantal) — MC dör aldrig mer helt.
+  **Bevaka:** inget synligt i appen; fel här syns som konstiga MC-val sent i
+  extrema givar — rapportera givar där slutspelet känns regellöst.
+- **Utspelsavkodningen struntar i trumf/budstyrda utspel:** längd- och
+  honnörsgissningen ur öppningsutspelet görs bara i sang utan visade färger.
+  **Bevaka:** motspelsbotten kan kännas något mindre "läsande" i sang-givar där
+  utspelet faktiskt VAR längsta färgen men auktionen visade färger — säg till om
+  försvaret verkar ha tappat läsningen.
+- **Tvingade återbud lovar ingen 6:e kort:** svar på negativ X / tvångssvar /
+  cue-tvångets återbud räknas som 5+ resp. 4. **Bevaka:** inget beteende ändras
+  vid bordet — bara samplerns antaganden; fel syns som ovan.
+
 ## Speldiagnosen S4 (2026-08-13) — tävlingslarmens tre fixar (runda 4, brickorna 8+1)
 - **Trumfdragningsplanen (NYAST, bricka 1):** spelförarsidan drar nu trumf när
   den kombinerade trumfen vinner styrkeprovet mot de osedda korten (även vid
@@ -66,10 +86,10 @@
   orört. **Bevaka:** ruffar spelföraren nu NÄR DET ÄR DUMT (t.ex. trumfar
   sönder egen trumfdragning)? MC-hjärnan ska normalt ta över i slutspelet —
   se även nästa punkt.
-- **KÄND KVARSTÅENDE (ej lagad):** Monte-Carlo-hjärnan föll ur i frö 20260772
-  (`sampleLayouts` hittade 0 förenliga lägen → tumreglerna tog över hela
-  slutspelet). Behöver egen utredning — handmodellens krav kan bli
-  omöjliga att uppfylla sent i givar med extrema fördelningar.
+- ~~KÄND KVARSTÅENDE: Monte-Carlo-hjärnan föll ur i frö 20260772~~ **LAGAD
+  2026-08-13 (S5):** rotorsaken var inte extremfördelningen utan att modellen
+  lovade mer än systemet (hp-golv där systemet öppnar på TP m.m.) — se
+  S5-posten överst.
 
 ## Budgivning (2026-08-08) — F6: stark 17+ enfärg efter två bjudna färger
 - **Den starka dubblingen efter två färger (NYAST, §7.3):** en 17+ hand med

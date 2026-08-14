@@ -61,13 +61,21 @@ export function applyOpeningLeadSignal(
   model: HandModel,
   state: PlayState,
   seat: Seat,
-  opts: { humanSeat?: Seat } = {},
+  opts: { humanSeat?: Seat; budstyrt?: boolean } = {},
 ): HandModel {
   const humanSeat = opts.humanSeat ?? 'S'
   const lead = openingLead(state)
   if (!lead) return model
   const leader = lead.seat
   if (leader === humanSeat) return model // människans markering avkodas inte
+  // MC-urfallet fix 3 (2026-08-13): inferenserna nedan gäller BARA när utspelet
+  // följde "längsta färgen"-doktrinen. Mot TRUMF väljer §8.3 "minst riskabla
+  // färgen" (kan vara K från K-6 dubbelton — frö 20260731), och ett BUDSTYRT
+  // utspel (partnerns färg / undvik deras — hål A–G) väljer färg av helt andra
+  // skäl. Att anta längd/honnör där satte falska golv som gjorde Monte-Carlo-
+  // samplingen omöjlig. Hellre färre inferenser än falska.
+  if (state.trump !== null) return model
+  if (opts.budstyrt) return model
   // Bara motspelarens utspel (utspelaren är alltid en försvarare, men vaktar
   // ändå: spelföraren/träkarlen "leder" aldrig trick 1).
   const suit = lead.card.suit
@@ -78,14 +86,18 @@ export function applyOpeningLeadSignal(
   // (2) Honnör: bara om det utspelade kortet bevisligen är utspelarens högsta i
   // färgen – dvs. varje HÖGRE kort i färgen syns redan för `seat` (egen hand +
   // träkarl + spelade). Då kan det inte vara ett spotutspel (3:e/5:e bästa), så
-  // honnörsutspelsdoktrinen gäller → den touchérande honnören hålls.
+  // honnörsutspelsdoktrinen gäller → den touchérande honnören hålls. Vakt (fix
+  // 3): syns den touchérande honnören redan någon annanstans kan utspelaren
+  // omöjligt hålla den → inget golv (skydd mot doktrin-drift).
   if (hcpOf(lead.card.rank) > 0) {
     const seen = new Set<string>()
     for (const c of playedCards(state)) if (c.suit === suit) seen.add(c.rank)
     for (const v of visibleSeats(state, seat)) for (const c of state.hands[v]) if (c.suit === suit) seen.add(c.rank)
     const higher = RANK_LOW_TO_HIGH.slice(rankVal(lead.card.rank) + 1)
     const allHigherSeen = higher.every((r) => seen.has(r))
-    if (allHigherSeen) suitHcpFloor(model[leader], suit, sequenceHcpFloor(lead.card.rank))
+    const touching = RANK_LOW_TO_HIGH[rankVal(lead.card.rank) - 1]
+    const touchingElsewhere = touching !== undefined && seen.has(touching)
+    if (allHigherSeen && !touchingElsewhere) suitHcpFloor(model[leader], suit, sequenceHcpFloor(lead.card.rank))
   }
 
   // Håll golv ≤ tak (signalen kan i teorin krocka med budinferensen; då vinner

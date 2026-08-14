@@ -404,6 +404,19 @@ const STRAIN_TO_SUIT: Record<string, Suit | undefined> = {
   C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades', NT: undefined,
 }
 
+/**
+ * Sant om öppningsutspelet var BUDSTYRT (hål A–G): utspelaren hade visade färger
+ * (partnerns/motståndarnas) att gå på, så "längsta färgen"-doktrinen styrde inte
+ * utspelet. Utspelsavkodningen (MC-urfallet fix 3) ska då stå över — avgörs här
+ * eftersom auktionen finns här, inte i avkodningen.
+ */
+export function budstyrtOpeningLead(state: PlayState, calls: ResolvedCall[]): boolean {
+  const leadSeat = state.completedTricks[0]?.cards[0]?.seat
+  if (!leadSeat || calls.length === 0) return false
+  const info = analyzeAuctionForLead(calls, leadSeat)
+  return info.partnerSuits.length > 0 || info.oppSuits.length > 0
+}
+
 /** Vad auktionen säger om VILKA färger som är partnerns resp. motståndarnas. */
 interface AuctionLeadInfo {
   partnerSuits: Suit[] // färger partnern bjudit (led gärna)
@@ -1275,7 +1288,7 @@ export function botCardSmartReasoned(
   const model = buildHandModel(calls, { voids: shownVoids(state) })
   // Signalavkodning (pt 50): skärp modellen med det öppningsutspelet avslöjar
   // (längd + ev. touchérande honnör), sett ur den agerande platsens synvinkel.
-  applyOpeningLeadSignal(model, state, seat)
+  applyOpeningLeadSignal(model, state, seat, { budstyrt: budstyrtOpeningLead(state, calls) })
   // Markeringar Steg 5: läs botarnas attitydmarkeringar under spelets gång.
   if (opts.decodeSignals !== false) applySignalReads(model, state, seat)
   const budget = mcBudget(cardsLeft)
