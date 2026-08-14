@@ -5,7 +5,11 @@
 //   PowerShell:  $env:TAVLING_DIAG='2026-08-13'; npx vitest run src/lib/engine/tavlingsdiagnos.probe.test.ts
 //   Bash:        TAVLING_DIAG=2026-08-13 npx vitest run src/lib/engine/tavlingsdiagnos.probe.test.ts
 //
-// Rattar: TAVLING_DAGAR (antal dagar i följd från startdatumet, standard 1).
+// Rattar: TAVLING_DAGAR (antal dagar i följd från startdatumet, standard 1) ·
+// TAVLING_HAVERI_ROTT=1 (nattvaktens läge, steg 1 2026-08-14: testet FAILAR då
+// enbart på objektiva HAVERIER — krasch, auktion som aldrig terminerar, giv som
+// DD-oraklet inte kan lösa. Mjuka larm (budtapp/speltapp — mest ärliga missar,
+// klassas i /speldiagnos) gör ALDRIG körningen röd; de följer med i rapporten).
 //
 // HEMLIGHETEN: tävlingsgivarna härleds ur DAILY_SEED_SECRET (HMAC, samma som
 // servern). Den läses ur miljön eller ur .env.local (gitignorad via *.local) —
@@ -34,6 +38,7 @@ import type { Strain } from './play'
 
 const START = process.env.TAVLING_DIAG ?? ''
 const DAGAR = Number(process.env.TAVLING_DAGAR ?? 1)
+const HAVERI_ROTT = process.env.TAVLING_HAVERI_ROTT === '1'
 const BRICKOR = 12
 
 /** Hemligheten ur miljön eller .env.local — utan att någonsin skrivas ut. */
@@ -66,10 +71,15 @@ it.skipIf(!START)('tävlingsförscreening', { timeout: 0 }, async () => {
   const dds = await getDds()
   mkdirSync(join(process.cwd(), 'revisor-output'), { recursive: true })
 
+  // Haverier över ALLA dagar — asserten görs EFTER loopen så varje dags
+  // rapportfiler alltid hinner skrivas innan en röd körning avbryter.
+  const haverierAlla: string[] = []
+
   for (let dag = 0; dag < DAGAR; dag++) {
     const datum = datumPlus(START, dag)
     const rader: string[] = [`=== TÄVLINGSFÖRSCREENING ${datum} (${BRICKOR} brickor, alla säten = bot) ===`]
     const larm: string[] = []
+    const haverier: string[] = []
     const json: unknown[] = []
 
     for (let board = 1; board <= BRICKOR; board++) {
@@ -77,14 +87,14 @@ it.skipIf(!START)('tävlingsförscreening', { timeout: 0 }, async () => {
       const playSeed = playSeedForBoard(secret!, datum, board)
       const history = botAuction(deal)
       if (!history) {
-        larm.push(`bricka ${board}: AUKTIONEN TERMINERADE ALDRIG — motorfel, MÅSTE granskas!`)
+        haverier.push(`${datum} bricka ${board}: AUKTIONEN TERMINERADE ALDRIG — motorfel, MÅSTE granskas!`)
         json.push({ board, fel: 'auktion-terminerade-aldrig' })
         continue
       }
       const oracle = computeOracle(dds, deal)
       const verdict = judgeDeal(deal, history, oracle.solve, board, oracle.parNS)
       if (!verdict) {
-        larm.push(`bricka ${board}: DD-oraklet kunde inte lösa given — granska!`)
+        haverier.push(`${datum} bricka ${board}: DD-oraklet kunde inte lösa given — granska!`)
         json.push({ board, fel: 'olosbar' })
         continue
       }
@@ -117,10 +127,19 @@ it.skipIf(!START)('tävlingsförscreening', { timeout: 0 }, async () => {
     }
 
     rader.push('')
-    rader.push(larm.length === 0 ? 'INGA LARM — dagen ser ren ut.' : `LARM (${larm.length}):\n  ` + larm.join('\n  '))
+    if (haverier.length > 0) rader.push(`🔴 HAVERIER (${haverier.length}):\n  ` + haverier.join('\n  '))
+    rader.push(larm.length === 0 ? 'Inga mjuka larm — dagen ser ren ut.' : `LARM (${larm.length}, klassas i /speldiagnos — gör aldrig körningen röd):\n  ` + larm.join('\n  '))
     const text = rader.join('\n')
     console.log('\n' + text + '\n')
-    writeFileSync(join(process.cwd(), 'revisor-output', `tavlingsdiagnos-${datum}.json`), JSON.stringify({ datum, larm, brickor: json }, null, 2), 'utf8')
+    writeFileSync(join(process.cwd(), 'revisor-output', `tavlingsdiagnos-${datum}.json`), JSON.stringify({ datum, haverier, larm, brickor: json }, null, 2), 'utf8')
     writeFileSync(join(process.cwd(), 'revisor-output', `tavlingsdiagnos-${datum}.txt`), text, 'utf8')
+    haverierAlla.push(...haverier)
+  }
+
+  // Nattvaktens rödkriterium (steg 1): ENBART objektiva haverier fäller
+  // körningen. Krascher fäller den av sig själva (testet kastar). Mjuka larm
+  // gör det aldrig — "RÄTT, inte max antal stick" gäller även vakten.
+  if (HAVERI_ROTT) {
+    expect(haverierAlla, `HAVERIER i förscreeningen:\n${haverierAlla.join('\n')}`).toEqual([])
   }
 })

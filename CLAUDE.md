@@ -24,9 +24,13 @@ efter ägarens ja. **S0–S5 körda, tretton fixar landade 2026-08-12/13**
 fixar: öppningslöftet i poäng · robusthetsnätet · utspelsavkodningens
 vakter · tvingade återbud ≠ 6+; spelförarflaggorna 307→277 och försvaret
 217→193 = seriens största samlade kliv — MC kör nu slutspel där den förut
-föll ur). Tävlingsspeldumpen: `DUMP_TAVLING=<datum>:<bricka>`. **NÄSTA
-GÅNG: ägarens val** — kandidater: masktekniken i trumfdragningen (SENARE) ·
-förscreena nästa tävlingsdag · ny granskningsrunda på S5-koden.
+föll ur). Tävlingsspeldumpen: `DUMP_TAVLING=<datum>:<bricka>`.
+**NATTVAKTEN BYGGD 2026-08-14** (ägarbeslut): schemalagd förscreening varje
+kväll i Actions (`tavling-forscreening.yml`, imorgon + övermorgon; röd =
+ENBART objektivt haveri → mejl; rapporter som artefakt; detalj + medvetna
+icke-byggen i `docs/speldiagnos.md`). **NÄSTA GÅNG: ägarens val** —
+kandidater: masktekniken i trumfdragningen (SENARE) · ny granskningsrunda
+på S5-koden.
 
 ---
 

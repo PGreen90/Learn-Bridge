@@ -72,11 +72,29 @@ ALDRIG i `.env` som är spårad av git):
 Bash:  TAVLING_DIAG=<YYYY-MM-DD> npx vitest run src/lib/engine/tavlingsdiagnos.probe.test.ts
 ```
 
-Ratt: `TAVLING_DAGAR` (dagar i följd, standard 1). **Ärlig begränsning:**
-förscreeningen spelar alla fyra säten med boten — även Syd, som i tävlingen är
-en människa. Fel som bara uppstår vid mänskliga val syns inte; den fångar
-krascher, icke-terminerande auktioner, absurda kontrakt och botlarm på just de
-12 givarna. Komplement till `/felrapporter`, inte ersättning.
+Rattar: `TAVLING_DAGAR` (dagar i följd, standard 1) · `TAVLING_HAVERI_ROTT=1`
+(testet failar ENBART på objektiva haverier — krasch, icke-terminerande
+auktion, olösbar giv; mjuka larm gör aldrig körningen röd). **Ärlig
+begränsning:** förscreeningen spelar alla fyra säten med boten — även Syd, som
+i tävlingen är en människa. Fel som bara uppstår vid mänskliga val syns inte;
+den fångar krascher, icke-terminerande auktioner, absurda kontrakt och botlarm
+på just de 12 givarna. Komplement till `/felrapporter`, inte ersättning.
+
+**Nattvakten (steg 1, ägarbeslut 2026-08-14):** den schemalagda workflowen
+`.github/workflows/tavling-forscreening.yml` kör förscreeningen varje kväll
+18:30 UTC (20:30 svensk sommartid) på ubuntu-latest: morgondagen +
+övermorgondagen (`TAVLING_DAGAR=2` = minst ett dygns reparationsfönster), med
+`TAVLING_HAVERI_ROTT=1` och `DAILY_SEED_SECRET` ur repo-hemligheterna.
+**Röd körning = objektivt haveri** (GitHub mejlar ägaren); rapporterna laddas
+alltid upp som artefakt (`tavlingsdiagnos-rapporter`, 30 dagar). Ingen AI,
+ingen produktionspåverkan — ren deterministisk kod på klocka. Manuell körning:
+Actions-fliken → "Tävlingsförscreening (nattvakt)" → Run workflow. DD-/bud-
+larmen i rapporterna klassas som vanligt i `/speldiagnos`-rundor — vakten
+dömer aldrig bridge, bara haverier. **Medvetet INTE byggt (ägardialog
+2026-08-14):** automatiskt byte av larmande givar (skulle dölja fel och
+snedvrida urvalet mot enkla givar — fel bor i logiken, inte i given) och
+bytesmekanism för havererade brickor (byggs först om ett rött larm faktiskt
+inträffar och fixen inte hinner före dagsöppning — egen grindad runda då).
 
 ## Arbetsgången (kodifierad i `/speldiagnos`)
 
