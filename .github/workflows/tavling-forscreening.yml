@@ -1,0 +1,56 @@
+name: Tävlingsförscreening (nattvakt)
+
+# NATTVAKTEN (steg 1, ägarbeslut 2026-08-14): spelar morgondagens OCH
+# övermorgondagens 12 tävlingsbrickor med bottarna varje kväll, INNAN de går
+# live. Två dagar = minst ett dygns reparationsfönster om något är trasigt.
+#
+# RÖD körning betyder ENBART objektivt haveri: krasch, auktion som aldrig
+# terminerar, eller giv som DD-oraklet inte kan lösa (TAVLING_HAVERI_ROTT=1 i
+# proben). Mjuka larm (budtapp/speltapp — mest ärliga missar) gör ALDRIG
+# körningen röd; de följer med i rapport-artefakten och klassas i /speldiagnos.
+# Rött → GitHub mejlar ägaren; rapporterna laddas alltid upp som artefakt.
+#
+# Ingen AI och ingen produktionspåverkan: detta är ren deterministisk kod på en
+# schemalagd molnmaskin. Deploygrinden (ci-deploy.yml) är orörd.
+
+on:
+  schedule:
+    # 18:30 UTC = 20:30 svensk sommartid / 19:30 vintertid — kvällen innan.
+    - cron: '30 18 * * *'
+  # Manuell körning (test/extra screening) från Actions-fliken.
+  workflow_dispatch:
+
+concurrency:
+  group: tavling-forscreening
+  cancel-in-progress: false
+
+jobs:
+  forscreening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Förscreena morgondagen + övermorgon
+        env:
+          DAILY_SEED_SECRET: ${{ secrets.DAILY_SEED_SECRET }}
+        run: |
+          IMORGON=$(TZ=Europe/Stockholm date -d 'tomorrow' +%F)
+          echo "Screenar $IMORGON + dagen efter (Europe/Stockholm)"
+          TAVLING_DIAG=$IMORGON TAVLING_DAGAR=2 TAVLING_HAVERI_ROTT=1 \
+            npx vitest run src/lib/engine/tavlingsdiagnos.probe.test.ts
+
+      - name: Ladda upp rapporterna (även vid rött)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tavlingsdiagnos-rapporter
+          path: revisor-output/tavlingsdiagnos-*
+          retention-days: 30
