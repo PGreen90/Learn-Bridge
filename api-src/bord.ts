@@ -31,6 +31,17 @@ import {
   nyBordKod,
 } from './_lib/bord-grund'
 import { KVOTER, kvotOk, type KvotHandling } from './_lib/kvot'
+import {
+  bordGiv,
+  bordPlaySeed,
+  drivFram,
+  givStartHandelse,
+  projiceraGiv,
+  utforDrag,
+  type BordDrag,
+  type GivHandelse,
+  type NyHandelse,
+} from './_lib/bord-motor'
 
 // ---------------------------------------------------------------------------
 // Små hjälpare (samma mönster som skicka-in.ts — funktionerna är medvetet
@@ -168,6 +179,8 @@ type StolRad = {
   status: 'aktiv' | 'paus' | 'borta'
   aktiv: boolean
   joined_at: string | null
+  /** Ägaren har reserverat stolen som bot (0008) — människor kan inte ta den. */
+  bot_reserverad: boolean
 }
 
 type HandelseRad = {
@@ -179,7 +192,7 @@ type HandelseRad = {
 }
 
 const BORD_KOLUMNER = 'id,kod,owner_id,status,spelform,givar,tempo,privat,aktuell_giv'
-const STOL_KOLUMNER = 'table_id,seat,user_id,typ,status,aktiv,joined_at'
+const STOL_KOLUMNER = 'table_id,seat,user_id,typ,status,aktiv,joined_at,bot_reserverad'
 const HANDELSE_KOLUMNER = 'seq,giv,typ,seat,data'
 
 async function hamtaBord(m: Miljo, kod: string): Promise<BordRad | null> {
@@ -230,14 +243,20 @@ async function hamtaHandelser(m: Miljo, tableId: string, franSeq: number): Promi
 
 /** Bokför händelser i loggen. Sekvensvakten: läs huvudet, skriv head+1.. i EN
  *  batch — krockar två skrivare tar primärnyckeln (table_id, seq) smällen och
- *  förloraren läser om och försöker igen. Returnerar nya huvudet. */
+ *  förloraren läser om och försöker igen. Returnerar nya huvudet + raderna.
+ *
+ *  `basHead`: skriv EXAKT ovanpå det här sekvensnumret, utan omtag — dragvägen
+ *  (4B) har validerat mot loggen vid basHead, och har någon annan hunnit skriva
+ *  är valideringen inaktuell: då returneras null och kallaren svarar 409 så
+ *  klienten läser om och försöker igen. */
 async function laggTillHandelser(
   m: Miljo,
   tableId: string,
   handelser: Array<{ giv?: number; typ: string; seat?: Stol | null; data?: unknown }>,
-): Promise<number> {
+  basHead?: number,
+): Promise<{ senasteSeq: number; rader: HandelseRad[] } | null> {
   for (let forsok = 0; forsok < 3; forsok++) {
-    const head = await hamtaSenasteSeq(m, tableId)
+    const head = basHead ?? (await hamtaSenasteSeq(m, tableId))
     const rader = handelser.map((h, i) => ({
       table_id: tableId,
       seq: head + 1 + i,
@@ -247,9 +266,48 @@ async function laggTillHandelser(
       data: h.data ?? {},
     }))
     const svar = await restPost(m, 'table_events', rader)
-    if (svar.status !== 409) return head + handelser.length
+    if (svar.status !== 409) {
+      return {
+        senasteSeq: head + handelser.length,
+        rader: rader.map((r) => ({ seq: r.seq, giv: r.giv, typ: r.typ, seat: r.seat, data: r.data })),
+      }
+    }
+    if (basHead !== undefined) return null // dragvägen: aldrig omtag på inaktuell bas
   }
   throw new Error('kapplöpning om sekvensnumret — försök igen')
+}
+
+/** Bordets hemliga frö — hämtas BARA av start/drag-vägarna, skickas aldrig
+ *  till klienten (därför ingår det inte i BORD_KOLUMNER). */
+async function hamtaSeed(m: Miljo, tableId: string): Promise<string> {
+  const rader = (await restGet(m, `tables?id=eq.${tableId}&select=seed`)) as Array<{ seed: string }>
+  if (!rader[0]) throw new Error('bordet saknar frö')
+  return rader[0].seed
+}
+
+/** Händelserna för EN giv (spelmotorns projektion läser bara bud/kort/trakarl/
+ *  giv-klar, men hela givens lista hämtas — indexet (table_id, giv) bär). */
+async function hamtaGivHandelser(m: Miljo, tableId: string, giv: number): Promise<GivHandelse[]> {
+  const rader = (await restGet(
+    m,
+    `table_events?table_id=eq.${tableId}&giv=eq.${giv}&select=${HANDELSE_KOLUMNER}&order=seq.asc&limit=500`,
+  )) as HandelseRad[]
+  return rader.map((r) => ({ typ: r.typ, seat: r.seat, data: r.data }))
+}
+
+/** Ställningen ({ns, ew}-totaler) EFTER senaste färdigspelade giv före `giv` —
+ *  läses ur den senaste giv-klar-händelsens inbakade ställning. */
+async function stallningFore(m: Miljo, tableId: string, giv: number): Promise<{ ns: number; ew: number }> {
+  const rader = (await restGet(
+    m,
+    `table_events?table_id=eq.${tableId}&typ=eq.giv-klar&giv=lt.${giv}&select=data&order=seq.desc&limit=1`,
+  )) as Array<{ data: { stallning?: { ns: number; ew: number } } }>
+  return rader[0]?.data.stallning ?? { ns: 0, ew: 0 }
+}
+
+/** Människostolarna (styrda av en aktiv människa) — botframdrivningens stopp. */
+function manniskoStolar(stolar: StolRad[]): Set<Stol> {
+  return new Set(stolar.filter((s) => s.user_id && s.typ === 'manniska').map((s) => s.seat))
 }
 
 async function rorBordet(m: Miljo, tableId: string): Promise<void> {
@@ -257,7 +315,8 @@ async function rorBordet(m: Miljo, tableId: string): Promise<void> {
 }
 
 /** Stolarna i klientform — user_id lämnar aldrig servern, bara visningsnamnet.
- *  I lobbyn visas en obemannad stol som "ledig" (bot sätts först vid start). */
+ *  I lobbyn visas en obemannad stol som "ledig" (bot sätts först vid start),
+ *  utom när ägaren reserverat den som bot (0008) — då visas den som bot direkt. */
 function stolarTillKlient(
   bord: BordRad,
   stolar: StolRad[],
@@ -265,7 +324,11 @@ function stolarTillKlient(
 ): Array<{ stol: Stol; typ: 'manniska' | 'bot' | 'ledig'; namn: string | null; status: string }> {
   return stolar.map((s) => ({
     stol: s.seat,
-    typ: s.user_id ? ('manniska' as const) : bord.status === 'lobby' ? ('ledig' as const) : ('bot' as const),
+    typ: s.user_id
+      ? ('manniska' as const)
+      : bord.status === 'lobby' && !s.bot_reserverad
+        ? ('ledig' as const)
+        : ('bot' as const),
     namn: s.user_id ? (namn.get(s.user_id) ?? null) : null,
     status: s.status,
   }))
@@ -500,7 +563,8 @@ async function hanteraGaMed(m: Miljo, userId: string, body: unknown, json: Svara
   if (min) return json(200, { ok: true, kod: bord.kod, stol: min.seat })
 
   const onskad = giltigStol(b.stol) ? b.stol : null
-  const lediga = stolar.filter((s) => !s.user_id).map((s) => s.seat)
+  // Reserverade botstolar (0008) är inte lediga för människor.
+  const lediga = stolar.filter((s) => !s.user_id && !s.bot_reserverad).map((s) => s.seat)
   if (!lediga.length) return json(409, { ok: false, fel: 'Bordet är fullt' })
   if (onskad && !lediga.includes(onskad)) {
     return json(409, { ok: false, fel: 'Stolen är upptagen — välj en annan' })
@@ -548,6 +612,27 @@ async function hanteraLage(
   const events = min ? await hamtaHandelser(m, bord.id, fran) : []
   const senasteSeq = events.length ? events[events.length - 1].seq : await hamtaSenasteSeq(m, bord.id)
 
+  // Din hand för pågående giv (4B, dolda händer): HELA den utdelade handen —
+  // klienten drar själv bort sina spelade kort. Bara din egen stol, aldrig
+  // någon annans; träkarlen kommer som händelse ('trakarl') när den avslöjas.
+  // Dessutom spelvyns startpaket: ställningen före aktuell giv + var givens
+  // händelser börjar i loggen (klienten behöver aldrig äldre händelser).
+  let dinHand: unknown = null
+  let stallning: { ns: number; ew: number } | null = null
+  let givStartSeq: number | null = null
+  if (min && (bord.status === 'spelar' || bord.status === 'klar') && bord.aktuell_giv >= 1) {
+    if (bord.status === 'spelar') {
+      const seed = await hamtaSeed(m, bord.id)
+      dinHand = bordGiv(seed, bord.aktuell_giv).hands[min.seat]
+    }
+    stallning = await stallningFore(m, bord.id, bord.aktuell_giv)
+    const startRad = (await restGet(
+      m,
+      `table_events?table_id=eq.${bord.id}&typ=eq.giv-start&select=seq&order=seq.desc&limit=1`,
+    )) as Array<{ seq: number }>
+    givStartSeq = startRad[0]?.seq ?? null
+  }
+
   return json(200, {
     ok: true,
     meta: {
@@ -567,6 +652,9 @@ async function hanteraLage(
     stolar: stolarTillKlient(bord, stolar, namn),
     events,
     senasteSeq,
+    dinHand,
+    stallning,
+    givStartSeq,
   })
 }
 
@@ -614,6 +702,30 @@ async function hanteraStol(m: Miljo, userId: string, body: unknown, json: Svara)
   const namn = await visningsnamn(m, [userId])
   const mittNamn = namn.get(userId) ?? null
 
+  if (handling === 'satt-bot' || handling === 'oppna-stol') {
+    // Reservera en ledig stol som bot / öppna den igen (0008). Bara ägaren,
+    // bara i lobbyn — efter start ÄR obemannade stolar bottar ändå.
+    if (bord.owner_id !== userId) {
+      return json(403, { ok: false, fel: 'Bara bordets ägare kan reservera stolar' })
+    }
+    if (bord.status !== 'lobby') {
+      return json(409, { ok: false, fel: 'Stolar reserveras före start' })
+    }
+    const stol = b.stol
+    if (!giltigStol(stol)) return json(400, { ok: false, fel: 'Ogiltig stol' })
+    const rad = stolar.find((s) => s.seat === stol)
+    if (!rad || rad.user_id) return json(409, { ok: false, fel: 'Stolen är inte ledig' })
+    const reservera = handling === 'satt-bot'
+    await restPatch(m, `table_seats?table_id=eq.${bord.id}&seat=eq.${stol}&user_id=is.null`, {
+      bot_reserverad: reservera,
+    })
+    await laggTillHandelser(m, bord.id, [
+      { typ: 'stol', seat: stol, data: { handling: reservera ? 'bot-reserverad' : 'stol-oppnad' } },
+    ])
+    await rorBordet(m, bord.id)
+    return json(200, { ok: true })
+  }
+
   if (handling === 'byt-stol') {
     if (bord.status !== 'lobby') {
       return json(409, { ok: false, fel: 'Stolbyte går bara före start' })
@@ -621,6 +733,10 @@ async function hanteraStol(m: Miljo, userId: string, body: unknown, json: Svara)
     const till = b.stol
     if (!giltigStol(till)) return json(400, { ok: false, fel: 'Ogiltig stol' })
     if (till === min.seat) return json(200, { ok: true, stol: min.seat })
+    const målRad = stolar.find((s) => s.seat === till)
+    if (målRad?.bot_reserverad) {
+      return json(409, { ok: false, fel: 'Stolen är reserverad för en bot' })
+    }
     // Frigör först (annars bråkar "en stol per användare"-indexet), ta sedan
     // den nya; misslyckas anspråket tas den gamla tillbaka.
     await frigorStol(m, bord.id, min.seat)
@@ -665,6 +781,155 @@ async function hanteraStol(m: Miljo, userId: string, body: unknown, json: Svara)
   return json(400, { ok: false, fel: 'Okänd stolhandling' })
 }
 
+/** Ägaren startar bordet: obemannade stolar blir bottar, första given genereras
+ *  och bottarna spelar fram till första människans tur — allt i EN händelsebatch. */
+async function hanteraStart(m: Miljo, userId: string, body: unknown, json: Svara): Promise<void> {
+  const b = (body ?? {}) as Record<string, unknown>
+  const kod = typeof b.kod === 'string' ? b.kod.trim().toUpperCase() : ''
+  if (!giltigBordKod(kod)) return json(400, { ok: false, fel: 'Ogiltig bordskod' })
+  const bord = await hamtaBord(m, kod)
+  if (!bord) return json(404, { ok: false, fel: 'Bordet finns inte längre' })
+  if (bord.owner_id !== userId) {
+    return json(403, { ok: false, fel: 'Bara bordets ägare kan starta spelet' })
+  }
+  if (bord.spelform !== 'full') {
+    // Läge 1 (endast budgivning) och läge 2 (endast spelföring) byggs i 4D.
+    return json(409, { ok: false, fel: 'Den här spelformen kommer i nästa delleverans' })
+  }
+
+  // Villkorad statusövergång = startvakten: bara EN kallare vinner lobby→spelar.
+  const overgang = await restPatch(
+    m,
+    `tables?id=eq.${bord.id}&status=eq.lobby`,
+    { status: 'spelar', aktuell_giv: 1, last_activity: new Date().toISOString() },
+    { representation: true },
+  )
+  if (!overgang.rader.length) {
+    return json(409, { ok: false, fel: 'Bordet är redan startat' })
+  }
+
+  // Obemannade stolar blir bottar (reserverade är det redan i praktiken).
+  await restPatch(m, `table_seats?table_id=eq.${bord.id}&user_id=is.null`, { typ: 'bot' })
+
+  const stolar = await hamtaStolar(m, bord.id)
+  const seed = await hamtaSeed(m, bord.id)
+  const deal = bordGiv(seed, 1)
+  const handelser: NyHandelse[] = [
+    { giv: 0, typ: 'bord-startat', data: {} },
+    givStartHandelse(deal, 1),
+  ]
+  const givLista: GivHandelse[] = handelser
+    .filter((h) => h.giv === 1)
+    .map((h) => ({ typ: h.typ, seat: h.seat ?? null, data: h.data ?? {} }))
+  handelser.push(
+    ...drivFram(deal, 1, givLista, {
+      manniskoStolar: manniskoStolar(stolar),
+      playSeed: bordPlaySeed(seed, 1),
+      stallning: { ns: 0, ew: 0 },
+    }),
+  )
+  const skrivet = await laggTillHandelser(m, bord.id, handelser)
+  return json(200, { ok: true, senasteSeq: skrivet?.senasteSeq ?? 0 })
+}
+
+/** Ett mänskligt drag (bud/kort/nästa giv). Sekvensvakten: klienten skickar
+ *  `basSeq` = senaste sekvensnummer den sett; stämmer det inte med loggens
+ *  huvud svarar vi 409 med färskt huvud (klienten hämtar ikapp och försöker
+ *  igen om det fortfarande är dess tur). Draget + alla botsvar bokförs som EN
+ *  batch ovanpå basSeq — primärnyckeln gör kapplöpningar ofarliga. */
+async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara): Promise<void> {
+  const b = (body ?? {}) as Record<string, unknown>
+  const kod = typeof b.kod === 'string' ? b.kod.trim().toUpperCase() : ''
+  if (!giltigBordKod(kod)) return json(400, { ok: false, fel: 'Ogiltig bordskod' })
+  const basSeq = Number(b.basSeq)
+  if (!Number.isInteger(basSeq) || basSeq < 0) {
+    return json(400, { ok: false, fel: 'Ogiltigt basSeq' })
+  }
+  const bord = await hamtaBord(m, kod)
+  if (!bord) return json(404, { ok: false, fel: 'Bordet finns inte längre' })
+  if (bord.status !== 'spelar') return json(409, { ok: false, fel: 'Bordet spelar inte' })
+  const stolar = await hamtaStolar(m, bord.id)
+  const min = stolar.find((s) => s.user_id === userId)
+  if (!min) return json(403, { ok: false, fel: 'Du sitter inte vid det här bordet' })
+
+  const head = await hamtaSenasteSeq(m, bord.id)
+  if (basSeq !== head) return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: head })
+
+  const seed = await hamtaSeed(m, bord.id)
+  const giv = bord.aktuell_giv
+  const deal = bordGiv(seed, giv)
+  const givLista = await hamtaGivHandelser(m, bord.id, giv)
+  const lage = projiceraGiv(deal, givLista)
+  const dragRaw = b.drag as Record<string, unknown> | null
+
+  // --- Nästa giv (efter giv-klar-revealen) -------------------------------
+  if (dragRaw?.typ === 'nasta-giv') {
+    if (!lage.givKlar) return json(409, { ok: false, fel: 'Given är inte färdigspelad' })
+    const stallning = await stallningFore(m, bord.id, giv + 1)
+    if (giv >= bord.givar) {
+      // Sista given: bordet är färdigspelat. Stolarna släpps (aktiv=false) så
+      // spelarna kan starta/sätta sig vid nya bord; raderna finns kvar för visning.
+      await restPatch(m, `tables?id=eq.${bord.id}`, { status: 'klar' })
+      await restPatch(m, `table_seats?table_id=eq.${bord.id}`, { aktiv: false })
+      const skrivet = await laggTillHandelser(
+        m,
+        bord.id,
+        [{ giv: 0, typ: 'bord-klar', data: { stallning } }],
+        basSeq,
+      )
+      if (!skrivet) {
+        return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: await hamtaSenasteSeq(m, bord.id) })
+      }
+      return json(200, { ok: true, events: skrivet.rader, senasteSeq: skrivet.senasteSeq })
+    }
+    const nastaGiv = giv + 1
+    const nastaDeal = bordGiv(seed, nastaGiv)
+    const handelser: NyHandelse[] = [givStartHandelse(nastaDeal, nastaGiv)]
+    handelser.push(
+      ...drivFram(
+        nastaDeal,
+        nastaGiv,
+        handelser.map((h) => ({ typ: h.typ, seat: h.seat ?? null, data: h.data ?? {} })),
+        { manniskoStolar: manniskoStolar(stolar), playSeed: bordPlaySeed(seed, nastaGiv), stallning },
+      ),
+    )
+    const skrivet = await laggTillHandelser(m, bord.id, handelser, basSeq)
+    if (!skrivet) {
+      return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: await hamtaSenasteSeq(m, bord.id) })
+    }
+    await restPatch(m, `tables?id=eq.${bord.id}`, {
+      aktuell_giv: nastaGiv,
+      last_activity: new Date().toISOString(),
+    })
+    return json(200, { ok: true, events: skrivet.rader, senasteSeq: skrivet.senasteSeq })
+  }
+
+  // --- Bud / kort ---------------------------------------------------------
+  if (dragRaw?.typ !== 'bud' && dragRaw?.typ !== 'kort') {
+    return json(400, { ok: false, fel: 'Ogiltigt drag' })
+  }
+  const drag = dragRaw as unknown as BordDrag
+  const utfall = utforDrag(deal, giv, lage, min.seat, drag)
+  if (!utfall.ok) return json(400, { ok: false, fel: utfall.fel })
+
+  const handelser: NyHandelse[] = [utfall.handelse]
+  const stallning = await stallningFore(m, bord.id, giv)
+  handelser.push(
+    ...drivFram(
+      deal,
+      giv,
+      [...givLista, { typ: utfall.handelse.typ, seat: utfall.handelse.seat ?? null, data: utfall.handelse.data ?? {} }],
+      { manniskoStolar: manniskoStolar(stolar), playSeed: bordPlaySeed(seed, giv), stallning },
+    ),
+  )
+  const skrivet = await laggTillHandelser(m, bord.id, handelser, basSeq)
+  if (!skrivet) {
+    return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: await hamtaSenasteSeq(m, bord.id) })
+  }
+  await rorBordet(m, bord.id)
+  return json(200, { ok: true, events: skrivet.rader, senasteSeq: skrivet.senasteSeq })
+}
+
 // ---------------------------------------------------------------------------
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -684,7 +949,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const url = new URL(req.url ?? '/', 'http://localhost')
   const h = url.searchParams.get('h') ?? ''
   const GET_HANDLINGAR = ['lista', 'lage']
-  const POST_HANDLINGAR = ['skapa', 'ga-med', 'hjartslag', 'stol']
+  const POST_HANDLINGAR = ['skapa', 'ga-med', 'hjartslag', 'stol', 'start', 'drag']
   const kravdMetod = GET_HANDLINGAR.includes(h) ? 'GET' : POST_HANDLINGAR.includes(h) ? 'POST' : null
   if (!kravdMetod) return json(400, { ok: false, fel: 'Okänd handling' })
   if (req.method !== kravdMetod) return json(405, { ok: false, fel: `${kravdMetod} krävs` })
@@ -716,6 +981,10 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         return await hanteraHjartslag(m, userId, body, json)
       case 'stol':
         return await hanteraStol(m, userId, body, json)
+      case 'start':
+        return await hanteraStart(m, userId, body, json)
+      case 'drag':
+        return await hanteraDrag(m, userId, body, json)
       default:
         return json(400, { ok: false, fel: 'Okänd handling' })
     }

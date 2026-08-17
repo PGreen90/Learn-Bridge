@@ -10,7 +10,7 @@
 // klienten sett hämtas läget om. Bordet fungerar alltså även om realtidskanalen
 // är nere, bara långsammare.
 
-import type { Seat } from '../../types/bridge'
+import type { Card, Seat } from '../../types/bridge'
 import { getCurrentSession } from './auth'
 import { getSupabase, hasSupabaseConfig } from './supabase'
 
@@ -66,6 +66,13 @@ export interface BordLage {
   stolar: BordStol[]
   events: BordHandelse[]
   senasteSeq: number
+  /** Din HELA utdelade hand för pågående giv (4B, dolda händer) — klienten drar
+   *  själv bort sina spelade kort. null utanför spel/din stol. */
+  dinHand: Card[] | null
+  /** Ställningen ({ns, ew}) före aktuell giv. null utanför spel. */
+  stallning: { ns: number; ew: number } | null
+  /** Sekvensnumret för aktuella givens giv-start — äldre händelser behövs aldrig. */
+  givStartSeq: number | null
 }
 
 /** Alla anrop svarar i den här formen — kallaren grenkar på `ok` utan try/catch. */
@@ -147,7 +154,7 @@ export function bordHjartslag(
   return anrop('POST', 'hjartslag', { body: { kod, seq } })
 }
 
-export type StolHandling = 'byt-stol' | 'lamna' | 'avsluta'
+export type StolHandling = 'byt-stol' | 'lamna' | 'avsluta' | 'satt-bot' | 'oppna-stol'
 
 export function stolHandling(
   kod: string,
@@ -155,6 +162,27 @@ export function stolHandling(
   stol?: Seat,
 ): Promise<BordSvar<{ stol?: Seat; avslutat?: boolean }>> {
   return anrop('POST', 'stol', { body: { kod, handling, stol } })
+}
+
+/** Ägaren startar bordet (4B): tomma stolar blir bottar, första given delas. */
+export function startaBord(kod: string): Promise<BordSvar<{ senasteSeq: number }>> {
+  return anrop('POST', 'start', { body: { kod } })
+}
+
+/** Ett drag vid bordet: bud, kort eller "nästa giv". `basSeq` = senaste
+ *  sekvensnummer klienten sett — stämmer det inte svarar servern 409 med
+ *  färskt huvud (hämta ikapp och försök igen om det fortfarande är din tur). */
+export type BordDragInput =
+  | { typ: 'bud'; bid: string }
+  | { typ: 'kort'; card: Card }
+  | { typ: 'nasta-giv' }
+
+export function skickaDrag(
+  kod: string,
+  basSeq: number,
+  drag: BordDragInput,
+): Promise<BordSvar<{ events: BordHandelse[]; senasteSeq: number }>> {
+  return anrop('POST', 'drag', { body: { kod, basSeq, drag } })
 }
 
 // ---------------------------------------------------------------------------
