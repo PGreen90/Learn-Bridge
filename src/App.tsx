@@ -27,6 +27,11 @@ const SpelHistorik = lazy(() =>
   import('./pages/SpelHistorik').then((m) => ({ default: m.SpelHistorik })),
 )
 const Om = lazy(() => import('./pages/Om').then((m) => ({ default: m.Om })))
+// Spela med vänner (Beslut B etapp 4): lobbyn + bordsskärmen (väntrum → spel).
+const SpelaMedVanner = lazy(() =>
+  import('./pages/bord/SpelaMedVanner').then((m) => ({ default: m.SpelaMedVanner })),
+)
+const Bord = lazy(() => import('./pages/bord/Bord').then((m) => ({ default: m.Bord })))
 const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })))
 
 // Konton (Beslut B etapp 1): inloggning, registrering och länklandningen.
@@ -96,6 +101,10 @@ export default function App() {
           {/* Frispelets resultathistorik (2026-08-03): senaste givarna, alla
               omspelbara via sitt frö. */}
           <Route path="spela-kort/historik" element={<SpelHistorik />} />
+          {/* Spela med vänner (Beslut B etapp 4): lobbyn i normal layout; själva
+              bordet (/bord/:kod, delbar inbjudningslänk) är immersivt. */}
+          <Route path="spela-med-vanner" element={<SpelaMedVanner />} />
+          <Route path="bord/:kod" element={<Bord />} />
           <Route path="installningar" element={<Settings />} />
           {/* Om rebidz (Etapp D): onboardingen — nås från startsidan + sidfoten. */}
           <Route path="om" element={<Om />} />

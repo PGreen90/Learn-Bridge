@@ -13,6 +13,7 @@ const NAV = [
   { to: '/budtraning', label: 'Budträning', end: false },
   { to: '/budvisning', label: 'Budvisning', end: false },
   { to: '/spela-kort', label: 'Spela kort', end: false },
+  { to: '/spela-med-vanner', label: 'Spela med vänner', end: false },
   { to: '/budsystem', label: 'Budsystem', end: false },
   { to: '/installningar', label: 'Inställningar', end: false },
 ]
@@ -54,7 +55,9 @@ export function Layout() {
   // eller marginal (ägarbeslut 2026-07-31). Övriga sidor behåller den centrerade,
   // paddade spalten.
   // startsWith: även Dagens giv (/spela-kort/dagens) spelas i helskärm.
-  const immersive = location.pathname.startsWith('/spela-kort')
+  // /bord/ = vänner-bordet (Beslut B etapp 4) — samma helskärm, vinröd duk.
+  const immersive =
+    location.pathname.startsWith('/spela-kort') || location.pathname.startsWith('/bord/')
 
   // Ljust/mörkt läge: månen tänder mörkret, solen släcker det.
   const themeButton = (

@@ -17,7 +17,7 @@ import { pathToFileURL } from 'node:url'
 import { join } from 'node:path'
 import { existsSync, readFileSync } from 'node:fs'
 
-const FUNKTIONER = ['dagens-tavling', 'generera-dagens-givar', 'giv-resultat', 'skicka-in', 'topplista']
+const FUNKTIONER = ['bord', 'dagens-tavling', 'generera-dagens-givar', 'giv-resultat', 'skicka-in', 'topplista']
 
 describe('api-buntning (Beslut B etapp 2 steg 1)', () => {
   beforeAll(() => {
