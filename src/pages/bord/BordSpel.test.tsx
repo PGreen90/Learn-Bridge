@@ -41,6 +41,7 @@ const h = (typ: string, seat: Seat | null, data: unknown, giv = 1): BordHandelse
 
 /** Det mockade serverläget — sätts per test före render. */
 let svarEvents: BordHandelse[] = []
+let svarBegaranden: Array<{ stol: Seat; slag: 'paus' | 'lamna'; namn: string | null }> = []
 
 vi.mock('../../lib/backend/bord', () => ({
   hamtaBordLage: vi.fn(async () => ({
@@ -68,6 +69,7 @@ vi.mock('../../lib/backend/bord', () => ({
     dinHand: MIN_HAND,
     stallning: { ns: 0, ew: 0 },
     givStartSeq: 1,
+    begaranden: svarBegaranden,
   })),
   bordHjartslag: vi.fn(async () => ({ ok: true, senasteSeq: 0, events: [] })),
   skickaDrag: vi.fn(async () => ({ ok: true, events: [], senasteSeq: 0 })),
@@ -78,6 +80,7 @@ import { BordSpel } from './BordSpel'
 
 afterEach(() => {
   cleanup()
+  svarBegaranden = []
 })
 
 function rendera() {
@@ -100,6 +103,19 @@ describe('BordSpel — röktest', () => {
     expect(screen.getByText(/Patrik \(du\)/)).toBeTruthy() // namnraden
     expect(screen.getByText(/Giv 1 av 4/)).toBeTruthy() // givbrickan
     expect(screen.getByText('HCP 10')).toBeTruthy() // ess+kung+dam+knekt i MIN_HAND
+  })
+
+  test('4C: ägaren ser godkännande-bannern för en väntande begäran', async () => {
+    seq = 0
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' }),
+      h('bud', 'N', { bid: '1S' }),
+    ]
+    svarBegaranden = [{ stol: 'E', slag: 'paus', namn: 'Anna' }]
+    rendera()
+    expect(await screen.findByText(/ber om paus/)).toBeTruthy()
+    expect(screen.getByText('Godkänn')).toBeTruthy()
+    expect(screen.getByText('Neka')).toBeTruthy()
   })
 
   test('spelfasen renderar: stickräknaren och min klickbara hand', async () => {

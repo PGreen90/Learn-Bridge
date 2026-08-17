@@ -32,6 +32,12 @@ import {
 } from './_lib/bord-grund'
 import { KVOTER, kvotOk, type KvotHandling } from './_lib/kvot'
 import {
+  narvaroBeslut,
+  vantandeBegaranden,
+  type NarvaroBegaran,
+  type NarvaroStol,
+} from './_lib/bord-narvaro'
+import {
   bordGiv,
   bordPlaySeed,
   drivFram,
@@ -179,6 +185,7 @@ type StolRad = {
   status: 'aktiv' | 'paus' | 'borta'
   aktiv: boolean
   joined_at: string | null
+  last_seen_at: string | null
   /** Ägaren har reserverat stolen som bot (0008) — människor kan inte ta den. */
   bot_reserverad: boolean
 }
@@ -192,7 +199,8 @@ type HandelseRad = {
 }
 
 const BORD_KOLUMNER = 'id,kod,owner_id,status,spelform,givar,tempo,privat,aktuell_giv'
-const STOL_KOLUMNER = 'table_id,seat,user_id,typ,status,aktiv,joined_at,bot_reserverad'
+const STOL_KOLUMNER =
+  'table_id,seat,user_id,typ,status,aktiv,joined_at,last_seen_at,bot_reserverad'
 const HANDELSE_KOLUMNER = 'seq,giv,typ,seat,data'
 
 async function hamtaBord(m: Miljo, kod: string): Promise<BordRad | null> {
@@ -305,9 +313,92 @@ async function stallningFore(m: Miljo, tableId: string, giv: number): Promise<{ 
   return rader[0]?.data.stallning ?? { ns: 0, ew: 0 }
 }
 
-/** Människostolarna (styrda av en aktiv människa) — botframdrivningens stopp. */
+/** Människostolarna (styrda av en aktiv människa) — botframdrivningens stopp.
+ *  4C: paus/borta räknas INTE — boten spelar de stolarna tills människan
+ *  återtar dem. */
 function manniskoStolar(stolar: StolRad[]): Set<Stol> {
-  return new Set(stolar.filter((s) => s.user_id && s.typ === 'manniska').map((s) => s.seat))
+  return new Set(
+    stolar
+      .filter((s) => s.user_id && s.typ === 'manniska' && s.status === 'aktiv')
+      .map((s) => s.seat),
+  )
+}
+
+/** De väntande paus-/lämna-begärandena, ur händelseloggen (4C). */
+async function hamtaBegaranden(m: Miljo, tableId: string): Promise<NarvaroBegaran[]> {
+  const rader = (await restGet(
+    m,
+    `table_events?table_id=eq.${tableId}&typ=in.(paus-begaran,lamna-begaran,paus-svar,lamna-svar,stol)` +
+      `&select=typ,seat,data,created_at&order=seq.asc&limit=500`,
+  )) as Array<{ typ: string; seat: Stol | null; data: unknown; created_at: string }>
+  return vantandeBegaranden(
+    rader.map((r) => ({ typ: r.typ, seat: r.seat, data: r.data, tidMs: Date.parse(r.created_at) })),
+  )
+}
+
+/** Verkställ en godkänd PAUS: stolen spelas av boten tills människan återtar. */
+async function verkstallPaus(m: Miljo, bordId: string, stol: Stol): Promise<void> {
+  await restPatch(m, `table_seats?table_id=eq.${bordId}&seat=eq.${stol}`, { status: 'paus' })
+  await laggTillHandelser(m, bordId, [
+    { typ: 'paus-svar', seat: stol, data: { godkand: true } },
+  ])
+}
+
+/** Verkställ ett godkänt LÄMNANDE: stolen frigörs (bot tills vidare, kan tas
+ *  av en ny människa på publika bord). Lämnar ÄGAREN flyttas värdskapet till
+ *  människan som suttit längst; finns ingen kvar avslutas bordet. */
+async function verkstallLamna(m: Miljo, bord: BordRad, stol: Stol): Promise<void> {
+  const stolar = await hamtaStolar(m, bord.id)
+  const rad = stolar.find((s) => s.seat === stol)
+  const lamnarUserId = rad?.user_id ?? null
+  await frigorStol(m, bord.id, stol)
+  await laggTillHandelser(m, bord.id, [
+    { typ: 'lamna-svar', seat: stol, data: { godkand: true } },
+    { typ: 'stol', seat: stol, data: { handling: 'lamnade' } },
+  ])
+  const kvar = stolar.filter((s) => s.user_id && s.seat !== stol)
+  if (!kvar.length) {
+    await avslutaBord(m, bord.id, 'sista-manniskan-lamnade')
+    return
+  }
+  if (lamnarUserId && lamnarUserId === bord.owner_id) {
+    const arvinge = kvar
+      .filter((s) => s.typ === 'manniska' && s.status === 'aktiv')
+      .sort((a, b) => (a.joined_at ?? 'z').localeCompare(b.joined_at ?? 'z'))[0]
+    const till = (arvinge ?? kvar[0]).user_id!
+    await restPatch(m, `tables?id=eq.${bord.id}`, { owner_id: till })
+    const namn = await visningsnamn(m, [till])
+    await laggTillHandelser(m, bord.id, [
+      { typ: 'agarbyte', data: { namn: namn.get(till) ?? null } },
+    ])
+  }
+}
+
+/** Spela väntande botdrag och bokför dem — hjärtslagets/verkställandenas
+ *  framdrivning (en stol som just blivit bot-styrd kan stå på tur). Skrivs
+ *  ovanpå det lästa huvudet; hann någon annan emellan släpps försöket tyst
+ *  (nästa hjärtslag tar det). */
+async function drivFramOchBokfor(m: Miljo, bordId: string): Promise<void> {
+  const bordRader = (await restGet(
+    m,
+    `tables?id=eq.${bordId}&select=${BORD_KOLUMNER},seed`,
+  )) as Array<BordRad & { seed: string }>
+  const bord = bordRader[0]
+  if (!bord || bord.status !== 'spelar' || bord.aktuell_giv < 1) return
+  const giv = bord.aktuell_giv
+  const [stolar, head, givLista, stallningInnan] = await Promise.all([
+    hamtaStolar(m, bordId),
+    hamtaSenasteSeq(m, bordId),
+    hamtaGivHandelser(m, bordId, giv),
+    stallningFore(m, bordId, giv),
+  ])
+  const deal = bordGiv(bord.seed, giv)
+  const nya = drivFram(deal, giv, givLista, {
+    manniskoStolar: manniskoStolar(stolar),
+    playSeed: bordPlaySeed(bord.seed, giv),
+    stallning: stallningInnan,
+  })
+  if (nya.length) await laggTillHandelser(m, bordId, nya, head)
 }
 
 async function rorBordet(m: Miljo, tableId: string): Promise<void> {
@@ -318,19 +409,32 @@ async function rorBordet(m: Miljo, tableId: string): Promise<void> {
  *  I lobbyn visas en obemannad stol som "ledig" (bot sätts först vid start),
  *  utom när ägaren reserverat den som bot (0008) — då visas den som bot direkt. */
 function stolarTillKlient(
-  bord: BordRad,
   stolar: StolRad[],
   namn: Map<string, string>,
 ): Array<{ stol: Stol; typ: 'manniska' | 'bot' | 'ledig'; namn: string | null; status: string }> {
   return stolar.map((s) => ({
     stol: s.seat,
+    // 4C: en obemannad, oreserverad stol är "ledig" ÄVEN under spel (någon
+    // lämnade för gott — en ny människa kan hoppa in; boten spelar så länge).
     typ: s.user_id
       ? ('manniska' as const)
-      : bord.status === 'lobby' && !s.bot_reserverad
-        ? ('ledig' as const)
-        : ('bot' as const),
+      : s.bot_reserverad
+        ? ('bot' as const)
+        : ('ledig' as const),
     namn: s.user_id ? (namn.get(s.user_id) ?? null) : null,
     status: s.status,
+  }))
+}
+
+/** Stolraderna i närvarodomarens form. */
+function tillNarvaroStolar(stolar: StolRad[]): NarvaroStol[] {
+  return stolar.map((s) => ({
+    stol: s.seat,
+    userId: s.user_id,
+    typ: s.typ,
+    status: s.status,
+    lastSeen: s.last_seen_at ? Date.parse(s.last_seen_at) : null,
+    joined: s.joined_at ? Date.parse(s.joined_at) : null,
   }))
 }
 
@@ -357,7 +461,7 @@ async function taStol(
   const nu = new Date().toISOString()
   const svar = await restPatch(
     m,
-    `table_seats?table_id=eq.${tableId}&seat=eq.${stol}&user_id=is.null`,
+    `table_seats?table_id=eq.${tableId}&seat=eq.${stol}&user_id=is.null&bot_reserverad=is.false`,
     { user_id: userId, typ: 'manniska', status: 'aktiv', joined_at: nu, last_seen_at: nu },
     { representation: true },
   )
@@ -532,7 +636,7 @@ async function hanteraLista(m: Miljo, userId: string, json: Svara): Promise<void
       givar: b.givar,
       tempo: b.tempo,
       privat: b.privat,
-      stolar: stolarTillKlient(b, stolar, namn),
+      stolar: stolarTillKlient(stolar, namn),
       dittBord: b.id === mittTableId,
     }
   })
@@ -552,10 +656,8 @@ async function hanteraGaMed(m: Miljo, userId: string, body: unknown, json: Svara
   if (!bord || bord.status === 'avslutat' || bord.status === 'klar') {
     return json(404, { ok: false, fel: 'Hittade inget bord med den koden' })
   }
-  if (bord.status !== 'lobby') {
-    // Att ta över en botstol vid ett pågående publikt bord byggs i 4C.
-    return json(409, { ok: false, fel: 'Bordet har redan startat' })
-  }
+  // 4C: under spel går det att ta över en FRIGJORD stol (någon lämnade för
+  // gott) — obemannad, inte bot-reserverad. Handen tas över som den är.
 
   const stolar = await hamtaStolar(m, bord.id)
   // Sitter du redan här? Då är allt väl (t.ex. omladdad flik).
@@ -620,6 +722,7 @@ async function hanteraLage(
   let dinHand: unknown = null
   let stallning: { ns: number; ew: number } | null = null
   let givStartSeq: number | null = null
+  let begaranden: Array<{ stol: Stol; slag: 'paus' | 'lamna'; namn: string | null }> = []
   if (min && (bord.status === 'spelar' || bord.status === 'klar') && bord.aktuell_giv >= 1) {
     if (bord.status === 'spelar') {
       const seed = await hamtaSeed(m, bord.id)
@@ -631,6 +734,12 @@ async function hanteraLage(
       `table_events?table_id=eq.${bord.id}&typ=eq.giv-start&select=seq&order=seq.desc&limit=1`,
     )) as Array<{ seq: number }>
     givStartSeq = startRad[0]?.seq ?? null
+    // Väntande paus-/lämna-begäranden (4C) — ägarens godkännande-UI.
+    const vantar = await hamtaBegaranden(m, bord.id)
+    begaranden = vantar.map((b) => {
+      const rad = stolar.find((s) => s.seat === b.stol)
+      return { stol: b.stol, slag: b.slag, namn: rad?.user_id ? (namn.get(rad.user_id) ?? null) : null }
+    })
   }
 
   return json(200, {
@@ -649,12 +758,13 @@ async function hanteraLage(
       duArAgare: bord.owner_id === userId,
       dinStol: min?.seat ?? null,
     },
-    stolar: stolarTillKlient(bord, stolar, namn),
+    stolar: stolarTillKlient(stolar, namn),
     events,
     senasteSeq,
     dinHand,
     stallning,
     givStartSeq,
+    begaranden,
   })
 }
 
@@ -679,8 +789,69 @@ async function hanteraHjartslag(
     last_seen_at: nu,
   })
   await restPatch(m, `tables?id=eq.${bord.id}`, { last_activity: nu })
-  // 4C bygger på: frånvarodetektering (45 s → bot), auto-godkännanden,
-  // ägarbyte och botframdrivning. 4A:s hjärtslag är bara närvaro + ikapp.
+
+  // Auto-återtag (4C): en 'borta'-stol vars människa hjärtslår igen var bara
+  // tillfälligt frånkopplad — stolen tas tillbaka utan knapptryck. (Frivillig
+  // paus kräver däremot "Ta tillbaka stolen".)
+  if (min.status === 'borta') {
+    await restPatch(m, `table_seats?table_id=eq.${bord.id}&seat=eq.${min.seat}`, {
+      status: 'aktiv',
+    })
+    await laggTillHandelser(m, bord.id, [
+      { typ: 'stol', seat: min.seat, data: { handling: 'aterta', skal: 'ateransluten' } },
+    ])
+  }
+
+  // Närvarodomaren (4C): frånvaro → bot, gamla begäranden → auto-godkänn,
+  // ägaren borta → ägarbyte. Ren beslutslogik i bord-narvaro.ts (facittestad
+  // med injicerad klocka); här verkställs domsluten.
+  if (bord.status === 'lobby' || bord.status === 'spelar') {
+    const [stolarNu, vantar] = await Promise.all([
+      hamtaStolar(m, bord.id),
+      bord.status === 'spelar' ? hamtaBegaranden(m, bord.id) : Promise.resolve([]),
+    ])
+    const beslut = narvaroBeslut(tillNarvaroStolar(stolarNu), vantar, bord.owner_id, Date.now())
+    for (const bes of beslut) {
+      if (bes.slag === 'bot-tar-over') {
+        if (bord.status === 'lobby') {
+          // I väntrummet finns inget att ta över — den frånkopplades stol
+          // frigörs bara så andra kan ta den.
+          await frigorStol(m, bord.id, bes.stol)
+          await laggTillHandelser(m, bord.id, [
+            { typ: 'stol', seat: bes.stol, data: { handling: 'lamnade', skal: 'franvaro' } },
+          ])
+        } else {
+          await restPatch(m, `table_seats?table_id=eq.${bord.id}&seat=eq.${bes.stol}`, {
+            status: 'borta',
+          })
+          await laggTillHandelser(m, bord.id, [
+            { typ: 'stol', seat: bes.stol, data: { handling: 'bot-tar-over', skal: 'franvaro' } },
+          ])
+        }
+      } else if (bes.slag === 'godkann') {
+        if (bes.begaran === 'paus') await verkstallPaus(m, bord.id, bes.stol)
+        else await verkstallLamna(m, bord, bes.stol)
+      } else {
+        await restPatch(m, `tables?id=eq.${bord.id}`, { owner_id: bes.tillUserId })
+        const namn = await visningsnamn(m, [bes.tillUserId])
+        await laggTillHandelser(m, bord.id, [
+          { typ: 'agarbyte', data: { namn: namn.get(bes.tillUserId) ?? null } },
+        ])
+      }
+    }
+
+    // Framdrivningen (4C): står en bot-styrd stol på tur och inget har hänt
+    // på ett par sekunder (kraschat drag-anrop, nyss övertagen stol) spelar
+    // hjärtslaget botdragen. PK-vakten gör samtidiga försök ofarliga.
+    if (bord.status === 'spelar') {
+      const sista = (await restGet(
+        m,
+        `table_events?table_id=eq.${bord.id}&select=created_at&order=seq.desc&limit=1`,
+      )) as Array<{ created_at: string }>
+      const alder = sista[0] ? Date.now() - Date.parse(sista[0].created_at) : Infinity
+      if (beslut.length > 0 || alder > 2_000) await drivFramOchBokfor(m, bord.id)
+    }
+  }
 
   const franParam = Number(b.seq ?? 0)
   const fran = Number.isFinite(franParam) && franParam >= 0 ? Math.floor(franParam) : 0
@@ -753,19 +924,79 @@ async function hanteraStol(m: Miljo, userId: string, body: unknown, json: Svara)
   }
 
   if (handling === 'lamna') {
-    if (bord.status !== 'lobby') {
-      // Att lämna under spel (bot tar över, ägaren godkänner) byggs i 4C.
-      return json(409, { ok: false, fel: 'Att lämna under spel byggs i nästa steg' })
+    if (bord.status === 'lobby') {
+      if (bord.owner_id === userId) {
+        await avslutaBord(m, bord.id, 'agaren-lamnade')
+        return json(200, { ok: true, avslutat: true })
+      }
+      await frigorStol(m, bord.id, min.seat)
+      await laggTillHandelser(m, bord.id, [
+        { typ: 'stol', seat: min.seat, data: { handling: 'lamnade', namn: mittNamn } },
+      ])
+      await rorBordet(m, bord.id)
+      return json(200, { ok: true })
     }
+    if (bord.status !== 'spelar') return json(409, { ok: false, fel: 'Bordet spelar inte' })
+    // Under spel (4C): begäran → ägaren godkänner (auto efter 60 s). Ägarens
+    // egen begäran verkställs direkt (hen godkänner sig själv) — värdskapet
+    // flyttas i samma veva.
     if (bord.owner_id === userId) {
-      await avslutaBord(m, bord.id, 'agaren-lamnade')
-      return json(200, { ok: true, avslutat: true })
+      await verkstallLamna(m, bord, min.seat)
+      await drivFramOchBokfor(m, bord.id)
+      return json(200, { ok: true, lamnat: true })
     }
-    await frigorStol(m, bord.id, min.seat)
     await laggTillHandelser(m, bord.id, [
-      { typ: 'stol', seat: min.seat, data: { handling: 'lamnade', namn: mittNamn } },
+      { typ: 'lamna-begaran', seat: min.seat, data: { namn: mittNamn } },
     ])
     await rorBordet(m, bord.id)
+    return json(200, { ok: true, vantar: true })
+  }
+
+  if (handling === 'paus-begaran') {
+    if (bord.status !== 'spelar') return json(409, { ok: false, fel: 'Bordet spelar inte' })
+    if (min.status !== 'aktiv') return json(409, { ok: false, fel: 'Du har redan paus' })
+    if (bord.owner_id === userId) {
+      await verkstallPaus(m, bord.id, min.seat)
+      await drivFramOchBokfor(m, bord.id)
+      return json(200, { ok: true, paus: true })
+    }
+    await laggTillHandelser(m, bord.id, [
+      { typ: 'paus-begaran', seat: min.seat, data: { namn: mittNamn } },
+    ])
+    await rorBordet(m, bord.id)
+    return json(200, { ok: true, vantar: true })
+  }
+
+  if (handling === 'aterta') {
+    if (min.status === 'aktiv') return json(200, { ok: true })
+    await restPatch(m, `table_seats?table_id=eq.${bord.id}&seat=eq.${min.seat}`, {
+      status: 'aktiv',
+      last_seen_at: new Date().toISOString(),
+    })
+    await laggTillHandelser(m, bord.id, [
+      { typ: 'stol', seat: min.seat, data: { handling: 'aterta', namn: mittNamn } },
+    ])
+    return json(200, { ok: true })
+  }
+
+  if (handling === 'godkann' || handling === 'neka') {
+    if (bord.owner_id !== userId) {
+      return json(403, { ok: false, fel: 'Bara bordets ägare svarar på begäranden' })
+    }
+    const stol = b.stol
+    if (!giltigStol(stol)) return json(400, { ok: false, fel: 'Ogiltig stol' })
+    const vantar = await hamtaBegaranden(m, bord.id)
+    const beg = vantar.find((v) => v.stol === stol)
+    if (!beg) return json(409, { ok: false, fel: 'Ingen väntande begäran för stolen' })
+    if (handling === 'neka') {
+      await laggTillHandelser(m, bord.id, [
+        { typ: `${beg.slag}-svar`, seat: stol, data: { godkand: false } },
+      ])
+      return json(200, { ok: true })
+    }
+    if (beg.slag === 'paus') await verkstallPaus(m, bord.id, stol)
+    else await verkstallLamna(m, bord, stol)
+    await drivFramOchBokfor(m, bord.id)
     return json(200, { ok: true })
   }
 
@@ -777,7 +1008,6 @@ async function hanteraStol(m: Miljo, userId: string, body: unknown, json: Svara)
     return json(200, { ok: true, avslutat: true })
   }
 
-  // paus-begaran / aterta / godkann / neka byggs i 4C.
   return json(400, { ok: false, fel: 'Okänd stolhandling' })
 }
 
@@ -864,6 +1094,11 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
   ])
   const min = stolar.find((s) => s.user_id === userId)
   if (!min) return json(403, { ok: false, fel: 'Du sitter inte vid det här bordet' })
+  // 4C: en pausad/frånvarande stol spelas av boten — människan måste ta
+  // tillbaka den innan hen får agera (UI:t blockerar, domaren avgör).
+  if (min.status !== 'aktiv') {
+    return json(409, { ok: false, fel: 'Boten spelar din stol — ta tillbaka den först' })
+  }
   if (basSeq !== head) return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: head })
 
   const seed = bord.seed

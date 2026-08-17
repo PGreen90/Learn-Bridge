@@ -50,9 +50,12 @@ function NamnRad({ stolar, minStol }: { stolar: BordStol[]; minStol: Seat }) {
       {NAMN_ORDNING.map((vis) => {
         const s = perStol.get(verklig(vis))
         const namn = s?.namn ?? 'Bot'
+        // 4C: paus/borta = boten spelar stolen tills människan är tillbaka.
+        const suffix = s?.status === 'paus' ? ' · paus' : s?.status === 'borta' ? ' · bot' : ''
         return (
           <span key={vis} className={vis === 'S' ? 'font-semibold text-gold-200' : ''}>
             {SEAT_LABEL[vis]}: {vis === 'S' ? `${namn} (du)` : namn}
+            {suffix}
           </span>
         )
       })}
@@ -75,6 +78,9 @@ function BordMeny({
   onLjud,
   kanRapportera,
   onRapportera,
+  kanPausa,
+  onPaus,
+  onLamnaBord,
   onAvsluta,
   children,
 }: {
@@ -90,6 +96,10 @@ function BordMeny({
    *  (händerna är dolda dessförinnan, av fusksäkerhetsskäl). */
   kanRapportera: boolean
   onRapportera: () => void
+  /** 4C: paus (boten tar över tills du återtar) och lämna för gott. */
+  kanPausa: boolean
+  onPaus: () => void
+  onLamnaBord: () => void
   onAvsluta: () => void
   children: ReactNode
 }) {
@@ -137,7 +147,29 @@ function BordMeny({
                 Felrapporten låses upp när given är klar (händerna är dolda under spelet).
               </p>
             )}
+            {kanPausa && (
+              <button
+                type="button"
+                onClick={() => {
+                  onToggle()
+                  onPaus()
+                }}
+                className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
+              >
+                Ta paus — boten tar över så länge
+              </button>
+            )}
             <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
+            <button
+              type="button"
+              onClick={() => {
+                onToggle()
+                onLamnaBord()
+              }}
+              className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
+            >
+              Lämna bordet för gott
+            </button>
             {agare && (
               <button
                 type="button"
@@ -183,12 +215,15 @@ export function BordSpel({
   const [visaInfo, setVisaInfo] = useState(false)
   const [visaAvsluta, setVisaAvsluta] = useState(false)
   const [visaRapport, setVisaRapport] = useState(false)
+  const [visaLamna, setVisaLamna] = useState(false)
   const [avslutar, setAvslutar] = useState(false)
+  const [stolArbete, setStolArbete] = useState(false)
   const [ljud, setLjud] = useState(isSoundEnabled)
   const {
     laddar,
     meta,
     stolar,
+    begaranden,
     dinHand,
     lage,
     auktion,
@@ -207,6 +242,24 @@ export function BordSpel({
     setAvslutar(true)
     await stolHandling(kod, 'avsluta')
     navigate('/spela-med-vanner')
+  }
+
+  /** 4C: stolhandlingarna (paus/lämna/återta/godkänn/neka) — synken hämtar om
+   *  läget via händelsen som servern skriver. */
+  async function korStol(handling: 'paus-begaran' | 'aterta' | 'godkann' | 'neka', stol?: Seat) {
+    setStolArbete(true)
+    await stolHandling(kod, handling, stol)
+    setStolArbete(false)
+  }
+
+  async function lamnaBordet() {
+    setStolArbete(true)
+    const svar = await stolHandling(kod, 'lamna')
+    setVisaLamna(false)
+    setStolArbete(false)
+    // Direkt verkställt (ägaren) → ut till lobbyn; annars väntar begäran på
+    // ägarens godkännande och spelaren sitter kvar tills det kommer.
+    if (svar.ok && !svar.vantar) navigate('/spela-med-vanner')
   }
 
   // Nollställ färgvalet när turen går vidare (samma princip som budlådan).
@@ -287,6 +340,33 @@ export function BordSpel({
     )
   }
 
+  // 4C: bordet avslutades (ägaren, eller sista människan lämnade) medan vyn
+  // var öppen — säg det i stället för att spela vidare mot en död logg.
+  if (meta?.status === 'avslutat') {
+    return (
+      <Felt tone="vanner" className={`${rot} items-center justify-center`}>
+        <div className="max-w-sm space-y-4 text-center">
+          <h1 className="text-2xl font-semibold text-rose-50">Bordet är avslutat</h1>
+          <Button onClick={() => navigate('/spela-med-vanner')}>Till Spela med vänner →</Button>
+        </div>
+      </Felt>
+    )
+  }
+
+  // 4C: min lämna-begäran godkändes (av ägaren eller automatiskt) — stolen är
+  // frigjord och jag är inte längre med vid bordet.
+  if (meta && !meta.dinStol) {
+    return (
+      <Felt tone="vanner" className={`${rot} items-center justify-center`}>
+        <div className="max-w-sm space-y-4 text-center">
+          <h1 className="text-2xl font-semibold text-rose-50">Du har lämnat bordet</h1>
+          <p className="text-rose-100/70">Tack för spelet!</p>
+          <Button onClick={() => navigate('/spela-med-vanner')}>Till Spela med vänner →</Button>
+        </div>
+      </Felt>
+    )
+  }
+
   // -------------------------------------------------------------------------
   // Gemensamma småbitar.
 
@@ -327,12 +407,105 @@ export function BordSpel({
       }}
       kanRapportera={!!lage?.klar}
       onRapportera={() => setVisaRapport(true)}
+      kanPausa={
+        meta?.status === 'spelar' &&
+        stolar.find((s) => s.stol === minStol)?.status === 'aktiv'
+      }
+      onPaus={() => void korStol('paus-begaran')}
+      onLamnaBord={() => setVisaLamna(true)}
       onAvsluta={() => setVisaAvsluta(true)}
     >
       Du sitter alltid <strong>nertill</strong> oavsett stol. När din ruta i auktionen lyser
       bjuder du i budlådan; i spelet klickar du en färg och sedan kortet. Tempot styr hur
       snabbt de andras drag visas — bara på din skärm.
     </BordMeny>
+  )
+
+  // 4C: min stols status + de gemensamma närvaro-överläggen.
+  const minStolStatus = stolar.find((s) => s.stol === minStol)?.status ?? 'aktiv'
+  const minBegaran = begaranden.find((b) => b.stol === minStol) ?? null
+
+  /** Ägarens banner: väntande paus-/lämna-begäranden med Godkänn/Neka. */
+  const begaranBanner = (meta?.duArAgare ?? false) && begaranden.length > 0 && (
+    <div className="absolute left-1/2 top-[calc(3.25rem+env(safe-area-inset-top))] z-30 w-full max-w-sm -translate-x-1/2 space-y-1.5 px-3">
+      {begaranden.map((b) => (
+        <div
+          key={b.stol}
+          className="flex items-center justify-between gap-2 rounded-xl bg-panel p-2.5 shadow-xl ring-1 ring-line"
+        >
+          <span className="text-sm text-ink">
+            <strong>{b.namn ?? SEAT_LABEL[vridStolLabel(b.stol, minStol)]}</strong>{' '}
+            {b.slag === 'paus' ? 'ber om paus' : 'vill lämna bordet'}
+          </span>
+          <span className="flex shrink-0 gap-1.5">
+            <Button
+              className="!px-2.5 !py-1 text-xs"
+              disabled={stolArbete}
+              onClick={() => void korStol('godkann', b.stol)}
+            >
+              Godkänn
+            </Button>
+            <Button
+              variant="secondary"
+              className="!px-2.5 !py-1 text-xs"
+              disabled={stolArbete}
+              onClick={() => void korStol('neka', b.stol)}
+            >
+              Neka
+            </Button>
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+
+  /** Min egen väntande begäran: liten kvitto-rad. */
+  const vantarRad = !meta?.duArAgare && minBegaran && (
+    <p className="px-3 py-1 text-center text-xs font-medium text-rose-100/70">
+      {minBegaran.slag === 'paus' ? 'Paus' : 'Lämna'}-begäran skickad — väntar på ägarens
+      godkännande (godkänns automatiskt efter en minut).
+    </p>
+  )
+
+  /** Paus-overlayen: boten spelar min stol tills jag tar tillbaka den. */
+  const pausOverlay = minStolStatus === 'paus' && (
+    <Dialog className="w-full max-w-sm p-6 text-center">
+      <h2 className="text-lg font-semibold text-ink">Du har paus</h2>
+      <p className="mt-2 text-sm text-ink-soft">
+        Boten spelar din stol så länge. Ta tillbaka den när du är redo.
+      </p>
+      <div className="mt-4">
+        <Button disabled={stolArbete} onClick={() => void korStol('aterta')}>
+          Ta tillbaka stolen
+        </Button>
+      </div>
+    </Dialog>
+  )
+
+  const lamnaDialog = visaLamna && (
+    <Dialog onClose={() => setVisaLamna(false)} className="w-full max-w-sm p-6">
+      <h2 className="text-lg font-semibold text-ink">Lämna bordet för gott?</h2>
+      <p className="mt-2 text-sm text-ink-soft">
+        En bot tar din stol (på publika bord kan en ny spelare hoppa in).
+        {!meta?.duArAgare && ' Bordets ägare godkänner först.'}
+      </p>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="secondary" onClick={() => setVisaLamna(false)}>
+          Avbryt
+        </Button>
+        <Button disabled={stolArbete} onClick={() => void lamnaBordet()}>
+          Lämna bordet
+        </Button>
+      </div>
+    </Dialog>
+  )
+
+  const narvaroOverlagg = (
+    <>
+      {begaranBanner}
+      {pausOverlay}
+      {lamnaDialog}
+    </>
   )
 
   const avslutaDialog = visaAvsluta && (
@@ -404,6 +577,7 @@ export function BordSpel({
           <NamnRad stolar={stolar} minStol={minStol} />
         </div>
         {felRad}
+        {vantarRad}
         <div className="px-2.5 pb-1.5">
           <BiddingBox
             legal={minTur ? legalCalls(auktion.calls, 'S') : []}
@@ -429,6 +603,7 @@ export function BordSpel({
             <p className="py-6 text-center text-sm text-rose-100/60">Hämtar din hand …</p>
           )}
         </div>
+        {narvaroOverlagg}
         {avslutaDialog}
       </Felt>
     )
@@ -566,6 +741,7 @@ export function BordSpel({
               />
             )
           })()}
+        {narvaroOverlagg}
         {avslutaDialog}
       </Felt>
     )
@@ -646,6 +822,7 @@ export function BordSpel({
         )}
       </div>
       {felRad}
+      {vantarRad}
 
       {/* ⓘ-overlay: budgivningen som ledde till kontraktet + förra sticket i
           miniatyr + utspelet — samma innehåll som spelbordets overlay. */}
@@ -752,6 +929,7 @@ export function BordSpel({
           />
         )}
       </div>
+      {narvaroOverlagg}
       {avslutaDialog}
     </Felt>
   )

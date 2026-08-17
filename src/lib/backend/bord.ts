@@ -73,6 +73,8 @@ export interface BordLage {
   stallning: { ns: number; ew: number } | null
   /** Sekvensnumret för aktuella givens giv-start — äldre händelser behövs aldrig. */
   givStartSeq: number | null
+  /** Väntande paus-/lämna-begäranden (4C). Tom utanför spel. */
+  begaranden?: BordBegaran[]
 }
 
 /** Alla anrop svarar i den här formen — kallaren grenkar på `ok` utan try/catch. */
@@ -154,13 +156,29 @@ export function bordHjartslag(
   return anrop('POST', 'hjartslag', { body: { kod, seq } })
 }
 
-export type StolHandling = 'byt-stol' | 'lamna' | 'avsluta' | 'satt-bot' | 'oppna-stol'
+export type StolHandling =
+  | 'byt-stol'
+  | 'lamna'
+  | 'avsluta'
+  | 'satt-bot'
+  | 'oppna-stol'
+  | 'paus-begaran'
+  | 'aterta'
+  | 'godkann'
+  | 'neka'
+
+/** En väntande paus-/lämna-begäran (4C) — ägarens godkännande-UI. */
+export interface BordBegaran {
+  stol: Seat
+  slag: 'paus' | 'lamna'
+  namn: string | null
+}
 
 export function stolHandling(
   kod: string,
   handling: StolHandling,
   stol?: Seat,
-): Promise<BordSvar<{ stol?: Seat; avslutat?: boolean }>> {
+): Promise<BordSvar<{ stol?: Seat; avslutat?: boolean; vantar?: boolean; lamnat?: boolean; paus?: boolean }>> {
   return anrop('POST', 'stol', { body: { kod, handling, stol } })
 }
 
