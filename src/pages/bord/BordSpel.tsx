@@ -18,7 +18,7 @@ import type { Card, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { legalCalls } from '../../lib/engine/auction-live'
 import { hcp } from '../../lib/engine/hand'
-import { legalCards, side } from '../../lib/engine/play'
+import { legalCards, side, type PlayState } from '../../lib/engine/play'
 import { AuctionGrid } from '../../components/AuctionGrid'
 import { BidChip } from '../../components/BidChip'
 import { BiddingBox } from '../../components/BiddingBox'
@@ -344,6 +344,19 @@ export function BordSpel({
     const ordning = klar.contract
       ? { ...klar.contract, declarer: vridStolLabel(klar.contract.declarer, minStol) }
       : { declarer: 'S' as Seat, strain: 'NT' as const, level: 1 }
+    // Nord ritas som bordets träkarl (SuitColumns, xl-kolumner) — ett stilla
+    // syntetiskt spelläge gör kolumnerna oklickbara (turen är aldrig Nords).
+    const stillaLage: PlayState = {
+      contract: ordning,
+      trump: ordning.strain === 'NT' ? null : ordning.strain,
+      hands: { N: [], E: [], S: [], W: [] },
+      leader: 'S',
+      toAct: 'S',
+      currentTrick: [],
+      completedTricks: [],
+      tricksNS: 0,
+      tricksEW: 0,
+    }
     return (
       <Felt tone="vanner" className={rot}>
         <div className="px-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
@@ -360,9 +373,16 @@ export function BordSpel({
         </div>
         {felRad}
 
-        {/* Nord uppvänd. */}
+        {/* Nord uppvänd — samma kolumnvy som bordets träkarl (kortregeln). */}
         <div className="flex justify-center px-2 pt-1">
-          <HandFan hand={klar.hands[vTill('N')]} size="sm" />
+          <SuitColumns
+            hand={klar.hands[vTill('N')]}
+            contract={ordning}
+            play={stillaLage}
+            seat="N"
+            onCardClick={() => {}}
+            selectedSuit={null}
+          />
         </div>
 
         {/* Väst | resultatet | Öst. */}
