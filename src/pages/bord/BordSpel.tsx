@@ -1,0 +1,378 @@
+// Beslut B etapp 4 (4B) — spelvyn vid vänner-bordet: bud → spel → giv-klar →
+// slutresultat, allt på den vinröda duken.
+//
+// Ren presentation ovanpå useBordSpel (synk/kö) och bord-projektion (läget).
+// Allt ritas i den VISUELLA världen — du sitter alltid Syd — och komponenterna
+// är spelbordets egna (AuctionGrid, BiddingBox, HandFan, SouthFan, SuitColumns,
+// SideDummyPiles, FaceDownFan, TrickCenterLive). Träkarlen du styr hamnar
+// alltid visuellt i Nord (spelförarens partner), så den klickbara vägen genom
+// SuitColumns räcker; en träkarl hos motståndarna ligger på sidorna
+// (SideDummyPiles, oklickbar — helt rätt, den är inte din).
+//
+// Inte i 4B (medvetet): claim/ångra (kräver motpartsgodkännande — SENARE),
+// kortflygningen och ljuden (polish när bordet bevisat sig).
+
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import type { Card, Seat } from '../../types/bridge'
+import { SEAT_LABEL } from '../../lib/bidding'
+import { legalCalls } from '../../lib/engine/auction-live'
+import { legalCards, side } from '../../lib/engine/play'
+import { AuctionGrid } from '../../components/AuctionGrid'
+import { BidChip } from '../../components/BidChip'
+import { BiddingBox } from '../../components/BiddingBox'
+import { Button } from '../../components/Button'
+import { CompassPanel } from '../../components/CompassPanel'
+import { Felt } from '../../components/Felt'
+import { HandFan } from '../../components/HandFan'
+import { FaceDownFan, SideDummyPiles, SouthFan, SuitColumns } from '../play/hands'
+import { TrickCenterLive } from '../play/trick-views'
+import { sameCard, STRAIN_CODE } from '../play/common'
+import type { PlaySpeed } from '../play/tempo'
+import type { BordStol } from '../../lib/backend/bord'
+import { vridTillbaka } from './bord-projektion'
+import { useBordSpel } from './useBordSpel'
+
+/** Visuell stolordning i namnraden: som auktionsrutnätet (V N Ö S). */
+const NAMN_ORDNING: Seat[] = ['W', 'N', 'E', 'S']
+
+function NamnRad({ stolar, minStol }: { stolar: BordStol[]; minStol: Seat }) {
+  const verklig = vridTillbaka(minStol)
+  const perStol = new Map(stolar.map((s) => [s.stol, s]))
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-wrap justify-center gap-x-3 gap-y-0.5 pt-1 text-[11px] text-rose-100/60">
+      {NAMN_ORDNING.map((vis) => {
+        const s = perStol.get(verklig(vis))
+        const namn = s?.namn ?? 'Bot'
+        return (
+          <span key={vis} className={vis === 'S' ? 'font-semibold text-gold-200' : ''}>
+            {SEAT_LABEL[vis]}: {vis === 'S' ? `${namn} (du)` : namn}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+export function BordSpel({
+  kod,
+  minStol,
+  tempo,
+  givar,
+}: {
+  kod: string
+  minStol: Seat
+  tempo: PlaySpeed
+  givar: number
+}) {
+  const navigate = useNavigate()
+  const {
+    laddar,
+    stolar,
+    dinHand,
+    lage,
+    auktion,
+    spel,
+    sweep,
+    fel,
+    aktuell,
+    skickar,
+    gorDrag,
+    hoppaOverSvep,
+  } = useBordSpel(kod, minStol, tempo)
+  const [selectedSuit, setSelectedSuit] = useState<Card['suit'] | null>(null)
+
+  // Nollställ färgvalet när turen går vidare (samma princip som budlådan).
+  const toActV = spel?.state.toAct ?? null
+  useEffect(() => setSelectedSuit(null), [toActV])
+
+  const rot =
+    'flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none'
+
+  if (laddar || !lage || !auktion) {
+    return (
+      <Felt tone="vanner" className={`${rot} items-center justify-center`}>
+        <p className="text-rose-100/70">Hämtar bordet …</p>
+      </Felt>
+    )
+  }
+
+  // -------------------------------------------------------------------------
+  // Gemensamma småbitar.
+
+  const givBadge = (
+    <div className="w-full rounded-md bg-gold-400/15 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-gold-200 ring-1 ring-inset ring-gold-400/30">
+      Giv {lage.giv} av {givar} · Bord {kod}
+    </div>
+  )
+
+  const minSida = side(minStol) // 'NS' | 'EW' i den VERKLIGA världen (poängen)
+  const stallningRad = (st: { ns: number; ew: number }) => {
+    const ni = minSida === 'NS' ? st.ns : st.ew
+    const de = minSida === 'NS' ? st.ew : st.ns
+    return `Ni ${ni} – De ${de}`
+  }
+
+  const felRad = fel && (
+    <p role="alert" className="px-3 py-1 text-center text-sm font-medium text-rose-200">
+      {fel}
+    </p>
+  )
+
+  // -------------------------------------------------------------------------
+  // Slutresultatet (bordet färdigspelat).
+
+  if (lage.bordKlar) {
+    const st = lage.bordKlar.stallning
+    const ni = minSida === 'NS' ? st.ns : st.ew
+    const de = minSida === 'NS' ? st.ew : st.ns
+    const rubrik = ni > de ? 'Ni vann! 🎉' : ni < de ? 'De vann den här gången' : 'Oavgjort!'
+    return (
+      <Felt tone="vanner" className={`${rot} items-center justify-center`}>
+        <div className="max-w-sm space-y-4 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
+            Bordet är färdigspelat
+          </p>
+          <h1 className="text-3xl font-semibold text-rose-50">{rubrik}</h1>
+          <p className="text-lg text-rose-100/80">{stallningRad(st)}</p>
+          <Button onClick={() => navigate('/spela-med-vanner')}>Till Spela med vänner →</Button>
+        </div>
+      </Felt>
+    )
+  }
+
+  // -------------------------------------------------------------------------
+  // Budfasen.
+
+  if (lage.fas === 'bud') {
+    const minTur = aktuell && auktion.toAct === 'S'
+    return (
+      <Felt tone="vanner" className={rot}>
+        <div className="px-2.5 pb-1 pt-[calc(0.625rem+env(safe-area-inset-top))]">
+          <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+            <CompassPanel
+              dealer={auktion.dealer}
+              board={lage.board}
+              vulnerability={auktion.vulnerability}
+              footer={givBadge}
+            />
+            <AuctionGrid
+              calls={auktion.calls}
+              dealer={auktion.dealer}
+              vulnerability={auktion.vulnerability}
+              activeSeat={aktuell ? auktion.toAct : null}
+              explanations="full"
+              hiddenHands
+            />
+          </div>
+          <NamnRad stolar={stolar} minStol={minStol} />
+        </div>
+        {felRad}
+        <div className="px-2.5 pb-1.5">
+          <BiddingBox
+            legal={minTur ? legalCalls(auktion.calls, 'S') : []}
+            onBid={(bid) => void gorDrag({ typ: 'bud', bid })}
+            recommendation={null}
+            history={auktion.calls}
+            showHelp
+          />
+        </div>
+        <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
+          {dinHand ? (
+            <HandFan hand={dinHand} flat />
+          ) : (
+            <p className="py-6 text-center text-sm text-rose-100/60">Hämtar din hand …</p>
+          )}
+        </div>
+      </Felt>
+    )
+  }
+
+  // -------------------------------------------------------------------------
+  // Giv klar: reveal + poäng + nästa giv. (Även utpassade givar landar här —
+  // servern bokför giv-klar med passadUt.)
+
+  if (lage.fas === 'klar' && lage.klar) {
+    const klar = lage.klar
+    const vTill = vridTillbaka(minStol)
+    const sista = lage.giv >= givar
+    const poang = minSida === 'NS' ? klar.nsScore : -klar.nsScore
+    return (
+      <Felt tone="vanner" className={`${rot} items-center justify-center px-3 py-8`}>
+        <div className="w-full max-w-lg space-y-4">
+          <header className="text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
+              Giv {lage.giv} av {givar}
+            </p>
+            {klar.passadUt || !klar.contract ? (
+              <h2 className="mt-1 text-2xl font-semibold text-rose-50">Given passades ut</h2>
+            ) : (
+              <h2 className="mt-1 flex items-center justify-center gap-2 text-2xl font-semibold text-rose-50">
+                <BidChip bid={`${klar.contract.level}${STRAIN_CODE[klar.contract.strain]}`} />
+                {klar.contract.doubled && (
+                  <span className="text-base font-bold text-rose-300">{klar.contract.doubled}</span>
+                )}
+                <span>spelas av {SEAT_LABEL[vridStolLabel(klar.contract.declarer, minStol)]}</span>
+              </h2>
+            )}
+            {!klar.passadUt && (
+              <p className="mt-1 text-rose-100/80">
+                {klar.declarerTricks} stick · {poang >= 0 ? `Ni +${poang}` : `De +${-poang}`}
+              </p>
+            )}
+            <p className="mt-1 text-sm text-rose-100/60">Ställning: {stallningRad(klar.stallning)}</p>
+          </header>
+
+          {/* Alla fyra händerna (reveal) — visuell diamant, du nertill. */}
+          <div className="space-y-2">
+            {(['N', 'W', 'E', 'S'] as Seat[]).map((vis) => (
+              <div key={vis} className="rounded-xl bg-red-950/30 px-2 py-1.5 ring-1 ring-rose-50/10">
+                <p className="pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-100/50">
+                  {SEAT_LABEL[vis]}
+                  {vis === 'S' ? ' (du)' : ''}
+                </p>
+                <HandFan hand={klar.hands[vTill(vis)]} size="sm" />
+              </div>
+            ))}
+          </div>
+
+          {felRad}
+          <div className="text-center">
+            <Button disabled={skickar} onClick={() => void gorDrag({ typ: 'nasta-giv' })}>
+              {sista ? 'Se slutresultatet →' : 'Nästa giv →'}
+            </Button>
+          </div>
+        </div>
+      </Felt>
+    )
+  }
+
+  // -------------------------------------------------------------------------
+  // Spelfasen.
+
+  const st = spel!.state
+  const dummyV = spel!.dummy
+  const trakarlUppe = lage.trakarl !== null
+  const jagArDummy = trakarlUppe && dummyV === 'S'
+
+  function klick(seatV: Seat) {
+    return (c: Card) => {
+      if (!aktuell || !spel) return
+      const s = spel.state
+      if (s.toAct !== seatV) return
+      const agerandeV = trakarlUppe && s.toAct === dummyV ? s.contract.declarer : s.toAct
+      if (agerandeV !== 'S') return
+      const legal = legalCards(s, seatV)
+      if (!legal.some((x) => sameCard(x, c))) return
+      const iFargen = legal.filter((x) => x.suit === c.suit)
+      if (selectedSuit === c.suit || iFargen.length === 1) {
+        setSelectedSuit(null)
+        void gorDrag({ typ: 'kort', card: c })
+      } else {
+        setSelectedSuit(c.suit)
+      }
+    }
+  }
+
+  const kontraktText = `${st.contract.level}${STRAIN_CODE[st.contract.strain]}`
+  const minTurSpel =
+    aktuell &&
+    (trakarlUppe && st.toAct === dummyV ? st.contract.declarer : st.toAct) === 'S'
+
+  return (
+    <Felt tone="vanner" className={rot}>
+      {/* Toppraden: kontrakt, stick, giv, ställning. */}
+      <div className="px-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 text-sm text-rose-100/80">
+          <div className="flex items-center gap-1.5">
+            <BidChip bid={kontraktText} />
+            {st.contract.doubled && (
+              <span className="text-xs font-bold text-rose-300">{st.contract.doubled}</span>
+            )}
+            <span className="text-xs">av {SEAT_LABEL[st.contract.declarer]}</span>
+          </div>
+          <div className="text-xs">
+            Stick: Ni {st.tricksNS} – De {st.tricksEW}
+          </div>
+          <div className="text-xs">
+            Giv {lage.giv}/{givar} · {stallningRad(lage.stallning)}
+          </div>
+        </div>
+        <NamnRad stolar={stolar} minStol={minStol} />
+        {minTurSpel && (
+          <p className="pt-0.5 text-center text-xs font-semibold text-gold-200">Din tur</p>
+        )}
+      </div>
+      {felRad}
+
+      {/* Nord: träkarlen öppen (klickbar när den är din) eller dold rad. */}
+      <div className="flex justify-center px-2 pt-1">
+        {trakarlUppe && dummyV === 'N' ? (
+          <SuitColumns
+            hand={st.hands.N}
+            contract={st.contract}
+            play={st}
+            seat="N"
+            onCardClick={klick('N')}
+            selectedSuit={selectedSuit}
+          />
+        ) : (
+          <FaceDownFan count={spel!.kvar.N} orientation="h" />
+        )}
+      </div>
+
+      {/* Mitten: Väst | sticket | Öst. */}
+      <div className="flex flex-1 items-center justify-between gap-1 px-2">
+        <div className="shrink-0">
+          {trakarlUppe && dummyV === 'W' ? (
+            <SideDummyPiles hand={st.hands.W} contract={st.contract} side="W" />
+          ) : (
+            <FaceDownFan count={spel!.kvar.W} orientation="v" />
+          )}
+        </div>
+        <TrickCenterLive
+          play={st}
+          thinking={skickar}
+          sweep={sweep}
+          onSkipSweep={hoppaOverSvep}
+          onCardClick={() => {}}
+          hasReason={() => false}
+        />
+        <div className="shrink-0">
+          {trakarlUppe && dummyV === 'E' ? (
+            <SideDummyPiles hand={st.hands.E} contract={st.contract} side="E" />
+          ) : (
+            <FaceDownFan count={spel!.kvar.E} orientation="v" />
+          )}
+        </div>
+      </div>
+
+      {/* Syd: din hand — klickbar när du styr den, stilla om du är träkarl. */}
+      <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
+        {jagArDummy && (
+          <p className="pb-1 text-center text-xs text-rose-100/60">
+            Du är träkarl — din partner (spelföraren) spelar dina kort.
+          </p>
+        )}
+        {jagArDummy ? (
+          <HandFan hand={st.hands.S} flat />
+        ) : (
+          <SouthFan
+            hand={st.hands.S}
+            contract={st.contract}
+            play={st}
+            onCardClick={klick('S')}
+            selectedSuit={selectedSuit}
+          />
+        )}
+      </div>
+    </Felt>
+  )
+}
+
+/** Spelförarens etikett i giv-klar-vyn: klar.contract är i VERKLIGA stolar. */
+function vridStolLabel(declarerVerklig: Seat, minStol: Seat): Seat {
+  const ORDER: Seat[] = ['N', 'E', 'S', 'W']
+  const shift = (2 - ORDER.indexOf(minStol) + 4) % 4
+  return ORDER[(ORDER.indexOf(declarerVerklig) + shift) % 4]
+}

@@ -26,11 +26,13 @@ import {
   gaMedBord,
   hamtaBordLage,
   prenumereraBordHandelser,
+  startaBord,
   stolHandling,
   type BordLage,
   type BordStol,
 } from '../../lib/backend/bord'
 import { SPELFORM_ETIKETT } from './SpelaMedVanner'
+import { BordSpel } from './BordSpel'
 
 const HJARTSLAG_MS = 5_000
 
@@ -61,19 +63,26 @@ function StolKort({
   stol,
   arDin,
   iLobby,
+  duArAgare,
   arbetar,
   onValj,
+  onBot,
 }: {
   stol: BordStol
   arDin: boolean
   iLobby: boolean
+  duArAgare: boolean
   arbetar: boolean
   onValj: (stol: Seat) => void
+  /** Ägarens bot-reservation (4B): true = reservera stolen som bot, false = öppna. */
+  onBot: (stol: Seat, reservera: boolean) => void
 }) {
   const grund = 'flex min-h-24 w-36 flex-col items-center justify-center gap-1 rounded-2xl p-3 text-center ring-1 transition-colors'
   const utseende = arDin
     ? 'bg-gold-400/15 ring-gold-400/40'
     : 'bg-red-950/30 ring-rose-50/10'
+  const knapp =
+    'rounded-lg px-2.5 py-1 text-xs font-semibold text-rose-50 ring-1 ring-rose-50/25 transition-colors hover:bg-red-950/45 disabled:opacity-50'
   return (
     <div className={`${grund} ${utseende}`}>
       <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-100/60">
@@ -84,17 +93,26 @@ function StolKort({
           {stol.namn}
           {arDin && <span className="text-gold-200"> (du)</span>}
         </p>
+      ) : stol.typ === 'bot' ? (
+        <>
+          <p className="text-sm text-rose-100/70">🤖 Bot</p>
+          {iLobby && duArAgare && (
+            <button type="button" disabled={arbetar} onClick={() => onBot(stol.stol, false)} className={knapp}>
+              Öppna stolen
+            </button>
+          )}
+        </>
       ) : (
         <>
-          <p className="text-sm text-rose-100/70">{stol.typ === 'bot' ? 'Bot' : 'Ledig'}</p>
-          {iLobby && stol.typ === 'ledig' && (
-            <button
-              type="button"
-              disabled={arbetar}
-              onClick={() => onValj(stol.stol)}
-              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-rose-50 ring-1 ring-rose-50/25 transition-colors hover:bg-red-950/45 disabled:opacity-50"
-            >
+          <p className="text-sm text-rose-100/70">Ledig</p>
+          {iLobby && (
+            <button type="button" disabled={arbetar} onClick={() => onValj(stol.stol)} className={knapp}>
               Sätt dig här
+            </button>
+          )}
+          {iLobby && duArAgare && (
+            <button type="button" disabled={arbetar} onClick={() => onBot(stol.stol, true)} className={knapp}>
+              Sätt bot här
             </button>
           )}
         </>
@@ -123,27 +141,36 @@ export function Bord() {
     }
     setFel(null)
     senasteSeqRef.current = svar.senasteSeq
-    setLage({ meta: svar.meta, stolar: svar.stolar, events: svar.events, senasteSeq: svar.senasteSeq })
+    setLage({
+      meta: svar.meta,
+      stolar: svar.stolar,
+      events: svar.events,
+      senasteSeq: svar.senasteSeq,
+      dinHand: svar.dinHand,
+      stallning: svar.stallning,
+      givStartSeq: svar.givStartSeq,
+    })
   }, [kod])
 
   useEffect(() => {
     if (signedIn) void hamta()
   }, [signedIn, hamta])
 
-  // Realtidsprenumerationen (deltagare): varje ny händelse → hämta om läget.
+  // Realtidsprenumerationen (deltagare, BARA i lobbyn — under spel sköter
+  // BordSpel/useBordSpel sin egen synk, annars dubbla hjärtslag).
   const bordId = lage?.meta.id ?? null
   const dinStol = lage?.meta.dinStol ?? null
+  const status = lage?.meta.status ?? null
   useEffect(() => {
-    if (!bordId || !dinStol) return
+    if (!bordId || !dinStol || status !== 'lobby') return
     return prenumereraBordHandelser(bordId, () => {
       void hamta()
     })
-  }, [bordId, dinStol, hamta])
+  }, [bordId, dinStol, status, hamta])
 
   // Hjärtslaget (deltagare): närvaro + auktoritativ ikapphämtning.
-  const status = lage?.meta.status ?? null
   useEffect(() => {
-    if (!dinStol || status === 'avslutat' || status === 'klar') return
+    if (!dinStol || status !== 'lobby') return
     const id = setInterval(() => {
       void (async () => {
         const svar = await bordHjartslag(kod.toUpperCase(), senasteSeqRef.current)
@@ -235,7 +262,7 @@ export function Bord() {
 
   const { meta, stolar } = lage
 
-  if (meta.status === 'avslutat' || meta.status === 'klar') {
+  if (meta.status === 'avslutat') {
     return (
       <Skarm>
         <div className="max-w-sm space-y-4 text-center">
@@ -247,6 +274,26 @@ export function Bord() {
     )
   }
 
+  // Spelet igång (eller färdigspelat): spelvyn tar över hela skärmen. Den har
+  // sin egen synk (useBordSpel) — väntrummets hjärtslag/prenumeration är
+  // avstängda utanför lobbyn.
+  if (meta.status === 'spelar' || meta.status === 'klar') {
+    if (!meta.dinStol) {
+      return (
+        <Skarm>
+          <div className="max-w-sm space-y-4 text-center">
+            <h1 className="text-2xl font-semibold text-rose-50">Bordet spelar</h1>
+            <p className="text-rose-100/70">
+              Partiet är igång — åskådarläge (kibitz) kommer i en senare version.
+            </p>
+            <HemLank />
+          </div>
+        </Skarm>
+      )
+    }
+    return <BordSpel kod={meta.kod} minStol={meta.dinStol} tempo={meta.tempo} givar={meta.givar} />
+  }
+
   const perStol = new Map(stolar.map((s) => [s.stol, s]))
   const stolKort = (stol: Seat) => {
     const s = perStol.get(stol)
@@ -256,8 +303,14 @@ export function Bord() {
         stol={s}
         arDin={meta.dinStol === stol}
         iLobby={meta.status === 'lobby'}
+        duArAgare={meta.duArAgare}
         arbetar={arbetar}
         onValj={valjStol}
+        onBot={(st, reservera) =>
+          void korHandling(() =>
+            stolHandling(kod.toUpperCase(), reservera ? 'satt-bot' : 'oppna-stol', st),
+          )
+        }
       />
     )
   }
@@ -310,7 +363,10 @@ export function Bord() {
           )}
           {meta.duArAgare && (
             <>
-              <Button disabled title="Spelstarten byggs i nästa steg">
+              <Button
+                disabled={arbetar}
+                onClick={() => void korHandling(() => startaBord(kod.toUpperCase()))}
+              >
                 Starta spelet
               </Button>
               <Button variant="secondary" disabled={arbetar} onClick={() => setVisaAvsluta(true)}>
@@ -324,9 +380,10 @@ export function Bord() {
             </Button>
           )}
         </div>
-        {meta.duArAgare && (
+        {meta.duArAgare && meta.status === 'lobby' && (
           <p className="text-xs text-rose-100/50">
-            Spelstarten kommer i nästa delleverans — bjud in och prova stolarna så länge.
+            Tomma stolar fylls med bottar när du startar. "Sätt bot här" låser en stol som bot
+            redan nu, så ingen annan tar den.
           </p>
         )}
 

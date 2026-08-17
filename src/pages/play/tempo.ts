@@ -23,6 +23,10 @@ export const SPEED_LABEL: Record<PlaySpeed, string> = {
 export const BASE = {
   /** Botens paus innan den lägger ett kort (snabba tumregelsvägen). */
   botDelay: 750,
+  /** Paus mellan visade bud vid vänner-bordet (etapp 4B): serverns botsvar
+   *  kommer i en batch och klienten visar dem i bordets tempo. Det lokala
+   *  spelets budloop (useGame) har sin egen hårdkodade paus och rörs inte. */
+  budDelay: 700,
   /** Minsta synliga "tänketid" för Monte-Carlo-svar — snabba svar från
    *  webworkern ska inte teleportera in. Watchdogen (15 s) skalas INTE. */
   mcFloor: 500,
