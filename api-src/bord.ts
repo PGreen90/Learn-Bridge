@@ -845,27 +845,44 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
   if (!Number.isInteger(basSeq) || basSeq < 0) {
     return json(400, { ok: false, fel: 'Ogiltigt basSeq' })
   }
-  const bord = await hamtaBord(m, kod)
+  // HETA VÄGEN: uppslagen slås ihop (bordet + fröet i EN fråga) och körs
+  // parallellt — sekventiella rundresor Vercel↔Supabase var det som gjorde
+  // varje drag segt (ägarens fynd 2026-08-17: 1–2 s innan kortet lade sig).
+  const bordRader = (await restGet(
+    m,
+    `tables?kod=eq.${kod}&select=${BORD_KOLUMNER},seed`,
+  )) as Array<BordRad & { seed: string }>
+  const bord = bordRader[0]
   if (!bord) return json(404, { ok: false, fel: 'Bordet finns inte längre' })
   if (bord.status !== 'spelar') return json(409, { ok: false, fel: 'Bordet spelar inte' })
-  const stolar = await hamtaStolar(m, bord.id)
+  const giv = bord.aktuell_giv
+  const [stolar, head, givLista, stallningInnan] = await Promise.all([
+    hamtaStolar(m, bord.id),
+    hamtaSenasteSeq(m, bord.id),
+    hamtaGivHandelser(m, bord.id, giv),
+    stallningFore(m, bord.id, giv),
+  ])
   const min = stolar.find((s) => s.user_id === userId)
   if (!min) return json(403, { ok: false, fel: 'Du sitter inte vid det här bordet' })
-
-  const head = await hamtaSenasteSeq(m, bord.id)
   if (basSeq !== head) return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: head })
 
-  const seed = await hamtaSeed(m, bord.id)
-  const giv = bord.aktuell_giv
+  const seed = bord.seed
   const deal = bordGiv(seed, giv)
-  const givLista = await hamtaGivHandelser(m, bord.id, giv)
   const lage = projiceraGiv(deal, givLista)
   const dragRaw = b.drag as Record<string, unknown> | null
 
   // --- Nästa giv (efter giv-klar-revealen) -------------------------------
   if (dragRaw?.typ === 'nasta-giv') {
     if (!lage.givKlar) return json(409, { ok: false, fel: 'Given är inte färdigspelad' })
-    const stallning = await stallningFore(m, bord.id, giv + 1)
+    // Ägaren styr bordets tempo (ägarbeslut 2026-08-17): bara hen går vidare.
+    if (bord.owner_id !== userId) {
+      return json(403, { ok: false, fel: 'Bara bordets ägare startar nästa giv' })
+    }
+    // Ställningen EFTER given ligger inbakad i givens giv-klar-händelse.
+    const klarRad = givLista.find((h) => h.typ === 'giv-klar')
+    const stallning =
+      (klarRad?.data as { stallning?: { ns: number; ew: number } } | undefined)?.stallning ??
+      stallningInnan
     if (giv >= bord.givar) {
       // Sista given: bordet är färdigspelat. Stolarna släpps (aktiv=false) så
       // spelarna kan starta/sätta sig vid nya bord; raderna finns kvar för visning.
@@ -913,13 +930,16 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
   if (!utfall.ok) return json(400, { ok: false, fel: utfall.fel })
 
   const handelser: NyHandelse[] = [utfall.handelse]
-  const stallning = await stallningFore(m, bord.id, giv)
   handelser.push(
     ...drivFram(
       deal,
       giv,
       [...givLista, { typ: utfall.handelse.typ, seat: utfall.handelse.seat ?? null, data: utfall.handelse.data ?? {} }],
-      { manniskoStolar: manniskoStolar(stolar), playSeed: bordPlaySeed(seed, giv), stallning },
+      {
+        manniskoStolar: manniskoStolar(stolar),
+        playSeed: bordPlaySeed(seed, giv),
+        stallning: stallningInnan,
+      },
     ),
   )
   const skrivet = await laggTillHandelser(m, bord.id, handelser, basSeq)

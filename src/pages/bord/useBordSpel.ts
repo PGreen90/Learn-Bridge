@@ -32,6 +32,7 @@ import {
   byggVisuelltSpel,
   projiceraBord,
   visuellAuktion,
+  vridTillbaka,
   type BordSpelLage,
   type VisuellAuktion,
   type VisuellSpel,
@@ -75,6 +76,11 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
   const [sweep, setSweep] = useState<Sweep | null>(null)
   const [fel, setFel] = useState<string | null>(null)
   const [skickar, setSkickar] = useState(false)
+  // Det optimistiska draget: ditt bud/kort visas OMEDELBART (annars ligger
+  // kortet kvar i handen under serverns svarstid — kändes som att det "hoppade
+  // tillbaka", ägarens fynd 2026-08-17). Serverns svar ersätter det; ett avslag
+  // plockar tillbaka det.
+  const [vantande, setVantande] = useState<BordHandelse | null>(null)
 
   const senasteSeqRef = useRef(0)
   senasteSeqRef.current = senasteSeq
@@ -172,11 +178,13 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     return () => clearTimeout(id)
   }, [events, visadeSeq, sweep, tempo, minStol])
 
-  // Projektionen av det som hittills avtäckts.
-  const synliga = useMemo(
-    () => (visadeSeq === null ? [] : events.filter((e) => e.seq <= visadeSeq)),
-    [events, visadeSeq],
-  )
+  // Projektionen av det som hittills avtäckts (+ det optimistiska draget, tills
+  // serverns bokförda version tagit dess plats).
+  const synliga = useMemo(() => {
+    const bas = visadeSeq === null ? [] : events.filter((e) => e.seq <= visadeSeq)
+    const sist = bas.length ? bas[bas.length - 1].seq : 0
+    return vantande && vantande.seq > sist ? [...bas, vantande] : bas
+  }, [events, visadeSeq, vantande])
   const lage = useMemo(() => projiceraBord(synliga, grundStallning), [synliga, grundStallning])
   const auktion = useMemo(() => (lage ? visuellAuktion(lage, minStol) : null), [lage, minStol])
   const spel = useMemo(
@@ -208,10 +216,34 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     settKort.current = n
   }, [lage?.kort.length, spel, tempo])
 
+  // Färska referenser till projektionen för det optimistiska draget (gorDrag
+  // ska inte byggas om varje gång läget ändras).
+  const lageRef = useRef(lage)
+  lageRef.current = lage
+  const spelRef = useRef(spel)
+  spelRef.current = spel
+
   const gorDrag = useCallback(
     async (drag: BordDragInput) => {
       setSkickar(true)
       setFel(null)
+      // Visa det egna draget direkt (optimistiskt). Kortets verkliga stol kan
+      // vara träkarlens (du är spelförare) — den läses ur den visuella turen.
+      if (drag.typ === 'bud' || drag.typ === 'kort') {
+        const seat =
+          drag.typ === 'bud'
+            ? minStol
+            : spelRef.current
+              ? vridTillbaka(minStol)(spelRef.current.state.toAct)
+              : minStol
+        setVantande({
+          seq: senasteSeqRef.current + 1,
+          giv: lageRef.current?.giv ?? 0,
+          typ: drag.typ,
+          seat,
+          data: drag.typ === 'bud' ? { bid: drag.bid } : { card: drag.card },
+        })
+      }
       const svar = await skickaDrag(kod, senasteSeqRef.current, drag)
       if (!svar.ok) {
         if (svar.status === 409) await synka() // ikapp — försök igen om det ännu är din tur
@@ -224,9 +256,10 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
           setVisadeSeq((prev) => (prev === null ? mitt : Math.max(prev, mitt)))
         }
       }
+      setVantande(null)
       setSkickar(false)
     },
-    [kod, laggTill, synka],
+    [kod, minStol, laggTill, synka],
   )
 
   const hoppaOverSvep = useCallback(() => setSweep(null), [])

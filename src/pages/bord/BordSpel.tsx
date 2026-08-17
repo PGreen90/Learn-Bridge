@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import type { Card, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { legalCalls } from '../../lib/engine/auction-live'
+import { hcp } from '../../lib/engine/hand'
 import { legalCards, side } from '../../lib/engine/play'
 import { AuctionGrid } from '../../components/AuctionGrid'
 import { BidChip } from '../../components/BidChip'
@@ -68,6 +69,7 @@ export function BordSpel({
   const navigate = useNavigate()
   const {
     laddar,
+    meta,
     stolar,
     dinHand,
     lage,
@@ -179,7 +181,16 @@ export function BordSpel({
         </div>
         <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
           {dinHand ? (
-            <HandFan hand={dinHand} flat />
+            <>
+              {/* HCP-brickan — samma som spelbordets budfas (ägarönskemål
+                  2026-08-17: se sina hp även vid vänner-bordet). */}
+              <div className="relative mx-auto w-full max-w-md">
+                <div className="absolute -top-4 right-0 z-10 rounded-md bg-red-950/80 px-2 py-0.5 text-xs font-semibold text-white ring-1 ring-gold-400/25">
+                  HCP {hcp(dinHand)}
+                </div>
+              </div>
+              <HandFan hand={dinHand} flat />
+            </>
           ) : (
             <p className="py-6 text-center text-sm text-rose-100/60">Hämtar din hand …</p>
           )}
@@ -189,59 +200,80 @@ export function BordSpel({
   }
 
   // -------------------------------------------------------------------------
-  // Giv klar: reveal + poäng + nästa giv. (Även utpassade givar landar här —
-  // servern bokför giv-klar med passadUt.)
+  // Giv klar: alla 52 kort vänds upp PÅ BORDET (ägarönskemål 2026-08-17 —
+  // ingen egen vy, ingen stickredovisning: 13 kort per väderstreck på sina
+  // platser). Resultatet ligger i mitten där sticket annars låg, och BARA
+  // ägaren startar nästa giv. Även utpassade givar landar här (giv-klar med
+  // passadUt från servern).
 
   if (lage.fas === 'klar' && lage.klar) {
     const klar = lage.klar
     const vTill = vridTillbaka(minStol)
     const sista = lage.giv >= givar
     const poang = minSida === 'NS' ? klar.nsScore : -klar.nsScore
+    const agare = meta?.duArAgare ?? false
+    // Suitordningen i sidostaplarna: trumfen först när det finns ett kontrakt.
+    const ordning = klar.contract
+      ? { ...klar.contract, declarer: vridStolLabel(klar.contract.declarer, minStol) }
+      : { declarer: 'S' as Seat, strain: 'NT' as const, level: 1 }
     return (
-      <Felt tone="vanner" className={`${rot} items-center justify-center px-3 py-8`}>
-        <div className="w-full max-w-lg space-y-4">
-          <header className="text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
-              Giv {lage.giv} av {givar}
-            </p>
+      <Felt tone="vanner" className={rot}>
+        <div className="px-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
+          <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 text-xs text-rose-100/80">
+            <span className="font-semibold text-gold-200">
+              Giv {lage.giv} av {givar} — klar
+            </span>
+            <span>Ställning: {stallningRad(klar.stallning)}</span>
+          </div>
+          <NamnRad stolar={stolar} minStol={minStol} />
+        </div>
+        {felRad}
+
+        {/* Nord uppvänd. */}
+        <div className="flex justify-center px-2 pt-1">
+          <HandFan hand={klar.hands[vTill('N')]} size="sm" />
+        </div>
+
+        {/* Väst | resultatet | Öst. */}
+        <div className="flex flex-1 items-center justify-between gap-1 px-2">
+          <div className="shrink-0">
+            <SideDummyPiles hand={klar.hands[vTill('W')]} contract={ordning} side="W" />
+          </div>
+          <div className="mx-auto max-w-xs rounded-2xl bg-red-950/50 px-4 py-3 text-center ring-1 ring-rose-50/15">
             {klar.passadUt || !klar.contract ? (
-              <h2 className="mt-1 text-2xl font-semibold text-rose-50">Given passades ut</h2>
+              <p className="font-semibold text-rose-50">Given passades ut</p>
             ) : (
-              <h2 className="mt-1 flex items-center justify-center gap-2 text-2xl font-semibold text-rose-50">
-                <BidChip bid={`${klar.contract.level}${STRAIN_CODE[klar.contract.strain]}`} />
-                {klar.contract.doubled && (
-                  <span className="text-base font-bold text-rose-300">{klar.contract.doubled}</span>
-                )}
-                <span>spelas av {SEAT_LABEL[vridStolLabel(klar.contract.declarer, minStol)]}</span>
-              </h2>
-            )}
-            {!klar.passadUt && (
-              <p className="mt-1 text-rose-100/80">
-                {klar.declarerTricks} stick · {poang >= 0 ? `Ni +${poang}` : `De +${-poang}`}
-              </p>
-            )}
-            <p className="mt-1 text-sm text-rose-100/60">Ställning: {stallningRad(klar.stallning)}</p>
-          </header>
-
-          {/* Alla fyra händerna (reveal) — visuell diamant, du nertill. */}
-          <div className="space-y-2">
-            {(['N', 'W', 'E', 'S'] as Seat[]).map((vis) => (
-              <div key={vis} className="rounded-xl bg-red-950/30 px-2 py-1.5 ring-1 ring-rose-50/10">
-                <p className="pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-100/50">
-                  {SEAT_LABEL[vis]}
-                  {vis === 'S' ? ' (du)' : ''}
+              <>
+                <p className="flex items-center justify-center gap-1.5 font-semibold text-rose-50">
+                  <BidChip bid={`${klar.contract.level}${STRAIN_CODE[klar.contract.strain]}`} />
+                  {klar.contract.doubled && (
+                    <span className="text-sm font-bold text-rose-300">{klar.contract.doubled}</span>
+                  )}
+                  <span>av {SEAT_LABEL[vridStolLabel(klar.contract.declarer, minStol)]}</span>
                 </p>
-                <HandFan hand={klar.hands[vTill(vis)]} size="sm" />
-              </div>
-            ))}
+                <p className="mt-1 text-sm text-rose-100/80">
+                  {klar.declarerTricks} stick · {poang >= 0 ? `Ni +${poang}` : `De +${-poang}`}
+                </p>
+              </>
+            )}
+            <div className="mt-2">
+              {agare ? (
+                <Button disabled={skickar} onClick={() => void gorDrag({ typ: 'nasta-giv' })}>
+                  {sista ? 'Se slutresultatet →' : 'Nästa giv →'}
+                </Button>
+              ) : (
+                <p className="text-xs text-rose-100/60">Bordets ägare startar nästa giv.</p>
+              )}
+            </div>
           </div>
+          <div className="shrink-0">
+            <SideDummyPiles hand={klar.hands[vTill('E')]} contract={ordning} side="E" />
+          </div>
+        </div>
 
-          {felRad}
-          <div className="text-center">
-            <Button disabled={skickar} onClick={() => void gorDrag({ typ: 'nasta-giv' })}>
-              {sista ? 'Se slutresultatet →' : 'Nästa giv →'}
-            </Button>
-          </div>
+        {/* Din hand nere, uppvänd som vanligt. */}
+        <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
+          <HandFan hand={klar.hands[vTill('S')]} flat />
         </div>
       </Felt>
     )

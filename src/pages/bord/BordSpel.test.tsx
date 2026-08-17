@@ -99,6 +99,7 @@ describe('BordSpel — röktest', () => {
     expect(await screen.findByText('PASS')).toBeTruthy() // budlådan
     expect(screen.getByText(/Patrik \(du\)/)).toBeTruthy() // namnraden
     expect(screen.getByText(/Giv 1 av 4/)).toBeTruthy() // givbrickan
+    expect(screen.getByText('HCP 10')).toBeTruthy() // ess+kung+dam+knekt i MIN_HAND
   })
 
   test('spelfasen renderar: stickräknaren och min klickbara hand', async () => {
