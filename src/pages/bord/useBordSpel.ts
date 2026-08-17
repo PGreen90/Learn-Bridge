@@ -60,6 +60,9 @@ export interface BordSpelet {
   fel: string | null
   /** Kön ikapp + inget svep + inget drag på väg → spelaren får agera. */
   aktuell: boolean
+  /** Som `aktuell` men utan svep-spärren: ett klick under svepet får hoppa
+   *  över svepet och agera direkt (ägarens fynd 2026-08-17 — "korten fastnar"). */
+  redo: boolean
   skickar: boolean
   gorDrag: (drag: BordDragInput) => Promise<void>
   hoppaOverSvep: () => void
@@ -264,7 +267,8 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
 
   const hoppaOverSvep = useCallback(() => setSweep(null), [])
 
-  const aktuell = visadeSeq !== null && visadeSeq === senasteSeq && !sweep && !skickar
+  const redo = visadeSeq !== null && visadeSeq === senasteSeq && !skickar
+  const aktuell = redo && !sweep
 
   return {
     laddar: visadeSeq === null,
@@ -277,6 +281,7 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     sweep,
     fel,
     aktuell,
+    redo,
     skickar,
     gorDrag,
     hoppaOverSvep,

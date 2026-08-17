@@ -12,7 +12,7 @@
 // Inte i 4B (medvetet): claim/ångra (kräver motpartsgodkännande — SENARE),
 // kortflygningen och ljuden (polish när bordet bevisat sig).
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Card, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
@@ -24,13 +24,14 @@ import { BidChip } from '../../components/BidChip'
 import { BiddingBox } from '../../components/BiddingBox'
 import { Button } from '../../components/Button'
 import { CompassPanel } from '../../components/CompassPanel'
+import { ClickAway, Dialog } from '../../components/Dialog'
 import { Felt } from '../../components/Felt'
 import { HandFan } from '../../components/HandFan'
-import { FaceDownFan, SideDummyPiles, SouthFan, SuitColumns } from '../play/hands'
+import { SideDummyPiles, SouthFan, SuitColumns } from '../play/hands'
 import { TrickCenterLive } from '../play/trick-views'
-import { sameCard, STRAIN_CODE } from '../play/common'
+import { MenuTempoRow, sameCard, STRAIN_CODE, VUL_TEXT } from '../play/common'
 import type { PlaySpeed } from '../play/tempo'
-import type { BordStol } from '../../lib/backend/bord'
+import { stolHandling, type BordStol } from '../../lib/backend/bord'
 import { vridTillbaka } from './bord-projektion'
 import { useBordSpel } from './useBordSpel'
 
@@ -55,6 +56,83 @@ function NamnRad({ stolar, minStol }: { stolar: BordStol[]; minStol: Seat }) {
   )
 }
 
+/** ⋮-menyn vid vänner-bordet (ägarönskemål 2026-08-17): samma mönster som
+ *  spelbordets TableMenu — inbjudningslänken, tempot (LOKALT: styr bara hur
+ *  snabbt serverns drag visas på DIN skärm), hjälptexten och vägen ut.
+ *  Ägaren får dessutom "Avsluta bordet". */
+function BordMeny({
+  open,
+  onToggle,
+  kod,
+  agare,
+  tempoVal,
+  onTempo,
+  onAvsluta,
+  children,
+}: {
+  open: boolean
+  onToggle: () => void
+  kod: string
+  agare: boolean
+  tempoVal: PlaySpeed
+  onTempo: (t: PlaySpeed) => void
+  onAvsluta: () => void
+  children: ReactNode
+}) {
+  const navigate = useNavigate()
+  const [kopierad, setKopierad] = useState(false)
+  function kopieraLank() {
+    const lank = `${window.location.origin}/#/bord/${kod}`
+    void navigator.clipboard?.writeText(lank).then(() => {
+      setKopierad(true)
+      setTimeout(() => setKopierad(false), 1800)
+    })
+  }
+  return (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-950/60 text-lg font-bold text-rose-50 ring-1 ring-rose-100/10 hover:bg-red-950/80"
+        aria-label="Meny"
+      >
+        ⋮
+      </button>
+      {open && (
+        <>
+          <ClickAway onClose={onToggle} />
+          <div className="absolute right-0 top-11 z-40 w-64 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
+            <Button className="w-full" variant="secondary" onClick={kopieraLank}>
+              {kopierad ? 'Länk kopierad ✓' : 'Kopiera inbjudningslänk'}
+            </Button>
+            <MenuTempoRow speed={tempoVal} onChange={onTempo} />
+            <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
+            {agare && (
+              <button
+                type="button"
+                onClick={() => {
+                  onToggle()
+                  onAvsluta()
+                }}
+                className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
+              >
+                Avsluta bordet
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => navigate('/spela-med-vanner')}
+              className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-ink-soft transition-opacity hover:opacity-80"
+            >
+              ← Till Spela med vänner
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export function BordSpel({
   kod,
   minStol,
@@ -67,6 +145,12 @@ export function BordSpel({
   givar: number
 }) {
   const navigate = useNavigate()
+  // Tempot lokalt (startar på bordets inställning): presentationskön är per
+  // skärm, så var och en får bläddra i sin egen takt via ⋮-menyn.
+  const [tempoVal, setTempoVal] = useState<PlaySpeed>(tempo)
+  const [visaMeny, setVisaMeny] = useState(false)
+  const [visaAvsluta, setVisaAvsluta] = useState(false)
+  const [avslutar, setAvslutar] = useState(false)
   const {
     laddar,
     meta,
@@ -78,11 +162,18 @@ export function BordSpel({
     sweep,
     fel,
     aktuell,
+    redo,
     skickar,
     gorDrag,
     hoppaOverSvep,
-  } = useBordSpel(kod, minStol, tempo)
+  } = useBordSpel(kod, minStol, tempoVal)
   const [selectedSuit, setSelectedSuit] = useState<Card['suit'] | null>(null)
+
+  async function avslutaBordet() {
+    setAvslutar(true)
+    await stolHandling(kod, 'avsluta')
+    navigate('/spela-med-vanner')
+  }
 
   // Nollställ färgvalet när turen går vidare (samma princip som budlådan).
   const toActV = spel?.state.toAct ?? null
@@ -121,6 +212,39 @@ export function BordSpel({
     </p>
   )
 
+  const meny = (
+    <BordMeny
+      open={visaMeny}
+      onToggle={() => setVisaMeny((v) => !v)}
+      kod={kod}
+      agare={meta?.duArAgare ?? false}
+      tempoVal={tempoVal}
+      onTempo={setTempoVal}
+      onAvsluta={() => setVisaAvsluta(true)}
+    >
+      Du sitter alltid <strong>nertill</strong> oavsett stol. När din ruta i auktionen lyser
+      bjuder du i budlådan; i spelet klickar du en färg och sedan kortet. Tempot styr hur
+      snabbt de andras drag visas — bara på din skärm.
+    </BordMeny>
+  )
+
+  const avslutaDialog = visaAvsluta && (
+    <Dialog onClose={() => setVisaAvsluta(false)} className="w-full max-w-sm p-6">
+      <h2 className="text-lg font-semibold text-ink">Avsluta bordet?</h2>
+      <p className="mt-2 text-sm text-ink-soft">
+        Bordet stängs för alla som sitter här. Det går inte att ångra.
+      </p>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="secondary" onClick={() => setVisaAvsluta(false)}>
+          Avbryt
+        </Button>
+        <Button disabled={avslutar} onClick={() => void avslutaBordet()}>
+          Avsluta bordet
+        </Button>
+      </div>
+    </Dialog>
+  )
+
   // -------------------------------------------------------------------------
   // Slutresultatet (bordet färdigspelat).
 
@@ -151,7 +275,7 @@ export function BordSpel({
     return (
       <Felt tone="vanner" className={rot}>
         <div className="px-2.5 pb-1 pt-[calc(0.625rem+env(safe-area-inset-top))]">
-          <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+          <div className="relative mx-auto flex w-full max-w-md items-stretch gap-2">
             <CompassPanel
               dealer={auktion.dealer}
               board={lage.board}
@@ -166,6 +290,9 @@ export function BordSpel({
               explanations="full"
               hiddenHands
             />
+            {/* ⋮-menyn: i radflödet på mobil, hängd utanför kolumnen från sm:
+                (samma kringflytande chrome som spelbordets budfas). */}
+            <div className="shrink-0 sm:absolute sm:-right-11 sm:top-0">{meny}</div>
           </div>
           <NamnRad stolar={stolar} minStol={minStol} />
         </div>
@@ -195,6 +322,7 @@ export function BordSpel({
             <p className="py-6 text-center text-sm text-rose-100/60">Hämtar din hand …</p>
           )}
         </div>
+        {avslutaDialog}
       </Felt>
     )
   }
@@ -223,7 +351,10 @@ export function BordSpel({
             <span className="font-semibold text-gold-200">
               Giv {lage.giv} av {givar} — klar
             </span>
-            <span>Ställning: {stallningRad(klar.stallning)}</span>
+            <div className="flex items-center gap-2">
+              <span>Ställning: {stallningRad(klar.stallning)}</span>
+              {meny}
+            </div>
           </div>
           <NamnRad stolar={stolar} minStol={minStol} />
         </div>
@@ -275,6 +406,7 @@ export function BordSpel({
         <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
           <HandFan hand={klar.hands[vTill('S')]} flat />
         </div>
+        {avslutaDialog}
       </Felt>
     )
   }
@@ -289,7 +421,10 @@ export function BordSpel({
 
   function klick(seatV: Seat) {
     return (c: Card) => {
-      if (!aktuell || !spel) return
+      // `redo` i stället för `aktuell`: ett klick mitt i sticksvepet hoppar
+      // över svepet och agerar direkt ("korten fastnar"-fyndet 2026-08-17).
+      if (!redo || !spel) return
+      if (sweep) hoppaOverSvep()
       const s = spel.state
       if (s.toAct !== seatV) return
       const agerandeV = trakarlUppe && s.toAct === dummyV ? s.contract.declarer : s.toAct
@@ -313,7 +448,7 @@ export function BordSpel({
 
   return (
     <Felt tone="vanner" className={rot}>
-      {/* Toppraden: kontrakt, stick, giv, ställning. */}
+      {/* Toppraden: kontrakt, stick, giv, ställning + ⋮-menyn. */}
       <div className="px-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 text-sm text-rose-100/80">
           <div className="flex items-center gap-1.5">
@@ -326,8 +461,11 @@ export function BordSpel({
           <div className="text-xs">
             Stick: Ni {st.tricksNS} – De {st.tricksEW}
           </div>
-          <div className="text-xs">
-            Giv {lage.giv}/{givar} · {stallningRad(lage.stallning)}
+          <div className="flex items-center gap-2">
+            <span className="text-xs">
+              Giv {lage.giv}/{givar} · {stallningRad(lage.stallning)}
+            </span>
+            {meny}
           </div>
         </div>
         <NamnRad stolar={stolar} minStol={minStol} />
@@ -337,9 +475,11 @@ export function BordSpel({
       </div>
       {felRad}
 
-      {/* Nord: träkarlen öppen (klickbar när den är din) eller dold rad. */}
-      <div className="flex justify-center px-2 pt-1">
-        {trakarlUppe && dummyV === 'N' ? (
+      {/* Nord-zonen: träkarlen som färgkolumner NÄR den sitter där — dolda
+          händer visas inte alls (spelbordets regel, Play.tsx). min-h håller
+          zonens plats så bordet inte hoppar när träkarlen läggs upp. */}
+      <div className="flex min-h-16 justify-center pt-1">
+        {trakarlUppe && dummyV === 'N' && (
           <SuitColumns
             hand={st.hands.N}
             contract={st.contract}
@@ -348,35 +488,38 @@ export function BordSpel({
             onCardClick={klick('N')}
             selectedSuit={selectedSuit}
           />
-        ) : (
-          <FaceDownFan count={spel!.kvar.N} orientation="h" />
         )}
       </div>
 
-      {/* Mitten: Väst | sticket | Öst. */}
-      <div className="flex flex-1 items-center justify-between gap-1 px-2">
-        <div className="shrink-0">
-          {trakarlUppe && dummyV === 'W' ? (
+      {/* Mitten: träkarlen på sin sida (bara när den sitter där) | sticket. */}
+      <div className="flex flex-1 items-center gap-1 px-1 py-2">
+        {trakarlUppe && dummyV === 'W' && (
+          <div className="shrink-0">
             <SideDummyPiles hand={st.hands.W} contract={st.contract} side="W" />
-          ) : (
-            <FaceDownFan count={spel!.kvar.W} orientation="v" />
-          )}
+          </div>
+        )}
+        <div className="flex min-w-0 flex-1 justify-center">
+          <TrickCenterLive
+            play={st}
+            thinking={skickar}
+            sweep={sweep}
+            onSkipSweep={hoppaOverSvep}
+            onCardClick={() => {}}
+            hasReason={() => false}
+          />
         </div>
-        <TrickCenterLive
-          play={st}
-          thinking={skickar}
-          sweep={sweep}
-          onSkipSweep={hoppaOverSvep}
-          onCardClick={() => {}}
-          hasReason={() => false}
-        />
-        <div className="shrink-0">
-          {trakarlUppe && dummyV === 'E' ? (
+        {trakarlUppe && dummyV === 'E' && (
+          <div className="shrink-0">
             <SideDummyPiles hand={st.hands.E} contract={st.contract} side="E" />
-          ) : (
-            <FaceDownFan count={spel!.kvar.E} orientation="v" />
-          )}
-        </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bricka + zon nere till vänster (som spelbordet) — zonen i DIN
+          synvinkel (visuella världen), samma som auktionsrutnätet. */}
+      <div className="px-3 pb-2 text-xs leading-tight text-rose-50/90">
+        <div>Bricka {lage.board}</div>
+        <div>{VUL_TEXT[auktion.vulnerability]}</div>
       </div>
 
       {/* Syd: din hand — klickbar när du styr den, stilla om du är träkarl. */}
@@ -398,6 +541,7 @@ export function BordSpel({
           />
         )}
       </div>
+      {avslutaDialog}
     </Felt>
   )
 }
