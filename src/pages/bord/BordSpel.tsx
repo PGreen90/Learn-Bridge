@@ -12,9 +12,9 @@
 // Inte i 4B (medvetet): claim/ångra (kräver motpartsgodkännande — SENARE),
 // kortflygningen och ljuden (polish när bordet bevisat sig).
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { Card, Seat } from '../../types/bridge'
+import type { Card, Deal, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { legalCalls } from '../../lib/engine/auction-live'
 import { hcp } from '../../lib/engine/hand'
@@ -26,11 +26,15 @@ import { Button } from '../../components/Button'
 import { CompassPanel } from '../../components/CompassPanel'
 import { ClickAway, Dialog } from '../../components/Dialog'
 import { Felt } from '../../components/Felt'
+import { FelrapportDialog } from '../../components/FelrapportDialog'
 import { HandFan } from '../../components/HandFan'
+import { PlayingCard } from '../../components/PlayingCard'
 import { SideDummyPiles, SouthFan, SuitColumns } from '../play/hands'
-import { TrickCenterLive } from '../play/trick-views'
-import { MenuTempoRow, sameCard, STRAIN_CODE, VUL_TEXT } from '../play/common'
-import type { PlaySpeed } from '../play/tempo'
+import { LastTrickPanel, TrickCenterLive } from '../play/trick-views'
+import { MenuTempoRow, MenuToggleRow, sameCard, STRAIN_CODE, VUL_TEXT } from '../play/common'
+import { ms, type PlaySpeed } from '../play/tempo'
+import { rebuildPlay } from '../../lib/engine/resume'
+import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
 import { vridTillbaka } from './bord-projektion'
 import { useBordSpel } from './useBordSpel'
@@ -67,6 +71,10 @@ function BordMeny({
   agare,
   tempoVal,
   onTempo,
+  ljud,
+  onLjud,
+  kanRapportera,
+  onRapportera,
   onAvsluta,
   children,
 }: {
@@ -76,6 +84,12 @@ function BordMeny({
   agare: boolean
   tempoVal: PlaySpeed
   onTempo: (t: PlaySpeed) => void
+  ljud: boolean
+  onLjud: (on: boolean) => void
+  /** Felrapporten kräver hela given — den låses upp när given är klar
+   *  (händerna är dolda dessförinnan, av fusksäkerhetsskäl). */
+  kanRapportera: boolean
+  onRapportera: () => void
   onAvsluta: () => void
   children: ReactNode
 }) {
@@ -106,6 +120,23 @@ function BordMeny({
               {kopierad ? 'Länk kopierad ✓' : 'Kopiera inbjudningslänk'}
             </Button>
             <MenuTempoRow speed={tempoVal} onChange={onTempo} />
+            <MenuToggleRow label="Ljud" hint="diskreta kortljud" on={ljud} onToggle={() => onLjud(!ljud)} />
+            {kanRapportera ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onToggle()
+                  onRapportera()
+                }}
+                className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
+              >
+                Rapportera fel i given
+              </button>
+            ) : (
+              <p className="mt-2 rounded-lg bg-panel-2 px-2.5 py-1.5 text-xs text-ink-faint">
+                Felrapporten låses upp när given är klar (händerna är dolda under spelet).
+              </p>
+            )}
             <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
             {agare && (
               <button
@@ -149,8 +180,11 @@ export function BordSpel({
   // skärm, så var och en får bläddra i sin egen takt via ⋮-menyn.
   const [tempoVal, setTempoVal] = useState<PlaySpeed>(tempo)
   const [visaMeny, setVisaMeny] = useState(false)
+  const [visaInfo, setVisaInfo] = useState(false)
   const [visaAvsluta, setVisaAvsluta] = useState(false)
+  const [visaRapport, setVisaRapport] = useState(false)
   const [avslutar, setAvslutar] = useState(false)
+  const [ljud, setLjud] = useState(isSoundEnabled)
   const {
     laddar,
     meta,
@@ -178,6 +212,69 @@ export function BordSpel({
   // Nollställ färgvalet när turen går vidare (samma princip som budlådan).
   const toActV = spel?.state.toAct ?? null
   useEffect(() => setSelectedSuit(null), [toActV])
+
+  // Ljudmotorn väcks i en riktig användargest (autoplay-policyn) — billig och
+  // idempotent, precis som på spelbordet.
+  useEffect(() => {
+    window.addEventListener('pointerdown', armSound)
+    return () => window.removeEventListener('pointerdown', armSound)
+  }, [])
+
+  // Tangentbordet i kortspelet (samma som Play.tsx): ←/→/↑/↓ flyttar fokus
+  // mellan spelbara kort (data-spelbart i PlayingCard), Enter spelar.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
+      const t = e.target as HTMLElement | null
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return
+      const cards = [...document.querySelectorAll<HTMLButtonElement>('button[data-spelbart]')]
+      if (cards.length === 0) return
+      e.preventDefault()
+      const fwd = e.key === 'ArrowRight' || e.key === 'ArrowDown'
+      const i = cards.indexOf(document.activeElement as HTMLButtonElement)
+      const next =
+        i === -1 ? (fwd ? 0 : cards.length - 1) : (i + (fwd ? 1 : -1) + cards.length) % cards.length
+      cards[next].focus()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Kortljuden (samma tre som spelbordet): knäpp per lagt kort, svisch när
+  // sticket sveps, serverings-tick när en ny giv delas. Ref-vakterna skiljer
+  // "nytt" från "monterad mitt i" — inget ljud vid omladdning.
+  const ljudRef = useRef(ljud)
+  ljudRef.current = ljud
+  const kortLjudRef = useRef(-1)
+  const antalKort = lage?.kort.length ?? 0
+  useEffect(() => {
+    if (kortLjudRef.current === -1) {
+      kortLjudRef.current = antalKort
+      return
+    }
+    if (antalKort > kortLjudRef.current && ljudRef.current) playSound('card')
+    kortLjudRef.current = antalKort
+  }, [antalKort])
+  const svepFas = sweep?.phase ?? null
+  useEffect(() => {
+    if (svepFas === 'slide' && ljudRef.current) playSound('sweep')
+  }, [svepFas])
+  const givNr = lage?.giv ?? 0
+  const givLjudRef = useRef(-1)
+  useEffect(() => {
+    if (givLjudRef.current === -1) {
+      givLjudRef.current = givNr
+      return
+    }
+    if (givNr > givLjudRef.current) {
+      givLjudRef.current = givNr
+      const id = setTimeout(() => {
+        if (ljudRef.current) playSound('deal')
+      }, ms('dealSoundDelay', tempoVal))
+      return () => clearTimeout(id)
+    }
+    givLjudRef.current = givNr
+  }, [givNr, tempoVal])
 
   const rot =
     'flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none'
@@ -215,11 +312,21 @@ export function BordSpel({
   const meny = (
     <BordMeny
       open={visaMeny}
-      onToggle={() => setVisaMeny((v) => !v)}
+      onToggle={() => {
+        setVisaMeny((v) => !v)
+        setVisaInfo(false)
+      }}
       kod={kod}
       agare={meta?.duArAgare ?? false}
       tempoVal={tempoVal}
       onTempo={setTempoVal}
+      ljud={ljud}
+      onLjud={(on) => {
+        setLjud(on)
+        setSoundEnabled(on)
+      }}
+      kanRapportera={!!lage?.klar}
+      onRapportera={() => setVisaRapport(true)}
       onAvsluta={() => setVisaAvsluta(true)}
     >
       Du sitter alltid <strong>nertill</strong> oavsett stol. När din ruta i auktionen lyser
@@ -416,6 +523,13 @@ export function BordSpel({
                 <p className="text-xs text-rose-100/60">Bordets ägare startar nästa giv.</p>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => setVisaRapport(true)}
+              className="mt-2 text-[11px] font-medium text-rose-100/50 underline underline-offset-2 hover:text-rose-100/80"
+            >
+              Kändes något fel? Rapportera given
+            </button>
           </div>
           <div className="shrink-0">
             <SideDummyPiles hand={klar.hands[vTill('E')]} contract={ordning} side="E" />
@@ -426,6 +540,32 @@ export function BordSpel({
         <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
           <HandFan hand={klar.hands[vTill('S')]} flat />
         </div>
+        {/* Felrapporten (ägarönskemål 2026-08-17): hela given är känd här —
+            deal ur revealen, auktion + spelade kort i VERKLIGA stolar (rapporten
+            ska gå att felsöka mot motorn), sticken via motorns egen omspelning. */}
+        {visaRapport &&
+          (() => {
+            const rapportDeal: Deal = {
+              id: `bord-${kod}-giv-${lage.giv}`,
+              hands: klar.hands,
+              dealer: lage.dealer,
+              vulnerability: lage.vulnerability,
+              board: lage.board,
+            }
+            const tricks = klar.contract
+              ? (rebuildPlay(rapportDeal, klar.contract, lage.kort.map((pc) => pc.card))
+                  ?.completedTricks ?? [])
+              : []
+            return (
+              <FelrapportDialog
+                deal={rapportDeal}
+                calls={lage.history}
+                contract={klar.contract}
+                tricks={tricks}
+                onClose={() => setVisaRapport(false)}
+              />
+            )
+          })()}
         {avslutaDialog}
       </Felt>
     )
@@ -485,6 +625,18 @@ export function BordSpel({
             <span className="text-xs">
               Giv {lage.giv}/{givar} · {stallningRad(lage.stallning)}
             </span>
+            {/* ⓘ: auktionen + förra sticket (samma overlay som spelbordet). */}
+            <button
+              type="button"
+              onClick={() => {
+                setVisaInfo((v) => !v)
+                setVisaMeny(false)
+              }}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-950/60 text-sm font-bold text-rose-50 ring-1 ring-rose-100/10 transition-colors hover:bg-red-950/80 hover:ring-gold-400/40"
+              aria-label="Budgivningen och förra sticket"
+            >
+              i
+            </button>
             {meny}
           </div>
         </div>
@@ -494,6 +646,45 @@ export function BordSpel({
         )}
       </div>
       {felRad}
+
+      {/* ⓘ-overlay: budgivningen som ledde till kontraktet + förra sticket i
+          miniatyr + utspelet — samma innehåll som spelbordets overlay. */}
+      {visaInfo && (
+        <>
+          <ClickAway onClose={() => setVisaInfo(false)} />
+          <div className="absolute left-1/2 top-[calc(3.5rem+env(safe-area-inset-top))] z-40 w-full max-w-sm -translate-x-1/2 space-y-2 px-3">
+            <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+              <AuctionGrid
+                calls={auktion.calls}
+                dealer={auktion.dealer}
+                vulnerability={auktion.vulnerability}
+                explanations="full"
+                hiddenHands
+              />
+            </div>
+            {st.completedTricks.length > 0 && (
+              <div className="flex justify-center rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+                <LastTrickPanel
+                  trick={st.completedTricks[st.completedTricks.length - 1]}
+                  onCardClick={() => {}}
+                  hasReason={() => false}
+                />
+              </div>
+            )}
+            {(() => {
+              const utspel = (st.completedTricks[0] ?? { cards: st.currentTrick }).cards[0]
+              if (!utspel) return null
+              return (
+                <div className="flex items-center justify-center gap-2 rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+                  <span className="text-xs font-medium text-ink-muted">Utspel:</span>
+                  <PlayingCard card={utspel.card} size="sm" />
+                  <span className="text-xs text-ink-muted">{SEAT_LABEL[utspel.seat]}</span>
+                </div>
+              )
+            })()}
+          </div>
+        </>
+      )}
 
       {/* Nord-zonen: träkarlen som färgkolumner NÄR den sitter där — dolda
           händer visas inte alls (spelbordets regel, Play.tsx). min-h håller

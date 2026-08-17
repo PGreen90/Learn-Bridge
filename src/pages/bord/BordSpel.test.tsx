@@ -138,5 +138,7 @@ describe('BordSpel — röktest', () => {
     expect(await screen.findByText('Nästa giv →')).toBeTruthy()
     expect(screen.getByText(/8 stick/)).toBeTruthy()
     expect(screen.getByText(/Ni \+110/)).toBeTruthy()
+    // Felrapporten (ägarönskemål 2026-08-17) nås från giv-klar-vyn.
+    expect(screen.getByText(/Rapportera given/)).toBeTruthy()
   })
 })
