@@ -63,6 +63,7 @@ function StolKort({
   stol,
   arDin,
   iLobby,
+  kanTa,
   duArAgare,
   arbetar,
   onValj,
@@ -71,6 +72,9 @@ function StolKort({
   stol: BordStol
   arDin: boolean
   iLobby: boolean
+  /** "Sätt dig här" visas: i lobbyn, eller (4C) för en obänkad besökare vid
+   *  ett pågående bord med frigjord stol. */
+  kanTa: boolean
   duArAgare: boolean
   arbetar: boolean
   onValj: (stol: Seat) => void
@@ -105,7 +109,7 @@ function StolKort({
       ) : (
         <>
           <p className="text-sm text-rose-100/70">Ledig</p>
-          {iLobby && (
+          {kanTa && (
             <button type="button" disabled={arbetar} onClick={() => onValj(stol.stol)} className={knapp}>
               Sätt dig här
             </button>
@@ -167,6 +171,14 @@ export function Bord() {
       void hamta()
     })
   }, [bordId, dinStol, status, hamta])
+
+  // Obänkad besökare vid ett pågående bord (4C): lätt omhämtning var 5:e
+  // sekund så stolskartan är färsk (hjärtslag kräver en stol — 403 annars).
+  useEffect(() => {
+    if (dinStol || status !== 'spelar') return
+    const id = setInterval(() => void hamta(), HJARTSLAG_MS)
+    return () => clearInterval(id)
+  }, [dinStol, status, hamta])
 
   // Hjärtslaget (deltagare): närvaro + auktoritativ ikapphämtning.
   useEffect(() => {
@@ -277,22 +289,22 @@ export function Bord() {
   // Spelet igång (eller färdigspelat): spelvyn tar över hela skärmen. Den har
   // sin egen synk (useBordSpel) — väntrummets hjärtslag/prenumeration är
   // avstängda utanför lobbyn.
-  if (meta.status === 'spelar' || meta.status === 'klar') {
-    if (!meta.dinStol) {
-      return (
-        <Skarm>
-          <div className="max-w-sm space-y-4 text-center">
-            <h1 className="text-2xl font-semibold text-rose-50">Bordet spelar</h1>
-            <p className="text-rose-100/70">
-              Partiet är igång — åskådarläge (kibitz) kommer i en senare version.
-            </p>
-            <HemLank />
-          </div>
-        </Skarm>
-      )
-    }
+  if ((meta.status === 'spelar' || meta.status === 'klar') && meta.dinStol) {
     return <BordSpel kod={meta.kod} minStol={meta.dinStol} tempo={meta.tempo} givar={meta.givar} />
   }
+  if (meta.status === 'klar' && !meta.dinStol) {
+    return (
+      <Skarm>
+        <div className="max-w-sm space-y-4 text-center">
+          <h1 className="text-2xl font-semibold text-rose-50">Bordet är färdigspelat</h1>
+          <HemLank />
+        </div>
+      </Skarm>
+    )
+  }
+  // spelar && !dinStol: faller vidare till stolskartan — en FRIGJORD stol
+  // (någon lämnade för gott) går att ta mitt i partiet (4C). Finns ingen
+  // ledig stol visar kartan bara läget.
 
   const perStol = new Map(stolar.map((s) => [s.stol, s]))
   const stolKort = (stol: Seat) => {
@@ -303,6 +315,7 @@ export function Bord() {
         stol={s}
         arDin={meta.dinStol === stol}
         iLobby={meta.status === 'lobby'}
+        kanTa={meta.status === 'lobby' || !meta.dinStol}
         duArAgare={meta.duArAgare}
         arbetar={arbetar}
         onValj={valjStol}
@@ -337,7 +350,9 @@ export function Bord() {
           <div />
           {stolKort('W')}
           <div className="px-2 text-center text-xs text-rose-100/50">
-            {meta.status === 'lobby' ? 'Lediga stolar fylls med bottar vid start' : ''}
+            {meta.status === 'lobby'
+              ? 'Lediga stolar fylls med bottar vid start'
+              : 'Bordet spelar — ta en ledig stol så hoppar du in'}
           </div>
           {stolKort('E')}
           <div />

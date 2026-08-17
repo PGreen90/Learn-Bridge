@@ -21,6 +21,7 @@ import {
   hamtaBordLage,
   prenumereraBordHandelser,
   skickaDrag,
+  type BordBegaran,
   type BordDragInput,
   type BordHandelse,
   type BordMeta,
@@ -51,6 +52,8 @@ export interface BordSpelet {
   laddar: boolean
   meta: BordMeta | null
   stolar: BordStol[]
+  /** Väntande paus-/lämna-begäranden (4C) — ägarens banner. */
+  begaranden: BordBegaran[]
   /** Din HELA utdelade hand för aktuell giv (budfasen visar den orörd). */
   dinHand: Card[] | null
   lage: BordSpelLage | null
@@ -76,6 +79,7 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
   const [grundStallning, setGrundStallning] = useState({ ns: 0, ew: 0 })
   const [meta, setMeta] = useState<BordMeta | null>(null)
   const [stolar, setStolar] = useState<BordStol[]>([])
+  const [begaranden, setBegaranden] = useState<BordBegaran[]>([])
   const [sweep, setSweep] = useState<Sweep | null>(null)
   const [fel, setFel] = useState<string | null>(null)
   const [skickar, setSkickar] = useState(false)
@@ -103,6 +107,7 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     }
     setMeta(svar.meta)
     setStolar(svar.stolar)
+    setBegaranden(svar.begaranden ?? [])
     if (svar.dinHand) setDinHand(svar.dinHand)
     if (svar.stallning) setGrundStallning(svar.stallning)
     let alla = svar.events
@@ -158,6 +163,27 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
       void synka()
     }
   }, [senasteGivStart, synka])
+
+  // Stol-/närvarohändelser (4C: paus, lämna, bot-övertag, ägarbyte, bord-slut)
+  // → hämta om stolarna/meta/begärandena så namnraden och bannern är färska.
+  const STOL_TYPER = useMemo(
+    () =>
+      new Set(['stol', 'paus-begaran', 'paus-svar', 'lamna-begaran', 'lamna-svar', 'agarbyte', 'bord-slut']),
+    [],
+  )
+  const senasteStolHandelse = useMemo(() => {
+    for (let i = events.length - 1; i >= 0; i--) {
+      if (STOL_TYPER.has(events[i].typ)) return events[i].seq
+    }
+    return 0
+  }, [events, STOL_TYPER])
+  const hamtadStolHandelse = useRef(0)
+  useEffect(() => {
+    if (senasteStolHandelse > hamtadStolHandelse.current) {
+      hamtadStolHandelse.current = senasteStolHandelse
+      void synka()
+    }
+  }, [senasteStolHandelse, synka])
 
   // Presentationskön: avtäck nästa händelse efter sin paus. Pausad under svep.
   useEffect(() => {
@@ -274,6 +300,7 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     laddar: visadeSeq === null,
     meta,
     stolar,
+    begaranden,
     dinHand,
     lage,
     auktion,
