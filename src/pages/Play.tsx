@@ -873,6 +873,18 @@ export function PlayTable({
           />
           {/* Tempot (ägarbeslut 2026-07-28): skalar botpauser + animationer. */}
           <MenuTempoRow speed={speed} onChange={setSpeed} />
+          {/* Felrapporten mitt i spelet (ägarbeslut 2026-08-17: rapporten ska
+              nås i ALLA lägen, inte bara efter given). */}
+          <button
+            type="button"
+            onClick={() => {
+              setReporting(true)
+              setShowMenu(false)
+            }}
+            className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
+          >
+            Rapportera fel i given
+          </button>
           <p className="mt-3 text-xs leading-relaxed text-ink-soft">
             Kontraktet är <strong>{contract.level}{STRAIN_CODE[contract.strain] === 'NT' ? 'NT' : ''}</strong>
             {STRAIN_CODE[contract.strain] !== 'NT' && <SuitSymbol suit={contract.strain as Suit} />} av{' '}
@@ -890,6 +902,18 @@ export function PlayTable({
             ← Avsluta spel
           </button>
         </div>
+      )}
+
+      {/* Felrapporten mitt i spelet (2026-08-17) — resultatvyns dialog nås
+          inte härifrån, så den renderas även på det levande bordet. */}
+      {reporting && (
+        <FelrapportDialog
+          deal={deal}
+          calls={calls}
+          contract={contract}
+          tricks={play.completedTricks}
+          onClose={() => setReporting(false)}
+        />
       )}
 
       {/* Claim-dialogen: ange sidans TOTALA stick i given; DDS dömer claimen. */}

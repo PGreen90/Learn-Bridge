@@ -173,6 +173,27 @@ export function visuellAuktion(lage: BordSpelLage, minStol: Seat): VisuellAuktio
   }
 }
 
+/** De färdigspelade sticken i VERKLIGA stolar (felrapporten m.m.) — byggda
+ *  direkt ur korthändelserna med motorns stickvinnarlogik, så de funkar även
+ *  under en pågående giv när dolda händer saknas. */
+export function verkligaStick(lage: BordSpelLage): Trick[] {
+  if (!lage.contract) return []
+  const trump = lage.contract.strain === 'NT' ? null : lage.contract.strain
+  const stick: Trick[] = []
+  let leader: Seat = NEXT_SEAT[lage.contract.declarer]
+  let aktuellt: PlayedCard[] = []
+  for (const pc of lage.kort) {
+    aktuellt = [...aktuellt, pc]
+    if (aktuellt.length === 4) {
+      const winner = currentWinner(aktuellt, trump)
+      stick.push({ leader, cards: aktuellt, winner })
+      leader = winner
+      aktuellt = []
+    }
+  }
+  return stick
+}
+
 // ---------------------------------------------------------------------------
 // Det visuella spelet.
 

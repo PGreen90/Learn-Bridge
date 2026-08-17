@@ -152,6 +152,7 @@ export function BiddingPhase({
               onExit={tavling ? tavling.onÖversikt : undefined}
               bidHelp={bidHelp}
               onToggleBidHelp={onToggleBidHelp}
+              onReport={() => setReporting(true)}
             >
               Du sitter <strong>Syd</strong>. När din ruta i auktionen lyser är det din tur:
               klicka ett bud i budlådan och bekräfta med <strong>OK</strong>. Datorn sköter
@@ -275,6 +276,7 @@ function TableMenu({
   onExit,
   bidHelp,
   onToggleBidHelp,
+  onReport,
   children,
 }: {
   open: boolean
@@ -287,6 +289,9 @@ function TableMenu({
   onExit?: () => void
   bidHelp: boolean
   onToggleBidHelp: () => void
+  /** Felrapporten mitt i budgivningen (ägarbeslut 2026-08-17: rapporten ska
+   *  nås i ALLA lägen — förr fanns den bara vid rundpass). */
+  onReport: () => void
   children: ReactNode
 }) {
   return (
@@ -313,6 +318,16 @@ function TableMenu({
               on={bidHelp}
               onToggle={onToggleBidHelp}
             />
+            <button
+              type="button"
+              onClick={() => {
+                onToggle()
+                onReport()
+              }}
+              className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
+            >
+              Rapportera fel i given
+            </button>
             <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
             {/* Enda vägen ut ur den immersiva vyn (headern är dold) → startsidan,
                 eller översikten i tävlingsläget. */}
