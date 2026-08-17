@@ -33,10 +33,9 @@ import { SideDummyPiles, SouthFan, SuitColumns } from '../play/hands'
 import { LastTrickPanel, TrickCenterLive } from '../play/trick-views'
 import { MenuTempoRow, MenuToggleRow, sameCard, STRAIN_CODE, VUL_TEXT } from '../play/common'
 import { ms, type PlaySpeed } from '../play/tempo'
-import { rebuildPlay } from '../../lib/engine/resume'
 import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
-import { vridTillbaka } from './bord-projektion'
+import { verkligaStick, vridTillbaka } from './bord-projektion'
 import { useBordSpel } from './useBordSpel'
 
 /** Visuell stolordning i namnraden: som auktionsrutnätet (V N Ö S). */
@@ -131,7 +130,7 @@ function BordMeny({
             </Button>
             <MenuTempoRow speed={tempoVal} onChange={onTempo} />
             <MenuToggleRow label="Ljud" hint="diskreta kortljud" on={ljud} onToggle={() => onLjud(!ljud)} />
-            {kanRapportera ? (
+            {kanRapportera && (
               <button
                 type="button"
                 onClick={() => {
@@ -142,10 +141,6 @@ function BordMeny({
               >
                 Rapportera fel i given
               </button>
-            ) : (
-              <p className="mt-2 rounded-lg bg-panel-2 px-2.5 py-1.5 text-xs text-ink-faint">
-                Felrapporten låses upp när given är klar (händerna är dolda under spelet).
-              </p>
             )}
             {kanPausa && (
               <button
@@ -405,7 +400,7 @@ export function BordSpel({
         setLjud(on)
         setSoundEnabled(on)
       }}
-      kanRapportera={!!lage?.klar}
+      kanRapportera={!!lage}
       onRapportera={() => setVisaRapport(true)}
       kanPausa={
         meta?.status === 'spelar' &&
@@ -500,11 +495,51 @@ export function BordSpel({
     </Dialog>
   )
 
+  /** Felrapporten (ägarbeslut 2026-08-17: tillgänglig i ALLA faser — bud,
+   *  spel och efter given, som i resten av rebidz). Rapporten bär det
+   *  klienten vet: hela given vid reveal; under pågående giv egen hand +
+   *  träkarlen (dolda händer utelämnas — fusksäkerheten) plus bordskoden i
+   *  giv-id:t så given kan återskapas exakt ur bordets frö. */
+  const rapportDialog =
+    visaRapport &&
+    lage &&
+    (() => {
+      const hands: Record<Seat, Card[]> = { N: [], E: [], S: [], W: [] }
+      if (lage.klar) {
+        Object.assign(hands, lage.klar.hands)
+      } else {
+        if (dinHand) hands[minStol] = dinHand
+        if (lage.trakarl) hands[lage.trakarl.stol] = lage.trakarl.hand
+      }
+      const rapportDeal: Deal = {
+        id: `bord-${kod}-giv-${lage.giv}`,
+        hands,
+        dealer: lage.dealer,
+        vulnerability: lage.vulnerability,
+        board: lage.board,
+      }
+      return (
+        <FelrapportDialog
+          deal={rapportDeal}
+          calls={lage.history}
+          contract={lage.contract}
+          tricks={verkligaStick(lage)}
+          onClose={() => setVisaRapport(false)}
+          intro={
+            lage.klar
+              ? undefined
+              : 'Auktionen och de spelade korten följer med automatiskt. Under en pågående giv utelämnas dolda händer — bordskoden i giv-id:t gör att given ändå kan återskapas exakt.'
+          }
+        />
+      )
+    })()
+
   const narvaroOverlagg = (
     <>
       {begaranBanner}
       {pausOverlay}
       {lamnaDialog}
+      {rapportDialog}
     </>
   )
 
@@ -715,32 +750,6 @@ export function BordSpel({
         <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
           <HandFan hand={klar.hands[vTill('S')]} flat />
         </div>
-        {/* Felrapporten (ägarönskemål 2026-08-17): hela given är känd här —
-            deal ur revealen, auktion + spelade kort i VERKLIGA stolar (rapporten
-            ska gå att felsöka mot motorn), sticken via motorns egen omspelning. */}
-        {visaRapport &&
-          (() => {
-            const rapportDeal: Deal = {
-              id: `bord-${kod}-giv-${lage.giv}`,
-              hands: klar.hands,
-              dealer: lage.dealer,
-              vulnerability: lage.vulnerability,
-              board: lage.board,
-            }
-            const tricks = klar.contract
-              ? (rebuildPlay(rapportDeal, klar.contract, lage.kort.map((pc) => pc.card))
-                  ?.completedTricks ?? [])
-              : []
-            return (
-              <FelrapportDialog
-                deal={rapportDeal}
-                calls={lage.history}
-                contract={klar.contract}
-                tricks={tricks}
-                onClose={() => setVisaRapport(false)}
-              />
-            )
-          })()}
         {narvaroOverlagg}
         {avslutaDialog}
       </Felt>
