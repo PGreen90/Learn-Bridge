@@ -51,10 +51,22 @@ projektion av loggen och spelar i samma anrop alla botdrag fram till nästa
 människas tur (`api-src/_lib/bord-motor.ts`). Ingen klient driver bottar.
 
 **Synken:** Supabase Realtime (Postgres Changes på `table_events`, RLS släpper
-bara bordets deltagare) är latenssocker; **hjärtslaget var 5:e sekund är
-auktoritativt** och gör dessutom hela närvarojobbet. Klientens drag skickas med
-`basSeq` (senast sedda sekvensnummer) — stämmer det inte med loggens huvud
-svarar servern 409 och klienten hämtar ikapp.
+bara bordets deltagare) är latenssocker; **hjärtslaget (`HJARTSLAG_MS` i
+`useBordSpel.ts`) är auktoritativt** och gör dessutom hela närvarojobbet.
+Klientens drag skickas med `basSeq` (senast sedda sekvensnummer) — stämmer det
+inte med loggens huvud svarar servern 409 och klienten hämtar ikapp.
+
+**Presentationsköns takt & ikapp-spolning** (fix 2026-08-18, träkarlens
+eftersläpning): den passiva stolen (träkarlen, vars kort spelföraren spelar)
+fick korten uppspelade i bot-takt, ett i taget, och halkade efter stick för
+stick när spelföraren — en människa — spelade snabbare än takten. Två
+ägarbeslut samma dag: (1) andras kort avtäcks nu i en liten utjämningstakt
+(`bordKort` i `tempo.ts`, inte bot-"tänketid") så det känns nära realtid vid
+ett människobord — stick-pausen (sweepHold) ger ändå beatet där man ser vem
+som vann; (2) ligger vyn mer än ett stick efter snabbspolas kön ikapp nuläget
+och sticksvepet hoppas över (`avtackningsPaus`/`skaSvepa` i `useBordSpel.ts`).
+Den kortare kant-takten släpper dessutom loss en snabb spelförare, som annars
+fick vänta in motståndarnas kort innan nästa kunde spelas.
 
 **Klienten är en projektor** (`src/pages/bord/bord-projektion.ts`): händelser →
 läge, med den **visuella vridningen** (du sitter alltid Syd — rotationen är

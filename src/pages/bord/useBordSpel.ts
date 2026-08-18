@@ -3,12 +3,19 @@
 // Tre inflöden av händelser, samma hantering (dedupe på seq + sortering):
 //  1. drag-svaret (egna drag + serverns botsvar — den agerande får dem direkt),
 //  2. realtidsprenumerationen (latenssocker),
-//  3. hjärtslaget var 5:e sekund (auktoritativt — bordet fungerar utan realtid).
+//  3. hjärtslaget (HJARTSLAG_MS) — auktoritativt, bordet fungerar utan realtid.
 //
 // PRESENTATIONSKÖN: servern spelar alla botdrag på en gång, men klienten visar
 // dem i bordets tempo — `visadeSeq` är läskursorn, och nästa händelse avtäcks
 // efter sin paus (bud/kort) eller direkt (övrigt). Egna drag avtäcks omedelbart.
 // Sticksvepet pausar kön (som i det lokala spelet).
+//
+// IKAPP-SPOLNINGEN (träkarlens eftersläpning, fix 2026-08-18): en passiv spelare
+// (träkarlen, vars kort spelas av spelföraren) får korten i bot-takt, ett i
+// taget — men producenten är en MÄNNISKA som kan spela snabbare än takten, så
+// backloggen växte stick för stick och hela stick "missades". Ligger vyn mer än
+// ett stick efter loggens huvud snabbspolar kön ikapp nuläget (0 ms) och
+// sticksvepet hoppas över. Besluten är rena: `avtackningsPaus`/`skaSvepa`.
 //
 // Min hand hämtas ur ?h=lage (hela den utdelade handen) och hämtas OM när en
 // ny giv börjar (giv-start-händelsen är signalen — oavsett vem som tryckte
@@ -39,7 +46,42 @@ import {
   type VisuellSpel,
 } from './bord-projektion'
 
-const HJARTSLAG_MS = 5_000
+// Tätare hjärtslag = kortare värsta-falls-släp om realtidskanalen hackar (den
+// passiva stolen har ingen annan snabb väg). Ofarligt: närvarodomarens trösklar
+// är 45/60 s och hjärtslagets botframdrivning är PK-vaktad + kräver >2 s stiltje.
+const HJARTSLAG_MS = 2_500
+
+// Fler än ett stick (4 kort) efter loggens huvud → snabbspola ikapp nuläget i
+// stället för att spela upp varje gammalt kort i bot-takt.
+export const IKAPP_TROSKEL = 4
+
+/** Pausen (ms) innan nästa köade händelse avtäcks. `bakom` = hur många
+ *  sekvenssteg den avtäckta vyn ligger efter loggens huvud. Är backloggen
+ *  större än ett stick snabbspolas allt (0 ms) så en passiv spelare (träkarlen)
+ *  inte missar hela stick. Vid den levande kanten gäller: egna drag direkt,
+ *  andras kort en liten utjämningstakt (`bordKort` — realtidskänsla, inte bot-
+ *  tänketid), andras bud budDelay (auktionen ska gå att läsa), resultat en
+ *  uttoning. Stick-pausen (vem vann?) ligger separat i sweep-effekten. */
+export function avtackningsPaus(
+  nasta: BordHandelse,
+  bakom: number,
+  egen: boolean,
+  tempo: PlaySpeed,
+): number {
+  if (bakom > IKAPP_TROSKEL) return 0
+  // Läge 2:s autobud (motorns färdiga auktion) bläddras i snabb takt.
+  const auto = nasta.typ === 'bud' && (nasta.data as { auto?: boolean }).auto === true
+  if (nasta.typ === 'bud') return egen ? 0 : auto ? 300 : ms('budDelay', tempo)
+  if (nasta.typ === 'kort') return egen ? 0 : ms('bordKort', tempo)
+  if (nasta.typ === 'giv-klar' || nasta.typ === 'facit') return ms('resultOutro', tempo)
+  return 0
+}
+
+/** Ska ett fullbordat stick svepas? Nej under ikapp-spolning — svepet fryser
+ *  annars kön (~1,3 s per stick) och backloggen hämtas aldrig in. */
+export function skaSvepa(bakom: number): boolean {
+  return bakom <= IKAPP_TROSKEL
+}
 
 function laggIhop(gamla: BordHandelse[], nya: BordHandelse[]): BordHandelse[] {
   if (!nya.length) return gamla
@@ -186,27 +228,14 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
   }, [senasteStolHandelse, synka])
 
   // Presentationskön: avtäck nästa händelse efter sin paus. Pausad under svep.
+  // Ligger vyn mer än ett stick efter (bakom) snabbspolas kön ikapp nuläget.
   useEffect(() => {
     if (visadeSeq === null || sweep) return
     const nasta = events.find((e) => e.seq > visadeSeq)
     if (!nasta) return
     const egen = (nasta.typ === 'bud' || nasta.typ === 'kort') && nasta.seat === minStol
-    // Läge 2:s autobud (motorns färdiga auktion) bläddras i snabb takt.
-    const auto = nasta.typ === 'bud' && (nasta.data as { auto?: boolean }).auto === true
-    const paus =
-      nasta.typ === 'bud'
-        ? egen
-          ? 0
-          : auto
-            ? 300
-            : ms('budDelay', tempo)
-        : nasta.typ === 'kort'
-          ? egen
-            ? 0
-            : ms('botDelay', tempo)
-          : nasta.typ === 'giv-klar' || nasta.typ === 'facit'
-            ? ms('resultOutro', tempo)
-            : 0
+    const bakom = events[events.length - 1].seq - visadeSeq
+    const paus = avtackningsPaus(nasta, bakom, egen, tempo)
     const id = setTimeout(() => setVisadeSeq(nasta.seq), paus)
     return () => clearTimeout(id)
   }, [events, visadeSeq, sweep, tempo, minStol])
@@ -235,7 +264,17 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
       settKort.current = n
       return
     }
-    if (n > settKort.current && n % 4 === 0 && spel && spel.state.completedTricks.length > 0) {
+    // Under ikapp-spolning hoppas svepet över (det skulle annars frysa kön och
+    // backloggen hämtas aldrig in) — settKort följer ändå med så inget gammalt
+    // stick sveps retroaktivt när vyn väl är ikapp.
+    const bakom = events.length && visadeSeq !== null ? events[events.length - 1].seq - visadeSeq : 0
+    if (
+      skaSvepa(bakom) &&
+      n > settKort.current &&
+      n % 4 === 0 &&
+      spel &&
+      spel.state.completedTricks.length > 0
+    ) {
       settKort.current = n
       const trick = spel.state.completedTricks[spel.state.completedTricks.length - 1]
       setSweep({ trick, phase: 'hold' })
@@ -247,7 +286,7 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
       }
     }
     settKort.current = n
-  }, [lage?.kort.length, spel, tempo])
+  }, [lage?.kort.length, spel, tempo, events, visadeSeq])
 
   // Färska referenser till projektionen för det optimistiska draget (gorDrag
   // ska inte byggas om varje gång läget ändras).
