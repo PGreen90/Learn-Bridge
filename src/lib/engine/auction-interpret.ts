@@ -281,6 +281,31 @@ function lastContract(prior: ResolvedCall[]): { seat: Seat; cb: ParsedBid } | nu
   return null
 }
 
+/**
+ * Är auktionen (ostört) den kanoniska 1x–1y–2NT-familjen (§5.2, systems on efter
+ * naturligt 2NT-återbud)? Läser bara kontraktsbudens mönster: 1-läges färgöppning
+ * (öppnaren) – 1-läges HÖGfärgssvar (svararen) – 2NT (samma öppnare). Returnerar
+ * öppnare + öppningsfärg + svararens högfärg + alla kontraktsbud, annars null.
+ */
+function twoNTRebidContext(
+  seat: Seat,
+  prior: ResolvedCall[],
+): { opener: Seat; responder: Seat; opened: string; responderMajor: string; bids: ParsedBid[] } | null {
+  if (opponentsHaveBid(seat, prior)) return null
+  const cbs: { seat: Seat; cb: ParsedBid }[] = []
+  for (const c of prior) {
+    const p = parseBid(c.bid)
+    if (p) cbs.push({ seat: c.seat, cb: p })
+  }
+  if (cbs.length < 3) return null
+  const [b0, b1, b2] = cbs
+  if (b0.cb.level !== 1 || b0.cb.strain === 'NT') return null // 1-läges färgöppning
+  if (b1.cb.level !== 1 || (b1.cb.strain !== 'H' && b1.cb.strain !== 'S')) return null // 1-läges HÖGfärgssvar
+  if (b2.cb.level !== 2 || b2.cb.strain !== 'NT') return null // 2NT-återbud
+  if (b0.seat !== b2.seat || b1.seat !== PARTNER[b0.seat]) return null
+  return { opener: b0.seat, responder: b1.seat, opened: b0.cb.strain, responderMajor: b1.cb.strain, bids: cbs.map((x) => x.cb) }
+}
+
 // ---- Tolkningen ------------------------------------------------------------
 
 /**
@@ -372,6 +397,64 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
         confidence: 'trolig',
         forcing: 'krav-1-rond',
       }
+    }
+  }
+
+  // Systems on efter naturligt 2NT-återbud (1x–1y–2NT, §5.2). Checkbacken och
+  // 5-3-jakten är KONVENTION — 3♣ är inte naturlig klöver. Läses ur sekvensen.
+  const twoNT = twoNTRebidContext(seat, prior)
+  if (twoNT) {
+    const otherMajor = twoNT.responderMajor === 'H' ? 'S' : 'H'
+    const n = twoNT.bids.length // antal kontraktsbud FÖRE detta
+    const last = twoNT.bids[n - 1]
+
+    // Steg 1 – svararens bud direkt efter 2NT (tre kontraktsbud före).
+    if (n === 3 && seat === twoNT.responder) {
+      if (cb.level === 3 && cb.strain === 'C') {
+        return {
+          text: `3♣ — checkback efter partnerns 2NT-återbud (18–19 balanserad): frågar efter en dold 4-korts ${NAME[otherMajor]} eller 3-korts stöd i din ${NAME[twoNT.responderMajor]} (5+). Konstgjort — säger inget om klöver.`,
+          confidence: 'trolig',
+          forcing: 'krav-1-rond',
+        }
+      }
+      if (cb.level === 3 && cb.strain === twoNT.responderMajor) {
+        return {
+          text: `3${sym} — visar en 5-korts ${name} och söker partnerns dolda 3-korts stöd (5-3-fit). Partnern höjer 4${sym} med stöd, annars 3NT.`,
+          confidence: 'trolig',
+          forcing: 'krav-1-rond',
+        }
+      }
+      if (cb.level === 3 && cb.strain === 'NT') {
+        return { text: `3NT — till spel mittemot 18–19 balanserad; ingen högfärgsfit att jaga.`, confidence: 'trolig', forcing: 'avslut' }
+      }
+    }
+
+    // Steg 2 – öppnarens svar på 3♣-checkbacken (sista budet före = 3♣).
+    if (n === 4 && seat === twoNT.opener && last.level === 3 && last.strain === 'C') {
+      if (cb.level === 3 && cb.strain === otherMajor) {
+        return { text: `3${sym} — svar på checkbacken: visar din dolda 4-korts ${name} (4-4-fit).`, confidence: 'trolig' }
+      }
+      if (cb.level === 3 && cb.strain === twoNT.responderMajor) {
+        return { text: `3${sym} — svar på checkbacken: 3-korts stöd i partnerns ${name} (5-3-fit).`, confidence: 'trolig' }
+      }
+      if (cb.level === 3 && cb.strain === 'NT') {
+        return { text: `3NT — svar på checkbacken: varken dold 4-korts ${NAME[otherMajor]} eller 3-stöd i ${NAME[twoNT.responderMajor]}.`, confidence: 'trolig', forcing: 'avslut' }
+      }
+    }
+
+    // Steg 2b – öппnarens svar på svararens direkta 3M (5-3-jakt).
+    if (n === 4 && seat === twoNT.opener && last.level === 3 && last.strain === twoNT.responderMajor) {
+      if (cb.level === 4 && cb.strain === twoNT.responderMajor) {
+        return { text: `4${sym} — höjer partnerns 5-korts ${name} med 3-korts stöd (5-3-fit, till spel).`, confidence: 'trolig', forcing: 'avslut' }
+      }
+      if (cb.level === 3 && cb.strain === 'NT') {
+        return { text: `3NT — bara 2-korts ${NAME[twoNT.responderMajor]}, ingen 5-3-fit → till spel i sang.`, confidence: 'trolig', forcing: 'avslut' }
+      }
+    }
+
+    // Steg 3 – svararen placerar den hittade högfärgsfiten (4♥/4♠).
+    if (n === 5 && seat === twoNT.responder && cb.level === 4 && cb.strain !== 'NT') {
+      return { text: `Utgång 4${sym} — placerar den högfärgsfit checkbacken hittade.`, confidence: 'trolig', forcing: 'avslut' }
     }
   }
 

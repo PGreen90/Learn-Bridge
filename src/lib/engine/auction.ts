@@ -19,8 +19,8 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
-import { responderSecondBid } from './responder-rebids'
+import { openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { responderPlaceAfter2NTCheckback, responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
 import { gerberInvestigation, gerber2NTInvestigation, gerberRebidInvestigation } from './nt-slam'
@@ -944,6 +944,32 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       if (responderSuit4c && reverseSuit4c) {
         const third = openerThirdBidAfterReverse(deal.hands[openerSeat], openerSuit, responderSuit4c, reverseSuit4c, second.call)
         turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+        return finish(false)
+      }
+    }
+    // Systems on: svararens CHECKBACK (3♣) efter öppnarens 2NT-återbud
+    // (1x–1y–2NT, 18–19 bal, §4.9). Öppnaren visar sin dolda 4-korts andra
+    // högfärg / 3NT, svararen placerar 4-4-fiten eller passar. Behöver BÅDA
+    // händerna → tas on-book här (linjen replay:as av live-lagret).
+    if (second.rule === '2NT-checkback') {
+      const responderMajor = parseBid(response.call).suit
+      if (responderMajor) {
+        const ans = openerAnswer2NTCheckback(deal.hands[openerSeat], responderMajor)
+        turns.push({ seat: openerSeat, role: 'öppnare', call: ans.call, rule: ans.rule, explanation: ans.explanation })
+        const place = responderPlaceAfter2NTCheckback(deal.hands[responderSeat], responderMajor, ans)
+        if (place.call !== 'P') {
+          turns.push({ seat: responderSeat, role: 'svarare', call: place.call, rule: place.rule, explanation: place.explanation })
+        }
+        return finish(false)
+      }
+    }
+    // Systems on: svararens direkta 3♥/3♠ (egen 5-korts högfärg, 5-3-jakt).
+    // Öppnaren höjer med 3-stöd (4M) eller placerar 3NT.
+    if (second.rule === '2NT-återbud (5-3-jakt)') {
+      const responderMajor = parseBid(response.call).suit
+      if (responderMajor) {
+        const ans = openerAnswer2NTMajorSeek(deal.hands[openerSeat], responderMajor)
+        turns.push({ seat: openerSeat, role: 'öppnare', call: ans.call, rule: ans.rule, explanation: ans.explanation })
         return finish(false)
       }
     }

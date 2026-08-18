@@ -626,6 +626,27 @@ export function responderPlaceAfterNMF(
   return pass('ingen fit, bara inbjudan')
 }
 
+// Svararens PLACERING efter öppnarens svar på 3♣-CHECKBACK (§5.2). Svararen har
+// 5+ spader + 4 hjärter. Visade öppnaren sin dolda ANDRA högfärg (3♥ = 4 hjärter)
+// finns 4-4-fiten → utgång där. Visade öppnaren 3-stöd i vår färg (3♠) är det en
+// 5-3-fit → utgång där. Bjöd öppnaren 3NT (ingen fit) står 3NT → pass.
+export function responderPlaceAfter2NTCheckback(hand: Hand, responderMajor: Suit, answer: ResponseResult): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const other: Suit = responderMajor === 'hearts' ? 'spades' : 'hearts'
+  const rule = 'placering efter 2NT-checkback'
+  const ansSuit = suitOfCall(answer.call)
+  // Öppnaren visade sin dolda andra högfärg → 4-4-fit i den.
+  if (ansSuit === other && len[other] >= 4) {
+    return { call: `4${BID[other]}`, rule, explanation: `${p} hp, 4-4-fit i ${NAME[other]} → utgång 4${SYM[other]}.` }
+  }
+  // Öppnaren visade 3-stöd i vår färg → 5-3-fit.
+  if (ansSuit === responderMajor && len[responderMajor] >= 5) {
+    return { call: `4${BID[responderMajor]}`, rule, explanation: `${p} hp, 5-3-fit i ${NAME[responderMajor]} → utgång 4${SYM[responderMajor]}.` }
+  }
+  return { call: 'P', rule, explanation: `${p} hp – öppnaren nekade högfärgsfit, 3NT står → pass.` }
+}
+
 // === Punkt 12: svararens andra bud i färgauktioner (fjärde färg krav), §6.6 ==
 
 export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSuit: Suit, rebid: ResponseResult): ResponseResult | null {
@@ -657,8 +678,27 @@ export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSu
       return ntLadder()
 
     // Öppnaren visade balanserat eller egen färg.
-    case '2NT (18–19)':
-      return { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot 18–19 → 3NT.` }
+    case '2NT (18–19)': {
+      // Systems on (checkback) mot öppnarens 18–19 bal (§5.2). Öppnarens 2NT
+      // NEKADE 4-stöd i vår färg OCH en billigt visbar 4-korts högfärg (hade hen
+      // 4 spader efter vårt 1♥ hade hen bjudit 1♠). Den ENDA dolda högfärgen är
+      // därför hjärter som öppnaren inte kunde visa efter vårt 1♠-svar (2♥ vore
+      // reverse). Dolda fitar: (a) öppnarens 3-stöd i vår 5-korts högfärg (5-3)
+      // → direkt 3♥/3♠; (b) 4-4 i hjärter efter ett 1♠-svar → 3♣ checkback.
+      if (yMaj) {
+        // Efter 1♠-svar med 4 hjärter (⇒ 5+ spader, annars 1♥ upp): 3♣ jagar
+        // öppnarens dolda 4-korts hjärter (4-4) OCH 3-stöd i spader (5-3).
+        if (y === 'spades' && len.hearts === 4) {
+          return { call: '3C', rule: '2NT-checkback', explanation: `${p} hp, 5+ spader + 4 hjärter → 3♣ (checkback: frågar öppnarens dolda 4-korts hjärter eller 3-stöd i spader).` }
+        }
+        // Egen 5+ högfärg utan sidohögfärg att jaga → direkt 3♥/3♠ (5-3).
+        if (len[y] >= 5) {
+          return { call: `3${BID[y]}`, rule: '2NT-återbud (5-3-jakt)', explanation: `${p} hp, 5-korts ${NAME[y]} → 3${SYM[y]} (söker öppnarens dolda 3-stöd, 5-3).` }
+        }
+      }
+      // Ingen högfärg att jaga → placering mot 18–19.
+      return { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot 18–19, ingen högfärgsfit att jaga → 3NT.` }
+    }
     case 'oklart': // 1NT-reservfallet (§5.2 steg 7) — behandlas som 1NT-återbud
     // (systemfel #2, frö 20261317: utan detta nåddes aldrig NMF och svararen
     // lämnades att passa den framtvingade fortsättningen).

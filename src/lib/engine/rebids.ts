@@ -767,6 +767,41 @@ export function openerAnswerNMF(
   return { call, rule, explanation: `${p} hp, inget av ovan – ${pretty(call)} (NMF är krav, pass förbjudet).` }
 }
 
+// === Svar på CHECKBACK efter naturligt 2NT-återbud (systems on, §5.2) ========
+// Öppnaren rebjöd 2NT (18–19 bal) och hör svararens 3♣ = konstgjord checkback:
+// svararen har 5+ spader + 4 hjärter (bjöd 1♠) och jagar (a) öppnarens DOLDA
+// 4-korts hjärter (den enda högfärg hen inte kunde visa billigt – 2♥ vore reverse)
+// och (b) 3-stöd i spadern (5-3). Prioritet (Root/Pavlicek): den dolda 4-korts
+// högfärgen FÖRST (jagar 4-4), sedan 3-stöd i svararens färg, annars 3NT. En 4-3
+// är utesluten – svararen lovade 5+ i sin färg (ägarbeslut 2026-08-18: undvik 4-3).
+export function openerAnswer2NTCheckback(hand: Hand, responderMajor: Suit): ResponseResult {
+  const other: Suit = responderMajor === 'hearts' ? 'spades' : 'hearts'
+  const len = lengths(hand)
+  const rule = 'svar på 2NT-checkback'
+  // 1) Dold 4-korts ANDRA högfärg → visa den (4-4-fit).
+  if (len[other] >= 4) {
+    return { call: `3${BID[other]}`, rule, explanation: `4-korts ${NAME[other]} → 3${SYM[other]} (visar den dolda andra högfärgen på checkback).` }
+  }
+  // 2) 3-korts stöd i svararens (5+) högfärg → visa 5-3-fiten.
+  if (len[responderMajor] >= 3) {
+    return { call: `3${BID[responderMajor]}`, rule, explanation: `3-korts stöd i ${NAME[responderMajor]} → 3${SYM[responderMajor]} (5-3-fit hittad).` }
+  }
+  // 3) Varken 4-4 eller 5-3 → 3NT.
+  return { call: '3NT', rule, explanation: `varken 4-korts ${NAME[other]} eller 3-stöd i ${NAME[responderMajor]} → 3NT.` }
+}
+
+// === Svar på DIREKT 3♥/3♠ efter naturligt 2NT-återbud (5-3-jakt, §5.2) =======
+// Svararen rebjöd sin EGNA högfärg (3♥/3♠) och lovar 5+ kort – jagar öppnarens
+// dolda 3-korts stöd (5-3). Öppnaren höjer till utgång med 3-stöd, annars 3NT.
+export function openerAnswer2NTMajorSeek(hand: Hand, responderMajor: Suit): ResponseResult {
+  const len = lengths(hand)
+  const rule = 'svar på 2NT-återbud (5-3-jakt)'
+  if (len[responderMajor] >= 3) {
+    return { call: `4${BID[responderMajor]}`, rule, explanation: `3-korts stöd i ${NAME[responderMajor]} → 4${SYM[responderMajor]} (5-3-fit hittad).` }
+  }
+  return { call: '3NT', rule, explanation: `bara 2-korts ${NAME[responderMajor]} → 3NT (ingen 5-3-fit).` }
+}
+
 // === Öppnarens TREDJE bud: svara svararens inbjudan i en 1NT-auktion ========
 // (felrapport #37). Efter 1NT–2♣ (Stayman) eller 1NT–2♦/2♥ (transfer) kan
 // svararens ANDRA bud vara en inbjudan (3M med fit, 2NT utan, 3M med 6+ färg).

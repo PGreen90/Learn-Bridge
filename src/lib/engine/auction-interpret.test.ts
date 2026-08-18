@@ -57,6 +57,49 @@ describe('skärmdumpen: 1♥ – 2♥(Michaels) – 3♥ – 4♠', () => {
   })
 })
 
+// Systems on efter naturligt 2NT-återbud (§5.2): heuristiken (regel-lösa
+// MÄNSKLIGA bud, t.ex. vänner-bordet) måste läsa checkbacken som konvention.
+describe('systems on efter 2NT-återbud – regel-lösa bud (heuristik)', () => {
+  it('3♣ efter 1♣–1♠–2NT = checkback (dold hjärter/3-stöd), INTE naturlig klöver', () => {
+    const r = interpretLastCall(h(['N', '1C'], ['S', '1S'], ['N', '2NT'], ['S', '3C']))!
+    expect(r.text).toMatch(/checkback/i)
+    expect(r.text).toMatch(/hjärter/i)
+    expect(r.text).not.toMatch(/naturlig klöver|klöverstöd|höjning i klöver/i)
+  })
+
+  it('öppnarens 3♥ på checkbacken = visar dold 4-korts hjärter (4-4)', () => {
+    const r = interpretLastCall(h(['N', '1C'], ['S', '1S'], ['N', '2NT'], ['S', '3C'], ['N', '3H']))!
+    expect(r.text).toMatch(/hjärter/i)
+    expect(r.text).toMatch(/4-4|checkback/i)
+  })
+
+  it('direkt 3♥ efter 1♣–1♥–2NT = 5-korts hjärter söker 5-3', () => {
+    const r = interpretLastCall(h(['N', '1C'], ['S', '1H'], ['N', '2NT'], ['S', '3H']))!
+    expect(r.text).toMatch(/5-3|5-korts/i)
+    expect(r.text).toMatch(/hjärter/i)
+  })
+
+  it('öppnarens 4♥ på direkt 3♥ = höjer 5-3-fiten till utgång', () => {
+    const r = interpretLastCall(h(['N', '1C'], ['S', '1H'], ['N', '2NT'], ['S', '3H'], ['N', '4H']))!
+    expect(r.text).toMatch(/utgång|5-3/i)
+    expect(r.forcing).toBe('avslut')
+  })
+
+  it('3NT efter 1♣–1♥–2NT = placering (ingen högfärg att jaga)', () => {
+    const r = interpretLastCall(h(['N', '1C'], ['S', '1H'], ['N', '2NT'], ['S', '3NT']))!
+    expect(r.text).toMatch(/till spel|placering/i)
+  })
+
+  it('bot-budet (med motor-regel) tolkas säkert ur regeln, inte heuristiken', () => {
+    const r = interpretLastCall(h(
+      ['N', '1C'], ['S', '1S'], ['N', '2NT'],
+      ['S', '3C', '2NT-checkback', '5+ spader + 4 hjärter → 3♣ (checkback).'],
+    ))!
+    expect(r.confidence).toBe('säker')
+    expect(r.text).toMatch(/checkback/i)
+  })
+})
+
 describe('heuristiska grundfall', () => {
   it('stöd i partnerns färg under utgång = höjning', () => {
     const r = interpretCall(h(['N', '1H'], ['S', '2H']), 1)
