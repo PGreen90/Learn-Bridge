@@ -230,6 +230,8 @@ export function BordSpel({
     skickar,
     gorDrag,
     hoppaOverSvep,
+    hoppaTillResultat,
+    harOspeladLogg,
   } = useBordSpel(kod, minStol, tempoVal)
   const [selectedSuit, setSelectedSuit] = useState<Card['suit'] | null>(null)
 
@@ -905,6 +907,12 @@ export function BordSpel({
   const dummyV = spel!.dummy
   const trakarlUppe = lage.trakarl !== null
   const jagArDummy = trakarlUppe && dummyV === 'S'
+  // "Hoppa till resultat" (ägaridé 2026-08-18): är jag ENDA människan och sitter
+  // som träkarl så spelar bara bottar — hela given ligger redan färdig i loggen,
+  // och den som inte vill se den ritas upp kan hoppa direkt till resultatet.
+  // Bara ett vy-hopp (harOspeladLogg = det finns kvar att avtäcka).
+  const enbartJagKvar = stolar.filter((s) => s.typ === 'manniska').length === 1
+  const kanHoppaTillResultat = jagArDummy && enbartJagKvar && harOspeladLogg
 
   function klick(seatV: Seat) {
     return (c: Card) => {
@@ -970,6 +978,17 @@ export function BordSpel({
         <NamnRad stolar={stolar} minStol={minStol} />
         {minTurSpel && (
           <p className="pt-0.5 text-center text-xs font-semibold text-gold-200">Din tur</p>
+        )}
+        {kanHoppaTillResultat && (
+          <div className="flex justify-center pt-1">
+            <button
+              type="button"
+              onClick={hoppaTillResultat}
+              className="rounded-full bg-red-950/60 px-3 py-1 text-xs font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30 transition-colors hover:bg-red-950/80 hover:ring-gold-400/50"
+            >
+              Hoppa till resultat →
+            </button>
+          </div>
         )}
       </div>
       {felRad}

@@ -56,17 +56,27 @@ bara bordets deltagare) är latenssocker; **hjärtslaget (`HJARTSLAG_MS` i
 Klientens drag skickas med `basSeq` (senast sedda sekvensnummer) — stämmer det
 inte med loggens huvud svarar servern 409 och klienten hämtar ikapp.
 
-**Presentationsköns takt & ikapp-spolning** (fix 2026-08-18, träkarlens
-eftersläpning): den passiva stolen (träkarlen, vars kort spelföraren spelar)
-fick korten uppspelade i bot-takt, ett i taget, och halkade efter stick för
-stick när spelföraren — en människa — spelade snabbare än takten. Två
-ägarbeslut samma dag: (1) andras kort avtäcks nu i en liten utjämningstakt
-(`bordKort` i `tempo.ts`, inte bot-"tänketid") så det känns nära realtid vid
-ett människobord — stick-pausen (sweepHold) ger ändå beatet där man ser vem
-som vann; (2) ligger vyn mer än ett stick efter snabbspolas kön ikapp nuläget
-och sticksvepet hoppas över (`avtackningsPaus`/`skaSvepa` i `useBordSpel.ts`).
-Den kortare kant-takten släpper dessutom loss en snabb spelförare, som annars
-fick vänta in motståndarnas kort innan nästa kunde spelas.
+**Presentationsköns takt** (fix 2026-08-18, träkarlens eftersläpning): den
+passiva stolen (träkarlen, vars kort spelföraren spelar) fick korten uppspelade
+i långsam bot-takt, ett i taget, och halkade efter stick för stick när
+spelföraren — en människa — spelade snabbare än takten. Boten: andras kort
+avtäcks nu i en snabb utjämningstakt (`bordKort` i `tempo.ts`, inte bot-
+"tänketid") — tömningen är mycket snabbare än en människa hinner producera kort,
+så vyn ligger aldrig efter och det känns nära realtid; stick-pausen (sweepHold)
+ger ändå beatet där man ser vem som vann. Beslutet bor i `avtackningsPaus`
+(`useBordSpel.ts`). **Ingen "snabbspola ikapp"-logik:** en sådan variant
+kollapsade en HEL bot-given (träkarl mot tre bottar → servern spelar hela given
+i ett svep) till en blink; den snabba takten räcker och ritar upp given i lugn
+takt precis som spelet mot datorn.
+
+**"Hoppa till resultat"** (ägaridé 2026-08-18): för den som inte vill se hela
+bot-given ritas upp — är du ENDA anslutna människan och sitter som träkarl (bot
+som spelförare → bara bottar spelar, given ligger redan färdig i loggen) visas
+en knapp som flyttar din läskursor direkt till resultatet (`hoppaTillResultat`/
+`harOspeladLogg` i `useBordSpel.ts`, knapp i `BordSpel.tsx`). Rent vy-hopp —
+inget resultat ändras, ingen annan påverkas. Medvetet BARA när du inget har att
+spela: är du motspelare vore "hoppa" = ge upp/concede, vilket är en egen
+SENARE-fråga (bottarna skulle spela klart ditt försvar).
 
 **Klienten är en projektor** (`src/pages/bord/bord-projektion.ts`): händelser →
 läge, med den **visuella vridningen** (du sitter alltid Syd — rotationen är
