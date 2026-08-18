@@ -106,3 +106,97 @@ describe('Felrapport #34 – tredje hand högt (§8.6)', () => {
     expect(['K', 'J', '10']).toContain(pick.rank)
   })
 })
+
+// Felrapport #51 (github.com/PGreen90/Learn-Bridge/issues/51): 3♣ av Nord.
+// Öst (partnern) leder ♥6, träkarlen (Syd) lägger lågt ♥2 – partnerns 6:a
+// "vinner" bara för att den DOLDA spelföraren (Nord) ännu inte spelat. Väst satt
+// med ♥A98753 och markerade LÅGT (♥3) i stället för att ta sticket med sin
+// MÄSTARE (esset). Följd: Nords stiff ♥T tog sticket gratis. Facit: tredje hand
+// högt med mästaren bakom en dold spelförare – att casha den kan aldrig kosta.
+describe('Felrapport #51 – tredje hand tar mästaren bakom dold spelförare', () => {
+  const deal = {
+    hands: {
+      N: parse('SAKT HT DJ963 CKT962'),
+      E: parse('SJ62 HKJ64 DKQ82 CQ7'),
+      S: parse('SQ7 HQ2 DAT75 CA8543'),
+      W: parse('S98543 HA98753 D4 CJ'),
+    } as Record<Seat, Card[]>,
+  }
+  const contract: Contract = { declarer: 'N', strain: 'clubs', level: 3 }
+
+  /** Trick 1: Öst leder ♥6, Syd (träkarl) ♥2 – Väst 3:e hand, Nord (dold) 4:e. */
+  function atWest(): PlayState {
+    let s = startPlay(deal as any, contract)
+    s = playCard(s, H('6')) // Öst (partnern) leder
+    s = playCard(s, H('2')) // Syd (träkarl) lågt
+    return s
+  }
+
+  it('tumregeln tar esset (mästaren), inte ett lågt markeringskort', () => {
+    expect(botCardReasoned(atWest(), 'W').card).toEqual(H('A'))
+  })
+
+  it('SKARPA boten (appen) tar också esset vid 13 kort', () => {
+    const pick = botCardSmart(atWest(), 'W', [])
+    expect(pick).toEqual(H('A'))
+  })
+
+  // Ägarnoteringen 2026-08-18: "sticket ser vunnet ut NU" är en svag anledning
+  // att krypa – tredje hand spelar normalt HÖGT. I sang pressar jag fram
+  // spelförarens honnör med min lägsta honnör även utan en äkta mästare.
+  it('sang: tredje hand pressar honnören (♥Q ur ♥KQ4), kryper inte', () => {
+    const nt = {
+      hands: {
+        N: parse('ST98 HAJT96 D976 C76'), // spelförare (dold), håller ♥A
+        E: parse('SKQ4 H875 DKQ5 CAKQJ'), // partnern, leder ♥5
+        S: parse('SJ765 H32 DAJT8 CT98'), // träkarl (lågt ♥2)
+        W: parse('SA32 HKQ4 D432 C5432'), // jag: ♥KQ4 bakom dold ♥A
+      } as Record<Seat, Card[]>,
+    }
+    let s = startPlay(nt as any, { declarer: 'N', strain: 'NT', level: 3 })
+    s = playCard(s, H('5')) // Öst leder lågt
+    s = playCard(s, H('2')) // Syd (träkarl) lågt
+    const pick = botCardReasoned(s, 'W').card
+    expect(pick.suit).toBe('hearts')
+    expect(pick.rank).toBe('Q') // lägsta av KQ – snålar med sekvensen
+  })
+
+  // Även i TRUMF pressas honnören (ägarbeslut 2026-08-18 efter A/B-mätning: den
+  // gamla "−1 i trumf"-noteringen replikerade inte – netto −2 över 209 trumfgivar,
+  // neutralt-till-svagt-bättre försvar). Tredje hand högt gäller nu i båda.
+  it('trumf: pressar också honnören (♥Q ur ♥KQ4), kryper inte', () => {
+    const tr = {
+      hands: {
+        N: parse('ST98 HAJT96 D976 C76'),
+        E: parse('SKQ4 H875 DKQ5 CAKQJ'),
+        S: parse('SJ765 H32 DAJT8 CT98'),
+        W: parse('SA32 HKQ4 D432 C5432'),
+      } as Record<Seat, Card[]>,
+    }
+    let s = startPlay(tr as any, { declarer: 'N', strain: 'spades', level: 4 })
+    s = playCard(s, H('5'))
+    s = playCard(s, H('2'))
+    const pick = botCardReasoned(s, 'W').card
+    expect(pick.suit).toBe('hearts')
+    expect(pick.rank).toBe('Q') // honnörstvång även i trumf
+  })
+
+  // Vakt: håller partnern själv mästaren (leder ess), ska jag INTE slösa en egen
+  // honnör över partnerns vinnande stick – markera lågt som förr.
+  it('övertar INTE när partnern redan lett färgens mästare', () => {
+    // Öst leder ♥A (mästaren), Syd lågt – Väst med ♥K bör markera, inte ta över.
+    const alt = {
+      hands: {
+        N: parse('SAKT HT DJ963 CKT962'),
+        E: parse('SJ62 HA64 DKQ82 CQ7'),
+        S: parse('SQ7 HJ2 DAT75 CA8543'),
+        W: parse('S98543 HK98753 D4 CJ'),
+      } as Record<Seat, Card[]>,
+    }
+    let s = startPlay(alt as any, contract)
+    s = playCard(s, H('A')) // Öst leder mästaren
+    s = playCard(s, H('2')) // Syd lågt
+    const pick = botCardReasoned(s, 'W').card
+    expect(pick).not.toEqual(H('K')) // slösar inte kungen över partnerns ess
+  })
+})

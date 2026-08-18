@@ -245,6 +245,54 @@ describe('felrapport #24 – öppnarens 1NT-återbud beskrivs som 12–14, inte 
   })
 })
 
+// Felrapport #52 (github.com/PGreen90/Learn-Bridge/issues/52): ett DIREKT
+// 1NT-inkliv över motståndarens öppning förklarades som ett svagt svar
+// (6–11 hp, "saknar bättre bud"). Fel: 1NT-inklivet visar 15–18 balanserad med
+// stopp i motståndarnas färg (kör 1NT-systemet); i balansering 11–14. Facit i
+// overcalls.ts (rule '1NT-inkliv') + budsystem.md §7.
+describe('felrapport #52 – direkt 1NT-inkliv = 15–18 balanserad med stopp', () => {
+  it('E 1♣ – S 1NT: 15–18, balanserad, stopp i klöver (INTE 6–11 svarshand)', () => {
+    const r = interpretCall(h(['E', '1C'], ['S', '1NT']), 1)
+    expect(r.text).toMatch(/15–18/)
+    expect(r.text).toMatch(/balanserad/i)
+    expect(r.text).toMatch(/stopp/i)
+    expect(r.text).toMatch(/klöver/i)
+    expect(r.text).not.toMatch(/6–11/)
+  })
+
+  it('balansering (1♣) P P – 1NT = lättare 11–14, fortfarande stopp', () => {
+    // W öppnar 1♣, N pass, E pass, S balanserar med 1NT.
+    const r = interpretCall(h(['W', '1C'], ['N', 'P'], ['E', 'P'], ['S', '1NT']), 3)
+    expect(r.text).toMatch(/11–14/)
+    expect(r.text).toMatch(/stopp/i)
+    expect(r.text).not.toMatch(/6–11/)
+  })
+})
+
+// Felrapport #53 (github.com/PGreen90/Learn-Bridge/issues/53): 2♣ över partnerns
+// 1NT-inkliv förklarades "naturligt, minst 4 kort i klöver". Fel: mot en naturlig
+// 1NT (öppning ELLER inkliv) är 2♣ Stayman – frågar efter 4-korts högfärg, säger
+// inget om klöver (systems on).
+describe('felrapport #53 – 2♣ över partnerns natur-1NT = Stayman', () => {
+  it('P 1♦ 1NT P – S 2♣: Stayman, frågar efter högfärg (ej naturlig klöver)', () => {
+    const r = interpretCall(h(['S', 'P'], ['W', '1D'], ['N', '1NT'], ['E', 'P'], ['S', '2C']), 4)
+    expect(r.text).toMatch(/Stayman/i)
+    expect(r.text).toMatch(/högfärg/i)
+    expect(r.text).not.toMatch(/naturligt|minst 4 kort i klöver/i)
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+
+  it('över partnerns 1NT-ÖPPNING är 2♣ också Stayman', () => {
+    const r = interpretCall(h(['N', '1NT'], ['S', '2C']), 1)
+    expect(r.text).toMatch(/Stayman/i)
+  })
+
+  it('men 2♣ efter partnerns 1NT-ÅTERBUD (öppnat färg först) är INTE Stayman', () => {
+    const r = interpretCall(h(['N', '1C'], ['S', '1D'], ['N', '1NT'], ['S', '2C']), 3)
+    expect(r.text).not.toMatch(/Stayman/i)
+  })
+})
+
 describe('motorns egen regel går före heuristiken (säker)', () => {
   it('använder budets explanation och kravnivå ur registret', () => {
     const hist = h(['N', '1H'], ['S', '2C', '2-över-1 GF', 'Tvåöver ett: utgångskrav, naturligt klöver'])

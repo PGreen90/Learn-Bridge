@@ -1576,3 +1576,30 @@ describe('felrapport #26 – cue-bjudaren fullföljer utgångskravet efter öppn
     expect(c.bid).toBe('3NT')
   })
 })
+
+// Felrapport #50 (github.com/PGreen90/Learn-Bridge/issues/50): NS försvarar.
+// V 1♣ – N P – Ö 1♠ – S X(takeout) – V 2♥ – N P – Ö 2♠ – S P – V 4♠ – N P –
+// Ö P – S X(STRAFF av deras utgång) – V P. Nu Nord: motorn läste Syds straff-X
+// av 4♠ som en upplysningsdubbling som MÅSTE besvaras och drog till 5♦ på en
+// SINGEL ♦Q (rule 'färgbud'). Facit: en dubbling av motståndarnas game-nivå
+// (4+ i färg) är STRAFF – Nord passar och försvarar, pullar inte.
+describe('felrapport #50 – straffdubbling av deras 4♠ pullas inte till 5♦', () => {
+  const deal = dealOf('W', {
+    N: 'S:QJ H:K83 D:Q C:9876542',
+    E: 'S:KT8732 H:Q6 D:J987 C:T',
+    S: 'S:A95 H:J974 D:AT542 C:A',
+    W: 'S:64 H:AT52 D:K63 C:KQJ3',
+  })
+  const history = [
+    call('W', '1C'), call('N', 'P'), call('E', '1S'), call('S', 'X'),
+    call('W', '2H'), call('N', 'P'), call('E', '2S'), call('S', 'P'),
+    call('W', '4S'), call('N', 'P'), call('E', 'P'), call('S', 'X'),
+    call('W', 'P'),
+  ]
+
+  it('Nord passar Syds straffdubbling av 4♠ (drar inte till 5♦)', () => {
+    const c = decideCall(deal, history, 'N')
+    expect(c.bid).toBe('P')
+    expect(c.bid).not.toBe('5D')
+  })
+})

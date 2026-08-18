@@ -9,6 +9,27 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Felrapporter #49 + #51 (2026-08-18) — spelfixar ur "Spela kort"
+- **Tredje hand HÖGT bakom en dold spelförare (#51 + ägarnoteringen):** ledde
+  partnern en färg och "vinner" bara tills den dolda spelföraren spelar sist,
+  spelar försvaret nu högt i stället för att krypa/markera lågt. Två nivåer: (1)
+  MÄSTAREN (ess/topp) tas i BÅDE sang och trumf — kan aldrig kosta, och låter mig
+  vända (partnerns långa färg i sang, ruff i trumf); (2) utan mästare pressas
+  spelförarens honnör med lägsta honnören (KD → D) i **båda** — den gamla "−1 i
+  trumf"-noteringen replikerade INTE i A/B-mätning (netto −2 spelförarstick över
+  209 trumfgivar, 9 ändrade: 6 bättre / 3 sämre → neutralt-till-svagt-bättre
+  försvar; ägarbeslut 2026-08-18). Facit: `play-bot-third-hand.test.ts`.
+  **Bevaka:** slösar boten en honnör över ett stick partnern REDAN vann säkert
+  (vakten kräver att ett osett högre kort kan slå partnerns kort), eller känns
+  honnörstvånget i trumf dumt i någon konkret giv? Säg till.
+- **Spelföraren fortsätter sin solida honnörssekvens (#49):** i sang, när
+  etableringsgrinden avstår och ingen säker cash finns, utvecklar spelföraren nu
+  en solid honnörssekvens (leder ♣Q ur QJT) i stället för att öppningsleda ur
+  längsta färgen rakt in i motståndarnas honnörer (Väst ledde ♠8 in i Nords ♠AQ).
+  Facit: `play-bot-establish.test.ts`. **Bevaka:** leder boten en sekvens och
+  släpper in motståndarna när den hellre borde suttit kvar/cashat — känns
+  utvecklingen förhastad i någon sang-giv?
+
 ## Speldiagnosen S5 (2026-08-13) — MC-urfallet lagat (fyra fixar, frön 20260772/20260731)
 - **Öppningslöftet i poäng (NYAST):** hand-modellen kräver nu `max(hp, startpoäng)
   ≥ 12` av en dold 1-i-färg-öppnare (10 i 3:e hand, 9 i 4:e) i stället för rå
