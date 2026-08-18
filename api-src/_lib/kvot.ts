@@ -1,5 +1,5 @@
-// Beslut B etapp 4 (4A) — anropskvoten ("minimal härdning inbakad",
-// ägarbeslut 2026-08-17).
+// Beslut B etapp 4 (4A) + etapp 3 — anropskvoten ("minimal härdning inbakad",
+// ägarbeslut 2026-08-17; tävlingens endpoints härdade i etapp 3 2026-08-18).
 //
 // Mekaniken: fast fönster i Postgres via RPC-funktionen kvot_okning()
 // (migration 0007) — atomisk upsert+increment, överlever kalla starter och
@@ -7,7 +7,9 @@
 // rundresa per kvotat anrop.
 
 /** Taken per handling: { fönsterlängd i sekunder, max anrop per fönster }.
- *  Hjärtslaget självbegränsas till 1/5 s i klienten — taket 20/min ger marge. */
+ *  Hjärtslaget självbegränsas till 1/5 s i klienten — taket 20/min ger marge.
+ *  Tävlingen (etapp 3): 12 givar per dag gör 20 inskick/min till ett generöst
+ *  tak för en människa och ett hårt för ett skript. */
 export const KVOTER = {
   skapa: { fonsterSek: 600, tak: 5 },
   lista: { fonsterSek: 60, tak: 30 },
@@ -17,6 +19,10 @@ export const KVOTER = {
   stol: { fonsterSek: 60, tak: 20 },
   hjartslag: { fonsterSek: 60, tak: 20 },
   lage: { fonsterSek: 60, tak: 30 },
+  'skicka-in': { fonsterSek: 60, tak: 20 },
+  topplista: { fonsterSek: 60, tak: 30 },
+  'giv-resultat': { fonsterSek: 60, tak: 30 },
+  'dagens-logg': { fonsterSek: 60, tak: 30 },
 } as const
 
 export type KvotHandling = keyof typeof KVOTER

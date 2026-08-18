@@ -5,11 +5,12 @@
 // in i streaken (ärlighetsregeln i daily.ts: ett igenfyllt hål väcker inte en
 // bruten svit). Framtida dagar är låsta — morgondagens giv är en överraskning.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { dailyDateFromNumber, dailyNumber } from '../lib/engine/daily'
 import { loadDailyLog } from '../lib/backend'
+import { synkaDagensLogg } from '../lib/backend/dagens-logg'
 
 // Måndag först, som svenska kalendrar. getDay() räknar söndag = 0 → (d+6)%7.
 const WEEKDAYS = ['M', 'T', 'O', 'T', 'F', 'L', 'S']
@@ -28,7 +29,12 @@ function monthLabel(y: number, m: number): string {
 export function DagensArkiv({ now = new Date() }: { now?: Date }) {
   const todayNr = dailyNumber(now)
   const premiere = dailyDateFromNumber(1)
-  const log = loadDailyLog()
+  // Kontospegeln (Beslut B etapp 3): visa den lokala loggen direkt och hämta
+  // in kontots rader i bakgrunden — på en ny enhet fylls kalendern då i.
+  const [log, setLog] = useState(loadDailyLog)
+  useEffect(() => {
+    void synkaDagensLogg().then(setLog)
+  }, [])
 
   // Bläddringen: en månad i taget, klampad mellan premiärmånaden och nu.
   const [shown, setShown] = useState({ y: now.getFullYear(), m: now.getMonth() })

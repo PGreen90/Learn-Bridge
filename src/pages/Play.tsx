@@ -13,6 +13,7 @@ import { contractFromCalls } from '../lib/engine/auction-live'
 import { resultHeadline } from '../lib/engine/scoring'
 import { playsFrom, validSavedGame, type SavedGame } from '../lib/engine/resume'
 import { addResult, validHistorik } from '../lib/engine/spel-historik'
+import { bokforDagensLogg } from '../lib/backend/dagens-logg'
 import {
   loadDailyLog,
   loadSavedGame,
@@ -511,6 +512,9 @@ export function PlayTable({
     // Första resultatet för dagen står sig — ett omspel skriver inte över det.
     if (log[n] === undefined) {
       saveDailyLog({ ...log, [n]: late ? { myTricks, late: true } : { myTricks } })
+      // Kontospegeln (Beslut B etapp 3): bokför på kontot också — fire-and-
+      // forget, utloggade/felande nät märker ingenting.
+      void bokforDagensLogg([late ? { nummer: n, myTricks, late: true } : { nummer: n, myTricks }])
     }
     if (!late) saveDailyPlayed(n)
     setStreak(late ? 0 : dailyStreak(loadDailyLog(), n))

@@ -14,6 +14,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { validera, type Inskick } from './_lib/validera'
+import { kvotOk } from './_lib/kvot'
 
 /** Läs och tolka JSON-kroppen ur en Node-request (Vercel parsar inte åt oss här). */
 function readJson(req: IncomingMessage): Promise<unknown> {
@@ -70,6 +71,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const user = (await userRes.json()) as { id?: string }
     const userId = user.id
     if (!userId) return json(401, { ok: false, fel: 'Ogiltig session' })
+
+    // Anropskvoten (Beslut B etapp 3): samma Postgres-räknare som borden.
+    if (!(await kvotOk(base, key, userId, 'skicka-in'))) {
+      return json(429, { ok: false, fel: 'För många anrop — vänta en liten stund' })
+    }
 
     // 2) Läs inskicket.
     const body = (await readJson(req)) as Partial<Inskick> | null

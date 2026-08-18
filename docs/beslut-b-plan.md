@@ -290,11 +290,24 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
 - Schemat byggs för framtida längder (tävlingsserie med storlek som kolumn) så
   8/16/24 kan läggas till utan ombyggnad.
 
-### Etapp 3 — härdning + drift
+### Etapp 3 — härdning + drift — BYGGD 2026-08-18
 
-- Arkiv och streaks på servern, granskningsverktyg för manuell granskning,
-  begränsning av anropstakt (rate limits) på inskick och inloggning, och —
-  efter grindbeslut — grunden för Nivå 2 (dolda händer på servern).
+🚪 *Grindbesluten TAGNA 2026-08-18 (ägaren): **Nivå 2 i tävlingen VÄNTAR**
+(triggern tillväxt/priser/fusk är inte nådd; bordens serverbot står redo den
+dag den behövs) · djupa botkortsgranskningen körs **nattligt i Actions**
+(`tavling-granskning.yml` + `tavlingsgranskning.probe.test.ts` — botbesluten
+är deterministiska ur playSeed, så jämförelsen är exakt; avvikare flyttas till
+status 'granskning') · granskningsverktyget är **rapporten i nattvakten**
+(artefakt), inget eget UI.*
+
+- Byggt: rate limits på tävlingens endpoints (`skicka-in`, `topplista`,
+  `giv-resultat`, `dagens-logg` — bordens `api_kvot`/`kvot_okning` återanvänds;
+  inloggningen skyddas av Supabases egna limits) · Dagens giv-loggen
+  (kalenderarkivet + 🔥-sviten) speglad på kontot (migration `0009`, endpoint
+  `dagens-logg.ts`, klientsynk `dagens-logg.ts` i backend-lagret — "första
+  resultatet står" på båda sidor) · nattliga djupgranskningen enligt ovan.
+- Ägarsteg vid deploy: kör migration `0009` + lägg GitHub-secrets
+  `SUPABASE_URL` och `SUPABASE_SERVICE_ROLE_KEY` (nattgranskningen).
 
 ### Etapp 4 — realtidsborden (= konkurrensplanens Fas 6, drömmen) — BYGGD & LIVE 2026-08-17/18
 
@@ -401,3 +414,12 @@ Hela detaljplanen, arkitekturen och delleveranserna 4A–4D: **`docs/bord-plan.m
   (härdningen) återstår — bordens endpoints fick dock rate limits direkt
   ("minimal härdning inbakad", ägarbeslut). Hela detaljplanen:
   `docs/bord-plan.md`.
+- **2026-08-18: ETAPP 3 (HÄRDNINGEN) BYGGD.** Grindbeslut (ägaren): Nivå 2 i
+  tävlingen väntar (trigger ej nådd) · djupgranskningen nattligt i Actions ·
+  granskningen som rapport, inget UI. Byggt: rate limits på tävlingens
+  endpoints (bordens kvotsystem) · Dagens giv-loggen på kontot (migration
+  `0009` + `dagens-logg.ts` server/klient) · nattliga djupgranskningen
+  (`tavling-granskning.yml` — exakt omspelning av botkorten ur playSeed,
+  avvikare → status 'granskning'). Ägarsteg: migration `0009` + GitHub-secrets
+  `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`. Därmed är ALLA Beslut B-etapper
+  (0–4) levererade.
