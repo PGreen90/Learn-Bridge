@@ -1638,6 +1638,72 @@ function openerAnswersNTResponse(deal: Deal, history: ResolvedCall[], seat: Seat
   return { seat, bid, rule: res.rule, explanation: res.explanation }
 }
 
+// ---- Systems on över ett 1NT-INKLIV (§4.3, uppföljning felrapport #53) ------
+//
+// Sangsystemet (`respondTo1NT` + fullföljandet ovan) var bara inkopplat över en
+// 1NT-ÖPPNING (`cleanNTOpening` kräver att 1NT är öppningen och att motståndarna
+// tigit). Ett 1NT-INKLIV (motståndarna öppnade i färg, vi klev in 1NT = 15–18
+// balanserad) visar SAMMA sorts hand, så systems on ska gälla där också: Stayman,
+// transfers, Texas, MSS – och inklivaren fullföljer. Betydelsen läses ur BUDET,
+// aldrig ur partnerns kort. V1: den EGNA svarsronden är ostörd (RHO passade); vidare
+// konkurrens över svaret är en känd förenkling.
+
+/**
+ * Gjorde vår sida ett rent, naturligt 1NT-INKLIV? Sant när auktionens öppning är
+ * motståndarnas 1-läges FÄRGöppning och vår sidas FÖRSTA kontraktsbud är 1NT utan
+ * en egen dubbling före (då vore 1NT en stark X-1NT, inte inklivet). Returnerar
+ * inklivarens plats, annars null. (Ovanlig 2NT är 2NT, inte 1NT → faller utanför.)
+ */
+function our1NTOvercall(history: ResolvedCall[], seat: Seat): { overcaller: Seat } | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat) || open.strain === 'NT' || open.level !== 1) return null
+  const ourContracts = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourContracts.length === 0 || ourContracts[0].bid !== '1NT') return null
+  const firstIdx = history.indexOf(ourContracts[0])
+  // Ingen egen icke-pass-handling FÖRE 1NT:et (t.ex. ett X) – då är det ett annat bud.
+  if (history.slice(0, firstIdx).some((c) => side(c.seat) === side(seat) && c.bid !== 'P')) return null
+  return { overcaller: ourContracts[0].seat }
+}
+
+/**
+ * PARTNERN klev in 1NT och det är advancerns (`seat`) tur att svara första gången,
+ * ostört (RHO passade) → kör sangsystemet (`respondTo1NT`): Stayman/transfer/Texas/MSS.
+ */
+function advancerRespondsTo1NTOvercall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const oc = our1NTOvercall(history, seat)
+  if (!oc || oc.overcaller !== PARTNER[seat]) return null
+  const ourContracts = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourContracts.length !== 1) return null // bara inklivet – advancern har inte svarat än
+  if (history.some((c) => c.seat === seat && c.bid !== 'P')) return null // advancern objuden
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== oc.overcaller || lastNonPass.bid !== '1NT') return null // RHO passade
+  const res = respondTo1NT(deal.hands[seat])
+  const bid = res.call as Bid
+  if (bid !== 'P' && !legalCalls(history, seat).includes(bid)) return null
+  return { seat, bid, rule: res.rule, explanation: res.explanation }
+}
+
+/**
+ * JAG klev in 1NT, advancern (partnern) svarade med ett systemsvar, ostört (RHO
+ * passade) → fullfölj (Stayman-svar, transfer, Texas, MSS) via samma dispatch som
+ * över en 1NT-öppning.
+ */
+function overcallerAnswersAdvance(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const oc = our1NTOvercall(history, seat)
+  if (!oc || oc.overcaller !== seat) return null
+  const ourContracts = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourContracts.length !== 2 || ourContracts[1].seat !== PARTNER[seat]) return null
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass !== ourContracts[1]) return null // advancerns svar senast (RHO passade)
+  const rule = ntResponseRule(1, ourContracts[1].bid)
+  if (!rule) return null
+  const res = openerRebidAfter1NTResponse({ call: ourContracts[1].bid, rule, explanation: '' }, deal.hands[seat])
+  if (!res) return null
+  const bid = res.call as Bid
+  if (bid !== 'P' && !legalCalls(history, seat).includes(bid)) return null
+  return { seat, bid, rule: res.rule, explanation: res.explanation }
+}
+
 // ---- Off-book: svara historiedrivet på Syds egna bud (pivotens kärna) -------
 //
 // När Syd bjudit utanför systemlinjen (off-book) har partnern ingen kanonisk
@@ -4408,6 +4474,14 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
     run: (c) => answerPartnerNTOpening(c.deal, c.history, c.seat) },
   { id: 'openerAnswersNTResponse', before: ['offBookResponse', 'honorForce'],
     run: (c) => openerAnswersNTResponse(c.deal, c.history, c.seat) },
+  // Systems on över ett 1NT-INKLIV (uppföljning felrapport #53): den kanoniska
+  // linjen (auction.ts) modellerar advancerns systemsvar, men off-book (ägaren
+  // bjuder i budlådan) fångas advancern + inklivarens fullföljd här – FÖRE
+  // off-book-svaret (som läste 2♦ som cue-höjning) och honorForce.
+  { id: 'advancerRespondsTo1NTOvercall', before: ['offBookResponse', 'honorForce'],
+    run: (c) => advancerRespondsTo1NTOvercall(c.deal, c.history, c.seat) },
+  { id: 'overcallerAnswersAdvance', before: ['offBookResponse', 'honorForce'],
+    run: (c) => overcallerAnswersAdvance(c.deal, c.history, c.seat) },
   // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
   { id: 'offBookResponse', before: ['honorForce'],
     run: (c) => offBookResponse(c.deal, c.history, c.seat) },

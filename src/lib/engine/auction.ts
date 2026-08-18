@@ -321,6 +321,17 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
           return finish(true)
         }
       }
+      // Advancer-logik över ett 1NT-INKLIV (§4.3, systems on – uppföljning
+      // felrapport #53): partnerns 1NT-inkliv (15–18 bal) visar samma sorts hand
+      // som en 1NT-öppning, så efter svararens pass kör advancern sangsystemet
+      // (Stayman/transfer/Texas/MSS) precis som över en öppning. Lämna auktionen
+      // ÖPPEN – inklivaren fullföljer (transfer/Stayman-svar) levande i budlådan.
+      if (ov.rule === '1NT-inkliv' && action.call === 'P') {
+        const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+        const adv = respondTo1NT(deal.hands[advancerSeat])
+        turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
+        return finish(true)
+      }
       // Advancer-logik för TVÅFÄRGSINKLIV (§7.2, Michaels / ovanlig 2NT): efter
       // partnerns tvåfärgsbud och svararens pass ger advancern preferens till sin
       // längsta av partnerns visade färger – i en OSTÖRD budgivning aldrig pass
