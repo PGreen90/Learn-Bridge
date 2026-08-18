@@ -17,6 +17,7 @@ import type { ResolvedCall } from '../src/lib/bidding'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { contractFromCalls } from '../src/lib/engine/auction-live'
 import { aggregeraTopplista, type Tävlingsrad } from '../src/lib/engine/matchpoints'
+import { kvotOk } from './_lib/kvot'
 
 async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
   const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
@@ -85,6 +86,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     // Vem frågar? (valfritt — utan giltig token bara den anonyma listan)
     const meId = await kallarId(base, key, req.headers.authorization)
+
+    // Anropskvoten (Beslut B etapp 3) för inloggade kallare — anonyma läsare
+    // har inget konto att räkna på och listan är ändå bara aggregat.
+    if (meId && !(await kvotOk(base, key, meId, 'topplista'))) {
+      return json(429, { ok: false, fel: 'För många anrop — vänta en liten stund' })
+    }
 
     // Räkna topplistan + kallarens egna siffror med den rena aggregatfunktionen.
     const rader: Tävlingsrad[] = results.map((r) => ({

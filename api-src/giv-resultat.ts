@@ -14,6 +14,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { ResolvedCall } from '../src/lib/bidding'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { byggBrickresultat, type Brickrad } from '../src/lib/engine/brickresultat'
+import { kvotOk } from './_lib/kvot'
 
 async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
   const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
@@ -50,6 +51,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (!userRes.ok) return json(401, { ok: false, fel: 'Ogiltig session' })
     const meId = ((await userRes.json()) as { id?: string }).id
     if (!meId) return json(401, { ok: false, fel: 'Ogiltig session' })
+
+    // Anropskvoten (Beslut B etapp 3): samma Postgres-räknare som borden.
+    if (!(await kvotOk(base, key, meId, 'giv-resultat'))) {
+      return json(429, { ok: false, fel: 'För många anrop — vänta en liten stund' })
+    }
 
     // Dagens tävling.
     const today = stockholmDateISO()

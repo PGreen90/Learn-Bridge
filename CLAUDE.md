@@ -10,21 +10,20 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — REALTIDSBORDEN KLARA & LIVE (Beslut B etapp 4) → NÄSTA: ägarens val
+### 🔵 NU — BESLUT B ETAPP 3 (HÄRDNINGEN) BYGGD 2026-08-18 → ägarsteg + verifiering kvar
 
-**"Spela med vänner" BYGGD & LIVE 2026-08-17/18** i fyra delleveranser 4A–4D,
-alla demolade och godkända av ägaren — allt i **`docs/bord-plan.md`** (läs den
-FÖRST vid bordsarbete): serverdomare med dolda händer per stol · append-only
-händelselogg med sekvensvakt · hjärtslag (auktoritativ) + Supabase Realtime
-(latenssocker) · den visuella vridningen (du sitter alltid Syd) · paus/lämna
-med ägargodkännande, bot-övertag vid frånkoppling, ägarbyte, inhopp på
-frigjord stol · tre spelformer (endast budgivning m. facit-genomgång · endast
-spelföring m. spelförar-rotation · full bridge) · bot-reservation · vinröd duk
-· rate limits ("minimal härdning inbakad"). Migrationerna `0007`+`0008` körda.
-Felrapporten nås numera i ALLA lägen — även vanliga spelbordets bud-/spelfas.
-**NÄSTA GÅNG: ägarens val** — kandidater: Beslut B etapp 3 (härdningen) ·
-speldiagnosens nästa runda (masktekniken · S5-granskningen) · bordens
-SENARE-lista (claim vid bordet, DD-jämförelsen — `docs/bord-plan.md`).
+Grindbeslut (ägaren 2026-08-18): **Nivå 2 i tävlingen VÄNTAR** (triggern
+tillväxt/priser/fusk ej nådd; bordens serverbot står redo) · djupa
+botkortsgranskningen körs **nattligt i Actions**
+(`tavlingsgranskning.probe.test.ts` + `tavling-granskning.yml`: exakt
+omspelning ur playSeed, avvikare → status 'granskning') · granskningen =
+**rapport i nattvakten**, inget UI. Byggt dessutom: rate limits på tävlingens
+endpoints (bordens kvotsystem återanvänt) · Dagens giv-loggen (kalenderarkivet
++ 🔥-sviten) speglad på kontot (migration `0009` + `dagens-logg.ts`
+server/klient — "första resultatet står"). **ÄGARSTEG:** kör migration `0009`
+i Supabase + lägg GitHub-secrets `SUPABASE_URL` och
+`SUPABASE_SERVICE_ROLE_KEY` (nattgranskningen). Därefter är ALLA Beslut
+B-etapper (0–4) levererade. Detalj: `docs/beslut-b-plan.md`.
 
 ---
 
@@ -32,6 +31,10 @@ SENARE-lista (claim vid bordet, DD-jämförelsen — `docs/bord-plan.md`).
 - **Tävlingen är KLAR & LIVE** (2026-08-11/12): konton → daglig 12-givarstävling
   → topplista. **MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE.**
   "Spela given igen" finns som övningsläge (räknas inte i MP%).
+- **Realtidsborden är KLARA & LIVE** (Beslut B etapp 4, 2026-08-17/18):
+  "Spela med vänner" — serverdomare med dolda händer, tre spelformer, närvaron
+  (paus/bot-övertag/ägarbyte). ALLT bordsarbete: **`docs/bord-plan.md`**.
+  Migrationerna `0007`+`0008` körda; felrapporten nås i alla lägen.
 - **Speldiagnosen är byggd & vilande** (2026-08-12/14, S0–S5 = tretton fixar,
   MC-urfallet stängt; nattvakten kör förscreening varje kväll i Actions):
   rigg/probe/kommandon/principen "RÄTT, inte max stick" — allt i
@@ -72,11 +75,10 @@ något känns fel i spel, eller när en ny fix ska läggas till. Senast (S5,
 vakter · tvingade återbud (MC-urfallet stängt — inga kända kvarstående).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Beslut B etapp 3 — härdning + drift** (arkiv/streaks på servern, rate limits
-   på tävlingens endpoints — borden har redan sina, ev. Nivå 2 dolda händer i
-   tävlingen; grindbesluten först — `docs/beslut-b-plan.md`).
-2. **Speldiagnosens nästa runda** — masktekniken i trumfdragningen eller ny
+1. **Speldiagnosens nästa runda** — masktekniken i trumfdragningen eller ny
    granskningsrunda på S5-koden (`docs/speldiagnos.md`).
+2. **Bordens SENARE-lista** — claim vid bordet · DD-jämförelsen ("hur bra mot
+   facit") · rondgenomgången per giv (`docs/bord-plan.md`).
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

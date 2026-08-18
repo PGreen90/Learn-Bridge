@@ -1,0 +1,58 @@
+name: Tävlingsgranskning (nattlig djupgranskning)
+
+# NATTLIG DJUPGRANSKNING (Beslut B etapp 3, grindbeslut 2026-08-18): spelar om
+# gårdagens GODKÄNDA tävlingsinskick och kontrollerar att varje BOTKORT var
+# motorns eget val (deterministiskt ur playSeed — exakt jämförelse). Avvikare
+# flyttas till status 'granskning' med skäl; rapporten laddas upp som artefakt
+# (ägarens grindbeslut: rapport i nattvakten, inget eget UI).
+#
+# RÖD körning = enbart haveri (nät/DB/motorfel) → GitHub mejlar ägaren.
+# Fynd gör ALDRIG körningen röd — de är rapport, inte larm.
+#
+# Hemligheter (Settings → Secrets → Actions): DAILY_SEED_SECRET (finns sedan
+# förscreeningen) + SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (ägarsteg vid
+# etapp 3-deployen). Ingen produktionspåverkan utöver statusflytten.
+
+on:
+  schedule:
+    # 01:30 UTC = 03:30 svensk sommartid / 02:30 vintertid — tävlingsdagen är
+    # stängd (dygnsskiftet Europe/Stockholm) och alla inskick är inne.
+    - cron: '30 1 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: tavling-granskning
+  cancel-in-progress: false
+
+jobs:
+  granskning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Granska gårdagens inskick
+        env:
+          DAILY_SEED_SECRET: ${{ secrets.DAILY_SEED_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          IGAR=$(TZ=Europe/Stockholm date -d 'yesterday' +%F)
+          echo "Granskar $IGAR (Europe/Stockholm)"
+          GRANSKA_TAVLING=$IGAR \
+            npx vitest run src/lib/engine/tavlingsgranskning.probe.test.ts
+
+      - name: Ladda upp rapporten (även vid rött)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tavlingsgranskning-rapporter
+          path: revisor-output/tavlingsgranskning-*
+          retention-days: 30
