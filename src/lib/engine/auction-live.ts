@@ -160,6 +160,12 @@ function takeoutDoubleToAnswer(history: ResolvedCall[], seat: Seat): { suit: Sui
     }
   }
   if (!their) return null
+  // STRAFF, inte upplysning (felrapport #50): en dubbling av motståndarnas
+  // game-nivå (4+ i färg) är straffdubbling – partnern passar och försvarar, den
+  // pullar aldrig till en egen (kanske singel-) färg. Upplysningsdubblingar –
+  // inklusive av en spärröppning på 3-läget, som besvaras på 4-läget – ligger
+  // kvar (level ≤ 3). (Nord drog Syds straff-X av 4♠ till 5♦ på en singel ♦Q.)
+  if (level >= 4) return null
   // Var X:et en BALANSERING (deras öppning, två pass, partnerns X i utpassnings-
   // läget)? Då är golvet sänkt ~3 hp (§7.6 "låna en kung") och advancern ska
   // räkna av den lånade kungen i sitt svar (F3/C12, 2026-08-07).

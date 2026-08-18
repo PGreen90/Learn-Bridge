@@ -705,7 +705,136 @@ function establishLongSuit(state: PlayState, seat: Seat, legal: Hand): CardChoic
   }
 }
 
+/**
+ * Spelförarplan när `establishLongSuit`-grinden avstått OCH ingen säker cash
+ * finns (felrapport #49): utveckla en SOLID honnörssekvens i stället för att
+ * öppningsleda ur längsta färgen rakt in i motståndarnas honnörer. Läget: Väst
+ * hade knäckt klöver-A-spärren med ♣K men reservutspelet ("längsta färgen") ledde
+ * sedan ♠8 in i Nords ♠AQ i stället för att fortsätta den etablerade sekvensen
+ * ♣QJT. Att leda TOPPEN av en 2+ touch-honnörssekvens ur den ledande handen kan
+ * aldrig skänka bort ett stick (till skillnad från att öppningsleda lågt in i en
+ * ny färg), och färgen har längd bakom sekvensen att etablera. Bara SANG (samma
+ * skäl som `establishLongSuit`): i trumf etableras genom ruff. Ärlig räkning –
+ * ser bara egen sida (`visibleSeats`) och spelade kort. Returnerar kortet eller null.
+ */
+function continueEstablishSequence(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+  if (side(seat) !== side(state.contract.declarer)) return null // bara spelförarsidan
+  if (state.trump !== null) return null // bara sang
+  const played = playedCards(state)
+  const visible = visibleSeats(state, seat)
+  const ourCards = visible.flatMap((v) => state.hands[v])
+  const suitsAll: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
+  const oursIn = (s: Suit) => ourCards.filter((c) => c.suit === s)
+  const immediate = (s: Suit) => oursIn(s).filter((c) => isSureWinner(c, ourCards, played)).length
+  const oppUnseen = (s: Suit): Rank[] => {
+    const ourRanks = new Set(oursIn(s).map((c) => c.rank))
+    const playedRanks = new Set(played.filter((c) => c.suit === s).map((c) => c.rank))
+    return RANK_LOW_TO_HIGH.filter((r) => !ourRanks.has(r) && !playedRanks.has(r))
+  }
+  let best: { suit: Suit; gain: number; len: number } | null = null
+  for (const s of suitsAll) {
+    const inHand = legal.filter((c) => c.suit === s) // den ledande handen måste hålla färgen
+    if (inHand.length < 2) continue
+    const ours = oursIn(s)
+    if (ours.length < 4) continue // för kort för att etablera längd
+    // Den ledande handens egen topp-sekvens: högsta kortet en honnör (≥ J) och
+    // minst 2 kort i följd (touch) – så toppen kan ledas utan att slösa/underleda.
+    const handRanks = inHand.map((c) => c.rank).sort((a, b) => rankVal(b) - rankVal(a))
+    if (rankVal(handRanks[0]) < rankVal('J')) continue
+    if (rankVal(handRanks[1]) !== rankVal(handRanks[0]) - 1) continue
+    const ourDesc = ours.map((c) => c.rank).sort((a, b) => rankVal(b) - rankVal(a))
+    const oppDesc = oppUnseen(s).sort((a, b) => rankVal(b) - rankVal(a))
+    const gain = suitTricks(ourDesc, oppDesc) - immediate(s)
+    if (gain < 1) continue // ingen etableringsvinst
+    if (!best || gain > best.gain || (gain === best.gain && ours.length > best.len)) {
+      best = { suit: s, gain, len: ours.length }
+    }
+  }
+  if (!best) return null
+  const mine = legal.filter((c) => c.suit === best.suit)
+  return {
+    card: unblockLead(state, seat, highest(mine)),
+    reason:
+      'Spelförarplan (felrapport #49): jag fortsätter min solida honnörssekvens och ' +
+      'utvecklar färgen – leder toppen av sekvensen i stället för att öppningsleda lågt ' +
+      'ur längsta färgen rakt in i motståndarnas honnörer.',
+  }
+}
+
 const ALL_RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
+/**
+ * TREDJE HAND HÖGT (§8.6, felrapport #51 + ägarnoteringen 2026-08-18). Läget: jag
+ * är försvarare, partnern LEDDE sticket och "vinner" just nu bara för att den DOLDA
+ * spelföraren (fjärde hand) ännu inte spelat. Att sticket ser vunnet ut NU är en
+ * svag anledning att krypa – tredje hand ska normalt spela HÖGT och ta/vända, och
+ * bara i få lägen kryper man sticket. Två nivåer, båda med tenass-/sekvenssnålhet:
+ *  1. MÄSTAREN (ess/topp – inget högre kort ospelat utom på min hand): ta den, i
+ *     BÅDE sang och trumf. Det kan aldrig kosta ett stick – kortet ger exakt ett
+ *     stick nu eller senare (är spelföraren renons ruffas det ändå), och det låter
+ *     mig vända tillbaka (partnerns långa färg i sang; en stöld/ruff i trumf om
+ *     partnern är kort). Nords stiff ♥T tog annars sticket gratis under ♥A98753.
+ *  2. HONNÖRSTVÅNG utan mästare (t.ex. KD, KJ): pressa fram spelförarens honnör
+ *     med min LÄGSTA honnör (`thirdHandHonor` – snålar med sekvensen, behåller en
+ *     tenass). Gäller i BÅDE sang och trumf. (En gammal notering påstod −1 i
+ *     trumf, men den byggde på en enda giv; A/B-mätning 2026-08-18 över 209
+ *     trumfgivar gav netto −2 spelförarstick, dvs. neutralt-till-svagt-BÄTTRE
+ *     försvar – ingen anledning att krypa i trumf. Detalj: docs/bevaka.md.)
+ * Vakter: bara 3:e hand med den DOLDA spelföraren (ej öppna träkarlen) som 4:e, och
+ * bara när partnerns kort faktiskt KAN slås av ett osett högre kort (annars vann
+ * partnern redan säkert → slösa ingen honnör). null = kryp (markera/kasta lågt).
+ */
+function defenderThirdHandHigh(state: PlayState, seat: Seat, legal: Hand, led: Suit, bestCard: Card): CardChoice | null {
+  if (side(seat) === side(state.contract.declarer)) return null // bara försvaret
+  if (state.currentTrick.length !== 2) return null // bara 3:e hand
+  const leaderSeat = state.currentTrick[0].seat
+  if (side(leaderSeat) !== side(seat)) return null // partnern måste ha lett sticket
+  const dummy = dummyOf(state.contract)
+  const yetToPlay = (['N', 'E', 'S', 'W'] as Seat[]).filter(
+    (s) => s !== seat && !state.currentTrick.some((pc) => pc.seat === s),
+  )
+  if (yetToPlay.length !== 1) return null
+  const fourth = yetToPlay[0]
+  if (side(fourth) === side(seat) || fourth === dummy) return null // fjärde = dold spelförare
+  // Kan partnerns ledda kort faktiskt slås av ett OSETT högre kort (dvs. av den
+  // dolda spelföraren)? Osett = rank varken hos mig, i träkarlen eller spelad.
+  const played = playedCards(state)
+  const ledRank = state.currentTrick[0].card.rank
+  const mineRanks = new Set(state.hands[seat].filter((c) => c.suit === led).map((c) => c.rank))
+  const dummyRanks = new Set(state.hands[dummy].filter((c) => c.suit === led).map((c) => c.rank))
+  const playedRanks = new Set(played.filter((c) => c.suit === led).map((c) => c.rank))
+  const unseenBeatsLed = ALL_RANKS.some(
+    (r) => rankVal(r) > rankVal(ledRank) && !mineRanks.has(r) && !dummyRanks.has(r) && !playedRanks.has(r),
+  )
+  if (!unseenBeatsLed) return null // partnern vinner redan säkert → kryp/markera
+
+  const myWin = legal.filter((c) => c.suit === led && beats(c, bestCard, led, state.trump))
+  if (myWin.length === 0) return null
+  // 1) Mästaren (säkert stick): ta den billigaste – i både sang och trumf.
+  const masters = myWin.filter((c) => isSureWinner(c, state.hands[seat], played))
+  if (masters.length > 0) {
+    return {
+      card: lowest(masters),
+      reason:
+        'Tredje hand högt (§8.6, felrapport #51): partnern ledde och "vinner" bara tills den ' +
+        'dolda spelföraren spelar sist. Jag tar sticket med färgens mästare (billigast) och kan ' +
+        'vända tillbaka – att casha mästaren kan aldrig kosta (renons → ruffas den ändå).',
+    }
+  }
+  // 2) Honnörstvång utan mästare – i både sang och trumf (A/B-mätt neutralt, se
+  // funktionsdoc): pressa fram spelförarens honnör med min lägsta honnör.
+  const honor = thirdHandHonor(myWin)
+  if (honor) {
+    return {
+      card: honor,
+      reason:
+        'Tredje hand högt (§8.6): partnern ledde och spelföraren spelar dolt efter mig – jag ' +
+        'pressar fram hans honnör med min lägsta honnör i stället för att krypa sticket och ' +
+        'låta honom vinna gratis (men slösar aldrig en honnör högre än nödvändigt).',
+    }
+  }
+  return null
+}
 
 /**
  * Spelförarsidan (som lagligt ser BÅDA sina händer) ska inte gömma sig bakom
@@ -953,6 +1082,12 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     if (safeCash.length > 0) {
       return { card: unblockLead(state, seat, highest(safeCash)), reason: 'Jag är inne och cashar en säker vinnare – inget högre kort är kvar i färgen.' }
     }
+    // Spelförarsidan utan säker cash: utveckla en SOLID honnörssekvens (felrapport
+    // #49) i stället för att öppningsleda ur längsta färgen in i motståndarna.
+    if (!defender) {
+      const seq = continueEstablishSequence(state, seat, legal)
+      if (seq) return seq
+    }
     // Motspelets utspelfärg (trick 1, om den leddes av vår sida) fortsätts före
     // allt annat – partnerns honnörer sitter ofta bakom den.
     const t1 = state.completedTricks[0]?.cards[0]
@@ -1017,6 +1152,11 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // billigast (felrapport #48).
     const winOver = winOverBeatablePartner(state, seat, legal, led, bestCard)
     if (winOver) return winOver
+    // Försvaret spelar tredje hand HÖGT bakom en dold spelförare (felrapport #51 +
+    // ägarnoteringen): tar mästaren / pressar honnören i stället för att krypa
+    // sticket och skänka bort det gratis.
+    const thirdHigh = defenderThirdHandHigh(state, seat, legal, led, bestCard)
+    if (thirdHigh) return thirdHigh
     const guarded = guardedDiscard(state, seat, legal)
     if (guarded) return { card: guarded, reason: guardReason }
     const lav = signalsOn ? defenderFirstDiscardSignal(state, seat, legal) : null

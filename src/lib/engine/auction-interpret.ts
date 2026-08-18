@@ -257,6 +257,21 @@ function askTrumpFallback(seat: Seat, prior: ResolvedCall[]): string | null {
   return null
 }
 
+/**
+ * Har partnern (sett från `seat`) visat en NATURLIG 1NT som `seat` nu kan köra
+ * 1NT-systemet mot? Sant när partnerns SENASTE kontraktsbud är 1NT (bara pass
+ * efter, dvs. ostört) OCH det är partnerns FÖRSTA kontraktsbud – då är 1NT:et en
+ * öppning eller ett inkliv (balanserad 15-ish), inte ett 1NT-ÅTERBUD (som i
+ * stället visar minimibalans efter egen färg → 2♣ blir checkback, inte Stayman).
+ */
+function partnerNaturalNT(seat: Seat, prior: ResolvedCall[]): boolean {
+  const partner = PARTNER[seat]
+  const last = lastContract(prior)
+  if (!last || last.seat !== partner || last.cb.strain !== 'NT' || last.cb.level !== 1) return false
+  const partnerContracts = prior.filter((c) => c.seat === partner && parseBid(c.bid))
+  return partnerContracts.length === 1
+}
+
 /** Senaste kontraktsbudet före `prior`s slut (för pass/dubbel-texter). */
 function lastContract(prior: ResolvedCall[]): { seat: Seat; cb: ParsedBid } | null {
   for (let i = prior.length - 1; i >= 0; i--) {
@@ -326,6 +341,19 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
     return {
       text: `Michaels cue-bud (${cb.level}${sym}) — tvåfärgshand: ${michaelsPhrase(open.cb.strain)}, oftast 5–5.`,
       confidence: 'trolig',
+    }
+  }
+
+  // 2♣ över partnerns naturliga 1NT (öppning ELLER inkliv) = Stayman: frågar
+  // efter partnerns 4-korts högfärg, säger inget om klöver (systems on).
+  // Felrapport #53 – tolkades som "naturligt, minst 4 kort i klöver".
+  if (cb.level === 2 && cb.strain === 'C' && partnerNaturalNT(seat, prior)) {
+    return {
+      text:
+        `2♣ — Stayman: frågar efter partnerns 4-korts högfärg (svar 2♦ = ingen, ` +
+        `2♥/2♠ = den högfärgen). Säger inget om klöver.`,
+      confidence: 'trolig',
+      forcing: 'krav-1-rond',
     }
   }
 
@@ -439,6 +467,21 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
       }
     }
     const stopp = competitive ? ' (lovar stopp i motståndarnas färg)' : ''
+    // 1NT-INKLIV: motståndarna öppnade och vår sida är ännu objuden. Ett direkt
+    // 1NT-inkliv visar 15–18 balanserad med stopp i deras färg (kör 1NT-systemet);
+    // i balansering (deras öppning har gått pass runt) 11–14. Felrapport #52 –
+    // lästes felaktigt som ett svagt svar (6–11 hp). Facit: overcalls.ts §7.
+    if (cb.level === 1 && !ownSideHasBid(seat, prior)) {
+      const open = opening(prior)!
+      const theirSuit = open.cb.strain !== 'NT' ? NAME[open.cb.strain] : 'motståndarnas färg'
+      const balancing = prior.some((c) => c.bid === 'P')
+      const range = balancing ? '11–14 hp' : '15–18 hp'
+      const kind = balancing ? '1NT-inkliv i balansering (återöppning)' : '1NT-inkliv'
+      return {
+        text: `1 sang — ${kind}: ${range}, balanserad med stopp i ${theirSuit} (kör 1NT-systemet).`,
+        confidence: 'trolig',
+      }
+    }
     if (cb.level >= 3) {
       return { text: `${cb.level} sang — till spel, balanserad hand${stopp}.`, confidence: 'trolig', forcing: 'avslut' }
     }

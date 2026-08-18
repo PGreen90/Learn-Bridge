@@ -11,9 +11,9 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
-import { botCard, botCardSmart } from './play-bot'
+import { botCard, botCardReasoned, botCardSmart } from './play-bot'
 import { doubleDummyDeclarerRemaining } from './dds'
-import { isComplete, playCard, side, type Contract, type PlayState, type Trick } from './play'
+import { isComplete, playCard, startPlay, side, type Contract, type PlayState, type Trick } from './play'
 
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
 const RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -117,4 +117,64 @@ describe('Felrapport #32 – spelföraren etablerar lång färg före cashandet'
     const start = fabricate(live, 'S', 'NT', 'S')
     expect(playOut(start, (s) => botCardSmart(s, s.toAct, [], { samples: 60 }))).toBeGreaterThanOrEqual(6)
   }, 60_000)
+})
+
+// Felrapport #49 (github.com/PGreen90/Learn-Bridge/issues/49): 2NT av Väst. Väst
+// knäckte klöver-A-spärren med ♣K (stick 4) men ÖVERGAV sedan färgen och ledde
+// ♠8 rakt in i Nords ♠AQ (stick 5) – i stället för att fortsätta den nyss
+// etablerade klöversekvensen ♣QJT. `establishLongSuit`-grinden avstod (spader
+// ostoppad) och reservutspelet föll tillbaka på öppningsleddoktrinen "längsta
+// färgen" (spader 4 > klöver 3). Facit: spelföraren utvecklar sin SOLIDA
+// honnörssekvens (leder ♣Q) i stället för att öppningsleda in i motståndarna.
+const P: Record<string, Suit> = { S: 'spades', H: 'hearts', D: 'diamonds', C: 'clubs' }
+const parseHand49 = (s: string): Card[] => {
+  const out: Card[] = []
+  for (const part of s.split(' ')) {
+    const su = P[part[0]]
+    for (const ch of part.slice(1)) out.push({ suit: su, rank: (ch === 'T' ? '10' : ch) as Rank })
+  }
+  return out
+}
+const K = (r: string, su: string): Card => ({ suit: P[su], rank: (r === 'T' ? '10' : r) as Rank })
+
+describe('Felrapport #49 – spelföraren fortsätter sin klöversekvens (ej ♠ in i AQ)', () => {
+  const deal = {
+    hands: {
+      N: parseHand49('SAQ32 H- DAKT9764 C64'),
+      E: parseHand49('ST6 HA7652 D85 C9873'),
+      S: parseHand49('SJ54 HQJ9843 D3 CA52'),
+      W: parseHand49('SK987 HKT DQJ2 CKQJT'),
+    } as Record<Seat, Card[]>,
+  }
+  const contract: Contract = { declarer: 'W', strain: 'NT', level: 2 }
+  // Stick 1–4 exakt som rapporten (spelad ordning per stick).
+  const recorded: Card[] = [
+    K('A', 'D'), K('5', 'D'), K('3', 'D'), K('2', 'D'),
+    K('K', 'D'), K('8', 'D'), K('3', 'H'), K('J', 'D'),
+    K('4', 'D'), K('7', 'H'), K('4', 'H'), K('Q', 'D'),
+    K('K', 'C'), K('4', 'C'), K('3', 'C'), K('2', 'C'),
+  ]
+
+  function atTrick5(): PlayState {
+    let s = startPlay(deal as any, contract)
+    for (const c of recorded) s = playCard(s, c)
+    return s
+  }
+
+  it('Väst är inne på stick 5 med ♠K987 ♥KT ♣QJT', () => {
+    const s = atTrick5()
+    expect(s.toAct).toBe('W')
+    expect(s.currentTrick.length).toBe(0)
+  })
+
+  it('tumregeln leder en klöver (fortsätter sekvensen), INTE en spader', () => {
+    const pick = botCardReasoned(atTrick5(), 'W').card
+    expect(pick.suit).toBe('clubs')
+    expect(pick.rank).toBe('Q') // toppen av sekvensen QJT
+  })
+
+  it('SKARPA boten (appen) leder också klöver vid 9 kort', () => {
+    const pick = botCardSmart(atTrick5(), 'W', [])
+    expect(pick.suit).toBe('clubs')
+  })
 })
