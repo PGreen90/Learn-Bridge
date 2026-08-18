@@ -10,27 +10,21 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — SPELDIAGNOSEN (ägarbeslut 2026-08-12): bottar som spelar, felsöker & rapporterar
+### 🔵 NU — REALTIDSBORDEN KLARA & LIVE (Beslut B etapp 4) → NÄSTA: ägarens val
 
-**RIGG STEG 1–7 BYGGD 2026-08-12** — allt i **`docs/speldiagnos.md`** (läs den
-FÖRST): helgivsspelaren `spela-giv.ts` · per-kort-DD-facit (`analyseSpel`) ·
-speldomen `speldom.ts` · proben (`SPELDIAG=1`, frö 20260721 = M-seriens
-universum) · repro-dumpen (`DUMP_SPEL`) · tävlingsförscreeningen
-(`TAVLING_DIAG`; `DAILY_SEED_SECRET` i `.env.local` — ALDRIG i spårade `.env`)
-· `/speldiagnos`. **Princip (ägaren): RÄTT, inte max antal stick** — larm
-klassas systemfel/ärlig miss/oklart i `/speldiagnos`; bara systemfel lagas,
-efter ägarens ja. **S0–S5 körda, tretton fixar landade 2026-08-12/13**
-(S-serien i `docs/speldiagnos.md`): senast S5 = MC-urfallet LAGAT (fyra
-fixar: öppningslöftet i poäng · robusthetsnätet · utspelsavkodningens
-vakter · tvingade återbud ≠ 6+; spelförarflaggorna 307→277 och försvaret
-217→193 = seriens största samlade kliv — MC kör nu slutspel där den förut
-föll ur). Tävlingsspeldumpen: `DUMP_TAVLING=<datum>:<bricka>`.
-**NATTVAKTEN BYGGD 2026-08-14** (ägarbeslut): schemalagd förscreening varje
-kväll i Actions (`tavling-forscreening.yml`, imorgon + övermorgon; röd =
-ENBART objektivt haveri → mejl; rapporter som artefakt; detalj + medvetna
-icke-byggen i `docs/speldiagnos.md`). **NÄSTA GÅNG: ägarens val** —
-kandidater: masktekniken i trumfdragningen (SENARE) · ny granskningsrunda
-på S5-koden.
+**"Spela med vänner" BYGGD & LIVE 2026-08-17/18** i fyra delleveranser 4A–4D,
+alla demolade och godkända av ägaren — allt i **`docs/bord-plan.md`** (läs den
+FÖRST vid bordsarbete): serverdomare med dolda händer per stol · append-only
+händelselogg med sekvensvakt · hjärtslag (auktoritativ) + Supabase Realtime
+(latenssocker) · den visuella vridningen (du sitter alltid Syd) · paus/lämna
+med ägargodkännande, bot-övertag vid frånkoppling, ägarbyte, inhopp på
+frigjord stol · tre spelformer (endast budgivning m. facit-genomgång · endast
+spelföring m. spelförar-rotation · full bridge) · bot-reservation · vinröd duk
+· rate limits ("minimal härdning inbakad"). Migrationerna `0007`+`0008` körda.
+Felrapporten nås numera i ALLA lägen — även vanliga spelbordets bud-/spelfas.
+**NÄSTA GÅNG: ägarens val** — kandidater: Beslut B etapp 3 (härdningen) ·
+speldiagnosens nästa runda (masktekniken · S5-granskningen) · bordens
+SENARE-lista (claim vid bordet, DD-jämförelsen — `docs/bord-plan.md`).
 
 ---
 
@@ -38,13 +32,17 @@ på S5-koden.
 - **Tävlingen är KLAR & LIVE** (2026-08-11/12): konton → daglig 12-givarstävling
   → topplista. **MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE.**
   "Spela given igen" finns som övningsläge (räknas inte i MP%).
+- **Speldiagnosen är byggd & vilande** (2026-08-12/14, S0–S5 = tretton fixar,
+  MC-urfallet stängt; nattvakten kör förscreening varje kväll i Actions):
+  rigg/probe/kommandon/principen "RÄTT, inte max stick" — allt i
+  `docs/speldiagnos.md`. Nästa runda är en NU-kandidat.
 - **Beslut B-masterplanen** (ägarbeslut 2026-08-08): konton → daglig tävling →
   realtidsbord (valfri mix människor/bottar). HELA planen — etapper 0–4,
   grindarna, GDPR/säkerhet — bor i **`docs/beslut-b-plan.md`** (läs den FÖRST
   vid allt Beslut B-arbete). Beslut tagna: Supabase · klassiska lösenord · EN
   12-givarstävling först · tävlingarna före borden. Stående regel: vid varje
   etappslut stannar Claude, visar läget och tar grindbesluten med ägaren.
-  Etapp 0–2 klara (etapp 2:s klientfas kvar — se NÄST).
+  Etapp 0–2 + 4 klara; etapp 3 (härdningen) kvar — se NÄST.
 - **Konkurrensplanen** (ägarbeslut 2026-07-29): rebidz konkurrerar med
   BBO/Funbridge/Synrey; Funbridge-modellen först, sv→en (Fas 5). Roadmap +
   hälsobild: **`docs/konkurrensplan.md`** (Fas 1-faceliften yta 1–4 + DAGENS
@@ -74,10 +72,11 @@ något känns fel i spel, eller när en ny fix ska läggas till. Senast (S5,
 vakter · tvingade återbud (MC-urfallet stängt — inga kända kvarstående).
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Beslut B etapp 2 forts.** — klientfasen: wira in tävlingen i appen, inskick,
-   validering, poäng/topplista (serversidan klar — `docs/beslut-b-plan.md`).
-2. **Beslut B etapp 3 — härdning + drift** (arkiv/streaks på servern, rate limits,
-   ev. Nivå 2 dolda händer; grindbesluten först — `docs/beslut-b-plan.md`).
+1. **Beslut B etapp 3 — härdning + drift** (arkiv/streaks på servern, rate limits
+   på tävlingens endpoints — borden har redan sina, ev. Nivå 2 dolda händer i
+   tävlingen; grindbesluten först — `docs/beslut-b-plan.md`).
+2. **Speldiagnosens nästa runda** — masktekniken i trumfdragningen eller ny
+   granskningsrunda på S5-koden (`docs/speldiagnos.md`).
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
@@ -144,11 +143,11 @@ projektets resa erfaren & trygg (ägarens egna ord 2026-08-13).
   Vercel-dashboarden; det finns ingen tag i repot.
 - GitHub Pages-workflowen är **inaktiverad** (`workflow_dispatch`-endast, filen
   kvar som referens).
-- **Backend FINNS sedan Beslut B etapp 1–2 (2026-08-10/11):** Supabase (konton +
-  tävlingsdata) + Vercel-serverfunktioner i `api-src/` (bundlas med esbuild).
-  Nya backend-delar byggs bara enligt planen + grindarna i
-  `docs/beslut-b-plan.md`. Hemligheter i `.env.local`/Vercels env — ALDRIG i
-  git-spårade filer.
+- **Backend FINNS sedan Beslut B etapp 1–2 & 4 (2026-08-10…18):** Supabase
+  (konton + tävlingsdata + borden, inkl. Realtime) + Vercel-serverfunktioner i
+  `api-src/` (bundlas med esbuild). Nya backend-delar byggs bara enligt planen
+  + grindarna i `docs/beslut-b-plan.md` (borden: `docs/bord-plan.md`).
+  Hemligheter i `.env.local`/Vercels env — ALDRIG i git-spårade filer.
 
 ## Bridge-specifikt
 - Budsystem: **2 över 1 (2/1)**, endast detta. Bygg inte flera system på en gång.

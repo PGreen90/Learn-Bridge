@@ -26,6 +26,7 @@ const LEVANDE = [
   'docs/arbetsrutiner.md',
   'docs/beslut-b-plan.md',
   'docs/bevaka.md',
+  'docs/bord-plan.md',
   'docs/bot-hjarna.md',
   'docs/budsystem-revision.md',
   'docs/budsystem.md',

@@ -112,6 +112,30 @@ export default async function handler(
       'set_id,board',
     )
 
+    // 5) Bordsstädningen (Beslut B etapp 4D): den dagliga cronen grovstädar
+    //    vänner-borden — färdiga/avslutade bord äldre än ett dygn raderas
+    //    (cascade tar stolar + händelselogg), liksom bord utan aktivitet på
+    //    ett dygn (opportunistiska 2 h-stängningen i ?h=skapa tar lobbyn).
+    //    Gamla kvotfönster rensas också. Fel här får ALDRIG fälla givarna —
+    //    städningen är städning, inte kärnjobb.
+    let stadade = 0
+    try {
+      const grans = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const ta = async (query: string) => {
+        const r = await fetch(`${base}/rest/v1/${query}`, {
+          method: 'DELETE',
+          headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: 'count=exact' },
+        })
+        const antal = Number(r.headers.get('content-range')?.split('/')[1] ?? 0)
+        return r.ok ? antal : 0
+      }
+      stadade += await ta(`tables?status=in.(klar,avslutat)&last_activity=lt.${grans}`)
+      stadade += await ta(`tables?status=in.(lobby,spelar)&last_activity=lt.${grans}`)
+      await ta(`api_kvot?fonster=lt.${grans}`)
+    } catch {
+      // Tyst: nästa natts körning tar det.
+    }
+
     // Svaret läcker ALDRIG händerna — bara att jobbet lyckades.
     return json(200, {
       ok: true,
@@ -119,6 +143,7 @@ export default async function handler(
       nummer,
       antalGivar: deals.length,
       brickor: deals.map((d) => d.board),
+      stadadeBord: stadade,
     })
   } catch (err) {
     return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })

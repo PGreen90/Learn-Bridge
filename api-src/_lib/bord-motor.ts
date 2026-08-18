@@ -71,6 +71,76 @@ export function bordGiv(seedHex: string, givNr: number, underIndex = 0): Deal {
   return { ...dealFromSeed(bordGivSeed(seedHex, givNr, underIndex), givNr), id: `bord-giv-${givNr}` }
 }
 
+const SEAT_ORDER: Seat[] = ['N', 'E', 'S', 'W']
+
+/** Rotera en giv `shift` steg medurs: händer, given och zonen följer med
+ *  konsekvent (samma matematik som klientens seatDealSouth — udda rotation
+ *  byter partnerskap och därmed NS/ÖV-zonen). Auktionen är en funktion av
+ *  (händer, given) och roterar därför exakt med. */
+export function roteraDeal(deal: Deal, shift: number): Deal {
+  const s = ((shift % 4) + 4) % 4
+  if (s === 0) return deal
+  const hands = {} as Deal['hands']
+  SEAT_ORDER.forEach((seat, i) => {
+    hands[seat] = deal.hands[SEAT_ORDER[(i - s + 4) % 4]]
+  })
+  const dealer = SEAT_ORDER[(SEAT_ORDER.indexOf(deal.dealer) + s) % 4]
+  const vul =
+    s % 2 === 0
+      ? deal.vulnerability
+      : deal.vulnerability === 'ns'
+        ? 'ew'
+        : deal.vulnerability === 'ew'
+          ? 'ns'
+          : deal.vulnerability
+  return { ...deal, hands, dealer, vulnerability: vul }
+}
+
+/** Motorns hela kanoniska auktion för en giv (facit-genomgången i läge 1 och
+ *  läge 2:s autobud): decideCall stol för stol tills auktionen är klar. */
+export function autoAuktion(deal: Deal): ResolvedCall[] {
+  const history: ResolvedCall[] = []
+  let vakt = 0
+  while (!auctionComplete(history) && vakt++ < 60) {
+    const seat = seatToAct(deal.dealer, history.length)
+    const call = decideCall(deal, history, seat)
+    history.push({ seat, bid: call.bid })
+  }
+  return history
+}
+
+/** Läge 2 ("endast spelföring"): given som spelas av `malStol`. Motorn bjuder
+ *  själv; en utpassad giv genereras om ur nästa underindex (läget ska alltid
+ *  ha en spelförare), och händerna roteras så spelförarstolen hamnar hos
+ *  människan på tur. Deterministisk ur (frö, givnummer, målstol). */
+export function lage2Giv(
+  seedHex: string,
+  givNr: number,
+  malStol: Seat,
+): { deal: Deal; underIndex: number; shift: number } {
+  for (let k = 0; k < 20; k++) {
+    const ratt = bordGiv(seedHex, givNr, k)
+    const auktion = autoAuktion(ratt)
+    const contract = contractFromCalls(auktion)
+    if (!contract) continue // utpassad — nästa underindex
+    const shift = (SEAT_ORDER.indexOf(malStol) - SEAT_ORDER.indexOf(contract.declarer) + 4) % 4
+    return { deal: roteraDeal(ratt, shift), underIndex: k, shift }
+  }
+  // 20 utpassade givar i rad händer inte i praktiken — men om, ta den sista rakt av.
+  return { deal: bordGiv(seedHex, givNr, 19), underIndex: 19, shift: 0 }
+}
+
+/** Återskapa givens EXAKTA deal ur giv-start-händelsens data (läge 2 bär
+ *  underindex + rotation; läge 1/3 använder standardvärdena). */
+export function dealUrGivStart(
+  seedHex: string,
+  givNr: number,
+  data: unknown,
+): Deal {
+  const d = (data ?? {}) as { underIndex?: number; shift?: number }
+  return roteraDeal(bordGiv(seedHex, givNr, d.underIndex ?? 0), d.shift ?? 0)
+}
+
 // ---------------------------------------------------------------------------
 // Projektionen: händelser → givläge.
 
@@ -115,7 +185,8 @@ export function projiceraGiv(deal: Deal, handelser: GivHandelse[]): GivLage {
       kort.push((h.data as { card: Card }).card)
     } else if (h.typ === 'trakarl') {
       trakarlLagd = true
-    } else if (h.typ === 'giv-klar') {
+    } else if (h.typ === 'giv-klar' || h.typ === 'facit') {
+      // 'facit' är läge 1:s slutpunkt (4D) — given är genomgången, inget spel.
       givKlar = true
     }
   }
@@ -200,6 +271,10 @@ export interface DrivMiljo {
   playSeed: number
   /** Ställningen FÖRE den här given ({ns, ew}-totaler) — bakas in i giv-klar. */
   stallning: { ns: number; ew: number }
+  /** Bordets spelform (4D): 'budgivning' stannar när auktionen är klar och
+   *  bokför 'facit' (reveal + motorns systemlinje) i stället för kortspel.
+   *  Default 'full' (läge 2 spelar också kort — auktionen är redan bokförd). */
+  spelform?: 'budgivning' | 'spelforing' | 'full'
   smart?: SmartOpts
   /** Total tidsbudget för botdragen i DETTA anrop (ms). Överskriden budget →
    *  resterande drag via tumreglerna (billiga, alltid lagliga). */
@@ -250,6 +325,16 @@ export function drivFram(
     if (fas === 'bud') {
       if (auctionComplete(history)) {
         contract = contractFromCalls(history)
+        // Läge 1 (endast budgivning, 4D): auktionen ÄR given — bokför facit
+        // (reveal + motorns kanoniska linje som jämförelse) och stanna.
+        if (miljo.spelform === 'budgivning') {
+          nya.push({
+            giv: givNr,
+            typ: 'facit',
+            data: { hands: deal.hands, contract, systemlinje: autoAuktion(deal) },
+          })
+          break
+        }
         if (!contract) {
           nya.push(givKlarHandelse(0, 0, true))
           break
@@ -299,11 +384,22 @@ export function drivFram(
 }
 
 /** Giv-start-händelsen: klientens enda källa till bricka/giv/zon (den läser
- *  ALDRIG bricknummerformeln själv — händelsen är sanningen). */
-export function givStartHandelse(deal: Deal, givNr: number): NyHandelse {
+ *  ALDRIG bricknummerformeln själv — händelsen är sanningen). Läge 2 bär
+ *  dessutom underindex + rotation så servern kan återskapa exakt samma deal
+ *  ur fröet i varje senare anrop (dealUrGivStart). */
+export function givStartHandelse(
+  deal: Deal,
+  givNr: number,
+  extra?: { underIndex: number; shift: number },
+): NyHandelse {
   return {
     giv: givNr,
     typ: 'giv-start',
-    data: { board: deal.board, dealer: deal.dealer, vulnerability: deal.vulnerability },
+    data: {
+      board: deal.board,
+      dealer: deal.dealer,
+      vulnerability: deal.vulnerability,
+      ...(extra ?? {}),
+    },
   }
 }

@@ -132,6 +132,33 @@ describe('BordSpel — röktest', () => {
     expect(screen.getByText(/Giv 1\/4/)).toBeTruthy()
   })
 
+  test('4D läge 1: facit-genomgången renderar jämförelsen + nästa giv', async () => {
+    seq = 0
+    const hands = { N: MIN_HAND, E: MIN_HAND, S: MIN_HAND, W: MIN_HAND }
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' }),
+      h('bud', 'N', { bid: '1S' }),
+      h('bud', 'E', { bid: 'P' }),
+      h('bud', 'S', { bid: 'P' }),
+      h('bud', 'W', { bid: 'P' }),
+      h('facit', null, {
+        hands,
+        contract: { declarer: 'N', strain: 'spades', level: 1 },
+        // En avvikande systemlinje → jämförelsepanelen ska visas.
+        systemlinje: [
+          { seat: 'N', bid: '1NT' },
+          { seat: 'E', bid: 'P' },
+          { seat: 'S', bid: 'P' },
+          { seat: 'W', bid: 'P' },
+        ],
+      }),
+    ]
+    rendera()
+    expect(await screen.findByText('Er budgivning')).toBeTruthy()
+    expect(screen.getByText('Motorns linje')).toBeTruthy()
+    expect(screen.getByText('Nästa giv →')).toBeTruthy()
+  })
+
   test('giv-klar renderar reveal + nästa giv-knappen', async () => {
     seq = 0
     const hands = { N: MIN_HAND, E: MIN_HAND, S: MIN_HAND, W: MIN_HAND }
