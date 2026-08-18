@@ -779,6 +779,27 @@ utgång eller slam fanns.*
 | 1NT (1♣–1♥–1NT) | 12–14, balanserad (15–17 hade öppnat 1NT) |
 | 2NT (hopp, 1♣–1♥–2NT) | 18–19, balanserad |
 
+**Svararens systems on efter 2NT-återbudet (checkback, 2026-08-18).** Öppnarens
+2NT (18–19 bal) *nekar* både 4-stöd i svararens färg (hade hen höjt) och en
+billigt visbar 4-korts högfärg (hade hen 4 spader efter svararens 1♥ hade hen
+bjudit **1♠**). Två högfärgsfitar kan ändå ligga dolda; svararen letar dem i
+stället för att gissa blint 3NT:
+- **Direkt 3♥/3♠** (svararen rebjuder sin **egen 5-korts** högfärg) = söker
+  öppnarens dolda **3-stöd** (5-3). Öppnaren höjer till **4M** med 3-stöd, annars
+  **3NT**.
+- **3♣ = checkback** efter ett **1♠-svar** med **4 hjärter** (⇒ 5+ spader, annars
+  hade svararen bjudit 1♥ upp). 3♣ frågar efter öppnarens **dolda 4-korts
+  hjärter** (den enda högfärg hen inte kunde visa billigt — 2♥ vore reverse)
+  eller **3-stöd i spadern**. Öppnaren svarar: **3♥** med 4 hjärter (4-4),
+  annars **3♠** med 3-korts spaderstöd (5-3), annars **3NT**. Svararen placerar
+  utgången i fiten (4♥/4♠) eller passar 3NT.
+- **3NT** annars (ingen högfärg att jaga).
+
+Svararen lovar 5+ i sin färg genom hela grenen, så en **4-3-fit spelas aldrig**
+(ägarbeslut 2026-08-18: undvik 4-3). Öppnaren är redan begränsad till 18–19 och
+svararen har lovat utgångsvärden genom att svara → auktionen driver alltid till
+utgång.
+
 **Extra styrka / krav:**
 | Återbud | Betydelse |
 |---|---|
@@ -1940,6 +1961,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-18 — Checkback efter naturligt 2NT-återbud (systems on, §5.2).**
+  Efter **1x–1y–2NT** (öppnaren 18–19 bal) bjöd svararen förr **blint 3NT**
+  (`responderRebidColorAuction` case `'2NT (18–19)'` → `return 3NT`) och missade
+  dolda högfärgsfitar. Ny behandling: **direkt 3♥/3♠** (egen 5-korts högfärg)
+  söker öppnarens dolda 3-stöd (5-3, öppnaren höjer 4M annars 3NT); **3♣ =
+  checkback** efter ett 1♠-svar med 4 hjärter frågar öppnarens dolda 4-korts
+  hjärter (öppnaren kunde ej visa dem – 2♥ vore reverse) eller 3-stöd i spadern,
+  och svararen placerar 4♥ (4-4) / 4♠ (5-3) / passar 3NT. **Scope-verifiering mot
+  motorn:** efter ett 1♥-svar visar öppnaren en 4-korts spader billigt med 1♠, så
+  2NT nekar båda högfärgerna → den dolda 4-4:an finns bara efter ett 1♠-svar (dold
+  hjärter). Svararen lovar 5+ i sin färg hela vägen → ingen 4-3 (ägarbeslut
+  2026-08-18: undvik 4-3). Tas on-book i `buildAuction` (behöver båda händerna;
+  live-lagret replay:ar den stängda linjen precis som 1NT-auktionsblocken); nya
+  `openerAnswer2NTCheckback` + `openerAnswer2NTMajorSeek` (`rebids.ts`) +
+  `responderPlaceAfter2NTCheckback` (`responder-rebids.ts`). Facit FÖRE fix:
+  `auction-2nt-checkback.test.ts` (svararens tre beslut, öppnarens svar, båda
+  kanoniska linjerna når 4♥/4♥). Hela sviten grön.
 - **2026-08-18 — Systems on över ett 1NT-INKLIV (§4.3/§7.1, uppföljning
   felrapport #53).** §7.1 lovade sedan tidigare att ett 1NT-inkliv "kör samma
   system som över en 1NT-öppning", men koden gjorde det bara över en 1NT-ÖPPNING:
