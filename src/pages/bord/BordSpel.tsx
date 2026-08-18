@@ -35,7 +35,7 @@ import { MenuTempoRow, MenuToggleRow, sameCard, STRAIN_CODE, VUL_TEXT } from '..
 import { ms, type PlaySpeed } from '../play/tempo'
 import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
-import { verkligaStick, vridTillbaka } from './bord-projektion'
+import { annoteraSystemiskt, verkligaStick, vridStol, vridTillbaka } from './bord-projektion'
 import { useBordSpel } from './useBordSpel'
 
 /** Visuell stolordning i namnraden: som auktionsrutnätet (V N Ö S). */
@@ -505,8 +505,9 @@ export function BordSpel({
     lage &&
     (() => {
       const hands: Record<Seat, Card[]> = { N: [], E: [], S: [], W: [] }
-      if (lage.klar) {
-        Object.assign(hands, lage.klar.hands)
+      const reveal = lage.klar?.hands ?? lage.facit?.hands ?? null
+      if (reveal) {
+        Object.assign(hands, reveal)
       } else {
         if (dinHand) hands[minStol] = dinHand
         if (lage.trakarl) hands[lage.trakarl.stol] = lage.trakarl.hand
@@ -526,7 +527,7 @@ export function BordSpel({
           tricks={verkligaStick(lage)}
           onClose={() => setVisaRapport(false)}
           intro={
-            lage.klar
+            reveal
               ? undefined
               : 'Auktionen och de spelade korten följer med automatiskt. Under en pågående giv utelämnas dolda händer — bordskoden i giv-id:t gör att given ändå kan återskapas exakt.'
           }
@@ -567,15 +568,23 @@ export function BordSpel({
     const st = lage.bordKlar.stallning
     const ni = minSida === 'NS' ? st.ns : st.ew
     const de = minSida === 'NS' ? st.ew : st.ns
-    const rubrik = ni > de ? 'Ni vann! 🎉' : ni < de ? 'De vann den här gången' : 'Oavgjort!'
+    // Läge 1 (endast budgivning) har ingen poäng — genomgången är målet.
+    const baraBudgivning = meta?.spelform === 'budgivning'
+    const rubrik = baraBudgivning
+      ? 'Alla givar genomgångna!'
+      : ni > de
+        ? 'Ni vann! 🎉'
+        : ni < de
+          ? 'De vann den här gången'
+          : 'Oavgjort!'
     return (
       <Felt tone="vanner" className={`${rot} items-center justify-center`}>
         <div className="max-w-sm space-y-4 text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
-            Bordet är färdigspelat
+            {baraBudgivning ? 'Budgivningen genomgången' : 'Bordet är färdigspelat'}
           </p>
           <h1 className="text-3xl font-semibold text-rose-50">{rubrik}</h1>
-          <p className="text-lg text-rose-100/80">{stallningRad(st)}</p>
+          {!baraBudgivning && <p className="text-lg text-rose-100/80">{stallningRad(st)}</p>}
           <Button onClick={() => navigate('/spela-med-vanner')}>Till Spela med vänner →</Button>
         </div>
       </Felt>
@@ -637,6 +646,139 @@ export function BordSpel({
           ) : (
             <p className="py-6 text-center text-sm text-rose-100/60">Hämtar din hand …</p>
           )}
+        </div>
+        {narvaroOverlagg}
+        {avslutaDialog}
+      </Felt>
+    )
+  }
+
+  // -------------------------------------------------------------------------
+  // Läge 1 (endast budgivning, 4D): facit-genomgången — alla händer vänds upp
+  // på bordet och mitten visar er budgivning sida vid sida med motorns
+  // kanoniska linje ("så här bjuder 2/1-boken"). Ägaren går vidare.
+
+  if (lage.fas === 'klar' && lage.facit) {
+    const facit = lage.facit
+    const vTill = vridTillbaka(minStol)
+    const v = vridStol(minStol)
+    const sista = lage.giv >= givar
+    const agare = meta?.duArAgare ?? false
+    const spelad = annoteraSystemiskt(auktion.calls)
+    const linje = annoteraSystemiskt(facit.systemlinje.map((c) => ({ seat: v(c.seat), bid: c.bid })))
+    const sammaLinje =
+      spelad.length === linje.length &&
+      spelad.every((c, i) => c.bid === linje[i].bid && c.seat === linje[i].seat)
+    const ordning = facit.contract
+      ? { ...facit.contract, declarer: vridStolLabel(facit.contract.declarer, minStol) }
+      : { declarer: 'S' as Seat, strain: 'NT' as const, level: 1 }
+    const stillaLage: PlayState = {
+      contract: ordning,
+      trump: ordning.strain === 'NT' ? null : ordning.strain,
+      hands: { N: [], E: [], S: [], W: [] },
+      leader: 'S',
+      toAct: 'S',
+      currentTrick: [],
+      completedTricks: [],
+      tricksNS: 0,
+      tricksEW: 0,
+    }
+    return (
+      <Felt tone="vanner" className={rot}>
+        <div className="px-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
+          <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 text-xs text-rose-100/80">
+            <span className="font-semibold text-gold-200">
+              Giv {lage.giv} av {givar} — budgivningen klar
+            </span>
+            {meny}
+          </div>
+          <NamnRad stolar={stolar} minStol={minStol} />
+        </div>
+        {felRad}
+
+        {/* Nord uppvänd. */}
+        <div className="flex justify-center px-2 pt-1">
+          <SuitColumns
+            hand={facit.hands[vTill('N')]}
+            contract={ordning}
+            play={stillaLage}
+            seat="N"
+            onCardClick={() => {}}
+            selectedSuit={null}
+          />
+        </div>
+
+        {/* Väst | jämförelsen | Öst. */}
+        <div className="flex flex-1 items-start justify-between gap-1 px-2 py-2">
+          <div className="shrink-0">
+            <SideDummyPiles hand={facit.hands[vTill('W')]} contract={ordning} side="W" />
+          </div>
+          <div className="mx-auto flex max-h-[55dvh] w-full max-w-sm flex-col gap-2 overflow-y-auto rounded-2xl bg-red-950/50 p-3 ring-1 ring-rose-50/15">
+            <p className="text-center font-semibold text-rose-50">
+              {facit.contract ? (
+                <>
+                  <BidChip
+                    bid={`${facit.contract.level}${STRAIN_CODE[facit.contract.strain]}`}
+                  />{' '}
+                  av {SEAT_LABEL[vridStolLabel(facit.contract.declarer, minStol)]}
+                </>
+              ) : (
+                'Given passades ut'
+              )}
+            </p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-100/60">
+              Er budgivning
+            </p>
+            <AuctionGrid
+              calls={spelad}
+              dealer={auktion.dealer}
+              vulnerability={auktion.vulnerability}
+              explanations="full"
+              dense
+            />
+            {sammaLinje ? (
+              <p className="text-center text-xs font-medium text-gold-200">
+                Ni bjöd precis som 2/1-boken. ✓
+              </p>
+            ) : (
+              <>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-100/60">
+                  Motorns linje
+                </p>
+                <AuctionGrid
+                  calls={linje}
+                  dealer={auktion.dealer}
+                  vulnerability={auktion.vulnerability}
+                  explanations="full"
+                  dense
+                />
+              </>
+            )}
+            <div className="text-center">
+              {agare ? (
+                <Button disabled={skickar} onClick={() => void gorDrag({ typ: 'nasta-giv' })}>
+                  {sista ? 'Avsluta genomgången →' : 'Nästa giv →'}
+                </Button>
+              ) : (
+                <p className="text-xs text-rose-100/60">Bordets ägare startar nästa giv.</p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setVisaRapport(true)}
+              className="text-[11px] font-medium text-rose-100/50 underline underline-offset-2 hover:text-rose-100/80"
+            >
+              Kändes något fel? Rapportera given
+            </button>
+          </div>
+          <div className="shrink-0">
+            <SideDummyPiles hand={facit.hands[vTill('E')]} contract={ordning} side="E" />
+          </div>
+        </div>
+
+        {/* Din hand nere. */}
+        <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
+          <HandFan hand={facit.hands[vTill('S')]} flat />
         </div>
         {narvaroOverlagg}
         {avslutaDialog}

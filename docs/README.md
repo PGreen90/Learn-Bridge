@@ -28,6 +28,7 @@
 | **utspel-teori.md** | ðŸ“˜ | Den kÃ¤llfÃ¶rankrade bridgeteorin bakom utspelet (Pavlicek/Walker/Cohen/bridgebum): holdingsâ†’utspel-tabeller (fÃ¤rg + NT), tenass-principen, aktiv/passiv, budgivningens roll, Lightner, slam + konventionsvalen. VAD som Ã¤r rÃ¤tt bridge â€” bygg utspelskoden mot den hÃ¤r. |
 | **arbetsrutiner.md** | ðŸŸ¢ | ðŸŸ¢-checklistan vid sessionsstart och ðŸ”´-checklistan vid sessionsslut. FÃ¶ljs varje gÃ¥ng. |
 | **beslut-b-plan.md** | 🟢 | **Masterplanen för Beslut B (ägarbeslut 2026-08-08):** konton → daglig 12-givarstävling → realtidsbord. Etapperna 0–4, besluten som är tagna (Supabase, lösenord, ordningen), beslutsgrindarna som återstår, GDPR/säkerhetsdetaljerna. Öppna den när Beslut B-arbetet fortsätter. |
+| **bord-plan.md** | 🟢 | **Realtidsborden "Spela med vänner" (Beslut B etapp 4, LIVE 2026-08-17/18):** ägarbesluten, serverdomare-arkitekturen (händelseloggen, hjärtslaget, den visuella vridningen), händelsetyperna, delleveranserna 4A–4D och medvetet-kvar-listan. Öppna den vid ALLT bordsarbete. |
 | **framtid-multiplayer-plattform.md** | ðŸ“˜ | Beslut A (klart: Vercel + domÃ¤n + PWA) vs **Beslut B** (konton/multiplayer/tÃ¤vlingar). Teknikunderlaget bakom Beslut B; sjÃ¤lva planen bor nu i `beslut-b-plan.md`. |
 | **bot-hjarna.md** | ðŸ“˜ | Roadmap fÃ¶r bottarnas *spelstyrka* (inferens, Monte-Carlo). Spelmotor-spÃ¥ret, inte budgivningen. |
 

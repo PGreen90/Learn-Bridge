@@ -5,16 +5,19 @@
 
 import { describe, test, expect } from 'vitest'
 import type { Seat } from '../../src/types/bridge'
-import { decideCall, seatToAct } from '../../src/lib/engine/auction-live'
+import { contractFromCalls, decideCall, seatToAct } from '../../src/lib/engine/auction-live'
 import { botCardSmart } from '../../src/lib/engine/play-bot'
 import { nsScore } from '../../src/lib/engine/matchpoints'
 import {
   agerande,
+  autoAuktion,
   bordGiv,
   bordGivSeed,
   bordPlaySeed,
+  dealUrGivStart,
   drivFram,
   givStartHandelse,
+  lage2Giv,
   projiceraGiv,
   utforDrag,
   SERVER_SMART,
@@ -222,6 +225,64 @@ describe('utforDrag — avvisningarna', () => {
     const frammandeKort = lage.state!.hands[annan][0]
     const utfall = utforDrag(deal, GIV, lage, stol, { typ: 'kort', card: frammandeKort })
     expect(utfall.ok).toBe(false)
+  })
+})
+
+describe('läge 1 — endast budgivning (4D)', () => {
+  test('drivFram stannar vid avslutad auktion och bokför facit i stället för spel', () => {
+    const deal = bordGiv(SEED, GIV)
+    const handelser: GivHandelse[] = [bokfor(givStartHandelse(deal, GIV))]
+    const nya = drivFram(deal, GIV, handelser, {
+      manniskoStolar: new Set(),
+      playSeed: bordPlaySeed(SEED, GIV),
+      stallning: { ns: 0, ew: 0 },
+      spelform: 'budgivning',
+      smart: SNABB,
+    })
+    const typer = nya.map((h) => h.typ)
+    expect(typer.filter((t) => t === 'kort')).toHaveLength(0)
+    expect(typer[typer.length - 1]).toBe('facit')
+    const facit = nya[nya.length - 1].data as {
+      hands: unknown
+      systemlinje: Array<{ seat: Seat; bid: string }>
+    }
+    expect(facit.hands).toEqual(deal.hands)
+    // Systemlinjen är motorns egen kanoniska auktion för given.
+    expect(facit.systemlinje).toEqual(autoAuktion(deal))
+    // Ett helt botbord bjuder per definition motorns linje — de ska sammanfalla.
+    const bjudet = [...handelser, ...nya.map(bokfor)]
+    expect(projiceraGiv(deal, bjudet).history).toEqual(autoAuktion(deal))
+    // Facit avslutar given (nästa giv-knappen låses upp).
+    expect(projiceraGiv(deal, bjudet).givKlar).toBe(true)
+  })
+})
+
+describe('läge 2 — endast spelföring (4D)', () => {
+  test('målstolen blir spelförare, rotationen är återskapbar och deterministisk', () => {
+    for (const mal of ['N', 'E', 'S', 'W'] as Seat[]) {
+      for (let giv = 1; giv <= 10; giv++) {
+        const { deal, underIndex, shift } = lage2Giv(SEED, giv, mal)
+        // Auktionen på den roterade given ger målstolen som spelförare.
+        const contract = contractFromCalls(autoAuktion(deal))
+        expect(contract, `giv ${giv} mål ${mal}: utpassad`).not.toBeNull()
+        expect(contract!.declarer, `giv ${giv} mål ${mal}`).toBe(mal)
+        // Rotationen i giv-start-datat återskapar exakt samma deal.
+        expect(dealUrGivStart(SEED, giv, { underIndex, shift })).toEqual(deal)
+        // Deterministisk: samma indata → samma giv.
+        expect(lage2Giv(SEED, giv, mal)).toEqual({ deal, underIndex, shift })
+      }
+    }
+  })
+
+  test('zonen följer partnerskapen vid udda rotation', () => {
+    const { deal, underIndex, shift } = lage2Giv(SEED, 3, 'E')
+    const ratt = bordGiv(SEED, 3, underIndex)
+    if (shift % 2 === 1) {
+      const speglad = ratt.vulnerability === 'ns' ? 'ew' : ratt.vulnerability === 'ew' ? 'ns' : ratt.vulnerability
+      expect(deal.vulnerability).toBe(speglad)
+    } else {
+      expect(deal.vulnerability).toBe(ratt.vulnerability)
+    }
   })
 })
 

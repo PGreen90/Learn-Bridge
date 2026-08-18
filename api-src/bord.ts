@@ -38,10 +38,13 @@ import {
   type NarvaroStol,
 } from './_lib/bord-narvaro'
 import {
+  autoAuktion,
   bordGiv,
   bordPlaySeed,
+  dealUrGivStart,
   drivFram,
   givStartHandelse,
+  lage2Giv,
   projiceraGiv,
   utforDrag,
   type BordDrag,
@@ -175,6 +178,8 @@ type BordRad = {
   tempo: 'lugn' | 'normal' | 'snabb'
   privat: boolean
   aktuell_giv: number
+  /** Läge 2: round-robin-pekaren för vems tur det är att spelföra. */
+  rotation_pekare: number
 }
 
 type StolRad = {
@@ -198,7 +203,8 @@ type HandelseRad = {
   data: unknown
 }
 
-const BORD_KOLUMNER = 'id,kod,owner_id,status,spelform,givar,tempo,privat,aktuell_giv'
+const BORD_KOLUMNER =
+  'id,kod,owner_id,status,spelform,givar,tempo,privat,aktuell_giv,rotation_pekare'
 const STOL_KOLUMNER =
   'table_id,seat,user_id,typ,status,aktiv,joined_at,last_seen_at,bot_reserverad'
 const HANDELSE_KOLUMNER = 'seq,giv,typ,seat,data'
@@ -374,6 +380,60 @@ async function verkstallLamna(m: Miljo, bord: BordRad, stol: Stol): Promise<void
   }
 }
 
+/** Givens giv-start-data ur givens händelselista (läge 2 bär rotationen). */
+function givStartData(givLista: GivHandelse[]): unknown {
+  return givLista.find((h) => h.typ === 'giv-start')?.data ?? {}
+}
+
+/** De sorterade människostolarna (stolordning N,E,S,W) — läge 2:s spelförar-
+ *  rotation räknar över dem med rotation_pekare. */
+function manniskorIOrdning(stolar: StolRad[]): Stol[] {
+  return [...manniskoStolar(stolar)].sort((a, b) => STOLAR.indexOf(a) - STOLAR.indexOf(b))
+}
+
+/** Händelserna som startar en giv: giv-start + (läge 2) motorns autobud, och
+ *  botframdrivningen fram till första människans tur. */
+function startaGiv(
+  bord: BordRad,
+  seed: string,
+  givNr: number,
+  stolar: StolRad[],
+  stallning: { ns: number; ew: number },
+): NyHandelse[] {
+  const handelser: NyHandelse[] = []
+  let deal
+  if (bord.spelform === 'spelforing') {
+    // Läge 2: motorn bjuder, given roteras så nästa människa (round-robin via
+    // rotation_pekare) blir spelförare. Rotationen bakas in i giv-start så
+    // varje senare anrop återskapar exakt samma deal (dealUrGivStart).
+    const manniskor = manniskorIOrdning(stolar)
+    const mal = manniskor.length ? manniskor[bord.rotation_pekare % manniskor.length] : 'S'
+    const lage2 = lage2Giv(seed, givNr, mal)
+    deal = lage2.deal
+    handelser.push(givStartHandelse(deal, givNr, { underIndex: lage2.underIndex, shift: lage2.shift }))
+    for (const c of autoAuktion(deal)) {
+      handelser.push({ giv: givNr, typ: 'bud', seat: c.seat, data: { bid: c.bid, auto: true } })
+    }
+  } else {
+    deal = bordGiv(seed, givNr)
+    handelser.push(givStartHandelse(deal, givNr))
+  }
+  handelser.push(
+    ...drivFram(
+      deal,
+      givNr,
+      handelser.map((h) => ({ typ: h.typ, seat: h.seat ?? null, data: h.data ?? {} })),
+      {
+        manniskoStolar: manniskoStolar(stolar),
+        playSeed: bordPlaySeed(seed, givNr),
+        stallning,
+        spelform: bord.spelform,
+      },
+    ),
+  )
+  return handelser
+}
+
 /** Spela väntande botdrag och bokför dem — hjärtslagets/verkställandenas
  *  framdrivning (en stol som just blivit bot-styrd kan stå på tur). Skrivs
  *  ovanpå det lästa huvudet; hann någon annan emellan släpps försöket tyst
@@ -392,11 +452,12 @@ async function drivFramOchBokfor(m: Miljo, bordId: string): Promise<void> {
     hamtaGivHandelser(m, bordId, giv),
     stallningFore(m, bordId, giv),
   ])
-  const deal = bordGiv(bord.seed, giv)
+  const deal = dealUrGivStart(bord.seed, giv, givStartData(givLista))
   const nya = drivFram(deal, giv, givLista, {
     manniskoStolar: manniskoStolar(stolar),
     playSeed: bordPlaySeed(bord.seed, giv),
     stallning: stallningInnan,
+    spelform: bord.spelform,
   })
   if (nya.length) await laggTillHandelser(m, bordId, nya, head)
 }
@@ -724,16 +785,17 @@ async function hanteraLage(
   let givStartSeq: number | null = null
   let begaranden: Array<{ stol: Stol; slag: 'paus' | 'lamna'; namn: string | null }> = []
   if (min && (bord.status === 'spelar' || bord.status === 'klar') && bord.aktuell_giv >= 1) {
-    if (bord.status === 'spelar') {
-      const seed = await hamtaSeed(m, bord.id)
-      dinHand = bordGiv(seed, bord.aktuell_giv).hands[min.seat]
-    }
     stallning = await stallningFore(m, bord.id, bord.aktuell_giv)
     const startRad = (await restGet(
       m,
-      `table_events?table_id=eq.${bord.id}&typ=eq.giv-start&select=seq&order=seq.desc&limit=1`,
-    )) as Array<{ seq: number }>
+      `table_events?table_id=eq.${bord.id}&typ=eq.giv-start&select=seq,data&order=seq.desc&limit=1`,
+    )) as Array<{ seq: number; data: unknown }>
     givStartSeq = startRad[0]?.seq ?? null
+    if (bord.status === 'spelar') {
+      const seed = await hamtaSeed(m, bord.id)
+      // Läge 2 bär rotationen i giv-start — samma deal-härledning som drag-vägen.
+      dinHand = dealUrGivStart(seed, bord.aktuell_giv, startRad[0]?.data ?? {}).hands[min.seat]
+    }
     // Väntande paus-/lämna-begäranden (4C) — ägarens godkännande-UI.
     const vantar = await hamtaBegaranden(m, bord.id)
     begaranden = vantar.map((b) => {
@@ -1022,16 +1084,18 @@ async function hanteraStart(m: Miljo, userId: string, body: unknown, json: Svara
   if (bord.owner_id !== userId) {
     return json(403, { ok: false, fel: 'Bara bordets ägare kan starta spelet' })
   }
-  if (bord.spelform !== 'full') {
-    // Läge 1 (endast budgivning) och läge 2 (endast spelföring) byggs i 4D.
-    return json(409, { ok: false, fel: 'Den här spelformen kommer i nästa delleverans' })
-  }
 
   // Villkorad statusövergång = startvakten: bara EN kallare vinner lobby→spelar.
   const overgang = await restPatch(
     m,
     `tables?id=eq.${bord.id}&status=eq.lobby`,
-    { status: 'spelar', aktuell_giv: 1, last_activity: new Date().toISOString() },
+    {
+      status: 'spelar',
+      aktuell_giv: 1,
+      // Läge 2: giv 1 spelförs av första människan → pekaren står på nästa.
+      rotation_pekare: bord.spelform === 'spelforing' ? 1 : 0,
+      last_activity: new Date().toISOString(),
+    },
     { representation: true },
   )
   if (!overgang.rader.length) {
@@ -1043,21 +1107,10 @@ async function hanteraStart(m: Miljo, userId: string, body: unknown, json: Svara
 
   const stolar = await hamtaStolar(m, bord.id)
   const seed = await hamtaSeed(m, bord.id)
-  const deal = bordGiv(seed, 1)
   const handelser: NyHandelse[] = [
     { giv: 0, typ: 'bord-startat', data: {} },
-    givStartHandelse(deal, 1),
+    ...startaGiv(bord, seed, 1, stolar, { ns: 0, ew: 0 }),
   ]
-  const givLista: GivHandelse[] = handelser
-    .filter((h) => h.giv === 1)
-    .map((h) => ({ typ: h.typ, seat: h.seat ?? null, data: h.data ?? {} }))
-  handelser.push(
-    ...drivFram(deal, 1, givLista, {
-      manniskoStolar: manniskoStolar(stolar),
-      playSeed: bordPlaySeed(seed, 1),
-      stallning: { ns: 0, ew: 0 },
-    }),
-  )
   const skrivet = await laggTillHandelser(m, bord.id, handelser)
   return json(200, { ok: true, senasteSeq: skrivet?.senasteSeq ?? 0 })
 }
@@ -1102,7 +1155,7 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
   if (basSeq !== head) return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: head })
 
   const seed = bord.seed
-  const deal = bordGiv(seed, giv)
+  const deal = dealUrGivStart(seed, giv, givStartData(givLista))
   const lage = projiceraGiv(deal, givLista)
   const dragRaw = b.drag as Record<string, unknown> | null
 
@@ -1135,25 +1188,24 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
       return json(200, { ok: true, events: skrivet.rader, senasteSeq: skrivet.senasteSeq })
     }
     const nastaGiv = giv + 1
-    const nastaDeal = bordGiv(seed, nastaGiv)
-    const handelser: NyHandelse[] = [givStartHandelse(nastaDeal, nastaGiv)]
-    handelser.push(
-      ...drivFram(
-        nastaDeal,
-        nastaGiv,
-        handelser.map((h) => ({ typ: h.typ, seat: h.seat ?? null, data: h.data ?? {} })),
-        { manniskoStolar: manniskoStolar(stolar), playSeed: bordPlaySeed(seed, nastaGiv), stallning },
-      ),
-    )
+    const handelser = startaGiv(bord, seed, nastaGiv, stolar, stallning)
     const skrivet = await laggTillHandelser(m, bord.id, handelser, basSeq)
     if (!skrivet) {
       return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: await hamtaSenasteSeq(m, bord.id) })
     }
     await restPatch(m, `tables?id=eq.${bord.id}`, {
       aktuell_giv: nastaGiv,
+      // Läge 2: nästa människa i tur att spelföra.
+      rotation_pekare:
+        bord.spelform === 'spelforing' ? bord.rotation_pekare + 1 : bord.rotation_pekare,
       last_activity: new Date().toISOString(),
     })
     return json(200, { ok: true, events: skrivet.rader, senasteSeq: skrivet.senasteSeq })
+  }
+
+  // Läge 1 (endast budgivning): inga kort spelas — bara bud/nästa giv.
+  if (bord.spelform === 'budgivning' && dragRaw?.typ === 'kort') {
+    return json(400, { ok: false, fel: 'Bordet spelar bara budgivningen' })
   }
 
   // --- Bud / kort ---------------------------------------------------------
@@ -1174,6 +1226,7 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
         manniskoStolar: manniskoStolar(stolar),
         playSeed: bordPlaySeed(seed, giv),
         stallning: stallningInnan,
+        spelform: bord.spelform,
       },
     ),
   )

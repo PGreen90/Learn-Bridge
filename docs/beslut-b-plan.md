@@ -205,7 +205,7 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
 - Facit: RLS-tester (en andra inloggad klient kan inte läsa/skriva andras
   rader) + auth-flödestester; mobilflödena testas manuellt på riktig telefon.
 
-### Etapp 2 — dagliga tävlingen, 12 givar (= konkurrensplanens Fas 3)
+### Etapp 2 — dagliga tävlingen, 12 givar (= konkurrensplanens Fas 3) — KLAR & LIVE-VERIFIERAD 2026-08-11/12
 
 🚪 *Grindbesluten TAGNA 2026-08-10 (ägaren):*
 - **Gratis "Dagens giv" (Wordle-delningen):** tas bort/**döljs** — tävlingen
@@ -296,10 +296,12 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   begränsning av anropstakt (rate limits) på inskick och inloggning, och —
   efter grindbeslut — grunden för Nivå 2 (dolda händer på servern).
 
-### Etapp 4 — realtidsborden (= konkurrensplanens Fas 6, drömmen)
+### Etapp 4 — realtidsborden (= konkurrensplanens Fas 6, drömmen) — BYGGD & LIVE 2026-08-17/18
 
-🚪 *Störst beslutsgrind: öppet bord, chattfraser, klockor, kibitzers,
-bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
+🚪 *Grindbesluten TAGNA i planeringssessionen 2026-08-17: konto krävs alltid
+(anonym gäst AVFÖRD) · inga chattfraser/klockor/kibitzers i v1 · totalpoäng NS
+mot ÖV (DD-jämförelse = senare) · max ett bord per ägare + globalt mjukt tak.
+Hela detaljplanen, arkitekturen och delleveranserna 4A–4D: **`docs/bord-plan.md`**.*
 
 - **Bord med valfri mix människor/bottar.** Servern är domaren: varje bud/kort
   går till en serverfunktion som validerar mot bordets händelselogg
@@ -386,3 +388,16 @@ bot-svårighetsgrad — designas tillsammans med ägaren innan kod skrivs.*
   hela sviten grön, tsc rent. **ÄGARSTEG FÖRE DEPLOY:** kör migration `0005` i
   Supabase (SQL Editor). Sedan live-verifieras hela kedjan (två konton → topplista)
   med ägaren.
+- **2026-08-11/12: ETAPP 2 KLAR & LIVE-VERIFIERAD** (hela kedjan två konton →
+  inskick → topplista med matchpoäng; migrationerna `0005`+`0006` körda;
+  testkonton städade). Därefter byggdes travellern (`giv-resultat.ts`, migration
+  `0006`), cross-device-framstegen och övningsläget "Spela given igen" —
+  detaljerna i `docs/historik.md`.
+- **2026-08-17/18: ETAPP 4 (REALTIDSBORDEN) BYGGD & LIVE** i fyra delleveranser
+  (4A lobby/väntrum → 4B server-drivet spel → 4C närvaron → 4D läge 1+2 +
+  dokumenten), var och en demolad och godkänd av ägaren. Grindbesluten togs
+  2026-08-17 (konto krävs alltid — anonym gäst avförd; ingen chatt/klockor/
+  kibitz i v1; totalpoäng NS–ÖV). Migrationerna `0007`+`0008` körda. Etapp 3
+  (härdningen) återstår — bordens endpoints fick dock rate limits direkt
+  ("minimal härdning inbakad", ägarbeslut). Hela detaljplanen:
+  `docs/bord-plan.md`.

@@ -66,6 +66,13 @@ export interface GivKlarData {
   stallning: { ns: number; ew: number }
 }
 
+export interface GivFacit {
+  hands: Record<Seat, Card[]>
+  contract: Contract | null
+  /** Motorns kanoniska auktion för given (verkliga stolar). */
+  systemlinje: ResolvedCall[]
+}
+
 export interface BordSpelLage {
   giv: number
   board: number
@@ -81,6 +88,8 @@ export interface BordSpelLage {
   /** Spelade kort i ordning (verkliga stolar ur händelserna). */
   kort: PlayedCard[]
   klar: GivKlarData | null
+  /** Läge 1 (endast budgivning, 4D): facit-genomgången avslutar given. */
+  facit: GivFacit | null
   /** Ställningen: klar-givens inbakade totaler, annars grundställningen. */
   stallning: { ns: number; ew: number }
   bordKlar: { stallning: { ns: number; ew: number } } | null
@@ -107,6 +116,7 @@ export function projiceraBord(
   const kort: PlayedCard[] = []
   let trakarl: BordSpelLage['trakarl'] = null
   let klar: GivKlarData | null = null
+  let facit: GivFacit | null = null
   let bordKlar: BordSpelLage['bordKlar'] = null
   for (const h of events.slice(startIndex + 1)) {
     if (h.typ === 'bord-klar') {
@@ -121,13 +131,16 @@ export function projiceraBord(
       trakarl = { stol: h.seat, hand: (h.data as { hand: Card[] }).hand }
     } else if (h.typ === 'giv-klar') {
       klar = h.data as unknown as GivKlarData
+    } else if (h.typ === 'facit') {
+      facit = h.data as unknown as GivFacit
     }
   }
 
   const budklar = auctionComplete(history)
   const contract = budklar ? contractFromCalls(history) : null
   const passadUt = budklar && !contract
-  const fas: BordSpelLage['fas'] = klar || passadUt ? 'klar' : budklar ? 'spel' : 'bud'
+  const fas: BordSpelLage['fas'] =
+    klar || facit || passadUt ? 'klar' : budklar ? 'spel' : 'bud'
   return {
     giv: start.giv,
     board: startData.board,
@@ -140,6 +153,7 @@ export function projiceraBord(
     trakarl,
     kort,
     klar,
+    facit,
     stallning: klar?.stallning ?? grundStallning,
     bordKlar,
   }
@@ -171,6 +185,14 @@ export function visuellAuktion(lage: BordSpelLage, minStol: Seat): VisuellAuktio
     vulnerability: vridZon(minStol, lage.vulnerability),
     toAct: lage.fas === 'bud' ? v(seatToAct(lage.dealer, lage.history.length)) : null,
   }
+}
+
+/** Systemiska förklaringar på en hel auktion (facit-genomgången i läge 1):
+ *  tolkningslagret läser bara auktionen — vid revealen är det ändå rätt röst,
+ *  och motorns systemlinje kommer utan lagrade förklaringar från servern. */
+export function annoteraSystemiskt(calls: ResolvedCall[]): ResolvedCall[] {
+  const rena = calls.map((c) => ({ seat: c.seat, bid: c.bid }))
+  return rena.map((c, i) => ({ ...c, explanation: interpretCall(rena, i).text }))
 }
 
 /** De färdigspelade sticken i VERKLIGA stolar (felrapporten m.m.) — byggda

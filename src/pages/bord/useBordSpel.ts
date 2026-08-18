@@ -191,16 +191,20 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     const nasta = events.find((e) => e.seq > visadeSeq)
     if (!nasta) return
     const egen = (nasta.typ === 'bud' || nasta.typ === 'kort') && nasta.seat === minStol
+    // Läge 2:s autobud (motorns färdiga auktion) bläddras i snabb takt.
+    const auto = nasta.typ === 'bud' && (nasta.data as { auto?: boolean }).auto === true
     const paus =
       nasta.typ === 'bud'
         ? egen
           ? 0
-          : ms('budDelay', tempo)
+          : auto
+            ? 300
+            : ms('budDelay', tempo)
         : nasta.typ === 'kort'
           ? egen
             ? 0
             : ms('botDelay', tempo)
-          : nasta.typ === 'giv-klar'
+          : nasta.typ === 'giv-klar' || nasta.typ === 'facit'
             ? ms('resultOutro', tempo)
             : 0
     const id = setTimeout(() => setVisadeSeq(nasta.seq), paus)
