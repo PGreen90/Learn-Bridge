@@ -291,6 +291,24 @@ describe('felrapport #53 – 2♣ över partnerns natur-1NT = Stayman', () => {
     const r = interpretCall(h(['N', '1C'], ['S', '1D'], ['N', '1NT'], ['S', '2C']), 3)
     expect(r.text).not.toMatch(/Stayman/i)
   })
+
+  it('2♦ över partnerns natur-1NT = Jacoby-transfer till hjärter', () => {
+    const r = interpretCall(h(['S', 'P'], ['W', '1D'], ['N', '1NT'], ['E', 'P'], ['S', '2D']), 4)
+    expect(r.text).toMatch(/transfer/i)
+    expect(r.text).toMatch(/hjärter/i)
+    expect(r.text).not.toMatch(/naturligt|minst 4 kort i ruter/i)
+  })
+
+  it('2♥ över partnerns natur-1NT = Jacoby-transfer till spader', () => {
+    const r = interpretCall(h(['N', '1NT'], ['S', '2H']), 1)
+    expect(r.text).toMatch(/transfer/i)
+    expect(r.text).toMatch(/spader/i)
+  })
+
+  it('2♠ över partnerns natur-1NT = Minor Suit Stayman', () => {
+    const r = interpretCall(h(['N', '1NT'], ['S', '2S']), 1)
+    expect(r.text).toMatch(/Minor Suit Stayman/i)
+  })
 })
 
 describe('motorns egen regel går före heuristiken (säker)', () => {

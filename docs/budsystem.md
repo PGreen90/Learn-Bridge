@@ -1940,6 +1940,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-18 — Systems on över ett 1NT-INKLIV (§4.3/§7.1, uppföljning
+  felrapport #53).** §7.1 lovade sedan tidigare att ett 1NT-inkliv "kör samma
+  system som över en 1NT-öppning", men koden gjorde det bara över en 1NT-ÖPPNING:
+  advancern passade och inklivaren fullföljde inte transfern/Stayman. Nu
+  modellerar den kanoniska linjen (`auction.ts`, ny advancer-gren över
+  `1NT-inkliv`) advancerns `respondTo1NT`-svar, och `auction-live.ts` fångar det
+  off-book (budlådan): `advancerRespondsTo1NTOvercall` (advancern) +
+  `overcallerAnswersAdvance` (inklivaren fullföljer via samma dispatch som över en
+  öppning). Tolkningslagret (`auction-interpret.ts`) förklarar 2♣ = Stayman,
+  2♦/2♥ = transfer, 2♠ = Minor Suit Stayman över partnerns natur-1NT. V1: den
+  egna svarsronden är ostörd (RHO passade); vidare konkurrens över svaret är en
+  känd förenkling. Facit: `auction-1nt-overcall-systemson.test.ts` +
+  `auction-interpret.test.ts`.
 - **2026-08-12 (speldiagnosen S3: cue-bud räknas inte som bjuden färg i
   utspelslogiken, §8.3)** – Trumfutspelsregeln ("motståndarna bjöd 3+ färger =
   korsruff-läge") triggade på frö 20260807 fast auktionen var en vanlig

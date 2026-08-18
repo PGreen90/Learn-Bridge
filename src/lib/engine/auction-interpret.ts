@@ -344,16 +344,34 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
     }
   }
 
-  // 2♣ över partnerns naturliga 1NT (öppning ELLER inkliv) = Stayman: frågar
-  // efter partnerns 4-korts högfärg, säger inget om klöver (systems on).
-  // Felrapport #53 – tolkades som "naturligt, minst 4 kort i klöver".
-  if (cb.level === 2 && cb.strain === 'C' && partnerNaturalNT(seat, prior)) {
-    return {
-      text:
-        `2♣ — Stayman: frågar efter partnerns 4-korts högfärg (svar 2♦ = ingen, ` +
-        `2♥/2♠ = den högfärgen). Säger inget om klöver.`,
-      confidence: 'trolig',
-      forcing: 'krav-1-rond',
+  // Systems on över partnerns naturliga 1NT (öppning ELLER inkliv): på 2-läget
+  // är klöver/ruter/hjärter/spader KONVENTION, inte naturliga färger (felrapport
+  // #53 + systems-on-bygget). 2♣ = Stayman, 2♦/2♥ = Jacoby-transfer, 2♠ = Minor
+  // Suit Stayman. Betydelsen läses ur budet, aldrig ur handen.
+  if (cb.level === 2 && partnerNaturalNT(seat, prior)) {
+    if (cb.strain === 'C') {
+      return {
+        text:
+          `2♣ — Stayman: frågar efter partnerns 4-korts högfärg (svar 2♦ = ingen, ` +
+          `2♥/2♠ = den högfärgen). Säger inget om klöver.`,
+        confidence: 'trolig',
+        forcing: 'krav-1-rond',
+      }
+    }
+    if (cb.strain === 'D' || cb.strain === 'H') {
+      const target = cb.strain === 'D' ? 'hjärter' : 'spader'
+      return {
+        text: `2${sym} — Jacoby-transfer: visar 5+ ${target}, partnern bjuder ${target} (säger inget om ${name}).`,
+        confidence: 'trolig',
+        forcing: 'krav-1-rond',
+      }
+    }
+    if (cb.strain === 'S') {
+      return {
+        text: `2♠ — Minor Suit Stayman: 5-4+ i lågfärgerna utan högfärg, utgångs-/slamintresse (säger inget om spader).`,
+        confidence: 'trolig',
+        forcing: 'krav-1-rond',
+      }
     }
   }
 
