@@ -23,6 +23,13 @@ export const SPEED_LABEL: Record<PlaySpeed, string> = {
 export const BASE = {
   /** Botens paus innan den lägger ett kort (snabba tumregelsvägen). */
   botDelay: 750,
+  /** Vänner-bordet (etapp 4): pausen innan ett ANNANS kort avtäcks vid den
+   *  levande kanten. Litet utjämningsvärde — inte bot-"tänketid": vid ett bord
+   *  där människor spelar ska kortet synas i stort sett när det landar (~real-
+   *  tid), och stick-pausen (sweepHold) ger ändå beatet där man ser vem som
+   *  vann. Ägarbeslut 2026-08-18 ("så nära realtid som möjligt"). Egna drag och
+   *  ikapp-spolning är 0; bud behåller budDelay (auktionen ska gå att läsa). */
+  bordKort: 140,
   /** Paus mellan visade bud vid vänner-bordet (etapp 4B): serverns botsvar
    *  kommer i en batch och klienten visar dem i bordets tempo. Det lokala
    *  spelets budloop (useGame) har sin egen hårdkodade paus och rörs inte. */
