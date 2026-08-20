@@ -57,12 +57,12 @@ export function respondTo2C(hand: Hand): ResponseResult {
       return {
         call: `${level}${BID[s5]}`,
         rule: '2♣-positivt',
-        explanation: `${p} hp med ${len[s5]}-korts ${NAME[s5]} → ${level}${SYM[s5]} (positivt, GF).`,
+        explanation: `${p} hp med ${len[s5]}-korts ${NAME[s5]} → ${level}${SYM[s5]} (positivt, utgångskrav).`,
       }
     }
     // Balanserad 8+ utan 5-korts färg → 2NT (positivt, GF).
     if (isBalanced(hand)) {
-      return { call: '2NT', rule: '2♣-positivt', explanation: `${p} hp balanserad → 2NT (positivt, GF).` }
+      return { call: '2NT', rule: '2♣-positivt', explanation: `${p} hp balanserad → 2NT (positivt, utgångskrav).` }
     }
   }
 
@@ -96,12 +96,12 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
   if (rs) {
     if (len[rs] >= 3) {
       const lvl = parseInt(response.call[0], 10) + 1
-      return { call: `${lvl}${BID[rs]}`, rule: 'rebid: stöd (GF)', explanation: `${p} hp, ${len[rs]} stöd i ${NAME[rs]} → ${lvl}${SYM[rs]} (sätter trumf, GF/slamintresse).` }
+      return { call: `${lvl}${BID[rs]}`, rule: 'rebid: stöd (GF)', explanation: `${p} hp, ${len[rs]} stöd i ${NAME[rs]} → ${lvl}${SYM[rs]} (sätter trumf, utgångskrav/slamintresse).` }
     }
     const own = longestSuit(len, 5)
     if (own && own !== rs) {
       const lvl = levelAbove(own, response.call)
-      return { call: `${lvl}${BID[own]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, GF).` }
+      return { call: `${lvl}${BID[own]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, utgångskrav).` }
     }
   }
   // Efter 2NT-positivt (färglöst svar): jättehandens egen 5+ färg får aldrig
@@ -111,7 +111,7 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
   const ownSuit = longestSuit(len, 5)
   if (ownSuit) {
     const lvl = levelAbove(ownSuit, response.call)
-    return { call: `${lvl}${BID[ownSuit]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[ownSuit]}-korts ${NAME[ownSuit]} → ${lvl}${SYM[ownSuit]} (naturlig, GF – visar färgen före 3NT).` }
+    return { call: `${lvl}${BID[ownSuit]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[ownSuit]}-korts ${NAME[ownSuit]} → ${lvl}${SYM[ownSuit]} (naturlig, utgångskrav – visar färgen före 3NT).` }
   }
   // Balanserat positivt (2NT) utan 5-färg → 3NT.
   return { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: `${p} hp – ingen egen 5-färg → 3NT.`, uncertain: !bal }
@@ -137,10 +137,10 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
 
   // Stöd i öppnarens färg → höj till utgång (GF, slamintresse i minor).
   if (isMajor(rs) && len[rs] >= 3) {
-    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `${p} hp, ${len[rs]} stöd → 4${SYM[rs]} (utgång, GF).` }
+    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `${p} hp, ${len[rs]} stöd → 4${SYM[rs]} (utgång).` }
   }
   if (!isMajor(rs) && len[rs] >= 4) {
-    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `${p} hp, ${len[rs]} stöd i ${NAME[rs]} → 4${SYM[rs]} (GF, slamintresse).` }
+    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `${p} hp, ${len[rs]} stöd i ${NAME[rs]} → 4${SYM[rs]} (utgångskrav, slamintresse).` }
   }
 
   // Egen 5+ färg, naturlig (krav i GF). F5/E2 "finaste färg" (frö 20261040):
@@ -152,13 +152,13 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
   if (ownMinorPast3NT && !isMajor(rs)) {
     for (const m of ['hearts', 'spades'] as Suit[]) {
       if (len[m] >= 4 && levelAbove(m, rebid.call) === 3) {
-        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT går före egen minor förbi 3NT, GF).` }
+        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT går före egen minor förbi 3NT, utgångskrav).` }
       }
     }
   }
   if (own && own !== rs) {
     const lvl = levelAbove(own, rebid.call)
-    return { call: `${lvl}${BID[own]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, GF).` }
+    return { call: `${lvl}${BID[own]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, utgångskrav).` }
   }
 
   // Efter öppnarens MINOR-rebud: visa en 4-korts högfärg under 3NT (fel färg-
@@ -169,7 +169,7 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
   if (!isMajor(rs)) {
     for (const m of ['hearts', 'spades'] as Suit[]) {
       if (len[m] >= 4 && levelAbove(m, rebid.call) === 3) {
-        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT, GF – hittar 4-4-fiten).` }
+        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT, utgångskrav – hittar 4-4-fiten).` }
       }
     }
   }

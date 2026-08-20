@@ -60,10 +60,11 @@ export function advanceDONT(hand: Hand, partnerCall: string): ResponseResult {
   if (partnerCall === '2C' || partnerCall === '2D') {
     const shown: Suit = partnerCall === '2C' ? 'clubs' : 'diamonds'
     if (len[shown] >= 3) {
-      return { call: 'P', rule: 'pass', explanation: `${len[shown]} kort i ${NAME[shown]} → passa partnerns ${partnerCall} (stöd i den visade färgen).` }
+      return { call: 'P', rule: 'pass', explanation: `${len[shown]} kort i ${NAME[shown]} → passa partnerns 2${SYM[shown]} (stöd i den visade färgen).` }
     }
     const relay = partnerCall === '2C' ? '2D' : '2H'
-    return { call: relay, rule: 'DONT pass-eller-rätta', explanation: `kort i ${NAME[shown]} (${len[shown]}) → ${relay} (pass-eller-rätta: partnern rättar till sin högre färg).` }
+    const relaySym = partnerCall === '2C' ? '2♦' : '2♥'
+    return { call: relay, rule: 'DONT pass-eller-rätta', explanation: `kort i ${NAME[shown]} (${len[shown]}) → ${relaySym} (pass-eller-rätta: partnern rättar till sin högre färg).` }
   }
   // Efter 2♥ (hjärter+spader) eller 2♠ (enfärg): passa (förenkling – stöd antas;
   // 2♥ säger inget om vilken högfärg som är längst, så vi rör den inte).

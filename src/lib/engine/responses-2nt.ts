@@ -57,12 +57,14 @@ export function respondTo2NT(hand: Hand, openerMin = 20): ResponseResult {
     // Texas: 6+ kort, ren utgång (utgångsstyrka utan slamintresse) → sätt direkt.
     if (L >= 6 && p >= game && p < slamInvite) {
       const call = major === 'hearts' ? '4D' : '4H'
-      return { call, rule: 'Texas (2NT)', explanation: `${p} hp med 6-korts ${sym} → ${call} (Texas, utgång utan slamiver).` }
+      const shown = major === 'hearts' ? '4♦' : '4♥'
+      return { call, rule: 'Texas (2NT)', explanation: `${p} hp med 6-korts ${sym} → ${shown} (Texas — transfer till ${major === 'hearts' ? 'hjärter' : 'spader'}, utgång utan slamiver).` }
     }
     // Transfer på 3-läget: 3♦ → ♥, 3♥ → ♠. Svag = signoff i delkontrakt, slam = 11+.
     const call = major === 'hearts' ? '3D' : '3H'
+    const shown = major === 'hearts' ? '3♦' : '3♥'
     const strength = p < game ? 'signoff i delkontrakt' : p >= slamInvite ? 'slamintresse' : 'utgång'
-    return { call, rule: 'transfer (2NT)', explanation: `${p} hp med ${L}-korts ${sym} → ${call} (transfer, ${strength}).` }
+    return { call, rule: 'transfer (2NT)', explanation: `${p} hp med ${L}-korts ${sym} → ${shown} (transfer till ${major === 'hearts' ? 'hjärter' : 'spader'}, ${strength}).` }
   }
 
   // ---- 4-korts högfärg, utgångsvärden → Stayman ----
