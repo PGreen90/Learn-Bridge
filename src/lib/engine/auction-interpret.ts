@@ -667,19 +667,134 @@ function countTrailingPasses(prior: ResolvedCall[]): number {
   return n
 }
 
+/** Färgerna motståndarsidan (sett från `seat`) har bjudit naturligt. */
+function opponentSuits(seat: Seat, prior: ResolvedCall[]): Set<string> {
+  const s = new Set<string>()
+  for (const c of prior) {
+    const cb = parseBid(c.bid)
+    if (cb && cb.strain !== 'NT' && SIDE[c.seat] !== SIDE[seat]) s.add(cb.strain)
+  }
+  return s
+}
+
+/**
+ * Tolka en dubbling UR AUKTIONEN (ägarprincip 2026-08-19: inga gissningar –
+ * betydelsen härleds, aldrig "straff" på måfå). Kategorierna skiljs på VEM som
+ * öppnade och om partnern hunnit svara:
+ *   negativ (partnern öppnade, jag ännu objuden) · stöd (jag öppnade, partnern
+ *   svarade i färg) · återöppning (jag öppnade, partnern passade) · upplysning
+ *   (ingen egen budgivning) · straff (1NT / utgång) · utgångsförsök (fit finns) ·
+ *   kooperativ (låg dubbling utan fit, båda sidor har bjudit).
+ */
 function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation {
+  const open = opening(prior)
   const last = lastContract(prior)
-  const ownHasBid = prior.some((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
-  if (last && !ownHasBid && last.cb.level <= 2) {
+  if (!last) return { text: 'Dubbelt.', confidence: 'trolig' }
+
+  const partner = PARTNER[seat]
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
+  const ownHasBid = ours.length > 0
+  const seatHasBid = prior.some((c) => c.seat === seat && parseBid(c.bid))
+  const doubledIsOpp = SIDE[last.seat] !== SIDE[seat]
+  const doubledName = last.cb.strain === 'NT' ? 'sang' : NAME[last.cb.strain]
+
+  // (1) NEGATIV DUBBLING — partnern öppnade 1 i färg, motståndaren klev in, och
+  //     detta är svararens FÖRSTA aktion. Visar 4+ i objuden högfärg (takeout).
+  if (
+    open && open.seat === partner && open.cb.level === 1 && open.cb.strain !== 'NT' &&
+    !seatHasBid && ours.length === 1 &&
+    doubledIsOpp && last.cb.strain !== 'NT' && last.cb.level <= 3
+  ) {
+    const oppSuits = opponentSuits(seat, prior)
+    const majors = ['H', 'S'].filter((m) => m !== open.cb.strain && !oppSuits.has(m))
+    const shown =
+      majors.length === 2
+        ? 'båda de objudna högfärgerna (hjärter och spader)'
+        : majors.length === 1
+          ? `4+ ${NAME[majors[0]]} (den objudna högfärgen)`
+          : 'de objudna färgerna'
     return {
-      text: 'Dubbelt — upplysningsdubbling: ber partnern välja färg (kort i den dubblade färgen, stöd för de övriga).',
+      text: `Negativ dubbling — visar ${shown} och ungefär svarsstyrka; takeout-artad, ber partnern välja färg (INTE straff).`,
       confidence: 'trolig',
       forcing: 'krav-1-rond',
     }
   }
+
+  // (2) STÖDDUBBLING — jag öppnade, partnern svarade i NY färg, motståndaren klev
+  //     in ≤ 2 av svararens färg. Visar exakt 3-korts stöd i partnerns färg.
+  if (open && open.seat === seat && open.cb.level === 1 && open.cb.strain !== 'NT') {
+    const partnerBid = prior.find((c) => c.seat === partner && parseBid(c.bid))
+    const pcb = partnerBid ? parseBid(partnerBid.bid) : null
+    if (
+      pcb && pcb.strain !== 'NT' && pcb.strain !== open.cb.strain &&
+      ours.length === 2 && doubledIsOpp &&
+      bidRank(last.cb) <= bidRank({ level: 2, strain: pcb.strain })
+    ) {
+      return {
+        text: `Stöddubbling — visar exakt 3-korts stöd i partnerns ${NAME[pcb.strain]} (med 4-korts stöd höjer man färgen i stället).`,
+        confidence: 'trolig',
+      }
+    }
+  }
+
+  // (3) ÅTERÖPPNINGSDUBBLING — jag öppnade, motståndarna klev in och partnern
+  //     passade; det kom tillbaka till mig. Takeout, extra värden, säljer inte billigt.
+  if (
+    open && open.seat === seat && ours.length === 1 &&
+    doubledIsOpp && last.cb.strain !== 'NT' &&
+    prior.some((c) => c.seat === partner && c.bid === 'P')
+  ) {
+    return {
+      text: `Återöppningsdubbling — takeout: du öppnade, motståndarna klev in och partnern passade. Du återöppnar med kort i ${doubledName} och extra värden och ber partnern välja (partnern kan sitta kvar för straff).`,
+      confidence: 'trolig',
+      forcing: 'krav-1-rond',
+    }
+  }
+
+  // (4) UPPLYSNINGSDUBBLING — vår sida har inte bjudit; direkt takeout av
+  //     motståndarnas färgbud på låg nivå (i balansering lättare styrka).
+  if (!ownHasBid && doubledIsOpp && last.cb.strain !== 'NT' && last.cb.level <= 2) {
+    const balancing = prior.some((c) => SIDE[c.seat] === SIDE[seat] && c.bid === 'P')
+    const bal = balancing ? ' i balansering' : ''
+    const extra = balancing ? ' (lättare styrka, återöppnar budgivningen)' : ''
+    return {
+      text: `Upplysningsdubbling${bal} — ber partnern välja färg: kort i ${doubledName}, stöd i de övriga${extra}.`,
+      confidence: 'trolig',
+      forcing: 'krav-1-rond',
+    }
+  }
+
+  // (5) STRAFF mot 1 sang — visar styrka, inte takeout.
+  if (last.cb.strain === 'NT' && last.cb.level === 1 && !ownHasBid) {
+    return {
+      text: 'Straffdubbling av 1 sang — visar styrka (~15+, ofta en bättre hand än 1NT-budgivaren); ni tar poäng på att straffa.',
+      confidence: 'trolig',
+    }
+  }
+
+  // (6) STRAFF mot utgång/slam — motståndarna når spel eller offrar.
+  if (isGameLevel(last.cb)) {
+    return {
+      text: `Straffdubbling — du tror motståndarnas ${last.cb.level}${SYMBOL[last.cb.strain]} går bet.`,
+      confidence: 'trolig',
+    }
+  }
+
+  // (7) UTGÅNGSFÖRSÖK (maximal) — ni har en högfärgsfit och motståndarna trängde
+  //     upp budet; dubblingen ber partnern bjuda utgången med det övre av sitt spann.
+  const agreed = agreedSuit(seat, prior)
+  if (agreed && (agreed === 'H' || agreed === 'S') && doubledIsOpp) {
+    return {
+      text: `Utgångsförsök via dubbling (maximal) — ni har en ${NAME[agreed]}fit och motståndarna trängde upp budgivningen. Dubblingen ber partnern bjuda utgången i ${NAME[agreed]} med det övre av sin styrka, annars passa.`,
+      confidence: 'trolig',
+    }
+  }
+
+  // (8) KOOPERATIV DUBBLING — låg dubbling där vår sida redan bjudit men ingen fit
+  //     är etablerad: värden + kort i färgen, partnern väljer straff eller bud.
   return {
-    text: 'Dubbelt — straffdubbling: du tror motståndarnas kontrakt går bet.',
-    confidence: 'gissning',
+    text: `Kooperativ dubbling — visar värden och oftast kort i ${doubledName}. Ingen ren straffdubbling: partnern väljer att straffa, bjuda vidare eller passa.`,
+    confidence: 'trolig',
   }
 }
 
