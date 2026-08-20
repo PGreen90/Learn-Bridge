@@ -356,8 +356,10 @@ export function pointsWithFloor(
         : startingPoints(hand).startingPoints
   const points = Math.max(hp, measure)
   const lifted = points > hp
-  const label = kind === 'support' ? 'stödp.' : kind === 'bergen' ? 'Bergenp.' : 'startp.'
-  return { hp, measure, points, lifted, text: lifted ? `${hp} hp / ${points} ${label}` : `${hp} hp` }
+  // Klarspråk (2026-08-19): den synliga texten säger "N med fördelning" i stället
+  // för de interna förkortningarna stödp./Bergenp./startp. `measure`/`kind` finns
+  // kvar oförändrade för logiken; bara texten byter.
+  return { hp, measure, points, lifted, text: lifted ? `${hp} hp (${points} med fördelning)` : `${hp} hp` }
 }
 
 /** Nivå 3: Bergenpoäng. `notrump` = true i sangkontrakt (ingen kortfärg räknas). */
