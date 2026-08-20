@@ -23,6 +23,12 @@ const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥'
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
+/** Bud med färgsymbol för förklaringstexten ("6C" → "6♣"); NT/pass oförändrade. */
+function prettyBid(bid: string): string {
+  const m = bid.match(/^([1-7])(C|D|H|S)$/)
+  const L: Record<string, string> = { C: '♣', D: '♦', H: '♥', S: '♠' }
+  return m ? `${m[1]}${L[m[2]]}` : bid
+}
 
 /** Budstege på 5-läget och uppåt (för steg-svar i Exclusion). */
 const LADDER = [
@@ -146,5 +152,5 @@ export function respondToExclusion(hand: Hand, trump: Suit, voidSuit: Suit): Res
   // Steg: 1=(1/4), 2=(0/3), 3=(2 utan dam), 4=(2 med dam).
   const step = kc === 1 || kc === 4 ? 1 : kc === 0 || kc === 3 ? 2 : q ? 4 : 3
   const call = callNStepsAbove(`5${LETTER[voidSuit]}`, step)
-  return { call, rule: 'Exclusion', explanation: `${kc} nyckelkort (esset i ${NAME[voidSuit]} borträknat)${q ? ' med trumfdam' : ''} → steg ${step} (${call}).` }
+  return { call, rule: 'Exclusion', explanation: `${kc} nyckelkort (esset i ${NAME[voidSuit]} borträknat)${q ? ' med trumfdam' : ''} → steg ${step} (${prettyBid(call)}).` }
 }

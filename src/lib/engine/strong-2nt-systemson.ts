@@ -65,7 +65,8 @@ export function strong2NTSystemsOn(openerHand: Hand, responderHand: Hand): { tur
   if (place.rule === 'Smolen') {
     const m = fiveCardMajorShown(resp, place)
     const call = m && oLen[m] >= 3 ? (m === 'spades' ? '4S' : '4H') : '3NT'
-    turns.push({ role: 'öppnare', call, rule: 'väljer utgång efter Smolen', explanation: `Placerar utgången efter svararens 5-4 → ${call}.` })
+    const shown = call === '4S' ? '4♠' : call === '4H' ? '4♥' : call
+    turns.push({ role: 'öppnare', call, rule: 'väljer utgång efter Smolen', explanation: `Placerar utgången efter svararens 5-4 → ${shown}.` })
     return { turns, open: false }
   }
 
@@ -75,7 +76,7 @@ export function strong2NTSystemsOn(openerHand: Hand, responderHand: Hand): { tur
     const m = fiveCardMajorShown(resp, place)
     if (m && oLen[m] >= 3) {
       const call = m === 'spades' ? '4S' : '4H'
-      turns.push({ role: 'öppnare', call, rule: 'väljer högfärgsutgång', explanation: `3-korts stöd i den visade 5-korts högfärgen → ${call}.` })
+      turns.push({ role: 'öppnare', call, rule: 'väljer högfärgsutgång', explanation: `3-korts stöd i den visade 5-korts högfärgen → ${m === 'spades' ? '4♠' : '4♥'}.` })
     }
   }
   return { turns, open: false }

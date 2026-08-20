@@ -267,7 +267,7 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
     const major = known[0]
     if (len[major] >= 3) {
       const call = cheapestBid(major, partnerCall)
-      return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[major]}-korts ${NAME[major]} → ${call} (preferens till partnerns högfärg).` }
+      return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[major]}-korts ${NAME[major]} → ${call[0]}${SYM[major]} (preferens till partnerns högfärg).` }
     }
     // Ingen högfärgsfit. Contested + svag → passa (partnern rättar sedan sin minor).
     if (contested && p < 8) return passContested
@@ -284,7 +284,7 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
   // Contested utan fit i någon av färgerna och svag → passa (spelrum finns).
   if (contested && known.every((s) => len[s] < 3) && p < 8) return passContested
   const call = cheapestBid(best, partnerCall)
-  return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[best]}-korts ${NAME[best]} (längst av partnerns färger) → ${call} (preferens).` }
+  return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[best]}-korts ${NAME[best]} (längst av partnerns färger) → ${call[0]}${SYM[best]} (preferens).` }
 }
 
 /**

@@ -108,3 +108,25 @@ svararens återbud → svar på 1NT. Mätt i svepet: `stödp./startp./sangp./TP/
 `responses-2nt.ts` (svar på 2NT, 2) · `strong-2nt-systemson.ts` (2) · `slam.ts` (1) ·
 samt ännu ogenomsökta: `doubles.ts`, `auction-live.ts` (konkurrens), `lebensohl.ts`,
 `defense-conventional.ts`, `responses-weak2/preempt.ts`, `dont.ts`, `contested-openings.ts`.
+
+---
+
+## Batch 6 — Svar på stark 2♣ + svar på 2NT  ·  ✅ APPLICERAD 2026-08-19
+Filer: `responses-2c.ts` (10× "GF" → "utgångskrav"), `responses-2nt.ts` (transfers
+`4D/3D` → `4♦/3♦`, tydligare "transfer till hjärter"), `strong-2nt-systemson.ts`
+(`4S/4H` → `4♠/4♥`).
+
+## Batch 7 — Konkurrens, inkliv & slam  ·  ✅ APPLICERAD 2026-08-19
+Filer: `dont.ts` (relä-bud → symbol), `overcalls.ts` (advance-preferens → symbol),
+`auction-live.ts` (off-book-lagret: ~25 bokstavskoder → symbol via ny `prettyBid()`,
+"TP" → "med fördelning", Lebensohl-utgång → symbol), `slam.ts` (Exclusion-steg → symbol).
+
+## FAS 2 SVEPET KLART (2026-08-19)
+
+Mätt över 10 000 budade givar: **0** bokstavskoder (t.ex. "2D", "3H"), **0** "GF",
+**0** "TP/stödp./startp./sangp./Bergenp." i någon budförklaringstext. Källkoll:
+`explanation`-strängar utan "GF" i hela `src/lib/engine`. Kvarvarande `${call}` i
+texten (overcalls.ts:344, rebids.ts:756) är SANG-bud (2NT/3NT) som renderas rätt.
+
+Rule-namn (t.ex. "2-över-1 GF", "rebid: stöd (GF)") står medvetet KVAR oförändrade
+— de vaktas av alerts/regelsvep och visas bara som chip, inte i förklaringstexten.
