@@ -31,6 +31,8 @@ export interface OpeningResult {
 }
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+// Färgsymbol för FÖRKLARINGSTEXTEN (det budet motorn läser står kvar som BID-kod).
+const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 
 /**
@@ -59,11 +61,11 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     {
       const noFive = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).every((s) => len[s] < 5)
       if (p === 19 && tp >= 20 && noFive) {
-        return { call: '2NT', rule: '2NT', explanation: `Balanserad bra 19 (${p} hp / ${tp} startp.) → 2NT (uppvärderad, spelar som 20–21).` }
+        return { call: '2NT', rule: '2NT', explanation: `Balanserad ${p} hp med extra kvalitet (ess och starka färger) → 2NT — för bra för att riskera pass, spelar som 20–21.` }
       }
     }
     if (p >= 25 && p <= 27) return { call: '3NT', rule: '3NT', explanation: `Balanserad ${p} hp (25–27) → 3NT.` }
-    if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `Balanserad ${p} hp (22+) → 2♣ (konstgjord, krav).` }
+    if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `Balanserad ${p} hp (22+) → 2♣ — konstgjort kravbud (säger inget om klöver).` }
 
     // TP-steg D (FAS 4, ägarbeslut 2026-07-01, steg b – sårbarhets-oberoende):
     // en "bra 14" (14 hp MEN startpoäng ≥ 15 – bra ess/tior/kvalitetsfärg som
@@ -77,14 +79,13 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     const noFiveCardSuit = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).every((s) => len[s] < 5)
     const nudgeFloor = vulnerable ? 16 : 15
     if (p === 14 && tp >= nudgeFloor && noFiveCardSuit) {
-      const zon = vulnerable ? 'sårbar ≥16' : 'ej sårbar ≥15'
-      return { call: '1NT', rule: '1NT', explanation: `Balanserad bra 14 (${p} hp / ${tp} startp., ${zon}) → 1NT (uppvärderad).` }
+      return { call: '1NT', rule: '1NT', explanation: `Balanserad ${p} hp med extra kvalitet (bra ess och tior) → 1NT — uppvärderad till 15–17-zonen.` }
     }
     // 12–14 och 18–19 balanserade öppnar i färg → faller vidare nedan.
   }
 
   // Stark 2♣ (obalanserad 22+).
-  if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `${p} hp (stark) → 2♣ (konstgjord, krav).` }
+  if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `${p} hp, för stark för en 1-öppning → 2♣ (konstgjort kravbud).` }
 
   // Distributionellt stark 2♣ (ägarens beslut 2026-07-01): en hand med många
   // SPELSTICK är nära utgång på egen hand och öppnar 2♣ även om HP < 22. Gräns
@@ -95,7 +96,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     return {
       call: '2C',
       rule: 'stark 2♣',
-      explanation: `${p} hp men ~${fmtTricks(pt)} spelstick (nära utgång på egen hand) → 2♣ (stark, krav).`,
+      explanation: `${p} hp men ~${fmtTricks(pt)} spelstick — nära utgång på egen hand → 2♣ (starkt kravbud).`,
     }
   }
 
@@ -106,7 +107,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
   //    – ess/tior/längd lyfter en bra 11:a till öppning.
   // En platt 11-hp-hand (TP < 12) avstår fortfarande. NT-stegen ovan är hp-def.
   if (p >= 12 || tp >= 12) {
-    const pts = tp > p ? `${p} hp / ${tp} TP` : `${p} hp`
+    const pts = tp > p ? `${p} hp (${tp} med fördelning)` : `${p} hp`
     // Möjligt missat distributionellt 2♣ (stark obalanserad med lång färg) – flaggas.
     const uncertain = p >= 19 && !bal && Object.values(len).some((l) => l >= 6)
     // 6-5 (6-korts LÅGfärg + 5-korts HÖGfärg), ägarregel 2026-07-07 (felrapport
@@ -121,7 +122,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
       return {
         call: `1${BID[sixMinor]}`,
         rule: 'minor-regeln',
-        explanation: `${pts} med 6-5 (6-korts ${NAME[sixMinor]} + 5-korts ${NAME[fiveMajor]}) → 1${BID[sixMinor]} (öppnar lågfärgen; 16+ räcker för att visa 6-5 via reverse).`,
+        explanation: `${pts} med 6-5 (6 ${NAME[sixMinor]} + 5 ${NAME[fiveMajor]}) → 1${SYM[sixMinor]} — öppnar den långa lågfärgen först och visar 5-korts ${NAME[fiveMajor]} nästa varv.`,
         uncertain,
       }
     }
@@ -130,7 +131,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
       return {
         call: `1${BID[suit]}`,
         rule: '5-korts högfärg',
-        explanation: `${pts} med ${len[suit]}-korts ${NAME[suit]} → 1${BID[suit]}.`,
+        explanation: `${pts} med ${len[suit]}-korts ${NAME[suit]} → 1${SYM[suit]}.`,
         uncertain,
       }
     }
@@ -138,7 +139,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     return {
       call: `1${BID[m]}`,
       rule: 'minor-regeln',
-      explanation: `${pts}, ingen 5-korts högfärg → 1${BID[m]} (minor-regeln).`,
+      explanation: `${pts} utan 5-korts högfärg → 1${SYM[m]} (öppnar bästa lågfärg).`,
       uncertain,
     }
   }
@@ -158,7 +159,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
       return {
         call: `1${BID[light]}`,
         rule: 'lättöppning',
-        explanation: `${p} hp men bra ${len[light]}-korts ${NAME[light]} (${topHonorCount(hand, light)} topphonnörer) i 3:e hand → 1${BID[light]} (lättöppning, partnern har passat).`,
+        explanation: `${p} hp men stark ${len[light]}-korts ${NAME[light]} (${topHonorCount(hand, light)} topphonnörer) i tredje hand → 1${SYM[light]} — lätt öppning sedan partnern passat.`,
       }
     }
   }
@@ -172,12 +173,12 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     if (p >= 9 && pearson >= 15) {
       if (len.spades >= 5 || len.hearts >= 5) {
         const suit: Suit = len.spades >= len.hearts ? 'spades' : 'hearts'
-        return { call: `1${BID[suit]}`, rule: 'regeln om 15', explanation: `${p} hp + ${len.spades} spader = ${pearson} (≥15, regeln om 15 i 4:e hand) → 1${BID[suit]}.` }
+        return { call: `1${BID[suit]}`, rule: 'regeln om 15', explanation: `${p} hp + ${len.spades} spader = ${pearson} → 1${SYM[suit]} — i fjärde hand öppnar man med minst 15 (poäng + spader) så given inte passas ut.` }
       }
       const m = openMinor(len)
-      return { call: `1${BID[m]}`, rule: 'regeln om 15', explanation: `${p} hp + ${len.spades} spader = ${pearson} (≥15, regeln om 15 i 4:e hand) → 1${BID[m]} (minor-regeln).` }
+      return { call: `1${BID[m]}`, rule: 'regeln om 15', explanation: `${p} hp + ${len.spades} spader = ${pearson} → 1${SYM[m]} — öppnar i fjärde hand (poäng + spader ≥ 15), bästa lågfärg.` }
     }
-    return { call: 'P', rule: 'pass', explanation: `${p} hp + ${len.spades} spader = ${pearson} (<15, regeln om 15 i 4:e hand) → pass (given passas ut).` }
+    return { call: 'P', rule: 'pass', explanation: `${p} hp + ${len.spades} spader = ${pearson} — under 15 i fjärde hand → pass, given läggs åt sidan.` }
   }
 
   // Spärröppning (7+ korts färg, svag) – kollas före svag tvåa.
@@ -193,11 +194,10 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
       const tops = topHonorCount(hand, suit)
       const need = level >= 4 ? (vulnerable ? 1 : 0) : vulnerable ? 2 : 1
       if (tops < need) break // för dålig färg för sårbarheten → ingen spärr
-      const zon = vulnerable ? 'sårbar' : 'ej sårbar'
       return {
         call: `${level}${BID[suit]}`,
         rule: 'spärr',
-        explanation: `${p} hp med ${len[suit]}-korts ${NAME[suit]} (${tops} topphonnör, ${zon}) → ${level}${BID[suit]} (spärröppning).`,
+        explanation: `${p} hp med ${len[suit]}-korts ${NAME[suit]} (${tops} topphonnörer) → ${level}${SYM[suit]} (spärröppning).`,
       }
     }
   }
@@ -209,7 +209,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
         return {
           call: `2${BID[suit]}`,
           rule: 'svag tvåa',
-          explanation: `${p} hp med 6-korts ${NAME[suit]} → 2${BID[suit]} (svag tvåöppning).`,
+          explanation: `${p} hp med 6-korts ${NAME[suit]} → 2${SYM[suit]} (svag tvåöppning).`,
         }
       }
     }

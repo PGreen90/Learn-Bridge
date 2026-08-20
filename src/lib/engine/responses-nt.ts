@@ -37,7 +37,7 @@ export function respondTo1NT(hand: Hand): ResponseResult {
   //  inbjudan(8–9)→ 2♦ (transfer ♥), sedan 2♠  = 5-5, inbjudan
   //  GF (10+)     → 2♥ (transfer ♠), sedan 3♥  = 5-5, GF
   if (sp === 5 && he === 5) {
-    if (p >= 10) return { call: '2H', rule: 'Jacoby-transfer', explanation: `${p} hp, 5-5 i högfärgerna, GF → 2♥ (transfer till spader; 3♥ sedan = 5-5).` }
+    if (p >= 10) return { call: '2H', rule: 'Jacoby-transfer', explanation: `${p} hp, 5-5 i högfärgerna, utgångskrav → 2♥ (transfer till spader; 3♥ sedan = 5-5).` }
     if (p >= 8) return { call: '2D', rule: 'Jacoby-transfer', explanation: `${p} hp, 5-5 i högfärgerna, inbjudan → 2♦ (transfer till hjärter; 2♠ sedan = 5-5).` }
     return { call: '2C', rule: 'Stayman', explanation: `${p} hp, 5-5 i högfärgerna, svag → 2♣ (garbage; passar hf-svar, annars 2 i bästa hf).` }
   }
@@ -46,16 +46,17 @@ export function respondTo1NT(hand: Hand): ResponseResult {
   const major = sp >= 5 && sp >= he ? 'spades' : he >= 5 ? 'hearts' : null
   if (major) {
     const L = len[major]
+    const targetName = major === 'hearts' ? 'hjärter' : 'spader'
     if (L >= 6 && p >= 10 && p <= 15) {
       // Texas: 4♦ → ♥, 4♥ → ♠. Utgång utan slamintresse.
       const call = major === 'hearts' ? '4D' : '4H'
-      const sym = major === 'hearts' ? '♥' : '♠'
-      return { call, rule: 'Texas', explanation: `${p} hp med 6-korts ${sym === '♥' ? 'hjärter' : 'spader'} → ${call} (Texas, utgång).` }
+      const shown = major === 'hearts' ? '4♦' : '4♥'
+      return { call, rule: 'Texas', explanation: `${p} hp med 6-korts ${targetName} → ${shown} (Texas — transfer till ${targetName}, utgång).` }
     }
     // Jacoby: 2♦ → ♥, 2♥ → ♠. Svag signoff upp till mild slam.
     const call = major === 'hearts' ? '2D' : '2H'
-    const sym = major === 'hearts' ? '♥' : '♠'
-    return { call, rule: 'Jacoby-transfer', explanation: `${p} hp med ${L}-korts ${sym === '♥' ? 'hjärter' : 'spader'} → ${call} (Jacoby-transfer).` }
+    const shown = major === 'hearts' ? '2♦' : '2♥'
+    return { call, rule: 'Jacoby-transfer', explanation: `${p} hp med ${L}-korts ${targetName} → ${shown} (transfer till ${targetName}).` }
   }
 
   // ---- 4-korts högfärg, inbjudan+ → Stayman ----
@@ -68,7 +69,7 @@ export function respondTo1NT(hand: Hand): ResponseResult {
   // ---- Minor Suit Stayman: 5-4+ i minorerna, GF/slam ----
   const mss = (len.clubs >= 5 && len.diamonds >= 4) || (len.diamonds >= 5 && len.clubs >= 4)
   if (mss && p >= 13) {
-    return { call: '2S', rule: 'Minor Suit Stayman', explanation: `${p} hp, 5-4+ i minorerna utan högfärg → 2♠ (Minor Suit Stayman, GF/slam).` }
+    return { call: '2S', rule: 'Minor Suit Stayman', explanation: `${p} hp, 5-4+ i minorerna utan högfärg → 2♠ (Minor Suit Stayman, utgångskrav/slam).` }
   }
 
   // ---- NT-stegen (balanserade/övriga utan högfärg) ----
