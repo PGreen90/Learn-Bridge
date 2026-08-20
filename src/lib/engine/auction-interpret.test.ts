@@ -395,3 +395,78 @@ describe('skyddsnät: ett bud MED motor-regel tolkas alltid ur regeln', () => {
     })
   }
 })
+
+// FYND 3 (budförklarings-revisionen, 2026-08-19): i motståndarvyn (dolda händer)
+// plattades ALLA dubblingar till "straffdubbling (gissning)". Fel — och mot
+// ägarprincipen "inga gissningar i bridge". Betydelsen ska härledas ur auktionen.
+// Varje kategori får nu ett eget, härlett svar; ingen dubbling får bli 'gissning'.
+describe('Fynd 3 – dubblingar tolkas ur auktionen, aldrig som gissning', () => {
+  it('negativ dubbling: partnern öppnade, motståndaren klev in, svararen X:ar', () => {
+    // N 1♦ (partner) – E 1♠ (inkliv) – S X = negativ, visar objuden högfärg (hjärter).
+    const r = interpretCall(h(['N', '1D'], ['E', '1S'], ['S', 'X']), 2)
+    expect(r.text).toMatch(/negativ/i)
+    expect(r.text).toMatch(/hjärter/i)
+    expect(r.text).not.toMatch(/straffdubbling/i)
+    expect(r.confidence).not.toBe('gissning')
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+
+  it('stöddubbling: öppnaren X:ar motståndarens inkliv efter partnerns färgsvar', () => {
+    // S 1♦ – W P – N 1♠ (svar) – E 2♥ (inkliv) – S X = stöd, exakt 3-korts spader.
+    const r = interpretCall(h(['S', '1D'], ['W', 'P'], ['N', '1S'], ['E', '2H'], ['S', 'X']), 4)
+    expect(r.text).toMatch(/stöddubbling/i)
+    expect(r.text).toMatch(/spader/i)
+    expect(r.text).toMatch(/3/)
+    expect(r.confidence).not.toBe('gissning')
+  })
+
+  it('återöppningsdubbling: öppnaren återöppnar efter partnerns pass', () => {
+    // S 1♥ – W 2♣ – N P – E P – S X = återöppning (takeout).
+    const r = interpretCall(h(['S', '1H'], ['W', '2C'], ['N', 'P'], ['E', 'P'], ['S', 'X']), 4)
+    expect(r.text).toMatch(/återöppning/i)
+    expect(r.text).not.toMatch(/^Straffdubbling/i)
+    expect(r.confidence).not.toBe('gissning')
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+
+  it('direkt upplysningsdubbling: ingen egen budgivning, låg motståndarfärg', () => {
+    const r = interpretCall(h(['E', '1S'], ['S', 'X']), 1)
+    expect(r.text).toMatch(/upplysning/i)
+    expect(r.text).not.toMatch(/straff/i)
+    expect(r.confidence).not.toBe('gissning')
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+
+  it('straffdubbling av 1NT: styrka, inte takeout', () => {
+    const r = interpretCall(h(['E', '1NT'], ['S', 'X']), 1)
+    expect(r.text).toMatch(/straff/i)
+    expect(r.text).toMatch(/sang/i)
+    expect(r.confidence).not.toBe('gissning')
+  })
+
+  it('straffdubbling av utgång: motståndarna offrar/når spel', () => {
+    // N 1♠ – E P – S 4♠ – W P – N P – E 5♣ – S X = straff mot deras 5♣.
+    const r = interpretCall(
+      h(['N', '1S'], ['E', 'P'], ['S', '4S'], ['W', 'P'], ['N', 'P'], ['E', '5C'], ['S', 'X']),
+      6,
+    )
+    expect(r.text).toMatch(/straff/i)
+    expect(r.text).toMatch(/bet/i)
+    expect(r.confidence).not.toBe('gissning')
+  })
+
+  it('utgångsförsök (maximal): fit finns, motståndarna trängde upp budet', () => {
+    // N 1♥ – E 2♣ – S 2♥ (fit) – W 3♣ – N X = game-try-dubbling i hjärterfiten.
+    const r = interpretCall(h(['N', '1H'], ['E', '2C'], ['S', '2H'], ['W', '3C'], ['N', 'X']), 4)
+    expect(r.text).toMatch(/utgångsförsök|game/i)
+    expect(r.text).toMatch(/hjärter/i)
+    expect(r.confidence).not.toBe('gissning')
+  })
+
+  it('kooperativ dubbling: låg dubbling utan fit där båda sidor bjudit', () => {
+    // N 1♣ – E 1♥ – S 1♠ – W 3♥ – N X: högt inkliv, ingen stöddubbling, ingen fit.
+    const r = interpretCall(h(['N', '1C'], ['E', '1H'], ['S', '1S'], ['W', '3H'], ['N', 'X']), 4)
+    expect(r.text).toMatch(/kooperativ/i)
+    expect(r.confidence).not.toBe('gissning')
+  })
+})
