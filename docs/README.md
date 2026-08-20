@@ -23,6 +23,7 @@
 |---|---|---|
 | **konkurrensplan.md** | ðŸŸ¢ | Konkurrensplanen mot BBO/Funbridge/Synrey (Ã¤garbeslut 2026-07-29): hÃ¤lsobedÃ¶mningen av appen + roadmapen Fas 0â€“6 (kvalitetsgrund â†’ facelift â†’ konton â†’ "Dagens givar" â†’ mobilappar â†’ engelska â†’ realtidsbord). |
 | **budsystem-revision.md** | ðŸŸ¢ | Budsystemets hÃ¤lsobild + kÃ¶rordningen F1â€“F6 och B-punkterna (t.ex. B13). HÃ¤r stÃ¥r vad som Ã¤r kvar att fÃ¶rbÃ¤ttra i systemet. |
+| **budforklaring-katalog.md** | 🟢 | Budförklarings-revisionen FAS 2: granskningsytan där ägaren synar budförklaringarnas text (före→efter per batch). |
 | **senare.md** | ðŸŸ¢ | Full beskrivning av allt i âšª SENARE och ðŸ…¿ï¸ PARKERAT (CLAUDE.md listar bara rubrikerna). |
 | **utspel-diagnos.md** | ðŸŸ¢ | Komplett diagnos av bottarnas **utspel** (trick 1 + mitt-i-given): vilka regler som finns, att utspelet ignorerar budgivningen, hÃ¥len mot doktrin (Aâ€“G) och den beslutade byggordningen. Ã–ppna den nÃ¤r utspelsspÃ¥ret Ã¥terupptas. |
 | **utspel-teori.md** | ðŸ“˜ | Den kÃ¤llfÃ¶rankrade bridgeteorin bakom utspelet (Pavlicek/Walker/Cohen/bridgebum): holdingsâ†’utspel-tabeller (fÃ¤rg + NT), tenass-principen, aktiv/passiv, budgivningens roll, Lightner, slam + konventionsvalen. VAD som Ã¤r rÃ¤tt bridge â€” bygg utspelskoden mot den hÃ¤r. |

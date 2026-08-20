@@ -25,6 +25,8 @@ export interface ResponseResult {
 }
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+// Färgsymbol för FÖRKLARINGSTEXTEN (budet motorn läser står kvar som BID-kod).
+const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 
 function otherMajor(m: Major): Major {
@@ -99,10 +101,10 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
     if (sp >= 12 && shortness) {
       const call = opened === 'hearts' ? '3S' : '3H'
       const sym = opened === 'hearts' ? '3♠' : '3♥'
-      return { call, rule: 'tvetydig splinter', explanation: `${spTxt}, ${support} stöd + kortfärg → ${sym} (tvetydig splinter, GF).` }
+      return { call, rule: 'tvetydig splinter', explanation: `${spTxt}, ${support} stöd + kortfärg → ${sym} (tvetydig splinter, utgångskrav).` }
     }
     if (sp >= 13) {
-      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `${spTxt}, ${support} stöd, ingen splintervärdig kortfärg → 2NT (Jacoby, GF).` }
+      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `${spTxt}, ${support} stöd, ingen splintervärdig kortfärg → 2NT (Jacoby, utgångskrav).` }
     }
     if (support === 4) {
       if (sp >= 10) return { call: '3D', rule: 'Bergen limit', explanation: `${spTxt}, 4 stöd → 3♦ (Bergen, limithöjning).` }
@@ -133,7 +135,7 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   // ---- 2-över-1 GF med en 5+ färg ----
   if (p >= 12) {
     const s5 = bestSuit(len, opened, 5)
-    if (s5) return { call: `2${BID[s5]}`, rule: '2-över-1 GF', explanation: `${p} hp med ${len[s5]}-korts ${NAME[s5]} → 2${BID[s5]} (2-över-1, GF).` }
+    if (s5) return { call: `2${BID[s5]}`, rule: '2-över-1 GF', explanation: `${p} hp med ${len[s5]}-korts ${NAME[s5]} → 2${SYM[s5]} (2-över-1, utgångskrav).` }
   }
 
   // ---- 3NT: 13–15 balanserad, exakt 2 i öppningsfärgen, ingen 4-korts annan högfärg ----
@@ -144,7 +146,7 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   // ---- 2-över-1 med en 4-korts färg (tunnare – flaggas) ----
   if (p >= 12) {
     const s4 = bestSuit(len, opened, 4)
-    if (s4) return { call: `2${BID[s4]}`, rule: '2-över-1 GF', explanation: `${p} hp med 4-korts ${NAME[s4]} → 2${BID[s4]} (2-över-1, GF).`, uncertain: true }
+    if (s4) return { call: `2${BID[s4]}`, rule: '2-över-1 GF', explanation: `${p} hp med 4-korts ${NAME[s4]} → 2${SYM[s4]} (2-över-1, utgångskrav).`, uncertain: true }
   }
 
   // ---- Semi-forcing 1NT (6–11, inget bättre) ----
@@ -204,7 +206,7 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
       return {
         call: `2${oBID}`,
         rule: '2-över-1 GF',
-        explanation: `${p} hp, utgångskrav med ${len[otherMinor]}-korts ${NAME[otherMinor]} → 2${osym} (2-över-1, sätter GF direkt före 4-korts högfärgen).`,
+        explanation: `${p} hp, utgångskrav med ${len[otherMinor]}-korts ${NAME[otherMinor]} → 2${osym} (2-över-1, sätter utgångskrav direkt före 4-korts högfärgen).`,
       }
     }
   }
@@ -228,7 +230,7 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
     if (bal && p >= 13 && p <= 15 && !hasWeakSideSuit(hand, opened)) {
       return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad, alla färger hållna → 3NT (till spel).` }
     }
-    const lift = mp > p ? ` (${p} hp / ${mp} TP)` : ''
+    const lift = mp > p ? ` (${p} hp, ${mp} med fördelning)` : ''
     return { call: `2${m}`, rule: 'inverterad minor', explanation: `${p} hp, ${support} stöd, ingen högfärg → 2${msym} (inverterad minor, krav)${lift}.` }
   }
 
@@ -239,7 +241,7 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
 
   // ---- 2-över-1 GF: 5+ kort i den andra minorn, 12+ hp ----
   if (len[otherMinor] >= 5 && p >= 12) {
-    return { call: `2${oBID}`, rule: '2-över-1 GF', explanation: `${p} hp med ${len[otherMinor]}-korts ${NAME[otherMinor]} → 2${osym} (2-över-1, GF).` }
+    return { call: `2${oBID}`, rule: '2-över-1 GF', explanation: `${p} hp med ${len[otherMinor]}-korts ${NAME[otherMinor]} → 2${osym} (2-över-1, utgångskrav).` }
   }
 
   // ---- 2NT inbjudan: 11–12 balanserad, stopp, ingen högfärg ----

@@ -50,7 +50,7 @@ describe('TP-princip: nedgradera aldrig (pointsWithFloor ≥ HP, globalt svep)',
             expect(r.points, ctx).toBe(Math.max(hp, r.measure))
             // lifted ⇔ formen lyfte handen STRIKT över HP (förklaringstexten beror på det).
             expect(r.lifted, ctx).toBe(r.points > hp)
-            expect(r.text, ctx).toBe(r.lifted ? `${hp} hp / ${r.points} ${kind === 'support' ? 'stödp.' : 'Bergenp.'}` : `${hp} hp`)
+            expect(r.text, ctx).toBe(r.lifted ? `${hp} hp (${r.points} med fördelning)` : `${hp} hp`)
             if (r.lifted) liftedCount++
           }
           // Bergen i sang (ingen kortfärg) får inte heller bryta golvet.

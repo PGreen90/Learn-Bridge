@@ -452,7 +452,7 @@ export function openerRebidAfterLimitedResponse(hand: Hand, response: ResponseRe
       // ess/tior, längd lyfter en NT-hand som spelar bättre än sina råa HP),
       // golvat vid HP så en hand aldrig nedgraderas. Ingen kortfärg i NT.
       const ntp = Math.max(p, startingPoints(hand).startingPoints)
-      const lift = ntp > p ? ` (${p} hp / ${ntp} startp.)` : ''
+      const lift = ntp > p ? ` (${p} hp, ${ntp} med fördelning)` : ''
       return ntp >= 14 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT${lift}.` } : pass
     }
     case '1NT':
@@ -517,7 +517,7 @@ export function openerRebidAfter1NTResponse(response: ResponseResult, hand: Hand
       // spelar som en 16:a och accepterar; en platt quack-15:a avböjer. Golvat
       // vid HP. Frö 20260744: ♠T72 ♥A83 ♦QT97 ♣AKQ = 15 hp → 3NT (600 fanns).
       const ntp = Math.max(p, notrumpPoints(hand))
-      const lift = ntp > p ? ` (${p} hp / ${ntp} sangp.)` : ''
+      const lift = ntp > p ? ` (${p} hp, räknat som ${ntp} i sang)` : ''
       return ntp >= 16 ? { call: '3NT', rule: 'accepterar inbjudan', explanation: `${p} hp – accepterar → 3NT${lift}.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp minimum → pass.` }
     }
     case '3NT till spel':
