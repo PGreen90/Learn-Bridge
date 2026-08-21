@@ -10,20 +10,25 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BESLUT B ETAPP 3 (HÄRDNINGEN) BYGGD 2026-08-18 → ägarsteg + verifiering kvar
+### 🔵 NU — BUDFÖRKLARINGS-REVISIONEN KLAR & LIVE (2026-08-19) → ägarens ordval-granskning kvar
 
-Grindbeslut (ägaren 2026-08-18): **Nivå 2 i tävlingen VÄNTAR** (triggern
-tillväxt/priser/fusk ej nådd; bordens serverbot står redo) · djupa
-botkortsgranskningen körs **nattligt i Actions**
-(`tavlingsgranskning.probe.test.ts` + `tavling-granskning.yml`: exakt
-omspelning ur playSeed, avvikare → status 'granskning') · granskningen =
-**rapport i nattvakten**, inget UI. Byggt dessutom: rate limits på tävlingens
-endpoints (bordens kvotsystem återanvänt) · Dagens giv-loggen (kalenderarkivet
-+ 🔥-sviten) speglad på kontot (migration `0009` + `dagens-logg.ts`
-server/klient — "första resultatet står"). **ÄGARSTEG:** kör migration `0009`
-i Supabase + lägg GitHub-secrets `SUPABASE_URL` och
-`SUPABASE_SERVICE_ROLE_KEY` (nattgranskningen). Därefter är ALLA Beslut
-B-etapper (0–4) levererade. Detalj: `docs/beslut-b-plan.md`.
+Texten som visas när man trycker på ett bud. **FAS 1** (täckning): svepet
+`forklaringssvep.probe.test.ts` visade 0 oförklarade bud; **Fynd 3** lagat —
+tolkningslagret (`auction-interpret.ts`) gissade förr "straffdubbling" på ALLA
+dubblingar i motståndarvyn, nu härleds åtta kategorier ur auktionen (ägarprincip
+**inga gissningar i bridge**). **FAS 2** (klarspråk, ägardirektiv "så tydligt som
+möjligt"): batch 1–7 KLARA & DEPLOYADE — hela motorn fri från bokstavskod (→
+färgsymboler), "GF" (→ utgångskrav), "TP/stödp./startp." (→ med fördelning) och
+interna regelnamn i den synliga texten. Rule-NAMN står kvar (chip + alerts/
+regelsvep). Katalog med före→efter: `docs/budforklaring-katalog.md`. Mätt: 0 av
+allt över 10 000 givar. **KVAR = ägarens del:** syna formuleringarna i katalogen
+och putsa enskilda ordval (peka på en rad → Claude byter ordagrant + deployar).
+
+**Parallellt pending ägarsteg (Beslut B etapp 3, byggt 2026-08-18):** kör migration
+`0009` i Supabase + lägg GitHub-secrets `SUPABASE_URL` och `SUPABASE_SERVICE_ROLE_KEY`
+(nattgranskningen). Därefter är ALLA Beslut B-etapper (0–4) levererade.
+Grindbeslut kvar: **Nivå 2 i tävlingen VÄNTAR** (trigger ej nådd). Detalj:
+`docs/beslut-b-plan.md`.
 
 ---
 
