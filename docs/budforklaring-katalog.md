@@ -23,7 +23,7 @@ tweaka någon rad.
 | 3 | 2NT "bra 19" | Balanserad bra 19 (19 hp / 20 startp.) → 2NT (uppvärderad…) | Balanserad 19 hp med extra kvalitet (ess och starka färger) → 2NT — för bra för att riskera pass, spelar som 20–21. |
 | 4 | 3NT 25–27 | Balanserad 26 hp (25–27) → 3NT. | *(oförändrad)* |
 | 5 | 2♣ bal 22+ | …→ 2♣ (konstgjord, krav). | Balanserad 23 hp (22+) → 2♣ — konstgjort kravbud (säger inget om klöver). |
-| 6 | 1NT "bra 14" | Balanserad bra 14 (14 hp / 15 startp., ej sårbar ≥15) → 1NT (uppvärderad). | Balanserad 14 hp med extra kvalitet (bra ess och tior) → 1NT — uppvärderad till 15–17-zonen. |
+| 6 | 1NT "bra 14" | Balanserad bra 14 (14 hp / 15 startp., ej sårbar ≥15) → 1NT (uppvärderad). | Balanserad 14 hp med extra kvalitet (starka mellankort — ess och tior) → 1NT — uppvärderad till 15–17-zonen. |
 | 7 | 2♣ stark 22+ | 23 hp (stark) → 2♣ (konstgjord, krav). | 23 hp, för stark för en 1-öppning → 2♣ (konstgjort kravbud). |
 | 8 | 2♣ spelstick | …(nära utgång på egen hand) → 2♣ (stark, krav). | 19 hp men ~9 spelstick — nära utgång på egen hand → 2♣ (starkt kravbud). |
 | 9 | 6-5, 16+ | …→ **1C** (öppnar lågfärgen; …via reverse). | 16 hp (…) med 6-5 (6 klöver + 5 spader) → **1♣** — öppnar den långa lågfärgen först och visar 5-korts spader nästa varv. |

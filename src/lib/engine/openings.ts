@@ -79,7 +79,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     const noFiveCardSuit = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).every((s) => len[s] < 5)
     const nudgeFloor = vulnerable ? 16 : 15
     if (p === 14 && tp >= nudgeFloor && noFiveCardSuit) {
-      return { call: '1NT', rule: '1NT', explanation: `Balanserad ${p} hp med extra kvalitet (bra ess och tior) → 1NT — uppvärderad till 15–17-zonen.` }
+      return { call: '1NT', rule: '1NT', explanation: `Balanserad ${p} hp med extra kvalitet (starka mellankort — ess och tior) → 1NT — uppvärderad till 15–17-zonen.` }
     }
     // 12–14 och 18–19 balanserade öppnar i färg → faller vidare nedan.
   }
