@@ -92,7 +92,8 @@ tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfi
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den
 starka dubblaren säljer given i rond 2 · svårighetsnivåer på bottarna ·
 bot-hjärnans B2/Steg C · bredare försvarsinferens · `auctionFacts`-lagret ·
-rondgenomgångens per-kort-motivering.
+rondgenomgångens per-kort-motivering · 2♣-öppningens bredare översyn
+(spelstick-tröskeln + kravnivån + balanserad/distributionell).
 
 ### 🅿️ PARKERAT (väg INTE in i beslut — full beskrivning i `docs/senare.md`)
 DDS-facit på tunga fulla givar · off-book §7 bredd · "framkalla slutbud"-väljaren ·

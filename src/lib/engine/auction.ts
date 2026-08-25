@@ -176,12 +176,12 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
     // (krav). Skiljer en inbjudande+ höjning från den rena konkurrenshöjningen.
     if (len[openerSuit] >= 3 && p >= 10) {
       const L = ovLevel + 1 // billigaste cue av deras färg ligger en nivå över inklivet
-      return { call: `${L}${LETTER[ovSuit]}`, rule: 'cue (limithöjning+)', explanation: `${p} hp, ${len[openerSuit]} stöd → cue ${SUIT_SYM[ovSuit]} (limithöjning+, krav).` }
+      return { call: `${L}${LETTER[ovSuit]}`, rule: 'cue (limithöjning+)', explanation: `10+ hp, 3+ stöd → cue ${SUIT_SYM[ovSuit]} (limithöjning+, krav).` }
     }
     // Konkurrenshöjning: 3+ stöd i öppnarens färg, 6–9 (spärr/konkurrens, ej inbjudan).
     if (len[openerSuit] >= 3 && p >= 6) {
       const L = cheapestLevelAbove(openerSuit, ovLevel, ovSuit)
-      return { call: `${L}${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${p} hp, ${len[openerSuit]} stöd → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
+      return { call: `${L}${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `3+ stöd (6–9) → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
     }
     // NT med stopp i deras färg – bara mot inkliv på 1–2-läget. Mot ett
     // hoppinkliv på 3-läget vore 2NT OLAGLIGT (under deras bud) och 3NT
@@ -192,9 +192,9 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
       // osv. (Tidigare beräknades nivån via klöver som proxy → alltid en nivå
       // för högt: 1♥–(1♠)–2NT i stället för naturligt 1NT. R1-fynd #1.)
       const L = ovLevel
-      return { call: `${L}NT`, rule: 'NT med stopp', explanation: `${p} hp balanserad med stopp → ${L}NT.` }
+      return { call: `${L}NT`, rule: 'NT med stopp', explanation: `Balanserad med stopp (8+) → ${L}NT.` }
     }
-    return { call: 'P', rule: 'pass', explanation: `${p} hp – inget lämpligt i konkurrens → pass.` }
+    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt i konkurrens → pass.` }
   }
 
   // Mot upplysningsdubbling (X): Jordan 2NT (limithöjning, 4+ trumf), annars
@@ -202,14 +202,14 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
   if (overcallCall === 'X') {
     // Jordan 2NT (§7.3, rad 193): 4+ stöd och limitvärden → 2NT, INTE Jacoby.
     if (len[openerSuit] >= 4 && p >= 10) {
-      return { call: '2NT', rule: 'Jordan 2NT', explanation: `${p} hp, ${len[openerSuit]} trumf → 2NT (Jordan, limithöjning+ med fit).` }
+      return { call: '2NT', rule: 'Jordan 2NT', explanation: `10+ hp, 4+ trumf → 2NT (Jordan, limithöjning+ med fit).` }
     }
-    if (p >= 10) return { call: 'XX', rule: 'redubbling', explanation: `${p} hp → XX (redubbling, lovar styrka).` }
-    if (len[openerSuit] >= 3) return { call: `2${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${p} hp, ${len[openerSuit]} stöd → 2${SUIT_SYM[openerSuit]}.` }
-    return { call: 'P', rule: 'pass', explanation: `${p} hp – pass.` }
+    if (p >= 10) return { call: 'XX', rule: 'redubbling', explanation: `10+ hp → XX (redubbling, lovar styrka).` }
+    if (len[openerSuit] >= 3) return { call: `2${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `3+ stöd → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning).` }
+    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt → pass.` }
   }
 
-  return { call: 'P', rule: 'pass', explanation: `${p} hp – pass.` }
+  return { call: 'P', rule: 'pass', explanation: `Inget lämpligt → pass.` }
 }
 
 // (`pairControlsSideSuits` — kontroll-gaten som läste BÅDA händerna — togs bort
@@ -636,7 +636,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
           role: 'svarare',
           call: '6NT',
           rule: 'slamavslut',
-          explanation: `${hcp(rh)} hp mot visad balanserad ${STRONG_2C_SHOWN_MIN}+ → 6NT (slamzon, sang behöver ingen fit).`,
+          explanation: `Slamzon mot visad balanserad ${STRONG_2C_SHOWN_MIN}+ → 6NT (sang behöver ingen fit).`,
         })
         return finish(false)
       }
@@ -927,10 +927,9 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
         const rest = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter(
           (s) => s !== openerSuit && s !== shown1 && s !== shown2,
         )
-        const rp = hcp(rh)
         const fourth = rest.every((s) => hasStopper(rh, s))
-          ? { call: '3NT', rule: '3NT till spel', explanation: `${rp} hp – öppnaren driver (15+) och resten är täckt → 3NT (till spel).` }
-          : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `${rp} hp – öppnaren driver (15+) men 3NT är otäckt → 5${SUIT_SYM[openerSuit]} (minorutgång).` }
+          ? { call: '3NT', rule: '3NT till spel', explanation: `Öppnaren driver (15+) och resten är täckt → 3NT (till spel).` }
+          : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `Öppnaren driver (15+) men 3NT är otäckt → 5${SUIT_SYM[openerSuit]} (minorutgång).` }
         turns.push({ seat: responderSeat, role: 'svarare', call: fourth.call, rule: fourth.rule, explanation: fourth.explanation })
       }
       return finish(false)

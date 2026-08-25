@@ -19,7 +19,6 @@ import type { ResponseResult } from './responses'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
@@ -57,7 +56,7 @@ export function answerNTInterference(hand: Hand, theirCall: string): ResponseRes
       return {
         call: `${lvl}${BID[longest]}`,
         rule: 'naturligt (to play)',
-        explanation: `${len[longest]}-korts ${NAME[longest]} → ${lvl}${SYM[longest]} (naturligt, konkurrerar).`,
+        explanation: `5+ ${SYM[longest]} → ${lvl}${SYM[longest]} (naturligt, konkurrerar).`,
       }
     }
   }
@@ -68,7 +67,7 @@ export function answerNTInterference(hand: Hand, theirCall: string): ResponseRes
     return {
       call: isX ? 'XX' : 'X',
       rule: 'straff/värden',
-      explanation: `${p} hp mitt emot 15–17 utan egen långfärg → ${isX ? 'XX' : 'X'} (straff/värden).`,
+      explanation: `8+ hp mitt emot 15–17 utan egen långfärg → ${isX ? 'XX' : 'X'} (straff/värden).`,
     }
   }
 
@@ -97,7 +96,7 @@ export function answerPreemptInterference(
     return {
       call: 'XX',
       rule: 'redubbling (värden)',
-      explanation: `${p} hp – värden/straffintresse mot deras upplysningsdubbling → XX.`,
+      explanation: `10+ hp – värden/straffintresse mot deras upplysningsdubbling → XX.`,
     }
   }
 
@@ -108,7 +107,7 @@ export function answerPreemptInterference(
     return {
       call: `${ourLevel + 1}${BID[ourSuit]}`,
       rule: 'spärrhöjning',
-      explanation: `${support}-korts stöd → ${ourLevel + 1}${SYM[ourSuit]} (fortsatt spärr, lag om totala stick).`,
+      explanation: `Med stöd → ${ourLevel + 1}${SYM[ourSuit]} (fortsatt spärr, lag om totala stick).`,
     }
   }
 

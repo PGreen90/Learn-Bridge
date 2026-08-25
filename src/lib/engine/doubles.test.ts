@@ -2,6 +2,23 @@ import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
 import { advancerFreeBidAfterDouble, answerSupportDouble, doublerAnswersCue, negativeDouble, openerAnswerNegativeDouble, penaltyDouble, responsiveDouble, supportDouble, supportDoublerRebid, answerTakeoutDouble } from './doubles'
 
+// ---- Budförklaring: löftet, inte handen (ägardirektiv 2026-08-24) ------------
+describe('dubblingarnas förklaring visar löftet, inte handen', () => {
+  it('negativ dubbling: golv (6+ hp), symbol, inte handens hp', () => {
+    const e = negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '1S')!.explanation
+    expect(e).toContain('6+ hp')
+    expect(e).toContain('♥')
+    expect(e).not.toMatch(/\b8 hp\b/)
+  })
+
+  it('straffdubbling: ingen trumfstick-räkning, ingen hp-läcka', () => {
+    const e = penaltyDouble(parseHand('S:AQJ5 H:32 D:K432 C:K43'), 'spades')!.explanation
+    expect(e).toContain('trumfstick')
+    expect(e).not.toMatch(/\b\d+ hp\b/)
+    expect(e).not.toMatch(/^\d+ säkra/) // ingen exakt siffra i inledningen
+  })
+})
+
 describe('negativeDouble (§7.3)', () => {
   it('1♦–(1♠)–X med 4+ hjärter', () => {
     expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '1S')?.call).toBe('X')
@@ -18,8 +35,8 @@ describe('negativeDouble (§7.3)', () => {
   it('1♣–(2♦)–X med båda högfärgerna → förklaringen nämner BÅDA', () => {
     const r = negativeDouble(parseHand('S:K9876 H:KT86 D:4 C:KJ5'), 'clubs', '2D')
     expect(r?.call).toBe('X')
-    expect(r?.explanation).toMatch(/spader/)
-    expect(r?.explanation).toMatch(/hjärter/)
+    expect(r?.explanation).toMatch(/♠/)
+    expect(r?.explanation).toMatch(/♥/)
   })
 })
 

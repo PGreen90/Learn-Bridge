@@ -13,7 +13,6 @@ import { hcp, isBalanced, lengths } from './hand'
 import type { ResponseResult } from './responses'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const RANK: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades'] // stigande budrang
 const rankOf = (s: Suit) => RANK.indexOf(s)
@@ -57,17 +56,17 @@ export function respondTo2C(hand: Hand): ResponseResult {
       return {
         call: `${level}${BID[s5]}`,
         rule: '2♣-positivt',
-        explanation: `${p} hp med ${len[s5]}-korts ${NAME[s5]} → ${level}${SYM[s5]} (positivt, utgångskrav).`,
+        explanation: `8+ hp med 5+ ${SYM[s5]} → ${level}${SYM[s5]} (positivt, utgångskrav).`,
       }
     }
     // Balanserad 8+ utan 5-korts färg → 2NT (positivt, GF).
     if (isBalanced(hand)) {
-      return { call: '2NT', rule: '2♣-positivt', explanation: `${p} hp balanserad → 2NT (positivt, utgångskrav).` }
+      return { call: '2NT', rule: '2♣-positivt', explanation: `8+ balanserad → 2NT (positivt, utgångskrav).` }
     }
   }
 
   // 0–7 hp (eller 8+ obalanserad utan biudbar 5-färg): 2♦ konstgjort väntebud.
-  return { call: '2D', rule: '2♦ väntebud', explanation: `${p} hp → 2♦ (konstgjort väntebud, säger inget om handen).` }
+  return { call: '2D', rule: '2♦ väntebud', explanation: `Väntebud → 2♦ (konstgjort, säger inget om handen).` }
 }
 
 // === 2. Öppnarens återbud efter svararens svar =============================
@@ -80,15 +79,15 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
 
   // --- Efter 2♦ väntebud: visa jättehandens form ---
   if (response.call === '2D') {
-    if (bal && p <= 24) return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `${p} hp balanserad → 2NT (22–24, ej krav).` }
-    if (bal) return { call: '3NT', rule: 'rebid: 3NT (28–30)', explanation: `${p} hp balanserad → 3NT (28–30, ej krav).` }
+    if (bal && p <= 24) return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `Balanserad (22–24) → 2NT (ej krav).` }
+    if (bal) return { call: '3NT', rule: 'rebid: 3NT (28–30)', explanation: `Balanserad (28–30) → 3NT (ej krav).` }
     // Obalanserad jätte: naturlig längsta färg, krav 1 rond.
     const s = longestSuit(len, 5) ?? longestSuit(len, 4)
     if (s) {
       const level = isMajor(s) ? 2 : 3
-      return { call: `${level}${BID[s]}`, rule: 'rebid: krav-färg', explanation: `${p} hp med ${len[s]}-korts ${NAME[s]} → ${level}${SYM[s]} (naturlig, krav 1 rond).` }
+      return { call: `${level}${BID[s]}`, rule: 'rebid: krav-färg', explanation: `Jättehand med 4+ ${SYM[s]} → ${level}${SYM[s]} (naturlig, krav 1 rond).` }
     }
-    return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `${p} hp → 2NT.`, uncertain: true }
+    return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `Stark hand → 2NT.`, uncertain: true }
   }
 
   // --- Efter ett positivt svar: paret är i GF, sikta mot slam ---
@@ -96,12 +95,12 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
   if (rs) {
     if (len[rs] >= 3) {
       const lvl = parseInt(response.call[0], 10) + 1
-      return { call: `${lvl}${BID[rs]}`, rule: 'rebid: stöd (GF)', explanation: `${p} hp, ${len[rs]} stöd i ${NAME[rs]} → ${lvl}${SYM[rs]} (sätter trumf, utgångskrav/slamintresse).` }
+      return { call: `${lvl}${BID[rs]}`, rule: 'rebid: stöd (GF)', explanation: `3+ stöd i ${SYM[rs]} → ${lvl}${SYM[rs]} (sätter trumf, utgångskrav/slamintresse).` }
     }
     const own = longestSuit(len, 5)
     if (own && own !== rs) {
       const lvl = levelAbove(own, response.call)
-      return { call: `${lvl}${BID[own]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, utgångskrav).` }
+      return { call: `${lvl}${BID[own]}`, rule: 'rebid: egen färg (GF)', explanation: `5+ ${SYM[own]} → ${lvl}${SYM[own]} (naturlig, utgångskrav).` }
     }
   }
   // Efter 2NT-positivt (färglöst svar): jättehandens egen 5+ färg får aldrig
@@ -111,10 +110,10 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
   const ownSuit = longestSuit(len, 5)
   if (ownSuit) {
     const lvl = levelAbove(ownSuit, response.call)
-    return { call: `${lvl}${BID[ownSuit]}`, rule: 'rebid: egen färg (GF)', explanation: `${p} hp med ${len[ownSuit]}-korts ${NAME[ownSuit]} → ${lvl}${SYM[ownSuit]} (naturlig, utgångskrav – visar färgen före 3NT).` }
+    return { call: `${lvl}${BID[ownSuit]}`, rule: 'rebid: egen färg (GF)', explanation: `5+ ${SYM[ownSuit]} → ${lvl}${SYM[ownSuit]} (naturlig, utgångskrav – visar färgen före 3NT).` }
   }
   // Balanserat positivt (2NT) utan 5-färg → 3NT.
-  return { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: `${p} hp – ingen egen 5-färg → 3NT.`, uncertain: !bal }
+  return { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: `Ingen egen 5-färg → 3NT.`, uncertain: !bal }
 }
 
 // === 3. Svararens andra bud (andra negativa) ===============================
@@ -132,15 +131,15 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
 
   // Andra negativa: riktig bottenhand (0–3) → billigaste klöver, efter en högfärg.
   if (p <= 3 && isMajor(rs)) {
-    return { call: '3C', rule: 'andra negativa', explanation: `${p} hp – riktig bottenhand → 3♣ (andra negativa, 0–3).` }
+    return { call: '3C', rule: 'andra negativa', explanation: `Riktig bottenhand (0–3) → 3♣ (andra negativa).` }
   }
 
   // Stöd i öppnarens färg → höj till utgång (GF, slamintresse i minor).
   if (isMajor(rs) && len[rs] >= 3) {
-    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `${p} hp, ${len[rs]} stöd → 4${SYM[rs]} (utgång).` }
+    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `3+ stöd → 4${SYM[rs]} (utgång).` }
   }
   if (!isMajor(rs) && len[rs] >= 4) {
-    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `${p} hp, ${len[rs]} stöd i ${NAME[rs]} → 4${SYM[rs]} (utgångskrav, slamintresse).` }
+    return { call: `4${BID[rs]}`, rule: 'höjning (GF)', explanation: `4+ stöd i ${SYM[rs]} → 4${SYM[rs]} (utgångskrav, slamintresse).` }
   }
 
   // Egen 5+ färg, naturlig (krav i GF). F5/E2 "finaste färg" (frö 20261040):
@@ -152,13 +151,13 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
   if (ownMinorPast3NT && !isMajor(rs)) {
     for (const m of ['hearts', 'spades'] as Suit[]) {
       if (len[m] >= 4 && levelAbove(m, rebid.call) === 3) {
-        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT går före egen minor förbi 3NT, utgångskrav).` }
+        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `4+ ${SYM[m]} → 3${SYM[m]} (4-korts högfärg under 3NT går före egen minor förbi 3NT, utgångskrav).` }
       }
     }
   }
   if (own && own !== rs) {
     const lvl = levelAbove(own, rebid.call)
-    return { call: `${lvl}${BID[own]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[own]}-korts ${NAME[own]} → ${lvl}${SYM[own]} (naturlig, utgångskrav).` }
+    return { call: `${lvl}${BID[own]}`, rule: 'ny färg (GF)', explanation: `5+ ${SYM[own]} → ${lvl}${SYM[own]} (naturlig, utgångskrav).` }
   }
 
   // Efter öppnarens MINOR-rebud: visa en 4-korts högfärg under 3NT (fel färg-
@@ -169,11 +168,11 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
   if (!isMajor(rs)) {
     for (const m of ['hearts', 'spades'] as Suit[]) {
       if (len[m] >= 4 && levelAbove(m, rebid.call) === 3) {
-        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `${p} hp med ${len[m]}-korts ${NAME[m]} → 3${SYM[m]} (4-korts högfärg under 3NT, utgångskrav – hittar 4-4-fiten).` }
+        return { call: `3${BID[m]}`, rule: 'ny färg (GF)', explanation: `4+ ${SYM[m]} → 3${SYM[m]} (4-korts högfärg under 3NT, utgångskrav – hittar 4-4-fiten).` }
       }
     }
   }
 
   // Inget bättre → 3NT till spel.
-  return { call: '3NT', rule: 'till spel', explanation: `${p} hp – ingen fit → 3NT.` }
+  return { call: '3NT', rule: 'till spel', explanation: `Ingen fit → 3NT.` }
 }

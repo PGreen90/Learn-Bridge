@@ -18,7 +18,6 @@ import type { ResponseResult } from './responses'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
@@ -94,7 +93,7 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   // 1) Ovanlig 2NT: 5-5 i de två lägsta objudna färgerna.
   const twoLowest = unbid.slice(0, 2)
   if (len[twoLowest[0]] >= 5 && len[twoLowest[1]] >= 5) {
-    return { call: '2NT', rule: 'ovanlig 2NT', explanation: `5-5 i ${NAME[twoLowest[0]]}+${NAME[twoLowest[1]]} → 2NT (ovanlig, två lägsta objudna).` }
+    return { call: '2NT', rule: 'ovanlig 2NT', explanation: `5-5 i ${SYM[twoLowest[0]]}+${SYM[twoLowest[1]]} → 2NT (ovanlig, två lägsta objudna).` }
   }
 
   // 2) Michaels cue-bud (5-5).
@@ -106,7 +105,7 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
     const otherMajor: Suit = their === 'hearts' ? 'spades' : 'hearts'
     const bestMinor: Suit = len.clubs >= len.diamonds ? 'clubs' : 'diamonds'
     if (len[otherMajor] >= 5 && len[bestMinor] >= 5) {
-      return { call: `2${BID[their]}`, rule: 'Michaels', explanation: `5-5 ${NAME[otherMajor]} + minor → 2${SYM[their]} (Michaels cue).` }
+      return { call: `2${BID[their]}`, rule: 'Michaels', explanation: `5-5 ${SYM[otherMajor]} + minor → 2${SYM[their]} (Michaels cue).` }
     }
   }
 
@@ -115,7 +114,7 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   const ntLow = balancing ? 11 : 15
   const ntHigh = balancing ? 14 : 18
   if (isBalanced(hand) && p >= ntLow && p <= ntHigh && hasStopper(hand, their)) {
-    return { call: '1NT', rule: '1NT-inkliv', explanation: `${p} hp balanserad med stopp i ${NAME[their]} → 1NT-inkliv (kör 1NT-systemet).` }
+    return { call: '1NT', rule: '1NT-inkliv', explanation: `Balanserad (${ntLow}–${ntHigh} hp) med stopp i ${SYM[their]} → 1NT-inkliv (kör 1NT-systemet).` }
   }
 
   // 3.5) 17+ STARK ENFÄRGSHAND (ägarregel, felrapport #23): en hand med 17+ hp och
@@ -127,7 +126,7 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   // handen.)
   const strongSuit = bestOvercallSuit(len, their)
   if (p >= 17 && strongSuit) {
-    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `${p} hp – för starkt för ett enkelt inkliv → X (upplysning; visar egna ${NAME[strongSuit]} på nästa varv, stark enfärgshand).` }
+    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `17+ hp – för starkt för ett enkelt inkliv → X (upplysning; visar egen färg på nästa varv, stark enfärgshand).` }
   }
 
   // 4) Upplysningsdubbling: kort i deras färg, stöd i övriga. Ägarbeslut
@@ -140,7 +139,7 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   const supportUnbid = unbid.every((s) => len[s] >= 3)
   const longestUnbid = Math.max(...unbid.map((s) => len[s]))
   if (shortTheirs && supportUnbid && ((fp.points >= 12 - relief && longestUnbid <= 5) || (fp.points >= 10 - relief && longestUnbid <= 4))) {
-    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${fp.text}, kort i ${NAME[their]}, stöd i övriga → X (upplysning).` }
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `10+ hp, korthet i ${SYM[their]}, stöd i övriga → X (upplysning).` }
   }
 
   // 5) Enkelt inkliv: bra 5+ färg, 8–16 hp (golv 8→5 i balansering; golvet
@@ -153,17 +152,18 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   const ov = bestOvercallSuit(len, their)
   const preemptMaterial = ov !== null && len[ov] >= 6 && p <= 10
   const ovPts = ov && goodSuit(hand, ov) && !preemptMaterial ? fp.points : p
-  const ovText = ovPts > p ? fp.text : `${p} hp`
+  // Löftet: inklivsintervallet (taket 16 – 17+ dubblar; golvet sänks i balansering).
+  const ovRange = `${8 - relief}–16 hp`
   if (ov && ovPts >= 8 - relief && p <= 16) {
     const lvl = overcallLevel(ov, their)
     // Svagt hoppinkliv: 6-korts färg, 6–10 hp som annars hade krävt 2-läget.
-    return { call: `${lvl}${BID[ov]}`, rule: 'enkelt inkliv', explanation: `${ovText} med ${len[ov]}-korts ${NAME[ov]} → ${lvl}${SYM[ov]} (inkliv).` }
+    return { call: `${lvl}${BID[ov]}`, rule: 'enkelt inkliv', explanation: `${ovRange} med 5+ ${SYM[ov]} → ${lvl}${SYM[ov]} (inkliv).` }
   }
 
   // 6) Svagt hoppinkliv: 6-korts färg, 6–10 hp (spärr).
   if (ov && len[ov] >= 6 && p >= 6 && p <= 10) {
     const lvl = overcallLevel(ov, their) + 1
-    return { call: `${lvl}${BID[ov]}`, rule: 'hoppinkliv', explanation: `${p} hp med 6-korts ${NAME[ov]} → ${lvl}${SYM[ov]} (svagt hoppinkliv, spärr).` }
+    return { call: `${lvl}${BID[ov]}`, rule: 'hoppinkliv', explanation: `(6–10 hp) med 6+ ${SYM[ov]} → ${lvl}${SYM[ov]} (svagt hoppinkliv, spärr).` }
   }
 
   // 7) 17+ SOM INTE FICK PLATS I NÅGOT FÖNSTER: sälj ALDRIG given → X.
@@ -175,7 +175,7 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   // (`defendWeakTwo`/`defendPreempt`): partnern måste svara, och den starka
   // handen får beskriva sig på nästa varv.
   if (p >= 17) {
-    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `${p} hp – för stark för att sälja given → X (upplysning).` }
+    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `17+ hp – för stark för att sälja given → X (upplysning).` }
   }
 
   return pass
@@ -208,12 +208,12 @@ export function takeoutOfResponse(hand: Hand, openSuit: Suit, respSuit: Suit): R
     if (!strong || len[s] > len[strong] || (len[s] === len[strong] && rankIdx(s) > rankIdx(strong))) strong = s
   }
   if (p >= 17 && strong) {
-    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `${p} hp – för starkt för ett inkliv som kan passas ut → X (upplysning; visar egna ${NAME[strong]} på nästa varv, stark enfärgshand).` }
+    return { call: 'X', rule: 'upplysningsdubbling (stark)', explanation: `17+ hp – för starkt för ett inkliv som kan passas ut → X (upplysning; visar egen färg på nästa varv, stark enfärgshand).` }
   }
 
   // Exakt 4-4 i de objudna, 10+ hp (en 5-korts objuden färg inkliver vi hellre).
   if (p >= 10 && len[u1] === 4 && len[u2] === 4) {
-    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, 4-4 i ${NAME[u1]}+${NAME[u2]} (deras ${NAME[openSuit]}+${NAME[respSuit]} objudna) → X (upplysning).` }
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `10+ hp, 4-4 i ${SYM[u1]}+${SYM[u2]} (deras ${SYM[openSuit]}+${SYM[respSuit]} objudna) → X (upplysning).` }
   }
 
   return { call: 'P', rule: 'pass', explanation: 'ingen aktion över deras två bjudna färger → pass.' }
@@ -267,12 +267,12 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
     const major = known[0]
     if (len[major] >= 3) {
       const call = cheapestBid(major, partnerCall)
-      return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[major]}-korts ${NAME[major]} → ${call[0]}${SYM[major]} (preferens till partnerns högfärg).` }
+      return { call, rule: 'advance tvåfärg (preferens)', explanation: `3+ ${SYM[major]} → ${call[0]}${SYM[major]} (preferens till partnerns högfärg).` }
     }
     // Ingen högfärgsfit. Contested + svag → passa (partnern rättar sedan sin minor).
     if (contested && p < 8) return passContested
     // Ostört: aldrig passa → 3♣ pass-eller-rätta (partnern passar/rättar till sin minor).
-    return { call: '3C', rule: 'advance tvåfärg (pass-eller-rätta minor)', explanation: `ingen högfärgsfit → 3♣ (pass-eller-rätta; partnern passar med klöver, rättar till ruter).` }
+    return { call: '3C', rule: 'advance tvåfärg (pass-eller-rätta minor)', explanation: `ingen högfärgsfit → 3♣ (pass-eller-rätta; partnern passar med ♣, rättar till ♦).` }
   }
 
   // Båda färgerna kända (Michaels över minor / ovanlig 2NT): bjud den vi är
@@ -284,7 +284,7 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
   // Contested utan fit i någon av färgerna och svag → passa (spelrum finns).
   if (contested && known.every((s) => len[s] < 3) && p < 8) return passContested
   const call = cheapestBid(best, partnerCall)
-  return { call, rule: 'advance tvåfärg (preferens)', explanation: `${len[best]}-korts ${NAME[best]} (längst av partnerns färger) → ${call[0]}${SYM[best]} (preferens).` }
+  return { call, rule: 'advance tvåfärg (preferens)', explanation: `${SYM[best]} (den jag är längst i av partnerns färger) → ${call[0]}${SYM[best]} (preferens).` }
 }
 
 /**
@@ -303,7 +303,7 @@ export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit, 
   const sym = SYM[partnerSuit]
   const bid = BID[partnerSuit]
 
-  if (p < 6 && support < 3) return { call: 'P', rule: 'pass', explanation: `${p} hp utan stöd → pass.` }
+  if (p < 6 && support < 3) return { call: 'P', rule: 'pass', explanation: `för svagt utan stöd → pass.` }
 
   // Fit-jump (§7.1, rad 714): bra stöd (4+) + egen 5+ sidofärg, inbjudande+ →
   // HOPP i sidofärgen (visar fit + trickkälla). Går före cue när en klar
@@ -317,32 +317,32 @@ export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit, 
     if (side) {
       const cheapest = rankIdx(side) > rankIdx(partnerSuit) ? overcallLevel : overcallLevel + 1
       const jump = cheapest + 1
-      return { call: `${jump}${BID[side]}`, rule: 'fit-jump', explanation: `${sp.text}, ${support} stöd + ${len[side]}-korts ${NAME[side]} → ${jump}${SYM[side]} (fit-jump, inbjudande+).` }
+      return { call: `${jump}${BID[side]}`, rule: 'fit-jump', explanation: `10+ stödpoäng, 4+ stöd + 5+ ${SYM[side]} → ${jump}${SYM[side]} (fit-jump, inbjudande+).` }
     }
   }
 
   // Cue-bud i deras färg = limithöjning eller bättre (bra stöd, krav).
   if (support >= 3 && sp.points >= 11) {
-    return { call: `2${BID[theirSuit]}`, rule: 'cue (limithöjning+)', explanation: `${sp.text}, ${support} stöd → cue ${SYM[theirSuit]} (limithöjning+, krav).` }
+    return { call: `2${BID[theirSuit]}`, rule: 'cue (limithöjning+)', explanation: `11+ stödpoäng, 3+ stöd → cue ${SYM[theirSuit]} (limithöjning+, krav).` }
   }
 
   // Höjning: stöd, konkurrens (inte inbjudan i sig).
   if (support >= 3) {
     const lvl = rankIdx(partnerSuit) > rankIdx(theirSuit) ? 2 : 3
-    return { call: `${lvl}${bid}`, rule: 'höjning', explanation: `${p} hp, ${support} stöd → ${lvl}${sym} (konkurrenshöjning).` }
+    return { call: `${lvl}${bid}`, rule: 'höjning', explanation: `3+ stöd, under limithöjning → ${lvl}${sym} (konkurrenshöjning).` }
   }
 
   // Ny färg: naturlig, konstruktiv (ej krav).
   const ownSuit = bestOvercallSuit(len, partnerSuit)
   if (ownSuit && p >= 8 && rankIdx(ownSuit) > rankIdx(partnerSuit)) {
-    return { call: `2${BID[ownSuit]}`, rule: 'ny färg', explanation: `${p} hp med ${len[ownSuit]}-korts ${NAME[ownSuit]} → 2${SYM[ownSuit]} (naturlig, ej krav).` }
+    return { call: `2${BID[ownSuit]}`, rule: 'ny färg', explanation: `8+ hp med 5+ ${SYM[ownSuit]} → 2${SYM[ownSuit]} (naturlig, ej krav).` }
   }
 
   // NT: stopp i deras färg, balanserad, lämplig styrka.
   if (isBalanced(hand) && hasStopper(hand, theirSuit) && p >= 8) {
     const call = p >= 11 ? '2NT' : '1NT'
-    return { call, rule: 'NT-svar', explanation: `${p} hp balanserad med stopp i ${NAME[theirSuit]} → ${call}.` }
+    return { call, rule: 'NT-svar', explanation: `Balanserad ${call === '2NT' ? '(11+ hp)' : '(8–10 hp)'} med stopp i ${SYM[theirSuit]} → ${call}.` }
   }
 
-  return { call: 'P', rule: 'pass', explanation: `${p} hp – inget lämpligt → pass.` }
+  return { call: 'P', rule: 'pass', explanation: `inget lämpligt → pass.` }
 }

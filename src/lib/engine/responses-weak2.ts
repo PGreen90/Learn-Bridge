@@ -15,7 +15,6 @@ import { hcp, isBalanced, lengths } from './hand'
 import type { ResponseResult } from './responses'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const RANK: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades'] // stigande budrang
 const rankOf = (s: Suit) => RANK.indexOf(s)
@@ -59,14 +58,14 @@ export function respondToWeakTwo(hand: Hand, opened: Suit): ResponseResult {
   // Svaga händer: höj spärren eller passa.
   if (p <= 10) {
     if (support >= 3) {
-      return { call: `3${bid}`, rule: 'spärrhöjning', explanation: `${p} hp, ${support} stöd → 3${sym} (spärrhöjning, höjer trycket, ej inbjudan).` }
+      return { call: `3${bid}`, rule: 'spärrhöjning', explanation: `0–10 hp, 3+ stöd → 3${sym} (spärrhöjning, ej inbjudan).` }
     }
-    return { call: 'P', rule: 'pass', explanation: `${p} hp, ingen utgångschans → pass.` }
+    return { call: 'P', rule: 'pass', explanation: `Ingen utgångschans → pass.` }
   }
 
   // 11+ med fit → 2NT Ogust (fråga om min/max + färgkvalitet).
   if (support >= 3) {
-    return { call: '2NT', rule: 'Ogust', explanation: `${p} hp, ${support} stöd – utgångsintresse → 2NT (Ogust, frågar min/max + kvalitet).` }
+    return { call: '2NT', rule: 'Ogust', explanation: `11+ med 3+ stöd, utgångsintresse → 2NT (Ogust, frågar min/max + kvalitet).` }
   }
 
   // 11+ utan fit: egen 5+ färg (krav) — på 2-läget från 11 hp, men på 3-LÄGET
@@ -76,18 +75,18 @@ export function respondToWeakTwo(hand: Hand, opened: Suit): ResponseResult {
   if (side) {
     const level = levelAbove(side, opened, 2)
     if (level === 2 || p >= 15) {
-      return { call: `${level}${BID[side]}`, rule: 'ny färg (krav)', explanation: `${p} hp med ${len[side]}-korts ${NAME[side]} → ${level}${SYM[side]} (naturlig, krav 1 rond).` }
+      return { call: `${level}${BID[side]}`, rule: 'ny färg (krav)', explanation: `Egen 5+ ${SYM[side]} → ${level}${SYM[side]} (naturlig, krav 1 rond).` }
     }
   }
   if (isBalanced(hand) && p >= 15) {
-    return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp balanserad utan fit → 3NT (till spel).` }
+    return { call: '3NT', rule: '3NT till spel', explanation: `15+ balanserad utan fit → 3NT (till spel).` }
   }
   // 15+ utan billig färg/sang: Ogust värderar öppnarens hand. 11–14 utan fit
   // som inte kan kräva billigt PASSAR — partnerns svaga tvåa står bäst själv.
   if (p >= 15) {
-    return { call: '2NT', rule: 'Ogust', explanation: `${p} hp – utgångsintresse → 2NT (Ogust, värderar öppnarens färg).` }
+    return { call: '2NT', rule: 'Ogust', explanation: `Utgångsintresse (15+) → 2NT (Ogust, värderar öppnarens färg).` }
   }
-  return { call: 'P', rule: 'pass', explanation: `${p} hp utan fit och utan billig egen färg → pass (partnerns spärr står bäst själv).` }
+  return { call: 'P', rule: 'pass', explanation: `Utan fit och utan billig egen färg → pass (partnerns spärr står bäst själv).` }
 }
 
 // === 2. Öppnarens Ogust-svar (steg) =======================================
@@ -98,11 +97,11 @@ export function openerRebidAfterOgust(hand: Hand, opened: Suit): ResponseResult 
   const tops = topHonors(hand, opened)
   const max = p >= 9 // svag tvåa = 6–11; 6–8 = min, 9–11 = max
 
-  if (!max && tops <= 1) return { call: '3C', rule: 'Ogust: min/dålig', explanation: `${p} hp (min 6–8), ${tops} topphonnör → 3♣.` }
-  if (!max) return { call: '3D', rule: 'Ogust: min/bra', explanation: `${p} hp (min 6–8), ${tops} topphonnörer → 3♦.` }
-  if (tops <= 1) return { call: '3H', rule: 'Ogust: max/dålig', explanation: `${p} hp (max 9–11), ${tops} topphonnör → 3♥.` }
-  if (tops === 2) return { call: '3S', rule: 'Ogust: max/bra', explanation: `${p} hp (max 9–11), 2 topphonnörer → 3♠.` }
-  return { call: '3NT', rule: 'Ogust: max/utmärkt', explanation: `${p} hp (max 9–11), alla 3 topphonnörer → 3NT.` }
+  if (!max && tops <= 1) return { call: '3C', rule: 'Ogust: min/dålig', explanation: `Min (6–8), dålig färg (≤1 topphonnör) → 3♣.` }
+  if (!max) return { call: '3D', rule: 'Ogust: min/bra', explanation: `Min (6–8), bra färg (2+ topphonnörer) → 3♦.` }
+  if (tops <= 1) return { call: '3H', rule: 'Ogust: max/dålig', explanation: `Max (9–11), dålig färg (≤1 topphonnör) → 3♥.` }
+  if (tops === 2) return { call: '3S', rule: 'Ogust: max/bra', explanation: `Max (9–11), bra färg (2 topphonnörer) → 3♠.` }
+  return { call: '3NT', rule: 'Ogust: max/utmärkt', explanation: `Max (9–11), solid färg (3 topphonnörer) → 3NT.` }
 }
 
 // === 3. Öppnarens svar på krav-ny-färg ====================================
@@ -117,10 +116,10 @@ export function openerRebidAfterNewSuit(hand: Hand, opened: Suit, newSuit: Suit)
   if (len[newSuit] >= 3) {
     const responderLevel = levelAbove(newSuit, opened, 2) // nivån svararen bjöd färgen på
     const level = responderLevel + (max ? 2 : 1)
-    return { call: `${level}${BID[newSuit]}`, rule: 'rebid: stöd', explanation: `${p} hp, ${len[newSuit]} stöd i ${NAME[newSuit]} → ${level}${SYM[newSuit]}${max ? ' (max, hopp)' : ' (min)'}.` }
+    return { call: `${level}${BID[newSuit]}`, rule: 'rebid: stöd', explanation: `3+ stöd i ${SYM[newSuit]} → ${level}${SYM[newSuit]}${max ? ' (max, hopp)' : ' (min)'}.` }
   }
   // Annars rebjuda egen 6-korts färg (minimum).
-  return { call: `3${BID[opened]}`, rule: 'rebid: egen färg', explanation: `${p} hp, 6 ${NAME[opened]} utan stöd → 3${SYM[opened]} (minimum).` }
+  return { call: `3${BID[opened]}`, rule: 'rebid: egen färg', explanation: `6 ${SYM[opened]} utan stöd → 3${SYM[opened]} (minimum).` }
 }
 
 // === 4. Svararens placering efter Ogust-svaret ============================
@@ -134,18 +133,18 @@ export function responderPlaceAfterOgust(hand: Hand, opened: Suit, ogust: Respon
   const max = ogust.rule === 'Ogust: max/dålig' || ogust.rule === 'Ogust: max/bra' || ogust.rule === 'Ogust: max/utmärkt'
 
   if (isMajor(opened)) {
-    if (ogust.rule === 'Ogust: max/utmärkt') return { call: `4${bid}`, rule: 'till spel', explanation: `${p} hp mittemot max + solid färg → 4${sym}.` }
-    if (max) return { call: `4${bid}`, rule: 'till spel', explanation: `${p} hp mittemot maximum → 4${sym} (utgång).` }
+    if (ogust.rule === 'Ogust: max/utmärkt') return { call: `4${bid}`, rule: 'till spel', explanation: `Mittemot max + solid färg → 4${sym}.` }
+    if (max) return { call: `4${bid}`, rule: 'till spel', explanation: `Mittemot maximum → 4${sym} (utgång).` }
     // Svararens EGEN styrka kan bära utgång även mittemot en MINIMUM svag tvåa:
     // ~19+ hp + partnerns 6-korts färg ≈ utgång oavsett öppnarens tier (felrapport
     // #22: Öst hade 22 hp och stack i 3♠). Med trumfstöd (3+) → utgång i färgen;
     // utan fit (kort trumf) → 3NT och låt partnerns långfärg ge sticken.
     if (p >= 19) {
       return len[opened] >= 3
-        ? { call: `4${bid}`, rule: 'till spel', explanation: `${p} hp på egen styrka + ${len[opened]} trumf → 4${sym} (utgång, även mittemot minimum).` }
-        : { call: '3NT', rule: 'till spel (3NT)', explanation: `${p} hp på egen styrka men bara ${len[opened]} trumf → 3NT (partnerns långfärg ger stick).` }
+        ? { call: `4${bid}`, rule: 'till spel', explanation: `Stark hand (19+) + trumfstöd → 4${sym} (utgång, även mittemot minimum).` }
+        : { call: '3NT', rule: 'till spel (3NT)', explanation: `Stark hand (19+) men kort trumf → 3NT (partnerns långfärg ger stick).` }
     }
-    return { call: `3${bid}`, rule: 'svararens signoff', explanation: `${p} hp mittemot minimum → 3${sym} (stannar, öppnaren passar).` }
+    return { call: `3${bid}`, rule: 'svararens signoff', explanation: `Mittemot minimum → 3${sym} (stannar, öppnaren passar).` }
   }
 
   // Minoröppning (2♦): öppnarens Ogust-svar ligger REDAN på 3-läget (3♣–3NT),
@@ -154,11 +153,11 @@ export function responderPlaceAfterOgust(hand: Hand, opened: Suit, ogust: Respon
   if (max) {
     // Sikta utgång (3NT). Är svaret redan 3NT (max/utmärkt) → passa det.
     return ogust.call === '3NT'
-      ? { call: 'P', rule: 'svararens pass', explanation: `${p} hp mittemot max – 3NT redan nått → pass.`, uncertain: true }
-      : { call: '3NT', rule: 'till spel', explanation: `${p} hp mittemot max → 3NT.`, uncertain: true }
+      ? { call: 'P', rule: 'svararens pass', explanation: `Mittemot max – 3NT redan nått → pass.`, uncertain: true }
+      : { call: '3NT', rule: 'till spel', explanation: `Mittemot max → 3NT.`, uncertain: true }
   }
   // Minimum: stanna i trumf. Är svaret redan 3♦ (min/bra) → passa; annars rätta till 3♦.
   return ogust.call === `3${bid}`
-    ? { call: 'P', rule: 'svararens pass', explanation: `${p} hp mittemot minimum – 3${sym} redan nått → pass.`, uncertain: true }
-    : { call: `3${bid}`, rule: 'svararens signoff', explanation: `${p} hp mittemot minimum → 3${sym} (delkontrakt).`, uncertain: true }
+    ? { call: 'P', rule: 'svararens pass', explanation: `Mittemot minimum – 3${sym} redan nått → pass.`, uncertain: true }
+    : { call: `3${bid}`, rule: 'svararens signoff', explanation: `Mittemot minimum → 3${sym} (delkontrakt).`, uncertain: true }
 }

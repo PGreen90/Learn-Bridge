@@ -22,7 +22,6 @@ import { hasStopper } from './overcalls'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 
@@ -54,7 +53,7 @@ export function naturalNTOvercall(hand: Hand): ResponseResult {
   return {
     call: `2${BID[long]}`,
     rule: 'naturligt inkliv (1NT)',
-    explanation: `${len[long]}-korts ${NAME[long]}, ${p} hp → 2${SYM[long]} (naturligt inkliv över deras 1NT).`,
+    explanation: `6+ ${SYM[long]}, 11–15 hp → 2${SYM[long]} (naturligt inkliv över deras 1NT).`,
   }
 }
 
@@ -75,7 +74,7 @@ export function lebensohlAfter1NT(hand: Hand, theirSuit: Suit): ResponseResult {
       return {
         call: `2${BID[hiMajor]}`,
         rule: 'Lebensohl naturligt 2-läge',
-        explanation: `svag hand med ${len[hiMajor]}-korts ${NAME[hiMajor]} → 2${SYM[hiMajor]} (naturligt, konkurrerar).`,
+        explanation: `svag hand med 5+ ${SYM[hiMajor]} → 2${SYM[hiMajor]} (naturligt, konkurrerar).`,
       }
     }
     // Svag med en lång färg som kräver 3-läget → relä för att stanna lågt.
@@ -83,7 +82,7 @@ export function lebensohlAfter1NT(hand: Hand, theirSuit: Suit): ResponseResult {
       return {
         call: '2NT',
         rule: 'Lebensohl 2NT (svag)',
-        explanation: `svag hand med ${len[ourLong]}-korts ${NAME[ourLong]} → 2NT (relä till 3♣, passar/rättar lågt).`,
+        explanation: `svag hand med 5+ ${SYM[ourLong]} → 2NT (relä till 3♣, passar/rättar lågt).`,
       }
     }
     return { call: 'P', rule: 'pass', explanation: 'svag hand utan färg → pass (försvarar deras inkliv).' }
@@ -94,7 +93,7 @@ export function lebensohlAfter1NT(hand: Hand, theirSuit: Suit): ResponseResult {
     return {
       call: `3${BID[ourLong]}`,
       rule: 'Lebensohl direkt 3-läge (krav)',
-      explanation: `utgångskrav med ${len[ourLong]}-korts ${NAME[ourLong]} → 3${SYM[ourLong]} (direkt = krav).`,
+      explanation: `utgångskrav med 5+ ${SYM[ourLong]} → 3${SYM[ourLong]} (direkt = krav).`,
     }
   }
 
@@ -104,8 +103,8 @@ export function lebensohlAfter1NT(hand: Hand, theirSuit: Suit): ResponseResult {
     call: '3NT',
     rule: 'Lebensohl 3NT (utgång)',
     explanation: stop
-      ? `utgång med stopp i ${NAME[theirSuit]} → 3NT.`
-      : `utgång, jämn hand → 3NT (öppnaren väntas ha stopp i ${NAME[theirSuit]}).`,
+      ? `utgång med stopp i ${SYM[theirSuit]} → 3NT.`
+      : `utgång, jämn hand → 3NT (öppnaren väntas ha stopp i ${SYM[theirSuit]}).`,
   }
 }
 
@@ -117,11 +116,11 @@ export function lebensohlAfter1NTRebid(hand: Hand, theirSuit: Suit): ResponseRes
   const len = lengths(hand)
   const ourLong = longestOther(len, theirSuit, 5)
   if (!ourLong || ourLong === 'clubs') {
-    return { call: 'P', rule: 'Lebensohl 3♣ (svag, stannar)', explanation: 'min långfärg är klöver → passar 3♣.' }
+    return { call: 'P', rule: 'Lebensohl 3♣ (svag, stannar)', explanation: 'min långfärg är ♣ → passar 3♣.' }
   }
   return {
     call: `3${BID[ourLong]}`,
     rule: 'Lebensohl 3-läge (svag, rättar)',
-    explanation: `rättar partnerns 3♣ till min ${len[ourLong]}-korts ${NAME[ourLong]} → 3${SYM[ourLong]} (partnern lägger upp).`,
+    explanation: `rättar partnerns 3♣ till min ${SYM[ourLong]} → 3${SYM[ourLong]} (partnern lägger upp).`,
   }
 }

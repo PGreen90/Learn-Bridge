@@ -30,9 +30,9 @@ export function respondToMajorPassed(hand: Hand, opened: Major): ResponseResult 
   // Drury: limithöjning (10–12 hp) med stöd → konstgjord 2♣/2♦.
   if (p >= 10 && p <= 12 && support >= 3) {
     if (support >= 4) {
-      return { call: '2D', rule: 'Drury', explanation: `${p} hp, ${support} trumf (passad hand) → 2♦ (Drury, limithöjning 4+).` }
+      return { call: '2D', rule: 'Drury', explanation: `10–12 hp, 4+ trumf (passad hand) → 2♦ (Drury, limithöjning).` }
     }
-    return { call: '2C', rule: 'Drury', explanation: `${p} hp, 3 trumf (passad hand) → 2♣ (Drury, limithöjning).` }
+    return { call: '2C', rule: 'Drury', explanation: `10–12 hp, 3 trumf (passad hand) → 2♣ (Drury, limithöjning).` }
   }
 
   // Övriga svar: vanligt schema (passad hand → begränsat, inga GF-bud i praktiken).
@@ -47,14 +47,14 @@ export function openerRebidAfterDrury(hand: Hand, opened: Major): ResponseResult
 
   // Riktig öppning → utgång (mot 10–12 limithöjning räcker ~14+ för 25+).
   if (p >= 15) {
-    return { call: `4${bid}`, rule: 'Drury: riktig öppning', explanation: `${p} hp – riktig öppning, utgång → 4${sym}.` }
+    return { call: `4${bid}`, rule: 'Drury: riktig öppning', explanation: `Riktig öppning (15+) → 4${sym} (utgång).` }
   }
   // Måttlig öppning → inbjuder genom att bjuda 3 i färgen (krav på svararens topp).
   if (p >= 13) {
-    return { call: `3${bid}`, rule: 'Drury: utgångsförsök', explanation: `${p} hp – möjlig utgång → 3${sym} (utgångsförsök).` }
+    return { call: `3${bid}`, rule: 'Drury: utgångsförsök', explanation: `Möjlig utgång (13–14) → 3${sym} (utgångsförsök).` }
   }
   // Lätt öppning → rebjuden högfärg = signoff (svararen passar).
-  return { call: `2${bid}`, rule: 'Drury: lätt öppning', explanation: `${p} hp – lätt öppning → 2${sym} (signoff, svararen passar).` }
+  return { call: `2${bid}`, rule: 'Drury: lätt öppning', explanation: `Lätt öppning → 2${sym} (signoff, svararen passar).` }
 }
 
 /**
@@ -75,9 +75,9 @@ export function responderAnswerDrury(hand: Hand, opened: Major, rebid: ResponseR
   if (rebid.call === `3${bid}`) {
     const sp = pointsWithFloor(hand, opened, 'support')
     if (sp.points >= 11) {
-      return { call: `4${bid}`, rule: 'Drury: accepterar utgångsförsök', explanation: `${sp.text} – toppen av limithöjningen → 4${sym} (accepterar).` }
+      return { call: `4${bid}`, rule: 'Drury: accepterar utgångsförsök', explanation: `Toppen av limithöjningen → 4${sym} (accepterar).` }
     }
-    return { call: 'P', rule: 'Drury: avböjer utgångsförsök', explanation: `${sp.text} – botten av limithöjningen → pass (avböjer 3${sym}).` }
+    return { call: 'P', rule: 'Drury: avböjer utgångsförsök', explanation: `Botten av limithöjningen → pass (avböjer 3${sym}).` }
   }
 
   // Öppnaren har redan placerat kontraktet (2M signoff / 4M utgång) → pass.

@@ -20,7 +20,6 @@ import type { ResponseResult } from './responses'
 
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 /** Bud med färgsymbol för förklaringstexten ("6C" → "6♣"); NT/pass oförändrade. */
@@ -81,7 +80,7 @@ export function respondToQueenAsk(hand: Hand, trump: Suit): ResponseResult {
   const kingSuit = RANK_ORDER.find((s) => s !== trump && hasRank(hand, s, 'K'))
   if (!kingSuit) return { call: '5NT', rule: 'trumfdam: ja, ingen sidokung', explanation: 'trumfdam men ingen sidokung → 5NT.' }
   const level = rankIdx(kingSuit) > rankIdx(trump) ? 5 : 6
-  return { call: `${level}${LETTER[kingSuit]}`, rule: 'trumfdam: ja + kung', explanation: `trumfdam + kung i ${NAME[kingSuit]} → ${level}${SYM[kingSuit]}.` }
+  return { call: `${level}${LETTER[kingSuit]}`, rule: 'trumfdam: ja + kung', explanation: `trumfdam + kung i ${SYM[kingSuit]} → ${level}${SYM[kingSuit]}.` }
 }
 
 // === §6.2 Cue-bid (kontrollbud) ============================================
@@ -96,8 +95,7 @@ export function cheapestCueBid(hand: Hand, trump: Suit, aboveSuit: Suit | null =
     if (s === trump) continue
     if (aboveSuit && rankIdx(s) <= rankIdx(aboveSuit)) continue
     if (firstRoundControl(hand, s)) {
-      const why = lengths(hand)[s] === 0 ? 'renons' : 'ess'
-      return { call: `4${LETTER[s]}`, rule: 'cue-bid', explanation: `första-rondskontroll (${why}) i ${NAME[s]} → 4${SYM[s]}.` }
+      return { call: `4${LETTER[s]}`, rule: 'cue-bid', explanation: `första-rondskontroll i ${SYM[s]} → 4${SYM[s]}.` }
     }
   }
   return null
@@ -111,7 +109,7 @@ export function respondToKingAsk(hand: Hand, trump: Suit): ResponseResult {
   if (kingSuits.length === 0) return { call: `6${LETTER[trump]}`, rule: 'Sjöberg 5NT', explanation: `ingen sidokung → 6 i trumf (6${SYM[trump]}).` }
   if (kingSuits.length >= 2) return { call: `7${LETTER[trump]}`, rule: 'Sjöberg 5NT', explanation: `två+ användbara kungar → 7 i trumf (7${SYM[trump]}).` }
   const s = kingSuits[0]
-  return { call: `6${LETTER[s]}`, rule: 'Sjöberg 5NT', explanation: `kungen i ${NAME[s]} → 6${SYM[s]}.` }
+  return { call: `6${LETTER[s]}`, rule: 'Sjöberg 5NT', explanation: `kungen i ${SYM[s]} → 6${SYM[s]}.` }
 }
 
 // === §6.4 Gerber (ess-/kungfråga över NT) ==================================
@@ -152,5 +150,5 @@ export function respondToExclusion(hand: Hand, trump: Suit, voidSuit: Suit): Res
   // Steg: 1=(1/4), 2=(0/3), 3=(2 utan dam), 4=(2 med dam).
   const step = kc === 1 || kc === 4 ? 1 : kc === 0 || kc === 3 ? 2 : q ? 4 : 3
   const call = callNStepsAbove(`5${LETTER[voidSuit]}`, step)
-  return { call, rule: 'Exclusion', explanation: `${kc} nyckelkort (esset i ${NAME[voidSuit]} borträknat)${q ? ' med trumfdam' : ''} → steg ${step} (${prettyBid(call)}).` }
+  return { call, rule: 'Exclusion', explanation: `${kc} nyckelkort (esset i ${SYM[voidSuit]} borträknat)${q ? ' med trumfdam' : ''} → steg ${step} (${prettyBid(call)}).` }
 }

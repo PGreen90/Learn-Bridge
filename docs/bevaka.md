@@ -9,6 +9,16 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## 6-5-handen: hinner motorn visa 6:e kortet? (2026-08-24, ägarnotering)
+- **Budgivningsfråga, ej textfråga.** Med 6-korts lågfärg + 5-korts högfärg (16+)
+  öppnar motorn lågfärgen (`minor-regeln`, `openings.ts`) och *planerar* att visa
+  högfärgen och sedan lågfärgen igen. Ägarens poäng (2026-08-24): en 6-5 är svår
+  att bjuda ut — det kräver att öppnaren är **inne minst tre gånger**, och när
+  lågfärgen väl bjuds om har den **bara lovat 5 kort**. **Bevaka:** hinner motorns
+  fortsättning (särskilt i konkurrens, t.ex. 1♣–(1♦)–1♠–…–2♣) faktiskt visa den
+  6:e lågfärgen och 5:e högfärgen, eller stannar formen halvvisad? Om det skaver i
+  spel → kandidat för en budgivnings-fix (utanför budförklarings-NU:t).
+
 ## Felrapporter #49 + #51 (2026-08-18) — spelfixar ur "Spela kort"
 - **Tredje hand HÖGT bakom en dold spelförare (#51 + ägarnoteringen):** ledde
   partnern en färg och "vinner" bara tills den dolda spelföraren spelar sist,

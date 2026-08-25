@@ -16,6 +16,88 @@ function callSeat(notation: string, seatOrder: 1 | 2 | 3 | 4, vulnerable = false
   return classifyOpening(parseHand(notation), vulnerable, seatOrder).call
 }
 
+function expl(notation: string): string {
+  return classifyOpening(parseHand(notation)).explanation
+}
+
+function explSeat(notation: string, seatOrder: 1 | 2 | 3 | 4, vulnerable = false): string {
+  return classifyOpening(parseHand(notation), vulnerable, seatOrder).explanation
+}
+
+// ---- Budförklaring: intervall/golv, ALDRIG handens faktiska poäng ------------
+// Ägardirektiv 2026-08-24: förklaringstexten visar vad budet LOVAR (ett intervall
+// "15–17", ett öppet golv "22+" eller kvalitativa ord), aldrig den här handens
+// exakta poäng. Handen i varje fall är vald så dess faktiska hp INTE sammanfaller
+// med intervallets gräns – då avslöjar ett läckt "N hp" sig direkt.
+describe('budförklaring visar löftet, inte handens faktiska poäng', () => {
+  it('1NT: intervall (15–17 hp), inte "16 hp"', () => {
+    const e = expl('S:AQ5 H:KQ7 D:Q842 C:K93') // 16 hp balanserad
+    expect(e).toContain('(15–17 hp)')
+    expect(e).not.toMatch(/\b16 hp\b/)
+  })
+
+  it('balanserad 2♣: öppet golv (22+ hp), inte "23 hp"', () => {
+    const e = expl('S:AKQ H:AQJ D:KQ5 C:Q432') // 23 hp balanserad
+    expect(e).toContain('22+ hp')
+    expect(e).not.toMatch(/\b23 hp\b/)
+  })
+
+  it('obalanserad stark 2♣: "22+ hp", inte "26 hp"', () => {
+    const e = expl('S:AKQJT98 H:AK D:AKQ C:4') // 26 hp obalanserad
+    expect(e).toContain('22+ hp')
+    expect(e).not.toMatch(/\b26 hp\b/)
+  })
+
+  it('1-lägesöppning: golvet (12+ hp) + längd-löftet (5+ korts), inte "13 hp"/"6-korts"', () => {
+    const e = expl('S:AKT652 H:K3 D:Q6 C:J52') // 13 hp, 6 spader
+    expect(e).toContain('12+ hp')
+    expect(e).toContain('5+ ♠') // lovar 5+, avslöjar inte handens 6
+    expect(e).not.toMatch(/\b13 hp\b/)
+    expect(e).not.toContain('6 ♠')
+  })
+
+  it('6-5-öppning: 1♦ avslöjar INTE formen (bara "öppnar lågfärgen")', () => {
+    const e = expl('S:AQJ32 H:KQ D:KJ8752 C:-') // 16 hp, 5 spader + 6 ruter
+    expect(e).toContain('öppnar lågfärgen')
+    expect(e).not.toContain('6-5') // budet lovar inte 6-5
+    expect(e).not.toContain('♠') // avslöjar inte sidohögfärgen
+  })
+
+  it('svag tvåa: intervall (6–11 hp), inte "7 hp"', () => {
+    const e = expl('S:KQT743 H:84 D:Q72 C:95') // 7 hp, 6 spader
+    expect(e).toContain('6–11 hp')
+    expect(e).not.toMatch(/\b7 hp\b/)
+  })
+
+  it('spärr 3-läget: "Svag hand" + längd-löftet (7-korts), utan honnörsläcka', () => {
+    const e = expl('S:KQT7432 H:8 D:Q72 C:95') // 7 hp, 7 spader
+    expect(e).toContain('Svag hand')
+    expect(e).toContain('7 ♠') // standard: 3-läget lovar 7
+    expect(e).not.toMatch(/\b7 hp\b/)
+    expect(e).not.toContain('topphonnörer') // avslöjar inte vårt innehav (punkt 3)
+  })
+
+  it('spärr 4-läget: öppet golv (8+)', () => {
+    const e = expl('S:KQT97432 H:8 D:Q7 C:96') // 8 spader → 4♠
+    expect(e).toContain('8+ ♠')
+    expect(e).not.toContain('topphonnörer')
+  })
+
+  it('tredje hand: öppet golv (10+ hp), INGET tak, ingen honnörsläcka', () => {
+    const e = explSeat('S:KQJ98 H:A54 D:872 C:43', 3) // 10 hp, lätt tredjehandsöppning
+    expect(e).toContain('10+ hp')
+    expect(e).toContain('5+ ♠')
+    expect(e).not.toContain('10–11') // inte ett fast intervall
+    expect(e).not.toContain('topphonnörer')
+  })
+
+  it('pass: "under öppningsstyrka", inte "8 hp"', () => {
+    const e = expl('S:K85 H:Q84 D:J762 C:Q93') // 8 hp balanserad
+    expect(e).toContain('öppningsstyrka')
+    expect(e).not.toMatch(/\b8 hp\b/)
+  })
+})
+
 describe('classifyOpening', () => {
   it('1NT med balanserad 15–17', () => {
     expect(call('S:AQ5 H:KJ7 D:Q842 C:K93')).toBe('1NT') // 15 hp, 3-3-4-3

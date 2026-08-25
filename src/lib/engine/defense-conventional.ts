@@ -13,7 +13,6 @@ import { hasStopper } from './overcalls'
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SUIT_OF_LETTER: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 
@@ -48,7 +47,7 @@ export function defendStrongClub(hand: Hand): ResponseResult {
   const suit = longestOther(len, 'clubs', 5)
   if (suit && hcp(hand) >= 8) {
     const lvl = rankIdx(suit) > rankIdx('clubs') ? 1 : 2
-    return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]} (naturligt).` }
+    return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `8+ hp med 5+ ${SYM[suit]} → ${lvl}${SYM[suit]} (naturligt).` }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen Mathe-hand → pass.' }
 }
@@ -79,19 +78,19 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12, ba
   // eller inkliver naturligt i stället.
   const twoLongOther = RANK_ORDER.filter((s) => s !== theirSuit && len[s] >= 5)
   if (twoLongOther.length >= 2 && p >= 15) {
-    return { call: `3${BID[theirSuit]}`, rule: 'cue (stark tvåfärg)', explanation: `${p} hp, 5-5 i ${NAME[twoLongOther[0]]}+${NAME[twoLongOther[1]]} → cue ${SYM[theirSuit]} (stark tvåfärg, krav).` }
+    return { call: `3${BID[theirSuit]}`, rule: 'cue (stark tvåfärg)', explanation: `15+ hp, 5-5 i ${SYM[twoLongOther[0]]}+${SYM[twoLongOther[1]]} → cue ${SYM[theirSuit]} (stark tvåfärg, krav).` }
   }
   // 2NT-inkliv: 15–18 balanserad med stopp (balansering: 12–15 — lånad kung).
   const ntFloor = balancing ? 12 : 15
   const ntCeil = balancing ? 15 : 18
   if (isBalanced(hand) && p >= ntFloor && p <= ntCeil && hasStopper(hand, theirSuit)) {
-    return { call: '2NT', rule: `2NT-inkliv (${ntFloor}–${ntCeil})`, explanation: `${p} hp balanserad med stopp → 2NT-inkliv.` }
+    return { call: '2NT', rule: `2NT-inkliv (${ntFloor}–${ntCeil})`, explanation: `Balanserad (${ntFloor}–${ntCeil} hp) med stopp → 2NT-inkliv.` }
   }
   // Upplysningsdubbling (takeout). I balansering räcker ≤3 kort i deras färg.
   // Ligger FÖRE 3NT-taket: kan handen dubbla (kort i deras färg) är X:et mer
   // flexibelt även med 19+ — 3NT är utloppet för händer med LÄNGD i deras färg.
   if (isTakeout(hand, theirSuit, takeoutFloor, balancing ? 3 : 2)) {
-    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[theirSuit]}, stöd i övriga → X.` }
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${takeoutFloor}+ hp, korthet i ${SYM[theirSuit]}, stöd i övriga → X.` }
   }
   // 3NT till spel (TAKET, etapp 6 hål 3): balanserad över 2NT-fönstret med
   // stopp, eller en stark 6+ minor (två topphonnörer = spelkälla) med stopp.
@@ -104,8 +103,8 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12, ba
   )
   if (hasStopper(hand, theirSuit) && ((isBalanced(hand) && p >= ntGameFloor) || (strongMinor && p >= 15))) {
     const why = strongMinor && !(isBalanced(hand) && p >= ntGameFloor)
-      ? `${p} hp med stark ${len[strongMinor]}-korts ${NAME[strongMinor]} (spelkälla) och stopp i ${NAME[theirSuit]}`
-      : `${p} hp balanserad med stopp i ${NAME[theirSuit]}`
+      ? `stark 6+ ${SYM[strongMinor]} (spelkälla) och stopp i ${SYM[theirSuit]}`
+      : `balanserad med stopp i ${SYM[theirSuit]}`
     return { call: '3NT', rule: '3NT till spel', explanation: `${why} → 3NT till spel.` }
   }
   // Naturligt inkliv med en 5+ färg (balansering: 2-lägesbud redan från 7 hp).
@@ -114,13 +113,13 @@ export function defendWeakTwo(hand: Hand, theirSuit: Suit, takeoutFloor = 12, ba
     const lvl = rankIdx(suit) > rankIdx(theirSuit) ? 2 : 3
     const floor = balancing && lvl === 2 ? 7 : 10
     if (p >= floor && p <= 16) {
-      return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]}.` }
+      return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `5+ ${SYM[suit]} → ${lvl}${SYM[suit]} (naturligt).` }
     }
   }
   // 17+ som inte fick plats i något fönster: sälj ALDRIG given — X (upplysning;
   // partnern svarar, och den starka handen får beskriva sig på nästa varv).
   if (p >= 17) {
-    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp – för stark för att sälja given → X (upplysning).` }
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `17+ hp – för stark för att sälja given → X (upplysning).` }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass.' }
 }
@@ -130,16 +129,16 @@ export function defendMulti(hand: Hand): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   if (isBalanced(hand) && p >= 15 && p <= 18 && hasStopper(hand, 'diamonds')) {
-    return { call: '2NT', rule: '2NT (15–18)', explanation: `${p} hp balanserad → 2NT.` }
+    return { call: '2NT', rule: '2NT (15–18)', explanation: `Balanserad (15–18 hp) → 2NT.` }
   }
   // Naturligt högfärgsinkliv (2♥/2♠) med 5+.
   const major = (['hearts', 'spades'] as Suit[]).find((m) => len[m] >= 5)
   if (major && p >= 10 && p <= 15) {
-    return { call: `2${BID[major]}`, rule: 'naturligt inkliv', explanation: `${len[major]}-korts ${NAME[major]} → 2${SYM[major]}.` }
+    return { call: `2${BID[major]}`, rule: 'naturligt inkliv', explanation: `(10–15 hp) med 5+ ${SYM[major]} → 2${SYM[major]}.` }
   }
   // X = stark/takeout-aktig (~13+).
   if (p >= 13) {
-    return { call: 'X', rule: 'X (stark/takeout)', explanation: `${p} hp – stark/takeout-aktig → X.` }
+    return { call: 'X', rule: 'X (stark/takeout)', explanation: `13+ hp – stark/takeout-aktig → X.` }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass.' }
 }
@@ -167,23 +166,23 @@ export function defendPreempt(hand: Hand, theirSuit: Suit, level: number, balanc
   // 3NT till spel: stopp i deras färg + utgångsvärden, balanserad.
   const ntFloor = raised ? (balancing ? 16 : 19) : 16
   if (level === 3 && isBalanced(hand) && p >= ntFloor && hasStopper(hand, theirSuit)) {
-    return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i ${NAME[theirSuit]} → 3NT.` }
+    return { call: '3NT', rule: '3NT till spel', explanation: `Balanserad med stopp i ${SYM[theirSuit]} → 3NT.` }
   }
   // Upplysningsdubbling (takeout): kort i deras färg, stöd i övriga, 14+ (högre nivå).
   if (isTakeout(hand, theirSuit, borrow ? 11 : 14, borrow ? 3 : 2)) {
-    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp, kort i ${NAME[theirSuit]}, stöd i övriga → X (takeout).` }
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${borrow ? 11 : 14}+ hp, korthet i ${SYM[theirSuit]}, stöd i övriga → X (takeout).` }
   }
   // Naturligt inkliv med en bra 5+ färg (på nivån ovanför). Tak 16 — starkare
   // händer dubblar först och visar färgen sedan (§7.2-principen).
   const suit = longestOther(len, theirSuit, 5)
   if (suit && p >= (borrow ? 10 : 13) && p <= 16) {
     const lvl = rankIdx(suit) > rankIdx(theirSuit) ? level : level + 1
-    return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `${len[suit]}-korts ${NAME[suit]} → ${lvl}${SYM[suit]}.` }
+    return { call: `${lvl}${BID[suit]}`, rule: 'naturligt inkliv', explanation: `5+ ${SYM[suit]} → ${lvl}${SYM[suit]} (naturligt).` }
   }
   // 17+ som inte fick plats i något fönster: sälj ALDRIG given → X (upplysning;
   // partnern svarar, och den starka handen får beskriva sig på nästa varv).
   if (p >= 17) {
-    return { call: 'X', rule: 'upplysningsdubbling', explanation: `${p} hp – för stark för att sälja given → X (upplysning).` }
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `17+ hp – för stark för att sälja given → X (upplysning).` }
   }
   return { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass (spärren tar plats).' }
 }

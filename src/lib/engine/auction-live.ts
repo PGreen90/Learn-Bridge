@@ -320,7 +320,7 @@ function doublerRaisesAdvance(deal: Deal, history: ResolvedCall[], seat: Seat): 
   if (xxEscape) return decline('Partnerns flykt över redubblingen var tvingad (lovar inga poäng) – pass.')
 
   const support = lengths(hand)[advSuit]
-  if (support < 3) return decline(`Utan stöd i partnerns ${SWE_NAME[letterOfSuit(advSuit)]} – pass.`)
+  if (support < 3) return decline(`Utan stöd i partnerns ${SWE_SYM[letterOfSuit(advSuit)]} – pass.`)
 
   // Hopp eller ej: partnerns svar mot billigaste möjliga nivån vid den punkten.
   let prevLevel = 0
@@ -344,22 +344,22 @@ function doublerRaisesAdvance(deal: Deal, history: ResolvedCall[], seat: Seat): 
   if (wasJump) {
     // Partnerns hopp = 9–11 (inbjudan): acceptera i högfärg med 15+.
     if (sp >= 15 && isMajor && legal.includes(gameBid)) {
-      return { seat, bid: gameBid, rule: 'dubblaren accepterar inbjudan', explanation: `${sp} stödpoäng mot partnerns hoppbud (9–11) → utgång ${gameBid}.` }
+      return { seat, bid: gameBid, rule: 'dubblaren accepterar inbjudan', explanation: `Utgångsvärden mot partnerns hoppbud (9–11) → utgång ${gameBid}.` }
     }
-    return decline(`${sp} stödpoäng – avböjer partnerns inbjudan (accept kräver 15+).`)
+    return decline(`Minimum – avböjer partnerns inbjudan (accept kräver 15+).`)
   }
 
   // Fritt icke-hopp = ~6–9.
   if (sp >= (isMajor ? 19 : 21) && legal.includes(gameBid)) {
-    return { seat, bid: gameBid, rule: 'dubblaren bjuder utgång', explanation: `${sp} stödpoäng mot partnerns fria svar (~6–9) → utgång ${gameBid}.` }
+    return { seat, bid: gameBid, rule: 'dubblaren bjuder utgång', explanation: `Utgångsvärden mot partnerns fria svar (~6–9) → utgång ${gameBid}.` }
   }
   if (sp >= 16) {
     const raise = cheapestBidIn(history, seat, letterOfSuit(advSuit))
     if (raise && parseContractBid(raise)!.level < (isMajor ? 4 : 5) && legal.includes(raise)) {
-      return { seat, bid: raise, rule: 'dubblaren höjer (inbjudan)', explanation: `${sp} stödpoäng med ${support}-korts stöd → ${prettyBid(raise)} (inbjudan mot partnerns fria svar).` }
+      return { seat, bid: raise, rule: 'dubblaren höjer (inbjudan)', explanation: `Inbjudan med 3+ stöd → ${prettyBid(raise)} (mot partnerns fria svar).` }
     }
   }
-  return decline(`${sp} stödpoäng – partnerns fria svar lovar ~6–9, utgång kräver mer.`)
+  return decline(`Minimum – partnerns fria svar lovar ~6–9, utgång kräver mer.`)
 }
 
 /**
@@ -726,7 +726,7 @@ function ownDoubledTwoSuiterRescue(
     bid,
     explanation:
       `Mitt tvåfärgsinkliv är konstgjort (5-5 i två andra färger) och står dubblat – ` +
-      `partnern visade ingen preferens, så jag flyr till min längsta visade färg: ${SWE_NAME[letterOfSuit(best)]}.`,
+      `partnern visade ingen preferens, så jag flyr till min längsta visade färg: ${SWE_SYM[letterOfSuit(best)]}.`,
   }
 }
 
@@ -783,7 +783,7 @@ function ownStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Seat): 
   if (!bid || !legal.includes(bid)) return null
   return {
     seat, bid, rule: 'starkt återbud',
-    explanation: `17+ hp – jag bjuder min egna ${SWE_NAME[letter]} över dubblingen (för stark för ett enkelt inkliv, rondkrav – game avgörs nästa varv).`,
+    explanation: `17+ hp – jag bjuder min egna ${SWE_SYM[letter]} över dubblingen (för stark för ett enkelt inkliv, rondkrav – game avgörs nästa varv).`,
   }
 }
 
@@ -917,14 +917,14 @@ function advanceStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Sea
     if (p >= 10) {
       const cue = cheapestBidIn(history, seat, ctx.openStrain)
       if (cue && legal.includes(cue)) {
-        return { seat, bid: cue, rule: 'stöd-cue (slamintresse)', explanation: `${p} hp med ${support} korts stöd i ${SWE_NAME[letter]} → cue i deras färg = utgång + slamintresse.` }
+        return { seat, bid: cue, rule: 'stöd-cue (slamintresse)', explanation: `Utgångsvärden + 3+ stöd i ${SWE_SYM[letter]} → cue i deras färg = utgång + slamintresse.` }
       }
     }
     const target = p >= 7 ? gameLevel : p >= 4 ? Math.min(shownLevel + 2, gameLevel) : Math.min(shownLevel + 1, gameLevel)
     const bid = bidAt(target) ?? bidAt(shownLevel + 1)
     if (bid) {
       const label = target >= gameLevel ? 'utgång' : p >= 4 ? 'hopphöjning (inbjudan)' : 'enkel höjning (minimum)'
-      return { seat, bid, rule: `stödhöjning – ${label}`, explanation: `${p} hp med ${support} korts stöd → ${prettyBid(bid)} (${label}; tvunget svar på det starka återbudet).` }
+      return { seat, bid, rule: `stödhöjning – ${label}`, explanation: `3+ stöd → ${prettyBid(bid)} (${label}; tvunget svar på det starka återbudet).` }
     }
   }
 
@@ -941,13 +941,13 @@ function advanceStrongDoubleRebid(deal: Deal, history: ResolvedCall[], seat: Sea
     const bid = cheapestBidIn(history, seat, letterOfSuit(chosen))
     if (bid && legal.includes(bid)) {
       const same = chosen === firstSuit
-      return { seat, bid, rule: 'tvångssvar (utan stöd)', explanation: `Utan stöd i ${SWE_NAME[letter]} → ${same ? `bjuder om min ${SWE_NAME[letterOfSuit(chosen)]} (5+)` : `näst längsta objudna (${SWE_NAME[letterOfSuit(chosen)]})`} = tvång, lovar inga poäng.` }
+      return { seat, bid, rule: 'tvångssvar (utan stöd)', explanation: `Utan stöd i ${SWE_SYM[letter]} → ${same ? `bjuder om min ${SWE_SYM[letterOfSuit(chosen)]} (5+)` : `näst längsta objudna (${SWE_SYM[letterOfSuit(chosen)]})`} = tvång, lovar inga poäng.` }
     }
   }
   // Nödfall (ingen färg att visa): ge minsta stöd i dubblarens färg (fortsatt tvång).
   const fallback = cheapestBidIn(history, seat, letter)
   if (fallback && legal.includes(fallback)) {
-    return { seat, bid: fallback, rule: 'tvångssvar (preferens)', explanation: `Inget eget bud → minsta preferens i ${SWE_NAME[letter]} (tvunget svar).` }
+    return { seat, bid: fallback, rule: 'tvångssvar (preferens)', explanation: `Inget eget bud → minsta preferens i ${SWE_SYM[letter]} (tvunget svar).` }
   }
   return null
 }
@@ -990,7 +990,7 @@ function strongDoublerSecondRebid(deal: Deal, history: ResolvedCall[], seat: Sea
     const p = hcp(hand)
     const accept = raiseLevel >= shownLevel + 2 ? p >= 18 : p >= 21
     if (accept && legal.includes(game)) {
-      return { seat, bid: game, rule: 'accepterar utgång', explanation: `${p} hp mittemot partnerns stödhöjning → utgång ${game}.` }
+      return { seat, bid: game, rule: 'accepterar utgång', explanation: `Utgångsvärden mittemot partnerns stödhöjning → utgång ${game}.` }
     }
     return null // minimum → passa höjningen (delkontrakt)
   }
@@ -1001,13 +1001,13 @@ function strongDoublerSecondRebid(deal: Deal, history: ResolvedCall[], seat: Sea
   if (sixPlus && tp >= 22 && shownLevel === 1) {
     const jump = `3${letter}` as Bid
     if (legal.includes(jump)) {
-      return { seat, bid: jump, rule: 'starkt återbud (utgångskrav)', explanation: `${len[suit]} korts ${SWE_NAME[letter]}, ${tp} med fördelning (≥22) → hopp till ${prettyBid(jump)} = utgångskrav.` }
+      return { seat, bid: jump, rule: 'starkt återbud (utgångskrav)', explanation: `6+ ${SWE_SYM[letter]} (≥22 med fördelning) → hopp till ${prettyBid(jump)} = utgångskrav.` }
     }
   }
   // Annars: bjud om färgen på lägsta nivå (ej krav; delkontrakt mot en tom partner).
   const low = cheapestBidIn(history, seat, letter)
   if (low && legal.includes(low)) {
-    return { seat, bid: low, rule: 'starkt återbud (lägsta)', explanation: `${len[suit]} korts ${SWE_NAME[letter]}, ${tp} med fördelning – bjuder om färgen lägst (${prettyBid(low)}); ej utgångskrav mot ett tvångssvar.` }
+    return { seat, bid: low, rule: 'starkt återbud (lägsta)', explanation: `6+ ${SWE_SYM[letter]} – bjuder om färgen lägst (${prettyBid(low)}); ej utgångskrav mot ett tvångssvar.` }
   }
   return null
 }
@@ -1034,10 +1034,10 @@ function answerStrongDoubleGameForce(deal: Deal, history: ResolvedCall[], seat: 
   // Gren A: HOPPET till 3-läget i dubblarens färg (från ett 1-läges återbud) = krav.
   if (second.strain === letter && second.level === 3 && ctx.doublerBids[0].level === 1) {
     if (support >= 1 && legal.includes(game)) {
-      return { seat, bid: game, rule: 'utgång (1–2 korts stöd)', explanation: `Utgångskravet accepteras: ${support} korts stöd i ${SWE_NAME[letter]} → ${prettyBid(game)} (minimum men utgång).` }
+      return { seat, bid: game, rule: 'utgång (1–2 korts stöd)', explanation: `Utgångskravet accepteras: stöd i ${SWE_SYM[letter]} → ${prettyBid(game)} (minimum men utgång).` }
     }
     if (legal.includes('3NT')) {
-      return { seat, bid: '3NT', rule: 'nekar stöd (3NT)', explanation: `Nekar helt stöd i ${SWE_NAME[letter]}, svagast möjliga → 3NT.` }
+      return { seat, bid: '3NT', rule: 'nekar stöd (3NT)', explanation: `Nekar helt stöd i ${SWE_SYM[letter]}, svagast möjliga → 3NT.` }
     }
     return null
   }
@@ -1055,11 +1055,11 @@ function answerStrongDoubleGameForce(deal: Deal, history: ResolvedCall[], seat: 
   if (second.strain !== letter || second.level >= gameLevel || !advancerCuedFirst) return null
   const p = hcp(hand)
   if (support >= 3 && legal.includes(game)) {
-    return { seat, bid: game, rule: 'cue-advancerns dom (utgång)', explanation: `Cuen visade redan mina värden; med ${support} korts stöd i ${SWE_NAME[letter]} → utgång ${game}.` }
+    return { seat, bid: game, rule: 'cue-advancerns dom (utgång)', explanation: `Cuen visade redan mina värden; med stöd i ${SWE_SYM[letter]} → utgång ${game}.` }
   }
   const stoppAlla = [...ctx.theirSuits].every((s) => hasStopper(hand, s))
   if (p >= 12 && stoppAlla && legal.includes('3NT')) {
-    return { seat, bid: '3NT', rule: 'cue-advancerns dom (3NT)', explanation: `Cuen visade redan mina värden; utan fit i ${SWE_NAME[letter]} men med stopp i deras färg → 3NT.` }
+    return { seat, bid: '3NT', rule: 'cue-advancerns dom (3NT)', explanation: `Cuen visade redan mina värden; utan fit i ${SWE_SYM[letter]} men med stopp i deras färg → 3NT.` }
   }
   return null
 }
@@ -1299,7 +1299,7 @@ function raisePartnerThreeNTToSlam(deal: Deal, history: ResolvedCall[], seat: Se
     bid: '6NT',
     rule: 'slamhöjning av 3NT',
     explanation:
-      `${p} hp mot partnerns visade ${SUIT_OPENING_SHOWN_MIN}+ (öppningen) = minst ${p + SUIT_OPENING_SHOWN_MIN} ihop ` +
+      `Slamzon mot partnerns visade ${SUIT_OPENING_SHOWN_MIN}+ (öppningen) ` +
       `→ 6NT. Slamzonen nås redan mot partnerns minimum, så jag placerar lillslammen i stället för att passa 3NT.`,
   }
 }
@@ -1408,7 +1408,7 @@ function competitiveSlamTry(deal: Deal, history: ResolvedCall[], seat: Seat): Re
     bid: '4NT',
     rule: 'konkurrens-slaminvit (RKC)',
     explanation:
-      `${sp} startpoäng + agreed ${SWE_NAME[letterOfSuit(fit)]} + första-rondskontroll i alla sidofärger → 4NT ` +
+      `Slamvärden + agreed ${SWE_SYM[letterOfSuit(fit)]} + första-rondskontroll i alla sidofärger → 4NT ` +
       `(1430 RKC). Jag har kontrollerna själv, så jag frågar nyckelkort direkt i stället för att cue:a och läcka dem.`,
   }
 }
@@ -1502,7 +1502,7 @@ function openerTriesSlamAfter3NT(deal: Deal, history: ResolvedCall[], seat: Seat
     bid: '4NT',
     rule: 'slamtrevare efter 3NT',
     explanation:
-      `${p} hp med löpande ${SWE_NAME[m.minor]} – för starkt för att bara passa partnerns 3NT ` +
+      `Slamintresse med löpande ${SWE_SYM[m.minor]} – för starkt för att bara passa partnerns 3NT ` +
       `→ 4NT (kvantitativ slamtrevare; partnern lyfter till 6NT med ett maximum).`,
   }
 }
@@ -1534,9 +1534,9 @@ function answerOpenerSlamTry(hand: Hand, minor: string): { call: Bid; rule: stri
         call: '6NT',
         rule: 'accepterar slamtrevare',
         explanation:
-          `${p} hp${fitHonor ? ` med topphonnör i ${SWE_NAME[minor]}` : ''} – maximum av min acceptans → 6NT.`,
+          `Maximum av min acceptans${fitHonor ? ` (topphonnör i ${SWE_SYM[minor]})` : ''} → 6NT.`,
       }
-    : { call: 'P', rule: 'avböjer slamtrevare', explanation: `${p} hp – minimum, avböjer trevaren → 4NT står.` }
+    : { call: 'P', rule: 'avböjer slamtrevare', explanation: `Minimum – avböjer trevaren → 4NT står.` }
 }
 
 // ---- Sangsystemet off-book (§4.3–4.4, felrapport #41) -----------------------
@@ -1713,7 +1713,6 @@ function overcallerAnswersAdvance(deal: Deal, history: ResolvedCall[], seat: Sea
 // handen – aldrig ur den (nu ogiltiga) ideallinjen. Medvetet konservativt; varje
 // regel ska vara TYDLIGT korrekt även om den är smal.
 
-const SWE_NAME: Record<string, string> = { C: 'klöver', D: 'ruter', H: 'hjärter', S: 'spader' }
 const SWE_SYM: Record<string, string> = { C: '♣', D: '♦', H: '♥', S: '♠' }
 /** Bud med färgsymbol för FÖRKLARINGSTEXTEN ("3H" → "3♥"); NT/pass/dubbel oförändrade. */
 function prettyBid(bid: string): string {
@@ -2002,7 +2001,7 @@ function raiseWithFit(
     if (cb.level >= game) return null // tävla inte till utgångsnivå mot en passad partner
     return {
       seat, bid,
-      explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]}, men partnern har passat (minimum) → ${prettyBid(bid)} (tävlande höjning, ej invit).`,
+      explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]}, men partnern har passat (minimum) → ${prettyBid(bid)} (tävlande höjning, ej invit).`,
     }
   }
 
@@ -2031,14 +2030,14 @@ function raiseWithFit(
     if (isBalanced(hand) && legal.includes('3NT' as Bid)) {
       return {
         seat, bid: '3NT' as Bid,
-        explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]} + utgångsvärden (${sp} stödpoäng), balanserad → 3NT.`,
+        explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden, balanserad → 3NT.`,
       }
     }
     const gameBid = `5${partnerSuit.strain}` as Bid
     if (legal.includes(gameBid)) {
       return {
         seat, bid: gameBid,
-        explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]} + utgångsvärden (${sp} stödpoäng) → minorutgång ${gameBid}.`,
+        explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden → minorutgång ${gameBid}.`,
       }
     }
     // Varken 3NT eller 5m lagligt (konkurrensen tryckte upp budet) → fall vidare.
@@ -2078,7 +2077,7 @@ function raiseWithFit(
       return {
         seat,
         bid,
-        explanation: `Stöd för partnerns ${SWE_NAME[partnerSuit.strain]} – ${label} med fit.`,
+        explanation: `Stöd för partnerns ${SWE_SYM[partnerSuit.strain]} – ${label} med fit.`,
       }
     }
   }
@@ -2119,10 +2118,10 @@ function respondWithoutFit(
     const level = Number(bid[0])
     // 1-läget: ny färg från 6+. 2-läget (måste gå upp): kräver 12+ (2/1-anda). Högre: avstå.
     if (level === 1 && points >= 6) {
-      return { seat, bid, explanation: `Egen färg ${SWE_NAME[st]} (4+ kort) – naturligt svar utan stöd för partnern.` }
+      return { seat, bid, explanation: `Egen färg ${SWE_SYM[st]} (4+ kort) – naturligt svar utan stöd för partnern.` }
     }
     if (level === 2 && points >= 12) {
-      return { seat, bid, explanation: `Egen färg ${SWE_NAME[st]} på 2-läget – 4+ kort och utgångsvärden.` }
+      return { seat, bid, explanation: `Egen färg ${SWE_SYM[st]} på 2-läget – 4+ kort och utgångsvärden.` }
     }
   }
 
@@ -2421,7 +2420,7 @@ function forcedMinimumBid(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
     const bid = cheapestBidIn(history, seat, st)
     if (bid) return {
       seat, bid, rule: 'krav – rebjuder egen färg',
-      explanation: `Auktionen är krav – jag får inte passa. Rebjuder min egna ${SWE_NAME[st]} (5+ kort).`,
+      explanation: `Auktionen är krav – jag får inte passa. Rebjuder min egna ${SWE_SYM[st]} (5+ kort).`,
     }
   }
 
@@ -2431,7 +2430,7 @@ function forcedMinimumBid(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
     const bid = cheapestBidIn(history, seat, ps.strain)
     if (bid) return {
       seat, bid, rule: 'krav – stödjer partnern',
-      explanation: `Auktionen är krav – jag får inte passa. Stöder partnerns ${SWE_NAME[ps.strain]} (3+ kort).`,
+      explanation: `Auktionen är krav – jag får inte passa. Stöder partnerns ${SWE_SYM[ps.strain]} (3+ kort).`,
     }
   }
 
@@ -2446,7 +2445,7 @@ function forcedMinimumBid(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
     const bid = cheapestBidIn(history, seat, st)
     if (bid) return {
       seat, bid, rule: 'krav – ny färg',
-      explanation: `Auktionen är krav – jag får inte passa. Visar en ny färg (${SWE_NAME[st]}, 4+ kort).`,
+      explanation: `Auktionen är krav – jag får inte passa. Visar en ny färg (${SWE_SYM[st]}, 4+ kort).`,
     }
   }
 
@@ -2499,7 +2498,7 @@ function placeGameAfterFourthSuit(deal: Deal, history: ResolvedCall[], seat: Sea
     const gameBid = `4${myStrain}` as Bid
     if (legal.includes(gameBid)) return {
       seat, bid: gameBid, rule: 'fjärde färg: utgång i fit',
-      explanation: `Fjärde färg var krav; partnern höjde min ${SWE_NAME[myStrain]} → utgång ${gameBid}.`,
+      explanation: `Fjärde färg var krav; partnern höjde min ${SWE_SYM[myStrain]} → utgång ${gameBid}.`,
     }
   }
   if (legal.includes('3NT')) return {
@@ -2542,7 +2541,7 @@ function respondToStrong2NTRebid(deal: Deal, history: ResolvedCall[], seat: Seat
   if (p < 3) return null // 0–2: passa 2NT (under utgång, korrekt)
   return {
     seat, bid: '3NT', rule: '2♣–2♦–2NT: utgång',
-    explanation: `Partnern visade 22–24 balanserad; ${p} hp räcker till utgång (22+3 = 25) → 3NT.`,
+    explanation: `Partnern visade 22–24 balanserad; utgångsvärden räcker (22+3 = 25) → 3NT.`,
   }
 }
 
@@ -2636,7 +2635,7 @@ function overcallerRaiseAdvance(deal: Deal, history: ResolvedCall[], seat: Seat)
   if (!legalCalls(history, seat).includes(bid)) return null
   return {
     seat, bid, rule: 'stöd åt advancern',
-    explanation: `Partnern avancerade mitt inkliv med en ny färg (${SWE_NAME[advCb.strain]}, lovar 5+) och jag har 3+ stöd → enkel höjning som bekräftar fiten (ej krav).`,
+    explanation: `Partnern avancerade mitt inkliv med en ny färg (${SWE_SYM[advCb.strain]}, lovar 5+) och jag har 3+ stöd → enkel höjning som bekräftar fiten (ej krav).`,
   }
 }
 
@@ -2708,13 +2707,13 @@ function overcallerCompetesAfterCueRaise(deal: Deal, history: ResolvedCall[], se
   if (extra && cheapestLvl <= gameLvl && legal.includes(gameBid)) {
     return {
       seat, bid: gameBid, rule: 'överklivaren tävlar (cue-höjning)',
-      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; med en stark lång svit sätter jag utgång ${gameBid} i stället för att sälja given.`,
+      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_SYM[strain]}; med en stark lång svit sätter jag utgång ${gameBid} i stället för att sälja given.`,
     }
   }
   if (cheapestLvl <= 3) {
     return {
       seat, bid: cheapest, rule: 'överklivaren tävlar (cue-höjning)',
-      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jag tävlar ${cheapest} i vår fit i stället för att sälja given till motståndarna.`,
+      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_SYM[strain]}; jag tävlar ${cheapest} i vår fit i stället för att sälja given till motståndarna.`,
     }
   }
   return null
@@ -2894,13 +2893,13 @@ function ownDONTXToCorrect(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   const len = lengths(deal.hands[seat])
   const suit = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st]).find((s) => len[s] >= 6)
   if (!suit || suit === 'clubs') {
-    return { seat, bid: 'P', rule: 'DONT: pass (klöver)', explanation: 'min DONT-enfärg är klöver → passa partnerns 2♣-relä.' }
+    return { seat, bid: 'P', rule: 'DONT: pass (klöver)', explanation: 'min DONT-enfärg är ♣ → passa partnerns 2♣-relä.' }
   }
   const bid = cheapestBidIn(history, seat, letterOfSuit(suit))
   if (!bid) return null
   return {
     seat, bid, rule: 'DONT: rättelse',
-    explanation: `min DONT-enfärg är ${SWE_NAME[letterOfSuit(suit)]} (6+) → rättar partnerns 2♣-relä till ${prettyBid(bid)}.`,
+    explanation: `min DONT-enfärg är ${SWE_SYM[letterOfSuit(suit)]} (6+) → rättar partnerns 2♣-relä till ${prettyBid(bid)}.`,
   }
 }
 
@@ -2937,7 +2936,7 @@ function ownDONTTwoSuiterToCorrect(deal: Deal, history: ResolvedCall[], seat: Se
   if (!bid) return null
   return {
     seat, bid, rule: 'DONT: rättelse (tvåfärg)',
-    explanation: `partnern relä:ade (${prettyBid(relay.bid)}) → visar min högre färg ${SWE_NAME[letterOfSuit(higher)]} → ${prettyBid(bid)}.`,
+    explanation: `partnern relä:ade (${prettyBid(relay.bid)}) → visar min högre färg ${SWE_SYM[letterOfSuit(higher)]} → ${prettyBid(bid)}.`,
   }
 }
 
@@ -3012,7 +3011,7 @@ function answerNTValueDoubleOpener(deal: Deal, history: ResolvedCall[], seat: Se
     if (bid) {
       return {
         seat, bid, rule: 'öppnarens svar på värde-X',
-        explanation: `${len[five]}-korts ${SWE_NAME[letterOfSuit(five)]} → ${prettyBid(bid)} (visar färgen; 2NT hade förnekat 5-kort).`,
+        explanation: `5+ ${SWE_SYM[letterOfSuit(five)]} → ${prettyBid(bid)} (visar färgen; 2NT hade förnekat 5-kort).`,
       }
     }
   }
@@ -3020,7 +3019,7 @@ function answerNTValueDoubleOpener(deal: Deal, history: ResolvedCall[], seat: Se
   if (!legalCalls(history, seat).includes(nt)) return null
   return {
     seat, bid: nt, rule: 'öppnarens svar på värde-X',
-    explanation: 'balanserad 15–17 utan 5-korts färg → 2NT (förnekar 5-kort; partnern placerar: pass 8–10, 3NT 11+).',
+    explanation: 'balanserad 15–17 utan 5+ färg → 2NT (förnekar 5+; partnern placerar: pass 8–10, 3NT 11+).',
   }
 }
 
@@ -3061,21 +3060,21 @@ function answerNTValueDoubleDoubler(deal: Deal, history: ResolvedCall[], seat: S
       if (legal.includes(bid)) {
         return {
           seat, bid, rule: 'svar på öppnarens värde-X-fortsättning',
-          explanation: `${len[openerSuit]}-korts stöd i ${SWE_NAME[openerCb.strain]} → ${prettyBid(bid)} (${strong ? 'utgång' : 'inbjudan'}).`,
+          explanation: `3+ stöd i ${SWE_SYM[openerCb.strain]} → ${prettyBid(bid)} (${strong ? 'utgång' : 'inbjudan'}).`,
         }
       }
     }
     if (strong && legal.includes('3NT' as Bid)) {
-      return { seat, bid: '3NT', rule: 'svar på öppnarens värde-X-fortsättning', explanation: `${p} hp utan fit → 3NT.` }
+      return { seat, bid: '3NT', rule: 'svar på öppnarens värde-X-fortsättning', explanation: `Utgångsvärden utan fit → 3NT.` }
     }
-    return { seat, bid: 'P', rule: 'pass', explanation: `${p} hp, inget bättre → pass (${ctx.openerBid} står).` }
+    return { seat, bid: 'P', rule: 'pass', explanation: `Inget bättre → pass (${ctx.openerBid} står).` }
   }
 
   // Öppnaren bjöd 2NT (förnekade 5-kort): placera utgång.
   if (strong && legal.includes('3NT' as Bid)) {
-    return { seat, bid: '3NT', rule: 'placerar utgång efter öppnarens 2NT', explanation: `${p} hp mitt emot öppnarens 15–17 → 3NT.` }
+    return { seat, bid: '3NT', rule: 'placerar utgång efter öppnarens 2NT', explanation: `Utgångsvärden mitt emot öppnarens 15–17 → 3NT.` }
   }
-  return { seat, bid: 'P', rule: 'pass', explanation: `${p} hp (8–10) → pass, 2NT står.` }
+  return { seat, bid: 'P', rule: 'pass', explanation: `Minimum (8–10) → pass, 2NT står.` }
 }
 
 // ---- Lebensohl efter VÅRT 1NT (§7.5, Lager 1) ------------------------------
@@ -3156,7 +3155,7 @@ function lebensohl1NTOpenerAnswerGF(hand: Hand, gfSuit: Suit): { call: string; r
     return {
       call: `4${letterOfSuit(gfSuit)}`,
       rule: 'Lebensohl höjer krav till utgång',
-      explanation: `${len[gfSuit]}-korts stöd i partnerns ${SWE_NAME[letterOfSuit(gfSuit)]} → 4${SWE_SYM[letterOfSuit(gfSuit)]}.`,
+      explanation: `Stöd i partnerns ${SWE_SYM[letterOfSuit(gfSuit)]} → 4${SWE_SYM[letterOfSuit(gfSuit)]}.`,
     }
   }
   return { call: '3NT', rule: 'Lebensohl 3NT (öppnaren väljer utgång)', explanation: 'inget bättre än 3NT över partnerns krav.' }
@@ -3285,13 +3284,13 @@ function answerTransferGameChoice(deal: Deal, history: ResolvedCall[], seat: Sea
     if (legalCalls(history, seat).includes(bid)) {
       return {
         seat, bid, rule: 'till spel',
-        explanation: `partnerns 3NT efter transfern = välj utgång: ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → 4 ${SWE_NAME[letterOfSuit(transferMajor)]} (5-3-fiten före sang).`,
+        explanation: `partnerns 3NT efter transfern = välj utgång: 3+ stöd i ${SWE_SYM[letterOfSuit(transferMajor)]} → 4 ${SWE_SYM[letterOfSuit(transferMajor)]} (5-3-fiten före sang).`,
       }
     }
   }
   return {
     seat, bid: 'P', rule: 'pass',
-    explanation: `partnerns 3NT efter transfern = välj utgång: bara ${support}-korts stöd i ${SWE_NAME[letterOfSuit(transferMajor)]} → pass (3NT står).`,
+    explanation: `partnerns 3NT efter transfern = välj utgång: utan 3-stöd i ${SWE_SYM[letterOfSuit(transferMajor)]} → pass (3NT står).`,
   }
 }
 
@@ -3306,7 +3305,7 @@ function answerRunout(history: ResolvedCall[], seat: Seat): ResolvedCall | null 
     seat, bid: 'X', rule: 'straffdubbling (vi äger handen)',
     explanation:
       `Vi öppnade 1NT och partnern redubblade (XX) – vår sida har 23+ och äger handen. ` +
-      `Motståndarna flyr till ${runout.level}${SWE_NAME[letterOfSuit(runout.suit)]} → straffdubbling.`,
+      `Motståndarna flyr till ${runout.level}${SWE_SYM[letterOfSuit(runout.suit)]} → straffdubbling.`,
   }
 }
 
@@ -3336,7 +3335,7 @@ function answerCueRaise(deal: Deal, history: ResolvedCall[], seat: Seat): Resolv
   ) {
     return {
       seat, bid: '3NT', rule: 'svar på cue-höjning',
-      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jämn hand med stopp i deras ${SWE_NAME[cueRaise.theirStrain]} → 3NT (rätt utgång före 5${SWE_NAME[strain]}).`,
+      explanation: `Partnerns cue lovar minst limithöjning i ${SWE_SYM[strain]}; jämn hand med stopp i deras ${SWE_SYM[cueRaise.theirStrain]} → 3NT (rätt utgång före 5${SWE_SYM[strain]}).`,
     }
   }
   const acceptGame = hcp(deal.hands[seat]) >= 15 && legal.includes(gameBid)
@@ -3345,8 +3344,8 @@ function answerCueRaise(deal: Deal, history: ResolvedCall[], seat: Seat): Resolv
     return {
       seat, bid, rule: 'svar på cue-höjning',
       explanation: acceptGame
-        ? `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]}; jag är maximum → accepterar utgång ${bid}.`
-        : `Partnerns cue lovar minst limithöjning i ${SWE_NAME[strain]} och är krav; med ett minimum återgår jag billigast i vår färg (${prettyBid(bid)}).`,
+        ? `Partnerns cue lovar minst limithöjning i ${SWE_SYM[strain]}; jag är maximum → accepterar utgång ${bid}.`
+        : `Partnerns cue lovar minst limithöjning i ${SWE_SYM[strain]} och är krav; med ett minimum återgår jag billigast i vår färg (${prettyBid(bid)}).`,
     }
   }
   return null
@@ -3385,7 +3384,7 @@ function answerWeakTwoCue(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
   if (bid && best) {
     return {
       seat, bid, rule: 'svar på tvåfärgs-cue',
-      explanation: `Partnerns cue lovar en stark tvåfärgshand (krav) – jag ger preferens till min längsta sidofärg ${SWE_NAME[best]} (${prettyBid(bid)}), passar aldrig cuet.`,
+      explanation: `Partnerns cue lovar en stark tvåfärgshand (krav) – jag ger preferens till min längsta sidofärg ${SWE_SYM[best]} (${prettyBid(bid)}), passar aldrig cuet.`,
     }
   }
   return null
@@ -3448,7 +3447,7 @@ function answerTwoOverOneRaise(deal: Deal, history: ResolvedCall[], seat: Seat):
     if (!legal.includes(bid)) return null
     return {
       seat, bid, rule: '2/1 utgångskrav',
-      explanation: `Vårt 2-över-1-svar var utgångskrav och partnern höjde min ${SWE_NAME[info.strain]} → jag sätter utgång ${prettyBid(bid)} (pass förbjudet).`,
+      explanation: `Vårt 2-över-1-svar var utgångskrav och partnern höjde min ${SWE_SYM[info.strain]} → jag sätter utgång ${prettyBid(bid)} (pass förbjudet).`,
     }
   }
   // Lågfärgs-2/1: 3NT om vi stoppar de objudna färgerna, annars 5m.
@@ -3465,7 +3464,7 @@ function answerTwoOverOneRaise(deal: Deal, history: ResolvedCall[], seat: Seat):
   if (!legal.includes(bid)) return null
   return {
     seat, bid, rule: '2/1 utgångskrav',
-    explanation: `Vårt 2-över-1 var utgångskrav och partnern höjde min ${SWE_NAME[info.strain]} → utgång ${prettyBid(bid)} (pass förbjudet).`,
+    explanation: `Vårt 2-över-1 var utgångskrav och partnern höjde min ${SWE_SYM[info.strain]} → utgång ${prettyBid(bid)} (pass förbjudet).`,
   }
 }
 
@@ -3531,13 +3530,13 @@ function answerCueBidderRebid(deal: Deal, history: ResolvedCall[], seat: Seat): 
     const sp = dummyPoints(hand, SUIT_OF_LETTER[info.agreedStrain]).dummyPoints
     if (sp < 13) return {
       seat, bid: 'P', rule: 'cue-höjningens fortsättning (limit stannar)',
-      explanation: `Min cue lovade limithöjning eller bättre; öppnaren återgick billigast (minimum) och jag har bara limit-värden (${sp} stödpoäng) → pass.`,
+      explanation: `Min cue lovade limithöjning eller bättre; öppnaren återgick billigast (minimum) och jag har bara limit-värden → pass.`,
     }
   }
   if (hasStopper(hand, theirSuit) && legal.includes('3NT' as Bid)) {
     return {
       seat, bid: '3NT', rule: 'cue-höjningens fortsättning',
-      explanation: `Min cue-höjning var utgångskrav; jag stoppar deras ${SWE_NAME[info.theirStrain]} → 3NT (pass förbjudet).`,
+      explanation: `Min cue-höjning var utgångskrav; jag stoppar deras ${SWE_SYM[info.theirStrain]} → 3NT (pass förbjudet).`,
     }
   }
   const isMajor = info.agreedStrain === 'H' || info.agreedStrain === 'S'
@@ -3545,7 +3544,7 @@ function answerCueBidderRebid(deal: Deal, history: ResolvedCall[], seat: Seat): 
   if (!legal.includes(bid)) return null
   return {
     seat, bid, rule: 'cue-höjningens fortsättning',
-    explanation: `Min cue-höjning var utgångskrav – utan säkert stopp i deras ${SWE_NAME[info.theirStrain]} sätter jag utgång i vår ${SWE_NAME[info.agreedStrain]} (${prettyBid(bid)}); pass förbjudet.`,
+    explanation: `Min cue-höjning var utgångskrav – utan säkert stopp i deras ${SWE_SYM[info.theirStrain]} sätter jag utgång i vår ${SWE_SYM[info.agreedStrain]} (${prettyBid(bid)}); pass förbjudet.`,
   }
 }
 
@@ -3596,12 +3595,12 @@ function openerCompetesAfterRaise(deal: Deal, history: ResolvedCall[], seat: Sea
   const legal = legalCalls(history, seat)
   const game = `4${M}` as Bid
   const threeM = `3${M}` as Bid
-  const mSym = SWE_NAME[M]
+  const mSym = SWE_SYM[M]
   // Utgångshand → utgång oavsett partnerns exakta styrka.
   if (bp >= 18 && legal.includes(game)) {
     return {
       seat, bid: game, rule: 'öppnaren bjuder utgång i konkurrens',
-      explanation: `~${bp} totalpoäng mittemot partnerns höjning → utgång ${game} i ${mSym}.`,
+      explanation: `Utgångsvärden mittemot partnerns höjning → utgång ${game} i ${mSym}.`,
     }
   }
   // Utgångsintresse (~15–17) → X = game try (maximal dubbling; cue vore utan
@@ -3609,7 +3608,7 @@ function openerCompetesAfterRaise(deal: Deal, history: ResolvedCall[], seat: Sea
   if (bp >= 15 && legal.includes('X')) {
     return {
       seat, bid: 'X', rule: 'maximal dubbling (game try)',
-      explanation: `~${bp} totalpoäng, utgångsintresse mittemot en 6–9-höjning – motståndarnas bud kläm­mer bort cue-budet, så X är game try: partnern bjuder ${game} med ett maximum, annars ${threeM}.`,
+      explanation: `Utgångsintresse mittemot en 6–9-höjning – motståndarnas bud kläm­mer bort cue-budet, så X är game try: partnern bjuder ${game} med ett maximum, annars ${threeM}.`,
     }
   }
   // Minimum men 6:e trumfen (9+ trumf ihop) → konkurrera på lagen om totala stick.
@@ -3649,17 +3648,16 @@ function answerOpenerMaximal(deal: Deal, history: ResolvedCall[], seat: Seat): R
   const legal = legalCalls(history, seat)
   const game = `4${M}` as Bid
   const decline = cheapestBidIn(history, seat, M) // 3M
-  const mSym = SWE_NAME[M]
   if (sp >= 8 && legal.includes(game)) {
     return {
       seat, bid: game, rule: 'accepterar game-try',
-      explanation: `Partnerns X är ett game try (maximal dubbling); jag är maximum av höjningen (${sp} stödpoäng i ${mSym}) → accepterar utgång ${game}.`,
+      explanation: `Partnerns X är ett game try (maximal dubbling); jag är maximum av höjningen → accepterar utgång ${game}.`,
     }
   }
   if (decline && legal.includes(decline)) {
     return {
       seat, bid: decline, rule: 'avböjer game-try',
-      explanation: `Partnerns X är ett game try; med ett minimum (${sp} stödpoäng i ${mSym}) återgår jag till ${decline} (avböjer).`,
+      explanation: `Partnerns X är ett game try; med ett minimum återgår jag till ${decline} (avböjer).`,
     }
   }
   return null
@@ -3693,12 +3691,12 @@ function answerOpenerNTInvite(deal: Deal, history: ResolvedCall[], seat: Seat): 
   if (p >= 8 && legal.includes('3NT' as Bid)) {
     return {
       seat, bid: '3NT', rule: 'accepterar sanginbjudan',
-      explanation: `Partnerns 2NT är en inbjudan (18–19); med ett maximum av min höjning (${p} hp) → 3NT (utgång).`,
+      explanation: `Partnerns 2NT är en inbjudan (18–19); med ett maximum av min höjning → 3NT (utgång).`,
     }
   }
   return {
     seat, bid: 'P', rule: 'avböjer sanginbjudan',
-    explanation: `Partnerns 2NT är en inbjudan; med ett minimum av min höjning (${p} hp) passar jag (stannar i 2NT).`,
+    explanation: `Partnerns 2NT är en inbjudan; med ett minimum av min höjning passar jag (stannar i 2NT).`,
   }
 }
 
@@ -3745,13 +3743,13 @@ function openerStrongNTAfterMinorRaise(deal: Deal, history: ResolvedCall[], seat
   if (p >= 20 && legal.includes('3NT' as Bid)) {
     return {
       seat, bid: '3NT', rule: 'öppnarens 3NT i konkurrens',
-      explanation: `~${p} hp, jämn/sangduglig hand med stopp i ${SWE_NAME[theirStrain]} mittemot partnerns höjning → 3NT (utgång).`,
+      explanation: `Jämn/sangduglig hand med stopp i ${SWE_SYM[theirStrain]} mittemot partnerns höjning → 3NT (utgång).`,
     }
   }
   if (p >= 18 && legal.includes('2NT' as Bid)) {
     return {
       seat, bid: '2NT', rule: 'öppnarens 2NT-inbjudan i konkurrens',
-      explanation: `~${p} hp, jämn hand med stopp i ${SWE_NAME[theirStrain]} – för starkt för ett tyst färgbud → 2NT (inbjudan; partnern bjuder 3NT med ett maximum).`,
+      explanation: `Jämn hand med stopp i ${SWE_SYM[theirStrain]} – för starkt för ett tyst färgbud → 2NT (inbjudan; partnern bjuder 3NT med ett maximum).`,
     }
   }
   return null
@@ -3828,15 +3826,15 @@ function openerRondTwoInCompetition(deal: Deal, history: ResolvedCall[], seat: S
   if (tp >= 18) {
     if (isMajorFit && legal.includes(`4${fitStrain}` as Bid)) return {
       seat, bid: `4${fitStrain}` as Bid, rule: 'öppnaren bjuder utgång i konkurrens',
-      explanation: `~${tp} totalpoäng med ${SWE_NAME[fitStrain!]}fit → utgång 4${SWE_NAME[fitStrain!]}.`,
+      explanation: `Utgångsvärden med ${SWE_SYM[fitStrain!]}-fit → utgång 4${SWE_SYM[fitStrain!]}.`,
     }
     if (isBalanced(hand) && hasStopper(hand, theirSuit) && legal.includes('3NT' as Bid)) return {
       seat, bid: '3NT', rule: 'öppnaren bjuder 3NT i konkurrens',
-      explanation: `~${tp} hp, jämn hand med stopp i ${SWE_NAME[theirStrain]} → 3NT.`,
+      explanation: `Jämn hand med stopp i ${SWE_SYM[theirStrain]} → 3NT.`,
     }
     if (cue) return {
       seat, bid: cue, rule: 'öppnarens cue (utgångskrav i konkurrens)',
-      explanation: `~${tp} hp – för starkt för att sälja given: cue i ${SWE_NAME[theirStrain]} = utgångskrav, hjälp mig välja utgång.`,
+      explanation: `För starkt för att sälja given: cue i ${SWE_SYM[theirStrain]} = utgångskrav, hjälp mig välja utgång.`,
     }
   }
 
@@ -3849,17 +3847,17 @@ function openerRondTwoInCompetition(deal: Deal, history: ResolvedCall[], seat: S
         const jump = `${cb.level + 1}${fitStrain}` as Bid
         if (legal.includes(jump)) return {
           seat, bid: jump, rule: 'öppnarens inbjudande höjning (konkurrens)',
-          explanation: `~${tp} stödpoäng med ${SWE_NAME[fitStrain!]}fit → inbjudande hopphöjning ${prettyBid(jump)}.`,
+          explanation: `Inbjudan med ${SWE_SYM[fitStrain!]}-fit → inbjudande hopphöjning ${prettyBid(jump)}.`,
         }
         if (legal.includes(simple)) return {
           seat, bid: simple, rule: 'öppnarens höjning (konkurrens)',
-          explanation: `~${tp} stödpoäng med ${SWE_NAME[fitStrain!]}fit → ${simple}.`,
+          explanation: `Med ${SWE_SYM[fitStrain!]}-fit → ${simple}.`,
         }
       }
     }
     if (cue) return {
       seat, bid: cue, rule: 'öppnarens cue (extra i konkurrens)',
-      explanation: `~${tp} hp – för bra för ett minimibud: cue i ${SWE_NAME[theirStrain]} visar extra och letar rätt utgång.`,
+      explanation: `För bra för ett minimibud: cue i ${SWE_SYM[theirStrain]} visar extra och letar rätt utgång.`,
     }
   }
 
@@ -3868,14 +3866,14 @@ function openerRondTwoInCompetition(deal: Deal, history: ResolvedCall[], seat: S
     const rebid = cheapestBidIn(history, seat, open.strain)
     if (rebid) return {
       seat, bid: rebid, rule: 'öppnaren tävlar (egen 6+ färg)',
-      explanation: `Minimum men 6+ ${SWE_NAME[open.strain]} → ${prettyBid(rebid)} (tävlar på lagen om totala stick, ej krav).`,
+      explanation: `Minimum men 6+ ${SWE_SYM[open.strain]} → ${prettyBid(rebid)} (tävlar på lagen om totala stick, ej krav).`,
     }
   }
   if (fitStrain) {
     const raise = cheapestBidIn(history, seat, fitStrain)
     if (raise) return {
       seat, bid: raise, rule: 'öppnaren tävlar (stödjer partnern)',
-      explanation: `Minimum med ${SWE_NAME[fitStrain]}fit → ${prettyBid(raise)} (tävlar).`,
+      explanation: `Minimum med ${SWE_SYM[fitStrain]}fit → ${prettyBid(raise)} (tävlar).`,
     }
   }
   return null
@@ -3929,14 +3927,14 @@ function openerReopensAfterPartnerPass(deal: Deal, history: ResolvedCall[], seat
     const rebid = cheapestBidIn(history, seat, open.strain)
     if (rebid && legal.includes(rebid)) return {
       seat, bid: rebid, rule: 'öppnaren tävlar efter partnerns pass (egen 6+ färg)',
-      explanation: `Partnern passade inklivet, men 6+ ${SWE_NAME[open.strain]} → ${prettyBid(rebid)} (tävlar på lagen om totala stick, ej krav).`,
+      explanation: `Partnern passade inklivet, men 6+ ${SWE_SYM[open.strain]} → ${prettyBid(rebid)} (tävlar på lagen om totala stick, ej krav).`,
     }
   }
 
   // 2) Extra (15+ hp) + kort i deras färg → återöppningsdubbling (takeout).
   if (hcp(hand) >= 15 && len[theirSuit] <= 2 && legal.includes('X' as Bid)) return {
     seat, bid: 'X', rule: 'öppnarens återöppningsdubbling (partnern passade)',
-    explanation: `~${hcp(hand)} hp och kort i ${SWE_NAME[theirStrain]} – för bra för att sälja given: återöppningsdubbling (takeout, välj färg partner).`,
+    explanation: `Kort i ${SWE_SYM[theirStrain]} och för bra för att sälja given → återöppningsdubbling (takeout, välj färg partner).`,
   }
 
   return null
@@ -3986,7 +3984,7 @@ function openerReopensBalancing(deal: Deal, history: ResolvedCall[], seat: Seat)
   //    Partnern har ofta längd/värden i deras färg (trap pass) → konverterar straff.
   if (len[theirSuit] <= 1 && legal.includes('X' as Bid)) return {
     seat, bid: 'X', rule: 'öppnarens återöppningsdubbling (utpassningssits)',
-    explanation: `Kort i ${SWE_NAME[theirStrain]} – sälj inte given: återöppningsdubbling (takeout; partnern kan konvertera till straff).`,
+    explanation: `Kort i ${SWE_SYM[theirStrain]} – sälj inte given: återöppningsdubbling (takeout; partnern kan konvertera till straff).`,
   }
 
   // 2) Egen 6+ färg → tävla genom att rebjuda den.
@@ -3994,14 +3992,14 @@ function openerReopensBalancing(deal: Deal, history: ResolvedCall[], seat: Seat)
     const rebid = cheapestBidIn(history, seat, open.strain)
     if (rebid && legal.includes(rebid)) return {
       seat, bid: rebid, rule: 'öppnaren tävlar i utpassningssits (egen 6+ färg)',
-      explanation: `6+ ${SWE_NAME[open.strain]} → ${prettyBid(rebid)} (sälj inte given med en 6-korts färg).`,
+      explanation: `6+ ${SWE_SYM[open.strain]} → ${prettyBid(rebid)} (sälj inte given med en 6-korts färg).`,
     }
   }
 
   // 3) Extra (15+ hp) → återöppningsdubbling även utan kort i deras färg.
   if (hcp(hand) >= 15 && legal.includes('X' as Bid)) return {
     seat, bid: 'X', rule: 'öppnarens återöppningsdubbling (extra, utpassningssits)',
-    explanation: `~${hcp(hand)} hp – för bra för att sälja given: återöppningsdubbling.`,
+    explanation: `För bra för att sälja given → återöppningsdubbling.`,
   }
 
   return null
@@ -4046,14 +4044,14 @@ function advancerCompetesToFit(deal: Deal, history: ResolvedCall[], seat: Seat):
     const game = `4${partnerSuit.strain}` as Bid
     if (legal.includes(game)) return {
       seat, bid: game, rule: 'advancern bjuder utgång med fit (konkurrens)',
-      explanation: `Fit i partnerns ${SWE_NAME[partnerSuit.strain]} + utgångsvärden (${sp} stödpoäng) → utgång ${game}.`,
+      explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden → utgång ${game}.`,
     }
   }
   // Tävla till lagens nivå (9 trumf → 3-läget). Har konkurrensen redan tryckt upp
   // billigaste höjning till 4-läget saknar vi värden att tävla dit → passa.
   if (level <= 3) return {
     seat, bid: cheapest, rule: 'advancern tävlar till fiten (lagen om totala stick)',
-    explanation: `3-korts stöd = 9-korts fit → ${prettyBid(cheapest)} (tävlar på lagen om totala stick; ej krav).`,
+    explanation: `Med trumfstöd → ${prettyBid(cheapest)} (tävlar på lagen om totala stick; ej krav).`,
   }
   return null
 }
@@ -4123,7 +4121,7 @@ function negativeDoublerContinues(deal: Deal, history: ResolvedCall[], seat: Sea
       const bid = `${lvl}${open.strain}` as Bid
       if (legal.includes(bid)) return {
         seat, bid, rule: 'negativ-dubblarens invit-fortsättning',
-        explanation: `${p} hp med 3-korts stöd för partnerns öppnade ${SWE_NAME[open.strain]} → ${lvl === Number(cheapest[0]) ? 'preferens' : 'invit-preferens'} ${prettyBid(bid)} (ej krav).`,
+        explanation: `3-korts stöd för partnerns öppnade ${SWE_SYM[open.strain]} → ${lvl === Number(cheapest[0]) ? 'preferens' : 'invit-preferens'} ${prettyBid(bid)} (ej krav).`,
       }
     }
   }
@@ -4138,7 +4136,7 @@ function negativeDoublerContinues(deal: Deal, history: ResolvedCall[], seat: Sea
     const bid = cheapestBidIn(history, seat, st)
     if (bid && Number(bid[0]) <= 3 && legal.includes(bid)) return {
       seat, bid, rule: 'negativ-dubblarens invit-fortsättning',
-      explanation: `${p} hp med ${len[SUIT_OF_LETTER[st]]}-korts ${SWE_NAME[st]} — rebjuder färgen billigast (invit, ej krav) i stället för att passa partnerns tvingade svar.`,
+      explanation: `6+ ${SWE_SYM[st]} — rebjuder färgen billigast (invit, ej krav) i stället för att passa partnerns tvingade svar.`,
     }
   }
 
@@ -4146,7 +4144,7 @@ function negativeDoublerContinues(deal: Deal, history: ResolvedCall[], seat: Sea
   if (isBalanced(hand) && hasStopper(hand, theirSuit) && legal.includes('2NT' as Bid)) {
     return {
       seat, bid: '2NT' as Bid, rule: 'negativ-dubblarens invit-fortsättning',
-      explanation: `${p} hp jämn med stopp i deras ${SWE_NAME[theirCb.strain]} → 2NT (invit, ej krav).`,
+      explanation: `Jämn med stopp i deras ${SWE_SYM[theirCb.strain]} → 2NT (invit, ej krav).`,
     }
   }
   return null

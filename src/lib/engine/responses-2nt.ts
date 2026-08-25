@@ -46,7 +46,7 @@ export function respondTo2NT(hand: Hand, openerMin = 20): ResponseResult {
   // ---- 5-4 i högfärgerna, utgångsvärden → Stayman (hittar 4-4 och 5-3) ----
   const fiveFourMajors = (sp === 5 && he === 4) || (he === 5 && sp === 4)
   if (fiveFourMajors && p >= game) {
-    return { call: '3C', rule: 'Stayman (2NT)', explanation: `${p} hp, 5-4 i högfärgerna → 3♣ (Stayman; visar sedan 5-färgen om fit saknas).` }
+    return { call: '3C', rule: 'Stayman (2NT)', explanation: `5-4 i högfärgerna → 3♣ (Stayman; visar sedan 5-färgen om fit saknas).` }
   }
 
   // ---- 5+ högfärg → transfer eller Texas ----
@@ -58,18 +58,18 @@ export function respondTo2NT(hand: Hand, openerMin = 20): ResponseResult {
     if (L >= 6 && p >= game && p < slamInvite) {
       const call = major === 'hearts' ? '4D' : '4H'
       const shown = major === 'hearts' ? '4♦' : '4♥'
-      return { call, rule: 'Texas (2NT)', explanation: `${p} hp med 6-korts ${sym} → ${shown} (Texas — transfer till ${major === 'hearts' ? 'hjärter' : 'spader'}, utgång utan slamiver).` }
+      return { call, rule: 'Texas (2NT)', explanation: `6+ ${sym} → ${shown} (Texas — transfer till ${sym}, utgång utan slamiver).` }
     }
     // Transfer på 3-läget: 3♦ → ♥, 3♥ → ♠. Svag = signoff i delkontrakt, slam = 11+.
     const call = major === 'hearts' ? '3D' : '3H'
     const shown = major === 'hearts' ? '3♦' : '3♥'
     const strength = p < game ? 'signoff i delkontrakt' : p >= slamInvite ? 'slamintresse' : 'utgång'
-    return { call, rule: 'transfer (2NT)', explanation: `${p} hp med ${L}-korts ${sym} → ${shown} (transfer till ${major === 'hearts' ? 'hjärter' : 'spader'}, ${strength}).` }
+    return { call, rule: 'transfer (2NT)', explanation: `5+ ${sym} → ${shown} (transfer till ${sym}, ${strength}).` }
   }
 
   // ---- 4-korts högfärg, utgångsvärden → Stayman ----
   if ((sp >= 4 || he >= 4) && p >= game) {
-    return { call: '3C', rule: 'Stayman (2NT)', explanation: `${p} hp med 4-korts högfärg → 3♣ (Stayman).` }
+    return { call: '3C', rule: 'Stayman (2NT)', explanation: `4+ högfärg → 3♣ (Stayman).` }
   }
 
   // Härefter: ingen biudbar högfärg.
@@ -77,20 +77,20 @@ export function respondTo2NT(hand: Hand, openerMin = 20): ResponseResult {
   // ---- Minorfråga: 5-4+ i minorerna med slamintresse → 3♠ ----
   const minors = (len.clubs >= 5 && len.diamonds >= 4) || (len.diamonds >= 5 && len.clubs >= 4)
   if (minors && p >= slamInvite) {
-    return { call: '3S', rule: 'minorfråga (2NT)', explanation: `${p} hp, 5-4+ i minorerna med slamvärden → 3♠ (frågar efter minorfit).` }
+    return { call: '3S', rule: 'minorfråga (2NT)', explanation: `5-4+ i minorerna med slamvärden → 3♠ (frågar efter minorfit).` }
   }
 
   // ---- NT-stegen ----
   if (p >= slam) {
-    return { call: '6NT', rule: '6NT till spel', explanation: `${p} hp balanserad (≈33+ tillsammans) → 6NT.` }
+    return { call: '6NT', rule: '6NT till spel', explanation: `Balanserad, slamzon → 6NT.` }
   }
   if (p >= slamInvite) {
-    return { call: '4NT', rule: '4NT kvantitativ', explanation: `${p} hp balanserad → 4NT (kvantitativ, inbjuder 6NT).` }
+    return { call: '4NT', rule: '4NT kvantitativ', explanation: `Balanserad slaminbjudan → 4NT (kvantitativ, inbjuder 6NT).` }
   }
   if (p >= game) {
-    return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp utan högfärg → 3NT (till spel).` }
+    return { call: '3NT', rule: '3NT till spel', explanation: `Utgångsvärden utan högfärg → 3NT (till spel).` }
   }
-  return { call: 'P', rule: 'pass', explanation: `${p} hp – för svagt för utgång → pass.` }
+  return { call: 'P', rule: 'pass', explanation: `För svagt för utgång → pass.` }
 }
 
 /** Öppnaren fullföljer svararens 2NT-svar (Stayman/transfer/Texas/minorfråga).
@@ -102,9 +102,9 @@ export function openerRebidAfter2NTResponse(response: ResponseResult, hand: Hand
 
   switch (response.rule) {
     case 'Stayman (2NT)':
-      if (len.hearts >= 4) return { call: '3H', rule: 'Stayman-svar', explanation: '4+ hjärter → 3♥.' }
-      if (len.spades >= 4) return { call: '3S', rule: 'Stayman-svar', explanation: '4 spader (förnekar 4 hjärter) → 3♠.' }
-      return { call: '3D', rule: 'Stayman-svar', explanation: 'ingen 4-korts högfärg → 3♦.' }
+      if (len.hearts >= 4) return { call: '3H', rule: 'Stayman-svar', explanation: '4+ ♥ → 3♥.' }
+      if (len.spades >= 4) return { call: '3S', rule: 'Stayman-svar', explanation: '4 ♠ (förnekar 4 ♥) → 3♠.' }
+      return { call: '3D', rule: 'Stayman-svar', explanation: 'ingen 4+ högfärg → 3♦.' }
     case 'transfer (2NT)': {
       const target: Suit = response.call === '3D' ? 'hearts' : 'spades'
       return { call: `3${BID[target]}`, rule: 'fullföljd transfer', explanation: `fullföljer transfern → 3${SYM[target]}.` }
@@ -114,13 +114,13 @@ export function openerRebidAfter2NTResponse(response: ResponseResult, hand: Hand
       return { call: `4${BID[target]}`, rule: 'fullföljd Texas', explanation: `fullföljer Texas → 4${SYM[target]}.` }
     }
     case 'minorfråga (2NT)':
-      if (len.clubs >= 4) return { call: '4C', rule: 'minorsvar', explanation: '4+ klöver → 4♣.' }
-      if (len.diamonds >= 4) return { call: '4D', rule: 'minorsvar', explanation: '4+ ruter (förnekar 4 klöver) → 4♦.' }
-      return { call: '3NT', rule: 'minorsvar', explanation: 'ingen 4-korts minor → 3NT.' }
+      if (len.clubs >= 4) return { call: '4C', rule: 'minorsvar', explanation: '4+ ♣ → 4♣.' }
+      if (len.diamonds >= 4) return { call: '4D', rule: 'minorsvar', explanation: '4+ ♦ (förnekar 4 ♣) → 4♦.' }
+      return { call: '3NT', rule: 'minorsvar', explanation: 'ingen 4+ minor → 3NT.' }
     case '3NT till spel':
       return { call: 'P', rule: 'rebid: pass', explanation: 'till spel → pass.' }
     case '4NT kvantitativ':
-      return p >= openerMax ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `${p} hp (max) → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp (minimum) → pass.` }
+      return p >= openerMax ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `Maximum → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `Minimum → pass.` }
     case '6NT till spel':
       return { call: 'P', rule: 'rebid: pass', explanation: 'slam satt → pass.' }
     default:
@@ -139,15 +139,15 @@ export function respondTo3NT(hand: Hand): ResponseResult {
   const p = hcp(hand)
   // Tillsammans: 6NT ≈ 33, 7NT ≈ 37. Mittemot 25–27 → ~6 = slam, ~12 = storslam.
   if (p >= 12) {
-    return { call: '6NT', rule: '6NT till spel', explanation: `${p} hp – storslam kan finnas, men exakt fråga (RKC/Gerber) tas i §6 → 6NT så länge.`, uncertain: true }
+    return { call: '6NT', rule: '6NT till spel', explanation: `Storslam kan finnas, men exakt fråga (RKC/Gerber) tas i §6 → 6NT så länge.`, uncertain: true }
   }
   if (p >= 8) {
-    return { call: '6NT', rule: '6NT till spel', explanation: `${p} hp mittemot 25–27 (≈33+) → 6NT.` }
+    return { call: '6NT', rule: '6NT till spel', explanation: `Slamzon mittemot 25–27 → 6NT.` }
   }
   if (p >= 5) {
-    return { call: '4NT', rule: '4NT kvantitativ', explanation: `${p} hp → 4NT (kvantitativ, inbjuder 6NT).` }
+    return { call: '4NT', rule: '4NT kvantitativ', explanation: `Slaminbjudan → 4NT (kvantitativ, inbjuder 6NT).` }
   }
-  return { call: 'P', rule: 'pass', explanation: `${p} hp – utgång räcker → pass.` }
+  return { call: 'P', rule: 'pass', explanation: `Utgång räcker → pass.` }
 }
 
 /** Öppnaren tar ställning till svararens kvantitativa 4NT över 3NT-öppningen. */
@@ -155,7 +155,7 @@ export function openerRebidAfter3NTResponse(response: ResponseResult, hand: Hand
   const p = hcp(hand)
   switch (response.rule) {
     case '4NT kvantitativ':
-      return p >= 26 ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `${p} hp (max) → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `${p} hp (minimum) → pass.` }
+      return p >= 26 ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `Maximum → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `Minimum → pass.` }
     case '6NT till spel':
       return { call: 'P', rule: 'rebid: pass', explanation: 'slam satt → pass.' }
     default:

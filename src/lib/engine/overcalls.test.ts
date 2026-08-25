@@ -3,6 +3,36 @@ import { parseHand } from '../bidding'
 import { overcall, advanceOvercall, advanceTwoSuiter, hasStopper } from './overcalls'
 
 const o = (n: string, their: string) => overcall(parseHand(n), their).call
+const oe = (n: string, their: string) => overcall(parseHand(n), their).explanation
+
+// ---- Budförklaring: löftet, inte handen (ägardirektiv 2026-08-24) ------------
+describe('inklivens förklaring visar löftet, inte handen', () => {
+  it('enkelt inkliv: intervall (8–16 hp) + 5+ korts, inte "11 hp"', () => {
+    const e = oe('S:KQJ42 H:K32 D:Q73 C:32', '1D') // 11 hp, 5 spader
+    expect(e).toContain('8–16 hp')
+    expect(e).toContain('5+ ♠')
+    expect(e).not.toMatch(/\b11 hp\b/)
+  })
+
+  it('1NT-inkliv: intervall (15–18 hp), inte "16 hp"', () => {
+    const e = oe('S:KQ4 H:KJ5 D:KQ32 C:Q42', '1H') // 16 hp
+    expect(e).toContain('(15–18 hp)')
+    expect(e).not.toMatch(/\b16 hp\b/)
+  })
+
+  it('upplysnings-X: öppet golv (10+ hp), inte "12 hp"', () => {
+    const e = oe('S:KQ43 H:3 D:KQ52 C:Q432', '1H') // 12 hp, singel hjärter
+    expect(e).toContain('10+ hp')
+    expect(e).not.toMatch(/\b12 hp\b/)
+  })
+
+  it('stark 17+ X: golv 17+ och färgen HEMLIG (ej "spader")', () => {
+    const e = oe('S:AKQ7653 H:Q4 D:Q54 C:A', '1C') // 17 hp, 7 spader
+    expect(e).toContain('17+ hp')
+    expect(e).toContain('egen färg') // avslöjar inte VILKEN färg
+    expect(e).not.toContain('♠')
+  })
+})
 
 describe('overcall – inkliv över deras 1-läges öppning (§7.1–7.2)', () => {
   it('enkelt inkliv 1♠ över (1♦)', () => {

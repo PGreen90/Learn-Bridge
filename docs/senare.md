@@ -9,6 +9,33 @@
 
 ## ⚪ SENARE
 
+### 2♣-öppningen — bredare översyn (2026-08-24, ägaren breddade fyndet)
+**Ursprung:** Grant Baze "6-5, come alive"-artikeln + sondkörning av artikelns
+exakta hand ♠4 ♥KQJ86 ♦AJ10765 ♣4 (11 hp, 6-5). Motorn öppnar den **2♣ (utgångs-
+krav)** eftersom `playingTricks` = 8½ och vi har regeln *"≥8½ spelstick → 2♣ även
+med hp<22"* (`evaluation.ts`/`openings.ts`, ägarbeslut 2026-07-01). Både artikeln
+och standard-2/1 behandlar den handen som ett **1-lägesdilemma** (öppna 1♥/1♦),
+inte en tvingande 2♣. → 8½-tröskeln **mis-fyrar på formstarka minimihänder**.
+
+**Ägaren (2026-08-24): hela 2♣-öppningen behöver ses över, inte bara den
+tröskeln.** Bredare frågor att ta med när jobbet hämtas upp:
+- **Spelstick-tröskeln:** höj 8½ → ~9, eller form-modulera (6-5/6-6 kräver mer
+  än en enfärgad 9-stickshand)? Mät hur ofta 8½-regeln fångar händer som borde
+  vara 1-öppningar.
+- **Kravnivån efter 2♣:** vår 2♣ är utgångskrav — passar det en distributionell
+  8½-stickshand med 11 hp som kan sakna fit? Ska den distributionella 2♣:an vara
+  utgångskrav eller bara stark/enrondskrav?
+- **Balanserad 22+ vs distributionell:** två helt olika handtyper under samma
+  öppning — beskrivs/behandlas de rätt i fortsättningen (2♦-relä, svararens steg,
+  2NT-återbudet)?
+- **Samspel med 6-5-luckan** i [docs/bevaka.md](bevaka.md): om en formstark 6-5
+  varken blir en bra 2♣ *eller* kan visa 6:e kortet efter en 1-öppning, var landar
+  den bäst?
+
+**Status:** budstruktur-ändring → kräver exempelhänder + ägargodkännande (låst
+regel), och ligger utanför budförklarings-NU:t. Facit-först när den hämtas upp;
+sonden ovan återskapar startläget. INGEN ändring förrän ägaren väljer upp den.
+
 ### Hål D steg 2 — cue-frontend i konkurrenslagret (PARKERAD 2026-08-07)
 Steg 1 (kontroll-komplett 4NT, budsystem.md §6.10) landade 2026-08-07: kaptenen
 med äkta extra + förstarundskontroll i ALLA sidofärger frågar 4NT direkt.

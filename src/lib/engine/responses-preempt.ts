@@ -13,7 +13,6 @@ import { hcp, isBalanced, lengths } from './hand'
 import type { ResponseResult } from './responses'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const RANK: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankOf = (s: Suit) => RANK.indexOf(s)
@@ -67,7 +66,7 @@ export function respondToPreempt(hand: Hand, opened: Suit, level: number): Respo
   const support = len[opened]
   const sym = SYM[opened]
   const bid = BID[opened]
-  const pass: ResponseResult = { call: 'P', rule: 'spärr-pass', explanation: `${p} hp – ingen utgång → pass (spärren är redan högt).` }
+  const pass: ResponseResult = { call: 'P', rule: 'spärr-pass', explanation: `Ingen utgång → pass (spärren är redan högt).` }
 
   // 4-läget: nästan ingen plats. Slam via 4NT/cue tas i §6 → tills dess pass.
   if (level >= 4) return pass
@@ -76,7 +75,7 @@ export function respondToPreempt(hand: Hand, opened: Suit, level: number): Respo
   if (p < 16) {
     // Utgång ändå med stark fit i högfärg (lång trumf täcker svaghet).
     if (isMajor(opened) && support >= 4 && p >= 13) {
-      return { call: `4${bid}`, rule: 'höjning till utgång', explanation: `${p} hp, ${support} stöd → 4${sym} (utgång, lång fit).` }
+      return { call: `4${bid}`, rule: 'höjning till utgång', explanation: `13+ hp med lång fit → 4${sym} (utgång).` }
     }
     return pass
   }
@@ -84,18 +83,18 @@ export function respondToPreempt(hand: Hand, opened: Suit, level: number): Respo
   // 16+ : kaptenen letar utgång.
   // Fit i öppnarens högfärg → utgång.
   if (isMajor(opened) && support >= 2) {
-    return { call: `4${bid}`, rule: 'höjning till utgång', explanation: `${p} hp, ${support} stöd → 4${sym} (utgång).` }
+    return { call: `4${bid}`, rule: 'höjning till utgång', explanation: `16+ hp med fit → 4${sym} (utgång).` }
   }
   // Egen stark 5+ sidofärg → ny färg, krav 1 rond.
   const side = longestSide(len, opened, 5)
   if (side) {
     const lvl = levelAbove(side, opened, 3)
-    return { call: `${lvl}${BID[side]}`, rule: 'ny färg (krav)', explanation: `${p} hp med ${len[side]}-korts ${NAME[side]} → ${lvl}${SYM[side]} (naturlig, krav 1 rond).` }
+    return { call: `${lvl}${BID[side]}`, rule: 'ny färg (krav)', explanation: `16+ hp med 5+ ${SYM[side]} → ${lvl}${SYM[side]} (naturlig, krav 1 rond).` }
   }
   // 3NT till spel: stopp i sidofärgerna, räknar med öppnarens långa färg.
   const sideSuits = RANK.filter((s) => s !== opened)
   if (isBalanced(hand) || sideSuits.every((s) => hasStopper(hand, s) || len[s] <= 2)) {
-    return { call: '3NT', rule: '3NT till spel', explanation: `${p} hp med stopp i sidofärgerna → 3NT (öppnarens långfärg ger stick).` }
+    return { call: '3NT', rule: '3NT till spel', explanation: `16+ hp med stopp i sidofärgerna → 3NT (öppnarens långfärg ger stick).` }
   }
   return pass
 }
@@ -107,13 +106,13 @@ export function openerRebidAfterPreemptNewSuit(hand: Hand, opened: Suit, newSuit
   const p = hcp(hand)
   const len = lengths(hand)
   const responderLevel = levelAbove(newSuit, opened, 3) // nivån svararen bjöd den nya färgen på
-  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'rebid: pass', explanation: `${p} hp – ${why} → pass.` })
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'rebid: pass', explanation: `${why} → pass.` })
 
   // Stöd (3+) i svararens färg → sätt utgång (eller passa om den redan är nådd).
   if (len[newSuit] >= 3) {
     const gameLevel = isMajor(newSuit) ? 4 : 5
-    if (responderLevel >= gameLevel) return pass(`stöd i ${NAME[newSuit]}, utgång redan nådd`)
-    return { call: `${gameLevel}${BID[newSuit]}`, rule: 'rebid: stöd', explanation: `${p} hp, ${len[newSuit]} stöd i ${NAME[newSuit]} → ${gameLevel}${SYM[newSuit]} (utgång).` }
+    if (responderLevel >= gameLevel) return pass(`stöd i ${SYM[newSuit]}, utgång redan nådd`)
+    return { call: `${gameLevel}${BID[newSuit]}`, rule: 'rebid: stöd', explanation: `3+ stöd i ${SYM[newSuit]} → ${gameLevel}${SYM[newSuit]} (utgång).` }
   }
 
   // Maximum spärr (~9–11) UTAN stöd → visa en "feature" (yttre A/K) i en sidofärg
@@ -126,7 +125,7 @@ export function openerRebidAfterPreemptNewSuit(hand: Hand, opened: Suit, newSuit
       if (s === opened || s === newSuit) continue
       if (rankOf(s) <= rankOf(newSuit)) continue // bara samma nivå (ingen dyr hopp-feature)
       if (topHonor(hand, s)) {
-        return { call: `${responderLevel}${BID[s]}`, rule: 'rebid: feature', explanation: `${p} hp (maximum), yttre honnör i ${NAME[s]} → ${responderLevel}${SYM[s]} (feature, visar sidohonnör).` }
+        return { call: `${responderLevel}${BID[s]}`, rule: 'rebid: feature', explanation: `Maximum spärr, yttre honnör i ${SYM[s]} → ${responderLevel}${SYM[s]} (feature, visar sidohonnör).` }
       }
     }
   }
@@ -135,7 +134,7 @@ export function openerRebidAfterPreemptNewSuit(hand: Hand, opened: Suit, newSuit
   const ownLevel = rankOf(opened) > rankOf(newSuit) ? responderLevel : responderLevel + 1
   const ownGame = isMajor(opened) ? 4 : 5
   if (ownLevel <= ownGame) {
-    return { call: `${ownLevel}${BID[opened]}`, rule: 'rebid: egen färg', explanation: `${p} hp – minimum, ingen passning → ${ownLevel}${SYM[opened]} (rebjuden färg).` }
+    return { call: `${ownLevel}${BID[opened]}`, rule: 'rebid: egen färg', explanation: `Minimum, ingen passning → ${ownLevel}${SYM[opened]} (rebjuden färg).` }
   }
   return pass('minimum, inget bättre')
 }

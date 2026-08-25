@@ -78,13 +78,13 @@ export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand):
       role: 'svarare',
       call: '4NT',
       rule: 'kvantitativ 4NT',
-      explanation: `${p} hp jämnt mot visade 12–14 → 4NT (inbjuder 6NT; partnern går vidare med mer än minimum).`,
+      explanation: `Jämn slaminbjudan mot visade 12–14 → 4NT (inbjuder 6NT; partnern går vidare med mer än minimum).`,
     })
     const op = hcp(openerHand)
     if (op >= 13) {
-      turns.push({ role: 'öppnare', call: '6NT', rule: 'kvantitativ 4NT: accept', explanation: `${op} hp — mer än minimum → accepterar, 6NT.` })
+      turns.push({ role: 'öppnare', call: '6NT', rule: 'kvantitativ 4NT: accept', explanation: `Mer än minimum → accepterar, 6NT.` })
     } else {
-      turns.push({ role: 'öppnare', call: 'P', rule: 'kvantitativ 4NT: avböjer', explanation: `${op} hp — blott minimum → passar 4NT.` })
+      turns.push({ role: 'öppnare', call: 'P', rule: 'kvantitativ 4NT: avböjer', explanation: `Blott minimum → passar 4NT.` })
     }
     return turns
   }
@@ -99,7 +99,7 @@ export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand):
  */
 function buildGerberSequence(openerHand: Hand, responderHand: Hand, p: number, partnerMin: number): SlamTurn[] {
   const turns: SlamTurn[] = []
-  turns.push({ role: 'svarare', call: '4C', rule: 'Gerber', explanation: `${p} hp balanserad, slamläge → 4♣ (Gerber, frågar ess).` })
+  turns.push({ role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` })
 
   const aceAnswer = respondToGerber(openerHand)
   turns.push({ role: 'öppnare', call: aceAnswer.call, rule: aceAnswer.rule, explanation: aceAnswer.explanation })
@@ -121,7 +121,7 @@ function buildGerberSequence(openerHand: Hand, responderHand: Hand, p: number, p
   const floor = p + partnerMin
   if (missing === 0 && aceCertain && floor >= 37) {
     // Alla ess + storslamszon mot visat minimum → kungfråga 5♣, placera 6NT/7NT.
-    turns.push({ role: 'svarare', call: '5C', rule: 'Gerber kungfråga', explanation: `alla ess + storslamszon (~${floor}+) → 5♣ (frågar kungar).` })
+    turns.push({ role: 'svarare', call: '5C', rule: 'Gerber kungfråga', explanation: `alla ess + storslamszon → 5♣ (frågar kungar).` })
     const kingAnswer = respondToGerberKingAsk(openerHand)
     turns.push({ role: 'öppnare', call: kingAnswer.call, rule: kingAnswer.rule, explanation: kingAnswer.explanation })
     // Härled kungarna ur svaret + egen hand (5♦ = 0 eller 4 → egen kung avgör).
@@ -133,7 +133,7 @@ function buildGerberSequence(openerHand: Hand, responderHand: Hand, p: number, p
       role: 'svarare',
       call: grand ? '7NT' : '6NT',
       rule: 'slamavslut',
-      explanation: grand ? `${ownKings + partnerKings} kungar + alla ess → storslam 7NT.` : 'alla ess men för få kungar → 6NT.',
+      explanation: grand ? `alla ess + kungarna räcker → storslam 7NT.` : 'alla ess men för få kungar → 6NT.',
     })
     return turns
   }

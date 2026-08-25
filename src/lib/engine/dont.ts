@@ -14,7 +14,6 @@ import { hcp, lengths } from './hand'
 import type { ResponseResult } from './responses'
 
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 const DONT_BID: Record<Suit, string> = { clubs: '2C', diamonds: '2D', hearts: '2H', spades: '2S' }
@@ -30,7 +29,7 @@ export function dontOvercall(hand: Hand): ResponseResult {
   if (len[s1] >= 5 && len[s2] >= 4) {
     const lower = rankIdx(s1) < rankIdx(s2) ? s1 : s2
     const higher = lower === s1 ? s2 : s1
-    return { call: DONT_BID[lower], rule: 'DONT tvåfärg', explanation: `${len[lower]}-${len[higher]} i ${NAME[lower]}+${NAME[higher]} → ${SYM[lower]} (DONT, lägre färgen).` }
+    return { call: DONT_BID[lower], rule: 'DONT tvåfärg', explanation: `5-4+ i ${SYM[lower]}+${SYM[higher]} → ${SYM[lower]} (DONT, lägre färgen).` }
   }
 
   // Enfärgshand 6+.
@@ -38,9 +37,9 @@ export function dontOvercall(hand: Hand): ResponseResult {
   if (single) {
     // Svag spader-enfärgare → 2♠ (svagare än X följt av 2♠).
     if (single === 'spades' && p <= 10) {
-      return { call: '2S', rule: 'DONT 2♠ (spader)', explanation: `svag enfärgshand i spader (6+) → 2♠.` }
+      return { call: '2S', rule: 'DONT 2♠ (spader)', explanation: `svag enfärgshand i ♠ (6+) → 2♠.` }
     }
-    return { call: 'X', rule: 'DONT X (enfärg)', explanation: `enfärgshand i ${NAME[single]} (6+) → X (relä till 2♣, rättar sedan).` }
+    return { call: 'X', rule: 'DONT X (enfärg)', explanation: `enfärgshand i ${SYM[single]} (6+) → X (relä till 2♣, rättar sedan).` }
   }
 
   return { call: 'P', rule: 'pass', explanation: 'ingen en-/tvåfärgshand → pass.' }
@@ -60,11 +59,11 @@ export function advanceDONT(hand: Hand, partnerCall: string): ResponseResult {
   if (partnerCall === '2C' || partnerCall === '2D') {
     const shown: Suit = partnerCall === '2C' ? 'clubs' : 'diamonds'
     if (len[shown] >= 3) {
-      return { call: 'P', rule: 'pass', explanation: `${len[shown]} kort i ${NAME[shown]} → passa partnerns 2${SYM[shown]} (stöd i den visade färgen).` }
+      return { call: 'P', rule: 'pass', explanation: `Stöd i ${SYM[shown]} → passa partnerns 2${SYM[shown]}.` }
     }
     const relay = partnerCall === '2C' ? '2D' : '2H'
     const relaySym = partnerCall === '2C' ? '2♦' : '2♥'
-    return { call: relay, rule: 'DONT pass-eller-rätta', explanation: `kort i ${NAME[shown]} (${len[shown]}) → ${relaySym} (pass-eller-rätta: partnern rättar till sin högre färg).` }
+    return { call: relay, rule: 'DONT pass-eller-rätta', explanation: `Korthet i ${SYM[shown]} → ${relaySym} (pass-eller-rätta: partnern rättar till sin högre färg).` }
   }
   // Efter 2♥ (hjärter+spader) eller 2♠ (enfärg): passa (förenkling – stöd antas;
   // 2♥ säger inget om vilken högfärg som är längst, så vi rör den inte).

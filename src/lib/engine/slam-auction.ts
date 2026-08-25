@@ -44,7 +44,6 @@ import {
 
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-const NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 
 /** Budets rang i stegen (1♣=0 … 7NT=34) så vi kan jämföra om ett bud är lagligt (högre). */
@@ -226,12 +225,11 @@ function cueSlamAuction(
     const cue = cheapestFreeCue(hand, trump, lastRank, gameRank, controlled)
     if (cue) {
       controlled.add(cue.suit)
-      const why = lengths(hand)[cue.suit] === 0 ? 'renons' : 'ess'
       turns.push({
         role: captainTurn ? 'svarare' : 'öppnare',
         call: cue.call,
         rule: 'cue-bid',
-        explanation: `första-rondskontroll (${why}) i ${NAME[cue.suit]} → ${cue.call[0]}${SYM[cue.suit]}.`,
+        explanation: `första-rondskontroll i ${SYM[cue.suit]} → ${cue.call[0]}${SYM[cue.suit]}.`,
       })
       lastRank = bidRank(cue.call)
       captainTurn = !captainTurn
@@ -281,7 +279,7 @@ function driveRKC(
     role: 'svarare',
     call: '4NT',
     rule: '1430 RKC',
-    explanation: `minst ~${floor} poäng ihop mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort).`,
+    explanation: `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort).`,
   })
 
   const answer = respondToRKC(openerHand, trump)
@@ -302,7 +300,7 @@ function driveRKC(
         role: 'svarare',
         call: '5NT',
         rule: 'Sjöberg 5NT',
-        explanation: `alla fem nyckelkort + trumfdam, storslamszon (~${floor}+) → 5NT (frågar kungar).`,
+        explanation: `alla fem nyckelkort + trumfdam, storslamszon → 5NT (frågar kungar).`,
       })
       const kingAnswer = respondToKingAsk(openerHand, trump)
       turns.push({ role: 'öppnare', call: kingAnswer.call, rule: kingAnswer.rule, explanation: kingAnswer.explanation })
@@ -372,14 +370,14 @@ function driveRKC(
 }
 
 /** Kanske-zonen: kaptenen bjuder in; partnern accepterar med mer än blott minimum. */
-function inviteSlam(openerHand: Hand, trump: Suit, ctx: SlamContext, floor: number): SlamTurn[] {
+function inviteSlam(openerHand: Hand, trump: Suit, ctx: SlamContext, _floor: number): SlamTurn[] {
   const invite = ctx.inviteCall!
   const turns: SlamTurn[] = []
   turns.push({
     role: 'svarare',
     call: invite,
     rule: 'slaminbjudan',
-    explanation: `~${floor}–${floor + 2} poäng ihop (slam bara om partnern har extra) → ${invite[0]}${SYM[trump]} (inbjuder slam).`,
+    explanation: `Slaminbjudningszon (slam bara om partnern har extra) → ${invite[0]}${SYM[trump]} (inbjuder slam).`,
   })
   // Partnern dömer på SIN hand mot sitt eget visade intervall: mer än blott
   // minimum → acceptera. (Omvärderad med fit: Bergenpoäng, aldrig under hp.)
@@ -389,7 +387,7 @@ function inviteSlam(openerHand: Hand, trump: Suit, ctx: SlamContext, floor: numb
       role: 'öppnare',
       call: `6${LETTER[trump]}`,
       rule: 'slaminbjudan: accept',
-      explanation: `${partnerPts} poäng — mer än blott minimum → accepterar, 6${SYM[trump]}.`,
+      explanation: `Mer än blott minimum → accepterar, 6${SYM[trump]}.`,
     })
   } else if (invite.startsWith('4')) {
     turns.push({
@@ -457,7 +455,7 @@ export function exclusionInvestigation(
     role: 'svarare',
     call: `5${LETTER[voidSuit]}`,
     rule: 'Exclusion',
-    explanation: `renons i ${NAME[voidSuit]}, ~${captain + partnerMin}+ ihop → 5${SYM[voidSuit]} (Exclusion: frågar nyckelkort utom esset där).`,
+    explanation: `renons i ${SYM[voidSuit]}, slamzon ihop → 5${SYM[voidSuit]} (Exclusion: frågar nyckelkort utom esset där).`,
   })
   const answer = respondToExclusion(openerHand, trump, voidSuit)
   turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
@@ -548,7 +546,7 @@ export function mssMinorFitContinuation(
       role: 'svarare',
       call: '3NT',
       rule: 'till spel',
-      explanation: `${ownHcp} hp mot visade 15–17 → 3NT (balanserad utgång, ej slamzon).`,
+      explanation: `Balanserad utgång mot visade 15–17 → 3NT (ej slamzon).`,
     }]
   }
 
@@ -557,7 +555,7 @@ export function mssMinorFitContinuation(
     role: 'svarare',
     call: '4NT',
     rule: '1430 RKC',
-    explanation: `minst ~${floor} hp ihop, NT-säker minorfit → 4NT (frågar nyckelkort inför NT-slam).`,
+    explanation: `Slamzon, NT-säker minorfit → 4NT (frågar nyckelkort inför NT-slam).`,
   })
   const answer = respondToRKC(openerHand, minor)
   turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
@@ -586,7 +584,7 @@ export function mssMinorFitContinuation(
       role: 'svarare',
       call: '5NT',
       rule: 'Sjöberg 5NT',
-      explanation: `alla fem nyckelkort + trumfdam, storslamszon (~${floor}+) → 5NT (frågar kungar).`,
+      explanation: `alla fem nyckelkort + trumfdam, storslamszon → 5NT (frågar kungar).`,
     })
     const kingAnswer = respondToKingAsk(openerHand, minor)
     turns.push({ role: 'öppnare', call: kingAnswer.call, rule: kingAnswer.rule, explanation: kingAnswer.explanation })
