@@ -157,16 +157,20 @@ describe('etapp 4 familj B fix 1: kaptensmatte + RKC efter positivt svar på 2�
 
 // ---- FIX 2: slamzon UTAN trumf (frö 20261372 + syntetiska vakter) -----------
 
-// Frö 20261372: `2♣–3♣–3♥–4♣–4♥–P` — svararen W (14 hp, AKQJT3 i klöver) har
-// ingen hjärterfit men står i slamzon (14 + visade 22 = 36) med en egen
-// SJÄLVBÄRANDE färg. Live-lagret rebjöd bara 4♣ och auktionen dog i 4♥.
-// Facit: RKC med egen färg som trumf → 6♣ (DD-verifierat 12 stick av W;
-// 6NT står också men 6♣ är den ärliga trumfen).
+// Frö 20261372 (JUSTERAT 2026-08-31: ♦K↔♦A bytta mellan E och W så öppnings-
+// handen klarar de nya 2♣-substanskraven — 9 spelstick + 4 spelfasta stick;
+// originalhanden ♦KQ943 öppnar numera korrekt 1♥. EW:s samlade kort är
+// oförändrade → DD-facit och RKC-matten intakta: exakt ett nyckelkort (♠A hos
+// Syd) saknas → 6♣, inte 7♣): svararen W (13 hp, AKQJT3 i klöver) har ingen
+// hjärterfit men står i slamzon (13 + visade 22 = 35) med en egen SJÄLVBÄRANDE
+// färg. Live-lagret rebjöd bara 4♣ och auktionen dog i 4♥.
+// Facit: RKC med egen färg som trumf → 6♣ (6NT står också men 6♣ är den
+// ärliga trumfen).
 const HANDS_1372 = {
   N: 'S:63 H:73 D:J762 C:97654',
-  E: 'S:K8 H:AKJT64 D:KQ943 C:-',
+  E: 'S:K8 H:AKJT64 D:AQ943 C:-',
   S: 'S:AJT9742 H:Q95 D:8 C:82',
-  W: 'S:Q5 H:82 D:AT5 C:AKQJT3',
+  W: 'S:Q5 H:82 D:KT5 C:AKQJT3',
 }
 const HISTORY_1372: ResolvedCall[] = [
   call('E', '2C'), call('S', 'P'), call('W', '3C'), call('N', 'P'),
@@ -212,7 +216,7 @@ const HISTORY_1107: ResolvedCall[] = [
 ]
 
 describe('etapp 4 familj B fix 2: slamzon utan trumf', () => {
-  it('frö 20261372-läget: W (14 hp, AKQJT3) frågar 4NT med egen färg som trumf', () => {
+  it('frö 20261372-läget: W (13 hp, AKQJT3) frågar 4NT med egen färg som trumf', () => {
     const d = deal('2cslam-20261372-pos', 'E', 'ns', HANDS_1372)
     expect(decideCall(d, HISTORY_1372, 'W').bid).toBe('4NT')
   })

@@ -63,15 +63,14 @@ har styrka för:
   inte att öppna lågfärgen och sedan reverse:a in högfärgen (reverse lovar extra).
 - **16+ hp: öppna LÅGfärgen** (den 6-korts) och **reverse:a** in högfärgen sedan –
   då visas 6-5 med extra styrka.
-- En riktigt stark 6-5 med **~8½+ spelstick** öppnar **2♣** (nära utgång på egen
-  hand), oavsett ovanstående.
+- En riktigt stark 6-5 som klarar **2♣-substanskraven** (§4.4: 9/9½ spelstick +
+  spelfasta stick) öppnar **2♣** (nära utgång på egen hand), oavsett ovanstående.
 - **Återbudet verifierat (F5, 2026-08-08):** reversen kommer i alla tre
   svarsvägar — efter svararens 1-lägesfärg (2♥/2♠, fanns), efter 2/1 GF
   (högfärgen visas naturligt, fanns) och **efter 1NT-svaret** (byggdes i F5:
   förr rebjöds 3m och högfärgen gömdes — men 1NT förnekar bara 4-korts
   högfärg, så 5-3-fiten hittas just via reversen). Mönstret är sällsynt vid
-  bordet (de flesta 16+ 6-5 öppnar 2♣ på spelstick) — därför enhetsfacit i
-  `auction-65-rebid.test.ts`, inte volymmätning.
+  bordet — därför enhetsfacit i `auction-65-rebid.test.ts`, inte volymmätning.
 
 ### Lättöppningar i 3:e och 4:e hand (TP-steg F, ägarbeslut 2026-07-03)
 När partnern redan passat är öppningskraven lägre (svaret är begränsat och
@@ -499,8 +498,13 @@ förnekar 4-korts hf. Frågar efter öppnarens 4-korts minor:
 Svararen passar med minimum, bjuder naturligt med mer, eller cue-bid mot slam.
 
 ### 4.4 Svar på 2♣ (stark, konstgjord)
-2♣ lovar **stark balanserad** (22+ hp) eller **stark obalanserad** (~9+ spelstick
-med hf, 10+ med lf – en stick från utgång). Krav. Balanserade ranger: 22–24
+2♣ lovar **stark balanserad** (22+ hp) eller **stark obalanserad** som klarar
+substanskraven (2026-08-31): **minst 9 spelstick** om längsta färgen är en
+högfärg, **9½ med lågfärg** (en stick från utgång; lågfärgshanden är längre
+från sin utgång och söker hellre 3NT via 1-läget) — **och minst 3 spelfasta
+stick** (EK=2, ED=1½, E=1, KD=1, Kx=½; försvarsstyrka, så en spärrhand aldrig
+låtsas vara stark). En honnörstung hand med **8½ spelstick och 4+ spelfasta
+stick** (t.ex. tre ess) öppnar också 2♣. Krav. Balanserade ranger: 22–24
 (→ 2NT-rebud) och 28–30 (→ 3NT-rebud); 25–27 öppnar 3NT direkt (se §3).
 
 **Svararens svar (2♦ väntebud):**
@@ -1961,6 +1965,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-08-31 — 2♣-öppningens substanskrav (§4.4, ägarbeslut "Regel B").**
+  Den distributionella 2♣:an (hp<22) öppnade förr på PLATT ≥8½ spelstick oavsett
+  färg — den mest aggressiva högfärgssiffran applicerad även på lågfärg, vilket
+  gav 2♣ på formstarka minimihänder (Grant Baze-fyndet: 11 hp 6-5 tvingades till
+  utgångskrav) och på spärrhänder utan försvar (9 hp, 9-korts färg, 2 spelfasta
+  stick). Nu (källor: K. Walker, bridgebum, Lawrence; mätning 20 000 givar i
+  `tvaklover-oversyn.probe.test.ts`, frekvensen 1,6 % → 1,1 % ≈ verklighetens
+  ~1 %): **9 spelstick (hög)/9½ (låg) OCH ≥3 spelfasta stick**, ELLER valven
+  **≥8½ spelstick OCH ≥4 spelfasta stick** (räddar honnörs-/esstunga händer, t.ex.
+  ägarens fixpunkt frö 20261050: 21 hp, tre ess). Ägarens andra fixpunkt frö
+  20260220 (13 hp 6-5) öppnar nu 1♠. `quickTricks` ny i `evaluation.ts`; facit
+  `openings-2c-substans.test.ts`; testfrö 20261372 (slamfacit) justerat ♦K↔♦A
+  E/W så öppningshanden klarar de nya kraven (EW:s samlade kort oförändrade).
 - **2026-08-18 — Checkback efter naturligt 2NT-återbud (systems on, §5.2).**
   Efter **1x–1y–2NT** (öppnaren 18–19 bal) bjöd svararen förr **blint 3NT**
   (`responderRebidColorAuction` case `'2NT (18–19)'` → `return 3NT`) och missade
