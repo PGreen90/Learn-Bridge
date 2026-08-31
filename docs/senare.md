@@ -9,32 +9,33 @@
 
 ## ⚪ SENARE
 
-### 2♣-öppningen — bredare översyn (2026-08-24, ägaren breddade fyndet)
-**Ursprung:** Grant Baze "6-5, come alive"-artikeln + sondkörning av artikelns
-exakta hand ♠4 ♥KQJ86 ♦AJ10765 ♣4 (11 hp, 6-5). Motorn öppnar den **2♣ (utgångs-
-krav)** eftersom `playingTricks` = 8½ och vi har regeln *"≥8½ spelstick → 2♣ även
-med hp<22"* (`evaluation.ts`/`openings.ts`, ägarbeslut 2026-07-01). Både artikeln
-och standard-2/1 behandlar den handen som ett **1-lägesdilemma** (öppna 1♥/1♦),
-inte en tvingande 2♣. → 8½-tröskeln **mis-fyrar på formstarka minimihänder**.
+### 2♣-öppningen — bredare översyn (steg 1 KLAR 2026-08-31, resten kvar)
+**Ursprung:** Grant Baze "6-5, come alive"-artikeln (11 hp 6-5 tvingades till
+2♣-utgångskrav av den platta 8½-spelsticksregeln); ägaren breddade 2026-08-24
+fyndet till hela öppningen.
 
-**Ägaren (2026-08-24): hela 2♣-öppningen behöver ses över, inte bara den
-tröskeln.** Bredare frågor att ta med när jobbet hämtas upp:
-- **Spelstick-tröskeln:** höj 8½ → ~9, eller form-modulera (6-5/6-6 kräver mer
-  än en enfärgad 9-stickshand)? Mät hur ofta 8½-regeln fångar händer som borde
-  vara 1-öppningar.
-- **Kravnivån efter 2♣:** vår 2♣ är utgångskrav — passar det en distributionell
-  8½-stickshand med 11 hp som kan sakna fit? Ska den distributionella 2♣:an vara
-  utgångskrav eller bara stark/enrondskrav?
-- **Balanserad 22+ vs distributionell:** två helt olika handtyper under samma
-  öppning — beskrivs/behandlas de rätt i fortsättningen (2♦-relä, svararens steg,
-  2NT-återbudet)?
+**Steg 1 (spelstick-tröskeln) KLAR & DEPLOYAD 2026-08-31 — ägarbeslut "Regel B":**
+distributionell 2♣ (hp<22) kräver **9 spelstick (högfärg)/9½ (lågfärg) OCH ≥3
+spelfasta stick**, ELLER valven **8½ stick OCH ≥4 spelfasta stick**. Källor:
+K. Walker/bridgebum/Lawrence; mätning 20 000 givar (frekvens 1,6 % → 1,1 % ≈
+verklighetens ~1 %) i `tvaklover-oversyn.probe.test.ts` (gate:ad `TVAKLOVER=1`).
+Ägarens fixpunkter: frö 20261050 (21 hp, tre ess) = 2♣ · frö 20260220 (13 hp 6-5)
+= 1♠. Facit: `openings-2c-substans.test.ts`; regel i budsystem.md §4.4 + §9.
+
+**Kvar när jobbet hämtas upp igen:**
+- **Kravnivån efter 2♣ (fråga 2):** vår 2♣ är utgångskrav — rätt även för den
+  distributionella varianten, eller ska den vara stark/enrondskrav?
+- **Balanserad vs distributionell i fortsättningen (fråga 3):** två handtyper
+  under samma öppning — 2♦-relä, svararens steg, 2NT-återbudet. Mätkandidat
+  (Lawrence-artikeln 2026-08-27): 25–27→3NT-öppningen kan begrava en 4-4-
+  högfärgsfit utan stopp i obudna färgen — mät innan dom.
 - **Samspel med 6-5-luckan** i [docs/bevaka.md](bevaka.md): om en formstark 6-5
   varken blir en bra 2♣ *eller* kan visa 6:e kortet efter en 1-öppning, var landar
   den bäst?
 
-**Status:** budstruktur-ändring → kräver exempelhänder + ägargodkännande (låst
-regel), och ligger utanför budförklarings-NU:t. Facit-först när den hämtas upp;
-sonden ovan återskapar startläget. INGEN ändring förrän ägaren väljer upp den.
+**Status:** budstruktur-ändringar → exempelhänder + ägargodkännande per steg
+(låst regel). Facit-först. Spellärdom ur Lawrence-artikeln (dummy reversal) hör
+till speldiagnosens låda, inte hit.
 
 ### Hål D steg 2 — cue-frontend i konkurrenslagret (PARKERAD 2026-08-07)
 Steg 1 (kontroll-komplett 4NT, budsystem.md §6.10) landade 2026-08-07: kaptenen

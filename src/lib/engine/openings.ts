@@ -3,7 +3,7 @@
 
 import type { Bid, Hand, Seat, Suit, Vulnerability } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
-import { playingTricks, startingPoints } from './evaluation'
+import { playingTricks, quickTricks, startingPoints } from './evaluation'
 
 /** Är positionen `seat` sårbar i den här givens sårbarhet? */
 export function isVulnerable(seat: Seat, vul: Vulnerability): boolean {
@@ -13,11 +13,6 @@ export function isVulnerable(seat: Seat, vul: Vulnerability): boolean {
   return seat === 'E' || seat === 'W' // 'ew'
 }
 
-/** Spelstick snyggt: 8 → "8", 8.5 → "8½". */
-function fmtTricks(t: number): string {
-  const whole = Math.floor(t)
-  return t - whole >= 0.5 ? `${whole}½` : `${whole}`
-}
 
 export interface OpeningResult {
   /** Budet, t.ex. "1S", "1NT", "2C", "P". */
@@ -86,16 +81,31 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
   // Stark 2♣ (obalanserad 22+).
   if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `22+ hp, för stark för en 1-öppning → 2♣ (konstgjort kravbud).` }
 
-  // Distributionellt stark 2♣ (ägarens beslut 2026-07-01): en hand med många
-  // SPELSTICK är nära utgång på egen hand och öppnar 2♣ även om HP < 22. Gräns
-  // ~8½ spelstick. Balanserade NT-öppningar/22+ har redan returnerats ovan, så
-  // det här fångar de starka fördelningshänderna (lång stark färg + sidohonnörer).
+  // Distributionellt stark 2♣ — substanskraven (ägarbeslut 2026-08-31 "Regel B",
+  // ersätter den platta 8½-gränsen från 2026-07-01; källor: K. Walker/bridgebum/
+  // Lawrence, mätning tvaklover-oversyn.probe.test.ts). Två vägar in:
+  //  A) Färgmodulerade spelstick — ≥9 om längsta färgen är HÖG, ≥9½ LÅG (en
+  //     lågfärgshand är längre från sin utgång och söker hellre 3NT via
+  //     1-läget) — OCH ≥3 spelfasta stick (försvarsstyrka: annars är det en
+  //     spärrhand som låtsas vara stark).
+  //  B) Valven: ≥8½ spelstick OCH ≥4 spelfasta stick — räddar honnörs-/ess-
+  //     tunga händer som faller på ren stickräkning (t.ex. tre-ess-händer).
+  // Balanserade NT-öppningar/22+ har redan returnerats ovan.
   const pt = playingTricks(hand)
-  if (pt >= 8.5) {
+  const qt = quickTricks(hand)
+  // Längsta färgen (vid lika längd: högfärg — lägre stickgolv, konservativt).
+  const longest = (['hearts', 'spades', 'diamonds', 'clubs'] as Suit[]).reduce((a, b) =>
+    len[b] > len[a] ? b : a,
+  )
+  const majorLong = longest === 'hearts' || longest === 'spades'
+  const trickFloor = majorLong ? 9 : 9.5
+  if ((pt >= trickFloor && qt >= 3) || (pt >= 8.5 && qt >= 4)) {
     return {
       call: '2C',
       rule: 'stark 2♣',
-      explanation: `~${fmtTricks(pt)} spelstick — nära utgång på egen hand → 2♣ (starkt kravbud).`,
+      explanation:
+        `Minst ${majorLong ? '9' : '9½'} spelstick med spelfasta toppkort (ess och kungar) — ` +
+        `nära utgång på egen hand → 2♣ (starkt kravbud).`,
     }
   }
 
@@ -116,7 +126,8 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     // och visa 6-5 med extra styrka; med minimum (12–15) öppna högfärgen (kan inte
     // reverse:a med minimum). Gäller bara HÖGfärg EXAKT 5 + en LÅGfärg 6+ (annars
     // faller det till den vanliga 5-korts-högfärg/minor-regeln nedan). Starka 6-5
-    // med 8½+ spelstick har redan öppnat 2♣ ovan.
+    // som klarar 2♣-substanskraven (spelstick + spelfasta stick) har redan
+    // öppnat 2♣ ovan.
     const fiveMajor: Suit | null = len.spades === 5 ? 'spades' : len.hearts === 5 ? 'hearts' : null
     const sixMinor: Suit | null = len.diamonds >= 6 ? 'diamonds' : len.clubs >= 6 ? 'clubs' : null
     if (fiveMajor && sixMinor && p >= 16) {

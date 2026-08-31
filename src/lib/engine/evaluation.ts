@@ -265,6 +265,26 @@ function suitPlayingTricks(ranks: Rank[]): number {
 }
 
 /**
+ * Spelfasta stick (quick tricks) — försvars-/substansmåttet i 2♣-grinden
+ * (Karen Walker: en stark öppning kräver spelfasta stick, inte bara längd).
+ * Per färg: EK = 2 · ED = 1½ · E = 1 · KD = 1 · Kx = ½.
+ */
+export function quickTricks(hand: Hand): number {
+  const bySuit = ranksBySuit(hand)
+  let qt = 0
+  for (const s of SUITS) {
+    const r = bySuit[s]
+    const A = r.includes('A'), K = r.includes('K'), Q = r.includes('Q')
+    if (A && K) qt += 2
+    else if (A && Q) qt += 1.5
+    else if (A) qt += 1
+    else if (K && Q) qt += 1
+    else if (K && r.length >= 2) qt += 0.5
+  }
+  return qt
+}
+
+/**
  * Kortfärgspoäng som *väntar* på en fit – endast för visning. Bergens metod
  * räknar ALDRIG korthet i startpoängen (man vet ännu inte om man har trumffit),
  * men vi vill kunna visa ägaren att singel/dubbel/renons inte är glömda, bara
