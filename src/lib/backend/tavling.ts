@@ -230,6 +230,8 @@ export interface TopplistaRad {
   /** Sant för den inloggades egen rad (steg 6 — highlightas). Kan saknas i
    *  äldre/anonyma svar. */
   jag?: boolean
+  /** Bot-deltagaren (rebidz-bot) — märks med 🤖. Kan saknas i äldre svar. */
+  bot?: boolean
 }
 
 /** Kallarens egen placering + snitt (bara med när man är inloggad och har minst
@@ -364,6 +366,8 @@ export interface BrickaRad {
   namn: string
   /** Din egen rad (highlightas). */
   jag: boolean
+  /** Bot-deltagaren (rebidz-bot) — märks med 🤖. Kan saknas i äldre svar. */
+  bot?: boolean
   /** Kontraktet spelaren nådde, eller null (utpassad giv). */
   kontrakt: GivKontrakt | null
   nsScore: number

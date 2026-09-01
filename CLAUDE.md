@@ -10,25 +10,30 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BUDFÖRKLARINGS-REVISIONEN KLAR & LIVE (2026-08-19) → ägarens ordval-granskning kvar
+### 🔵 NU — BOT-DELTAGARE I DAGLIGA TÄVLINGEN (ägarbeslut 2026-08-31) → BYGGD, ägarsteg + deploy kvar
 
-Texten som visas när man trycker på ett bud. **FAS 1** (täckning): svepet
-`forklaringssvep.probe.test.ts` visade 0 oförklarade bud; **Fynd 3** lagat —
-tolkningslagret (`auction-interpret.ts`) gissade förr "straffdubbling" på ALLA
-dubblingar i motståndarvyn, nu härleds åtta kategorier ur auktionen (ägarprincip
-**inga gissningar i bridge**). **FAS 2** (klarspråk, ägardirektiv "så tydligt som
-möjligt"): batch 1–7 KLARA & DEPLOYADE — hela motorn fri från bokstavskod (→
-färgsymboler), "GF" (→ utgångskrav), "TP/stödp./startp." (→ med fördelning) och
-interna regelnamn i den synliga texten. Rule-NAMN står kvar (chip + alerts/
-regelsvep). Katalog med före→efter: `docs/budforklaring-katalog.md`. Mätt: 0 av
-allt över 10 000 givar. **KVAR = ägarens del:** syna formuleringarna i katalogen
-och putsa enskilda ordval (peka på en rad → Claude byter ordagrant + deployar).
+Boten **rebidz-bot** spelar dagens 12 givar varje natt → minst två resultat per
+giv (med 1–3 användare var MP ofta meningslös) + roligare att mäta sig. BYGGT
+samma dag (detalj: påbyggnadsrubriken i `docs/beslut-b-plan.md`):
+`botspelare.ts` (boten spelar även Syd, samma per-besluts-frön som vid
+människans bord → nattgranskningen godkänner raderna) + facit
+`botspelare.test.ts` (validera-paritet — **boten har ingen egen poängväg** —
+determinism, granskningsreplay) · nattjobbet `tavlingsbot.probe.test.ts` +
+workflow `tavling-botspelare.yml` (23:45 UTC; bot-kontot skapas automatiskt
+första körningen) · migration `0010` (`profiles.is_bot`) · 🤖-märkning i
+topplistan + travellern. **KVAR:** ägarsteg migration `0010` (+ etapp
+3-secrets nedan om ej lagda) → deploy → verifiera första körningen.
 
-**Parallellt pending ägarsteg (Beslut B etapp 3, byggt 2026-08-18):** kör migration
-`0009` i Supabase + lägg GitHub-secrets `SUPABASE_URL` och `SUPABASE_SERVICE_ROLE_KEY`
-(nattgranskningen). Därefter är ALLA Beslut B-etapper (0–4) levererade.
-Grindbeslut kvar: **Nivå 2 i tävlingen VÄNTAR** (trigger ej nådd). Detalj:
-`docs/beslut-b-plan.md`.
+**Parallella pending ägarsteg:**
+1. **Budförklaringarnas ordval-granskning** (revisionen KLAR & LIVE 2026-08-19,
+   batch 1–7 deployade, 0 oförklarade bud över 10 000 givar): syna katalogen
+   `docs/budforklaring-katalog.md`, peka på en rad → Claude byter ordagrant +
+   deployar.
+2. **Beslut B etapp 3** (byggt 2026-08-18): kör migration `0009` i Supabase +
+   lägg GitHub-secrets `SUPABASE_URL` och `SUPABASE_SERVICE_ROLE_KEY`
+   (nattgranskningen). Därefter är ALLA Beslut B-etapper (0–4) levererade.
+   Grindbeslut kvar: **Nivå 2 i tävlingen VÄNTAR** (trigger ej nådd). Detalj:
+   `docs/beslut-b-plan.md`.
 
 ---
 

@@ -165,6 +165,7 @@ const MEDVETET_EJ_INKOPPLAD: Record<string, string> = {
   'revisor-dds.ts': 'Mätriggens DD-orakel (bridge-dds, dev-beroende) — körs bara av revisor.probe.test.ts.',
   'spela-giv.ts': 'Speldiagnosens helgivsspelare (docs/speldiagnos.md) — körs bara av probes/facittester; appen spelar via usePlayTable.',
   'speldiagnos.ts': 'Speldiagnosens aggregator (docs/speldiagnos.md) — körs bara av speldiagnos.probe.test.ts.',
+  'botspelare.ts': 'Tävlingsbotens givspelare (beslut-b-plan.md, påbyggnaden) — driftvägen ÄR nattjobbet tavlingsbot.probe.test.ts (Actions); appen spelar via usePlayTable.',
 }
 
 it('dokumentvakten: varje motormodul är inkopplad i produktionskoden', () => {

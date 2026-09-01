@@ -155,25 +155,27 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           : { board },
       )
 
-    // Visningsnamn för spelarna på listan.
+    // Visningsnamn + bot-flagga för spelarna på listan (boten — migration
+    // 0010 + nattjobbet tavlingsbot.probe — märks med 🤖 i klienten).
     const ids = agg.topplista.map((p) => p.spelare)
-    const namn = new Map<string, string>()
+    const profil = new Map<string, { namn: string; bot: boolean }>()
     if (ids.length) {
       const inList = ids.map((id) => `"${id}"`).join(',')
       const profiler = (await restGet(
         base,
         key,
-        `profiles?id=in.(${inList})&select=id,display_name`,
-      )) as Array<{ id: string; display_name: string }>
-      for (const p of profiler) namn.set(p.id, p.display_name)
+        `profiles?id=in.(${inList})&select=id,display_name,is_bot`,
+      )) as Array<{ id: string; display_name: string; is_bot: boolean | null }>
+      for (const p of profiler) profil.set(p.id, { namn: p.display_name, bot: p.is_bot === true })
     }
 
     const topplista = agg.topplista.map((p) => ({
-      namn: namn.get(p.spelare) ?? '—',
+      namn: profil.get(p.spelare)?.namn ?? '—',
       snitt: p.snitt,
       antalGivar: p.antalGivar,
       // Markera kallarens egen rad (steg 6) — klienten highlightar den.
       jag: p.spelare === meId,
+      bot: profil.get(p.spelare)?.bot ?? false,
     }))
 
     return json(200, {
