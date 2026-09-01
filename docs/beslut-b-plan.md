@@ -339,6 +339,34 @@ Hela detaljplanen, arkitekturen och delleveranserna 4A–4D: **`docs/bord-plan.m
 - **Chatt:** endast förvalda fraser ("Bra spelat!") — ingen fritext = inget
   modereringsansvar.
 
+### Påbyggnad — bot-deltagaren i dagliga tävlingen (ägarbeslut 2026-08-31)
+
+**Varför:** med 1–3 mänskliga spelare är matchpoängen ofta meningslös (ensam på
+en giv = ingen jämförelse, "väntar på fler"). Boten **rebidz-bot** spelar dagens
+12 givar varje natt → minst två resultat per giv, MP% betyder något varje dag,
+och man har alltid någon att mäta sig mot.
+
+**Hur det hänger ihop (allt återanvänt):**
+- `src/lib/engine/botspelare.ts` — spelar EN giv med bot-hjärnan även på Syds
+  plats: `botAuction` (auktionen) + `botCardSmart` med per-besluts-frön ur
+  `playSeedForBoard` — **exakt samma frön som bottarna vid människans bord**,
+  så nattgranskningen godkänner botens rader av sig själv. Facit:
+  `botspelare.test.ts` (validera-paritet, determinism, granskningsreplay).
+- `src/lib/engine/tavlingsbot.probe.test.ts` — nattjobbet (gate:at
+  `BOT_TAVLING=datum`): skapar bot-kontot första gången (admin-API:t,
+  slumplösenord som slängs; triggern i migration 0001 skapar profilen),
+  flaggar `is_bot` (migration `0010`), spelar alla brickor och skriver
+  `daily_results` i **samma radform och genom samma `validera()`** som
+  människors inskick — boten har ingen egen poängväg. Avvisat botinskick =
+  motorbugg → FYND i rapporten, aldrig rött.
+- `.github/workflows/tavling-botspelare.yml` — cron 23:45 UTC (efter
+  givgenereringens 23:05); idempotent, samma tre secrets som nattgranskningen.
+- Topplistan + travellern skickar `bot`-flaggan (ur `profiles.is_bot`);
+  klienten märker raden med 🤖 ("Datorspelare").
+
+**Ägarsteg vid deploy:** kör migration `0010` i Supabase (secrets-steget delas
+med etapp 3 ovan). Bot-kontot skapas automatiskt vid första körningen.
+
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
 
 - `profiles` — användare, unikt visningsnamn.
@@ -423,3 +451,9 @@ Hela detaljplanen, arkitekturen och delleveranserna 4A–4D: **`docs/bord-plan.m
   avvikare → status 'granskning'). Ägarsteg: migration `0009` + GitHub-secrets
   `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`. Därmed är ALLA Beslut B-etapper
   (0–4) levererade.
+- **2026-08-31: BOT-DELTAGAREN BYGGD** (ägarbeslut samma dag: "så snart som
+  möjligt" — fler MP-jämförelser vid 1–3 användare). Se påbyggnadsrubriken ovan:
+  `botspelare.ts` + facit, nattjobbet `tavlingsbot.probe.test.ts`, workflow
+  `tavling-botspelare.yml` (23:45 UTC), migration `0010` (`profiles.is_bot`),
+  🤖-märkning i topplistan + travellern. Ägarsteg: migration `0010` (+ etapp
+  3-secrets om de inte redan är lagda).
