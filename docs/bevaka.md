@@ -9,6 +9,26 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Andra hand ser bordet (2026-09-01, speldiagnos S6 — fix behållen)
+- Försvarets andra hand går numera UPP och tar sticket när spelföraren leder,
+  partnern har VISAT renons i färgen, och kortet slår både det ledda kortet och
+  bordets bästa (bara i sang/trumfledning; bordet måste ha kort i färgen).
+  Facit: `play-bot-second-hand.test.ts`. Känt mjukt motexempel (frö 20260735,
+  −1): det "säkra" sticket kan bli en inpetning. **Bevaka:** går boten upp med
+  en honnör där det känns dumt vid bordet — särskilt om den sedan tvingas leda
+  ut i en gaffel — säg till med given.
+
+## Monte-Carlo med FÅ lägen tar stora beslut (2026-09-01, speldiagnos fynd 3)
+- Rundan 2026-09-01 (rapporten `revisor-output/speldiagnos-rapport-2026-09-01.md`):
+  i frö 20260894 (stick 6) maskade spelföraren på ett underlag av bara **6
+  samplade lägen** — DD-tappet blev 5 stick i ett slag. S5-robusthetsnätet
+  räddar 0-lägen-fallet, men beslut på en handfull lägen har hög varians.
+  **Bevaka:** enskilda givar där MC-motiveringen ("jag delade ut N troliga
+  lägen") visar ensiffrigt N OCH utfallet blev en stor DD-rörelse. Kandidat om
+  det återkommer: minsta antal lägen innan MC får överrida en säker linje —
+  utreds ihop med trumfteknik-jobbet (fynd 1), inte separat.
+  Repro: `DUMP_SPEL=20260894 npx vitest run src/lib/engine/speldump.probe.test.ts`.
+
 ## 6-5-handen: hinner motorn visa 6:e kortet? (2026-08-24, ägarnotering)
 - **Budgivningsfråga, ej textfråga.** Med 6-korts lågfärg + 5-korts högfärg (16+)
   öppnar motorn lågfärgen (`minor-regeln`, `openings.ts`) och *planerar* att visa

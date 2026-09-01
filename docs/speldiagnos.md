@@ -277,3 +277,30 @@ detaljbeskrivning i `docs/bot-hjarna.md` ("MC-urfallet lagat"):
   skillnad från S4 som bara flyttade förarsidan). Efter fixarna hittar
   samplern lägen i alla 48 MC-beslut i de två utredda fröna (0 × "0 LÄGEN").
   Som alltid: enskilda kortföljder är omtärnade — låsen är facit-testerna.
+
+### S6 — granskningsrunda: en fix behållen, en byggd-mätt-FÖRKASTAD (2026-09-01)
+
+Samma 200 givar och kommando som S0 (byt `s0` mot `s6` i OUT-namnen).
+Rundans rapport: `revisor-output/speldiagnos-rapport-2026-09-01.md`;
+fixdetaljerna: `docs/bot-hjarna.md` "runda 6".
+
+- **Nollmätning före fixarna** (samma kommando, OUT `speldiagnos-2026-09-01-<a|b|c|d>.json`):
+  spelförarsidan **258** flaggade stick (S5 277), försvaret **175** (S5 193),
+  utspelet 57 (57), rent spelade 22/200 (19). Spelet hade alltså förbättrats
+  sedan S5 **utan att spelkoden rörts** — trolig mekanism: budförklarings-
+  revisionens lagning av dubblings-tolkningen (2026-08-19), som ärliga
+  inferensen läser auktionen genom. Bud: 17,5 % (35/200), 259 p/giv —
+  S-seriens konstant.
+- **Fix "andra hand ser bordet" (frö 20260826) BEHÅLLEN:** förare **258**
+  (±0), försvar **174** (−1), rent spelade 23/200 (+1). Tre givar ändrade,
+  alla attribuerade: 20260826 (försvar 4→2, spel-poäng −770→+200), 20260744
+  (förartapp 1→0, −700→0) och motexemplet 20260735 (försvar 2→3 — det säkra
+  sticket blev en inpetning). Facit: `play-bot-second-hand.test.ts`.
+- **Kandidat "trumfplansval i cash-grenen" (frö 20260758) FÖRKASTAD efter
+  mätning:** ihop med fix 2 gav den förare 264 (+6)/försvar 177 (+2) — den
+  lagade sitt frö men stjälpte 20260741/20260773/20260733 (kungen bakom
+  kombinationen; masken kräver positionell kunskap tumregeln inte har).
+  Koden återkallad; lärdomen i `docs/bot-hjarna.md`.
+- **Metodlärdom:** två beteenderegler mättes först IHOP och kunde inte
+  attribueras — mät en i taget (omkörningen ovan gjordes om med bara fix 2).
+- Bevakning ur rundan: MC-beslut på få samplade lägen (`docs/bevaka.md`).

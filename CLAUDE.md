@@ -10,30 +10,37 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BOT-DELTAGARE I DAGLIGA TÄVLINGEN (ägarbeslut 2026-08-31) → BYGGD, ägarsteg + deploy kvar
+### 🔵 NU — TRE TÄVLINGSBOTTAR I NIVÅER (ägarval 2026-09-01, "nästa session = trebot")
 
-Boten **rebidz-bot** spelar dagens 12 givar varje natt → minst två resultat per
-giv (med 1–3 användare var MP ofta meningslös) + roligare att mäta sig. BYGGT
-samma dag (detalj: påbyggnadsrubriken i `docs/beslut-b-plan.md`):
-`botspelare.ts` (boten spelar även Syd, samma per-besluts-frön som vid
-människans bord → nattgranskningen godkänner raderna) + facit
-`botspelare.test.ts` (validera-paritet — **boten har ingen egen poängväg** —
-determinism, granskningsreplay) · nattjobbet `tavlingsbot.probe.test.ts` +
-workflow `tavling-botspelare.yml` (23:45 UTC; bot-kontot skapas automatiskt
-första körningen) · migration `0010` (`profiles.is_bot`) · 🤖-märkning i
-topplistan + travellern. **KVAR:** ägarsteg migration `0010` (+ etapp
-3-secrets nedan om ej lagda) → deploy → verifiera första körningen.
+Nybörjare/medel/expert i dagliga tävlingen. **Alla förberedande beslut är
+tagna — bygg direkt:** all nivåskillnad i SYDS beslut (partner/motståndare
+förblir standardmotorn — valideringen kräver det); expert = dagens bot,
+svagare nivåer via spelhjärnans rattar (MC-budget, `maxCardsForMC`,
+`decodeSignals`); nivåerna MÄTS isär (netto-metoden, EN beteenderegel i
+taget — S6-lärdomen). **Namn (låsta):** Gunnar52=expert (rebidz-bot döps om),
+Lasse68=medel, Emma03=nybörjare — människonamn, ingen 🤖 i listan, nivåkoppling
+bara i dokumentationen; info-raden "I tävlingen deltar även datorspelare" in i
+tävlingsinfon. Detalj: `docs/beslut-b-plan.md` påbyggnaden + minnet.
 
-**Parallella pending ägarsteg:**
-1. **Budförklaringarnas ordval-granskning** (revisionen KLAR & LIVE 2026-08-19,
-   batch 1–7 deployade, 0 oförklarade bud över 10 000 givar): syna katalogen
-   `docs/budforklaring-katalog.md`, peka på en rad → Claude byter ordagrant +
-   deployar.
-2. **Beslut B etapp 3** (byggt 2026-08-18): kör migration `0009` i Supabase +
-   lägg GitHub-secrets `SUPABASE_URL` och `SUPABASE_SERVICE_ROLE_KEY`
-   (nattgranskningen). Därefter är ALLA Beslut B-etapper (0–4) levererade.
-   Grindbeslut kvar: **Nivå 2 i tävlingen VÄNTAR** (trigger ej nådd). Detalj:
-   `docs/beslut-b-plan.md`.
+**Nyss klart (2026-09-01):** speldiagnosens runda 6 — "andra hand ser bordet"
+behållen (S6: försvar 175→174), trumfplans-kandidaten byggd-mätt-FÖRKASTAD,
+MC-på-få-lägen bevakas. Mätpunkt `docs/speldiagnos.md` §S6, lärdomar
+`docs/bot-hjarna.md` runda 6. Samma dag: bot-deltagaren rebidz-bot KLAR &
+LIVE-VERIFIERAD + ALLA Beslut B-etapper levererade (migrationerna 0009–0011 +
+secrets körda). Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR.
+
+**Nyss klart (2026-09-01): bot-deltagaren KLAR & LIVE-VERIFIERAD** — rebidz-bot
+spelar dagens 12 givar varje natt (Actions 23:45 UTC), 🤖-rad i topplistan/
+travellern, samma `validera()` som människor (ingen egen poängväg),
+nattgranskningen godkänner raderna. Detalj: påbyggnadsrubriken i
+`docs/beslut-b-plan.md`. Migrationerna `0009`–`0011` + secrets körda av ägaren
+→ **ALLA Beslut B-etapper (0–4) levererade.** Grindbeslut kvar: Nivå 2 i
+tävlingen VÄNTAR (trigger ej nådd).
+
+**Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
+(revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen
+`docs/budforklaring-katalog.md`, peka på en rad → Claude byter ordagrant +
+deployar.
 
 ---
 
@@ -80,23 +87,22 @@ felrapporterna. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
 
 ### 👀 Bevaka i spel
 Hela listan (nyast först): **`docs/bevaka.md`** — läs den när ägaren säger att
-något känns fel i spel, eller när en ny fix ska läggas till. Senast (S5,
-2026-08-13): öppningslöftet i poäng · robusthetsnätet · utspelsavkodningens
-vakter · tvingade återbud (MC-urfallet stängt — inga kända kvarstående).
+något känns fel i spel, eller när en ny fix ska läggas till. Senast
+(2026-09-01, speldiagnos fynd 3): MC-beslut på FÅ samplade lägen · dessförinnan
+S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Speldiagnosens nästa runda** — masktekniken i trumfdragningen eller ny
-   granskningsrunda på S5-koden (`docs/speldiagnos.md`).
-2. **Bordens SENARE-lista** — claim vid bordet · DD-jämförelsen ("hur bra mot
+1. **Bordens SENARE-lista** — claim vid bordet · DD-jämförelsen ("hur bra mot
    facit") · rondgenomgången per giv (`docs/bord-plan.md`).
+2. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
+   ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
 subagent-användning · Lebensohl nästa lager · fler budträningsgivar +
 tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den
-starka dubblaren säljer given i rond 2 · svårighetsnivåer på bottarna ·
-bot-hjärnans B2/Steg C · bredare försvarsinferens · `auctionFacts`-lagret ·
+starka dubblaren säljer given i rond 2 · bot-hjärnans B2/Steg C · bredare försvarsinferens · `auctionFacts`-lagret ·
 rondgenomgångens per-kort-motivering · 2♣-öppningens bredare översyn forts.
 (steg 1 substanskraven KLAR 2026-08-31; kvar: kravnivån + balanserad/
 distributionell + 6-5-samspelet).

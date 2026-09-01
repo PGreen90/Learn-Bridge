@@ -42,6 +42,37 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
 
 Se `docs/status.md` för detaljer.
 
+## Speldiagnosen runda 6 (2026-09-01 → mätpunkt S6): en fix behållen, en förkastad
+
+Granskningsrundan på S5-koden (rapporten
+`revisor-output/speldiagnos-rapport-2026-09-01.md`) byggde två kandidatfixar
+facit-först och MÄTTE dem över S-seriens 200 givar. En överlevde:
+
+1. **BEHÅLLEN — Andra hand ser bordet (`play-bot.ts`, frö 20260826):**
+   försvarets andra hand kryper inte längre blint. När SPELFÖRAREN leder
+   (träkarlen spelar efter mig, synlig), partnern har VISAT renons i färgen
+   (show-out) och mitt kort slår både det ledda kortet och bordets bästa — då
+   tas det garanterade sticket billigast möjligt. Vakter: bara sang eller
+   trumfledning (annars kan renons-partnern ruffa) och bordet måste ha kort i
+   färgen. Facit: `play-bot-second-hand.test.ts` (DDS-låst mekanismslut +
+   fröet). Känt mjukt motexempel: 20260735 (−1, "ta det säkra sticket" blev
+   en inpetning — tempo som tumregeln inte ser).
+2. **FÖRKASTAD — trumfplansval i cash-grenen (frö 20260758):** kandidaten lät
+   trumfdragningsplanen välja kortet (lågt mot partnerns honnörskombination i
+   stället för toppcash). DD-mätning per alternativ i fröet gav ♠A = 7 stick,
+   lågt = 9, mask mot bordets ♦AQ = 10 — men mätningen över alla 200 givar
+   fällde regeln: den lagade sitt frö och stjälpte tre andra (20260741:
+   kungen satt BAKOM kombinationen och ledningen kostade + startade en
+   kaskad; 20260773, 20260733). **Lärdom: masken kräver positionell kunskap
+   som en tumregel ärligt inte har — det är Monte-Carlo-lagrets jobb.**
+   Koden återkallad; kommentar vid cash-grenen pekar hit.
+
+**Metodlärdomar ur rundan:** (a) den första mekanismhypotesen ("finess mot KQ
+bakom tenacen") var DD-neutral i konstruerade slut — bygg aldrig på hypotesen,
+bygg på DD-mätning per alternativ; (b) två fixar mättes först ihop och kunde
+inte attribueras — mät EN beteenderegel i taget. Bevakning kvar: MC-beslut på
+få samplade lägen (`docs/bevaka.md`, fynd 3).
+
 ## MC-urfallet lagat (2026-08-13, speldiagnosen runda 5 → mätpunkt S5)
 
 Den kända kvarstående punkten från S1 ("`sampleLayouts` 0 lägen → tumreglerna
