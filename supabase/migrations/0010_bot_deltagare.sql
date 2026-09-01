@@ -14,3 +14,6 @@ alter table public.profiles
 
 comment on column public.profiles.is_bot is
   'Bot-konto (t.ex. rebidz-bot i dagliga tävlingen). Sätts bara av nattjobbet via service-nyckeln.';
+
+-- OBS: UPDATE-granten som nattjobbet också behöver ligger i 0011 (kördes som
+-- separat query i Supabase 2026-09-01 — filerna speglar körhistoriken 1:1).
