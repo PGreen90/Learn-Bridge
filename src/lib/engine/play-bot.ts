@@ -1079,6 +1079,12 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
           (c) => attacked.has(c.suit) || cashable.filter((w) => w.suit === c.suit).length >= 2,
         )
       : cashable
+    // OBS (speldiagnosen runda 6, 2026-09-01): en kandidatregel som lät
+    // trumfdragningsplanen välja kortet här (lågt mot partnerns
+    // honnörskombination i stället för toppcash, frö 20260758) byggdes,
+    // MÄTTES och FÖRKASTADES — den hjälpte sitt frö men stjälpte tre andra
+    // givar (20260741/20260773/20260733): masken kräver positionell kunskap
+    // som tumregeln ärligt inte har. Detalj: docs/bot-hjarna.md runda 6.
     if (safeCash.length > 0) {
       return { card: unblockLead(state, seat, highest(safeCash)), reason: 'Jag är inne och cashar en säker vinnare – inget högre kort är kvar i färgen.' }
     }
@@ -1268,6 +1274,39 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
             reason:
               'Andra hand på spelförarsidan: jag täcker billigt – partnern har ändå boss bakom, ' +
               'så kortet kostar inget men kan vinna sticket gratis och sparar partnerns honnör.',
+          }
+        }
+      }
+    }
+    // Speldiagnosen 2026-09-01 (fynd 2, frö 20260826): FÖRSVARETS andra hand är
+    // inte blind för bordet. När SPELFÖRAREN leder (träkarlen spelar efter mig,
+    // SYNLIG), partnern har VISAT renons i färgen (show-out) och jag har ett
+    // kort som slår BÅDE det ledda kortet och bordets bästa kort — då vinner
+    // jag sticket GARANTERAT, medan "andra hand lågt" garanterat skänker det
+    // (partnern kan inte hjälpa). Allt räknat på ärlig information: spelade
+    // kort + synligt bord. Vakter: bara i sang eller när trumfen leds (annars
+    // kan renons-partnern ruffa), och bordet måste ha kort i färgen (annars
+    // kan bordet ruffa över).
+    if (
+      side(seat) !== side(state.contract.declarer) &&
+      state.currentTrick[0].seat === state.contract.declarer &&
+      (state.trump === null || led === state.trump)
+    ) {
+      const dummy = dummyOf(state.contract)
+      const partner = PARTNER_SEAT[seat]
+      const dummyInLed = state.hands[dummy].filter((c) => c.suit === led)
+      if (dummyInLed.length > 0 && shownVoids(state)[partner].has(led)) {
+        const attSla = Math.max(
+          rankVal(state.currentTrick[0].card.rank),
+          ...dummyInLed.map((c) => rankVal(c.rank)),
+        )
+        const vinnare = legal.filter((c) => c.suit === led && rankVal(c.rank) > attSla)
+        if (vinnare.length > 0) {
+          return {
+            card: lowest(vinnare),
+            reason:
+              'Andra hand ser bordet: partnern har visat renons och bordets bästa kort vinner ' +
+              'annars sticket – jag går upp och tar det garanterade sticket billigast möjligt.',
           }
         }
       }
