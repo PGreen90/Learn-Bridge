@@ -1856,6 +1856,24 @@ function partnerBalanced(
 }
 
 /**
+ * Var partnerns färg ett ENKELT 1-LÄGESINKLIV över motståndarnas öppning
+ * (pliktsvepet K3, ägarbeslut 2026-09-02)? Inklivet lovar 5+ → 3-korts stöd
+ * är fit (8 trumf) och höjs från 6 poäng — men bara till 2-läget (lagen om
+ * totala stick) och aldrig som hopp. Partnerns FÖRSTA kontraktsbud, på
+ * 1-läget, i färgen, utan att jag agerat före det (då vore det ett svar på
+ * min dubbling, inte ett inkliv).
+ */
+function partnerSimpleOvercalled(history: ResolvedCall[], seat: Seat, partnerSuit: { strain: string }): boolean {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat)) return false
+  const idx = history.findIndex((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
+  if (idx === -1) return false
+  const cb = parseContractBid(history[idx].bid)!
+  if (cb.level !== 1 || cb.strain === 'NT' || cb.strain !== partnerSuit.strain) return false
+  return !history.slice(0, idx).some((c) => c.seat === seat && c.bid !== 'P')
+}
+
+/**
  * Hur många trumf vi kräver för att kalla det fit i partnerns färg. Öppnade
  * partnern den HÖGfärgen på 1-läget lovar den 5+ → 3-korts stöd räcker (8-korts
  * fit). Samma sak när partnern HOPPINKLIVIT (6+ kort lovade). I alla andra fall
@@ -1922,6 +1940,7 @@ function fitLengthNeeded(history: ResolvedCall[], seat: Seat, partnerSuit: { str
     return true
   }).length
   if (partnerBidsInSuit >= 2) return 2
+  if (partnerSimpleOvercalled(history, seat, partnerSuit)) return 3 // K3: 1-lägesinkliv lovar 5+
   const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
   const open = openingBid(history)
   const partnerOpenedMajor =
@@ -1992,6 +2011,12 @@ function raiseWithFit(
   // minimum utan utgångsintresse — höjningen är då bara TÄVLANDE: billigaste
   // nivån, aldrig invit/utgångsblås (frön 20261090/20261409/20261459: negativ-
   // dubblaren blåste 5♣ på 13–16 stödpoäng fast öppnaren passat; 2♣/3♣ räcker).
+  // K3 (2026-09-02): 3-korts stöd för partnerns enkla 1-lägesinkliv = 8 trumf →
+  // höjningen stannar på 2-LÄGET (lagen om totala stick), aldrig hopp eller
+  // utgång på tre kort; pressade de upp billigaste höjningen till 3-läget → pass.
+  const threeCardOvercallFit = lengths(hand)[suit] === 3 && partnerSimpleOvercalled(history, seat, partnerSuit)
+  if (threeCardOvercallFit && hcp(hand) < 6) return null // ägarens golv: 6 hp för höjningen på tre kort
+
   const partnerLastCall = [...history].reverse().find((c) => c.seat === PARTNER[seat])
   if (partnerLastCall?.bid === 'P' && opponentsHaveBid(history, seat)) {
     const bid = cheapestBidIn(history, seat, partnerSuit.strain)
@@ -1999,6 +2024,7 @@ function raiseWithFit(
     const cb = parseContractBid(bid)!
     const game = partnerSuit.strain === 'H' || partnerSuit.strain === 'S' ? 4 : 5
     if (cb.level >= game) return null // tävla inte till utgångsnivå mot en passad partner
+    if (threeCardOvercallFit && cb.level > 2) return null // 8 trumf tävlar inte till 3-läget
     return {
       seat, bid,
       explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]}, men partnern har passat (minimum) → ${prettyBid(bid)} (tävlande höjning, ej invit).`,
@@ -2059,7 +2085,14 @@ function raiseWithFit(
   // Mot en balansering kapas dessutom vid 3-LÄGET utan äkta utgångsvärden
   // efter rabatten (fix 5a): ett inbjudande hopp över ett 2-läges balansinkliv
   // vore redan utgångsnivån.
-  if (balanced && sp < 13) wantLevel = Math.min(wantLevel, 3)
+  // (K3, frö 20263212: taket 3 låg UNDER en enkel höjning av ett 3-läges
+  // balansinkliv (2♠)–P–P–3♦, så fem trumf mot 6+ = 11 trumf passades — taket
+  // får aldrig hindra själva den enkla höjningen.)
+  if (balanced && sp < 13) wantLevel = Math.min(wantLevel, Math.max(3, partnerSuit.level + 1))
+  if (threeCardOvercallFit) {
+    wantLevel = 2
+    label = `enkel höjning (3-korts stöd mot 1-lägesinkliv, 8 trumf – tävlar bara till 2-läget)`
+  }
   // En inbjudande/enkel höjning får ALDRIG gå förbi utgång (felrapport #33: en
   // "inbjudande hopp" = level+2 blåste 7♦ över partnerns 5♦). Kapa vid utgångs-
   // nivån (högfärg 4, lågfärg 5). Har partnern REDAN nått utgång och vi bara har
@@ -2718,6 +2751,67 @@ function overcallerCompetesAfterCueRaise(deal: Deal, history: ResolvedCall[], se
     }
   }
   return null
+}
+
+/**
+ * Pliktsvepet K1 (2026-09-02, docs/senare.md "Svep: partnerskapsplikter i
+ * konkurrens"): INKLIVAREN svarar advancerns CUE-HÖJNING när motståndarna
+ * ligger tysta. Cuet (§7.1) lovar limithöjning eller bättre (11+ stödpoäng,
+ * 3+ stöd) och är krav — förr fanns bara öppnarens svar (`answerCueRaise`)
+ * och tävlingsfallet efter deras vidarebud (#47), så inklivaren PASSADE och
+ * cuet spelades i motståndarnas färg (12 av 1539 störda auktioner i svepet;
+ * frö 20260905: 1♦–(1♠)–P–(2♦*)–P–P–P → 2♦ av advancern).
+ * Svaret läser totalpoäng (`max(hp, startpoäng)`, längden räknas): 14+ =
+ * extra → utgång i högfärgen (14 + 11 = 25), i lågfärg 3NT med stopp i deras
+ * färg; annars billigaste återgång i egen färg (minimum, ej krav — cue-
+ * bjudaren går vidare med 13+ stödpoäng via `answerCueBidderRebid`, som nu
+ * täcker även advancern). Tvingar cuet upp återgången till utgångsnivån
+ * (3-lägescue över ett 2-lägesinkliv) bjuds utgången ändå — cuet är krav.
+ */
+function overcallerAnswersCueRaise(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || open.strain === 'NT' || side(open.seat) === side(seat)) return null // MOTSTÅNDARNA öppnade
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2) return null
+  const [mine, cue] = ourBids
+  if (mine.seat !== seat || cue.seat !== PARTNER[seat]) return null // JAG klev in, partnern cue-höjde
+  const mineCb = parseContractBid(mine.bid)!
+  const cueCb = parseContractBid(cue.bid)!
+  if (mineCb.strain === 'NT' || opponentsBidStrain(history, seat, mineCb.strain)) return null // mitt inkliv = naturlig egen färg
+  if (cueCb.strain === 'NT' || !opponentsBidStrain(history, seat, cueCb.strain)) return null // cuet ligger i DERAS färg
+  // Bara pass efter cuet (bjuder de vidare gäller overcallerCompetesAfterCueRaise).
+  if (history.slice(history.indexOf(cue) + 1).some((c) => c.bid !== 'P')) return null
+
+  const hand = deal.hands[seat]
+  const strain = mineCb.strain
+  const isMajor = strain === 'H' || strain === 'S'
+  const gameLevel = isMajor ? 4 : 5
+  const legal = legalCalls(history, seat)
+  const tp = pointsWithFloor(hand, null, 'starting')
+  const cueText = `Partnerns cue i ${SWE_SYM[cueCb.strain]} lovar minst limithöjning i ${SWE_SYM[strain]} (11+ med fördelning) och är krav`
+  if (tp.points >= 14) {
+    const game = `${gameLevel}${strain}` as Bid
+    if (isMajor && legal.includes(game)) return {
+      seat, bid: game, rule: 'inklivaren svarar cue-höjning (utgång)',
+      explanation: `${cueText}; jag har extra (${tp.text}) → utgång ${prettyBid(game)}.`,
+    }
+    if (!isMajor && hasStopper(hand, SUIT_OF_LETTER[cueCb.strain]) && legal.includes('3NT' as Bid)) return {
+      seat, bid: '3NT', rule: 'inklivaren svarar cue-höjning (utgång)',
+      explanation: `${cueText}; jag har extra (${tp.text}) och stopp i deras ${SWE_SYM[cueCb.strain]} → 3NT (rätt utgång före 5${SWE_SYM[strain]}).`,
+    }
+  }
+  const cheapest = cheapestBidIn(history, seat, strain)
+  if (!cheapest) return null
+  const cb = parseContractBid(cheapest)!
+  if (bidValue(cb.level, cb.strain) > bidValue(gameLevel, strain)) return null // förbi utgång – inget att återgå till
+  if (cb.level >= gameLevel) return {
+    seat, bid: cheapest, rule: 'inklivaren svarar cue-höjning (utgång)',
+    explanation: `${cueText}; billigaste återgången i ${SWE_SYM[strain]} är redan utgångsnivån → ${prettyBid(cheapest)}.`,
+  }
+  return {
+    seat, bid: cheapest, rule: 'inklivaren svarar cue-höjning (minimum)',
+    explanation: `${cueText}; med ett minimum (${tp.text}) återgår jag billigast i min färg → ${prettyBid(cheapest)} (ej krav – partnern går vidare med utgångsvärden).`,
+  }
 }
 
 // ---- Off-book: motståndarnas riktiga inkliv (§7-försvaret in i budlådan) -----
@@ -3485,12 +3579,16 @@ function cueBidderRebidToAnswer(
 ): { agreedStrain: string; theirStrain: string } | null {
   const open = openingBid(history)
   if (!open || open.strain === 'NT') return null
-  if (side(open.seat) !== side(seat)) return null // VÅR öppning
-  if (open.seat !== PARTNER[seat]) return null // partnern öppnade, JAG cue-bjöd
+  // Den överenskomna färgen = VÅR sidas första kontraktsbud: öppningen när vi
+  // öppnade, annars partnerns INKLIV (pliktsvepet K1, 2026-09-02: advancern
+  // fullföljer på samma sätt efter inklivarens svar på cuet). Partnern bjöd
+  // den, JAG cue-bjöd, partnern svarade.
   const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
   if (ourBids.length !== 3) return null
-  const [openC, cueC, answerC] = ourBids
-  if (openC.seat !== open.seat || cueC.seat !== seat || answerC.seat !== open.seat) return null
+  const [agreedC, cueC, answerC] = ourBids
+  if (agreedC.seat !== PARTNER[seat] || cueC.seat !== seat || answerC.seat !== PARTNER[seat]) return null
+  const agreed = parseContractBid(agreedC.bid)!
+  if (agreed.strain === 'NT' || opponentsBidStrain(history, seat, agreed.strain)) return null // partnerns bud = naturlig egen färg
   const cb = parseContractBid(cueC.bid)!
   if (cb.strain === 'NT') return null
   // Cuet måste ligga i en färg motståndarna bjudit.
@@ -3502,11 +3600,11 @@ function cueBidderRebidToAnswer(
   const ansIdx = history.indexOf(answerC)
   if (history.slice(ansIdx + 1).some((c) => parseContractBid(c.bid))) return null
   const ans = parseContractBid(answerC.bid)!
-  const isMajor = open.strain === 'H' || open.strain === 'S'
+  const isMajor = agreed.strain === 'H' || agreed.strain === 'S'
   const gameLevel = isMajor ? 4 : 5
   if (ans.strain === 'NT' && ans.level >= 3) return null // redan 3NT (utgång nådd)
-  if (bidValue(ans.level, ans.strain) >= bidValue(gameLevel, open.strain)) return null // redan utgång/över
-  return { agreedStrain: open.strain, theirStrain: cb.strain }
+  if (bidValue(ans.level, ans.strain) >= bidValue(gameLevel, agreed.strain)) return null // redan utgång/över
+  return { agreedStrain: agreed.strain, theirStrain: cb.strain }
 }
 
 /**
@@ -4629,6 +4727,11 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // läge. Måste ligga FÖRE off-book-svaret (som annars passar).
   { id: 'overcallerCompetesAfterCueRaise', before: ['offBookResponse'],
     run: (c) => overcallerCompetesAfterCueRaise(c.deal, c.history, c.seat) },
+  // … och inklivarens svar på cuet när motståndarna ligger TYSTA (pliktsvepet
+  // K1, 2026-09-02): cuet är krav, passar man spelas det i deras färg. FÖRE
+  // off-book-svaret (som inte ser någon egen färg hos partnern och passar).
+  { id: 'overcallerAnswersCueRaise', before: ['offBookResponse'],
+    run: (c) => overcallerAnswersCueRaise(c.deal, c.history, c.seat) },
   // Svararen PLACERAR kontraktet efter öppnarens NMF-svar (§5.7, steg 3).
   // Måste ligga FÖRE off-book-svaret (som annars vägrar re-höja svararens egen
   // högfärg och passar en klar 5-3-fit).

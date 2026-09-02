@@ -116,19 +116,40 @@ describe('F6/C14: linjen passar aldrig ut ett ostört tvåfärgsinkliv (låser #
   // Felrapport #14-given: V öppnar 1♠, Nord kliver in ovanlig 2NT (båda minor-
   // färgerna), Öst passar — Syd (8 hp, 6-korts ruter) MÅSTE ge preferens i
   // SJÄLVA LINJEBYGGET (buildAuction), inte bara i decideCall.
+  // (Pliktsvepet K3, 2026-09-02: Öst hade ursprungligen ♠AJT2 + 11 hp och
+  // passar inte längre 2NT — svararen höjer 4♠ med 4-korts stöd och 10+
+  // stödpoäng. Öst har därför fått ♠JT + 7-korts hjärter så passet består och
+  // preferensplikten prövas; det gamla läget låses separat nedan.)
   const TVAFARG = dealOf('W', {
     N: 'S:65 H:3 D:QJT97 C:A8643',
-    E: 'S:AJT2 H:KJ872 D:A2 C:J9',
+    E: 'S:JT H:KJ98752 D:A2 C:J9',
     S: 'S:3 H:AT6 D:K86543 C:QT2',
-    W: 'S:KQ9874 H:Q954 D:- C:K75',
+    W: 'S:AKQ98742 H:Q4 D:- C:K75',
   })
 
   it('linjen 1♠–2NT–P fortsätter med Syds preferens 3♦ och lämnas öppen', () => {
     const built = buildAuction(TVAFARG)
     expect(built).not.toBeNull()
+    const e = built!.turns.find((t) => t.seat === 'E')
+    expect(e?.call).toBe('P')
     const s = built!.turns.find((t) => t.seat === 'S')
     expect(s?.call).toBe('3D')
     expect(s?.rule).toBe('advance tvåfärg (preferens)')
+    expect(built!.open).toBe(true)
+  })
+
+  it('K3: svararen med ♠AJT2 och 11 hp höjer 4♠ över 2NT i linjen — och linjen lämnas öppen', () => {
+    const deal = dealOf('W', {
+      N: 'S:65 H:3 D:QJT97 C:A8643',
+      E: 'S:AJT2 H:KJ872 D:A2 C:J9',
+      S: 'S:3 H:AT6 D:K86543 C:QT2',
+      W: 'S:KQ9874 H:Q954 D:- C:K75',
+    })
+    const built = buildAuction(deal)
+    expect(built).not.toBeNull()
+    const e = built!.turns.find((t) => t.seat === 'E')
+    expect(e?.call).toBe('4S')
+    expect(e?.rule).toBe('höjning till utgång')
     expect(built!.open).toBe(true)
   })
 })
