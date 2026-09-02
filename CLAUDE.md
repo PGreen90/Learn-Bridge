@@ -12,7 +12,7 @@ svarar på vad).
 
 ### 🔵 NU — (tomt: trebottarna levererade 2026-09-02, ägaren väljer nästa ur NÄST)
 
-**Nyss klart (2026-09-02): TREBOTTARNA I NIVÅER BYGGDA** — Gunnar52 (expert =
+**Nyss klart (2026-09-02): TREBOTTARNA KLARA & LIVE-VERIFIERADE** — Gunnar52 (expert =
 dagens bot, rebidz-bot döps om av nattjobbet), Lasse68 (medel), Emma03
 (nybörjare) spelar dagens tävling varje natt. All nivåskillnad i SYDS kortspel
 (`src/lib/engine/botniva.ts` + `spelaBotGiv`); N/Ö/V alltid standardmotorn →
@@ -22,8 +22,9 @@ skillnad (FÖRKASTAD), fönster 5/4/0 = 0/−2/−6 på 24 givar; bekräftat på
 givar: medel −8, nybörjare −18 → medel = fönster 4 + 8 sampel + ingen
 avkodning, nybörjare = ingen MC. 🤖 borttaget ur UI **och** API-svaren (hade läckt via nätverksfliken);
 info-raden "I tävlingen deltar även datorspelare" in. Inga nya migrationer.
-Detalj: `docs/beslut-b-plan.md` Påbyggnad 2. **Live-verifieras vid första
-nattkörningen** (namnbytet + Lasse68/Emma03-kontona skapas då).
+Detalj: `docs/beslut-b-plan.md` Påbyggnad 2. **LIVE-VERIFIERAD 2026-09-02**
+(manuell körning): namnbytet slog igenom, Lasse68/Emma03 spelade 12/12
+godkända, ställningen visar expert > medel > nybörjare utan bot-märkning.
 
 **Nyss klart (2026-09-01):** speldiagnosens runda 6 — "andra hand ser bordet"
 behållen (S6: försvar 175→174), trumfplans-kandidaten byggd-mätt-FÖRKASTAD,
