@@ -989,6 +989,16 @@ hand:
 | **enkel höjning** | minimum **med fit** → tävla |
 | Pass | minimum utan lång färg eller fit → sälj inte, men höj inte heller |
 
+**Står partnerns fria högfärgsbud kvar (de passar) — felrapport #55:** budet
+lovar **5+** (den negativa dubblingen tar 4-kortsfallet), så öppnaren höjer på
+**3-korts stöd** med samma skala som §5.2: **12–15 enkel höjning, 16–18
+hopphöjning (inbjudan), 19+ utgång.** Svararen räknar sedan **Bergenpoäng**
+mot den kända fiten (längden i egen trumf räknas): **14+ → utgång, 12–13 →
+inbjudan 3M** (öppnaren antar med 14+ stödpoäng), annars pass. *Giv 2:
+1♦–(1♥)–1♠–P–2♠–P–4♠ med ♠KQ87432 mittemot ♠AJ9 — 11 stick; förr 2♣ med 6.*
+Samma 3-korts-regel gäller i tabellen ovan när de konkurrerar över det fria
+högfärgsbudet.
+
 **Trösklarna speglar delbit 6 / §5.4:** ~15 = visa extra, 18 = driv utgång, en egen
 6:e färg tävlar på minimum. **Cue-budet i motståndarnas färg** är verktyget för att
 visa extra utan ett klart naturligt bud (t.ex. 17 hp med en lång färg men utan stopp
@@ -1446,6 +1456,16 @@ cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
 | 1NT / 2NT | naturlig, stopp i deras färg, lämplig styrka |
 | fit-jump (hopp i ny färg) | bra stöd + egen sidofärg, inbjudande+ |
 
+**Inklivarens andra färg = "välj" (felrapport #56).** Kliver partnern in och
+bjuder sedan en **ny färg** (t.ex. 1♥–(1♠)–3♥–P–P–**4♦**) visar hen två färger
+och ber advancern **välja** — det är inget styrkebud att passa på poäng.
+Advancern ger **preferens till inklivsfärgen** när stödet är bättre där,
+**oavsett poäng**: kostar preferensen ingen nivå (inklivsfärgen rankar över
+den andra, 4♦ → **4♠**) räcker lika lång eller längre inklivsfärg; kostar den
+en nivå (1♦-inkliv, sedan 2♠ → 3♦) krävs klar skillnad (2+ kort). Aldrig
+förbi utgång. Bättre stöd i den andra färgen → pass/höjning som vanligt.
+*Giv 6: Nord passade 4♦ med ♠K9873 ♦T86 — 4♠ var gratis.*
+
 **Advancern tävlar upp till fiten (lagen om totala stick, 2026-07-05):** klev partnern
 in på **2-läget** lovar det en bra **6+ färg**, så **3-korts stöd = 9-korts fit**. Hittar
 motståndarna sedan sin egen fit (t.ex. **1♠–(2♥)–2♠**) ska advancern **inte sälja given**
@@ -1600,7 +1620,13 @@ dubblarens eget flöde (X + egen färg).
 ### 7.4 Övriga dubblingar (negativ, responsiv, stöd)
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
   upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
-  ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. Klev de in i en **lågfärg** så att **båda**
+  ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. **Exakt fyra, inte fem (felrapport #55):**
+  kan den objudna högfärgen bjudas på **1-läget** visar X:et exakt 4 kort — med
+  **5+ bjuder svararen färgen** (t.ex. 1♦–(1♥)–**1♠** = 5+ ♠, fritt bud och
+  rondkrav, 6+ hp). Måste färgen upp på **2-läget** bjuds den med 5+ bara från
+  **10 hp** (fritt 2-över-1, §5.5); svagare händer dubblar och visar färgen
+  senare. 5-4 i **båda** högfärgerna mot ett 2-lägesinkliv dubblar fortfarande
+  (X:et hittar 4-4-fiten). Klev de in i en **lågfärg** så att **båda**
   högfärgerna är objudna (t.ex. 1♣–(2♦)–X), visar X:et **båda** högfärgerna,
   minst 4-4 — förklaringen nämner då bägge (felrapport #45). Öppnaren svarar som
   på en upplysningsdubbling.
@@ -1965,6 +1991,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-02 — Felrapporterna #54–#57 (fyra fixar).** **(#55, §7.4/§5.5/§5.8)**
+  den negativa dubblingen lovar exakt 4 i en högfärg som kan bjudas på
+  1-läget; med 5+ bjuds färgen (`negativeDouble` i `doubles.ts` returnerar
+  null, ny regel `fritt bud` i `competitiveResponderAction`, `auction.ts`;
+  2-läget kräver 10 hp, 5-4 mot 2-lägesinkliv dubblar kvar). Fortsättningen:
+  `openerRaisesFreeBid` (3-korts höjning, hp-skalan 12–15/16–18/19+),
+  `responderAfterFreeBidRaise` (Bergen 14+/12–13), `openerAnswersFreeBidInvite`
+  i `auction-live.ts`; §5.8-höjningen kräver 3 (inte 4) för ett fritt
+  högfärgsbud; kravminnet läser inte längre öppnarens HÖJNING av svararens färg
+  som reverse. **(#56, §7.1)** `advancerPrefersOvercallSuit`: preferens till
+  inklivsfärgen när partnern visat två färger, oavsett poäng. **(#54, #57,
+  tolkningslagret `auction-interpret.ts`)** öppningar på 2-/3-/4-läget förklaras
+  som svag tvåa/spärr/stark 2♣ (inte "öppningshand"), och svaren på Stayman
+  (2♦ = ingen 4-korts hf, 2♥/2♠) + fullföljd transfer/superaccept förklaras som
+  konvention, inte färger. Facit: `auction-fritt-bud-svar.test.ts`,
+  `auction-advancer-preferens.test.ts`, `doubles.test.ts` (#55),
+  `auction-interpret.test.ts` (#54/#57).
 - **2026-08-31 — 2♣-öppningens substanskrav (§4.4, ägarbeslut "Regel B").**
   Den distributionella 2♣:an (hp<22) öppnade förr på PLATT ≥8½ spelstick oavsett
   färg — den mest aggressiva högfärgssiffran applicerad även på lågfärg, vilket

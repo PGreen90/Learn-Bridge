@@ -40,6 +40,21 @@ export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): Re
 
   const unbidMajors = (['hearts', 'spades'] as Suit[]).filter((s) => s !== ourOpen && s !== their)
   const fourPlus = unbidMajors.filter((m) => len[m] >= 4)
+
+  // Felrapport #55: X:et visar EXAKT fyra kort i en objuden högfärg som kan
+  // bjudas på 1-läget — med 5+ bjuder svararen färgen själv (fritt bud, §5.5).
+  // Måste färgen upp på 2-läget visas 5+ bara med 10+ hp (fritt 2-över-1 i
+  // konkurrens); svagare händer dubblar och visar färgen senare (= 5 kort,
+  // svagt). 5-4 i BÅDA högfärgerna mot ett 2-lägesinkliv dubblar fortfarande
+  // (felrapport #45: X:et hittar 4-4-fiten i den andra högfärgen).
+  const theirLevel = Number(theirCall[0])
+  for (const m of unbidMajors) {
+    if (len[m] < 5) continue
+    const atOneLevel = theirLevel === 1 && rankIdx(m) > rankIdx(their)
+    const other = unbidMajors.find((x) => x !== m)
+    const fiveFour = !!other && len[other] >= 4
+    if (atOneLevel || (p >= 10 && !fiveFour)) return null
+  }
   // Är BÅDA högfärgerna objudna (inklivet i en lågfärg) och båda 4+ hos oss, visar
   // X:et BÅDA högfärgerna (minst 4-4) – förklaringen får inte fastna på bara den
   // ena (felrapport #45: 1♣–(2♦)–X med 5-4 lästes som "4+ hjärter").

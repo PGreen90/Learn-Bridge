@@ -9,6 +9,17 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Fritt bud i stället för negativ X, och fortsättningen (2026-09-02, felrapport #55)
+- Svararen bjuder nu sin 5+ högfärg över inklivet (1♦–(1♥)–**1♠**) i stället
+  för att dubbla; på 2-läget från 10 hp (1♦–(1♠)–**2♥**). Öppnaren höjer på
+  3-korts stöd, svararen bjuder utgång/invit på Bergenpoäng. **Bevaka:** (a)
+  fortsättningen efter ett fritt bud på **2-läget utan fit** går fortfarande
+  genom den generella off-book-/kravlogiken (probe: 1♦–(1♠)–2♥–P–3♦–P–5♦ på
+  26 hp där 3NT/4♥ kan vara bättre) — säg till om öppnaren rebjuder en
+  5-korts minor eller partnern blåser 5m där sang låg närmare. (b) Advancerns
+  preferens till inklivsfärgen (felrapport #56) kostar ibland en nivå — säg
+  till om 3♦-preferensen på 3-1 känns för hög i praktiken.
+
 ## Andra hand ser bordet (2026-09-01, speldiagnos S6 — fix behållen)
 - Försvarets andra hand går numera UPP och tar sticket när spelföraren leder,
   partnern har VISAT renons i färgen, och kortet slår både det ledda kortet och
