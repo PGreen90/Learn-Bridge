@@ -9,6 +9,26 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Höjning på visad längd (2026-09-02, pliktsvepet K3)
+- Advancern höjer nu partnerns 1-lägesinkliv på **3-korts stöd från 6 hp**
+  (bara till 2-läget); svararen svarar över **1NT-inkliv** (2M / X = straff 10+)
+  och över **ovanlig 2NT/Michaels** (3M tävlande, 4M med 10+ stödpoäng).
+  **Bevaka:** (a) 3M över tvåfärgsinklivet på 4 små trumf och 0–5 hp — känns
+  det för friskt vid bordet? (b) motståndarnas FORTSÄTTNING efter vår höjning
+  är inte byggd: 2NT-bjudaren passade 4♥ med 6-5 i minorerna och 20 hp (frö
+  20261162) och advancern passade 3♠ med 12 hp och stöd i båda minorerna (frö
+  20262021). Kandidater för svepet när vår sidas plikter är klara.
+  Repro: `$env:DUMP='20261162,20262021'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`.
+
+## Inklivaren svarar advancerns cue-höjning (2026-09-02, pliktsvepet K1)
+- Efter deras öppning, vårt inkliv och partnerns cue i deras färg (limithöjning+)
+  passar inklivaren aldrig längre när motståndarna ligger tysta: 14+ totalpoäng →
+  utgång (högfärg) / 3NT med stopp (lågfärg), annars billigaste återgång; cue-
+  bjudaren passar återgången med 11–12, driver utgång med 13+ stödpoäng.
+  **Bevaka:** (a) 14-gränsen — känns 4M på 14 + limithöjning för tunt/för
+  försiktigt vid bordet? (b) lågfärgsinkliv med extra men UTAN stopp återgår
+  bara billigast (3m) — säg till om en utgång missas där.
+
 ## Fritt bud i stället för negativ X, och fortsättningen (2026-09-02, felrapport #55)
 - Svararen bjuder nu sin 5+ högfärg över inklivet (1♦–(1♥)–**1♠**) i stället
   för att dubbla; på 2-läget från 10 hp (1♦–(1♠)–**2♥**). Öppnaren höjer på

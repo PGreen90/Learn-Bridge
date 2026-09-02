@@ -1479,7 +1479,32 @@ utan tävla:
 
 Lagen: med **9 gemensamma trumf** är 3-läget säkert att tävla till (om det betas var
 deras kontrakt oftast att gå hem). Ett **1-läges** inkliv (bara 5+ lovad) kräver
-fortfarande **4-korts** stöd för samma fit.
+**4-korts** stöd för att tävla till 3-läget.
+
+**3-korts stöd mot ett 1-lägesinkliv = 8 trumf → höj till 2-läget (pliktsvepet
+K3, ägarbeslut 2026-09-02).** Inklivet lovar 5+, så tre kort är fit: advancern
+**höjer enkelt från 6 hp** — även när motståndarna hunnit höja
+(**1♥–(1♠)–2♥–2♠** med ♠A75 ♥AQT ♦9873 ♣983), och även när partnern sedan passat
+(tävlande höjning). Aldrig hopp eller utgång på tre kort, och pressar de upp
+billigaste höjningen till **3-läget** passar advancern (8 trumf tävlar inte
+dit). Förr krävde motorn 4 kort och sålde given: 92 av 1539 störda auktioner i
+svepet var passade höjningar på känd fit (`$env:PLIKT='1'; npx vitest run
+src/lib/engine/pliktsvep.probe.test.ts`, före fixen).
+
+**Inklivaren svarar cuet när motståndarna ligger tysta (pliktsvepet K1,
+2026-09-02).** Advancerns cue är krav — passar inklivaren spelas cuet i
+motståndarnas färg (så gick det förr: 1♦–(1♠)–P–(2♦\*)–P–**P**–P blev 2♦ av
+advancern). Inklivaren värderar i totalpoäng (hp med längdpoäng):
+
+| Inklivarens svar på cuet | Betydelse |
+|---|---|
+| **utgång i högfärgen** (4M) | extra: **14+** totalpoäng (14 + cuets 11 = utgång) |
+| **3NT** | lågfärgsinkliv, 14+ **med stopp** i deras färg |
+| **billigaste återgång** i egen färg (t.ex. 2♠) | minimum (under 14) — ej krav |
+
+Cue-bjudaren går sedan vidare som efter en öppning: **ren limithöjning
+(11–12) passar** återgången, **13+ stödpoäng driver utgång** (3NT med stopp i
+deras färg, annars 4M/5m).
 
 **Överklivaren säljer inte heller ut efter partnerns cue-höjning (felrapport #47):**
 speglingen av regeln ovan. Cue-budade advancern deras färg (limithöjning eller
@@ -1817,6 +1842,24 @@ flyktbud när de smiter undan till en färg – steg för steg, tills de får sp
 dubblat. Gäller **bara** efter vårt 1NT + XX (där vi bevisligen äger handen), inte
 efter våra svaga tvåor/spärrar.
 
+**(e) De kliver in 1NT eller med ett tvåfärgsinkliv över vår 1♥/1♠ (pliktsvepet
+K3, ägarbeslut 2026-09-02).** Förr hade svararen inget svar alls här och passade
+med 4–5 trumf (`1♠–(2NT)–P` på ♠K9874 och 17 stödpoäng).
+
+| Läge | Svararens bud | Betydelse |
+|---|---|---|
+| **1M–(1NT)** | **X** | **10+ hp** = straff — vi har balansen mot deras 15–18 |
+| | **2M** | 3+ stöd, **6–9 hp** — konkurrenshöjning |
+| | pass | annars |
+| **1M–(2NT / Michaels-cue)** | **4M** | 4+ stöd och **10+ stödpoäng** — direkt utgång |
+| | **3M** | 4+ stöd (9 trumf), svagare — **tävlande** höjning, inte spärr; eller 3-korts stöd med 10+ |
+| | pass | annars |
+
+Motståndarna har visat 5-5, så lagen om totala stick bär 3M med nio trumf
+oavsett poäng. Bara efter en högfärgsöppning; efter 1♣/1♦ gäller de gamla
+reglerna. "Unusual vs unusual" (cue i deras färger som limithöjning+) spelas
+inte.
+
 **(d) De dubblar vår 1♥/1♠-öppning — Jordan 2NT och fortsättningen.**
 Efter **1M–(X)** är svararens **2NT Jordan/Truscott**: konstgjord
 **limithöjning eller bättre** (10+, 4+ trumf) — hopphöjningen direkt till 3M
@@ -1991,6 +2034,29 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-02 — Pliktsvepet K3: höjning på visad längd (§7.1, §7.8 e).**
+  Svepet fann 92 av 1539 störda auktioner där en fit passades (kommandot i
+  posten nedan). Tre hål: (a) advancern med 3-korts stöd för partnerns
+  1-lägesinkliv — `fitLengthNeeded` krävde 4; nu `partnerSimpleOvercalled`
+  → 3 kort = fit, enkel höjning från 6 hp, bara till 2-läget, aldrig hopp
+  (`raiseWithFit`); balanseringstaket hindrade dessutom den enkla höjningen av
+  ett 3-lägesinkliv (frö 20263212). (b) svararen över ett 1NT-inkliv: X =
+  straff 10+, 2M med 3+ stöd 6–9. (c) svararen över ovanlig 2NT/Michaels:
+  4+ stöd → 3M tävlande, 10+ stödpoäng → 4M; 3-korts + 10+ → 3M
+  (`competitiveResponderAction` i `auction.ts` fick inklivets regelnamn).
+  Ägarbeslut samma dag: 6 hp räcker för höjningen; 3M är tävlande, ej spärr.
+  Efter fixen: 5 träffar kvar, alla balansinkliv där kungen redan är lånad.
+  Facit: `auction-hojning-visad-langd.test.ts`.
+- **2026-09-02 — Pliktsvepet K1: inklivaren svarar advancerns cue-höjning
+  (§7.1).** Svepet `pliktsvep.probe.test.ts` (`$env:PLIKT='1'; npx vitest run
+  src/lib/engine/pliktsvep.probe.test.ts`, 3000 givar från frö 20260721) fann
+  12 av 1539 störda auktioner där inklivaren PASSADE partnerns cue när
+  motståndarna låg tysta — cuet spelades i deras färg. Ny detektor
+  `overcallerAnswersCueRaise` (`auction-live.ts`): 14+ totalpoäng → utgång
+  (högfärg) / 3NT med stopp (lågfärg), annars billigaste återgång.
+  `cueBidderRebidToAnswer` generaliserad så cue-bjudaren fullföljer även på
+  inklivssidan (limit passar återgången, 13+ driver utgång). Facit:
+  `auction-inklivaren-svarar-cue.test.ts`.
 - **2026-09-02 — Felrapporterna #54–#57 (fyra fixar).** **(#55, §7.4/§5.5/§5.8)**
   den negativa dubblingen lovar exakt 4 i en högfärg som kan bjudas på
   1-läget; med 5+ bjuds färgen (`negativeDouble` i `doubles.ts` returnerar

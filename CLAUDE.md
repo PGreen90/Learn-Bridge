@@ -10,7 +10,18 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — (tomt: trebottarna levererade 2026-09-02, ägaren väljer nästa ur NÄST)
+### 🔵 NU — Svep: partnerskapsplikter i konkurrens (ägarval 2026-09-02, "grund först")
+Mätriggen `src/lib/engine/pliktsvep.probe.test.ts` (`$env:PLIKT='1'; npx vitest
+run src/lib/engine/pliktsvep.probe.test.ts`) låter motorn bjuda 3000 givar och
+flaggar varje pass som bryter en plikt (K1 passat krav · K2 preferens · K3
+höjning på visad längd · K4 tio trumf · K5/K6 inventeringar). En regel i taget,
+facit före fix. **Klart:** K1 — inklivaren svarar advancerns cue-höjning ostört
+(`overcallerAnswersCueRaise`, facit `auction-inklivaren-svarar-cue.test.ts`);
+K3 — höjning på visad längd (advancern 3-korts stöd mot 1-lägesinkliv från 6 hp;
+svararen över 1NT-inkliv/ovanlig 2NT/Michaels; facit
+`auction-hojning-visad-langd.test.ts`; 92 → 5 träffar). **Kvar (i ordning):**
+K2 negativ-dubblarens preferens · K5 öppnaren efter fritt bud på 2-läget
+(5m-blåsningen) · motståndarnas fortsättning efter våra nya höjningar (bevaka).
 
 **Nyss klart (2026-09-02, kväll): felrapporterna #54–#57 LAGADE & LIVE**
 (mergepunkt `4898958`): fritt bud i 5+ högfärg i stället för negativ X (+

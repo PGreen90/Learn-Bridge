@@ -15,6 +15,7 @@ import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { respondToMajorPassed } from './responses-drury'
 import { overcall, advanceOvercall, advanceTwoSuiter, takeoutOfResponse } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
+import { pointsWithFloor } from './evaluation'
 import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
@@ -161,10 +162,41 @@ function cheapestLevelAbove(suit: Suit, refLevel: number, refSuit: Suit | null):
  * Svararens reaktion när motståndaren (LHO) klivit in efter vår öppning. §7.3.
  * Negativ dubbling, konkurrenshöjning, NT med stopp, ny färg eller pass.
  */
-function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit, overcallCall: string): ResponseResult {
+function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit, overcallCall: string, overcallRule?: string): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   const { level: ovLevel, suit: ovSuit } = parseBid(overcallCall)
+  const isMajorOpening = openerSuit === 'hearts' || openerSuit === 'spades'
+
+  // Mot ett 1NT-INKLIV (pliktsvepet K3 b, ägarbeslut 2026-09-02): förr fanns
+  // inget svar alls, så svararen passade med 4-korts stöd (frö 20260732:
+  // 1♥–(1NT)–P på ♥9752 + 7 hp). 10+ hp → X = straff (vi äger balansen mot
+  // deras 15–18); 3+ stöd och 6–9 → 2M (konkurrenshöjning); annars pass.
+  if (overcallCall === '1NT') {
+    if (p >= 10) return { call: 'X', rule: 'straffdubbling', explanation: `10+ hp mot deras 1NT-inkliv → X (straff – vi har balansen).` }
+    if (len[openerSuit] >= 3 && p >= 6) {
+      return { call: `2${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `3+ stöd (6–9) → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning över deras 1NT).` }
+    }
+    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt mot deras 1NT-inkliv → pass.` }
+  }
+
+  // Mot ett TVÅFÄRGSINKLIV (Michaels-cue i vår färg / ovanlig 2NT; K3 c): höjningen
+  // är TÄVLANDE, inte spärr (ägarbeslut 2026-09-02). Motståndarna har visat 5-5,
+  // så med 4+ stöd (9 trumf) tävlar vi till 3M; med 10+ stödpoäng bjuds 4M direkt.
+  // 3-korts stöd tävlar 3M bara med 10+. Förr passade svararen allt (frö
+  // 20263327: ♠K9874 + 17 stödpoäng passade 2NT). Bara efter 1♥/1♠.
+  const twoSuiter = overcallRule === 'Michaels' || overcallRule === 'ovanlig 2NT' || ovSuit === openerSuit
+  if (twoSuiter && isMajorOpening) {
+    const support = len[openerSuit]
+    const sp = pointsWithFloor(hand, openerSuit, 'support')
+    if (support >= 4 && sp.points >= 10) {
+      return { call: `4${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `4+ stöd och ${sp.text} mot deras tvåfärgsinkliv → 4${SUIT_SYM[openerSuit]} direkt.` }
+    }
+    if (support >= 4 || (support === 3 && sp.points >= 10)) {
+      return { call: `3${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${support >= 4 ? '4+ stöd (9 trumf)' : `3-korts stöd med ${sp.text}`} mot deras tvåfärgsinkliv → 3${SUIT_SYM[openerSuit]} (tävlande höjning, ej krav).` }
+    }
+    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt mot deras tvåfärgsinkliv → pass.` }
+  }
 
   // Mot ett färginkliv:
   if (ovSuit) {
@@ -314,7 +346,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     const ov = overcall(deal.hands[lhoSeat], opening.call)
     if (ov.call !== 'P') {
       turns.push({ seat: lhoSeat, role: 'motståndare', call: ov.call, rule: ov.rule, explanation: ov.explanation, uncertain: ov.uncertain })
-      const action = competitiveResponderAction(deal.hands[responderSeat], openerSuit, ov.call)
+      const action = competitiveResponderAction(deal.hands[responderSeat], openerSuit, ov.call, ov.rule)
       turns.push({ seat: responderSeat, role: 'svarare', call: action.call, rule: action.rule, explanation: action.explanation, uncertain: action.uncertain })
       // En upplysningsdubbling som svararen passar är INTE utbjuden: advancern
       // (LHO:s partner) är skyldig att svara. Lämna auktionen öppen så vi inte
