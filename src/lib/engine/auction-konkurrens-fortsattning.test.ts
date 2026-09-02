@@ -190,11 +190,14 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
   it('frö 20261621 (regressionsvakt): tvingat 2♥-ombud efter 1♥-ÖPPNING höjs på dubbelton', () => {
     // Öppningen 1♥ lovade redan 5+ → dubbelton = 7-korts fit; dubbelton-vaktens
     // undantag för tvingade ombud får INTE stoppa den här höjningen (4♥ hemma).
+    // Västs hand justerad 2026-09-02 (felrapport #55): med FEM spader och 11 hp
+    // bjuder Väst numera 2♠ (fritt bud på 2-läget, 10+) i stället för X, så
+    // vakten behöver exakt fyra spader (♠4 → Syd, ♣3 → Väst) för X-vägen.
     const d = deal('felfarg-20261621-vakt', 'E', 'none', {
       N: 'S:J972 H:983 D:JT875 C:9',
       E: 'S:K63 H:AQT742 D:AQ C:75',
-      S: 'S:Q H:J5 D:9632 C:AKQ632',
-      W: 'S:AT854 H:K6 D:K4 C:JT84',
+      S: 'S:Q4 H:J5 D:9632 C:AKQ62',
+      W: 'S:AT85 H:K6 D:K4 C:JT843',
     })
     const history = botAuction(d)
     expect(history).not.toBeNull()
@@ -216,11 +219,14 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
 
   it('frö 20261351 (regressionsvakt): öppnaren visar sin ANDRA färg före ett billigt rebud', () => {
     // 5♥+4♦ efter 1♥–(2♣)–X: 2♦ (objuden färg, samma nivå) före 2♥ — 4-5-ruterfiten hittas.
+    // Västs hand justerad 2026-09-02 (felrapport #55): med FEM spader och 10 hp
+    // bjuder Väst numera 2♠ (fritt bud) i stället för X, så vakten behöver
+    // exakt fyra spader (♠2 → Syd, ♥4 → Väst) för att X-vägen ska prövas.
     const d = deal('felfarg-20261351-vakt', 'W', 'ns', {
       N: 'S:T54 H:QJ7 D:JT9 C:QT87',
       E: 'S:A86 H:AT632 D:A873 C:4',
-      S: 'S:J9 H:9854 D:K C:AKJ532',
-      W: 'S:KQ732 H:K D:Q6542 C:96',
+      S: 'S:J92 H:985 D:K C:AKJ532',
+      W: 'S:KQ73 H:K4 D:Q6542 C:96',
     })
     const history = botAuction(d)
     expect(history).not.toBeNull()

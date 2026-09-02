@@ -22,7 +22,7 @@ import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { lebensohlAfter1NT, lebensohlAfter1NTRebid } from './lebensohl'
 import { defendPreempt } from './defense-conventional'
-import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfterJordan2NT } from './rebids'
+import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfterJordan2NT, openerThirdBidAfterOwnRaise } from './rebids'
 import { respondTo1NT } from './responses-nt'
 import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
 import { jordanRaiseAfterSignoff, responderPlaceAfterNMF } from './responder-rebids'
@@ -2364,6 +2364,7 @@ function competitionForce(
       firstResp?.level === 1 &&
       second.level === 2 && second.strain !== 'NT' &&
       second.strain !== firstOpen.strain &&
+      second.strain !== firstResp.strain && // öppnarens HÖJNING av svararens färg är ingen reverse (felrapport #55)
       strainRank(second.strain) > strainRank(firstOpen.strain)
     if (isReverse) return { kind: 'round' }
   }
@@ -3777,6 +3778,136 @@ function openerStrongNTAfterMinorRaise(deal: Deal, history: ResolvedCall[], seat
  * Bara mönstret matchas (senaste kontraktsbudet är motståndarnas); den ostörda
  * rondkravs-varianten (motståndarna passade svaret) sköts av honorForce.
  */
+/**
+ * Felrapport #55: läget kring partnerns/mitt FRIA BUD (§5.5) — svararens nya
+ * färg (ej hopp, ej cue, ej sang) direkt över motståndarnas färginkliv på vår
+ * 1-lägesöppning, som svararens första aktion. Sett från `seat` (öppnare eller
+ * svarare). `contracts` = auktionens kontraktsbud i ordning (öppning, inkliv,
+ * fritt bud, …). null när mönstret inte stämmer.
+ */
+function freeBidContext(
+  history: ResolvedCall[],
+  seat: Seat,
+): { opener: Seat; responder: Seat; free: { strain: string; level: number }; contracts: ResolvedCall[] } | null {
+  const open = openingBid(history)
+  if (!open || open.level !== 1 || open.strain === 'NT' || side(open.seat) !== side(seat)) return null
+  const contracts = history.filter((c) => parseContractBid(c.bid))
+  if (contracts.length < 3) return null
+  const [, ov, free] = contracts
+  if (side(ov.seat) === side(seat)) return null
+  const ovb = parseContractBid(ov.bid)!
+  if (ovb.strain === 'NT') return null
+  const responder = PARTNER[open.seat]
+  if (free.seat !== responder) return null
+  const fb = parseContractBid(free.bid)!
+  if (fb.strain === 'NT' || fb.strain === open.strain || fb.strain === ovb.strain) return null
+  const cheapest = ovb.level + (SUIT_STRAINS.indexOf(fb.strain as 'C') > SUIT_STRAINS.indexOf(ovb.strain as 'C') ? 0 : 1)
+  if (fb.level !== cheapest) return null // ett hopp är inget fritt bud
+  const responderActions = history.filter((c) => c.seat === responder && c.bid !== 'P')
+  if (responderActions[0] !== free) return null // t.ex. X först → inte ett fritt bud
+  return { opener: open.seat, responder, free: fb, contracts }
+}
+
+/**
+ * Felrapport #55 (del 2): ÖPPNAREN höjer partnerns fria HÖGFÄRGSBUD på 3-korts
+ * stöd — budet lovar 5+ (den negativa dubblingen tar 4-kortsfallet), så 3+3
+ * … 5+3 = fit. Skalan är öppnarens (§5.2, ren hp som on-book-syskonet
+ * `openerRebidAfter1LevelResponse`): 12–15 enkel höjning, 16–18 hopphöjning
+ * (inbjudan), 19+ utgång. Bara när det fria budet
+ * står som senaste kontraktsbud (bjuder de över gäller §5.8-logiken).
+ * (Giv 2: 1♦–(1♥)–1♠–P: öppnaren bjöd 2♣ på ♠AJ9 — 2♠ är rätt, spader var hemma.)
+ */
+function openerRaisesFreeBid(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = freeBidContext(history, seat)
+  if (!ctx || ctx.opener !== seat || ctx.contracts.length !== 3) return null
+  const freeCall = ctx.contracts[2]
+  if (history.slice(history.indexOf(freeCall) + 1).some((c) => c.bid !== 'P')) return null
+  const strain = ctx.free.strain
+  if (strain !== 'H' && strain !== 'S') return null
+  const suit = SUIT_OF_LETTER[strain]
+  const hand = deal.hands[seat]
+  if (lengths(hand)[suit] < 3) return null
+  const tp = hcp(hand)
+  const legal = legalCalls(history, seat)
+  const simple = cheapestBidIn(history, seat, strain)
+  if (!simple) return null
+  const simpleLevel = parseContractBid(simple)!.level
+  const game = `4${strain}` as Bid
+  // Ett fritt bud på 2-LÄGET lovade 10+ (§5.5): 14+ hos öppnaren = 24+ ihop
+  // med fit → utgång direkt; 12–13 → enkel höjning (3M, partnern går vidare).
+  const gameFloor = ctx.free.level >= 2 ? 14 : 19
+  if (tp >= gameFloor && legal.includes(game)) return {
+    seat, bid: game, rule: 'höjning av fritt bud (utgång)',
+    explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]} (${ctx.free.level >= 2 ? '10+ hp' : '6+ hp'}); 3+ stöd och utgångsvärden → ${prettyBid(game)}.`,
+  }
+  const jump = `${simpleLevel + 1}${strain}` as Bid
+  if (tp >= 16 && simpleLevel + 1 <= 4 && legal.includes(jump)) return {
+    seat, bid: jump, rule: 'höjning av fritt bud (inbjudan)',
+    explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]}; 3+ stöd och extra (16–18) → hopphöjning ${prettyBid(jump)} (inbjudan).`,
+  }
+  if (!legal.includes(simple)) return null
+  return {
+    seat, bid: simple, rule: 'höjning av fritt bud',
+    explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]}; 3+ stöd → ${prettyBid(simple)} (enkel höjning, minimum 12–15).`,
+  }
+}
+
+/**
+ * Felrapport #55 (del 3): SVARAREN går vidare när öppnaren höjt det fria
+ * högfärgsbudet enkelt (12–15): fiten är känd, så svararen räknar Bergenpoäng
+ * (golvade vid hp — längden i den egna trumffärgen räknas): 14+ → utgång 4M,
+ * 12–13 → inbjudan 3M, annars pass (null). Bara ostört efter höjningen.
+ * (Giv 2: ♠KQ87432 = 8 hp men 7 trumf mot 3 visade → 14 → 4♠; 11 stick fanns.)
+ */
+function responderAfterFreeBidRaise(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = freeBidContext(history, seat)
+  if (!ctx || ctx.responder !== seat || ctx.contracts.length !== 4) return null
+  const raise = ctx.contracts[3]
+  const rb = parseContractBid(raise.bid)!
+  if (raise.seat !== ctx.opener || rb.strain !== ctx.free.strain || rb.level !== ctx.free.level + 1) return null
+  if (history.slice(history.indexOf(raise) + 1).some((c) => c.bid !== 'P')) return null
+  const strain = ctx.free.strain
+  if (strain !== 'H' && strain !== 'S') return null
+  const tp = pointsWithFloor(deal.hands[seat], SUIT_OF_LETTER[strain], 'bergen').points
+  const legal = legalCalls(history, seat)
+  const game = `4${strain}` as Bid
+  // Efter ett 2-läges fritt bud (10+) är öppnarens enkla höjning 12–13 →
+  // svararen behöver 13+ (Bergen) för utgång, annars pass.
+  const gameFloor = ctx.free.level >= 2 ? 13 : 14
+  if (tp >= gameFloor && legal.includes(game)) return {
+    seat, bid: game, rule: 'utgång efter höjt fritt bud',
+    explanation: `Öppnaren höjde min ${SWE_SYM[strain]} (fit); utgångsvärden med fördelning → ${prettyBid(game)}.`,
+  }
+  const invite = `3${strain}` as Bid
+  if (tp >= 12 && rb.level < 3 && legal.includes(invite)) return {
+    seat, bid: invite, rule: 'inbjudan efter höjt fritt bud',
+    explanation: `Öppnaren höjde min ${SWE_SYM[strain]} (fit); inbjudningsvärden → ${prettyBid(invite)} (inbjudan).`,
+  }
+  return null
+}
+
+/**
+ * Felrapport #55 (del 4): ÖPPNAREN svarar på svararens 3M-inbjudan efter sin
+ * egen enkla höjning av det fria budet — samma dom som efter en ostörd
+ * höjning (`openerThirdBidAfterOwnRaise`: 14+ stödpoäng accepterar).
+ */
+function openerAnswersFreeBidInvite(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const ctx = freeBidContext(history, seat)
+  if (!ctx || ctx.opener !== seat || ctx.contracts.length !== 5) return null
+  const [, , , raise, invite] = ctx.contracts
+  const rb = parseContractBid(raise.bid)!
+  const ib = parseContractBid(invite.bid)!
+  const strain = ctx.free.strain
+  if (strain !== 'H' && strain !== 'S') return null
+  if (raise.seat !== seat || rb.strain !== strain || rb.level !== ctx.free.level + 1) return null
+  if (invite.seat !== ctx.responder || ib.strain !== strain || ib.level !== 3) return null
+  if (history.slice(history.indexOf(invite) + 1).some((c) => c.bid !== 'P')) return null
+  const r = openerThirdBidAfterOwnRaise(deal.hands[seat], SUIT_OF_LETTER[strain] as Major)
+  const bid = r.call as Bid
+  if (bid !== 'P' && !legalCalls(history, seat).includes(bid)) return null
+  return { seat, bid, rule: r.rule, explanation: r.explanation }
+}
+
 function openerRondTwoInCompetition(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
   const open = openingBid(history)
   if (!open || open.strain === 'NT' || open.level !== 1) return null
@@ -3815,10 +3946,13 @@ function openerRondTwoInCompetition(deal: Deal, history: ResolvedCall[], seat: S
   const theirSuit = SUIT_OF_LETTER[theirStrain]
   const cue = cheapestBidIn(history, seat, theirStrain)
 
-  // Fit i partnerns nya färg? 1-lägessvar lovar 4+ (öppnaren behöver 4), ett
-  // 2/1-svar lovar 5+ (öppnaren behöver 3). Bergen bara med fit; annars ren hp.
+  // Fit i partnerns nya färg? Ett fritt HÖGFÄRGSBUD lovar 5+ (felrapport #55:
+  // den negativa dubblingen tar 4-kortsfallet) och ett 2/1-svar lovar 5+ →
+  // öppnaren behöver 3; ett fritt 1-läges LÅGFÄRGSBUD lovar 4+ → 4 krävs.
+  // Bergen bara med fit; annars ren hp.
   let fitStrain: string | null = null
-  if (respStrain && len[SUIT_OF_LETTER[respStrain]] >= (resp.level >= 2 ? 3 : 4)) fitStrain = respStrain
+  const respIsMajor = respStrain === 'H' || respStrain === 'S'
+  if (respStrain && len[SUIT_OF_LETTER[respStrain]] >= (resp.level >= 2 || respIsMajor ? 3 : 4)) fitStrain = respStrain
   const tp = fitStrain ? pointsWithFloor(hand, SUIT_OF_LETTER[fitStrain], 'bergen').points : hcp(hand)
   const isMajorFit = fitStrain === 'H' || fitStrain === 'S'
 
@@ -4012,6 +4146,50 @@ function openerReopensBalancing(deal: Deal, history: ResolvedCall[], seat: Seat)
 // 3-läget. Skilt från raiseWithFit (som kräver 4-korts stöd för ett 2-läges inkliv och
 // hade bjudit 4♥ inbjudande = överbud). Ägarregel: 3-korts stöd + motståndarna har
 // hittat sin fit → tävla 3M; genuina utgångsvärden (13+ stödpoäng) → utgång; svag → pass.
+/**
+ * Felrapport #56: advancerns PREFERENS när inklivaren visat TVÅ färger.
+ * Mönstret: motståndarna öppnade; vår sidas enda kontraktsbud är partnerns
+ * (naturliga) inkliv och sedan partnerns NYA färg — "välj den som passar bäst";
+ * jag har bara passat; partnerns andra färg är senaste kontraktsbudet. Regeln
+ * (§7.1): preferens till inklivsfärgen med bättre stöd där, OAVSETT poäng —
+ * partnern bad om ett val, inte om styrka. Kostar preferensen ingen nivå
+ * (inklivsfärgen rankar över den andra) räcker lika lång eller längre; kostar
+ * den en nivå krävs klar skillnad (2+ kort). Aldrig förbi utgång. Bättre stöd i
+ * den andra färgen → null (pass/höjning sköts av befintlig logik).
+ * (Giv 6: 1♥–1♠–3♥–P–P–4♦–P: Nord passade 4♦ med ♠K9873 ♦T86 — 4♠ var gratis.)
+ */
+function advancerPrefersOvercallSuit(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  const open = openingBid(history)
+  if (!open || side(open.seat) === side(seat)) return null // motståndarna ska ha öppnat
+  if (history.some((c) => c.seat === seat && c.bid !== 'P')) return null // jag har bara passat
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2 || ourBids.some((c) => c.seat !== PARTNER[seat])) return null
+  const first = parseContractBid(ourBids[0].bid)!
+  const second = parseContractBid(ourBids[1].bid)!
+  if (first.strain === 'NT' || second.strain === 'NT' || first.strain === second.strain) return null
+  // Båda ska vara naturliga egna färger (en cue i deras färg är ingen färg).
+  if (opponentsBidStrain(history, seat, first.strain) || opponentsBidStrain(history, seat, second.strain)) return null
+  // Partnerns andra färg står som senaste kontraktsbud (bjuder de över gäller konkurrenslogiken).
+  const lastContract = [...history].reverse().find((c) => parseContractBid(c.bid))
+  if (lastContract !== ourBids[1]) return null
+
+  const len = lengths(deal.hands[seat])
+  const a = SUIT_OF_LETTER[first.strain]
+  const b = SUIT_OF_LETTER[second.strain]
+  const bid = cheapestBidIn(history, seat, first.strain)
+  if (!bid) return null
+  const level = parseContractBid(bid)!.level
+  const gameLevel = first.strain === 'H' || first.strain === 'S' ? 4 : 5
+  if (level > gameLevel) return null // aldrig förbi utgång
+  const costsLevel = level > second.level
+  const clearlyBetter = costsLevel ? len[a] >= len[b] + 2 : len[a] >= len[b]
+  if (!clearlyBetter) return null
+  return {
+    seat, bid, rule: 'preferens till inklivsfärgen',
+    explanation: `Partnern visade ${SWE_SYM[first.strain]} och ${SWE_SYM[second.strain]} och bad mig välja — bättre stöd i ${SWE_SYM[first.strain]} → ${prettyBid(bid)} (preferens, ej krav).`,
+  }
+}
+
 function advancerCompetesToFit(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
   const open = openingBid(history)
   if (!open || side(open.seat) === side(seat)) return null // motståndarna ska ha ÖPPNAT
@@ -4356,6 +4534,15 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // FÖRE maybePenaltyDouble (extra → cue, inte straffdubbling), FÖRE
   // off-book-svaret (som annars säljer given genom att passa) och FÖRE
   // reopen-varianterna nedan (som kräver att partnern INTE bjöd).
+  // Felrapport #55: partnerns FRIA högfärgsbud (5+) — öppnaren höjer på 3-korts
+  // stöd, svararen går vidare, öppnaren dömer inviten. Måste ligga FÖRE
+  // off-book-svaret (som kräver 4-korts stöd och därför bjöd 2♣ på ♠AJ9).
+  { id: 'openerRaisesFreeBid', before: ['maybePenaltyDouble', 'offBookResponse'],
+    run: (c) => openerRaisesFreeBid(c.deal, c.history, c.seat) },
+  { id: 'responderAfterFreeBidRaise', before: ['maybePenaltyDouble', 'offBookResponse'],
+    run: (c) => responderAfterFreeBidRaise(c.deal, c.history, c.seat) },
+  { id: 'openerAnswersFreeBidInvite', before: ['maybePenaltyDouble', 'offBookResponse'],
+    run: (c) => openerAnswersFreeBidInvite(c.deal, c.history, c.seat) },
   { id: 'openerRondTwoInCompetition',
     before: ['openerReopensAfterPartnerPass', 'maybePenaltyDouble', 'offBookResponse'],
     run: (c) => openerRondTwoInCompetition(c.deal, c.history, c.seat) },
@@ -4452,6 +4639,12 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // arnas fitvisande höjning (partnern klev in 2-läges → 3-korts stöd räcker).
   // Måste ligga FÖRE off-book-svaret (som kräver 4-korts stöd för ett 2-läges
   // inkliv och därför passar den 3-korts fiten).
+  // Felrapport #56: partnern klev in och visade sedan en ANDRA färg — advancern
+  // ger preferens till inklivsfärgen med bättre stöd, oavsett poäng. Måste ligga
+  // FÖRE advancerCompetesToFit (som annars höjer den ANDRA färgen på 3-korts
+  // stöd) och före off-book-svaret (som passade 4♦ med fem spader).
+  { id: 'advancerPrefersOvercallSuit', before: ['advancerCompetesToFit', 'offBookResponse'],
+    run: (c) => advancerPrefersOvercallSuit(c.deal, c.history, c.seat) },
   { id: 'advancerCompetesToFit', before: ['offBookResponse'],
     run: (c) => advancerCompetesToFit(c.deal, c.history, c.seat) },
   // Svararens svar på 2♣–2♦–2NT (öppnarens 22–24): 3+ hp = utgång → 3NT,

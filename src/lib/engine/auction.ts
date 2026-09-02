@@ -172,6 +172,25 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
     // inkliv på valfri nivå, inte bara 1-läget).
     const neg = negativeDouble(hand, openerSuit, overcallCall)
     if (neg) return neg
+    // Fritt bud i en 5+ HÖGFÄRG (§5.5, felrapport #55): på 1-läget från 6 hp,
+    // på 2-läget från 10 hp — rondkrav. Högfärgen visas före cue/höjning, UTOM
+    // när öppnaren öppnade en högfärg vi har 3+ stöd i (då är fiten känd och
+    // cue/höjning säger mer). Förr saknades grenen helt: med 7-korts spader
+    // efter 1♦–(1♥) dubblade svararen negativt (lovar 4) och passade sedan.
+    const openerMajorFit = (openerSuit === 'hearts' || openerSuit === 'spades') && len[openerSuit] >= 3
+    if (!openerMajorFit) {
+      for (const m of ['spades', 'hearts'] as Suit[]) {
+        if (m === openerSuit || m === ovSuit || len[m] < 5) continue
+        const L = cheapestLevelAbove(m, ovLevel, ovSuit)
+        if ((L === 1 && p >= 6) || (L === 2 && p >= 10)) {
+          return {
+            call: `${L}${LETTER[m]}`,
+            rule: 'fritt bud',
+            explanation: `5+ ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 1 ? '6' : '10'}+ hp, rondkrav).`,
+          }
+        }
+      }
+    }
     // Limithöjning eller bättre (§7.1): cue i DERAS färg med 3+ stöd och 10+ hp
     // (krav). Skiljer en inbjudande+ höjning från den rena konkurrenshöjningen.
     if (len[openerSuit] >= 3 && p >= 10) {
@@ -193,6 +212,17 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
       // för högt: 1♥–(1♠)–2NT i stället för naturligt 1NT. R1-fynd #1.)
       const L = ovLevel
       return { call: `${L}NT`, rule: 'NT med stopp', explanation: `Balanserad med stopp (8+) → ${L}NT.` }
+    }
+    // Fritt bud i en 5+ LÅGFÄRG på 2-läget (§5.5, felrapport #55): 10+ hp,
+    // utan fit och utan sang-alternativ — rondkrav, lovar värden men inte utgång.
+    for (const m of ['diamonds', 'clubs'] as Suit[]) {
+      if (m === openerSuit || m === ovSuit || len[m] < 5 || p < 10) continue
+      if (cheapestLevelAbove(m, ovLevel, ovSuit) !== 2) continue
+      return {
+        call: `2${LETTER[m]}`,
+        rule: 'fritt bud',
+        explanation: `5+ ${SUIT_SYM[m]} → 2${SUIT_SYM[m]} (fritt bud i konkurrens, 10+ hp, rondkrav).`,
+      }
     }
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt i konkurrens → pass.` }
   }

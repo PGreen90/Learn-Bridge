@@ -53,9 +53,15 @@ describe('Öppnarens rond-2 i konkurrens efter partnerns 1-lägessvar (1♣–(1
   })
 
   it('minimum, ingen fit, ingen lång färg → passar (faller igenom)', () => {
-    // 13 hp, 3-korts hjärter (ingen 4-fit), inga 6+ färger
-    const deal = dealOf('S', { ...A_CTX, S: 'S:AJ3 H:Q94 D:842 C:AQ54' })
+    // 13 hp, 2-korts hjärter (ingen fit), inga 6+ färger, ingen ny 4-kortsfärg
+    const deal = dealOf('S', { ...A_CTX, S: 'S:AJ3 H:Q9 D:8542 C:AQ54' })
     expect(decideCall(deal, A_HISTORY, 'S').bid).toBe('P')
+  })
+
+  it('minimum med 3-korts hjärter → tävlar 2♥ (fritt högfärgsbud lovar 5+, felrapport #55)', () => {
+    // 13 hp, 3-korts hjärter: 1♥ över (1♦) är ett fritt bud = 5+ (X hade visat 4) → 5-3-fit.
+    const deal = dealOf('S', { ...A_CTX, S: 'S:AJ3 H:Q94 D:842 C:AQ54' })
+    expect(decideCall(deal, A_HISTORY, 'S').bid).toBe('2H')
   })
 })
 

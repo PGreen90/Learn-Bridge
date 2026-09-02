@@ -272,6 +272,25 @@ function partnerNaturalNT(seat: Seat, prior: ResolvedCall[]): boolean {
   return partnerContracts.length === 1
 }
 
+/**
+ * Har partnern just bjudit en 2-läges KONVENTION över `seat`s egen naturliga
+ * 1NT (öppning eller inkliv) som `seat` nu svarar på? Sant när sidans
+ * kontraktsbud är exakt två — `seat`s 1NT och partnerns 2♣/2♦/2♥ — och
+ * partnerns bud är auktionens senaste kontraktsbud (ostört). Returnerar
+ * partnerns strain ('C' = Stayman, 'D'/'H' = transfer), annars null.
+ */
+function partnerNTConventionToAnswer(seat: Seat, prior: ResolvedCall[]): string | null {
+  const contracts = prior.map((c) => ({ c, cb: parseBid(c.bid) })).filter((x) => x.cb) as { c: ResolvedCall; cb: ParsedBid }[]
+  const ours = contracts.filter((x) => SIDE[x.c.seat] === SIDE[seat])
+  if (ours.length !== 2) return null
+  const [mine, partners] = ours
+  if (mine.c.seat !== seat || mine.cb.level !== 1 || mine.cb.strain !== 'NT') return null
+  if (partners.c.seat !== PARTNER[seat] || partners.cb.level !== 2 || !['C', 'D', 'H'].includes(partners.cb.strain)) return null
+  if (contracts[contracts.length - 1] !== partners) return null // ostört efter konventionen
+  if (contracts.indexOf(partners) !== contracts.indexOf(mine) + 1) return null // ostört mellan 1NT och svaret
+  return partners.cb.strain
+}
+
 /** Senaste kontraktsbudet före `prior`s slut (för pass/dubbel-texter). */
 function lastContract(prior: ResolvedCall[]): { seat: Seat; cb: ParsedBid } | null {
   for (let i = prior.length - 1; i >= 0; i--) {
@@ -347,14 +366,49 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
   const partnerSuits = suitsShown(PARTNER[seat], prior)
   const ownSuits = suitsShown(seat, prior)
 
-  // Öppningsbud (inget kontraktsbud före)?
+  // Öppningsbud (inget kontraktsbud före)? Nivån avgör (§3): 1-läget =
+  // öppningshand, 2♣ = stark konstgjord, 2♦/2♥/2♠ = svag tvåa, 3-läget = spärr
+  // (7-korts), 4-läget = spärr (8+). Felrapport #54: 3♣ kallades "öppningshand".
   if (!opening(prior)) {
     if (cb.strain === 'NT') {
-      const range = cb.level === 1 ? '15–17 hp' : cb.level === 2 ? '20–21 hp' : 'stark balanserad hand'
+      const range = cb.level === 1 ? '15–17 hp' : cb.level === 2 ? '20–21 hp' : '25–27 hp'
       return { text: `Öppningsbud ${cb.level} sang — balanserad hand, ${range}.`, confidence: 'trolig' }
     }
+    if (cb.level === 1) {
+      const minLen = cb.strain === 'H' || cb.strain === 'S' ? '5+' : '3+'
+      return {
+        text: `Öppningsbud 1${sym} — visar en öppningshand (12+ hp) med ${minLen} ${name}.`,
+        confidence: 'trolig',
+      }
+    }
+    if (cb.level === 2 && cb.strain === 'C') {
+      return {
+        text: `Öppningsbud 2♣ — stark, konstgjord öppning (22+ hp eller ~8½+ spelstick), krav. Säger inget om klöver.`,
+        confidence: 'trolig',
+        forcing: 'utgangskrav',
+      }
+    }
+    if (cb.level === 2) {
+      return {
+        text: `Öppningsbud 2${sym} — svag tvåöppning: 6–11 hp med en 6-korts ${name}.`,
+        confidence: 'trolig',
+      }
+    }
+    if (cb.level === 3) {
+      return {
+        text: `Öppningsbud 3${sym} — spärröppning: svag hand (under öppningsstyrka) med 7-korts ${name}.`,
+        confidence: 'trolig',
+      }
+    }
+    if (cb.level === 4 && (cb.strain === 'H' || cb.strain === 'S')) {
+      return {
+        text: `Öppningsbud 4${sym} — spärr till utgång: svag hand med lång ${name} (8+ kort, ~7+ spelstick).`,
+        confidence: 'trolig',
+        forcing: 'avslut',
+      }
+    }
     return {
-      text: `Öppningsbud ${cb.level}${sym} — visar en öppningshand med ${name}.`,
+      text: `Öppningsbud ${cb.level}${sym} — spärröppning: svag hand med mycket lång ${name} (8+ kort).`,
       confidence: 'trolig',
     }
   }
@@ -396,6 +450,37 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
         text: `2♠ — Minor Suit Stayman: 5-4+ i lågfärgerna utan högfärg, utgångs-/slamintresse (säger inget om spader).`,
         confidence: 'trolig',
         forcing: 'krav-1-rond',
+      }
+    }
+  }
+
+  // Sangöppnarens/-inklivarens SVAR på partnerns konvention (felrapport #57:
+  // 2♦ på Stayman lästes som "naturligt, minst 4 ruter"). Svaret på Stayman är
+  // konvention (§4.3); fullföljd transfer lovar inget om egen längd.
+  const conv = partnerNTConventionToAnswer(seat, prior)
+  if (conv === 'C' && cb.level === 2) {
+    if (cb.strain === 'D') {
+      return { text: `2♦ — svar på Stayman: ingen 4-korts högfärg. Säger inget om ruter.`, confidence: 'trolig' }
+    }
+    if (cb.strain === 'H') {
+      return { text: `2♥ — svar på Stayman: 4 hjärter (kan ha 4 spader också).`, confidence: 'trolig' }
+    }
+    if (cb.strain === 'S') {
+      return { text: `2♠ — svar på Stayman: 4 spader, förnekar 4 hjärter.`, confidence: 'trolig' }
+    }
+  }
+  if ((conv === 'D' && cb.strain === 'H') || (conv === 'H' && cb.strain === 'S')) {
+    if (cb.level === 2) {
+      return {
+        text: `2${sym} — fullföljer partnerns Jacoby-transfer (partnern visade 5+ ${name}). Säger inget om egen längd i ${name}.`,
+        confidence: 'trolig',
+      }
+    }
+    if (cb.level === 3) {
+      return {
+        text: `3${sym} — superaccept av transfern: 4-korts ${name} och maximum, inbjuder utgång.`,
+        confidence: 'trolig',
+        forcing: 'inbjudan',
       }
     }
   }

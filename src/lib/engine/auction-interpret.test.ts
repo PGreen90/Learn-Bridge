@@ -470,3 +470,77 @@ describe('Fynd 3 – dubblingar tolkas ur auktionen, aldrig som gissning', () =>
     expect(r.confidence).not.toBe('gissning')
   })
 })
+
+// Felrapport #54 (github.com/PGreen90/Learn-Bridge/issues/54): motståndarens
+// 3♣-öppning förklarades "visar en öppningshand med klöver". Fel: 3♣ är en
+// SPÄRRÖPPNING — svag hand (under öppningsstyrka) med lång klöver (§3: 3-läget
+// = 7+ kort). Tolkningslagret läser andras bud utan regel (läckvakten skalar
+// bort motorns regel), så öppningsheuristiken måste skilja nivåerna åt.
+describe('felrapport #54 – öppningar på 2-, 3- och 4-läget är inte "öppningshänder"', () => {
+  it('3♣ = spärröppning, svag, 7-korts klöver', () => {
+    const r = interpretCall(h(['S', '3C']), 0)
+    expect(r.text).toMatch(/spärr/i)
+    expect(r.text).toMatch(/svag/i)
+    expect(r.text).toMatch(/7/)
+    expect(r.text).toMatch(/klöver/i)
+    expect(r.text).not.toMatch(/öppningshand/i)
+  })
+  it('2♥ = svag tvåöppning, 6-korts färg, 6–11 hp', () => {
+    const r = interpretCall(h(['W', '2H']), 0)
+    expect(r.text).toMatch(/svag två/i)
+    expect(r.text).toMatch(/6–11/)
+    expect(r.text).toMatch(/6-korts/i)
+    expect(r.text).not.toMatch(/öppningshand/i)
+  })
+  it('2♣ = stark konstgjord öppning (krav)', () => {
+    const r = interpretCall(h(['N', '2C']), 0)
+    expect(r.text).toMatch(/stark/i)
+    expect(r.text).toMatch(/konstgjor/i)
+    expect(r.text).not.toMatch(/öppningshand/i)
+  })
+  it('4♠ = spärr till utgång, lång färg', () => {
+    const r = interpretCall(h(['E', '4S']), 0)
+    expect(r.text).toMatch(/spärr/i)
+    expect(r.text).not.toMatch(/öppningshand/i)
+  })
+  it('1♥ beskrivs fortfarande som öppningshand (12+ hp, 5+ hjärter)', () => {
+    const r = interpretCall(h(['S', '1H']), 0)
+    expect(r.text).toMatch(/öppningshand/i)
+    expect(r.text).toMatch(/hjärter/i)
+  })
+})
+
+// Felrapport #57 (github.com/PGreen90/Learn-Bridge/issues/57): Östs 2♦ på
+// partnerns Stayman (P P P 1NT P 2♣ P 2♦) förklarades "naturligt, minst 4 kort
+// i ruter". Fel: svaret på Stayman är KONVENTION — 2♦ = ingen 4-korts högfärg,
+// 2♥ = 4 hjärter (kan ha 4 spader), 2♠ = 4 spader utan 4 hjärter (§4.3).
+describe('felrapport #57 – svaren på Stayman är konvention, inte färger', () => {
+  const stayman = h(['S', 'P'], ['W', 'P'], ['N', 'P'], ['E', '1NT'], ['S', 'P'], ['W', '2C'], ['N', 'P'])
+
+  it('2♦ på Stayman = ingen 4-korts högfärg (säger inget om ruter)', () => {
+    const r = interpretCall([...stayman, { seat: 'E', bid: '2D' }], 7)
+    expect(r.text).toMatch(/Stayman/i)
+    expect(r.text).toMatch(/ingen 4-korts högfärg/i)
+    expect(r.text).not.toMatch(/minst 4 kort i ruter|naturligt/i)
+  })
+  it('2♥ på Stayman = 4 hjärter (kan ha 4 spader också)', () => {
+    const r = interpretCall([...stayman, { seat: 'E', bid: '2H' }], 7)
+    expect(r.text).toMatch(/Stayman/i)
+    expect(r.text).toMatch(/4 hjärter/i)
+  })
+  it('2♠ på Stayman = 4 spader, förnekar 4 hjärter', () => {
+    const r = interpretCall([...stayman, { seat: 'E', bid: '2S' }], 7)
+    expect(r.text).toMatch(/Stayman/i)
+    expect(r.text).toMatch(/4 spader/i)
+    expect(r.text).toMatch(/förnekar|inte 4 hjärter/i)
+  })
+  it('fullföljd transfer: 1NT – 2♦ – 2♥ = fullföljer transfern, säger inget om hjärterlängd', () => {
+    const r = interpretCall(h(['N', '1NT'], ['E', 'P'], ['S', '2D'], ['W', 'P'], ['N', '2H']), 4)
+    expect(r.text).toMatch(/transfer/i)
+    expect(r.text).not.toMatch(/naturligt|minst 4 kort/i)
+  })
+  it('Stayman-svaret gäller även efter ett 1NT-INKLIV (systems on)', () => {
+    const r = interpretCall(h(['W', '1D'], ['N', '1NT'], ['E', 'P'], ['S', '2C'], ['W', 'P'], ['N', '2D']), 5)
+    expect(r.text).toMatch(/ingen 4-korts högfärg/i)
+  })
+})

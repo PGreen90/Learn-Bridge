@@ -111,6 +111,7 @@ function oracleCompetitionForce(history: ResolvedCall[], seat: Seat): boolean {
       firstResp?.level === 1 &&
       second.level === 2 && second.strain !== 'NT' &&
       second.strain !== firstOpen.strain &&
+      second.strain !== firstResp.strain && // öppnarens höjning av svararens färg är ingen reverse (felrapport #55)
       rank(second.strain) > rank(firstOpen.strain)
     if (isReverse) return true
   }

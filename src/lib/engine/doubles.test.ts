@@ -307,3 +307,30 @@ describe('doublerAnswersCue (dubblarens svar på advancerns cue)', () => {
     expect(doublerAnswersCue(parseHand('S:AJ9 H:K93 D:QT83 C:A73'), ['clubs'], '3C').call).toBe('3NT')
   })
 })
+
+// Felrapport #55 (github.com/PGreen90/Learn-Bridge/issues/55): 1♦–(1♥) med
+// ♠KQ87432 (7-korts spader, 8 hp) → Nord dubblade negativt och passade sedan
+// 2♣. Fel: den negativa dubblingen visar EXAKT 4 kort i en objuden högfärg som
+// kunde bjudits på 1-läget — med 5+ bjuder man färgen (1♠ = fritt bud, 5+).
+// Måste färgen upp på 2-läget gäller: 10+ hp → fritt bud (2♥), svagare → X
+// (och färgen visas senare = 5 kort, svagt).
+describe('felrapport #55 – negativ dubbling visar 4, inte 5+, i en 1-läges högfärg', () => {
+  it('1♦–(1♥) med 7 spader → INGEN negativ dubbling (1♠ naturligt)', () => {
+    expect(negativeDouble(parseHand('S:KQ87432 H:T6 D:K C:532'), 'diamonds', '1H')).toBeNull()
+  })
+  it('1♦–(1♥) med exakt 5 spader (6 hp) → ingen X, 1♠ visar färgen', () => {
+    expect(negativeDouble(parseHand('S:K9876 H:T6 D:Q32 C:J32'), 'diamonds', '1H')).toBeNull()
+  })
+  it('1♦–(1♥) med exakt 4 spader → X som förr', () => {
+    expect(negativeDouble(parseHand('S:KQ87 H:T63 D:K2 C:5432'), 'diamonds', '1H')?.call).toBe('X')
+  })
+  it('1♦–(1♠) med 5 hjärter och 8 hp → X (2♥ vore ett fritt bud som kräver 10+)', () => {
+    expect(negativeDouble(parseHand('S:32 H:KQ876 D:J32 C:J32'), 'diamonds', '1S')?.call).toBe('X')
+  })
+  it('1♦–(1♠) med 5 hjärter och 11 hp → ingen X (fritt bud 2♥ visar 5+)', () => {
+    expect(negativeDouble(parseHand('S:32 H:KQ876 D:K32 C:Q32'), 'diamonds', '1S')).toBeNull()
+  })
+  it('1♣–(1♦) med 5-4 i högfärgerna → ingen X, den 5-korts högfärgen bjuds på 1-läget', () => {
+    expect(negativeDouble(parseHand('S:K9876 H:KT86 D:4 C:J32'), 'clubs', '1D')).toBeNull()
+  })
+})
