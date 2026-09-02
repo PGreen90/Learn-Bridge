@@ -1,14 +1,15 @@
-name: Tävlingsbot (nattligt botspel)
+name: Tävlingsbottarna (nattligt botspel)
 
-# BOT-DELTAGAREN I DAGLIGA TÄVLINGEN (ägarbeslut 2026-08-31): "rebidz-bot"
-# spelar dagens 12 givar strax efter att de genererats och skickar in resultaten
-# i daily_results — samma validering och radform som människors inskick
+# TREBOTTARNA I DAGLIGA TÄVLINGEN (ägarbeslut 2026-08-31 + 2026-09-01): de tre
+# bottarna (src/lib/engine/botniva.ts — expert/medel/nybörjare) spelar dagens
+# 12 givar strax efter att de genererats och skickar in resultaten i
+# daily_results — samma validering och radform som människors inskick
 # (src/lib/engine/tavlingsbot.probe.test.ts). Med 1–3 mänskliga spelare
-# garanterar boten minst två resultat per giv, så matchpoängen betyder något
-# varje dag.
+# garanterar bottarna minst fyra resultat per giv, så matchpoängen betyder
+# något varje dag — och det finns alltid någon i sin egen styrkeklass.
 #
 # Tider: Vercel-cronen genererar givarna 23:05 UTC (00:05/01:05 svensk tid —
-# ny tävlingsdag). Boten spelar 23:45 UTC (00:45/01:45 svensk tid) — dagens
+# ny tävlingsdag). Bottarna spelar 23:45 UTC (00:45/01:45 svensk tid) — dagens
 # datum i Europe/Stockholm är då alltid den NYA tävlingsdagen, året runt.
 #
 # Idempotent: allt är deterministiskt ur (hemlighet, datum, bricka) och redan
@@ -34,8 +35,9 @@ concurrency:
 jobs:
   botspel:
     runs-on: ubuntu-latest
-    # ~40 s per giv × 12 givar + marginal (delade CI-kärnor är långsammare).
-    timeout-minutes: 45
+    # ~40 s per giv × 12 givar × 3 bottar + marginal (delade CI-kärnor är
+    # långsammare; motståndarsätena kör standardmotorns MC på alla nivåer).
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -46,14 +48,14 @@ jobs:
       - name: Installera beroenden
         run: npm ci
 
-      - name: Spela dagens tävling som bot
+      - name: Spela dagens tävling som bottarna
         env:
           DAILY_SEED_SECRET: ${{ secrets.DAILY_SEED_SECRET }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           IDAG=$(TZ=Europe/Stockholm date +%F)
-          echo "Boten spelar $IDAG (Europe/Stockholm)"
+          echo "Bottarna spelar $IDAG (Europe/Stockholm)"
           BOT_TAVLING=$IDAG \
             npx vitest run src/lib/engine/tavlingsbot.probe.test.ts
 

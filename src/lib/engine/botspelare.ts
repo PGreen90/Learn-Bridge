@@ -17,13 +17,13 @@
 // (api-src/_lib/seed.ts har HMAC-hemligheten; den hör inte hemma här, modulen
 // ska kunna importeras var som helst utan node:crypto).
 
-import type { Card } from '../../types/bridge'
+import type { Card, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { dealFromSeed, mulberry32 } from './deal'
 import { botAuction } from './revisor'
 import { contractFromCalls } from './auction-live'
-import { contractResult, isComplete, playCard, startPlay } from './play'
-import { botCardSmart } from './play-bot'
+import { contractResult, isComplete, playCard, side, startPlay } from './play'
+import { botCardSmart, type SmartOpts } from './play-bot'
 import { botDecisionSeed, playIndexOf } from './play-seed'
 
 /** Samma form som api-src/_lib/validera.ts `Inskick` (medvetet strukturellt
@@ -40,8 +40,21 @@ export interface BotInskick {
  * kortspel (varje beslut fröat ur playSeed). `null` om auktionen skenar
  * (botAuctions vakt) — då får brickan inget bot-inskick, vilket rapporteras av
  * nattjobbet i stället för att gissas bort.
+ *
+ * `nivaOpts` (trebottarna, botniva.ts) gäller BARA de säten Syd styr — samma
+ * urval som människans i nattgranskningen: S alltid, hela N/S-sidan när N/S är
+ * spelförande. Övriga säten spelas alltid av standardmotorn med samma frön, så
+ * djupgranskningens exakta replay godkänner inskicket oavsett nivå. Tomma opts
+ * (default) = expert = exakt dagens bot. Auktionen är standard för alla nivåer
+ * (valideringen kräver motorns bud på N/Ö/V; Syds bud hålls också standard —
+ * nivåskillnaden ligger i kortspelet, ägarbeslut 2026-09-01).
  */
-export function spelaBotGiv(givSeed: number, playSeed: number, board: number): BotInskick | null {
+export function spelaBotGiv(
+  givSeed: number,
+  playSeed: number,
+  board: number,
+  nivaOpts: SmartOpts = {},
+): BotInskick | null {
   const deal = dealFromSeed(givSeed, board)
   const history = botAuction(deal)
   if (!history) return null
@@ -50,13 +63,17 @@ export function spelaBotGiv(givSeed: number, playSeed: number, board: number): B
   const contract = contractFromCalls(history)
   if (!contract) return { board, history, plays: [], declarerTricks: 0 }
 
+  const sydStyr = (seat: Seat) =>
+    side(contract.declarer) === 'NS' ? side(seat) === 'NS' : seat === 'S'
+
   let state = startPlay(deal, contract)
   const plays: Card[] = []
   let guard = 0
   while (!isComplete(state) && guard++ < 60) {
     const index = playIndexOf(state.completedTricks.length, state.currentTrick.length)
     const rng = mulberry32(botDecisionSeed(playSeed, index))
-    const card = botCardSmart(state, state.toAct, history, { rng })
+    const opts = sydStyr(state.toAct) ? { ...nivaOpts, rng } : { rng }
+    const card = botCardSmart(state, state.toAct, history, opts)
     plays.push(card)
     state = playCard(state, card)
   }

@@ -122,8 +122,8 @@ export function DagensTavling() {
         <div className="max-w-sm space-y-4 text-center">
           <h1 className="text-2xl font-semibold text-emerald-50">Dagens tävling</h1>
           <p className="text-emerald-100/80">
-            Samma 12 givar för alla varje dag. För att spela tävlingen och komma med
-            på topplistan behöver du ett konto.
+            Samma 12 givar för alla varje dag. I tävlingen deltar även datorspelare.
+            För att spela tävlingen och komma med på topplistan behöver du ett konto.
           </p>
           <div className="flex flex-col items-center gap-2">
             <Link to="/logga-in">
@@ -712,7 +712,6 @@ function TravellerTabell({ data }: { data: GivResultatSvar }) {
                 className={`border-t border-emerald-100/5 ${r.jag ? 'bg-gold-400/10' : ''}`}
               >
                 <td className={`py-1.5 pr-2 ${r.jag ? 'font-semibold text-gold-200' : 'text-emerald-50'}`}>
-                  {r.bot && <span title="Datorspelare">🤖 </span>}
                   {r.namn}
                   {r.jag && ' (du)'}
                 </td>
@@ -773,7 +772,6 @@ function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
                     <span className="w-5 text-right tabular-nums text-emerald-100/60">
                       {medalj ?? `${i + 1}.`}
                     </span>
-                    {rad.bot && <span title="Datorspelare">🤖</span>}
                     {rad.namn}
                     {rad.jag && <span className="text-xs text-gold-300/80">(du)</span>}
                   </span>
@@ -788,6 +786,11 @@ function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
           </p>
         </>
       )}
+      {/* Öppen redovisning (trebottarna, ägar-ja 2026-09-01): datorspelarna har
+          människonamn och pekas aldrig ut — men att de finns sägs rakt ut. */}
+      <p className="text-center text-[11px] text-emerald-100/50">
+        I tävlingen deltar även datorspelare.
+      </p>
     </div>
   )
 }

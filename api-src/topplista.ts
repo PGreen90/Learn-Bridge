@@ -155,27 +155,29 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           : { board },
       )
 
-    // Visningsnamn + bot-flagga för spelarna på listan (boten — migration
-    // 0010 + nattjobbet tavlingsbot.probe — märks med 🤖 i klienten).
+    // Visningsnamn för spelarna på listan. MEDVETET ingen bot-flagga i svaret
+    // (trebottarna, ägarbeslut 2026-09-01): bottarna har människonamn och pekas
+    // aldrig ut — en flagga här hade läckt det via nätverksfliken. is_bot finns
+    // kvar i DB för nattjobben/statistiken; klienten visar i stället info-raden
+    // "I tävlingen deltar även datorspelare".
     const ids = agg.topplista.map((p) => p.spelare)
-    const profil = new Map<string, { namn: string; bot: boolean }>()
+    const profil = new Map<string, string>()
     if (ids.length) {
       const inList = ids.map((id) => `"${id}"`).join(',')
       const profiler = (await restGet(
         base,
         key,
-        `profiles?id=in.(${inList})&select=id,display_name,is_bot`,
-      )) as Array<{ id: string; display_name: string; is_bot: boolean | null }>
-      for (const p of profiler) profil.set(p.id, { namn: p.display_name, bot: p.is_bot === true })
+        `profiles?id=in.(${inList})&select=id,display_name`,
+      )) as Array<{ id: string; display_name: string }>
+      for (const p of profiler) profil.set(p.id, p.display_name)
     }
 
     const topplista = agg.topplista.map((p) => ({
-      namn: profil.get(p.spelare)?.namn ?? '—',
+      namn: profil.get(p.spelare) ?? '—',
       snitt: p.snitt,
       antalGivar: p.antalGivar,
       // Markera kallarens egen rad (steg 6) — klienten highlightar den.
       jag: p.spelare === meId,
-      bot: profil.get(p.spelare)?.bot ?? false,
     }))
 
     return json(200, {

@@ -367,6 +367,40 @@ och man har alltid någon att mäta sig mot.
 **Ägarsteg vid deploy:** kör migration `0010` i Supabase (secrets-steget delas
 med etapp 3 ovan). Bot-kontot skapas automatiskt vid första körningen.
 
+### Påbyggnad 2 — trebottarna i nivåer (ägarbeslut 2026-09-01)
+
+**Varför:** en ensam expertbot ger bara EN referenspunkt — en nybörjare möter
+alltid någon som slår hen. Tre bottar i nivåer ger alla spelare någon i sin
+egen styrkeklass att mäta sig mot, varje dag.
+
+**Besluten (låsta):**
+- **Människonamn, ingen 🤖:** Gunnar52 (=expert, ärver rebidz-bots konto som
+  döps om via service-nyckeln — UPDATE-granten i migration `0011`), Lasse68
+  (=medel), Emma03 (=nybörjare). Nivåkopplingen dokumenteras BARA i kod/docs,
+  aldrig i UI:t; bot-flaggan skickas inte ens i API-svaren längre (den hade
+  läckt via nätverksfliken). `is_bot` finns kvar i DB för nattjobben.
+- **Öppen redovisning:** info-raden "I tävlingen deltar även datorspelare"
+  (ägar-ja 2026-09-01) visas i tävlingsinfon (utloggad intro + under
+  ställningen).
+- **All nivåskillnad i SYDS kortbeslut** (`src/lib/engine/botniva.ts` +
+  `spelaBotGiv`): N/Ö/V spelas alltid av standardmotorn med playSeed-fröna —
+  valideringen kräver motorns bud och nattgranskningen replayar deras kort
+  exakt, så alla nivåers rader godkänns av sig själva. Auktionen är standard
+  för alla nivåer. Expert = tomma opts = exakt dagens bot.
+- **Nivårattarna** (spelhjärnans befintliga `SmartOpts`, inga nya regler):
+  medel = MC-fönster 4 kort + 8 sampel + ingen signalavkodning; nybörjare =
+  ingen Monte-Carlo alls (enbart tumreglerna). MÄTTA isär med netto-metoden
+  (`botniva.probe.test.ts`, kommando i filhuvudet): på 24 givar gav fönster 6
+  ≈ ingen skillnad (FÖRKASTAD) och fönster 5/4/0 gav 0/−2/−6 — monotont svar
+  på fönsterratten, medel valdes till mittläget; bekräftat på 48 givar
+  (NIVAMAT_DEALS=48): medel −8, nybörjare −18. S6-lärdomen: bygg-mät-besluta.
+- Nattjobbet (`tavlingsbot.probe.test.ts` + `tavling-botspelare.yml`) spelar
+  alla tre bottarna i samma körning; idempotent per (bot, bricka).
+
+**Ägarsteg vid deploy:** inga nya migrationer — `0010`+`0011` räcker. Lasse68-
+och Emma03-kontona skapas automatiskt vid första nattkörningen; Gunnar52-
+namnbytet sker i samma körning.
+
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
 
 - `profiles` — användare, unikt visningsnamn.
@@ -457,3 +491,9 @@ med etapp 3 ovan). Bot-kontot skapas automatiskt vid första körningen.
   `tavling-botspelare.yml` (23:45 UTC), migration `0010` (`profiles.is_bot`),
   🤖-märkning i topplistan + travellern. Ägarsteg: migration `0010` (+ etapp
   3-secrets om de inte redan är lagda).
+- **2026-09-02: TREBOTTARNA I NIVÅER BYGGDA** (se "Påbyggnad 2" ovan):
+  `botniva.ts` (Gunnar52/Lasse68/Emma03 + nivårattar) + facit `botniva.test.ts`,
+  `spelaBotGiv` med nivå-opts på Syds säten, nattjobbet spelar alla tre,
+  🤖-märkningen borttagen (UI + API-svar), info-raden "I tävlingen deltar även
+  datorspelare" tillagd, nivåmätningen `botniva.probe.test.ts`. Inga nya
+  migrationer.

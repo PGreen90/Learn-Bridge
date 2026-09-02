@@ -230,8 +230,6 @@ export interface TopplistaRad {
   /** Sant för den inloggades egen rad (steg 6 — highlightas). Kan saknas i
    *  äldre/anonyma svar. */
   jag?: boolean
-  /** Bot-deltagaren (rebidz-bot) — märks med 🤖. Kan saknas i äldre svar. */
-  bot?: boolean
 }
 
 /** Kallarens egen placering + snitt (bara med när man är inloggad och har minst
@@ -361,13 +359,13 @@ export function slåIhopFramsteg(lokala: GivResultat[], server: DinInskick[]): G
 // Led 4 — travellern (hela fältets resultat på EN giv, steg 6)
 // ===========================================================================
 
-/** En spelares rad i travellern på en giv: kontrakt + N/S-poäng + MP%. */
+/** En spelares rad i travellern på en giv: kontrakt + N/S-poäng + MP%.
+ *  Ingen bot-flagga (trebottarna 2026-09-01): bottarna har människonamn och
+ *  pekas aldrig ut — servern skickar den inte ens. */
 export interface BrickaRad {
   namn: string
   /** Din egen rad (highlightas). */
   jag: boolean
-  /** Bot-deltagaren (rebidz-bot) — märks med 🤖. Kan saknas i äldre svar. */
-  bot?: boolean
   /** Kontraktet spelaren nådde, eller null (utpassad giv). */
   kontrakt: GivKontrakt | null
   nsScore: number
