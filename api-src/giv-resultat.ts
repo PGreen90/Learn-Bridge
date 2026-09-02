@@ -94,26 +94,27 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }))
     const resultat = byggBrickresultat(rader)
 
-    // Visningsnamn + bot-flagga för spelarna (boten märks med 🤖 i klienten).
+    // Visningsnamn för spelarna. MEDVETET ingen bot-flagga i svaret
+    // (trebottarna, ägarbeslut 2026-09-01): bottarna har människonamn och pekas
+    // aldrig ut — se kommentaren i topplista.ts.
     const ids = [...new Set(rows.map((r) => r.user_id))]
-    const profil = new Map<string, { namn: string; bot: boolean }>()
+    const profil = new Map<string, string>()
     if (ids.length) {
       const inList = ids.map((id) => `"${id}"`).join(',')
       const profiler = (await restGet(
         base,
         key,
-        `profiles?id=in.(${inList})&select=id,display_name,is_bot`,
-      )) as Array<{ id: string; display_name: string; is_bot: boolean | null }>
-      for (const p of profiler) profil.set(p.id, { namn: p.display_name, bot: p.is_bot === true })
+        `profiles?id=in.(${inList})&select=id,display_name`,
+      )) as Array<{ id: string; display_name: string }>
+      for (const p of profiler) profil.set(p.id, p.display_name)
     }
 
     return json(200, {
       ok: true,
       board,
       resultat: resultat.map((r) => ({
-        namn: profil.get(r.spelare)?.namn ?? '—',
+        namn: profil.get(r.spelare) ?? '—',
         jag: r.spelare === meId,
-        bot: profil.get(r.spelare)?.bot ?? false,
         kontrakt: r.kontrakt,
         nsScore: r.nsScore,
         procent: r.procent,

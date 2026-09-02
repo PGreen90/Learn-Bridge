@@ -10,32 +10,27 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — TRE TÄVLINGSBOTTAR I NIVÅER (ägarval 2026-09-01, "nästa session = trebot")
+### 🔵 NU — (tomt: trebottarna levererade 2026-09-02, ägaren väljer nästa ur NÄST)
 
-Nybörjare/medel/expert i dagliga tävlingen. **Alla förberedande beslut är
-tagna — bygg direkt:** all nivåskillnad i SYDS beslut (partner/motståndare
-förblir standardmotorn — valideringen kräver det); expert = dagens bot,
-svagare nivåer via spelhjärnans rattar (MC-budget, `maxCardsForMC`,
-`decodeSignals`); nivåerna MÄTS isär (netto-metoden, EN beteenderegel i
-taget — S6-lärdomen). **Namn (låsta):** Gunnar52=expert (rebidz-bot döps om),
-Lasse68=medel, Emma03=nybörjare — människonamn, ingen 🤖 i listan, nivåkoppling
-bara i dokumentationen; info-raden "I tävlingen deltar även datorspelare" in i
-tävlingsinfon. Detalj: `docs/beslut-b-plan.md` påbyggnaden + minnet.
+**Nyss klart (2026-09-02): TREBOTTARNA I NIVÅER BYGGDA** — Gunnar52 (expert =
+dagens bot, rebidz-bot döps om av nattjobbet), Lasse68 (medel), Emma03
+(nybörjare) spelar dagens tävling varje natt. All nivåskillnad i SYDS kortspel
+(`src/lib/engine/botniva.ts` + `spelaBotGiv`); N/Ö/V alltid standardmotorn →
+nattgranskningen godkänner alla nivåer. Rattarna MÄTTA med netto-metoden
+(`botniva.probe.test.ts`, kommandot i filhuvudet): MC-fönster 6 ≈ ingen
+skillnad (FÖRKASTAD), fönster 5/4/0 = 0/−2/−6 på 24 givar; bekräftat på 48
+givar: medel −8, nybörjare −18 → medel = fönster 4 + 8 sampel + ingen
+avkodning, nybörjare = ingen MC. 🤖 borttaget ur UI **och** API-svaren (hade läckt via nätverksfliken);
+info-raden "I tävlingen deltar även datorspelare" in. Inga nya migrationer.
+Detalj: `docs/beslut-b-plan.md` Påbyggnad 2. **Live-verifieras vid första
+nattkörningen** (namnbytet + Lasse68/Emma03-kontona skapas då).
 
 **Nyss klart (2026-09-01):** speldiagnosens runda 6 — "andra hand ser bordet"
 behållen (S6: försvar 175→174), trumfplans-kandidaten byggd-mätt-FÖRKASTAD,
-MC-på-få-lägen bevakas. Mätpunkt `docs/speldiagnos.md` §S6, lärdomar
-`docs/bot-hjarna.md` runda 6. Samma dag: bot-deltagaren rebidz-bot KLAR &
-LIVE-VERIFIERAD + ALLA Beslut B-etapper levererade (migrationerna 0009–0011 +
-secrets körda). Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR.
-
-**Nyss klart (2026-09-01): bot-deltagaren KLAR & LIVE-VERIFIERAD** — rebidz-bot
-spelar dagens 12 givar varje natt (Actions 23:45 UTC), 🤖-rad i topplistan/
-travellern, samma `validera()` som människor (ingen egen poängväg),
-nattgranskningen godkänner raderna. Detalj: påbyggnadsrubriken i
-`docs/beslut-b-plan.md`. Migrationerna `0009`–`0011` + secrets körda av ägaren
-→ **ALLA Beslut B-etapper (0–4) levererade.** Grindbeslut kvar: Nivå 2 i
-tävlingen VÄNTAR (trigger ej nådd).
+MC-på-få-lägen bevakas (`docs/speldiagnos.md` §S6, `docs/bot-hjarna.md` runda
+6). Samma dag: bot-deltagaren rebidz-bot KLAR & LIVE-VERIFIERAD + ALLA Beslut
+B-etapper (0–4) levererade (migrationerna 0009–0011 + secrets körda).
+Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen

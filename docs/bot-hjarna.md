@@ -245,9 +245,15 @@ motspelets stick.
   stickräkningen behöver rättas för en skvis (svårast; byggs bara om facit-givar
   visar behovet).
 
-**Beslutat SENARE (ägaren 2026-07-01):**
-- **Svårighetsnivåer** — samma hjärna med rattar (nybörjar-tumregler → expert
-  inferens+Monte Carlo). Byggs in när kärnan står.
+**Svårighetsnivåer (beslutade 2026-07-01, BYGGDA 2026-09-02):** samma hjärna
+med rattar — `nivaSmartOpts()` i `src/lib/engine/botniva.ts`. Expert = tomma
+opts (orörd standardhjärna); medel = MC-fönster 4 kort + 8 sampel + ingen
+signalavkodning (fönstret MÄTT fram — 6 gav ingen skillnad, förkastad);
+nybörjare = ingen Monte-Carlo (enbart tumreglerna, `botCard`).
+Används av trebottarna i dagliga tävlingen (Gunnar52/Lasse68/Emma03,
+`docs/beslut-b-plan.md` Påbyggnad 2); nivån gäller bara Syds säten — övriga
+spelas alltid av standardhjärnan. Mätning: netto-metoden i
+`botniva.probe.test.ts` (kommando i filhuvudet).
 
 ## Arbetsregler (som resten av felsökningsplanen)
 - FACIT FÖRE FIX (testrad: giv → rätt kort) + hela `npm test` efter varje fix.
