@@ -12,6 +12,14 @@ svarar på vad).
 
 ### 🔵 NU — (tomt: trebottarna levererade 2026-09-02, ägaren väljer nästa ur NÄST)
 
+**Nyss klart (2026-09-02, kväll): felrapporterna #54–#57 LAGADE & LIVE**
+(mergepunkt `4898958`): fritt bud i 5+ högfärg i stället för negativ X (+
+öppnarens 3-korts höjning och fortsättningen), advancerns preferens när
+inklivaren visat två färger, tolkningstexter för spärr/svag tvåa/2♣ och
+Stayman-svaren. Ägarbeslut samma kväll: **svep av partnerskapsplikter i
+konkurrens** ligger i ⚪ SENARE (`docs/senare.md` överst). Ägarens ord: säg
+"regeln saknades", inte "off-book" (motorterm för "linjen lämnad").
+
 **Nyss klart (2026-09-02): TREBOTTARNA KLARA & LIVE-VERIFIERADE** — Gunnar52 (expert =
 dagens bot, rebidz-bot döps om av nattjobbet), Lasse68 (medel), Emma03
 (nybörjare) spelar dagens tävling varje natt. All nivåskillnad i SYDS kortspel
@@ -98,7 +106,9 @@ FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + sm
 subagent-användning · Lebensohl nästa lager · fler budträningsgivar +
 tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den
-starka dubblaren säljer given i rond 2 · bot-hjärnans B2/Steg C · bredare försvarsinferens · `auctionFacts`-lagret ·
+starka dubblaren säljer given i rond 2 · **svep: partnerskapsplikter i konkurrens**
+(preferens/fritt bud/höjning på visad längd, ägarbeslut 2026-09-02 efter
+felrapport #55–#56) · bot-hjärnans B2/Steg C · bredare försvarsinferens · `auctionFacts`-lagret ·
 rondgenomgångens per-kort-motivering · 2♣-öppningens bredare översyn forts.
 (steg 1 substanskraven KLAR 2026-08-31; kvar: kravnivån + balanserad/
 distributionell + 6-5-samspelet).

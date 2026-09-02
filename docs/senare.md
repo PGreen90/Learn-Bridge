@@ -9,6 +9,37 @@
 
 ## ⚪ SENARE
 
+### Svep: grundläggande partnerskapsplikter i konkurrens (ägarbeslut 2026-09-02)
+Bakgrund: felrapporterna #55 och #56 visade att två av bridgens mest
+grundläggande regler saknades HELT i den störda budgivningen — svararens fria
+bud i en 5+ högfärg (motorn dubblade negativt med sju spader) och advancerns
+preferens när inklivaren visat två färger (Nord passade 4♦ med fem spader).
+Ägarens reaktion: "om det här saknas har vi större problem än jag trodde".
+Termen "off-book" är bara motorns ord för att den förberäknade linjen lämnats
+(`auction.ts` → detektorkedjan i `auction-live.ts`); den säger inget om
+systemet. Hålen var alltså riktiga hål, inte "ovanliga lägen".
+
+**Uppdraget:** gå igenom partnerskapsplikterna i störd budgivning SYSTEMATISKT
+och lås varje plikt med en egen detektor + facit, i stället för att vänta på
+nästa felrapport. Kandidater (mät med `auktionsdump.probe.test.ts` /
+systemrevisorns frön före bygge, en regel i taget):
+- **Preferens överallt:** öppnaren visade två färger i konkurrens → svararen
+  väljer (speglingen av #56 på öppnarsidan); dubblarens två färger.
+- **Fritt bud på 2-läget utan fit** (`docs/bevaka.md` 2026-09-02): öppnarens
+  fortsättning går genom den generella logiken (probe: 1♦–(1♠)–2♥–P–3♦–P–5♦
+  på 26 hp där 3NT/4♥ låg närmare) — bygg öppnarens rebud-stege efter ett
+  fritt bud utan fit (sang med stopp, egen 6+, ny färg, preferens).
+- **Höjning på visad längd:** varje bud som lovar 5+/6+ ska ge fit på 3/2 kort
+  i `fitLengthNeeded` — inventera vilka löften som saknas (hoppinkliv har det,
+  fritt högfärgsbud fick det 2026-09-02; kvar: t.ex. inklivarens rebjudna färg,
+  svag tvåa + höjning i konkurrens).
+- **Spärrhöjning på tio trumf:** advancern med 5-korts stöd + minimum över
+  motståndarnas höjning (1♥–1♠–3♥–?: Nord passade med ♠K9873, lagen säger 4♠).
+- **Krav som glöms:** svep `competitionForce`/`honorForce` mot en lista över
+  rondkrav i konkurrens (§5.5) — och vaktera att en HÖJNING aldrig läses som
+  krav (reverse-buggen 2026-09-02 var en sådan).
+Facit-mönster: `auction-fritt-bud-svar.test.ts`, `auction-advancer-preferens.test.ts`.
+
 ### 2♣-öppningen — bredare översyn (steg 1 KLAR 2026-08-31, resten kvar)
 **Ursprung:** Grant Baze "6-5, come alive"-artikeln (11 hp 6-5 tvingades till
 2♣-utgångskrav av den platta 8½-spelsticksregeln); ägaren breddade 2026-08-24
