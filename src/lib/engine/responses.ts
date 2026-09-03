@@ -221,6 +221,22 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
 
   // Härefter: ingen biudbar 4-korts högfärg.
 
+  // ---- 2-över-1 GF FÖRE inverterad höjning (ägarbeslut 2026-09-03, felrapport #58) ----
+  // "Att sätta game force är viktigare än att kommunicera träff i färg — har vi
+  // ett utgångskrav hinner vi visa färger senare." Med 12+ hp och 5+ i den ANDRA
+  // lågfärgen sätts utgångskravet direkt med 2/1 (stödet visas i nästa rond).
+  // Den inverterade höjningen (bara rondkrav) behåller 10–11-händerna och
+  // utgångshänder utan egen 5-kortsfärg. Samma princip som 2026-08-06 (2/1
+  // före 4-korts högfärg): kortaste vägen till game force. Ligger även före
+  // den direkta 3NT:n — en hand med egen 5-kortsfärg beskrivs, gissar inte.
+  if (len[otherMinor] >= 5 && p >= 12) {
+    return {
+      call: `2${oBID}`,
+      rule: '2-över-1 GF',
+      explanation: `12+ hp med 5+ ${SYM[otherMinor]} → 2${osym} (2-över-1, utgångskrav; stöd visas i nästa rond).`,
+    }
+  }
+
   // ---- Stark inverterad höjning: 4+ stöd, 10+ TP (längd/sidofärg lyfter) ----
   if (support >= 4 && mp >= 10) {
     // Balanserad utgångshand → 3NT direkt BARA om vi själva kan hålla alla
@@ -235,11 +251,6 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
   // ---- 3NT till spel: 13–15 balanserad, ingen högfärg ----
   if (bal && p >= 13 && p <= 15) {
     return { call: '3NT', rule: '3NT till spel', explanation: `Balanserad (13–15) utan högfärg → 3NT (till spel).` }
-  }
-
-  // ---- 2-över-1 GF: 5+ kort i den andra minorn, 12+ hp ----
-  if (len[otherMinor] >= 5 && p >= 12) {
-    return { call: `2${oBID}`, rule: '2-över-1 GF', explanation: `12+ hp med 5+ ${SYM[otherMinor]} → 2${osym} (2-över-1, utgångskrav).` }
   }
 
   // ---- 2NT inbjudan: 11–12 balanserad, stopp, ingen högfärg ----

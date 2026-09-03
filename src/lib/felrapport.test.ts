@@ -127,3 +127,23 @@ describe('felrapportUrl', () => {
     expect(params.get('body')).toBe(buildIssueBody(input))
   })
 })
+
+// Felrapport #58 skickades MITT I budgivningen (sju bud, Syd vid draget) och
+// rapporten skrev "given passades ut" / "kontrakt: utpassad" — vilseledande.
+// En ofullbordad auktion rapporteras som pågående.
+describe('rapport mitt i budgivningen', () => {
+  const ongoingCalls: ResolvedCall[] = [
+    { seat: 'W', bid: 'P' }, { seat: 'N', bid: '1D' }, { seat: 'E', bid: 'P' },
+    { seat: 'S', bid: '2C' }, { seat: 'W', bid: 'P' }, { seat: 'N', bid: '2NT' }, { seat: 'E', bid: 'P' },
+  ]
+  const ongoing: FelrapportInput = { ...input, calls: ongoingCalls, contract: null, tricks: [] }
+
+  it('märks som pågående, inte utpassad', () => {
+    const body = buildIssueBody(ongoing)
+    expect(body).toContain('kontrakt: pågår')
+    expect(body).toContain('mitt i budgivningen')
+    expect(body).not.toContain('passades ut')
+    expect(buildIssueTitle(ongoing)).toContain('budgivning pågår')
+    expect(buildIssueTitle(ongoing)).not.toContain('utpassad')
+  })
+})

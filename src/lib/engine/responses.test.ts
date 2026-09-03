@@ -244,3 +244,27 @@ describe('respondToMinor', () => {
     expect(respM('S:32 H:J43 D:K3 C:KQ9764', 'diamonds')).toBe('1NT') // 9 hp, 6 klöver
   })
 })
+
+// Felrapport #58, ägarbeslut 2026-09-03: "att sätta game force är viktigare
+// än att kommunicera träff i färg — har vi ett utgångskrav hinner vi visa
+// färger senare." Med 12+ hp och 5+ i den ANDRA lågfärgen går 2-över-1 FÖRE
+// den inverterade höjningen (som bara är rondkrav); stödet visas i nästa rond.
+// Samma princip som 2026-08-06 (2/1 före 4-korts högfärg): kortaste vägen till
+// game force.
+describe('2-över-1 före inverterad höjning med utgångskrav + egen 5-kortsfärg (2026-09-03)', () => {
+  it('bricka 4 (#58): ♠AKJ ♥— ♦AJ84 ♣AT8753 över 1♦ → 2♣ (2/1), inte 2♦', () => {
+    expect(respM('S:AKJ H:- D:AJ84 C:AT8753', 'diamonds')).toBe('2C')
+  })
+  it('♠K5 ♥73 ♦KQ96 ♣AQJ84 (14 hp, 4♦ + 5♣) över 1♦ → 2♣', () => {
+    expect(respM('S:K5 H:73 D:KQ96 C:AQJ84', 'diamonds')).toBe('2C')
+  })
+  it('… och spegelbilden över 1♣: 4♣ + 5♦ med 12+ → 2♦', () => {
+    expect(respM('S:K5 H:73 D:AQJ84 C:KQ96', 'clubs')).toBe('2D')
+  })
+  it('utan egen 5-kortsfärg (4-4 i lågfärgerna, balanserad 13) → 3NT som förr', () => {
+    expect(respM('S:K5 H:Q73 D:KQ96 C:AJ84', 'diamonds')).toBe('3NT')
+  })
+  it('med bara 10 hp är det inget 2/1 → inverterad 2♦ som förr', () => {
+    expect(respM('S:K5 H:73 D:KQ96 C:QJ984', 'diamonds')).toBe('2D')
+  })
+})

@@ -2377,3 +2377,17 @@ sig vara SPÅRAD av git → tävlingshemligheten ska alltid till `.env.local`
   K5 öppnaren höjer fritt 2♣/2♦ (5♣-blåsningen borta). Boken §5.8, §7.1,
   §7.4, §7.8 e, §9. Kvar i `docs/bevaka.md`: frö 20262632 (egen 8-korts färg
   vs 3-korts minorfit) och motståndarnas fortsättning efter våra höjningar.
+- **2026-09-03 — felrapport #58 (2-över-1-kravet syntes inte):** bricka 4,
+  1♦–P–2♣ (människan) –P– 2NT. Syds 2♣ avvek från motorns linje (inverterad
+  2♦), så Nords återbud byggdes som ett svarar-bud utan regel ("2 sang 11–12,
+  inget stöd") och förklaringarna sade "krav 1 rond" resp. "18–19, inbjuder".
+  Ny detektor `openerRebidAfterPartnersTwoOverOne` (§5.3-återbudet via
+  `openerRebidAfter2over1`, regel + kravnivå), tolkningslagret känner igen
+  2/1 och märker hela auktionen under utgång som utgångskrav, regeltabellen
+  fick `rebid: 2NT (GF)`/`rebid: ny färg (GF)`. Felrapporter som skickas mitt
+  i budgivningen skriver "budgivning pågår" (inte "passades ut"). Ägarbeslut
+  ur samma giv: 2/1 går FÖRE inverterad höjning med 12+ och egen 5-kortsfärg
+  ("game force först, stödet visas i nästa rond") — försenat stöd 3m med
+  slamintresse → öppnarens 3NT-förslag/4m → slamutredningen; bricka 4 →
+  6♦. Boken §4.2, §5.3, §9. Facit: `auction-2over1-aterbud-offbook.test.ts`,
+  `responses.test.ts`.

@@ -69,7 +69,9 @@ hand S: …
 hand W: …
 budgivning: 1NT P 3NT P P P   ← alla bud i ordning från dealern
 kontrakt: 3NT N               ← nivå+färgkod(C/D/H/S/NT) + spelförare,
-                                eller "utpassad"
+                                eller "utpassad", eller "pågår" (rapporten
+                                skickades mitt i budgivningen — buden hittills
+                                står i budgivning:-raden; nästa plats i tur är vid draget)
 stick 1: E HQ HK H6 H2 (S)    ← utspelare, korten i spelad ordning
                                 (färgbokstav+valör), vinnaren i parentes;
                                 en rad per spelat stick

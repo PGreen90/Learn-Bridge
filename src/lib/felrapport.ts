@@ -6,6 +6,7 @@
 
 import type { Card, Deal, Hand, Rank, Seat, Suit, Vulnerability } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from './bidding'
+import { auctionComplete } from './engine/auction-live'
 import { side, type Contract, type Trick } from './engine/play'
 
 /** Kategorierna ägaren kan välja i rapportdialogen från Spela kort (hela given). */
@@ -115,10 +116,21 @@ function resultPretty(contract: Contract, tricks: Trick[]): string {
   return diff >= 0 ? `hemma, ${won} stick${diff > 0 ? ` (+${diff})` : ''}` : `${-diff} bet (${won} stick)`
 }
 
+/**
+ * Utan kontrakt är given antingen UTPASSAD (färdig auktion utan bud) eller
+ * rapporterad MITT I budgivningen (felrapport #58 skickades efter sju bud och
+ * skrevs "passades ut" — vilseledande). Skiljs på om auktionen är komplett.
+ */
+function auctionOngoing(input: FelrapportInput): boolean {
+  return !input.contract && !auctionComplete(input.calls)
+}
+
 export function buildIssueTitle(input: FelrapportInput): string {
   const what = input.contract
     ? `${input.contract.level}${STRAIN_CODE[input.contract.strain]} av ${input.contract.declarer}`
-    : 'utpassad'
+    : auctionOngoing(input)
+      ? 'budgivning pågår'
+      : 'utpassad'
   return `Felrapport: ${input.category} (bricka ${input.deal.board}, ${what})`
 }
 
@@ -133,6 +145,8 @@ export function buildIssueBody(input: FelrapportInput): string {
   lines.push(`**Bricka ${deal.board}** · Giv: ${SEAT_LABEL[deal.dealer]} · ${VUL_TEXT[deal.vulnerability]}`)
   if (contract) {
     lines.push(`**Kontrakt:** ${contractPretty(contract)} · **Resultat:** ${resultPretty(contract, tricks)}`)
+  } else if (auctionOngoing(input)) {
+    lines.push('**Kontrakt:** inget ännu — rapporten skickades mitt i budgivningen.')
   } else {
     lines.push('**Kontrakt:** given passades ut.')
   }
@@ -155,7 +169,9 @@ export function buildIssueBody(input: FelrapportInput): string {
   lines.push(
     contract
       ? `kontrakt: ${contract.level}${STRAIN_CODE[contract.strain]} ${contract.declarer}`
-      : 'kontrakt: utpassad',
+      : auctionOngoing(input)
+        ? 'kontrakt: pågår'
+        : 'kontrakt: utpassad',
   )
   tricks.forEach((t, i) => {
     lines.push(`stick ${i + 1}: ${t.leader} ${t.cards.map((pc) => cardCode(pc.card)).join(' ')} (${t.winner})`)

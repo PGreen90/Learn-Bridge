@@ -22,7 +22,7 @@ import { advanceDONT } from './dont'
 import { answerNTInterference, answerPreemptInterference } from './contested-openings'
 import { lebensohlAfter1NT, lebensohlAfter1NTRebid } from './lebensohl'
 import { defendPreempt } from './defense-conventional'
-import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfterJordan2NT, openerThirdBidAfterOwnRaise } from './rebids'
+import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfter2over1, openerRebidAfterJordan2NT, openerThirdBidAfterOwnRaise } from './rebids'
 import { respondTo1NT } from './responses-nt'
 import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
 import { jordanRaiseAfterSignoff, responderPlaceAfterNMF } from './responder-rebids'
@@ -3486,6 +3486,43 @@ function answerWeakTwoCue(deal: Deal, history: ResolvedCall[], seat: Seat): Reso
 }
 
 /**
+ * Öppnarens ÅTERBUD efter partnerns 2-ÖVER-1 när linjen inte styr (felrapport
+ * #58, bricka 4: 1♦–P–2♣–P–?). Motorns linje hade valt ett annat svar för Syds
+ * hand (inverterad 2♦), så människans 2♣ blev off-book och Nords återbud
+ * byggdes av det generella off-book-svaret som ett SVARAR-bud ("2 sang,
+ * 11–12 hp, inget stöd") — utan regel, utan utgångskrav. Ett äkta 2/1
+ * (ostört, opassad svarare, ny LÄGRE färg på 2-läget) är utgångskrav i hela
+ * systemet (§4.2), och öppnarens återbud följer §5.3: stöd = fit, ny färg =
+ * form, 2NT = balanserad utan extra form (12–15). Samma on-book-funktion
+ * (`openerRebidAfter2over1`) används här, så budet får regel + kravnivå.
+ */
+function openerRebidAfterPartnersTwoOverOne(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall | null {
+  if (history.some((c) => side(c.seat) !== side(seat) && parseContractBid(c.bid))) return null // ostört
+  const open = openingBid(history)
+  if (!open || open.seat !== seat || open.level !== 1 || open.strain === 'NT') return null
+  const responder = PARTNER[seat]
+  const ourBids = history.filter((c) => side(c.seat) === side(seat) && parseContractBid(c.bid))
+  if (ourBids.length !== 2 || ourBids[1].seat !== responder) return null
+  const respC = ourBids[1]
+  const rb = parseContractBid(respC.bid)!
+  if (rb.strain === 'NT' || rb.level !== 2 || rb.strain === open.strain) return null
+  const openRank = SUIT_STRAINS.indexOf(open.strain as (typeof SUIT_STRAINS)[number])
+  const respRank = SUIT_STRAINS.indexOf(rb.strain as (typeof SUIT_STRAINS)[number])
+  if (openRank < 0 || respRank < 0 || respRank >= openRank) return null // högre rang = inget 2/1
+  const respIdx = history.indexOf(respC)
+  if (history.slice(0, respIdx).some((c) => c.seat === responder && c.bid === 'P')) return null // passad hand: ej GF
+  if (history.slice(respIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter svaret
+  const res = openerRebidAfter2over1(
+    deal.hands[seat],
+    SUIT_OF_LETTER[open.strain as keyof typeof SUIT_OF_LETTER],
+    SUIT_OF_LETTER[rb.strain as keyof typeof SUIT_OF_LETTER],
+  )
+  const bid = res.call as Bid
+  if (!legalCalls(history, seat).includes(bid)) return null
+  return { seat, bid, rule: res.rule, explanation: `Partnerns 2-över-1 är utgångskrav; ${res.explanation}` }
+}
+
+/**
  * Har VÅR 2-över-1-svarare (utgångskrav) fått sin färg HÖJD av öppnaren, så att
  * svararen nu måste placera minst utgång i stället för att passa (felrapport #27)?
  * Ett 2-över-1-svar (ny lägre färg på 2-läget, ostört) är utgångskrav i hela
@@ -4761,6 +4798,11 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // vägrar höja en redan bjuden färg och passar).
   { id: 'answerTwoOverOneRaise', before: ['offBookResponse'],
     run: (c) => answerTwoOverOneRaise(c.deal, c.history, c.seat) },
+  // Öppnarens återbud efter partnerns OFF-BOOK 2-över-1 (felrapport #58):
+  // §5.3-återbudet med regel + utgångskrav, i stället för off-book-svarets
+  // svarar-sang ("11–12 hp, inbjudan"). Måste ligga FÖRE off-book-svaret.
+  { id: 'openerRebidAfterPartnersTwoOverOne', before: ['offBookResponse'],
+    run: (c) => openerRebidAfterPartnersTwoOverOne(c.deal, c.history, c.seat) },
   // Inklivaren stöttar advancerns NYA färg (felrapport #15): enkel stödhöjning
   // i stället för att passa. Måste ligga FÖRE off-book-svaret (som annars
   // kräver 4-korts stöd för en minor och passar en klar 3-korts fit).

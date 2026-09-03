@@ -359,7 +359,58 @@ export function interpretLastCall(history: ResolvedCall[]): CallInterpretation |
   return interpretCall(history, history.length - 1)
 }
 
+/**
+ * Är VÅR sida i 2-över-1-utgångskrav (§4.2), läst enbart ur auktionen?
+ * Ostört (inget kontraktsbud från motståndarna), partnerskapets öppning 1 i
+ * färg, svararens FÖRSTA bud en ny LÄGRE färg på 2-läget, svararen opassad
+ * före sitt svar — och utgång ännu inte nådd. Felrapport #58: kravet syntes
+ * inte i förklaringarna (2♣ lästes som "krav 1 rond", 2NT som "inbjudan").
+ */
+function twoOverOneGameForce(seat: Seat, prior: ResolvedCall[]): boolean {
+  const contracts: Array<{ c: ResolvedCall; cb: ParsedBid; i: number }> = []
+  prior.forEach((c, i) => {
+    const cb = parseBid(c.bid)
+    if (cb) contracts.push({ c, cb, i })
+  })
+  if (contracts.length < 2) return false
+  if (contracts.some((x) => SIDE[x.c.seat] !== SIDE[seat])) return false // ostört
+  const open = contracts[0]
+  if (open.cb.level !== 1 || open.cb.strain === 'NT') return false
+  const responder = PARTNER[open.c.seat]
+  const resp = contracts.find((x) => x.c.seat === responder)
+  if (!resp || resp.cb.level !== 2 || resp.cb.strain === 'NT' || resp.cb.strain === open.cb.strain) return false
+  if (rankAbove(resp.cb.strain, open.cb.strain)) return false // högre rang = hoppskift/annat, inget 2/1
+  if (prior.slice(0, resp.i).some((c) => c.seat === responder && c.bid === 'P')) return false // passad hand
+  return !isGameLevel(contracts[contracts.length - 1].cb)
+}
+
+/** Är budet som bjuds NU självt ett 2-över-1-svar (samma villkor som `twoOverOneGameForce`)? */
+function isTwoOverOneResponse(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): boolean {
+  if (cb.level !== 2 || cb.strain === 'NT') return false
+  const withBid = [...prior, { seat, bid: `2${cb.strain}` } as ResolvedCall]
+  return twoOverOneGameForce(seat, withBid)
+}
+
 function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInterpretation {
+  const raw = interpretContractBidRaw(seat, cb, prior)
+  // 2-över-1-utgångskravet (§4.2) färgar VARJE bud under utgång i en ostörd
+  // 2/1-auktion: ingen får passa. Kravmärket lyfts till utgångskrav och texten
+  // får en rad om den inte redan säger det (felrapport #58).
+  if (
+    !isGameLevel(cb) &&
+    raw.forcing !== 'utgangskrav' &&
+    raw.forcing !== 'slamintresse' &&
+    twoOverOneGameForce(seat, prior)
+  ) {
+    const note = /utgångskrav/i.test(raw.text)
+      ? ''
+      : ' Utgångskravet från 2-över-1 gäller — ingen av er får passa under utgång.'
+    return { ...raw, text: raw.text + note, forcing: 'utgangskrav' }
+  }
+  return raw
+}
+
+function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInterpretation {
   const sym = SYMBOL[cb.strain]
   const name = NAME[cb.strain]
   const competitive = opponentsHaveBid(seat, prior)
@@ -676,6 +727,16 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
     // (~12–14 hp; 15–17 hade öppnat 1NT), 2NT = stark balanserad (~18–19 hp).
     // Felrapport #24: 1NT-återbudet kallades felaktigt "svag balanserad hand".
     const open = opening(prior)
+    // Öppnarens 2NT-återbud efter partnerns 2-ÖVER-1 (§5.3, felrapport #58):
+    // ingen hoppstyrka utan "balanserad utan extra form" — och hela auktionen
+    // är utgångskrav, så partnern får aldrig passa.
+    if (cb.level === 2 && open && open.seat === seat && open.cb.strain !== 'NT' && twoOverOneGameForce(seat, prior)) {
+      return {
+        text: `Återbud 2 sang efter partnerns 2-över-1 — balanserad hand utan extra form (~12–15 hp). Utgångskravet gäller: partnern får inte passa.`,
+        confidence: 'trolig',
+        forcing: 'utgangskrav',
+      }
+    }
     if (open && open.seat === seat && open.cb.strain !== 'NT') {
       if (cb.level === 1) {
         return {
@@ -693,6 +754,16 @@ function interpretContractBid(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]):
     // Övriga sangbud (svararens/advancerns): begränsat svar, inte en spärr.
     const range = cb.level === 1 ? '6–11 hp, balanserad, saknar stöd och bättre bud' : 'inbjudande balanserad hand (~11–12 hp)'
     return { text: `${cb.level} sang — ${range}${stopp}.`, confidence: 'trolig', forcing: cb.level === 2 ? 'inbjudan' : undefined }
+  }
+
+  // 2-ÖVER-1 (§4.2, felrapport #58): svararens FÖRSTA bud, en ny LÄGRE färg
+  // på 2-läget över partnerns 1-färgsöppning, ostört och opassad = utgångskrav.
+  if (isTwoOverOneResponse(seat, cb, prior)) {
+    return {
+      text: `${cb.level}${sym} — 2-över-1: naturligt, 4+ (oftast 5+) ${name} och 12+ hp. Utgångskrav — ingen av er får passa under utgång.`,
+      confidence: 'trolig',
+      forcing: 'utgangskrav',
+    }
   }
 
   // Ny färg med hopp = svagt hoppskift: lång egen färg, begränsad styrka.

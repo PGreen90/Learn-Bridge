@@ -544,3 +544,54 @@ describe('felrapport #57 – svaren på Stayman är konvention, inte färger', (
     expect(r.text).toMatch(/ingen 4-korts högfärg/i)
   })
 })
+
+// Felrapport #58 (2026-09-03): människans 2♣ över partnerns 1♦ lästes som
+// "ny färg, krav 1 rond" och öppnarens 2NT-återbud som "18–19, inbjuder utgång"
+// — men ett 2-över-1 är UTGÅNGSKRAV (§4.2), och 2NT efter 2/1 är 12–15
+// balanserad i krav (§5.3). Tolkningen läser bara auktionen, aldrig korten.
+describe('2-över-1 = utgångskrav i tolkningslagret (felrapport #58)', () => {
+  it('2♣ över partnerns 1♦ (ostört, opassad) = 2-över-1, utgångskrav', () => {
+    const r = interpretCall(h(['W', 'P'], ['N', '1D'], ['E', 'P'], ['S', '2C']), 3)
+    expect(r.text).toMatch(/2-över-1/i)
+    expect(r.text).toMatch(/12\+/)
+    expect(r.forcing).toBe('utgangskrav')
+  })
+
+  it('2♦ över 1♥ och 2♥ över 1♠ är också 2/1; 2♠ över 1♥ (högre rang) är det inte', () => {
+    expect(interpretCall(h(['N', '1H'], ['E', 'P'], ['S', '2D']), 2).forcing).toBe('utgangskrav')
+    expect(interpretCall(h(['N', '1S'], ['E', 'P'], ['S', '2H']), 2).forcing).toBe('utgangskrav')
+    expect(interpretCall(h(['N', '1H'], ['E', 'P'], ['S', '2S']), 2).forcing).not.toBe('utgangskrav')
+  })
+
+  it('en passad hands 2♣ är inget 2-över-1', () => {
+    const r = interpretCall(h(['S', 'P'], ['W', 'P'], ['N', '1D'], ['E', 'P'], ['S', '2C']), 4)
+    expect(r.text).not.toMatch(/2-över-1/i)
+    expect(r.forcing).not.toBe('utgangskrav')
+  })
+
+  it('öppnarens 2NT efter 2/1 = balanserad 12–15 i utgångskrav (inte 18–19 inbjudan)', () => {
+    const r = interpretCall(h(['W', 'P'], ['N', '1D'], ['E', 'P'], ['S', '2C'], ['W', 'P'], ['N', '2NT']), 5)
+    expect(r.text).toMatch(/12–15/)
+    expect(r.text).not.toMatch(/18–19|inbjuder/)
+    expect(r.forcing).toBe('utgangskrav')
+  })
+
+  it('öppnarens 2NT efter ett 1-lägessvar är fortfarande 18–19, inbjudan', () => {
+    const r = interpretCall(h(['N', '1D'], ['E', 'P'], ['S', '1H'], ['W', 'P'], ['N', '2NT']), 4)
+    expect(r.text).toMatch(/18–19/)
+    expect(r.forcing).toBe('inbjudan')
+  })
+
+  it('öppnarens höjning av 2/1-färgen under utgång bär utgångskravet vidare', () => {
+    const r = interpretCall(h(['N', '1D'], ['E', 'P'], ['S', '2C'], ['W', 'P'], ['N', '3C']), 4)
+    expect(r.forcing).toBe('utgangskrav')
+  })
+
+  it('svararens 3♦-höjning efter 1♦–2♣–2NT är utgångskrav, inte inbjudan', () => {
+    const r = interpretCall(
+      h(['N', '1D'], ['E', 'P'], ['S', '2C'], ['W', 'P'], ['N', '2NT'], ['E', 'P'], ['S', '3D']),
+      6,
+    )
+    expect(r.forcing).toBe('utgangskrav')
+  })
+})

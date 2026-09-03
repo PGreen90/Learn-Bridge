@@ -20,7 +20,7 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderPlaceAfter2NTCheckback, responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -900,6 +900,37 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   const second = responderSecondBid(opening.call, response, rebid, deal.hands[responderSeat])
   if (second) {
     turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
+
+    // 2/1 med FÖRSENAT stöd i öppnarens lågfärg (ägarbeslut 2026-09-03,
+    // felrapport #58): 1m–2m'–2NT–3m satte trumf med slamintresse. Öppnaren
+    // beskriver (3NT-förslag / 4m), sedan räknar kaptenen mot 2NT:s visade 12
+    // (ärliga slamportar): cue-ronden över 3NT, driv 33+, inbjudan 31–32 —
+    // annars placeras utgången (pass på 3NT / 5m).
+    if (second.rule === '2/1: försenat stöd' && openerSuit && (openerSuit === 'clubs' || openerSuit === 'diamonds')) {
+      const oh = deal.hands[openerSeat]
+      const rh = deal.hands[responderSeat]
+      const third = openerAfterDelayedMinorSupport(oh, openerSuit)
+      turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
+      const slam = slamInvestigation(oh, rh, openerSuit, third.call, {
+        partnerMin: 12,
+        inviteCall: third.call === '3NT' ? `4${LETTER[openerSuit]}` : `5${LETTER[openerSuit]}`,
+        gameForcing: true,
+        cueFloor: '3NT',
+      })
+      if (slam) {
+        for (const t of slam) {
+          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
+          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+        }
+        return finish(false)
+      }
+      const place =
+        third.call === '3NT'
+          ? { call: 'P', rule: 'svararens pass', explanation: `Under slamzonen mot visade 12 → 3NT står (pass).` }
+          : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `Under slamzonen → 5${SUIT_SYM[openerSuit]} (utgång i den satta trumfen).` }
+      turns.push({ seat: responderSeat, role: 'svarare', call: place.call, rule: place.rule, explanation: place.explanation })
+      return finish(false)
+    }
 
     // NMF-SLAM (hål C, cue-bud 2026-08-03): efter 1m–1M–1NT–2m(NMF) svarar
     // öppnaren, och visar hen fördröjt 3-korts stöd i svararens högfärg är en
