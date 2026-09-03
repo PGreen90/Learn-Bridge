@@ -3921,7 +3921,6 @@ function openerRaisesFreeBid(deal: Deal, history: ResolvedCall[], seat: Seat): R
   const freeCall = ctx.contracts[2]
   if (history.slice(history.indexOf(freeCall) + 1).some((c) => c.bid !== 'P')) return null
   const strain = ctx.free.strain
-  if (strain !== 'H' && strain !== 'S') return null
   const suit = SUIT_OF_LETTER[strain]
   const hand = deal.hands[seat]
   if (lengths(hand)[suit] < 3) return null
@@ -3930,6 +3929,29 @@ function openerRaisesFreeBid(deal: Deal, history: ResolvedCall[], seat: Seat): R
   const simple = cheapestBidIn(history, seat, strain)
   if (!simple) return null
   const simpleLevel = parseContractBid(simple)!.level
+  // Pliktsvepet K5 (2026-09-02): ett fritt LÅGFÄRGSBUD på 2-läget (5+, 10+).
+  // Förr föll öppnaren till off-book-höjningen, som blåste 5♣ på 13 hp och
+  // 4-korts stöd (frö 20261396: 1♥–(1♠)–2♣–P–5♣). Nu: 12–13 → 3m (enkel
+  // höjning, partnern går vidare med extra); 14+ → 3NT med stopp i deras
+  // färg, annars 4m (hopphöjning = inbjudan till 5m, visar extra).
+  if (strain === 'C' || strain === 'D') {
+    if (ctx.free.level < 2) return null
+    const theirStrain = parseContractBid(ctx.contracts[1].bid)!.strain
+    if (tp >= 14 && hasStopper(hand, SUIT_OF_LETTER[theirStrain]) && legal.includes('3NT' as Bid)) return {
+      seat, bid: '3NT', rule: 'höjning av fritt bud (utgång)',
+      explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]} (10+ hp); stöd, utgångsvärden och stopp i deras ${SWE_SYM[theirStrain]} → 3NT (rätt utgång före 5${SWE_SYM[strain]}).`,
+    }
+    const jump = `${simpleLevel + 1}${strain}` as Bid
+    if (tp >= 14 && simpleLevel + 1 <= 4 && legal.includes(jump)) return {
+      seat, bid: jump, rule: 'höjning av fritt bud (inbjudan)',
+      explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]}; stöd och extra utan stopp i deras ${SWE_SYM[theirStrain]} → hopphöjning ${prettyBid(jump)} (inbjudan till 5${SWE_SYM[strain]}).`,
+    }
+    if (!legal.includes(simple)) return null
+    return {
+      seat, bid: simple, rule: 'höjning av fritt bud',
+      explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]} (10+ hp); 3+ stöd → ${prettyBid(simple)} (enkel höjning, minimum 12–13).`,
+    }
+  }
   const game = `4${strain}` as Bid
   // Ett fritt bud på 2-LÄGET lovade 10+ (§5.5): 14+ hos öppnaren = 24+ ihop
   // med fit → utgång direkt; 12–13 → enkel höjning (3M, partnern går vidare).
@@ -4385,9 +4407,32 @@ function negativeDoublerContinues(deal: Deal, history: ResolvedCall[], seat: Sea
   // 1M resp. 5-korts ruterstöd). raiseWithFit är ren → säkert att provfråga.
   if (raiseWithFit(deal, history, seat, answer)) return null
   if (p > 12) return null // utgångsvärden → befintlig kravlogik tar hand om det
+  const legal = legalCalls(history, seat)
+
+  // Pliktsvepet K2 (2026-09-02): SVAG PREFERENS till öppningsfärgen. Partnerns
+  // tvingade svar på min dubbling landade i en färg jag stöder sämre än
+  // öppningsfärgen (frö 20262871: 1♦–(1♠)–X–P–2♣ med ♦K752 ♣73 → 2♦, förr pass).
+  // Samma kriterier som advancerns preferens (§7.1, felrapport #56): kostar
+  // preferensen ingen nivå räcker lika lång eller längre öppningsfärg (minst 3
+  // kort); kostar den en nivå krävs klar skillnad (2+ kort). Aldrig förbi utgång.
+  if (p < 10 && answer.strain !== open.strain) {
+    const pref = cheapestBidIn(history, seat, open.strain)
+    if (pref) {
+      const lvl = Number(pref[0])
+      const gameLvl = open.strain === 'H' || open.strain === 'S' ? 4 : 5
+      const costs = lvl > answer.level
+      const lo = len[SUIT_OF_LETTER[open.strain]]
+      const la = len[SUIT_OF_LETTER[answer.strain]]
+      const better = lo >= 3 && (costs ? lo >= la + 2 : lo >= la)
+      if (better && lvl <= gameLvl && legal.includes(pref)) return {
+        seat, bid: pref, rule: 'negativ-dubblarens preferens',
+        explanation: `Partnerns ${prettyBid(lastNonPass.bid)} var ett tvingat svar på min dubbling; bättre stöd i öppningsfärgen ${SWE_SYM[open.strain]} (${lo}–${la}) → ${prettyBid(pref)} (preferens, ej krav).`,
+      }
+    }
+  }
+
   const hasSix = SUIT_STRAINS.some((st) => st !== theirCb.strain && len[SUIT_OF_LETTER[st]] >= 6)
   if (p < 10 && !(p >= 9 && hasSix)) return null // under invitzonen → pass som förr
-  const legal = legalCalls(history, seat)
 
   // 1. Invit-preferens: 3+ stöd i partnerns ÖPPNINGSFÄRG när svaret var en annan.
   if (answer.strain !== open.strain && len[SUIT_OF_LETTER[open.strain]] >= 3) {

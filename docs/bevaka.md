@@ -9,6 +9,16 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Negativ-dubblarens preferens + öppnarens höjning av fritt lågfärgsbud (2026-09-02, pliktsvepet K2/K5)
+- K2: efter 1x–(1y)–X–P–2z ger dubblaren nu preferens till öppningsfärgen även
+  med 6–9 hp (gratis: lika lång eller längre, minst 3 kort; kostar en nivå: 2+
+  korts skillnad). **Bevaka:** preferensen på 3-läget med 7 hp (4-2) — känns
+  den för hög? K5: öppnaren höjer partnerns fria 2♣/2♦ enkelt (12–13), 3NT/4m
+  med 14+. **Bevaka (kvar, ej byggt):** svararens fortsättning efter öppnarens
+  rebjudna färg — frö 20262632 `1♦–(1♠)–2♥–P–3♦–P–5♦` med ♥AKJ87542: den
+  egna 8-korts färgen ska vinna över en 3-korts minorfit (4♥, inte 5♦).
+  Repro: `$env:DUMP='20262632'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`.
+
 ## Höjning på visad längd (2026-09-02, pliktsvepet K3)
 - Advancern höjer nu partnerns 1-lägesinkliv på **3-korts stöd från 6 hp**
   (bara till 2-läget); svararen svarar över **1NT-inkliv** (2M / X = straff 10+)
