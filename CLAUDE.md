@@ -15,43 +15,19 @@ Mätriggen `src/lib/engine/pliktsvep.probe.test.ts` (`$env:PLIKT='1'; npx vitest
 run src/lib/engine/pliktsvep.probe.test.ts`) låter motorn bjuda 3000 givar och
 flaggar varje pass som bryter en plikt (K1 passat krav · K2 preferens · K3
 höjning på visad längd · K4 tio trumf · K5/K6 inventeringar). En regel i taget,
-facit före fix. **Klart:** K1 — inklivaren svarar advancerns cue-höjning ostört
-(`overcallerAnswersCueRaise`, facit `auction-inklivaren-svarar-cue.test.ts`);
-K3 — höjning på visad längd (advancern 3-korts stöd mot 1-lägesinkliv från 6 hp;
-svararen över 1NT-inkliv/ovanlig 2NT/Michaels; facit
-`auction-hojning-visad-langd.test.ts`; 92 → 5 träffar); K2 negativ-dubblarens
-svaga preferens (8 → 2); K5 öppnaren höjer fritt lågfärgsbud (5m-blåsningen
-borta). **Kvar:** svararens egen 7+ färg vs 3-korts minorfit (frö 20262632) ·
-motståndarnas fortsättning efter våra nya höjningar — båda i `docs/bevaka.md`.
+facit före fix. **K1, K3, K2, K5 KLARA & LIVE** (2026-09-02/03, mergepunkter
+`842809b` + `e7a3931`; 12→0, 92→5, 8→2, 5♣-blåsningen borta — detalj i
+`docs/historik.md` + bokens §9). **Nästa gång börjar vi med:** frö 20262632 —
+svararens egen 8-korts färg ska vinna över en 3-korts minorfit
+(`1♦–(1♠)–2♥–P–3♦–P–5♦` → 4♥, liten fix i `raiseWithFit`); därefter
+motståndarnas fortsättning efter våra nya höjningar (ny K-check i proben först).
+Båda beskrivna i `docs/bevaka.md`. När de är klara är svepet i hamn → NÄST.
 
-**Nyss klart (2026-09-02, kväll): felrapporterna #54–#57 LAGADE & LIVE**
-(mergepunkt `4898958`): fritt bud i 5+ högfärg i stället för negativ X (+
-öppnarens 3-korts höjning och fortsättningen), advancerns preferens när
-inklivaren visat två färger, tolkningstexter för spärr/svag tvåa/2♣ och
-Stayman-svaren. Ägarbeslut samma kväll: **svep av partnerskapsplikter i
-konkurrens** ligger i ⚪ SENARE (`docs/senare.md` överst). Ägarens ord: säg
-"regeln saknades", inte "off-book" (motorterm för "linjen lämnad").
-
-**Nyss klart (2026-09-02): TREBOTTARNA KLARA & LIVE-VERIFIERADE** — Gunnar52 (expert =
-dagens bot, rebidz-bot döps om av nattjobbet), Lasse68 (medel), Emma03
-(nybörjare) spelar dagens tävling varje natt. All nivåskillnad i SYDS kortspel
-(`src/lib/engine/botniva.ts` + `spelaBotGiv`); N/Ö/V alltid standardmotorn →
-nattgranskningen godkänner alla nivåer. Rattarna MÄTTA med netto-metoden
-(`botniva.probe.test.ts`, kommandot i filhuvudet): MC-fönster 6 ≈ ingen
-skillnad (FÖRKASTAD), fönster 5/4/0 = 0/−2/−6 på 24 givar; bekräftat på 48
-givar: medel −8, nybörjare −18 → medel = fönster 4 + 8 sampel + ingen
-avkodning, nybörjare = ingen MC. 🤖 borttaget ur UI **och** API-svaren (hade läckt via nätverksfliken);
-info-raden "I tävlingen deltar även datorspelare" in. Inga nya migrationer.
-Detalj: `docs/beslut-b-plan.md` Påbyggnad 2. **LIVE-VERIFIERAD 2026-09-02**
-(manuell körning): namnbytet slog igenom, Lasse68/Emma03 spelade 12/12
-godkända, ställningen visar expert > medel > nybörjare utan bot-märkning.
-
-**Nyss klart (2026-09-01):** speldiagnosens runda 6 — "andra hand ser bordet"
-behållen (S6: försvar 175→174), trumfplans-kandidaten byggd-mätt-FÖRKASTAD,
-MC-på-få-lägen bevakas (`docs/speldiagnos.md` §S6, `docs/bot-hjarna.md` runda
-6). Samma dag: bot-deltagaren rebidz-bot KLAR & LIVE-VERIFIERAD + ALLA Beslut
-B-etapper (0–4) levererade (migrationerna 0009–0011 + secrets körda).
-Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+**Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
+runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
+Emma03 LIVE** (nivå bara i Syds kortspel, `botniva.ts`) · felrapporterna
+#54–#57 (`4898958`) · pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen
+VÄNTAR (trigger ej nådd). Ägarens ord: säg "regeln saknades", inte "off-book".
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen

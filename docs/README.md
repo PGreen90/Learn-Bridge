@@ -47,7 +47,7 @@
 
 | Fil | | InnehÃ¥ll |
 |---|---|---|
-| **historik.md** (162 kB) | ðŸ“¦ | **Allt fÃ¤rdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, Ã„RLIGA SLAMPORTAR-bygget, felrapporter #1â€“#39, UI-overhaulen, Steg A. SlÃ¥ upp hÃ¤r nÃ¤r du undrar *varfÃ¶r* nÃ¥got byggdes som det gjordes. |
+| **historik.md** (165 kB) | ðŸ“¦ | **Allt fÃ¤rdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, Ã„RLIGA SLAMPORTAR-bygget, felrapporter #1â€“#39, UI-overhaulen, Steg A. SlÃ¥ upp hÃ¤r nÃ¤r du undrar *varfÃ¶r* nÃ¥got byggdes som det gjordes. |
 | **arbetslista.md** | ðŸ“¦ | Byggordningen FAS 0â€“12 (genomfÃ¶rd). Punkt 28 = bakgrunden till vÃ¥r egen DDS-lÃ¶sare. Kvar som arkiv; NU/NÃ„ST styrs av CLAUDE.md. |
 | **tp-arbetslista.md** | ðŸ“¦ | TP-stegen Aâ€“F. **Alla klara 2026-07-03** â€” filen innehÃ¥ller gamla "â¬œ Kvar att bygga"-rubriker som Ã¤r Ã¶verspelade av notisen hÃ¶gst upp. |
 | **audit/** (5 filer + SLUTRAPPORT) | ðŸ“¦ | Revisionen R1â€“R5 (2026-07-04): budsystem, arkitektur, UI/UX, dokumentation, git/deploy. Alla fynd Ã¤r antingen Ã¥tgÃ¤rdade eller upplyfta till SENARE. |

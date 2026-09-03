@@ -2346,3 +2346,34 @@ helgivslooparna ersattes av `spela-giv.ts` (per-beslut-frön via
 `botDecisionSeed` → körningar 100 % reproducerbara ur fröet). `.env` visade
 sig vara SPÅRAD av git → tävlingshemligheten ska alltid till `.env.local`
 (gitignorad via `*.local`).
+
+## 2026-09-01…03 — Trebottarna, felrapporterna #54–#57 och pliktsvepet K1–K5 (flyttat från CLAUDE.md NU)
+
+- **2026-09-01:** speldiagnosens runda 6 ("andra hand ser bordet" behållen,
+  trumfplans-kandidaten byggd-mätt-förkastad, MC-på-få-lägen bevakas —
+  `docs/speldiagnos.md` §S6). Bot-deltagaren rebidz-bot KLAR & LIVE + ALLA
+  Beslut B-etapper (0–4) levererade (migrationerna 0009–0011 + secrets).
+  Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+- **2026-09-02 — trebottarna i nivåer (mergepunkt `fe2ffb3`):** Gunnar52
+  (expert), Lasse68 (medel), Emma03 (nybörjare) spelar dagens tävling varje
+  natt; all nivåskillnad i SYDS kortspel (`botniva.ts` + `spelaBotGiv`),
+  N/Ö/V standardmotorn. Rattarna netto-mätta (`botniva.probe.test.ts`,
+  kommandot i filhuvudet): medel = MC-fönster 4 + 8 sampel + ingen avkodning,
+  nybörjare = ingen MC. 🤖 borta ur UI och API-svar; info-raden "I tävlingen
+  deltar även datorspelare". Live-verifierad samma dag. Detalj:
+  `docs/beslut-b-plan.md` Påbyggnad 2.
+- **2026-09-02 — felrapporterna #54–#57 (mergepunkt `4898958`):** fritt bud i
+  5+ högfärg i stället för negativ X (+ öppnarens 3-korts höjning och
+  fortsättningen), advancerns preferens när inklivaren visat två färger,
+  tolkningstexter för spärr/svag tvåa/2♣ och Stayman-svaren. Ägarens ord:
+  säg "regeln saknades", inte "off-book".
+- **2026-09-02/03 — pliktsvepet K1–K5 (mergepunkter `842809b`, `e7a3931`):**
+  ägarval "grund först". Riggen `pliktsvep.probe.test.ts` (`$env:PLIKT='1'`)
+  prövar varje pass i störda auktioner mot plikterna. K1 inklivaren svarar
+  advancerns cue-höjning ostört (12 → 0 av 1539 störda), K3 höjning på visad
+  längd — 3-korts höjning av 1-lägesinkliv från 6 hp, svararen över
+  1NT-inkliv (2M / X = straff 10+) och ovanlig 2NT/Michaels (3M tävlande, 4M
+  med 10+ stödpoäng) (92 → 5), K2 negativ-dubblarens svaga preferens (8 → 2),
+  K5 öppnaren höjer fritt 2♣/2♦ (5♣-blåsningen borta). Boken §5.8, §7.1,
+  §7.4, §7.8 e, §9. Kvar i `docs/bevaka.md`: frö 20262632 (egen 8-korts färg
+  vs 3-korts minorfit) och motståndarnas fortsättning efter våra höjningar.
