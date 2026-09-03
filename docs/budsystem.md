@@ -999,6 +999,13 @@ inbjudan 3M** (öppnaren antar med 14+ stödpoäng), annars pass. *Giv 2:
 Samma 3-korts-regel gäller i tabellen ovan när de konkurrerar över det fria
 högfärgsbudet.
 
+**Står partnerns fria LÅGFÄRGSBUD på 2-läget kvar (pliktsvepet K5,
+2026-09-02):** budet lovar 5+ och 10+ hp, så öppnaren höjer på 3-korts stöd —
+**12–13 → 3m** (enkel höjning, partnern går vidare med extra), **14+ → 3NT med
+stopp i deras färg**, annars **4m** (hopphöjning = inbjudan till 5m). Förr
+blåste öppnaren minorutgång direkt: *1♥–(1♠)–2♣–P–**5♣** på ♠63 ♥KQJ96 ♦A7
+♣JT98 — utan spaderstopp och långt från elva stick; 3♣ är rätt.*
+
 **Trösklarna speglar delbit 6 / §5.4:** ~15 = visa extra, 18 = driv utgång, en egen
 6:e färg tävlar på minimum. **Cue-budet i motståndarnas färg** är verktyget för att
 visa extra utan ett klart naturligt bud (t.ex. 17 hp med en lång färg men utan stopp
@@ -1665,6 +1672,12 @@ dubblarens eget flöde (X + egen färg).
   1♥/1♠-öppningen redan 5+ får dubbelton höjas — men bara med
   **utgångsvärden** (13+ stödpoäng). En enkel/inbjudande höjning på dubbelton
   pressar bara upp partnerns minimum.
+  **Dubblarens svaga preferens (pliktsvepet K2, 2026-09-02):** landar öppnarens
+  tvingade svar i en färg dubblaren stöder **sämre än öppningsfärgen** ger
+  dubblaren preferens även med bara **6–9 hp** — samma kriterier som advancerns
+  preferens (§7.1): kostar den ingen nivå räcker lika lång eller längre
+  öppningsfärg (minst 3 kort), kostar den en nivå krävs 2+ korts skillnad,
+  aldrig förbi utgång. *1♦–(1♠)–X–P–2♣–P–**2♦** med ♦K752 ♣73 (förr pass).*
   **Dubblarens invit-fortsättning (fel färg-spåret fix 5b):** öppnarens svar är
   *tvingat* och kan vara ett nödrebud — men dubblaren i **invitzonen (~9–12 hp)**
   passar det inte längre. I ordning: **invit-preferens** med 3-korts stöd för
@@ -2034,6 +2047,14 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-02 — Pliktsvepet K2 + K5 (§7.4, §5.8).** **K2:** negativ-dubblaren
+  ger nu SVAG preferens (6–9 hp) till öppningsfärgen när partnerns tvingade
+  svar landade i en färg med sämre stöd — advancer-preferensens kriterier
+  (#56) återanvända i `negativeDoublerContinues` (`auction-live.ts`); svepet
+  8 → 2 träffar (de två kvar: partnerns svarsfärg är minst lika lång).
+  **K5:** `openerRaisesFreeBid` täcker nu fria lågfärgsbud på 2-läget (12–13
+  → 3m, 14+ → 3NT med stopp / 4m) — förr blåste off-book-höjningen 5♣ på
+  13 hp. Facit: `auction-negx-preferens.test.ts`, `auction-fritt-bud-minor.test.ts`.
 - **2026-09-02 — Pliktsvepet K3: höjning på visad längd (§7.1, §7.8 e).**
   Svepet fann 92 av 1539 störda auktioner där en fit passades (kommandot i
   posten nedan). Tre hål: (a) advancern med 3-korts stöd för partnerns
