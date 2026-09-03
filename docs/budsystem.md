@@ -268,6 +268,12 @@ trumf → 3 i trumf):
   4-korts hf); 1m–3m = **svag spärr** (0–6 hp, 5+ stöd). Den svaga handen
   spärrar direkt, den starka hålls låg för att få plats att utforska.
 - Ny färg på 2-läget utan hopp = **2-över-1 GF**.
+- **2-över-1 går före den inverterade höjningen** (ägarbeslut 2026-09-03,
+  felrapport #58): med **12+ hp och 5+ kort i den andra lågfärgen** bjuds den
+  färgen (2♣/2♦, utgångskrav) även med 4+ stöd — "att sätta game force är
+  viktigare än att kommunicera träff i färg; har vi ett utgångskrav hinner vi
+  visa färger senare". Stödet visas i nästa rond (§5.3). Den inverterade
+  höjningen behåller 10–11-händerna och utgångshänder utan egen 5-kortsfärg.
 - **Svagt hoppskift avskaffat** (ägarbeslut 2026-07-06, felrapport #31). En svag
   6-korts högfärg **hoppar inte** till 2♥/2♠ – när partnern har öppnat håller
   svararen budgivningen låg och bjuder högfärgen billigast på **1-läget** (1♥/1♠,
@@ -284,7 +290,7 @@ trumf → 3 i trumf):
 | 1♦ | 4+ ♦, 6+ hp | Krav (1 rond) | naturligt |
 | 1♥ / 1♠ | 4+ färg, 6+ hp | Krav (1 rond) | naturligt (4-korts upp) |
 | 1NT | 6–10 hp, balanserad, ingen 4-korts hf | Ej krav | naturligt |
-| 2♣ | 4+ ♣, 10+ hp, ingen 4-korts hf | Krav (1 rond) | Inverterad minor ● |
+| 2♣ | 4+ ♣, 10+ hp, ingen 4-korts hf (ej 12+ med 5+ ♦ → 2♦) | Krav (1 rond) | Inverterad minor ● |
 | 2♦ | 4+ (oftast 5+) ♦, 12+ hp | Utgångskrav | 2-över-1 GF |
 | 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♣ | 5+ ♣, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
@@ -296,7 +302,7 @@ trumf → 3 i trumf):
 | 1♥ / 1♠ | 4+ färg, 6+ hp | Krav (1 rond) | naturligt (4-korts upp) |
 | 1NT | 6–10 hp, balanserad, ingen 4-korts hf | Ej krav | naturligt |
 | 2♣ | 4+ (oftast 5+) ♣, 12+ hp — **går före 4-korts hf** | Utgångskrav | 2-över-1 GF |
-| 2♦ | 4+ ♦, 10+ hp, ingen 4-korts hf | Krav (1 rond) | Inverterad minor ● |
+| 2♦ | 4+ ♦, 10+ hp, ingen 4-korts hf (ej 12+ med 5+ ♣ → 2♣) | Krav (1 rond) | Inverterad minor ● |
 | 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♦ | 5+ ♦, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
 | 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
@@ -843,9 +849,18 @@ Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gälle
 - **"Fast arrival":** snabb väg till utgång (direkt 4 i färgen) visar **minimum**;
   att ta omvägar visar **extra / slamintresse**.
 - **Ny färg** = naturlig form, krav (hela budgivningen är ju redan krav).
-- **2NT** = balanserad utan extra form (~12–15); **rebjuden egen färg** = 6+;
+- **2NT** = balanserad utan extra form (~12–15) — **krav**, partnern får aldrig
+  passa det (felrapport #58); **rebjuden egen färg** = 6+;
   **stöd i svararens färg** = fit.
 - **Hopp / splinter** = kortfärg och slamintresse.
+- **Svararens försenade stöd i öppnarens lågfärg (ägarbeslut 2026-09-03,
+  felrapport #58):** efter 1m–2m′–2NT sätter svararen trumf med **3m** bara med
+  **slamintresse** (stödpoäng + öppnarens visade 12 når kanske-zonen 31+,
+  slamporten §6); annars är 3NT den naturliga utgången även med fit. Öppnaren
+  svarar **3NT** som sangförslag när alla sidofärger är täckta (kaptenen får
+  passa), annars **4m** (kravet står). Sedan cue-ronden över 3NT / 1430 RKC
+  som efter inverterad höjning (§6.2). Exempel: ♠AKJ ♥— ♦AJ84 ♣AT8753 mot
+  1♦: 2♣–(2NT)–3♦–(4♦)–4NT–(5♠)–6♦.
 - **Svararens återbud med egen 4-korts högfärg (2026-08-07):** visas naturligt
   under 3NT när den är auktionens **tredje** färg (öppnaren rebjöd egen färg
   eller stödde svararens) — infriar 2/1-regelns löfte om att högfärgen kommer i
@@ -2047,6 +2062,37 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-03 — Felrapport #58: 2-över-1-kravet syntes inte (§4.2, §5.3).**
+  Bricka 4: 1♦–P–2♣ (Syd, människan) –P– 2NT (Nord). Motorns egen linje hade
+  valt inverterad 2♦ för Syds hand, så 2♣ avvek från linjen och Nords återbud
+  byggdes av det generella off-book-svaret som ett SVARAR-bud ("2 sang –
+  balanserad 11–12 hp, inget stöd", utan regel); tolkningslagret läste Syds
+  2♣ som "ny färg, krav 1 rond" och Nords 2NT som "18–19, inbjuder utgång".
+  Ägaren: "2 klöver är 2 över 1, dvs game forcing — buden framåt måste
+  indikera det." Tre lagningar: **(a)** budlådan (`auction-live.ts`, ny
+  detektor `openerRebidAfterPartnersTwoOverOne` före off-book-svaret) låter
+  öppnaren göra sitt vanliga §5.3-återbud via `openerRebidAfter2over1` även
+  när partnerns 2/1 avvek från linjen — 2NT = balanserad utan extra form
+  (12–15), stöd = fit, ny färg = form — med regel och kravnivå; **(b)**
+  tolkningslagret (`auction-interpret.ts`) känner igen ett äkta 2/1 (ostört,
+  opassad svarare, ny lägre färg på 2-läget) och märker det och ALLA bud
+  under utgång i den auktionen som **utgångskrav**; öppnarens 2NT efter 2/1
+  förklaras som 12–15 i krav, inte 18–19 inbjudan; **(c)** regeltabellen
+  (`rules.ts`) fick kravnivån för `rebid: 2NT (GF)`/`rebid: ny färg (GF)`.
+  Dessutom: en felrapport som skickas mitt i budgivningen skriver nu
+  "budgivning pågår" i stället för "given passades ut" (`felrapport.ts`).
+  Facit: `auction-2over1-aterbud-offbook.test.ts`,
+  `auction-interpret.test.ts` ("2-över-1 = utgångskrav"), `felrapport.test.ts`.
+  **Ägarbeslut samma dag, ur samma giv:** "att sätta game force är viktigare
+  än att kommunicera träff i färg." Med 12+ hp och 5+ i den andra lågfärgen
+  går 2-över-1 nu FÖRE den inverterade höjningen (`responses.ts`,
+  `respondToMinor`), och stödet visas i nästa rond: `2/1: försenat stöd` (3m
+  med slamintresse, `responder-rebids.ts`) → öppnarens 3NT-förslag/4m
+  (`openerAfterDelayedMinorSupport`, `rebids.ts`) → slamutredningen mot visade
+  12 (`auction.ts`). Bricka 4 bjuds nu 1♦–2♣–2NT–3♦–4♦–4NT–5♠–6♦ (förr 2♦
+  inverterad → 6♦ via den vägen; utan slamintresse 3NT). Boken §4.2, §5.3.
+  Facit: `responses.test.ts` ("2-över-1 före inverterad") +
+  `auction-2over1-aterbud-offbook.test.ts` (hela bricka 4).
 - **2026-09-02 — Pliktsvepet K2 + K5 (§7.4, §5.8).** **K2:** negativ-dubblaren
   ger nu SVAG preferens (6–9 hp) till öppningsfärgen när partnerns tvingade
   svar landade i en färg med sämre stöd — advancer-preferensens kriterier

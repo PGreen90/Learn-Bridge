@@ -41,7 +41,7 @@ const ALL_ENGINE_RULES: string[] = [
   'rebid: 2NT (22–24)', 'rebid: 3NT (28–30)', 'rebid: 3NT (GF)', 'rebid: 3NT',
   'rebid: egen färg (GF)', 'rebid: egen färg', 'rebid: feature', 'rebid: hopp (inbjudan)', 'rebid: hoppskift',
   'rebid: krav-färg', 'rebid: ny färg', 'rebid: pass', 'rebid: reverse', 'rebid: signoff',
-  'rebid: stanna', 'rebid: stöd (GF)', 'rebid: stöd', 'rebid: utgång', 'rebjuden färg',
+  'rebid: stanna', 'rebid: stöd (GF)', 'rebid: 2NT (GF)', 'rebid: ny färg (GF)', '2/1: försenat stöd', '2/1: sangförslag', '2/1: höjning (GF)', 'rebid: stöd', 'rebid: utgång', 'rebjuden färg',
   'redubbling', 'regeln om 15', 'responsiv dubbling', 'reverse', 'semi-forcing 1NT', 'slamavslut',
   'splinter-relä', 'splinter: kortfärg', 'spärr till utgång', 'spärr', 'spärr-pass', 'spärrhöjning',
   'stark 2♣', 'stöddubbling', 'superaccept', 'svag tvåa', 'svagt hoppskift',

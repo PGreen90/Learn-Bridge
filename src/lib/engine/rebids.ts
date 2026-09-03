@@ -238,6 +238,22 @@ export function openerRebidAfter2over1(hand: Hand, opened: Suit, responder: Suit
   return { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: `Inget tydligt återbud → 3NT.`, uncertain: true }
 }
 
+/**
+ * Öppnarens svar på svararens FÖRSENADE stöd i öppnarens lågfärg i en 2/1-
+ * auktion (1m–2m'–2NT–3m, ägarbeslut 2026-09-03 / felrapport #58). Trumfen är
+ * satt och auktionen är utgångskrav; svararen (kaptenen) har slamintresse och
+ * räknar sedan mot 2NT:s visade 12. Öppnaren beskriver bara: alla sidofärger
+ * täckta → 3NT som sangförslag (kaptenen får passa eller cue:a ovanför), annars
+ * 4m (inget att tillägga, kravet står — cue-ronden ligger över 3NT, §6.2).
+ */
+export function openerAfterDelayedMinorSupport(hand: Hand, m: Suit): ResponseResult {
+  const side = RANK.filter((s) => s !== m)
+  if (side.every((s) => hasStopper(hand, s))) {
+    return { call: '3NT', rule: '2/1: sangförslag', explanation: `Alla sidofärger täckta → 3NT (sangförslag; ${SYM[m]} är trumf om partnern går vidare).` }
+  }
+  return { call: `4${BID[m]}`, rule: '2/1: höjning (GF)', explanation: `3NT otäckt → 4${SYM[m]} (trumfen bekräftad, utgångskravet står).` }
+}
+
 // === Punkt 4: återbud efter Bergen-höjningar, §4.1 ==========================
 
 export function openerRebidAfterBergen(hand: Hand, M: Major, rule: string): ResponseResult {

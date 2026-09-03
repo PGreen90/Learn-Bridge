@@ -145,6 +145,23 @@ export function responderRebidIn2over1Auction(
   if (rebid.call === '3NT') {
     return { call: 'P', rule: 'svararens pass', explanation: `Öppnaren bjöd 3NT (utgång nådd) → pass.` }
   }
+  // 2a. Försenat stöd i öppnarens LÅGFÄRG (ägarbeslut 2026-09-03, felrapport
+  // #58): 2/1 gick före den inverterade höjningen ("game force först, stödet
+  // visas i nästa rond"). Efter öppnarens 2NT (12–15) sätter svararen trumf
+  // med 3m BARA med slamintresse — stödpoäng + visat minimum når kanske-zonen
+  // (31+, slamporten 2026-07-07); annars är 3NT den naturliga utgången även med
+  // fit (4-4 i lågfärg spelar sällan bättre än sang).
+  const openedMinor = opened === 'clubs' || opened === 'diamonds'
+  if (rebid.call === '2NT' && openedMinor && len[opened] >= 4) {
+    const { points: sp } = pointsWithFloor(hand, opened, 'support')
+    if (sp + 12 >= 31) {
+      return {
+        call: `3${BID[opened]}`,
+        rule: '2/1: försenat stöd',
+        explanation: `4+ stöd i ${SYM[opened]} och slamintresse → 3${SYM[opened]} (trumf satt, utgångskrav).`,
+      }
+    }
+  }
   if (rebid.call === '2NT') {
     return { call: '3NT', rule, explanation: `Mittemot balanserad öppnare – utgångskravet fullföljs → 3NT.` }
   }

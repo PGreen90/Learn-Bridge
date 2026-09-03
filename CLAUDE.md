@@ -26,7 +26,7 @@ Båda beskrivna i `docs/bevaka.md`. När de är klara är svepet i hamn → NÄS
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
 Emma03 LIVE** (nivå bara i Syds kortspel, `botniva.ts`) · felrapporterna
-#54–#57 (`4898958`) · pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen
+#54–#57 (`4898958`) + **#58** (2026-09-03: 2-över-1-kravet syns nu i budlådan och förklaringarna; 2/1 går före inverterad höjning, stödet visas i nästa rond) · pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen
 VÄNTAR (trigger ej nådd). Ägarens ord: säg "regeln saknades", inte "off-book".
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
