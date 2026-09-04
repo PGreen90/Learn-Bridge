@@ -6,6 +6,9 @@ import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
 import { classifyOpening, isVulnerable } from './openings'
+import { decideFromTable, type DecidedCall } from './auction-decide'
+import { auctionFacts } from './auction-facts'
+import type { ResolvedCall } from '../bidding'
 import { respondToMajor, respondToMinor, type Major, type ResponseResult } from './responses'
 import { respondTo1NT } from './responses-nt'
 import { respondTo2C } from './responses-2c'
@@ -297,19 +300,23 @@ export function buildAuction(deal: Deal): BuiltAuction | null {
 }
 
 function buildAuctionCore(deal: Deal): BuiltAuction | null {
+  // Öppningen tas ur BESLUTSTABELLEN (motorbytet etapp 3 familj 1, 2026-09-04):
+  // manuset härleds ur stolarnas beslut, inte tvärtom. Varje stol får bara sin
+  // egen hand + passen hittills — samma väg som `decideCall` tar vid bordet.
   let openerSeat: Seat | null = null
   let openerIndex = -1
-  let opening = null as ReturnType<typeof classifyOpening> | null
+  let opening: { call: string; rule: string; explanation: string; uncertain?: boolean } | null = null
+  const passes: ResolvedCall[] = []
   for (let i = 0; i < 4; i++) {
     const seat = seatAt(deal.dealer, i)
-    // Positionen (1:a–4:e hand) trådas in för TP-steg F: 3:e/4:e hand öppnar lätt.
-    const o = classifyOpening(deal.hands[seat], isVulnerable(seat, deal.vulnerability), (i + 1) as 1 | 2 | 3 | 4)
-    if (o.call !== 'P') {
+    const d: DecidedCall = decideFromTable(deal.hands[seat], auctionFacts(passes, seat), isVulnerable(seat, deal.vulnerability))!.call
+    if (d.bid !== 'P') {
       openerSeat = seat
       openerIndex = i
-      opening = o
+      opening = { call: d.bid, rule: d.rule!, explanation: d.explanation!, uncertain: d.uncertain }
       break
     }
+    passes.push({ seat, bid: 'P' })
   }
   if (!openerSeat || !opening) return null
 

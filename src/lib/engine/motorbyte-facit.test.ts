@@ -18,6 +18,39 @@ import { decideCall } from './auction-live'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 
+// Fynd ur etapp 3 familj 1 (2026-09-04): manuset skrev öppningen för den FÖRSTA
+// stol som klassades som öppnare; passade människan den handen ("skulle" ha
+// öppnat) fanns ingen regel för nästa stol och given passades ut. Med tabellen
+// bjuder varje stol i öppningsposition ur egen hand + passen hittills.
+describe('etapp 3 familj 1 – öppningen per stol (LANDAD 2026-09-04)', () => {
+  it('frö 20270021: Syd (12 hp, skulle öppna 1♣) passar → Väst (♠KJ98 ♥AK3 ♦QJ ♣QJ76, 17 hp) öppnar 1NT — inte pass', () => {
+    const deal = dealFromSeed(20270021)
+    expect(decideCall(deal, [call('S', 'P')], 'W').bid).toBe('1NT')
+  })
+
+  it('frö 20270018: Nord (7 hp, skulle spärra 3♥) passar → Öst (♠KQT42 ♥QJ ♦84 ♣AKQT, 17 hp) öppnar 1♠ — inte pass', () => {
+    const deal = dealFromSeed(20270018)
+    expect(decideCall(deal, [call('N', 'P')], 'E').bid).toBe('1S')
+  })
+
+  it('frö 20270003: Öst (15 hp, skulle öppna 1NT) passar, Syd passar → Syd i 3:e hand (♠AQT973 ♥AJ7 ♦762 ♣8, 11 hp) öppnar 1♠', () => {
+    const deal = dealFromSeed(20270003)
+    expect(decideCall(deal, [call('E', 'P'), call('S', 'P')], 'W').bid).toBe('P')
+    expect(decideCall(deal, [call('E', 'P')], 'S').bid).toBe('1S')
+  })
+})
+
+// Bifynd under familj 1 (2026-09-04): öppnar människan en hand som motorn inte
+// klassar som öppning, och ingen annan stol heller gör det, finns inget manus
+// alls ('ingen öppning') — partnern svarar aldrig. Familj 2 (svaret) ska svara
+// på det bud som FAKTISKT bjöds, ur egen hand.
+describe('etapp 3 familj 2 – svaret: partnern svarar på det bud som bjöds', () => {
+  it.todo('frö 20271606: Syd öppnar 1♠ (♠A852 ♥Q7 ♦AJ93 ♣985, 11 hp – motorn hade passat); Nord (♠J63 ♥A863 ♦Q752 ♣AT, 11 hp, 3-korts stöd) svarar 1NT (semi-forcing) — inte pass', () => {
+    const deal = dealFromSeed(20271606)
+    expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('1NT')
+  })
+})
+
 // Pliktsvepets två rester (pausat 2026-09-04, docs/bevaka.md 2026-09-02).
 
 describe('etapp 4 familj 1 – inkliv och advance: tvåfärgsinklivarens fortsättning', () => {

@@ -374,6 +374,14 @@ Budgivningen är medvetet delad i **tre lager med olika ansvar**:
    betydelsesvepet (`docs/motorbyte-plan.md` §3). Lagret blir steg 1 "betydelse"
    i den nya beslutsfunktionen; det här avsnittet skrivs om i etapp 5.
 
+**Sedan motorbytets etapp 3 (2026-09-04) ligger BESLUTSTABELLEN
+`auction-decide.ts` (`decideFromTable`) FÖRE alla tre lagren:** `decideCall`
+frågar den först, och täcker en rad läget (familj 1: öppningen, "ingen har
+öppnat") avgörs budet där ur egen hand + fakta — utan manus. Manusets
+motsvarande gren läser tabellen. Lagren nedan gäller för de familjer som inte
+flyttat än; ny logik i en flyttad familj byggs som en tabellrad, aldrig i
+manuset eller kedjan (`docs/motorbyte-plan.md`).
+
 **`open`-flaggan är seamen.** `auction.ts` säger via `open` "jag är klar med det
 jag modellerar — auktionen är fortfarande öppen, ta vid". `decideCall` läser det
 och fortsätter live. **Regel för framtida arbete:**
