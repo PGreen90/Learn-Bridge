@@ -2406,3 +2406,18 @@ sig vara SPÅRAD av git → tävlingshemligheten ska alltid till `.env.local`
   Facit: `responder-rebids.test.ts`, `auction-live.test.ts`,
   `auction-interpret.test.ts`, `rules.test.ts`. Lärdom: repots filer är CRLF,
   Write/heredoc ger LF — flerradiga skriptankare måste konverteras.
+
+## 2026-09-04 — Motorbytet beslutat: från manus till fyra spelare (pliktsvepet pausat)
+
+Ägaren begärde en total genomgång av "den kanoniska linjen": budgivningen
+kändes overklig och oren, felen kom i jämn ström. Genomgången visade att motorn
+skriver ett MANUS (`buildAuction` ser hela given, modellerar en konkurrensrond)
+som `decideCall` spelar upp, och att 70 detektorer i en ordningskritisk kedja
+tar över när manuset tar slut. Varje söm har gett en ström av felrapporter, samma
+beslut finns på två ställen, och manusets slamfunktioner tar båda parhänderna
+som indata. R2 pekade ut avsaknaden av auktionsläge redan 2026-07; vi lappade.
+
+**Ägarbeslut:** motorbytet är NU. Planen (diagnos, målbild, skyddsnät, etapp
+0–6, grindbeslut) bor i `docs/motorbyte-plan.md`. Pliktsvepet pausat (K1/K3/
+K2/K5 live; resterna blir facit i etapp 4). Ägaren vill ha en etapp per
+session; nästa session = etapp 0 (rigg + baslinjer).

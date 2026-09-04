@@ -34,6 +34,7 @@ const LEVANDE = [
   'docs/handvardering.md',
   'docs/konkurrensplan.md',
   'docs/kortspel.md',
+  'docs/motorbyte-plan.md',
   'docs/off-book-syd.md',
   'docs/oversikt.md',
   'docs/senare.md',

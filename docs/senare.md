@@ -9,7 +9,17 @@
 
 ## ⚪ SENARE
 
-### Svep: grundläggande partnerskapsplikter i konkurrens (ägarbeslut 2026-09-02)
+### Svep: grundläggande partnerskapsplikter i konkurrens (ägarbeslut 2026-09-02) — PAUSAT 2026-09-04
+**Läge 2026-09-04:** K1, K3, K2, K5 KLARA & LIVE (mergepunkter `842809b` +
+`e7a3931`). Svepet PAUSADES när motorbytet blev NU (`docs/motorbyte-plan.md`,
+grind 0): resterna lagas inte i det gamla lagret utan blir facit-fall i
+motorbytets etapp 4, familj 4 (fria bud/höjningar/lagen om totala stick):
+- frö 20262632 — svararens egen 8-korts färg ska vinna över en 3-korts
+  minorfit (`1♦–(1♠)–2♥–P–3♦–P–5♦` → 4♥).
+- motståndarnas fortsättning efter våra nya höjningar (ny K-check i proben).
+Båda beskrivna i `docs/bevaka.md`. Riggen `pliktsvep.probe.test.ts` körs vidare
+som skyddsnät efter varje familj i bytet.
+
 Bakgrund: felrapporterna #55 och #56 visade att två av bridgens mest
 grundläggande regler saknades HELT i den störda budgivningen — svararens fria
 bud i en 5+ högfärg (motorn dubblade negativt med sju spader) och advancerns
@@ -269,13 +279,9 @@ spår — hela gränssnittet plus budsystem-boken (appens största text) ska
 Fram till dess: skriv ny UI-text så den är lätt att lyfta ut (hela meningar,
 inga hopklistrade fragment).
 
-### `auctionFacts`-lagret (R2 steg 2, noterat 2026-08-07 vid F2-bygget)
-F2 gjorde detektorkedjan i `decideCall` datadriven (`FORCED_DETECTORS`/
-`CONTESTED_DETECTORS` med maskinvaktade före-krav). R2:s andra steg är kvar
-som idé: ett tunt lager som räknar ut de fakta detektorerna delar (öppnare/
-svarare, senaste konventionella budet, trumföverenskommelse, "äger vi handen?")
-EN gång per beslut, så detektorerna slutar re-skanna `history` var för sig.
-Byggs först när en konkret detektor behöver det — inte spekulativt.
+### ~~`auctionFacts`-lagret~~ (R2 steg 2) — UPPTAGET i motorbytet 2026-09-04
+Idén från F2-bygget (ett tunt lager som räknar auktionsfakta EN gång per beslut)
+är nu **etapp 2 i `docs/motorbyte-plan.md`** och byggs inte längre separat.
 
 ## 🅿️ PARKERAT
 

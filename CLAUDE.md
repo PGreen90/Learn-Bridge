@@ -10,18 +10,19 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Svep: partnerskapsplikter i konkurrens (ägarval 2026-09-02, "grund först")
-Mätriggen `src/lib/engine/pliktsvep.probe.test.ts` (`$env:PLIKT='1'; npx vitest
-run src/lib/engine/pliktsvep.probe.test.ts`) låter motorn bjuda 3000 givar och
-flaggar varje pass som bryter en plikt (K1 passat krav · K2 preferens · K3
-höjning på visad längd · K4 tio trumf · K5/K6 inventeringar). En regel i taget,
-facit före fix. **K1, K3, K2, K5 KLARA & LIVE** (2026-09-02/03, mergepunkter
-`842809b` + `e7a3931`; 12→0, 92→5, 8→2, 5♣-blåsningen borta — detalj i
-`docs/historik.md` + bokens §9). **Nästa gång börjar vi med:** frö 20262632 —
-svararens egen 8-korts färg ska vinna över en 3-korts minorfit
-(`1♦–(1♠)–2♥–P–3♦–P–5♦` → 4♥, liten fix i `raiseWithFit`); därefter
-motståndarnas fortsättning efter våra nya höjningar (ny K-check i proben först).
-Båda beskrivna i `docs/bevaka.md`. När de är klara är svepet i hamn → NÄST.
+### 🔵 NU — MOTORBYTET: från manus till fyra spelare (ägarbeslut 2026-09-04)
+Budmotorn skriver idag ett **manus** (`buildAuction`) som budlådan spelar upp,
+och 70 detektorer tar över när manuset tar slut — varje söm har gett en ström av
+felrapporter. Bytet: **egen hand + auktionen hittills → ett bud**, en
+beslutsfunktion för alla fyra stolar, betydelse → fakta → val, kikvakt som
+bevisar ärlig inferens. HELA planen (diagnos, målbild, skyddsnät, etapp 0–6,
+grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbete.
+**Regler under bytet:** inga lappar i manuset/detektorkedjan; felrapporter får
+facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
+session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
+**Nästa gång börjar vi med:** etapp 0 — auktionsdumpens intervall-läge,
+diff-skriptet och baslinjerna (auktionsdump + revisorn). Pliktsvepet är PAUSAT
+(resterna = facit i etapp 4, se `docs/senare.md`).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
