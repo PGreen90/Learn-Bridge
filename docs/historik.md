@@ -2391,3 +2391,18 @@ sig vara SPÅRAD av git → tävlingshemligheten ska alltid till `.env.local`
   slamintresse → öppnarens 3NT-förslag/4m → slamutredningen; bricka 4 →
   6♦. Boken §4.2, §5.3, §9. Facit: `auction-2over1-aterbud-offbook.test.ts`,
   `responses.test.ts`.
+- **2026-09-04 — felrapporterna #59 + #60:** **(#59, bricka 6)** 1♠–1NT–2♣–P
+  med ♠A ♥QJ943 ♦KJT852 ♣T. Boken §5.1 hade regeln (ny färg efter 1NT = 5+
+  kort, inget stöd) men koden saknade den → "inget bättre, pass" och 2♣ på
+  4-1. 1NT var systemriktigt (9 hp < 2/1). Ny regel `ny färg efter 1NT`
+  (`responder-rebids.ts`, 6+ kort före 2-korts preferens), öppnaren passar
+  (`rebids.ts`), kravminnet läser inte budet som rondkrav (`auctionForce`).
+  Tolkningslagret: 1M–1NT–2x lästes som Stayman → nu "återbud i ny färg, 3+,
+  ej krav"; svararens 2y = egen färg till spel. **(#60, bricka 9)**
+  1♥–(3♦)–4♦–P–4♥–P–4NT–P–5♣–P–5♥–P–P med fyra nyckelkort: rättelsen över
+  stoppbudet fanns bara i den kanoniska linjen. Ny detektor
+  `rkcSignoffCorrection` i budlådan (regel `RKC: rättelse`), tolkningslagret
+  läser hela essfrågesekvensen. Boken §5.1, §6.1, §9. Mergepunkt `d3b7961`.
+  Facit: `responder-rebids.test.ts`, `auction-live.test.ts`,
+  `auction-interpret.test.ts`, `rules.test.ts`. Lärdom: repots filer är CRLF,
+  Write/heredoc ger LF — flerradiga skriptankare måste konverteras.
