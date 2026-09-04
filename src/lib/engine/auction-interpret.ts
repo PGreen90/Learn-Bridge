@@ -269,7 +269,64 @@ function partnerNaturalNT(seat: Seat, prior: ResolvedCall[]): boolean {
   const last = lastContract(prior)
   if (!last || last.seat !== partner || last.cb.strain !== 'NT' || last.cb.level !== 1) return false
   const partnerContracts = prior.filter((c) => c.seat === partner && parseBid(c.bid))
-  return partnerContracts.length === 1
+  if (partnerContracts.length !== 1) return false
+  // Har JAG redan bjudit ett kontraktsbud är partnerns 1NT ett SVAR på min
+  // färg (semi-forcing 1NT, §4.1) — mitt 2♣ är då naturlig ny färg, inte
+  // Stayman (felrapport #59: 1♠–1NT–2♣ lästes som Stayman).
+  return !prior.some((c) => c.seat === seat && parseBid(c.bid))
+}
+
+/**
+ * Svararens NY FÄRG efter eget 1NT-svar (1M–1NT–2x–2y, §5.1; felrapport #59):
+ * partnern öppnade 1♥/1♠, jag svarade 1NT, partnern bjöd en naturlig ny färg
+ * på 2-läget, och jag bjuder nu en tredje färg på 2-läget. Ostört. Naturligt,
+ * 5+ kort (oftast 6), svag hand utan stöd — partnern får passa.
+ */
+function responderNewSuitAfter1NT(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): boolean {
+  if (cb.level !== 2 || cb.strain === 'NT') return false
+  const contracts = prior.map((c) => ({ c, cb: parseBid(c.bid) })).filter((x) => x.cb) as { c: ResolvedCall; cb: ParsedBid }[]
+  if (contracts.length !== 3) return false
+  const [open, nt, rebid] = contracts
+  if (open.c.seat !== PARTNER[seat] || open.cb.level !== 1 || (open.cb.strain !== 'H' && open.cb.strain !== 'S')) return false
+  if (nt.c.seat !== seat || nt.cb.level !== 1 || nt.cb.strain !== 'NT') return false
+  if (rebid.c.seat !== PARTNER[seat] || rebid.cb.level !== 2 || rebid.cb.strain === 'NT' || rebid.cb.strain === open.cb.strain) return false
+  return cb.strain !== open.cb.strain && cb.strain !== rebid.cb.strain
+}
+
+/**
+ * Öppnarens ÅTERBUD i ny färg efter partnerns 1NT-svar (1♥/1♠–1NT–2x, §5.1;
+ * felrapport #59): `seat` öppnade 1M, partnern svarade 1NT, ostört, och `seat`
+ * bjuder nu en LÄGRE ny färg på 2-läget (2♠ över 1♥ är reverse och lämnas).
+ * Naturligt, 3+ kort (2♥ över 1♠: 4+), minimum, ej krav.
+ */
+function openerNewSuitAfter1NTResponse(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): boolean {
+  if (cb.level !== 2 || cb.strain === 'NT') return false
+  const contracts = prior.map((c) => ({ c, cb: parseBid(c.bid) })).filter((x) => x.cb) as { c: ResolvedCall; cb: ParsedBid }[]
+  if (contracts.length !== 2) return false
+  const [open, nt] = contracts
+  if (open.c.seat !== seat || open.cb.level !== 1 || (open.cb.strain !== 'H' && open.cb.strain !== 'S')) return false
+  if (nt.c.seat !== PARTNER[seat] || nt.cb.level !== 1 || nt.cb.strain !== 'NT') return false
+  return cb.strain !== open.cb.strain && STRAIN_RANK[cb.strain] < STRAIN_RANK[open.cb.strain]
+}
+
+/**
+ * Essfrågesekvensen (1430 RKC, §6.1) sedd från `seat` (felrapport #60): vår
+ * sidas 4NT-essfråga med härledd trumf, partnerns stegsvar (om givet) och om
+ * frågaren därefter stannat i 5-trumf. null = ingen essfråga, eller
+ * motståndarna har bjudit in i sekvensen.
+ */
+function rkcSequence(seat: Seat, prior: ResolvedCall[]): { asker: Seat; trump: string; answer?: ParsedBid; signoff: boolean } | null {
+  const askIdx = prior.findIndex((c) => c.bid === '4NT' && SIDE[c.seat] === SIDE[seat])
+  if (askIdx < 0) return null
+  const asker = prior[askIdx].seat
+  const before = prior.slice(0, askIdx)
+  const trump = agreedSuit(asker, before) ?? askTrumpFallback(asker, before)
+  if (!trump) return null
+  const after = prior.slice(askIdx + 1).filter((c) => parseBid(c.bid))
+  if (after.some((c) => SIDE[c.seat] !== SIDE[seat])) return null
+  const answer = after[0] && after[0].seat === PARTNER[asker] ? parseBid(after[0].bid)! : undefined
+  const signoff = !!(answer && after[1] && after[1].seat === asker && after[1].bid === `5${trump}`)
+  return { asker, trump, answer, signoff }
 }
 
 /**
@@ -461,6 +518,68 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     return {
       text: `Öppningsbud ${cb.level}${sym} — spärröppning: svag hand med mycket lång ${name} (8+ kort).`,
       confidence: 'trolig',
+    }
+  }
+
+  // Essfrågesekvensen (1430 RKC, §6.1) — felrapport #60: svaret 5♣ lästes som
+  // "naturlig klöver", stoppbudet 5♥ och rättelsen 6♥ som utgångshöjningar.
+  const rkc = cb.level >= 5 ? rkcSequence(seat, prior) : null
+  if (rkc) {
+    const tsym = SYMBOL[rkc.trump]
+    if (!rkc.answer && seat === PARTNER[rkc.asker] && cb.level === 5) {
+      const step: Record<string, string> = {
+        C: '1 eller 4 nyckelkort', D: '0 eller 3 nyckelkort',
+        H: '2 (eller 5) nyckelkort utan trumfdam', S: '2 (eller 5) nyckelkort med trumfdam',
+      }
+      if (step[cb.strain]) {
+        return {
+          text: `5${sym} — svar på essfrågan: ${step[cb.strain]} (1430 RKC, ${NAME[rkc.trump]} som trumf). Säger inget om ${name}.`,
+          confidence: 'trolig',
+          forcing: 'slamintresse',
+        }
+      }
+    }
+    if (rkc.answer && !rkc.signoff && seat === rkc.asker && cb.strain === rkc.trump) {
+      if (cb.level === 5) {
+        return {
+          text:
+            `5${tsym} — stopp efter essfrågan: räknat lågt saknas två nyckelkort. ` +
+            `Partnern passar med det låga antalet i sitt svar och bjuder 6${tsym} med det höga.`,
+          confidence: 'trolig',
+          forcing: 'avslut',
+        }
+      }
+      if (cb.level === 6) {
+        return { text: `6${tsym} — lillslam: nyckelkortssvaret räckte (högst ett nyckelkort saknas).`, confidence: 'trolig', forcing: 'avslut' }
+      }
+    }
+    if (rkc.answer && rkc.signoff && seat === PARTNER[rkc.asker] && cb.level === 6 && cb.strain === rkc.trump) {
+      const high = rkc.answer.strain === 'C' ? '4' : rkc.answer.strain === 'D' ? '3' : '5'
+      return {
+        text: `6${tsym} — rättelse över stoppbudet: svaret 5${SYMBOL[rkc.answer.strain]} var tvetydigt och jag har det höga antalet (${high} nyckelkort).`,
+        confidence: 'trolig',
+        forcing: 'avslut',
+      }
+    }
+  }
+
+  // Öppnarens återbud i ny färg efter partnerns 1NT-svar (1M–1NT–2x, §5.1;
+  // felrapport #59: lästes som Stayman / "minst 4 kort, krav 1 rond").
+  if (!competitive && openerNewSuitAfter1NTResponse(seat, cb, prior)) {
+    const minLen = cb.strain === 'H' ? '4+' : '3+ (oftast 4+)'
+    return {
+      text: `2${sym} — återbud i ny färg efter partnerns 1 sang: naturligt, ${minLen} ${name}, minimum (~12–15 hp). Partnern får passa.`,
+      confidence: 'trolig',
+      forcing: 'ej-krav',
+    }
+  }
+
+  // Svararens ny färg efter eget 1NT-svar (1M–1NT–2x–2y, §5.1; felrapport #59).
+  if (!competitive && responderNewSuitAfter1NT(seat, cb, prior)) {
+    return {
+      text: `2${sym} — egen färg efter 1 sang-svaret: naturligt, 5+ ${name} (oftast 6), svag hand utan stöd för partnern. Partnern får passa.`,
+      confidence: 'trolig',
+      forcing: 'ej-krav',
     }
   }
 

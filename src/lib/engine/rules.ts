@@ -105,6 +105,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   '3NT till spel': 'avslut',
   '6NT till spel': 'avslut',
   slamavslut: 'avslut',
+  'RKC: rättelse': 'avslut',
   'fullföljd Texas': 'avslut',
   oklart: 'ej-krav',
 
@@ -130,6 +131,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   preferens: 'ej-krav',
   'ny färg': 'ej-krav',
   'ny färg (2-läget)': 'ej-krav',
+  'ny färg efter 1NT': 'ej-krav',
   'rebid: ny färg': 'ej-krav',
   'rebjuden färg': 'ej-krav',
   'rebid: egen färg': 'ej-krav',

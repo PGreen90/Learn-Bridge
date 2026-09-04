@@ -595,3 +595,55 @@ describe('2-över-1 = utgångskrav i tolkningslagret (felrapport #58)', () => {
     expect(r.forcing).toBe('utgangskrav')
   })
 })
+
+// Felrapport #59 + #60 (2026-09-04): tolkningslagret i samma två auktioner.
+// #59: öppnarens 2♣ efter 1♠–1NT lästes som Stayman (partnerns 1NT var ett
+// SVAR, inte en öppning) och svararens 2♦ som "krav 1 rond". #60: essfrågans
+// stegsvar 5♣ lästes som "naturlig klöver", stoppbudet 5♥ och rättelsen 6♥ som
+// utgångshöjningar i konkurrens.
+describe('felrapport #59 – 1NT-svarets fortsättning', () => {
+  const s59 = h(['E', 'P'], ['S', '1S'], ['W', 'P'], ['N', '1NT'], ['E', 'P'], ['S', '2C'], ['W', 'P'], ['N', '2D'])
+  it('öppnarens 2♣ efter 1♠–1NT är naturlig klöver, inte Stayman', () => {
+    const r = interpretCall(s59, 5)
+    expect(r.text).not.toMatch(/Stayman/)
+    expect(r.text).toMatch(/3\+/)
+    expect(r.forcing).toBe('ej-krav')
+  })
+  it('svararens 2♦ efter 1NT = egen färg, 5+ kort, svag, partnern får passa', () => {
+    const r = interpretCall(s59, 7)
+    expect(r.text).toMatch(/5\+/)
+    expect(r.text).toMatch(/får passa/)
+    expect(r.forcing).toBe('ej-krav')
+  })
+  it('Stayman läses fortfarande som Stayman över partnerns 1NT-ÖPPNING', () => {
+    const r = interpretCall(h(['N', '1NT'], ['E', 'P'], ['S', '2C']), 2)
+    expect(r.text).toMatch(/Stayman/)
+  })
+})
+
+describe('felrapport #60 – essfrågesekvensen i konkurrens', () => {
+  const s60 = h(
+    ['N', '1H'], ['E', '3D'], ['S', '4D'], ['W', 'P'], ['N', '4H'], ['E', 'P'],
+    ['S', '4NT'], ['W', 'P'], ['N', '5C'], ['E', 'P'], ['S', '5H'], ['W', 'P'], ['N', '6H'],
+  )
+  it('5♣ = svar på essfrågan: 1 eller 4 nyckelkort', () => {
+    const r = interpretCall(s60, 8)
+    expect(r.text).toMatch(/1 eller 4/)
+    expect(r.text).not.toMatch(/naturlig/i)
+  })
+  it('5♥ = stopp; partnern bjuder 6 med det höga antalet', () => {
+    const r = interpretCall(s60, 10)
+    expect(r.text).toMatch(/stopp/i)
+    expect(r.text).toMatch(/höga/)
+    expect(r.forcing).toBe('avslut')
+  })
+  it('6♥ av svararen = rättelse med det höga antalet', () => {
+    const r = interpretCall(s60, 12)
+    expect(r.text).toMatch(/rättelse/i)
+    expect(r.text).toMatch(/4 nyckelkort/)
+  })
+  it('frågarens direkta 6♥ efter svaret = lillslam på nyckelkorten', () => {
+    const r = interpretCall(h(...s60.slice(0, 10).map((c) => [c.seat, c.bid] as [ResolvedCall['seat'], string]), ['S', '6H']), 10)
+    expect(r.text).toMatch(/lillslam/i)
+  })
+})

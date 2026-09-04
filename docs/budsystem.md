@@ -729,6 +729,13 @@ billigast som förut.
 naturlig minorrebid med stöd, eller höjning/NT som visar 11–12 (inbjudan). En
 ny färg av svararen efter 1NT lovar 5+ kort och förnekar stöd (se §4.1-noten).
 
+**Svararens egen färg på 2-läget** (t.ex. 1♠–1NT–2♣–**2♦**/**2♥**; felrapport
+#59): naturligt, **5+ kort (oftast 6)**, svag hand utan stöd — **till spel**,
+öppnaren passar (hon har redan visat minimum med sitt återbud). Med **6+ kort**
+går den egna färgen före en 2-korts preferens (6-1 spelar bättre än 5-2); med
+bara 5 kort prefereras först. Budet ryms bara mellan öppnarens återbud och
+hennes högfärg (efter 1♥–1NT–2♦ finns inget sådant 2-läge).
+
 **Öppnarens TREDJE bud — inbjudan ska alltid besvaras** (etapp 5, 2026-07-24):
 en inbjudan från svararen får aldrig lämnas obesvarad. Öppnaren dömer på
 **Bergenpoäng** (form räknas, aldrig under hp) mot det svararen visat (10–12):
@@ -1153,6 +1160,11 @@ Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
   färgen; 5NT = dam **utan** sidokungar.
 - **5NT = kungfråga** (lovar alla 5 nyckelkort + trumfdam) – vi spelar
   **Sjöbergs 5NT**, se §6.3.
+- **Stoppbudet 5-trumf efter ett tvetydigt svar** (5♣ = 1 eller 4, 5♦ = 0
+  eller 3) betyder *"pass med det låga antalet, bjud vidare med det höga"*:
+  den som svarade och sitter med **4 (resp. 3) nyckelkort lyfter själv till
+  6-trumf**. Gäller lika i konkurrens (felrapport #60: 5♥ passades med fyra
+  nyckelkort).
 - Används efter t.ex. splinter, Jacoby 2NT, 2♣-träff eller cue-bid-sekvenser –
   när trumf är klar och man vet att inga två kontroller saknas.
 
@@ -2062,6 +2074,30 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-04 — Felrapporterna #59 + #60 (§5.1, §6.1).** **(#59, bricka 6)**
+  1♠–P–1NT–P–2♣–P–**P** med ♠A ♥QJ943 ♦KJT852 ♣T. Boken sa redan att en ny
+  färg av svararen efter 1NT lovar 5+ kort och förnekar stöd, men regeln
+  saknades i koden: svararen föll till "inget bättre → pass" och paret spelade
+  2♣ på 4-1. 1NT var systemriktigt (9 hp räcker inte till 2-över-1); felet var
+  passet. Ny regel `ny färg efter 1NT` (`responder-rebids.ts`): egen 5+ färg
+  som ryms på 2-läget bjuds naturligt, svagt, till spel — 6+ kort före en
+  2-korts preferens, 5 kort efter. Öppnaren passar
+  (`openerThirdBidAfterSemiForcing1NT`, `rebids.ts`), och kravminnet
+  (`auctionForce`, `auction-live.ts`) läser inte längre budet som rondkrav
+  (förr "tvingades" öppnaren till 2♠ på 5-1). Tolkningslagret: öppnarens 2♣
+  efter 1♠–1NT lästes som *Stayman* (partnerns 1NT var ett svar, inte en
+  öppning) — nu "återbud i ny färg, 3+, ej krav"; svararens 2♦ förklaras som
+  egen färg till spel. **(#60, bricka 9)** 1♥–(3♦)–4♦–P–4♥–P–4NT–P–5♣–P–5♥–
+  P–**P** med ♠AK ♥AK876 ♦64 ♣A762 (fyra nyckelkort). Rättelsen över
+  stoppbudet fanns bara i den kanoniska linjen (`slam-auction.ts`); i
+  budlådan saknades den. Ny detektor `rkcSignoffCorrection`
+  (`auction-live.ts`, regel `RKC: rättelse`): efter eget 5♣/5♦-svar och
+  partnerns 5-trumf lyfter handen med det höga antalet (4 resp. 3) till
+  6-trumf. Tolkningslagret läser nu hela essfrågesekvensen (stegsvaret,
+  stoppbudet, rättelsen, frågarens lillslam) i stället för "naturlig
+  klöver"/"utgångshöjning". Facit: `responder-rebids.test.ts` (#59 + hela
+  bricka 6), `auction-live.test.ts` (#60 + 0/3-varianten),
+  `auction-interpret.test.ts` (båda), `rules.test.ts`.
 - **2026-09-03 — Felrapport #58: 2-över-1-kravet syntes inte (§4.2, §5.3).**
   Bricka 4: 1♦–P–2♣ (Syd, människan) –P– 2NT (Nord). Motorns egen linje hade
   valt inverterad 2♦ för Syds hand, så 2♣ avvek från linjen och Nords återbud

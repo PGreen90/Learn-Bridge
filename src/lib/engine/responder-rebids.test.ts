@@ -409,3 +409,50 @@ describe('responderRebidIn2over1Auction (§5.3, felrapport #4)', () => {
     expect(after3C('S:A3 H:872 D:AKQJ9 C:762').call).toBe('3S')
   })
 })
+
+// Felrapport #59 (2026-09-04, bricka 6): 1♠–P–1NT–P–2♣–P–**P** (Nord med
+// ♠A ♥QJ943 ♦KJT852 ♣T). Boken §5.1 säger redan "en ny färg av svararen efter
+// 1NT lovar 5+ kort och förnekar stöd", men regeln saknades i koden: utan stöd,
+// utan fit i öppnarens minor och utan preferens föll svararen till "inget
+// bättre → pass" och paret spelade 2♣ på 4-1. 1NT var systemriktigt (9 hp är
+// för lite för 2/1); felet är passet. Facit: egen 5+ (helst 6+) färg som ryms
+// på 2-läget mellan öppnarens återbud och hennes högfärg bjuds naturligt, svagt
+// och utan krav. 6+ kort går före en 2-korts preferens, 5 kort efter.
+describe('felrapport #59 – svararens egen färg efter 1NT–2♣ (§5.1)', () => {
+  it('Nord (6-5 i röda, singel ♣) bjuder 2♦ i stället för att passa 2♣', () => {
+    expect(r10('S:A H:QJ943 D:KJT852 C:T', 'spades', '2C', 'rebid: ny färg')).toBe('2D')
+  })
+  it('regel + förklaring: ny färg efter 1NT, ej krav', () => {
+    const rebid: ResponseResult = { call: '2C', rule: 'rebid: ny färg', explanation: '' }
+    const r = responderRebidAfterSemiForcing1NT(parseHand('S:A H:QJ943 D:KJT852 C:T'), 'spades', rebid)
+    expect(r?.rule).toBe('ny färg efter 1NT')
+    expect(r?.explanation).toMatch(/5\+/)
+    expect(r?.explanation).toMatch(/får passa/)
+  })
+  it('5-5 i röda → den högre färgen (2♥)', () => {
+    expect(r10('S:2 H:QJ943 D:KJT85 C:T3', 'spades', '2C', 'rebid: ny färg')).toBe('2H')
+  })
+  it('6-korts ruter går före 2-korts preferens (2♦, inte 2♠)', () => {
+    expect(r10('S:K3 H:Q94 D:KJT852 C:T3', 'spades', '2C', 'rebid: ny färg')).toBe('2D')
+  })
+  it('5-korts ruter med 2-korts stöd → preferensen 2♠ står kvar', () => {
+    expect(r10('S:K3 H:Q943 D:KJT85 C:T3', 'spades', '2C', 'rebid: ny färg')).toBe('2S')
+  })
+  it('efter 1♥–1NT–2♦ finns inget 2-läge kvar → oförändrat (pass)', () => {
+    expect(r10('S:Q84 H:7 D:73 C:KJ8642', 'hearts', '2D', 'rebid: ny färg')).toBe('P')
+  })
+  it('hela bricka 6 i motorn: 1♠–1NT–2♣–2♦ och sedan pass', () => {
+    const deal: Deal = {
+      id: 't', dealer: 'E', vulnerability: 'ew', board: 6,
+      hands: {
+        N: parseHand('S:A H:QJ943 D:KJT852 C:T'),
+        E: parseHand('S:872 H:K76 D:A63 C:K653'),
+        S: parseHand('S:T9543 H:A8 D:94 C:AQJ7'),
+        W: parseHand('S:KQJ6 H:T52 D:Q7 C:9842'),
+      },
+    }
+    const a = buildAuction(deal)
+    expect(a?.turns.map((t) => t.call)).toEqual(['1S', '1NT', '2C', '2D', 'P'])
+    expect(a?.turns[a.turns.length - 1]?.explanation).toMatch(/till spel/)
+  })
+})

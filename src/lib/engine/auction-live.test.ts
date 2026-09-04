@@ -1603,3 +1603,67 @@ describe('felrapport #50 – straffdubbling av deras 4♠ pullas inte till 5♦'
     expect(c.bid).not.toBe('5D')
   })
 })
+
+// Felrapport #60 (2026-09-04, bricka 9): 1♥–(3♦)–4♦–P–4♥–P–4NT–P–5♣–P–5♥–P–**P**.
+// Nord (♠AK ♥AK876 ♦64 ♣A762) svarade 5♣ = "1 eller 4" på Syds essfråga och
+// Syd stannade i 5♥. Med FYRA nyckelkort får Nord aldrig passa stoppbudet:
+// 5-trumf efter ett tvetydigt svar betyder "pass med det låga antalet, bjud
+// vidare med det höga" (boken §6, "rättar partnern med det höga antalet själv
+// upp till 6"). Mekaniken fanns bara i den kanoniska linjen (`slam-auction.ts`);
+// i budlådan/konkurrens (3♦-inklivet) saknades regeln. Ägaren: "Partner skall
+// bjuda 6 hjärter efter essfråga. Han har ju 4 ess."
+describe('felrapport #60 – rättelsen över stoppbudet efter 1-eller-4-svaret', () => {
+  const deal = dealOf('N', {
+    N: 'S:AK H:AK876 D:64 C:A762',
+    E: 'S:T652 H:- D:KQJT973 C:J9',
+    S: 'S:Q84 H:T95432 D:A2 C:KQ',
+    W: 'S:J973 H:QJ D:85 C:T8543',
+  })
+  const upToSignoff = [
+    call('N', '1H'), call('E', '3D'), call('S', '4D'), call('W', 'P'),
+    call('N', '4H'), call('E', 'P'), call('S', '4NT'), call('W', 'P'),
+    call('N', '5C'), call('E', 'P'), call('S', '5H'), call('W', 'P'),
+  ]
+
+  it('Nord svarar 5♣ (4 nyckelkort) på 4NT', () => {
+    const c = decideCall(deal, upToSignoff.slice(0, 8), 'N')
+    expect(c.bid).toBe('5C')
+  })
+
+  it('Nord med 4 nyckelkort lyfter Syds 5♥-stopp till 6♥', () => {
+    const c = decideCall(deal, upToSignoff, 'N')
+    expect(c.bid).toBe('6H')
+    expect(c.rule).toBe('RKC: rättelse')
+    expect(c.explanation).toMatch(/1 ELLER 4|1 eller 4/)
+  })
+
+  it('… men med bara 1 nyckelkort står stoppet (pass)', () => {
+    // Samma auktion, Nord har bara ♥K som nyckelkort (♠/♣-essen flyttade till Väst).
+    const weak = dealOf('N', {
+      N: 'S:QJ H:KQ876 D:64 C:K762',
+      E: 'S:T652 H:- D:KQJT973 C:J9',
+      S: 'S:K84 H:T95432 D:A2 C:AQ',
+      W: 'S:A973 H:AJ D:85 C:T8543',
+    })
+    const c = decideCall(weak, upToSignoff, 'N')
+    expect(c.bid).toBe('P')
+  })
+
+  it('0-eller-3-svaret: 3 nyckelkort lyfter till 6, 0 passar', () => {
+    const three = dealOf('N', {
+      N: 'S:AK H:A8763 D:64 C:A762',
+      E: 'S:T652 H:- D:KQJT973 C:J9',
+      S: 'S:Q84 H:KT9542 D:A2 C:KQ',
+      W: 'S:J973 H:QJ D:85 C:T8543',
+    })
+    const hist = [...upToSignoff.slice(0, 8), call('N', '5D'), call('E', 'P'), call('S', '5H'), call('W', 'P')]
+    expect(decideCall(three, hist, 'N').bid).toBe('6H')
+    const zero = dealOf('N', {
+      N: 'S:QJ H:Q8763 D:64 C:KQ62',
+      E: 'S:T652 H:- D:KQJT973 C:J9',
+      S: 'S:AK4 H:AKT954 D:A2 C:A7',
+      W: 'S:9873 H:J2 D:85 C:T98543',
+    })
+    expect(decideCall(zero, hist, 'N').bid).toBe('P')
+  })
+})
