@@ -20,15 +20,18 @@ grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbet
 **Regler under bytet:** inga lappar i manuset/detektorkedjan; felrapporter får
 facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
 session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
-**Etapp 0 + 1 KLARA 2026-09-04** (loggen i planen): riggen (`decideCallTraced`,
-`DUMP_RANGE`, `scripts/auktionsdiff.mjs`, facit-kön `motorbyte-facit.test.ts`) och
+**Etapp 0 + 1 + 2 KLARA 2026-09-04** (loggen i planen): riggen (`decideCallTraced`,
+`DUMP_RANGE`, `scripts/auktionsdiff.mjs`, facit-kön `motorbyte-facit.test.ts`),
 betydelselagret `auction-meaning.ts` (`meaningOf`, systembokens §4–§6 i kod;
-`interpretCall` är en tunn läsare), betydelsesvepet (noll avvikelser ostört) och
-kikvakten (manuset kikar i 13,9 % av buden — mätläget, ska bli 0 i etapp 3).
+`interpretCall` är en tunn läsare), betydelsesvepet (noll avvikelser ostört),
+kikvakten (manuset kikar i 13,9 % av buden — mätläget, ska bli 0 i etapp 3) och
+**faktalagret `auction-facts.ts`** (`auctionFacts` → `AuctionFacts`: roller,
+kontraktsbud per sida, krav, trumf, partnerns färg, utpassningssits, passad hand,
+betydelse per bud; detektorerna läser `DetectorCtx.facts`, inget bud ändrat).
 Åtta bok-mot-motor-fynd väntar på ägarbeslut vid respektive familj (loggen).
-**Nästa gång börjar vi med:** etapp 2 — faktalagret *auction-facts.ts* (planerad
-fil, `auctionFacts`), en hjälpare i taget ur `auction-live.ts`, auktionsdiffen
-noll efter varje byte.
+**Nästa gång börjar vi med:** etapp 3 familj 1 — öppningen per stol i
+beslutstabellen *auction-decide.ts* (planerad fil); manusets öppningsgren rivs
+när familjen landat; b-listan med exempelhänder till ägaren (grind per familj).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
@@ -103,7 +106,7 @@ tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfi
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den
 starka dubblaren säljer given i rond 2 · **svep: partnerskapsplikter i konkurrens**
 (preferens/fritt bud/höjning på visad längd, ägarbeslut 2026-09-02 efter
-felrapport #55–#56) · bot-hjärnans B2/Steg C · bredare försvarsinferens · `auctionFacts`-lagret ·
+felrapport #55–#56) · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
 rondgenomgångens per-kort-motivering · 2♣-öppningens bredare översyn forts.
 (steg 1 substanskraven KLAR 2026-08-31; kvar: kravnivån + balanserad/
 distributionell + 6-5-samspelet).
