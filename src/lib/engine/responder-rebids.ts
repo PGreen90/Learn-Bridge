@@ -418,7 +418,24 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
     if (len[M] >= 3 && p >= 10) return { call: `3${mBid}`, rule: 'inbjudan (limithöjning)', explanation: `3+ stöd → 3${mSym} (limithöjning).` }
     if (len[rs] >= 4 && p <= 10) return pass(`stöd i ${SYM[rs]}`)
     if (p >= 11 && bal) return { call: '2NT', rule: 'inbjudan', explanation: `Balanserad inbjudan → 2NT.` }
+    // Felrapport #59 (§5.1 "en ny färg av svararen efter 1NT lovar 5+ kort och
+    // förnekar stöd" — regeln stod i boken men saknades här): egen 5+ färg som
+    // ryms på 2-läget (över öppnarens återbud, under hennes högfärg) bjuds
+    // naturligt, svagt och utan krav. 6+ kort går FÖRE en 2-korts preferens
+    // (6-1 spelar bättre än 5-2), 5 kort efter. Längst först, lika → högst.
+    const ownSuitAtTwo = (min: number): Suit | null =>
+      RANK.filter((s) => s !== M && s !== rs && rankOf(s) > rankOf(rs) && rankOf(s) < rankOf(M) && len[s] >= min)
+        .sort((a, b) => len[b] - len[a] || rankOf(b) - rankOf(a))[0] ?? null
+    const newSuit = (s: Suit): ResponseResult => ({
+      call: `2${BID[s]}`,
+      rule: 'ny färg efter 1NT',
+      explanation: `Egen färg utan stöd → 2${SYM[s]} (naturligt, 5+ kort – oftast 6 –, svag hand; partnern får passa).`,
+    })
+    const six = ownSuitAtTwo(6)
+    if (six) return newSuit(six)
     if (len[M] >= 2 && rankOf(M) > rankOf(rs)) return { call: `2${mBid}`, rule: 'preferens', explanation: `Preferens → 2${mSym}.` }
+    const five = ownSuitAtTwo(5)
+    if (five) return newSuit(five)
     return pass('inget bättre')
   }
 

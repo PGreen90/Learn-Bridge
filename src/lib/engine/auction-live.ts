@@ -1251,6 +1251,33 @@ function kingAskToAnswer(history: ResolvedCall[], seat: Seat): Suit | null {
   return slamAskTrump(history, seat)
 }
 
+/**
+ * RÄTTELSEN över stoppbudet (felrapport #60, §6.1): jag svarade 5♣/5♦ på
+ * partnerns 4NT-essfråga (1 eller 4 / 0 eller 3), partnern stannade i 5-trumf,
+ * och jag sitter med det HÖGA antalet. Stoppbudet betyder "pass med det låga,
+ * bjud vidare med det höga" — annars säljs lillslammen (Nord passade 5♥ med
+ * fyra nyckelkort). Mekaniken fanns i den kanoniska linjen
+ * (`slam-auction.ts`, "RKC: rättelse") men saknades i budlådan. Positionsexakt:
+ * partnerns 4NT → mitt 5♣/5♦ → partnerns 5-trumf → (bara pass). Returnerar
+ * trumf + det höga antalet, annars null.
+ */
+function rkcSignoffCorrectionToBid(history: ResolvedCall[], seat: Seat, hand: Hand): { trump: Suit; high: number } | null {
+  const lastNonPass = [...history].reverse().find((c) => c.bid !== 'P')
+  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
+  let i = history.lastIndexOf(lastNonPass) - 1
+  while (i >= 0 && history[i].bid === 'P') i--
+  const answer = history[i]
+  if (!answer || answer.seat !== seat || (answer.bid !== '5C' && answer.bid !== '5D')) return null
+  let j = i - 1
+  while (j >= 0 && history[j].bid === 'P') j--
+  const ask = history[j]
+  if (!ask || ask.seat !== PARTNER[seat] || ask.bid !== '4NT') return null
+  const trump = slamAskTrump(history, seat)
+  if (!trump || lastNonPass.bid !== `5${letterOfSuit(trump)}`) return null
+  const high = answer.bid === '5C' ? 4 : 3
+  return keycards(hand, trump) === high ? { trump, high } : null
+}
+
 // ---- Kvantitativ höjning av partnerns naturliga 3NT (felrapport #42) --------
 //
 // Systemets slamportar satt bara i den kanoniska linjens NAMNGIVNA mönster
@@ -2301,7 +2328,18 @@ function auctionForce(history: ResolvedCall[], seat: Seat): { kind: 'round' | 'g
     const openerBidSuit = openerBids.some((c) => parseContractBid(c.bid)!.strain === bid.strain)
     const isNewSuit =
       bid.strain !== 'NT' && bid.strain !== open.strain && responderTimesInSuit === 1 && !openerBidSuit
-    if (isNewSuit) return { kind: 'round' }
+    // Undantag (felrapport #59, §5.1): svararens EGEN färg på 2-läget efter
+    // sitt 1NT-svar (1M–1NT–2x–2y) är till spel — svag hand, 5+ kort, inget
+    // stöd. Utan undantaget "tvingades" öppnaren rebjuda sin högfärg (2♠ på
+    // en 5-1-fit) fast partnern bad om att få spela 2♦.
+    const openerRebid = openerBids[1] ? parseContractBid(openerBids[1].bid) : null
+    const ownSuitAfterOwn1NT =
+      open.level === 1 && (open.strain === 'H' || open.strain === 'S') &&
+      firstResp?.level === 1 && firstResp.strain === 'NT' &&
+      responderBids.length === 2 && openerBids.length === 2 &&
+      !!openerRebid && openerRebid.level === 2 && openerRebid.strain !== 'NT' && openerRebid.strain !== open.strain &&
+      bid.level === 2
+    if (isNewSuit && !ownSuitAfterOwn1NT) return { kind: 'round' }
   }
 
   // (b) Öppnarens REVERSE → svararen måste svara (rondkrav).
@@ -4689,6 +4727,17 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   { id: 'kingAskToAnswer',
     run: (c) => answered(kingAskToAnswer(c.history, c.seat),
       (trump) => respondToKingAsk(c.hand, trump), c.history, c.seat) },
+  // Partnern stannade i 5-trumf efter mitt tvetydiga svar (5♣ = 1/4, 5♦ = 0/3)
+  // och jag har det höga antalet → lyfter själv till 6 (felrapport #60, §6.1).
+  { id: 'rkcSignoffCorrection',
+    run: (c) => answered(rkcSignoffCorrectionToBid(c.history, c.seat, c.hand),
+      (d) => ({
+        call: `6${letterOfSuit(d.trump)}`,
+        rule: 'RKC: rättelse',
+        explanation:
+          `Mitt svar visade ${d.high === 4 ? '1 ELLER 4' : '0 ELLER 3'} nyckelkort och partnern räknade lågt i sitt stopp — ` +
+          `jag har ${d.high} → lyfter till 6${SWE_SYM[letterOfSuit(d.trump)]}.`,
+      }), c.history, c.seat) },
   // Öppnarens rond-2 i det INKLÄMDA konkurrensläget + partnerns svar på
   // maximal-dubblingen (R1 Fynd #2 delbit 6). Måste ligga FÖRE
   // maybePenaltyDouble: i det inklämda läget är X reserverat för game try

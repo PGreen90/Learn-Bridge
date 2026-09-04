@@ -858,6 +858,13 @@ export function openerThirdBidAfterSemiForcing1NT(
     return { call: 'P', rule: 'pass', explanation: `Minimum → passar inbjudan (3${mSym}).` }
   }
 
+  // Svararens EGEN färg efter 1NT (§5.1, felrapport #59): till spel — svag
+  // hand, 5+ kort, förnekar stöd. Vi har redan visat minimum → pass.
+  if (second.rule === 'ny färg efter 1NT') {
+    const s = suitOfCall(second.call)
+    return { call: 'P', rule: 'pass', explanation: `Partnerns egen ${s ? SYM[s] : 'färg'} efter 1 sang är till spel (svag hand, 5+ kort) → pass.` }
+  }
+
   if (second.call !== '2NT') return null
 
   // 2NT efter vårt 2M-återbud (6+ kort): rätta alltid till färgen.

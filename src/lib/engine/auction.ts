@@ -979,7 +979,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     // ETAPP 5 fix 2: samma sak efter semi-forcing 1NT (1♥/1♠–1NT–…). Öppnaren
     // svarade förr inte alls på svararens inbjudan → off-book-lagret passade
     // och utgången försvann (frö 20260843: 2NT med AQT863 + 14 hp, 4♠ hemma).
-    if ((opening.call === '1H' || opening.call === '1S') && response.rule === 'semi-forcing 1NT' && second.rule.startsWith('inbjudan')) {
+    if ((opening.call === '1H' || opening.call === '1S') && response.rule === 'semi-forcing 1NT' && (second.rule.startsWith('inbjudan') || second.rule === 'ny färg efter 1NT')) {
       const third = openerThirdBidAfterSemiForcing1NT(
         deal.hands[openerSeat],
         opening.call === '1H' ? 'hearts' : 'spades',
