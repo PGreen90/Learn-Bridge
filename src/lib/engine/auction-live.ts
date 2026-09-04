@@ -4929,9 +4929,32 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
 ]
 
 export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): ResolvedCall {
+  return decideCallTraced(deal, history, seat).call
+}
+
+/**
+ * Ett bud med sin KÄLLA — var i motorn beslutet togs. Motorbytets mätrigg
+ * (docs/motorbyte-plan.md etapp 0): auktionsdumpen skriver källan per bud så
+ * att diffen mellan två körningar visar inte bara ATT ett bud ändrats utan
+ * vilken väg som tog det, och så att familjernas ordning i etapp 4 kan mätas
+ * (hur ofta varje detektor faktiskt avgör ett bud). Källorna:
+ *   'ingen öppning'        ingen stol öppnar → alla passar
+ *   'manus'                budet lästes ur `buildAuction`-linjen
+ *   'väckning'             linjens pass byttes mot väckning efter spärrhöjning
+ *   'konkurrens-slam'      competitiveRKCPlace/competitiveSlamTry
+ *   'detektor:<id>'        en detektor i FORCED_/CONTESTED_DETECTORS
+ *   'pass (ingen regel)'   ingen regel hade något att säga
+ * Själva beslutet är oförändrat — `decideCall` är bara `.call` av detta.
+ */
+export interface TracedCall {
+  call: ResolvedCall
+  källa: string
+}
+
+export function decideCallTraced(deal: Deal, history: ResolvedCall[], seat: Seat): TracedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
   const built = buildAuction(deal)
-  if (!built) return pass // ingen öppnar given → alla passar
+  if (!built) return { call: pass, källa: 'ingen öppning' } // ingen öppnar given → alla passar
 
   const line = turnsToCalls(built.turns, deal.dealer)
   const offBook = divergedFromLine(history, line)
@@ -4945,21 +4968,21 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
     if (next && next.seat === seat) {
       if (next.bid === 'P') {
         const wake = defendRaisedPreemptCall(c)
-        if (wake && wake.bid !== 'P') return wake
+        if (wake && wake.bid !== 'P') return { call: wake, källa: 'väckning' }
       }
-      return next
+      return { call: next, källa: 'manus' }
     }
   }
 
   // Etapp 7 hål D: konkurrens-slaminvit (kontroll-komplett 4NT + placering) —
   // FÖRE utgångshöjningarna och det nakna passet.
   const slamStep = competitiveRKCPlace(deal, history, seat) ?? competitiveSlamTry(deal, history, seat)
-  if (slamStep) return slamStep
+  if (slamStep) return { call: slamStep, källa: 'konkurrens-slam' }
 
   // Tvingande svar — gäller ÄVEN on-book (kedjan FORCED_DETECTORS ovan).
   for (const d of FORCED_DETECTORS) {
     const call = d.run(c)
-    if (call) return call
+    if (call) return { call, källa: `detektor:${d.id}` }
   }
 
   // Konkurrenskedjan CONTESTED_DETECTORS — bara när linjen inte styr längre:
@@ -4968,9 +4991,9 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
   if (offBook || lineExhaustedOpen) {
     for (const d of CONTESTED_DETECTORS) {
       const call = d.run(c)
-      if (call) return call
+      if (call) return { call, källa: `detektor:${d.id}` }
     }
   }
 
-  return pass
+  return { call: pass, källa: 'pass (ingen regel)' }
 }

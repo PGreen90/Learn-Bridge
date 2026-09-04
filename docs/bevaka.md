@@ -18,6 +18,8 @@
   rebjudna färg — frö 20262632 `1♦–(1♠)–2♥–P–3♦–P–5♦` med ♥AKJ87542: den
   egna 8-korts färgen ska vinna över en 3-korts minorfit (4♥, inte 5♦).
   Repro: `$env:DUMP='20262632'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`.
+  Facit-kö (motorbytet etapp 0, 2026-09-04): `motorbyte-facit.test.ts`, lagas i
+  etapp 4 familj 4 — inte i det gamla lagret.
 
 ## Höjning på visad längd (2026-09-02, pliktsvepet K3)
 - Advancern höjer nu partnerns 1-lägesinkliv på **3-korts stöd från 6 hp**
@@ -29,6 +31,8 @@
   20261162) och advancern passade 3♠ med 12 hp och stöd i båda minorerna (frö
   20262021). Kandidater för svepet när vår sidas plikter är klara.
   Repro: `$env:DUMP='20261162,20262021'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`.
+  Facit-kö (motorbytet etapp 0, 2026-09-04): `motorbyte-facit.test.ts` (5♣
+  resp. 4♣ föreslaget), lagas i etapp 4 familj 1.
 
 ## Inklivaren svarar advancerns cue-höjning (2026-09-02, pliktsvepet K1)
 - Efter deras öppning, vårt inkliv och partnerns cue i deras färg (limithöjning+)

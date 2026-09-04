@@ -12,12 +12,15 @@
 ### Svep: grundläggande partnerskapsplikter i konkurrens (ägarbeslut 2026-09-02) — PAUSAT 2026-09-04
 **Läge 2026-09-04:** K1, K3, K2, K5 KLARA & LIVE (mergepunkter `842809b` +
 `e7a3931`). Svepet PAUSADES när motorbytet blev NU (`docs/motorbyte-plan.md`,
-grind 0): resterna lagas inte i det gamla lagret utan blir facit-fall i
-motorbytets etapp 4, familj 4 (fria bud/höjningar/lagen om totala stick):
-- frö 20262632 — svararens egen 8-korts färg ska vinna över en 3-korts
-  minorfit (`1♦–(1♠)–2♥–P–3♦–P–5♦` → 4♥).
-- motståndarnas fortsättning efter våra nya höjningar (ny K-check i proben).
-Båda beskrivna i `docs/bevaka.md`. Riggen `pliktsvep.probe.test.ts` körs vidare
+grind 0): resterna lagas inte i det gamla lagret utan ligger som `it.todo`-facit
+i `src/lib/engine/motorbyte-facit.test.ts` (etapp 0, 2026-09-04) och lagas när
+familjen kommer i etapp 4:
+- frö 20262632 (familj 4, fria bud/höjningar) — svararens egen 8-korts färg
+  ska vinna över en 3-korts minorfit (`1♦–(1♠)–2♥–P–3♦–P–5♦` → 4♥).
+- frö 20261162 + 20262021 (familj 1, inkliv och advance) — motståndarnas
+  fortsättning efter våra nya höjningar: 2NT-bjudaren med 6-5/20 hp bjuder
+  5♣ över 4♥; advancern med 12 hp och stöd i båda lågfärgerna bjuder 4♣ över 3♠.
+Alla beskrivna i `docs/bevaka.md`. Riggen `pliktsvep.probe.test.ts` körs vidare
 som skyddsnät efter varje familj i bytet.
 
 Bakgrund: felrapporterna #55 och #56 visade att två av bridgens mest
