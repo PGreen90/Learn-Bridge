@@ -66,7 +66,7 @@ Ingen UI-fil läser manuset (`BuiltAuction`/`turns`). Bytet sker helt INNANFÖR
 - **EN beslutsfunktion.** `decideCall(deal, history, seat)` behåller sin
   signatur men läser bara `deal.hands[seat]`, `deal.dealer`,
   `deal.vulnerability` och `history`. Aldrig en annan hand.
-- **Kikvakten** (*src/lib/engine/kikvakt.test.ts* (planerad fil), byggs i etapp 1): ett
+- **Kikvakten** (`src/lib/engine/kikvakt.test.ts`, byggd i etapp 1): ett
   egenskapstest som byter ut de tre andra händerna mot slumpkort och kräver
   exakt samma bud. Det är ärlig inferens bevisad av maskinen, inte lovad i
   text. Kör: `npx vitest run src/lib/engine/kikvakt.test.ts`.
@@ -188,16 +188,26 @@ som måste bli klart innan appen fungerar.
   färg efter reverse · splintersvarens tabell efter 1♠–3♥ · 4NT över partnerns
   1NT-återbud (kvantitativt eller RKC?) · andra negativa med 4+ hp.
 
-### Etapp 2 — faktalagret (*src/lib/engine/auction-facts.ts* (planerad fil))
-- `auctionFacts(history, seat)` räknar auktionsläget ur betydelserna (listan i
-  §2). Ersätter de spridda hjälparna i `auction-live.ts` (`auctionForce`,
-  `competitionForce`, `agreedTrump`, `partnerLastSuit`, `opponentsHaveBid`,
-  `openingBid`, `freeBidContext`, `strongDoubleContext` m.fl.) — en i taget,
-  med auktionsdiffen noll efter varje byte.
-- Detektorerna FÅR fakta i sin `DetectorCtx` och slutar re-skanna `history`.
-  Inget bud ändras i etapp 2 — det är en ren flytt av var sanningen räknas.
-- **Klart när:** auktionsdiffen noll, ingen detektor läser `history` direkt
-  för det som fakta täcker.
+### Etapp 2 — faktalagret (`auction-facts.ts`) — KLAR 2026-09-04
+- `auctionFacts(history, seat)` räknar auktionsläget EN gång per beslut
+  (`AuctionFacts`): kontraktsbuden per sida, öppning + roller (öppnare/svarare/
+  inklivare/advancer), passad hand, senaste icke-pass/kontraktsbud,
+  utpassningssitsen, partnerns senast visade färg, överenskommen trumf (+ Jacoby-
+  fit), kravläget, det fria budet, den starka dubblingens läge, och
+  betydelsen per bud (`meaning(i)`, memoiserad läsare av `meaningOf`). De
+  spridda hjälparna i `auction-live.ts` (`auctionForce`/`competitionForce`,
+  `agreedTrump`, `jacobyFitTrump`, `partnerLastSuit`, `opponentsHaveBid`,
+  `opponentsBidStrain`, `openingBid`, `freeBidContext`, `strongDoubleContext`)
+  flyttade dit ORDAGRANT. Facit: `auction-facts.test.ts`.
+- Detektorerna FÅR fakta i `DetectorCtx.facts`: de som skannade `history`
+  efter sådant fakta täcker tar nu `c: DetectorCtx` / `f: AuctionFacts` och
+  läser fälten. Inget bud ändrades — en ren flytt av var sanningen räknas
+  (auktionsdiffen noll, loggen).
+- **Klart-villkoret uppfyllt:** auktionsdiffen noll; ingen detektor läser
+  `history` direkt för det fakta täcker (kvar: `legalCalls` — bridge-regeln —
+  och en stol-filtrerad "mitt senaste icke-pass", som inte är ett faktum i
+  lagret). Visade INTERVALL per stol (§2) byggs när familjerna kommer i etapp
+  3 — registret (`rules.ts`) bär idag kravnivå och alert, inte intervall.
 
 ### Etapp 3 — den ostörda linjen utan manus (familj för familj)
 Detta är den stora etappen. Beslutstabellen (*src/lib/engine/auction-decide.ts* (planerad fil))
@@ -310,6 +320,25 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-04 — Etapp 2 KLAR: faktalagret.** Ny fil `auction-facts.ts`
+  (`auctionFacts` → `AuctionFacts`, fälten i etapp 2-avsnittet) med facit
+  `auction-facts.test.ts`; hjälparna flyttade ordagrant ur `auction-live.ts`
+  (som krympte från 4999 till 4592 rader: `git diff --stat` mot `b8490a7`).
+  `DetectorCtx` fick `facts`; 96 icke-exporterade detektor-/mönsterfunktioner
+  tar nu `c: DetectorCtx` eller `f: AuctionFacts` i stället för `(deal,)
+  history, seat` (`grep -cE "^(function \w+\(|  )[cf]: (DetectorCtx|AuctionFacts)"
+  src/lib/engine/auction-live.ts`). Bytet gjordes i tre mekaniska pass (flytt →
+  fältläsning → resterande skanningar), med typkontroll och auktionsdiff efter
+  varje. **Auktionsdiffen** (kommandot i §3, baslinje på `b8490a7`): 3000
+  givar, ÄNDRAT BUD 0, samma bud med annan regel/källa 0. **Kikvaktens
+  mätläge** (kommandot i §3): oförändrat 2898 bud / 404 byter (13,9 %), alla ur
+  manuset. **Betydelsesvepet** (kommandot i §3): identiskt med mergepunkten —
+  ostört kravnivå 0, alert 3 bud i 1 mönster (= den kända motoravvikelsen
+  2♣–3♦–3♥–4♦, frö 20271084, facit i kön), registerhål 0; kända
+  motoravvikelser 40 bud i 3 mönster (samma tre som i etapp 1-loggen; antalet
+  räknar bud, inte mönster). **Förklaringssvepet**: 0 utan förklaring, 0
+  gissningar. Hela sviten grön (`npm test`), `npx tsc` rent. Inga bud ändrade
+  → inget grindbeslut; nästa: etapp 3 familj 1 (öppningen).
 - **2026-09-04 — Etapp 1 KLAR: betydelselagret.** `auction-interpret.ts` →
   `auction-meaning.ts` (git mv; `meaningOf` + den ostörda läsaren, §4–§6 i
   kod), `auction-interpret.ts` = tunn läsare. Betydelsesvepet

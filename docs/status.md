@@ -361,6 +361,11 @@ Budgivningen är medvetet delad i **tre lager med olika ansvar**:
    (`divergedFromLine`). Tar sedan över live via en **ordnad kedja av detektorer**
    (`…ToAnswer`/`…ToCorrect`/`…Rescue`) + `offBookResponse`. All konkurrens BORTOM
    den enda ronden i `auction.ts`, och alla svar på Syds egna bud, bor här.
+   Sedan motorbytets etapp 2 (2026-09-04) läser detektorerna auktionsläget ur
+   **`auction-facts.ts`** (`auctionFacts` → `AuctionFacts` i `DetectorCtx.facts`:
+   öppning/roller, kontraktsbud per sida, krav, trumf, partnerns färg,
+   utpassningssits, passad hand, betydelse per bud) i stället för att skanna
+   `history` själva — steg 2 "fakta" i den nya beslutsfunktionen.
 3. **`auction-interpret.ts` (`interpretCall`) — FÖRKLARANDE.** Översätter ett bud
    till läsbar text för användaren. Sedan motorbytets etapp 1 (2026-09-04) är
    den en tunn läsare av **`auction-meaning.ts`** (`meaningOf`): använder motorns
