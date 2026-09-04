@@ -125,10 +125,22 @@ Hela sviten (`npm test`) är grunden. Ovanpå den, per etapp och per familj:
   ändringsloggen med datum.
 - **Riggarna** `pliktsvep.probe`, `forklaringssvep.probe`, `regelsvep.probe`
   körs efter varje familj (kommandon i respektive fil).
-- **Betydelsesvepet (byggs i etapp 1):** för varje botbud ska den härledda
-  betydelsen stämma med regeln motorn satte. Avvikelse = betydelselagret har
-  ett hål, lagas innan familjen som behöver det byggs.
-- **Kikvakten** från etapp 1 och framåt.
+- **Betydelsesvepet (BYGGT i etapp 1, 2026-09-04):** för varje botbud i en
+  ostörd auktion jämförs den HÄRLEDDA betydelsen (regeln bortskalad, som för
+  ett människobud) med regeln motorn satte, på två axlar registret kan svara
+  på: kravnivå (under utgång, plus slamintresse) och alert. Avvikelse =
+  betydelselagret har ett hål — lagas där, aldrig i motorn. Störda auktioner
+  mäts men grindas i etapp 4. Bud där MOTORN avviker från boken listas som
+  "kända motoravvikelser" med facit i `motorbyte-facit.test.ts` (utanför
+  grinden, aldrig utan facit-fall):
+  `$env:BETYDELSE='1'; npx vitest run src/lib/engine/auction-meaning.probe.test.ts`
+  → `revisor-output/betydelsesvep.txt` (~3 s).
+- **Kikvakten (BYGGD i etapp 1):** `npx vitest run src/lib/engine/kikvakt.test.ts`.
+  Del 1 (betydelselagret tar ingen giv) är skarp. Del 2 (`decideCall` ger samma
+  bud med tre slumpade andra händer) är `it.todo` till etapp 3; tills dess finns
+  MÄTLÄGET som visar hur mycket dagens motor kikar:
+  `$env:KIKVAKT='1'; npx vitest run src/lib/engine/kikvakt.test.ts` →
+  `revisor-output/kikvakt.txt`.
 - **Facit-testerna** behålls allihop. De filer som anropar `buildAuction`
   direkt (`grep -l "buildAuction(" src/lib/engine/*.test.ts`) fortsätter
   fungera via hjälparen; de som testar manusets INTERNA form
@@ -154,21 +166,27 @@ som måste bli klart innan appen fungerar.
 - **Klart när:** diff-skriptet visar noll skillnad mellan två körningar av
   samma kod, och baslinjerna står i loggen. ✔ Båda uppfyllda (loggen).
 
-### Etapp 1 — betydelselagret (*src/lib/engine/auction-meaning.ts* (planerad fil))
+### Etapp 1 — betydelselagret (`auction-meaning.ts`) — KLAR 2026-09-04
 - `meaningOf(history, index)` ger varje bud sin systembetydelse ur auktionen
-  ensam. Startpunkt: `interpretCall`:s säkra gren + regelregistret i `rules.ts`
-  (`forcingOf`, `isAlertRule`, `ruleInfo`). Bär budet en regel från motorn
-  används den; saknas regel (människans bud) härleds betydelsen. Målet är att
-  den härledda betydelsen alltid stämmer med regeln, så regeln blir en cache.
-- `interpretCall` blir en tunn läsare av `meaningOf` (förklaringstexterna
-  behålls oförändrade — förklaringssvepet vaktar).
-- Betydelsesvepet (*auction-meaning.probe.test.ts* (planerad fil)) byggs och körs till noll
-  avvikelser på botbud i ostörda auktioner. Störda auktioner får sitt svep i
-  etapp 4.
-- Kikvakten byggs (trivial för `interpretCall`, skarp för `decideCall` från
-  etapp 3).
-- **Klart när:** betydelsesvepet grönt på ostörda auktioner, auktionsdiffen
-  noll (inget bud har ändrats — bara förklaringsvägen).
+  ensam: `{ rule, forcing, alert, text, confidence, källa }`. Bär budet en regel
+  från motorn används den (källa 'regel' — regeln är en cache); saknas regel
+  (människans bud, eller ett botbud med regeln bortskalad) härleds betydelsen
+  (källa 'härledd'). Kärnan är den OSTÖRDA LÄSAREN: systembokens §4–§6 i kod
+  (`undisturbed` → `slamZone` / sangsystemet / 2♣ / 1M / 1m / svaga tvåor /
+  spärrar), som sätter registrets regelnamn där boken namnger konventionen, så
+  kravnivå och alert kommer ur `rules.ts` — samma källa som motorns bud.
+- `interpretCall` är en tunn läsare av `meaningOf` (texterna vaktas av
+  förklaringssvepet + `auction-interpret.test.ts`; UI:t rörde vi inte).
+- Betydelsesvepet och kikvakten byggda (§3). Registret fick kravnivå för 28
+  regler motorn redan producerade men som saknades (`rules.test.ts` listar dem).
+- Facit-kön fick tre motorfynd som `it.todo` (2♣-familjen ×2, svaga tvåor ×1).
+- **Klart-villkoret uppfyllt:** betydelsesvepet noll kravnivå- och alert-
+  avvikelser på ostörda auktioner (tre bud i kända motoravvikelser, alla med
+  facit), auktionsdiffen noll ändrade bud, hela sviten grön (loggen).
+- **Öppna bok-mot-motor-frågor** (ägarbeslut när familjen kommer, listade i
+  loggen 2026-09-04): fjärde färg efter reverse · höjningen av öppnarens andra
+  färg efter reverse · splintersvarens tabell efter 1♠–3♥ · 4NT över partnerns
+  1NT-återbud (kvantitativt eller RKC?) · andra negativa med 4+ hp.
 
 ### Etapp 2 — faktalagret (*src/lib/engine/auction-facts.ts* (planerad fil))
 - `auctionFacts(history, seat)` räknar auktionsläget ur betydelserna (listan i
@@ -292,6 +310,46 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-04 — Etapp 1 KLAR: betydelselagret.** `auction-interpret.ts` →
+  `auction-meaning.ts` (git mv; `meaningOf` + den ostörda läsaren, §4–§6 i
+  kod), `auction-interpret.ts` = tunn läsare. Betydelsesvepet
+  (`auction-meaning.probe.test.ts`) och kikvakten (`kikvakt.test.ts`) byggda.
+  **Mätning före → efter** (`$env:BETYDELSE='1'; npx vitest run
+  src/lib/engine/auction-meaning.probe.test.ts`, frön 20270001–20273000, 1388
+  ostörda av 3000 givar, 4998 botbud med regel i ostörda auktioner): kravnivå-
+  avvikelser 2826 bud/106 mönster → **0** · alert 915/37 → **0** · registerhål
+  96 regler → **0** · kända motoravvikelser 3 bud/3 mönster (facit i
+  `motorbyte-facit.test.ts`). Störda auktioner (etapp 4:s svep): kravnivå 1908
+  bud/30 mönster, alert 958/15, registerhål 68 regler. **Auktionsdiffen**
+  (kommandot i §3): 3000 givar, ÄNDRAT BUD 0, samma bud med annan regel 2 —
+  de två etikettfelen som svepet hittade och som rättades i kunskapsmodulerna
+  (`rebids.ts`: 1x–1NT–3m var 'rebid: egen färg' men är 'hopp i egen färg
+  (inbjudan)'; `responder-rebids.ts`: 1NT–2♥–2♠–3♥ var 'utgång' men är 'ny
+  färg (GF)'). Registret: `superaccept` ej-krav → inbjudan (§4.3 "inbjuder
+  utgång"). **Kikvaktens mätläge** (`$env:KIKVAKT='1'; npx vitest run
+  src/lib/engine/kikvakt.test.ts`, frön 20270001–20270300): 2898 bud, **404
+  (13,9 %) byter bud** när de tre andra händerna byts — ALLA ur källan
+  'manus', noll ur detektorerna. Det är måttet på hur mycket manuset kikar;
+  ska bli 0 i etapp 3. **Förklaringssvepet** (`$env:FORKLARINGSSVEP='1'; npx
+  vitest run src/lib/engine/forklaringssvep.probe.test.ts`): 0 bud utan
+  förklaring, 0 gissningar. Hela sviten grön (`npm test`), `npx tsc` rent.
+  **Fynd som lagret följer MOTORN i (boken säger annat — ägarbeslut vid
+  familjen):** (1) fjärde färg spelas även efter reverse (§6.6 undantar);
+  (2) billigaste höjningen av öppnarens andra färg efter reverse är ej krav
+  (§6.6: "redan krav"); (3) splintersvaren efter 1♠–3♥ går 4♣/4♦/4♥ = ♣/♦/♥
+  (§4.1 säger 3NT/4♣/4♥); (4) semi-forcing 1NT och inverterad höjning spelas
+  även av passad hand. **Fynd där motorn bjuder tvetydigt (samma auktion, två
+  betydelser beroende på hand — systemfel, facit i kön):** (5) 2♣–2♦–2M–3♣ är
+  andra negativa med 0–3 hp men naturlig klöver med 4+ (§4.4 säger alltid
+  andra negativa); (6) 4NT över partnerns 1NT-återbud är kvantitativt med jämn
+  hand och RKC med egen färg (§5.7) — lagret läser RKC när frågaren visat en
+  färg; (7) 2♣–3♦–3♥–4♦ (kravsteget: naturligt) mot 2♣–3♦–3♠–4♦ (manuset:
+  cue); (8) öppnaren höjer partnerns kravfärg till 5M över svag tvåa.
+  Motorns cue-konvention som lagret nu läser: svararen i utgångskrav sätter
+  partnerns färg som trumf med ett 4-lägesbud över 3NT (högfärg: alltid,
+  även egen färg; lågfärg: bara utan egen visad färg); den balanserade
+  2♣-svararen cue:ar redan på 3-läget; med trumf satt av båda cue:as även i
+  egen färg när partnern just cue:at.
 - **2026-09-04 — Etapp 0 KLAR: rigg och baslinjer.** Byggt: `decideCallTraced`
   (källa per bud, `decideCall` = `.call` av den — inget bud ändrat), intervall-
   läget `DUMP_RANGE`/`DUMP_OUT` i `auktionsdump.probe.test.ts`, frekvensbilden,

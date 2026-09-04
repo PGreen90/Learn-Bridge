@@ -362,9 +362,12 @@ Budgivningen är medvetet delad i **tre lager med olika ansvar**:
    (`…ToAnswer`/`…ToCorrect`/`…Rescue`) + `offBookResponse`. All konkurrens BORTOM
    den enda ronden i `auction.ts`, och alla svar på Syds egna bud, bor här.
 3. **`auction-interpret.ts` (`interpretCall`) — FÖRKLARANDE.** Översätter ett bud
-   till läsbar text för användaren. Använder motorns `rule` när budet har en
-   (`confidence: säker`); annars en SEPARAT heuristik (bara för människans
-   off-book-bud utan regel).
+   till läsbar text för användaren. Sedan motorbytets etapp 1 (2026-09-04) är
+   den en tunn läsare av **`auction-meaning.ts`** (`meaningOf`): använder motorns
+   `rule` när budet har en (`confidence: säker`); annars härleds betydelsen ur
+   auktionen ensam — hela den ostörda 2/1-strukturen (§4–§6) i kod, vaktad av
+   betydelsesvepet (`docs/motorbyte-plan.md` §3). Lagret blir steg 1 "betydelse"
+   i den nya beslutsfunktionen; det här avsnittet skrivs om i etapp 5.
 
 **`open`-flaggan är seamen.** `auction.ts` säger via `open` "jag är klar med det
 jag modellerar — auktionen är fortfarande öppen, ta vid". `decideCall` läser det
