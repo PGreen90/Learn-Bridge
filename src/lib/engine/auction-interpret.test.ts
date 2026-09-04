@@ -191,7 +191,9 @@ describe('felrapport #9 – svar på negativ dubbling + 4NT-essfrågan', () => {
     expect(r.text).toMatch(/essfråga/i)
     expect(r.text).toMatch(/1430/)
     expect(r.text).not.toMatch(/till spel/i)
-    expect(r.forcing).toBe('krav-1-rond')
+    // Kravnivån kommer ur regelregistret ('1430 RKC' = slamintresse) sedan
+    // betydelselagret (motorbytet etapp 1) — inte heuristikens gamla 'krav-1-rond'.
+    expect(r.forcing).toBe(ruleInfo('1430 RKC').forcing)
   })
 })
 
@@ -213,7 +215,8 @@ describe('etablerad högfärgsfit: 4-läges sidobud = kontrollbud (ej färghöjn
     expect(r.text).toMatch(/spader/i)
     expect(r.text).not.toMatch(/ruter/i)
     expect(r.text).not.toMatch(/höjning/i)
-    expect(r.forcing).toBe('krav-1-rond')
+    // Kravnivån ur registret ('cue-bid' = slamintresse), se betydelselagret.
+    expect(r.forcing).toBe(ruleInfo('cue-bid').forcing)
   })
 
   it('4♦ (äkta kontroll) läses också som kontrollbud, inte höjning', () => {
@@ -237,13 +240,14 @@ describe('etablerad högfärgsfit: 4-läges sidobud = kontrollbud (ej färghöjn
 // är den färgen.
 describe('felrapport #10 – 4NT på partnerns spärröppning tolkas som essfråga', () => {
   it('P–3♠–P–4NT = essfråga 1430 RKC med spader som trumf', () => {
+    // Kravnivån ur registret ('1430 RKC' = slamintresse) sedan betydelselagret.
     const hist = h(['W', 'P'], ['N', '3S'], ['E', 'P'], ['S', '4NT'])
     const r = interpretCall(hist, 3)
     expect(r.text).toMatch(/essfråga/i)
     expect(r.text).toMatch(/1430/)
     expect(r.text).toMatch(/spader/i)
     expect(r.text).not.toMatch(/till spel/i)
-    expect(r.forcing).toBe('krav-1-rond')
+    expect(r.forcing).toBe(ruleInfo('1430 RKC').forcing)
   })
 
   it('1NT–4NT förblir kvantitativt/naturligt (INTE essfråga)', () => {

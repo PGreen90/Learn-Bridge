@@ -2074,6 +2074,16 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-04 — Betydelselagret (motorbytet etapp 1, `docs/motorbyte-plan.md`).**
+  Inga bud ändrade. Förklaringen av ett bud läses nu ur `auction-meaning.ts`,
+  som kan hela den ostörda strukturen i §4–§6 ur auktionen ensam (samma
+  funktion för bot och människa). Tre rättelser som syns för användaren:
+  kravnivån för **superaccept** (§4.3) var 'ej krav' i registret men är
+  'inbjudan'; öppnarens hopp **1x–1NT–3m** var märkt 'rebid: egen färg' (ej
+  krav) men är 'hopp i egen färg (inbjudan)' (§5.2); svararens **3♥ efter
+  1NT–2♥–2♠** (5-5, §4.3) var märkt 'utgång' men är utgångskrav. Åtta ställen
+  där motorn och boken säger olika saker är listade i motorbytesplanens logg
+  och avgörs av ägaren när familjen flyttar (etapp 3).
 - **2026-09-04 — Felrapporterna #59 + #60 (§5.1, §6.1).** **(#59, bricka 6)**
   1♠–P–1NT–P–2♣–P–**P** med ♠A ♥QJ943 ♦KJT852 ♣T. Boken sa redan att en ny
   färg av svararen efter 1NT lovar 5+ kort och förnekar stöd, men regeln

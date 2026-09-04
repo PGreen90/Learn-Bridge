@@ -48,6 +48,18 @@ const ALL_ENGINE_RULES: string[] = [
   'svararens pass', 'svararens signoff', 'till spel', 'transfer (2NT)',
   'trumfdam: ja + kung', 'trumfdam: ja, ingen sidokung', 'trumfdam: nej',
   'tvetydig splinter', 'upplysningsdubbling', 'utgång',
+  // Regler som fanns i motorn men saknades här OCH i registret (hittade av
+  // betydelsesvepet, motorbytet etapp 1, 2026-09-04).
+  'New Minor Forcing', 'svar på New Minor Forcing', 'placering efter NMF',
+  '2NT-checkback', 'svar på 2NT-checkback', 'placering efter 2NT-checkback',
+  '2NT-återbud (5-3-jakt)', 'svar på 2NT-återbud (5-3-jakt)',
+  'svar på fjärde färg', 'fjärde färg: placerar utgång', 'fjärde färg: utgång i fit',
+  '2/1: fortsättning', 'rebjuden färg (inbjudan)', 'hopphöjning (inbjudan)',
+  'inbjudan antagen', 'accepterar sanginbjudan', 'väljer högfärgsutgång',
+  'Drury: accepterar utgångsförsök', 'slaminbjudan', 'slaminbjudan: accept',
+  'slamtrevare efter 3NT', 'cue: avslut', 'krav – rebjuder egen färg',
+  'krav – stödjer partnern', 'krav – ny färg', 'krav – sang', 'stöd-cue (slamintresse)',
+  'RKC: stopp',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

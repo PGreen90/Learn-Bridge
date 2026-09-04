@@ -481,7 +481,10 @@ export function openerRebidAfterLimitedResponse(hand: Hand, response: ResponseRe
       if (sp.points >= 16 && (opened === 'clubs' || opened === 'diamonds') && len[opened] >= 6 && fiveMajor) {
         return { call: `2${BID[fiveMajor]}`, rule: 'reverse', explanation: `16+ reverse → 2${SYM[fiveMajor]} (visar ${SYM[fiveMajor]} vid sidan av ${SYM[opened]}).` }
       }
-      if (p >= 16 && len[opened] >= 6) return { call: `3${BID[opened]}`, rule: 'rebid: egen färg', explanation: `6+ ${SYM[opened]} → 3${SYM[opened]} (16+, inbjudan).` }
+      // Regeln var felmärkt 'rebid: egen färg' (ej krav) fast budet är hoppet
+      // med inbjudan (§5.2) — hittat av betydelsesvepet 2026-09-04. Bara etiketten
+      // ändrad, samma bud.
+      if (p >= 16 && len[opened] >= 6) return { call: `3${BID[opened]}`, rule: 'hopp i egen färg (inbjudan)', explanation: `6+ ${SYM[opened]} → 3${SYM[opened]} (16+, inbjudan).` }
       return pass
     }
     case 'svagt hoppskift': {

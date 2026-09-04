@@ -37,6 +37,8 @@ const ALERT_RULE_PREFIXES: string[] = [
   'Drury',
   'Smolen',
   'fjärde färg krav',
+  'New Minor Forcing', // konstgjord fråga (§5.7)
+  '2NT-checkback', // konstgjord fråga (§5.2)
   '2♦ väntebud',
   'stark 2♣',
   // Slamverktyg (konstgjorda frågor/svar)
@@ -142,7 +144,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'andra negativa': 'ej-krav',
   'fullföljd transfer': 'ej-krav',
   färgbud: 'ej-krav',
-  superaccept: 'ej-krav',
+  superaccept: 'inbjudan', // hoppet till 3M inbjuder utgång (§4.3); var felaktigt 'ej-krav' (rättat 2026-09-04)
   minorsvar: 'ej-krav',
 
   // ---- Krav 1 rond ----
@@ -282,6 +284,40 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'Ogust: max/dålig': 'ej-krav',
   'Ogust: max/bra': 'ej-krav',
   'Ogust: max/utmärkt': 'ej-krav',
+
+  // ---- Regler som saknade kravnivå (betydelsesvepet, motorbytet etapp 1) ----
+  // Ostörda sekvenser: NMF (§5.7), checkback (§5.2), fjärde färg (§6.6),
+  // 2/1-fortsättningar (§5.3), inbjudningar, slaminbjudan (§5.2), kravsteget.
+  'New Minor Forcing': 'krav-1-rond',
+  'svar på New Minor Forcing': 'ej-krav',
+  'placering efter NMF': 'avslut',
+  '2NT-checkback': 'krav-1-rond',
+  'svar på 2NT-checkback': 'ej-krav',
+  'placering efter 2NT-checkback': 'avslut',
+  '2NT-återbud (5-3-jakt)': 'krav-1-rond',
+  'svar på 2NT-återbud (5-3-jakt)': 'avslut',
+  'svar på fjärde färg': 'utgangskrav',
+  'fjärde färg: placerar utgång': 'avslut',
+  'fjärde färg: utgång i fit': 'avslut',
+  '2/1: fortsättning': 'utgangskrav',
+  'rebjuden färg (inbjudan)': 'inbjudan',
+  'hopphöjning (inbjudan)': 'inbjudan',
+  'inbjudan antagen': 'avslut',
+  'accepterar sanginbjudan': 'avslut',
+  'väljer högfärgsutgång': 'avslut',
+  'Drury: accepterar utgångsförsök': 'avslut',
+  slaminbjudan: 'slamintresse',
+  'slaminbjudan: accept': 'avslut',
+  'slamtrevare efter 3NT': 'slamintresse',
+  'cue: avslut': 'avslut',
+  // Kravstegets tvångsbud ("auktionen är krav – jag får inte passa"): kravet
+  // som tvingar är i ostörda auktioner utgångskravet (2♣, 2/1, fjärde färg).
+  'krav – rebjuder egen färg': 'utgangskrav',
+  'krav – stödjer partnern': 'utgangskrav',
+  'krav – ny färg': 'utgangskrav',
+  'krav – sang': 'utgangskrav',
+  'stöd-cue (slamintresse)': 'slamintresse',
+  'RKC: stopp': 'avslut',
 }
 
 /** Kravnivå (§2) för ett bud givet dess regel, eller undefined om okänd. */

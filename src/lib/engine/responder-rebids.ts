@@ -502,7 +502,9 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
       if (len.hearts === 5 && len.spades === 5) {
         return target === 'hearts'
           ? { call: '2S', rule: 'inbjudan', explanation: `5-5 i högfärgerna → 2♠ (inbjudan; öppnaren väljer).` }
-          : { call: '3H', rule: 'utgång', explanation: `5-5 i högfärgerna, utgångskrav → 3♥ (öppnaren väljer högfärg).` }
+          : // Var felmärkt 'utgång' (avslut) fast budet är utgångskrav — etiketten
+            // rättad av betydelsesvepet 2026-09-04, samma bud.
+            { call: '3H', rule: 'ny färg (GF)', explanation: `5-5 i högfärgerna, utgångskrav → 3♥ (öppnaren väljer högfärg).` }
       }
       if (len[target] >= 6) {
         if (p >= 10) return { call: `4${tBid}`, rule: 'utgång', explanation: `Utgångsvärden, 6+ ${SYM[target]} → 4${tSym}.` }
