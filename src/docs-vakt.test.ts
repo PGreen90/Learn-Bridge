@@ -56,7 +56,7 @@ const läs = (f: string) => readFileSync(f, 'utf8')
 // === 1. Varje kodfil som ett levande dokument nämner måste finnas ===========
 
 // Filer som nämns men medvetet INTE finns i repot (genereras vid körning).
-const GENERERADE = new Set(['manifest.json', 'latest.json', 'speldiagnos-latest.json'])
+const GENERERADE = new Set(['manifest.json', 'latest.json', 'speldiagnos-latest.json', 'auktionsdump.json'])
 
 function källfiler(): Set<string> {
   const namn = new Set<string>()
