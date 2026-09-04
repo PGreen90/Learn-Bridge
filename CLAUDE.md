@@ -20,9 +20,11 @@ grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbet
 **Regler under bytet:** inga lappar i manuset/detektorkedjan; felrapporter får
 facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
 session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
-**Nästa gång börjar vi med:** etapp 0 — auktionsdumpens intervall-läge,
-diff-skriptet och baslinjerna (auktionsdump + revisorn). Pliktsvepet är PAUSAT
-(resterna = facit i etapp 4, se `docs/senare.md`).
+**Etapp 0 KLAR 2026-09-04** (rigg + baslinjer, loggen i planen): `decideCallTraced`
+(källa per bud), `DUMP_RANGE`-läget, `scripts/auktionsdiff.mjs`, facit-kön
+`motorbyte-facit.test.ts` (pliktsvepets rester som `it.todo`). **Nästa gång
+börjar vi med:** etapp 1 — betydelselagret *auction-meaning.ts* (planerad fil, `meaningOf`),
+betydelsesvepet och kikvakten; auktionsdiffen ska vara noll efter etappen.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

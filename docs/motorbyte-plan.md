@@ -96,13 +96,26 @@ Ingen UI-fil läser manuset (`BuiltAuction`/`turns`). Bytet sker helt INNANFÖR
 
 Hela sviten (`npm test`) är grunden. Ovanpå den, per etapp och per familj:
 
-- **Auktionsdiffen (byggs i etapp 0).** `auktionsdump.probe.test.ts` får ett
-  intervall-läge som bjuder tusentals frön och skriver JSON. Ett diff-skript
-  jämför två körningar och listar varje giv där auktionen ändrats, med
-  regelnamn per bud. Baslinjen tas från mergepunkten före bytet (aldrig
-  commitad, återskapas ur git):
-  `$env:DUMP_RANGE='20270001-20273000'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`
-  → `revisor-output/auktionsdump.json`. Varje ändrad giv klassas:
+- **Auktionsdiffen (BYGGD i etapp 0, 2026-09-04).** `auktionsdump.probe.test.ts`
+  har ett intervall-läge som bjuder tusentals frön och skriver JSON med regel
+  OCH KÄLLA per bud (`decideCallTraced` i `auction-live.ts`: manus /
+  detektor:<id> / väckning / konkurrens-slam / pass utan regel — samma beslut
+  som `decideCall`, bara med vägen synlig). Skriptet `scripts/auktionsdiff.mjs`
+  jämför två körningar och listar varje giv där ett bud ändrats (händer, båda
+  auktionerna, första skillnaden med regel + källa + förklaring); "samma bud
+  men annan regel/källa" räknas separat. Avslutningskod 1 vid ändrat bud.
+  Baslinjen tas på mergepunkten före ändringen (aldrig commitad, återskapas ur
+  git) och sparas undan med `DUMP_OUT`:
+  ```
+  $env:DUMP_RANGE='20270001-20273000'; $env:DUMP_OUT='revisor-output/auktionsdump-baslinje.json'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
+  $env:DUMP_RANGE='20270001-20273000'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
+  node scripts/auktionsdiff.mjs revisor-output/auktionsdump-baslinje.json revisor-output/auktionsdump.json
+  ```
+  (första raden på baslinje-commiten, andra på arbetsträdet; ~2 s per körning;
+  full lista i `revisor-output/auktionsdiff.txt`). Intervall-läget skriver
+  också `revisor-output/auktionsdump-frekvens.txt` — hur ofta varje källa och
+  regel avgjorde ett bud, som styr familjeordningen i etapp 4. Varje ändrad
+  giv klassas:
   **(a)** samma bud (borde vara majoriteten), **(b)** bättre enligt bokens
   paragraf (skrivs in i ändringsloggen med frö), **(c)** sämre = fel som lagas
   före merge. Inget mergas med en oklassad ändring.
@@ -128,17 +141,18 @@ Varje etapp är testdriven som alltid (facit före fix). Ordningen är vald så 
 motorn är körbar och deploybar efter VARJE familj — aldrig ett halvbyggt läge
 som måste bli klart innan appen fungerar.
 
-### Etapp 0 — baslinje och rigg (ingen motorändring)
+### Etapp 0 — baslinje och rigg (ingen motorändring) — KLAR 2026-09-04
 - Auktionsdumpens intervall-läge + JSON-utdata + diff-skriptet
   (`scripts/auktionsdiff.mjs`: två JSON-filer in, ändrade givar ut med regel
-  per bud).
+  och källa per bud). Källan kommer från `decideCallTraced` (§3).
 - Baslinjer mätta och noterade i ändringsloggen: auktionsdump (frön enligt
   kommandot ovan) och revisorn.
-- Pliktsvepets två rester (frö 20262632 · motståndarnas fortsättning efter
-  våra höjningar, `docs/bevaka.md`) skrivs in som facit-fall i etapp 4:s
-  familjer i stället för att lagas i det gamla lagret.
+- Pliktsvepets rester (frö 20262632 · motståndarnas fortsättning efter våra
+  höjningar, frö 20261162 + 20262021, `docs/bevaka.md`) ligger som `it.todo`-
+  facit i `src/lib/engine/motorbyte-facit.test.ts` — facit-kön för allt som
+  hittas under bytet. När familjen landar byts `it.todo` mot `it`.
 - **Klart när:** diff-skriptet visar noll skillnad mellan två körningar av
-  samma kod, och baslinjerna står i loggen.
+  samma kod, och baslinjerna står i loggen. ✔ Båda uppfyllda (loggen).
 
 ### Etapp 1 — betydelselagret (*src/lib/engine/auction-meaning.ts* (planerad fil))
 - `meaningOf(history, index)` ger varje bud sin systembetydelse ur auktionen
@@ -195,7 +209,11 @@ inte sämre, hela sviten grön, egen mergepunkt. 🚪 Grindbeslut per familj (§
 ### Etapp 4 — konkurrensen (familj för familj)
 Manusets enda konkurrensrond och de 70 detektorerna flyttar in i tabellen.
 Varje familj tar med sig sina detektorer, och detektorn raderas när familjen
-landat. Ordning efter hur ofta läget uppstår i auktionsdumpen (mäts i etapp 0):
+landat. Ordning efter hur ofta läget uppstår i auktionsdumpen (mätt 2026-09-04,
+frekvensbilden i ändringsloggen: dubblingsfamiljen och inklivsfamiljen är
+störst, `offBookResponse` — familj 4:s "partnern visade en färg" — är den
+enskilt största detektorn; ordningen nedan är planens och fastställs mot
+mätningen vid etapp 4:s start):
 
 1. Inkliv och advance (`overcall`, `advanceOvercall`, `advanceTwoSuiter`,
    inklivarens fortsättningar).
@@ -274,6 +292,35 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-04 — Etapp 0 KLAR: rigg och baslinjer.** Byggt: `decideCallTraced`
+  (källa per bud, `decideCall` = `.call` av den — inget bud ändrat), intervall-
+  läget `DUMP_RANGE`/`DUMP_OUT` i `auktionsdump.probe.test.ts`, frekvensbilden,
+  `scripts/auktionsdiff.mjs`, facit-kön `motorbyte-facit.test.ts` (tre `it.todo`:
+  frö 20261162 → 5♣, 20262021 → 4♣, 20262632 → 4♥; facit-buden är förslag som
+  ägaren bekräftar vid familjens grind). Hela sviten grön (`npm test`), `npx tsc`
+  rent. Klart-villkoret: två körningar av samma kod → `ÄNDRAT BUD: 0`,
+  `samma bud, annan regel/källa: 0` (diff-kommandot i §3).
+  **Baslinje auktionsdump** (`$env:DUMP_RANGE='20270001-20273000'; npx vitest
+  run src/lib/engine/auktionsdump.probe.test.ts` → `auktionsdump-frekvens.txt`):
+  3000 givar · 2987 med öppning · 1612 störda (båda sidor bjöd) · 0 oändliga ·
+  28971 bud, varav 16679 manus · 9187 pass utan regel · 52 ingen öppning ·
+  11 väckning · detektorer i fallande ordning: offBookResponse 780 ·
+  ownPreemptInterferenceToAnswer 210 · doublerRaisesAdvance 178 · honorForce 174
+  · takeoutDoubleToAnswer 147 · negativeDoubleToAnswer 140 · answerCueRaise 138
+  · openerReopensAfterPartnerPass 122 · advancerCompetesToFit 108 ·
+  ntInterferenceToAnswer 105 · answerCueBidderRebid 100 (resten < 100, filen).
+  Summerat per etapp 4-familj (samma fil, detektor-id → familj för hand):
+  dubblingar (2) ≈ 520 · inkliv/advance (1) ≈ 400 · spärrar (7) ≈ 220 · mot 1NT
+  (6) ≈ 215 · balansering (5) ≈ 195 · negativ/stöd-X (3) ≈ 195 · fria bud (4)
+  ≈ 130 + offBookResponse 780.
+  **Baslinje revisorn** (`$env:REVISOR='1'; npx vitest run
+  src/lib/engine/revisor.probe.test.ts`, 1000 givar, frö 20260721, ~7 min):
+  rätt kontrakt 20,3 % · snittförlust 268,6 · kategorier (antal/förlust):
+  missad-utgang 142/48100 · fel-farg-bet 118/50260 · battre-an-facit 116/20320
+  · billig-offring 109/28740 · fel-strain 92/2150 · missad-lillslam 80/49730 ·
+  sald-giv 62/20130 · for-hogt 42/10140 · missad-storslam 33/38170 · utpassad
+  3/810 (`revisor-output/latest.json`). Får inte försämras mellan etapperna.
+  Bifynd: `docs/README.md` var dubbelkodad (cp1252-mojibake) sedan 2026-08-07
+  — lagad i samma commit.
 - **2026-09-04** — planen skriven efter ägarens genomgång ("total genomgång,
   lös detta permanent"). Grind 0 tagen: motorbytet är NU, pliktsvepet pausat.
-  Baslinjer mäts i etapp 0 (ännu inte körda).
