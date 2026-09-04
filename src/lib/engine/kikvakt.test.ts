@@ -7,10 +7,11 @@
 //       fält auktioner för att visa att det aldrig behöver en hand (och aldrig
 //       kastar). Byggd i etapp 1.
 //   (2) Beslutsfunktionen — `decideCall(deal, history, seat)` ska ge SAMMA bud
-//       när de tre andra händerna byts mot slumpkort. Skarp från etapp 3
-//       (`it.todo` tills dess). Fram till dess finns MÄTLÄGET som visar hur
-//       ofta dagens manus-motor byter bud när de andra händerna byts — det är
-//       måttet på hur mycket manuset "kikar":
+//       när de tre andra händerna byts mot slumpkort. Skarp FAMILJ FÖR FAMILJ
+//       under etapp 3 (familj 1 öppningsvarvet sedan 2026-09-04); hela
+//       auktionen (`it.todo`) när etapp 3 är klar. Tills dess finns MÄTLÄGET
+//       som visar hur ofta dagens manus-motor byter bud när de andra händerna
+//       byts — det är måttet på hur mycket manuset "kikar":
 //
 //   $env:KIKVAKT='1'; npx vitest run src/lib/engine/kikvakt.test.ts
 //   $env:KIKVAKT_RANGE='20270001-20270300'   (standard)
@@ -62,7 +63,29 @@ describe('kikvakten (1): betydelselagret läser bara auktionen', () => {
 })
 
 describe('kikvakten (2): beslutet läser bara egen hand + auktionen', () => {
-  it.todo('decideCall ger samma bud när de tre andra händerna byts mot slumpkort (skarp från etapp 3)')
+  it.todo('decideCall ger samma bud när de tre andra händerna byts mot slumpkort (skarp för HELA auktionen när etapp 3 är klar)')
+
+  // Skarp familj för familj (etapp 3): varje bud beslutstabellen tagit över
+  // ska överleva att de andra händerna byts. Familj 1 = öppningsvarvet: alla
+  // bud till och med det första icke-passet (eller alla fyra pass).
+  it('familj 1 – öppningsvarvet: samma bud när de tre andra händerna byts (300 givar)', () => {
+    let bud = 0
+    for (let seed = 20270001; seed <= 20270300; seed++) {
+      const deal = dealFromSeed(seed)
+      const history = botAuction(deal)
+      if (!history) continue
+      const första = history.findIndex((c) => c.bid !== 'P')
+      const sista = första === -1 ? history.length - 1 : första
+      for (let i = 0; i <= sista; i++) {
+        const seat = history[i].seat
+        const annan = decideCallTraced(omgivnaAndra(deal, seat, mulberry32(seed * 64 + i)), history.slice(0, i), seat)
+        expect(annan.källa, `frö ${seed} bud ${i + 1}`).toBe('tabell:öppning')
+        expect(annan.call.bid, `frö ${seed} bud ${i + 1}`).toBe(history[i].bid)
+        bud++
+      }
+    }
+    expect(bud).toBeGreaterThan(300)
+  })
 
   it.skipIf(process.env.KIKVAKT !== '1')('MÄTLÄGE: hur ofta byter dagens motor bud när de andra händerna byts?', { timeout: 0 }, () => {
     const m = /^(\d+)-(\d+)$/.exec(process.env.KIKVAKT_RANGE ?? '20270001-20270300')!

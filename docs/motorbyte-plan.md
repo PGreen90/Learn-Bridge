@@ -210,14 +210,18 @@ som måste bli klart innan appen fungerar.
   3 — registret (`rules.ts`) bär idag kravnivå och alert, inte intervall.
 
 ### Etapp 3 — den ostörda linjen utan manus (familj för familj)
-Detta är den stora etappen. Beslutstabellen (*src/lib/engine/auction-decide.ts* (planerad fil))
+Detta är den stora etappen. Beslutstabellen (`src/lib/engine/auction-decide.ts`,
+`decideFromTable(hand, facts, vulnerable)`: rader `{ id, läge(fakta), välj(hand + fakta) }`,
+första träffande rad väljer, ingen rad → det gamla lagret)
 byggs upp familj för familj, och manusets motsvarande gren i `auction.ts`
 rivs när familjen landat. Efter varje familj går alla auktioner genom
 `decideCall` från första budet, med manuset kvar bara för de familjer som
 inte flyttat än.
 
-1. **Öppningen** — `classifyOpening` per stol med position 1–4 och zon
-   (nästan färdig: manuset gör redan detta per stol).
+1. **Öppningen** — `classifyOpening` per stol med position 1–4 och zon.
+   **KLAR 2026-09-04** (loggen): tabellens första rad, läget "ingen har
+   öppnat"; manusets öppningsloop läser tabellen; kikvakten skarp för
+   öppningsvarvet.
 2. **Svaret** — `respondToMajor`/`respondToMinor`/`respondTo1NT`/`respondTo2C`/
    svaga tvåor/spärrar/2NT/Drury, valt ur fakta (öppningsbud, passad hand).
 3. **Öppnarens återbud** — `openerSecondBid` och syskonen i `rebids.ts`.
@@ -320,6 +324,32 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-04 — Etapp 3 familj 1 KLAR: öppningen per stol.** Ny fil
+  `auction-decide.ts` (beslutstabellen, §2 steg 3) med raden *öppning*: läget
+  "ingen har öppnat" (`facts.opening === null`) → `classifyOpening(hand,
+  sårbarhet, position)` där positionen räknas ur passen hittills. `decideCallTraced`
+  frågar tabellen FÖRST (källa `tabell:öppning`); manusets öppningsloop i
+  `auction.ts` läser samma tabell (manuset härleds ur besluten). Facit:
+  `auction-decide.test.ts`; kikvakten skarp för öppningsvarvet
+  (`kikvakt.test.ts`, 300 givar). **Auktionsdiffen** (kommandot i §3, baslinje
+  på `bd8c869`): 3000 givar, ÄNDRAT BUD 0, samma bud med annan källa 3000 —
+  varje öppningsvarv har bytt källa manus → tabell:öppning med samma regel;
+  passen före öppnaren bär nu regeln `pass` med förklaring (förut ingen regel).
+  **Ändrade bud finns bara där människan avvek i öppningsvarvet** — dagens
+  motor hade ingen regel för nästa stol när människan passat en hand manuset
+  "skulle" öppnat, given passades ut (sond 2026-09-04, tre facit-fall i
+  `motorbyte-facit.test.ts`: frö 20270021 → Väst 1NT, 20270018 → Öst 1♠,
+  20270003 → Syd 1♠ i 3:e hand). Bifynd till familj 2 (facit-kön, `it.todo`):
+  öppnar människan en hand motorn inte klassar som öppning, och ingen annan
+  stol gör det, svarar partnern aldrig (`ingen öppning`, frö 20271606).
+  **Kikvaktens mätläge** (kommandot i §3): 2898 bud, 332 byter (11,5 %, från
+  404/13,9 %); `tabell:öppning` 522 bud / 0 byter. **Betydelsesvepet** och
+  **förklaringssvepet**: identiska med etapp 2-loggen (ostört 0/3/0, kända
+  motoravvikelser 40 bud i 3 mönster; 0 utan förklaring, 0 gissningar).
+  Frekvensbilden: manus 16679 → 11333 bud, `tabell:öppning` 5398
+  (auktionsdump-frekvens.txt). Hela sviten grön (`npm test`), `npx tsc` rent.
+  **Revisorn** (kommandot i §3, 1000 givar, frö 20260721): rätt kontrakt
+  20,3 % · snittförlust 268,55 — identiskt med etapp 0-baslinjen (inte sämre).
 - **2026-09-04 — Etapp 2 KLAR: faktalagret.** Ny fil `auction-facts.ts`
   (`auctionFacts` → `AuctionFacts`, fälten i etapp 2-avsnittet) med facit
   `auction-facts.test.ts`; hjälparna flyttade ordagrant ur `auction-live.ts`

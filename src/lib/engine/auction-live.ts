@@ -16,7 +16,9 @@
 import type { Bid, Deal, Hand, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
+import { decideFromTable } from './auction-decide'
 import { turnsToCalls } from './auction-contract'
+import { isVulnerable } from './openings'
 import {
   auctionFacts, isGameOrHigher, parseContractBid, strainRank, PARTNER, STRAINS, SUIT_OF_LETTER, SUIT_STRAINS,
   type AuctionFacts,
@@ -4531,6 +4533,7 @@ export function decideCall(deal: Deal, history: ResolvedCall[], seat: Seat): Res
  * att diffen mellan två körningar visar inte bara ATT ett bud ändrats utan
  * vilken väg som tog det, och så att familjernas ordning i etapp 4 kan mätas
  * (hur ofta varje detektor faktiskt avgör ett bud). Källorna:
+ *   'tabell:<familj>'      beslutstabellen (auction-decide.ts) — den nya motorn
  *   'ingen öppning'        ingen stol öppnar → alla passar
  *   'manus'                budet lästes ur `buildAuction`-linjen
  *   'väckning'             linjens pass byttes mot väckning efter spärrhöjning
@@ -4546,12 +4549,23 @@ export interface TracedCall {
 
 export function decideCallTraced(deal: Deal, history: ResolvedCall[], seat: Seat): TracedCall {
   const pass: ResolvedCall = { seat, bid: 'P' }
+  const hand = deal.hands[seat]
+  const facts = auctionFacts(history, seat)
+
+  // BESLUTSTABELLEN FÖRST (motorbytet etapp 3, docs/motorbyte-plan.md §2):
+  // egen hand + auktionen hittills → ett bud, stol för stol. Täcker tabellen
+  // läget avgörs budet här, utan manus och utan att någon annan hand finns
+  // att läsa. Resten av funktionen är det gamla lagret, som rivs familj för
+  // familj tills tabellen täcker allt.
+  const tabell = decideFromTable(hand, facts, isVulnerable(seat, deal.vulnerability))
+  if (tabell) return tabell
+
   const built = buildAuction(deal)
   if (!built) return { call: pass, källa: 'ingen öppning' } // ingen öppnar given → alla passar
 
   const line = turnsToCalls(built.turns, deal.dealer)
   const offBook = divergedFromLine(history, line)
-  const c: DetectorCtx = { deal, history, seat, hand: deal.hands[seat], facts: auctionFacts(history, seat) }
+  const c: DetectorCtx = { deal, history, seat, hand, facts }
 
   // Följ linjen så länge den verkliga budföljden inte motsagt den — men ett
   // inbakat försvarspass efter deras spärrhöjning får inte tysta väckningen
