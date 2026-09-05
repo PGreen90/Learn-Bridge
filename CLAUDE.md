@@ -45,6 +45,16 @@ nr 10 familj A-slamportens värdering av 6-5-händer).
 reverse-preferens; adaptern för svararens andra bud som öppnaren ser det —
 regelnamnssvepet visade 135 mönster, mest terminala 'till spel'-namn); sedan
 familj 5 slam (sekvensernas fortsättning, kikvakten helt skarp).
+**Startrutin 4b:** (1) ta baslinjerna (auktionsdump + avvikelsedump, planens
+§3) på mergepunkten `45fa322`; (2) ge avvikelsedumpen ett fjärde läge där
+människan bjuder svararens ANDRA bud fritt (bottens tredje bud = 4b:s
+b-lista); (3) regelnamnssvep på svararens andra bud som öppnaren ser det
+(sond som i 4a) → adaptern `secondAsSeen`; (4) raden *tredje* med manusets
+grenar efter `second` i `auction.ts` (2/1 försenat stöd, NMF, 1NT-inbjudan,
+semi-forcing-inbjudan, egen höjning, inverterad broms, reverse-preferens,
+2NT-checkback, 5-3-jakt). **OBS:** fyra familjer (mergepunkterna 451f692,
+5b1a9dc, b56a72f, 45fa322) ligger LOKALT, inte pushade — deployfrågan är
+öppen (Claudes rekommendation 2026-09-05: deploya).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
