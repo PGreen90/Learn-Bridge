@@ -2074,6 +2074,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-05 — Slam efter 1NT-återbudet, obalanserad del (§5.2/§5.7; motorbytet
+  etapp 3 familj 4a).** Kaptenen med säker fit (6+ egen högfärg / 5+ i
+  öppnarens minor) räknar nu **hp** mot visade 12–14, inte stödpoäng: ingen fit
+  är bjuden, så kortfärger får inte lyfta värderingen (15 hp med 6-korts spader
+  → New Minor Forcing som förut, inte slaminbjudan; 10 hp 6-5 → ingen 5♠).
+  Porten slog förr bara till när återbudet var ett "riktigt" 1NT (12–14);
+  reservfallet "oklart" dolde den. Facit: frö 20261317 (`auction-oklart-
+  aterbud.test.ts`, 2026-08-07: "ärligt mot visade intervall = 4♥"), frö
+  20272122 i `motorbyte-facit.test.ts`. Dessutom: efter 1M–2x(2/1) och
+  öppnarens HÖJNING av svararens högfärg under utgång sätter svararen utgång
+  4M (felrapport #27, nu i beslutstabellen).
 - **2026-09-05 — Öppnarens återbud efter svararens nya färg över svag tvåa/
   spärr (§4.5/§4.6; motorbytet etapp 3 familj 3).** Svararens nya färg kan
   ligga högre än billigaste nivån (t.ex. 2♦–3♥, 3♣–4♦): öppnarens återbud

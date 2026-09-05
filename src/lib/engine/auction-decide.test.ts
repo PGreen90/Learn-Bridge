@@ -5,10 +5,12 @@
 import { describe, expect, it } from 'vitest'
 import type { Seat } from '../../types/bridge'
 import { parseHand, type ResolvedCall } from '../bidding'
-import { decideFromTable } from './auction-decide'
+import { decideFromTable, rebidAsSeen } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import { decideCallTraced } from './auction-live'
 import { botAuction, dealFromSeed } from './revisor'
+import { slamCaptainFirstStep, slamInvestigation } from './slam-auction'
+import { mulberry32 } from './deal'
 
 const P = (seat: Seat): ResolvedCall => ({ seat, bid: 'P' })
 
@@ -198,5 +200,123 @@ describe('familj 3 – öppnarens återbud: läget "jag öppnade, partnern svara
     expect(a.källa).toBe('tabell:återbud')
     expect(a.call.bid).not.toBe('P')
     expect(b.call.bid).toBe(a.call.bid)
+  })
+})
+
+describe('familj 4a – svararens andra bud: läget "jag svarade, partnern gav återbud ostört"', () => {
+  const hist = (open: string, resp: string, rebid: string): ResolvedCall[] => [
+    { seat: 'N', bid: open }, P('E'), { seat: 'S', bid: resp }, P('W'), { seat: 'N', bid: rebid }, P('E'),
+  ]
+
+  it('träffar bara svararen efter öppning–svar–återbud utan störning', () => {
+    const h = 'S:KQ73 H:K65 D:Q92 C:83'
+    expect(bud(h, hist('1C', '1S', '2S'), 'S')?.källa).toBe('tabell:svar2')
+    // X någonstans, eller motståndarnas kontraktsbud → inte den här raden.
+    expect(bud(h, [{ seat: 'N', bid: '1C' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '2S' }, P('E')], 'S')).toBeNull()
+    expect(bud(h, [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '2S' }, { seat: 'E', bid: '3C' }], 'S')).toBeNull()
+    // Öppnaren passade mitt svar → auktionen är slut för min del.
+    expect(bud(h, hist('1S', '2S', 'P'), 'S')).toBeNull()
+  })
+
+  it('läser partnerns återbud ur den nakna auktionen: människans 2♠ (höjning) ger samma andra bud som botens', () => {
+    const h = 'S:KQ73 H:A65 D:Q92 C:83' // 11 hp, 4 spader → inbjudan (3♠) efter enkel höjning
+    const människa = bud(h, hist('1C', '1S', '2S'), 'S')!.call
+    const bot = bud(h, [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1S', rule: 'ny färg (1-läget)' }, P('W'), { seat: 'N', bid: '2S', rule: 'enkel höjning' }, P('E')], 'S')!.call
+    expect(människa.bid).toBe('3S')
+    expect(människa.bid).toBe(bot.bid)
+  })
+
+  it('Ogust-svaret läses och svararen placerar (min/dålig → signoff i öppnarens färg)', () => {
+    const h = 'S:K4 H:A98 D:KQ53 C:JT62' // 12 hp, 2-korts spader – frågade Ogust
+    const c = bud(h, hist('2S', '2NT', '3C'), 'S')!.call
+    expect(c).toMatchObject({ bid: '3S', rule: 'svararens signoff' })
+  })
+
+  it('systems on efter 2♣–2♦–2NT: Stayman ur egen hand', () => {
+    const h = 'S:KJ74 H:9863 D:75 C:842' // 4-4 i högfärgerna, 4 hp — mot 22–24 räcker det
+    const c = bud(h, hist('2C', '2D', '2NT'), 'S')!.call
+    expect(c).toMatchObject({ bid: '3C', rule: 'Stayman (2NT)' })
+  })
+
+  it('slamporten (Jacoby-fit): kaptenens första steg ur egen hand, samma bud som manusets sekvens', () => {
+    const h = 'S:KQ73 H:A5 D:AKJ2 C:K83' // 19 hp + 4-korts spader → slamzon mot Jacoby-minimum 12
+    const c = bud(h, hist('1S', '2NT', '4S'), 'S')!.call
+    expect(c.bid).not.toBe('P')
+    expect(['4NT', '5S', '5C', '5D', '5H']).toContain(c.bid) // RKC / inbjudan / cue
+  })
+
+  it('"oklart" i partnerns återbud syns inte: 1♣–1♥–1NT läses som 12–14 (frö 20270949: 20 hp + 6-korts ♥ → slaminbjudan 5♥, hp mot 12–14)', () => {
+    const deal = dealFromSeed(20270949) // Nord ♠A98 ♥AKQT72 ♦AQT9 ♣–, Syds 1NT-återbud var "oklart"
+    const h: ResolvedCall[] = [P('E'), { seat: 'S', bid: '1C' }, P('W'), { seat: 'N', bid: '1H' }, P('E'), { seat: 'S', bid: '1NT', rule: 'oklart' }, P('W')]
+    const t = decideCallTraced(deal, h, 'N')
+    expect(t.källa).toBe('tabell:svar2')
+    expect(t.call).toMatchObject({ bid: '5H', rule: 'slaminbjudan' })
+  })
+
+  it('familj A räknar hp, inte stödpoäng: 15 hp med 6-korts spader mot 1NT (12–14) → NMF, ingen slaminbjudan (facit frö 20261317)', () => {
+    const c = bud('S:AQ8652 H:AT62 D:KQ C:3', [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')], 'S')!.call
+    expect(c).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' })
+  })
+
+  it('2/1 + öppnaren höjde min högfärg under utgång → 4M (felrapport #27), höjd lågfärg går den vanliga vägen', () => {
+    const n = 'S:A H:KQT94 D:KT7 C:KQ32'
+    expect(bud(n, [{ seat: 'N', bid: '1S' }, P('E'), { seat: 'S', bid: '2H' }, P('W'), { seat: 'N', bid: '3H' }, P('E')], 'S')!.call).toMatchObject({ bid: '4H', rule: '2/1 utgångskrav' })
+    const m = 'S:A2 H:K3 D:KQ982 C:Q832'
+    const c = bud(m, [{ seat: 'N', bid: '1S' }, P('E'), { seat: 'S', bid: '2D' }, P('W'), { seat: 'N', bid: '3D' }, P('E')], 'S')!.call
+    expect(c.bid).not.toBe('5D')
+    expect(c.bid).not.toBe('P')
+  })
+
+  it('ser aldrig de andra händerna: samma andra bud när de tre andra är kopior av den egna', () => {
+    const deal = dealFromSeed(20270949)
+    const h: ResolvedCall[] = [P('E'), { seat: 'S', bid: '1C' }, P('W'), { seat: 'N', bid: '1H' }, P('E'), { seat: 'S', bid: '1NT' }, P('W')]
+    const kopior = { ...deal, hands: { N: deal.hands.N, E: deal.hands.N, S: deal.hands.N, W: deal.hands.N } }
+    expect(decideCallTraced(kopior, h, 'N').call.bid).toBe(decideCallTraced(deal, h, 'N').call.bid)
+  })
+})
+
+describe('familj 4a – adaptern rebidAsSeen ger motorns egna namn på öppnarens återbud (3000 botauktioner)', () => {
+  // Avsiktliga skillnader: partnerns egen osäkerhet ('oklart') är osynlig; ett
+  // slutbud efter slaminbjudan läses som "till spel" (svararen passar ändå).
+  const TILLÅTNA = new Set(['oklart', 'accepterar slaminbjudan'])
+  it('samma regelnamn som boten satte, utom de tillåtna', () => {
+    const avvikelser: string[] = []
+    let n = 0
+    for (let seed = 20270001; seed <= 20273000; seed++) {
+      const deal = dealFromSeed(seed)
+      const h = botAuction(deal)
+      if (!h) continue
+      const o = h.findIndex((c) => c.bid !== 'P')
+      if (o === -1 || o + 4 >= h.length) continue
+      if (h[o + 1].bid !== 'P' || h[o + 3].bid !== 'P' || h[o + 2].bid === 'P' || h[o + 4].bid === 'P') continue
+      const r = h[o + 4]
+      if (TILLÅTNA.has(r.rule ?? '')) continue
+      n++
+      const seen = rebidAsSeen(auctionFacts(h.slice(0, o + 6), h[o + 2].seat), o + 4)
+      if (seen?.rule !== r.rule) avvikelser.push(`frö ${seed} ${h[o].bid}–${h[o + 2].bid}–${r.bid}: motor [${r.rule}] adapter [${seen?.rule ?? '—'}]`)
+    }
+    expect(n).toBeGreaterThan(900)
+    expect(avvikelser, avvikelser.slice(0, 10).join('\n')).toEqual([])
+  })
+})
+
+describe('familj 4a – slamsekvensens första bud är kaptenens första steg (samma port)', () => {
+  it('slamInvestigation börjar alltid med slamCaptainFirstStep, för slumpade händer och trumfar', () => {
+    const rng = mulberry32(4711)
+    let jämförda = 0
+    for (let seed = 20270001; seed <= 20270400; seed++) {
+      const deal = dealFromSeed(seed)
+      const trumps = ['clubs', 'diamonds', 'hearts', 'spades'] as const
+      const trump = trumps[Math.floor(rng() * 4)]
+      const ctx = { partnerMin: 12 + Math.floor(rng() * 8), inviteCall: trump === 'hearts' || trump === 'spades' ? `5${trump[0].toUpperCase()}` : `4${trump[0].toUpperCase()}`, gameForcing: rng() < 0.5 }
+      const first = slamCaptainFirstStep(deal.hands.S, trump, '2NT', ctx)
+      const seq = slamInvestigation(deal.hands.N, deal.hands.S, trump, '2NT', ctx)
+      expect(seq === null).toBe(first === null)
+      if (seq && first) {
+        jämförda++
+        expect(seq[0]).toEqual(first)
+      }
+    }
+    expect(jämförda).toBeGreaterThan(20)
   })
 })

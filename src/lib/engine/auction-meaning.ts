@@ -575,6 +575,7 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
   if (!competitive && openerNewSuitAfter1NTResponse(seat, cb, prior)) {
     const minLen = cb.strain === 'H' ? '4+' : '3+ (oftast 4+)'
     return {
+      rule: 'rebid: ny färg',
       text: `2${sym} — återbud i ny färg efter partnerns 1 sang: naturligt, ${minLen} ${name}, minimum (~12–15 hp). Partnern får passa.`,
       confidence: 'trolig',
       forcing: 'ej-krav',
@@ -1641,7 +1642,8 @@ function afterStrongTwoClubs(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInt
     }
     // Positivt svar → utgångskrav.
     const resp = b[1].cb
-    if (cb.strain === resp.strain) return R('rebid: stöd (GF)', `${B(cb)} — stöd i partnerns ${name}${isGameLevel(cb) ? ', minimum (snabb utgång)' : ' — trumfen satt, slamutredning kan följa'}.`, below(cb, 'utgangskrav'))
+    if (resp.strain !== 'NT' && cb.strain === resp.strain) return R('rebid: stöd (GF)', `${B(cb)} — stöd i partnerns ${name}${isGameLevel(cb) ? ', minimum (snabb utgång)' : ' — trumfen satt, slamutredning kan följa'}.`, below(cb, 'utgangskrav'))
+    if (same(cb, 3, 'NT')) return R('rebid: 3NT (GF)', `3 sang — balanserad efter positivt svar, ingen egen 5-färg. Utgångskravet står; partnern går vidare med slamintresse.`, below(cb, 'utgangskrav'))
     if (cb.strain === 'NT') return R('rebid: 2NT (GF)', `${B(cb)} — balanserad efter positivt svar. Utgångskravet står.`, below(cb, 'utgangskrav'))
     return R('rebid: ny färg (GF)', `${B(cb)} — naturlig färg (5+) efter positivt svar. Utgångskravet står.`, below(cb, 'utgangskrav'))
   }
@@ -1765,7 +1767,7 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
     if (same(resp, 3, otherMajor(M))) {
       // Öppnarens svar på tvetydig splinter: relä eller signoff.
       if ((M === 'H' && same(cb, 3, 'NT')) || (M === 'S' && same(cb, 3, 'S'))) return R('splinter-relä', `${B(cb)} — relä: frågar vilken färg partnern är kort i (splintern). Säger inget om ${cb.strain === 'NT' ? 'sang' : name}.`)
-      if (same(cb, 4, M)) return N(`${B(cb)} — signoff i utgång: handen passar inte för slam.`, 'avslut')
+      if (same(cb, 4, M)) return R('rebid: signoff', `${B(cb)} — signoff i utgång: handen passar inte för slam.`)
       return null
     }
     if (same(resp, 3, 'NT')) {
@@ -1953,7 +1955,7 @@ function openerRebidAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed): C
   if (respSuit && cb.strain === resp.strain) {
     if (isGameLevel(cb)) return R('rebid: utgång', `${B(cb)} — höjning till utgång: 4-korts stöd, ~19+ hp.`)
     if (cb.level === minLevelOver(resp, cb.strain)) return R('rebid: stöd', `${B(cb)} — höjning: 4-korts stöd i ${name}, minimum 12–15. Ej krav.`)
-    return R('rebid: hopp (inbjudan)', `${B(cb)} — hopphöjning: 4-korts stöd i ${name}, 16–18. Inbjudan.`)
+    return R('hopphöjning (inbjudan)', `${B(cb)} — hopphöjning: 4-korts stöd i ${name}, 16–18. Inbjudan.`)
   }
   if (cb.strain === open.strain) {
     if (isGameLevel(cb)) return R('rebid: utgång', `${B(cb)} — 6+ ${oname}, 19+ startpoäng. Till spel.`)
@@ -1963,7 +1965,7 @@ function openerRebidAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed): C
   if (cb.strain === 'NT') {
     if (cb.level === 1) return R('1NT (12–14)', `Återbud 1 sang — balanserad minimihand (12–14 hp; 15–17 hade öppnat 1 sang).`)
     if (cb.level === 2) return R('rebid: 2NT (18–19)', `Återbud 2 sang — 18–19 hp balanserad, inbjuder utgång.`)
-    return N(`3 sang — till spel.`, 'avslut')
+    return R('rebid: 3NT', `3 sang — till spel (~18+ hp balanserad mot partnerns begränsade svar).`)
   }
   // Ny färg.
   const minL = minLevelOver(resp, cb.strain)

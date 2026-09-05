@@ -51,6 +51,20 @@ describe('etapp 3 familj 2 – svaret: partnern svarar på det bud som bjöds (L
   })
 })
 
+// Familj A-slamporten efter öppnarens 1NT-återbud (12–14) räknade kaptenen med
+// stödpoäng: en 6-5-hand med två kortfärger lyftes från 10 hp till slam-
+// inbjudan (5♠) och öppnaren accepterade till 6♠. Porten fanns live för vanliga
+// 1NT-återbud; familj 4a gjorde den synlig även efter "oklart"-1NT. Lagad
+// 2026-09-05: §5.2 räknar hp mot det visade intervallet (facit frö 20261317
+// 2026-08-07: 15 hp → 4♥, inte slam).
+describe('etapp 3 familj 4a – familj A-slamporten räknar hp mot 1NT-återbudet (§5.2) (LANDAD 2026-09-05)', () => {
+  it('frö 20272122: 1♣–1♠–1NT: Väst (♠AQJ973 ♥2 ♦KT975 ♣T, 10 hp) bjuder INTE 5♠ (slaminbjudan)', () => {
+    const deal = dealFromSeed(20272122)
+    const hist = [call('N', 'P'), call('E', '1C'), call('S', 'P'), call('W', '1S'), call('N', 'P'), call('E', '1NT'), call('S', 'P')]
+    expect(decideCall(deal, hist, 'W').bid).not.toBe('5S')
+  })
+})
+
 // Pliktsvepets två rester (pausat 2026-09-04, docs/bevaka.md 2026-09-02).
 
 describe('etapp 4 familj 1 – inkliv och advance: tvåfärgsinklivarens fortsättning', () => {

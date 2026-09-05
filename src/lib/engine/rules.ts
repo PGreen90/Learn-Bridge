@@ -300,6 +300,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'fjärde färg: placerar utgång': 'avslut',
   'fjärde färg: utgång i fit': 'avslut',
   '2/1: fortsättning': 'utgangskrav',
+  '2/1 utgångskrav': 'avslut', // svararen sätter utgång efter öppnarens höjning av 2/1-högfärgen (felrapport #27; beslutstabellen familj 4a)
   'rebjuden färg (inbjudan)': 'inbjudan',
   'hopphöjning (inbjudan)': 'inbjudan',
   'inbjudan antagen': 'avslut',
