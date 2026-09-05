@@ -59,12 +59,12 @@ describe('FACIT: slam efter 1NT-återbud (F1 familj A)', () => {
     expect(contract!.level).toBeLessThan(6) // utgång, ingen slamblast på kik
   })
 
-  it('1♣–1♠–1NT: OBALANSERAD svarare med EGEN 6-korts spader + slamvärden → 6♠ (Gerber, placerar i färgen)', () => {
-    // Ärlig färgslam-väg: S:s egen 6-korts spader är en säker trumf på egen hand
-    // (ingen kik behövs). 21 hp + form mot visade 12–14 → driv. Sedan familj 6
-    // (2026-09-05) frågar S med GERBER 4♣ — 4NT direkt över partnerns sang-
-    // återbud är kvantitativt och N kan inte se att S menar spader — N svarar
-    // 4♠ (två ess), S har två själv → alla ess → 6♠.
+  it('1♣–1♠–1NT: OBALANSERAD svarare med EGEN 6-korts spader + slamvärden → 6♠ (NMF, rebud 3♠, 4NT RKC i satt trumf)', () => {
+    // Ärlig färgslam-väg (§5b beslut 1, 2026-09-05): S visar färgen FÖRST —
+    // 2♦ NMF, öppnaren 2NT (inget stöd), S rebjuder 3♠ (6+, slamintresse,
+    // utgångskrav), N sätter trumfen 4♠, S frågar 4NT RKC (21 + 12 ≥ 33), N
+    // svarar 5♥ (två nyckelkort), S har två + damen → 6♠. Gerber 4♣ över 1NT
+    // är bara den jämna handen utan färg; slam med känd färg går aldrig via 4♣.
     const deal = dealOf('N', {
       N: 'S:32 H:A54 D:A65 C:KJT94', // 12 hp balanserad → 1♣, 1NT-återbud
       E: 'S:8654 H:8763 D:872 C:76',

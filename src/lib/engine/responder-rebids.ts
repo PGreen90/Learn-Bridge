@@ -592,10 +592,25 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
 // frågar efter den dolda passningen, i stället för att gissa sang och tappa en
 // 5-3-fit. Efter 1♥–1♠–1NT är båda lågfärgerna lediga → bjud den starkare
 // (mest hp, antyder stopp); vid lika den billigaste (klöver). Ägarbeslut 2026-07-05.
+/**
+ * Slamzonen mot öppnarens 1NT-återbud räknad i hp (§5.2): 19 + visade 12 = 31.
+ * Styr både NMF-vägen för handen med färg (§5b beslut 1) och kaptenens
+ * färgvisning efter öppnarens NMF-svar (3M / 3m).
+ */
+export const NMF_SLAM_ZONE_HP = 19
+
 function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: number): ResponseResult | null {
   if (responderSuit !== 'hearts' && responderSuit !== 'spades') return null // NMF jagar en HÖGfärgsfit
-  if (lengths(hand)[responderSuit] < 5) return null // 5-3-fit kräver 5-korts högfärg
-  if (p < 11) return null // inbjudande+ värden
+  const len = lengths(hand)
+  // §5b beslut 1 (ägarbeslut 2026-09-05): också handen med 5+ kort i öppnarens
+  // LÅGFÄRG och slamvärden (19+ hp = 31 mot visade 12) går via NMF — den höjer
+  // lågfärgen efteråt (3m = stöd, slamintresse, utgångskrav). Slam med känd
+  // färg går aldrig via 4♣ (Gerber är den jämna handen utan färg, §5.7).
+  const minorRoute = (opened === 'clubs' || opened === 'diamonds') && len[opened] >= 5 && p >= NMF_SLAM_ZONE_HP
+  if (!minorRoute) {
+    if (len[responderSuit] < 5) return null // 5-3-fit kräver 5-korts högfärg
+    if (p < 11) return null // inbjudande+ värden
+  }
 
   const freeMinors = (['clubs', 'diamonds'] as Suit[]).filter((m) => m !== opened && m !== responderSuit)
   if (freeMinors.length === 0) return null
@@ -607,7 +622,9 @@ function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: nu
   return {
     call,
     rule: 'New Minor Forcing',
-    explanation: `5+ ${SYM[responderSuit]}, 11+ hp – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens dolda 3-stöd i ${SYM[responderSuit]} eller egen 4+ högfärg.`,
+    explanation: len[responderSuit] >= 5
+      ? `5+ ${SYM[responderSuit]}, 11+ hp – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens dolda 3-stöd i ${SYM[responderSuit]} eller egen 4+ högfärg.`
+      : `5+ ${SYM[opened]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens hand och höjer sedan ${SYM[opened]} (§5.7).`,
   }
 }
 
@@ -632,6 +649,13 @@ export function responderPlaceAfterNMF(
   const toGame = game || openerMax
   const rM = BID[responderMajor]
   const pass = (why: string): ResponseResult => ({ call: 'P', rule, explanation: `${why} → pass.` })
+  // §5b beslut 1 (2026-09-05, "rebjud färgen"): 6+ egen högfärg utan visat stöd
+  // → 4M med utgångsvärden, inte 3NT — öppnarens sang lovar 2+ kort, så fiten
+  // är säker på egen hand. Slamhanden (19+) har redan visat färgen med 3M i
+  // `responderThirdDecision` innan placeringen når hit.
+  const ownSix: ResponseResult | null = game && len[responderMajor] >= 6
+    ? { call: `4${rM}`, rule, explanation: `6+ ${SYM[responderMajor]} (öppnarens sang lovar 2+ kort) → utgång 4${SYM[responderMajor]}.` }
+    : null
 
   // 1) Öppnaren visade STÖD i din högfärg → 5-3-fit.
   if (answer.strain === rM) {
@@ -645,18 +669,21 @@ export function responderPlaceAfterNMF(
       if (toGame) return { call: `4${BID[otherMajor]}`, rule, explanation: `4-4-fit i ${SYM[otherMajor]} → utgång.` }
       return pass(`4-4-fit men bara inbjudan mittemot minimum`)
     }
+    if (ownSix) return ownSix
     if (game) return { call: '3NT', rule, explanation: `Utgångsvärden, ingen högfärgsfit → 3NT.` }
     return pass('ingen fit, bara inbjudan')
   }
 
   // 3) Öppnaren bjöd sang (2NT minimum / 3NT maximum).
   if (answer.strain === 'NT') {
+    if (ownSix) return ownSix
     if (answer.level >= 3) return pass('öppnaren bjöd redan 3NT')
     if (game) return { call: '3NT', rule, explanation: `Utgångsvärden → 3NT.` }
     return pass('inbjudan mittemot minimum')
   }
 
   // 4) Öppnaren höjde NMF-lågfärgen / rebjöd egen färg (ingen högfärgspassning).
+  if (ownSix) return ownSix
   if (game) return { call: '3NT', rule, explanation: `Utgångsvärden, ingen högfärgsfit → 3NT.` }
   return pass('ingen fit, bara inbjudan')
 }

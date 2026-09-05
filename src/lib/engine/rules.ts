@@ -291,6 +291,13 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'New Minor Forcing': 'krav-1-rond',
   'svar på New Minor Forcing': 'ej-krav',
   'placering efter NMF': 'avslut',
+  // §5b beslut 1 (2026-09-05): färgvisningen efter NMF utan stöd — svararens
+  // 3M/3m (slamintresse, utgångskrav) och öppnarens svar (4M / 3NT-förslag / 4m).
+  'NMF: rebjuder egen högfärg': 'utgangskrav',
+  'NMF: höjer öppnarens lågfärg': 'utgangskrav',
+  'NMF: trumfen satt': 'ej-krav',
+  'NMF: sangförslag': 'ej-krav',
+  'NMF: höjning (GF)': 'utgangskrav',
   '2NT-checkback': 'krav-1-rond',
   'svar på 2NT-checkback': 'ej-krav',
   'placering efter 2NT-checkback': 'avslut',

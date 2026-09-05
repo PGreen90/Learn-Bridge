@@ -378,6 +378,10 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   NT-hand UTAN färg, färgen sköts av NMF. §5.7:s gamla "klöverinbjudan 4m"
   försvinner (ersätts av NMF-vägen). Tröskel Gerber/4NT: "kan jag räkna 33 mot
   partnerns minimum?" → Gerber, annars 4NT. Rör §5.7 + §6.4.
+  **BYGGT 2026-09-05 (grönt, väntar på ägarens PCD):** NMF-vägen med
+  färgvisning 3M/3m + öppnarens 4M / 3NT / 4m + slamsekvens på prefix 7;
+  Gerber-med-färgplacering och 5M/4♦-inbjudan borta; facit "§5b beslut 1" i
+  `motorbyte-facit.test.ts`; mätningarna i loggen nedan och systembokens §9.
 
 - **Beslut 2 — fynd 1 (fjärde färg efter reverse), 2026-09-05.** Ägarbeslut:
   behåll motorns linje — fjärde färg efter en reverse (`1♦–1♠–2♥–3♣`) är
@@ -520,7 +524,8 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
 **SVEPET KLART 2026-09-05: alla 15 fynd har ägarbeslut (1–9, 11–14, 16; nr 10
 och 15 ingår i 1 resp. finns inte).** Nästa steg: bygg besluten test-drivet
 (facit FÖRE fix, systembok-§, regeln i det nya lagret), en per commit, sedan
-PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF) → 3 (fast
+PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF — BYGGT
+2026-09-05, väntar på PCD) → 3 (fast
 arrival efter reverse) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
 steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M) →
@@ -549,6 +554,36 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-05 — §5b beslut 1 BYGGT (Gerber/NMF över 1NT-återbudet; väntar på
+  ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 1" i
+  `motorbyte-facit.test.ts` (sju fall, röda före fixen) + omskrivna facit i
+  `auction-decide.test.ts`, `auction-slam-1nt-rebid.test.ts`,
+  `new-minor-forcing.test.ts`. Regeln i det nya lagret: `newMinorForcingBid`
+  (5+ i öppnarens lågfärg + 19 hp = `NMF_SLAM_ZONE_HP` går NMF),
+  `responderPlaceAfterNMF` (6+ högfärg → 4M), `responderThirdDecision` (3M /
+  3m med slamvärden), `openerFourthDecision` (4M "NMF: trumfen satt" /
+  `openerAfterDelayedMinorSupport(…, 'NMF')`), `slamSituation` prefix 7
+  (kaptenen räknar hp mot 12; lågfärg: cue-golv 3NT, inbjudan 4m över 3NT);
+  bortrivet: `familyAFitTrump`, Gerbers `placeSuit`, 1NT-grenarna i
+  `slamContextFor`/`slamTrumpFromAuction`, `gerberRebidInvestigation`.
+  Betydelselagret: `nmfSuitShown`/`afterNMFSuitShow` (3M/3m/4M/3NT/4m med
+  kravnivå i `rules.ts`), 5M direkt över 1NT-återbudet = till spel. Systembok
+  §5.7 (Krav, Din placering, Färgvisning med slamvärden, Slam efter
+  1NT-återbudet), §6.4, §9. **Mätningar** (kommandon i §3; baslinjer tagna på
+  `81ca5eb`): hela sviten grön (`npm test`), `npx tsc` rent; auktionsdiffen
+  3000 givar: ÄNDRAT BUD 4, alla klass b (frö 20270949 via NMF till samma 6♥;
+  20272165/20272519/20272533: 6-korts högfärg → 4♠ i stället för 3NT);
+  avvikelsedumpen: 12 ändrade — 7 × människans 4♦ över 1♦–1M–1NT (förr
+  ruterinbjudan, nu "pass (ingen regel)": budet finns inte i systemet, klass
+  b med känt hål) + 5 × botens 4M i stället för 3NT (klass b); olagliga
+  tabellbud 0; betydelsesvepet: kravnivå 0, alert 4 (oförändrat), registerhål
+  0 efter `rules.ts`-posterna; pliktsvep/förklaringssvep/regelsvep gröna;
+  revisorn 1000 givar: rätt kontrakt 20,2 % · snittförlust 268,83 (familj 6:
+  20,3 % · 268,55) — frö 20260897 (4♥ i stället för 3NT) och frö 20261109
+  (5♣ efter cue-ronden, 6♣ satt men Nord blott minimum — systemriktig miss;
+  ägaren dömer i grinden). Kända hål till SENARE: människans direkta 4♦/5M
+  över 1NT-återbudet saknar regel (boten passar); 5-korts högfärg + 21 hp utan
+  fit efter NMF placerar 3NT.
 - **2026-09-05 — Etapp 3 familj 6 KLAR & LIVE (mergepunkt `f05bfef`; grinden
   godkänd av ägaren samma dag inkl. §5.7-regeländringen, och grinden efter
   etapp 3 togs med deployen): manuset för ostörda auktioner rivet.** `buildAuctionCore` i `auction.ts` består nu av öppningen
