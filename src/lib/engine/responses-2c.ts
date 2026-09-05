@@ -112,7 +112,12 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
     const lvl = levelAbove(ownSuit, response.call)
     return { call: `${lvl}${BID[ownSuit]}`, rule: 'rebid: egen färg (GF)', explanation: `5+ ${SYM[ownSuit]} → ${lvl}${SYM[ownSuit]} (naturlig, utgångskrav – visar färgen före 3NT).` }
   }
-  // Balanserat positivt (2NT) utan 5-färg → 3NT.
+  // Balanserat positivt (2NT) utan 5-färg → 3NT — om svaret ligger under 3NT.
+  // Svarade partnern 3NT eller högre (människobud) är utgången redan satt → pass.
+  const responseLevel = parseInt(response.call[0], 10)
+  if (response.call === '3NT' || responseLevel >= 4) {
+    return { call: 'P', rule: 'rebid: pass', explanation: `Utgången är redan bjuden och ingen egen 5-färg att visa → pass.` }
+  }
   return { call: '3NT', rule: 'rebid: 3NT (GF)', explanation: `Ingen egen 5-färg → 3NT.`, uncertain: !bal }
 }
 

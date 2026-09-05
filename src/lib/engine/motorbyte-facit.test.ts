@@ -89,8 +89,8 @@ describe('etapp 3 familj 4/5 – stark 2♣: en auktionsform, en betydelse', () 
   })
 })
 
-describe('etapp 3 familj 3 – öppnarens återbud efter svag tvåa (§4.5)', () => {
-  it.todo('frö 20271048: 2♠–3♥ (krav): Öst (♠KJ9653 ♥A98 ♦5 ♣JT2) höjer till 4♥, inte 5♥ — utgången är 4♥ och 5♥ är ingen slaminbjudan med svag tvåa', () => {
+describe('etapp 3 familj 3 – öppnarens återbud efter svag tvåa (§4.5) (LANDAD 2026-09-05)', () => {
+  it('frö 20271048: 2♠–3♥ (krav): Öst (♠KJ9653 ♥A98 ♦5 ♣JT2) höjer till 4♥, inte 5♥ — utgången är 4♥ och 5♥ är ingen slaminbjudan med svag tvåa', () => {
     const deal = dealFromSeed(20271048)
     const hist = [call('N', 'P'), call('E', '2S'), call('S', 'P'), call('W', '3H'), call('N', 'P')]
     expect(decideCall(deal, hist, 'E').bid).toBe('4H')

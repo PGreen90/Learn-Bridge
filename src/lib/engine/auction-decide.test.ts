@@ -96,8 +96,8 @@ describe('familj 2 – svaret: läget "partnern öppnade ostört, jag har inte b
     // Störning (inkliv eller X) mellan öppningen och mig → inte den här raden.
     expect(bud(h, [open1S, { seat: 'E', bid: '2C' }], 'S')).toBeNull()
     expect(bud(h, [open1S, { seat: 'E', bid: 'X' }], 'S')).toBeNull()
-    // Efter mitt eget svar är läget öppnarens/svararens andra bud (familj 3–4).
-    expect(bud(h, [open1S, P('E'), { seat: 'S', bid: '3S' }, P('W')], 'N')).toBeNull()
+    // Efter mitt svar är det öppnarens återbud (familj 3).
+    expect(bud(h, [open1S, P('E'), { seat: 'S', bid: '3S' }, P('W')], 'N')?.källa).toBe('tabell:återbud')
     // Öppningar utan svarsregler lämnas åt det gamla lagret.
     expect(bud(h, [{ seat: 'N', bid: '4NT' }, P('E')], 'S')).toBeNull()
   })
@@ -138,6 +138,65 @@ describe('familj 2 – svaret: läget "partnern öppnade ostört, jag har inte b
     const a = decideCallTraced(deal, hist, 'W')
     const b = decideCallTraced(kopior, hist, 'W')
     expect(a.källa).toBe('tabell:svar')
+    expect(b.call.bid).toBe(a.call.bid)
+  })
+})
+
+describe('familj 3 – öppnarens återbud: läget "jag öppnade, partnern svarade ostört"', () => {
+  const opener = 'S:AQ863 H:K52 D:A74 C:83' // 13 hp, 5 spader
+  const hist = (svar: string): ResolvedCall[] => [{ seat: 'N', bid: '1S' }, P('E'), { seat: 'S', bid: svar }, P('W')]
+
+  it('träffar bara öppnaren, efter öppning – pass – svar – pass', () => {
+    expect(bud(opener, hist('2S'), 'N')?.källa).toBe('tabell:återbud')
+    // Inkliv eller X någonstans → inte den här raden (etapp 4).
+    expect(bud(opener, [{ seat: 'N', bid: '1S' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '2S' }, P('W')], 'N')).toBeNull()
+    expect(bud(opener, [{ seat: 'N', bid: '1S' }, P('E'), { seat: 'S', bid: '2S' }, { seat: 'W', bid: '3C' }], 'N')).toBeNull()
+    // Svararen passade → inget återbud att ta (auktionen dör eller balanseras).
+    expect(bud(opener, hist('P'), 'N')).toBeNull()
+  })
+
+  it('läser partnerns bud som öppnaren ser det: samma återbud på människans 2♠ som på botens (regel bortskalad)', () => {
+    const människa = bud(opener, hist('2S'), 'N')!.call
+    const bot = bud(opener, [{ seat: 'N', bid: '1S' }, P('E'), { seat: 'S', bid: '2S', rule: 'enkel höjning' }, P('W')], 'N')!.call
+    expect(människa.bid).toBe(bot.bid)
+    expect(människa.rule).toBe(bot.rule)
+  })
+
+  it('Jacoby 2NT från människan får systemets svar, inte pass', () => {
+    const c = bud(opener, hist('2NT'), 'N')!.call
+    expect(c.bid).not.toBe('P')
+    expect(c.rule).toContain('Jacoby')
+  })
+
+  it('1♣–1NT från människan läses som 1NT-svaret (läsarens "NT-svar" → återbudsfunktionens "1NT"): samma återbud som på botens 1NT', () => {
+    const h18 = 'S:AK3 H:KQ2 D:A54 C:KJ87' // 18 hp balanserad
+    const människa = bud(h18, [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1NT' }, P('W')], 'N')!.call
+    const bot = bud(h18, [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1NT', rule: '1NT' }, P('W')], 'N')!.call
+    expect(människa.bid).not.toBe('P')
+    expect(människa.bid).toBe(bot.bid)
+  })
+
+  it('Gerber 4♣ över 1NT besvaras med essantalet ur egen hand', () => {
+    const h = 'S:AK3 H:KQ2 D:A54 C:J987' // 2 ess → 4♠
+    const c = bud(h, [{ seat: 'N', bid: '1NT' }, P('E'), { seat: 'S', bid: '4C' }, P('W')], 'N')!.call
+    expect(c).toMatchObject({ bid: '4S', rule: 'Gerber' })
+  })
+
+  it('svag tvåa – partnerns hoppande nya färg: återbudet ligger över svaret och stannar på utgång', () => {
+    const h = 'S:KJ9653 H:A98 D:5 C:JT2' // frö 20271048:s Öst
+    const c = bud(h, [{ seat: 'N', bid: '2S' }, P('E'), { seat: 'S', bid: '3H' }, P('W')], 'N')!.call
+    expect(c.bid).toBe('4H')
+  })
+
+  it('ser aldrig de andra händerna: samma återbud när de tre andra är kopior av den egna', () => {
+    const deal = dealFromSeed(20270006)
+    // Opassad svarare (Jacoby). En PASSAD hands 2NT läser lagret som naturlig inbjudan — bok-mot-motor-fråga i planens logg.
+    const h: ResolvedCall[] = [{ seat: 'W', bid: '1H' }, P('N'), { seat: 'E', bid: '2NT' }, P('S')]
+    const kopior = { ...deal, hands: { N: deal.hands.W, E: deal.hands.W, S: deal.hands.W, W: deal.hands.W } }
+    const a = decideCallTraced(deal, h, 'W')
+    const b = decideCallTraced(kopior, h, 'W')
+    expect(a.källa).toBe('tabell:återbud')
+    expect(a.call.bid).not.toBe('P')
     expect(b.call.bid).toBe(a.call.bid)
   })
 })

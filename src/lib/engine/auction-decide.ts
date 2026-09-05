@@ -19,12 +19,20 @@
 //      inte bjudit → svarsfunktionen för öppningsbudet (`responseDecision`),
 //      passad hand → Drury över 1M; Gerber-handen frågar 4♣ över 1NT/2NT.
 //      Öppningar utan svarsregler (4NT, 5m …) lämnas åt det gamla lagret.
+//   3. Öppnarens återbud (2026-09-05): jag öppnade, partnern svarade ostört →
+//      `openerSecondBid` med partnerns bud SOM JAG SER DET: bud + systemregel
+//      härledd ur den nakna auktionen (`partnerResponseAsSeen`), aldrig ur
+//      partnerns hand eller partnerns cachade regel. Gerber-frågan besvaras
+//      med esssvaret. Svar utan återbudsregel lämnas åt det gamla lagret.
 
 import type { Hand } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import type { AuctionFacts } from './auction-facts'
+import { meaningOf } from './auction-meaning'
 import { gerberAsk } from './nt-slam'
 import { classifyOpening } from './openings'
+import { openerSecondBid } from './rebids'
+import { respondToGerber } from './slam'
 import { respondToMajor, respondToMinor, type ResponseResult } from './responses'
 import { respondToMajorPassed } from './responses-drury'
 import { respondTo1NT } from './responses-nt'
@@ -56,8 +64,8 @@ interface Row {
   id: string
   /** Läget: när gäller raden? Bara fakta, aldrig handen. */
   läge: (f: AuctionFacts) => boolean
-  /** Valet: kunskapsfunktionen som ger budet ur handen + läget. */
-  välj: (s: Situation) => DecidedCall
+  /** Valet: kunskapsfunktionen som ger budet ur handen + läget. null = ingen regel för det här svaret än (det gamla lagret tar vid). */
+  välj: (s: Situation) => DecidedCall | null
 }
 
 /** Position i varvet från given (1:a–4:e hand) — bara meningsfull innan någon öppnat. */
@@ -101,6 +109,38 @@ export function responseDecision(openCall: string, hand: Hand, responderPassed =
   return respondToMinor(hand, suit)
 }
 
+/**
+ * Partnerns bud nr `index` SOM JAG SER DET: budet + den systemregel som
+ * återbudsfunktionerna dispatchar på, härledd ur den NAKNA auktionen
+ * (regler bortskalade — som om alla bud vore människobud). Så läser
+ * öppnaren aldrig partnerns hand, och inte heller partnerns egen motivering
+ * (t.ex. ett "oklart" 1NT-svar ser ut som vilket 1NT-svar som helst).
+ * null = betydelselagret namnger inte budet → ingen regel att dispatcha på.
+ */
+export function partnerResponseAsSeen(f: AuctionFacts, index: number): ResponseResult | null {
+  const naken = f.history.map((c) => ({ seat: c.seat, bid: c.bid }) as ResolvedCall)
+  const m = meaningOf(naken, index)
+  let rule = m.rule
+  if (!rule) return null
+  const bid = f.history[index].bid
+  // Läsarens namn → återbudsfunktionens namn, där motorn själv använde flera
+  // namn för samma bud (1m–1NT: '1NT'/'gap-hand 1NT'; 1NT–2NT: '2NT inbjudan').
+  if (rule === 'NT-svar') rule = '1NT'
+  if (rule === 'inbjudan' && bid === '2NT' && f.opening?.strain === 'NT') rule = '2NT inbjudan'
+  return { call: bid, rule, explanation: m.text }
+}
+
+/**
+ * Öppnarens återbud på partnerns ostörda svar `seen` (bud + regel som öppnaren
+ * ser det), ur egen hand. Gerber 4♣ besvaras med esssvaret; annars
+ * `openerSecondBid`. null = ingen regel för svaret. Delas av tabellraden och
+ * manuset (`auction.ts`).
+ */
+export function openerRebidDecision(openCall: string, seen: ResponseResult, hand: Hand): ResponseResult | null {
+  if (seen.rule === 'Gerber' && seen.call === '4C' && (openCall === '1NT' || openCall === '2NT')) return respondToGerber(hand)
+  return openerSecondBid(openCall, seen, hand)
+}
+
 const TABELL: Row[] = [
   // Familj 1 — öppningen. Ingen har öppnat (inga kontraktsbud; X/XX kan inte
   // komma före ett bud), så stolen är i öppningsposition. Positionen styr
@@ -133,6 +173,27 @@ const TABELL: Row[] = [
       return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
     },
   },
+  // Familj 3 — öppnarens återbud. Jag öppnade, partnern svarade (vår sidas två
+  // enda kontraktsbud), motståndarna har bara passat (ingen X, inget inkliv),
+  // och svaret är det senaste som hänt. Partnerns bud läses som jag ser det.
+  {
+    id: 'återbud',
+    läge: (f) =>
+      f.opening !== null &&
+      f.opening.seat === f.seat &&
+      f.ourContractBids.length === 2 &&
+      f.theirContractBids.length === 0 &&
+      f.ourContractBids[1].seat === f.partner &&
+      f.lastNonPass === f.ourContractBids[1] &&
+      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+    välj: ({ hand, facts }) => {
+      const seen = partnerResponseAsSeen(facts, facts.history.indexOf(facts.ourContractBids[1]))
+      if (!seen) return null
+      const r = openerRebidDecision(`${facts.opening!.level}${facts.opening!.strain}`, seen, hand)
+      if (!r) return null
+      return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
+    },
+  },
 ]
 
 /**
@@ -142,7 +203,8 @@ const TABELL: Row[] = [
 export function decideFromTable(hand: Hand, facts: AuctionFacts, vulnerable: boolean): Decision | null {
   for (const row of TABELL) {
     if (!row.läge(facts)) continue
-    return { call: row.välj({ hand, facts, vulnerable }), källa: `tabell:${row.id}` }
+    const call = row.välj({ hand, facts, vulnerable })
+    if (call) return { call, källa: `tabell:${row.id}` }
   }
   return null
 }

@@ -129,9 +129,14 @@ Hela sviten (`npm test`) är grunden. Ovanpå den, per etapp och per familj:
   $env:AVVIK='1'; npx vitest run src/lib/engine/avvikelsedump.probe.test.ts
   node scripts/auktionsdiff.mjs revisor-output/avvikelsedump-baslinje.json revisor-output/avvikelsedump.json revisor-output/avvikelsediff.txt
   ```
-  (~2 s per körning, 300 frön = 10200 auktioner). Det är HÄR familjernas
-  b-listor kommer ifrån i etapp 3: bot mot bot ändras inget (samma
-  kunskapsfunktioner), skillnaden är att tabellen svarar där manuset saknades.
+  (~2 s per körning). Sedan familj 3 finns ett tredje läge, *svar*: boten
+  öppnar ostört och människan i svararstolen bjuder vart och ett av de lagliga
+  kontraktsbuden upp till 4NT (nyckel `<frö>/svar/<öppning>-<svar>`). Det är
+  HÄR familjernas b-listor kommer ifrån i etapp 3: bot mot bot ändras inget
+  (samma kunskapsfunktioner), skillnaden är att tabellen svarar där manuset
+  saknades. Dumpen avslöjar också OLAGLIGA tabellbud (laglighetsvakten i
+  `decideCallTraced` gör dem till pass med källan märkt `olagligt`) — räkna dem
+  med `node -e` över JSON-filen; de ska vara noll före merge.
 - **Revisorn** (bud mot par): `$env:REVISOR='1'; npx vitest run
   src/lib/engine/revisor.probe.test.ts` (standard 1000 givar, frö 20260721).
   Får inte försämras mellan etapper. Baslinjen mäts i etapp 0 och skrivs i
@@ -241,7 +246,9 @@ inte flyttat än.
    handens 4♣ ur egen hand (`gerberAsk`), avvikelsedumpen byggd.
 3. **Öppnarens återbud** — `openerSecondBid` och syskonen i `rebids.ts`.
    Här byggs adaptern som ger dem svararens bud + regel ur betydelselagret i
-   stället för det interna `ResponseResult`.
+   stället för det interna `ResponseResult`. **KLAR 2026-09-05** (loggen):
+   raden *återbud*, adaptern `partnerResponseAsSeen` (härleder ur den NAKNA
+   auktionen), Gerber-svaret, avvikelsedumpens svar-läge.
 4. **Svararens andra bud och öppnarens tredje** — fjärde färg, NMF, checkback,
    preferens, inverterade minorhöjningar, Bergen/Jacoby/splinter-fortsättningar.
 5. **Slamutredningen** — `slamInvestigation`/Gerber/Exclusion/MSS per stol:
@@ -339,6 +346,46 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-05 — Etapp 3 familj 3 KLAR: öppnarens återbud.** Raden *återbud*
+  i `auction-decide.ts`: läget "jag öppnade, partnern svarade (vår sidas två
+  enda kontraktsbud), motståndarna bara pass, ingen X, svaret är det senaste"
+  → `openerRebidDecision` = Gerber-svaret (`respondToGerber`) eller
+  `openerSecondBid` med partnerns bud SOM JAG SER DET: adaptern
+  `partnerResponseAsSeen` härleder bud + regel ur den NAKNA auktionen
+  (`meaningOf` utan cachade regler — ett "oklart" 1NT-svar ser ut som vilket
+  1NT-svar som helst). Två namn där läsaren och återbudsfunktionen skiljer sig
+  översätts i adaptern ('NT-svar' → '1NT', 1NT–2NT 'inbjudan' → '2NT
+  inbjudan'); två namn rättades i läsaren (3NT över svag tvåa = '3NT till spel',
+  1M–4M = 'spärr till utgång'). Manusets återbud går genom samma funktion.
+  Regelnamnssvepet som styrde adaptern (sond, 3000 frön, svararens bud i
+  ostörda botauktioner): 1313 svar, 1235 samma namn, resten de fyra mönstren
+  ovan + 'oklart'. **Kunskapsmoduler lagade med facit** (svararens nya färg kan
+  ligga högre än botens billigaste nivå — avvikelsedumpen visade 30 OLAGLIGA
+  återbud): `openerRebidAfterNewSuit` (svag tvåa) och
+  `openerRebidAfterPreemptNewSuit` tar svarets nivå, rebjuder egen färg över
+  svaret och höjer med max till UTGÅNG, aldrig förbi (facit frö 20271048:
+  2♠–3♥ → 4♥, inte 5♥ — skarp i kön); `openerRebidAfter2C` passar när svaret
+  redan ligger på 3NT+. Efter fixarna: 0 olagliga. **Auktionsdiffen** (baslinje
+  `5b1a9dc`): 3000 givar, ÄNDRAT BUD 1 = frö 20271048 (5♥ → 4♥, klass b, facit),
+  samma bud med annan källa 1263. **Avvikelsedumpen** (12678 auktioner, tre
+  lägen): ÄNDRAT BUD 2131, ALLA i öppnarens återbud; svar-läget 479 ändrade —
+  öppnaren svarar nu Ogust, accepterar 2NT-inbjudan, höjer Bergen/enkel
+  höjning till utgång, reläar på splinter, svarar Gerber, i stället för
+  gisslagrets 3NT/5♦/pass. Täckning i svar-läget: 1427 återbud ur tabellen;
+  resten är svar utan systemregel (svagt hoppskift är avskaffat 2026-07-06,
+  3-lägesfärg över 1NT och hopp till 4-läget saknar återbudsregel i modulen,
+  4NT = RKC-detektorn) → det gamla lagret som förut. **Kikvaktens mätläge**:
+  2898 bud, 208 byter (7,2 %, från 9,2 %); `tabell:återbud` 122/0.
+  **Sveparna**: betydelse ostört 0/3/0, kända motoravvikelser 40 bud i 3
+  mönster → **39 i 2** (svag tvåa-mönstret försvann med fixen); förklaring
+  0/0; regelsvepet grönt. **Bok-mot-motor-fynd (ägarbeslut, familj 2/3):**
+  (9) en PASSAD hands 2NT över 1♥/1♠ — motorns svarsfunktion faller tillbaka
+  på Jacoby 2NT (utgångskrav), men §6.7 säger att passad hand är begränsad
+  till utgång och läsaren läser 2NT som naturlig inbjudan 11–12; öppnaren får
+  idag inget återbud ur tabellen (det gamla lagret passar). Hela sviten grön
+  (`npm test`), `npx tsc` rent. **Revisorn** (kommandot i §3, 1000 givar, frö
+  20260721): rätt kontrakt 20,3 % · snittförlust 268,55 — identiskt med
+  baslinjen (frö 20271048 ligger inte i revisorns urval).
 - **2026-09-04 — Etapp 3 familj 2 KLAR: svaret.** Raden *svar* i
   `auction-decide.ts`: läget "partnern öppnade (enda kontraktsbudet), inget
   utom pass sedan dess, jag har inte bjudit, öppningen har svarsregler

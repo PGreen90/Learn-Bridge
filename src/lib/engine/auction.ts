@@ -6,7 +6,7 @@ import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
 import { classifyOpening, isVulnerable } from './openings'
-import { decideFromTable, responseDecision, RESPONDABLE, type DecidedCall } from './auction-decide'
+import { decideFromTable, openerRebidDecision, partnerResponseAsSeen, responseDecision, RESPONDABLE, type DecidedCall } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
@@ -18,7 +18,7 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerNMF, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderPlaceAfter2NTCheckback, responderSecondBid } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -568,8 +568,19 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
-  // Öppnarens återbud (dispatchas på öppning + svar).
-  const rebid = openerSecondBid(opening.call, response, deal.hands[openerSeat])
+  // Öppnarens återbud ur BESLUTSTABELLENS kunskap (etapp 3 familj 3,
+  // 2026-09-05): partnerns svar läses som öppnaren ser det (bud + regel ur den
+  // nakna auktionen), samma väg som `decideCall` tar vid bordet.
+  const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
+  const hittills: ResolvedCall[] = [
+    ...passes,
+    { seat: openerSeat, bid: opening.call as ResolvedCall['bid'] },
+    { seat: seatAt(deal.dealer, (openerIndex + 1) % 4), bid: 'P' },
+    { seat: responderSeat, bid: response.call },
+    { seat: rhoSeat, bid: 'P' },
+  ]
+  const seen = partnerResponseAsSeen(auctionFacts(hittills, openerSeat), hittills.length - 2)
+  const rebid = seen ? openerRebidDecision(opening.call, seen, deal.hands[openerSeat]) : null
   if (!rebid) {
     // Inget återbud ännu (svarstyp utan regel): auktionen fortsätter senare.
     return finish(true)
