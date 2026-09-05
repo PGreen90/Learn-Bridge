@@ -2143,9 +2143,8 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   (människans 1♠, botens 3♥ passades förr av öppnaren med 28 hp ihop; nu
   cue 3♠ → 4♥). Revisorn (`$env:REVISOR='1'; npx vitest run
   src/lib/engine/revisor.probe.test.ts`): rätt kontrakt 20,2 % ·
-  snittförlust 268,83 — identiskt med beslut 1. Öppen ägarfråga: beslutet
-  säger "3+ stöd"; bygget kräver **4+** (reversens färg är 4 kort, 4-3-fit
-  är ingen trumf) — ändras med ett tal om ägaren vill.
+  snittförlust 268,83 — identiskt med beslut 1. Ägaren bekräftade
+  **4+ stöd** 2026-09-06 (beslutstexten sa 3+; reversens färg är 4 kort).
 - **2026-09-05 — Slam efter 1NT-återbudet: Gerber bara för den jämna handen
   utan färg, färgen går via NMF (§5.7, §6.4; motorbytet §5b beslut 1,
   `docs/motorbyte-plan.md`).** Ägarbeslut på bok-mot-motor-fynd 6 + 15. Förr

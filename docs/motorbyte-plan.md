@@ -397,7 +397,7 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   svagare handen med 3+ stöd, ingen slamambition**. Ingen svag delkontrakts-
   escape behövs (minimihanden hoppar till 4♥). Ersätter både motorns "ej krav"
   och bokens odelade "krav". Rör §6.6.
-  **BYGGT 2026-09-06 (grönt, väntar på ägarens PCD):** 3M/4M i `fourthSuit`,
+  **BYGGT & LIVE 2026-09-06 (mergepunkt `1a6adf0`; ägaren bekräftade 4+ stöd):** 3M/4M i `fourthSuit`,
   öppnaren öppnar cue-ronden (`SlamSetup.partnerStarts`, prefix 4 i
   `slamSituation`), betydelselagret läser 3M/4M och kontrollbud i egen färg;
   bygget kräver **4+ stöd** (beslutstexten säger 3+ — reversens färg är 4
@@ -531,7 +531,7 @@ och 15 ingår i 1 resp. finns inte).** Nästa steg: bygg besluten test-drivet
 (facit FÖRE fix, systembok-§, regeln i det nya lagret), en per commit, sedan
 PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF — LIVE
 2026-09-05, `3491ece`) → 3 (fast
-arrival efter reverse — BYGGT 2026-09-06, väntar på PCD) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
+arrival efter reverse — LIVE 2026-09-06, `1a6adf0`) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
 steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M) →
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa) → 11 (ny färg på
@@ -559,8 +559,8 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
-- **2026-09-06 — §5b beslut 3 BYGGT (fast arrival efter reverse i högfärg;
-  väntar på ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 3" i
+- **2026-09-06 — §5b beslut 3 KLAR & LIVE (fast arrival efter reverse i högfärg;
+  mergepunkt `1a6adf0`, Actions grön, rebidz.com aliasad; ägaren bekräftade 4+ stöd).** Test-drivet: facit-blocket "§5b beslut 3" i
   `motorbyte-facit.test.ts` (nio fall, röda före fixen). Regeln i det nya
   lagret: `fourthSuit` (3M = 12+ stödpoäng/4+ stöd, annars 4M),
   `responderSecondDecision` (ingen slamport direkt över högfärgsreversen),
