@@ -42,11 +42,11 @@ Tretton bok-mot-motor-fynd väntar på ägarbeslut (loggen; nr 9 passad hands
 (`slamInvestigation`/Gerber/Exclusion/MSS: kaptenens tur ur kaptenens hand,
 öppnarens ur öppnarens; signaturerna smalnas till EN hand + fakta; kikvakten
 helt skarp) plus svararens tredje bud (placeringarna efter NMF/fjärde färg/
-checkback/broms). **Startrutin 5:** (1) baslinjerna (planens §3) på 4b:s
+checkback/broms). **Startrutin 5:** (1) baslinjerna (planens §3) på `4a14bca`
 mergepunkt; (2) kikvaktens mätläge: vilka manusgrenar byter bud?; (3) dela
 slamsekvenserna i turfunktioner (RKC-svar, cue-svar, placering) ur EN hand;
 (4) raden per läge. **OBS:** fem familjer (mergepunkterna 451f692, 5b1a9dc,
-b56a72f, 45fa322 + 4b) ligger LOKALT, inte pushade — deployfrågan är öppen
+b56a72f, 45fa322, 4a14bca) ligger LOKALT, inte pushade — deployfrågan är öppen
 (Claudes rekommendation 2026-09-05: deploya).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
