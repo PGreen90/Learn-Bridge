@@ -572,8 +572,14 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
   if (rebid.rule === 'reverse' || rebid.rule === 'hoppskift') {
     const secondSuit = suitOf(rebid.call)
     const firstSuitMin = rebid.rule === 'reverse' || openerSuit === 'hearts' || openerSuit === 'spades' ? 3 : 4
-    const trumpC =
-      secondSuit && rl[secondSuit] >= 4
+    // §5b beslut 3 (2026-09-05): 4+ stöd i reversens HÖGFÄRG → ingen slamport
+    // direkt över reversen; svararen höjer billigt (stark) eller hoppar till
+    // utgång (svag) i `fourthSuit`, och cue-ronden öppnas av öppnaren (raden
+    // slam, prefix 4). Hoppskift och reverse i lågfärg som förut.
+    const reverseMajorFit = rebid.rule === 'reverse' && secondSuit !== null && isMajorSuit(secondSuit) && rl[secondSuit] >= 4
+    const trumpC = reverseMajorFit
+      ? null
+      : secondSuit && rl[secondSuit] >= 4
         ? secondSuit
         : openerSuit && rl[openerSuit] >= firstSuitMin
           ? openerSuit
@@ -929,6 +935,17 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
   if (!response || !rebid) return null
   const openerSuit = suitOf(openCall)
   const first = ours[3].bid
+
+  // §5b beslut 3 (2026-09-05): reverse + kaptenens BILLIGA höjning av reversens
+  // högfärg (1♦–1♠–2♥–3♥) = stark, utgångskrav, slamintresse. Öppnaren öppnar
+  // cue-ronden på 4-läget (`partnerStarts`); kaptenen räknar mot visade 16.
+  if (rebid.rule === 'reverse' && response.rule === 'ny färg (1-läget)') {
+    const rs = suitOf(rebid.call)
+    if (rs && isMajorSuit(rs) && first === `3${LETTER[rs]}`) {
+      const ctx: SlamContext = { partnerMin: 16, inviteCall: `5${LETTER[rs]}`, gameForcing: true }
+      return { kind: 'slam', captain, prefix: 4, setup: { trump: rs, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+    }
+  }
 
   // Gerber över 1NT-återbudet (§5.7): 1m–1M–1NT–4♣. Och 4NT direkt över
   // sang-återbudet är KVANTITATIVT (den jämna 19–20-handen; standard-2/1) —

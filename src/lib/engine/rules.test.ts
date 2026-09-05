@@ -64,6 +64,8 @@ const ALL_ENGINE_RULES: string[] = [
   '2/1 utgångskrav',
   // §5b beslut 1 (2026-09-05): färgvisningen efter NMF utan stöd och öppnarens svar.
   'NMF: rebjuder egen högfärg', 'NMF: höjer öppnarens lågfärg', 'NMF: trumfen satt', 'NMF: sangförslag', 'NMF: höjning (GF)',
+  // §5b beslut 3 (2026-09-05): fast arrival efter reverse i högfärg.
+  'reverse: höjning (stark)', 'reverse: utgång',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

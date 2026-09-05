@@ -124,6 +124,13 @@ export interface SlamSetup {
   lastCall: string | undefined
   ctx: SlamContext
   partnerShort?: Suit
+  /**
+   * Partnern (öppnaren) öppnar cue-ronden — kaptenens första slambud var själva
+   * trumfsättningen (billig höjning efter reverse, §5b beslut 3): öppnaren cue:ar
+   * sin billigaste kontroll under utgång eller avslutar i utgång; därefter
+   * fortsätter kaptenen som vanligt (cue tillbaka, 4NT, inbjudan, avslut).
+   */
+  partnerStarts?: boolean
 }
 
 /**
@@ -200,6 +207,13 @@ export function slamInvestigation(
  */
 export function slamTurn(role: SlamRole, hand: Hand, setup: SlamSetup, sofar: SlamBid[]): SlamTurn | null {
   const { trump, ctx } = setup
+  if (setup.partnerStarts) {
+    // Partnern öppnar cue-ronden (§5b beslut 3). Avslutar partnern direkt i
+    // utgång fortsätter kaptenen som över vilken utgångsplacering som helst
+    // (4NT med 33+, inbjudan med 31–32, annars pass).
+    if (sofar.length === 0) return role === CAPTAIN ? null : partnerFirstStep(hand, setup)
+    if (!isCueCall(sofar[0].call, trump)) return slamTurn(role, hand, { ...setup, lastCall: sofar[0].call, partnerStarts: false }, sofar.slice(1))
+  }
   if (sofar.length === 0) {
     return role === CAPTAIN ? slamCaptainFirstStep(hand, trump, setup.lastCall, ctx, setup.partnerShort) : null
   }
@@ -344,10 +358,25 @@ function isCueCall(call: string, trump: Suit): boolean {
  * Ronden finns bara i utgångskrav (`ctx.gameForcing`) och bara när sekvensen
  * BÖRJADE med ett kontrollbud; annars null.
  */
+/**
+ * Partnerns (öppnarens) FÖRSTA steg när hen öppnar cue-ronden (§5b beslut 3):
+ * billigaste första-rondskontroll över `lastCall` under utgång — gratis i
+ * utgångskrav (§6.2) — annars avslut i utgång.
+ */
+function partnerFirstStep(hand: Hand, setup: SlamSetup): SlamTurn {
+  const { trump } = setup
+  const gameRank = bidRank(gameCallFor(trump))
+  const cue = cheapestFreeCue(hand, trump, setup.lastCall ? bidRank(setup.lastCall) : -1, gameRank, new Set())
+  if (cue) return cueTurn('öppnare', cue)
+  const game = gameCallFor(trump)
+  return { role: 'öppnare', call: game, rule: 'cue: avslut', explanation: `inga kontroller under utgång → ${game[0]}${SYM[trump]}.` }
+}
+
 function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: number, sofar: SlamBid[]): SlamTurn | null {
   const { trump, ctx } = setup
   if (!ctx.gameForcing) return null
-  if (sofar[0].role !== CAPTAIN || !isCueCall(sofar[0].call, trump)) return null
+  const starter: SlamRole = setup.partnerStarts ? 'öppnare' : CAPTAIN
+  if (sofar[0].role !== starter || !isCueCall(sofar[0].call, trump)) return null
   const gameRank = bidRank(gameCallFor(trump))
   const controlled = new Set<Suit>()
   for (const b of sofar) {

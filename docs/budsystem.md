@@ -693,7 +693,10 @@ placera kontraktet. Tre styrkenivåer styr valet:
   reverse och högfärgsöppning; 4+ krävs mot hoppskiftets minoröppning):
   **33+ → driv** (4NT RKC), **31–32 → slaminbjudan** (öppnaren accepterar
   med mer än blott minimum, dömt på egna Bergenpoäng), annars vanliga
-  utgångsflödet.
+  utgångsflödet. **Undantag (ägarbeslut 2026-09-05, §6.6):** efter en reverse
+  i **högfärg** med 4+ stöd frågas inte 4NT direkt — svararen höjer först
+  (billigt = stark, hopp = svag, fast arrival) och cue-ronden öppnas av
+  öppnaren; essfrågan kommer efter kontrollbuden.
 - **1x–1y–2NT** = 18–19 hp balanserad (för stark för 1NT-öppning).
 - I en **2/1 GF-budgivning** är paret redan bundet till utgång – öppnaren bjuder
   då naturligt och i lugn takt (visar form först, sparar styrkebeskedet).
@@ -1323,10 +1326,19 @@ utgången försvann:
 | 10–12 | hopphöjning = inbjudan (3♠) |
 | 13+ | utgång (4♠) |
 
-Två undantag: (a) efter en **reverse** har öppnaren 17+ och den billigaste
-höjningen är redan krav — där tas inget utrymme; (b) en **minorhöjning** ligger
-redan på 3-läget och graderas inte uppåt (utgång i minor kräver elva stick —
-vägen går via 3NT eller fjärde färg).
+Två undantag: (a) efter en **reverse i högfärg** (1♦–1♠–2♥) går paret nästan
+alltid till utgång, så höjningen delas i **fast arrival** (ägarbeslut
+2026-09-05): **billig höjning (3♥) = stark** — 4+ stöd och egna öppningsvärden
+(12+ stödpoäng), slamintresse, **utgångskrav**; öppnaren öppnar cue-ronden
+(§6.2) med sitt billigaste kontrollbud under utgång, även i egen färg
+(3♠/4♣/4♦), eller avslutar 4♥ utan kontroll; svararen cue:ar tillbaka, frågar
+4NT med 33+ mot visade 16 (kontrollerna räknade) eller avslutar 4♥ — och över
+öppnarens 4♥-avslut driver hon ändå 4NT med 33+, inbjuder 5♥ med 31–32.
+**Hopp till utgång (4♥) = den svagare handen** med 4+ stöd, ingen slamambition.
+Ingen delkontrakts-escape behövs. Reverse i lågfärg (1♣–1♥–2♦) höjs billigast
+som förut (4♦ = slaminbjudan, §5). (b) en **minorhöjning** ligger redan på
+3-läget och graderas inte uppåt (utgång i minor kräver elva stick — vägen går
+via 3NT eller fjärde färg).
 
 **Öppnarens 1NT-reservfall snävas in (2026-08-07, systemfel #2):** med
 **singel/renons i svararens färg** och en egen **5-korts färg** rebjuder
@@ -2107,6 +2119,33 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-06 — Fast arrival efter reverse i högfärg (§6.6, §5; motorbytet
+  §5b beslut 3, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
+  bok-mot-motor-fynd 2. Förr höjdes reversens högfärg billigast oavsett
+  styrka ("ej krav" i motorn, "krav" i boken) och kaptenen frågade 4NT /
+  inbjöd 5M direkt över reversen. Nu: **3M = stark** (4+ stöd, 12+
+  stödpoäng, slamintresse, utgångskrav) — öppnaren öppnar cue-ronden med
+  billigaste kontrollbud under utgång, även i egen färg, annars 4M; kaptenen
+  cue:ar tillbaka / 4NT med 33+ och kontrollerna räknade / 4M, och över
+  öppnarens 4M-avslut 4NT med 33+, 5M med 31–32. **4M = svag** (4+ stöd,
+  ingen slamambition). Lågfärgsreverse oförändrad. Kod: `fourthSuit`
+  (`responder-rebids.ts`, 3M/4M), `responderSecondDecision` (ingen slamport
+  direkt över högfärgsreversen), `slamSituation` prefix 4 + `SlamSetup.
+  partnerStarts` (öppnaren öppnar cue-ronden: `partnerFirstStep`, `slamTurn`,
+  `cuePhaseTurn`), betydelselagret `reverseMajorRaise` (3M/4M-läsning,
+  utgångskrav, kontrollbud i egen färg), registret i `rules.ts`. Facit:
+  `motorbyte-facit.test.ts` "§5b beslut 3" (nio fall). Auktionsdiffen
+  (`$env:DUMP_RANGE='20270001-20273000'; npx vitest run
+  src/lib/engine/auktionsdump.probe.test.ts` + `node scripts/auktionsdiff.mjs`
+  mot baslinjen på `b86d004`): 1 ändrad, klass b — frö 20272351 (fynd 14:s
+  nakna 4NT efter reverse) går nu 3♥ → 3♠ → 4♣ → 4♦ → 4NT → 6♥, samma slam
+  med trumfen satt. Avvikelsedumpen: 1 ändrad, klass b — frö 20270106
+  (människans 1♠, botens 3♥ passades förr av öppnaren med 28 hp ihop; nu
+  cue 3♠ → 4♥). Revisorn (`$env:REVISOR='1'; npx vitest run
+  src/lib/engine/revisor.probe.test.ts`): rätt kontrakt 20,2 % ·
+  snittförlust 268,83 — identiskt med beslut 1. Öppen ägarfråga: beslutet
+  säger "3+ stöd"; bygget kräver **4+** (reversens färg är 4 kort, 4-3-fit
+  är ingen trumf) — ändras med ett tal om ägaren vill.
 - **2026-09-05 — Slam efter 1NT-återbudet: Gerber bara för den jämna handen
   utan färg, färgen går via NMF (§5.7, §6.4; motorbytet §5b beslut 1,
   `docs/motorbyte-plan.md`).** Ägarbeslut på bok-mot-motor-fynd 6 + 15. Förr

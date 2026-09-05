@@ -11,13 +11,14 @@
 // Återskapa en giv: $env:DUMP='<frö>'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
 
 import { describe, expect, it } from 'vitest'
-import type { Seat } from '../../types/bridge'
+import type { Card, Deal, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseHand } from '../bidding'
 import { dealFromSeed } from './revisor'
 import { decideCall } from './auction-live'
 import { decideFromTable } from './auction-decide'
 import { auctionFacts } from './auction-facts'
+import { meaningOf } from './auction-meaning'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 
@@ -248,5 +249,89 @@ describe('§5b beslut 1 – 4♣ över 1NT-återbudet är Gerber bara utan färg
     expect(bud('S:AK2 H:AK75 D:K64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4C', rule: 'Gerber' }) // 22 hp
     expect(bud('S:A32 H:AK75 D:A64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' }) // 20 hp
     expect(bud('S:AK2 H:AK753 D:K6 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' }) // 22 hp, 5 hjärter
+  })
+})
+
+// §5b beslut 3 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 2): höjningen av
+// öppnarens andra färg efter en REVERSE (1♦–1♠–2♥) delas i fast arrival —
+// billig höjning 3M = stark (egna öppningsvärden 12+, 4+ stöd, slamintresse,
+// utgångskrav; öppnaren öppnar 4-läget med kontrollbud), hopp till utgång 4M =
+// den svagare handen (4+ stöd, ingen slamambition). Förr: billigaste höjning
+// oavsett styrka ("ej krav" i motorn, "krav" i boken), och kaptenen frågade
+// 4NT / inbjöd 5M direkt över reversen. Lågfärgsreverse (1♣–1♥–2♦) rörs inte.
+describe('§5b beslut 3 – fast arrival efter reverse: 3M stark (GF, cue-ronden), 4M svag (LANDAD 2026-09-05)', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  /** Giv ur Nords och Syds händer; resten av leken delas växelvis till Öst/Väst. */
+  const dealNS = (n: string, s: string): Deal => {
+    const N = parseHand(n)
+    const S = parseHand(s)
+    const used = new Set([...N, ...S].map((c) => `${c.suit}${c.rank}`))
+    const ranks: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+    const rest: Card[] = []
+    for (const suit of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) for (const rank of ranks) if (!used.has(`${suit}${rank}`)) rest.push({ suit, rank })
+    return { id: 'facit', dealer: 'N', vulnerability: 'none', board: 1, hands: { N, S, E: rest.filter((_, i) => i % 2 === 0), W: rest.filter((_, i) => i % 2 === 1) } }
+  }
+  // 1♦–1♠–2♥ (reverse, 16+): Syd har 4 hjärter.
+  const h = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '2H'), P('E')]
+
+  it('4+ stöd och egna öppningsvärden (13 hp) → billig höjning 3♥ (stark, utgångskrav, slamintresse)', () => {
+    expect(bud('S:KQ84 H:AJ85 D:72 C:K63', h, 'S')!.call).toMatchObject({ bid: '3H', rule: 'reverse: höjning (stark)' })
+  })
+
+  it('4+ stöd med svagare hand (8 hp) → hopp till utgång 4♥ (fast arrival, ingen slamambition)', () => {
+    expect(bud('S:KJ84 H:Q985 D:72 C:Q63', h, 'S')!.call).toMatchObject({ bid: '4H', rule: 'reverse: utgång' })
+  })
+
+  it('kaptenen frågar inte 4NT direkt över reversen längre: 17 hp med 4 hjärter → 3♥ först', () => {
+    expect(bud('S:KQ84 H:AJ85 D:A2 C:K63', h, 'S')!.call.bid).toBe('3H') // 16 hp
+    expect(bud('S:AQ84 H:AJ85 D:A2 C:K63', h, 'S')!.call.bid).toBe('3H') // 18 hp — förr 4NT
+  })
+
+  it('öppnaren öppnar cue-ronden med billigaste kontrollbud över 3♥ (3♠ med ♠A; 4♦ i egen första färg); utan kontroll under utgång → 4♥', () => {
+    const h3 = [...h, call('S', '3H'), P('W')]
+    expect(bud('S:A3 H:KQ72 D:AKJ85 C:Q4', h3, 'N')!.call).toMatchObject({ bid: '3S', rule: 'cue-bid' })
+    expect(bud('S:K3 H:KQ72 D:AKJ85 C:Q4', h3, 'N')!.call).toMatchObject({ bid: '4D', rule: 'cue-bid' })
+    expect(bud('S:K3 H:KQ72 D:KQJ85 C:K4', h3, 'N')!.call).toMatchObject({ bid: '4H', rule: 'cue: avslut' })
+  })
+
+  it('hela sekvensen: 3♥ → 4♦ (cue) → 4NT (kaptenen 17 + 16 = 33, bara klövern okontrollerad) → 5♠ (två nyckelkort + dam) → 6♥', () => {
+    const syd = 'S:AQ84 H:AJ85 D:72 C:K63' // 16 hp + dubbelton
+    const nord = 'S:K3 H:KQ72 D:AKJ85 C:Q4' // 17 hp
+    const h4 = [...h, call('S', '3H'), P('W'), call('N', '4D'), P('E')]
+    expect(bud(syd, h4, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '4NT' } })
+    const h5 = [...h4, call('S', '4NT'), P('W')]
+    expect(bud(nord, h5, 'N')!.call.bid).toBe('5S') // ♥K ♦A = två nyckelkort MED trumfdam
+    const h6 = [...h5, call('N', '5S'), P('E')]
+    expect(bud(syd, h6, 'S')!.call.bid).toBe('6H')
+  })
+
+  it('kaptenen med 13 hp (29 mot visade 16) avslutar i 4♥ efter öppnarens cue; efter öppnarens 4♥-avslut passar hon', () => {
+    const syd = 'S:KQ84 H:AJ85 D:72 C:K63'
+    const h4 = [...h, call('S', '3H'), P('W'), call('N', '4D'), P('E')]
+    expect(bud(syd, h4, 'S')!.call).toMatchObject({ bid: '4H', rule: 'cue: avslut' })
+    const deal = dealNS('S:K3 H:KQ72 D:KQJ85 C:K4', syd)
+    const h4b = [...h, call('S', '3H'), P('W'), call('N', '4H'), P('E')]
+    expect(decideCall(deal, h4b, 'S').bid).toBe('P')
+  })
+
+  it('efter öppnarens 4♥-avslut driver kaptenen ändå med 33+ (4NT) och inbjuder med 31–32 (5♥)', () => {
+    const h4b = [...h, call('S', '3H'), P('W'), call('N', '4H'), P('E')]
+    expect(bud('S:AQ84 H:AJ85 D:A2 C:K63', h4b, 'S')!.call.bid).toBe('4NT') // 18 + 16 = 34
+    expect(bud('S:KQ84 H:AJ85 D:Q2 C:K63', h4b, 'S')!.call.bid).toBe('5H') // 15 hp + dubbelton = 16, + 16 = 32
+    const h5 = [...h4b, call('S', '5H'), P('W')]
+    expect(bud('S:K3 H:KQ72 D:KQJ85 C:K4', h5, 'N')!.call.rule).toMatch(/^slaminbjudan: /) // öppnaren dömer på sina Bergenpoäng
+  })
+
+  it('betydelselagret läser 3♥ som stark höjning (utgångskrav), 4♥ som fast arrival och öppnarens 4♦ som kontrollbud', () => {
+    const h3 = [...h, call('S', '3H'), P('W')]
+    expect(meaningOf(h3, 6)).toMatchObject({ rule: 'reverse: höjning (stark)', forcing: 'utgangskrav' })
+    expect(meaningOf([...h, call('S', '4H')], 6)).toMatchObject({ rule: 'reverse: utgång' })
+    expect(meaningOf([...h3, call('N', '4D')], 8).rule).toBe('cue-bid')
+  })
+
+  it('lågfärgsreverse rörs inte: 1♣–1♥–2♦ med 4 ruter höjs billigast som förut', () => {
+    const hm = [call('N', '1C'), P('E'), call('S', '1H'), P('W'), call('N', '2D'), P('E')]
+    expect(bud('S:K84 H:AJ85 D:K963 C:72', hm, 'S')!.call.bid).toBe('3D')
   })
 })
