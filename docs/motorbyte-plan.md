@@ -119,6 +119,19 @@ Hela sviten (`npm test`) är grunden. Ovanpå den, per etapp och per familj:
   **(a)** samma bud (borde vara majoriteten), **(b)** bättre enligt bokens
   paragraf (skrivs in i ändringsloggen med frö), **(c)** sämre = fel som lagas
   före merge. Inget mergas med en oklassad ändring.
+- **Avvikelsedumpen (BYGGD i etapp 3 familj 2, 2026-09-04).** Auktionsdumpen
+  täcker bot mot bot; `avvikelsedump.probe.test.ts` låter MÄNNISKAN öppna
+  fritt (17 öppningsbud × två lägen: given öppnar / tredje hand öppnar med
+  svararen som passad hand) och bottarna spela klart. Samma JSON-form → samma
+  diff-skript; nyckeln är `<frö>/<läge>/<öppning>`:
+  ```
+  $env:AVVIK='1'; $env:AVVIK_OUT='revisor-output/avvikelsedump-baslinje.json'; npx vitest run src/lib/engine/avvikelsedump.probe.test.ts
+  $env:AVVIK='1'; npx vitest run src/lib/engine/avvikelsedump.probe.test.ts
+  node scripts/auktionsdiff.mjs revisor-output/avvikelsedump-baslinje.json revisor-output/avvikelsedump.json revisor-output/avvikelsediff.txt
+  ```
+  (~2 s per körning, 300 frön = 10200 auktioner). Det är HÄR familjernas
+  b-listor kommer ifrån i etapp 3: bot mot bot ändras inget (samma
+  kunskapsfunktioner), skillnaden är att tabellen svarar där manuset saknades.
 - **Revisorn** (bud mot par): `$env:REVISOR='1'; npx vitest run
   src/lib/engine/revisor.probe.test.ts` (standard 1000 givar, frö 20260721).
   Får inte försämras mellan etapper. Baslinjen mäts i etapp 0 och skrivs i
@@ -224,6 +237,8 @@ inte flyttat än.
    öppningsvarvet.
 2. **Svaret** — `respondToMajor`/`respondToMinor`/`respondTo1NT`/`respondTo2C`/
    svaga tvåor/spärrar/2NT/Drury, valt ur fakta (öppningsbud, passad hand).
+   **KLAR 2026-09-04** (loggen): raden *svar* (`responseDecision`), Gerber-
+   handens 4♣ ur egen hand (`gerberAsk`), avvikelsedumpen byggd.
 3. **Öppnarens återbud** — `openerSecondBid` och syskonen i `rebids.ts`.
    Här byggs adaptern som ger dem svararens bud + regel ur betydelselagret i
    stället för det interna `ResponseResult`.
@@ -324,6 +339,40 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-04 — Etapp 3 familj 2 KLAR: svaret.** Raden *svar* i
+  `auction-decide.ts`: läget "partnern öppnade (enda kontraktsbudet), inget
+  utom pass sedan dess, jag har inte bjudit, öppningen har svarsregler
+  (`RESPONDABLE`)" → `responseDecision(öppning, hand, passad hand)` = manusets
+  gamla `computeResponse` (flyttad hit; manuset läser den) + Gerber-handens 4♣
+  över 1NT/2NT ur egen hand (`gerberAsk` i `nt-slam.ts`, som manusets
+  Gerber-sekvenser nu börjar med). `decideCallTraced` fick laglighetsvakten:
+  ett olagligt tabellbud blir pass med källan märkt `(olagligt … → pass)`.
+  Facit: `auction-decide.test.ts` (familj 2), kikvakten prövar nu VARJE bud
+  med källa `tabell:*` i botauktionerna (växer av sig självt per familj).
+  **Auktionsdiffen** (baslinje `451f692`): 3000 givar, ÄNDRAT BUD 0, samma
+  bud med annan källa 1598 (manus → tabell:svar). **Avvikelsedumpen**
+  (kommandot i §3, baslinje `451f692`): 10200 auktioner, ÄNDRAT BUD 4008 —
+  ALLA i själva svaret, inga olagliga bud; förut svarade `offBookResponse`
+  (gissning: höjde spärrar till utgång, 5♣ på 2♣ …) eller ingen regel alls
+  (pass på 2♣, 3NT, 1♠ …), nu systemsvaret (analysen: 248 mönster, störst
+  3NT→6NT 428, 3♠→spärr-pass 163, 2♦→spärrhöjning 124, 2♣→2♦ väntebud 122,
+  2♥→Ogust 121; `scratch analys` per första skillnad). Klass (b) per
+  konstruktion: samma kunskapsfunktion som manuset använder när boten
+  öppnar. **Bifynd till familj 3** (syns i avvikelsedumpen, t.ex.
+  `20270006/3:e hand/1H`): efter svararens Jacoby 2NT på en öppning manuset
+  inte förutsåg PASSAR öppnaren — det gamla lagrets kravvakt känner inte
+  Jacoby utan manus; landar när öppnarens återbud flyttar. **Kikvaktens
+  mätläge**: 2898 bud, 267 byter (9,2 %, från 11,5 %); `tabell:svar` 154/0.
+  **Sveparna** (betydelse/förklaring/regel): identiska med familj 1.
+  Frekvensbilden: manus 11333 → 9735, `tabell:svar` 1598. Facit-kön: frö
+  20271606 skarp (Nord svarar 1NT på Syds 1♠); 2♣- och svag-tvåa-fynden
+  omdöpta till familj 3/4 (de rör återbud, inte svaret). Fem tester i
+  `auction-live.test.ts` ("datorpartnern svarar på Syds egna bud") vaktade
+  gisslagrets egna nivåer (3♠/4♠/2NT/5♦/3♦) och skrevs om till systemets
+  facit (Bergen 3♦, Jacoby 2NT, semi-forcing 1NT, inverterad 2♦). Hela sviten grön
+  (`npm test`), `npx tsc` rent. **Revisorn** (kommandot i §3, 1000 givar, frö
+  20260721): rätt kontrakt 20,3 % · snittförlust 268,55 — identiskt med
+  baslinjen (bot mot bot ändras inget).
 - **2026-09-04 — Etapp 3 familj 1 KLAR: öppningen per stol.** Ny fil
   `auction-decide.ts` (beslutstabellen, §2 steg 3) med raden *öppning*: läget
   "ingen har öppnat" (`facts.opening === null`) → `classifyOpening(hand,

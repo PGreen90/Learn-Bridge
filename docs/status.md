@@ -377,7 +377,8 @@ Budgivningen är medvetet delad i **tre lager med olika ansvar**:
 **Sedan motorbytets etapp 3 (2026-09-04) ligger BESLUTSTABELLEN
 `auction-decide.ts` (`decideFromTable`) FÖRE alla tre lagren:** `decideCall`
 frågar den först, och täcker en rad läget (familj 1: öppningen, "ingen har
-öppnat") avgörs budet där ur egen hand + fakta — utan manus. Manusets
+öppnat"; familj 2: svaret, "partnern öppnade ostört, jag har inte bjudit")
+avgörs budet där ur egen hand + fakta — utan manus. Manusets
 motsvarande gren läser tabellen. Lagren nedan gäller för de familjer som inte
 flyttat än; ny logik i en flyttad familj byggs som en tabellrad, aldrig i
 manuset eller kedjan (`docs/motorbyte-plan.md`).

@@ -35,12 +35,25 @@ function qualifiesForGerber(responderHand: Hand): boolean {
   return true
 }
 
+/**
+ * Svararens FÖRSTA bud över partnerns naturliga 1NT/2NT när handen är en
+ * Gerber-hand: 4♣. Bara svararens egen hand + det visade intervallet (över
+ * 1NT 15–17: egen 18+; över 2NT 20–21: egen 13+). null = ingen slamhand → den
+ * vanliga svarskedjan (respondTo1NT/respondTo2NT). Beslutstabellens rad för
+ * svaret (auction-decide.ts) läser den här; manusets sekvenser nedan börjar
+ * med samma bud, så tabell och manus kan aldrig glida isär.
+ */
+export function gerberAsk(responderHand: Hand, over: '1NT' | '2NT'): SlamTurn | null {
+  if (!qualifiesForGerber(responderHand)) return null
+  if (hcp(responderHand) < (over === '1NT' ? 18 : 13)) return null // därunder: kvantitativ 4NT i svarskedjan
+  return { role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` }
+}
+
 /** Gerber-slamutredning över partnerns 1NT (visade 15–17). null = ingen slamhand. */
 export function gerberInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
-  if (!qualifiesForGerber(responderHand)) return null
-  const p = hcp(responderHand)
-  if (p < 18) return null // 16–17 stannar som kvantitativ 4NT (inbjudan)
-  return buildGerberSequence(openerHand, responderHand, p, 15)
+  const ask = gerberAsk(responderHand, '1NT')
+  if (!ask) return null
+  return buildGerberSequence(openerHand, responderHand, hcp(responderHand), 15, ask)
 }
 
 /**
@@ -49,10 +62,9 @@ export function gerberInvestigation(openerHand: Hand, responderHand: Hand): Slam
  * kvantitativ 4NT (inbjudan) där.
  */
 export function gerber2NTInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
-  if (!qualifiesForGerber(responderHand)) return null
-  const p = hcp(responderHand)
-  if (p < 13) return null
-  return buildGerberSequence(openerHand, responderHand, p, 20)
+  const ask = gerberAsk(responderHand, '2NT')
+  if (!ask) return null
+  return buildGerberSequence(openerHand, responderHand, hcp(responderHand), 20, ask)
 }
 
 /**
@@ -97,9 +109,15 @@ export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand):
  * `partnerMin` = undre gränsen i partnerns visade intervall (storslamszonen
  * räknas alltid mot minimum — aldrig hopp om maximum).
  */
-function buildGerberSequence(openerHand: Hand, responderHand: Hand, p: number, partnerMin: number): SlamTurn[] {
+function buildGerberSequence(
+  openerHand: Hand,
+  responderHand: Hand,
+  p: number,
+  partnerMin: number,
+  ask: SlamTurn = { role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` },
+): SlamTurn[] {
   const turns: SlamTurn[] = []
-  turns.push({ role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` })
+  turns.push(ask)
 
   const aceAnswer = respondToGerber(openerHand)
   turns.push({ role: 'öppnare', call: aceAnswer.call, rule: aceAnswer.rule, explanation: aceAnswer.explanation })

@@ -24,9 +24,9 @@ describe('familj 1 – öppningen: läget "ingen har öppnat"', () => {
     expect(bud(h, [P('N')], 'E')?.källa).toBe('tabell:öppning')
     expect(bud(h, [P('N'), P('E')], 'S')?.källa).toBe('tabell:öppning')
     expect(bud(h, [P('N'), P('E'), P('S')], 'W')?.källa).toBe('tabell:öppning')
-    // Efter en öppning är läget svararens/inklivarens — familj 2 och etapp 4.
+    // Efter en öppning är läget inklivarens (etapp 4) resp. svararens (familj 2).
     expect(bud(h, [{ seat: 'N', bid: '1C' }], 'E')).toBeNull()
-    expect(bud(h, [{ seat: 'N', bid: '1C' }, P('E')], 'S')).toBeNull()
+    expect(bud(h, [{ seat: 'N', bid: '1C' }, P('E')], 'S')?.källa).toBe('tabell:svar')
   })
 
   it('ger budet med regel och förklaring, även passet', () => {
@@ -82,5 +82,62 @@ describe('familj 1 – decideCall går genom tabellen för hela öppningsvarvet'
     const kopior = { ...deal, hands: { N: deal.hands.E, E: deal.hands.E, S: deal.hands.E, W: deal.hands.E } }
     expect(decideCallTraced(deal, [], 'E').call.bid).toBe('1NT')
     expect(decideCallTraced(kopior, [], 'E').call.bid).toBe('1NT')
+  })
+})
+
+describe('familj 2 – svaret: läget "partnern öppnade ostört, jag har inte bjudit"', () => {
+  const h = 'S:KJ74 H:A83 D:Q62 C:J52' // 10 hp, 4-korts spaderstöd
+  const open1S: ResolvedCall = { seat: 'N', bid: '1S' }
+
+  it('träffar bara svararen, direkt efter öppning + pass', () => {
+    expect(bud(h, [open1S, P('E')], 'S')?.källa).toBe('tabell:svar')
+    // Motståndaren till öppnaren är inte svarare (etapp 4).
+    expect(bud(h, [open1S], 'E')).toBeNull()
+    // Störning (inkliv eller X) mellan öppningen och mig → inte den här raden.
+    expect(bud(h, [open1S, { seat: 'E', bid: '2C' }], 'S')).toBeNull()
+    expect(bud(h, [open1S, { seat: 'E', bid: 'X' }], 'S')).toBeNull()
+    // Efter mitt eget svar är läget öppnarens/svararens andra bud (familj 3–4).
+    expect(bud(h, [open1S, P('E'), { seat: 'S', bid: '3S' }, P('W')], 'N')).toBeNull()
+    // Öppningar utan svarsregler lämnas åt det gamla lagret.
+    expect(bud(h, [{ seat: 'N', bid: '4NT' }, P('E')], 'S')).toBeNull()
+  })
+
+  it('ger systemsvaret ur egen hand: Bergen 3♦ (limithöjning, 4-korts stöd) på 1♠ med 10 hp', () => {
+    const c = bud(h, [open1S, P('E')], 'S')!.call
+    expect(c).toMatchObject({ seat: 'S', bid: '3D' })
+    expect(c.rule).toBeTruthy()
+    expect(c.explanation).toBeTruthy()
+  })
+
+  it('passad hand läses ur fakta: Drury över 1♠ i 3:e hand, limithöjning i 1:a', () => {
+    const drury = 'S:KJ7 H:A83 D:Q962 C:J52' // 10 hp, 3-korts stöd
+    expect(bud(drury, [P('S'), P('W'), open1S, P('E')], 'S')!.call).toMatchObject({ bid: '2C', rule: 'Drury' })
+    expect(bud(drury, [open1S, P('E')], 'S')!.call.rule).not.toBe('Drury')
+  })
+
+  it('Gerber-handen frågar 4♣ över 1NT ur egen hand (18+ balanserad utan 4-korts högfärg)', () => {
+    const gerber = 'S:AQ3 H:KJ2 D:KQ5 C:AJ92' // 20 hp
+    expect(bud(gerber, [{ seat: 'N', bid: '1NT' }, P('E')], 'S')!.call).toMatchObject({ bid: '4C', rule: 'Gerber' })
+    const invit = 'S:Q73 H:KJ2 D:KQ5 C:AJ92' // 16 hp → kvantitativ 4NT, inte Gerber
+    expect(bud(invit, [{ seat: 'N', bid: '1NT' }, P('E')], 'S')!.call.bid).toBe('4NT')
+  })
+
+  it('svarar på det bud som FAKTISKT bjöds, även när motorn själv inte hade öppnat handen', () => {
+    // Bifyndet från familj 1: Syd öppnar 1♠ med 11 hp; motorn hade passat och
+    // manuset fanns inte ("ingen öppning") → Nord passade. Nu: semi-forcing 1NT.
+    const deal = dealFromSeed(20271606)
+    const t = decideCallTraced(deal, [{ seat: 'S', bid: '1S' }, P('W')], 'N')
+    expect(t.källa).toBe('tabell:svar')
+    expect(t.call).toMatchObject({ bid: '1NT', rule: 'semi-forcing 1NT' })
+  })
+
+  it('ser aldrig de andra händerna: samma svar när de tre andra är kopior av den egna', () => {
+    const deal = dealFromSeed(20270003) // Öst öppnar 1NT, Väst svarar
+    const kopior = { ...deal, hands: { N: deal.hands.W, E: deal.hands.W, S: deal.hands.W, W: deal.hands.W } }
+    const hist: ResolvedCall[] = [{ seat: 'E', bid: '1NT' }, P('S')]
+    const a = decideCallTraced(deal, hist, 'W')
+    const b = decideCallTraced(kopior, hist, 'W')
+    expect(a.källa).toBe('tabell:svar')
+    expect(b.call.bid).toBe(a.call.bid)
   })
 })

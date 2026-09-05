@@ -6,16 +6,11 @@ import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
 import { classifyOpening, isVulnerable } from './openings'
-import { decideFromTable, type DecidedCall } from './auction-decide'
+import { decideFromTable, responseDecision, RESPONDABLE, type DecidedCall } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
-import { respondToMajor, respondToMinor, type Major, type ResponseResult } from './responses'
+import { respondToMajor, type Major, type ResponseResult } from './responses'
 import { respondTo1NT } from './responses-nt'
-import { respondTo2C } from './responses-2c'
-import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
-import { respondToPreempt, preemptOf } from './responses-preempt'
-import { respondTo2NT, respondTo3NT } from './responses-2nt'
-import { respondToMajorPassed } from './responses-drury'
 import { overcall, advanceOvercall, advanceTwoSuiter, takeoutOfResponse } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
 import { pointsWithFloor } from './evaluation'
@@ -83,10 +78,6 @@ export function dealWithMajorOpening(maxTries = 300): { deal: Deal; auction: Maj
 // regel (t.ex. återbud efter en höjning) stannar den och markeras som öppen.
 
 const PARTNER_OF: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
-const RESPONDABLE = new Set([
-  '1C', '1D', '1H', '1S', '1NT', '2C', '2D', '2H', '2S', '2NT',
-  '3C', '3D', '3H', '3S', '3NT', '4C', '4D', '4H', '4S',
-])
 const OPEN_SUIT: Record<string, Major | 'clubs' | 'diamonds'> = {
   '1C': 'clubs', '1D': 'diamonds', '1H': 'hearts', '1S': 'spades',
 }
@@ -111,24 +102,6 @@ export interface BuiltAuction {
   turns: AuctionTurn[]
   /** Sant så länge motorn ännu inte har regler för nästa bud i sekvensen. */
   open: boolean
-}
-
-/** Räknar ut svararens första bud givet öppningsbudet. */
-function computeResponse(openCall: string, responderHand: Deal['hands'][Seat], responderPassed = false): ResponseResult {
-  if (openCall === '2C') return respondTo2C(responderHand)
-  const weak = suitOfWeakTwo(openCall)
-  if (weak) return respondToWeakTwo(responderHand, weak)
-  const preempt = preemptOf(openCall)
-  if (preempt) return respondToPreempt(responderHand, preempt.suit, preempt.level)
-  if (openCall === '1NT') return respondTo1NT(responderHand)
-  if (openCall === '2NT') return respondTo2NT(responderHand)
-  if (openCall === '3NT') return respondTo3NT(responderHand)
-  const suit = OPEN_SUIT[openCall]
-  if (suit === 'hearts' || suit === 'spades') {
-    // Passad hand över 1♥/1♠ → Drury (§6.7).
-    return responderPassed ? respondToMajorPassed(responderHand, suit) : respondToMajor(responderHand, suit)
-  }
-  return respondToMinor(responderHand, suit)
 }
 
 // ---- Störd budgivning (punkt 27): motståndaren kliver in på riktigt --------
@@ -496,7 +469,10 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
-  const response = computeResponse(opening.call, deal.hands[responderSeat], responderPassed)
+  // Svaret ur BESLUTSTABELLENS kunskap (etapp 3 familj 2, 2026-09-04): samma
+  // funktion som `decideCall` använder vid bordet. Gerber-fallen ovan börjar
+  // med samma 4♣ (`gerberAsk`), så manus och tabell kan inte glida isär.
+  const response = responseDecision(opening.call, deal.hands[responderSeat], responderPassed)!
   turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
 
   // Svararen passade → given är på väg att passas ut till öppningsbudet.

@@ -342,7 +342,12 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
   // fit (graderat efter styrka), annars bjuda egen färg/sang. Syd är balanserad
   // 17 hp så motorns linje öppnar 1NT; vi matar in ett annat öppningsbud för Syd
   // för att tvinga fram divergensen.
-  describe('off-book: datorpartnern svarar på Syds egna bud', () => {
+  // Motorbytet etapp 3 familj 2 (2026-09-04): svaret på Syds egna öppning tas
+  // ur BESLUTSTABELLEN med systemets svarsfunktioner (samma som när boten
+  // öppnar) — inte längre ur gisslagret `offBookResponse`. Facit-buden nedan
+  // är därför systemboken §4: Bergen, Jacoby 2NT, semi-forcing 1NT, inverterade
+  // minorhöjningar. (Före bytet: 3♠/4♠/2NT/5♦/3♦ — gisslagrets egna nivåer.)
+  describe('datorpartnern svarar med systemet på Syds egna bud (tabellraden svar)', () => {
     const base = {
       S: 'S:KQ4 H:AQ5 D:K843 C:QJ2', // 17 hp, balanserad → linjen säger 1NT
       W: 'S:865 H:J983 D:JT6 C:T54',
@@ -360,14 +365,18 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     })
 
     // ---- Steg 2: styrkan styr höjningens nivå -------------------------------
-    it('inbjudande styrka (11–12 stödpoäng) → hopp till 3♠', () => {
+    it('inbjudande styrka med 4-korts stöd → Bergen 3♦ (limithöjning, §4.1)', () => {
       const deal = dealWithN('S:KQ73 H:K65 D:Q92 C:83') // 10 hp + dubbleton → inbjudan
-      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('3S')
+      const c = decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N')
+      expect(c.bid).toBe('3D')
+      expect(c.rule).toBe('Bergen limit')
     })
 
-    it('utgångsstyrka (13+ stödpoäng) → direkt till 4♠', () => {
+    it('utgångsstyrka med 4-korts stöd → Jacoby 2NT (utgångskrav, §4.1)', () => {
       const deal = dealWithN('S:KQ73 H:AK5 D:K92 C:83') // 15 hp + fit → utgång
-      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('4S')
+      const c = decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N')
+      expect(c.bid).toBe('2NT')
+      expect(c.rule).toBe('Jacoby 2NT')
     })
 
     // ---- Steg 3: utan fit – egen färg eller sang ----------------------------
@@ -392,23 +401,28 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
       expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('2C')
     })
 
-    it('utan fit, balanserad 11–12 → 2NT (för svag för 2-läges färg)', () => {
+    it('utan fit, balanserad 11 hp → semi-forcing 1NT (6–11, för svag för 2-läges färg)', () => {
       const deal = dealWithN('S:A2 H:KJ32 D:Q432 C:J83') // 11 hp balanserad, 2 spader
-      expect(decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N').bid).toBe('2NT')
+      const c = decideCall(deal, [call('S', '1S'), call('W', 'P')], 'N')
+      expect(c.bid).toBe('1NT')
+      expect(c.rule).toBe('semi-forcing 1NT')
     })
 
-    // "Rätt nivå med fit" (2026-07-05): en minorfit med UTGÅNGSVÄRDEN (13+ stöd-
-    // poäng) ska nå utgång, inte kapas vid en inbjudan. Obalanserad (5-4-2-2) →
-    // minorutgång 5♦. (Förr stannade motorn medvetet på 3♦ – det taket var buggen.)
-    it('minorfit + utgångsvärden: 14 hp, 5-korts ruter, obalanserad → 5♦', () => {
+    // Minorfit utan högfärg → inverterad höjning 2♦ (10+, krav, §4.2) — både med
+    // utgångsvärden (14 hp) och inbjudande (11 hp); nivån avgörs i fortsättningen,
+    // inte genom att hoppa till 5♦/3♦ direkt (gisslagrets gamla facit).
+    it('minorfit + utgångsvärden: 14 hp, 5-korts ruter → inverterad 2♦ (krav)', () => {
       const deal = dealWithN('S:A2 H:K3 D:KQ982 C:Q832') // 14 hp, 5-4-2-2
-      expect(decideCall(deal, [call('S', '1D'), call('W', 'P')], 'N').bid).toBe('5D')
+      const c = decideCall(deal, [call('S', '1D'), call('W', 'P')], 'N')
+      expect(c.bid).toBe('2D')
+      expect(c.rule).toBe('inverterad minor')
     })
 
-    // …men en INBJUDANDE minorfit (11–12 stödpoäng) får aldrig blåsas till utgång.
-    it('minorfit, bara inbjudan (11 hp) → 3♦, inte 5♦', () => {
+    it('minorfit, inbjudande (11 hp) → inverterad 2♦ (10+), inte 3♦', () => {
       const deal = dealWithN('S:A2 H:83 D:KQ982 C:9832') // 11 hp, 5-korts ruterfit
-      expect(decideCall(deal, [call('S', '1D'), call('W', 'P')], 'N').bid).toBe('3D')
+      const c = decideCall(deal, [call('S', '1D'), call('W', 'P')], 'N')
+      expect(c.bid).toBe('2D')
+      expect(c.rule).toBe('inverterad minor')
     })
 
     it('motståndaren (Väst) lägger sig still – svarar inte på Syds bud', () => {

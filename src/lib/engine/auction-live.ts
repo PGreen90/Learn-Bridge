@@ -4558,7 +4558,13 @@ export function decideCallTraced(deal: Deal, history: ResolvedCall[], seat: Seat
   // att läsa. Resten av funktionen är det gamla lagret, som rivs familj för
   // familj tills tabellen täcker allt.
   const tabell = decideFromTable(hand, facts, isVulnerable(seat, deal.vulnerability))
-  if (tabell) return tabell
+  if (tabell) {
+    // Bridge-regeln vaktar tabellen: ett olagligt bud (kunskapsfunktionen
+    // räknade inte med läget) blir pass med källan märkt, så att dumparna
+    // avslöjar hålet i stället för att bordet kraschar.
+    if (tabell.call.bid === 'P' || legalCalls(history, seat).includes(tabell.call.bid)) return tabell
+    return { call: pass, källa: `${tabell.källa} (olagligt ${tabell.call.bid} → pass)` }
+  }
 
   const built = buildAuction(deal)
   if (!built) return { call: pass, källa: 'ingen öppning' } // ingen öppnar given → alla passar

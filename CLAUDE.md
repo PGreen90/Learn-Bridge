@@ -29,14 +29,15 @@ kikvakten (manuset kikar i 13,9 % av buden — mätläget, ska bli 0 i etapp 3) 
 kontraktsbud per sida, krav, trumf, partnerns färg, utpassningssits, passad hand,
 betydelse per bud; detektorerna läser `DetectorCtx.facts`, inget bud ändrat).
 Åtta bok-mot-motor-fynd väntar på ägarbeslut vid respektive familj (loggen).
-**Etapp 3 familj 1 KLAR 2026-09-04:** beslutstabellen `auction-decide.ts`
-(`decideFromTable`: läge → kunskapsfunktion) med öppningen per stol;
-`decideCall` frågar tabellen först, manuset läser den; kikvakten skarp för
-öppningsvarvet; ändrade bud bara där människan avvek (facit i kön).
-**Nästa gång börjar vi med:** etapp 3 familj 2 — svaret på öppningen (ur
-öppningsbudet + passad hand, `computeResponse` i manuset blir tabellrad);
-bifyndet frö 20271606 (partnern svarar aldrig på människans "omöjliga"
-öppning) landar då; b-listan med exempelhänder till ägaren (grind per familj).
+**Etapp 3 familj 1 + 2 KLARA 2026-09-04:** beslutstabellen `auction-decide.ts`
+(`decideFromTable`: läge → kunskapsfunktion) med öppningen per stol och
+svaret (`responseDecision`, Gerber-4♣ ur egen hand); `decideCall` frågar
+tabellen först (laglighetsvakt), manuset läser den; kikvakten prövar varje
+tabellbud; avvikelsedumpen (människan öppnar fritt) ger b-listorna.
+**Nästa gång börjar vi med:** etapp 3 familj 3 — öppnarens återbud
+(`openerSecondBid` + syskonen i `rebids.ts`; adaptern som ger dem svararens
+bud + regel ur betydelselagret i stället för `ResponseResult`); bifyndet att
+öppnaren passar Jacoby 2NT utan manus landar då; b-lista ur avvikelsedumpen.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
