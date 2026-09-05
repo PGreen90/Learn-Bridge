@@ -40,12 +40,11 @@ kikvakten prövar varje tabellbud; avvikelsedumpen (fyra lägen: människan
 = förare över samma steg), raderna slam/svar3/fjärde. Sexton bok-mot-motor-fynd
 väntar på ägarbeslut (loggen; bl.a. nr 14 naket 4NT utan bjuden fit, nr 15
 §5.7 "4m-inbjudan" mot §6.4 Gerber).
-**Nästa gång börjar vi med:** 🚪 grindbeslutet för familj 5 (b-listan i planens
-logg 2026-09-05) + PCD (familj 5 ligger LOKALT). Sedan familj 6 — manuset rivs
+**Nästa gång börjar vi med:** etapp 3 familj 6 — manuset rivs
 ur `auction.ts` — och 🚪 grinden efter etapp 3. **Startrutin 6:** (1) baslinjerna
 (§3) på familj 5:s mergepunkt; (2) återstående manusgrenar (`grep -n "finish("
 auction.ts`); (3) riv gren för gren med auktionsdiffen noll. **LIVE 2026-09-05:**
-etapp 0–3 familj 1–4b deployade (mergepunkter 451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca).
+etapp 0–3 familj 1–5 deployade (Actions grön, mergepunkter 451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca, e303016; familj 5 godkänd i grinden, revisorns två givar = systemriktiga missar).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
