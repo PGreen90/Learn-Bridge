@@ -24,15 +24,27 @@
 //      härledd ur den nakna auktionen (`partnerResponseAsSeen`), aldrig ur
 //      partnerns hand eller partnerns cachade regel. Gerber-frågan besvaras
 //      med esssvaret. Svar utan återbudsregel lämnas åt det gamla lagret.
+//   4a. Svararens andra bud (2026-09-05): jag svarade, partnern gav återbud
+//      ostört → `responderSecondDecision`: manusets grenordning (systems on
+//      efter 2♣–2♦–2NT, slamportarna efter 2♣-positivt / hopp i egen minor /
+//      hopphöjning / reverse–hoppskift / Jacoby–inverterad fit / splinter-relä
+//      / MSS / 1NT-återbudet, sedan `responderSecondBid`) där varje slamgren
+//      ger KAPTENENS FÖRSTA STEG ur egen hand (`slamCaptainFirstStep` m.fl.).
+//      Partnerns återbud läses med `rebidAsSeen`. Familj 4b (öppnarens tredje
+//      bud) och familj 5 (resten av slamsekvenserna) är kvar i manuset.
 
-import type { Hand } from '../../types/bridge'
+import type { Hand, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import type { AuctionFacts } from './auction-facts'
+import { parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
-import { gerberAsk } from './nt-slam'
+import { hcp, lengths } from './hand'
+import { gerberAsk, gerberRebidFirstStep } from './nt-slam'
 import { classifyOpening } from './openings'
 import { openerSecondBid } from './rebids'
+import { responderSecondBid } from './responder-rebids'
 import { respondToGerber } from './slam'
+import { exclusionFirstStep, familyAFitTrump, mssFirstStep, slamCaptainFirstStep, type SlamContext, type SlamTurn } from './slam-auction'
+import { systemsOnFirstStep } from './strong-2nt-systemson'
 import { respondToMajor, respondToMinor, type ResponseResult } from './responses'
 import { respondToMajorPassed } from './responses-drury'
 import { respondTo1NT } from './responses-nt'
@@ -131,6 +143,240 @@ export function partnerResponseAsSeen(f: AuctionFacts, index: number): ResponseR
 }
 
 /**
+ * Partnerns ÅTERBUD nr `index` som svararen ser det: bud + den regel som
+ * svararens andra-buds-funktioner dispatchar på, härledd ur den NAKNA
+ * auktionen. Läsaren använder registrets namn; där motorn själv använder ett
+ * annat namn för samma bud översätts det här (tabellen nedan). Kontexten
+ * (öppning + svar) avgör: efter 1M–1NT (semi-forcing) heter reverse/hoppskift/
+ * hopp "rebid: …" i motorn. null = läsaren namnger inte budet.
+ */
+export function rebidAsSeen(f: AuctionFacts, index: number): ResponseResult | null {
+  const naken = f.history.map((c) => ({ seat: c.seat, bid: c.bid }) as ResolvedCall)
+  const m = meaningOf(naken, index)
+  let rule = m.rule
+  if (!rule) return null
+  const bid = f.history[index].bid
+  const open = f.opening!
+  const openCall = `${open.level}${open.strain}`
+  const respBid = f.ourContractBids[1]?.bid ?? ''
+  const respStrain = parseContractBid(respBid)?.strain
+  // Motorns namn beror på sammanhanget: efter ett 1-lägessvar i färg heter
+  // höjning/rebud/2NT/utgång 'enkel höjning'/'rebjuden färg'/'2NT (18–19)'/
+  // 'höjning till utgång'; efter 1M–1NT (semi-forcing) och svag tvåa behåller
+  // de läsarens 'rebid: …'-namn. Efter 2♣ heter öppnarens naturliga färg
+  // 'rebid: egen färg (GF)'. Adaptersvepet i auction-decide.test.ts vaktar.
+  const oneLevelSuit = /^1[CDHS]$/.test(respBid)
+  const semi = (openCall === '1H' || openCall === '1S') && respBid === '1NT'
+  const cb = parseContractBid(bid)
+  if (rule === 'rebid: stöd' && oneLevelSuit) rule = respStrain === 'C' || respStrain === 'D' ? 'höjning av minor' : 'enkel höjning'
+  else if (rule === 'rebid: egen färg' && oneLevelSuit) rule = 'rebjuden färg'
+  else if (rule === 'hopp i egen färg (inbjudan)' && semi) rule = 'rebid: hopp (inbjudan)'
+  else if (rule === 'reverse' && semi) rule = 'rebid: reverse'
+  else if (rule === 'hoppskift' && semi) rule = 'rebid: hoppskift'
+  else if (rule === 'rebid: 2NT (18–19)' && oneLevelSuit) rule = '2NT (18–19)'
+  else if (rule === 'rebid: utgång' && oneLevelSuit && cb && cb.strain === respStrain) rule = 'höjning till utgång'
+  else if (rule === 'rebid: ny färg (GF)' && openCall === '2C') rule = 'rebid: egen färg (GF)'
+  return { call: bid, rule, explanation: m.text }
+}
+
+const STRONG_2C_SHOWN_MIN = 22
+const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+const isMajorSuit = (s: Suit) => s === 'hearts' || s === 'spades'
+const suitOf = (call: string): Suit | null => {
+  const cb = parseContractBid(call)
+  return cb && cb.strain !== 'NT' ? SUIT_OF_LETTER[cb.strain] : null
+}
+const asResponse = (t: SlamTurn | ResponseResult): ResponseResult => ({ call: t.call as ResponseResult['call'], rule: t.rule, explanation: t.explanation })
+
+/** Vad manuset ska bygga vidare på efter svararens andra bud (tills familj 5 flyttar sekvenserna). */
+export type SecondPlan =
+  | { kind: 'call' }
+  | { kind: 'final' }
+  | { kind: 'systemsOn' }
+  | { kind: 'slam'; trump: Suit; lastCall: string; ctx: SlamContext; partnerShort?: Suit }
+  | { kind: 'exclusion'; trump: Suit; partnerMin: number }
+  | { kind: 'mss'; minor: Suit; rebidCall: string }
+  | { kind: 'gerberRebid' }
+
+export interface SecondDecision {
+  turn: ResponseResult
+  plan: SecondPlan
+}
+
+/**
+ * Svararens ANDRA bud på partnerns ostörda återbud, ur egen hand: manusets
+ * grenar i samma ordning, där varje slamgren ger kaptenens första steg
+ * (`slamCaptainFirstStep` m.fl. — bara egen hand + partnerns visade minimum).
+ * `response` = mitt eget svar, `rebid` = partnerns återbud, båda som de ses i
+ * auktionen. null = ingen regel (det gamla lagret tar vid).
+ */
+export function responderSecondDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, hand: Hand): SecondDecision | null {
+  if (rebid.call === 'P') return null
+  const openerSuit = suitOf(openCall)
+  const rl = lengths(hand)
+  const slamStep = (trump: Suit, ctx: SlamContext, partnerShort?: Suit): SecondDecision | null => {
+    const first = slamCaptainFirstStep(hand, trump, rebid.call, ctx, partnerShort)
+    return first ? { turn: asResponse(first), plan: { kind: 'slam', trump, lastCall: rebid.call, ctx, partnerShort } } : null
+  }
+
+  // Systems on efter 2♣–2♦–2NT (22–24): Stayman/transfer som mot 2NT.
+  if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') {
+    const so = systemsOnFirstStep(hand)
+    if (so) return { turn: so, plan: { kind: 'systemsOn' } }
+  }
+
+  // Slamutredning efter stark 2♣ + positivt svar (§4.4): trumf funnen →
+  // kaptenen räknar mot visade 22+; annars egen solid färg / 6NT mot 3NT.
+  if (openCall === '2C' && response.rule === '2♣-positivt') {
+    const respSuit = suitOf(response.call)
+    const rebidSuit = suitOf(rebid.call)
+    const trump2C =
+      rebid.rule === 'rebid: stöd (GF)' && respSuit
+        ? respSuit
+        : rebid.rule === 'rebid: egen färg (GF)' && rebidSuit && rl[rebidSuit] >= 3
+          ? rebidSuit
+          : null
+    if (trump2C) {
+      const majorTrump = isMajorSuit(trump2C)
+      const gameCall = majorTrump ? `4${LETTER[trump2C]}` : `5${LETTER[trump2C]}`
+      const inviteCall = majorTrump
+        ? `5${LETTER[trump2C]}`
+        : rebid.call === `4${LETTER[trump2C]}`
+          ? `5${LETTER[trump2C]}`
+          : `4${LETTER[trump2C]}`
+      const slam = slamStep(trump2C, { partnerMin: STRONG_2C_SHOWN_MIN, inviteCall, gameForcing: true, cueFloor: majorTrump ? undefined : '3NT' })
+      if (slam) return slam
+      return {
+        turn: {
+          call: gameCall as ResponseResult['call'],
+          rule: rebid.rule === 'rebid: stöd (GF)' ? 'till spel' : 'höjning (GF)',
+          explanation: `under slamzonen mot partnerns visade ${STRONG_2C_SHOWN_MIN}+ → ${gameCall[0]}${SYM[trump2C]} (utgång).`,
+        },
+        plan: { kind: 'final' },
+      }
+    }
+    if (hcp(hand) + STRONG_2C_SHOWN_MIN >= 33) {
+      const topHonors = respSuit ? hand.filter((c) => c.suit === respSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length : 0
+      const ownSolid = respSuit && rl[respSuit] >= 6 && topHonors >= 2 ? respSuit : null
+      const slam = ownSolid ? slamStep(ownSolid, { partnerMin: STRONG_2C_SHOWN_MIN }) : null
+      if (slam) return slam
+      if (rebid.rule === 'rebid: 3NT (GF)') {
+        return { turn: { call: '6NT', rule: 'slamavslut', explanation: `Slamzon mot visad balanserad ${STRONG_2C_SHOWN_MIN}+ → 6NT (sang behöver ingen fit).` }, plan: { kind: 'final' } }
+      }
+    }
+  }
+
+  // Hopp i egen minor (1m–1M–3m, visade 16–18 med 6+) + 3+ fit → slamport.
+  if (
+    (openCall === '1C' || openCall === '1D') &&
+    response.rule === 'ny färg (1-läget)' &&
+    rebid.rule === 'hopp i egen färg (inbjudan)' &&
+    openerSuit && suitOf(rebid.call) === openerSuit &&
+    rl[openerSuit] >= 3
+  ) {
+    const slam = slamStep(openerSuit, { partnerMin: 16, inviteCall: `4${LETTER[openerSuit]}` })
+    if (slam) return slam
+  }
+
+  // Hopphöjning av min högfärg (1x–1M–3M, visade 16–18 med 4-korts stöd).
+  const respMajor = response.call === '1H' ? 'hearts' : response.call === '1S' ? 'spades' : null
+  if (rebid.rule === 'hopphöjning (inbjudan)' && respMajor && suitOf(rebid.call) === respMajor) {
+    const slam = slamStep(respMajor, { partnerMin: 16, inviteCall: `5${LETTER[respMajor]}` })
+    if (slam) return slam
+  }
+
+  // Reverse (16+) / hoppskift (19+): trumf säkrad på EGEN kunskap.
+  if (rebid.rule === 'reverse' || rebid.rule === 'hoppskift') {
+    const secondSuit = suitOf(rebid.call)
+    const firstSuitMin = rebid.rule === 'reverse' || openerSuit === 'hearts' || openerSuit === 'spades' ? 3 : 4
+    const trumpC =
+      secondSuit && rl[secondSuit] >= 4
+        ? secondSuit
+        : openerSuit && rl[openerSuit] >= firstSuitMin
+          ? openerSuit
+          : null
+    if (trumpC) {
+      const slam = slamStep(trumpC, {
+        partnerMin: rebid.rule === 'hoppskift' ? 19 : 16,
+        inviteCall: isMajorSuit(trumpC) ? `5${LETTER[trumpC]}` : `4${LETTER[trumpC]}`,
+      })
+      if (slam) return slam
+    }
+  }
+
+  // Överenskommen trumf via Jacoby 2NT / inverterad minor → kaptenen räknar
+  // mot vad öppnarens återbud visade (visat minimum per regel).
+  const majorFit = response.rule === 'Jacoby 2NT' && (openerSuit === 'hearts' || openerSuit === 'spades')
+  const minorFit = response.rule === 'inverterad minor' && (openerSuit === 'clubs' || openerSuit === 'diamonds')
+  if ((majorFit || minorFit) && openerSuit) {
+    const openerShort = rebid.rule === 'Jacoby: kortfärg' ? (suitOf(rebid.call) ?? undefined) : undefined
+    const SHOWN_MIN: Record<string, number> = {
+      'Jacoby: minimum': 12,
+      'Jacoby: 3NT': 14,
+      'Jacoby: slamintresse': 16,
+      'Jacoby: sidofärg': 12,
+      'Jacoby: kortfärg': 12,
+      'inverterad: 3NT': 18,
+      'inverterad: 2NT': 12,
+      'inverterad: stopp-visning': 12,
+      'inverterad: minimum': 12,
+    }
+    const slam = slamStep(openerSuit, {
+      partnerMin: SHOWN_MIN[rebid.rule] ?? 12,
+      inviteCall: majorFit ? `5${LETTER[openerSuit]}` : `4${LETTER[openerSuit]}`,
+      gameForcing: true,
+      cueFloor: minorFit ? '3NT' : undefined,
+    }, openerShort)
+    if (slam) return slam
+  }
+
+  // Exclusion efter splinter + relä (öppnarens slamintresse, visat minimum 15).
+  if (response.rule === 'tvetydig splinter' && rebid.rule === 'splinter-relä' && (openerSuit === 'hearts' || openerSuit === 'spades')) {
+    const first = exclusionFirstStep(hand, openerSuit, 15)
+    if (first) return { turn: asResponse(first), plan: { kind: 'exclusion', trump: openerSuit, partnerMin: 15 } }
+  }
+
+  // MSS: minorfit funnen efter 1NT–2♠–3m.
+  if (openCall === '1NT' && response.rule === 'Minor Suit Stayman' && (rebid.call === '3C' || rebid.call === '3D')) {
+    const minor: Suit = rebid.call === '3C' ? 'clubs' : 'diamonds'
+    return { turn: asResponse(mssFirstStep(hand, minor, rebid.call)), plan: { kind: 'mss', minor, rebidCall: rebid.call } }
+  }
+
+  // Öppnarens 1NT-återbud (12–14): jämn 19+ → Gerber/kvantitativ; säker fit → slamport.
+  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
+    const g = gerberRebidFirstStep(hand)
+    if (g) return { turn: asResponse(g), plan: { kind: 'gerberRebid' } }
+    const trump = familyAFitTrump(hand, openerSuit, suitOf(response.call))
+    if (trump) {
+      // hp mot visade 12–14 (§5.2): ingen bjuden fit, kortfärger lyfter inte.
+      const slam = slamStep(trump, { partnerMin: 12, inviteCall: isMajorSuit(trump) ? `5${LETTER[trump]}` : `4${LETTER[trump]}`, hpOnly: true })
+      if (slam) return slam
+    }
+  }
+
+  // Öppnaren HÖJDE min 2-över-1-HÖGFÄRG under utgång (1♠–2♥–3♥): trumfen är
+  // satt och utgångskravet står → utgång 4M (felrapport #27; §5.3-fortsättningen
+  // saknar fallet eftersom boten själv höjer direkt till utgång). En höjd
+  // lågfärg fortsätter som förut i `responderRebidIn2over1Auction` (3NT med
+  // stopp, naturlig högfärg, 5m sist). Slamutredningen här (cue-ronden med
+  // satt trumf) hör till familj 5.
+  if (response.rule === '2-över-1 GF') {
+    const rs = suitOf(response.call)
+    const rb = parseContractBid(rebid.call)
+    if (rs && isMajorSuit(rs) && rb && rb.strain !== 'NT' && SUIT_OF_LETTER[rb.strain] === rs && rb.level < 4) {
+      return {
+        turn: { call: `4${LETTER[rs]}` as ResponseResult['call'], rule: '2/1 utgångskrav', explanation: `Vårt 2-över-1-svar var utgångskrav och partnern höjde min ${SYM[rs]} → jag sätter utgång 4${SYM[rs]} (pass förbjudet).` },
+        plan: { kind: 'final' },
+      }
+    }
+  }
+
+  const second = responderSecondBid(openCall, response, rebid, hand)
+  return second ? { turn: second, plan: { kind: 'call' } } : null
+}
+
+/**
  * Öppnarens återbud på partnerns ostörda svar `seen` (bud + regel som öppnaren
  * ser det), ur egen hand. Gerber 4♣ besvaras med esssvaret; annars
  * `openerSecondBid`. null = ingen regel för svaret. Delas av tabellraden och
@@ -192,6 +438,30 @@ const TABELL: Row[] = [
       const r = openerRebidDecision(`${facts.opening!.level}${facts.opening!.strain}`, seen, hand)
       if (!r) return null
       return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
+    },
+  },
+  // Familj 4a — svararens andra bud. Vår sida har exakt tre kontraktsbud
+  // (öppning, mitt svar, partnerns återbud), motståndarna bara pass, ingen X,
+  // och partnerns återbud är det senaste som hänt.
+  {
+    id: 'svar2',
+    läge: (f) =>
+      f.opening !== null &&
+      f.role === 'svarare' &&
+      f.ourContractBids.length === 3 &&
+      f.theirContractBids.length === 0 &&
+      f.ourContractBids[1].seat === f.seat &&
+      f.ourContractBids[2].seat === f.partner &&
+      f.lastNonPass === f.ourContractBids[2] &&
+      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+    välj: ({ hand, facts }) => {
+      const response = partnerResponseAsSeen(facts, facts.history.indexOf(facts.ourContractBids[1]))
+      const rebid = rebidAsSeen(facts, facts.history.indexOf(facts.ourContractBids[2]))
+      if (!response || !rebid) return null
+      const dec = responderSecondDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, hand)
+      if (!dec) return null
+      const t = dec.turn
+      return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain }
     },
   },
 ]

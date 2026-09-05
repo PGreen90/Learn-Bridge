@@ -77,21 +77,36 @@ export function gerber2NTInvestigation(openerHand: Hand, responderHand: Hand): S
  * Svararen måste vara jämn UTAN 5-korts färg (5-korts högfärg jagar 5-3-fit via
  * NMF; obalanserat vill åt färgkontrakt — se familyAFitTrump).
  */
-export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
+/**
+ * Svararens FÖRSTA slambud över öppnarens 1NT-återbud (12–14) ur EGEN hand:
+ * jämn utan 5-korts färg, 21+ → Gerber 4♣; 19–20 → kvantitativ 4NT; annars null.
+ * `gerberRebidInvestigation` börjar med samma bud (beslutstabellen läser den här).
+ */
+export function gerberRebidFirstStep(responderHand: Hand): SlamTurn | null {
   if (!isBalanced(responderHand)) return null
   const len = lengths(responderHand)
   if (Math.max(len.clubs, len.diamonds, len.hearts, len.spades) >= 5) return null
   const p = hcp(responderHand)
-  if (p >= 21) return buildGerberSequence(openerHand, responderHand, p, 12)
+  if (p >= 21) return { role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` }
   if (p >= 19) {
-    // Kanske-zonen: kvantitativ 4NT — partnern med mer än minimum accepterar.
-    const turns: SlamTurn[] = []
-    turns.push({
+    return {
       role: 'svarare',
       call: '4NT',
       rule: 'kvantitativ 4NT',
       explanation: `Jämn slaminbjudan mot visade 12–14 → 4NT (inbjuder 6NT; partnern går vidare med mer än minimum).`,
-    })
+    }
+  }
+  return null
+}
+
+export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
+  const first = gerberRebidFirstStep(responderHand)
+  if (!first) return null
+  const p = hcp(responderHand)
+  if (first.rule === 'Gerber') return buildGerberSequence(openerHand, responderHand, p, 12, first)
+  {
+    // Kanske-zonen: kvantitativ 4NT — partnern med mer än minimum accepterar.
+    const turns: SlamTurn[] = [first]
     const op = hcp(openerHand)
     if (op >= 13) {
       turns.push({ role: 'öppnare', call: '6NT', rule: 'kvantitativ 4NT: accept', explanation: `Mer än minimum → accepterar, 6NT.` })

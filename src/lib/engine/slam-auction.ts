@@ -78,6 +78,14 @@ export interface SlamContext {
    *  STOPP-letande (§4.2), över 3NT kontrollbud — så budspråken aldrig krockar.
    *  Utelämnat = cue direkt över senaste budet (högfärgslägena). */
   cueFloor?: string
+  /**
+   * Kaptenen räknar BARA hp (inte stödpoäng) mot partnerns visade minimum —
+   * §5.2 "Slam efter 1NT-återbudet": trumfen är kaptenens egen 6+ högfärg
+   * eller 5+ i öppnarens minor, ingen bjuden fit, så kortfärger får inte
+   * lyfta värderingen (facit frö 20261317: 15 hp 6-korts spader → 4♥ via NMF,
+   * inte slaminbjudan; motorbytet etapp 3 familj 4a, 2026-09-05).
+   */
+  hpOnly?: boolean
 }
 
 /**
@@ -117,37 +125,86 @@ export function slamInvestigation(
   ctx: SlamContext,
   partnerShortSuit?: Suit,
 ): SlamTurn[] | null {
-  // Kaptenens EGEN värdering: stödpoäng golvade vid hp (ägarens TP-princip:
-  // form får LYFTA men aldrig sänka under hp). Har partnern VISAT en kortfärg
-  // (Jacoby-kortfärgsrebud) nedvärderas egna K/D där — det är ärlig information
-  // (kortheten är bjuden), FAS 4 punkt 18.
-  const wasted = partnerShortSuit ? wastedHonorsOppositeShortness(responderHand, partnerShortSuit) : 0
-  const captain = Math.max(hcp(responderHand), dummyPoints(responderHand, trump).dummyPoints) - wasted
-  const floor = captain + ctx.partnerMin
-  const lastRank = lastCall ? bidRank(lastCall) : -1
+  // Sekvensens FÖRSTA bud är kaptenens och tas ur kaptenens hand ensam
+  // (`slamCaptainFirstStep`, motorbytet etapp 3 familj 4a, 2026-09-05); resten
+  // av sekvensen byggs här med båda händerna tills familj 5 flyttar den till
+  // beslutstabellen. Porten är därmed EN: manuset och tabellen kan inte glida isär.
+  const first = slamCaptainFirstStep(responderHand, trump, lastCall, ctx, partnerShortSuit)
+  if (!first) return null
+  const floor = captainFloor(responderHand, trump, ctx, partnerShortSuit)
+  if (first.rule === 'cue-bid') return cueSlamAuction(openerHand, responderHand, trump, lastCall, ctx, floor)
+  if (first.rule === '1430 RKC') return driveRKC(openerHand, responderHand, trump, ctx, floor)
+  return inviteSlam(openerHand, trump, ctx, floor)
+}
 
-  // GF + trumf klar: cue-ronden (§6.2) körs FRITT under utgång när slam är
-  // aritmetiskt möjlig (floor ≥ 30). Har kaptenen ingen gratis cue faller det
-  // igenom till den gamla porten nedan (oförändrat). Ägarbeslut 2026-08-03.
-  // B13-undantag (2026-08-07): i MINORTRUMF ligger utgången (5m) ÖVER 4NT —
-  // cue-utrymmet är trångt. I klar drivzon (33+) går kaptenen därför direkt på
-  // 4NT RKC i stället för att cue:a bort frågeutrymmet (frö 20261469: cue-ronden
-  // åt upp 4NT → 5♦, lillslammen tappad). Kanske-zonen 30–32 cue:ar som vanligt.
+/**
+ * Kaptenens EGEN värdering mot partnerns visade minimum: stödpoäng golvade vid
+ * hp (ägarens TP-princip: form får LYFTA men aldrig sänka under hp). Har
+ * partnern VISAT en kortfärg (Jacoby-kortfärgsrebud) nedvärderas egna K/D där —
+ * det är ärlig information (kortheten är BJUDEN), FAS 4 punkt 18.
+ */
+function captainFloor(responderHand: Hand, trump: Suit, ctx: SlamContext, partnerShortSuit?: Suit): number {
+  const wasted = partnerShortSuit ? wastedHonorsOppositeShortness(responderHand, partnerShortSuit) : 0
+  const captain = (ctx.hpOnly ? hcp(responderHand) : Math.max(hcp(responderHand), dummyPoints(responderHand, trump).dummyPoints)) - wasted
+  return captain + ctx.partnerMin
+}
+
+const cueTurn = (role: 'svarare' | 'öppnare', cue: { call: string; suit: Suit }): SlamTurn => ({
+  role,
+  call: cue.call,
+  rule: 'cue-bid',
+  explanation: `första-rondskontroll i ${SYM[cue.suit]} → ${cue.call[0]}${SYM[cue.suit]}.`,
+})
+const rkcAskTurn = (ctx: SlamContext): SlamTurn => ({
+  role: 'svarare',
+  call: '4NT',
+  rule: '1430 RKC',
+  explanation: `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort).`,
+})
+const inviteTurn = (invite: string, trump: Suit): SlamTurn => ({
+  role: 'svarare',
+  call: invite,
+  rule: 'slaminbjudan',
+  explanation: `Slaminbjudningszon (slam bara om partnern har extra) → ${invite[0]}${SYM[trump]} (inbjuder slam).`,
+})
+
+/** Kaptenens första gratis cue: billigaste första-rondskontroll över `lastCall` (och cue-golvet) under utgång. */
+function captainFirstCue(responderHand: Hand, trump: Suit, lastCall: string | undefined, ctx: SlamContext): { call: string; suit: Suit } | null {
+  const gameRank = bidRank(gameCallFor(trump))
+  let lastRank = lastCall ? bidRank(lastCall) : -1
+  if (ctx.cueFloor) lastRank = Math.max(lastRank, bidRank(ctx.cueFloor))
+  return cheapestFreeCue(responderHand, trump, lastRank, gameRank, new Set())
+}
+
+/**
+ * Kaptenens (svararens) FÖRSTA slambud ur EGEN hand + partnerns visade minimum
+ * (`ctx.partnerMin`) — beslutstabellens rad för svararens andra bud läser den
+ * här; `slamInvestigation` börjar med samma bud. Portarna (ägarbeslut
+ * 2026-07-07 "ärliga slamportar" + cue-ronden 2026-08-03 + B13 2026-08-07):
+ *  • GF + trumf klar + floor ≥ 30 → billigaste gratis cue under utgång (utom i
+ *    minortrumf i klar drivzon, där 4NT går direkt: cue-utrymmet är trångt);
+ *  • floor ≥ 33 → 4NT RKC;  • floor 31–32 → slaminbjudan (`ctx.inviteCall`);
+ *  • annars null (ingen slamhand → den vanliga kedjan).
+ */
+export function slamCaptainFirstStep(
+  responderHand: Hand,
+  trump: Suit,
+  lastCall: string | undefined,
+  ctx: SlamContext,
+  partnerShortSuit?: Suit,
+): SlamTurn | null {
+  const floor = captainFloor(responderHand, trump, ctx, partnerShortSuit)
+  const lastRank = lastCall ? bidRank(lastCall) : -1
   if (ctx.gameForcing && floor >= 30) {
     const tightSpace = bidRank(gameCallFor(trump)) > bidRank('4NT')
     const clearDrive = tightSpace && floor >= 33 && bidRank('4NT') > lastRank
     if (!clearDrive) {
-      const cued = cueSlamAuction(openerHand, responderHand, trump, lastCall, ctx, floor)
-      if (cued) return cued
+      const cue = captainFirstCue(responderHand, trump, lastCall, ctx)
+      if (cue) return cueTurn('svarare', cue)
     }
   }
-
-  if (floor >= 33 && bidRank('4NT') > lastRank) {
-    return driveRKC(openerHand, responderHand, trump, ctx, floor)
-  }
-  if (floor >= 31 && ctx.inviteCall && bidRank(ctx.inviteCall) > lastRank) {
-    return inviteSlam(openerHand, trump, ctx, floor)
-  }
+  if (floor >= 33 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
+  if (floor >= 31 && ctx.inviteCall && bidRank(ctx.inviteCall) > lastRank) return inviteTurn(ctx.inviteCall, trump)
   return null
 }
 
@@ -225,12 +282,7 @@ function cueSlamAuction(
     const cue = cheapestFreeCue(hand, trump, lastRank, gameRank, controlled)
     if (cue) {
       controlled.add(cue.suit)
-      turns.push({
-        role: captainTurn ? 'svarare' : 'öppnare',
-        call: cue.call,
-        rule: 'cue-bid',
-        explanation: `första-rondskontroll i ${SYM[cue.suit]} → ${cue.call[0]}${SYM[cue.suit]}.`,
-      })
+      turns.push(cueTurn(captainTurn ? 'svarare' : 'öppnare', cue))
       lastRank = bidRank(cue.call)
       captainTurn = !captainTurn
       continue
@@ -275,12 +327,7 @@ function driveRKC(
   floor: number,
 ): SlamTurn[] {
   const turns: SlamTurn[] = []
-  turns.push({
-    role: 'svarare',
-    call: '4NT',
-    rule: '1430 RKC',
-    explanation: `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort).`,
-  })
+  turns.push(rkcAskTurn(ctx))
 
   const answer = respondToRKC(openerHand, trump)
   turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
@@ -373,12 +420,7 @@ function driveRKC(
 function inviteSlam(openerHand: Hand, trump: Suit, ctx: SlamContext, _floor: number): SlamTurn[] {
   const invite = ctx.inviteCall!
   const turns: SlamTurn[] = []
-  turns.push({
-    role: 'svarare',
-    call: invite,
-    rule: 'slaminbjudan',
-    explanation: `Slaminbjudningszon (slam bara om partnern har extra) → ${invite[0]}${SYM[trump]} (inbjuder slam).`,
-  })
+  turns.push(inviteTurn(invite, trump))
   // Partnern dömer på SIN hand mot sitt eget visade intervall: mer än blott
   // minimum → acceptera. (Omvärderad med fit: Bergenpoäng, aldrig under hp.)
   const partnerPts = Math.max(hcp(openerHand), bergenPoints(openerHand, trump).bergenPoints)
@@ -437,26 +479,34 @@ export function familyAFitTrump(
  * esset där; öppnaren svarar ärligt i steg; kaptenen placerar på svaret.
  * null = ingen sidorenons eller för svagt → vanlig auktion.
  */
+const SUIT_OF_LETTER_: Record<string, Suit> = { C: 'clubs', D: 'diamonds', H: 'hearts', S: 'spades' }
+
+/** Kaptenens Exclusion-hopp ur EGEN hand: sidorenons + slamzon mot partnerns visade minimum. null = inget. */
+export function exclusionFirstStep(responderHand: Hand, trump: Suit, partnerMin: number): SlamTurn | null {
+  const len = lengths(responderHand)
+  const voidSuit = RANK_ORDER.find((s) => s !== trump && len[s] === 0)
+  if (!voidSuit) return null
+  const captain = Math.max(hcp(responderHand), dummyPoints(responderHand, trump).dummyPoints)
+  if (captain + partnerMin < 33) return null
+  return {
+    role: 'svarare',
+    call: `5${LETTER[voidSuit]}`,
+    rule: 'Exclusion',
+    explanation: `renons i ${SYM[voidSuit]}, slamzon ihop → 5${SYM[voidSuit]} (Exclusion: frågar nyckelkort utom esset där).`,
+  }
+}
+
 export function exclusionInvestigation(
   openerHand: Hand,
   responderHand: Hand,
   trump: Suit,
   partnerMin: number,
 ): SlamTurn[] | null {
-  const len = lengths(responderHand)
-  const voidSuit = RANK_ORDER.find((s) => s !== trump && len[s] === 0)
-  if (!voidSuit) return null
+  const first = exclusionFirstStep(responderHand, trump, partnerMin)
+  if (!first) return null
+  const voidSuit = SUIT_OF_LETTER_[first.call[1]]
 
-  const captain = Math.max(hcp(responderHand), dummyPoints(responderHand, trump).dummyPoints)
-  if (captain + partnerMin < 33) return null
-
-  const turns: SlamTurn[] = []
-  turns.push({
-    role: 'svarare',
-    call: `5${LETTER[voidSuit]}`,
-    rule: 'Exclusion',
-    explanation: `renons i ${SYM[voidSuit]}, slamzon ihop → 5${SYM[voidSuit]} (Exclusion: frågar nyckelkort utom esset där).`,
-  })
+  const turns: SlamTurn[] = [first]
   const answer = respondToExclusion(openerHand, trump, voidSuit)
   turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
 
@@ -514,49 +564,55 @@ function ntUnsafe(responderHand: Hand): boolean {
  * Svararens fortsättning efter 1NT–2♠–3♣/3♦ (minorfit funnen). Returnerar hela
  * placeringen (asksekvens + slutbud), aldrig null – en fit finns alltid.
  */
+const mssSlamCtx = (minor: Suit): SlamContext => ({ partnerMin: OPENER_1NT_MIN, inviteCall: `4${LETTER[minor]}` })
+
+/**
+ * Kaptenens FÖRSTA bud efter 1NT–2♠–3m (MSS, minorfit funnen) ur EGEN hand:
+ * NT-osäker (högfärgslucka) → slamsteg i minorn eller 5m; annars 3NT under
+ * slamzonen, 4NT RKC i slamzonen. `mssMinorFitContinuation` börjar med samma bud.
+ */
+export function mssFirstStep(responderHand: Hand, minor: Suit, openerRebidCall: string): SlamTurn {
+  if (ntUnsafe(responderHand)) {
+    const slam = slamCaptainFirstStep(responderHand, minor, openerRebidCall, mssSlamCtx(minor))
+    if (slam) return slam
+    return {
+      role: 'svarare',
+      call: `5${LETTER[minor]}`,
+      rule: 'MSS: minorutgång',
+      explanation: `NT osäkert (högfärgslucka på egen hand), för svagt för slam → 5${SYM[minor]} (minorutgång).`,
+    }
+  }
+  if (hcp(responderHand) + OPENER_1NT_MIN < 33) {
+    return {
+      role: 'svarare',
+      call: '3NT',
+      rule: 'till spel',
+      explanation: `Balanserad utgång mot visade 15–17 → 3NT (ej slamzon).`,
+    }
+  }
+  return {
+    role: 'svarare',
+    call: '4NT',
+    rule: '1430 RKC',
+    explanation: `Slamzon, NT-säker minorfit → 4NT (frågar nyckelkort inför NT-slam).`,
+  }
+}
+
 export function mssMinorFitContinuation(
   openerHand: Hand,
   responderHand: Hand,
   minor: Suit, // 'clubs' | 'diamonds'
   openerRebidCall: string, // '3C' | '3D'
 ): SlamTurn[] {
-  // NT osäkert på egen hand → minor-slam-spåret (4NT RKC → 6/7-minor). Räcker
-  // det inte till slam → minorutgång 5m (kan stjäla förlorare, till skillnad
-  // från 3NT). Inbjudan 4m i kanske-zonen.
+  const first = mssFirstStep(responderHand, minor, openerRebidCall)
   if (ntUnsafe(responderHand)) {
-    const slam = slamInvestigation(openerHand, responderHand, minor, openerRebidCall, {
-      partnerMin: OPENER_1NT_MIN,
-      inviteCall: `4${LETTER[minor]}`,
-    })
-    if (slam) return slam
-    return [{
-      role: 'svarare',
-      call: `5${LETTER[minor]}`,
-      rule: 'MSS: minorutgång',
-      explanation: `NT osäkert (högfärgslucka på egen hand), för svagt för slam → 5${SYM[minor]} (minorutgång).`,
-    }]
+    const slam = slamInvestigation(openerHand, responderHand, minor, openerRebidCall, mssSlamCtx(minor))
+    return slam ?? [first]
   }
+  if (first.rule !== '1430 RKC') return [first]
 
-  // NT-säkert → sikta NT-slam. Kaptenens egen hp + öppnarens visade 15:
-  // 33+ = driv (RKC), annars 3NT (balanserad utgång).
-  const ownHcp = hcp(responderHand)
-  const floor = ownHcp + OPENER_1NT_MIN
-  if (floor < 33) {
-    return [{
-      role: 'svarare',
-      call: '3NT',
-      rule: 'till spel',
-      explanation: `Balanserad utgång mot visade 15–17 → 3NT (ej slamzon).`,
-    }]
-  }
-
-  const turns: SlamTurn[] = []
-  turns.push({
-    role: 'svarare',
-    call: '4NT',
-    rule: '1430 RKC',
-    explanation: `Slamzon, NT-säker minorfit → 4NT (frågar nyckelkort inför NT-slam).`,
-  })
+  const floor = hcp(responderHand) + OPENER_1NT_MIN
+  const turns: SlamTurn[] = [first]
   const answer = respondToRKC(openerHand, minor)
   turns.push({ role: 'öppnare', call: answer.call, rule: answer.rule, explanation: answer.explanation })
 

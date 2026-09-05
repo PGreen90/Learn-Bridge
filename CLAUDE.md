@@ -29,20 +29,22 @@ kikvakten (manuset kikar i 13,9 % av buden — mätläget, ska bli 0 i etapp 3) 
 kontraktsbud per sida, krav, trumf, partnerns färg, utpassningssits, passad hand,
 betydelse per bud; detektorerna läser `DetectorCtx.facts`, inget bud ändrat).
 Åtta bok-mot-motor-fynd väntar på ägarbeslut vid respektive familj (loggen).
-**Etapp 3 familj 1–3 KLARA 2026-09-04/05:** beslutstabellen `auction-decide.ts`
+**Etapp 3 familj 1–4a KLARA 2026-09-04/05:** beslutstabellen `auction-decide.ts`
 (`decideFromTable`: läge → kunskapsfunktion) med öppningen per stol, svaret
-(`responseDecision`) och öppnarens återbud (`partnerResponseAsSeen` läser
-partnerns bud ur den nakna auktionen → `openerSecondBid`/Gerber-svar);
-`decideCall` frågar tabellen först (laglighetsvakt), manuset läser den;
-kikvakten prövar varje tabellbud; avvikelsedumpen (människan öppnar/svarar
-fritt) ger b-listorna. Nio bok-mot-motor-fynd väntar (loggen; nr 9 = passad
-hands 2NT).
-**Nästa gång börjar vi med:** etapp 3 familj 4 — svararens andra bud och
-öppnarens tredje (fjärde färg, NMF, checkback, preferens, inverterade
-fortsättningar, Bergen/Jacoby/splinter-fortsättningar; `responderSecondBid`
-+ `openerThirdBid*`); adaptern utökas till öppnarens återbud som svararen
-ser det; facit-kön har två 2♣-fynd för familjen; b-lista ur avvikelsedumpen
-(nytt läge: människan bjuder svararens andra bud).
+(`responseDecision`), öppnarens återbud (`partnerResponseAsSeen` →
+`openerSecondBid`/Gerber-svar) och svararens andra bud
+(`responderSecondDecision`: manusets grenordning, varje slamgren ger kaptenens
+FÖRSTA steg ur egen hand — `slamCaptainFirstStep` m.fl.; `rebidAsSeen` läser
+öppnarens återbud ur nakna auktionen med skarpt adaptersvep); `decideCall`
+frågar tabellen först (laglighetsvakt), manuset läser den; kikvakten prövar
+varje tabellbud; avvikelsedumpen (människan öppnar/svarar fritt) ger
+b-listorna. Tio bok-mot-motor-fynd väntar (loggen; nr 9 passad hands 2NT,
+nr 10 familj A-slamportens värdering av 6-5-händer).
+**Nästa gång börjar vi med:** etapp 3 familj 4b — öppnarens tredje bud
+(`openerThirdBid*`, NMF-/checkback-svaren, 2/1-försenat stöd, inverterad broms,
+reverse-preferens; adaptern för svararens andra bud som öppnaren ser det —
+regelnamnssvepet visade 135 mönster, mest terminala 'till spel'-namn); sedan
+familj 5 slam (sekvensernas fortsättning, kikvakten helt skarp).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

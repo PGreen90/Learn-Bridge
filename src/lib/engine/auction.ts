@@ -6,7 +6,7 @@ import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
 import { classifyOpening, isVulnerable } from './openings'
-import { decideFromTable, openerRebidDecision, partnerResponseAsSeen, responseDecision, RESPONDABLE, type DecidedCall } from './auction-decide'
+import { decideFromTable, openerRebidDecision, partnerResponseAsSeen, rebidAsSeen, responderSecondDecision, responseDecision, RESPONDABLE, type DecidedCall } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
@@ -19,8 +19,8 @@ import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
 import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerNMF, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
-import { responderPlaceAfter2NTCheckback, responderSecondBid } from './responder-rebids'
-import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation, familyAFitTrump, type SlamTurn } from './slam-auction'
+import { responderPlaceAfter2NTCheckback } from './responder-rebids'
+import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
 import { gerberInvestigation, gerber2NTInvestigation, gerberRebidInvestigation } from './nt-slam'
 import { dontOvercall } from './dont'
@@ -113,7 +113,6 @@ const SUIT_SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: 
 // Vad den starka 2♣-öppningen VISADE som minimum (§4.4): 22+ hp balanserad
 // eller ~9+ spelstick ("en stick från utgång" ≈ samma spelvärde). Kaptenens
 // slammatte efter positivt svar räknar mot detta — aldrig öppnarens kort.
-const STRONG_2C_SHOWN_MIN = 22
 const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
 
 /** Tolkar ett inkliv ("1S"/"2H"/"X"/"2NT") → nivå + ev. färg. */
@@ -590,309 +589,54 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // Öppnaren passade svararens bud → kontraktet är satt.
   if (rebid.call === 'P') return finish(false)
 
-  // Systems-on efter 2♣–2♦–2NT (öppnarens 22–24): svararen använder Stayman/
-  // transfer precis som mot en 2NT-öppning (fast 22–24 mittemot). Bygger hela
-  // sekvensen deterministiskt. null = svararen för svag (0–2) → faller igenom och
-  // passar 2NT via det vanliga flödet.
-  if (opening.call === '2C' && response.call === '2D' && rebid.call === '2NT') {
-    const so = strong2NTSystemsOn(deal.hands[openerSeat], deal.hands[responderSeat])
-    if (so) {
-      for (const st of so.turns) {
-        const seat = st.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: st.role, call: st.call, rule: st.rule, explanation: st.explanation })
-      }
+  // Svararens andra bud ur BESLUTSTABELLENS kunskap (etapp 3 familj 4a,
+  // 2026-09-05): `responderSecondDecision` ger budet + PLANEN. Slamsekvensernas
+  // första steg kommer ur svararens hand ensam; resten av sekvensen byggs här
+  // med båda händerna tills familj 5 flyttar den. Samma väg som `decideCall`.
+  const hittills2: ResolvedCall[] = [
+    ...hittills,
+    { seat: openerSeat, bid: rebid.call },
+    { seat: seatAt(deal.dealer, (openerIndex + 1) % 4), bid: 'P' },
+  ]
+  const f2 = auctionFacts(hittills2, responderSeat)
+  const seenResponse = partnerResponseAsSeen(f2, hittills.length - 2)
+  const seenRebid = rebidAsSeen(f2, hittills2.length - 2)
+  const dec = seenResponse && seenRebid ? responderSecondDecision(opening.call, seenResponse, seenRebid, deal.hands[responderSeat]) : null
+  if (!dec) return finish(true)
+  const oh = deal.hands[openerSeat]
+  const rh = deal.hands[responderSeat]
+  const pushSeq = (seq: { role: 'öppnare' | 'svarare'; call: string; rule: string; explanation: string }[]) => {
+    for (const t of seq) turns.push({ seat: t.role === 'öppnare' ? openerSeat : responderSeat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
+  }
+  switch (dec.plan.kind) {
+    case 'systemsOn': {
+      const so = strong2NTSystemsOn(oh, rh)!
+      pushSeq(so.turns)
       return finish(so.open)
     }
-  }
-
-  // Slamutredning efter stark 2♣ + POSITIVT svar (ETAPP 4, F1 familj B fix 1).
-  // 2♣ VISADE ~22+ (stark balanserad 22+ hp eller ~9+ spelstick — "en stick
-  // från utgång", §4.4); det positiva svaret visade 8+. När en trumf är funnen
-  // räknar SVARAREN (kaptenen) sin egen hand mot det visade minimumet (ärliga
-  // slamportar): driv 33+ (4NT RKC), inbjudan 31–32 (öppnaren dömer accepten
-  // på sina EGNA Bergenpoäng — så räknas spelstick-händernas längd ärligt),
-  // annars sätts utgången (GF). Aldrig partnerns kort.
-  if (opening.call === '2C' && response.rule === '2♣-positivt') {
-    const respSuit = parseBid(response.call).suit
-    const rebidSuit = parseBid(rebid.call).suit
-    // Trumfen: öppnaren stödde svararens färg (B1), eller svararen har 3+ kort
-    // i öppnarens naturliga färgrebud som lovade 5+ (B2).
-    const trump2C =
-      rebid.rule === 'rebid: stöd (GF)' && respSuit
-        ? respSuit
-        : rebid.rule === 'rebid: egen färg (GF)' && rebidSuit && lengths(deal.hands[responderSeat])[rebidSuit] >= 3
-          ? rebidSuit
-          : null
-    if (trump2C) {
-      const majorTrump = trump2C === 'hearts' || trump2C === 'spades'
-      const gameCall = majorTrump ? `4${LETTER[trump2C]}` : `5${LETTER[trump2C]}`
-      // Inbjudan: höjningen till 5M, respektive stödhöjningen 4m ("enkel
-      // stödhöjning efter positivt svar = slamintresse", §4.4) — men aldrig
-      // under öppnarens sista bud (stöd-återbudet i minor står redan på 4m).
-      const inviteCall = majorTrump
-        ? `5${LETTER[trump2C]}`
-        : rebid.call === `4${LETTER[trump2C]}`
-          ? `5${LETTER[trump2C]}`
-          : `4${LETTER[trump2C]}`
-      const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trump2C, rebid.call, {
-        partnerMin: STRONG_2C_SHOWN_MIN,
-        inviteCall,
-        // B13 (2026-08-07): trumfen är AGREED (stöd-återbudet/3+ stöd) och 2♣-
-        // auktionen är GF per system → cue-ronden (§6.2) körs. I minortrumf
-        // först ÖVER 3NT (sangen kan fortfarande vara rätt kontrakt under den).
-        gameForcing: true,
-        cueFloor: majorTrump ? undefined : '3NT',
-      })
-      if (slam) {
-        for (const t of slam) {
-          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-        }
-        return finish(false)
-      }
-      // Under slamzonen: kaptenen sätter utgången (GF) i den funna trumfen.
-      turns.push({
-        seat: responderSeat,
-        role: 'svarare',
-        call: gameCall,
-        rule: rebid.rule === 'rebid: stöd (GF)' ? 'till spel' : 'höjning (GF)',
-        explanation: `under slamzonen mot partnerns visade ${STRONG_2C_SHOWN_MIN}+ → ${gameCall[0]}${SUIT_SYM[trump2C]} (utgång).`,
-      })
+    case 'slam': {
+      const p = dec.plan
+      pushSeq(slamInvestigation(oh, rh, p.trump, p.lastCall, p.ctx, p.partnerShort)!)
       return finish(false)
     }
-
-    // FIX 2: INGEN trumf funnen — kaptenen kan ändå stå i slamzon (33+ mot
-    // visade 22). Egen redan VISAD 6+ färg med minst två topphonnörer (A/K/Q)
-    // är en självbärande trumf → RKC i den (nyckelkortssvaret vaktar mot att
-    // en spelstick-öppning saknar essen). 6NT direkt bjuds BARA när öppnarens
-    // återbud var 3NT — då är styrkan visad BALANSERAD (riktiga hp); efter ett
-    // FÄRG-återbud kan "22:an" vara en spelstick-hand vars längd inte ger
-    // sangstick utan fit (frö 20261107: 13 hp 6-5 → 6NT åtta stick), så där
-    // fortsätter auktionen naturligt. Under 33 → vanliga flödet står kvar
-    // (avgränsning: ingen kvantitativ inbjudan i 31–32 utan trumf).
-    const rh = deal.hands[responderSeat]
-    if (hcp(rh) + STRONG_2C_SHOWN_MIN >= 33) {
-      const topHonors = respSuit
-        ? rh.filter((c) => c.suit === respSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length
-        : 0
-      const ownSolid = respSuit && lengths(rh)[respSuit] >= 6 && topHonors >= 2 ? respSuit : null
-      const slam = ownSolid
-        ? slamInvestigation(deal.hands[openerSeat], rh, ownSolid, rebid.call, { partnerMin: STRONG_2C_SHOWN_MIN })
-        : null
-      if (slam) {
-        for (const t of slam) {
-          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-        }
-        return finish(false)
-      }
-      if (rebid.rule === 'rebid: 3NT (GF)') {
-        turns.push({
-          seat: responderSeat,
-          role: 'svarare',
-          call: '6NT',
-          rule: 'slamavslut',
-          explanation: `Slamzon mot visad balanserad ${STRONG_2C_SHOWN_MIN}+ → 6NT (sang behöver ingen fit).`,
-        })
-        return finish(false)
-      }
-      // Färg-återbud utan fit och utan egen solid färg: ingen blast — vidare.
-    }
-  }
-
-  // Slamutredning efter öppnarens HOPP-ÅTERBUD i egen minor (1m–1M–3m, felrapport
-  // #29): återbudet VISADE 16–18 med 6+ färg. Svararen (kaptenen) med 3+ fit
-  // räknar SIN hand mot det visade minimumet (ärliga slamportar 2026-07-07):
-  // driv 33+, inbjudan 4m i kanske-zonen, annars står den vanliga auktionen.
-  if (
-    (opening.call === '1C' || opening.call === '1D') &&
-    response.rule === 'ny färg (1-läget)' &&
-    rebid.rule === 'hopp i egen färg (inbjudan)' &&
-    openerSuit && parseBid(rebid.call).suit === openerSuit &&
-    lengths(deal.hands[responderSeat])[openerSuit] >= 3
-  ) {
-    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit, rebid.call, {
-      partnerMin: 16,
-      inviteCall: `4${LETTER[openerSuit]}`,
-    })
-    if (slam) {
-      for (const t of slam) {
-        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-      }
+    case 'exclusion':
+      pushSeq(exclusionInvestigation(oh, rh, dec.plan.trump, dec.plan.partnerMin)!)
       return finish(false)
-    }
-  }
-
-  // Slamutredning efter öppnarens HOPPHÖJNING av svararens högfärg (1x–1M–3M,
-  // F1 familj C). Hopphöjningen VISADE 16–18 med 4-korts stöd; trumfen är redan
-  // överenskommen. Svararen (kaptenen) räknar SIN hand mot det visade minimumet
-  // (ärliga slamportar 2026-07-07): driv 33+ (4NT RKC), inbjudan 5M i kanske-
-  // zonen, annars står den vanliga kedjan kvar (accepterar 4M / passar).
-  if (
-    rebid.rule === 'hopphöjning (inbjudan)' &&
-    respMajor && parseBid(rebid.call).suit === respMajor
-  ) {
-    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], respMajor, rebid.call, {
-      partnerMin: 16,
-      inviteCall: `5${LETTER[respMajor]}`,
-    })
-    if (slam) {
-      for (const t of slam) {
-        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-      }
+    case 'mss':
+      pushSeq(mssMinorFitContinuation(oh, rh, dec.plan.minor, dec.plan.rebidCall))
       return finish(false)
-    }
-  }
-
-  // Slamutredning efter öppnarens REVERSE (visade 16+) eller HOPPSKIFT i ny
-  // färg (visade 19+) — ETAPP 4, F1 familj C-resten. Svararen (kaptenen,
-  // obegränsad efter sitt svar) räknar SIN hand mot det visade minimumet när
-  // en trumf är säkrad på EGEN kunskap: öppnarens ANDRA färg med 4+ egna
-  // (4 lovade där), eller öppnarens FÖRSTA färg med 3+ — en reverse lovar 5+
-  // där (längre första färg), liksom en högfärgsöppning; bara hoppskiftets
-  // MINOR-öppning (kan vara 4) kräver 4+ egna. Driv 33+ (4NT RKC), inbjudan
-  // 31–32 (öppnaren accepterar på egna Bergenpoäng), annars står dagens
-  // flöde (fourthSuit-graderingen m.m.) kvar.
-  if (rebid.rule === 'reverse' || rebid.rule === 'hoppskift') {
-    const secondSuit = parseBid(rebid.call).suit
-    const rl = lengths(deal.hands[responderSeat])
-    const firstSuitMin =
-      rebid.rule === 'reverse' || openerSuit === 'hearts' || openerSuit === 'spades' ? 3 : 4
-    const trumpC =
-      secondSuit && rl[secondSuit] >= 4
-        ? secondSuit
-        : openerSuit && rl[openerSuit] >= firstSuitMin
-          ? openerSuit
-          : null
-    if (trumpC) {
-      const majorT = trumpC === 'hearts' || trumpC === 'spades'
-      const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trumpC, rebid.call, {
-        partnerMin: rebid.rule === 'hoppskift' ? 19 : 16,
-        inviteCall: majorT ? `5${LETTER[trumpC]}` : `4${LETTER[trumpC]}`,
-        // Ingen cue-flagga: trumfen här är INFERRERAD (svararens längd), inte
-        // agreed via buden → ett cue skulle läsas som naturligt. Cue-bud kräver
-        // överenskommen trumf (§6.2). Återkoms i ett senare steg.
-      })
-      if (slam) {
-        for (const t of slam) {
-          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-        }
-        return finish(false)
-      }
-    }
-  }
-
-  // Slamutredning: efter en överenskommen trumf växer 1430 RKC (+ ev. Sjöbergs
-  // 5NT) auktionen vidare. Högfärgsfit via Jacoby 2NT (Steg 1–2) eller minorfit
-  // via inverterad minor (Steg 3). Ärliga slamportar 2026-07-07: kaptenen räknar
-  // SIN hand mot vad öppnarens ÅTERBUD visade (intervallets minimum per regel).
-  const majorFit = response.rule === 'Jacoby 2NT' && (openerSuit === 'hearts' || openerSuit === 'spades')
-  const minorFit = response.rule === 'inverterad minor' && (openerSuit === 'clubs' || openerSuit === 'diamonds')
-  if (majorFit || minorFit) {
-    // FAS 4 punkt 18: visade öppnaren en singel/renons (Jacoby-kortfärg) skickar
-    // vi in den korta färgen så kaptenen nedvärderar sina honnörer där (ärligt:
-    // kortheten är BJUDEN). Visat minimum per återbudsregel — regler som kan
-    // döljas av starkare händer (sidofärg/kortfärg går före styrkevisning) får
-    // sitt LÄGSTA möjliga värde; det är precis vad en människa vet.
-    const openerShort = rebid.rule === 'Jacoby: kortfärg' ? (parseBid(rebid.call).suit ?? undefined) : undefined
-    const SHOWN_MIN: Record<string, number> = {
-      'Jacoby: minimum': 12,
-      'Jacoby: 3NT': 14,
-      'Jacoby: slamintresse': 16,
-      'Jacoby: sidofärg': 12,
-      'Jacoby: kortfärg': 12,
-      'inverterad: 3NT': 18,
-      'inverterad: 2NT': 12,
-      'inverterad: stopp-visning': 12,
-      'inverterad: minimum': 12,
-    }
-    const trumpS = openerSuit as Suit
-    const slam = slamInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], trumpS, rebid.call, {
-      partnerMin: SHOWN_MIN[rebid.rule] ?? 12,
-      inviteCall: majorFit ? `5${LETTER[trumpS]}` : `4${LETTER[trumpS]}`,
-      // Jacoby 2NT = utgångskravande högfärgshöjning → cue-bud fritt under utgång
-      // (§6.2, ägarbeslut 2026-08-03). B13 (2026-08-07): även minorfiten cue:ar —
-      // men först ÖVER 3NT (under 3NT betyder nya färger STOPP, §4.2), så de två
-      // budspråken aldrig krockar. cueFloor sätter den gränsen.
-      gameForcing: true,
-      cueFloor: minorFit ? '3NT' : undefined,
-    }, openerShort)
-    if (slam) {
-      for (const t of slam) {
-        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-      }
+    case 'gerberRebid':
+      pushSeq(gerberRebidInvestigation(oh, rh)!)
       return finish(false)
-    }
-  }
-
-  // Exclusion Blackwood (Steg 5): efter en splinter där öppnaren visat
-  // slamintresse (splinter-relä) kan svararen med en sidorenons hoppa till
-  // 5 i renonsfärgen och fråga nyckelkort utom esset där.
-  if (response.rule === 'tvetydig splinter' && rebid.rule === 'splinter-relä' && (openerSuit === 'hearts' || openerSuit === 'spades')) {
-    // Splinter-relät visade slamintresse (Bergen ≥15) → kaptenens visade minimum = 15.
-    const exc = exclusionInvestigation(deal.hands[openerSeat], deal.hands[responderSeat], openerSuit as Suit, 15)
-    if (exc) {
-      for (const t of exc) {
-        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-      }
+    case 'final':
+      turns.push({ seat: responderSeat, role: 'svarare', call: dec.turn.call, rule: dec.turn.rule, explanation: dec.turn.explanation })
       return finish(false)
-    }
+    case 'call':
+      break
   }
 
-  // MSS-slam (FAS 8): efter 1NT–2♠–3♣/3♦ har svararen (kaptenen) 5-4+ i minorerna
-  // och en minorfit är garanterad. Svararen driver mot slam med hela arsenalen och
-  // placerar NT-slam (6NT/7NT) när alla färger är täckta, annars minor-slam/utgång
-  // (behöver BÅDA händerna → ligger här, inte i responderSecondBid).
-  if (opening.call === '1NT' && response.rule === 'Minor Suit Stayman' && (rebid.call === '3C' || rebid.call === '3D')) {
-    const minor: Suit = rebid.call === '3C' ? 'clubs' : 'diamonds'
-    const cont = mssMinorFitContinuation(deal.hands[openerSeat], deal.hands[responderSeat], minor, rebid.call)
-    for (const t of cont) {
-      const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-      turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-    }
-    return finish(false)
-  }
-
-  // Slamutredning efter öppnarens 1NT-ÅTERBUD (1m–1M–1NT, visade 12–14; F1
-  // familj A). Svararen (kaptenen) dömer på SIN hand mot det visade intervallet
-  // (ärliga slamportar 2026-07-07). Två vägar:
-  //  • JÄMN svarare (ingen 5-korts färg): 21+ hp → Gerber 4♣ → 6NT/7NT;
-  //    19–20 hp → kvantitativ 4NT-inbjudan (öppnaren accepterar med 13–14).
-  //  • OBALANSERAD med en SÄKER färgfit på egen hand (6+ egen högfärg, eller 5+
-  //    kort i öppnarens minor som lovade 3+) → färgslam via 4NT RKC; inbjudan i
-  //    kanske-zonen. Gömda 4-4-fits jagas inte längre (kräver kikande).
-  // Utanför zonerna står den vanliga kedjan (NMF / sang-stegen) kvar.
-  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
-    const oh = deal.hands[openerSeat]
-    const rh = deal.hands[responderSeat]
-    let slam: SlamTurn[] | null = gerberRebidInvestigation(oh, rh)
-    if (!slam) {
-      const trump = familyAFitTrump(rh, openerSuit, parseBid(response.call).suit)
-      if (trump) {
-        const isMajorTrump = trump === 'hearts' || trump === 'spades'
-        slam = slamInvestigation(oh, rh, trump, rebid.call, {
-          partnerMin: 12,
-          inviteCall: isMajorTrump ? `5${LETTER[trump]}` : `4${LETTER[trump]}`,
-        })
-      }
-    }
-    if (slam) {
-      for (const t of slam) {
-        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-      }
-      return finish(false)
-    }
-  }
-
-  // Svararens andra bud (dispatchas på hela sekvensen).
-  const second = responderSecondBid(opening.call, response, rebid, deal.hands[responderSeat])
-  if (second) {
+  const second = dec.turn
+  {
     turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
 
     // 2/1 med FÖRSENAT stöd i öppnarens lågfärg (ägarbeslut 2026-09-03,

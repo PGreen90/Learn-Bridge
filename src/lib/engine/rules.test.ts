@@ -60,6 +60,8 @@ const ALL_ENGINE_RULES: string[] = [
   'slamtrevare efter 3NT', 'cue: avslut', 'krav – rebjuder egen färg',
   'krav – stödjer partnern', 'krav – ny färg', 'krav – sang', 'stöd-cue (slamintresse)',
   'RKC: stopp',
+  // Beslutstabellen familj 4a (2026-09-05): svararen sätter utgång efter öppnarens höjning av 2/1-högfärgen.
+  '2/1 utgångskrav',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

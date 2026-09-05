@@ -43,9 +43,15 @@ function fiveCardMajorShown(resp: ResponseResult, place: ResponseResult): Suit |
  * för svag för utgång (0–2 hp → respondTo2NT ger pass): då passar hen 2NT och det
  * vanliga flödet (buildAuction/live) sköter utpassningen.
  */
-export function strong2NTSystemsOn(openerHand: Hand, responderHand: Hand): { turns: SystemsOnTurn[]; open: boolean } | null {
+/** Svararens FÖRSTA bud efter 2♣–2♦–2NT ur EGEN hand (sangsystemet mot 22–24). null = för svag (passar 2NT). */
+export function systemsOnFirstStep(responderHand: Hand): ResponseResult | null {
   const resp = respondTo2NT(responderHand, OPENER_MIN)
-  if (resp.call === 'P') return null // 0–2 hp: passar 2NT (hanteras utanför)
+  return resp.call === 'P' ? null : resp
+}
+
+export function strong2NTSystemsOn(openerHand: Hand, responderHand: Hand): { turns: SystemsOnTurn[]; open: boolean } | null {
+  const resp = systemsOnFirstStep(responderHand)
+  if (!resp) return null // 0–2 hp: passar 2NT (hanteras utanför)
 
   const turns: SystemsOnTurn[] = [t('svarare', resp)]
 

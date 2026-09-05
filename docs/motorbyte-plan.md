@@ -134,7 +134,8 @@ Hela sviten (`npm test`) är grunden. Ovanpå den, per etapp och per familj:
   kontraktsbuden upp till 4NT (nyckel `<frö>/svar/<öppning>-<svar>`). Det är
   HÄR familjernas b-listor kommer ifrån i etapp 3: bot mot bot ändras inget
   (samma kunskapsfunktioner), skillnaden är att tabellen svarar där manuset
-  saknades. Dumpen avslöjar också OLAGLIGA tabellbud (laglighetsvakten i
+  saknades. (Svar-läget bär också familj 4a: bottens andra bud på människans
+  öppning syns i direkt/3:e hand-lägena.) Dumpen avslöjar också OLAGLIGA tabellbud (laglighetsvakten i
   `decideCallTraced` gör dem till pass med källan märkt `olagligt`) — räkna dem
   med `node -e` över JSON-filen; de ska vara noll före merge.
 - **Revisorn** (bud mot par): `$env:REVISOR='1'; npx vitest run
@@ -251,6 +252,13 @@ inte flyttat än.
    auktionen), Gerber-svaret, avvikelsedumpens svar-läge.
 4. **Svararens andra bud och öppnarens tredje** — fjärde färg, NMF, checkback,
    preferens, inverterade minorhöjningar, Bergen/Jacoby/splinter-fortsättningar.
+   Delad 2026-09-05: **4a svararens andra bud KLAR 2026-09-05** (loggen): raden
+   *svar2* med `responderSecondDecision` (manusets grenordning; varje slamgren
+   ger kaptenens första steg ur egen hand — `slamCaptainFirstStep`,
+   `exclusionFirstStep`, `mssFirstStep`, `gerberRebidFirstStep`,
+   `systemsOnFirstStep`) och adaptern `rebidAsSeen`. **4b öppnarens tredje bud**
+   återstår (NÄSTA): `openerThirdBid*`, NMF-/checkback-svaren, 2/1-försenat
+   stöd; adaptern för svararens andra bud som öppnaren ser det.
 5. **Slamutredningen** — `slamInvestigation`/Gerber/Exclusion/MSS per stol:
    kaptenens tur använder kaptenens hand, öppnarens tur öppnarens. Funktions-
    signaturerna smalnas till EN hand + fakta. Kikvakten blir skarp här.
@@ -346,6 +354,58 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-05 — Etapp 3 familj 4a KLAR: svararens andra bud.** Raden *svar2*
+  i `auction-decide.ts` (läget: vår sidas tre kontraktsbud öppning–mitt svar–
+  partnerns återbud, motståndarna bara pass, ingen X) → `responderSecondDecision`
+  = manusets grenar i samma ordning (systems on efter 2♣–2♦–2NT · 2♣-positivt
+  · hopp i egen minor · hopphöjning · reverse/hoppskift · Jacoby/inverterad fit
+  · splinter-relä → Exclusion · MSS · 1NT-återbudet → Gerber/familj A · sedan
+  `responderSecondBid`), där VARJE slamgren ger kaptenens första steg ur egen
+  hand + partnerns visade minimum: `slamCaptainFirstStep` (cue/4NT/inbjudan —
+  `slamInvestigation` BÖRJAR nu med det steget, en port), `exclusionFirstStep`,
+  `mssFirstStep`, `gerberRebidFirstStep`, `systemsOnFirstStep`. Beslutet bär en
+  PLAN (`SecondPlan`) som manuset använder för att bygga resten av sekvensen
+  med båda händerna tills familj 5. Adaptern `rebidAsSeen` läser öppnarens
+  återbud ur den nakna auktionen och översätter läsarens namn till motorns
+  kontextberoende (1-lägessvar / semi-forcing 1NT / 2♣); skarpt adaptersvep i
+  `auction-decide.test.ts` (3000 botauktioner, tillåtna skillnader: 'oklart',
+  'accepterar slaminbjudan'). Läsaren rättad på fem ställen: 2♣–2NT–3NT lästes
+  som stöd (= 'rebid: 3NT (GF)'), hopphöjningen hette som hoppet i egen färg
+  (= 'hopphöjning (inbjudan)'), 1M–1NT–2x/1m–1NT–3NT/splinter-signoff saknade
+  regelnamn ('rebid: ny färg', 'rebid: 3NT', 'rebid: signoff'). Regelnamnssvepet
+  före: öppnarens återbud 1133 bud, 845 samma namn, 61 mönster; svararens
+  andra bud 816/482/135 (mest terminala 'till spel'-namn — 4b:s adapter).
+  **Auktionsdiffen** (baslinje `b56a72f`): 3000 givar, ÄNDRAT BUD 7, samma bud
+  med annan källa 1030 — alla klass (b): (i) öppnarens "oklart"-1NT (1m–1M–1NT)
+  läses nu som 12–14 och §5.2-porten gäller: frö 20270949 → 5♥ slaminbjudan
+  (20 hp + 6-korts ♥ mot 12–14) i stället för NMF; (ii) hp-räkningen i porten
+  (nedan) tar bort fyra stödpoängsdrivna slambud över riktiga 1NT-återbud:
+  frö 20271982/20272664 4NT → 3NT, frö 20272165/20272533 5♠ → NMF; (iii)
+  öppnaren höjde svararens 2/1-högfärg under utgång → 4♥: frö 20270347 (förr
+  3NT trots hjärterfit), 20270752 (förr 4♠). Före hp-fixen gav "oklart"-
+  läsningen även frö 20272091 → 4NT med 12 hp 6-5 renons och frö 20272122 →
+  5♠ slaminbjudan med 10 hp 6-5 som öppnaren accepterade till 6♠ (samma port
+  som redan var live för vanliga 1NT-återbud). Porten
+  räknade kaptenen med stödpoäng, men §5.2 säger hp mot det visade intervallet
+  och det befintliga facitet frö 20261317 (2026-08-07, "ärligt mot visade
+  intervall = 4♥") föll: **lagad som kunskapsmodulbugg** (`hpOnly` i
+  `SlamContext`, facit frö 20272122 skarp i kön, budsystem §9). Efter fixen:
+  20270949 → 5♥ slaminbjudan (20 hp mot 12–14), 20272091/20272122 → som förut.
+  Dessutom lades fallet "öppnaren höjde min 2/1-högfärg under utgång → 4M"
+  (felrapport #27, förr detektorn `answerTwoOverOneRaise`) in i beslutet;
+  höjd lågfärg går som förut i `responderRebidIn2over1Auction`.
+  **Avvikelsedumpen** (12678 auktioner): ÄNDRAT BUD 2127, nästan alla i svararens
+  andra bud, 4 senare (fjärde färg får nu regel → placeringen 3NT), 0
+  olagliga; typiskt: Ogust-signoff i stället för gissad 4M, 3NT till spel
+  efter transfer i stället för 4M, Stayman efter 2♣–2♦–2NT i stället för 3NT,
+  Drury-pass på öppnarens signoff, RKC/6NT efter 2♣-fit i stället för
+  kravvaktens 5m/pass. **Kikvaktens mätläge**: 2898 bud, 141 byter (4,9 %, från
+  7,2 %); `tabell:svar2` 100/0. Konsistenstest: `slamInvestigation[0]` ==
+  `slamCaptainFirstStep` (400 slumpade lägen). **Sveparna** identiska (ostört
+  0/3/0, kända 39 bud i 2 mönster; förklaring 0/0; regelsvep grönt). Hela sviten
+  grön (`npm test`), `npx tsc` rent. **Revisorn** (kommandot i §3, 1000 givar,
+  frö 20260721): rätt kontrakt 20,4 % · snittförlust 268,05 (baslinjen 20,3 %
+  · 268,55 — inte sämre; fel-färg-bet 118 → 117).
 - **2026-09-05 — Etapp 3 familj 3 KLAR: öppnarens återbud.** Raden *återbud*
   i `auction-decide.ts`: läget "jag öppnade, partnern svarade (vår sidas två
   enda kontraktsbud), motståndarna bara pass, ingen X, svaret är det senaste"
