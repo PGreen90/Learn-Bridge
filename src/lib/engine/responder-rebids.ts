@@ -827,6 +827,19 @@ function fourthSuit(hand: Hand, x: Suit, y: Suit, second: Suit, rebid: ResponseR
   if (len[second] >= 4) {
     const call = bidAbove(second, rebid.call)
     const secondIsMajor = second === 'hearts' || second === 'spades'
+    // §5b beslut 3 (ägarbeslut 2026-09-05, fast arrival efter REVERSE i högfärg):
+    // efter en reverse går paret nästan alltid till utgång, så höjningen delas —
+    // billig höjning 3M = egna öppningsvärden (12+ stödpoäng), slamintresse,
+    // utgångskrav (öppnaren öppnar 4-läget med kontrollbud); hopp till 4M = den
+    // svagare handen, ingen slamambition. Ingen delkontrakts-escape behövs.
+    // Lågfärgsreverse (1♣–1♥–2♦) höjs billigast som förut.
+    if (secondIsMajor && rebid.rule === 'reverse') {
+      const sp = pointsWithFloor(hand, second, 'support')
+      if (sp.points >= 12) {
+        return { call, rule: 'reverse: höjning (stark)', explanation: `4+ stöd i ${SYM[second]} och egna öppningsvärden → ${pretty(call)} (utgångskrav, slamintresse — partnern cue:ar på 4-läget).` }
+      }
+      return { call: `4${BID[second]}`, rule: 'reverse: utgång', explanation: `4+ stöd i ${SYM[second]} utan slamambition → 4${SYM[second]} (fast arrival efter reversen).` }
+    }
     if (secondIsMajor && rebid.rule !== 'reverse') {
       const sp = pointsWithFloor(hand, second, 'support')
       const level = parseInt(call[0], 10)

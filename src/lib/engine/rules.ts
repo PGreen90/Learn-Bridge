@@ -298,6 +298,9 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'NMF: trumfen satt': 'ej-krav',
   'NMF: sangförslag': 'ej-krav',
   'NMF: höjning (GF)': 'utgangskrav',
+  // §5b beslut 3 (2026-09-05): fast arrival efter reverse i högfärg.
+  'reverse: höjning (stark)': 'utgangskrav',
+  'reverse: utgång': 'avslut',
   '2NT-checkback': 'krav-1-rond',
   'svar på 2NT-checkback': 'ej-krav',
   'placering efter 2NT-checkback': 'avslut',

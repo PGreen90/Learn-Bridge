@@ -1148,6 +1148,8 @@ function gameForced(u: Undisturbed, seat: Seat, prior: ResolvedCall[]): boolean 
     if (reb.strain !== 'NT' && reb.strain !== open.strain && reb.strain !== resp.strain && isJumpOver(resp, reb)) return true
     // Fjärde färg krav av svararen.
     if (u.bids.length >= 4 && isFourthSuit(u, u.bids[3].cb)) return true
+    // Reverse + svararens billiga höjning av reversens högfärg (§5b beslut 3): utgångskrav.
+    if (reverseMajorRaise(u)) return true
     // NMF + öppnarens visade stöd (1x–1M–1NT–2m–2M/3M): fördröjt högfärgsstöd, GF
     // och cue-ronden öppen (§6.2 "New Minor Forcing → öppnarens fördröjda högfärgsstöd").
     if (u.bids.length >= 5 && isNMF(u, u.bids[3].cb) && u.bids[4].cb.strain === resp.strain) return true
@@ -1176,6 +1178,20 @@ function secondNegativeIndex(u: Undisturbed): number {
 /** Svararens andra negativa: 3♣ över öppnarens 2♥/2♠-kravfärg (2♣–2♦–2M–3♣). Motorn spelar den bara där. */
 function isSecondNegative(rebid: ParsedBid, cb: ParsedBid): boolean {
   return rebid.level === 2 && isMajor(rebid.strain) && same(cb, 3, 'C')
+}
+
+/**
+ * Reverse i HÖGFÄRG (1x–1y–2M, M över x) följd av svararens billiga höjning 3M
+ * (§5b beslut 3, 2026-09-05): stark, utgångskrav — öppnaren öppnar cue-ronden,
+ * och ett 4-lägesbud i vilken sidofärg som helst (även egen) är ett kontrollbud.
+ */
+function reverseMajorRaise(u: Undisturbed): boolean {
+  const b = u.bids
+  if (b.length < 4) return false // gäller även passad hand (motorn höjer likadant)
+  const [open, resp, reb, raise] = b.map((x) => x.cb)
+  if (resp.level !== 1 || resp.strain === 'NT') return false
+  const reverse = reb.level === 2 && reb.strain !== 'NT' && reb.strain !== open.strain && reb.strain !== resp.strain && rankAbove(reb.strain, open.strain)
+  return reverse && isMajor(reb.strain) && b[3].seat === u.responder && same(raise, 3, reb.strain)
 }
 
 /** Fjärde färg (§6.6): tre färger bjudna av oss, detta är den fjärde, inte alla på 1-läget, opassad hand, ingen reverse före. */
@@ -1365,7 +1381,8 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   // Cue-bud (§6.2): trumf satt, ny färg under utgång i trumfen — i minorfit bara ÖVER 3NT.
   // (Är trumfen satt av båda och partnern just cue:at svarar motorn med cue även i en
   // egen visad färg: 1♥–1♠–1NT–2♦–2♠–3♦–3♥. Utan pågående cue-rond är egen färg naturlig.)
-  if (trump && cb.strain !== 'NT' && cb.strain !== trump && n >= 2 && ((agreed && lastWasCue) || !own.has(cb.strain))) {
+  // Efter reverse + stark höjning (§5b beslut 3) öppnar öppnaren cue-ronden — även i egen visad färg (1♦–1♠–2♥–3♥–4♦).
+  if (trump && cb.strain !== 'NT' && cb.strain !== trump && n >= 2 && ((agreed && lastWasCue) || !own.has(cb.strain) || (n >= 4 && reverseMajorRaise(u)))) {
     const game = gameIn(trump)
     const ok =
       bidRank(cb) < bidRank(game) &&
@@ -1468,7 +1485,10 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
     if (artificial()) return
     const above3NT = bidRank(cb) > bidRank({ level: 3, strain: 'NT' })
     // Kontrollbud med satt trumf.
-    if (trump && cb.strain !== trump && ((agreed && cues.has(k - 1)) || !mine.has(cb.strain)) && k >= 2) {
+    // Efter reverse + stark höjning (§5b beslut 3) är även ett 4-lägesbud i EGEN
+    // visad färg ett kontrollbud (1♦–1♠–2♥–3♥–4♦ = ruterkontroll, inte ruter).
+    const cueInOwnSuit = k >= 4 && reverseMajorRaise(u)
+    if (trump && cb.strain !== trump && ((agreed && cues.has(k - 1)) || !mine.has(cb.strain) || cueInOwnSuit) && k >= 2) {
       const belowGame = bidRank(cb) < bidRank(gameIn(trump))
       if (belowGame && ((isMajor(trump) && (cb.level === 4 || (cb.level === 3 && gf))) || (isMinor(trump) && above3NT))) {
         cues.add(k)
@@ -2072,6 +2092,12 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
   // Slamport efter reversen (§5): hopphöjning till 4m i öppnarens andra färg = slaminbjudan.
   if (reverse && cb.level === 4 && isMinor(cb.strain) && cb.strain === reb.strain) {
     return R('slaminbjudan', `${B(cb)} — hopphöjning av ${name} efter reversen: slaminbjudan (31–32 mot visade 16). Partnern accepterar med extra.`)
+  }
+  // §5b beslut 3 (2026-09-05): fast arrival efter reverse i HÖGFÄRG — billig
+  // höjning = stark (utgångskrav, slamintresse), hopp till utgång = svag.
+  if (reverse && isMajor(reb.strain) && cb.strain === reb.strain) {
+    if (cb.level === 3) return R('reverse: höjning (stark)', `${B(cb)} — höjer partnerns ${name} billigt efter reversen: 4+ stöd och egna öppningsvärden (12+), slamintresse. Utgångskrav — partnern öppnar 4-läget med kontrollbud.`, 'utgangskrav')
+    if (cb.level === 4) return R('reverse: utgång', `${B(cb)} — hopp till utgång efter reversen (fast arrival): 4+ stöd, den svagare handen, ingen slamambition.`, 'avslut')
   }
   if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
   if (jumpShift) return N(`${B(cb)} — naturligt efter hoppskiftet; utgångskravet står.`, 'utgangskrav')

@@ -397,6 +397,11 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   svagare handen med 3+ stöd, ingen slamambition**. Ingen svag delkontrakts-
   escape behövs (minimihanden hoppar till 4♥). Ersätter både motorns "ej krav"
   och bokens odelade "krav". Rör §6.6.
+  **BYGGT 2026-09-06 (grönt, väntar på ägarens PCD):** 3M/4M i `fourthSuit`,
+  öppnaren öppnar cue-ronden (`SlamSetup.partnerStarts`, prefix 4 i
+  `slamSituation`), betydelselagret läser 3M/4M och kontrollbud i egen färg;
+  bygget kräver **4+ stöd** (beslutstexten säger 3+ — reversens färg är 4
+  kort; ägaren avgör). Mätningar i loggen nedan och systembokens §9.
 
 - **Beslut 4 — fynd 3 (kortfärgen efter `1♠–3♥–3♠`, tvetydig splinter),
   2026-09-05.** Ägarbeslut: **rena steg** — kort ♣→3NT, kort ♦→4♣, kort ♥→4♦
@@ -526,7 +531,7 @@ och 15 ingår i 1 resp. finns inte).** Nästa steg: bygg besluten test-drivet
 (facit FÖRE fix, systembok-§, regeln i det nya lagret), en per commit, sedan
 PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF — LIVE
 2026-09-05, `3491ece`) → 3 (fast
-arrival efter reverse) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
+arrival efter reverse — BYGGT 2026-09-06, väntar på PCD) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
 steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M) →
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa) → 11 (ny färg på
@@ -554,6 +559,31 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-06 — §5b beslut 3 BYGGT (fast arrival efter reverse i högfärg;
+  väntar på ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 3" i
+  `motorbyte-facit.test.ts` (nio fall, röda före fixen). Regeln i det nya
+  lagret: `fourthSuit` (3M = 12+ stödpoäng/4+ stöd, annars 4M),
+  `responderSecondDecision` (ingen slamport direkt över högfärgsreversen),
+  `slamSituation` prefix 4 med `SlamSetup.partnerStarts` — öppnaren öppnar
+  cue-ronden (`partnerFirstStep`: billigaste kontroll under utgång, annars
+  4M; `cuePhaseTurn` tar partnern som startare; avslutar öppnaren direkt i
+  4M fortsätter kaptenen som över en utgångsplacering: 4NT 33+, 5M 31–32).
+  Betydelselagret: `reverseMajorRaise` — 3M 'reverse: höjning (stark)'
+  (utgångskrav), 4M 'reverse: utgång', utgångskrav i `gameForced`, och
+  4-lägesbud i EGEN färg läses som kontrollbud i det läget (både
+  `naturalSuits` och slamzonens cue-läsare). Registret i `rules.ts`.
+  Systembok §6.6 (undantag a omskrivet), §5 (slamporten efter reverse),
+  §9. **Mätningar** (kommandon i §3; baslinjer på `b86d004`): hela sviten
+  grön (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD
+  1, klass b (frö 20272351 — fynd 14:s nakna 4NT efter reverse — går nu
+  3♥ → 3♠ → 4♣ → 4♦ → 4NT → 6♥); avvikelsedumpen: 1 ändrad, klass b (frö
+  20270106: människans 1♠, botens 3♥ passades förr av öppnaren, nu cue 3♠
+  → 4♥); olagliga tabellbud 0; betydelsesvepet kravnivå 0 · alert 4
+  (oförändrat) · registerhål 0; pliktsvep/förklaringssvep/regelsvep gröna;
+  revisorn 1000 givar: rätt kontrakt 20,2 % · snittförlust 268,83
+  (identiskt med beslut 1). **Öppen ägarfråga:** beslutstexten säger "3+
+  stöd", bygget kräver 4+ (reversens färg är 4 kort; 4-3 är ingen trumf).
+  Kvar: fynd 14:s facit i kön blir `it` vid beslut 14 (4NT-läsningen).
 - **2026-09-05 — §5b beslut 1 KLAR & LIVE (Gerber/NMF över 1NT-återbudet; mergepunkt
   `3491ece`, Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 1" i
   `motorbyte-facit.test.ts` (sju fall, röda före fixen) + omskrivna facit i
