@@ -28,9 +28,8 @@ session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per famil
 `auction-decide.ts` (`decideFromTable`: läge → kunskapsfunktion) med raderna
 öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
 bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
-varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **Bok-mot-motor-
-fynden (15 st): ALLA ägarbeslut TAGNA 2026-09-05, loggade i planens §5b.
-Inget byggt än.**
+varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **§5b: alla 15
+ägarbeslut tagna 2026-09-05; beslut 1 BYGGT samma dag (grönt, väntar PCD).**
 **Familj 6 KLAR & LIVE 2026-09-05 (mergepunkt f05bfef; grinden efter etapp 3
 = deployad):** manusets ostörda del riven — `buildAuctionCore` spelar ut vår
 sida ur tabellen stol för stol; kvar = konkurrensronden + `open`-flaggan
@@ -39,10 +38,12 @@ färg → Gerber 4♣) är live; vakt: manuset avgör inga bud i ostörda auktio
 Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägarens
 ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
-**Nästa gång börjar vi med:** BYGGET av besluten, test-drivet (facit FÖRE fix,
-systembok §, regel i nya lagret), ett beslut per commit i planens byggordning
-(§5b sist: 1 → 3 → 7 → 14 → 2 → 13 → 4 → 5 → 9 → 6 → 11 → 12 → 16) → PCD efter
-varje grönt steg eller samlat, ägarens val. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
+**Nästa gång börjar vi med:** ägarens grindbeslut på beslut 1 (PCD? frö
+20261109 stannar i 5♣ — Nord blott minimum — okej som systemriktig miss?),
+sedan beslut 3, test-drivet (facit FÖRE fix, systembok §, regel i nya lagret),
+ett beslut per commit i planens byggordning (§5b sist: 1 ✔ → 3 → 7 → 14 → 2 →
+13 → 4 → 5 → 9 → 6 → 11 → 12 → 16) → PCD efter varje grönt steg eller samlat,
+ägarens val. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
 (`overcall`, `advanceOvercall`, `advanceTwoSuiter`, inklivarens fortsättningar)
 in i tabellen; ordningen mot frekvensbilden (`auktionsdump-frekvens.txt`, planens
 §4 etapp 4); baslinjerna (§3) på `f05bfef`.

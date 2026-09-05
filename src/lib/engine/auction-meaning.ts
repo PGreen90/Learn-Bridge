@@ -1151,6 +1151,9 @@ function gameForced(u: Undisturbed, seat: Seat, prior: ResolvedCall[]): boolean 
     // NMF + öppnarens visade stöd (1x–1M–1NT–2m–2M/3M): fördröjt högfärgsstöd, GF
     // och cue-ronden öppen (§6.2 "New Minor Forcing → öppnarens fördröjda högfärgsstöd").
     if (u.bids.length >= 5 && isNMF(u, u.bids[3].cb) && u.bids[4].cb.strain === resp.strain) return true
+    // NMF utan visat stöd + svararens färgvisning (§5b beslut 1, 2026-09-05):
+    // 3M = 6+ egen högfärg, 3m = 5+ i öppnarens lågfärg — slamintresse, utgångskrav.
+    if (nmfSuitShown(u)) return true
     // Öppnarens NYA (fjärde) färg i rond 3 efter svararens preferens = krav.
     if (u.bids.length >= 5 && u.bids[4].seat === u.opener) {
       const w5 = u.bids[4].cb
@@ -1184,6 +1187,45 @@ function isFourthSuit(u: Undisturbed, cb: ParsedBid): boolean {
   // Motorn spelar fjärde färg även efter en reverse (boken §6.6 undantar den —
   // avvikelse noterad i motorbytets logg 2026-09-04; lagret följer motorn).
   return cb.level > 1
+}
+
+/**
+ * Svararens färgvisning efter NMF utan visat stöd (§5b beslut 1, 2026-09-05):
+ * 3M = rebud av egen högfärg (6+), 3m = höjning av öppnarens lågfärg (5+ stöd)
+ * — båda slamintresse och utgångskrav. Returnerar färgen eller null.
+ */
+function nmfSuitShown(u: Undisturbed): string | null {
+  const b = u.bids
+  if (b.length < 6 || !isNMF(u, b[3].cb) || b[5].seat !== u.responder) return null
+  const open = b[0].cb
+  const resp = b[1].cb
+  const cb = b[5].cb
+  if (cb.level !== 3) return null
+  if (cb.strain === resp.strain && b[4].cb.strain !== resp.strain) return resp.strain
+  if (cb.strain === open.strain && isMinor(open.strain)) return open.strain
+  return null
+}
+
+/** Läsningarna kring färgvisningen efter NMF: svararens 3M/3m (femte budet) och öppnarens svar (sjätte). */
+function afterNMFSuitShow(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterpretation | null {
+  const b = u.bids
+  const n = b.length
+  const name = NAME[cb.strain]
+  if (n === 5 && seat === u.responder && isNMF(u, b[3].cb) && cb.level === 3) {
+    const open = b[0].cb
+    const resp = b[1].cb
+    if (cb.strain === resp.strain && b[4].cb.strain !== resp.strain) return R('NMF: rebjuder egen högfärg', `${B(cb)} — rebjuder ${name} efter NMF: 6+ kort, slamintresse. Utgångskrav — partnern sätter trumfen (4 i färgen).`, 'utgangskrav')
+    if (cb.strain === open.strain && isMinor(open.strain)) return R('NMF: höjer öppnarens lågfärg', `${B(cb)} — höjer partnerns ${name} efter NMF: 5+ stöd, slamintresse. Utgångskrav — partnern föreslår 3 sang med håll runtom, annars 4 i färgen.`, 'utgangskrav')
+    return null
+  }
+  if (n === 6 && seat === u.opener) {
+    const shown = nmfSuitShown(u)
+    if (!shown) return null
+    if (isMajor(shown) && same(cb, 4, shown)) return R('NMF: trumfen satt', `${B(cb)} — sätter ${name} som trumf (2+ kort mot partnerns 6+); partnern frågar vidare.`)
+    if (isMinor(shown) && same(cb, 3, 'NT')) return R('NMF: sangförslag', `3 sang — alla sidofärger täckta; ${NAME[shown]} är trumf om partnern går vidare (kontrollbud över 3 sang).`)
+    if (isMinor(shown) && same(cb, 4, shown)) return R('NMF: höjning (GF)', `${B(cb)} — 3 sang otäckt: trumfen bekräftad, utgångskravet står.`, 'utgangskrav')
+  }
+  return null
 }
 
 /** New Minor Forcing (§5.7): efter 1x–1M–1NT bjuder svararen en obruten lågfärg på 2-läget. */
@@ -1289,6 +1331,12 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
     if (same(cb, 6, 'NT')) return R('accepterar slaminbjudan', `6 sang — accepterar den kvantitativa slaminbjudan (maximum).`)
   }
 
+  // 5M direkt över partnerns 1NT-återbud (1x–1M–1NT–5M) är ingen slaminbjudan
+  // sedan §5b beslut 1 (2026-09-05): inbjudan/essfrågan går via New Minor
+  // Forcing (§5.7). Budet läses som utgång-plus i egen färg, till spel.
+  if (!rkc && cb.level === 5 && isMajor(cb.strain) && n === 3 && partnerLast && same(last, 1, 'NT') && u.bids[1].cb.level === 1 && seat === u.responder) {
+    return N(`5${sym} — 6+ ${name}, till spel. Slaminbjudan över 1 sang-återbudet går via New Minor Forcing (§5.7), inte 5${sym}.`, 'avslut')
+  }
   // Slaminbjudan 5M (kaptensregeln 31–32) och accepten 6M.
   if (!rkc && cb.level === 5 && isMajor(cb.strain)) {
     return R('slaminbjudan', `5${sym} — slaminbjudan i ${name}: bjud 6${sym} med mer än blott minimum, passa annars.`)
@@ -1856,6 +1904,10 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   }
 
   if (n === 4 && isOpener && (same(resp, 1, 'S') || (same(resp, 1, 'NT') && u.responderPassed))) return openerThirdAfterOneLevel(seat, cb, u, prior)
+  if (n >= 5) {
+    const nmf = afterNMFSuitShow(seat, cb, u)
+    if (nmf) return nmf
+  }
   if (n >= 4) return lateUndisturbed(seat, cb, u, prior)
   return null
 }
@@ -1926,6 +1978,10 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   }
 
   if (n === 4 && isOpener && resp.level === 1) return openerThirdAfterOneLevel(seat, cb, u, prior)
+  if (n >= 5) {
+    const nmf = afterNMFSuitShow(seat, cb, u)
+    if (nmf) return nmf
+  }
   if (n === 4 && isOpener && same(resp, 2, m)) {
     // Öppnarens andra bud efter den inverterade höjningen + svararens broms/stopp (§4.2).
     if (same(cb, 3, 'NT')) return R('inverterad: 3NT', `3 sang — sidofärgerna täckta, till spel.`)

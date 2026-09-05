@@ -68,10 +68,10 @@ import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
 import { classifyOpening } from './openings'
 import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
-import { responderPlaceAfter2NTCheckback, responderPlaceAfterNMF, responderRebidIn2NTAuction, responderSecondBid } from './responder-rebids'
+import { NMF_SLAM_ZONE_HP, responderPlaceAfter2NTCheckback, responderPlaceAfterNMF, responderRebidIn2NTAuction, responderSecondBid } from './responder-rebids'
 import { openerRebidAfter2NTResponse } from './responses-2nt'
 import { respondToGerber } from './slam'
-import { exclusionFirstStep, exclusionTurn, familyAFitTrump, mssFirstStep, mssSetup, mssTurn, slamCaptainFirstStep, slamTurn, type SlamBid, type SlamContext, type SlamRole, type SlamSetup, type SlamTurn } from './slam-auction'
+import { exclusionFirstStep, exclusionTurn, mssFirstStep, mssSetup, mssTurn, slamCaptainFirstStep, slamTurn, type SlamBid, type SlamContext, type SlamRole, type SlamSetup, type SlamTurn } from './slam-auction'
 import { openerChoosesAfterSystemsOn, systemsOnFirstStep } from './strong-2nt-systemson'
 import { respondToMajor, respondToMinor, type ResponseResult } from './responses'
 import { respondToMajorPassed } from './responses-drury'
@@ -363,15 +363,10 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
     }
   }
 
-  // Öppnarens 1NT-återbud (12–14, familj A): säker fit på egen hand → hp mot
-  // visade 12–14 (§5.2): ingen bjuden fit, kortfärger lyfter inte.
-  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)' && ((respMajor && trump === respMajor) || (openerSuit && !isMajorSuit(openerSuit) && trump === openerSuit))) {
-    // Inbjudan 5M/4♦. I KLÖVER finns ingen: 4♣ över 1NT-återbudet ÄR Gerber (§6.4),
-    // så samma bud kan inte också vara en klöverinbjudan (familj 5, 2026-09-05;
-    // bok-mot-motor-fynd 15 — §5.7 säger "4m", §6.4 säger Gerber).
-    const inviteCall = majorTrump ? `5${LETTER[trump]}` : trump === 'diamonds' ? '4D' : undefined
-    return { ctx: { partnerMin: 12, inviteCall, hpOnly: true } }
-  }
+  // Öppnarens 1NT-återbud (12–14): ingen slamgren direkt över sangen sedan
+  // §5b beslut 1 (2026-09-05) — den jämna handen frågar Gerber/kvantitativt
+  // (`gerberRebidFirstStep`), handen med färg går via New Minor Forcing och
+  // sätter trumfen först; slamkontexten läses då i `slamSituation` (prefix 7).
 
   return null
 }
@@ -467,12 +462,9 @@ function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid:
   }
   if (response.rule === 'Jacoby 2NT' && openerSuit && isMajorSuit(openerSuit)) return openerSuit
   if (response.rule === 'inverterad minor' && openerSuit && !isMajorSuit(openerSuit)) return openerSuit
-  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
-    for (const t of [respMajor, openerSuit && !isMajorSuit(openerSuit) ? openerSuit : null]) {
-      if (t && slamContextFor(openCall, response, rebid, t)?.ctx.inviteCall === firstSlamCall) return t
-    }
-    return null
-  }
+  // 1NT-återbudet: inga slambud direkt över sangen utom Gerber 4♣/kvantitativ
+  // 4NT (lästa ovan i `slamSituation`); färgslammen går via NMF (§5b beslut 1).
+  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') return null
   return null
 }
 
@@ -487,8 +479,8 @@ export type SecondPlan =
   | { kind: 'slam'; setup: SlamSetup }
   | { kind: 'exclusion'; trump: Suit; partnerMin: number }
   | { kind: 'mss'; minor: Suit; rebidCall: string }
-  /** Gerber 4♣ över 1NT-återbudet (jämn 21+) eller kvantitativ 4NT (19–20); med `suit`: essfrågan för en egen självbärande färg, placeringen blir 6/7 i den (§5.7). */
-  | { kind: 'gerberRebid'; suit?: Suit }
+  /** Gerber 4♣ över 1NT-återbudet (jämn 21+, placerar i sang) eller kvantitativ 4NT (19–20) (§5.7). */
+  | { kind: 'gerberRebid' }
 
 export interface SecondDecision {
   turn: ResponseResult
@@ -613,25 +605,15 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
     return { turn: asResponse(mssFirstStep(hand, minor, rebid.call)), plan: { kind: 'mss', minor, rebidCall: rebid.call } }
   }
 
-  // Öppnarens 1NT-återbud (12–14): jämn 19+ → Gerber/kvantitativ; säker fit → slamport.
+  // Öppnarens 1NT-återbud (12–14, §5.7): den JÄMNA handen utan färg frågar
+  // Gerber 4♣ (räknar 33 mot visade 12) eller inbjuder kvantitativt 4NT
+  // (31–32). En färg — 6+ egen högfärg, 5+ i öppnarens lågfärg — visas FÖRST
+  // via New Minor Forcing (`responderSecondBid`), och slammen frågas sedan i
+  // den satta trumfen (§5b beslut 1, 2026-09-05; förr Gerber-med-placering i
+  // egen färg och inbjudan 5M/4♦ direkt över sangen — bok-mot-motor-fynd 6+15).
   if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
     const g = gerberRebidFirstStep(hand)
     if (g) return { turn: asResponse(g), plan: { kind: 'gerberRebid' } }
-    const trump = familyAFitTrump(hand, openerSuit, suitOf(response.call))
-    if (trump) {
-      const slam = slamStep(trump)
-      // Drivzonen frågar med GERBER 4♣, inte 4NT (familj 6, 2026-09-05): 4NT
-      // direkt över partnerns sang-återbud är kvantitativt (§5.7, den jämna
-      // 19–20-handen) och partnern kan inte se att jag menar min egen färg.
-      // 4♣ är entydigt ess-fråga (§6.4), och placeringen blir 6 i min färg.
-      if (slam && slam.turn.call === '4NT') {
-        return {
-          turn: { call: '4C', rule: 'Gerber', explanation: `Självbärande ${SYM[trump]} och slamzon mot visade 12–14 → 4♣ (Gerber, frågar ess — placerar sedan i ${SYM[trump]}).` },
-          plan: { kind: 'gerberRebid', suit: trump },
-        }
-      }
-      if (slam) return slam
-    }
   }
 
   // Öppnaren HÖJDE min 2-över-1-HÖGFÄRG under utgång (1♠–2♥–3♥): trumfen är
@@ -813,6 +795,29 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
       const slam = slamStep(respSuit)
       if (slam) return slam
     }
+    // §5b beslut 1 (2026-09-05): inget stöd visat → visa FÄRGEN med slamvärden
+    // (19+ hp = 31 mot visade 12, hp-räkning §5.2): 6+ egen högfärg → 3M
+    // (utgångskrav, slamintresse; öppnaren sätter trumfen med 4M), 5+ i
+    // öppnarens lågfärg → 3m (stöd, slamintresse; öppnaren beskriver 3NT/4m).
+    // Slammen frågas sedan i den satta trumfen (raden slam, prefix 7). Under
+    // 19 placeras utgången (6+ högfärg → 4M i `responderPlaceAfterNMF`).
+    if (suitOf(third.call) !== respSuit && hcp(hand) >= NMF_SLAM_ZONE_HP) {
+      const len = lengths(hand)
+      const ownMajor = `3${LETTER[respSuit]}`
+      if (len[respSuit] >= 6 && bidRank(ownMajor) > bidRank(third.call)) {
+        return {
+          turn: { call: ownMajor as ResponseResult['call'], rule: 'NMF: rebjuder egen högfärg', explanation: `6+ ${SYM[respSuit]} och slamvärden mot visade 12–14 → 3${SYM[respSuit]} (utgångskrav; partnern sätter trumfen, sedan essfrågan i ${SYM[respSuit]}).` },
+          plan: { kind: 'call' },
+        }
+      }
+      const raise = `3${LETTER[openerSuit]}`
+      if (!isMajorSuit(openerSuit) && len[openerSuit] >= 5 && bidRank(raise) > bidRank(third.call)) {
+        return {
+          turn: { call: raise as ResponseResult['call'], rule: 'NMF: höjer öppnarens lågfärg', explanation: `5+ ${SYM[openerSuit]} (partnern lovade 3+) och slamvärden mot visade 12–14 → 3${SYM[openerSuit]}: trumfen satt, utgångskrav, slamintresse.` },
+          plan: { kind: 'call' },
+        }
+      }
+    }
     const otherMajor: Suit = respSuit === 'hearts' ? 'spades' : 'hearts'
     const unbid = RANK.find((s) => s !== openerSuit && s !== respSuit && s !== nmfMinor)!
     const cb = parseContractBid(third.call)!
@@ -860,6 +865,20 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
 export function openerFourthDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, second: ResponseResult, fourth: ResponseResult, hand: Hand): ResponseResult | null {
   if (fourth.call === 'P') return null
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') return openerChoosesAfterSystemsOn(hand, second, fourth)
+
+  // §5b beslut 1 (2026-09-05): efter mitt NMF-svar utan stöd visade partnern
+  // sin färg med slamvärden — 3M (6+) → jag sätter trumfen med 4M (min sang
+  // lovade 2+; kaptenen frågar 4NT eller inbjuder 5M); 3m i min lågfärg (5+
+  // stöd) → 3NT-förslag med alla sidofärger täckta, annars 4m (trumfen
+  // bekräftad, utgångskravet står — samma beskrivning som 2/1-försenat stöd).
+  const openerSuit = suitOf(openCall)
+  const respSuit = suitOf(response.call)
+  if (second.rule === 'New Minor Forcing' && rebid.rule === '1NT (12–14)' && openerSuit && respSuit && isMajorSuit(respSuit)) {
+    if (fourth.call === `3${LETTER[respSuit]}`) {
+      return { call: `4${LETTER[respSuit]}` as ResponseResult['call'], rule: 'NMF: trumfen satt', explanation: `Partnern rebjöd ${SYM[respSuit]} (6+, slamintresse) och min sang lovade 2+ kort → 4${SYM[respSuit]} sätter trumfen; partnern frågar vidare.` }
+    }
+    if (!isMajorSuit(openerSuit) && fourth.call === `3${LETTER[openerSuit]}`) return openerAfterDelayedMinorSupport(hand, openerSuit, 'NMF')
+  }
   return null
 }
 
@@ -876,8 +895,6 @@ export interface SlamSituation {
   trump?: Suit
   minor?: Suit
   rebidCall?: string
-  /** Gerber för en egen självbärande färg (§5.7): kaptenen placerar i den, inte i sang. Bara kaptenen vet. */
-  placeSuit?: Suit
   /** Sekvensens bud hittills (från och med kaptenens första slambud). */
   sofar: SlamBid[]
 }
@@ -934,6 +951,23 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
     const second = secondAsSeen(f, at(3))
     const third = thirdAsSeen(f, at(4))
     if (second && third) {
+      // §5b beslut 1 (2026-09-05): efter NMF utan visat stöd satte KAPTENEN
+      // trumfen själv — 3M (6+ egen högfärg) eller 3m (5+ i öppnarens lågfärg)
+      // — och öppnaren svarade (4M / 3NT-förslag / 4m). Kaptenen räknar hp
+      // mot visade 12 (§5.2); i lågfärgen är cue-ronden öppen över 3NT.
+      if (ours.length >= 7 && second.rule === 'New Minor Forcing' && response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
+        const respSuit = suitOf(response.call)
+        const fourth = ours[5].bid
+        const fifth = ours[6].bid
+        if (respSuit && isMajorSuit(respSuit) && suitOf(third.call) !== respSuit && fourth === `3${LETTER[respSuit]}` && fifth === `4${LETTER[respSuit]}`) {
+          const ctx: SlamContext = { partnerMin: 12, inviteCall: `5${LETTER[respSuit]}`, gameForcing: true, hpOnly: true }
+          return { kind: 'slam', captain, prefix: 7, setup: { trump: respSuit, lastCall: fifth, ctx }, sofar: sofarFrom(7) }
+        }
+        if (openerSuit && !isMajorSuit(openerSuit) && fourth === `3${LETTER[openerSuit]}` && (fifth === '3NT' || fifth === `4${LETTER[openerSuit]}`)) {
+          const ctx: SlamContext = { partnerMin: 12, inviteCall: fifth === '3NT' ? `4${LETTER[openerSuit]}` : undefined, gameForcing: true, cueFloor: '3NT', hpOnly: true }
+          return { kind: 'slam', captain, prefix: 7, setup: { trump: openerSuit, lastCall: fifth, ctx }, sofar: sofarFrom(7) }
+        }
+      }
       const t5 = slamTrumpAfterThird(openCall, response, second, third)
       const c5 = t5 ? slamContextAfterThird(openCall, response, second, third, t5) : null
       if (t5 && c5) return { kind: 'slam', captain, prefix: 5, setup: { trump: t5, lastCall: third.call, ctx: c5.ctx }, sofar: sofarFrom(5) }
@@ -951,7 +985,7 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
 function slamSituationTurn(sit: SlamSituation, role: SlamRole, hand: Hand): SlamTurn | null {
   switch (sit.kind) {
     case 'gerber':
-      return gerberTurn(role, hand, sit.partnerMin!, sit.sofar, sit.placeSuit)
+      return gerberTurn(role, hand, sit.partnerMin!, sit.sofar)
     case 'kvantitativ':
       // Partnern dömer inbjudan på SIN hand; kaptenen har inget mer att säga.
       return role === 'öppnare' && sit.sofar.length === 1 ? quantitativeAnswer(hand, sit.partnerMin!) : null
@@ -974,6 +1008,7 @@ function captainIntent(sit: SlamSituation, f: AuctionFacts, hand: Hand): SlamSit
   const ours = f.ourContractBids
   const at = (i: number) => f.history.indexOf(ours[i])
   const openCall = `${f.opening!.level}${f.opening!.strain}`
+  if (sit.prefix >= ours.length) return sit // kaptenens första slambud läggs nu (prefix 7: trumfen entydig ur auktionen)
   const firstCall = ours[sit.prefix].bid
   if (sit.prefix === 3) {
     const response = partnerResponseAsSeen(f, at(1))
@@ -983,7 +1018,6 @@ function captainIntent(sit: SlamSituation, f: AuctionFacts, hand: Hand): SlamSit
       if (dec.plan.kind === 'slam') return { ...sit, kind: 'slam', setup: dec.plan.setup }
       if (dec.plan.kind === 'exclusion') return { ...sit, kind: 'exclusion', trump: dec.plan.trump, partnerMin: dec.plan.partnerMin }
       if (dec.plan.kind === 'mss') return { ...sit, kind: 'mss', minor: dec.plan.minor, rebidCall: dec.plan.rebidCall }
-      if (dec.plan.kind === 'gerberRebid' && dec.plan.suit && firstCall === '4C') return { ...sit, kind: 'gerber', partnerMin: 12, placeSuit: dec.plan.suit }
     }
   } else if (sit.prefix === 5) {
     const response = partnerResponseAsSeen(f, at(1))

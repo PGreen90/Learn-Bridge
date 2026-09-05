@@ -967,8 +967,11 @@ din hand"*.
 | 1♥–1♠–1NT | **2♣ / 2♦** (bjud den starkare = antyder stopp) |
 
 **Krav:** 5-korts högfärg + inbjudande eller mer (**11+ hp**; 13+ = utgångskrav).
-Ostört läge; störs 1NT-rebudet gäller andra verktyg. Priset: du ger upp det
-naturliga svaga 2-budet i NMF-lågfärgen. NMF gäller **även när öppnarens 1NT
+NMF får också användas av handen med **5+ kort i öppnarens lågfärg och
+slamvärden (19+ hp)** — den höjer lågfärgen i nästa rond (se "Färgvisning med
+slamvärden" nedan; ägarbeslut 2026-09-05, §9). Ostört läge; störs 1NT-rebudet
+gäller andra verktyg. Priset: du ger upp det naturliga svaga 2-budet i
+NMF-lågfärgen. NMF gäller **även när öppnarens 1NT
 var reservfallet** ("oklart", §5.2 steg 7) — det är fortfarande ett 1NT-återbud
 och svararen behandlar det likadant (systemfel #2, 2026-08-07; förr föll de
 auktionerna ur systemet och kravet kunde passas, frö 20261317).
@@ -982,30 +985,41 @@ auktionerna ur systemet och kravet kunde passas, frö 20261317).
 
 **Din placering:** har öppnaren visat **stöd** → `4M` med utgångsvärden (eller mot
 öppnarens maximum), annars pass i delkontrakt. Visade öppnaren **sang/ingen fit**
-→ `3NT` med utgångsvärden, annars pass. Kort sagt: 13+ når alltid utgång; 11–12
-når utgång bara när öppnaren visat maximum.
+→ `3NT` med utgångsvärden, annars pass — men med **6+ kort i din högfärg** →
+`4M` (öppnarens sang lovar 2+ kort, så fiten är säker på egen hand). Kort sagt:
+13+ når alltid utgång; 11–12 når utgång bara när öppnaren visat maximum.
 
-**Slam efter 1NT-återbudet (ärliga portar).** Öppnarens 1NT-återbud visar
-**12–14**. Du (kaptenen) räknar **din egen hand mot det visade intervallet** —
-aldrig partnerns faktiska kort:
-- **Jämn hand utan 5-korts färg:** **21+ hp** (21+12 ≥ 33) → **Gerber 4♣** (§6.4:
-  4♣ är Gerber även över ett NT-*återbud*): frågar ess, placerar **6NT** (stannar
-  i 4NT om två ess saknas; 7NT bara med alla ess + storslamszon mot minimum).
-  **19–20 hp** (slam bara om öppnaren har max) → **kvantitativ 4NT-inbjudan**:
-  öppnaren bjuder 6NT med 13–14, passar med 12.
-- **Obalanserad hand med en SÄKER fit på egen hand:** en **6+ egen högfärg**,
-  eller **5+ kort i öppnarens minor** (1♣/1♦ lovade 3+ → minst 8 ihop) blir
-  trumf → i drivzonen **Gerber 4♣** (frågar ess; öppnaren svarar som vanligt och
-  passar placeringen) → **6 i färgen** — stannar i 5 i färgen om två ess saknas.
-  **4NT direkt över sang-återbudet är alltid kvantitativt** (den jämna
-  19–20-handen ovan, som i standard-2/1): öppnaren kan inte se om du menar din
-  egen färg, så essfrågan går via 4♣ (2026-09-05, motorbytet familj 6 — förr
-  4NT RKC, som bara fungerade när motorn såg båda händerna). Inbjudan i
-  kanske-zonen: 5M / 4♦ — i klöver finns ingen inbjudan, eftersom 4♣ över sang
-  är Gerber, §6.4.
-  En gömd 4-4-fit går inte att *veta* utan att kika → den jagas inte här
-  (5-korts högfärg letar 5-3-fit via New Minor Forcing som vanligt).
-Utanför zonerna står den vanliga vägen kvar (New Minor Forcing / sang-stegen).
+**Färgvisning med slamvärden (19+ hp; ägarbeslut 2026-09-05).** Visade öppnaren
+inget stöd rebjuder du **`3M` = 6+ kort, slamintresse, utgångskrav** — öppnaren
+sätter trumfen med `4M` (sangen lovade 2+ kort), och du frågar **`4NT` (1430 RKC)**
+med 33+ räknat mot visade 12, inbjuder `5M` med 31–32. Med **5+ kort i öppnarens
+lågfärg** höjer du i stället: **`3m` = 5+ stöd, slamintresse, utgångskrav** —
+öppnaren föreslår `3NT` med håll i alla sidofärger, annars `4m` (trumfen
+bekräftad), och cue-ronden (§6.2) förs över 3NT/4m: 33+ → 4NT, 31–32 →
+billigaste kontrollbud (eller `4m` över 3NT som inbjudan). Under 19 hp gäller
+placeringen ovan — slam med känd färg går aldrig via 4♣/4NT direkt över sangen.
+
+**Slam efter 1NT-återbudet (ärliga portar; ägarbeslut 2026-09-05).** Öppnarens
+1NT-återbud visar **12–14**. Du (kaptenen) räknar **din egen hand i hp mot det
+visade intervallet** — aldrig partnerns faktiska kort, och kortfärger lyfter
+inte värderingen (partnern har bara sagt "sang"). Fyra vägar, i den ordningen:
+1. **Färg att visa** — 6+ egen högfärg (5-korts högfärg går NMF som alltid)
+   eller 5+ kort i öppnarens lågfärg → **New Minor Forcing** och sedan
+   färgvisningen ovan (`3M` / `3m`); slammen frågas med **4NT RKC i den satta
+   trumfen**. Slam med känd färg går **aldrig** via 4♣/4NT direkt över sangen.
+2. **Jämn hand utan färg att visa, sikte på sang, 21+ hp** (kan räkna 33 mot
+   partnerns minimum 12) → **Gerber 4♣** (§6.4: 4♣ är Gerber även över ett
+   NT-*återbud*) — mot ett så snävt intervall är essen det verkliga okända,
+   styrkan räknar du själv: placerar **6NT** (stannar i 4NT om två ess saknas;
+   7NT bara med alla ess + storslamszon mot minimum).
+3. **Jämn hand på gränsen, 19–20 hp** (slam bara om öppnaren har max) →
+   **kvantitativ 4NT**: öppnaren bjuder 6NT med 13–14, passar med 12. **4NT
+   direkt över sang-återbudet är alltid kvantitativt** (som i standard-2/1).
+4. Ingen slamambition → **3NT** (eller NMF-vägen till utgång).
+Direkta inbjudningar `5M` / `4♦` / `4♣` över sangen finns inte: 4♣ är Gerber
+(§6.4) och 5M/4♦ ersattes av NMF-vägen (2026-09-05; förr fanns "Gerber med
+placering i egen färg" och inbjudan 5M/4♦ — bok-mot-motor-fynd 6 och 15).
+En gömd 4-4-fit går inte att *veta* utan att kika → den jagas inte här.
 Bottarna följer samma regler som en människa: de kan **missa** en slam som råkar
 sitta (t.ex. med bara 4-korts stöd i öppnarens minor) — det är systemriktigt.
 
@@ -1234,7 +1248,10 @@ med stick för storslam (t.ex. K-D mittemot ess).
 ### 6.4 Gerber (ess-fråga över NT)
 **4♣** är Gerber – ess-fråga – men **endast som hopp direkt över en naturlig
 NT-öppning eller NT-återbud** (1NT, 2NT). Används för balanserade slamhänder där
-NT är "trumf" (mot ett färgkontrakt används i stället 1430 RKC).
+NT är "trumf" (mot ett färgkontrakt används i stället 1430 RKC). Över ett
+1NT-*återbud* frågar bara den **jämna handen utan färg att visa** (§5.7): en
+egen färg visas först via New Minor Forcing och slammen går via 4NT RKC i den
+satta trumfen — Gerber frågar aldrig för en färg (ägarbeslut 2026-09-05).
 
 **Ess-svar:**
 | Svar | Ess |
@@ -2090,6 +2107,36 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-05 — Slam efter 1NT-återbudet: Gerber bara för den jämna handen
+  utan färg, färgen går via NMF (§5.7, §6.4; motorbytet §5b beslut 1,
+  `docs/motorbyte-plan.md`).** Ägarbeslut på bok-mot-motor-fynd 6 + 15. Förr
+  frågade svararen med egen 6+ högfärg eller 5+ i öppnarens lågfärg **Gerber 4♣
+  och placerade 6 i färgen**, och inbjöd 5M/4♦ direkt över sangen. Nu: **(1)**
+  färg att visa → **New Minor Forcing** (får också bjudas med 5+ i öppnarens
+  lågfärg + 19+ hp), och efter öppnarens svar utan stöd **3M = 6+, slamintresse,
+  utgångskrav** (öppnaren 4M; kaptenen 4NT RKC med 33+, 5M med 31–32) eller
+  **3m = 5+ stöd, slamintresse** (öppnaren 3NT-förslag / 4m; cue-ronden §6.2);
+  **(2)** jämn hand utan färg, 21+ → Gerber 4♣ → 6NT; **(3)** 19–20 →
+  kvantitativ 4NT; **(4)** annars 3NT. Dessutom: 6+ egen högfärg med
+  utgångsvärden efter NMF utan stöd → **4M** (förr 3NT). Kod:
+  `newMinorForcingBid` (lågfärgsvägen), `responderPlaceAfterNMF` (4M),
+  `responderThirdDecision` (3M/3m), `openerFourthDecision` (4M / 3NT / 4m),
+  `slamSituation` prefix 7, `gerberTurn` utan färgplacering (`familyAFitTrump`
+  borttagen); betydelselagret läser 3M/3m/4M/3NT/4m och 5M över 1NT-återbudet
+  som "till spel". Facit: `motorbyte-facit.test.ts` "§5b beslut 1" (frö
+  20270949: 2♦ NMF → 3♥ → 4♥ → 5♥; frö 20261109: 2♦ → 2♥ → 3♣ → 4♣ → cue 4♥ →
+  5♣). Auktionsdiffen (`$env:DUMP_RANGE='20270001-20273000'; npx vitest run
+  src/lib/engine/auktionsdump.probe.test.ts` + `node scripts/auktionsdiff.mjs`
+  mot baslinjen på `81ca5eb`): 4 ändrade bud, alla klass b (frö 20270949 NMF-
+  vägen till samma 6♥; fröna 20272165, 20272519, 20272533: 6-korts högfärg →
+  4♠ i stället för 3NT). Revisorn (`$env:REVISOR='1'; npx vitest run
+  src/lib/engine/revisor.probe.test.ts`, 1000 givar, frö 20260721): rätt
+  kontrakt 20,2 % · snittförlust 268,83 (förr 20,3 % · 268,55) — två givar:
+  frö 20260897 (4♥ i stället för 3NT) och frö 20261109 (5♣ efter cue-ronden i
+  stället för 3NT: 6♣ satt, men Nord har blott minimum och säger av —
+  systemriktig miss). Känt hål kvar (SENARE): en människas direkta 4♦/5M över
+  1NT-återbudet har ingen regel längre (boten passar); 5-korts högfärg + 21 utan
+  fit efter NMF placerar 3NT (ingen sangslam-fråga i det läget).
 - **2026-09-05 — Manuset för ostörda auktioner rivet (motorbytet etapp 3 familj 6,
   `docs/motorbyte-plan.md`).** Ingen regeländring i sig: varje bud vår sida
   lägger i en ostörd auktion tas nu ur beslutstabellen (egen hand + auktionen)

@@ -164,6 +164,14 @@ describe('NMF steg 3 – svararens placering', () => {
   it('sang 2NT (min) + bara inbjudan (11) → pass', () => {
     expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2NT')).toBe('P')
   })
+  // 6-korts högfärg + utgångsvärden utan stöd → 4M (§5b beslut 1, 2026-09-05: "rebjud färgen"),
+  // inte 3NT: öppnarens 1NT lovar 2+ kort, så 6+ egen högfärg är en 8-korts fit på egen hand.
+  it('sang 2NT (min) + 6-korts hjärter + utgångsvärden (13) → 4♥, inte 3NT', () => {
+    expect(place('S:K2 H:AQJ976 D:K85 C:84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2NT')).toBe('4H')
+  })
+  it('öppnaren rebjöd egen färg (3♣) + 6-korts hjärter + utgångsvärden → 4♥', () => {
+    expect(place('S:K2 H:AQJ976 D:K85 C:84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '3C')).toBe('4H')
+  })
   // Sang 3NT (max): utgång redan nådd → pass.
   it('öppnaren bjöd 3NT → pass', () => {
     expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '3NT')).toBe('P')

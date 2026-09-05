@@ -15,13 +15,11 @@
 //    egen 19–20 hp → NY kvantitativ 4NT-inbjudan (öppnaren accepterar 6NT med
 //    13–14, passar med 12). Förr räknade porten parets FAKTISKA hp — borttaget.
 
-import type { Hand, Suit } from '../../types/bridge'
+import type { Hand } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import { countAces, countKings, respondToGerber, respondToGerberKingAsk } from './slam'
 import type { SlamBid, SlamRole, SlamTurn } from './slam-auction'
 
-const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
-const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 
 /**
  * Kvalificerar svararens hand för Gerber (gemensamt för 1NT/2NT): balanserad,
@@ -77,13 +75,14 @@ export function gerber2NTInvestigation(openerHand: Hand, responderHand: Hand): S
  *  • 19–20 (33 bara mot maximum) → kvantitativ 4NT-inbjudan; öppnaren dömer på
  *    SIN hand (13–14 → 6NT, 12 → pass).
  * null = under kanske-zonen → den vanliga kedjan (NMF / sang-stegen) står kvar.
- * Svararen måste vara jämn UTAN 5-korts färg (5-korts högfärg jagar 5-3-fit via
- * NMF; obalanserat vill åt färgkontrakt — se familyAFitTrump).
+ * Svararen måste vara jämn UTAN 5-korts färg — "jämn hand utan färg att visa"
+ * (§5b beslut 1, 2026-09-05): 5-korts högfärg jagar 5-3-fit via NMF, och handen
+ * med 6+ högfärg eller 5+ i öppnarens lågfärg visar färgen via NMF och frågar
+ * sedan i den satta trumfen. Gerber frågar aldrig för en färg.
  */
 /**
  * Svararens FÖRSTA slambud över öppnarens 1NT-återbud (12–14) ur EGEN hand:
  * jämn utan 5-korts färg, 21+ → Gerber 4♣; 19–20 → kvantitativ 4NT; annars null.
- * `gerberRebidInvestigation` börjar med samma bud (beslutstabellen läser den här).
  */
 export function gerberRebidFirstStep(responderHand: Hand): SlamTurn | null {
   if (!isBalanced(responderHand)) return null
@@ -102,13 +101,6 @@ export function gerberRebidFirstStep(responderHand: Hand): SlamTurn | null {
   return null
 }
 
-export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
-  const first = gerberRebidFirstStep(responderHand)
-  if (!first) return null
-  if (first.rule === 'Gerber') return playGerber(openerHand, responderHand, 12)
-  // Kanske-zonen: kvantitativ 4NT — partnern med mer än minimum accepterar.
-  return [first, quantitativeAnswer(openerHand, 12)]
-}
 
 /**
  * Partnern dömer kaptenens kvantitativa 4NT över 1NT-återbudet på SIN hand mot
@@ -143,7 +135,7 @@ function playGerber(openerHand: Hand, responderHand: Hand, partnerMin: number): 
  * `partnerMin` = undre gränsen i partnerns visade intervall (storslamszonen
  * räknas alltid mot minimum — aldrig hopp om maximum). null = ingen tur.
  */
-export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar: SlamBid[], placeSuit?: Suit): SlamTurn | null {
+export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar: SlamBid[]): SlamTurn | null {
   if (sofar.length === 0 || sofar[0].role !== 'svarare' || sofar[0].call !== '4C') return null
   if (sofar[sofar.length - 1].role === role) return null
   const after = sofar.slice(1)
@@ -151,12 +143,11 @@ export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar
     const a = respondToGerber(hand)
     return { role: 'öppnare', call: a.call, rule: a.rule, explanation: a.explanation }
   }
-  // Kaptenen placerar i sang — eller, när hon frågade för en egen självbärande
-  // färg över partnerns sang-återbud (§5.7), i den färgen: stoppet blir 5 i
-  // färgen, slammen 6/7 i färgen. Partnern behöver inte veta vilket: han svarar
-  // ess/kungar och passar placeringen.
-  const place = (level: 4 | 5 | 6 | 7): string => (placeSuit ? `${level === 4 ? 5 : level}${LETTER[placeSuit]}` : `${level}NT`)
-  const namn = (call: string): string => (placeSuit ? `${call[0]}${SYM[placeSuit]}` : call)
+  // Kaptenen placerar i sang: stoppet 4NT, slammen 6/7NT. Gerber frågar aldrig
+  // för en egen färg (§5b beslut 1, 2026-09-05): färgen visas först (NMF) och
+  // slammen går via 4NT RKC i den satta trumfen.
+  const place = (level: 4 | 5 | 6 | 7): string => `${level}NT`
+  const namn = (call: string): string => call
   const aceCall = after[0].call
   if (after.length === 1) {
     // Härled partnerns ess ur svaret + egen hand. 4♦ = 0 ELLER 4: har kaptenen

@@ -13,8 +13,11 @@
 import { describe, expect, it } from 'vitest'
 import type { Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
+import { parseHand } from '../bidding'
 import { dealFromSeed } from './revisor'
 import { decideCall } from './auction-live'
+import { decideFromTable } from './auction-decide'
+import { auctionFacts } from './auction-facts'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 
@@ -153,5 +156,97 @@ describe('etapp 4 familj 4 – svararens fortsättning i konkurrens', () => {
     const deal = dealFromSeed(20262632)
     const hist = [call('E', 'P'), call('S', '1D'), call('W', '1S'), call('N', '2H'), call('E', 'P'), call('S', '3D'), call('W', 'P')]
     expect(decideCall(deal, hist, 'N').bid).toBe('4H')
+  })
+})
+
+// §5b beslut 1 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 6 + 15): över
+// öppnarens 1NT-återbud (12–14) är 4♣ Gerber BARA för den jämna handen utan
+// färg att visa (räknar 33 mot visade 12 → Gerber; 31–32 → kvantitativ 4NT).
+// Har svararen en färg — 6+ egen högfärg eller 5+ i öppnarens lågfärg — går
+// den via New Minor Forcing: efter öppnarens svar rebjuds högfärgen (3M = 6+,
+// slamintresse, utgångskrav) eller höjs lågfärgen (3m = 5+ stöd, slamintresse),
+// och slammen frågas med 4NT RKC i den SATTA trumfen. Slam med känd färg går
+// aldrig via 4♣/4NT direkt; inbjudan 5M/4♦ direkt över 1NT finns inte längre.
+describe('§5b beslut 1 – 4♣ över 1NT-återbudet är Gerber bara utan färg att visa; färgen går via NMF (LANDAD 2026-09-05)', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  // 1♣–1♠–1NT: Nord ♠32 ♥A54 ♦A65 ♣KJT94 (12), Syd ♠AKQJ97 ♥KQ ♦KQJ ♣32 (21).
+  const nord = 'S:32 H:A54 D:A65 C:KJT94'
+  const syd = 'S:AKQJ97 H:KQ D:KQJ C:32'
+  const h1 = [call('N', '1C'), P('E'), call('S', '1S'), P('W'), call('N', '1NT'), P('E')]
+
+  it('6-korts spader + 21 hp över 1NT → 2♦ New Minor Forcing, inte 4♣ (Gerber är den jämna handen utan färg)', () => {
+    expect(bud(syd, h1, 'S')!.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' })
+  })
+
+  it('efter öppnarens 2NT rebjuder svararen 3♠ (6+, slamintresse, utgångskrav); öppnaren sätter trumfen med 4♠; kaptenen frågar 4NT och placerar 6♠', () => {
+    expect(bud(nord, [...h1, call('S', '2D'), P('W')], 'N')!.call.bid).toBe('2NT')
+    const h2 = [...h1, call('S', '2D'), P('W'), call('N', '2NT'), P('E')]
+    expect(bud(syd, h2, 'S')!.call).toMatchObject({ bid: '3S', rule: 'NMF: rebjuder egen högfärg' })
+    const h3 = [...h2, call('S', '3S'), P('W')]
+    expect(bud(nord, h3, 'N')!.call).toMatchObject({ bid: '4S', rule: 'NMF: trumfen satt' })
+    const h4 = [...h3, call('N', '4S'), P('E')]
+    expect(bud(syd, h4, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '4NT' } })
+    const h5 = [...h4, call('S', '4NT'), P('W')]
+    expect(bud(nord, h5, 'N')!.call.bid).toBe('5H') // två nyckelkort (♥A ♦A) utan trumfdam
+    const h6 = [...h5, call('N', '5H'), P('E')]
+    expect(bud(syd, h6, 'S')!.call.bid).toBe('6S')
+  })
+
+  it('6-korts högfärg med utgångsvärden (13–18) efter NMF utan stöd → 4M, inte 3NT', () => {
+    const h2 = [...h1, call('S', '2D'), P('W'), call('N', '2NT'), P('E')]
+    expect(bud('S:AQJ976 H:K4 D:K52 C:32', h2, 'S')!.call.bid).toBe('4S') // 13 hp
+  })
+
+  it('frö 20270949: 1♣–1♥–1NT: Nord (♠A98 ♥AKQT72 ♦AQT9 ♣–, 20 hp) bjuder 2♦ NMF — inte 5♥; sedan 3♥, Syd 4♥, Nord inbjuder 5♥ (20+12 = 32)', () => {
+    const deal = dealFromSeed(20270949)
+    const h = [P('E'), call('S', '1C'), P('W'), call('N', '1H'), P('E'), call('S', '1NT'), P('W')]
+    expect(decideCall(deal, h, 'N').bid).toBe('2D')
+    const h2 = [...h, call('N', '2D'), P('E')]
+    expect(decideCall(deal, h2, 'S').bid).toBe('2NT') // ♠K2 stopp, minimum
+    const h3 = [...h2, call('S', '2NT'), P('W')]
+    expect(decideCall(deal, h3, 'N').bid).toBe('3H')
+    const h4 = [...h3, call('N', '3H'), P('E')]
+    expect(decideCall(deal, h4, 'S').bid).toBe('4H')
+    const h5 = [...h4, call('S', '4H'), P('W')]
+    expect(decideCall(deal, h5, 'N').bid).toBe('5H')
+  })
+
+  it('5+ kort i öppnarens lågfärg + slamvärden (19+) → NMF, sedan 3♦ (stöd, slamintresse); öppnaren beskriver (3NT-förslag / 4♦); kaptenen cue:ar över 4♦', () => {
+    const h = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '1NT'), P('E')]
+    const syd2 = 'S:AKQ4 H:A6 D:KQ863 C:J2' // 19 hp, 5 ruter mot öppnarens 3+
+    expect(bud(syd2, h, 'S')!.call).toMatchObject({ bid: '2C', rule: 'New Minor Forcing' })
+    const nord2 = 'S:J7 H:KQ3 D:AT72 C:QJ42' // 13 hp
+    const h2 = [...h, call('S', '2C'), P('W')]
+    expect(bud(nord2, h2, 'N')!.call.bid).toBe('2NT')
+    const h3 = [...h2, call('N', '2NT'), P('E')]
+    expect(bud(syd2, h3, 'S')!.call).toMatchObject({ bid: '3D', rule: 'NMF: höjer öppnarens lågfärg' })
+    const h4 = [...h3, call('S', '3D'), P('W')]
+    expect(bud(nord2, h4, 'N')!.call.bid).toBe('4D') // ♠J7 otäckt → inget 3NT-förslag
+    const h5 = [...h4, call('N', '4D'), P('E')]
+    const k = bud(syd2, h5, 'S')
+    expect(k?.källa).toBe('tabell:slam')
+    expect(['4H', '4S', '4NT']).toContain(k!.call.bid) // 19+12 = 31: cue-ronden över 4♦
+  })
+
+  it('frö 20261109 (fynd 15): 1♣–1♠–1NT: Syd (♠AKQ4 ♥A6 ♦J2 ♣KQ863, 19 hp, 5 klöver) går NMF 2♦ — inte 4♣ — och höjer klövern: 2♥ (Nords 4-korts hjärter) → 3♣ → 4♣ → cue 4♥', () => {
+    const deal = dealFromSeed(20261109) // Nord ♠J7 ♥QJ32 ♦AT7 ♣AJ42 öppnade 1♣ och rebjöd 1NT; förr accepterade manuset en "klöverinbjudan 4♣"
+    const h = [call('W', 'P'), call('N', '1C'), P('E'), call('S', '1S'), P('W'), call('N', '1NT'), P('E')]
+    expect(decideCall(deal, h, 'S')).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' })
+    const h2 = [...h, call('S', '2D'), P('W')]
+    expect(decideCall(deal, h2, 'N').bid).toBe('2H')
+    const h3 = [...h2, call('N', '2H'), P('E')]
+    expect(decideCall(deal, h3, 'S')).toMatchObject({ bid: '3C', rule: 'NMF: höjer öppnarens lågfärg' })
+    const h4 = [...h3, call('S', '3C'), P('W')]
+    expect(decideCall(deal, h4, 'N')).toMatchObject({ bid: '4C', rule: 'NMF: höjning (GF)' }) // ♠J7 otäckt
+    const h5 = [...h4, call('N', '4C'), P('E')]
+    expect(decideCall(deal, h5, 'S')).toMatchObject({ bid: '4H', rule: 'cue-bid' }) // 19+12 = 31: cue-ronden över 4♣
+  })
+
+  it('jämn hand utan färg: 22 hp → 4♣ Gerber, 20 → kvantitativ 4NT, 5-korts högfärg → NMF (aldrig Gerber)', () => {
+    const h = [call('N', '1C'), P('E'), call('S', '1H'), P('W'), call('N', '1NT'), P('E')]
+    expect(bud('S:AK2 H:AK75 D:K64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4C', rule: 'Gerber' }) // 22 hp
+    expect(bud('S:A32 H:AK75 D:A64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' }) // 20 hp
+    expect(bud('S:AK2 H:AK753 D:K6 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' }) // 22 hp, 5 hjärter
   })
 })

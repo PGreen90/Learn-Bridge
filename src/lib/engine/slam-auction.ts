@@ -103,10 +103,11 @@ export interface SlamContext {
   cueFloor?: string
   /**
    * Kaptenen räknar BARA hp (inte stödpoäng) mot partnerns visade minimum —
-   * §5.2 "Slam efter 1NT-återbudet": trumfen är kaptenens egen 6+ högfärg
-   * eller 5+ i öppnarens minor, ingen bjuden fit, så kortfärger får inte
-   * lyfta värderingen (facit frö 20261317: 15 hp 6-korts spader → 4♥ via NMF,
-   * inte slaminbjudan; motorbytet etapp 3 familj 4a, 2026-09-05).
+   * §5.2 "Slam efter 1NT-återbudet": kaptenens egen 6+ högfärg eller 5+ i
+   * öppnarens minor, visad via NMF (§5b beslut 1) — partnern har bara sagt
+   * "sang", så kortfärger får inte lyfta värderingen (facit frö 20261317:
+   * 15 hp 6-korts spader → 4♥ via NMF, inte slaminbjudan; motorbytet etapp 3
+   * familj 4a, 2026-09-05).
    */
   hpOnly?: boolean
 }
@@ -488,28 +489,6 @@ function inviteAnswer(hand: Hand, trump: Suit, ctx: SlamContext): SlamTurn {
   return { role: 'öppnare', call: 'P', rule: 'slaminbjudan: avböjer', explanation: `blott minimum → avböjer, passar ${invite[0]}${SYM[trump]}.` }
 }
 
-/**
- * Trumfval för en OBALANSERAD slamhand efter öppnarens 1NT-återbud (F1 familj A)
- * — på SVARARENS EGEN hand + vad öppningen lovat (aldrig öppnarens kort):
- *  1. egen 6+ högfärg (självförsörjande trumf),
- *  2. 5+ kort i öppnarens öppnade MINOR (1♣/1♦ lovar 3+ → 8-korts fit garanterad).
- * En gömd 4-4-fit hittas INTE längre här (den kräver kikande eller checkback —
- * ärlig väg är New Minor Forcing i den vanliga kedjan). null = ingen säker fit.
- */
-export function familyAFitTrump(
-  responder: Hand,
-  openedSuit: Suit | null,
-  responderSuit: Suit | null,
-): Suit | null {
-  const lr = lengths(responder)
-  if (responderSuit && (responderSuit === 'hearts' || responderSuit === 'spades') && lr[responderSuit] >= 6) {
-    return responderSuit
-  }
-  if (openedSuit && (openedSuit === 'clubs' || openedSuit === 'diamonds') && lr[openedSuit] >= 5) {
-    return openedSuit
-  }
-  return null
-}
 
 // === §6.5 Exclusion Blackwood efter splinter + relä ==========================
 //

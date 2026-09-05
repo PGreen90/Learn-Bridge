@@ -245,12 +245,12 @@ describe('familj 4a – svararens andra bud: läget "jag svarade, partnern gav �
     expect(['4NT', '5S', '5C', '5D', '5H']).toContain(c.bid) // RKC / inbjudan / cue
   })
 
-  it('"oklart" i partnerns återbud syns inte: 1♣–1♥–1NT läses som 12–14 (frö 20270949: 20 hp + 6-korts ♥ → slaminbjudan 5♥, hp mot 12–14)', () => {
+  it('"oklart" i partnerns återbud syns inte: 1♣–1♥–1NT läses som 12–14 (frö 20270949: 20 hp + 6-korts ♥ → NMF först, färgen visas före slamfrågan — §5b beslut 1)', () => {
     const deal = dealFromSeed(20270949) // Nord ♠A98 ♥AKQT72 ♦AQT9 ♣–, Syds 1NT-återbud var "oklart"
     const h: ResolvedCall[] = [P('E'), { seat: 'S', bid: '1C' }, P('W'), { seat: 'N', bid: '1H' }, P('E'), { seat: 'S', bid: '1NT', rule: 'oklart' }, P('W')]
     const t = decideCallTraced(deal, h, 'N')
     expect(t.källa).toBe('tabell:svar2')
-    expect(t.call).toMatchObject({ bid: '5H', rule: 'slaminbjudan' })
+    expect(t.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' })
   })
 
   it('familj A räknar hp, inte stödpoäng: 15 hp med 6-korts spader mot 1NT (12–14) → NMF, ingen slaminbjudan (facit frö 20261317)', () => {
@@ -632,23 +632,17 @@ describe('familj 6 – manuset avgör inga bud i ostörda auktioner (bot mot bot
     expect(decideCallTraced(d3, h3, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6S', rule: 'slaminbjudan: accept' } })
   })
 
-  it('1m–1M–1NT: 4NT direkt är kvantitativt (öppnaren dömer på sin hand); egen självbärande färg frågar med Gerber 4♣ och placerar i färgen (§5.7)', () => {
+  it('1m–1M–1NT: 4NT direkt är kvantitativt (öppnaren dömer på sin hand); egen självbärande färg går via NMF, aldrig Gerber (§5.7, beslut 1)', () => {
     const h: ResolvedCall[] = [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1H' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')]
     // Jämn 20 hp → kvantitativ 4NT; Nord med 13 accepterar (6NT), med 12 passar.
     expect(bud('S:A32 H:AK75 D:A64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' })
     const h4 = [...h, { seat: 'S', bid: '4NT' } as ResolvedCall, P('W')]
     expect(bud('S:KQ5 H:Q64 D:KJ2 C:Q943', h4, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6NT', rule: 'kvantitativ 4NT: accept' } })
     expect(bud('S:KQ5 H:J64 D:KJ2 C:Q943', h4, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: 'P', rule: 'kvantitativ 4NT: avböjer' } })
-    // 6-korts spader + 21 hp → Gerber 4♣ (inte 4NT); på 4♠ (två ess) placerar hon 6♠, med två ess saknade stannar hon i 5♠.
+    // 6-korts spader + 21 hp → 2♦ New Minor Forcing (§5b beslut 1, 2026-09-05): färgen visas
+    // först, slammen frågas med 4NT RKC i den satta trumfen (facit i motorbyte-facit.test.ts).
+    // Gerber 4♣ är bara den jämna handen utan färg.
     const hs: ResolvedCall[] = [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')]
-    const spader = 'S:AKQJ97 H:KQ D:KQJ C:32'
-    expect(bud(spader, hs, 'S')!.call).toMatchObject({ bid: '4C', rule: 'Gerber' })
-    const efter4S = [...hs, { seat: 'S', bid: '4C' } as ResolvedCall, P('W'), { seat: 'N', bid: '4S' } as ResolvedCall, P('E')]
-    expect(bud(spader, efter4S, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6S', rule: 'slamavslut' } })
-    const efter4D = [...hs, { seat: 'S', bid: '4C' } as ResolvedCall, P('W'), { seat: 'N', bid: '4D' } as ResolvedCall, P('E')]
-    expect(bud(spader, efter4D, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '5S', rule: 'Gerber: stannar' } })
-    // Öppnaren svarar ess som vanligt och passar placeringen — han behöver inte veta färgen.
-    expect(bud('S:32 H:A54 D:A65 C:KJT94', [...hs, { seat: 'S', bid: '4C' } as ResolvedCall, P('W')], 'N')!.call.bid).toBe('4S')
-    expect(bud('S:32 H:A54 D:A65 C:KJT94', [...efter4S, { seat: 'S', bid: '6S' } as ResolvedCall, P('W')], 'N')!.call).toMatchObject({ bid: 'P', rule: 'pass' })
+    expect(bud('S:AKQJ97 H:KQ D:KQJ C:32', hs, 'S')!.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' })
   })
 })

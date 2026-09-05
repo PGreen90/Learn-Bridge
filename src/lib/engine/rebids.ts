@@ -247,12 +247,13 @@ export function openerRebidAfter2over1(hand: Hand, opened: Suit, responder: Suit
  * täckta → 3NT som sangförslag (kaptenen får passa eller cue:a ovanför), annars
  * 4m (inget att tillägga, kravet står — cue-ronden ligger över 3NT, §6.2).
  */
-export function openerAfterDelayedMinorSupport(hand: Hand, m: Suit): ResponseResult {
+/** `tag` namnger läget i regeln: '2/1' (försenat stöd) eller 'NMF' (partnerns 3m efter New Minor Forcing, §5b beslut 1). */
+export function openerAfterDelayedMinorSupport(hand: Hand, m: Suit, tag: '2/1' | 'NMF' = '2/1'): ResponseResult {
   const side = RANK.filter((s) => s !== m)
   if (side.every((s) => hasStopper(hand, s))) {
-    return { call: '3NT', rule: '2/1: sangförslag', explanation: `Alla sidofärger täckta → 3NT (sangförslag; ${SYM[m]} är trumf om partnern går vidare).` }
+    return { call: '3NT', rule: `${tag}: sangförslag`, explanation: `Alla sidofärger täckta → 3NT (sangförslag; ${SYM[m]} är trumf om partnern går vidare).` }
   }
-  return { call: `4${BID[m]}`, rule: '2/1: höjning (GF)', explanation: `3NT otäckt → 4${SYM[m]} (trumfen bekräftad, utgångskravet står).` }
+  return { call: `4${BID[m]}`, rule: `${tag}: höjning (GF)`, explanation: `3NT otäckt → 4${SYM[m]} (trumfen bekräftad, utgångskravet står).` }
 }
 
 // === Punkt 4: återbud efter Bergen-höjningar, §4.1 ==========================
