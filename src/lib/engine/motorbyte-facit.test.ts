@@ -65,6 +65,36 @@ describe('etapp 3 familj 4a – familj A-slamporten räknar hp mot 1NT-återbude
   })
 })
 
+// Familj 5 (2026-09-05): slamsekvenserna byggdes bara i manuset — vid bordet
+// (människan i kaptenstolen, eller boten efter människans öppning) passades
+// nyckelkortssvaret bort, Gerber-svaret likaså, och Gerber-stoppet 4NT lästes
+// som en essfråga. Avvikelsedumpen (§3) visade fallen; tabellraden *slam* tar
+// varje tur ur egen hand.
+describe('etapp 3 familj 5 – slamutredningen per stol (LANDAD 2026-09-05)', () => {
+  it('frö 20270017: 2♣–3♦–4♦–4NT–5♦: Väst (♠A5 ♥AJ7 ♦AKQ97 ♣Q97) placerar 6♦ på nyckelkortssvaret — inte pass', () => {
+    const deal = dealFromSeed(20270017)
+    const hist = [call('W', 'P'), call('N', 'P'), call('E', '2C'), call('S', 'P'), call('W', '3D'), call('N', 'P'), call('E', '4D'), call('S', 'P'), call('W', '4NT'), call('N', 'P'), call('E', '5D'), call('S', 'P')]
+    expect(decideCall(deal, hist, 'W').bid).toBe('6D')
+  })
+
+  it('frö 20270043: 1NT–4♣ (Gerber)–4♠: Väst (♠763 ♥AQJT52 ♦8 ♣T84 hade människan; boten i stolen räknar ess) placerar — 6NT med två egna ess + två visade', () => {
+    const deal = dealFromSeed(20270043)
+    const hist = [call('N', 'P'), call('E', '1NT'), call('S', 'P'), call('W', '4C'), call('N', 'P'), call('E', '4S'), call('S', 'P')]
+    expect(decideCall(deal, hist, 'W').bid).not.toBe('P')
+  })
+
+  it('frö 20270139: 2NT–4♣–4♦–4NT (Gerber: stannar, två ess saknas): Nord passar — 4NT är inget RKC', () => {
+    const deal = dealFromSeed(20270139)
+    const hist = [call('S', 'P'), call('W', 'P'), call('N', '2NT'), call('E', 'P'), call('S', '4C'), call('W', 'P'), call('N', '4D'), call('E', 'P'), call('S', '4NT'), call('W', 'P')]
+    expect(decideCall(deal, hist, 'N').bid).toBe('P')
+  })
+
+  it.todo('bok-mot-motor-fynd 14: 1♦–1♠–2♥–4NT (reverse) och 2♣–3♦–3♥–4NT — 4NT utan bjuden fit är tvetydigt (vilken färg är trumf?); kaptenen ska sätta trumfen (eller inbjuda i den) före essfrågan', () => {
+    const reverse = [call('N', '1D'), call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2H'), call('E', 'P'), call('S', '4NT'), call('W', 'P')]
+    expect(decideCall(dealFromSeed(20270001), reverse, 'N').rule).toBe('1430 RKC')
+  })
+})
+
 // Pliktsvepets två rester (pausat 2026-09-04, docs/bevaka.md 2026-09-02).
 
 describe('etapp 4 familj 1 – inkliv och advance: tvåfärgsinklivarens fortsättning', () => {

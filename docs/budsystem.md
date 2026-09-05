@@ -986,7 +986,7 @@ aldrig partnerns faktiska kort:
   öppnaren bjuder 6NT med 13–14, passar med 12.
 - **Obalanserad hand med en SÄKER fit på egen hand:** en **6+ egen högfärg**,
   eller **5+ kort i öppnarens minor** (1♣/1♦ lovade 3+ → minst 8 ihop) blir
-  trumf → **4NT RKC** → **6 i färgen** (inbjudan i kanske-zonen: 5M/4m).
+  trumf → **4NT RKC** → **6 i färgen** (inbjudan i kanske-zonen: 5M / 4♦ — i klöver finns ingen inbjudan, eftersom 4♣ över sang är Gerber, §6.4).
   En gömd 4-4-fit går inte att *veta* utan att kika → den jagas inte här
   (5-korts högfärg letar 5-3-fit via New Minor Forcing som vanligt).
 Utanför zonerna står den vanliga vägen kvar (New Minor Forcing / sang-stegen).
@@ -2074,6 +2074,20 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-05 — Slamutredningen per stol (§5.7, §6.1–6.5; motorbytet etapp 3
+  familj 5, `docs/motorbyte-plan.md`).** Varje tur i en slamsekvens (cue-ronden,
+  4NT, nyckelkortssvaret, placeringen, 5NT, stoppbudet och rättelsen,
+  inbjudan och partnerns dom, Gerber, Exclusion, MSS) tas nu ur EGEN hand +
+  auktionen även vid bordet — förr fanns fortsättningarna bara i motorns manus,
+  så med människan i kaptenstolen passades nyckelkortssvaret och Gerber-svaret
+  bort. Fyra regler skärptes på vägen: (1) efter New Minor Forcing med visat
+  3-korts stöd går bara **13+ (utgångskrav)** in i cue-ronden — 11–12 var en
+  inbjudan och placerar som förut; (2) **5m efter partnerns 4m är utgången**,
+  ingen slaminbjudan (partnern kan inte skilja dem; 4NT är essfrågan); (3)
+  **4♣ över 1NT-återbudet är Gerber** (§6.4) — familj A:s klöverinbjudan i §5.7
+  finns inte (4♦ finns kvar); (4) **4♣ är inte Gerber när en färg redan är
+  trumf** (1♣–2♣–2NT–4♣ är en klöverhöjning). Dessutom: öppnarens val efter
+  Smolen ligger nu i linjen även efter en 2NT-öppning (förr passades 3M).
 - **2026-09-05 — Slam efter 1NT-återbudet, obalanserad del (§5.2/§5.7; motorbytet
   etapp 3 familj 4a).** Kaptenen med säker fit (6+ egen högfärg / 5+ i
   öppnarens minor) räknar nu **hp** mot visade 12–14, inte stödpoäng: ingen fit

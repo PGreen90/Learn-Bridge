@@ -55,7 +55,7 @@ const ALL_ENGINE_RULES: string[] = [
   '2NT-återbud (5-3-jakt)', 'svar på 2NT-återbud (5-3-jakt)',
   'svar på fjärde färg', 'fjärde färg: placerar utgång', 'fjärde färg: utgång i fit',
   '2/1: fortsättning', 'rebjuden färg (inbjudan)', 'hopphöjning (inbjudan)',
-  'inbjudan antagen', 'accepterar sanginbjudan', 'väljer högfärgsutgång',
+  'inbjudan antagen', 'accepterar sanginbjudan', 'väljer högfärgsutgång', 'väljer utgång efter Smolen',
   'Drury: accepterar utgångsförsök', 'slaminbjudan', 'slaminbjudan: accept',
   'slamtrevare efter 3NT', 'cue: avslut', 'krav – rebjuder egen färg',
   'krav – stödjer partnern', 'krav – ny färg', 'krav – sang', 'stöd-cue (slamintresse)',

@@ -128,8 +128,9 @@ describe('buildAuction – 2NT/3NT end-to-end (inkoppling)', () => {
       },
     }
     const a = buildAuction(deal)
-    // Turn 4 (punkt 24): 5-korts hf GF utan 6:e kort → 3NT (öppnaren väljer).
-    expect(a?.turns.map((t) => t.call)).toEqual(['2NT', '3D', '3H', '3NT'])
+    // Turn 4 (punkt 24): 5-korts hf GF utan 6:e kort → 3NT (öppnaren väljer);
+    // öppnaren har 3-korts stöd (♥K43) → 4♥ (familj 5, 2026-09-05: valet ligger i manuset).
+    expect(a?.turns.map((t) => t.call)).toEqual(['2NT', '3D', '3H', '3NT', '4H'])
   })
 
   it('bygger 3NT – P (svararen passar storhanden)', () => {

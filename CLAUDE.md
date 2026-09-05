@@ -35,17 +35,17 @@ broms, reverse + preferens, 2NT-checkback, 5-3-jakt; `secondAsSeen`).
 `decideCall` frågar tabellen först (laglighetsvakt), manuset läser den;
 kikvakten prövar varje tabellbud; avvikelsedumpen (fyra lägen: människan
 öppnar/svarar/bjuder andra budet fritt) ger b-listorna med skarpa adaptersvep.
-Tretton bok-mot-motor-fynd väntar på ägarbeslut (loggen; nr 9 passad hands
-2NT, nr 11 svararens 3-lägesfärg efter 1M–1NT, nr 12 hopp till 4m efter
-2/1–2NT, nr 13 fjärde färg i 2/1-form).
-**Nästa gång börjar vi med:** etapp 3 familj 5 — slamutredningen per stol
-(`slamInvestigation`/Gerber/Exclusion/MSS: kaptenens tur ur kaptenens hand,
-öppnarens ur öppnarens; signaturerna smalnas till EN hand + fakta; kikvakten
-helt skarp) plus svararens tredje bud (placeringarna efter NMF/fjärde färg/
-checkback/broms). **Startrutin 5:** (1) baslinjerna (planens §3) på `4a14bca`
-mergepunkt; (2) kikvaktens mätläge: vilka manusgrenar byter bud?; (3) dela
-slamsekvenserna i turfunktioner (RKC-svar, cue-svar, placering) ur EN hand;
-(4) raden per läge. **LIVE 2026-09-05:** etapp 0–3 familj 1–4b deployade (PCD efter 4b, Actions grön, mergepunkter 451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca).
+**Etapp 3 familj 5 KLAR 2026-09-05:** slamutredningen per stol — stegmaskiner
+(`slamTurn`/`gerberTurn`/`exclusionTurn`/`mssTurn`, en tur ur EN hand; manuset
+= förare över samma steg), raderna slam/svar3/fjärde. Sexton bok-mot-motor-fynd
+väntar på ägarbeslut (loggen; bl.a. nr 14 naket 4NT utan bjuden fit, nr 15
+§5.7 "4m-inbjudan" mot §6.4 Gerber).
+**Nästa gång börjar vi med:** 🚪 grindbeslutet för familj 5 (b-listan i planens
+logg 2026-09-05) + PCD (familj 5 ligger LOKALT). Sedan familj 6 — manuset rivs
+ur `auction.ts` — och 🚪 grinden efter etapp 3. **Startrutin 6:** (1) baslinjerna
+(§3) på familj 5:s mergepunkt; (2) återstående manusgrenar (`grep -n "finish("
+auction.ts`); (3) riv gren för gren med auktionsdiffen noll. **LIVE 2026-09-05:**
+etapp 0–3 familj 1–4b deployade (mergepunkter 451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
