@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Seat } from '../../types/bridge'
 import { parseHand, type ResolvedCall } from '../bidding'
-import { decideFromTable, rebidAsSeen } from './auction-decide'
+import { decideFromTable, rebidAsSeen, secondAsSeen } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import { decideCallTraced } from './auction-live'
 import { botAuction, dealFromSeed } from './revisor'
@@ -318,5 +318,111 @@ describe('familj 4a – slamsekvensens första bud är kaptenens första steg (s
       }
     }
     expect(jämförda).toBeGreaterThan(20)
+  })
+})
+
+describe('familj 4b – öppnarens tredje bud: läget "jag öppnade, partnern svarade, jag gav återbud, partnern bjöd igen — ostört"', () => {
+  const hist = (open: string, resp: string, rebid: string, second: string): ResolvedCall[] => [
+    { seat: 'N', bid: open }, P('E'), { seat: 'S', bid: resp }, P('W'), { seat: 'N', bid: rebid }, P('E'), { seat: 'S', bid: second }, P('W'),
+  ]
+
+  it('träffar bara öppnaren efter fyra ostörda kontraktsbud', () => {
+    const h = 'S:K73 H:A2 D:AQ864 C:J93'
+    expect(bud(h, hist('1D', '1S', '1NT', '2C'), 'N')?.källa).toBe('tabell:tredje')
+    // X någonstans, eller motståndarnas kontraktsbud → inte den här raden.
+    expect(bud(h, [{ seat: 'N', bid: '1D' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E'), { seat: 'S', bid: '2C' }, P('W')], 'N')).toBeNull()
+    expect(bud(h, [{ seat: 'N', bid: '1D' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E'), { seat: 'S', bid: '2C' }, { seat: 'W', bid: '2H' }], 'N')).toBeNull()
+    // Partnern passade mitt återbud → auktionen är slut för min del.
+    expect(bud(h, hist('1D', '1S', '1NT', 'P'), 'N')).toBeNull()
+    // Svararens tur (svararens tredje bud) är inte den här raden.
+    expect(bud(h, [...hist('1D', '1S', '1NT', '2C'), { seat: 'N', bid: '2S' }, P('E')], 'S')).toBeNull()
+  })
+
+  it('New Minor Forcing besvaras ur egen hand, lika för människans och botens 2♣', () => {
+    const h = 'S:K73 H:A2 D:AQ864 C:T93' // 13 hp, 3-korts spaderstöd, minimum → 2♠
+    const människa = bud(h, hist('1D', '1S', '1NT', '2C'), 'N')!.call
+    expect(människa).toMatchObject({ bid: '2S', rule: 'svar på New Minor Forcing' })
+    const bot = bud(h, [{ seat: 'N', bid: '1D' }, P('E'), { seat: 'S', bid: '1S', rule: 'ny färg (1-läget)' }, P('W'), { seat: 'N', bid: '1NT', rule: '1NT (12–14)' }, P('E'), { seat: 'S', bid: '2C', rule: 'New Minor Forcing' }, P('W')], 'N')!.call
+    expect(bot.bid).toBe(människa.bid)
+  })
+
+  it('fjärde färg besvaras i bokens mönster (tre 1-lägesbud); 2/1-formen lämnas åt det gamla lagret', () => {
+    const h = 'S:KQ73 H:A72 D:8 C:AQ863'
+    expect(bud(h, hist('1C', '1H', '1S', '2D'), 'N')!.call).toMatchObject({ bid: '2H', rule: 'svar på fjärde färg' })
+    expect(bud(h, hist('1S', '2C', '2D', '2H'), 'N')).toBeNull()
+  })
+
+  it('egen enkel höjning + partnerns 3M-inbjudan: öppnaren dömer', () => {
+    expect(bud('S:A4 H:KQ73 D:K852 C:A62', hist('1C', '1H', '2H', '3H'), 'N')!.call).toMatchObject({ bid: '4H', rule: 'inbjudan antagen' })
+    expect(bud('S:J4 H:KQ73 D:K852 C:Q62', hist('1C', '1H', '2H', '3H'), 'N')!.call).toMatchObject({ bid: 'P', rule: 'inbjudan avböjd' })
+  })
+
+  it('semi-forcing 1NT: 3M-limithöjningen döms (läsarens "inbjudan (limithöjning)" = motorns "inbjudan"), egen färg efter 1NT passas', () => {
+    expect(bud('S:AKJ863 H:K5 D:A74 C:83', hist('1S', '1NT', '2S', '3S'), 'N')!.call).toMatchObject({ bid: '4S', rule: 'accepterar inbjudan' })
+    expect(bud('S:AQJ863 H:Q5 D:K74 C:83', hist('1S', '1NT', '2D', '2H'), 'N')!.call).toMatchObject({ bid: 'P', rule: 'pass' })
+  })
+
+  it('reverse + preferens tillbaka: 17 passar, 19 med håll driver 3NT', () => {
+    expect(bud('S:A3 H:K2 D:AQ75 C:KJ864', hist('1C', '1H', '2D', '3C'), 'N')!.call).toMatchObject({ bid: 'P', rule: 'reverse: minimum' })
+    expect(bud('S:A3 H:K2 D:AQJ5 C:AKQ84', hist('1C', '1H', '2D', '3C'), 'N')!.call).toMatchObject({ bid: '3NT', rule: 'reverse: 3NT' })
+  })
+
+  it('inverterad broms: minimum passar, 15+ med alla sidofärger täckta bjuder 3NT', () => {
+    expect(bud('S:K72 H:Q3 D:AJ5 C:KJ864', hist('1C', '2C', '2D', '3C'), 'N')!.call).toMatchObject({ bid: 'P', rule: 'rebid: pass' })
+    expect(bud('S:KQ2 H:KJ3 D:AJ5 C:KQ86', hist('1C', '2C', '2D', '3C'), 'N')!.call).toMatchObject({ bid: '3NT', rule: '3NT till spel' })
+  })
+
+  it('2/1 med försenat stöd: öppnaren beskriver på 3m; ett hopp till 4m är inte det läget (lämnas åt det gamla lagret, aldrig ett olagligt bud)', () => {
+    const h = 'S:K72 H:Q3 D:AQJ54 C:K86'
+    const t = bud(h, hist('1D', '2C', '2NT', '3D'), 'N')!.call
+    expect(['3NT', '4D']).toContain(t.bid)
+    expect(bud(h, hist('1D', '2C', '2NT', '4D'), 'N')).toBeNull()
+  })
+
+  it('1NT-auktionens inbjudan efter Stayman: maximum accepterar, minimum passar', () => {
+    expect(bud('S:A4 H:KQ73 D:KJ52 C:A62', hist('1NT', '2C', '2H', '3H'), 'N')!.call).toMatchObject({ bid: '4H', rule: 'accepterar inbjudan' })
+    expect(bud('S:A4 H:KQ73 D:KJ52 C:Q62', hist('1NT', '2C', '2H', '3H'), 'N')!.call).toMatchObject({ bid: 'P', rule: 'pass' })
+  })
+
+  it('ser aldrig de andra händerna: samma tredje bud när de tre andra är kopior av den egna', () => {
+    const deal = dealFromSeed(20270166) // 1♠–1NT–2♠–3♠ (inbjudan) i botauktionen
+    const h = botAuction(deal)!
+    const o = h.findIndex((c) => c.bid !== 'P')
+    const hist7 = h.slice(0, o + 7).map((c) => ({ seat: c.seat, bid: c.bid }) as ResolvedCall)
+    const opener = h[o].seat
+    const a = decideCallTraced(deal, hist7, opener)
+    expect(a.källa).toBe('tabell:tredje')
+    const kopior = { ...deal, hands: { N: deal.hands[opener], E: deal.hands[opener], S: deal.hands[opener], W: deal.hands[opener] } }
+    expect(decideCallTraced(kopior, hist7, opener).call.bid).toBe(a.call.bid)
+  })
+})
+
+describe('familj 4b – adaptern secondAsSeen ger motorns namn på svararens andra bud där tredje budet dispatchar (3000 botauktioner)', () => {
+  // Namnen öppnarens tredje bud beror på. Terminala namn (till spel/utgång …)
+  // får skilja sig mellan läsaren och motorn — de avgör inget tredje bud.
+  const DISPATCH = new Set([
+    '2/1: försenat stöd', 'New Minor Forcing', 'fjärde färg krav', 'inbjudan', 'inbjudan (limithöjning)',
+    'ny färg efter 1NT', 'inverterad: broms', 'preferens', '2NT-checkback', '2NT-återbud (5-3-jakt)',
+  ])
+  it('samma regelnamn som boten satte, så fort någon av sidorna nämner ett dispatch-namn', () => {
+    const avvikelser: string[] = []
+    let n = 0
+    for (let seed = 20270001; seed <= 20273000; seed++) {
+      const deal = dealFromSeed(seed)
+      const h = botAuction(deal)
+      if (!h) continue
+      const o = h.findIndex((c) => c.bid !== 'P')
+      if (o === -1 || o + 6 >= h.length) continue
+      if (h[o + 1].bid !== 'P' || h[o + 3].bid !== 'P' || h[o + 5].bid !== 'P') continue
+      if (h[o + 2].bid === 'P' || h[o + 4].bid === 'P' || h[o + 6].bid === 'P') continue
+      const s = h[o + 6]
+      if (!s.rule) continue // det gamla lagrets bud utan regel (kravvakten m.fl.)
+      n++
+      const seen = secondAsSeen(auctionFacts(h.slice(0, o + 8), h[o].seat), o + 6)
+      if (!DISPATCH.has(s.rule) && !DISPATCH.has(seen?.rule ?? '')) continue
+      if (seen?.rule !== s.rule) avvikelser.push(`frö ${seed} ${h[o].bid}–${h[o + 2].bid}–${h[o + 4].bid}–${s.bid}: motor [${s.rule}] adapter [${seen?.rule ?? '—'}]`)
+    }
+    expect(n).toBeGreaterThan(600)
+    expect(avvikelser, avvikelser.slice(0, 10).join('\n')).toEqual([])
   })
 })

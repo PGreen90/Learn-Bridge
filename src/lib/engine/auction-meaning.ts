@@ -583,8 +583,10 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
   }
 
   // Svararens ny färg efter eget 1NT-svar (1M–1NT–2x–2y, §5.1; felrapport #59).
+  // Regelnamnet är motorns (`responderSecondBid`) — öppnarens tredje bud dispatchar på det.
   if (!competitive && responderNewSuitAfter1NT(seat, cb, prior)) {
     return {
+      rule: 'ny färg efter 1NT',
       text: `2${sym} — egen färg efter 1 sang-svaret: naturligt, 5+ ${name} (oftast 6), svag hand utan stöd för partnern. Partnern får passa.`,
       confidence: 'trolig',
       forcing: 'ej-krav',
@@ -1574,8 +1576,9 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
         if (isGameLevel(cb)) return R('till spel', `${B(cb)} — utgång i den hittade ${name}fiten.`)
         return R('inbjudan', `${B(cb)} — höjer partnerns ${name} till 3: inbjudan (4 stöd, 8–9 hp).`)
       }
-      if (same(cb, L + 1, 'NT')) return R('inbjudan', `${B(cb)} — inbjudan utan högfärgsfit (8–9 hp).`)
+      // 3 sang är alltid till spel — även över 2 sang, där L + 1 = 3 (annars lästes den som inbjudan).
       if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — till spel: ingen högfärgsfit hittad.`)
+      if (same(cb, L + 1, 'NT')) return R('inbjudan', `${B(cb)} — inbjudan utan högfärgsfit (8–9 hp).`)
       if (isMajor(cb.strain) && isGameLevel(cb)) return R('till spel', `${B(cb)} — utgång i ${name}.`)
     }
     if (same(mine, L + 1, 'D') || same(mine, L + 1, 'H')) {
@@ -1585,8 +1588,9 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
         if (isGameLevel(cb)) return R('till spel', `${B(cb)} — 6+ ${name}, utgång till spel.`)
         return R('inbjudan', `${B(cb)} — 6+ ${name}, inbjudan till utgång.`)
       }
-      if (same(cb, L + 1, 'NT')) return R('inbjudan', `${B(cb)} — 5 ${NAME[target]}, balanserad, inbjudan (8–9 hp). Partnern väljer sang eller ${NAME[target]}.`)
+      // 3 sang före inbjudan: över 2 sang är L + 1 = 3, och 3 sang är till spel.
       if (same(cb, 3, 'NT')) return R('till spel', `3 sang — 5 ${NAME[target]}, balanserad utgångshand; partnern väljer 3 sang eller 4 ${NAME[target]}.`)
+      if (same(cb, L + 1, 'NT')) return R('inbjudan', `${B(cb)} — 5 ${NAME[target]}, balanserad, inbjudan (8–9 hp). Partnern väljer sang eller ${NAME[target]}.`)
       if (same(cb, 2, 'S') && target === 'H' && L === 1) return R('inbjudan', `2♠ — 5 hjärter och 5 spader, inbjudan (8–9 hp).`)
       if (same(cb, 3, 'H') && target === 'S' && L === 1) return R('ny färg (GF)', `3♥ — 5 spader och 5 hjärter, utgångskrav: partnern väljer högfärg.`)
       if (cb.level === L + 2 && cb.strain !== 'NT' && cb.strain !== target) return R('ny färg (GF)', `${B(cb)} — 5+ ${NAME[target]} och 4+ ${name}, utgångskrav.`)
@@ -1813,6 +1817,9 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — till spel.`)
       if (cb.strain === reb.strain && !isGameLevel(cb)) return R('inbjudan', `${B(cb)} — höjer partnerns ${name}: 11–12 hp med stöd, inbjudan.`)
       if (cb.strain === reb.strain) return R('utgång', `${B(cb)} — utgång i ${name}.`)
+      // Svararens egen färg på 2-LÄGET läses av `responderNewSuitAfter1NT`
+      // (före den här läsaren). En ny färg på 3-läget saknar regel i motorn
+      // (standard: inbjudan med 6+ kort — fynd i motorbytets logg 2026-09-05).
       return null
     }
     if (same(resp, 2, M)) {
@@ -1999,7 +2006,8 @@ function responderSecondAfter2over1(_seat: Seat, cb: ParsedBid, u: Undisturbed, 
   const name = NAME[cb.strain]
   if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
   if (cb.strain === open.strain) {
-    if (same(reb, 2, 'NT') && isMinor(open.strain)) return R('2/1: försenat stöd', `${B(cb)} — försenat stöd i ${name} med slamintresse: sätter trumf i utgångskravet.`)
+    // Försenat stöd är det BILLIGA 3m (felrapport #58); ett hopp till 4m är stöd i kravet, inget öppnaren har en beskrivning för.
+    if (same(reb, 2, 'NT') && isMinor(open.strain) && cb.level === 3) return R('2/1: försenat stöd', `${B(cb)} — försenat stöd i ${name} med slamintresse: sätter trumf i utgångskravet.`)
     return R('2/1: fortsättning', `${B(cb)} — stöd i partnerns ${name}. Utgångskravet står.`, 'utgangskrav')
   }
   if (cb.strain === u.bids[1].cb.strain) return R('2/1: fortsättning', `${B(cb)} — rebjuder egen ${name} (6+). Utgångskravet står.`, 'utgangskrav')
