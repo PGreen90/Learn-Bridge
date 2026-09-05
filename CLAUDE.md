@@ -45,9 +45,7 @@ helt skarp) plus svararens tredje bud (placeringarna efter NMF/fjärde färg/
 checkback/broms). **Startrutin 5:** (1) baslinjerna (planens §3) på `4a14bca`
 mergepunkt; (2) kikvaktens mätläge: vilka manusgrenar byter bud?; (3) dela
 slamsekvenserna i turfunktioner (RKC-svar, cue-svar, placering) ur EN hand;
-(4) raden per läge. **OBS:** fem familjer (mergepunkterna 451f692, 5b1a9dc,
-b56a72f, 45fa322, 4a14bca) ligger LOKALT, inte pushade — deployfrågan är öppen
-(Claudes rekommendation 2026-09-05: deploya).
+(4) raden per läge. **LIVE 2026-09-05:** etapp 0–3 familj 1–4b deployade (PCD efter 4b, Actions grön, mergepunkter 451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
