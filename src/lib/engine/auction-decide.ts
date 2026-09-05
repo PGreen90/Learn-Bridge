@@ -15,11 +15,23 @@
 // Familjer som flyttat in:
 //   1. Öppningen (2026-09-04): ingen har öppnat → `classifyOpening` med
 //      position 1–4 i varvet från given och stolens sårbarhet.
+//   2. Svaret (2026-09-04): partnern öppnade, motståndarna har passat, jag har
+//      inte bjudit → svarsfunktionen för öppningsbudet (`responseDecision`),
+//      passad hand → Drury över 1M; Gerber-handen frågar 4♣ över 1NT/2NT.
+//      Öppningar utan svarsregler (4NT, 5m …) lämnas åt det gamla lagret.
 
 import type { Hand } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import type { AuctionFacts } from './auction-facts'
+import { gerberAsk } from './nt-slam'
 import { classifyOpening } from './openings'
+import { respondToMajor, respondToMinor, type ResponseResult } from './responses'
+import { respondToMajorPassed } from './responses-drury'
+import { respondTo1NT } from './responses-nt'
+import { respondTo2C } from './responses-2c'
+import { respondTo2NT, respondTo3NT } from './responses-2nt'
+import { preemptOf, respondToPreempt } from './responses-preempt'
+import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -53,6 +65,42 @@ function position(f: AuctionFacts): 1 | 2 | 3 | 4 {
   return (f.history.length + 1) as 1 | 2 | 3 | 4
 }
 
+/** Öppningar vi har svarsregler för. Övriga (4NT, 5♣ …) lämnas åt det gamla lagret. */
+export const RESPONDABLE = new Set([
+  '1C', '1D', '1H', '1S', '1NT', '2C', '2D', '2H', '2S', '2NT',
+  '3C', '3D', '3H', '3S', '3NT', '4C', '4D', '4H', '4S',
+])
+const OPEN_SUIT: Record<string, 'clubs' | 'diamonds' | 'hearts' | 'spades'> = {
+  '1C': 'clubs', '1D': 'diamonds', '1H': 'hearts', '1S': 'spades',
+}
+
+/**
+ * Svararens första bud på partnerns ostörda öppning `openCall`, ur egen hand.
+ * `responderPassed` = svararen är passad hand (Drury över 1♥/1♠, §6.7).
+ * null = ingen svarsregel för det öppningsbudet. Delas av tabellraden och
+ * manuset (`auction.ts`), så båda läser samma svar.
+ */
+export function responseDecision(openCall: string, hand: Hand, responderPassed = false): ResponseResult | null {
+  if (!RESPONDABLE.has(openCall)) return null
+  if (openCall === '2C') return respondTo2C(hand)
+  const weak = suitOfWeakTwo(openCall)
+  if (weak) return respondToWeakTwo(hand, weak)
+  const preempt = preemptOf(openCall)
+  if (preempt) return respondToPreempt(hand, preempt.suit, preempt.level)
+  if (openCall === '1NT' || openCall === '2NT') {
+    // NT-slam (§6.4): Gerber-handen frågar ess före den vanliga kedjan.
+    const g = gerberAsk(hand, openCall)
+    if (g) return { call: g.call as ResponseResult['call'], rule: g.rule, explanation: g.explanation }
+    return openCall === '1NT' ? respondTo1NT(hand) : respondTo2NT(hand)
+  }
+  if (openCall === '3NT') return respondTo3NT(hand)
+  const suit = OPEN_SUIT[openCall]
+  if (suit === 'hearts' || suit === 'spades') {
+    return responderPassed ? respondToMajorPassed(hand, suit) : respondToMajor(hand, suit)
+  }
+  return respondToMinor(hand, suit)
+}
+
 const TABELL: Row[] = [
   // Familj 1 — öppningen. Ingen har öppnat (inga kontraktsbud; X/XX kan inte
   // komma före ett bud), så stolen är i öppningsposition. Positionen styr
@@ -63,6 +111,26 @@ const TABELL: Row[] = [
     välj: ({ hand, facts, vulnerable }) => {
       const o = classifyOpening(hand, vulnerable, position(facts))
       return { seat: facts.seat, bid: o.call, rule: o.rule, explanation: o.explanation, uncertain: o.uncertain }
+    },
+  },
+  // Familj 2 — svaret. Partnern öppnade (enda kontraktsbudet), inget har hänt
+  // sedan dess utom pass (ingen störning, ingen X), och jag har inte bjudit.
+  // Passad hand läses ur fakta (Drury). Öppningar utan svarsregler lämnas åt
+  // det gamla lagret genom att läget inte träffar.
+  {
+    id: 'svar',
+    läge: (f) =>
+      f.opening !== null &&
+      f.role === 'svarare' &&
+      f.contractBids.length === 1 &&
+      f.lastNonPass !== null &&
+      f.lastNonPass.seat === f.opening.seat &&
+      f.lastNonPass.bid === `${f.opening.level}${f.opening.strain}` &&
+      RESPONDABLE.has(f.lastNonPass.bid),
+    välj: ({ hand, facts }) => {
+      const open = facts.lastNonPass!.bid
+      const r = responseDecision(open, hand, facts.passedHand[facts.seat])!
+      return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
     },
   },
 ]

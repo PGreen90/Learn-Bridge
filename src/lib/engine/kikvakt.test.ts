@@ -66,25 +66,31 @@ describe('kikvakten (2): beslutet läser bara egen hand + auktionen', () => {
   it.todo('decideCall ger samma bud när de tre andra händerna byts mot slumpkort (skarp för HELA auktionen när etapp 3 är klar)')
 
   // Skarp familj för familj (etapp 3): varje bud beslutstabellen tagit över
-  // ska överleva att de andra händerna byts. Familj 1 = öppningsvarvet: alla
-  // bud till och med det första icke-passet (eller alla fyra pass).
-  it('familj 1 – öppningsvarvet: samma bud när de tre andra händerna byts (300 givar)', () => {
+  // (källa `tabell:<familj>`) ska överleva att de andra händerna byts — och
+  // tabellen ska svara likadant (samma källa) med de bytta händerna. Testet
+  // växer av sig självt när nya rader läggs till: varje bud med källa
+  // tabell:* i botauktionerna prövas (familj 1 öppningsvarvet, familj 2 svaret, …).
+  it('tabellens bud: samma bud och källa när de tre andra händerna byts (300 givar)', () => {
     let bud = 0
+    const perKälla = new Map<string, number>()
     for (let seed = 20270001; seed <= 20270300; seed++) {
       const deal = dealFromSeed(seed)
       const history = botAuction(deal)
       if (!history) continue
-      const första = history.findIndex((c) => c.bid !== 'P')
-      const sista = första === -1 ? history.length - 1 : första
-      for (let i = 0; i <= sista; i++) {
+      for (let i = 0; i < history.length; i++) {
         const seat = history[i].seat
+        const ursprung = decideCallTraced(deal, history.slice(0, i), seat)
+        if (!ursprung.källa.startsWith('tabell:')) continue // det gamla lagret (t.ex. motståndarnas pass) mäts i mätläget
         const annan = decideCallTraced(omgivnaAndra(deal, seat, mulberry32(seed * 64 + i)), history.slice(0, i), seat)
-        expect(annan.källa, `frö ${seed} bud ${i + 1}`).toBe('tabell:öppning')
+        expect(annan.källa, `frö ${seed} bud ${i + 1}`).toBe(ursprung.källa)
         expect(annan.call.bid, `frö ${seed} bud ${i + 1}`).toBe(history[i].bid)
         bud++
+        perKälla.set(ursprung.källa, (perKälla.get(ursprung.källa) ?? 0) + 1)
       }
     }
     expect(bud).toBeGreaterThan(300)
+    expect(perKälla.get('tabell:öppning') ?? 0).toBeGreaterThan(200)
+    expect(perKälla.get('tabell:svar') ?? 0).toBeGreaterThan(100)
   })
 
   it.skipIf(process.env.KIKVAKT !== '1')('MÄTLÄGE: hur ofta byter dagens motor bud när de andra händerna byts?', { timeout: 0 }, () => {
