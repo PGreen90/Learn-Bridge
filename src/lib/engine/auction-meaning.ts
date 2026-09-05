@@ -1272,12 +1272,13 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   if (same(cb, 6, 'NT')) return R('6NT till spel', `6 sang — lillslam i sang, till spel.`)
   if (same(cb, 7, 'NT')) return R('slamavslut', `7 sang — storslam i sang, till spel.`)
 
-  // Gerber (§6.4): hopp till 4♣ direkt över partnerns naturliga 1NT/2NT (öppning eller återbud).
+  // Gerber (§6.4): hopp till 4♣ direkt över partnerns naturliga 1NT/2NT (öppning eller
+  // återbud) — men inte när en färg redan är trumf (1♣–2♣–2NT–4♣ är en klöverhöjning).
   const partnerNT = partnerLast && last.strain === 'NT' && isNaturalNT(u, n - 1)
-  if (partnerNT && last.level <= 2 && same(cb, 4, 'C')) {
+  if (partnerNT && !trump && last.level <= 2 && same(cb, 4, 'C')) {
     return R('Gerber', `4♣ — Gerber: essfråga över partnerns sang. Partnern svarar 4♦ = 0/4 ess, 4♥ = 1, 4♠ = 2, 4NT = 3. Säger inget om klöver.`)
   }
-  if (n >= 2 && same(last, 4, 'C') && partnerLast && u.bids[n - 2].seat === seat && u.bids[n - 2].cb.strain === 'NT' && u.bids[n - 2].cb.level <= 2 && isNaturalNT(u, n - 2) && cb.level === 4) {
+  if (n >= 2 && same(last, 4, 'C') && partnerLast && !trump && u.bids[n - 2].seat === seat && u.bids[n - 2].cb.strain === 'NT' && u.bids[n - 2].cb.level <= 2 && isNaturalNT(u, n - 2) && cb.level === 4) {
     const ess: Record<string, string> = { D: '0 eller 4 ess', H: '1 ess', S: '2 ess', NT: '3 ess' }
     if (ess[cb.strain]) return R('Gerber', `${B(cb)} — svar på Gerber: ${ess[cb.strain]}. Säger inget om ${cb.strain === 'NT' ? 'sang' : name}.`)
   }

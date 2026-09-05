@@ -271,6 +271,13 @@ inte flyttat än.
 5. **Slamutredningen** — `slamInvestigation`/Gerber/Exclusion/MSS per stol:
    kaptenens tur använder kaptenens hand, öppnarens tur öppnarens. Funktions-
    signaturerna smalnas till EN hand + fakta. Kikvakten blir skarp här.
+   **KLAR 2026-09-05** (loggen): stegmaskinerna `slamTurn`/`gerberTurn`/
+   `exclusionTurn`/`mssTurn` (en tur ur EN hand), raden *slam*
+   (`slamSituation` läser uppsättningen ur auktionen), raden *svar3*
+   (svararens tredje bud: slamsteg efter försenat stöd/NMF-stöd, placeringarna
+   efter NMF/fjärde färg/broms/checkback, systems on) och raden *fjärde*
+   (Smolen-valet efter 2♣–2♦–2NT). Manuset = förare över samma steg. Tvetydigt
+   4NT utan bjuden fit tiger tills ägarbeslut (fynd 14).
 6. **Manuset för ostörda auktioner rivs** ur `auction.ts`; `buildAuction` =
    hjälparen "spela ut fyra stolar".
 
@@ -362,6 +369,84 @@ auktioner och ägaren spelat på etapp 4-motorn.
 - Inget andra budsystem.
 
 ## Ändringslogg
+
+- **2026-09-05 — Etapp 3 familj 5 KLAR: slamutredningen per stol + svararens
+  tredje bud.** Varje tur i en slamsekvens tas nu ur EN hand + auktionen:
+  `slam-auction.ts` fick stegmaskinen `slamTurn(role, hand, setup, sofar)`
+  (kaptenens första steg → cue-ronden → 4NT → svar → placering → 5NT →
+  kungsvar → storslam; stoppbudet + partnerns rättelse; inbjudan + partnerns
+  dom), `exclusionTurn`, `mssTurn`; `nt-slam.ts` fick `gerberTurn` (ess-svar,
+  placering, kungfråga, kungsvar, 6NT/7NT; partnern passar uttryckligen på
+  kaptenens placering så 4NT-stoppet aldrig läses som essfråga). De gamla
+  sekvensfunktionerna (`slamInvestigation`, `exclusionInvestigation`,
+  `mssMinorFitContinuation`, `gerberInvestigation` …) är tunna FÖRARE som
+  spelar stegfunktionen växelvis med de två händerna — manuset härleds ur
+  besluten, och `auction-decide.test.ts` vaktar att varje `tabell:slam`-bud i
+  3000 botauktioner är manusets bud. Raden *slam* i `auction-decide.ts`:
+  `slamSituation(facts)` läser sekvensen ur AUKTIONEN ensam (ostört, kaptenens
+  första slambud finns): uppsättningen `SlamSetup` (trumf, `SlamContext` ur
+  `slamContextFor`/`slamContextAfterThird` — samma funktioner som kaptenens
+  första steg, så manus och bord räknar mot samma visade minimum). Trumfen ur
+  auktionen där den är entydig (Jacoby, inverterad, hopphöjning, hopp i egen
+  minor, 2♣ med stöd, försenat stöd, NMF-stöd, MSS, Exclusion) eller namngiven
+  av inbjudningsbudet; kaptenen spelar upp sitt eget beslut på prefixet
+  (`captainIntent`) och får sin egen avsikt. Raden *svar3*
+  (`responderThirdDecision`): slamsekvensens första steg efter 2/1-försenat
+  stöd och NMF-stöd, placeringarna efter NMF (`responderPlaceAfterNMF`), fjärde
+  färg (bara över öppnarens bud), inverterad broms, 2NT-checkback, och systems
+  on-placeringen efter 2♣–2♦–2NT. Raden *fjärde* (`openerFourthDecision`):
+  Smolen-valet / 3NT-erbjudandet efter 2♣–2♦–2NT (`openerChoosesAfterSystemsOn`
+  i `strong-2nt-systemson.ts`, som också avgör öppnarens tredje bud efter en
+  2NT-ÖPPNING — förr saknades Smolen-valet där helt). `strong2NTSystemsOn`
+  (två händer) är borta: sekvensen går genom raderna tredje/svar3/fjärde.
+  Adaptern `thirdAsSeen` ger tom regel när läsaren inte namnger budet (de
+  tredje buden dispatchar på nivå/färg). **Fem systemfel som bygget avslöjade,
+  alla lagade som regler (facit i `auction-decide.test.ts`):** (1) NMF-slam-
+  grenen körde cue-ronden även för 11–12-handen (inbjudan) — cue-bud är gratis
+  bara i utgångskrav → 13+; (2) 5m efter partnerns 4m var både utgång och
+  "slaminbjudan" (2♣ med minorfit, försenat stöd) — partnern kan inte skilja
+  dem → ingen inbjudan där; (3) 1♣–1♠–1NT–4♣ var både Gerber (§6.4) och familj
+  A:s klöverinbjudan (§5.7 "4m") → Gerber vinner, ingen klöverinbjudan (fynd
+  15 nedan); (4) läsaren kallade 4♣ Gerber även med satt trumf (1♣–2♣–2NT–4♣)
+  → bara utan trumf; (5) Gerber-stoppet 4NT lästes av det gamla lagret som
+  RKC (frö 20270139, facit skarp). **Tiger medvetet (det gamla lagret som
+  förut):** ett naket 4NT utan bjuden fit efter reverse/hoppskift, 2♣ med
+  öppnarens egen färg (etapp 1-fynd 7: kravvaktens naturliga rebud och manusets
+  cue är samma bud) och 1NT-återbudet (fynd 6) — bok-mot-motor-fynd 14
+  (`it.todo` i kön). **Auktionsdiffen** (kommandot i §3, baslinje `72eb60c` =
+  `4a14bca`-koden): 3000 givar, ÄNDRAT BUD 1 = frö 20270930 (NMF med 3-stöd:
+  kaptenen cue:ar 4♥ i stället för att placera 4♠ direkt — samma kontrakt,
+  klass b: manuset byggde förr cue-ronden och KASTADE den när den inte nådde
+  slam, ett kik), samma bud med annan källa 96 (manus → tabell:slam/svar3/
+  tredje/fjärde). **Avvikelsedumpen** (kommandot i §3, fyra lägen, 14029
+  auktioner): ÄNDRAT BUD 353 i 189 mönster, 0 olagliga; alla klass b — förr
+  passades nyckelkortssvaret (2♣–3♦–4♦–4NT–5♦: pass → 6♦, frö 20270017,
+  facit skarp), Gerber-svaret (1NT–4♣–4♠: pass → 6NT, frö 20270043), cue-
+  buden fick kravvaktens 5♣ i stället för ett cue-svar (2♣–2♠–3♠–4♣: 5♣ → 4♠),
+  Stayman efter 2♣–2♦–2NT fick gisslagrets 3NT (→ 3♥), Smolen efter 2NT
+  passades. Mönstren i `revisor-output/avvik-monster.txt` (skapas av
+  `node`-raden i sessionen; återskapas ur de två JSON-filerna). **Kikvaktens
+  mätläge** (kommandot i §3): 2898 bud, 132 byter (4,6 %); `tabell:slam`
+  2/0, `tabell:svar3` 5/0, `tabell:tredje` 16/0 — den skarpa kikvakten
+  prövar varje tabellbud. **Sveparna** (kommandona i §3): betydelse ostört
+  0/3/0 (registerhålet 'väljer utgång efter Smolen' lagat i `rules.ts`), kända
+  39 bud i 2 mönster; förklaring 0 utan förklaring; regelsvep grönt;
+  pliktsvep 0 auktionsfel. Hela sviten grön (`npm test`), `npx tsc` rent.
+  **Revisorn** (kommandot i §3, 1000 givar, frö 20260721): rätt kontrakt
+  20,3 % · snittförlust 268,75 (familj 4b: 20,4 % · 268,05) — marginellt sämre,
+  och skillnaden är TVÅ givar i revisorns urval (auktionsdiff på fröna
+  20260721–20261720, baslinje ur git stash: ÄNDRAT BUD 2): frö 20261109
+  (1♣–1♠–1NT–4♣: manuset lät öppnaren acceptera en klöverinbjudan till 6♣,
+  nu är 4♣ Gerber — systemriktig miss, fynd 15) och frö 20260963 (2NT–3♣–3♦–
+  3♥ Smolen: öppnaren väljer nu 4♠ med 3-korts stöd i stället för
+  gisslagrets 3NT). Båda klass b; ägaren dömer i grinden.
+  **Bok-mot-motor-fynd (ägarbeslut):** (14) naket 4NT utan bjuden fit
+  (1♦–1♠–2♥–4NT, 2♣–3♦–3♥–4NT, 1m–1M–1NT–4NT): vilken färg är trumf? —
+  kaptenen bör sätta trumfen (eller inbjuda i den) före essfrågan; (15) §5.7
+  säger "inbjudan 4m" efter 1NT-återbudet men §6.4 gör 4♣ till Gerber —
+  klöverinbjudan finns inte; boken behöver välja. (16) 5m efter partnerns 4m:
+  ingen inbjudningsväg finns i minorfit (4NT är essfrågan) — motorn driver
+  33+ och placerar utgång annars.
 
 - **2026-09-05 — Etapp 3 familj 4b KLAR: öppnarens tredje bud.** Raden
   *tredje* i `auction-decide.ts` (läget: vår sidas fyra kontraktsbud öppning–

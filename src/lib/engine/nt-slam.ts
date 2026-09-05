@@ -18,7 +18,7 @@
 import type { Hand } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import { countAces, countKings, respondToGerber, respondToGerberKingAsk } from './slam'
-import type { SlamTurn } from './slam-auction'
+import type { SlamBid, SlamRole, SlamTurn } from './slam-auction'
 
 /**
  * Kvalificerar svararens hand för Gerber (gemensamt för 1NT/2NT): balanserad,
@@ -53,7 +53,7 @@ export function gerberAsk(responderHand: Hand, over: '1NT' | '2NT'): SlamTurn | 
 export function gerberInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
   const ask = gerberAsk(responderHand, '1NT')
   if (!ask) return null
-  return buildGerberSequence(openerHand, responderHand, hcp(responderHand), 15, ask)
+  return playGerber(openerHand, responderHand, 15)
 }
 
 /**
@@ -64,7 +64,7 @@ export function gerberInvestigation(openerHand: Hand, responderHand: Hand): Slam
 export function gerber2NTInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
   const ask = gerberAsk(responderHand, '2NT')
   if (!ask) return null
-  return buildGerberSequence(openerHand, responderHand, hcp(responderHand), 20, ask)
+  return playGerber(openerHand, responderHand, 20)
 }
 
 /**
@@ -102,80 +102,85 @@ export function gerberRebidFirstStep(responderHand: Hand): SlamTurn | null {
 export function gerberRebidInvestigation(openerHand: Hand, responderHand: Hand): SlamTurn[] | null {
   const first = gerberRebidFirstStep(responderHand)
   if (!first) return null
-  const p = hcp(responderHand)
-  if (first.rule === 'Gerber') return buildGerberSequence(openerHand, responderHand, p, 12, first)
-  {
-    // Kanske-zonen: kvantitativ 4NT — partnern med mer än minimum accepterar.
-    const turns: SlamTurn[] = [first]
-    const op = hcp(openerHand)
-    if (op >= 13) {
-      turns.push({ role: 'öppnare', call: '6NT', rule: 'kvantitativ 4NT: accept', explanation: `Mer än minimum → accepterar, 6NT.` })
-    } else {
-      turns.push({ role: 'öppnare', call: 'P', rule: 'kvantitativ 4NT: avböjer', explanation: `Blott minimum → passar 4NT.` })
-    }
-    return turns
-  }
-  return null
+  if (first.rule === 'Gerber') return playGerber(openerHand, responderHand, 12)
+  // Kanske-zonen: kvantitativ 4NT — partnern med mer än minimum accepterar.
+  return [first, quantitativeAnswer(openerHand, 12)]
 }
 
 /**
- * Bygger 4♣ Gerber-dialogen bud för bud. Ess-/kungsvaren är öppnarens egna;
+ * Partnern dömer kaptenens kvantitativa 4NT över 1NT-återbudet på SIN hand mot
+ * sitt eget visade intervall (`shownMin` = 12): mer än minimum → 6NT, annars pass.
+ */
+export function quantitativeAnswer(hand: Hand, shownMin: number): SlamTurn {
+  return hcp(hand) >= shownMin + 1
+    ? { role: 'öppnare', call: '6NT', rule: 'kvantitativ 4NT: accept', explanation: `Mer än minimum → accepterar, 6NT.` }
+    : { role: 'öppnare', call: 'P', rule: 'kvantitativ 4NT: avböjer', explanation: `Blott minimum → passar 4NT.` }
+}
+
+const GERBER_ASK: SlamTurn = { role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` }
+
+/** Spelar Gerber-dialogen till slut med två händer, tur för tur ur EN hand (manusets förare). */
+function playGerber(openerHand: Hand, responderHand: Hand, partnerMin: number): SlamTurn[] {
+  const turns: SlamTurn[] = [GERBER_ASK]
+  let role: SlamRole = 'öppnare'
+  for (let guard = 0; guard < 6; guard++) {
+    const t = gerberTurn(role, role === 'svarare' ? responderHand : openerHand, partnerMin, turns)
+    if (!t || t.call === 'P') break // partnerns pass på placeringen är underförstått i manuset
+    turns.push(t)
+    role = role === 'svarare' ? 'öppnare' : 'svarare'
+  }
+  return turns
+}
+
+/**
+ * Gerber-dialogen (§6.4) en tur i taget ur EN hand, efter kaptenens 4♣ (`sofar[0]`):
+ * öppnarens ess-svar, kaptenens placering (4NT stopp / 5♣ kungfråga / 6NT),
+ * öppnarens kungsvar, kaptenens 6NT/7NT. Ess-/kungsvaren är öppnarens egna;
  * kaptenen härleder antalet ur SVARET + sin egen hand (aldrig partnerns kort).
  * `partnerMin` = undre gränsen i partnerns visade intervall (storslamszonen
- * räknas alltid mot minimum — aldrig hopp om maximum).
+ * räknas alltid mot minimum — aldrig hopp om maximum). null = ingen tur.
  */
-function buildGerberSequence(
-  openerHand: Hand,
-  responderHand: Hand,
-  p: number,
-  partnerMin: number,
-  ask: SlamTurn = { role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` },
-): SlamTurn[] {
-  const turns: SlamTurn[] = []
-  turns.push(ask)
-
-  const aceAnswer = respondToGerber(openerHand)
-  turns.push({ role: 'öppnare', call: aceAnswer.call, rule: aceAnswer.rule, explanation: aceAnswer.explanation })
-
-  // Härled partnerns ess ur svaret + egen hand. 4♦ = 0 ELLER 4: har kaptenen
-  // själv ett ess är 4 omöjligt (bara 4 finns) → 0; med 0 egna ess antas det
-  // låga (pessimistiskt — hellre missa en extrem slam än chansa).
-  const ownAces = countAces(responderHand)
-  const partnerAces =
-    aceAnswer.call === '4H' ? 1 : aceAnswer.call === '4S' ? 2 : aceAnswer.call === '4NT' ? 3 : 0
-  const aceCertain = aceAnswer.call !== '4D' || ownAces >= 1
-  const missing = 4 - ownAces - partnerAces
-
-  if (missing >= 2) {
-    turns.push({ role: 'svarare', call: '4NT', rule: 'Gerber: stannar', explanation: 'två ess saknas → stannar i 4NT.' })
-    return turns
+export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar: SlamBid[]): SlamTurn | null {
+  if (sofar.length === 0 || sofar[0].role !== 'svarare' || sofar[0].call !== '4C') return null
+  if (sofar[sofar.length - 1].role === role) return null
+  const after = sofar.slice(1)
+  if (after.length === 0) {
+    const a = respondToGerber(hand)
+    return { role: 'öppnare', call: a.call, rule: a.rule, explanation: a.explanation }
   }
-
-  const floor = p + partnerMin
-  if (missing === 0 && aceCertain && floor >= 37) {
-    // Alla ess + storslamszon mot visat minimum → kungfråga 5♣, placera 6NT/7NT.
-    turns.push({ role: 'svarare', call: '5C', rule: 'Gerber kungfråga', explanation: `alla ess + storslamszon → 5♣ (frågar kungar).` })
-    const kingAnswer = respondToGerberKingAsk(openerHand)
-    turns.push({ role: 'öppnare', call: kingAnswer.call, rule: kingAnswer.rule, explanation: kingAnswer.explanation })
+  const aceCall = after[0].call
+  if (after.length === 1) {
+    // Härled partnerns ess ur svaret + egen hand. 4♦ = 0 ELLER 4: har kaptenen
+    // själv ett ess är 4 omöjligt (bara 4 finns) → 0; med 0 egna ess antas det
+    // låga (pessimistiskt — hellre missa en extrem slam än chansa).
+    const ownAces = countAces(hand)
+    const partnerAces = aceCall === '4H' ? 1 : aceCall === '4S' ? 2 : aceCall === '4NT' ? 3 : 0
+    const aceCertain = aceCall !== '4D' || ownAces >= 1
+    const missing = 4 - ownAces - partnerAces
+    if (missing >= 2) return { role: 'svarare', call: '4NT', rule: 'Gerber: stannar', explanation: 'två ess saknas → stannar i 4NT.' }
+    const floor = hcp(hand) + partnerMin
+    if (missing === 0 && aceCertain && floor >= 37) {
+      // Alla ess + storslamszon mot visat minimum → kungfråga 5♣, placera 6NT/7NT.
+      return { role: 'svarare', call: '5C', rule: 'Gerber kungfråga', explanation: `alla ess + storslamszon → 5♣ (frågar kungar).` }
+    }
+    return { role: 'svarare', call: '6NT', rule: 'slamavslut', explanation: missing === 0 ? 'alla ess → 6NT.' : 'ett ess saknas → 6NT (lillslam).' }
+  }
+  if (after[1].call !== '5C') {
+    // Kaptenen placerade (4NT stannar / 6NT / 7NT) → partnern passar. Sägs
+    // uttryckligen så att 4NT-stoppet aldrig läses som en essfråga.
+    return after.length === 2 ? { role: 'öppnare', call: 'P', rule: 'pass', explanation: `partnern placerade i ${after[1].call} → pass.` } : null
+  }
+  if (after.length === 2) {
+    const k = respondToGerberKingAsk(hand)
+    return { role: 'öppnare', call: k.call, rule: k.rule, explanation: k.explanation }
+  }
+  if (after.length === 3) {
     // Härled kungarna ur svaret + egen hand (5♦ = 0 eller 4 → egen kung avgör).
-    const ownKings = countKings(responderHand)
-    const partnerKings =
-      kingAnswer.call === '5H' ? 1 : kingAnswer.call === '5S' ? 2 : kingAnswer.call === '5NT' ? 3 : 0
+    const kingCall = after[2].call
+    const ownKings = countKings(hand)
+    const partnerKings = kingCall === '5H' ? 1 : kingCall === '5S' ? 2 : kingCall === '5NT' ? 3 : 0
     const grand = ownKings + partnerKings >= 3
-    turns.push({
-      role: 'svarare',
-      call: grand ? '7NT' : '6NT',
-      rule: 'slamavslut',
-      explanation: grand ? `alla ess + kungarna räcker → storslam 7NT.` : 'alla ess men för få kungar → 6NT.',
-    })
-    return turns
+    return { role: 'svarare', call: grand ? '7NT' : '6NT', rule: 'slamavslut', explanation: grand ? `alla ess + kungarna räcker → storslam 7NT.` : 'alla ess men för få kungar → 6NT.' }
   }
-
-  turns.push({
-    role: 'svarare',
-    call: '6NT',
-    rule: 'slamavslut',
-    explanation: missing === 0 ? 'alla ess → 6NT.' : 'ett ess saknas → 6NT (lillslam).',
-  })
-  return turns
+  return null
 }
