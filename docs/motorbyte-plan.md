@@ -358,7 +358,7 @@ revisorn identisk med familj 5.
 att manuset inte kommer tillbaka. Tas när betydelsesvepet är grönt på störda
 auktioner och ägaren spelat på etapp 4-motorn.
 
-## 5b. Ägarbeslut på etapp 3:s bok-mot-motor-fynd (påbörjat 2026-09-05)
+## 5b. Ägarbeslut på etapp 3:s bok-mot-motor-fynd (påbörjat 2026-09-05, svepet KLART 2026-09-05)
 
 Etapp 3 samlade 15 numrerade bok-mot-motor-fynd (loggen; kartan sa "sexton" —
 nr 10 finns inte, det försvann när familj 4a:s slam-buggar lagades direkt).
@@ -419,6 +419,114 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   svarsstrukturen efter `2♣–2♦–2M` blir därmed naturlig och tvetydigheten
   (andra negativa vs naturlig klöver) försvinner. Ersätter §4.4:s "3♣ = alltid
   andra negativa". Rör §4.4 + motorns 2♣-svarsgren.
+
+- **Beslut 7 — fynd 7 (`2♣–3♦–3M–4♦`, samma bud två betydelser), 2026-09-05.**
+  Ägarbeslut: **4♦ är naturligt i båda fallen** (3♥ och 3♠) — rebud av egen
+  färg, 6+ ruter eller bra 5 utan 3-stöd i öppnarens högfärg, utgångskravet
+  står. Stöd visas i stället: **3-stöd + slamintresse → kontrollbud i NY färg**
+  (4♣ över 3♥/3♠, 4♥ över 3♠) som sätter öppnarens högfärg; **3-stöd + minimum
+  → 4M direkt** (fast arrival, samma logik som beslut 3). Ersätter motorns
+  cue-läsning i 3♠-fallet (frö 20271411: Syd bjuder 4♠ direkt i stället för
+  cue 4♦, samma slutkontrakt; frö 20271084 oförändrat naturligt). Rör §4.4 (en
+  mening om 3♠-fallet + stödreglerna) + betydelselagrets `impliedCueTrump`
+  (undantaget "även i egen visad färg" tas bort) + facit-köns fynd 7-post.
+
+- **Beslut 8 — fynd 8 (öppnaren höjde partnerns kravfärg till 5M över svag
+  tvåa), 2026-09-05.** Ägarbeslut: **bekräftar familj 3:s fix** — med stöd +
+  maximum höjer öppnaren till utgången, aldrig förbi (frö 20271048: `2♠–3♥` →
+  4♥, inte 5♥). Redan byggt, i §4.5:s ändringslogg och grönt i facit-kön.
+  Inget mer att bygga.
+
+- **Beslut 9 — fynd 9 (passad hands stödsvar över 1♥/1♠), 2026-09-05.**
+  Ägarbeslut: **passad hand spelar Jacoby AV och Bergen AV; Drury tar alla
+  limithöjningar.** Strukturen efter pass: **2♣/2♦ Drury** = limithöjning
+  **10–12 stödpoäng** (3 resp. 4+ trumf — tröskeln på stödpoäng, inte hp, så
+  handen med 4 trumf + kortfärg hamnar här och aldrig i Jacoby); **2M** = 6–9
+  med 3+ stöd; **3M** = spärr, 4+ stöd under 6; **2NT** = naturlig inbjudan,
+  ~11 hp balanserad utan 3-stöd (öppnaren 3NT med 14+, annars pass);
+  **3♣/3♦** = naturliga, 6+ färg, ej krav. Exempel: frö 20271423 (`P–P–P–1♥–
+  P–3♦ Bergen limit` → blir 2♦ Drury, samma 4♥), frö 20272394 (`3♣ Bergen
+  konstruktiv` med 7 hp → blir 2♥ enkel höjning). Boken §6.7 och
+  betydelselagret säger redan detta; motorn följer efter. Rör §6.7 (tabellen
+  utökas) + `respondToMajorPassed` (inget fall får falla till Jacoby/Bergen) +
+  öppnarens svar på passad hands 2NT i tabellen (raden återbud).
+
+- **Beslut 11 — fynd 11 (svararens nya färg på 3-läget efter `1M–1NT–2x`),
+  2026-09-05.** Ägarbeslut: **naturlig inbjudan med 6+ kort** — ny färg på
+  3-läget efter semi-forcing 1NT och öppnarens 2-lägesåterbud (`1♠–1NT–2♠–3♥`,
+  `1♠–1NT–2♣–3♦`, `1♥–1NT–2♦–3♣`) = **6+ kort, 10–11 hp, inbjudan, ej krav,
+  förnekar 3-korts stöd i M**. Svagare 6+-händer bjuder färgen på 2-läget om
+  det ryms (#59), annars preferens/pass. Öppnaren svarar: **pass** = minimum
+  med tolerans (2+ kort); **3M** = rättelse, 6+ egen färg utan tolerans; **4 i
+  svararens färg** = maximum (14–15) med 3-korts stöd eller bra dubbelton;
+  **3NT** = maximum med håll runtom. Boten bjuder budet själv (idag 2NT/pass
+  med 6-kortsfärgen). Budet förekom 0 gånger i 3000 botgivar (sonden i
+  sessionen) — fyndet syns när en människa bjuder det. Rör §5.1 (svararens
+  andra bud + öppnarens svarstabell) + `responderRebidAfterSemiForcing1NT` +
+  raden tredje + betydelselagrets läsare (returnerar null idag).
+
+- **Beslut 12 — fynd 12 (svararens hopp till 4m efter `1m–2m'–2NT`),
+  2026-09-05.** Ägarbeslut: **hoppet 4m = trumf satt + slamdriv, förbi 3NT** —
+  4+ stöd, driv mot slam (33+ mot visat minimum 12, kaptensregeln §5.2) och
+  ingen sanghand (kortfärg någonstans). Öppnaren svarar som i cue-ronden
+  (§6.2): billigaste kontrollbud (4♥/4♠), annars 5m utan kontroll att visa;
+  kaptenen (svararen) frågar 4NT när den vill. Boten fortsätter själv bjuda
+  det billiga 3m (#58; mer rum för kontrollbud under utgång) — beslutet är en
+  läsregel + öppnarens svar. Samma för `1♣–2♦–2NT–4♣`. Förkastat: 4m till spel
+  (dagens kravvakt 5m, kastar slammen) och Minorwood (ny konvention, §7 —
+  SENARE-kandidat). Rör §5.3 + `responderSecondAfter2over1` (läsaren) +
+  raden tredje (cue-ronden i stället för kravvaktens 5m).
+
+- **Beslut 13 — fynd 13 (fjärde färg i 2/1-form, `1♠–2♣–2♦–2♥`),
+  2026-09-05.** Ägarbeslut: **fjärde färg finns inte när 2/1 är satt** —
+  utgångskravet räcker en gång; svararens nya färg efter 2/1 är **naturlig
+  (4+ kort)**, man ska kunna bjuda sina färger utan att stoppas av en
+  konvention. Ägarens ord: "det räcker med game force en gång". (Claude
+  rekommenderade konstgjord fjärde färg som hållfråga; ägaren valde bokens
+  §6.6-linje.) Konsekvens: svararen utan håll i fjärde färgen och utan
+  naturligt bud bjuder preferens/egen färg, och öppnaren — som vet att kravet
+  står — bjuder sang med håll. Gäller alla 2/1-former (`1♥–2♣–2♦–2♠`,
+  `1♠–2♥–3♣–3♦`, `1♥–2♦–3♣–3♠`). Rör betydelselagrets `isFourthSuit`
+  (undanta 2/1, som boken) + `responderRebidIn2over1Auction` steg 3b (spärren
+  "fjärde färg har konventionell mening" bort: 4+ i färgen → naturligt bud) +
+  öppnarens svar på svararens naturliga tredje färg i raden tredje (höjning
+  med 4, annars beskrivning: sang med håll / egen längd / preferens).
+
+- **Beslut 14 — fynd 14 (naket 4NT utan satt trumf), 2026-09-05.** Ägarbeslut:
+  **naket 4NT = essfråga i den senast naturligt bjudna färgen** ("last bid
+  suit"); ägarens ord på det öppna fallet: `1♦–1♠–2♥–4NT` (reverse) = **essfråga
+  i hjärter**. Samma regel ger `2♣–2♠–3♥–4NT` = hjärter (redan byggt, familj 6)
+  och `1♠–2♣–2♦–4NT` = ruter. Över partnerns sangbud (1NT/2NT-återbud,
+  sangöppning) är 4NT kvantitativt (beslut 1, §5.7). Boten själv sätter alltid
+  trumfen först (billig höjning efter reverse = beslut 3, kontrollbud i ny färg
+  = beslut 7), så tvetydigheten uppstår bara efter en människas bud (frö
+  20272351: Nord bjuder 3♥ i stället för naket 4NT). Rör §6.1 (en mening om
+  trumfen när inget är satt) + `slamTrumpFromAuction` (reverse/hoppskift-grenen
+  returnerar senast bjudna färg för 4NT; öppnaren tiger inte längre) +
+  facit-köns fynd 14-post (blir `it`).
+
+- **Beslut 16 — fynd 16 (5m efter partnerns 4m, slaminbjudan i lågfärgsfit),
+  2026-09-05.** Ägarbeslut: **bekräftar linjen — 5m efter partnerns 4m är
+  utgången, till spel; inbjudan i lågfärgsfit ÄR kontrollbudet.** Med trumf
+  satt i utgångskrav är cue under utgång gratis (§6.2): 4♦/4♥/4♠ över 4♣,
+  4♥/4♠ över 4♦; kaptenen med 31–32 visar billigaste kontroll, partnern cue:ar
+  tillbaka med extra (→ 4NT) eller bjuder 5m med minimum; 33+ frågar 4NT
+  direkt. Handen utan billig kontroll bjuder 5m — systemriktig miss. Inget
+  bud ändras. Förkastat: 4NT som inbjudan (kolliderar med essfrågan) och
+  Minorwood/kickback (ny konvention, §7 — SENARE-kandidat med beslut 12).
+  Rör §6.2 (en mening: cue-ronden är lågfärgens inbjudan förbi 4m) + ett
+  facit-test på cue-ronden efter 4m.
+
+**SVEPET KLART 2026-09-05: alla 15 fynd har ägarbeslut (1–9, 11–14, 16; nr 10
+och 15 ingår i 1 resp. finns inte).** Nästa steg: bygg besluten test-drivet
+(facit FÖRE fix, systembok-§, regeln i det nya lagret), en per commit, sedan
+PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF) → 3 (fast
+arrival efter reverse) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
+2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
+steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M) →
+6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa) → 11 (ny färg på
+3-läget efter 1M–1NT–2x) → 12 (hopp till 4m = driv) → 16 (bara bok + facit) →
+8 (redan byggt, bara låst).
 
 ## 6. Arbetssättet under bytet
 
