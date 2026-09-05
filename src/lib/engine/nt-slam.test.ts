@@ -101,7 +101,11 @@ describe('buildAuction – Gerber växer fram över 2NT (FAS 8)', () => {
       },
     }
     const a = buildAuction(deal)!
-    expect(a.turns.map((t) => t.call)).toEqual(['2NT', '4C', '4S', '6NT'])
+    // Sedan familj 6 (2026-09-05) spelas sekvensen ut stol för stol ur
+    // tabellen: öppnarens pass på kaptenens placering är ett eget, förklarat
+    // bud (förut underförstått i manusets tvåhandsförare).
+    expect(a.turns.map((t) => t.call)).toEqual(['2NT', '4C', '4S', '6NT', 'P'])
+    expect(a.turns[4].explanation).toMatch(/placerade i 6NT/)
     expect(a.open).toBe(false)
   })
 })

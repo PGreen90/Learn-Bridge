@@ -89,7 +89,14 @@ describe('etapp 3 familj 5 – slamutredningen per stol (LANDAD 2026-09-05)', ()
     expect(decideCall(deal, hist, 'N').bid).toBe('P')
   })
 
-  it.todo('bok-mot-motor-fynd 14: 1♦–1♠–2♥–4NT (reverse) och 2♣–3♦–3♥–4NT — 4NT utan bjuden fit är tvetydigt (vilken färg är trumf?); kaptenen ska sätta trumfen (eller inbjuda i den) före essfrågan', () => {
+  // Familj 6 (2026-09-05): efter 2♣–positivt–3y läser öppnaren 4NT som essfrågan
+  // i y (senast bjudna färg, samma regel som det gamla lagrets `slamAskTrump`);
+  // kaptenen som menade sin EGEN självbärande färg (§4.4 "utan trumf") får sin
+  // avsikt via captainIntent — de två kan skilja sig åt (frö 20271008: Nord
+  // svarar 5♦ = tre nyckelkort i hjärter, Syd frågade för spader och placerar
+  // ändå 6♠). Efter reverse/hoppskift tiger öppnarens läsning helt; kaptenen
+  // placerar via captainOwnSituation (frö 20272351: 1♣–1♠–2♥–4NT–5♦ → 6♥).
+  it.todo('bok-mot-motor-fynd 14: 1♦–1♠–2♥–4NT (reverse) och 2♣–2♠–3♥–4NT — 4NT utan bjuden fit är tvetydigt (vilken färg är trumf?); kaptenen ska sätta trumfen (eller inbjuda i den) före essfrågan', () => {
     const reverse = [call('N', '1D'), call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2H'), call('E', 'P'), call('S', '4NT'), call('W', 'P')]
     expect(decideCall(dealFromSeed(20270001), reverse, 'N').rule).toBe('1430 RKC')
   })

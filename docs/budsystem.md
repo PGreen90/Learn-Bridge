@@ -579,6 +579,15 @@ lite på fötterna och håller utgångskravet.
   längd inte ger sangstick utan fit → auktionen fortsätter naturligt. I
   31–32 utan trumf står den vanliga utgångsauktionen (ingen kvantitativ
   inbjudan där ännu).
+- **Så läser ÖPPNAREN kaptenens slambud efter sitt färg-återbud** (2♣–positivt–
+  3y, 2026-09-05): **4NT är essfrågan i y** — den senast bjudna färgen (öppnaren
+  kan inte se om svararen har 3+ stöd eller frågar för en egen självbärande färg;
+  det tvetydiga fallet är bok-mot-motor-fynd 14, `docs/motorbyte-plan.md`). Ett
+  **kontrollbud i en ny färg** (inte svararens egen) över öppnarens färg och
+  under dess utgång **sätter öppnarens färg som trumf**: den balanserade
+  2NT-svararen cue:ar redan på 3-läget (2♣–2NT–3♥–3♠), efter ett färgpositivt
+  bara när öppnarens färg är en högfärg. Svararens rebud i sin **egen** färg
+  (2♣–3♦–3♥–4♦) är naturligt.
 - Svararens **enkla stödhöjning** efter sitt positiva svar = slamintresse;
   **dubbelhöjning direkt till utgång** = minimum utan slamintresse.
 - Balanserat: efter 2NT-rebud (22–24) sätter svararen nivån med NT-stegen
@@ -986,7 +995,14 @@ aldrig partnerns faktiska kort:
   öppnaren bjuder 6NT med 13–14, passar med 12.
 - **Obalanserad hand med en SÄKER fit på egen hand:** en **6+ egen högfärg**,
   eller **5+ kort i öppnarens minor** (1♣/1♦ lovade 3+ → minst 8 ihop) blir
-  trumf → **4NT RKC** → **6 i färgen** (inbjudan i kanske-zonen: 5M / 4♦ — i klöver finns ingen inbjudan, eftersom 4♣ över sang är Gerber, §6.4).
+  trumf → i drivzonen **Gerber 4♣** (frågar ess; öppnaren svarar som vanligt och
+  passar placeringen) → **6 i färgen** — stannar i 5 i färgen om två ess saknas.
+  **4NT direkt över sang-återbudet är alltid kvantitativt** (den jämna
+  19–20-handen ovan, som i standard-2/1): öppnaren kan inte se om du menar din
+  egen färg, så essfrågan går via 4♣ (2026-09-05, motorbytet familj 6 — förr
+  4NT RKC, som bara fungerade när motorn såg båda händerna). Inbjudan i
+  kanske-zonen: 5M / 4♦ — i klöver finns ingen inbjudan, eftersom 4♣ över sang
+  är Gerber, §6.4.
   En gömd 4-4-fit går inte att *veta* utan att kika → den jagas inte här
   (5-korts högfärg letar 5-3-fit via New Minor Forcing som vanligt).
 Utanför zonerna står den vanliga vägen kvar (New Minor Forcing / sang-stegen).
@@ -2074,6 +2090,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-05 — Manuset för ostörda auktioner rivet (motorbytet etapp 3 familj 6,
+  `docs/motorbyte-plan.md`).** Ingen regeländring i sig: varje bud vår sida
+  lägger i en ostörd auktion tas nu ur beslutstabellen (egen hand + auktionen)
+  även när motorn budar hela given själv — de sista tvåhandsförarna (Gerber
+  över 1NT/2NT, slamsekvenserna) är borta. Två läsregler skrevs in på vägen
+  (§4.4 "Så läser ÖPPNAREN kaptenens slambud"): efter 2♣–positivt–3y är
+  **4NT essfrågan i y** och ett **kontrollbud i ny färg sätter y** — förr fick
+  bara manuset (som såg båda händerna) den sekvensen rätt, med människan i
+  någon av stolarna passades nyckelkortssvaret eller kravet improviserades.
+  Kaptenen som frågat 4NT vet dessutom alltid själv vilken trumf hon menade och
+  placerar därefter, även när trumfen inte syns i auktionen (reverse, §5.7).
+  **En regeländring (§5.7):** efter 1m–1M–1NT frågar kaptenen med en egen
+  självbärande färg ess med **Gerber 4♣** och placerar 6 i färgen; **4NT direkt
+  över sang-återbudet är alltid kvantitativt** (den jämna 19–20-handen). Förr
+  var samma 4NT både kvantitativ inbjudan och RKC — bara manuset, som såg båda
+  händerna, kunde hålla isär dem (bok-mot-motor-fynd 6). Öppnaren dömer nu
+  4NT på sin hand (6NT med 13–14, pass med 12) och svarar ess på 4♣.
 - **2026-09-05 — Slamutredningen per stol (§5.7, §6.1–6.5; motorbytet etapp 3
   familj 5, `docs/motorbyte-plan.md`).** Varje tur i en slamsekvens (cue-ronden,
   4NT, nyckelkortssvaret, placeringen, 5NT, stoppbudet och rättelsen,

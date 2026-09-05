@@ -65,7 +65,7 @@ import type { ResolvedCall } from '../bidding'
 import { parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
 import { hcp, lengths } from './hand'
-import { gerberAsk, gerberRebidFirstStep, gerberTurn } from './nt-slam'
+import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
 import { classifyOpening } from './openings'
 import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderPlaceAfter2NTCheckback, responderPlaceAfterNMF, responderRebidIn2NTAuction, responderSecondBid } from './responder-rebids'
@@ -85,6 +85,13 @@ import { hasStopper } from './overcalls'
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
   uncertain?: boolean
+  /**
+   * Budet PLACERAR kontraktet för min del (svararens utgångsplacering efter
+   * 2♣ med fit, 6NT-avslutet, 2/1-utgången): partnern har inget att tillägga.
+   * Manuset (`auction.ts`) läser flaggan för att lämna auktionen stängd åt det
+   * gamla lagret — samma gräns som manusets tidigare `final`-plan.
+   */
+  avslut?: boolean
 }
 
 /** Tabellens svar: budet + källan (`tabell:<familj>`, syns i auktionsdumpen). */
@@ -422,11 +429,32 @@ function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid:
 
   if (openCall === '2C' && response.rule === '2♣-positivt') {
     if (rebid.rule === 'rebid: stöd (GF)') return respSuit
-    // Öppnarens egen färg utan bjuden fit: svararens 4-lägesbud är i motorn
-    // ETT cue (kaptenen med 3+ stöd) men i kravvakten ett naturligt rebud i
-    // egen färg (2♣–3♦–3♥–4♦, etapp 1-fynd 7, facit frö 20271084 i kön) —
-    // samma bud, två betydelser. Tills ägarbeslutet tiger raden här (det
-    // gamla lagret som förut).
+    if (rebid.rule === 'rebid: egen färg (GF)' && rebidSuit) {
+      // Öppnarens egen färg utan bjuden fit (familj 6, 2026-09-05 — förut tiger):
+      //  · 4NT = essfrågan i SENAST BJUDNA FÄRG, öppnarens (samma regel som det
+      //    gamla lagret svarar en människa efter, `slamAskTrump`). Kaptenen som
+      //    frågade med en egen självbärande färg i tankarna (§4.4 "utan trumf")
+      //    får sin egen avsikt via `captainIntent`; att de två kan skilja sig
+      //    åt är bok-mot-motor-fynd 14 (ägarbeslut).
+      //  · Ett kontrollbud i NY färg (inte kaptenens egen) över öppnarens färg
+      //    och under dess utgång sätter öppnarens färg — betydelselagrets
+      //    konvention (etapp 1): den balanserade 2♣-svararen cue:ar redan på
+      //    3-läget; efter ett färgpositivt bara högfärgen. Kaptenens rebud i
+      //    EGEN färg (2♣–3♦–3♥–4♦) är fortfarande naturligt i kravvakten och
+      //    cue i manuset (etapp 1-fynd 7, facit frö 20271084 i kön) → tiger.
+      if (firstSlamCall === '4NT') return rebidSuit
+      // Slaminbjudan i öppnarens färg (5M / 4m över 3m, §4.4 "31–32") — öppnaren dömer.
+      if (slamContextFor(openCall, response, rebid, rebidSuit)?.ctx.inviteCall === firstSlamCall) return rebidSuit
+      const cueSuit = suitOf(firstSlamCall)
+      const balanced = response.call === '2NT'
+      const floor = isMajorSuit(rebidSuit) ? `3${LETTER[rebidSuit]}` : '3NT'
+      const game = isMajorSuit(rebidSuit) ? `4${LETTER[rebidSuit]}` : `5${LETTER[rebidSuit]}`
+      if (
+        cueSuit && cueSuit !== rebidSuit && cueSuit !== respSuit &&
+        (balanced || isMajorSuit(rebidSuit)) &&
+        bidRank(firstSlamCall) > bidRank(floor) && bidRank(firstSlamCall) < bidRank(game)
+      ) return rebidSuit
+    }
     return null
   }
   if ((openCall === '1C' || openCall === '1D') && response.rule === 'ny färg (1-läget)' && rebid.rule === 'hopp i egen färg (inbjudan)' && openerSuit && rebidSuit === openerSuit) return openerSuit
@@ -448,14 +476,19 @@ function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid:
   return null
 }
 
-/** Vad manuset ska bygga vidare på efter svararens andra bud (slamsekvenserna spelas ut med `slamInvestigation` m.fl.). */
+/**
+ * Svararens plan bakom sitt andra bud. Sedan familj 6 (2026-09-05) läser
+ * ingen manuskod planen: slamgrenarnas fortsättning spelas tur för tur ur EN
+ * hand genom raden *slam*; `final` blir flaggan `avslut` på budet.
+ */
 export type SecondPlan =
   | { kind: 'call' }
   | { kind: 'final' }
   | { kind: 'slam'; setup: SlamSetup }
   | { kind: 'exclusion'; trump: Suit; partnerMin: number }
   | { kind: 'mss'; minor: Suit; rebidCall: string }
-  | { kind: 'gerberRebid' }
+  /** Gerber 4♣ över 1NT-återbudet (jämn 21+) eller kvantitativ 4NT (19–20); med `suit`: essfrågan för en egen självbärande färg, placeringen blir 6/7 i den (§5.7). */
+  | { kind: 'gerberRebid'; suit?: Suit }
 
 export interface SecondDecision {
   turn: ResponseResult
@@ -587,6 +620,16 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
     const trump = familyAFitTrump(hand, openerSuit, suitOf(response.call))
     if (trump) {
       const slam = slamStep(trump)
+      // Drivzonen frågar med GERBER 4♣, inte 4NT (familj 6, 2026-09-05): 4NT
+      // direkt över partnerns sang-återbud är kvantitativt (§5.7, den jämna
+      // 19–20-handen) och partnern kan inte se att jag menar min egen färg.
+      // 4♣ är entydigt ess-fråga (§6.4), och placeringen blir 6 i min färg.
+      if (slam && slam.turn.call === '4NT') {
+        return {
+          turn: { call: '4C', rule: 'Gerber', explanation: `Självbärande ${SYM[trump]} och slamzon mot visade 12–14 → 4♣ (Gerber, frågar ess — placerar sedan i ${SYM[trump]}).` },
+          plan: { kind: 'gerberRebid', suit: trump },
+        }
+      }
       if (slam) return slam
     }
   }
@@ -711,7 +754,7 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
   return null
 }
 
-/** Vad manuset ska bygga vidare på efter svararens tredje bud. */
+/** Svararens plan bakom sitt tredje bud (slamgrenen fortsätter genom raden *slam*). */
 export type ThirdPlan = { kind: 'call' } | { kind: 'slam'; setup: SlamSetup }
 
 export interface ThirdDecision {
@@ -824,7 +867,7 @@ export function openerFourthDecision(openCall: string, response: ResponseResult,
 
 /** En pågående slamsekvens läst ur auktionen ensam (öppnarens stol kan inte se mer). */
 export interface SlamSituation {
-  kind: 'slam' | 'gerber' | 'exclusion' | 'mss'
+  kind: 'slam' | 'gerber' | 'exclusion' | 'mss' | 'kvantitativ'
   captain: Seat
   /** Antal av vår sidas kontraktsbud före kaptenens första slambud. */
   prefix: number
@@ -833,6 +876,8 @@ export interface SlamSituation {
   trump?: Suit
   minor?: Suit
   rebidCall?: string
+  /** Gerber för en egen självbärande färg (§5.7): kaptenen placerar i den, inte i sang. Bara kaptenen vet. */
+  placeSuit?: Suit
   /** Sekvensens bud hittills (från och med kaptenens första slambud). */
   sofar: SlamBid[]
 }
@@ -868,9 +913,12 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
   const openerSuit = suitOf(openCall)
   const first = ours[3].bid
 
-  // Gerber över 1NT-återbudet (§5.7): 1m–1M–1NT–4♣.
-  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)' && first === '4C') {
-    return { kind: 'gerber', captain, prefix: 3, partnerMin: 12, sofar: sofarFrom(3) }
+  // Gerber över 1NT-återbudet (§5.7): 1m–1M–1NT–4♣. Och 4NT direkt över
+  // sang-återbudet är KVANTITATIVT (den jämna 19–20-handen; standard-2/1) —
+  // partnern dömer på sin hand mot visade 12–14 (familj 6, 2026-09-05).
+  if (response.rule === 'ny färg (1-läget)' && rebid.rule === '1NT (12–14)') {
+    if (first === '4C') return { kind: 'gerber', captain, prefix: 3, partnerMin: 12, sofar: sofarFrom(3) }
+    if (first === '4NT') return { kind: 'kvantitativ', captain, prefix: 3, partnerMin: 12, sofar: sofarFrom(3) }
   }
   // Exclusion efter splinter + relä (§6.5).
   if (response.rule === 'tvetydig splinter' && rebid.rule === 'splinter-relä' && openerSuit && isMajorSuit(openerSuit) && /^5[CDHS]$/.test(first) && suitOf(first) !== openerSuit) {
@@ -903,7 +951,10 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
 function slamSituationTurn(sit: SlamSituation, role: SlamRole, hand: Hand): SlamTurn | null {
   switch (sit.kind) {
     case 'gerber':
-      return gerberTurn(role, hand, sit.partnerMin!, sit.sofar)
+      return gerberTurn(role, hand, sit.partnerMin!, sit.sofar, sit.placeSuit)
+    case 'kvantitativ':
+      // Partnern dömer inbjudan på SIN hand; kaptenen har inget mer att säga.
+      return role === 'öppnare' && sit.sofar.length === 1 ? quantitativeAnswer(hand, sit.partnerMin!) : null
     case 'exclusion':
       return exclusionTurn(role, hand, sit.trump!, sit.partnerMin!, sit.sofar)
     case 'mss':
@@ -932,6 +983,7 @@ function captainIntent(sit: SlamSituation, f: AuctionFacts, hand: Hand): SlamSit
       if (dec.plan.kind === 'slam') return { ...sit, kind: 'slam', setup: dec.plan.setup }
       if (dec.plan.kind === 'exclusion') return { ...sit, kind: 'exclusion', trump: dec.plan.trump, partnerMin: dec.plan.partnerMin }
       if (dec.plan.kind === 'mss') return { ...sit, kind: 'mss', minor: dec.plan.minor, rebidCall: dec.plan.rebidCall }
+      if (dec.plan.kind === 'gerberRebid' && dec.plan.suit && firstCall === '4C') return { ...sit, kind: 'gerber', partnerMin: 12, placeSuit: dec.plan.suit }
     }
   } else if (sit.prefix === 5) {
     const response = partnerResponseAsSeen(f, at(1))
@@ -944,19 +996,50 @@ function captainIntent(sit: SlamSituation, f: AuctionFacts, hand: Hand): SlamSit
   return sit
 }
 
+/**
+ * Kaptenens tur i en slamsekvens vars trumf INTE går att läsa ur auktionen
+ * (naket 4NT efter reverse/hoppskift eller över 1NT-återbudet — bok-mot-motor-
+ * fynd 14): kaptenen vet ändå vad hon menade. Samma uppspelning som
+ * `captainIntent`, men från noll: hennes eget beslut på prefixet måste ge
+ * exakt budet i auktionen och en slamplan, annars null (människan i
+ * kaptenstolen kan ha menat något annat). Familj 6, 2026-09-05 — förut
+ * spelade manuset upp fortsättningen med båda händerna.
+ */
+function captainOwnSituation(f: AuctionFacts, hand: Hand): SlamSituation | null {
+  const open = f.opening
+  if (!open || f.theirContractBids.length > 0) return null
+  if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  const ours = f.ourContractBids
+  const captain = PARTNER[open.seat]
+  if (f.seat !== captain || ours.length < 5 || ours.length % 2 === 0) return null // kaptenens tur efter sitt första slamsteg
+  if (ours[0] !== f.contractBids[0]) return null
+  for (let i = 0; i < ours.length; i++) if (ours[i].seat !== (i % 2 === 0 ? open.seat : captain)) return null
+  const sofarFrom = (k: number): SlamBid[] => ours.slice(k).map((c) => ({ role: c.seat === captain ? 'svarare' : 'öppnare', call: c.bid }))
+  for (const prefix of [3, 5] as const) {
+    if (ours.length <= prefix) break
+    const guess: SlamSituation = { kind: 'slam', captain, prefix, sofar: sofarFrom(prefix) }
+    const mine = captainIntent(guess, f, hand)
+    if (mine !== guess) return mine
+  }
+  return null
+}
+
 const TABELL: Row[] = [
   // Familj 5 — slamutredningen per stol. En slamsekvens pågår (kaptenens
   // första slambud finns i den ostörda auktionen). Raden spänner över
   // budpositionerna — en slamsekvens är en delauktion inne i den ostörda
   // linjen — och ligger därför först; tiger den (inte min tur, sekvensen är
-  // slut, oläsbar trumf) får positionsraderna ordet.
+  // slut, oläsbar trumf) får positionsraderna ordet. Kaptenen får sin egen
+  // avsikt även när trumfen inte syns i auktionen (`captainOwnSituation`).
   {
     id: 'slam',
-    läge: (f) => slamSituation(f) !== null,
+    läge: (f) => slamSituation(f) !== null || (f.opening !== null && f.role === 'svarare' && f.ourContractBids.length >= 5),
     välj: ({ hand, facts }) => {
-      const sit = slamSituation(facts)!
+      const read = slamSituation(facts)
+      const sit = read ?? captainOwnSituation(facts, hand)
+      if (!sit) return null
       const role: SlamRole = facts.seat === sit.captain ? 'svarare' : 'öppnare'
-      const mine = role === 'svarare' ? captainIntent(sit, facts, hand) : sit
+      const mine = role === 'svarare' && read ? captainIntent(read, facts, hand) : sit
       const t = slamSituationTurn(mine, role, hand)
       if (!t) return null
       return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation }
@@ -1035,7 +1118,9 @@ const TABELL: Row[] = [
       const dec = responderSecondDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, hand)
       if (!dec) return null
       const t = dec.turn
-      return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain }
+      // `avslut`: placeringen efter 2♣ med fit, 6NT-avslutet och 2/1-utgången
+      // sätter kontraktet — partnern har inget att tillägga (manuset läser den).
+      return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain, avslut: dec.plan.kind === 'final' || undefined }
     },
   },
   // Familj 4b — öppnarens tredje bud. Vår sida har exakt fyra kontraktsbud
