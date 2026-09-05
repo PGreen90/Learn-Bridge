@@ -30,8 +30,16 @@
 //      hopphöjning / reverse–hoppskift / Jacoby–inverterad fit / splinter-relä
 //      / MSS / 1NT-återbudet, sedan `responderSecondBid`) där varje slamgren
 //      ger KAPTENENS FÖRSTA STEG ur egen hand (`slamCaptainFirstStep` m.fl.).
-//      Partnerns återbud läses med `rebidAsSeen`. Familj 4b (öppnarens tredje
-//      bud) och familj 5 (resten av slamsekvenserna) är kvar i manuset.
+//      Partnerns återbud läses med `rebidAsSeen`.
+//   4b. Öppnarens tredje bud (2026-09-05): jag öppnade, partnern svarade, jag
+//      gav återbud, partnern bjöd sitt andra bud — allt ostört →
+//      `openerThirdDecision`: manusets grenar i samma ordning (2/1 försenat
+//      stöd · NMF · fjärde färg · 1NT-auktionens inbjudan · semi-forcing 1NT ·
+//      egen höjning + inbjudan · inverterad broms · reverse + preferens ·
+//      2NT-checkback · 5-3-jakt). Partnerns andra bud läses med `secondAsSeen`;
+//      mitt eget återbud med samma `rebidAsSeen` som svararen använder (den
+//      läser bara auktionen). Svararens tredje bud (placeringar) och familj 5
+//      (resten av slamsekvenserna) är kvar i manuset.
 
 import type { Hand, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
@@ -40,7 +48,7 @@ import { meaningOf } from './auction-meaning'
 import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep } from './nt-slam'
 import { classifyOpening } from './openings'
-import { openerSecondBid } from './rebids'
+import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderSecondBid } from './responder-rebids'
 import { respondToGerber } from './slam'
 import { exclusionFirstStep, familyAFitTrump, mssFirstStep, slamCaptainFirstStep, type SlamContext, type SlamTurn } from './slam-auction'
@@ -176,6 +184,31 @@ export function rebidAsSeen(f: AuctionFacts, index: number): ResponseResult | nu
   else if (rule === 'rebid: 2NT (18–19)' && oneLevelSuit) rule = '2NT (18–19)'
   else if (rule === 'rebid: utgång' && oneLevelSuit && cb && cb.strain === respStrain) rule = 'höjning till utgång'
   else if (rule === 'rebid: ny färg (GF)' && openCall === '2C') rule = 'rebid: egen färg (GF)'
+  return { call: bid, rule, explanation: m.text }
+}
+
+/**
+ * Partnerns ANDRA bud nr `index` som öppnaren ser det: bud + den regel som
+ * öppnarens tredje-buds-funktioner dispatchar på, härledd ur den NAKNA
+ * auktionen. Läsaren och motorn använder samma namn för allt tredje budet
+ * beror på (NMF, fjärde färg, inbjudan, broms, preferens, checkback …); ett
+ * undantag översätts här: efter 1M–1NT–2M säger motorn 'inbjudan' om
+ * 3M-limithöjningen, läsaren 'inbjudan (limithöjning)'. Terminala namn (till
+ * spel/utgång) skiljer sig men avgör inget tredje bud. Adaptersvepet i
+ * auction-decide.test.ts vaktar. null = läsaren namnger inte budet.
+ */
+export function secondAsSeen(f: AuctionFacts, index: number): ResponseResult | null {
+  const naken = f.history.map((c) => ({ seat: c.seat, bid: c.bid }) as ResolvedCall)
+  const m = meaningOf(naken, index)
+  let rule = m.rule
+  if (!rule) return null
+  const bid = f.history[index].bid
+  const open = f.opening!
+  const openCall = `${open.level}${open.strain}`
+  const respBid = f.ourContractBids[1]?.bid ?? ''
+  const rebidBid = f.ourContractBids[2]?.bid ?? ''
+  const semi = (openCall === '1H' || openCall === '1S') && respBid === '1NT'
+  if (rule === 'inbjudan (limithöjning)' && semi && rebidBid === `2${open.strain}`) rule = 'inbjudan'
   return { call: bid, rule, explanation: m.text }
 }
 
@@ -387,6 +420,85 @@ export function openerRebidDecision(openCall: string, seen: ResponseResult, hand
   return openerSecondBid(openCall, seen, hand)
 }
 
+const RANK: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+
+/**
+ * Öppnarens TREDJE bud på partnerns ostörda andra bud, ur egen hand: manusets
+ * grenar i samma ordning. `response` = partnerns svar, `rebid` = mitt eget
+ * återbud, `second` = partnerns andra bud — alla som de ses i auktionen.
+ * null = ingen regel för läget (det gamla lagret tar vid: utgångsbud som
+ * passas, 2/1-fortsättningar, preferens utan reverse …). Delas av tabellraden
+ * och manuset (`auction.ts`).
+ */
+export function openerThirdDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, second: ResponseResult, hand: Hand): ResponseResult | null {
+  if (second.call === 'P') return null
+  const openerSuit = suitOf(openCall)
+  const respSuit = suitOf(response.call)
+
+  // 2/1 med FÖRSENAT stöd i öppnarens lågfärg (1m–2m'–2NT–3m, felrapport #58):
+  // öppnaren beskriver (3NT-förslag / 4m); kaptenen räknar sedan mot visade 12.
+  if (second.rule === '2/1: försenat stöd' && openerSuit && !isMajorSuit(openerSuit)) {
+    return openerAfterDelayedMinorSupport(hand, openerSuit)
+  }
+
+  // New Minor Forcing (§5.7, krav): öppnaren svarar alltid.
+  if (second.rule === 'New Minor Forcing' && openerSuit && respSuit && isMajorSuit(respSuit)) {
+    const nmfMinor = suitOf(second.call)
+    if (nmfMinor) {
+      const unbid = RANK.find((s) => s !== openerSuit && s !== respSuit && s !== nmfMinor)!
+      return openerAnswerNMF(hand, openerSuit, respSuit, nmfMinor, unbid)
+    }
+  }
+
+  // Fjärde färg (§6.6, utgångskrav): öppnaren beskriver. Svarsfunktionen är
+  // byggd för bokens mönster — tre 1-lägesbud och fjärde färgen billigast på
+  // 2-läget (kunde den bjudits på 1-läget är den naturlig). Annat → gamla lagret.
+  if (second.rule === 'fjärde färg krav' && openerSuit && respSuit) {
+    const secondSuit = suitOf(rebid.call)
+    const fourth = suitOf(second.call)
+    const cb = parseContractBid(second.call)
+    if (secondSuit && fourth && cb && cb.level === 2 && response.call.startsWith('1') && rebid.call.startsWith('1') && RANK.indexOf(fourth) < RANK.indexOf(secondSuit)) {
+      return openerAnswerFourthSuit(hand, openerSuit, secondSuit, respSuit, fourth)
+    }
+  }
+
+  // Inbjudan i en 1NT-auktion (Stayman/transfer, felrapport #37).
+  if (openCall === '1NT' && second.rule === 'inbjudan') {
+    const t = openerThirdBidIn1NTAuction(response, rebid, second, hand)
+    if (t) return t
+  }
+
+  // Efter semi-forcing 1NT: inbjudan (3M/2NT/höjning) eller svararens egen
+  // färg till spel (etapp 5 fix 2, felrapport #59).
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'semi-forcing 1NT' && (second.rule.startsWith('inbjudan') || second.rule === 'ny färg efter 1NT')) {
+    const t = openerThirdBidAfterSemiForcing1NT(hand, openerSuit as 'hearts' | 'spades', rebid, second)
+    if (t) return t
+  }
+
+  // Min enkla höjning av partnerns 1M + partnerns 3M-inbjudan: öppnaren
+  // svarar alltid (systemfel #3 delfix 4b).
+  if ((response.call === '1H' || response.call === '1S') && rebid.rule === 'enkel höjning' && second.rule === 'inbjudan' && second.call === `3${response.call[1]}`) {
+    return openerThirdBidAfterOwnRaise(hand, respSuit as 'hearts' | 'spades')
+  }
+
+  // Svararens broms efter min stopp-visning i den inverterade minorn (B13).
+  if (second.rule === 'inverterad: broms' && openerSuit && !isMajorSuit(openerSuit)) {
+    return openerThirdBidAfterInvertedBrake(hand, openerSuit, suitOf(rebid.call))
+  }
+
+  // Min reverse + partnerns preferens tillbaka (delfix 4c).
+  if (rebid.rule === 'reverse' && second.rule === 'preferens' && openerSuit && respSuit) {
+    const reverseSuit = suitOf(rebid.call)
+    if (reverseSuit) return openerThirdBidAfterReverse(hand, openerSuit, respSuit, reverseSuit, second.call)
+  }
+
+  // Systems on efter mitt 2NT-återbud: checkback resp. direkt 3M (5-3-jakt).
+  if (second.rule === '2NT-checkback' && respSuit) return openerAnswer2NTCheckback(hand, respSuit)
+  if (second.rule === '2NT-återbud (5-3-jakt)' && respSuit) return openerAnswer2NTMajorSeek(hand, respSuit)
+
+  return null
+}
+
 const TABELL: Row[] = [
   // Familj 1 — öppningen. Ingen har öppnat (inga kontraktsbud; X/XX kan inte
   // komma före ett bud), så stolen är i öppningsposition. Positionen styr
@@ -462,6 +574,32 @@ const TABELL: Row[] = [
       if (!dec) return null
       const t = dec.turn
       return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain }
+    },
+  },
+  // Familj 4b — öppnarens tredje bud. Vår sida har exakt fyra kontraktsbud
+  // (min öppning, partnerns svar, mitt återbud, partnerns andra bud),
+  // motståndarna bara pass, ingen X, och partnerns andra bud är det senaste.
+  {
+    id: 'tredje',
+    läge: (f) =>
+      f.opening !== null &&
+      f.opening.seat === f.seat &&
+      f.ourContractBids.length === 4 &&
+      f.theirContractBids.length === 0 &&
+      f.ourContractBids[1].seat === f.partner &&
+      f.ourContractBids[2].seat === f.seat &&
+      f.ourContractBids[3].seat === f.partner &&
+      f.lastNonPass === f.ourContractBids[3] &&
+      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+    välj: ({ hand, facts }) => {
+      const at = (i: number) => facts.history.indexOf(facts.ourContractBids[i])
+      const response = partnerResponseAsSeen(facts, at(1))
+      const rebid = rebidAsSeen(facts, at(2))
+      const second = secondAsSeen(facts, at(3))
+      if (!response || !rebid || !second) return null
+      const r = openerThirdDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, second, hand)
+      if (!r) return null
+      return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
     },
   },
 ]

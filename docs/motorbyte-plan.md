@@ -135,7 +135,12 @@ Hela sviten (`npm test`) är grunden. Ovanpå den, per etapp och per familj:
   HÄR familjernas b-listor kommer ifrån i etapp 3: bot mot bot ändras inget
   (samma kunskapsfunktioner), skillnaden är att tabellen svarar där manuset
   saknades. (Svar-läget bär också familj 4a: bottens andra bud på människans
-  öppning syns i direkt/3:e hand-lägena.) Dumpen avslöjar också OLAGLIGA tabellbud (laglighetsvakten i
+  öppning syns i direkt/3:e hand-lägena.) Sedan familj 4b finns ett fjärde
+  läge, *svar2*: bottarna bjuder ostört fram till svararens ANDRA tur
+  (öppning–P–svar–P–återbud–P) och människan bjuder vart och ett av de
+  lagliga kontraktsbuden upp till 4NT samt 5♣/5♦ (nyckel
+  `<frö>/svar2/<öppning>-<svar>-<återbud>-<bud>`) — bottens tredje bud är
+  familj 4b:s b-lista. Dumpen avslöjar också OLAGLIGA tabellbud (laglighetsvakten i
   `decideCallTraced` gör dem till pass med källan märkt `olagligt`) — räkna dem
   med `node -e` över JSON-filen; de ska vara noll före merge.
 - **Revisorn** (bud mot par): `$env:REVISOR='1'; npx vitest run
@@ -256,9 +261,13 @@ inte flyttat än.
    *svar2* med `responderSecondDecision` (manusets grenordning; varje slamgren
    ger kaptenens första steg ur egen hand — `slamCaptainFirstStep`,
    `exclusionFirstStep`, `mssFirstStep`, `gerberRebidFirstStep`,
-   `systemsOnFirstStep`) och adaptern `rebidAsSeen`. **4b öppnarens tredje bud**
-   återstår (NÄSTA): `openerThirdBid*`, NMF-/checkback-svaren, 2/1-försenat
-   stöd; adaptern för svararens andra bud som öppnaren ser det.
+   `systemsOnFirstStep`) och adaptern `rebidAsSeen`. **4b öppnarens tredje bud
+   KLAR 2026-09-05** (loggen): raden *tredje* med `openerThirdDecision`
+   (manusets grenar: 2/1 försenat stöd · NMF · fjärde färg · 1NT-auktionens
+   inbjudan · semi-forcing 1NT · egen höjning + inbjudan · inverterad broms ·
+   reverse + preferens · 2NT-checkback · 5-3-jakt) och adaptern `secondAsSeen`;
+   svararens tredje bud (placeringarna efter NMF/fjärde färg/checkback/broms)
+   ligger kvar i manuset och det gamla lagret tills familj 5.
 5. **Slamutredningen** — `slamInvestigation`/Gerber/Exclusion/MSS per stol:
    kaptenens tur använder kaptenens hand, öppnarens tur öppnarens. Funktions-
    signaturerna smalnas till EN hand + fakta. Kikvakten blir skarp här.
@@ -354,6 +363,63 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-05 — Etapp 3 familj 4b KLAR: öppnarens tredje bud.** Raden
+  *tredje* i `auction-decide.ts` (läget: vår sidas fyra kontraktsbud öppning–
+  svar–återbud–svararens andra bud, motståndarna bara pass, ingen X, partnerns
+  andra bud senast) → `openerThirdDecision` = manusets grenar i samma ordning:
+  2/1 försenat stöd (`openerAfterDelayedMinorSupport`) · NMF (`openerAnswerNMF`)
+  · fjärde färg (`openerAnswerFourthSuit`, bara bokens mönster: tre 1-lägesbud
+  och fjärde färgen billigast på 2-läget) · 1NT-auktionens inbjudan
+  (`openerThirdBidIn1NTAuction`) · semi-forcing 1NT (`openerThirdBidAfter
+  SemiForcing1NT`) · egen höjning + 3M-inbjudan (`openerThirdBidAfterOwnRaise`)
+  · inverterad broms (`openerThirdBidAfterInvertedBrake`) · reverse + preferens
+  (`openerThirdBidAfterReverse`) · 2NT-checkback och 5-3-jakt. Partnerns andra
+  bud läses med adaptern `secondAsSeen` (nakna auktionen; enda översättningen:
+  'inbjudan (limithöjning)' → 'inbjudan' efter 1M–1NT–2M), mitt eget återbud
+  med `rebidAsSeen`. Manuset (`auction.ts`) läser samma beslut och bygger bara
+  fortsättningarna som behöver svararens hand (placeringen efter checkback,
+  bromsens fjärde bud) eller båda händerna (försenat stöds slam, NMF-slam —
+  familj 5). Skarpt adaptersvep i `auction-decide.test.ts`: 3000 botauktioner,
+  bara DISPATCH-namnen jämförs (terminala 'till spel'/'utgång'-namn får skilja).
+  Regelnamnssvepet före (sond, 3000 frön): svararens andra bud 816, 480 samma
+  namn, 134 mönster, nästan alla terminala. **Läsaren rättad på tre ställen**
+  (hål som svepet/dumpen visade): svararens egen färg på 2-läget efter 1M–1NT–2x
+  (`responderNewSuitAfter1NT`) saknade regelnamn ('ny färg efter 1NT' — utan
+  det passade öppnaren inte längre 1♥–1NT–2♣–2♦, frö 20272049); 3NT över
+  2NT-Stayman/-transfer lästes som inbjudan (L + 1 = 3); försenat stöd lästes
+  även för ett hopp till 4m (1♦–2♣–2NT–4♦ → öppnarens 3NT var OLAGLIGT →
+  pass), nu bara 3m. Avvikelsedumpen fick det fjärde läget *svar2* (§3);
+  baslinjen togs om med den nya proben på `45fa322`-koden.
+  **Auktionsdiffen** (baslinje `45fa322`): 3000 givar, ÄNDRAT BUD 0, samma bud
+  med annan källa 154 (manus → tabell:tredje, plus passen efter svararens
+  andra bud som nu ligger i manuset). **Avvikelsedumpen** (14029 auktioner,
+  fyra lägen): ÄNDRAT BUD 99 i 67 mönster, 0 olagliga; alla klass (b) —
+  samma kunskapsfunktioner som manuset: öppnaren dömer nu inbjudningar
+  (accepterar/avböjer: 1♠–1NT–2♠–3♠ → 4♠ med 15+ bergenpoäng, 1NT–2♦–2♥–2NT →
+  3♥ preferens med minimum + fit) i stället för pass utan regel eller
+  gisslagrets 3NT; svarar på checkback (1♣–1♠–2NT–3♣ → 3♥ med fyra hjärter),
+  5-3-jakt (3NT utan 3-stöd), NMF; driver efter bromsen (1♦–2♦–2♠–3♦ → 5♦
+  med 15+ och 3NT otäckt, B13); 2/1-försenat stöd → 3NT-förslag (frö 20270063:
+  förr kravvaktens 4♣); reverse + preferens → 5♣ med 18+ (frö 20270156). I
+  svar2-läget (1351 auktioner) tog tabellen öppnarens tredje bud i 85; resten
+  är människans utgångsbud (öppnaren passar utan regel), kravvakten,
+  gisslagret och RKC-detektorn — familj 5-läget. **Kikvaktens mätläge**: 2898
+  bud, 134 byter (4,6 %, från 4,9 %); `tabell:tredje` 14/0. **Sveparna**
+  identiska (betydelse ostört 0/3/0, kända 39 bud i 2 mönster; förklaring 0
+  utan förklaring; regelsvep grönt). Frekvensbilden: manus 7354 bud,
+  `tabell:tredje` 154. Hela sviten grön (`npm test`), `npx tsc` rent.
+  **Bok-mot-motor-fynd (ägarbeslut vid familjen):** (11) svararens NYA färg på
+  3-läget efter 1M–1NT–2x (t.ex. 1♠–1NT–2♠–3♥) — standard: inbjudan med 6+
+  kort; motorn saknar regeln (läsaren namnger inte budet, kravvakten svarar
+  "krav – rebjuder egen färg"); (12) svararens hopp till 4m efter 1m–2m'–2NT
+  (1♦–2♣–2NT–4♦) saknar regel (kravvakten 5♦); (13) fjärde färg i 2/1-form
+  (1♠–2♣–2♦–2♥): läsaren läser fjärde färg men svarsfunktionen är byggd för
+  1-lägesmönstret — gamla lagret. **Känt hål till familj 5:** en BOT i
+  svararstolen som bjudit checkback/NMF/fjärde färg ur tabellen (partnern
+  människa) placerar inte efteråt — placeringarna bor i manuset och
+  `nmfPlacementToAnswer`/`placeGameAfterFourthSuit`; kortfärgssvaren på
+  splinter-reläet läses som cue-bud av slamzonen (familj 5:s läsare).
+  **Revisorn** (kommandot i §3, 1000 givar, frö 20260721): rätt kontrakt 20,4 % · snittförlust 268,05 — identiskt med familj 4a (bot mot bot ändras inget; fel-färg-bet 117).
 - **2026-09-05 — Etapp 3 familj 4a KLAR: svararens andra bud.** Raden *svar2*
   i `auction-decide.ts` (läget: vår sidas tre kontraktsbud öppning–mitt svar–
   partnerns återbud, motståndarna bara pass, ingen X) → `responderSecondDecision`

@@ -6,7 +6,7 @@ import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
 import { classifyOpening, isVulnerable } from './openings'
-import { decideFromTable, openerRebidDecision, partnerResponseAsSeen, rebidAsSeen, responderSecondDecision, responseDecision, RESPONDABLE, type DecidedCall } from './auction-decide'
+import { decideFromTable, openerRebidDecision, openerThirdDecision, partnerResponseAsSeen, rebidAsSeen, responderSecondDecision, responseDecision, secondAsSeen, RESPONDABLE, type DecidedCall } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
@@ -18,7 +18,6 @@ import { hasStopper } from './overcalls'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerNMF, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { responderPlaceAfter2NTCheckback } from './responder-rebids'
 import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
 import { strong2NTSystemsOn } from './strong-2nt-systemson'
@@ -636,179 +635,111 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   }
 
   const second = dec.turn
-  {
-    turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
+  turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
 
-    // 2/1 med FÖRSENAT stöd i öppnarens lågfärg (ägarbeslut 2026-09-03,
-    // felrapport #58): 1m–2m'–2NT–3m satte trumf med slamintresse. Öppnaren
-    // beskriver (3NT-förslag / 4m), sedan räknar kaptenen mot 2NT:s visade 12
-    // (ärliga slamportar): cue-ronden över 3NT, driv 33+, inbjudan 31–32 —
-    // annars placeras utgången (pass på 3NT / 5m).
-    if (second.rule === '2/1: försenat stöd' && openerSuit && (openerSuit === 'clubs' || openerSuit === 'diamonds')) {
-      const oh = deal.hands[openerSeat]
-      const rh = deal.hands[responderSeat]
-      const third = openerAfterDelayedMinorSupport(oh, openerSuit)
-      turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
-      const slam = slamInvestigation(oh, rh, openerSuit, third.call, {
-        partnerMin: 12,
-        inviteCall: third.call === '3NT' ? `4${LETTER[openerSuit]}` : `5${LETTER[openerSuit]}`,
-        gameForcing: true,
-        cueFloor: '3NT',
-      })
-      if (slam) {
-        for (const t of slam) {
-          const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-          turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-        }
-        return finish(false)
-      }
-      const place =
-        third.call === '3NT'
-          ? { call: 'P', rule: 'svararens pass', explanation: `Under slamzonen mot visade 12 → 3NT står (pass).` }
-          : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `Under slamzonen → 5${SUIT_SYM[openerSuit]} (utgång i den satta trumfen).` }
-      turns.push({ seat: responderSeat, role: 'svarare', call: place.call, rule: place.rule, explanation: place.explanation })
+  // Öppnarens TREDJE bud ur BESLUTSTABELLENS kunskap (etapp 3 familj 4b,
+  // 2026-09-05): partnerns andra bud läses som öppnaren ser det
+  // (`secondAsSeen`), mitt eget återbud med `rebidAsSeen` — samma väg som
+  // `decideCall` tar vid bordet. Fortsättningarna som behöver svararens hand
+  // (placeringar) eller båda händerna (slamsekvenser, familj 5) byggs här.
+  const hittills3: ResolvedCall[] = [
+    ...hittills2,
+    { seat: responderSeat, bid: second.call },
+    { seat: rhoSeat, bid: 'P' },
+  ]
+  const f3 = auctionFacts(hittills3, openerSeat)
+  const seenResponse3 = partnerResponseAsSeen(f3, hittills.length - 2)
+  const seenRebid3 = rebidAsSeen(f3, hittills2.length - 2)
+  const seenSecond = secondAsSeen(f3, hittills3.length - 2)
+  const third = seenResponse3 && seenRebid3 && seenSecond ? openerThirdDecision(opening.call, seenResponse3, seenRebid3, seenSecond, oh) : null
+  // Ingen regel för partnerns andra bud (utgångsbud, 2/1-fortsättning, preferens
+  // utan reverse …): auktionen fortsätter i det gamla lagret som förut.
+  if (!third) return finish(second.call !== 'P')
+  turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation, uncertain: third.uncertain })
+
+  // 2/1 med FÖRSENAT stöd i öppnarens lågfärg (ägarbeslut 2026-09-03,
+  // felrapport #58): 1m–2m'–2NT–3m satte trumf med slamintresse. Öppnaren har
+  // beskrivit (3NT-förslag / 4m); nu räknar kaptenen mot 2NT:s visade 12
+  // (ärliga slamportar): cue-ronden över 3NT, driv 33+, inbjudan 31–32 —
+  // annars placeras utgången (pass på 3NT / 5m).
+  if (second.rule === '2/1: försenat stöd' && openerSuit && (openerSuit === 'clubs' || openerSuit === 'diamonds')) {
+    const slam = slamInvestigation(oh, rh, openerSuit, third.call, {
+      partnerMin: 12,
+      inviteCall: third.call === '3NT' ? `4${LETTER[openerSuit]}` : `5${LETTER[openerSuit]}`,
+      gameForcing: true,
+      cueFloor: '3NT',
+    })
+    if (slam) {
+      pushSeq(slam)
       return finish(false)
     }
-
-    // NMF-SLAM (hål C, cue-bud 2026-08-03): efter 1m–1M–1NT–2m(NMF) svarar
-    // öppnaren, och visar hen fördröjt 3-korts stöd i svararens högfärg är en
-    // 5-3-fit AGREED → trumf klar → cue-ronden (§6.2) körs. Tas on-book BARA när
-    // det faktiskt når slam (6/7); annars lämnas auktionen öppen och live-lagret
-    // placerar utgången via responderPlaceAfterNMF precis som förut.
-    if (second.rule === 'New Minor Forcing' && openerSuit) {
-      const oh = deal.hands[openerSeat]
-      const rh = deal.hands[responderSeat]
-      const responderMajor = parseBid(response.call).suit
-      const nmfMinor = parseBid(second.call).suit
-      if (responderMajor && nmfMinor) {
-        const unbid = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).find(
-          (s) => s !== openerSuit && s !== responderMajor && s !== nmfMinor,
-        )!
-        const ans = openerAnswerNMF(oh, openerSuit, responderMajor, nmfMinor, unbid)
-        if (parseBid(ans.call).suit === responderMajor && lengths(rh)[responderMajor] >= 5) {
-          const slam = slamInvestigation(oh, rh, responderMajor, ans.call, {
-            partnerMin: ans.call.startsWith('3') ? 14 : 12, // öppnarens hopp = maximum
-            inviteCall: `5${LETTER[responderMajor]}`,
-            gameForcing: true,
-          })
-          if (slam && Number(slam[slam.length - 1].call[0]) >= 6) {
-            turns.push({ seat: openerSeat, role: 'öppnare', call: ans.call, rule: ans.rule, explanation: ans.explanation })
-            for (const t of slam) {
-              const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-              turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-            }
-            return finish(false)
-          }
-        }
-      }
-    }
-
-    // Öppnarens TREDJE bud (felrapport #37): en INBJUDAN i en 1NT-auktion
-    // besvaras on-book (accept med maximum / pass med minimum) i stället för
-    // att falla igenom till off-book-svaret (som bjöd 3NT "utan stöd" mitt i
-    // en Stayman-hittad hjärterfit).
-    if (opening.call === '1NT' && second.rule === 'inbjudan') {
-      const third = openerThirdBidIn1NTAuction(response, rebid, second, deal.hands[openerSeat])
-      if (third) {
-        turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
-        return finish(false)
-      }
-    }
-    // ETAPP 5 fix 2: samma sak efter semi-forcing 1NT (1♥/1♠–1NT–…). Öppnaren
-    // svarade förr inte alls på svararens inbjudan → off-book-lagret passade
-    // och utgången försvann (frö 20260843: 2NT med AQT863 + 14 hp, 4♠ hemma).
-    if ((opening.call === '1H' || opening.call === '1S') && response.rule === 'semi-forcing 1NT' && (second.rule.startsWith('inbjudan') || second.rule === 'ny färg efter 1NT')) {
-      const third = openerThirdBidAfterSemiForcing1NT(
-        deal.hands[openerSeat],
-        opening.call === '1H' ? 'hearts' : 'spades',
-        rebid,
-        second,
-      )
-      if (third) {
-        turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
-        return finish(false)
-      }
-    }
-    // Systemfel #3 delfix 4b (2026-08-07): öppnaren höjde svararens 1M till 2M
-    // (enkel höjning) och svararen inviterar 3M — öppnaren svarar ALLTID:
-    // 14+ stödpoäng mot fiten accepterar (4M), annars pass (frö 20260982:
-    // 15 hp + 4 trumf + singel passade inviten → 3♥ på 26 hp).
-    if (
-      (response.call === '1H' || response.call === '1S') &&
-      rebid.rule === 'enkel höjning' &&
-      second.rule === 'inbjudan' &&
-      second.call === `3${response.call[1]}`
-    ) {
-      const M4b = response.call === '1H' ? ('hearts' as const) : ('spades' as const)
-      const third = openerThirdBidAfterOwnRaise(deal.hands[openerSeat], M4b)
-      turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
-      return finish(false)
-    }
-    // B13 (2026-08-07): svararens BROMS efter öppnarens stopp-visning i den
-    // inverterade minorn (1m–2m–ny färg–3m = "bara minimum, 10–12"). Öppnaren
-    // svarar alltid: pass med 12–14, driv med 15+ (3NT / andra stoppen / 5m).
-    // Efter en andra stopp-visning täcker svararen resten eller tar 5m.
-    if (second.rule === 'inverterad: broms' && openerSuit && (openerSuit === 'clubs' || openerSuit === 'diamonds')) {
-      const third = openerThirdBidAfterInvertedBrake(deal.hands[openerSeat], openerSuit, parseBid(rebid.call).suit)
-      turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
-      if (third.rule === 'inverterad: stopp-visning') {
-        const shown1 = parseBid(rebid.call).suit
-        const shown2 = parseBid(third.call).suit
-        const rh = deal.hands[responderSeat]
-        const rest = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter(
-          (s) => s !== openerSuit && s !== shown1 && s !== shown2,
-        )
-        const fourth = rest.every((s) => hasStopper(rh, s))
-          ? { call: '3NT', rule: '3NT till spel', explanation: `Öppnaren driver (15+) och resten är täckt → 3NT (till spel).` }
-          : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `Öppnaren driver (15+) men 3NT är otäckt → 5${SUIT_SYM[openerSuit]} (minorutgång).` }
-        turns.push({ seat: responderSeat, role: 'svarare', call: fourth.call, rule: fourth.rule, explanation: fourth.explanation })
-      }
-      return finish(false)
-    }
-    // Delfix 4c: öppnarens reverse + svararens preferens tillbaka — reversens
-    // 17-minimum får passa, 18+ driver till utgång (3NT med håll i objudna
-    // färgen + 2+ kort i partnerns färg, annars fiten; frö 20261111 → 5♣).
-    if (rebid.rule === 'reverse' && second.rule === 'preferens' && openerSuit) {
-      const responderSuit4c = parseBid(response.call).suit
-      const reverseSuit4c = parseBid(rebid.call).suit
-      if (responderSuit4c && reverseSuit4c) {
-        const third = openerThirdBidAfterReverse(deal.hands[openerSeat], openerSuit, responderSuit4c, reverseSuit4c, second.call)
-        turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation })
-        return finish(false)
-      }
-    }
-    // Systems on: svararens CHECKBACK (3♣) efter öppnarens 2NT-återbud
-    // (1x–1y–2NT, 18–19 bal, §4.9). Öppnaren visar sin dolda 4-korts andra
-    // högfärg / 3NT, svararen placerar 4-4-fiten eller passar. Behöver BÅDA
-    // händerna → tas on-book här (linjen replay:as av live-lagret).
-    if (second.rule === '2NT-checkback') {
-      const responderMajor = parseBid(response.call).suit
-      if (responderMajor) {
-        const ans = openerAnswer2NTCheckback(deal.hands[openerSeat], responderMajor)
-        turns.push({ seat: openerSeat, role: 'öppnare', call: ans.call, rule: ans.rule, explanation: ans.explanation })
-        const place = responderPlaceAfter2NTCheckback(deal.hands[responderSeat], responderMajor, ans)
-        if (place.call !== 'P') {
-          turns.push({ seat: responderSeat, role: 'svarare', call: place.call, rule: place.rule, explanation: place.explanation })
-        }
-        return finish(false)
-      }
-    }
-    // Systems on: svararens direkta 3♥/3♠ (egen 5-korts högfärg, 5-3-jakt).
-    // Öppnaren höjer med 3-stöd (4M) eller placerar 3NT.
-    if (second.rule === '2NT-återbud (5-3-jakt)') {
-      const responderMajor = parseBid(response.call).suit
-      if (responderMajor) {
-        const ans = openerAnswer2NTMajorSeek(deal.hands[openerSeat], responderMajor)
-        turns.push({ seat: openerSeat, role: 'öppnare', call: ans.call, rule: ans.rule, explanation: ans.explanation })
-        return finish(false)
-      }
-    }
-    return finish(second.call !== 'P')
+    const place =
+      third.call === '3NT'
+        ? { call: 'P', rule: 'svararens pass', explanation: `Under slamzonen mot visade 12 → 3NT står (pass).` }
+        : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `Under slamzonen → 5${SUIT_SYM[openerSuit]} (utgång i den satta trumfen).` }
+    turns.push({ seat: responderSeat, role: 'svarare', call: place.call, rule: place.rule, explanation: place.explanation })
+    return finish(false)
   }
 
-  // Svararens andra bud saknar regel än: auktionen fortsätter senare.
-  return finish(true)
+  // NMF-SLAM (hål C, cue-bud 2026-08-03): visade öppnaren fördröjt 3-korts stöd
+  // i svararens högfärg är en 5-3-fit AGREED → trumf klar → cue-ronden (§6.2)
+  // körs BARA när den faktiskt når slam (6/7); annars lämnas auktionen öppen
+  // och svararen placerar utgången via responderPlaceAfterNMF som förut.
+  if (second.rule === 'New Minor Forcing' && openerSuit) {
+    const responderMajor = parseBid(response.call).suit
+    if (responderMajor && parseBid(third.call).suit === responderMajor && lengths(rh)[responderMajor] >= 5) {
+      const slam = slamInvestigation(oh, rh, responderMajor, third.call, {
+        partnerMin: third.call.startsWith('3') ? 14 : 12, // öppnarens hopp = maximum
+        inviteCall: `5${LETTER[responderMajor]}`,
+        gameForcing: true,
+      })
+      if (slam && Number(slam[slam.length - 1].call[0]) >= 6) {
+        pushSeq(slam)
+        return finish(false)
+      }
+    }
+    return finish(true)
+  }
+
+  // Fjärde färg: öppnaren har beskrivit; svararen placerar utgången i det
+  // gamla lagret (placeGameAfterFourthSuit) tills placeringarna flyttar.
+  if (second.rule === 'fjärde färg krav') return finish(true)
+
+  // B13 (2026-08-07): efter öppnarens ANDRA stopp-visning över svararens broms
+  // täcker svararen resten (3NT) eller tar 5m.
+  if (second.rule === 'inverterad: broms' && openerSuit && (openerSuit === 'clubs' || openerSuit === 'diamonds')) {
+    if (third.rule === 'inverterad: stopp-visning') {
+      const shown1 = parseBid(rebid.call).suit
+      const shown2 = parseBid(third.call).suit
+      const rest = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).filter(
+        (s) => s !== openerSuit && s !== shown1 && s !== shown2,
+      )
+      const fourth = rest.every((s) => hasStopper(rh, s))
+        ? { call: '3NT', rule: '3NT till spel', explanation: `Öppnaren driver (15+) och resten är täckt → 3NT (till spel).` }
+        : { call: `5${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `Öppnaren driver (15+) men 3NT är otäckt → 5${SUIT_SYM[openerSuit]} (minorutgång).` }
+      turns.push({ seat: responderSeat, role: 'svarare', call: fourth.call, rule: fourth.rule, explanation: fourth.explanation })
+    }
+    return finish(false)
+  }
+
+  // Systems on: efter öppnarens svar på checkbacken placerar svararen
+  // 4-4-fiten eller passar (svararens hand ensam).
+  if (second.rule === '2NT-checkback') {
+    const responderMajor = parseBid(response.call).suit
+    if (responderMajor) {
+      const place = responderPlaceAfter2NTCheckback(rh, responderMajor, third)
+      if (place.call !== 'P') {
+        turns.push({ seat: responderSeat, role: 'svarare', call: place.call, rule: place.rule, explanation: place.explanation })
+      }
+    }
+    return finish(false)
+  }
+
+  // Övriga tredje bud (1NT-auktionens inbjudan, semi-forcing 1NT, egen
+  // höjning, reverse + preferens, 5-3-jakt) avslutar auktionen.
+  return finish(false)
 }
+
 
 /** Slumpar givar tills en med en öppning vi kan bygga vidare på dyker upp. */
 export function dealWithAuction(maxTries = 300): { deal: Deal; auction: BuiltAuction } | null {

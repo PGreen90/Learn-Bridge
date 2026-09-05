@@ -20,46 +20,39 @@ grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbet
 **Regler under bytet:** inga lappar i manuset/detektorkedjan; felrapporter får
 facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
 session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
-**Etapp 0 + 1 + 2 KLARA 2026-09-04** (loggen i planen): riggen (`decideCallTraced`,
+**Etapp 0–2 KLARA 2026-09-04** (loggen i planen): riggen (`decideCallTraced`,
 `DUMP_RANGE`, `scripts/auktionsdiff.mjs`, facit-kön `motorbyte-facit.test.ts`),
-betydelselagret `auction-meaning.ts` (`meaningOf`, systembokens §4–§6 i kod;
-`interpretCall` är en tunn läsare), betydelsesvepet (noll avvikelser ostört),
-kikvakten (manuset kikar i 13,9 % av buden — mätläget, ska bli 0 i etapp 3) och
-**faktalagret `auction-facts.ts`** (`auctionFacts` → `AuctionFacts`: roller,
-kontraktsbud per sida, krav, trumf, partnerns färg, utpassningssits, passad hand,
-betydelse per bud; detektorerna läser `DetectorCtx.facts`, inget bud ändrat).
-Åtta bok-mot-motor-fynd väntar på ägarbeslut vid respektive familj (loggen).
-**Etapp 3 familj 1–4a KLARA 2026-09-04/05:** beslutstabellen `auction-decide.ts`
-(`decideFromTable`: läge → kunskapsfunktion) med öppningen per stol, svaret
-(`responseDecision`), öppnarens återbud (`partnerResponseAsSeen` →
-`openerSecondBid`/Gerber-svar) och svararens andra bud
-(`responderSecondDecision`: manusets grenordning, varje slamgren ger kaptenens
-FÖRSTA steg ur egen hand — `slamCaptainFirstStep` m.fl.; `rebidAsSeen` läser
-öppnarens återbud ur nakna auktionen med skarpt adaptersvep); `decideCall`
-frågar tabellen först (laglighetsvakt), manuset läser den; kikvakten prövar
-varje tabellbud; avvikelsedumpen (människan öppnar/svarar fritt) ger
-b-listorna. Tio bok-mot-motor-fynd väntar (loggen; nr 9 passad hands 2NT,
-nr 10 familj A-slamportens värdering av 6-5-händer).
-**Nästa gång börjar vi med:** etapp 3 familj 4b — öppnarens tredje bud
-(`openerThirdBid*`, NMF-/checkback-svaren, 2/1-försenat stöd, inverterad broms,
-reverse-preferens; adaptern för svararens andra bud som öppnaren ser det —
-regelnamnssvepet visade 135 mönster, mest terminala 'till spel'-namn); sedan
-familj 5 slam (sekvensernas fortsättning, kikvakten helt skarp).
-**Startrutin 4b:** (1) ta baslinjerna (auktionsdump + avvikelsedump, planens
-§3) på mergepunkten `45fa322`; (2) ge avvikelsedumpen ett fjärde läge där
-människan bjuder svararens ANDRA bud fritt (bottens tredje bud = 4b:s
-b-lista); (3) regelnamnssvep på svararens andra bud som öppnaren ser det
-(sond som i 4a) → adaptern `secondAsSeen`; (4) raden *tredje* med manusets
-grenar efter `second` i `auction.ts` (2/1 försenat stöd, NMF, 1NT-inbjudan,
-semi-forcing-inbjudan, egen höjning, inverterad broms, reverse-preferens,
-2NT-checkback, 5-3-jakt). **OBS:** fyra familjer (mergepunkterna 451f692,
-5b1a9dc, b56a72f, 45fa322) ligger LOKALT, inte pushade — deployfrågan är
-öppen (Claudes rekommendation 2026-09-05: deploya).
+betydelselagret `auction-meaning.ts` (`meaningOf`; `interpretCall` tunn läsare),
+betydelsesvepet, kikvakten (mätläget) och faktalagret `auction-facts.ts`
+(`auctionFacts` → `AuctionFacts`; detektorerna läser `DetectorCtx.facts`).
+**Etapp 3 familj 1–4b KLARA 2026-09-04/05:** beslutstabellen `auction-decide.ts`
+(`decideFromTable`: läge → kunskapsfunktion) med raderna öppning, svar
+(`responseDecision`), återbud (`partnerResponseAsSeen` → `openerSecondBid`),
+svar2 (`responderSecondDecision`: varje slamgren = kaptenens FÖRSTA steg ur
+egen hand; `rebidAsSeen`) och tredje (`openerThirdDecision`: 2/1 försenat stöd,
+NMF, fjärde färg, 1NT-inbjudan, semi-forcing 1NT, egen höjning, inverterad
+broms, reverse + preferens, 2NT-checkback, 5-3-jakt; `secondAsSeen`).
+`decideCall` frågar tabellen först (laglighetsvakt), manuset läser den;
+kikvakten prövar varje tabellbud; avvikelsedumpen (fyra lägen: människan
+öppnar/svarar/bjuder andra budet fritt) ger b-listorna med skarpa adaptersvep.
+Tretton bok-mot-motor-fynd väntar på ägarbeslut (loggen; nr 9 passad hands
+2NT, nr 11 svararens 3-lägesfärg efter 1M–1NT, nr 12 hopp till 4m efter
+2/1–2NT, nr 13 fjärde färg i 2/1-form).
+**Nästa gång börjar vi med:** etapp 3 familj 5 — slamutredningen per stol
+(`slamInvestigation`/Gerber/Exclusion/MSS: kaptenens tur ur kaptenens hand,
+öppnarens ur öppnarens; signaturerna smalnas till EN hand + fakta; kikvakten
+helt skarp) plus svararens tredje bud (placeringarna efter NMF/fjärde färg/
+checkback/broms). **Startrutin 5:** (1) baslinjerna (planens §3) på 4b:s
+mergepunkt; (2) kikvaktens mätläge: vilka manusgrenar byter bud?; (3) dela
+slamsekvenserna i turfunktioner (RKC-svar, cue-svar, placering) ur EN hand;
+(4) raden per läge. **OBS:** fem familjer (mergepunkterna 451f692, 5b1a9dc,
+b56a72f, 45fa322 + 4b) ligger LOKALT, inte pushade — deployfrågan är öppen
+(Claudes rekommendation 2026-09-05: deploya).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
 Emma03 LIVE** (nivå bara i Syds kortspel, `botniva.ts`) · felrapporterna
-#54–#57 (`4898958`) + **#58** (2026-09-03: 2-över-1-kravet syns nu i budlådan och förklaringarna; 2/1 går före inverterad höjning, stödet visas i nästa rond) + **#59–#60** (2026-09-04: svararens egen färg efter 1NT är till spel; rättelsen över 5-trumf-stoppet finns nu i budlådan; tolkningslagret läser essfrågesekvensen och 1M–1NT-återbuden rätt) · pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen
+#54–#60 (`4898958` + 2026-09-03/04: 2/1-kravet i budlådan, svararens egen färg efter 1NT till spel, essfrågeläsningen) · pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen
 VÄNTAR (trigger ej nådd). Ägarens ord: säg "regeln saknades", inte "off-book".
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
