@@ -30,7 +30,8 @@ session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per famil
 bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
 varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. Sexton bok-mot-
 motor-fynd väntar på ägarbeslut (loggen; bl.a. nr 14 naket 4NT utan bjuden fit).
-**Familj 6 BYGGD 2026-09-05, VÄNTAR PÅ GRIND (ej commitad):** manusets ostörda
+**Familj 6 KLAR & LIVE 2026-09-05 (mergepunkt f05bfef, grinden godkänd inkl.
+§5.7-regeländringen; grinden efter etapp 3 = deployad):** manusets ostörda
 del riven — `buildAuctionCore` spelar ut vår sida ur tabellen stol för stol
 (adapterkedjan, Gerber-blocken, tvåhandsförarna borta); kvar = konkurrensronden
 + `open`-flaggan (etapp 4). På vägen: 2♣-grenens slamläsning (4NT = essfrågan i
@@ -39,10 +40,11 @@ oläsbar trumf (`captainOwnSituation`) och **§5.7-regeländringen**: 4NT direkt
 över 1NT-återbudet är alltid kvantitativt, egen självbärande färg frågar med
 Gerber 4♣ (fynd 6 löst — ägaren kan vända det i grinden); vakt: manuset avgör
 inga bud i ostörda auktioner (`auction-decide.test.ts`).
-**Nästa gång börjar vi med:** 🚪 grinden för familj 6 (b-listan i loggen: frö
-20271008, 20271809, 20272312 + avvikelsedumpens 94 fullföljda slamsekvenser
-efter människans 2♣) → merge `--no-ff` → 🚪 grinden efter etapp 3 (deploya?) →
-etapp 4 familj 1 (inkliv och advance) i frekvensbildens ordning.
+**Nästa gång börjar vi med:** etapp 4 familj 1 — inkliv och advance
+(`overcall`, `advanceOvercall`, `advanceTwoSuiter`, inklivarens fortsättningar)
+flyttar in i tabellen och deras detektorer raderas; ordningen fastställs mot
+frekvensbilden (`auktionsdump-frekvens.txt`, planens §4 etapp 4). Startrutin:
+baslinjerna (§3) på `f05bfef`, betydelsesvepets störda del som mätare.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

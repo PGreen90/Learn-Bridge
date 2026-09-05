@@ -351,6 +351,8 @@ input i konkreta budsituationer är här, inte i koden.
 🚪 **Grind efter etapp 3:** deploya den ostörda kärnan innan konkurrensen
 byggs? Rekommendation: JA, om revisorn inte är sämre — då spelar ägaren på den
 nya motorn tidigt och känslan i ostörda auktioner kan bedömas i verkligheten.
+**TAGEN 2026-09-05: JA** — familj 1–6 är live (sista mergepunkt `f05bfef`),
+revisorn identisk med familj 5.
 
 🚪 **Grind efter etapp 4:** rivningen (etapp 5) är irreversibel i den meningen
 att manuset inte kommer tillbaka. Tas när betydelsesvepet är grönt på störda
@@ -377,8 +379,9 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
-- **2026-09-05 — Etapp 3 familj 6 BYGGD (väntar på grind): manuset för ostörda
-  auktioner rivet.** `buildAuctionCore` i `auction.ts` består nu av öppningen
+- **2026-09-05 — Etapp 3 familj 6 KLAR & LIVE (mergepunkt `f05bfef`; grinden
+  godkänd av ägaren samma dag inkl. §5.7-regeländringen, och grinden efter
+  etapp 3 togs med deployen): manuset för ostörda auktioner rivet.** `buildAuctionCore` i `auction.ts` består nu av öppningen
   (tabellen, som förut), den modellerade konkurrensronden (oförändrad, etapp 4)
   och EN loop: fråga beslutstabellen stol för stol (`decideFromTable`, egen
   hand + auktionen), motståndarna passar, tills tabellen tiger eller någon
