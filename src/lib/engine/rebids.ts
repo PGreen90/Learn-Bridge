@@ -216,7 +216,8 @@ export function openerRebidAfterSimpleRaise(hand: Hand, M: Major): ResponseResul
 export function openerRebidAfter2over1(hand: Hand, opened: Suit, responder: Suit | null): ResponseResult {
   const len = lengths(hand)
   const bal = isBalanced(hand)
-  const mk = (call: string, rule: string, why: string): ResponseResult => ({ call, rule, explanation: `${why} → ${pretty(call)}.` })
+  // Kravet syns i texten (felrapport #58): partnerns 2-över-1 är utgångskrav.
+  const mk = (call: string, rule: string, why: string): ResponseResult => ({ call, rule, explanation: `${why} → ${pretty(call)} (partnerns 2-över-1 är utgångskrav).` })
 
   if (responder) {
     // Stöd i svararens färg.
@@ -558,7 +559,7 @@ export function openerSecondBid(openCall: string, response: ResponseResult, hand
         return openerRebidAfterOgust(hand, weak)
       case 'ny färg (krav)': {
         const ns = suitOfCall(response.call)
-        return ns ? openerRebidAfterNewSuit(hand, weak, ns) : null
+        return ns ? openerRebidAfterNewSuit(hand, weak, ns, parseInt(response.call[0], 10)) : null
       }
       case 'spärrhöjning':
       case '3NT till spel':
@@ -574,7 +575,7 @@ export function openerSecondBid(openCall: string, response: ResponseResult, hand
     switch (response.rule) {
       case 'ny färg (krav)': {
         const ns = suitOfCall(response.call)
-        return ns ? openerRebidAfterPreemptNewSuit(hand, preempt.suit, ns) : null
+        return ns ? openerRebidAfterPreemptNewSuit(hand, preempt.suit, ns, parseInt(response.call[0], 10)) : null
       }
       case 'höjning till utgång':
       case '3NT till spel':

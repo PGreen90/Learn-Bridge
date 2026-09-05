@@ -106,20 +106,27 @@ export function openerRebidAfterOgust(hand: Hand, opened: Suit): ResponseResult 
 
 // === 3. Öppnarens svar på krav-ny-färg ====================================
 
-/** Öppnarens återbud efter svararens krav-ny-färg: stöd eller rebjuden färg. §4.5. */
-export function openerRebidAfterNewSuit(hand: Hand, opened: Suit, newSuit: Suit): ResponseResult {
+/**
+ * Öppnarens återbud efter svararens krav-ny-färg: stöd eller rebjuden färg. §4.5.
+ * `responseLevel` = nivån svararen bjöd den nya färgen på (standard: billigaste
+ * nivån, som boten själv bjuder; en människa kan hoppa, t.ex. 2♦–3♥, och då
+ * måste återbudet ligga ÖVER svaret — motorbytet etapp 3 familj 3, 2026-09-05).
+ */
+export function openerRebidAfterNewSuit(hand: Hand, opened: Suit, newSuit: Suit, responseLevel = levelAbove(newSuit, opened, 2)): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   const max = p >= 9
 
-  // Stöd (3+) i svararens nya färg → höj (min = ett steg, max = hopp till utgång).
+  // Stöd (3+) i svararens nya färg → höj: min = ett steg, max = hopp — men
+  // aldrig förbi utgången (2♠–3♥ med max → 4♥, inte 5♥; facit frö 20271048).
   if (len[newSuit] >= 3) {
-    const responderLevel = levelAbove(newSuit, opened, 2) // nivån svararen bjöd färgen på
-    const level = responderLevel + (max ? 2 : 1)
+    const game = isMajor(newSuit) ? 4 : 5
+    const level = max ? Math.max(responseLevel + 1, Math.min(responseLevel + 2, game)) : responseLevel + 1
     return { call: `${level}${BID[newSuit]}`, rule: 'rebid: stöd', explanation: `3+ stöd i ${SYM[newSuit]} → ${level}${SYM[newSuit]}${max ? ' (max, hopp)' : ' (min)'}.` }
   }
-  // Annars rebjuda egen 6-korts färg (minimum).
-  return { call: `3${BID[opened]}`, rule: 'rebid: egen färg', explanation: `6 ${SYM[opened]} utan stöd → 3${SYM[opened]} (minimum).` }
+  // Annars rebjuda egen 6-korts färg (minimum) billigast över svaret.
+  const own = levelAbove(opened, newSuit, responseLevel)
+  return { call: `${own}${BID[opened]}`, rule: 'rebid: egen färg', explanation: `6 ${SYM[opened]} utan stöd → ${own}${SYM[opened]} (minimum).` }
 }
 
 // === 4. Svararens placering efter Ogust-svaret ============================

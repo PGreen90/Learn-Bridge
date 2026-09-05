@@ -119,3 +119,12 @@ describe('buildAuction – 2♣ end-to-end (inkoppling)', () => {
     expect(a?.responderSeat).toBe('S')
   })
 })
+
+describe('openerRebidAfter2C – svaret ligger redan på utgång (människobud)', () => {
+  // Motorbytet etapp 3 familj 3 (2026-09-05): 2♣–3NT → öppnaren utan egen 5-färg
+  // får inte "bjuda 3NT" igen (olagligt) — utgången är satt, pass.
+  it('2♣–3NT: balanserad öppnare utan 5-färg passar', () => {
+    const r = openerRebidAfter2C(parseHand('S:AKQ2 H:AK3 D:AQ4 C:K52'), { call: '3NT', rule: '3NT till spel', explanation: '' })
+    expect(r.call).toBe('P')
+  })
+})

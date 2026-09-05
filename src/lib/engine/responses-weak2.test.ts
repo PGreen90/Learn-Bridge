@@ -63,6 +63,18 @@ describe('openerRebidAfterNewSuit – svar på krav-ny-färg', () => {
   it('rebjuder egen färg utan stöd', () => {
     expect(openerRebidAfterNewSuit(parseHand('S:5 H:QJ9842 D:K72 C:863'), 'hearts', 'spades').call).toBe('3H')
   })
+
+  // Motorbytet etapp 3 familj 3 (2026-09-05): svararens nya färg kan ligga
+  // högre än billigaste nivån (människobud), och maxhöjningen stannar på utgång.
+  it('2♠–3♥ (krav): max med 3+ hjärter höjer till 4♥ — utgången, inte 5♥ (frö 20271048)', () => {
+    expect(openerRebidAfterNewSuit(parseHand('S:KJ9653 H:A98 D:5 C:JT2'), 'spades', 'hearts', 3).call).toBe('4H')
+  })
+  it('2♦–3♥ (krav) utan stöd: egen färg billigast ÖVER svaret → 4♦, aldrig 3♦', () => {
+    expect(openerRebidAfterNewSuit(parseHand('S:5 H:72 D:KQJ842 C:863'), 'diamonds', 'hearts', 3).call).toBe('4D')
+  })
+  it('2♥–2♠ (krav): max med stöd → 4♠ som förut (standardnivån ändras inte)', () => {
+    expect(openerRebidAfterNewSuit(parseHand('S:K84 H:AQJ842 D:7 C:863'), 'hearts', 'spades').call).toBe('4S')
+  })
 })
 
 describe('responderPlaceAfterOgust – svararen placerar', () => {

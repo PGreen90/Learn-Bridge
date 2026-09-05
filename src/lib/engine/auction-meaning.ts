@@ -1709,7 +1709,7 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
     if (same(cb, 3, M)) return R('Bergen spärr', `${B(cb)} — spärrhöjning: 4 trumf, 0–6 hp. Avslut.`)
     if (same(cb, 3, otherMajor(M))) return R('tvetydig splinter', `${B(cb)} — tvetydig splinter: 4+ ${mname}, 12+ hp och en kort färg (singel, ej A/K, eller renons) som partnern frågar efter med ett relä. Utgångskrav, slamintresse. Säger inget om ${name}.`)
     if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — 13–15 hp balanserad med exakt 2 ${mname}, till spel.`)
-    if (same(cb, 4, M)) return R('höjning till utgång', `${B(cb)} — spärr till utgång: 4+ stöd, högst ~10 hp. Avslut.`)
+    if (same(cb, 4, M)) return R('spärr till utgång', `${B(cb)} — spärr till utgång: 4+ stöd, högst ~10 hp. Avslut.`)
     return null
   }
 
@@ -2105,7 +2105,7 @@ function afterWeakTwo(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterpreta
     if (same(cb, 2, 'NT')) return R('Ogust', `2 sang — Ogust: konstgjord fråga om styrka och färgkvalitet (svar 3♣ = min/dålig, 3♦ = min/bra, 3♥ = max/dålig, 3♠ = max/bra, 3NT = max/utmärkt). Krav. Säger inget om sang.`)
     if (cb.strain === W) return isGameLevel(cb) ? R('spärr till utgång', `${B(cb)} — höjer spärren till utgång: stöd, till spel (tvetydig för motståndarna).`) : R('spärrhöjning', `${B(cb)} — spärrhöjning: stöd, höjer trycket. Ej inbjudan, avslut.`)
     if (same(cb, 4, 'NT')) return R('1430 RKC', `4 sang — essfråga (1430 RKC) med ${wname} som trumf. Partnern svarar i steg: 5♣ = 1/4 nyckelkort, 5♦ = 0/3, 5♥ = 2 utan trumfdam, 5♠ = 2 med.`)
-    if (same(cb, 3, 'NT')) return N(`3 sang — till spel, räknar med 9 stick.`, 'avslut')
+    if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — till spel, räknar med 9 stick.`)
     if (cb.strain !== 'NT' && !isGameLevel(cb)) return R('ny färg (krav)', `${B(cb)} — naturligt, 5+ ${name}. Krav 1 rond.`)
     if (isGameLevel(cb)) return N(`${B(cb)} — till spel i ${name}.`, 'avslut')
     return null

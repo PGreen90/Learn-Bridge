@@ -1,7 +1,7 @@
 // AVVIKELSEDUMPEN (motorbytet etapp 3, docs/motorbyte-plan.md §3): auktionerna
 // där MÄNNISKAN avviker från vad motorn själv hade bjudit. Auktionsdumpen
 // (auktionsdump.probe.test.ts) täcker bot-mot-bot; den här riggen låter en
-// stol öppna ett godtyckligt bud och låter bottarna spela klart, så att
+// stol bjuda ett godtyckligt bud och låter bottarna spela klart, så att
 // diffen mellan två körningar visar hur det NYA lagret svarar när manuset
 // aldrig förutsåg budet. Samma JSON-form som auktionsdumpen → samma diff-skript:
 //
@@ -11,14 +11,17 @@
 //
 //   $env:AVVIK_RANGE='20270001-20270300'   (standard)
 //
-// Två lägen per giv och öppningsbud: "direkt" (given öppnar) och "3:e hand"
-// (given och nästa stol passar, tredje stolen öppnar → svararen är passad hand).
-// Nyckeln i dumpen är "<frö>/<läge>/<öppning>".
+// Tre lägen per giv. Öppningen (familj 1–2): "direkt" (given öppnar ett av 17
+// bud) och "3:e hand" (given och nästa stol passar, tredje stolen öppnar →
+// svararen är passad hand). Svaret (familj 3): "svar" — boten öppnar som
+// vanligt (ostört), människan i svararstolen bjuder vart och ett av
+// kontraktsbuden över öppningen upp till 4NT, bottarna spelar klart.
+// Nyckeln i dumpen är "<frö>/<läge>/<bud>".
 import { it } from 'vitest'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import type { Deal } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
-import { auctionComplete, decideCallTraced } from './auction-live'
+import { auctionComplete, decideCallTraced, legalCalls } from './auction-live'
 import { formatHand } from '../felrapport'
 import { dealFromSeed } from './revisor'
 
@@ -42,9 +45,10 @@ interface DumpDeal {
   calls: DumpCall[] | null
 }
 
-function playOut(deal: Deal, start: ResolvedCall[], maxCalls = 60): DumpCall[] | null {
-  const history = [...start]
-  const calls: DumpCall[] = start.map((c) => ({ seat: c.seat, bid: c.bid, rule: null, källa: 'människan', explanation: null }))
+/** Spelar klart auktionen från `start`; buden i `start` utan källa är människans. */
+function playOut(deal: Deal, start: DumpCall[], maxCalls = 60): DumpCall[] | null {
+  const history: ResolvedCall[] = start.map((c) => ({ seat: c.seat as ResolvedCall['seat'], bid: c.bid as ResolvedCall['bid'], rule: c.rule ?? undefined }))
+  const calls = [...start]
   while (!auctionComplete(history)) {
     if (history.length >= maxCalls) return null
     const t = decideCallTraced(deal, history, seatAt(deal.dealer, history.length))
@@ -55,21 +59,41 @@ function playOut(deal: Deal, start: ResolvedCall[], maxCalls = 60): DumpCall[] |
   return calls
 }
 
-it.skipIf(process.env.AVVIK !== '1')('avvikelsedumpen: människan öppnar fritt, bottarna spelar klart', { timeout: 0 }, () => {
+const människan = (seat: string, bid: string): DumpCall => ({ seat, bid, rule: null, källa: 'människan', explanation: null })
+
+it.skipIf(process.env.AVVIK !== '1')('avvikelsedumpen: människan bjuder fritt, bottarna spelar klart', { timeout: 0 }, () => {
   const m = /^(\d+)-(\d+)$/.exec(RANGE)!
   const [från, till] = [Number(m[1]), Number(m[2])]
   const dump: DumpDeal[] = []
   for (let seed = från; seed <= till; seed++) {
     const deal = dealFromSeed(seed)
     const hands = Object.fromEntries((['N', 'E', 'S', 'W'] as const).map((s) => [s, formatHand(deal.hands[s])]))
+    const giv = (key: string, calls: DumpCall[] | null): DumpDeal => ({ seed: key, dealer: deal.dealer, vulnerability: deal.vulnerability, hands, calls })
     const d0 = seatAt(deal.dealer, 0)
     const d1 = seatAt(deal.dealer, 1)
     const d2 = seatAt(deal.dealer, 2)
     for (const open of OPENINGS) {
-      dump.push({ seed: `${seed}/direkt/${open}`, dealer: deal.dealer, vulnerability: deal.vulnerability, hands,
-        calls: playOut(deal, [{ seat: d0, bid: open }]) })
-      dump.push({ seed: `${seed}/3:e hand/${open}`, dealer: deal.dealer, vulnerability: deal.vulnerability, hands,
-        calls: playOut(deal, [{ seat: d0, bid: 'P' }, { seat: d1, bid: 'P' }, { seat: d2, bid: open }]) })
+      dump.push(giv(`${seed}/direkt/${open}`, playOut(deal, [människan(d0, open)])))
+      dump.push(giv(`${seed}/3:e hand/${open}`, playOut(deal, [människan(d0, 'P'), människan(d1, 'P'), människan(d2, open)])))
+    }
+    // Svaret: bottarna bjuder fram till svararens tur (ostörd öppning), sedan
+    // bjuder människan vart och ett av de lagliga kontraktsbuden upp till 4NT.
+    const fram: ResolvedCall[] = []
+    while (!auctionComplete(fram) && fram.length < 8) {
+      const seat = seatAt(deal.dealer, fram.length)
+      const t = decideCallTraced(deal, fram, seat)
+      fram.push(t.call)
+      const o = fram.findIndex((c) => c.bid !== 'P')
+      if (o !== -1 && fram.length === o + 2) {
+        if (fram[o + 1].bid !== 'P') break // störd → inte det här läget
+        const svarare = seatAt(deal.dealer, fram.length)
+        const start: DumpCall[] = fram.map((c) => ({ seat: c.seat, bid: c.bid, rule: c.rule ?? null, källa: 'bot', explanation: c.explanation ?? null }))
+        for (const bid of legalCalls(fram, svarare)) {
+          if (!/^[1-4](C|D|H|S|NT)$/.test(bid)) continue
+          dump.push(giv(`${seed}/svar/${fram[o].bid}-${bid}`, playOut(deal, [...start, människan(svarare, bid)])))
+        }
+        break
+      }
     }
   }
   mkdirSync('revisor-output', { recursive: true })

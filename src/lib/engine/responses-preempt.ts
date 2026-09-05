@@ -101,11 +101,14 @@ export function respondToPreempt(hand: Hand, opened: Suit, level: number): Respo
 
 // === 2. Öppnarens svar på krav-ny-färg =====================================
 
-/** Öppnarens återbud efter svararens krav-ny-färg över en spärr. §4.6. */
-export function openerRebidAfterPreemptNewSuit(hand: Hand, opened: Suit, newSuit: Suit): ResponseResult {
+/**
+ * Öppnarens återbud efter svararens krav-ny-färg över en spärr. §4.6.
+ * `responderLevel` = nivån svararen bjöd den nya färgen på (standard: billigaste
+ * nivån; en människa kan hoppa, t.ex. 3♣–4♦, och återbudet måste ligga över).
+ */
+export function openerRebidAfterPreemptNewSuit(hand: Hand, opened: Suit, newSuit: Suit, responderLevel = levelAbove(newSuit, opened, 3)): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
-  const responderLevel = levelAbove(newSuit, opened, 3) // nivån svararen bjöd den nya färgen på
   const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'rebid: pass', explanation: `${why} → pass.` })
 
   // Stöd (3+) i svararens färg → sätt utgång (eller passa om den redan är nådd).

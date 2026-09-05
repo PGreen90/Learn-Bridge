@@ -39,6 +39,16 @@ describe('respondToPreempt – svararens svar på spärr', () => {
   })
 })
 
+describe('openerRebidAfterPreemptNewSuit – svararens nya färg på en högre nivå (människobud)', () => {
+  // Motorbytet etapp 3 familj 3 (2026-09-05): 3♣–4♦ (hopp) — återbudet får aldrig ligga under 4♦.
+  it('3♣–4♦ med max och yttre honnör i hjärter → feature 4♥ (samma nivå), inte 3♥', () => {
+    expect(openerRebidAfterPreemptNewSuit(parseHand('S:52 H:K84 D:2 C:KQJ9764'), 'clubs', 'diamonds', 4).call).toBe('4H')
+  })
+  it('3♣–4♦ minimum utan stöd → rebjuder klöver billigast över svaret (5♣)', () => {
+    expect(openerRebidAfterPreemptNewSuit(parseHand('S:52 H:842 D:2 C:QJT9764'), 'clubs', 'diamonds', 4).call).toBe('5C')
+  })
+})
+
 describe('openerRebidAfterPreemptNewSuit – öppnarens återbud', () => {
   it('passar när stöd och utgång redan nådd (3♠–4♥)', () => {
     expect(openerRebidAfterPreemptNewSuit(parseHand('S:KQJ9742 H:K84 D:5 C:32'), 'spades', 'hearts').call).toBe('P')

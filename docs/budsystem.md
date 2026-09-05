@@ -2074,6 +2074,16 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-05 — Öppnarens återbud efter svararens nya färg över svag tvåa/
+  spärr (§4.5/§4.6; motorbytet etapp 3 familj 3).** Svararens nya färg kan
+  ligga högre än billigaste nivån (t.ex. 2♦–3♥, 3♣–4♦): öppnarens återbud
+  ligger nu alltid ÖVER svaret (rebjuden färg billigast över; feature på
+  svarets nivå), och höjningen med stöd + maximum går till **utgången, aldrig
+  förbi** (2♠–3♥ med max → 4♥, inte 5♥; §4.5 "hopp" = hopp till utgång).
+  Efter 2♣ med svar på 3NT eller högre passar öppnaren utan egen 5-färg
+  (utgången är satt). Facit: `responses-weak2.test.ts`,
+  `responses-preempt.test.ts`, `responses-2c.test.ts`, frö 20271048 i
+  `motorbyte-facit.test.ts`.
 - **2026-09-04 — Betydelselagret (motorbytet etapp 1, `docs/motorbyte-plan.md`).**
   Inga bud ändrade. Förklaringen av ett bud läses nu ur `auction-meaning.ts`,
   som kan hela den ostörda strukturen i §4–§6 ur auktionen ensam (samma
