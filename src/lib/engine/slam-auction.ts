@@ -34,11 +34,11 @@
 // tur i en slamsekvens tas ur EN hand + vad auktionen visat: `slamTurn(role,
 // hand, setup, sofar)` ger nästa bud för stolen `role` givet uppsättningen
 // (trumf + kaptenens kontext, allt ur auktionen) och sekvensens bud hittills.
-// Beslutstabellen (`auction-decide.ts`, raden *slam*) anropar den vid bordet;
-// manuset (`buildAuction`) spelar samma stegfunktion växelvis med de två
-// händerna (`playSlam`) — så manus och tabell kan inte glida isär, och ingen
-// tur ser den andra handen. `slamInvestigation`/`exclusionInvestigation`/
-// `mssMinorFitContinuation` är kvar som tunna förare (facit-testerna).
+// Beslutstabellen (`auction-decide.ts`, raden *slam*) anropar den vid bordet,
+// och sedan familj 6 (2026-09-05) går även manusets ostörda linje genom
+// tabellen — ingen tur ser den andra handen. `slamInvestigation`/
+// `exclusionInvestigation`/`mssMinorFitContinuation` (`playSlam`) är kvar
+// BARA som tvåhandsförare åt facit-testerna; ingen motorkod anropar dem.
 
 import type { Hand, Suit } from '../../types/bridge'
 import { bergenPoints, dummyPoints, wastedHonorsOppositeShortness } from './evaluation'

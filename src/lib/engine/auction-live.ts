@@ -7,11 +7,11 @@
 //   - contractFromCalls – slutkontraktet ur en färdig budföljd (spelförare m.m.)
 //   - decideCall       – "bot-hjärnan": vad bjuder datorn på en plats just nu?
 //
-// `decideCall` återanvänder hela den befintliga (testade) budmotorn via
-// `buildAuction`: den bygger parets kanoniska systemlinje och spelar upp den
-// bud för bud. Datorn (Väst/Nord/Öst) följer linjen; Syd bjuder själv. Så länge
-// alla följer systemet stämmer historiken med linjen. (Udda Syd-bud "off-book"
-// hanteras senare – tills dess passar datorn för att stänga rond.)
+// `decideCall` frågar FÖRST beslutstabellen (`auction-decide.ts`: egen hand +
+// auktionen → ett bud, motorbytet etapp 3). Täcker tabellen inte läget tar det
+// gamla lagret vid: manusets konkurrensrond (`buildAuction`, spelas upp bud
+// för bud så länge historiken följer den) och detektorkedjan. Sedan familj 6
+// (2026-09-05) avgör manuset inga bud i ostörda auktioner — bara `open`.
 
 import type { Bid, Deal, Hand, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'

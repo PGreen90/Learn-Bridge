@@ -15,10 +15,13 @@
 //    egen 19–20 hp → NY kvantitativ 4NT-inbjudan (öppnaren accepterar 6NT med
 //    13–14, passar med 12). Förr räknade porten parets FAKTISKA hp — borttaget.
 
-import type { Hand } from '../../types/bridge'
+import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import { countAces, countKings, respondToGerber, respondToGerberKingAsk } from './slam'
 import type { SlamBid, SlamRole, SlamTurn } from './slam-auction'
+
+const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
+const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 
 /**
  * Kvalificerar svararens hand för Gerber (gemensamt för 1NT/2NT): balanserad,
@@ -119,7 +122,7 @@ export function quantitativeAnswer(hand: Hand, shownMin: number): SlamTurn {
 
 const GERBER_ASK: SlamTurn = { role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` }
 
-/** Spelar Gerber-dialogen till slut med två händer, tur för tur ur EN hand (manusets förare). */
+/** Spelar Gerber-dialogen till slut med två händer, tur för tur ur EN hand — bara facit-testernas förare sedan familj 6 (motorn går genom raden *slam*). */
 function playGerber(openerHand: Hand, responderHand: Hand, partnerMin: number): SlamTurn[] {
   const turns: SlamTurn[] = [GERBER_ASK]
   let role: SlamRole = 'öppnare'
@@ -140,7 +143,7 @@ function playGerber(openerHand: Hand, responderHand: Hand, partnerMin: number): 
  * `partnerMin` = undre gränsen i partnerns visade intervall (storslamszonen
  * räknas alltid mot minimum — aldrig hopp om maximum). null = ingen tur.
  */
-export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar: SlamBid[]): SlamTurn | null {
+export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar: SlamBid[], placeSuit?: Suit): SlamTurn | null {
   if (sofar.length === 0 || sofar[0].role !== 'svarare' || sofar[0].call !== '4C') return null
   if (sofar[sofar.length - 1].role === role) return null
   const after = sofar.slice(1)
@@ -148,6 +151,12 @@ export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar
     const a = respondToGerber(hand)
     return { role: 'öppnare', call: a.call, rule: a.rule, explanation: a.explanation }
   }
+  // Kaptenen placerar i sang — eller, när hon frågade för en egen självbärande
+  // färg över partnerns sang-återbud (§5.7), i den färgen: stoppet blir 5 i
+  // färgen, slammen 6/7 i färgen. Partnern behöver inte veta vilket: han svarar
+  // ess/kungar och passar placeringen.
+  const place = (level: 4 | 5 | 6 | 7): string => (placeSuit ? `${level === 4 ? 5 : level}${LETTER[placeSuit]}` : `${level}NT`)
+  const namn = (call: string): string => (placeSuit ? `${call[0]}${SYM[placeSuit]}` : call)
   const aceCall = after[0].call
   if (after.length === 1) {
     // Härled partnerns ess ur svaret + egen hand. 4♦ = 0 ELLER 4: har kaptenen
@@ -157,13 +166,13 @@ export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar
     const partnerAces = aceCall === '4H' ? 1 : aceCall === '4S' ? 2 : aceCall === '4NT' ? 3 : 0
     const aceCertain = aceCall !== '4D' || ownAces >= 1
     const missing = 4 - ownAces - partnerAces
-    if (missing >= 2) return { role: 'svarare', call: '4NT', rule: 'Gerber: stannar', explanation: 'två ess saknas → stannar i 4NT.' }
+    if (missing >= 2) return { role: 'svarare', call: place(4), rule: 'Gerber: stannar', explanation: `två ess saknas → stannar i ${namn(place(4))}.` }
     const floor = hcp(hand) + partnerMin
     if (missing === 0 && aceCertain && floor >= 37) {
-      // Alla ess + storslamszon mot visat minimum → kungfråga 5♣, placera 6NT/7NT.
+      // Alla ess + storslamszon mot visat minimum → kungfråga 5♣, placera 6/7.
       return { role: 'svarare', call: '5C', rule: 'Gerber kungfråga', explanation: `alla ess + storslamszon → 5♣ (frågar kungar).` }
     }
-    return { role: 'svarare', call: '6NT', rule: 'slamavslut', explanation: missing === 0 ? 'alla ess → 6NT.' : 'ett ess saknas → 6NT (lillslam).' }
+    return { role: 'svarare', call: place(6), rule: 'slamavslut', explanation: missing === 0 ? `alla ess → ${namn(place(6))}.` : `ett ess saknas → ${namn(place(6))} (lillslam).` }
   }
   if (after[1].call !== '5C') {
     // Kaptenen placerade (4NT stannar / 6NT / 7NT) → partnern passar. Sägs
@@ -180,7 +189,7 @@ export function gerberTurn(role: SlamRole, hand: Hand, partnerMin: number, sofar
     const ownKings = countKings(hand)
     const partnerKings = kingCall === '5H' ? 1 : kingCall === '5S' ? 2 : kingCall === '5NT' ? 3 : 0
     const grand = ownKings + partnerKings >= 3
-    return { role: 'svarare', call: grand ? '7NT' : '6NT', rule: 'slamavslut', explanation: grand ? `alla ess + kungarna räcker → storslam 7NT.` : 'alla ess men för få kungar → 6NT.' }
+    return { role: 'svarare', call: grand ? place(7) : place(6), rule: 'slamavslut', explanation: grand ? `alla ess + kungarna räcker → storslam ${namn(place(7))}.` : `alla ess men för få kungar → ${namn(place(6))}.` }
   }
   return null
 }

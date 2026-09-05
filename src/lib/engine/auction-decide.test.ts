@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vitest'
 import type { Seat } from '../../types/bridge'
 import { parseHand, type ResolvedCall } from '../bidding'
 import { decideFromTable, rebidAsSeen, secondAsSeen, slamContextAfterThird, slamSituation } from './auction-decide'
-import { buildAuction } from './auction'
 import { auctionFacts } from './auction-facts'
 import { decideCallTraced } from './auction-live'
 import { botAuction, dealFromSeed } from './revisor'
@@ -590,27 +589,66 @@ describe('familj 5 – svararens tredje bud (raden svar3) och öppnarens fjärde
   })
 })
 
-describe('familj 5 – manuset spelar samma stegfunktion som tabellen (bot mot bot, 3000 givar)', () => {
-  it('varje bud i en slamsekvens (källa tabell:slam) är lika med manusets bud på samma plats', () => {
-    let n = 0
+describe('familj 6 – manuset avgör inga bud i ostörda auktioner (bot mot bot, 3000 givar)', () => {
+  // Familj 6 (2026-09-05) rev manusets ostörda del: varje bud vår sida lägger i
+  // en ostörd auktion kommer ur beslutstabellen (egen hand + auktionen) eller,
+  // där tabellen ännu tiger, ur det gamla lagrets detektorer/pass — aldrig ur
+  // ett förskrivet manus med båda händerna. Källan 'manus' får bara finnas
+  // kvar för motståndarnas pass och konkurrensronden (etapp 4).
+  it("inget bud från vår sida har källan 'manus' när motståndarna bara passat", () => {
+    let bud = 0
+    let slam = 0
     for (let seed = 20270001; seed <= 20273000; seed++) {
       const deal = dealFromSeed(seed)
       const h = botAuction(deal)
       if (!h) continue
-      const built = buildAuction(deal)
-      if (!built) continue
-      const lineBids = built.turns.filter((t) => t.call !== 'P').map((t) => t.call)
-      let j = 0
+      const opener = h.find((c) => c.bid !== 'P')
+      if (!opener) continue
+      const ourSide = (s: Seat) => (s === 'N' || s === 'S') === (opener.seat === 'N' || opener.seat === 'S')
+      if (h.some((c) => c.bid !== 'P' && !ourSide(c.seat))) continue // störd — etapp 4
       for (let i = 0; i < h.length; i++) {
-        if (h[i].bid === 'P') continue
+        if (!ourSide(h[i].seat)) continue
         const t = decideCallTraced(deal, h.slice(0, i), h[i].seat)
-        if (t.källa === 'tabell:slam' && j < lineBids.length) {
-          n++
-          expect(lineBids[j], `frö ${seed} bud ${i + 1}`).toBe(h[i].bid)
-        }
-        j++
+        expect(t.källa, `frö ${seed} bud ${i + 1}: ${h[i].seat} ${h[i].bid}`).not.toBe('manus')
+        bud++
+        if (t.källa === 'tabell:slam') slam++
       }
     }
-    expect(n).toBeGreaterThan(50)
+    expect(bud).toBeGreaterThan(5000)
+    expect(slam).toBeGreaterThan(100) // slamsekvenserna (inkl. 2♣-grenens) spelas ur tabellen
+  })
+
+  it('2♣–2NT–3♦–4♣: kontrollbudet sätter öppnarens färg — öppnaren cue:ar vidare (frö 20271809), och 2♣–2♠–3♥–4NT: essfrågan gäller öppnarens färg (frö 20271008)', () => {
+    const d1 = dealFromSeed(20271809)
+    const h1: ResolvedCall[] = [{ seat: 'E', bid: '2C' }, P('S'), { seat: 'W', bid: '2NT' }, P('N'), { seat: 'E', bid: '3D' }, P('S'), { seat: 'W', bid: '4C' }, P('N')]
+    expect(decideCallTraced(d1, h1, 'E')).toMatchObject({ källa: 'tabell:slam', call: { bid: '4H', rule: 'cue-bid' } })
+    const d2 = dealFromSeed(20271008)
+    const h2: ResolvedCall[] = [{ seat: 'N', bid: '2C' }, P('E'), { seat: 'S', bid: '2S' }, P('W'), { seat: 'N', bid: '3H' }, P('E'), { seat: 'S', bid: '4NT' }, P('W')]
+    // Nord (♠4 ♥AKQ942 ♦J3 ♣AK97): tre nyckelkort i hjärter → 5♦ (förut svarade manuset i kaptenens spader — ett kik).
+    expect(decideCallTraced(d2, h2, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: '5D', rule: '1430 RKC' } })
+    // 2♣–2NT–3♠–5♠ (slaminbjudan i öppnarens färg): öppnaren dömer på sin hand (frö 20261494, revisorns urval — förut manus).
+    const d3 = dealFromSeed(20261494)
+    const h3: ResolvedCall[] = [P('N'), P('E'), { seat: 'S', bid: '2C' }, P('W'), { seat: 'N', bid: '2NT' }, P('E'), { seat: 'S', bid: '3S' }, P('W'), { seat: 'N', bid: '5S' }, P('E')]
+    expect(decideCallTraced(d3, h3, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6S', rule: 'slaminbjudan: accept' } })
+  })
+
+  it('1m–1M–1NT: 4NT direkt är kvantitativt (öppnaren dömer på sin hand); egen självbärande färg frågar med Gerber 4♣ och placerar i färgen (§5.7)', () => {
+    const h: ResolvedCall[] = [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1H' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')]
+    // Jämn 20 hp → kvantitativ 4NT; Nord med 13 accepterar (6NT), med 12 passar.
+    expect(bud('S:A32 H:AK75 D:A64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' })
+    const h4 = [...h, { seat: 'S', bid: '4NT' } as ResolvedCall, P('W')]
+    expect(bud('S:KQ5 H:Q64 D:KJ2 C:Q943', h4, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6NT', rule: 'kvantitativ 4NT: accept' } })
+    expect(bud('S:KQ5 H:J64 D:KJ2 C:Q943', h4, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: 'P', rule: 'kvantitativ 4NT: avböjer' } })
+    // 6-korts spader + 21 hp → Gerber 4♣ (inte 4NT); på 4♠ (två ess) placerar hon 6♠, med två ess saknade stannar hon i 5♠.
+    const hs: ResolvedCall[] = [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')]
+    const spader = 'S:AKQJ97 H:KQ D:KQJ C:32'
+    expect(bud(spader, hs, 'S')!.call).toMatchObject({ bid: '4C', rule: 'Gerber' })
+    const efter4S = [...hs, { seat: 'S', bid: '4C' } as ResolvedCall, P('W'), { seat: 'N', bid: '4S' } as ResolvedCall, P('E')]
+    expect(bud(spader, efter4S, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6S', rule: 'slamavslut' } })
+    const efter4D = [...hs, { seat: 'S', bid: '4C' } as ResolvedCall, P('W'), { seat: 'N', bid: '4D' } as ResolvedCall, P('E')]
+    expect(bud(spader, efter4D, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '5S', rule: 'Gerber: stannar' } })
+    // Öppnaren svarar ess som vanligt och passar placeringen — han behöver inte veta färgen.
+    expect(bud('S:32 H:A54 D:A65 C:KJT94', [...hs, { seat: 'S', bid: '4C' } as ResolvedCall, P('W')], 'N')!.call.bid).toBe('4S')
+    expect(bud('S:32 H:A54 D:A65 C:KJT94', [...efter4S, { seat: 'S', bid: '6S' } as ResolvedCall, P('W')], 'N')!.call).toMatchObject({ bid: 'P', rule: 'pass' })
   })
 })

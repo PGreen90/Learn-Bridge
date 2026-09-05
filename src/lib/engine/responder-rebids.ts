@@ -530,11 +530,11 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
       // Öppnaren har svarat: 3♣ = 4+ klöver, 3♦ = 4+ ruter (förnekar 4 klöver),
       // 2NT = ingen 4-korts minor (ej max), 3NT = ingen 4-korts minor (max).
       // No-fit-fallen placeras här; MINORFITEN (3♣/3♦) – inkl. hela slam-/NT-
-      // placeringen – ägs av auction.ts via mssMinorFitContinuation (behöver
-      // BÅDA händerna för NT-säkerhets- och nyckelkortsbedömningen).
+      // placeringen – spelas tur för tur ur EN hand av `mssTurn` (slam-auction.ts)
+      // via beslutstabellens rad *slam* (kaptenens första steg: `mssFirstStep`).
       if (rebid.call === '3NT') return pass('öppnaren visade max utan minorfit – 3NT står')
       if (rebid.call === '2NT') return { call: '3NT', rule: 'till spel', explanation: `Ingen minorfit → 3NT.` }
-      return null // 3♣/3♦ minorfit hanteras i auction.ts (mssMinorFitContinuation)
+      return null // 3♣/3♦ minorfit: raden *slam* (mssFirstStep/mssTurn)
     }
 
     default:

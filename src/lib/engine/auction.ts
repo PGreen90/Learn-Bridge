@@ -1,12 +1,24 @@
-// Liten auktions-hjälpare för titta-läget: hitta den första öppningen i en giv
-// och – om den är 1♥/1♠ – räkna ut partnerns svar. Detta är fröet till en hel
-// budgivning; just nu bara två bud (öppning + svar).
+// Manuset — det som är kvar av det (motorbytet, docs/motorbyte-plan.md).
+//
+// Sedan etapp 3 familj 6 (2026-09-05) avgör `buildAuction` INGA bud i en ostörd
+// auktion: öppningen, svaret och hela fortsättningen spelas ut stol för stol ur
+// beslutstabellen (`auction-decide.ts`) — samma beslut som stolen tar vid
+// bordet, ur egen hand + auktionen. Det manuset fortfarande äger är
+//   · konkurrensronden (LHO:s inkliv/X/DONT/försvar, svararens svar på det,
+//     advancern, balanseringen, den starka dubblingen, stöddubblingen) — den
+//     flyttar in i tabellen familj för familj i etapp 4;
+//   · flaggan `open`: får det gamla lagrets konkurrensdetektorer bjuda vidare
+//     när tabellen tiger, eller är resten bara avslutande pass?
+// När etapp 4 är klar blir `buildAuction` hjälparen "spela ut fyra stolar"
+// (jfr `botAuction` i revisor.ts) och `open` försvinner.
+//
+// Överst: den lilla hjälparen för titta-läget (första 1♥/1♠-öppningen + svar).
 
 import type { Deal, Seat } from '../../types/bridge'
 import { seatAt } from '../bidding'
 import { dealRandom } from './deal'
 import { classifyOpening, isVulnerable } from './openings'
-import { decideFromTable, openerFourthDecision, openerRebidDecision, openerThirdDecision, partnerResponseAsSeen, rebidAsSeen, responderSecondDecision, responderThirdDecision, responseDecision, secondAsSeen, thirdAsSeen, RESPONDABLE, type DecidedCall } from './auction-decide'
+import { decideFromTable, RESPONDABLE, type DecidedCall, type Decision } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
@@ -17,8 +29,6 @@ import { pointsWithFloor } from './evaluation'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
 import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
-import { slamInvestigation, exclusionInvestigation, mssMinorFitContinuation } from './slam-auction'
-import { gerberInvestigation, gerber2NTInvestigation, gerberRebidInvestigation } from './nt-slam'
 import { dontOvercall } from './dont'
 import { naturalNTOvercall } from './lebensohl'
 import { conventionalDefense } from './defense-conventional'
@@ -68,10 +78,11 @@ export function dealWithMajorOpening(maxTries = 300): { deal: Deal; auction: Maj
   return null
 }
 
-// ---- Allmän auktion: öppning → svar → (öppnarens återbud) ------------------
-// Bygger en hel (men ostörd) auktion för alla öppningar vi kan svara på.
-// Motståndarna passar. Auktionen växer så långt motorn har regler; saknas en
-// regel (t.ex. återbud efter en höjning) stannar den och markeras som öppen.
+// ---- Manuset: konkurrensronden + den ostörda linjen ur tabellen -------------
+// `turns` = vår sidas bud (och konkurrensrondens) i ordning; motståndarnas
+// pass fylls i av `turnsToCalls`. Auktionen växer så långt tabellen har regler;
+// tiger den markeras auktionen som öppen eller stängd enligt reglerna längst
+// ner i `buildAuctionCore`.
 
 const PARTNER_OF: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
 const OPEN_SUIT: Record<string, Major | 'clubs' | 'diamonds'> = {
@@ -250,7 +261,7 @@ function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit,
 // poängen + nyckelkortssvaret. Bottarna kan därmed, som människor, någon gång
 // bjuda en slam där motståndarna tar två snabba stick.)
 
-/** Bygger en (ev. störd) auktion för första öppningen. */
+/** Bygger linjen för given: öppning och ostörd fortsättning ur tabellen, EN modellerad konkurrensrond. */
 // Minne per giv (R2-fynd #3): `buildAuction` är en ren funktion av given, och
 // samma giv byggs om vid VARJE bot-tur (`decideCall` anropar den varje gång) och
 // vid varje omritning i spelskärmen. En `WeakMap` på giv-objektet återanvänder den
@@ -289,11 +300,6 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   if (!openerSeat || !opening) return null
 
   const responderSeat = PARTNER_OF[openerSeat]
-  // Svararen är passad hand om hennes plats kom (och passade) före öppnarens i
-  // varvet från given – då gäller Drury över 1♥/1♠ (§6.7).
-  let responderIndex = -1
-  for (let i = 0; i < 4; i++) if (seatAt(deal.dealer, i) === responderSeat) responderIndex = i
-  const responderPassed = responderIndex < openerIndex
   const turns: AuctionTurn[] = [
     { seat: openerSeat, role: 'öppnare', call: opening.call, rule: opening.rule, explanation: opening.explanation, uncertain: opening.uncertain },
   ]
@@ -438,37 +444,25 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
-  // NT-slam (Steg 4): över en naturlig 1NT kan svararen med en slamsäker
-  // balanserad hand fråga ess med Gerber 4♣ (i stället för kvantitativ 4NT).
-  if (opening.call === '1NT') {
-    const g = gerberInvestigation(deal.hands[openerSeat], deal.hands[responderSeat])
-    if (g) {
-      for (const t of g) {
-        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-      }
-      return finish(false)
-    }
+  // Svaret ur BESLUTSTABELLEN (etapp 3 familj 2, 2026-09-04): samma beslut som
+  // `decideCall` tar vid bordet, ur svararens hand + auktionen hittills (passad
+  // hand → Drury läses ur passen före öppningen). Gerber-handens 4♣ över
+  // 1NT/2NT kommer samma väg (`gerberAsk`); essfrågan spelas sedan ut tur för
+  // tur i tabell-loopen längst ner (raden *slam*) — familj 6 rev de två
+  // tvåhandsförarna som förut byggde hela Gerber-sekvensen här.
+  const history: ResolvedCall[] = [...passes, { seat: openerSeat, bid: opening.call as ResolvedCall['bid'], rule: opening.rule, explanation: opening.explanation }]
+  /** Stolens beslut ur tabellen, med motståndarnas pass ifyllda fram till stolen (den ostörda linjen). */
+  const ask = (seat: Seat): Decision | null => {
+    while (seatAt(deal.dealer, history.length) !== seat) history.push({ seat: seatAt(deal.dealer, history.length), bid: 'P' })
+    return decideFromTable(deal.hands[seat], auctionFacts(history, seat), isVulnerable(seat, deal.vulnerability))
   }
-
-  // NT-slam över 2NT (FAS 8): en balanserad slamsäker svarare (13+ mittemot
-  // 20–21 ≈ 33+) frågar ess med Gerber 4♣ i stället för att blint blåsa 6NT.
-  if (opening.call === '2NT') {
-    const g = gerber2NTInvestigation(deal.hands[openerSeat], deal.hands[responderSeat])
-    if (g) {
-      for (const t of g) {
-        const seat = t.role === 'öppnare' ? openerSeat : responderSeat
-        turns.push({ seat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-      }
-      return finish(false)
-    }
+  const lay = (seat: Seat, d: DecidedCall) => {
+    turns.push({ seat, role: seat === openerSeat ? 'öppnare' : 'svarare', call: d.bid, rule: d.rule!, explanation: d.explanation!, uncertain: d.uncertain })
+    history.push({ seat, bid: d.bid, rule: d.rule, explanation: d.explanation })
   }
-
-  // Svaret ur BESLUTSTABELLENS kunskap (etapp 3 familj 2, 2026-09-04): samma
-  // funktion som `decideCall` använder vid bordet. Gerber-fallen ovan börjar
-  // med samma 4♣ (`gerberAsk`), så manus och tabell kan inte glida isär.
-  const response = responseDecision(opening.call, deal.hands[responderSeat], responderPassed)!
-  turns.push({ seat: responderSeat, role: 'svarare', call: response.call, rule: response.rule, explanation: response.explanation, uncertain: response.uncertain })
+  const response = ask(responderSeat)?.call
+  if (!response) return finish(true)
+  lay(responderSeat, response)
 
   // Svararen passade → given är på väg att passas ut till öppningsbudet.
   // BALANSERING (felrapport #5): innan kontraktet sätts får fjärde hand
@@ -477,7 +471,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // `balancing=true` sänker §7-golven med 3 hp (partnern är markerad med värden).
   // Fortsättningen (advancerns höjning m.m.) bjuds levande i budlådan
   // (`decideCall`), därför lämnas auktionen öppen.
-  if (response.call === 'P') {
+  if (response.bid === 'P') {
     if (openerSuit) {
       const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
       const bal = overcall(deal.hands[balancerSeat], opening.call, true)
@@ -532,7 +526,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // (rondkrav; tvångssvaret + det starka återbudet bjuds levande i budlådan).
   // Den vanliga 4-4-dubblingen förblir MEDVETET live-only – att träda in den
   // ändrar en stor andel ostörda linjer och är ett eget beslut (`docs/senare.md`).
-  const respNew = parseBid(response.call)
+  const respNew = parseBid(response.bid)
   if (openerSuit && respNew.level === 1 && respNew.suit && respNew.suit !== openerSuit) {
     const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
     const takeout = takeoutOfResponse(deal.hands[rhoSeat], openerSuit, respNew.suit)
@@ -548,10 +542,10 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // stöd-X faktiskt slår till – annars skulle vi trunkera massor av ostörda
   // auktioner. Öppnarens övriga konkurrenssvar hör till en senare punkt, så då
   // lämnas linjen ostörd som förut (RHO:s ev. inkliv modelleras inte).
-  const respMajor: Suit | null = response.call === '1H' ? 'hearts' : response.call === '1S' ? 'spades' : null
+  const respMajor: Suit | null = response.bid === '1H' ? 'hearts' : response.bid === '1S' ? 'spades' : null
   if (openerSuit && respMajor) {
     const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-    const rho = overcall(deal.hands[rhoSeat], response.call)
+    const rho = overcall(deal.hands[rhoSeat], response.bid)
     // Bara ett äkta färginkliv (ej i öppnarens egen färg) kan utlösa stöd-X.
     if (rho.call !== 'P' && parseBid(rho.call).suit !== openerSuit) {
       const sd = supportDouble(deal.hands[openerSeat], respMajor, rho.call)
@@ -563,137 +557,45 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
-  // Öppnarens återbud ur BESLUTSTABELLENS kunskap (etapp 3 familj 3,
-  // 2026-09-05): partnerns svar läses som öppnaren ser det (bud + regel ur den
-  // nakna auktionen), samma väg som `decideCall` tar vid bordet.
-  const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-  const hittills: ResolvedCall[] = [
-    ...passes,
-    { seat: openerSeat, bid: opening.call as ResolvedCall['bid'] },
-    { seat: seatAt(deal.dealer, (openerIndex + 1) % 4), bid: 'P' },
-    { seat: responderSeat, bid: response.call },
-    { seat: rhoSeat, bid: 'P' },
-  ]
-  const seen = partnerResponseAsSeen(auctionFacts(hittills, openerSeat), hittills.length - 2)
-  const rebid = seen ? openerRebidDecision(opening.call, seen, deal.hands[openerSeat]) : null
-  if (!rebid) {
-    // Inget återbud ännu (svarstyp utan regel): auktionen fortsätter senare.
-    return finish(true)
-  }
-  turns.push({ seat: openerSeat, role: 'öppnare', call: rebid.call, rule: rebid.rule, explanation: rebid.explanation, uncertain: rebid.uncertain })
-
-  // Öppnaren passade svararens bud → kontraktet är satt.
-  if (rebid.call === 'P') return finish(false)
-
-  // Svararens andra bud ur BESLUTSTABELLENS kunskap (etapp 3 familj 4a,
-  // 2026-09-05): `responderSecondDecision` ger budet + PLANEN. Slamsekvensernas
-  // första steg kommer ur svararens hand ensam; resten av sekvensen byggs här
-  // med båda händerna tills familj 5 flyttar den. Samma väg som `decideCall`.
-  const hittills2: ResolvedCall[] = [
-    ...hittills,
-    { seat: openerSeat, bid: rebid.call },
-    { seat: seatAt(deal.dealer, (openerIndex + 1) % 4), bid: 'P' },
-  ]
-  const f2 = auctionFacts(hittills2, responderSeat)
-  const seenResponse = partnerResponseAsSeen(f2, hittills.length - 2)
-  const seenRebid = rebidAsSeen(f2, hittills2.length - 2)
-  const dec = seenResponse && seenRebid ? responderSecondDecision(opening.call, seenResponse, seenRebid, deal.hands[responderSeat]) : null
-  if (!dec) return finish(true)
-  const oh = deal.hands[openerSeat]
-  const rh = deal.hands[responderSeat]
-  const pushSeq = (seq: { role: 'öppnare' | 'svarare'; call: string; rule: string; explanation: string }[]) => {
-    for (const t of seq) turns.push({ seat: t.role === 'öppnare' ? openerSeat : responderSeat, role: t.role, call: t.call, rule: t.rule, explanation: t.explanation })
-  }
-  switch (dec.plan.kind) {
-    case 'slam': {
-      const p = dec.plan.setup
-      pushSeq(slamInvestigation(oh, rh, p.trump, p.lastCall, p.ctx, p.partnerShort)!)
+  // ---- Den ostörda fortsättningen: stol för stol ur beslutstabellen ---------
+  // Sedan familj 6 (2026-09-05, docs/motorbyte-plan.md) avgör manuset INGET
+  // bud här. Varje tur är exakt det beslut stolen tar vid bordet
+  // (`decideFromTable`: egen hand + auktionen hittills, aldrig partnerns kort),
+  // och motståndarna passar. Det enda manuset tillför är svaret på frågan "är
+  // auktionen ÖPPEN när tabellen tiger?" — dvs. om det gamla lagrets
+  // konkurrensdetektorer får bjuda vidare (`lineExhaustedOpen` i `decideCall`)
+  // eller om resten bara är avslutande pass. Reglerna är de rivna grenarnas,
+  // oförändrade (auktionsdiffen noll vid rivningen):
+  //   · slamraden har bjudit (en slamsekvens spelades) och tabellen tiger →
+  //     sekvensen är slut → stängd;
+  //   · stolen passade, eller partnerns bud var en placering (`avslut`) → stängd;
+  //   · öppnarens återbud / svararens andra bud / öppnarens tredje bud saknar
+  //     regel → öppen (det gamla lagret fortsätter som förut);
+  //   · svararens tredje bud saknar regel → öppen bara efter fjärde färg / NMF
+  //     (slamvägen med 18+ resp. oläsbart NMF-svar), annars stängd;
+  //   · därefter → stängd.
+  // Flaggan och reglerna försvinner med det gamla lagret (etapp 4).
+  let seat = openerSeat
+  let settled = false // partnerns senaste bud var en placering (`avslut`)
+  let slamPlayed = false // slamraden har bjudit → sekvensen tar slut när den tiger
+  for (let guard = 0; guard < 24; guard++) {
+    const dec = ask(seat)
+    const d = dec?.call ?? null
+    if (!d) {
+      if (settled || slamPlayed) return finish(false)
+      const n = turns.length // våra turer hittills: öppning, svar, återbud, …
+      if (n <= 4) return finish(true)
+      if (n === 5) return finish(turns[3].rule === 'fjärde färg krav' || turns[3].rule === 'New Minor Forcing')
       return finish(false)
     }
-    case 'exclusion':
-      pushSeq(exclusionInvestigation(oh, rh, dec.plan.trump, dec.plan.partnerMin)!)
-      return finish(false)
-    case 'mss':
-      pushSeq(mssMinorFitContinuation(oh, rh, dec.plan.minor, dec.plan.rebidCall))
-      return finish(false)
-    case 'gerberRebid':
-      pushSeq(gerberRebidInvestigation(oh, rh)!)
-      return finish(false)
-    case 'final':
-      turns.push({ seat: responderSeat, role: 'svarare', call: dec.turn.call, rule: dec.turn.rule, explanation: dec.turn.explanation })
-      return finish(false)
-    case 'call':
-      break
+    lay(seat, d)
+    if (d.bid === 'P') return finish(false)
+    settled = d.avslut === true
+    if (dec!.källa === 'tabell:slam') slamPlayed = true
+    seat = PARTNER_OF[seat]
   }
-
-  const second = dec.turn
-  turns.push({ seat: responderSeat, role: 'svarare', call: second.call, rule: second.rule, explanation: second.explanation, uncertain: second.uncertain })
-
-  // Öppnarens TREDJE bud ur BESLUTSTABELLENS kunskap (etapp 3 familj 4b,
-  // 2026-09-05): partnerns andra bud läses som öppnaren ser det
-  // (`secondAsSeen`), mitt eget återbud med `rebidAsSeen` — samma väg som
-  // `decideCall` tar vid bordet. Fortsättningarna som behöver svararens hand
-  // (placeringar) eller båda händerna (slamsekvenser, familj 5) byggs här.
-  const hittills3: ResolvedCall[] = [
-    ...hittills2,
-    { seat: responderSeat, bid: second.call },
-    { seat: rhoSeat, bid: 'P' },
-  ]
-  const f3 = auctionFacts(hittills3, openerSeat)
-  const seenResponse3 = partnerResponseAsSeen(f3, hittills.length - 2)
-  const seenRebid3 = rebidAsSeen(f3, hittills2.length - 2)
-  const seenSecond = secondAsSeen(f3, hittills3.length - 2)
-  const third = seenResponse3 && seenRebid3 && seenSecond ? openerThirdDecision(opening.call, seenResponse3, seenRebid3, seenSecond, oh) : null
-  // Ingen regel för partnerns andra bud (utgångsbud, 2/1-fortsättning, preferens
-  // utan reverse …): auktionen fortsätter i det gamla lagret som förut.
-  if (!third) return finish(second.call !== 'P')
-  turns.push({ seat: openerSeat, role: 'öppnare', call: third.call, rule: third.rule, explanation: third.explanation, uncertain: third.uncertain })
-
-  // Svararens TREDJE bud ur BESLUTSTABELLENS kunskap (etapp 3 familj 5,
-  // 2026-09-05): slamsekvensens första steg där öppnarens tredje bud satte
-  // trumfen (2/1 försenat stöd, NMF-stöd), annars placeringen (NMF, fjärde
-  // färg, inverterad broms, 2NT-checkback, systems on). Slamsekvensen spelas
-  // sedan ut tur för tur ur EN hand (`slamInvestigation` = samma stegfunktion
-  // som tabellen använder vid bordet).
-  const hittills4: ResolvedCall[] = [
-    ...hittills3,
-    { seat: openerSeat, bid: third.call },
-    { seat: seatAt(deal.dealer, (openerIndex + 1) % 4), bid: 'P' },
-  ]
-  const f4 = auctionFacts(hittills4, responderSeat)
-  const seenSecond4 = secondAsSeen(f4, hittills3.length - 2)
-  const seenThird = thirdAsSeen(f4, hittills4.length - 2)
-  const dec3 = seenResponse && seenRebid && seenSecond4 && seenThird
-    ? responderThirdDecision(opening.call, seenResponse, seenRebid, seenSecond4, seenThird, rh)
-    : null
-  // Ingen regel: fjärde färg med 18+ hp (slamvägen) och NMF utan läsbart svar
-  // fortsätter i det gamla lagret; övriga tredje bud avslutar auktionen.
-  if (!dec3) return finish(second.rule === 'fjärde färg krav' || second.rule === 'New Minor Forcing')
-  if (dec3.plan.kind === 'slam') {
-    const p = dec3.plan.setup
-    pushSeq(slamInvestigation(oh, rh, p.trump, p.lastCall, p.ctx, p.partnerShort)!)
-    return finish(false)
-  }
-  turns.push({ seat: responderSeat, role: 'svarare', call: dec3.turn.call, rule: dec3.turn.rule, explanation: dec3.turn.explanation })
-  if (dec3.turn.call === 'P') return finish(false)
-
-  // Öppnarens FJÄRDE bud (systems on efter 2♣–2♦–2NT: valet efter Smolen /
-  // 3NT-erbjudandet), samma väg som tabellraden.
-  const hittills5: ResolvedCall[] = [
-    ...hittills4,
-    { seat: responderSeat, bid: dec3.turn.call },
-    { seat: rhoSeat, bid: 'P' },
-  ]
-  const f5 = auctionFacts(hittills5, openerSeat)
-  const seenSecond5 = secondAsSeen(f5, hittills3.length - 2)
-  const seenPlace = thirdAsSeen(f5, hittills5.length - 2)
-  const fourth = seenResponse3 && seenRebid3 && seenSecond5 && seenPlace
-    ? openerFourthDecision(opening.call, seenResponse3, seenRebid3, seenSecond5, seenPlace, oh)
-    : null
-  if (fourth) turns.push({ seat: openerSeat, role: 'öppnare', call: fourth.call, rule: fourth.rule, explanation: fourth.explanation })
   return finish(false)
 }
-
 
 /** Slumpar givar tills en med en öppning vi kan bygga vidare på dyker upp. */
 export function dealWithAuction(maxTries = 300): { deal: Deal; auction: BuiltAuction } | null {

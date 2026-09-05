@@ -20,31 +20,29 @@ grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbet
 **Regler under bytet:** inga lappar i manuset/detektorkedjan; felrapporter får
 facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
 session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
-**Etapp 0–2 KLARA 2026-09-04** (loggen i planen): riggen (`decideCallTraced`,
-`DUMP_RANGE`, `scripts/auktionsdiff.mjs`, facit-kön `motorbyte-facit.test.ts`),
-betydelselagret `auction-meaning.ts` (`meaningOf`; `interpretCall` tunn läsare),
-betydelsesvepet, kikvakten (mätläget) och faktalagret `auction-facts.ts`
-(`auctionFacts` → `AuctionFacts`; detektorerna läser `DetectorCtx.facts`).
-**Etapp 3 familj 1–4b KLARA 2026-09-04/05:** beslutstabellen `auction-decide.ts`
-(`decideFromTable`: läge → kunskapsfunktion) med raderna öppning, svar
-(`responseDecision`), återbud (`partnerResponseAsSeen` → `openerSecondBid`),
-svar2 (`responderSecondDecision`: varje slamgren = kaptenens FÖRSTA steg ur
-egen hand; `rebidAsSeen`) och tredje (`openerThirdDecision`: 2/1 försenat stöd,
-NMF, fjärde färg, 1NT-inbjudan, semi-forcing 1NT, egen höjning, inverterad
-broms, reverse + preferens, 2NT-checkback, 5-3-jakt; `secondAsSeen`).
-`decideCall` frågar tabellen först (laglighetsvakt), manuset läser den;
-kikvakten prövar varje tabellbud; avvikelsedumpen (fyra lägen: människan
-öppnar/svarar/bjuder andra budet fritt) ger b-listorna med skarpa adaptersvep.
-**Etapp 3 familj 5 KLAR 2026-09-05:** slamutredningen per stol — stegmaskiner
-(`slamTurn`/`gerberTurn`/`exclusionTurn`/`mssTurn`, en tur ur EN hand; manuset
-= förare över samma steg), raderna slam/svar3/fjärde. Sexton bok-mot-motor-fynd
-väntar på ägarbeslut (loggen; bl.a. nr 14 naket 4NT utan bjuden fit, nr 15
-§5.7 "4m-inbjudan" mot §6.4 Gerber).
-**Nästa gång börjar vi med:** etapp 3 familj 6 — manuset rivs
-ur `auction.ts` — och 🚪 grinden efter etapp 3. **Startrutin 6:** (1) baslinjerna
-(§3) på familj 5:s mergepunkt; (2) återstående manusgrenar (`grep -n "finish("
-auction.ts`); (3) riv gren för gren med auktionsdiffen noll. **LIVE 2026-09-05:**
-etapp 0–3 familj 1–5 deployade (Actions grön, mergepunkter 451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca, e303016; familj 5 godkänd i grinden, revisorns två givar = systemriktiga missar).
+**Läget (detalj i planens logg):** etapp 0–2 KLARA 2026-09-04 (riggen
+`decideCallTraced`/`DUMP_RANGE`/`scripts/auktionsdiff.mjs`/facit-kön
+`motorbyte-facit.test.ts`, betydelselagret `auction-meaning.ts`, faktalagret
+`auction-facts.ts`). **Etapp 3 familj 1–5 KLARA & LIVE 2026-09-05** (mergepunkter
+451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca, e303016): beslutstabellen
+`auction-decide.ts` (`decideFromTable`: läge → kunskapsfunktion) med raderna
+öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
+bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
+varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. Sexton bok-mot-
+motor-fynd väntar på ägarbeslut (loggen; bl.a. nr 14 naket 4NT utan bjuden fit).
+**Familj 6 BYGGD 2026-09-05, VÄNTAR PÅ GRIND (ej commitad):** manusets ostörda
+del riven — `buildAuctionCore` spelar ut vår sida ur tabellen stol för stol
+(adapterkedjan, Gerber-blocken, tvåhandsförarna borta); kvar = konkurrensronden
++ `open`-flaggan (etapp 4). På vägen: 2♣-grenens slamläsning (4NT = essfrågan i
+öppnarens färg, kontrollbud i ny färg sätter den), kaptenens egen avsikt vid
+oläsbar trumf (`captainOwnSituation`) och **§5.7-regeländringen**: 4NT direkt
+över 1NT-återbudet är alltid kvantitativt, egen självbärande färg frågar med
+Gerber 4♣ (fynd 6 löst — ägaren kan vända det i grinden); vakt: manuset avgör
+inga bud i ostörda auktioner (`auction-decide.test.ts`).
+**Nästa gång börjar vi med:** 🚪 grinden för familj 6 (b-listan i loggen: frö
+20271008, 20271809, 20272312 + avvikelsedumpens 94 fullföljda slamsekvenser
+efter människans 2♣) → merge `--no-ff` → 🚪 grinden efter etapp 3 (deploya?) →
+etapp 4 familj 1 (inkliv och advance) i frekvensbildens ordning.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

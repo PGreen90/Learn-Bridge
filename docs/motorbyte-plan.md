@@ -278,8 +278,15 @@ inte flyttat än.
    efter NMF/fjärde färg/broms/checkback, systems on) och raden *fjärde*
    (Smolen-valet efter 2♣–2♦–2NT). Manuset = förare över samma steg. Tvetydigt
    4NT utan bjuden fit tiger tills ägarbeslut (fynd 14).
-6. **Manuset för ostörda auktioner rivs** ur `auction.ts`; `buildAuction` =
-   hjälparen "spela ut fyra stolar".
+6. **Manuset för ostörda auktioner rivs** ur `auction.ts`. **KLAR 2026-09-05**
+   (loggen): den ostörda fortsättningen är en loop som frågar beslutstabellen
+   stol för stol (samma beslut som vid bordet); adapterkedjan, de två Gerber-
+   blocken och tvåhandsförarna för slamsekvenserna är borta. Kvar i
+   `buildAuction` tills etapp 4: den modellerade konkurrensronden och flaggan
+   `open` (får det gamla lagrets konkurrensdetektorer bjuda vidare när
+   tabellen tiger?) — reglerna för flaggan är de rivna grenarnas, oförändrade.
+   `buildAuction` blir hjälparen "spela ut fyra stolar" när konkurrensronden
+   flyttat in (etapp 4), eftersom det gamla lagret behöver linjen till dess.
 
 Per familj: facit-test för läget, auktionsdiffen klassad (a/b/c), revisorn
 inte sämre, hela sviten grön, egen mergepunkt. 🚪 Grindbeslut per familj (§5).
@@ -370,6 +377,82 @@ auktioner och ägaren spelat på etapp 4-motorn.
 
 ## Ändringslogg
 
+- **2026-09-05 — Etapp 3 familj 6 BYGGD (väntar på grind): manuset för ostörda
+  auktioner rivet.** `buildAuctionCore` i `auction.ts` består nu av öppningen
+  (tabellen, som förut), den modellerade konkurrensronden (oförändrad, etapp 4)
+  och EN loop: fråga beslutstabellen stol för stol (`decideFromTable`, egen
+  hand + auktionen), motståndarna passar, tills tabellen tiger eller någon
+  passar. Adapterkedjan (`hittills`/`f2`…`f5`), de två Gerber-blocken och
+  tvåhandsförarna för slamsekvenserna är borta (`git diff --stat` mot
+  `c4f486f`; filen 706 → 608 rader). Manuset avgör INGA bud i ostörda
+  auktioner längre — vakt: `auction-decide.test.ts` "familj 6" (3000
+  botauktioner, ingen källa `manus` från vår sida när motståndarna bara
+  passat). Det enda manuset tillför är `open`-flaggan; reglerna är de rivna
+  grenarnas, återskapade exakt (sond över 3000 frön före rivningen: bara ÖPPNA
+  linjer får detektorbud efter linjens slut, stängda bara pass): slamraden har
+  bjudit och tiger → stängd; pass eller partnerns `avslut`-bud → stängd (nytt
+  fält `DecidedCall.avslut`, satt av raden svar2 för manusets gamla
+  `final`-plan: 2♣-utgångsplaceringen, 6NT-avslutet, 2/1-utgången); vår sidas
+  2:a–4:e tur utan regel → öppen; 5:e tur utan regel → öppen bara efter fjärde
+  färg/NMF; därefter stängd. Lärdom: `slamSituation(f) !== null` duger inte som
+  "sekvens pågår" (läser trumf även när 3NT var 'till spel' → två auktioner
+  bytte `open`, frö 20271779/20271997) — källan `tabell:slam` är rätt signal.
+  `buildAuction` blir hjälparen "spela ut fyra stolar" först när
+  konkurrensronden flyttat (etapp 4): det gamla lagret behöver linjen för
+  `offBook`/`lineExhaustedOpen`, och en `decideCall`-baserad `buildAuction`
+  vore rekursiv.
+  **Rivningen avslöjade tre kikhål som lagades i det nya lagret:** (1) den
+  2♣-positiva slamgrenen — `slamTrumpFromAuction` läser nu **4NT efter
+  2♣–positivt–3y som essfrågan i y** (senast bjudna färg = det gamla lagrets
+  `slamAskTrump`-regel), **slaminbjudan i y** (5M / 4m över 3m — hittad av
+  revisorn: frö 20261494, 2♣–2NT–3♠–5♠ passades tills öppnaren fick döma ur
+  tabellen) och **ett kontrollbud i ny färg som sätter y**
+  (betydelselagrets konvention från etapp 1: den balanserade 2NT-svararen
+  cue:ar från 3-läget, efter färgpositivt bara högfärgen; rebud i egen färg
+  förblir naturligt, fynd 7); förut svarade manuset med kaptenens hand som
+  facit (frö 20271008: 5♥ "för spader" → nu 5♦ = tre nyckelkort i hjärter,
+  kaptenen placerar ändå 6♠ ur sin egen avsikt — fynd 14-bevis). (2)
+  **Kaptenens egen avsikt när trumfen är oläsbar** (`captainOwnSituation`):
+  reverse–4NT (frö 20272351) placeras nu av kaptenen själv; förut spelade
+  manuset. (3) **4NT direkt över 1NT-återbudet var två bud i ett** (fynd 6):
+  kvantitativ inbjudan (jämn 19–20) OCH RKC för en egen självbärande färg —
+  bara manuset kunde hålla isär dem, och båda facit-testerna i
+  `auction-slam-1nt-rebid.test.ts` föll utan kik. **Regeländring (§5.7,
+  systembokens §9):** 4NT direkt över sang-återbudet är alltid kvantitativt
+  (standard-2/1; öppnaren dömer på sin hand, raden slam `kind: 'kvantitativ'`),
+  och kaptenen med egen självbärande färg frågar med **Gerber 4♣** och placerar
+  6 i färgen (`gerberTurn(…, placeSuit)`; öppnaren svarar ess och passar
+  placeringen utan att behöva veta färgen). Betydelselagret följer med
+  (`ownSuitOverNTRebid` borttagen; 4NT över partnerns sang-återbud förklaras
+  kvantitativt). Facit: `auction-decide.test.ts` "familj 6" (kvantitativ
+  accept/avböj, Gerber → 6♠ / stopp 5♠, öppnarens ess-svar och pass).
+  **Auktionsdiffen** (kommandot i §3, baslinje `c4f486f` = familj 5-koden):
+  3000 givar, ÄNDRAT BUD 3 — alla klass b: frö 20271008 (ovan), 20271809 och
+  20272312 (2♣–2NT–3♦–4♣: öppnaren cue:ar 4♥ och paret når 6♦ resp. stannar i
+  5♦ där honorForce förut improviserade 4♦); samma bud med annan källa 17 (de
+  sista manusbuden i ostörda auktioner → `tabell:slam`, två motståndarpass →
+  `pass (ingen regel)`). **Avvikelsedumpen** (kommandot i §3, fyra lägen):
+  ÄNDRAT BUD 100, 0 olagliga — 94 är slamsekvenser som nu fullföljs efter
+  MÄNNISKANS 2♣ (förut `pass (ingen regel)` mitt i sekvensen: nyckelkortssvar,
+  placeringar, cue-ronden; mönstren: slamavslut 47, cue: avslut 14, 1430 RKC
+  14, cue-bid 13, RKC: stopp 5, Sjöberg 1), 4 är öppnarens 6NT-accept på
+  människans kvantitativa 4NT över 1NT-återbudet, 2 är öppnarens dom på
+  människans slaminbjudan 5M efter 2♣. **Kikvaktens mätläge**
+  (kommandot i §3): 2898 bud, 131 byter (4,5 %) — alla ur källan `manus`, dvs.
+  konkurrensronden (etapp 4); varje `tabell:*`-källa 0 byten. Frekvensbilden:
+  `tabell:slam` 61 → 117 bud, `manus` 7320 → 7266 (`auktionsdump-frekvens.txt`).
+  **Sveparna** (kommandona i §3): betydelse ostört 0/4/0 (samma kända mönster
+  som familj 5, frö 20271084), kända 37 bud i 2 mönster; förklaring 0 utan
+  förklaring, 0 gissningar; regelsvep 0 oändliga; pliktsvep 0 auktionsfel,
+  identiskt med baslinjen. Hela sviten grön (`npm test`), `npx tsc` rent.
+  **Revisorn** (kommandot i §3, 1000 givar, frö 20260721): rätt kontrakt
+  20,3 % · snittförlust 268,75 — identiskt med familj 5 (auktionsdiff på
+  revisorns frön 20260721–20261720 mot baslinjen ur `git stash`: ÄNDRAT BUD 0;
+  före inbjudningsfixet var det 1 giv, frö 20261494, och 269,44).
+  🚪 **Grindbeslut för ägaren:** (a) familj 6:s b-lista ovan; (b) §5.7-
+  regeländringen (Gerber i stället för 4NT för den självbärande färgen) — kan
+  vändas till "kaptenen sätter trumfen via NMF först" om ägaren hellre vill det
+  (fynd 14:s riktning); (c) grinden efter etapp 3: deploya?
 - **2026-09-05 — Etapp 3 familj 5 KLAR: slamutredningen per stol + svararens
   tredje bud.** Varje tur i en slamsekvens tas nu ur EN hand + auktionen:
   `slam-auction.ts` fick stegmaskinen `slamTurn(role, hand, setup, sofar)`

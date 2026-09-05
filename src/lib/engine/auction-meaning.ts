@@ -349,26 +349,6 @@ function openerNewSuitAfter1NTResponse(seat: Seat, cb: ParsedBid, prior: Resolve
 }
 
 /**
- * 4NT över partnerns sang-ÅTERBUD (1x–1M–1NT–4NT, §5.7): frågaren har visat en
- * egen färg och partnern har nekat stöd med sang — 4NT är då essfråga med den
- * egna färgen som trumf (kvantitativt bara över en sangÖPPNING). Sant när
- * partnern bjudit en färg FÖRE sin sang (dvs. ett återbud) och frågarens första
- * kontraktsbud var en färg på 1–2-läget.
- */
-function ownSuitOverNTRebid(asker: Seat, before: ResolvedCall[]): string | null {
-  const partner = PARTNER[asker]
-  const ours = before.filter((c) => SIDE[c.seat] === SIDE[asker] && parseBid(c.bid))
-  const partnerBids = ours.filter((c) => c.seat === partner).map((c) => parseBid(c.bid)!)
-  const lastPartner = partnerBids[partnerBids.length - 1]
-  if (!lastPartner || lastPartner.strain !== 'NT' || lastPartner.level > 2) return null
-  if (!partnerBids.some((cb) => cb.strain !== 'NT')) return null // sangöppning → kvantitativt
-  const first = ours.find((c) => c.seat === asker)
-  const fcb = first ? parseBid(first.bid) : null
-  if (!fcb || fcb.strain === 'NT' || fcb.level > 2) return null
-  return fcb.strain
-}
-
-/**
  * Essfrågesekvensen (1430 RKC, §6.1) sedd från `seat` (felrapport #60): vår
  * sidas 4NT-essfråga med härledd trumf, partnerns stegsvar (om givet) och om
  * frågaren därefter stannat i 5-trumf. null = ingen essfråga, eller
@@ -379,7 +359,7 @@ function rkcSequence(seat: Seat, prior: ResolvedCall[]): { asker: Seat; trump: s
   if (askIdx < 0) return null
   const asker = prior[askIdx].seat
   const before = prior.slice(0, askIdx)
-  const trump = agreedSuit(asker, before) ?? askTrumpFallback(asker, before) ?? ownSuitOverNTRebid(asker, before)
+  const trump = agreedSuit(asker, before) ?? askTrumpFallback(asker, before)
   if (!trump) return null
   const after = prior.slice(askIdx + 1).filter((c) => parseBid(c.bid))
   if (after.some((c) => SIDE[c.seat] !== SIDE[seat])) return null
@@ -1291,6 +1271,12 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
       return last.level === 3 && ntBase < 0
         ? R('slamtrevare efter 3NT', `4 sang — slamtrevare över partnerns 3 sang: kvantitativ inbjudan, bjud 6 sang med maximum, passa annars.`)
         : R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan över partnerns sang: bjud 6 sang med maximum, passa med minimum.`)
+    }
+    // 4NT direkt över partnerns sang-ÅTERBUD (1x–1M–1NT/2NT–4NT) är kvantitativt
+    // (§5.7; motorbytet familj 6, 2026-09-05): essfrågan för en egen färg går
+    // via Gerber 4♣ där, så partnern aldrig behöver gissa vad 4NT menar.
+    if (partnerLast && !trump && last.strain === 'NT' && last.level <= 2 && u.bids.slice(0, n - 1).some((b) => b.seat === PARTNER[seat] && b.cb.strain !== 'NT')) {
+      return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan över partnerns sang-återbud: bjud 6 sang med maximum, passa med minimum.`)
     }
     const ownLast = [...u.bids].reverse().find((b) => b.seat === seat && own.has(b.cb.strain))?.cb.strain ?? null
     const t = trump ?? ownLast ?? askTrumpFallback(seat, prior)
