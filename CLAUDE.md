@@ -28,8 +28,13 @@ session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per famil
 `auction-decide.ts` (`decideFromTable`: läge → kunskapsfunktion) med raderna
 öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
 bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
-varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. Sexton bok-mot-
-motor-fynd väntar på ägarbeslut (loggen; bl.a. nr 14 naket 4NT utan bjuden fit).
+varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **Bok-mot-motor-
+fynden (15 st, inte 16 — nr 10 finns inte): ägaren tar besluten en i taget.
+Beslut 1–6 TAGNA 2026-09-05, loggade i planens §5b** (fynd 6+15 4NT/Gerber ·
+fynd 1 fjärde färg efter reverse · fynd 2 fast-arrival-höjning efter reverse ·
+fynd 3 rena steg i splinterreläet · fynd 4 passad hands höjningar · fynd 5
+naturlig 3♣ efter 2♣–2♦–2M). **Inget byggt än** — systembok + facit + regel görs
+test-drivet EFTER hela svepet, deployas inte utan PCD. Kvar: beslut 7–15.
 **Familj 6 KLAR & LIVE 2026-09-05 (mergepunkt f05bfef, grinden godkänd inkl.
 §5.7-regeländringen; grinden efter etapp 3 = deployad):** manusets ostörda
 del riven — `buildAuctionCore` spelar ut vår sida ur tabellen stol för stol
@@ -40,11 +45,14 @@ oläsbar trumf (`captainOwnSituation`) och **§5.7-regeländringen**: 4NT direkt
 över 1NT-återbudet är alltid kvantitativt, egen självbärande färg frågar med
 Gerber 4♣ (fynd 6 löst — ägaren kan vända det i grinden); vakt: manuset avgör
 inga bud i ostörda auktioner (`auction-decide.test.ts`).
-**Nästa gång börjar vi med:** etapp 4 familj 1 — inkliv och advance
+**Nästa gång börjar vi med:** beslut 7 (fynd 7: `2♣–3♦–3♥–4♦` naturligt vs
+`2♣–3♦–3♠–4♦` cue — samma auktion behöver EN betydelse). Fortsätt svepet
+beslut 7–15 (fynd 7,8,9,11,12,13,14,16), lås var och en i planens §5b. NÄR
+svepet är klart: bygg alla besluten test-drivet (facit FÖRE fix, systembok §,
+regel i nya lagret) → PCD. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
 (`overcall`, `advanceOvercall`, `advanceTwoSuiter`, inklivarens fortsättningar)
-flyttar in i tabellen och deras detektorer raderas; ordningen fastställs mot
-frekvensbilden (`auktionsdump-frekvens.txt`, planens §4 etapp 4). Startrutin:
-baslinjerna (§3) på `f05bfef`, betydelsesvepets störda del som mätare.
+in i tabellen; ordningen mot frekvensbilden (`auktionsdump-frekvens.txt`, planens
+§4 etapp 4); baslinjerna (§3) på `f05bfef`.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

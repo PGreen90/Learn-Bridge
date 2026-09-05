@@ -358,6 +358,68 @@ revisorn identisk med familj 5.
 att manuset inte kommer tillbaka. Tas när betydelsesvepet är grönt på störda
 auktioner och ägaren spelat på etapp 4-motorn.
 
+## 5b. Ägarbeslut på etapp 3:s bok-mot-motor-fynd (påbörjat 2026-09-05)
+
+Etapp 3 samlade 15 numrerade bok-mot-motor-fynd (loggen; kartan sa "sexton" —
+nr 10 finns inte, det försvann när familj 4a:s slam-buggar lagades direkt).
+Ägaren tar besluten en i taget. Här förs varje beslut in när det tas; själva
+bygget (systembok §, facit-test FÖRE fix, regeln i det nya lagret) görs
+test-drivet efter svepet och deployas inte utan ägarens PCD.
+
+- **Beslut 1 — fynd 6 + 15 (4NT och 4♣ över 1NT-återbudet), 2026-09-05.**
+  Ägarbeslut: efter `1x–1M–1NT` (öppnaren 12–14 jämnt), svararens andra bud —
+  (1) **färg att visa → 2♣ NMF**, sedan rebjud färgen (slam med känd färg går
+  aldrig via 4♣/4NT); (2) **jämn hand utan färg, sikte på NT-slutkontrakt,
+  styrkan räcker (kan räkna ~33 mot partnerns minimum 12) → 4♣ Gerber** —
+  förstahandsvalet, för mot ett så snävt intervall (12–14) är essen den verkliga
+  okända, styrkan räknar svararen själv; (3) **jämn hand på gränsen (slam bara om
+  partnern max, ~19–20) → 4NT kvantitativt**; (4) ingen slamambition → 3NT.
+  Motorn knyter idag 4♣ Gerber till att man HAR en färg — det vänds: 4♣ = jämn
+  NT-hand UTAN färg, färgen sköts av NMF. §5.7:s gamla "klöverinbjudan 4m"
+  försvinner (ersätts av NMF-vägen). Tröskel Gerber/4NT: "kan jag räkna 33 mot
+  partnerns minimum?" → Gerber, annars 4NT. Rör §5.7 + §6.4.
+
+- **Beslut 2 — fynd 1 (fjärde färg efter reverse), 2026-09-05.** Ägarbeslut:
+  behåll motorns linje — fjärde färg efter en reverse (`1♦–1♠–2♥–3♣`) är
+  **konstlad** (håll-/beskrivningsfråga), inte naturlig. Auktionen är redan
+  utgångskrav, men håll-frågan till 3NT är verklig. Rätta boken §6.6 (som idag
+  undantar reverse). Rör §6.6.
+
+- **Beslut 3 — fynd 2 (höjning av öppnarens andra färg efter reverse),
+  2026-09-05.** Ägarbeslut: efter en reverse går man nästan alltid till utgång,
+  så höjningen delas i "fast arrival" — **billig höjning (`1♦–1♠–2♥–3♥`) = stark,
+  slamintresse, minst poäng till egen öppning (~12+), 3+ stöd**, öppnar 4-nivån
+  för kontrollbud ([[cue-bids-reinstated]]); **hopp till utgång (`…–4♥`) = den
+  svagare handen med 3+ stöd, ingen slamambition**. Ingen svag delkontrakts-
+  escape behövs (minimihanden hoppar till 4♥). Ersätter både motorns "ej krav"
+  och bokens odelade "krav". Rör §6.6.
+
+- **Beslut 4 — fynd 3 (kortfärgen efter `1♠–3♥–3♠`, tvetydig splinter),
+  2026-09-05.** Ägarbeslut: **rena steg** — kort ♣→3NT, kort ♦→4♣, kort ♥→4♦
+  (lägst möjligt hela vägen = mest rum för kontrollbud, samma logik som beslut
+  3). Ersätter motorns "bjud din korta färg" (4♣/4♦/4♥) och bokens
+  4♦-överhopp (3NT/4♣/4♥). `1♥–3♠–3NT`-tabellen (4♣=♣/4♦=♦/4♥=♠) är redan
+  rena steg — lämnas. Rör §4.1 (bara `1♠`-tabellen) + splinter-reläsvaret i
+  motorn.
+
+- **Beslut 5 — fynd 4 (passad hands semi-forcing 1NT + inverterad minorhöjning),
+  2026-09-05.** Ägarbeslut: **Del A** semi-forcing 1NT av passad hand behålls
+  (naturligt icke-krav, öppnaren får passa) — skrivs bara in att det gäller efter
+  pass. **Del B** inverterat är i praktiken AV för passad hand: `pass–…–1♦–2♦` =
+  **6–11, icke-krav, enkel höjning**; öppnaren (1♦-budet) avgör om budgivningen
+  går vidare. 3♦ kvar för den svaga formstarka höjningen (5+ ruter, under 6,
+  tävlande). Samma för 2♣ efter `pass–…–1♣`. Rör §4 (minorhöjningarna) + motorns
+  svarsfunktion för passad hand.
+
+- **Beslut 6 — fynd 5 (`2♣–2♦–2M–3♣`), 2026-09-05.** Ägarbeslut: 3♣ görs
+  **naturligt** — **0–7 hp, 5+ klöver** (bjud din riktiga färg, håll auktionen
+  levande så 2♣-öppnaren får beskriva en gång till). Symmetriskt: **3♦ = 0–7,
+  5+ ruter**, 5-korts högfärg visas naturligt. Den konstlade "jag har inget"-
+  varningen (suit-lös bottenhand, 0–3, ingen fit) **flyttar till 2NT**. Hela
+  svarsstrukturen efter `2♣–2♦–2M` blir därmed naturlig och tvetydigheten
+  (andra negativa vs naturlig klöver) försvinner. Ersätter §4.4:s "3♣ = alltid
+  andra negativa". Rör §4.4 + motorns 2♣-svarsgren.
+
 ## 6. Arbetssättet under bytet
 
 - **En familj per session** är rätt takt; en session får aldrig lämna en
