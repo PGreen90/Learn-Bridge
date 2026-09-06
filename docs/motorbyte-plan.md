@@ -521,7 +521,7 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   trumfen när inget är satt) + `slamTrumpFromAuction` (reverse/hoppskift-grenen
   returnerar senast bjudna färg för 4NT; öppnaren tiger inte längre) +
   facit-köns fynd 14-post (blir `it`).
-  **BYGGT 2026-09-06 (väntar PCD; loggen nedan).** Två följder utöver
+  **BYGGT & LIVE 2026-09-06 (mergepunkt `4be2ba3`, Actions grön, rebidz.com aliasad; loggen nedan).** Två följder utöver
   beslutstexten: (1) kaptenen med fit bara i öppnarens FÖRSTA färg efter
   reverse/hoppskift frågar inte längre naket 4NT (det läses i den andra) —
   hon visar slamintresset med inbjudningsbudet 5M/4m, som namnger trumfen,
@@ -575,8 +575,8 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
-- **2026-09-06 — §5b beslut 14 BYGGT (naket 4NT = essfråga i senast bjudna
-  färg; väntar ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 14" i
+- **2026-09-06 — §5b beslut 14 KLAR & LIVE (naket 4NT = essfråga i senast bjudna
+  färg; mergepunkt `4be2ba3`, Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 14" i
   `motorbyte-facit.test.ts` (fyra fall; fynd 14-posten ersatt), det gamla
   facitet "20261372: 4NT med egen färg som trumf" omskrivet (4♣ naturligt;
   hela auktionen till 6♣ = `it.todo` för 2♣-linjens svar3-rad). Regeln i

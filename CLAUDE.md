@@ -29,7 +29,7 @@ session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per famil
 öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
 bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
 varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **§5b: alla 15
-ägarbeslut tagna 2026-09-05; beslut 1 LIVE (`3491ece`), 3 LIVE (`1a6adf0`), 7 LIVE (`820ab71`), 14 BYGGT 2026-09-06 (väntar PCD).**
+ägarbeslut tagna 2026-09-05; beslut 1 LIVE (`3491ece`), 3 LIVE (`1a6adf0`), 7 LIVE (`820ab71`), 14 LIVE 2026-09-06 (`4be2ba3`).**
 **Familj 6 KLAR & LIVE 2026-09-05 (mergepunkt f05bfef; grinden efter etapp 3
 = deployad):** manusets ostörda del riven — `buildAuctionCore` spelar ut vår
 sida ur tabellen stol för stol; kvar = konkurrensronden + `open`-flaggan
