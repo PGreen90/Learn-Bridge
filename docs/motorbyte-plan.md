@@ -439,6 +439,14 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   cue 4♦, samma slutkontrakt; frö 20271084 oförändrat naturligt). Rör §4.4 (en
   mening om 3♠-fallet + stödreglerna) + betydelselagrets `impliedCueTrump`
   (undantaget "även i egen visad färg" tas bort) + facit-köns fynd 7-post.
+  **BYGGT 2026-09-06 (väntar PCD; loggen nedan).** Claudes tolkningar utöver
+  beslutstexten, för ägaren att bekräfta: (1) "bra 5" = två av A/K/Q, eller
+  5 med singel/renons; **5-3-3-2 bjuder sang** även med bra färg (frö
+  20271242); (2) **ingen 5M-inbjudan** efter öppnarens egen högfärg — utan
+  kontrollbud i ny färg bjuds 4M (33+ → 4NT); (3) svararen utan stöd och
+  rebud bjuder **3NT direkt** (aldrig 2NT), och **öppnaren rättar till 4M med
+  6+** (ny regel i raden tredje — utan den passade 2♣-öppnaren 3NT med sex
+  spader, frö 20271242).
 
 - **Beslut 8 — fynd 8 (öppnaren höjde partnerns kravfärg till 5M över svag
   tvåa), 2026-09-05.** Ägarbeslut: **bekräftar familj 3:s fix** — med stöd +
@@ -559,6 +567,37 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-06 — §5b beslut 7 BYGGT (4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
+  ny färg sätter öppnarens högfärg; väntar ägarens PCD).** Test-drivet:
+  facit-blocket "§5b beslut 7" i `motorbyte-facit.test.ts` (nio fall, sex röda
+  före fixen; fynd 7-posten `it.todo` → `it`). Regeln i det nya lagret:
+  `slamContextFor` 2♣-grenen (`SlamContext.noCueIn` = kaptenens egen färg,
+  cue-golv 3NT även i högfärgslinjen, ingen 5M-inbjudan efter öppnarens egen
+  högfärg), `responderSecondDecision` (fast arrival 4M utan cue; utan stöd:
+  rebud 6+ / 5 med korthet / bra 5 i annat än 5-3-3-2 → ny färg under 3NT →
+  3NT), `openerThirdDecision` (öppnaren rättar partnerns 3NT till 4M med 6+ —
+  'rättelse till högfärg'), `slamTrumpFromAuction` (cue-läsningen kräver
+  4-läget efter färgpositivt). Betydelselagret: `impliedCueTrump` tar aldrig
+  egen visad färg som cue (2♣–3♦–3M–4♦ = '2♣: rebud egen färg (GF)'), det
+  trumfsättande kontrollbudet sätter `agreed` så öppnarens cue i svararens färg
+  läses som cue (2♣–3♦–3♥–4♣–4♦). Registret: '2♣: rebud egen färg (GF)',
+  'rättelse till högfärg'. Systembok §4.4 (tre stycken) + §9.
+  **Mätningar** (kommandon i §3; baslinjer på `148d170`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 4 — b:
+  frö 20271411 (ägarens exempel, 4♠ direkt i stället för cue 4♦), 20271024
+  (3NT i stället för 4♣ → 4♥ på 5-2), 20272253 (öppnaren rättar 3NT till 4♥
+  med sex hjärter, förr pass); a: 20271242 (samma 4♠ via 3NT + rättelse);
+  avvikelsedumpen: 27 ändrade — 17 b, 10 a, 0 c (grupperna: 3NT/rättelse 12,
+  kontrollbud i ny färg 6, 4NT med 33+ 5, fast arrival 1, lågfärgsinbjudan 1,
+  finaste färgen 2); olagliga tabellbud 0; betydelsesvepet kravnivå 0 · alert 0
+  (förr 4) · registerhål 0; pliktsvep/förklaringssvep/regelsvep gröna;
+  revisorn 1000 givar: rätt kontrakt 20,2 % · snittförlust 268,83 (identiskt med beslut 1 och 3). **Två utkast förkastades på diffen** (c-fall): "bra 5" utan
+  formkrav skickade 5-3-3-2-händer förbi 3NT (4♦ → 5♦), 3NT bjöds med singel i
+  partnerns färg, och 2♣-öppnaren passade partnerns 3NT med sex spader —
+  rättelseregeln i raden tredje kom därav. **Känt hål kvar (gamla lagret,
+  etapp 4-kandidat):** svararens tredje bud i 2♣-linjen (honorForce rebjuder
+  en 5-kortsfärg på 4-läget med singel i partnerns 6-kortsfärg, frön
+  20270462/20271752 → 4♥ på 5-0/5-2 i stället för 4♠).
 - **2026-09-06 — §5b beslut 3 KLAR & LIVE (fast arrival efter reverse i högfärg;
   mergepunkt `1a6adf0`, Actions grön, rebidz.com aliasad; ägaren bekräftade 4+ stöd).** Test-drivet: facit-blocket "§5b beslut 3" i
   `motorbyte-facit.test.ts` (nio fall, röda före fixen). Regeln i det nya

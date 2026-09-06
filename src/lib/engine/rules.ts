@@ -170,6 +170,10 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'rebid: hoppskift': 'utgangskrav',
   hoppskift: 'utgangskrav',
   'rebid: egen färg (GF)': 'utgangskrav',
+  // Svararens andra bud efter 2♣–positivt–öppnarens egen färg (§5b beslut 7),
+  // och öppnarens rättelse av partnerns 3NT med 6+ i egen högfärg.
+  '2♣: rebud egen färg (GF)': 'utgangskrav',
+  'rättelse till högfärg': 'avslut',
   'rebid: stöd (GF)': 'utgangskrav',
   'rebid: 3NT (GF)': 'avslut',
   'rebid: 3NT': 'avslut',

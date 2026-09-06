@@ -566,10 +566,13 @@ lite på fötterna och håller utgångskravet.
   öppnarens naturliga färgrebud) räknar **svararen (kaptenen)** sin egen hand
   mot 2♣-öppningens **visade minimum 22** (22+ hp balanserad eller ~9+
   spelstick ≈ samma spelvärde): **33+ → driv** med **1430 RKC Blackwood**
-  (ess + trumfdam, detaljer i §6); **31–32 → slaminbjudan** (5M i högfärg,
-  stödhöjningen i minor) som öppnaren accepterar med mer än blott minimum
-  (dömt på egna Bergenpoäng); annars sätts utgången. Manuella **cue-bid**
-  enligt §6.2 tolkas som vanligt.
+  (ess + trumfdam, detaljer i §6); **31–32 → slaminbjudan** (5M i högfärg
+  när öppnaren stödde svararens färg, stödhöjningen i minor) som öppnaren
+  accepterar med mer än blott minimum (dömt på egna Bergenpoäng); annars sätts
+  utgången. Efter öppnarens **egen högfärg** (2♣–3♦–3M) finns ingen 5M-
+  inbjudan — där visas slamintresset med kontrollbud i ny färg, och handen
+  utan kontrollbud att visa bjuder 4M direkt (regeln nedan). Manuella
+  **cue-bid** enligt §6.2 tolkas som vanligt.
 - **Utan trumf** gäller samma kaptensmatte: med **33+** mot visade 22 frågar
   svararen RKC med sin egen redan visade färg som trumf om den är
   **självbärande** (6+ kort med minst två av A/K/Q — nyckelkortssvaret vaktar
@@ -579,17 +582,30 @@ lite på fötterna och håller utgångskravet.
   längd inte ger sangstick utan fit → auktionen fortsätter naturligt. I
   31–32 utan trumf står den vanliga utgångsauktionen (ingen kvantitativ
   inbjudan där ännu).
-- **Så läser ÖPPNAREN kaptenens slambud efter sitt färg-återbud** (2♣–positivt–
-  3y, 2026-09-05): **4NT är essfrågan i y** — den senast bjudna färgen (öppnaren
-  kan inte se om svararen har 3+ stöd eller frågar för en egen självbärande färg;
-  det tvetydiga fallet är bok-mot-motor-fynd 14, `docs/motorbyte-plan.md`). Ett
-  **kontrollbud i en ny färg** (inte svararens egen) över öppnarens färg och
-  under dess utgång **sätter öppnarens färg som trumf**: den balanserade
-  2NT-svararen cue:ar redan på 3-läget (2♣–2NT–3♥–3♠), efter ett färgpositivt
-  bara när öppnarens färg är en högfärg. Svararens rebud i sin **egen** färg
-  (2♣–3♦–3♥–4♦) är naturligt.
-- Svararens **enkla stödhöjning** efter sitt positiva svar = slamintresse;
-  **dubbelhöjning direkt till utgång** = minimum utan slamintresse.
+- **Så läser ÖPPNAREN kaptenens bud efter sitt färg-återbud** (2♣–positivt–
+  3y, 2026-09-05; stödreglerna 2026-09-06 = motorbytets §5b beslut 7,
+  `docs/motorbyte-plan.md`): **4NT är essfrågan i y** — den senast bjudna
+  färgen (öppnaren kan inte se om svararen har 3+ stöd eller frågar för en egen
+  självbärande färg; det tvetydiga fallet är bok-mot-motor-fynd 14). Ett
+  **kontrollbud i en NY färg på 4-läget** (över 3NT, under utgången i y —
+  aldrig svararens egen färg) **sätter öppnarens högfärg som trumf** och visar
+  3+ stöd med slamintresse: 4♣ över 3♥/3♠, 4♥ över 3♠ (den balanserade
+  2NT-svararen cue:ar redan på 3-läget: 2♣–2NT–3♥–3♠). Ny färg på 3-läget
+  efter ett färgpositivt (2♣–3♦–3♥–3♠) är naturlig, inte kontrollbud. **3+ stöd
+  utan kontrollbud att visa → 4M direkt** (fast arrival, ingen slamambition —
+  samma logik som efter reverse, §6.6); med 33+ mot visade 22 frågar kaptenen
+  4NT direkt. Svararens rebud i sin **egen** färg (2♣–3♦–3♥–4♦ **och**
+  2♣–3♦–3♠–4♦ — samma bud, samma betydelse) är **naturlig**: 6+ kort, eller 5
+  i en obalanserad hand (singel/renons någonstans, eller bra färg med två av
+  A/K/Q i annat än 5-3-3-2); den förnekar 3-korts stöd och utgångskravet står.
+  Utan stöd och utan rebud: ny färg under 3NT (5+, eller 4-korts högfärg —
+  finaste färgen före sangen), annars **3NT** direkt (5-3-3-2 bjuder sang även
+  med bra färg). Öppnaren **rättar 3NT till 4M med 6+** i sin högfärg, annars
+  står 3NT.
+- Svararens **enkla stödhöjning** under 3NT efter sitt positiva svar
+  (2♣–2♥–2♠–3♠) = slamintresse; **höjning direkt till utgång** = minimum utan
+  slamintresse (på 4-läget visas slamintresset med kontrollbudet i ny färg,
+  regeln ovan).
 - Balanserat: efter 2NT-rebud (22–24) sätter svararen nivån med NT-stegen
   (Stayman/transfers, eller kvantitativt mot 6NT med ~10+ hp).
 - *Exempel:* 2♣ – 2♥ (5+ ♥, 8+) – 3♥ (stöd, slamintresse) – cue-bids – 1430 RKC
@@ -2119,6 +2135,25 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-06 — 4♦ naturligt efter 2♣–3♦–3M; kontrollbud i ny färg sätter
+  öppnarens högfärg (§4.4; motorbytet §5b beslut 7, `docs/motorbyte-plan.md`).**
+  Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 7: samma auktionsform hade två
+  betydelser (4♦ = cue i 3♠-fallet, naturlig rebud via kravsteget i
+  3♥-fallet). Nu: svararens rebud i egen färg är **alltid naturlig** (6+, eller
+  5 i obalanserad hand / bra 5 i annat än 5-3-3-2; förnekar 3-stöd);
+  **3+ stöd + slamintresse → kontrollbud i NY färg på 4-läget** (4♣ över
+  3♥/3♠, 4♥ över 3♠) som sätter öppnarens högfärg — ny färg på 3-läget är
+  naturlig; **3+ stöd utan kontrollbud att visa → 4M direkt** (fast arrival;
+  5M-inbjudan finns inte i det läget); 33+ → 4NT direkt. Utan stöd och rebud:
+  ny färg under 3NT, annars 3NT (öppnaren rättar till 4M med 6+ i högfärgen —
+  ny regel i raden tredje). Kod: `slamContextFor`/`responderSecondDecision`/
+  `openerThirdDecision` (`auction-decide.ts`), `SlamContext.noCueIn` +
+  cue-golvet 3NT (`slam-auction.ts`), betydelselagret `impliedCueTrump` (egen
+  visad färg aldrig cue; kontrollbudet sätter trumfen "på riktigt" så
+  öppnarens cue i svararens färg läses som cue), registret (`rules.ts`:
+  '2♣: rebud egen färg (GF)', 'rättelse till högfärg'). Facit: blocket
+  "§5b beslut 7" i `motorbyte-facit.test.ts` (frön 20271084, 20271411,
+  20271242).
 - **2026-09-06 — Fast arrival efter reverse i högfärg (§6.6, §5; motorbytet
   §5b beslut 3, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
   bok-mot-motor-fynd 2. Förr höjdes reversens högfärg billigast oavsett
