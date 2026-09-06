@@ -76,11 +76,6 @@ const KÄNDA_MOTORAVVIKELSER: { rule: string; bid?: RegExp; explanation?: RegExp
     bid: /^5[HS]$/,
     facit: 'öppnaren höjer partnerns kravfärg till 5M över svag tvåa (4M är utgången) — facit i motorbyte-facit.test.ts (svaga tvåor)',
   },
-  {
-    rule: 'krav – rebjuder egen färg',
-    bid: /^4[CD]$/,
-    facit: 'kravstegets tvångsbud rebjuder egen lågfärg på 4-läget i cue-zonen (2♣–3♦–3♥–4♦, frö 20271084) medan manuset cue:ar samma form (2♣–3♦–3♠–4♦, frö 20271411): en auktion, två betydelser — facit i motorbyte-facit.test.ts (2♣-familjen)',
-  },
 ]
 
 it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {

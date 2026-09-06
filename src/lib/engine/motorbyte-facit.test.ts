@@ -13,14 +13,32 @@
 import { describe, expect, it } from 'vitest'
 import type { Card, Deal, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { parseHand } from '../bidding'
+import { parseHand, seatAt } from '../bidding'
 import { dealFromSeed } from './revisor'
-import { decideCall } from './auction-live'
+import { auctionComplete, decideCall, decideCallTraced } from './auction-live'
 import { decideFromTable } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
+
+/** Giv ur Nords och Syds händer; resten av leken delas växelvis till Öst/Väst. */
+const dealNS = (n: string, s: string): Deal => {
+  const N = parseHand(n)
+  const S = parseHand(s)
+  const used = new Set([...N, ...S].map((c) => `${c.suit}${c.rank}`))
+  const ranks: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+  const rest: Card[] = []
+  for (const suit of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) for (const rank of ranks) if (!used.has(`${suit}${rank}`)) rest.push({ suit, rank })
+  return { id: 'facit', dealer: 'N', vulnerability: 'none', board: 1, hands: { N, S, E: rest.filter((_, i) => i % 2 === 0), W: rest.filter((_, i) => i % 2 === 1) } }
+}
+
+/** Bottarna bjuder given klart ostört; buden i ordning. */
+function spelaKlart(deal: Deal): string[] {
+  const hist: ResolvedCall[] = []
+  while (!auctionComplete(hist) && hist.length < 40) hist.push(decideCall(deal, hist, seatAt(deal.dealer, hist.length)))
+  return hist.map((c) => c.bid)
+}
 
 // Fynd ur etapp 3 familj 1 (2026-09-04): manuset skrev öppningen för den FÖRSTA
 // stol som klassades som öppnare; passade människan den handen ("skulle" ha
@@ -131,16 +149,6 @@ describe('etapp 3 familj 4 – svararens andra bud efter stark 2♣ (§4.4)', ()
     const hist = [call('E', 'P'), call('S', 'P'), call('W', 'P'), call('N', '2C'), call('E', 'P'), call('S', '2D'), call('W', 'P'), call('N', '2S'), call('E', 'P')]
     const c = decideCall(deal, hist, 'S')
     expect(c.bid === '3C' && c.rule !== 'andra negativa').toBe(false)
-  })
-})
-
-describe('etapp 3 familj 4/5 – stark 2♣: en auktionsform, en betydelse', () => {
-  it.todo('frö 20271084: 2♣–3♦–3♥–4♦ måste betyda samma sak som 2♣–3♦–3♠–4♦ (frö 20271411, manuset: cue-bid) — idag naturlig rebud via kravsteget', () => {
-    const deal = dealFromSeed(20271084)
-    const hist = [call('W', 'P'), call('N', '2C'), call('E', 'P'), call('S', '3D'), call('W', 'P'), call('N', '3H'), call('E', 'P')]
-    const c = decideCall(deal, hist, 'S')
-    // En namngiven regel ur tabellen — aldrig kravstegets "auktionen är krav"-fallback.
-    expect(c.rule?.startsWith('krav – ')).toBe(false)
   })
 })
 
@@ -262,16 +270,6 @@ describe('§5b beslut 1 – 4♣ över 1NT-återbudet är Gerber bara utan färg
 describe('§5b beslut 3 – fast arrival efter reverse: 3M stark (GF, cue-ronden), 4M svag (LANDAD 2026-09-05)', () => {
   const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
   const P = (seat: Seat) => call(seat, 'P')
-  /** Giv ur Nords och Syds händer; resten av leken delas växelvis till Öst/Väst. */
-  const dealNS = (n: string, s: string): Deal => {
-    const N = parseHand(n)
-    const S = parseHand(s)
-    const used = new Set([...N, ...S].map((c) => `${c.suit}${c.rank}`))
-    const ranks: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-    const rest: Card[] = []
-    for (const suit of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) for (const rank of ranks) if (!used.has(`${suit}${rank}`)) rest.push({ suit, rank })
-    return { id: 'facit', dealer: 'N', vulnerability: 'none', board: 1, hands: { N, S, E: rest.filter((_, i) => i % 2 === 0), W: rest.filter((_, i) => i % 2 === 1) } }
-  }
   // 1♦–1♠–2♥ (reverse, 16+): Syd har 4 hjärter.
   const h = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '2H'), P('E')]
 
@@ -333,5 +331,82 @@ describe('§5b beslut 3 – fast arrival efter reverse: 3M stark (GF, cue-ronden
   it('lågfärgsreverse rörs inte: 1♣–1♥–2♦ med 4 ruter höjs billigast som förut', () => {
     const hm = [call('N', '1C'), P('E'), call('S', '1H'), P('W'), call('N', '2D'), P('E')]
     expect(bud('S:K84 H:AJ85 D:K963 C:72', hm, 'S')!.call.bid).toBe('3D')
+  })
+})
+
+// §5b beslut 7 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 7): efter 2♣–3♦–3M
+// är 4♦ NATURLIGT i båda fallen (rebud av egen färg: 6+ eller bra 5 utan
+// 3-stöd, utgångskravet står). Stöd visas i stället: 3+ stöd + slamintresse →
+// kontrollbud i NY färg på 4-läget (4♣ över 3♥/3♠, 4♥ över 3♠) som sätter
+// öppnarens högfärg; 3+ stöd utan kontrollbud att visa → 4M direkt (fast
+// arrival, samma logik som beslut 3). Förr: 4♦ = cue i 3♠-fallet (frö 20271411)
+// men naturlig rebud via kravsteget i 3♥-fallet (frö 20271084) — en auktion,
+// två betydelser. Ny färg på 3-läget (2♣–3♦–3♥–3♠) är naturlig, inte cue.
+describe('§5b beslut 7 – 4♦ naturligt efter 2♣–3♦–3M; kontrollbud i ny färg sätter öppnarens högfärg', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  const hH = [call('N', '2C'), P('E'), call('S', '3D'), P('W'), call('N', '3H'), P('E')]
+  const hS = [call('N', '2C'), P('E'), call('S', '3D'), P('W'), call('N', '3S'), P('E')]
+
+  it('frö 20271084: Syd (♠K95 ♥8 ♦KQJ82 ♣J964) rebjuder 4♦ ur TABELLEN — bra 5 utan 3-stöd, naturligt, utgångskravet står', () => {
+    const deal = dealFromSeed(20271084)
+    const hist = [P('W'), call('N', '2C'), P('E'), call('S', '3D'), P('W'), call('N', '3H'), P('E')]
+    expect(decideCallTraced(deal, hist, 'S')).toMatchObject({ källa: 'tabell:svar2', call: { bid: '4D', rule: '2♣: rebud egen färg (GF)' } })
+  })
+
+  it('frö 20271411: Syd (♠J75 ♥J53 ♦AK942 ♣T9) bjuder 4♠ direkt — 3-stöd utan kontrollbud i ny färg = fast arrival, inte cue 4♦; 4♠ blir slutbudet', () => {
+    const deal = dealFromSeed(20271411)
+    const hist = [call('N', '2C'), P('E'), call('S', '3D'), P('W'), call('N', '3S'), P('E')]
+    expect(decideCall(deal, hist, 'S').bid).toBe('4S')
+    const kontrakt = spelaKlart(deal).filter((b) => b !== 'P')
+    expect(kontrakt[kontrakt.length - 1]).toBe('4S')
+  })
+
+  it('3-stöd + slamintresse: kontrollbud i NY färg — 4♣ över 3♥ och 3♠ (♣A), 4♥ över 3♠ (♥A); den egna rutern cue:as aldrig', () => {
+    expect(bud('S:J75 H:J53 D:AK942 C:A9', hS, 'S')!.call).toMatchObject({ bid: '4C', rule: 'cue-bid' })
+    expect(bud('S:J75 H:J53 D:AK942 C:A9', hH, 'S')!.call).toMatchObject({ bid: '4C', rule: 'cue-bid' })
+    expect(bud('S:J75 H:A53 D:KQ942 C:T9', hS, 'S')!.call).toMatchObject({ bid: '4H', rule: 'cue-bid' })
+    expect(bud('S:J75 H:J53 D:AK942 C:T9', hH, 'S')!.call.bid).toBe('4H') // ♦A är i egen färg → ingen cue → 4♥
+  })
+
+  it('ny färg på 3-läget är naturlig, inte cue: med ♠A och 3 hjärter över 3♥ (32 mot visade 22) bjuds 4♥ (fast arrival), aldrig 3♠ som kontrollbud', () => {
+    expect(bud('S:A75 H:J53 D:KJ942 C:T9', hH, 'S')!.call.bid).toBe('4H')
+  })
+
+  it('33+ mot visade 22 utan kontrollbud i ny färg → 4NT direkt (essfråga i öppnarens färg)', () => {
+    expect(bud('S:KQ5 H:KJ3 D:KQJ92 C:Q9', hS, 'S')!.call).toMatchObject({ bid: '4NT', rule: '1430 RKC' }) // 17 + 22 = 39
+  })
+
+  it('utan 3-stöd: 6+ egen färg → 4♦; 5 med sidokorthet → 4♦; bra 5 i 5-3-3-2 → 3NT (sangen ligger under rebuden); tunn 5 utan korthet → 3NT', () => {
+    expect(bud('S:K5 H:8 D:QJ8632 C:J964', hS, 'S')!.call).toMatchObject({ bid: '4D', rule: '2♣: rebud egen färg (GF)' })
+    expect(bud('S:T H:QJ8 D:KT964 C:KJ82', hS, 'S')!.call.bid).toBe('4D') // singel i partnerns färg, 5-kortsfärg
+    expect(bud('S:JT H:K94 D:KQJT8 C:T43', hS, 'S')!.call.bid).toBe('3NT') // frö 20271242: 5-3-3-2 med bra ruter
+    expect(bud('S:KJ5 H:82 D:KJ862 C:Q94', hH, 'S')!.call.bid).toBe('3NT')
+  })
+
+  it('öppnaren rättar partnerns 3NT till 4♠ med 6+ spader (frö 20271242); med 5 står 3NT', () => {
+    const deal = dealFromSeed(20271242)
+    const hist = [P('E'), call('S', '2C'), P('W'), call('N', '3D'), P('E'), call('S', '3S'), P('W'), call('N', '3NT'), P('E')]
+    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: '4S', rule: 'rättelse till högfärg' })
+    const h3 = [...hS, call('S', '3NT'), P('W')]
+    expect(bud('S:AKQ97 H:T6 D:92 C:AKQ2', h3, 'N')).toBeNull()
+  })
+
+  it('betydelselagret: 4♦ = naturlig rebud (utgångskrav) i båda fallen, 4♣ = kontrollbud som sätter högfärgen, 3♠ över 3♥ = naturlig, öppnarens cue i svararens färg läses som cue', () => {
+    expect(meaningOf([...hS, call('S', '4D')], 6)).toMatchObject({ rule: '2♣: rebud egen färg (GF)', forcing: 'utgangskrav' })
+    expect(meaningOf([...hH, call('S', '4D')], 6)).toMatchObject({ rule: '2♣: rebud egen färg (GF)', forcing: 'utgangskrav' })
+    expect(meaningOf([...hS, call('S', '4C')], 6).rule).toBe('cue-bid')
+    expect(meaningOf([...hH, call('S', '4C')], 6).rule).toBe('cue-bid')
+    expect(meaningOf([...hH, call('S', '3S')], 6).rule).not.toBe('cue-bid')
+    expect(meaningOf([...hS, call('S', '4S')], 6).rule).not.toBe('cue-bid')
+    expect(meaningOf([...hH, call('S', '4C'), P('W'), call('N', '4D')], 8).rule).toBe('cue-bid')
+  })
+
+  it('hela sekvensen bot mot bot: 2♣–3♦–3♠–4♣ (cue, spader satt) → … → 6♠', () => {
+    const deal = dealNS('S:AKT84 H:KQ D:T C:AK753', 'S:J75 H:J53 D:AK942 C:A9')
+    const bud = spelaKlart(deal)
+    expect(bud.slice(0, 8)).toEqual(['2C', 'P', '3D', 'P', '3S', 'P', '4C', 'P'])
+    const kontrakt = bud.filter((b) => b !== 'P')
+    expect(kontrakt[kontrakt.length - 1]).toBe('6S')
   })
 })

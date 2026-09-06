@@ -1371,8 +1371,7 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   if (!trump && gf && seat === u.responder) {
     const ps = [...u.bids].reverse().find((b) => b.seat === PARTNER[seat] && partnerS.has(b.cb.strain))?.cb.strain ?? null
     const balanced = u.bids.length > 1 && same(u.bids[0].cb, 2, 'C') && same(u.bids[1].cb, 2, 'NT')
-    const ownTimes = u.bids.filter((b) => b.seat === seat && b.cb.strain === cb.strain).length
-    const t = impliedCueTrump(cb, ps, partnerS, own, balanced, ownTimes)
+    const t = impliedCueTrump(cb, ps, partnerS, own, balanced)
     if (t) {
       return R('cue-bid', `Kontrollbud ${B(cb)} — sätter partnerns ${NAME[t]} som trumf och visar kontroll (ess/renons) i ${name}, slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${gameIn(t).level}${SYMBOL[t]}.`)
     }
@@ -1403,18 +1402,19 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
 /**
  * Svararens 4-lägesbud i UTGÅNGSKRAV utan satt trumf (2♣-auktioner, 2/1) som
  * cue:ar och sätter partnerns senaste färg som trumf — så som motorn spelar det:
- *  · över 3NT och under utgång i partnerns färg,
- *  · partnerns färg HÖGfärg: alltid ett cue (även i egen visad färg: 2♣–3♦–3♠–4♦),
+ *  · över 3NT och under utgång i partnerns färg, i en NY färg — aldrig i en
+ *    egen visad färg (§5b beslut 7, 2026-09-06: 2♣–3♦–3M–4♦ är en naturlig
+ *    rebud; 2♣–2♥–2♠–3♥–3♠–4♥ en placering; 1♠–2♣–2♠–3♣–3♠–4♣ en rebud),
+ *  · partnerns färg HÖGfärg: ett cue (den balanserade svararen redan på 3-läget),
  *  · partnerns färg LÅGfärg: bara när svararen inte visat någon egen färg
  *    (2♣–2NT–3♦–4♣); annars är budet naturligt (andra färgen / egen färg).
  * 2♣-öppnarens 4-lägesfärger är alltid naturliga (§4.4 "naturlig färgrebud").
  * Returnerar trumfen eller null.
  */
-function impliedCueTrump(cb: ParsedBid, partnerSuit: string | null, partnerShown: Set<string>, ownShown: Set<string>, balancedResponder: boolean, ownTimes: number): string | null {
+function impliedCueTrump(cb: ParsedBid, partnerSuit: string | null, partnerShown: Set<string>, ownShown: Set<string>, balancedResponder: boolean): string | null {
   if (!partnerSuit || cb.strain === 'NT' || cb.level < 3) return null
   if (partnerShown.has(cb.strain)) return null // höjning/placering, inte cue
-  if (isGameLevel(cb) && ownShown.size > 0) return null // utgång i egen visad färg = placering (2♣–2♥–2♠–3♥–3♠–4♥)
-  if (ownTimes >= 2) return null // tredje budet i egen färg är en rebud (1♠–2♣–2♠–3♣–3♠–4♣), inte ett cue
+  if (ownShown.has(cb.strain)) return null // egen visad färg = rebud/placering, aldrig ett trumfsättande cue
   if (bidRank(cb) >= bidRank(gameIn(partnerSuit))) return null
   if (isMajor(partnerSuit)) {
     if (cb.level === 4) return partnerSuit
@@ -1428,7 +1428,7 @@ interface NaturalSuits {
   suits: Map<Seat, Set<string>>
   /** Index i `u.bids` för buden som var kontrollbud. */
   cues: Set<number>
-  /** Trumf satt genom att båda bjudit färgen naturligt. */
+  /** Trumf satt på riktigt: båda bjöd färgen naturligt, eller ett kontrollbud satte partnerns färg. */
   agreed: string | null
   /** Trumf: äkta överenskommen, konventionellt satt (Jacoby/Bergen/…) eller underförstådd av ett kontrollbud. */
   trump: string | null
@@ -1498,11 +1498,11 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
     // Svararens kontrollbud som SÄTTER trumfen i utgångskrav.
     if (!trump && gf && k >= 2 && b.seat === u.responder) {
       const balanced = same(open, 2, 'C') && same(u.bids[1].cb, 2, 'NT')
-      const ownTimes = u.bids.slice(0, k).filter((x) => x.seat === b.seat && x.cb.strain === cb.strain).length
-      const t = impliedCueTrump(cb, lastSuit.get(u.opener) ?? null, theirs, mine, balanced, ownTimes)
+      const t = impliedCueTrump(cb, lastSuit.get(u.opener) ?? null, theirs, mine, balanced)
       if (t) {
         cues.add(k)
         trump = t
+        agreed = t // trumfen är satt på riktigt: partnerns cue i svararens färg är ett cue, inte en höjning
         return
       }
     }
@@ -1729,7 +1729,11 @@ function afterStrongTwoClubs(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInt
     const partnerSuits = new Set(äkta.filter((x) => x.seat === PARTNER[seat]).map((x) => x.cb.strain))
     const ownSuits = new Set(äkta.filter((x) => x.seat === seat).map((x) => x.cb.strain))
     if (cb.strain !== 'NT' && partnerSuits.has(cb.strain)) return R('höjning (GF)', `${B(cb)} — stöd i partnerns ${name}, utgångskravet står.`, 'utgangskrav')
-    if (cb.strain !== 'NT' && ownSuits.has(cb.strain)) return R('rebid: egen färg (GF)', `${B(cb)} — rebjuder egen ${name} (6+), utgångskravet står.`, 'utgangskrav')
+    if (cb.strain !== 'NT' && ownSuits.has(cb.strain)) {
+      // Svararens rebud efter öppnarens egen färg (§5b beslut 7): 6+ eller bra 5, förnekar 3-stöd.
+      if (!isOpener && b[1].cb.strain !== 'NT' && b[2].cb.strain !== 'NT') return R('2♣: rebud egen färg (GF)', `${B(cb)} — rebjuder egen ${name}: 6+ kort, eller 5 i en obalanserad hand (bra färg eller sidokorthet); förnekar 3-korts stöd i partnerns färg. Utgångskravet står.`, 'utgangskrav')
+      return R('rebid: egen färg (GF)', `${B(cb)} — rebjuder egen ${name} (6+), utgångskravet står.`, 'utgangskrav')
+    }
     if (cb.strain === 'NT') return R('rebid: 2NT (GF)', `${B(cb)} — naturlig sang, utgångskravet står.`, 'utgangskrav')
     return R('ny färg (GF)', `${B(cb)} — ny färg, naturligt. Utgångskravet står.`, 'utgangskrav')
   }

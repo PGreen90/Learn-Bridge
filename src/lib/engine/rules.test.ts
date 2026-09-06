@@ -66,6 +66,8 @@ const ALL_ENGINE_RULES: string[] = [
   'NMF: rebjuder egen högfärg', 'NMF: höjer öppnarens lågfärg', 'NMF: trumfen satt', 'NMF: sangförslag', 'NMF: höjning (GF)',
   // §5b beslut 3 (2026-09-05): fast arrival efter reverse i högfärg.
   'reverse: höjning (stark)', 'reverse: utgång',
+  // §5b beslut 7 (2026-09-06): svararens andra bud utan 3-stöd efter 2♣–positivt–öppnarens egen färg.
+  '2♣: rebud egen färg (GF)', 'rättelse till högfärg',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

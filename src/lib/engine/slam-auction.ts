@@ -110,6 +110,14 @@ export interface SlamContext {
    * familj 4a, 2026-09-05).
    */
   hpOnly?: boolean
+  /**
+   * Kaptenens egen naturligt visade färg — ett bud där är en REBUD, aldrig
+   * kaptenens första kontrollbud (§5b beslut 7, 2026-09-06: efter 2♣–3♦–3M är
+   * 4♦ naturligt; trumfen sätts av ett kontrollbud i NY färg). Gäller bara det
+   * trumfsättande första steget — i cue-ronden därefter är trumfen satt och
+   * även egen färg ett kontrollbud (som efter reverse, beslut 3).
+   */
+  noCueIn?: Suit
 }
 
 /**
@@ -263,7 +271,7 @@ function captainFirstCue(responderHand: Hand, trump: Suit, lastCall: string | un
   const gameRank = bidRank(gameCallFor(trump))
   let lastRank = lastCall ? bidRank(lastCall) : -1
   if (ctx.cueFloor) lastRank = Math.max(lastRank, bidRank(ctx.cueFloor))
-  return cheapestFreeCue(responderHand, trump, lastRank, gameRank, new Set())
+  return cheapestFreeCue(responderHand, trump, lastRank, gameRank, new Set(ctx.noCueIn ? [ctx.noCueIn] : []))
 }
 
 /**

@@ -311,15 +311,31 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   if (openCall === '2C' && response.rule === '2♣-positivt') {
     const fitTrump = rebid.rule === 'rebid: stöd (GF)' ? respSuit : rebid.rule === 'rebid: egen färg (GF)' ? rebidSuit : null
     if (fitTrump && trump === fitTrump) {
+      // Öppnarens EGEN färg efter ett färgpositivt svar (§5b beslut 7, 2026-09-06):
+      // kaptenens egen färg är aldrig ett kontrollbud (4♦ efter 2♣–3♦–3M är en
+      // naturlig rebud), kontrollbuden ligger på 4-läget (över 3NT) i NY färg
+      // och sätter öppnarens färg; 3+ stöd utan kontrollbud att visa bjuder
+      // högfärgsutgången direkt (fast arrival) — ingen 5M-inbjudan i det läget.
+      const ownSuitLine = rebid.rule === 'rebid: egen färg (GF)' && respSuit !== null
       // Inbjudan: 5M, eller 4m över öppnarens 3m. Har öppnaren redan bjudit 4m
       // ÄR 5m utgången — partnern kan inte skilja den från en inbjudan, så
       // ingen inbjudningsväg finns där (familj 5, 2026-09-05).
       const inviteCall = majorTrump
-        ? `5${LETTER[trump]}`
+        ? ownSuitLine
+          ? undefined
+          : `5${LETTER[trump]}`
         : rebid.call === `4${LETTER[trump]}`
           ? undefined
           : `4${LETTER[trump]}`
-      return { ctx: { partnerMin: STRONG_2C_SHOWN_MIN, inviteCall, gameForcing: true, cueFloor: majorTrump ? undefined : '3NT' } }
+      return {
+        ctx: {
+          partnerMin: STRONG_2C_SHOWN_MIN,
+          inviteCall,
+          gameForcing: true,
+          cueFloor: majorTrump && !ownSuitLine ? undefined : '3NT',
+          noCueIn: ownSuitLine ? respSuit! : undefined,
+        },
+      }
     }
     if (respSuit && trump === respSuit) return { ctx: { partnerMin: STRONG_2C_SHOWN_MIN } }
     return null
@@ -434,15 +450,15 @@ function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid:
       //  · Ett kontrollbud i NY färg (inte kaptenens egen) över öppnarens färg
       //    och under dess utgång sätter öppnarens färg — betydelselagrets
       //    konvention (etapp 1): den balanserade 2♣-svararen cue:ar redan på
-      //    3-läget; efter ett färgpositivt bara högfärgen. Kaptenens rebud i
-      //    EGEN färg (2♣–3♦–3♥–4♦) är fortfarande naturligt i kravvakten och
-      //    cue i manuset (etapp 1-fynd 7, facit frö 20271084 i kön) → tiger.
+      //    3-läget; efter ett färgpositivt bara högfärgen och bara på 4-läget
+      //    (över 3NT — ny färg på 3-läget är naturlig). Kaptenens rebud i EGEN
+      //    färg (2♣–3♦–3M–4♦) är naturlig (§5b beslut 7, 2026-09-06).
       if (firstSlamCall === '4NT') return rebidSuit
       // Slaminbjudan i öppnarens färg (5M / 4m över 3m, §4.4 "31–32") — öppnaren dömer.
       if (slamContextFor(openCall, response, rebid, rebidSuit)?.ctx.inviteCall === firstSlamCall) return rebidSuit
       const cueSuit = suitOf(firstSlamCall)
       const balanced = response.call === '2NT'
-      const floor = isMajorSuit(rebidSuit) ? `3${LETTER[rebidSuit]}` : '3NT'
+      const floor = balanced && isMajorSuit(rebidSuit) ? `3${LETTER[rebidSuit]}` : '3NT'
       const game = isMajorSuit(rebidSuit) ? `4${LETTER[rebidSuit]}` : `5${LETTER[rebidSuit]}`
       if (
         cueSuit && cueSuit !== rebidSuit && cueSuit !== respSuit &&
@@ -529,22 +545,70 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
       const gameCall = majorTrump ? `4${LETTER[trump2C]}` : `5${LETTER[trump2C]}`
       const slam = slamStep(trump2C)
       if (slam) return slam
+      // Fast arrival (§5b beslut 7): 3+ stöd i öppnarens högfärg utan kontrollbud
+      // i ny färg att visa → utgången direkt, ingen slamambition.
+      const fastArrival = rebid.rule === 'rebid: egen färg (GF)' && majorTrump
       return {
         turn: {
           call: gameCall as ResponseResult['call'],
           rule: rebid.rule === 'rebid: stöd (GF)' ? 'till spel' : 'höjning (GF)',
-          explanation: `under slamzonen mot partnerns visade ${STRONG_2C_SHOWN_MIN}+ → ${gameCall[0]}${SYM[trump2C]} (utgång).`,
+          explanation: fastArrival
+            ? `3+ stöd i partnerns ${SYM[trump2C]} utan kontrollbud i ny färg att visa → ${gameCall[0]}${SYM[trump2C]} (fast arrival, ingen slamambition).`
+            : `under slamzonen mot partnerns visade ${STRONG_2C_SHOWN_MIN}+ → ${gameCall[0]}${SYM[trump2C]} (utgång).`,
         },
         plan: { kind: 'final' },
       }
     }
+    const topHonors = respSuit ? hand.filter((c) => c.suit === respSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length : 0
     if (hcp(hand) + STRONG_2C_SHOWN_MIN >= 33) {
-      const topHonors = respSuit ? hand.filter((c) => c.suit === respSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length : 0
       const ownSolid = respSuit && rl[respSuit] >= 6 && topHonors >= 2 ? respSuit : null
       const slam = ownSolid ? slamStep(ownSolid) : null
       if (slam) return slam
       if (rebid.rule === 'rebid: 3NT (GF)') {
         return { turn: { call: '6NT', rule: 'slamavslut', explanation: `Slamzon mot visad balanserad ${STRONG_2C_SHOWN_MIN}+ → 6NT (sang behöver ingen fit).` }, plan: { kind: 'final' } }
+      }
+    }
+    // Utan 3-stöd i öppnarens egen färg (§4.4 + §5b beslut 7, 2026-09-06):
+    // rebjud egen färg med 6+, eller med 5 när handen är obalanserad (singel/
+    // renons) eller färgen bra (två av A/K/Q) i annat än 5-3-3-2 — naturligt,
+    // utgångskravet står (5-3-3-2 bjuder sang, även med bra färg: sangen ligger
+    // under en rebud förbi 3NT); annars en ny färg under 3NT (5+, eller 4-korts
+    // högfärg — finaste färgen före sangen); annars 3NT direkt (förnekar stöd
+    // och slamintresse; öppnaren rättar till 4M med 6+, raden tredje). Räcker
+    // inget → null (det gamla lagret som förut).
+    if (rebid.rule === 'rebid: egen färg (GF)' && respSuit && rebidSuit) {
+      const above = (call: string) => bidRank(call) > bidRank(rebid.call)
+      const cheapestIn = (s: Suit): string | null => {
+        for (let lvl = 2; lvl <= 5; lvl++) if (above(`${lvl}${LETTER[s]}`)) return `${lvl}${LETTER[s]}`
+        return null
+      }
+      const ALL: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
+      const shortSuit = ALL.some((s) => rl[s] <= 1)
+      const fiveThreeThreeTwo = rl[respSuit] === 5 && !shortSuit && ALL.filter((s) => rl[s] === 2).length === 1
+      const rebidOwn = cheapestIn(respSuit)
+      if (rebidOwn && (rl[respSuit] >= 6 || (rl[respSuit] === 5 && (shortSuit || (topHonors >= 2 && !fiveThreeThreeTwo))))) {
+        return {
+          turn: {
+            call: rebidOwn as ResponseResult['call'],
+            rule: '2♣: rebud egen färg (GF)',
+            explanation: `6+ ${SYM[respSuit]}, eller 5 i en obalanserad hand / bra 5, utan 3-korts stöd i partnerns ${SYM[rebidSuit]} → ${rebidOwn[0]}${SYM[respSuit]} (naturlig rebud, utgångskravet står).`,
+          },
+          plan: { kind: 'call' },
+        }
+      }
+      for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
+        if (s === respSuit || s === rebidSuit) continue
+        const call = cheapestIn(s)
+        if (!call || bidRank(call) >= bidRank('3NT')) continue
+        if (rl[s] >= 5 || (rl[s] >= 4 && isMajorSuit(s))) {
+          return {
+            turn: { call: call as ResponseResult['call'], rule: 'ny färg (GF)', explanation: `${rl[s] >= 5 ? '5+' : '4+'} ${SYM[s]} under 3NT, utan 3-stöd i partnerns ${SYM[rebidSuit]} → ${call[0]}${SYM[s]} (naturlig, utgångskravet står).` },
+            plan: { kind: 'call' },
+          }
+        }
+      }
+      if (above('3NT')) {
+        return { turn: { call: '3NT', rule: 'utgång', explanation: `utan 3-stöd i partnerns ${SYM[rebidSuit]} och utan egen färg att rebjuda → 3NT (utgång; partnern rättar till 4 i högfärgen med 6+).` }, plan: { kind: 'final' } }
       }
     }
   }
@@ -671,6 +735,17 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
   // Texas/minorfråga/kvantitativ 4NT besvaras som mot en 2NT-öppning.
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') {
     return openerRebidAfter2NTResponse(second, hand, 24)
+  }
+
+  // Stark 2♣ + positivt svar + min egen färg + partnerns 3NT (§5b beslut 7,
+  // 2026-09-06): 3NT förnekar 3-stöd och egen rebud. Med 6+ i min högfärg
+  // rättar jag till 4M (minst 6-2), annars står 3NT (det gamla lagret passar).
+  if (openCall === '2C' && response.rule === '2♣-positivt' && rebid.rule === 'rebid: egen färg (GF)' && second.call === '3NT') {
+    const mine = suitOf(rebid.call)
+    if (mine && isMajorSuit(mine) && lengths(hand)[mine] >= 6) {
+      return { call: `4${LETTER[mine]}` as ResponseResult['call'], rule: 'rättelse till högfärg', explanation: `6+ ${SYM[mine]} mot partnerns 3NT utan stöd → 4${SYM[mine]} (minst 6-2-fit, spelar bättre än sang).` }
+    }
+    return null
   }
 
   // 2NT-öppningen: efter svararens placering väljer öppnaren — Smolen (4 i
