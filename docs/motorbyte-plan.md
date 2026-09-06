@@ -439,7 +439,7 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   cue 4♦, samma slutkontrakt; frö 20271084 oförändrat naturligt). Rör §4.4 (en
   mening om 3♠-fallet + stödreglerna) + betydelselagrets `impliedCueTrump`
   (undantaget "även i egen visad färg" tas bort) + facit-köns fynd 7-post.
-  **BYGGT 2026-09-06 (väntar PCD; loggen nedan).** Claudes tolkningar utöver
+  **BYGGT & LIVE 2026-09-06 (mergepunkt `820ab71`, Actions grön, rebidz.com aliasad; loggen nedan).** Claudes tolkningar utöver
   beslutstexten, för ägaren att bekräfta: (1) "bra 5" = två av A/K/Q, eller
   5 med singel/renons; **5-3-3-2 bjuder sang** även med bra färg (frö
   20271242); (2) **ingen 5M-inbjudan** efter öppnarens egen högfärg — utan
@@ -567,8 +567,8 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
-- **2026-09-06 — §5b beslut 7 BYGGT (4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
-  ny färg sätter öppnarens högfärg; väntar ägarens PCD).** Test-drivet:
+- **2026-09-06 — §5b beslut 7 KLAR & LIVE (4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
+  ny färg sätter öppnarens högfärg; mergepunkt `820ab71`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 7" i `motorbyte-facit.test.ts` (nio fall, sex röda
   före fixen; fynd 7-posten `it.todo` → `it`). Regeln i det nya lagret:
   `slamContextFor` 2♣-grenen (`SlamContext.noCueIn` = kaptenens egen färg,
