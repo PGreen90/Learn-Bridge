@@ -118,6 +118,13 @@ export interface SlamContext {
    * även egen färg ett kontrollbud (som efter reverse, beslut 3).
    */
   noCueIn?: Suit
+  /**
+   * Trumfen är INTE sidans senast bjudna färg (öppnarens första färg efter
+   * reverse/hoppskift): ett naket 4NT skulle läsas i fel färg (§5b beslut 14,
+   * 2026-09-06), så slamintresset visas bara med inbjudningsbudet, som
+   * namnger trumfen — även i drivzonen (33+).
+   */
+  inviteOnly?: boolean
 }
 
 /**
@@ -301,7 +308,7 @@ export function slamCaptainFirstStep(
       if (cue) return cueTurn('svarare', cue)
     }
   }
-  if (floor >= 33 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
+  if (floor >= 33 && !ctx.inviteOnly && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
   if (floor >= 31 && ctx.inviteCall && bidRank(ctx.inviteCall) > lastRank) return inviteTurn(ctx.inviteCall, trump)
   return null
 }

@@ -359,7 +359,9 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
 
   // Reverse (16+) / hoppskift (19+): trumf = öppnarens andra eller första färg.
   if ((rebid.rule === 'reverse' || rebid.rule === 'hoppskift') && rebidSuit && openerSuit && (trump === rebidSuit || trump === openerSuit)) {
-    return { ctx: { partnerMin: rebid.rule === 'hoppskift' ? 19 : 16, inviteCall: majorTrump ? `5${LETTER[trump]}` : `4${LETTER[trump]}` } }
+    // Öppnarens FÖRSTA färg är inte senast bjuden: naket 4NT läses i den andra
+    // (§5b beslut 14) → bara inbjudningsbudet, som namnger trumfen.
+    return { ctx: { partnerMin: rebid.rule === 'hoppskift' ? 19 : 16, inviteCall: majorTrump ? `5${LETTER[trump]}` : `4${LETTER[trump]}`, inviteOnly: trump === openerSuit && trump !== rebidSuit } }
   }
 
   // Överenskommen trumf via Jacoby 2NT / inverterad minor → kaptenen räknar
@@ -426,11 +428,12 @@ function slamTrumpAfterThird(openCall: string, response: ResponseResult, second:
  * Trumfen i en slamsekvens efter öppning–svar–återbud, läst ur AUKTIONEN
  * (öppnarens stol — hen ser inte kaptenens hand). Entydig där fiten är bjuden
  * eller konventionellt satt (Jacoby, inverterad, hopphöjning, hopp i egen
- * minor, 2♣ med stöd); i de tvetydiga grenarna (reverse/hoppskift, 2♣ med
- * egen färg, 1NT-återbudet) syns trumfen bara i kaptenens INBJUDNINGSBUD
- * (5M/4m) eller — 2♣-grenen — i ett kontrollbud över 3NT som sätter
- * öppnarens färg. Ett naket 4NT där är tvetydigt (bok-mot-motor-fynd 6):
- * null → det gamla lagret som förut.
+ * minor, 2♣ med stöd); i grenarna utan bjuden fit (reverse/hoppskift, 2♣ med
+ * egen färg) syns trumfen i kaptenens INBJUDNINGSBUD (5M/4m), i ett
+ * kontrollbud som sätter öppnarens färg — eller i ett NAKET 4NT, som är
+ * essfrågan i den SENAST naturligt bjudna färgen (§5b beslut 14, 2026-09-06:
+ * 1♦–1♠–2♥–4NT = hjärter; samma regel som det gamla lagrets `slamAskTrump`).
+ * Över 1NT-återbudet är 4NT kvantitativt (§5.7). null → det gamla lagret.
  */
 function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid: ResponseResult, firstSlamCall: string): Suit | null {
   const openerSuit = suitOf(openCall)
@@ -471,6 +474,7 @@ function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid:
   if ((openCall === '1C' || openCall === '1D') && response.rule === 'ny färg (1-läget)' && rebid.rule === 'hopp i egen färg (inbjudan)' && openerSuit && rebidSuit === openerSuit) return openerSuit
   if (rebid.rule === 'hopphöjning (inbjudan)' && respMajor && rebidSuit === respMajor) return respMajor
   if (rebid.rule === 'reverse' || rebid.rule === 'hoppskift') {
+    if (firstSlamCall === '4NT') return rebidSuit // senast bjudna färg = reversens/hoppskiftets (§5b beslut 14)
     for (const t of [rebidSuit, openerSuit]) {
       if (t && slamContextFor(openCall, response, rebid, t)?.ctx.inviteCall === firstSlamCall) return t
     }
@@ -560,10 +564,9 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
       }
     }
     const topHonors = respSuit ? hand.filter((c) => c.suit === respSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length : 0
+    // Ett naket 4NT här frågar i ÖPPNARENS färg (§5b beslut 14) — egen solid
+    // färg utan fit rebjuds naturligt i stället (nedan), aldrig 4NT direkt.
     if (hcp(hand) + STRONG_2C_SHOWN_MIN >= 33) {
-      const ownSolid = respSuit && rl[respSuit] >= 6 && topHonors >= 2 ? respSuit : null
-      const slam = ownSolid ? slamStep(ownSolid) : null
-      if (slam) return slam
       if (rebid.rule === 'rebid: 3NT (GF)') {
         return { turn: { call: '6NT', rule: 'slamavslut', explanation: `Slamzon mot visad balanserad ${STRONG_2C_SHOWN_MIN}+ → 6NT (sang behöver ingen fit).` }, plan: { kind: 'final' } }
       }
@@ -635,11 +638,14 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
   // Reverse (16+) / hoppskift (19+): trumf säkrad på EGEN kunskap.
   if (rebid.rule === 'reverse' || rebid.rule === 'hoppskift') {
     const secondSuit = suitOf(rebid.call)
-    const firstSuitMin = rebid.rule === 'reverse' || openerSuit === 'hearts' || openerSuit === 'spades' ? 3 : 4
     // §5b beslut 3 (2026-09-05): 4+ stöd i reversens HÖGFÄRG → ingen slamport
     // direkt över reversen; svararen höjer billigt (stark) eller hoppar till
     // utgång (svag) i `fourthSuit`, och cue-ronden öppnas av öppnaren (raden
     // slam, prefix 4). Hoppskift och reverse i lågfärg som förut.
+    // §5b beslut 14 (2026-09-06): ett naket 4NT frågar i den SENAST bjudna färgen
+    // (reversens/hoppskiftets); med fit bara i öppnarens FÖRSTA färg visas
+    // slamintresset med inbjudningsbudet (`inviteOnly` i kontexten).
+    const firstSuitMin = rebid.rule === 'reverse' || openerSuit === 'hearts' || openerSuit === 'spades' ? 3 : 4
     const reverseMajorFit = rebid.rule === 'reverse' && secondSuit !== null && isMajorSuit(secondSuit) && rl[secondSuit] >= 4
     const trumpC = reverseMajorFit
       ? null

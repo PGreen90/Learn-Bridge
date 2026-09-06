@@ -111,17 +111,8 @@ describe('etapp 3 familj 5 – slamutredningen per stol (LANDAD 2026-09-05)', ()
     expect(decideCall(deal, hist, 'N').bid).toBe('P')
   })
 
-  // Familj 6 (2026-09-05): efter 2♣–positivt–3y läser öppnaren 4NT som essfrågan
-  // i y (senast bjudna färg, samma regel som det gamla lagrets `slamAskTrump`);
-  // kaptenen som menade sin EGEN självbärande färg (§4.4 "utan trumf") får sin
-  // avsikt via captainIntent — de två kan skilja sig åt (frö 20271008: Nord
-  // svarar 5♦ = tre nyckelkort i hjärter, Syd frågade för spader och placerar
-  // ändå 6♠). Efter reverse/hoppskift tiger öppnarens läsning helt; kaptenen
-  // placerar via captainOwnSituation (frö 20272351: 1♣–1♠–2♥–4NT–5♦ → 6♥).
-  it.todo('bok-mot-motor-fynd 14: 1♦–1♠–2♥–4NT (reverse) och 2♣–2♠–3♥–4NT — 4NT utan bjuden fit är tvetydigt (vilken färg är trumf?); kaptenen ska sätta trumfen (eller inbjuda i den) före essfrågan', () => {
-    const reverse = [call('N', '1D'), call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2H'), call('E', 'P'), call('S', '4NT'), call('W', 'P')]
-    expect(decideCall(dealFromSeed(20270001), reverse, 'N').rule).toBe('1430 RKC')
-  })
+  // Bok-mot-motor-fynd 14 → §5b beslut 14 (2026-09-06): naket 4NT = essfråga i
+  // senast naturligt bjudna färg — facit-blocket "§5b beslut 14" sist i filen.
 })
 
 // Pliktsvepets två rester (pausat 2026-09-04, docs/bevaka.md 2026-09-02).
@@ -408,5 +399,55 @@ describe('§5b beslut 7 – 4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
     expect(bud.slice(0, 8)).toEqual(['2C', 'P', '3D', 'P', '3S', 'P', '4C', 'P'])
     const kontrakt = bud.filter((b) => b !== 'P')
     expect(kontrakt[kontrakt.length - 1]).toBe('6S')
+  })
+})
+
+// §5b beslut 14 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 14): ett NAKET 4NT
+// utan satt trumf är essfrågan i den SENAST naturligt bjudna färgen ("last bid
+// suit"): 1♦–1♠–2♥–4NT = hjärter (reverse), 1♦–1♠–3♥–4NT = hjärter (hoppskift),
+// 2♣–2♠–3♥–4NT = hjärter, 1♠–2♣–2♦–4NT = ruter. Över partnerns sangbud är 4NT
+// kvantitativt (beslut 1, §5.7). Förr: öppnarens läsning teg efter reverse/
+// hoppskift (kaptenen fick placera själv), betydelselagret läste frågarens EGEN
+// senaste färg, och boten kunde fråga naket 4NT för en annan färg än den
+// senast bjudna (öppnarens första färg efter reverse, egen solid färg efter 2♣).
+// Nu sätter boten alltid trumfen först — naket 4NT frågar bara i senast bjudna
+// färg — så tvetydigheten uppstår bara efter en människas bud.
+describe('§5b beslut 14 – naket 4NT = essfråga i senast bjudna färg', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  const reverse = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '2H'), P('E'), call('S', '4NT'), P('W')]
+  const hoppskift = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '3H'), P('E'), call('S', '4NT'), P('W')]
+  const tvaKlover = [call('N', '2C'), P('E'), call('S', '2S'), P('W'), call('N', '3H'), P('E'), call('S', '4NT'), P('W')]
+
+  it('öppnaren svarar ur TABELLEN på 4NT efter sin reverse — nyckelkorten räknas med hjärter som trumf (♥K är nyckelkort, ♠K inte)', () => {
+    // ♠K3 ♥KQ72 ♦AKJ85 ♣Q4: nyckelkort i hjärter = ♥K + ♦A = 2 (utan ♥Q? ♥Q finns → 5♠); i spader vore det ♠K + ♦A.
+    expect(bud('S:K3 H:KQ72 D:AKJ85 C:Q4', reverse, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: '5S', rule: '1430 RKC' } })
+    // ♠A3 ♥J972 ♦AKJ85 ♣Q4: ♠A + ♦A = 2 nyckelkort utan trumfdam → 5♥ (i spader hade ♠A räknats lika, men ♥-damen saknas).
+    expect(bud('S:A3 H:J972 D:AKJ85 C:Q4', reverse, 'N')!.call).toMatchObject({ bid: '5H', rule: '1430 RKC' })
+    expect(decideCallTraced(dealFromSeed(20270001), reverse, 'N').källa).toBe('tabell:slam')
+  })
+
+  it('samma regel efter hoppskift (1♦–1♠–3♥–4NT = hjärter) och efter 2♣–2♠–3♥ (hjärter)', () => {
+    expect(bud('S:K3 H:KQ72 D:AKJ85 C:Q4', hoppskift, 'N')!.call).toMatchObject({ bid: '5S', rule: '1430 RKC' })
+    expect(bud('S:K3 H:AKQ72 D:AK5 C:AQ4', tvaKlover, 'N')!.call).toMatchObject({ bid: '5C', rule: '1430 RKC' }) // ♥A ♥K ♦A ♣A = 4 nyckelkort → 5♣
+  })
+
+  it('betydelselagret: 4NT efter reverse/hoppskift/2♣-färg = essfråga i den senast bjudna färgen, över sang-återbudet kvantitativt', () => {
+    expect(meaningOf(reverse, 6).text).toContain('hjärter som trumf')
+    expect(meaningOf(hoppskift, 6).text).toContain('hjärter som trumf')
+    expect(meaningOf(tvaKlover, 6).text).toContain('hjärter som trumf')
+    const tvaOverEtt = [call('N', '1S'), P('E'), call('S', '2C'), P('W'), call('N', '2D'), P('E'), call('S', '4NT'), P('W')]
+    expect(meaningOf(tvaOverEtt, 6).text).toContain('ruter som trumf')
+    const overNT = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '1NT'), P('E'), call('S', '4NT'), P('W')]
+    expect(meaningOf(overNT, 6).rule).toBe('4NT kvantitativ')
+  })
+
+  it('boten frågar aldrig naket 4NT för en ANNAN färg än den senast bjudna: fit bara i öppnarens första färg efter reverse → inget nakent 4NT', () => {
+    const h = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '2H'), P('E')]
+    const c = bud('S:AKJ84 H:3 D:KQ96 C:A52', h, 'S') // 17 hp, 4 ruter, singel hjärter
+    expect(c?.call.bid).not.toBe('4NT')
+    const h2c = [call('N', '2C'), P('E'), call('S', '2S'), P('W'), call('N', '3H'), P('E')]
+    const c2 = bud('S:AKQJ74 H:3 D:K96 C:Q52', h2c, 'S') // solid spader, 14 hp, ingen hjärterfit
+    expect(c2?.call.bid).not.toBe('4NT')
   })
 })
