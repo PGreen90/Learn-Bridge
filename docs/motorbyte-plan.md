@@ -521,6 +521,14 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   trumfen när inget är satt) + `slamTrumpFromAuction` (reverse/hoppskift-grenen
   returnerar senast bjudna färg för 4NT; öppnaren tiger inte längre) +
   facit-köns fynd 14-post (blir `it`).
+  **BYGGT 2026-09-06 (väntar PCD; loggen nedan).** Två följder utöver
+  beslutstexten: (1) kaptenen med fit bara i öppnarens FÖRSTA färg efter
+  reverse/hoppskift frågar inte längre naket 4NT (det läses i den andra) —
+  hon visar slamintresset med inbjudningsbudet 5M/4m, som namnger trumfen,
+  även i drivzonen (`SlamContext.inviteOnly`); (2) §4.4:s gamla "utan trumf:
+  RKC med egen självbärande färg" är borta — den solida egna färgen rebjuds
+  naturligt (beslut 7) och slammen söks i fortsättningen, som i 2♣-linjen
+  ligger i det gamla lagret (känt hål, loggen).
 
 - **Beslut 16 — fynd 16 (5m efter partnerns 4m, slaminbjudan i lågfärgsfit),
   2026-09-05.** Ägarbeslut: **bekräftar linjen — 5m efter partnerns 4m är
@@ -567,6 +575,36 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-06 — §5b beslut 14 BYGGT (naket 4NT = essfråga i senast bjudna
+  färg; väntar ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 14" i
+  `motorbyte-facit.test.ts` (fyra fall; fynd 14-posten ersatt), det gamla
+  facitet "20261372: 4NT med egen färg som trumf" omskrivet (4♣ naturligt;
+  hela auktionen till 6♣ = `it.todo` för 2♣-linjens svar3-rad). Regeln i
+  det nya lagret: `slamTrumpFromAuction` (reverse/hoppskift + 4NT →
+  reversens färg; öppnaren svarar ur tabellen), `responderSecondDecision`
+  (fit i öppnarens första färg → bara inbjudan, `SlamContext.inviteOnly`;
+  2♣-grenens "egen solid färg → 4NT" borttagen), betydelselagret
+  (`askTrumpFallback` i stället för frågarens egen färg). Systembok §6.1
+  (regeln), §4.4 ("utan trumf"-stycket omskrivet), §9.
+  **Mätningar** (kommandon i §3; baslinjer på `cdf37d5`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 1 —
+  b: frö 20271008 (Syd ♠KQJ972 rebjuder 3♠ i stället för naket 4NT som
+  öppnaren läste i hjärter; fortsättningen 4♥ på 6-1 kommer ur det gamla
+  lagret, se hålet nedan — förr 6♠ av en slump: kaptenen placerade för
+  spader på ett hjärtersvar); avvikelsedumpen: 15 ändrade, alla b (10 ×
+  egen solid färg efter 2♣ rebjuds i stället för 4NT, 2 × 6NT direkt över
+  3NT-återbudet, 3 × kaptenen fullföljer människans 4NT efter reverse/
+  hoppskift i reversens färg — förr pass utan regel); olagliga tabellbud 0;
+  betydelsesvepet kravnivå 0 · alert 0 · registerhål 0; pliktsvep/
+  förklaringssvep/regelsvep gröna; revisorn 1000 givar: rätt kontrakt 20,2 % · snittförlust 268,83 (beslut 7: 20,2 % · 268,83). **Ett utkast förkastades**
+  (fyra gamla tester röda, frö 20271425 tappade 6♥): slamporten i öppnarens
+  första färg efter reverse/hoppskift togs bort helt, fast inbjudningsbudet
+  där är otvetydigt — bara det nakna 4NT ska bort. **Känt hål (gamla lagret,
+  etapp 4-kandidat, samma som beslut 7:s):** 2♣-linjens svar3/tredje-rader —
+  efter svararens naturliga rebud rebjuder öppnaren sin färg och svararen
+  passar utgången (frö 20271008 → 4♥ på 6-1; 20261372 → 4♥ i stället för
+  6♣). Slammen med egen solid färg efter 2♣ hittas alltså inte förrän den
+  raden byggs.
 - **2026-09-06 — §5b beslut 7 KLAR & LIVE (4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
   ny färg sätter öppnarens högfärg; mergepunkt `820ab71`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 7" i `motorbyte-facit.test.ts` (nio fall, sex röda

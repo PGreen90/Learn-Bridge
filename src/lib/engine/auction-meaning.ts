@@ -1336,8 +1336,10 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
     if (partnerLast && !trump && last.strain === 'NT' && last.level <= 2 && u.bids.slice(0, n - 1).some((b) => b.seat === PARTNER[seat] && b.cb.strain !== 'NT')) {
       return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan över partnerns sang-återbud: bjud 6 sang med maximum, passa med minimum.`)
     }
-    const ownLast = [...u.bids].reverse().find((b) => b.seat === seat && own.has(b.cb.strain))?.cb.strain ?? null
-    const t = trump ?? ownLast ?? askTrumpFallback(seat, prior)
+    // Naket 4NT utan satt trumf = essfrågan i sidans SENAST naturligt bjudna
+    // färg (§5b beslut 14, 2026-09-06: 1♦–1♠–2♥–4NT = hjärter) — inte frågarens
+    // egen färg.
+    const t = trump ?? askTrumpFallback(seat, prior)
     if (t) {
       return R('1430 RKC', `4 sang — essfråga (1430 RKC) med ${NAME[t]} som trumf. Partnern svarar i steg: 5♣ = 1/4 nyckelkort, 5♦ = 0/3, 5♥ = 2 utan trumfdam, 5♠ = 2 med.`)
     }

@@ -520,9 +520,9 @@ describe('familj 5 – slamraden: läget "en slamsekvens pågår" (ostört, kapt
     expect(['6NT', '6C']).toContain(c.call.bid)
   })
 
-  it('tvetydigt 4NT (reverse utan inbjudan, 2♣ med öppnarens egen färg) → raden tiger, det gamla lagret som förut', () => {
+  it('naket 4NT efter reverse = essfråga i reversens färg (§5b beslut 14); 2♣–3♦–3♥–4♦ är naturligt (beslut 7) → ingen slamsekvens', () => {
     const reverse: ResolvedCall[] = [{ seat: 'N', bid: '1D' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '2H' }, P('E'), { seat: 'S', bid: '4NT' }, P('W')]
-    expect(slamSituation(auctionFacts(reverse, 'N'))).toBeNull()
+    expect(slamSituation(auctionFacts(reverse, 'N'))?.setup?.trump).toBe('hearts')
     const tvaKlover: ResolvedCall[] = [{ seat: 'N', bid: '2C' }, P('E'), { seat: 'S', bid: '3D' }, P('W'), { seat: 'N', bid: '3H' }, P('E'), { seat: 'S', bid: '4D' }, P('W')]
     expect(slamSituation(auctionFacts(tvaKlover, 'N'))).toBeNull()
     // …men inbjudningsbudet namnger trumfen: 1♦–1♠–2♥–5♥ = slaminbjudan i hjärter.

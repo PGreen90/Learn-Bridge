@@ -573,13 +573,15 @@ lite på fötterna och håller utgångskravet.
   inbjudan — där visas slamintresset med kontrollbud i ny färg, och handen
   utan kontrollbud att visa bjuder 4M direkt (regeln nedan). Manuella
   **cue-bid** enligt §6.2 tolkas som vanligt.
-- **Utan trumf** gäller samma kaptensmatte: med **33+** mot visade 22 frågar
-  svararen RKC med sin egen redan visade färg som trumf om den är
-  **självbärande** (6+ kort med minst två av A/K/Q — nyckelkortssvaret vaktar
-  mot en spelstick-öppning utan essen). **6NT direkt** bjuds bara när
-  öppnarens återbud var **3NT** (styrkan visad balanserad = riktiga hp);
-  efter ett **färg-återbud** utan fit kan "22:an" vara en spelstick-hand vars
-  längd inte ger sangstick utan fit → auktionen fortsätter naturligt. I
+- **Utan trumf** gäller samma kaptensmatte, men **ingen essfråga förrän
+  trumfen är satt**: ett naket 4NT efter öppnarens färg-återbud är essfrågan i
+  **öppnarens** färg (senast bjudna, §6.1 — ägarbeslut 2026-09-05), så
+  svararen med en egen **självbärande** färg (6+ med minst två av A/K/Q)
+  **rebjuder den naturligt** först (utgångskravet står) och söker slammen i
+  fortsättningen — aldrig 4NT direkt för sin egen färg. **6NT direkt** bjuds
+  bara när öppnarens återbud var **3NT** (styrkan visad balanserad = riktiga
+  hp); efter ett **färg-återbud** utan fit kan "22:an" vara en spelstick-hand
+  vars längd inte ger sangstick utan fit → auktionen fortsätter naturligt. I
   31–32 utan trumf står den vanliga utgångsauktionen (ingen kvantitativ
   inbjudan där ännu).
 - **Så läser ÖPPNAREN kaptenens bud efter sitt färg-återbud** (2♣–positivt–
@@ -1194,7 +1196,14 @@ VISAT via buden**, aldrig på partnerns faktiska kort:
 
 ### 6.1 1430 RKC Blackwood
 Slamverktyg när en **trumf är överenskommen**. **4NT** frågar efter de fem
-**nyckelkorten** = de 4 essen + **trumfkungen**.
+**nyckelkorten** = de 4 essen + **trumfkungen**. **Är ingen trumf satt** är ett
+naket 4NT essfrågan i sidans **senast naturligt bjudna färg** ("last bid suit",
+ägarbeslut 2026-09-05): 1♦–1♠–2♥–4NT = hjärter (även efter hoppskift),
+2♣–2♠–3♥–4NT = hjärter, 1♠–2♣–2♦–4NT = ruter. Över partnerns **sangbud**
+(1NT/2NT-återbud, sangöppning) är 4NT kvantitativt (§5.7, §6.8). Bottarna
+sätter alltid trumfen först (höjning, kontrollbud i ny färg) och frågar naket
+4NT bara i den senast bjudna färgen — tvetydigheten uppstår bara efter en
+människas bud.
 
 **Svar (1430-varianten):**
 | Svar | Nyckelkort |
@@ -2135,6 +2144,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-06 — Naket 4NT = essfråga i senast bjudna färg (§6.1; motorbytet
+  §5b beslut 14, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
+  bok-mot-motor-fynd 14. Förr teg öppnarens läsning efter reverse/hoppskift
+  (kaptenen placerade själv), betydelselagret läste frågarens EGEN senaste
+  färg, och boten kunde fråga naket 4NT för en annan färg än den senast
+  bjudna. Nu: 4NT efter reverse/hoppskift = essfråga i reversens färg
+  (`slamTrumpFromAuction`; öppnaren svarar ur tabellen), betydelselagret läser
+  sidans senast bjudna färg (`askTrumpFallback`), och kaptenen frågar naket
+  4NT bara i den senast bjudna färgen — fit i öppnarens första färg efter
+  reverse går preferensvägen, egen solid färg efter 2♣ rebjuds naturligt
+  (beslut 7). Facit: blocket "§5b beslut 14" i `motorbyte-facit.test.ts`.
 - **2026-09-06 — 4♦ naturligt efter 2♣–3♦–3M; kontrollbud i ny färg sätter
   öppnarens högfärg (§4.4; motorbytet §5b beslut 7, `docs/motorbyte-plan.md`).**
   Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 7: samma auktionsform hade två
