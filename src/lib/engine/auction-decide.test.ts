@@ -346,10 +346,10 @@ describe('familj 4b – öppnarens tredje bud: läget "jag öppnade, partnern sv
     expect(bot.bid).toBe(människa.bid)
   })
 
-  it('fjärde färg besvaras i bokens mönster (tre 1-lägesbud); 2/1-formen lämnas åt det gamla lagret', () => {
+  it('fjärde färg besvaras i bokens mönster (tre 1-lägesbud); i 2/1-formen är den nya färgen naturlig (§5b beslut 13) och besvaras som sådan', () => {
     const h = 'S:KQ73 H:A72 D:8 C:AQ863'
     expect(bud(h, hist('1C', '1H', '1S', '2D'), 'N')!.call).toMatchObject({ bid: '2H', rule: 'svar på fjärde färg' })
-    expect(bud(h, hist('1S', '2C', '2D', '2H'), 'N')).toBeNull()
+    expect(bud('S:KQJ73 H:A72 D:AQ86 C:3', hist('1S', '2C', '2D', '2H'), 'N')!.call).toMatchObject({ rule: '2/1: svar på ny färg' })
   })
 
   it('egen enkel höjning + partnerns 3M-inbjudan: öppnaren dömer', () => {

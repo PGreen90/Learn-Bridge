@@ -181,11 +181,11 @@ export function responderRebidIn2over1Auction(
   // §9-löftet från 2/1-regeln 2026-08-06: 2♣ före högfärgen, högfärgen i
   // ÅTERBUDET). Efter det försenade stödet (känd 5-3-fit slår hypotetisk 4-4,
   // ägarbeslut) men FÖRE 3NT, så en 4-4-högfärgsfit aldrig begravs i sang.
-  // BARA när högfärgen blir auktionens TREDJE färg (öppnaren rebjöd egen färg
-  // eller stödde min): har tre olika färger redan bjudits är högfärgsbudet
-  // FJÄRDE FÄRG med konventionell mening — då gäller 3NT-med-håll som förr.
-  // Öppnaren har dessutom redan nekat egen 4-korts högfärg när hen inte visade
-  // en (openerRebidAfter2over1 bjuder den före både 2NT och egen färg).
+  // BARA när högfärgen blir auktionens TREDJE färg: har öppnaren visat två
+  // färger har hen nekat en 4-korts högfärg (openerRebidAfter2over1 bjuder den
+  // före både 2NT och egen färg), så 3NT-med-håll går före. Blir högfärgen
+  // FJÄRDE färg är den ändå NATURLIG (ingen fjärde färg efter 2/1 — §5b beslut
+  // 13, ägarbeslut 2026-09-05) och bjuds i steg 6b när håll saknas.
   if (rebidSuit === null || rebidSuit === opened || rebidSuit === responderSuit) {
     for (const maj of ['hearts', 'spades'] as Suit[]) {
       if (maj !== opened && maj !== responderSuit && len[maj] >= 4) {
@@ -216,9 +216,28 @@ export function responderRebidIn2over1Auction(
     return { call, rule, explanation: `6+ ${SYM[responderSuit]} → ${pretty(call)} (extra längd, utgångskrav).` }
   }
 
+  // 6b. Ny 4+ färg under 3NT — auktionens fjärde färg, NATURLIG (ingen fjärde
+  // färg efter 2/1, §5b beslut 13): 1♠–2♣–2♦–2♥ med fyra hjärter utan
+  // hjärterhåll, 1♠–2♥–3♣–3♦ med fyra ruter. Hellre än en preferens på
+  // dubbelton; högfärg före lågfärg.
+  for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
+    if (s !== opened && s !== responderSuit && s !== rebidSuit && len[s] >= 4) {
+      const call = bidAbove(s, rebid.call)
+      if (bidRankOf(call) < bidRankOf('3NT')) {
+        return { call, rule, explanation: `4+ ${SYM[s]} → ${pretty(call)} (naturlig ny färg, utgångskravet står).` }
+      }
+    }
+  }
+
   // 7. Nödutväg: preferens till öppnarens första färg – kravet får aldrig passas.
   const call = bidAbove(opened, rebid.call)
   return { call, rule, explanation: `Preferens till ${SYM[opened]} (2/1 är utgångskrav, pass förbjudet).` }
+}
+
+/** Budets rang i auktionsordning (1♣ = 0 … 7NT = 34). */
+function bidRankOf(call: string): number {
+  const order = ['C', 'D', 'H', 'S', 'NT']
+  return (parseInt(call[0], 10) - 1) * 5 + order.indexOf(call.slice(1))
 }
 
 // === FAS 6 punkt 27: svararens fortsättning efter inverterad minor, §4.2 =====

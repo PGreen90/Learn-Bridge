@@ -174,6 +174,9 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // och öppnarens rättelse av partnerns 3NT med 6+ i egen högfärg.
   '2♣: rebud egen färg (GF)': 'utgangskrav',
   'rättelse till högfärg': 'avslut',
+  // Öppnarens svar på svararens naturliga nya färg efter 2/1 (§5b beslut 13).
+  '2/1: svar på ny färg': 'utgangskrav',
+  '2/1: placerar utgång': 'avslut',
   'rebid: stöd (GF)': 'utgangskrav',
   'rebid: 3NT (GF)': 'avslut',
   'rebid: 3NT': 'avslut',

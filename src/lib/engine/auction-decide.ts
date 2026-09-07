@@ -67,7 +67,7 @@ import { meaningOf } from './auction-meaning'
 import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
 import { classifyOpening } from './openings'
-import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNaturalThirdSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { NMF_SLAM_ZONE_HP, responderPlaceAfter2NTCheckback, responderPlaceAfterNMF, responderRebidIn2NTAuction, responderSecondBid } from './responder-rebids'
 import { openerRebidAfter2NTResponse } from './responses-2nt'
 import { respondToGerber } from './slam'
@@ -765,6 +765,24 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
     return openerAfterDelayedMinorSupport(hand, openerSuit)
   }
 
+  // Svararens NATURLIGA nya färg efter 2/1 (1♠–2♣–2♦–2♥; §5b beslut 13,
+  // 2026-09-07 — ingen fjärde färg efter 2/1): öppnaren höjer med fyra,
+  // bjuder sang med håll, visar egen längd eller ger preferens.
+  // Bara när jag visade en ANDRA färg (inte höjde partnerns — då är hens
+  // nya färg cue/håll, inte naturlig), budet är billigast möjligt (ett hopp
+  // är splinter) och ligger under 3NT (på 4-läget vore "sang" en essfråga).
+  if (response.rule === '2-över-1 GF' && second.rule === '2/1: fortsättning' && openerSuit && respSuit) {
+    const secondSuit = suitOf(rebid.call)
+    const third = suitOf(second.call)
+    const rebidCb = parseContractBid(rebid.call)
+    if (secondSuit && third && rebidCb && secondSuit !== respSuit && third !== openerSuit && third !== secondSuit && third !== respSuit) {
+      const cheapest = `${RANK.indexOf(third) > RANK.indexOf(secondSuit) ? rebidCb.level : rebidCb.level + 1}${LETTER[third]}`
+      if (second.call === cheapest && bidRank(second.call) < bidRank('3NT')) {
+        return openerAnswerNaturalThirdSuit(hand, openerSuit, secondSuit, respSuit, third, second.call)
+      }
+    }
+  }
+
   // New Minor Forcing (§5.7, krav): öppnaren svarar alltid.
   if (second.rule === 'New Minor Forcing' && openerSuit && respSuit && isMajorSuit(respSuit)) {
     const nmfMinor = suitOf(second.call)
@@ -874,6 +892,30 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
         ? { call: 'P', rule: 'svararens pass', explanation: `Under slamzonen mot visade 12 → 3NT står (pass).` }
         : { call: `5${LETTER[openerSuit]}` as ResponseResult['call'], rule: 'höjning till utgång', explanation: `Under slamzonen → 5${SYM[openerSuit]} (utgång i den satta trumfen).` }
     return { turn: place, plan: { kind: 'call' } }
+  }
+
+  // Min NATURLIGA nya färg efter 2/1 (§5b beslut 13) och öppnarens svar:
+  // placera utgången — 4 i min högfärg om partnern höjde den, 4M i öppnarens
+  // rebjudna 6+-högfärg med 2+ stöd, annars 3NT (förr passade det gamla
+  // lagret öppnarens 2NT mitt i utgångskravet). 18+ → gamla vägen (slam).
+  if (second.rule === '2/1: fortsättning' && third.rule === '2/1: svar på ny färg' && respSuit) {
+    if (isGameOrHigher(third.call)) return null
+    const mySuit = suitOf(second.call)
+    const thirdSuit = suitOf(third.call)
+    const secondSuit = suitOf(rebid.call)
+    const rl3 = lengths(hand)
+    const rule = '2/1: placerar utgång'
+    if (mySuit && isMajorSuit(mySuit) && thirdSuit === mySuit) {
+      return { turn: { call: `4${LETTER[mySuit]}` as ResponseResult['call'], rule, explanation: `Partnern höjde min ${SYM[mySuit]} → 4${SYM[mySuit]} (utgång i fiten).` }, plan: { kind: 'call' } }
+    }
+    if (openerSuit && isMajorSuit(openerSuit) && thirdSuit === openerSuit && rl3[openerSuit] >= 2) {
+      return { turn: { call: `4${LETTER[openerSuit]}` as ResponseResult['call'], rule, explanation: `Partnern rebjöd sin ${SYM[openerSuit]} (6+) och jag har 2+ → 4${SYM[openerSuit]} (utgång).` }, plan: { kind: 'call' } }
+    }
+    if (secondSuit && isMajorSuit(secondSuit) && thirdSuit === secondSuit && rl3[secondSuit] >= 3) {
+      return { turn: { call: `4${LETTER[secondSuit]}` as ResponseResult['call'], rule, explanation: `Partnern rebjöd sin andrafärg ${SYM[secondSuit]} (5+) och jag har 3+ → 4${SYM[secondSuit]} (utgång).` }, plan: { kind: 'call' } }
+    }
+    if (bidRank('3NT') <= bidRank(third.call)) return null
+    return { turn: { call: '3NT', rule, explanation: `Utgångskravet står och ingen fit hittad → 3NT.` }, plan: { kind: 'call' } }
   }
 
   // NMF (§5.7): visade öppnaren 3-korts stöd i min högfärg är 5-3-fiten

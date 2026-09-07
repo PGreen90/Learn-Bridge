@@ -68,6 +68,8 @@ const ALL_ENGINE_RULES: string[] = [
   'reverse: höjning (stark)', 'reverse: utgång',
   // §5b beslut 7 (2026-09-06): svararens andra bud utan 3-stöd efter 2♣–positivt–öppnarens egen färg.
   '2♣: rebud egen färg (GF)', 'rättelse till högfärg',
+  // §5b beslut 13 (2026-09-07): öppnarens svar på svararens naturliga nya färg efter 2/1.
+  '2/1: svar på ny färg', '2/1: placerar utgång',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

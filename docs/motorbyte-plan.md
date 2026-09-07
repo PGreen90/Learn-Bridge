@@ -513,6 +513,13 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   "fjärde färg har konventionell mening" bort: 4+ i färgen → naturligt bud) +
   öppnarens svar på svararens naturliga tredje färg i raden tredje (höjning
   med 4, annars beskrivning: sang med håll / egen längd / preferens).
+  **BYGGT 2026-09-07 (väntar PCD; loggen nedan).** Två preciseringar i
+  bygget: (1) svararens 4-korts högfärg som FJÄRDE färg visas bara utan håll
+  i den — med håll går 3NT före, eftersom öppnaren med två visade färger
+  redan nekat en 4-korts högfärg (felrapportens facit ♠3 ♥QJ72 ♦AKQJ9 ♣T76 →
+  3NT står); (2) öppnarens svar och svararens placering byggdes samtidigt
+  (raden tredje + svar3) — utan placeringen passade det gamla lagret
+  öppnarens 2NT mitt i utgångskravet (facit "hela auktionen").
 
 - **Beslut 14 — fynd 14 (naket 4NT utan satt trumf), 2026-09-05.** Ägarbeslut:
   **naket 4NT = essfråga i den senast naturligt bjudna färgen** ("last bid
@@ -580,6 +587,29 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-07 — §5b beslut 13 BYGGT (ingen fjärde färg efter 2/1; väntar
+  ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 13" i
+  `motorbyte-facit.test.ts` (fem fall, fyra röda före fixen). Regeln i det
+  nya lagret: `responderRebidIn2over1Auction` (steg 6b: ny 4+ färg under 3NT
+  är naturlig — högfärg före lågfärg, efter 3NT-med-håll och eget 6+),
+  `openerAnswerNaturalThirdSuit` i raden tredje ('2/1: svar på ny färg':
+  höj med fyra · 6+ egen · 5+ andra · sang med jämn hand · preferens 3+ ·
+  sang), svararens placering i raden svar3 ('2/1: placerar utgång': 4M i
+  höjd egen högfärg / 4M mot öppnarens 6+ / 3NT); betydelselagret
+  `isFourthSuit` undantar 2/1 och `openerThirdAfter2over1` läser
+  öppnarens svar (förr tom regel → adaptern tystnade). Registret: två nya
+  regler. Systembok §5.3 (stycket "ny färg i rond 2" + öppnarens svar), §6.6
+  (undantaget 2/1 förklarat), §9.
+  **Mätningar** (kommandon i §3; baslinjer på `f7d5c72`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 4 — a: frön 20270257/20270477 (den nya
+  färgen visas naturligt i stället för preferens/höjning på dubbelton, samma
+  4♥); b: 20270497 (3NT i stället för 4♥ på 6-1 efter preferens på singel),
+  20272636 (svararen placerar 3NT i stället för det gamla lagrets 5♦);
+  avvikelsedumpen: 25 ändrade — 7 a, 18 b, 0 c (naturlig ny färg i stället
+  för preferens/höjning; öppnarens svar ur tabellen; svararens placering där
+  det gamla lagret passade 2NT, rebjöd 4-korts högfärg eller hittade på 5m); olagliga tabellbud 0;
+  betydelsesvepet kravnivå 0 · alert 0 · registerhål 0; pliktsvep/
+  förklaringssvep/regelsvep gröna; revisorn 1000 givar: rätt kontrakt 20,2 % · snittförlust 269,55 (beslut 2: 20,2 % · 268,83). Skillnaden är EN giv (auktionsdiffen på revisorns frön 20260721–20261720 mot stash-baslinjen): frö 20261274, 1♦–2♣–2♦–2♠–3♦ — svararen (♠KJ73 ♥A83 ♦8 ♣KQJ52) placerar nu 3NT (regeln: partnern rebjöd sin lågfärg, ingen fit) där det gamla lagret rebjöd 4♣ → 5♣; systemriktig placering, facit-tabellen straffar den på just den given (bud = systemriktighet, inte poäng på enskild giv).
 - **2026-09-06 — §5b beslut 2 KLAR & LIVE 2026-09-07 (fjärde färg gäller även efter reverse;
   mergepunkt `f7d5c72`, Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 2" i
   `motorbyte-facit.test.ts` (tre fall; två röda före fixen — svararens 3♣ och

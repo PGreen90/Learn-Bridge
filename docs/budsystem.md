@@ -886,6 +886,15 @@ Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gälle
 - **"Fast arrival":** snabb väg till utgång (direkt 4 i färgen) visar **minimum**;
   att ta omvägar visar **extra / slamintresse**.
 - **Ny färg** = naturlig form, krav (hela budgivningen är ju redan krav).
+  Det gäller **även svararens nya färg i rond 2** (1♠–2♣–2♦–2♥, 1♥–2♣–2♦–2♠,
+  1♠–2♥–3♣–3♦): **fjärde färg finns inte när 2/1 är satt** — utgångskravet
+  räcker en gång, budet visar 4+ kort (ägarbeslut 2026-09-05, motorbytets §5b
+  beslut 13: "det räcker med game force en gång"). Svararen visar sin 4-korts
+  högfärg före 3NT; utan håll och utan naturligt bud ger hon preferens eller
+  rebjuder sin färg. Öppnaren — som vet att kravet står — **höjer med fyra**,
+  bjuder **sang med håll** i den objudna färgen (billigast), visar **egen
+  längd** (6+ i öppningsfärgen, 5+ i andrafärgen) eller ger **preferens** till
+  svararens färg med 3+; i nödfall billigaste sang (pass är förbjudet).
 - **2NT** = balanserad utan extra form (~12–15) — **krav**, partnern får aldrig
   passa det (felrapport #58); **rebjuden egen färg** = 6+;
   **stöd i svararens färg** = fit.
@@ -2150,6 +2159,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-07 — Ingen fjärde färg efter 2/1 (§5.3, §6.6; motorbytet §5b
+  beslut 13, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
+  bok-mot-motor-fynd 13: svararens nya färg efter 2/1 är naturlig (4+),
+  utgångskravet räcker en gång. Förr spärrade motorn svararens 4-korts
+  högfärg när den blev auktionens fjärde färg, betydelselagret läste budet
+  som konstgjort (alert) och öppnarens svar låg i det gamla lagret. Nu:
+  `responderRebidIn2over1Auction` (högfärgen visas alltid under 3NT, ny
+  4-korts lågfärg efter egen 6+), betydelselagrets `isFourthSuit` undantar
+  2/1, öppnarens svar `openerAnswerNaturalThirdSuit` (raden tredje, regeln
+  '2/1: svar på ny färg'; betydelselagret läser det via
+  `openerThirdAfter2over1`), svararens placering (raden svar3, '2/1:
+  placerar utgång' — förr passade det gamla lagret öppnarens 2NT mitt i
+  utgångskravet). Facit: blocket "§5b beslut 13" i `motorbyte-facit.test.ts`.
 - **2026-09-06 — Fjärde färg gäller även efter reverse (§6.6; motorbytet §5b
   beslut 2, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
   bok-mot-motor-fynd 1: boken undantog reversen, motorn spelade fjärde färg
