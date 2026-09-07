@@ -388,7 +388,7 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   **konstlad** (håll-/beskrivningsfråga), inte naturlig. Auktionen är redan
   utgångskrav, men håll-frågan till 3NT är verklig. Rätta boken §6.6 (som idag
   undantar reverse). Rör §6.6.
-  **BYGGT 2026-09-06 (väntar PCD; loggen nedan).** Utöver bokrättelsen fick
+  **BYGGT & LIVE 2026-09-07 (mergepunkt `f7d5c72`, Actions grön, rebidz.com aliasad; loggen nedan).** Utöver bokrättelsen fick
   det nya lagret öppnarens SVAR på fjärde färgen på 3-läget (efter reverse
   ligger den där): förr rebjöd det gamla lagret alltid öppningsfärgen (och
   höjde fjärde färgen till 5♣ med fyra klöver), nu samma prioritet som i
@@ -580,8 +580,8 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
-- **2026-09-06 — §5b beslut 2 BYGGT (fjärde färg gäller även efter reverse;
-  väntar ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 2" i
+- **2026-09-06 — §5b beslut 2 KLAR & LIVE 2026-09-07 (fjärde färg gäller även efter reverse;
+  mergepunkt `f7d5c72`, Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 2" i
   `motorbyte-facit.test.ts` (tre fall; två röda före fixen — svararens 3♣ och
   betydelselagrets läsning var redan rätt, öppnarens svar saknades). Regeln i
   det nya lagret: `openerAnswerFourthSuit` tar nivån (2 i grundmönstret, 3
