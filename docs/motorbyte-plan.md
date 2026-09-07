@@ -572,7 +572,7 @@ PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF — LIVE
 arrival efter reverse — LIVE 2026-09-06, `1a6adf0`) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
 steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
-`ca954b4`) → 9 (passad hand över 1M) →
+`ca954b4`) → 9 (passad hand över 1M — KLAR 2026-09-07, PCD väntar) →
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa) → 11 (ny färg på
 3-läget efter 1M–1NT–2x) → 12 (hopp till 4m = driv) → 16 (bara bok + facit) →
 8 (redan byggt, bara låst).
@@ -598,6 +598,41 @@ steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 
 ## Ändringslogg
 
+- **2026-09-07 — §5b beslut 9 KLAR (passad hand över 1♥/1♠: Jacoby/Bergen/
+  splinter AV, Drury på stödpoäng, 2NT naturlig inbjudan; väntar ägarens PCD —
+  mergepunkt fylls i).** Test-drivet: facit-blocket "§5b beslut 9" i
+  `motorbyte-facit.test.ts` (sex fall, alla röda före fixen). Nya lagret:
+  `respondToMajorPassed` omskriven (3M spärr under 6 med 4+ · 4M 5+ trumf under
+  10 stödpoäng · Drury på 10+ stödpoäng med 3+ trumf · 2M 6–9 med 3+ · 1♠ · 3♣/3♦
+  6+ svag · 2NT 11–12 jämn utan stöd · annars det vanliga schemat, som utan fit
+  aldrig når Jacoby/Bergen); öppnaren `openerRebidAfterPassedMajorResponse`
+  (2NT: 14+ → 3NT/4M med 6+, minimum 6+ → 3M 'rebid: stanna', annars pass;
+  3M-spärr: 4M bara med 18+; 3♣/3♦: pass, 3NT 16+ jämn, 4M 16+ med 6+, egen
+  färg igen med singel/renons i partnerns färg); svararen passar öppnarens
+  placering; betydelselagret läser passad hands 3♣/3♦ som 'ny färg' (ej krav,
+  ingen alert), 3M som 'spärrhöjning', öppnarens svar som 'rebid: stanna'/
+  'rebid: utgång'/'rebid: 3NT'/'rebid: egen färg'. Inga nya regelnamn.
+  Claudes tolkningar utöver beslutstexten (flaggade för ägaren): 4M-spärren
+  behålls för 5+ trumf under 10 stödpoäng (med kortfärg blir det Drury —
+  tröskeln går på stödpoäng, precis som ägaren sa); 2NT-inbjudan 11–12, en
+  passad 13–15 jämn (bara människan) går 3NT som förut; 3♣/3♦ = 6–9.
+  Systembok §6.7 (hela tabellen), §4.1-not, §9. `responses-drury.test.ts`:
+  "för svag för Drury" ger nu 2♥ (förr Bergen 3♣).
+  **Mätningar** (kommandon i §3; baslinjer på `ca954b4`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 10 —
+  alla b (frön 20270448, 20270495, 20271834, 20272372 = 3♣ naturligt i stället
+  för 1NT; 20271113 = 3♠ spärr med 4 hp och 4 trumf i stället för pass;
+  20271144 = 2♣ Drury på 10 stödpoäng med 3 trumf; 20271423 och 20272394 =
+  ägarens exempel, Bergen → Drury/2♥; 20271706, 20272996 = 2NT-inbjudan med
+  11 jämn); avvikelsedumpen: 144 ändrade + 9 samma bud/annan regel — alla b
+  (109 Drury där den syntetiskt "passade" boten förr bjöd Jacoby/splinter/
+  2-över-1/1NT med 10+ stödpoäng, 9 öppnarpass på passad hands 3♣/3♦/3M där
+  Bergen-svaret förr gav 4M, 7 naturliga 3♣/3♦, 5 2NT-inbjudningar, 6
+  höjningar, 4 spärrar, 2 öppnarsvar på 2NT som förr var "pass (ingen
+  regel)", 2 egen färg igen med renons/singel i partnerns lågfärg), 0 c,
+  olagliga tabellbud 0; betydelsesvepet kravnivå 0 · alert 0 · registerhål 0;
+  pliktsvep/förklaringssvep/regelsvep gröna; revisorn 1000 givar: rätt
+  kontrakt 20,3 % · snittförlust 268,58 (beslut 5: 20,3 % · 268,77).
 - **2026-09-07 — §5b beslut 5 KLAR & LIVE (passad hand i minor: semi-forcing 1NT
   behålls, inverterat AV; mergepunkt `ca954b4`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 5" i `motorbyte-facit.test.ts` (sju fall, alla röda

@@ -250,8 +250,9 @@ trumf → 3 i trumf):
   sidofärg som visas – annars visa hellre kortfärg.
 - **Svararens fortsättning:** efter ett 3-läges-återbud visar en ny färg (ej
   trumf) **första-rondskontroll** (ess eller renons) – cue-bid uppåt mot slam.
-- **Passad hand / konkurrens:** tas i senare avsnitt (passad hand: Drury;
-  efter upplysningsdubbling: Jordan 2NT = limithöjning). **Passad hands 1NT
+- **Passad hand / konkurrens:** tas i senare avsnitt (passad hand: **hela
+  svarsstrukturen i §6.7** — Jacoby/Bergen/splinter AV, Drury på stödpoäng,
+  2NT naturlig inbjudan; efter upplysningsdubbling: Jordan 2NT = limithöjning). **Passad hands 1NT
   är semi-forcing som förut** (ägarbeslut 2026-09-05, motorbytet §5b beslut
   5): naturligt 6–11, ej krav, öppnaren får passa med minimum balanserad hand
   (§5.1). Skillnaden mot ohöjd hand är bara att 1NT inte kan dölja någon
@@ -1459,10 +1460,22 @@ Gäller när **svararen är passad hand** och partnern öppnar **1♥/1♠ i 3:e
 hand** (där lätta öppningar är vanliga). Begränsar höjningen så man inte hamnar
 för högt.
 
-| Svar (passad hand) | Betydelse | Konvention |
+**Passad hand spelar Jacoby AV, Bergen AV och splinter AV — Drury tar alla
+limithöjningar** (ägarbeslut 2026-09-05, motorbytet §5b beslut 9). Tröskeln
+går på **stödpoäng**, inte hp: handen med 4 trumf och en kortfärg hamnar i
+Drury, aldrig i Jacoby/splinter. Hela strukturen efter pass:
+
+| Svar (passad hand) | Betydelse | Kravnivå / konvention |
 |---|---|---|
-| 2♣ | limithöjning (~10–12 hp), exakt **3** trumf | Drury (tvåvägs) ● |
-| 2♦ | limithöjning (~10–12 hp), **4+** trumf | Drury (tvåvägs) ● |
+| 2♣ | limithöjning **10–12 stödpoäng**, exakt **3** trumf | Drury (tvåvägs) ● |
+| 2♦ | limithöjning **10–12 stödpoäng**, **4+** trumf | Drury (tvåvägs) ● |
+| 2♥ / 2♠ (höjning) | 6–9 med 3+ stöd — enkel höjning (öppnarens game try 2NT som vanligt) | Ej krav |
+| 3♥ / 3♠ (hopphöjning) | spärr: 4+ stöd, under 6 hp (öppnaren 4M bara med 18+) | Avslut |
+| 4♥ / 4♠ | 5+ trumf, svag och formstark (under 10 stödpoäng) | Avslut |
+| 2NT | **naturlig inbjudan**: 11+ hp balanserad, högst 2 trumf — öppnaren 3NT med 14+ (4M med 6+ trumf), 3M = minimum med 6+ trumf, annars pass | Inbjudan |
+| 3♣ / 3♦ | naturligt, 6+ färg, svag (6–9) — öppnaren passar med minimum, 3NT med 16+ jämn, 4M med 16+ och 6+ trumf | Ej krav |
+| 1NT | semi-forcing som förut (§4.1, §5.1) | Semi-krav |
+| 1♠ över 1♥ | 4+ spader, som förut | Krav 1 rond |
 
 **Öppnarens återbud:**
 - **rebjuda högfärgen** (2♥/2♠) = lätt öppning, **signoff** (svararen passar).
@@ -2218,6 +2231,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-07 — Passad hand över 1♥/1♠: Jacoby/Bergen/splinter AV, Drury på
+  stödpoäng, 2NT naturlig inbjudan (§4.1, §6.7; motorbytet §5b beslut 9,
+  `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 9.
+  Strukturen efter pass: 2♣/2♦ Drury = 10–12 **stödpoäng** (3 resp. 4+ trumf —
+  4 trumf + kortfärg hamnar här, aldrig i splinter/Jacoby); 2M = 6–9 med 3+;
+  3M = spärr 4+ under 6 (öppnaren 4M bara med 18+); 4M = 5+ trumf under 10
+  stödpoäng; 2NT = naturlig inbjudan 11–12 balanserad utan stöd (öppnaren 3NT
+  med 14+, 4M med 6+ trumf, 3M = minimum med 6+, annars pass); 3♣/3♦ =
+  naturliga 6+, svaga (öppnaren passar, 3NT med 16+ jämn, 4M med 16+ och 6+
+  trumf, egen färg igen med kort i partnerns färg). Kod: `respondToMajorPassed`
+  (inget fall faller längre till Jacoby/Bergen/splinter),
+  `openerRebidAfterPassedMajorResponse` (rebids.ts), svararens pass i
+  responder-rebids.ts, betydelselagrets läsning (passad 3♣/3♦ = naturligt,
+  3M = spärrhöjning, öppnarens svar). Förr föll passad hand utanför Drurys
+  hp-fönster tillbaka på det vanliga schemat (frö 20271423: 3♦ Bergen limit,
+  frö 20272394: 3♣ Bergen konstruktiv med 7 hp). Facit: blocket "§5b beslut 9"
+  i `motorbyte-facit.test.ts`.
 - **2026-09-07 — Passad hand i minor: inverterat AV, semi-forcing 1NT behålls
   (§4.1, §4.2 "Passad hand", §5.1, §6.7; motorbytet §5b beslut 5,
   `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 4.

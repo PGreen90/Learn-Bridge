@@ -17,8 +17,8 @@ describe('respondToMajorPassed – Drury (passad hand)', () => {
     expect(d('S:K4 H:Q842 D:KJ95 C:Q43', 'hearts').call).toBe('2D') // 11 hp, 4 hjärter
   })
 
-  it('för svag för Drury → vanligt svar (Bergen 3♣)', () => {
-    expect(d('S:43 H:Q842 D:K975 C:K43', 'hearts').call).toBe('3C') // 8 hp, 4 stöd → Bergen konstruktiv
+  it('för svag för Drury → enkel höjning 2♥ (Bergen är AV för passad hand, §5b beslut 9)', () => {
+    expect(d('S:43 H:Q842 D:K975 C:K43', 'hearts').call).toBe('2H') // 8 hp, 4 stöd, platt → 2♥ (förr Bergen 3♣)
   })
 
   it('för stark hp men passad → fortfarande Drury i limitläget', () => {

@@ -685,3 +685,75 @@ describe('§5b beslut 5 – passad hand: semi-forcing 1NT behålls, minorhöjnin
     expect(kontrakt).toEqual(['1D', '2D', '2S', '3NT'])
   })
 })
+
+// §5b beslut 9 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 9): PASSAD HAND över
+// 1♥/1♠ spelar Jacoby AV och Bergen AV — Drury tar alla limithöjningar.
+// Strukturen efter pass: 2♣/2♦ Drury = 10–12 STÖDPOÄNG (3 resp. 4+ trumf);
+// 2M = 6–9 med 3+ stöd; 3M = spärr, 4+ stöd under 6; 2NT = naturlig inbjudan
+// ~11 hp balanserad utan 3-stöd (öppnaren 3NT med 14+, annars pass); 3♣/3♦ =
+// naturliga, 6+ färg, ej krav. Förr föll passad hand utanför Drury-fönstret
+// tillbaka på det vanliga svarsschemat (Bergen 3♣/3♦, Jacoby 2NT, splinter).
+describe('§5b beslut 9 – passad hand över 1♥/1♠: Jacoby/Bergen AV, Drury på stödpoäng, 2NT naturlig inbjudan', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  const passadDeal = (n: string, s: string): Deal => ({ ...dealNS(n, s), dealer: 'S' })
+  const h = [P('S'), P('W'), call('N', '1H'), P('E')] // Syd passade, Nord öppnade 1♥ i tredje hand
+
+  it('stödsvaren: Drury 2♦/2♣ på 10–12 stödpoäng (även 8 hp + singel med 4 trumf, även 12 hp + kortfärg — aldrig splinter/Jacoby); 2♥ = 6–9 med 3+ (förr Bergen 3♣); 3♥ = under 6 med 4+; 4♥ = 5+ trumf, svag, formstark', () => {
+    expect(bud('S:K4 H:Q842 D:KJ95 C:Q43', h, 'S')!.call).toMatchObject({ bid: '2D', rule: 'Drury' }) // 11 hp, 4 trumf
+    expect(bud('S:K43 H:Q84 D:KJ95 C:Q43', h, 'S')!.call).toMatchObject({ bid: '2C', rule: 'Drury' }) // 11 hp, 3 trumf
+    expect(bud('S:5 H:Q842 D:KJ95 C:Q843', h, 'S')!.call).toMatchObject({ bid: '2D', rule: 'Drury' }) // 8 hp men singel → 10 stödpoäng
+    expect(bud('S:5 H:Q842 D:AKJ5 C:J843', h, 'S')!.call).toMatchObject({ bid: '2D', rule: 'Drury' }) // 11 hp + singel (15 stödpoäng): förr tvetydig splinter
+    expect(bud('S:43 H:Q842 D:K975 C:K43', h, 'S')!.call).toMatchObject({ bid: '2H', rule: 'enkel höjning' }) // 8 hp, 4 trumf, platt: förr Bergen 3♣ (frö 20272394-mönstret)
+    expect(bud('S:K43 H:Q84 D:9752 C:J43', h, 'S')!.call).toMatchObject({ bid: '2H', rule: 'enkel höjning' }) // 6 hp, 3 trumf
+    expect(bud('S:J5 H:Q8642 D:T975 C:43', h, 'S')!.call).toMatchObject({ bid: '3H', rule: 'spärrhöjning' }) // 3 hp, 5 trumf
+    expect(bud('S:J5 H:Q8642 D:K975 C:43', h, 'S')!.call).toMatchObject({ bid: '4H', rule: 'spärr till utgång' }) // 6 hp, 5 trumf, under 10 stödpoäng (med singel blir det Drury — tröskeln går på stödpoäng)
+  })
+
+  it('utan stöd: 2NT = naturlig inbjudan (11 hp balanserad, högst 2 trumf); 3♣/3♦ = 6+ färg, svag, ej krav; annars semi-forcing 1NT / 1♠ som förut', () => {
+    expect(bud('S:K43 H:Q8 D:KJ95 C:QJ43', h, 'S')!.call).toMatchObject({ bid: '2NT', rule: 'inbjudan' }) // 11 jämn
+    expect(bud('S:43 H:8 D:K5 C:KJT9742', h, 'S')!.call).toMatchObject({ bid: '3C', rule: 'ny färg' }) // 7 hp, 7 klöver
+    expect(bud('S:K43 H:Q8 D:J952 C:J843', h, 'S')!.call).toMatchObject({ bid: '1NT', rule: 'semi-forcing 1NT' }) // 7 jämn
+    expect(bud('S:K843 H:Q8 D:J952 C:J43', h, 'S')!.call.bid).toBe('1S') // 4 spader först
+  })
+
+  it('betydelselagret: passad hands 3♣ är naturlig (ej krav, ingen alert — förr Bergen), 3♥ = spärrhöjning, 2NT = inbjudan; opassad 3♣ är fortfarande Bergen', () => {
+    expect(meaningOf([...h, call('S', '3C')], 4)).toMatchObject({ rule: 'ny färg', forcing: 'ej-krav', alert: false })
+    expect(meaningOf([...h, call('S', '3H')], 4)).toMatchObject({ rule: 'spärrhöjning', forcing: 'avslut' })
+    expect(meaningOf([...h, call('S', '2NT')], 4)).toMatchObject({ rule: 'inbjudan', forcing: 'inbjudan', alert: false })
+    expect(meaningOf([call('N', '1H'), P('E'), call('S', '3C')], 2).rule).toBe('Bergen konstruktiv')
+  })
+
+  const h2NT = [...h, call('S', '2NT'), P('W')]
+
+  it('öppnaren på passad hands 2NT: 14+ → 3NT (4♥ med 6+ hjärter), minimum → pass, minimum med 6+ hjärter → 3♥ (avböjer); svararen passar sedan', () => {
+    expect(bud('S:A5 H:AKJ62 D:Q43 C:432', h2NT, 'N')!.call).toMatchObject({ bid: '3NT', rule: 'accepterar inbjudan' }) // 14
+    expect(bud('S:A5 H:AKJ632 D:Q43 C:43', h2NT, 'N')!.call).toMatchObject({ bid: '4H', rule: 'accepterar inbjudan' }) // 14, 6 hjärter
+    expect(bud('S:K5 H:AK962 D:Q43 C:432', h2NT, 'N')!.call).toMatchObject({ bid: 'P', rule: 'rebid: pass' }) // 12
+    expect(bud('S:K5 H:AK9632 D:Q43 C:43', h2NT, 'N')!.call).toMatchObject({ bid: '3H', rule: 'rebid: stanna' }) // 12, 6 hjärter
+    expect(decideCallTraced(passadDeal('S:A5 H:AKJ62 D:Q43 C:432', 'S:K43 H:Q8 D:KJ95 C:QJ43'), h2NT, 'N').källa).toBe('tabell:återbud')
+    expect(meaningOf([...h2NT, call('N', '3H')], 6)).toMatchObject({ rule: 'rebid: stanna', forcing: 'avslut' })
+    expect(bud('S:K43 H:Q8 D:KJ95 C:QJ43', [...h2NT, call('N', '3H'), P('E')], 'S')!.call).toMatchObject({ bid: 'P', rule: 'svararens pass' })
+    expect(bud('S:K43 H:Q8 D:KJ95 C:QJ43', [...h2NT, call('N', '3NT'), P('E')], 'S')!.call).toMatchObject({ bid: 'P', rule: 'svararens pass' })
+  })
+
+  it('öppnaren på passad hands 3♥ (spärr): 18+ → 4♥, annars pass; på 3♣ (6+ klöver, svag): pass med minimum, 3NT med 16+ jämn, 4♥ med 16+ och 6+ hjärter', () => {
+    const h3H = [...h, call('S', '3H'), P('W')]
+    expect(bud('S:AK5 H:AK962 D:A43 C:43', h3H, 'N')!.call).toMatchObject({ bid: '4H', rule: 'rebid: utgång' }) // 18
+    expect(bud('S:K5 H:AK962 D:Q43 C:K32', h3H, 'N')!.call).toMatchObject({ bid: 'P', rule: 'rebid: pass' }) // 14
+    const h3C = [...h, call('S', '3C'), P('W')]
+    expect(bud('S:K5 H:AK962 D:Q43 C:K32', h3C, 'N')!.call).toMatchObject({ bid: 'P', rule: 'rebid: pass' }) // 14
+    expect(bud('S:AQ5 H:AKJ62 D:Q43 C:43', h3C, 'N')!.call).toMatchObject({ bid: '3NT', rule: 'rebid: 3NT' }) // 16 jämn
+    expect(bud('S:AQ H:AKJ632 D:Q43 C:43', h3C, 'N')!.call).toMatchObject({ bid: '4H', rule: 'rebid: utgång' }) // 16, 6 hjärter
+    expect(bud('S:K5 H:AKJ632 D:Q432 C:-', h3C, 'N')!.call).toMatchObject({ bid: '3H', rule: 'rebid: egen färg' }) // 13, 6 hjärter, renons i partnerns klöver → egen färg hellre än 3♣
+    expect(bud('S:K5 H:AKJ632 D:Q43 C:2', [...h, call('S', '3D'), P('W')], 'N')!.call).toMatchObject({ bid: 'P', rule: 'rebid: pass' }) // 3 ruter hos öppnaren → 3♦ står
+    expect(bud('S:43 H:8 D:K5 C:KJT9742', [...h3C, call('N', '3NT'), P('E')], 'S')!.call).toMatchObject({ bid: 'P', rule: 'svararens pass' })
+  })
+
+  it('hela auktionen bot mot bot (Syd giv, passar med 8 hp och 4 trumf): P–P–1♥–P–2♥ … (förr 3♣ Bergen)', () => {
+    const deal: Deal = { ...passadDeal('S:AK5 H:AKJ62 D:Q43 C:J5', 'S:43 H:Q842 D:K975 C:K43'), hands: { N: parseHand('S:AK5 H:AKJ62 D:Q43 C:J5'), S: parseHand('S:43 H:Q842 D:K975 C:K43'), E: parseHand('S:QT97 H:T9 D:AJ8 C:T986'), W: parseHand('S:J862 H:753 D:T62 C:AQ72') } }
+    const kontrakt = spelaKlart(deal).filter((b) => b !== 'P')
+    expect(kontrakt.slice(0, 2)).toEqual(['1H', '2H'])
+    expect(kontrakt[kontrakt.length - 1]).toBe('4H') // 17 + 8 med fyra trumf: game try → utgång
+  })
+})
