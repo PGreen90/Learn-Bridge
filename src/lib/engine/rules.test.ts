@@ -34,6 +34,7 @@ const ALL_ENGINE_RULES: string[] = [
   'höjning till utgång', 'höjning', 'inbjudan (limithöjning)', 'inbjudan',
   'inverterad minor', 'inverterad minor, svag', 'inverterad: 2NT', 'inverterad: 3NT',
   'inverterad: broms', 'inverterad: minimum', 'inverterad: stopp-visning',
+  'passad höjning: 2NT', 'passad höjning: stopp-visning', 'passad höjning: 3NT', 'passad höjning: broms',
   'konkurrenshöjning', 'krav-svar',
   'lättöppning', 'minor-regeln', 'minorfråga (2NT)', 'minorsvar', 'naturligt inkliv', 'negativ dubbling',
   'ny färg (1-läget)', 'ny färg (2-läget)', 'ny färg (GF)', 'ny färg (krav)', 'ny färg', 'ny färg efter 1NT',

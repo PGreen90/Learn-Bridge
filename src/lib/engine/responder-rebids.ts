@@ -106,6 +106,11 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
   if ((openCall === '1C' || openCall === '1D') && response.rule.startsWith('inverterad minor')) {
     return responderRebidAfterInvertedMinor(hand, openCall === '1C' ? 'clubs' : 'diamonds', rebid)
   }
+  // §5b beslut 5 – passad hands enkla minorhöjning (1m–2m, 6–11 ej krav):
+  // svararen svarar på öppnarens inbjudan/stopp-visning.
+  if ((openCall === '1C' || openCall === '1D') && response.rule === 'enkel höjning') {
+    return responderRebidAfterPassedMinorRaise(hand, openCall === '1C' ? 'clubs' : 'diamonds', rebid)
+  }
 
   // Felrapport #4 – svararens fortsättning i en 2/1 GF-auktion (§5.3). Utgång
   // är säkrad: svararen får ALDRIG passa under utgång.
@@ -293,6 +298,43 @@ export function responderRebidAfterInvertedMinor(hand: Hand, m: Suit, rebid: Res
         return { call: '3NT', rule: '3NT till spel', explanation: `Resterande sidofärger täckta → 3NT (till spel).` }
       }
       return { call: `5${mBid}`, rule: 'höjning till utgång', explanation: `Utan stopp i alla sidofärger → 5${mSym} (minorutgång; 3NT osäker).`, uncertain: true }
+    }
+
+    default:
+      return null
+  }
+}
+
+// === §5b beslut 5: svararens fortsättning efter passad hands ENKLA
+// minorhöjning (§4.2 "Passad hand"). Höjningen lovade 6–11, ej krav; öppnaren
+// passade med 12–14, bjöd 2NT (15–17, inbjudan), 3NT (18+) eller visade
+// stopp (15+, krav 1 rond). Passad hand → aldrig slam. ========================
+export function responderRebidAfterPassedMinorRaise(hand: Hand, m: Suit, rebid: ResponseResult): ResponseResult | null {
+  const p = hcp(hand)
+  const mBid = BID[m]
+  const mSym = SYM[m]
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${why} → pass.` })
+
+  switch (rebid.rule) {
+    case 'passad höjning: 3NT':
+      return pass('öppnaren bjöd 3NT (till spel), står')
+
+    case 'passad höjning: 2NT':
+      // Öppnaren 15–17 balanserad, inbjudan. Med 9+ (24+ ihop) → 3NT.
+      return p >= 9
+        ? { call: '3NT', rule: '3NT till spel', explanation: `9+ mittemot inbjudan 15–17 → 3NT (till spel).` }
+        : pass('under 9 mittemot inbjudan 15–17 – 2NT räcker')
+
+    case 'passad höjning: stopp-visning': {
+      // Öppnaren 15+ visade stopp (krav). Under 10 bromsar svararen med 3m;
+      // med 10–11 bjuds 3NT när de ÖVRIGA sidofärgerna är täckta — annars broms
+      // också (5m på 25 hp är för tunt; öppnaren driver själv med 18+).
+      const shown = suitOfCall(rebid.call)
+      const remaining = RANK.filter((s) => s !== m && s !== shown)
+      if (p >= 10 && remaining.every((s) => hasStopper(hand, s))) {
+        return { call: '3NT', rule: '3NT till spel', explanation: `10+ och resterande sidofärger täckta → 3NT (till spel).` }
+      }
+      return { call: `3${mBid}`, rule: 'passad höjning: broms', explanation: p >= 10 ? `10+ men utan håll i resten → 3${mSym} (broms; öppnaren driver med 18+).` : `Under 10 → 3${mSym} (broms; öppnaren driver med 18+).` }
     }
 
     default:

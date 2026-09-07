@@ -67,7 +67,7 @@ import { meaningOf } from './auction-meaning'
 import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
 import { classifyOpening } from './openings'
-import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNaturalThirdSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNaturalThirdSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterPassedBrake, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { NMF_SLAM_ZONE_HP, responderPlaceAfter2NTCheckback, responderPlaceAfterNMF, responderRebidIn2NTAuction, responderSecondBid } from './responder-rebids'
 import { openerRebidAfter2NTResponse } from './responses-2nt'
 import { respondToGerber } from './slam'
@@ -154,7 +154,7 @@ export function responseDecision(openCall: string, hand: Hand, responderPassed =
   if (suit === 'hearts' || suit === 'spades') {
     return responderPassed ? respondToMajorPassed(hand, suit) : respondToMajor(hand, suit)
   }
-  return respondToMinor(hand, suit)
+  return respondToMinor(hand, suit, responderPassed)
 }
 
 /**
@@ -832,6 +832,10 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
   if (second.rule === 'inverterad: broms' && openerSuit && !isMajorSuit(openerSuit)) {
     return openerThirdBidAfterInvertedBrake(hand, openerSuit, suitOf(rebid.call))
   }
+  // Passad hands broms efter min stopp-visning på den enkla höjningen (§5b beslut 5).
+  if (second.rule === 'passad höjning: broms' && openerSuit && !isMajorSuit(openerSuit)) {
+    return openerThirdBidAfterPassedBrake(hand, openerSuit, suitOf(rebid.call))
+  }
 
   // Min reverse + partnerns preferens tillbaka (delfix 4c).
   if (rebid.rule === 'reverse' && second.rule === 'preferens' && openerSuit && respSuit) {
@@ -971,14 +975,21 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
   }
 
   // B13 (2026-08-07): efter öppnarens ANDRA stopp-visning över min broms
-  // täcker jag resten (3NT) eller tar 5m.
-  if (second.rule === 'inverterad: broms' && third.rule === 'inverterad: stopp-visning' && openerSuit && !isMajorSuit(openerSuit)) {
+  // täcker jag resten (3NT) eller tar 5m. Samma för passad hands broms på den
+  // enkla höjningen (§5b beslut 5) — öppnaren driver då med 18+.
+  if (
+    ((second.rule === 'inverterad: broms' && third.rule === 'inverterad: stopp-visning') ||
+      (second.rule === 'passad höjning: broms' && third.rule === 'passad höjning: stopp-visning')) &&
+    openerSuit &&
+    !isMajorSuit(openerSuit)
+  ) {
     const shown1 = suitOf(rebid.call)
     const shown2 = suitOf(third.call)
     const rest = RANK.filter((s) => s !== openerSuit && s !== shown1 && s !== shown2)
+    const driver = second.rule === 'passad höjning: broms' ? '18+' : '15+'
     const turn: ResponseResult = rest.every((s) => hasStopper(hand, s))
-      ? { call: '3NT', rule: '3NT till spel', explanation: `Öppnaren driver (15+) och resten är täckt → 3NT (till spel).` }
-      : { call: `5${LETTER[openerSuit]}` as ResponseResult['call'], rule: 'höjning till utgång', explanation: `Öppnaren driver (15+) men 3NT är otäckt → 5${SYM[openerSuit]} (minorutgång).` }
+      ? { call: '3NT', rule: '3NT till spel', explanation: `Öppnaren driver (${driver}) och resten är täckt → 3NT (till spel).` }
+      : { call: `5${LETTER[openerSuit]}` as ResponseResult['call'], rule: 'höjning till utgång', explanation: `Öppnaren driver (${driver}) men 3NT är otäckt → 5${SYM[openerSuit]} (minorutgång).` }
     return { turn, plan: { kind: 'call' } }
   }
 

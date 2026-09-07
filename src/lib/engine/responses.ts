@@ -156,7 +156,13 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
 }
 
 /** Vad svarar man på partnerns 1♣/1♦ (ostörd, ohöjd hand)? Systembok §4.2. */
-export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
+/**
+ * Svararens första bud på 1♣/1♦. `passed` = svararen är PASSAD hand (§4.2
+ * "Passad hand", motorbytet §5b beslut 5, 2026-09-07): inverterat är AV —
+ * 2m = enkel höjning 6–11 (ej krav), 3m = svag höjning under 6 med 5+ stöd,
+ * inga 2-över-1 (kravet finns inte i en passad hand).
+ */
+export function respondToMinor(hand: Hand, opened: Minor, passed = false): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
   const support = len[opened]
@@ -174,8 +180,9 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
   const osym = otherMinor === 'clubs' ? '♣' : '♦'
 
   // ---- Svag spärrhöjning (inverterad minor, svag): 5+ stöd, 0–6 hp ----
-  if (support >= 5 && p <= 6) {
-    return { call: `3${m}`, rule: 'inverterad minor, svag', explanation: `0–6 hp, 5+ stöd → 3${msym} (svag spärrhöjning).` }
+  // Passad hand: under 6 (6–11 är den enkla höjningen 2m, §5b beslut 5).
+  if (support >= 5 && (passed ? p <= 5 : p <= 6)) {
+    return { call: `3${m}`, rule: 'inverterad minor, svag', explanation: passed ? `Under 6 hp, 5+ stöd (passad hand) → 3${msym} (svag spärrhöjning).` : `0–6 hp, 5+ stöd → 3${msym} (svag spärrhöjning).` }
   }
 
   if (p < 6) return { call: 'P', rule: 'pass', explanation: `För svagt för att svara → pass.` }
@@ -201,7 +208,7 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
     // väljer man 5-kortsfärgen (källa: standard 2/1, se §9). Över 1♣ visas den
     // längre RUTERN billigt på 1-läget (1♦), så regeln gäller inte där.
     const maxMajor = Math.max(len.hearts, len.spades)
-    if (opened === 'diamonds' && p >= 12 && len[otherMinor] >= 5 && maxMajor === 4) {
+    if (!passed && opened === 'diamonds' && p >= 12 && len[otherMinor] >= 5 && maxMajor === 4) {
       return {
         call: `2${oBID}`,
         rule: '2-över-1 GF',
@@ -221,6 +228,16 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
 
   // Härefter: ingen biudbar 4-korts högfärg.
 
+  // ---- Passad hand: ENKEL höjning 2m med 4+ stöd, 6–11 (§5b beslut 5) ----
+  // Inverterat är AV för passad hand: 2m är ej krav, öppnaren avgör om
+  // budgivningen går vidare (§4.2 "Passad hand"). Före 2NT/1NT — stödet visas
+  // först; 2-över-1 finns inte (kravet kan inte finnas i en passad hand).
+  // (En passad hand med 12+ finns bara hos människan: jämn 12–15 går till sang
+  // nedan, ojämn eller 16+ med stöd höjer enkelt hellre än att bli "oklart".)
+  if (passed && support >= 4 && (p <= 11 || !bal || p >= 16)) {
+    return { call: `2${m}`, rule: 'enkel höjning', explanation: `6–11 hp, 4+ stöd, ingen 4-korts högfärg (passad hand) → 2${msym} (enkel höjning, ej krav).` }
+  }
+
   // ---- 2-över-1 GF FÖRE inverterad höjning (ägarbeslut 2026-09-03, felrapport #58) ----
   // "Att sätta game force är viktigare än att kommunicera träff i färg — har vi
   // ett utgångskrav hinner vi visa färger senare." Med 12+ hp och 5+ i den ANDRA
@@ -230,6 +247,9 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
   // före 4-korts högfärg): kortaste vägen till game force. Ligger även före
   // den direkta 3NT:n — en hand med egen 5-kortsfärg beskrivs, gissar inte.
   if (len[otherMinor] >= 5 && p >= 12) {
+    // Passad hand (människan): samma bud, men naturligt och ej krav — ett
+    // utgångskrav kan inte finnas i en passad hand (betydelselagret läser det så).
+    if (passed) return { call: `2${oBID}`, rule: 'ny färg (2-läget)', explanation: `Passad hand med 5+ ${SYM[otherMinor]} → 2${osym} (naturligt, ej krav).` }
     return {
       call: `2${oBID}`,
       rule: '2-över-1 GF',
@@ -238,7 +258,8 @@ export function respondToMinor(hand: Hand, opened: Minor): ResponseResult {
   }
 
   // ---- Stark inverterad höjning: 4+ stöd, 10+ TP (längd/sidofärg lyfter) ----
-  if (support >= 4 && mp >= 10) {
+  // (Opassad hand — passad hand höjde enkelt ovan; en passad 12+ faller till sang.)
+  if (!passed && support >= 4 && mp >= 10) {
     // Balanserad utgångshand → 3NT direkt BARA om vi själva kan hålla alla
     // sidofärger. Har vi en riktigt svag färg utforskar vi via inverterad 2m i
     // stället (kan landa i 5m när 3NT inte är säkert). Ägarregel 2026-07-05.

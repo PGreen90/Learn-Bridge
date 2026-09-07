@@ -20,11 +20,10 @@ grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbet
 **Regler under bytet:** inga lappar i manuset/detektorkedjan; felrapporter får
 facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
 session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
-**Läget (detalj i planens logg):** etapp 0–2 KLARA 2026-09-04 (riggen
-`decideCallTraced`/`DUMP_RANGE`/`scripts/auktionsdiff.mjs`/facit-kön
+**Läget (detalj i planens logg):** etapp 0–2 KLARA 2026-09-04 (rigg + facit-kö
 `motorbyte-facit.test.ts`, betydelselagret `auction-meaning.ts`, faktalagret
 `auction-facts.ts`). **Etapp 3 familj 1–5 KLARA & LIVE 2026-09-05** (mergepunkter
-451f692, 5b1a9dc, b56a72f, 45fa322, 4a14bca, e303016): beslutstabellen
+i planens logg): beslutstabellen
 `auction-decide.ts` (`decideFromTable`: läge → kunskapsfunktion) med raderna
 öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
 bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
@@ -38,14 +37,16 @@ färg → Gerber 4♣) är live; vakt: manuset avgör inga bud i ostörda auktio
 Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägarens
 ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
-**Nästa gång börjar vi med:** beslut 5 (passad hand: semi-forcing 1NT behålls,
-inverterad minor AV — 2m = 6–11 enkel höjning), test-drivet (facit FÖRE fix,
-systembok §, regel i nya lagret), ett beslut per commit i byggordningen (§5b
-sist: 1 ✔ → 3 ✔ → 7 ✔ → 14 ✔ → 2 ✔ → 13 ✔ → 4 ✔ → 5 → 9 → 6 → 11 → 12 → 16) →
-PCD per grönt steg, ägarens val. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
+**Beslut 5 BYGGD 2026-09-07 (passad hand i minor: 2m = 6–11 enkel höjning, ej
+krav; öppnaren avgör; semi-forcing 1NT behålls) — väntar ägarens PCD.**
+**Nästa gång börjar vi med:** PCD av beslut 5 om den inte hann ske, sedan beslut 9 (passad hand över 1M: Jacoby/Bergen AV, 2NT = naturlig
+inbjudan, öppnarens svar i tabellen), test-drivet (facit FÖRE fix, systembok §,
+regel i nya lagret), ett beslut per commit i byggordningen (§5b sist: 1 ✔ → 3 ✔
+→ 7 ✔ → 14 ✔ → 2 ✔ → 13 ✔ → 4 ✔ → 5 ✔ → 9 → 6 → 11 → 12 → 16) → PCD per grönt
+steg, ägarens val. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
 (`overcall`, `advanceOvercall`, `advanceTwoSuiter`, inklivarens fortsättningar)
-in i tabellen; ordningen mot frekvensbilden (`auktionsdump-frekvens.txt`, planens
-§4 etapp 4); baslinjerna (§3) på `f05bfef`.
+in i tabellen; ordningen mot frekvensbilden (planens §4 etapp 4); baslinjerna
+(§3) på `f05bfef`.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
