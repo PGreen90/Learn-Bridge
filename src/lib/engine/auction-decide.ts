@@ -774,15 +774,20 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
     }
   }
 
-  // Fjärde färg (§6.6, utgångskrav): öppnaren beskriver. Svarsfunktionen är
-  // byggd för bokens mönster — tre 1-lägesbud och fjärde färgen billigast på
-  // 2-läget (kunde den bjudits på 1-läget är den naturlig). Annat → gamla lagret.
+  // Fjärde färg (§6.6, utgångskrav): öppnaren beskriver. Bokens grundmönster
+  // — tre 1-lägesbud och fjärde färgen billigast på 2-läget (kunde den bjudits
+  // på 1-läget är den naturlig) — och efter min REVERSE (1♦–1♠–2♥–3♣, fjärde
+  // färgen på 3-läget; §5b beslut 2, 2026-09-06: konstlad även där). Annat →
+  // gamla lagret.
   if (second.rule === 'fjärde färg krav' && openerSuit && respSuit) {
     const secondSuit = suitOf(rebid.call)
     const fourth = suitOf(second.call)
     const cb = parseContractBid(second.call)
     if (secondSuit && fourth && cb && cb.level === 2 && response.call.startsWith('1') && rebid.call.startsWith('1') && RANK.indexOf(fourth) < RANK.indexOf(secondSuit)) {
       return openerAnswerFourthSuit(hand, openerSuit, secondSuit, respSuit, fourth)
+    }
+    if (secondSuit && fourth && cb && cb.level === 3 && rebid.rule === 'reverse' && response.call.startsWith('1')) {
+      return openerAnswerFourthSuit(hand, openerSuit, secondSuit, respSuit, fourth, 3)
     }
   }
 

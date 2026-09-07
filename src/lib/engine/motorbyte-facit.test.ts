@@ -451,3 +451,38 @@ describe('§5b beslut 14 – naket 4NT = essfråga i senast bjudna färg', () =>
     expect(c2?.call.bid).not.toBe('4NT')
   })
 })
+
+// §5b beslut 2 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 1): fjärde färg efter
+// en REVERSE (1♦–1♠–2♥–3♣) är KONSTLAD — en håll-/beskrivningsfråga, inte
+// naturlig klöver. Reversen gör auktionen utgångskrav redan, men håll-frågan
+// till 3NT är verklig. Boken §6.6 undantog reversen (rättad); motorn spelade
+// redan så. Nytt i det nya lagret: öppnarens SVAR på fjärde färgen på 3-läget
+// (förr det gamla lagrets "krav – rebjuder egen färg" oavsett hand, och 5♣ på
+// fyra klöver).
+describe('§5b beslut 2 – fjärde färg efter reverse är konstlad; öppnaren svarar ur tabellen', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  const h = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '2H'), P('E')]
+  const h3 = [...h, call('S', '3C'), P('W')]
+
+  it('svararen med utgångsvärden utan klöverhåll och utan naturligt bud bjuder 3♣ = fjärde färg krav (konstlat, alert)', () => {
+    expect(bud('S:KQ874 H:53 D:Q9 C:J864', h, 'S')!.call.bid).not.toBe('3C') // 9 hp → preferens, inte fjärde färg
+    expect(bud('S:KQJ74 H:K3 D:Q9 C:J864', h, 'S')!.call).toMatchObject({ bid: '3C', rule: 'fjärde färg krav' }) // 12 hp (KQJ=6, K=3, Q=2, J=1), inget klöverhåll
+    expect(meaningOf(h3, 6)).toMatchObject({ rule: 'fjärde färg krav', forcing: 'utgangskrav', alert: true })
+  })
+
+  it('öppnaren beskriver ur tabellen: 3-stöd i spader → 3♠; klöverhåll → 3NT; 6+ ruter → 3♦; 5-5 → 3♥; fyra klöver utan håll → 4♣', () => {
+    expect(bud('S:A32 H:AKJ5 D:AKJ85 C:4', h3, 'N')!.call).toMatchObject({ bid: '3S', rule: 'svar på fjärde färg' })
+    expect(bud('S:A3 H:AKJ5 D:AKJ85 C:K4', h3, 'N')!.call).toMatchObject({ bid: '3NT', rule: 'svar på fjärde färg' })
+    expect(bud('S:32 H:AKJ5 D:AKJ865 C:4', h3, 'N')!.call).toMatchObject({ bid: '3D', rule: 'svar på fjärde färg' })
+    expect(bud('S:3 H:AKJ52 D:AKJ85 C:74', h3, 'N')!.call).toMatchObject({ bid: '3H', rule: 'svar på fjärde färg' })
+    expect(bud('S:32 H:AKJ5 D:AKJ8 C:T643', h3, 'N')!.call).toMatchObject({ bid: '4C', rule: 'svar på fjärde färg' })
+    expect(decideCallTraced(dealNS('S:32 H:AKJ5 D:AKJ8 C:T643', 'S:KQJ74 H:K3 D:Q9 C:J864'), h3, 'N').källa).toBe('tabell:tredje')
+  })
+
+  it('svararen placerar efter beskrivningen: 3♠ → 4♠, 3♦ → 3NT; hela auktionen 1♦–1♠–2♥–3♣–3♠–4♠', () => {
+    expect(bud('S:KQJ74 H:K3 D:Q9 C:J864', [...h3, call('N', '3S'), P('W')], 'S')!.call.bid).toBe('4S')
+    expect(bud('S:KQJ74 H:K3 D:Q9 C:J864', [...h3, call('N', '3D'), P('W')], 'S')!.call.bid).toBe('3NT')
+    expect(spelaKlart(dealNS('S:A32 H:AKJ5 D:AKJ85 C:4', 'S:KQJ74 H:K3 D:Q9 C:J864')).slice(0, 12)).toEqual(['1D', 'P', '1S', 'P', '2H', 'P', '3C', 'P', '3S', 'P', '4S', 'P'])
+  })
+})

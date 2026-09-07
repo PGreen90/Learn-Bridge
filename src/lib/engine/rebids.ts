@@ -685,7 +685,10 @@ function stopperIn(hand: Hand, suit: Suit): boolean {
 /**
  * Öppnarens svar på svararens fjärde färg-krav. `opened`/`second` = öppnarens
  * två visade färger, `responderSuit` = svararens första färg, `fourth` = den
- * konstgjorda fjärde färgen (bjuden på 2-läget). Returnerar ALLTID ett bud.
+ * konstgjorda fjärde färgen, `fourthLevel` = nivån den bjöds på (2 i bokens
+ * grundmönster 1x–1y–1z–2w; 3 efter en reverse, 1♦–1♠–2♥–3♣ — §5b beslut 2,
+ * 2026-09-06: fjärde färg är konstlad även efter reverse). Returnerar ALLTID
+ * ett bud.
  */
 export function openerAnswerFourthSuit(
   hand: Hand,
@@ -693,11 +696,13 @@ export function openerAnswerFourthSuit(
   second: Suit,
   responderSuit: Suit,
   fourth: Suit,
+  fourthLevel: 2 | 3 = 2,
 ): ResponseResult {
   const len = lengths(hand)
   const rule = 'svar på fjärde färg'
-  // Billigaste nivån över fjärde färgen (som ligger på 2-läget).
-  const cheap = (s: Suit) => (rankOf(s) > rankOf(fourth) ? 2 : 3)
+  // Billigaste nivån över fjärde färgen.
+  const cheap = (s: Suit) => (rankOf(s) > rankOf(fourth) ? fourthLevel : fourthLevel + 1)
+  const nt = `${fourthLevel}NT`
 
   // 1. Tre-korts stöd i svararens högfärg (5+ lovade i sammanhanget).
   if ((responderSuit === 'hearts' || responderSuit === 'spades') && len[responderSuit] >= 3) {
@@ -717,12 +722,12 @@ export function openerAnswerFourthSuit(
 
   // 3. NT med stopp i fjärde färgen (2NT ligger alltid över ett 2-lägesbud).
   if (stopperIn(hand, fourth)) {
-    return { call: '2NT', rule, explanation: `Stopp i ${SYM[fourth]} → 2NT (svar på fjärde färgen, mot 3NT).` }
+    return { call: nt, rule, explanation: `Stopp i ${SYM[fourth]} → ${nt} (svar på fjärde färgen${nt === '2NT' ? ', mot 3NT' : ': håll, till spel'}).` }
   }
 
   // 4. Höj fjärde färgen med 4 kort (visar äkta fit i den – sällsynt).
   if (len[fourth] >= 4) {
-    const call = `3${BID[fourth]}`
+    const call = `${fourthLevel + 1}${BID[fourth]}`
     return { call, rule, explanation: `4+ ${SYM[fourth]} → ${pretty(call)} (höjning av fjärde färgen).` }
   }
 
