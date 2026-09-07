@@ -571,8 +571,8 @@ PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF — LIVE
 2026-09-05, `3491ece`) → 3 (fast
 arrival efter reverse — LIVE 2026-09-06, `1a6adf0`) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
-steg i splinterreläet) → 5 (passad hand i minor — KLAR 2026-09-07, PCD
-väntar) → 9 (passad hand över 1M) →
+steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
+`ca954b4`) → 9 (passad hand över 1M) →
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa) → 11 (ny färg på
 3-läget efter 1M–1NT–2x) → 12 (hopp till 4m = driv) → 16 (bara bok + facit) →
 8 (redan byggt, bara låst).
@@ -598,8 +598,8 @@ väntar) → 9 (passad hand över 1M) →
 
 ## Ändringslogg
 
-- **2026-09-07 — §5b beslut 5 KLAR (passad hand i minor: semi-forcing 1NT
-  behålls, inverterat AV; väntar ägarens PCD — mergepunkt fylls i).** Test-drivet:
+- **2026-09-07 — §5b beslut 5 KLAR & LIVE (passad hand i minor: semi-forcing 1NT
+  behålls, inverterat AV; mergepunkt `ca954b4`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 5" i `motorbyte-facit.test.ts` (sju fall, alla röda
   före fixen). **Del A** (1NT över 1♥/1♠ av passad hand): ingen motorändring —
   betydelselagrets text säger nu "passad hand" (limithöjningen gick via Drury),
