@@ -194,13 +194,23 @@ så öppnarens nedvärdering nedan står på säker grund.
 | 4♦ | kort ♦ |
 | 4♥ | kort ♠ |
 
-*Efter 1♠–3♥:* öppnaren bjuder **3♠ (relä)**; svararen visar kort färg:
+*Efter 1♠–3♥:* öppnaren bjuder **3♠ (relä)**; svararen visar kort färg i
+**rena steg** (lägst möjligt hela vägen = mest rum för kontrollbud, ägarbeslut
+2026-09-05, motorbytets §5b beslut 4 — förr 3NT/4♣/4♥ i boken och 4♣/4♦/4♥ i
+motorn):
 
 | Svar | Kort färg |
 |---|---|
 | 3NT | kort ♣ |
 | 4♣ | kort ♦ |
-| 4♥ | kort ♥ |
+| 4♦ | kort ♥ |
+
+**Fortsättningen** (2026-09-07): öppnaren öppnar cue-ronden (§6.2) med sitt
+billigaste kontrollbud under utgången, eller avslutar 4M — direkt när handen
+är full av honnörer mittemot kortheten (K/D/J där räknas bort; minimum kvar →
+4M). Svararen (kaptenen, 12+) räknar sina stödpoäng mot öppnarens visade
+minimum 12: cue:ar tillbaka gratis, driver 4NT med 33+ och kontrollerna
+räknade, inbjuder 5M med 31–32 över öppnarens 4M-avslut, annars utgång.
 
 **Slamvärdering (nyckeln):** *nedvärdera honnörer mittemot den korta färgen.*
 Kung eller dam mittemot singleton/renons är nästan värdelös ("slöseri"); ess och
@@ -2159,6 +2169,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-07 — Rena steg i splinterreläet efter 1♠–3♥–3♠ (§4.1; motorbytet
+  §5b beslut 4, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
+  bok-mot-motor-fynd 3: kortfärgssvaret 3NT = kort ♣, 4♣ = kort ♦, 4♦ = kort
+  ♥ (förr 4♣/4♦/4♥ i motorn, 3NT/4♣/4♥ i boken). 1♥–3♠–3NT-tabellen orörd.
+  Kod: `responderRevealSplinterShortness` (stegen per trumf), betydelselagret
+  (kortfärgsläsningen; splintern sätter nu trumfen i läsaren så svaret aldrig
+  läses som kontrollbud). **Fortsättningen efter kortfärgssvaret** ligger nu i
+  tabellen (slamraden, prefix 4): öppnaren öppnar cue-ronden med billigaste
+  kontrollbud under 4M eller avslutar 4M — med K/D/J mittemot partnerns
+  kortfärg nedvärderade (§4.1 "slöseri"); kaptenen räknar mot visade 12 och
+  cue:ar/driver/avslutar. Förr låg fortsättningen i det gamla lagret (5♣/5♦ i
+  kaptenens KORTA färg, pass på 4♥-svaret). Facit: blocket "§5b beslut 4" i
+  `motorbyte-facit.test.ts`.
 - **2026-09-07 — Ingen fjärde färg efter 2/1 (§5.3, §6.6; motorbytet §5b
   beslut 13, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
   bok-mot-motor-fynd 13: svararens nya färg efter 2/1 är naturlig (4+),

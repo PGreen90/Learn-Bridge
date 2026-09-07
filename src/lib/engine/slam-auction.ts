@@ -125,6 +125,13 @@ export interface SlamContext {
    * namnger trumfen — även i drivzonen (33+).
    */
   inviteOnly?: boolean
+  /**
+   * Kaptenen (svararen) har VISAT kortfärg här (tvetydig splinter + relä,
+   * §4.1): partnern (öppnaren) nedvärderar K/D/J mittemot — "honnörer
+   * mittemot partnerns kortfärg är slöseri" — när hen öppnar cue-ronden och
+   * dömer inbjudningar (§5b beslut 4, 2026-09-07).
+   */
+  captainShort?: Suit
 }
 
 /**
@@ -379,12 +386,26 @@ function isCueCall(call: string, trump: Suit): boolean {
  * utgångskrav (§6.2) — annars avslut i utgång.
  */
 function partnerFirstStep(hand: Hand, setup: SlamSetup): SlamTurn {
-  const { trump } = setup
-  const gameRank = bidRank(gameCallFor(trump))
-  const cue = cheapestFreeCue(hand, trump, setup.lastCall ? bidRank(setup.lastCall) : -1, gameRank, new Set())
-  if (cue) return cueTurn('öppnare', cue)
+  const { trump, ctx } = setup
   const game = gameCallFor(trump)
-  return { role: 'öppnare', call: game, rule: 'cue: avslut', explanation: `inga kontroller under utgång → ${game[0]}${SYM[trump]}.` }
+  const lastRank = setup.lastCall ? bidRank(setup.lastCall) : -1
+  // Avslutet: står utgången redan (kortfärgssvaret 4♥ efter 1♥–3♠–3NT) passar
+  // öppnaren; annars 4M. Efter partnerns visade kortfärg är avslutet ett
+  // naturligt utgångsbud (ingen cue-rond har börjat → ingen alert).
+  const signoff = (why: string): SlamTurn =>
+    bidRank(game) <= lastRank
+      ? { role: 'öppnare', call: 'P', rule: ctx.captainShort ? 'utgång' : 'cue: avslut', explanation: `${why} → passar (${game[0]}${SYM[trump]} står).` }
+      : { role: 'öppnare', call: game, rule: ctx.captainShort ? 'utgång' : 'cue: avslut', explanation: `${why} → ${game[0]}${SYM[trump]}.` }
+  // Partnerns visade kortfärg (§4.1): är handen full av honnörer mittemot
+  // kortheten stannar öppnaren i utgång — kontrollerna är inte värda en
+  // cue-rond med ett devalverat minimum.
+  if (ctx.captainShort) {
+    const wasted = wastedHonorsOppositeShortness(hand, ctx.captainShort)
+    if (wasted >= 2 && hcp(hand) - wasted < 14) return signoff(`honnörer mittemot partnerns korta ${SYM[ctx.captainShort]} är slöseri`)
+  }
+  const cue = cheapestFreeCue(hand, trump, lastRank, bidRank(game), new Set())
+  if (cue) return cueTurn('öppnare', cue)
+  return signoff('inga kontroller under utgång')
 }
 
 function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: number, sofar: SlamBid[]): SlamTurn | null {
@@ -522,8 +543,10 @@ function signoffCorrection(hand: Hand, trump: Suit, answerCall: string): SlamTur
 /** Kanske-zonen: partnern dömer kaptenens inbjudan på SIN hand mot sitt eget visade intervall — mer än blott minimum → accepterar. */
 function inviteAnswer(hand: Hand, trump: Suit, ctx: SlamContext): SlamTurn {
   const invite = ctx.inviteCall!
-  // Omvärderad med fit: Bergenpoäng, aldrig under hp.
-  const partnerPts = Math.max(hcp(hand), bergenPoints(hand, trump).bergenPoints)
+  // Omvärderad med fit: Bergenpoäng, aldrig under hp — minus honnörer mittemot
+  // partnerns visade kortfärg (§4.1).
+  const wasted = ctx.captainShort ? wastedHonorsOppositeShortness(hand, ctx.captainShort) : 0
+  const partnerPts = Math.max(hcp(hand), bergenPoints(hand, trump).bergenPoints) - wasted
   if (partnerPts >= ctx.partnerMin + 1) {
     return { role: 'öppnare', call: `6${LETTER[trump]}`, rule: 'slaminbjudan: accept', explanation: `Mer än blott minimum → accepterar, 6${SYM[trump]}.` }
   }

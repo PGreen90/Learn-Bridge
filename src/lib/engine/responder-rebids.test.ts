@@ -58,12 +58,15 @@ describe('FAS 3 punkt 14 – svararen visar kortfärgen efter splinter-relä (up
     expect(r?.explanation).toContain('renons')
   })
 
-  // Spaderfit: icke-trumf = ♣ ♦ ♥ → stegen 4♣ / 4♦ / 4♥.
-  it('1♠: singel klöver → 4♣', () => {
-    expect(reveal('S:KQ74 H:AJ85 D:K43 C:3', 'spades')?.call).toBe('4C')
+  // Spaderfit: icke-trumf = ♣ ♦ ♥ → rena steg över reläet 3♠: 3NT / 4♣ / 4♦ (§5b beslut 4, 2026-09-07).
+  it('1♠: singel klöver → 3NT (lägsta steget)', () => {
+    expect(reveal('S:KQ74 H:AJ85 D:K43 C:3', 'spades')?.call).toBe('3NT')
   })
-  it('1♠: singel hjärter → 4♥ (högsta steget, under utgång 4♠)', () => {
-    expect(reveal('S:KQ74 H:3 D:AJ85 C:K43', 'spades')?.call).toBe('4H')
+  it('1♠: singel ruter → 4♣', () => {
+    expect(reveal('S:KQ74 H:AJ85 D:3 C:K432', 'spades')?.call).toBe('4C')
+  })
+  it('1♠: singel hjärter → 4♦ (högsta steget, gott om rum under 4♠)', () => {
+    expect(reveal('S:KQ74 H:3 D:AJ85 C:K43', 'spades')?.call).toBe('4D')
   })
 
   it('regel + märkning: budet bär regeln "splinter: kortfärg"', () => {

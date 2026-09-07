@@ -304,8 +304,10 @@ export function responderRebidAfterInvertedMinor(hand: Hand, m: Suit, rebid: Res
 // Tvetydig splinter (singel/renons någonstans) → öppnaren relär → svararen visar
 // VILKEN färg kortheten sitter i, UPP-THE-LINE (ägarens beslut 2026-07-01):
 // lägsta lediga bud = lägsta möjliga kortfärg. Icke-trumffärgerna är alltid tre i
-// rangordning (♣ < ♦ < ♥ < ♠), och de tre stegen ovanför relät (3NT resp. 3♠) är
-// i praktiken 4♣ / 4♦ / 4♥. En slamsäker renons fångas redan av Exclusion i
+// rangordning (♣ < ♦ < ♥ < ♠), och de tre stegen är RENA STEG ovanför relät:
+// efter 1♥–3♠–3NT 4♣ / 4♦ / 4♥, efter 1♠–3♥–3♠ 3NT / 4♣ / 4♦ (§5b beslut 4,
+// ägarbeslut 2026-09-05: lägst möjligt hela vägen = mest rum för kontrollbud;
+// förr 4♣/4♦/4♥ även där). En slamsäker renons fångas redan av Exclusion i
 // auction.ts; hit når singlar (och renonser som inte var slamsäkra).
 // Öppnarens slamvärdering på den visade kortfärgen (nedvärdera K/D mittemot) hör
 // till FAS 4 punkt 18 – här stannar kedjan vid att kortfärgen är VISAD.
@@ -318,7 +320,7 @@ export function responderRevealSplinterShortness(hand: Hand, M: Major): Response
   const worthy = splinterShortSuits(hand, M)
   const shortSuit = nonTrump.find((s) => worthy.includes(s))
   if (!shortSuit) return null
-  const stepCalls = ['4C', '4D', '4H']
+  const stepCalls = M === 'hearts' ? ['4C', '4D', '4H'] : ['3NT', '4C', '4D']
   const call = stepCalls[nonTrump.indexOf(shortSuit)]
   const isVoid = len[shortSuit] === 0
   return {

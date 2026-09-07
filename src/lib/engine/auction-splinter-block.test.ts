@@ -57,11 +57,12 @@ describe('splinterregeln – singel A/K blockerar splinter (→ Jacoby 2NT)', ()
   })
 
   it('reveal pekar på RENONSEN, inte singel-kungen', () => {
-    // Samma hand: kortfärgsvisningen efter relät ska visa ruterrenonsen (4♦),
-    // inte klöverns singel-K (4♣) — reveal och splinterbeslut delar predikat.
+    // Samma hand: kortfärgsvisningen efter relät ska visa ruterrenonsen (steg
+    // två = 4♣ efter 1♠–3♥–3♠, rena steg §5b beslut 4), inte klöverns singel-K
+    // (steg ett = 3NT) — reveal och splinterbeslut delar predikat.
     const call = responderRevealSplinterShortness(parseHand('S:AJ84 H:Q8765432 D:- C:K'), 'spades')
     expect(call).not.toBeNull()
-    expect(call!.call).toBe('4D')
+    expect(call!.call).toBe('4C')
   })
 })
 
