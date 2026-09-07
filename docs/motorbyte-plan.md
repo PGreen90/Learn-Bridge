@@ -415,7 +415,7 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   4♦-överhopp (3NT/4♣/4♥). `1♥–3♠–3NT`-tabellen (4♣=♣/4♦=♦/4♥=♠) är redan
   rena steg — lämnas. Rör §4.1 (bara `1♠`-tabellen) + splinter-reläsvaret i
   motorn.
-  **BYGGT 2026-09-07 (väntar PCD; loggen nedan).** Stegbytet var litet, men
+  **BYGGT & LIVE 2026-09-07 (mergepunkt `26b05ac`, Actions grön, rebidz.com aliasad; loggen nedan).** Stegbytet var litet, men
   det avslöjade att FORTSÄTTNINGEN efter kortfärgssvaret låg i det gamla
   lagret: 3NT-svaret passades som ett sangkontrakt, och förr bjöd öppnaren
   5♣/5♦ i kaptenens KORTA färg eller passade 4♥-svaret. Nu: slamraden
@@ -597,8 +597,8 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
-- **2026-09-07 — §5b beslut 4 BYGGT (rena steg i splinterreläet efter
-  1♠–3♥–3♠ + fortsättningen; väntar ägarens PCD).** Test-drivet:
+- **2026-09-07 — §5b beslut 4 KLAR & LIVE (rena steg i splinterreläet efter
+  1♠–3♥–3♠ + fortsättningen; mergepunkt `26b05ac`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 4" i `motorbyte-facit.test.ts` (fem fall).
   Regeln i det nya lagret: `responderRevealSplinterShortness` (stegen per
   trumf: 3NT/4♣/4♦ efter 1♠, 4♣/4♦/4♥ efter 1♥), betydelselagrets
