@@ -736,6 +736,57 @@ export function openerAnswerFourthSuit(
   return { call, rule, explanation: `Inget stopp och ingen extra form – ${pretty(call)} (fjärde färgen är krav, pass förbjudet).` }
 }
 
+/**
+ * Öppnarens svar på svararens NATURLIGA nya färg efter 2/1 (1♠–2♣–2♦–2♥:
+ * 4+ hjärter, utgångskravet står — ingen fjärde färg efter 2/1, §5b beslut
+ * 13, 2026-09-07). `opened`/`second` = mina två färger, `responderSuit` =
+ * partnerns 2/1-färg, `third` = partnerns nya färg, `thirdCall` = budet.
+ * Alla fyra färger är nu bjudna, så "håll" är inget krav för sangen.
+ * Prioritet: höj med fyra · 6+ i öppningsfärgen · 5+ i andrafärgen · sang
+ * med jämn hand (ingen singel/renons) · preferens till partnerns färg med 3+
+ * · annars billigaste sang (kravet får aldrig passas).
+ */
+export function openerAnswerNaturalThirdSuit(
+  hand: Hand,
+  opened: Suit,
+  second: Suit,
+  responderSuit: Suit,
+  third: Suit,
+  thirdCall: string,
+): ResponseResult {
+  const len = lengths(hand)
+  const rule = '2/1: svar på ny färg'
+  const above = (s: Suit): string => {
+    const lvl = parseInt(thirdCall[0], 10)
+    return rankOf(s) > rankOf(third) ? `${lvl}${BID[s]}` : `${lvl + 1}${BID[s]}`
+  }
+  const nt = `${parseInt(thirdCall[0], 10)}NT`
+  if (len[third] >= 4) {
+    const call = above(third)
+    return { call, rule, explanation: `4+ stöd i partnerns ${SYM[third]} → ${pretty(call)} (höjning, utgångskravet står).` }
+  }
+  if (len[opened] >= 6) {
+    const call = above(opened)
+    return { call, rule, explanation: `6+ ${SYM[opened]} → ${pretty(call)} (extra längd, utgångskravet står).` }
+  }
+  if (second !== opened && len[second] >= 5) {
+    const call = above(second)
+    return { call, rule, explanation: `5+ ${SYM[second]} → ${pretty(call)} (extra längd, utgångskravet står).` }
+  }
+  if (RANK.every((s) => len[s] >= 2)) {
+    return nt === '3NT'
+      ? { call: '3NT', rule: 'utgång', explanation: `Jämn hand utan extra längd → 3NT (utgång, alla färger bjudna).` }
+      : { call: nt, rule, explanation: `Jämn hand utan extra längd → ${nt} (naturlig sang, alla färger bjudna, utgångskravet står).` }
+  }
+  if (len[responderSuit] >= 3) {
+    const call = above(responderSuit)
+    return { call, rule, explanation: `3+ stöd i partnerns ${SYM[responderSuit]} → ${pretty(call)} (preferens, utgångskravet står).` }
+  }
+  return nt === '3NT'
+    ? { call: '3NT', rule: 'utgång', explanation: `Ingen fit och ingen extra längd → 3NT (utgång).` }
+    : { call: nt, rule, explanation: `Ingen fit och ingen extra längd → ${nt} (utgångskravet står, pass förbjudet).` }
+}
+
 // === Svar på New Minor Forcing (§5.7) ========================================
 // Öppnaren rebjöd 1NT (12–14 bal) och hör NMF (svararens konstgjorda 2♣/2♦).
 // Prioritet (Root/Pavlicek): 1) 4-korts ANDRA högfärg (jagar 4-4) · 2) 3-korts

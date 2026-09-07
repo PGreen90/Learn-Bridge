@@ -486,3 +486,62 @@ describe('§5b beslut 2 – fjärde färg efter reverse är konstlad; öppnaren 
     expect(spelaKlart(dealNS('S:A32 H:AKJ5 D:AKJ85 C:4', 'S:KQJ74 H:K3 D:Q9 C:J864')).slice(0, 12)).toEqual(['1D', 'P', '1S', 'P', '2H', 'P', '3C', 'P', '3S', 'P', '4S', 'P'])
   })
 })
+
+// §5b beslut 13 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 13): fjärde färg
+// finns INTE när 2/1 är satt — "det räcker med game force en gång". Svararens
+// nya färg efter 2/1 (1♠–2♣–2♦–2♥, 1♥–2♣–2♦–2♠, 1♠–2♥–3♣–3♦) är naturlig
+// (4+ kort); utan håll och utan naturligt bud bjuds preferens/egen färg, och
+// öppnaren — som vet att kravet står — bjuder sang med håll, höjer med fyra,
+// visar egen längd eller ger preferens. Förr: spärren "fjärde färg har
+// konventionell mening" höll svararen från sin 4-kortshögfärg, betydelselagret
+// läste budet som konstgjort, och öppnarens svar låg i det gamla lagret.
+describe('§5b beslut 13 – ingen fjärde färg efter 2/1: svararens nya färg är naturlig, öppnaren svarar ur tabellen', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  const h = [call('N', '1S'), P('E'), call('S', '2C'), P('W'), call('N', '2D'), P('E')] // 1♠–2♣–2♦
+  const h2H = [...h, call('S', '2H'), P('W')]
+
+  it('svararen med 4 hjärter utan håll och utan stöd bjuder 2♥ naturligt (förr preferens — spärrat som "fjärde färg"); med håll går 3NT före; betydelselagret läser naturligt, ej alert', () => {
+    expect(bud('S:K5 H:J972 D:83 C:AKQ64', h, 'S')!.call).toMatchObject({ bid: '2H', rule: '2/1: fortsättning' })
+    expect(bud('S:K5 H:AQ72 D:83 C:KQJ64', h, 'S')!.call.bid).toBe('3NT') // hjärterhåll → sangen före (öppnaren nekade 4 hjärter)
+    expect(meaningOf(h2H, 6)).toMatchObject({ forcing: 'utgangskrav', alert: false })
+    expect(meaningOf(h2H, 6).rule).not.toBe('fjärde färg krav')
+  })
+
+  it('utan naturligt bud och utan håll i den objudna färgen: preferens/egen färg, aldrig ett konstgjort bud', () => {
+    // ♠K5 ♥J73 ♦83 ♣KQJ642: inget hjärterhåll, 6 klöver → rebjuder 3♣.
+    expect(bud('S:K5 H:J73 D:83 C:KQJ642', h, 'S')!.call.bid).toBe('3C')
+    // ♠K52 ♥J73 ♦83 ♣KQJ64: 3-stöd → försenat stöd (fast arrival 4♠ med minimum).
+    expect(bud('S:K52 H:J73 D:83 C:KQJ64', h, 'S')!.call.bid).toBe('4S')
+  })
+
+  it('öppnaren svarar ur tabellen på den naturliga 2♥: fyra hjärter → höjning; jämn hand → 2NT; 6+ spader → 2♠; ojämn med 3 klöver → preferens 3♣', () => {
+    expect(bud('S:AQ864 H:KJ73 D:AQ4 C:5', h2H, 'N')!.call).toMatchObject({ bid: '3H', rule: '2/1: svar på ny färg' })
+    expect(bud('S:AQ864 H:K3 D:AQ42 C:75', h2H, 'N')!.call).toMatchObject({ bid: '2NT', rule: '2/1: svar på ny färg' })
+    expect(bud('S:AQJ864 H:53 D:AQ42 C:7', h2H, 'N')!.call).toMatchObject({ bid: '2S', rule: '2/1: svar på ny färg' })
+    expect(bud('S:AQ864 H:5 D:AQ42 C:K72', h2H, 'N')!.call).toMatchObject({ bid: '3C', rule: '2/1: svar på ny färg' })
+    expect(decideCallTraced(dealNS('S:AQ864 H:KJ73 D:AQ4 C:5', 'S:K5 H:J972 D:83 C:AKQ64'), h2H, 'N').källa).toBe('tabell:tredje')
+  })
+
+  it('samma i 2♥-formen: 1♠–2♥–3♣–3♦ är naturlig ruter (4+), inte fjärde färg', () => {
+    const h3 = [call('N', '1S'), P('E'), call('S', '2H'), P('W'), call('N', '3C'), P('E')]
+    expect(bud('S:5 H:AQJ72 D:J983 C:K64', h3, 'S')!.call.bid).toBe('3D')
+    expect(meaningOf([...h3, call('S', '3D')], 6).rule).not.toBe('fjärde färg krav')
+  })
+
+  it('även efter öppnarens rebud av egen färg (1♥–2♦–2♥–3♣): öppnaren svarar 3♥ med 6+, svararen placerar 4♥ med 3-stöd i den rebjudna färgen; efter öppnarens HÖJNING (1♠–2♣–3♣–3♥) tiger raden (ny färg är cue/håll, inte naturlig)', () => {
+    const hR = [call('N', '1H'), P('E'), call('S', '2D'), P('W'), call('N', '2H'), P('E'), call('S', '3C'), P('W')]
+    expect(bud('S:K5 H:AQ9763 D:T7 C:A4', hR, 'N')!.call).toMatchObject({ bid: '3H', rule: '2/1: svar på ny färg' })
+    expect(bud('S:KT8 H:K73 D:AKQJ C:J532', [...hR, call('N', '3H'), P('E')], 'S')!.call).toMatchObject({ bid: '4H', rule: '2/1: placerar utgång' })
+    const hS = [call('N', '1S'), P('E'), call('S', '2D'), P('W'), call('N', '2H'), P('E'), call('S', '3C'), P('W'), call('N', '3H'), P('E')]
+    expect(bud('S:Q9 H:KT9 D:AQ92 C:J972', hS, 'S')!.call.bid).toBe('4H') // frö 20270257: 3-stöd i öppnarens rebjudna andrafärg
+    const hRaise = [call('N', '1S'), P('E'), call('S', '2C'), P('W'), call('N', '3C'), P('E'), call('S', '3H'), P('W')]
+    expect(bud('S:K8632 H:KT8 D:A C:T732', hRaise, 'N')?.call.rule).not.toBe('2/1: svar på ny färg')
+  })
+
+  it('hela auktionen bot mot bot: 1♠–2♣–2♦–2♥ (naturlig) – 2NT (ingen fit, ingen extra längd) → 3NT', () => {
+    const kontrakt = spelaKlart(dealNS('S:AQ864 H:KQ7 D:AQ42 C:5', 'S:K5 H:J972 D:83 C:AKQ64')).filter((b) => b !== 'P')
+    expect(kontrakt.slice(0, 5)).toEqual(['1S', '2C', '2D', '2H', '2NT'])
+    expect(kontrakt[kontrakt.length - 1]).toBe('3NT')
+  })
+})

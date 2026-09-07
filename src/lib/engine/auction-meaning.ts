@@ -1198,6 +1198,9 @@ function reverseMajorRaise(u: Undisturbed): boolean {
 function isFourthSuit(u: Undisturbed, cb: ParsedBid): boolean {
   if (u.bids.length < 3 || cb.strain === 'NT' || u.responderPassed) return false
   const [open, resp, reb] = u.bids.map((b) => b.cb)
+  // Efter ett 2-över-1-svar finns ingen fjärde färg — utgångskravet räcker en
+  // gång, svararens nya färg är naturlig (§5b beslut 13, ägarbeslut 2026-09-05).
+  if (open.level === 1 && open.strain !== 'NT' && resp.level === 2 && resp.strain !== 'NT' && resp.strain !== open.strain) return false
   const suits = new Set([open.strain, resp.strain, reb.strain].filter((s) => s !== 'NT'))
   if (suits.size !== 3 || suits.has(cb.strain)) return false
   // Fjärde färg är konstlad även efter en reverse (1♦–1♠–2♥–3♣): en håll-/
@@ -1931,6 +1934,7 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   }
 
   if (n === 4 && isOpener && (same(resp, 1, 'S') || (same(resp, 1, 'NT') && u.responderPassed))) return openerThirdAfterOneLevel(seat, cb, u, prior)
+  if (n === 4 && isOpener && resp.level === 2 && resp.strain !== 'NT' && resp.strain !== M && !u.responderPassed) return openerThirdAfter2over1(seat, cb, u)
   if (n >= 5) {
     const nmf = afterNMFSuitShow(seat, cb, u)
     if (nmf) return nmf
@@ -2005,6 +2009,7 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   }
 
   if (n === 4 && isOpener && resp.level === 1) return openerThirdAfterOneLevel(seat, cb, u, prior)
+  if (n === 4 && isOpener && resp.level === 2 && isMinor(resp.strain) && resp.strain !== m && !u.responderPassed) return openerThirdAfter2over1(seat, cb, u)
   if (n >= 5) {
     const nmf = afterNMFSuitShow(seat, cb, u)
     if (nmf) return nmf
@@ -2069,6 +2074,29 @@ function openerRebidAfter2over1(_seat: Seat, cb: ParsedBid, u: Undisturbed): Cal
   return null
 }
 
+/**
+ * Öppnarens tredje bud efter 2/1 när svararen bjöd en NY färg i rond 2
+ * (1♠–2♣–2♦–2♥ — naturlig, 4+; ingen fjärde färg efter 2/1, §5b beslut 13).
+ * Öppnaren höjer med fyra, visar egen längd, bjuder sang eller ger preferens;
+ * utgångskravet står. Andra lägen (svararen höjde/rebjöd/sang) → null (generella läsningar).
+ */
+function openerThirdAfter2over1(_seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterpretation | null {
+  const [open, resp, reb, third] = u.bids.map((x) => x.cb)
+  const name = NAME[cb.strain]
+  if (reb.strain === 'NT' || third.strain === 'NT') return null
+  const shown = new Set([open.strain, resp.strain, reb.strain])
+  if (reb.strain === resp.strain || shown.has(third.strain)) return null // öppnaren höjde (då är ny färg cue/håll), eller svararens bud var stöd/rebud
+  const tname = NAME[third.strain]
+  if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
+  const rule = '2/1: svar på ny färg'
+  if (cb.strain === third.strain) return R(rule, `${B(cb)} — höjning av partnerns naturliga ${tname}: 4+ stöd. Utgångskravet står.`, 'utgangskrav')
+  if (cb.strain === 'NT') return R(rule, `${B(cb)} — naturlig sang efter partnerns nya färg: jämn hand utan fit. Utgångskravet står.`, 'utgangskrav')
+  if (cb.strain === open.strain) return R(rule, `${B(cb)} — rebjuder egen ${name}: 6+ kort. Utgångskravet står.`, 'utgangskrav')
+  if (cb.strain === reb.strain) return R(rule, `${B(cb)} — rebjuder andrafärgen ${name}: 5+ kort. Utgångskravet står.`, 'utgangskrav')
+  if (cb.strain === resp.strain) return R(rule, `${B(cb)} — preferens till partnerns ${name}: 3+ kort. Utgångskravet står.`, 'utgangskrav')
+  return null
+}
+
 /** Svararens andra bud efter eget 2-över-1 (§5.3): allt under utgång är krav. */
 function responderSecondAfter2over1(_seat: Seat, cb: ParsedBid, u: Undisturbed, _prior: ResolvedCall[]): CallInterpretation | null {
   const open = u.bids[0].cb
@@ -2083,7 +2111,7 @@ function responderSecondAfter2over1(_seat: Seat, cb: ParsedBid, u: Undisturbed, 
   if (cb.strain === u.bids[1].cb.strain) return R('2/1: fortsättning', `${B(cb)} — rebjuder egen ${name} (6+). Utgångskravet står.`, 'utgangskrav')
   if (cb.strain === reb.strain && reb.strain !== 'NT') return R('2/1: fortsättning', `${B(cb)} — stöd i partnerns ${name}. Utgångskravet står.`, 'utgangskrav')
   if (cb.strain === 'NT') return R('2/1: fortsättning', `${B(cb)} — naturlig sang, balanserad. Utgångskravet står.`, 'utgangskrav')
-  if (isFourthSuit(u, cb)) return R('fjärde färg krav', `${B(cb)} — fjärde färg: konstgjort, ber partnern beskriva (stopp för 3 sang / gömd fit). Utgångskrav. Säger inget om ${name}.`)
+  // Ingen fjärde färg efter 2/1 (§5b beslut 13): den nya färgen är naturlig.
   return R('2/1: fortsättning', `${B(cb)} — ny färg, naturligt (4+ ${name}). Utgångskravet står.`, 'utgangskrav')
 }
 
