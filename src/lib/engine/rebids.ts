@@ -692,12 +692,56 @@ function rebidAfterMajorResponse(M: Major, response: ResponseResult, hand: Hand)
       return openerRebidAfterJacoby2NT(hand, M)
     case 'Drury':
       return openerRebidAfterDrury(hand, M)
+    case 'inbjudan': // passad hands naturliga 2NT (§6.7, §5b beslut 9)
+    case 'spärrhöjning': // passad hands 3M (4+ trumf under 6)
+    case 'ny färg': // passad hands 3♣/3♦ (6+ färg, svag)
+      return openerRebidAfterPassedMajorResponse(hand, M, response)
     case 'svagt hoppskift':
     case '3NT till spel':
     case 'spärr till utgång':
       return openerRebidAfterLimitedResponse(hand, response, M)
     default:
       return null
+  }
+}
+
+/**
+ * Öppnarens återbud på passad hands begränsade svar över 1♥/1♠ (§6.7; §5b
+ * beslut 9): 2NT (naturlig inbjudan, 11+ jämn utan stöd) → 3NT med 14+ (4M med
+ * 6+ trumf), 3M med minimum och 6+ trumf (avböjer), annars pass; 3M (spärr,
+ * under 6) → 4M bara med 18+; 3♣/3♦ (6+ färg, svag) → pass med minimum, 3NT
+ * med 16+ balanserad, 4M med 16+ och 6+ trumf.
+ */
+export function openerRebidAfterPassedMajorResponse(hand: Hand, M: Major, response: ResponseResult): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const six = len[M] >= 6
+  const pass: ResponseResult = { call: 'P', rule: 'rebid: pass', explanation: `Minimum mittemot partnerns begränsade svar (passad hand) → pass.` }
+  switch (response.rule) {
+    case 'inbjudan':
+      if (p >= 14) {
+        return six
+          ? { call: `4${BID[M]}`, rule: 'accepterar inbjudan', explanation: `14+ med 6+ ${SYM[M]} → 4${SYM[M]} (accepterar inbjudan).` }
+          : { call: '3NT', rule: 'accepterar inbjudan', explanation: `14+ mittemot 2NT-inbjudan (11+) → 3NT.` }
+      }
+      if (six) return { call: `3${BID[M]}`, rule: 'rebid: stanna', explanation: `Minimum med 6+ ${SYM[M]} → 3${SYM[M]} (avböjer inbjudan).` }
+      return pass
+    case 'spärrhöjning':
+      if (p >= 18) return { call: `4${BID[M]}`, rule: 'rebid: utgång', explanation: `18+ mittemot spärrhöjningen → 4${SYM[M]} (utgång).` }
+      return pass
+    case 'ny färg': {
+      if (p >= 16 && six) return { call: `4${BID[M]}`, rule: 'rebid: utgång', explanation: `16+ med 6+ ${SYM[M]} → 4${SYM[M]} (utgång).` }
+      if (p >= 16 && isBalanced(hand)) return { call: '3NT', rule: 'rebid: 3NT', explanation: `16+ balanserad mittemot partnerns långa lågfärg → 3NT.` }
+      // Kort i partnerns lågfärg (singel/renons) → egen färg rebjuds hellre än
+      // att sitta i partnerns 3m: 6+ trumf, eller 5+ med renons. Ej krav.
+      const minor = suitOfCall(response.call)
+      const short = minor ? len[minor] : 13
+      if (six && short <= 1) return { call: `3${BID[M]}`, rule: 'rebid: egen färg', explanation: `6+ ${SYM[M]} och kort i partnerns ${SYM[minor!]} → 3${SYM[M]} (egen färg, ej krav).` }
+      if (len[M] >= 5 && short === 0) return { call: `3${BID[M]}`, rule: 'rebid: egen färg', explanation: `Renons i partnerns ${SYM[minor!]} → 3${SYM[M]} (egen färg, ej krav).` }
+      return pass
+    }
+    default:
+      return pass
   }
 }
 

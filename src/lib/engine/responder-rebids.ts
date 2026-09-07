@@ -90,6 +90,11 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
   if ((openCall === '1H' || openCall === '1S') && response.rule === 'Drury') {
     return responderAnswerDrury(hand, openCall === '1H' ? 'hearts' : 'spades', rebid)
   }
+  // §5b beslut 9 – passad hands begränsade svar (2NT-inbjudan, 3M-spärr, 3♣/3♦
+  // svag): öppnaren har placerat kontraktet, svararen passar.
+  if ((openCall === '1H' || openCall === '1S') && (response.rule === 'inbjudan' || response.rule === 'spärrhöjning' || response.rule === 'ny färg')) {
+    return { call: 'P', rule: 'svararens pass', explanation: `Öppnaren placerade kontraktet (${rebid.call}) mittemot mitt begränsade svar → pass.` }
+  }
 
   // Punkt 13 – svararens andra bud efter stark 2♣ (andra negativa m.m.).
   if (openCall === '2C') {

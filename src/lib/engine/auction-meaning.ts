@@ -1782,6 +1782,9 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
         ? R('inbjudan', `2 sang — 11–12 hp balanserad, passad hand: inbjudan.`)
         : R('Jacoby 2NT', `2 sang — Jacoby 2NT: 4+ ${mname}, 13+ hp, balanserad (ingen kortfärg). Utgångskrav med slamintresse. Säger inget om sang.`)
     }
+    // Passad hand (§6.7, §5b beslut 9): Bergen är AV — 3♣/3♦ naturliga, 3M spärr.
+    if (u.responderPassed && (same(cb, 3, 'C') || same(cb, 3, 'D'))) return R('ny färg', `${B(cb)} — naturligt, passad hand: 6+ ${name}, svag (6–9). Ej krav.`)
+    if (u.responderPassed && same(cb, 3, M)) return R('spärrhöjning', `${B(cb)} — spärrhöjning, passad hand: 4+ trumf, under 6 hp. Avslut.`)
     if (same(cb, 3, 'C')) return R('Bergen konstruktiv', `3♣ — Bergen: 4 ${mname}, 7–9 hp (konstruktiv höjning). Säger inget om klöver. Inbjudan.`)
     if (same(cb, 3, 'D')) return R('Bergen limit', `3♦ — Bergen: 4 ${mname}, 10–12 hp (limithöjning). Säger inget om ruter. Inbjudan.`)
     if (same(cb, 3, M)) return R('Bergen spärr', `${B(cb)} — spärrhöjning: 4 trumf, 0–6 hp. Avslut.`)
@@ -1824,8 +1827,15 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       return null
     }
     if (same(resp, 2, 'NT') && u.responderPassed) {
-      if (isGameLevel(cb)) return R('accepterar inbjudan', `${B(cb)} — accepterar inbjudan.`)
-      if (same(cb, 3, M)) return N(`${B(cb)} — avböjer inbjudan, 6+ ${mname}.`, 'avslut')
+      if (isGameLevel(cb)) return R('accepterar inbjudan', `${B(cb)} — accepterar inbjudan (14+).`)
+      if (same(cb, 3, M)) return R('rebid: stanna', `${B(cb)} — avböjer inbjudan: minimum med 6+ ${mname}. Partnern passar.`)
+      return null
+    }
+    if (u.responderPassed && resp.level === 3 && (resp.strain === 'C' || resp.strain === 'D')) {
+      // Efter passad hands naturliga 3♣/3♦ (6+ färg, svag).
+      if (same(cb, 4, M)) return R('rebid: utgång', `${B(cb)} — 16+ med 6+ ${mname}, utgång.`)
+      if (same(cb, 3, 'NT')) return R('rebid: 3NT', `3 sang — 16+ balanserad mittemot partnerns långa ${name}, till spel.`)
+      if (same(cb, 3, M)) return R('rebid: egen färg', `${B(cb)} — egen färg igen (6+, eller 5+ med renons i ${name}): kort i partnerns färg. Ej krav.`)
       return null
     }
     if (resp.level === 3 && (resp.strain === 'C' || resp.strain === 'D')) {
