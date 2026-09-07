@@ -34,6 +34,7 @@ const ALERT_RULE_PREFIXES: string[] = [
   'semi-forcing 1NT',
   'inverterad minor',
   'inverterad: stopp',
+  'passad höjning: stopp', // ny färg = stopp, inte längd (§4.2 "Passad hand")
   'Drury',
   'Smolen',
   'fjärde färg krav',
@@ -211,6 +212,12 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'inverterad: 3NT': 'avslut',
   'inverterad: minimum': 'ej-krav',
   'inverterad: broms': 'ej-krav', // B13: svararens 3m = "bara minimum 10–12"
+  // Passad hands enkla minorhöjning (§4.2 "Passad hand", §5b beslut 5): svaret
+  // heter 'enkel höjning' (ej krav, nedan); öppnarens fortsättning:
+  'passad höjning: 2NT': 'inbjudan',
+  'passad höjning: stopp-visning': 'krav-1-rond',
+  'passad höjning: 3NT': 'avslut',
+  'passad höjning: broms': 'ej-krav',
 
   // ---- NT-konventioner (§4.3) ----
   Stayman: 'krav-1-rond',

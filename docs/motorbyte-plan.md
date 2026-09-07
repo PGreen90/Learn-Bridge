@@ -571,7 +571,8 @@ PCD. Byggordning (beroenden först): 1 (§5.7/§6.4 Gerber/NMF — LIVE
 2026-09-05, `3491ece`) → 3 (fast
 arrival efter reverse — LIVE 2026-09-06, `1a6adf0`) → 7 (4♦ naturligt, cue i ny färg) → 14 (naket 4NT) →
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
-steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M) →
+steg i splinterreläet) → 5 (passad hand i minor — KLAR 2026-09-07, PCD
+väntar) → 9 (passad hand över 1M) →
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa) → 11 (ny färg på
 3-läget efter 1M–1NT–2x) → 12 (hopp till 4m = driv) → 16 (bara bok + facit) →
 8 (redan byggt, bara låst).
@@ -597,6 +598,40 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-07 — §5b beslut 5 KLAR (passad hand i minor: semi-forcing 1NT
+  behålls, inverterat AV; väntar ägarens PCD — mergepunkt fylls i).** Test-drivet:
+  facit-blocket "§5b beslut 5" i `motorbyte-facit.test.ts` (sju fall, alla röda
+  före fixen). **Del A** (1NT över 1♥/1♠ av passad hand): ingen motorändring —
+  betydelselagrets text säger nu "passad hand" (limithöjningen gick via Drury),
+  boken §4.1/§5.1/§6.7. **Del B** i det nya lagret: `respondToMinor(hand, m,
+  passed)` — 2m = enkel höjning 6–11 med 4+ stöd (regeln 'enkel höjning', ej
+  krav), 3m svag under 6 med 5+, 2-över-1 finns inte (en passad 12+ med 5+ i
+  andra lågfärgen bjuder den naturligt, 'ny färg (2-läget)'; en passad ojämn/
+  16+ med stöd höjer enkelt hellre än "oklart" — bara människohänder);
+  betydelselagret läser 2m/3m/öppnarens fortsättning/bromsen/tredje budet i
+  passad-hand-läget; öppnaren `openerRebidAfterPassedMinorRaise` (under 15
+  startpoäng golvade vid hp → pass · 18+ med håll överallt → 3NT · jämn 15–17 →
+  2NT-inbjudan · annars billigaste äkta stopp, fantomstopp) och
+  `openerThirdBidAfterPassedBrake` (≤17 pass · 18+ 3NT/andra stopp/5m);
+  svararen `responderRebidAfterPassedMinorRaise` (3NT med 9+ på 2NT · 3NT med
+  10+ och håll på stopp-visningen, annars broms 3m — även 10–11 utan håll, 5m
+  på 25 hp är för tunt) och raden svar3 (efter andra stopp-visningen: 3NT/5m,
+  delad med den inverterade bromsen). Regelnamnen `passad höjning: 2NT/
+  stopp-visning/3NT/broms` i registret + testkatalogen. Systembok §4.2 nytt
+  avsnitt "Passad hand", §4.1/§5.1/§6.7 noter, §9.
+  **Mätningar** (kommandon i §3; baslinjer på `609d555`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 10 — alla
+  b (själva beslutet: passad hands 2m i stället för inverterad 2m/"gap-hand
+  1NT", öppnaren passar med 12–14 där han förr bjöd 2NT 12–14 som ändå passades;
+  frön 20270406, 20270864, 20270993, 20271161, 20271176, 20271250, 20271424,
+  20271713, 20272838, 20272944 — 20271713 är enda given där regeln avstår en
+  25-hp 3NT: platt 14:a mittemot 11, boken säger pass); avvikelsedumpen:
+  55 ändrade + 8 samma bud/annan regel — alla b (25 öppnarpass med 12–14, 12
+  enkla höjningar, 7 "högfärgen först" för passad 12+ med 5-korts lågfärg, 6
+  sangplaceringar för passad jämn 12+, 3 utgångar efter inbjudan/stopp, 2 pass),
+  0 c, 0 "oklart", olagliga tabellbud 0; betydelsesvepet kravnivå 0 · alert 0 ·
+  registerhål 0; pliktsvep/förklaringssvep/regelsvep gröna; revisorn 1000
+  givar: rätt kontrakt 20,3 % · snittförlust 268,77 (beslut 4: 20,2 % · 268,99).
 - **2026-09-07 — §5b beslut 4 KLAR & LIVE (rena steg i splinterreläet efter
   1♠–3♥–3♠ + fortsättningen; mergepunkt `26b05ac`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 4" i `motorbyte-facit.test.ts` (fem fall).

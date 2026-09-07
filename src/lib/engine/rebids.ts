@@ -451,6 +451,66 @@ export function openerThirdBidAfterInvertedBrake(hand: Hand, m: Suit, shownSuit:
   return { call: `5${BID[m]}`, rule: 'höjning till utgång', explanation: `Utgångsvärden men 3NT otäckt → 5${SYM[m]} (lågfärgsutgång).` }
 }
 
+// === Passad hands ENKLA minorhöjning (§4.2 "Passad hand"; motorbytet §5b
+// beslut 5, 2026-09-07): pass–…–1m–2m = 6–11, 4+ stöd, ej krav. Inverterat
+// är AV för passad hand — öppnaren avgör om budgivningen går vidare. =========
+
+/**
+ * Öppnarens återbud efter passad hands enkla höjning (1m–2m, 6–11 ej krav):
+ *   12–14 → pass (delkontraktet står; 25 nås inte utan max mot max),
+ *   15–17 balanserad → 2NT (inbjudan, ej krav; svararen går vidare med 9+),
+ *   18+ med håll i alla tre sidofärgerna → 3NT,
+ *   15+ annars → billigaste äkta stopp i ny färg (krav 1 rond, letar 3NT) —
+ *   samma stopp-språk som den inverterade höjningen men mot 6–11 i stället
+ *   för 10+; saknas äkta stopp bjuds bästa sidofärgen ("fantomstoppen").
+ */
+export function openerRebidAfterPassedMinorRaise(hand: Hand, m: Suit): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const bal = isBalanced(hand)
+  const side = RANK.filter((s) => s !== m)
+  // Gränsen 15 mäts i STARTPOÄNG golvade vid hp (som sanginbjudan i §4.2): en
+  // bra 14:a (tior, 5-kortsfärg) får bjuda vidare mot partnerns möjliga 11,
+  // en platt 14:a passar. Aldrig nedgradering.
+  const sp = Math.max(p, startingPoints(hand).startingPoints)
+  if (sp < 15) return { call: 'P', rule: 'rebid: pass', explanation: `12–14 mittemot partnerns enkla höjning (6–11, passad hand) → pass (delkontraktet står).` }
+  if (p >= 18 && side.every((s) => hasStopper(hand, s))) return { call: '3NT', rule: 'passad höjning: 3NT', explanation: `18+ med håll i alla sidofärger mittemot höjningen (6–11) → 3NT (till spel).` }
+  if (bal) return { call: '2NT', rule: 'passad höjning: 2NT', explanation: `Balanserad 15–17 mittemot höjningen (6–11) → 2NT (inbjudan; partnern går vidare med 9+).` }
+  for (const s of RANK) {
+    if (s !== m && rankOf(s) > rankOf(m) && hasStopper(hand, s)) return { call: `2${BID[s]}`, rule: 'passad höjning: stopp-visning', explanation: `15+ med stopp i ${SYM[s]} → 2${SYM[s]} (letar 3NT mot höjningen, krav 1 rond).` }
+  }
+  for (const s of RANK) {
+    if (s !== m && rankOf(s) < rankOf(m) && hasStopper(hand, s)) return { call: `3${BID[s]}`, rule: 'passad höjning: stopp-visning', explanation: `15+ med stopp i ${SYM[s]} → 3${SYM[s]} (letar 3NT mot höjningen, krav 1 rond).` }
+  }
+  let best: Suit | null = null
+  for (const s of side) {
+    if (best === null || len[s] > len[best] || (len[s] === len[best] && suitHcp(hand, s) > suitHcp(hand, best))) best = s
+  }
+  const call = bidSuit(best!, m)
+  return { call, rule: 'passad höjning: stopp-visning', explanation: `15+ utan äkta stopp att visa → ${pretty(call)} (bästa sidofärgen, letar 3NT, krav 1 rond).` }
+}
+
+/**
+ * Öppnarens TREDJE bud efter passad hands broms (1m–2m–ny färg–3m): med
+ * 15–17 passar öppnaren (bromsen = under 10, eller utan håll — utgång är
+ * inte säkrad); med 18+ driver hon: 3NT när egna handen täcker alla tre
+ * sidofärgerna, annars en ANDRA stopp-visning under 3NT om en ryms, annars
+ * lågfärgsutgången 5m. Samma trappa som den inverterade bromsen, tre poäng
+ * högre (höjningen lovar 6, inte 10).
+ */
+export function openerThirdBidAfterPassedBrake(hand: Hand, m: Suit, shownSuit: Suit | null): ResponseResult {
+  const p = hcp(hand)
+  const side = RANK.filter((s) => s !== m)
+  if (p <= 17) return { call: 'P', rule: 'rebid: pass', explanation: `15–17 mot partnerns broms (passad hand) → pass, delkontraktet står.` }
+  if (side.every((s) => hasStopper(hand, s))) return { call: '3NT', rule: 'passad höjning: 3NT', explanation: `18+ och alla sidofärger täckta → 3NT (utgång trots bromsen).` }
+  for (const s of RANK) {
+    if (s !== m && s !== shownSuit && rankOf(s) > rankOf(m) && hasStopper(hand, s)) {
+      return { call: `3${BID[s]}`, rule: 'passad höjning: stopp-visning', explanation: `18+ med stopp även i ${SYM[s]} → 3${SYM[s]} (driver mot 3NT, krav).` }
+    }
+  }
+  return { call: `5${BID[m]}`, rule: 'höjning till utgång', explanation: `18+ men 3NT otäckt → 5${SYM[m]} (lågfärgsutgång).` }
+}
+
 // === Punkt 8: återbud efter begränsade/avslutande svar ======================
 
 export function openerRebidAfterLimitedResponse(hand: Hand, response: ResponseResult, opened: Suit): ResponseResult {
@@ -649,6 +709,8 @@ function rebidAfterMinorResponse(m: Suit, response: ResponseResult, hand: Hand):
       return openerRebidAfterInvertedMinor(hand, m, true)
     case 'inverterad minor, svag':
       return openerRebidAfterInvertedMinor(hand, m, false)
+    case 'enkel höjning': // passad hand: 2m = 6–11, ej krav (§5b beslut 5)
+      return openerRebidAfterPassedMinorRaise(hand, m)
     case 'svagt hoppskift':
     case '1NT':
     case 'gap-hand 1NT':

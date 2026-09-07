@@ -1764,6 +1764,9 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   if (n === 1 && !isOpener) {
     if (same(cb, 1, 'S') && M === 'H') return R('ny färg (1-läget)', `1♠ — 4+ spader, 6+ hp. Krav 1 rond.`)
     if (same(cb, 1, 'NT')) {
+      // Passad hand (§5b beslut 5): samma bud, samma kravnivå — men limithöjningen
+      // gick via Drury, så 1NT döljer ingen 3-korts limithöjning.
+      if (u.responderPassed) return R('semi-forcing 1NT', `1 sang — semi-forcing, passad hand: 6–11 hp utan Drury-höjning (limithöjningen hade gått via 2♣/2♦). Naturligt, ej krav — öppnaren får passa med minimum balanserad hand.`)
       return R('semi-forcing 1NT', `1 sang — semi-forcing: 6–11 hp, ingen 2-över-1 (kan dölja en 3-korts limithöjning). Öppnaren får passa bara med minimum balanserad hand.`)
     }
     if (cb.level === 2 && cb.strain !== 'NT' && cb.strain !== M && !rankAbove(cb.strain, M)) {
@@ -1960,9 +1963,13 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   if (n === 1 && !isOpener) {
     if (cb.level === 1 && cb.strain !== 'NT') return R('ny färg (1-läget)', `${B(cb)} — 4+ ${name}, 6+ hp. Krav 1 rond.`)
     if (same(cb, 1, 'NT')) return R('NT-svar', `1 sang — 6–10 hp balanserad, ingen 4-korts högfärg. Ej krav.`)
-    // Motorn spelar den inverterade höjningen även med passad hand.
-    if (same(cb, 2, m)) return R('inverterad minor', `${B(cb)} — inverterad höjning: 4+ ${mname}, 10+ hp, ingen 4-korts högfärg. Krav 1 rond — paret letar 3 sang.`)
-    if (same(cb, 3, m)) return R('inverterad minor, svag', `${B(cb)} — svag spärrhöjning: 5+ ${mname}, 0–6 hp. Avslut.`)
+    // Passad hand (§4.2 "Passad hand", §5b beslut 5): inverterat är AV — 2m är
+    // en ENKEL höjning 6–11 (ej krav), 3m svag under 6. Opassad: inverterat.
+    if (same(cb, 2, m)) {
+      if (u.responderPassed) return R('enkel höjning', `${B(cb)} — enkel höjning (passad hand): 4+ ${mname}, 6–11 hp, ingen 4-korts högfärg. Ej krav — öppnaren avgör om budgivningen går vidare.`)
+      return R('inverterad minor', `${B(cb)} — inverterad höjning: 4+ ${mname}, 10+ hp, ingen 4-korts högfärg. Krav 1 rond — paret letar 3 sang.`)
+    }
+    if (same(cb, 3, m)) return R('inverterad minor, svag', `${B(cb)} — svag spärrhöjning: 5+ ${mname}, ${u.responderPassed ? 'under 6 hp (passad hand)' : '0–6 hp'}. Avslut.`)
     if (cb.level === 2 && isMinor(cb.strain) && cb.strain !== m) {
       return u.responderPassed
         ? N(`${B(cb)} — naturligt, 5+ ${name}, passad hand: ej krav.`, 'ej-krav')
@@ -1976,6 +1983,15 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   const resp = b[1].cb
   if (n === 2 && isOpener) {
     if (resp.level === 1) return openerRebidAfterOneLevel(seat, cb, u)
+    if (same(resp, 2, m) && u.responderPassed) {
+      // Öppnarens fortsättning efter passad hands ENKLA höjning (§4.2 "Passad hand").
+      if (cb.strain !== 'NT' && cb.strain !== m && !isGameLevel(cb)) return R('passad höjning: stopp-visning', `${B(cb)} — visar äkta stopp i ${name} (15+), letar 3 sang mot höjningen 6–11. Krav 1 rond. Säger inget om längd.`)
+      if (same(cb, 2, 'NT')) return R('passad höjning: 2NT', `2 sang — balanserad 15–17 hp, inbjuder 3 sang (partnern går vidare med 9+). Ej krav.`)
+      if (same(cb, 3, 'NT')) return R('passad höjning: 3NT', `3 sang — 18+ hp med håll i sidofärgerna, till spel.`)
+      if (same(cb, 3, m)) return N(`${B(cb)} — spärrande höjning av ${mname} (öppnaren bjuder annars pass med 12–14). Ej krav.`, 'ej-krav')
+      if (same(cb, 5, m)) return R('utgång', `${B(cb)} — lågfärgsutgång.`)
+      return null
+    }
     if (same(resp, 2, m)) {
       // Öppnarens fortsättning efter inverterad höjning (§4.2).
       if (cb.strain !== 'NT' && cb.strain !== m && !isGameLevel(cb)) return R('inverterad: stopp-visning', `${B(cb)} — visar äkta stopp i ${name} (12+), letar 3 sang. Krav 1 rond. Säger inget om längd.`)
@@ -2000,6 +2016,13 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
 
   if (n === 3 && !isOpener) {
     if (resp.level === 1) return responderSecondAfterOneLevel(seat, cb, u, prior)
+    if (same(resp, 2, m) && u.responderPassed) {
+      // Svararens (passad hand) andra bud efter öppnarens fortsättning på den enkla höjningen.
+      if (same(cb, 3, m)) return R('passad höjning: broms', `${B(cb)} — broms efter partnerns stopp-visning: under 10 hp, eller utan håll i resten. Ej krav — partnern passar med 15–17, driver med 18+.`)
+      if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — ${same(b[2].cb, 2, 'NT') ? 'accepterar inbjudan (9+)' : 'övriga sidofärger täckta (10+)'}, till spel.`)
+      if (same(cb, 5, m)) return R('utgång', `${B(cb)} — lågfärgsutgång: stoppen räcker inte till 3 sang.`)
+      return null
+    }
     if (same(resp, 2, m)) {
       if (same(cb, 3, m)) return R('inverterad: broms', `${B(cb)} — "bara minimum" (10–12) efter partnerns stopp-visning. Ej krav — partnern passar med 12–14, driver med 15+.`)
       if (same(cb, 3, 'NT')) return R('inverterad: 3NT', `3 sang — övriga sidofärger täckta, till spel.`)
@@ -2017,6 +2040,12 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   if (n >= 5) {
     const nmf = afterNMFSuitShow(seat, cb, u)
     if (nmf) return nmf
+  }
+  if (n === 4 && isOpener && same(resp, 2, m) && u.responderPassed) {
+    // Öppnarens tredje bud efter passad hands enkla höjning + bromsen (§4.2 "Passad hand").
+    if (same(cb, 3, 'NT')) return R('passad höjning: 3NT', `3 sang — driver (18+): sidofärgerna täckta, till spel.`)
+    if (same(cb, 5, m)) return R('utgång', `${B(cb)} — driver (18+) men 3 sang är otäckt: lågfärgsutgång.`)
+    if (cb.strain !== 'NT' && cb.strain !== m && bidRank(cb) < bidRank({ level: 3, strain: 'NT' })) return R('passad höjning: stopp-visning', `${B(cb)} — andra stopp-visningen (18+): visar stopp i ${name}, letar 3 sang. Krav 1 rond.`)
   }
   if (n === 4 && isOpener && same(resp, 2, m)) {
     // Öppnarens andra bud efter den inverterade höjningen + svararens broms/stopp (§4.2).

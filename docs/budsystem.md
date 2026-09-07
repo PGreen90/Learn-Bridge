@@ -251,10 +251,15 @@ trumf → 3 i trumf):
 - **Svararens fortsättning:** efter ett 3-läges-återbud visar en ny färg (ej
   trumf) **första-rondskontroll** (ess eller renons) – cue-bid uppåt mot slam.
 - **Passad hand / konkurrens:** tas i senare avsnitt (passad hand: Drury;
-  efter upplysningsdubbling: Jordan 2NT = limithöjning).
+  efter upplysningsdubbling: Jordan 2NT = limithöjning). **Passad hands 1NT
+  är semi-forcing som förut** (ägarbeslut 2026-09-05, motorbytet §5b beslut
+  5): naturligt 6–11, ej krav, öppnaren får passa med minimum balanserad hand
+  (§5.1). Skillnaden mot ohöjd hand är bara att 1NT inte kan dölja någon
+  3-korts limithöjning — den går via Drury (§6.7).
 
 ### 4.2 Svar på 1♣ / 1♦
-*(Ohöjd hand, ingen störning. Passad hand och konkurrens tas senare.)*
+*(Ohöjd hand, ingen störning. Passad hand: se "Passad hand" sist i avsnittet;
+konkurrens tas senare.)*
 
 Öppningen lovar 3+ kort (ibland "kort" via minor-regeln) och 12+ hp.
 
@@ -367,6 +372,43 @@ för att chansa en sang som faller på första utspel:
   högfärgerna hållas bjuds 3NT. Med bara inbjudan (10–12) passas 3 i lf.
 - **Efter öppnarens stopp-visning:** är de återstående sidofärgerna täckta → 3NT,
   annars **5 i lf**.
+
+#### Passad hand — inverterat är AV (ägarbeslut 2026-09-05, motorbytet §5b beslut 5)
+När **svararen är passad hand** (partnern öppnar 1♣/1♦ i 3:e/4:e hand) finns
+inget krav att bevara: 2-över-1 finns inte (utgångskravet kan inte finnas i en
+passad hand) och den inverterade höjningen har inget att utforska med. Höjningen
+är därför **enkel**, och **öppnaren (1♣/1♦-budet) avgör om budgivningen går
+vidare**. Övriga svar (1-lägesfärg "4-korts upp", 1NT 6–10 utan stöd, 2NT
+11–12 balanserad utan stöd) är som för ohöjd hand.
+
+| Svar (passad hand) | Betydelse | Kravnivå |
+|---|---|---|
+| 2♣ / 2♦ (höjning) | **6–11 hp, 4+ stöd, ingen 4-korts hf** — enkel höjning | Ej krav |
+| 3♣ / 3♦ (hopphöjning) | **under 6 hp, 5+ stöd** — svag, formstark, tävlande | Avslut/spärr |
+| 2♦ över 1♣ / 2♣ över 1♦ | naturligt, 5+ i färgen, ej krav | Ej krav |
+
+**Öppnarens fortsättning efter den enkla höjningen** (samma stopp-språk som
+efter den inverterade höjningen, men mätt mot 6–11 i stället för 10+):
+
+| Återbud | Betydelse |
+|---|---|
+| Pass | 12–14 — delkontraktet står |
+| 2NT | balanserad 15–17, **inbjudan** till 3NT (svararen går vidare med 9+) |
+| ny färg | 15+, **äkta stopp** i färgen (A, Kx, Qxx, J10xx), letar 3NT — krav 1 rond; saknas äkta stopp bjuds bästa sidofärgen ("fantomstoppen", som i den inverterade) |
+| 3NT | 18+ med håll i alla tre sidofärgerna, till spel |
+
+**Svararens svar:** på 2NT → 3NT med 9+, annars pass. På stopp-visningen →
+**3NT med 10+ och håll i de återstående sidofärgerna**, annars **3 i lf =
+broms** (ej krav) — även med 10–11 utan håll, för 5 i lf på 25 hp är för tunt;
+det är öppnaren som driver. **Öppnarens tredje bud efter bromsen:** 15–17 →
+pass; **18+** driver — 3NT när egna handen täcker alla tre sidofärgerna,
+annars en andra stopp-visning under 3NT om en ryms, annars 5 i lf. Efter den
+andra stopp-visningen bjuder svararen 3NT när resten är täckt, annars 5 i lf.
+Passad hand → aldrig slam.
+
+*Förr spelade motorn inverterat även av passad hand: 2m = 10+ krav, och 7–9
+med stöd gick som "gap-hand 1NT" — höjningen kom aldrig fram. Bok-mot-motor-
+fynd 4 (2026-09-05).*
 
 ### 4.3 Svar på 1NT (15–17 hp, balanserad)
 *(Ingen störning. Konkurrens tas senare.)*
@@ -731,7 +773,9 @@ placera kontraktet. Tre styrkenivåer styr valet:
 
 ### 5.1 Efter semi-forcing 1NT (1♥–1NT / 1♠–1NT)
 Eftersom 1NT är *semi*-forcing får öppnaren **passa** med minimum balanserad hand
-utan bra återbud. Annars beskriver hon hand och styrka:
+utan bra återbud. Annars beskriver hon hand och styrka. **Gäller lika när
+svararen är passad hand** (ägarbeslut 2026-09-05, §5b beslut 5): samma bud,
+samma återbud — 1NT döljer då bara ingen 3-korts limithöjning (Drury, §6.7).
 
 *Efter 1♥–1NT:*
 | Återbud | Betydelse |
@@ -1426,6 +1470,11 @@ för högt.
   värden.
 
 Eftersom svararen redan är passad är allt begränsat till utgång (ingen slam).
+
+**Passad hands övriga svar** (ägarbeslut 2026-09-05, §5b beslut 5): 1NT över
+1♥/1♠ är semi-forcing som förut (§4.1, §5.1). Över **1♣/1♦** är den
+inverterade höjningen AV — 2m = enkel höjning 6–11, ej krav (§4.2 "Passad
+hand").
 
 ### 6.8 Kvantitativ höjning av partnerns naturliga 3NT
 Placerar partnern kontraktet i ett **naturligt 3NT** i en vanlig färgauktion är
@@ -2169,6 +2218,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-07 — Passad hand i minor: inverterat AV, semi-forcing 1NT behålls
+  (§4.1, §4.2 "Passad hand", §5.1, §6.7; motorbytet §5b beslut 5,
+  `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 4.
+  Del A: passad hands 1NT över 1♥/1♠ är semi-forcing som förut — bara
+  inskrivet (betydelselagrets text säger nu "passad hand", ingen motorändring).
+  Del B: `pass–…–1m–2m` = **6–11, 4+ stöd, enkel höjning, ej krav**; 3m =
+  svag under 6 med 5+ stöd; öppnaren avgör (12–14 pass · 15–17 jämn 2NT-
+  inbjudan · 18+ med håll 3NT · 15+ ojämn äkta stopp i ny färg, krav 1 rond);
+  svararen 3NT med 9+ på 2NT, 3NT med 10+ och håll på stopp-visningen, annars
+  broms 3m; öppnaren driver efter bromsen bara med 18+. Kod:
+  `respondToMinor(hand, m, passed)` (svaret), `openerRebidAfterPassedMinorRaise`
+  + `openerThirdBidAfterPassedBrake` (rebids.ts), `responderRebidAfterPassedMinorRaise`
+  (responder-rebids.ts), betydelselagrets läsning i alla fyra stolar, regel-
+  namnen `passad höjning: 2NT/stopp-visning/3NT/broms` i registret. Förr
+  spelade motorn inverterat även av passad hand (2m = 10+ krav) och 7–9 med
+  stöd blev "gap-hand 1NT". Facit: blocket "§5b beslut 5" i
+  `motorbyte-facit.test.ts`.
 - **2026-09-07 — Rena steg i splinterreläet efter 1♠–3♥–3♠ (§4.1; motorbytet
   §5b beslut 4, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
   bok-mot-motor-fynd 3: kortfärgssvaret 3NT = kort ♣, 4♣ = kort ♦, 4♦ = kort
