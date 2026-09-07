@@ -82,9 +82,10 @@ describe('responderSecondBidAfter2C – svararens andra bud', () => {
   const second = (notation: string, rebid: ResponseResult) =>
     responderSecondBidAfter2C(parseHand(notation), r('2D', '2♦ väntebud'), rebid)?.call
 
-  it('andra negativa (3♣) med riktig bottenhand efter krav-högfärg', () => {
-    // 2♣ – 2♦ – 2♠ (krav) – 3♣ (0–3, andra negativa). Bokens exempel.
-    expect(second('S:Q73 H:9842 D:7532 C:64', r('2S', 'rebid: krav-färg'))).toBe('3C') // 2 hp
+  it('andra negativa (2NT) med riktig bottenhand utan fit och utan 5-kortsfärg efter krav-högfärg (§5b beslut 6)', () => {
+    // 2♣ – 2♦ – 2♠ (krav) – 2NT (0–3, andra negativa). Bokens exempel.
+    expect(second('S:73 H:9842 D:7532 C:J64', r('2S', 'rebid: krav-färg'))).toBe('2NT') // 1 hp
+    expect(second('S:63 H:654 D:8762 C:J9543', r('2S', 'rebid: krav-färg'))).toBe('3C') // 1 hp men 5 klöver → naturligt 3♣
   })
 
   it('höjer öppnarens högfärg till utgång med stöd (ej bottenhand)', () => {

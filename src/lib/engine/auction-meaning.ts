@@ -1175,9 +1175,13 @@ function secondNegativeIndex(u: Undisturbed): number {
   return isSecondNegative(reb, b[3].cb) ? 3 : -1
 }
 
-/** Svararens andra negativa: 3♣ över öppnarens 2♥/2♠-kravfärg (2♣–2♦–2M–3♣). Motorn spelar den bara där. */
+/**
+ * Svararens andra negativa: 2NT över öppnarens 2♥/2♠-kravfärg (2♣–2♦–2M–2NT) —
+ * §5b beslut 6 (2026-09-07): 0–3 utan fit och utan 5-kortsfärg; 3♣/3♦ är
+ * naturliga. Förr var 3♣ andra negativa.
+ */
 function isSecondNegative(rebid: ParsedBid, cb: ParsedBid): boolean {
-  return rebid.level === 2 && isMajor(rebid.strain) && same(cb, 3, 'C')
+  return rebid.level === 2 && isMajor(rebid.strain) && same(cb, 2, 'NT')
 }
 
 /**
@@ -1719,17 +1723,20 @@ function afterStrongTwoClubs(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInt
   const secondNeg = secondNegativeIndex(u)
   if (n === 3 && !isOpener && waiting) {
     const reb = b[2].cb
-    if (reb.strain !== 'NT' && isSecondNegative(reb, cb)) return R('andra negativa', `${B(cb)} — andra negativa: billigaste lågfärg = 0–3 hp, riktig bottenhand. Säger inget om ${name}. Öppnaren får stanna lågt.`)
+    if (reb.strain !== 'NT' && isSecondNegative(reb, cb)) return R('andra negativa', `2 sang — andra negativa: 0–3 hp, riktig bottenhand utan fit och utan 5-kortsfärg. Säger inget om sang. Öppnaren får stanna lågt.`)
     if (cb.strain === reb.strain) return R('höjning (GF)', `${B(cb)} — stöd i partnerns ${name}${isGameLevel(cb) ? ', minimum (snabb utgång)' : ', utgångskravet står'}.`, below(cb, 'utgangskrav'))
     if (cb.strain === 'NT') return isGameLevel(cb) ? R('3NT till spel', `3 sang — till spel, ingen fit.`) : R('ny färg (GF)', `${B(cb)} — naturlig sang efter kravfärgen, utgångskravet står.`, 'utgangskrav')
+    if (isMajor(reb.strain) && cb.level === 3 && isMinor(cb.strain)) return R('ny färg (GF)', `${B(cb)} — naturligt: 5+ ${name}, 0–7 hp (bjuder sin riktiga färg så 2♣-öppnaren får beskriva igen). Utgångskravet står.`, below(cb, 'utgangskrav'))
     return R('ny färg (GF)', `${B(cb)} — ny färg (5+, eller 4-korts högfärg under 3 sang) efter kravfärgen. Utgångskravet står.`, below(cb, 'utgangskrav'))
   }
   if (n >= 3) {
     if (secondNeg >= 0) {
-      // Efter andra negativa: öppnaren får stanna lågt.
+      // Efter andra negativa (2NT): öppnaren får stanna lågt.
       const own = b[2].cb
       if (isOpener && cb.strain === own.strain && !isGameLevel(cb)) return R('rebid: egen färg', `${B(cb)} — rebjuder färgen lågt efter andra negativa: ej krav, partnern får passa.`)
       if (isGameLevel(cb)) return R('utgång', `${B(cb)} — utgång på egen hand.`)
+      if (isOpener && n === 4 && cb.strain !== 'NT') return R('rebid: ny färg', `${B(cb)} — andra färgen (4+) efter andra negativa: naturligt, ej krav — partnern väljer.`)
+      if (!isOpener && cb.strain === own.strain) return isGameLevel(cb) ? R('höjning', `${B(cb)} — höjer med 3 trumf och något av värde.`) : R('preferens', `${B(cb)} — preferens till öppnarens första färg. Ej krav.`)
       return N(`${B(cb)} — naturligt efter andra negativa.`, 'ej-krav')
     }
     // Utgångskravet står tills utgång.

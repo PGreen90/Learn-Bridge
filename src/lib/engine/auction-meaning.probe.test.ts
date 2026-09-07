@@ -65,12 +65,7 @@ interface Hål {
  * här för att få grinden grön utan ett facit-fall.
  */
 const KÄNDA_MOTORAVVIKELSER: { rule: string; bid?: RegExp; explanation?: RegExp; facit: string }[] = [
-  {
-    rule: 'ny färg (GF)',
-    bid: /^3C$/,
-    explanation: /5\+ ♣ → 3♣ \(naturlig, utgångskrav\)/,
-    facit: '2♣–2♦–2M–3♣ bjuds som naturlig klöver med 4+ hp, men budet ÄR andra negativa (§4.4) — facit i motorbyte-facit.test.ts (2♣-familjen)',
-  },
+  // (2♣–2♦–2M–3♣-raden borttagen 2026-09-07: §5b beslut 6 gjorde 3♣ naturligt, andra negativa = 2NT.)
   {
     rule: 'rebid: stöd',
     bid: /^5[HS]$/,

@@ -585,7 +585,14 @@ stick** (t.ex. tre ess) öppnar också 2♣. Krav. Balanserade ranger: 22–24
 - Efter **2NT (22–24)** använder svararen NT-konventionerna (Stayman, transfers
   m.m.) precis som över 1NT, fast med 22–24 hp mittemot.
 - Efter en **naturlig färgrebud** är utgång påtvingad (utom andra negativa);
-  svararen visar stöd, ny färg (5+) eller NT naturligt.
+  svararen visar stöd, ny färg (5+) eller NT naturligt. **Efter 2♣–2♦–2♥/2♠
+  är hela svarsstrukturen naturlig** (ägarbeslut 2026-09-05, motorbytet §5b
+  beslut 6): **3♣ = 0–7 hp, 5+ klöver · 3♦ = 0–7 hp, 5+ ruter** (bjud din
+  riktiga färg, håll auktionen levande så 2♣-öppnaren får beskriva en gång
+  till) · 5-korts högfärg visas naturligt (2♠ över 2♥, 3♥ över 2♠) · 3+ stöd →
+  4M · och den konstlade **"jag har inget"-varningen är 2NT** (andra negativa:
+  0–3 hp, ingen 5-kortsfärg, ingen fit — säger inget om sang). Utan fit, utan
+  5-kortsfärg och med 4–7 hp bjuds 3NT.
 - **Finaste färgen före 3NT:** efter öppnarens **minor-rebud** (2♣–2♦–3♣/3♦)
   visar svararen utan stöd och utan egen 5-korts färg en **4-korts högfärg**
   under 3NT (billigast först: hjärter före spader). Så hittas en 4-4-högfärgsfit
@@ -671,14 +678,16 @@ nästan inget mittemot.
 - Efter 2♦ rebjuder öppnaren: **2NT (22–24)** – svararen passar med 0–2 hp,
   annars systembud (Stayman/transfer); **färgrebud (krav 1 rond)** – svararen
   letar utgång.
-- Med en riktig bottenhand visar svararen **andra negativa** (billigaste minor,
-  0–3 hp). Då vet öppnaren att det är tomt mittemot och kan:
-  - **rebjuda egen färg lågt** = ej krav, svararen får passa (delkontrakt när
-    utgång är hopplös),
+- Med en riktig bottenhand visar svararen **andra negativa = 2NT** över
+  öppnarens 2♥/2♠ (0–3 hp, ingen 5-kortsfärg, ingen fit; ägarbeslut
+  2026-09-05, §5b beslut 6 — förr 3♣, som nu är naturlig klöver). Då vet
+  öppnaren att det är tomt mittemot och kan:
+  - **rebjuda egen färg lågt** (3♥/3♠) = ej krav, svararen får passa
+    (delkontrakt när utgång är hopplös),
   - **bjuda utgång** ändå (t.ex. en solid lång färg som räcker ensam),
   - **3NT** = balanserad jätte, till spel.
-- *Exempel:* 2♣ – 2♦ (0–7) – 2♠ (krav) – 3♣ (andra negativa, 0–3) – 3♠ (ej krav,
-  svararen kan passa).
+- *Exempel:* 2♣ – 2♦ (0–7) – 2♠ (krav) – 2NT (andra negativa, 0–3) – 3♠ (ej krav,
+  svararen kan passa). Med ♣A9543 och 5 hp bjuds i stället **3♣** (naturligt).
 
 ### 4.5 Svar på svaga tvåöppningar (2♦ / 2♥ / 2♠)
 Öppningen visar 6-korts färg och 6–11 hp (svag). Svar:
@@ -2231,6 +2240,20 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-07 — Naturliga 3♣/3♦ efter 2♣–2♦–2M, andra negativa = 2NT (§4.4;
+  motorbytet §5b beslut 6, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05
+  på bok-mot-motor-fynd 5: 3♣ = 0–7 hp, 5+ klöver; 3♦ = 0–7, 5+ ruter;
+  5-korts högfärg visas naturligt; 3+ stöd → 4M; den konstlade "jag har
+  inget"-varningen (0–3, ingen fit, ingen 5-kortsfärg) är **2NT**. Förr var
+  3♣ andra negativa i boken men motorn bjöd 3♣ naturligt med 4+ hp — samma
+  bud, två betydelser (frö 20271509). Öppnarens fortsättning efter 2NT ligger
+  nu i tabellen (raden tredje: `openerThirdAfterSecondNegative` — 4M med 6+
+  trumf och 24+, 3M med 6+, annars andra 4-kortsfärgen naturligt, ej krav) och
+  svararens placering i raden svar3 (`responderAfterSecondNegative`: pass,
+  höjning med 3 trumf och 2+ hp, preferens). Förr låg öppnarens tredje bud
+  i det gamla lagret. Betydelselagret: `isSecondNegative` läser 2NT, 3♣/3♦
+  naturliga (0–7, 5+), öppnarens andra färg 'rebid: ny färg'. Facit: blocket
+  "§5b beslut 6" i `motorbyte-facit.test.ts` + frö 20271509 (förr `it.todo`).
 - **2026-09-07 — Passad hand över 1♥/1♠: Jacoby/Bergen/splinter AV, Drury på
   stödpoäng, 2NT naturlig inbjudan (§4.1, §6.7; motorbytet §5b beslut 9,
   `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 9.

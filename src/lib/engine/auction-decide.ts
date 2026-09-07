@@ -76,7 +76,7 @@ import { openerChoosesAfterSystemsOn, systemsOnFirstStep } from './strong-2nt-sy
 import { respondToMajor, respondToMinor, type ResponseResult } from './responses'
 import { respondToMajorPassed } from './responses-drury'
 import { respondTo1NT } from './responses-nt'
-import { respondTo2C } from './responses-2c'
+import { openerThirdAfterSecondNegative, respondTo2C, responderAfterSecondNegative } from './responses-2c'
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
@@ -828,6 +828,13 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
     return openerThirdBidAfterOwnRaise(hand, respSuit as 'hearts' | 'spades')
   }
 
+  // Partnerns andra negativa (2♣–2♦–2M–2NT, §5b beslut 6): jag får stanna lågt —
+  // 3M/4M med 6+, andra färgen naturligt, annars 3M.
+  if (openCall === '2C' && response.call === '2D' && rebid.rule === 'rebid: krav-färg' && second.rule === 'andra negativa') {
+    const M = suitOf(rebid.call)
+    if (M && isMajorSuit(M)) return openerThirdAfterSecondNegative(hand, M)
+  }
+
   // Svararens broms efter min stopp-visning i den inverterade minorn (B13).
   if (second.rule === 'inverterad: broms' && openerSuit && !isMajorSuit(openerSuit)) {
     return openerThirdBidAfterInvertedBrake(hand, openerSuit, suitOf(rebid.call))
@@ -974,6 +981,13 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
     return { turn: { call: '3NT', rule: 'fjärde färg: placerar utgång', explanation: `Fjärde färg var krav (utgångsvärden); partnern har beskrivit sin hand → placerar 3NT.` }, plan: { kind: 'call' } }
   }
 
+  // Efter min andra negativa (2♣–2♦–2M–2NT, §5b beslut 6) placerar jag: pass,
+  // höjning med 3 trumf och något av värde, eller preferens.
+  if (openCall === '2C' && response.call === '2D' && rebid.rule === 'rebid: krav-färg' && second.rule === 'andra negativa') {
+    const M = suitOf(rebid.call)
+    if (M && isMajorSuit(M)) return { turn: responderAfterSecondNegative(hand, M, third), plan: { kind: 'call' } }
+  }
+
   // B13 (2026-08-07): efter öppnarens ANDRA stopp-visning över min broms
   // täcker jag resten (3NT) eller tar 5m. Samma för passad hands broms på den
   // enkla höjningen (§5b beslut 5) — öppnaren driver då med 18+.
@@ -1010,6 +1024,11 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
 export function openerFourthDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, second: ResponseResult, fourth: ResponseResult, hand: Hand): ResponseResult | null {
   if (fourth.call === 'P') return null
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') return openerChoosesAfterSystemsOn(hand, second, fourth)
+  // Efter partnerns andra negativa (2♣–2♦–2M–2NT, §5b beslut 6) placerade
+  // partnern kontraktet (preferens/höjning) — inget krav finns, jag passar.
+  if (openCall === '2C' && response.call === '2D' && rebid.rule === 'rebid: krav-färg' && second.rule === 'andra negativa') {
+    return { call: 'P', rule: 'rebid: pass', explanation: `Partnern placerade kontraktet efter sin andra negativa (${fourth.call}) → pass.` }
+  }
 
   // §5b beslut 1 (2026-09-05): efter mitt NMF-svar utan stöd visade partnern
   // sin färg med slamvärden — 3M (6+) → jag sätter trumfen med 4M (min sang
