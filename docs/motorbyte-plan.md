@@ -388,6 +388,11 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   **konstlad** (håll-/beskrivningsfråga), inte naturlig. Auktionen är redan
   utgångskrav, men håll-frågan till 3NT är verklig. Rätta boken §6.6 (som idag
   undantar reverse). Rör §6.6.
+  **BYGGT 2026-09-06 (väntar PCD; loggen nedan).** Utöver bokrättelsen fick
+  det nya lagret öppnarens SVAR på fjärde färgen på 3-läget (efter reverse
+  ligger den där): förr rebjöd det gamla lagret alltid öppningsfärgen (och
+  höjde fjärde färgen till 5♣ med fyra klöver), nu samma prioritet som i
+  grundmönstret — 3-stöd, extra längd, 3NT med håll, höjning med fyra.
 
 - **Beslut 3 — fynd 2 (höjning av öppnarens andra färg efter reverse),
   2026-09-05.** Ägarbeslut: efter en reverse går man nästan alltid till utgång,
@@ -575,6 +580,22 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-06 — §5b beslut 2 BYGGT (fjärde färg gäller även efter reverse;
+  väntar ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 2" i
+  `motorbyte-facit.test.ts` (tre fall; två röda före fixen — svararens 3♣ och
+  betydelselagrets läsning var redan rätt, öppnarens svar saknades). Regeln i
+  det nya lagret: `openerAnswerFourthSuit` tar nivån (2 i grundmönstret, 3
+  efter reverse) och `openerThirdDecision` dispatchar även reverse-mönstret;
+  betydelselagrets `isFourthSuit`-kommentar rättad. Systembok §6.6 (undantaget
+  "öppnaren har reverserat" borttaget, exempel + öppnarens svar) + §9.
+  **Mätningar** (kommandon i §3; baslinjer på `0b1f056`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 0 (bot
+  mot bot bjöd redan så); avvikelsedumpen: 2 ändrade, båda b — människans
+  fjärde färg efter reverse (1♣–1♠–2♦–3♥) besvaras nu ur tabellen: frö
+  20270080 3♠ (3-stöd) → 4♠ i stället för 4♣-rebud, frö 20270156 3NT (håll)
+  i stället för 4♣ → 5♣; olagliga tabellbud 0; betydelsesvepet kravnivå 0 ·
+  alert 0 · registerhål 0; pliktsvep/förklaringssvep/regelsvep gröna;
+  revisorn 1000 givar: rätt kontrakt 20,2 % · snittförlust 268,83 (beslut 14: 20,2 % · 268,83).
 - **2026-09-06 — §5b beslut 14 KLAR & LIVE (naket 4NT = essfråga i senast bjudna
   färg; mergepunkt `4be2ba3`, Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 14" i
   `motorbyte-facit.test.ts` (fyra fall; fynd 14-posten ersatt), det gamla

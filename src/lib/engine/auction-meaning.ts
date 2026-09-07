@@ -1200,8 +1200,9 @@ function isFourthSuit(u: Undisturbed, cb: ParsedBid): boolean {
   const [open, resp, reb] = u.bids.map((b) => b.cb)
   const suits = new Set([open.strain, resp.strain, reb.strain].filter((s) => s !== 'NT'))
   if (suits.size !== 3 || suits.has(cb.strain)) return false
-  // Motorn spelar fjärde färg även efter en reverse (boken §6.6 undantar den —
-  // avvikelse noterad i motorbytets logg 2026-09-04; lagret följer motorn).
+  // Fjärde färg är konstlad även efter en reverse (1♦–1♠–2♥–3♣): en håll-/
+  // beskrivningsfråga i ett läge som redan är utgångskrav (§5b beslut 2,
+  // 2026-09-06 — boken §6.6 rättad).
   return cb.level > 1
 }
 

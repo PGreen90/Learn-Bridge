@@ -1327,7 +1327,10 @@ mer (oftast: har vi stopp för 3NT, eller en gömd fit?).
 Vi spelar **fjärde färg = krav till utgång (GF)**. *(Alternativ: krav 1 rond med
 inbjudningsstyrka 10+ – kan ändras senare.)*
 
-*Exempel:* 1♦–1♠–2♣–2♥ (fjärde färg), 1♣–1♥–1♠–2♦ (fjärde färg).
+*Exempel:* 1♦–1♠–2♣–2♥ (fjärde färg), 1♣–1♥–1♠–2♦ (fjärde färg),
+1♦–1♠–2♥–3♣ (fjärde färg **efter reverse** — auktionen är redan utgångskrav,
+men håll-frågan till 3NT är verklig; ägarbeslut 2026-09-05, motorbytets §5b
+beslut 2).
 
 **Partnerns svar (prioritet):**
 1. visa 3-korts stöd för partnerns hf,
@@ -1336,8 +1339,11 @@ inbjudningsstyrka 10+ – kan ändras senare.)*
 4. (sällan) höja fjärde färgen med 4 kort.
 
 **När fjärde färg INTE gäller:** passad hand, motståndarna stör, alla fyra färger
-bjudna på 1-läget, öppnaren har reverserat, eller svararen redan gjort hoppskift
-/ 2-över-1.
+bjudna på 1-läget, eller svararen redan gjort hoppskift / 2-över-1 (beslut 13:
+efter 2/1 är svararens nya färg naturlig). Efter öppnarens **reverse** gäller
+den (se exemplet ovan): öppnaren svarar med samma prioritet — 3-korts stöd i
+svararens högfärg, extra längd, 3NT med håll, höjning av fjärde färgen med
+fyra kort — och svararen placerar (4M i fiten, annars 3NT).
 
 **Fit i öppnarens ANDRA färg = vanlig höjningsstege** (etapp 5, 2026-07-24).
 Har svararen 4+ kort i den färg öppnaren visade i rond 2 (t.ex. 1♣–1♥–1♠) höjer
@@ -2144,6 +2150,15 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-06 — Fjärde färg gäller även efter reverse (§6.6; motorbytet §5b
+  beslut 2, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
+  bok-mot-motor-fynd 1: boken undantog reversen, motorn spelade fjärde färg
+  där — motorns linje behålls (1♦–1♠–2♥–3♣ = konstlad håll-/beskrivnings-
+  fråga i ett läge som redan är utgångskrav). Nytt i det nya lagret:
+  öppnarens svar på fjärde färgen på 3-läget (`openerAnswerFourthSuit` med
+  nivån; raden tredje) — förr rebjöd det gamla lagret alltid öppningsfärgen,
+  och höjde fjärde färgen till 5♣ med fyra klöver. Facit: blocket "§5b
+  beslut 2" i `motorbyte-facit.test.ts`.
 - **2026-09-06 — Naket 4NT = essfråga i senast bjudna färg (§6.1; motorbytet
   §5b beslut 14, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05 på
   bok-mot-motor-fynd 14. Förr teg öppnarens läsning efter reverse/hoppskift
