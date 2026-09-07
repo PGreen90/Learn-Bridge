@@ -37,18 +37,21 @@ färg → Gerber 4♣) är live; vakt: manuset avgör inga bud i ostörda auktio
 Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägarens
 ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
-**Nästa gång börjar vi med:** beslut 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT =
-andra negativa), test-drivet (facit FÖRE fix, systembok §, regel i nya lagret),
-ett beslut per commit i byggordningen (§5b sist: 1 ✔ → 3 ✔ → 7 ✔ → 14 ✔ → 2 ✔
-→ 13 ✔ → 4 ✔ → 5 ✔ → 9 ✔ → 6 → 11 → 12 → 16) → PCD per grönt steg, ägarens val. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
+**Beslut 6 BYGGD 2026-09-07 (naturliga 3♣/3♦ efter 2♣–2♦–2M, andra negativa =
+2NT, öppnarens fortsättning i tabellen) — väntar ägarens PCD.**
+**Nästa gång börjar vi med:** beslut 11 (svararens nya färg på 3-läget efter
+1M–1NT–2x = inbjudan, 6+ kort), test-drivet (facit FÖRE fix, systembok §, regel
+i nya lagret), ett beslut per commit i byggordningen (§5b sist: 1 ✔ → 3 ✔ → 7 ✔
+→ 14 ✔ → 2 ✔ → 13 ✔ → 4 ✔ → 5 ✔ → 9 ✔ → 6 ✔ → 11 → 12 → 16) → PCD per grönt
+steg, ägarens val. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
 (`overcall`, `advanceOvercall`, inklivarens fortsättningar) in i tabellen; ordningen mot frekvensbilden (planens §4 etapp 4); baslinjerna
 (§3) på `f05bfef`.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
 Emma03 LIVE** (nivå bara i Syds kortspel, `botniva.ts`) · felrapporterna
-#54–#60 (`4898958` + 2026-09-03/04: 2/1-kravet i budlådan, svararens egen färg efter 1NT till spel, essfrågeläsningen) · pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen
-VÄNTAR (trigger ej nådd). Ägarens ord: säg "regeln saknades", inte "off-book".
+#54–#60 (`4898958`, 2026-09-03/04) · pliktsvepet K1–K5. Grindbeslut kvar:
+Nivå 2 i tävlingen VÄNTAR (trigger ej nådd). Ägarens ord: säg "regeln saknades", inte "off-book".
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen

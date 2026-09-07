@@ -573,7 +573,8 @@ arrival efter reverse — LIVE 2026-09-06, `1a6adf0`) → 7 (4♦ naturligt, cue
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
 steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 `ca954b4`) → 9 (passad hand över 1M — LIVE 2026-09-07, `47a5c8f`) →
-6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa) → 11 (ny färg på
+6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa — KLAR 2026-09-07,
+PCD väntar) → 11 (ny färg på
 3-läget efter 1M–1NT–2x) → 12 (hopp till 4m = driv) → 16 (bara bok + facit) →
 8 (redan byggt, bara låst).
 
@@ -598,6 +599,38 @@ steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 
 ## Ändringslogg
 
+- **2026-09-07 — §5b beslut 6 KLAR (naturliga 3♣/3♦ efter 2♣–2♦–2M, andra
+  negativa = 2NT; väntar ägarens PCD — mergepunkt fylls i).** Test-drivet:
+  facit-blocket "§5b beslut 6" i `motorbyte-facit.test.ts` (fem fall) + frö
+  20271509 (förr `it.todo`, nu skarpt: 3♣ naturligt med 5 hp och 5 klöver).
+  Nya lagret: `responderSecondBidAfter2C` — 2NT = andra negativa bara med 0–3,
+  ingen fit (under 3 i högfärgen) och ingen 5-kortsfärg; 3♣/3♦/2♠/3♥ naturliga
+  (5+) oavsett styrka; stöd → 4M som förut. Öppnarens tredje bud efter 2NT i
+  tabellen (raden tredje, `openerThirdAfterSecondNegative`): 4M med 6+ trumf
+  och 24+ eller 9½+ spelstick ('utgång'), 3M med 6+ ('rebid: egen färg', ej
+  krav), annars andra 4+-färgen ('rebid: ny färg', ej krav), annars 3M.
+  Svararens placering (raden svar3, `responderAfterSecondNegative`): pass,
+  4M med 3 trumf och 2+ hp ('höjning'), preferens till kravfärgen; öppnarens
+  fjärde bud efter placeringen = pass (raden fjärde). Betydelselagret:
+  `isSecondNegative` läser 2NT, 3♣/3♦ efter 2M naturliga (0–7, 5+), öppnarens
+  andra färg 'rebid: ny färg', svararens 'höjning'/'preferens'. Inga nya
+  regelnamn. Betydelsesvepets kända motoravvikelse (2♣–2♦–2M–3♣) struken —
+  listan är nu tom. Claudes tolkningar utöver beslutstexten (flaggade för
+  ägaren): 3+ stöd höjer till 4M även med 0–3 (som förut); 4M på egen hand =
+  24+ eller 9½ spelstick; svararen höjer 3M → 4M med 3 trumf och 2+ hp.
+  Systembok §4.4 (svarsstrukturen + "Vid miss") + §9.
+  **Mätningar** (kommandon i §3; baslinjer på `47a5c8f`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 1 — b
+  (frö 20272063: 3 hp med tre hjärter höjer 4♥ direkt i stället för 3♣ + gamla
+  lagrets 3♥/4♦-kaos); samma bud/annan regel 1 (frö 20272202: 3♣ heter nu
+  'ny färg (GF)', klass a); avvikelsedumpen: 13 ändrade + 3 omdöpta — alla b
+  (människans 2NT och bottens svar: 4 naturliga 3♦/2♠, 4 höjningar, 2 andra
+  negativa 2NT, öppnarens 4♥ på 9½ spelstick där gamla lagret förr drev via
+  honorForce, 3♦ andra färg + preferens där gamla lagret förr bjöd 5♦), 0 c,
+  olagliga tabellbud 0; betydelsesvepet kravnivå 0 · alert 0 · registerhål 0 ·
+  kända motoravvikelser 0 (förr 2); pliktsvep/förklaringssvep/regelsvep
+  gröna; revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust 268,39
+  (beslut 9: 20,3 % · 268,58).
 - **2026-09-07 — §5b beslut 9 KLAR & LIVE (passad hand över 1♥/1♠: Jacoby/Bergen/
   splinter AV, Drury på stödpoäng, 2NT naturlig inbjudan; mergepunkt `47a5c8f`,
   Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 9" i

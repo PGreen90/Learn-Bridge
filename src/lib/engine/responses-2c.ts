@@ -10,6 +10,7 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
+import { playingTricks } from './evaluation'
 import type { ResponseResult } from './responses'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
@@ -134,9 +135,11 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
   const rs = suitOfCall(rebid.call)
   if (!rs) return null
 
-  // Andra negativa: riktig bottenhand (0–3) → billigaste klöver, efter en högfärg.
-  if (p <= 3 && isMajor(rs)) {
-    return { call: '3C', rule: 'andra negativa', explanation: `Riktig bottenhand (0–3) → 3♣ (andra negativa).` }
+  // Andra negativa = 2NT (§5b beslut 6, 2026-09-07): riktig bottenhand (0–3)
+  // UTAN fit och UTAN 5-kortsfärg, efter en högfärg. 3♣/3♦ är naturliga (0–7,
+  // 5+ kort) — bjud din riktiga färg så 2♣-öppnaren får beskriva en gång till.
+  if (p <= 3 && isMajor(rs) && len[rs] < 3 && !longestSuit(len, 5)) {
+    return { call: '2NT', rule: 'andra negativa', explanation: `Riktig bottenhand (0–3) utan fit och utan 5-kortsfärg → 2NT (andra negativa, säger inget om sang).` }
   }
 
   // Stöd i öppnarens färg → höj till utgång (GF, slamintresse i minor).
@@ -180,4 +183,49 @@ export function responderSecondBidAfter2C(hand: Hand, response: ResponseResult, 
 
   // Inget bättre → 3NT till spel.
   return { call: '3NT', rule: 'till spel', explanation: `Ingen fit → 3NT.` }
+}
+
+// === 4. Efter andra negativa (2♣–2♦–2M–2NT), §4.4 "Vid miss" ==============
+// §5b beslut 6 (2026-09-07): svararen har visat 0–3 utan fit och utan
+// 5-kortsfärg. Öppnaren får stanna lågt — inget krav längre.
+
+/** Öppnarens tredje bud efter partnerns andra negativa (2NT) på kravfärgen `M`. */
+export function openerThirdAfterSecondNegative(hand: Hand, M: Suit): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  // Utgången på egen hand: 6+ trumf och 24+, eller 9½+ spelstick (solid lång
+  // färg; 2♣ öppnas på 8½) — partnern lovade bara 0–3 utan fit.
+  if (len[M] >= 6 && (p >= 24 || playingTricks(hand) >= 9.5)) {
+    return { call: `4${BID[M]}`, rule: 'utgång', explanation: `6+ ${SYM[M]} och ${p >= 24 ? '24+' : '9½+ spelstick'} → 4${SYM[M]} (utgång på egen hand trots bottenhanden).` }
+  }
+  if (len[M] >= 6) {
+    return { call: `3${BID[M]}`, rule: 'rebid: egen färg', explanation: `6+ ${SYM[M]} mittemot bottenhanden → 3${SYM[M]} (ej krav, partnern får passa).` }
+  }
+  const second = (['hearts', 'spades', 'diamonds', 'clubs'] as Suit[]).filter((s) => s !== M && len[s] >= 4).sort((a, b) => len[b] - len[a])[0]
+  if (second) {
+    return { call: `3${BID[second]}`, rule: 'rebid: ny färg', explanation: `Andra färgen, 4+ ${SYM[second]} → 3${SYM[second]} (naturligt, ej krav — partnern väljer).` }
+  }
+  return { call: `3${BID[M]}`, rule: 'rebid: egen färg', explanation: `Inget bättre mittemot bottenhanden → 3${SYM[M]} (ej krav).` }
+}
+
+/** Svararens placering efter öppnarens fortsättning på andra negativa. `M` = öppnarens kravfärg. */
+export function responderAfterSecondNegative(hand: Hand, M: Suit, third: ResponseResult): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${why} → pass.` })
+  const level = parseInt(third.call[0], 10)
+  if (level >= 4 || third.call.endsWith('NT')) return pass('öppnaren placerade kontraktet')
+  const shown = suitOfCall(third.call)
+  if (shown === M) {
+    // 3M (ej krav): höj till utgång bara med 3 trumf och något av värde (2+ hp).
+    if (len[M] >= 3 && p >= 2) return { call: `4${BID[M]}`, rule: 'höjning', explanation: `3 trumf och ${p} hp mittemot jättehanden → 4${SYM[M]} (höjer bottenhandens max).` }
+    return pass('bottenhand utan trumfstöd – 3' + SYM[M] + ' räcker')
+  }
+  if (shown) {
+    // Öppnarens andra färg (ej krav): stanna med 4+, annars preferens till kravfärgen om den ryms på 3-läget.
+    if (len[shown] >= 4) return pass(`4+ ${SYM[shown]} – öppnarens andra färg står`)
+    if (rankOf(M) > rankOf(shown)) return { call: `3${BID[M]}`, rule: 'preferens', explanation: `Preferens till öppnarens första färg → 3${SYM[M]} (ej krav).` }
+    return pass('ingen bättre plats')
+  }
+  return pass('öppnaren placerade kontraktet')
 }
