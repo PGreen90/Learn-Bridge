@@ -415,6 +415,16 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   4♦-överhopp (3NT/4♣/4♥). `1♥–3♠–3NT`-tabellen (4♣=♣/4♦=♦/4♥=♠) är redan
   rena steg — lämnas. Rör §4.1 (bara `1♠`-tabellen) + splinter-reläsvaret i
   motorn.
+  **BYGGT 2026-09-07 (väntar PCD; loggen nedan).** Stegbytet var litet, men
+  det avslöjade att FORTSÄTTNINGEN efter kortfärgssvaret låg i det gamla
+  lagret: 3NT-svaret passades som ett sangkontrakt, och förr bjöd öppnaren
+  5♣/5♦ i kaptenens KORTA färg eller passade 4♥-svaret. Nu: slamraden
+  (prefix 4, öppnaren startar som efter reverse-höjningen i beslut 3) —
+  billigaste kontrollbud under 4M eller 4M-avslut, med K/D/J mittemot
+  partnerns kortfärg nedvärderade (`SlamContext.captainShort`); kaptenen
+  räknar mot visade 12. Betydelselagret: den tvetydiga splintern sätter nu
+  trumfen redan i läsaren (förr lästes kortfärgssvaret 4♣ som ett
+  trumfsättande kontrollbud).
 
 - **Beslut 5 — fynd 4 (passad hands semi-forcing 1NT + inverterad minorhöjning),
   2026-09-05.** Ägarbeslut: **Del A** semi-forcing 1NT av passad hand behålls
@@ -587,6 +597,29 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
+- **2026-09-07 — §5b beslut 4 BYGGT (rena steg i splinterreläet efter
+  1♠–3♥–3♠ + fortsättningen; väntar ägarens PCD).** Test-drivet:
+  facit-blocket "§5b beslut 4" i `motorbyte-facit.test.ts` (fem fall).
+  Regeln i det nya lagret: `responderRevealSplinterShortness` (stegen per
+  trumf: 3NT/4♣/4♦ efter 1♠, 4♣/4♦/4♥ efter 1♥), betydelselagrets
+  kortfärgsläsning + `conventionalTrump` redan vid det konstgjorda svaret,
+  slamraden prefix 4 för kortfärgssvaret (`partnerStarts`,
+  `SlamContext.captainShort`: `partnerFirstStep` avslutar 4M med ≥ 2
+  bortkastade honnörspoäng mittemot kortheten och under 14 kvar, annars
+  billigaste cue; `inviteAnswer` drar av dem). Systembok §4.1
+  (1♠-tabellen + "Fortsättningen") + §9. `responder-rebids.test.ts`
+  omskrivet för 1♠-fallet.
+  **Mätningar** (kommandon i §3; baslinjer på `158e23f`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 4 — b: frön 20270485 (3NT-steget →
+  4♠, förr 5♣ i kaptenens KORTA färg), 20271314 (öppnaren avslutar 4♥, förr
+  5♦ i den korta färgen), 20272100 (4♣-steget → 4♠, förr 5♦); a: 20270758
+  (samma 4♠); avvikelsedumpen: 25 ändrade — alla a/b, 0 c (stegbytet i
+  1♠-fallet; öppnarens fortsättning ur slamraden: 4M-avslut med slöseri
+  mittemot kortheten eller cue-rond — två slammar hittas nu, frö 20270104
+  och 20270215 i båda lägena, där det gamla lagret bjöd 5♣ i den korta
+  färgen); olagliga tabellbud 0;
+  betydelsesvepet kravnivå 0 · alert 0 · registerhål 0; pliktsvep/
+  förklaringssvep/regelsvep gröna; revisorn 1000 givar: rätt kontrakt 20,2 % · snittförlust 268,99 (beslut 13: 20,2 % · 269,55).
 - **2026-09-07 — §5b beslut 13 KLAR & LIVE (ingen fjärde färg efter 2/1;
   mergepunkt `158e23f`, Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 13" i
   `motorbyte-facit.test.ts` (fem fall, fyra röda före fixen). Regeln i det

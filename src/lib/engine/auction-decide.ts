@@ -1086,6 +1086,22 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
   if (response.rule === 'tvetydig splinter' && rebid.rule === 'splinter-relä' && openerSuit && isMajorSuit(openerSuit) && /^5[CDHS]$/.test(first) && suitOf(first) !== openerSuit) {
     return { kind: 'exclusion', captain, prefix: 3, trump: openerSuit, partnerMin: 15, sofar: sofarFrom(3) }
   }
+  // Kortfärgssvaret på splinterreläet (§4.1, rena steg — §5b beslut 4,
+  // 2026-09-07): trumfen är öppnarens högfärg, svararen (kaptenen, 12+ GF)
+  // har visat sin kortfärg. Öppnaren öppnar cue-ronden (billigaste kontroll
+  // under utgång) eller avslutar 4M — med honnörer mittemot kortheten
+  // nedvärderade; kaptenen räknar sedan mot öppnarens visade 12. Förr låg
+  // fortsättningen i det gamla lagret (5m i kaptenens KORTA färg, pass på
+  // 4♥-svaret).
+  if (response.rule === 'tvetydig splinter' && rebid.rule === 'splinter-relä' && openerSuit && isMajorSuit(openerSuit)) {
+    const steps = openerSuit === 'hearts' ? ['4C', '4D', '4H'] : ['3NT', '4C', '4D']
+    const idx = steps.indexOf(first)
+    if (idx >= 0) {
+      const captainShort = RANK.filter((s) => s !== openerSuit)[idx]
+      const ctx: SlamContext = { partnerMin: 12, inviteCall: `5${LETTER[openerSuit]}`, gameForcing: true, captainShort }
+      return { kind: 'slam', captain, prefix: 4, setup: { trump: openerSuit, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+    }
+  }
   // MSS: minorfit funnen efter 1NT–2♠–3m.
   if (openCall === '1NT' && response.rule === 'Minor Suit Stayman' && (rebid.call === '3C' || rebid.call === '3D')) {
     const minor: Suit = rebid.call === '3C' ? 'clubs' : 'diamonds'

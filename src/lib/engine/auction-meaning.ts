@@ -1488,6 +1488,10 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
       if (k === 3 && u.bids[2].cb.strain === 'NT' && u.bids[2].cb.level === 2 && same(cb, 3, 'C') && u.bids[1].cb.level === 1) return true // checkback
       return false
     }
+    // Ett konstgjort svar (Bergen, tvetydig splinter, Drury) sätter ändå trumfen
+    // — annars läses kortfärgssvaret på splinterreläet som ett trumfsättande
+    // kontrollbud (§5b beslut 4, 2026-09-07).
+    if (k === 1 && !trump) trump = conventionalTrump(u)
     if (artificial()) return
     const above3NT = bidRank(cb) > bidRank({ level: 3, strain: 'NT' })
     // Kontrollbud med satt trumf.
@@ -1917,10 +1921,10 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       return null
     }
     if (same(resp, 3, otherMajor(M))) {
-      // Kortfärgssvaren på reläet: motorn visar kortfärgen upp-the-line i stegen
-      // 4♣/4♦/4♥ = de tre icke-trumffärgerna i rangordning (responder-rebids.ts;
-      // boken §4.1 har en annan tabell för 1♠–3♥ — avvikelse noterad 2026-09-04).
-      const short: Record<string, string> = M === 'H' ? { '4C': 'klöver', '4D': 'ruter', '4H': 'spader' } : { '4C': 'klöver', '4D': 'ruter', '4H': 'hjärter' }
+      // Kortfärgssvaren på reläet i RENA STEG (§5b beslut 4, 2026-09-07): de tre
+      // icke-trumffärgerna i rangordning på de tre lägsta buden över reläet —
+      // efter 1♥–3♠–3NT 4♣/4♦/4♥, efter 1♠–3♥–3♠ 3NT/4♣/4♦ (responder-rebids.ts).
+      const short: Record<string, string> = M === 'H' ? { '4C': 'klöver', '4D': 'ruter', '4H': 'spader' } : { '3NT': 'klöver', '4C': 'ruter', '4D': 'hjärter' }
       const key = `${cb.level}${cb.strain}`
       if (short[key]) return R('splinter: kortfärg', `${B(cb)} — svar på reläet: den korta färgen är ${short[key]}. Säger inget om ${cb.strain === 'NT' ? 'sang' : name}.`)
       return null

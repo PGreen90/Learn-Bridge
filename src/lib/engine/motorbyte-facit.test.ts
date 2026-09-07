@@ -545,3 +545,56 @@ describe('§5b beslut 13 – ingen fjärde färg efter 2/1: svararens nya färg 
     expect(kontrakt[kontrakt.length - 1]).toBe('3NT')
   })
 })
+
+// §5b beslut 4 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 3): kortfärgssvaret
+// på splinterreläet efter 1♠–3♥–3♠ går i RENA STEG — kort ♣ → 3NT, kort ♦ → 4♣,
+// kort ♥ → 4♦ (lägst möjligt hela vägen = mest rum för kontrollbud, samma logik
+// som beslut 3). Förr: motorn 4♣/4♦/4♥ ("bjud din korta färg"), boken
+// 3NT/4♣/4♥ (överhopp) — en auktion, tre tolkningar. 1♥–3♠–3NT-tabellen
+// (4♣ = ♣, 4♦ = ♦, 4♥ = ♠) är redan rena steg och lämnas.
+describe('§5b beslut 4 – rena steg i splinterreläet efter 1♠–3♥–3♠', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  const hS = [call('N', '1S'), P('E'), call('S', '3H'), P('W'), call('N', '3S'), P('E')]
+  const hH = [call('N', '1H'), P('E'), call('S', '3S'), P('W'), call('N', '3NT'), P('E')]
+
+  it('1♠–3♥–3♠: kort klöver → 3NT, kort ruter → 4♣, kort hjärter → 4♦ (rena steg)', () => {
+    expect(bud('S:KQ74 H:AJ85 D:K43 C:3', hS, 'S')!.call).toMatchObject({ bid: '3NT', rule: 'splinter: kortfärg' })
+    expect(bud('S:KQ74 H:AJ85 D:3 C:K432', hS, 'S')!.call).toMatchObject({ bid: '4C', rule: 'splinter: kortfärg' })
+    expect(bud('S:KQ74 H:3 D:AJ85 C:K432', hS, 'S')!.call).toMatchObject({ bid: '4D', rule: 'splinter: kortfärg' })
+  })
+
+  it('1♥–3♠–3NT lämnas: kort klöver → 4♣, kort ruter → 4♦, kort spader → 4♥', () => {
+    expect(bud('S:K43 H:KQ74 D:AJ85 C:3', hH, 'S')!.call.bid).toBe('4C')
+    expect(bud('S:K43 H:KQ74 D:3 C:AJ852', hH, 'S')!.call.bid).toBe('4D')
+    expect(bud('S:3 H:KQ74 D:AJ85 C:K432', hH, 'S')!.call.bid).toBe('4H')
+  })
+
+  it('betydelselagret läser stegen: 3NT = kort klöver, 4♣ = kort ruter, 4♦ = kort hjärter (alert); efter 1♥ som förut', () => {
+    expect(meaningOf([...hS, call('S', '3NT')], 6)).toMatchObject({ rule: 'splinter: kortfärg', alert: true })
+    expect(meaningOf([...hS, call('S', '3NT')], 6).text).toContain('klöver')
+    expect(meaningOf([...hS, call('S', '4C')], 6).text).toContain('ruter')
+    expect(meaningOf([...hS, call('S', '4D')], 6).text).toContain('hjärter')
+    expect(meaningOf([...hH, call('S', '4H')], 6).text).toContain('spader')
+  })
+
+  it('öppnaren fortsätter ur tabellen efter kortfärgssvaret: billigaste kontrollbud under 4♠ (4♦ med ♦A), 4♠ med honnörer mittemot kortheten; kaptenen avslutar/driver', () => {
+    const h3NT = [...hS, call('S', '3NT'), P('W')] // kort klöver
+    expect(bud('S:AJ9853 H:K4 D:AQ2 C:75', h3NT, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: '4D', rule: 'cue-bid' } })
+    expect(bud('S:AJ9853 H:74 D:Q52 C:KQ', h3NT, 'N')!.call).toMatchObject({ bid: '4S', rule: 'utgång' }) // ♣KQ mittemot singel = slöseri
+    // Kaptenen (♠KQ74 ♥AJ85 ♦K43 ♣3: 16 stödpoäng mot visade 12 = 28) cue:ar ♥A gratis, sedan avslut 4♠.
+    const h4D = [...h3NT, call('N', '4D'), P('E')]
+    expect(bud('S:KQ74 H:AJ85 D:K43 C:3', h4D, 'S')!.call).toMatchObject({ bid: '4H', rule: 'cue-bid' })
+    const h4H = [...h4D, call('S', '4H'), P('W')]
+    expect(bud('S:AJ9853 H:K4 D:AQ2 C:75', h4H, 'N')!.call).toMatchObject({ bid: '4S', rule: 'cue: avslut' }) // inga fler kontroller under utgång (cue-ronden pågår)
+    expect(bud('S:KQ74 H:AJ85 D:K43 C:3', [...h4H, call('N', '4S'), P('E')], 'S')!.call.bid).toBe('P') // 28 mot visade 12 → utgången står
+  })
+
+  it('efter 1♥–3♠–3NT–4♦ (kort ruter): inga kontrollbud ryms mellan 4♦ och 4♥ → öppnaren avslutar 4♥ (även med kontroll); kaptenen fortsätter över avslutet', () => {
+    const h4D = [...hH, call('S', '4D'), P('W')]
+    expect(bud('S:A4 H:AQJ85 D:K72 C:K53', h4D, 'N')!.call).toMatchObject({ bid: '4H', rule: 'utgång' }) // ♦K mittemot kort ruter = slöseri, 15 − 2 < 14
+    expect(bud('S:AK4 H:AQJ85 D:752 C:K3', h4D, 'N')!.call.bid).toBe('4H') // inga kontrollbud mellan 4♦ och 4♥ → avslut; kaptenen fortsätter
+    // Kortfärgssvaret 4♥ (kort spader) ÄR utgången: öppnaren passar (förr olagligt "4♥" → pass utan regel).
+    expect(bud('S:AK4 H:AQJ85 D:752 C:K3', [...hH, call('S', '4H'), P('W')], 'N')!.call).toMatchObject({ bid: 'P', rule: 'utgång' })
+  })
+})
