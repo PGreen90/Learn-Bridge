@@ -513,7 +513,7 @@ test-drivet efter svepet och deployas inte utan ägarens PCD.
   "fjärde färg har konventionell mening" bort: 4+ i färgen → naturligt bud) +
   öppnarens svar på svararens naturliga tredje färg i raden tredje (höjning
   med 4, annars beskrivning: sang med håll / egen längd / preferens).
-  **BYGGT 2026-09-07 (väntar PCD; loggen nedan).** Två preciseringar i
+  **BYGGT & LIVE 2026-09-07 (mergepunkt `158e23f`, Actions grön, rebidz.com aliasad; loggen nedan).** Två preciseringar i
   bygget: (1) svararens 4-korts högfärg som FJÄRDE färg visas bara utan håll
   i den — med håll går 3NT före, eftersom öppnaren med två visade färger
   redan nekat en 4-korts högfärg (felrapportens facit ♠3 ♥QJ72 ♦AKQJ9 ♣T76 →
@@ -587,8 +587,8 @@ steg i splinterreläet) → 5 (passad hand i minor) → 9 (passad hand över 1M)
 
 ## Ändringslogg
 
-- **2026-09-07 — §5b beslut 13 BYGGT (ingen fjärde färg efter 2/1; väntar
-  ägarens PCD).** Test-drivet: facit-blocket "§5b beslut 13" i
+- **2026-09-07 — §5b beslut 13 KLAR & LIVE (ingen fjärde färg efter 2/1;
+  mergepunkt `158e23f`, Actions grön, rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 13" i
   `motorbyte-facit.test.ts` (fem fall, fyra röda före fixen). Regeln i det
   nya lagret: `responderRebidIn2over1Auction` (steg 6b: ny 4+ färg under 3NT
   är naturlig — högfärg före lågfärg, efter 3NT-med-håll och eget 6+),
