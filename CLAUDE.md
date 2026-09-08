@@ -44,13 +44,13 @@ ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen A
 x-dubblaren/x-advancern*; tjugo detektorer rivna; kunskapen i
 `overcall-continuations.ts`/`double-continuations.ts`; deras X av vårt svar =
 systems on i de ostörda raderna. b-listorna står i planens logg.
-**Familj 3 (negativ/stöd-X, Jordan, svararens konkurrenssvar) BYGGD
-2026-09-08, grinden VÄNTAR:** åtta rader, kunskapen i `contested-opening.ts`
-+ `fit-raise.ts`, sex detektorer + manusets kik-rond rivna. Ägaren godkänner:
-Jordan bara efter 1M (över 1m XX), negativ-dubblarens 3NT/2NT, NMF för passad
-hand. **Nästa:** grinden (planens logg), sedan familj 4 (öppnarens
+**Familj 3 (negativ/stöd-X, Jordan, svararens konkurrenssvar) KLAR & LIVE
+2026-09-08 (mergepunkt `2ae5d05`, grinden godkänd):** åtta rader, kunskapen i
+`contested-opening.ts` + `fit-raise.ts`, sex detektorer + manusets kik-rond
+rivna; Jordan bara efter 1M (över 1m XX), negativ-dubblarens 3NT/2NT, NMF för
+passad hand. **Nästa gång börjar vi med:** familj 4 (öppnarens
 konkurrensåterbud, svararens fria bud, RHO:s inkliv över svaret) med nya
-baslinjer på familj 3:s mergepunkt.
+baslinjer (§3) på `2ae5d05`.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

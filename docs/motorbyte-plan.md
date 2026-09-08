@@ -324,8 +324,8 @@ mätningen vid etapp 4:s start):
    i de ostörda raderna (och i betydelselagret). Tio detektorer rivna.
    Familjegräns: deras FÄRGöppning krävs — DONT-X över 1NT (familj 6) och
    dubblingar på vår öppning (familj 3) stannar i det gamla lagret.
-3. Negativ dubbling, stöddubbling, öppnarens svar på dem. **KLAR 2026-09-08
-   (loggen; mergepunkt i loggen när grinden tagits):** raderna *svar-stört*
+3. Negativ dubbling, stöddubbling, öppnarens svar på dem. **KLAR & LIVE
+   2026-09-08 (loggen; mergepunkt `2ae5d05`):** raderna *svar-stört*
    (svararens första bud när LHO stört partnerns 1-läges färgöppning — hela
    manusets konkurrenssvar: negativ X, fritt bud, cue, konkurrenshöjning, NT
    med stopp, K3-tabellen, Jordan/XX), *stöd-x* / *stöd-x-svar* /
@@ -638,9 +638,9 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
-- **2026-09-08 — Etapp 4 familj 3 BYGGD: när de stör vår öppning (negativ
-  dubbling, stöddubbling, Jordan, svararens konkurrenssvar) i tabellen. 🚪
-  Grinden VÄNTAR på ägaren (mergepunkt skrivs in när den tagits).**
+- **2026-09-08 — Etapp 4 familj 3 KLAR & LIVE: när de stör vår öppning (negativ
+  dubbling, stöddubbling, Jordan, svararens konkurrenssvar) i tabellen
+  (grinden godkänd av ägaren samma dag, "pcd"; mergepunkt `2ae5d05`).**
   Test-drivet: facit-blocket "etapp 4 familj 3" i `motorbyte-facit.test.ts`
   (frö 20270004 → X / 3NT / XX, 20270008 → X, 20270007 → 1♠, 20270269 → 2♥)
   + `auction-etapp4-familj3.test.ts` (raderna, lägesgränserna, det rivna).
