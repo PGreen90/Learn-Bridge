@@ -1907,8 +1907,11 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       if (cb.strain === reb.strain && !isGameLevel(cb)) return R('inbjudan', `${B(cb)} — höjer partnerns ${name}: 11–12 hp med stöd, inbjudan.`)
       if (cb.strain === reb.strain) return R('utgång', `${B(cb)} — utgång i ${name}.`)
       // Svararens egen färg på 2-LÄGET läses av `responderNewSuitAfter1NT`
-      // (före den här läsaren). En ny färg på 3-läget saknar regel i motorn
-      // (standard: inbjudan med 6+ kort — fynd i motorbytets logg 2026-09-05).
+      // (före den här läsaren). Ny färg på 3-LÄGET (§5b beslut 11, 2026-09-07):
+      // 6+ kort, 10–11 hp, inbjudan, ej krav, förnekar 3-korts stöd.
+      if (cb.level === 3 && cb.strain !== 'NT' && cb.strain !== M && cb.strain !== reb.strain && reb.level === 2) {
+        return R('inbjudan (ny färg)', `${B(cb)} — naturligt: 6+ ${name}, 10–11 hp, inbjudan. Förnekar 3-korts stöd i ${mname}. Ej krav — öppnaren passar med minimum och tolerans, rättar till 3${msym} med 6+ utan tolerans, går till utgång med maximum.`)
+      }
       return null
     }
     if (same(resp, 2, M)) {
@@ -1957,6 +1960,17 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
     return null
   }
 
+  if (n === 4 && isOpener && same(resp, 1, 'NT') && b[2].cb.level === 2 && b[2].cb.strain !== 'NT') {
+    // Öppnarens svar på svararens inbjudan i ny färg på 3-läget (§5b beslut 11).
+    const inv = b[3].cb
+    if (inv.level === 3 && inv.strain !== 'NT' && inv.strain !== M && inv.strain !== b[2].cb.strain) {
+      if (same(cb, 3, M)) return R('rebid: egen färg', `${B(cb)} — rättelse: 6+ ${mname} utan tolerans för partnerns ${NAME[inv.strain]}. Ej krav.`)
+      if (cb.strain === inv.strain && isGameLevel(cb)) return R('accepterar inbjudan', `${B(cb)} — accepterar inbjudan: maximum (14–15) med stöd eller bra dubbelton i ${NAME[inv.strain]}.`)
+      if (same(cb, 3, 'NT')) return R('accepterar inbjudan', `3 sang — accepterar inbjudan: maximum (14–15) med håll runtom.`)
+      if (cb.strain === inv.strain && cb.level === 4) return N(`${B(cb)} — höjer partnerns ${NAME[inv.strain]}, maximum med stöd.`, 'inbjudan')
+      return null
+    }
+  }
   if (n === 4 && isOpener && (same(resp, 1, 'S') || (same(resp, 1, 'NT') && u.responderPassed))) return openerThirdAfterOneLevel(seat, cb, u, prior)
   if (n === 4 && isOpener && resp.level === 2 && resp.strain !== 'NT' && resp.strain !== M && !u.responderPassed) return openerThirdAfter2over1(seat, cb, u)
   if (n >= 5) {

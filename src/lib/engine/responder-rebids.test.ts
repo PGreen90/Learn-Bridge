@@ -422,12 +422,16 @@ describe('responderRebidIn2over1Auction (§5.3, felrapport #4)', () => {
 // på 2-läget mellan öppnarens återbud och hennes högfärg bjuds naturligt, svagt
 // och utan krav. 6+ kort går före en 2-korts preferens, 5 kort efter.
 describe('felrapport #59 – svararens egen färg efter 1NT–2♣ (§5.1)', () => {
-  it('Nord (6-5 i röda, singel ♣) bjuder 2♦ i stället för att passa 2♣', () => {
-    expect(r10('S:A H:QJ943 D:KJT852 C:T', 'spades', '2C', 'rebid: ny färg')).toBe('2D')
+  // §5b beslut 11 (2026-09-07): brickans Nord har 11 hp och 6 ruter → 3♦
+  // (naturlig inbjudan, 6+ kort, 10–11). Den svaga versionen (under 10) är
+  // 2♦ som förut — se 9-poängaren nedan.
+  it('Nord (6-5 i röda, singel ♣, 11 hp) bjuder 3♦ (inbjudan) i stället för att passa 2♣ — med 9 hp 2♦', () => {
+    expect(r10('S:A H:QJ943 D:KJT852 C:T', 'spades', '2C', 'rebid: ny färg')).toBe('3D')
+    expect(r10('S:2 H:QJ943 D:KJT852 C:T4', 'spades', '2C', 'rebid: ny färg')).toBe('2D') // 7 hp: svag, 2-läget
   })
-  it('regel + förklaring: ny färg efter 1NT, ej krav', () => {
+  it('regel + förklaring: ny färg efter 1NT, ej krav (svaga versionen)', () => {
     const rebid: ResponseResult = { call: '2C', rule: 'rebid: ny färg', explanation: '' }
-    const r = responderRebidAfterSemiForcing1NT(parseHand('S:A H:QJ943 D:KJT852 C:T'), 'spades', rebid)
+    const r = responderRebidAfterSemiForcing1NT(parseHand('S:2 H:QJ943 D:KJT852 C:T4'), 'spades', rebid)
     expect(r?.rule).toBe('ny färg efter 1NT')
     expect(r?.explanation).toMatch(/5\+/)
     expect(r?.explanation).toMatch(/får passa/)
@@ -444,7 +448,7 @@ describe('felrapport #59 – svararens egen färg efter 1NT–2♣ (§5.1)', () 
   it('efter 1♥–1NT–2♦ finns inget 2-läge kvar → oförändrat (pass)', () => {
     expect(r10('S:Q84 H:7 D:73 C:KJ8642', 'hearts', '2D', 'rebid: ny färg')).toBe('P')
   })
-  it('hela bricka 6 i motorn: 1♠–1NT–2♣–2♦ och sedan pass', () => {
+  it('hela bricka 6 i motorn: 1♠–1NT–2♣–3♦ (inbjudan, §5b beslut 11) och öppnaren passar med minimum och tolerans', () => {
     const deal: Deal = {
       id: 't', dealer: 'E', vulnerability: 'ew', board: 6,
       hands: {
@@ -455,7 +459,7 @@ describe('felrapport #59 – svararens egen färg efter 1NT–2♣ (§5.1)', () 
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['1S', '1NT', '2C', '2D', 'P'])
-    expect(a?.turns[a.turns.length - 1]?.explanation).toMatch(/till spel/)
+    expect(a?.turns.map((t) => t.call)).toEqual(['1S', '1NT', '2C', '3D', 'P'])
+    expect(a?.turns[a.turns.length - 1]?.explanation).toMatch(/tolerans/)
   })
 })

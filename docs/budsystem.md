@@ -155,6 +155,26 @@ balanserat. Bjuder svararen därefter en ny färg lovar det 5+ kort och
 **förnekar** stöd i öppnarens färg(er). Annars kan svararen visa preferens i
 öppnarens färger.
 
+**Svararens nya färg på 3-läget efter 1M–1NT–2x** (ägarbeslut 2026-09-05,
+motorbytet §5b beslut 11; t.ex. 1♠–1NT–2♠–3♥, 1♠–1NT–2♣–3♦, 1♥–1NT–2♦–3♣):
+**6+ kort, 10–11 hp, naturlig inbjudan, ej krav, förnekar 3-korts stöd** i
+öppnarens högfärg (med 3-korts stöd går limithöjningen 3M före). Svagare
+6-kortshänder bjuder färgen på 2-läget om den ryms (svag, 5+; §5.1 ovan),
+annars preferens/pass — därför är 3-lägesbudet ett hopp när färgen rymts på
+2-läget (1♠–1NT–2♣–**3♥**) och det billigaste budet när den inte gör det
+(1♠–1NT–2♠–3♥). Öppnarens svar:
+
+| Öppnarens svar | Betydelse |
+|---|---|
+| Pass | minimum (12–13) med tolerans (2+ kort i svararens färg) |
+| 3M | rättelse: 6+ egen färg utan tolerans (högst en) — ej krav |
+| 4 i svararens högfärg | maximum (14–15) med 3-korts stöd eller bra dubbelton (A/K/Q) |
+| 3NT | maximum (14–15) med håll i de två objudna färgerna |
+| 5 i svararens lågfärg | maximum med 4-korts stöd när håll saknas för sang |
+
+Svararen passar öppnarens svar. *Förr saknades regeln: boten bjöd 2NT eller
+passade med 6-kortsfärgen och budet hade ingen betydelse i läsaren.*
+
 #### Enkel höjning (1♥–2♥ / 1♠–2♠) — Bergen game try
 Svararens enkla höjning visar 3 stöd, 6–9 hp. Vill öppnaren göra ett
 **utgångsförsök** bjuder hon **2NT** (konstgjort, krav, ≈ 15–17 hp / 6 förlorare)
@@ -2240,6 +2260,23 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-08 — Svararens nya färg på 3-läget efter 1M–1NT–2x = 6+ kort,
+  10–11, inbjudan (§5.1; motorbytet §5b beslut 11, `docs/motorbyte-plan.md`).**
+  Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 11. Förr saknades regeln:
+  boten bjöd 2NT eller passade med 6-kortsfärgen, betydelselagret gav null
+  och öppnarens svar låg i det gamla lagret. Nu: svararen
+  (`responderRebidAfterSemiForcing1NT`, `inviteSuit`) bjuder 3x med 6+, 10–11
+  och under 3-korts stöd — efter både 2M-rebudet och en ny 2-lägesfärg (då
+  är budet ett hopp; 2-lägesfärgen förblir den svaga, #59); öppnaren
+  (`openerThirdBidAfterSemiForcing1NT`, raden tredje): pass = minimum med
+  tolerans, 3M = 6+ utan tolerans, 4 i svararens högfärg = maximum 14–15 med
+  3-korts stöd eller bra dubbelton, 3NT = maximum med håll i de objudna
+  färgerna, 5m = maximum med 4-korts stöd utan håll; svararen passar (raden
+  svar3). Betydelselagret läser 3x som 'inbjudan (ny färg)' och öppnarens
+  svar. **Följd för felrapport #59:** brickans Nord (♠A ♥QJ943 ♦KJT852 ♣T,
+  11 hp) bjuder nu 3♦ (inbjudan) i stället för 2♦ — 2♦ är kvar för svagare
+  händer. Facit: blocket "§5b beslut 11" i `motorbyte-facit.test.ts`,
+  `responder-rebids.test.ts` (#59-blocket omskrivet).
 - **2026-09-07 — Naturliga 3♣/3♦ efter 2♣–2♦–2M, andra negativa = 2NT (§4.4;
   motorbytet §5b beslut 6, `docs/motorbyte-plan.md`).** Ägarbeslut 2026-09-05
   på bok-mot-motor-fynd 5: 3♣ = 0–7 hp, 5+ klöver; 3♦ = 0–7, 5+ ruter;

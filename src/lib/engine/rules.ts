@@ -115,6 +115,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // ---- Inbjudningar ----
   inbjudan: 'inbjudan',
   'inbjudan (limithöjning)': 'inbjudan',
+  'inbjudan (ny färg)': 'inbjudan', // ny färg på 3-läget efter 1M–1NT–2x: 6+ kort, 10–11 (§5.1, §5b beslut 11)
   '2NT inbjudan': 'inbjudan',
   '2NT (18–19)': 'inbjudan',
   'rebid: 2NT (18–19)': 'inbjudan',

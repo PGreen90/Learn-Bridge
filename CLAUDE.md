@@ -37,10 +37,12 @@ färg → Gerber 4♣) är live; vakt: manuset avgör inga bud i ostörda auktio
 Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägarens
 ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
-**Nästa gång börjar vi med:** beslut 11 (svararens nya färg på 3-läget efter
-1M–1NT–2x = inbjudan, 6+ kort), test-drivet (facit FÖRE fix, systembok §, regel
-i nya lagret), ett beslut per commit i byggordningen (§5b sist: 1 ✔ → 3 ✔ → 7 ✔
-→ 14 ✔ → 2 ✔ → 13 ✔ → 4 ✔ → 5 ✔ → 9 ✔ → 6 ✔ → 11 → 12 → 16) → PCD per grönt
+**Beslut 11 BYGGD 2026-09-08 (ny färg på 3-läget efter 1M–1NT–2x = 6+, 10–11,
+inbjudan; öppnarens svar i tabellen; #59-handen bjuder nu 3♦) — väntar ägarens
+PCD.** **Nästa gång börjar vi med:** beslut 12 (hopp till 4m efter 1m–2m'–2NT
+= trumf satt + slamdriv), test-drivet (facit FÖRE fix, systembok §, regel i nya
+lagret), ett beslut per commit i byggordningen (§5b sist: 1 ✔ → 3 ✔ → 7 ✔ →
+14 ✔ → 2 ✔ → 13 ✔ → 4 ✔ → 5 ✔ → 9 ✔ → 6 ✔ → 11 ✔ → 12 → 16) → PCD per grönt
 steg, ägarens val. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
 (`overcall`, `advanceOvercall`, inklivarens fortsättningar) in i tabellen; ordningen mot frekvensbilden (planens §4 etapp 4); baslinjerna
 (§3) på `f05bfef`.
