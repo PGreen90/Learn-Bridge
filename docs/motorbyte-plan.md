@@ -576,8 +576,8 @@ steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa — LIVE 2026-09-07,
 `f4cbe74`) → 11 (ny färg på
 3-läget efter 1M–1NT–2x — LIVE 2026-09-08, `b06c673`) → 12 (hopp till 4m =
-driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — KLAR 2026-09-08,
-PCD väntar) →
+driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-08,
+`226882b`) →
 8 (redan byggt, bara låst).
 
 ## 6. Arbetssättet under bytet
@@ -601,9 +601,10 @@ PCD väntar) →
 
 ## Ändringslogg
 
-- **2026-09-08 — §5b beslut 16 KLAR (lågfärgsfit i utgångskrav: 5m är
-  utgången, inbjudan är kontrollbudet — bara bok + facit; väntar ägarens PCD
-  — mergepunkt fylls i).** Facit-blocket "§5b beslut 16" i
+- **2026-09-08 — §5b beslut 16 KLAR & LIVE (lågfärgsfit i utgångskrav: 5m är
+  utgången, inbjudan är kontrollbudet — bara bok + facit; mergepunkt `226882b`,
+  Actions grön, rebidz.com aliasad). HELA §5b ÄR DÄRMED BYGGD OCH LIVE — nästa:
+  etapp 4 familj 1.** Facit-blocket "§5b beslut 16" i
   `motorbyte-facit.test.ts` (tre fall) låser linjen: efter 1♦–2♣–2NT–3♦–4♦
   cue:ar kaptenen 4♥/4♠ med 31–32 (jämn 19 mot visade 12), bjuder 5♦ utan
   första-rondskontroll (systemriktig miss), frågar 4NT med 33+; partnern
