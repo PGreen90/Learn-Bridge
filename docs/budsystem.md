@@ -1717,6 +1717,31 @@ Lagen: med **9 gemensamma trumf** är 3-läget säkert att tävla till (om det b
 deras kontrakt oftast att gå hem). Ett **1-läges** inkliv (bara 5+ lovad) kräver
 **4-korts** stöd för att tävla till 3-läget.
 
+**Advancern svarar på ett 2-lägesinkliv med samma tabell som på 1-läget
+(motorbytet etapp 4 familj 1, 2026-09-08).** Förr svarade den allmänna
+fit-höjningen där (4-korts stöd krävdes, ny färg bara med 12+). Nu, när
+svararen passat, t.ex. **1♥–(2♣)–P–?**:
+
+| Advancerns svar | Betydelse |
+|---|---|
+| **cue i deras färg** (2♥) | limithöjning eller bättre: 3+ stöd, 11+ stödpoäng, krav |
+| **höjning** (3♣) | 3+ stöd, minst **6 stödpoäng** (höjningen hamnar på 3-läget) |
+| **ny färg** (2♠) | naturlig, konstruktiv, ej krav: 5+ kort, 8+ hp — bara på 2-läget och aldrig deras färg |
+| **2NT** | jämn hand med stopp i deras färg, 11+ hp (1NT finns inte över ett 2-lägesinkliv) |
+| fit-jump | 4+ stöd + egen 5+ sidofärg, 10+ stödpoäng |
+| pass | inget av ovan (t.ex. 8–10 jämnt utan stöd) |
+
+**Advancerns nya färg bjuds på billigaste nivån** (samma ändring): över
+**1♦–(1♥)–P** bjuder advancern med 5+ spader och 8+ hp **1♠**, inte 2♠ (som
+förr — ett omotiverat hopp).
+
+**Inklivaren svarar fit-jumpen** (samma ändring; regeln saknades — förr
+höjdes sidofärgen, frö 20270356: 1♠–(2♥)–P–4♦–P–**5♦** i stället för 4♥):
+med **extra** (12+ totalpoäng, eller 6+ egen färg med 10+) **utgång i
+inklivsfärgen** (lågfärg: 3NT med stopp i deras färg om det ryms, annars 5m);
+utan extra **billigaste återgång** i inklivsfärgen (ej krav) — blir den
+återgången utgångsnivån bjuds den ändå, fit-jumpen är inbjudande+.
+
 **3-korts stöd mot ett 1-lägesinkliv = 8 trumf → höj till 2-läget (pliktsvepet
 K3, ägarbeslut 2026-09-02).** Inklivet lovar 5+, så tre kort är fit: advancern
 **höjer enkelt från 6 hp** — även när motståndarna hunnit höja
@@ -1777,6 +1802,28 @@ får hon **aldrig passa** – hon måste ta ut tvåfärgshanden. Är motståndar
 finns **spelrum för pass**, och partnern kan bjuda igen för att visa sin
 **ospecificerade** färg (t.ex. Michaels över deras högfärg, där ena färgen är en
 okänd minor – utan högfärgsfit bjuder advancern då ostört 3♣ pass-eller-rätta).
+
+**Preferensen gäller även när motståndarna höjt sin egen färg** (motorbytet
+etapp 4 familj 1, 2026-09-08; frö 20262021): efter **1♠–(2NT)–3♠** ger
+advancern preferens **4♣/4♦** — budet hamnar bara ett läge högre. Förr
+passade motorn där (3♣ var olagligt och ingen regel fanns). Spelrummet för
+pass i konkurrens är uttalat: på **4-läget** krävs 4+ kort i färgen ELLER 8+ hp,
+på **5-läget** 4+ kort OCH 8+ hp; pass-eller-rätta-3♣ bjuds inte på 5-läget.
+*Frö 20270138: 1♥–(2NT)–4♥ med ♣Q2 ♦9 och 10 hp → pass, inte 5♣.*
+
+**Michaels-bjudaren svarar pass-eller-rätta** (samma ändring; regeln saknades —
+frö 20272323: 1♠–(2♠)–3♠–4♣–P–**5♣** med ♣J9854): efter partnerns
+klöver-pass-eller-rätta **passar** inklivaren med klöver som sin lågfärg och
+**rättar till ruter** (billigast) annars.
+
+**Tvåfärgsinklivarens egen fortsättning** (samma ändring; frö 20261162):
+- **Dubblat utan preferens** (felrapport #7): budet är konstgjort och får aldrig
+  spelas → flykt till den längsta visade färgen.
+- **Motståndarna bjöd över och partnern passade:** bara den **starka zonen**
+  bjuder vidare — **15+ hp, eller 13+ med 6-5** — då den längsta visade färgen
+  billigast, aldrig förbi utgång. *1♥–(2NT)–4♥–P–P med ♦A8643 ♣AKT732 (20 hp) →
+  5♣.* Svag zon → pass (partnern hade inget att säga, det är inte inklivarens
+  hand att bjuda på).
 
 ### 7.3 Takeout Double
 Upplysningsdubbling (takeout) – vår viktigaste dubbling. Den ber partnern **bjuda
@@ -2276,6 +2323,28 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-08 — Inkliv och advance flyttar in i beslutstabellen (§7.1–7.2;
+  motorbytet etapp 4 familj 1, `docs/motorbyte-plan.md`).** Raderna *inkliv*
+  (`overcall`: direkt sits + balansering, även passet), *advance*
+  (`advanceOvercall` på 1- och 2-läget, `advanceTwoSuiter`, 1NT-inklivets
+  systems on), *inkliv2* (inklivarens svar på cue-höjningen, stöd åt
+  advancerns nya färg, 1NT-inklivets fullföljd, tvåfärgsinklivarens
+  flykt/fortsättning) och *advance2* (preferens till inklivsfärgen, tävla till
+  fiten, cue-bjudarens fortsättning) — kunskapen i `overcall-continuations.ts`.
+  Konkurrens-slaminvitet (§6.10) blev tabellraden *konkurrens-slam* med samma
+  företräde som förut (`competitive-slam.ts`). Tio detektorer rivna; kvar i
+  det gamla lagret tills familj 2: dubblingsfamiljens lägen (all X på vår
+  sida). Bokändringar: advancerns svar på ett **2-lägesinkliv** följer
+  §7.1-tabellen (cue 11+/3+, höjning från 6 stödpoäng, ny färg 5+ 8+ på
+  2-läget, 2NT 11+); advancerns nya färg på **billigaste nivån**;
+  tvåfärgspreferens **även efter deras höjning** med uttalat spelrum för pass
+  (4-läget: 4+ kort eller 8+ hp; 5-läget: båda); tvåfärgsinklivarens
+  **flykt** när dubblad och **fortsättning i den starka zonen** (15+, eller
+  13+ med 6-5). Bridge-reglerna (`legalCalls` m.fl.) bor nu i
+  `auction-rules.ts`. Facit: `auction-etapp4-familj1.test.ts` +
+  familj 1-blocket i `motorbyte-facit.test.ts`; familj 2 fick två nya facit
+  (dubblarens fortsättning efter advancerns fria 2NT/cue — förr lästes de av
+  misstag som tvåfärgsinkliv).
 - **2026-09-08 — Lågfärgsfit i utgångskrav: 5m är utgången, inbjudan är
   kontrollbudet (§6.2; motorbytet §5b beslut 16, `docs/motorbyte-plan.md`).**
   Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 16 — bekräftar linjen, inget

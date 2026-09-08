@@ -22,8 +22,7 @@ import { decideFromTable, RESPONDABLE, type DecidedCall, type Decision } from '.
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
-import { respondTo1NT } from './responses-nt'
-import { overcall, advanceOvercall, advanceTwoSuiter, takeoutOfResponse, hasStopper } from './overcalls'
+import { overcall, takeoutOfResponse, hasStopper } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
 import { pointsWithFloor } from './evaluation'
 import type { Forcing, Suit } from '../../types/bridge'
@@ -304,6 +303,24 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     { seat: openerSeat, role: 'öppnare', call: opening.call, rule: opening.rule, explanation: opening.explanation, uncertain: opening.uncertain },
   ]
 
+  // Auktionen hittills som varje stol ser den (etapp 3 familj 6 / etapp 4
+  // familj 1): tabellen frågas stol för stol med motståndarnas pass ifyllda.
+  const history: ResolvedCall[] = [...passes, { seat: openerSeat, bid: opening.call as ResolvedCall['bid'], rule: opening.rule, explanation: opening.explanation }]
+  /** Stolens beslut ur tabellen, med motståndarnas pass ifyllda fram till stolen (den ostörda linjen). */
+  const ask = (seat: Seat): Decision | null => {
+    while (seatAt(deal.dealer, history.length) !== seat) history.push({ seat: seatAt(deal.dealer, history.length), bid: 'P' })
+    return decideFromTable(deal.hands[seat], auctionFacts(history, seat), isVulnerable(seat, deal.vulnerability))
+  }
+  const lay = (seat: Seat, d: DecidedCall) => {
+    turns.push({ seat, role: seat === openerSeat ? 'öppnare' : 'svarare', call: d.bid, rule: d.rule!, explanation: d.explanation!, uncertain: d.uncertain })
+    history.push({ seat, bid: d.bid, rule: d.rule, explanation: d.explanation })
+  }
+  /** Motståndarens tur ur tabellen (etapp 4 familj 1: inkliv, advance, balansering) — samma beslut som vid bordet. */
+  const layOpp = (seat: Seat, d: DecidedCall) => {
+    turns.push({ seat, role: 'motståndare', call: d.bid, rule: d.rule!, explanation: d.explanation!, uncertain: d.uncertain })
+    history.push({ seat, bid: d.bid, rule: d.rule, explanation: d.explanation })
+  }
+
   // Enda chokepoint för att bygga resultatet: fyller varje turns kravnivå
   // (§2) ur regelregistret innan auktionen returneras, så `forcing` alltid
   // härleds ur SAMMA regel som budet.
@@ -321,26 +338,29 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   }
 
   // Störd budgivning (punkt 27): efter en 1-läges färgöppning kan LHO kliva in.
+  // Inklivet tas ur BESLUTSTABELLEN (etapp 4 familj 1, 2026-09-08: raden
+  // *inkliv* = `overcall` ur LHO:s egen hand) — samma beslut som vid bordet.
   const openerSuit = OPEN_SUIT[opening.call]
   if (openerSuit) {
     const lhoSeat = seatAt(deal.dealer, (openerIndex + 1) % 4)
-    const ov = overcall(deal.hands[lhoSeat], opening.call)
-    if (ov.call !== 'P') {
-      turns.push({ seat: lhoSeat, role: 'motståndare', call: ov.call, rule: ov.rule, explanation: ov.explanation, uncertain: ov.uncertain })
-      const action = competitiveResponderAction(deal.hands[responderSeat], openerSuit, ov.call, ov.rule)
+    const ov = ask(lhoSeat)?.call ?? { seat: lhoSeat, bid: 'P' as ResolvedCall['bid'], rule: 'pass', explanation: '' }
+    if (ov.bid !== 'P') {
+      layOpp(lhoSeat, ov)
+      const action = competitiveResponderAction(deal.hands[responderSeat], openerSuit, ov.bid, ov.rule)
       turns.push({ seat: responderSeat, role: 'svarare', call: action.call, rule: action.rule, explanation: action.explanation, uncertain: action.uncertain })
+      history.push({ seat: responderSeat, bid: action.call as ResolvedCall['bid'], rule: action.rule, explanation: action.explanation })
       // En upplysningsdubbling som svararen passar är INTE utbjuden: advancern
       // (LHO:s partner) är skyldig att svara. Lämna auktionen öppen så vi inte
       // härleder ett felaktigt "passat ut"-kontrakt – det levande svaret bjuds i
       // budlådan (decideCall). Övriga konkurrensgrenar modelleras en rond.
-      if (ov.call === 'X' && action.call === 'P') {
+      if (ov.bid === 'X' && action.call === 'P') {
         return finish(true)
       }
       // Responsiv dubbling (punkt 9, §7.3): (1M)–X(LHO upplysning)–2M(svararen
       // höjer)–X(advancern). När svararen HÖJT öppnarens färg efter en
       // upplysningsdubbling kan advancern (dubblarens partner) svara responsivt
       // med stöd i de objudna färgerna. Bara efter en enkel höjning av vår färg.
-      if (ov.call === 'X' && action.rule === 'konkurrenshöjning') {
+      if (ov.bid === 'X' && action.rule === 'konkurrenshöjning') {
         const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
         const resp = responsiveDouble(deal.hands[advancerSeat], openerSuit)
         if (resp) {
@@ -352,12 +372,14 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // svararens pass svarar advancern (inklivarens partner): höjning, cue =
       // limithöjning+, ny färg, NT eller fit-jump. Bara i det ostörda advance-
       // läget (svararen passade) över ett 1-läges inkliv, så budet blir lagligt.
-      if (ov.rule === 'enkelt inkliv' && /^1[CDHS]$/.test(ov.call) && action.call === 'P') {
-        const partnerSuit = parseBid(ov.call).suit
+      // Sedan etapp 4 familj 1 kommer advancerns bud ur tabellen (raden
+      // *advance* = `advanceOvercall` ur advancerns egen hand).
+      if (ov.rule === 'enkelt inkliv' && /^1[CDHS]$/.test(ov.bid) && action.call === 'P') {
+        const partnerSuit = parseBid(ov.bid).suit
         if (partnerSuit) {
           const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-          const adv = advanceOvercall(deal.hands[advancerSeat], partnerSuit, openerSuit, 1)
-          turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
+          const adv = ask(advancerSeat)?.call
+          if (adv) layOpp(advancerSeat, adv)
           // Auktionen är INTE död när advancern passar (felrapport #38): öppnaren
           // sitter då i utpassningssitsen och ska få återöppningsfrågan
           // (openerReopensBalancing i decideCall) — annars säljs given i 1-läget.
@@ -371,8 +393,8 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // ÖPPEN – inklivaren fullföljer (transfer/Stayman-svar) levande i budlådan.
       if (ov.rule === '1NT-inkliv' && action.call === 'P') {
         const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-        const adv = respondTo1NT(deal.hands[advancerSeat])
-        turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
+        const adv = ask(advancerSeat)?.call
+        if (adv) layOpp(advancerSeat, adv)
         return finish(true)
       }
       // Advancer-logik för TVÅFÄRGSINKLIV (§7.2, Michaels / ovanlig 2NT): efter
@@ -384,9 +406,9 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // för tidigt.
       if ((ov.rule === 'Michaels' || ov.rule === 'ovanlig 2NT') && action.call === 'P') {
         const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-        const adv = advanceTwoSuiter(deal.hands[advancerSeat], ov.call, openerSuit, false)
-        turns.push({ seat: advancerSeat, role: 'motståndare', call: adv.call, rule: adv.rule, explanation: adv.explanation })
-        return finish(adv.call !== 'P')
+        const adv = ask(advancerSeat)?.call
+        if (adv) layOpp(advancerSeat, adv)
+        return finish(!!adv && adv.bid !== 'P')
       }
       // Svararen PASSADE ett naturligt inkliv (2-läges, eller ett 1-läges inkliv
       // som inte är "enkelt inkliv"): buildAuction stängde förr given här och
@@ -395,7 +417,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // bjuds levande i budlådan (decideCall), precis som takeout-X/Michaels-
       // grenarna ovan. Lämna öppen. (Ett äkta pass-ut faller ändå ut live – samma
       // slutkontrakt – medan en återöppningshand nu tävlar i stället för att sälja.)
-      if (action.call === 'P' && parseBid(ov.call).suit) {
+      if (action.call === 'P' && parseBid(ov.bid).suit) {
         return finish(true)
       }
       return finish(action.call !== 'P')
@@ -450,16 +472,6 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // 1NT/2NT kommer samma väg (`gerberAsk`); essfrågan spelas sedan ut tur för
   // tur i tabell-loopen längst ner (raden *slam*) — familj 6 rev de två
   // tvåhandsförarna som förut byggde hela Gerber-sekvensen här.
-  const history: ResolvedCall[] = [...passes, { seat: openerSeat, bid: opening.call as ResolvedCall['bid'], rule: opening.rule, explanation: opening.explanation }]
-  /** Stolens beslut ur tabellen, med motståndarnas pass ifyllda fram till stolen (den ostörda linjen). */
-  const ask = (seat: Seat): Decision | null => {
-    while (seatAt(deal.dealer, history.length) !== seat) history.push({ seat: seatAt(deal.dealer, history.length), bid: 'P' })
-    return decideFromTable(deal.hands[seat], auctionFacts(history, seat), isVulnerable(seat, deal.vulnerability))
-  }
-  const lay = (seat: Seat, d: DecidedCall) => {
-    turns.push({ seat, role: seat === openerSeat ? 'öppnare' : 'svarare', call: d.bid, rule: d.rule!, explanation: d.explanation!, uncertain: d.uncertain })
-    history.push({ seat, bid: d.bid, rule: d.rule, explanation: d.explanation })
-  }
   const response = ask(responderSeat)?.call
   if (!response) return finish(true)
   lay(responderSeat, response)
@@ -472,18 +484,13 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // Fortsättningen (advancerns höjning m.m.) bjuds levande i budlådan
   // (`decideCall`), därför lämnas auktionen öppen.
   if (response.bid === 'P') {
+    // Balanseringen ur tabellen (etapp 4 familj 1: raden *inkliv* i
+    // utpassningsläget = `overcall(…, balancing)` ur fjärde hands egen hand).
     if (openerSuit) {
       const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-      const bal = overcall(deal.hands[balancerSeat], opening.call, true)
-      if (bal.call !== 'P') {
-        turns.push({
-          seat: balancerSeat,
-          role: 'motståndare',
-          call: bal.call,
-          rule: bal.rule,
-          explanation: `${bal.explanation} (balansering – utpassningsläget)`,
-          uncertain: bal.uncertain,
-        })
+      const bal = ask(balancerSeat)?.call
+      if (bal && bal.bid !== 'P') {
+        layOpp(balancerSeat, bal)
         return finish(true)
       }
     }

@@ -301,7 +301,19 @@ enskilt största detektorn; ordningen nedan är planens och fastställs mot
 mätningen vid etapp 4:s start):
 
 1. Inkliv och advance (`overcall`, `advanceOvercall`, `advanceTwoSuiter`,
-   inklivarens fortsättningar).
+   inklivarens fortsättningar). **BYGGD 2026-09-08 (loggen), väntar på
+   grinden:** raderna *inkliv* (direkt sits + balansering, även passet),
+   *advance* (1-/2-lägesinkliv, tvåfärg, 1NT-inklivets systems on), *inkliv2*
+   (inklivarens andra tur) och *advance2* (advancerns senare bud); kunskapen
+   i `overcall-continuations.ts`. Konkurrens-slaminvitet (etapp 7 hål D)
+   blev tabellraden *konkurrens-slam* (`competitive-slam.ts`) med samma
+   företräde som steget hade. Bridge-reglerna (`legalCalls` m.fl.) i
+   `auction-rules.ts`. Tio detektorer rivna. Kvar i det gamla lagret tills
+   familj 2: allt där någon på vår sida dubblat (dubblarens vakter går före),
+   inkl. en tunn `advancerCompetesToFit` för de lägena; hoppinklivets advance
+   (spärrhöjningen i `raiseWithFit`); advancern efter deras vidarebud över
+   ett 1-lägesinkliv (K3 i `raiseWithFit`) → familj 4:s "partnern visade en
+   färg".
 2. Upplysningsdubbling, svar och dubblarens återbud (den starka dubblaren).
 3. Negativ dubbling, stöddubbling, öppnarens svar på dem.
 4. Svararens fria bud, öppnarens fortsättning i konkurrens, höjningar på visad
@@ -600,6 +612,91 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 - Inget andra budsystem.
 
 ## Ändringslogg
+
+- **2026-09-08 — Etapp 4 familj 1 BYGGD: inkliv och advance i tabellen (väntar
+  på grinden).** Test-drivet: facit-blocket "etapp 4 familj 1" i
+  `motorbyte-facit.test.ts` (frö 20261162 → 5♣, frö 20262021 → 4♣) +
+  `auction-etapp4-familj1.test.ts` (22 fall: raderna, lägesgränserna, det
+  rivna). **Bygget:** `auction-rules.ts` (bridge-reglerna utbrutna ur
+  `auction-live.ts`, som re-exporterar — annars cirkelimport tabell ↔ gamla
+  lagret); `overcall-continuations.ts` (lägesläsarna `overcallSeat`,
+  `advanceSeat`, `twoSuiterAdvanceSeat`, `our1NTOvercall`,
+  `overcallerSecondTurn`, `ownTwoSuiterSeat`, `cueBidderTurn` + kunskapen
+  som funktioner av EN hand + fakta); `competitive-slam.ts` (konkurrens-
+  slaminvitet ordagrant flyttat). Raderna: *konkurrens-slam* (före familjens
+  rader — steget låg före detektorerna i det gamla lagret; utan raden pre-
+  emptade advance2 ett 4NT i avvikelsedumpen), *inkliv* (`overcall`, direkt +
+  balansering, svarar alltid inkl. pass), *advance* (`advanceOvercall` 1-/2-
+  läget, `advanceTwoSuiter` med `overCall`-parametern, `respondTo1NT`),
+  *inkliv2* (straffdubblingen först, cue-svar tyst/tävlat, fit-jump-svaret,
+  stöd åt advancern, 1NT-fullföljd, Michaels-svaret på pass-eller-rätta,
+  tvåfärgsinklivets flykt/fortsättning, sist "tävla till fiten" för
+  inklivaren), *advance2* (straffdubblingen först, preferens till
+  inklivsfärgen, tävla till fiten, cue-bjudarens fortsättning). Manuset
+  (`auction.ts`) läser tabellen för LHO:s inkliv, advancern och
+  balanseringen (`history`/`ask`/`layOpp` flyttade upp före konkurrens-
+  ronden). Rivet ur `auction-live.ts`: `maybeOvercall`,
+  `partnerTwoSuiterToAnswer`, `ownDoubledTwoSuiterRescue`,
+  `advancerRespondsTo1NTOvercall`, `overcallerAnswersAdvance`,
+  `overcallerRaiseAdvance`, `overcallerCompetesAfterCueRaise`,
+  `overcallerAnswersCueRaise`, `advancerPrefersOvercallSuit` och
+  konkurrens-slam-steget; `answerCueBidderRebid` = tunt anrop till den
+  delade `cueBidderContinues(…, 'öppnare')` tills familj 4.
+  **Familjegränsen som kostade tre diffvarv:** all X på VÅR sida är
+  dubblingsfamiljens läge — tabellraderna inkliv2/advance2 tiger då
+  (`ourSideDoubled`) och det gamla lagret behåller en tunn detektor
+  `advancerCompetesToFit` (preferens ?? tävla, bara med X på vår sida) EFTER
+  dubblarens vakter. Utan gränsen pre-emptade raden "dubblaren nöjer sig"-
+  passen (26 c-fall) och den starka dubblingens återbud. Samma sak med
+  straffdubblingen (`maybePenaltyDouble` låg före fortsättningarna: två
+  X → 5♦ i revisorns intervall) → `penaltyDoubleFirst` först i båda raderna.
+  Regeln att ta med till familj 2–8: en rad som flyttar en catch-all-detektor
+  ska behålla dess räckvidd men utesluta lägen där en TIDIGARE detektor i
+  kedjan ägde beslutet — diffen avslöjar det som "före: <detektor A> → efter:
+  tabell:<rad>".
+  **b-listan (bokens paragraf i budsystem §7.1–7.2, alla i §9):**
+  (1) advancern svarar på ett **2-lägesinkliv** med §7.1-tabellen — cue 3+/11+
+  (frö 20270035: 1♦–(2♣)–P: ♠K ♥KT9 ♦K9765 ♣Q976 → 2♦ i stället för 5♣; sedan
+  3♣ minimum, 3NT), höjning från 6 stödpoäng (frö 20270262: ♠93 ♥KT52 ♦AQ62
+  ♣T83 → 3♣ i stället för pass), ny färg 5+/8+ på 2-läget aldrig deras färg
+  (frö 20270120: ♠54 ♥AK94 ♦KT9743 ♣8 → 2♦), 2NT 11+ med stopp (frö 20271567:
+  ♠AT3 ♥QT3 ♦K3 ♣KJ753 → 2NT; frö 20270968 → 2NT i stället för 4-korts 2♠),
+  fit-jump (frö 20270356: ♠7 ♥KQT96 ♦AKQ62 ♣T8 → 4♦ i stället för 4♥);
+  (2) advancerns nya färg på **billigaste nivån** (frö 20270592: 1♣–(1♥)–P
+  med ♠QJ976 → 1♠, förr hoppet 2♠); (3) **tvåfärgspreferens efter deras
+  höjning** (frö 20270044: 1♠–(2NT)–3♠ med ♦AQ954 → 4♦; frö 20262021 → 4♣)
+  med spelrum för pass (4-läget: 4+ kort eller 8+ hp; 5-läget: båda — frö
+  20270138 ♣Q2 10 hp → pass, frö 20270064 fem hjärter 1 hp → pass; p/c-3♣
+  aldrig på 5-läget); (4) **inklivaren svarar fit-jumpen** (frö 20270356: Öst
+  ♥AJ752 9 hp → 4♥ i stället för gamla lagrets 5♦-höjning av sidofärgen) och
+  **Michaels-svaret på pass-eller-rätta** (frö 20272323: ♣J9854 → pass i stället
+  för 5♣); (5) **tvåfärgsinklivarens flykt/fortsättning** (frö 20261162 →
+  5♣); (6) boten kliver in över människans öppning även när ingen bot skulle
+  öppna (avvikelsedumpen 20270031: "ingen öppning" → 2♣/1♥). **Familj 2-fynd
+  (14 bot-mot-bot-givar):** det gamla lagrets tvåfärgsläsare tog partnerns
+  2NT/cue EFTER vår upplysningsdubbling för Michaels/ovanlig 2NT och "gav
+  preferens" (frö 20270004: 3♣; 20270461: 3♠); nu pass = regeln saknas
+  (dubblarens fortsättning efter advancerns fria 2NT / cue) → `it.todo` i
+  facit-kön (20270004 → 3NT, 20270461 → 3♠); pliktsvepets K1 visar dem som
+  "dubblarens partner passar cue (krav)" (6 träffar).
+  **Mätningar** (kommandon i §3; baslinjer på `226882b`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 86
+  (b-listan + familj 2-fynden; a-mönster: manusets LHO-inkliv/advance/
+  balansering + inklivarens/advancerns flyttade fortsättningar), samma
+  bud/annan källa 2138; avvikelsedumpen: ÄNDRAT BUD 136 (samma mönster; 11 st
+  "2-lägesadvance passar i stället för 4-korts ny färg på 12+"), samma bud/
+  annan källa 5092, olagliga tabellbud 0; revisorns intervall
+  (20260721–20261720, baslinje via `git stash`): ÄNDRAT BUD 30 (samma
+  mönster). Frekvensbilden (`auktionsdump-frekvens.txt`): `tabell:inkliv`
+  2317 · `tabell:advance` 321 · `tabell:inkliv2` 120 · `tabell:advance2`
+  102; `manus` 7330 → 4862 bud, `pass (ingen regel)` 8993 → 8892, `detektor:advancerCompetesToFit` 108 → 10 (bara X-lägena), 101 → 89 källor. Betydelsesvepet: ostörda grinden kravnivå 0 · alert 0 ·
+  registerhål 0 · kända motoravvikelser 0; störda (etapp 4 familj 9)
+  kravnivå 1907 → 2100 bud · alert 958 → 1045 · registerhål 1315 → 1030 (fler cue-advance och fit-jumps att läsa; grindas i familj 9). Pliktsvep: K1 19 → 25 (de sex nya = "dubblarens partner passar cue (krav)" = familj 2-fyndet), K2 2 → 3, K3 5 → 5, K4 0, K6-inventeringen 12 → 29 (fler cue-advance); förklaringssvep grönt; regelsvep grönt.
+  Kikvakten skarp för alla tabellkällor (300 givar; nya krav `tabell:inkliv`
+  > 100, `tabell:advance` > 0). Revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust 270,16 (baslinje 226882b: 20,4 % · 268,38, dvs. +1,78 per giv ≈ en givs förlust på tusen); kategorier (antal/förlust): fel-farg-bet 117/49760 · missad-lillslam 76/49080 · missad-utgang 139/47460 · missad-storslam 34/39190 · billig-offring 116/32300 · battre-an-facit 119/20810 · sald-giv 58/18430 · for-hogt 42/10230 · fel-strain 92/2090 · utpassad 3/810 (revisor-output/latest.json). 29 av revisorns 1000 givar bytte slutkontrakt (listan ur auktionsdump-revrange-diffen: t.ex. 20260806 4♠ → 4♥ Ö/V via tvåfärgspreferens, 20261162 4♥ → 5♣ = facit-fröet, 20261601 5♣ → 4♣ via fit-jump) — alla b-mönster; ingen regel tunad på poäng (ägarprincip 2026-08-06).
+  Nästa: 🚪 grinden (b-listan ovan) → `--no-ff`-mergepunkt + deploy → etapp
+  4 familj 2 (upplysningsdubbling, svar, dubblarens återbud) med nya
+  baslinjer på familj 1:s mergepunkt.
 
 - **2026-09-08 — §5b beslut 16 KLAR & LIVE (lågfärgsfit i utgångskrav: 5m är
   utgången, inbjudan är kontrollbudet — bara bok + facit; mergepunkt `226882b`,

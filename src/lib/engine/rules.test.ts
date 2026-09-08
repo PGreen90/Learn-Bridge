@@ -71,6 +71,15 @@ const ALL_ENGINE_RULES: string[] = [
   '2♣: rebud egen färg (GF)', 'rättelse till högfärg',
   // §5b beslut 13 (2026-09-07): öppnarens svar på svararens naturliga nya färg efter 2/1.
   '2/1: svar på ny färg', '2/1: placerar utgång',
+  // Etapp 4 familj 1 (2026-09-08): inkliv och advance i tabellen (overcalls.ts, overcall-continuations.ts, competitive-slam.ts).
+  'fit-jump', 'advance tvåfärg (preferens)', 'advance tvåfärg (pass-eller-rätta minor)',
+  'tvåfärgsinkliv: flykt', 'tvåfärgsinkliv: bjuder vidare (stark)', 'stöd åt advancern',
+  'inklivaren svarar cue-höjning (utgång)', 'inklivaren svarar cue-höjning (minimum)', 'överklivaren tävlar (cue-höjning)',
+  'inklivaren svarar fit-jump (utgång)', 'inklivaren svarar fit-jump (minimum)',
+  'tvåfärgsinkliv: passar pass-eller-rätta', 'tvåfärgsinkliv: rättar till ruter',
+  'advancern tävlar till fiten (lagen om totala stick)', 'advancern bjuder utgång med fit (konkurrens)',
+  'cue-höjningens fortsättning', 'cue-höjningens fortsättning (limit stannar)',
+  'konkurrens-slaminvit (RKC)', 'konkurrens-slam: placering', 'konkurrens-slam: stopp',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

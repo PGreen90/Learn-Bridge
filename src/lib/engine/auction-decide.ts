@@ -59,8 +59,24 @@
 //        2♣–2♦–2NT.
 //      · raden *fjärde*: öppnarens fjärde bud — valet efter Smolen och
 //        3NT-erbjudandet i systems on efter 2♣–2♦–2NT.
+//   Etapp 4 (konkurrensen):
+//   E4.1. Inkliv och advance (2026-09-08):
+//      · raden *inkliv*: motståndarna öppnade 1 i färg, vår sida tyst, direkt
+//        sits eller balansering → `overcall` (enkelt inkliv, hoppinkliv, 1NT,
+//        Michaels, ovanlig 2NT, upplysnings-X — eller pass).
+//      · raden *advance*: advancerns första bud — partnerns naturliga inkliv
+//        (1-/2-läget, svararen tyst) → `advanceOvercall`; tvåfärgsinkliv →
+//        `advanceTwoSuiter` (även när de höjt sin färg); 1NT-inkliv →
+//        sangsystemet (systems on).
+//      · raden *inkliv2*: inklivarens andra tur — svaret på cue-höjningen
+//        (tyst / efter deras vidarebud), svaret på fit-jumpen, stöd åt
+//        advancerns nya färg, 1NT-inklivets fullföljd, Michaels-svaret på
+//        pass-eller-rätta, tvåfärgsinklivets flykt/fortsättning.
+//      · raden *advance2*: advancerns senare bud — preferens till inklivs-
+//        färgen, tävla till fiten (lagen om totala stick), cue-bjudarens
+//        fortsättning. Kunskapen bor i `overcall-continuations.ts`.
 
-import type { Hand, Seat, Suit } from '../../types/bridge'
+import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
@@ -80,7 +96,9 @@ import { openerThirdAfterSecondNegative, respondTo2C, responderAfterSecondNegati
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
-import { hasStopper } from './overcalls'
+import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall } from './overcalls'
+import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
+import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -1285,6 +1303,20 @@ const TABELL: Row[] = [
       return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation }
     },
   },
+  // Konkurrens-slam (etapp 7 hål D, §6.10; flyttad hit i etapp 4 familj 1 —
+  // steget låg FÖRE konkurrensdetektorerna i det gamla lagret och behåller
+  // den platsen här, före etapp 4:s rader): den kontroll-kompletta kaptenen
+  // frågar 4NT mot partnerns hopp i en högfärgsfit, och placerar på svaret.
+  // Läget: motståndarna har bjudit och vår sida har minst ett kontraktsbud;
+  // funktionerna själva avgör om triggern/placeringen gäller (annars null).
+  {
+    id: 'konkurrens-slam',
+    läge: (f) => f.opponentsHaveBid && f.ourContractBids.length >= 1,
+    välj: ({ hand, facts }) => {
+      const k = competitiveRKCPlace(hand, facts) ?? competitiveSlamTry(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
   // Familj 1 — öppningen. Ingen har öppnat (inga kontraktsbud; X/XX kan inte
   // komma före ett bud), så stolen är i öppningsposition. Positionen styr
   // lättöppningen i 3:e hand och regeln om 15 i 4:e (systemboken §3).
@@ -1441,6 +1473,101 @@ const TABELL: Row[] = [
       const r = openerFourthDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, second, fourth, hand)
       if (!r) return null
       return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
+    },
+  },
+
+  // ---- Etapp 4 familj 1 — inkliv och advance (2026-09-08) -------------------
+  // Inklivssitsen: motståndarna öppnade 1 i färg och vår sida har inte sagt
+  // ett ljud — direkt sits eller balansering (utpassningsläget, "låna en
+  // kung"). Hela §7.1–7.2-arsenalen ur `overcall`; pass är också ett beslut,
+  // så raden svarar alltid (samma sitsar som manusets konkurrensrond och det
+  // gamla lagrets `maybeOvercall` hade).
+  {
+    id: 'inkliv',
+    läge: (f) => overcallSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const s = overcallSeat(facts)!
+      const r = overcall(hand, s.openBid, s.balancing)
+      const note = s.balancing && r.call !== 'P' ? ' (balansering – utpassningsläget: lättare krav, "låna en kung")' : ''
+      return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation + note, uncertain: r.uncertain }
+    },
+  },
+  // Advancerns första bud. Tre lägen, inbördes uteslutande (partnerns enda
+  // kontraktsbud är ett naturligt färginkliv / ett tvåfärgsbud / 1NT):
+  //  · naturligt inkliv på 1- eller 2-läget (ej hopp), svararen passade →
+  //    `advanceOvercall` (höjning, cue = limithöjning+, ny färg, NT, fit-jump);
+  //  · Michaels / ovanlig 2NT → `advanceTwoSuiter`: preferens till den längsta
+  //    av partnerns visade färger, över det senaste kontraktsbudet (de kan ha
+  //    höjt sin egen färg); i konkurrens finns spelrum för pass;
+  //  · 1NT-inkliv, svararen passade → sangsystemet (§4.3 systems on).
+  // Hoppinkliv och partnerns svar på deras vidarebud lämnas åt det gamla lagret.
+  {
+    id: 'advance',
+    läge: (f) => advanceSeat(f) !== null || twoSuiterAdvanceSeat(f) !== null || our1NTOvercall(f)?.overcaller === f.partner,
+    välj: ({ hand, facts }) => {
+      const a = advanceSeat(facts)
+      if (a) {
+        const r = advanceOvercall(hand, a.partnerSuit, a.theirSuit, a.level)
+        return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
+      }
+      const t = twoSuiterAdvanceSeat(facts)
+      if (t) {
+        const r = advanceTwoSuiter(hand, t.partnerCall, t.theirSuit, t.contested, facts.lastContract!.bid)
+        return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
+      }
+      const nt = advancerRespondsTo1NTOvercall(hand, facts)
+      return nt ? asCall(facts.seat, nt) : null
+    },
+  },
+  // Inklivarens andra tur: jag var först på vår sida (inklivaren) över deras
+  // öppning. Kunskapsfunktionerna läser själva sitt exakta läge ur auktionen
+  // (mitt naturliga inkliv + partnerns cue/nya färg; mitt 1NT-inkliv +
+  // partnerns systemsvar; mitt tvåfärgsinkliv dubblat/överbjudet; sist
+  // "tävla till fiten" när partnern visat en 2-lägesfärg och de hittat sin
+  // fit) och svarar null annars — då gäller det gamla lagret som förut.
+  // Har någon på vår sida dubblat är det dubblingsfamiljens läge (familj 2).
+  // Straffdubblingen prövas först i båda raderna — samma företräde som det
+  // gamla lagrets `maybePenaltyDouble` hade före de här fortsättningarna.
+  {
+    id: 'inkliv2',
+    läge: (f) => f.opening !== null && !f.weOpened && f.role === 'inklivare' && f.ourContractBids.length >= 1 && f.ourContractBids[0].seat === f.seat && !ourSideDoubled(f),
+    välj: ({ hand, facts }) => {
+      const k =
+        penaltyDoubleFirst(hand, facts) ??
+        overcallerAnswersCue(hand, facts) ??
+        overcallerCompetesAfterCue(hand, facts) ??
+        overcallerAnswersFitJump(hand, facts) ??
+        overcallerRaisesAdvance(hand, facts) ??
+        overcallerAnswersAdvance(hand, facts) ??
+        twoSuiterAnswersPassOrCorrect(hand, facts) ??
+        twoSuiterContinues(hand, facts) ??
+        advancerCompetesToFit(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Advancerns senare bud: partnern gjorde vår sidas första KONTRAKTSBUD över
+  // deras öppning (inklivet) och ingen på vår sida har dubblat — dubblingens
+  // flöden (dubblarens vakter, den starka X:en) är familj 2 och ligger kvar i
+  // det gamla lagret, som därför även behåller "tävla till fiten" för den som
+  // själv dubblade. Raden *advance* hade inget att säga. Preferens till
+  // inklivsfärgen när partnern visat två färger · tävla till fiten efter
+  // deras fitvisning · cue-bjudarens fortsättning efter inklivarens svar.
+  // null → det gamla lagret.
+  {
+    id: 'advance2',
+    läge: (f) =>
+      f.opening !== null &&
+      !f.weOpened &&
+      f.ourContractBids.length >= 1 &&
+      f.ourContractBids[0].seat === f.partner &&
+      !ourSideDoubled(f),
+    välj: ({ hand, facts }) => {
+      const k =
+        penaltyDoubleFirst(hand, facts) ??
+        advancerPrefersOvercallSuit(hand, facts) ??
+        advancerCompetesToFit(hand, facts) ??
+        cueBidderContinues(hand, facts, 'inklivare')
+      return k ? asCall(facts.seat, k) : null
     },
   },
 ]
