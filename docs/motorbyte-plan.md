@@ -576,7 +576,8 @@ steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa — LIVE 2026-09-07,
 `f4cbe74`) → 11 (ny färg på
 3-läget efter 1M–1NT–2x — LIVE 2026-09-08, `b06c673`) → 12 (hopp till 4m =
-driv — KLAR 2026-09-08, PCD väntar) → 16 (bara bok + facit) →
+driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — KLAR 2026-09-08,
+PCD väntar) →
 8 (redan byggt, bara låst).
 
 ## 6. Arbetssättet under bytet
@@ -600,8 +601,28 @@ driv — KLAR 2026-09-08, PCD väntar) → 16 (bara bok + facit) →
 
 ## Ändringslogg
 
-- **2026-09-08 — §5b beslut 12 KLAR (hopp till 4m efter 1m–2m′–2NT = trumf
-  satt + slamdriv; väntar ägarens PCD — mergepunkt fylls i).** Test-drivet:
+- **2026-09-08 — §5b beslut 16 KLAR (lågfärgsfit i utgångskrav: 5m är
+  utgången, inbjudan är kontrollbudet — bara bok + facit; väntar ägarens PCD
+  — mergepunkt fylls i).** Facit-blocket "§5b beslut 16" i
+  `motorbyte-facit.test.ts` (tre fall) låser linjen: efter 1♦–2♣–2NT–3♦–4♦
+  cue:ar kaptenen 4♥/4♠ med 31–32 (jämn 19 mot visade 12), bjuder 5♦ utan
+  första-rondskontroll (systemriktig miss), frågar 4NT med 33+; partnern
+  cue:ar tillbaka med extra eller avslutar 5♦; betydelselagret läser 4♥ som
+  cue och 5♦ som utgång. Sonden före bygget visade att motorn redan gjorde
+  allt detta — inget bud ändras. Enda kodtillägg: partnerns uttryckliga pass
+  ur slamraden när kaptenen avslutar direkt i 5m (`slamTurn`; förr gamla
+  lagret — samma bud, ny källa). Systembok §6.2 (en mening) + §9.
+  **Mätningar** (kommandon i §3; baslinjer på `3cd2cfa`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 0, samma
+  bud/annan källa 15 (partnerns pass efter kaptenens utgångsavslut ur
+  slamraden/manuset — a); avvikelsedumpen: ÄNDRAT BUD 0, samma bud/annan källa
+  43 (samma pass), olagliga tabellbud 0; betydelsesvepet kravnivå 0 · alert 0 ·
+  registerhål 0 · kända motoravvikelser 0; pliktsvep/förklaringssvep/regelsvep
+  gröna; revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust 268,38
+  (identiskt med beslut 12 — inget bud ändras).
+- **2026-09-08 — §5b beslut 12 KLAR & LIVE (hopp till 4m efter 1m–2m′–2NT =
+  trumf satt + slamdriv; mergepunkt `3cd2cfa`, Actions grön, rebidz.com
+  aliasad).** Test-drivet:
   facit-blocket "§5b beslut 12" i `motorbyte-facit.test.ts` (fyra fall). Bara
   läsregel + öppnarens svar — boten bjuder själv fortfarande det billiga 3m
   (#58). Nya lagret: betydelselagret `responderSecondAfter2over1` läser 4m som

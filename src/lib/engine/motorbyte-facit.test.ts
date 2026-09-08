@@ -928,3 +928,39 @@ describe('§5b beslut 12 – hopp till 4m efter 1m–2m′–2NT = trumf satt + 
     expect(bud('S:5 H:K4 D:AJ763 C:AKJ52', [...hD, call('N', '5D'), P('E')], 'S')!.call.bid).toBe('P')
   })
 })
+
+// §5b beslut 16 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 16): 5m efter
+// partnerns 4m ÄR utgången (till spel); inbjudan i lågfärgsfit är
+// KONTROLLBUDET. Med trumf satt i utgångskrav är cue under utgång gratis (§6.2):
+// kaptenen med 31–32 visar billigaste kontroll (4♥/4♠ över 4♦), partnern cue:ar
+// tillbaka med extra eller bjuder 5m med minimum; 33+ frågar 4NT direkt; handen
+// utan billig kontroll bjuder 5m — systemriktig miss. Inget bud ändras: blocket
+// LÅSER linjen (bok + facit). Enda kodtillägget: partnerns uttryckliga pass ur
+// slamraden när kaptenen avslutar direkt i 5m (förr gamla lagret).
+describe('§5b beslut 16 – lågfärgsfit i utgångskrav: 5m är utgången, inbjudan är kontrollbudet (låsning)', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  // 1♦–2♣–2NT–3♦ (försenat stöd) – 4♦ (öppnaren: kravet står, ingen sang) — kaptenen (Syd) mot visade 12.
+  const h4D = [call('N', '1D'), P('E'), call('S', '2C'), P('W'), call('N', '2NT'), P('E'), call('S', '3D'), P('W'), call('N', '4D'), P('E')]
+
+  it('kaptenen med 31–32 visar billigaste kontroll över 4♦ (4♥ med ♥A, 4♠ med ♠A); utan första-rondskontroll → 5♦ (systemriktig miss); 33+ frågar 4NT direkt', () => {
+    expect(bud('S:K54 H:A43 D:KQ76 C:AQJ', h4D, 'S')!.call).toMatchObject({ bid: '4H', rule: 'cue-bid' }) // 19 jämn → 31
+    expect(bud('S:A54 H:K43 D:KQ76 C:AQJ', h4D, 'S')!.call).toMatchObject({ bid: '4S', rule: 'cue-bid' })
+    expect(bud('S:KQ4 H:KQJ D:KQ76 C:QJT', h4D, 'S')!.call).toMatchObject({ bid: '5D', rule: 'höjning till utgång' }) // 19 men inga ess
+    expect(bud('S:A54 H:AJ3 D:KQ76 C:AQJ', h4D, 'S')!.call).toMatchObject({ bid: '4NT', rule: '1430 RKC' }) // 21 → 33
+  })
+
+  it('partnern (öppnaren) efter kaptenens 4♥-cue: extra → cue tillbaka (4♠), minimum → 5♦ (avslut); efter kaptenens 5♦ passar hon ur slamraden', () => {
+    const h4H = [...h4D, call('S', '4H'), P('W')]
+    expect(bud('S:A43 H:J73 D:AJ85 C:K6', h4H, 'N')!.call).toMatchObject({ bid: '4S', rule: 'cue-bid' }) // 13 med ♠A
+    expect(bud('S:Q43 H:J73 D:AJ85 C:K6', h4H, 'N')!.call).toMatchObject({ bid: '5D', rule: 'cue: avslut' }) // 10-11: inget att visa
+    const h5D = [...h4D, call('S', '5D'), P('W')]
+    expect(bud('S:A43 H:J73 D:AJ85 C:K6', h5D, 'N')!.call).toMatchObject({ bid: 'P', rule: 'pass' })
+    expect(decideCallTraced(dealNS('S:A43 H:J73 D:AJ85 C:K6', 'S:KQ4 H:KQJ D:KQ76 C:QJT'), h5D, 'N').källa).toBe('tabell:slam')
+  })
+
+  it('betydelselagret: 4♥ över 4♦ med satt ruter = kontrollbud (alert), 5♦ = utgång — inte inbjudan', () => {
+    expect(meaningOf([...h4D, call('S', '4H')], 10)).toMatchObject({ rule: 'cue-bid', alert: true })
+    expect(meaningOf([...h4D, call('S', '5D')], 10)).toMatchObject({ rule: 'utgång', forcing: 'avslut' })
+  })
+})

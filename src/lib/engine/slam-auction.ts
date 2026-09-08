@@ -248,6 +248,11 @@ export function slamTurn(role: SlamRole, hand: Hand, setup: SlamSetup, sofar: Sl
     return role === CAPTAIN ? slamCaptainFirstStep(hand, trump, setup.lastCall, ctx, setup.partnerShort) : null
   }
   if (sofar[sofar.length - 1].role === role) return null // inte min tur i sekvensen
+  // Kaptenen avslutade direkt i utgång (5m efter mitt 4m, §5b beslut 16: utgången
+  // står, inbjudan i lågfärgsfit ÄR kontrollbudet) → partnern passar uttryckligen.
+  if (sofar.length === 1 && sofar[0].role === CAPTAIN && role !== CAPTAIN && sofar[0].call === gameCallFor(trump)) {
+    return { role, call: 'P', rule: 'pass', explanation: `Partnern avslutade i utgång (${sofar[0].call}) → pass.` }
+  }
   const floor = role === CAPTAIN ? captainFloor(hand, trump, ctx, setup.partnerShort) : 0
   const askIdx = sofar.findIndex((b) => b.role === CAPTAIN && b.call === '4NT')
   if (askIdx >= 0) return rkcPhaseTurn(role, hand, trump, ctx, floor, sofar.slice(askIdx + 1))
