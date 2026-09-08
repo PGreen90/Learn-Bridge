@@ -38,16 +38,13 @@ Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägaren
 ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
 **HELA §5b LIVE 2026-09-08** (sista mergepunkt `226882b`). **Etapp 4 familj 1
-(inkliv och advance) BYGGD 2026-09-08 — VÄNTAR PÅ GRIND:** raderna *inkliv/advance/
+(inkliv och advance) KLAR & LIVE 2026-09-08 (mergepunkt `26687c9`, grinden godkänd):** raderna *inkliv/advance/
 inkliv2/advance2* + *konkurrens-slam* i tabellen, tio detektorer rivna,
 kunskapen i `overcall-continuations.ts`/`competitive-slam.ts`, bridge-
-reglerna i `auction-rules.ts`. b-listan (advancern på 2-lägesinkliv,
-tvåfärgspreferens efter deras höjning, ny färg billigast, tvåfärgsinklivarens
-fortsättning) står i planens logg med exempelhänder — **ägaren godkänner
-familjen eller pekar på en giv → sedan merge (`--no-ff`) + deploy.** Kvar i
-gamla lagret tills familj 2: all X på vår sida (dubblarens vakter). Därefter:
-etapp 4 familj 2 (upplysningsdubbling, svar, dubblarens återbud) — nya
-baslinjer på familj 1:s mergepunkt först.
+reglerna i `auction-rules.ts`. b-listan står i planens logg.
+Kvar i gamla lagret tills familj 2: all X på vår sida (dubblarens vakter).
+**Nästa gång börjar vi med:** etapp 4 familj 2 (upplysningsdubbling, svar,
+dubblarens återbud) — nya baslinjer (§3) på `26687c9` först.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

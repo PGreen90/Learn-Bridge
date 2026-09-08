@@ -301,8 +301,8 @@ enskilt största detektorn; ordningen nedan är planens och fastställs mot
 mätningen vid etapp 4:s start):
 
 1. Inkliv och advance (`overcall`, `advanceOvercall`, `advanceTwoSuiter`,
-   inklivarens fortsättningar). **BYGGD 2026-09-08 (loggen), väntar på
-   grinden:** raderna *inkliv* (direkt sits + balansering, även passet),
+   inklivarens fortsättningar). **KLAR & LIVE 2026-09-08 (loggen; mergepunkt
+   `26687c9`):** raderna *inkliv* (direkt sits + balansering, även passet),
    *advance* (1-/2-lägesinkliv, tvåfärg, 1NT-inklivets systems on), *inkliv2*
    (inklivarens andra tur) och *advance2* (advancerns senare bud); kunskapen
    i `overcall-continuations.ts`. Konkurrens-slaminvitet (etapp 7 hål D)
@@ -613,8 +613,9 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
-- **2026-09-08 — Etapp 4 familj 1 BYGGD: inkliv och advance i tabellen (väntar
-  på grinden).** Test-drivet: facit-blocket "etapp 4 familj 1" i
+- **2026-09-08 — Etapp 4 familj 1 KLAR & LIVE: inkliv och advance i tabellen
+  (grinden godkänd av ägaren samma dag; mergepunkt `26687c9`, Actions grön,
+  rebidz.com aliasad).** Test-drivet: facit-blocket "etapp 4 familj 1" i
   `motorbyte-facit.test.ts` (frö 20261162 → 5♣, frö 20262021 → 4♣) +
   `auction-etapp4-familj1.test.ts` (22 fall: raderna, lägesgränserna, det
   rivna). **Bygget:** `auction-rules.ts` (bridge-reglerna utbrutna ur
@@ -694,8 +695,7 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
   kravnivå 1907 → 2100 bud · alert 958 → 1045 · registerhål 1315 → 1030 (fler cue-advance och fit-jumps att läsa; grindas i familj 9). Pliktsvep: K1 19 → 25 (de sex nya = "dubblarens partner passar cue (krav)" = familj 2-fyndet), K2 2 → 3, K3 5 → 5, K4 0, K6-inventeringen 12 → 29 (fler cue-advance); förklaringssvep grönt; regelsvep grönt.
   Kikvakten skarp för alla tabellkällor (300 givar; nya krav `tabell:inkliv`
   > 100, `tabell:advance` > 0). Revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust 270,16 (baslinje 226882b: 20,4 % · 268,38, dvs. +1,78 per giv ≈ en givs förlust på tusen); kategorier (antal/förlust): fel-farg-bet 117/49760 · missad-lillslam 76/49080 · missad-utgang 139/47460 · missad-storslam 34/39190 · billig-offring 116/32300 · battre-an-facit 119/20810 · sald-giv 58/18430 · for-hogt 42/10230 · fel-strain 92/2090 · utpassad 3/810 (revisor-output/latest.json). 29 av revisorns 1000 givar bytte slutkontrakt (listan ur auktionsdump-revrange-diffen: t.ex. 20260806 4♠ → 4♥ Ö/V via tvåfärgspreferens, 20261162 4♥ → 5♣ = facit-fröet, 20261601 5♣ → 4♣ via fit-jump) — alla b-mönster; ingen regel tunad på poäng (ägarprincip 2026-08-06).
-  Nästa: 🚪 grinden (b-listan ovan) → `--no-ff`-mergepunkt + deploy → etapp
-  4 familj 2 (upplysningsdubbling, svar, dubblarens återbud) med nya
+  🚪 Grinden TAGEN 2026-09-08 ("Godkänt, kör PCD"). Nästa: etapp 4 familj 2 (upplysningsdubbling, svar, dubblarens återbud) med nya
   baslinjer på familj 1:s mergepunkt.
 
 - **2026-09-08 — §5b beslut 16 KLAR & LIVE (lågfärgsfit i utgångskrav: 5m är
