@@ -1,7 +1,7 @@
 // FACIT-TEST för etapp 6 hål 1 (billig offring, docs/systemrevisorn.md
 // "Etapp 6 FÖRSKANNAD", 2026-07-25): STÖDDUBBLINGEN BESVARAS ALDRIG.
 //
-// Rot: `takeoutDoubleToAnswer` i auction-live.ts stänger av svarstvånget så
+// Rot: `takeoutDoubleToAnswer` i auction-live.ts stängde av svarstvånget så
 // fort vår sida bjudit ett kontraktsbud — och stöddubblingen (öppnarens X =
 // exakt 3 stöd efter 1x–(P)–1M–(inkliv)) hade ingen egen svarsväg. Följd:
 // svararen passade ut partnerns upplysande dubbling och motståndarna fick
@@ -12,11 +12,19 @@
 // DD-verifierade (revisor-output/dd-tabell.txt, dd-tabell-proben) OCH
 // systemriktiga — svararen bjuder på egen hand + partnerns visade exakt
 // 3-stöd, aldrig på facit.
+//
+// Sedan motorbytets etapp 4 familj 3 (2026-09-08) är stöddubblingen, svaret
+// och stöddubblarens fortsättning tabellrader (*stöd-x*, *stöd-x-svar*,
+// *stöd-x-öppnaren*), och manusets kik-rond är riven: RHO:s inkliv över
+// svaret läggs inte i botauktionen förrän familj 4. Testet ger därför
+// auktionen fram till inklivet som budföljd och låter bottarna bjuda klart
+// därifrån (samma `decideCall` som vid bordet).
 
 import { describe, expect, it } from 'vitest'
-import type { Deal } from '../../types/bridge'
-import { parseHand } from '../bidding'
-import { botAuction } from './revisor'
+import type { Deal, Seat } from '../../types/bridge'
+import { parseHand, type ResolvedCall } from '../bidding'
+import { decideCallTraced } from './auction-live'
+import { auctionComplete, seatToAct } from './auction-rules'
 import { contractFromCalls } from './auction-contract'
 
 function deal(
@@ -39,11 +47,17 @@ function deal(
   }
 }
 
-/** Motorn bjuder alla fyra händerna; ger slutkontrakt + hela budlistan. */
-function finalOf(d: Deal) {
-  const history = botAuction(d)
-  expect(history).not.toBeNull()
-  return { contract: contractFromCalls(history!), bids: history!.map((c) => c.bid) }
+/** Bottarna bjuder klart från `prefix` (buden i tur och ordning från given); ger slutkontrakt + hela budlistan + källorna. */
+function finalOf(d: Deal, prefix: string[]) {
+  const history: ResolvedCall[] = prefix.map((bid, i) => ({ seat: seatToAct(d.dealer, i), bid: bid as ResolvedCall['bid'] }))
+  const källor: string[] = []
+  while (!auctionComplete(history) && history.length < 40) {
+    const seat: Seat = seatToAct(d.dealer, history.length)
+    const t = decideCallTraced(d, history, seat)
+    history.push(t.call)
+    källor.push(`${seat}:${t.call.bid}<${t.källa}>`)
+  }
+  return { contract: contractFromCalls(history), bids: history.map((c) => c.bid), källor }
 }
 
 describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
@@ -54,7 +68,10 @@ describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
       S: 'S:J762 H:QJT65 D:6 C:A96',
       W: 'S:KQ3 H:AK D:QJ9742 C:J5',
     })
-    const { contract, bids } = finalOf(d)
+    const { contract, bids, källor } = finalOf(d, ['P', 'P', 'P', '1D', 'P', '1S', '2H'])
+    expect(källor[0]).toBe('W:X<tabell:stöd-x>')
+    expect(källor[2]).toBe('E:3D<tabell:stöd-x-svar>')
+    expect(källor[4]).toBe('W:5D<tabell:stöd-x-öppnaren>')
     expect(bids).toContain('3D')
     expect(contract).toMatchObject({ level: 5, strain: 'diamonds' })
   })
@@ -66,7 +83,9 @@ describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
       S: 'S:A65 H:8632 D:AKJT C:QJ',
       W: 'S:82 H:AQT9 D:Q6542 C:64',
     })
-    const { contract, bids } = finalOf(d)
+    const { contract, bids, källor } = finalOf(d, ['1C', 'P', '1H', '2D'])
+    expect(källor[0]).toBe('N:X<tabell:stöd-x>')
+    expect(källor[2]).toBe('S:3NT<tabell:stöd-x-svar>')
     expect(bids).toContain('3NT')
     expect(contract).toMatchObject({ level: 3, strain: 'NT' })
   })
@@ -86,7 +105,9 @@ describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
       S: 'S:KJT75 H:A83 D:8 C:KQJ5',
       W: 'S:864 H:KT976 D:KJ9 C:A7',
     })
-    const { contract, bids } = finalOf(d)
+    const { contract, bids, källor } = finalOf(d, ['P', '1D', 'P', '1S', '2H'])
+    expect(källor[0]).toBe('N:X<tabell:stöd-x>')
+    expect(källor[2]).toBe('S:4S<tabell:stöd-x-svar>')
     expect(bids).toContain('4S')
     expect(contract).toMatchObject({ level: 4, strain: 'spades' })
   })
@@ -98,7 +119,9 @@ describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
       S: 'S:754 H:62 D:AJ765 C:K43',
       W: 'S:A32 H:KT3 D:Q4 C:QJ976',
     })
-    const { contract, bids } = finalOf(d)
+    const { contract, bids, källor } = finalOf(d, ['P', '1C', 'P', '1H', '2D'])
+    expect(källor[0]).toBe('W:X<tabell:stöd-x>')
+    expect(källor[2]).toBe('E:4H<tabell:stöd-x-svar>')
     expect(bids).toContain('4H')
     expect(contract).toMatchObject({ level: 4, strain: 'hearts' })
   })
@@ -110,7 +133,10 @@ describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
       S: 'S:83 H:AT87532 D:K54 C:Q',
       W: 'S:KJ2 H:4 D:AQ932 C:AJ43',
     })
-    const { contract, bids } = finalOf(d)
+    const { contract, bids, källor } = finalOf(d, ['P', '1D', 'P', '1S', '2H'])
+    expect(källor[0]).toBe('W:X<tabell:stöd-x>')
+    expect(källor[2]).toBe('E:3C<tabell:stöd-x-svar>')
+    expect(källor[4]).toBe('W:5C<tabell:stöd-x-öppnaren>')
     expect(bids).toContain('3C')
     expect(contract).toMatchObject({ level: 5, strain: 'clubs' })
   })

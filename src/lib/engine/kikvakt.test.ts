@@ -95,6 +95,7 @@ describe('kikvakten (2): beslutet läser bara egen hand + auktionen', () => {
     expect(perKälla.get('tabell:svar3') ?? 0).toBeGreaterThan(0)
     expect(perKälla.get('tabell:inkliv') ?? 0).toBeGreaterThan(100) // etapp 4 familj 1: inklivssitsen (även passet)
     expect(perKälla.get('tabell:advance') ?? 0).toBeGreaterThan(0)
+    expect(perKälla.get('tabell:svar-stört') ?? 0).toBeGreaterThan(50) // etapp 4 familj 3: svararen när de stört öppningen
   })
 
   it.skipIf(process.env.KIKVAKT !== '1')('MÄTLÄGE: hur ofta byter dagens motor bud när de andra händerna byts?', { timeout: 0 }, () => {

@@ -1095,7 +1095,9 @@ NMF får också användas av handen med **5+ kort i öppnarens lågfärg och
 slamvärden (19+ hp)** — den höjer lågfärgen i nästa rond (se "Färgvisning med
 slamvärden" nedan; ägarbeslut 2026-09-05, §9). Ostört läge; störs 1NT-rebudet
 gäller andra verktyg. Priset: du ger upp det naturliga svaga 2-budet i
-NMF-lågfärgen. NMF gäller **även när öppnarens 1NT
+NMF-lågfärgen. **Gäller även passad hand** (motorbytet etapp 4 familj 3,
+2026-09-08): en passad 11:a med 5-korts högfärg ställer samma fråga — Drury
+tar bara höjningarna. NMF gäller **även när öppnarens 1NT
 var reservfallet** ("oklart", §5.2 steg 7) — det är fortfarande ett 1NT-återbud
 och svararen behandlar det likadant (systemfel #2, 2026-08-07; förr föll de
 auktionerna ur systemet och kravet kunde passas, frö 20261317).
@@ -1973,8 +1975,14 @@ dubblarens eget flöde (X + egen färg).
   och stopp i deras färg. Har dubblaren i stället **fit för den svarade färgen**
   höjer hen som vanligt (höjningsreglerna ovan går före). **X + egen färg är
   EJ krav** (det är svagare än att bjuda färgen direkt) — öppnaren får passa
-  på minimum och höjer/accepterar bara med extra. Under 9 hp: pass som förr;
-  13+ bjuder krav-artat som förr.
+  på minimum och höjer/accepterar bara med extra. Under 9 hp: pass som förr.
+  **Dubblarens utgång (motorbytet etapp 4 familj 3, 2026-09-08):** med
+  **13+** och fit för svaret höjer dubblaren till utgång (höjningsreglerna);
+  utan fit bjuder hen **3NT** när partnern svarade **sang** (minimum med stopp)
+  eller när hen själv är **jämn med stopp** i deras färg. Mot partnerns
+  sangsvar är **2NT = 10–12** (inbjudan, ej krav). *1♦–(1♠)–X–P–1NT–P–**3NT**
+  med ♠54 ♥AJ54 ♦AJ6 ♣KJ98 (förr bjöd motorn 2♣ på fyra kort).* Ojämna 13+-
+  händer utan stopp saknar ännu regel.
 - **Responsiv dubbling:** när de bjudit *och höjt* en färg (t.ex.
   (1♥)–X–(2♥)–X) = vår dubbling är upplysning, oftast de två objudna färgerna.
   Gäller efter **svararens** höjning till 2-läget (inte öppnarens rebud av sin
@@ -2176,7 +2184,11 @@ inte än (kandidat i `docs/senare.md`).
 **(d) De dubblar vår 1♥/1♠-öppning — Jordan 2NT och fortsättningen.**
 Efter **1M–(X)** är svararens **2NT Jordan/Truscott**: konstgjord
 **limithöjning eller bättre** (10+, 4+ trumf) — hopphöjningen direkt till 3M
-blir därmed ren spärr. Källa: bridgebum (jordan_2nt.php).
+blir därmed ren spärr. Källa: bridgebum (jordan_2nt.php). **Bara efter
+högfärgsöppningen** (motorbytet etapp 4 familj 3, 2026-09-08): efter
+**1♣/1♦–(X)** gäller (b) — **XX med 10+** (även med stöd), annars höjning med
+3+ eller pass. Förr bjöd motorn "Jordan" även över lågfärgen, och öppnaren hade
+inget svar: 2NT passades ut.
 
 **Öppnaren passar aldrig Jordan** (den visar tvåsidig styrka och väntar på
 besked). Fortsättningen (2026-08-07, "bara 3M/4M" — inget ny färg-utgångsförsök
@@ -2347,6 +2359,26 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-08 — När de stör vår öppning flyttar in i beslutstabellen (§7.4,
+  §7.8 b/d/e, §5.7; motorbytet etapp 4 familj 3, `docs/motorbyte-plan.md`).**
+  Raderna *svar-stört* (svararens första bud när LHO stört partnerns 1-läges
+  färgöppning: negativ dubbling, fritt bud, cue, konkurrenshöjning, NT med
+  stopp, K3-tabellen mot 1NT/tvåfärg, Jordan/XX/höjning mot deras X — samma
+  beslut som manuset alltid tog i botauktionerna, nu även vid bordet där
+  svararen förr föll till motorns sista utväg), *stöd-x* (exakt 3 stöd →
+  X, bjuden på ett inkliv som faktiskt lagts), *stöd-x-svar* /
+  *stöd-x-öppnaren*, *negativ-x-öppnaren* / *negativ-dubblaren* (höjning
+  med fit, preferens, invit-fortsättning — och det nya: 13+ → 3NT, 2NT =
+  10–12 mot sangsvaret), *jordan-öppnaren* / *jordan-svararen* — kunskapen i
+  `contested-opening.ts`, höjningen i `fit-raise.ts`. Sex detektorer rivna.
+  **Nya regler:** "Jordan 2NT" bara efter 1♥/1♠ — över 1♣/1♦ XX med 10+
+  (§7.8 d); negativ-dubblarens utgång (§7.4); NMF gäller passad hand (§5.7).
+  Tvåfärgsinklivet över vår öppning läses ur auktionen (2NT direkt = ovanlig,
+  cue = Michaels), inte ur motståndarens regeletikett. **Rivet utan
+  ersättning:** manusets stöddubblingsrond, som lade RHO:s inkliv över vårt
+  svar bara när öppnaren hade exakt tre stöd (en kik i öppnarens hand) —
+  RHO:s inkliv över svaret bjuds i botauktionerna först när öppnarens
+  konkurrensåterbud finns i tabellen (familj 4).
 - **2026-09-08 — Dubblingsfamiljen flyttar in i beslutstabellen (§7.3, §7.4,
   §7.8 f; motorbytet etapp 4 familj 2, `docs/motorbyte-plan.md`).** Raderna
   *dubbling* (X efter två bjudna färger ur `takeoutOfResponse` — även den

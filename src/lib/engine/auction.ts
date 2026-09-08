@@ -22,12 +22,9 @@ import { decideFromTable, RESPONDABLE, type DecidedCall, type Decision } from '.
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
-import { overcall, hasStopper } from './overcalls'
-import { hcp, isBalanced, lengths } from './hand'
-import { pointsWithFloor } from './evaluation'
+import { hcp } from './hand'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
-import { negativeDouble, supportDouble } from './doubles'
 import { dontOvercall } from './dont'
 import { naturalNTOvercall } from './lebensohl'
 import { conventionalDefense } from './defense-conventional'
@@ -112,15 +109,6 @@ export interface BuiltAuction {
 
 // ---- Störd budgivning (punkt 27): motståndaren kliver in på riktigt --------
 
-const RANK_ORDER: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
-const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
-const SUIT_SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
-
-// Vad den starka 2♣-öppningen VISADE som minimum (§4.4): 22+ hp balanserad
-// eller ~9+ spelstick ("en stick från utgång" ≈ samma spelvärde). Kaptenens
-// slammatte efter positivt svar räknar mot detta — aldrig öppnarens kort.
-const rankIdx = (s: Suit) => RANK_ORDER.indexOf(s)
-
 /** Tolkar ett inkliv ("1S"/"2H"/"X"/"2NT") → nivå + ev. färg. */
 function parseBid(call: string): { level: number; suit: Suit | null } {
   const m = call.match(/^([1-7])(C|D|H|S)$/)
@@ -128,131 +116,6 @@ function parseBid(call: string): { level: number; suit: Suit | null } {
   const nt = call.match(/^([1-7])NT$/)
   if (nt) return { level: parseInt(nt[1], 10), suit: null }
   return { level: 0, suit: null }
-}
-
-/** Lägsta nivå där (level, suit) ligger över referensbudet (refLevel, refSuit). */
-function cheapestLevelAbove(suit: Suit, refLevel: number, refSuit: Suit | null): number {
-  for (let L = 1; L <= 7; L++) {
-    const above = L > refLevel || (L === refLevel && refSuit !== null && rankIdx(suit) > rankIdx(refSuit))
-    if (above) return L
-  }
-  return 7
-}
-
-/**
- * Svararens reaktion när motståndaren (LHO) klivit in efter vår öppning. §7.3.
- * Negativ dubbling, konkurrenshöjning, NT med stopp, ny färg eller pass.
- */
-function competitiveResponderAction(hand: Deal['hands'][Seat], openerSuit: Suit, overcallCall: string, overcallRule?: string): ResponseResult {
-  const p = hcp(hand)
-  const len = lengths(hand)
-  const { level: ovLevel, suit: ovSuit } = parseBid(overcallCall)
-  const isMajorOpening = openerSuit === 'hearts' || openerSuit === 'spades'
-
-  // Mot ett 1NT-INKLIV (pliktsvepet K3 b, ägarbeslut 2026-09-02): förr fanns
-  // inget svar alls, så svararen passade med 4-korts stöd (frö 20260732:
-  // 1♥–(1NT)–P på ♥9752 + 7 hp). 10+ hp → X = straff (vi äger balansen mot
-  // deras 15–18); 3+ stöd och 6–9 → 2M (konkurrenshöjning); annars pass.
-  if (overcallCall === '1NT') {
-    if (p >= 10) return { call: 'X', rule: 'straffdubbling', explanation: `10+ hp mot deras 1NT-inkliv → X (straff – vi har balansen).` }
-    if (len[openerSuit] >= 3 && p >= 6) {
-      return { call: `2${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `3+ stöd (6–9) → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning över deras 1NT).` }
-    }
-    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt mot deras 1NT-inkliv → pass.` }
-  }
-
-  // Mot ett TVÅFÄRGSINKLIV (Michaels-cue i vår färg / ovanlig 2NT; K3 c): höjningen
-  // är TÄVLANDE, inte spärr (ägarbeslut 2026-09-02). Motståndarna har visat 5-5,
-  // så med 4+ stöd (9 trumf) tävlar vi till 3M; med 10+ stödpoäng bjuds 4M direkt.
-  // 3-korts stöd tävlar 3M bara med 10+. Förr passade svararen allt (frö
-  // 20263327: ♠K9874 + 17 stödpoäng passade 2NT). Bara efter 1♥/1♠.
-  const twoSuiter = overcallRule === 'Michaels' || overcallRule === 'ovanlig 2NT' || ovSuit === openerSuit
-  if (twoSuiter && isMajorOpening) {
-    const support = len[openerSuit]
-    const sp = pointsWithFloor(hand, openerSuit, 'support')
-    if (support >= 4 && sp.points >= 10) {
-      return { call: `4${LETTER[openerSuit]}`, rule: 'höjning till utgång', explanation: `4+ stöd och ${sp.text} mot deras tvåfärgsinkliv → 4${SUIT_SYM[openerSuit]} direkt.` }
-    }
-    if (support >= 4 || (support === 3 && sp.points >= 10)) {
-      return { call: `3${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `${support >= 4 ? '4+ stöd (9 trumf)' : `3-korts stöd med ${sp.text}`} mot deras tvåfärgsinkliv → 3${SUIT_SYM[openerSuit]} (tävlande höjning, ej krav).` }
-    }
-    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt mot deras tvåfärgsinkliv → pass.` }
-  }
-
-  // Mot ett färginkliv:
-  if (ovSuit) {
-    // Negativ dubbling (§7.3) – EN källa: samma logik som doubles.ts (gäller
-    // inkliv på valfri nivå, inte bara 1-läget).
-    const neg = negativeDouble(hand, openerSuit, overcallCall)
-    if (neg) return neg
-    // Fritt bud i en 5+ HÖGFÄRG (§5.5, felrapport #55): på 1-läget från 6 hp,
-    // på 2-läget från 10 hp — rondkrav. Högfärgen visas före cue/höjning, UTOM
-    // när öppnaren öppnade en högfärg vi har 3+ stöd i (då är fiten känd och
-    // cue/höjning säger mer). Förr saknades grenen helt: med 7-korts spader
-    // efter 1♦–(1♥) dubblade svararen negativt (lovar 4) och passade sedan.
-    const openerMajorFit = (openerSuit === 'hearts' || openerSuit === 'spades') && len[openerSuit] >= 3
-    if (!openerMajorFit) {
-      for (const m of ['spades', 'hearts'] as Suit[]) {
-        if (m === openerSuit || m === ovSuit || len[m] < 5) continue
-        const L = cheapestLevelAbove(m, ovLevel, ovSuit)
-        if ((L === 1 && p >= 6) || (L === 2 && p >= 10)) {
-          return {
-            call: `${L}${LETTER[m]}`,
-            rule: 'fritt bud',
-            explanation: `5+ ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 1 ? '6' : '10'}+ hp, rondkrav).`,
-          }
-        }
-      }
-    }
-    // Limithöjning eller bättre (§7.1): cue i DERAS färg med 3+ stöd och 10+ hp
-    // (krav). Skiljer en inbjudande+ höjning från den rena konkurrenshöjningen.
-    if (len[openerSuit] >= 3 && p >= 10) {
-      const L = ovLevel + 1 // billigaste cue av deras färg ligger en nivå över inklivet
-      return { call: `${L}${LETTER[ovSuit]}`, rule: 'cue (limithöjning+)', explanation: `10+ hp, 3+ stöd → cue ${SUIT_SYM[ovSuit]} (limithöjning+, krav).` }
-    }
-    // Konkurrenshöjning: 3+ stöd i öppnarens färg, 6–9 (spärr/konkurrens, ej inbjudan).
-    if (len[openerSuit] >= 3 && p >= 6) {
-      const L = cheapestLevelAbove(openerSuit, ovLevel, ovSuit)
-      return { call: `${L}${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `3+ stöd (6–9) → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
-    }
-    // NT med stopp i deras färg – bara mot inkliv på 1–2-läget. Mot ett
-    // hoppinkliv på 3-läget vore 2NT OLAGLIGT (under deras bud) och 3NT
-    // osunt på bara 8+ → då passar svararen i stället (FAS 1 punkt 3).
-    if (ovLevel <= 2 && isBalanced(hand) && hasStopper(hand, ovSuit) && p >= 8) {
-      // Billigaste NT över ett FÄRGinkliv på nivå `ovLevel` är exakt `ovLevel`:
-      // sang rankar över alla färger, så 1NT är lagligt över (1♠), 2NT över (2♣)
-      // osv. (Tidigare beräknades nivån via klöver som proxy → alltid en nivå
-      // för högt: 1♥–(1♠)–2NT i stället för naturligt 1NT. R1-fynd #1.)
-      const L = ovLevel
-      return { call: `${L}NT`, rule: 'NT med stopp', explanation: `Balanserad med stopp (8+) → ${L}NT.` }
-    }
-    // Fritt bud i en 5+ LÅGFÄRG på 2-läget (§5.5, felrapport #55): 10+ hp,
-    // utan fit och utan sang-alternativ — rondkrav, lovar värden men inte utgång.
-    for (const m of ['diamonds', 'clubs'] as Suit[]) {
-      if (m === openerSuit || m === ovSuit || len[m] < 5 || p < 10) continue
-      if (cheapestLevelAbove(m, ovLevel, ovSuit) !== 2) continue
-      return {
-        call: `2${LETTER[m]}`,
-        rule: 'fritt bud',
-        explanation: `5+ ${SUIT_SYM[m]} → 2${SUIT_SYM[m]} (fritt bud i konkurrens, 10+ hp, rondkrav).`,
-      }
-    }
-    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt i konkurrens → pass.` }
-  }
-
-  // Mot upplysningsdubbling (X): Jordan 2NT (limithöjning, 4+ trumf), annars
-  // redubbla med 10+ utan fit, annars stöd/pass.
-  if (overcallCall === 'X') {
-    // Jordan 2NT (§7.3, rad 193): 4+ stöd och limitvärden → 2NT, INTE Jacoby.
-    if (len[openerSuit] >= 4 && p >= 10) {
-      return { call: '2NT', rule: 'Jordan 2NT', explanation: `10+ hp, 4+ trumf → 2NT (Jordan, limithöjning+ med fit).` }
-    }
-    if (p >= 10) return { call: 'XX', rule: 'redubbling', explanation: `10+ hp → XX (redubbling, lovar styrka).` }
-    if (len[openerSuit] >= 3) return { call: `2${LETTER[openerSuit]}`, rule: 'konkurrenshöjning', explanation: `3+ stöd → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning).` }
-    return { call: 'P', rule: 'pass', explanation: `Inget lämpligt → pass.` }
-  }
-
-  return { call: 'P', rule: 'pass', explanation: `Inget lämpligt → pass.` }
 }
 
 // (`pairControlsSideSuits` — kontroll-gaten som läste BÅDA händerna — togs bort
@@ -346,14 +209,16 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     const ov = ask(lhoSeat)?.call ?? { seat: lhoSeat, bid: 'P' as ResolvedCall['bid'], rule: 'pass', explanation: '' }
     if (ov.bid !== 'P') {
       layOpp(lhoSeat, ov)
-      const action = competitiveResponderAction(deal.hands[responderSeat], openerSuit, ov.bid, ov.rule)
-      turns.push({ seat: responderSeat, role: 'svarare', call: action.call, rule: action.rule, explanation: action.explanation, uncertain: action.uncertain })
-      history.push({ seat: responderSeat, bid: action.call as ResolvedCall['bid'], rule: action.rule, explanation: action.explanation })
+      // Svararens konkurrensbeslut ur tabellen (etapp 4 familj 3, 2026-09-08:
+      // raden *svar-stört* = `contestedResponse` ur svararens egen hand) —
+      // samma beslut som vid bordet, även när inklivet inte var det väntade.
+      const action = ask(responderSeat)?.call ?? { seat: responderSeat, bid: 'P' as ResolvedCall['bid'], rule: 'pass', explanation: 'Inget lämpligt → pass.' }
+      lay(responderSeat, action)
       // En upplysningsdubbling som svararen passar är INTE utbjuden: advancern
       // (LHO:s partner) är skyldig att svara. Lämna auktionen öppen så vi inte
       // härleder ett felaktigt "passat ut"-kontrakt – det levande svaret bjuds i
       // budlådan (decideCall). Övriga konkurrensgrenar modelleras en rond.
-      if (ov.bid === 'X' && action.call === 'P') {
+      if (ov.bid === 'X' && action.bid === 'P') {
         return finish(true)
       }
       // Svararen bjöd ÖVER partnerns upplysningsdubbling: advancerns fria svar
@@ -372,7 +237,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // läget (svararen passade) över ett 1-läges inkliv, så budet blir lagligt.
       // Sedan etapp 4 familj 1 kommer advancerns bud ur tabellen (raden
       // *advance* = `advanceOvercall` ur advancerns egen hand).
-      if (ov.rule === 'enkelt inkliv' && /^1[CDHS]$/.test(ov.bid) && action.call === 'P') {
+      if (ov.rule === 'enkelt inkliv' && /^1[CDHS]$/.test(ov.bid) && action.bid === 'P') {
         const partnerSuit = parseBid(ov.bid).suit
         if (partnerSuit) {
           const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
@@ -389,7 +254,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // som en 1NT-öppning, så efter svararens pass kör advancern sangsystemet
       // (Stayman/transfer/Texas/MSS) precis som över en öppning. Lämna auktionen
       // ÖPPEN – inklivaren fullföljer (transfer/Stayman-svar) levande i budlådan.
-      if (ov.rule === '1NT-inkliv' && action.call === 'P') {
+      if (ov.rule === '1NT-inkliv' && action.bid === 'P') {
         const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
         const adv = ask(advancerSeat)?.call
         if (adv) layOpp(advancerSeat, adv)
@@ -402,7 +267,7 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // advanceTwoSuiter nåddes aldrig och Syd fick pass som förslag). Utan denna
       // gren föll tvåfärgsinklivet till finish(false) och auktionen dog en rond
       // för tidigt.
-      if ((ov.rule === 'Michaels' || ov.rule === 'ovanlig 2NT') && action.call === 'P') {
+      if ((ov.rule === 'Michaels' || ov.rule === 'ovanlig 2NT') && action.bid === 'P') {
         const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
         const adv = ask(advancerSeat)?.call
         if (adv) layOpp(advancerSeat, adv)
@@ -415,10 +280,10 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       // bjuds levande i budlådan (decideCall), precis som takeout-X/Michaels-
       // grenarna ovan. Lämna öppen. (Ett äkta pass-ut faller ändå ut live – samma
       // slutkontrakt – medan en återöppningshand nu tävlar i stället för att sälja.)
-      if (action.call === 'P' && parseBid(ov.bid).suit) {
+      if (action.bid === 'P' && parseBid(ov.bid).suit) {
         return finish(true)
       }
-      return finish(action.call !== 'P')
+      return finish(action.bid !== 'P')
     }
   }
 
@@ -530,7 +395,13 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // manuset bara den starka dubblingen här (F6, 2026-08-08) och den vanliga
   // 4-4:an fanns bara i det gamla lagret — nu är den ett beslut som alla
   // andra. Fortsättningen (tvångssvaret, det starka återbudet, öppnarens
-  // fortsättning) bjuds levande.
+  // fortsättning) bjuds levande. RHO:s naturliga INKLIV över svaret bjuds
+  // inte i botauktionerna än: manusets stöddubblingsrond (etapp 4 familj 3,
+  // 2026-09-08, riven) lade det bara när ÖPPNAREN hade exakt tre stöd — en
+  // kik i en annan hand — och utan öppnarens konkurrensåterbud i tabellen
+  // (familj 4) föll återbudet till det gamla lagrets catch-all. Stöddubblingen
+  // och svaret på den ligger i tabellen och bjuds på ett inkliv som faktiskt
+  // lagts (vid bordet).
   const respNew = parseBid(response.bid)
   if (openerSuit && respNew.level === 1 && respNew.suit && respNew.suit !== openerSuit) {
     const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
@@ -538,27 +409,6 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     if (x && x.bid !== 'P') {
       layOpp(rhoSeat, x)
       return finish(true)
-    }
-  }
-
-  // Stöddubbling (punkt 8, §7.3): öppning 1 i färg – (LHO pass) – svararen 1♥/1♠
-  // – (RHO kliver in). Öppnaren med EXAKT 3 stöd upplyser med en stöddubbling
-  // (en direkt höjning = 4 stöd). Vi modellerar den här störningsronden BARA när
-  // stöd-X faktiskt slår till – annars skulle vi trunkera massor av ostörda
-  // auktioner. Öppnarens övriga konkurrenssvar hör till en senare punkt, så då
-  // lämnas linjen ostörd som förut (RHO:s ev. inkliv modelleras inte).
-  const respMajor: Suit | null = response.bid === '1H' ? 'hearts' : response.bid === '1S' ? 'spades' : null
-  if (openerSuit && respMajor) {
-    const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-    const rho = overcall(deal.hands[rhoSeat], response.bid)
-    // Bara ett äkta färginkliv (ej i öppnarens egen färg) kan utlösa stöd-X.
-    if (rho.call !== 'P' && parseBid(rho.call).suit !== openerSuit) {
-      const sd = supportDouble(deal.hands[openerSeat], respMajor, rho.call)
-      if (sd) {
-        turns.push({ seat: rhoSeat, role: 'motståndare', call: rho.call, rule: rho.rule, explanation: rho.explanation, uncertain: rho.uncertain })
-        turns.push({ seat: openerSeat, role: 'öppnare', call: sd.call, rule: sd.rule, explanation: sd.explanation })
-        return finish(true)
-      }
     }
   }
 

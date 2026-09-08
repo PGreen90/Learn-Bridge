@@ -301,6 +301,14 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'responsiv dubbling': 'krav-1-rond',
   stöddubbling: 'ej-krav',
   'X (stark/takeout)': 'krav-1-rond',
+  // När de stör vår öppning (etapp 4 familj 3, 2026-09-08)
+  'negativ-dubblarens utgång': 'avslut',
+  'negativ-dubblarens invit-fortsättning': 'inbjudan',
+  'negativ-dubblarens preferens': 'ej-krav',
+  'höjning efter negativ dubbling (utgång)': 'avslut',
+  'höjning efter negativ dubbling (inbjudan)': 'inbjudan',
+  'höjning efter negativ dubbling (enkel)': 'ej-krav',
+  straffdubbling: 'ej-krav',
   // Lebensohl
   'Lebensohl 2NT (svag)': 'ej-krav',
   'Lebensohl direkt 3-läge (krav)': 'utgangskrav',
