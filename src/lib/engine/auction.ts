@@ -22,12 +22,12 @@ import { decideFromTable, RESPONDABLE, type DecidedCall, type Decision } from '.
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
-import { overcall, takeoutOfResponse, hasStopper } from './overcalls'
+import { overcall, hasStopper } from './overcalls'
 import { hcp, isBalanced, lengths } from './hand'
 import { pointsWithFloor } from './evaluation'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
-import { negativeDouble, supportDouble, responsiveDouble } from './doubles'
+import { negativeDouble, supportDouble } from './doubles'
 import { dontOvercall } from './dont'
 import { naturalNTOvercall } from './lebensohl'
 import { conventionalDefense } from './defense-conventional'
@@ -356,17 +356,15 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
       if (ov.bid === 'X' && action.call === 'P') {
         return finish(true)
       }
-      // Responsiv dubbling (punkt 9, §7.3): (1M)–X(LHO upplysning)–2M(svararen
-      // höjer)–X(advancern). När svararen HÖJT öppnarens färg efter en
-      // upplysningsdubbling kan advancern (dubblarens partner) svara responsivt
-      // med stöd i de objudna färgerna. Bara efter en enkel höjning av vår färg.
-      if (ov.bid === 'X' && action.rule === 'konkurrenshöjning') {
+      // Svararen bjöd ÖVER partnerns upplysningsdubbling: advancerns fria svar
+      // (responsiv dubbling efter höjningen, §7.4; annars värde-/formstyrt
+      // fritt bud, §7.3) kommer ur tabellen (etapp 4 familj 2, raden *x-svar*)
+      // — samma beslut som vid bordet. Dubblarens fortsättning bjuds levande.
+      if (ov.bid === 'X') {
         const advancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-        const resp = responsiveDouble(deal.hands[advancerSeat], openerSuit)
-        if (resp) {
-          turns.push({ seat: advancerSeat, role: 'motståndare', call: resp.call, rule: resp.rule, explanation: resp.explanation })
-          return finish(true)
-        }
+        const adv = ask(advancerSeat)?.call
+        if (adv && adv.bid !== 'P') layOpp(advancerSeat, adv)
+        return finish(true)
       }
       // Advancer-logik (punkt 10, §7.1): efter partnerns enkla 1-läges inkliv och
       // svararens pass svarar advancern (inklivarens partner): höjning, cue =
@@ -524,21 +522,21 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     return finish(false)
   }
 
-  // F6 (C5, §7.3 "efter två bjudna färger"): motståndarna har bjudit TVÅ
-  // 1-lägesfärger (öppning + svar i ny färg, t.ex. 1♦–P–1♥) och spelaren DIREKT
-  // ÖVER svararen sitter med den STARKA enfärgshanden (17+ hp, egen 5+ objuden
-  // färg). Utan den här ronden låg hennes pass INBAKAT i linjen och decideCall
-  // följde det – live-detektorn `maybeTakeoutOfResponse` nåddes aldrig on-book
-  // (senare.md-hålet 2026-07-05). Vi modellerar BARA den starka dubblingen
-  // (rondkrav; tvångssvaret + det starka återbudet bjuds levande i budlådan).
-  // Den vanliga 4-4-dubblingen förblir MEDVETET live-only – att träda in den
-  // ändrar en stor andel ostörda linjer och är ett eget beslut (`docs/senare.md`).
+  // Dubblingssitsen efter TVÅ bjudna färger (§7.3; etapp 4 familj 2,
+  // 2026-09-08): motståndarna har bjudit öppning + svar i ny 1-lägesfärg
+  // (t.ex. 1♦–P–1♥) och spelaren direkt över svararen får sitt beslut ur
+  // tabellen (raden *dubbling* = `takeoutOfResponse` ur egen hand: 4-4 i de
+  // objudna från 10 hp, eller den starka 17+-enfärgshanden). Förr modellerade
+  // manuset bara den starka dubblingen här (F6, 2026-08-08) och den vanliga
+  // 4-4:an fanns bara i det gamla lagret — nu är den ett beslut som alla
+  // andra. Fortsättningen (tvångssvaret, det starka återbudet, öppnarens
+  // fortsättning) bjuds levande.
   const respNew = parseBid(response.bid)
   if (openerSuit && respNew.level === 1 && respNew.suit && respNew.suit !== openerSuit) {
     const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-    const takeout = takeoutOfResponse(deal.hands[rhoSeat], openerSuit, respNew.suit)
-    if (takeout.rule === 'upplysningsdubbling (stark)') {
-      turns.push({ seat: rhoSeat, role: 'motståndare', call: takeout.call, rule: takeout.rule, explanation: takeout.explanation })
+    const x = ask(rhoSeat)?.call
+    if (x && x.bid !== 'P') {
+      layOpp(rhoSeat, x)
       return finish(true)
     }
   }

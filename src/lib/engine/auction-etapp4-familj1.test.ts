@@ -155,17 +155,17 @@ describe('raden *inkliv2*: inklivaren svarar fit-jumpen och Michaels-svaret på 
   })
 })
 
-describe('det gamla lagret: familjens detektorer är rivna, dubblingsfamiljens kvar', () => {
+describe('det gamla lagret: familjens detektorer är rivna (dubblingsfamiljens revs i familj 2)', () => {
   it('inklivsdetektorerna finns inte längre i CONTESTED_DETECTORS', () => {
     const ids = new Set(CONTESTED_DETECTORS.map((d) => d.id))
     for (const gone of ['maybeOvercall', 'partnerTwoSuiterToAnswer', 'ownDoubledTwoSuiterRescue', 'overcallerRaiseAdvance', 'overcallerCompetesAfterCueRaise', 'overcallerAnswersCueRaise', 'advancerPrefersOvercallSuit', 'advancerRespondsTo1NTOvercall', 'overcallerAnswersAdvance']) {
       expect(ids.has(gone), gone).toBe(false)
     }
-    // Kvar tills familj 2: dubblarens "tävla till fiten" (bara när vår sida dubblat).
-    expect(ids.has('advancerCompetesToFit')).toBe(true)
-    expect(FORCED_DETECTORS.some((d) => d.id === 'doublerRaisesAdvance')).toBe(true)
+    // Familj 2 (2026-09-08) rev dubblarens vakter och den tunna "tävla till fiten"-detektorn.
+    expect(ids.has('advancerCompetesToFit')).toBe(false)
+    expect(FORCED_DETECTORS.some((d) => d.id === 'doublerRaisesAdvance')).toBe(false)
   })
-  it('med X på vår sida tiger tabellens advance2-rad (familj 2:s läge) — frö 20260811 går som förut till 4♠', () => {
+  it('med X på vår sida tiger tabellens advance2-rad — frö 20260811 går som förut till 4♠ (sedan familj 2 ur raden x-dubblaren)', () => {
     const d = dealOf('N', {
       N: 'S:T98762 H:KT854 D:8 C:3',
       E: 'S:Q4 H:J3 D:A97532 C:Q92',
@@ -174,7 +174,7 @@ describe('det gamla lagret: familjens detektorer är rivna, dubblingsfamiljens k
     }, 'ns')
     const hist = [call('N', 'P'), call('E', '2D'), call('S', 'X'), call('W', '3D'), call('N', '3S'), call('E', 'P')]
     const t = decideCallTraced(d, hist, 'S')
-    expect(t.källa).not.toMatch(/^tabell:advance/)
+    expect(t.källa).toBe('tabell:x-dubblaren')
     expect(decideCall(d, hist, 'S').bid).toBe('4S')
   })
 })

@@ -1068,19 +1068,29 @@ interface Undisturbed {
   responderPassed: boolean
 }
 
-/** Auktionen sedd från `seat`s sida när motståndarna bara passat, annars null. */
+/**
+ * Auktionen sedd från `seat`s sida när motståndarna bara passat, annars null.
+ * Undantag (etapp 4 familj 2, 2026-09-08): deras upplysningsdubbling av vårt
+ * SVAR (1♦–P–1♥–X) tar ingen budyta — linjen fortsätter som ostörd ("systems
+ * on"), så det X:et tolereras när det är deras enda aktion och ligger direkt
+ * efter svaret. Samma regel som tabellens `xOfResponse` (auction-decide.ts).
+ */
 function undisturbed(seat: Seat, prior: ResolvedCall[]): Undisturbed | null {
   const open = opening(prior)
   if (!open || SIDE[open.seat] !== SIDE[seat]) return null
   const responder = PARTNER[open.seat]
   const bids: OurBid[] = []
   let responderPassed = false
+  let doubledResponse = false
   for (const c of prior) {
     if (c.bid === 'P') {
       if (bids.length === 0 && c.seat === responder) responderPassed = true
       continue
     }
-    if (SIDE[c.seat] !== SIDE[seat]) return null // motståndarna har bjudit/dubblat
+    if (SIDE[c.seat] !== SIDE[seat]) {
+      if (c.bid === 'X' && bids.length === 2 && !doubledResponse) { doubledResponse = true; continue }
+      return null // motståndarna har bjudit/dubblat
+    }
     const cb = parseBid(c.bid)
     if (!cb) return null // egen X/XX — ingen ostörd auktion
     bids.push({ seat: c.seat, cb })

@@ -290,6 +290,9 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'konkurrens-slaminvit (RKC)': 'slamintresse',
   'konkurrens-slam: placering': 'avslut',
   'konkurrens-slam: stopp': 'avslut',
+  // Dubblingsfamiljen (etapp 4 familj 2, 2026-09-08)
+  'dubblaren höjer till 3NT': 'avslut',
+  'svar på dubblarens cue': 'utgangskrav',
   'cue (krav)': 'utgangskrav',
   'Jordan 2NT': 'inbjudan',
   'cue (stark tvåfärg)': 'ej-krav',

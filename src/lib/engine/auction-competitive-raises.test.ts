@@ -48,8 +48,11 @@ describe('FAS 2 punkt 6 – Jordan 2NT efter upplysningsdubbling', () => {
         'S:AQ3 H:K3 D:KJ32 C:5432', // 13 hp, bara 2 hjärter → XX
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', 'X', 'XX'])
+    // Sedan motorbytets etapp 4 familj 2 (2026-09-08) lägger manuset även
+    // advancerns tvångsflykt över redubblingen ur tabellen (raden *x-svar*).
+    expect(a?.turns.map((t) => t.call)).toEqual(['1H', 'X', 'XX', '2C'])
     expect(a?.turns[2].rule).toBe('redubbling')
+    expect(a?.turns[3].rule).toBe('färgbud')
   })
 })
 

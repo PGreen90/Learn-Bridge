@@ -333,7 +333,7 @@
   **KÄNT HÅL I ROND 2 (kontrollmätning M19, frö 20260952):** den starka
   dubblaren kan **sälja given i nästa rond**. `1♦–X–P–3♣–P–P–P`: Väst dubblar
   med 19 hp, Öst hoppar 3♣, och Väst **passar** — ÖV kunde ta 7NT.
-  `ownStrongDoubleRebid` kräver en egen 5+ **objuden** färg för det starka
+  `ownStrongDoubleRebid` (sedan 2026-09-08 i `double-continuations.ts`) kräver en egen 5+ **objuden** färg för det starka
   återbudet, och en jämn 19-poängare har ingen → ingen väg vidare alls.
   Principen "17+ säljer aldrig given" gäller alltså bara rond 1 i dag. Är detta
   kandidat till ett eget jobb står det i `docs/senare.md`.

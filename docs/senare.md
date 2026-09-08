@@ -173,14 +173,16 @@ rabatten — byggs på om spel visar att de driver för högt (`docs/bevaka.md`)
 ### ~~17+ stark enfärgshand EFTER två bjudna färger~~ (BYGGD 2026-08-08 via F6)
 Linjen (`buildAuction`) modellerar nu den starka dubblingen efter två bjudna
 1-lägesfärger; handbedömningen delas med budlådan (`takeoutOfResponse`, §7.3).
-Kvar som bevakning, inte byggpunkt: **den vanliga 4-4-dubblingen är MEDVETET
-fortsatt live-only** — att träda in den i linjen ändrar en stor andel ostörda
-linjer (Budvisningen, träningsgivar) och byggs bara på eget ägarbeslut om spel
-visar att bottarna säljer sådana givar (`docs/bevaka.md`).
+~~Kvar som bevakning: den vanliga 4-4-dubblingen är medvetet live-only.~~
+**BYGGD 2026-09-08 (motorbytet etapp 4 familj 2):** hela sitsen är tabellraden
+*dubbling* (`double-continuations.ts`) — 4-4-dubblingen bjuds även i bottarnas
+egna auktioner (16 av 3000 givar i auktionsdumpen), och öppnarens återbud över
+det X:et är systems on (§7.8 f). Kandidat kvar: **XX = 18+** över deras X av
+svaret, och sandwich-inklivet (5-korts objuden färg efter två bjudna färger).
 
 ### Den starka dubblaren säljer given i ROND 2 (2026-07-28, funnen i Mätning #19)
 "17+ säljer aldrig given" gäller i dag bara **första** ronden (§7.1, felrapport
-#40). I rond 2 kräver `ownStrongDoubleRebid` (auction-live.ts) en egen **5+
+#40). I rond 2 kräver `ownStrongDoubleRebid` (`double-continuations.ts`) en egen **5+
 objuden** färg för det starka återbudet — en jämn 17–19-poängare har ingen, och
 då finns ingen väg vidare alls. Frö 20260952: `1♦–X–P–3♣–P–P–P`, Väst dubblar med
 19 hp, Öst hoppar 3♣, Väst **passar** — ÖV kunde ta 7NT (par 1520). Kostade

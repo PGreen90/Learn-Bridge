@@ -423,7 +423,8 @@ förgenererad auktion). Rent, testat (`auction-live.test.ts`, 23 tester):
   upplysningsdubblar och svararen passar är auktionen INTE utbjuden – advancern
   (dubblarens partner) måste svara. `buildAuction` markerar nu det läget som öppet
   (förut härleddes ett felaktigt "passat ut"-kontrakt), och `decideCall` tvingar
-  via `takeoutDoubleToAnswer` fram advancerns svar (`answerTakeoutDouble`: längsta
+  via `takeoutDoubleToAnswer` (sedan 2026-09-08 tabellraden *x-svar* i
+  `double-continuations.ts`) fram advancerns svar (`answerTakeoutDouble`: längsta
   objudna färg, 12+ = cue). Historiedriven → robust även när Syd bjuder off-book.
 - ~~**Känd gräns:** slam-quirken (två bud i rad på samma plats i Jacoby 2NT → cue
   → RKC)~~ **LÖST 2026-07-07** i och med att den automatiska cue-ronden togs bort
