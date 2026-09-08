@@ -157,16 +157,24 @@ describe('etapp 3 familj 3 – öppnarens återbud efter svag tvåa (§4.5) (LAN
 // tvåfärgsinkliv och "gav preferens". Tabellen läser rätt (ingen tvåfärg),
 // men dubblarens fortsättning efter advancerns fria 2NT / cue saknar regel
 // → facit åt familj 2.
-describe('etapp 4 familj 2 – dubblarens fortsättning efter advancerns fria svar', () => {
-  it.todo('frö 20270004: 1♠–(X)–2♠–(2NT)–P: Syd (♠54 ♥AJ54 ♦AJ6 ♣KJ98, 14 hp) höjer partnerns fria 2NT (10–12) till 3NT — inte pass', () => {
+describe('etapp 4 familj 2 – dubblarens fortsättning efter advancerns fria svar (LANDAD 2026-09-08)', () => {
+  it('frö 20270004: 1♠–(X)–2♠–(2NT)–P: Syd (♠54 ♥AJ54 ♦AJ6 ♣KJ98, 14 hp) höjer partnerns fria 2NT (10–12) till 3NT — inte pass', () => {
     const deal = dealFromSeed(20270004)
     const hist = [call('N', 'P'), call('E', '1S'), call('S', 'X'), call('W', '2S'), call('N', '2NT'), call('E', 'P')]
     expect(decideCall(deal, hist, 'S').bid).toBe('3NT')
   })
-  it.todo('frö 20270461: 1♥–(X)–2♥–(X responsiv)–P–(3♥ cue)–P: Väst (♠5432 ♥T ♦J974 ♣AK86) svarar partnerns cue med 3♠ — inte pass', () => {
+  it('frö 20270461: 1♥–(X)–2♥–(X responsiv)–P–(3♥ cue)–P: Väst (♠5432 ♥T ♦J974 ♣AK86) svarar partnerns cue med 3♠ — inte pass', () => {
     const deal = dealFromSeed(20270461)
     const hist = [call('N', '1H'), call('E', 'X'), call('S', '2H'), call('W', 'X'), call('N', 'P'), call('E', '3H'), call('S', 'P')]
     expect(decideCall(deal, hist, 'W').bid).toBe('3S')
+  })
+})
+
+describe('etapp 4 familj 6 – försvar mot 1NT: DONT-dubblarens fortsättning', () => {
+  it.todo('frö 20272187: 1NT–(X DONT)–2♦–P–3♣–?: Syd (♠KQT763 ♥K9 ♦AQ ♣KJ2, 19 hp) visar sin enfärg 3♠ — inte pass (förr gav det starka X-flödet 3♠ av misstag; familj 2 kräver deras FÄRGöppning)', () => {
+    const deal = dealFromSeed(20272187)
+    const hist = [call('N', 'P'), call('E', '1NT'), call('S', 'X'), call('W', '2D'), call('N', 'P'), call('E', '3C')]
+    expect(decideCall(deal, hist, 'S').bid).toBe('3S')
   })
 })
 

@@ -1873,6 +1873,9 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
   återbudet, stödstegen). *Ex:* (1♦)–(P)–(1♥)–**X**, sedan **2♠** över partnerns
   framtvingade 2♣.
 - Advancern svarar **aldrig i en av deras bjudna färger**.
+- **Sedan 2026-09-08 (motorbytet etapp 4 familj 2)** är hela sitsen ett vanligt
+  beslut ur egen hand: bottarna dubblar med 4-4 i de objudna från 10 hp även i
+  sina egna auktioner (förr modellerade motorn bara den starka dubblingen där).
 
 **Mot deras svaga tvåor och spärrar (samma verktyg, starkare krav):**
 - Aktionen är farligare på högre nivå, så golvet är högre. **Mot en svag tvåa:**
@@ -1924,6 +1927,14 @@ icke-hoppet (~6–9)** höjs till utgång först med **19+** (högfärg) / 21+
 (lågfärg) och får en **enkel höjning (inbjudan)** med 16–18; **flykten över XX
 höjs aldrig** (den lovar inga poäng). Med 17+ hp gäller som förut den starka
 dubblarens eget flöde (X + egen färg).
+- **Partnerns 2NT (9–11 med stopp) höjs till 3NT med 14+ hp** hos dubblaren
+  (motorbytet etapp 4 familj 2, frö 20270004: ♠54 ♥AJ54 ♦AJ6 ♣KJ98 passade förr
+  — regeln saknades); med mindre nöjer sig dubblaren.
+- **Dubblaren svarar partnerns responsiva dubbling** som en upplysning (bästa
+  objudna färg, hopp, eller **cue med 12+**), och **advancern svarar det cuet**
+  som dubblaren skulle svarat ett cue: billigaste 4-korts högfärg först, annars
+  3NT med stopp, annars längsta objudna färg (frö 20270461: ♠5432 ♥T ♦J974
+  ♣AK86 → 3♠ över 1♥–(X)–2♥–(X)–P–(3♥)–P; förr pass — regeln saknades).
 
 ### 7.4 Övriga dubblingar (negativ, responsiv, stöd)
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
@@ -1966,6 +1977,10 @@ dubblarens eget flöde (X + egen färg).
   13+ bjuder krav-artat som förr.
 - **Responsiv dubbling:** när de bjudit *och höjt* en färg (t.ex.
   (1♥)–X–(2♥)–X) = vår dubbling är upplysning, oftast de två objudna färgerna.
+  Gäller efter **svararens** höjning till 2-läget (inte öppnarens rebud av sin
+  färg), från 7 hp med 3+ kort i två objudna färger och ingen egen 5-korts
+  färg; den går **före** det fria svaret i §7.3 (samma ordning som förr gällde
+  i bottarnas egna auktioner — sedan 2026-09-08 även vid bordet).
 - **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
   3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
   längdinfo i konkurrens.
@@ -2149,6 +2164,15 @@ oavsett poäng. Bara efter en högfärgsöppning; efter 1♣/1♦ gäller de gam
 reglerna. "Unusual vs unusual" (cue i deras färger som limithöjning+) spelas
 inte.
 
+**(f) De dubblar vårt svar — systems on (motorbytet etapp 4 familj 2,
+2026-09-08).** Efter 1♦–(P)–1♥–(X) tar dubblingen ingen budyta: **öppnaren
+ger sitt vanliga återbud** (1NT 12–14, enkel höjning, rebud, reverse …) och
+svararen sitt vanliga andra bud (NMF, fjärde färg, preferens …) precis som
+ostört. Förr föll öppnarens återbud här till motorns sista utväg (2NT på 12 hp,
+3NT på 14, hopp till 3♠ på 13, pass med 7-korts ruter — revisorintervallets
+frön 20260836, 20261592, 20261707, 20261497). En redubbling (XX = 18+) spelas
+inte än (kandidat i `docs/senare.md`).
+
 **(d) De dubblar vår 1♥/1♠-öppning — Jordan 2NT och fortsättningen.**
 Efter **1M–(X)** är svararens **2NT Jordan/Truscott**: konstgjord
 **limithöjning eller bättre** (10+, 4+ trumf) — hopphöjningen direkt till 3M
@@ -2323,6 +2347,27 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-08 — Dubblingsfamiljen flyttar in i beslutstabellen (§7.3, §7.4,
+  §7.8 f; motorbytet etapp 4 familj 2, `docs/motorbyte-plan.md`).** Raderna
+  *dubbling* (X efter två bjudna färger ur `takeoutOfResponse` — även den
+  vanliga 4-4:an, förr live-only), *x-svar* (advancerns tvungna eller fria
+  svar; responsiv dubbling först, annars uttryckligt pass), *x-dubblaren*
+  (svaret på cuet, höjningen av svaret vägd mot vad svaret visade, det starka
+  återbudet och dess dom, 3NT över partnerns 2NT, straffdubbling, preferens/
+  tävla) och *x-advancern* (stödstegen, domen på 3-hoppet, svaret på
+  dubblarens cue, straffdubbling, preferens/tävla) — kunskapen i
+  `double-continuations.ts`. Tio detektorer rivna. **Nya regler:** dubblaren
+  höjer partnerns 2NT till 3NT med 14+ (frö 20270004); advancern svarar
+  dubblarens cue efter sin responsiva X (frö 20270461); deras X av vårt svar =
+  systems on i de ostörda raderna (även betydelselagret läser auktionen som
+  ostörd). **Familjegräns:** deras FÄRGöppning krävs — DONT-X över 1NT stannar i
+  det gamla lagret (det starka X-flödet slog förr till där av misstag: frö
+  20271222/20271334 höjde en DONT-enfärg till utgång; frö 20272187 = facit åt
+  familj 6). Auktionsdiffen 3000 givar: 32 ändrade bud (16 nya 4-4-dubblingar,
+  3 st 3NT, 8 svar på dubblarens cue, 2 systems on, 4 DONT-fall); avvikelse-
+  dumpen 79 ändrade (12 dubblingar, 17 responsiva X, ~45 systems on-återbud
+  som förr gick till sista utvägen), olagliga tabellbud 0; revisorintervallet
+  10 ändrade. Kommandon i planens §3.
 - **2026-09-08 — Inkliv och advance flyttar in i beslutstabellen (§7.1–7.2;
   motorbytet etapp 4 familj 1, `docs/motorbyte-plan.md`).** Raderna *inkliv*
   (`overcall`: direkt sits + balansering, även passet), *advance*

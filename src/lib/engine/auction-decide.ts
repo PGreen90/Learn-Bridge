@@ -75,6 +75,21 @@
 //      · raden *advance2*: advancerns senare bud — preferens till inklivs-
 //        färgen, tävla till fiten (lagen om totala stick), cue-bjudarens
 //        fortsättning. Kunskapen bor i `overcall-continuations.ts`.
+//   E4.2. Dubblingsfamiljen (2026-09-08): upplysningsdubblingen på VÅR sida.
+//      · raden *dubbling*: de bjöd två 1-lägesfärger (1♦–P–1♥) och jag sitter
+//        över svararen → `takeoutOfResponse` (4-4 i de objudna från 10 hp,
+//        eller den starka 17+-enfärgshanden — eller pass).
+//      · raden *x-svar*: partnerns X är senaste icke-pass (tvunget svar,
+//        `answerTakeoutDouble`) eller de bjöd över X:et (fritt svar,
+//        `advancerFreeBidAfterDouble`, annars pass).
+//      · raden *x-dubblaren*: dubblarens senare turer — svaret på partnerns
+//        cue, höjningen av svaret vägd mot vad svaret visade, det starka
+//        återbudet (17+, X + egen färg) och dess dom, 3NT över partnerns 2NT,
+//        straffdubblingen, sist preferens/tävla till fiten.
+//      · raden *x-advancern*: advancerns senare bud — stödstegen på det starka
+//        återbudet, domen på 3-hoppet, svaret på dubblarens cue efter min
+//        responsiva X, straffdubblingen, sist preferens/tävla till fiten.
+//      Kunskapen bor i `double-continuations.ts`.
 
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
@@ -96,9 +111,11 @@ import { openerThirdAfterSecondNegative, respondTo2C, responderAfterSecondNegati
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
-import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall } from './overcalls'
+import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, takeoutOfResponse } from './overcalls'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
+import { side } from './play'
+import { advanceStrongDoubleRebid, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -1282,6 +1299,26 @@ function captainOwnSituation(f: AuctionFacts, hand: Hand): SlamSituation | null 
   return null
 }
 
+/**
+ * Deras upplysningsdubbling av vårt SVAR (1♦–P–1♥–X, etapp 4 familj 2): X:et
+ * tar ingen budyta, så den ostörda linjen fortsätter som om inget hänt
+ * ("systems on") — öppnaren ger sitt vanliga återbud, svararen sitt vanliga
+ * andra bud. Returnerar det X:et när det är deras ENDA aktion och ligger direkt
+ * efter vårt svar, annars null. (Förr föll öppnarens återbud här till det gamla
+ * lagrets catch-all: 2NT på 12 hp, 3NT på 14, pass med 7-korts färg.)
+ */
+function xOfResponse(f: AuctionFacts): ResolvedCall | null {
+  const marks = f.history.filter((c) => c.bid === 'X' || c.bid === 'XX')
+  if (marks.length !== 1 || marks[0].bid !== 'X' || side(marks[0].seat) === side(f.seat)) return null
+  const resp = f.ourContractBids[1]
+  if (!resp || f.history.indexOf(marks[0]) !== f.history.indexOf(resp) + 1) return null
+  return marks[0]
+}
+/** Ostört (inga X/XX alls) — eller bara deras X av svaret, som linjen bjuder över. */
+function quietOrDoubledResponse(f: AuctionFacts): boolean {
+  return !f.history.some((c) => c.bid === 'X' || c.bid === 'XX') || xOfResponse(f) !== null
+}
+
 const TABELL: Row[] = [
   // Familj 5 — slamutredningen per stol. En slamsekvens pågår (kaptenens
   // första slambud finns i den ostörda auktionen). Raden spänner över
@@ -1349,8 +1386,9 @@ const TABELL: Row[] = [
     },
   },
   // Familj 3 — öppnarens återbud. Jag öppnade, partnern svarade (vår sidas två
-  // enda kontraktsbud), motståndarna har bara passat (ingen X, inget inkliv),
-  // och svaret är det senaste som hänt. Partnerns bud läses som jag ser det.
+  // enda kontraktsbud), motståndarna har bara passat (inget inkliv; deras X av
+  // svaret tolereras — systems on, se `xOfResponse`), och svaret (eller det
+  // X:et) är det senaste som hänt. Partnerns bud läses som jag ser det.
   {
     id: 'återbud',
     läge: (f) =>
@@ -1359,8 +1397,8 @@ const TABELL: Row[] = [
       f.ourContractBids.length === 2 &&
       f.theirContractBids.length === 0 &&
       f.ourContractBids[1].seat === f.partner &&
-      f.lastNonPass === f.ourContractBids[1] &&
-      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+      (f.lastNonPass === f.ourContractBids[1] || f.lastNonPass === xOfResponse(f)) &&
+      quietOrDoubledResponse(f),
     välj: ({ hand, facts }) => {
       const seen = partnerResponseAsSeen(facts, facts.history.indexOf(facts.ourContractBids[1]))
       if (!seen) return null
@@ -1382,7 +1420,7 @@ const TABELL: Row[] = [
       f.ourContractBids[1].seat === f.seat &&
       f.ourContractBids[2].seat === f.partner &&
       f.lastNonPass === f.ourContractBids[2] &&
-      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+      quietOrDoubledResponse(f),
     välj: ({ hand, facts }) => {
       const response = partnerResponseAsSeen(facts, facts.history.indexOf(facts.ourContractBids[1]))
       const rebid = rebidAsSeen(facts, facts.history.indexOf(facts.ourContractBids[2]))
@@ -1409,7 +1447,7 @@ const TABELL: Row[] = [
       f.ourContractBids[2].seat === f.seat &&
       f.ourContractBids[3].seat === f.partner &&
       f.lastNonPass === f.ourContractBids[3] &&
-      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+      quietOrDoubledResponse(f),
     välj: ({ hand, facts }) => {
       const at = (i: number) => facts.history.indexOf(facts.ourContractBids[i])
       const response = partnerResponseAsSeen(facts, at(1))
@@ -1436,7 +1474,7 @@ const TABELL: Row[] = [
       f.ourContractBids[3].seat === f.seat &&
       f.ourContractBids[4].seat === f.partner &&
       f.lastNonPass === f.ourContractBids[4] &&
-      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+      quietOrDoubledResponse(f),
     välj: ({ hand, facts }) => {
       const at = (i: number) => facts.history.indexOf(facts.ourContractBids[i])
       const response = partnerResponseAsSeen(facts, at(1))
@@ -1462,7 +1500,7 @@ const TABELL: Row[] = [
       f.theirContractBids.length === 0 &&
       f.ourContractBids.every((c, i) => c.seat === (i % 2 === 0 ? f.seat : f.partner)) &&
       f.lastNonPass === f.ourContractBids[5] &&
-      !f.history.some((c) => c.bid === 'X' || c.bid === 'XX'),
+      quietOrDoubledResponse(f),
     välj: ({ hand, facts }) => {
       const at = (i: number) => facts.history.indexOf(facts.ourContractBids[i])
       const response = partnerResponseAsSeen(facts, at(1))
@@ -1567,6 +1605,81 @@ const TABELL: Row[] = [
         advancerPrefersOvercallSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts) ??
         cueBidderContinues(hand, facts, 'inklivare')
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+
+  // ---- Etapp 4 familj 2 — dubblingsfamiljen (2026-09-08) ------------------
+  // Dubblingssitsen efter två bjudna färger: motståndarna öppnade 1 i färg och
+  // svarade 1 i ny färg, vår sida tyst, jag sitter över svararen. X lovar 4-4 i
+  // de objudna (10+) eller den starka 17+-enfärgshanden. (Förr modellerade
+  // manuset bara den starka dubblingen — den vanliga 4-4:an fanns bara i det
+  // gamla lagret.) Passet lämnas åt det gamla lagret (null): samma stol äger
+  // INKLIVET över svaret, som manuset bara bjuder i stöddubblingsronden —
+  // det flyttar med stöddubblingen (familj 3), och ett uttryckligt pass här
+  // skulle tysta det.
+  {
+    id: 'dubbling',
+    läge: (f) => takeoutOfResponseSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const s = takeoutOfResponseSeat(facts)!
+      const r = takeoutOfResponse(hand, s.openSuit, s.respSuit)
+      if (r.call === 'P') return null
+      return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation }
+    },
+  },
+  // Advancerns svar på partnerns upplysningsdubbling (även dubblarens svar på
+  // partnerns responsiva X): tvunget när partnerns X är senaste icke-pass,
+  // fritt när de bjöd över X:et. Raden svarar alltid (fritt läge utan bud =
+  // pass). Läget läses av de två lägesläsarna själva.
+  {
+    id: 'x-svar',
+    läge: (f) => doubleFamily(f) !== null && (takeoutDoubleToAnswer(f) !== null || takeoutDoubleOverbidToAnswer(f) !== null),
+    välj: ({ hand, facts }) => {
+      const k = advancerAnswersDouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Dubblarens senare turer: jag dubblade först på vår sida (upplysningen).
+  // Ordningen är det gamla lagrets: cuet (krav) och höjningen av svaret var
+  // tvingande vakter; sedan det starka X-flödet, 3NT över partnerns 2NT,
+  // straffdubblingen, och sist preferens/tävla till fiten. null → det gamla
+  // lagret (t.ex. den jämna 17+-handen utan egen färg, docs/bevaka.md).
+  {
+    id: 'x-dubblaren',
+    läge: (f) => {
+      const d = doubleFamily(f)
+      return d !== null && d.doubler === f.seat && takeoutDoubleToAnswer(f) === null && takeoutDoubleOverbidToAnswer(f) === null
+    },
+    välj: ({ hand, facts }) => {
+      const k =
+        answerCueAfterDouble(hand, facts) ??
+        doublerWeighsAdvance(hand, facts) ??
+        ownStrongDoubleRebid(hand, facts) ??
+        strongDoublerSecondRebid(hand, facts) ??
+        doublerAnswersAdvancers2NT(hand, facts) ??
+        penaltyDoubleFirst(hand, facts) ??
+        doubleSideCompetes(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Advancerns senare bud: partnern dubblade först på vår sida. Stödstegen på
+  // det starka återbudet och domen på 3-hoppet (tvång), svaret på dubblarens
+  // cue efter min responsiva X (krav), straffdubblingen, sist preferens/tävla
+  // till fiten. null → det gamla lagret.
+  {
+    id: 'x-advancern',
+    läge: (f) => {
+      const d = doubleFamily(f)
+      return d !== null && d.doubler === f.partner && takeoutDoubleToAnswer(f) === null && takeoutDoubleOverbidToAnswer(f) === null
+    },
+    välj: ({ hand, facts }) => {
+      const k =
+        answerCueAfterDouble(hand, facts) ??
+        advanceStrongDoubleRebid(hand, facts) ??
+        answerStrongDoubleGameForce(hand, facts) ??
+        penaltyDoubleFirst(hand, facts) ??
+        doubleSideCompetes(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },

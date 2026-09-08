@@ -8,9 +8,11 @@
 // (senare.md 2026-07-05): den generativa linjen i `buildAuction` modellerade
 // aldrig den här ronden, så spelarens pass låg INBAKAT i linjen och decideCall
 // följde det — live-detektorn `maybeTakeoutOfResponse` (som bara gjorde 4-4)
-// nåddes aldrig on-book. Fixen: (1) linjen modellerar den starka dubblingen,
-// (2) live-detektorn kan även den starka handen (för off-book-lägen).
-// 4-4-dubblingen förblir MEDVETET live-only (regressionsvakten sist).
+// nåddes aldrig on-book. Fixen (2026-08-08): (1) linjen modellerar den starka
+// dubblingen, (2) live-detektorn kan även den starka handen. Sedan motorbytets
+// etapp 4 familj 2 (2026-09-08) är hela sitsen tabellraden *dubbling*
+// (`takeoutOfResponse` ur egen hand) — även den vanliga 4-4-dubblingen, som
+// förr var medvetet live-only (vakten sist låser att den nu kommer ur tabellen).
 //
 // C14 — LINJEN FÅR ALDRIG PASSA UT ETT OSTÖRT TVÅFÄRGSINKLIV (§7.2): lagat i
 // roten redan 2026-07-04 (felrapport #14), men revisionstabellen stod kvar på
@@ -92,10 +94,10 @@ describe('F6/C5: den starka dubblingen fungerar även OFF-BOOK (live-detektorn)'
   })
 })
 
-describe('F6/C5 regressionsvakt: 4-4-dubblingen är MEDVETET fortsatt live-only', () => {
-  // Samma läge (1♦–P–1♥ on-book) men Väst har "bara" ett vanligt 15 hp 4-4-X.
-  // Linjen modellerar INTE den vanliga dubblingen (ett eget, större beslut —
-  // den ändrar en stor andel ostörda linjer); den fyrar som förr bara live/off-book.
+describe('etapp 4 familj 2: även den vanliga 4-4-dubblingen kommer ur tabellen (raden *dubbling*)', () => {
+  // Samma läge (1♦–P–1♥) men Väst har "bara" ett vanligt 15 hp 4-4-X. Förr var
+  // den medvetet live-only (manuset modellerade bara den starka); nu är den
+  // ett beslut som alla andra — manuset läser tabellen och lämnar auktionen öppen.
   const FYRAFYRA = dealOf('N', {
     N: 'S:972 H:K84 D:AQJ52 C:K6',    // 13 hp → 1♦
     E: 'S:AJT6 H:T93 D:T4 C:9732',    // 5 hp, ingen kvalitetsfärg → passar
@@ -103,12 +105,14 @@ describe('F6/C5 regressionsvakt: 4-4-dubblingen är MEDVETET fortsatt live-only'
     W: 'S:KQ54 H:A2 D:K87 C:QJT4',    // 15 hp, 4-4 spader/klöver — under 17
   })
 
-  it('linjen har ingen Väst-tur och on-book-passet står kvar', () => {
+  it('linjen lägger Västs X (upplysning, 4-4 i de objudna) och lämnar auktionen öppen', () => {
     const built = buildAuction(FYRAFYRA)
     expect(built).not.toBeNull()
-    expect(built!.turns.find((t) => t.seat === 'W')).toBeUndefined()
-    const w = decideCall(FYRAFYRA, [call('N', '1D'), call('E', 'P'), call('S', '1H')], 'W')
-    expect(w.bid).toBe('P')
+    const w = built!.turns.find((t) => t.seat === 'W')
+    expect(w?.call).toBe('X')
+    expect(w?.rule).toBe('upplysningsdubbling')
+    expect(built!.open).toBe(true)
+    expect(decideCall(FYRAFYRA, [call('N', '1D'), call('E', 'P'), call('S', '1H')], 'W').bid).toBe('X')
   })
 })
 

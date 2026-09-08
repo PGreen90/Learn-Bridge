@@ -315,6 +315,15 @@ mätningen vid etapp 4:s start):
    ett 1-lägesinkliv (K3 i `raiseWithFit`) → familj 4:s "partnern visade en
    färg".
 2. Upplysningsdubbling, svar och dubblarens återbud (den starka dubblaren).
+   **KLAR 2026-09-08 (loggen; mergepunkt i loggen):** raderna *dubbling*
+   (X efter två bjudna färger — även den vanliga 4-4:an), *x-svar*
+   (advancerns tvungna/fria svar, responsiv X först), *x-dubblaren*
+   (cue-svaret, höjningen av svaret, det starka X-flödet, 3NT över 2NT) och
+   *x-advancern* (stödstegen, domen på 3-hoppet, svaret på dubblarens cue);
+   kunskapen i `double-continuations.ts`. Deras X av vårt svar = systems on
+   i de ostörda raderna (och i betydelselagret). Tio detektorer rivna.
+   Familjegräns: deras FÄRGöppning krävs — DONT-X över 1NT (familj 6) och
+   dubblingar på vår öppning (familj 3) stannar i det gamla lagret.
 3. Negativ dubbling, stöddubbling, öppnarens svar på dem.
 4. Svararens fria bud, öppnarens fortsättning i konkurrens, höjningar på visad
    längd, lagen om totala stick (pliktsvepets K-regler blir facit här).
@@ -612,6 +621,74 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 - Inget andra budsystem.
 
 ## Ändringslogg
+
+- **2026-09-08 — Etapp 4 familj 2 KLAR: dubblingsfamiljen i tabellen.**
+  Test-drivet: facit-blocket "etapp 4 familj 2" i `motorbyte-facit.test.ts`
+  (frö 20270004 → 3NT, frö 20270461 → 3♠) + `auction-etapp4-familj2.test.ts`
+  (raderna, lägesgränserna, systems on över deras X, det rivna). **Bygget:**
+  `double-continuations.ts` (lägesläsarna `doubleFamily` [vår sidas FÖRSTA
+  X i tid = dubblaren; kräver deras färgöppning], `takeoutOfResponseSeat`,
+  `takeoutDoubleToAnswer`, `takeoutDoubleOverbidToAnswer`,
+  `cueAfterOurDoubleToAnswer` [generaliserad: även dubblarens cue efter
+  advancerns responsiva X] + kunskapen flyttad som funktioner av EN hand +
+  fakta). Raderna: *dubbling* (`takeoutOfResponse`; passet lämnas åt det gamla
+  lagret — samma stol äger inklivet över svaret, som manuset bara bjuder i
+  stöddubblingsronden = familj 3), *x-svar* (tvunget svar / responsiv X efter
+  svararens 2-lägeshöjning / fritt svar / uttryckligt pass), *x-dubblaren*
+  (cue-svar → `doublerWeighsAdvance` → `ownStrongDoubleRebid` →
+  `strongDoublerSecondRebid` → 3NT över 2NT → straff-X → preferens/tävla),
+  *x-advancern* (cue-svar → stödstegen → domen på 3-hoppet → straff-X →
+  preferens/tävla). Manuset (`auction.ts`) läser tabellen för X-sitsen efter
+  två färger och för advancerns svar när svararen bjöd över X:et. **Systems on
+  över deras X av vårt svar:** raderna återbud/svar2/tredje/svar3/fjärde
+  tolererar deras enda X direkt efter svaret (`xOfResponse`), och
+  betydelselagrets `undisturbed` likaså — utan det föll öppnarens återbud till
+  `offBookResponse` (2NT på 12 hp, 3NT på 14, hopp till 3♠ på 13, pass med
+  7-korts ruter; revisorintervallets frön 20260836/20261592/20261707/20261497).
+  Rivet ur `auction-live.ts`: `takeoutDoubleToAnswer`,
+  `takeoutDoubleOverbidToAnswer`, `advancerCueToAnswer`,
+  `doublerRaisesAdvance`, `maybeTakeoutOfResponse`, `ownStrongDoubleRebid`,
+  `advanceStrongDoubleRebid`, `strongDoublerSecondRebid`,
+  `answerStrongDoubleGameForce` och den tunna `advancerCompetesToFit`.
+  **Tre diffvarv:** (1) raden *dubbling* svarade uttryckligt pass → tystade
+  manusets inkliv över svaret (fyra röda stöddubblingstester) → null vid pass;
+  (2) manusets responsiva dubbling tystades av det fria svaret (44 givar) →
+  responsiv X först i *x-svar*, bara efter SVARARENS höjning (inte öppnarens
+  rebud); (3) 4-4-dubblingen gav öppnaren catch-all-återbud → systems on.
+  **Familjegränsen:** det starka X-flödet slog förr till på DONT-X över 1NT
+  (`ownStrongDoubleRebid` krävde bara nivå 1) — frö 20271222/20271334 höjde
+  en DONT-enfärg till utgång på 8 hp (nu pass = bättre), frö 20272187 (19 hp,
+  6 spader) visade sin färg 3♠ av rätt skäl fel väg → `it.todo` åt familj 6;
+  frö 20271153 (5♣ på 5-läget mot 4♠) → pass, försvarbart.
+  **b-listan (bokens §7.3/§7.4/§7.8 f, allt i §9):** (1) **den vanliga
+  4-4-dubblingen efter två bjudna färger** bjuds nu i bottarnas egna auktioner
+  (16 av 3000 givar; förr medvetet live-only, `senare.md`) — frö 20270009:
+  1♦–P–1♥, N ♠AQ72 ♥K9752 ♦– ♣KQ92 → X; frö 20270236: ♠KJ65 ♥2 ♦QT85 ♣AJ53 →
+  X; (2) **dubblaren höjer partnerns 2NT till 3NT med 14+** (frö 20270004,
+  20272095: ♠K92 ♥Q ♦KJT62 ♣KQT2 → 3NT); (3) **advancern svarar dubblarens cue
+  efter sin responsiva X** (frö 20270461 → 3♠; 20271444: ♠8764 ♥932 ♦Q5 ♣AJ74
+  → 3♠, sedan 4♠; 20261404 → 4♦; 20261378 → 4♣); (4) **systems on över deras X
+  av vårt svar** (frö 20261592: S ♠KJ4 ♥T6 ♦T95 ♣AKQJT → 1NT i stället för
+  3NT; 20260836 → 1NT i stället för 2NT; 20261707 → 2♠ i stället för 3♠;
+  20261497 → 2♦ i stället för pass; 20271041: 1♠–3♠(Bergen spärr)–X → 4♠, samma
+  som ostört); (5) **responsiv X även vid bordet** (avvikelsedumpen: 17 givar
+  där människan öppnat och advancern förr bjöd 3NT/2NT/cue eller passade —
+  nu X, samma företräde som manuset alltid gav den i bot-auktioner). Kandidat
+  till ägarbeslut (ej byggt): responsiv X med 12+ → 3NT/cue direkt i stället?
+  **Mätningar** (kommandon i §3; baslinjer på `26687c9`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 32
+  (b-listan + 4 DONT-fall), samma bud/annan källa 329; avvikelsedumpen: ÄNDRAT
+  BUD 79 (12 dubblingar, 17 responsiva X, ~45 systems on-återbud/andra bud som
+  förr gick till `offBookResponse`/`honorForce`), samma bud/annan källa 447,
+  96 svar2-nycklar bara i baslinjen (auktionen är inte längre ostörd fram till
+  svararens andra tur när RHO dubblar 4-4), olagliga tabellbud 0;
+  revisorintervallet (20260721–20261720, baslinje via `git stash`): ÄNDRAT
+  BUD 10 (samma mönster). Frekvensbilden: `tabell:x-svar` 371 ·
+  `tabell:x-dubblaren` 257 · `tabell:x-advancern` 43 · `tabell:dubbling`
+  17; `manus` 4862 → 4785 bud, `pass (ingen regel)` 8892 → 8799,
+  `detektor:maybePenaltyDouble` 16 → 9 (straff-X:en i dubblingsläget går via
+  raderna), 61 → 56 källor. Betydelsesvepet: ostörda grinden kravnivå 0 · alert 0 · registerhål 0 · kända motoravvikelser 0; störda (familj 9) kravnivå 2100 → 2105 bud · alert 1045 → 1061 · registerhål 1030 → 1018. Pliktsvep: K1 25 → 19 (de sex "dubblarens partner passar cue (krav)" är borta = facit 20270461-mönstret), K2 3, K3 5, K4 0, K5 9, K6 29 (oförändrade); förklaringssvep grönt (0 oförklarade); regelsvep grönt (0 auktioner utan slut). Kikvakten skarp grön (alla tabellkällor). Revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust 270,27 (baslinje 26687c9: 20,4 % · 270,16, dvs. +0,11 per giv = brus); kategorier (antal/förlust): fel-farg-bet 118/50150 · missad-lillslam 76/49080 · missad-utgang 139/47460 · missad-storslam 34/39190 · billig-offring 116/32300 · battre-an-facit 118/20540 · sald-giv 58/18430 · for-hogt 42/10220 · fel-strain 92/2090 · utpassad 3/810 (revisor-output/latest.json). 4 av revisorns 1000 givar bytte slutkontrakt (20260728 3NT → 4♣ efter systems on-passet över 1♦–3♦–X; 20261239 4♣ → 5♣; 20261378 4♠ → 5♣ och 20261404 3♥ → 5♥ via svaret på dubblarens cue) — alla b-mönster; ingen regel tunad på poäng (ägarprincip 2026-08-06).
+  🚪 Grinden: VÄNTAR — b-listan framlagd för ägaren 2026-09-08.
 
 - **2026-09-08 — Etapp 4 familj 1 KLAR & LIVE: inkliv och advance i tabellen
   (grinden godkänd av ägaren samma dag; mergepunkt `26687c9`, Actions grön,
