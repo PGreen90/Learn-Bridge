@@ -315,7 +315,7 @@ mätningen vid etapp 4:s start):
    ett 1-lägesinkliv (K3 i `raiseWithFit`) → familj 4:s "partnern visade en
    färg".
 2. Upplysningsdubbling, svar och dubblarens återbud (den starka dubblaren).
-   **KLAR 2026-09-08 (loggen; mergepunkt i loggen):** raderna *dubbling*
+   **KLAR & LIVE 2026-09-08 (loggen; mergepunkt `d3f7116`):** raderna *dubbling*
    (X efter två bjudna färger — även den vanliga 4-4:an), *x-svar*
    (advancerns tvungna/fria svar, responsiv X först), *x-dubblaren*
    (cue-svaret, höjningen av svaret, det starka X-flödet, 3NT över 2NT) och
@@ -622,7 +622,7 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
-- **2026-09-08 — Etapp 4 familj 2 KLAR: dubblingsfamiljen i tabellen.**
+- **2026-09-08 — Etapp 4 familj 2 KLAR & LIVE: dubblingsfamiljen i tabellen (grinden godkänd av ägaren samma dag, "Godkänt, kör PCD"; mergepunkt `d3f7116`).**
   Test-drivet: facit-blocket "etapp 4 familj 2" i `motorbyte-facit.test.ts`
   (frö 20270004 → 3NT, frö 20270461 → 3♠) + `auction-etapp4-familj2.test.ts`
   (raderna, lägesgränserna, systems on över deras X, det rivna). **Bygget:**
@@ -688,7 +688,7 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
   17; `manus` 4862 → 4785 bud, `pass (ingen regel)` 8892 → 8799,
   `detektor:maybePenaltyDouble` 16 → 9 (straff-X:en i dubblingsläget går via
   raderna), 61 → 56 källor. Betydelsesvepet: ostörda grinden kravnivå 0 · alert 0 · registerhål 0 · kända motoravvikelser 0; störda (familj 9) kravnivå 2100 → 2105 bud · alert 1045 → 1061 · registerhål 1030 → 1018. Pliktsvep: K1 25 → 19 (de sex "dubblarens partner passar cue (krav)" är borta = facit 20270461-mönstret), K2 3, K3 5, K4 0, K5 9, K6 29 (oförändrade); förklaringssvep grönt (0 oförklarade); regelsvep grönt (0 auktioner utan slut). Kikvakten skarp grön (alla tabellkällor). Revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust 270,27 (baslinje 26687c9: 20,4 % · 270,16, dvs. +0,11 per giv = brus); kategorier (antal/förlust): fel-farg-bet 118/50150 · missad-lillslam 76/49080 · missad-utgang 139/47460 · missad-storslam 34/39190 · billig-offring 116/32300 · battre-an-facit 118/20540 · sald-giv 58/18430 · for-hogt 42/10220 · fel-strain 92/2090 · utpassad 3/810 (revisor-output/latest.json). 4 av revisorns 1000 givar bytte slutkontrakt (20260728 3NT → 4♣ efter systems on-passet över 1♦–3♦–X; 20261239 4♣ → 5♣; 20261378 4♠ → 5♣ och 20261404 3♥ → 5♥ via svaret på dubblarens cue) — alla b-mönster; ingen regel tunad på poäng (ägarprincip 2026-08-06).
-  🚪 Grinden: VÄNTAR — b-listan framlagd för ägaren 2026-09-08.
+  🚪 Grinden TAGEN 2026-09-08 ("Godkänt, kör PCD"). Nästa: etapp 4 familj 3 (negativ dubbling, stöddubbling, öppnarens svar) med nya baslinjer på `d3f7116`.
 
 - **2026-09-08 — Etapp 4 familj 1 KLAR & LIVE: inkliv och advance i tabellen
   (grinden godkänd av ägaren samma dag; mergepunkt `26687c9`, Actions grön,

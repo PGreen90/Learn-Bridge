@@ -39,7 +39,7 @@ ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen A
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
 **HELA §5b LIVE 2026-09-08** (sista mergepunkt `226882b`). **Etapp 4 familj 1
 (inkliv/advance) KLAR & LIVE 2026-09-08 (`26687c9`) och familj 2
-(dubblingsfamiljen) KLAR 2026-09-08 (grinden + PCD: se planens logg):** raderna
+(dubblingsfamiljen) KLAR & LIVE 2026-09-08 (mergepunkt `d3f7116`, grinden godkänd):** raderna
 *inkliv/advance/inkliv2/advance2/konkurrens-slam* resp. *dubbling/x-svar/
 x-dubblaren/x-advancern*; tjugo detektorer rivna; kunskapen i
 `overcall-continuations.ts`/`double-continuations.ts`; deras X av vårt svar =
