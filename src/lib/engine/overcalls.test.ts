@@ -116,8 +116,16 @@ describe('advanceOvercall – svar på partnerns inkliv (§7.1)', () => {
   it('konkurrenshöjning med stöd och under 11', () => {
     expect(advanceOvercall(parseHand('S:K43 H:Q42 D:432 C:Q432'), 'spades', 'diamonds').call).toBe('2S')
   })
-  it('ny färg naturlig (egen 5-färg, ej stöd)', () => {
-    expect(advanceOvercall(parseHand('S:KQ543 H:2 D:432 C:K432'), 'hearts', 'diamonds').call).toBe('2S')
+  it('ny färg naturlig (egen 5-färg, ej stöd) — på billigaste nivån (etapp 4 familj 1: 1♠ över 1♥, inte hoppet 2♠)', () => {
+    expect(advanceOvercall(parseHand('S:KQ543 H:2 D:432 C:K432'), 'hearts', 'diamonds').call).toBe('1S')
+    // Över ett 2-lägesinkliv: 2-läget; aldrig deras färg; 2NT kräver 11+ med stopp.
+    expect(advanceOvercall(parseHand('S:KQ543 H:2 D:43 C:K5432'), 'diamonds', 'hearts', 2).call).toBe('2S')
+    expect(advanceOvercall(parseHand('S:KQ543 H:2 D:43 C:K5432'), 'diamonds', 'spades', 2).call).toBe('P')
+    expect(advanceOvercall(parseHand('S:KQ5 H:A2 D:J43 C:KJ432'), 'hearts', 'spades', 2).call).toBe('2NT') // utan 3-korts stöd (då vinner cuet)
+  })
+  it('höjning över ett 2-lägesinkliv kräver 6 stödpoäng (3-läget); över 1-läget som förut', () => {
+    expect(advanceOvercall(parseHand('S:JT52 H:JT96 D:87 C:T84'), 'clubs', 'diamonds', 2).call).toBe('P')
+    expect(advanceOvercall(parseHand('S:JT52 H:K96 D:87 C:Q84'), 'clubs', 'diamonds', 2).call).toBe('3C')
   })
   it('fit-jump: 4 stöd + egen 5-färg, inbjudande+ → hopp i sidofärgen', () => {
     // partnern klev in 1♥, advancern har 4 hjärter + 5 spader, 10 hp → 2♠ (fit-jump).

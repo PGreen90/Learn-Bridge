@@ -241,9 +241,26 @@ function cheapestBid(suit: Suit, refCall: string): string {
  * högfärg, där ena färgen är en okänd minor).
  *
  * `partnerCall` = partnerns bud ("2C"/"2D"/"2H"/"2S" = Michaels-cue, "2NT" =
- * ovanlig). `theirSuit` = motståndarens öppningsfärg.
+ * ovanlig). `theirSuit` = motståndarens öppningsfärg. `overCall` = det
+ * SENASTE kontraktsbudet att bjuda över (etapp 4 familj 1, frö 20262021:
+ * motståndarna höjde sin egen färg över tvåfärgsbudet — preferensplikten
+ * består, budet hamnar bara ett läge högre); utelämnat = partnerns bud.
+ * Trycks preferensen upp till 4-läget i konkurrens krävs 4+ kort i färgen
+ * eller 8+ hp — annars pass (lagen om totala stick: 5-5 + 3 = 8 trumf).
  */
-export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Suit, contested = false): ResponseResult {
+export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Suit, contested = false, overCall?: string): ResponseResult {
+  const over = overCall ?? partnerCall
+  const guarded = (r: ResponseResult, suit: Suit): ResponseResult => {
+    const level = Number(r.call[0])
+    const L = lengths(hand)[suit]
+    const p = hcp(hand)
+    // 4-läget: 4+ kort ELLER 8+ hp; 5-läget: 4+ kort OCH 8+ hp. Annars pass.
+    const ok = level <= 3 || (level === 4 ? L >= 4 || p >= 8 : L >= 4 && p >= 8)
+    if (contested && !ok) {
+      return { call: 'P', rule: 'pass', explanation: `motståndarna tryckte upp preferensen till ${level}-läget; med ${L} ${SYM[suit]} och ${p} hp passar jag (spelrum för pass i konkurrens).` }
+    }
+    return r
+  }
   const p = hcp(hand)
   const len = lengths(hand)
   const unbid = RANK_ORDER.filter((s) => s !== theirSuit)
@@ -266,13 +283,15 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
   if (unknownMinor) {
     const major = known[0]
     if (len[major] >= 3) {
-      const call = cheapestBid(major, partnerCall)
-      return { call, rule: 'advance tvåfärg (preferens)', explanation: `3+ ${SYM[major]} → ${call[0]}${SYM[major]} (preferens till partnerns högfärg).` }
+      const call = cheapestBid(major, over)
+      return guarded({ call, rule: 'advance tvåfärg (preferens)', explanation: `3+ ${SYM[major]} → ${call[0]}${SYM[major]} (preferens till partnerns högfärg).` }, major)
     }
     // Ingen högfärgsfit. Contested + svag → passa (partnern rättar sedan sin minor).
     if (contested && p < 8) return passContested
     // Ostört: aldrig passa → 3♣ pass-eller-rätta (partnern passar/rättar till sin minor).
-    return { call: '3C', rule: 'advance tvåfärg (pass-eller-rätta minor)', explanation: `ingen högfärgsfit → 3♣ (pass-eller-rätta; partnern passar med ♣, rättar till ♦).` }
+    const pc = cheapestBid('clubs', over)
+    if (contested && Number(pc[0]) >= 5) return { call: 'P', rule: 'pass', explanation: `ingen högfärgsfit och pass-eller-rätta skulle hamna på 5-läget → pass (spelrum för pass i konkurrens).` }
+    return { call: pc, rule: 'advance tvåfärg (pass-eller-rätta minor)', explanation: `ingen högfärgsfit → ${pc[0]}♣ (pass-eller-rätta; partnern passar med ♣, rättar till ♦).` }
   }
 
   // Båda färgerna kända (Michaels över minor / ovanlig 2NT): bjud den vi är
@@ -283,13 +302,20 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
   }
   // Contested utan fit i någon av färgerna och svag → passa (spelrum finns).
   if (contested && known.every((s) => len[s] < 3) && p < 8) return passContested
-  const call = cheapestBid(best, partnerCall)
-  return { call, rule: 'advance tvåfärg (preferens)', explanation: `${SYM[best]} (den jag är längst i av partnerns färger) → ${call[0]}${SYM[best]} (preferens).` }
+  const call = cheapestBid(best, over)
+  return guarded({ call, rule: 'advance tvåfärg (preferens)', explanation: `${SYM[best]} (den jag är längst i av partnerns färger) → ${call[0]}${SYM[best]} (preferens).` }, best)
 }
 
 /**
  * Svar på partnerns enkla inkliv (advancer). §7.1. `overcallLevel` = nivån
  * partnerns inkliv låg på (styr hoppet i en fit-jump); default 1.
+ *
+ * Etapp 4 familj 1 (2026-09-08): funktionen bär även 2-LÄGESINKLIVET (förr
+ * svarade det gamla lagrets allmänna fit-höjning där, som krävde 4 kort).
+ * På 2-läget gäller: ny färg bjuds aldrig i deras färg, sangsvaret är 2NT
+ * (11+ hp med stopp — 1NT finns inte), och cue/höjning/fit-jump följer samma
+ * tabell som på 1-läget (3-korts stöd räcker: inklivet lovar 5+, på 2-läget
+ * en bra färg).
  *
  * F4 (D9): fit-trösklarna (fit-jump 10+, cue 11+) läser STÖDPOÄNG
  * `max(hp, dummyPoints)` — samma mått som live-lagrets `raiseWithFit`.
@@ -326,22 +352,28 @@ export function advanceOvercall(hand: Hand, partnerSuit: Suit, theirSuit: Suit, 
     return { call: `2${BID[theirSuit]}`, rule: 'cue (limithöjning+)', explanation: `11+ stödpoäng, 3+ stöd → cue ${SYM[theirSuit]} (limithöjning+, krav).` }
   }
 
-  // Höjning: stöd, konkurrens (inte inbjudan i sig).
-  if (support >= 3) {
+  // Höjning: stöd, konkurrens (inte inbjudan i sig). Över ett 2-lägesinkliv
+  // hamnar höjningen på 3-läget — då krävs minst 6 stödpoäng (K3:s golv;
+  // 8 trumf tävlar inte till 3-läget på en bust).
+  if (support >= 3 && (overcallLevel === 1 || sp.points >= 6)) {
     const lvl = rankIdx(partnerSuit) > rankIdx(theirSuit) ? 2 : 3
     return { call: `${lvl}${bid}`, rule: 'höjning', explanation: `3+ stöd, under limithöjning → ${lvl}${sym} (konkurrenshöjning).` }
   }
 
-  // Ny färg: naturlig, konstruktiv (ej krav).
+  // Ny färg: naturlig, konstruktiv (ej krav), på BILLIGASTE nivån (etapp 4
+  // familj 1: förr alltid 2-läget — 1♣–(1♦)–P–2♥ var ett omotiverat hopp).
+  // Aldrig deras färg (det vore ett cue), aldrig upp en nivå (då räcker inte
+  // "konstruktiv").
   const ownSuit = bestOvercallSuit(len, partnerSuit)
-  if (ownSuit && p >= 8 && rankIdx(ownSuit) > rankIdx(partnerSuit)) {
-    return { call: `2${BID[ownSuit]}`, rule: 'ny färg', explanation: `8+ hp med 5+ ${SYM[ownSuit]} → 2${SYM[ownSuit]} (naturlig, ej krav).` }
+  if (ownSuit && ownSuit !== theirSuit && p >= 8 && rankIdx(ownSuit) > rankIdx(partnerSuit)) {
+    return { call: `${overcallLevel}${BID[ownSuit]}`, rule: 'ny färg', explanation: `8+ hp med 5+ ${SYM[ownSuit]} → ${overcallLevel}${SYM[ownSuit]} (naturlig, ej krav).` }
   }
 
-  // NT: stopp i deras färg, balanserad, lämplig styrka.
+  // NT: stopp i deras färg, balanserad, lämplig styrka. Över ett 2-lägesinkliv
+  // finns bara 2NT (11+).
   if (isBalanced(hand) && hasStopper(hand, theirSuit) && p >= 8) {
-    const call = p >= 11 ? '2NT' : '1NT'
-    return { call, rule: 'NT-svar', explanation: `Balanserad ${call === '2NT' ? '(11+ hp)' : '(8–10 hp)'} med stopp i ${SYM[theirSuit]} → ${call}.` }
+    const call = p >= 11 ? '2NT' : overcallLevel === 1 ? '1NT' : null
+    if (call) return { call, rule: 'NT-svar', explanation: `Balanserad ${call === '2NT' ? '(11+ hp)' : '(8–10 hp)'} med stopp i ${SYM[theirSuit]} → ${call}.` }
   }
 
   return { call: 'P', rule: 'pass', explanation: `inget lämpligt → pass.` }

@@ -27,8 +27,8 @@ i planens logg): beslutstabellen
 `auction-decide.ts` (`decideFromTable`: läge → kunskapsfunktion) med raderna
 öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
 bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
-varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **§5b: alla 15
-ägarbeslut tagna 2026-09-05; beslut 1 LIVE (`3491ece`), 3 LIVE (`1a6adf0`), 7 LIVE (`820ab71`), 14 LIVE (`4be2ba3`), 2 LIVE (`f7d5c72`), 13 LIVE (`158e23f`), 4 LIVE (`26b05ac`), 5 LIVE (`ca954b4`), 9 LIVE (`47a5c8f`), 6 LIVE (`f4cbe74`), 11 LIVE (`b06c673`), 12 LIVE 2026-09-08 (`3cd2cfa`).**
+varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **§5b: alla 16
+ägarbeslut tagna 2026-09-05 och LIVE (mergepunkter i planens logg).**
 **Familj 6 KLAR & LIVE 2026-09-05 (mergepunkt f05bfef; grinden efter etapp 3
 = deployad):** manusets ostörda del riven — `buildAuctionCore` spelar ut vår
 sida ur tabellen stol för stol; kvar = konkurrensronden + `open`-flaggan
@@ -37,12 +37,17 @@ färg → Gerber 4♣) är live; vakt: manuset avgör inga bud i ostörda auktio
 Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägarens
 ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
-**HELA §5b ÄR BYGGD OCH LIVE 2026-09-08** (16 LIVE `226882b`; ordningen 1 → 3
-→ 7 → 14 → 2 → 13 → 4 → 5 → 9 → 6 → 11 → 12 → 16, 8 var redan låst; varje
-beslut har mätningar i planens logg). **Nästa gång börjar vi med:** etapp 4
-familj 1 (nedan) — ta nya baslinjer (§3) på `226882b` först. FÖRST DÄREFTER: etapp 4 familj 1 — inkliv och advance
-(`overcall`, `advanceOvercall`, inklivarens fortsättningar) in i tabellen; ordningen mot frekvensbilden (planens §4 etapp 4); baslinjerna
-(§3) på `f05bfef`.
+**HELA §5b LIVE 2026-09-08** (sista mergepunkt `226882b`). **Etapp 4 familj 1
+(inkliv och advance) BYGGD 2026-09-08 — VÄNTAR PÅ GRIND:** raderna *inkliv/advance/
+inkliv2/advance2* + *konkurrens-slam* i tabellen, tio detektorer rivna,
+kunskapen i `overcall-continuations.ts`/`competitive-slam.ts`, bridge-
+reglerna i `auction-rules.ts`. b-listan (advancern på 2-lägesinkliv,
+tvåfärgspreferens efter deras höjning, ny färg billigast, tvåfärgsinklivarens
+fortsättning) står i planens logg med exempelhänder — **ägaren godkänner
+familjen eller pekar på en giv → sedan merge (`--no-ff`) + deploy.** Kvar i
+gamla lagret tills familj 2: all X på vår sida (dubblarens vakter). Därefter:
+etapp 4 familj 2 (upplysningsdubbling, svar, dubblarens återbud) — nya
+baslinjer på familj 1:s mergepunkt först.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

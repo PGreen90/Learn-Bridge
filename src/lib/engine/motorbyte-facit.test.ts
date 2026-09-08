@@ -117,14 +117,14 @@ describe('etapp 3 familj 5 – slamutredningen per stol (LANDAD 2026-09-05)', ()
 
 // Pliktsvepets två rester (pausat 2026-09-04, docs/bevaka.md 2026-09-02).
 
-describe('etapp 4 familj 1 – inkliv och advance: tvåfärgsinklivarens fortsättning', () => {
-  it.todo('frö 20261162: 1♥–(2NT)–4♥–P–P: Nord (♠A ♥K ♦A8643 ♣AKT732, 20 hp, 6-5) bjuder 5♣ — inte pass', () => {
+describe('etapp 4 familj 1 – inkliv och advance: tvåfärgsinklivarens fortsättning (LANDAD 2026-09-08)', () => {
+  it('frö 20261162: 1♥–(2NT)–4♥–P–P: Nord (♠A ♥K ♦A8643 ♣AKT732, 20 hp, 6-5) bjuder 5♣ — inte pass', () => {
     const deal = dealFromSeed(20261162)
     const hist = [call('W', '1H'), call('N', '2NT'), call('E', '4H'), call('S', 'P'), call('W', 'P')]
     expect(decideCall(deal, hist, 'N').bid).toBe('5C')
   })
 
-  it.todo('frö 20262021: 1♠–(2NT)–3♠: Öst (♠T832 ♥J2 ♦KQJ ♣AQT3, 12 hp, stöd i båda lågfärgerna) bjuder 4♣ — inte pass', () => {
+  it('frö 20262021: 1♠–(2NT)–3♠: Öst (♠T832 ♥J2 ♦KQJ ♣AQT3, 12 hp, stöd i båda lågfärgerna) bjuder 4♣ — inte pass', () => {
     const deal = dealFromSeed(20262021)
     const hist = [call('S', '1S'), call('W', '2NT'), call('N', '3S')]
     expect(decideCall(deal, hist, 'E').bid).toBe('4C')
@@ -152,7 +152,33 @@ describe('etapp 3 familj 3 – öppnarens återbud efter svag tvåa (§4.5) (LAN
   })
 })
 
+// Fynd ur etapp 4 familj 1 (2026-09-08): det gamla lagrets tvåfärgsläsare
+// tog partnerns 2NT/cue EFTER vår egen upplysningsdubbling för ett
+// tvåfärgsinkliv och "gav preferens". Tabellen läser rätt (ingen tvåfärg),
+// men dubblarens fortsättning efter advancerns fria 2NT / cue saknar regel
+// → facit åt familj 2.
+describe('etapp 4 familj 2 – dubblarens fortsättning efter advancerns fria svar', () => {
+  it.todo('frö 20270004: 1♠–(X)–2♠–(2NT)–P: Syd (♠54 ♥AJ54 ♦AJ6 ♣KJ98, 14 hp) höjer partnerns fria 2NT (10–12) till 3NT — inte pass', () => {
+    const deal = dealFromSeed(20270004)
+    const hist = [call('N', 'P'), call('E', '1S'), call('S', 'X'), call('W', '2S'), call('N', '2NT'), call('E', 'P')]
+    expect(decideCall(deal, hist, 'S').bid).toBe('3NT')
+  })
+  it.todo('frö 20270461: 1♥–(X)–2♥–(X responsiv)–P–(3♥ cue)–P: Väst (♠5432 ♥T ♦J974 ♣AK86) svarar partnerns cue med 3♠ — inte pass', () => {
+    const deal = dealFromSeed(20270461)
+    const hist = [call('N', '1H'), call('E', 'X'), call('S', '2H'), call('W', 'X'), call('N', 'P'), call('E', '3H'), call('S', 'P')]
+    expect(decideCall(deal, hist, 'W').bid).toBe('3S')
+  })
+})
+
 describe('etapp 4 familj 4 – svararens fortsättning i konkurrens', () => {
+  // Pliktsvepet K2, fynd ur etapp 4 familj 1 (2026-09-08): advancerns nya färg bjuds nu
+  // billigast (1♠), så sekvensen 1♦–(1♥)–P–(1♠)–X–P–P–(2♣)–P uppstår — inklivaren ska ge
+  // preferens till advancerns FÖRSTA färg (5+) med 3-3, inte passa (K2 = familj 4:s facit).
+  it.todo('frö 20263370: 1♦–(1♥)–P–(1♠)–X–P–P–(2♣)–P: Nord (♠KT9 ♥AT876 ♦73 ♣J87) ger preferens 2♠ — inte pass', () => {
+    const deal = dealFromSeed(20263370)
+    const hist = [call('W', '1D'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'X'), call('N', 'P'), call('E', 'P'), call('S', '2C'), call('W', 'P')]
+    expect(decideCall(deal, hist, 'N').bid).toBe('2S')
+  })
   it.todo('frö 20262632: 1♦–(1♠)–2♥–P–3♦–P: Nord (♠A ♥AKJ87542 ♦T97 ♣7) bjuder 4♥ — den egna 8-korts färgen vinner över 3-korts ♦-fit (inte 5♦)', () => {
     const deal = dealFromSeed(20262632)
     const hist = [call('E', 'P'), call('S', '1D'), call('W', '1S'), call('N', '2H'), call('E', 'P'), call('S', '3D'), call('W', 'P')]

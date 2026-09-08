@@ -45,7 +45,9 @@ describe('FACIT: advancern hoppar inte förbi utgång (felrapport #33)', () => {
     // Öst öppnar 1♦, Syd kliver in 1♥, Väst passar → advancern (N) höjer.
     const history: ResolvedCall[] = [call('E', '1D'), call('S', '1H'), call('W', 'P')]
     const n = decideCall(deal, history, 'N')
-    // Ska vara en riktig höjning (inte pass, inte förbi 4♥ utgång).
-    expect(['2H', '3H', '4H']).toContain(n.bid)
+    // Ska vara en riktig höjning (inte pass, inte förbi 4♥ utgång). Sedan
+    // etapp 4 familj 1 (2026-09-08) svarar advancern ur tabellen: 11+
+    // stödpoäng med 4-korts stöd = cue-budet 2♦ (limithöjning+, §7.1).
+    expect(['2D', '2H', '3H', '4H']).toContain(n.bid)
   })
 })

@@ -26,8 +26,8 @@ describe('familj 1 – öppningen: läget "ingen har öppnat"', () => {
     expect(bud(h, [P('N')], 'E')?.källa).toBe('tabell:öppning')
     expect(bud(h, [P('N'), P('E')], 'S')?.källa).toBe('tabell:öppning')
     expect(bud(h, [P('N'), P('E'), P('S')], 'W')?.källa).toBe('tabell:öppning')
-    // Efter en öppning är läget inklivarens (etapp 4) resp. svararens (familj 2).
-    expect(bud(h, [{ seat: 'N', bid: '1C' }], 'E')).toBeNull()
+    // Efter en öppning är läget inklivarens (etapp 4 familj 1) resp. svararens (familj 2).
+    expect(bud(h, [{ seat: 'N', bid: '1C' }], 'E')?.källa).toBe('tabell:inkliv')
     expect(bud(h, [{ seat: 'N', bid: '1C' }, P('E')], 'S')?.källa).toBe('tabell:svar')
   })
 
@@ -93,8 +93,8 @@ describe('familj 2 – svaret: läget "partnern öppnade ostört, jag har inte b
 
   it('träffar bara svararen, direkt efter öppning + pass', () => {
     expect(bud(h, [open1S, P('E')], 'S')?.källa).toBe('tabell:svar')
-    // Motståndaren till öppnaren är inte svarare (etapp 4).
-    expect(bud(h, [open1S], 'E')).toBeNull()
+    // Motståndaren till öppnaren är inte svarare utan inklivare (etapp 4 familj 1).
+    expect(bud(h, [open1S], 'E')?.källa).toBe('tabell:inkliv')
     // Störning (inkliv eller X) mellan öppningen och mig → inte den här raden.
     expect(bud(h, [open1S, { seat: 'E', bid: '2C' }], 'S')).toBeNull()
     expect(bud(h, [open1S, { seat: 'E', bid: 'X' }], 'S')).toBeNull()
