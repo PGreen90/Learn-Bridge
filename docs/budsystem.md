@@ -1356,7 +1356,13 @@ positivt svar + satt trumf** (alla äkta agreed trumf). Två minorregler skyddar
 budspråken: (1) i minorfit cue:as **först ÖVER 3NT** — under 3NT betyder nya
 färger stopp-letande (§4.2); (2) i **klar drivzon (33+)** hoppas cue-ronden
 över i minortrumf och kaptenen frågar 4NT direkt, eftersom 5m ligger över 4NT
-och cue-buden annars kan äta upp frågeutrymmet. Reverse/hoppskift väntar på
+och cue-buden annars kan äta upp frågeutrymmet. **Lågfärgens slaminbjudan
+förbi 4m är cue-ronden** (ägarbeslut 2026-09-05, motorbytet §5b beslut 16):
+5m efter partnerns 4m är utgången, till spel; kaptenen med 31–32 visar
+billigaste kontroll (4♥/4♠ över 4♦; 4♦/4♥/4♠ över 4♣), partnern cue:ar
+tillbaka med extra eller bjuder 5m med minimum, 33+ frågar 4NT direkt — och
+handen utan billig kontroll bjuder 5m, en systemriktig miss (4NT som
+inbjudan kolliderar med essfrågan; Minorwood är en senare fråga). Reverse/hoppskift väntar på
 egen trumf-agreement-analys (där är trumfen inferrerad, inte bjuden — ett cue
 skulle läsas naturligt). Bjuder **du** själv ett cue i standardordning
 (billigaste först) följer boten med; en cue i annan ordning hamnar tills
@@ -2270,6 +2276,15 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-08 — Lågfärgsfit i utgångskrav: 5m är utgången, inbjudan är
+  kontrollbudet (§6.2; motorbytet §5b beslut 16, `docs/motorbyte-plan.md`).**
+  Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 16 — bekräftar linjen, inget
+  bud ändras: kaptenen med 31–32 cue:ar billigast över 4m, partnern cue:ar
+  tillbaka eller avslutar 5m, 33+ frågar 4NT direkt, utan billig kontroll
+  5m. Boken fick meningen i §6.2; facit-blocket "§5b beslut 16" i
+  `motorbyte-facit.test.ts` låser den. Enda kodtillägg: partnerns uttryckliga
+  pass ur slamraden när kaptenen avslutar direkt i 5m (`slamTurn`; förr
+  gamla lagrets pass).
 - **2026-09-08 — Hopp till 4m efter 1m–2m′–2NT = trumf satt + slamdriv (§5.3;
   motorbytet §5b beslut 12, `docs/motorbyte-plan.md`).** Ägarbeslut
   2026-09-05 på bok-mot-motor-fynd 12: 1♦–2♣–2NT–4♦ / 1♣–2♦–2NT–4♣ = 4+ stöd,
