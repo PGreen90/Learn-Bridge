@@ -31,7 +31,7 @@ const ALL_ENGINE_RULES: string[] = [
   'höjning av fritt bud', 'höjning av fritt bud (inbjudan)', 'höjning av fritt bud (utgång)',
   'inbjudan efter höjt fritt bud', 'utgång efter höjt fritt bud', 'preferens till inklivsfärgen',
   'hoppbud (inbjudan)', 'hoppinkliv', 'hoppskift', 'höjning (GF)', 'höjning av minor',
-  'höjning till utgång', 'höjning', 'inbjudan (limithöjning)', 'inbjudan',
+  'höjning till utgång', 'höjning', 'inbjudan (limithöjning)', 'inbjudan (ny färg)', 'inbjudan',
   'inverterad minor', 'inverterad minor, svag', 'inverterad: 2NT', 'inverterad: 3NT',
   'inverterad: broms', 'inverterad: minimum', 'inverterad: stopp-visning',
   'passad höjning: 2NT', 'passad höjning: stopp-visning', 'passad höjning: 3NT', 'passad höjning: broms',

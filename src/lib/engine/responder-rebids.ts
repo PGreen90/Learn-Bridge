@@ -434,9 +434,21 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
   if (call === 'P') return null
   if (call === `4${mBid}`) return pass('öppnaren bjöd utgång')
 
+  // §5b beslut 11 (2026-09-07): egen 6+ färg med 10–11 hp och utan 3-korts
+  // stöd → ny färg på 3-LÄGET = naturlig inbjudan, ej krav (§5.1). Går före
+  // 2NT-inbjudan och före den svaga 2-lägesfärgen (som är 5+, svag).
+  const inviteSuit = (): ResponseResult | null => {
+    if (p < 10 || p > 11 || len[M] >= 3) return null
+    const s = RANK.filter((x) => x !== M && x !== rs && len[x] >= 6).sort((a, b) => len[b] - len[a] || rankOf(b) - rankOf(a))[0]
+    if (!s) return null
+    return { call: `3${BID[s]}`, rule: 'inbjudan (ny färg)', explanation: `6+ ${SYM[s]}, 10–11 hp, inget stöd → 3${SYM[s]} (naturlig inbjudan, ej krav).` }
+  }
+
   // Öppnaren rebjöd sin högfärg (6+).
   if (call === `2${mBid}`) {
     if (len[M] >= 3 && p >= 10) return { call: `3${mBid}`, rule: 'inbjudan', explanation: `3+ stöd → 3${mSym} (3-korts limithöjning).` }
+    const inv = inviteSuit()
+    if (inv) return inv
     if (p >= 11) return { call: '2NT', rule: 'inbjudan', explanation: `Inbjudningsstyrka → 2NT (inbjudan).` }
     return pass('preferens, minimum')
   }
@@ -484,6 +496,8 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
   // Naturlig ny färg (2♣/2♦, eller 2♥ över 1♠) – ej krav.
   if (rs && rs !== M) {
     if (len[M] >= 3 && p >= 10) return { call: `3${mBid}`, rule: 'inbjudan (limithöjning)', explanation: `3+ stöd → 3${mSym} (limithöjning).` }
+    const inv = inviteSuit()
+    if (inv) return inv
     if (len[rs] >= 4 && p <= 10) return pass(`stöd i ${SYM[rs]}`)
     if (p >= 11 && bal) return { call: '2NT', rule: 'inbjudan', explanation: `Balanserad inbjudan → 2NT.` }
     // Felrapport #59 (§5.1 "en ny färg av svararen efter 1NT lovar 5+ kort och

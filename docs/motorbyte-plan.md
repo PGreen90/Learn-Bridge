@@ -575,7 +575,8 @@ steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 `ca954b4`) → 9 (passad hand över 1M — LIVE 2026-09-07, `47a5c8f`) →
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa — LIVE 2026-09-07,
 `f4cbe74`) → 11 (ny färg på
-3-läget efter 1M–1NT–2x) → 12 (hopp till 4m = driv) → 16 (bara bok + facit) →
+3-läget efter 1M–1NT–2x — KLAR 2026-09-08, PCD väntar) → 12 (hopp till 4m =
+driv) → 16 (bara bok + facit) →
 8 (redan byggt, bara låst).
 
 ## 6. Arbetssättet under bytet
@@ -599,6 +600,39 @@ steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 
 ## Ändringslogg
 
+- **2026-09-08 — §5b beslut 11 KLAR (svararens nya färg på 3-läget efter
+  1M–1NT–2x = 6+ kort, 10–11, inbjudan; väntar ägarens PCD — mergepunkt fylls
+  i).** Test-drivet: facit-blocket "§5b beslut 11" i `motorbyte-facit.test.ts`
+  (fem fall, alla röda före fixen). Nya lagret: `inviteSuit` i
+  `responderRebidAfterSemiForcing1NT` (6+ färg, 10–11, under 3-korts stöd →
+  3x, efter både 2M-rebudet och en ny 2-lägesfärg; limithöjningen 3M går
+  före; den svaga 2-lägesfärgen från #59 står kvar under 10); öppnaren i
+  `openerThirdBidAfterSemiForcing1NT` (pass = minimum med tolerans 2+; 3M =
+  6+ utan tolerans; 4 i svararens högfärg = 14+ med 3-korts stöd eller
+  A/K/Q-dubbelton; 3NT = 14+ med håll i de två objudna; 5m = 14+ med 4-korts
+  stöd utan håll; annars pass); svararen passar (raden svar3).
+  Betydelselagret: 3x efter 1M–1NT–2x = 'inbjudan (ny färg)' (nytt regelnamn,
+  kravnivå inbjudan, ingen alert — registret + testkatalogen), öppnarens svar
+  ('rebid: egen färg' / 'accepterar inbjudan'). Systembok §5.1 (nytt stycke +
+  svarstabell) + §9. **Följd för felrapport #59 (flaggad för ägaren):**
+  brickans Nord (♠A ♥QJ943 ♦KJT852 ♣T, 11 hp) bjuder nu 3♦ i stället för 2♦ —
+  beslutstexten säger 10–11 → 3-läget, #59:s "svagare" är under 10;
+  `responder-rebids.test.ts` omskrivet. Claudes tolkningar utöver
+  beslutstexten: maximum = 14+ hp; "bra dubbelton" = A/K/Q; lågfärg: 3NT med
+  håll, annars 5m bara med 4-korts stöd; maximum utan fit och utan håll →
+  pass.
+  **Mätningar** (kommandon i §3; baslinjer på `f4cbe74`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 4 — alla
+  b (frön 20270042, 20270188, 20271951, 20272049: 6-kortsfärgen bjuds 3♦/3♥
+  som inbjudan i stället för pass/2NT/2♦; öppnaren rättar 3♠ utan tolerans
+  eller passar); avvikelsedumpen: 25 ändrade + 4 omdöpta — alla b (människans
+  3x: öppnaren passar med minimum och tolerans 11 ggr och accepterar 3NT/4♥
+  3 ggr där gamla lagret förr drev via honorForce 3♠/3♥/4♥ eller
+  offBookResponse 4♠/5♦/5♣; bottens egna 3♦/3♥/3♣ 6 ggr; svararens pass på
+  öppnarens svar 4 ggr), 0 c, olagliga tabellbud 0; betydelsesvepet kravnivå
+  0 · alert 0 · registerhål 0 · kända motoravvikelser 0; pliktsvep/
+  förklaringssvep/regelsvep gröna; revisorn 1000 givar: rätt kontrakt 20,4 % ·
+  snittförlust 268,38 (beslut 6: 20,4 % · 268,39).
 - **2026-09-07 — §5b beslut 6 KLAR & LIVE (naturliga 3♣/3♦ efter 2♣–2♦–2M, andra
   negativa = 2NT; mergepunkt `f4cbe74`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 6" i `motorbyte-facit.test.ts` (fem fall) + frö

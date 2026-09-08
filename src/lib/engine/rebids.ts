@@ -1032,6 +1032,30 @@ export function openerThirdBidAfterSemiForcing1NT(
     return { call: 'P', rule: 'pass', explanation: `Partnerns egen ${s ? SYM[s] : 'färg'} efter 1 sang är till spel (svag hand, 5+ kort) → pass.` }
   }
 
+  // §5b beslut 11 (2026-09-07): partnerns NYA FÄRG PÅ 3-LÄGET = 6+ kort, 10–11,
+  // inbjudan, förnekar 3-korts stöd. Pass = minimum med tolerans (2+ kort);
+  // 3M = 6+ egen färg utan tolerans; 4 i partnerns högfärg = maximum (14–15)
+  // med 3-korts stöd eller bra dubbelton (A/K/Q); 3NT = maximum med håll
+  // runtom (de två objudna färgerna). Lågfärg: 3NT med håll, 5m med 4+ stöd.
+  if (second.rule === 'inbjudan (ny färg)') {
+    const s = suitOfCall(second.call)
+    if (!s) return null
+    const n = len[s]
+    const honourDoubleton = n === 2 && hand.some((c) => c.suit === s && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q'))
+    const unbid = RANK.filter((x) => x !== M && x !== s)
+    const max = p >= 14
+    if (n <= 1) return len[M] >= 6
+      ? { call: `3${mBid}`, rule: 'rebid: egen färg', explanation: `Ingen tolerans för partnerns ${SYM[s]} (högst en) → 3${mSym} (rättelse, 6+ ${SYM[M]}, ej krav).` }
+      : { call: 'P', rule: 'pass', explanation: `Ingen tolerans men ingen sjätte ${SYM[M]} → pass på partnerns inbjudan.` }
+    if (max) {
+      const isMajor = s === 'hearts' || s === 'spades'
+      if (isMajor && (n >= 3 || honourDoubleton)) return { call: `4${BID[s]}`, rule: 'accepterar inbjudan', explanation: `Maximum (14–15) med ${n >= 3 ? '3-korts stöd' : 'bra dubbelton'} i ${SYM[s]} → 4${SYM[s]}.` }
+      if (unbid.every((x) => hasStopper(hand, x))) return { call: '3NT', rule: 'accepterar inbjudan', explanation: `Maximum (14–15) med håll runtom → 3NT.` }
+      if (!isMajor && n >= 4) return { call: `5${BID[s]}`, rule: 'accepterar inbjudan', explanation: `Maximum (14–15) med 4-korts stöd i ${SYM[s]}, håll saknas för sang → 5${SYM[s]}.` }
+    }
+    return { call: 'P', rule: 'pass', explanation: `${max ? 'Maximum men varken fit eller håll runtom' : 'Minimum med tolerans (2+ kort)'} → pass på partnerns inbjudan.` }
+  }
+
   if (second.call !== '2NT') return null
 
   // 2NT efter vårt 2M-återbud (6+ kort): rätta alltid till färgen.

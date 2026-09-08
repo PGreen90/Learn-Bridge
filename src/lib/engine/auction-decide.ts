@@ -885,6 +885,12 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
     return first ? { turn: asResponse(first), plan: { kind: 'slam', setup: { trump, lastCall: third.call, ctx: c.ctx } } } : null
   }
 
+  // Min inbjudan i ny färg på 3-läget efter semi-forcing 1NT (§5b beslut 11):
+  // öppnaren svarade (pass/3M/4x/3NT/5m) — hon placerade, jag passar.
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'semi-forcing 1NT' && second.rule === 'inbjudan (ny färg)') {
+    return { turn: { call: 'P', rule: 'svararens pass', explanation: `Öppnaren svarade på min inbjudan (${third.call}) → pass.` }, plan: { kind: 'call' } }
+  }
+
   // Systems on efter 2♣–2♦–2NT: svararen placerar (Smolen / 4M / 3NT / pass).
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') {
     const p = responderRebidIn2NTAuction(second, third, hand, 22)
