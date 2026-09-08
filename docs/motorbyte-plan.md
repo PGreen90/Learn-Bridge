@@ -573,8 +573,8 @@ arrival efter reverse — LIVE 2026-09-06, `1a6adf0`) → 7 (4♦ naturligt, cue
 2 (fjärde färg efter reverse) → 13 (fjärde färg bort efter 2/1) → 4 (rena
 steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 `ca954b4`) → 9 (passad hand över 1M — LIVE 2026-09-07, `47a5c8f`) →
-6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa — KLAR 2026-09-07,
-PCD väntar) → 11 (ny färg på
+6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa — LIVE 2026-09-07,
+`f4cbe74`) → 11 (ny färg på
 3-läget efter 1M–1NT–2x) → 12 (hopp till 4m = driv) → 16 (bara bok + facit) →
 8 (redan byggt, bara låst).
 
@@ -599,8 +599,8 @@ PCD väntar) → 11 (ny färg på
 
 ## Ändringslogg
 
-- **2026-09-07 — §5b beslut 6 KLAR (naturliga 3♣/3♦ efter 2♣–2♦–2M, andra
-  negativa = 2NT; väntar ägarens PCD — mergepunkt fylls i).** Test-drivet:
+- **2026-09-07 — §5b beslut 6 KLAR & LIVE (naturliga 3♣/3♦ efter 2♣–2♦–2M, andra
+  negativa = 2NT; mergepunkt `f4cbe74`, Actions grön, rebidz.com aliasad).** Test-drivet:
   facit-blocket "§5b beslut 6" i `motorbyte-facit.test.ts` (fem fall) + frö
   20271509 (förr `it.todo`, nu skarpt: 3♣ naturligt med 5 hp och 5 klöver).
   Nya lagret: `responderSecondBidAfter2C` — 2NT = andra negativa bara med 0–3,

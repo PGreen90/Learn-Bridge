@@ -28,7 +28,7 @@ i planens logg): beslutstabellen
 öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
 bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
 varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **§5b: alla 15
-ägarbeslut tagna 2026-09-05; beslut 1 LIVE (`3491ece`), 3 LIVE (`1a6adf0`), 7 LIVE (`820ab71`), 14 LIVE (`4be2ba3`), 2 LIVE (`f7d5c72`), 13 LIVE (`158e23f`), 4 LIVE (`26b05ac`), 5 LIVE (`ca954b4`), 9 LIVE 2026-09-07 (`47a5c8f`).**
+ägarbeslut tagna 2026-09-05; beslut 1 LIVE (`3491ece`), 3 LIVE (`1a6adf0`), 7 LIVE (`820ab71`), 14 LIVE (`4be2ba3`), 2 LIVE (`f7d5c72`), 13 LIVE (`158e23f`), 4 LIVE (`26b05ac`), 5 LIVE (`ca954b4`), 9 LIVE (`47a5c8f`), 6 LIVE 2026-09-07 (`f4cbe74`).**
 **Familj 6 KLAR & LIVE 2026-09-05 (mergepunkt f05bfef; grinden efter etapp 3
 = deployad):** manusets ostörda del riven — `buildAuctionCore` spelar ut vår
 sida ur tabellen stol för stol; kvar = konkurrensronden + `open`-flaggan
@@ -37,8 +37,6 @@ färg → Gerber 4♣) är live; vakt: manuset avgör inga bud i ostörda auktio
 Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägarens
 ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
 (9) · naket 4NT = essfråga i senast bjudna färg (14).
-**Beslut 6 BYGGD 2026-09-07 (naturliga 3♣/3♦ efter 2♣–2♦–2M, andra negativa =
-2NT, öppnarens fortsättning i tabellen) — väntar ägarens PCD.**
 **Nästa gång börjar vi med:** beslut 11 (svararens nya färg på 3-läget efter
 1M–1NT–2x = inbjudan, 6+ kort), test-drivet (facit FÖRE fix, systembok §, regel
 i nya lagret), ett beslut per commit i byggordningen (§5b sist: 1 ✔ → 3 ✔ → 7 ✔
