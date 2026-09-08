@@ -82,6 +82,10 @@ const ALL_ENGINE_RULES: string[] = [
   'konkurrens-slaminvit (RKC)', 'konkurrens-slam: placering', 'konkurrens-slam: stopp',
   // Etapp 4 familj 2 (2026-09-08): dubblingsfamiljen (double-continuations.ts).
   'dubblaren höjer till 3NT', 'svar på dubblarens cue',
+  // När de stör vår öppning (etapp 4 familj 3, 2026-09-08)
+  'negativ-dubblarens utgång', 'negativ-dubblarens invit-fortsättning', 'negativ-dubblarens preferens',
+  'höjning efter negativ dubbling (utgång)', 'höjning efter negativ dubbling (inbjudan)', 'höjning efter negativ dubbling (enkel)',
+  'straffdubbling',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

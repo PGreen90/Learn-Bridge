@@ -49,7 +49,7 @@ describe('raden *dubbling*: X efter två bjudna färger ur tabellen', () => {
     expect(t.källa).toBe('tabell:dubbling')
     expect(t.call).toMatchObject({ bid: 'X', rule: 'upplysningsdubbling (stark)' })
   })
-  it('passet lämnas åt det gamla lagret (samma stol äger inklivet över svaret, familj 3)', () => {
+  it('passet lämnas åt det gamla lagret (samma stol äger inklivet över svaret — väntar på familj 4:s öppnarrader)', () => {
     const t = decideCallTraced(ensam('W', 'S:K7654 H:2 D:Q85 C:AJ53'), hist, 'W') // 5-korts spader → inte 4-4
     expect(t.källa).not.toBe('tabell:dubbling')
     expect(t.call.bid).toBe('P')

@@ -1262,11 +1262,17 @@ function afterNMFSuitShow(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterp
   return null
 }
 
-/** New Minor Forcing (§5.7): efter 1x–1M–1NT bjuder svararen en obruten lågfärg på 2-läget. */
+/**
+ * New Minor Forcing (§5.7): efter 1x–1M–1NT bjuder svararen en obruten lågfärg
+ * på 2-läget. Gäller ÄVEN passad hand (etapp 4 familj 3, 2026-09-08: den
+ * ostörda linjen bjöd NMF som passad hand med 11 hp — frö 20270269 — medan
+ * läsaren nekade och öppnarens svar föll ur tabellen; boken §5.7 utesluter
+ * inte passad hand, och en passad 11:a har fortfarande sin inbjudan att ställa).
+ */
 function isNMF(u: Undisturbed, cb: ParsedBid): boolean {
   // `cb` är (kandidaten till) svararens ANDRA bud — anropas både när det bjuds
   // (n = 3) och senare i auktionen med u.bids[3].
-  if (u.bids.length < 3 || cb.level !== 2 || !isMinor(cb.strain) || u.responderPassed) return false
+  if (u.bids.length < 3 || cb.level !== 2 || !isMinor(cb.strain)) return false
   const [open, resp, reb] = u.bids.map((b) => b.cb)
   if (!same(reb, 1, 'NT') || resp.level !== 1 || !isMajor(resp.strain)) return false
   return cb.strain !== open.strain
@@ -2212,6 +2218,13 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
   if (reverse && isMajor(reb.strain) && cb.strain === reb.strain) {
     if (cb.level === 3) return R('reverse: höjning (stark)', `${B(cb)} — höjer partnerns ${name} billigt efter reversen: 4+ stöd och egna öppningsvärden (12+), slamintresse. Utgångskrav — partnern öppnar 4-läget med kontrollbud.`, 'utgangskrav')
     if (cb.level === 4) return R('reverse: utgång', `${B(cb)} — hopp till utgång efter reversen (fast arrival): 4+ stöd, den svagare handen, ingen slamambition.`, 'avslut')
+  }
+  // Slamport efter hoppskiftet (§5.2): HOPPhöjning till 4m i en av öppnarens
+  // färger (3m fanns) = slaminbjudan — samma steg som kaptenens `inviteTurn`
+  // (etapp 4 familj 3, 2026-09-08: frö 20270453, 1♦–1♠–3♣–4♦ låg förr dold
+  // bakom manusets kik-rond; läsaren sa "naturligt, utgångskravet står").
+  if (jumpShift && cb.level === 4 && isMinor(cb.strain) && (cb.strain === open.strain || cb.strain === reb.strain) && isJumpOver(reb, cb)) {
+    return R('slaminbjudan', `${B(cb)} — hopphöjning av ${name} efter hoppskiftet: slaminbjudan (slam bara om partnern har extra). Partnern accepterar med mer än minimum.`)
   }
   if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
   if (jumpShift) return N(`${B(cb)} — naturligt efter hoppskiftet; utgångskravet står.`, 'utgangskrav')

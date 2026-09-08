@@ -90,6 +90,24 @@
 //        återbudet, domen på 3-hoppet, svaret på dubblarens cue efter min
 //        responsiva X, straffdubblingen, sist preferens/tävla till fiten.
 //      Kunskapen bor i `double-continuations.ts`.
+//   E4.3. När de stör vår öppning (2026-09-08): negativ dubbling, stöddubbling,
+//      Jordan. (Inklivet över vårt svar väntar på familj 4:s öppnarrader.)
+//      · raden *svar-stört*: partnern öppnade 1 i färg, LHO störde (färg-
+//        inkliv, 1NT, X, 2NT, cue), min första tur → `contestedResponse`
+//        (negativ X, fritt bud, cue, konkurrenshöjning, NT med stopp; K3-
+//        tabellen mot 1NT/tvåfärg; Jordan 2NT/XX/höjning mot deras X).
+//        Tvåfärgsinklivet läses ur auktionen, aldrig ur motståndarens regel.
+//      · raden *stöd-x*: jag öppnade 1 i färg, partnern svarade 1M, RHO klev
+//        in i färg direkt efter → `supportDouble` (exakt 3 stöd = X; annars
+//        det gamla lagret, familj 4).
+//      · raderna *stöd-x-svar* / *stöd-x-öppnaren*: svaret på partnerns
+//        stöddubbling (aldrig bortpassad) och stöddubblarens dom på svaret.
+//      · raderna *negativ-x-öppnaren* / *negativ-dubblaren*: öppnarens svar
+//        på den negativa dubblingen (rondkrav) och dubblarens andra tur
+//        (höjning med fit, preferens, invit-fortsättning, 2NT).
+//      · raderna *jordan-öppnaren* / *jordan-svararen*: svaret på Jordan 2NT
+//        (3M/4M, aldrig pass) och Jordan-bjudarens dom på 3M-avslutet.
+//      Kunskapen bor i `contested-opening.ts`; höjningen i `fit-raise.ts`.
 
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
@@ -116,6 +134,7 @@ import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
+import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerContinues, negativeDoublerSeat, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -1615,9 +1634,12 @@ const TABELL: Row[] = [
   // de objudna (10+) eller den starka 17+-enfärgshanden. (Förr modellerade
   // manuset bara den starka dubblingen — den vanliga 4-4:an fanns bara i det
   // gamla lagret.) Passet lämnas åt det gamla lagret (null): samma stol äger
-  // INKLIVET över svaret, som manuset bara bjuder i stöddubblingsronden —
-  // det flyttar med stöddubblingen (familj 3), och ett uttryckligt pass här
-  // skulle tysta det.
+  // INKLIVET över svaret, som väntar på familj 4 — öppnarens konkurrens-
+  // återbud måste finnas i tabellen innan RHO får kliva in över svaret i
+  // botauktionerna (etapp 4 familj 3 prövade raden: utan öppnarraden föll
+  // återbudet till det gamla lagrets catch-all — 4♠ på 13 hp, reverse på
+  // 14 — se planens logg 2026-09-08). Manusets gamla stöddubblingsrond, som
+  // bjöd inklivet bara när ÖPPNAREN hade exakt tre stöd (en kik), är riven.
   {
     id: 'dubbling',
     läge: (f) => takeoutOfResponseSeat(f) !== null,
@@ -1680,6 +1702,88 @@ const TABELL: Row[] = [
         answerStrongDoubleGameForce(hand, facts) ??
         penaltyDoubleFirst(hand, facts) ??
         doubleSideCompetes(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // ---- Etapp 4 familj 3 — när de stör vår öppning (2026-09-08) -------------
+  // Svararens första tur när LHO stört partnerns 1-läges färgöppning: negativ
+  // dubbling, fritt bud, cue, konkurrenshöjning, NT med stopp, K3-tabellen
+  // mot 1NT/tvåfärgsinkliv, Jordan 2NT/XX/höjning mot deras X — eller pass.
+  // Raden svarar alltid (samma beslut som manuset förr tog i sin
+  // konkurrensrond; vid bordet föll svararen förr till det gamla lagrets
+  // catch-all när LHO:s inkliv inte var det manuset gissat).
+  {
+    id: 'svar-stört',
+    läge: (f) => contestedResponseSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const s = contestedResponseSeat(facts)!
+      const r = contestedResponse(hand, s.openerSuit, s.theirCall)
+      return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
+    },
+  },
+  // Öppnarens stöddubbling: 1x–(P)–1M–(färginkliv) med exakt 3 stöd → X.
+  // Annars null: öppnarens övriga konkurrensåterbud är familj 4:s.
+  {
+    id: 'stöd-x',
+    läge: (f) => supportDoubleSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = openerSupportDouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Svaret på partnerns stöddubbling — aldrig bortpassad (pass bara som
+  // medvetet straffpass) — och stöddubblarens dom på svaret (15+ accepterar,
+  // utgångsbud står, fritt bud passas aldrig).
+  {
+    id: 'stöd-x-svar',
+    läge: (f) => supportDoubleToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = answerPartnersSupportDouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'stöd-x-öppnaren',
+    läge: (f) => supportDoubleFollowUpToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = supportDoublerContinues(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Öppnarens svar på partnerns negativa dubbling (rondkrav — aldrig pass)
+  // och negativ-dubblarens andra tur (höjning med fit, svag preferens,
+  // invit-fortsättning, 2NT; 13+ och tysta händer → det gamla lagret).
+  {
+    id: 'negativ-x-öppnaren',
+    läge: (f) => negativeDoubleToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = answerPartnersNegativeDouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'negativ-dubblaren',
+    läge: (f) => negativeDoublerSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = negativeDoublerContinues(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Jordan 2NT över deras X av vår 1M-öppning: öppnaren svarar alltid (3M
+  // minimum, 4M med 15+ stödpoäng); Jordan-bjudaren höjer 3M-avslutet med 13+.
+  {
+    id: 'jordan-öppnaren',
+    läge: (f) => jordanToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = answerJordan(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'jordan-svararen',
+    läge: (f) => jordanSignoffToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = jordanBidderAfterSignoff(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },

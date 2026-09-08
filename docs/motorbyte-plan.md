@@ -324,9 +324,25 @@ mätningen vid etapp 4:s start):
    i de ostörda raderna (och i betydelselagret). Tio detektorer rivna.
    Familjegräns: deras FÄRGöppning krävs — DONT-X över 1NT (familj 6) och
    dubblingar på vår öppning (familj 3) stannar i det gamla lagret.
-3. Negativ dubbling, stöddubbling, öppnarens svar på dem.
+3. Negativ dubbling, stöddubbling, öppnarens svar på dem. **KLAR 2026-09-08
+   (loggen; mergepunkt i loggen när grinden tagits):** raderna *svar-stört*
+   (svararens första bud när LHO stört partnerns 1-läges färgöppning — hela
+   manusets konkurrenssvar: negativ X, fritt bud, cue, konkurrenshöjning, NT
+   med stopp, K3-tabellen, Jordan/XX), *stöd-x* / *stöd-x-svar* /
+   *stöd-x-öppnaren*, *negativ-x-öppnaren* / *negativ-dubblaren*,
+   *jordan-öppnaren* / *jordan-svararen*; kunskapen i
+   `contested-opening.ts`, höjningslogiken utbruten till `fit-raise.ts`
+   (familj 4:s hem). Sex detektorer rivna. Manusets stöddubblingsrond
+   (kik i öppnarens hand) riven utan ersättning: **RHO:s inkliv över vårt
+   svar bjuds i botauktionerna först i familj 4** — provet visade att utan
+   öppnarens konkurrensåterbud i tabellen faller återbudet till det gamla
+   lagrets catch-all (4♠ på 13 hp, reverse på 14, cue som partnern passar).
 4. Svararens fria bud, öppnarens fortsättning i konkurrens, höjningar på visad
-   längd, lagen om totala stick (pliktsvepets K-regler blir facit här).
+   längd, lagen om totala stick (pliktsvepets K-regler blir facit här). **Tar
+   med sig från familj 3:** RHO:s inkliv över vårt svar (raden byggs när
+   öppnarens rad finns; `overcall` mot svaret med tredje-färgs-/stoppvakt),
+   svararens svar på öppnarens cue i konkurrens (frö 20270156-mönstret:
+   cuet passades), negativ-dubblarens ojämna 13+-händer utan stopp.
 5. Balansering och återöppning.
 6. Försvar mot 1NT (DONT, naturligt inkliv, Lebensohl, värde-X, flykt).
 7. Försvar mot svaga tvåor och spärrar, deras höjningar.
@@ -622,6 +638,100 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-08 — Etapp 4 familj 3 BYGGD: när de stör vår öppning (negativ
+  dubbling, stöddubbling, Jordan, svararens konkurrenssvar) i tabellen. 🚪
+  Grinden VÄNTAR på ägaren (mergepunkt skrivs in när den tagits).**
+  Test-drivet: facit-blocket "etapp 4 familj 3" i `motorbyte-facit.test.ts`
+  (frö 20270004 → X / 3NT / XX, 20270008 → X, 20270007 → 1♠, 20270269 → 2♥)
+  + `auction-etapp4-familj3.test.ts` (raderna, lägesgränserna, det rivna).
+  **Bygget:** `contested-opening.ts` (lägesläsarna `contestedResponseSeat`,
+  `supportDoubleSeat`, `supportDoubleToAnswer`, `supportDoubleFollowUpToAnswer`,
+  `negativeDoubleToAnswer`, `negativeDoublerSeat`, `jordanToAnswer`,
+  `jordanSignoffToAnswer` + kunskapen som funktioner av EN hand + fakta:
+  `contestedResponse` = manusets hela konkurrenssvar, flyttat) och
+  `fit-raise.ts` (`raiseWithFit` + `fitLengthNeeded`/`partnerSimpleOvercalled`/
+  `partnerJumpOvercalled`/`partnerBalanced` utbrutna ur det gamla lagret, som
+  behåller en tunn detektorform — familj 4:s hem). Raderna: *svar-stört*
+  (partnern öppnade 1 i färg, LHO störde, min första tur: negativ X, fritt
+  bud, cue, konkurrenshöjning, NT med stopp, K3-tabellen mot 1NT/tvåfärg,
+  Jordan/XX/höjning mot deras X — svarar alltid), *stöd-x* (exakt 3 stöd → X
+  efter 1x–(P)–1M–(färginkliv); annars null → familj 4), *stöd-x-svar* /
+  *stöd-x-öppnaren*, *negativ-x-öppnaren* (rondkrav, aldrig pass),
+  *negativ-dubblaren* (höjning med fit ur `fit-raise` → 13+ utan fit → 3NT →
+  svag preferens (K2) → invit-fortsättning → 2NT), *jordan-öppnaren* /
+  *jordan-svararen*. Manuset (`auction.ts`): svararens konkurrensbud kommer ur
+  tabellen (`ask(responderSeat)`); `competitiveResponderAction` och
+  stöddubblingsronden borta. Rivet ur `auction-live.ts`: detektorerna
+  `supportDoubleToAnswer`, `supportDoubleFollowUpToAnswer`, `jordanToAnswer`,
+  `jordanSignoffToAnswer`, `negativeDoubleToAnswer`, `negativeDoublerContinues`
+  med lägesläsare. Tvåfärgsinklivet över vår öppning läses ur AUKTIONEN (2NT
+  direkt = ovanlig, cue av öppningsfärgen = Michaels) — förr ur motståndarens
+  regeletikett, som inte finns vid bordet.
+  **Diffvarvet som revs:** raden *inkliv-över-svaret* (RHO:s naturliga inkliv
+  över vårt 1-lägessvar ur RHO:s egen hand — det manuset förr bara lade när
+  ÖPPNAREN hade exakt tre stöd, en kik) byggdes och gav 103 ändrade givar där
+  öppnarens återbud föll till det gamla lagrets catch-all: 4♠ på 13 hp med
+  4-korts stöd (frö 20270008), reverse 2♥ på 14 utan fit (20270060/20270104),
+  öppnarens cue som svararen passade (20270156). Det är familj 4:s stol
+  (öppnarens konkurrensåterbud) → raden revs; kik-ronden revs ändå, så
+  botauktionen är ostörd där tills familj 4 (regel: bygg aldrig en ny
+  motståndaraktion innan MOTTAGARENS rad finns).
+  **b-listan (bokens §7.4/§7.8 b/d/e, §5.7 — allt i §9):** (1) **svararen tar
+  sitt konkurrensbeslut ur tabellen vid bordet** — avvikelsedumpen (människan
+  öppnade, boten klev in) visar 700 givar där svararen förr fick catch-allens
+  bud: cue (limithöjning+) 192 (frö 20270002: 1♣–(1♥) med ♠64 ♥T85 ♦A
+  ♣AKQT532 → 2♥, förr 5♣), negativ dubbling 193 (20270004: 1♦–(1♠) med ♠54
+  ♥AJ54 ♦AJ6 ♣KJ98 → X, förr 2♣), konkurrenshöjning 143 (20270001: 1♣–(1NT)
+  med 8 hp och 4 klöver → 2♣, förr 3♣), straff-X mot 1NT 36 (20270008 → X,
+  förr 3NT), fritt bud 37 (20270007: 1♣–(1♥) med ♠QT863 → 1♠, förr 5♣), XX
+  46, Jordan 17, 4M/3M mot tvåfärg 12, NT med stopp 9, pass 43 (20270001:
+  1 hp → pass, förr "enkel höjning" 2♣); (2) **"Jordan 2NT" bara efter
+  1♥/1♠** — över 1♣/1♦ med 4+ stöd och 10+ → XX (15 av 3000 botgivar, t.ex.
+  20270093: ♠A6 ♥T8653 ♦K5 ♣KT54 efter 1♣–(X) → XX; förr 2NT som öppnaren
+  passade ut); (3) **negativ-dubblarens utgång**: 13+ utan fit → 3NT mot
+  partnerns sangsvar eller jämn med stopp (20272408: ♠A ♥QT52 ♦J984 ♣AK65
+  efter 1♣–(1♠)–X–P–1NT → 3NT, förr 5♣; 20272188 → 3NT, förr 2♠) och 2NT =
+  10–12 mot sangsvaret (20271063: ♠Q986 ♥KQ72 ♦K9 ♣432 → 2NT, förr pass);
+  (4) **NMF gäller passad hand** — den ostörda linjen bjöd redan NMF (svar2)
+  medan läsaren nekade, så öppnarens svar föll ur tabellen (20270269:
+  P–P–P–1♦–P–1♥–P–1NT–P–2♣ → 2♥ ur raden *tredje*; avvikelsedumpen 24 givar
+  där honorForce/catch-all förr gav 3♣/2♠/3NT); (5) betydelselagret: 4m-
+  hopphöjning efter hoppskift = slaminbjudan (20270453: 1♦–1♠–3♣–4♦, förr
+  "naturligt, utgångskravet står" — ostörda grinden tillbaka på 0). Kvar åt
+  familj 4 (facit/anteckning i §4): ojämna 13+ negativ-dubblare utan stopp,
+  svararens svar på öppnarens cue i konkurrens, RHO:s inkliv över svaret.
+  **Mätningar** (kommandon i §3; baslinjer på `d3f7116`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 57 (37
+  = kik-ronden borta, ostörd linje i stället — a; 15 Jordan → XX; 3 → 3NT;
+  2 → 2NT), samma bud/annan källa 1164; revisorintervallet (20260721–20261720):
+  ÄNDRAT BUD 22 (17/3/1/1, samma mönster), samma bud/annan källa 406;
+  avvikelsedumpen: ÄNDRAT BUD 768 (b-listan + 10 kik-rond), samma bud/annan
+  källa 434, 92 nycklar bara i baslinjen (svar2-läget nås inte när RHO förr
+  klev in), olagliga tabellbud 0 i alla tre. Frekvensbilden (3000):
+  `tabell:svar-stört` 1184 · `tabell:negativ-x-öppnaren` 140 ·
+  `tabell:negativ-dubblaren` 73 · `tabell:jordan-öppnaren` 8 ·
+  `tabell:jordan-svararen` 3 (stöd-x-raderna nås bara vid bordet tills familj
+  4); `manus` 4785 → 3623 bud, `pass (ingen regel)` 8799 → 8773,
+  `detektor:offBookResponse` 746 → 706, 56 → 55 källor. Betydelsesvepet:
+  ostörda grinden kravnivå 0 · alert 0 · registerhål 0 · kända motoravvikelser
+  0; störda (familj 9) kravnivå 2105 → 2098 bud · alert 1061 → 1009 ·
+  registerhål 1018 → 942 (familjens regelnamn registrerade i `rules.ts`).
+  Pliktsvep: K1 19, K2 3, K3 5, K4 0, K5 9, K6 29 (oförändrade);
+  förklaringssvep grönt (0 oförklarade); regelsvep grönt (284 regler, 0
+  auktioner utan slut). Kikvakten skarp grön (nytt krav `tabell:svar-stört`
+  > 50). Revisorn 1000 givar: rätt kontrakt 20,3 % · snittförlust 271,06
+  (baslinje d3f7116: 20,4 % · 270,27, dvs. +0,79 per giv = brus); kategorier
+  (antal/förlust): fel-farg-bet 122/51520 · missad-lillslam 76/49080 ·
+  missad-utgang 142/48170 · missad-storslam 34/39190 · billig-offring
+  115/32410 · battre-an-facit 115/19500 · sald-giv 61/18850 · for-hogt
+  40/9540 · fel-strain 89/1990 · utpassad 3/810 (revisor-output/latest.json).
+  19 av revisorns 1000 givar bytte slutkontrakt — nästan alla för att RHO:s
+  inkliv över svaret inte längre läggs i botauktionen (kik-ronden riven, t.ex.
+  20260884 5♦ → 3NT = etapp 6-facitgiven, nu ostörd; 20260742: RHO med 8-korts
+  spader tiger → 2♣ passas ut — priset för att vänta med inklivet till familj
+  4, som bygger det med öppnarens återbud på plats); resten Jordan → XX
+  (20260756 2NT → 2♣, 20261121 2NT → 2♦) och negativ-dubblarens 3NT
+  (20261115 2♦ → 3NT). Ingen regel tunad på poäng (ägarprincip 2026-08-06).
 - **2026-09-08 — Etapp 4 familj 2 KLAR & LIVE: dubblingsfamiljen i tabellen (grinden godkänd av ägaren samma dag, "Godkänt, kör PCD"; mergepunkt `d3f7116`).**
   Test-drivet: facit-blocket "etapp 4 familj 2" i `motorbyte-facit.test.ts`
   (frö 20270004 → 3NT, frö 20270461 → 3♠) + `auction-etapp4-familj2.test.ts`

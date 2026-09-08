@@ -381,7 +381,12 @@ frågar den först, och täcker en rad läget (familj 1: öppningen, "ingen har
 familj 3: öppnarens återbud, "jag öppnade, partnern svarade ostört" — partnerns
 bud läses ur den nakna auktionen, aldrig ur partnerns hand eller regel; familj
 4a: svararens andra bud, där slamsekvensernas första steg tas ur kaptenens
-hand ensam och manuset bygger resten enligt beslutets plan)
+hand ensam och manuset bygger resten enligt beslutets plan; sedan 2026-09-05
+även 4b/5 — öppnarens tredje bud, slamturerna, svararens tredje/öppnarens
+fjärde — och sedan 2026-09-08 etapp 4:s familjer 1–3: inkliv/advance,
+dubblingsfamiljen, och "när de stör vår öppning" — svararens konkurrenssvar,
+negativ/stöddubbling med svar, Jordan; raderna listas i huvudkommentaren i
+`auction-decide.ts`)
 avgörs budet där ur egen hand + fakta — utan manus. Manusets
 motsvarande gren läser tabellen. Lagren nedan gäller för de familjer som inte
 flyttat än; ny logik i en flyttad familj byggs som en tabellrad, aldrig i

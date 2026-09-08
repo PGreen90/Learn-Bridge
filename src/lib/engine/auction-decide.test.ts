@@ -95,9 +95,10 @@ describe('familj 2 – svaret: läget "partnern öppnade ostört, jag har inte b
     expect(bud(h, [open1S, P('E')], 'S')?.källa).toBe('tabell:svar')
     // Motståndaren till öppnaren är inte svarare utan inklivare (etapp 4 familj 1).
     expect(bud(h, [open1S], 'E')?.källa).toBe('tabell:inkliv')
-    // Störning (inkliv eller X) mellan öppningen och mig → inte den här raden.
-    expect(bud(h, [open1S, { seat: 'E', bid: '2C' }], 'S')).toBeNull()
-    expect(bud(h, [open1S, { seat: 'E', bid: 'X' }], 'S')).toBeNull()
+    // Störning (inkliv eller X) mellan öppningen och mig → inte den här raden
+    // utan *svar-stört* (etapp 4 familj 3).
+    expect(bud(h, [open1S, { seat: 'E', bid: '2C' }], 'S')?.källa).toBe('tabell:svar-stört')
+    expect(bud(h, [open1S, { seat: 'E', bid: 'X' }], 'S')?.källa).toBe('tabell:svar-stört')
     // Efter mitt svar är det öppnarens återbud (familj 3).
     expect(bud(h, [open1S, P('E'), { seat: 'S', bid: '3S' }, P('W')], 'N')?.källa).toBe('tabell:återbud')
     // Öppningar utan svarsregler lämnas åt det gamla lagret.

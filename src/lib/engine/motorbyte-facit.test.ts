@@ -170,6 +170,49 @@ describe('etapp 4 familj 2 – dubblarens fortsättning efter advancerns fria sv
   })
 })
 
+describe('etapp 4 familj 3 – när de stör vår öppning (LANDAD 2026-09-08)', () => {
+  // Avvikelsedumpens b-lista: svararen vid bordet (människan öppnade, boten
+  // klev in) fick förr sitt bud ur det gamla lagrets catch-all. Nu raden
+  // *svar-stört* = samma beslut som manuset alltid tog i botauktionerna.
+  it('frö 20270004: 1♦–(1♠)–?: Syd (♠54 ♥AJ54 ♦AJ6 ♣KJ98) dubblar negativt — inte 2♣', () => {
+    const deal = dealFromSeed(20270004)
+    const t = decideCallTraced(deal, [call('N', '1D'), call('E', '1S')], 'S')
+    expect(t.källa).toBe('tabell:svar-stört')
+    expect(t.call).toMatchObject({ bid: 'X', rule: 'negativ dubbling' })
+  })
+  it('frö 20270004: 1♦–(1♠)–X–P–1NT–P–?: samma Syd (14 hp) bjuder 3NT — inte 2♣ (catch-allens 4-kortsfärg på 2-läget)', () => {
+    const deal = dealFromSeed(20270004)
+    const hist = [call('N', '1D'), call('E', '1S'), call('S', 'X'), call('W', 'P'), call('N', '1NT'), call('E', 'P')]
+    const t = decideCallTraced(deal, hist, 'S')
+    expect(t.källa).toBe('tabell:negativ-dubblaren')
+    expect(t.call.bid).toBe('3NT')
+  })
+  it('frö 20270004: 1♣–(X)–?: samma Syd redubblar (10+) — inte "Jordan 2NT" över en lågfärg (öppnaren hade inget svar och 2NT passades ut)', () => {
+    const deal = dealFromSeed(20270004)
+    expect(decideCall(deal, [call('N', '1C'), call('E', 'X')], 'S')).toMatchObject({ bid: 'XX', rule: 'redubbling' })
+  })
+  it('frö 20270008: P–P–1♣–(1NT)–?: Öst (♠QJ94 ♥Q75 ♦AK ♣T543, 13 hp) straffdubblar — inte 3NT', () => {
+    const deal = dealFromSeed(20270008)
+    expect(decideCall(deal, [call('E', 'P'), call('S', 'P'), call('W', '1C'), call('N', '1NT')], 'E')).toMatchObject({ bid: 'X', rule: 'straffdubbling' })
+  })
+  it('frö 20270007: 1♣–(1♥)–?: Syd (♠QT863 ♥A8 ♦T6 ♣AQT8) bjuder 1♠ (fritt bud) — inte 5♣', () => {
+    const deal = dealFromSeed(20270007)
+    expect(decideCall(deal, [call('N', '1C'), call('E', '1H')], 'S')).toMatchObject({ bid: '1S', rule: 'fritt bud' })
+  })
+  // Bifynd (den ostörda linjen): passad hands NMF. Förr dolde manusets
+  // kik-rond given (RHO klev in); nu bjuder Syd (11 hp, 5 hjärter, passad
+  // i andra hand) 2♣ = NMF över 1NT, och öppnaren svarar ur raden *tredje* —
+  // betydelselagret nekade förr NMF för passad hand, så svaret föll ur tabellen.
+  it('frö 20270269: P–P–P–1♦–P–1♥–P–1NT–P–2♣(NMF, passad hand)–P–?: Nord (♠QT7 ♥A32 ♦8764 ♣AQ4) visar 3-korts hjärterstöd 2♥ ur tabellen', () => {
+    const deal = dealFromSeed(20270269)
+    const hist = [call('E', 'P'), call('S', 'P'), call('W', 'P'), call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', 'P'), call('N', '1NT'), call('E', 'P'), call('S', '2C'), call('W', 'P')]
+    const t = decideCallTraced(deal, hist, 'N')
+    expect(t.källa).toBe('tabell:tredje')
+    expect(t.call.bid).toBe('2H')
+    expect(meaningOf(hist, 9).rule).toBe('New Minor Forcing')
+  })
+})
+
 describe('etapp 4 familj 6 – försvar mot 1NT: DONT-dubblarens fortsättning', () => {
   it.todo('frö 20272187: 1NT–(X DONT)–2♦–P–3♣–?: Syd (♠KQT763 ♥K9 ♦AQ ♣KJ2, 19 hp) visar sin enfärg 3♠ — inte pass (förr gav det starka X-flödet 3♠ av misstag; familj 2 kräver deras FÄRGöppning)', () => {
     const deal = dealFromSeed(20272187)
