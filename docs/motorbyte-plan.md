@@ -575,8 +575,8 @@ steg i splinterreläet) → 5 (passad hand i minor — LIVE 2026-09-07,
 `ca954b4`) → 9 (passad hand över 1M — LIVE 2026-09-07, `47a5c8f`) →
 6 (naturliga 3♣/3♦ efter 2♣–2♦–2M, 2NT = andra negativa — LIVE 2026-09-07,
 `f4cbe74`) → 11 (ny färg på
-3-läget efter 1M–1NT–2x — KLAR 2026-09-08, PCD väntar) → 12 (hopp till 4m =
-driv) → 16 (bara bok + facit) →
+3-läget efter 1M–1NT–2x — LIVE 2026-09-08, `b06c673`) → 12 (hopp till 4m =
+driv — KLAR 2026-09-08, PCD väntar) → 16 (bara bok + facit) →
 8 (redan byggt, bara låst).
 
 ## 6. Arbetssättet under bytet
@@ -600,9 +600,34 @@ driv) → 16 (bara bok + facit) →
 
 ## Ändringslogg
 
-- **2026-09-08 — §5b beslut 11 KLAR (svararens nya färg på 3-läget efter
-  1M–1NT–2x = 6+ kort, 10–11, inbjudan; väntar ägarens PCD — mergepunkt fylls
-  i).** Test-drivet: facit-blocket "§5b beslut 11" i `motorbyte-facit.test.ts`
+- **2026-09-08 — §5b beslut 12 KLAR (hopp till 4m efter 1m–2m′–2NT = trumf
+  satt + slamdriv; väntar ägarens PCD — mergepunkt fylls i).** Test-drivet:
+  facit-blocket "§5b beslut 12" i `motorbyte-facit.test.ts` (fyra fall). Bara
+  läsregel + öppnarens svar — boten bjuder själv fortfarande det billiga 3m
+  (#58). Nya lagret: betydelselagret `responderSecondAfter2over1` läser 4m som
+  '2/1: hopphöjning (slamdriv)' (nytt regelnamn, kravnivå slamintresse;
+  registret + testkatalogen); tabellens slamrad (`slamSituation`, ny gren:
+  prefix 4, `partnerStarts`, partnerMin 12, GF) — öppnaren cue:ar billigaste
+  första-rondskontroll under 5m eller avslutar 5m, kaptenen fortsätter
+  (cue/4NT) eller passar. Två hål som dök upp under bygget: (1) 1♣–2♦–2NT–4♣
+  lästes som Gerber — Gerber-läsaren (fråga och svar) fick undantaget
+  `jumpRaise2over1`; (2) kaptenens tur efter partnerns direkta 5m-avslut gav
+  null i `slamTurn` (föll till gamla lagret) — nu uttryckligt 'svararens
+  pass' i `partnerStarts`-grenen, vilket också gäller beslut 3/4-flödena
+  (samma bud, ny källa). `auction-decide.test.ts`: "4m lämnas åt gamla
+  lagret" omskrivet (öppnaren svarar 5♦). Systembok §5.3 + §9.
+  **Mätningar** (kommandon i §3; baslinjer på `b06c673`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 0,
+  samma bud/annan källa 7 (kaptenens pass efter partnerns utgångsavslut kommer
+  nu ur slamraden — a); avvikelsedumpen: 1 ändrad (b: människans 4♦ → öppnaren
+  cue:ar 4♥ i stället för gamla lagrets "krav – stödjer partnern" 5♦) + 14
+  omdöpta (a), 0 c, olagliga tabellbud 0; betydelsesvepet kravnivå 0 · alert
+  0 · registerhål 0 · kända motoravvikelser 0; pliktsvep/förklaringssvep/
+  regelsvep gröna; revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust
+  268,38 (identiskt med beslut 11 — boten bjuder inte hoppet själv).
+- **2026-09-08 — §5b beslut 11 KLAR & LIVE (svararens nya färg på 3-läget efter
+  1M–1NT–2x = 6+ kort, 10–11, inbjudan; mergepunkt `b06c673`, Actions grön,
+  rebidz.com aliasad).** Test-drivet: facit-blocket "§5b beslut 11" i `motorbyte-facit.test.ts`
   (fem fall, alla röda före fixen). Nya lagret: `inviteSuit` i
   `responderRebidAfterSemiForcing1NT` (6+ färg, 10–11, under 3-korts stöd →
   3x, efter både 2M-rebudet och en ny 2-lägesfärg; limithöjningen 3M går

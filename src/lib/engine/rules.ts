@@ -164,6 +164,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // Öppnarens §5.3-återbud efter 2/1 (felrapport #58: saknade kravnivå).
   'rebid: ny färg (GF)': 'utgangskrav',
   'rebid: 2NT (GF)': 'utgangskrav',
+  '2/1: hopphöjning (slamdriv)': 'slamintresse', // 1m–2m′–2NT–4m: trumf satt + slamdriv (§5.3, §5b beslut 12)
   // 2/1 med försenat lågfärgsstöd (ägarbeslut 2026-09-03): 3m sätter trumf i
   // krav; öppnarens 3NT är ett förslag kaptenen får passa, 4m håller kravet.
   '2/1: försenat stöd': 'utgangskrav',

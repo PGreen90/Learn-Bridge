@@ -372,11 +372,11 @@ describe('familj 4b – öppnarens tredje bud: läget "jag öppnade, partnern sv
     expect(bud('S:KQ2 H:KJ3 D:AJ5 C:KQ86', hist('1C', '2C', '2D', '3C'), 'N')!.call).toMatchObject({ bid: '3NT', rule: '3NT till spel' })
   })
 
-  it('2/1 med försenat stöd: öppnaren beskriver på 3m; ett hopp till 4m är inte det läget (lämnas åt det gamla lagret, aldrig ett olagligt bud)', () => {
+  it('2/1 med försenat stöd: öppnaren beskriver på 3m; ett hopp till 4m är trumf satt + slamdriv (§5b beslut 12) — öppnaren öppnar cue-ronden ur slamraden (här 5♦: ingen kontroll utanför trumfen att visa)', () => {
     const h = 'S:K72 H:Q3 D:AQJ54 C:K86'
     const t = bud(h, hist('1D', '2C', '2NT', '3D'), 'N')!.call
     expect(['3NT', '4D']).toContain(t.bid)
-    expect(bud(h, hist('1D', '2C', '2NT', '4D'), 'N')).toBeNull()
+    expect(bud(h, hist('1D', '2C', '2NT', '4D'), 'N')!.call.bid).toBe('5D')
   })
 
   it('1NT-auktionens inbjudan efter Stayman: maximum accepterar, minimum passar', () => {

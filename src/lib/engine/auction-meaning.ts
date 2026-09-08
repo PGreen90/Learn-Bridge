@@ -1321,10 +1321,12 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   // Gerber (§6.4): hopp till 4♣ direkt över partnerns naturliga 1NT/2NT (öppning eller
   // återbud) — men inte när en färg redan är trumf (1♣–2♣–2NT–4♣ är en klöverhöjning).
   const partnerNT = partnerLast && last.strain === 'NT' && isNaturalNT(u, n - 1)
-  if (partnerNT && !trump && last.level <= 2 && same(cb, 4, 'C')) {
+  // 1♣–2♦–2NT–4♣ är ingen Gerber utan hopphöjningen i 2/1 (§5b beslut 12).
+  const jumpRaise2over1 = (k: number) => k === 3 && same(u.bids[0].cb, 1, 'C') && u.bids[1].cb.level === 2 && u.bids[1].cb.strain === 'D' && same(u.bids[2].cb, 2, 'NT') && !u.responderPassed
+  if (partnerNT && !trump && last.level <= 2 && same(cb, 4, 'C') && !jumpRaise2over1(n)) {
     return R('Gerber', `4♣ — Gerber: essfråga över partnerns sang. Partnern svarar 4♦ = 0/4 ess, 4♥ = 1, 4♠ = 2, 4NT = 3. Säger inget om klöver.`)
   }
-  if (n >= 2 && same(last, 4, 'C') && partnerLast && !trump && u.bids[n - 2].seat === seat && u.bids[n - 2].cb.strain === 'NT' && u.bids[n - 2].cb.level <= 2 && isNaturalNT(u, n - 2) && cb.level === 4) {
+  if (n >= 2 && same(last, 4, 'C') && partnerLast && !trump && !jumpRaise2over1(n - 1) && u.bids[n - 2].seat === seat && u.bids[n - 2].cb.strain === 'NT' && u.bids[n - 2].cb.level <= 2 && isNaturalNT(u, n - 2) && cb.level === 4) {
     const ess: Record<string, string> = { D: '0 eller 4 ess', H: '1 ess', S: '2 ess', NT: '3 ess' }
     if (ess[cb.strain]) return R('Gerber', `${B(cb)} — svar på Gerber: ${ess[cb.strain]}. Säger inget om ${cb.strain === 'NT' ? 'sang' : name}.`)
   }
@@ -2168,8 +2170,11 @@ function responderSecondAfter2over1(_seat: Seat, cb: ParsedBid, u: Undisturbed, 
   const name = NAME[cb.strain]
   if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
   if (cb.strain === open.strain) {
-    // Försenat stöd är det BILLIGA 3m (felrapport #58); ett hopp till 4m är stöd i kravet, inget öppnaren har en beskrivning för.
+    // Försenat stöd är det BILLIGA 3m (felrapport #58). Hoppet till 4m (§5b
+    // beslut 12, 2026-09-08) = trumf satt + slamdriv förbi 3NT: 4+ stöd, 33+
+    // mot visat minimum, ingen sanghand — öppnaren öppnar cue-ronden.
     if (same(reb, 2, 'NT') && isMinor(open.strain) && cb.level === 3) return R('2/1: försenat stöd', `${B(cb)} — försenat stöd i ${name} med slamintresse: sätter trumf i utgångskravet.`)
+    if (same(reb, 2, 'NT') && isMinor(open.strain) && cb.level === 4) return R('2/1: hopphöjning (slamdriv)', `${B(cb)} — hopp förbi 3 sang: sätter ${name} som trumf med 4+ stöd och slamdriv (33+ mot partnerns visade 12), ingen sanghand. Partnern visar billigaste kontroll (4♥/4♠) eller bjuder 5${SYMBOL[cb.strain]} utan kontroll att visa; kaptenen frågar 4NT när hon vill.`)
     return R('2/1: fortsättning', `${B(cb)} — stöd i partnerns ${name}. Utgångskravet står.`, 'utgangskrav')
   }
   if (cb.strain === u.bids[1].cb.strain) return R('2/1: fortsättning', `${B(cb)} — rebjuder egen ${name} (6+). Utgångskravet står.`, 'utgangskrav')
