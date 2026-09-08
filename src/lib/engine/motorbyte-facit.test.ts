@@ -884,3 +884,47 @@ describe('§5b beslut 11 – ny färg på 3-läget efter 1M–1NT–2x: 6+ kort,
     expect(kontrakt).toEqual(['1S', '1NT', '2S', '3H', '4H'])
   })
 })
+
+// §5b beslut 12 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 12): svararens HOPP
+// till 4m efter 1m–2m'–2NT (1♦–2♣–2NT–4♦, 1♣–2♦–2NT–4♣) = trumf satt + slamdriv
+// förbi 3NT — 4+ stöd, 33+ mot visat minimum 12, ingen sanghand. Öppnaren
+// svarar som i cue-ronden (§6.2): billigaste kontrollbud under 5m, annars 5m;
+// kaptenen (svararen) frågar 4NT när den vill. Boten själv fortsätter bjuda
+// det billiga 3m (#58) — beslutet är en läsregel + öppnarens svar. Förr: 4m
+// lästes som "stöd i kravet", öppnaren hade inget svar (kravvaktens 5m).
+describe('§5b beslut 12 – hopp till 4m efter 1m–2m′–2NT = trumf satt + slamdriv; öppnaren öppnar cue-ronden', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  const P = (seat: Seat) => call(seat, 'P')
+  const hD = [call('N', '1D'), P('E'), call('S', '2C'), P('W'), call('N', '2NT'), P('E'), call('S', '4D'), P('W')] // 1♦–2♣–2NT–4♦
+  const hC = [call('N', '1C'), P('E'), call('S', '2D'), P('W'), call('N', '2NT'), P('E'), call('S', '4C'), P('W')] // 1♣–2♦–2NT–4♣
+
+  it('betydelselagret: 4♦ läses som trumfsättning med slamdriv (inte "stöd i kravet"); det billiga 3♦ är fortfarande försenat stöd', () => {
+    expect(meaningOf(hD, 6)).toMatchObject({ rule: '2/1: hopphöjning (slamdriv)', forcing: 'slamintresse' })
+    expect(meaningOf(hC, 6).rule).toBe('2/1: hopphöjning (slamdriv)')
+    expect(meaningOf([call('N', '1D'), P('E'), call('S', '2C'), P('W'), call('N', '2NT'), P('E'), call('S', '3D')], 6).rule).toBe('2/1: försenat stöd')
+  })
+
+  it('öppnaren (raden slam, partnern öppnar cue-ronden): billigaste kontrollbud under 5♦ — 4♥ med ♥A, 4♠ med ♠A men inte ♥A; utan kontroll att visa → 5♦', () => {
+    expect(bud('S:K43 H:A73 D:KQ85 C:Q63', hD, 'N')!.call.bid).toBe('4H')
+    expect(bud('S:A43 H:K73 D:KQ85 C:Q63', hD, 'N')!.call.bid).toBe('4S')
+    expect(bud('S:K43 H:Q73 D:KQ85 C:KJ6', hD, 'N')!.call.bid).toBe('5D')
+    expect(decideCallTraced(dealNS('S:K43 H:A73 D:KQ85 C:Q63', 'S:A H:KQ D:AJ763 C:AKQ52'), hD, 'N').källa).toBe('tabell:slam')
+    // Öppnarens kontrollbud läses som cue (alert), 5♦ som avslut.
+    expect(meaningOf([...hD, call('N', '4H')], 8).alert).toBe(true)
+    expect(meaningOf([...hD, call('N', '4H')], 8).rule).toMatch(/cue/)
+  })
+
+  it('samma i klöverformen: 1♣–2♦–2NT–4♣ → öppnaren cue:ar 4♦/4♥/4♠ billigast, annars 5♣', () => {
+    expect(bud('S:K43 H:Q73 D:A85 C:KQ63', hC, 'N')!.call.bid).toBe('4D')
+    expect(bud('S:K43 H:A73 D:Q85 C:KQ63', hC, 'N')!.call.bid).toBe('4H')
+    expect(bud('S:K43 H:Q73 D:K85 C:KQ63', hC, 'N')!.call.bid).toBe('5C')
+  })
+
+  it('kaptenen fortsätter efter öppnarens cue: med slamvärden frågar hon vidare (cue/4NT) ur slamraden; öppnarens 5♦ utan slamvärden passas', () => {
+    const h4H = [...hD, call('N', '4H'), P('E')]
+    const t = decideCallTraced(dealNS('S:K43 H:A73 D:KQ85 C:Q63', 'S:A H:KQ D:AJ763 C:AKQ52'), h4H, 'S')
+    expect(t.källa).toBe('tabell:slam')
+    expect(['4S', '4NT']).toContain(t.call.bid)
+    expect(bud('S:5 H:K4 D:AJ763 C:AKJ52', [...hD, call('N', '5D'), P('E')], 'S')!.call.bid).toBe('P')
+  })
+})

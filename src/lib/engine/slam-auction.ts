@@ -234,7 +234,15 @@ export function slamTurn(role: SlamRole, hand: Hand, setup: SlamSetup, sofar: Sl
     // utgång fortsätter kaptenen som över vilken utgångsplacering som helst
     // (4NT med 33+, inbjudan med 31–32, annars pass).
     if (sofar.length === 0) return role === CAPTAIN ? null : partnerFirstStep(hand, setup)
-    if (!isCueCall(sofar[0].call, trump)) return slamTurn(role, hand, { ...setup, lastCall: sofar[0].call, partnerStarts: false }, sofar.slice(1))
+    if (!isCueCall(sofar[0].call, trump)) {
+      const t = slamTurn(role, hand, { ...setup, lastCall: sofar[0].call, partnerStarts: false }, sofar.slice(1))
+      if (t) return t
+      // Partnern avslutade i utgång och kaptenen har varken driv eller
+      // inbjudan → uttryckligt pass ur slamraden (§5b beslut 12; förr föll
+      // turen till det gamla lagret).
+      if (role === CAPTAIN && sofar.length === 1) return { role: CAPTAIN, call: 'P', rule: 'svararens pass', explanation: `Partnern avslutade i utgång (${sofar[0].call}) och slamvärden saknas → pass.` }
+      return null
+    }
   }
   if (sofar.length === 0) {
     return role === CAPTAIN ? slamCaptainFirstStep(hand, trump, setup.lastCall, ctx, setup.partnerShort) : null

@@ -991,6 +991,16 @@ Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gälle
   passa), annars **4m** (kravet står). Sedan cue-ronden över 3NT / 1430 RKC
   som efter inverterad höjning (§6.2). Exempel: ♠AKJ ♥— ♦AJ84 ♣AT8753 mot
   1♦: 2♣–(2NT)–3♦–(4♦)–4NT–(5♠)–6♦.
+- **Svararens HOPP till 4m efter 1m–2m′–2NT** (ägarbeslut 2026-09-05,
+  motorbytet §5b beslut 12; t.ex. 1♦–2♣–2NT–**4♦**, 1♣–2♦–2NT–**4♣**) =
+  **trumf satt + slamdriv förbi 3NT**: 4+ stöd, driv mot slam (33+ mot
+  öppnarens visade 12, kaptensregeln §5.2) och ingen sanghand (kortfärg
+  någonstans). Öppnaren svarar som i cue-ronden (§6.2): **billigaste
+  kontrollbud** (4♥/4♠, 4♦ över 4♣), annars **5m** utan kontroll att visa;
+  kaptenen (svararen) frågar 4NT när hon vill. Boten själv fortsätter bjuda
+  det billiga 3m (mer rum för kontrollbud under utgång) — regeln gäller när
+  människan hoppar. *Förkastat: 4m till spel (kastar slammen) och Minorwood
+  (ny konvention — senare).*
 - **Svararens återbud med egen 4-korts högfärg (2026-08-07):** visas naturligt
   under 3NT när den är auktionens **tredje** färg (öppnaren rebjöd egen färg
   eller stödde svararens) — infriar 2/1-regelns löfte om att högfärgen kommer i
@@ -2260,6 +2270,18 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-08 — Hopp till 4m efter 1m–2m′–2NT = trumf satt + slamdriv (§5.3;
+  motorbytet §5b beslut 12, `docs/motorbyte-plan.md`).** Ägarbeslut
+  2026-09-05 på bok-mot-motor-fynd 12: 1♦–2♣–2NT–4♦ / 1♣–2♦–2NT–4♣ = 4+ stöd,
+  33+ mot visade 12, ingen sanghand; öppnaren öppnar cue-ronden (billigaste
+  kontroll under 5m, annars 5m), kaptenen fortsätter (cue/4NT/avslut). Kod:
+  betydelselagret `responderSecondAfter2over1` läser hoppet som
+  '2/1: hopphöjning (slamdriv)' (nytt regelnamn, kravnivå slamintresse),
+  tabellens slamrad (`slamSituation`, prefix 4 med `partnerStarts`, samma
+  maskineri som reverse-höjningen §5b beslut 3 och splinterreläets svar §5b
+  beslut 4). Boten bjuder själv fortfarande det billiga 3m (#58). Förr lästes
+  4m som "stöd i kravet" och öppnarens svar låg i det gamla lagret. Facit:
+  blocket "§5b beslut 12" i `motorbyte-facit.test.ts`.
 - **2026-09-08 — Svararens nya färg på 3-läget efter 1M–1NT–2x = 6+ kort,
   10–11, inbjudan (§5.1; motorbytet §5b beslut 11, `docs/motorbyte-plan.md`).**
   Ägarbeslut 2026-09-05 på bok-mot-motor-fynd 11. Förr saknades regeln:

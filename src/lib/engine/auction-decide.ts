@@ -1111,6 +1111,15 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
     }
   }
 
+  // §5b beslut 12 (2026-09-08): svararens HOPP till 4m efter 1m–2m′–2NT =
+  // trumf satt + slamdriv (4+ stöd, 33+ mot visade 12, ingen sanghand).
+  // Öppnaren öppnar cue-ronden (billigaste kontroll under 5m, annars 5m);
+  // kaptenen fortsätter (cue/4NT/avslut). Boten själv bjuder det billiga 3m.
+  if (openerSuit && !isMajorSuit(openerSuit) && response.rule === '2-över-1 GF' && rebid.call === '2NT' && first === `4${LETTER[openerSuit]}`) {
+    const ctx: SlamContext = { partnerMin: 12, gameForcing: true }
+    return { kind: 'slam', captain, prefix: 4, setup: { trump: openerSuit, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+  }
+
   // Gerber över 1NT-återbudet (§5.7): 1m–1M–1NT–4♣. Och 4NT direkt över
   // sang-återbudet är KVANTITATIVT (den jämna 19–20-handen; standard-2/1) —
   // partnern dömer på sin hand mot visade 12–14 (familj 6, 2026-09-05).
