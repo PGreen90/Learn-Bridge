@@ -26,9 +26,7 @@ import {
 } from './auction-facts'
 import { penaltyDouble } from './doubles'
 import { raiseWithFit as raisePartnerSuit } from './fit-raise'
-import { advanceDONT } from './dont'
-import { answerNTInterference, answerPreemptInterference } from './contested-openings'
-import { lebensohlAfter1NT, lebensohlAfter1NTRebid } from './lebensohl'
+import { answerPreemptInterference } from './contested-openings'
 import { defendPreempt } from './defense-conventional'
 import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfter2over1 } from './rebids'
 import { respondTo1NT } from './responses-nt'
@@ -474,8 +472,8 @@ function cleanNTOpening(f: AuctionFacts): { seat: Seat; level: number } | null {
   const open = f.opening
   if (!open || open.strain !== 'NT' || open.level > 2) return null
   if (side(open.seat) !== side(seat)) return null
-  // Motståndarna ska ha varit HELT tysta – stör de äger `ntInterferenceToAnswer`
-  // och DONT-detektorerna läget, inte sangsystemet.
+  // Motståndarna ska ha varit HELT tysta – stör de äger tabellraden
+  // *vårt-1nt-stört* (Lebensohl/värde-X) läget, inte sangsystemet.
   if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null
   return { seat: open.seat, level: open.level }
 }
@@ -869,326 +867,6 @@ function maybePenaltyDouble(c: DetectorCtx): ResolvedCall | null {
   return { seat, bid: 'X', rule: ans.rule, explanation: ans.explanation }
 }
 
-// ---- DONT-fortsättningar mot deras 1NT (§7.5, Fynd #2 delbit 1) -------------
-
-/**
- * Har partnern gjort ett DONT-bud mot motståndarnas 1NT som `seat` (advancern)
- * ska svara på? Mönstret: motståndarnas 1NT-öppning, och partnerns DONT-bud
- * (X / 2♣ / 2♦ / 2♥ / 2♠) är vår sidas ENDA aktion, senaste icke-pass, följt av
- * bara pass. Returnerar partnerns DONT-bud, annars null. (X får aldrig lämnas att
- * passas – det är ett relä; jfr felrapport #7 för tvåfärgsinkliv.)
- */
-function partnerDONTToAnswer(f: AuctionFacts): string | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
-  if (!['X', '2C', '2D', '2H', '2S'].includes(lastNonPass.bid)) return null
-  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
-  if (ourActions.length !== 1 || ourActions[0] !== lastNonPass) return null
-  return lastNonPass.bid
-}
-
-/**
- * Står `seat`s egen DONT-X (enfärgshand) och väntar på rättelse? Mönstret:
- * motståndarnas 1NT, vår X, partnerns FORCERADE 2♣-relä, sedan bara pass. X:et
- * lovar en 6+ enfärgshand – vi rättar till den (pass med klöver-enfärg). Utan
- * detta skulle X:et bli spelat som straffdubbling av 1NT.
- */
-function ownDONTXToCorrect(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
-  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
-  if (ourActions.length !== 2) return null
-  if (ourActions[0].seat !== seat || ourActions[0].bid !== 'X') return null
-  if (ourActions[1].seat !== PARTNER[seat] || ourActions[1].bid !== '2C') return null
-  const idx = history.indexOf(ourActions[1])
-  if (!history.slice(idx + 1).every((c) => c.bid === 'P')) return null
-
-  const len = lengths(deal.hands[seat])
-  const suit = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st]).find((s) => len[s] >= 6)
-  if (!suit || suit === 'clubs') {
-    return { seat, bid: 'P', rule: 'DONT: pass (klöver)', explanation: 'min DONT-enfärg är ♣ → passa partnerns 2♣-relä.' }
-  }
-  const bid = cheapestBidIn(history, seat, letterOfSuit(suit))
-  if (!bid) return null
-  return {
-    seat, bid, rule: 'DONT: rättelse',
-    explanation: `min DONT-enfärg är ${SWE_SYM[letterOfSuit(suit)]} (6+) → rättar partnerns 2♣-relä till ${prettyBid(bid)}.`,
-  }
-}
-
-/**
- * Står `seat`s egen DONT-TVÅFÄRGSbud (2♣/2♦ = lägre färg + en högre) och väntar
- * på rättelse efter partnerns pass-eller-rätta-relä? Mönstret: motståndarnas 1NT,
- * vårt 2♣/2♦, partnerns relä ETT steg upp (2♣→2♦ · 2♦→2♥), sedan bara pass.
- * Partnern saknade stöd i den lägre färgen och ber oss visa den HÖGRE – vi rättar
- * dit (felrapport #20). Utan detta skulle relä-budet bli spelat som ett äkta
- * naturligt bud i en misfit.
- */
-function ownDONTTwoSuiterToCorrect(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
-  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
-  if (ourActions.length !== 2) return null
-  const [mine, relay] = ourActions
-  if (mine.seat !== seat) return null
-  const relayFor: Record<string, string> = { '2C': '2D', '2D': '2H' } // 2♥/2♠/X hanteras ej här
-  const expectRelay = relayFor[mine.bid]
-  if (!expectRelay || relay.seat !== PARTNER[seat] || relay.bid !== expectRelay) return null
-  const idx = history.indexOf(relay)
-  if (!history.slice(idx + 1).every((c) => c.bid === 'P')) return null
-
-  // Min HÖGRE av de två DONT-färgerna (de två längsta i handen; högst rankad).
-  const len = lengths(deal.hands[seat])
-  const twoLongest = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st])
-    .sort((a, b) => len[b] - len[a] || SUIT_STRAINS.indexOf(letterOfSuit(b)) - SUIT_STRAINS.indexOf(letterOfSuit(a)))
-    .slice(0, 2)
-  const higher = SUIT_STRAINS.indexOf(letterOfSuit(twoLongest[0])) > SUIT_STRAINS.indexOf(letterOfSuit(twoLongest[1]))
-    ? twoLongest[0]
-    : twoLongest[1]
-  const bid = cheapestBidIn(history, seat, letterOfSuit(higher))
-  if (!bid) return null
-  return {
-    seat, bid, rule: 'DONT: rättelse (tvåfärg)',
-    explanation: `partnern relä:ade (${prettyBid(relay.bid)}) → visar min högre färg ${SWE_SYM[letterOfSuit(higher)]} → ${prettyBid(bid)}.`,
-  }
-}
-
-// ---- Motståndaren stör VÅR icke-1-färgs-öppning (§7, Fynd #2 delbit 4) ------
-
-/**
- * Har motståndaren stört VÅRT 1NT med DONT, så att svararen (öppnarens partner)
- * ska svara i stället för att passa? Mönstret: vår 1NT-öppning, motståndarens
- * DONT-bud (X / 2♣–2♠) är senaste icke-pass och vår sida har bara bjudit 1NT.
- * Returnerar deras DONT-bud, annars null. (Skiljer sig från DONT-FÖRSVARET, där
- * 1NT är MOTSTÅNDARNAS öppning – här är 1NT vårt eget.)
- */
-function ntInterferenceToAnswer(f: AuctionFacts): string | null {
-  const { seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (side(open.seat) !== side(seat)) return null // måste vara VÅRT 1NT
-  if (seat !== PARTNER[open.seat]) return null // seat = svararen (öppnarens partner)
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 1) return null // bara 1NT bjudet av oss (svararens FÖRSTA svar)
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
-  if (!['X', '2C', '2D', '2H', '2S'].includes(lastNonPass.bid)) return null
-  return lastNonPass.bid
-}
-
-// ---- Öppnarens fortsättning efter partnerns VÄRDE-DUBBEL (felrapport #43) ----
-// Läge: vi öppnade 1NT (15–17), motståndaren störde med ett 2-lägesinkliv (DONT),
-// partnern (svararen) dubblade = straff/värden (8+ – answerNTInterference). X:et
-// har en BRED range (8 upp till 15+), så öppnaren kan inte blint bjuda utgång
-// (15+8 = 23 räcker inte). Ägarbeslut 2026-08-04: ett 2NT-RELÄ där öppnaren
-// beskriver — VISAR en 5-korts färg om den finns, annars 2NT (förnekar 5-kort) —
-// och svararen PLACERAR (pass 8–10 / 3NT 11+). Öppnaren säljer inte given med pass
-// (det var det gamla off-book-reservbudet som missade utgången).
-
-/** Öppnarens tur efter partnerns värde-X över deras 2-lägesstörning av vårt 1NT? */
-function ntValueDoubleOpenerToAnswer(f: AuctionFacts): { theirStrain: string } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (open.seat !== seat) return null // öppnaren själv
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 1) return null // vi har bara bjudit 1NT
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
-  // Färgen partnern dubblade = motståndarnas senaste kontraktsbud, ett 2-lägesinkliv.
-  let doubled: { level: number; strain: string; call: ResolvedCall } | null = null
-  for (let i = history.length - 1; i >= 0; i--) {
-    const cb = parseContractBid(history[i].bid)
-    if (cb) { doubled = { level: cb.level, strain: cb.strain, call: history[i] }; break }
-  }
-  if (!doubled || side(doubled.call.seat) === side(seat) || doubled.level !== 2) return null
-  // ENBART mot ett DONT-inkliv (konstgjort tvåfärg som de flyr från) beskriver
-  // öppnaren mot utgång. Mot ett NATURLIGT inkliv står försvaret/passen kvar
-  // (felrapport #39: 2♥X är rätt straff, 3NT går bet) – där firar detektorn inte.
-  if (!doubled.call.rule?.startsWith('DONT')) return null
-  return { theirStrain: doubled.strain }
-}
-
-/** Öppnarens beskrivande svar: 5-korts färg om den finns, annars 2NT (förnekar 5-kort). */
-function answerNTValueDoubleOpener(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const ctx = ntValueDoubleOpenerToAnswer(f)
-  if (!ctx) return null
-  const hand = deal.hands[seat]
-  const len = lengths(hand)
-  const theirSuit = SUIT_OF_LETTER[ctx.theirStrain]
-  // Egen 5-korts färg (högst rankad, ej deras) → visa den naturligt.
-  let five: Suit | null = null
-  for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
-    if (s !== theirSuit && len[s] >= 5) { five = s; break }
-  }
-  if (five) {
-    const bid = cheapestBidIn(history, seat, letterOfSuit(five))
-    if (bid) {
-      return {
-        seat, bid, rule: 'öppnarens svar på värde-X',
-        explanation: `5+ ${SWE_SYM[letterOfSuit(five)]} → ${prettyBid(bid)} (visar färgen; 2NT hade förnekat 5-kort).`,
-      }
-    }
-  }
-  const nt = '2NT' as Bid
-  if (!legalCalls(history, seat).includes(nt)) return null
-  return {
-    seat, bid: nt, rule: 'öppnarens svar på värde-X',
-    explanation: 'balanserad 15–17 utan 5+ färg → 2NT (förnekar 5+; partnern placerar: pass 8–10, 3NT 11+).',
-  }
-}
-
-/** Dubblarens (svararens) tur efter att öppnaren beskrivit med 2NT eller en 5-korts färg? */
-function ntValueDoubleDoublerToAnswer(f: AuctionFacts): { openerBid: string } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (side(open.seat) !== side(seat) || seat !== PARTNER[open.seat]) return null // dubblaren
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 2) return null // 1NT + öppnarens beskrivande bud
-  const myLastNonPass = [...history.filter((c) => c.seat === seat)].reverse().find((c) => c.bid !== 'P')
-  if (!myLastNonPass || myLastNonPass.bid !== 'X') return null // jag dubblade
-  const openerBids = history.filter((c) => c.seat === open.seat && parseContractBid(c.bid))
-  if (openerBids.length !== 2) return null
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== open.seat) return null // öppnarens svar är senast (LHO passade)
-  return { openerBid: openerBids[1].bid }
-}
-
-/** Svararen placerar: 3NT med 11+, annars pass; över en visad färg — fit → höj, annars 3NT/pass. */
-function answerNTValueDoubleDoubler(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const ctx = ntValueDoubleDoublerToAnswer(f)
-  if (!ctx) return null
-  const hand = deal.hands[seat]
-  const p = hcp(hand)
-  const len = lengths(hand)
-  const legal = legalCalls(history, seat)
-  const strong = p >= 11
-  const openerCb = parseContractBid(ctx.openerBid as Bid)
-  if (!openerCb) return null
-
-  // Öppnaren visade en 5-korts FÄRG (inte 2NT).
-  if (openerCb.strain !== 'NT') {
-    const openerSuit = SUIT_OF_LETTER[openerCb.strain]
-    const isMajor = openerSuit === 'hearts' || openerSuit === 'spades'
-    if (isMajor && len[openerSuit] >= 3) {
-      const bid = `${strong ? 4 : 3}${openerCb.strain}` as Bid
-      if (legal.includes(bid)) {
-        return {
-          seat, bid, rule: 'svar på öppnarens värde-X-fortsättning',
-          explanation: `3+ stöd i ${SWE_SYM[openerCb.strain]} → ${prettyBid(bid)} (${strong ? 'utgång' : 'inbjudan'}).`,
-        }
-      }
-    }
-    if (strong && legal.includes('3NT' as Bid)) {
-      return { seat, bid: '3NT', rule: 'svar på öppnarens värde-X-fortsättning', explanation: `Utgångsvärden utan fit → 3NT.` }
-    }
-    return { seat, bid: 'P', rule: 'pass', explanation: `Inget bättre → pass (${ctx.openerBid} står).` }
-  }
-
-  // Öppnaren bjöd 2NT (förnekade 5-kort): placera utgång.
-  if (strong && legal.includes('3NT' as Bid)) {
-    return { seat, bid: '3NT', rule: 'placerar utgång efter öppnarens 2NT', explanation: `Utgångsvärden mitt emot öppnarens 15–17 → 3NT.` }
-  }
-  return { seat, bid: 'P', rule: 'pass', explanation: `Minimum (8–10) → pass, 2NT står.` }
-}
-
-// ---- Lebensohl efter VÅRT 1NT (§7.5, Lager 1) ------------------------------
-// Motståndaren har klivit in NATURELLT över vårt 1NT (rule = 'naturligt inkliv
-// (1NT)', modelleras i auction.ts). Svararen spelar Lebensohl; öppnaren fullföljer
-// 2NT-reläet med tvunget 3♣. Ett DONT-inkliv saknar den naturliga rule-etiketten
-// och faller därför på gamla vägen (answerNTInterference) – diskriminatorn.
-
-/** Motståndarens naturliga inkliv över VÅRT 1NT (färg + budarens plats), annars null. */
-function naturalOvercallOf1NT(f: AuctionFacts): { suit: Suit; seat: Seat } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (side(open.seat) !== side(seat)) return null // måste vara VÅRT 1NT
-  const over = history.find((c) => c.rule === 'naturligt inkliv (1NT)' && side(c.seat) !== side(seat))
-  if (!over) return null
-  const m = /^2([CDHS])$/.exec(over.bid)
-  if (!m) return null
-  return { suit: SUIT_OF_LETTER[m[1]], seat: over.seat }
-}
-
-/** Svararens FÖRSTA Lebensohl-bud (deras naturliga inkliv ligger kvar). */
-function lebensohl1NTFirstToAnswer(f: AuctionFacts): Suit | null {
-  const { seat } = f
-  const open = f.opening
-  if (!open || seat !== PARTNER[open.seat]) return null // svararen (öppnarens partner)
-  const nat = naturalOvercallOf1NT(f)
-  if (!nat) return null
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 1) return null // bara 1NT bjudet av oss
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== nat.seat) return null // deras inkliv är senast
-  return nat.suit
-}
-
-/** Öppnaren tvingas 3♣ över svararens 2NT-relä. */
-function lebensohl1NTRelayComplete(f: AuctionFacts): ResolvedCall | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.seat !== seat) return null // öppnaren själv
-  if (!naturalOvercallOf1NT(f)) return null
-  const partnerBids = history.filter((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
-  if (partnerBids.length === 0 || partnerBids[partnerBids.length - 1].bid !== '2NT') return null
-  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
-  if (ourBids.length !== 1) return null // bara 1NT hittills
-  if (!legalCalls(history, seat).includes('3C' as Bid)) return null
-  return { seat, bid: '3C' as Bid, rule: 'Lebensohl 3♣ (tvunget relä-svar)', explanation: 'partnerns 2NT var Lebensohl-relä → jag måste bjuda 3♣.' }
-}
-
-/** Svararens rättelse (pass/ny färg) efter öppnarens tvungna 3♣. */
-function lebensohl1NTRebidToAnswer(f: AuctionFacts): Suit | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || seat !== PARTNER[open.seat]) return null
-  const nat = naturalOvercallOf1NT(f)
-  if (!nat) return null
-  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
-  if (ourBids.length !== 1 || ourBids[0].bid !== '2NT') return null // vi bjöd 2NT
-  const openerBids = history.filter((c) => c.seat === open.seat && parseContractBid(c.bid))
-  if (openerBids[openerBids.length - 1]?.bid !== '3C') return null // öppnaren svarade 3♣
-  return nat.suit
-}
-
-/** Öppnarens fortsättning efter svararens DIREKTA 3-läges krav (GF): major-fit → utgång, annars 3NT. */
-function lebensohl1NTGFToAnswer(f: AuctionFacts): Suit | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.seat !== seat) return null // öppnaren
-  if (!naturalOvercallOf1NT(f)) return null
-  const partnerBids = history.filter((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
-  if (partnerBids.length !== 1) return null
-  const m = /^3([CDHS])$/.exec(partnerBids[0].bid) // ett direkt 3-läges färgbud (ej 2NT-relä)
-  if (!m) return null
-  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
-  if (ourBids.length !== 1) return null // bara 1NT
-  return SUIT_OF_LETTER[m[1]]
-}
-
-function lebensohl1NTOpenerAnswerGF(hand: Hand, gfSuit: Suit): { call: string; rule: string; explanation: string } {
-  const len = lengths(hand)
-  const isMajor = gfSuit === 'hearts' || gfSuit === 'spades'
-  if (isMajor && len[gfSuit] >= 3) {
-    return {
-      call: `4${letterOfSuit(gfSuit)}`,
-      rule: 'Lebensohl höjer krav till utgång',
-      explanation: `Stöd i partnerns ${SWE_SYM[letterOfSuit(gfSuit)]} → 4${SWE_SYM[letterOfSuit(gfSuit)]}.`,
-    }
-  }
-  return { call: '3NT', rule: 'Lebensohl 3NT (öppnaren väljer utgång)', explanation: 'inget bättre än 3NT över partnerns krav.' }
-}
-
 /**
  * Har motståndaren stört VÅR svaga tvåa/spärr, så att svararen ska svara?
  * Mönstret: vår öppning är en svag tvåa (2♦/2♥/2♠) eller spärr (3-läget+ i färg),
@@ -1214,36 +892,6 @@ function ownPreemptInterferenceToAnswer(
   if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
   if (lastNonPass.bid === 'XX') return null // deras ev. XX besvaras inte här
   return { ourSuit, ourLevel: open.level, theirCall: lastNonPass.bid }
-}
-
-/**
- * Case A (Fynd #2 delbit 5): FORTSÄTTNINGEN efter vårt 1NT + partnerns värde-XX.
- * Har motståndaren stört vårt 1NT med DONT och partnern REDUBBLAT (XX = 8+ hp,
- * delbit 4) äger vår sida handen: 1NT (15–17) + XX (8+) = 23+, majoriteten. Flyr
- * de då undan till en färg straffdubblar vi dem – VARJE steg, tills de får spela
- * dubblat. Utan detta passar öppnaren flykten (auktionen dör efter att XX-
- * detektorn svarat en gång). Kraven:
- *  - auktionens öppning är VÅRT 1NT (första kontraktsbud, vår sida, 1NT),
- *  - vår sida har ett XX i historiken (enda vägen dit är värde-XX:et över deras
- *    DONT-X – XX kan inte uppstå på annat sätt efter vårt eget 1NT),
- *  - senaste icke-pass är motståndarnas FÄRGkontraktsbud (deras flykt – DONT
- *    flyr aldrig till NT), och X är lagligt för oss nu.
- * Returnerar deras flyktfärg + nivå, annars null. INGEN handkvalitetsgrind:
- * mönstret garanterar att vi äger balansen, så dubblingen är korrekt oavsett
- * vilken av våra två händer som råkar vara i tur (öppnaren eller XX-svararen).
- */
-function runoutAfterOurRedouble(f: AuctionFacts): { suit: Suit; level: number } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (side(open.seat) !== side(seat)) return null // måste vara VÅRT 1NT
-  if (!history.some((c) => side(c.seat) === side(seat) && c.bid === 'XX')) return null
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
-  const cb = parseContractBid(lastNonPass.bid)
-  if (!cb || cb.strain === 'NT') return null // bara deras FÄRGflykt straffdubblas
-  if (!legalCalls(history, seat).includes('X')) return null
-  return { suit: SUIT_OF_LETTER[cb.strain], level: cb.level }
 }
 
 // ---- Bot-hjärnan -----------------------------------------------------------
@@ -1321,22 +969,6 @@ function answerTransferGameChoice(c: DetectorCtx): ResolvedCall | null {
   return {
     seat, bid: 'P', rule: 'pass',
     explanation: `partnerns 3NT efter transfern = välj utgång: utan 3-stöd i ${SWE_SYM[letterOfSuit(transferMajor)]} → pass (3NT står).`,
-  }
-}
-
-/**
- * Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vår sida
- * handen; straffdubbla motståndarnas flykt undan till en färg – varje steg.
- */
-function answerRunout(f: AuctionFacts): ResolvedCall | null {
-  const { seat } = f
-  const runout = runoutAfterOurRedouble(f)
-  if (!runout) return null
-  return {
-    seat, bid: 'X', rule: 'straffdubbling (vi äger handen)',
-    explanation:
-      `Vi öppnade 1NT och partnern redubblade (XX) – vår sida har 23+ och äger handen. ` +
-      `Motståndarna flyr till ${runout.level}${SWE_SYM[letterOfSuit(runout.suit)]} → straffdubbling.`,
   }
 }
 
@@ -1585,17 +1217,9 @@ export const FORCED_DETECTORS: readonly LiveDetector[] = [
 // DATA i `before` och vaktas av kedjevakten — en ny konvention läggs på rätt
 // plats i listan MED sina före-krav ifyllda, inte sist av bekvämlighet.
 export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
-  // Partnerns DONT-bud mot deras 1NT besvaras (§7.5, Fynd #2 delbit 1) …
-  { id: 'partnerDONTToAnswer',
-    run: (c) => answered(partnerDONTToAnswer(c.facts),
-      (d) => advanceDONT(c.hand, d), c.history, c.seat) },
-  // … och vår egen DONT-X rättas till sin riktiga färg efter partnerns relä.
-  { id: 'ownDONTXToCorrect',
-    run: (c) => ownDONTXToCorrect(c) },
-  // … och vårt egna DONT-tvåfärgsbud (2♣/2♦) rättas till den högre färgen när
-  // partnern relä:at pass-eller-rätta (felrapport #20).
-  { id: 'ownDONTTwoSuiterToCorrect',
-    run: (c) => ownDONTTwoSuiterToCorrect(c) },
+  // (DONT-försvaret mot deras 1NT + advancern/rättelsen flyttade till
+  // beslutstabellen, raderna *försvar-1nt* / *dont-advance*, motorbytet etapp 4
+  // familj 6, 2026-09-09.)
   // Etapp 7 hål 2 ("3NT-stoppen"): öppnaren trevar 4NT efter svararens 3NT,
   // och svararen accepterar/avböjer. Måste ligga FÖRE rkcToAnswer så den
   // kvantitativa 4NT:n (ingen trumf agreed) inte läses som essfråga, och
@@ -1632,41 +1256,12 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // Måste ligga FÖRE off-book-svaret (som annars stöder transferns relä).
   { id: 'answerTransferGameChoice', before: ['offBookResponse'],
     run: (c) => answerTransferGameChoice(c) },
-  // Fynd #2 delbit 5 (Case A): efter vårt 1NT + partnerns värde-XX äger vi
-  // handen – straffdubbla flykten. Måste ligga FÖRE delbit 4-detektorerna
-  // (ntInterference) och off-book-svaret.
-  { id: 'answerRunout', before: ['ntInterferenceToAnswer', 'offBookResponse'],
-    run: (c) => answerRunout(c.facts) },
-  // Lebensohl efter VÅRT 1NT (§7.5): motståndaren klev in NATURELLT. Måste
-  // ligga FÖRE ntInterference (DONT) – annars läses det naturliga inklivet
-  // som DONT. Diskriminatorn = 'naturligt inkliv (1NT)'-rule på deras bud.
-  { id: 'lebensohl1NTFirstToAnswer', before: ['ntInterferenceToAnswer'],
-    run: (c) => answered(lebensohl1NTFirstToAnswer(c.facts),
-      (their) => lebensohlAfter1NT(c.hand, their), c.history, c.seat) },
-  { id: 'lebensohl1NTRelayComplete',
-    run: (c) => lebensohl1NTRelayComplete(c.facts) },
-  { id: 'lebensohl1NTRebidToAnswer',
-    run: (c) => answered(lebensohl1NTRebidToAnswer(c.facts),
-      (their) => lebensohlAfter1NTRebid(c.hand, their), c.history, c.seat) },
-  { id: 'lebensohl1NTGFToAnswer',
-    run: (c) => answered(lebensohl1NTGFToAnswer(c.facts),
-      (gf) => lebensohl1NTOpenerAnswerGF(c.hand, gf), c.history, c.seat) },
-  // Motståndaren störde VÅR icke-1-färgs-öppning (Fynd #2 delbit 4):
-  // svararen svarar. Måste ligga FÖRE off-book-svaret.
-  { id: 'ntInterferenceToAnswer', before: ['offBookResponse'],
-    run: (c) => answered(ntInterferenceToAnswer(c.facts),
-      (i) => answerNTInterference(c.hand, i), c.history, c.seat) },
+  // (Störningen över VÅRT 1NT — Lebensohl, värde-X och flykt-straffet — flyttade
+  // till beslutstabellen, raden *vårt-1nt-stört*, motorbytet etapp 4 familj 6,
+  // 2026-09-09.)
   { id: 'ownPreemptInterferenceToAnswer', before: ['offBookResponse'],
     run: (c) => answered(ownPreemptInterferenceToAnswer(c.facts),
       (p) => answerPreemptInterference(c.hand, p.ourSuit, p.theirCall, p.ourLevel), c.history, c.seat) },
-  // Öppnarens fortsättning efter partnerns VÄRDE-DUBBEL över vårt störda 1NT
-  // (felrapport #43): 2NT-relä (förnekar 5-kort) eller visa 5-korts färg, och
-  // svararens placering över det. FÖRE off-book-svaret (som gav bar pass →
-  // missad utgång eftersom öppnaren saknade all logik här).
-  { id: 'answerNTValueDoubleOpener', before: ['offBookResponse'],
-    run: (c) => answerNTValueDoubleOpener(c) },
-  { id: 'answerNTValueDoubleDoubler', before: ['offBookResponse'],
-    run: (c) => answerNTValueDoubleDoubler(c) },
   // Advancern svarar partnerns TVÅFÄRGS-CUE över deras svaga tvåa (felrapport
   // #18): krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
   { id: 'answerWeakTwoCue', before: ['offBookResponse'],

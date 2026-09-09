@@ -34,24 +34,22 @@ finns inte efter 2/1** (beslut 13, ägarens ord "det räcker med game force en
 gång") · passad hand spelar Jacoby/Bergen AV (9) · naket 4NT = essfråga i
 senast bjudna färg (14) · 4NT över 1NT-återbudet kvantitativt, egen färg →
 Gerber 4♣ (§5.7).
-**Etapp 4 familj 1
-(inkliv/advance) KLAR & LIVE 2026-09-08 (`26687c9`) och familj 2
-(dubblingsfamiljen) KLAR & LIVE 2026-09-08 (mergepunkt `d3f7116`):** nio rader,
-tjugo detektorer rivna; kunskapen i `overcall-continuations.ts`/
-`double-continuations.ts`; b-listorna i planens logg.
-**Familj 3 (negativ/stöd-X, Jordan, svararens konkurrenssvar) KLAR & LIVE
-2026-09-08 (mergepunkt `2ae5d05`, grinden godkänd):** åtta rader, kunskapen i
-`contested-opening.ts` + `fit-raise.ts`, sex detektorer + manusets kik-rond
-rivna; Jordan bara efter 1M (över 1m XX), negativ-dubblarens 3NT/2NT, NMF för
-passad hand. **Familj 4 (fortsättning när de stört) KLAR & LIVE 2026-09-09 (`4fa2604`):**
+**Etapp 4 familj 1–3 KLAR & LIVE 2026-09-08:** inkliv/advance (`26687c9`),
+dubblingsfamiljen (`d3f7116`), negativ/stöd-X/Jordan/svararens konkurrenssvar
+(`2ae5d05`); kunskapen i `overcall-continuations.ts`/`double-continuations.ts`/
+`contested-opening.ts`+`fit-raise.ts`; detaljer i planens logg.
+**Familj 4 (fortsättning när de stört) KLAR & LIVE 2026-09-09 (`4fa2604`):**
 *inkliv-över-svaret*, *öppnaren-stört*, *svararen-stört* i
 `contested-continuations.ts`. **Familj 5 (balansering/återöppning) KLAR & LIVE
 2026-09-09 (mergepunkt `78735c2`, grinden godkänd "pcd"):** advancern efter
 deras X/höjning (*advance2*), öppnaren efter deras X + höjning (*öppnaren-stört*),
 K1-resten = negativa dubblaren svarar på öppnarens ANDRA X (*svararen-stört*);
 ny modul `balancing-continuations.ts`; `offBookResponse` 711→223, K1 20→13.
-**Svar-stört-rättelsen LIVE 2026-09-09:** ingen negativ dubbling med 3+ stöd i
-partnerns öppnade högfärg → höjning/cue (§7.4). **Nästa gång:** familj 6 (1NT).
+**Svar-stört-rättelsen LIVE 2026-09-09** (§7.4): aldrig negativ dubbling med 3+
+stöd i partnerns öppnade högfärg → höjning/cue. **Familj 6 (försvar mot 1NT) KLAR
+& LIVE 2026-09-09:** DONT/naturligt, advancern, Lebensohl/värde-X/flykt (raderna
+*försvar-1nt*/*dont-advance*/*vårt-1nt-stört*, `nt-defense-continuations.ts`);
+manusronden + elva detektorer rivna. **Nästa gång:** familj 7 (svaga tvåor/spärrar).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

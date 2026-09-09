@@ -2416,6 +2416,15 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-09 — Försvar mot 1NT flyttar in i beslutstabellen (§7.5; motorbytet
+  etapp 4 familj 6, `docs/motorbyte-plan.md`).** DONT/naturligt inkliv mot deras
+  1NT (raden *försvar-1nt*), advancern + rättelsen (*dont-advance*) och störningen
+  över VÅRT 1NT — Lebensohl, värde-X, flykt (*vårt-1nt-stört*) — kommer nu ur
+  beslutstabellen (`nt-defense-continuations.ts`) i stället för manuset och
+  konkurrensdetektorerna. Reglerna (dont.ts/lebensohl.ts) är oförändrade. Bot mot
+  bot: 0 ändrade bud. Avvikelsedumpen (människan öppnar): 250 givar där boten förr
+  PASSADE deras 1NT nu försvarar det (via `decideCall`) — manusets försvarsrond
+  fanns bara i den ostörda bot-linjen. Revisorn 20,7 % · 270,43 (oförändrad).
 - **2026-09-09 — Aldrig negativ dubbling med stöd i partnerns öppnade högfärg
   (§7.4; ägarbeslut 2026-09-09, "Man får INTE bjuda negativ dubbel när man har
   stöd i partners öppnade högfärg").** `contestedResponse` prövade negativ

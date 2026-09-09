@@ -22,11 +22,8 @@ import { decideFromTable, RESPONDABLE, type DecidedCall, type Decision } from '.
 import { auctionFacts } from './auction-facts'
 import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
-import { hcp } from './hand'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
-import { dontOvercall } from './dont'
-import { naturalNTOvercall } from './lebensohl'
 import { conventionalDefense } from './defense-conventional'
 
 export interface MajorAuction {
@@ -287,27 +284,18 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
-  // §7.5 DONT mot deras 1NT (Fynd #2, delbit 1): LHO stör direkt över en
-  // 1NT-öppning. Ägarbeslut 2026-07-04: golv 8 hp i direkt sits + rätt form
-  // (dontOvercall kräver 5-4+ eller 6-korts). Vi modellerar bara SJÄLVA inklivet
-  // här (en rond) och lämnar auktionen öppen – advancerns relä/preferens och
-  // X-arens rättelse bjuds levande i budlådan (`decideCall`). Balansering (efter
-  // två pass) hanteras också i `decideCall`.
+  // §7.5 försvar mot deras 1NT (naturligt inkliv / DONT): LHO stör direkt. Sedan
+  // etapp 4 familj 6 (2026-09-09) kommer inklivet ur BESLUTSTABELLEN (raden
+  // *försvar-1nt* = `defendTheirNT` ur LHO:s egen hand) — samma beslut som vid
+  // bordet. Vi modellerar bara SJÄLVA inklivet (en rond) och lämnar auktionen
+  // öppen: advancerns relä/preferens och X-arens rättelse bjuds levande i
+  // budlådan (`decideCall`). Balansering hanteras nedan (också via tabellen).
   if (opening.call === '1NT') {
     const lhoSeat = seatAt(deal.dealer, (openerIndex + 1) % 4)
-    // §7.5 (Lebensohl): en stark enfärgshand (6+, 11–15) klivar in NATURELLT –
-    // då spelar svararen Lebensohl (decideCall). Tvåfärgade/svaga händer tar DONT.
-    const nat = naturalNTOvercall(deal.hands[lhoSeat])
-    if (nat.call !== 'P') {
-      turns.push({ seat: lhoSeat, role: 'motståndare', call: nat.call, rule: nat.rule, explanation: nat.explanation })
+    const ov = ask(lhoSeat)?.call
+    if (ov && ov.bid !== 'P') {
+      layOpp(lhoSeat, ov)
       return finish(true)
-    }
-    if (hcp(deal.hands[lhoSeat]) >= 8) {
-      const d = dontOvercall(deal.hands[lhoSeat])
-      if (d.call !== 'P') {
-        turns.push({ seat: lhoSeat, role: 'motståndare', call: d.call, rule: d.rule, explanation: d.explanation })
-        return finish(true)
-      }
     }
   }
 
@@ -357,17 +345,15 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
         return finish(true)
       }
     }
-    // §7.5 DONT i balansering (Fynd #2, delbit 1): deras 1NT passas ut till
-    // fjärde hand. Ägarbeslut: lättare golv (6 hp) i balansering. Alla DONT-bud
-    // (2-läget/X) ligger över 1NT → alltid lagliga här.
+    // §7.5 DONT i balansering: deras 1NT passas ut till fjärde hand. Sedan etapp
+    // 4 familj 6 kommer budet ur tabellen (raden *försvar-1nt* i utpassnings-
+    // sitsen = `defendTheirNT(…, balancing)` ur fjärde hands egen hand, golv 6 hp).
     if (opening.call === '1NT') {
       const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-      if (hcp(deal.hands[balancerSeat]) >= 6) {
-        const d = dontOvercall(deal.hands[balancerSeat])
-        if (d.call !== 'P') {
-          turns.push({ seat: balancerSeat, role: 'motståndare', call: d.call, rule: d.rule, explanation: `${d.explanation} (balansering)` })
-          return finish(true)
-        }
+      const bal = ask(balancerSeat)?.call
+      if (bal && bal.bid !== 'P') {
+        layOpp(balancerSeat, bal)
+        return finish(true)
       }
     }
     // §7.6 balansering mot deras svaga tvåa/spärr (Fynd #2 delbit 2): passas
