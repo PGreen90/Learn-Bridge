@@ -86,6 +86,21 @@ const ALL_ENGINE_RULES: string[] = [
   'negativ-dubblarens utgång', 'negativ-dubblarens invit-fortsättning', 'negativ-dubblarens preferens',
   'höjning efter negativ dubbling (utgång)', 'höjning efter negativ dubbling (inbjudan)', 'höjning efter negativ dubbling (enkel)',
   'straffdubbling',
+  // Öppnarens och svararens fortsättning när de stört (etapp 4 familj 4, 2026-09-08; contested-continuations.ts, overcalls.ts)
+  'svar på cue-höjning', 'öppnaren bjuder utgång i konkurrens', 'öppnaren bjuder 3NT i konkurrens', 'maximal dubbling (game try)',
+  'öppnaren konkurrerar (6:e trumfen)', 'öppnaren passar i konkurrens', 'accepterar game-try', 'avböjer game-try',
+  'avböjer sanginbjudan', 'öppnarens 3NT i konkurrens', 'öppnarens 2NT-inbjudan i konkurrens',
+  'öppnarens cue (utgångskrav i konkurrens)', 'öppnarens cue (extra i konkurrens)', 'öppnarens inbjudande höjning (konkurrens)',
+  'öppnarens höjning (konkurrens)', 'öppnaren tävlar (egen 6+ färg)', 'öppnaren tävlar (stödjer partnern)',
+  'öppnaren tävlar efter partnerns pass (egen 6+ färg)', 'öppnarens återöppningsdubbling (partnern passade)',
+  'öppnarens återöppningsdubbling (utpassningssits)', 'öppnaren tävlar i utpassningssits (egen 6+ färg)',
+  'öppnarens återöppningsdubbling (extra, utpassningssits)',
+  'återbud i konkurrens: egen 6+ färg', 'återbud i konkurrens: sang', 'återbud i konkurrens: sang (18–19)',
+  'återbud i konkurrens: ny färg', 'återbud i konkurrens: reverse', 'återbud i konkurrens: egen färg (minimum)',
+  'svar på partnerns cue', 'fritt bud: utgång i egen färg', 'fritt bud: rebjuder egen färg', 'fritt bud: utgång med fit',
+  'fritt bud: utgång i sang', 'fritt bud: stannar', 'fritt bud: cue (utgångskrav)', 'fritt bud: inbjudande höjning',
+  'negativ-dubblarens cue (utgångskrav)', 'svar på återöppningsdubbling', 'svar på återöppningsdubbling (utgång)',
+  'straffpass (återöppningsdubbling)',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

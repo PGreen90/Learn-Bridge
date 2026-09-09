@@ -166,18 +166,20 @@ describe('det rivna och familjegränsen', () => {
       expect(ids.has(id), id).toBe(false)
     }
   })
-  it('manusets kik-rond är riven: RHO:s inkliv över svaret läggs inte i botauktionen (öppnaren hade tre stöd — förr avgjorde det RHO:s bud)', () => {
+  it('manusets kik-rond är riven: RHO:s inkliv över svaret läggs ur RHO:s EGEN hand (familj 4), oavsett vad öppnaren håller', () => {
     const d = dealOf('N', {
       N: 'S:A32 H:K32 D:AKJ432 C:2', // 15 hp, EXAKT 3 hjärter
       E: 'S:76 H:JT98 D:T8 C:KJT98',
       S: 'S:Q54 H:AQ54 D:65 C:Q543', // 1♥
-      W: 'S:KJT98 H:76 D:Q97 C:A76', // 10 hp, 5 spader — inkliv vid bordet, men inte i manuset
+      W: 'S:KJT98 H:76 D:Q97 C:A76', // 10 hp, 5 spader — inkliv ur egen hand (raden *inkliv-över-svaret*)
     })
     const a = buildAuction(d)!
-    expect(a.turns.every((t) => t.role !== 'motståndare')).toBe(true)
-    // Vid bordet: läggs inklivet, stöddubblar öppnaren ur tabellen.
+    expect(a.turns.map((t) => t.call)).toEqual(['1D', '1H', '1S'])
+    // Samma inkliv när öppnaren har FYRA hjärter (förr lades det bara vid exakt tre — en kik).
+    const d2 = dealOf('N', { N: 'S:A3 H:K432 D:AKJ432 C:2', E: 'S:76 H:JT98 D:T8 C:KJT98', S: 'S:Q54 H:AQ54 D:65 C:Q543', W: 'S:KJT98 H:76 D:Q97 C:A76' })
+    expect(buildAuction(d2)!.turns.map((t) => t.call)).toEqual(['1D', '1H', '1S'])
+    // Vid bordet: stöddubblar öppnaren ur tabellen.
     expect(decideCallTraced(d, [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', '1S')], 'N').källa).toBe('tabell:stöd-x')
-    // RHO:s eget beslut över svaret: X ur raden *dubbling* när formen finns, annars det gamla lagrets pass.
-    expect(decideCallTraced(d, [call('N', '1D'), call('E', 'P'), call('S', '1H')], 'W').call.bid).toBe('P')
+    expect(decideCallTraced(d, [call('N', '1D'), call('E', 'P'), call('S', '1H')], 'W').källa).toBe('tabell:inkliv-över-svaret')
   })
 })

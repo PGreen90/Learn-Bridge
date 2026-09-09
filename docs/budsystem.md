@@ -1184,6 +1184,37 @@ stopp i deras färg**, annars **4m** (hopphöjning = inbjudan till 5m). Förr
 blåste öppnaren minorutgång direkt: *1♥–(1♠)–2♣–P–**5♣** på ♠63 ♥KQJ96 ♦A7
 ♣JT98 — utan spaderstopp och långt från elva stick; 3♣ är rätt.*
 
+**Utan stöd för det fria budet (motorbytet etapp 4 familj 4, 2026-09-08):**
+det fria budet är rondkrav (§5.5), så öppnaren bjuder alltid — som det ostörda
+återbudet, men sangen kräver **stopp i deras färg**: **egen 6+ färg → rebjud**
+den · **jämn med stopp → billigaste sang** (18–19 hoppar i sang) · **ny lägre
+färg** (4+) naturligt · **reverse** (ny färg över öppningsfärgen på 2-läget)
+bara med **17+** · sist **rebjud öppningsfärgen** (5 kort, minimum). *1♣–(1♦)–
+1♠–P med ♠6 ♥KQ84 ♦85 ♣AQJ85 (14 hp) → **2♣**, inte 2♥ (reverse på 14 var
+motorns förra svar); med ♦A5 ♣AKJ85 (17) → 2♥.*
+
+**Svararens fortsättning efter det fria budet** när öppnaren *inte* höjde
+(rebjöd egen färg, ny färg eller sang, bara pass efter): **egen 6+ färg →
+utgång i högfärgen** med 13+ inklusive längden och minst 10 hp, annars rebjud
+(inbjudan) — den egna färgen går **före** ett tunt stöd åt partnerns rebjudna
+färg (*1♦–(1♠)–2♥–P–3♦–P med ♠A ♥AKJ87542 ♦T97 ♣7 → **4♥**, inte 5♦*) ·
+**13+**: utgång med fit (3+ mot en rebjuden 6+ färg, 4+ mot en ny färg: 4M, 3NT
+med stopp, annars 5m), **3NT** med stopp i deras färg, annars **cue i deras
+färg = utgångskrav** (partnern bjuder 3NT med stopp) · **10–12** med 3+ stöd
+för en rebjuden 6+ färg → billigaste höjning (inbjudan, ryms den på 3-läget) ·
+annars **pass** — öppnaren visade minimum. Öppnarens **reverse eller hopp** är
+krav och passas aldrig (kravvakten §5.5).
+
+**Svaret på öppnarens cue** ("hjälp mig välja utgång" i tabellen ovan): cuet är
+krav — **stopp i deras färg → 3NT** · **3+ stöd i partnerns visade 5+ högfärg
+→ 4M** · **egen 6+ färg → rebjud** (utgång i högfärg) · **4+ stöd i partnerns
+färg → billigaste höjning** (partnern placerar) · sist billigaste sang. *Förr
+passade svararen cuet (frö 20270156).*
+
+**Fiten mäts mot vad svaret lovade:** ett **fritt** högfärgsbud lovar 5+ (tre
+räcker), ett **ostört** 1-lägessvar (1x–P–1y–inkliv) lovar 4+ — då krävs fyra;
+exakt tre är stöddubblingens (§7.4).
+
 **Trösklarna speglar delbit 6 / §5.4:** ~15 = visa extra, 18 = driv utgång, en egen
 6:e färg tävlar på minimum. **Cue-budet i motståndarnas färg** är verktyget för att
 visa extra utan ett klart naturligt bud (t.ex. 17 hp med en lång färg men utan stopp
@@ -1221,6 +1252,14 @@ färg bakom sig och väntar på att du ska återöppna). Gäller **även 1-läge
 (annars hade motståndarna budat vidare), så en återöppning på **kort i deras färg** är
 billig – och en trap pass hos partnern (längd + honnörer i deras färg) blir en **straff**
 när hen konverterar din takeout-dubbling.
+
+**Svararens svar på återöppningsdubblingen (motorbytet etapp 4 familj 4,
+2026-09-08):** X:et är upplysande och får inte passas bort tyst. Med **längd
+OCH honnörer i deras färg** (4+ kort med 4+ hp i färgen, eller 5+ med 3+) →
+**straffpass** (trap pass, §7.3); annars **längsta färg utanför deras**
+billigast (partnerns öppningsfärg räknas med 3+ stöd), **5+ högfärg och 12+ →
+utgång**. *1♥–(2♦)–P–P–X–P med ♠T64 ♥94 ♦6532 ♣K954 → **3♣** — fyra hackor
+i ruter är ingen straff (förr passades X:et och 2♦X spelades).*
 
 ### 5.10 Öppnarens sang-återbud när vår MINOR höjts i konkurrens
 Du öppnar **1♣/1♦**, en motståndare kliver in med en färg, och partnern **höjer din
@@ -1864,6 +1903,15 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
 - **Fri-bud-regeln:** ett *tvunget* bud lovar inget, men bjuder partnern **frivilligt
   igen** (nästa varv, eller trots att motståndarna stör) visar det **värden**.
 
+**Det naturliga inklivet över två bjudna färger — sandwich-sitsen (motorbytet
+etapp 4 familj 4, 2026-09-08):** partnern har passat och båda motståndarna
+visat värden, så bara det **sunda enkla inklivet**: **5+ kort i en objuden
+färg** — på 1-läget kvalitetsfärg (3 av topp-5) från **10 hp**, på 2-läget
+**11+ hp** med 6+ kort (eller 5 med kvalitet). Tak 16 (17+ dubblar). Inga
+hoppinkliv och ingen sandwich-1NT (passa och balansera hellre). *(1♦)–P–(1♥)
+med ♠AQJ85 ♥63 ♦K92 ♣T74 → **1♠**; med ♣J8532 och 11 hp → pass.* Dubblingen
+nedan prövas före inklivet.
+
 **Efter två bjudna färger (öppning + svar, t.ex. (1♦)–(P)–(1♥)):**
 - När motståndarna redan bjudit **två** färger lovar X **4-4 i de två objudna
   färgerna** (här ♠ + ♣), från **10 hp**. Partnern har bara två färger att välja
@@ -1982,7 +2030,9 @@ dubblarens eget flöde (X + egen färg).
   eller när hen själv är **jämn med stopp** i deras färg. Mot partnerns
   sangsvar är **2NT = 10–12** (inbjudan, ej krav). *1♦–(1♠)–X–P–1NT–P–**3NT**
   med ♠54 ♥AJ54 ♦AJ6 ♣KJ98 (förr bjöd motorn 2♣ på fyra kort).* Ojämna 13+-
-  händer utan stopp saknar ännu regel.
+  händer utan stopp **cue-bjuder deras färg = utgångskrav** (motorbytet etapp
+  4 familj 4, 2026-09-08): partnern bjuder 3NT med stopp, annars färg. *1♦–
+  (1♠)–X–P–2♣–P med ♠63 ♥AQJ85 ♦KQ84 ♣A7 → **2♠**.*
 - **Responsiv dubbling:** när de bjudit *och höjt* en färg (t.ex.
   (1♥)–X–(2♥)–X) = vår dubbling är upplysning, oftast de två objudna färgerna.
   Gäller efter **svararens** höjning till 2-läget (inte öppnarens rebud av sin
@@ -2359,6 +2409,25 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-08 — Öppnarens och svararens fortsättning när de stört flyttar in
+  i beslutstabellen (§5.4, §5.5, §5.8, §5.9, §5.10, §7.3, §7.4; motorbytet
+  etapp 4 familj 4, `docs/motorbyte-plan.md`).** Raderna *inkliv-över-svaret*
+  (sandwich-sitsen: det sunda enkla inklivet över deras öppning + svar, ur
+  RHO:s egen hand — manusets kik-rond ersatt av ett riktigt beslut),
+  *öppnaren-stört* (svaret på cue-höjningen, §5.4 maximal dubbling, §5.10
+  sangen efter minorhöjning, höjningen av det fria budet, §5.8 rond två, §5.9
+  A/B återöppningen — och det nya: **återbudet utan stöd efter partnerns fria
+  bud** (egen 6+, sang med stopp, ny färg utan reverse, reverse 17+, sist egen
+  5-korts) samt **svaret på partnerns cue**) och *svararen-stört* (domen på
+  maximal dubbling och 2NT-inbjudan, fortsättningen efter höjt fritt bud,
+  cue-höjarens fortsättning — och det nya: **svaret på öppnarens
+  återöppningsdubbling** (straffpass / längsta färg), **svaret på öppnarens
+  cue**, **negativ-dubblarens 13+-cue**, **fortsättningen efter det fria budet**
+  när öppnaren inte höjde). §5.8-fiten mäts mot vad svaret lovade (fritt
+  högfärgsbud 5+, ostört 1-lägessvar 4+). Kunskapen i
+  `contested-continuations.ts` + `overcallOfResponse` i `overcalls.ts`; tolv
+  detektorer rivna ur `auction-live.ts`. Facit: `auction-etapp4-familj4.test.ts`
+  + frö 20262632 i `motorbyte-facit.test.ts`.
 - **2026-09-08 — När de stör vår öppning flyttar in i beslutstabellen (§7.4,
   §7.8 b/d/e, §5.7; motorbytet etapp 4 familj 3, `docs/motorbyte-plan.md`).**
   Raderna *svar-stört* (svararens första bud när LHO stört partnerns 1-läges

@@ -108,6 +108,27 @@
 //      · raderna *jordan-öppnaren* / *jordan-svararen*: svaret på Jordan 2NT
 //        (3M/4M, aldrig pass) och Jordan-bjudarens dom på 3M-avslutet.
 //      Kunskapen bor i `contested-opening.ts`; höjningen i `fit-raise.ts`.
+//   E4.4. Öppnarens och svararens fortsättning när de stört (2026-09-08):
+//      · raden *inkliv-över-svaret*: sandwich-sitsen (de bjöd 1x–P–1y, jag
+//        sitter över svararen, dubblingen sa nej) → `overcallOfResponse`
+//        (sunt enkelt inkliv i en objuden färg — eller pass; raden svarar
+//        alltid, så manuset lägger inklivet ur RHO:s egen hand).
+//      · raden *öppnaren-stört*: jag öppnade 1 i färg, motståndarna har
+//        bjudit, familj 3:s öppnarrader tiger → svaret på cue-höjningen,
+//        §5.4 (inklämt: 4M / X game try / 3M / pass), §5.10 (sang efter
+//        minorhöjning), partnerns fria bud (höjning på 3-korts stöd, annars
+//        det NYA återbudet utan fit: egen 6+, sang med stopp, ny färg utan
+//        reverse, sist egen 5-korts), domen på 3M-inbjudan, §5.8 (rond två
+//        när de konkurrerat över svaret — fiten mäts mot vad svaret lovade),
+//        §5.9 A/B (återöppningen), sist svaret på partnerns cue.
+//      · raden *svararen-stört*: partnern öppnade 1 i färg, motståndarna har
+//        bjudit, familj 3:s svararrader tiger → domen på maximal dubbling,
+//        domen på 2NT-inbjudan, fortsättningen efter höjt fritt bud, cue-
+//        höjarens fortsättning, svaret på öppnarens återöppningsdubbling
+//        (NYTT: straffpass / längsta färg), svaret på öppnarens cue (NYTT), negativ-
+//        dubblarens 13+-cue (NYTT), fortsättningen efter fritt bud när
+//        öppnaren inte höjde (NYTT: egen 6+ före fit, 13+ → utgång, annars
+//        pass). Kunskapen bor i `contested-continuations.ts`.
 
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
@@ -129,11 +150,12 @@ import { openerThirdAfterSecondNegative, respondTo2C, responderAfterSecondNegati
 import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
-import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, takeoutOfResponse } from './overcalls'
+import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
+import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat } from './contested-continuations'
 import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerContinues, negativeDoublerSeat, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
@@ -1784,6 +1806,60 @@ const TABELL: Row[] = [
     läge: (f) => jordanSignoffToAnswer(f) !== null,
     välj: ({ hand, facts }) => {
       const k = jordanBidderAfterSignoff(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // ---- Etapp 4 familj 4 — öppnarens och svararens fortsättning (2026-09-08)
+  // Sandwich-sitsen: samma läge som raden *dubbling* (den sa nej) → det sunda
+  // enkla inklivet i en objuden färg, annars ett uttryckligt pass. Raden svarar
+  // alltid, så RHO:s inkliv över vårt svar bjuds i botauktionerna ur RHO:s
+  // egen hand (manusets kik-rond som familj 3 rev ersätts av ett riktigt beslut).
+  {
+    id: 'inkliv-över-svaret',
+    läge: (f) => takeoutOfResponseSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const s = takeoutOfResponseSeat(facts)!
+      const r = overcallOfResponse(hand, s.openSuit, s.respSuit)
+      return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation }
+    },
+  },
+  // Öppnarens senare turer när de stört. Ordningen är det gamla lagrets
+  // (svaret på cue-höjningen låg efter straffdubblingen men kan aldrig
+  // krocka med den: partnerns cue är senaste kontraktsbud). null → det gamla
+  // lagret (straffdubblingen, catch-allen, kravvakten) som förut.
+  {
+    id: 'öppnaren-stört',
+    läge: (f) => openerContestedSeat(f),
+    välj: ({ hand, facts }) => {
+      const k =
+        openerAnswersCueRaise(hand, facts) ??
+        openerCompetesAfterRaise(hand, facts) ??
+        openerStrongNTAfterMinorRaise(hand, facts) ??
+        openerRaisesFreeBid(hand, facts) ??
+        openerRebidsAfterFreeBid(hand, facts) ??
+        openerAnswersFreeBidInvite(hand, facts) ??
+        openerRondTwoInCompetition(hand, facts) ??
+        openerReopensAfterPartnerPass(hand, facts) ??
+        openerReopensBalancing(hand, facts) ??
+        answerPartnersCue(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Svararens senare turer när de stört (familj 3:s *svar-stört* tar första
+  // turen, *negativ-dubblaren*/*stöd-x-svar*/*jordan-svararen* sina lägen).
+  {
+    id: 'svararen-stört',
+    läge: (f) => responderContestedSeat(f),
+    välj: ({ hand, facts }) => {
+      const k =
+        responderAnswersMaximal(hand, facts) ??
+        responderAnswersReopeningDouble(hand, facts) ??
+        responderAnswersNTInvite(hand, facts) ??
+        responderAfterFreeBidRaise(hand, facts) ??
+        cueRaiserContinues(hand, facts) ??
+        answerPartnersCue(hand, facts) ??
+        negativeDoublerCue(hand, facts) ??
+        responderAfterFreeBid(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },
