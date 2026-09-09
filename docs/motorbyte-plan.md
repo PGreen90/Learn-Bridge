@@ -374,7 +374,15 @@ mätningen vid etapp 4:s start):
    1NT); ny modul `nt-defense-continuations.ts`. Manusets 1NT-försvarsrond riven
    (ask→tabell), elva detektorer rivna. Bot mot bot 0 ändrade bud; avvikelsedumpen
    250 nya försvar (boten passade förr deras 1NT via `decideCall`).
-7. Försvar mot svaga tvåor och spärrar, deras höjningar.
+7. Försvar mot svaga tvåor och spärrar, deras höjningar. **KLAR & LIVE
+   2026-09-09 (loggen; mergepunkt `47c6e6f`):** raderna *försvar-svag2*
+   (vår sidas första försvar mot deras svaga tvåa/spärr — direkt, balansering
+   och efter deras spärrhöjning, `defendTheirPreempt` via `conventionalDefense`/
+   `defendPreempt`) och *svag2-fortsättning* (advancerns svar på partnerns
+   tvåfärgs-cue + svararens svar på störning av VÅR svaga tvåa/spärr); ny modul
+   `preempt-defense-continuations.ts`. Manusets två §7.6-ronder + väckningen
+   rivna, tre detektorer borta. Bot mot bot 0 ändrade bud; avvikelsedumpen 2331
+   nya försvar (boten sålde förr deras svaga tvåa/spärr via `decideCall`).
 8. Konkurrens-slam (kontroll-komplett 4NT, placering).
 9. Betydelsesvepet på störda auktioner till noll.
 
@@ -667,6 +675,39 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-09 — Etapp 4 familj 7 KLAR & LIVE: försvar mot svaga tvåor och
+  spärrar i tabellen (grinden godkänd av ägaren 2026-09-09 "Godkänt — kör PCD";
+  mergepunkt `47c6e6f`, deployen grön och aliasad).** Test-drivet:
+  familj 7-blocket i `motorbyte-facit.test.ts` (direkt X/2NT-balansering,
+  spärrhöjningens X, tvåfärgs-cue-svaret, XX på störning av vår svaga tvåa).
+  **Bygget:** ny modul `preempt-defense-continuations.ts` — funktioner av EN
+  hand + fakta. Två delar: **(1) vårt försvar mot deras svaga tvåa/spärr** (raden
+  *försvar-svag2*, `defendTheirPreempt`): direkt sits, balansering ("låna en
+  kung") OCH efter deras spärrhöjning (2♠–P–3♠) — kunskapen oförändrad
+  (`conventionalDefense`/`defendPreempt`); manusets två §7.6-ronder bytta mot
+  `ask`→tabell, väckningsdetektorn `defendRaisedPreempt` + dess inbakade
+  specialfall rivna (tabellen frågas FÖRST). **(2) preempt-konkurrensens
+  fortsättningar** (raden *svag2-fortsättning*, `respondInPreemptCompetition`):
+  advancern svarar partnerns tvåfärgs-cue (`answerWeakTwoCue`, krav) och svararen
+  svarar på störning av VÅR svaga tvåa/spärr (`answerPreemptInterference`, XX/
+  fortsatt spärr) — två detektorer flyttade; kunskapshandlaren
+  (`answerPreemptInterference`) bor kvar i `contested-openings.ts`. Tre
+  detektorer + fyra hjälpfunktioner rivna ur `auction-live.ts`. **b-listan
+  (klass b):** boten försvarar nu deras svaga tvåa/spärr vid bordet (via
+  `decideCall`) i människo-öppnade sekvenser där den förr PASSADE (sålde given) —
+  manusets §7.6-rond fanns bara i den ostörda bot-linjen. **Mätningar** (kommandon
+  i §3; baslinjer på `d07cdd8`): hela sviten grön (`npm test`, 2422), `npx tsc`
+  rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 0, samma bud/annan källa 186 (alla
+  manus/väckning/detektor → `tabell:försvar-svag2`); avvikelsedumpen: ÄNDRAT BUD
+  2331 (alla pass → försvar, klass b); olagliga tabellbud 0 i båda. Frekvens
+  (3000): `tabell:försvar-svag2` 186 (ur manus/väckning) · `tabell:svag2-fortsättning`
+  215 (ur `ownPreemptInterferenceToAnswer` 210 + `answerWeakTwoCue` 5). Pliktsvep
+  oförändrad (K1 13, 0 auktionsfel); förklaringssvep grönt (0 oförklarade, 0
+  gissningar); regelsvep grönt (306 regler, 0 auktioner utan slut); betydelse-
+  svepets ostörda grind 0/0/0; kikvakten skarp grön (*försvar-svag2*/
+  *svag2-fortsättning* vaktade). Revisorn 1000 givar: 20,7 % · 270,43 (oförändrad
+  — bot mot bot ändrades inte). **Nästa gång börjar vi med:** familj 8 (konkurrens-
+  slam) med nya baslinjer (§3) på `47c6e6f`.
 - **2026-09-09 — Etapp 4 familj 6 KLAR & LIVE: försvar mot 1NT i tabellen
   (grinden godkänd av ägaren 2026-09-09 "kör klart hela familj 6 nu ... grind +
   PCD"; mergepunkt `d07cdd8`, deployen grön och aliasad).** Test-drivet:

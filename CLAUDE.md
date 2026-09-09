@@ -44,12 +44,16 @@ dubblingsfamiljen (`d3f7116`), negativ/stöd-X/Jordan/svararens konkurrenssvar
 2026-09-09 (mergepunkt `78735c2`, grinden godkänd "pcd"):** advancern efter
 deras X/höjning (*advance2*), öppnaren efter deras X + höjning (*öppnaren-stört*),
 K1-resten = negativa dubblaren svarar på öppnarens ANDRA X (*svararen-stört*);
-ny modul `balancing-continuations.ts`; `offBookResponse` 711→223, K1 20→13.
+`balancing-continuations.ts`.
 **Svar-stört-rättelsen LIVE 2026-09-09** (§7.4): aldrig negativ dubbling med 3+
 stöd i partnerns öppnade högfärg → höjning/cue. **Familj 6 (försvar mot 1NT) KLAR
 & LIVE 2026-09-09:** DONT/naturligt, advancern, Lebensohl/värde-X/flykt (raderna
 *försvar-1nt*/*dont-advance*/*vårt-1nt-stört*, `nt-defense-continuations.ts`);
-manusronden + elva detektorer rivna. **Nästa gång:** familj 7 (svaga tvåor/spärrar).
+manusronden + elva detektorer rivna. **Familj 7 (försvar mot svaga tvåor/spärrar)
+KLAR & LIVE 2026-09-09 (mergepunkt `47c6e6f`):** raderna *försvar-svag2* +
+*svag2-fortsättning* (`preempt-defense-continuations.ts`); §7.6-ronderna +
+väckningen + tre detektorer rivna; avvikelsedumpen 2331 nya försvar. **Nästa
+gång:** familj 8 (konkurrens-slam).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
