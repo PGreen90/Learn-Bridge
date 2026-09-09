@@ -102,6 +102,8 @@ describe('kikvakten (2): beslutet läser bara egen hand + auktionen', () => {
     expect(perKälla.get('tabell:advance2') ?? 0).toBeGreaterThan(5) // etapp 4 familj 5: advancern efter deras X/höjning
     expect(perKälla.get('tabell:försvar-1nt') ?? 0).toBeGreaterThan(5) // etapp 4 familj 6: försvar mot deras 1NT
     expect(perKälla.get('tabell:vårt-1nt-stört') ?? 0).toBeGreaterThan(5) // etapp 4 familj 6: störning över vårt 1NT
+    expect(perKälla.get('tabell:försvar-svag2') ?? 0).toBeGreaterThan(5) // etapp 4 familj 7: försvar mot deras svaga tvåa/spärr
+    expect(perKälla.get('tabell:svag2-fortsättning') ?? 0).toBeGreaterThan(5) // etapp 4 familj 7: preempt-konkurrensens fortsättningar
   })
 
   it.skipIf(process.env.KIKVAKT !== '1')('MÄTLÄGE: hur ofta byter dagens motor bud när de andra händerna byts?', { timeout: 0 }, () => {
