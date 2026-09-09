@@ -364,8 +364,9 @@ mätningen vid etapp 4:s start):
    (K1-resten: den negativa dubblaren svarar på öppnarens ANDRA X,
    `responderAnswersSecondDouble`); ny modul `balancing-continuations.ts`.
    `offBookResponse` 711→223 (den största kvarvarande detektorn nästan halverad;
-   lever kvar för familj 6–9 + rena advancern). Köat fynd: svar-stört-rättelsen
-   (höjning före negativ X med 3+ stöd i partnerns högfärg — familj 3).
+   lever kvar för familj 6–9 + rena advancern). Svar-stört-rättelsen (höjning i
+   stället för negativ X med 3+ stöd i partnerns högfärg — familj 3) ÅTGÄRDAD &
+   LIVE 2026-09-09 (loggen nedan).
 6. Försvar mot 1NT (DONT, naturligt inkliv, Lebensohl, värde-X, flykt).
 7. Försvar mot svaga tvåor och spärrar, deras höjningar.
 8. Konkurrens-slam (kontroll-komplett 4NT, placering).
@@ -693,8 +694,11 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
   (`contestedResponse`, familj 3) prövar negativ dubbling FÖRE stödhöjningen, så
   med 3-korts stöd i partnerns HÖGFÄRG döljs fiten bakom X (frö 20272221:
   `1♥–(3♣)` gav X i stället för 3♥). Egen princip (openerMajorFit) finns men är
-  bara kopplad till fritt-bud-grenen. Rättelsen tas som eget familj 3-steg efter
-  familj 5, med exempelhänder; `it.todo` i `motorbyte-facit.test.ts`.
+  bara kopplad till fritt-bud-grenen. **ÅTGÄRDAD & LIVE 2026-09-09** (ägaren:
+  "Man får INTE bjuda negativ dubbel när man har stöd i partners öppnade
+  högfärg"): dubblingen gatad bakom `openerMajorFit`, 3+ stöd → höjning/cue,
+  stödet går före sidofärg; budsystem §7.4 + §9; 51 bot + 45 avvik ändrade bud
+  (alla X → höjning/cue, klass b); revisorn 20,7 % · 270,43 (liten förbättring).
   **Mätningar** (kommandon i §3; baslinjer på `4fa2604`): hela sviten grön
   (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT
   BUD 0, samma bud/annan källa 376; avvikelsedumpen: ÄNDRAT BUD 7 (K1-resten);

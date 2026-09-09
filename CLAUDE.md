@@ -50,8 +50,8 @@ passad hand. **Familj 4 (fortsättning när de stört) KLAR & LIVE 2026-09-09 (`
 deras X/höjning (*advance2*), öppnaren efter deras X + höjning (*öppnaren-stört*),
 K1-resten = negativa dubblaren svarar på öppnarens ANDRA X (*svararen-stört*);
 ny modul `balancing-continuations.ts`; `offBookResponse` 711→223, K1 20→13.
-**Köat:** höjning före negativ X med 3+ stöd i partnerns högfärg (svar-stört,
-familj 3, frö 20272221). **Nästa gång:** familj 6 (försvar mot 1NT).
+**Svar-stört-rättelsen LIVE 2026-09-09:** ingen negativ dubbling med 3+ stöd i
+partnerns öppnade högfärg → höjning/cue (§7.4). **Nästa gång:** familj 6 (1NT).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
