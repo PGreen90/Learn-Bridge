@@ -18,7 +18,7 @@ import type { ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
 import { decideFromTable } from './auction-decide'
 import { turnsToCalls } from './auction-contract'
-import { allContractBids, bidValue, cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
+import { allContractBids, cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { isVulnerable } from './openings'
 import {
   auctionFacts, isGameOrHigher, parseContractBid, strainRank, PARTNER, STRAINS, SUIT_OF_LETTER, SUIT_STRAINS,
@@ -26,8 +26,6 @@ import {
 } from './auction-facts'
 import { penaltyDouble } from './doubles'
 import { raiseWithFit as raisePartnerSuit } from './fit-raise'
-import { answerPreemptInterference } from './contested-openings'
-import { defendPreempt } from './defense-conventional'
 import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfter2over1 } from './rebids'
 import { respondTo1NT } from './responses-nt'
 import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
@@ -785,62 +783,6 @@ function respondToStrong2NTRebid(c: DetectorCtx): ResolvedCall | null {
 }
 
 /**
- * Har PARTNERN cue-bjudit motståndarnas SVAGA TVÅA som en stark tvåfärgshand
- * (§7.6 "cue (stark tvåfärg)", 15+ 5-5), så att jag (advancern) måste ge
- * preferens i stället för att passa (felrapport #18)? Ett tvåfärgs-cue är krav
- * och får aldrig passas – annars spelas cuet i motståndarnas färg. Mönstret:
- * motståndarnas svaga tvåa (2♦/2♥/2♠, ej 2♣), partnerns bud = 3-i-deras-färg
- * (cuet), det är vår sidas ENDA kontraktsbud och senaste (bara pass efter).
- * Returnerar deras (svaga-tvåa-)färg, annars null.
- */
-function partnerWeakTwoCueToAnswer(f: AuctionFacts): { theirStrain: string } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.level !== 2 || open.strain === 'C' || open.strain === 'NT') return null
-  if (side(open.seat) === side(seat)) return null // motståndarnas svaga tvåa
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 1 || ourBids[0].seat !== PARTNER[seat]) return null
-  const cue = ourBids[0]
-  const cb = parseContractBid(cue.bid)!
-  if (cb.level !== 3 || cb.strain !== open.strain) return null // cue = 3 i deras färg
-  const cueIdx = history.indexOf(cue)
-  if (history.slice(cueIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter
-  return { theirStrain: open.strain }
-}
-
-/**
- * Har motståndarna ÖPPNAT och SPÄRRHÖJT till 3-läget (etapp 6 hål 4)? Mönstret:
- * deras färgöppning + partnerns höjning i SAMMA färg till 3-läget (2♠–P–3♠
- * eller 1♣–P–3♣), och vår sida har inte sagt ett ljud. `maybeOvercall` kräver
- * exakt ETT kontraktsbud i historiken, så här stängdes auktionen helt förr —
- * en 21-poängare passade ut 2♦–P–3♦ (frö 20261477). Sitsen är direkt
- * (höjningen är senaste icke-pass) eller balansering (höjningen följd av exakt
- * två pass → "låna en kung"). Höjningar förbi 3-läget (2♠–P–4♠) lämnas
- * medvetet tysta — att väcka på 4-läget lovar mer än §7.6-fönstren har.
- */
-function raisedPreemptToDefend(
-  history: ResolvedCall[],
-  seat: Seat,
-): { suit: Suit; balancing: boolean } | null {
-  // Vår sida har aldrig gjort något annat än pass.
-  if (history.some((c) => side(c.seat) === side(seat) && c.bid !== 'P')) return null
-  // Deras aktioner: exakt två kontraktsbud (öppning + höjning i samma färg,
-  // höjningen av PARTNERN till 3-läget), inga X/XX.
-  const theirs = history.filter((c) => c.bid !== 'P')
-  if (theirs.length !== 2) return null
-  const open = parseContractBid(theirs[0].bid)
-  const raise = parseContractBid(theirs[1].bid)
-  if (!open || !raise) return null
-  if (theirs[1].seat !== PARTNER[theirs[0].seat]) return null
-  const suit = SUIT_OF_LETTER[open.strain]
-  if (!suit || open.strain !== raise.strain || raise.level !== 3) return null
-  // Sits: direkt över höjningen, eller balansering efter exakt två pass.
-  const after = history.slice(history.indexOf(theirs[1]) + 1)
-  if (after.length !== 0 && after.length !== 2) return null
-  return { suit, balancing: after.length === 2 }
-}
-
-/**
  * Får `seat` STRAFFDUBBLA här (ägarbeslut 2026-07-04, poängarbetet)? Kraven —
  * medvetet stränga, så X:et aldrig kan förväxlas med en konventionell dubbling:
  *  - senaste icke-pass är motståndarnas FÄRGKONTRAKT på 3-läget eller högre
@@ -865,33 +807,6 @@ function maybePenaltyDouble(c: DetectorCtx): ResolvedCall | null {
   const ans = penaltyDouble(deal.hands[seat], SUIT_OF_LETTER[cb.strain])
   if (!ans) return null
   return { seat, bid: 'X', rule: ans.rule, explanation: ans.explanation }
-}
-
-/**
- * Har motståndaren stört VÅR svaga tvåa/spärr, så att svararen ska svara?
- * Mönstret: vår öppning är en svag tvåa (2♦/2♥/2♠) eller spärr (3-läget+ i färg),
- * motståndarens störning (X / inkliv) är senaste icke-pass och vår sida har bara
- * bjudit öppningen. Returnerar {ourSuit, ourLevel, theirCall}, annars null.
- */
-function ownPreemptInterferenceToAnswer(
-  f: AuctionFacts,
-): { ourSuit: Suit; ourLevel: number; theirCall: string } | null {
-  const { seat } = f
-  const open = f.opening
-  if (!open) return null
-  const ourSuit = SUIT_OF_LETTER[open.strain]
-  if (!ourSuit) return null // 1NT/2NT-öppning – hanteras inte här
-  const isWeakTwo = open.level === 2 && open.strain !== 'C' // 2♣ = stark, ej svag tvåa
-  const isPreempt = open.level >= 3
-  if (!isWeakTwo && !isPreempt) return null
-  if (side(open.seat) !== side(seat)) return null // VÅR öppning
-  if (seat !== PARTNER[open.seat]) return null // seat = svararen (öppnarens partner)
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 1) return null // bara öppningen bjuden av oss (svararens FÖRSTA svar)
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
-  if (lastNonPass.bid === 'XX') return null // deras ev. XX besvaras inte här
-  return { ourSuit, ourLevel: open.level, theirCall: lastNonPass.bid }
 }
 
 // ---- Bot-hjärnan -----------------------------------------------------------
@@ -970,46 +885,6 @@ function answerTransferGameChoice(c: DetectorCtx): ResolvedCall | null {
     seat, bid: 'P', rule: 'pass',
     explanation: `partnerns 3NT efter transfern = välj utgång: utan 3-stöd i ${SWE_SYM[letterOfSuit(transferMajor)]} → pass (3NT står).`,
   }
-}
-
-/**
- * Advancern svarar partnerns TVÅFÄRGS-cue över motståndarnas svaga tvåa
- * (felrapport #18): ge preferens till längsta sidofärg (≠ deras), passa aldrig.
- */
-function answerWeakTwoCue(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const wtCue = partnerWeakTwoCueToAnswer(f)
-  if (!wtCue) return null
-  const len = lengths(deal.hands[seat])
-  const sideStrains = SUIT_STRAINS.filter((st) => st !== wtCue.theirStrain)
-  // Cuet lovar 5-5 i TVÅ av de tre sidofärgerna — vilka två vet advancern inte.
-  // Preferens på längd, men LIKA långa färger avgörs av billigaste nivån (frö
-  // 20260733: 3-3 i klöver/hjärter valde förr 4♣ på tre hackor fast 3♥ fanns).
-  let best: string | null = null
-  let bestBid: Bid | null = null
-  const legal = legalCalls(history, seat)
-  for (const st of sideStrains) {
-    const stBid = cheapestBidIn(history, seat, st)
-    if (!stBid || !legal.includes(stBid)) continue
-    const cb = parseContractBid(stBid)!
-    const better =
-      best === null ||
-      len[SUIT_OF_LETTER[st]] > len[SUIT_OF_LETTER[best]] ||
-      (len[SUIT_OF_LETTER[st]] === len[SUIT_OF_LETTER[best]] &&
-        bidValue(cb.level, cb.strain) < bidValue(parseContractBid(bestBid!)!.level, parseContractBid(bestBid!)!.strain))
-    if (better) {
-      best = st
-      bestBid = stBid
-    }
-  }
-  const bid = bestBid
-  if (bid && best) {
-    return {
-      seat, bid, rule: 'svar på tvåfärgs-cue',
-      explanation: `Partnerns cue lovar en stark tvåfärgshand (krav) – jag ger preferens till min längsta sidofärg ${SWE_SYM[best]} (${prettyBid(bid)}), passar aldrig cuet.`,
-    }
-  }
-  return null
 }
 
 /**
@@ -1165,24 +1040,6 @@ export interface LiveDetector {
   run: (c: DetectorCtx) => ResolvedCall | null
 }
 
-/**
- * §7.6-väckningen över deras öppning + spärrhöjning (etapp 6 hål 4): linjen
- * modellerar bara direktsitsen över själva ÖPPNINGEN, så försvarssidans pass
- * efter höjningen (2♠–P–3♠ / 1♣–P–3♣) ligger INBAKADE i linjen — en
- * 21-poängare passade ut 2♦–P–3♦ (frö 20261477). Prövas därför både som
- * överstyrning av linjens pass (i decideCall) och som tvingande svar bortom
- * en stängd linje (sist i FORCED_DETECTORS).
- */
-function defendRaisedPreemptCall(c: DetectorCtx): ResolvedCall | null {
-  return answered(raisedPreemptToDefend(c.history, c.seat), (r) => {
-    const def = defendPreempt(c.hand, r.suit, 3, r.balancing, true)
-    if (def.call === 'P') return def
-    return r.balancing
-      ? { ...def, explanation: `${def.explanation} (balansering – "låna en kung")` }
-      : def
-  }, c.history, c.seat)
-}
-
 // ---- Tvingande svar (gäller ÄVEN on-book) ----------------------------------
 // Linjen gav inget bud för oss här. Vissa lägen är ändå rondkrav: partnern får
 // ALDRIG lämnas att passa bort en upplysning/fjärde färg. Prövas i ordning;
@@ -1199,14 +1056,9 @@ export const FORCED_DETECTORS: readonly LiveDetector[] = [
   { id: 'nmfToAnswer',
     run: (c) => answered(nmfToAnswer(c.facts),
       (n) => openerAnswerNMF(c.hand, n.opened, n.responderMajor, n.nmfMinor, n.unbidSuit), c.history, c.seat) },
-  // §7.6-väckningen över deras spärrhöjning (etapp 6 hål 4) — täcker
-  // balanseringssitsen när linjen är STÄNGD (built.open === false) och
-  // konkurrenskedjan därför aldrig nås. Pass faller vidare (null).
-  { id: 'defendRaisedPreempt',
-    run: (c) => {
-      const wake = defendRaisedPreemptCall(c)
-      return wake && wake.bid !== 'P' ? wake : null
-    } },
+  // (§7.6-försvaret mot deras svaga tvåa/spärr — även spärrhöjningen 2♠–P–3♠ —
+  // flyttade till beslutstabellen, raden *försvar-svag2*, motorbytet etapp 4
+  // familj 7, 2026-09-09; väckningen behövs inte längre — tabellen frågas FÖRST.)
 ]
 
 // ---- Historiedrivna svar när linjen inte styr längre -----------------------
@@ -1259,13 +1111,9 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // (Störningen över VÅRT 1NT — Lebensohl, värde-X och flykt-straffet — flyttade
   // till beslutstabellen, raden *vårt-1nt-stört*, motorbytet etapp 4 familj 6,
   // 2026-09-09.)
-  { id: 'ownPreemptInterferenceToAnswer', before: ['offBookResponse'],
-    run: (c) => answered(ownPreemptInterferenceToAnswer(c.facts),
-      (p) => answerPreemptInterference(c.hand, p.ourSuit, p.theirCall, p.ourLevel), c.history, c.seat) },
-  // Advancern svarar partnerns TVÅFÄRGS-CUE över deras svaga tvåa (felrapport
-  // #18): krav, får aldrig passas. Måste ligga FÖRE off-book-svaret.
-  { id: 'answerWeakTwoCue', before: ['offBookResponse'],
-    run: (c) => answerWeakTwoCue(c) },
+  // (Störningen av VÅR svaga tvåa/spärr och advancerns svar på partnerns
+  // tvåfärgs-CUE över deras svaga tvåa flyttade till beslutstabellen, raden
+  // *svag2-fortsättning*, motorbytet etapp 4 familj 7, 2026-09-09.)
   // Vårt 2-över-1 var utgångskrav och öppnaren höjde vår färg (felrapport
   // #27): svararen sätter minst utgång, passar aldrig. Uppstår off-book (Syd
   // öppnade svagare handen). Måste ligga FÖRE off-book-svaret (som annars
@@ -1358,16 +1206,12 @@ export function decideCallTraced(deal: Deal, history: ResolvedCall[], seat: Seat
   const offBook = divergedFromLine(history, line)
   const c: DetectorCtx = { deal, history, seat, hand, facts }
 
-  // Följ linjen så länge den verkliga budföljden inte motsagt den — men ett
-  // inbakat försvarspass efter deras spärrhöjning får inte tysta väckningen
-  // (se defendRaisedPreemptCall ovan).
+  // Följ linjen så länge den verkliga budföljden inte motsagt den. (Försvaret
+  // mot deras spärrhöjning — förr en väckning som bröt linjens inbakade pass —
+  // är sedan familj 7 en tabellrad som frågas FÖRST, ovan.)
   if (!offBook) {
     const next = line[history.length]
     if (next && next.seat === seat) {
-      if (next.bid === 'P') {
-        const wake = defendRaisedPreemptCall(c)
-        if (wake && wake.bid !== 'P') return { call: wake, källa: 'väckning' }
-      }
       return { call: next, källa: 'manus' }
     }
   }

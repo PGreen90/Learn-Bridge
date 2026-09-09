@@ -153,6 +153,7 @@ import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { advancerActsInCompetition, openerActsInCompetition, responderActsInCompetition } from './balancing-continuations'
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
+import { defendPreemptSeat, defendTheirPreempt, preemptFollowUpSeat, respondInPreemptCompetition } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
@@ -1901,6 +1902,27 @@ const TABELL: Row[] = [
     id: 'vårt-1nt-stört',
     läge: (f) => ourNTContestedSeat(f),
     välj: ({ hand, facts }) => respondToOurNTInterference(hand, facts),
+  },
+
+  // ---- Etapp 4 familj 7 — försvar mot svaga tvåor och spärrar (2026-09-09) --
+  // Deras svaga tvåa (2♦/2♥/2♠) eller spärr (3-läget+), vår sidas FÖRSTA försvar:
+  // direkt sits, balansering (utpassningssitsen), eller efter deras spärrhöjning
+  // (2♠–P–3♠). Naturligt inkliv / takeout-X / 2NT / cue / 3NT (§7.6), ur egen
+  // hand. Förr modellerade manuset §7.6-ronderna (direkt + balansering) och en
+  // väckningsdetektor (`defendRaisedPreempt`) bar spärrhöjningen — nu ett beslut
+  // som alla andra. 2♣ = stark och försvaras inte här (faller vidare).
+  {
+    id: 'försvar-svag2',
+    läge: (f) => defendPreemptSeat(f),
+    välj: ({ hand, facts, vulnerable }) => defendTheirPreempt(hand, facts, vulnerable),
+  },
+  // Fortsättningen i preempt-konkurrensen: advancern svarar partnerns tvåfärgs-
+  // cue över deras svaga tvåa (krav, aldrig pass), och svararen svarar på störning
+  // av VÅR svaga tvåa/spärr (XX värden / fortsatt spärr). null → det gamla lagret.
+  {
+    id: 'svag2-fortsättning',
+    läge: (f) => preemptFollowUpSeat(f),
+    välj: ({ hand, facts }) => respondInPreemptCompetition(hand, facts),
   },
 ]
 

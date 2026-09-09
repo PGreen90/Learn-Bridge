@@ -24,7 +24,6 @@ import type { ResolvedCall } from '../bidding'
 import { respondToMajor, type Major, type ResponseResult } from './responses'
 import type { Forcing, Suit } from '../../types/bridge'
 import { forcingOf, isAlertRule } from './rules'
-import { conventionalDefense } from './defense-conventional'
 
 export interface MajorAuction {
   openerSeat: Seat
@@ -299,20 +298,17 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
     }
   }
 
-  // §7.6 Försvar mot deras SVAGA TVÅA (2♦/2♥/2♠) eller SPÄRR (3-läget+) — Fynd #2
-  // delbit 2. LHO stör direkt (takeout-X/2NT/cue/naturligt/3NT). Ägarbeslut
-  // 2026-07-04: takeout-golv 12 hp ej sårbar / 13 sårbar i direkt sits. Vi
-  // modellerar bara själva inklivet (en rond) och lämnar auktionen öppen –
-  // svaret på ett takeout-X (level-medvetet, Fynd #5) och övriga fortsättningar
-  // bjuds levande i budlådan (`decideCall`). 2♣/1NT hanteras inte här.
+  // §7.6 Försvar mot deras SVAGA TVÅA (2♦/2♥/2♠) eller SPÄRR (3-läget+). Sedan
+  // etapp 4 familj 7 (2026-09-09) kommer inklivet ur BESLUTSTABELLEN (raden
+  // *försvar-svag2* = `defendTheirPreempt` ur LHO:s egen hand) — samma beslut
+  // som vid bordet. Vi modellerar bara SJÄLVA inklivet (en rond) och lämnar
+  // auktionen öppen: svaret på ett takeout-X och övriga fortsättningar bjuds
+  // levande i budlådan (`decideCall`). Balansering hanteras nedan (också tabellen).
   {
     const lhoSeat = seatAt(deal.dealer, (openerIndex + 1) % 4)
-    const def = conventionalDefense(deal.hands[lhoSeat], opening.call, {
-      vulnerable: isVulnerable(lhoSeat, deal.vulnerability),
-      balancing: false,
-    })
-    if (def && def.call !== 'P') {
-      turns.push({ seat: lhoSeat, role: 'motståndare', call: def.call, rule: def.rule, explanation: def.explanation })
+    const ov = ask(lhoSeat)?.call
+    if (ov && ov.bid !== 'P') {
+      layOpp(lhoSeat, ov)
       return finish(true)
     }
   }
@@ -356,17 +352,15 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
         return finish(true)
       }
     }
-    // §7.6 balansering mot deras svaga tvåa/spärr (Fynd #2 delbit 2): passas
-    // öppningen runt till fjärde hand får den ett lättare försvar – ägarbeslut:
-    // takeout-golv 10 hp i balansering. Alla försvarsbud ligger över öppningen.
+    // §7.6 balansering mot deras svaga tvåa/spärr: passas öppningen runt till
+    // fjärde hand får den ett lättare försvar (golv 10 hp, "låna en kung"). Sedan
+    // etapp 4 familj 7 kommer budet ur tabellen (raden *försvar-svag2* i
+    // utpassningssitsen = `defendTheirPreempt(…, balancing)` ur fjärde hands egen hand).
     {
       const balancerSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
-      const def = conventionalDefense(deal.hands[balancerSeat], opening.call, {
-        vulnerable: isVulnerable(balancerSeat, deal.vulnerability),
-        balancing: true,
-      })
-      if (def && def.call !== 'P') {
-        turns.push({ seat: balancerSeat, role: 'motståndare', call: def.call, rule: def.rule, explanation: `${def.explanation} (balansering)` })
+      const bal = ask(balancerSeat)?.call
+      if (bal && bal.bid !== 'P') {
+        layOpp(balancerSeat, bal)
         return finish(true)
       }
     }

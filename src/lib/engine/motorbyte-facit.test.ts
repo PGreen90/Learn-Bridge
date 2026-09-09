@@ -349,6 +349,48 @@ describe('etapp 4 familj 6 – försvar mot 1NT: DONT, naturligt inkliv, Lebenso
   })
 })
 
+describe('etapp 4 familj 7 – försvar mot svaga tvåor och spärrar (LANDAD 2026-09-09)', () => {
+  // Del 1 — vårt försvar mot deras svaga tvåa/spärr (raden *försvar-svag2*),
+  // förr manuset (§7.6-ronderna) + väckningsdetektorn.
+  it('frö 20270018: (3♥ spärr)–?: Öst (♠KQT42 ♥QJ ♦84 ♣AKQT, 17 hp) dubblar upplysande — direkt sits, ur tabellen', () => {
+    const deal = dealFromSeed(20270018)
+    const t = decideCallTraced(deal, [call('N', '3H')], 'E')
+    expect(t.källa).toBe('tabell:försvar-svag2')
+    expect(t.call).toMatchObject({ bid: 'X', rule: 'upplysningsdubbling' })
+  })
+  it('frö 20270297: (2♥ svag tvåa)–P–P–?: Nord (♠KT53 ♥QJT ♦AKT9 ♣76, 12 hp) balanserar 2NT ("låna en kung", 12–15)', () => {
+    const deal = dealFromSeed(20270297)
+    const t = decideCallTraced(deal, [call('E', '2H'), call('S', 'P'), call('W', 'P')], 'N')
+    expect(t.källa).toBe('tabell:försvar-svag2')
+    expect(t.call.bid).toBe('2NT')
+  })
+  // Del 1b — deras öppning + spärrhöjning (2♦–P–3♦): förr en väckningsdetektor,
+  // nu samma tabellrad (tabellen frågas FÖRST, ingen inbakad linjepass tystar den).
+  it('frö 20270442: (2♦)–P–(3♦ spärrhöjning)–?: Syd (♠KJ83 ♥KQ875 ♦Q ♣K82, 12 hp) dubblar upplysande — inte pass (spärren säljer inte given)', () => {
+    const deal = dealFromSeed(20270442)
+    const t = decideCallTraced(deal, [call('W', '2D'), call('N', 'P'), call('E', '3D')], 'S')
+    expect(t.källa).toBe('tabell:försvar-svag2')
+    expect(t.call).toMatchObject({ bid: 'X', rule: 'upplysningsdubbling' })
+  })
+  // Del 2 — advancern svarar partnerns tvåfärgs-cue över deras svaga tvåa
+  // (raden *svag2-fortsättning*, krav — aldrig pass, felrapport #18).
+  it('frö 20270175: (2♥)–3♥(cue stark tvåfärg)–P–?: Syd (♠Q653 ♥KT5 ♦Q85 ♣T94) ger preferens 3♠ — passar aldrig cuet', () => {
+    const deal = dealFromSeed(20270175)
+    const hist = [call('S', 'P'), call('W', '2H'), call('N', '3H'), call('E', 'P')]
+    const t = decideCallTraced(deal, hist, 'S')
+    expect(t.källa).toBe('tabell:svag2-fortsättning')
+    expect(t.call).toMatchObject({ bid: '3S', rule: 'svar på tvåfärgs-cue' })
+  })
+  // Del 3 — svararen svarar på störning av VÅR svaga tvåa/spärr (samma rad):
+  // XX = värden/straffintresse (10+) mot deras upplysningsdubbling.
+  it('frö 20270018: 3♥–(X)–?: Syd (♠AJ8653 ♥A8 ♦QJ32 ♣J, 11 hp) redubblar (värden) över deras upplysningsdubbling — inte pass', () => {
+    const deal = dealFromSeed(20270018)
+    const t = decideCallTraced(deal, [call('N', '3H'), call('E', 'X')], 'S')
+    expect(t.källa).toBe('tabell:svag2-fortsättning')
+    expect(t.call).toMatchObject({ bid: 'XX', rule: 'redubbling (värden)' })
+  })
+})
+
 // §5b beslut 1 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 6 + 15): över
 // öppnarens 1NT-återbud (12–14) är 4♣ Gerber BARA för den jämna handen utan
 // färg att visa (räknar 33 mot visade 12 → Gerber; 31–32 → kvantitativ 4NT).
