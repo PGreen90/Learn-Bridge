@@ -357,7 +357,15 @@ mätningen vid etapp 4:s start):
    inklivet (familj 1:s rest, `offBookResponse`:s största kvarvarande post),
    öppnarens fortsättning efter deras X + partnerns höjning (1x–(X)–2x–…),
    svararen som passat och sedan möter öppnarens andra X (K1-resten).
-5. Balansering och återöppning.
+5. Balansering och återöppning. **KLAR & LIVE 2026-09-09 (loggen; mergepunkt
+   `78735c2`, grinden godkänd "pcd"):** raderna *advance2* (advancern efter
+   deras X/höjning, `advancerActsInCompetition`), *öppnaren-stört* (öppnaren
+   efter deras X + höjning, `openerActsInCompetition`) och *svararen-stört*
+   (K1-resten: den negativa dubblaren svarar på öppnarens ANDRA X,
+   `responderAnswersSecondDouble`); ny modul `balancing-continuations.ts`.
+   `offBookResponse` 711→223 (den största kvarvarande detektorn nästan halverad;
+   lever kvar för familj 6–9 + rena advancern). Köat fynd: svar-stört-rättelsen
+   (höjning före negativ X med 3+ stöd i partnerns högfärg — familj 3).
 6. Försvar mot 1NT (DONT, naturligt inkliv, Lebensohl, värde-X, flykt).
 7. Försvar mot svaga tvåor och spärrar, deras höjningar.
 8. Konkurrens-slam (kontroll-komplett 4NT, placering).
@@ -652,6 +660,57 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-09 — Etapp 4 familj 5 KLAR & LIVE: balansering & återöppning i
+  tabellen (grinden godkänd av ägaren 2026-09-09, "pcd"; mergepunkt `78735c2`,
+  deployen grön och aliasad).** Test-drivet: familj 5-blocket i
+  `motorbyte-facit.test.ts` (advancer 20270013/20270007, öppnaren 20270024,
+  K1-resten 20271643/20272221). **Bygget:** ny modul `balancing-continuations.ts`
+  — funktioner av EN hand + fakta (kikvakten skarp grön, ny *advance2*-assertion).
+  Kärnan `partnerSuitResponse` är `offBookResponse`:s kropp (raiseWithFit ??
+  respondWithoutFit), avgränsad per läge; sang-grenen i den porterade
+  respondWithoutFit begränsad till en HELT ostörd auktion (en ren dubbling
+  räknades förr som ostört → 3NT). Raderna: *advance2* +
+  `advancerActsInCompetition` (advancern efter deras X/höjning, konkurrensgräns:
+  motståndarna aktiva EFTER partnerns inkliv — rena advancern kvar i gamla
+  lagret), *öppnaren-stört* + `openerActsInCompetition`, *svararen-stört* +
+  `responderActsInCompetition` (K1-resten `responderAnswersSecondDouble` prövas
+  först: fit → graderad `raiseWithFit`, annars den utbrutna
+  `answerReopeningDoubleCore`). Ur `contested-continuations.ts` bröts
+  `answerReopeningDoubleCore` ut ur `responderAnswersReopeningDouble` (familj 4,
+  oförändrad för sin första-tur-guard). Ett utestående artificiellt krav
+  (fjärde färg / NMF) lämnas åt FORCED-detektorerna (`outstandingArtificialForce`
+  läser regeln ur betydelselagret) — annars kapade tabellen
+  `placeGameAfterFourthSuit` (frö 20270219 i avvikelsedumpen: 4♠ på dubbelton i
+  en FSF-auktion). **b-listan (klass b — enbart K1-resten):** den negativa
+  dubblaren svarar nu på öppnarens återöppningsdubbling i stället för att passa
+  den (8 bot + 7 avvik ändrade bud). T.ex. frö 20272221 (`1♥–(3♣)–X–(4♣)–X–P`,
+  Syd ♠KQT53 ♥742 ♦K42 ♣T8 → 4♠, Nord 18 hp, 8-korts spaderfit; förr pass →
+  4♣X hos motståndarna); frö 20270064 (människan öppnar; Nord ♠AKJ6 ♥7 ♦96
+  ♣KJ9642 → 4♣ och Syd 5♣, 11-korts klöverfit; förr pass → 2♦X). Situation a
+  (advancern) + b (öppnaren) var rena flyttar (0 ändrade bud). **c-fix under
+  diffvarven:** FSF/NMF-kapningen ovan (frö 20270219) och den dubiösa 3NT-efter-
+  dubbling i respondWithoutFit-porten. **Köat fynd (2026-09-09):** svar-stört
+  (`contestedResponse`, familj 3) prövar negativ dubbling FÖRE stödhöjningen, så
+  med 3-korts stöd i partnerns HÖGFÄRG döljs fiten bakom X (frö 20272221:
+  `1♥–(3♣)` gav X i stället för 3♥). Egen princip (openerMajorFit) finns men är
+  bara kopplad till fritt-bud-grenen. Rättelsen tas som eget familj 3-steg efter
+  familj 5, med exempelhänder; `it.todo` i `motorbyte-facit.test.ts`.
+  **Mätningar** (kommandon i §3; baslinjer på `4fa2604`): hela sviten grön
+  (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT
+  BUD 0, samma bud/annan källa 376; avvikelsedumpen: ÄNDRAT BUD 7 (K1-resten);
+  botdiffen (ur auktionsdumpen efter K1-fixen): 8 ändrade bud; olagliga
+  tabellbud 0 i båda. Frekvens (3000): `detektor:offBookResponse` 711 → 223 ·
+  `tabell:advance2` 95 → 313 · `tabell:öppnaren-stört` 495 → 593 ·
+  `tabell:svararen-stört` 223 → 406. Pliktsvep: K1 20 → 13 (resten = korrekta
+  straffpass + redouble-/reverse-sekvenser utanför familj 5), K2 4, K3 6, K4 1,
+  K5 9, K6 29; förklaringssvep grönt (0 oförklarade, 0 gissningar); regelsvep
+  grönt (306 regler, 0 auktioner utan slut). Betydelsesvepet: ostörda grinden
+  kravnivå 0 · alert 0 · registerhål 0 · kända motoravvikelser 0. Kikvakten
+  skarp grön (advance2/öppnaren-stört/svararen-stört vaktade). Revisorn 1000
+  givar: rätt kontrakt 20,4 % · snittförlust 270,85 (baslinje `4fa2604`: 20,4 %
+  · 270,55, dvs. +0,30 per giv = brus; ingen regel tunad på poäng).
+  **Nästa gång börjar vi med:** familj 6 (försvar mot 1NT) med nya baslinjer
+  (§3) på `78735c2`.
 - **2026-09-08 — Etapp 4 familj 4 KLAR & LIVE: öppnarens och svararens
   fortsättning när de stört, i tabellen (grinden godkänd av ägaren 2026-09-09,
   "Godkänt, kör PCD"; mergepunkt `4fa2604`, deployen grön och aliasad).** Test-drivet: facit-
