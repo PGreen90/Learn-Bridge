@@ -367,7 +367,13 @@ mätningen vid etapp 4:s start):
    lever kvar för familj 6–9 + rena advancern). Svar-stört-rättelsen (höjning i
    stället för negativ X med 3+ stöd i partnerns högfärg — familj 3) ÅTGÄRDAD &
    LIVE 2026-09-09 (loggen nedan).
-6. Försvar mot 1NT (DONT, naturligt inkliv, Lebensohl, värde-X, flykt).
+6. Försvar mot 1NT (DONT, naturligt inkliv, Lebensohl, värde-X, flykt). **KLAR &
+   LIVE 2026-09-09 (loggen; mergepunkt `d07cdd8`):** raderna *försvar-1nt*
+   (DONT/naturligt mot deras 1NT, direkt + balansering), *dont-advance* (advancern
+   + egen DONT-rättelse) och *vårt-1nt-stört* (Lebensohl, värde-X, flykt över vårt
+   1NT); ny modul `nt-defense-continuations.ts`. Manusets 1NT-försvarsrond riven
+   (ask→tabell), elva detektorer rivna. Bot mot bot 0 ändrade bud; avvikelsedumpen
+   250 nya försvar (boten passade förr deras 1NT via `decideCall`).
 7. Försvar mot svaga tvåor och spärrar, deras höjningar.
 8. Konkurrens-slam (kontroll-komplett 4NT, placering).
 9. Betydelsesvepet på störda auktioner till noll.
@@ -661,6 +667,36 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-09 — Etapp 4 familj 6 KLAR & LIVE: försvar mot 1NT i tabellen
+  (grinden godkänd av ägaren 2026-09-09 "kör klart hela familj 6 nu ... grind +
+  PCD"; mergepunkt `d07cdd8`, deployen grön och aliasad).** Test-drivet:
+  familj 6-blocket i `motorbyte-facit.test.ts` (DONT-2färg/naturligt/DONT-X,
+  advancerns 2♣-relä, Lebensohl 2NT, värde-X 2NT). **Bygget:** ny modul
+  `nt-defense-continuations.ts` — funktioner av EN hand + fakta. Tre delar:
+  **(1) försvar mot deras 1NT** (raden *försvar-1nt*, `defendTheirNT`): naturligt
+  inkliv före DONT i direkt sits (golv 8), DONT i balansering (golv 6) — manusets
+  1NT-försvarsrond bytt mot `ask`→tabell i `auction.ts`. **(2) advancern +
+  rättelsen** (raden *dont-advance*: `advancePartnerDONT`/`correctOwnDONTX`/
+  `correctOwnDONTTwoSuiter`) — tre detektorer flyttade. **(3) störning över vårt
+  1NT** (raden *vårt-1nt-stört*, `respondToOurNTInterference`): Lebensohl-stegen,
+  värde-X-flödet (öppnaren beskriver, dubblaren placerar), ntInterference och
+  flykt-straffet — åtta detektorer flyttade; kunskapshandlarna (answerNTInterference,
+  lebensohlAfter1NT/Rebid) bor kvar i sina moduler. Elva detektorer + manusronden
+  rivna (`auction-live.ts` ~370 rader kortare). **b-listan (klass b):** boten
+  försvarar nu deras 1NT vid bordet (via `decideCall`) i människo-öppnade
+  sekvenser där den förr PASSADE — manusets försvarsrond fanns bara i den ostörda
+  bot-linjen. **Mätningar** (kommandon i §3; baslinjer på `78735c2`/`ff006d7`):
+  hela sviten grön (`npm test`), `npx tsc` rent; auktionsdiffen 3000 givar: ÄNDRAT
+  BUD 0, samma bud/annan källa 111; avvikelsedumpen: ÄNDRAT BUD 250 (alla
+  pass → försvar-1nt, klass b), samma bud/annan källa 10; olagliga tabellbud 0 i
+  båda. Frekvens (3000): `tabell:försvar-1nt` 111 (ur manus) · `tabell:dont-advance`
+  54 (ur detektorer) · `tabell:vårt-1nt-stört` 160 (ur detektorer). Pliktsvep
+  oförändrad (K1 13, K2 4, K3 6, K4 1, K5 9, K6 29, 0 auktionsfel); förklaringssvep
+  grönt (0 oförklarade, 0 gissningar); regelsvep grönt (306 regler, 0 auktioner
+  utan slut); betydelsesvepets ostörda grind 0/0/0; kikvakten skarp grön
+  (*försvar-1nt*/*vårt-1nt-stört* vaktade). Revisorn 1000 givar: 20,7 % · 270,43
+  (oförändrad — bot mot bot ändrades inte). **Nästa gång börjar vi med:** familj 7
+  (försvar mot svaga tvåor och spärrar, deras höjningar) med nya baslinjer (§3).
 - **2026-09-09 — Etapp 4 familj 5 KLAR & LIVE: balansering & återöppning i
   tabellen (grinden godkänd av ägaren 2026-09-09, "pcd"; mergepunkt `78735c2`,
   deployen grön och aliasad).** Test-drivet: familj 5-blocket i
