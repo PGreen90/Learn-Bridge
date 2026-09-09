@@ -343,6 +343,19 @@ mätningen vid etapp 4:s start):
    öppnarens rad finns; `overcall` mot svaret med tredje-färgs-/stoppvakt),
    svararens svar på öppnarens cue i konkurrens (frö 20270156-mönstret:
    cuet passades), negativ-dubblarens ojämna 13+-händer utan stopp.
+   **KLAR 2026-09-08 (loggen; grinden väntar):** raderna *inkliv-över-svaret*
+   (sandwich-sitsen ur RHO:s egen hand, `overcallOfResponse`),
+   *öppnaren-stört* (svaret på cue-höjningen, §5.4, §5.10, det fria budets
+   höjning + det NYA återbudet utan stöd, §5.8 med fit mätt mot vad svaret
+   lovade, §5.9 A/B, svaret på partnerns cue) och *svararen-stört* (maximal/
+   2NT-domen, fortsättningen efter höjt fritt bud, cue-höjarens fortsättning,
+   NYTT: svaret på återöppningsdubblingen, svaret på öppnarens cue, negativ-
+   dubblarens 13+-cue, fortsättningen efter fritt bud utan höjning); kunskapen
+   i `contested-continuations.ts`. Tolv detektorer rivna. Kvar åt senare
+   familjer: advancerns bud efter deras negativa dubbling/höjning av
+   inklivet (familj 1:s rest, `offBookResponse`:s största kvarvarande post),
+   öppnarens fortsättning efter deras X + partnerns höjning (1x–(X)–2x–…),
+   svararen som passat och sedan möter öppnarens andra X (K1-resten).
 5. Balansering och återöppning.
 6. Försvar mot 1NT (DONT, naturligt inkliv, Lebensohl, värde-X, flykt).
 7. Försvar mot svaga tvåor och spärrar, deras höjningar.
@@ -638,6 +651,91 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-08 — Etapp 4 familj 4 KLAR: öppnarens och svararens fortsättning
+  när de stört, i tabellen (grinden väntar på ägaren).** Test-drivet: facit-
+  filen `auction-etapp4-familj4.test.ts` (raderna, det nya, det rivna) + frö
+  20262632 ur facit-kön (`motorbyte-facit.test.ts`, 1♦–(1♠)–2♥–P–3♦–P →
+  4♥). **Bygget:** `contested-continuations.ts` (lägesläsarna
+  `openerContestedSeat`/`responderContestedSeat` = vår 1-i-färg-öppning +
+  motståndarna har bjudit eller dubblat; `partnerCueRaiseToAnswer`,
+  `openerMaximalToAnswer`, `partnerCueToAnswer` — och kunskapen som funktioner
+  av EN hand + fakta: de tolv flyttade detektorerna + det nya) och
+  `overcallOfResponse` i `overcalls.ts` (sandwich-inklivet). Raderna:
+  *inkliv-över-svaret* (samma läge som *dubbling*; svarar alltid, så manuset
+  lägger RHO:s inkliv ur RHO:s egen hand — familj 3:s rivna kik-rond ersatt),
+  *öppnaren-stört* (kedjan i det gamla lagrets ordning: cue-höjningens svar,
+  §5.4, §5.10, fritt bud → höjning / NYTT återbud utan stöd, 3M-invitens dom,
+  §5.8, §5.9 A, §5.9 B, NYTT svar på partnerns cue; null → det gamla lagret som
+  förut), *svararen-stört* (maximal-domen, NYTT svar på återöppningsdubblingen,
+  2NT-domen, efter höjt fritt bud, cue-höjarens fortsättning, NYTT svar på
+  öppnarens cue, NYTT negativ-dubblarens 13+-cue, NYTT fortsättningen efter
+  fritt bud utan höjning). Rivet ur `auction-live.ts`: answerCueRaise,
+  answerCueBidderRebid, openerCompetesAfterRaise, answerOpenerMaximal,
+  openerStrongNTAfterMinorRaise, answerOpenerNTInvite, openerRaisesFreeBid,
+  responderAfterFreeBidRaise, openerAnswersFreeBidInvite,
+  openerRondTwoInCompetition, openerReopensAfterPartnerPass,
+  openerReopensBalancing (filen 2533 → 1806 rader, `git diff --stat`).
+  **c-fixar under diffvarven (lagade före merge):** (1) svararens dom på
+  öppnarens 2NT-inbjudan försvann när motståndarna bara DUBBLAT (frö
+  20270877) → lägena läser "bjudit eller dubblat"; (2) partnerns rebud i VÅR
+  egen färg lästes som cue när de cue-bjudit den (20270117: 1♥–(2♣)–P–(2♥)–3♥
+  gav 3NT på 1 hp; 20271921) → egen färg är aldrig cue; (3) 4♠ på 8 hp efter
+  fritt bud (20270204: längdpoäng utan honnörer) → 4M kräver 10+ hp; (4)
+  stresstestet: svararen passade öppnarens reverse efter sitt fria bud (giv
+  1909) → reverse/hopp lämnas åt kravvakten; (5) straffpasset mot
+  återöppningsdubblingen krävde bara 4 kort + 7 hp (20260800: ♣T642) → längd
+  OCH honnörer i deras färg. **b-listan (bokens §5.5/§5.8/§5.9/§7.3/§7.4 — allt
+  i §9):** (1) **sandwich-inklivet** bjuds ur RHO:s egen hand: 32 av 3000
+  botgivar (t.ex. 20270139: (1♦)–P–(1♥) med ♠KQJ98763 ♥3 ♦A4 ♣A9 → 1♠;
+  20271001: (1♣)–P–(1♠) med ♠A ♥QJ8762 ♦KQT94 ♣9 → 2♥); (2) **svaret på
+  öppnarens återöppningsdubbling** (pliktsvepet K1 blottade 62 passade X när
+  regeln fick kravnivå): 46 givar (20261000: 1♥–(2♦)–P–P–X–P med ♠T64 ♥94
+  ♦6532 ♣K954 → 3♣, förr pass och 2♦X spelades); (3) **öppnarens återbud utan
+  stöd efter fritt bud** i stället för catch-allens reverse/kravbud: 20270503
+  (1♦–(1♠)–2♥–P med ♠Q84 ♥A4 ♦AK43 ♣T932 → 2NT, förr 3♣ "krav – ny färg"),
+  20270869 (utan stopp → 3♦, förr 2NT), 20272627 (1♣–(1♥)–1♠–P → 2♣ med 14,
+  förr reverse 2♦), 20271260/20270896 (6+ → 3♦); (4) **svararens fortsättning
+  efter fritt bud**: 20270055 (1♦–(1♠)–2♥–P–3♦–P med ♠2 ♥AKQT74 ♦8 ♣QJ943 →
+  4♥, förr pass), 20270204 (♠A96543 8 hp → 2♠ rebud, förr pass), 20271043
+  (♠Q8732 ♥AKJ7 ♦53 ♣Q2 → pass, förr 5♦), 20272991 (♣Q76 mot 6+ klöver → 3♣
+  inbjudan, förr 4♣), 20272932 (♠KQ742 ♥962 ♦AQ2 ♣K5 → cue 2♥, förr 3NT utan
+  stopp); (5) **svaret på partnerns cue**: 20270221 (1♣–(1♠)–2♦–(2♠)–3♠–P med
+  ♠KJ73 ♥K52 ♦QJ542 ♣J → 3NT, förr pass = 20270156-mönstret), 20271441
+  (♦KQJT74 → 4♦, öppnaren 5♦); (6) **negativ-dubblarens cue**: 20270127
+  (1♠–(2♣)–X–P–2♠–P med ♠9 ♥AK92 ♦QJT87 ♣AK8 → 3♣, öppnaren 4♠; förr pass i
+  2♠ med 17 hp), 20271003 → 2♥. Kikvakten skarp grön (de tre nya raderna
+  vaktas i `kikvakt.test.ts`). **Mätningar** (kommandon i §3; baslinjer på
+  `2ae5d05`): hela sviten grön (`npm test`), `npx tsc` rent; auktionsdiffen
+  3000 givar: ÄNDRAT BUD 111 (b-listan; per regel i
+  `revisor-output/auktionsdiff-f4-klass.txt`), samma bud/annan källa 818;
+  revisorintervallet (20260721–20261720): ÄNDRAT BUD 34, samma bud/annan
+  källa 303; avvikelsedumpen: ÄNDRAT BUD 122, samma bud/annan källa 1537, 66
+  nycklar bara i ena filen (nya sekvenser); olagliga tabellbud 0 i alla tre.
+  Frekvensbilden (3000): `tabell:öppnaren-stört` 495 · `tabell:inkliv-över-
+  svaret` 474 · `tabell:svararen-stört` 223; `manus` 3623 → 3110,
+  `detektor:honorForce` 150 → 132, `detektor:offBookResponse` 706 → 711 (dess
+  största poster är advancerns bud efter deras negativa X/höjning — familj
+  1:s rest — och öppnaren efter deras X + partnerns höjning). Kikvaktens
+  mätläge: 2941 bud, 28 byter (1,0 %, alla ur manus); de tre raderna 49/53/27
+  bud, 0 byten. Betydelsesvepet: ostörda grinden kravnivå 0 · alert 0 ·
+  registerhål 0 · kända motoravvikelser 0; störda (familj 9) kravnivå 2098 →
+  2505 bud (fler störda auktioner nu när sandwich-inklivet finns) · alert
+  1009 → 1019 · registerhål 942 → 547 (familjens regelnamn registrerade i
+  `rules.ts`). Pliktsvep: K1 19 → 20 (varav 14 = svararen passar öppnarens
+  återöppningsdubbling i lägen raden inte tar: negativ-dubblaren som möter
+  öppnarens ANDRA X, passad hand — familj 5), K2 3 → 4, K3 5 → 6, K4 0 → 1
+  (nya sekvenser ur sandwich-inklivet), K5 9, K6 29; förklaringssvep grönt (0
+  oförklarade, 0 gissningar); regelsvep grönt (284 → 305 regler, 0 auktioner
+  utan slut). Revisorn 1000 givar: rätt kontrakt 20,4 % · snittförlust 270,55
+  (baslinje 2ae5d05: 20,3 % · 271,06, dvs. −0,51 per giv = brus); kategorier
+  (antal/förlust): fel-farg-bet 126/53830 · missad-lillslam 77/50110 ·
+  missad-utgang 138/46630 · missad-storslam 35/39950 · billig-offring
+  114/31230 · battre-an-facit 111/17810 · sald-giv 58/17480 · for-hogt
+  45/10670 · fel-strain 89/2030 · utpassad 3/810 (revisor-output/latest.json).
+  34 av revisorns 1000 givar bytte slutkontrakt (ur revisorintervallets diff:
+  t.ex. 20260771 2♣ → 4♠ via egen 6+ efter fritt bud, 20260800 2♣X → 2♠ via
+  svaret på återöppningsdubblingen, 20260860 2♥ → 4♥ via negativ-dubblarens
+  cue) — alla b-mönster; ingen regel tunad på poäng (ägarprincip 2026-08-06).
 - **2026-09-08 — Etapp 4 familj 3 KLAR & LIVE: när de stör vår öppning (negativ
   dubbling, stöddubbling, Jordan, svararens konkurrenssvar) i tabellen
   (grinden godkänd av ägaren samma dag, "pcd"; mergepunkt `2ae5d05`).**

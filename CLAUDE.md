@@ -21,36 +21,37 @@ grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbet
 facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
 session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
 **Läget (detalj i planens logg):** etapp 0–2 KLARA 2026-09-04 (rigg + facit-kö
-`motorbyte-facit.test.ts`, betydelselagret `auction-meaning.ts`, faktalagret
-`auction-facts.ts`). **Etapp 3 familj 1–5 KLARA & LIVE 2026-09-05** (mergepunkter
-i planens logg): beslutstabellen
-`auction-decide.ts` (`decideFromTable`: läge → kunskapsfunktion) med raderna
-öppning/svar/återbud/svar2/tredje/slam/svar3/fjärde; adaptrarna läser partnerns
-bud ur den NAKNA auktionen; `decideCall` frågar tabellen först; kikvakten prövar
-varje tabellbud; avvikelsedumpen (fyra lägen) ger b-listorna. **§5b: alla 16
-ägarbeslut tagna 2026-09-05 och LIVE (mergepunkter i planens logg).**
-**Familj 6 KLAR & LIVE 2026-09-05 (mergepunkt f05bfef; grinden efter etapp 3
-= deployad):** manusets ostörda del riven — `buildAuctionCore` spelar ut vår
-sida ur tabellen stol för stol; kvar = konkurrensronden + `open`-flaggan
-(etapp 4). §5.7-regeländringen (4NT över 1NT-återbudet kvantitativt, egen
-färg → Gerber 4♣) är live; vakt: manuset avgör inga bud i ostörda auktioner.
-Viktigast att minnas: **fjärde färg finns inte efter 2/1** (beslut 13, ägarens
-ord "det räcker med game force en gång") · passad hand spelar Jacoby/Bergen AV
-(9) · naket 4NT = essfråga i senast bjudna färg (14).
-**HELA §5b LIVE 2026-09-08** (sista mergepunkt `226882b`). **Etapp 4 familj 1
+`motorbyte-facit.test.ts`, `auction-meaning.ts`, `auction-facts.ts`). **Etapp 3
+familj 1–6 KLARA & LIVE 2026-09-05** (sista mergepunkt `f05bfef`, grinden efter
+etapp 3 = deployad): beslutstabellen `auction-decide.ts` (`decideFromTable`:
+läge → kunskapsfunktion) med raderna öppning/svar/återbud/svar2/tredje/slam/
+svar3/fjärde; adaptrarna läser partnerns bud ur den NAKNA auktionen;
+`decideCall` frågar tabellen först; kikvakten prövar varje tabellbud;
+avvikelsedumpen ger b-listorna; manusets ostörda del riven (kvar =
+konkurrensronden + `open`-flaggan). **§5b: alla 16 ägarbeslut LIVE
+2026-09-08** (sista mergepunkt `226882b`). Viktigast att minnas: **fjärde färg
+finns inte efter 2/1** (beslut 13, ägarens ord "det räcker med game force en
+gång") · passad hand spelar Jacoby/Bergen AV (9) · naket 4NT = essfråga i
+senast bjudna färg (14) · 4NT över 1NT-återbudet kvantitativt, egen färg →
+Gerber 4♣ (§5.7).
+**Etapp 4 familj 1
 (inkliv/advance) KLAR & LIVE 2026-09-08 (`26687c9`) och familj 2
-(dubblingsfamiljen) KLAR & LIVE 2026-09-08 (mergepunkt `d3f7116`, grinden godkänd):** raderna
-*inkliv/advance/inkliv2/advance2/konkurrens-slam* resp. *dubbling/x-svar/
-x-dubblaren/x-advancern*; tjugo detektorer rivna; kunskapen i
-`overcall-continuations.ts`/`double-continuations.ts`; deras X av vårt svar =
-systems on i de ostörda raderna. b-listorna står i planens logg.
+(dubblingsfamiljen) KLAR & LIVE 2026-09-08 (mergepunkt `d3f7116`):** nio rader,
+tjugo detektorer rivna; kunskapen i `overcall-continuations.ts`/
+`double-continuations.ts`; b-listorna i planens logg.
 **Familj 3 (negativ/stöd-X, Jordan, svararens konkurrenssvar) KLAR & LIVE
 2026-09-08 (mergepunkt `2ae5d05`, grinden godkänd):** åtta rader, kunskapen i
 `contested-opening.ts` + `fit-raise.ts`, sex detektorer + manusets kik-rond
 rivna; Jordan bara efter 1M (över 1m XX), negativ-dubblarens 3NT/2NT, NMF för
-passad hand. **Nästa gång börjar vi med:** familj 4 (öppnarens
-konkurrensåterbud, svararens fria bud, RHO:s inkliv över svaret) med nya
-baslinjer (§3) på `2ae5d05`.
+passad hand. **Familj 4 (öppnarens och svararens fortsättning när de stört)
+KLAR 2026-09-08 — grinden väntar på ägaren:** raderna *inkliv-över-svaret*
+(sandwich-inklivet ur RHO:s egen hand), *öppnaren-stört* och *svararen-stört*,
+kunskapen i `contested-continuations.ts`; tolv detektorer rivna; nytt: återbudet
+utan stöd efter fritt bud, svaret på partnerns cue, svaret på
+återöppningsdubblingen, negativ-dubblarens 13+-cue. b-listan i planens logg.
+**Nästa gång börjar vi med:** grindbeslutet för familj 4 (PCD), sedan familj 5
+(balansering/återöppning: advancern efter deras X/höjning, öppnaren efter deras
+X + höjning, K1-resten) med nya baslinjer (§3) på familj 4:s mergepunkt.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

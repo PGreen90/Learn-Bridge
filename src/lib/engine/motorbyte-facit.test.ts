@@ -221,16 +221,18 @@ describe('etapp 4 familj 6 – försvar mot 1NT: DONT-dubblarens fortsättning',
   })
 })
 
-describe('etapp 4 familj 4 – svararens fortsättning i konkurrens', () => {
+describe('etapp 4 familj 4 – svararens fortsättning i konkurrens (LANDAD 2026-09-08; K2-fröet är inklivarens stol → familj 1:s rest)', () => {
   // Pliktsvepet K2, fynd ur etapp 4 familj 1 (2026-09-08): advancerns nya färg bjuds nu
   // billigast (1♠), så sekvensen 1♦–(1♥)–P–(1♠)–X–P–P–(2♣)–P uppstår — inklivaren ska ge
-  // preferens till advancerns FÖRSTA färg (5+) med 3-3, inte passa (K2 = familj 4:s facit).
+  // preferens till advancerns FÖRSTA färg (5+) med 3-3, inte passa (K2; inklivarens stol =
+  // raden *inkliv2*, kvar i kön).
   it.todo('frö 20263370: 1♦–(1♥)–P–(1♠)–X–P–P–(2♣)–P: Nord (♠KT9 ♥AT876 ♦73 ♣J87) ger preferens 2♠ — inte pass', () => {
     const deal = dealFromSeed(20263370)
     const hist = [call('W', '1D'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'X'), call('N', 'P'), call('E', 'P'), call('S', '2C'), call('W', 'P')]
     expect(decideCall(deal, hist, 'N').bid).toBe('2S')
   })
-  it.todo('frö 20262632: 1♦–(1♠)–2♥–P–3♦–P: Nord (♠A ♥AKJ87542 ♦T97 ♣7) bjuder 4♥ — den egna 8-korts färgen vinner över 3-korts ♦-fit (inte 5♦)', () => {
+  // LANDAD 2026-09-08 (etapp 4 familj 4, raden *svararen-stört*: egen 6+ före stöd åt partnerns rebjudna färg).
+  it('frö 20262632: 1♦–(1♠)–2♥–P–3♦–P: Nord (♠A ♥AKJ87542 ♦T97 ♣7) bjuder 4♥ — den egna 8-korts färgen vinner över 3-korts ♦-fit (inte 5♦)', () => {
     const deal = dealFromSeed(20262632)
     const hist = [call('E', 'P'), call('S', '1D'), call('W', '1S'), call('N', '2H'), call('E', 'P'), call('S', '3D'), call('W', 'P')]
     expect(decideCall(deal, hist, 'N').bid).toBe('4H')

@@ -219,6 +219,41 @@ export function takeoutOfResponse(hand: Hand, openSuit: Suit, respSuit: Suit): R
   return { call: 'P', rule: 'pass', explanation: 'ingen aktion över deras två bjudna färger → pass.' }
 }
 
+/**
+ * Naturligt inkliv i SANDWICH-sitsen (motorbytet etapp 4 familj 4,
+ * 2026-09-08): motståndarna har bjudit öppning + svar i två 1-lägesfärger
+ * (t.ex. 1♦–(P)–1♥) och jag sitter direkt över svararen, partnern har passat.
+ * Partnern är begränsad och båda motståndarna har visat värden, så bara det
+ * SUNDA enkla inklivet: 5+ i en OBJUDEN färg — på 1-läget kvalitetsfärg
+ * (3 av topp-5) och 10+ hp, på 2-läget 11+ hp och 6+ kort (eller 5 med
+ * kvalitet). Tak 16 (17+ dubblar, `takeoutOfResponse`). Inga hoppinkliv,
+ * ingen sandwich-1NT här (passa och balansera hellre). Dubblingen (4-4 i de
+ * objudna / stark enfärg) prövas FÖRE denna i tabellen.
+ */
+export function overcallOfResponse(hand: Hand, openSuit: Suit, respSuit: Suit): ResponseResult {
+  const pass: ResponseResult = { call: 'P', rule: 'pass', explanation: 'inget sunt inkliv över deras två färger → pass.' }
+  const p = hcp(hand)
+  if (p > 16) return pass
+  const len = lengths(hand)
+  const unbid = RANK_ORDER.filter((s) => s !== openSuit && s !== respSuit)
+  let best: Suit | null = null
+  for (const s of unbid) {
+    if (len[s] < 5) continue
+    if (best === null || len[s] > len[best] || (len[s] === len[best] && rankIdx(s) > rankIdx(best))) best = s
+  }
+  if (!best) return pass
+  const level = rankIdx(best) > rankIdx(respSuit) ? 1 : 2
+  const ok = level === 1
+    ? p >= 10 && goodSuit(hand, best)
+    : p >= 11 && (len[best] >= 6 || goodSuit(hand, best))
+  if (!ok) return pass
+  return {
+    call: `${level}${BID[best]}` as ResponseResult['call'],
+    rule: 'enkelt inkliv',
+    explanation: `${level === 1 ? '10' : '11'}–16 hp med 5+ ${SYM[best]} över deras ${SYM[openSuit]}+${SYM[respSuit]} → ${level}${SYM[best]} (inkliv i sandwich-sitsen).`,
+  }
+}
+
 /** Billigaste lagliga budet i `suit` STRIKT över partnerns tvåfärgsbud `refCall`. */
 function cheapestBid(suit: Suit, refCall: string): string {
   const m = refCall.match(/^(\d)(NT|C|D|H|S)$/)

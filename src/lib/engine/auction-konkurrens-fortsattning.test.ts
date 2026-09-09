@@ -212,9 +212,15 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
       S: 'S:T92 H:QT987432 D:T6 C:-',
       W: 'S:Q6 H:A D:Q2 C:AQJ86432',
     })
+    // Dubbelton-vakten prövas på den explicita X-sekvensen (raden *negativ-dubblaren*):
+    const hist: ResolvedCall[] = [{ seat: 'W', bid: '1C' }, { seat: 'N', bid: '1D' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: 'P' }, { seat: 'W', bid: '2C' }, { seat: 'N', bid: 'P' }]
+    expect(decideCall(d, hist, 'E').bid).toBe('5C')
+    // Botauktionen: sedan 2026-09-02 bjuder Öst det fria budet 1♠ (fem spader) i
+    // stället för X, och sedan motorbytets familj 4 (2026-09-08) sätter svararen
+    // utgång i sin egen 6-korts högfärg (4♠) före dubbelton-stödet till 2♣.
     const history = botAuction(d)
     expect(history).not.toBeNull()
-    expect(contractFromCalls(history!)).toMatchObject({ strain: 'clubs', declarer: 'W' })
+    expect(contractFromCalls(history!)).toMatchObject({ strain: 'spades', declarer: 'E' })
   })
 
   it('frö 20261351 (regressionsvakt): öppnaren visar sin ANDRA färg före ett billigt rebud', () => {

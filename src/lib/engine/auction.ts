@@ -395,13 +395,13 @@ function buildAuctionCore(deal: Deal): BuiltAuction | null {
   // manuset bara den starka dubblingen här (F6, 2026-08-08) och den vanliga
   // 4-4:an fanns bara i det gamla lagret — nu är den ett beslut som alla
   // andra. Fortsättningen (tvångssvaret, det starka återbudet, öppnarens
-  // fortsättning) bjuds levande. RHO:s naturliga INKLIV över svaret bjuds
-  // inte i botauktionerna än: manusets stöddubblingsrond (etapp 4 familj 3,
-  // 2026-09-08, riven) lade det bara när ÖPPNAREN hade exakt tre stöd — en
-  // kik i en annan hand — och utan öppnarens konkurrensåterbud i tabellen
-  // (familj 4) föll återbudet till det gamla lagrets catch-all. Stöddubblingen
-  // och svaret på den ligger i tabellen och bjuds på ett inkliv som faktiskt
-  // lagts (vid bordet).
+  // fortsättning) bjuds levande. RHO:s naturliga INKLIV över svaret kommer
+  // sedan etapp 4 familj 4 (2026-09-08) ur samma fråga (raden
+  // *inkliv-över-svaret* = `overcallOfResponse` ur RHO:s egen hand):
+  // manusets gamla stöddubblingsrond lade det bara när ÖPPNAREN hade exakt
+  // tre stöd (en kik) och revs i familj 3; nu är det ett beslut som alla
+  // andra, och öppnarens återbud efter inklivet kommer ur tabellen
+  // (*stöd-x*, *öppnaren-stört*) när resten bjuds levande.
   const respNew = parseBid(response.bid)
   if (openerSuit && respNew.level === 1 && respNew.suit && respNew.suit !== openerSuit) {
     const rhoSeat = seatAt(deal.dealer, (openerIndex + 3) % 4)
