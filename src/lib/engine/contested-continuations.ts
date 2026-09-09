@@ -821,12 +821,29 @@ export function negativeDoublerCue(hand: Hand, f: AuctionFacts): Kunskap | null 
  * → straffpass (trap pass); annars längsta färg utanför deras (partnerns färg
  * med 3+ räknas), billigast — 5+ högfärg och 12+ → utgång. Pliktsvepet K1
  * visade 62 passade återöppningsdubblingar på 3000 givar (2026-09-08).
+ *
+ * Kärnan (`answerReopeningDoubleCore`) är utbruten så att motorbytets familj 5
+ * (K1-resten: den negativa dubblaren som möter öppnarens ANDRA X — se
+ * `responderAnswersSecondDouble` i balancing-continuations.ts) kan återanvända
+ * den efter att först ha prövat en graderad fithöjning.
  */
 export function responderAnswersReopeningDouble(hand: Hand, f: AuctionFacts): Kunskap | null {
   const { history, seat } = f
+  if (history.some((c) => c.seat === seat && c.bid !== 'P')) return null // svararens FÖRSTA tur
+  return answerReopeningDoubleCore(hand, f)
+}
+
+/**
+ * Själva svaret på partnerns upplysande (återöppnings-)dubbling, utan
+ * tur-guarden: partnern öppnade 1 i färg, partnerns senaste bud är X med ett
+ * motståndarkontrakt i färg under utgång som senaste kontraktsbud, bara pass
+ * efter. Längd + honnörer i deras färg → straffpass; annars längsta färg utanför
+ * deras (partnerns färg med 3+ räknas), billigast — 5+ högfärg och 12+ → utgång.
+ */
+export function answerReopeningDoubleCore(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
   const open = f.opening
   if (!open || open.seat !== f.partner || open.level !== 1 || open.strain === 'NT') return null
-  if (history.some((c) => c.seat === seat && c.bid !== 'P')) return null
   const last = f.lastNonPass
   if (!last || last.seat !== f.partner || last.bid !== 'X') return null
   if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null

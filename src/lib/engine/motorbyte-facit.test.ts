@@ -239,6 +239,67 @@ describe('etapp 4 familj 4 – svararens fortsättning i konkurrens (LANDAD 2026
   })
 })
 
+describe('etapp 4 familj 5 – balansering & återöppning: advancern/öppnaren/svararen efter deras konkurrens (LANDAD 2026-09-09)', () => {
+  // (a) Advancern efter deras X — raden *advance2* höjer partnerns inkliv ur
+  // egen hand (samma kunskap som förr, nu i tabellen).
+  it('frö 20270013: 1♣–(2♠)–X–?: Öst (♠KQ95 ♥A9 ♦K986 ♣Q32, 13 hp, 4-korts stöd) höjer partnerns 2♠-inkliv till 3♠ efter deras negativa X', () => {
+    const deal = dealFromSeed(20270013)
+    const t = decideCallTraced(deal, [call('S', '1C'), call('W', '2S'), call('N', 'X')], 'E')
+    expect(t.källa).toBe('tabell:advance2')
+    expect(t.call.bid).toBe('3S')
+  })
+  // (a) Advancern efter deras höjning — fit + utgångsvärden → utgång.
+  it('frö 20270007: (1♥)–1♠–(2♥)–?: Nord (♠AJ542 ♥3 ♦AJ54 ♣953, 5-korts stöd) bjuder utgång 4♠ efter deras höjning', () => {
+    const deal = dealFromSeed(20270007)
+    const t = decideCallTraced(deal, [call('N', 'P'), call('E', '1H'), call('S', '1S'), call('W', '2H')], 'N')
+    expect(t.källa).toBe('tabell:advance2')
+    expect(t.call.bid).toBe('4S')
+  })
+  // (b) Öppnaren efter deras X + höjning — raden *öppnaren-stört* svarar ur egen
+  // hand i stället för det gamla lagrets catch-all.
+  it('frö 20270024: 1♦–(X)–(2♦ cue)–X–?: Väst/öppnaren (♠A64 ♥Q963 ♦AQJ52 ♣3) visar sin 4-korts hjärter 2♥', () => {
+    const deal = dealFromSeed(20270024)
+    const hist = [call('S', 'P'), call('W', '1D'), call('N', 'X'), call('E', '2D'), call('S', 'X')]
+    const t = decideCallTraced(deal, hist, 'W')
+    expect(t.källa).toBe('tabell:öppnaren-stört')
+    expect(t.call.bid).toBe('2H')
+  })
+  // (c) K1-resten: den negativa dubblaren möter öppnarens ANDRA (återöppnings-)
+  // dubbling. Med FIT når vi utgång (graderad höjning, inte billig preferens).
+  it('frö 20271643: (1♥)–2♣ över... egentligen 1♥–(2♣)–X–3♣–X–P–?: Öst (♠AT963 ♥Q6432 ♦K87 ♣—, 5-korts hjärter + klöverrenons) höjer till 4♥ — inte 3♥ preferens', () => {
+    const deal = dealFromSeed(20271643)
+    const hist = [call('S', 'P'), call('W', '1H'), call('N', '2C'), call('E', 'X'), call('S', '3C'), call('W', 'X'), call('N', 'P')]
+    const t = decideCallTraced(deal, hist, 'E')
+    expect(t.källa).toBe('tabell:svararen-stört')
+    expect(t.call.bid).toBe('4H')
+  })
+  // (c) K1-resten utan fit: den forcerande andra dubblingen måste besvaras — Syd
+  // passade förr, nu tvingande bud (aldrig pass av ett upplysande krav).
+  it('frö 20272221: 1♥–(3♣)–X–(4♣)–X–P–?: Syd (♠KQT53 ♥742 ♦K42 ♣T8) passade förr öppnarens andra X — nu 4♠ (svaret på återöppningsdubblingen)', () => {
+    const deal = dealFromSeed(20272221)
+    const hist = [call('W', 'P'), call('N', '1H'), call('E', '3C'), call('S', 'X'), call('W', '4C'), call('N', 'X'), call('E', 'P')]
+    const t = decideCallTraced(deal, hist, 'S')
+    expect(t.källa).toBe('tabell:svararen-stört')
+    expect(t.call.bid).toBe('4S')
+  })
+})
+
+// KÖ (fynd under familj 5:s grind, 2026-09-09; ägaren såg frö 20272221 i dev):
+// svar-stört (`contestedResponse`, familj 3) prövar NEGATIV DUBBLING före
+// stödhöjningen, så med 3-korts stöd i partnerns HÖGFÄRG döljs fiten bakom ett
+// X (som per systemet inte lovar stöd). Funktionens egen princip finns redan
+// (openerMajorFit på rad 408 — "har vi fit visar cue/höjning mer"), men vakten
+// är bara kopplad till fritt-bud-grenen, inte till den negativa dubblingen.
+// Rättelsen (raise före negativ X med 3+ stöd i partnerns högfärg) tas som ett
+// eget litet familj 3-steg EFTER familj 5, med exempelhänder för ägaren.
+describe('KÖ – svar-stört: höjning före negativ dubbling med 3+ stöd i partnerns högfärg (familj 3-rättelse)', () => {
+  it.todo('frö 20272221: 1♥–(3♣)–?: Syd (♠KQT53 ♥742 ♦K42 ♣T8, 3-korts hjärterstöd + 8 hp) bör bjuda 3♥ (konkurrenshöjning, visar fiten) — inte X (negativ dubbling döljer stödet)', () => {
+    const deal = dealFromSeed(20272221)
+    const hist = [call('W', 'P'), call('N', '1H'), call('E', '3C')]
+    expect(decideCall(deal, hist, 'S').bid).toBe('3H')
+  })
+})
+
 // §5b beslut 1 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 6 + 15): över
 // öppnarens 1NT-återbud (12–14) är 4♣ Gerber BARA för den jämna handen utan
 // färg att visa (räknar 33 mot visade 12 → Gerber; 31–32 → kvantitativ 4NT).

@@ -151,6 +151,7 @@ import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
+import { advancerActsInCompetition, openerActsInCompetition, responderActsInCompetition } from './balancing-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
@@ -1646,7 +1647,10 @@ const TABELL: Row[] = [
         advancerPrefersOvercallSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts) ??
         cueBidderContinues(hand, facts, 'inklivare')
-      return k ? asCall(facts.seat, k) : null
+      if (k) return asCall(facts.seat, k)
+      // Familj 5 (a): advancern efter deras X/höjning — höj med fit / egen färg /
+      // sang (samma kunskap som `offBookResponse`, avgränsad till konkurrens).
+      return advancerActsInCompetition(hand, facts)
     },
   },
 
@@ -1842,7 +1846,10 @@ const TABELL: Row[] = [
         openerReopensAfterPartnerPass(hand, facts) ??
         openerReopensBalancing(hand, facts) ??
         answerPartnersCue(hand, facts)
-      return k ? asCall(facts.seat, k) : null
+      if (k) return asCall(facts.seat, k)
+      // Familj 5 (b): öppnaren efter deras X + höjning — höj med fit / egen färg /
+      // sang (samma kunskap som `offBookResponse`; kravvakten körs efter för null).
+      return openerActsInCompetition(hand, facts)
     },
   },
   // Svararens senare turer när de stört (familj 3:s *svar-stört* tar första
@@ -1860,7 +1867,11 @@ const TABELL: Row[] = [
         answerPartnersCue(hand, facts) ??
         negativeDoublerCue(hand, facts) ??
         responderAfterFreeBid(hand, facts)
-      return k ? asCall(facts.seat, k) : null
+      if (k) return asCall(facts.seat, k)
+      // Familj 5 (c + balansering): svararens balanserings-/återöppningssvar och
+      // K1-resten (passad negativ-dubblare mot öppnarens andra X) — samma kunskap
+      // som `offBookResponse`; kravvakten körs efter för null-fallen.
+      return responderActsInCompetition(hand, facts)
     },
   },
 ]
