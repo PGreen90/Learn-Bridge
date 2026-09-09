@@ -284,19 +284,35 @@ describe('etapp 4 familj 5 – balansering & återöppning: advancern/öppnaren/
   })
 })
 
-// KÖ (fynd under familj 5:s grind, 2026-09-09; ägaren såg frö 20272221 i dev):
-// svar-stört (`contestedResponse`, familj 3) prövar NEGATIV DUBBLING före
-// stödhöjningen, så med 3-korts stöd i partnerns HÖGFÄRG döljs fiten bakom ett
-// X (som per systemet inte lovar stöd). Funktionens egen princip finns redan
-// (openerMajorFit på rad 408 — "har vi fit visar cue/höjning mer"), men vakten
-// är bara kopplad till fritt-bud-grenen, inte till den negativa dubblingen.
-// Rättelsen (raise före negativ X med 3+ stöd i partnerns högfärg) tas som ett
-// eget litet familj 3-steg EFTER familj 5, med exempelhänder för ägaren.
-describe('KÖ – svar-stört: höjning före negativ dubbling med 3+ stöd i partnerns högfärg (familj 3-rättelse)', () => {
-  it.todo('frö 20272221: 1♥–(3♣)–?: Syd (♠KQT53 ♥742 ♦K42 ♣T8, 3-korts hjärterstöd + 8 hp) bör bjuda 3♥ (konkurrenshöjning, visar fiten) — inte X (negativ dubbling döljer stödet)', () => {
+// Svar-stört-rättelsen (ägarbeslut 2026-09-09, familj 3): "Man får INTE bjuda
+// negativ dubbel när man har stöd i partnerns öppnade högfärg." `contestedResponse`
+// prövade negativ dubbling FÖRE stödhöjningen, så med 3+ stöd i partnerns HÖGFÄRG
+// doldes fiten bakom ett X (som per systemet inte lovar stöd). Fixen gatar
+// dubblingen bakom `openerMajorFit`: 3+ stöd → höjning (6–9) / cue (10+), aldrig X.
+// Stödet går före en sidofärg (även 4-korts högfärg). Minoröppning eller ≤2 i
+// partnerns högfärg → negativ dubbling som förr.
+describe('svar-stört-rättelsen – höjning (inte negativ X) med 3+ stöd i partnerns högfärg (familj 3, LANDAD 2026-09-09)', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  it('frö 20272221: 1♥–(3♣)–?: Syd (♠KQT53 ♥742 ♦K42 ♣T8, 3-korts stöd + 8 hp) bjuder 3♥ (konkurrenshöjning) — inte X', () => {
     const deal = dealFromSeed(20272221)
     const hist = [call('W', 'P'), call('N', '1H'), call('E', '3C')]
     expect(decideCall(deal, hist, 'S').bid).toBe('3H')
+  })
+  it('1♥–(2♣)–?: 3-korts stöd + 10+ hp (♠KQ7 ♥Q84 ♦AK43 ♣932) → cue 3♣ (limithöjning+), inte X', () => {
+    const c = bud('S:KQ7 H:Q84 D:AK43 C:932', [call('N', '1H'), call('E', '2C')], 'S')
+    expect(c!.call).toMatchObject({ bid: '3C', rule: 'cue (limithöjning+)' })
+  })
+  it('1♥–(2♣)–?: 3-korts stöd + 4-korts SIDOFÄRG (♠AJ84 ♥K84 ♦9832 ♣43, 8 hp) → 2♥ (billigaste konkurrenshöjning) — stödet går före spadern, inte X', () => {
+    const c = bud('S:AJ84 H:K84 D:9832 C:43', [call('N', '1H'), call('E', '2C')], 'S')
+    expect(c!.call).toMatchObject({ bid: '2H', rule: 'konkurrenshöjning' })
+  })
+  it('1♦–(2♣)–?: MINORöppning (♠KJ84 ♥AQ73 ♦92 ♣T43) → X (negativ dubbling) — regeln gäller bara högfärgsöppning', () => {
+    const c = bud('S:KJ84 H:AQ73 D:92 C:T43', [call('N', '1D'), call('E', '2C')], 'S')
+    expect(c!.call.bid).toBe('X')
+  })
+  it('1♥–(2♣)–?: bara 2 i partnerns högfärg (♠KQ84 ♥J4 ♦A932 ♣T43) = inte stöd → X (negativ dubbling)', () => {
+    const c = bud('S:KQ84 H:J4 D:A932 C:T43', [call('N', '1H'), call('E', '2C')], 'S')
+    expect(c!.call.bid).toBe('X')
   })
 })
 

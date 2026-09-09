@@ -1989,7 +1989,14 @@ dubblarens eget flöde (X + egen färg).
 ### 7.4 Övriga dubblingar (negativ, responsiv, stöd)
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
   upplysning, visar typiskt de objudna färgerna (särskilt objudna högfärger),
-  ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. **Exakt fyra, inte fem (felrapport #55):**
+  ~6+ hp. *Ex:* 1♦–(1♠)–X = 4+ ♥. **Aldrig med stöd i partnerns öppnade
+  högfärg (ägarbeslut 2026-09-09):** har svararen **3+ kort i den högfärg
+  partnern öppnat** bjuds ALDRIG negativ dubbling — en negativ dubbling förnekar
+  (visar inte) stöd, så fiten skulle döljas. Svararen visar den i stället:
+  **konkurrenshöjning** (6–9, billigaste nivå) eller **cue i deras färg**
+  (limithöjning+, 10+, krav), även med en egen 4-korts högfärg vid sidan (stödet
+  går före att leta en sidofärg). Gäller bara högfärgsöppning; efter 1♣/1♦
+  dubblar svararen som vanligt (en minor 'stöds' inte på samma sätt). **Exakt fyra, inte fem (felrapport #55):**
   kan den objudna högfärgen bjudas på **1-läget** visar X:et exakt 4 kort — med
   **5+ bjuder svararen färgen** (t.ex. 1♦–(1♥)–**1♠** = 5+ ♠, fritt bud och
   rondkrav, 6+ hp). Måste färgen upp på **2-läget** bjuds den med 5+ bara från
@@ -2409,6 +2416,18 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-09 — Aldrig negativ dubbling med stöd i partnerns öppnade högfärg
+  (§7.4; ägarbeslut 2026-09-09, "Man får INTE bjuda negativ dubbel när man har
+  stöd i partners öppnade högfärg").** `contestedResponse` prövade negativ
+  dubbling FÖRE stödhöjningen, så med 3+ stöd i partnerns HÖGFÄRG doldes fiten
+  bakom ett X (frö 20272221: 1♥–(3♣) med ♠KQT53 ♥742 gav X i stället för 3♥).
+  Fixen gatar dubblingen bakom `openerMajorFit`: 3+ stöd → konkurrenshöjning
+  (6–9) / cue (10+), aldrig X — stödet går före en sidofärg (även 4-korts
+  högfärg). Minoröppning eller ≤2 i partnerns högfärg → negativ dubbling som
+  förr. Fynd under familj 5:s grind (ägaren såg given i dev). Auktionsdiff: 51
+  bot + 45 avvik ändrade bud, alla X → höjning/cue (klass b); revisorn 20,7 % ·
+  270,43 (från 20,4 % · 270,85 = liten förbättring). Facit: svar-stört-blocket i
+  `motorbyte-facit.test.ts`.
 - **2026-09-08 — Öppnarens och svararens fortsättning när de stört flyttar in
   i beslutstabellen (§5.4, §5.5, §5.8, §5.9, §5.10, §7.3, §7.4; motorbytet
   etapp 4 familj 4, `docs/motorbyte-plan.md`).** Raderna *inkliv-över-svaret*

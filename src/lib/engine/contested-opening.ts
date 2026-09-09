@@ -396,16 +396,23 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
 
   // Mot ett färginkliv:
   if (ovSuit) {
-    // Negativ dubbling (§7.4) – EN källa: samma logik som doubles.ts (gäller
-    // inkliv på valfri nivå, inte bara 1-läget).
-    const neg = negativeDouble(hand, openerSuit, theirCall)
-    if (neg) return neg
+    // §7.4 (ägarbeslut 2026-09-09): med 3+ STÖD i partnerns öppnade HÖGFÄRG
+    // bjuder vi ALDRIG negativ dubbling — en negativ dubbling förnekar (visar
+    // inte) stöd, så fiten skulle döljas. Vi visar den i stället (cue/höjning
+    // nedan). Vakten `openerMajorFit` fanns redan för fritt-bud-grenen men var
+    // inte kopplad till dubblingen (frö 20272221: 1♥–(3♣) med ♠KQT53 ♥742 gav
+    // X i stället för 3♥). Utan sådant stöd (minoröppning, eller ≤2 i högfärgen)
+    // gäller negativ dubbling som förr — EN källa, samma logik som doubles.ts.
+    const openerMajorFit = isMajorOpening && len[openerSuit] >= 3
+    if (!openerMajorFit) {
+      const neg = negativeDouble(hand, openerSuit, theirCall)
+      if (neg) return neg
+    }
     // Fritt bud i en 5+ HÖGFÄRG (§5.5, felrapport #55): på 1-läget från 6 hp,
     // på 2-läget från 10 hp — rondkrav. Högfärgen visas före cue/höjning, UTOM
     // när öppnaren öppnade en högfärg vi har 3+ stöd i (då är fiten känd och
     // cue/höjning säger mer). Förr saknades grenen helt: med 7-korts spader
     // efter 1♦–(1♥) dubblade svararen negativt (lovar 4) och passade sedan.
-    const openerMajorFit = isMajorOpening && len[openerSuit] >= 3
     if (!openerMajorFit) {
       for (const m of ['spades', 'hearts'] as Suit[]) {
         if (m === openerSuit || m === ovSuit || len[m] < 5) continue
