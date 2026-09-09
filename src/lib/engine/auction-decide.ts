@@ -152,6 +152,7 @@ import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { advancerActsInCompetition, openerActsInCompetition, responderActsInCompetition } from './balancing-continuations'
+import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
@@ -1873,6 +1874,33 @@ const TABELL: Row[] = [
       // som `offBookResponse`; kravvakten körs efter för null-fallen.
       return responderActsInCompetition(hand, facts)
     },
+  },
+
+  // ---- Etapp 4 familj 6 — försvar mot 1NT (2026-09-09) ---------------------
+  // Deras 1NT-öppning, vår sidas första försvarsaktion (direkt sits eller
+  // balansering): naturligt inkliv / DONT (§7.5), ur egen hand. Förr modellerade
+  // manuset denna rond; fortsättningarna (advancerns relä, X-arens rättelse,
+  // Lebensohl, värde-X, flykt) flyttar in i samma familj.
+  {
+    id: 'försvar-1nt',
+    läge: (f) => defendTheirNTSeat(f) !== null,
+    välj: ({ hand, facts }) => defendTheirNT(hand, facts.seat, defendTheirNTSeat(facts)!.balancing),
+  },
+  // Fortsättningen på vårt 1NT-försvar: advancern svarar på partnerns DONT, och
+  // vår egen DONT-X/tvåfärg rättas efter partnerns relä.
+  {
+    id: 'dont-advance',
+    läge: (f) => ntDefenseFollowUpSeat(f),
+    välj: ({ hand, facts }) =>
+      advancePartnerDONT(hand, facts) ?? correctOwnDONTX(hand, facts) ?? correctOwnDONTTwoSuiter(hand, facts),
+  },
+  // Störning över VÅRT 1NT: Lebensohl (deras naturliga inkliv), värde-X-flödet
+  // (deras DONT + partnerns straff-X), och flykt-straffet efter vår XX. null →
+  // det gamla lagret (answerTransferGameChoice m.fl. som inte flyttat).
+  {
+    id: 'vårt-1nt-stört',
+    läge: (f) => ourNTContestedSeat(f),
+    välj: ({ hand, facts }) => respondToOurNTInterference(hand, facts),
   },
 ]
 

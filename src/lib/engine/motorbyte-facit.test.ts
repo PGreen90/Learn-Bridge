@@ -316,6 +316,39 @@ describe('svar-stört-rättelsen – höjning (inte negativ X) med 3+ stöd i pa
   })
 })
 
+describe('etapp 4 familj 6 – försvar mot 1NT: DONT, naturligt inkliv, Lebensohl, värde-X (LANDAD 2026-09-09)', () => {
+  const bud = (hand: string, hist: ResolvedCall[], seat: Seat) => decideFromTable(parseHand(hand), auctionFacts(hist, seat), false)
+  // Del 1 — vårt försvar mot deras 1NT (raden *försvar-1nt*), förr manuset.
+  it('frö 20270038: (1NT)–?: Väst (♠A953 ♥6 ♦A9875 ♣T62) bjuder 2♦ (DONT, lägre av ♦+♠)', () => {
+    expect(decideCall(dealFromSeed(20270038), [call('S', '1NT')], 'W')).toMatchObject({ bid: '2D', rule: 'DONT tvåfärg' })
+  })
+  it('frö 20270003: (1NT)–?: Syd (♠AQT973 ♥AJ7 ♦762 ♣8) bjuder 2♠ (naturligt inkliv, 6+, 11–15)', () => {
+    expect(decideCall(dealFromSeed(20270003), [call('E', '1NT')], 'S')).toMatchObject({ bid: '2S', rule: 'naturligt inkliv (1NT)' })
+  })
+  it('frö 20270089: (1NT)–?: Öst (♠J7 ♥AQ8764 ♦J65 ♣85) bjuder X (DONT enfärg, relä till 2♣)', () => {
+    expect(decideCall(dealFromSeed(20270089), [call('N', '1NT')], 'E')).toMatchObject({ bid: 'X', rule: 'DONT X (enfärg)' })
+  })
+  // Del 2 — advancern svarar på partnerns DONT-X (påtvingad 2♣-relä), raden *dont-advance*.
+  it('(1NT)–X(DONT)–P–?: advancern relä:ar 2♣ (pass-eller-rätta åt partnern)', () => {
+    const t = bud('S:K963 H:J84 D:QT73 C:T8', [call('E', '1NT'), call('S', 'X'), call('W', 'P')], 'N')
+    expect(t?.källa).toBe('tabell:dont-advance')
+    expect(t!.call).toMatchObject({ bid: '2C', rule: 'DONT relä' })
+  })
+  // Del 3 — störning över VÅRT 1NT (raden *vårt-1nt-stört*): Lebensohl + värde-X.
+  it('frö 20270003: 1NT–(2♠ naturligt)–?: svararen spelar Lebensohl 2NT', () => {
+    const hist: ResolvedCall[] = [call('E', '1NT'), { seat: 'S', bid: '2S', rule: 'naturligt inkliv (1NT)' }]
+    const t = decideCallTraced(dealFromSeed(20270003), hist, 'W')
+    expect(t.källa).toBe('tabell:vårt-1nt-stört')
+    expect(t.call.bid).toBe('2NT')
+  })
+  it('frö 20270163: 1NT–(2♥ DONT)–X(värde)–P–?: öppnaren beskriver 2NT (förnekar 5-kort)', () => {
+    const hist: ResolvedCall[] = [call('N', '1NT'), { seat: 'E', bid: '2H', rule: 'DONT tvåfärg' }, { seat: 'S', bid: 'X', rule: 'straff/värden' }, call('W', 'P')]
+    const t = decideCallTraced(dealFromSeed(20270163), hist, 'N')
+    expect(t.källa).toBe('tabell:vårt-1nt-stört')
+    expect(t.call.bid).toBe('2NT')
+  })
+})
+
 // §5b beslut 1 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 6 + 15): över
 // öppnarens 1NT-återbud (12–14) är 4♣ Gerber BARA för den jämna handen utan
 // färg att visa (räknar 33 mot visade 12 → Gerber; 31–32 → kvantitativ 4NT).
