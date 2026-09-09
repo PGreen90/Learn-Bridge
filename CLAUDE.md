@@ -44,14 +44,14 @@ tjugo detektorer rivna; kunskapen i `overcall-continuations.ts`/
 `contested-opening.ts` + `fit-raise.ts`, sex detektorer + manusets kik-rond
 rivna; Jordan bara efter 1M (över 1m XX), negativ-dubblarens 3NT/2NT, NMF för
 passad hand. **Familj 4 (öppnarens och svararens fortsättning när de stört)
-KLAR 2026-09-08 — grinden väntar på ägaren:** raderna *inkliv-över-svaret*
+KLAR & LIVE 2026-09-09 (mergepunkt `4fa2604`, grinden godkänd):** raderna *inkliv-över-svaret*
 (sandwich-inklivet ur RHO:s egen hand), *öppnaren-stört* och *svararen-stört*,
 kunskapen i `contested-continuations.ts`; tolv detektorer rivna; nytt: återbudet
 utan stöd efter fritt bud, svaret på partnerns cue, svaret på
 återöppningsdubblingen, negativ-dubblarens 13+-cue. b-listan i planens logg.
-**Nästa gång börjar vi med:** grindbeslutet för familj 4 (PCD), sedan familj 5
-(balansering/återöppning: advancern efter deras X/höjning, öppnaren efter deras
-X + höjning, K1-resten) med nya baslinjer (§3) på familj 4:s mergepunkt.
+**Nästa gång börjar vi med:** familj 5 (balansering/återöppning: advancern efter
+deras X/höjning, öppnaren efter deras X + höjning, K1-resten) med nya
+baslinjer (§3) på `4fa2604`.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

@@ -343,7 +343,8 @@ mätningen vid etapp 4:s start):
    öppnarens rad finns; `overcall` mot svaret med tredje-färgs-/stoppvakt),
    svararens svar på öppnarens cue i konkurrens (frö 20270156-mönstret:
    cuet passades), negativ-dubblarens ojämna 13+-händer utan stopp.
-   **KLAR 2026-09-08 (loggen; grinden väntar):** raderna *inkliv-över-svaret*
+   **KLAR & LIVE 2026-09-09 (loggen; mergepunkt `4fa2604`, grinden godkänd):**
+   raderna *inkliv-över-svaret*
    (sandwich-sitsen ur RHO:s egen hand, `overcallOfResponse`),
    *öppnaren-stört* (svaret på cue-höjningen, §5.4, §5.10, det fria budets
    höjning + det NYA återbudet utan stöd, §5.8 med fit mätt mot vad svaret
@@ -651,8 +652,9 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
-- **2026-09-08 — Etapp 4 familj 4 KLAR: öppnarens och svararens fortsättning
-  när de stört, i tabellen (grinden väntar på ägaren).** Test-drivet: facit-
+- **2026-09-08 — Etapp 4 familj 4 KLAR & LIVE: öppnarens och svararens
+  fortsättning när de stört, i tabellen (grinden godkänd av ägaren 2026-09-09,
+  "Godkänt, kör PCD"; mergepunkt `4fa2604`, deployen grön och aliasad).** Test-drivet: facit-
   filen `auction-etapp4-familj4.test.ts` (raderna, det nya, det rivna) + frö
   20262632 ur facit-kön (`motorbyte-facit.test.ts`, 1♦–(1♠)–2♥–P–3♦–P →
   4♥). **Bygget:** `contested-continuations.ts` (lägesläsarna
