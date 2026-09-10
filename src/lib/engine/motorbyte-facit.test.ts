@@ -1325,3 +1325,29 @@ describe('etapp 4 familj 9 — betydelselagret på störda auktioner', () => {
     expect(forcingOf('dubblaren höjer (inbjudan)')).toBe('inbjudan')
   })
 })
+
+// FÄLTFYND 2026-09-10 (ägaren spelade på etapp 4-motorn, bricka 6, ÖV i zon):
+// efter ett STARKT 2NT-återbud i KONKURRENS (1♣–(1♠)–P–(2♠)–2NT, ~18–19 bal med
+// spaderhåll) passade svararen med fem hjärter och singelspader. Rätt är att
+// RYMMA ner i den egna femkortshögfärgen — naturligt 3♥, inte en transfer: vi
+// spelar 5-3-fiten i stället för sang med bara ett spaderhåll (Axxx) mot
+// motståndarnas spaderfärg och en singelspader mittemot. Verktyget finns OSTÖRT
+// (1♣–1♥–2NT: direkt 3M visar 5-3, systems on efter 2NT-återbudet 2026-08-18)
+// men aldrig i konkurrens. Ägarbeslut B (2026-09-10): logga nu, bygg som en
+// konkurrensfortsättning EFTER etapp 5. Regel att bygga: svararen får bjuda en
+// svag naturlig 3M (5+ kort) över partnerns starka 2NT-återbud i konkurrens.
+describe('fältfynd – svararen rymmer till femkorts högfärg (naturligt 3M) över starkt 2NT-återbud i konkurrens', () => {
+  it.todo('1♣–(1♠)–P–(2♠)–2NT–P–?: Nord (♠7 ♥JT652 ♦K953 ♣T62, 4 hp) bjuder naturligt 3♥ — inte pass', () => {
+    const deal: Deal = {
+      id: 'fältfynd-2nt-konkurrens', dealer: 'E', vulnerability: 'ew', board: 6,
+      hands: {
+        N: parseHand('S:7 H:JT652 D:K953 C:T62'),
+        E: parseHand('S:KJT H:9 D:QJ762 C:J943'),
+        S: parseHand('S:A652 H:A84 D:A4 C:AQ87'),
+        W: parseHand('S:Q9843 H:KQ73 D:T8 C:K5'),
+      },
+    }
+    const hist = [call('E', 'P'), call('S', '1C'), call('W', '1S'), call('N', 'P'), call('E', '2S'), call('S', '2NT'), call('W', 'P')]
+    expect(decideCall(deal, hist, 'N').bid).toBe('3H')
+  })
+})

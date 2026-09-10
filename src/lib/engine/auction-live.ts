@@ -21,18 +21,13 @@ import { turnsToCalls } from './auction-contract'
 import { allContractBids, cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { isVulnerable } from './openings'
 import {
-  auctionFacts, isGameOrHigher, parseContractBid, strainRank, PARTNER, STRAINS, SUIT_OF_LETTER, SUIT_STRAINS,
+  auctionFacts, isGameOrHigher, parseContractBid, strainRank, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS,
   type AuctionFacts,
 } from './auction-facts'
 import { penaltyDouble } from './doubles'
 import { raiseWithFit as raisePartnerSuit } from './fit-raise'
-import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, openerRebidAfter2over1 } from './rebids'
-import { respondTo1NT } from './responses-nt'
-import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
-import { responderPlaceAfterNMF } from './responder-rebids'
 import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
-import { ntResponseRule } from './overcall-continuations'
 import { side } from './play'
 
 // ---- Bridge-reglerna ------------------------------------------------------
@@ -47,124 +42,6 @@ export { auctionComplete, legalCalls, seatToAct } from './auction-rules'
 // `finalContract`). Re-exporteras här så budlådans användare (Play.tsx m.fl.)
 // hittar den bland de övriga auktionsverktygen.
 export { contractFromCalls } from './auction-contract'
-
-/**
- * Har partnern just bjudit FJÄRDE FÄRG (§6.6, utgångskrav) som `seat` (öppnaren)
- * måste svara på? Mönstret (ostört): vår 1-läges färgöppning – partnerns
- * 1-läges färgsvar – vårt 1-läges färgåterbud (ny färg) – partnerns bud i den
- * FJÄRDE färgen på 2-läget. Kravet får aldrig passas (felrapport #3).
- * Undantag ur systemboken: motståndarna stör (kontraktsbud), passad hand, och
- * "alla fyra färger på 1-läget" (fjärde färgen kunde bjudits på 1-läget → den
- * är naturlig, inte konstgjord). Returnerar färgerna, annars null.
- */
-function fourthSuitToAnswer(
-  f: AuctionFacts,
-): { opened: Suit; second: Suit; responderSuit: Suit; fourth: Suit } | null {
-  const { history, seat } = f
-  if (f.opponentsHaveBid) return null // stört → fjärde färg gäller inte
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
-
-  // Kontraktsbuden ska vara exakt: vår öppning, partnerns svar, vårt återbud,
-  // partnerns fjärde färg – alla i färg, de tre första på 1-läget.
-  const bids = f.contractBids
-  if (bids.length !== 4 || bids[3] !== lastNonPass) return null
-  if (bids[0].seat !== seat || bids[1].seat !== PARTNER[seat] || bids[2].seat !== seat) return null
-  const cbs = bids.map((c) => parseContractBid(c.bid)!)
-  if (cbs.some((cb) => cb.strain === 'NT')) return null
-  const strains = cbs.map((cb) => cb.strain)
-  if (new Set(strains).size !== 4) return null // fjärde färg = fyra OLIKA färger
-  if (!cbs.slice(0, 3).every((cb) => cb.level === 1) || cbs[3].level !== 2) return null
-  // Kunde fjärde färgen bjudits redan på 1-läget (rankar över vårt återbud) är
-  // den naturlig (systembokens undantag) – och ett HOPP till 2-läget är inget
-  // fjärde färg-krav.
-  if (STRAINS.indexOf(strains[3] as (typeof STRAINS)[number]) > STRAINS.indexOf(strains[2] as (typeof STRAINS)[number])) return null
-  // Passad hand: passade partnern innan sitt första bud gäller fjärde färg inte.
-  const firstPartnerBid = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
-  if (history.slice(0, firstPartnerBid).some((c) => c.seat === PARTNER[seat])) return null
-
-  return {
-    opened: SUIT_OF_LETTER[strains[0]],
-    second: SUIT_OF_LETTER[strains[2]],
-    responderSuit: SUIT_OF_LETTER[strains[1]],
-    fourth: SUIT_OF_LETTER[strains[3]],
-  }
-}
-
-/**
- * Har partnern just bjudit NEW MINOR FORCING (§5.7) som `seat` (öppnaren) måste
- * svara på? Mönstret (ostört): vår 1-läges färgöppning – partnerns 1-läges
- * HÖGfärgssvar – vårt 1NT-återbud – partnerns 2-läges LÅGfärg som INTE är
- * öppningsfärgen (den oanvända lågfärgen = konstgjort, tvingande). Kravet får
- * aldrig passas. Returnerar färgerna (inkl. den objudna färgen för stopp-koll),
- * annars null.
- */
-function nmfToAnswer(
-  f: AuctionFacts,
-): { opened: Suit; responderMajor: Suit; nmfMinor: Suit; unbidSuit: Suit } | null {
-  const { history, seat } = f
-  if (f.opponentsHaveBid) return null // stört → NMF gäller inte
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
-
-  const bids = f.contractBids
-  if (bids.length !== 4 || bids[3] !== lastNonPass) return null
-  if (bids[0].seat !== seat || bids[1].seat !== PARTNER[seat] || bids[2].seat !== seat || bids[3].seat !== PARTNER[seat]) return null
-  const cbs = bids.map((c) => parseContractBid(c.bid)!)
-  if (cbs[0].level !== 1 || cbs[0].strain === 'NT') return null // vår öppning: 1-läges färg
-  if (cbs[1].level !== 1 || (cbs[1].strain !== 'H' && cbs[1].strain !== 'S')) return null // 1-läges HÖGfärgssvar
-  if (cbs[2].level !== 1 || cbs[2].strain !== 'NT') return null // vårt återbud: exakt 1NT
-  if (cbs[3].level !== 2 || (cbs[3].strain !== 'C' && cbs[3].strain !== 'D')) return null // 2-läges lågfärg
-  if (cbs[3].strain === cbs[0].strain) return null // 2 i ÖPPNAD lågfärg = naturligt, ej NMF
-
-  // Passad hand: passade partnern innan sitt första bud gäller NMF inte.
-  const firstPartnerBid = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
-  if (history.slice(0, firstPartnerBid).some((c) => c.seat === PARTNER[seat])) return null
-
-  const opened = SUIT_OF_LETTER[cbs[0].strain]
-  const responderMajor = SUIT_OF_LETTER[cbs[1].strain]
-  const nmfMinor = SUIT_OF_LETTER[cbs[3].strain]
-  const unbidSuit = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[])
-    .find((s) => s !== opened && s !== responderMajor && s !== nmfMinor)!
-  return { opened, responderMajor, nmfMinor, unbidSuit }
-}
-
-/**
- * Har öppnaren just SVARAT på vår NMF (§5.7, steg 3) så att `seat` (svararen, som
- * bjöd NMF) ska placera kontraktet? Mönstret (ostört): 1m–1M–1NT–2m(NMF)–[öppnarens
- * svar], bara pass efter svaret, och `seat` är NMF-bjudaren. Returnerar färgerna +
- * öppnarens svar (nivå/färg → min/max) för `responderPlaceAfterNMF`, annars null.
- */
-function nmfPlacementToAnswer(
-  f: AuctionFacts,
-): { opened: Suit; responderMajor: Suit; otherMajor: Suit; nmfMinor: Suit; unbidSuit: Suit; answer: { level: number; strain: string } } | null {
-  const { history, seat } = f
-  if (f.opponentsHaveBid) return null
-  const bids = f.contractBids
-  if (bids.length !== 5) return null // öppning, svar, 1NT, NMF, öppnarens svar
-  const opener = bids[0].seat
-  if (seat !== PARTNER[opener]) return null // vi är svararen (NMF-bjudaren)
-  if (bids[1].seat !== seat || bids[2].seat !== opener || bids[3].seat !== seat || bids[4].seat !== opener) return null
-  const cbs = bids.map((c) => parseContractBid(c.bid)!)
-  if (cbs[0].level !== 1 || cbs[0].strain === 'NT') return null
-  if (cbs[1].level !== 1 || (cbs[1].strain !== 'H' && cbs[1].strain !== 'S')) return null
-  if (cbs[2].level !== 1 || cbs[2].strain !== 'NT') return null
-  if (cbs[3].level !== 2 || (cbs[3].strain !== 'C' && cbs[3].strain !== 'D')) return null
-  if (cbs[3].strain === cbs[0].strain) return null
-  // Bara pass efter öppnarens svar (senaste kontraktsbudet).
-  if (history.slice(history.indexOf(bids[4]) + 1).some((c) => c.bid !== 'P')) return null
-  // Passad hand-undantag.
-  const firstOurBid = history.findIndex((c) => c.seat === seat && c.bid !== 'P')
-  if (history.slice(0, firstOurBid).some((c) => c.seat === seat)) return null
-
-  const opened = SUIT_OF_LETTER[cbs[0].strain]
-  const responderMajor = SUIT_OF_LETTER[cbs[1].strain]
-  const nmfMinor = SUIT_OF_LETTER[cbs[3].strain]
-  const otherMajor: Suit = responderMajor === 'hearts' ? 'spades' : 'hearts'
-  const unbidSuit = (['clubs', 'diamonds', 'hearts', 'spades'] as Suit[])
-    .find((s) => s !== opened && s !== responderMajor && s !== nmfMinor)!
-  return { opened, responderMajor, otherMajor, nmfMinor, unbidSuit, answer: { level: cbs[4].level, strain: cbs[4].strain } }
-}
 
 // ---- Tvåfärgsinkliv (Michaels / ovanlig 2NT, §7.2) i den levande auktionen --
 
@@ -207,77 +84,6 @@ function transferGameChoiceToAnswer(f: AuctionFacts): Suit | null {
   if (complete.seat !== seat || complete.bid !== `${level}${letterOfSuit(target)}`) return null
   if (nt !== lastNonPass) return null
   return target
-}
-
-// ---- Sangsystemet off-book (§4.3–4.4, felrapport #41) -----------------------
-//
-// `respondTo1NT`/`respondTo2NT` och öppnarens återbud var BARA inkopplade i den
-// kanoniska linjen (`auction.ts`). Bjöds sangöppningen off-book — t.ex. när
-// ägaren tar budet själv i budlådan — fanns ingen väg in: `offBookResponse`
-// kräver att partnern visat en FÄRG, och en sangöppning visar ingen. Resultatet
-// var att 1NT passades ut även med en stark hand mittemot (felrapport #41).
-//
-// Båda sidor av bordet behövs för att auktionen ska bli hel: svararen får sitt
-// systemsvar, öppnaren sitt återbud. Betydelsen av svarsbudet läses ur BUDET,
-// aldrig ur partnerns kort (ärliga slamportar).
-
-/** Är auktionen ostörd med sangöppningen som enda kontraktsbud från vår sida? */
-function cleanNTOpening(f: AuctionFacts): { seat: Seat; level: number } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level > 2) return null
-  if (side(open.seat) !== side(seat)) return null
-  // Motståndarna ska ha varit HELT tysta – stör de äger tabellraden
-  // *vårt-1nt-stört* (Lebensohl/värde-X) läget, inte sangsystemet.
-  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null
-  return { seat: open.seat, level: open.level }
-}
-
-/**
- * PARTNERN öppnade 1NT/2NT off-book och det är `seat`s tur att svara första
- * gången → kör sangsystemet (§4.3/§4.4): Stayman, transfers, Texas, Minor Suit
- * Stayman/minorfråga och NT-stegen. Kräver att öppningen är auktionens enda
- * kontraktsbud och att `seat` inte redan bjudit något själv (bara pass tillåts,
- * t.ex. när partnern öppnat i tredje hand).
- */
-function answerPartnerNTOpening(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const open = cleanNTOpening(f)
-  if (!open || open.seat !== PARTNER[seat]) return null
-  if (f.contractBids.length !== 1) return null
-  if (history.some((c) => c.seat === seat && c.bid !== 'P')) return null
-
-  const hand = deal.hands[seat]
-  const res = open.level === 1 ? respondTo1NT(hand) : respondTo2NT(hand)
-  const bid = res.call as Bid
-  if (bid !== 'P' && !legalCalls(history, seat).includes(bid)) return null
-  return { seat, bid, rule: res.rule, explanation: res.explanation }
-}
-
-/**
- * `seat` öppnade 1NT/2NT off-book och partnern har svarat med ett systemsvar som
- * väntar på öppnarens återbud (Stayman-svar, fullföljd transfer/Texas, MSS-svar,
- * accept/avböj av inbjudan). Exakt två kontraktsbud i historiken: vår öppning +
- * partnerns svar.
- */
-function openerAnswersNTResponse(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const open = cleanNTOpening(f)
-  if (!open || open.seat !== seat) return null
-  const bids = f.contractBids
-  if (bids.length !== 2 || bids[1].seat !== PARTNER[seat]) return null
-
-  const rule = ntResponseRule(open.level, bids[1].bid)
-  if (!rule) return null
-  const response = { call: bids[1].bid, rule, explanation: '' }
-  const hand = deal.hands[seat]
-  const res = open.level === 1
-    ? openerRebidAfter1NTResponse(response, hand)
-    : openerRebidAfter2NTResponse(response, hand)
-  if (!res) return null
-  const bid = res.call as Bid
-  if (bid !== 'P' && !legalCalls(history, seat).includes(bid)) return null
-  return { seat, bid, rule: res.rule, explanation: res.explanation }
 }
 
 // ---- Off-book: svara historiedrivet på Syds egna bud (pivotens kärna) -------
@@ -512,34 +318,6 @@ function honorForce(c: DetectorCtx): ResolvedCall | null {
 }
 
 /**
- * Svararens svar på öppnarens 2NT-återbud efter 2♣–2♦ (öppnaren visade 22–24
- * balanserad). `auctionForce` släpper kravet där (2NT är inbjudande, inte game),
- * men enkel matte (ägarbeslut 2026-07-07): 22–24 mittemot 3+ hp = utgång
- * (22+3 = 25). Svararen får aldrig passa bort utgångsvärden → 3NT med 3+ hp;
- * 0–2 = pass (null, korrekt: 24 max är under utgång). Full systems-on (Stayman/
- * transfer över 2NT-återbudet) är medvetet uppskjutet – här räcker "nå utgång".
- * Matchar bara den exakta ostörda sekvensen 2♣–2♦–2NT med svararen i tur.
- */
-function respondToStrong2NTRebid(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const contractBids = f.contractBids
-  if (contractBids.length !== 3) return null
-  if (f.opponentsHaveBid) return null // ostört
-  const [o1, r1, o2] = contractBids
-  const opener = o1.seat
-  const responder = PARTNER[opener]
-  if (seat !== responder) return null
-  if (o1.bid !== '2C' || r1.seat !== responder || r1.bid !== '2D' || o2.seat !== opener || o2.bid !== '2NT') return null
-  if (history.slice(history.indexOf(o2) + 1).some((c) => c.bid !== 'P')) return null // bara pass efter 2NT
-  const p = hcp(deal.hands[seat])
-  if (p < 3) return null // 0–2: passa 2NT (under utgång, korrekt)
-  return {
-    seat, bid: '3NT', rule: '2♣–2♦–2NT: utgång',
-    explanation: `Partnern visade 22–24 balanserad; utgångsvärden räcker (22+3 = 25) → 3NT.`,
-  }
-}
-
-/**
  * Får `seat` STRAFFDUBBLA här (ägarbeslut 2026-07-04, poängarbetet)? Kraven —
  * medvetet stränga, så X:et aldrig kan förväxlas med en konventionell dubbling:
  *  - senaste icke-pass är motståndarnas FÄRGKONTRAKT på 3-läget eller högre
@@ -601,26 +379,6 @@ function divergedFromLine(history: ResolvedCall[], line: ResolvedCall[]): boolea
  * turerna bara avslutande pass och boten ska passa.
  */
 /**
- * Kör mönstret "detektor → svar → laglighetskoll" som annars upprepades för varje
- * konvention: om `detected` är falsy hoppas steget över; annars byggs svaret och
- * returneras bara om budet är lagligt just här (annars null → nästa steg prövas).
- * Så en detektor kan aldrig råka lämna ett olagligt bud, och kedjan i decideCall
- * blir en läsbar, ordnad lista i stället för 17 nästan identiska if-block.
- */
-function answered<T>(
-  detected: T | null | undefined,
-  answer: (d: T) => { call: string; rule?: string; explanation?: string },
-  history: ResolvedCall[],
-  seat: Seat,
-): ResolvedCall | null {
-  if (!detected) return null
-  const ans = answer(detected)
-  const bid = ans.call as Bid
-  if (!legalCalls(history, seat).includes(bid)) return null
-  return { seat, bid, rule: ans.rule, explanation: ans.explanation }
-}
-
-/**
  * Partnerns 3NT efter fullföljd transfer = välj utgång (felrapport #13): 4 i
  * högfärgen med 3-korts stöd, annars pass (3NT står).
  */
@@ -642,44 +400,6 @@ function answerTransferGameChoice(c: DetectorCtx): ResolvedCall | null {
     seat, bid: 'P', rule: 'pass',
     explanation: `partnerns 3NT efter transfern = välj utgång: utan 3-stöd i ${SWE_SYM[letterOfSuit(transferMajor)]} → pass (3NT står).`,
   }
-}
-
-/**
- * Öppnarens ÅTERBUD efter partnerns 2-ÖVER-1 när linjen inte styr (felrapport
- * #58, bricka 4: 1♦–P–2♣–P–?). Motorns linje hade valt ett annat svar för Syds
- * hand (inverterad 2♦), så människans 2♣ blev off-book och Nords återbud
- * byggdes av det generella off-book-svaret som ett SVARAR-bud ("2 sang,
- * 11–12 hp, inget stöd") — utan regel, utan utgångskrav. Ett äkta 2/1
- * (ostört, opassad svarare, ny LÄGRE färg på 2-läget) är utgångskrav i hela
- * systemet (§4.2), och öppnarens återbud följer §5.3: stöd = fit, ny färg =
- * form, 2NT = balanserad utan extra form (12–15). Samma on-book-funktion
- * (`openerRebidAfter2over1`) används här, så budet får regel + kravnivå.
- */
-function openerRebidAfterPartnersTwoOverOne(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  if (f.opponentsHaveBid) return null // ostört
-  const open = f.opening
-  if (!open || open.seat !== seat || open.level !== 1 || open.strain === 'NT') return null
-  const responder = PARTNER[seat]
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 2 || ourBids[1].seat !== responder) return null
-  const respC = ourBids[1]
-  const rb = parseContractBid(respC.bid)!
-  if (rb.strain === 'NT' || rb.level !== 2 || rb.strain === open.strain) return null
-  const openRank = SUIT_STRAINS.indexOf(open.strain as (typeof SUIT_STRAINS)[number])
-  const respRank = SUIT_STRAINS.indexOf(rb.strain as (typeof SUIT_STRAINS)[number])
-  if (openRank < 0 || respRank < 0 || respRank >= openRank) return null // högre rang = inget 2/1
-  const respIdx = history.indexOf(respC)
-  if (history.slice(0, respIdx).some((c) => c.seat === responder && c.bid === 'P')) return null // passad hand: ej GF
-  if (history.slice(respIdx + 1).some((c) => parseContractBid(c.bid))) return null // bara pass efter svaret
-  const res = openerRebidAfter2over1(
-    deal.hands[seat],
-    SUIT_OF_LETTER[open.strain as keyof typeof SUIT_OF_LETTER],
-    SUIT_OF_LETTER[rb.strain as keyof typeof SUIT_OF_LETTER],
-  )
-  const bid = res.call as Bid
-  if (!legalCalls(history, seat).includes(bid)) return null
-  return { seat, bid, rule: res.rule, explanation: `Partnerns 2-över-1 är utgångskrav; ${res.explanation}` }
 }
 
 /**
@@ -802,17 +522,12 @@ export interface LiveDetector {
 // ALDRIG lämnas att passa bort en upplysning/fjärde färg. Prövas i ordning;
 // första detektorn som ger ett lagligt bud vinner.
 export const FORCED_DETECTORS: readonly LiveDetector[] = [
-  // Partnerns FJÄRDE FÄRG (§6.6, utgångskrav): öppnaren svarar alltid.
-  { id: 'fourthSuitToAnswer',
-    run: (c) => answered(fourthSuitToAnswer(c.facts),
-      (f) => openerAnswerFourthSuit(c.hand, f.opened, f.second, f.responderSuit, f.fourth), c.history, c.seat) },
   // Min EGEN fjärde färg har besvarats — placera utgång, passa aldrig kravet.
   { id: 'placeGameAfterFourthSuit',
     run: (c) => placeGameAfterFourthSuit(c) },
-  // Partnerns NEW MINOR FORCING (§5.7, krav): öppnaren svarar alltid.
-  { id: 'nmfToAnswer',
-    run: (c) => answered(nmfToAnswer(c.facts),
-      (n) => openerAnswerNMF(c.hand, n.opened, n.responderMajor, n.nmfMinor, n.unbidSuit), c.history, c.seat) },
+  // (Partnerns fjärde färg / New Minor Forcing besvaras nu i beslutstabellen,
+  // raden *tredje* — de gamla detektorerna fourthSuitToAnswer/nmfToAnswer fyrade
+  // aldrig längre (auktions- och avvikelsedump 0), rivna motorbytet etapp 5.)
   // (§7.6-försvaret mot deras svaga tvåa/spärr — även spärrhöjningen 2♠–P–3♠ —
   // flyttade till beslutstabellen, raden *försvar-svag2*, motorbytet etapp 4
   // familj 7, 2026-09-09; väckningen behövs inte längre — tabellen frågas FÖRST.)
@@ -851,30 +566,14 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // vägrar höja en redan bjuden färg och passar).
   { id: 'answerTwoOverOneRaise', before: ['offBookResponse'],
     run: (c) => answerTwoOverOneRaise(c) },
-  // Öppnarens återbud efter partnerns OFF-BOOK 2-över-1 (felrapport #58):
-  // §5.3-återbudet med regel + utgångskrav, i stället för off-book-svarets
-  // svarar-sang ("11–12 hp, inbjudan"). Måste ligga FÖRE off-book-svaret.
-  { id: 'openerRebidAfterPartnersTwoOverOne', before: ['offBookResponse'],
-    run: (c) => openerRebidAfterPartnersTwoOverOne(c) },
-  // Svararen PLACERAR kontraktet efter öppnarens NMF-svar (§5.7, steg 3).
-  // Måste ligga FÖRE off-book-svaret (som annars vägrar re-höja svararens egen
-  // högfärg och passar en klar 5-3-fit).
-  { id: 'nmfPlacementToAnswer', before: ['offBookResponse'],
-    run: (c) => answered(nmfPlacementToAnswer(c.facts),
-      (n) => responderPlaceAfterNMF(c.hand, n.responderMajor, n.otherMajor, n.nmfMinor, n.opened, n.unbidSuit, n.answer), c.history, c.seat) },
-  { id: 'respondToStrong2NTRebid', before: ['offBookResponse'],
-    run: (c) => respondToStrong2NTRebid(c) },
+  // (Öppnarens återbud efter partnerns 2-över-1 (felrapport #58), svararens
+  // placering efter NMF-svaret (§5.7), svaret på 2♣–2♦–2NT, och hela
+  // off-book-sangsystemet (felrapport #41) besvaras nu i beslutstabellen
+  // (raderna *återbud*/*tredje*/*svar2*/*svar*): de gamla detektorerna fyrade
+  // aldrig längre (auktions- och avvikelsedump 0), rivna motorbytet etapp 5.)
   // (Kaptenens kvantitativa höjning av partnerns naturliga 3NT till 6NT,
   // felrapport #42, flyttade till beslutstabellen, raden *slam-forts*,
   // motorbytet etapp 4 familj 8.)
-  // Sangsystemet när sangöppningen bjudits OFF-BOOK (felrapport #41):
-  // svararen får §4.3/§4.4-svaret, öppnaren sitt återbud. Måste ligga FÖRE
-  // off-book-svaret (som kräver en visad FÄRG och därför passade ut 1NT)
-  // och före honorForce (som läste Stayman-2♣ som "krav – ny färg").
-  { id: 'answerPartnerNTOpening', before: ['offBookResponse', 'honorForce'],
-    run: (c) => answerPartnerNTOpening(c) },
-  { id: 'openerAnswersNTResponse', before: ['offBookResponse', 'honorForce'],
-    run: (c) => openerAnswersNTResponse(c) },
   // Generellt historiedrivet off-book-svar (fångar fit/egen färg/sang).
   { id: 'offBookResponse', before: ['honorForce'],
     run: (c) => offBookResponse(c) },

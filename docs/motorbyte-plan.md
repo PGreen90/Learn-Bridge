@@ -690,6 +690,28 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-10 — Etapp 5 påbörjad, rivning familj 1: sju döda detektorer bort
+  (ren radering, 0 ändrade bud).** Frekvensmätningen av det gamla lagret (bot mot
+  bot `auktionsdump-frekvens.txt` + människo-öppnad `avvikelsedump`) delade de 13
+  kvarvarande detektorerna i LEVANDE (fyrar bud) och DÖDA (tabellen täcker redan).
+  Sju fyrade aldrig i någondera dumpen och revs ur `auction-live.ts`:
+  `fourthSuitToAnswer`, `nmfToAnswer`, `nmfPlacementToAnswer`,
+  `openerRebidAfterPartnersTwoOverOne`, `respondToStrong2NTRebid`,
+  `answerPartnerNTOpening`, `openerAnswersNTResponse` — plus hjälparna `answered`
+  och `cleanNTOpening` och deras nu föräldralösa imports (`openerAnswer*`/
+  `respondTo1NT`/`respondTo2NT`/`responderPlaceAfterNMF`/`ntResponseRule`).
+  Deras lägen (fjärde färg / NMF-svar+placering / off-book 2/1-återbud /
+  2♣–2♦–2NT / off-book-sangsystemet) besvaras sedan etapp 3–4 av beslutstabellen
+  (raderna *återbud*/*tredje*/*svar2*/*svar*). **Bevis:** `tsc` grön;
+  auktionsdiffen 0/0 över 3000 bot-mot-bot-givar och avvikelsediffen 0/0 över
+  13959 människo-öppnade scenarier (baslinjer `*-etapp5-baslinje.json`, kommando
+  i §3). Kvar i det gamla lagret (levande, migreras familj för familj):
+  `offBookResponse`, `honorForce`, `answerTransferGameChoice`, `maybePenaltyDouble`,
+  `placeGameAfterFourthSuit`, `answerTwoOverOneRaise`. **Fältfynd loggat samma dag**
+  (ägaren spelade på etapp 4-motorn): svararen rymmer inte till femkorts högfärg
+  (naturligt 3M) över ett starkt 2NT-återbud i KONKURRENS — facit-kö
+  (`motorbyte-facit.test.ts`, `it.todo`) + `docs/bevaka.md`, ägarbeslut B: byggs
+  som konkurrensfortsättning EFTER etapp 5.
 - **2026-09-10 — Etapp 4 familj 9 KLAR (sista etapp 4-familjen): betydelsesvepet
   på störda auktioner till noll (ägarbeslut om "noll" 2026-09-10, AskUserQuestion:
   "noll på det avgörbara + lista resten").** Till skillnad från familj 1–8 flyttade
