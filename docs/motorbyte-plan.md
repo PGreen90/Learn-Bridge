@@ -383,7 +383,19 @@ mätningen vid etapp 4:s start):
    `preempt-defense-continuations.ts`. Manusets två §7.6-ronder + väckningen
    rivna, tre detektorer borta. Bot mot bot 0 ändrade bud; avvikelsedumpen 2331
    nya försvar (boten sålde förr deras svaga tvåa/spärr via `decideCall`).
-8. Konkurrens-slam (kontroll-komplett 4NT, placering).
+8. Konkurrens-slam (kontroll-komplett 4NT, placering). **KLAR & LIVE
+   2026-09-10 (loggen; mergepunkt `df930d9`):** steg 1 (kontroll-komplett 4NT)
+   flyttades redan i familj 1 (raden *konkurrens-slam*), och steg 2 (cue-frontend
+   för kontroll-ofullständiga händer) är PARKERAT (ny konvention, `senare.md`).
+   Familjen blev därför **slam-svarssvepet**: de sex kvarvarande slam-detektorer
+   som fyrade när linjen tog slut (människan/inklivet förde budet förbi manuset)
+   → raden *slam-forts* (ny modul `slam-answer-continuations.ts`): essfrågan 4NT
+   (1430 RKC) + kungfrågan 5NT besvaras oavsett hur trumfen sattes (#9/#10/
+   R1-fynd #3), rättelsen över stoppet (#60), 3NT→6NT-höjningen (#42) och
+   3NT-stoppen (etapp 7 hål 2). Raden ligger SIST i tabellen (samma sista-utväg-
+   företräde detektorerna hade). Ren klass a — 0 ändrade bud. Kvar i det gamla
+   lagret: catch-all-vakterna (`offBookResponse`, `honorForce`,
+   `answerTransferGameChoice`, `maybePenaltyDouble`) → sista städfamiljen.
 9. Betydelsesvepet på störda auktioner till noll.
 
 **Klart när:** `FORCED_DETECTORS`/`CONTESTED_DETECTORS` är tomma och raderas
@@ -675,6 +687,43 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-10 — Etapp 4 familj 8 KLAR & LIVE: slam-svarssvepet i tabellen
+  (grinden godkänd av ägaren 2026-09-10 "Pcd"; mergepunkt `df930d9`).**
+  Familjens namn var "konkurrens-slam", men steg 1 (kontroll-komplett 4NT)
+  flyttades redan i familj 1 (raden *konkurrens-slam*, `competitive-slam.ts`, 0
+  träffar på 3000 bot-givar — sällsynt) och steg 2 (cue-frontend för de
+  kontroll-ofullständiga händerna) är PARKERAT (ny konvention, §7/`senare.md`).
+  Ägaren valde därför **slam-svarssvepet** (2026-09-10, AskUserQuestion): flytta
+  de sex kvarvarande slam-detektorerna ur `auction-live.ts`. De fyrade bara när
+  linjen tog slut (människan/inklivet förde budet förbi manuset — därför 0 i
+  bot-dumpen; `rkcToAnswer` 196 i avvikelsedumpen). **Bygget:** ny modul
+  `slam-answer-continuations.ts` — funktioner av EN hand + fakta: `answerRKC`
+  (1430 RKC, trumf ur `slamAskTrump` som flyttade med — #9 överenskommen, #10
+  spärrfärgen, R1-fynd #3 Jacoby), `answerKingAsk` (Sjöberg 5NT), `rkcCorrection`
+  (#60 rättelsen över stoppet), `raise3NTToSlam` (#42 kaptenens 3NT→6NT),
+  `openerTry3NTStop`/`answer3NTStopTry` (etapp 7 hål 2). Raden *slam-forts*
+  (`slamAnswerContinuation` i detektorkedjans ordning: 3NT-stoppens svar före
+  RKC-svaret). **c-fix under diffvarven:** raden hamnade först före
+  positionsraderna och stal ett direkt 4NT över 2♣ (8 avvik-givar → RKC-i-klöver
+  i stället för öppnarens naturliga rebud, `slamAskTrump` läser artificiella 2♣
+  som färg) → flyttad SIST i tabellen (samma sista-utväg-företräde detektorerna
+  hade; en positionsrad som äger budet behåller det). Sex detektorer + nio
+  hjälpfunktioner/konstanter rivna ur `auction-live.ts`. **Ingen b-lista:** ren
+  klass a — varje bud identiskt, bara källan bytte. **Mätningar** (kommandon i
+  §3; baslinjer på `47c6e6f`): hela sviten grön (`npm test`, 2427), `npx tsc`
+  rent; auktionsdiffen 3000 givar: ÄNDRAT BUD 0, samma bud/annan källa 2 (slam-
+  detektorer → `tabell:slam-forts`); avvikelsedumpen 13959 givar: ÄNDRAT BUD 0,
+  samma bud/annan källa 196 (alla `detektor:rkcToAnswer` → `tabell:slam-forts`);
+  olagliga tabellbud 0 i båda. Frekvens: `tabell:slam-forts` 4 (bot) / 196
+  (avvik). Pliktsvep oförändrad (0 auktionsfel; K1 13, K2 4, K3 6, K4 1);
+  förklaringssvep grönt (0 oförklarade, 0 gissningar); regelsvep grönt (306
+  regler, 0 auktioner utan slut); betydelsesvepets ostörda grind 0/0/0; kikvakten
+  skarp grön (ny deterministisk *slam-forts*-assertion på frö 20261020). Revisorn
+  1000 givar: 20,7 % · 270,43 (identisk med baslinjen — bot mot bot ändrades
+  inte). **Nästa gång börjar vi med:** familj 9 (betydelsesvepet på störda
+  auktioner till noll) — den sista etapp 4-familjen; catch-all-vakterna
+  (`offBookResponse`/`honorForce`/`answerTransferGameChoice`/`maybePenaltyDouble`)
+  rivs i den avslutande städningen inför etapp 5.
 - **2026-09-09 — Etapp 4 familj 7 KLAR & LIVE: försvar mot svaga tvåor och
   spärrar i tabellen (grinden godkänd av ägaren 2026-09-09 "Godkänt — kör PCD";
   mergepunkt `47c6e6f`, deployen grön och aliasad).** Test-drivet:

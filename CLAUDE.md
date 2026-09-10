@@ -38,22 +38,19 @@ Gerber 4♣ (§5.7).
 dubblingsfamiljen (`d3f7116`), negativ/stöd-X/Jordan/svararens konkurrenssvar
 (`2ae5d05`); kunskapen i `overcall-continuations.ts`/`double-continuations.ts`/
 `contested-opening.ts`+`fit-raise.ts`; detaljer i planens logg.
-**Familj 4 (fortsättning när de stört) KLAR & LIVE 2026-09-09 (`4fa2604`):**
-*inkliv-över-svaret*, *öppnaren-stört*, *svararen-stört* i
-`contested-continuations.ts`. **Familj 5 (balansering/återöppning) KLAR & LIVE
-2026-09-09 (mergepunkt `78735c2`, grinden godkänd "pcd"):** advancern efter
-deras X/höjning (*advance2*), öppnaren efter deras X + höjning (*öppnaren-stört*),
-K1-resten = negativa dubblaren svarar på öppnarens ANDRA X (*svararen-stört*);
-`balancing-continuations.ts`.
-**Svar-stört-rättelsen LIVE 2026-09-09** (§7.4): aldrig negativ dubbling med 3+
-stöd i partnerns öppnade högfärg → höjning/cue. **Familj 6 (försvar mot 1NT) KLAR
-& LIVE 2026-09-09:** DONT/naturligt, advancern, Lebensohl/värde-X/flykt (raderna
-*försvar-1nt*/*dont-advance*/*vårt-1nt-stört*, `nt-defense-continuations.ts`);
-manusronden + elva detektorer rivna. **Familj 7 (försvar mot svaga tvåor/spärrar)
-KLAR & LIVE 2026-09-09 (mergepunkt `47c6e6f`):** raderna *försvar-svag2* +
-*svag2-fortsättning* (`preempt-defense-continuations.ts`); §7.6-ronderna +
-väckningen + tre detektorer rivna; avvikelsedumpen 2331 nya försvar. **Nästa
-gång:** familj 8 (konkurrens-slam).
+**Familj 4–7 KLARA & LIVE 2026-09-09** (detalj i planens logg): fortsättning när
+de stört (`4fa2604`, `contested-continuations.ts`) · balansering/återöppning +
+K1-resten (`78735c2`, `balancing-continuations.ts`) · svar-stört-rättelsen (§7.4:
+aldrig negativ dubbling med 3+ stöd i partnerns öppnade högfärg → höjning/cue) ·
+försvar mot 1NT (`nt-defense-continuations.ts`) · försvar mot svaga tvåor/spärrar
+(mergepunkt `47c6e6f`, `preempt-defense-continuations.ts`).
+**Familj 8 (slam-svarssvepet) KLAR & LIVE 2026-09-10 (mergepunkt `df930d9`):**
+de sex kvarvarande slam-detektorerna (RKC/kung-svaret, rättelsen #60, 3NT→6NT
+#42, 3NT-stoppen) → raden *slam-forts* (`slam-answer-continuations.ts`, sist i
+tabellen = sista utväg); ren klass a, 0 ändrade bud. Steg 1 låg redan i familj 1,
+steg 2 (cue-frontend) förblir PARKERAT. **Nästa gång:** familj 9 (betydelsesvepet
+på störda auktioner till noll) — sista etapp 4-familjen; catch-all-vakterna rivs i
+den avslutande städningen inför etapp 5.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
