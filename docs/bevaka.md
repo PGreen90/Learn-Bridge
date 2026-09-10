@@ -9,6 +9,17 @@
 > spel, när en felrapport kommer in, och när en ny fix ska läggas till listan.
 > Punkter som stått länge utan klagomål kan strykas — de har passerat provet.
 
+## Svararen rymmer inte till femkorts högfärg över starkt 2NT-återbud i konkurrens (2026-09-10, fältfynd)
+- Ägaren spelade på etapp 4-motorn (bricka 6): efter `1♣–(1♠)–P–(2♠)–2NT`
+  (~18–19 balanserad med spaderhåll) passade svararen med fem hjärter och
+  singelspader i stället för att rymma ner i sin femkortsfärg. Rätt = **naturligt
+  3♥** (inte transfer): 5-3-fiten slår sang med bara ett spaderhåll (Axxx) mot
+  deras spaderfärg. Verktyget finns OSTÖRT (`1♣–1♥–2NT`: direkt 3M visar 5-3,
+  systems on 2026-08-18) men aldrig i konkurrens.
+- **Ägarbeslut B (2026-09-10):** logga nu, håll etapp 5 ren, bygg regeln som en
+  konkurrensfortsättning EFTER etapp 5. Facit-kö: `motorbyte-facit.test.ts`
+  (`fältfynd – svararen rymmer …`, `it.todo`, Nord ♠7 ♥JT652 ♦K953 ♣T62 → 3♥).
+
 ## Negativ-dubblarens preferens + öppnarens höjning av fritt lågfärgsbud (2026-09-02, pliktsvepet K2/K5)
 - K2: efter 1x–(1y)–X–P–2z ger dubblaren nu preferens till öppningsfärgen även
   med 6–9 hp (gratis: lika lång eller längre, minst 3 kort; kostar en nivå: 2+
