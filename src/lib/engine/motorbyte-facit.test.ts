@@ -19,6 +19,7 @@ import { auctionComplete, decideCall, decideCallTraced } from './auction-live'
 import { decideFromTable } from './auction-decide'
 import { auctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
+import { forcingOf, isAlertRule } from './rules'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 
@@ -1263,5 +1264,64 @@ describe('§5b beslut 16 – lågfärgsfit i utgångskrav: 5m är utgången, inb
   it('betydelselagret: 4♥ över 4♦ med satt ruter = kontrollbud (alert), 5♦ = utgång — inte inbjudan', () => {
     expect(meaningOf([...h4D, call('S', '4H')], 10)).toMatchObject({ rule: 'cue-bid', alert: true })
     expect(meaningOf([...h4D, call('S', '5D')], 10)).toMatchObject({ rule: 'utgång', forcing: 'avslut' })
+  })
+})
+
+// ETAPP 4 FAMILJ 9 (2026-09-10): betydelselagret på STÖRDA auktioner. Den härledda
+// läsaren räknar kravnivå/alert ur den nakna auktionen (kikvakten) — ur ROLLEN, inte
+// handen. Betydelsesvepets störda grind är 0 (auction-meaning.probe.test.ts); de
+// kortberoende resterna ligger som dokumenterade STÖRDA_UNDANTAG utanför grinden.
+// Facit-fallen nedan låser de STRUKTURELLA vinsterna (körs i grinden).
+describe('etapp 4 familj 9 — betydelselagret på störda auktioner', () => {
+  const m = (h: ResolvedCall[], i: number) => meaningOf(h, i)
+
+  it('höjningar i konkurrens: enkel höjning (även efter deras X) och hopphöjning är EJ KRAV (preemptivt), inte inbjudan; ingen alert', () => {
+    // N P E 1S S X [W 2S] — svararens enkla höjning över motståndarens dubbling.
+    expect(m([call('N', 'P'), call('E', '1S'), call('S', 'X'), call('W', '2S')], 3)).toMatchObject({ forcing: 'ej-krav', alert: false })
+    // S P W P N P E 1S S 2NT [W 3S] — hopphöjning över ovanlig 2NT = lagen om totala stick.
+    expect(m([call('S', 'P'), call('W', 'P'), call('N', 'P'), call('E', '1S'), call('S', '2NT'), call('W', '3S')], 5).forcing).toBe('ej-krav')
+  })
+
+  it('hoppinkliv är spärrartat (ej krav), inte en inbjudan', () => {
+    expect(m([call('S', '1C'), call('W', '2S')], 1)).toMatchObject({ forcing: 'ej-krav', alert: false })
+  })
+
+  it('cue-bud efter roll: advancerns cue-höjning = krav 1 rond, öppnarens/dubblarens cue = utgångskrav — bägge alertpliktiga', () => {
+    // S P W P N 1D E 2C S P [W 2D] — advancern cue:ar partnerns inkliv (limithöjning+).
+    expect(m([call('S', 'P'), call('W', 'P'), call('N', '1D'), call('E', '2C'), call('S', 'P'), call('W', '2D')], 5)).toMatchObject({ forcing: 'krav-1-rond', alert: true })
+    // W P N P E 1C S 1S W 2D N 2S [E 3S] — öppnaren cue:ar i konkurrens (utgångskrav).
+    expect(m([call('W', 'P'), call('N', 'P'), call('E', '1C'), call('S', '1S'), call('W', '2D'), call('N', '2S'), call('E', '3S')], 6)).toMatchObject({ forcing: 'utgangskrav', alert: true })
+  })
+
+  it('DONT: direkt 2♦ över deras 1NT = DONT tvåfärg (ej krav, alert); direkt 2♠ är naturligt inkliv (ingen alert)', () => {
+    expect(m([call('S', '1NT'), call('W', '2D')], 1)).toMatchObject({ forcing: 'ej-krav', alert: true })
+    expect(m([call('E', '1NT'), call('S', '2S')], 1).alert).toBe(false)
+  })
+
+  it('2NT-konventioner i konkurrens: Jordan (inbjudan+alert), ovanlig 2NT (ej krav+alert), Lebensohl 2NT (ej krav+alert)', () => {
+    expect(m([call('E', '1S'), call('S', 'X'), call('W', '2NT')], 2)).toMatchObject({ rule: 'Jordan 2NT', forcing: 'inbjudan', alert: true })
+    expect(m([call('S', 'P'), call('W', 'P'), call('N', 'P'), call('E', '1S'), call('S', '2NT')], 4)).toMatchObject({ rule: 'ovanlig 2NT', forcing: 'ej-krav', alert: true })
+    expect(m([call('E', '1NT'), call('S', '2S'), call('W', '2NT')], 2)).toMatchObject({ rule: 'Lebensohl 2NT (svag)', alert: true })
+  })
+
+  it('dubblingsfamiljen ur auktionen: negativ och upplysning = krav 1 rond + alert; kooperativ/straff = ej krav utan alert', () => {
+    expect(m([call('E', 'P'), call('S', '1H'), call('W', '2C'), call('N', 'X')], 3)).toMatchObject({ rule: 'negativ dubbling', forcing: 'krav-1-rond', alert: true })
+    expect(m([call('N', 'P'), call('E', '1S'), call('S', 'X')], 2)).toMatchObject({ rule: 'upplysningsdubbling', forcing: 'krav-1-rond', alert: true })
+    // Straffdubbling av deras utgång: ej krav, ingen alert.
+    expect(m([call('N', '4H'), call('E', 'X')], 1)).toMatchObject({ rule: 'straffdubbling', forcing: 'ej-krav', alert: false })
+  })
+
+  it('upplysningsdubblaren som bjuder egen ny färg efter sin dubbling = starkt återbud (krav 1 rond)', () => {
+    expect(m([call('E', '1D'), call('S', 'X'), call('W', '2D'), call('N', 'X'), call('E', 'P'), call('S', '3C')], 5).forcing).toBe('krav-1-rond')
+  })
+
+  it('registret: cue-BUD alertas men deras naturliga fortsättning/avslut gör det inte; störda registerhål fyllda', () => {
+    expect(isAlertRule('cue (limithöjning+)')).toBe(true)
+    expect(isAlertRule('cue (krav)')).toBe(true)
+    expect(isAlertRule('cue-höjningens fortsättning')).toBe(false)
+    expect(isAlertRule('cue: avslut')).toBe(false)
+    expect(forcingOf('svar på negativ dubbling')).toBe('ej-krav')
+    expect(forcingOf('naturligt (to play)')).toBe('ej-krav')
+    expect(forcingOf('dubblaren höjer (inbjudan)')).toBe('inbjudan')
   })
 })

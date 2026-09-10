@@ -39,18 +39,22 @@ dubblingsfamiljen (`d3f7116`), negativ/stöd-X/Jordan/svararens konkurrenssvar
 (`2ae5d05`); kunskapen i `overcall-continuations.ts`/`double-continuations.ts`/
 `contested-opening.ts`+`fit-raise.ts`; detaljer i planens logg.
 **Familj 4–7 KLARA & LIVE 2026-09-09** (detalj i planens logg): fortsättning när
-de stört (`4fa2604`, `contested-continuations.ts`) · balansering/återöppning +
-K1-resten (`78735c2`, `balancing-continuations.ts`) · svar-stört-rättelsen (§7.4:
-aldrig negativ dubbling med 3+ stöd i partnerns öppnade högfärg → höjning/cue) ·
-försvar mot 1NT (`nt-defense-continuations.ts`) · försvar mot svaga tvåor/spärrar
-(mergepunkt `47c6e6f`, `preempt-defense-continuations.ts`).
+de stört (`4fa2604`) · balansering/återöppning + K1-resten (`78735c2`) ·
+svar-stört-rättelsen (§7.4: aldrig negativ dubbling med 3+ stöd i partnerns
+öppnade högfärg → höjning/cue) · försvar mot 1NT · försvar mot svaga tvåor/spärrar
+(`47c6e6f`).
 **Familj 8 (slam-svarssvepet) KLAR & LIVE 2026-09-10 (mergepunkt `df930d9`):**
-de sex kvarvarande slam-detektorerna (RKC/kung-svaret, rättelsen #60, 3NT→6NT
-#42, 3NT-stoppen) → raden *slam-forts* (`slam-answer-continuations.ts`, sist i
-tabellen = sista utväg); ren klass a, 0 ändrade bud. Steg 1 låg redan i familj 1,
-steg 2 (cue-frontend) förblir PARKERAT. **Nästa gång:** familj 9 (betydelsesvepet
-på störda auktioner till noll) — sista etapp 4-familjen; catch-all-vakterna rivs i
-den avslutande städningen inför etapp 5.
+de sex kvarvarande slam-detektorerna → raden *slam-forts*
+(`slam-answer-continuations.ts`, sist i tabellen); ren klass a, 0 ändrade bud.
+**Familj 9 (betydelsesvepet på störda auktioner) KLAR 2026-09-10 — SISTA
+etapp 4-familjen, HELA ETAPP 4 KLAR:** inga detektorer flyttade, 0 ändrade bud
+(auktionsdiff 0) — bara betydelselagret (`auction-meaning.ts` + registret) lärt
+räkna kravnivå/alert i konkurrens ur ROLLEN. Störda grinden 0/0/0. **Ägarbeslut om
+"noll":** noll på det avgörbara + de KORTBEROENDE resterna (inbjudan/ej krav beror
+på handen — ärlig inferens golv) listade som `STÖRDA_UNDANTAG` utanför grinden (50
+mönster). Registret konsekvent: alla cue-BUD alertas, fortsättningarna inte.
+**Nästa gång:** ETAPP 5 (rivning + städning: catch-all-vakterna, detektorerna,
+`open`-flaggan; docs + minne).
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
