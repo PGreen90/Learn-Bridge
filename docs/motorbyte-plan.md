@@ -396,7 +396,10 @@ mätningen vid etapp 4:s start):
    företräde detektorerna hade). Ren klass a — 0 ändrade bud. Kvar i det gamla
    lagret: catch-all-vakterna (`offBookResponse`, `honorForce`,
    `answerTransferGameChoice`, `maybePenaltyDouble`) → sista städfamiljen.
-9. Betydelsesvepet på störda auktioner till noll.
+9. Betydelsesvepet på störda auktioner till noll. **KLAR 2026-09-10 (loggen):**
+   betydelselagret räknar kravnivå/alert i konkurrens ur rollen; störda grinden
+   0/0/0; de kortberoende resterna dokumenterade som `STÖRDA_UNDANTAG` utanför
+   grinden (ägarbeslut "noll på det avgörbara + lista resten"). 0 ändrade bud.
 
 **Klart när:** `FORCED_DETECTORS`/`CONTESTED_DETECTORS` är tomma och raderas
 tillsammans med `detector-chain.test.ts`, `divergedFromLine`, `open`-flaggan
@@ -687,6 +690,44 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-10 — Etapp 4 familj 9 KLAR (sista etapp 4-familjen): betydelsesvepet
+  på störda auktioner till noll (ägarbeslut om "noll" 2026-09-10, AskUserQuestion:
+  "noll på det avgörbara + lista resten").** Till skillnad från familj 1–8 flyttade
+  den här INGA detektorer och ändrade INGA bud — den täppte hålen i
+  BETYDELSELAGRET (`auction-meaning.ts` + registret `rules.ts`) så att den härledda
+  betydelsen (regeln bortskalad, som ett människobud) stämmer med registret även i
+  konkurrens. **Bygget:** den härledda läsaren räknar nu kravnivå/alert i konkurrens
+  ur ROLLEN (öppnare/svarare/inklivare/advancer/dubblare), aldrig ur handen
+  (kikvakten): fritt bud vs inkliv/advance/öppnarens återbud (ny färg), hoppinkliv
+  (spärr, ej krav), konkurrenshöjning (även hopphöjning, preemptiv), rebjuden färg
+  per roll, cue-bud roll-uppdelat (advancerns limithöjning-cue vs öppnarens/
+  dubblarens utgångskrav-cue), dubblingsfamiljen (negativ/upplysning/stöd/
+  återöppning/straff/maximal med registernamn), Jordan/ovanlig 2NT/Lebensohl 2NT/
+  2NT-inkliv (`interpretCompetitive2NT`), DONT över deras 1NT + fortsättningarna
+  (`interpretNTDefenseSuit`), upplysningsdubbling av spärr (nivå ≤3), spärrhöjning
+  = avslut, dubblarens starka återbud/inbjudande höjning, svar på negativ dubbling.
+  Registret fick kravnivå för **37 störda regler** och gjordes KONSEKVENT på cue:
+  alla cue-BUD alertas (`cue-bid`/`cue (`/`öppnarens cue`/`negativ-dubblarens cue`/
+  `stöd-cue`/`fritt bud: cue`), medan deras naturliga fortsättningar/avslut
+  (`cue-höjningens fortsättning`, `cue: avslut`) INTE alertas längre (de alertades
+  förr av misstag via det breda `cue`-prefixet). **Golvet (ägarbeslut):** ~halva
+  resten är KORTBEROENDE — samma störda auktion kan bära inbjudan/ej krav/stark
+  beroende på handen, vilket en nakenauktions-läsare aldrig kan avgöra (ärlig
+  inferens). De ligger som dokumenterade `STÖRDA_UNDANTAG` i probet (50 mönster,
+  183 bud, skälkoder K/C/D/L/M), räknade UTANFÖR grinden precis som ostördas kända
+  motoravvikelser; probet har nu en `expect(grind).toBe(0)`-assertion + vakt mot
+  döda undantagsrader. **Mätningar** (kommandon i §3; baslinjer på `df930d9`):
+  betydelsesvepet störda grind **kravnivå 2557→0 · alert 991→0 · registerhål
+  515→0** (`$env:BETYDELSE='1'; npx vitest run …auction-meaning.probe.test.ts`);
+  ostörda grinden orörd 0/0/0; auktionsdiffen 3000 givar **ÄNDRAT BUD 0** (helt
+  budneutralt → revisorn oförändrad per konstruktion); `npx tsc` rent; hela sviten
+  grön (`npx vitest run`, 2436) inkl. nytt facit-block "etapp 4 familj 9" (8 fall,
+  i grinden); förklaringssvep + regelsvep gröna. **Nästa gång börjar vi med:**
+  etapp 5 — rivningen och den avslutande städningen (catch-all-vakterna
+  `offBookResponse`/`honorForce`/`answerTransferGameChoice`/`maybePenaltyDouble`,
+  `FORCED_/CONTESTED_DETECTORS`, `divergedFromLine`, `open`-flaggan) + docs/minne.
+  🚪 Grinden (familj 9): ingen b-lista (0 ändrade bud) — ägaren godkänner resultatet
+  + PCD.
 - **2026-09-10 — Etapp 4 familj 8 KLAR & LIVE: slam-svarssvepet i tabellen
   (grinden godkänd av ägaren 2026-09-10 "Pcd"; mergepunkt `df930d9`).**
   Familjens namn var "konkurrens-slam", men steg 1 (kontroll-komplett 4NT)

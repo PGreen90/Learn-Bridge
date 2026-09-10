@@ -101,6 +101,20 @@ const ALL_ENGINE_RULES: string[] = [
   'fritt bud: utgång i sang', 'fritt bud: stannar', 'fritt bud: cue (utgångskrav)', 'fritt bud: inbjudande höjning',
   'negativ-dubblarens cue (utgångskrav)', 'svar på återöppningsdubbling', 'svar på återöppningsdubbling (utgång)',
   'straffpass (återöppningsdubbling)',
+  // Etapp 4 familj 9 (2026-09-10): störda regler som fick kravnivå i registret
+  // (betydelsesvepet stört; auction-meaning.probe.test.ts).
+  'svar på negativ dubbling', 'upplysningsdubbling (stark)', 'fritt svar på upplysningsdubbling',
+  'straff/värden', 'öppnarens svar på värde-X', 'svar på öppnarens värde-X-fortsättning',
+  'redubbling (värden)', 'svar på stöddubbling', 'dubblaren höjer (inbjudan)',
+  'dubblaren accepterar inbjudan', 'dubblaren bjuder utgång', 'dubblarens svar på cue',
+  'starkt återbud', 'starkt återbud (lägsta)', 'tvångssvar (utan stöd)', 'svar på tvåfärgs-cue',
+  'naturligt (to play)', 'naturligt inkliv (1NT)', '2NT-inkliv (12–15)',
+  'stödhöjning – utgång', 'stödhöjning – enkel höjning (minimum)', 'stödhöjning – hopphöjning (inbjudan)',
+  'accepterar (minimum)', 'accepterar utgång', 'placerar utgång efter öppnarens 2NT', 'cue-advancerns dom (3NT)',
+  'Jordan: utgång', 'Jordan: minimum', 'Jordan: höjning till utgång',
+  'DONT pass-eller-rätta', 'DONT: rättelse (tvåfärg)', 'DONT: rättelse',
+  'Lebensohl 3NT (utgång)', 'Lebensohl 3NT (öppnaren väljer utgång)', 'Lebensohl 3♣ (tvunget relä-svar)',
+  'Lebensohl 3-läge (svag, rättar)', 'Lebensohl naturligt 2-läge',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

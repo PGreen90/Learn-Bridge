@@ -12,7 +12,7 @@
 //   $env:BETYDELSE_RANGE='20270001-20273000'   (standard — samma frön som auktionsdumpen)
 //
 // Utdata: revisor-output/betydelsesvep.txt
-import { it } from 'vitest'
+import { it, expect } from 'vitest'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import type { ResolvedCall } from '../bidding'
 import { meaningOf } from './auction-meaning'
@@ -73,6 +73,79 @@ const KÄNDA_MOTORAVVIKELSER: { rule: string; bid?: RegExp; explanation?: RegExp
   },
 ]
 
+// STÖRDA UNDANTAG (motorbytet etapp 4 familj 9, ägarbeslut 2026-09-10: "noll på
+// det avgörbara + lista resten"). Störda lägen där den HÄRLEDDA betydelsen inte
+// KAN stämma med registret ur den nakna auktionen ensam — golvet som ärlig
+// inferens själv sätter. De räknas UTANFÖR grinden (som de kända motoravvikelserna
+// på ostörda auktioner), aldrig utan ett skäl. Nyckeln är exakt den rad
+// betydelsesvepet skriver. Lägg ALDRIG till en rad här för att dölja ett
+// STRUKTURELLT hål (ett som går att avgöra ur budgivningen) — laga det i stället.
+//
+// Skälkoder:
+//   K = kortberoende styrkeval (samma auktion = minimum/inbjudan/stark beror på handen)
+//   C = cue-buds/-svars exakta kravnivå (kontext- och styrkeberoende)
+//   D = kortberoende konvention-vs-naturligt (samma bud = DONT-tvåfärg eller naturligt)
+//   L = Lebensohl-fortsättning över 1NT (bägge sidors relä/rättelse/3NT) — ej modellerad i läsaren
+//   M = motoravvikelse (motorn namnger konventionssvaret generiskt i störd auktion; läsaren mer exakt)
+const STÖRDA_UNDANTAG: Record<string, string> = {
+  // K — kortberoende styrkeval
+  'fritt bud: rebjuder egen färg | härlett ej-krav ≠ register inbjudan': 'K',
+  'fritt svar på upplysningsdubbling | härlett inbjudan ≠ register ej-krav': 'K',
+  'negativ-dubblarens invit-fortsättning | härlett ej-krav ≠ register inbjudan': 'K',
+  'svar på negativ dubbling | härlett inbjudan ≠ register ej-krav': 'K',
+  '2NT inbjudan | härlett ej-krav ≠ register inbjudan': 'K',
+  'svar på återöppningsdubbling | härlett inbjudan ≠ register ej-krav': 'K',
+  'svar på återöppningsdubbling | härlett krav-1-rond ≠ register ej-krav': 'K',
+  'starkt återbud | härlett inbjudan ≠ register krav-1-rond': 'K',
+  'starkt återbud (lägsta) | härlett ej-krav ≠ register krav-1-rond': 'K',
+  'starkt återbud (lägsta) | härlett inbjudan ≠ register krav-1-rond': 'K',
+  'öppnarens återöppningsdubbling (partnern passade) | härlett ej-krav ≠ register krav-1-rond': 'K',
+  'höjning efter negativ dubbling (inbjudan) | härlett ej-krav ≠ register inbjudan': 'K',
+  'öppnarens 2NT-inbjudan i konkurrens | härlett ej-krav ≠ register inbjudan': 'K',
+  'stödhöjning – hopphöjning (inbjudan) | härlett ej-krav ≠ register inbjudan': 'K',
+  'öppnaren tävlar (stödjer partnern) | härlett inbjudan ≠ register ej-krav': 'K',
+  'inbjudan efter höjt fritt bud | härlett ej-krav ≠ register inbjudan': 'K',
+  'fritt bud: inbjudande höjning | härlett ej-krav ≠ register inbjudan': 'K',
+  'upplysningsdubbling | härlett ej-krav ≠ register krav-1-rond': 'K',
+  'straff/värden | härlett krav-1-rond ≠ register ej-krav': 'K',
+  'straffdubbling | härlett inbjudan ≠ register ej-krav': 'K',
+  'tvångssvar (utan stöd) | härlett ej-krav ≠ register krav-1-rond': 'K',
+  'tvångssvar (utan stöd) | härlett alert=true ≠ register false': 'K',
+  'avböjer game-try | härlett ej-krav ≠ register avslut': 'K',
+  'färgbud | härlett krav-1-rond ≠ register ej-krav': 'K',
+  // C — cue-buds/-svars exakta kravnivå
+  'cue (krav) | härlett krav-1-rond ≠ register utgangskrav': 'C',
+  'cue (limithöjning+) | härlett ej-krav ≠ register krav-1-rond': 'C',
+  'cue (limithöjning+) | härlett alert=false ≠ register true': 'C',
+  'öppnarens cue (extra i konkurrens) | härlett utgangskrav ≠ register krav-1-rond': 'C',
+  'svar på dubblarens cue | härlett inbjudan ≠ register utgangskrav': 'C',
+  'svar på dubblarens cue | härlett krav-1-rond ≠ register utgangskrav': 'C',
+  'svar på tvåfärgs-cue | härlett ej-krav ≠ register utgangskrav': 'C',
+  'svar på tvåfärgs-cue | härlett krav-1-rond ≠ register utgangskrav': 'C',
+  'svar på partnerns cue | härlett ej-krav ≠ register krav-1-rond': 'C',
+  'dubblarens svar på cue | härlett inbjudan ≠ register utgangskrav': 'C',
+  'dubblarens svar på cue | härlett krav-1-rond ≠ register utgangskrav': 'C',
+  'stöd-cue (slamintresse) | härlett krav-1-rond ≠ register slamintresse': 'C',
+  'fritt bud: cue (utgångskrav) | härlett krav-1-rond ≠ register utgangskrav': 'C',
+  // D — kortberoende konvention-vs-naturligt över deras 1NT
+  'advancern tävlar till fiten (lagen om totala stick) | härlett inbjudan ≠ register ej-krav': 'D',
+  'advancern tävlar till fiten (lagen om totala stick) | härlett alert=true ≠ register false': 'D',
+  'naturligt inkliv (1NT) | härlett alert=true ≠ register false': 'D',
+  'naturligt (to play) | härlett alert=true ≠ register false': 'D',
+  'naturligt (to play) | härlett utgangskrav ≠ register ej-krav': 'D',
+  'DONT 2♠ (spader) | härlett alert=false ≠ register true': 'D',
+  // L — Lebensohl-fortsättning över 1NT (ej modellerad)
+  'Lebensohl 3NT (utgång) | härlett alert=false ≠ register true': 'L',
+  'Lebensohl 3NT (öppnaren väljer utgång) | härlett alert=false ≠ register true': 'L',
+  'Lebensohl 3♣ (tvunget relä-svar) | härlett alert=false ≠ register true': 'L',
+  'Lebensohl 3-läge (svag, rättar) | härlett alert=false ≠ register true': 'L',
+  'Lebensohl naturligt 2-läge | härlett alert=false ≠ register true': 'L',
+  // M — motoravvikelse (motorn generisk, läsaren mer exakt)
+  'krav – ny färg | härlett alert=true ≠ register false': 'M',
+  'upplysningsdubbling | härlett alert=false ≠ register true': 'M',
+  'svar på återöppningsdubbling | härlett alert=true ≠ register false': 'M',
+}
+
 it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
   const hål = {
     krav: new Map<string, Hål>(), // härledd kravnivå ≠ registrets (ostört)
@@ -83,11 +156,19 @@ it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
     alertStört: new Map<string, Hål>(),
     pass: new Map<string, Hål>(), // pass med regel: härledd kravnivå ≠ registrets
     kända: new Map<string, Hål>(), // kända motoravvikelser (facit i motorbyte-facit.test.ts)
+    undantag: new Map<string, Hål>(), // störda undantag (dokumenterade, utanför grinden)
   }
   const bumpa = (m: Map<string, Hål>, nyckel: string, exempel: string) => {
     const h = m.get(nyckel)
     if (h) h.antal++
     else m.set(nyckel, { nyckel, antal: 1, exempel })
+  }
+  // Störd avvikelse: dokumenterade undantag (STÖRDA_UNDANTAG) räknas utanför
+  // grinden; övriga i grindkartan (som ska drivas till noll).
+  const bumpStört = (grind: Map<string, Hål>, nyckel: string, exempel: string) => {
+    const skäl = STÖRDA_UNDANTAG[nyckel]
+    if (skäl) bumpa(hål.undantag, `[${skäl}] ${nyckel}`, exempel)
+    else bumpa(grind, nyckel, exempel)
   }
 
   let givar = 0
@@ -132,9 +213,17 @@ it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
         // Kravstegets tvångsbud ("auktionen är krav – jag får inte passa") bär
         // kravet som redan finns, inte en egen kravnivå — jämförs bara på alert.
       } else if (under || reg === 'slamintresse' || m.forcing === 'slamintresse') {
-        if (m.forcing !== reg) bumpa(lugn ? hål.krav : hål.kravStört, `${call.rule} | härlett ${m.forcing ?? '—'} ≠ register ${reg}`, ex)
+        if (m.forcing !== reg) {
+          const key = `${call.rule} | härlett ${m.forcing ?? '—'} ≠ register ${reg}`
+          if (lugn) bumpa(hål.krav, key, ex)
+          else bumpStört(hål.kravStört, key, ex)
+        }
       }
-      if (m.alert !== regAlert) bumpa(lugn ? hål.alert : hål.alertStört, `${call.rule} | härlett alert=${m.alert} ≠ register ${regAlert}`, ex)
+      if (m.alert !== regAlert) {
+        const key = `${call.rule} | härlett alert=${m.alert} ≠ register ${regAlert}`
+        if (lugn) bumpa(hål.alert, key, ex)
+        else bumpStört(hål.alertStört, key, ex)
+      }
     })
   }
 
@@ -148,7 +237,8 @@ it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
     `BETYDELSESVEPET — frön ${RANGE}: ${givar} givar (${ostörda} ostörda), ${bud} botbud med regel (${budOstörda} i ostörda auktioner)`,
     '',
     `GRIND (ostörda auktioner): kravnivå-avvikelser ${summa(hål.krav)} bud i ${hål.krav.size} mönster · alert-avvikelser ${summa(hål.alert)} bud i ${hål.alert.size} mönster · registerhål ${summa(hål.register)} bud i ${hål.register.size} regler`,
-    `Störda auktioner (etapp 4): kravnivå ${summa(hål.kravStört)} bud i ${hål.kravStört.size} mönster · alert ${summa(hål.alertStört)} bud i ${hål.alertStört.size} mönster · registerhål ${summa(hål.registerStört)} bud i ${hål.registerStört.size} regler`,
+    `GRIND (störda auktioner, familj 9): kravnivå ${summa(hål.kravStört)} bud i ${hål.kravStört.size} mönster · alert ${summa(hål.alertStört)} bud i ${hål.alertStört.size} mönster · registerhål ${summa(hål.registerStört)} bud i ${hål.registerStört.size} regler`,
+    `Störda undantag (dokumenterade, utanför grinden — ärlig inferens golv): ${summa(hål.undantag)} bud i ${hål.undantag.size} mönster`,
     `Pass med regel: ${summa(hål.pass)} bud i ${hål.pass.size} mönster (informativt)`,
     `Kända motoravvikelser (facit i motorbyte-facit.test.ts, utanför grinden): ${summa(hål.kända)} bud i ${hål.kända.size} mönster`,
     '',
@@ -173,9 +263,23 @@ it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
     '=== REGISTERHÅL (stört) ===',
     ...lista(hål.registerStört),
     '',
+    '=== STÖRDA UNDANTAG (utanför grinden, dokumenterade) ===',
+    ...lista(hål.undantag),
+    '',
     '=== PASS MED REGEL ===',
     ...lista(hål.pass),
   ]
   mkdirSync('revisor-output', { recursive: true })
   writeFileSync('revisor-output/betydelsesvep.txt', rader.join('\n'), 'utf8')
+
+  // GRINDEN: ostörda OCH störda auktioner ska vara noll på det avgörbara. De
+  // störda undantagen (kortberoende/cue-nivå/Lebensohl/motoravvikelse) är listade
+  // separat ovan (ägarbeslut 2026-09-10). Ett NYTT strukturellt hål (inte i
+  // STÖRDA_UNDANTAG) gör svepet rött — laga det, lägg inte till en undantagsrad.
+  const grind =
+    summa(hål.krav) + summa(hål.alert) + summa(hål.register) + summa(hål.kravStört) + summa(hål.alertStört) + summa(hål.registerStört)
+  expect(grind, `betydelsesvepets grind ska vara 0 (se revisor-output/betydelsesvep.txt)`).toBe(0)
+  // Varje undantagsrad måste faktiskt förekomma — inga döda rader som ruttnar.
+  const döda = Object.keys(STÖRDA_UNDANTAG).filter((k) => ![...hål.undantag.values()].some((h) => h.nyckel.endsWith(k)))
+  expect(döda, 'döda STÖRDA_UNDANTAG-rader (förekommer inte längre — ta bort dem)').toEqual([])
 })

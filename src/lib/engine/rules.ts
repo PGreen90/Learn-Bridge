@@ -47,7 +47,18 @@ const ALERT_RULE_PREFIXES: string[] = [
   'Sjöberg',
   'Gerber',
   'Exclusion',
-  'cue',
+  // Cue-buden är konstlade; deras NATURLIGA fortsättningar/avslut ('cue-höjningens
+  // fortsättning', 'cue: avslut') är det inte — därför de exakta prefixen i stället
+  // för det breda 'cue' (familj 9: registret alertade fortsättningarna av misstag).
+  'cue-bid',
+  'cue (',
+  // Övriga cue-BUD i konkurrens är också konstlade och alertpliktiga (familj 9:
+  // registret alertade dem inte tidigare). Deras SVAR ('svar på … cue') och
+  // FORTSÄTTNINGAR ('cue-höjningens fortsättning') är naturliga → alertas inte.
+  'öppnarens cue',
+  'negativ-dubblarens cue',
+  'stöd-cue',
+  'fritt bud: cue',
   'trumfdam',
   // Konkurrens / försvar
   'Michaels',
@@ -419,6 +430,53 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'krav – sang': 'utgangskrav',
   'stöd-cue (slamintresse)': 'slamintresse',
   'RKC: stopp': 'avslut',
+
+  // ---- Störda regler som saknade kravnivå (betydelsesvepet, etapp 4 familj 9) ----
+  // Konkurrens/försvar-fortsättningar som motorn producerade men registret inte
+  // bar kravnivå för. Värdena speglar systemets mening; betydelselagret läser
+  // samma nivå ur den nakna auktionen (auction-meaning.probe.test.ts vaktar).
+  // Dubblingsfamiljen:
+  'svar på negativ dubbling': 'ej-krav',
+  'upplysningsdubbling (stark)': 'krav-1-rond',
+  'fritt svar på upplysningsdubbling': 'ej-krav',
+  'straff/värden': 'ej-krav',
+  'öppnarens svar på värde-X': 'ej-krav',
+  'svar på öppnarens värde-X-fortsättning': 'ej-krav',
+  'redubbling (värden)': 'krav-1-rond',
+  'svar på stöddubbling': 'ej-krav',
+  'dubblaren höjer (inbjudan)': 'inbjudan',
+  'dubblaren accepterar inbjudan': 'avslut',
+  'dubblaren bjuder utgång': 'avslut',
+  'dubblarens svar på cue': 'utgangskrav',
+  'starkt återbud': 'krav-1-rond',
+  'starkt återbud (lägsta)': 'krav-1-rond',
+  'tvångssvar (utan stöd)': 'krav-1-rond',
+  'svar på tvåfärgs-cue': 'utgangskrav',
+  // Naturliga inkliv / höjningar / avslut:
+  'naturligt (to play)': 'ej-krav',
+  'naturligt inkliv (1NT)': 'ej-krav',
+  '2NT-inkliv (12–15)': 'ej-krav',
+  'stödhöjning – utgång': 'avslut',
+  'stödhöjning – enkel höjning (minimum)': 'ej-krav',
+  'stödhöjning – hopphöjning (inbjudan)': 'inbjudan',
+  'accepterar (minimum)': 'avslut',
+  'accepterar utgång': 'avslut',
+  'placerar utgång efter öppnarens 2NT': 'avslut',
+  'cue-advancerns dom (3NT)': 'avslut',
+  // Jordan-fortsättningar:
+  'Jordan: utgång': 'avslut',
+  'Jordan: minimum': 'ej-krav',
+  'Jordan: höjning till utgång': 'avslut',
+  // DONT-fortsättningar:
+  'DONT pass-eller-rätta': 'ej-krav',
+  'DONT: rättelse (tvåfärg)': 'ej-krav',
+  'DONT: rättelse': 'ej-krav',
+  // Lebensohl-fortsättningar (över deras inkliv av vårt 1NT):
+  'Lebensohl 3NT (utgång)': 'avslut',
+  'Lebensohl 3NT (öppnaren väljer utgång)': 'avslut',
+  'Lebensohl 3♣ (tvunget relä-svar)': 'ej-krav',
+  'Lebensohl 3-läge (svag, rättar)': 'ej-krav',
+  'Lebensohl naturligt 2-läge': 'ej-krav',
 }
 
 /** Kravnivå (§2) för ett bud givet dess regel, eller undefined om okänd. */
