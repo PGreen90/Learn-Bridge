@@ -106,6 +106,32 @@ describe('kikvakten (2): beslutet läser bara egen hand + auktionen', () => {
     expect(perKälla.get('tabell:svag2-fortsättning') ?? 0).toBeGreaterThan(5) // etapp 4 familj 7: preempt-konkurrensens fortsättningar
   })
 
+  // Slam-svarssvepet (etapp 4 familj 8) fyrar för sällan i 300 slumpgivar för
+  // att synas i sveptestet ovan (3NT-stoppen ligger på frö 20271779/20271997).
+  // Raden är ändå kik-säker av konstruktion (`välj` får bara {hand, facts});
+  // här bevisas det deterministiskt på 3NT-stoppen (frö 20261020): öppnarens
+  // 4NT-trevare och svararens accept ger samma bud + källa när de tre andra
+  // händerna byts mot slumpkort.
+  it('slam-forts: 3NT-stoppens trevare och accept överlever handbyte (frö 20261020)', () => {
+    const deal = dealFromSeed(20261020)
+    const c = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
+    const try3nt: ResolvedCall[] = [c('N', '1C'), c('E', 'P'), c('S', '1H'), c('W', 'P'), c('N', '3C'), c('E', 'P'), c('S', '3NT'), c('W', 'P')]
+    const fall: readonly [Seat, ResolvedCall[], string][] = [
+      ['N', try3nt, '4NT'],
+      ['S', [...try3nt, c('N', '4NT'), c('E', 'P')], '6NT'],
+    ]
+    for (const [seat, hist, förväntat] of fall) {
+      const ursprung = decideCallTraced(deal, hist, seat)
+      expect(ursprung.källa).toBe('tabell:slam-forts')
+      expect(ursprung.call.bid).toBe(förväntat)
+      for (let k = 0; k < 5; k++) {
+        const annan = decideCallTraced(omgivnaAndra(deal, seat, mulberry32(1000 + k)), hist, seat)
+        expect(annan.källa, `handbyte ${k}`).toBe('tabell:slam-forts')
+        expect(annan.call.bid, `handbyte ${k}`).toBe(förväntat)
+      }
+    }
+  })
+
   it.skipIf(process.env.KIKVAKT !== '1')('MÄTLÄGE: hur ofta byter dagens motor bud när de andra händerna byts?', { timeout: 0 }, () => {
     const m = /^(\d+)-(\d+)$/.exec(process.env.KIKVAKT_RANGE ?? '20270001-20270300')!
     const [från, till] = [Number(m[1]), Number(m[2])]

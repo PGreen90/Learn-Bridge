@@ -391,6 +391,76 @@ describe('etapp 4 familj 7 – försvar mot svaga tvåor och spärrar (LANDAD 20
   })
 })
 
+// Etapp 4 familj 8 (slam-svarssvepet, motorbytet): de slam-beslut som INTE
+// hörde till den kanoniska ostörda sekvensen (raden *slam*) eller
+// konkurrens-slaminvitet (raden *konkurrens-slam*) — de fyrade förr som
+// detektorer när linjen tog slut (människan/inklivet förde budet förbi manuset).
+// Facit = de befintliga felrapport-givarna, nu via tabellraden *slam-forts*.
+describe('etapp 4 familj 8 – slam-svarssvepet: RKC/kung/rättelse/3NT-höjning/3NT-stopp ur tabellen (LANDAD 2026-09-10)', () => {
+  const deal = (h: Record<Seat, string>, dealer: Seat = 'N'): Deal => ({
+    id: 'facit-f8', dealer, vulnerability: 'none', board: 1,
+    hands: { N: parseHand(h.N), E: parseHand(h.E), S: parseHand(h.S), W: parseHand(h.W) },
+  })
+
+  // Essfrågan 4NT (1430 RKC) besvaras oavsett hur trumfen sattes — här
+  // överenskommen hjärter I KONKURRENS (felrapport #9): Nord har 3 nyckelkort → 5♦.
+  it('essfrågan 4NT besvaras (1430 RKC), överenskommen trumf i konkurrens (felrapport #9)', () => {
+    const d = deal({ N: 'S:Q9 H:AKJ4 D:AJ9 C:Q943', E: 'S:8532 H:T76 D:8 C:T8652', S: 'S:A6 H:Q953 D:KQT432 C:J', W: 'S:KJT74 H:82 D:765 C:AK7' }, 'S')
+    const hist = [call('S', '1D'), call('W', '1S'), call('N', 'X'), call('E', 'P'), call('S', '2H'), call('W', 'P'), call('N', '4H'), call('E', 'P'), call('S', '4NT'), call('W', 'P')]
+    const t = decideCallTraced(d, hist, 'N')
+    expect(t.källa).toBe('tabell:slam-forts')
+    expect(t.call.bid).toBe('5D')
+  })
+
+  // Essfrågan på spärröppningen (trumf = sidans senaste naturliga färg) +
+  // kungfrågan 5NT (Sjöberg): Nord 1 nyckelkort → 5♣, sedan ingen sidokung → 6♠ (felrapport #10).
+  it('essfrågan på spärröppningen + kungfrågan 5NT (felrapport #10)', () => {
+    const d = deal({ N: 'S:KQ98732 H:7 D:- C:QT864', E: 'S:J65 H:AJ64 D:T9863 C:2', S: 'S:A H:T83 D:AQ4 C:AKJ753', W: 'S:T4 H:KQ952 D:KJ752 C:9' }, 'W')
+    const askA = [call('W', 'P'), call('N', '3S'), call('E', 'P'), call('S', '4NT'), call('W', 'P')]
+    const a = decideCallTraced(d, askA, 'N')
+    expect(a.källa).toBe('tabell:slam-forts')
+    expect(a.call.bid).toBe('5C')
+    const askK = [...askA, call('N', '5C'), call('E', 'P'), call('S', '5NT'), call('W', 'P')]
+    const k = decideCallTraced(d, askK, 'N')
+    expect(k.källa).toBe('tabell:slam-forts')
+    expect(k.call.bid).toBe('6S')
+  })
+
+  // Rättelsen över stoppbudet efter det tvetydiga 1-eller-4-svaret (felrapport
+  // #60, i konkurrens): Nord med 4 nyckelkort lyfter Syds 5♥-stopp till 6♥.
+  it('rättelsen över stoppbudet efter 1-eller-4-svaret (felrapport #60)', () => {
+    const d = deal({ N: 'S:AK H:AK876 D:64 C:A762', E: 'S:T652 H:- D:KQJT973 C:J9', S: 'S:Q84 H:T95432 D:A2 C:KQ', W: 'S:J973 H:QJ D:85 C:T8543' })
+    const hist = [call('N', '1H'), call('E', '3D'), call('S', '4D'), call('W', 'P'), call('N', '4H'), call('E', 'P'), call('S', '4NT'), call('W', 'P'), call('N', '5C'), call('E', 'P'), call('S', '5H'), call('W', 'P')]
+    const t = decideCallTraced(d, hist, 'N')
+    expect(t.källa).toBe('tabell:slam-forts')
+    expect(t.call).toMatchObject({ bid: '6H', rule: 'RKC: rättelse' })
+  })
+
+  // Kaptenens kvantitativa höjning av partnerns naturliga 3NT till 6NT
+  // (felrapport #42): Nord 21 hp mot partnerns visade 12+ (öppningen) = 33.
+  it('kvantitativ höjning av partnerns naturliga 3NT till 6NT (felrapport #42)', () => {
+    const d = deal({ N: 'S:K H:AQ93 D:AKT74 C:KQ7', E: 'S:Q7643 H:754 D:J92 C:62', S: 'S:AJ98 H:KJT D:53 C:AT43', W: 'S:T52 H:862 D:Q86 C:J985' }, 'S')
+    const hist = [call('S', '1C'), call('W', 'P'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2D'), call('E', 'P'), call('S', '2H'), call('W', 'P'), call('N', '3D'), call('E', 'P'), call('S', '3NT'), call('W', 'P')]
+    const t = decideCallTraced(d, hist, 'N')
+    expect(t.källa).toBe('tabell:slam-forts')
+    expect(t.call).toMatchObject({ bid: '6NT', rule: 'slamhöjning av 3NT' })
+  })
+
+  // 3NT-stoppen (etapp 7 hål 2, frö 20261020): öppnaren (20 hp, löpande klöver)
+  // trevar 4NT efter svararens 3NT; svararen (fittande ♣K) accepterar → 6NT.
+  it('3NT-stoppen: öppnaren trevar 4NT, svararen accepterar 6NT (frö 20261020)', () => {
+    const d = dealFromSeed(20261020)
+    const try3nt = [call('N', '1C'), call('E', 'P'), call('S', '1H'), call('W', 'P'), call('N', '3C'), call('E', 'P'), call('S', '3NT'), call('W', 'P')]
+    const n = decideCallTraced(d, try3nt, 'N')
+    expect(n.källa).toBe('tabell:slam-forts')
+    expect(n.call).toMatchObject({ bid: '4NT', rule: 'slamtrevare efter 3NT' })
+    const ans = [...try3nt, call('N', '4NT'), call('E', 'P')]
+    const s = decideCallTraced(d, ans, 'S')
+    expect(s.källa).toBe('tabell:slam-forts')
+    expect(s.call).toMatchObject({ bid: '6NT', rule: 'accepterar slamtrevare' })
+  })
+})
+
 // §5b beslut 1 (ägarbeslut 2026-09-05, bok-mot-motor-fynd 6 + 15): över
 // öppnarens 1NT-återbud (12–14) är 4♣ Gerber BARA för den jämna handen utan
 // färg att visa (räknar 33 mot visade 12 → Gerber; 31–32 → kvantitativ 4NT).

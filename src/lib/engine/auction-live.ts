@@ -30,11 +30,10 @@ import { openerAnswerFourthSuit, openerAnswerNMF, openerRebidAfter1NTResponse, o
 import { respondTo1NT } from './responses-nt'
 import { openerRebidAfter2NTResponse, respondTo2NT } from './responses-2nt'
 import { responderPlaceAfterNMF } from './responder-rebids'
-import { hcp, isBalanced, lengths, suitHcp } from './hand'
+import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import { ntResponseRule } from './overcall-continuations'
 import { side } from './play'
-import { keycards, respondToKingAsk, respondToRKC } from './slam'
 
 // ---- Bridge-reglerna ------------------------------------------------------
 // Utbrutna till `auction-rules.ts` (etapp 4 familj 1, 2026-09-08) så att
@@ -175,55 +174,12 @@ function nmfPlacementToAnswer(
  * lovar 5-5 i två ANDRA färger.
  */
 
-// ---- Essfrågan 4NT (1430 RKC) i den levande auktionen -----------------------
-
-/**
- * Trumffärgen partnerns 4NT-essfråga gäller. Tre steg:
- *  1. ÖVERENSKOMMEN trumf (en färg båda bjudit) – felrapport #9.
- *  2. KONVENTIONS-fit utan naturligt färgbud: en Jacoby 2NT sätter öppnarens
- *     högfärg som trumf (R1-fynd #3 – annars lästes öppnarens konstgjorda
- *     Jacoby-kortfärg, t.ex. 3♣, som en naturlig klöverfärg → fel essredovisning).
- *  3. Ingen av ovan? Standardregeln (felrapport #10: 4NT direkt på partnerns
- *     3♠-spärr passades): 4NT är essfråga så länge sidans senaste naturliga bud
- *     FÖRE frågan var en FÄRG – trumfen är den färgen. Kvantitativt är 4NT bara
- *     när sidans senaste bud var SANG.
- * Ankras vid partnerns FÖRSTA 4NT så kungfrågan (5NT) läser samma trumf och
- * aldrig snubblar på det konstgjorda stegsvaret (5♣/5♦/…) däremellan.
- */
-function slamAskTrump(f: AuctionFacts): Suit | null {
-  const { history, seat } = f
-  const agreed = f.agreedTrump
-  if (agreed) return agreed
-  const jacoby = f.jacobyTrump
-  if (jacoby) return jacoby
-  const askIdx = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid === '4NT')
-  if (askIdx < 0) return null
-  for (let i = askIdx - 1; i >= 0; i--) {
-    const c = history[i]
-    if (side(c.seat) !== side(seat)) continue
-    const cb = parseContractBid(c.bid)
-    if (!cb) continue
-    if (cb.strain === 'NT') return null // sidans senaste bud var sang → kvantitativt
-    if (f.theirStrains.has(cb.strain)) continue // cue, ingen egen färg
-    return SUIT_OF_LETTER[cb.strain]
-  }
-  return null
-}
-
-/**
- * Ska `seat` svara på partnerns 4NT-ESSFRÅGA (1430 RKC, §6.1)? Kraven
- * (felrapport #9 + #10 – Nord passade på en "odiskutabel essfråga"):
- *  - partnerns senaste icke-pass är 4NT (bara pass har följt),
- *  - trumfen kan härledas via `slamAskTrump` (överenskommen färg, eller
- *    sidans senaste naturliga färg – t.ex. spärröppningen 4NT ställs på).
- * Returnerar trumffärgen, annars null.
- */
-function rkcToAnswer(f: AuctionFacts): Suit | null {
-  const { seat } = f
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '4NT') return null
-  return slamAskTrump(f)
-}
+// ---- Transferns utgångsval (felrapport #13) --------------------------------
+//
+// (Essfrågan 4NT/5NT, rättelsen över stoppet, 3NT-höjningen och 3NT-stoppen —
+// alla slam-svar som fyrade när linjen tog slut — flyttade till beslutstabellen,
+// raden *slam-forts*, motorbytet etapp 4 familj 8. `slamAskTrump` bor nu i
+// `slam-answer-continuations.ts`.)
 
 /**
  * Har partnern bett öppnaren VÄLJA UTGÅNG efter en Jacoby-transfer
@@ -251,205 +207,6 @@ function transferGameChoiceToAnswer(f: AuctionFacts): Suit | null {
   if (complete.seat !== seat || complete.bid !== `${level}${letterOfSuit(target)}`) return null
   if (nt !== lastNonPass) return null
   return target
-}
-
-/**
- * Ska `seat` svara på partnerns 5NT-KUNGFRÅGA (Sjöberg, §6.3)? Bara i en
- * essfrågesekvens: partnern har tidigare bjudit 4NT (essfrågan) och nu 5NT.
- */
-function kingAskToAnswer(f: AuctionFacts): Suit | null {
-  const { history, seat } = f
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '5NT') return null
-  if (!history.some((c) => c.seat === PARTNER[seat] && c.bid === '4NT')) return null
-  return slamAskTrump(f)
-}
-
-/**
- * RÄTTELSEN över stoppbudet (felrapport #60, §6.1): jag svarade 5♣/5♦ på
- * partnerns 4NT-essfråga (1 eller 4 / 0 eller 3), partnern stannade i 5-trumf,
- * och jag sitter med det HÖGA antalet. Stoppbudet betyder "pass med det låga,
- * bjud vidare med det höga" — annars säljs lillslammen (Nord passade 5♥ med
- * fyra nyckelkort). Mekaniken fanns i den kanoniska linjen
- * (`slam-auction.ts`, "RKC: rättelse") men saknades i budlådan. Positionsexakt:
- * partnerns 4NT → mitt 5♣/5♦ → partnerns 5-trumf → (bara pass). Returnerar
- * trumf + det höga antalet, annars null.
- */
-function rkcSignoffCorrectionToBid(f: AuctionFacts, hand: Hand): { trump: Suit; high: number } | null {
-  const { history, seat } = f
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
-  let i = history.lastIndexOf(lastNonPass) - 1
-  while (i >= 0 && history[i].bid === 'P') i--
-  const answer = history[i]
-  if (!answer || answer.seat !== seat || (answer.bid !== '5C' && answer.bid !== '5D')) return null
-  let j = i - 1
-  while (j >= 0 && history[j].bid === 'P') j--
-  const ask = history[j]
-  if (!ask || ask.seat !== PARTNER[seat] || ask.bid !== '4NT') return null
-  const trump = slamAskTrump(f)
-  if (!trump || lastNonPass.bid !== `5${letterOfSuit(trump)}`) return null
-  const high = answer.bid === '5C' ? 4 : 3
-  return keycards(hand, trump) === high ? { trump, high } : null
-}
-
-// ---- Kvantitativ höjning av partnerns naturliga 3NT (felrapport #42) --------
-//
-// Systemets slamportar satt bara i den kanoniska linjens NAMNGIVNA mönster
-// (Jacoby 2NT, inverterad minor, 1NT-återbudet, MSS …). Placerade partnern
-// kontraktet i ett naturligt 3NT i en vanlig färgauktion fanns ingen kvantitativ
-// höjning alls — kaptenen hade inget bud och passade bort lillslammen
-// (felrapport #42: 21 hp mittemot en öppningshand, 12 stick i 3NT).
-//
-// Regeln är systemets EGEN kaptensregel (§5.2, ärliga slamportar 2026-07-07):
-// egen hand + partnerns VISADE minimum ≥ 33 → driv. Partnern har ÖPPNAT på
-// 1-läget i en färg, och den låsta regeln är att en 12-poängshand alltid öppnar
-// → visat minimum = 12, alltså tröskeln 21 hp på egen hand. Ingen kontrollkoll
-// (ägarbeslut), och storslam kräver visshet → taket är 6NT.
-
-/** Partnerns visade minimum när hen öppnat på 1-läget i en färg (låst regel). */
-const SUIT_OPENING_SHOWN_MIN = 12
-
-/**
- * Höjer partnerns naturliga 3NT till 6NT när kaptenens egen hand + partnerns
- * visade minimum når slamzonen (33). Smal med flit:
- *  - partnerns 3NT ska vara auktionens SENASTE bud (ingen har bjudit över),
- *  - partnern ska ha ÖPPNAT på 1-läget i en FÄRG (då är 12-golvet ärligt;
- *    sangöppningar har sina egna portar i `respondTo1NT`/`respondTo2NT`),
- *  - motståndarna ska ha varit tysta (deras bud kan göra 3NT till ett
- *    tävlingsbud i stället för en styrkevisning),
- *  - egen hand utan renons — vild fördelning hör inte hemma i 6NT.
- */
-function raisePartnerThreeNTToSlam(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '3NT') return null
-
-  const open = f.opening
-  if (!open || open.seat !== PARTNER[seat]) return null
-  if (open.level !== 1 || open.strain === 'NT') return null
-  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null
-
-  const hand = deal.hands[seat]
-  const p = hcp(hand)
-  if (p + SUIT_OPENING_SHOWN_MIN < 33) return null
-  const len = lengths(hand)
-  if ((['clubs', 'diamonds', 'hearts', 'spades'] as Suit[]).some((s) => len[s] === 0)) return null
-  if (!legalCalls(history, seat).includes('6NT')) return null
-
-  return {
-    seat,
-    bid: '6NT',
-    rule: 'slamhöjning av 3NT',
-    explanation:
-      `Slamzon mot partnerns visade ${SUIT_OPENING_SHOWN_MIN}+ (öppningen) ` +
-      `→ 6NT. Slamzonen nås redan mot partnerns minimum, så jag placerar lillslammen i stället för att passa 3NT.`,
-  }
-}
-
-// ---- Etapp 7 hål D: slaminvit efter en HÖGFÄRGSFIT funnen i KONKURRENS -------
-//
-// Systemrevisorns Fynd 3 (mönster E): vår sida hittar en högfärgsfit GENOM
-// konkurrens och når 4M — sedan passar den starka kaptenen naket (Fynd 1). Cue-/
-// RKC-maskineriet fanns bara i det kanoniska lagret.
-//
-// ÄGARBESLUT 2026-08-05 "bara äkta extra" + info-läckage: i konkurrens läcker
-// cue-bud kontroll-info till motståndarna som lyssnar. STEG 1 (detta) tar därför
-// bara det KONTROLL-KOMPLETTA fallet: har kaptenen första-rondskontroll (ess/
-// renons) i ALLA sidofärger behövs ingen cue — hen frågar nyckelkort direkt (4NT).
-// Det är samtidigt en tight grind: en vanlig utgångshand är nästan aldrig kontroll-
-// komplett, så trevaren tänds inte på den (v0-genvägen "17+ + fit → 4NT" blåste
-// 8 utgångshänder till slam; kontroll-kompletthet är det som skiljer). Cue-front-
-// enden för de kontroll-OFULLSTÄNDIGA fallen byggs som steg 2. Ingen kik: kaptenen
-// räknar sin EGEN hand + partnerns visade fit. Storslam bjuds aldrig blint.
-
-// ---- Etapp 7 hål 2: öppnarens slamtrevare efter svararens 3NT ("3NT-stoppen")
-//
-// Systerfallet till felrapport #42 (`raisePartnerThreeNTToSlam` ovan), fast från
-// den sida som SJÄLV har extra: öppnaren invit-hoppade i sin minor (1m–1X–3m), och
-// svararen accepterade utgången med 3NT. Öppnaren saknade en väg vidare och föll
-// till det nakna passet (Fynd 1) — lillslammen försvann fast öppnaren hade en
-// stark hand med löpande färg. Med genuint slamvärde hen SJÄLV vet om gör öppnaren
-// nu EN kvantitativ slamtrevare (4NT); svararen accepterar 6NT med ett maximum av
-// sin acceptans (topp av intervallet, eller en fittande topphonnör i minoren).
-//
-// Smal med flit (ägarbeslut 2026-07-31, "bara äkta extra"): från öppnarens stol är
-// en 16–18-hand med löpande minor OSKILJBAR från en tunn 26-hp-slam som bara går
-// på DD, så bara 19+ får treva. Ingen kontrollkoll (ägarbeslut), taket är 6NT.
-
-const MINOR_SUIT: Record<string, Suit> = { C: 'clubs', D: 'diamonds' }
-const ALL_SUITS: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
-
-/** Öppnarens invit-hopp 1m–1X–3m följt av svararens 3NT (senaste budet, ostört)? */
-function openerJumpMinorThenResponder3NT(f: AuctionFacts): { minor: string } | null {
-  const { history, seat } = f
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '3NT') return null
-  const open = f.opening
-  if (!open || open.seat !== seat) return null // seat = öppnaren själv
-  if (open.level !== 1 || (open.strain !== 'C' && open.strain !== 'D')) return null
-  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null // ostört
-  // Öppnarens ANDRA kontraktsbud ska vara hoppet 3m i öppningsfärgen.
-  const ourBids = history.filter((c) => c.seat === seat).map((c) => parseContractBid(c.bid)).filter((b): b is { level: number; strain: string } => b !== null)
-  if (ourBids.length < 2) return null
-  const rebid = ourBids[1]
-  if (rebid.level !== 3 || rebid.strain !== open.strain) return null
-  return { minor: open.strain }
-}
-
-/** Öppnaren (19+ hp, 6+ i minoren) trevar 4NT efter svararens 3NT. */
-function openerTriesSlamAfter3NT(c: DetectorCtx): ResolvedCall | null {
-  const { deal, history, seat, facts: f } = c
-  const m = openerJumpMinorThenResponder3NT(f)
-  if (!m) return null
-  const hand = deal.hands[seat]
-  const p = hcp(hand)
-  if (p < 19) return null // bara äkta extra öppnaren SJÄLV vet om
-  const len = lengths(hand)
-  if (len[MINOR_SUIT[m.minor]] < 6) return null
-  if (ALL_SUITS.some((s) => len[s] === 0)) return null // ingen renons – NT är målet
-  if (!legalCalls(history, seat).includes('4NT')) return null
-  return {
-    seat,
-    bid: '4NT',
-    rule: 'slamtrevare efter 3NT',
-    explanation:
-      `Slamintresse med löpande ${SWE_SYM[m.minor]} – för starkt för att bara passa partnerns 3NT ` +
-      `→ 4NT (kvantitativ slamtrevare; partnern lyfter till 6NT med ett maximum).`,
-  }
-}
-
-/** Öppnarens kvantitativa 4NT efter 1m–1X–3m–3NT (senaste budet, ostört)? */
-function openerSlamTryToAnswer(f: AuctionFacts): { minor: string } | null {
-  const { history, seat } = f
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '4NT') return null
-  const open = f.opening
-  if (!open || open.seat !== PARTNER[seat]) return null // partnern = öppnaren
-  if (open.level !== 1 || (open.strain !== 'C' && open.strain !== 'D')) return null
-  if (history.some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null // ostört
-  // Sekvensen ska vara 1m–1X–3m–3NT–4NT: partnern hoppade 3m, VI bjöd 3NT.
-  const partnerBids = history.filter((c) => c.seat === PARTNER[seat]).map((c) => parseContractBid(c.bid)).filter((b): b is { level: number; strain: string } => b !== null)
-  if (partnerBids.length < 3) return null
-  if (partnerBids[1].level !== 3 || partnerBids[1].strain !== open.strain) return null
-  const ourBids = history.filter((c) => c.seat === seat).map((c) => parseContractBid(c.bid)).filter((b): b is { level: number; strain: string } => b !== null)
-  if (!ourBids.some((b) => b.level === 3 && b.strain === 'NT')) return null
-  return { minor: open.strain }
-}
-
-/** Svararen accepterar öppnarens slamtrevare med ett maximum, annars pass. */
-function answerOpenerSlamTry(hand: Hand, minor: string): { call: Bid; rule: string; explanation: string } {
-  const p = hcp(hand)
-  const fitHonor = suitHcp(hand, MINOR_SUIT[minor]) >= 3 // K/A i partnerns 6-korts minor
-  const accept = p >= 12 || (p >= 9 && fitHonor)
-  return accept
-    ? {
-        call: '6NT',
-        rule: 'accepterar slamtrevare',
-        explanation:
-          `Maximum av min acceptans${fitHonor ? ` (topphonnör i ${SWE_SYM[minor]})` : ''} → 6NT.`,
-      }
-    : { call: 'P', rule: 'avböjer slamtrevare', explanation: `Minimum – avböjer trevaren → 4NT står.` }
 }
 
 // ---- Sangsystemet off-book (§4.3–4.4, felrapport #41) -----------------------
@@ -1072,34 +829,8 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
   // (DONT-försvaret mot deras 1NT + advancern/rättelsen flyttade till
   // beslutstabellen, raderna *försvar-1nt* / *dont-advance*, motorbytet etapp 4
   // familj 6, 2026-09-09.)
-  // Etapp 7 hål 2 ("3NT-stoppen"): öppnaren trevar 4NT efter svararens 3NT,
-  // och svararen accepterar/avböjer. Måste ligga FÖRE rkcToAnswer så den
-  // kvantitativa 4NT:n (ingen trumf agreed) inte läses som essfråga, och
-  // FÖRE off-book-svaret som annars passar bort trevaren.
-  { id: 'openerTriesSlamAfter3NT', before: ['rkcToAnswer', 'offBookResponse'],
-    run: (c) => openerTriesSlamAfter3NT(c) },
-  { id: 'openerSlamTryToAnswer', before: ['rkcToAnswer', 'offBookResponse'],
-    run: (c) => answered(openerSlamTryToAnswer(c.facts),
-      (s) => answerOpenerSlamTry(c.hand, s.minor), c.history, c.seat) },
-  // Partnerns 4NT med trumf = ESSFRÅGAN (1430 RKC, §6.1); 5NT = kungfrågan
-  // (Sjöberg, §6.3). Får aldrig passas (felrapport #9).
-  { id: 'rkcToAnswer',
-    run: (c) => answered(rkcToAnswer(c.facts),
-      (trump) => respondToRKC(c.hand, trump), c.history, c.seat) },
-  { id: 'kingAskToAnswer',
-    run: (c) => answered(kingAskToAnswer(c.facts),
-      (trump) => respondToKingAsk(c.hand, trump), c.history, c.seat) },
-  // Partnern stannade i 5-trumf efter mitt tvetydiga svar (5♣ = 1/4, 5♦ = 0/3)
-  // och jag har det höga antalet → lyfter själv till 6 (felrapport #60, §6.1).
-  { id: 'rkcSignoffCorrection',
-    run: (c) => answered(rkcSignoffCorrectionToBid(c.facts, c.hand),
-      (d) => ({
-        call: `6${letterOfSuit(d.trump)}`,
-        rule: 'RKC: rättelse',
-        explanation:
-          `Mitt svar visade ${d.high === 4 ? '1 ELLER 4' : '0 ELLER 3'} nyckelkort och partnern räknade lågt i sitt stopp — ` +
-          `jag har ${d.high} → lyfter till 6${SWE_SYM[letterOfSuit(d.trump)]}.`,
-      }), c.history, c.seat) },
+  // (Essfrågan 4NT/5NT, rättelsen över stoppet och 3NT-stoppen flyttade till
+  // beslutstabellen, raden *slam-forts*, motorbytet etapp 4 familj 8.)
   // Straffdubbla motståndarnas höga färgkontrakt när handen sätter det
   // (poängarbetet 2026-07-04): 2+ säkra trumfstick + 10+ hp.
   { id: 'maybePenaltyDouble',
@@ -1133,11 +864,9 @@ export const CONTESTED_DETECTORS: readonly LiveDetector[] = [
       (n) => responderPlaceAfterNMF(c.hand, n.responderMajor, n.otherMajor, n.nmfMinor, n.opened, n.unbidSuit, n.answer), c.history, c.seat) },
   { id: 'respondToStrong2NTRebid', before: ['offBookResponse'],
     run: (c) => respondToStrong2NTRebid(c) },
-  // Kaptenen höjer partnerns naturliga 3NT till 6NT när slamzonen nås redan
-  // mot partnerns visade minimum (felrapport #42). Måste ligga FÖRE
-  // off-book-svaret, som skyddar partnerns utgångsbud och därmed passar.
-  { id: 'raisePartnerThreeNTToSlam', before: ['offBookResponse'],
-    run: (c) => raisePartnerThreeNTToSlam(c) },
+  // (Kaptenens kvantitativa höjning av partnerns naturliga 3NT till 6NT,
+  // felrapport #42, flyttade till beslutstabellen, raden *slam-forts*,
+  // motorbytet etapp 4 familj 8.)
   // Sangsystemet när sangöppningen bjudits OFF-BOOK (felrapport #41):
   // svararen får §4.3/§4.4-svaret, öppnaren sitt återbud. Måste ligga FÖRE
   // off-book-svaret (som kräver en visad FÄRG och därför passade ut 1NT)
