@@ -1326,6 +1326,31 @@ describe('etapp 4 familj 9 — betydelselagret på störda auktioner', () => {
   })
 })
 
+// Etapp 5 familj 2 (2026-09-10): de fyra små catch-all-detektorerna flyttade
+// till beslutstabellen (catch-all-continuations.ts). Ren 0-diff bot mot bot; en
+// klass-b-förbättring i avvikelsedumpen: när MÄNNISKAN öppnat en sub-minimum-1NT
+// nåddes förr answerTransferGameChoice aldrig (buildAuction hittade ingen
+// botöppnare → 'ingen öppning' kortslöt före detektorkedjan), så svararen passade
+// 3NT-erbjudandet trots 3-korts stöd. Som tabellrad (frågas först) väljer stolen
+// nu 4M — systemriktigt (5-3-fiten före sang). Ägaren godkände 2026-09-10.
+describe('etapp 5 familj 2 – de fyra små catch-all-svaren ur tabellen (LANDAD 2026-09-10)', () => {
+  it('frö 20270031: 1NT(S,10 hp)–P–2♥–P–2♠–P–3NT–P: Syd (♠A72 ♥AT7 ♦T654 ♣Q84, 3-korts stöd) väljer utgång 4♠ efter transfer-erbjudandet — inte pass', () => {
+    const deal: Deal = {
+      id: 'f2-transfer', dealer: 'S', vulnerability: 'all', board: 1,
+      hands: {
+        N: parseHand('S:K9653 H:QJ2 D:KQ98 C:9'),
+        E: parseHand('S:Q8 H:K9843 D:A3 C:J752'),
+        S: parseHand('S:A72 H:AT7 D:T654 C:Q84'),
+        W: parseHand('S:JT4 H:65 D:J72 C:AKT63'),
+      },
+    }
+    const hist = [call('S', '1NT'), call('W', 'P'), call('N', '2H'), call('E', 'P'), call('S', '2S'), call('W', 'P'), call('N', '3NT'), call('E', 'P')]
+    const t = decideCallTraced(deal, hist, 'S')
+    expect(t.källa).toBe('tabell:transfer-utgång')
+    expect(t.call.bid).toBe('4S')
+  })
+})
+
 // FÄLTFYND 2026-09-10 (ägaren spelade på etapp 4-motorn, bricka 6, ÖV i zon):
 // efter ett STARKT 2NT-återbud i KONKURRENS (1♣–(1♠)–P–(2♠)–2NT, ~18–19 bal med
 // spaderhåll) passade svararen med fem hjärter och singelspader. Rätt är att

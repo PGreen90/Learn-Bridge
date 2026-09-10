@@ -156,6 +156,7 @@ import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendThe
 import { defendPreemptSeat, defendTheirPreempt, preemptFollowUpSeat, respondInPreemptCompetition } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
+import { answerTransferGameChoice, answerTwoOverOneRaise, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
@@ -1926,6 +1927,35 @@ const TABELL: Row[] = [
     välj: ({ hand, facts }) => respondInPreemptCompetition(hand, facts),
   },
 
+  // ---- Etapp 5 familj 2 — fyra små "sista utväg"-svar (2026-09-10) ---------
+  // Flyttade ur auction-live.ts detektorkedjan (catch-all-continuations.ts).
+  // Alla har smala, inbördes uteslutande lägen → 0 ändrade bud. De ligger före
+  // *slam-forts* (den generella slam-utvägen) så en specifik placering vinner.
+  // partnerns 3NT efter fullföljd transfer = välj utgång (felrapport #13).
+  {
+    id: 'transfer-utgång',
+    läge: (f) => transferGameChoiceSeat(f),
+    välj: ({ hand, facts }) => answerTransferGameChoice(hand, facts),
+  },
+  // straffdubbling av deras höga färgkontrakt (3+ läget), vår sida 2+ bud.
+  {
+    id: 'straff-x',
+    läge: (f) => penaltyDoubleSeat(f) !== null,
+    välj: ({ hand, facts }) => maybePenaltyDouble(hand, facts),
+  },
+  // placera utgång efter att MIN fjärde färg (krav) besvarats (18+ → null,
+  // slammaskineriet i det gamla lagret tar vid, felrapport #42).
+  {
+    id: 'fjärde-färg-placering',
+    läge: (f) => fourthSuitPlacementSeat(f),
+    välj: ({ hand, facts }) => placeGameAfterFourthSuit(hand, facts),
+  },
+  // sätt utgång efter att öppnaren höjt vår 2/1-färg (felrapport #27).
+  {
+    id: '2/1-utgång',
+    läge: (f) => twoOverOneRaiseSeat(f),
+    välj: ({ hand, facts }) => answerTwoOverOneRaise(hand, facts),
+  },
   // ---- Etapp 4 familj 8 — slam-svarssvepet (2026-09-10) --------------------
   // De slam-beslut som INTE hörde till den kanoniska ostörda sekvensen (raden
   // *slam*) eller konkurrens-slaminvitet (raden *konkurrens-slam*) — essfrågan
