@@ -155,6 +155,7 @@ import { advancerActsInCompetition, openerActsInCompetition, responderActsInComp
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
 import { defendPreemptSeat, defendTheirPreempt, preemptFollowUpSeat, respondInPreemptCompetition } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
+import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
@@ -1923,6 +1924,27 @@ const TABELL: Row[] = [
     id: 'svag2-fortsättning',
     läge: (f) => preemptFollowUpSeat(f),
     välj: ({ hand, facts }) => respondInPreemptCompetition(hand, facts),
+  },
+
+  // ---- Etapp 4 familj 8 — slam-svarssvepet (2026-09-10) --------------------
+  // De slam-beslut som INTE hörde till den kanoniska ostörda sekvensen (raden
+  // *slam*) eller konkurrens-slaminvitet (raden *konkurrens-slam*) — essfrågan
+  // 4NT (1430 RKC) och kungfrågan 5NT besvaras oavsett hur trumfen sattes,
+  // stoppbudet rättas (felrapport #9/#10/#60), partnerns naturliga 3NT höjs till
+  // 6NT (#42), och 3NT-stoppen trevar/accepterar (etapp 7 hål 2). De fyrade förr
+  // som detektorer när linjen tog slut — SISTA utvägen, efter manus OCH
+  // positionsraderna. Raden ligger därför SIST i tabellen (samma företräde): en
+  // positionsrad som äger budet (t.ex. öppnarens naturliga rebud på ett direkt
+  // 4NT över 2♣) behåller det, och slam-svaret gäller bara där inget annat tog
+  // budet. Läget gatar på partnerns slamrelevanta bud; valet avgör om en vakt
+  // faktiskt gäller (annars null → det gamla lagret).
+  {
+    id: 'slam-forts',
+    läge: (f) => slamAnswerSeat(f),
+    välj: ({ hand, facts }) => {
+      const k = slamAnswerContinuation(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
   },
 ]
 
