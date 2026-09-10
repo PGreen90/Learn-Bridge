@@ -690,6 +690,22 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-10 — Etapp 5 slutkärnan (offBookResponse + honorForce): FÖRSÖKT &
+  REVERTERAD.** Försök att flytta de två sista catch-all-detektorerna till tabellrader
+  (*off-book-svar* = `partnerSuitResponse`, *krav-minimibud* = `forcedMinimumBid`),
+  tömma detektorlistorna och riva manus-grinden. **Blockeraren (mätt, inte gissad):**
+  `offBookResponse`/`honorForce` fyrar idag bara när `built.open || offBook` ("linjen
+  styr inte längre"). Som tabellrader (frågas FÖRST) fyrar de i AVGJORDA auktioner och
+  återöppnar dem — tre klass-c-mönster bot mot bot (höjer partnerns preferens/
+  inbjudningssvar som redan avböjts, t.ex. `1NT–2♥–2♠–2NT–3S` → 4♠ i stället för pass).
+  Gate-heuristiker träffar fel: `ourContractBids.length ≤ 4` tappar legitima djupa
+  ostörda fyrningar; `f.force` för brett. Full flytt gav **31 bot + 109 avvik ändrade
+  bud** — reverterad hellre än gate-hackad på den oåterkalleliga kärnan. **Nästa gång:**
+  designa FÖRST ett troget faktabaserat "auktionen lever / är inte avgjord"-villkor
+  (motsvarande `built.open`: ostört ≈ linjen tog slut tidigt eller fjärde färg/NMF), mät
+  mot det. Alternativ mellansteg: behåll ett tunt post-tabell-fallback i `decideCallTraced`
+  med exakt `built.open`-gaten och riv bara LiveDetector-wrappern (0-diff, men river inte
+  manus). HEAD kvar 9d45c31 (familj 2); ingen kod ändrad.
 - **2026-09-10 — Etapp 5 familj 2: de fyra små catch-all-detektorerna → tabellen
   (0 ändrade bud bot mot bot, en klass-b-förbättring i avvik).** Ny kunskapsmodul
   `catch-all-continuations.ts` (funktioner av EN hand + fakta) och fyra tabellrader
