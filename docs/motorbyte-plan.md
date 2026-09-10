@@ -690,6 +690,27 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-10 — Etapp 5 familj 2: de fyra små catch-all-detektorerna → tabellen
+  (0 ändrade bud bot mot bot, en klass-b-förbättring i avvik).** Ny kunskapsmodul
+  `catch-all-continuations.ts` (funktioner av EN hand + fakta) och fyra tabellrader
+  före *slam-forts*: *transfer-utgång* (`answerTransferGameChoice`, felrapport #13
+  — gatad till **1NT-öppningen**, eftersom 2NT-transferns utgångsval redan ägs av
+  raden *tredje* i systems-on-2NT; utan gaten stal raden 2NT-passet från *tredje*
+  och sänkte `auction-decide.test.ts`),
+  *straff-x* (`maybePenaltyDouble`, ägarbeslut 2026-07-04), *fjärde-färg-placering*
+  (`placeGameAfterFourthSuit`, frö 20260743) och *2/1-utgång* (`answerTwoOverOneRaise`,
+  felrapport #27). De fyra detektorerna + hjälparna (`transferGameChoiceToAnswer`,
+  `twoOverOneRaiseToAnswer`) rivna ur `auction-live.ts`; **FORCED_DETECTORS nu TOM**;
+  CONTESTED kvar = bara `offBookResponse` + `honorForce`. **Mätt** (baslinjer
+  `*-f2-baslinje.json`, kommandon §3): auktionsdiff **0 ändrade bud** / 23 källbyten
+  (6 straff-x + 17 pass som blev *manus* när de nya raderna gjorde linjen aningen
+  längre); avvikelsediff **1 ändrat bud** + 153 källbyten. Det enda ändrade budet
+  (frö 20270031/direkt/1NT, klass b, ägaren godkände): människan öppnar en 10-hp-1NT
+  som ingen bot öppnar → `buildAuction` gav 'ingen öppning' och kortslöt före den
+  gamla detektorkedjan, så svararen passade 3NT-erbjudandet trots 3-korts stöd; som
+  tabellrad (frågas FÖRST) väljer stolen nu 4♠ (systemriktigt, 5-3-fiten). Facit
+  `etapp 5 familj 2` i `motorbyte-facit.test.ts`. Kvar till slutkärnan:
+  `offBookResponse` + `honorForce` + manus-grinden (`open`/`divergedFromLine`).
 - **2026-09-10 — Etapp 5 påbörjad, rivning familj 1: sju döda detektorer bort
   (ren radering, 0 ändrade bud).** Frekvensmätningen av det gamla lagret (bot mot
   bot `auktionsdump-frekvens.txt` + människo-öppnad `avvikelsedump`) delade de 13
