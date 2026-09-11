@@ -151,12 +151,12 @@ import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
-import { advancerActsInCompetition, openerActsInCompetition, responderActsInCompetition } from './balancing-continuations'
+import { advancerActsInCompetition, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
 import { defendPreemptSeat, defendTheirPreempt, preemptFollowUpSeat, respondInPreemptCompetition } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
-import { answerTransferGameChoice, answerTwoOverOneRaise, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
+import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
@@ -1975,6 +1975,23 @@ const TABELL: Row[] = [
       const k = slamAnswerContinuation(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
+  },
+  // ---- Etapp 5 familj 3 — slutkärnan: de två sista catch-allerna (2026-09-11)
+  // De ligger SIST: varje positionsrad ovan äger sina bud, så de här fångar bara
+  // det som annars föll till det gamla lagrets `offBookResponse`/`honorForce`.
+  // Gaten är ett FAKTUM, inte manusets djup-proxy `built.open`: `!partnerSignedOff`
+  // (partnern har inte avslutat) hindrar dem från att återöppna en AVGJORD auktion
+  // (t.ex. `1NT–2♥–2♠–2NT–3♠` — partnern avböjde). Kunskapen är oförändrad
+  // (`partnerSuitResponse` i fit-raise/balancing, `forcedMinimumBid` i catch-all).
+  {
+    id: 'partner-färg',
+    läge: (f) => f.partnerLastSuit !== null && !f.partnerSignedOff,
+    välj: ({ hand, facts }) => partnerSuitResponse(hand, facts),
+  },
+  {
+    id: 'krav-minimibud',
+    läge: (f) => f.force !== null && !f.partnerSignedOff,
+    välj: ({ hand, facts }) => forcedMinimumBid(hand, facts),
   },
 ]
 

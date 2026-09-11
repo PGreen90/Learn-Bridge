@@ -213,9 +213,12 @@ describe('familj 4a – svararens andra bud: läget "jag svarade, partnern gav �
   it('träffar bara svararen efter öppning–svar–återbud utan störning', () => {
     const h = 'S:KQ73 H:K65 D:Q92 C:83'
     expect(bud(h, hist('1C', '1S', '2S'), 'S')?.källa).toBe('tabell:svar2')
-    // X någonstans, eller motståndarnas kontraktsbud → inte den här raden.
-    expect(bud(h, [{ seat: 'N', bid: '1C' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '2S' }, P('E')], 'S')).toBeNull()
-    expect(bud(h, [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '2S' }, { seat: 'E', bid: '3C' }], 'S')).toBeNull()
+    // X eller motståndarnas kontraktsbud → inte raden *svar2*. I konkurrens faller
+    // fortsättningen till slutkärnans catch-all (*krav-minimibud*/*partner-färg*),
+    // aldrig till *svar2* — den kontrerade svarsfortsättningen är en SENARE-kandidat
+    // (motorbyte-plan §4b, kända rester).
+    expect(bud(h, [{ seat: 'N', bid: '1C' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '2S' }, P('E')], 'S')?.källa).not.toBe('tabell:svar2')
+    expect(bud(h, [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '2S' }, { seat: 'E', bid: '3C' }], 'S')?.källa).not.toBe('tabell:svar2')
     // Öppnaren passade mitt svar → auktionen är slut för min del.
     expect(bud(h, hist('1S', '2S', 'P'), 'S')).toBeNull()
   })
@@ -331,8 +334,11 @@ describe('familj 4b – öppnarens tredje bud: läget "jag öppnade, partnern sv
   it('träffar bara öppnaren efter fyra ostörda kontraktsbud', () => {
     const h = 'S:K73 H:A2 D:AQ864 C:J93'
     expect(bud(h, hist('1D', '1S', '1NT', '2C'), 'N')?.källa).toBe('tabell:tredje')
-    // X någonstans, eller motståndarnas kontraktsbud → inte den här raden.
-    expect(bud(h, [{ seat: 'N', bid: '1D' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E'), { seat: 'S', bid: '2C' }, P('W')], 'N')).toBeNull()
+    // X någonstans, eller motståndarnas kontraktsbud → inte raden *tredje*. Med
+    // en störande X faller den kontrerade NMF-fortsättningen till slutkärnans
+    // sista rad (*krav-minimibud* hedrar kravet), inte till *tredje* — den
+    // riktiga kontrerade checkbacken är en SENARE-kandidat (motorbyte-plan §4b).
+    expect(bud(h, [{ seat: 'N', bid: '1D' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E'), { seat: 'S', bid: '2C' }, P('W')], 'N')?.källa).not.toBe('tabell:tredje')
     expect(bud(h, [{ seat: 'N', bid: '1D' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E'), { seat: 'S', bid: '2C' }, { seat: 'W', bid: '2H' }], 'N')).toBeNull()
     // Partnern passade mitt återbud → auktionen är slut för min del.
     expect(bud(h, hist('1D', '1S', '1NT', 'P'), 'N')).toBeNull()

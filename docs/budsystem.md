@@ -4381,3 +4381,10 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   annars 12+ hp med stopp i deras färg(er) → 3NT. Paragraf §7.3
   ("Advancerns svar"). Facit: `auction-konkurrens-fortsattning.test.ts`
   (20260772-läget + hela auktionen → 3NT).
+- **2026-09-11** – Motorbytet etapp 5 slutkärnan: ny intern kravnivåregel
+  **`avböjer inbjudan: rättelse`** = *avslut*. Efter `1NT–2♥–2♠–2NT–3♠` och
+  `1M–1NT–2M–2NT–3M` är öppnarens rättelse till den kända fiten / egna 6-korts
+  högfärgen ett **avslut** (partnern passar), inte en preferens — så en catch-all
+  aldrig kör över den och återöppnar en avgjord auktion. Budneutralt (samma bud,
+  förklaringstexten oförändrad); §4.3/§5.1:s avböjande är nu formellt ett signoff.
+  Kod, inte systemändring för spelaren.

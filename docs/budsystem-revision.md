@@ -97,7 +97,7 @@ kravminnet löst.
 
 | # | Svaghet | Status | Åtgärd |
 |---|---------|:---:|--------|
-| E1 | Detektorkedjan i `decideCall` — tung att underhålla, ordningskänslig | 🟢 | **BYGGD 2026-08-07 (F2):** kedjan är data (`FORCED_DETECTORS`/`CONTESTED_DETECTORS`, varje detektor `{ id, before?, run }`); före-kraven vaktas av `detector-chain.test.ts` i deploygrinden. `auctionFacts`-lagret (R2 steg 2) medvetet ej byggt — vid behov |
+| E1 | Detektorkedjan i `decideCall` — tung att underhålla, ordningskänslig | 🟢 | **BYGGD 2026-08-07 (F2):** kedjan är data (`FORCED_DETECTORS`/`CONTESTED_DETECTORS`, varje detektor `{ id, before?, run }`); före-kraven vaktades av kedjevakten i deploygrinden (borttagen med detektorerna i motorbytets slutkärna 2026-09-11). `auctionFacts`-lagret (R2 steg 2) medvetet ej byggt — vid behov |
 | E2 | ~~Forcerad minimi-stege i 2♣ väljer inte alltid finaste färg~~ | 🟢 | **F5 KLAR 2026-08-08:** högfärg före minor + konstgjorda 2♣ exkluderat (`forcedMinimumBid`/`fitLengthNeeded`/`responderSecondBidAfter2C`) |
 | E3 | Ingen kvarvarande probe-rigg i repot | 🟢 | Systemrevisorn BYGGD (etapp 2, `docs/systemrevisorn.md`, mätserien M1→M27); denna rad var stale tills 2026-08-07-svepet |
 

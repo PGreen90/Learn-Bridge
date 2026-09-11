@@ -1928,7 +1928,7 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
   if (m === 4 && meOpener) {
     const inv = rel[3].cb
     if (isGameLevel(cb)) return R('accepterar inbjudan', `${B(cb)} — accepterar partnerns inbjudan (mer än minimum).`)
-    if (cb.strain === inv.strain || (isMajor(cb.strain) && cb.level === 3)) return R('preferens', `${B(cb)} — minimum: väljer ${name} som slutkontrakt (3-korts stöd). Ej krav.`)
+    if (cb.strain === inv.strain || (isMajor(cb.strain) && cb.level === 3)) return R('avböjer inbjudan: rättelse', `${B(cb)} — minimum: avböjer inbjudan och rättar till ${name} som slutkontrakt (3-korts stöd). Partnern passar.`)
     return null
   }
 

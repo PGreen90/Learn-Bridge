@@ -203,3 +203,29 @@ describe('auctionFacts – betydelserna finns att läsa per bud', () => {
     expect(f.meaning(2)).toBe(f.meaning(2)) // memoiserad
   })
 })
+
+// partnerSignedOff (motorbytet slutkärnan 2026-09-11): har partnern AVSLUTAT?
+// Ersätter manusets djup-proxy `built.open` som gate för de två sista catch-
+// allerna — en catch-all får aldrig köra över partnerns avslut.
+describe('auctionFacts – partnerSignedOff', () => {
+  it('(i) partnerns senaste bud betyder ett avslut → true (1NT–2♥–2♠–2NT–3♠, öppnaren avböjde)', () => {
+    const hist = h('N:1NT E:P S:2H W:P N:2S E:P S:2NT W:P N:3S E:P')
+    expect(auctionFacts(hist, 'S').partnerSignedOff).toBe(true)
+  })
+  it('(ii) partnerns obestridda utgångsbud → true', () => {
+    expect(auctionFacts(h('N:1S E:P S:4S W:P'), 'N').partnerSignedOff).toBe(true)
+  })
+  it('(iii) en motståndare bjöd EFTER partnerns avslut → false (auktionen lever igen)', () => {
+    expect(auctionFacts(h('N:1S E:P S:4S W:5D'), 'N').partnerSignedOff).toBe(false)
+  })
+  it('(iv) partnerns bud är krav/ej-krav (inte avslut) → false (partnern får fortsätta)', () => {
+    expect(auctionFacts(h('N:1H E:P S:1S W:P'), 'N').partnerSignedOff).toBe(false)
+  })
+  it('(v) partnern PASSADE vårt stående kontrakt → true (deklinerade, catch-allen får inte återöppna)', () => {
+    expect(auctionFacts(h('N:1S E:P S:P W:P'), 'N').partnerSignedOff).toBe(true) // partnern passade min öppning
+    expect(auctionFacts(h('N:1D E:P S:1S W:P N:1NT E:P S:P W:P'), 'N').partnerSignedOff).toBe(true) // passade mitt 1NT-återbud
+  })
+  it('(v-b) partnern passade men MOTSTÅNDARNA äger kontraktet → false (vi kan balansera)', () => {
+    expect(auctionFacts(h('N:1H E:P S:P W:2C'), 'N').partnerSignedOff).toBe(false)
+  })
+})

@@ -1061,7 +1061,7 @@ export function openerThirdBidAfterSemiForcing1NT(
   // 2NT efter vårt 2M-återbud (6+ kort): rätta alltid till färgen.
   if (rebid.call === `2${mBid}` && len[M] >= 6) {
     if (bp >= 15) return { call: `4${mBid}`, rule: 'accepterar inbjudan', explanation: `Utgångsvärden med 6+ ${SYM[M]} → 4${mSym} (utgång).` }
-    return { call: `3${mBid}`, rule: 'rebid: egen färg', explanation: `Minimum – 6+ ${SYM[M]} spelar bättre än sang → 3${mSym}.` }
+    return { call: `3${mBid}`, rule: 'avböjer inbjudan: rättelse', explanation: `Minimum – 6+ ${SYM[M]} spelar bättre än sang → 3${mSym}.` }
   }
 
   // 2NT efter en ny färg (5-4-handen): äkta sanginbjudan.
@@ -1132,7 +1132,7 @@ export function openerThirdBidIn1NTAuction(
       }
       // Minimum MED fit: rätta till 3M (5-3-fiten spelar bättre än 2NT).
       if (fit) {
-        return { call: `3${BID[target]}`, rule: 'preferens',
+        return { call: `3${BID[target]}`, rule: 'avböjer inbjudan: rättelse',
           explanation: `Minimum (15) – avböjer men rättar till 5-3-fiten i ${SYM[target]} → 3${SYM[target]}.` }
       }
       return decline('ingen fit och ingen extra styrka')

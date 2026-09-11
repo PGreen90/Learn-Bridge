@@ -16,8 +16,8 @@
 
 import type { Bid, Hand, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { letterOfSuit, legalCalls, prettyBid, SWE_SYM } from './auction-rules'
-import { isGameOrHigher, parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
+import { allContractBids, cheapestBidIn, letterOfSuit, legalCalls, prettyBid, SWE_SYM } from './auction-rules'
+import { isGameOrHigher, parseContractBid, strainRank, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { hcp, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import { penaltyDouble } from './doubles'
@@ -233,4 +233,83 @@ export function answerTwoOverOneRaise(hand: Hand, facts: AuctionFacts): Resolved
     seat, bid, rule: '2/1 utgångskrav',
     explanation: `Vårt 2-över-1 var utgångskrav och partnern höjde min ${SWE_SYM[info.strain]} → utgång ${prettyBid(bid)} (pass förbjudet).`,
   }
+}
+
+// ---- Kravets minimibud (grunden bakom "krav får aldrig passas") -------------
+
+/**
+ * Ett naturligt MINIMIBUD som hedrar ett krav (aldrig pass). Prioritet:
+ *   1. rebjud en egen 5+ färg vi redan visat (visar verklig längd),
+ *   2. stöd en färg partnern visat (3+ kort), billigast,
+ *   3. en ny 4+ färg, billigast (längst, sedan lägst),
+ *   4. billigaste sang,
+ *   5. sista utväg: billigaste lagliga kontraktsbud (kravet får aldrig brytas).
+ * Flyttad ordagrant ur off-book-lagret (auction-live.ts) till en ren funktion av
+ * EN hand + fakta (motorbytet slutkärnan). Raden *krav-minimibud* gatar den med
+ * `f.force !== null && !f.partnerSignedOff` — en registrerad avslutsregel kan
+ * alltså aldrig tvinga fram ett bud.
+ */
+export function forcedMinimumBid(hand: Hand, f: AuctionFacts): ResolvedCall | null {
+  const { history, seat } = f
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+
+  // 1) Rebjud egen 5+ färg vi redan bjudit. F5/E2 (frön 20262070/20261885):
+  // det KONSTGJORDA 2♣-öppningsbudet räknas aldrig som bjuden klöver, och
+  // högfärger går före minorer ("finaste färg" — en äkta 6-korts spader ska
+  // rebjudas hellre än att "klövern" spränger 3NT).
+  const firstContract = history.find((c) => parseContractBid(c.bid))
+  const strong2C = firstContract?.bid === '2C' ? firstContract : null
+  const rebidOrder = [...SUIT_STRAINS].sort(
+    (a, b) => Number(b === 'H' || b === 'S') - Number(a === 'H' || a === 'S'),
+  )
+  for (const st of rebidOrder) {
+    if (len[SUIT_OF_LETTER[st]] < 5) continue
+    if (!history.some((c) => c.seat === seat && c !== strong2C && parseContractBid(c.bid)?.strain === st)) continue
+    const bid = cheapestBidIn(history, seat, st)
+    if (bid) return {
+      seat, bid, rule: 'krav – rebjuder egen färg',
+      explanation: `Auktionen är krav – jag får inte passa. Rebjuder min egna ${SWE_SYM[st]} (5+ kort).`,
+    }
+  }
+
+  // 2) Stöd partnerns visade färg (3+ kort).
+  const ps = f.partnerLastSuit
+  if (ps && len[SUIT_OF_LETTER[ps.strain]] >= 3) {
+    const bid = cheapestBidIn(history, seat, ps.strain)
+    if (bid) return {
+      seat, bid, rule: 'krav – stödjer partnern',
+      explanation: `Auktionen är krav – jag får inte passa. Stöder partnerns ${SWE_SYM[ps.strain]} (3+ kort).`,
+    }
+  }
+
+  // 3) En ny 4+ färg (längst först, sedan billigast).
+  const newSuits = SUIT_STRAINS
+    .filter((st) =>
+      len[SUIT_OF_LETTER[st]] >= 4 &&
+      !f.theirStrains.has(st) &&
+      !history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === st))
+    .sort((a, b) => len[SUIT_OF_LETTER[b]] - len[SUIT_OF_LETTER[a]] || strainRank(a) - strainRank(b))
+  for (const st of newSuits) {
+    const bid = cheapestBidIn(history, seat, st)
+    if (bid) return {
+      seat, bid, rule: 'krav – ny färg',
+      explanation: `Auktionen är krav – jag får inte passa. Visar en ny färg (${SWE_SYM[st]}, 4+ kort).`,
+    }
+  }
+
+  // 4) Billigaste sang.
+  const nt = (['1NT', '2NT', '3NT'] as Bid[]).find((b) => legal.includes(b))
+  if (nt) return {
+    seat, bid: nt, rule: 'krav – sang',
+    explanation: `Auktionen är krav – jag får inte passa. Billigaste sang.`,
+  }
+
+  // 5) Sista utväg: billigaste lagliga kontraktsbud.
+  const anyBid = allContractBids().find((b) => legal.includes(b))
+  if (anyBid) return {
+    seat, bid: anyBid, rule: 'krav – billigaste bud',
+    explanation: `Auktionen är krav – jag får inte passa; billigaste möjliga bud.`,
+  }
+  return null
 }
