@@ -80,7 +80,9 @@ describe('kikvakten (2): beslutet läser bara egen hand + auktionen', () => {
       for (let i = 0; i < history.length; i++) {
         const seat = history[i].seat
         const ursprung = decideCallTraced(deal, history.slice(0, i), seat)
-        if (!ursprung.källa.startsWith('tabell:')) continue // det gamla lagret (t.ex. motståndarnas pass) mäts i mätläget
+        // Sedan manuset rivits (etapp 5 session B) är alla källor `tabell:*` eller
+        // `pass (ingen regel)` — VARJE bud prövas nu (ett pass utan regel kan per
+        // konstruktion inte bero på de andra händerna, så det är också invariant).
         const annan = decideCallTraced(omgivnaAndra(deal, seat, mulberry32(seed * 64 + i)), history.slice(0, i), seat)
         expect(annan.källa, `frö ${seed} bud ${i + 1}`).toBe(ursprung.källa)
         expect(annan.call.bid, `frö ${seed} bud ${i + 1}`).toBe(history[i].bid)

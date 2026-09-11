@@ -19,7 +19,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Deal, Seat } from '../../types/bridge'
 import { parseHand, type ResolvedCall } from '../bidding'
-import { CONTESTED_DETECTORS, FORCED_DETECTORS, decideCall, decideCallTraced } from './auction-live'
+import { decideCall, decideCallTraced } from './auction-live'
 import { dealFromSeed } from './revisor'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
@@ -156,15 +156,9 @@ describe('raden *inkliv2*: inklivaren svarar fit-jumpen och Michaels-svaret på 
 })
 
 describe('det gamla lagret: familjens detektorer är rivna (dubblingsfamiljens revs i familj 2)', () => {
-  it('inklivsdetektorerna finns inte längre i CONTESTED_DETECTORS', () => {
-    const ids = new Set(CONTESTED_DETECTORS.map((d) => d.id))
-    for (const gone of ['maybeOvercall', 'partnerTwoSuiterToAnswer', 'ownDoubledTwoSuiterRescue', 'overcallerRaiseAdvance', 'overcallerCompetesAfterCueRaise', 'overcallerAnswersCueRaise', 'advancerPrefersOvercallSuit', 'advancerRespondsTo1NTOvercall', 'overcallerAnswersAdvance']) {
-      expect(ids.has(gone), gone).toBe(false)
-    }
-    // Familj 2 (2026-09-08) rev dubblarens vakter och den tunna "tävla till fiten"-detektorn.
-    expect(ids.has('advancerCompetesToFit')).toBe(false)
-    expect(FORCED_DETECTORS.some((d) => d.id === 'doublerRaisesAdvance')).toBe(false)
-  })
+  // (Frånvaro-assertionerna på FORCED_/CONTESTED_DETECTORS togs bort i motorbytets
+  // etapp 5 session B, 2026-09-11: hela detektorkedjan är riven — det finns inga
+  // listor kvar att pröva. Beteende-testerna nedan står kvar.)
   it('med X på vår sida tiger tabellens advance2-rad — frö 20260811 går som förut till 4♠ (sedan familj 2 ur raden x-dubblaren)', () => {
     const d = dealOf('N', {
       N: 'S:T98762 H:KT854 D:8 C:3',

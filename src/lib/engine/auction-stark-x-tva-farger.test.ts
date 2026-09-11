@@ -51,7 +51,6 @@ describe('F6/C5: stark 17+ enfärg efter två bjudna färger — kanoniska linje
     const w = built!.turns.find((t) => t.seat === 'W')
     expect(w?.call).toBe('X')
     expect(w?.rule).toBe('upplysningsdubbling (stark)')
-    expect(built!.open).toBe(true)
   })
 
   it('on-book decideCall följer linjen: Väst dubblar (passet är inte längre inbakat)', () => {
@@ -111,7 +110,6 @@ describe('etapp 4 familj 2: även den vanliga 4-4-dubblingen kommer ur tabellen 
     const w = built!.turns.find((t) => t.seat === 'W')
     expect(w?.call).toBe('X')
     expect(w?.rule).toBe('upplysningsdubbling')
-    expect(built!.open).toBe(true)
     expect(decideCall(FYRAFYRA, [call('N', '1D'), call('E', 'P'), call('S', '1H')], 'W').bid).toBe('X')
   })
 })
@@ -139,7 +137,6 @@ describe('F6/C14: linjen passar aldrig ut ett ostört tvåfärgsinkliv (låser #
     const s = built!.turns.find((t) => t.seat === 'S')
     expect(s?.call).toBe('3D')
     expect(s?.rule).toBe('advance tvåfärg (preferens)')
-    expect(built!.open).toBe(true)
   })
 
   it('K3: svararen med ♠AJT2 och 11 hp höjer 4♠ över 2NT i linjen — och linjen lämnas öppen', () => {
@@ -154,6 +151,5 @@ describe('F6/C14: linjen passar aldrig ut ett ostört tvåfärgsinkliv (låser #
     const e = built!.turns.find((t) => t.seat === 'E')
     expect(e?.call).toBe('4S')
     expect(e?.rule).toBe('höjning till utgång')
-    expect(built!.open).toBe(true)
   })
 })

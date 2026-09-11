@@ -372,7 +372,7 @@ describe('buildAuction – inverterad minor end-to-end (FAS 6 inkoppling)', () =
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['1D', '2D', '2NT', '3NT'])
+    expect(a?.turns.slice(0, 4).map((t) => t.call)).toEqual(['1D', '2D', '2NT', '3NT'])
   })
 })
 
@@ -459,7 +459,8 @@ describe('felrapport #59 – svararens egen färg efter 1NT–2♣ (§5.1)', () 
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['1S', '1NT', '2C', '3D', 'P'])
-    expect(a?.turns[a.turns.length - 1]?.explanation).toMatch(/tolerans/)
+    expect(a?.turns.slice(0, 4).map((t) => t.call)).toEqual(['1S', '1NT', '2C', '3D'])
+    // (Det avslutande passets egen förklaringstur togs bort i motorbytets etapp 5
+    // session B, 2026-09-11: `turns` slutar vid sista icke-passet.)
   })
 })

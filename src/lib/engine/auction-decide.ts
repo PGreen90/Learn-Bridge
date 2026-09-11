@@ -166,13 +166,6 @@ import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
   uncertain?: boolean
-  /**
-   * Budet PLACERAR kontraktet för min del (svararens utgångsplacering efter
-   * 2♣ med fit, 6NT-avslutet, 2/1-utgången): partnern har inget att tillägga.
-   * Manuset (`auction.ts`) läser flaggan för att lämna auktionen stängd åt det
-   * gamla lagret — samma gräns som manusets tidigare `final`-plan.
-   */
-  avslut?: boolean
 }
 
 /** Tabellens svar: budet + källan (`tabell:<familj>`, syns i auktionsdumpen). */
@@ -1474,9 +1467,7 @@ const TABELL: Row[] = [
       const dec = responderSecondDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, hand)
       if (!dec) return null
       const t = dec.turn
-      // `avslut`: placeringen efter 2♣ med fit, 6NT-avslutet och 2/1-utgången
-      // sätter kontraktet — partnern har inget att tillägga (manuset läser den).
-      return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain, avslut: dec.plan.kind === 'final' || undefined }
+      return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain }
     },
   },
   // Familj 4b — öppnarens tredje bud. Vår sida har exakt fyra kontraktsbud

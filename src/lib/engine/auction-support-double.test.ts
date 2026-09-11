@@ -43,7 +43,7 @@ describe('FAS 2 punkt 8 – stöddubbling i den levande auktionen', () => {
   })
   it('botauktionen lägger RHO:s inkliv över svaret ur RHO:s EGEN hand (familj 4) — ingen kik i öppnarens hand', () => {
     const a = buildAuction(d)!
-    expect(a.turns.map((t) => t.call)).toEqual(['1D', '1H', '1S'])
+    expect(a.turns.slice(0, 3).map((t) => t.call)).toEqual(['1D', '1H', '1S'])
     expect(a.turns[2]).toMatchObject({ seat: 'W', role: 'motståndare', rule: 'enkelt inkliv' })
     expect(decideCallTraced(d, [{ seat: 'N', bid: '1D' }, { seat: 'E', bid: 'P' }, { seat: 'S', bid: '1H' }], 'W').källa).toBe('tabell:inkliv-över-svaret')
   })

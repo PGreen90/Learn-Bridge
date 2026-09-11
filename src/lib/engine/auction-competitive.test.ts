@@ -20,7 +20,7 @@ describe('buildAuction – störd budgivning (punkt 27)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['1D', '1S', 'X'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1D', '1S', 'X'])
     expect(a?.turns[1].role).toBe('motståndare')
   })
 
@@ -38,7 +38,7 @@ describe('buildAuction – störd budgivning (punkt 27)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '1S', '2H'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', '1S', '2H'])
   })
 
   it('ostört (LHO passar) → vanligt svar, ingen motståndarrad', () => {

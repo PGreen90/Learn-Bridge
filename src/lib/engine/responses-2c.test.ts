@@ -115,7 +115,7 @@ describe('buildAuction – 2♣ end-to-end (inkoppling)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['2C', '2D', '2NT', '3C', '3S', '4S'])
+    expect(a?.turns.slice(0, 6).map((t) => t.call)).toEqual(['2C', '2D', '2NT', '3C', '3S', '4S'])
     expect(a?.openerSeat).toBe('N')
     expect(a?.responderSeat).toBe('S')
   })

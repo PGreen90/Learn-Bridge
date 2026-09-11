@@ -1,77 +1,36 @@
 import { describe, expect, it } from 'vitest'
 import type { Seat } from '../../types/bridge'
-import type { AuctionTurn, BuiltAuction } from './auction'
-import { dealForPlay, finalContract, turnsToCalls } from './auction-contract'
+import type { ResolvedCall } from '../bidding'
+import { contractFromCalls } from './auction-contract'
 
-function turn(seat: Seat, call: string, role: AuctionTurn['role'] = 'öppnare'): AuctionTurn {
-  return { seat, call, role, rule: 't', explanation: 'e' }
-}
+// `finalContract`/`turnsToCalls`/`dealForPlay` revs i motorbytets etapp 5 session B
+// (2026-09-11) — de var det gamla manuslagrets brygga. Kontrakthärledningen bor kvar
+// i `contractFromCalls` (används av budlådan), och fallen nedan testar den direkt.
+const c = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 
-function auction(turns: AuctionTurn[], open: boolean): BuiltAuction {
-  return { openerSeat: turns[0].seat, responderSeat: 'N', openCall: turns[0].call, turns, open }
-}
-
-describe('finalContract – slutkontrakt ur en färdig auktion', () => {
-  it('öppen auktion (motorn ej klar) → null', () => {
-    expect(finalContract(auction([turn('S', '1S')], true))).toBeNull()
-  })
-
+describe('contractFromCalls – slutkontrakt ur en budföljd', () => {
   it('saknar kontraktsbud (bara passar) → null', () => {
-    expect(finalContract(auction([turn('S', 'P')], false))).toBeNull()
+    expect(contractFromCalls([c('S', 'P')])).toBeNull()
   })
 
   it('1NT passat ut → 1 NT av öppnaren', () => {
-    const c = finalContract(auction([turn('S', '1NT'), turn('N', 'P', 'svarare')], false))
-    expect(c).toEqual({ declarer: 'S', strain: 'NT', level: 1 })
+    expect(contractFromCalls([c('S', '1NT'), c('N', 'P')])).toEqual({ declarer: 'S', strain: 'NT', level: 1 })
   })
 
   it('spelförare = den som FÖRST nämnde slutfärgen (svararen)', () => {
     // S 1C – N 1S – S 2S (höjning): spader ägs av N/S, först nämnd av N.
-    const c = finalContract(
-      auction(
-        [turn('S', '1C'), turn('N', '1S', 'svarare'), turn('S', '2S'), turn('N', 'P', 'svarare')],
-        false,
-      ),
-    )
-    expect(c).toEqual({ declarer: 'N', strain: 'spades', level: 2 })
+    expect(contractFromCalls([c('S', '1C'), c('N', '1S'), c('S', '2S'), c('N', 'P')]))
+      .toEqual({ declarer: 'N', strain: 'spades', level: 2 })
   })
 
   it('inkliv: motståndaren spelar slutkontraktet', () => {
     // S 1H – V 2D (inkliv) – passat ut: 2D av Väst (Ö/V).
-    const c = finalContract(
-      auction(
-        [turn('S', '1H'), turn('W', '2D', 'motståndare'), turn('N', 'P', 'svarare')],
-        false,
-      ),
-    )
-    expect(c).toEqual({ declarer: 'W', strain: 'diamonds', level: 2 })
+    expect(contractFromCalls([c('S', '1H'), c('W', '2D'), c('N', 'P')]))
+      .toEqual({ declarer: 'W', strain: 'diamonds', level: 2 })
   })
-})
 
-describe('turnsToCalls – fyller i motståndarpassar', () => {
-  it('öppnare S, svarare N (giv S): mellanliggande V passar', () => {
-    const calls = turnsToCalls([turn('S', '1NT'), turn('N', '3NT', 'svarare')], 'S')
-    expect(calls).toEqual([
-      { seat: 'S', bid: '1NT', rule: 't', explanation: 'e' },
-      { seat: 'W', bid: 'P' }, // ifylld motståndarpass – ingen regel/förklaring
-      { seat: 'N', bid: '3NT', rule: 't', explanation: 'e' },
-    ])
-  })
-})
-
-describe('dealForPlay – kontraktet matchar den visade budgivningen', () => {
-  it('100 givar: när en auktion finns slutar den i kontraktet som spelas', () => {
-    for (let i = 0; i < 100; i++) {
-      const { contract, calls } = dealForPlay()
-      expect(contract.level).toBeGreaterThanOrEqual(1)
-      expect(contract.level).toBeLessThanOrEqual(7)
-      if (calls) {
-        // Sista kontraktsbudet i budföljden = kontraktet som spelas.
-        const bids = calls.filter((c) => /^[1-7](C|D|H|S|NT)$/.test(c.bid))
-        const last = bids[bids.length - 1]
-        const strainLetter = contract.strain === 'NT' ? 'NT' : contract.strain[0].toUpperCase()
-        expect(last.bid).toBe(`${contract.level}${strainLetter}`)
-      }
-    }
+  it('dubbling gäller sista kontraktsbudet', () => {
+    expect(contractFromCalls([c('S', '4H'), c('W', 'X'), c('N', 'P'), c('E', 'P'), c('S', 'P')]))
+      .toEqual({ declarer: 'S', strain: 'hearts', level: 4, doubled: 'X' })
   })
 })
