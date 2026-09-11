@@ -254,8 +254,9 @@
   i stället för rå hp. NT-stegen + starka 2♣ är fortsatt hp-definierade. Bra
   11-hp-händer öppnar, platta D/kn-tunga 12-hp-händer avstår. Se `docs/handvardering.md`.
 - ✅ Punkt **29** (kortspels-läge) – `play.ts` (spelmotor: följa färg, trumf,
-  stickvinnare, räkning), `play-bot.ts` (bott-tumregler), `play-contract.ts`
-  (heuristiskt kontrakt) och fliken **Spela kort** (`src/pages/Play.tsx`): klicka
+  stickvinnare, räkning), `play-bot.ts` (bott-tumregler), play-contract.ts
+  (heuristiskt kontrakt — RADERAD i motorbytets etapp 5, kontrakt ur budgivningen
+  via `contractFromCalls`) och fliken **Spela kort** (`src/pages/Play.tsx`): klicka
   ut korten mot bottar, avslut + motspel, stickräkning, satt/bet. Se `docs/kortspel.md`.
 - ✅ **Bot-tumreglerna förfinade** (`play-bot.ts`): **andra hand lågt** (spar
   honnörer i stället för att vinna i onödan), **ruffar aldrig partnerns vinnande

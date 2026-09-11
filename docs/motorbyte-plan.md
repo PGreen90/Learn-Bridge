@@ -814,7 +814,7 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
   budgivningen är slut (`buildAuctionCore` med konkurrensronden + `open`-flaggan
   raderad); `BuiltAuction` tappade `open`, `DecidedCall.avslut` (dött, läste bara
   manuset) borta, `auction-contract.ts` behåller bara `contractFromCalls`
-  (`turnsToCalls`/`finalContract`/`dealForPlay` + `play-contract.ts`/`pickContract`
+  (`turnsToCalls`/`finalContract`/`dealForPlay` + play-contract.ts/`pickContract`
   rivna — inga produktionsanropare). Källorna är nu bara `tabell:*`,
   `<bud> → pass` (laglighetsvakt) och `pass (ingen regel)`. **Kikvakten skärpt:**
   `tabell:`-filtret borta — VARJE bud i botauktionen prövas nu mot handbyte (ett
