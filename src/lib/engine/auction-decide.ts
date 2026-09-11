@@ -1185,6 +1185,20 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
     }
   }
 
+  // Kaptenen höjer öppnarens NYA högfärg i en 2/1 GF-auktion (1♥–2♦–2♠–3♠;
+  // live-prov 2026-09-11): höjningen sätter högfärgen som trumf, GF står, och
+  // öppnaren öppnar cue-ronden (`partnerStarts`) — precis som efter reverse +
+  // billig höjning (beslut 3). Skillnaden: öppnaren har bara visat minimum efter
+  // ett 2/1 (partnerMin 12). Utan detta föll läget till `pass (ingen regel)` —
+  // motorn passade partnerns kontrollbud, ett krav som aldrig får passas.
+  if (response.rule === '2-över-1 GF' && rebid.rule === 'rebid: ny färg (GF)') {
+    const rs = suitOf(rebid.call)
+    if (rs && isMajorSuit(rs) && first === `3${LETTER[rs]}`) {
+      const ctx: SlamContext = { partnerMin: 12, inviteCall: `5${LETTER[rs]}`, gameForcing: true, strictDrive: true }
+      return { kind: 'slam', captain, prefix: 4, setup: { trump: rs, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+    }
+  }
+
   // §5b beslut 12 (2026-09-08): svararens HOPP till 4m efter 1m–2m′–2NT =
   // trumf satt + slamdriv (4+ stöd, 33+ mot visade 12, ingen sanghand).
   // Öppnaren öppnar cue-ronden (billigaste kontroll under 5m, annars 5m);

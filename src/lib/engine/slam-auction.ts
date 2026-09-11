@@ -132,6 +132,15 @@ export interface SlamContext {
    * dömer inbjudningar (§5b beslut 4, 2026-09-07).
    */
   captainShort?: Suit
+  /**
+   * Cue-rondens driv FÖRBI utgången kräver full drivzon (33+), inte det
+   * aggressivare 31 som gäller när partnern visat EXTRA (reverse, beslut 3).
+   * Sätts när partnern bara visat MINIMUM (2/1 + kaptenens höjning av öppnarens
+   * nya högfärg, live-prov 2026-09-11): då överbjöd ett cue-rond-driv på 31–32
+   * (frö 20270216: 32 → 6♥ bet 2), eftersom kaptenens stödpoäng dubblerar
+   * mittemot ett balanserat minimum.
+   */
+  strictDrive?: boolean
 }
 
 /**
@@ -442,7 +451,8 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
     // Kaptenen avgör: driv förbi utgången eller avslut. Okontrollerad sidofärg
     // = varken visad (av någon) eller kontrollerad på kaptenens EGEN hand.
     const uncontrolled = RANK_ORDER.filter((s) => s !== trump && !controlled.has(s) && !firstRoundControl(hand, s))
-    if (floor >= 31 && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
+    const driveFloor = ctx.strictDrive ? 33 : 31
+    if (floor >= driveFloor && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
     return bidRank(game) > lastRank
       ? { role: 'svarare', call: game, rule: 'cue: avslut', explanation: `otillräckligt för slam → utgång (${game[0]}${SYM[trump]}).` }
       : { role: 'svarare', call: 'P', rule: 'cue: avslut', explanation: `otillräckligt för slam → passar (${game} står).` }

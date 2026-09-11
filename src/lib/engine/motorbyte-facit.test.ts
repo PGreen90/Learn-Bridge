@@ -1421,3 +1421,28 @@ describe('etapp 5 slutkärnan – kända rester (facit-kö)', () => {
   })
   it.todo('C: advancern ska inte hoppa till 5♣ på 4-korts stöd i djup konkurrens (frö 20271014, raiseWithFit-överbud)')
 })
+
+// Fynd ur etapp 6:s live-prov (ägaren, 2026-09-11, bricka 5): efter att KAPTENEN
+// höjt öppnarens andra färg (1♥–2♦–2♠–3♠, spader satt som trumf) och öppnaren
+// cue:at (4♥) rekommenderade motorn PASS (`pass (ingen regel)`) — ett kontrollbud
+// får aldrig passas. Slam-läsaren kände inte igen denna väg till trumf-
+// överenskommelse (kaptenen höjer öppnarens 2:a färg), så cue-ronden startade
+// aldrig. Ägarbeslut: minimum → signa av 4♠; nytt färgbud över partnerns cue =
+// kontrollbud (inte "placerar utgången").
+describe('etapp 6 – cue-rond efter kaptenens höjning av öppnarens 2:a färg', () => {
+  const P = (seat: Seat) => call(seat, 'P')
+  const cueDeal = dealNS('S:AK9 H:AKQ98 D:A7 C:A98', 'S:QJT62 H:7 D:KQ64 C:K32')
+  const til4H: ResolvedCall[] = [
+    call('N', '1H'), P('E'), call('S', '2D'), P('W'),
+    call('N', '2S'), P('E'), call('S', '3S'), P('W'),
+    call('N', '4H'), P('E'),
+  ]
+  it('Syd (11 hp minimum) signar av 4♠ över partnerns kontrollbud 4♥ — aldrig pass', () => {
+    expect(decideCall(cueDeal, til4H, 'S').bid).toBe('4S')
+  })
+  it('Syds nya färg 5♣ över partnerns cue läses som kontrollbud, inte utgångsplacering', () => {
+    const m = meaningOf([...til4H, call('S', '5C')], til4H.length)
+    expect(m.rule).toBe('cue-bid')
+    expect(m.forcing).not.toBe('avslut')
+  })
+})

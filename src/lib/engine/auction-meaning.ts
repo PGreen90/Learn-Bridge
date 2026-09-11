@@ -1437,6 +1437,23 @@ function reverseMajorRaise(u: Undisturbed): boolean {
   return reverse && isMajor(reb.strain) && b[3].seat === u.responder && same(raise, 3, reb.strain)
 }
 
+/**
+ * Kaptenen höjde öppnarens NYA högfärg efter ett 2/1-svar (1♥–2♦–2♠–3♠):
+ * höjningen sätter högfärgen som trumf i en redan GF-auktion, och öppnarens
+ * senare bud i sin FÖRSTA färg (1♥→4♥) är ett kontrollbud, inte naturligt —
+ * samma logik som `reverseMajorRaise`, men via 2/1-vägen (live-prov 2026-09-11).
+ */
+function twoOverOneMajorRaise(u: Undisturbed): boolean {
+  const b = u.bids
+  if (b.length < 4) return false
+  const [open, resp, reb] = b.map((x) => x.cb)
+  if (open.level !== 1 || open.strain === 'NT') return false
+  if (resp.level !== 2 || resp.strain === 'NT' || resp.strain === open.strain) return false // 2-över-1
+  if (reb.level !== 2 || reb.strain === 'NT' || reb.strain === open.strain || reb.strain === resp.strain) return false // öppnarens nya färg
+  if (!isMajor(reb.strain)) return false
+  return b[3].seat === u.responder && same(b[3].cb, 3, reb.strain)
+}
+
 /** Fjärde färg (§6.6): tre färger bjudna av oss, detta är den fjärde, inte alla på 1-läget, opassad hand, ingen reverse före. */
 function isFourthSuit(u: Undisturbed, cb: ParsedBid): boolean {
   if (u.bids.length < 3 || cb.strain === 'NT' || u.responderPassed) return false
@@ -1640,9 +1657,16 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   // Efter reverse + stark höjning (§5b beslut 3) öppnar öppnaren cue-ronden — även i egen visad färg (1♦–1♠–2♥–3♥–4♦).
   if (trump && cb.strain !== 'NT' && cb.strain !== trump && n >= 2 && ((agreed && lastWasCue) || !own.has(cb.strain) || (n >= 4 && reverseMajorRaise(u)))) {
     const game = gameIn(trump)
+    const belowGame = bidRank(cb) < bidRank(game)
+    // En cue-rond kan pressas FÖRBI utgången: har partnern just cue:at och
+    // trumfen är satt, är nästa nya färg ett kontrollbud även över utgången
+    // (1♥–2♦–2♠–3♠–4♥–5♣ — klöver-cuet måste till 5-läget), men under lillslam
+    // i trumfen (live-prov 2026-09-11).
+    const cueRoundPastGame = lastWasCue && !belowGame && bidRank(cb) < bidRank({ level: 6, strain: trump })
     const ok =
-      bidRank(cb) < bidRank(game) &&
-      (isMajor(trump) ? cb.level === 4 || (cb.level === 3 && gf && n >= 3) : bidRank(cb) > bidRank({ level: 3, strain: 'NT' }))
+      (belowGame &&
+        (isMajor(trump) ? cb.level === 4 || (cb.level === 3 && gf && n >= 3) : bidRank(cb) > bidRank({ level: 3, strain: 'NT' })))
+      || cueRoundPastGame
     // Öppnarens svar på Jacoby 2NT och kortfärgssvaren på splinterreläet är egna regler (afterOneMajor).
     const jacobyReply = n === 2 && same(u.bids[1].cb, 2, 'NT') && seat === u.opener
     const splinterReply = n === 3 && u.bids[1].cb.level === 3 && isMajor(u.bids[1].cb.strain) && u.bids[1].cb.strain !== u.bids[0].cb.strain && seat === u.responder
@@ -1748,7 +1772,7 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
     // Kontrollbud med satt trumf.
     // Efter reverse + stark höjning (§5b beslut 3) är även ett 4-lägesbud i EGEN
     // visad färg ett kontrollbud (1♦–1♠–2♥–3♥–4♦ = ruterkontroll, inte ruter).
-    const cueInOwnSuit = k >= 4 && reverseMajorRaise(u)
+    const cueInOwnSuit = k >= 4 && (reverseMajorRaise(u) || twoOverOneMajorRaise(u))
     if (trump && cb.strain !== trump && ((agreed && cues.has(k - 1)) || !mine.has(cb.strain) || cueInOwnSuit) && k >= 2) {
       const belowGame = bidRank(cb) < bidRank(gameIn(trump))
       if (belowGame && ((isMajor(trump) && (cb.level === 4 || (cb.level === 3 && gf))) || (isMinor(trump) && above3NT))) {
