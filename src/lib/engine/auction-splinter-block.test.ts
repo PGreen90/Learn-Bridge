@@ -94,6 +94,6 @@ describe('kanoniska linjen: blockerad splinter går Jacoby-vägen hela vägen', 
     expect(sResponse!.rule).toBe('Jacoby 2NT')
     // Hela den kanoniska vägen: Jacoby → öppnarens 3NT (14–15 bal) → cue 4♣/4♦
     // → 4NT RKC → 5♠ (2 nyckelkort + trumfdam) → 6♠ (♥A saknas → inte storslam).
-    expect(auction!.turns.map((t) => t.call)).toEqual(['1S', '2NT', '3NT', '4C', '4D', '4NT', '5S', '6S'])
+    expect(auction!.turns.slice(0, 8).map((t) => t.call)).toEqual(['1S', '2NT', '3NT', '4C', '4D', '4NT', '5S', '6S'])
   })
 })

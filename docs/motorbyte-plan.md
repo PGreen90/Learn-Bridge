@@ -486,7 +486,7 @@ Källorna blir `tabell:partner-färg` / `tabell:krav-minimibud`; kikvaktens
 - **A4. Mätning och klassning (kärnan):** auktionsdiff + avvikelsediff mot baslinjerna, aggregera första skillnad per mönster; `olagligt` = 0. Väntat: `offBookResponse→partner-färg`/`honorForce→krav-minimibud` samma bud = **a**; `pass`/`manus`→`krav-minimibud` i ostörd 2/1-/2♣ under utgång = **b** (frö i loggen, visas ägaren); `pass`→`partner-färg` på djup ≥ 6 granskas en och en (systemriktig höjning = **b**; "partnern hade stannat" = betydelsehål → A2-rättelse, aldrig gate); höjning av fjärde färg/NMF → nu pass/kravbud = **b**; allt annat = **c** lagas före merge. **Kräver ett c-mönster en GATE → STOPP, rapportera ägaren.** Sveparna: pliktsvep, förklaringssvep, regelsvep, betydelsesvep (ostört 0/0/0, stört grind 0), kikvakt (skarp; deterministisk assertion på `krav-minimibud` om svepet < 5 träffar), `npm test`, revisorn 1000 (inte sämre).
 - **A5. Docs + grind:** planens §4 etapp 5-rad + logg, CLAUDE.md NU, budsystem §9. 🚪 **Grind familj 3:** b-lista med exempelhänder → godkänt → `--no-ff`-mergepunkt → PCD.
 
-### Session B — Etapp 5 familj 4: rivningen av manuset (0 ändrade bud)
+### Session B — Etapp 5 familj 4: rivningen av manuset (0 ändrade bud) — KLAR 2026-09-11 (loggen)
 Efter A kan det gamla lagret bara ge pass → rivningen är 0-diff **per
 konstruktion**, bevisas med dumparna.
 - **B0.** Baslinjer på A:s mergepunkt.
@@ -805,6 +805,34 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-11 — Etapp 5 SESSION B KLAR: manuset rivet (0 ändrade bud per
+  konstruktion).** `decideCallTraced` (`auction-live.ts`) krympt till fakta →
+  `decideFromTable` → laglighetsvakt → `pass (ingen regel)`; hela det gamla
+  manuslagret borta: `buildAuction`-linjen, detektorkedjan (`DetectorCtx`,
+  `LiveDetector`, `FORCED_/CONTESTED_DETECTORS`), `divergedFromLine`. `buildAuction`
+  (`auction.ts`) är nu en tunn hjälpare som spelar `decideCall` stol för stol tills
+  budgivningen är slut (`buildAuctionCore` med konkurrensronden + `open`-flaggan
+  raderad); `BuiltAuction` tappade `open`, `DecidedCall.avslut` (dött, läste bara
+  manuset) borta, `auction-contract.ts` behåller bara `contractFromCalls`
+  (`turnsToCalls`/`finalContract`/`dealForPlay` + `play-contract.ts`/`pickContract`
+  rivna — inga produktionsanropare). Källorna är nu bara `tabell:*`,
+  `<bud> → pass` (laglighetsvakt) och `pass (ingen regel)`. **Kikvakten skärpt:**
+  `tabell:`-filtret borta — VARJE bud i botauktionen prövas nu mot handbyte (ett
+  pass utan regel kan per konstruktion inte bero på andra händer). **Testmigrering:**
+  24 `buildAuction`-testers `.open`-assertioner strukna, hela-`turns`-jämförelser i
+  STÖRDA auktioner (som manuset förr trunkerade en rond) skrivna om till prefix-
+  checkar (`.turns.slice(0, N)`) — inget förväntat bud ändrat, bara formen; det
+  avslutande passets egen förklaringstur (som slam-sekvenserna aldrig hade — gammal
+  inkonsekvens) togs bort ur fem ostörda tester; on-book-invarianttesterna
+  (linje-mot-`decideCall`) rivna som tautologiska. **Bevis** (baslinjer
+  `*-rivning-baslinje.json` på session A-mergepunkten `71d0dbe`, kommandon §3):
+  auktionsdiff bot **0 ändrade bud** (1433 källbyten manus→pass), avvikelsediff
+  **0 ändrade bud** (264 källbyten); `npx tsc` rent; hela sviten grön (`npx vitest
+  run`) utom CLAUDE.md-storleken lokalt (CRLF-artefakt, LF < 16384 på CI);
+  betydelsesvep ostört 0/0/0; kikvakt (skärpt) grön; revisorn IDENTISK per
+  konstruktion (0-diff → `decideCall` oförändrad). 🚪 Ingen b-lista (0 ändrade bud).
+  **Nästa gång:** session C — dokumentation, minne, CLAUDE.md (ordet on-/off-book/
+  manus ska sedan bara finnas i historik).
 - **2026-09-11 — Etapp 5 SLUTKÄRNAN (session A) KLAR: de två sista catch-allerna
   → tabellrader, gatade med faktumet `partnerSignedOff` (ägaren godkände familjen
   "kör 1").** `offBookResponse`/`honorForce` (det gamla lagrets sista två

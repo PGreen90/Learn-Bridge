@@ -21,7 +21,7 @@ import { describe, expect, it } from 'vitest'
 import type { Deal, Seat } from '../../types/bridge'
 import { parseHand, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
-import { CONTESTED_DETECTORS, FORCED_DETECTORS, decideCallTraced } from './auction-live'
+import { decideCallTraced } from './auction-live'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 function dealOf(dealer: Seat, hands: Record<Seat, string>, vul: Deal['vulnerability'] = 'none'): Deal {
@@ -83,7 +83,7 @@ describe('raden *svar-stört*: svararens första bud när LHO stört partnerns �
       W: 'S:JT9 H:JT9 D:T9 C:QJ98',
     })
     const a = buildAuction(d)!
-    expect(a.turns.map((t) => `${t.seat}:${t.call}`)).toEqual(['N:1D', 'E:1S', 'S:X'])
+    expect(a.turns.slice(0, 3).map((t) => `${t.seat}:${t.call}`)).toEqual(['N:1D', 'E:1S', 'S:X'])
     expect(a.turns[2]).toMatchObject({ role: 'svarare', rule: 'negativ dubbling' })
     expect(decideCallTraced(d, [call('N', '1D'), call('E', '1S')], 'S').källa).toBe('tabell:svar-stört')
   })
@@ -160,12 +160,8 @@ describe('raderna *jordan-öppnaren* / *jordan-svararen*', () => {
 })
 
 describe('det rivna och familjegränsen', () => {
-  it('detektorerna för stöd-X, negativ X och Jordan finns inte kvar i kedjorna', () => {
-    const ids = new Set([...FORCED_DETECTORS, ...CONTESTED_DETECTORS].map((d) => d.id))
-    for (const id of ['supportDoubleToAnswer', 'supportDoubleFollowUpToAnswer', 'jordanToAnswer', 'jordanSignoffToAnswer', 'negativeDoubleToAnswer', 'negativeDoublerContinues']) {
-      expect(ids.has(id), id).toBe(false)
-    }
-  })
+  // (Frånvaro-assertionen på FORCED_/CONTESTED_DETECTORS togs bort i etapp 5
+  // session B, 2026-09-11: detektorkedjan är riven, inga listor kvar att pröva.)
   it('manusets kik-rond är riven: RHO:s inkliv över svaret läggs ur RHO:s EGEN hand (familj 4), oavsett vad öppnaren håller', () => {
     const d = dealOf('N', {
       N: 'S:A32 H:K32 D:AKJ432 C:2', // 15 hp, EXAKT 3 hjärter
@@ -174,10 +170,10 @@ describe('det rivna och familjegränsen', () => {
       W: 'S:KJT98 H:76 D:Q97 C:A76', // 10 hp, 5 spader — inkliv ur egen hand (raden *inkliv-över-svaret*)
     })
     const a = buildAuction(d)!
-    expect(a.turns.map((t) => t.call)).toEqual(['1D', '1H', '1S'])
+    expect(a.turns.slice(0, 3).map((t) => t.call)).toEqual(['1D', '1H', '1S'])
     // Samma inkliv när öppnaren har FYRA hjärter (förr lades det bara vid exakt tre — en kik).
     const d2 = dealOf('N', { N: 'S:A3 H:K432 D:AKJ432 C:2', E: 'S:76 H:JT98 D:T8 C:KJT98', S: 'S:Q54 H:AQ54 D:65 C:Q543', W: 'S:KJT98 H:76 D:Q97 C:A76' })
-    expect(buildAuction(d2)!.turns.map((t) => t.call)).toEqual(['1D', '1H', '1S'])
+    expect(buildAuction(d2)!.turns.slice(0, 3).map((t) => t.call)).toEqual(['1D', '1H', '1S'])
     // Vid bordet: stöddubblar öppnaren ur tabellen.
     expect(decideCallTraced(d, [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', '1S')], 'N').källa).toBe('tabell:stöd-x')
     expect(decideCallTraced(d, [call('N', '1D'), call('E', 'P'), call('S', '1H')], 'W').källa).toBe('tabell:inkliv-över-svaret')

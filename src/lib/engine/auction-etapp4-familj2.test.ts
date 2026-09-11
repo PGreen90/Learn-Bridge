@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest'
 import type { Deal, Seat } from '../../types/bridge'
 import { parseHand, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
-import { CONTESTED_DETECTORS, FORCED_DETECTORS, decideCall, decideCallTraced } from './auction-live'
+import { decideCall, decideCallTraced } from './auction-live'
 import { dealFromSeed } from './revisor'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
@@ -62,8 +62,7 @@ describe('raden *dubbling*: X efter två bjudna färger ur tabellen', () => {
       W: 'S:KQ54 H:A2 D:K87 C:QJT4', // 15 hp, 4-4 ♠/♣
     })
     const built = buildAuction(d)!
-    expect(built.turns.map((t) => `${t.seat}:${t.call}`)).toEqual(['N:1D', 'S:1H', 'W:X'])
-    expect(built.open).toBe(true)
+    expect(built.turns.slice(0, 3).map((t) => `${t.seat}:${t.call}`)).toEqual(['N:1D', 'S:1H', 'W:X'])
   })
 })
 
@@ -195,12 +194,8 @@ describe('familjegränserna', () => {
 })
 
 describe('det gamla lagret: familjens detektorer är rivna', () => {
-  it('dubblingsdetektorerna finns inte längre i FORCED_/CONTESTED_DETECTORS', () => {
-    const ids = new Set([...FORCED_DETECTORS, ...CONTESTED_DETECTORS].map((d) => d.id))
-    for (const gone of ['takeoutDoubleToAnswer', 'takeoutDoubleOverbidToAnswer', 'advancerCueToAnswer', 'doublerRaisesAdvance', 'maybeTakeoutOfResponse', 'ownStrongDoubleRebid', 'advanceStrongDoubleRebid', 'strongDoublerSecondRebid', 'answerStrongDoubleGameForce', 'advancerCompetesToFit']) {
-      expect(ids.has(gone), gone).toBe(false)
-    }
-  })
+  // (Frånvaro-assertionen på FORCED_/CONTESTED_DETECTORS togs bort i etapp 5
+  // session B, 2026-09-11: detektorkedjan är riven, inga listor kvar att pröva.)
   it('decideCall och decideCallTraced ger samma bud (samma beslut, vägen synlig)', () => {
     const hist = [call('N', '1H'), call('E', 'X'), call('S', 'P')]
     const d = ensam('W', 'S:T9876 H:65 D:8743 C:32')

@@ -222,7 +222,7 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 ## Kortspel (punkt 29)
 
 - Flik **"Spela kort"** – `src/pages/Play.tsx`
-- Spelmotor `play.ts` (följa färg, trumf, stickvinnare), bottar `play-bot.ts` (tumregler), kontrakt `play-contract.ts`.
+- Spelmotor `play.ts` (följa färg, trumf, stickvinnare), bottar `play-bot.ts` (tumregler), kontrakt ur budgivningen via `contractFromCalls` (`auction-contract.ts`; den gamla heuristiken play-contract.ts revs i motorbytets etapp 5, 2026-09-11).
 - Spelaren sitter Syd (avslut + motspel).
 - Spec: `docs/kortspel.md`
 

@@ -53,7 +53,7 @@ räkna kravnivå/alert i konkurrens ur ROLLEN. Störda grinden 0/0/0. **Ägarbes
 "noll":** noll på det avgörbara + de KORTBEROENDE resterna (inbjudan/ej krav beror
 på handen — ärlig inferens golv) listade som `STÖRDA_UNDANTAG` utanför grinden (50
 mönster). Registret konsekvent: alla cue-BUD alertas, fortsättningarna inte.
-**Nästa:** ETAPP 5 session B (riv manuset); slutkärnan (A) LIVE 2026-09-11.
+**Nästa:** ETAPP 5 session C (docs/minne); slutkärnan (A) + manusrivningen (B, 0-diff) LIVE 2026-09-11.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

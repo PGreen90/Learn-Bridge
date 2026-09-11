@@ -133,10 +133,10 @@ describe('buildAuction – svag tvåa end-to-end (inkoppling)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['2H', '2NT', '3S', '4H'])
+    expect(a?.turns.slice(0, 4).map((t) => t.call)).toEqual(['2H', '2NT', '3S', '4H'])
     // Steg 3 + 6: varje tur bär kravnivå + alert ur regelregistret.
-    expect(a?.turns.map((t) => t.forcing)).toEqual(['ej-krav', 'krav-1-rond', 'ej-krav', 'avslut'])
-    expect(a?.turns.map((t) => t.alert)).toEqual([false, true, true, false])
+    expect(a?.turns.slice(0, 4).map((t) => t.forcing)).toEqual(['ej-krav', 'krav-1-rond', 'ej-krav', 'avslut'])
+    expect(a?.turns.slice(0, 4).map((t) => t.alert)).toEqual([false, true, true, false])
   })
 
   // Felrapport #22 (bricka 3): Väst svag 2♠, Öst 22 hp frågar Ogust, Väst 3♣
@@ -152,6 +152,6 @@ describe('buildAuction – svag tvåa end-to-end (inkoppling)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['2S', '2NT', '3C', '3NT'])
+    expect(a?.turns.slice(0, 4).map((t) => t.call)).toEqual(['2S', '2NT', '3C', '3NT'])
   })
 })

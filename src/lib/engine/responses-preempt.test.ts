@@ -94,6 +94,6 @@ describe('buildAuction – spärr end-to-end (inkoppling)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['3S', '4S', 'P'])
+    expect(a?.turns.slice(0, 2).map((t) => t.call)).toEqual(['3S', '4S'])
   })
 })

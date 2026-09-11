@@ -34,7 +34,7 @@ describe('FAS 2 punkt 6 – Jordan 2NT efter upplysningsdubbling', () => {
         'S:KQ3 H:QT98 D:K43 C:432', // 10 hp, 4 hjärter → Jordan 2NT
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', 'X', '2NT'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', 'X', '2NT'])
     expect(a?.turns[2].rule).toBe('Jordan 2NT')
     // Får ALDRIG tolkas som Jacoby 2NT (utgångskrav, kortfärgsfråga).
     expect(a?.turns[2].rule).not.toBe('Jacoby 2NT')
@@ -50,7 +50,7 @@ describe('FAS 2 punkt 6 – Jordan 2NT efter upplysningsdubbling', () => {
     )
     // Sedan motorbytets etapp 4 familj 2 (2026-09-08) lägger manuset även
     // advancerns tvångsflykt över redubblingen ur tabellen (raden *x-svar*).
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', 'X', 'XX', '2C'])
+    expect(a?.turns.slice(0, 4).map((t) => t.call)).toEqual(['1H', 'X', 'XX', '2C'])
     expect(a?.turns[2].rule).toBe('redubbling')
     expect(a?.turns[3].rule).toBe('färgbud')
   })
@@ -69,7 +69,7 @@ describe('R1-fynd #1 – konkurrens-NT-svaret på rätt nivå', () => {
         'S:KJ32 H:54 D:KQ4 C:5432', // 9 hp, jämn (4-2-3-4), spaderstopp, 2 hjärter → 1NT
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '1S', '1NT'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', '1S', '1NT'])
     expect(a?.turns[2].rule).toBe('NT med stopp')
   })
 
@@ -81,7 +81,7 @@ describe('R1-fynd #1 – konkurrens-NT-svaret på rätt nivå', () => {
         'S:K43 H:54 D:KQ42 C:Q432', // 10 hp, jämn (3-2-4-4), <4 spader (ingen negativ X), klöverstopp → 2NT
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '2C', '2NT'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', '2C', '2NT'])
     expect(a?.turns[2].rule).toBe('NT med stopp')
   })
 })
@@ -95,7 +95,7 @@ describe('FAS 2 punkt 5 – svararens höjningar efter färginkliv', () => {
         'S:K32 H:KQ3 D:QT98 C:432', // 10 hp, 3 hjärter → cue 2♠
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '1S', '2S'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', '1S', '2S'])
     expect(a?.turns[2].rule).toBe('cue (limithöjning+)')
   })
 
@@ -107,7 +107,7 @@ describe('FAS 2 punkt 5 – svararens höjningar efter färginkliv', () => {
         'S:K43 H:KQ3 D:KJ32 C:432', // 12 hp, 3 hjärter → cue 3♣
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '2C', '3C'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', '2C', '3C'])
     expect(a?.turns[2].rule).toBe('cue (limithöjning+)')
   })
 
@@ -119,7 +119,7 @@ describe('FAS 2 punkt 5 – svararens höjningar efter färginkliv', () => {
         'S:Q43 H:K98 D:32 C:Q5432', // 7 hp, 3 hjärter → enkel 2♥
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '2D', '2H'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', '2D', '2H'])
     expect(a?.turns[2].rule).toBe('konkurrenshöjning')
   })
 
@@ -131,7 +131,7 @@ describe('FAS 2 punkt 5 – svararens höjningar efter färginkliv', () => {
         'S:QT98 H:K3 D:KQ3 C:5432', // 10 hp, 4 spader → cue 3♥
       ),
     )
-    expect(a?.turns.map((t) => t.call)).toEqual(['1S', '2H', '3H'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1S', '2H', '3H'])
     expect(a?.turns[2].rule).toBe('cue (limithöjning+)')
   })
 })

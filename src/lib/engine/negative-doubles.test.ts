@@ -68,7 +68,7 @@ describe('FAS 2 punkt 7 – minor-dubbling i levande auktion', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.map((t) => t.call)).toEqual(['1H', '1S', 'X'])
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', '1S', 'X'])
     expect(a?.turns[2].rule).toBe('negativ dubbling')
   })
 })

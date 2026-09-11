@@ -25,7 +25,7 @@ import { describe, expect, it } from 'vitest'
 import type { Deal, Seat } from '../../types/bridge'
 import { parseHand, type ResolvedCall } from '../bidding'
 import { buildAuction } from './auction'
-import { CONTESTED_DETECTORS, FORCED_DETECTORS, decideCall, decideCallTraced } from './auction-live'
+import { decideCall, decideCallTraced } from './auction-live'
 import { dealFromSeed } from './revisor'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
@@ -71,9 +71,8 @@ describe('raden *inkliv-över-svaret*: RHO:s naturliga inkliv över vårt 1-läg
       W: 'S:AQJ975 H:T9 D:A7 C:KT9', // 13 hp, 6 spader → 1♠ (sandwich)
     })
     const b = buildAuction(d)!
-    expect(b.turns.map((t) => t.call)).toEqual(['1D', '1H', '1S'])
+    expect(b.turns.slice(0, 3).map((t) => t.call)).toEqual(['1D', '1H', '1S'])
     expect(b.turns[2]).toMatchObject({ seat: 'W', role: 'motståndare', rule: 'enkelt inkliv' })
-    expect(b.open).toBe(true)
   })
 })
 
@@ -169,14 +168,8 @@ describe('raden *svararen-stört*: svararens fortsättning när de stört', () =
 })
 
 describe('det rivna och familjegränsen', () => {
-  it('familjens tolv detektorer finns inte kvar i kedjorna', () => {
-    const ids = new Set([...FORCED_DETECTORS, ...CONTESTED_DETECTORS].map((d) => d.id))
-    for (const id of [
-      'answerCueRaise', 'answerCueBidderRebid', 'openerCompetesAfterRaise', 'answerOpenerMaximal',
-      'openerStrongNTAfterMinorRaise', 'answerOpenerNTInvite', 'openerRaisesFreeBid', 'responderAfterFreeBidRaise',
-      'openerAnswersFreeBidInvite', 'openerRondTwoInCompetition', 'openerReopensAfterPartnerPass', 'openerReopensBalancing',
-    ]) expect(ids.has(id), id).toBe(false)
-  })
+  // (Frånvaro-assertionen på FORCED_/CONTESTED_DETECTORS togs bort i etapp 5
+  // session B, 2026-09-11: detektorkedjan är riven, inga listor kvar att pröva.)
   it('raderna gäller bara vår 1-i-färg-öppning i en störd auktion: ostört är det etapp 3:s rader', () => {
     expect(decideCallTraced(ensam('N', 'S:AJ9 H:63 D:AKJ85 C:T74'), [call('N', '1D'), call('E', 'P'), call('S', '1S'), call('W', 'P')], 'N').källa).toBe('tabell:återbud')
   })
