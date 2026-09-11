@@ -422,6 +422,121 @@ tabellen: *partnern visade en färg → höj med fit / egen färg / sang / pass*
 - Deploy enligt `deploy-verifiering`. 🚪 Ägarens live-prov: några givar i
   Spela kort, ett bord, en tävlingsgiv.
 
+## 4b. Slutkärnan — sessionsplan A/B/C + etapp 6 (designen vald 2026-09-11)
+
+Etapp 5 familj 1 (sju döda detektorer, `9b74b6b`) och familj 2 (fyra små
+catch-all-rader, `9d45c31`) är live. Kvar i det gamla lagret: exakt **två
+detektorer** (`offBookResponse`, `honorForce` i `CONTESTED_DETECTORS`),
+**manus-grinden** (`buildAuction` → `open`-flaggan + `divergedFromLine` i
+`decideCallTraced`) och allt som refererar dem.
+
+Första försöket att flytta de två detektorerna som ogatade tabellrader
+(2026-09-10, `aa103f0`, reverterat) misslyckades **inte på kunskapen utan på
+gaten**: de fyrar idag bara när `built.open || offBook`; som ogatade rader
+(frågas FÖRST) återöppnade de AVGJORDA auktioner — kärnexemplet
+`1NT–2♥–2♠–2NT–3♠ → 4♠` där partnern redan avböjt inbjudan (31 bot + 109 avvik
+ändrade bud). Slutsatsen: **designa ett troget faktabaserat villkor FÖRST, prova
+inte gates.**
+
+### Vad `built.open` betyder (mätt ur `auction.ts`, inte gissat)
+Grinden (`auction-live.ts:408`) släpper fram detektorerna när människan avvikit
+(`offBook`) ELLER linjen tog slut och `open`. I konkurrens är `open` ≈ "alltid"
+(störda catch-all-lägena är sedan familj 5 egna rader). Ostört är `open` en
+**djup-proxy** för "ingen har placerat kontraktet än": öppen när tabellen tiger
+efter svar/återbud/svar2/tredje (turns ≤ 4), öppen vid svararens tredje bud
+(turns = 5) bara om svararens andra bud var fjärde färg/NMF, annars stängd
+(turns ≥ 6, slamraden bjudit, partnerns bud var `avslut`, eller stolen passade).
+Det är proxyn som ersätts med sanningen.
+
+### Kärndesignen: `partnerSignedOff(f)` — ett faktum ur betydelselagret
+Sanningen bakom "auktionen är avgjord" är **betydelsen av partnerns senaste
+bud**: ett avslut (kravnivå `avslut`) eller ett obestritt utgångsbud.
+Betydelselagret bär redan axeln (`f.meaning(i).forcing` för både botbud och
+människobud). Nytt fält i `AuctionFacts`, räknat ur auktionen ensam (kikvakten
+gäller):
+1. Hitta partnerns senaste bud `i` (kontraktsbud/X/XX — pass räknas inte; inget → `false`).
+2. Någon motståndare gjort kontraktsbud/X efter `i` → `false` (auktionen lever; konkurrensraderna äger den).
+3. `f.meaning(i).forcing === 'avslut'` → `true`.
+4. Annars: partnerns senaste kontraktsbud är utgång+ och obestritt (dagens `partnerGameBidStandsUnopposed`, flyttas in i fakta) → `true`.
+5. Annars `false`. **`ej-krav` räknas som LEVANDE** (t.ex. `1♠–1NT–2♦` ska kunna få preferens/höjning).
+
+**Troget, inte en gate:** de tre c-mönstren var alla "höjer partnerns avböjda
+inbjudan/preferens". Bedöms de som levande beror det på att budets kravnivå INTE
+är `avslut` — då lagas det i **betydelselagret/registret** (familj 9:s metod),
+inte med en gate.
+
+### De två nya raderna (sist i tabellen, efter *slam-forts*)
+Ordningen speglar det gamla lagret: alla slam-detektorer låg FÖRE
+`offBookResponse`, `honorForce` var sista vakten.
+
+| Rad | `läge(f)` | `välj` | Kunskap |
+|---|---|---|---|
+| **`partner-färg`** | `f.partnerLastSuit !== null && !f.partnerSignedOff` | `partnerSuitResponse(hand, f)` | finns redan i `balancing-continuations.ts` (ordagrant `offBookResponse`) — exporteras; behåll `outstandingArtificialForce`-vakten. |
+| **`krav-minimibud`** | `f.force !== null && !f.partnerSignedOff` | `forcedMinimumBid(hand, f)` | flyttas ordagrant ur `auction-live.ts` till `catch-all-continuations.ts`. |
+
+Källorna blir `tabell:partner-färg` / `tabell:krav-minimibud`; kikvaktens
+300-givarssvep täcker dem (`källa.startsWith('tabell:')`).
+
+### Session A — Etapp 5 familj 3: slutkärnan (rader + villkor), MÄTT
+- **A0.** Baslinjer på `aa103f0` (auktionsdump 3000 + avvikelsedump, mätprotokollet). Revisorns baslinje 20,7 % · 270,43 (`df930d9`) — kör efter bygget och jämför.
+- **A1. Facit FÖRE fix** (`motorbyte-facit.test.ts`, block `etapp 5 slutkärnan`): `1NT–2♥–2♠–2NT–3♠` m. fit → **pass**; djupt ostört 2/1 där tabellen tiger under utgång → **ett bud, aldrig pass** (`it.todo` tills given vald ur A4); `auction-facts.test.ts`: `partnerSignedOff` (i) avslut→true (ii) obestritt utgång→true (iii) motst. bjöd efter→false (iv) `ej-krav`→false (v) pass→false.
+- **A2. Betydelserättelse INNAN raderna:** alla "stannar/avböjer"-svar är redan `avslut` UTOM två: `1NT–2♥–2♠–2NT–3♠` (`rebids.ts` `openerThirdBidIn1NTAuction`, idag `preferens`) och `1M–1NT–2M–2NT–3M` (`rebids.ts`, idag `rebid: egen färg`) → nytt regelnamn **`avböjer inbjudan: rättelse`** = `avslut`. `preferens` förblir `ej-krav`. Bygget: `rules.ts` (`FORCING_BY_RULE` + `ALL_ENGINE_RULES`), de två producenterna, härledda läsaren i `auction-meaning.ts` (`overNaturalNT`-grenen), förklaringstexten oförändrad. Budneutralt; betydelsesvep ostört 0/0/0.
+- **Känt hål (facit-kö, INTE bygge i A):** öppnarens svar på `1x–1y–1NT–2NT` saknar gren i raden *tredje* — idag `offBookResponse`/pass; efter A ger *partner-färg* samma bud (klass a). `it.todo` (pass 12–13 / 3NT 14 / 3y-fit).
+- **A3. Bygget:** (1) `auction-facts.ts` `partnerSignedOff` (+ flytt av `partnerGameBidStandsUnopposed`); (2) `catch-all-continuations.ts` `forcedMinimumBid(hand, f)`; (3) `balancing-continuations.ts` export `partnerSuitResponse`, dess `partnerGameBidStandsUnopposed`-anrop → `f.partnerSignedOff`; (4) `auction-decide.ts` raderna sist; (5) `auction-live.ts` wrapparna bort, `CONTESTED_DETECTORS` tom (listorna + grinden står kvar till B); (6) `detector-chain.test.ts` raderas; (7) `npx tsc`.
+- **A4. Mätning och klassning (kärnan):** auktionsdiff + avvikelsediff mot baslinjerna, aggregera första skillnad per mönster; `olagligt` = 0. Väntat: `offBookResponse→partner-färg`/`honorForce→krav-minimibud` samma bud = **a**; `pass`/`manus`→`krav-minimibud` i ostörd 2/1-/2♣ under utgång = **b** (frö i loggen, visas ägaren); `pass`→`partner-färg` på djup ≥ 6 granskas en och en (systemriktig höjning = **b**; "partnern hade stannat" = betydelsehål → A2-rättelse, aldrig gate); höjning av fjärde färg/NMF → nu pass/kravbud = **b**; allt annat = **c** lagas före merge. **Kräver ett c-mönster en GATE → STOPP, rapportera ägaren.** Sveparna: pliktsvep, förklaringssvep, regelsvep, betydelsesvep (ostört 0/0/0, stört grind 0), kikvakt (skarp; deterministisk assertion på `krav-minimibud` om svepet < 5 träffar), `npm test`, revisorn 1000 (inte sämre).
+- **A5. Docs + grind:** planens §4 etapp 5-rad + logg, CLAUDE.md NU, budsystem §9. 🚪 **Grind familj 3:** b-lista med exempelhänder → godkänt → `--no-ff`-mergepunkt → PCD.
+
+### Session B — Etapp 5 familj 4: rivningen av manuset (0 ändrade bud)
+Efter A kan det gamla lagret bara ge pass → rivningen är 0-diff **per
+konstruktion**, bevisas med dumparna.
+- **B0.** Baslinjer på A:s mergepunkt.
+- **B1.** `auction-live.ts` → bridge-reglerna + `decideCall` (fakta → `decideFromTable` → laglighetsvakt → `pass (ingen regel)`). Bort: `DetectorCtx`, `LiveDetector`, `FORCED_/CONTESTED_DETECTORS`, `divergedFromLine`, `buildAuction`/`turnsToCalls`-importerna.
+- **B2.** `auction.ts` → tunn hjälpare: `buildAuctionCore` raderas; ny `buildAuction` kör `decideCall` stol för stol (återanvänd `simulateAuction`); `BuiltAuction` tappar `open`; `DecidedCall.avslut` blir död → bort (sanningen bor i `partnerSignedOff`); `auction-contract.ts` behåller bara `contractFromCalls`.
+- **B3.** Testmigrering (24 filer anropar `buildAuction`): `open`-assertioner stryks, hela-`turns`-jämförelser i störda auktioner → budföljd (`simulateAuction(deal).map(c=>c.bid)`), **inget förväntat bud ändras**. Kikvakten skärps: `källa.startsWith('tabell:')`-filtret bort (varje bud oförändrat när tre händer byts).
+- **B4. Bevis:** `npx tsc`; auktionsdiff **0** + avvikelsediff **0**; `npm test` grön; sveparna oförändrade; kikvakten total grön; revisorn identisk.
+- **B5.** Logg + CLAUDE.md; 🚪 ingen b-lista (0 diff) → godkänt + PCD, mergepunkt.
+
+### Session C — Etapp 5 familj 5: dokumentation, minne, CLAUDE.md
+Efter C ska "off-book"/"on-book"/"manus" bara finnas i historik. `docs/status.md`
+§"tre auktionslager" → "tre steg i ett beslut"; `docs/off-book-syd.md` → ARKIV;
+`docs/README.md`; `CLAUDE.md` NU-blocket + §"Budmotorn" + en låsning "Motorbytet
+KLART & LIVE"; `docs/budsystem.md` §9 + de renderade off-book-omnämnandena;
+`.claude/commands/felrapporter.md`; minnet (`motorbytet-manus-till-spelare` KLART,
+`off-book-lacks-state-model` historisk, `MEMORY.md`).
+
+### Etapp 6 — efterkontroll och live
+Alla riggar en sista gång på C:s mergepunkt (kikvakt total, dumparna,
+betydelsesvep, revisorn 1000, `npm test`, `npx tsc`); speldiagnosen orörd;
+bordets serverfunktioner (`bord-motor.ts`/`validera.ts` via `decideCall`)
+testkörda + ett lokalt bord. Deploy enligt `deploy-verifiering`. 🚪 Ägarens
+live-prov: några givar i Spela kort (minst en "utanför boken"), ett bord, en
+tävlingsgiv.
+
+### Mätprotokoll (kommandon — sifferregeln)
+```
+$env:DUMP_RANGE='20270001-20273000'; $env:DUMP_OUT='revisor-output/auktionsdump-slutkarna-baslinje.json'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
+$env:AVVIK='1'; $env:AVVIK_OUT='revisor-output/avvikelsedump-slutkarna-baslinje.json'; npx vitest run src/lib/engine/avvikelsedump.probe.test.ts
+$env:DUMP_RANGE='20270001-20273000'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts
+$env:AVVIK='1'; npx vitest run src/lib/engine/avvikelsedump.probe.test.ts
+node scripts/auktionsdiff.mjs revisor-output/auktionsdump-slutkarna-baslinje.json revisor-output/auktionsdump.json
+node scripts/auktionsdiff.mjs revisor-output/avvikelsedump-slutkarna-baslinje.json revisor-output/avvikelsedump.json revisor-output/avvikelsediff.txt
+$env:PLIKT='1'; npx vitest run src/lib/engine/pliktsvep.probe.test.ts
+$env:BETYDELSE='1'; npx vitest run src/lib/engine/auction-meaning.probe.test.ts
+npx vitest run src/lib/engine/kikvakt.test.ts
+$env:REVISOR='1'; npx vitest run src/lib/engine/revisor.probe.test.ts
+npx tsc; npm test
+```
+Olagliga tabellbud räknas med `node -e` över JSON-filen (källa `olagligt`) — 0.
+Motorfilerna är CRLF: patcha med node-skript som fil i scratchpad, aldrig heredoc.
+
+### Risker (lärdomar som gäller)
+- **Ingen gate i `läge`.** Kräver ett c-mönster en gate → stopp + ägarfråga.
+- Raderna ligger SIST → positionsraderna äger sina bud (familj 8:s lärdom); kolla ändå att `krav-minimibud` inte fyrar där en rad medvetet returnerar `null`.
+- `f.force` i konkurrens = bara rondkrav (`competitionForce`) — ingen breddning.
+- CLAUDE.md-vakten (16 kB): mät `git show :CLAUDE.md | wc -c` (LF) före push.
+- Kikvakten total kan avslöja `pass (ingen regel)`-ändring vid människoöppning utan svarsregel (`!RESPONDABLE`) — hål i raden *svar*, facit-kö, inte undantag.
+
+
 ## 5. Beslutsgrindarna — ägarbeslut längs vägen
 
 🚪 **Grind 0 (tas 2026-09-04): motorbytet blir NU.** Pliktsvepet pausas;
@@ -690,6 +805,19 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-11 — Slutkärnans design vald + planen införd (§4b).** Efter det
+  reverterade försöket (posten nedan) planerades slutförandet i detalj: rotorsaken
+  är att grinden `built.open` är en **djup-proxy**, och kärnfallet
+  `1NT–2♥–2♠–2NT–3♠ → 4♠` är ett **betydelsehål** (avböjandet bär `preferens`/
+  `ej-krav`, borde vara `avslut`). Designen ersätter proxyn med faktumet
+  **`partnerSignedOff(f)`** (ur betydelselagret: kravnivå `avslut` eller obestritt
+  utgångsbud) och lägger de två sista catch-allerna (`offBookResponse`/`honorForce`)
+  som ogatade tabellrader SIST (*partner-färg* / *krav-minimibud*). Järnregel:
+  **inga gates i tabellen** — kräver ett c-mönster en gate stannar Claude och frågar
+  ägaren (det är signalen att betydelselagret saknar något). Sessionsordning:
+  A (rader + villkor, mätt) → B (riv manuset, 0-diff per konstruktion) →
+  C (docs/minne) → etapp 6 (live). Hela planen: §4b ovan. Ingen kod ändrad; HEAD
+  `aa103f0`.
 - **2026-09-10 — Etapp 5 slutkärnan (offBookResponse + honorForce): FÖRSÖKT &
   REVERTERAD.** Försök att flytta de två sista catch-all-detektorerna till tabellrader
   (*off-book-svar* = `partnerSuitResponse`, *krav-minimibud* = `forcedMinimumBid`),
