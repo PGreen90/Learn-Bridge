@@ -577,6 +577,12 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     }
   }
 
+  // Systems on efter vårt 2NT-inkliv över deras svaga tvåa/spärr (live-prov
+  // 2026-09-11): advancerns transfers/3NT, fullföljningen, rebudet. Före de
+  // naturliga färgreglerna så 3♦ inte läses som "naturlig ny färg".
+  const ntSystemsOn = interpretOvercallNTSystemsOn(seat, cb, prior)
+  if (ntSystemsOn) return ntSystemsOn
+
   // Försvar mot 1NT (familj 9): DONT över deras 1NT, Lebensohl över vårt.
   const ntDef = interpretNTDefenseSuit(seat, cb, prior)
   if (ntDef) return ntDef
@@ -1067,6 +1073,54 @@ function interpretCompetitive2NT(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     if (open.cb.level === 1) {
       return R('ovanlig 2NT', `2 sang (ovanlig sang) — tvåfärgshand: de två lägsta objudna färgerna (minst 5–5), svag eller stark. Ej krav.`)
     }
+  }
+  return null
+}
+
+/**
+ * Systems on efter VÅRT naturliga 2NT-inkliv över deras svaga tvåa/spärr
+ * (live-prov 2026-09-11): advancerns transfer (3♦→hjärter, 3♥→spader) och 3NT,
+ * inklivarens fullföljning (3M / super-accept 4M) och advancerns rebud (3NT
+ * inbjudan / 4M med 6-korts högfärg). Läst ur auktionen ensam. null = inget
+ * systems-on-mönster (faller till de naturliga grenarna).
+ */
+function interpretOvercallNTSystemsOn(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.strain === 'NT' || SIDE[open.seat] === SIDE[seat]) return null
+  const theirPreempt = open.cb.level >= 3 || (open.cb.level === 2 && open.cb.strain !== 'C')
+  if (!theirPreempt) return null
+  if (prior.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  const ourBids = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
+  if (ourBids.length === 0 || ourBids[0].bid !== '2NT') return null
+  const openingIdx = prior.findIndex((c) => parseBid(c.bid))
+  if (prior.indexOf(ourBids[0]) !== openingIdx + 1) return null // bara det direkta 15–18-inklivet, ej balansering
+  const overcaller = ourBids[0].seat
+  const advancer = PARTNER[overcaller]
+
+  // Advancerns svar på 2NT-inklivet.
+  if (ourBids.length === 1 && seat === advancer) {
+    if (same(cb, 3, 'D')) return R('2NT-inkliv: transfer', `3♦ — transfer till hjärter (5+ ♥): systems on över partnerns 2NT-inkliv. Partnern bjuder 3♥.`)
+    if (same(cb, 3, 'H')) return R('2NT-inkliv: transfer', `3♥ — transfer till spader (5+ ♠): systems on över partnerns 2NT-inkliv. Partnern bjuder 3♠.`)
+    if (same(cb, 3, 'NT')) return R('2NT-inkliv: till spel', `3 sang — till spel: balanserad utan 5-korts högfärg mittemot partnerns 15–18.`)
+    return null
+  }
+  // Inklivaren fullföljer transfern.
+  if (ourBids.length === 2 && seat === overcaller) {
+    const t = parseBid(ourBids[1].bid)
+    if (!t || t.level !== 3 || (t.strain !== 'D' && t.strain !== 'H')) return null
+    const target = t.strain === 'D' ? 'H' : 'S'
+    const tname = target === 'H' ? 'hjärter' : 'spader'
+    if (same(cb, 3, target)) return R('2NT-inkliv: fullföljd transfer', `3${SYMBOL[target]} — fullföljer transfern till ${tname}.`)
+    if (same(cb, 4, target)) return R('2NT-inkliv: super-accept', `4${SYMBOL[target]} — super-accept: maximum (17–18) med 3-korts stöd → hopp till utgång.`)
+    return null
+  }
+  // Advancerns rebud efter enkel fullföljning (3♥/3♠).
+  if (ourBids.length === 3 && seat === advancer) {
+    const c = parseBid(ourBids[2].bid)
+    if (!c || c.level !== 3 || (c.strain !== 'H' && c.strain !== 'S')) return null
+    if (same(cb, 3, 'NT')) return R('2NT-inkliv: inbjudan', `3 sang — inbjudan med stopp i deras färg: partnern väljer 3 sang eller utgång i högfärgen.`)
+    if (same(cb, 4, c.strain)) return R('2NT-inkliv: utgång', `4${SYMBOL[c.strain]} — utgång: 6-korts ${c.strain === 'H' ? 'hjärter' : 'spader'}.`)
+    return null
   }
   return null
 }

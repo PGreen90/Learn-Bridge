@@ -63,6 +63,7 @@ const ALERT_RULE_PREFIXES: string[] = [
   // Konkurrens / försvar
   'Michaels',
   'ovanlig 2NT',
+  '2NT-inkliv: transfer', // systems on efter vårt 2NT-inkliv (konstgjord transfer)
   'upplysningsdubbling',
   'negativ dubbling',
   'responsiv dubbling',
@@ -383,6 +384,16 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'Mathe 1NT (minorer)': 'ej-krav',
   '2NT-inkliv (15–18)': 'ej-krav',
   '2NT (15–18)': 'ej-krav',
+  // Systems on efter vårt 2NT-inkliv (live-prov 2026-09-11): advancerns
+  // transfer (krav 1 rond), inklivarens fullföljning, super-accept och
+  // advancerns rebud.
+  '2NT-inkliv: transfer': 'krav-1-rond',
+  '2NT-inkliv: fullföljd transfer': 'ej-krav',
+  '2NT-inkliv: super-accept': 'avslut',
+  '2NT-inkliv: till spel': 'avslut',
+  '2NT-inkliv: inbjudan': 'ej-krav',
+  '2NT-inkliv: utgång': 'avslut',
+  '2NT-inkliv: stannar': 'avslut',
   // Ogust (ask = krav, stegsvar = beskriver)
   Ogust: 'krav-1-rond',
   'Ogust: min/dålig': 'ej-krav',

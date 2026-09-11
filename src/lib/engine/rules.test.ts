@@ -8,6 +8,8 @@ import { FORCING_LABEL, forcingOf, isAlertRule, knownForcingRules, ruleInfo } fr
 const ALL_ENGINE_RULES: string[] = [
   '1430 RKC', '1NT (12–14)', '1NT', '1NT-inkliv', '2-över-1 GF',
   '2NT (15–18)', '2NT (18–19)', '2NT inbjudan', '2NT', '2NT-inkliv (15–18)',
+  '2NT-inkliv: transfer', '2NT-inkliv: fullföljd transfer', '2NT-inkliv: super-accept',
+  '2NT-inkliv: till spel', '2NT-inkliv: inbjudan', '2NT-inkliv: utgång', '2NT-inkliv: stannar',
   '2♣-positivt', '2♦ väntebud', '3NT direkt (förnekar stopp)', '3NT till spel',
   '3NT', '4NT kvantitativ', '5-korts högfärg', '6NT till spel', 'Bergen game try',
   'game try: kortfärg', 'game try: accepterar', 'game try: signoff',

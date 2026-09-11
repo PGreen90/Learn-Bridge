@@ -153,7 +153,7 @@ import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { advancerActsInCompetition, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
-import { defendPreemptSeat, defendTheirPreempt, preemptFollowUpSeat, respondInPreemptCompetition } from './preempt-defense-continuations'
+import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preemptFollowUpSeat, respondInPreemptCompetition, respondToOvercallNTSystemsOn } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
@@ -1930,6 +1930,15 @@ const TABELL: Row[] = [
     id: 'svag2-fortsättning',
     läge: (f) => preemptFollowUpSeat(f),
     välj: ({ hand, facts }) => respondInPreemptCompetition(hand, facts),
+  },
+  // Systems on efter VÅRT naturliga 2NT-inkliv över deras svaga tvåa/spärr
+  // (live-prov 2026-09-11): advancerns transfers/3NT, inklivarens fullföljning
+  // (super-accept), advancerns rebud. Förr föll advancerns 3♦ till "naturlig ny
+  // färg" och partnern passade. null → gamla lagret.
+  {
+    id: 'svag2-2nt-systemson',
+    läge: (f) => overcallNTSystemsOnSeat(f) !== null,
+    välj: ({ hand, facts }) => respondToOvercallNTSystemsOn(hand, facts),
   },
 
   // ---- Etapp 5 familj 2 — fyra små "sista utväg"-svar (2026-09-10) ---------
