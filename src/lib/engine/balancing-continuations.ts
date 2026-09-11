@@ -17,31 +17,13 @@
 
 import type { Bid, Hand } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
+import { parseContractBid, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { cheapestBidIn, legalCalls, SWE_SYM } from './auction-rules'
 import { answerReopeningDoubleCore } from './contested-continuations'
 import { raiseWithFit } from './fit-raise'
 import { hcp, isBalanced, lengths } from './hand'
 import { asCall } from './overcall-continuations'
 import { side } from './play'
-
-/**
- * Står partnerns SENASTE kontraktsbud utgång eller högre, obestritt? Då hittar vi
- * inte på en "höjning"/flykt till en annan strain (5♣-ryckaren). Ordagrant ur
- * `offBookResponse` (auction-live.ts).
- */
-function partnerGameBidStandsUnopposed(history: ResolvedCall[], seat: AuctionFacts['seat']): boolean {
-  let partnerGameAt = -1
-  for (const [idx, c] of history.entries()) {
-    if (c.seat !== PARTNER[seat]) continue
-    const cb = parseContractBid(c.bid)
-    if (!cb) continue
-    const trickScore = cb.level * (cb.strain === 'C' || cb.strain === 'D' ? 20 : 30) + (cb.strain === 'NT' ? 10 : 0)
-    partnerGameAt = trickScore >= 100 ? idx : -1
-  }
-  if (partnerGameAt < 0) return false
-  return !history.some((c, idx) => idx > partnerGameAt && side(c.seat) !== side(seat) && parseContractBid(c.bid))
-}
 
 /**
  * Inget fit för partnern: bjud en egen 4+ färg (billigaste läge) eller en
@@ -147,8 +129,8 @@ function outstandingArtificialForce(f: AuctionFacts): boolean {
  * kravvakten här (annars skulle den flytta företräde). Ett utestående
  * artificiellt krav lämnas åt FORCED-detektorerna (se `outstandingArtificialForce`).
  */
-function partnerSuitResponse(hand: Hand, f: AuctionFacts): ResolvedCall | null {
-  if (partnerGameBidStandsUnopposed(f.history, f.seat)) return null
+export function partnerSuitResponse(hand: Hand, f: AuctionFacts): ResolvedCall | null {
+  if (f.partnerSignedOff) return null
   if (outstandingArtificialForce(f)) return null
   const partnerSuit = f.partnerLastSuit
   if (!partnerSuit) return null // partnern har inte visat en färg → vi hittar inte på något

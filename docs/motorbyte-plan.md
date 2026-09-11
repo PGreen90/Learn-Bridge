@@ -402,8 +402,8 @@ mätningen vid etapp 4:s start):
    grinden (ägarbeslut "noll på det avgörbara + lista resten"). 0 ändrade bud.
 
 **Klart när:** `FORCED_DETECTORS`/`CONTESTED_DETECTORS` är tomma och raderas
-tillsammans med `detector-chain.test.ts`, `divergedFromLine`, `open`-flaggan
-och `offBookResponse`. Det som var "sista utvägen" är nu en vanlig regel i
+tillsammans med kedjevakten (detector-chain-testet, raderat 2026-09-11),
+`divergedFromLine`, `open`-flaggan och `offBookResponse`. Det som var "sista utvägen" är nu en vanlig regel i
 tabellen: *partnern visade en färg → höj med fit / egen färg / sang / pass*.
 
 ### Etapp 5 — rivning och dokumentation
@@ -477,12 +477,12 @@ Ordningen speglar det gamla lagret: alla slam-detektorer låg FÖRE
 Källorna blir `tabell:partner-färg` / `tabell:krav-minimibud`; kikvaktens
 300-givarssvep täcker dem (`källa.startsWith('tabell:')`).
 
-### Session A — Etapp 5 familj 3: slutkärnan (rader + villkor), MÄTT
+### Session A — Etapp 5 familj 3: slutkärnan (rader + villkor), MÄTT — KLAR 2026-09-11 (loggen)
 - **A0.** Baslinjer på `aa103f0` (auktionsdump 3000 + avvikelsedump, mätprotokollet). Revisorns baslinje 20,7 % · 270,43 (`df930d9`) — kör efter bygget och jämför.
 - **A1. Facit FÖRE fix** (`motorbyte-facit.test.ts`, block `etapp 5 slutkärnan`): `1NT–2♥–2♠–2NT–3♠` m. fit → **pass**; djupt ostört 2/1 där tabellen tiger under utgång → **ett bud, aldrig pass** (`it.todo` tills given vald ur A4); `auction-facts.test.ts`: `partnerSignedOff` (i) avslut→true (ii) obestritt utgång→true (iii) motst. bjöd efter→false (iv) `ej-krav`→false (v) pass→false.
 - **A2. Betydelserättelse INNAN raderna:** alla "stannar/avböjer"-svar är redan `avslut` UTOM två: `1NT–2♥–2♠–2NT–3♠` (`rebids.ts` `openerThirdBidIn1NTAuction`, idag `preferens`) och `1M–1NT–2M–2NT–3M` (`rebids.ts`, idag `rebid: egen färg`) → nytt regelnamn **`avböjer inbjudan: rättelse`** = `avslut`. `preferens` förblir `ej-krav`. Bygget: `rules.ts` (`FORCING_BY_RULE` + `ALL_ENGINE_RULES`), de två producenterna, härledda läsaren i `auction-meaning.ts` (`overNaturalNT`-grenen), förklaringstexten oförändrad. Budneutralt; betydelsesvep ostört 0/0/0.
 - **Känt hål (facit-kö, INTE bygge i A):** öppnarens svar på `1x–1y–1NT–2NT` saknar gren i raden *tredje* — idag `offBookResponse`/pass; efter A ger *partner-färg* samma bud (klass a). `it.todo` (pass 12–13 / 3NT 14 / 3y-fit).
-- **A3. Bygget:** (1) `auction-facts.ts` `partnerSignedOff` (+ flytt av `partnerGameBidStandsUnopposed`); (2) `catch-all-continuations.ts` `forcedMinimumBid(hand, f)`; (3) `balancing-continuations.ts` export `partnerSuitResponse`, dess `partnerGameBidStandsUnopposed`-anrop → `f.partnerSignedOff`; (4) `auction-decide.ts` raderna sist; (5) `auction-live.ts` wrapparna bort, `CONTESTED_DETECTORS` tom (listorna + grinden står kvar till B); (6) `detector-chain.test.ts` raderas; (7) `npx tsc`.
+- **A3. Bygget:** (1) `auction-facts.ts` `partnerSignedOff` (+ flytt av `partnerGameBidStandsUnopposed`); (2) `catch-all-continuations.ts` `forcedMinimumBid(hand, f)`; (3) `balancing-continuations.ts` export `partnerSuitResponse`, dess `partnerGameBidStandsUnopposed`-anrop → `f.partnerSignedOff`; (4) `auction-decide.ts` raderna sist; (5) `auction-live.ts` wrapparna bort, `CONTESTED_DETECTORS` tom (listorna + grinden står kvar till B); (6) kedjevakten (detector-chain-testet) raderas; (7) `npx tsc`.
 - **A4. Mätning och klassning (kärnan):** auktionsdiff + avvikelsediff mot baslinjerna, aggregera första skillnad per mönster; `olagligt` = 0. Väntat: `offBookResponse→partner-färg`/`honorForce→krav-minimibud` samma bud = **a**; `pass`/`manus`→`krav-minimibud` i ostörd 2/1-/2♣ under utgång = **b** (frö i loggen, visas ägaren); `pass`→`partner-färg` på djup ≥ 6 granskas en och en (systemriktig höjning = **b**; "partnern hade stannat" = betydelsehål → A2-rättelse, aldrig gate); höjning av fjärde färg/NMF → nu pass/kravbud = **b**; allt annat = **c** lagas före merge. **Kräver ett c-mönster en GATE → STOPP, rapportera ägaren.** Sveparna: pliktsvep, förklaringssvep, regelsvep, betydelsesvep (ostört 0/0/0, stört grind 0), kikvakt (skarp; deterministisk assertion på `krav-minimibud` om svepet < 5 träffar), `npm test`, revisorn 1000 (inte sämre).
 - **A5. Docs + grind:** planens §4 etapp 5-rad + logg, CLAUDE.md NU, budsystem §9. 🚪 **Grind familj 3:** b-lista med exempelhänder → godkänt → `--no-ff`-mergepunkt → PCD.
 
@@ -805,6 +805,49 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-11 — Etapp 5 SLUTKÄRNAN (session A) KLAR: de två sista catch-allerna
+  → tabellrader, gatade med faktumet `partnerSignedOff` (ägaren godkände familjen
+  "kör 1").** `offBookResponse`/`honorForce` (det gamla lagrets sista två
+  detektorer) blev raderna *partner-färg* (`f.partnerLastSuit && !f.partnerSignedOff`
+  → `partnerSuitResponse`, exporterad ur `balancing-continuations.ts`) och
+  *krav-minimibud* (`f.force && !f.partnerSignedOff` → `forcedMinimumBid`, flyttad
+  ordagrant till `catch-all-continuations.ts`), **sist** i tabellen (positionsraderna
+  äger sina bud). Manusets djup-proxy `built.open` ersatt av **`partnerSignedOff(f)`**
+  (nytt faktum i `auction-facts.ts`): partnerns senaste bud betyder ett avslut
+  (kravnivå `avslut`) ELLER är ett obestritt utgångsbud ELLER partnern passade vårt
+  stående kontrakt → catch-allen får inte återöppna. `CONTESTED_DETECTORS` TOM;
+  kedjevakten (detector-chain-testet) raderad. **A2 (betydelserättelse, budneutral):**
+  nya regeln `avböjer inbjudan: rättelse` = avslut för `1NT–2♥–2♠–2NT–3♠` (rebids.ts
+  1135) och `1M–1NT–2M–2NT–3M` (1064) + transfer-läsaren i `auction-meaning.ts`, så
+  öppnarens avböjande läses som avslut (förr `preferens`/`rebid: egen färg` = ej-krav).
+  **Faktalagerhål som de nya raderna avslöjade:** `partnerSignedOff` såg inte
+  partnerns AVSLUTANDE pass (partnern passade vårt stående kontrakt) → catch-allen
+  återöppnade; lagat med steg 0 (inte en gate). **Reverse-quirken som INTE lagades:**
+  `auctionForce`s ostörda reverse-koll läser `1x–1M–2M` (öppnarens höjning av
+  svararens färg) som en reverse → falskt rondkrav; en fix (undantaget som
+  `competitionForce` har, felrapport #55) PROVADES men REVERTERADES: felrapport
+  #42:s ostörda slam-auktion (`1C–1H–1S–2D–2H–3D–3NT–6NT`) förlitar sig på just det
+  kravet för att driva kaptenens 21-poängshand förbi 2♥ — utan det passar Nord 2♥.
+  Quirken ger rimliga bud (invit-höjningar) och blir en känd rest tills kaptenens
+  stora hand får en egen fortsättningsregel (SENARE); i konkurrens faller
+  `1x–(X)–1M–2M` till catch-allen (facit-kö). **Mätningar** (baslinjer `*-slutkarna-baslinje.json` på `aa103f0`, kommandon
+  i mätprotokollet §4b/§3): auktionsdiff bot **29 ändrade bud** (25 → pass = catch-allen
+  slutar köra över avslut · 4 krav-minimibud = kravhedrande minimum) + 288 källbyten;
+  avvikelsediff **61 ändrade bud** (44 → pass · 17 krav-minimibud) + 1645 källbyten;
+  **0 olagliga tabellbud**; betydelsesvep ostört **0/0/0**; kikvakt grön; A2 budneutral
+  (0 ändrade bud); revisorn 1000 **20,7 % / 270,57** (baslinje 20,7 % / 270,43 — inte
+  sämre); `npx tsc` rent; hela sviten grön (`npx vitest run`) utom CLAUDE.md-storleken
+  lokalt (CRLF-artefakt, `git show :CLAUDE.md | wc -c` = 16357 < 16384, grön på CI).
+  **Klass a+b** (ägaren godkände): själva bytet — catch-allen respekterar partnerns
+  avslut, och den tvivelaktiga naturliga sangen i dubblade auktioner (gamla
+  `offBookResponse`) ersätts av balancing-kunskapens strikta pass. **Kända rester
+  (facit-kö `motorbyte-facit.test.ts` "etapp 5 slutkärnan – kända rester", it.todo):**
+  A = kontrerad NMF (`1D–(X)–1S–1NT–2C` ger grovt 2♦ i stället för NMF-svaret 2♠;
+  SENARE: kontrerad checkback) · B = `1NT–(X DONT)–2♠(flykt)` höjs 3♠ i stället för
+  pass (frö 20270254/20270765; smalt force-/betydelsehål). Alla tre är smala fall i
+  KONKURRENS, inte sämre än det gamla off-book-lagret, lagas i betydelse-/force-lagret
+  eller som SENARE — aldrig med en gate. **Nästa gång:** etapp 5 session B — riv
+  manuset (`buildAuction`-linjen, `open`, `divergedFromLine`); 0-diff per konstruktion.
 - **2026-09-11 — Slutkärnans design vald + planen införd (§4b).** Efter det
   reverterade försöket (posten nedan) planerades slutförandet i detalj: rotorsaken
   är att grinden `built.open` är en **djup-proxy**, och kärnfallet

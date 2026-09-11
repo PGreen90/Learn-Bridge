@@ -120,6 +120,12 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   '6NT till spel': 'avslut',
   slamavslut: 'avslut',
   'RKC: rättelse': 'avslut',
+  // Öppnaren avböjer svararens 2NT-inbjudan och rättar till en känd fit / egen
+  // 6-korts högfärg under utgång (1NT–2M(transfer)–2M–2NT–3M, 1M–1NT–2M–2NT–3M).
+  // Ett AVSLUT: partnern får passa — annars återöppnas en avgjord auktion
+  // (motorbytet slutkärnan 2026-09-11). Skild från `preferens` (levande) som
+  // gäller andra svar.
+  'avböjer inbjudan: rättelse': 'avslut',
   'fullföljd Texas': 'avslut',
   oklart: 'ej-krav',
 

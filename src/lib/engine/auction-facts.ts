@@ -132,6 +132,10 @@ export interface AuctionFacts {
 
   /** Partnerns senast visade naturliga färg (med nivån), eller null. */
   partnerLastSuit: { strain: string; level: number } | null
+  /** Har partnern AVSLUTAT? Partnerns senaste bud betyder ett avslut (kravnivå
+   *  `avslut`) eller är ett obestritt utgångsbud — då ska ingen catch-all hitta
+   *  på en fortsättning (motorbytet slutkärnan, ersätter manusets `built.open`). */
+  partnerSignedOff: boolean
   /** Parets överenskomna trumf: en färg BÅDA bjudit (senast bjudna om flera). */
   agreedTrump: Suit | null
   /** Högfärgsfit satt av Jacoby 2NT / Jordan 2NT (konstgjort, syns inte i `agreedTrump`). */
@@ -212,6 +216,7 @@ export function auctionFacts(history: ResolvedCall[], seat: Seat): AuctionFacts 
     quietSinceLastContract,
     passOut,
     partnerLastSuit: partnerLastSuit(history, seat),
+    partnerSignedOff: partnerSignedOff(history, seat, meaning),
     agreedTrump: agreedTrump(history, seat),
     jacobyTrump: jacobyFitTrump(history, seat),
     force: auctionForce(history, seat),
@@ -284,6 +289,69 @@ export function isArtificialNTResponse(history: ResolvedCall[], idx: number): bo
 /** Har motståndarsidan (sett från `seat`) gjort ett kontraktsbud? (konkurrens) */
 export function opponentsHaveBid(history: ResolvedCall[], seat: Seat): boolean {
   return history.some((c) => side(c.seat) !== side(seat) && parseContractBid(c.bid))
+}
+
+/**
+ * Står partnerns SENASTE kontraktsbud utgång eller högre, obestritt? Då hittar en
+ * catch-all inte på en "höjning"/flykt till en annan strain. Flyttad hit ur
+ * off-book-lagret (motorbytet slutkärnan) — EN källa för sanningen.
+ */
+export function partnerGameBidStandsUnopposed(history: ResolvedCall[], seat: Seat): boolean {
+  let partnerGameAt = -1
+  for (const [idx, c] of history.entries()) {
+    if (c.seat !== PARTNER[seat]) continue
+    const cb = parseContractBid(c.bid)
+    if (!cb) continue
+    const trickScore = cb.level * (cb.strain === 'C' || cb.strain === 'D' ? 20 : 30) + (cb.strain === 'NT' ? 10 : 0)
+    partnerGameAt = trickScore >= 100 ? idx : -1 // senaste budet räknas
+  }
+  if (partnerGameAt < 0) return false
+  return !history.some((c, idx) => idx > partnerGameAt && side(c.seat) !== side(seat) && parseContractBid(c.bid))
+}
+
+/**
+ * Har partnern AVSLUTAT? Sant när partnerns senaste bud betyder ett avslut
+ * (kravnivå `avslut` i registret/härledningen) eller är ett obestritt utgångsbud
+ * — då ska ingen catch-all hitta på en fortsättning och återöppna en avgjord
+ * auktion (motorbytet slutkärnan 2026-09-11, ersätter manusets djup-proxy
+ * `built.open`). Läst ur auktionen ensam (kikvakten). `ej-krav` räknas som
+ * LEVANDE: partnerns icke-krav-bud (t.ex. 1♠–1NT–2♦) ska kunna få preferens/höjning.
+ */
+export function partnerSignedOff(
+  history: ResolvedCall[],
+  seat: Seat,
+  meaning: (index: number) => Meaning,
+): boolean {
+  // Partnerns SENASTE call (även pass).
+  let lastPartnerIdx = -1
+  for (let k = history.length - 1; k >= 0; k--) {
+    if (history[k].seat === PARTNER[seat]) { lastPartnerIdx = k; break }
+  }
+  if (lastPartnerIdx < 0) return false
+  // 0) Partnerns senaste call är ett PASS som lämnar VÅR sidas kontrakt stående →
+  //    partnern deklinerade (motsvarar manusets `built.open=false` när linjen
+  //    vilat); en catch-all får inte återöppna. (Konkurrens där VI ska balansera
+  //    över DERAS kontrakt ägs av inklivs-/balanseringsraderna, inte av catch-allen.)
+  if (history[lastPartnerIdx].bid === 'P') {
+    const lastContract = [...history].reverse().find((c) => parseContractBid(c.bid))
+    if (lastContract && side(lastContract.seat) === side(seat)) return true
+  }
+  // 1) Partnerns senaste bud (kontraktsbud/X/XX; pass räknas inte).
+  let i = -1
+  for (let k = lastPartnerIdx; k >= 0; k--) {
+    if (history[k].seat === PARTNER[seat] && history[k].bid !== 'P') { i = k; break }
+  }
+  if (i < 0) return false
+  // 2) Bjöd någon motståndare (kontraktsbud/X/XX) efter det → auktionen lever igen.
+  for (let k = i + 1; k < history.length; k++) {
+    const c = history[k]
+    if (side(c.seat) === side(seat)) continue
+    if (parseContractBid(c.bid) || c.bid === 'X' || c.bid === 'XX') return false
+  }
+  // 3) Betydelsens kravnivå är ett avslut.
+  if (meaning(i).forcing === 'avslut') return true
+  // 4) Annars: partnerns senaste kontraktsbud är utgång+ och obestritt.
+  return partnerGameBidStandsUnopposed(history, seat)
 }
 
 /** Har motståndarsidan bjudit `strain` som kontraktsbud? (då är det inte en egen färg) */

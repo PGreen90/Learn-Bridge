@@ -1376,3 +1376,48 @@ describe('fältfynd – svararen rymmer till femkorts högfärg (naturligt 3M) �
     expect(decideCall(deal, hist, 'N').bid).toBe('3H')
   })
 })
+
+// ETAPP 5 SLUTKÄRNAN (motorbytet, 2026-09-11): de två sista catch-allerna
+// (`offBookResponse`/`honorForce`) blev raderna *partner-färg*/*krav-minimibud*
+// SIST i tabellen, gatade med faktumet `!partnerSignedOff` (ersätter manusets
+// djup-proxy `built.open`). Kärnan: en catch-all får aldrig köra ÖVER partnerns
+// avslut och återöppna en avgjord auktion.
+describe('etapp 5 slutkärnan – catch-allerna kör inte över partnerns avslut', () => {
+  const P = (seat: Seat) => call(seat, 'P')
+  // 1NT–2♥(transfer)–2♠–2NT–3♠: öppnaren avböjde inbjudan och rättade till 5-3-
+  // fiten (§5b beslut 1-släkting). Svararen med fit får INTE höja till 4♠ — 3♠
+  // är ett avslut. Förr: offBookResponse höjde 4♠ (byggde vidare en avgjord auktion).
+  const declined = [call('N', '1NT'), P('E'), call('S', '2H'), P('W'), call('N', '2S'), P('E'), call('S', '2NT'), P('W'), call('N', '3S'), P('E')]
+
+  it('betydelselagret: öppnarens 3♠ efter 2NT-inbjudan = avböjer inbjudan: rättelse (avslut)', () => {
+    expect(meaningOf(declined, 8)).toMatchObject({ rule: 'avböjer inbjudan: rättelse', forcing: 'avslut' })
+  })
+
+  it('partnern har avslutat → ingen catch-all fyrar (tabellen tiger, decideCall passar)', () => {
+    const svarare = parseHand('S:KQ763 H:J82 D:Q52 C:93') // 5 spader, inbjöd, 3-korts... fit finns
+    const f = auctionFacts(declined, 'S')
+    expect(f.partnerSignedOff).toBe(true)
+    expect(decideFromTable(svarare, f, false)).toBeNull() // varken partner-färg eller krav-minimibud
+    const deal = dealNS('S:A5 H:AKJ62 D:Q43 C:432', 'S:KQ763 H:J82 D:Q52 C:93')
+    expect(decideCall(deal, declined, 'S').bid).toBe('P')
+  })
+})
+
+// partnerSignedOff-faktumets fem grenar dokumenteras i auction-facts.test.ts.
+// Kända rester efter slutkärnan (auktionsdiffens klass "A/B/C", ägaren godkände
+// familjen 2026-09-11): smala fall där en catch-all i KONKURRENS ger ett grovt
+// (men systemriktigt kravhedrande) bud. Lagas som betydelse-/force-hål eller
+// SENARE (kontrerad checkback), aldrig med en gate. Facit-kö tills de byggs.
+describe('etapp 5 slutkärnan – kända rester (facit-kö)', () => {
+  const P = (seat: Seat) => call(seat, 'P')
+  it.todo('A: kontrerad NMF 1D–(X)–1S–1NT–2C → öppnaren med 3 spader bör svara 2♠ (NMF), inte 2♦', () => {
+    const hist = [call('N', '1D'), call('E', 'X'), call('S', '1S'), P('W'), call('N', '1NT'), P('E'), call('S', '2C'), P('W')]
+    expect(decideFromTable(parseHand('S:K73 H:A2 D:AQ864 C:J93'), auctionFacts(hist, 'N'), false)?.call.bid).toBe('2S')
+  })
+  it.todo('B: 1NT–(X DONT)–2♠(flykt)–P → svararen ska passa, inte höja till 3♠ (frö 20270254/20270765)', () => {
+    const deal = dealFromSeed(20270254)
+    const hist = [P('N'), P('E'), call('S', '1NT'), call('W', 'X'), call('N', '2S'), P('E')]
+    expect(decideCall(deal, hist, 'S').bid).toBe('P')
+  })
+  it.todo('C: advancern ska inte hoppa till 5♣ på 4-korts stöd i djup konkurrens (frö 20271014, raiseWithFit-överbud)')
+})
