@@ -1392,7 +1392,10 @@ beslutet att gå **förbi** utgången (4NT RKC / slam), som kräver både kontro
 vägarna (driv 33+ / inbjudan 31–32) kvar oförändrade. Inkopplat:
 **Jacoby 2NT**, **New Minor Forcing → öppnarens fördröjda högfärgsstöd**, och
 sedan B13 (2026-08-07) även **inverterad minor** och **2♣-grenen efter
-positivt svar + satt trumf** (alla äkta agreed trumf). Två minorregler skyddar
+positivt svar + satt trumf**, och sedan etapp 6 (2026-09-11) **kaptenens
+höjning av öppnarens andra högfärg efter ett 2/1** (1♥–2♦–2♠–3♠: höjningen
+sätter högfärgen, öppnaren öppnar cue-ronden — som efter en reverse + billig
+höjning) (alla äkta agreed trumf). Två minorregler skyddar
 budspråken: (1) i minorfit cue:as **först ÖVER 3NT** — under 3NT betyder nya
 färger stopp-letande (§4.2); (2) i **klar drivzon (33+)** hoppas cue-ronden
 över i minortrumf och kaptenen frågar 4NT direkt, eftersom 5m ligger över 4NT
@@ -2415,6 +2418,20 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-11 — Cue-rond efter kaptenens höjning av öppnarens andra högfärg
+  (§6.2; etapp 6 live-prov).** Efter `1♥–2♦–2♠–3♠` (kaptenen höjer öppnarens nya
+  högfärg → spader satt som trumf, utgångskrav) öppnar öppnaren cue-ronden, precis
+  som efter en reverse + billig höjning. Förr kände slam-läsaren inte igen den här
+  vägen till trumf-överenskommelse: motorn rekommenderade PASS på öppnarens
+  kontrollbud (4♥) — ett kontrollbud får aldrig passas. Nu bjuder kaptenen med
+  minimum utgång (4♠), med extra kontroller ett cue tillbaka, med drivvärden 4NT;
+  ett nytt färgbud över partnerns cue är ett kontrollbud, inte en utgångsplacering.
+  **Golv för driv förbi utgången:** eftersom öppnaren efter ett 2/1 bara visat
+  minimum (12) kräver ett slamdriv fulla 33 (§5.2), inte den aggressivare
+  cue-rondsgränsen 31 som gäller när partnern visat extra — annars överbjöds
+  balanserade händer (frö 20270216: 6♥ bet 2, rätt = 4♥). Auktionsdiff 1 bot +
+  7 avvik (alla a/b); revisorn 20,7 % · 270,57 (identisk). Facit: block "etapp 6"
+  i `motorbyte-facit.test.ts`.
 - **2026-09-11 — Motorbytet KLART & LIVE (etapp 5, `docs/motorbyte-plan.md`).**
   Hela det gamla manus-/detektorlagret är rivet: `auction.ts` skriver inte längre
   något manus och `auction-live.ts` har ingen detektorkedja (`open`-flaggan,
