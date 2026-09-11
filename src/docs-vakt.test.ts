@@ -35,7 +35,6 @@ const LEVANDE = [
   'docs/konkurrensplan.md',
   'docs/kortspel.md',
   'docs/motorbyte-plan.md',
-  'docs/off-book-syd.md',
   'docs/oversikt.md',
   'docs/senare.md',
   'docs/speldiagnos.md',
@@ -47,6 +46,7 @@ const ARKIV = [
   'AUDIT_PROMPTS.md',
   'docs/arbetslista.md',
   'docs/historik.md',
+  'docs/off-book-syd.md',
   'docs/sanningskarta.md',
   'docs/tp-arbetslista.md',
 ]

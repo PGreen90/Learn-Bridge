@@ -292,8 +292,8 @@ Idén från F2-bygget (ett tunt lager som räknar auktionsfakta EN gång per bes
 
 ### Övrigt parkerat
 - **DDS-facit på tunga fulla givar:** känd gräns (nodbudget). Ej fel.
-- **Off-book §7 bredd** (inkliv över 1NT/svaga tvåor/spärrar; balansering BYGGD
-  2026-07-03 — kvar här: "låna en kung"-lättnaden i generell mening).
+- **§7-försvarets bredd i konkurrens** (inkliv över 1NT/svaga tvåor/spärrar;
+  balansering BYGGD 2026-07-03 — kvar här: "låna en kung"-lättnaden i generell mening).
 - **"Framkalla slutbud"-väljaren** (ägaridé) + **webworker för DDS-facit**.
 
 ### Mathe mot stark konstgjord 1♣ (ägarbeslut 2026-07-04)

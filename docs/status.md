@@ -4,9 +4,9 @@
 > inaktuella påståenden rättade — se "Rättat vid genomgången" sist i filen).
 >
 > **Så läser du filen:**
-> - **Viktigast:** §"Budmotorns tre auktionslager + `open`-handoff" (längre ner) =
->   **arkitekturkontraktet**. Läs ALLTID den före budarbete. Den är verifierad
->   aktuell.
+> - **Viktigast:** §"Budmotorns beslutsfunktion — tre steg i ett beslut" (längre
+>   ner) = **arkitekturkontraktet**. Läs ALLTID den före budarbete. Den är
+>   verifierad aktuell.
 > - Resten är **byggnoteringar per FAS**, skrivna när respektive del landade. De
 >   säger vad som finns och i vilken fil — men de beskriver läget *då*. Är en
 >   detalj avgörande: kolla koden.
@@ -344,72 +344,63 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   **Sidoeffekt-fix i budmotorn:** motorn nådde aldrig 5♣/5♦ – lagat (se §4.2 i
   budsystem.md + `hasWeakSideSuit` i `responses.ts`).
 
-## Budmotorns tre auktionslager + `open`-handoff (ARKITEKTURKONTRAKT — läs före budarbete)
+## Budmotorns beslutsfunktion — tre steg i ett beslut (ARKITEKTURKONTRAKT — läs före budarbete)
 
-> **Varför detta står här (R2→R4):** det här är motorns viktigaste och tidigare
-> minst dokumenterade koppling. En session som ska röra budlogik MÅSTE veta vilket
-> av tre lager den jobbar i — annars byggs logiken i fel fil eller dubbleras.
+> **Varför detta står här (R2→motorbytet):** det här är motorns viktigaste
+> koppling. En session som ska röra budlogik MÅSTE veta hur ett bud blir till —
+> annars byggs logiken i fel fil eller dubbleras. Verifierad aktuell.
 
-Budgivningen är medvetet delad i **tre lager med olika ansvar**:
+Sedan **motorbytet** (ägarbeslut 2026-09-04, helt LIVE 2026-09-11; hela planen i
+`docs/motorbyte-plan.md`) bjuder motorn som fyra spelare: **egen hand + auktionen
+hittills → ett bud**, en och samma beslutsfunktion för alla fyra stolar. Inget
+förskrivet manus, ingen skillnad mellan "linjen" och budlådan.
 
-1. **`auction.ts` (`buildAuction`) — GENERATIVT.** Bygger parets kanoniska
-   systemlinje (hand → en rad) och modellerar **EN** konkurrensrond. Sätter sedan
-   flaggan **`open: true`** på resultatet (`BuiltAuction`) och lämnar över. Här bor
-   on-book-kärnan (öppning/svar/återbud/slam) + den första störningsronden.
-2. **`auction-live.ts` (`decideCall`) — LEVANDE.** Spelar upp linjen från
-   `buildAuction` bud för bud tills den tar slut ELLER Syd bjuder off-book
-   (`divergedFromLine`). Tar sedan över live via en **ordnad kedja av detektorer**
-   (`…ToAnswer`/`…ToCorrect`/`…Rescue`) + `offBookResponse`. All konkurrens BORTOM
-   den enda ronden i `auction.ts`, och alla svar på Syds egna bud, bor här.
-   Sedan motorbytets etapp 2 (2026-09-04) läser detektorerna auktionsläget ur
-   **`auction-facts.ts`** (`auctionFacts` → `AuctionFacts` i `DetectorCtx.facts`:
-   öppning/roller, kontraktsbud per sida, krav, trumf, partnerns färg,
-   utpassningssits, passad hand, betydelse per bud) i stället för att skanna
-   `history` själva — steg 2 "fakta" i den nya beslutsfunktionen.
-3. **`auction-interpret.ts` (`interpretCall`) — FÖRKLARANDE.** Översätter ett bud
-   till läsbar text för användaren. Sedan motorbytets etapp 1 (2026-09-04) är
-   den en tunn läsare av **`auction-meaning.ts`** (`meaningOf`): använder motorns
-   `rule` när budet har en (`confidence: säker`); annars härleds betydelsen ur
-   auktionen ensam — hela den ostörda 2/1-strukturen (§4–§6) i kod, vaktad av
-   betydelsesvepet (`docs/motorbyte-plan.md` §3). Lagret blir steg 1 "betydelse"
-   i den nya beslutsfunktionen; det här avsnittet skrivs om i etapp 5.
+**`decideCall(deal, history, seat)` (`auction-live.ts`)** är hela ingången. Den
+läser bara `deal.hands[seat]`, `deal.dealer`, `deal.vulnerability` och `history`
+— **aldrig en annan hand** (ärlig inferens, bevisad av kikvakten
+`kikvakt.test.ts`). Den räknar fakta och frågar beslutstabellen; täcker tabellen
+inte läget passar stolen. Tre steg i samma beslut:
 
-**Sedan motorbytets etapp 3 (2026-09-04) ligger BESLUTSTABELLEN
-`auction-decide.ts` (`decideFromTable`) FÖRE alla tre lagren:** `decideCall`
-frågar den först, och täcker en rad läget (familj 1: öppningen, "ingen har
-öppnat"; familj 2: svaret, "partnern öppnade ostört, jag har inte bjudit";
-familj 3: öppnarens återbud, "jag öppnade, partnern svarade ostört" — partnerns
-bud läses ur den nakna auktionen, aldrig ur partnerns hand eller regel; familj
-4a: svararens andra bud, där slamsekvensernas första steg tas ur kaptenens
-hand ensam och manuset bygger resten enligt beslutets plan; sedan 2026-09-05
-även 4b/5 — öppnarens tredje bud, slamturerna, svararens tredje/öppnarens
-fjärde — och sedan 2026-09-08 etapp 4:s familjer 1–3: inkliv/advance,
-dubblingsfamiljen, och "när de stör vår öppning" — svararens konkurrenssvar,
-negativ/stöddubbling med svar, Jordan; raderna listas i huvudkommentaren i
-`auction-decide.ts`)
-avgörs budet där ur egen hand + fakta — utan manus. Manusets
-motsvarande gren läser tabellen. Lagren nedan gäller för de familjer som inte
-flyttat än; ny logik i en flyttad familj byggs som en tabellrad, aldrig i
-manuset eller kedjan (`docs/motorbyte-plan.md`).
+1. **Betydelse (`auction-meaning.ts`, `meaningOf`).** Varje bud i auktionen får
+   sin systembetydelse ur auktionen ENSAM: `{ rule, forcing, alert, text, … }`.
+   Bär budet en motor-regel används den (en cache); saknas den (människans bud)
+   härleds betydelsen ur den ostörda 2/1-strukturen (§4–§6 i kod) och ur rollen i
+   konkurrens. Samma lager förklarar budet för användaren — `auction-interpret.ts`
+   (`interpretCall`) är en tunn läsare av `meaningOf`.
+2. **Fakta (`auction-facts.ts`, `auctionFacts`).** Ur betydelserna räknas
+   auktionsläget EN gång per beslut (`AuctionFacts`): öppnare/svarare/inklivare/
+   advancer, kravläget, trumföverenskommelse, partnerns senast visade färg,
+   utpassningssits, passad hand, `partnerSignedOff` (auktionen avgjord) m.m.
+3. **Val (`auction-decide.ts`, `decideFromTable(hand, facts, vulnerable)`).** En
+   tabell av rader `{ id, läge(fakta), välj(hand + fakta) }`. Första träffande
+   rad väljer; läget är ett exakt faktavillkor, inte en plats i en kö — ordning
+   spelar ingen roll. Raderna täcker öppning → svar → återbud → svararens andra/
+   öppnarens tredje → slam → konkurrens (inkliv/advance, dubblingar, försvar mot
+   1NT/spärrar, balansering) → de sista catch-all-raderna (`partner-färg`,
+   `krav-minimibud`). Huvudkommentaren i `auction-decide.ts` listar dem.
 
-**`open`-flaggan är seamen.** `auction.ts` säger via `open` "jag är klar med det
-jag modellerar — auktionen är fortfarande öppen, ta vid". `decideCall` läser det
-och fortsätter live. **Regel för framtida arbete:**
-- Ny **on-book**-fortsättning (ostörd systemlinje, en ny konvention i vårt system)
-  → byggs i **`auction.ts`** (eller dess `responses*/rebids*`-filer).
-- Ny **konkurrens/off-book**-hantering (svar på motståndarnas bud bortom en rond,
-  svar på Syds egna bud) → byggs i **`auction-live.ts`** som en detektor i kedjan
-  (`FORCED_DETECTORS`/`CONTESTED_DETECTORS`, F2 2026-08-07): ett objekt
-  `{ id, before?, run }` där `before` anger vilka detektorer som måste ligga
-  senare. Ordningen var korrekthetskritisk och maskinvaktad av kedjevakten
-  (borttagen i motorbytets slutkärna 2026-09-11, då CONTESTED_DETECTORS tömdes;
-  detta avsnitt skrivs om i etapp 5 session C).
-- Ny **budförklaring** för människans off-book-bud → **`auction-interpret.ts`**.
+**Bridgekunskapen** bor kvar i egna moduler med hand-in/bud-ut-signaturer
+(`openings.ts`, `responses-2c.ts`, `rebids.ts`, `overcalls.ts`, `doubles.ts`,
+`slam-auction.ts` och familjernas `*-continuations.ts`). En tabellrads `välj`
+anropar dem; själva bridgeregeln ändras där, aldrig i orkestreringen.
 
-Detektorkedjan i `decideCall` är den del som blir tung att underhålla först när
-systemet växer (R2 Fynd #1) — lägg inte fler konkurrenskonventioner ovanpå den utan
-att först väga R2:s förslag att göra kedjan datadriven. Se
-[`docs/audit/r2-arkitektur.md`](audit/r2-arkitektur.md).
+**Regel för framtida arbete:**
+- Ny budlogik (ostörd systemlinje ELLER konkurrens) = **en ny rad i
+  `auction-decide.ts`** (läge ur fakta → kunskapsfunktion ur EN hand). Bygg
+  aldrig ett "manus" eller en ordnad detektorkedja igen.
+- Nytt faktum som flera rader behöver → **`auction-facts.ts`**.
+- Ny budförklaring → **`auction-meaning.ts`** (tolkningen läser det därifrån).
+- `auction.ts` (`buildAuction`) är sedan motorbytet en **tunn hjälpare** som kör
+  `decideCall` stol för stol tills tre pass (för Budvisningen och de tester som
+  anropar den) — lägg ingen bridgelogik där.
+
+**Historik:** fram till motorbytet var budgivningen tre lager — `auction.ts`
+skrev ett manus som `auction-live.ts` spelade upp, och en ordnad kedja av ~70
+detektorer tog över när manuset tog slut (`open`-flaggan, `divergedFromLine`).
+Sömmarna där manuset slutade gav en jämn ström av felrapporter (R2 Fynd #1,
+[`docs/audit/r2-arkitektur.md`](audit/r2-arkitektur.md)); motorbytet ersatte hela
+konstruktionen. FAS-noteringarna längre ner i filen beskriver det gamla lagret —
+läs dem som historik, inte som dagens arkitektur.
 
 ## Budlådan – logiklagret (`auction-live.ts`)
 

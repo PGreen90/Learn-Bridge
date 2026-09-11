@@ -1029,10 +1029,9 @@ annars tillbaka till **3M** (avböjer). Golven speglar den ostörda accepten (§
 
 ### 5.5 Krav får aldrig passas — även när du bjuder en egen väg
 Ett **krav** betyder att partnern lovat bjuda igen: du får inte passa. Motorn
-hedrar detta i sin planerade linje, men tidigare kunde den tappa kravet när *du*
-bjöd en annan hand än den räknat med ("off-book"). Nu läser motorn kravet direkt
-ur de **faktiskt spelade buden** i ostörda auktioner och tvingar fram ett
-naturligt minimibud i stället för att passa:
+läser kravet direkt ur de **faktiskt spelade buden** i ostörda auktioner och
+tvingar fram ett naturligt minimibud i stället för att passa — även när du
+bjuder en egen väg:
 
 | Krav | Exempel | Vem får inte passa |
 |---|---|---|
@@ -1406,8 +1405,8 @@ handen utan billig kontroll bjuder 5m, en systemriktig miss (4NT som
 inbjudan kolliderar med essfrågan; Minorwood är en senare fråga). Reverse/hoppskift väntar på
 egen trumf-agreement-analys (där är trumfen inferrerad, inte bjuden — ett cue
 skulle läsas naturligt). Bjuder **du** själv ett cue i standardordning
-(billigaste först) följer boten med; en cue i annan ordning hamnar tills
-vidare off-book.
+(billigaste först) följer boten med; en cue i annan ordning saknar tills
+vidare en regel (motorn följer inte med).
 
 ### 6.3 Sjöbergs 5NT (kungfråga)
 Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
@@ -2416,6 +2415,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-11 — Motorbytet KLART & LIVE (etapp 5, `docs/motorbyte-plan.md`).**
+  Hela det gamla manus-/detektorlagret är rivet: `auction.ts` skriver inte längre
+  något manus och `auction-live.ts` har ingen detektorkedja (`open`-flaggan,
+  `divergedFromLine`, `offBookResponse` borta). Budgivningen är nu EN
+  beslutsfunktion per stol — `decideCall` frågar beslutstabellen
+  `auction-decide.ts` (betydelse → fakta → val), samma beslut i budvisningen, vid
+  bordet och i budlådan. Manusrivningen var **budneutral per konstruktion** (0
+  ändrade bud, bevisat med auktions- och avvikelsedumpen); enda rule-ändringen var
+  slutkärnans `avböjer inbjudan: rättelse` (se 2026-09-11-posten nedan).
+  Arkitekturen bor nu i `docs/status.md` ("Budmotorns beslutsfunktion — tre steg i
+  ett beslut"). Termerna off-book/on-book/manus är pensionerade.
 - **2026-09-09 — Försvar mot 1NT flyttar in i beslutstabellen (§7.5; motorbytet
   etapp 4 familj 6, `docs/motorbyte-plan.md`).** DONT/naturligt inkliv mot deras
   1NT (raden *försvar-1nt*), advancern + rättelsen (*dont-advance*) och störningen

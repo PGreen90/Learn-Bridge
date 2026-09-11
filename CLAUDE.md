@@ -10,56 +10,23 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — MOTORBYTET: från manus till fyra spelare (ägarbeslut 2026-09-04)
-Budmotorn skriver idag ett **manus** (`buildAuction`) som budlådan spelar upp,
-och 70 detektorer tar över när manuset tar slut — varje söm har gett en ström av
-felrapporter. Bytet: **egen hand + auktionen hittills → ett bud**, en
-beslutsfunktion för alla fyra stolar, betydelse → fakta → val, kikvakt som
-bevisar ärlig inferens. HELA planen (diagnos, målbild, skyddsnät, etapp 0–6,
-grindarna): **`docs/motorbyte-plan.md`** — läs den FÖRST vid allt motorarbete.
-**Regler under bytet:** inga lappar i manuset/detektorkedjan; felrapporter får
-facit (`it.todo`) och lagas i det nya lagret när familjen kommer; en familj per
-session; auktionsdiffen klassad (a/b/c) före varje merge; grindbeslut per familj.
-**Läget (detalj i planens logg):** etapp 0–2 KLARA 2026-09-04 (rigg + facit-kö
-`motorbyte-facit.test.ts`, `auction-meaning.ts`, `auction-facts.ts`). **Etapp 3
-familj 1–6 KLARA & LIVE 2026-09-05** (sista mergepunkt `f05bfef`, grinden efter
-etapp 3 = deployad): beslutstabellen `auction-decide.ts` (`decideFromTable`:
-läge → kunskapsfunktion) med raderna öppning/svar/återbud/svar2/tredje/slam/
-svar3/fjärde; adaptrarna läser partnerns bud ur den NAKNA auktionen;
-`decideCall` frågar tabellen först; kikvakten prövar varje tabellbud;
-avvikelsedumpen ger b-listorna; manusets ostörda del riven (kvar =
-konkurrensronden + `open`-flaggan). **§5b: alla 16 ägarbeslut LIVE
-2026-09-08** (sista mergepunkt `226882b`). Viktigast att minnas: **fjärde färg
-finns inte efter 2/1** (beslut 13, ägarens ord "det räcker med game force en
-gång") · passad hand spelar Jacoby/Bergen AV (9) · naket 4NT = essfråga i
-senast bjudna färg (14) · 4NT över 1NT-återbudet kvantitativt, egen färg →
-Gerber 4♣ (§5.7).
-**Etapp 4 familj 1–3 KLAR & LIVE 2026-09-08:** inkliv/advance (`26687c9`),
-dubblingsfamiljen (`d3f7116`), negativ/stöd-X/Jordan/svararens konkurrenssvar
-(`2ae5d05`); kunskapen i `overcall-continuations.ts`/`double-continuations.ts`/
-`contested-opening.ts`+`fit-raise.ts`; detaljer i planens logg.
-**Familj 4–7 KLARA & LIVE 2026-09-09** (detalj i planens logg): fortsättning när
-de stört (`4fa2604`) · balansering/återöppning + K1-resten (`78735c2`) ·
-svar-stört-rättelsen (§7.4: aldrig negativ dubbling med 3+ stöd i partnerns
-öppnade högfärg → höjning/cue) · försvar mot 1NT · försvar mot svaga tvåor/spärrar
-(`47c6e6f`).
-**Familj 8 (slam-svarssvepet) KLAR & LIVE 2026-09-10 (mergepunkt `df930d9`):**
-de sex kvarvarande slam-detektorerna → raden *slam-forts*
-(`slam-answer-continuations.ts`, sist i tabellen); ren klass a, 0 ändrade bud.
-**Familj 9 (betydelsesvepet på störda auktioner) KLAR 2026-09-10 — SISTA
-etapp 4-familjen, HELA ETAPP 4 KLAR:** inga detektorer flyttade, 0 ändrade bud
-(auktionsdiff 0) — bara betydelselagret (`auction-meaning.ts` + registret) lärt
-räkna kravnivå/alert i konkurrens ur ROLLEN. Störda grinden 0/0/0. **Ägarbeslut om
-"noll":** noll på det avgörbara + de KORTBEROENDE resterna (inbjudan/ej krav beror
-på handen — ärlig inferens golv) listade som `STÖRDA_UNDANTAG` utanför grinden (50
-mönster). Registret konsekvent: alla cue-BUD alertas, fortsättningarna inte.
-**Nästa:** ETAPP 5 session C (docs/minne); slutkärnan (A) + manusrivningen (B, 0-diff) LIVE 2026-09-11.
+### 🔵 NU — MOTORBYTET etapp 6: efterkontroll + ägarens live-prov (ägarbeslut 2026-09-04)
+Budmotorn är ombyggd: från förskrivet manus + detektorkedja till **EN
+beslutsfunktion per stol** — `decideCall` frågar beslutstabellen
+`auction-decide.ts` stol för stol (betydelse → fakta → val; ärlig inferens
+bevisad av kikvakten, aldrig en annan hand). Hela koden är LIVE (etapp 0–5, sista
+mergepunkt `e1f70e9`); docs + minne städade (session C, 2026-09-11). **Kvar =
+etapp 6:** kör alla riggar en sista gång (kikvakt, auktions-/avvikelsedump,
+betydelsesvep, revisorn, `npm test`, `npx tsc`), bordets serverfunktioner
+testkörda, sedan 🚪 **ägarens live-prov** (några givar i Spela kort inkl. en
+"utanför boken", ett bord, en tävlingsgiv). HELA planen + loggen:
+**`docs/motorbyte-plan.md`**.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
 Emma03 LIVE** (nivå bara i Syds kortspel, `botniva.ts`) · felrapporterna
 #54–#60 (`4898958`, 2026-09-03/04) · pliktsvepet K1–K5. Grindbeslut kvar:
-Nivå 2 i tävlingen VÄNTAR (trigger ej nådd). Ägarens ord: säg "regeln saknades", inte "off-book".
+Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen
@@ -69,6 +36,12 @@ deployar.
 ---
 
 **Levande låsningar ur avslutade etapper** (hela historiken: `docs/historik.md`):
+- **Motorbytet är KLART & LIVE** (etapp 0–5, 2026-09-04…11): budmotorn är EN
+  beslutsfunktion per stol — `decideCall` frågar beslutstabellen
+  `auction-decide.ts` stol för stol. **Inget manus, ingen detektorkedja, ingen
+  `open`-flagga kvar.** Ny budlogik byggs ALLTID som en tabellrad (läge ur fakta →
+  kunskapsfunktion ur EN hand), aldrig i `auction.ts` (nu tunn `buildAuction`-
+  hjälpare). Kikvakten bevisar ärlig inferens. Detaljer i `docs/motorbyte-plan.md`.
 - **Tävlingen är KLAR & LIVE** (2026-08-11/12): konton → daglig 12-givarstävling
   → topplista. **MP är STANDARD (topp=100 %, snitt 50 %) — ändra INTE.**
   "Spela given igen" finns som övningsläge (räknas inte i MP%).
@@ -134,7 +107,7 @@ rondgenomgångens per-kort-motivering · 2♣-öppningens bredare översyn forts
 distributionell + 6-5-samspelet).
 
 ### 🅿️ PARKERAT (väg INTE in i beslut — full beskrivning i `docs/senare.md`)
-DDS-facit på tunga fulla givar · off-book §7 bredd · "framkalla slutbud"-väljaren ·
+DDS-facit på tunga fulla givar · §7-försvarets bredd i konkurrens · "framkalla slutbud"-väljaren ·
 Mathe mot stark konstgjord 1♣ · hål D steg 2 (cue-frontend i konkurrens).
 
 ## Arbetsrutiner (följ varje gång)
@@ -215,11 +188,18 @@ projektets resa erfaren & trygg (ägarens egna ord 2026-08-13).
   tolkas som minimum.
 
 ## Budmotorn — innan du rör budlogik
-- Motorn har **tre auktionslager**. Läs "Budmotorns tre auktionslager +
-  `open`-handoff" i **`docs/status.md`** — den avgör var ny logik hör hemma:
-  - `auction.ts` — **on-book**, den kanoniska linjen (generativ)
-  - `auction-live.ts` — **konkurrens/off-book** (budlådan, `decideCall`)
-  - `auction-interpret.ts` — **förklaringen** av ett bud
+- Motorn är **EN beslutsfunktion per stol**: `decideCall(deal, history, seat)`
+  läser bara den egna handen + auktionen hittills och frågar beslutstabellen
+  `auction-decide.ts` (`decideFromTable`: rad = läge ur fakta → kunskapsfunktion).
+  Tre steg i beslutet: **betydelse** (`auction-meaning.ts`) → **fakta**
+  (`auction-facts.ts`) → **val** (tabellen). Kontraktet "Budmotorns beslutsfunktion
+  — tre steg i ett beslut" i **`docs/status.md`** avgör var ny logik hör hemma —
+  läs den före budarbete.
+  - Ny budlogik = **en ny tabellrad** (läge + kunskapsfunktion ur EN hand), aldrig
+    en lapp i `auction.ts` (nu tunn `buildAuction`-hjälpare). Ärlig inferens:
+    aldrig en annan hand — kikvakten (`kikvakt.test.ts`) bevisar det.
+  - Ny **budförklaring** → betydelselagret `auction-meaning.ts`; `auction-interpret.ts`
+    är en tunn läsare av det.
 - Allt byggs **test-drivet** (`npm test`), facit-testet skrivs FÖRE fixen.
 - **Varje regeländring måste skrivas in i `docs/budsystem.md`** i läsbar
   paragraf-form — appens Budsystem-sida renderar den filen live för ägaren.

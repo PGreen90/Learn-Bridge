@@ -1,11 +1,20 @@
 # Off-book Syd — datorpartnerns beteende (FAS 2 punkt 10b)
 
+> 📦 **ARKIV (2026-09-11, motorbytet).** Den här filen beskriver hur det gamla
+> manus-/detektorlagret svarade när du (Syd) bjöd utanför den förberäknade
+> linjen. **Mekanismen finns inte längre:** sedan motorbytet är budgivningen EN
+> beslutsfunktion per stol (betydelse → fakta → val), och det här beteendet bor
+> nu i beslutstabellens rad **`partner-färg`** (`partnerSuitResponse` i
+> `balancing-continuations.ts`) — "partnern visade en färg → höj med fit / egen
+> färg / sang / pass". Regelinnehållet nedan överlevde ordagrant; bara
+> orkestreringen ("off-book", `offBookResponse`, `divergedFromLine`) är borta.
+> Arkitekturen står i `docs/status.md` + `docs/motorbyte-plan.md`. Läs resten som
+> historik.
+>
 > **Definition, bekräftad av ägaren 2026-07-01 ("lås som det är").**
 > Beskriver vad datorpartnern gör när du (Syd) bjuder **utanför systemlinjen**
 > (off-book) i den levande budgivningen. Detta är det vanligaste läget för en
-> spelare mot datorn. Beteendet bor i `src/lib/engine/auction-live.ts`
-> (`offBookResponse` → `raiseWithFit` / `respondWithoutFit`) och är facit-låst i
-> `auction-live.test.ts`.
+> spelare mot datorn.
 
 ## När triggar off-book-svaret?
 `decideCall` följer parets kanoniska systemlinje **så länge den verkliga

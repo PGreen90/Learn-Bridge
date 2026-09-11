@@ -38,7 +38,8 @@ som innehåller HELA given maskinläsbart. Din uppgift: läs rapporterna,
      som övriga facit-lås). Se testet FALLA först.
 
 4. **Laga felet** tills facit-testet (och hela `npm test`) är grönt.
-   Ändra aldrig on-book-beteende utan att befintliga facit-lås skyddar det.
+   Ändra aldrig ett bud som redan är systemriktigt utan att befintliga
+   facit-lås skyddar det.
 
    **STANDARDRAPPORT till ägaren — alltid, för varje lagad rapport**
    (ägarbeslut 2026-07-02). På enkel svenska, en block per issue:
