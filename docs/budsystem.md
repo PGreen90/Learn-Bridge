@@ -2131,6 +2131,16 @@ man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer ti
   preferens till längsta sidofärgen, men **lika långa färger avgörs av
   billigaste nivån** — med 3-3 väljs färgen som kan bjudas en nivå lägre (t.ex.
   3♥ före 4♣ efter (2♦)–3♦), aldrig en onödig nivåhöjning på hackor.
+- **Systems on efter det direkta 2NT-inklivet (15–18, live-prov 2026-09-11):**
+  över partnerns naturliga 2NT-inkliv svarar man som över en 2NT-öppning, men med
+  lite mer (inklivet är 15–18, inte 20–21): **3♦ = transfer till hjärter**,
+  **3♥ = transfer till spader**, **3NT = till spel** (9+, balanserad utan
+  5-korts högfärg), pass = svag. Inklivaren fullföljer transfern med **3 i
+  högfärgen**, eller **super-accept 4 i högfärgen** med maximum (17–18) och
+  3-korts stöd. Efter en enkel fullföljning bjuder advancern om: **pass** (~6–8,
+  stannar i 3-läget), **3NT** (~9–10, lovar stopp i deras färg → inklivaren väljer
+  3 sang eller utgång i högfärgen) eller **4 i högfärgen** (lovar 6 kort). Gäller
+  bara det DIREKTA inklivet; balanseringen (12–15) har för lite för systemet.
 - **Balansering mot svaga tvåor (fel färg-spåret fix 5a):** passas den svaga
   tvåan runt till utpassningsläget (t.ex. 2♥–P–P–?) gäller **"låna en kung"**
   (§7.1) även här — förr fanns bara takeout-X:et där och 2♥–P–P–P såldes:
@@ -2418,6 +2428,16 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-11 — Systems on efter det direkta 2NT-inklivet över deras svaga
+  tvåa/spärr (§7.7; etapp 6 live-prov).** Efter deras svaga tvåa och vårt
+  naturliga 2NT-inkliv (15–18) svarar advancern som över en 2NT-öppning:
+  3♦ = transfer till hjärter, 3♥ = transfer till spader, 3NT = till spel. Förr
+  läste motorn advancerns 3♦ som "naturlig ruter" och rekommenderade pass — ett
+  helt saknat svarslager. Inklivaren fullföljer (3M / super-accept 4M med 17–18 +
+  3 stöd), advancern bjuder om (pass / 3NT med stopp / 4M med 6 kort). Bara det
+  direkta inklivet (balanseringen 12–15 orörd). Auktionsdiff 4 bot + 18 avvik —
+  alla där boten förr passade 2NT-inklivet, nu rätt kontrakt; revisorn 20,7 % ·
+  270,54 (ej sämre). Facit: `auction-2nt-overcall-systemson.test.ts`.
 - **2026-09-11 — Cue-rond efter kaptenens höjning av öppnarens andra högfärg
   (§6.2; etapp 6 live-prov).** Efter `1♥–2♦–2♠–3♠` (kaptenen höjer öppnarens nya
   högfärg → spader satt som trumf, utgångskrav) öppnar öppnaren cue-ronden, precis
