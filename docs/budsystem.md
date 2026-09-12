@@ -350,13 +350,18 @@ Efter den **starka höjningen** (1m–2m, krav) söker paret oftast **3NT**.
 | Återbud | Betydelse |
 |---|---|
 | ny färg | **äkta stopp** (A, Kx, Qxx, J10xx) i färgen, 12+, krav – letar 3NT |
-| 2NT | balanserad 12–14 hp, ingen utgångsiver (ej krav) |
+| 2NT | balanserad 12–14 hp **med stopp i ALLA objudna färger**, ingen utgångsiver (ej krav) |
 | 3 i lf | **minimum 12–14** utan stopp att visa (ej krav) |
 | 3NT | balanserad 18–19 hp, till spel |
 
 Tre preciseringar (B13):
 - **"Stopp" är honnörsstopp**, aldrig bara längd — ♠9642 är inget spaderstopp.
   Billigaste stoppfärgen bjuds först (upp-the-line).
+- **2NT lovar stopp i alla objudna färger** (provspels-fynd frö 20260955): en
+  balanserad 12–14 utan stopp i en sidofärg (t.ex. ♦762) bjuder INTE 2NT — då
+  ljuger budet om sangduglighet och paret dör i 3NT-bet fast klöverfiten fanns.
+  Utan full stopptäckning visar öppnaren i stället en färg hen HAR stopp i
+  (stopp-visningen), så paret ser var det läcker och stannar i minorn.
 - **3 i lf är strikt 12–14.** En hand med **15+** bjuder ALLTID krav: finns
   inget äkta sidostopp bjuds bästa sidofärgen ändå ("fantomstoppen",
   standardpraxis — samma bud som stopp-visningen, partnern kan inte skilja dem
@@ -2056,7 +2061,13 @@ dubblarens eget flöde (X + egen färg).
   bra på minimum med stopp, men på **2-läget+** kräver sangen **extra (~15+)** —
   en minimiöppnare visar hellre (utan nivåhöjning, i ordning) en **annan objuden
   4+ färg**, sedan sitt **5-korts återbud** (t.ex. 1♦–(2♣)–X–P–**2♦**), och tar
-  sang-med-stopp först som sista utväg. **Höjningsregeln för dubblaren:** ett
+  sang-med-stopp först som sista utväg.
+  **Egen 6-korts högfärg rebjuds FÖRE sang (provspels-fynd frö 20260797):** har
+  öppnaren en **6-korts högfärg** (och inte 4-korts stöd i den högfärg X:et lovar)
+  visas den — billigast med minimum, **hoppande med 16+** — före ett sang-bud. En
+  högfärgsutgång slår sang, så en känd 6-korts högfärg får inte gömmas i NT (1♥–
+  (2♦)–X–P med ♠7 ♥AJT865 ♦KQ ♣AQJ9, 17 hp → **3♥**, inte 2NT). En 6-korts
+  *lågfärg* rebjuds däremot efter sang (3NT slår 5m). **Höjningsregeln för dubblaren:** ett
   billigt tvingat ombud i en icke-1M-färg lovar bara 5 kort → ingen
   dubbelton-höjning alls; visade ombudet 6+ (fick gå upp en nivå) eller lovade
   1♥/1♠-öppningen redan 5+ får dubbelton höjas — men bara med
@@ -2472,6 +2483,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-12 — Provspels-fynd ur systemrevisorn (2 systemfel, §4.2 + §7.3/7.4).**
+  1000 givar bot-mot-bot mot DD-facit. (a) **Öppnarens svar på negativ dubbling
+  rebjöd sang FÖRE sin egen 6-korts högfärg** (frö 20260797: 1♥–(2♦)–X–P, 17 hp +
+  6 hjärter → 2NT, dog i sang fast 4♥ kall). Nytt steg i `openerAnswerNegativeDouble`
+  ([doubles.ts](src/lib/engine/doubles.ts)): en 6-korts HÖGFÄRG rebjuds före
+  sang (billigast/16+ hoppande); 6-korts lågfärg fortsatt efter sang. (b)
+  **Inverterad minor: 2NT-återbudet krävde ingen stopp i objudna färger** (frö
+  20260955: ♠J5 ♥A87 ♦762 ♣AQJ54 → 2NT utan ruterstopp, 3NT-bet fast 5♣ kall).
+  Nu kräver `inverterad: 2NT` ([rebids.ts](src/lib/engine/rebids.ts)) stopp i
+  ALLA objudna färger; annars stopp-visning (paret ser läckan och stannar i
+  minorn). Facit: `auction-revisor-fynd-2026-09-12.test.ts`.
 - **2026-09-12 — Dubblarens cue-höjning är krav; advancern svarar (§7.3; etapp 6
   live-prov, Bricka 9).** Efter upplysnings-X + advancerns högfärgsadvance på
   1-läget var dubblarens bud i motståndarnas färg (en cue = stark höjning, 17+)

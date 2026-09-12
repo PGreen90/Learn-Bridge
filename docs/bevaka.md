@@ -1,5 +1,16 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Negativ-dubblaren accepterar inte öppnarens invit-hopp (2026-09-12, upptäckt vid provspels-fynd 1)
+- Efter fixen "6-korts högfärg före sang" bjuder öppnaren rätt: `1♥–(2♦)–X–P–3♥`
+  (16+, 6 hjärter, invit). MEN den negativa dubblaren (frö 20260797: Öst ♠AK43
+  ♥94 ♦94 ♣85432, 8 hp, 2-korts stöd) **passar** 3♥ i stället för att acceptera
+  till **4♥** — paret stannar i 3♥ fast utgången är kall (8 hp + 6-2-fit mot
+  visat 16+ = utgång).
+- **Bevaka/SENARE:** bygg den negativa dubblarens (advancerns) accept av
+  öppnarens invit-hopp — raise till utgång med mer än blott minimum (~8+ mot ett
+  16+-hopp). Metodval (acceptgränsen) → stäm av med ägaren. Separat från fynd 1
+  (som bara gällde öppnarens egen bud).
+
 ## Dubblarens cue-höjning: ingen slamletning över advancerns maximum (2026-09-12, live-prov Bricka 9)
 - Nya `advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`: efter `1M-öppning
   motståndare–X–högfärgsadvance–cue` svarar advancern (2M/3M eller 2NT/3NT) och

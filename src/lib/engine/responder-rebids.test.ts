@@ -365,10 +365,13 @@ describe('buildAuction – inverterad minor end-to-end (FAS 6 inkoppling)', () =
       dealer: 'N',
       vulnerability: 'none',
       hands: {
-        N: parseHand('S:KQ4 H:KJ7 D:A842 C:432'), // 13 hp bal, minor-regeln → 1♦, rebid 2NT
-        S: parseHand('S:A2 H:A32 D:KJ643 C:432'), // 12 hp, 5 ruterstöd → 2♦ inverterad, sen 3NT
-        E: parseHand('S:J876 H:Q865 D:7 C:QJ95'),
-        W: parseHand('S:T953 H:T94 D:QT5 C:KT8'),
+        // 14 hp bal med stopp i ALLA objudna färger (♠KQ/♥Qxx/♣QJx) → 1♦, rebid
+        // 2NT. (Gammal hand hade ♣432 utan klöverstopp OCH var olaglig – dubbel
+        // C:432 – och låste därmed just den bugg fixen tar bort.)
+        N: parseHand('S:KQ5 H:Q97 D:A842 C:QJ3'),
+        S: parseHand('S:A6 H:K83 D:KJ975 C:T42'), // 11 hp, 5 ruterstöd → 2♦ inverterad, sen 3NT
+        E: parseHand('S:JT98 H:A65 D:Q3 C:9876'),
+        W: parseHand('S:7432 H:JT42 D:T6 C:AK5'),
       },
     }
     const a = buildAuction(deal)

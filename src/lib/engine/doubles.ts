@@ -118,6 +118,22 @@ export function openerAnswerNegativeDouble(hand: Hand, ourOpen: Suit, theirCall:
     }
   }
 
+  // 1b. Egen 6+ HÖGFÄRG rebjuds FÖRE sang – en högfärgsutgång slår sang, så en
+  //     känd 6-korts högfärg ska visas hellre än att gömmas i NT (provspels-fynd
+  //     frö 20260797: 1♥–(2♦)–X–P med 17 hp + 6 hjärter bjöd 2NT och dog i sang
+  //     fast 4♥ var kall). Minimum (12–15) billigast; 16+ hoppande (extra
+  //     längd + styrka). Gäller bara högfärgen: en 6-korts LÅGFÄRG rebjuds efter
+  //     sang (3NT slår 5m), i steg 3 nedan.
+  if ((ourOpen === 'hearts' || ourOpen === 'spades') && len[ourOpen] >= 6) {
+    const lvl = cheapLevel(ourOpen) + (p >= 16 ? 1 : 0)
+    const strength = p >= 16 ? '16+ (extra längd + styrka, hoppande)' : 'minimum (12–15)'
+    return {
+      call: `${lvl}${BID[ourOpen]}`,
+      rule: 'svar på negativ dubbling',
+      explanation: `Egen 6-korts ${SYM[ourOpen]} rebjuds före sang – ${strength} → ${lvl}${SYM[ourOpen]}.`,
+    }
+  }
+
   // 2. Sang med stopp i deras färg. På 1-läget (1NT) räcker minimum, men på
   //    2-läget+ kräver sangen extra (~15+): en minimiöppnare som lyfter till
   //    2NT bara för stoppet spelar sang utan värdena (frö 20260763: 11 hp →

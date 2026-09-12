@@ -28,9 +28,18 @@ lillslam-mot-utgång, storslamsgrenen SENARE) · **dubblarens cue-höjning är k
 (advancern svarar 2M/3M/2NT/3NT på dubblarens cue i st.f. att passa ut den;
 `advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`, §7.3, slam-över-max
 SENARE). Detaljerna:
-[[motorbytet-manus-till-spelare]] + budsystem §9. **Nästa
-session: fortsätt live-provet** (ägaren spelar vidare), laga nya fynd. HELA planen:
-**`docs/motorbyte-plan.md`**.
+[[motorbytet-manus-till-spelare]] + budsystem §9.
+
+**Dessutom (Claudes egen provspelning 2026-09-12, systemrevisorn 1000 givar):** två
+systemfel lagade & LIVE — (1) öppnarens svar på negativ dubbling rebjöd sang FÖRE
+egen 6-korts högfärg (nu 3♥ före 2NT, `doubles.ts`); (2) inverterad minors
+2NT-återbud krävde ingen stopp i objudna färger (nu stopp-krav, annars
+stopp-visning, `rebids.ts`). Facit: `auction-revisor-fynd-2026-09-12.test.ts`.
+Upptäckt följd-fynd (bevaka.md): negativ-dubblaren accepterar inte öppnarens
+invit-hopp (3♥ passas fast 4♥ kall) — metodval, väntar ägaren.
+
+**Nästa session: fortsätt live-provet** (ägaren spelar vidare), laga nya fynd. HELA
+planen: **`docs/motorbyte-plan.md`**.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
 runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/

@@ -395,7 +395,12 @@ export function openerRebidAfterInvertedMinor(hand: Hand, m: Suit, strong: boole
   // 15+ bjuder alltid krav så utgången aldrig passas bort (källa: bridgebum,
   // inverted minors; öppnarens nya färger är krav).
   if (bal && p >= 18) return { call: '3NT', rule: 'inverterad: 3NT', explanation: `Balanserad (18–19) → 3NT.` }
-  if (bal) return { call: '2NT', rule: 'inverterad: 2NT', explanation: `Balanserad (12–14) → 2NT (ej krav).` }
+  // 2NT LOVAR stopp i alla objudna färger — annars ljuger den om sangduglighet
+  // (provspels-fynd frö 20260955: ♠J5 ♥A87 ♦762 ♣AQJ54 bjöd 2NT utan ruterstopp
+  // → 3NT bet fast 5♣ var kall). Saknas en stoppar öppnaren i stället en färg
+  // där hen HAR stopp (stopp-visning nedan), så paret ser var det läcker.
+  const unbidStopped = RANK.every((s) => s === m || hasStopper(hand, s))
+  if (bal && unbidStopped) return { call: '2NT', rule: 'inverterad: 2NT', explanation: `Balanserad (12–14), stopp i alla objudna färger → 2NT (ej krav).` }
   // Visa äkta stopp i en ny färg (billigast) – letar 3NT, krav.
   for (const s of RANK) {
     if (s !== m && rankOf(s) > rankOf(m) && hasStopper(hand, s)) return { call: `2${BID[s]}`, rule: 'inverterad: stopp-visning', explanation: `Stopp i ${SYM[s]} → 2${SYM[s]} (letar 3NT, krav).` }
