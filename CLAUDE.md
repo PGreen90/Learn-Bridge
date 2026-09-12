@@ -15,11 +15,15 @@ Budmotorn är ombyggd: från förskrivet manus + detektorkedja till **EN
 beslutsfunktion per stol** — `decideCall` frågar beslutstabellen
 `auction-decide.ts` stol för stol (betydelse → fakta → val; ärlig inferens
 bevisad av kikvakten, aldrig en annan hand). Hela koden är LIVE (etapp 0–5, sista
-mergepunkt `e1f70e9`); docs + minne städade (session C, 2026-09-11). **Kvar =
-etapp 6:** kör alla riggar en sista gång (kikvakt, auktions-/avvikelsedump,
-betydelsesvep, revisorn, `npm test`, `npx tsc`), bordets serverfunktioner
-testkörda, sedan 🚪 **ägarens live-prov** (några givar i Spela kort inkl. en
-"utanför boken", ett bord, en tävlingsgiv). HELA planen + loggen:
+mergepunkt `e1f70e9`); docs + minne städade (session C, 2026-09-11). Etapp 6:s
+**efterkontroll KLAR 2026-09-11** (alla riggar gröna, bordet testkört). **Nu pågår
+🚪 ägarens live-prov** — ägaren provspelar och rapporterar fel; jag lagar test-
+drivet (facit + auktionsdiff + grind) och PCD:ar var för sig. **Sex hål lagade &
+LIVE 2026-09-11/12:** cue-rond+överbudsrättelse · systems-on efter 2NT-inkliv ·
+2♣-återbudet 5+ · Smolen/garbage över 1NT-inkliv · RKC-trumfdamen ärlig (bevisad
+10-fit) · konkurrens-fritt-bud (öppnarens 5-4/2NT + svararens fortsättning,
+`1e298d2`). Detaljerna: [[motorbytet-manus-till-spelare]] + budsystem §9. **Nästa
+session: fortsätt live-provet** (ägaren spelar vidare), laga nya fynd. HELA planen:
 **`docs/motorbyte-plan.md`**.
 
 **Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
