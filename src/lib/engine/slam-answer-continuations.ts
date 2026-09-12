@@ -26,7 +26,7 @@
 // samma företräde som detektorerna hade när linjen tog slut.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { PARTNER, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { openingBid, PARTNER, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { legalCalls, letterOfSuit, SWE_SYM } from './auction-rules'
 import { hcp, lengths, suitHcp } from './hand'
 import type { Kunskap } from './overcall-continuations'
@@ -77,12 +77,36 @@ export function slamAskTrump(f: AuctionFacts): Suit | null {
  *  - partnerns senaste icke-pass är 4NT (bara pass har följt),
  *  - trumfen kan härledas via `slamAskTrump`.
  */
+/**
+ * Partnerns (essfrågarens) VISADE trumflängd, härledd ur auktionen med
+ * försiktiga golv (ärlig inferens — motorn spårar inte visad längd exakt):
+ *  · partnern öppnade trumffärgen: 1-läges högfärg → 5, 1♦ → 4, 1♣ → 3,
+ *    svag tvåa → 6, spärr → nivån + 4;
+ *  · trumf satt via Jacoby 2NT (partnern visade 4+ stöd) → 4;
+ *  · annars (partnern höjde/agreed) → golv 3.
+ * Används för RKC-svarets trumfdam: damen visas via längd bara när egen längd +
+ * detta ≥ 10 (bevisad 10-korts fit), aldrig på ett antagande.
+ */
+export function partnerShownTrumpLength(f: AuctionFacts, trump: Suit): number {
+  const partner = PARTNER[f.seat]
+  const L = letterOfSuit(trump)
+  const open = openingBid(f.history)
+  if (open && open.seat === partner && open.strain === L) {
+    if (open.level === 1) return trump === 'hearts' || trump === 'spades' ? 5 : trump === 'diamonds' ? 4 : 3
+    if (open.level === 2) return 6 // svag tvåa
+    return open.level + 4 // spärr (3→7, 4→8)
+  }
+  if (f.jacobyTrump === trump) return 4 // partnern satte fiten med Jacoby 2NT (4+ stöd)
+  return 3 // partnern har agreed trumf (höjning) → golv 3
+}
+
 export function answerRKC(hand: Hand, f: AuctionFacts): Kunskap | null {
   const lastNonPass = f.lastNonPass
   if (!lastNonPass || lastNonPass.seat !== PARTNER[f.seat] || lastNonPass.bid !== '4NT') return null
   const trump = slamAskTrump(f)
   if (!trump) return null
-  return respondToRKC(hand, trump)
+  const knownCombined = lengths(hand)[trump] + partnerShownTrumpLength(f, trump)
+  return respondToRKC(hand, trump, knownCombined)
 }
 
 /**

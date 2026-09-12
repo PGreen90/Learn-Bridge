@@ -1356,6 +1356,12 @@ människas bud.
 | 5♥ | 2 (eller 5) **utan** trumfdam |
 | 5♠ | 2 (eller 5) **med** trumfdam |
 
+- **Trumfdam i svaret (5♠/5♥):** du visar damen om du **håller den**, eller om
+  paret **bevisligen har 10+ trumf** (din längd + partnerns *visade* längd) — då
+  ersätter längden damen. Har du bara 5+ egen trumf men känt **mindre än 10**
+  gemensamt (t.ex. partnern har bara visat 3+) säger du sanningen (**5♥, utan
+  dam**) och låter frågaren avgöra på sin egen hand. Vi antar aldrig damen utan
+  säkra grunder.
 - **Trumfdam-fråga:** efter 5♣/5♦-svar frågar billigaste icke-trumf om trumfdam.
   Svar: återgå till trumf = **ingen** dam; annat färgbud = **dam + kung** i den
   färgen; 5NT = dam **utan** sidokungar.
@@ -2431,6 +2437,16 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-12 — RKC-svarets trumfdam kräver bevisad 10-korts fit (§6.1; etapp 6
+  live-prov).** Förr visade svararen trumfdamen (5♠) så fort hen hade **5+ egen
+  trumf** — ett antagande om 10+ gemensamt även när partnern bara visat 3+
+  (bricka: svarare 5, frågare 3 = känt 8, ej 10). Nu ersätter längden damen bara
+  när paret BEVISLIGEN har 10+ (egen längd + partnerns *visade* längd, härledd med
+  försiktiga golv); annars säger svararen sanningen (5♥, utan dam) och frågaren
+  avgör på sin egen hand (`captainPlaceAfterRKC` räknar redan damen ur EGEN hand
+  eller 5♠-svaret). Ärlig inferens — inget antagande utan grund. 0 ändrade bud i
+  bot-auktionerna (revisorn oförändrad); 19 avvikelsegivar (konstlade 4NT-frågor)
+  visar det ärliga 5♥. Facit: `auction-rkc-queen-honest.test.ts`.
 - **2026-09-12 — Smolen/garbage efter Stayman över vårt 1NT-inkliv (§7.1; etapp 6
   live-prov).** Systems on över ett 1NT-inkliv saknade advancerns Stayman-rebud:
   efter 1NT-inkliv–2♣–2♦ (ingen högfärg) rekommenderade motorn PASS med en svag

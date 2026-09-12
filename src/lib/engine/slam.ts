@@ -48,9 +48,18 @@ export function keycards(hand: Hand, trump: Suit): number {
   return countAces(hand) + (hasRank(hand, trump, 'K') ? 1 : 0)
 }
 
-/** Trumfdam "räknas" om man har damen ELLER 5+ trumf (längden ersätter damen). */
-export function hasTrumpQueen(hand: Hand, trump: Suit): boolean {
-  return hasRank(hand, trump, 'Q') || lengths(hand)[trump] >= 5
+/**
+ * Trumfdam "räknas" om man HÅLLER den, eller — när det gemensamma är KÄNT — om
+ * paret bevisligen har 10+ trumf (`knownCombinedLen` = egen längd + partnerns
+ * VISADE längd). Utan känt gemensamt (facit-tvåhandsföraren) står det gamla
+ * längd-golvet (5+ egen). Live-prov 2026-09-12: "5+ egen" ensam ANTOG 10+ utan
+ * grund — svararen visade en dam paret inte bevisats ha (partnern visade bara
+ * 3+). Ärlig inferens kräver bevisad längd, inte ett antagande.
+ */
+export function hasTrumpQueen(hand: Hand, trump: Suit, knownCombinedLen?: number): boolean {
+  if (hasRank(hand, trump, 'Q')) return true
+  if (knownCombinedLen !== undefined) return knownCombinedLen >= 10
+  return lengths(hand)[trump] >= 5
 }
 
 /** Första-rondskontroll i en färg: ess eller renons. */
@@ -61,12 +70,12 @@ export function firstRoundControl(hand: Hand, suit: Suit): boolean {
 // === §6.1 1430 RKC Blackwood ===============================================
 
 /** Svar på 4NT (1430 RKC) givet överenskommen trumf. */
-export function respondToRKC(hand: Hand, trump: Suit): ResponseResult {
+export function respondToRKC(hand: Hand, trump: Suit, knownCombinedLen?: number): ResponseResult {
   const kc = keycards(hand, trump)
   if (kc === 0 || kc === 3) return { call: '5D', rule: '1430 RKC', explanation: `${kc} nyckelkort → 5♦ (0 eller 3).` }
   if (kc === 1 || kc === 4) return { call: '5C', rule: '1430 RKC', explanation: `${kc} nyckelkort → 5♣ (1 eller 4).` }
   // kc === 2 || kc === 5
-  return hasTrumpQueen(hand, trump)
+  return hasTrumpQueen(hand, trump, knownCombinedLen)
     ? { call: '5S', rule: '1430 RKC', explanation: `${kc} nyckelkort MED trumfdam → 5♠.` }
     : { call: '5H', rule: '1430 RKC', explanation: `${kc} nyckelkort utan trumfdam → 5♥.` }
 }
