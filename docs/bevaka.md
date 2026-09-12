@@ -1,5 +1,15 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Dubblarens cue-höjning: ingen slamletning över advancerns maximum (2026-09-12, live-prov Bricka 9)
+- Nya `advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`: efter `1M-öppning
+  motståndare–X–högfärgsadvance–cue` svarar advancern (2M/3M eller 2NT/3NT) och
+  dubblaren placerar minst utgång. **Medveten avgränsning:** dubblaren driver
+  bara till **utgång**, aldrig slam — även när advancern visat sitt **maximum**
+  (3M/3NT). Med en stark dubblare (t.ex. 21 hp) + advancerns 8+ kan slam finnas.
+- **Bevaka:** en giv där advancern hoppar (3♠/3NT) och paret ändå stannar i
+  utgång fast slamzonen (≈30+) nås — SENARE-kandidat att bygga slamletningen
+  (cue/RKC) för dubblaren över advancerns maximum.
+
 ## RKC-frågaren via öppnaren-som-kapten bjuder aldrig storslam (2026-09-12, live-prov Bricka 14)
 - Nya `rkc-asker-continuations.ts` (tabellrad `rkc-frågare`) placerar RKC-frågaren
   seat-agnostiskt — inklusive **öppnaren** som driver slammen — och använder

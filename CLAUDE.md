@@ -18,13 +18,16 @@ bevisad av kikvakten, aldrig en annan hand). Hela koden är LIVE (etapp 0–5, s
 mergepunkt `e1f70e9`); docs + minne städade (session C, 2026-09-11). Etapp 6:s
 **efterkontroll KLAR 2026-09-11** (alla riggar gröna, bordet testkört). **Nu pågår
 🚪 ägarens live-prov** — ägaren provspelar och rapporterar fel; jag lagar test-
-drivet (facit + auktionsdiff + grind) och PCD:ar var för sig. **Sju hål lagade &
+drivet (facit + auktionsdiff + grind) och PCD:ar var för sig. **Åtta hål lagade &
 LIVE 2026-09-11/12:** cue-rond+överbudsrättelse · systems-on efter 2NT-inkliv ·
 2♣-återbudet 5+ · Smolen/garbage över 1NT-inkliv · RKC-trumfdamen ärlig (bevisad
 10-fit) · konkurrens-fritt-bud (öppnarens 5-4/2NT + svararens fortsättning,
 `1e298d2`) · **RKC-frågaren seat-agnostisk** (öppnaren-som-kapten frågar
 trumfdam med 5♥ i st.f. PASS; `rkc-asker-continuations.ts`, damfrågan avgör
-lillslam-mot-utgång, storslamsgrenen SENARE). Detaljerna:
+lillslam-mot-utgång, storslamsgrenen SENARE) · **dubblarens cue-höjning är krav**
+(advancern svarar 2M/3M/2NT/3NT på dubblarens cue i st.f. att passa ut den;
+`advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`, §7.3, slam-över-max
+SENARE). Detaljerna:
 [[motorbytet-manus-till-spelare]] + budsystem §9. **Nästa
 session: fortsätt live-provet** (ägaren spelar vidare), laga nya fynd. HELA planen:
 **`docs/motorbyte-plan.md`**.

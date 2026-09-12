@@ -300,6 +300,126 @@ export function answerCueAfterDouble(hand: Hand, f: AuctionFacts): Kunskap | nul
 }
 
 // ============================================================================
+// Dubblarens CUE-HÖJNING av advancerns färgadvance (live-prov, 2026-09-12)
+// ============================================================================
+//
+// Sekvensen: motståndarna öppnade i färg, PARTNERN dubblade (upplysning), jag
+// (advancern) advancerade en HÖGFÄRG på 1-läget, och partnern (dubblaren) bjöd
+// sedan MOTSTÅNDARNAS färg = en **cue** — en stark höjning (17+, för stark för
+// att bara höja advancen), utgångskrav med bekräftat intresse. Cuet FÅR ALDRIG
+// passas (fältfynd Bricka 9: 1♣–X–1♠–2♣ passades ut i 2♣). Förr fanns bara svaret
+// på dubblarens cue när advancern INTE bjudit en egen färg
+// (`cueAfterOurDoubleToAnswer` kräver att alla våra bud före cuet är dubblingar);
+// när advancern redan advancerat en färg fanns inget läge → catch-all pass.
+//
+// Advancern SVARAR (ägarbeslut 2026-09-12): cuet garanterar inte att advancen var
+// 4-korts, så svaret bekräftar högfärgen eller styr om till NT, och visar styrka
+// på 8-hp-gränsen:
+//   · 4+ i högfärgen:  under 8 hp → billigaste högfärg;  8+ → hopp i högfärgen
+//   · under 4 i högfärgen:  under 8 hp → 2NT;  8+ → 3NT
+// Dubblaren placerar sedan minst UTGÅNG (4M över fitsvaret, 3NT över 2NT).
+// Slamletning över advancerns MAXIMUM (3M/3NT) = SENARE (docs/bevaka.md).
+
+/** Läser cue-höjnings-sekvensen: X (dubblaren) – högfärgsadvance (advancern) –
+ *  cue i deras färg (dubblaren) – [ev. advancerns svar]. null = inte den. */
+function readCueRaise(f: AuctionFacts): {
+  doubler: Seat
+  advancer: Seat
+  major: Suit
+  cueBid: string
+  ourNonPass: typeof f.history
+} | null {
+  const fam = doubleFamily(f)
+  if (!fam) return null
+  const mySide = side(f.seat)
+  const ourNonPass = f.history.filter((c) => side(c.seat) === mySide && c.bid !== 'P')
+  if (ourNonPass.length < 3) return null
+  // 1) dubblarens upplysnings-X först.
+  if (ourNonPass[0].bid !== 'X' || ourNonPass[0].seat !== fam.doubler) return null
+  const doubler = fam.doubler
+  const advancer = PARTNER[doubler]
+  // 2) advancerns HÖGFÄRGS-advance på 1-läget.
+  const adv = ourNonPass[1]
+  if (adv.seat !== advancer) return null
+  const advCb = parseContractBid(adv.bid)
+  if (!advCb || advCb.level !== 1) return null
+  const major = SUIT_OF_LETTER[advCb.strain]
+  if (major !== 'hearts' && major !== 'spades') return null
+  // 3) dubblarens cue = bud i en av MOTSTÅNDARNAS färger, under utgång.
+  const cue = ourNonPass[2]
+  if (cue.seat !== doubler) return null
+  const cueCb = parseContractBid(cue.bid)
+  if (!cueCb) return null
+  const cueSuit = SUIT_OF_LETTER[cueCb.strain]
+  const theirSuits = new Set<Suit>()
+  for (const c of f.contractBids) {
+    if (side(c.seat) === mySide) continue
+    const s = SUIT_OF_LETTER[parseContractBid(c.bid)!.strain]
+    if (s) theirSuits.add(s)
+  }
+  if (!cueSuit || !theirSuits.has(cueSuit)) return null
+  return { doubler, advancer, major, cueBid: cue.bid, ourNonPass }
+}
+
+/** ADVANCERN svarar på dubblarens cue (krav): bekräftar högfärgen (billigaste =
+ *  svag, hopp = 8+) eller styr om till NT (2NT svag / 3NT stark) utan 4-korts. */
+export function advancerAnswersCueRaise(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const r = readCueRaise(f)
+  if (!r || f.seat !== r.advancer) return null
+  if (r.ourNonPass.length !== 3) return null // jag har inte svarat än
+  if (f.lastNonPass?.bid !== r.cueBid) return null // cuet är senaste icke-pass
+  const L = letterOfSuit(r.major)
+  const SYM = SWE_SYM[L]
+  const strong = hcp(hand) >= 8
+  const styrka = strong ? '8+ hp' : 'under 8 hp'
+  if (lengths(hand)[r.major] >= 4) {
+    const cheap = cheapestBidIn(f.history, f.seat, L)
+    if (!cheap) return null
+    const cheapCb = parseContractBid(cheap)!
+    const call = strong ? `${cheapCb.level + 1}${L}` : cheap
+    return lawful(f, {
+      call,
+      rule: 'svar på dubblarens cue',
+      explanation: `Partnerns cue är krav – jag bekräftar 4+ ${SYM} och visar ${styrka} → ${prettyBid(call)}.`,
+    })
+  }
+  const call = strong ? '3NT' : '2NT'
+  return lawful(f, {
+    call,
+    rule: 'svar på dubblarens cue',
+    explanation: `Partnerns cue är krav – jag har inte 4 ${SYM}, så jag styr om till sang och visar ${styrka} → ${call}.`,
+  })
+}
+
+/** DUBBLAREN placerar efter advancerns cue-svar: minst utgång (4M över fitsvaret,
+ *  3NT över 2NT, pass över 3NT). Slam över advancerns maximum = SENARE. */
+export function doublerPlacesAfterCueRaise(_hand: Hand, f: AuctionFacts): Kunskap | null {
+  const r = readCueRaise(f)
+  if (!r || f.seat !== r.doubler) return null
+  if (r.ourNonPass.length !== 4) return null
+  const answer = r.ourNonPass[3]
+  if (answer.seat !== r.advancer || f.lastNonPass?.bid !== answer.bid) return null
+  const L = letterOfSuit(r.major)
+  const SYM = SWE_SYM[L]
+  const ansCb = parseContractBid(answer.bid)
+  if (!ansCb) return null
+  if (ansCb.strain === L) {
+    return lawful(f, {
+      call: `4${L}`,
+      rule: 'dubblaren placerar utgång',
+      explanation: `Partnern bekräftade ${SYM}-fiten på min cue → 4${SYM} (utgång).`,
+    })
+  }
+  if (answer.bid === '2NT') {
+    return lawful(f, { call: '3NT', rule: 'dubblaren placerar utgång', explanation: `Partnern förnekade ${SYM}-fit (2NT, svag) → 3NT.` })
+  }
+  if (answer.bid === '3NT') {
+    return { call: 'P', rule: 'dubblaren placerar utgång', explanation: `Partnern förnekade ${SYM}-fit men visade styrka (3NT) → pass, utgång står.` }
+  }
+  return null
+}
+
+// ============================================================================
 // Dubblarens fortsättningar (raden *x-dubblaren*)
 // ============================================================================
 

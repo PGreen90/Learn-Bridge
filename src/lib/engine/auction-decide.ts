@@ -160,7 +160,7 @@ import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
-import { advanceStrongDoubleRebid, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
+import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat } from './contested-continuations'
 import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerContinues, negativeDoublerSeat, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
@@ -1712,6 +1712,7 @@ const TABELL: Row[] = [
     },
     välj: ({ hand, facts }) => {
       const k =
+        doublerPlacesAfterCueRaise(hand, facts) ??
         answerCueAfterDouble(hand, facts) ??
         doublerWeighsAdvance(hand, facts) ??
         ownStrongDoubleRebid(hand, facts) ??
@@ -1734,6 +1735,7 @@ const TABELL: Row[] = [
     },
     välj: ({ hand, facts }) => {
       const k =
+        advancerAnswersCueRaise(hand, facts) ??
         answerCueAfterDouble(hand, facts) ??
         advanceStrongDoubleRebid(hand, facts) ??
         answerStrongDoubleGameForce(hand, facts) ??

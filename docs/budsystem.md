@@ -2015,6 +2015,22 @@ dubblarens eget flöde (X + egen färg).
   som dubblaren skulle svarat ett cue: billigaste 4-korts högfärg först, annars
   3NT med stopp, annars längsta objudna färg (frö 20270461: ♠5432 ♥T ♦J974
   ♣AK86 → 3♠ över 1♥–(X)–2♥–(X)–P–(3♥)–P; förr pass — regeln saknades).
+- **Dubblarens CUE-höjning av advancerns advance = stark höjning, KRAV** (fältfynd
+  Bricka 9, ägarbeslut 2026-09-12). Har advancern advancerat en högfärg på
+  1-läget och dubblaren sedan bjudit **motståndarnas färg** (en cue), visar cuet
+  en hand för stark för att bara höja (17+) och **får aldrig passas** (förr
+  passades `1♣–X–1♠–2♣` ut i 2♣). Cuet garanterar inte att advancen var
+  4-korts, så **advancern svarar och bekräftar/omdirigerar** samt visar styrka
+  på **8-hp-gränsen**:
+  - **4+ i högfärgen:** under 8 hp → **billigaste högfärg** (t.ex. 2♠); 8+ →
+    **hopp i högfärgen** (3♠).
+  - **under 4 i högfärgen:** under 8 hp → **2NT**; 8+ → **3NT** (styr om till sang).
+
+  **Dubblaren placerar** sedan minst utgång: **4M** över fitsvaret (2M/3M),
+  **3NT** över 2NT, pass över 3NT. *Slamletning över advancerns maximum (3M/3NT)
+  bjuds ännu inte — SENARE (`docs/bevaka.md`).* *Exempel (Bricka 9):* Syd ♠AQJ9
+  ♥Q8 ♦KQ63 ♣AK3 (21 hp) dubblar 1♣, Nord advancerar 1♠, Syd cue:ar **2♣**;
+  Nord (4 spader, 6 hp) svarar **2♠** och Syd höjer till **4♠**.
 
 ### 7.4 Övriga dubblingar (negativ, responsiv, stöd)
 - **Negativ dubbling** (när *vi* öppnat och de klivit in): svararens dubbling =
@@ -2456,6 +2472,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-12 — Dubblarens cue-höjning är krav; advancern svarar (§7.3; etapp 6
+  live-prov, Bricka 9).** Efter upplysnings-X + advancerns högfärgsadvance på
+  1-läget var dubblarens bud i motståndarnas färg (en cue = stark höjning, 17+)
+  utan svar — `cueAfterOurDoubleToAnswer` kräver att alla våra bud före cuet är
+  dubblingar, så när advancern redan bjudit en färg fanns inget läge → cuet
+  passades ut (`1♣–X–1♠–2♣` blev kontrakt 2♣). Nya `advancerAnswersCueRaise` +
+  `doublerPlacesAfterCueRaise` (rader `x-advancern`/`x-dubblaren`): advancern
+  bekräftar 4+ i högfärgen (under 8 hp → billigaste, 8+ → hopp) eller styr om
+  till NT (2NT/3NT), och dubblaren placerar minst utgång (4M/3NT). Ägarschema
+  (cuet garanterar inte 4-korts advance; 8-hp-gränsen). Slam över advancerns
+  maximum = SENARE. Facit: `auction-x-cue-raise.test.ts`.
 - **2026-09-12 — RKC-frågaren placerar seat-agnostiskt; damfrågan avgör
   lillslam-mot-utgång (§6.1; etapp 6 live-prov, Bricka 14).** Slammaskineriet
   modellerade kaptenen (RKC-frågaren) som **svararen**. När den starka
