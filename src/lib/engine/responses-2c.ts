@@ -82,13 +82,15 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
   if (response.call === '2D') {
     if (bal && p <= 24) return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `Balanserad (22–24) → 2NT (ej krav).` }
     if (bal) return { call: '3NT', rule: 'rebid: 3NT (28–30)', explanation: `Balanserad (28–30) → 3NT (ej krav).` }
-    // Obalanserad jätte: naturlig längsta färg, krav 1 rond.
-    const s = longestSuit(len, 5) ?? longestSuit(len, 4)
+    // Obalanserad jätte: naturlig 5+ färg, krav 1 rond. Ett 2♣-återbud i färg
+    // LOVAR 5+ (live-prov 2026-09-12); den treifärgade jätten (4-4-4-1) utan
+    // 5-korts färg får inte bjuda en 4-korts "krav-färg" — den bjuder 2NT.
+    const s = longestSuit(len, 5)
     if (s) {
       const level = isMajor(s) ? 2 : 3
-      return { call: `${level}${BID[s]}`, rule: 'rebid: krav-färg', explanation: `Jättehand med 4+ ${SYM[s]} → ${level}${SYM[s]} (naturlig, krav 1 rond).` }
+      return { call: `${level}${BID[s]}`, rule: 'rebid: krav-färg', explanation: `Jättehand med 5+ ${SYM[s]} → ${level}${SYM[s]} (naturlig, krav 1 rond).` }
     }
-    return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `Stark hand → 2NT.`, uncertain: true }
+    return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `Stark treifärgshand utan 5-korts färg → 2NT.`, uncertain: true }
   }
 
   // --- Efter ett positivt svar: paret är i GF, sikta mot slam ---

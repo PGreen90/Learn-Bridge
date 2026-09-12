@@ -2428,6 +2428,13 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-12 — 2♣-öppnarens färgåterbud lovar 5+ (§3; etapp 6 live-prov).**
+  Efter 2♣–2♦ bjöd koden längsta färgen men föll tillbaka på en **4-korts** färg
+  för en 4-4-4-1-jätte, så "krav-färg" kunde visas på 4 kort (förklaringen sa
+  "4+"). Nu: färgåterbudet lovar **5+** (som §3-tabellen alltid sagt); en
+  treifärgad jätte utan 5-korts färg bjuder **2NT** i stället. Budneutralt för
+  5+-händer (bara texten 4+→5+); 2 avvikelsegivar (4-4-4-1-jättar → 2NT). Facit:
+  `auction-2c-rebid-5plus.test.ts`.
 - **2026-09-11 — Systems on efter det direkta 2NT-inklivet över deras svaga
   tvåa/spärr (§7.7; etapp 6 live-prov).** Efter deras svaga tvåa och vårt
   naturliga 2NT-inkliv (15–18) svarar advancern som över en 2NT-öppning:
