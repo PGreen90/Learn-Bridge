@@ -156,6 +156,7 @@ import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendThe
 import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preemptFollowUpSeat, respondInPreemptCompetition, respondToOvercallNTSystemsOn } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
+import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
 import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
@@ -1970,6 +1971,22 @@ const TABELL: Row[] = [
     id: '2/1-utgång',
     läge: (f) => twoOverOneRaiseSeat(f),
     välj: ({ hand, facts }) => answerTwoOverOneRaise(hand, facts),
+  },
+  // ---- Live-prov etapp 6 — RKC-frågarens placering (2026-09-12) ------------
+  // Slammaskineriet (raden *slam*) modellerar kaptenen som SVARAREN. När
+  // ÖPPNAREN driver slammen (stark 2♣ → färg → höjning → 4NT RKC) matchar ingen
+  // slamrad och läget föll till PASS, med 5♥ läst som naturlig hjärter. Den här
+  // raden placerar frågaren seat-agnostiskt — inklusive trumfdam-frågan (5♥)
+  // och damsvaret — och gäller bara när raden *slam* ovan tigit (öppnaren-som-
+  // kapten). Läget gatar på partnerns 5/6-lägessvar + att vår sida frågat 4NT;
+  // funktionen avgör om någon av de tre bitarna faktiskt gäller (annars null).
+  {
+    id: 'rkc-frågare',
+    läge: (f) => rkcAskerSeat(f),
+    välj: ({ hand, facts }) => {
+      const k = rkcAskerContinuation(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
   },
   // ---- Etapp 4 familj 8 — slam-svarssvepet (2026-09-10) --------------------
   // De slam-beslut som INTE hörde till den kanoniska ostörda sekvensen (raden

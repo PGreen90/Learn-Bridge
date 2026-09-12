@@ -1373,6 +1373,17 @@ människas bud.
 - **Trumfdam-fråga:** efter 5♣/5♦-svar frågar billigaste icke-trumf om trumfdam.
   Svar: återgå till trumf = **ingen** dam; annat färgbud = **dam + kung** i den
   färgen; 5NT = dam **utan** sidokungar.
+- **Frågaren ställer damfrågan när damen avgör slammen.** Saknas exakt ett
+  nyckelkort (storslam är ute) men **trumfdamen är inte säkrad** — du håller den
+  inte, paret har inte bevisat 10+ trumf, och svaret var inte 5♠ — då är valet
+  **lillslam eller utgång**, och det hänger på damen. Bjud då **damfrågan** i
+  stället för att gissa 6-trumf: visas damen bjuder du lillslam, nekas den står
+  utgången (det saknade nyckelkortet är redan en förlorare, så en tappad
+  trumfdam blir den andra — slammen faller). *Exempel (Bricka 14):* du håller
+  ♠AK842 ♥AKQ73 ♦AK ♣x, partnern har höjt din spader och svarat **5♦** (0/3 →
+  0 mot dina fyra); ♣A ligger ute, så utan trumfdam går 6♠ bet → **5♥** frågar
+  damen. Detta gäller **oavsett vem** som frågar — även när den starka
+  **öppnaren** driver slammen efter en höjning (t.ex. 2♣–2♦–2♠–4♠–4NT).
 - **5NT = kungfråga** (lovar alla 5 nyckelkort + trumfdam) – vi spelar
   **Sjöbergs 5NT**, se §6.3.
 - **Stoppbudet 5-trumf efter ett tvetydigt svar** (5♣ = 1 eller 4, 5♦ = 0
@@ -2445,6 +2456,20 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-12 — RKC-frågaren placerar seat-agnostiskt; damfrågan avgör
+  lillslam-mot-utgång (§6.1; etapp 6 live-prov, Bricka 14).** Slammaskineriet
+  modellerade kaptenen (RKC-frågaren) som **svararen**. När den starka
+  **öppnaren** drev slammen (2♣–2♦–2♠–4♠–4NT–5♦) matchade ingen slamrad → läget
+  föll till **PASS**, och 5♥ lästes naturligt ("utgång i hjärter"). Ny modul
+  `rkc-asker-continuations.ts` + tabellrad `rkc-frågare` (före `slam-forts`)
+  placerar frågaren ur EN hand oavsett stol: saknas ett nyckelkort men
+  trumfdamen inte är säkrad (ej hållen, ej bevisad 10-fit, ej 5♠-svar) bjuds
+  **damfrågan** (billigaste icke-trumf), och på svaret **6-trumf** (dam visad)
+  eller **utgång** (dam nekad); svararen besvarar damfrågan (`respondToQueenAsk`).
+  Trumfen läses FÖRE frågan (inte globala `agreedTrump`, som förorenas av den
+  konstgjorda 2♣-öppningen + partnerns 6♣-kungvisning). Vägen bjuder aldrig
+  storslam (SENARE, `docs/bevaka.md`); den tvetydiga räkningen backas av
+  svararens rättelse (`rkcCorrection`). Facit: `auction-slam-rkc-asker.test.ts`.
 - **2026-09-12 — Öppnarens 5-4/2NT + svararens fortsättning efter fritt bud i
   konkurrens (§5.8; etapp 6 live-prov).** Tre ägarregler för `1♦–(2♣)–2♥–(P)`-
   typen: (1) det fria budets tolkning säger nu **5+** (inte 4+ — med 4 dubblar

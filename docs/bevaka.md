@@ -1,5 +1,17 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## RKC-frågaren via öppnaren-som-kapten bjuder aldrig storslam (2026-09-12, live-prov Bricka 14)
+- Nya `rkc-asker-continuations.ts` (tabellrad `rkc-frågare`) placerar RKC-frågaren
+  seat-agnostiskt — inklusive **öppnaren** som driver slammen — och använder
+  trumfdam-frågan (5♥) för att skilja lillslam från utgång. **Medveten
+  avgränsning:** den här vägen tar alltid **lillslam** när ett nyckelkort
+  saknas och bjuder **aldrig storslam** (kaptenen med alla fem + dam går bara
+  till 6). Den responder-som-kapten-vägen (`captainPlaceAfterRKC`, med 5NT-
+  kungfråga) har storslam; frågaren-som-öppnare har det inte.
+- **Bevaka:** en giv där öppnaren efter 4NT sitter med alla fem nyckelkort +
+  trumfdam + storslamszon och "bara" bjuder 6 — SENARE-kandidat att lyfta in
+  storslamsgrenen (5NT) även på frågarvägen.
+
 > **Vad detta är:** varje gång vi bygger något nytt i budgivningen skrivs en rad
 > här om vad ägaren ska hålla ögonen på vid bordet. Listan är **nyast först**.
 > CLAUDE.md visar bara de tre senaste — hela listan bor här (flyttat 2026-07-25
