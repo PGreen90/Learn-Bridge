@@ -1665,7 +1665,10 @@ cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
 - **Hoppinkliv** (t.ex. (1♦)–2♠): **svagt**, 6-korts färg, spärr (som en svag
   tvåa).
 - **1NT-inkliv:** 15–18 hp, bra stopp i deras färg – **kör samma system som över
-  en 1NT-öppning** (Stayman, transfers m.m., §4.3), fast med 15–18 hp.
+  en 1NT-öppning** (Stayman, transfers m.m., §4.3), fast med 15–18 hp. Advancerns
+  fortsättning efter Stayman är också densamma: **Smolen** (utgångskrav 5-4 → hopp
+  i den kortare högfärgen efter inklivarens 2♦) och **garbage** (svag 5-5 → 2 i
+  bästa högfärg, pass-eller-rätta). Inbjudningshänder sköts som förut.
 - **Balansering (utpassningsläget, felrapport #5):** efter deras 1-lägesöppning
   och två pass får fjärde hand hela §7-arsenalen (inkliv/X/Michaels/ovanlig 2NT)
   – given passas inte ut med en klar aktion på handen.
@@ -2428,6 +2431,16 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-12 — Smolen/garbage efter Stayman över vårt 1NT-inkliv (§7.1; etapp 6
+  live-prov).** Systems on över ett 1NT-inkliv saknade advancerns Stayman-rebud:
+  efter 1NT-inkliv–2♣–2♦ (ingen högfärg) rekommenderade motorn PASS med en svag
+  5-5-hand. Nu återanvänds samma maskineri som över en 1NT-öppning
+  (`responderRebidIn1NTAuction`): **garbage** (svag 5-5 → 2 i bästa högfärg),
+  **Smolen** (GF 5-4 → hopp i kortare högfärg), 3NT/utgång. Inbjudningshänder
+  lämnas åt det befintliga lagret (ingen accept-rad ännu → skulle missa utgång),
+  och transfer-fortsättningarna är oförändrade. Auktionsdiff 3 bot + 17 avvik,
+  alla b (pass/dellek → utgång); revisorn 20,8 % · 270,48 (bättre än 270,54).
+  Facit: `auction-1nt-overcall-smolen.test.ts`.
 - **2026-09-12 — 2♣-öppnarens färgåterbud lovar 5+ (§3; etapp 6 live-prov).**
   Efter 2♣–2♦ bjöd koden längsta färgen men föll tillbaka på en **4-korts** färg
   för en 4-4-4-1-jätte, så "krav-färg" kunde visas på 4 kort (förklaringen sa

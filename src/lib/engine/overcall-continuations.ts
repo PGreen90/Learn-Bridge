@@ -26,6 +26,8 @@ import { hcp, lengths } from './hand'
 import { penaltyDouble } from './doubles'
 import { hasStopper } from './overcalls'
 import { openerRebidAfter1NTResponse } from './rebids'
+import type { ResponseResult } from './responses'
+import { responderRebidIn1NTAuction } from './responder-rebids'
 import { respondTo1NT } from './responses-nt'
 import { side } from './play'
 
@@ -226,6 +228,43 @@ export function overcallerAnswersAdvance(hand: Hand, f: AuctionFacts): Kunskap |
   if (!rule) return null
   const res = openerRebidAfter1NTResponse({ call: ourContracts[1].bid, rule, explanation: '' }, hand)
   if (!res) return null
+  return { call: res.call, rule: res.rule, explanation: res.explanation }
+}
+
+/**
+ * Advancerns ANDRA bud efter partnerns 1NT-inkliv (systems on, live-prov
+ * 2026-09-12): jag svarade partnerns inkliv med ett systemsvar (Stayman/
+ * transfer), partnern fullföljde, nu bjuder jag om — **Smolen** (GF 5-4 → hopp
+ * i den kortare högfärgen), **garbage** (svag 5-5/5-4 → 2-läget, pass-eller-
+ * rätta), inbjudan m.m. Delegeras till SAMMA maskineri som över en 1NT-öppning
+ * (`responderRebidIn1NTAuction`), som redan bär Smolen/garbage. Förr saknades
+ * lagret → motorn passade svararens 5-5. null → gamla lagret.
+ */
+export function advancerRebidsAfter1NTOvercall(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const oc = our1NTOvercall(f)
+  if (!oc || oc.overcaller !== f.partner) return null
+  const ours = f.ourContractBids
+  if (ours.length !== 3) return null
+  if (ours[0].bid !== '1NT' || ours[0].seat !== f.partner) return null // partnerns inkliv
+  if (ours[1].seat !== f.seat) return null // mitt systemsvar
+  if (ours[2].seat !== f.partner) return null // partnerns fullföljning
+  if (!f.lastNonPass || f.lastNonPass !== ours[2]) return null // ostört (partnerns svar senast)
+  const responseRule = ntResponseRule(1, ours[1].bid)
+  // Avgränsat till STAYMAN-vägen (live-provsfyndet: garbage 5-5 / Smolen 5-4).
+  // Transfer-fortsättningarna över inklivet sköts av det gamla lagret som förut
+  // — att fånga dem här ändrade fungerande auktioner (utgång → dellek).
+  if (responseRule !== 'Stayman') return null
+  const response: ResponseResult = { call: ours[1].bid, rule: responseRule, explanation: '' }
+  // responderRebidIn1NTAuction dispatchar på response.rule + rebid.call.
+  const rebid: ResponseResult = { call: ours[2].bid, rule: 'Stayman-svar', explanation: '' }
+  const res = responderRebidIn1NTAuction(response, rebid, hand)
+  if (!res) return null
+  // Bara de DEFINITIVA buden tas här: svag garbage-signoff (5-5 → 2M), Smolen
+  // (GF 5-4), 3NT och utgång. En INBJUDAN (2NT/3M) hänger — inklivaren har ingen
+  // rad som accepterar den ännu, så utgång skulle missas; den lämnas åt det gamla
+  // lagret som förut (som hoppar till utgång med fit). Live-prov 2026-09-12.
+  if (res.rule === 'inbjudan') return null
+  if (res.call !== 'P' && !legalCalls(f.history, f.seat).includes(res.call)) return null // olagligt → gamla lagret
   return { call: res.call, rule: res.rule, explanation: res.explanation }
 }
 
