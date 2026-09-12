@@ -91,9 +91,12 @@ describe('raden *öppnaren-stört*: öppnarens återbud när de stört', () => {
     const hist = [call('N', '1D'), call('E', '1H'), call('S', '1S'), call('W', 'P')]
     expect(decideCallTraced(ensam('N', 'S:6 H:Q84 D:AKQJ85 C:K74'), hist, 'N').call).toMatchObject({ bid: '2D', rule: 'återbud i konkurrens: egen 6+ färg' })
     expect(decideCallTraced(ensam('N', 'S:6 H:K84 D:AQJ85 C:KJ74'), hist, 'N').call).toMatchObject({ bid: '2C', rule: 'återbud i konkurrens: ny färg' })
-    // 1♣–(1♦)–1♠–(P): 4 hjärter = reverse → 14 hp rebjuder klövern (5), 17 hp reverse 2♥
+    // 1♣–(1♦)–1♠–(P): den högre nya färgen (hjärter) = 5-4 UTAN stopp i deras
+    // ruter, öppningsstyrka (ägarregel 2026-09-12: inte längre ett 17+-reverse).
     const h2 = [call('N', '1C'), call('E', '1D'), call('S', '1S'), call('W', 'P')]
-    expect(decideCallTraced(ensam('N', 'S:6 H:KQ84 D:85 C:AQJ85'), h2, 'N').call).toMatchObject({ bid: '2C', rule: 'återbud i konkurrens: egen färg (minimum)' })
+    expect(decideCallTraced(ensam('N', 'S:6 H:KQ84 D:85 C:AQJ85'), h2, 'N').call).toMatchObject({ bid: '2H', rule: 'återbud i konkurrens: 5-4 utan stopp' })
+    // Med stopp i deras ruter (♦A5) men singel → varken 2NT (obalanserad) eller
+    // 5-4-utan-stopp → 17+ reverse gäller fortfarande.
     expect(decideCallTraced(ensam('N', 'S:6 H:KQ84 D:A5 C:AKJ85'), h2, 'N').call).toMatchObject({ bid: '2H', rule: 'återbud i konkurrens: reverse' })
   })
   it('§5.8 flyttad: fiten mäts mot vad svaret lovade — ett OSTÖRT 1♥-svar (4+) höjs inte på tre kort, ett fritt 1♠ (5+) höjs', () => {

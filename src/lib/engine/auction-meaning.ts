@@ -937,13 +937,31 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     return { text: `Ny färg ${name} (${cb.level}${sym}) efter din negativa dubbling — inbjudande med värden och egen längd.`, confidence: 'trolig', forcing: 'inbjudan' }
   }
 
+  // Ett fritt bud i ny färg på 2-läget i konkurrens lovar 5+ (med 4 kort dubblar
+  // man för att visa färgen) — live-prov 2026-09-12. Ett 1-läges fritt bud, och
+  // ostörda nya färger, är 4+.
+  const twoLevelFreeBid = opponentsInterfered(seat, prior) && freeResponder(seat, prior) && cb.level >= 2
+  // Öppnarens REVERSE (högre ny färg på 2-läget) i konkurrens = 5-4 utan stopp i
+  // deras färg, rondkrav (ägarregel 2026-09-12) — som en ostörd reverse.
+  const openReverse = opening(prior)
+  // Bara efter partnerns FRIA BUD (kontraktsbud) och när vår sida inte dubblat —
+  // annars är det svaret på en negativ dubbling (ej krav), inte 5-4-budet.
+  const partnerFreeBid = prior.some((c) => c.seat === PARTNER[seat] && !!parseBid(c.bid))
+  const ourDoubled = prior.some((c) => SIDE[c.seat] === SIDE[seat] && c.bid === 'X')
+  const openerReverse = !!openReverse && openReverse.cb.strain !== 'NT' && iAmOpener(seat, prior) &&
+    partnerFreeBid && !ourDoubled &&
+    cb.strain !== openReverse.cb.strain && cb.level >= 2 && rankAbove(cb.strain, openReverse.cb.strain)
   return {
-    text: `Ny färg ${name} (${cb.level}${sym}) — naturligt, visar minst 4 kort i ${name}.`,
+    text: twoLevelFreeBid
+      ? `Fritt bud i ny färg ${name} (${cb.level}${sym}) — naturligt, 5+ ${name} och värden (10+), rondkrav (med bara 4 kort dubblar man i stället).`
+      : openerReverse && opponentsInterfered(seat, prior)
+      ? `Reverse i konkurrens (${cb.level}${sym}) — 5-4 (5 i öppningsfärgen + 4 ${name}) utan stopp i deras färg, rondkrav.`
+      : `Ny färg ${name} (${cb.level}${sym}) — naturligt, visar minst 4 kort i ${name}.`,
     confidence: 'trolig',
-    // Ny färg i konkurrens (även efter en ren dubbling): svararens fria bud är
-    // krav 1 rond, inkliv/advance/öppnarens återbud är naturliga och ej krav;
-    // helt ostört är en ny färg krav 1 rond. (Familj 9.)
-    forcing: opponentsInterfered(seat, prior) ? (freeResponder(seat, prior) ? 'krav-1-rond' : 'ej-krav') : 'krav-1-rond',
+    // Ny färg i konkurrens (även efter en ren dubbling): svararens fria bud och
+    // öppnarens reverse är krav 1 rond, övriga inkliv/advance/återbud är
+    // naturliga och ej krav; helt ostört är en ny färg krav 1 rond. (Familj 9.)
+    forcing: opponentsInterfered(seat, prior) ? (freeResponder(seat, prior) || openerReverse ? 'krav-1-rond' : 'ej-krav') : 'krav-1-rond',
   }
 }
 

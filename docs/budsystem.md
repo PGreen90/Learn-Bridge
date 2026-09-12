@@ -1183,14 +1183,17 @@ stopp i deras färg**, annars **4m** (hopphöjning = inbjudan till 5m). Förr
 blåste öppnaren minorutgång direkt: *1♥–(1♠)–2♣–P–**5♣** på ♠63 ♥KQJ96 ♦A7
 ♣JT98 — utan spaderstopp och långt från elva stick; 3♣ är rätt.*
 
-**Utan stöd för det fria budet (motorbytet etapp 4 familj 4, 2026-09-08):**
-det fria budet är rondkrav (§5.5), så öppnaren bjuder alltid — som det ostörda
-återbudet, men sangen kräver **stopp i deras färg**: **egen 6+ färg → rebjud**
-den · **jämn med stopp → billigaste sang** (18–19 hoppar i sang) · **ny lägre
-färg** (4+) naturligt · **reverse** (ny färg över öppningsfärgen på 2-läget)
-bara med **17+** · sist **rebjud öppningsfärgen** (5 kort, minimum). *1♣–(1♦)–
-1♠–P med ♠6 ♥KQ84 ♦85 ♣AQJ85 (14 hp) → **2♣**, inte 2♥ (reverse på 14 var
-motorns förra svar); med ♦A5 ♣AKJ85 (17) → 2♥.*
+**Utan stöd för det fria budet (motorbytet etapp 4 familj 4, 2026-09-08; ägarregel
+2026-09-12):** det fria budet är rondkrav (§5.5), så öppnaren bjuder alltid:
+**egen 6+ färg → rebjud** den · **stopp i deras färg → billigaste sang**
+(semi-balanserad räcker; 18–19 hoppar i sang; minimum-sangen bara utan 5-korts
+högfärg — den rebjuds hellre) · **INGET stopp + 5-4** (5 i öppningsfärgen + 4 i en
+högre ny färg) → **den högre färgen** på öppningsstyrka (ägarregel: detta är INTE
+längre ett 17+-reverse, utan ett formvisande 5-4-bud utan stopp) · **ny lägre
+färg** (4+) naturligt · sist **rebjud öppningsfärgen** (5 kort, minimum).
+*1♣–(1♦)–1♠–P med ♠6 ♥KQ84 ♦85 ♣AQJ85 (5♣-4♥, inget ruterstopp) → **2♥**
+(5-4 utan stopp); med ♦A5 ♣AKJ85 (ruterstopp men singelspader → varken 2NT eller
+5-4) → 2♥ (17+ reverse).*
 
 **Svararens fortsättning efter det fria budet** när öppnaren *inte* höjde
 (rebjöd egen färg, ny färg eller sang, bara pass efter): **egen 6+ färg →
@@ -1203,6 +1206,11 @@ färg = utgångskrav** (partnern bjuder 3NT med stopp) · **10–12** med 3+ st�
 för en rebjuden 6+ färg → billigaste höjning (inbjudan, ryms den på 3-läget) ·
 annars **pass** — öppnaren visade minimum. Öppnarens **reverse eller hopp** är
 krav och passas aldrig (kravvakten §5.5).
+
+**Efter öppnarens 5-4-bud** (den högre nya färgen = 5-4 utan stopp, ägarregel
+2026-09-12): svararen bjuder om sin **egen 6+ färg** (t.ex. 3♥ efter ett 2♥-fritt
+bud → hittar 8-korts fiten), **3NT** med **stopp i deras färg + öppningsvärden**
+(12+), **2NT** med **stopp** utan fulla öppningsvärden (10–11); annars stöd/pass.
 
 **Svaret på öppnarens cue** ("hjälp mig välja utgång" i tabellen ovan): cuet är
 krav — **stopp i deras färg → 3NT** · **3+ stöd i partnerns visade 5+ högfärg
@@ -2437,6 +2445,15 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-12 — Öppnarens 5-4/2NT + svararens fortsättning efter fritt bud i
+  konkurrens (§5.8; etapp 6 live-prov).** Tre ägarregler för `1♦–(2♣)–2♥–(P)`-
+  typen: (1) det fria budets tolkning säger nu **5+** (inte 4+ — med 4 dubblar
+  man); (2) öppnaren visar **2♠ = 5-4 utan stopp** i deras färg (inte längre ett
+  17+-reverse) och **2NT = stopp**; (3) svararen fortsätter efter 2♠ med **3♥**
+  (6+, hittar fiten), **3NT** (stopp + 12+) eller **2NT** (stopp, 10–11). Gatad
+  till äkta fritt bud (återöppningsdubblingar orörda). Auktionsdiff 1 bot + 2
+  avvik, alla samma slutkontrakt (bättre beskrivna auktioner); betydelsesvep
+  0/0/0. Facit: `auction-komp-fritt-bud.test.ts`.
 - **2026-09-12 — RKC-svarets trumfdam kräver bevisad 10-korts fit (§6.1; etapp 6
   live-prov).** Förr visade svararen trumfdamen (5♠) så fort hen hade **5+ egen
   trumf** — ett antagande om 10+ gemensamt även när partnern bara visat 3+

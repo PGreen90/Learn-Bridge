@@ -99,6 +99,7 @@ const ALL_ENGINE_RULES: string[] = [
   'öppnarens återöppningsdubbling (extra, utpassningssits)',
   'återbud i konkurrens: egen 6+ färg', 'återbud i konkurrens: sang', 'återbud i konkurrens: sang (18–19)',
   'återbud i konkurrens: ny färg', 'återbud i konkurrens: reverse', 'återbud i konkurrens: egen färg (minimum)',
+  'återbud i konkurrens: 5-4 utan stopp', 'fritt bud: rebjuder egen 6+ (konkurrens)', 'fritt bud: 3NT med stopp', 'fritt bud: 2NT med stopp',
   'svar på partnerns cue', 'fritt bud: utgång i egen färg', 'fritt bud: rebjuder egen färg', 'fritt bud: utgång med fit',
   'fritt bud: utgång i sang', 'fritt bud: stannar', 'fritt bud: cue (utgångskrav)', 'fritt bud: inbjudande höjning',
   'negativ-dubblarens cue (utgångskrav)', 'svar på återöppningsdubbling', 'svar på återöppningsdubbling (utgång)',

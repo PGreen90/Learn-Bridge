@@ -319,6 +319,9 @@ export function openerRebidsAfterFreeBid(hand: Hand, f: AuctionFacts): Kunskap |
   const p = hcp(hand)
   const legal = legalCalls(history, seat)
   const mySuit = SUIT_OF_LETTER[open.strain]
+  // Ägarens 5-4/2NT-regler (2026-09-12) gäller BARA efter partnerns äkta fria bud
+  // — dubblade VÅR sida (återöppning) är det en annan sekvens (behåll gammalt).
+  const weDoubled = history.some((c) => side(c.seat) === side(seat) && c.bid === 'X')
 
   if (len[mySuit] >= 6) {
     const bid = cheapestBidIn(history, seat, open.strain)
@@ -327,15 +330,22 @@ export function openerRebidsAfterFreeBid(hand: Hand, f: AuctionFacts): Kunskap |
       explanation: `Partnerns fria bud är rondkrav; utan stöd rebjuder jag min 6+ ${SWE_SYM[open.strain]} (${prettyBid(bid)}).`,
     }
   }
-  if (isBalanced(hand) && hasStopper(hand, theirSuit)) {
+  // Stopp i deras färg → sang (ägarregel 2026-09-12: "när stopp, bjud sang").
+  // Semi-balanserad räcker (ingen singel/renons) — en 5-4-2-2 med stopp visar
+  // stoppet via 2NT hellre än sin andra färg.
+  const semiBalanced = len.spades >= 2 && len.hearts >= 2 && len.diamonds >= 2 && len.clubs >= 2
+  if ((weDoubled ? isBalanced(hand) : semiBalanced) && hasStopper(hand, theirSuit)) {
     const nts = (['1NT', '2NT', '3NT'] as Bid[]).filter((b) => legal.includes(b))
     if (p >= 18 && nts.length >= 2) return {
       call: nts[1], rule: 'återbud i konkurrens: sang (18–19)',
       explanation: `Jämn hand, 18–19 hp med stopp i deras ${SWE_SYM[theirStrain]}, inget stöd för partnerns fria bud → ${prettyBid(nts[1])} (hopp i sang).`,
     }
-    if (nts.length >= 1) return {
+    // Efter partnerns fria bud: minimum-sang bara UTAN 5-korts högfärg (en
+    // 5-korts högfärg rebjuds hellre — att gömma den i 2NT tappar en möjlig fit).
+    // Återöppningsvägen (weDoubled) behåller gammalt beteende.
+    if (nts.length >= 1 && (weDoubled || (len.hearts < 5 && len.spades < 5))) return {
       call: nts[0], rule: 'återbud i konkurrens: sang',
-      explanation: `Jämn hand med stopp i deras ${SWE_SYM[theirStrain]}, inget stöd för partnerns fria bud → ${prettyBid(nts[0])} (minimum).`,
+      explanation: `Stopp i deras ${SWE_SYM[theirStrain]}, inget stöd för partnerns fria bud → ${prettyBid(nts[0])} (minimum).`,
     }
   }
   // Ny färg: längst först, sedan billigast. Reverse = färgen rankar över
@@ -350,6 +360,15 @@ export function openerRebidsAfterFreeBid(hand: Hand, f: AuctionFacts): Kunskap |
     const reverse = cb.level >= 2 && SUIT_STRAINS.indexOf(st) > SUIT_STRAINS.indexOf(open.strain as (typeof SUIT_STRAINS)[number])
     if (cb.level >= 3) continue // hoppskift/3-läget: inte här
     if (reverse) {
+      // Konkurrens (ägarregel 2026-09-12): den HÖGRE nya färgen = 5-4 (5 i
+      // öppningsfärgen + 4 i den nya) UTAN stopp i deras färg — öppningsstyrka
+      // räcker, det är INTE ett styrke-reverse (17+). Med stopp bjöds 2NT ovan.
+      if (!weDoubled && len[mySuit] >= 5 && len[SUIT_OF_LETTER[st]] >= 4 && !hasStopper(hand, theirSuit)) {
+        return {
+          call: bid, rule: 'återbud i konkurrens: 5-4 utan stopp',
+          explanation: `5-4 (5 ${SWE_SYM[open.strain]} + 4 ${SWE_SYM[st]}) utan stopp i deras ${SWE_SYM[theirStrain]} → ${prettyBid(bid)} (öppningsstyrka, rondkrav).`,
+        }
+      }
       if (p >= 17) return {
         call: bid, rule: 'återbud i konkurrens: reverse',
         explanation: `17+ hp med 4+ ${SWE_SYM[st]} → ${prettyBid(bid)} (reverse, rondkrav) utan stöd för partnerns fria bud.`,
@@ -703,15 +722,6 @@ export function responderAfterFreeBid(hand: Hand, f: AuctionFacts): Kunskap | nu
   if (history.slice(history.indexOf(rebid) + 1).some((c) => c.bid !== 'P')) return null
   if (isGameOrHigher(rebid.bid as Bid)) return null
   const open = f.opening!
-  // Öppnarens REVERSE (ny färg över öppningsfärgen på 2-läget, 17+) eller
-  // HOPP är krav — då gäller kravvakten (det gamla lagrets minimibud), aldrig
-  // ett pass härifrån (stresstestet: 1♣–(1♦)–1♠–P–2♥–P med 6 hp → 2♠, inte pass).
-  if (rb.strain !== 'NT') {
-    const reverse = rb.level >= 2 && SUIT_STRAINS.indexOf(rb.strain as (typeof SUIT_STRAINS)[number]) > SUIT_STRAINS.indexOf(open.strain as (typeof SUIT_STRAINS)[number])
-    const prev = parseContractBid(ctx.contracts[2].bid)!
-    const minLevel = SUIT_STRAINS.indexOf(rb.strain as (typeof SUIT_STRAINS)[number]) > SUIT_STRAINS.indexOf(prev.strain as (typeof SUIT_STRAINS)[number]) ? prev.level : prev.level + 1
-    if (reverse || rb.level > minLevel) return null
-  }
   const theirStrain = parseContractBid(ctx.contracts[1].bid)!.strain
   const theirSuit = SUIT_OF_LETTER[theirStrain]
   const len = lengths(hand)
@@ -719,6 +729,36 @@ export function responderAfterFreeBid(hand: Hand, f: AuctionFacts): Kunskap | nu
   const mySuit = SUIT_OF_LETTER[ctx.free.strain]
   const myPts = pointsWithFloor(hand, mySuit, 'bergen').points
   const p = hcp(hand)
+  // Öppnarens HÖGRE nya färg i konkurrens = 5-4 UTAN stopp (ägarregel 2026-09-12),
+  // inte ett styrke-reverse. Svararen bjuder om egen 6+ färg (hittar fiten på
+  // 3-läget), annars sang med stopp i deras färg (3NT med öppningsvärden, 2NT
+  // annars). Ett HOPP av öppnaren är fortfarande krav → kravvakten (aldrig pass).
+  if (rb.strain !== 'NT') {
+    const reverse = rb.level >= 2 && SUIT_STRAINS.indexOf(rb.strain as (typeof SUIT_STRAINS)[number]) > SUIT_STRAINS.indexOf(open.strain as (typeof SUIT_STRAINS)[number])
+    const prev = parseContractBid(ctx.contracts[2].bid)!
+    const minLevel = SUIT_STRAINS.indexOf(rb.strain as (typeof SUIT_STRAINS)[number]) > SUIT_STRAINS.indexOf(prev.strain as (typeof SUIT_STRAINS)[number]) ? prev.level : prev.level + 1
+    if (reverse) {
+      if (len[mySuit] >= 6) {
+        const again = cheapestBidIn(history, seat, ctx.free.strain)
+        if (again && legal.includes(again) && parseContractBid(again)!.level <= 3) return {
+          call: again, rule: 'fritt bud: rebjuder egen 6+ (konkurrens)',
+          explanation: `6+ ${SWE_SYM[ctx.free.strain]} (längre än de 5 jag visat) → ${prettyBid(again)}; partnern höjer med tvåkortsstöd (8-korts fit).`,
+        }
+      }
+      if (hasStopper(hand, theirSuit)) {
+        if (p >= 12 && legal.includes('3NT' as Bid)) return {
+          call: '3NT', rule: 'fritt bud: 3NT med stopp',
+          explanation: `Stopp i deras ${SWE_SYM[theirStrain]} + öppningsvärden (12+) → 3NT.`,
+        }
+        if (legal.includes('2NT' as Bid)) return {
+          call: '2NT', rule: 'fritt bud: 2NT med stopp',
+          explanation: `Stopp i deras ${SWE_SYM[theirStrain]} → 2NT.`,
+        }
+      }
+      return null // annat → gamla lagret / kravvakt
+    }
+    if (rb.level > minLevel) return null // hopp = krav → kravvakten
+  }
 
   if (len[mySuit] >= 6) {
     const game = `4${ctx.free.strain}` as Bid
