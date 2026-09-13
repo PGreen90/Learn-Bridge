@@ -147,8 +147,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         if (p.is_bot) bottar.add(p.id)
       }
     }
+    // (En dag med bara en spelare i ställningen delar inte ut medaljer.)
     const medaljer = raknaMedaljer(
-      standings.map((r) => ({ spelare: r.user_id, placering: r.placering })),
+      standings.map((r) => ({ set: r.set_id, spelare: r.user_id, placering: r.placering })),
       bottar,
     ).map((m) => ({
       namn: namn.get(m.spelare) ?? '—',

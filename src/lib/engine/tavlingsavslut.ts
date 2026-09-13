@@ -49,16 +49,26 @@ export interface Medaljrad {
   brons: number
 }
 
-/** Medaljtabellen ur alla dagars placeringar: räkna 1/2/3 per spelare, uteslut
+/** Minst så många spelare i en dags ställning för att dagen ska dela ut
+ *  medaljer (ägarbeslut 2026-09-13): en ensam spelare vinner ingenting.
+ *  Bottarna räknas som spelare här — de var med i ställningen. */
+export const MIN_SPELARE_FOR_MEDALJ = 2
+
+/** Medaljtabellen ur alla dagars placeringar (`set` = dagen): räkna 1/2/3 per
+ *  spelare — bara för dagar med minst `minSpelare` i ställningen — uteslut
  *  `uteslut` (bottarna), sortera guld → silver → brons (fallande, sedan namn
  *  för stabil ordning) och skär till `topp`. Bara spelare med minst en medalj. */
 export function raknaMedaljer(
-  placeringar: Array<{ spelare: string; placering: number }>,
+  placeringar: Array<{ set: string; spelare: string; placering: number }>,
   uteslut: Set<string>,
   topp = 5,
+  minSpelare = MIN_SPELARE_FOR_MEDALJ,
 ): Medaljrad[] {
+  const perDag = new Map<string, number>()
+  for (const { set } of placeringar) perDag.set(set, (perDag.get(set) ?? 0) + 1)
   const per = new Map<string, Medaljrad>()
-  for (const { spelare, placering } of placeringar) {
+  for (const { set, spelare, placering } of placeringar) {
+    if ((perDag.get(set) ?? 0) < minSpelare) continue
     if (uteslut.has(spelare) || placering < 1 || placering > 3) continue
     const rad = per.get(spelare) ?? { spelare, guld: 0, silver: 0, brons: 0 }
     if (placering === 1) rad.guld++

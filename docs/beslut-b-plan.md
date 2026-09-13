@@ -601,3 +601,10 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   `TravellerTabell`, `TopplistaVy`, `Skärm`, `HemLänk`) lyfta ur
   `DagensTavling.tsx` till `tavling/TavlingDelar.tsx`; länk "Tidigare
   tävlingar & medaljer →" under Ställningen. Facit: ny `TavlingHistorik.test.tsx`.
+- **2026-09-13: MEDALJ KRÄVER MINST TVÅ SPELARE** (ägarbeslut efter första
+  nattkörningen: fem gamla solodagar i augusti gav "guld" med 40 %).
+  `raknaMedaljer` tar nu dagen (`set`) per rad och hoppar över dagar med färre
+  än `MIN_SPELARE_FOR_MEDALJ` (2) i ställningen; bottarna räknas som spelare
+  där (de var med). Fotnoten på medaljtabellen säger det. Facit:
+  `tavlingsavslut.test.ts` + `tavling-historik.test.ts`. Ägarsteget `0012` +
+  första nattkörningen KLARA 2026-09-13 (18 dagar frusna, 16 tomma).

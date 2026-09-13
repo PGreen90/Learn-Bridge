@@ -44,8 +44,12 @@ describe('byggStallning — slutlig ställning för en dag', () => {
 })
 
 describe('raknaMedaljer — topp 5 i guld/silver/brons', () => {
-  const dag = (placeringar: Record<string, number>) =>
-    Object.entries(placeringar).map(([spelare, placering]) => ({ spelare, placering }))
+  // Varje anrop = en egen tävlingsdag (unikt set-id).
+  let dagNr = 0
+  const dag = (placeringar: Record<string, number>) => {
+    const set = `set-${++dagNr}`
+    return Object.entries(placeringar).map(([spelare, placering]) => ({ set, spelare, placering }))
+  }
 
   test('räknar 1/2/3 per dag, sorterar guld → silver → brons, delad rang ger två guld', () => {
     const alla = [
@@ -86,7 +90,26 @@ describe('raknaMedaljer — topp 5 i guld/silver/brons', () => {
   })
 
   test('lika medaljer → stabil ordning på namn (deterministiskt)', () => {
-    const m = raknaMedaljer([...dag({ b: 1 }), ...dag({ a: 1 })], new Set())
-    expect(m.map((r) => r.spelare)).toEqual(['a', 'b'])
+    const m = raknaMedaljer([...dag({ b: 1, c: 2 }), ...dag({ a: 1, c: 2 })], new Set())
+    expect(m.map((r) => r.spelare)).toEqual(['a', 'b', 'c'])
+  })
+
+  test('en dag med bara EN spelare i ställningen ger ingen medalj (ägarbeslut 2026-09-13)', () => {
+    const alla = [
+      ...dag({ a: 1 }), // ensam — inget guld
+      ...dag({ a: 1, bot: 2 }), // människa + bot = två i ställningen → guld
+      ...dag({ b: 1 }), // ensam — inget guld
+    ]
+    const m = raknaMedaljer(alla, new Set(['bot']))
+    expect(m).toEqual([{ spelare: 'a', guld: 1, silver: 0, brons: 0 }])
+  })
+
+  test('gränsen går att höja (minSpelare = 3)', () => {
+    const alla = [...dag({ a: 1, b: 2 }), ...dag({ a: 1, b: 2, c: 3 })]
+    expect(raknaMedaljer(alla, new Set(), 5, 3)).toEqual([
+      { spelare: 'a', guld: 1, silver: 0, brons: 0 },
+      { spelare: 'b', guld: 0, silver: 1, brons: 0 },
+      { spelare: 'c', guld: 0, silver: 0, brons: 1 },
+    ])
   })
 })

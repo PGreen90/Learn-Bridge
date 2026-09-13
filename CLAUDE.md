@@ -18,9 +18,9 @@ giv · **E** "Spelade givar" på Mitt konto + GDPR-exporten · **D1** `daily_sta
 + nattlig finalisering (migration 0012 = ägarsteg) · **D2** `?dag=` på läs-
 endpoints + `tavling-historik` · **D3** historiksidan + medaljtabellen (topp 5
 guld/silver/brons, bottar uteslutna). Ägarbeslut + detalj: `docs/beslut-b-plan.md`
-("Påbyggnad — tävlingens livskvalitet"). **Läge: ALLA ETAPPER BYGGDA** (A–E + D1–D3, 2026-09-13); kvar = 🚪 ägarsteget:
-kör migration `0012` i Supabase, sedan `workflow_dispatch` på
-tavling-granskning så historiken fylls, och ägarens live-prov av historiksidan.
+("Påbyggnad — tävlingens livskvalitet"). **Läge: ALLT LIVE** (A–E + D1–D3, 2026-09-13; migration `0012` körd, historiken
+fylld av första nattkörningen, medalj kräver ≥ 2 spelare). Kvar = ägarens
+live-prov av historiksidan + genomgångarna; fynd lagas test-drivet.
 
 **Parallellt pågående (ägarstyrt, inget NU-jobb): motorbytet etapp 6 — ägarens
 live-prov.** Motorbytet är KLART & LIVE (etapp 0–5, mergepunkt `e1f70e9`);

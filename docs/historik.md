@@ -2568,3 +2568,14 @@ flödet. Länk "Tidigare tävlingar & medaljer →" under Ställningen. Facit:
 spelare → genomgång → tillbaka hela vägen). Därmed är alla fem ägarönskemålen
 från 2026-09-13 levererade; kvar = ägarsteget migration `0012` + första
 nattkörningen som fyller historiken.
+
+## 2026-09-13 — Migration 0012 körd, historiken fylld, medalj kräver två spelare
+
+Ägaren körde `0012`; `workflow_dispatch` på tavling-granskning skrev
+slutställningar för alla 34 avslutade dagar (18 med inskick, 16 tomma). Första
+körningen avslöjade en regellucka: fem solodagar i augusti (ägarens testrundor
+före bottarna) gav en ensam spelare "guld" med 40 % på 1–7 givar. Ägarbeslut:
+en medalj kräver minst två spelare i dagens ställning (samma tanke som
+poänggränsen per giv). `raknaMedaljer(placeringar med set, uteslut, topp,
+minSpelare = MIN_SPELARE_FOR_MEDALJ)` — bottar räknas som spelare i gränsen.
+Facit utökade; fotnoten på medaljtabellen säger regeln.
