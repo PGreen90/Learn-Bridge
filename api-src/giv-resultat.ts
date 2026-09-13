@@ -9,8 +9,13 @@
 // på brickan — annars 403. Så kan man aldrig tjuvkika på en giv man inte spelat
 // (travellern skulle avslöja att brickan är en slam m.m.). Bara visningsnamn +
 // publika brickresultat lämnas ut, inga privata uppgifter.
+//
+// Påbyggnad 3 (2026-09-13): varje rad bär dessutom spelarens auktion (kompakt,
+// utan hand-byggd förklaringstext) + spelade kort + spelförarstick, så klienten
+// kan stega igenom hur VEM SOM HELST bjöd och spelade given (GivGranskning).
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { Card } from '../src/types/bridge'
 import type { ResolvedCall } from '../src/lib/bidding'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { byggBrickresultat, type Brickrad } from '../src/lib/engine/brickresultat'
@@ -70,7 +75,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       ns_score: number | null
       declarer_tricks: number | null
       passed_out: boolean
-      payload: { history?: ResolvedCall[] } | null
+      payload: { history?: ResolvedCall[]; plays?: Card[] } | null
     }>
 
     // Ingen tjuvkik: kallaren måste själv ha spelat brickan.
@@ -84,6 +89,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       declarerTricks: r.declarer_tricks,
       passedOut: r.passed_out,
       history: Array.isArray(r.payload?.history) ? r.payload!.history! : [],
+      plays: Array.isArray(r.payload?.plays) ? r.payload!.plays! : [],
     }))
     const resultat = byggBrickresultat(rader)
 
@@ -111,6 +117,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         kontrakt: r.kontrakt,
         nsScore: r.nsScore,
         procent: r.procent,
+        // Påbyggnad 3 (2026-09-13): auktion (kompakt) + spelade kort + spelförar-
+        // stick per spelare, så vem som helst kan stega igenom hur given bjöds
+        // och spelades — även bottarnas. Bara efter att man själv spelat brickan
+        // (grinden ovan), så inget läcker i förväg.
+        history: r.history,
+        plays: r.plays,
+        declarerTricks: r.declarerTricks,
       })),
     })
   } catch (err) {

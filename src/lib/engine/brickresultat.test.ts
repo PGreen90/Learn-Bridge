@@ -2,7 +2,7 @@
 
 import { describe, test, expect } from 'vitest'
 import type { ResolvedCall } from '../bidding'
-import { byggBrickresultat, type Brickrad } from './brickresultat'
+import { byggBrickresultat, kompaktHistorik, type Brickrad } from './brickresultat'
 
 /** En avslutad auktion "kontrakt + tre pass" (spelföraren nämner färgen först). */
 function auktion(seat: 'N' | 'E' | 'S' | 'W', bid: string): ResolvedCall[] {
@@ -59,5 +59,41 @@ describe('byggBrickresultat', () => {
     expect(res[0].kontrakt?.strain).toBe('diamonds')
     expect(res[0].kontrakt?.diff).toBe(0) // 3♦ = 9 stick, jämnt
     expect(res.find((r) => r.spelare === 'B')!.kontrakt?.diff).toBe(1) // 10 stick = +1
+  })
+  test('Påbyggnad 3: auktion + spelade kort + spelförarstick följer med per spelare (för genomgången)', () => {
+    const kort = [{ suit: 'spades', rank: 'A' }, { suit: 'spades', rank: 'K' }] as Brickrad['plays']
+    const rader: Brickrad[] = [
+      { spelare: 'A', nsScore: 420, declarerTricks: 10, passedOut: false, history: auktion('S', '4S'), plays: kort },
+      { spelare: 'B', nsScore: 0, declarerTricks: 0, passedOut: true, history: [], plays: [] },
+    ]
+    const res = byggBrickresultat(rader)
+    const a = res.find((r) => r.spelare === 'A')!
+    expect(a.plays).toEqual(kort)
+    expect(a.declarerTricks).toBe(10)
+    // Auktionen är KOMPAKT: säte + bud + regelnamn, aldrig förklaringstexten.
+    expect(a.history).toEqual(auktion('S', '4S').map((c) => ({ seat: c.seat, bid: c.bid })))
+    const b = res.find((r) => r.spelare === 'B')!
+    expect(b.plays).toEqual([])
+    expect(b.history).toEqual([])
+  })
+})
+
+describe('kompaktHistorik', () => {
+  test('behåller säte, bud och regelnamn — strippar förklaringstexten', () => {
+    const full: ResolvedCall[] = [
+      { seat: 'S', bid: '1NT', rule: 'open-1nt', explanation: 'Jämn hand med 15–17 hp.' },
+      { seat: 'W', bid: 'P' },
+    ]
+    expect(kompaktHistorik(full)).toEqual([
+      { seat: 'S', bid: '1NT', rule: 'open-1nt' },
+      { seat: 'W', bid: 'P' },
+    ])
+    // Ingen nyckel "explanation" alls (inte ens undefined) — svaret ska vara litet.
+    expect(Object.keys(kompaktHistorik(full)[0])).toEqual(['seat', 'bid', 'rule'])
+  })
+
+  test('tål trasig indata (inte en lista) → tom auktion', () => {
+    expect(kompaktHistorik(undefined)).toEqual([])
+    expect(kompaktHistorik('x' as unknown as ResolvedCall[])).toEqual([])
   })
 })

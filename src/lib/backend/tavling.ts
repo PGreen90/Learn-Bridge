@@ -379,6 +379,12 @@ export interface BrickaRad {
   kontrakt: GivKontrakt | null
   nsScore: number
   procent: number
+  /** Påbyggnad 3 (2026-09-13): spelarens auktion (kompakt: säte + bud + regel,
+   *  utan förklaringstext — klienten tolkar om systemiskt), spelade kort och
+   *  spelförarstick → genomgången "Så spelade X given". Saknas i äldre svar. */
+  history?: ResolvedCall[]
+  plays?: Card[]
+  declarerTricks?: number | null
 }
 
 export interface GivResultatSvar {

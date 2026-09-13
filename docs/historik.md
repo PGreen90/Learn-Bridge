@@ -2478,3 +2478,20 @@ i Din ställning, "preliminärt 100 %"-cellen ersatt av "väntar" (räknas som 4
 Alla med minst ett inskick står nu på listan. Facit: `matchpoints.test.ts`,
 ny `api-src/topplista.test.ts` (endpoint-skalet + vakten att `is_bot` aldrig
 serialiseras), `DagensTavling.test.tsx`.
+
+## 2026-09-13 — Livskvalitetssvepet etapp C: se hur vilken spelare som helst bjöd och spelade
+
+Datat fanns redan (`daily_results.payload` bär auktion + kort för alla, även
+bottarna); bara läsvägen och vyn saknades. Servern (`giv-resultat.ts`) skickar
+nu `history` (kompakt: säte + bud + regelnamn — `kompaktHistorik` strippar den
+hand-byggda förklaringstexten), `plays` och `declarerTricks` per rad, bakom
+samma 403-grind som förr (du måste själv ha spelat brickan). Klienten: varje
+rad i travellern är klickbar → `GivGranskning` ("Så spelade X given"): sticken
+återskapas med `byggGranskning` och stegas i `PlayReplay` (perspektivfri — rätt
+för andras händer); auktionens förklaringar tolkas systemiskt ur buden
+(`interpretCall`), lika för alla. Din egen rad leder vidare till
+`RondRapportView`, som nu läser serverns payload före localStorage → egen
+genomgång fungerar på annan enhet (cross-device-luckan stängd). Kontraktscellen
+lyft till `tavling/TavlingDelar.tsx` (delas med historiksidan i D3). Facit:
+`brickresultat.test.ts`, ny `api-src/giv-resultat.test.ts` (401/400/429/403,
+passthrough, ingen `explanation`/`is_bot` i svaret), `DagensTavling.test.tsx`.

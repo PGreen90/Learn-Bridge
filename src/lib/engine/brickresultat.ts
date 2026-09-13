@@ -7,7 +7,7 @@
 //
 // Ren logik utan I/O; facit testar den isolerat (brickresultat.test.ts).
 
-import type { Seat } from '../../types/bridge'
+import type { Card, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { contractFromCalls } from './auction-live'
 import { matchpointsForBoard } from './matchpoints'
@@ -30,6 +30,8 @@ export interface Brickrad {
   declarerTricks: number | null
   passedOut: boolean
   history: ResolvedCall[]
+  /** Spelarens spelade kort i ordning (ur payload). Tom/saknad om okänd. */
+  plays?: Card[]
 }
 
 /** En spelares färdiga travellerpost på brickan. */
@@ -41,6 +43,20 @@ export interface Brickresultat {
   mp: number
   max: number
   procent: number
+  /** Påbyggnad 3 (2026-09-13): auktionen (kompakt, utan förklaringstext) +
+   *  spelade kort + spelförarstick, så vem som helst kan stega igenom hur
+   *  spelaren bjöd och spelade given. */
+  history: ResolvedCall[]
+  plays: Card[]
+  declarerTricks: number | null
+}
+
+/** Auktionen i kompakt form: säte + bud + regelnamn (för ALERT) — aldrig den
+ *  lagrade förklaringstexten (byggd av spelarens hand; klienten tolkar om
+ *  systemiskt ur auktionen). Tål trasig indata → tom lista. */
+export function kompaktHistorik(history: ResolvedCall[] | undefined): ResolvedCall[] {
+  if (!Array.isArray(history)) return []
+  return history.map((c) => (c.rule ? { seat: c.seat, bid: c.bid, rule: c.rule } : { seat: c.seat, bid: c.bid }))
 }
 
 /** Bygg travellern: matchpoäng per spelare på brickan + varje spelares kontrakt.
@@ -69,6 +85,9 @@ export function byggBrickresultat(rader: Brickrad[]): Brickresultat[] {
         mp: mp[i].mp,
         max: mp[i].max,
         procent: mp[i].procent,
+        history: kompaktHistorik(r.history),
+        plays: Array.isArray(r.plays) ? r.plays : [],
+        declarerTricks: r.declarerTricks,
       }
     })
     .sort((a, b) => b.procent - a.procent)

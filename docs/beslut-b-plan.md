@@ -439,7 +439,7 @@ någonsin** — bara läsvägarna (låsta till `stockholmDateISO()`) och UI:t sa
   via RLS-policyerna. Fritt spel mot datorn räknas inte (finns bara lokalt).
   GDPR-exporten utökas med resultaten, dagsloggen och placeringarna.
 
-**Läge:** etapp A + B KLARA 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3,
+**Läge:** etapp A + B + C KLARA 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3,
 egen mergepunkt var. Ägarsteg: migration `0012` (D1).
 
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
@@ -549,3 +549,13 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   Din ställning "spelade/12" med 40 %-noten, "preliminärt 100 %" borttaget
   (motsade listan). Facit: `matchpoints.test.ts`, ny `api-src/topplista.test.ts`
   (inkl. vakt: `is_bot` lämnar aldrig servern), `DagensTavling.test.tsx`.
+- **2026-09-13: ETAPP C (SE VILKEN SPELARES GIV SOM HELST) KLAR.** Travellern
+  (`giv-resultat.ts`) lämnar nu per spelare auktionen (kompakt via
+  `kompaktHistorik` — aldrig hand-byggd förklaringstext), spelade kort och
+  spelförarstick; tjuvkiks-grinden oförändrad. Ny vy `tavling/GivGranskning.tsx`
+  ("Så spelade X given": `byggGranskning` → perspektivfri `PlayReplay`,
+  förklaringar tolkade systemiskt ur auktionen) nås från varje travellerrad;
+  egen rad leder vidare till `RondRapportView` — nu ur serverns payload, så
+  egen genomgång fungerar på annan enhet. `tavling/TavlingDelar.tsx` (kontrakts-
+  cellen) lyft ur sidan. Facit: `brickresultat.test.ts`, ny
+  `api-src/giv-resultat.test.ts` (grindar + inga läckor), `DagensTavling.test.tsx`.
