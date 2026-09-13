@@ -157,7 +157,8 @@ function Medaljtabell({ medaljer }: { medaljer: Medaljrad[] }) {
         </table>
       )}
       <p className="text-center text-[11px] text-emerald-100/50">
-        Topp 5 · guld/silver/brons = plats 1/2/3 en tävlingsdag · datorspelare räknas inte i medaljtabellen.
+        Topp 5 · guld/silver/brons = plats 1/2/3 en tävlingsdag med minst två spelare · datorspelare
+        räknas inte i medaljtabellen.
       </p>
     </div>
   )

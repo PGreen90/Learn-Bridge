@@ -72,6 +72,8 @@ const STANDINGS = [
   { set_id: 'set-3', user_id: 'user-b', placering: 1, snitt: 58, spelade: 12 },
   { set_id: 'set-3', user_id: 'user-a', placering: 1, snitt: 58, spelade: 12 },
   { set_id: 'set-3', user_id: 'bot', placering: 3, snitt: 40, spelade: 12 },
+  // dag 0 (gammal): b ENSAM i ställningen → ingen medalj (ägarbeslut 2026-09-13)
+  { set_id: 'set-0', user_id: 'user-b', placering: 1, snitt: 40, spelade: 3 },
 ]
 
 function mockaFetch({ authOk = true, kvotOk = true, standingsFinns = true } = {}) {
@@ -169,7 +171,7 @@ describe('tavling-historik — dagslistan och medaljtabellen', () => {
     expect(resultatAnrop).toHaveLength(2)
   })
 
-  test('medaljtabellen: bottarna uteslutna men placeringarna räknas som de var; ingen is_bot i svaret', async () => {
+  test('medaljtabellen: bottarna uteslutna men placeringarna räknas som de var; ensam dag ger inget; ingen is_bot i svaret', async () => {
     vi.stubGlobal('fetch', mockaFetch().fn)
     const { res, svar } = fakeRes()
     await handler(fakeReq('GET', 't'), res)
