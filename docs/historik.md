@@ -2421,3 +2421,46 @@ som indata. R2 pekade ut avsaknaden av auktionsläge redan 2026-07; vi lappade.
 0–6, grindbeslut) bor i `docs/motorbyte-plan.md`. Pliktsvepet pausat (K1/K3/
 K2/K5 live; resterna blir facit i etapp 4). Ägaren vill ha en etapp per
 session; nästa session = etapp 0 (rigg + baslinjer).
+
+## 2026-09-11/12 — Motorbytet etapp 6: efterkontrollen klar + live-provets första fynd (flyttat från CLAUDE.md NU 2026-09-13)
+
+Efterkontrollen KLAR 2026-09-11 (alla riggar gröna, bordet testkört). Därefter
+🚪 ägarens live-prov: ägaren provspelar och rapporterar fel; Claude lagar
+test-drivet (facit + auktionsdiff + grind) och PCD:ar var för sig.
+
+**Åtta hål lagade & LIVE 2026-09-11/12:** cue-rond+överbudsrättelse · systems-on
+efter 2NT-inkliv · 2♣-återbudet 5+ · Smolen/garbage över 1NT-inkliv ·
+RKC-trumfdamen ärlig (bevisad 10-fit) · konkurrens-fritt-bud (öppnarens 5-4/2NT +
+svararens fortsättning, `1e298d2`) · **RKC-frågaren seat-agnostisk**
+(öppnaren-som-kapten frågar trumfdam med 5♥ i st.f. PASS;
+`rkc-asker-continuations.ts`, damfrågan avgör lillslam-mot-utgång,
+storslamsgrenen SENARE) · **dubblarens cue-höjning är krav** (advancern svarar
+2M/3M/2NT/3NT på dubblarens cue i st.f. att passa ut den;
+`advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`, §7.3, slam-över-max
+SENARE). Detaljerna: [[motorbytet-manus-till-spelare]] + budsystem §9.
+
+**Dessutom (Claudes provspelning 2026-09-12, systemrevisorn 1000 givar):** tre
+systemfel lagade & LIVE — negativ-dubblingssvar (6-korts högfärg före sang) ·
+inverterad minors 2NT-stoppkrav · Michaels-cue i egen färg ≠ cue-höjning. Detalj:
+budsystem §9 + `auction-revisor-fynd-2026-09-12.test.ts`. Följd-fynd (bevaka.md):
+negativ-dubblaren accepterar inte invit-hoppet — metodval, väntar ägaren.
+
+**Nyss klart dessförinnan (2026-09-01…03):** speldiagnosens runda 6 · rebidz-bot +
+alla Beslut B-etapper · trebottarna Gunnar52/Lasse68/Emma03 LIVE (nivå bara i
+Syds kortspel, `botniva.ts`) · felrapporterna #54–#60 (`4898958`, 2026-09-03/04) ·
+pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+
+## 2026-09-13 — Livskvalitetssvepet i Dagens tävling påbörjat (etapp A: två tryck alltid)
+
+Ägaren kom med fem önskemål runt tävlingen och kontot (planen med etapp A–E +
+D1–D3 och ägarbesluten: `docs/beslut-b-plan.md`, "Påbyggnad — tävlingens
+livskvalitet"). Kartläggningen visade att hela auktionen + alla spelade kort
+redan sparas per spelare (`daily_results.payload`) och att ingen tävlingsdata
+raderas — historiken finns, bara läsvägar och UI saknas.
+
+**Etapp A KLAR:** ett-trycks-genvägen för singeltons (facelift pass 3, 2026-08-02)
+gav feltryck vid bordet → borttagen i både Spela kort (`usePlayTable.onCardClick`)
+och vänbordet (`BordSpel.klick`). Två tryck gäller nu alltid: första väljer
+färgen, andra spelar. Bottarna oberörda (egna vägar). Facit `play/tvatryck.test.tsx`
+(seedad giv där Syd håller en singelton på utspel); `syd-trakarl.test.tsx` klickar
+nu ovillkorligt två gånger.

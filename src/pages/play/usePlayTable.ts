@@ -431,11 +431,10 @@ export function usePlayTable(
     // Under claim-revealen ligger korten stilla — bara Gå vidare-knappen verkar.
     if (pendingClaim) return
     skipSweep()
-    // Singelton (enda kortet i sin färg) spelas direkt på ETT tryck — det finns
-    // inget att välja mellan, så färgvalssteget hoppas över (ägarönskemål).
-    // Korten görs bara klickbara på egen tur, så play.toAct äger alltid kortet.
-    const suitCount = play.hands[play.toAct].filter((c) => c.suit === card.suit).length
-    if (suitCount > 1 && selectedSuit !== card.suit) {
+    // Två tryck gäller ALLTID — även för en singelton (ägarbeslut 2026-09-13).
+    // Den gamla genvägen (singelton spelas på ett tryck) gav feltryck vid bordet:
+    // ett oavsiktligt tryck kostade kortet direkt. Facit: tvatryck.test.tsx.
+    if (selectedSuit !== card.suit) {
       setSelectedSuit(card.suit)
       return
     }

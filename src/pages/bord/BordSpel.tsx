@@ -926,8 +926,10 @@ export function BordSpel({
       if (agerandeV !== 'S') return
       const legal = legalCards(s, seatV)
       if (!legal.some((x) => sameCard(x, c))) return
-      const iFargen = legal.filter((x) => x.suit === c.suit)
-      if (selectedSuit === c.suit || iFargen.length === 1) {
+      // Två tryck gäller alltid, även för ett ensamt lagligt kort (ägarbeslut
+      // 2026-09-13: ett-trycks-genvägen gav feltryck) — samma regel som i
+      // usePlayTable.onCardClick.
+      if (selectedSuit === c.suit) {
         setSelectedSuit(null)
         void gorDrag({ typ: 'kort', card: c })
       } else {
