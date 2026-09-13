@@ -10,10 +10,10 @@ import handler from './topplista'
 
 const BAS = 'https://exempel.supabase.co'
 
-function fakeReq(token?: string): IncomingMessage {
+function fakeReq(token?: string, url = '/api/topplista'): IncomingMessage {
   const req = Readable.from([]) as unknown as { method: string; url: string; headers: Record<string, string> }
   req.method = 'GET'
-  req.url = '/api/topplista'
+  req.url = url
   req.headers = token ? { authorization: `Bearer ${token}` } : {}
   return req as unknown as IncomingMessage
 }
@@ -21,6 +21,9 @@ function fakeReq(token?: string): IncomingMessage {
 type Rad = { namn: string; snitt: number; antalGivar: number; spelade: number; jag: boolean }
 type Svar = {
   ok: boolean
+  dag?: string
+  idag?: boolean
+  slutlig?: boolean
   storlek: number
   provisoriskProcent: number
   topplista: Rad[]
@@ -56,8 +59,9 @@ function resultatRader() {
   return rader
 }
 
-function mockaFetch() {
+function mockaFetch({ slutlig = false } = {}) {
   const kvotAnrop: string[] = []
+  const setAnrop: string[] = []
   const fn = vi.fn(async (url: string) => {
     const svar = (json: unknown) => ({ ok: true, status: 200, json: async () => json, text: async () => '' })
     if (url.includes('/auth/v1/user')) return svar({ id: 'user-a' })
@@ -65,7 +69,11 @@ function mockaFetch() {
       kvotAnrop.push(url)
       return svar(true)
     }
-    if (url.includes('daily_sets?')) return svar([{ id: 'set-1', daily_number: 42, size: 12 }])
+    if (url.includes('daily_sets?')) {
+      setAnrop.push(url)
+      return svar([{ id: 'set-1', daily_number: 42, size: 12 }])
+    }
+    if (url.includes('daily_standings?')) return slutlig ? svar([{ set_id: 'set-1' }]) : svar([])
     if (url.includes('daily_results?') && url.includes('user_id=eq.')) {
       return svar(resultatRader().filter((r) => r.user_id === 'user-a').map((r) => ({
         board: r.board, declarer_tricks: 10, passed_out: false, payload: null,
@@ -81,7 +89,7 @@ function mockaFetch() {
     }
     return svar([])
   })
-  return { fn, kvotAnrop }
+  return { fn, kvotAnrop, setAnrop }
 }
 
 beforeEach(() => {
@@ -131,5 +139,39 @@ describe('topplista — tillsvidare-snittet och spelade givar', () => {
     expect(body.du).toBeNull()
     expect(body.topplista.every((r) => r.jag === false)).toBe(true)
     expect(kvotAnrop).toHaveLength(0)
+  })
+})
+
+describe('topplista — tidigare dagar (?dag=, Påbyggnad 3)', () => {
+  test('utan ?dag= är det dagens tävling (idag = true) och provisorisk', async () => {
+    const { fn } = mockaFetch()
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('t'), res)
+    const { body } = svar()
+    expect(body.idag).toBe(true)
+    expect(body.slutlig).toBe(false)
+  })
+
+  test('?dag=2026-08-11 → den dagens set, idag = false, slutlig när nattjobbet frusit den', async () => {
+    const { fn, setAnrop } = mockaFetch({ slutlig: true })
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('t', '/api/topplista?dag=2026-08-11'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(setAnrop[0]).toContain('comp_date=eq.2026-08-11')
+    expect(body.dag).toBe('2026-08-11')
+    expect(body.idag).toBe(false)
+    expect(body.slutlig).toBe(true)
+  })
+
+  test('framtida eller trasig dag → 400 (morgondagens givar lämnas aldrig ut)', async () => {
+    vi.stubGlobal('fetch', mockaFetch().fn)
+    for (const q of ['?dag=2099-01-01', '?dag=igår']) {
+      const { res, svar } = fakeRes()
+      await handler(fakeReq('t', `/api/topplista${q}`), res)
+      expect(svar().status).toBe(400)
+    }
   })
 })

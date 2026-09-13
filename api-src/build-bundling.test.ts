@@ -24,6 +24,7 @@ const FUNKTIONER = [
   'generera-dagens-givar',
   'giv-resultat',
   'skicka-in',
+  'tavling-historik',
   'topplista',
 ]
 

@@ -14,7 +14,6 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { ResolvedCall } from '../src/lib/bidding'
-import { stockholmDateISO } from '../src/lib/engine/daily'
 import { contractFromCalls } from '../src/lib/engine/auction-live'
 import {
   aggregeraTopplista,
@@ -24,6 +23,7 @@ import {
 import { MIN_PER_GIV } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
+import { lasDag } from './_lib/tavlingsdag'
 
 /** Vem kallar? Verifiera en valfri inloggnings-token mot Supabase och lämna
  *  tillbaka user-id, eller null (ingen/ogiltig token = anonym — endpointen
@@ -65,14 +65,35 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   if (!base || !key) return json(500, { ok: false, fel: 'Saknar SUPABASE_URL / SERVICE_ROLE_KEY' })
 
   try {
-    const today = stockholmDateISO()
+    // Idag som standard; `?dag=` för en tidigare dag (historiken, Påbyggnad 3).
+    const valdDag = lasDag(new URL(req.url ?? '', 'http://x'))
+    if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    const today = valdDag.dag
     const sets = (await restGet(
       base,
       key,
       `daily_sets?comp_date=eq.${today}&select=id,daily_number,size`,
     )) as Array<{ id: string; daily_number: number; size: number }>
-    if (!sets.length) return json(404, { ok: false, fel: 'Ingen tävling idag' })
+    if (!sets.length) {
+      return json(404, { ok: false, fel: valdDag.idag ? 'Ingen tävling idag' : 'Ingen tävling den dagen' })
+    }
     const set = sets[0]
+
+    // Slutlig? = nattjobbet har skrivit dagens ställning till daily_standings
+    // (Påbyggnad 3). Siffrorna räknas ändå ur daily_results (EN kodväg — efter
+    // granskningen ändras inget, så de är lika). Tabellen kan saknas tills
+    // migration 0012 körts → då bara 'provisorisk'.
+    let slutlig = false
+    try {
+      const st = (await restGet(
+        base,
+        key,
+        `daily_standings?set_id=eq.${set.id}&select=set_id&limit=1`,
+      )) as unknown[]
+      slutlig = Array.isArray(st) && st.length > 0
+    } catch {
+      slutlig = false
+    }
 
     const results = (await restGet(
       base,
@@ -182,6 +203,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return json(200, {
       ok: true,
       nummer: set.daily_number,
+      dag: today,
+      idag: valdDag.idag,
+      slutlig,
       storlek: set.size,
       poängsattaGivar: agg.poängsattaGivar,
       minPerGiv: MIN_PER_GIV,

@@ -439,8 +439,8 @@ någonsin** — bara läsvägarna (låsta till `stockholmDateISO()`) och UI:t sa
   via RLS-policyerna. Fritt spel mot datorn räknas inte (finns bara lokalt).
   GDPR-exporten utökas med resultaten, dagsloggen och placeringarna.
 
-**Läge:** etapp A + B + C + E + D1 KLARA 2026-09-13 (D1 väntar på ägarsteget
-migration `0012`). Etapporder: A → B → C → E → D1 → D2 → D3,
+**Läge:** etapp A + B + C + E + D1 + D2 KLARA 2026-09-13 (D1 väntar på
+ägarsteget migration `0012`); kvar = D3. Etapporder: A → B → C → E → D1 → D2 → D3,
 egen mergepunkt var. Ägarsteg: migration `0012` (D1).
 
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
@@ -579,3 +579,14 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   bortfallna spelare. **ÄGARSTEG:** kör `0012` i Supabase; därefter
   `workflow_dispatch` på tavling-granskning så historiken fylls. Facit:
   `tavlingsavslut.test.ts`.
+- **2026-09-13: ETAPP D2 (HISTORIK-API) KLAR.** `?dag=YYYY-MM-DD` på
+  `dagens-tavling`, `topplista` (svaret får `dag`/`idag`/`slutlig`) och
+  `giv-resultat` (tjuvkiks-grinden bara för dagens tävling) via ny
+  `_lib/tavlingsdag.ts` (`lasDag`: framtid/ogiltigt → 400 — morgondagens givar
+  lämnas aldrig ut). Ny endpoint `tavling-historik.ts` (Bearer + kvot):
+  avslutade dagar med din placering ur `daily_standings` (ofrusna räknas i
+  farten, max tre) + medaljtabellen topp 5 (bottar uteslutna server-side,
+  `is_bot` serialiseras aldrig). `restGetAlla` (Range-paginering) i
+  `_lib/supabase-rest.ts`. Klient: `fetchDagensTavling/fetchTopplista/
+  fetchGivResultat(…, dag?)` + `fetchTavlingHistorik()`. Facit: `tavlingsdag`,
+  `supabase-rest`, `topplista`, `giv-resultat`, ny `tavling-historik.test.ts`.

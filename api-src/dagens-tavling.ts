@@ -11,12 +11,12 @@
 // på att gömma given. (Nivå 2 = dolda händer per stol, senare ägarbeslut.)
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { stockholmDateISO } from '../src/lib/engine/daily'
 import { playSeedForBoard } from './_lib/seed'
 import { restGet } from './_lib/supabase-rest'
+import { lasDag } from './_lib/tavlingsdag'
 
 export default async function handler(
-  _req: IncomingMessage,
+  req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
   const json = (status: number, data: unknown) => {
@@ -36,7 +36,12 @@ export default async function handler(
   }
 
   try {
-    const today = stockholmDateISO()
+    // Vilken dag? Idag som standard; `?dag=YYYY-MM-DD` för en tidigare dag
+    // (tävlingshistoriken, Påbyggnad 3). Framtid/ogiltigt → 400: morgondagens
+    // givar ligger redan i databasen och får aldrig lämnas ut i förväg.
+    const valdDag = lasDag(new URL(req.url ?? '', 'http://x'))
+    if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    const today = valdDag.dag
     const sets = (await restGet(
       base,
       key,
@@ -44,7 +49,10 @@ export default async function handler(
     )) as Array<{ id: string; daily_number: number; comp_date: string; size: number }>
 
     if (!sets.length) {
-      return json(404, { ok: false, fel: 'Ingen tävling genererad för idag än' })
+      return json(404, {
+        ok: false,
+        fel: valdDag.idag ? 'Ingen tävling genererad för idag än' : 'Ingen tävling den dagen',
+      })
     }
     const set = sets[0]
 

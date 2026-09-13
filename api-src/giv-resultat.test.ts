@@ -152,3 +152,21 @@ describe('giv-resultat — genomgångsdata per spelare (Påbyggnad 3)', () => {
     expect(text).not.toContain('is_bot')
   })
 })
+
+describe('giv-resultat — tidigare dagar (?dag=, Påbyggnad 3)', () => {
+  test('avslutad dag: inloggning räcker — tjuvkiks-grinden gäller bara idag', async () => {
+    vi.stubGlobal('fetch', mockaFetch({ medMig: false }))
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3&dag=2026-08-11', 't'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(body.resultat!.map((r) => r.namn)).toEqual(['Gunnar52'])
+  })
+
+  test('framtida dag → 400', async () => {
+    vi.stubGlobal('fetch', mockaFetch())
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3&dag=2099-01-01', 't'), res)
+    expect(svar().status).toBe(400)
+  })
+})

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { restGet } from './supabase-rest'
+import { restGet, restGetAlla } from './supabase-rest'
 
 const svar = (status: number, body = '') =>
   ({ ok: status >= 200 && status < 300, status, json: async () => (body ? JSON.parse(body) : null), text: async () => body }) as Response
@@ -40,5 +40,27 @@ describe('supabase restGet — omförsök på transienta fel', () => {
     vi.stubGlobal('fetch', fetchMock)
     await expect(restGet('http://b', 'k', 'x', 3)).rejects.toThrow(/503/)
     expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+})
+
+describe('supabase restGetAlla — paginerad läsning (Påbyggnad 3)', () => {
+  it('läser sida för sida med Range-headers tills en sida är kortare än sidstorleken', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(svar(206, '[1,2,3]'))
+      .mockResolvedValueOnce(svar(206, '[4,5,6]'))
+      .mockResolvedValueOnce(svar(200, '[7]'))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await restGetAlla('http://b', 'k', 'daily_standings?select=set_id', 3)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    const ranges = fetchMock.mock.calls.map((c) => (c[1] as { headers: Record<string, string> }).headers.Range)
+    expect(ranges).toEqual(['0-2', '3-5', '6-8'])
+  })
+
+  it('exakt full sista sida → ett tomt extra anrop, sedan klart', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(svar(206, '[1,2]')).mockResolvedValueOnce(svar(200, '[]'))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await restGetAlla('http://b', 'k', 'x', 2)).toEqual([1, 2])
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 })

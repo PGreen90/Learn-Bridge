@@ -23,6 +23,7 @@ export const KVOTER = {
   topplista: { fonsterSek: 60, tak: 30 },
   'giv-resultat': { fonsterSek: 60, tak: 30 },
   'dagens-logg': { fonsterSek: 60, tak: 30 },
+  'tavling-historik': { fonsterSek: 60, tak: 30 },
 } as const
 
 export type KvotHandling = keyof typeof KVOTER
