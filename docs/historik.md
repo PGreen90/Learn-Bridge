@@ -2579,3 +2579,25 @@ en medalj kräver minst två spelare i dagens ställning (samma tanke som
 poänggränsen per giv). `raknaMedaljer(placeringar med set, uteslut, topp,
 minSpelare = MIN_SPELARE_FOR_MEDALJ)` — bottar räknas som spelare i gränsen.
 Facit utökade; fotnoten på medaljtabellen säger regeln.
+
+## 2026-09-13 — Motorbytet slutfört: facit-kön tömd, invit-hoppet, M19, Smolen efter 1NT
+
+Ägaren: "liveproven är klara. gör klart budmotorn." Etapp 6 stängdes och de
+kända resterna byggdes test-drivet i ett svep — facit före fix, baslinje-dumpar
+på `c4d7ac7` före första kodändringen, auktions- och avvikelsediff klassad per
+mönster, hela sviten grön. Elva regler (budsystem §9 2026-09-13, planens logg):
+flykten över deras X av vårt 1NT är avslut (force-faktumet läste den som
+rondkrav) · DONT-dubblaren visar enfärgen själv · inklivarens preferens (K2) ·
+återöppningssvaret undviker deras färger · responsiv-dubblaren väger partnerns
+tvingade svar · den starka dubblaren utan egen färg (M19) · negativ-dubblaren
+accepterar invit-hoppet (8+ TP) · svag rymning 3M över 2NT i konkurrens · 2♣-
+linjens lillslam på solid egen färg · öppnarens Smolen-/5-4-svar efter
+1NT–2♣–2♦ · kikvakten skarp för hela auktionen. Kvar som SENARE: kontrerad
+checkback.
+
+**Lärdomar:** (1) auktionsdiffen avslöjade två hål facit-kön inte kände till
+(Smolen-svaret saknades efter 1NT; deras cue i VÅR färg räknades som "deras
+färg") — diffen är grinden, inte facit-testerna ensamma. (2) Två av reglerna
+fick först för brett grepp (force-avsmalningen tog 4♦ efter transfer; responsiv-
+trösklarna glömde att partnern är dubblaren med 12+) — mät, smalna av, mät igen,
+innan docs skrivs.

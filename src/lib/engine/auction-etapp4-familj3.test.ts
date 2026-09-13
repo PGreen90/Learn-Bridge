@@ -138,8 +138,12 @@ describe('raderna *negativ-x-öppnaren* / *negativ-dubblaren*', () => {
     expect(game.källa).toBe('tabell:negativ-dubblaren')
     expect(game.call).toMatchObject({ bid: '3NT', rule: 'negativ-dubblarens utgång' })
   })
-  it('läget: partnerns hopp (16+) och partnerns utgångsbud lämnas åt det gamla lagret', () => {
-    expect(decideCallTraced(ensam('S', 'S:54 H:AJ54 D:AJ6 C:KJ98'), [...hist, call('N', '3H'), call('E', 'P')], 'S').källa).not.toBe('tabell:negativ-dubblaren')
+  // Motorbytets slutförande 2026-09-13: partnerns INVIT-HOPP (16–18) besvaras nu
+  // ur raden (`negativeDoublerAnswersJump`); partnerns utgångsbud står orört.
+  it('läget: partnerns invit-hopp (16–18) besvaras ur raden; partnerns utgångsbud lämnas', () => {
+    const hopp = decideCallTraced(ensam('S', 'S:54 H:AJ54 D:AJ6 C:KJ98'), [...hist, call('N', '3H'), call('E', 'P')], 'S')
+    expect(hopp.källa).toBe('tabell:negativ-dubblaren')
+    expect(hopp.call).toMatchObject({ bid: '4H', rule: 'negativ-dubblaren accepterar inbjudan' })
     expect(decideCallTraced(ensam('S', 'S:54 H:AJ54 D:AJ6 C:KJ98'), [...hist, call('N', '4H'), call('E', 'P')], 'S').källa).not.toBe('tabell:negativ-dubblaren')
   })
 })

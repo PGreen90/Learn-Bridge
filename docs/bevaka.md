@@ -1,5 +1,21 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Motorbytets slutförande — elva regler i ett svep (2026-09-13, ägarbesked "gör klart budmotorn")
+- Facit-kön tömd + de sista kända hålen (budsystem §9 2026-09-13): flykten över
+  deras X av vårt 1NT är avslut · DONT-dubblaren visar enfärgen själv ·
+  inklivarens preferens (K2) · återöppningssvaret undviker deras färger ·
+  responsiv-dubblaren väger det tvingade svaret · den starka dubblaren utan egen
+  färg (M19) · invit-hoppet accepteras med 8+ TP · svag rymning 3M över 2NT i
+  konkurrens · 2♣-linjens lillslam på solid färg · öppnarens Smolen-/5-4-svar
+  efter 1NT.
+- **Bevaka:** (a) passar responsiv-dubblaren nu för ofta partnerns tvingade svar
+  (gränsen 10/13 stödpoäng)? (b) den starka dubblarens sang utan egen färg —
+  känns 2NT (20–21) / 3NT (22+) rätt mot partnerns billiga svar? (c) DONT-
+  dubblarens 3-lägesvisning (12+ hp eller 7+ kort) — för lätt/för tung? (d)
+  accepterar negativ-dubblaren invit-hoppet på för lite (8 TP = ägarens
+  metodval, justera i `negativeDoublerAnswersJump`)? (e) 6 i egen solid färg i
+  2♣-linjen — bjuds den när partnern i själva verket hade fit/bättre slam?
+
 ## Försvararen ser träkarlen — kryper inte partnerns slagbara stick (2026-09-13, fältfynd Bricka 7)
 - Nord försvarade 5♦ med ♥AKJT972; efter ♥A ledde Syd hjärter, och Nord (3:e
   hand) KRÖP med ♥J i stället för att ta ♥K — träkarlen (Öst) satt med ♥Q EFTER
@@ -14,16 +30,13 @@
   spelförare där kortet kan sitta fel) — och att den inte går upp i onödan när
   partnern redan vinner säkert.
 
-## Negativ-dubblaren accepterar inte öppnarens invit-hopp (2026-09-12, upptäckt vid provspels-fynd 1)
-- Efter fixen "6-korts högfärg före sang" bjuder öppnaren rätt: `1♥–(2♦)–X–P–3♥`
-  (16+, 6 hjärter, invit). MEN den negativa dubblaren (frö 20260797: Öst ♠AK43
-  ♥94 ♦94 ♣85432, 8 hp, 2-korts stöd) **passar** 3♥ i stället för att acceptera
-  till **4♥** — paret stannar i 3♥ fast utgången är kall (8 hp + 6-2-fit mot
-  visat 16+ = utgång).
-- **Bevaka/SENARE:** bygg den negativa dubblarens (advancerns) accept av
-  öppnarens invit-hopp — raise till utgång med mer än blott minimum (~8+ mot ett
-  16+-hopp). Metodval (acceptgränsen) → stäm av med ägaren. Separat från fynd 1
-  (som bara gällde öppnarens egen bud).
+## ~~Negativ-dubblaren accepterar inte öppnarens invit-hopp~~ — BYGGD 2026-09-13 (upptäckt 2026-09-12)
+- Efter fixen "6-korts högfärg före sang" bjöd öppnaren rätt (`1♥–(2♦)–X–P–3♥`,
+  16+, 6 hjärter, invit) men dubblaren passade (frö 20260797: Öst ♠AK43 ♥94
+  ♦94 ♣85432 — 7 hp, 9 startpoäng). **Byggd** i motorbytets slutförande:
+  `negativeDoublerAnswersJump` accepterar med **8+ TP** (stödpoäng med 3+ stöd,
+  annars startpoäng) → 4♥; budsystem §7.4. Gränsen är Claudes bokförslag —
+  ägaren justerar vid behov (posten ovan, punkt d).
 
 ## Dubblarens cue-höjning: ingen slamletning över advancerns maximum (2026-09-12, live-prov Bricka 9)
 - Nya `advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`: efter `1M-öppning
@@ -388,13 +401,11 @@
   dubblar bottarna nu på händer där pass kändes bättre — särskilt med LÄNGD i
   deras färg (X:et är ju upplysning, inte straff)? (b) tvingas partnern svara
   på luft och åka på straff?
-  **KÄNT HÅL I ROND 2 (kontrollmätning M19, frö 20260952):** den starka
-  dubblaren kan **sälja given i nästa rond**. `1♦–X–P–3♣–P–P–P`: Väst dubblar
-  med 19 hp, Öst hoppar 3♣, och Väst **passar** — ÖV kunde ta 7NT.
-  `ownStrongDoubleRebid` (sedan 2026-09-08 i `double-continuations.ts`) kräver en egen 5+ **objuden** färg för det starka
-  återbudet, och en jämn 19-poängare har ingen → ingen väg vidare alls.
-  Principen "17+ säljer aldrig given" gäller alltså bara rond 1 i dag. Är detta
-  kandidat till ett eget jobb står det i `docs/senare.md`.
+  **~~KÄNT HÅL I ROND 2 (M19, frö 20260952)~~ — LAGAT 2026-09-13:** den starka
+  dubblaren utan egen 5+ objuden färg sålde given i rond 2 (`1♦–X–P–3♣–P–P–P`
+  med 19 hp; ÖV kunde ta 7NT). Nu `strongDoublerWithoutSuit`
+  (`double-continuations.ts`): mot partnerns hopp utgång (4M/3NT/5m), mot
+  billigt svar höjning eller sang efter styrka — budsystem §7.3.
 - **Sangsystemet gäller även off-book (#41).** Bjuder du 1NT/2NT själv i
   budlådan svarar partnern nu med Stayman/transfer/Texas/Minor Suit Stayman och
   öppnaren ger sitt vanliga återbud. **Bevaka:** (a) läser motorn ditt bud som

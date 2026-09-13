@@ -23,7 +23,7 @@
 // modellerade bara den starka); nu är den ett beslut som alla andra.
 
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
-import { parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
+import { isGameOrHigher, parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { dummyPoints, startingPoints } from './evaluation'
 import { hcp, lengths } from './hand'
@@ -806,3 +806,144 @@ export function doubleSideCompetes(hand: Hand, f: AuctionFacts): Kunskap | null 
   return advancerPrefersOvercallSuit(hand, f) ?? advancerCompetesToFit(hand, f)
 }
 
+
+/**
+ * Den RESPONSIVA dubblaren väger partnerns tvingade svar (facit-kön C, frö
+ * 20271014; byggd i motorbytets slutförande 2026-09-13): partnern dubblade
+ * upplysande, de höjde, jag dubblade responsivt (7+, stöd i de objudna) och
+ * partnern valde färg. Svaret var TVINGAT och lovar inget utöver
+ * upplysningsdubblingen (12–15), så jag räknar mot 12: i högfärg 13+
+ * stödpoäng → utgång (25+ ihop), 10–12 → höjning (inbjudan); i lågfärg
+ * bara 13+ → en nivå (inbjudan, 5m kräver mer) — annars pass (förr hoppade
+ * catch-allen "inbjudande" till 5♣ på 10 hp).
+ */
+export function responsiveDoublerWeighsAnswer(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
+  const ourNonPass = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourNonPass.length !== 3) return null
+  const [px, mx, ans] = ourNonPass
+  if (px.seat !== PARTNER[seat] || px.bid !== 'X' || mx.seat !== seat || mx.bid !== 'X' || ans.seat !== PARTNER[seat]) return null
+  const cb = parseContractBid(ans.bid)
+  if (!cb || cb.strain === 'NT' || f.theirStrains.has(cb.strain)) return null
+  if (history.slice(history.indexOf(ans) + 1).some((c) => c.bid !== 'P')) return null
+  if (isGameOrHigher(ans.bid as Bid)) return null
+  const suit = SUIT_OF_LETTER[cb.strain]
+  const support = lengths(hand)[suit]
+  const isMajor = suit === 'hearts' || suit === 'spades'
+  const legal = legalCalls(history, seat)
+  const sym = SWE_SYM[cb.strain]
+  if (support >= 3) {
+    const sp = dummyPoints(hand, suit).dummyPoints
+    const gameBid = `${isMajor ? 4 : 5}${cb.strain}` as Bid
+    if (sp >= 13 && isMajor && legal.includes(gameBid)) return {
+      call: gameBid, rule: 'responsiv-dubblaren bjuder utgång',
+      explanation: `Partnerns ${prettyBid(ans.bid)} var ett tvingat svar på min responsiva dubbling (12–15); med fit och utgångsvärden (13+ stödpoäng mot 12) → ${prettyBid(gameBid)}.`,
+    }
+    if (sp >= (isMajor ? 10 : 13)) {
+      const raise = cheapestBidIn(history, seat, cb.strain)
+      if (raise && parseContractBid(raise)!.level < (isMajor ? 4 : 5) && legal.includes(raise)) return {
+        call: raise, rule: 'responsiv-dubblaren höjer (inbjudan)',
+        explanation: `Partnerns ${prettyBid(ans.bid)} var ett tvingat svar på min responsiva dubbling (12–15); med fit och extra (${isMajor ? '10–12' : '13+'} stödpoäng) → ${prettyBid(raise)} (inbjudan).`,
+      }
+    }
+  }
+  return {
+    call: 'P', rule: 'responsiv-dubblaren nöjer sig',
+    explanation: `Partnerns ${prettyBid(ans.bid)} var ett tvingat svar på min responsiva dubbling och lovar inget utöver upplysningsdubblingen (12–15) → pass i ${sym}.`,
+  }
+}
+
+/**
+ * Den STARKA dubblaren UTAN egen 5+ objuden färg (M19, frö 20260952,
+ * docs/bevaka.md; byggd i motorbytets slutförande 2026-09-13): 17+ jämn hand
+ * som dubblade (för stark för inkliv) och nu hör partnerns svar.
+ * `ownStrongDoubleRebid` kräver en egen färg — utan den sålde motorn given
+ * (1♦–X–P–3♣–P–P–P med 19 hp; ÖV kunde ta 7NT). Principen "17+ säljer aldrig
+ * given" gäller nu även rond 2:
+ *   · partnerns HOPP (9–11): utgång — 4M med 4-korts stöd i högfärgen, annars
+ *     3NT med stopp i deras färg(er), annars 5m med 4-korts stöd i lågfärgen;
+ *   · partnerns billiga svar (0–8): 4-korts stöd i högfärgen → höjning
+ *     (17–18 en nivå, 19–21 hopphöjning, 22+ utgång); annars sang efter
+ *     styrka med stopp — 17–19 billigaste sang (1NT/2NT), 20–21 2NT, 22+ 3NT.
+ * Utan stöd och utan stopp → null (raden fortsätter).
+ */
+export function strongDoublerWithoutSuit(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || side(open.seat) === side(seat) || open.level !== 1 || !SUIT_OF_LETTER[open.strain]) return null
+  const ourNonPass = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourNonPass.length !== 2 || ourNonPass[0].seat !== seat || ourNonPass[0].bid !== 'X') return null
+  const advCall = ourNonPass[1]
+  if (advCall.seat !== PARTNER[seat]) return null
+  const advCb = parseContractBid(advCall.bid)
+  if (!advCb || advCb.strain === 'NT' || f.theirStrains.has(advCb.strain)) return null
+  const advIdx = history.indexOf(advCall)
+  if (history.slice(advIdx + 1).some((c) => c.bid !== 'P')) return null
+  if (isGameOrHigher(advCall.bid as Bid)) return null
+  const p = hcp(hand)
+  if (p < 17) return null
+  const len = lengths(hand)
+  const theirSuits = [...f.theirStrains].map((st) => SUIT_OF_LETTER[st]).filter((s): s is Suit => !!s)
+  // Egen 5+ objuden färg → `ownStrongDoubleRebid` äger läget.
+  if (SUIT_STRAINS.some((st) => !f.theirStrains.has(st) && len[SUIT_OF_LETTER[st]] >= 5)) return null
+
+  // Hopp eller ej: partnerns svar mot billigaste möjliga nivån vid den punkten.
+  let prevLevel = 0
+  let prevRank = -1
+  for (let i = 0; i < advIdx; i++) {
+    const cb = parseContractBid(history[i].bid)
+    if (!cb) continue
+    prevLevel = cb.level
+    prevRank = SUIT_STRAINS.indexOf(cb.strain as (typeof SUIT_STRAINS)[number])
+  }
+  const advRank = SUIT_STRAINS.indexOf(advCb.strain as (typeof SUIT_STRAINS)[number])
+  const minLevel = advRank > prevRank ? Math.max(prevLevel, 1) : prevLevel + 1
+  const wasJump = advCb.level > minLevel
+
+  const advSuit = SUIT_OF_LETTER[advCb.strain]
+  const support = len[advSuit]
+  const isMajor = advSuit === 'hearts' || advSuit === 'spades'
+  const legal = legalCalls(history, seat)
+  const sym = SWE_SYM[advCb.strain]
+  const stopped = theirSuits.every((s) => hasStopper(hand, s))
+  const gameBid = `${isMajor ? 4 : 5}${advCb.strain}` as Bid
+  const rule = 'stark dubblare: fortsätter'
+
+  if (wasJump) {
+    if (isMajor && support >= 4 && legal.includes(gameBid)) return {
+      call: gameBid, rule, explanation: `Partnerns hopp (9–11) mot min starka dubbling (17+) = utgång; 4-korts stöd i ${sym} → ${prettyBid(gameBid)}.`,
+    }
+    if (stopped && legal.includes('3NT' as Bid)) return {
+      call: '3NT', rule, explanation: `Partnerns hopp (9–11) mot min starka dubbling (17+, jämn) = utgång; stopp i deras färg → 3NT.`,
+    }
+    if (!isMajor && support >= 4 && legal.includes(gameBid)) return {
+      call: gameBid, rule, explanation: `Partnerns hopp (9–11) mot min starka dubbling (17+) = utgång; utan stopp för sang men 4-korts stöd i ${sym} → ${prettyBid(gameBid)}.`,
+    }
+    return null
+  }
+
+  if (isMajor && support >= 4) {
+    if (p >= 22 && legal.includes(gameBid)) return {
+      call: gameBid, rule, explanation: `Stark dubbling (22+) med 4-korts stöd i partnerns ${sym} → utgång ${prettyBid(gameBid)} (partnerns svar kan vara svagt, men fiten + styrkan räcker).`,
+    }
+    const raise = cheapestBidIn(history, seat, advCb.strain)
+    if (raise) {
+      const jump = `${parseContractBid(raise)!.level + 1}${advCb.strain}` as Bid
+      if (p >= 19 && parseContractBid(jump)!.level < 4 && legal.includes(jump)) return {
+        call: jump, rule, explanation: `Stark dubbling (19–21) med 4-korts stöd i partnerns ${sym} → hopphöjning ${prettyBid(jump)} (inbjudan — partnern bjuder utgång med 6+).`,
+      }
+      if (legal.includes(raise)) return {
+        call: raise, rule, explanation: `Stark dubbling (17–18) med 4-korts stöd i partnerns ${sym} → ${prettyBid(raise)} (inbjudan — partnern höjer med 8+).`,
+      }
+    }
+  }
+  if (!stopped) return null
+  const cheapestNT = (['1NT', '2NT', '3NT'] as Bid[]).find((b) => legal.includes(b))
+  if (!cheapestNT) return null
+  const nt: Bid = p >= 22 ? '3NT' : p >= 20 ? (cheapestNT === '3NT' ? '3NT' : '2NT') : cheapestNT
+  if (!legal.includes(nt)) return null
+  const shows = nt === '3NT' ? '22+ (eller utgång ihop)' : nt === '2NT' ? '20–21' : '18–19'
+  return {
+    call: nt, rule, explanation: `Stark dubbling utan egen färg: jämn hand med stopp i deras färg → ${prettyBid(nt)} (${shows} hp, ej krav — partnern höjer med värden).`,
+  }
+}

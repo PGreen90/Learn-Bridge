@@ -926,11 +926,50 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
       forcing: 'inbjudan',
     }
   }
+  // Flykt över deras X av VÅR 1 sang (§7.5, systems off efter X): svararens
+  // färg på 2-läget är naturlig, till spel — ett AVSLUT, inte ett rondkrav
+  // (motorbytets slutförande 2026-09-13, facit-kön B frö 20270254: öppnaren
+  // "tvingades" höja flykten ur catch-allen).
+  {
+    const o = opening(prior)
+    const ours = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && c.bid !== 'P')
+    const theirs = prior.filter((c) => SIDE[c.seat] !== SIDE[seat] && c.bid !== 'P')
+    if (
+      o && o.seat === PARTNER[seat] && o.cb.level === 1 && o.cb.strain === 'NT' && cb.level === 2 &&
+      ours.length === 1 && theirs.length === 1 && theirs[0].bid === 'X'
+    ) {
+      return {
+        text: `Flykt ${cb.level}${sym} — naturlig färg till spel över deras dubbling av vårt 1 sang (svag hand, 5+ ${name}). Ej krav.`,
+        confidence: 'trolig',
+        forcing: 'avslut',
+      }
+    }
+    // Svag rymning över partnerns 2 sang-återbud i KONKURRENS (fältfynd
+    // 2026-09-10, ägarbeslut B; byggd 2026-09-13): svararen som bara passat
+    // bjuder 3 i en högfärg = 5+ kort, för svag för sang — till spel (avslut).
+    const theirBids = prior.filter((c) => SIDE[c.seat] !== SIDE[seat] && parseBid(c.bid))
+    if (
+      o && o.seat === PARTNER[seat] && o.cb.level === 1 && o.cb.strain !== 'NT' && cb.level === 3 && isMajor(cb.strain) &&
+      theirBids.length > 0 && ours.length === 2 && ours.every((c) => c.seat === PARTNER[seat]) && ours[1].bid === '2NT'
+    ) {
+      return {
+        text: `Svag rymning ${cb.level}${sym} — 5+ ${name}, för svag för sang; till spel över partnerns 2 sang-återbud i konkurrens. Ej krav.`,
+        confidence: 'trolig',
+        forcing: 'avslut',
+      }
+    }
+  }
   // Har JAG dubblat och bjuder nu en NY färg visar det värden utöver dubblingen:
   // upplysningsdubblaren (motståndarna öppnade) är stark och forcerande ('starkt
   // återbud'); den negativa dubblaren (vår sida öppnade) är inbjudande. (Familj 9.)
   if (opponentsInterfered(seat, prior) && iDoubledFirst(seat, prior)) {
     const open = opening(prior)
+    // Dubblade PARTNERN efter min upplysningsdubbling (responsiv X) är min färg
+    // det TVINGADE svaret på den — inte ett starkt återbud (frö 20271014,
+    // slutförandet 2026-09-13: "17+, krav" gav catch-allen 5♣ på 10 hp).
+    if (open && SIDE[open.seat] !== SIDE[seat] && prior.some((c) => c.seat === PARTNER[seat] && c.bid === 'X')) {
+      return { text: `Svar på partnerns responsiva dubbling (${cb.level}${sym}) — väljer ${name} som partnern bad om; tvingat, lovar inget utöver upplysningsdubblingen (12–15). Ej krav.`, confidence: 'trolig', forcing: 'ej-krav' }
+    }
     if (open && SIDE[open.seat] !== SIDE[seat]) {
       return { text: `Starkt återbud i ny färg (${cb.level}${sym}) — du dubblade och bjuder nu egen ${name}: en stark hand (~17+), krav.`, confidence: 'trolig', forcing: 'krav-1-rond' }
     }

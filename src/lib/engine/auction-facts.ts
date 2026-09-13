@@ -489,7 +489,14 @@ export function auctionForce(history: ResolvedCall[], seat: Seat): Force | null 
   // utgångsnivå lämnar inget rondkrav hängande (fix 6, frö 20261112: svararens
   // 4♥ i öppnarens hjärter lästes som ny färg → öppnaren "tvingades" dra
   // partnerns utgång till 5♦ bet).
-  if (seat === opener && highest.seat === responderSeat && !isGameOrHigher(highest.bid as Bid)) {
+  // Efter en SANG-öppning är svararens färg på 2-LÄGET aldrig en naturlig
+  // krav-ny-färg: ostört är den transfer/Stayman (egna rader), efter deras X en
+  // flykt till spel (motorbytets slutförande 2026-09-13, facit-kön B frö
+  // 20270254: 1NT–(X)–2♠ "tvingade" öppnaren till 3♠ ur catch-allen). En ny
+  // färg på 3-läget+ efter sangöppningen (t.ex. 1NT–2♥–2♠–4♦, naturlig andra
+  // färg/splinter) är fortsatt krav som förr.
+  const ntOpeningTwoLevel = open.strain === 'NT' && parseContractBid(highest.bid)!.level === 2
+  if (seat === opener && !ntOpeningTwoLevel && highest.seat === responderSeat && !isGameOrHigher(highest.bid as Bid)) {
     const bid = parseContractBid(highest.bid)!
     const responderTimesInSuit = responderBids.filter(
       (c) => parseContractBid(c.bid)!.strain === bid.strain,

@@ -12,7 +12,7 @@
 
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
+import { isGameOrHigher, parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { answerNTInterference } from './contested-openings'
 import { advanceDONT, dontOvercall } from './dont'
@@ -384,4 +384,41 @@ export function respondToOurNTInterference(hand: Hand, f: AuctionFacts): Resolve
   if (inter) return asCall(answerNTInterference(hand, inter))
 
   return answerNTValueDoubleOpener(hand, f) ?? answerNTValueDoubleDoubler(hand, f)
+}
+
+/**
+ * DONT-dubblarens EGEN fortsättning när partnerns relä uteblev (motorbytets
+ * slutförande 2026-09-13, facit-kön frö 20272187): jag dubblade deras 1NT
+ * (enfärg, 6+), RHO bjöd en färg över X:et så partnern inte kunde relä:a 2♣,
+ * partnern passade — nu visar jag färgen själv. På 2-läget alltid (det är
+ * exakt vad X:et lovade); på 3-läget bara med substans (12+ hp eller 7+ kort).
+ * Läget: vår sidas enda aktion är mitt X, deras senaste färgbud (under utgång)
+ * är senaste icke-pass. null → pass.
+ */
+export function dontDoublerShowsSuit(hand: Hand, f: AuctionFacts): ResolvedCall | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.strain !== 'NT' || open.level !== 1 || side(open.seat) === side(seat)) return null
+  const ourActions = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourActions.length !== 1 || ourActions[0].seat !== seat || ourActions[0].bid !== 'X') return null
+  const xIdx = history.indexOf(ourActions[0])
+  if (!history.slice(xIdx + 1).some((c) => side(c.seat) !== side(seat) && parseContractBid(c.bid))) return null
+  const last = f.lastNonPass
+  if (!last || side(last.seat) === side(seat) || !parseContractBid(last.bid)) return null
+  if (isGameOrHigher(last.bid as Bid)) return null
+  const len = lengths(hand)
+  const suit = SUIT_STRAINS.map((st) => SUIT_OF_LETTER[st]).find((s) => len[s] >= 6)
+  if (!suit) return null
+  const bid = cheapestBidIn(history, seat, letterOfSuit(suit))
+  if (!bid || !legalCalls(history, seat).includes(bid)) return null
+  const level = parseContractBid(bid)!.level
+  if (level > 3) return null
+  if (level === 3 && hcp(hand) < 12 && len[suit] < 7) return null
+  const sym = SWE_SYM[letterOfSuit(suit)]
+  return {
+    seat, bid, rule: 'DONT: visar enfärgen själv',
+    explanation: level === 2
+      ? `Partnern kunde inte relä:a 2♣ (de bjöd över min dubbling) → visar min DONT-enfärg ${sym} (6+) själv: ${prettyBid(bid)} (till spel, ej krav).`
+      : `Partnern kunde inte relä:a 2♣ (de bjöd över min dubbling) → visar min DONT-enfärg ${sym} (6+) på 3-läget: ${prettyBid(bid)} — lovar substans (12+ hp eller 7+ kort), ej krav.`,
+  }
 }

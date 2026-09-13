@@ -10,14 +10,14 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — MOTORBYTET etapp 6: ägarens live-prov (ägarbeslut 2026-09-04)
-Motorbytet är KLART & LIVE (etapp 0–5, mergepunkt `e1f70e9`); efterkontrollen
-KLAR 2026-09-11. Ägaren provspelar och rapporterar fel; jag lagar test-drivet
-(facit + auktionsdiff + grind) och PCD:ar var för sig. Elva fynd lagade & LIVE
-2026-09-11/12 (listan: `docs/historik.md` 2026-09-11/12 + budsystem §9). Öppet
-metodval (bevaka.md): negativ-dubblaren accepterar inte invit-hoppet. HELA
-planen: **`docs/motorbyte-plan.md`**. **Nästa session: fortsätt live-provet**
-(nu även historiksidan + genomgångarna, se nedan) — laga nya fynd.
+### 🔵 NU — MOTORBYTET SLUTFÖRT (etapp 6 stängd 2026-09-13) → ägaren väljer nästa NU
+Ägarbesked 2026-09-13: "liveproven är klara — gör klart budmotorn." Gjort samma
+dag, test-drivet: facit-kön tömd (bara kontrerad checkback kvar = SENARE),
+invit-hoppet (8+ TP, ägarens metodval), M19, kikvakten skarp för hela
+auktionen, öppnarens Smolen-svar efter 1NT — elva regler (budsystem §9
+2026-09-13, `docs/motorbyte-plan.md` loggen, bevaka-posten). HELA planen:
+**`docs/motorbyte-plan.md`**. **Väntar:** PCD + grindbeslut (diffens b-lista i
+loggen). Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
 fem ägarönskemål i sju etapper + ett följdbeslut (mergepunkter i

@@ -257,6 +257,37 @@ export function negativeDoubleToAnswer(
 export function negativeDoublerSeat(
   f: AuctionFacts,
 ): { open: { level: number; strain: string }; answer: { level: number; strain: string }; their: { level: number; strain: string }; answerCall: ResolvedCall } | null {
+  const t = negativeDoublerTurn(f)
+  if (!t) return null
+  // Bara partnerns BILLIGA svar (ett HOPP visar 16+ — `negativeDoublerJumpSeat`).
+  if (t.answer.level > t.minLevel) return null
+  // Under utgång: partnerns utgångsbud står (det gamla lagrets vakt).
+  const gameLevel = t.answer.strain === 'NT' ? 3 : t.answer.strain === 'H' || t.answer.strain === 'S' ? 4 : 5
+  if (t.answer.level >= gameLevel) return null
+  return { open: t.open, answer: t.answer, their: t.their, answerCall: t.answerCall }
+}
+
+/**
+ * Negativ-dubblarens tur när partnern HOPPADE i färg (16–18, inbjudan:
+ * egen 6-korts färg rebjuden eller 4-korts stöd i min visade högfärg) — samma
+ * läsning som `negativeDoublerSeat`, men exakt ett steg över billigaste nivån
+ * och under utgång. Motorbytets slutförande 2026-09-13 (docs/bevaka.md
+ * 2026-09-12: dubblaren passade öppnarens 3♥-hopp med 8 hp).
+ */
+export function negativeDoublerJumpSeat(
+  f: AuctionFacts,
+): { open: { level: number; strain: string }; answer: { level: number; strain: string }; their: { level: number; strain: string }; answerCall: ResolvedCall } | null {
+  const t = negativeDoublerTurn(f)
+  if (!t || t.answer.strain === 'NT' || t.answer.level !== t.minLevel + 1) return null
+  const gameLevel = t.answer.strain === 'H' || t.answer.strain === 'S' ? 4 : 5
+  if (t.answer.level >= gameLevel) return null
+  return { open: t.open, answer: t.answer, their: t.their, answerCall: t.answerCall }
+}
+
+/** Gemensam läsare: partnern öppnade 1 i färg, de klev in i EN färg, mitt enda besked är X:et, partnerns färg-/sangsvar är senaste icke-pass. */
+function negativeDoublerTurn(
+  f: AuctionFacts,
+): { open: { level: number; strain: string }; answer: { level: number; strain: string }; their: { level: number; strain: string }; answerCall: ResolvedCall; minLevel: number } | null {
   const { history, seat } = f
   const lastNonPass = f.lastNonPass
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
@@ -279,15 +310,11 @@ export function negativeDoublerSeat(
   const theirCb = parseContractBid(theirBids[0].bid)!
   if (!SUIT_OF_LETTER[theirCb.strain]) return null
 
-  // Bara partnerns BILLIGA svar (ett HOPP visar 16+ och sköts av kravlogiken).
+  // Billigaste nivån för svaret över deras inkliv (svar = billigt, +1 = hopp).
   let minLevel = 1
   while (bidValue(minLevel, answer.strain) <= bidValue(theirCb.level, theirCb.strain)) minLevel++
-  if (answer.level > minLevel) return null
-  // Under utgång: partnerns utgångsbud står (det gamla lagrets vakt).
-  const gameLevel = answer.strain === 'NT' ? 3 : answer.strain === 'H' || answer.strain === 'S' ? 4 : 5
-  if (answer.level >= gameLevel) return null
 
-  return { open: { level: open.level, strain: open.strain }, answer, their: theirCb, answerCall: lastNonPass }
+  return { open: { level: open.level, strain: open.strain }, answer, their: theirCb, answerCall: lastNonPass, minLevel }
 }
 
 /**
@@ -655,4 +682,52 @@ export function jordanBidderAfterSignoff(hand: Hand, f: AuctionFacts): Kunskap |
   const j = jordanSignoffToAnswer(f)
   if (!j) return null
   return lawful(f, jordanRaiseAfterSignoff(hand, j.major))
+}
+
+/**
+ * Negativ-dubblaren accepterar eller avböjer öppnarens INVIT-HOPP (§7.4;
+ * docs/bevaka.md 2026-09-12, frö 20260797; byggd i motorbytets slutförande
+ * 2026-09-13). Öppnarens hopp i färg efter min negativa dubbling visar 16–18
+ * — egen 6-korts färg rebjuden, eller 4-korts stöd i min visade högfärg — och
+ * inbjuder utgång. Jag accepterar med 8+ (TP: stödpoäng med 3+ stöd, annars
+ * startpoäng — TP lyfter aldrig ner, `pointsWithFloor`; 8 + 16 = utgångs-
+ * zonen), annars pass. Lågfärgshopp: 3NT med stopp i deras färg (8+), 5 i
+ * lågfärgen med 4+ stöd (10+), annars pass. Acceptgränsen 8 är Claudes
+ * förslag ur boken (docs/bevaka.md: "~8+") — ägaren justerar vid behov.
+ */
+export function negativeDoublerAnswersJump(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const s = negativeDoublerJumpSeat(f)
+  if (!s) return null
+  const { history, seat } = f
+  const { open, answer, their, answerCall } = s
+  const suit = SUIT_OF_LETTER[answer.strain]
+  const len = lengths(hand)
+  const support = len[suit]
+  const pts = support >= 3 ? pointsWithFloor(hand, suit, 'support').points : pointsWithFloor(hand, null, 'starting').points
+  const legal = legalCalls(history, seat)
+  const sym = SWE_SYM[answer.strain]
+  const shown = answer.strain === open.strain ? `egen 6-korts ${sym}` : `4-korts stöd i min ${sym}`
+  const decline: Kunskap = {
+    call: 'P', rule: 'negativ-dubblaren avböjer inbjudan',
+    explanation: `Partnerns hopp ${prettyBid(answerCall.bid)} visar 16–18 med ${shown} och inbjuder utgång; utan 8+ → pass.`,
+  }
+  if (answer.strain === 'H' || answer.strain === 'S') {
+    const game = `4${answer.strain}` as Bid
+    if (pts >= 8 && legal.includes(game)) return {
+      call: game, rule: 'negativ-dubblaren accepterar inbjudan',
+      explanation: `Partnerns hopp ${prettyBid(answerCall.bid)} visar 16–18 med ${shown} och inbjuder utgång; med 8+ → 4${sym}.`,
+    }
+    return decline
+  }
+  const theirSuit = SUIT_OF_LETTER[their.strain]
+  if (pts >= 8 && hasStopper(hand, theirSuit) && legal.includes('3NT' as Bid)) return {
+    call: '3NT', rule: 'negativ-dubblaren accepterar inbjudan',
+    explanation: `Partnerns hopp ${prettyBid(answerCall.bid)} visar 16–18 med ${shown} och inbjuder; med 8+ och stopp i deras ${SWE_SYM[their.strain]} → 3NT.`,
+  }
+  const game = `5${answer.strain}` as Bid
+  if (support >= 4 && pts >= 10 && legal.includes(game)) return {
+    call: game, rule: 'negativ-dubblaren accepterar inbjudan',
+    explanation: `Partnerns hopp ${prettyBid(answerCall.bid)} visar 16–18 med ${shown} och inbjuder; med 4+ stöd och 10+ → 5${sym}.`,
+  }
+  return decline
 }

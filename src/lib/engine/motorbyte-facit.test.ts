@@ -215,10 +215,28 @@ describe('etapp 4 familj 3 – när de stör vår öppning (LANDAD 2026-09-08)',
 })
 
 describe('etapp 4 familj 6 – försvar mot 1NT: DONT-dubblarens fortsättning', () => {
-  it.todo('frö 20272187: 1NT–(X DONT)–2♦–P–3♣–?: Syd (♠KQT763 ♥K9 ♦AQ ♣KJ2, 19 hp) visar sin enfärg 3♠ — inte pass (förr gav det starka X-flödet 3♠ av misstag; familj 2 kräver deras FÄRGöppning)', () => {
+  // LANDAD 2026-09-13 (motorbytets slutförande): DONT-dubblaren visar enfärgen
+  // själv när partnerns relä uteblev (`dontDoublerShowsSuit`) — på 2-läget
+  // alltid, på 3-läget med substans (12+ hp eller 7+ kort).
+  it('frö 20272187: 1NT–(X DONT)–2♦–P–3♣–?: Syd (♠KQT763 ♥K9 ♦AQ ♣KJ2, 19 hp) visar sin enfärg 3♠ — inte pass', () => {
     const deal = dealFromSeed(20272187)
     const hist = [call('N', 'P'), call('E', '1NT'), call('S', 'X'), call('W', '2D'), call('N', 'P'), call('E', '3C')]
-    expect(decideCall(deal, hist, 'S').bid).toBe('3S')
+    const t = decideCallTraced(deal, hist, 'S')
+    expect(t.källa).toBe('tabell:dont-advance')
+    expect(t.call.bid).toBe('3S')
+  })
+  it('frö 20272187: 1NT–(X DONT)–2♦–P–P–?: Syd visar enfärgen billigt, 2♠', () => {
+    const deal = dealFromSeed(20272187)
+    const hist = [call('N', 'P'), call('E', '1NT'), call('S', 'X'), call('W', '2D'), call('N', 'P'), call('E', 'P')]
+    expect(decideCall(deal, hist, 'S').bid).toBe('2S')
+  })
+  // Samma giv, öppnarens stol: partnerns 2♦ över DONT-X:et är en flykt till spel —
+  // inget rondkrav (förr tvingade `auctionForce` fram 3♣ ur catch-allen).
+  it('frö 20272187: 1NT–(X DONT)–2♦–P–?: Öst (öppnaren) passar partnerns flykt — inte 3♣', () => {
+    const deal = dealFromSeed(20272187)
+    const hist = [call('N', 'P'), call('E', '1NT'), call('S', 'X'), call('W', '2D'), call('N', 'P')]
+    expect(auctionFacts(hist, 'E').force).toBeNull()
+    expect(decideCall(deal, hist, 'E').bid).toBe('P')
   })
 })
 
@@ -227,10 +245,24 @@ describe('etapp 4 familj 4 – svararens fortsättning i konkurrens (LANDAD 2026
   // billigast (1♠), så sekvensen 1♦–(1♥)–P–(1♠)–X–P–P–(2♣)–P uppstår — inklivaren ska ge
   // preferens till advancerns FÖRSTA färg (5+) med 3-3, inte passa (K2; inklivarens stol =
   // raden *inkliv2*, kvar i kön).
-  it.todo('frö 20263370: 1♦–(1♥)–P–(1♠)–X–P–P–(2♣)–P: Nord (♠KT9 ♥AT876 ♦73 ♣J87) ger preferens 2♠ — inte pass', () => {
+  // LANDAD 2026-09-13 (motorbytets slutförande): `overcallerPrefersAdvancerSuit`
+  // i raden *inkliv2* — advancerns första färg lovar 5+, så lika långt stöd ger
+  // preferens dit (samma kriterier som advancerns preferens, felrapport #56).
+  it('frö 20263370: 1♦–(1♥)–P–(1♠)–X–P–P–(2♣)–P: Nord (♠KT9 ♥AT876 ♦73 ♣J87) ger preferens 2♠ — inte pass', () => {
     const deal = dealFromSeed(20263370)
     const hist = [call('W', '1D'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'X'), call('N', 'P'), call('E', 'P'), call('S', '2C'), call('W', 'P')]
-    expect(decideCall(deal, hist, 'N').bid).toBe('2S')
+    const t = decideCallTraced(deal, hist, 'N')
+    expect(t.källa).toBe('tabell:inkliv2')
+    expect(t.call.bid).toBe('2S')
+  })
+  // Bifynd i samma giv (auktionsdumpen 2026-09-13): svaret på öppnarens
+  // återöppningsdubbling valde INKLIVARENS färg (2♥ med ♥5432) som "längsta färg
+  // utanför deras ♠" — partnern läste det som en cue-höjning och hoppade till 5♦
+  // på 18 hp ihop. Svaret får aldrig vara en färg motståndarna bjudit.
+  it('frö 20263370: 1♦–(1♥)–P–(1♠)–X–P–?: Öst (♠J74 ♥5432 ♦JT65 ♣65) svarar 2♦ (preferens) — aldrig deras 2♥', () => {
+    const deal = dealFromSeed(20263370)
+    const hist = [call('W', '1D'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'X'), call('N', 'P')]
+    expect(decideCall(deal, hist, 'E').bid).toBe('2D')
   })
   // LANDAD 2026-09-08 (etapp 4 familj 4, raden *svararen-stört*: egen 6+ före stöd åt partnerns rebjudna färg).
   it('frö 20262632: 1♦–(1♠)–2♥–P–3♦–P: Nord (♠A ♥AKJ87542 ♦T97 ♣7) bjuder 4♥ — den egna 8-korts färgen vinner över 3-korts ♦-fit (inte 5♦)', () => {
@@ -1312,7 +1344,12 @@ describe('etapp 4 familj 9 — betydelselagret på störda auktioner', () => {
   })
 
   it('upplysningsdubblaren som bjuder egen ny färg efter sin dubbling = starkt återbud (krav 1 rond)', () => {
-    expect(m([call('E', '1D'), call('S', 'X'), call('W', '2D'), call('N', 'X'), call('E', 'P'), call('S', '3C')], 5).forcing).toBe('krav-1-rond')
+    expect(m([call('E', '1D'), call('S', 'X'), call('W', '2D'), call('N', 'P'), call('E', 'P'), call('S', '3C')], 5).forcing).toBe('krav-1-rond')
+  })
+  // Slutförandet 2026-09-13 (frö 20271014): dubblade PARTNERN responsivt är
+  // dubblarens färg det tvingade svaret — ej krav, inte "starkt återbud".
+  it('upplysningsdubblarens färg efter partnerns responsiva X = tvingat svar (ej krav)', () => {
+    expect(m([call('E', '1D'), call('S', 'X'), call('W', '2D'), call('N', 'X'), call('E', 'P'), call('S', '3C')], 5).forcing).toBe('ej-krav')
   })
 
   it('registret: cue-BUD alertas men deras naturliga fortsättning/avslut gör det inte; störda registerhål fyllda', () => {
@@ -1362,7 +1399,10 @@ describe('etapp 5 familj 2 – de fyra små catch-all-svaren ur tabellen (LANDAD
 // konkurrensfortsättning EFTER etapp 5. Regel att bygga: svararen får bjuda en
 // svag naturlig 3M (5+ kort) över partnerns starka 2NT-återbud i konkurrens.
 describe('fältfynd – svararen rymmer till femkorts högfärg (naturligt 3M) över starkt 2NT-återbud i konkurrens', () => {
-  it.todo('1♣–(1♠)–P–(2♠)–2NT–P–?: Nord (♠7 ♥JT652 ♦K953 ♣T62, 4 hp) bjuder naturligt 3♥ — inte pass', () => {
+  // LANDAD 2026-09-13 (motorbytets slutförande): `responderEscapesOverStrong2NT`
+  // i raden *svararen-stört*; betydelsen "svag rymning" är ett avslut, så
+  // öppnaren passar (testet nedan).
+  it('1♣–(1♠)–P–(2♠)–2NT–P–?: Nord (♠7 ♥JT652 ♦K953 ♣T62, 4 hp) bjuder naturligt 3♥ — inte pass', () => {
     const deal: Deal = {
       id: 'fältfynd-2nt-konkurrens', dealer: 'E', vulnerability: 'ew', board: 6,
       hands: {
@@ -1373,7 +1413,24 @@ describe('fältfynd – svararen rymmer till femkorts högfärg (naturligt 3M) �
       },
     }
     const hist = [call('E', 'P'), call('S', '1C'), call('W', '1S'), call('N', 'P'), call('E', '2S'), call('S', '2NT'), call('W', 'P')]
-    expect(decideCall(deal, hist, 'N').bid).toBe('3H')
+    const t = decideCallTraced(deal, hist, 'N')
+    expect(t.källa).toBe('tabell:svararen-stört')
+    expect(t.call.bid).toBe('3H')
+  })
+  it('…–2NT–P–3♥–P–?: öppnaren (♠A652 ♥A84 ♦A4 ♣AQ87) passar den svaga rymningen (avslut)', () => {
+    const deal: Deal = {
+      id: 'fältfynd-2nt-konkurrens-2', dealer: 'E', vulnerability: 'ew', board: 6,
+      hands: {
+        N: parseHand('S:7 H:JT652 D:K953 C:T62'),
+        E: parseHand('S:KJT H:9 D:QJ762 C:J943'),
+        S: parseHand('S:A652 H:A84 D:A4 C:AQ87'),
+        W: parseHand('S:Q9843 H:KQ73 D:T8 C:K5'),
+      },
+    }
+    const hist = [call('E', 'P'), call('S', '1C'), call('W', '1S'), call('N', 'P'), call('E', '2S'), call('S', '2NT'), call('W', 'P'), call('N', '3H'), call('E', 'P')]
+    expect(meaningOf(hist, 7).forcing).toBe('avslut')
+    expect(auctionFacts(hist, 'S').partnerSignedOff).toBe(true)
+    expect(decideCall(deal, hist, 'S').bid).toBe('P')
   })
 })
 
@@ -1410,16 +1467,40 @@ describe('etapp 5 slutkärnan – catch-allerna kör inte över partnerns avslut
 // SENARE (kontrerad checkback), aldrig med en gate. Facit-kö tills de byggs.
 describe('etapp 5 slutkärnan – kända rester (facit-kö)', () => {
   const P = (seat: Seat) => call(seat, 'P')
+  // A är SENARE (kontrerad checkback, docs/senare.md): kräver att betydelselagret
+  // och tre beslutssteg (svararens NMF, öppnarens svar, placeringen) lärs den
+  // dubblade linjen — ett eget jobb, inte en lapp. Facit står kvar här.
   it.todo('A: kontrerad NMF 1D–(X)–1S–1NT–2C → öppnaren med 3 spader bör svara 2♠ (NMF), inte 2♦', () => {
     const hist = [call('N', '1D'), call('E', 'X'), call('S', '1S'), P('W'), call('N', '1NT'), P('E'), call('S', '2C'), P('W')]
     expect(decideFromTable(parseHand('S:K73 H:A2 D:AQ864 C:J93'), auctionFacts(hist, 'N'), false)?.call.bid).toBe('2S')
   })
-  it.todo('B: 1NT–(X DONT)–2♠(flykt)–P → svararen ska passa, inte höja till 3♠ (frö 20270254/20270765)', () => {
-    const deal = dealFromSeed(20270254)
-    const hist = [P('N'), P('E'), call('S', '1NT'), call('W', 'X'), call('N', '2S'), P('E')]
-    expect(decideCall(deal, hist, 'S').bid).toBe('P')
+  // LANDAD 2026-09-13 (motorbytets slutförande): två hål bakom B — `auctionForce`
+  // läste svararens färg efter en SANG-öppning som ett naturligt rondkrav (nu
+  // undantaget: transfer/Stayman/flykt är aldrig krav-ny-färg), och betydelsen
+  // av flykten över deras X är nu ett avslut (partnerSignedOff → catch-allen tiger).
+  it('B: 1NT–(X DONT)–2♠(flykt)–P → öppnaren passar, höjer inte till 3♠ (frö 20270254/20270765)', () => {
+    for (const seed of [20270254, 20270765]) {
+      const deal = dealFromSeed(seed)
+      const hist = seed === 20270254
+        ? [P('N'), P('E'), call('S', '1NT'), call('W', 'X'), call('N', '2S'), P('E')]
+        : [call('S', '1NT'), call('W', 'X'), call('N', '2S'), P('E')]
+      const f = auctionFacts(hist, 'S')
+      expect(f.force, `frö ${seed}`).toBeNull()
+      expect(f.partnerSignedOff, `frö ${seed}`).toBe(true)
+      expect(decideCall(deal, hist, 'S').bid, `frö ${seed}`).toBe('P')
+    }
   })
-  it.todo('C: advancern ska inte hoppa till 5♣ på 4-korts stöd i djup konkurrens (frö 20271014, raiseWithFit-överbud)')
+  // LANDAD 2026-09-13: den RESPONSIVA dubblaren väger partnerns tvingade svar
+  // (`responsiveDoublerWeighsAnswer`, raden *x-advancern*): svaret lovar inget
+  // utöver upplysningsdubblingen → höj bara med egna extra (13+ stödpoäng).
+  it('C: advancern ska inte hoppa till 5♣ på 4-korts stöd i djup konkurrens (frö 20271014): Öst (♠AKT2 ♥J54 ♦Q7 ♣9654) passar partnerns tvingade 3♣', () => {
+    const deal = dealFromSeed(20271014)
+    const hist = [P('N'), P('E'), call('S', '1S'), call('W', 'X'), call('N', '2S'), call('E', 'X'), P('S'), call('W', '3C'), P('N')]
+    expect(meaningOf(hist, 7).forcing).toBe('ej-krav') // 3♣ = tvingat svar på responsiv X, inte "starkt återbud"
+    const t = decideCallTraced(deal, hist, 'E')
+    expect(t.källa).toBe('tabell:x-advancern')
+    expect(t.call.bid).toBe('P')
+  })
 })
 
 // Fynd ur etapp 6:s live-prov (ägaren, 2026-09-11, bricka 5): efter att KAPTENEN
@@ -1444,5 +1525,84 @@ describe('etapp 6 – cue-rond efter kaptenens höjning av öppnarens 2:a färg'
     const m = meaningOf([...til4H, call('S', '5C')], til4H.length)
     expect(m.rule).toBe('cue-bid')
     expect(m.forcing).not.toBe('avslut')
+  })
+})
+
+// MOTORBYTETS SLUTFÖRANDE (2026-09-13, efter ägarens live-prov): de sista
+// kända hålen i budmotorn — bevaka-listans öppna metodval och M19.
+describe('slutförandet – negativ-dubblaren accepterar öppnarens invit-hopp (docs/bevaka.md 2026-09-12)', () => {
+  const P = (seat: Seat) => call(seat, 'P')
+  // Öppnarens hopp 3♥ efter min negativa X = 16–18 med 6 hjärter, inbjudan.
+  // 8 hp + 6-2-fit mot 16+ = utgång → 4♥ (förr pass, paret stannade i 3♥).
+  it('frö 20260797: 1♥–(2♦)–X–P–3♥–P–?: Öst (♠AK43 ♥94 ♦94 ♣85432, 8 hp) accepterar → 4♥', () => {
+    const deal = dealFromSeed(20260797)
+    const hist = [call('W', '1H'), call('N', '2D'), call('E', 'X'), P('S'), call('W', '3H'), P('N')]
+    const t = decideCallTraced(deal, hist, 'E')
+    expect(t.källa).toBe('tabell:negativ-dubblaren')
+    expect(t.call.bid).toBe('4H')
+  })
+  it('samma läge med 6 hp (♠KT43 ♥94 ♦94 ♣K8543): avböjer → pass', () => {
+    const d: Deal = {
+      id: 'invit-hopp-avböj', dealer: 'W', vulnerability: 'all', board: 1,
+      hands: {
+        W: parseHand('S:7 H:AJT865 D:KQ C:AQJ9'),
+        N: parseHand('S:QJ92 H:KQ D:AJ8753 C:7'),
+        E: parseHand('S:KT43 H:94 D:94 C:K8543'),
+        S: parseHand('S:A865 H:732 D:T62 C:T62'),
+      },
+    }
+    const hist = [call('W', '1H'), call('N', '2D'), call('E', 'X'), P('S'), call('W', '3H'), P('N')]
+    const t = decideCallTraced(d, hist, 'E')
+    expect(t.källa).toBe('tabell:negativ-dubblaren')
+    expect(t.call.bid).toBe('P')
+  })
+})
+
+describe('slutförandet – den starka dubblaren utan egen färg säljer inte given (M19, frö 20260952)', () => {
+  const P = (seat: Seat) => call(seat, 'P')
+  // Väst dubblade med 19 jämna (♠Q432 ♥AQJ9 ♦AQ4 ♣A2), Öst hoppade 3♣ (9–11) —
+  // förr passade Väst (`ownStrongDoubleRebid` kräver egen 5+ färg). Nu: 17+ mot
+  // partnerns hopp = utgång; utan 4-korts högfärgsstöd och med stopp → 3NT.
+  it('1♦–X–P–3♣–P–?: Väst bjuder 3NT — inte pass', () => {
+    const deal = dealFromSeed(20260952)
+    const hist = [call('S', '1D'), call('W', 'X'), P('N'), call('E', '3C'), P('S')]
+    const t = decideCallTraced(deal, hist, 'W')
+    expect(t.källa).toBe('tabell:x-dubblaren')
+    expect(t.call.bid).toBe('3NT')
+  })
+  it('1♦–X–P–1♠–P–?: mot partnerns billiga svar hopphöjer 19 jämna med 4-korts stöd → 3♠ (19–21, inbjudan)', () => {
+    const deal = dealFromSeed(20260952)
+    const hist = [call('S', '1D'), call('W', 'X'), P('N'), call('E', '1S'), P('S')]
+    expect(decideCall(deal, hist, 'W').bid).toBe('3S')
+  })
+  it('1♦–X–P–2♣–P–?: utan stöd för partnerns färg visar 19 jämna 2NT (billigaste sang, ej krav)', () => {
+    const deal = dealFromSeed(20260952)
+    const hist = [call('S', '1D'), call('W', 'X'), P('N'), call('E', '2C'), P('S')]
+    expect(decideCall(deal, hist, 'W').bid).toBe('2NT')
+  })
+})
+
+// Förbefintligt hål funnet i slutförandets auktionsdiff (avvikelsedumpen
+// 20270151/20270173/20270243): efter 1NT–2♣–2♦ saknade öppnaren svar på
+// Smolen (3♥/3♠, utgångskrav) och på den naturliga 5-4-inbjudan (2♥/2♠) —
+// catch-allen bjöd "4♣ ny färg" respektive "3♦ rebjuder egen färg".
+describe('slutförandet – öppnarens svar på Smolen och 5-4-inbjudan efter 1NT–2♣–2♦', () => {
+  const P = (seat: Seat) => call(seat, 'P')
+  const stayman = (second: string) => [call('N', '1NT'), P('E'), call('S', '2C'), P('W'), call('N', '2D'), P('E'), call('S', second), P('W')]
+  it('Smolen 3♥ (5 spader + 4 hjärter): öppnaren med 3 spader → 4♠', () => {
+    const deal = dealNS('S:K73 H:AQ2 D:KJ84 C:A96', 'S:AQJ85 H:KJ73 D:52 C:Q4')
+    const t = decideCallTraced(deal, stayman('3H'), 'N')
+    expect(t.källa).toBe('tabell:tredje')
+    expect(t.call.bid).toBe('4S')
+  })
+  it('Smolen 3♥: öppnaren med 2 spader → 3NT', () => {
+    const deal = dealNS('S:K7 H:AQ3 D:KJ84 C:A962', 'S:AQJ85 H:KJ73 D:52 C:Q4')
+    expect(decideCall(deal, stayman('3H'), 'N').bid).toBe('3NT')
+  })
+  it('naturlig 2♥ (5 hjärter + 4 spader, inbjudan): maximum med 3 hjärter → 4♥, minimum → pass', () => {
+    const max = dealNS('S:K73 H:AQ2 D:KJ84 C:A96', 'S:AJ85 H:KJ973 D:52 C:Q4')
+    expect(decideCall(max, stayman('2H'), 'N').bid).toBe('4H')
+    const min = dealNS('S:K73 H:Q92 D:KJ84 C:A96', 'S:AJ85 H:KJ973 D:52 C:Q4')
+    expect(decideCall(min, stayman('2H'), 'N').bid).toBe('P')
   })
 })
