@@ -2495,3 +2495,20 @@ genomgång fungerar på annan enhet (cross-device-luckan stängd). Kontraktscell
 lyft till `tavling/TavlingDelar.tsx` (delas med historiksidan i D3). Facit:
 `brickresultat.test.ts`, ny `api-src/giv-resultat.test.ts` (401/400/429/403,
 passthrough, ingen `explanation`/`is_bot` i svaret), `DagensTavling.test.tsx`.
+
+## 2026-09-13 — Livskvalitetssvepet etapp E: "Spelade givar" på Mitt konto + exporten
+
+Ägarbeslut: räkna tävlingsgivar + Dagens giv (serverdata, exakt från dag ett);
+fritt spel mot datorn finns bara lokalt och räknas inte. Ingen ny endpoint:
+`fetchSpeladeGivar()` i `src/lib/backend/account.ts` gör två count-frågor
+(head) mot de egna raderna — RLS-policyerna "läs egna resultat"/"läs egen
+dagslogg" släpper ändå bara igenom `auth.uid()`, men frågan filtrerar
+uttryckligen. Tävlingsgivar = status godkand + granskning (avvisade är ingen
+giv). `Konto.tsx` visar raden "Spelade givar" med totalen och underraden
+"tävling N · dagens giv M" ("…" under laddning, "—" vid fel — sidan blockeras
+aldrig). GDPR: `exportMyData()` (kommentaren sade sedan etapp 2 att den skulle
+utökas) tar nu med tävlingsresultaten inkl. payload, dagsloggen och
+placeringarna (`daily_standings`, null tills 0012 körts). Facit: nya
+`account.test.ts` (hånad supabase-klient: vilka frågor + hopsättning) och
+`Konto.test.tsx`. Lärdom: `mockReset`/`mockClear` i `beforeEach` fick vitest 4
+att fälla felfallet trots sidans `.catch` — varje test sätter sin egen mock.
