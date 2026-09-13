@@ -439,7 +439,8 @@ någonsin** — bara läsvägarna (låsta till `stockholmDateISO()`) och UI:t sa
   via RLS-policyerna. Fritt spel mot datorn räknas inte (finns bara lokalt).
   GDPR-exporten utökas med resultaten, dagsloggen och placeringarna.
 
-**Läge:** etapp A + B + C + E KLARA 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3,
+**Läge:** etapp A + B + C + E + D1 KLARA 2026-09-13 (D1 väntar på ägarsteget
+migration `0012`). Etapporder: A → B → C → E → D1 → D2 → D3,
 egen mergepunkt var. Ägarsteg: migration `0012` (D1).
 
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
@@ -566,3 +567,15 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   tar nu med `tavlingsresultat` (inkl. payload), `dagensGivLogg` och
   `tavlingsplaceringar` (null tills migration `0012` körts). Ingen ny endpoint,
   ingen migration. Facit: nya `account.test.ts` + `Konto.test.tsx`.
+- **2026-09-13: ETAPP D1 (`daily_standings` + NATTLIG FINALISERING) BYGGD.**
+  Migration `0012_daily_standings.sql` (slutlig placering/snitt/antal per dag
+  och spelare, kaskad på `auth.users` + `daily_sets`, RLS "läs egen" för
+  exporten). Ren modul `tavlingsavslut.ts`: `byggStallning` (delad rang,
+  tillsvidare-snittet) + `raknaMedaljer` (1/2/3 → guld/silver/brons, bottar
+  uteslutna, topp 5) + `MIN_PER_GIV` (nu EN sanning, delad med `topplista.ts`).
+  Nattsteget `tavlingsavslut.probe.test.ts` (`AVSLUTA_TAVLING=1`) i
+  `tavling-granskning.yml` efter granskningen (`if: always()`): fyller alla
+  saknade dagar + skriver om de tre senaste, idempotent upsert, rensar
+  bortfallna spelare. **ÄGARSTEG:** kör `0012` i Supabase; därefter
+  `workflow_dispatch` på tavling-granskning så historiken fylls. Facit:
+  `tavlingsavslut.test.ts`.

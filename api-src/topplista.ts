@@ -21,6 +21,7 @@ import {
   PROVISORISK_PROCENT,
   type Tävlingsrad,
 } from '../src/lib/engine/matchpoints'
+import { MIN_PER_GIV } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
 
@@ -41,8 +42,6 @@ async function kallarId(base: string, key: string, authz: string | undefined): P
     return null
   }
 }
-
-const MIN_PER_GIV = 2
 
 /** Kompakt kontrakt + resultat för en av kallarens givar (matchar klientens
  *  GivKontrakt). `diff` = spelförarens över-/understick mot kontraktet. */
