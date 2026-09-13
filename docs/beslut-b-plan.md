@@ -439,7 +439,7 @@ någonsin** — bara läsvägarna (låsta till `stockholmDateISO()`) och UI:t sa
   via RLS-policyerna. Fritt spel mot datorn räknas inte (finns bara lokalt).
   GDPR-exporten utökas med resultaten, dagsloggen och placeringarna.
 
-**Läge:** etapp A + B + C KLARA 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3,
+**Läge:** etapp A + B + C + E KLARA 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3,
 egen mergepunkt var. Ägarsteg: migration `0012` (D1).
 
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
@@ -559,3 +559,10 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   egen genomgång fungerar på annan enhet. `tavling/TavlingDelar.tsx` (kontrakts-
   cellen) lyft ur sidan. Facit: `brickresultat.test.ts`, ny
   `api-src/giv-resultat.test.ts` (grindar + inga läckor), `DagensTavling.test.tsx`.
+- **2026-09-13: ETAPP E ("SPELADE GIVAR" PÅ MITT KONTO + GDPR-EXPORTEN) KLAR.**
+  `fetchSpeladeGivar()` i `account.ts` räknar egna rader (count/head via RLS
+  "läs egen"): tävlingsgivar (godkand + granskning) + Dagens giv-loggen; raden
+  "Spelade givar" i `Konto.tsx` med uppdelningen som underrad. `exportMyData()`
+  tar nu med `tavlingsresultat` (inkl. payload), `dagensGivLogg` och
+  `tavlingsplaceringar` (null tills migration `0012` körts). Ingen ny endpoint,
+  ingen migration. Facit: nya `account.test.ts` + `Konto.test.tsx`.

@@ -8,15 +8,23 @@ import { PageHeader } from '../../components/PageHeader'
 import { Panel } from '../../components/Panel'
 import { Button } from '../../components/Button'
 import { useAuth } from '../../components/AuthProvider'
-import { deleteOwnAccount, exportMyData } from '../../lib/backend/account'
+import {
+  deleteOwnAccount,
+  exportMyData,
+  fetchSpeladeGivar,
+  type SpeladeGivar,
+} from '../../lib/backend/account'
 import { errorText, FormError } from './parts'
 
-/** En etikett-/värde-rad. */
-function Row({ label, value }: { label: string; value: string }) {
+/** En etikett-/värde-rad, med valfri dämpad underrad under värdet. */
+function Row({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-b-0">
       <span className="text-sm text-ink-muted">{label}</span>
-      <span className="text-sm font-semibold text-ink">{value}</span>
+      <span className="text-right">
+        <span className="block text-sm font-semibold text-ink">{value}</span>
+        {sub && <span className="block text-xs text-ink-faint">{sub}</span>}
+      </span>
     </div>
   )
 }
@@ -27,11 +35,30 @@ export function Konto() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [confirmText, setConfirmText] = useState('')
+  // Spelade givar (Påbyggnad 3): undefined = hämtas, null = kunde inte räknas.
+  const [spelade, setSpelade] = useState<SpeladeGivar | null | undefined>(undefined)
 
   // Inte inloggad (och klar med laddningen) → till inloggningen.
   useEffect(() => {
     if (!loading && !signedIn) navigate('/logga-in', { replace: true })
   }, [loading, signedIn, navigate])
+
+  // Räkna spelade givar när kontot visas. Ett fel gör bara raden till "—" —
+  // sidan (utloggning, export, radering) ska aldrig blockeras av räkningen.
+  useEffect(() => {
+    if (loading || !signedIn) return
+    let active = true
+    fetchSpeladeGivar()
+      .then((s) => {
+        if (active) setSpelade(s)
+      })
+      .catch(() => {
+        if (active) setSpelade(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [loading, signedIn])
 
   if (loading || !signedIn) return null
 
@@ -87,6 +114,13 @@ export function Konto() {
         <div className="space-y-1">
           <Row label="Visningsnamn" value={profile?.display_name ?? '—'} />
           <Row label="E-post" value={user?.email ?? '—'} />
+          {/* Spelade givar (Påbyggnad 3): tävlingsgivar + Dagens giv, räknade ur
+              dina egna rader på servern. Fritt spel mot datorn räknas inte. */}
+          <Row
+            label="Spelade givar"
+            value={spelade === undefined ? '…' : spelade === null ? '—' : String(spelade.totalt)}
+            sub={spelade ? `tävling ${spelade.tavling} · dagens giv ${spelade.dagensGiv}` : undefined}
+          />
         </div>
       </Panel>
 
