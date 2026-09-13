@@ -183,8 +183,9 @@ första intrycket görs bara en gång.
       sprids med `justify-between` inom samma `max-w-md` som budlådan → tydligare.
     - **Två tryck på samma bud = OK** (inget dubbelklick-intervall); annat bud
       byter val, OK-knappen kvar som förr.
-    - **Singelton spelas på ETT tryck** — färgvalssteget hoppas över när färgen
-      bara har ett kort.
+    - ~~**Singelton spelas på ETT tryck**~~ — **borttagen 2026-09-13** (ägarbeslut:
+      genvägen gav feltryck vid bordet). Två tryck gäller nu alltid, i Spela kort
+      och vid vänborden; facit `play/tvatryck.test.tsx`.
     - **Träkarlen på sin RIKTIGA sida vid försvar** (`SideDummyPiles`): spelförare
       Öst → träkarl Väst till vänster (och tvärtom), som Synrey-högar — en hög
       per färg staplade lodrätt, korten roterade 90°, HÖGSTA kortet underst mot

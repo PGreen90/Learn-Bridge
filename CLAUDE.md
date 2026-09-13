@@ -10,40 +10,24 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — MOTORBYTET etapp 6: efterkontroll + ägarens live-prov (ägarbeslut 2026-09-04)
-Budmotorn är ombyggd: från förskrivet manus + detektorkedja till **EN
-beslutsfunktion per stol** — `decideCall` frågar beslutstabellen
-`auction-decide.ts` stol för stol (betydelse → fakta → val; ärlig inferens
-bevisad av kikvakten, aldrig en annan hand). Hela koden är LIVE (etapp 0–5, sista
-mergepunkt `e1f70e9`); docs + minne städade (session C, 2026-09-11). Etapp 6:s
-**efterkontroll KLAR 2026-09-11** (alla riggar gröna, bordet testkört). **Nu pågår
-🚪 ägarens live-prov** — ägaren provspelar och rapporterar fel; jag lagar test-
-drivet (facit + auktionsdiff + grind) och PCD:ar var för sig. **Åtta hål lagade &
-LIVE 2026-09-11/12:** cue-rond+överbudsrättelse · systems-on efter 2NT-inkliv ·
-2♣-återbudet 5+ · Smolen/garbage över 1NT-inkliv · RKC-trumfdamen ärlig (bevisad
-10-fit) · konkurrens-fritt-bud (öppnarens 5-4/2NT + svararens fortsättning,
-`1e298d2`) · **RKC-frågaren seat-agnostisk** (öppnaren-som-kapten frågar
-trumfdam med 5♥ i st.f. PASS; `rkc-asker-continuations.ts`, damfrågan avgör
-lillslam-mot-utgång, storslamsgrenen SENARE) · **dubblarens cue-höjning är krav**
-(advancern svarar 2M/3M/2NT/3NT på dubblarens cue i st.f. att passa ut den;
-`advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`, §7.3, slam-över-max
-SENARE). Detaljerna:
-[[motorbytet-manus-till-spelare]] + budsystem §9.
+### 🔵 NU — LIVSKVALITETSSVEPET i Dagens tävling (ägarbeslut 2026-09-13)
+Fem ägarönskemål, byggda som sju etapper med egen mergepunkt var: **A** två tryck
+alltid (singelton-genvägen bort) · **B** tillsvidare-% (40 % per ospelad giv) +
+"7/12" i Ställningen · **C** se hur vilken spelare som helst bjöd och spelade en
+giv · **E** "Spelade givar" på Mitt konto + GDPR-exporten · **D1** `daily_standings`
++ nattlig finalisering (migration 0012 = ägarsteg) · **D2** `?dag=` på läs-
+endpoints + `tavling-historik` · **D3** historiksidan + medaljtabellen (topp 5
+guld/silver/brons, bottar uteslutna). Ägarbeslut + detalj: `docs/beslut-b-plan.md`
+("Påbyggnad — tävlingens livskvalitet"). **Läge: etapp A KLAR** (2026-09-13);
+nästa = B.
 
-**Dessutom (Claudes provspelning 2026-09-12, systemrevisorn 1000 givar):** tre
-systemfel lagade & LIVE — negativ-dubblingssvar (6-korts högfärg före sang) ·
-inverterad minors 2NT-stoppkrav · Michaels-cue i egen färg ≠ cue-höjning. Detalj:
-budsystem §9 + `auction-revisor-fynd-2026-09-12.test.ts`. Följd-fynd (bevaka.md):
-negativ-dubblaren accepterar inte invit-hoppet — metodval, väntar ägaren.
-
-**Nästa session: fortsätt live-provet** (ägaren spelar vidare), laga nya fynd. HELA
-planen: **`docs/motorbyte-plan.md`**.
-
-**Nyss klart (2026-09-01…03, detalj i `docs/historik.md`):** speldiagnosens
-runda 6 · rebidz-bot + alla Beslut B-etapper · **trebottarna Gunnar52/Lasse68/
-Emma03 LIVE** (nivå bara i Syds kortspel, `botniva.ts`) · felrapporterna
-#54–#60 (`4898958`, 2026-09-03/04) · pliktsvepet K1–K5. Grindbeslut kvar:
-Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+**Parallellt pågående (ägarstyrt, inget NU-jobb): motorbytet etapp 6 — ägarens
+live-prov.** Motorbytet är KLART & LIVE (etapp 0–5, mergepunkt `e1f70e9`);
+efterkontrollen KLAR 2026-09-11. Ägaren provspelar och rapporterar fel; jag lagar
+test-drivet (facit + auktionsdiff + grind) och PCD:ar var för sig. Elva fynd
+lagade & LIVE 2026-09-11/12 (listan: `docs/historik.md` 2026-09-11/12 + budsystem
+§9). Öppet metodval (bevaka.md): negativ-dubblaren accepterar inte invit-hoppet.
+HELA planen: **`docs/motorbyte-plan.md`**.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen

@@ -401,6 +401,45 @@ egen styrkeklass att mäta sig mot, varje dag.
 och Emma03-kontona skapas automatiskt vid första nattkörningen; Gunnar52-
 namnbytet sker i samma körning.
 
+### Påbyggnad 3 — tävlingens livskvalitet (ägarbeslut 2026-09-13)
+
+Ägaren kom med fem önskemål. Kartläggningen visade att tre av dem redan har sin
+data: **hela auktionen + alla spelade kort sparas per spelare** i
+`daily_results.payload` (även bottarna), och **ingen tävlingsdata raderas
+någonsin** — bara läsvägarna (låsta till `stockholmDateISO()`) och UI:t saknas.
+
+**Ägarbeslut (frågade före planen):**
+- **Två tryck gäller alltid.** Ett-trycks-genvägen för singeltons gav feltryck →
+  bort i Spela kort och vid vänborden (etapp A).
+- **Tillsvidare-procent (etapp B):** snitt = (Σ MP% på poängsatta givar +
+  40 × ej poängsatta) / storlek. Identiskt med det gamla snittet när alla 12 är
+  spelade. Samma tal styr ordningen i Ställningen för ALLA och Din ställning;
+  listan visar "spelade/12" per spelare. Klubbstandarden "medel minus" för en
+  ospelad bricka. En spelad men ännu opoängsatt bricka (<2 spelare) räknas som
+  spelad men som 40 i snittet tills den poängsätts.
+- **Se vilken spelares giv som helst (etapp C):** travellern lämnar ut varje
+  spelares auktion + spelade kort; en rad öppnar en perspektivfri stegning
+  (`PlayReplay`). Tjuvkiks-grinden (403 tills du själv spelat brickan) kvar för
+  dagens tävling; för gårdagar räcker inloggning. Lagar även egen genomgång på
+  annan enhet (serverns payload före localStorage).
+- **Tävlingshistorik + medaljtabell (etapp D1–D3):** ny tabell `daily_standings`
+  (slutlig placering per dag och spelare, migration `0012`, kaskad på
+  `auth.users`) fylls **idempotent av nattjobbet i `tavling-granskning.yml`** —
+  efter svensk midnatt och efter granskningens statusflyttar (alternativen
+  "räkna allt i farten" och "lat finalisering vid första anrop" förkastade:
+  obegränsad växt resp. risk att frysa före granskningen). Läs-endpoints får
+  `?dag=`; ny `tavling-historik` ger dagslistan + topp 5 i guld/silver/brons.
+  **Bottarna räknas INTE i medaljtabellen** (men står kvar i dagens ställning
+  och pekas aldrig ut; `is_bot` lämnar aldrig servern). Delad rang kvar: två
+  guld samma dag är avsett.
+- **"Spelade givar" på Mitt konto (etapp E):** tävlingsgivar (`daily_results`,
+  godkända + under granskning) + Dagens giv (`daily_log`), räknade ur egna rader
+  via RLS-policyerna. Fritt spel mot datorn räknas inte (finns bara lokalt).
+  GDPR-exporten utökas med resultaten, dagsloggen och placeringarna.
+
+**Läge:** etapp A KLAR 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3, egen
+mergepunkt var. Ägarsteg: migration `0012` (D1).
+
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
 
 - `profiles` — användare, unikt visningsnamn.
@@ -408,7 +447,8 @@ namnbytet sker i samma körning.
 - `daily_deals` — dagens givar (läsbara först när dagen är inne).
 - `daily_results` — inskick per spelare/giv med status
   (provisorisk/godkänd/avvisad/manuell granskning/importerad).
-- `daily_standings` — ställningen (vy över resultaten).
+- `daily_standings` — slutlig ställning per dag och spelare (tabell, fylls av
+  nattjobbet — Påbyggnad 3; dagens ställning räknas alltjämt i farten).
 - Etapp 4: `tables`, `table_seats`, `table_events` (append-only händelselogg,
   inga händer i själva händelserna).
 
@@ -497,3 +537,6 @@ namnbytet sker i samma körning.
   🤖-märkningen borttagen (UI + API-svar), info-raden "I tävlingen deltar även
   datorspelare" tillagd, nivåmätningen `botniva.probe.test.ts`. Inga nya
   migrationer.
+- **2026-09-13: PÅBYGGNAD 3 (LIVSKVALITETSSVEPET) PÅBÖRJAD — etapp A KLAR** (två
+  tryck gäller alltid; facit `play/tvatryck.test.tsx`). Ägarbesluten för alla
+  etapper står under "Påbyggnad 3" ovan. Inga migrationer i etapp A.

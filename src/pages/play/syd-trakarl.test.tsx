@@ -62,14 +62,14 @@ function renderTable() {
 const CARD_NAME = /^(10|[AKQJ2-9])[♠♥♦♣]/
 const playableCards = () => screen.queryAllByRole('button', { name: CARD_NAME })
 
-/** Spela översta spelbara kortet via två-trycks-flödet (andra trycket = spela;
- *  en singelton spelas redan på första trycket och behöver inget andra). */
+/** Spela översta spelbara kortet via två-trycks-flödet (första trycket väljer
+ *  färgen, andra trycket spelar — gäller alla kort, även singeltons). */
 function playTopCard() {
   const btn = playableCards()[0]
   const label = btn.textContent
   fireEvent.click(btn)
-  const again = playableCards().find((b) => b.textContent === label)
-  if (again) fireEvent.click(again)
+  const again = playableCards().find((b) => b.textContent === label)!
+  fireEvent.click(again)
 }
 
 describe('Syd träkarl — Nord spelförare styrs av dig och given fastnar inte', () => {
