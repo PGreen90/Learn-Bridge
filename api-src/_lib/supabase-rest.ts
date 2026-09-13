@@ -17,12 +17,18 @@ const sov = (ms: number) => new Promise((r) => setTimeout(r, ms))
  * (standard 3: paus 200 ms → 400 ms mellan). Kastar på 4xx direkt och efter
  * sista försöket vid ihållande 5xx/429/nätfel.
  */
-export async function restGet(base: string, key: string, pathWithQuery: string, forsok = 3): Promise<unknown> {
+export async function restGet(
+  base: string,
+  key: string,
+  pathWithQuery: string,
+  forsok = 3,
+  extraHeaders: Record<string, string> = {},
+): Promise<unknown> {
   for (let i = 1; ; i++) {
     let r: Response
     try {
       r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
-        headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
+        headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json', ...extraHeaders },
       })
     } catch (e) {
       if (i >= forsok) throw e
@@ -37,5 +43,29 @@ export async function restGet(base: string, key: string, pathWithQuery: string, 
       continue
     }
     throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
+  }
+}
+
+/**
+ * Läs ALLA rader sida för sida (PostgREST Range-headers, `sida` rader per
+ * anrop) — för tabeller som växer utan tak (daily_standings, Påbyggnad 3).
+ * Varje sida går genom `restGet` (omförsök). Stannar när en sida är kortare
+ * än `sida`.
+ */
+export async function restGetAlla<T = unknown>(
+  base: string,
+  key: string,
+  pathWithQuery: string,
+  sida = 1000,
+): Promise<T[]> {
+  const alla: T[] = []
+  for (let from = 0; ; from += sida) {
+    const del = (await restGet(base, key, pathWithQuery, 3, {
+      Range: `${from}-${from + sida - 1}`,
+      'Range-Unit': 'items',
+    })) as T[]
+    if (!Array.isArray(del)) return alla
+    alla.push(...del)
+    if (del.length < sida) return alla
   }
 }

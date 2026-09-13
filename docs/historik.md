@@ -2531,3 +2531,19 @@ men deras placeringar räknas som de var, så silver bakom en bot förblir
 silver; sortering guld → silver → brons → namn). `MIN_PER_GIV` flyttad hit och
 delas med `topplista.ts`. Migration `0012` = ägarsteg; kod och export tål att
 tabellen saknas tills dess.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D2: historik-API:t
+
+Läsvägarna till tidigare tävlingsdagar. `lasDag` (`api-src/_lib/tavlingsdag.ts`)
+tolkar `?dag=`: saknas → idag (Stockholmsdygnet), giltigt datum ≤ idag → den
+dagen, framtid/ogiltigt → 400 — förscreeningen lägger morgondagens givar i
+databasen i förväg och de får aldrig lämnas ut. De tre läs-endpointsen tar
+parametern; `topplista` svarar dessutom `slutlig` (finns en frusen rad i
+`daily_standings`) och `giv-resultat` släpper tjuvkiks-grinden för avslutade
+dagar (inget att kika på). Ny `tavling-historik.ts`: dagslistan nyast först
+med din placering ur `daily_standings`; ofrusna dagar (i regel gårdagen före
+nattjobbet) räknas i farten med `byggStallning`, men högst tre så anropet
+inte växer med historiken; medaljtabellen via `raknaMedaljer` med bottarna
+uteslutna server-side (`profiles.is_bot` läses men serialiseras aldrig —
+vaktat i facit). `restGetAlla` läser `daily_standings` sida för sida (Range).
+Klienten fick `dag?`-parametrar + `fetchTavlingHistorik()`; UI:t kommer i D3.

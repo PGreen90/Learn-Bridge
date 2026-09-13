@@ -88,6 +88,12 @@ function isCard(x: unknown): x is Card {
   return typeof c === 'object' && c !== null && typeof c.suit === 'string' && typeof c.rank === 'string'
 }
 
+/** `?dag=YYYY-MM-DD` för en tidigare tävlingsdag (historiken, Påbyggnad 3);
+ *  utelämnad → idag. `first` = om det blir första query-parametern. */
+function dagQuery(dag?: string, first = true): string {
+  return dag ? `${first ? '?' : '&'}dag=${encodeURIComponent(dag)}` : ''
+}
+
 /** Ren översättning: serverns JSON → DagensTavling. Kastar vid trasig form så
  *  kallaren kan visa ett tydligt fel i stället för att krascha halvvägs in i
  *  spelet. Varje giv får ett stabilt, unikt `id` (`tavling-<nr>-<bricka>`) —
@@ -150,10 +156,10 @@ export function tavlingFromResponse(data: unknown): DagensTavling {
 /** Hämta dagens tävling från servern. Nätverksfel och trasiga svar fångas och
  *  översätts till { status: 'fel' } så sidan kan visa en vänlig ruta. 404 =
  *  ingen tävling genererad för idag än (status 'ingen'). */
-export async function fetchDagensTavling(): Promise<TavlingsResultat> {
+export async function fetchDagensTavling(dag?: string): Promise<TavlingsResultat> {
   let res: Response
   try {
-    res = await fetch('/api/dagens-tavling', { headers: { Accept: 'application/json' } })
+    res = await fetch(`/api/dagens-tavling${dagQuery(dag)}`, { headers: { Accept: 'application/json' } })
   } catch {
     return { status: 'fel', fel: 'Kunde inte nå servern. Kontrollera nätet och försök igen.' }
   }
@@ -276,6 +282,11 @@ export interface Topplista {
   minPerGiv: number
   /** Tillsvidare-procenten per ospelad giv (40). Saknas i äldre svar. */
   provisoriskProcent?: number
+  /** Tävlingsdagen (YYYY-MM-DD) och om det är dagens tävling. Saknas i äldre svar. */
+  dag?: string
+  idag?: boolean
+  /** Sant när nattjobbet skrivit dagens slutliga ställning (historiken). */
+  slutlig?: boolean
   topplista: TopplistaRad[]
   /** Din placering + snitt när inloggad, annars null (UI-polish steg 2). */
   du: DinPlacering | null
@@ -296,14 +307,14 @@ export type TopplistaResultat =
  *  själva listan (bara visningsnamn + procent lämnas ut), men skickar vi med
  *  inloggnings-token svarar servern DESSUTOM med kallarens egna siffror
  *  (`du` + `dinaGivar`, UI-polish steg 2). Är man utloggad förblir de null/tom. */
-export async function fetchTopplista(): Promise<TopplistaResultat> {
+export async function fetchTopplista(dag?: string): Promise<TopplistaResultat> {
   const session = await getCurrentSession()
   const token = session?.access_token
   const headers: Record<string, string> = { Accept: 'application/json' }
   if (token) headers.Authorization = `Bearer ${token}`
   let res: Response
   try {
-    res = await fetch('/api/topplista', { headers })
+    res = await fetch(`/api/topplista${dagQuery(dag)}`, { headers })
   } catch {
     return { status: 'fel', fel: 'Kunde inte nå servern.' }
   }
@@ -318,6 +329,9 @@ export async function fetchTopplista(): Promise<TopplistaResultat> {
       poängsattaGivar: raw.poängsattaGivar ?? 0,
       minPerGiv: raw.minPerGiv ?? 2,
       provisoriskProcent: raw.provisoriskProcent ?? 40,
+      dag: raw.dag,
+      idag: raw.idag,
+      slutlig: raw.slutlig ?? false,
       topplista: raw.topplista ?? [],
       du: raw.du ?? null,
       dinaGivar: raw.dinaGivar ?? [],
@@ -399,13 +413,13 @@ export type GivResultatUtfall =
 
 /** Hämta hela fältets resultat på en giv (travellern). Kräver inloggning OCH att
  *  man själv spelat brickan (servern nekar annars — ingen tjuvkik). */
-export async function fetchGivResultat(board: number): Promise<GivResultatUtfall> {
+export async function fetchGivResultat(board: number, dag?: string): Promise<GivResultatUtfall> {
   const session = await getCurrentSession()
   const token = session?.access_token
   if (!token) return { status: 'fel', fel: 'Inte inloggad.' }
   let res: Response
   try {
-    res = await fetch(`/api/giv-resultat?board=${board}`, {
+    res = await fetch(`/api/giv-resultat?board=${board}${dagQuery(dag, false)}`, {
       headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
     })
   } catch {
@@ -414,6 +428,66 @@ export async function fetchGivResultat(board: number): Promise<GivResultatUtfall
   if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
   try {
     return { status: 'ok', data: (await res.json()) as GivResultatSvar }
+  } catch (err) {
+    return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
+  }
+}
+
+
+// ===========================================================================
+// Påbyggnad 3 — tävlingshistoriken + medaljtabellen (2026-09-13)
+// ===========================================================================
+
+/** En avslutad tävlingsdag i historiklistan. */
+export interface HistorikDag {
+  dag: string
+  nummer: number
+  storlek: number
+  /** Antal spelare i dagens ställning; null om dagen inte kunnat räknas. */
+  antalSpelare: number | null
+  /** Sant när nattjobbet frusit ställningen (annars räknad i farten). */
+  slutlig: boolean
+  /** Din placering den dagen, eller null om du inte spelade. */
+  du: { placering: number; snitt: number; spelade: number } | null
+}
+
+/** En rad i medaljtabellen (topp 5, bottar uteslutna, ingen bot-flagga). */
+export interface Medaljrad {
+  namn: string
+  guld: number
+  silver: number
+  brons: number
+  jag: boolean
+}
+
+export interface TavlingHistorik {
+  /** Avslutade dagar, nyast först. */
+  dagar: HistorikDag[]
+  medaljer: Medaljrad[]
+}
+
+export type HistorikResultat =
+  | { status: 'ok'; data: TavlingHistorik }
+  | { status: 'fel'; fel: string }
+
+/** Hämta tävlingshistoriken (tidigare dagar med din placering) + medaljtabellen.
+ *  Kräver inloggning. Fel översätts till { status: 'fel' }. */
+export async function fetchTavlingHistorik(): Promise<HistorikResultat> {
+  const session = await getCurrentSession()
+  const token = session?.access_token
+  if (!token) return { status: 'fel', fel: 'Inte inloggad.' }
+  let res: Response
+  try {
+    res = await fetch('/api/tavling-historik', {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+    })
+  } catch {
+    return { status: 'fel', fel: 'Kunde inte nå servern.' }
+  }
+  if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
+  try {
+    const raw = (await res.json()) as Partial<TavlingHistorik>
+    return { status: 'ok', data: { dagar: raw.dagar ?? [], medaljer: raw.medaljer ?? [] } }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
   }

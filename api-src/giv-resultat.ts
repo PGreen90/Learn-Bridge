@@ -17,10 +17,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Card } from '../src/types/bridge'
 import type { ResolvedCall } from '../src/lib/bidding'
-import { stockholmDateISO } from '../src/lib/engine/daily'
 import { byggBrickresultat, type Brickrad } from '../src/lib/engine/brickresultat'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
+import { lasDag } from './_lib/tavlingsdag'
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const json = (status: number, data: unknown) => {
@@ -55,14 +55,18 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       return json(429, { ok: false, fel: 'För många anrop — vänta en liten stund' })
     }
 
-    // Dagens tävling.
-    const today = stockholmDateISO()
+    // Dagens tävling — eller en tidigare dag via `?dag=` (historiken).
+    const valdDag = lasDag(url)
+    if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    const today = valdDag.dag
     const sets = (await restGet(
       base,
       key,
       `daily_sets?comp_date=eq.${today}&select=id`,
     )) as Array<{ id: string }>
-    if (!sets.length) return json(404, { ok: false, fel: 'Ingen tävling idag' })
+    if (!sets.length) {
+      return json(404, { ok: false, fel: valdDag.idag ? 'Ingen tävling idag' : 'Ingen tävling den dagen' })
+    }
     const setId = sets[0].id
 
     // Fältets godkända rader på brickan.
@@ -78,8 +82,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       payload: { history?: ResolvedCall[]; plays?: Card[] } | null
     }>
 
-    // Ingen tjuvkik: kallaren måste själv ha spelat brickan.
-    if (!rows.some((r) => r.user_id === meId)) {
+    // Ingen tjuvkik: kallaren måste själv ha spelat brickan — gäller DAGENS
+    // tävling. En avslutad dag har inget att kika på; där räcker inloggning.
+    if (valdDag.idag && !rows.some((r) => r.user_id === meId)) {
       return json(403, { ok: false, fel: 'Du har inte spelat den här given än' })
     }
 
