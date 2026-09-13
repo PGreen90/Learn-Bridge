@@ -2547,3 +2547,24 @@ inte växer med historiken; medaljtabellen via `raknaMedaljer` med bottarna
 uteslutna server-side (`profiles.is_bot` läses men serialiseras aldrig —
 vaktat i facit). `restGetAlla` läser `daily_standings` sida för sida (Range).
 Klienten fick `dag?`-parametrar + `fetchTavlingHistorik()`; UI:t kommer i D3.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D3: historiksidan + medaljtabellen (svepet KLART)
+
+Sista etappen. `src/pages/TavlingHistorik.tsx` (rutt `spela-kort/tavling/
+historik`, immersiv som tävlingen, konto krävs): listvyn visar medaljtabellen
+(topp 5 i guld/silver/brons, din rad markerad, "datorspelare räknas inte i
+medaljtabellen" sagt rakt ut) och alla avslutade dagar nyast först med din
+placering ("2:a av 5 · 55,3 %" eller "spelade inte"; ofrusna dagar märkta
+provisorisk). Dagvyn via `?dag=YYYY-MM-DD` (delbar djuplänk): Din ställning,
+bricklistan (ditt kontrakt/resultat/MP% där du spelade, annars "spelade
+inte" — alla klickbara), ställningen märkt "slutlig", travellern med `dag`,
+genomgången "Så spelade X given" och övningsläget (skickar aldrig in). För att
+båda sidorna ska dela vyerna lyftes `DinStällning`, `Resultattabell`,
+`GivDetalj` (nu med `dag?` + valfri `onÖvning`), `TravellerTabell`,
+`TopplistaVy` (fotnot "slutlig"/"provisorisk"), `Skärm` och `HemLänk` ur
+`DagensTavling.tsx` till `tavling/TavlingDelar.tsx` — sidan behåller bara
+flödet. Länk "Tidigare tävlingar & medaljer →" under Ställningen. Facit:
+`TavlingHistorik.test.tsx` (utloggad · listvy · dagvy · djuplänk → traveller →
+spelare → genomgång → tillbaka hela vägen). Därmed är alla fem ägarönskemålen
+från 2026-09-13 levererade; kvar = ägarsteget migration `0012` + första
+nattkörningen som fyller historiken.

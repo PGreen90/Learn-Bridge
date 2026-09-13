@@ -439,8 +439,8 @@ någonsin** — bara läsvägarna (låsta till `stockholmDateISO()`) och UI:t sa
   via RLS-policyerna. Fritt spel mot datorn räknas inte (finns bara lokalt).
   GDPR-exporten utökas med resultaten, dagsloggen och placeringarna.
 
-**Läge:** etapp A + B + C + E + D1 + D2 KLARA 2026-09-13 (D1 väntar på
-ägarsteget migration `0012`); kvar = D3. Etapporder: A → B → C → E → D1 → D2 → D3,
+**Läge:** ALLA etapper (A–E, D1–D3) BYGGDA 2026-09-13; kvar = ägarsteget
+migration `0012` + första nattkörningen (fyller historiken) + live-prov. Etapporder: A → B → C → E → D1 → D2 → D3,
 egen mergepunkt var. Ägarsteg: migration `0012` (D1).
 
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
@@ -590,3 +590,14 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   `_lib/supabase-rest.ts`. Klient: `fetchDagensTavling/fetchTopplista/
   fetchGivResultat(…, dag?)` + `fetchTavlingHistorik()`. Facit: `tavlingsdag`,
   `supabase-rest`, `topplista`, `giv-resultat`, ny `tavling-historik.test.ts`.
+- **2026-09-13: ETAPP D3 (HISTORIKSIDAN + MEDALJTABELLEN) KLAR — HELA
+  PÅBYGGNAD 3 LEVERERAD.** Ny sida `TavlingHistorik.tsx` på
+  `#/spela-kort/tavling/historik` (immersiv): listvyn = medaljtabellen (topp 5
+  🥇/🥈/🥉, egen rad markerad, noten "datorspelare räknas inte") + alla
+  avslutade dagar med din placering; dagvyn (`?dag=`, delbar) = Din ställning,
+  alla brickor (klickbara även ospelade — en avslutad dag har inget att kika
+  på), ställningen "slutlig", traveller → "Så spelade X given", övningsläget.
+  De delade vyerna (`DinStällning`, `Resultattabell`, `GivDetalj` med `dag`,
+  `TravellerTabell`, `TopplistaVy`, `Skärm`, `HemLänk`) lyfta ur
+  `DagensTavling.tsx` till `tavling/TavlingDelar.tsx`; länk "Tidigare
+  tävlingar & medaljer →" under Ställningen. Facit: ny `TavlingHistorik.test.tsx`.
