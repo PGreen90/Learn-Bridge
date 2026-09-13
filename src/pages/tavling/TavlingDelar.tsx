@@ -178,6 +178,15 @@ export function Resultattabell({
                       <span className="text-danger" title="Inskicket avvisades">✗</span>
                     ) : mp !== undefined ? (
                       <span className="font-semibold text-gold-200">{mp.toFixed(0)} %</span>
+                    ) : r.inskickStatus === 'fel' ? (
+                      // Inskicket kom aldrig fram (2026-09-13): sägs rakt ut, och
+                      // skickas om vid sidöppning / uppdatera-knappen.
+                      <span
+                        className="text-gold-300/80"
+                        title="Inskicket kom inte fram till servern — skickas om när du öppnar sidan eller trycker på uppdatera-knappen"
+                      >
+                        ej inskickad
+                      </span>
                     ) : (
                       <span
                         className="text-emerald-100/40"

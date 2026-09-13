@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { restGet, restGetAlla } from './supabase-rest'
+import { restGet, restGetAlla, restPost } from './supabase-rest'
 
 const svar = (status: number, body = '') =>
   ({ ok: status >= 200 && status < 300, status, json: async () => (body ? JSON.parse(body) : null), text: async () => body }) as Response
@@ -61,6 +61,29 @@ describe('supabase restGetAlla — paginerad läsning (Påbyggnad 3)', () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(svar(206, '[1,2]')).mockResolvedValueOnce(svar(200, '[]'))
     vi.stubGlobal('fetch', fetchMock)
     expect(await restGetAlla('http://b', 'k', 'x', 2)).toEqual([1, 2])
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('supabase restPost — omförsök på transienta fel, 4xx lämnas till kallaren (inskicket 2026-09-13)', () => {
+  it('försöker om på 503 och returnerar 201 på andra försöket', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(svar(503, 'down')).mockResolvedValueOnce(svar(201))
+    vi.stubGlobal('fetch', fetchMock)
+    const r = await restPost('http://b', 'k', 'daily_results', [{ x: 1 }], 3)
+    expect(r.status).toBe(201)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'POST', body: '[{"x":1}]' })
+  })
+  it('409 (unik-krock: första försöket landade) returneras direkt utan omförsök', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(svar(409, 'duplicate'))
+    vi.stubGlobal('fetch', fetchMock)
+    expect((await restPost('http://b', 'k', 'daily_results', {}, 3)).status).toBe(409)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+  it('kastar efter sista försöket vid nätfel', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error('ECONNRESET'))
+    vi.stubGlobal('fetch', fetchMock)
+    await expect(restPost('http://b', 'k', 'x', {}, 2)).rejects.toThrow(/ECONNRESET/)
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 })

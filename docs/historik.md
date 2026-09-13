@@ -2601,3 +2601,24 @@ färg") — diffen är grinden, inte facit-testerna ensamma. (2) Två av reglern
 fick först för brett grepp (force-avsmalningen tog 4♦ efter transfer; responsiv-
 trösklarna glömde att partnern är dubblaren med 12+) — mät, smalna av, mät igen,
 innan docs skrivs.
+
+## 2026-09-13 — Tappade tävlingsinskick: omförsök på servern + omsändning i klienten (ägarrapport "403")
+
+Ägaren: användares givar registreras inte som de ska, felkod 403. Datat i
+`daily_results` visade inga avvisade rader men två brickor som saknades helt
+mitt i annars kompletta sviter (Fernstedt 10, Oskar 11). Kedjan: given bokförs
+lokalt när den blir klar och skickas in EN gång i bakgrunden; faller det
+(`skicka-in.ts` gjorde ett enda fetch mot Supabase utan omförsök, och
+klienten skickade aldrig om) står given som spelad lokalt medan servern saknar
+den — travellern (`giv-resultat.ts`) svarar då 403 "du har inte spelat given".
+Fix: `restPost` med omförsök i `api-src/_lib/supabase-rest.ts` (409 vid
+unik-krock = första försöket landade → raden som står returneras),
+`skicka-in.ts` på den delade `restGet`/`restPost`; klienten sparar
+spelförarsticken i framsteget, `inskickUrFramsteg`/`behöverSkickasOm`
+(`tavling.ts`) bygger om inskicket, och `DagensTavling` skickar om osända
+givar vid sidöppning och uppdatera-knappen; raden visar "ej inskickad", och
+403-texten i travellern förklarar läget. Facit: `supabase-rest.test.ts`,
+`tavling.test.ts`, `DagensTavling-flode.test.tsx`. Deploy-skevheten (PWA:n
+byter inte version mitt i en session, servern validerar botbud med ny motor)
+finns kvar som mekanism men slog inte här: botauktionerna på dagens och
+gårdagens 24 brickor var identiska före/efter morgonens deploy.

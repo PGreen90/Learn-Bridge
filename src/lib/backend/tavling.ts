@@ -61,6 +61,10 @@ export interface GivResultat {
    *  är genomgången inte tillgänglig). */
   history?: ResolvedCall[]
   plays?: Card[]
+  /** Spelförarens stick ur inskicket (2026-09-13) — sparas så ett inskick som
+   *  aldrig kom fram kan skickas om exakt. `undefined` = äldre framsteg (då
+   *  räknas sticken ur kontraktet, se `inskickUrFramsteg`). */
+  declarerTricks?: number
 }
 
 /** Framstegen i dagens tävling — vilka givar som är klara, per tävlingsnummer.
@@ -222,6 +226,31 @@ export async function submitTavlingGiv(inskick: TavlingInskick): Promise<Inskick
   const status: InskickStatus =
     s === 'godkand' || s === 'avvisad' || s === 'granskning' ? s : 'fel'
   return { status, nsScore: d?.nsScore ?? null, skäl: d?.skäl }
+}
+
+/**
+ * Bygg om inskicket ur en lokalt bokförd giv — för OMSÄNDNING när det första
+ * inskicket aldrig kom fram (nätfel, tillfälligt serverfel; 2026-09-13: två
+ * brickor tappades på ett dygn och syntes sedan som "403" i travellern).
+ * null när auktionen/korten inte sparats (äldre framsteg — då finns inget att
+ * skicka). Spelförarsticken: det sparade värdet, annars ur kontraktet
+ * (6 + nivå + resultat); en utpassad giv (kontrakt null) har 0 kort och 0 stick.
+ */
+export function inskickUrFramsteg(r: GivResultat): TavlingInskick | null {
+  if (!r.history || !r.plays) return null
+  const declarerTricks =
+    r.declarerTricks ??
+    (r.kontrakt === null ? 0 : r.kontrakt ? 6 + r.kontrakt.level + r.kontrakt.diff : null)
+  if (declarerTricks === null) return null
+  return { board: r.board, history: r.history, plays: r.plays, declarerTricks }
+}
+
+/** Ska den här lokalt bokförda given skickas (om)? Sant för ett inskick som
+ *  misslyckades ('fel') eller aldrig fick något svar (odefinierat — sidan
+ *  laddades om mitt i). Serverns egna utfall (godkand/avvisad/granskning/redan)
+ *  är slutgiltiga. */
+export function behöverSkickasOm(r: GivResultat): boolean {
+  return (r.inskickStatus === undefined || r.inskickStatus === 'fel') && inskickUrFramsteg(r) !== null
 }
 
 // ===========================================================================
@@ -424,6 +453,14 @@ export async function fetchGivResultat(board: number, dag?: string): Promise<Giv
     })
   } catch {
     return { status: 'fel', fel: 'Kunde inte nå servern.' }
+  }
+  // 403 = servern har ingen godkänd giv från dig på brickan: inskicket kom
+  // aldrig fram (skickas om automatiskt från översikten) eller avvisades.
+  if (res.status === 403) {
+    return {
+      status: 'fel',
+      fel: 'Given är inte registrerad på servern än. Gå tillbaka till översikten och tryck på uppdatera-knappen, så skickas den in igen.',
+    }
   }
   if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
   try {
