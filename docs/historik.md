@@ -2512,3 +2512,22 @@ placeringarna (`daily_standings`, null tills 0012 körts). Facit: nya
 `account.test.ts` (hånad supabase-klient: vilka frågor + hopsättning) och
 `Konto.test.tsx`. Lärdom: `mockReset`/`mockClear` i `beforeEach` fick vitest 4
 att fälla felfallet trots sidans `.catch` — varje test sätter sin egen mock.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D1: `daily_standings` + nattlig finalisering
+
+Grunden för tävlingshistoriken och medaljtabellen. Vägval: en FRYST ställning
+per dag i tabell (inte "räkna allt i farten" — obegränsad växt och medaljer
+som kunde ändras i efterhand — och inte "lat finalisering vid första anrop",
+som kunde frysa dagen före granskningens statusflyttar). Skrivs av nattjobbet
+i `tavling-granskning.yml` som ett steg EFTER djupgranskningen, `if: always()`
+så fynd aldrig blockerar det. Proben `tavlingsavslut.probe.test.ts` tar alla
+dagar före idag (Stockholm) utan ställning + skriver om de tre senaste —
+självläkande vid röd natt, fyller hela historiken vid första körningen —
+upsert `on_conflict=set_id,user_id` med `merge-duplicates`, och tar bort
+spelare som fallit ur en dags ställning. Rena modulen `tavlingsavslut.ts`:
+`byggStallning` (samma aggregat som den levande listan → siffran som fryses är
+den man såg) och `raknaMedaljer` (delad rang kan ge två guld; bottar uteslutna
+men deras placeringar räknas som de var, så silver bakom en bot förblir
+silver; sortering guld → silver → brons → namn). `MIN_PER_GIV` flyttad hit och
+delas med `topplista.ts`. Migration `0012` = ägarsteg; kod och export tål att
+tabellen saknas tills dess.

@@ -49,10 +49,23 @@ jobs:
           GRANSKA_TAVLING=$IGAR \
             npx vitest run src/lib/engine/tavlingsgranskning.probe.test.ts
 
+      # Påbyggnad 3 (2026-09-13): den SLUTLIGA ställningen för avslutade dagar →
+      # daily_standings (historiken + medaljtabellen). Körs EFTER granskningen
+      # (statusflyttar ska inte räknas) och även om den fick fynd (if: always()).
+      # Idempotent: fyller saknade dagar + skriver om de tre senaste.
+      - name: Avsluta gårdagens tävling (slutlig ställning → daily_standings)
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: AVSLUTA_TAVLING=1 npx vitest run src/lib/engine/tavlingsavslut.probe.test.ts
+
       - name: Ladda upp rapporten (även vid rött)
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: tavlingsgranskning-rapporter
-          path: revisor-output/tavlingsgranskning-*
+          path: |
+            revisor-output/tavlingsgranskning-*
+            revisor-output/tavlingsavslut-*
           retention-days: 30
