@@ -224,20 +224,26 @@ export async function submitTavlingGiv(inskick: TavlingInskick): Promise<Inskick
 
 export interface TopplistaRad {
   namn: string
-  /** Snittprocent över de poängsatta givarna (0–100). */
+  /** Tillsvidare-snittet (0–100): MP% på poängsatta givar + 40 % per återstående
+   *  giv, delat på tävlingens storlek (Påbyggnad 3). */
   snitt: number
+  /** Antal poängsatta givar. */
   antalGivar: number
+  /** Antal spelade (inskickade) givar — visas som "7/12". Saknas i äldre svar. */
+  spelade?: number
   /** Sant för den inloggades egen rad (steg 6 — highlightas). Kan saknas i
    *  äldre/anonyma svar. */
   jag?: boolean
 }
 
-/** Kallarens egen placering + snitt (bara med när man är inloggad och har minst
- *  en poängsatt giv; annars null). */
+/** Kallarens egen placering + snitt (bara med när man är inloggad och har
+ *  skickat in minst en giv; annars null). */
 export interface DinPlacering {
   placering: number
   snitt: number
   antalGivar: number
+  /** Antal spelade (inskickade) givar. Saknas i äldre svar. */
+  spelade?: number
 }
 
 /** Kallarens matchpoäng på EN spelad, poängsatt giv (till resultattabellen). */
@@ -268,6 +274,8 @@ export interface Topplista {
   /** Antal givar med minst `minPerGiv` spelare (de som ger poäng). */
   poängsattaGivar: number
   minPerGiv: number
+  /** Tillsvidare-procenten per ospelad giv (40). Saknas i äldre svar. */
+  provisoriskProcent?: number
   topplista: TopplistaRad[]
   /** Din placering + snitt när inloggad, annars null (UI-polish steg 2). */
   du: DinPlacering | null
@@ -309,6 +317,7 @@ export async function fetchTopplista(): Promise<TopplistaResultat> {
       storlek: raw.storlek ?? 0,
       poängsattaGivar: raw.poängsattaGivar ?? 0,
       minPerGiv: raw.minPerGiv ?? 2,
+      provisoriskProcent: raw.provisoriskProcent ?? 40,
       topplista: raw.topplista ?? [],
       du: raw.du ?? null,
       dinaGivar: raw.dinaGivar ?? [],

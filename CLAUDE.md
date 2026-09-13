@@ -18,8 +18,8 @@ giv · **E** "Spelade givar" på Mitt konto + GDPR-exporten · **D1** `daily_sta
 + nattlig finalisering (migration 0012 = ägarsteg) · **D2** `?dag=` på läs-
 endpoints + `tavling-historik` · **D3** historiksidan + medaljtabellen (topp 5
 guld/silver/brons, bottar uteslutna). Ägarbeslut + detalj: `docs/beslut-b-plan.md`
-("Påbyggnad — tävlingens livskvalitet"). **Läge: etapp A KLAR** (2026-09-13);
-nästa = B.
+("Påbyggnad — tävlingens livskvalitet"). **Läge: etapp A + B KLARA** (2026-09-13);
+nästa = C.
 
 **Parallellt pågående (ägarstyrt, inget NU-jobb): motorbytet etapp 6 — ägarens
 live-prov.** Motorbytet är KLART & LIVE (etapp 0–5, mergepunkt `e1f70e9`);
