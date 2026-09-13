@@ -1,5 +1,19 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Försvararen ser träkarlen — kryper inte partnerns slagbara stick (2026-09-13, fältfynd Bricka 7)
+- Nord försvarade 5♦ med ♥AKJT972; efter ♥A ledde Syd hjärter, och Nord (3:e
+  hand) KRÖP med ♥J i stället för att ta ♥K — träkarlen (Öst) satt med ♥Q EFTER
+  Nord och tog sticket gratis. Grundläggande spelförening: ta ess OCH kung medan
+  chansen finns (nästa rond ruffas). Orsak: `winOverBeatablePartner` gällde bara
+  spelförarsidan; en försvarare som ser TRÄKARLEN bakom sig hade ingen regel.
+- **Fix:** `defenderWinOverVisibleDummy` (play-bot.ts) — försvararen går upp med
+  billigaste vinnaren över träkarlens hot när (a) träkarlen spelar efter mig, (b)
+  den dolda spelföraren redan lagt, (c) träkarlen kan gå över partnern. Facit
+  `play-bot-defender-see-dummy.test.ts` (DD-bevisad vinst: ♥K tjänar ett stick).
+- **Bevaka:** att regeln bara slår till bakom TRÄKARLEN (inte bakom en dold
+  spelförare där kortet kan sitta fel) — och att den inte går upp i onödan när
+  partnern redan vinner säkert.
+
 ## Negativ-dubblaren accepterar inte öppnarens invit-hopp (2026-09-12, upptäckt vid provspels-fynd 1)
 - Efter fixen "6-korts högfärg före sang" bjuder öppnaren rätt: `1♥–(2♦)–X–P–3♥`
   (16+, 6 hjärter, invit). MEN den negativa dubblaren (frö 20260797: Öst ♠AK43

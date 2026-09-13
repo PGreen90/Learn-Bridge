@@ -894,6 +894,48 @@ function winOverBeatablePartner(
 }
 
 /**
+ * FÖRSVARAREN ser TRÄKARLEN (fältfynd 2026-09-13, Bricka 7): när partnern
+ * "vinner" sticket men TRÄKARLEN — som spelar EFTER mig och vars kort ligger
+ * ÖPPNA — kan gå över partnerns kort, kryper jag inte. Jag går upp med det
+ * billigaste kort som slår träkarlens högsta hot och vinner sticket åt oss.
+ * (Motsvarigheten till `winOverBeatablePartner` för spelförarsidan; en
+ * försvarare ser lagligt bara EN hand efter sig – träkarlen.) Bara när:
+ *  · jag är försvarare och det är inte jag som är träkarlen,
+ *  · träkarlen spelar EFTER mig och den dolda spelföraren redan lagt (spelar
+ *    hen efter mig kan hen övergå osett → avstå konservativt),
+ *  · träkarlen har ett kort i ledd färg som slår partnern och jag har ett som
+ *    slår träkarlens högsta ledda kort.
+ * null = träkarlen slår inte partnern (partnern vinner säkert) → kryp som förr.
+ */
+function defenderWinOverVisibleDummy(
+  state: PlayState,
+  seat: Seat,
+  legal: Hand,
+  led: Suit,
+  bestCard: Card,
+): CardChoice | null {
+  const decl = state.contract.declarer
+  if (side(seat) === side(decl)) return null // bara försvararsidan
+  const dummy = PARTNER_SEAT[decl]
+  if (dummy === seat) return null
+  const played = new Set(state.currentTrick.map((pc) => pc.seat))
+  if (played.has(dummy)) return null // träkarlen måste spela EFTER mig
+  if (!played.has(decl)) return null // dold spelförare kvar bakom mig → osett hot
+  const dummyLed = state.hands[dummy].filter((c) => c.suit === led)
+  if (dummyLed.length === 0) return null
+  const dummyBest = dummyLed.reduce((a, b) => (rankVal(b.rank) > rankVal(a.rank) ? b : a))
+  if (!beats(dummyBest, bestCard, led, state.trump)) return null // träkarlen slår inte partnern → kryp
+  const mineWin = legal.filter((c) => beats(c, dummyBest, led, state.trump))
+  if (mineWin.length === 0) return null
+  return {
+    card: lowest(mineWin),
+    reason:
+      'Jag ser träkarlen: partnerns kort slås av träkarlen som spelar efter mig – jag går ' +
+      'upp med det billigaste kort som vinner över träkarlen i stället för att krypa sticket.',
+  }
+}
+
+/**
  * Speldiagnosen S2 (frö 20260731, stick 6): Nord ledde trumf ur ♠J76 EFTER att
  * Öst sakat i trumf — all kvarvarande trumf (♠QT32) satt alltså bevisligen hos
  * Väst, med toppen ÖVER vår topp och minst lika lång som vår längsta trumfhand.
@@ -1158,6 +1200,10 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // billigast (felrapport #48).
     const winOver = winOverBeatablePartner(state, seat, legal, led, bestCard)
     if (winOver) return winOver
+    // Försvararen ser TRÄKARLEN bakom sig och kryper inte ett stick som träkarlen
+    // kan gå över (fältfynd 2026-09-13, Bricka 7).
+    const seeDummy = defenderWinOverVisibleDummy(state, seat, legal, led, bestCard)
+    if (seeDummy) return seeDummy
     // Försvaret spelar tredje hand HÖGT bakom en dold spelförare (felrapport #51 +
     // ägarnoteringen): tar mästaren / pressar honnören i stället för att krypa
     // sticket och skänka bort det gratis.
