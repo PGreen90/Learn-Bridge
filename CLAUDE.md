@@ -10,25 +10,24 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LIVSKVALITETSSVEPET i Dagens tävling (ägarbeslut 2026-09-13)
-Fem ägarönskemål, byggda som sju etapper med egen mergepunkt var: **A** två tryck
-alltid (singelton-genvägen bort) · **B** tillsvidare-% (40 % per ospelad giv) +
-"7/12" i Ställningen · **C** se hur vilken spelare som helst bjöd och spelade en
-giv · **E** "Spelade givar" på Mitt konto + GDPR-exporten · **D1** `daily_standings`
-+ nattlig finalisering (migration 0012 = ägarsteg) · **D2** `?dag=` på läs-
-endpoints + `tavling-historik` · **D3** historiksidan + medaljtabellen (topp 5
-guld/silver/brons, bottar uteslutna). Ägarbeslut + detalj: `docs/beslut-b-plan.md`
-("Påbyggnad — tävlingens livskvalitet"). **Läge: ALLT LIVE** (A–E + D1–D3, 2026-09-13; migration `0012` körd, historiken
-fylld av första nattkörningen, medalj kräver ≥ 2 spelare). Kvar = ägarens
-live-prov av historiksidan + genomgångarna; fynd lagas test-drivet.
+### 🔵 NU — MOTORBYTET etapp 6: ägarens live-prov (ägarbeslut 2026-09-04)
+Motorbytet är KLART & LIVE (etapp 0–5, mergepunkt `e1f70e9`); efterkontrollen
+KLAR 2026-09-11. Ägaren provspelar och rapporterar fel; jag lagar test-drivet
+(facit + auktionsdiff + grind) och PCD:ar var för sig. Elva fynd lagade & LIVE
+2026-09-11/12 (listan: `docs/historik.md` 2026-09-11/12 + budsystem §9). Öppet
+metodval (bevaka.md): negativ-dubblaren accepterar inte invit-hoppet. HELA
+planen: **`docs/motorbyte-plan.md`**. **Nästa session: fortsätt live-provet**
+(nu även historiksidan + genomgångarna, se nedan) — laga nya fynd.
 
-**Parallellt pågående (ägarstyrt, inget NU-jobb): motorbytet etapp 6 — ägarens
-live-prov.** Motorbytet är KLART & LIVE (etapp 0–5, mergepunkt `e1f70e9`);
-efterkontrollen KLAR 2026-09-11. Ägaren provspelar och rapporterar fel; jag lagar
-test-drivet (facit + auktionsdiff + grind) och PCD:ar var för sig. Elva fynd
-lagade & LIVE 2026-09-11/12 (listan: `docs/historik.md` 2026-09-11/12 + budsystem
-§9). Öppet metodval (bevaka.md): negativ-dubblaren accepterar inte invit-hoppet.
-HELA planen: **`docs/motorbyte-plan.md`**.
+**Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
+fem ägarönskemål i sju etapper + ett följdbeslut (mergepunkter i
+`docs/historik.md`): två tryck alltid · tillsvidare-% (40 % per ospelad giv) +
+"7/12" · se hur vilken spelare som helst bjöd och spelade · "Spelade givar" på
+Mitt konto + GDPR-exporten · `daily_standings` + nattlig finalisering (0012 körd,
+historiken fylld) · `?dag=` + `tavling-historik` · historiksidan + medaljtabellen
+(topp 5, bottar uteslutna, medalj kräver ≥ 2 spelare). Ägarbeslut + detalj:
+`docs/beslut-b-plan.md` "Påbyggnad 3". Delade tävlingsvyer bor i
+`src/pages/tavling/TavlingDelar.tsx`.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen
