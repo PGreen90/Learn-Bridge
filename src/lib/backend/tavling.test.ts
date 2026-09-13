@@ -5,6 +5,8 @@
 import { describe, test, expect } from 'vitest'
 import type { Card, Suit, Rank } from '../../types/bridge'
 import {
+  behöverSkickasOm,
+  inskickUrFramsteg,
   slåIhopFramsteg,
   tavlingFromResponse,
   type DinInskick,
@@ -175,5 +177,34 @@ describe('slåIhopFramsteg — lokalt framsteg + serverns inskick', () => {
     ]
     const ut = slåIhopFramsteg(lokala, server)
     expect(ut.map((r) => r.board)).toEqual([1, 2, 4])
+  })
+})
+
+// Omsändning av tappade inskick (2026-09-13): en giv med status 'fel' eller
+// utan svar byggs om till ett exakt inskick ur det lokala framsteget.
+describe('inskickUrFramsteg / behöverSkickasOm — tappade inskick skickas om', () => {
+  const bas: GivResultat = { board: 3, myTricks: 8, win: true, headline: 'x', scoreLabel: null }
+  const kort: Card[] = [{ suit: 'spades', rank: 'A' }]
+  const kontrakt: GivKontrakt = { level: 3, strain: 'NT', declarer: 'S', diff: 1 }
+  test('sparade spelförarstick används rakt av', () => {
+    expect(inskickUrFramsteg({ ...bas, history: [], plays: kort, declarerTricks: 10, inskickStatus: 'fel' })).toEqual({
+      board: 3, history: [], plays: kort, declarerTricks: 10,
+    })
+  })
+  test('äldre framsteg utan sparade stick: räknas ur kontraktet (6 + nivå + resultat); utpassad = 0', () => {
+    expect(inskickUrFramsteg({ ...bas, history: [], plays: kort, kontrakt })?.declarerTricks).toBe(10)
+    expect(inskickUrFramsteg({ ...bas, history: [], plays: [], kontrakt: null })?.declarerTricks).toBe(0)
+  })
+  test('utan auktion/kort (eller utan kontrakt att räkna ur) finns inget att skicka', () => {
+    expect(inskickUrFramsteg({ ...bas, inskickStatus: 'fel' })).toBeNull()
+    expect(inskickUrFramsteg({ ...bas, history: [], plays: kort })).toBeNull()
+  })
+  test('bara fel/utan svar skickas om — serverns utfall är slutgiltiga', () => {
+    const komplett = { ...bas, history: [], plays: kort, declarerTricks: 10 }
+    expect(behöverSkickasOm({ ...komplett, inskickStatus: 'fel' })).toBe(true)
+    expect(behöverSkickasOm({ ...komplett })).toBe(true)
+    expect(behöverSkickasOm({ ...komplett, inskickStatus: 'godkand' })).toBe(false)
+    expect(behöverSkickasOm({ ...komplett, inskickStatus: 'avvisad' })).toBe(false)
+    expect(behöverSkickasOm({ ...bas, inskickStatus: 'fel' })).toBe(false)
   })
 })

@@ -9,7 +9,7 @@
 // STATE-flödet i DagensTavling, inte spelmotorn.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import '@testing-library/jest-dom/vitest'
 import type { DagensTavling as TavlingData, TavlingsResultat } from '../lib/backend/tavling'
@@ -55,6 +55,7 @@ vi.mock('./Play', async () => {
 })
 
 import { DagensTavling } from './DagensTavling'
+import { saveTavlingFramsteg } from '../lib/backend'
 
 function giv(board: number) {
   return {
@@ -115,5 +116,35 @@ describe('Dagens tävling — framsteget bokförs när given blir klar', () => {
     expect(
       screen.queryByRole('button', { name: /Starta tävlingen|Fortsätt – giv/ }),
     ).not.toBeInTheDocument()
+  })
+})
+
+// 2026-09-13 (ägarrapport "403 / givar registreras ej"): ett inskick som aldrig
+// kom fram låg kvar för evigt som spelad lokalt utan att servern hade given.
+// Nu skickas det om när sidan öppnas — exakt samma inskick — och raden får
+// serverns status.
+describe('Dagens tävling — tappade inskick skickas om när sidan öppnas', () => {
+  it("en giv med status 'fel' skickas om vid start och blir inne (Fortsätt giv 2 kvar)", async () => {
+    saveTavlingFramsteg({
+      nummer: 9,
+      klara: [{
+        board: 1, myTricks: 9, win: true, headline: 'x', scoreLabel: null,
+        inskickStatus: 'fel', history: [], plays: [], declarerTricks: 9,
+      }],
+    })
+    starta()
+    await waitFor(() => expect(submitMock).toHaveBeenCalledTimes(1))
+    expect(submitMock).toHaveBeenCalledWith({ board: 1, history: [], plays: [], declarerTricks: 9 })
+    expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByText('ej inskickad')).not.toBeInTheDocument())
+  })
+  it('en godkänd giv skickas INTE om', async () => {
+    saveTavlingFramsteg({
+      nummer: 9,
+      klara: [{ board: 1, myTricks: 9, win: true, headline: 'x', scoreLabel: null, inskickStatus: 'godkand', history: [], plays: [], declarerTricks: 9 }],
+    })
+    starta()
+    expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
+    expect(submitMock).not.toHaveBeenCalled()
   })
 })

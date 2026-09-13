@@ -19,11 +19,14 @@ import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
 import {
   fetchDagensTavling,
   fetchTopplista,
+  behöverSkickasOm,
+  inskickUrFramsteg,
   slåIhopFramsteg,
   submitTavlingGiv,
   type BrickaRad,
   type DagensTavling as TavlingData,
   type GivResultat,
+  type InskickStatus,
   type TavlingFramsteg,
   type TavlingsResultat,
   type TopplistaResultat,
@@ -73,6 +76,9 @@ export function DagensTavling() {
   // `uppdaterar` snurrar ikonen medan den nya hämtningen pågår.
   const [uppdateraNonce, setUppdateraNonce] = useState(0)
   const [uppdaterar, setUppdaterar] = useState(false)
+  // Bumpas när en omsändning av tappade inskick landat, så topplistan hämtas
+  // om och den omsända given får sin MP% (2026-09-13).
+  const [omsäntNonce, setOmsäntNonce] = useState(0)
   // Alltid senaste framsteget (utan att fastna i en gammal closure) — så
   // bokföring på färdig giv och "nästa giv"-navigeringen läser samma sanning.
   const framstegRef = useRef<TavlingFramsteg | null>(null)
@@ -102,6 +108,46 @@ export function DagensTavling() {
     setFramsteg(sparat && sparat.nummer === nummer ? sparat : { nummer, klara: [] })
   }, [resultat])
 
+  // OMSÄNDNING (2026-09-13): ett inskick som aldrig kom fram (nätfel, tillfälligt
+  // serverfel → status 'fel', eller sidan laddades om mitt i → inget svar)
+  // låg förr kvar för evigt som "spelad" lokalt medan servern saknade given —
+  // travellern svarade 403 och given räknades aldrig. Nu skickas sådana givar om
+  // när sidan öppnas och när uppdatera-knappen trycks. "Första inskicket står"
+  // på servern gör omsändningen ofarlig (409 → 'redan').
+  useEffect(() => {
+    if (!resultat || resultat.status !== 'ok') return
+    const nummer = resultat.tavling.nummer
+    const f = framstegRef.current?.nummer === nummer ? framstegRef.current : loadTavlingFramsteg()
+    if (!f || f.nummer !== nummer) return
+    const osända = f.klara.filter(behöverSkickasOm)
+    if (osända.length === 0) return
+    let active = true
+    ;(async () => {
+      const statusar = new Map<number, InskickStatus>()
+      for (const rad of osända) {
+        const inskick = inskickUrFramsteg(rad)
+        if (!inskick) continue
+        const svar = await submitTavlingGiv(inskick)
+        statusar.set(rad.board, svar.status)
+      }
+      if (!active) return
+      setFramsteg((prev) => {
+        if (!prev || prev.nummer !== nummer) return prev
+        const klara = prev.klara.map((k) =>
+          statusar.has(k.board) ? { ...k, inskickStatus: statusar.get(k.board) } : k,
+        )
+        const nf: TavlingFramsteg = { ...prev, klara }
+        framstegRef.current = nf
+        saveTavlingFramsteg(nf)
+        return nf
+      })
+      if ([...statusar.values()].some((s) => s !== 'fel')) setOmsäntNonce((n) => n + 1)
+    })()
+    return () => {
+      active = false
+    }
+  }, [resultat, uppdateraNonce])
+
   // Hämta topplistan när översikten visas (och efter varje giv man kommer
   // tillbaka från) — den uppdateras löpande under dagen.
   useEffect(() => {
@@ -116,7 +162,7 @@ export function DagensTavling() {
     return () => {
       active = false
     }
-  }, [resultat, spelIndex, uppdateraNonce])
+  }, [resultat, spelIndex, uppdateraNonce, omsäntNonce])
 
   // --- Grindar: konto krävs -------------------------------------------------
   if (authLoading) {
@@ -209,7 +255,7 @@ export function DagensTavling() {
         // bricka). Läser/ skriver framstegRef så navigeringen efteråt ser den
         // uppdaterade listan även om React ännu inte hunnit rendera om. Auktionen
         // + korten sparas med (steg 5) så rondgenomgången kan återskapas.
-        const rad: GivResultat = { ...r, history: inskick.history, plays: inskick.plays }
+        const rad: GivResultat = { ...r, history: inskick.history, plays: inskick.plays, declarerTricks: inskick.declarerTricks }
         const base = framstegRef.current?.klara ?? []
         const klara = [...base.filter((k) => k.board !== r.board), rad]
         const nytt: TavlingFramsteg = { nummer: tavling.nummer, klara }

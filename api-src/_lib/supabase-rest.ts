@@ -69,3 +69,50 @@ export async function restGetAlla<T = unknown>(
     if (del.length < sida) return alla
   }
 }
+
+/**
+ * POST mot Supabase PostgREST med omförsök på transienta fel (5xx/429/nätfel),
+ * samma paus-schema som `restGet`. Returnerar SVARET — även 4xx (t.ex. 409 vid
+ * unik-krock, som kallaren tolkar) — och kastar bara när nätet är nere efter
+ * sista försöket. Säkert för skrivningar som skyddas av en UNIK nyckel: landade
+ * det första försöket fast svaret gick förlorat, svarar nästa 409 — aldrig en
+ * dubblett. Bakgrund (2026-09-13): tävlingens inskick gjorde ETT fetch, så en
+ * Supabase-hicka tappade brickan tyst (två spelare, två brickor på ett dygn) —
+ * och klienten skickade aldrig om.
+ */
+export async function restPost(
+  base: string,
+  key: string,
+  path: string,
+  body: unknown,
+  forsok = 3,
+  extraHeaders: Record<string, string> = {},
+): Promise<Response> {
+  for (let i = 1; ; i++) {
+    let r: Response
+    try {
+      r = await fetch(`${base}/rest/v1/${path}`, {
+        method: 'POST',
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+          ...extraHeaders,
+        },
+        body: JSON.stringify(body),
+      })
+    } catch (e) {
+      if (i >= forsok) throw e
+      await sov(200 * i)
+      continue
+    }
+    const transient = r.status === 429 || r.status >= 500
+    if (transient && i < forsok) {
+      await r.text().catch(() => undefined)
+      await sov(200 * i)
+      continue
+    }
+    return r
+  }
+}

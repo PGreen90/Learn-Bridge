@@ -15,6 +15,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { validera, type Inskick } from './_lib/validera'
 import { kvotOk } from './_lib/kvot'
+import { restGet, restPost } from './_lib/supabase-rest'
 
 /** Läs och tolka JSON-kroppen ur en Node-request (Vercel parsar inte åt oss här). */
 function readJson(req: IncomingMessage): Promise<unknown> {
@@ -35,13 +36,7 @@ function readJson(req: IncomingMessage): Promise<unknown> {
   })
 }
 
-async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
-  const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
-  })
-  if (!r.ok) throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
-  return r.json()
-}
+
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const json = (status: number, data: unknown) => {
@@ -122,16 +117,21 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       reason: v.giltig ? null : v.skäl,
       payload: { history: inskick.history, plays: inskick.plays, declarerTricks: inskick.declarerTricks },
     }
-    const skriv = await fetch(`${base}/rest/v1/daily_results`, {
-      method: 'POST',
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify([rad]),
-    })
+    // Skrivningen med omförsök på transienta fel (2026-09-13: två brickor
+    // tappades tyst på ett dygn när ETT fetch mot Supabase föll). Den unika
+    // nyckeln (set_id, board, user_id) gör omförsöket ofarligt: landade det
+    // första försöket fast svaret gick förlorat svarar nästa 409 — då läser vi
+    // raden som står och svarar med DEN (klienten ser sin giv som inne).
+    const skriv = await restPost(base, key, 'daily_results', [rad])
+    if (skriv.status === 409) {
+      const star = (await restGet(
+        base,
+        key,
+        `daily_results?set_id=eq.${setId}&board=eq.${inskick.board}&user_id=eq.${userId}&select=status,ns_score,reason`,
+      )) as Array<{ status: string; ns_score: number | null; reason: string | null }>
+      const s = star[0]
+      return json(200, { ok: true, status: s?.status ?? rad.status, nsScore: s?.ns_score ?? null, skäl: s?.reason ?? null })
+    }
     if (!skriv.ok) throw new Error(`skriv daily_results: ${skriv.status} ${await skriv.text()}`)
 
     return json(200, {
