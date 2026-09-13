@@ -16,7 +16,11 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { ResolvedCall } from '../src/lib/bidding'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { contractFromCalls } from '../src/lib/engine/auction-live'
-import { aggregeraTopplista, type Tävlingsrad } from '../src/lib/engine/matchpoints'
+import {
+  aggregeraTopplista,
+  PROVISORISK_PROCENT,
+  type Tävlingsrad,
+} from '../src/lib/engine/matchpoints'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
 
@@ -92,7 +96,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       spelare: r.user_id,
       poäng: r.ns_score ?? 0,
     }))
-    const agg = aggregeraTopplista(rader, MIN_PER_GIV, meId)
+    // Tillsvidare-snittet räknas mot tävlingens storlek (40 % per ospelad giv,
+    // Påbyggnad 3) — samma tal för listan och kallarens eget kort.
+    const agg = aggregeraTopplista(rader, MIN_PER_GIV, meId, set.size)
 
     // Kontrakt + resultat per giv för kallaren (steg 4-fix). Servern är
     // auktoritativ: den läser `declarer_tricks` + auktionen ur den lagrade
@@ -169,6 +175,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       namn: profil.get(p.spelare) ?? '—',
       snitt: p.snitt,
       antalGivar: p.antalGivar,
+      spelade: p.spelade,
       // Markera kallarens egen rad (steg 6) — klienten highlightar den.
       jag: p.spelare === meId,
     }))
@@ -179,6 +186,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       storlek: set.size,
       poängsattaGivar: agg.poängsattaGivar,
       minPerGiv: MIN_PER_GIV,
+      provisoriskProcent: PROVISORISK_PROCENT,
       topplista,
       // Personliga fält — bara med när en giltig token skickats (annars null/[]).
       du: agg.du,

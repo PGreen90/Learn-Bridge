@@ -187,7 +187,7 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(screen.getByText('väntar')).toBeInTheDocument()
   })
 
-  it('godkänd men opoängsatt giv (ensam spelare) visar preliminärt 100 %, inte "väntar"', async () => {
+  it('godkänd men opoängsatt giv (ensam spelare) visar "väntar" (räknas som 40 % i snittet), aldrig 100 %', async () => {
     localStorage.setItem(
       'learnbridge:tavling-framsteg',
       JSON.stringify({
@@ -217,27 +217,29 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
       </MemoryRouter>,
     )
     expect(await screen.findByText('Dina givar')).toBeInTheDocument()
-    // Godkänd + opoängsatt → preliminärt 100 % (inte "väntar").
-    expect(screen.getByText('100 %')).toBeInTheDocument()
-    expect(screen.queryByText('väntar')).not.toBeInTheDocument()
+    // Godkänd + opoängsatt → "väntar" (Påbyggnad 3: det gamla "preliminärt 100 %"
+    // motsade ställningen, där given räknas som 40 %).
+    const cell = screen.getByText('väntar')
+    expect(cell).toBeInTheDocument()
+    expect(cell).toHaveAttribute('title', expect.stringMatching(/40 %/))
+    expect(screen.queryByText('100 %')).not.toBeInTheDocument()
   })
 
-  it('Din ställning-kortet visar preliminärt 1:a / 100 % för ensam spelare (du null men inskick finns)', async () => {
+  it('Din ställning-kortet (Påbyggnad 3): "1/2 givar" + tillsvidare-snittet med 40 %-noten', async () => {
     fetchMock.mockResolvedValue(ok())
     topplistaMock.mockResolvedValue({
       status: 'ok',
       data: {
         nummer: 9,
         storlek: 2,
-        poängsattaGivar: 0,
+        poängsattaGivar: 1,
         minPerGiv: 2,
-        topplista: [],
-        du: null, // ingen poängsatt giv än
-        dinaGivar: [],
-        dinaInskick: [
-          { board: 1, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 } },
-          { board: 2, kontrakt: { level: 3, strain: 'NT', declarer: 'N', diff: 1 } },
-        ],
+        provisoriskProcent: 40,
+        topplista: [{ namn: 'Green', snitt: 70, antalGivar: 1, spelade: 1, jag: true }],
+        // En spelad, poängsatt giv på 100 %: (100 + 40) / 2 = 70.
+        du: { placering: 1, snitt: 70, antalGivar: 1, spelade: 1 },
+        dinaGivar: [{ board: 1, mp: 1, max: 1, procent: 100 }],
+        dinaInskick: [{ board: 1, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 } }],
       },
     })
     render(
@@ -245,11 +247,41 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
         <DagensTavling />
       </MemoryRouter>,
     )
-    // Preliminärt 1:a (🥇) på dina 2 inskickade givar, tydligt märkt.
-    expect(await screen.findByText('🥇')).toBeInTheDocument()
-    expect(screen.getByText('preliminärt')).toBeInTheDocument()
-    expect(screen.getByText('2 givar inne')).toBeInTheDocument()
-    expect(screen.getByText(/Preliminärt tills minst 2 spelat samma giv/)).toBeInTheDocument()
+    // 🥇 både i Din ställning och på listans första rad.
+    expect((await screen.findAllByText('🥇')).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('1/2 givar')).toBeInTheDocument()
+    expect(screen.getByText(/Ospelade givar räknas som 40 % tills du spelat dem/)).toBeInTheDocument()
+    expect(screen.queryByText(/preliminär/)).not.toBeInTheDocument()
+  })
+
+  it('Ställningen visar spelade givar per spelare ("7/12") och 40 %-fotnoten', async () => {
+    fetchMock.mockResolvedValue(ok())
+    topplistaMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        nummer: 9,
+        storlek: 12,
+        poängsattaGivar: 7,
+        minPerGiv: 2,
+        provisoriskProcent: 40,
+        topplista: [
+          { namn: 'Green', snitt: 75, antalGivar: 7, spelade: 7, jag: true },
+          { namn: 'Gunnar52', snitt: 200 / 12, antalGivar: 7, spelade: 12, jag: false },
+        ],
+        du: { placering: 1, snitt: 75, antalGivar: 7, spelade: 7 },
+        dinaGivar: [],
+        dinaInskick: [],
+      },
+    })
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Ställningen')).toBeInTheDocument()
+    expect(screen.getByText('7/12')).toBeInTheDocument()
+    expect(screen.getByText('12/12')).toBeInTheDocument()
+    expect(screen.getByText(/Ospelade givar räknas som 40 % tills de spelats/)).toBeInTheDocument()
   })
 
   it('resultattabellen: varje spelad giv är klickbar → fältets resultat (travellern)', async () => {

@@ -277,7 +277,9 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
 - Matchpoäng per giv (`src/lib/engine/matchpoints.ts`, ren funktion +
   `matchpoints.test.ts`): N/S-poängen (`nsScore`) jämförs mot alla andra på given
   (bättre = 1, lika = 0,5), toppen = antal spelare − 1, i procent.
-  Tävlingsresultatet = snittet över de poängsatta givarna. Minst **två spelare per
+  Tävlingsresultatet = snittet över de poängsatta givarna (sedan Påbyggnad 3,
+  2026-09-13: under dagen ett TILLSVIDARE-snitt där varje ännu opoängsatt giv
+  räknas som 40 %). Minst **två spelare per
   giv** krävs, annars "väntar på fler". `/api/topplista` (`api-src/topplista.ts`)
   aggregerar dagens godkända inskick server-side (service-nyckeln) + hämtar
   visningsnamn; `fetchTopplista()` + `TopplistaVy` på `DagensTavling`-sidan.
@@ -437,8 +439,8 @@ någonsin** — bara läsvägarna (låsta till `stockholmDateISO()`) och UI:t sa
   via RLS-policyerna. Fritt spel mot datorn räknas inte (finns bara lokalt).
   GDPR-exporten utökas med resultaten, dagsloggen och placeringarna.
 
-**Läge:** etapp A KLAR 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3, egen
-mergepunkt var. Ägarsteg: migration `0012` (D1).
+**Läge:** etapp A + B KLARA 2026-09-13. Etapporder: A → B → C → E → D1 → D2 → D3,
+egen mergepunkt var. Ägarsteg: migration `0012` (D1).
 
 ## Databasskissen (radskydd på allt; skrivningar via serverfunktioner)
 
@@ -540,3 +542,10 @@ mergepunkt var. Ägarsteg: migration `0012` (D1).
 - **2026-09-13: PÅBYGGNAD 3 (LIVSKVALITETSSVEPET) PÅBÖRJAD — etapp A KLAR** (två
   tryck gäller alltid; facit `play/tvatryck.test.tsx`). Ägarbesluten för alla
   etapper står under "Påbyggnad 3" ovan. Inga migrationer i etapp A.
+- **2026-09-13: ETAPP B (TILLSVIDARE-PROCENTEN) KLAR.** `provisorisktSnitt()` +
+  `PROVISORISK_PROCENT` i `matchpoints.ts`; `aggregeraTopplista` tar tävlingens
+  storlek och räknar `spelade` per spelare ur alla inskick; `topplista.ts`
+  skickar `spelade` + `provisoriskProcent`; Ställningen visar "7/12" per rad,
+  Din ställning "spelade/12" med 40 %-noten, "preliminärt 100 %" borttaget
+  (motsade listan). Facit: `matchpoints.test.ts`, ny `api-src/topplista.test.ts`
+  (inkl. vakt: `is_bot` lämnar aldrig servern), `DagensTavling.test.tsx`.

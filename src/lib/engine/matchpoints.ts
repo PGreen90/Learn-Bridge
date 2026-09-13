@@ -6,8 +6,10 @@
 //
 // Matchpoäng (klassisk parpoäng): för varje annan spelare på given ger en bättre
 // N/S-poäng 1 poäng, lika 0,5. Toppen = (antal spelare − 1). Tävlingsresultatet
-// är snittet i procent över de 12 givarna (docs/beslut-b-plan.md, 2b). Minst två
-// spelare per giv krävs för poäng — det gränsvärdet vaktas av kallaren.
+// är snittet i procent över de 12 givarna (docs/beslut-b-plan.md, 2b) — under
+// dagen som TILLSVIDARE-snitt där varje ännu opoängsatt giv räknas som 40 %
+// (Påbyggnad 3, ägarbeslut 2026-09-13). Minst två spelare per giv krävs för
+// poäng — det gränsvärdet vaktas av kallaren.
 //
 // Ren aritmetik utan I/O — servern räknar topplistan med den här funktionen, och
 // facit testar den isolerat.
@@ -73,12 +75,29 @@ export interface Tävlingsrad {
   poäng: number
 }
 
+/** Tillsvidare-procenten för en giv spelaren ännu inte fått poäng på —
+ *  klubbstandarden "medel minus" (ägarbeslut 2026-09-13). */
+export const PROVISORISK_PROCENT = 40
+
+/** Tillsvidare-snittet: (summan av MP% på de poängsatta givarna + 40 × de som
+ *  återstår) / tävlingens storlek. Är alla `storlek` givar poängsatta blir det
+ *  exakt det vanliga snittet. Samma tal styr ordningen i ställningen för alla
+ *  och "Din ställning" — så en halvspelad serie aldrig ser bättre ut än en hel. */
+export function provisorisktSnitt(summa: number, antalPoängsatta: number, storlek: number): number {
+  if (storlek <= 0) return 0
+  const kvar = Math.max(0, storlek - antalPoängsatta)
+  return (summa + PROVISORISK_PROCENT * kvar) / storlek
+}
+
 /** En rad på topplistan — id kvar (servern översätter till visningsnamn). */
 export interface TopplistaPost {
   spelare: string
-  /** Snittprocent över spelarens poängsatta givar (0–100). */
+  /** Tillsvidare-snittet (0–100): poängsatta givar + 40 % per återstående. */
   snitt: number
+  /** Antal POÄNGSATTA givar (≥ minPerGiv spelare). */
   antalGivar: number
+  /** Antal SPELADE (inskickade) givar — det som visas som "7/12". */
+  spelade: number
 }
 
 /** Kallarens egen giv: matchpoängen på EN bricka hen spelat (poängsatt giv). */
@@ -95,29 +114,36 @@ export interface TopplistaAggregat {
   topplista: TopplistaPost[]
   /** Antal givar med minst `minPerGiv` spelare (de som ger poäng). */
   poängsattaGivar: number
-  /** Kallarens placering + snitt, eller null (okänd kallare / inga poängsatta
-   *  givar spelade än). Placeringen delar rang vid lika snitt. */
-  du: { placering: number; snitt: number; antalGivar: number } | null
+  /** Kallarens placering + snitt, eller null (okänd kallare / inget inskick
+   *  än). Placeringen delar rang vid lika snitt. */
+  du: { placering: number; snitt: number; antalGivar: number; spelade: number } | null
   /** Kallarens matchpoäng per poängsatt giv, i brickordning. Tom om kallaren
    *  saknas eller ännu inte har någon poängsatt giv. */
   dinaGivar: DinGiv[]
 }
 
 /** Räkna topplistan ur alla godkända tävlingsrader: gruppera per bricka, ge
- *  matchpoäng på varje giv med ≥ `minPerGiv` spelare, och snitta i procent per
- *  spelare. Ges `kallare` fylls även `du` (placering delad vid lika snitt) och
- *  `dinaGivar` (kallarens MP% per poängsatt giv). Ren aritmetik utan I/O. */
+ *  matchpoäng på varje giv med ≥ `minPerGiv` spelare, och räkna tillsvidare-
+ *  snittet per spelare (`provisorisktSnitt` mot tävlingens `storlek`). Alla som
+ *  skickat in minst en giv står på listan. Ges `kallare` fylls även `du`
+ *  (placering delad vid lika snitt) och `dinaGivar` (kallarens MP% per
+ *  poängsatt giv). Ren aritmetik utan I/O. */
 export function aggregeraTopplista(
   rader: Tävlingsrad[],
   minPerGiv: number,
-  kallare?: string | null,
+  kallare: string | null | undefined,
+  storlek: number,
 ): TopplistaAggregat {
-  const perSpelare = new Map<string, { summa: number; antal: number }>()
+  const perSpelare = new Map<string, { summa: number; antal: number; spelade: number }>()
   const brickor = new Map<number, GivPoäng[]>()
   for (const r of rader) {
     const lista = brickor.get(r.board) ?? []
     lista.push({ spelare: r.spelare, poäng: r.poäng })
     brickor.set(r.board, lista)
+    // Spelade givar räknas ur ALLA rader — även de som ännu inte poängsatts.
+    const nu = perSpelare.get(r.spelare) ?? { summa: 0, antal: 0, spelade: 0 }
+    nu.spelade += 1
+    perSpelare.set(r.spelare, nu)
   }
 
   const dinaGivar: DinGiv[] = []
@@ -129,10 +155,9 @@ export function aggregeraTopplista(
     if (entries.length < minPerGiv) continue
     poängsattaGivar++
     for (const mp of matchpointsForBoard(entries)) {
-      const nu = perSpelare.get(mp.spelare) ?? { summa: 0, antal: 0 }
+      const nu = perSpelare.get(mp.spelare)!
       nu.summa += mp.procent
       nu.antal += 1
-      perSpelare.set(mp.spelare, nu)
       if (kallare && mp.spelare === kallare) {
         dinaGivar.push({ board, mp: mp.mp, max: mp.max, procent: mp.procent })
       }
@@ -142,19 +167,19 @@ export function aggregeraTopplista(
   const topplista: TopplistaPost[] = [...perSpelare.entries()]
     .map(([spelare, v]) => ({
       spelare,
-      snitt: v.antal ? v.summa / v.antal : 0,
+      snitt: provisorisktSnitt(v.summa, v.antal, storlek),
       antalGivar: v.antal,
+      spelade: v.spelade,
     }))
     .sort((a, b) => b.snitt - a.snitt)
 
   let du: TopplistaAggregat['du'] = null
   if (kallare) {
-    const min = perSpelare.get(kallare)
-    if (min && min.antal > 0) {
-      const snitt = min.summa / min.antal
+    const min = topplista.find((p) => p.spelare === kallare)
+    if (min) {
       // Delad rang: 1 + antalet spelare med STRIKT högre snitt.
-      const placering = 1 + topplista.filter((p) => p.snitt > snitt).length
-      du = { placering, snitt, antalGivar: min.antal }
+      const placering = 1 + topplista.filter((p) => p.snitt > min.snitt).length
+      du = { placering, snitt: min.snitt, antalGivar: min.antalGivar, spelade: min.spelade }
     }
   }
 

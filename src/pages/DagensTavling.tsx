@@ -434,27 +434,23 @@ function Nedrakning() {
 }
 
 /** Ditt eget läge överst i ställningen (UI-polish steg 3): placering + snitt-MP%.
- *  Visas när servern rankat dig (≥1 poängsatt giv) ELLER — preliminärt — när du
- *  skickat in givar men ingen poängsatts än (ensam spelare). I det preliminära
- *  läget visas 1:a / 100 % tydligt märkt "preliminär" (samma grepp som per-giv-
- *  cellen). Har du inte skickat in något alls är kortet tyst. */
+ *  Visas så fort servern har minst ett inskick från dig (Påbyggnad 3: alla med
+ *  inskick står på listan — ospelade givar räknas som 40 % tills de spelats, så
+ *  snittet är ett TILLSVIDARE-snitt tills alla givar är inne). Har du inte
+ *  skickat in något alls är kortet tyst. */
 function DinStällning({ resultat, total }: { resultat: TopplistaResultat | null; total: number }) {
   if (!resultat || resultat.status !== 'ok') return null
-  const { du, topplista } = resultat.data
-  const dinaInskick = resultat.data.dinaInskick ?? []
-  // Preliminärt: inga poängsatta givar än (du null) men du HAR inskick.
-  const prel = !du && dinaInskick.length > 0
-  if (!du && !prel) return null
+  const { du, topplista, provisoriskProcent } = resultat.data
+  if (!du) return null
 
-  const placering = du ? du.placering : 1
-  const snitt = du ? du.snitt : 100
-  const antalGivar = du ? du.antalGivar : dinaInskick.length
+  const { placering, snitt } = du
+  const spelade = du.spelade ?? du.antalGivar
   const antalRankade = topplista.length
   const medalj = placering === 1 ? '🥇' : placering === 2 ? '🥈' : placering === 3 ? '🥉' : null
   return (
     <div className="w-full rounded-xl bg-gradient-to-br from-emerald-800/70 to-emerald-950/60 p-4 ring-1 ring-gold-400/30">
       <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-emerald-100/60">
-        Din ställning{prel && <span className="text-gold-300/70"> · preliminär</span>}
+        Din ställning
       </p>
       <div className="flex items-stretch justify-around gap-4 text-center">
         <div className="flex flex-col items-center justify-center">
@@ -462,25 +458,19 @@ function DinStällning({ resultat, total }: { resultat: TopplistaResultat | null
             {medalj && <span className="text-2xl leading-none">{medalj}</span>}
             <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">{placering}</span>
           </span>
-          <span className="mt-1 text-xs text-emerald-100/60">
-            {prel ? 'preliminärt' : `av ${antalRankade} spelare`}
-          </span>
+          <span className="mt-1 text-xs text-emerald-100/60">av {antalRankade} spelare</span>
         </div>
         <div className="w-px self-stretch bg-emerald-100/10" />
         <div className="flex flex-col items-center justify-center">
           <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">
             {snitt.toFixed(1)}<span className="text-2xl"> %</span>
           </span>
-          <span className="mt-1 text-xs text-emerald-100/60">
-            {prel
-              ? `${antalGivar} ${antalGivar === 1 ? 'giv inne' : 'givar inne'}`
-              : `${antalGivar}/${total} givar`}
-          </span>
+          <span className="mt-1 text-xs text-emerald-100/60">{`${spelade}/${total} givar`}</span>
         </div>
       </div>
-      {prel && (
+      {spelade < total && (
         <p className="mt-2 text-center text-[11px] text-emerald-100/50">
-          Preliminärt tills minst 2 spelat samma giv.
+          Ospelade givar räknas som {provisoriskProcent ?? 40} % tills du spelat dem.
         </p>
       )}
     </div>
@@ -560,9 +550,10 @@ function Resultattabell({
             {rader.map((r) => {
               const mp = mpPerBricka.get(r.board)
               const avvisad = r.inskickStatus === 'avvisad'
-              // Servern har tagit emot given (men den kanske inte poängsatts än
-              // för att du är ensam spelare). Då visas ett preliminärt 100 % i
-              // stället för "väntar" — tydligare att resultatet ÄR inne.
+              // Servern har tagit emot given men den är inte poängsatt än (för få
+              // spelare). Då "väntar" — och i snittet räknas den som 40 % tills
+              // fler spelat den (Påbyggnad 3; det gamla "preliminärt 100 %"
+              // motsade ställningen).
               const inne = r.inskickStatus === 'godkand' || r.inskickStatus === 'redan'
               // Kontrakt/resultat: serverns värde vinner (fyller även äldre
               // givar); annars det lokalt sparade.
@@ -601,15 +592,17 @@ function Resultattabell({
                       <span className="text-danger" title="Inskicket avvisades">✗</span>
                     ) : mp !== undefined ? (
                       <span className="font-semibold text-gold-200">{mp.toFixed(0)} %</span>
-                    ) : inne ? (
-                      <span
-                        className="font-semibold text-gold-200"
-                        title="Preliminärt 100 % — du är ensam på given än; siffran kan ändras när fler spelat den"
-                      >
-                        100 %
-                      </span>
                     ) : (
-                      <span className="text-emerald-100/40">väntar</span>
+                      <span
+                        className="text-emerald-100/40"
+                        title={
+                          inne
+                            ? 'Given är inne men inte poängsatt än — räknas som 40 % i snittet tills fler spelat den'
+                            : 'Väntar på serverns bekräftelse'
+                        }
+                      >
+                        väntar
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -745,14 +738,14 @@ function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
     return <p className="text-center text-xs text-emerald-100/50">Hämtar ställningen …</p>
   }
   if (resultat.status !== 'ok') return null
-  const { topplista, poängsattaGivar, minPerGiv } = resultat.data
+  const { topplista, poängsattaGivar, storlek, provisoriskProcent } = resultat.data
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
       <h2 className="text-center font-brand text-lg text-gold-200">Ställningen</h2>
       {topplista.length === 0 ? (
         <p className="text-center text-sm text-emerald-100/70">
-          Dina spelade givar är inne (se "Dina givar" ovan). Ställningen mot andra
-          spelare visas när minst {minPerGiv} spelare spelat samma giv.
+          Ingen har skickat in någon giv än — ställningen visas så fort den första
+          given är inne.
         </p>
       ) : (
         <>
@@ -774,6 +767,10 @@ function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
                     </span>
                     {rad.namn}
                     {rad.jag && <span className="text-xs text-gold-300/80">(du)</span>}
+                    {/* Spelade givar (Påbyggnad 3): "7/12" — äldre svar saknar fältet. */}
+                    <span className="text-xs tabular-nums text-emerald-100/50" title="Spelade givar">
+                      {rad.spelade ?? rad.antalGivar}/{storlek}
+                    </span>
                   </span>
                   <span className="font-semibold text-gold-200">{rad.snitt.toFixed(1)} %</span>
                 </li>
@@ -781,8 +778,9 @@ function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
             })}
           </ol>
           <p className="text-center text-[11px] text-emerald-100/50">
-            {poängsattaGivar} {poängsattaGivar === 1 ? 'giv' : 'givar'} med tillräckligt många
-            spelare · provisorisk
+            Ospelade givar räknas som {provisoriskProcent ?? 40} % tills de spelats ·{' '}
+            {poängsattaGivar} {poängsattaGivar === 1 ? 'giv' : 'givar'} poängsatt
+            {poängsattaGivar === 1 ? '' : 'a'} · provisorisk
           </p>
         </>
       )}

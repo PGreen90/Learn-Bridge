@@ -2464,3 +2464,17 @@ och vänbordet (`BordSpel.klick`). Två tryck gäller nu alltid: första väljer
 färgen, andra spelar. Bottarna oberörda (egna vägar). Facit `play/tvatryck.test.tsx`
 (seedad giv där Syd håller en singelton på utspel); `syd-trakarl.test.tsx` klickar
 nu ovillkorligt två gånger.
+
+## 2026-09-13 — Livskvalitetssvepet etapp B: tillsvidare-procenten + "7/12"
+
+Ägarbeslut: snitt = (Σ MP% på poängsatta givar + 40 × ej poängsatta) / storlek —
+klubbens "medel minus" för ospelad bricka; identiskt med det gamla snittet när
+alla 12 är inne, och samma tal styr ordningen i Ställningen för alla. Byggt:
+`provisorisktSnitt()`/`PROVISORISK_PROCENT` i `matchpoints.ts`, `spelade` per
+spelare (räknas ur ALLA inskick, även opoängsatta), obligatorisk `storlek` i
+`aggregeraTopplista`; endpointen `topplista.ts` lämnar `spelade` +
+`provisoriskProcent`; UI: "7/12" per rad i Ställningen, "spelade/12" + 40 %-not
+i Din ställning, "preliminärt 100 %"-cellen ersatt av "väntar" (räknas som 40 %).
+Alla med minst ett inskick står nu på listan. Facit: `matchpoints.test.ts`,
+ny `api-src/topplista.test.ts` (endpoint-skalet + vakten att `is_bot` aldrig
+serialiseras), `DagensTavling.test.tsx`.
