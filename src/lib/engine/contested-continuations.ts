@@ -83,6 +83,11 @@ export function partnerCueRaiseToAnswer(f: AuctionFacts): { agreedStrain: string
   const cue = ourBids[1]
   const cueStrain = parseContractBid(cue.bid)!.strain
   if (cueStrain === 'NT') return null
+  // Vår egen ÖPPNINGSFÄRG är aldrig ett cue, även om motståndarna cue-bjudit den
+  // (Michaels i vår färg): partnerns bud där är en NATURLIG höjning, inte en
+  // cue-höjning (provspels-fynd frö 20260893: 1♠–(2♠ Michaels)–4♠ är utgångs-
+  // höjning, inte krav → öppnaren passar; förr "återgick" den till 5♠, bet).
+  if (cueStrain === open.strain) return null
   if (!f.theirStrains.has(cueStrain)) return null
   const cueIdx = history.indexOf(cue)
   if (history.slice(cueIdx + 1).some((c) => parseContractBid(c.bid))) return null

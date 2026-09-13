@@ -2493,7 +2493,13 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   20260955: ♠J5 ♥A87 ♦762 ♣AQJ54 → 2NT utan ruterstopp, 3NT-bet fast 5♣ kall).
   Nu kräver `inverterad: 2NT` ([rebids.ts](src/lib/engine/rebids.ts)) stopp i
   ALLA objudna färger; annars stopp-visning (paret ser läckan och stannar i
-  minorn). Facit: `auction-revisor-fynd-2026-09-12.test.ts`.
+  minorn). (c) **Michaels-cue i vår färg gjorde partnerns höjning till en
+  "cue-höjning"** (frö 20260893: 1♠–(2♠ Michaels)–4♠ lästes som tvingande cue →
+  öppnaren "återgick" till 5♠, bet, fast 4♠ kall). `partnerCueRaiseToAnswer`
+  ([contested-continuations.ts](src/lib/engine/contested-continuations.ts))
+  utesluter nu vår egen öppningsfärg som cue-strain (samma vakt som
+  `partnerCueToAnswer` redan hade) → öppnaren passar utgångshöjningen. Facit:
+  `auction-revisor-fynd-2026-09-12.test.ts`.
 - **2026-09-12 — Dubblarens cue-höjning är krav; advancern svarar (§7.3; etapp 6
   live-prov, Bricka 9).** Efter upplysnings-X + advancerns högfärgsadvance på
   1-läget var dubblarens bud i motståndarnas färg (en cue = stark höjning, 17+)

@@ -55,3 +55,17 @@ describe('Fynd 2: inverterad minor – 2NT-rebudet kräver stopp i objudna färg
     expect(bud[bud.length - 4]).toBe('3C') // slutkontraktet (följt av tre pass)
   })
 })
+
+// FYND 3 — Michaels-cuen förgiftar cue-höjnings-läsaren. Frö 20260893:
+// 1♠(N)–2♠(E Michaels)–4♠(S, naturlig utgångshöjning)–P. E:s Michaels-cue
+// ligger i SPADER-läget, så motorn räknar spader som "deras" färg och läser
+// Nords partners 4♠ som en tvingande CUE-höjning → "återgår" till 5♠ förbi
+// utgången (bet, fast 4♠ kall). Vår egen öppningsfärg kan aldrig vara ett cue.
+describe('Fynd 3: Michaels-cue i vår färg gör inte partnerns höjning till en cue', () => {
+  const HIST = [call('N', '1S'), call('E', '2S'), call('S', '4S'), call('W', 'P')]
+
+  it('frö 20260893: Nord passar partnerns 4♠ (inte 5♠)', () => {
+    const deal = dealFromSeed(20260893)
+    expect(decideCall(deal, HIST, 'N').bid).toBe('P')
+  })
+})
