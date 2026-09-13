@@ -326,6 +326,59 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(screen.getByText(/\(du\)/)).toBeInTheDocument()
   })
 
+  it('travellern (Påbyggnad 3): klick på en annan spelares rad → "Så spelade X given" med stegningen', async () => {
+    localStorage.setItem(
+      'learnbridge:tavling-framsteg',
+      JSON.stringify({
+        nummer: 9,
+        klara: [{ board: 1, myTricks: 10, win: true, headline: '', scoreLabel: null, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 } }],
+      }),
+    )
+    fetchMock.mockResolvedValue(ok())
+    // Testkontots spelade kort: bara utspelet (Väst leder mot 4♠ av Syd) — räcker
+    // för att stegningen ska byggas ur serverns payload.
+    const utspel = TÄVLING.givar[0].deal.hands.W[0]
+    givResultatMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        board: 1,
+        resultat: [
+          { namn: 'Green', jag: true, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 }, nsScore: 420, procent: 50, history: [{ seat: 'S', bid: '4S' }, { seat: 'W', bid: 'P' }, { seat: 'N', bid: 'P' }, { seat: 'E', bid: 'P' }], plays: [utspel], declarerTricks: 10 },
+          { namn: 'Testkonto', jag: false, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 }, nsScore: 420, procent: 50, history: [{ seat: 'S', bid: '4S' }, { seat: 'W', bid: 'P' }, { seat: 'N', bid: 'P' }, { seat: 'E', bid: 'P' }], plays: [utspel], declarerTricks: 10 },
+          { namn: 'Utan', jag: false, kontrakt: { level: 3, strain: 'NT', declarer: 'S', diff: 0 }, nsScore: 400, procent: 0 },
+        ],
+      },
+    })
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Dina givar')).toBeInTheDocument()
+    fireEvent.click(screen.getAllByTitle('Visa fältets resultat')[0])
+    expect(await screen.findByText('Hela fältets resultat')).toBeInTheDocument()
+
+    // Klick på Testkontos rad → genomgången i perspektivfri form (PlayReplay:
+    // "Bricka 1"), ingen "du"-knapp för någon annans giv.
+    fireEvent.click(screen.getByTitle('Se hur Testkonto spelade given'))
+    expect(await screen.findByText('Så spelade Testkonto giv 1')).toBeInTheDocument()
+    expect(screen.getByText('Bricka 1')).toBeInTheDocument()
+    expect(screen.queryByText(/Rondgenomgång med förklaringar/)).not.toBeInTheDocument()
+
+    // Tillbaka → travellern igen; egen rad → "Så spelade du" + vägen till rapporten.
+    fireEvent.click(screen.getByText('← Tillbaka'))
+    expect(await screen.findByText('Hela fältets resultat')).toBeInTheDocument()
+    fireEvent.click(screen.getByTitle('Se hur du spelade given'))
+    expect(await screen.findByText('Så spelade du giv 1')).toBeInTheDocument()
+    expect(screen.getByText(/Rondgenomgång med förklaringar/)).toBeInTheDocument()
+
+    // Rad utan sparade kort → vänligt meddelande i stället för krasch.
+    fireEvent.click(screen.getByText('← Tillbaka'))
+    expect(await screen.findByText('Hela fältets resultat')).toBeInTheDocument()
+    fireEvent.click(screen.getByTitle('Se hur Utan spelade given'))
+    expect(await screen.findByText(/Genomgången är inte tillgänglig/)).toBeInTheDocument()
+  })
+
   it('resultattabellen fyller kontrakt/resultat från SERVERN även utan lokalt kontrakt', async () => {
     // Lokalt framsteg UTAN kontraktsfält (spelad före kontraktssparningen).
     localStorage.setItem(

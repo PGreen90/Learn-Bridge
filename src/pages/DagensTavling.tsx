@@ -15,8 +15,6 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
 import { Felt } from '../components/Felt'
-import { SuitSymbol } from '../components/SuitSymbol'
-import type { Seat } from '../types/bridge'
 import { loadTavlingFramsteg, saveTavlingFramsteg } from '../lib/backend'
 import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
 import {
@@ -25,6 +23,7 @@ import {
   fetchTopplista,
   slåIhopFramsteg,
   submitTavlingGiv,
+  type BrickaRad,
   type DagensTavling as TavlingData,
   type GivKontrakt,
   type GivResultat,
@@ -38,6 +37,8 @@ import { Play } from './Play'
 import { RondRapportView } from './play/RondRapport'
 import { byggGranskning } from './play/granska-tavling'
 import type { TavlingSpel } from './play/tavling-mode'
+import { GivGranskning } from './tavling/GivGranskning'
+import { Kontraktscell, resultatText } from './tavling/TavlingDelar'
 
 /** Index i givar-listan för den första ospelade given, eller null om alla är
  *  klara. Robust mot ordning: matchar på bricknummer, inte listindex. */
@@ -59,8 +60,11 @@ export function DagensTavling() {
   // Index i givar-listan för given som spelas om i ÖVNINGSLÄGE (2026-08-12) från
   // giv-detaljvyn, null = ingen. Skilt från spelIndex: övningen bokför ALDRIG.
   const [övningIndex, setÖvningIndex] = useState<number | null>(null)
-  // Bricknummer för given vars rondgenomgång visas (steg 5), null = ingen.
-  const [granskaBoard, setGranskaBoard] = useState<number | null>(null)
+  // Genomgången "Så spelade X given" (Påbyggnad 3): vilken spelares rad i
+  // travellern som stegas igenom, null = ingen. `rapport` = din EGEN givs
+  // rondgenomgång med förklaringar (steg 5), öppnas ur genomgången.
+  const [granska, setGranska] = useState<{ board: number; rad: BrickaRad } | null>(null)
+  const [rapport, setRapport] = useState<{ board: number; rad: BrickaRad } | null>(null)
   // Dagens topplista (hämtas på översikten).
   const [topplista, setTopplista] = useState<TopplistaResultat | null>(null)
   // Räknare som tvingar en ny hämtning av topplistan (uppdatera-knappen bumpar den);
@@ -232,14 +236,17 @@ export function DagensTavling() {
     return <Play key={`tavling-${tavling.nummer}-${giv.deal.board}`} tavling={spel} />
   }
 
-  // --- Granska en klar giv (steg 5): rondgenomgången ur den sparade given ----
-  if (granskaBoard !== null) {
-    const giv = tavling.givar.find((g) => g.deal.board === granskaBoard)
-    const rad = klara.find((k) => k.board === granskaBoard)
-    const tillbaka = () => setGranskaBoard(null)
-    // Genomgången kräver den sparade given (kontrakt + kort). Saknas den (äldre
-    // framsteg / utpassad giv) → vänligt meddelande i stället för en krasch.
-    if (!giv || !rad || !rad.kontrakt || !rad.plays) {
+  // --- Din egen rondgenomgång med förklaringar (steg 5), öppnad ur genomgången.
+  // Serverns payload (auktion + kort ur travellern) vinner — så den fungerar
+  // även på en annan enhet än den du spelade på; det lokala framsteget är reserv.
+  if (rapport !== null) {
+    const giv = tavling.givar.find((g) => g.deal.board === rapport.board)
+    const lokal = klara.find((k) => k.board === rapport.board)
+    const kontrakt = rapport.rad.kontrakt ?? lokal?.kontrakt
+    const plays = rapport.rad.plays ?? lokal?.plays
+    const history = rapport.rad.history ?? lokal?.history ?? []
+    const tillbaka = () => setRapport(null)
+    if (!giv || !kontrakt || !plays) {
       return (
         <Skärm>
           <div className="max-w-sm space-y-3 text-center">
@@ -250,19 +257,19 @@ export function DagensTavling() {
               onClick={tillbaka}
               className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
             >
-              ← Till översikten
+              ← Tillbaka
             </button>
           </div>
         </Skärm>
       )
     }
-    const g = byggGranskning(giv.deal, rad.plays, rad.kontrakt)
+    const g = byggGranskning(giv.deal, plays, kontrakt)
     return (
       <div className="min-h-[100dvh] bg-surface px-4 py-6">
         <RondRapportView
           deal={giv.deal}
           contract={g.contract}
-          calls={rad.history ?? []}
+          calls={history}
           tricks={g.tricks}
           result={g.result}
           score={g.score}
@@ -272,6 +279,21 @@ export function DagensTavling() {
         />
       </div>
     )
+  }
+
+  // --- "Så spelade X given" (Påbyggnad 3): stega vilken spelares giv som helst.
+  if (granska !== null) {
+    const giv = tavling.givar.find((g) => g.deal.board === granska.board)
+    if (giv) {
+      return (
+        <GivGranskning
+          deal={giv.deal}
+          rad={granska.rad}
+          onBack={() => setGranska(null)}
+          onRapport={granska.rad.jag ? () => setRapport(granska) : undefined}
+        />
+      )
+    }
   }
 
   // --- Spela given igen: ÖVNINGSLÄGE (2026-08-12) ---------------------------
@@ -302,15 +324,11 @@ export function DagensTavling() {
 
   // --- Giv-detalj (steg 6): hela fältets traveller för EN spelad giv ---------
   if (detaljBoard !== null) {
-    const rad = klara.find((k) => k.board === detaljBoard)
-    // Din egen rondgenomgång kräver den lokalt sparade given (kort + auktion).
-    const kanGenomgang = !!(rad?.kontrakt && rad.history && rad.plays)
     return (
       <GivDetalj
         board={detaljBoard}
-        kanGenomgang={kanGenomgang}
         onBack={() => setDetaljBoard(null)}
-        onGenomgang={() => setGranskaBoard(detaljBoard)}
+        onGranska={(rad) => setGranska({ board: detaljBoard, rad })}
         onÖvning={() => {
           const i = tavling.givar.findIndex((g) => g.deal.board === detaljBoard)
           if (i >= 0) setÖvningIndex(i)
@@ -477,35 +495,6 @@ function DinStällning({ resultat, total }: { resultat: TopplistaResultat | null
   )
 }
 
-/** Spelförarens säte på svenska (kompakt, till kontraktscellen). */
-const SÄTE_SV: Record<Seat, string> = { N: 'N', E: 'Ö', S: 'S', W: 'V' }
-
-/** Resultatet relativt kontraktet: "=", "+1", "−2" (ur spelförarens sikt). */
-function resultatText(k?: GivKontrakt | null): string {
-  if (!k) return '—'
-  if (k.diff === 0) return '='
-  return k.diff > 0 ? `+${k.diff}` : `−${-k.diff}`
-}
-
-/** Kontraktscellen: nivå + färgsymbol (spader svart) + ev. dubbling + säte.
- *  `null` = utpassad giv; `undefined` = äldre framsteg utan kontraktsfält. */
-function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
-  if (k === null) return <span className="text-emerald-100/50">Passad</span>
-  if (!k) return <span className="text-emerald-100/40">—</span>
-  return (
-    <span className="inline-flex items-center gap-0.5 text-emerald-50">
-      <span className="tabular-nums">{k.level}</span>
-      {k.strain === 'NT' ? (
-        <span className="font-semibold">NT</span>
-      ) : (
-        <SuitSymbol suit={k.strain} />
-      )}
-      {k.doubled && <span className="font-semibold text-danger">{k.doubled}</span>}
-      <span className="ml-1 text-xs text-emerald-100/50">{SÄTE_SV[k.declarer]}</span>
-    </span>
-  )
-}
-
 /** Din resultattabell (UI-polish steg 4): en rad per spelad giv — kontrakt,
  *  resultat och din MP%. MP% kommer från serverns `dinaGivar` (matchat på
  *  bricka); en giv som ännu inte poängsatts (för få spelare) visar "väntar",
@@ -617,18 +606,19 @@ function Resultattabell({
 }
 
 /** Detaljvy för EN spelad giv (steg 6): hela fältets traveller (kontrakt ·
- *  resultat · MP%, din rad markerad) + väg till din egen rondgenomgång. */
+ *  resultat · MP%, din rad markerad). Varje rad öppnar genomgången "Så spelade
+ *  X given" (Påbyggnad 3) — din egen rad leder vidare till rondgenomgången med
+ *  förklaringar. */
 function GivDetalj({
   board,
-  kanGenomgang,
   onBack,
-  onGenomgang,
+  onGranska,
   onÖvning,
 }: {
   board: number
-  kanGenomgang: boolean
   onBack: () => void
-  onGenomgang: () => void
+  /** Klick på en spelares rad → stega igenom hur hen bjöd och spelade given. */
+  onGranska: (rad: BrickaRad) => void
   /** Spela om given i övningsläge (räknas inte). */
   onÖvning: () => void
 }) {
@@ -657,11 +647,10 @@ function GivDetalj({
         ) : utfall.status !== 'ok' ? (
           <p className="text-center text-sm text-emerald-100/70">{utfall.fel}</p>
         ) : (
-          <TravellerTabell data={utfall.data} />
+          <TravellerTabell data={utfall.data} onVälj={onGranska} />
         )}
 
         <div className="flex flex-col items-center gap-3">
-          {kanGenomgang && <Button onClick={onGenomgang}>Se hela given (bud + spel) →</Button>}
           {/* Spela om given i övningsläge (2026-08-12). Tydligt märkt "räknas
               inte" så det aldrig förväxlas med tävlingsresultatet. */}
           <Button variant="secondary" onClick={onÖvning}>
@@ -680,8 +669,9 @@ function GivDetalj({
   )
 }
 
-/** Travellern: en rad per spelare på brickan (bäst MP% först), din rad markerad. */
-function TravellerTabell({ data }: { data: GivResultatSvar }) {
+/** Travellern: en rad per spelare på brickan (bäst MP% först), din rad markerad.
+ *  Varje rad är klickbar (Påbyggnad 3) → "Så spelade X given". */
+function TravellerTabell({ data, onVälj }: { data: GivResultatSvar; onVälj: (rad: BrickaRad) => void }) {
   if (data.resultat.length === 0) {
     return <p className="text-center text-sm text-emerald-100/70">Inga resultat än.</p>
   }
@@ -699,14 +689,27 @@ function TravellerTabell({ data }: { data: GivResultatSvar }) {
             </tr>
           </thead>
           <tbody>
-            {data.resultat.map((r, i) => (
+            {data.resultat.map((r, i) => {
+              const välj = () => onVälj(r)
+              return (
               <tr
                 key={i}
-                className={`border-t border-emerald-100/5 ${r.jag ? 'bg-gold-400/10' : ''}`}
+                className={`cursor-pointer border-t border-emerald-100/5 hover:bg-emerald-900/30 ${r.jag ? 'bg-gold-400/10' : ''}`}
+                role="button"
+                tabIndex={0}
+                title={r.jag ? 'Se hur du spelade given' : `Se hur ${r.namn} spelade given`}
+                onClick={välj}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    välj()
+                  }
+                }}
               >
                 <td className={`py-1.5 pr-2 ${r.jag ? 'font-semibold text-gold-200' : 'text-emerald-50'}`}>
                   {r.namn}
                   {r.jag && ' (du)'}
+                  <span className="ml-1 text-gold-300/70">›</span>
                 </td>
                 <td className="px-2 py-1.5">
                   <Kontraktscell k={r.kontrakt} />
@@ -718,7 +721,8 @@ function TravellerTabell({ data }: { data: GivResultatSvar }) {
                   {r.procent.toFixed(0)} %
                 </td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -727,6 +731,9 @@ function TravellerTabell({ data }: { data: GivResultatSvar }) {
           Väntar på fler spelare på den här given.
         </p>
       )}
+      <p className="text-center text-[11px] text-emerald-100/45">
+        Tryck på en spelare för att se hur given bjöds och spelades.
+      </p>
     </div>
   )
 }
