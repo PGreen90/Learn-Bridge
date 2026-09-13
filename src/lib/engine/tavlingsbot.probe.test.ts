@@ -69,19 +69,42 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
   expect(base, 'SUPABASE_URL saknas (miljön eller .env.local)').toBeTruthy()
   expect(key, 'SUPABASE_SERVICE_ROLE_KEY saknas (miljön eller .env.local)').toBeTruthy()
 
-  const rest = async (pathWithQuery: string, init?: RequestInit): Promise<unknown> => {
-    const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
-      ...init,
-      headers: {
-        apikey: key!,
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        ...(init?.headers ?? {}),
-      },
-    })
-    if (!r.ok) throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
-    const text = await r.text()
-    return text ? JSON.parse(text) : null
+  // Transient Supabase-hicka (504 Gateway Timeout, nätfel) ska INTE blanka en
+  // hel natt (2026-09-13: ett enda 504 på Gunnar52-uppslaget rev körningen).
+  // Vi försöker om på 5xx/429 och nätfel med växande paus; 4xx (äkta fel) och
+  // sista försöket kastar som förr. Idempotent hot-path (GET + upsert-radform),
+  // så en omförsökt skrivning är ofarlig.
+  const sov = (ms: number) => new Promise((res) => setTimeout(res, ms))
+  const rest = async (pathWithQuery: string, init?: RequestInit, forsok = 4): Promise<unknown> => {
+    for (let i = 1; ; i++) {
+      let r: Response
+      try {
+        r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
+          ...init,
+          headers: {
+            apikey: key!,
+            Authorization: `Bearer ${key}`,
+            'Content-Type': 'application/json',
+            ...(init?.headers ?? {}),
+          },
+        })
+      } catch (e) {
+        if (i >= forsok) throw e
+        await sov(1000 * i * i)
+        continue
+      }
+      if (r.ok) {
+        const text = await r.text()
+        return text ? JSON.parse(text) : null
+      }
+      const transient = r.status === 429 || r.status >= 500
+      if (transient && i < forsok) {
+        await r.text().catch(() => undefined) // töm kroppen innan nästa försök
+        await sov(1000 * i * i)
+        continue
+      }
+      throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
+    }
   }
 
   /** Bot-kontots id — hitta under nuvarande namn, annars gamla namnet (döp om),
