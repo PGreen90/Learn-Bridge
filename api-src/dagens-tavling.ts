@@ -13,14 +13,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { playSeedForBoard } from './_lib/seed'
-
-async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
-  const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
-  })
-  if (!r.ok) throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
-  return r.json()
-}
+import { restGet } from './_lib/supabase-rest'
 
 export default async function handler(
   _req: IncomingMessage,

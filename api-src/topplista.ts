@@ -18,14 +18,7 @@ import { stockholmDateISO } from '../src/lib/engine/daily'
 import { contractFromCalls } from '../src/lib/engine/auction-live'
 import { aggregeraTopplista, type Tävlingsrad } from '../src/lib/engine/matchpoints'
 import { kvotOk } from './_lib/kvot'
-
-async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
-  const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
-  })
-  if (!r.ok) throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
-  return r.json()
-}
+import { restGet } from './_lib/supabase-rest'
 
 /** Vem kallar? Verifiera en valfri inloggnings-token mot Supabase och lämna
  *  tillbaka user-id, eller null (ingen/ogiltig token = anonym — endpointen

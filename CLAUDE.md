@@ -30,16 +30,11 @@ lillslam-mot-utgång, storslamsgrenen SENARE) · **dubblarens cue-höjning är k
 SENARE). Detaljerna:
 [[motorbytet-manus-till-spelare]] + budsystem §9.
 
-**Dessutom (Claudes egen provspelning 2026-09-12, systemrevisorn 1000 givar):** tre
-systemfel lagade & LIVE — (1) öppnarens svar på negativ dubbling rebjöd sang FÖRE
-egen 6-korts högfärg (nu 3♥ före 2NT, `doubles.ts`); (2) inverterad minors
-2NT-återbud krävde ingen stopp i objudna färger (nu stopp-krav, annars
-stopp-visning, `rebids.ts`); (3) Michaels-cue i vår färg gjorde partnerns
-utgångshöjning till en tvingande cue-höjning (1♠–(2♠)–4♠ → öppnaren "återgick"
-5♠ bet; nu passar hen — `partnerCueRaiseToAnswer` utesluter egen öppningsfärg,
-`contested-continuations.ts`). Facit: `auction-revisor-fynd-2026-09-12.test.ts`.
-Upptäckt följd-fynd (bevaka.md): negativ-dubblaren accepterar inte öppnarens
-invit-hopp (3♥ passas fast 4♥ kall) — metodval, väntar ägaren.
+**Dessutom (Claudes provspelning 2026-09-12, systemrevisorn 1000 givar):** tre
+systemfel lagade & LIVE — negativ-dubblingssvar (6-korts högfärg före sang) ·
+inverterad minors 2NT-stoppkrav · Michaels-cue i egen färg ≠ cue-höjning. Detalj:
+budsystem §9 + `auction-revisor-fynd-2026-09-12.test.ts`. Följd-fynd (bevaka.md):
+negativ-dubblaren accepterar inte invit-hoppet — metodval, väntar ägaren.
 
 **Nästa session: fortsätt live-provet** (ägaren spelar vidare), laga nya fynd. HELA
 planen: **`docs/motorbyte-plan.md`**.

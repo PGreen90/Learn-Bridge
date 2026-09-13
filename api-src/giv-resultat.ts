@@ -15,14 +15,7 @@ import type { ResolvedCall } from '../src/lib/bidding'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { byggBrickresultat, type Brickrad } from '../src/lib/engine/brickresultat'
 import { kvotOk } from './_lib/kvot'
-
-async function restGet(base: string, key: string, pathWithQuery: string): Promise<unknown> {
-  const r = await fetch(`${base}/rest/v1/${pathWithQuery}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
-  })
-  if (!r.ok) throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
-  return r.json()
-}
+import { restGet } from './_lib/supabase-rest'
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const json = (status: number, data: unknown) => {
