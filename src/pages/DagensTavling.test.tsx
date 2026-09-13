@@ -320,7 +320,8 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     // Klick på giv 1 → detaljvyn hämtar och visar travellern.
     fireEvent.click(knappar[0])
     expect(await screen.findByText('Hela fältets resultat')).toBeInTheDocument()
-    expect(givResultatMock).toHaveBeenCalledWith(1)
+    // Dagens tävling → ingen dag-parameter (historiken skickar sin dag).
+    expect(givResultatMock).toHaveBeenCalledWith(1, undefined)
     // Din rad markeras och motståndaren listas.
     expect(screen.getByText('Testkonto')).toBeInTheDocument()
     expect(screen.getByText(/\(du\)/)).toBeInTheDocument()

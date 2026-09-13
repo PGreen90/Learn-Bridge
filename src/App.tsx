@@ -23,6 +23,9 @@ const DagensArkiv = lazy(() =>
 const DagensTavling = lazy(() =>
   import('./pages/DagensTavling').then((m) => ({ default: m.DagensTavling })),
 )
+const TavlingHistorik = lazy(() =>
+  import('./pages/TavlingHistorik').then((m) => ({ default: m.TavlingHistorik })),
+)
 const SpelHistorik = lazy(() =>
   import('./pages/SpelHistorik').then((m) => ({ default: m.SpelHistorik })),
 )
@@ -95,6 +98,9 @@ export default function App() {
           {/* Dagliga tävlingen (Beslut B etapp 2): 12 givar, konto krävs, spelas
               linjärt. Under /spela-kort så vyn blir immersiv (dold header). */}
           <Route path="spela-kort/tavling" element={<DagensTavling />} />
+          {/* Tävlingshistoriken + medaljtabellen (Påbyggnad 3, 2026-09-13):
+              tidigare dagar (?dag=YYYY-MM-DD = delbar dagvy). Immersiv som tävlingen. */}
+          <Route path="spela-kort/tavling/historik" element={<TavlingHistorik />} />
           {/* Kalenderarkivet (2026-08-03): alla dagars givar sedan premiären —
               spelade dagar visar resultatet, missade går att spela i efterhand. */}
           <Route path="spela-kort/dagens/arkiv" element={<DagensArkiv />} />
