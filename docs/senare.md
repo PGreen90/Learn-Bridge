@@ -180,7 +180,22 @@ egna auktioner (16 av 3000 givar i auktionsdumpen), och öppnarens återbud öve
 det X:et är systems on (§7.8 f). Kandidat kvar: **XX = 18+** över deras X av
 svaret, och sandwich-inklivet (5-korts objuden färg efter två bjudna färger).
 
-### Den starka dubblaren säljer given i ROND 2 (2026-07-28, funnen i Mätning #19)
+### Kontrerad checkback — NMF/checkback efter deras X (2026-09-13, motorbytets slutförande)
+Facit A i `motorbyte-facit.test.ts` ("etapp 5 slutkärnan – kända rester",
+`it.todo`): efter `1♦–(X)–1♠–1NT–2♣` bör svararens 2♣ vara New Minor Forcing
+(systems on efter en ren dubbling, som §7.8 f redan säger för deras X av
+SVARET) och öppnaren svara 2♠ med 3-korts stöd — i dag ger catch-allen ett
+grovt 2♦. Kräver att betydelselagret (`undisturbed()` tolererar bara X av
+svaret) och tre beslutssteg lärs den dubblade linjen: svararens NMF-bud,
+öppnarens svar (`openerAnswerNMF` finns), placeringen (`responderPlaceAfterNMF`
+finns). Ett eget jobb, inte en lapp — samma gäller 2NT-checkbacken.
+
+### ~~Den starka dubblaren säljer given i ROND 2~~ — BYGGD 2026-09-13 (motorbytets slutförande)
+`strongDoublerWithoutSuit` i `double-continuations.ts`, budsystem §7.3; facit
+i `motorbyte-facit.test.ts` ("slutförandet – den starka dubblaren utan egen
+färg"). Texten nedan är bakgrunden.
+
+### (bakgrund) Den starka dubblaren säljer given i ROND 2 (2026-07-28, funnen i Mätning #19)
 "17+ säljer aldrig given" gäller i dag bara **första** ronden (§7.1, felrapport
 #40). I rond 2 kräver `ownStrongDoubleRebid` (`double-continuations.ts`) en egen **5+
 objuden** färg för det starka återbudet — en jämn 17–19-poängare har ingen, och

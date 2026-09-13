@@ -227,7 +227,11 @@ describe('etapp 4 familj B fix 2: slamzon utan trumf', () => {
   // Svararens TREDJE bud i 2♣-linjen (över öppnarens 4♥-rebud) ligger i det
   // gamla lagret, som passar partnerns utgångsbud → 4♥ på 6-2 i stället för
   // 6♣. Facit för 2♣-linjens svar3-rad (motorbytet, känt hål i planens logg).
-  it.todo('frö 20261372 hela auktionen: lillslam 6♣ nås', () => {
+  // LANDAD 2026-09-13 (motorbytets slutförande): svararens tredje bud i 2♣-linjen
+  // med en SOLID egen långfärg (AKQ + 7+, varje kort ett stick) rebjuden två
+  // gånger, öppnaren utan fit → 9+ egna säkra stick mot 2♣:s 22+ räcker till
+  // lillslam i egen färg (`responderThirdDecision`). Storslam kräver visshet → 6.
+  it('frö 20261372 hela auktionen: lillslam 6♣ nås', () => {
     const d = deal('2cslam-20261372', 'E', 'ns', HANDS_1372)
     const history = botAuction(d)
     expect(history).not.toBeNull()

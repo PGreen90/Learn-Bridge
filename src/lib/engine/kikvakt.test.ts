@@ -9,9 +9,10 @@
 //   (2) Beslutsfunktionen — `decideCall(deal, history, seat)` ska ge SAMMA bud
 //       när de tre andra händerna byts mot slumpkort. Skarp FAMILJ FÖR FAMILJ
 //       under etapp 3 (familj 1 öppningsvarvet sedan 2026-09-04); hela
-//       auktionen (`it.todo`) när etapp 3 är klar. Tills dess finns MÄTLÄGET
-//       som visar hur ofta dagens manus-motor byter bud när de andra händerna
-//       byts — det är måttet på hur mycket manuset "kikar":
+//       auktionen sedan manuset revs (etapp 5, 2026-09-11): testet prövar
+//       VARJE bud i 300 botauktioner (skarpt 2026-09-13). MÄTLÄGET nedan finns
+//       kvar som verktyg — hur ofta byter motorn bud när de andra händerna
+//       byts (ska vara 0):
 //
 //   $env:KIKVAKT='1'; npx vitest run src/lib/engine/kikvakt.test.ts
 //   $env:KIKVAKT_RANGE='20270001-20270300'   (standard)
@@ -63,7 +64,7 @@ describe('kikvakten (1): betydelselagret läser bara auktionen', () => {
 })
 
 describe('kikvakten (2): beslutet läser bara egen hand + auktionen', () => {
-  it.todo('decideCall ger samma bud när de tre andra händerna byts mot slumpkort (skarp för HELA auktionen när etapp 3 är klar)')
+
 
   // Skarp familj för familj (etapp 3): varje bud beslutstabellen tagit över
   // (källa `tabell:<familj>`) ska överleva att de andra händerna byts — och

@@ -909,7 +909,13 @@ export function answerReopeningDoubleCore(hand: Hand, f: AuctionFacts): Kunskap 
     explanation: `Partnerns återöppningsdubbling är upplysande, men med ${len[theirSuit]} kort och honnörer i deras ${SWE_SYM[tb.strain]} passar jag för straff.`,
   }
   const cands = SUIT_STRAINS
-    .filter((st) => st !== tb.strain && (st !== open.strain ? len[SUIT_OF_LETTER[st]] >= 4 : len[SUIT_OF_LETTER[st]] >= 3))
+    // Aldrig en färg motståndarna bjudit — inte bara den senaste (motorbytets
+    // slutförande 2026-09-13, frö 20263370: efter 1♦–(1♥)–P–(1♠)–X svarade
+    // svararen 2♥ i INKLIVARENS färg som "längsta färg utanför deras ♠", och
+    // öppnaren läste det som en cue-höjning → 5♦ på 18 hp ihop).
+    // Undantag: partnerns ÖPPNINGSFÄRG är alltid vår, även om de cue-bjudit den
+    // (frö 20271622: deras 2♠-cue av vår 1♠ gjorde preferensen 3♠ "förbjuden").
+    .filter((st) => st !== tb.strain && (st === open.strain || !f.theirStrains.has(st)) && (st !== open.strain ? len[SUIT_OF_LETTER[st]] >= 4 : len[SUIT_OF_LETTER[st]] >= 3))
     .sort((a, b) => len[SUIT_OF_LETTER[b]] - len[SUIT_OF_LETTER[a]] || Number(isMajorStrain(b)) - Number(isMajorStrain(a)) || SUIT_STRAINS.indexOf(a) - SUIT_STRAINS.indexOf(b))
   for (const st of cands) {
     if (isMajorStrain(st) && st !== open.strain && len[SUIT_OF_LETTER[st]] >= 5 && p >= 12 && legal.includes(`4${st}` as Bid)) return {
@@ -933,4 +939,37 @@ export function answerReopeningDoubleCore(hand: Hand, f: AuctionFacts): Kunskap 
 /** Cue-bjudaren (svararen) fullföljer efter öppnarens svar på cue-höjningen (felrapport #26). */
 export function cueRaiserContinues(hand: Hand, f: AuctionFacts): Kunskap | null {
   return cueBidderContinues(hand, f, 'öppnare')
+}
+
+/**
+ * SVAG RYMNING över partnerns starka 2NT-återbud i konkurrens (fältfynd
+ * 2026-09-10, ägarbeslut B; byggd i motorbytets slutförande 2026-09-13):
+ * partnern öppnade 1 i färg, de klev in (och höjde), jag har bara passat, och
+ * partnerns 2NT (18–19 balanserat med stopp) är senaste bud. Med en svag hand
+ * (under 8 hp) och 5+ i en objuden högfärg spelar vi hellre 3 i högfärgen än
+ * sang med ett ensamt stopp mittemot min singel → naturligt 3M, till spel
+ * (betydelselagret: avslut → öppnaren passar). Ostört finns verktyget redan
+ * (systems on efter 2NT-återbudet, §5.2); i konkurrens saknades det helt.
+ * 8+ hp → de vanliga vägarna (3NT/inbjudan).
+ */
+export function responderEscapesOverStrong2NT(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const open = f.opening
+  if (!open || open.seat !== f.partner || open.level !== 1 || open.strain === 'NT') return null
+  const ourBids = f.ourContractBids
+  if (ourBids.length !== 2 || ourBids[1].seat !== f.partner || ourBids[1].bid !== '2NT') return null
+  if (f.history.some((c) => c.seat === f.seat && c.bid !== 'P')) return null // jag har bara passat
+  if (f.theirContractBids.length === 0) return null // konkurrens — ostört äger raden svar2 läget
+  if (f.lastNonPass !== ourBids[1]) return null
+  if (hcp(hand) >= 8) return null
+  const len = lengths(hand)
+  const major = (['S', 'H'] as const)
+    .filter((st) => len[SUIT_OF_LETTER[st]] >= 5 && !f.theirStrains.has(st))
+    .sort((a, b) => len[SUIT_OF_LETTER[b]] - len[SUIT_OF_LETTER[a]])[0]
+  if (!major) return null
+  const bid = `3${major}` as Bid
+  if (!legalCalls(f.history, f.seat).includes(bid)) return null
+  return {
+    call: bid, rule: 'svag rymning över 2NT-återbudet',
+    explanation: `Partnerns 2NT i konkurrens visar 18–19 balanserat; en svag hand med 5+ ${SWE_SYM[major]} spelar hellre 3${SWE_SYM[major]} än sang → 3${SWE_SYM[major]} (till spel, ej krav).`,
+  }
 }

@@ -484,6 +484,8 @@ ruter, bättre än 1NT med klöversingel/renons. Ingen 5-korts högfärg (då tr
 
 **5-4 i högfärgerna, inbjudan (8–9):** efter 2♣–2♦ (öppnaren förnekar hf) visar
 svararen sin **5-korts** högfärg naturligt på 2-läget (2♥/2♠), inte 2NT.
+Öppnaren svarar (2026-09-13): med **maximum** 4M med 3-korts stöd, annars 3NT;
+med **minimum** pass.
 
 #### Smolen (efter 1NT–2♣–2♦)
 När öppnaren förnekat 4-korts hf (2♦) visar svararen 5-4 i hf med GF-styrka genom
@@ -495,7 +497,9 @@ att **hoppa till 3 i sin _kortare_ hf**:
 | 3♠ | 4 ♠ + 5 ♥, GF |
 
 Öppnaren bjuder den 5-korts hf:en på utgångsläget med 3 stöd, annars 3NT (med
-bara dubbel i den långa). Poängen är densamma som vid transfer: den **starka
+bara dubbel i den långa). *Svaret fanns länge bara efter 2NT-öppningen; sedan
+2026-09-13 ger öppnaren det även efter 1NT (förr föll hen till motorns sista
+utväg och bjöd "4♣ ny färg").* Poängen är densamma som vid transfer: den **starka
 handen blir spelförare**.
 
 #### Jacoby-transfer (2♦ / 2♥)
@@ -697,6 +701,13 @@ lite på fötterna och håller utgångskravet.
   (Stayman/transfers, eller kvantitativt mot 6NT med ~10+ hp).
 - *Exempel:* 2♣ – 2♥ (5+ ♥, 8+) – 3♥ (stöd, slamintresse) – cue-bids – 1430 RKC
   – 6♥.
+- **Solid egen färg utan fit (2026-09-13):** har svararen visat sin färg två
+  gånger (positivt svar + rebud) och öppnaren rebjudit sin egen färg två gånger
+  (ingen fit), och svararens färg är **solid** (AKQJ + 6 kort eller AKQ + 7 —
+  spelar utan stöd), bjuder svararen **6 i egen färg** när slamzonen nås mot
+  2♣:s visade 22 (egna hp + 22 ≥ 33) eller när färgen ensam ger 9+ stick.
+  Storslam kräver visshet → aldrig 7. *2♣–3♣–3♥–4♣–4♥–**6♣** med ♠Q5 ♥82 ♦KT5
+  ♣AKQJT3 (förr passades 4♥ på 6-2).*
 
 **Vid miss** (negativt 2♦, ev. andra negativa): öppnaren har jättehanden men
 nästan inget mittemot.
@@ -1271,7 +1282,10 @@ OCH honnörer i deras färg** (4+ kort med 4+ hp i färgen, eller 5+ med 3+) →
 **straffpass** (trap pass, §7.3); annars **längsta färg utanför deras**
 billigast (partnerns öppningsfärg räknas med 3+ stöd), **5+ högfärg och 12+ →
 utgång**. *1♥–(2♦)–P–P–X–P med ♠T64 ♥94 ♦6532 ♣K954 → **3♣** — fyra hackor
-i ruter är ingen straff (förr passades X:et och 2♦X spelades).*
+i ruter är ingen straff (förr passades X:et och 2♦X spelades).* **Aldrig en
+färg motståndarna bjudit** (2026-09-13, frö 20263370: 2♥ i inklivarens färg
+lästes som cue-höjning → 5♦ på 18 hp ihop); bara vår egen öppningsfärg får
+väljas även när de cue-bjudit den.
 
 ### 5.10 Öppnarens sang-återbud när vår MINOR höjts i konkurrens
 Du öppnar **1♣/1♦**, en motståndare kliver in med en färg, och partnern **höjer din
@@ -1759,6 +1773,14 @@ cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
   (cue = limithöjning+ vid 11+, fit-jump vid 10+) läser **stödpoäng**
   `max(hp, stödpoäng)` — samma mått som de levande höjningarna redan använde.
 
+**Inklivarens preferens mellan advancerns två färger (pliktsvepet K2, byggd
+2026-09-13):** har partnern (advancern) visat två egna färger (den första lovar
+5+) och den andra är senaste bud, väljer inklivaren med samma kriterier som
+advancerns preferens (felrapport #56): kostar preferensen ingen nivå räcker
+lika långt eller längre stöd i första färgen, kostar den en nivå krävs 2+ korts
+skillnad; aldrig förbi utgång, bättre stöd i den andra → pass. *1♦–(1♥)–P–(1♠)–
+X–P–P–(2♣)–P–**2♠** med ♠KT9 ♥AT876 ♦73 ♣J87 (förr pass).*
+
 **Svar på partnerns enkla inkliv:**
 | Svar | Betydelse |
 |---|---|
@@ -1937,6 +1959,13 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
   (nekar helt stöd).
 - **Fri-bud-regeln:** ett *tvunget* bud lovar inget, men bjuder partnern **frivilligt
   igen** (nästa varv, eller trots att motståndarna stör) visar det **värden**.
+- **Den starka dubblaren UTAN egen färg (M19, byggd 2026-09-13):** en jämn 17+-
+  hand som dubblade och saknar 5+ objuden färg säljer inte heller given i rond 2.
+  Mot partnerns **hopp** (9–11): utgång — 4M med 4-korts stöd, annars 3NT med
+  stopp i deras färg, annars 5m med 4-korts stöd. Mot partnerns **billiga svar**
+  (0–8): 4-korts stöd i högfärgen → höjning (17–18 en nivå, 19–21 hopphöjning,
+  22+ utgång); annars sang med stopp — 17–19 billigaste sang, 20–21 2NT, 22+ 3NT.
+  *1♦–X–P–3♣–P–**3NT** med ♠Q432 ♥AQJ9 ♦AQ4 ♣A2 (förr pass; ÖV kunde ta 7NT).*
 
 **Det naturliga inklivet över två bjudna färger — sandwich-sitsen (motorbytet
 etapp 4 familj 4, 2026-09-08):** partnern har passat och båda motståndarna
@@ -2097,12 +2126,25 @@ dubblarens eget flöde (X + egen färg).
   händer utan stopp **cue-bjuder deras färg = utgångskrav** (motorbytet etapp
   4 familj 4, 2026-09-08): partnern bjuder 3NT med stopp, annars färg. *1♦–
   (1♠)–X–P–2♣–P med ♠63 ♥AQJ85 ♦KQ84 ♣A7 → **2♠**.*
+  **Dubblarens svar på öppnarens invit-hopp (byggd 2026-09-13, bevaka
+  2026-09-12):** öppnarens **hopp** i färg (egen 6-korts färg rebjuden, eller
+  4-korts stöd i dubblarens visade högfärg) visar **16–18 och inbjuder**;
+  dubblaren accepterar med **8+ TP** (stödpoäng med 3+ stöd, annars startpoäng —
+  TP lyfter aldrig ner) → 4M, annars pass. Lågfärgshopp: 3NT med stopp i deras
+  färg (8+), 5m med 4+ stöd (10+), annars pass. Acceptgränsen 8 är Claudes
+  bokförslag — ägaren justerar vid behov. *1♥–(2♦)–X–P–3♥–P–**4♥** med ♠AK43
+  ♥94 ♦94 ♣85432 (förr pass i 3♥ med kall utgång).*
 - **Responsiv dubbling:** när de bjudit *och höjt* en färg (t.ex.
   (1♥)–X–(2♥)–X) = vår dubbling är upplysning, oftast de två objudna färgerna.
   Gäller efter **svararens** höjning till 2-läget (inte öppnarens rebud av sin
   färg), från 7 hp med 3+ kort i två objudna färger och ingen egen 5-korts
   färg; den går **före** det fria svaret i §7.3 (samma ordning som förr gällde
   i bottarnas egna auktioner — sedan 2026-09-08 även vid bordet).
+  **Responsiv-dubblarens fortsättning (byggd 2026-09-13):** partnerns färgval
+  efter min responsiva dubbling är **tvingat** och lovar inget utöver
+  upplysningsdubblingen (12–15) — jag räknar mot 12: i högfärg **13+ stödpoäng →
+  utgång**, 10–12 → höjning (inbjudan); i lågfärg bara 13+ → en nivå; annars
+  **pass** (förr hoppade motorn "inbjudande" till 5♣ på 10 hp, frö 20271014).
 - **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
   3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
   längdinfo i konkurrens.
@@ -2173,6 +2215,14 @@ tvåfärgshänder och svagare enfärgshänder; den starka enfärgshanden bjuder 
 **Advancer:** efter X bjuds 2♣ som pass-eller-rätta; efter ett tvåfärgsbud passar
 man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer tillåtna
 – ännu lättare i återbudsläge (balansering).
+
+**DONT-dubblarens egen fortsättning när reläet uteblev (byggd 2026-09-13):**
+bjuder motståndaren en färg över vårt X så att partnern inte kan relä:a 2♣ (och
+partnern passar), visar dubblaren sin enfärg själv — på **2-läget alltid** (det är
+vad X:et lovade), på **3-läget bara med substans** (12+ hp eller 7+ kort).
+*1NT–(X)–2♦–P–3♣–**3♠** med ♠KQT763 ♥K9 ♦AQ ♣KJ2 (förr pass).* Öppnaren på
+andra sidan **passar** partnerns naturliga flykt över vår dubbling (den är till
+spel) — förr "tvingade" ett felläst rondkrav fram 3♣/3♠ ur catch-allen.
 
 ### 7.7 Mot konventionella och svaga öppningar
 > **Takeout-dubblingen** mot deras svaga tvåor och spärrar beskrivs i sin helhet i
@@ -2304,6 +2354,14 @@ ostört. Förr föll öppnarens återbud här till motorns sista utväg (2NT på
 3NT på 14, hopp till 3♠ på 13, pass med 7-korts ruter — revisorintervallets
 frön 20260836, 20261592, 20261707, 20261497). En redubbling (XX = 18+) spelas
 inte än (kandidat i `docs/senare.md`).
+
+**(g) Svag rymning över partnerns 2NT-återbud i konkurrens (fältfynd
+2026-09-10, ägarbeslut B; byggd 2026-09-13).** Efter t.ex. 1♣–(1♠)–P–(2♠)–2NT
+(öppnaren 18–19 balanserad med stopp) får svararen som bara passat bjuda **3 i
+en högfärg = 5+ kort, för svag för sang (under 8 hp), till spel** — öppnaren
+passar (budet är ett avslut). Med 8+ gäller de vanliga vägarna (3NT). *Nord
+♠7 ♥JT652 ♦K953 ♣T62 → **3♥** (förr pass: 2NT med ett ensamt spaderstopp
+mittemot singel).*
 
 **(d) De dubblar vår 1♥/1♠-öppning — Jordan 2NT och fortsättningen.**
 Efter **1M–(X)** är svararens **2NT Jordan/Truscott**: konstgjord
@@ -2483,6 +2541,31 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-13 — Motorbytet SLUTFÖRT: facit-kön tömd + de sista kända hålen
+  (§4.3, §4.4, §5.8, §7.1, §7.3, §7.4, §7.6, §7.8; ägarbesked "liveproven är
+  klara, gör klart budmotorn").** Elva regler, alla test-drivna (facit FÖRE fix:
+  `motorbyte-facit.test.ts` blocken "slutförandet" + de gamla `it.todo`-posterna,
+  `auction-2c-slam.test.ts`): (1) **`auctionForce`**: svararens färg på 2-läget
+  efter en SANGöppning är aldrig ett naturligt rondkrav (transfer/Stayman/flykt)
+  — förr "tvingades" öppnaren höja flykten `1NT–(X)–2♠` till 3♠ ur catch-allen
+  (facit B, frö 20270254); flykten över deras X betyder nu **avslut**. (2)
+  **DONT-dubblaren visar enfärgen själv** när partnerns relä uteblev (§7.6; frö
+  20272187). (3) **Inklivarens preferens** mellan advancerns två färger (§7.1,
+  pliktsvepet K2; frö 20263370). (4) **Svaret på återöppningsdubblingen** väljer
+  aldrig en färg motståndarna bjudit — bara vår öppningsfärg får vara cue-bjuden
+  av dem (§5.8; frö 20263370/20271622). (5) **Responsiv-dubblaren väger
+  partnerns tvingade svar** (§7.4; facit C, frö 20271014) — och betydelsen av
+  dubblarens färg efter partnerns responsiva X är "tvingat svar", inte "starkt
+  återbud". (6) **Den starka dubblaren utan egen färg säljer inte given** (§7.3,
+  M19 frö 20260952). (7) **Negativ-dubblaren accepterar öppnarens invit-hopp**
+  med 8+ TP (§7.4; frö 20260797, bevaka 2026-09-12). (8) **Svag rymning 3M över
+  partnerns 2NT-återbud i konkurrens** (§7.8 g; fältfynd 2026-09-10, ägarbeslut
+  B). (9) **2♣-linjen: lillslam på solid egen färg** (§4.4; frö 20261372). (10)
+  **Öppnarens svar på Smolen och 5-4-inbjudan efter 1NT–2♣–2♦** (§4.3; hål
+  funnet i auktionsdiffen — förr "4♣ ny färg" ur catch-allen). (11) **Kikvakten
+  skarp för hela auktionen** (`it.todo` struken — testet prövar redan varje
+  bud). Kvar som SENARE: kontrerad checkback (NMF efter deras X, facit A i kön).
+  Mätprotokoll + diffklassning: `docs/motorbyte-plan.md` loggen 2026-09-13.
 - **2026-09-12 — Provspels-fynd ur systemrevisorn (2 systemfel, §4.2 + §7.3/7.4).**
   1000 givar bot-mot-bot mot DD-facit. (a) **Öppnarens svar på negativ dubbling
   rebjöd sang FÖRE sin egen 6-korts högfärg** (frö 20260797: 1♥–(2♦)–X–P, 17 hp +

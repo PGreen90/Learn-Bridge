@@ -504,7 +504,10 @@ KLART & LIVE"; `docs/budsystem.md` §9 + de renderade off-book-omnämnandena;
 `.claude/commands/felrapporter.md`; minnet (`motorbytet-manus-till-spelare` KLART,
 `off-book-lacks-state-model` historisk, `MEMORY.md`).
 
-### Etapp 6 — efterkontroll och live
+### Etapp 6 — efterkontroll och live — KLAR 2026-09-13
+**Efterkontrollen KLAR 2026-09-11, ägarens live-prov KLART 2026-09-13**
+("liveproven är klara — gör klart budmotorn"). Slutförandet samma dag: loggen
+2026-09-13 nedan. Planen ursprungligen:
 Alla riggar en sista gång på C:s mergepunkt (kikvakt total, dumparna,
 betydelsesvep, revisorn 1000, `npm test`, `npx tsc`); speldiagnosen orörd;
 bordets serverfunktioner (`bord-motor.ts`/`validera.ts` via `decideCall`)
@@ -805,6 +808,48 @@ driv — LIVE 2026-09-08, `3cd2cfa`) → 16 (bara bok + facit — LIVE 2026-09-0
 
 ## Ändringslogg
 
+- **2026-09-13 — MOTORBYTET SLUTFÖRT (etapp 6 stängd): facit-kön tömd + de
+  sista kända hålen.** Ägarbesked: "liveproven är klara. gör klart budmotorn."
+  Elva regler i ett svep, alla facit FÖRE fix (`motorbyte-facit.test.ts`
+  block "slutförandet" + de gamla `it.todo`-posterna omgjorda till `it`;
+  `auction-2c-slam.test.ts`; kikvaktens `it.todo` struken — testet prövar redan
+  VARJE bud sedan session B): (1) `auctionForce`: svararens 2-lägesfärg efter
+  SANGöppning är inget rondkrav (`ntOpeningTwoLevel`; 3-läget+ som förr — första
+  versionen tog även 4♦ efter transfer, diffen avslöjade det) + betydelsen
+  "flykt över deras X" = avslut · (2) `dontDoublerShowsSuit`
+  (nt-defense-continuations, raden *dont-advance*) · (3)
+  `overcallerPrefersAdvancerSuit` (overcall-continuations, raden *inkliv2*) ·
+  (4) `answerReopeningDoubleCore` undviker ALLA deras färger utom vår
+  öppningsfärg (cue-bjuden) · (5) `responsiveDoublerWeighsAnswer`
+  (double-continuations, raden *x-advancern*; trösklar 13+ utgång / 10–12
+  höjning i högfärg, 13+ i lågfärg — första versionen 16/13 var för snål:
+  partnern är ju upplysningsdubblaren med 12+) + betydelsen "svar på partnerns
+  responsiva dubbling" (ej krav) · (6) `strongDoublerWithoutSuit` (M19, raden
+  *x-dubblaren*) · (7) `negativeDoublerJumpSeat`/`negativeDoublerAnswersJump`
+  (contested-opening, raden *negativ-dubblaren*; gemensam läsare
+  `negativeDoublerTurn`) · (8) `responderEscapesOverStrong2NT`
+  (contested-continuations, raden *svararen-stört*) + betydelsen "svag rymning"
+  (avslut) · (9) `responderThirdDecision` 2♣-gren: `solidSuitTricks` +
+  kaptensregeln mot `TWO_CLUBS_SHOWN_MIN` · (10) `openerThirdBidIn1NTAuction`:
+  Smolen + naturlig 2M-inbjudan efter 2♦ (guarden i `openerThirdDecision`
+  öppnad för `Smolen`) — hål funnet i avvikelsediffen, inte i facit-kön.
+  **Mätning (protokollet i §4b):** baslinje = `c4d7ac7` (baslinjedumparna
+  sparade med suffixet *slutford-baslinje* i revisor-output/ via `DUMP_OUT`/`AVVIK_OUT`);
+  diffen klassad per mönster med ett aggregeringsskript (första skillnaden
+  "regel <källa> → regel <källa>"). **Mätt** (kommandona i §4b:s protokoll, efter
+  `git checkout c4d7ac7 -- src` för baslinjen): auktionsdiff bot **29 ändrade
+  bud** (+18 samma bud/annan källa) av 3000, avvik **59** (+11) av 13964,
+  **0 olagliga tabellbud**. Klassning: **alla a/b, ingen c.** b-listan i
+  mönster: catch-allens "krav – ny färg/stödjer partnern" efter `1NT–(X)–2x` →
+  pass (flykten står) · partner-färgs 2♣/2♦/2♠/4♠ från den starka dubblaren →
+  1NT/2NT/3NT/höjning efter styrka · responsiv-dubblarens 5♣/4♦/4♥ på 8–10 hp →
+  pass · "advancern tävlar till fiten" 3M på partnerns TVINGADE svar utan att de
+  bjudit vidare → pass · återöppningssvaret 4♦ i deras transferfärg → 3♠, 3♦ i
+  inklivsfärgen → 2NT · Smolen-svaret 3NT (partner-färg) → 4M med 3-korts stöd ·
+  negativ-dubblaren pass → 4M på invit-hoppet · 2♣-linjen 4M/5m → 6m på solid
+  färg (bara i avvik-riggen — botarna når inte läget på 3000 givar).
+  **Kvar (SENARE):** kontrerad checkback (facit A, `it.todo`). Ingen gate i
+  tabellen; kikvakten grön; `npx tsc` rent; hela sviten grön (`npm test`).
 - **2026-09-11 — Etapp 5 SESSION B KLAR: manuset rivet (0 ändrade bud per
   konstruktion).** `decideCallTraced` (`auction-live.ts`) krympt till fakta →
   `decideFromTable` → laglighetsvakt → `pass (ingen regel)`; hela det gamla

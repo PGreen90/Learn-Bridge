@@ -130,7 +130,7 @@
 //        öppnaren inte höjde (NYTT: egen 6+ före fit, 13+ → utgång, annars
 //        pass). Kunskapen bor i `contested-continuations.ts`.
 
-import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
+import type { Bid, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
@@ -152,17 +152,17 @@ import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { advancerActsInCompetition, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
-import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
+import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, dontDoublerShowsSuit, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
 import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preemptFollowUpSeat, respondInPreemptCompetition, respondToOvercallNTSystemsOn } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
+import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
-import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, strongDoublerSecondRebid, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
-import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat } from './contested-continuations'
-import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerContinues, negativeDoublerSeat, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
+import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
+import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
+import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -884,8 +884,9 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
     }
   }
 
-  // Inbjudan i en 1NT-auktion (Stayman/transfer, felrapport #37).
-  if (openCall === '1NT' && second.rule === 'inbjudan') {
+  // Inbjudan i en 1NT-auktion (Stayman/transfer, felrapport #37) — och Smolen
+  // efter Stayman (slutförandet 2026-09-13: svaret fanns bara efter 2NT).
+  if (openCall === '1NT' && (second.rule === 'inbjudan' || second.rule === 'Smolen')) {
     const t = openerThirdBidIn1NTAuction(response, rebid, second, hand)
     if (t) return t
   }
@@ -949,10 +950,55 @@ export interface ThirdDecision {
  * auktionen. null = ingen regel (det gamla lagret tar vid: fjärde färg med
  * 18+ hp, utgångsbud som passas …). Delas av tabellraden och manuset.
  */
+/**
+ * Säkra stick i en SOLID långfärg — en färg som spelar för sig själv utan
+ * stöd: AKQJ + 6 kort (motståndarnas sju är slut eller under mina efter tre
+ * ronder, utom vid 7-0) eller AKQ + 7 kort. Då är varje kort ett stick;
+ * annars 0. Läser bara EN hand.
+ */
+function solidSuitTricks(hand: Hand, suit: Suit): number {
+  const ranks = new Set(hand.filter((c) => c.suit === suit).map((c) => c.rank))
+  const has = (...r: Rank[]) => r.every((x) => ranks.has(x))
+  if ((ranks.size >= 6 && has('A', 'K', 'Q', 'J')) || (ranks.size >= 7 && has('A', 'K', 'Q'))) return ranks.size
+  return 0
+}
+
+/** 2♣-öppningens visade minimum (§4.4: 22+ hp balanserat eller ~9 spelstick). */
+const TWO_CLUBS_SHOWN_MIN = 22
+
 export function responderThirdDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, second: ResponseResult, third: ResponseResult, hand: Hand): ThirdDecision | null {
   if (third.call === 'P') return null
   const openerSuit = suitOf(openCall)
   const respSuit = suitOf(response.call)
+
+  // 2♣-linjen, svararens tredje bud (facit-kön frö 20261372, motorbytets
+  // slutförande 2026-09-13): min SOLIDA egna långfärg (spelar utan stöd — se
+  // `solidSuitTricks`) visad två gånger (positivt svar + rebud), öppnaren
+  // rebjöd sin egen färg två gånger (ingen fit för min). Kaptensregeln (§5.2)
+  // mot 2♣:s visade minimum 22: mina hp + 22 ≥ 33 → slam, och trumfen blir
+  // min solida färg (den behöver ingen fit — partnern kan vara renons). Eller
+  // rå stickstyrka: 9+ egna säkra stick mot 2♣:s ≈ 3–4. Storslam kräver
+  // visshet → alltid 6, aldrig 7.
+  if (openCall === '2C' && respSuit && suitOf(second.call) === respSuit) {
+    const openerRebidSuit = suitOf(rebid.call)
+    const thirdCb = parseContractBid(third.call)
+    if (openerRebidSuit && openerRebidSuit !== respSuit && suitOf(third.call) === openerRebidSuit && thirdCb && thirdCb.level < 6) {
+      const tricks = solidSuitTricks(hand, respSuit)
+      const slamZone = hcp(hand) + TWO_CLUBS_SHOWN_MIN >= 33
+      if (tricks >= 9 || (tricks > 0 && slamZone)) {
+        const slam = `6${LETTER[respSuit]}` as ResponseResult['call']
+        return {
+          turn: {
+            call: slam, rule: '2♣: lillslam på solid egen färg',
+            explanation: tricks >= 9
+              ? `Min ${SYM[respSuit]} är solid (varje kort ett stick, 9+) och partnerns 2♣ lovar 22+ → 6${SYM[respSuit]} (storslam kräver visshet).`
+              : `Slamzonen nådd mot 2♣:s visade 22+ (33+ ihop) och min ${SYM[respSuit]} är solid — spelar utan stöd → 6${SYM[respSuit]} (storslam kräver visshet).`,
+          },
+          plan: { kind: 'call' },
+        }
+      }
+    }
+  }
   const slamStep = (trump: Suit): ThirdDecision | null => {
     const c = slamContextAfterThird(openCall, response, second, third, trump)
     if (!c) return null
@@ -1631,6 +1677,7 @@ const TABELL: Row[] = [
         overcallerAnswersAdvance(hand, facts) ??
         twoSuiterAnswersPassOrCorrect(hand, facts) ??
         twoSuiterContinues(hand, facts) ??
+        overcallerPrefersAdvancerSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
@@ -1716,6 +1763,7 @@ const TABELL: Row[] = [
         answerCueAfterDouble(hand, facts) ??
         doublerWeighsAdvance(hand, facts) ??
         ownStrongDoubleRebid(hand, facts) ??
+        strongDoublerWithoutSuit(hand, facts) ??
         strongDoublerSecondRebid(hand, facts) ??
         doublerAnswersAdvancers2NT(hand, facts) ??
         penaltyDoubleFirst(hand, facts) ??
@@ -1739,6 +1787,7 @@ const TABELL: Row[] = [
         answerCueAfterDouble(hand, facts) ??
         advanceStrongDoubleRebid(hand, facts) ??
         answerStrongDoubleGameForce(hand, facts) ??
+        responsiveDoublerWeighsAnswer(hand, facts) ??
         penaltyDoubleFirst(hand, facts) ??
         doubleSideCompetes(hand, facts)
       return k ? asCall(facts.seat, k) : null
@@ -1800,11 +1849,13 @@ const TABELL: Row[] = [
       return k ? asCall(facts.seat, k) : null
     },
   },
+  // Negativ-dubblarens andra tur: partnerns billiga svar (`negativeDoublerContinues`)
+  // eller partnerns invit-hopp (`negativeDoublerAnswersJump`, slutförandet 2026-09-13).
   {
     id: 'negativ-dubblaren',
-    läge: (f) => negativeDoublerSeat(f) !== null,
+    läge: (f) => negativeDoublerSeat(f) !== null || negativeDoublerJumpSeat(f) !== null,
     välj: ({ hand, facts }) => {
-      const k = negativeDoublerContinues(hand, facts)
+      const k = negativeDoublerContinues(hand, facts) ?? negativeDoublerAnswersJump(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },
@@ -1879,6 +1930,7 @@ const TABELL: Row[] = [
         cueRaiserContinues(hand, facts) ??
         answerPartnersCue(hand, facts) ??
         negativeDoublerCue(hand, facts) ??
+        responderEscapesOverStrong2NT(hand, facts) ??
         responderAfterFreeBid(hand, facts)
       if (k) return asCall(facts.seat, k)
       // Familj 5 (c + balansering): svararens balanserings-/återöppningssvar och
@@ -1904,7 +1956,7 @@ const TABELL: Row[] = [
     id: 'dont-advance',
     läge: (f) => ntDefenseFollowUpSeat(f),
     välj: ({ hand, facts }) =>
-      advancePartnerDONT(hand, facts) ?? correctOwnDONTX(hand, facts) ?? correctOwnDONTTwoSuiter(hand, facts),
+      advancePartnerDONT(hand, facts) ?? correctOwnDONTX(hand, facts) ?? correctOwnDONTTwoSuiter(hand, facts) ?? dontDoublerShowsSuit(hand, facts),
   },
   // Störning över VÅRT 1NT: Lebensohl (deras naturliga inkliv), värde-X-flödet
   // (deras DONT + partnerns straff-X), och flykt-straffet efter vår XX. null →

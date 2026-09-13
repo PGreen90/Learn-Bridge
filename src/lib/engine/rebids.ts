@@ -1115,6 +1115,34 @@ export function openerThirdBidIn1NTAuction(
         ? acceptGame('3NT', 'accepterar den balanserade inbjudan')
         : decline('ingen fit och ingen extra styrka')
     }
+    // Smolen (svararen 5-4 i högfärgerna, utgångskrav) efter vårt 2♦: 3♥ = 5
+    // spader + 4 hjärter, 3♠ = 5 hjärter + 4 spader. 4 i femkortsfärgen med 3+
+    // stöd (5-3-fiten), annars 3NT. Förr fanns svaret bara efter 2NT-öppningen
+    // → efter 1NT föll öppnaren till catch-allen ("4♣ ny färg"; motorbytets
+    // slutförande 2026-09-13, avvikelsedumpen 20270151).
+    if (rebid.call === '2D' && (second.call === '3H' || second.call === '3S')) {
+      const five: Suit = second.call === '3H' ? 'spades' : 'hearts'
+      const call = len[five] >= 3 ? `4${BID[five]}` : '3NT'
+      return {
+        call, rule: 'väljer utgång efter Smolen',
+        explanation: len[five] >= 3
+          ? `Smolen: partnern har 5 ${SYM[five]} och 4 i den andra högfärgen – 3+ stöd → ${pretty(call)} (5-3-fiten).`
+          : `Smolen: partnern har 5 ${SYM[five]} och 4 i den andra högfärgen – utan 3-korts stöd → 3NT.`,
+      }
+    }
+    // Naturlig 2M efter vårt 2♦ = 5-4 i högfärgerna (5 i den bjudna), inbjudan:
+    // 3+ stöd → 4M med maximum, annars pass; utan stöd → 3NT med maximum.
+    if (rebid.call === '2D' && (second.call === '2H' || second.call === '2S')) {
+      const five: Suit = second.call === '2H' ? 'hearts' : 'spades'
+      if (len[five] >= 3) {
+        return accepts(five)
+          ? acceptGame(`4${BID[five]}`, `accepterar inbjudan med 3-korts stöd i partnerns 5-korts ${SYM[five]}`)
+          : decline(`3-korts stöd i ${SYM[five]} men ingen extra styrka`)
+      }
+      return accepts(null)
+        ? acceptGame('3NT', 'accepterar den naturliga inbjudan utan fit')
+        : decline('ingen fit och ingen extra styrka')
+    }
     return null
   }
 

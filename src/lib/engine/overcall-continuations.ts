@@ -766,3 +766,44 @@ export function asCall(seat: Seat, k: Kunskap): ResolvedCall {
   return { seat, bid: k.call as Bid, rule: k.rule, explanation: k.explanation }
 }
 
+
+/**
+ * INKLIVARENS preferens mellan advancerns två färger (pliktsvepet K2, facit-kön
+ * frö 20263370; byggd i motorbytets slutförande 2026-09-13): jag klev in
+ * naturligt, partnern (advancern) har visat två egna färger (den första lovar
+ * 5+) och den andra är senaste kontraktsbudet — jag väljer. Samma kriterier
+ * som advancerns preferens (§7.1, felrapport #56): kostar preferensen ingen
+ * nivå räcker lika långt eller längre stöd i första färgen; kostar den en
+ * nivå krävs klar skillnad (2+ kort). Aldrig förbi utgång; bättre stöd i den
+ * andra färgen → null (pass, den står).
+ */
+export function overcallerPrefersAdvancerSuit(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const open = f.opening
+  if (!open || f.weOpened) return null
+  const ourBids = f.ourContractBids
+  if (ourBids.length !== 3 || ourBids[0].seat !== f.seat || ourBids[1].seat !== f.partner || ourBids[2].seat !== f.partner) return null
+  const mine = parseContractBid(ourBids[0].bid)!
+  const first = parseContractBid(ourBids[1].bid)!
+  const second = parseContractBid(ourBids[2].bid)!
+  if (mine.strain === 'NT' || first.strain === 'NT' || second.strain === 'NT') return null
+  if (first.strain === second.strain || first.strain === mine.strain || second.strain === mine.strain) return null
+  if (f.theirStrains.has(first.strain) || f.theirStrains.has(second.strain)) return null
+  if (f.lastContract !== ourBids[2]) return null
+  if (f.history.slice(f.history.indexOf(ourBids[2]) + 1).some((c) => c.bid !== 'P')) return null
+
+  const len = lengths(hand)
+  const a = SUIT_OF_LETTER[first.strain]
+  const b = SUIT_OF_LETTER[second.strain]
+  const bid = cheapestBidIn(f.history, f.seat, first.strain)
+  if (!bid || !legalCalls(f.history, f.seat).includes(bid as Bid)) return null
+  const level = parseContractBid(bid)!.level
+  const gameLevel = isMajorStrain(first.strain) ? 4 : 5
+  if (level > gameLevel) return null
+  const costsLevel = level > second.level
+  const clearlyBetter = costsLevel ? len[a] >= len[b] + 2 : len[a] >= len[b]
+  if (!clearlyBetter) return null
+  return {
+    call: bid, rule: 'preferens till advancerns första färg',
+    explanation: `Partnern visade ${SWE_SYM[first.strain]} (5+) och ${SWE_SYM[second.strain]} och bad mig välja — minst lika bra stöd i den första → ${prettyBid(bid)} (preferens, ej krav).`,
+  }
+}
