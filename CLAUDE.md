@@ -17,7 +17,7 @@ bordet.** Bakgrund `docs/bord-plan.md` "Medvetet utanför v1".
   live-prov återstår.** `bord-genomgang.ts` + `BordGenomgang.tsx` + knappen
   "Genomgång av given →" i giv-klar-vyn (alla vid bordet). Detalj
   `docs/bord-plan.md` delleveranserna.
-- **Etapp 2 DD-jämförelsen: BYGGD 2026-09-14, PCD väntar på ägaren.** Spiken
+- **Etapp 2 DD-jämförelsen: KLAR & LIVE 2026-09-14 (`1af5972`), ägarens live-prov återstår.** Spiken
   gick (`bridge-dds` WASM buntas i api/bord.js, tabell 5–150 ms): servern
   bakar in `dd` i giv-klar (`api-src/_lib/dd-facit.ts`), klienten visar facit
   + par (`src/lib/engine/dd-facit.ts`, `DdFacitRad`). Bordet kan inte
