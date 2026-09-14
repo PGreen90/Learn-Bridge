@@ -12,7 +12,7 @@ import type { Contract, PlayedCard, Trick } from '../lib/engine/play'
 import { bySuit, FLAT_OVERLAP, handSuitsTrumpFirst } from '../lib/cardLayout'
 import { AuctionGrid } from './AuctionGrid'
 import { BidChip } from './BidChip'
-import { Felt } from './Felt'
+import { Felt, type FeltTone } from './Felt'
 import { PlayingCard } from './PlayingCard'
 import { SideStack } from './SideStack'
 
@@ -39,6 +39,7 @@ export function PlayReplay({
   tricks,
   calls,
   explanations = 'full',
+  tone = 'club',
 }: {
   deal: Deal
   contract: Contract
@@ -46,6 +47,8 @@ export function PlayReplay({
   calls: ResolvedCall[]
   /** Budstöd av → 'minimal': auktionsvyn visar bara chip + regelnamn + ALERT. */
   explanations?: 'full' | 'minimal'
+  /** Dukens ton: vänner-bordets genomgång kör den vinröda duken. */
+  tone?: FeltTone
 }) {
   // `played` = antal färdigvisade stick. `anim` = hur många kort i NÄSTA stick
   // som hittills lagts på bordet (1–4 under uppspelningen, 0 = ingen uppspelning).
@@ -111,7 +114,7 @@ export function PlayReplay({
     // skärmen och Nord får notch-säker toppmarginal — förr låg Nords kort under
     // urtaget på iPhone. Alla händer ritas med de FASTA xl-korten (64×96,
     // kortstorleksregeln 2026-08-02) — omspelningen var sista vyn med småkort.
-    <Felt className="flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none">
+    <Felt tone={tone} className="flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none">
       {/* Nord: sammanhängande kortrad överst (samma look som Syd i spelfasen). */}
       <div className="flex justify-center pt-[calc(0.75rem+env(safe-area-inset-top))]">
         <Fan cards={handCards('N')} />

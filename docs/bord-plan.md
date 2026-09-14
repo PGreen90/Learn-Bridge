@@ -133,13 +133,24 @@ bord som stått stilla > 2 h innan det globala taket räknas.
   domar-vakten mot drag från pausad stol.
 - **4D** — läge 1 (facit-genomgången) + läge 2 (spelförar-rotationen +
   autobuden i snabb takt) + cron-städningen + dokumenten.
+- **SENARE-listan etapp 1 (2026-09-14) — rondgenomgången per giv:** knappen
+  "Genomgång av given →" i giv-klar-vyn (alla vid bordet, medan ägaren väntar
+  med nästa giv) öppnar samma stegvisa vy som tävlingens "Så spelade X given"
+  (`PlayReplay`, vinröd duk): auktionen med systemiska förklaringar ur buden
+  (aldrig ur någons hand) och sedan stick för stick, i bordets verkliga stolar
+  med namnen från stolarna. Allt ur loggen — `byggBordGenomgang`
+  (`bord-genomgang.ts`: `klar.hands` = hela given, `verkligaStick` ur
+  korthändelserna, `annoteraSystemiskt`); ingen serverändring. Stängs själv
+  när given byts. Inga botmotiveringar (serverns resonemang lämnar aldrig
+  servern). Facit `bord-genomgang.test.ts` + röktest `BordSpel.test.tsx`.
 
 ## Medvetet utanför v1 (kandidater till SENARE)
 
 - **Claim/concede/ångra vid bordet** — kräver motpartsgodkännande; design­fråga.
 - **DD-jämförelsen** ("hur bra spelade vi mot facit") — ägarbeslut: vidare-
   utveckling; datat finns redan i loggen.
-- **Rondgenomgång per giv** — datat finns (logg + reveal).
+- ~~**Rondgenomgång per giv**~~ — BYGGD 2026-09-14 (SENARE-listan etapp 1,
+  se delleveranserna ovan).
 - **Kortförklaringar under spel** ("Varför spelade boten så?") — serverns
   botresonemang skickas inte till klienten.
 - **Kortflygningen och klockor/chatt/kibitzers** — polish respektive

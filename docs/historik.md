@@ -2664,3 +2664,21 @@ Browser-verifierat i Spela kort (handen syns efter 2 s, trycket sveper; ringen
 mätt med getBoundingClientRect vid 375×812, 504×909 och 1280×700: 200 px,
 ingen överlapp med kort utanför stickytan, ingen klippning). Ej automattestat:
 bordets kö-vakt (kräver hook-rigg med mockad backend).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 1: rondgenomgången per giv
+
+Ägaren valde NÄST 1 (bordens SENARE-lista) och godkände körordningen
+rondgenomgång → DD-jämförelse → claim. Etapp 1 byggd samma dag, facit före
+kod: ren modul `src/pages/bord/bord-genomgang.ts` (`byggBordGenomgang`:
+bordets projicerade givläge → hela given ur giv-klar-revealen, kontraktet,
+sticken ur korthändelserna via `verkligaStick`, buden systemiskt förklarade via
+`annoteraSystemiskt`; null när given inte är klar/utpassad), vyn
+`BordGenomgang.tsx` (topprad med kontrakt/stick/poäng, namnraden i verkliga
+stolar, `PlayReplay` som fick en `tone`-prop för den vinröda duken) och knappen
+"Genomgång av given →" i BordSpels giv-klar-vy för alla vid bordet; en effekt
+stänger genomgången när `lage.giv` byts. Ingen serverändring. Facit
+`bord-genomgang.test.ts` (motorns genomspelning som facit för sticken) +
+röktest i `BordSpel.test.tsx` (knapp → vy → tillbaka). Bordet kan inte
+provspelas lokalt (serverfunktionerna bara i molnet) → ägarens live-prov efter
+deploy. Kvar i NU: etapp 2 (DD-jämförelsen, WASM-provet först) och etapp 3
+(claim, designfrågor med ägaren före kod).
