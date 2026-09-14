@@ -18,8 +18,8 @@ leder boten fylls en tunn guldring runt högen i 2/3/4 s (snabb/normal/lugn,
 ägarens skiss) och sedan svep; tryck/mellanslag/Enter går alltid vidare. Facit
 `src/pages/play/stickvantan.test.tsx`, tiderna i `tempo.ts` (SWEEP_HOLD +
 sweepHint), detalj `docs/historik.md` 2026-09-14. Status: byggd, hela sviten
-grön, browser-verifierad (hand + ring, mätt utan överlapp 375/504/1280 px) —
-PCD väntar på ägaren.
+grön, browser-verifierad (hand + ring, mätt utan överlapp 375/504/1280 px).
+**KLAR & LIVE 2026-09-14** (mergepunkt `e57e6a9`).
 **Nästa NU (ägarbeslut 2026-09-14, körordningen bestämd):** bordens SENARE-lista
 i ordningen 1) rondgenomgången per giv (återanvänd `byggGranskning` +
 `PlayReplay`, datat finns i loggen) → 2) DD-jämförelsen (kräver serverräknat DD
