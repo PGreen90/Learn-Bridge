@@ -1790,6 +1790,26 @@ X–P–P–(2♣)–P–**2♠** med ♠KT9 ♥AT876 ♦73 ♣J87 (förr pass).
 | 1NT / 2NT | naturlig, stopp i deras färg, lämplig styrka |
 | fit-jump (hopp i ny färg) | bra stöd + egen sidofärg, inbjudande+ |
 
+**Advancern med stöd PASSAR hellre än bjuder ny färg (ägarrapport 2026-09-14,
+dagens tävling bricka 12).** Inklivet lovar 5+, så **3+ stöd är fit**. Räcker
+handen inte till en höjning (t.ex. minimum mot partnerns **balansinkliv**, där
+kungen redan är lånad — rabatten ovan) **passar** advancern och **tävlar vidare
+om motståndarna bjuder igen**: mot ett 1-lägesinkliv höjer 3+ stöd med **6+ hp**
+till **2-läget** så snart motståndarna bjudit eller dubblat efter inklivet
+(8+ trumf, lagen om totala stick) — oavsett vad stödpoängen efter rabatten
+säger; 3-läget kräver de vanliga poängen. En ny färg **förnekar stöd** och bjuds
+bara utan fit. Advancern efter ett balansinkliv svarar i övrigt med samma tabell
+som i direkt sits (ny färg 5+/8+, sang med stopp), med rabatten på höjningen.
+*Bricka 12: 1♦–P–P–(1♥)–P–? med ♠KQ42 ♥QJ32 ♦J2 ♣653 → **pass** (förr 1♠, och
+kontraktet blev 1♠ i en 4-2); bjuder öppnaren 2♦ → **2♥**.*
+
+**Inklivaren rättar till egen färg efter advancerns nya färg (samma rapport).**
+Advancerns nya färg är ej krav — men med **högst två kort** där går inklivaren
+**tillbaka till sin egen 5+ färg** på billigaste nivån (ej krav; på 3-läget bara
+med 6+ kort, aldrig förbi utgång). Med 3+ kort i advancerns färg passar/höjer
+inklivaren som förut (5-3 räcker). *Bricka 12: …–(1♥)–P–(1♠)–P → **2♥** med
+♠53 ♥AT965 (förr pass, i 4-2:an).*
+
 **Inklivarens andra färg = "välj" (felrapport #56).** Kliver partnern in och
 bjuder sedan en **ny färg** (t.ex. 1♥–(1♠)–3♥–P–P–**4♦**) visar hen två färger
 och ber advancern **välja** — det är inget styrkebud att passa på poäng.
@@ -4651,3 +4671,18 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   aldrig kör över den och återöppnar en avgjord auktion. Budneutralt (samma bud,
   förklaringstexten oförändrad); §4.3/§5.1:s avböjande är nu formellt ett signoff.
   Kod, inte systemändring för spelaren.
+
+- **2026-09-14** – **Ägarrapport, dagens tävling bricka 12 (§7.1):** advancern
+  efter partnerns BALANSINKLIV får en egen tabellrad (`advance-balans`,
+  `balancingAdvanceSeat` i overcall-continuations.ts) — förr föll sitsen till
+  slutkärnans catch-all, som bjöd ny färg trots stöd (1♠ på ♠KQ42 ♥QJ32 mot
+  partnerns 1♥ → 1♠ i en 4-2). Tre regler: (1) **fit utan höjning → pass,
+  aldrig ny färg** (`advancerFitPass`, balancing-continuations.ts — ligger även
+  i catch-allen `partnerSuitResponse` så advancern i konkurrens får samma
+  vett); (2) **tävlande höjning till 2-läget** mot ett 1-lägesinkliv med 3+ stöd
+  och 6+ hp när motståndarna bjudit vidare, oavsett rabatten (`raiseWithFit`,
+  fit-raise.ts); (3) **inklivaren rättar till egen färg** med högst två kort i
+  advancerns nya färg (`overcallerCorrectsToOwnSuit`, raden *inkliv2*). Facit:
+  `auction-advancer-balansinkliv.test.ts` (bricka 12 exakt + varianter).
+  Bricka 12 landar nu i 1♥ av N (`DUMP_TAVLING=2026-09-14:12 npx vitest run
+  src/lib/engine/speldump.probe.test.ts`).

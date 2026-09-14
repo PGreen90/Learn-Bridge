@@ -20,7 +20,7 @@ import type { ResolvedCall } from '../bidding'
 import { parseContractBid, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { cheapestBidIn, legalCalls, SWE_SYM } from './auction-rules'
 import { answerReopeningDoubleCore } from './contested-continuations'
-import { raiseWithFit } from './fit-raise'
+import { partnerBalanced, raiseWithFit } from './fit-raise'
 import { hcp, isBalanced, lengths } from './hand'
 import { asCall } from './overcall-continuations'
 import { side } from './play'
@@ -134,7 +134,39 @@ export function partnerSuitResponse(hand: Hand, f: AuctionFacts): ResolvedCall |
   if (outstandingArtificialForce(f)) return null
   const partnerSuit = f.partnerLastSuit
   if (!partnerSuit) return null // partnern har inte visat en färg → vi hittar inte på något
-  return raiseWithFit(hand, f, partnerSuit) ?? respondWithoutFit(hand, f, partnerSuit)
+  return raiseWithFit(hand, f, partnerSuit) ?? advancerFitPass(hand, f, partnerSuit) ?? respondWithoutFit(hand, f, partnerSuit)
+}
+
+/**
+ * ADVANCERN MED FIT MEN UTAN HÖJNING → PASS, aldrig ny färg (ägarrapport
+ * 2026-09-14, bricka 12). Partnerns färginkliv över deras öppning lovar 5+, så
+ * 3+ stöd är fit — säger höjningskunskapen "för svagt" (t.ex. minimum mot en
+ * balansering där kungen redan är lånad) PASSAR advancern och tävlar vidare om
+ * motståndarna bjuder igen. En ny färg förnekar stöd (§7.1) — förr föll
+ * handen till `respondWithoutFit` och bjöd 1♠ på ♠KQ42 ♥QJ32 mot partnerns 1♥,
+ * så kontraktet blev 1♠ i en 4-2 i stället för 1♥ i en 9-korts fit. Bara
+ * advancerns FÖRSTA egna aktion (inget eget icke-pass hittills, partnerns
+ * inkliv är vår sidas enda kontraktsbud); senare turer ägs av andra regler.
+ */
+export function advancerFitPass(
+  hand: Hand,
+  f: AuctionFacts,
+  partnerSuit: { strain: string; level: number },
+): ResolvedCall | null {
+  if (!f.opening || f.weOpened) return null
+  const overcall = f.ourContractBids[0]
+  if (!overcall || overcall.seat !== f.partner || f.ourContractBids.length !== 1) return null
+  const cb = parseContractBid(overcall.bid)
+  if (!cb || cb.strain === 'NT' || cb.strain !== partnerSuit.strain || f.theirStrains.has(cb.strain)) return null
+  if (f.history.some((c) => c.seat === f.seat && c.bid !== 'P')) return null
+  if (lengths(hand)[SUIT_OF_LETTER[cb.strain]] < 3) return null
+  const balanserat = partnerBalanced(f, partnerSuit)
+  return {
+    seat: f.seat,
+    bid: 'P' as Bid,
+    rule: 'pass med fit',
+    explanation: `Stöd för partnerns ${SWE_SYM[cb.strain]} (3+ mot ett inkliv = fit) men inget att höja på${balanserat ? ' – partnern lånade redan kungen i balanseringen' : ''} → pass; vi tävlar vidare om motståndarna bjuder igen. Ny färg skulle förneka stödet.`,
+  }
 }
 
 /**

@@ -2622,3 +2622,17 @@ givar vid sidöppning och uppdatera-knappen; raden visar "ej inskickad", och
 byter inte version mitt i en session, servern validerar botbud med ny motor)
 finns kvar som mekanism men slog inte här: botauktionerna på dagens och
 gårdagens 24 brickor var identiska före/efter morgonens deploy.
+
+## 2026-09-14 — Bricka 12: advancern efter balansinkliv + inklivarens rättelse (ägarrapport)
+
+Ägaren rapporterade dagens bricka 12: 1♦–P–P–(1♥)–P–**1♠** på ♠KQ42 ♥QJ32 ♦J2 ♣653
+(ny färg trots 4-korts stöd), och Nord passade 1♠ med ♠53 ♥AT965 → 1♠ i en 4-2
+i stället för 1♥ i 9-korts fiten. Roten: advancer-raden täckte bara direkt sits;
+balanserings-advancern föll till catch-allen (`partner-färg`), vars "utan fit"-
+gren tände fast fiten fanns (rabatten −3 gjorde höjningen "för svag"). Och
+inklivaren hade ingen regel för advancerns nya färg på 1-läget. Byggt test-
+drivet (facit före fix): ny rad `advance-balans`, `advancerFitPass` (fit →
+pass, aldrig ny färg), tävlande 2-lägeshöjning från 6 hp när de bjuder vidare,
+`overcallerCorrectsToOwnSuit` (≤ 2 kort i advancerns färg → tillbaka till egen
+5+). Budsystem §7.1 + §9. Facit `auction-advancer-balansinkliv.test.ts`; hela
+sviten grön (`npm test`). Bricka 12 landar nu i 1♥ av N.
