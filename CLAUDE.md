@@ -25,7 +25,7 @@ tävlingsinskick får omförsök på servern och skickas om från klienten
 balansinkliv passar med fit (aldrig ny färg) och tävlar 2♥ när de bjuder
 vidare; inklivaren rättar till egen färg med ≤ 2 kort i advancerns nya färg
 (budsystem §7.1/§9, `docs/historik.md` 2026-09-14, facit
-`auction-advancer-balansinkliv.test.ts`). Byggd & grön — PCD väntar på ägaren.
+`auction-advancer-balansinkliv.test.ts`). KLAR & LIVE 2026-09-14 (mergepunkt `0d44eeb`).
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
 fem ägarönskemål i sju etapper + ett följdbeslut (mergepunkter i
