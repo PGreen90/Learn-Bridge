@@ -116,6 +116,30 @@ export function advanceSeat(f: AuctionFacts): { partnerSuit: Suit; theirSuit: Su
  *    konkurrens → null.
  * `contested` = något annat än pass har hänt efter inklivet.
  */
+/**
+ * Advancerns första bud efter partnerns BALANSINKLIV (ägarrapport 2026-09-14,
+ * bricka 12): deras 1-läges färgöppning, två pass (mitt eget och svararens),
+ * partnerns naturliga färginkliv i utpassningsläget (ej hopp), öppnaren
+ * passade → min tur. Samma form som `advanceSeat` men i balanseringen; förr
+ * föll sitsen till slutkärnans catch-all, som bjöd ny färg trots stöd.
+ */
+export function balancingAdvanceSeat(f: AuctionFacts): { partnerSuit: Suit; theirSuit: Suit; level: 1 | 2 } | null {
+  const open = theirOneSuitOpening(f)
+  if (!open) return null
+  const h = f.history
+  if (h.length !== open.index + 5) return null
+  if (h[open.index + 1].bid !== 'P' || h[open.index + 2].bid !== 'P') return null
+  const ov = h[open.index + 3]
+  if (ov.seat !== f.partner) return null
+  const cb = parseContractBid(ov.bid)
+  if (!cb || cb.strain === 'NT' || cb.strain === open.strain) return null
+  if (h[open.index + 4].bid !== 'P') return null
+  const partnerSuit = SUIT_OF_LETTER[cb.strain]
+  const cheapestLevel = rankIdx(partnerSuit) > rankIdx(open.suit) ? 1 : 2
+  if (cb.level !== cheapestLevel) return null // hoppinkliv
+  return { partnerSuit, theirSuit: open.suit, level: cheapestLevel }
+}
+
 export function twoSuiterAdvanceSeat(f: AuctionFacts): { partnerCall: string; theirSuit: Suit; contested: boolean } | null {
   const open = theirOneSuitOpening(f)
   if (!open) return null
@@ -289,6 +313,36 @@ export function overcallerSecondTurn(f: AuctionFacts): { mine: ResolvedCall; adv
   const mineIdx = f.history.indexOf(mine)
   if (f.history.slice(0, mineIdx).some((c) => c.seat === f.seat && c.bid !== 'P')) return null // X först = annan hand
   return { mine, adv }
+}
+
+/**
+ * INKLIVAREN RÄTTAR TILL EGEN FÄRG (ägarrapport 2026-09-14, bricka 12):
+ * advancerns nya färg är naturlig och EJ KRAV (§7.1) — men med högst två kort
+ * där och min egen 5+ inklivsfärg är den nya färgen fel kontrakt (1♠ på 4-2
+ * fast 1♥ hade 9 trumf: ♠53 ♥AT965 passade partnerns 1♠). Billigaste återgång
+ * till inklivsfärgen, ej krav; på 3-läget bara med 6+ kort, aldrig förbi utgång.
+ * 3+ kort i advancerns färg → pass/höjning som förut (5-3 räcker). Fit-jumpen
+ * (hopp i ny färg) ägs av `overcallerAnswersFitJump` och rörs inte.
+ */
+export function overcallerCorrectsToOwnSuit(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const t = overcallerSecondTurn(f)
+  if (!t) return null
+  const mineCb = parseContractBid(t.mine.bid)!
+  const advCb = parseContractBid(t.adv.bid)!
+  if (advCb.strain === 'NT' || advCb.strain === mineCb.strain || f.theirStrains.has(advCb.strain)) return null
+  if (f.lastNonPass !== t.adv) return null // bara pass efter advancerns färg
+  if (isJump(f.history, t.adv)) return null // fit-jump = annan regel
+  const len = lengths(hand)
+  if (len[SUIT_OF_LETTER[advCb.strain]] >= 3) return null // 5-3 räcker – passa/höj
+  const bid = cheapestBidIn(f.history, f.seat, mineCb.strain)
+  if (!bid || !legalCalls(f.history, f.seat).includes(bid as Bid)) return null
+  const level = parseContractBid(bid)!.level
+  if (level > 2 && len[SUIT_OF_LETTER[mineCb.strain]] < 6) return null
+  if (level > (isMajorStrain(mineCb.strain) ? 4 : 5)) return null
+  return {
+    call: bid, rule: 'rättelse till inklivsfärgen',
+    explanation: `Partnern visade egen färg ${SWE_SYM[advCb.strain]} (ej krav) och jag har högst två kort där → tillbaka till min ${SWE_SYM[mineCb.strain]} (5+ kort), ${prettyBid(bid)} – ej krav.`,
+  }
 }
 
 /**

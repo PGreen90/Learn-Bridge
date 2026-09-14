@@ -151,14 +151,15 @@ import { respondTo2NT, respondTo3NT } from './responses-2nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
-import { advancerActsInCompetition, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
+import { advancerActsInCompetition, advancerFitPass, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
+import { raiseWithFit } from './fit-raise'
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, dontDoublerShowsSuit, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
 import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preemptFollowUpSeat, respondInPreemptCompetition, respondToOvercallNTSystemsOn } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { advanceSeat, advancerCompetesToFit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
+import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
@@ -1655,6 +1656,24 @@ const TABELL: Row[] = [
       return nt ? asCall(facts.seat, nt) : null
     },
   },
+  // Advancerns första bud efter partnerns BALANSINKLIV (ägarrapport 2026-09-14,
+  // bricka 12: 1♦–P–P–1♥–P–?). Höjningskunskapen med advancer-rabatten
+  // (`raiseWithFit`) först; fit utan höjning → PASS (`advancerFitPass`, aldrig
+  // ny färg med stöd); utan stöd gäller direkt-sitsens tabell (`advanceOvercall`:
+  // ny färg 5+/8+, sang med stopp, annars pass). Förr föll sitsen till
+  // slutkärnans catch-all, som bjöd 1♠ på ♠KQ42 ♥QJ32 mot partnerns 1♥.
+  {
+    id: 'advance-balans',
+    läge: (f) => balancingAdvanceSeat(f) !== null && f.partnerLastSuit !== null,
+    välj: ({ hand, facts }) => {
+      const a = balancingAdvanceSeat(facts)!
+      const partnerSuit = facts.partnerLastSuit!
+      const fit = raiseWithFit(hand, facts, partnerSuit) ?? advancerFitPass(hand, facts, partnerSuit)
+      if (fit) return fit
+      const r = advanceOvercall(hand, a.partnerSuit, a.theirSuit, a.level)
+      return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
+    },
+  },
   // Inklivarens andra tur: jag var först på vår sida (inklivaren) över deras
   // öppning. Kunskapsfunktionerna läser själva sitt exakta läge ur auktionen
   // (mitt naturliga inkliv + partnerns cue/nya färg; mitt 1NT-inkliv +
@@ -1675,6 +1694,7 @@ const TABELL: Row[] = [
         overcallerAnswersFitJump(hand, facts) ??
         overcallerRaisesAdvance(hand, facts) ??
         overcallerAnswersAdvance(hand, facts) ??
+        overcallerCorrectsToOwnSuit(hand, facts) ??
         twoSuiterAnswersPassOrCorrect(hand, facts) ??
         twoSuiterContinues(hand, facts) ??
         overcallerPrefersAdvancerSuit(hand, facts) ??

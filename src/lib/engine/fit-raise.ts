@@ -88,6 +88,18 @@ export function partnerSimpleOvercalled(f: AuctionFacts, partnerSuit: { strain: 
 }
 
 /**
+ * Har motståndarna bjudit eller dubblat EFTER partnerns inkliv i färgen? Då är
+ * auktionen tävlande — höjningen till 2-läget är en tävlande höjning, inte en
+ * styrkevisning.
+ */
+export function opponentsBidAfterPartnerOvercall(f: AuctionFacts, partnerSuit: { strain: string }): boolean {
+  const { history, seat } = f
+  const idx = history.findIndex((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid)?.strain === partnerSuit.strain)
+  if (idx === -1) return false
+  return history.slice(idx + 1).some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')
+}
+
+/**
  * Hur många trumf vi kräver för att kalla det fit i partnerns färg. Öppnade
  * partnern den HÖGfärgen på 1-läget lovar den 5+ → 3-korts stöd räcker (8-korts
  * fit). Samma sak när partnern HOPPINKLIVIT (6+ kort lovade). I alla andra fall
@@ -202,7 +214,21 @@ export function raiseWithFit(
   // F3-facit: 1♥–P–P–1♠ med 11 sp höjdes till invit-3♠ där 2♠ räcker).
   const balanced = partnerBalanced(f, partnerSuit)
   const sp = dummyPoints(hand, suit).dummyPoints - (balanced ? 3 : 0)
-  if (sp < 6) return null // för svagt för att höja
+  // TÄVLANDE höjning till 2-LÄGET (ägarrapport 2026-09-14, bricka 12): mot
+  // partnerns enkla 1-lägesinkliv (5+ lovade) är 3+ stöd 8+ trumf — har
+  // motståndarna bjudit vidare EFTER inklivet tävlar vi till 2-läget på lagen om
+  // totala stick från 6 hp (K3:s golv), även när stödpoängen efter rabatten/
+  // avdragen säger "för svagt". Rabatten ska hindra utgångs-/invitblås, inte
+  // att fiten säljs på 2-läget (giv 12: ♠KQ42 ♥QJ32 ♦J2 ♣653 passade 2♦ mot
+  // partnerns balanserade 1♥ med nio trumf). Bara den billigaste höjningen och
+  // bara på 2-läget — 3-läget kräver de vanliga poängen.
+  const competingTwoLevel =
+    sp < 6 &&
+    hcp(hand) >= 6 &&
+    partnerSimpleOvercalled(f, partnerSuit) &&
+    opponentsBidAfterPartnerOvercall(f, partnerSuit) &&
+    parseContractBid(cheapestBidIn(history, seat, partnerSuit.strain) ?? '')?.level === 2
+  if (sp < 6 && !competingTwoLevel) return null // för svagt för att höja
 
   // En dubbelton-fit som bygger på ett TVINGAT ombud (partnerns svar på min
   // egen dubbling) höjs bara med UTGÅNGSVÄRDEN (13+ stödpoäng, då jagar

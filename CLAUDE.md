@@ -21,6 +21,12 @@ tävlingsinskick får omförsök på servern och skickas om från klienten
 (`docs/historik.md` 2026-09-13). **Nästa session:** ägaren väljer NU ur
 🟢 NÄST (regeln i `docs/arbetsrutiner.md`); rekommendation NÄST 1.
 
+**Nyss klart (2026-09-14): bricka 12-rapporten** — advancern efter partnerns
+balansinkliv passar med fit (aldrig ny färg) och tävlar 2♥ när de bjuder
+vidare; inklivaren rättar till egen färg med ≤ 2 kort i advancerns nya färg
+(budsystem §7.1/§9, `docs/historik.md` 2026-09-14, facit
+`auction-advancer-balansinkliv.test.ts`). Byggd & grön — PCD väntar på ägaren.
+
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
 fem ägarönskemål i sju etapper + ett följdbeslut (mergepunkter i
 `docs/historik.md`): två tryck alltid · tillsvidare-% (40 % per ospelad giv) +
