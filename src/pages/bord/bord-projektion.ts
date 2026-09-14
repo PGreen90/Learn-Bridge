@@ -68,6 +68,16 @@ export interface GivKlarData {
   /** DD-facit (etapp 2, 2026-09-14): serverns tabell + par. Saknas i äldre
    *  händelser eller när lösaren vägrade — klienten döljer då jämförelsen. */
   dd?: DdFacit
+  /** Etapp 3: given avslutades med en claim (resten av sticken utan spel). */
+  claim?: { total: number; stol: Seat }
+}
+
+/** Claimen vid bordet (etapp 3): serverns förslag + svaren hittills. */
+export interface BordClaim {
+  total: number
+  stol: Seat
+  svar: Partial<Record<Seat, boolean>>
+  avbojd: boolean
 }
 
 export interface GivFacit {
@@ -92,6 +102,8 @@ export interface BordSpelLage {
   /** Spelade kort i ordning (verkliga stolar ur händelserna). */
   kort: PlayedCard[]
   klar: GivKlarData | null
+  /** Etapp 3: föreslagen claim i given (null = ingen). */
+  claim: BordClaim | null
   /** Läge 1 (endast budgivning, 4D): facit-genomgången avslutar given. */
   facit: GivFacit | null
   /** Ställningen: klar-givens inbakade totaler, annars grundställningen. */
@@ -120,6 +132,7 @@ export function projiceraBord(
   const kort: PlayedCard[] = []
   let trakarl: BordSpelLage['trakarl'] = null
   let klar: GivKlarData | null = null
+  let claim: BordClaim | null = null
   let facit: GivFacit | null = null
   let bordKlar: BordSpelLage['bordKlar'] = null
   for (const h of events.slice(startIndex + 1)) {
@@ -137,6 +150,13 @@ export function projiceraBord(
       klar = h.data as unknown as GivKlarData
     } else if (h.typ === 'facit') {
       facit = h.data as unknown as GivFacit
+    } else if (h.typ === 'claim-forslag') {
+      const d = h.data as { total: number; stol: Seat }
+      claim = { total: d.total, stol: d.stol, svar: {}, avbojd: false }
+    } else if (h.typ === 'claim-svar' && h.seat && claim) {
+      const ok = (h.data as { ok: boolean }).ok === true
+      claim.svar[h.seat] = ok
+      if (!ok) claim.avbojd = true
     }
   }
 
@@ -157,6 +177,7 @@ export function projiceraBord(
     trakarl,
     kort,
     klar,
+    claim,
     facit,
     stallning: klar?.stallning ?? grundStallning,
     bordKlar,

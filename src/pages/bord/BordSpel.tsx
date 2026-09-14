@@ -18,7 +18,7 @@ import type { Card, Deal, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { legalCalls } from '../../lib/engine/auction-live'
 import { hcp } from '../../lib/engine/hand'
-import { legalCards, side, type PlayState } from '../../lib/engine/play'
+import { dummyOf, legalCards, side, type PlayState } from '../../lib/engine/play'
 import { AuctionGrid } from '../../components/AuctionGrid'
 import { BidChip } from '../../components/BidChip'
 import { BiddingBox } from '../../components/BiddingBox'
@@ -507,6 +507,37 @@ export function BordSpel({
     </Dialog>
   )
 
+  /** Claimen (etapp 3, ägarbeslut 2026-09-14): servern föreslog att spelföraren
+   *  tar resten. Är jag en av dem som ska svara (aktiv människa, inte träkarl,
+   *  inte svarat än) får jag dialogen: OK bokför given, "Spela klart" fortsätter
+   *  spelet för alla. De andra ser en rad om att svar väntar. */
+  const claimAktiv = !!lage && lage.fas === 'spel' && !!lage.claim && !lage.claim.avbojd && !!lage.contract
+  const jagSkaSvara =
+    claimAktiv && lage!.claim!.svar[minStol] === undefined && dummyOf(lage!.contract!) !== minStol && redo
+  const claimDialog = jagSkaSvara && (
+    <Dialog className="w-full max-w-sm p-6">
+      <h2 className="text-lg font-semibold text-ink">Claim: spelföraren tar resten</h2>
+      <p className="mt-2 text-sm text-ink-soft">
+        Med perfekt spel är resten av sticken säkra för spelföraren (
+        {SEAT_LABEL[vridStol(minStol)(lage!.claim!.stol)]}, totalt {lage!.claim!.total} stick). Godkänn så
+        bokförs given direkt, eller spela klart handen.
+      </p>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="secondary" disabled={skickar} onClick={() => void gorDrag({ typ: 'claim-svar', ok: false })}>
+          Spela klart
+        </Button>
+        <Button disabled={skickar} onClick={() => void gorDrag({ typ: 'claim-svar', ok: true })}>
+          OK, bokför given
+        </Button>
+      </div>
+    </Dialog>
+  )
+  const claimRad = claimAktiv && !jagSkaSvara && (
+    <p className="mx-auto mt-1 max-w-md rounded-lg bg-red-950/50 px-3 py-1 text-center text-xs text-rose-100/80 ring-1 ring-rose-50/15">
+      Claim föreslagen: spelföraren tar resten ({lage!.claim!.total} stick) — väntar på att alla svarar.
+    </p>
+  )
+
   const lamnaDialog = visaLamna && (
     <Dialog onClose={() => setVisaLamna(false)} className="w-full max-w-sm p-6">
       <h2 className="text-lg font-semibold text-ink">Lämna bordet för gott?</h2>
@@ -570,6 +601,7 @@ export function BordSpel({
       {begaranBanner}
       {pausOverlay}
       {lamnaDialog}
+      {claimDialog}
       {rapportDialog}
     </>
   )
@@ -907,6 +939,11 @@ export function BordSpel({
                 <p className="mt-1 text-sm text-rose-100/80">
                   {klar.declarerTricks} stick · {poang >= 0 ? `Ni +${poang}` : `De +${-poang}`}
                 </p>
+                {klar.claim && (
+                  <p className="mt-1 text-xs text-rose-100/75">
+                    Claim: spelföraren tog resten av sticken utan spel ({klar.claim.total} stick totalt).
+                  </p>
+                )}
                 {klar.dd && (
                   <DdFacitRad dd={klar.dd} contract={klar.contract} declarerTricks={klar.declarerTricks} className="mt-1" />
                 )}
@@ -1047,6 +1084,7 @@ export function BordSpel({
         )}
       </div>
       {felRad}
+      {claimRad}
       {vantarRad}
 
       {/* ⓘ-overlay: budgivningen som ledde till kontraktet + förra sticket i

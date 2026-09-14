@@ -189,6 +189,67 @@ describe('BordSpel — röktest', () => {
     expect(screen.queryByText(/Genomgång av given/)).toBeNull()
   })
 
+  test('etapp 3: claim-förslaget ger mig dialogen, "Spela klart" skickar nej', async () => {
+    seq = 0
+    // Öst spelför 1♠ (träkarl Väst) → jag (Syd) är motspelare på utspel: jag ska svara.
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('bud', 'E', { bid: '1S' }),
+      h('bud', 'S', { bid: 'P' }),
+      h('bud', 'W', { bid: 'P' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('claim-forslag', 'E', { total: 13, stol: 'E' }),
+    ]
+    rendera()
+    expect(await screen.findByText(/Claim: spelföraren tar resten/)).toBeTruthy()
+    const { skickaDrag } = await import('../../lib/backend/bord')
+    fireEvent.click(screen.getByText('Spela klart'))
+    expect(vi.mocked(skickaDrag)).toHaveBeenCalledWith('ABC234', expect.any(Number), { typ: 'claim-svar', ok: false })
+  })
+
+  test('etapp 3: har jag svarat visas väntanraden, och giv-klar efter claim visar notisen', async () => {
+    seq = 0
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('bud', 'E', { bid: '1S' }),
+      h('bud', 'S', { bid: 'P' }),
+      h('bud', 'W', { bid: 'P' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('claim-forslag', 'E', { total: 13, stol: 'E' }),
+      h('claim-svar', 'S', { ok: true }),
+    ]
+    rendera()
+    expect(await screen.findByText(/Claim föreslagen: spelföraren tar resten \(13 stick\)/)).toBeTruthy()
+    expect(screen.queryByText('Spela klart')).toBeNull()
+    cleanup()
+
+    seq = 0
+    const hands = { N: MIN_HAND, E: MIN_HAND, S: MIN_HAND, W: MIN_HAND }
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('bud', 'E', { bid: '1S' }),
+      h('bud', 'S', { bid: 'P' }),
+      h('bud', 'W', { bid: 'P' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('claim-forslag', 'E', { total: 13, stol: 'E' }),
+      h('claim-svar', 'S', { ok: true }),
+      h('giv-klar', null, {
+        hands,
+        contract: { declarer: 'E', strain: 'spades', level: 1 },
+        passadUt: false,
+        declarerTricks: 13,
+        nsScore: -260,
+        stallning: { ns: 0, ew: 260 },
+        claim: { total: 13, stol: 'E' },
+      }),
+    ]
+    rendera()
+    expect(await screen.findByText(/Claim: spelföraren tog resten av sticken utan spel \(13 stick totalt\)/)).toBeTruthy()
+  })
+
   test('etapp 1 (2026-09-14): genomgången av given nås från giv-klar-vyn och går att stänga', async () => {
     seq = 0
     const deal = { ...dealFromSeed(7), dealer: 'N' as const }
