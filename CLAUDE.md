@@ -13,7 +13,7 @@ svarar på vad).
 ### 🔵 NU — BORDENS SENARE-LISTA (ägarbeslut 2026-09-14, körordningen bestämd)
 Ordningen: **1) rondgenomgången per giv → 2) DD-jämförelsen → 3) claim vid
 bordet.** Bakgrund `docs/bord-plan.md` "Medvetet utanför v1".
-- **Etapp 1 rondgenomgången: BYGGD 2026-09-14, PCD väntar på ägaren.** Ren modul
+- **Etapp 1 rondgenomgången: KLAR & LIVE 2026-09-14 (mergepunkt `5088526`), ägarens live-prov vid bordet återstår.** Ren modul
   `src/pages/bord/bord-genomgang.ts` (loggen → given/kontrakt/stick/systemiskt
   förklarade bud, verkliga stolar) + vyn `BordGenomgang.tsx` (PlayReplay på
   vinröd duk, namnraden) + knappen "Genomgång av given →" i giv-klar-vyn för
