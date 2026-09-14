@@ -499,8 +499,10 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
   // (7-korts), 4-läget = spärr (8+). Felrapport #54: 3♣ kallades "öppningshand".
   if (!opening(prior)) {
     if (cb.strain === 'NT') {
-      const range = cb.level === 1 ? '15–17 hp' : cb.level === 2 ? '20–21 hp' : '25–27 hp'
-      return R(cb.level === 1 ? '1NT' : cb.level === 2 ? '2NT' : '3NT', `Öppningsbud ${cb.level} sang — balanserad hand, ${range}.`)
+      // 3NT = Gambling (§3.1, 2026-09-14): solid lågfärg, inte en balanserad hand.
+      if (cb.level === 3) return R('Gambling 3NT', `Öppningsbud 3 sang — Gambling: solid 7+ lågfärg (AKQ i topp), inget ess eller kung vid sidan om, ingen renons. Partnern passar med håll i sidofärgerna, annars 4♣ = pass eller rätta.`)
+      const range = cb.level === 1 ? '15–17 hp' : '20–21 hp'
+      return R(cb.level === 1 ? '1NT' : '2NT', `Öppningsbud ${cb.level} sang — balanserad hand, ${range}.`)
     }
     if (cb.level === 1) {
       const major = cb.strain === 'H' || cb.strain === 'S'
@@ -1638,7 +1640,11 @@ function isNMF(u: Undisturbed, cb: ParsedBid): boolean {
 function undisturbedMeaning(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall[]): CallInterpretation | null {
   const open = u.bids[0].cb
   const ntBase = naturalNTBase(u)
+  // 2♣–2♦–4NT = 28–30 balanserad (§4.4) — före slamzonen, som annars läser RKC.
+  const strong2CRebid4NT = same(open, 2, 'C') && u.bids.length === 2 && same(u.bids[1].cb, 2, 'D') && same(cb, 4, 'NT') && seat === u.opener
   return (
+    (same(open, 3, 'NT') ? afterGambling3NT(seat, cb, u) : null) ??
+    (strong2CRebid4NT ? afterStrongTwoClubs(seat, cb, u) : null) ??
     slamZone(seat, cb, u, prior) ??
     (ntBase >= 0 ? overNaturalNT(seat, cb, u, ntBase) : null) ??
     (same(open, 2, 'C') ? afterStrongTwoClubs(seat, cb, u) : null) ??
@@ -1649,10 +1655,10 @@ function undisturbedMeaning(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Re
   )
 }
 
-/** Index i `u.bids` för den naturliga sang som sangsystemet spelas mot (1NT/2NT/3NT-öppning, 2♣–2♦–2NT/3NT), eller −1. */
+/** Index i `u.bids` för den naturliga sang som sangsystemet spelas mot (1NT/2NT-öppning, 2♣–2♦–2NT/3NT/4NT), eller −1. En 3NT-ÖPPNING är Gambling (§3.1) — inget sangsystem över den. */
 function naturalNTBase(u: Undisturbed): number {
   const b = u.bids
-  if (b[0].cb.strain === 'NT') return 0
+  if (b[0].cb.strain === 'NT') return b[0].cb.level <= 2 ? 0 : -1
   if (b.length >= 3 && same(b[0].cb, 2, 'C') && same(b[1].cb, 2, 'D') && b[2].cb.strain === 'NT') return 2
   return -1
 }
@@ -1916,7 +1922,7 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
 function isNaturalNT(u: Undisturbed, k: number): boolean {
   const cb = u.bids[k].cb
   if (cb.strain !== 'NT') return false
-  if (k === 0) return true
+  if (k === 0) return cb.level <= 2 // 3NT-öppningen är Gambling (konstlad, §3.1)
   const open = u.bids[0].cb
   if (k === 1) {
     if (open.level === 1 && isMajor(open.strain) && cb.level === 2) return u.responderPassed // Jacoby (opassad)
@@ -2091,7 +2097,8 @@ function afterStrongTwoClubs(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInt
   if (n === 2 && isOpener) {
     if (waiting) {
       if (same(cb, 2, 'NT')) return R('rebid: 2NT (22–24)', `Återbud 2 sang efter 2♣–2♦: 22–24 hp balanserad. Ej krav — partnern passar med 0–2 hp, annars sangsystemet (Stayman/transfer).`)
-      if (same(cb, 3, 'NT')) return R('rebid: 3NT (28–30)', `Återbud 3 sang efter 2♣–2♦: 28–30 hp balanserad.`)
+      if (same(cb, 3, 'NT')) return R('rebid: 3NT (25–27)', `Återbud 3 sang efter 2♣–2♦: 25–27 hp balanserad. Ej krav — partnern passar under slamzonen, 6 sang med 8+.`)
+      if (same(cb, 4, 'NT')) return R('rebid: 4NT (28–30)', `Återbud 4 sang efter 2♣–2♦: 28–30 hp balanserad. Ej krav — partnern passar med 0–4, 6 sang med 5+.`)
       if (cb.strain !== 'NT') return R('rebid: krav-färg', `${B(cb)} — naturlig färg (5+) efter 2♣: krav 1 rond. Partnern letar utgång.`)
       return null
     }
@@ -2736,6 +2743,30 @@ function afterPreempt(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterpreta
     return R('svararens signoff', `${B(cb)} — signoff under utgång.`)
   }
   if (n >= 3 && isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången.`)
+  return null
+}
+
+/**
+ * Efter Gambling 3NT (§3.1, 2026-09-14): svararens pass-eller-rätta (4♣/5♣),
+ * naturliga 4M, kvantitativa 4NT — och öppnarens rättelse till ruter.
+ */
+function afterGambling3NT(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterpretation | null {
+  const b = u.bids
+  const n = b.length
+  const isOpener = seat === u.opener
+  if (n === 1 && !isOpener) {
+    if (same(cb, 4, 'C')) return R('Gambling: 4♣ pass eller rätta', `4♣ — pass eller rätta: saknar håll för 3 sang. Öppnaren passar med klöver, rättar till 4♦ med ruter. Säger inget om klöver.`)
+    if (same(cb, 5, 'C')) return R('Gambling: 5♣ pass eller rätta', `5♣ — pass eller rätta på utgångsnivå: utgångsvärden och stöd i båda lågfärgerna men hål för 3 sang. Öppnaren passar med klöver, rättar till 5♦ med ruter.`)
+    if (cb.level === 4 && isMajor(cb.strain)) return R('Gambling: 4M till spel', `${B(cb)} — naturligt: bra 6+ ${NAME[cb.strain]}, till spel.`)
+    if (same(cb, 4, 'NT')) return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan över Gambling 3 sang (öppnarens svarsschema byggs senare).`)
+    if (same(cb, 4, 'D')) return N(`4♦ — inte definierat över Gambling 3 sang i systemet ännu (slamfrågan byggs senare).`)
+    return null
+  }
+  if (n === 2 && isOpener) {
+    const resp = b[1].cb
+    if (resp.strain === 'C' && cb.strain === 'D' && cb.level === resp.level) return R('Gambling: rättelse', `${B(cb)} — rättelse: lågfärgen är ruter, till spel.`)
+    return null
+  }
   return null
 }
 

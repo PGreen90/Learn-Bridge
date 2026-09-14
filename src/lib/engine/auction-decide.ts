@@ -147,7 +147,8 @@ import { respondToMajor, respondToMinor, type ResponseResult } from './responses
 import { respondToMajorPassed } from './responses-drury'
 import { respondTo1NT } from './responses-nt'
 import { openerThirdAfterSecondNegative, respondTo2C, responderAfterSecondNegative } from './responses-2c'
-import { respondTo2NT, respondTo3NT } from './responses-2nt'
+import { respondTo2NT } from './responses-2nt'
+import { defendTheirGambling3NT, defendTheirGambling3NTSeat, respondToGambling3NT } from './gambling-3nt'
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
@@ -225,7 +226,7 @@ export function responseDecision(openCall: string, hand: Hand, responderPassed =
     if (g) return { call: g.call as ResponseResult['call'], rule: g.rule, explanation: g.explanation }
     return openCall === '1NT' ? respondTo1NT(hand) : respondTo2NT(hand)
   }
-  if (openCall === '3NT') return respondTo3NT(hand)
+  if (openCall === '3NT') return respondToGambling3NT(hand)
   const suit = OPEN_SUIT[openCall]
   if (suit === 'hearts' || suit === 'spades') {
     return responderPassed ? respondToMajorPassed(hand, suit) : respondToMajor(hand, suit)
@@ -607,6 +608,17 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') {
     const so = systemsOnFirstStep(hand)
     if (so) return { turn: so, plan: { kind: 'call' } }
+  }
+
+  // 2♣–2♦–3NT (25–27) / 4NT (28–30) — de stora balanserade händerna sedan
+  // 3NT-öppningen blev Gambling (2026-09-14, §4.4): svararen räknar mot det
+  // visade minimumet — 37+ storslam, 33+ lillslam i sang, annars pass.
+  if (openCall === '2C' && response.call === '2D' && (rebid.call === '3NT' || rebid.call === '4NT')) {
+    const shownMin = rebid.call === '3NT' ? 25 : 28
+    const total = hcp(hand) + shownMin
+    if (total >= 37) return { turn: { call: '7NT', rule: 'slamavslut', explanation: `Storslamzon (37+) mot partnerns visade ${shownMin}+ balanserad → 7NT.` }, plan: { kind: 'final' } }
+    if (total >= 33) return { turn: { call: '6NT', rule: 'slamavslut', explanation: `Slamzon (33+) mot partnerns visade ${shownMin}+ balanserad → 6NT.` }, plan: { kind: 'final' } }
+    return { turn: { call: 'P', rule: 'pass', explanation: `Under slamzonen mot partnerns visade ${shownMin}–${shownMin + 2} → pass.` }, plan: { kind: 'final' } }
   }
 
   // Slamutredning efter stark 2♣ + positivt svar (§4.4): trumf funnen →
@@ -1969,6 +1981,14 @@ const TABELL: Row[] = [
     id: 'försvar-1nt',
     läge: (f) => defendTheirNTSeat(f) !== null,
     välj: ({ hand, facts }) => defendTheirNT(hand, facts.seat, defendTheirNTSeat(facts)!.balancing),
+  },
+  // Deras Gambling 3NT-öppning (§3.1, 2026-09-14), vår sidas första försvar
+  // (direkt sits eller balansering): v1 = naturlig 4M med bra 6+ färg och
+  // öppningsstyrka, annars pass. Straff-X/Klinger-takeout är SENARE.
+  {
+    id: 'försvar-gambling-3nt',
+    läge: (f) => defendTheirGambling3NTSeat(f) !== null,
+    välj: ({ hand, facts }) => defendTheirGambling3NT(hand, facts),
   },
   // Fortsättningen på vårt 1NT-försvar: advancern svarar på partnerns DONT, och
   // vår egen DONT-X/tvåfärg rättas efter partnerns relä.

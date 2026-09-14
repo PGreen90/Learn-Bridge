@@ -47,8 +47,12 @@ describe('openerRebidAfter2C – öppnarens återbud', () => {
     expect(open('S:AKQ4 H:AKQ D:AJ3 C:432', r('2D', '2♦ väntebud'))).toBe('2NT') // 23 hp, 4-3-3-3
   })
 
-  it('3NT efter 2♦ med balanserad 28+', () => {
-    expect(open('S:AKQ4 H:AKQ D:AK3 C:A32', r('2D', '2♦ väntebud'))).toBe('3NT') // 29 hp
+  it('3NT efter 2♦ med balanserad 25–27 (sedan 3NT-öppningen blev Gambling 2026-09-14)', () => {
+    expect(open('S:AKQ4 H:AK5 D:AQ3 C:KJ8', r('2D', '2♦ väntebud'))).toBe('3NT') // 26 hp
+  })
+
+  it('4NT efter 2♦ med balanserad 28–30', () => {
+    expect(open('S:AKQ4 H:AKQ D:AK3 C:A32', r('2D', '2♦ väntebud'))).toBe('4NT') // 29 hp
   })
 
   it('krav-färg efter 2♦ med obalanserad jätte', () => {
@@ -73,8 +77,12 @@ describe('openerRebidAfter2C – öppnarens återbud', () => {
     expect(open('S:AKJ42 H:AK D:AKQ4 C:32', r('2NT', '2♣-positivt'))).toBe('3S') // 5-korts spader
   })
 
-  it('genuint balanserad utan 5-färg bjuder fortfarande 3NT över 2NT-positivt', () => {
-    expect(open('S:AKQ4 H:AKJ D:KQ4 C:AJ3', r('2NT', '2♣-positivt'))).toBe('3NT') // 4-3-3-3
+  it('genuint balanserad 22–24 utan 5-färg bjuder fortfarande 3NT över 2NT-positivt', () => {
+    expect(open('S:AKQ4 H:AKJ D:KQ4 C:J53', r('2NT', '2♣-positivt'))).toBe('3NT') // 23 hp, 4-3-3-3
+  })
+
+  it('balanserad 25+ över 2NT-positivt (8+) vet slammen → 6NT (Gambling-flytten 2026-09-14)', () => {
+    expect(open('S:AKQ4 H:AKJ D:KQ4 C:AJ3', r('2NT', '2♣-positivt'))).toBe('6NT') // 27 hp
   })
 })
 
