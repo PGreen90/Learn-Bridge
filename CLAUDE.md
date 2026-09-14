@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — GAMBLING 3NT (ägarbeslut 2026-09-14, byggd samma dag — väntar på PCD + live-prov)
+### 🔵 NU — GAMBLING 3NT: KLAR & LIVE 2026-09-14 (mergepunkt `8e327b3`) — ägarens live-prov kvar
 **Ägarbeslut 2026-09-14 (ja på alla fem):** 3NT-öppningen = **Gambling** i
 aggressiv stil (solid 7+ lågfärg med AKQ, inget A/K utanför, ingen renons, ingen
 4-korts sidofärg) · 25–27 balanserad → 2♣–2♦–3NT, 28–30 → 4NT · svar v1: pass med
@@ -20,8 +20,8 @@ håll / 4♣ & 5♣ pass-eller-rätta / 4M naturligt · försvar v1: pass eller 
 4NT-svaret, Klinger-försvaret, 2♣-linjens färgslam mot 25+): `docs/senare.md`.
 
 **Parallellt ägarsteg:** live-prov vid ett vänner-bord av bordens etapp 1–3
-(genomgången · facit/par-raden · DD-claimen med OK/spela klart). När Gambling
-3NT är live väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
+(genomgången · facit/par-raden · DD-claimen med OK/spela klart) + Gambling 3NT
+i appen. Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
 
 **Nyss klart (2026-09-14, ALLT LIVE): BORDENS SENARE-LISTA** i ordningen
 1) rondgenomgången per giv (`5088526`) → 2) DD-jämförelsen (`1af5972`;
