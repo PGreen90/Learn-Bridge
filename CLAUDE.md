@@ -10,24 +10,27 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — STICKVÄNTAN (ägarbeslut 2026-09-14) → sedan bordens SENARE-lista
-Ägaren 2026-09-14: "sticket försvinner för snabbt från bordets mitt". Byggt
-samma dag på ALLA spelbara ytor (Spela kort + vänner-bordet), en mekanik: leder
-DU nästa stick ligger sticket kvar tills du trycker (pekande hand efter 2 s);
-leder boten fylls en tunn guldring runt högen i 2/3/4 s (snabb/normal/lugn,
-ägarens skiss) och sedan svep; tryck/mellanslag/Enter går alltid vidare. Facit
-`src/pages/play/stickvantan.test.tsx`, tiderna i `tempo.ts` (SWEEP_HOLD +
-sweepHint), detalj `docs/historik.md` 2026-09-14. Status: byggd, hela sviten
-grön, browser-verifierad (hand + ring, mätt utan överlapp 375/504/1280 px).
-**KLAR & LIVE 2026-09-14** (mergepunkt `e57e6a9`).
-**Nästa NU (ägarbeslut 2026-09-14, körordningen bestämd):** bordens SENARE-lista
-i ordningen 1) rondgenomgången per giv (återanvänd `byggGranskning` +
-`PlayReplay`, datat finns i loggen) → 2) DD-jämförelsen (kräver serverräknat DD
-vid giv-klar: prova FÖRST att bunta `bridge-dds` (WASM) i Vercel-funktionen) →
-3) claim vid bordet (nytt protokoll: begäran/svar-händelser, motpartsgodkännande,
-botens dom — designfrågor med ägaren före kod). Bakgrund `docs/bord-plan.md`
-"Medvetet utanför v1". Motorbytets slutförande + 403-fixen (2026-09-13) bor nu
-helt i `docs/historik.md`.
+### 🔵 NU — BORDENS SENARE-LISTA (ägarbeslut 2026-09-14, körordningen bestämd)
+Ordningen: **1) rondgenomgången per giv → 2) DD-jämförelsen → 3) claim vid
+bordet.** Bakgrund `docs/bord-plan.md` "Medvetet utanför v1".
+- **Etapp 1 rondgenomgången: BYGGD 2026-09-14, PCD väntar på ägaren.** Ren modul
+  `src/pages/bord/bord-genomgang.ts` (loggen → given/kontrakt/stick/systemiskt
+  förklarade bud, verkliga stolar) + vyn `BordGenomgang.tsx` (PlayReplay på
+  vinröd duk, namnraden) + knappen "Genomgång av given →" i giv-klar-vyn för
+  ALLA vid bordet; stängs själv när ägaren startar nästa giv. Facit
+  `bord-genomgang.test.ts` + röktest i `BordSpel.test.tsx`. Bordet kan inte
+  provspelas lokalt (serverfunktionerna finns bara i molnet) → live-prov efter
+  deploy är ägarsteget.
+- **Etapp 2 DD-jämförelsen:** kräver serverräknat DD vid giv-klar — prova
+  FÖRST att bunta `bridge-dds` (WASM) i Vercel-funktionen; går det inte är
+  nattlig efterberäkning reserven (sämre).
+- **Etapp 3 claim vid bordet:** nytt protokoll (begäran/svar-händelser,
+  motpartsgodkännande, botens dom) — designfrågor med ägaren FÖRE kod.
+
+**Nyss klart (2026-09-14, LIVE `e57e6a9`): STICKVÄNTAN** på alla spelbara ytor —
+sticket ligger kvar tills du trycker när du leder (hand efter 2 s), guldringen
+2/3/4 s när boten leder. Facit `stickvantan.test.tsx`, tider i `tempo.ts`,
+detalj `docs/historik.md` 2026-09-14 (även motorbytets slut + 403-fixen).
 
 **Nyss klart (2026-09-14): bricka 12-rapporten** — advancern efter partnerns
 balansinkliv passar med fit (aldrig ny färg) och tävlar 2♥ när de bjuder
@@ -106,9 +109,7 @@ något känns fel i spel, eller när en ny fix ska läggas till. Senast
 S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Bordens SENARE-lista** — claim vid bordet · DD-jämförelsen ("hur bra mot
-   facit") · rondgenomgången per giv (`docs/bord-plan.md`).
-2. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
+1. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
    ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)

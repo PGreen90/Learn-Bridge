@@ -36,6 +36,8 @@ import { ms, type PlaySpeed } from '../play/tempo'
 import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
 import { annoteraSystemiskt, verkligaStick, vridStol, vridTillbaka } from './bord-projektion'
+import { byggBordGenomgang } from './bord-genomgang'
+import { BordGenomgang } from './BordGenomgang'
 import { useBordSpel } from './useBordSpel'
 
 /** Visuell stolordning i namnraden: som auktionsrutnätet (V N Ö S). */
@@ -210,6 +212,10 @@ export function BordSpel({
   const [visaInfo, setVisaInfo] = useState(false)
   const [visaAvsluta, setVisaAvsluta] = useState(false)
   const [visaRapport, setVisaRapport] = useState(false)
+  // Rondgenomgången per giv (bordens SENARE-lista etapp 1, 2026-09-14): öppnas
+  // från giv-klar-vyn; stängs av sig själv när given byts (ägaren startade
+  // nästa giv) så ingen blir kvar i en gammal giv.
+  const [visaGenomgang, setVisaGenomgang] = useState(false)
   const [visaLamna, setVisaLamna] = useState(false)
   const [avslutar, setAvslutar] = useState(false)
   const [stolArbete, setStolArbete] = useState(false)
@@ -248,6 +254,13 @@ export function BordSpel({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [sweep, gaVidareSvep])
+  // Genomgången stängs av sig själv när given byts (ägaren startade nästa giv).
+  const givNuRef = useRef<number | null>(null)
+  useEffect(() => {
+    const giv = lage?.giv ?? null
+    if (givNuRef.current !== null && giv !== givNuRef.current) setVisaGenomgang(false)
+    givNuRef.current = giv
+  }, [lage?.giv])
   const [selectedSuit, setSelectedSuit] = useState<Card['suit'] | null>(null)
 
   async function avslutaBordet() {
@@ -812,6 +825,19 @@ export function BordSpel({
 
   if (lage.fas === 'klar' && lage.klar) {
     const klar = lage.klar
+    const genomgang = byggBordGenomgang(lage, kod)
+    if (visaGenomgang && genomgang) {
+      return (
+        <BordGenomgang
+          genomgang={genomgang}
+          stolar={stolar}
+          givNr={lage.giv}
+          givar={givar}
+          minStol={minStol}
+          onBack={() => setVisaGenomgang(false)}
+        />
+      )
+    }
     const vTill = vridTillbaka(minStol)
     const sista = lage.giv >= givar
     const poang = minSida === 'NS' ? klar.nsScore : -klar.nsScore
@@ -892,6 +918,15 @@ export function BordSpel({
                 <p className="text-xs text-rose-100/60">Bordets ägare startar nästa giv.</p>
               )}
             </div>
+            {genomgang && (
+              <button
+                type="button"
+                onClick={() => setVisaGenomgang(true)}
+                className="mt-2 block w-full text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
+              >
+                Genomgång av given →
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setVisaRapport(true)}

@@ -6,10 +6,12 @@
 // inte kan provspelas lokalt (serverfunktionerna finns bara i molnet).
 
 import { describe, test, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import type { Card, Seat } from '../../types/bridge'
 import type { BordHandelse } from '../../lib/backend/bord'
+import { dealFromSeed } from '../../lib/engine/revisor'
+import { isComplete, legalCards, playCard, startPlay, type Contract } from '../../lib/engine/play'
 
 const kort = (suit: Card['suit'], rank: Card['rank']): Card => ({ suit, rank })
 
@@ -182,6 +184,47 @@ describe('BordSpel — röktest', () => {
     expect(screen.getByText(/8 stick/)).toBeTruthy()
     expect(screen.getByText(/Ni \+110/)).toBeTruthy()
     // Felrapporten (ägarönskemål 2026-08-17) nås från giv-klar-vyn.
+    expect(screen.getByText(/Rapportera given/)).toBeTruthy()
+    // Utan spelade kort finns ingen genomgång att öppna.
+    expect(screen.queryByText(/Genomgång av given/)).toBeNull()
+  })
+
+  test('etapp 1 (2026-09-14): genomgången av given nås från giv-klar-vyn och går att stänga', async () => {
+    seq = 0
+    const deal = { ...dealFromSeed(7), dealer: 'N' as const }
+    const contract: Contract = { declarer: 'N', strain: 'NT', level: 3 }
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'ns' }),
+      h('bud', 'N', { bid: '1NT' }),
+      h('bud', 'E', { bid: 'P' }),
+      h('bud', 'S', { bid: '3NT' }),
+      h('bud', 'W', { bid: 'P' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('bud', 'E', { bid: 'P' }),
+    ]
+    let st = startPlay(deal, contract)
+    while (!isComplete(st)) {
+      const card = legalCards(st, st.toAct)[0]
+      svarEvents.push(h('kort', st.toAct, { card }))
+      st = playCard(st, card)
+    }
+    svarEvents.push(
+      h('giv-klar', null, {
+        hands: deal.hands,
+        contract,
+        passadUt: false,
+        declarerTricks: st.tricksNS,
+        nsScore: 400,
+        stallning: { ns: 400, ew: 0 },
+      }),
+    )
+    rendera()
+    const knapp = await screen.findByText(/Genomgång av given/)
+    fireEvent.click(knapp)
+    expect(await screen.findByText(/Genomgång av giv 1 av/)).toBeTruthy()
+    expect(screen.getByText(/Stega sticken med pilarna/)).toBeTruthy()
+    fireEvent.click(screen.getByText('← Tillbaka'))
+    expect(await screen.findByText(/Genomgång av given/)).toBeTruthy()
     expect(screen.getByText(/Rapportera given/)).toBeTruthy()
   })
 })
