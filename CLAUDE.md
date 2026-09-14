@@ -10,14 +10,16 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — MOTORBYTET SLUTFÖRT (etapp 6 stängd 2026-09-13) → ägaren väljer nästa NU
+### 🔵 NU — ägaren väljer nästa NU (motorbytet SLUTFÖRT & LIVE 2026-09-13)
 Ägarbesked 2026-09-13: "liveproven är klara — gör klart budmotorn." Gjort samma
-dag, test-drivet: facit-kön tömd (bara kontrerad checkback kvar = SENARE),
-invit-hoppet (8+ TP, ägarens metodval), M19, kikvakten skarp för hela
-auktionen, öppnarens Smolen-svar efter 1NT — elva regler (budsystem §9
-2026-09-13, `docs/motorbyte-plan.md` loggen, bevaka-posten). HELA planen:
-**`docs/motorbyte-plan.md`**. **Väntar:** PCD + grindbeslut (diffens b-lista i
-loggen). Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
+dag, test-drivet, PCD:at (mergepunkt `ee02860`): facit-kön tömd (bara kontrerad
+checkback kvar = SENARE), invit-hoppet (8+ TP, ägarens metodval), M19,
+kikvakten skarp för hela auktionen, öppnarens Smolen-svar efter 1NT — elva
+regler (budsystem §9 2026-09-13, `docs/motorbyte-plan.md` loggen, bevaka-
+posten). Samma kväll: **403-rapporten lagad & LIVE** (`0fd37b9`) — tappade
+tävlingsinskick får omförsök på servern och skickas om från klienten
+(`docs/historik.md` 2026-09-13). **Nästa session:** ägaren väljer NU ur
+🟢 NÄST (regeln i `docs/arbetsrutiner.md`); rekommendation NÄST 1.
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
 fem ägarönskemål i sju etapper + ett följdbeslut (mergepunkter i
@@ -74,7 +76,7 @@ yta 1–4 · Lebensohl lager 1 · utspelet hål A–G (teori `docs/utspel-teori.
 förfining `docs/utspel-diagnos.md`) · etapp 7 "missad lillslam"
 (`docs/systemrevisorn.md`) · mätetapperna E1–E7, B13, F1–F6
 (`docs/budsystem-revision.md`) · stora granskningen · Beslut B etapp 0–2 ·
-felrapporterna. Känt hål kvar: M19, frö 20260952 (`docs/bevaka.md`).
+felrapporterna. M19 (frö 20260952) lagad 2026-09-13.
 
 > **ÄRLIG INFERENS (grundprincip, LIVE — styr ALLA bottbeslut, bud OCH spel):**
 > bottarna tänker som människor — egen hand + vad budgivningen och spelet
