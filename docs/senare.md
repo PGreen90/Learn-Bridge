@@ -9,6 +9,23 @@
 
 ## ⚪ SENARE
 
+### Gambling 3NT — nästa lager (v1 KLAR 2026-09-14, budsystem §3.1)
+v1 är öppningen (aggressiv stil), svaren pass/4♣/5♣/4M, öppnarens rättelse och
+ett minimalt försvar. Kvar, i ungefärlig nyttoordning:
+- **Slamfrågan 4♦** över Gambling 3NT (öppnaren visar singelton 4♥/4♠/4NT-steg
+  eller semi-balanserad) — bridgebums "approach #2".
+- **Öppnarens svar på kvantitativ 4NT** (idag passar hen; med 8-korts färg
+  borde 6m/6NT övervägas).
+- **Klingers försvar mot deras Gambling 3NT:** X = straff, 4♣ = takeout för
+  högfärgerna med preferens hjärter, 4♦ = dito med preferens spader. v1 har bara
+  naturlig 4M.
+- **2♣-linjens färgslam mot 25+ balanserad:** efter 2♣–2♥/2♠/3m (positivt) och
+  öppnarens stöd räknar kaptenen mot visade 22 → slammen på 26 + 8 missas (fanns
+  redan för 28–30, blev synligare när 25–27 flyttade in). Kandidat: öppnaren
+  driver själv över svararens fast arrival (§6.9-mönstret).
+- **Utspelet mot Gambling 3NT:** utspelaren borde ess-hunta (ta för ett ess och
+  titta på bordet) i stället för fjärde högsta — kolla utspelsmotorns läsning.
+
 ### Svep: grundläggande partnerskapsplikter i konkurrens (ägarbeslut 2026-09-02) — PAUSAT 2026-09-04
 **Läge 2026-09-04:** K1, K3, K2, K5 KLARA & LIVE (mergepunkter `842809b` +
 `e7a3931`). Svepet PAUSADES när motorbytet blev NU (`docs/motorbyte-plan.md`,
@@ -71,8 +88,8 @@ verklighetens ~1 %) i `tvaklover-oversyn.probe.test.ts` (gate:ad `TVAKLOVER=1`).
   distributionella varianten, eller ska den vara stark/enrondskrav?
 - **Balanserad vs distributionell i fortsättningen (fråga 3):** två handtyper
   under samma öppning — 2♦-relä, svararens steg, 2NT-återbudet. Mätkandidat
-  (Lawrence-artikeln 2026-08-27): 25–27→3NT-öppningen kan begrava en 4-4-
-  högfärgsfit utan stopp i obudna färgen — mät innan dom.
+  (Lawrence-artikeln 2026-08-27): *(löst 2026-09-14 — 25–27 öppnar 2♣ sedan
+  3NT blev Gambling; 4-4-fiten söks i 2♣-linjen.)*
 - **Samspel med 6-5-luckan** i [docs/bevaka.md](bevaka.md): om en formstark 6-5
   varken blir en bra 2♣ *eller* kan visa 6:e kortet efter en 1-öppning, var landar
   den bäst?

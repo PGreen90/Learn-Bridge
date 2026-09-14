@@ -2725,3 +2725,24 @@ försvarsstick → nej, aldrig mitt i ett stick, även när spelföraren själv 
 claim-blocket i `bord-motor.test.ts`, röktest i `BordSpel.test.tsx`. Live-prov
 vid bordet är ägarsteget. Därmed är HELA bordens SENARE-lista (etapp 1–3)
 byggd samma dag.
+
+## 2026-09-14 — Gambling 3NT ersätter "3NT = 25–27 balanserad" (ägarbeslut, byggd samma dag)
+
+Startade med ägarens fråga "P P P 3NT — vad betyder 3NT?" och beslutet att bygga
+om 3NT-öppningen till **Gambling 3NT**. Fem grindbeslut togs FÖRE bygget (alla
+ja): aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför, ingen renons, ingen
+4-korts sidofärg) · 25–27 balanserad → 2♣–2♦–3NT och 28–30 → 4NT · svar v1
+pass/4♣/5♣ pass-eller-rätta/4M · försvar v1 pass eller naturlig 4M · samma
+betydelse i alla sitsar. Exempelhänder visades före bygget (öppningsstrukturen).
+
+Byggt test-drivet (facit `gambling-3nt.test.ts` FÖRE koden): ny modul
+`gambling-3nt.ts` (öppning, svar, öppnarens rättelse, försvaret som tabellrad
+`försvar-gambling-3nt`), `openings.ts` anropar den före 1-läget och spärren,
+`responses-2c.ts` (3NT = 25–27, 4NT = 28–30, 6NT/7NT direkt över positivt 2NT
+med 25+/29+), `auction-decide.ts` (svararens 6NT/7NT/pass efter 2♣–2♦–3NT/4NT),
+betydelselagret (`afterGambling3NT`, 3NT-öppningen är inte längre sangsystemets
+bas, 2♣–2♦–4NT läses före slamzonen så det inte blir "RKC"), regelregistret +
+alertlistan. Det gamla `respondTo3NT`/`openerRebidAfter3NTResponse` rivet.
+Systemboken §3.1 (ny) + §4.4 + §9; SENARE-listan fick "Gambling 3NT — nästa
+lager". Rättelse under bygget: exempelhanden ♣AKJT763 utan dam öppnar **3♣**
+(spärr), inte 1♣ som först sades till ägaren.

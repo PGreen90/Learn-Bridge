@@ -4,6 +4,7 @@
 import type { Bid, Hand, Seat, Suit, Vulnerability } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
 import { playingTricks, quickTricks, startingPoints } from './evaluation'
+import { gambling3NTOpening } from './gambling-3nt'
 
 /** Är positionen `seat` sårbar i den här givens sårbarhet? */
 export function isVulnerable(seat: Seat, vul: Vulnerability): boolean {
@@ -58,7 +59,8 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
         return { call: '2NT', rule: '2NT', explanation: `Balanserad med extra kvalitet (ess och starka färger) → 2NT (spelar som 20–21).` }
       }
     }
-    if (p >= 25 && p <= 27) return { call: '3NT', rule: '3NT', explanation: `Balanserad (25–27 hp) → 3NT.` }
+    // 25–27 balanserad öppnar 2♣ och rebjuder 3NT (§4.4) sedan 3NT-öppningen
+    // blev Gambling (ägarbeslut 2026-09-14) — faller in i 22+-raden nedan.
     if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `Balanserad (22+ hp) → 2♣ (konstgjort kravbud).` }
 
     // TP-steg D (FAS 4, ägarbeslut 2026-07-01, steg b – sårbarhets-oberoende):
@@ -77,6 +79,14 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
     }
     // 12–14 och 18–19 balanserade öppnar i färg → faller vidare nedan.
   }
+
+  // Gambling 3NT (ägarbeslut 2026-09-14, §3.1): solid 7+ lågfärg (AKQ i topp)
+  // utan ess/kung vid sidan om, ingen renons, ingen 4-korts sidofärg. Före
+  // 1-lägesöppningen (en 12-hp-hand med solid färg är fortfarande Gambling) och
+  // före spärren. Samma betydelse i alla fyra sitsar. Kunskapen bor i
+  // `gambling-3nt.ts`.
+  const gambling = gambling3NTOpening(hand)
+  if (gambling) return gambling
 
   // Stark 2♣ (obalanserad 22+).
   if (p >= 22) return { call: '2C', rule: 'stark 2♣', explanation: `22+ hp, för stark för en 1-öppning → 2♣ (konstgjort kravbud).` }

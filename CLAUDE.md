@@ -10,10 +10,18 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — ägaren väljer nästa NU (bordens SENARE-lista KLAR & LIVE 2026-09-14)
-**Nästa session börjar med:** ägarens live-prov vid ett vänner-bord av etapp
-1–3 (genomgången · facit/par-raden · DD-claimen med OK/spela klart), sedan
-väljer ägaren NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
+### 🔵 NU — GAMBLING 3NT (ägarbeslut 2026-09-14, byggd samma dag — väntar på PCD + live-prov)
+**Ägarbeslut 2026-09-14 (ja på alla fem):** 3NT-öppningen = **Gambling** i
+aggressiv stil (solid 7+ lågfärg med AKQ, inget A/K utanför, ingen renons, ingen
+4-korts sidofärg) · 25–27 balanserad → 2♣–2♦–3NT, 28–30 → 4NT · svar v1: pass med
+håll / 4♣ & 5♣ pass-eller-rätta / 4M naturligt · försvar v1: pass eller naturlig
+4M · samma betydelse i alla sitsar. Kod `src/lib/engine/gambling-3nt.ts`, facit
+`gambling-3nt.test.ts`, systemboken §3.1 + §4.4. Utanför v1 (4♦-slamfrågan,
+4NT-svaret, Klinger-försvaret, 2♣-linjens färgslam mot 25+): `docs/senare.md`.
+
+**Parallellt ägarsteg:** live-prov vid ett vänner-bord av bordens etapp 1–3
+(genomgången · facit/par-raden · DD-claimen med OK/spela klart). När Gambling
+3NT är live väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
 
 **Nyss klart (2026-09-14, ALLT LIVE): BORDENS SENARE-LISTA** i ordningen
 1) rondgenomgången per giv (`5088526`) → 2) DD-jämförelsen (`1af5972`;
@@ -35,14 +43,10 @@ vidare; inklivaren rättar till egen färg (budsystem §7.1/§9, facit
 `auction-advancer-balansinkliv.test.ts`).
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
-fem ägarönskemål i sju etapper + ett följdbeslut (mergepunkter i
-`docs/historik.md`): två tryck alltid · tillsvidare-% (40 % per ospelad giv) +
-"7/12" · se hur vilken spelare som helst bjöd och spelade · "Spelade givar" på
-Mitt konto + GDPR-exporten · `daily_standings` + nattlig finalisering (0012 körd,
-historiken fylld) · `?dag=` + `tavling-historik` · historiksidan + medaljtabellen
-(topp 5, bottar uteslutna, medalj kräver ≥ 2 spelare). Ägarbeslut + detalj:
-`docs/beslut-b-plan.md` "Påbyggnad 3". Delade tävlingsvyer bor i
-`src/pages/tavling/TavlingDelar.tsx`.
+sju etapper (två tryck · 40 %-regeln + "7/12" · se alla spelares givar · konto-
+räknaren + GDPR · `daily_standings` + nattlig finalisering · `?dag=` · historik-
+sidan + medaljtabellen). Detalj: `docs/beslut-b-plan.md` "Påbyggnad 3" +
+`docs/historik.md` 2026-09-13; delade vyer `src/pages/tavling/TavlingDelar.tsx`.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen

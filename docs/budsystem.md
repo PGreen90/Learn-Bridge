@@ -35,7 +35,7 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force) ·
 | **2♦ / 2♥ / 2♠** | 6 | 6–11 hp | Svaga tvåöppningar |
 | **2NT** | — | 20–21 hp | Balanserad |
 | **3♣ / 3♦ / 3♥ / 3♠** | 7+ | svag | Spärröppning |
-| **3NT** | — | 25–27 hp | Stor balanserad |
+| **3NT** | 7+ (lf) | solid AKQ, inget A/K utanför | **Gambling 3NT** (§3.1) — alert |
 | **4♣ / 4♦** | lång färg | spärr | Naturlig spärröppning |
 | **4♥ / 4♠** | lång färg | spärr (~7+ spelstick) | Spärr till utgång |
 
@@ -85,6 +85,46 @@ När partnern redan passat är öppningskraven lägre (svaret är begränsat och
   avgör vem som vinner delkontraktskampen. Ingen spärr/svag tvåa i 4:e hand
   under öppningsgolvet – det finns ingen kvar att spärra mot.
 Källa: bridgebum.com (Pearson points; third seat openings).
+
+### 3.1 Gambling 3NT (ägarbeslut 2026-09-14)
+**Öppningsbudet 3NT är Gambling** — inte en stor balanserad hand (25–27 öppnar
+2♣ och rebjuder 3NT, §4.4). Stilen är den **aggressiva** (ägarens val av de tre
+varianterna på bridgebum: aggressiv / moderat / konservativ):
+- **Solid 7+ lågfärg** med **A, K och Q** i topp — partnern räknar 7 (eller 8)
+  stick exakt.
+- **Inget ess eller kung** i någon annan färg (damer och knektar är tillåtna).
+- **Ingen renons, ingen 4+ sidofärg.**
+- **Samma betydelse i alla fyra sitsar** — även fjärde hand (enklare för bot och
+  människa än en särregel; frågan "P P P 3NT?" var det som startade bygget).
+- Alertpliktig. Förklaringen avslöjar inte **vilken** lågfärg det är.
+
+**Svararens bud** (hen vet inte vilken lågfärg partnern har):
+| Svar | Betydelse |
+|---|---|
+| pass | håll i båda högfärgerna och i en lågfärg; den andra lågfärgen är stoppad **eller kort (≤ 3 kort — då är den nästan säkert partnerns)**. 3NT står. |
+| 4♣ | **pass eller rätta**: saknar håll för 3NT. Öppnaren passar med klöver, rättar till 4♦ med ruter. Alert. |
+| 4♥ / 4♠ | naturligt: bra 6+ färg (≥ 2 av A/K/Q), till spel |
+| 5♣ | **pass eller rätta på utgångsnivå**: 3+ kort i båda lågfärgerna och ≥ 3 spelfasta stick (öppnarens 7 + våra ≈ 11) men hål för 3NT. Öppnaren passar / 5♦. Alert. |
+| 4NT | kvantitativ slaminbjudan — svarsschemat byggs senare, öppnaren passar tills vidare |
+
+Ett ostoppat hål räcker för 4♣ även med 12 hp (aggressiv stil: motståndarna kör
+färgen). Har svararen 4+ kort i den ostoppade lågfärgen är den knappast
+partnerns → 4♣. **Öppnaren** rättar 4♣→4♦ / 5♣→5♦ med ruter, passar med klöver
+och passar partnerns 4M.
+
+**Försvar mot deras Gambling 3NT (v1):** naturlig 4♥/4♠ med bra 6+ färg (≥ 2 av
+A/K/Q) och öppningsstyrka (12+ hp), annars pass — i direkt sits och i
+balanseringen.
+
+**Medvetet utanför v1** (`docs/senare.md`): slamfrågan 4♦ (singelton-fråga),
+öppnarens svar på kvantitativ 4NT, Klingers försvar (X = straff, 4♣/4♦ = takeout
+för högfärgerna med preferens ♥ resp. ♠), och 2♣-linjens färgslam när öppnaren
+har 25+ balanserad mittemot ett positivt färgsvar.
+
+*Exempel:* ♠84 ♥Q2 ♦AKQ9763 ♣53 → **3NT** · ♠5 ♥J83 ♦J4 ♣AKQT872 → **3NT** ·
+♠A4 ♥73 ♦AKQ8752 ♣9 → **1♦** (ess utanför) · ♠84 ♥42 ♦73 ♣AKJT763 → **3♣**
+(spärr — inte solid, damen saknas). Källa: bridgebum.com (Gambling 3NT; Schenken
+1968). Kod `gambling-3nt.ts`, facit `gambling-3nt.test.ts`.
 
 ## 4. Svar & fortsättningar
 ### 4.1 Svar på 1♥ / 1♠
@@ -593,7 +633,8 @@ från sin utgång och söker hellre 3NT via 1-läget) — **och minst 3 spelfast
 stick** (EK=2, ED=1½, E=1, KD=1, Kx=½; försvarsstyrka, så en spärrhand aldrig
 låtsas vara stark). En honnörstung hand med **8½ spelstick och 4+ spelfasta
 stick** (t.ex. tre ess) öppnar också 2♣. Krav. Balanserade ranger: 22–24
-(→ 2NT-rebud) och 28–30 (→ 3NT-rebud); 25–27 öppnar 3NT direkt (se §3).
+(→ 2NT-rebud), **25–27 (→ 3NT-rebud)** och **28–30 (→ 4NT-rebud)** — sedan
+3NT-öppningen blev Gambling (2026-09-14, §3.1).
 
 **Svararens svar (2♦ väntebud):**
 | Svar | Betydelse |
@@ -609,10 +650,14 @@ stick** (t.ex. tre ess) öppnar också 2♣. Krav. Balanserade ranger: 22–24
 | 2♥ / 2♠ | 5+ färg, naturlig | krav 1 rond |
 | 2NT | 22–24 hp, balanserad | ej krav |
 | 3♣ / 3♦ | 5+ färg, naturlig | krav 1 rond |
-| 3NT | 28–30 hp, balanserad | ej krav |
+| 3NT | 25–27 hp, balanserad | ej krav — svararen (0–7) passar; 33 nås inte mot visade 25 |
+| 4NT | 28–30 hp, balanserad | ej krav — svararen passar med 0–4, 6NT med 5+ (7NT med 9+) |
 
 - Efter **2NT (22–24)** använder svararen NT-konventionerna (Stayman, transfers
   m.m.) precis som över 1NT, fast med 22–24 hp mittemot.
+- **2♣–2NT (positivt, 8+ balanserad)** mittemot en balanserad **25+**: öppnaren
+  vet slammen (25 + 8 = 33) och bjuder **6NT** direkt, **7NT** med 29+ (37).
+  Kaptenen på svararsidan räknar annars bara mot visade 22 (2026-09-14).
 - Efter en **naturlig färgrebud** är utgång påtvingad (utom andra negativa);
   svararen visar stöd, ny färg (5+) eller NT naturligt. **Efter 2♣–2♦–2♥/2♠
   är hela svarsstrukturen naturlig** (ägarbeslut 2026-09-05, motorbytet §5b
@@ -2561,6 +2606,18 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-14 — Gambling 3NT ersätter "3NT = 25–27 balanserad" (§3.1, §4.4;
+  ägarbeslut, ja på alla fem punkterna).** Stil: aggressiv (solid 7+ lågfärg med
+  AKQ, inget A/K utanför, ingen renons, ingen 4-korts sidofärg), samma betydelse
+  i alla sitsar. Svar v1: pass med håll · 4♣/5♣ pass-eller-rätta · 4M naturligt;
+  öppnaren rättar till ruter. 25–27 balanserad flyttar in i 2♣-linjen
+  (2♣–2♦–**3NT** = 25–27, **4NT** = 28–30; svararen 6NT/7NT mot visat minimum,
+  annars pass) och över positivt 2NT bjuder öppnaren med 25+ slammen direkt
+  (6NT/7NT). Försvar mot deras Gambling 3NT v1: naturlig 4M med bra 6+ färg och
+  öppningsstyrka, annars pass. Utanför v1 → `docs/senare.md`. Kod
+  `gambling-3nt.ts` (öppning/svar/rättelse/försvar), betydelselagret
+  (`afterGambling3NT`; en 3NT-öppning är inte längre sangsystemets bas), facit
+  `gambling-3nt.test.ts` (skrivet före bygget). Källa: bridgebum.com.
 - **2026-09-13 — Motorbytet SLUTFÖRT: facit-kön tömd + de sista kända hålen
   (§4.3, §4.4, §5.8, §7.1, §7.3, §7.4, §7.6, §7.8; ägarbesked "liveproven är
   klara, gör klart budmotorn").** Elva regler, alla test-drivna (facit FÖRE fix:

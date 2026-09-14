@@ -2,15 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { parseHand } from '../bidding'
 import {
   respondTo2NT,
-  respondTo3NT,
   openerRebidAfter2NTResponse,
-  openerRebidAfter3NTResponse,
 } from './responses-2nt'
 import { buildAuction } from './auction'
 import type { Deal } from '../../types/bridge'
 
 const r2 = (notation: string) => respondTo2NT(parseHand(notation))
-const r3 = (notation: string) => respondTo3NT(parseHand(notation)).call
 
 describe('respondTo2NT – svararens svar på 2NT (20–21)', () => {
   it('pass med riktigt svag balanserad hand (ingen utgång)', () => {
@@ -94,25 +91,6 @@ describe('openerRebidAfter2NTResponse – öppnaren fullföljer', () => {
   })
 })
 
-describe('respondTo3NT – hantering av 3NT-öppning (25–27)', () => {
-  it('pass med svag hand (utgång räcker)', () => {
-    expect(r3('S:432 H:543 D:6432 C:765')).toBe('P') // 0 hp
-  })
-
-  it('4NT kvantitativ med 5–7 hp', () => {
-    expect(r3('S:K43 H:543 D:Q432 C:765')).toBe('4NT') // 5 hp
-  })
-
-  it('6NT med 8+ hp', () => {
-    expect(r3('S:K43 H:Q43 D:K432 C:765')).toBe('6NT') // 8 hp
-  })
-
-  it('accepterar kvantitativ 4NT med max (27)', () => {
-    const q = respondTo3NT(parseHand('S:K43 H:543 D:Q432 C:765'))
-    expect(openerRebidAfter3NTResponse(q, parseHand('S:AKQ4 H:AQ4 D:AK4 C:KQ2'))!.call).toBe('6NT') // 27 hp
-  })
-})
-
 describe('buildAuction – 2NT/3NT end-to-end (inkoppling)', () => {
   it('bygger 2NT – 3♦ – 3♥ (transfer fullföljd)', () => {
     const deal: Deal = {
@@ -133,20 +111,20 @@ describe('buildAuction – 2NT/3NT end-to-end (inkoppling)', () => {
     expect(a?.turns.slice(0, 5).map((t) => t.call)).toEqual(['2NT', '3D', '3H', '3NT', '4H'])
   })
 
-  it('bygger 3NT – P (svararen passar storhanden)', () => {
+  it('storhanden 25 balanserad öppnar 2♣ (3NT-öppningen är Gambling sedan 2026-09-14)', () => {
     const deal: Deal = {
       id: 'test',
       board: 2,
       dealer: 'N',
       vulnerability: 'none',
       hands: {
-        N: parseHand('S:AKQ4 H:AQ4 D:AK4 C:K32'), // 25 hp balanserad → 3NT
+        N: parseHand('S:AKQ4 H:AQ4 D:AK4 C:K32'), // 25 hp balanserad → 2♣ (→ 3NT-återbud)
         S: parseHand('S:32 H:9853 D:Q762 C:765'), //  2 hp → pass
         E: parseHand('S:J865 H:JT6 D:JT9 C:JT9'),
         W: parseHand('S:T97 H:K72 D:853 C:AQ84'),
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.slice(0, 1).map((t) => t.call)).toEqual(['3NT'])
+    expect(a?.turns.slice(0, 1).map((t) => t.call)).toEqual(['2C'])
   })
 })

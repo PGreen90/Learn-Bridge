@@ -20,7 +20,7 @@
 - **Stark 2♣** – `responses-2c.ts`
 - **Svaga tvåor 2♦/2♥/2♠ med Ogust** – `responses-weak2.ts`
 - **Spärröppningar 3X/4X** – `responses-preempt.ts`
-- **2NT/3NT-öppningar** – `responses-2nt.ts`
+- **2NT-öppningen** – `responses-2nt.ts` · **Gambling 3NT** (§3.1, 2026-09-14) – `gambling-3nt.ts`
 - **Drury** för passad hand – `responses-drury.ts`
 - **Försvarsbud §7** (punkt 21–27): inkliv/Michaels/ovanlig 2NT (`overcalls.ts`), dubblingar (`doubles.ts`), DONT (`dont.ts`), försvar mot konventionella öppningar (`defense-conventional.ts`) — störd budgivning inkopplad i `buildAuction` (LHO kliver in på riktigt).
 - ⚠️ **Lebensohl (`lebensohl.ts`) är byggd och testad men INTE inkopplad** — ingen produktionsfil importerar den, och ett svep där motorn bjöd 3 000 givar (2026-07-25) gav 0 träffar. Systemboken §7.5 beskriver den ändå. Känd skuld, se `docs/bevaka.md`; låst av kopplingsvakten i `src/docs-vakt.test.ts`.
@@ -97,8 +97,8 @@
   **Svararens turn 4 byggd** (`responderRebidIn2NTAuction`): minorfit→utgång,
   ingen fit→3NT, 5-4 hf efter 3♦→Smolen över 2NT, svag transfer→pass. Inkopplad i
   `responderSecondBid`. 2NT-auktioner löser sig nu helt på systemlinjen som 1NT.
-- **Punkt 25 3NT-öppningen**: verifierad (svararen placerar pass/4NT kvant/6NT;
-  öppnaren tar ställning till kvantitativ 4NT, max 27).
+- **Punkt 25 3NT-öppningen**: *(historiskt — 25–27-varianten ersattes av Gambling
+  3NT 2026-09-14, se §3.1; 25–27 går via 2♣–2♦–3NT.)*
 - Ny hjälpare `suitHcp` (`hand.ts`) för färgstyrka. Systembeslut i §4.3.
 - **Punkt 23 Minor Suit Stayman KLAR:** svararens turn 4 byggd i
   `responderRebidIn1NTAuction` (case `Minor Suit Stayman`). Insikt: MSS-handen har

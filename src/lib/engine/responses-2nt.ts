@@ -1,5 +1,5 @@
-// Budmotorns svar på partnerns 2NT-öppning (20–21 balanserad) och hantering av
-// 3NT-öppning (25–27 balanserad). Punkt 16 i arbetslistan.
+// Budmotorns svar på partnerns 2NT-öppning (20–21 balanserad). Punkt 16 i
+// arbetslistan. (3NT-öppningen är Gambling sedan 2026-09-14 — `gambling-3nt.ts`.)
 //
 // VIKTIGT: 2NT har INTE samma svarsstruktur som 1NT. Över 1NT (15–17) är utgång
 // osäker → svararen har inbjudningsbud. Över 2NT (20–21) är paret i princip i
@@ -8,8 +8,6 @@
 //
 //   respondTo2NT             – svararens första bud över 2NT (GF-schema)
 //   openerRebidAfter2NTResponse – öppnaren fullföljer Stayman/transfer/minorfråga
-//   respondTo3NT             – svararen placerar kontraktet över 3NT (slam/pass)
-//   openerRebidAfter3NTResponse – öppnaren tar ställning till kvantitativ 4NT
 //
 // Avgränsning: exakta slamverktyg (RKC, Gerber, storslam) hör till §6 (punkt
 // 17–20). Tills dess är 4NT *kvantitativ* (inbjuder 6NT) och storslam flaggas.
@@ -121,41 +119,6 @@ export function openerRebidAfter2NTResponse(response: ResponseResult, hand: Hand
       return { call: 'P', rule: 'rebid: pass', explanation: 'till spel → pass.' }
     case '4NT kvantitativ':
       return p >= openerMax ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `Maximum → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `Minimum → pass.` }
-    case '6NT till spel':
-      return { call: 'P', rule: 'rebid: pass', explanation: 'slam satt → pass.' }
-    default:
-      return null
-  }
-}
-
-// === Hantering av 3NT-öppning (25–27) ======================================
-
-/**
- * Svar på partnerns 3NT-öppning (25–27, stor balanserad). Svararen placerar
- * kontraktet: nästan alltid pass (utgång är redan nådd) – med slamvärden 6NT,
- * eller 4NT kvantitativ som inbjudan. Exakt storslam hör till §6 (flaggas).
- */
-export function respondTo3NT(hand: Hand): ResponseResult {
-  const p = hcp(hand)
-  // Tillsammans: 6NT ≈ 33, 7NT ≈ 37. Mittemot 25–27 → ~6 = slam, ~12 = storslam.
-  if (p >= 12) {
-    return { call: '6NT', rule: '6NT till spel', explanation: `Storslam kan finnas, men exakt fråga (RKC/Gerber) tas i §6 → 6NT så länge.`, uncertain: true }
-  }
-  if (p >= 8) {
-    return { call: '6NT', rule: '6NT till spel', explanation: `Slamzon mittemot 25–27 → 6NT.` }
-  }
-  if (p >= 5) {
-    return { call: '4NT', rule: '4NT kvantitativ', explanation: `Slaminbjudan → 4NT (kvantitativ, inbjuder 6NT).` }
-  }
-  return { call: 'P', rule: 'pass', explanation: `Utgång räcker → pass.` }
-}
-
-/** Öppnaren tar ställning till svararens kvantitativa 4NT över 3NT-öppningen. */
-export function openerRebidAfter3NTResponse(response: ResponseResult, hand: Hand): ResponseResult | null {
-  const p = hcp(hand)
-  switch (response.rule) {
-    case '4NT kvantitativ':
-      return p >= 26 ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: `Maximum → 6NT.` } : { call: 'P', rule: 'rebid: pass', explanation: `Minimum → pass.` }
     case '6NT till spel':
       return { call: 'P', rule: 'rebid: pass', explanation: 'slam satt → pass.' }
     default:

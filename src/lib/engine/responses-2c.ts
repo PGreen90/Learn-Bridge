@@ -1,7 +1,7 @@
 // Budmotorns svar på partnerns starka, konstgjorda 2♣-öppning (22+ hp, krav).
 // Härlett ur systemboken §4.4. Tre delar i en ostörd auktion:
 //   1. respondTo2C            – svararens FÖRSTA bud (2♦ väntebud + positiva)
-//   2. openerRebidAfter2C     – öppnarens återbud (2NT/3NT eller krav-färg)
+//   2. openerRebidAfter2C     – öppnarens återbud (2NT/3NT/4NT eller krav-färg)
 //   3. responderSecondBidAfter2C – svararens andra bud (andra negativa m.m.)
 //
 // Avgränsning: efter öppnarens 2NT (22–24) använder svararen NT-konventionerna
@@ -81,7 +81,9 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
   // --- Efter 2♦ väntebud: visa jättehandens form ---
   if (response.call === '2D') {
     if (bal && p <= 24) return { call: '2NT', rule: 'rebid: 2NT (22–24)', explanation: `Balanserad (22–24) → 2NT (ej krav).` }
-    if (bal) return { call: '3NT', rule: 'rebid: 3NT (28–30)', explanation: `Balanserad (28–30) → 3NT (ej krav).` }
+    // 25–27 rebjuder 3NT och 28–30 4NT sedan 3NT-öppningen blev Gambling (2026-09-14).
+    if (bal && p <= 27) return { call: '3NT', rule: 'rebid: 3NT (25–27)', explanation: `Balanserad (25–27) → 3NT (ej krav).` }
+    if (bal) return { call: '4NT', rule: 'rebid: 4NT (28–30)', explanation: `Balanserad (28–30) → 4NT (ej krav).` }
     // Obalanserad jätte: naturlig 5+ färg, krav 1 rond. Ett 2♣-återbud i färg
     // LOVAR 5+ (live-prov 2026-09-12); den treifärgade jätten (4-4-4-1) utan
     // 5-korts färg får inte bjuda en 4-korts "krav-färg" — den bjuder 2NT.
@@ -114,6 +116,14 @@ export function openerRebidAfter2C(hand: Hand, response: ResponseResult): Respon
   if (ownSuit) {
     const lvl = levelAbove(ownSuit, response.call)
     return { call: `${lvl}${BID[ownSuit]}`, rule: 'rebid: egen färg (GF)', explanation: `5+ ${SYM[ownSuit]} → ${lvl}${SYM[ownSuit]} (naturlig, utgångskrav – visar färgen före 3NT).` }
+  }
+  // Balanserat positivt 2NT (8+) mittemot 25+ balanserad: öppnaren VET slammen
+  // (25 + 8 = 33; 29 + 8 = 37) och bjuder den direkt — sedan 25–27 öppnar 2♣
+  // (Gambling 3NT, 2026-09-14). Kaptenen på andra sidan räknar bara mot visade 22.
+  if (response.call === '2NT' && bal && p >= 25) {
+    return p >= 29
+      ? { call: '7NT', rule: 'slamavslut', explanation: `Balanserad 29+ mittemot partnerns positiva 2NT (8+) → 37+ ihop → 7NT.` }
+      : { call: '6NT', rule: 'slamavslut', explanation: `Balanserad 25+ mittemot partnerns positiva 2NT (8+) → 33+ ihop → 6NT.` }
   }
   // Balanserat positivt (2NT) utan 5-färg → 3NT — om svaret ligger under 3NT.
   // Svarade partnern 3NT eller högre (människobud) är utgången redan satt → pass.

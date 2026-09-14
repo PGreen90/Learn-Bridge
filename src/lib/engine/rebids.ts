@@ -14,7 +14,8 @@ import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
 import { openerRebidAfterOgust, openerRebidAfterNewSuit, suitOfWeakTwo } from './responses-weak2'
 import { openerRebidAfterPreemptNewSuit, preemptOf } from './responses-preempt'
-import { openerRebidAfter2NTResponse, openerRebidAfter3NTResponse } from './responses-2nt'
+import { openerRebidAfter2NTResponse } from './responses-2nt'
+import { openerRebidAfterGambling3NT } from './gambling-3nt'
 import { openerRebidAfterDrury } from './responses-drury'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
@@ -674,7 +675,7 @@ export function openerSecondBid(openCall: string, response: ResponseResult, hand
     return openerRebidAfter2NTResponse(response, hand)
   }
   if (openCall === '3NT') {
-    return openerRebidAfter3NTResponse(response, hand)
+    return openerRebidAfterGambling3NT(response, hand)
   }
   return null
 }

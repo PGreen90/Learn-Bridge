@@ -42,6 +42,11 @@ const ALERT_RULE_PREFIXES: string[] = [
   '2NT-checkback', // konstgjord fråga (§5.2)
   '2♦ väntebud',
   'stark 2♣',
+  // Gambling 3NT (§3.1): öppningen och pass-eller-rätta-svaren är konstlade;
+  // 4M till spel och rättelsen är naturliga.
+  'Gambling 3NT',
+  'Gambling: 4♣',
+  'Gambling: 5♣',
   // Slamverktyg (konstgjorda frågor/svar)
   '1430 RKC',
   'Sjöberg',
@@ -90,7 +95,12 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // ---- Öppningar ----
   '1NT': 'ej-krav',
   '2NT': 'ej-krav',
-  '3NT': 'avslut',
+  'Gambling 3NT': 'ej-krav', // partnern passar med håll, annars 4♣/5♣ pass-eller-rätta / 4M (§3.1)
+  'Gambling: 4♣ pass eller rätta': 'ej-krav',
+  'Gambling: 5♣ pass eller rätta': 'ej-krav',
+  'Gambling: 4M till spel': 'avslut',
+  'Gambling: rättelse': 'avslut',
+  'inkliv över Gambling 3NT': 'avslut',
   'stark 2♣': 'utgangskrav',
   '5-korts högfärg': 'ej-krav',
   'minor-regeln': 'ej-krav',
@@ -145,7 +155,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   '1NT (12–14)': 'ej-krav',
   'gap-hand 1NT': 'ej-krav',
   'rebid: 2NT (22–24)': 'ej-krav',
-  'rebid: 3NT (28–30)': 'ej-krav',
+  'rebid: 3NT (25–27)': 'ej-krav',
+  'rebid: 4NT (28–30)': 'ej-krav',
   'enkel höjning': 'ej-krav',
   'höjning av minor': 'ej-krav',
   höjning: 'ej-krav',
