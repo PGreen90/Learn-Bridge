@@ -37,7 +37,7 @@ import {
   type BordMeta,
   type BordStol,
 } from '../../lib/backend/bord'
-import { ms, type PlaySpeed } from '../play/tempo'
+import { ms, sweepHoldMs, type PlaySpeed } from '../play/tempo'
 import type { Sweep } from '../play/common'
 import {
   byggVisuelltSpel,
@@ -68,6 +68,16 @@ export function avtackningsPaus(nasta: BordHandelse, egen: boolean, tempo: PlayS
   return 0
 }
 
+/** Leder JAG nästa stick vid bordet (stickväntan 2026-09-14)? Vinnaren i
+ *  VISUELLA stolar (jag är alltid Syd): min egen stol, eller träkarlen när jag
+ *  är spelförare. Som träkarl spelar jag aldrig (spelföraren styr min hand) →
+ *  ingen väntan. Ren funktion — facit i stickvantan.test.tsx. */
+export function jagLederNasta(declarerV: Seat, winnerV: Seat): boolean {
+  if (declarerV === 'S') return winnerV === 'S' || winnerV === 'N'
+  if (declarerV === 'N') return false
+  return winnerV === 'S'
+}
+
 function laggIhop(gamla: BordHandelse[], nya: BordHandelse[]): BordHandelse[] {
   if (!nya.length) return gamla
   const perSeq = new Map(gamla.map((h) => [h.seq, h]))
@@ -96,6 +106,9 @@ export interface BordSpelet {
   skickar: boolean
   gorDrag: (drag: BordDragInput) => Promise<void>
   hoppaOverSvep: () => void
+  /** Stickväntan: gå vidare från ett vilande stick (tryck på stickytan,
+   *  mellanslag/Enter) — svepet startar direkt, även under botens paus. */
+  gaVidareSvep: () => void
   /** Ensam människa + träkarl + bot som spelförare: hoppa din vy direkt till
    *  resultatet. Hela given ligger redan färdigspelad i loggen (bara bottar) —
    *  ett rent vy-hopp som flyttar läskursorn till loggens huvud, inget resultat
@@ -222,9 +235,17 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
 
   // Presentationskön: avtäck nästa händelse efter sin paus. Pausad under svep.
   useEffect(() => {
-    if (visadeSeq === null || sweep) return
+    if (visadeSeq === null) return
     const nasta = events.find((e) => e.seq > visadeSeq)
     if (!nasta) return
+    if (sweep?.phase === 'vanta') {
+      // Sticket väntar på MITT tryck, men loggen har redan nästa kort (boten
+      // tog min stol vid frånvaro, eller jag spelade från en annan flik) →
+      // sticket är över på riktigt: svep och gå vidare utan tryck.
+      if (nasta.typ === 'kort') setSweep({ trick: sweep.trick, phase: 'slide' })
+      return
+    }
+    if (sweep) return
     const egen = (nasta.typ === 'bud' || nasta.typ === 'kort') && nasta.seat === minStol
     const paus = avtackningsPaus(nasta, egen, tempo)
     const id = setTimeout(() => setVisadeSeq(nasta.seq), paus)
@@ -258,16 +279,33 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     if (n > settKort.current && n % 4 === 0 && spel && spel.state.completedTricks.length > 0) {
       settKort.current = n
       const trick = spel.state.completedTricks[spel.state.completedTricks.length - 1]
-      setSweep({ trick, phase: 'hold' })
-      const t1 = setTimeout(() => setSweep({ trick, phase: 'slide' }), ms('sweepHold', tempo))
-      const t2 = setTimeout(() => setSweep(null), ms('sweepHold', tempo) + ms('sweepSlide', tempo))
-      return () => {
-        clearTimeout(t1)
-        clearTimeout(t2)
-      }
+      // Stickväntan (2026-09-14): leder JAG nästa stick väntar sticket på mitt
+      // tryck ('vanta'); annars bot-pausen SWEEP_HOLD (ringen fylls) och svep ('hold'). Sista
+      // sticket har ingen nästa ledare → 'hold' (giv-klar kommer av sig själv).
+      const sista = spel.state.completedTricks.length === 13
+      const vanta = !sista && jagLederNasta(spel.state.contract.declarer, trick.winner)
+      setSweep(vanta ? { trick, phase: 'vanta' } : { trick, phase: 'hold', holdMs: sweepHoldMs(tempo) })
     }
     settKort.current = n
   }, [lage?.kort.length, spel, tempo])
+
+  // Svepets fasmaskin (samma som usePlayTable): hold → slide → borta på
+  // timers; 'vanta' tänder handen efter sweepHint och står sedan stilla tills
+  // gaVidareSvep/hoppaOverSvep (eller kön ser nästa kort, ovan).
+  useEffect(() => {
+    if (!sweep) return
+    if (sweep.phase === 'hold') {
+      const id = setTimeout(() => setSweep({ trick: sweep.trick, phase: 'slide' }), sweep.holdMs ?? sweepHoldMs(tempo))
+      return () => clearTimeout(id)
+    }
+    if (sweep.phase === 'vanta') {
+      if (sweep.hint) return
+      const id = setTimeout(() => setSweep({ trick: sweep.trick, phase: 'vanta', hint: true }), ms('sweepHint', tempo))
+      return () => clearTimeout(id)
+    }
+    const id = setTimeout(() => setSweep(null), ms('sweepSlide', tempo))
+    return () => clearTimeout(id)
+  }, [sweep, tempo])
 
   // Färska referenser till projektionen för det optimistiska draget (gorDrag
   // ska inte byggas om varje gång läget ändras).
@@ -316,6 +354,10 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
   )
 
   const hoppaOverSvep = useCallback(() => setSweep(null), [])
+  const gaVidareSvep = useCallback(
+    () => setSweep((s) => (s && s.phase !== 'slide' ? { trick: s.trick, phase: 'slide' } : s)),
+    [],
+  )
   // Ensam människa som träkarl: hoppa direkt till resultatet — given är redan
   // färdigspelad av bottarna i loggen, så det räcker att flytta läskursorn till
   // huvudet (och släppa ett eventuellt pågående svep).
@@ -344,6 +386,7 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     skickar,
     gorDrag,
     hoppaOverSvep,
+    gaVidareSvep,
     hoppaTillResultat,
     harOspeladLogg,
   }

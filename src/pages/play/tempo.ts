@@ -39,8 +39,9 @@ export const BASE = {
   mcFloor: 500,
   /** Kortflygningen hand → bordet (etapp 3). */
   flight: 280,
-  /** Paus med vinnarmarkering innan sticket sveps ihop (etapp 2). */
-  sweepHold: 900,
+  /** Stickväntan (2026-09-14): leder DU nästa stick ligger sticket kvar tills
+   *  du trycker — efter den här tiden tänds den pekande handen som visar det. */
+  sweepHint: 2000,
   /** Själva svepet mot vinnarens sida (etapp 2). */
   sweepSlide: 450,
   /** Bordets uttoning innan resultatdialogen (etapp 5). Claim-revealen har
@@ -49,6 +50,23 @@ export const BASE = {
   /** Giv-klar-ljudet: efter deal-in-kaskadens slut (13 kort × 35 ms + 300 ms). */
   dealSoundDelay: 760,
 } as const
+
+/** Stickväntans bot-paus (ägarbeslut 2026-09-14): när BOTEN leder nästa stick
+ *  ligger sticket kvar exakt så här länge medan ringen runt högen fylls, sedan
+ *  sveps det. Runda, valda tal per tempo — INTE faktor-skalade som resten
+ *  (ägarens önskan: 2/3/4 s; ersatte BASE.sweepHold 900 × faktor). Ringens
+ *  CSS-animation får samma tal inline, så ring och JS-timer slutar samtidigt.
+ *  Ett tryck sveper direkt. */
+export const SWEEP_HOLD: Record<PlaySpeed, number> = {
+  snabb: 2000,
+  normal: 3000,
+  lugn: 4000,
+}
+
+/** Bot-pausen för stickväntan vid valt tempo (ms). */
+export function sweepHoldMs(speed: PlaySpeed): number {
+  return SWEEP_HOLD[speed]
+}
 
 /** En bastid skalad efter hastighetsvalet, avrundad till hela ms. */
 export function ms(key: keyof typeof BASE, speed: PlaySpeed): number {

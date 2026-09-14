@@ -281,6 +281,15 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   paus med pulserande vinnarglow → alla fyra korten sveps mot vinnarens sida →
   borta. UI-fas `sweep` i `usePlayTable.ts` (hold/slide, tider från `tempo.ts`);
   botarna, auto-claim och `done` väntar ut svepet; klick hoppar över det.
+  **Stickväntan (2026-09-14, ägarbeslut):** fas `'vanta'` när DU leder nästa
+  stick (`svepStartFas` i `common.tsx`; bordet `jagLederNasta` i
+  `useBordSpel.ts`) — sticket ligger kvar tills tryck på stickytan
+  (`advanceSweep`/`gaVidareSvep`, även mellanslag/Enter), den pekande handen
+  (`StickHint`, CSS `stick-hint`) tänds efter `sweepHint`; leder boten fylls
+  ringen (`HoldRing`, CSS `stick-ring-fill` + in/ut-fade `RING_FADE_MS` 0,5 s
+  som del av pausen, tider inline ur `sweep.holdMs`) under `SWEEP_HOLD` (2/3/4 s per tempo, egen tabell i `tempo.ts` — inte
+  faktor-skalad). Sista sticket väntar aldrig; en claim-reveal (`pendingClaim`)
+  släcker svepet. Facit `stickvantan.test.tsx`.
   Mittens gamla "förra sticket ligger kvar"-fallback borttagen — historiken bor
   i Förra sticket-panelen (döljs under svepet). CSS: `trick-sweep-*` +
   `winner-glow` i `index.css`. Test: `src/pages/play/sticksvep.test.tsx`.

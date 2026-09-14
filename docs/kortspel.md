@@ -101,8 +101,14 @@ Spåret som gav kortspelet liv, byggt i fem etapper helt i UI-lagret (spelmotorn
 - **En sanning om tiderna:** alla spelfasens tider bor i `src/pages/play/tempo.ts`
   (`BASE` + `ms(key, speed)`). Temporaden Lugn/Normal/Snabb i ⋮-menyn skalar
   både JS-pauser och CSS-animationer (`--motion-scale` på bordets Felt).
-- **Sticksvepet:** färdigt stick ligger kvar med vinnarglow, sveps sedan mot
-  vinnarens sida; botarna väntar, klick hoppar över.
+- **Sticksvepet + stickväntan (2026-09-14):** färdigt stick ligger kvar med
+  vinnarglow. Leder DU nästa stick ligger det kvar tills du trycker på det
+  (mellanslag/Enter går också; en pekande hand tänds efter `sweepHint`);
+  leder boten fylls en tunn guldring runt högen under `SWEEP_HOLD` (2/3/4 s
+  vid snabb/normal/lugn — runda tal, inte faktor-skalade) och sedan sveps det.
+  Ett tryck går alltid vidare direkt, ett klick på ett kort hoppar över svepet.
+  En claim-reveal släcker ett väntande stick. Samma mekanik vid vänner-bordet.
+  Facit `stickvantan.test.tsx`.
 - **Kortflygningen:** spelade kort flyger som WAAPI-klon från handen (eller dold
   hands bordskant) till stickplatsen (`useCardFlight.ts` + `FlightLayer.tsx`).
 - **Ljuden:** tre diskreta Web Audio-syntetiserade ljud i `src/lib/sound.ts` —

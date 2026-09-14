@@ -33,8 +33,8 @@ import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib/engine/play-bot'
 import { mulberry32 } from '../../lib/engine/deal'
 import { botDecisionSeed, playIndexOf } from '../../lib/engine/play-seed'
-import { controls, sameCard } from './common'
-import { ms, type PlaySpeed } from './tempo'
+import { controls, sameCard, svepStartFas } from './common'
+import { ms, sweepHoldMs, type PlaySpeed } from './tempo'
 import { useCardFlight } from './useCardFlight'
 import { isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 
@@ -114,6 +114,9 @@ export function usePlayTable(
   // ligger korten kvar med vinnarglow ('hold'), sveps sedan mot vinnaren
   // ('slide') och försvinner. Botarna och auto-claim VÄNTAR under svepet;
   // ett klick (kort eller stickytan) hoppar över det — otåliga blockeras aldrig.
+  // Stickväntan (ägarbeslut 2026-09-14): leder DU nästa stick startar svepet i
+  // 'vanta' — sticket ligger kvar tills du trycker på det (handen tänds efter
+  // sweepHint); leder boten är pausen SWEEP_HOLD (2/3/4 s, ringen fylls) innan svepet.
   const [sweep, setSweep] = useState<Sweep | null>(null)
   // Ref-jämförelse (inte effekt-på-play rakt av) så StrictMode-dubbelkörningen
   // i dev inte startar svepet två gånger. Startar på ANTALET redan spelade
@@ -162,24 +165,48 @@ export function usePlayTable(
     const n = play.completedTricks.length
     if (n <= sweptCount.current) return
     sweptCount.current = n
-    setSweep({ trick: play.completedTricks[n - 1], phase: 'hold' })
-  }, [play])
+    const trick = play.completedTricks[n - 1]
+    const fas = svepStartFas(contract, trick.winner, isComplete(play))
+    setSweep(fas === 'hold' ? { trick, phase: 'hold', holdMs: sweepHoldMs(speed) } : { trick, phase: 'vanta' })
+  }, [play, contract, speed])
 
-  // Svepets fasmaskin: hold (vinnarglow) → slide (svepet) → borta. Rena
-  // setTimeout (aldrig rAF) så fake timers i testerna styr den deterministiskt.
+  // Svepets fasmaskin: hold (vinnarglow) → slide (svepet) → borta. 'vanta'
+  // tänder bara handen efter sweepHint och står sedan stilla tills advanceSweep/
+  // skipSweep. Rena setTimeout (aldrig rAF) så fake timers i testerna styr den
+  // deterministiskt.
   useEffect(() => {
     if (!sweep) return
     if (sweep.phase === 'hold') {
-      const id = setTimeout(() => setSweep({ trick: sweep.trick, phase: 'slide' }), ms('sweepHold', speed))
+      const id = setTimeout(() => setSweep({ trick: sweep.trick, phase: 'slide' }), sweep.holdMs ?? sweepHoldMs(speed))
+      return () => clearTimeout(id)
+    }
+    if (sweep.phase === 'vanta') {
+      if (sweep.hint) return
+      const id = setTimeout(() => setSweep({ trick: sweep.trick, phase: 'vanta', hint: true }), ms('sweepHint', speed))
       return () => clearTimeout(id)
     }
     const id = setTimeout(() => setSweep(null), ms('sweepSlide', speed))
     return () => clearTimeout(id)
   }, [sweep, speed])
 
-  /** Hoppa över svepet direkt (klick på kort eller stickytan). */
+  // Claim-revealen (även auto-claim, som startar i samma ögonblick som sticket
+  // blir klart och hinner före väntefasen): korten ligger stilla med alla händer
+  // uppe — ett väntande stick i mitten (och handen) skulle annars hänga kvar
+  // över en redan avgjord giv (ägarens skärmbild 2026-09-14). Släck svepet så
+  // fort revealen visas.
+  useEffect(() => {
+    if (pendingClaim) setSweep(null)
+  }, [pendingClaim])
+
+  /** Hoppa över svepet direkt (klick på ett kort — du spelar redan vidare). */
   function skipSweep() {
     setSweep(null)
+  }
+
+  /** Gå vidare från ett vilande stick (tryck på stickytan, mellanslag/Enter):
+   *  svepet startar direkt — även under botens paus (otåliga blockeras aldrig). */
+  function advanceSweep() {
+    setSweep((s) => (s && s.phase !== 'slide' ? { trick: s.trick, phase: 'slide' } : s))
   }
 
   /** Gå vidare från claim-revealen (knappen på bordet): committa claimen och
@@ -528,6 +555,7 @@ export function usePlayTable(
     toggleSound,
     sweep,
     skipSweep,
+    advanceSweep,
     flight,
     endFlight,
     registerCardEl,

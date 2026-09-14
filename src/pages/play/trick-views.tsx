@@ -87,6 +87,80 @@ export function LastTrickPanel({
   )
 }
 
+/** Den pekande handen (stickväntan, ägarbeslut 2026-09-14): tänds efter
+ *  sweepHint när sticket väntar på DITT tryck och pulserar mjukt (CSS-klassen
+ *  stick-hint). Ren illustration — hela stickytan är träffytan, så handen
+ *  själv släpper igenom trycket. */
+function StickHint() {
+  return (
+    <span aria-hidden className="stick-hint pointer-events-none absolute left-1/2 top-1/2 z-20 text-gold-200">
+      <svg
+        width="44"
+        height="44"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.65))' }}
+      >
+        {/* Pekfingret + de tre böjda fingrarna och tummen */}
+        <path d="M9 11.5V4.75a1.5 1.5 0 0 1 3 0V11" />
+        <path d="M12 10.5a1.5 1.5 0 0 1 3 0V12" />
+        <path d="M15 11.5a1.5 1.5 0 0 1 3 0V13" />
+        <path d="M18 12.5a1.5 1.5 0 0 1 3 0V16a6 6 0 0 1-6 6h-2.2a6 6 0 0 1-4.9-2.5L4.1 15.4a1.6 1.6 0 0 1 2.5-2L9 16.2" />
+        {/* Tryck-ringarna vid fingertoppen */}
+        <path d="M6.6 3.6a4.9 4.9 0 0 1 7.8 0" opacity="0.7" />
+        <path d="M5 2a7.5 7.5 0 0 1 11 0" opacity="0.4" />
+      </svg>
+    </span>
+  )
+}
+
+/** Stickväntans ring (ägarens skiss 2026-09-14): när BOTEN leder nästa stick
+ *  fylls en tunn guldring RUNT hela stickhögen, utanför väderstreckspillren,
+ *  medurs från klockan tolv — exakt under bot-pausen (`holdMs`, inline så ring
+ *  och JS-timer slutar samtidigt). Så förstår spelaren att bordet väntar med
+ *  flit och hur länge. Ren illustration (pointer-events none); trycket på
+ *  stickytan sveper som vanligt. Diametern 200 px kring den 160 px stora ytan:
+ *  ~20 px utanför pillren, aldrig över kort eller pillren.
+ *  Ringen tonar IN de första och UT de sista RING_FADE_MS av pausen (ägar-
+ *  önskan: 0,5 s vardera, som DEL av tiden — inte ovanpå): två opacitets-
+ *  animationer, ut-fasen fördröjd `ms − RING_FADE_MS`, båda inline ur samma tal. */
+export const RING_FADE_MS = 500
+function HoldRing({ ms }: { ms: number }) {
+  const r = 98
+  const c = 2 * Math.PI * r
+  const fade = Math.min(RING_FADE_MS, Math.floor(ms / 2))
+  return (
+    <svg
+      aria-hidden
+      className="stick-ring pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+      width="200"
+      height="200"
+      viewBox="0 0 200 200"
+      style={{ animationDuration: `${fade}ms, ${fade}ms`, animationDelay: `0ms, ${ms - fade}ms` }}
+    >
+      <circle cx="100" cy="100" r={r} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="2" />
+      <circle
+        className="stick-ring-fill"
+        cx="100"
+        cy="100"
+        r={r}
+        fill="none"
+        stroke="rgba(253, 230, 138, 0.75)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeDasharray={c}
+        strokeDashoffset={c}
+        transform="rotate(-90 100 100)"
+        style={{ animationDuration: `${ms}ms` }}
+      />
+    </svg>
+  )
+}
+
 /** Sticket i mitten (live): mörk platta, väderstrecken runt om — en mjuk
  *  ljuskägla (spotlight) lyser upp platsen som är i tur (pulserar när
  *  bot-hjärnan räknar). Ett färdigt stick ligger kvar med vinnarglow under
@@ -200,8 +274,14 @@ export function TrickCenterLive({
     // N/S centrerade ±24 px från mitten (topp-/bottenkant 24 px in → 16 px =
     // 25 % av 64 i N/S-överlapp), V/Ö vridna med boxvänsterkant 32 px in →
     // samma 25 % av den vridna bredden. Spelordningen styr z-index i card().
-    <div className="relative h-40 w-40 shrink-0" onClick={sweep ? onSkipSweep : undefined}>
+    <div
+      className={`relative h-40 w-40 shrink-0 ${sweep && sweep.phase !== 'slide' ? 'cursor-pointer' : ''}`}
+      onClick={sweep ? onSkipSweep : undefined}
+      aria-label={sweep?.phase === 'vanta' ? 'Tryck för att gå vidare till nästa stick' : undefined}
+    >
       <div className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-emerald-950/50 ring-1 ring-emerald-100/10" />
+      {sweep?.phase === 'vanta' && sweep.hint && <StickHint />}
+      {sweep?.phase === 'hold' && sweep.holdMs !== undefined && <HoldRing ms={sweep.holdMs} />}
       {seatPill('N', 'N', 'top-1 left-1/2 -translate-x-1/2')}
       {seatPill('S', 'S', 'bottom-1 left-1/2 -translate-x-1/2')}
       {seatPill('W', 'V', 'left-0 top-1/2 -translate-y-1/2')}

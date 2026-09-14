@@ -10,7 +10,7 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { dealFromSeed } from '../../lib/engine/revisor'
 import { legalCards, type Contract } from '../../lib/engine/play'
 import { usePlayTable } from './usePlayTable'
-import { ms } from './tempo'
+import { ms, sweepHoldMs } from './tempo'
 import { playSound } from '../../lib/sound'
 
 // playSound/armSound mockas (jsdom kan inte spela något ändå); av/på-läsningen
@@ -109,7 +109,7 @@ describe('usePlayTable — hook-punkterna', () => {
     expect(heard()).not.toContain('sweep')
 
     // Vinnarglow-pausen är tyst; svischet kommer exakt när sliden börjar.
-    await advance(ms('sweepHold', 'normal'))
+    await advance(sweepHoldMs('normal'))
     expect(result.current.sweep?.phase).toBe('slide')
     expect(heard().filter((k) => k === 'sweep').length).toBe(1)
   })
