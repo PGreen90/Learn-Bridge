@@ -13,13 +13,35 @@ import {
 } from '../../lib/engine/play'
 import { SPEED_LABEL, type PlaySpeed } from './tempo'
 
-/** Sticksvepet (etapp 2): 'hold' = korten ligger kvar med vinnarglow,
- *  'slide' = alla fyra sveps mot vinnarens sida. null = inget svep. */
-export type Sweep = { trick: Trick; phase: 'hold' | 'slide' }
+/** Sticksvepet (etapp 2 + stickväntan 2026-09-14): 'hold' = korten ligger kvar
+ *  med vinnarglow i sweepHold (boten leder nästa stick), 'vanta' = korten ligger
+ *  kvar tills DU trycker (du leder nästa; `hint` tänds efter sweepHint och visar
+ *  den pekande handen), 'slide' = alla fyra sveps mot vinnarens sida.
+ *  null = inget svep. */
+export type Sweep = {
+  trick: Trick
+  phase: 'hold' | 'vanta' | 'slide'
+  /** 'vanta': handen är tänd (efter sweepHint). */
+  hint?: boolean
+  /** 'hold': bot-pausens längd (SWEEP_HOLD vid valt tempo) — ringen runt
+   *  högen fylls exakt så länge, sedan sveps sticket. */
+  holdMs?: number
+}
 
 /** Spelar ägaren (Syd) den här platsen? Vi spelar = både N och S; vi försvarar = bara S. */
 export function controls(contract: Contract, seat: Seat): boolean {
   return side(contract.declarer) === 'NS' ? side(seat) === 'NS' : seat === 'S'
+}
+
+/** Svepets startfas när ett stick just blivit klart (stickväntan, ägarbeslut
+ *  2026-09-14: "sticket försvann för snabbt — det ska ligga kvar tills
+ *  spelföraren är redo"). Leder DU nästa stick (vinnaren är en plats du styr)
+ *  väntar sticket på ditt tryck ('vanta'); annars ligger det kvar sin tid och
+ *  sveps ('hold'). Sista sticket har ingen nästa ledare → 'hold', så resultatet
+ *  kommer av sig självt. */
+export function svepStartFas(contract: Contract, winner: Seat, sistaSticket: boolean): 'hold' | 'vanta' {
+  if (sistaSticket) return 'hold'
+  return controls(contract, winner) ? 'vanta' : 'hold'
 }
 
 export function sameCard(a: Card, b: Card) {

@@ -10,16 +10,24 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — ägaren väljer nästa NU (motorbytet SLUTFÖRT & LIVE 2026-09-13)
-Ägarbesked 2026-09-13: "liveproven är klara — gör klart budmotorn." Gjort samma
-dag, test-drivet, PCD:at (mergepunkt `ee02860`): facit-kön tömd (bara kontrerad
-checkback kvar = SENARE), invit-hoppet (8+ TP, ägarens metodval), M19,
-kikvakten skarp för hela auktionen, öppnarens Smolen-svar efter 1NT — elva
-regler (budsystem §9 2026-09-13, `docs/motorbyte-plan.md` loggen, bevaka-
-posten). Samma kväll: **403-rapporten lagad & LIVE** (`0fd37b9`) — tappade
-tävlingsinskick får omförsök på servern och skickas om från klienten
-(`docs/historik.md` 2026-09-13). **Nästa session:** ägaren väljer NU ur
-🟢 NÄST (regeln i `docs/arbetsrutiner.md`); rekommendation NÄST 1.
+### 🔵 NU — STICKVÄNTAN (ägarbeslut 2026-09-14) → sedan bordens SENARE-lista
+Ägaren 2026-09-14: "sticket försvinner för snabbt från bordets mitt". Byggt
+samma dag på ALLA spelbara ytor (Spela kort + vänner-bordet), en mekanik: leder
+DU nästa stick ligger sticket kvar tills du trycker (pekande hand efter 2 s);
+leder boten fylls en tunn guldring runt högen i 2/3/4 s (snabb/normal/lugn,
+ägarens skiss) och sedan svep; tryck/mellanslag/Enter går alltid vidare. Facit
+`src/pages/play/stickvantan.test.tsx`, tiderna i `tempo.ts` (SWEEP_HOLD +
+sweepHint), detalj `docs/historik.md` 2026-09-14. Status: byggd, hela sviten
+grön, browser-verifierad (hand + ring, mätt utan överlapp 375/504/1280 px) —
+PCD väntar på ägaren.
+**Nästa NU (ägarbeslut 2026-09-14, körordningen bestämd):** bordens SENARE-lista
+i ordningen 1) rondgenomgången per giv (återanvänd `byggGranskning` +
+`PlayReplay`, datat finns i loggen) → 2) DD-jämförelsen (kräver serverräknat DD
+vid giv-klar: prova FÖRST att bunta `bridge-dds` (WASM) i Vercel-funktionen) →
+3) claim vid bordet (nytt protokoll: begäran/svar-händelser, motpartsgodkännande,
+botens dom — designfrågor med ägaren före kod). Bakgrund `docs/bord-plan.md`
+"Medvetet utanför v1". Motorbytets slutförande + 403-fixen (2026-09-13) bor nu
+helt i `docs/historik.md`.
 
 **Nyss klart (2026-09-14): bricka 12-rapporten** — advancern efter partnerns
 balansinkliv passar med fit (aldrig ny färg) och tävlar 2♥ när de bjuder

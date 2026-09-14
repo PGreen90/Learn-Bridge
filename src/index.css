@@ -257,6 +257,30 @@
 }
 .winner-glow { animation: winner-glow calc(1200ms * var(--motion-scale, 1)) ease-in-out infinite; }
 
+/* Stickväntan (ägarbeslut 2026-09-14): den pekande handen pulserar mjukt när
+   sticket väntar på ditt tryck. Tänds efter BASE.sweepHint (tempo.ts).
+   Centreringen ligger i keyframen (transform), inte i Tailwind-klasser. */
+@keyframes stick-hint {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(0.92); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+}
+.stick-hint { transform: translate(-50%, -50%); animation: stick-hint calc(1600ms * var(--motion-scale, 1)) ease-in-out infinite; }
+
+/* Stickväntans ring (ägarens skiss 2026-09-14): när boten leder nästa stick
+   fylls en tunn guldring runt stickhögen medurs, exakt under bot-pausen.
+   Tiden sätts INLINE per svep ur SWEEP_HOLD (tempo.ts) — inte via
+   --motion-scale — så ringen och JS-timern slutar samtidigt. */
+@keyframes stick-ring-fill { to { stroke-dashoffset: 0; } }
+.stick-ring-fill { animation: stick-ring-fill linear both; }
+/* Ringen tonar in 0,5 s och ut 0,5 s SOM DEL av pausen (ägarönskan): två
+   animationer på wrappern, ut-fasen fördröjd (paus − 0,5 s). Tider och
+   fördröjning sätts inline av HoldRing (trick-views.tsx). Bara "forwards" —
+   ingen bakåtfyllnad, annars skulle ut-fasens startvärde täcka in-fasen. */
+@keyframes stick-ring-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes stick-ring-out { from { opacity: 1; } to { opacity: 0; } }
+.stick-ring { opacity: 0; animation: stick-ring-in ease-out forwards, stick-ring-out ease-in forwards; }
+@media (prefers-reduced-motion: reduce) { .stick-ring { display: none; } }
+
 /* Resultatövergången (etapp 5): hela bordet tonar ut innan resultatvyn tar
    över. Bastiden 500 ms MÅSTE matcha BASE.resultOutro i tempo.ts — JS-timern
    (showResult) och uttoningen löper parallellt och ska sluta samtidigt.
@@ -387,7 +411,7 @@
 @media (prefers-reduced-motion: reduce) {
   .card-in-n, .card-in-s, .card-in-w, .card-in-e,
   .trick-sweep-n, .trick-sweep-s, .trick-sweep-w, .trick-sweep-e,
-  .winner-glow,
+  .winner-glow, .stick-hint,
   .felt-fade-out, .result-made-glow::before, .result-made-glow::after,
   .deal-in, .page-in, .overlay-in, .dialog-in,
   .text-gold-shimmer,

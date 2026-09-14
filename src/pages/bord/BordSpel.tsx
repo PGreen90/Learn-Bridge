@@ -230,9 +230,24 @@ export function BordSpel({
     skickar,
     gorDrag,
     hoppaOverSvep,
+    gaVidareSvep,
     hoppaTillResultat,
     harOspeladLogg,
   } = useBordSpel(kod, minStol, tempoVal)
+  // Stickväntan (2026-09-14): mellanslag/Enter går vidare från ett vilande
+  // stick — utom när fokus ligger på en knapp eller ett fält.
+  useEffect(() => {
+    if (!sweep || sweep.phase === 'slide') return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== ' ' && e.key !== 'Enter') return
+      const t = e.target as HTMLElement | null
+      if (t && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName)) return
+      e.preventDefault()
+      gaVidareSvep()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [sweep, gaVidareSvep])
   const [selectedSuit, setSelectedSuit] = useState<Card['suit'] | null>(null)
 
   async function avslutaBordet() {
@@ -1063,7 +1078,7 @@ export function BordSpel({
             play={st}
             thinking={skickar}
             sweep={sweep}
-            onSkipSweep={hoppaOverSvep}
+            onSkipSweep={gaVidareSvep}
             onCardClick={() => {}}
             hasReason={() => false}
           />

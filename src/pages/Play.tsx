@@ -338,7 +338,7 @@ export function PlayTable({
     sound,
     toggleSound,
     sweep,
-    skipSweep,
+    advanceSweep,
     flight,
     endFlight,
     registerCardEl,
@@ -409,6 +409,22 @@ export function PlayTable({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  // Stickväntan (2026-09-14): mellanslag/Enter går vidare från ett vilande
+  // stick — utom när fokus ligger på en knapp eller ett fält (Enter på ett
+  // fokuserat kort spelar kortet som förut).
+  useEffect(() => {
+    if (!sweep || sweep.phase === 'slide') return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== ' ' && e.key !== 'Enter') return
+      const t = e.target as HTMLElement | null
+      if (t && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName)) return
+      e.preventDefault()
+      advanceSweep()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [sweep, advanceSweep])
 
   // Dina stick = din sidas (N/S) stick, oavsett vem som var spelförare.
   const myTricks = declSide === 'NS' ? result.declarerTricks : 13 - result.declarerTricks
@@ -1018,7 +1034,7 @@ export function PlayTable({
             sweep={sweep}
             flight={flight}
             wasFlown={wasFlown}
-            onSkipSweep={skipSweep}
+            onSkipSweep={advanceSweep}
             onCardClick={onPlayedCardClick}
             hasReason={(pc) => !!reasonFor(pc)}
           />

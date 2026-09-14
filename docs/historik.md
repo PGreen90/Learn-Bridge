@@ -2636,3 +2636,31 @@ pass, aldrig ny färg), tävlande 2-lägeshöjning från 6 hp när de bjuder vid
 `overcallerCorrectsToOwnSuit` (≤ 2 kort i advancerns färg → tillbaka till egen
 5+). Budsystem §7.1 + §9. Facit `auction-advancer-balansinkliv.test.ts`; hela
 sviten grön (`npm test`). Bricka 12 landar nu i 1♥ av N.
+
+## 2026-09-14 — Stickväntan: sticket ligger kvar tills du trycker (ägarbeslut)
+
+Ägaren: "när ett stick är spelat försvinner det för snabbt från bordets mitt".
+Byggt på alla spelbara ytor (Spela kort `usePlayTable`, vänner-bordet
+`useBordSpel`) med EN mekanism: svepet startar i `'vanta'` när DU leder nästa
+stick (vinnaren är en plats du styr — `svepStartFas`/`jagLederNasta`) och står
+stilla tills du trycker på stickytan (mellanslag/Enter går också); den pekande
+handen (`StickHint`, CSS `stick-hint`) tänds efter `sweepHint` (2 s). Leder
+boten: `'hold'` under `SWEEP_HOLD` — ägarens uppföljning samma dag: en tunn
+guldring runt hela stickhögen (utanför pillren, ägarens skiss) fylls medurs i
+exakt bot-pausen, 2/3/4 s för snabb/normal/lugn (`SWEEP_HOLD` i `tempo.ts`,
+runda tal i stället för det faktor-skalade `sweepHold` 900; ringens CSS-tid
+sätts inline ur `sweep.holdMs` så ring och timer slutar samtidigt; ringen
+tonar in 0,5 s och ut 0,5 s SOM DEL av pausen — `RING_FADE_MS`, två
+opacitetsanimationer med ut-fasen fördröjd paus − 0,5 s) — och svep.
+Ett tryck går alltid vidare, även under botens paus
+(`advanceSweep`/`gaVidareSvep`); klick på ett kort hoppar över som förut.
+Sista sticket väntar aldrig (resultatet kommer av sig självt). Bugg ur ägarens
+skärmbild: auto-claim startade i samma ögonblick som sticket blev klart och
+handen hängde kvar över claim-revealen → `pendingClaim` släcker svepet. Bordet: väntar jag men loggen redan har nästa kort (boten tog min
+stol vid frånvaro) sveps sticket av sig självt. Facit `stickvantan.test.tsx`
+(frö 2 = vi vinner, frö 1 = boten vinner; proben: spela första sticket med
+usePlayTable och läs vinnaren); befintliga svep-/ljud-/flygtester orörda gröna.
+Browser-verifierat i Spela kort (handen syns efter 2 s, trycket sveper; ringen
+mätt med getBoundingClientRect vid 375×812, 504×909 och 1280×700: 200 px,
+ingen överlapp med kort utanför stickytan, ingen klippning). Ej automattestat:
+bordets kö-vakt (kräver hook-rigg med mockad backend).

@@ -9,7 +9,7 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { dealFromSeed } from '../../lib/engine/revisor'
 import { legalCards, type Contract } from '../../lib/engine/play'
 import { usePlayTable } from './usePlayTable'
-import { ms } from './tempo'
+import { ms, sweepHoldMs } from './tempo'
 
 // Väst spelar 1♣ → Nord (bot) leder, Öst (bot) följer, Syd (vi) är tredje hand,
 // Väst (bot) fjärde. Seedad giv → samma händer och samma stickvinnare varje gång.
@@ -55,7 +55,7 @@ describe('sticksvepet — fasmaskinen', () => {
     expect(result.current.sweep?.phase).toBe('hold')
 
     // Pausen håller hela sin tid (botDelay < sweepHold — inget kort får smyga in).
-    await advance(ms('sweepHold', 'normal') - 1)
+    await advance(sweepHoldMs('normal') - 1)
     expect(result.current.sweep?.phase).toBe('hold')
     expect(result.current.play.currentTrick.length).toBe(0)
 
