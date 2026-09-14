@@ -13,17 +13,15 @@ svarar på vad).
 ### 🔵 NU — BORDENS SENARE-LISTA (ägarbeslut 2026-09-14, körordningen bestämd)
 Ordningen: **1) rondgenomgången per giv → 2) DD-jämförelsen → 3) claim vid
 bordet.** Bakgrund `docs/bord-plan.md` "Medvetet utanför v1".
-- **Etapp 1 rondgenomgången: KLAR & LIVE 2026-09-14 (mergepunkt `5088526`), ägarens live-prov vid bordet återstår.** Ren modul
-  `src/pages/bord/bord-genomgang.ts` (loggen → given/kontrakt/stick/systemiskt
-  förklarade bud, verkliga stolar) + vyn `BordGenomgang.tsx` (PlayReplay på
-  vinröd duk, namnraden) + knappen "Genomgång av given →" i giv-klar-vyn för
-  ALLA vid bordet; stängs själv när ägaren startar nästa giv. Facit
-  `bord-genomgang.test.ts` + röktest i `BordSpel.test.tsx`. Bordet kan inte
-  provspelas lokalt (serverfunktionerna finns bara i molnet) → live-prov efter
-  deploy är ägarsteget.
-- **Etapp 2 DD-jämförelsen:** kräver serverräknat DD vid giv-klar — prova
-  FÖRST att bunta `bridge-dds` (WASM) i Vercel-funktionen; går det inte är
-  nattlig efterberäkning reserven (sämre).
+- **Etapp 1 rondgenomgången: KLAR & LIVE 2026-09-14 (`5088526`), ägarens
+  live-prov återstår.** `bord-genomgang.ts` + `BordGenomgang.tsx` + knappen
+  "Genomgång av given →" i giv-klar-vyn (alla vid bordet). Detalj
+  `docs/bord-plan.md` delleveranserna.
+- **Etapp 2 DD-jämförelsen: BYGGD 2026-09-14, PCD väntar på ägaren.** Spiken
+  gick (`bridge-dds` WASM buntas i api/bord.js, tabell 5–150 ms): servern
+  bakar in `dd` i giv-klar (`api-src/_lib/dd-facit.ts`), klienten visar facit
+  + par (`src/lib/engine/dd-facit.ts`, `DdFacitRad`). Bordet kan inte
+  provspelas lokalt → live-prov efter deploy är ägarsteget.
 - **Etapp 3 claim vid bordet:** nytt protokoll (begäran/svar-händelser,
   motpartsgodkännande, botens dom) — designfrågor med ägaren FÖRE kod.
 
@@ -32,11 +30,10 @@ sticket ligger kvar tills du trycker när du leder (hand efter 2 s), guldringen
 2/3/4 s när boten leder. Facit `stickvantan.test.tsx`, tider i `tempo.ts`,
 detalj `docs/historik.md` 2026-09-14 (även motorbytets slut + 403-fixen).
 
-**Nyss klart (2026-09-14): bricka 12-rapporten** — advancern efter partnerns
-balansinkliv passar med fit (aldrig ny färg) och tävlar 2♥ när de bjuder
-vidare; inklivaren rättar till egen färg med ≤ 2 kort i advancerns nya färg
-(budsystem §7.1/§9, `docs/historik.md` 2026-09-14, facit
-`auction-advancer-balansinkliv.test.ts`). KLAR & LIVE 2026-09-14 (mergepunkt `0d44eeb`).
+**Nyss klart (2026-09-14, LIVE `0d44eeb`): bricka 12-rapporten** — advancern
+efter balansinkliv passar med fit (aldrig ny färg), tävlar 2♥ när de bjuder
+vidare; inklivaren rättar till egen färg (budsystem §7.1/§9, facit
+`auction-advancer-balansinkliv.test.ts`).
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
 fem ägarönskemål i sju etapper + ett följdbeslut (mergepunkter i

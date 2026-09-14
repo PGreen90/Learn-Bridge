@@ -37,7 +37,7 @@ import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
 import { annoteraSystemiskt, verkligaStick, vridStol, vridTillbaka } from './bord-projektion'
 import { byggBordGenomgang } from './bord-genomgang'
-import { BordGenomgang } from './BordGenomgang'
+import { BordGenomgang, DdFacitRad } from './BordGenomgang'
 import { useBordSpel } from './useBordSpel'
 
 /** Visuell stolordning i namnraden: som auktionsrutnätet (V N Ö S). */
@@ -907,6 +907,9 @@ export function BordSpel({
                 <p className="mt-1 text-sm text-rose-100/80">
                   {klar.declarerTricks} stick · {poang >= 0 ? `Ni +${poang}` : `De +${-poang}`}
                 </p>
+                {klar.dd && (
+                  <DdFacitRad dd={klar.dd} contract={klar.contract} declarerTricks={klar.declarerTricks} className="mt-1" />
+                )}
               </>
             )}
             <div className="mt-2">

@@ -11,6 +11,7 @@
 import type { Deal } from '../../types/bridge'
 import type { ResolvedCall } from '../../lib/bidding'
 import type { Contract, Trick } from '../../lib/engine/play'
+import type { DdFacit } from '../../lib/engine/dd-facit'
 import { annoteraSystemiskt, verkligaStick, type BordSpelLage } from './bord-projektion'
 
 export interface BordGenomgang {
@@ -22,6 +23,8 @@ export interface BordGenomgang {
   tricks: Trick[]
   declarerTricks: number
   nsScore: number
+  /** DD-facit ur giv-klar (etapp 2), null när servern inte kunde räkna. */
+  dd: DdFacit | null
 }
 
 /** Genomgångens indata ur ett KLART givläge, eller null när given inte går att
@@ -46,5 +49,6 @@ export function byggBordGenomgang(lage: BordSpelLage, kod: string): BordGenomgan
     tricks,
     declarerTricks: klar.declarerTricks,
     nsScore: klar.nsScore,
+    dd: klar.dd ?? null,
   }
 }

@@ -143,12 +143,27 @@ bord som stått stilla > 2 h innan det globala taket räknas.
   korthändelserna, `annoteraSystemiskt`); ingen serverändring. Stängs själv
   när given byts. Inga botmotiveringar (serverns resonemang lämnar aldrig
   servern). Facit `bord-genomgang.test.ts` + röktest `BordSpel.test.tsx`.
+- **SENARE-listan etapp 2 (2026-09-14) — DD-jämförelsen ("hur bra mot
+  facit"):** servern räknar hela DD-tabellen (spelförare × strain) + par med
+  `bridge-dds` när given blir klar och bakar in `dd` i giv-klar-händelsens data
+  (`api-src/_lib/dd-facit.ts`, anropad vid alla tre bokföringsvägarna i
+  `bord.ts`: giv-start med bara bottar, hjärtslagets framdrivning, draget).
+  Ingen schemaändring. WASM:en ligger inbäddad i paketets JS så esbuild buntar
+  den rakt in i api/bord.js (spike 2026-09-14: +569 kB, laddning ~12 ms per
+  varm instans, tabell 5–150 ms). Lösarfel stoppar aldrig given — giv-klar
+  bokförs då utan `dd` och klienten döljer raden. Klienten: den delade rena
+  läsaren `src/lib/engine/dd-facit.ts` (uppslag i lösarens tabell, jämförelsen,
+  par-texten) och `DdFacitRad` i giv-klar-vyn + genomgången: "Facit (perfekt
+  spel): X stick · spelföraren tog Y (±diff)" och "Par: 4♠ NS (NS +420)".
+  Facit `api-src/_lib/dd-facit.test.ts`, `src/lib/engine/dd-facit.test.ts`,
+  röktest `BordSpel.test.tsx`. Kandidat till senare: per-kort-DD i
+  genomgången (AnalysePlayPBN — 52 lösningar per giv, dyrare).
 
 ## Medvetet utanför v1 (kandidater till SENARE)
 
 - **Claim/concede/ångra vid bordet** — kräver motpartsgodkännande; design­fråga.
-- **DD-jämförelsen** ("hur bra spelade vi mot facit") — ägarbeslut: vidare-
-  utveckling; datat finns redan i loggen.
+- ~~**DD-jämförelsen**~~ — BYGGD 2026-09-14 (SENARE-listan etapp 2, se
+  delleveranserna ovan).
 - ~~**Rondgenomgång per giv**~~ — BYGGD 2026-09-14 (SENARE-listan etapp 1,
   se delleveranserna ovan).
 - **Kortförklaringar under spel** ("Varför spelade boten så?") — serverns
