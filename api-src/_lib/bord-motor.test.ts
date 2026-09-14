@@ -7,13 +7,16 @@ import { describe, test, expect } from 'vitest'
 import type { Seat } from '../../src/types/bridge'
 import { contractFromCalls, decideCall, seatToAct } from '../../src/lib/engine/auction-live'
 import { botCardSmart } from '../../src/lib/engine/play-bot'
+import { dummyOf } from '../../src/lib/engine/play'
 import { nsScore } from '../../src/lib/engine/matchpoints'
+import { declarerTricksWon, remainingTricks } from '../../src/lib/engine/claim'
 import {
   agerande,
   autoAuktion,
   bordGiv,
   bordGivSeed,
   bordPlaySeed,
+  claimSvarande,
   dealUrGivStart,
   drivFram,
   givStartHandelse,
@@ -225,6 +228,142 @@ describe('utforDrag — avvisningarna', () => {
     const frammandeKort = lage.state!.hands[annan][0]
     const utfall = utforDrag(deal, GIV, lage, stol, { typ: 'kort', card: frammandeKort })
     expect(utfall.ok).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Claimen vid bordet (SENARE-listan etapp 3, ägarbeslut 2026-09-14): "när DD
+// vill claima ska den göra det, men människan ska få välja OK eller spela
+// klart". DD-domen (claim-dd.ts) testas mot den riktiga lösaren i
+// claim-dd.test.ts — här injiceras den som stub så flödet i motorn kan
+// facittestas exakt: förslag vid stickstart, pausen, svaren, bokföringen.
+describe('claimen — förslag, svar och bokföring (etapp 3)', () => {
+  /** Spela given som spelaGiv, men med en claim-kontroll som slår till vid
+   *  första stickstart efter minst två spelade stick; stannar när förslaget
+   *  ligger i loggen (eller när given tog slut utan förslag). */
+  function spelaTillClaim(manniskor: Set<Seat>, kontroll?: (st: import('../../src/lib/engine/play').PlayState) => boolean) {
+    const deal = bordGiv(SEED, GIV)
+    const miljo = {
+      manniskoStolar: manniskor,
+      playSeed: bordPlaySeed(SEED, GIV),
+      stallning: { ns: 0, ew: 0 },
+      smart: SNABB,
+      claimKontroll: kontroll ?? ((st) => st.completedTricks.length >= 2 && st.currentTrick.length === 0),
+    }
+    const handelser: GivHandelse[] = [bokfor(givStartHandelse(deal, GIV))]
+    handelser.push(...drivFram(deal, GIV, handelser, miljo).map(bokfor))
+    let vakt = 0
+    for (;;) {
+      if (vakt++ > 120) throw new Error('given tog aldrig slut')
+      const lage = projiceraGiv(deal, handelser)
+      if (lage.givKlar || (lage.claim && !lage.claim.avbojd)) return { deal, miljo, handelser, lage }
+      let stol: Seat
+      let drag
+      if (lage.fas === 'bud') {
+        stol = seatToAct(deal.dealer, lage.history.length)
+        drag = { typ: 'bud' as const, bid: decideCall(deal, lage.history, stol).bid }
+      } else {
+        const toAct = lage.state!.toAct
+        stol = agerande(lage.contract!, toAct)
+        drag = { typ: 'kort' as const, card: botCardSmart(lage.state!, toAct, lage.history, SNABB) }
+      }
+      const utfall = utforDrag(deal, GIV, lage, stol, drag)
+      if (!utfall.ok) throw new Error(`draget avvisades: ${utfall.fel}`)
+      handelser.push(bokfor(utfall.handelse))
+      handelser.push(...drivFram(deal, GIV, handelser, miljo).map(bokfor))
+    }
+  }
+  const HUMANS = new Set<Seat>(['S', 'W'])
+
+  test('förslaget: vid stickstart bokförs claim-forslag med spelförarens total, sedan står spelet', () => {
+    const { handelser, lage } = spelaTillClaim(HUMANS)
+    const forslag = handelser.filter((h) => h.typ === 'claim-forslag')
+    expect(forslag).toHaveLength(1)
+    expect(handelser[handelser.length - 1].typ).toBe('claim-forslag') // inga kort efter
+    const d = forslag[0].data as { total: number; stol: Seat }
+    expect(forslag[0].seat).toBe(lage.contract!.declarer)
+    expect(d.stol).toBe(lage.contract!.declarer)
+    expect(lage.state!.currentTrick).toHaveLength(0)
+    expect(d.total).toBe(declarerTricksWon(lage.state!) + remainingTricks(lage.state!))
+    expect(lage.claim).toEqual({ total: d.total, stol: d.stol, svar: {}, avbojd: false })
+  })
+
+  test('medan claimen väntar avvisas kort, och drivFram spelar inga botkort', () => {
+    const { deal, miljo, handelser, lage } = spelaTillClaim(HUMANS)
+    const toAct = lage.state!.toAct
+    const utfall = utforDrag(deal, GIV, lage, agerande(lage.contract!, toAct), {
+      typ: 'kort',
+      card: botCardSmart(lage.state!, toAct, lage.history, SNABB),
+    })
+    expect(utfall.ok).toBe(false)
+    expect(!utfall.ok && utfall.fel).toBe('Claimen väntar på svar')
+    expect(drivFram(deal, GIV, handelser, miljo)).toEqual([])
+  })
+
+  test('alla som ska svara säger OK → giv-klar med claimens total, resten av sticken ospelade', () => {
+    const { deal, miljo, handelser, lage } = spelaTillClaim(HUMANS)
+    const kravda = claimSvarande(lage.contract!, HUMANS)
+    expect(kravda.length).toBeGreaterThan(0)
+    expect(kravda).not.toContain(dummyOf(lage.contract!))
+    const total = lage.claim!.total
+    const kortInnan = handelser.filter((h) => h.typ === 'kort').length
+    // Första svaret räcker inte om fler ska svara.
+    for (let i = 0; i < kravda.length; i++) {
+      handelser.push({ typ: 'claim-svar', seat: kravda[i], data: { ok: true } })
+      const nya = drivFram(deal, GIV, handelser, miljo)
+      if (i < kravda.length - 1) {
+        expect(nya).toEqual([])
+      } else {
+        expect(nya.map((h) => h.typ)).toEqual(['giv-klar'])
+        const klar = nya[0].data as { declarerTricks: number; claim: { total: number; stol: Seat }; nsScore: number }
+        expect(klar.declarerTricks).toBe(total)
+        expect(klar.claim).toEqual({ total, stol: lage.contract!.declarer })
+        expect(klar.nsScore).toBe(nsScore(lage.contract!, total, deal.vulnerability))
+        handelser.push(bokfor(nya[0]))
+      }
+    }
+    expect(handelser.filter((h) => h.typ === 'kort').length).toBe(kortInnan)
+    expect(projiceraGiv(deal, handelser).givKlar).toBe(true)
+  })
+
+  test('ett nej → spelet fortsätter till slut, och ingen ny claim föreslås i given', () => {
+    const { deal, miljo, handelser, lage } = spelaTillClaim(HUMANS)
+    const kravda = claimSvarande(lage.contract!, HUMANS)
+    handelser.push({ typ: 'claim-svar', seat: kravda[0], data: { ok: false } })
+    expect(projiceraGiv(deal, handelser).claim!.avbojd).toBe(true)
+    // Spela klart med kontrollen fortfarande "ja" vid varje stickstart.
+    handelser.push(...drivFram(deal, GIV, handelser, miljo).map(bokfor))
+    let vakt = 0
+    for (;;) {
+      if (vakt++ > 120) throw new Error('given tog aldrig slut')
+      const l = projiceraGiv(deal, handelser)
+      if (l.givKlar) break
+      const toAct = l.state!.toAct
+      const stol = agerande(l.contract!, toAct)
+      const utfall = utforDrag(deal, GIV, l, stol, { typ: 'kort', card: botCardSmart(l.state!, toAct, l.history, SNABB) })
+      if (!utfall.ok) throw new Error(`draget avvisades: ${utfall.fel}`)
+      handelser.push(bokfor(utfall.handelse))
+      handelser.push(...drivFram(deal, GIV, handelser, miljo).map(bokfor))
+    }
+    expect(handelser.filter((h) => h.typ === 'claim-forslag')).toHaveLength(1)
+    expect(handelser.filter((h) => h.typ === 'kort')).toHaveLength(52)
+    const klar = handelser.find((h) => h.typ === 'giv-klar')!.data as { claim?: unknown }
+    expect(klar.claim).toBeUndefined()
+  })
+
+  test('ingen som behöver svara (bara träkarlen är människa) → given bokförs direkt', () => {
+    const forsta = spelaTillClaim(HUMANS)
+    const dummy = dummyOf(forsta.lage.contract!)
+    const { handelser } = spelaTillClaim(new Set<Seat>([dummy]))
+    const typer = handelser.map((h) => h.typ)
+    expect(typer.filter((t) => t === 'claim-forslag')).toHaveLength(1)
+    expect(typer[typer.length - 1]).toBe('giv-klar')
+    expect(typer.indexOf('claim-forslag')).toBe(typer.length - 2)
+  })
+
+  test('utan claim-kontroll föreslås aldrig någon claim (spelet är opåverkat)', () => {
+    const handelser = spelaGiv(GIV, HUMANS)
+    expect(handelser.some((h) => h.typ === 'claim-forslag')).toBe(false)
   })
 })
 

@@ -47,6 +47,7 @@ import {
 import { botCardSmart, type SmartOpts } from '../../src/lib/engine/play-bot'
 import { botDecisionSeed, playIndexOf } from '../../src/lib/engine/play-seed'
 import { nsScore } from '../../src/lib/engine/matchpoints'
+import { declarerTricksWon, remainingTricks } from '../../src/lib/engine/claim'
 
 // ---------------------------------------------------------------------------
 // Givarna ur bordsfröet.
@@ -159,6 +160,17 @@ export interface NyHandelse {
   data?: unknown
 }
 
+/** Claimen vid bordet (etapp 3, 2026-09-14): servern föreslog att spelföraren
+ *  tar resten ('claim-forslag'), människorna svarar ('claim-svar' per stol).
+ *  Ett nej → `avbojd`, spelet fortsätter och ingen ny claim föreslås i given. */
+export interface ClaimLage {
+  /** Spelförarens totala stick om claimen bokförs (vunna + alla återstående). */
+  total: number
+  stol: Seat
+  svar: Partial<Record<Seat, boolean>>
+  avbojd: boolean
+}
+
 export interface GivLage {
   history: ResolvedCall[]
   fas: 'bud' | 'spel' | 'klar'
@@ -168,6 +180,20 @@ export interface GivLage {
   state: PlayState | null
   trakarlLagd: boolean
   givKlar: boolean
+  /** Föreslagen claim i given (null = ingen). */
+  claim: ClaimLage | null
+}
+
+/** Stolarna som måste svara på en claim: de aktiva människorna utom träkarlen
+ *  (som inte spelar). Tom mängd → claimen bokförs direkt. */
+export function claimSvarande(contract: Contract, manniskoStolar: Set<Seat>): Seat[] {
+  const dummy = dummyOf(contract)
+  return [...manniskoStolar].filter((s) => s !== dummy)
+}
+
+/** Har alla som måste svara sagt OK? (Ett nej syns som `avbojd`.) */
+export function claimGodkand(claim: ClaimLage, svarande: Seat[]): boolean {
+  return !claim.avbojd && svarande.every((s) => claim.svar[s] === true)
 }
 
 /** Bygg givläget ur givens händelser. Kastar vid korrupt logg (olagligt kort)
@@ -178,6 +204,7 @@ export function projiceraGiv(deal: Deal, handelser: GivHandelse[]): GivLage {
   const kort: Card[] = []
   let trakarlLagd = false
   let givKlar = false
+  let claim: ClaimLage | null = null
   for (const h of handelser) {
     if (h.typ === 'bud' && h.seat) {
       history.push({ seat: h.seat, bid: (h.data as { bid: string }).bid })
@@ -188,20 +215,27 @@ export function projiceraGiv(deal: Deal, handelser: GivHandelse[]): GivLage {
     } else if (h.typ === 'giv-klar' || h.typ === 'facit') {
       // 'facit' är läge 1:s slutpunkt (4D) — given är genomgången, inget spel.
       givKlar = true
+    } else if (h.typ === 'claim-forslag') {
+      const d = h.data as { total: number; stol: Seat }
+      claim = { total: d.total, stol: d.stol, svar: {}, avbojd: false }
+    } else if (h.typ === 'claim-svar' && h.seat && claim) {
+      const ok = (h.data as { ok: boolean }).ok === true
+      claim.svar[h.seat] = ok
+      if (!ok) claim.avbojd = true
     }
   }
 
   if (!auctionComplete(history)) {
-    return { history, fas: 'bud', contract: null, passadUt: false, state: null, trakarlLagd, givKlar }
+    return { history, fas: 'bud', contract: null, passadUt: false, state: null, trakarlLagd, givKlar, claim }
   }
   const contract = contractFromCalls(history)
   if (!contract) {
-    return { history, fas: 'klar', contract: null, passadUt: true, state: null, trakarlLagd, givKlar }
+    return { history, fas: 'klar', contract: null, passadUt: true, state: null, trakarlLagd, givKlar, claim }
   }
   let state = startPlay(deal, contract)
   for (const c of kort) state = playCard(state, c)
   const fas = givKlar || isComplete(state) ? 'klar' : 'spel'
-  return { history, fas, contract, passadUt: false, state, trakarlLagd, givKlar }
+  return { history, fas, contract, passadUt: false, state, trakarlLagd, givKlar, claim }
 }
 
 // ---------------------------------------------------------------------------
@@ -239,6 +273,11 @@ export function utforDrag(
 
   if (lage.fas !== 'spel' || !lage.state || !lage.contract) {
     return { ok: false, fel: 'Kortspelet pågår inte' }
+  }
+  // Etapp 3: medan en föreslagen claim väntar på svar spelas inga kort —
+  // dialogen kräver ett val (OK eller spela klart) av var och en.
+  if (lage.claim && !lage.claim.avbojd) {
+    return { ok: false, fel: 'Claimen väntar på svar' }
   }
   const toAct = lage.state.toAct
   if (agerande(lage.contract, toAct) !== stol) {
@@ -281,6 +320,9 @@ export interface DrivMiljo {
   budgetMs?: number
   /** Injektbar klocka (test). */
   nu?: () => number
+  /** Claimens DD-dom (etapp 3, claim-dd.ts): tar spelförarsidan alla
+   *  återstående stick från det här stickstartet? Saknas → inga claims. */
+  claimKontroll?: (state: PlayState) => boolean
 }
 
 /**
@@ -304,7 +346,12 @@ export function drivFram(
   if (lage.givKlar) return nya
   let { history, fas, contract, state, trakarlLagd } = lage
 
-  const givKlarHandelse = (declarerTricks: number, poang: number, passadUt: boolean): NyHandelse => ({
+  const givKlarHandelse = (
+    declarerTricks: number,
+    poang: number,
+    passadUt: boolean,
+    claim?: { total: number; stol: Seat },
+  ): NyHandelse => ({
     giv: givNr,
     typ: 'giv-klar',
     data: {
@@ -317,6 +364,7 @@ export function drivFram(
         ns: miljo.stallning.ns + (poang > 0 ? poang : 0),
         ew: miljo.stallning.ew + (poang < 0 ? -poang : 0),
       },
+      ...(claim ? { claim } : {}),
     },
   })
 
@@ -365,6 +413,34 @@ export function drivFram(
       nya.push(
         givKlarHandelse(declarerTricks, nsScore(contract!, declarerTricks, deal.vulnerability), false),
       )
+      break
+    }
+    // Etapp 3 — claimen: en föreslagen claim pausar spelet tills alla som ska
+    // svara har svarat. Alla OK → given bokförs med claimens total (resten av
+    // sticken utan spel). Ett nej → spelet fortsätter, aldrig ett nytt förslag.
+    if (lage.claim && !lage.claim.avbojd) {
+      if (claimGodkand(lage.claim, claimSvarande(contract!, miljo.manniskoStolar))) {
+        const total = lage.claim.total
+        nya.push(
+          givKlarHandelse(total, nsScore(contract!, total, deal.vulnerability), false, {
+            total,
+            stol: lage.claim.stol,
+          }),
+        )
+      }
+      break
+    }
+    // Vid varje stickstart: vill DD claima? (Ägarbeslut 2026-09-14: då gör den
+    // det, och människorna får välja OK eller spela klart.)
+    if (!lage.claim && st.currentTrick.length === 0 && miljo.claimKontroll?.(st)) {
+      const total = declarerTricksWon(st) + remainingTricks(st)
+      const claim = { total, stol: contract!.declarer }
+      nya.push({ giv: givNr, typ: 'claim-forslag', seat: contract!.declarer, data: claim })
+      // Ingen som behöver svara (bara bottar, eller människan är träkarl) →
+      // bokför direkt i samma anrop, precis som om alla sagt OK.
+      if (claimSvarande(contract!, miljo.manniskoStolar).length === 0) {
+        nya.push(givKlarHandelse(total, nsScore(contract!, total, deal.vulnerability), false, claim))
+      }
       break
     }
     const toAct = st.toAct

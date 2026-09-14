@@ -32,6 +32,7 @@ import {
 } from './_lib/bord-grund'
 import { KVOTER, kvotOk, type KvotHandling } from './_lib/kvot'
 import {
+  AUTO_GODKANN_MS,
   narvaroBeslut,
   vantandeBegaranden,
   type NarvaroBegaran,
@@ -41,6 +42,7 @@ import {
   autoAuktion,
   bordGiv,
   bordPlaySeed,
+  claimSvarande,
   dealUrGivStart,
   drivFram,
   givStartHandelse,
@@ -52,6 +54,7 @@ import {
   type NyHandelse,
 } from './_lib/bord-motor'
 import { medDdFacit } from './_lib/dd-facit'
+import { claimKontrollen } from './_lib/claim-dd'
 
 // ---------------------------------------------------------------------------
 // Små hjälpare (samma mönster som skicka-in.ts — funktionerna är medvetet
@@ -429,11 +432,37 @@ async function startaGiv(
         playSeed: bordPlaySeed(seed, givNr),
         stallning,
         spelform: bord.spelform,
+        claimKontroll: (await claimKontrollen()) ?? undefined,
       },
     ),
   )
   // Bara bottar (eller träkarl mot tre bottar) kan spela hela given här → facit.
   return medDdFacit(handelser, deal)
+}
+
+/** Claimens tidsgräns (etapp 3): en 'claim-forslag' utan svar från alla som
+ *  ska svara, äldre än AUTO_GODKANN_MS → auto-OK för de som inte svarat.
+ *  Returnerar true när något bokfördes (framdrivningen tar sedan giv-klar). */
+async function claimAutoSvar(m: Miljo, bord: BordRad, stolar: StolRad[]): Promise<boolean> {
+  const giv = bord.aktuell_giv
+  if (giv < 1) return false
+  const forslag = (await restGet(
+    m,
+    `table_events?table_id=eq.${bord.id}&giv=eq.${giv}&typ=eq.claim-forslag&select=created_at&order=seq.desc&limit=1`,
+  )) as Array<{ created_at: string }>
+  if (!forslag[0] || Date.now() - Date.parse(forslag[0].created_at) <= AUTO_GODKANN_MS) return false
+  const givLista = await hamtaGivHandelser(m, bord.id, giv)
+  const deal = dealUrGivStart(await hamtaSeed(m, bord.id), giv, givStartData(givLista))
+  const lage = projiceraGiv(deal, givLista)
+  if (!lage.claim || lage.claim.avbojd || lage.givKlar || !lage.contract) return false
+  const kvar = claimSvarande(lage.contract, manniskoStolar(stolar)).filter((s) => lage.claim!.svar[s] === undefined)
+  if (kvar.length === 0) return false
+  await laggTillHandelser(
+    m,
+    bord.id,
+    kvar.map((s) => ({ giv, typ: 'claim-svar', seat: s, data: { ok: true, auto: true } })),
+  )
+  return true
 }
 
 /** Spela väntande botdrag och bokför dem — hjärtslagets/verkställandenas
@@ -461,6 +490,7 @@ async function drivFramOchBokfor(m: Miljo, bordId: string): Promise<void> {
       playSeed: bordPlaySeed(bord.seed, giv),
       stallning: stallningInnan,
       spelform: bord.spelform,
+      claimKontroll: (await claimKontrollen()) ?? undefined,
     }),
     deal,
   )
@@ -907,6 +937,11 @@ async function hanteraHjartslag(
       }
     }
 
+    // Claimen (etapp 3): obesvarad claim äldre än AUTO_GODKANN_MS godkänns
+    // automatiskt för de som inte svarat (bordet får inte fastna — samma regel
+    // som paus-/lämna-begäranden). Auto-svaret märks `auto`.
+    const autoClaim = bord.status === 'spelar' && (await claimAutoSvar(m, bord, stolarNu))
+
     // Framdrivningen (4C): står en bot-styrd stol på tur och inget har hänt
     // på ett par sekunder (kraschat drag-anrop, nyss övertagen stol) spelar
     // hjärtslaget botdragen. PK-vakten gör samtidiga försök ofarliga.
@@ -916,7 +951,7 @@ async function hanteraHjartslag(
         `table_events?table_id=eq.${bord.id}&select=created_at&order=seq.desc&limit=1`,
       )) as Array<{ created_at: string }>
       const alder = sista[0] ? Date.now() - Date.parse(sista[0].created_at) : Infinity
-      if (beslut.length > 0 || alder > 2_000) await drivFramOchBokfor(m, bord.id)
+      if (beslut.length > 0 || autoClaim || alder > 2_000) await drivFramOchBokfor(m, bord.id)
     }
   }
 
@@ -1213,6 +1248,39 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
     return json(400, { ok: false, fel: 'Bordet spelar bara budgivningen' })
   }
 
+  // --- Claim-svar (etapp 3) ------------------------------------------------
+  // Servern föreslog att spelföraren tar resten; varje aktiv människa utom
+  // träkarlen svarar OK (bokför) eller nej (spela klart). Alla OK → drivFram
+  // bokför giv-klar med claimens total; ett nej → spelet fortsätter.
+  if (dragRaw?.typ === 'claim-svar') {
+    if (!lage.claim || lage.claim.avbojd || lage.givKlar || !lage.contract) {
+      return json(409, { ok: false, fel: 'Ingen claim väntar på svar' })
+    }
+    if (!claimSvarande(lage.contract, manniskoStolar(stolar)).includes(min.seat)) {
+      return json(403, { ok: false, fel: 'Du behöver inte svara på claimen' })
+    }
+    if (lage.claim.svar[min.seat] !== undefined) {
+      return json(409, { ok: false, fel: 'Du har redan svarat' })
+    }
+    const ok = dragRaw.ok === true
+    const svarHandelse: NyHandelse = { giv, typ: 'claim-svar', seat: min.seat, data: { ok } }
+    const handelser: NyHandelse[] = [svarHandelse]
+    handelser.push(
+      ...drivFram(deal, giv, [...givLista, { typ: 'claim-svar', seat: min.seat, data: { ok } }], {
+        manniskoStolar: manniskoStolar(stolar),
+        playSeed: bordPlaySeed(seed, giv),
+        stallning: stallningInnan,
+        spelform: bord.spelform,
+        claimKontroll: (await claimKontrollen()) ?? undefined,
+      }),
+    )
+    const skrivet = await laggTillHandelser(m, bord.id, await medDdFacit(handelser, deal), basSeq)
+    if (!skrivet) {
+      return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: await hamtaSenasteSeq(m, bord.id) })
+    }
+    return json(200, { ok: true, events: skrivet.rader, senasteSeq: skrivet.senasteSeq })
+  }
+
   // --- Bud / kort ---------------------------------------------------------
   if (dragRaw?.typ !== 'bud' && dragRaw?.typ !== 'kort') {
     return json(400, { ok: false, fel: 'Ogiltigt drag' })
@@ -1232,6 +1300,7 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
         playSeed: bordPlaySeed(seed, giv),
         stallning: stallningInnan,
         spelform: bord.spelform,
+        claimKontroll: (await claimKontrollen()) ?? undefined,
       },
     ),
   )

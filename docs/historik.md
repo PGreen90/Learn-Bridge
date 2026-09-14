@@ -2702,3 +2702,26 @@ genomgången. Ingen schemaändring, ingen ändring av webbläsarappens beroenden
 testet kör den riktiga bygget och importerar api/bord.js under Node. Live-prov
 är ägarsteget (bordet kan inte provspelas lokalt). Kvar i NU: etapp 3 (claim
 vid bordet — designfrågor med ägaren före kod).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 3: claimen vid bordet
+
+Designfrågorna först (DD-dom eller motpartsgodkännande · ge upp · auto-claim);
+ägarens svar satte modellen: "när DD vill claima ska den göra det, men
+människan ska få möjlighet att spela klart handen = OK på claimen eller spela
+klart". Byggt facit före kod: `api-src/_lib/claim-dd.ts`
+(`spelforarenTarResten`: SolveBoardPBN på de återstående korten från
+stickstartet, exakt och på millisekunder; `claimKontrollen` ger en synkron
+funktion som `drivFram` får injicerad), bord-motorns `claim-forslag`/
+`claim-svar`-projektion (`ClaimLage`, `claimSvarande` = aktiva människor utom
+träkarlen, `claimGodkand`), pausen (kortdrag avvisas medan claimen väntar),
+bokföringen (giv-klar med claimens total + `claim` i datat, direkt när ingen
+behöver svara), nej-vägen (spelet fortsätter, aldrig nytt förslag), dragvägen
+`claim-svar` i `bord.ts` och hjärtslagets auto-OK efter 60 s
+(`claimAutoSvar`). Klienten: `BordClaim` i projektionen, dialogen "OK, bokför
+given" / "Spela klart" för den som ska svara, väntanraden för de andra, notisen
+i giv-klar-vyn. Manuell claim och "ge upp" medvetet utanför. Facit
+`claim-dd.test.ts` (riktiga lösaren: alla toppkort → ja, ett säkert
+försvarsstick → nej, aldrig mitt i ett stick, även när spelföraren själv leder),
+claim-blocket i `bord-motor.test.ts`, röktest i `BordSpel.test.tsx`. Live-prov
+vid bordet är ägarsteget. Därmed är HELA bordens SENARE-lista (etapp 1–3)
+byggd samma dag.

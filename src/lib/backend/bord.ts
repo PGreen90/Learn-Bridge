@@ -194,6 +194,8 @@ export type BordDragInput =
   | { typ: 'bud'; bid: string }
   | { typ: 'kort'; card: Card }
   | { typ: 'nasta-giv' }
+  /** Etapp 3: svaret på serverns claim-förslag (OK = bokför, nej = spela klart). */
+  | { typ: 'claim-svar'; ok: boolean }
 
 export function skickaDrag(
   kod: string,

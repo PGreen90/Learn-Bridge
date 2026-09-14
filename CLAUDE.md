@@ -17,13 +17,14 @@ bordet.** Bakgrund `docs/bord-plan.md` "Medvetet utanför v1".
   live-prov återstår.** `bord-genomgang.ts` + `BordGenomgang.tsx` + knappen
   "Genomgång av given →" i giv-klar-vyn (alla vid bordet). Detalj
   `docs/bord-plan.md` delleveranserna.
-- **Etapp 2 DD-jämförelsen: KLAR & LIVE 2026-09-14 (`1af5972`), ägarens live-prov återstår.** Spiken
-  gick (`bridge-dds` WASM buntas i api/bord.js, tabell 5–150 ms): servern
-  bakar in `dd` i giv-klar (`api-src/_lib/dd-facit.ts`), klienten visar facit
-  + par (`src/lib/engine/dd-facit.ts`, `DdFacitRad`). Bordet kan inte
-  provspelas lokalt → live-prov efter deploy är ägarsteget.
-- **Etapp 3 claim vid bordet:** nytt protokoll (begäran/svar-händelser,
-  motpartsgodkännande, botens dom) — designfrågor med ägaren FÖRE kod.
+- **Etapp 2 DD-jämförelsen: KLAR & LIVE 2026-09-14 (`1af5972`), live-prov
+  återstår.** `bridge-dds` (WASM) buntas i api/bord.js; servern bakar in `dd`
+  i giv-klar, klienten visar facit + par (`DdFacitRad`).
+- **Etapp 3 claim vid bordet: BYGGD 2026-09-14, PCD väntar på ägaren.**
+  Ägarens modell: DD föreslår claimen vid stickstart (`claim-dd.ts` →
+  `claim-forslag`), varje människa utom träkarlen svarar OK/spela klart
+  (`claim-svar`); alla OK → giv-klar, ett nej → spela vidare, 60 s → auto-OK.
+  Manuell claim/"ge upp" medvetet utanför. Detalj `docs/bord-plan.md`.
 
 **Nyss klart (2026-09-14, LIVE `e57e6a9`): STICKVÄNTAN** på alla spelbara ytor —
 sticket ligger kvar tills du trycker när du leder (hand efter 2 s), guldringen

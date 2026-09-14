@@ -158,10 +158,33 @@ bord som stått stilla > 2 h innan det globala taket räknas.
   Facit `api-src/_lib/dd-facit.test.ts`, `src/lib/engine/dd-facit.test.ts`,
   röktest `BordSpel.test.tsx`. Kandidat till senare: per-kort-DD i
   genomgången (AnalysePlayPBN — 52 lösningar per giv, dyrare).
+- **SENARE-listan etapp 3 (2026-09-14) — claimen vid bordet.** Ägarbeslut:
+  "när DD vill claima ska den göra det, men människan ska få möjlighet att
+  spela klart handen". Ingen manuell claim och inget "ge upp" (medvetet
+  utanför — DD-claimen täcker behovet; kan läggas till senare). Flödet:
+  vid varje STICKSTART frågar servern lösaren om spelförarsidan tar alla
+  återstående stick mot bästa motspel från exakt den ställningen
+  (`api-src/_lib/claim-dd.ts`: SolveBoardPBN på de återstående korten, ms;
+  injiceras synkront i `drivFram` som `claimKontroll`). Ja → händelsen
+  `claim-forslag` {total, stol} och spelet står. Alla AKTIVA MÄNNISKOR UTOM
+  TRÄKARLEN svarar med draget `claim-svar` {ok} (dialogen "OK, bokför given" /
+  "Spela klart" i BordSpel; de andra ser en väntanrad). Alla OK → `giv-klar`
+  med claimens total som spelförarstick och `claim` i datat (notis i giv-klar-
+  vyn; genomgången visar bara de spelade sticken). Ett nej → spelet fortsätter
+  och ingen ny claim föreslås i given. Ingen som behöver svara (bara bottar,
+  eller människan är träkarl) → bokförs i samma anrop. Obesvarad claim efter
+  AUTO_GODKANN_MS (60 s) → hjärtslaget skriver auto-OK för de som inte svarat
+  (bordet får inte fastna — samma regel som paus/lämna). Under en väntande
+  claim avvisar servern kortdrag ("Claimen väntar på svar"). Lösarfel → inga
+  claims, spelet opåverkat. Facit `claim-dd.test.ts` (riktiga lösaren),
+  claim-blocket i `bord-motor.test.ts` (stubbad dom: förslag, paus, svar,
+  bokföring, nej-vägen, direktbokföring), röktest i `BordSpel.test.tsx`.
 
 ## Medvetet utanför v1 (kandidater till SENARE)
 
-- **Claim/concede/ångra vid bordet** — kräver motpartsgodkännande; design­fråga.
+- ~~**Claim vid bordet**~~ — BYGGD 2026-09-14 som DD-claim med mänskligt
+  veto (SENARE-listan etapp 3, se delleveranserna). Kvar som kandidater:
+  manuell claim, "ge upp" (concede) och ångra.
 - ~~**DD-jämförelsen**~~ — BYGGD 2026-09-14 (SENARE-listan etapp 2, se
   delleveranserna ovan).
 - ~~**Rondgenomgång per giv**~~ — BYGGD 2026-09-14 (SENARE-listan etapp 1,
