@@ -10,21 +10,19 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — BORDENS SENARE-LISTA (ägarbeslut 2026-09-14, körordningen bestämd)
-Ordningen: **1) rondgenomgången per giv → 2) DD-jämförelsen → 3) claim vid
-bordet.** Bakgrund `docs/bord-plan.md` "Medvetet utanför v1".
-- **Etapp 1 rondgenomgången: KLAR & LIVE 2026-09-14 (`5088526`), ägarens
-  live-prov återstår.** `bord-genomgang.ts` + `BordGenomgang.tsx` + knappen
-  "Genomgång av given →" i giv-klar-vyn (alla vid bordet). Detalj
-  `docs/bord-plan.md` delleveranserna.
-- **Etapp 2 DD-jämförelsen: KLAR & LIVE 2026-09-14 (`1af5972`), live-prov
-  återstår.** `bridge-dds` (WASM) buntas i api/bord.js; servern bakar in `dd`
-  i giv-klar, klienten visar facit + par (`DdFacitRad`).
-- **Etapp 3 claim vid bordet: BYGGD 2026-09-14, PCD väntar på ägaren.**
-  Ägarens modell: DD föreslår claimen vid stickstart (`claim-dd.ts` →
-  `claim-forslag`), varje människa utom träkarlen svarar OK/spela klart
-  (`claim-svar`); alla OK → giv-klar, ett nej → spela vidare, 60 s → auto-OK.
-  Manuell claim/"ge upp" medvetet utanför. Detalj `docs/bord-plan.md`.
+### 🔵 NU — ägaren väljer nästa NU (bordens SENARE-lista KLAR & LIVE 2026-09-14)
+**Nästa session börjar med:** ägarens live-prov vid ett vänner-bord av etapp
+1–3 (genomgången · facit/par-raden · DD-claimen med OK/spela klart), sedan
+väljer ägaren NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
+
+**Nyss klart (2026-09-14, ALLT LIVE): BORDENS SENARE-LISTA** i ordningen
+1) rondgenomgången per giv (`5088526`) → 2) DD-jämförelsen (`1af5972`;
+`bridge-dds` WASM buntad i api/bord.js, servern bakar in `dd` i giv-klar) →
+3) claim vid bordet (`5dc1524`; ägarens modell: DD föreslår vid stickstart,
+varje människa utom träkarlen svarar OK/spela klart, alla OK → giv-klar, ett
+nej → spela vidare, 60 s → auto-OK). Manuell claim/"ge upp" medvetet utanför
+(kandidater i `docs/bord-plan.md`). Detalj: `docs/bord-plan.md`
+delleveranserna + `docs/historik.md` 2026-09-14.
 
 **Nyss klart (2026-09-14, LIVE `e57e6a9`): STICKVÄNTAN** på alla spelbara ytor —
 sticket ligger kvar tills du trycker när du leder (hand efter 2 s), guldringen
@@ -109,6 +107,8 @@ S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 ### 🟢 NÄST (max 3, i ordning)
 1. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
    ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
+2. **Bordens kandidater efter live-provet** — manuell claim · "ge upp" ·
+   per-kort-DD i genomgången (`docs/bord-plan.md` "Medvetet utanför v1").
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
