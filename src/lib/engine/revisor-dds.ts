@@ -4,8 +4,10 @@
 // nodbudget och klarar inte hela 13-korts givar i volym (R3-fyndet: 79/80
 // sprängde 2M-budgeten) — mätriggen behöver tusentals helgivstabeller, och
 // CalcDDTablePBN löser alla 20 (spelförare × strain) på tiotals millisekunder.
-// Paketet är ett REN DEV-BEROENDE: bara revisorn importerar det, inget i den
-// skeppade appen.
+// Paketet är ett dev-beroende som INTE når webbläsarappen. Sedan bordens
+// etapp 2 (2026-09-14) buntar esbuild det dock in i serverfunktionen
+// api/bord.js (api-src/_lib/dd-facit.ts) — WASM:en ligger inbäddad i paketets
+// JS, så bunten är självständig precis som förut.
 //
 // Verifierade konventioner (låsta av revisor-dds.test.ts):
 //   resTable[strain][säte] med strain 0=♠ 1=♥ 2=♦ 3=♣ 4=NT, säte 0=N 1=Ö 2=S 3=V.

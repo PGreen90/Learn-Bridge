@@ -51,6 +51,7 @@ import {
   type GivHandelse,
   type NyHandelse,
 } from './_lib/bord-motor'
+import { medDdFacit } from './_lib/dd-facit'
 
 // ---------------------------------------------------------------------------
 // Små hjälpare (samma mönster som skicka-in.ts — funktionerna är medvetet
@@ -393,13 +394,13 @@ function manniskorIOrdning(stolar: StolRad[]): Stol[] {
 
 /** Händelserna som startar en giv: giv-start + (läge 2) motorns autobud, och
  *  botframdrivningen fram till första människans tur. */
-function startaGiv(
+async function startaGiv(
   bord: BordRad,
   seed: string,
   givNr: number,
   stolar: StolRad[],
   stallning: { ns: number; ew: number },
-): NyHandelse[] {
+): Promise<NyHandelse[]> {
   const handelser: NyHandelse[] = []
   let deal
   if (bord.spelform === 'spelforing') {
@@ -431,7 +432,8 @@ function startaGiv(
       },
     ),
   )
-  return handelser
+  // Bara bottar (eller träkarl mot tre bottar) kan spela hela given här → facit.
+  return medDdFacit(handelser, deal)
 }
 
 /** Spela väntande botdrag och bokför dem — hjärtslagets/verkställandenas
@@ -453,12 +455,15 @@ async function drivFramOchBokfor(m: Miljo, bordId: string): Promise<void> {
     stallningFore(m, bordId, giv),
   ])
   const deal = dealUrGivStart(bord.seed, giv, givStartData(givLista))
-  const nya = drivFram(deal, giv, givLista, {
-    manniskoStolar: manniskoStolar(stolar),
-    playSeed: bordPlaySeed(bord.seed, giv),
-    stallning: stallningInnan,
-    spelform: bord.spelform,
-  })
+  const nya = await medDdFacit(
+    drivFram(deal, giv, givLista, {
+      manniskoStolar: manniskoStolar(stolar),
+      playSeed: bordPlaySeed(bord.seed, giv),
+      stallning: stallningInnan,
+      spelform: bord.spelform,
+    }),
+    deal,
+  )
   if (nya.length) await laggTillHandelser(m, bordId, nya, head)
 }
 
@@ -1109,7 +1114,7 @@ async function hanteraStart(m: Miljo, userId: string, body: unknown, json: Svara
   const seed = await hamtaSeed(m, bord.id)
   const handelser: NyHandelse[] = [
     { giv: 0, typ: 'bord-startat', data: {} },
-    ...startaGiv(bord, seed, 1, stolar, { ns: 0, ew: 0 }),
+    ...(await startaGiv(bord, seed, 1, stolar, { ns: 0, ew: 0 })),
   ]
   const skrivet = await laggTillHandelser(m, bord.id, handelser)
   return json(200, { ok: true, senasteSeq: skrivet?.senasteSeq ?? 0 })
@@ -1188,7 +1193,7 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
       return json(200, { ok: true, events: skrivet.rader, senasteSeq: skrivet.senasteSeq })
     }
     const nastaGiv = giv + 1
-    const handelser = startaGiv(bord, seed, nastaGiv, stolar, stallning)
+    const handelser = await startaGiv(bord, seed, nastaGiv, stolar, stallning)
     const skrivet = await laggTillHandelser(m, bord.id, handelser, basSeq)
     if (!skrivet) {
       return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: await hamtaSenasteSeq(m, bord.id) })
@@ -1230,7 +1235,8 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
       },
     ),
   )
-  const skrivet = await laggTillHandelser(m, bord.id, handelser, basSeq)
+  // Etapp 2 (2026-09-14): blev given klar av det här draget får giv-klar sitt DD-facit.
+  const skrivet = await laggTillHandelser(m, bord.id, await medDdFacit(handelser, deal), basSeq)
   if (!skrivet) {
     return json(409, { ok: false, fel: 'Läget har ändrats', senasteSeq: await hamtaSenasteSeq(m, bord.id) })
   }

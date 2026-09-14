@@ -216,12 +216,19 @@ describe('BordSpel — röktest', () => {
         declarerTricks: st.tricksNS,
         nsScore: 400,
         stallning: { ns: 400, ew: 0 },
+        // Etapp 2: serverns DD-facit följer med giv-klar.
+        dd: { tabell: [[7, 6, 7, 6], [8, 5, 8, 5], [6, 7, 6, 7], [5, 8, 5, 8], [9, 4, 9, 4]], parNS: 400, parKontrakt: ['3N-NS'] },
       }),
     )
     rendera()
     const knapp = await screen.findByText(/Genomgång av given/)
+    // DD-jämförelsen i giv-klar-vyn: facit 9 stick i 3NT av N, par 3NT NS.
+    expect(screen.getByText(/Facit \(perfekt spel\)/)).toBeTruthy()
+    expect(screen.getByText(/9 stick/)).toBeTruthy()
+    expect(screen.getByText(/Par: 3NT NS \(NS \+400\)/)).toBeTruthy()
     fireEvent.click(knapp)
     expect(await screen.findByText(/Genomgång av giv 1 av/)).toBeTruthy()
+    expect(screen.getByText(/Par: 3NT NS/)).toBeTruthy()
     expect(screen.getByText(/Stega sticken med pilarna/)).toBeTruthy()
     fireEvent.click(screen.getByText('← Tillbaka'))
     expect(await screen.findByText(/Genomgång av given/)).toBeTruthy()

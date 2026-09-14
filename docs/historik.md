@@ -2682,3 +2682,23 @@ röktest i `BordSpel.test.tsx` (knapp → vy → tillbaka). Bordet kan inte
 provspelas lokalt (serverfunktionerna bara i molnet) → ägarens live-prov efter
 deploy. Kvar i NU: etapp 2 (DD-jämförelsen, WASM-provet först) och etapp 3
 (claim, designfrågor med ägaren före kod).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 2: DD-jämförelsen
+
+Spiken först: kan `bridge-dds` (Bo Haglunds lösare som WebAssembly) buntas i
+Vercel-funktionen? Ja — WASM:en ligger inbäddad som base64 i paketets JS, så
+esbuild med API-buntningens inställningar gav en självständig bunt (+569 kB);
+under Node laddade lösaren på 12 ms och räknade en full tabell på 5–150 ms.
+Därmed valdes serverräkning vid giv-klar (inte nattlig efterberäkning). Byggt
+facit före kod: `api-src/_lib/dd-facit.ts` (`beraknaDdFacit`: tabell + par via
+`getDds`/`dealToPbn` ur revisor-dds; `medDdFacit`: giv-klar för spelad giv får
+`data.dd`, lösarfel → orörd händelse), inkopplad i `bord.ts` vid alla tre
+bokföringsvägar (`startaGiv` blev async). Delad ren läsare
+`src/lib/engine/dd-facit.ts` (`ddStick`, `ddJamforelse`, `parText` med
+lösarens kontraktsform "4S-NS" → "4♠ NS"); `DdFacitRad` i giv-klar-vyn och
+genomgången. Ingen schemaändring, ingen ändring av webbläsarappens beroenden
+(paketet når bara serverbunten). Facit `api-src/_lib/dd-facit.test.ts`,
+`src/lib/engine/dd-facit.test.ts`, röktest i `BordSpel.test.tsx`; buntnings-
+testet kör den riktiga bygget och importerar api/bord.js under Node. Live-prov
+är ägarsteget (bordet kan inte provspelas lokalt). Kvar i NU: etapp 3 (claim
+vid bordet — designfrågor med ägaren före kod).

@@ -19,6 +19,7 @@ import type { ResolvedCall } from '../../lib/bidding'
 import type { BordHandelse } from '../../lib/backend/bord'
 import { auctionComplete, contractFromCalls, seatToAct } from '../../lib/engine/auction-live'
 import { interpretCall } from '../../lib/engine/auction-interpret'
+import type { DdFacit } from '../../lib/engine/dd-facit'
 import {
   currentWinner,
   NEXT_SEAT,
@@ -64,6 +65,9 @@ export interface GivKlarData {
   declarerTricks: number
   nsScore: number
   stallning: { ns: number; ew: number }
+  /** DD-facit (etapp 2, 2026-09-14): serverns tabell + par. Saknas i äldre
+   *  händelser eller när lösaren vägrade — klienten döljer då jämförelsen. */
+  dd?: DdFacit
 }
 
 export interface GivFacit {
