@@ -20,35 +20,17 @@ Slamport efter Puppet-fit byggd. Systemboken **§4.3b**, facit
 `puppet-stayman.test.ts`. Sond `puppet.probe.test.ts`: 44→46 % rätt; fynd 1 LIVE.
 Slamvägarna kompletta LIVE. **Nästa: ägarens live-prov.**
 
-**Nyss klart (2026-09-14): GAMBLING 3NT** KLAR & LIVE (mergepunkt `8e327b3`),
-ägarens live-prov kvar. Aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför),
-25–27 bal → 2♣–2♦–3NT, 28–30 → 4NT; svar pass/4♣/5♣/4M; försvar pass eller 4M.
-Kod `src/lib/engine/gambling-3nt.ts`, facit `gambling-3nt.test.ts`, systemboken
-§3.1 + §4.4. Fortsättningen = SENARE, låg prio (ägarbeslut 2026-09-15).
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** Gambling 3NT
+(`8e327b3`, `gambling-3nt.ts`, systemboken §3.1+§4.4; forts. SENARE) · kortregeln
+(bara träkarlen i färgkolumner, `useSvavandeMeny.ts`) · bordens SENARE-lista
+(rondgenomgång `5088526` · DD-jämförelse `1af5972` · claim `5dc1524`,
+`docs/bord-plan.md`) · stickväntan (`e57e6a9`) · livskvalitetssvepet i Dagens
+tävling (`docs/beslut-b-plan.md` "Påbyggnad 3"). Öppet ägarsteg: live-prov
+Gambling 3NT + bordens etapp 1–3.
 
 **Parallellt ägarsteg:** live-prov vid ett vänner-bord av bordens etapp 1–3
 (genomgången · facit/par-raden · DD-claimen) + Gambling 3NT
 i appen. Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
-
-**Nyss klart (2026-09-15): KORTREGELN** — bara träkarlen ligger i färgkolumner,
-spelföraren alltid i kortrad (ägarbeslut) + ⋮/i-knapparna svävar ner under Nords
-kortrad när raden är för bred (`useSvavandeMeny.ts`). Facit `syd-trakarl.test.tsx`
-+ `BordSpel.test.tsx`, detalj `docs/historik.md` 2026-09-15.
-
-**Nyss klart (2026-09-14, ALLT LIVE): BORDENS SENARE-LISTA** — 1) rondgenomgången
-per giv (`5088526`) · 2) DD-jämförelsen (`1af5972`; `bridge-dds` WASM buntad i
-api/bord.js) · 3) claim vid bordet (`5dc1524`; DD föreslår vid stickstart, varje
-människa svarar OK/spela klart, ett nej → spela vidare, 60 s → auto-OK). Manuell
-claim/"ge upp" medvetet utanför. Detalj: `docs/bord-plan.md` + `docs/historik.md`.
-
-**Nyss klart (2026-09-14, LIVE `e57e6a9`): STICKVÄNTAN** — sticket ligger kvar
-tills du trycker när du leder, guldringen när boten leder. Facit
-`stickvantan.test.tsx`, tider i `tempo.ts`, detalj `docs/historik.md` 2026-09-14.
-
-**Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
-sju etapper (två tryck · 40 %-regeln · alla spelares givar · konto-räknaren +
-GDPR · `daily_standings` · `?dag=` · historik + medaljer). Detalj:
-`docs/beslut-b-plan.md` "Påbyggnad 3" + `docs/historik.md` 2026-09-13.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (KLAR & LIVE 2026-08-19): syna `docs/budforklaring-katalog.md`, peka på en
