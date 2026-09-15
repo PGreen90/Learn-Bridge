@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — LIVE `2620287`/`df05c03`/`0207209`
+### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — LIVE, senast `0207209`
 **Ägarbeslut 2026-09-15 (alla åtta i `docs/puppet-stayman-plan.md`):** 3♣ över
 2NT (även 2♣–2♦–2NT och vårt 2NT-inkliv) = Puppet Stayman: 3♥/3♠ = 5-korts,
 3♦ = 4-korts finns, 3NT = ingen; efter 3♦ bjuder svararen högfärgen hen INTE
