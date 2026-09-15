@@ -1,6 +1,11 @@
 // Händerna på spelbordet: Nord-sidans öppna hand som färgkolumner, Syds
-// solfjäder och Ö/V-träkarlarnas kortordning. Två-klicks-spelet: klick i en
+// kortrad och Ö/V-träkarlarnas kortordning. Två-klicks-spelet: klick i en
 // färg väljer (fäller ut) den, klick i vald färg spelar kortet.
+// Kortregeln (ägarbeslut 2026-09-15): ENDAST träkarlen ligger som färgkolumner
+// (`SuitColumns`), spelföraren ALLTID som kortrad (`SouthFan` med `seat`) —
+// oavsett om det är Nord eller Syd. Nord och Syd ligger aldrig i kolumner
+// samtidigt (två kolumnhänder ryms inte på en mobilskärm). Kolumnroten bär
+// `data-kolumner=<stol>` så facit-testerna kan skilja vyerna.
 
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Contract, PlayState } from '../../lib/engine/play'
@@ -35,7 +40,7 @@ export function SuitColumns({
 }) {
   const { myTurn, legalSet } = turnInfo(play, contract, seat)
   return (
-    <div className="flex items-start justify-center gap-1.5">
+    <div data-kolumner={seat} className="flex items-start justify-center gap-1.5">
       {handSuitsTrumpFirst(contract.strain).map((suit) => {
         const cards = bySuit(hand, suit)
         if (cards.length === 0) return null
@@ -160,13 +165,15 @@ export function FaceDownFan({ count, orientation }: { count: number; orientation
   )
 }
 
-/** Din hand som kortrad (Syd): färgsorterad med trumf längst till vänster,
+/** Spelförarens hand som kortrad: färgsorterad med trumf längst till vänster,
  *  ETT jämnt överlapp över hela raden (inget glapp mellan färgerna), vald färg
- *  visas ensam och utfälld. */
+ *  visas ensam och utfälld. Normalt din egen hand (Syd); när Nord spelför och
+ *  Syd är träkarl ritas Nords hand med samma kortrad upptill (`seat="N"`). */
 export function SouthFan({
   hand,
   contract,
   play,
+  seat = 'S',
   onCardClick,
   selectedSuit,
   registerCardEl,
@@ -174,12 +181,14 @@ export function SouthFan({
   hand: Hand
   contract: Contract
   play: PlayState
+  /** Vems hand raden är (turen + lagliga kort räknas för den stolen). */
+  seat?: Seat
   onCardClick: (c: Card) => void
   selectedSuit: Suit | null
   /** Kortflygningens ref-register (etapp 3): källkortets läge mäts härifrån. */
   registerCardEl?: RegisterCardEl
 }) {
-  const { myTurn, legalSet } = turnInfo(play, contract, 'S')
+  const { myTurn, legalSet } = turnInfo(play, contract, seat)
   let dealt = 0 // löpande kortindex över alla färggrupper → utdelningskaskaden
   return (
     <div className="flex items-end justify-center">

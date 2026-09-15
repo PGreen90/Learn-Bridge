@@ -115,3 +115,88 @@ describe('Syd träkarl — Nord spelförare styrs av dig och given fastnar inte'
     expect(container.querySelectorAll('.rotate-90, .-rotate-90').length).toBe(26)
   })
 })
+
+describe('Träkarlen ligger som färgkolumner, spelföraren som kortrad (ägarbeslut 2026-09-15)', () => {
+  // Ägarens observation: när Syd spelför ligger Nord-träkarlen i fyra lodräta
+  // färgkolumner, men när Syd är träkarl låg Syds kort som en vågrät kortrad.
+  // Regeln: ENDAST träkarlen ligger i kolumner, spelföraren ALLTID i kortrad —
+  // Nord och Syd ligger aldrig i kolumner samtidigt (två kolumnhänder får inte
+  // plats på en mobilskärm, uppmätt 2026-09-15).
+  it('Nord spelför: Syd (träkarl) i kolumner, Nord i kortrad — och tvärtom', async () => {
+    const { container, unmount } = renderTable()
+    await advance(ms('botDelay', 'normal')) // Öst spelar ut → träkarlen läggs upp
+    expect(container.querySelector('[data-kolumner="S"]')).not.toBeNull()
+    expect(container.querySelector('[data-kolumner="N"]')).toBeNull()
+    // Du styr fortfarande Syds kort (spelmodellen är oförändrad).
+    expect(playableCards().length).toBeGreaterThan(0)
+    unmount()
+
+    // Syd spelför → Nord är träkarl (kolumner), Syd är din spelande hand (kortrad).
+    const { container: c2 } = render(
+      <PlayTable
+        deal={DEAL}
+        contract={{ ...CONTRACT, declarer: 'S' }}
+        calls={[]}
+        onNewGame={() => {}}
+        bidHelp={false}
+        onToggleBidHelp={() => {}}
+      />,
+    )
+    await advance(ms('botDelay', 'normal')) // Väst spelar ut
+    expect(c2.querySelector('[data-kolumner="N"]')).not.toBeNull()
+    expect(c2.querySelector('[data-kolumner="S"]')).toBeNull()
+  })
+})
+
+describe('Svävande menyknappar: ⋮/i flyttar ner under Nords kortrad när raden är för bred (ägarbeslut 2026-09-15)', () => {
+  // jsdom har ingen layout — rektanglarna mockas per element: Nords kortrad
+  // (`data-kortrad="N"`) och knappstapeln (`data-bordsmeny`). Måtten är de
+  // uppmätta från en 375 px-skärm: raden 13→362 px bred, knapparna vid x 332.
+  let radRight = 362
+  beforeEach(() => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const rect = (left: number, top: number, right: number, bottom: number) =>
+        ({ left, top, right, bottom, x: left, y: top, width: right - left, height: bottom - top, toJSON: () => ({}) }) as DOMRect
+      if (this.matches('[data-kortrad="N"]')) return rect(13, 13, radRight, 109)
+      if (this.matches('[data-bordsmeny-ankare]')) return rect(332, 9, 364, 79) // knapparnas naturliga läge
+      return rect(0, 0, 0, 0)
+    })
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
+    radRight = 362
+  })
+  const meny = () => document.querySelector('[data-bordsmeny]') as HTMLElement
+
+  it('sänks under raden när raden når in under knapparna, och svävar tillbaka när handen krympt', async () => {
+    renderTable() // Nord spelför → Nord i kortrad upptill
+    await advance(ms('botDelay', 'normal'))
+    // Raden slutar vid 362 > knapparnas vänsterkant 332 → sänkt: knapparnas
+    // överkant läggs 8 px under radens underkant (109 + 8 − 9 = 108).
+    expect(meny().style.transform).toBe('translateY(108px)')
+    expect(meny().dataset.sankt).toBe('1')
+
+    // Handen har krympt (raden slutar vid 290 < 332) → tillbaka upp.
+    radRight = 290
+    await act(async () => {
+      window.dispatchEvent(new Event('resize'))
+    })
+    expect(meny().style.transform).toBe('translateY(0px)')
+    expect(meny().dataset.sankt).toBeUndefined()
+  })
+
+  it('rör inte knapparna när Syd spelför (Nord-träkarlen ligger i kolumner)', async () => {
+    render(
+      <PlayTable
+        deal={DEAL}
+        contract={{ ...CONTRACT, declarer: 'S' }}
+        calls={[]}
+        onNewGame={() => {}}
+        bidHelp={false}
+        onToggleBidHelp={() => {}}
+      />,
+    )
+    await advance(ms('botDelay', 'normal'))
+    expect(meny().style.transform).toBe('translateY(0px)')
+  })
+})

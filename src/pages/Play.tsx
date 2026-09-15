@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { Deal, Seat, Suit } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
-import type { Contract } from '../lib/engine/play'
+import { dummyOf, type Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
 import { dailyNumber, dailyStreak, shareText } from '../lib/engine/daily'
@@ -40,6 +40,7 @@ import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
+import { useSvavandeMeny } from './play/useSvavandeMeny'
 import { LastTrickPanel, TrickCenterLive } from './play/trick-views'
 import { ScenarioPicker, SearchOverlay } from './play/pickers'
 import { BiddingPhase } from './play/BiddingPhase'
@@ -549,6 +550,21 @@ export function PlayTable({
   const westUp = isFaceUp('W')
   const eastUp = isFaceUp('E')
 
+  // Svävande menyknappar (ägarbeslut 2026-09-15): när Nord spelför ligger Nords
+  // kortrad upptill och kan nå in under ⋮/i — då sänks knapparna mjukt till
+  // under raden och svävar tillbaka när handen krympt (useSvavandeMeny).
+  const nordRadRef = useRef<HTMLDivElement>(null)
+  const menyAnkareRef = useRef<HTMLDivElement>(null)
+  const nordSomKortrad = northUp && contract.declarer === 'N'
+  const menyOffset = useSvavandeMeny(
+    nordRadRef,
+    menyAnkareRef,
+    nordSomKortrad,
+    selectedSuit !== null,
+    play.hands.N.length,
+  )
+  const menyOverlayTop = `calc(3rem + env(safe-area-inset-top) + ${menyOffset}px)`
+
   // Färdigspelad giv: bordet hinner tona ut (felt-fade-out under resultOutro,
   // showResult väntar ut den) → resultatdialog ovanpå omspelningen (Synrey-stil).
   if (done && showResult) {
@@ -791,8 +807,20 @@ export function PlayTable({
 
       {/* ⋮ (meny) överst, ⓘ (budgivningen) under den — staplade i appens övre
           högra hörn (ägarbeslut 2026-07-31). Säker marginal för urtaget nu när
-          headern är borta (immersiv spelvy). */}
-      <div className="absolute right-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20 flex flex-col gap-1.5">
+          headern är borta (immersiv spelvy). Ankaret står stilla; stapeln inuti
+          svävar mjukt ner under Nords kortrad när raden är för bred och upp
+          igen när platsen finns (useSvavandeMeny, ägarbeslut 2026-09-15). */}
+      <div
+        ref={menyAnkareRef}
+        data-bordsmeny-ankare
+        className="absolute right-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20"
+      >
+      <div
+        data-bordsmeny
+        data-sankt={menyOffset > 0 ? '1' : undefined}
+        className="flex flex-col gap-1.5 transition-transform duration-500 ease-in-out motion-reduce:transition-none"
+        style={{ transform: `translateY(${menyOffset}px)` }}
+      >
         <button
           type="button"
           onClick={() => {
@@ -816,6 +844,7 @@ export function PlayTable({
           i
         </button>
       </div>
+      </div>
 
       {/* Klick utanför stänger ⋮/ⓘ (R3-fynd #6). */}
       {(showMenu || showInfo) && (
@@ -829,7 +858,10 @@ export function PlayTable({
 
       {/* Meny-overlay: ny giv, facit och hjälp – inget av det stör bordet annars. */}
       {showMenu && (
-        <div className="absolute right-2.5 top-[calc(3rem+env(safe-area-inset-top))] z-40 w-72 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
+        <div
+          className="absolute right-2.5 z-40 w-72 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line"
+          style={{ top: menyOverlayTop }}
+        >
           {/* Facit finns nu som direktknapp på bordet (R3-fynd #4); menyn har
               bara ny giv, claim och hjälp. */}
           <Button className="w-full" onClick={onNewGame}>
@@ -954,7 +986,10 @@ export function PlayTable({
       {/* ⓘ-overlay: budgivningen som ledde till kontraktet + förra sticket i
           miniatyr (som Synrey — bor här i stället för flytande på bordet). */}
       {showInfo && (
-        <div className="absolute left-1/2 top-[calc(3rem+env(safe-area-inset-top))] z-40 w-full max-w-sm -translate-x-1/2 space-y-2 px-3">
+        <div
+          className="absolute left-1/2 z-40 w-full max-w-sm -translate-x-1/2 space-y-2 px-3"
+          style={{ top: menyOverlayTop }}
+        >
           <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
             {/* hiddenHands (Etapp C): under spelet är händerna dolda — andras
                 bud förklaras systemiskt, aldrig ur deras faktiska kort. */}
@@ -992,21 +1027,38 @@ export function PlayTable({
 
       {/* Toppzonen: Nord-sidans öppna hand — träkarlen Nord när DU spelar, eller
           spelföraren Nord när Syd är träkarl (du spelar Nords kort i båda fallen).
+          Kortregeln (ägarbeslut 2026-09-15): ENDAST träkarlen ligger i kolumner,
+          spelföraren alltid i kortrad — så spelföraren Nord ritas som kortrad
+          och Syd-träkarlen som kolumner nertill (aldrig två kolumnhänder).
           När du försvarar sitter motståndarnas träkarl i stället på sin riktiga
           sida (se mittraden nedan) så man aldrig förväxlar den med partnern.
           Dolda motståndarhänder visas inte alls. */}
       <div className="flex min-h-16 justify-center pt-[calc(0.75rem+env(safe-area-inset-top))]">
-        {northUp && (
-          <SuitColumns
-            hand={play.hands.N}
-            contract={contract}
-            play={play}
-            seat="N"
-            onCardClick={onCardClick}
-            selectedSuit={selectedSuit}
-            registerCardEl={registerCardEl}
-          />
-        )}
+        {northUp &&
+          (contract.declarer === 'N' ? (
+            // Omslaget mäts av useSvavandeMeny (radens högerkant/underkant).
+            <div ref={nordRadRef} data-kortrad="N" className="flex">
+              <SouthFan
+                hand={play.hands.N}
+                contract={contract}
+                play={play}
+                seat="N"
+                onCardClick={onCardClick}
+                selectedSuit={selectedSuit}
+                registerCardEl={registerCardEl}
+              />
+            </div>
+          ) : (
+            <SuitColumns
+              hand={play.hands.N}
+              contract={contract}
+              play={play}
+              seat="N"
+              onCardClick={onCardClick}
+              selectedSuit={selectedSuit}
+              registerCardEl={registerCardEl}
+            />
+          ))}
       </div>
 
       {/* Förra sticket bor numera inne i ⓘ-overlayen (som Synrey), inte flytande
@@ -1104,8 +1156,11 @@ export function PlayTable({
         )
       )}
 
-      {/* Din hand som solfjäder längst ner (trumf längst till vänster). Säker
-          botten-marginal (hemindikatorn) nu när duken går edge-to-edge. */}
+      {/* Din hand längst ner (trumf längst till vänster). Säker botten-marginal
+          (hemindikatorn) nu när duken går edge-to-edge. Är SYD träkarl (Nord
+          spelför) ritas handen som färgkolumner — kortregeln: träkarlen i
+          kolumner, spelföraren i kortrad (ägarbeslut 2026-09-15); du spelar
+          korten ändå (controls i common.tsx). Spelar du själv: kortraden. */}
       <div className="border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
         {/* När bara en vald färg visas: väg tillbaka till alla färger (Synrey). */}
         {selectedSuit && (
@@ -1119,14 +1174,26 @@ export function PlayTable({
             </button>
           </div>
         )}
-        <SouthFan
-          hand={play.hands.S}
-          contract={contract}
-          play={play}
-          onCardClick={onCardClick}
-          selectedSuit={selectedSuit}
-          registerCardEl={registerCardEl}
-        />
+        {dummyOf(contract) === 'S' ? (
+          <SuitColumns
+            hand={play.hands.S}
+            contract={contract}
+            play={play}
+            seat="S"
+            onCardClick={onCardClick}
+            selectedSuit={selectedSuit}
+            registerCardEl={registerCardEl}
+          />
+        ) : (
+          <SouthFan
+            hand={play.hands.S}
+            contract={contract}
+            play={play}
+            onCardClick={onCardClick}
+            selectedSuit={selectedSuit}
+            registerCardEl={registerCardEl}
+          />
+        )}
       </div>
 
       {/* Flyglagret (etapp 3): klonen som flyger hand → stickmitten. Ovanpå
