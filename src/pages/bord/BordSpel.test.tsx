@@ -250,6 +250,27 @@ describe('BordSpel — röktest', () => {
     expect(await screen.findByText(/Claim: spelföraren tog resten av sticken utan spel \(13 stick totalt\)/)).toBeTruthy()
   })
 
+  test('Syd träkarl (2026-09-15): min hand ligger som färgkolumner som Nords, utan klickbara kort', async () => {
+    seq = 0
+    // Nord spelför 1♠ → jag (Syd) är träkarl; Öst har spelat ut och träkarlen
+    // är upplagd. Ägarönskemål: Syd-träkarlen ska se ut som Nord-träkarlen
+    // (färgkolumner), inte som en kortrad — och partnern spelar korten, så
+    // inget av dem får vara klickbart hos mig.
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' }),
+      h('bud', 'N', { bid: '1S' }),
+      h('bud', 'E', { bid: 'P' }),
+      h('bud', 'S', { bid: 'P' }),
+      h('bud', 'W', { bid: 'P' }),
+      h('kort', 'E', { card: kort('hearts', 'K') }),
+      h('trakarl', 'S', { hand: MIN_HAND }),
+    ]
+    const { container } = rendera()
+    expect(await screen.findByText(/Du är träkarl/)).toBeTruthy()
+    expect(container.querySelector('[data-kolumner="S"]')).not.toBeNull()
+    expect(container.querySelectorAll('[data-spelbart]').length).toBe(0)
+  })
+
   test('etapp 1 (2026-09-14): genomgången av given nås från giv-klar-vyn och går att stänga', async () => {
     seq = 0
     const deal = { ...dealFromSeed(7), dealer: 'N' as const }

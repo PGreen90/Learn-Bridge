@@ -1173,7 +1173,10 @@ export function BordSpel({
         <div>{VUL_TEXT[auktion.vulnerability]}</div>
       </div>
 
-      {/* Syd: din hand — klickbar när du styr den, stilla om du är träkarl. */}
+      {/* Syd: din hand — klickbar när du styr den, stilla om du är träkarl.
+          Träkarlen ritas som färgkolumner precis som Nord-träkarlen (Nord är
+          facit, ägarönskemål 2026-09-15). Spelläget vrids så turen aldrig är
+          Syds: partnern (spelföraren) spelar korten, inget får bli klickbart. */}
       <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
         {jagArDummy && (
           <p className="pb-1 text-center text-xs text-rose-100/60">
@@ -1181,7 +1184,14 @@ export function BordSpel({
           </p>
         )}
         {jagArDummy ? (
-          <HandFan hand={st.hands.S} flat />
+          <SuitColumns
+            hand={st.hands.S}
+            contract={st.contract}
+            play={{ ...st, toAct: st.contract.declarer }}
+            seat="S"
+            onCardClick={() => {}}
+            selectedSuit={null}
+          />
         ) : (
           <SouthFan
             hand={st.hands.S}

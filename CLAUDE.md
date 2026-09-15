@@ -23,6 +23,12 @@ prio (ägarbeslut 2026-09-15). Provfrön i `docs/senare.md`.
 (genomgången · facit/par-raden · DD-claimen med OK/spela klart) + Gambling 3NT
 i appen. Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
 
+**Nyss klart (2026-09-15): KORTREGELN** — endast träkarlen ligger i färg-
+kolumner, spelföraren alltid i kortrad (ägarbeslut; Syd-träkarlen låg förr som
+kortrad, två kolumnhänder ryms inte på mobil) + ⋮/i-knapparna svävar mjukt ner
+under Nords kortrad när raden är för bred (`useSvavandeMeny.ts`). Facit
+`syd-trakarl.test.tsx` + `BordSpel.test.tsx`, detalj `docs/historik.md` 2026-09-15.
+
 **Nyss klart (2026-09-14, ALLT LIVE): BORDENS SENARE-LISTA** i ordningen
 1) rondgenomgången per giv (`5088526`) → 2) DD-jämförelsen (`1af5972`;
 `bridge-dds` WASM buntad i api/bord.js, servern bakar in `dd` i giv-klar) →
@@ -36,10 +42,6 @@ delleveranserna + `docs/historik.md` 2026-09-14.
 sticket ligger kvar tills du trycker när du leder (hand efter 2 s), guldringen
 2/3/4 s när boten leder. Facit `stickvantan.test.tsx`, tider i `tempo.ts`,
 detalj `docs/historik.md` 2026-09-14 (även motorbytets slut + 403-fixen).
-
-**Nyss klart (2026-09-14, LIVE `0d44eeb`): bricka 12-rapporten** — advancern
-efter balansinkliv passar med fit, tävlar när de bjuder vidare (§7.1/§9, facit
-`auction-advancer-balansinkliv.test.ts`).
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
 sju etapper (två tryck · 40 %-regeln + "7/12" · se alla spelares givar · konto-

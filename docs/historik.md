@@ -2758,3 +2758,35 @@ balanserat (frö 3970) och med 17 hp 5-5 (frö 1370) — Klinger-försvaret sakn
 småfix. CLAUDE.md-rubriken sattes till KLAR & LIVE (`8e327b3`) och pushades
 separat (grön deploy). Nästa: ägarens live-prov (borden etapp 1–3 + Gambling 3NT
 i appen), sedan väljer ägaren nästa NU ur 🟢 NÄST.
+
+## 2026-09-15 — Kortregeln: träkarlen i kolumner, spelföraren i kortrad (ägarönskemål)
+
+Ägarens observation: när Syd spelför ligger Nord-träkarlen i fyra lodräta
+färgkolumner, men när Syd är träkarl låg Syds kort som en vågrät kortrad.
+Första bygget lade Syd-träkarlen i kolumner och lät spelföraren Nord ligga kvar
+i kolumner — uppmätt på 375×812: sidan blev 993 px hög (två kolumnhänder à
+336 px vid 5-kortsfärg), och inte ens den tätaste läsbara remsan (44 px,
+valörhörnet är 39 px) räckte. **Ägarbeslut:** Nord och Syd ligger aldrig i
+kolumner samtidigt — ENDAST träkarlen i kolumner, spelföraren ALLTID i kortrad.
+
+Byggt test-drivet (facit i `syd-trakarl.test.tsx` + `BordSpel.test.tsx` FÖRE
+koden): `SuitColumns` bär `data-kolumner=<stol>`; `SouthFan` fick `seat`
+(default Syd) så samma kortrad ritar spelföraren Nord upptill; `Play.tsx` ritar
+Nord som kortrad när Nord spelför och Syd-träkarlen som kolumner nertill (du
+spelar korten som förut, två tryck); `BordSpel.tsx` ritar Syd-träkarlen som
+stilla kolumner (spelläget vrids så turen aldrig är Syds → inget klickbart).
+Uppmätt efter bygget: sidhöjd 818 px på 375×812 (samma budget som förr med
+Nord-träkarlen i kolumner). Känd kosmetisk rest: ⋮/i-knapparna uppe till höger
+täcker högra delen av Nord-radens sista kort (valörhörnet syns, kortet är
+klickbart i sin vänstra del) — kortraden är 349 px bred på 375 px skärm.
+Hela sviten grön (`npm test`).
+
+**Påbyggnad samma dag — svävande menyknappar (ägarbeslut, alternativ 3):** i
+stället för att flytta ⋮/i permanent sänks knapparna mjukt (transform,
+500 ms ease-in-out, avstängd vid reducerad rörelse) till 8 px under Nords
+kortrad när raden når in under dem, och svävar tillbaka upp när Nords hand
+krympt så platsen finns. Ren DOM-geometri i `useSvavandeMeny.ts` (ankaret står
+stilla, stapeln inuti flyttas; vald färg fryser mätningen så knapparna inte
+studsar vid varje två-trycks-spel); menyn och ⓘ-overlayen följer med. Facit i
+`syd-trakarl.test.tsx` (rektanglarna mockas — jsdom har ingen layout). Uppmätt
+i browsern på 380 px: sänkta vid 13–11 kort, uppe igen från 10 kort.
