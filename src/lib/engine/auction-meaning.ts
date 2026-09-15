@@ -1708,6 +1708,17 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   const name = NAME[cb.strain]
   const lastWasCue = partnerLast && nat.cues.has(n - 1)
 
+  // Puppet Stayman (2026-09-15): kaptenens trumfsättning efter öppnarens 5-korts
+  // högfärg (3♠ över 3♥ / 4♥ över 3♠) och det KVANTITATIVA 4NT direkt över ett
+  // Puppet-svar — läses före allt annat i slamzonen (annars blev 4NT en essfråga).
+  if (puppetAsked(u) && n === naturalNTBase(u) + 3 && seat === u.responder) {
+    const a = u.bids[n - 1].cb
+    if (same(a, 3, 'H') && same(cb, 3, 'S')) return R(PUPPET.agree, `3♠ — hjärter är trumf (partnerns 5-korts), slamintresse. Säger inget om spader. Partnern visar en kontroll under 4♥ eller stannar i 4♥.`)
+    if (same(a, 3, 'S') && same(cb, 4, 'H')) return R(PUPPET.agree, `4♥ — spader är trumf (partnerns 5-korts), slamintresse. Säger inget om hjärter. Partnern visar en kontroll under 4♠ eller stannar i 4♠.`)
+    if (same(cb, 4, 'NT')) return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan utan högfärgsfit efter Puppet Stayman: bjud 6 sang med maximum, passa med minimum.`)
+    if (same(cb, 6, 'NT')) return R('6NT till spel', `6 sang — lillslam i sang, ingen högfärgsfit.`)
+  }
+
   // Sjöbergs 5NT (§6.3): frågaren bjuder 5NT efter nyckelkortssvaret.
   const rkc = rkcSequence(seat, prior)
   if (rkc && rkc.answer && seat === rkc.asker && same(cb, 5, 'NT')) {
@@ -1920,6 +1931,18 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
     // — annars läses kortfärgssvaret på splinterreläet som ett trumfsättande
     // kontrollbud (§5b beslut 4, 2026-09-07).
     if (k === 1 && !trump) trump = conventionalTrump(u)
+    // Puppet Stayman (2026-09-15): kaptenens trumfsättning (3♠ över 3♥ / 4♥ över
+    // 3♠) sätter öppnarens 5-korts högfärg som trumf — öppnarens 4♣/4♦ därefter
+    // är kontrollbud.
+    if (ntBase >= 0 && k === ntBase + 3 && u.bids[ntBase].cb.level === 2 && same(u.bids[ntBase + 1].cb, 3, 'C')) {
+      const a = u.bids[ntBase + 2].cb
+      if ((same(a, 3, 'H') && same(cb, 3, 'S')) || (same(a, 3, 'S') && same(cb, 4, 'H'))) {
+        trump = a.strain
+        agreed = a.strain
+        cues.add(k)
+        return
+      }
+    }
     if (artificial()) return
     const above3NT = bidRank(cb) > bidRank({ level: 3, strain: 'NT' })
     // Kontrollbud med satt trumf.

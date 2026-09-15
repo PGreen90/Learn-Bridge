@@ -25,7 +25,7 @@ const ALL_ENGINE_RULES: string[] = [
   'Minor Suit Stayman: höjning',
   'NT med stopp', 'NT-svar', 'Ogust', 'Ogust: max/bra', 'Ogust: max/dålig',
   'Ogust: max/utmärkt', 'Ogust: min/bra', 'Ogust: min/dålig', 'Sjöberg 5NT',
-  'Smolen', 'Puppet Stayman', 'Puppet-svar', 'Puppet-svar: ingen högfärg', 'Puppet: 4 spader', 'Puppet: 4 hjärter', 'Puppet: båda högfärgerna', 'Puppet: båda, slamintresse', 'väljer utgång efter Puppet', 'transfer: 4 spader', 'transfer: 5 hjärter', 'Stayman', 'Stayman-svar', 'Texas (2NT)', 'Texas',
+  'Smolen', 'Puppet Stayman', 'Puppet-svar', 'Puppet-svar: ingen högfärg', 'Puppet: 4 spader', 'Puppet: 4 hjärter', 'Puppet: båda högfärgerna', 'Puppet: båda, slamintresse', 'Puppet: trumf satt, slamintresse', 'väljer utgång efter Puppet', 'transfer: 4 spader', 'transfer: 5 hjärter', 'Stayman', 'Stayman-svar', 'Texas (2NT)', 'Texas',
   'X (stark/takeout)', 'accepterar inbjudan', 'accepterar slaminbjudan', 'accepterar',
   'andra negativa', 'cue (krav)', 'cue (limithöjning+)', 'cue (stark tvåfärg)',
   'cue-bid', 'enkel höjning', 'enkelt inkliv', 'fjärde färg krav', 'fullföljd Texas',

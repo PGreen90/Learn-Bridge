@@ -674,10 +674,14 @@ har, så att den starka handen blir spelförare i 4-4-fiten:
 | 4NT / 6NT | ingen 4-korts högfärg, 11–12 / 13+ | kvantitativ / till spel |
 
 **Efter 3♥/3♠ (öppnarens 5-korts):** 3+ stöd → 4 i högfärgen; annars 3NT (11–12
-→ 4NT kvantitativ, 13+ → 6NT). Med stöd och slamvärden är utgången etablerad:
-**kontrollbuden är gratis under 4M** (§6.2; t.ex. 2NT–3♣–3♥–4♦ = ruterkontroll
-med hjärter som trumf) och kaptenen räknar hp mot visade 20 — **33+ driver**
-(4NT RKC), annars stannar paret i utgång.
+→ 4NT kvantitativ, 13+ → 6NT). Med stöd och **slamvärden (11+)** sätter
+svararen trumfen med den andra högfärgen — **3♠ över 3♥, 4♥ över 3♠** (säger
+inget om den färgen) — och öppnaren öppnar cue-ronden (billigaste kontroll
+under 4M, §6.2) eller stannar i 4M; kaptenen räknar hp mot visade 20: **33+
+driver** (4NT RKC), 31–32 inbjuder 5M, annars utgång. **4NT direkt över ett
+Puppet-svar är alltid kvantitativt** (ingen fit): öppnaren bjuder 6NT med
+maximum, passar annars. *(Sondens fynd 2026-09-15: förr lästes 4NT som essfråga
+och öppnaren svarade 5♦ — frö 20265815.)*
 
 **Efter 3NT:** pass; 11–12 → 4NT kvantitativ; 13+ → 6NT.
 
@@ -4844,3 +4848,13 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   (slamraderna), `auction-meaning.ts` (betydelserna + utgångskrav efter 3♣),
   `preempt-defense-continuations.ts` (inklivet), `rules.ts`. Facit
   `puppet-stayman.test.ts` (facit före fix). Plan: `docs/puppet-stayman-plan.md`.
+
+- **2026-09-15 (kväll) — Puppet-sonden, fynd 1 (frö 20265815/20271194):** 4NT
+  direkt över ett Puppet-svar lästes som essfråga (öppnaren svarade 5♦, en gång
+  6♥ på 5-2). Nu: 4NT över 3♦/3♥/3♠/3NT = kvantitativt (öppnaren 6NT med max,
+  annars pass); slam med stöd går via trumfsättningen **3♠ över 3♥ / 4♥ över 3♠**
+  (öppnaren öppnar cue-ronden, `partnerStarts`). Sonden `puppet.probe.test.ts`
+  (PUPPET=1): 282 givar via 2NT–3♣ ur 20 000, dömda mot DD-par; samma givar med
+  gamla koden (git worktree 50a6be6, PUPPET_SEEDS): rätt kontrakt 44,0 % → 46,1 %,
+  snittförlust 259,8 → 246,7 p/giv. Revisorn 1000 givar före/efter: 21,2 % · 267,52
+  → 21,3 % · 267,45 (`REVISOR=1 npx vitest run src/lib/engine/revisor.probe.test.ts`).

@@ -242,18 +242,41 @@ describe('Puppet Stayman – hela sekvenser ur EN hand (beslutstabellen)', () =>
   })
 })
 
-describe('Puppet Stayman – slamporten efter fit (beslut 4 + 6)', () => {
-  it('14 hp + 4 spader mot 2NT–3♣–3♠ (5 spader): 34 ≥ 33 → 4NT RKC, inte 4♠ (sondens lucka)', () => {
-    const S = 'S:AQ43 H:K43 D:K43 C:K32'
-    expect(bud(S, seq('2NT', '3C', '3S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
+describe('Puppet Stayman – slamporten efter fit (beslut 4 + 6) — sondens fynd 2026-09-15: 4NT över ett Puppet-svar är KVANTITATIVT, slam med stöd går via trumfsättningen', () => {
+  it('14 hp + 3 spader mot 2NT–3♣–3♠ (5 spader): 34 ≥ 31 → 4♥ = spader satt, slamintresse (inte 4NT, inte 4♠)', () => {
+    const S = 'S:AQ4 H:K43 D:K432 C:K32'
+    expect(bud(S, seq('2NT', '3C', '3S'), 'S')).toMatchObject({ bid: '4H', rule: 'Puppet: trumf satt, slamintresse' })
   })
-  it('öppnaren svarar på 4NT i den satta spadern (5-läget)', () => {
-    const n = bud('S:KJT98 H:AQ D:AQ2 C:AQ4', seq('2NT', '3C', '3S', '4NT'), 'N')
-    expect(n && ['5C', '5D', '5H', '5S'].includes(n.bid)).toBe(true)
+  it('efter trumfsättningen öppnar öppnaren cue-ronden eller stannar i 4♠; kaptenen frågar 4NT över 4♠ med 33+', () => {
+    const N = 'S:KJT98 H:AQ D:AQ2 C:AQ4' // 21, inga kontrollbud under 4♠ möjliga → 4♠
+    const n = bud(N, seq('2NT', '3C', '3S', '4H'), 'N')
+    expect(n && ['4S', '4NT'].includes(n.bid)).toBe(true)
+    if (n?.bid === '4S') expect(bud('S:AQ4 H:K43 D:K432 C:K32', seq('2NT', '3C', '3S', '4H', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
   })
-  it('kontrollbud finns: 13 hp med ess i ruter och 3 hjärter mot 3♥ (5 hjärter) → cue 4♦ (gratis under utgång)', () => {
-    const s = bud('S:K43 H:Q42 D:A543 C:K32', seq('2NT', '3C', '3H'), 'S')
-    expect(s).toMatchObject({ bid: '4D', rule: 'cue-bid' })
+  it('13 hp med 3 hjärter mot 3♥ (5 hjärter) → 3♠ = hjärter satt, slamintresse; öppnaren cue:ar 4♣ (klöveress) under utgång', () => {
+    expect(bud('S:K43 H:Q42 D:A543 C:K32', seq('2NT', '3C', '3H'), 'S')).toMatchObject({ bid: '3S', rule: 'Puppet: trumf satt, slamintresse' })
+    const n = bud('S:AQ H:AKJ43 D:KQ4 C:A32', seq('2NT', '3C', '3H', '3S'), 'N')
+    expect(n && ['4C', '4D', '4H', '4NT'].includes(n.bid)).toBe(true)
+  })
+  it('8 hp med 3 hjärter mot 3♥ → bara 4♥ (under slamzonen)', () => {
+    expect(bud('S:K43 H:Q42 D:J543 C:432', seq('2NT', '3C', '3H'), 'S')).toMatchObject({ bid: '4H' })
+  })
+  it('sondens frö 20265815: 2NT–3♣–3♦–4NT är kvantitativt — öppnaren med 20 passar (förr svarade hen 5♦ som på en essfråga)', () => {
+    // N ♠KQ54 ♥Q4 ♦AKQ ♣A953 (20) – S ♠A98 ♥A7 ♦T76 ♣QJ642 (11, 3 spader, ingen 4-korts)
+    expect(bud('S:A98 H:A7 D:T76 C:QJ642', seq('2NT', '3C', '3D'), 'S')).toMatchObject({ bid: '4NT', rule: '4NT kvantitativ' })
+    const n = bud('S:KQ54 H:Q4 D:AKQ C:A953', seq('2NT', '3C', '3D', '4NT'), 'N')
+    expect(n === undefined || n.bid === 'P').toBe(true)
+  })
+  it('sondens frö 20271194: 2NT–3♣–3♥–4NT utan stöd är kvantitativt — öppnaren med 21 bjuder 6NT (förr 5♦ → 6♥ på 5-2)', () => {
+    // W ♠Q5 ♥AKQ82 ♦QJ6 ♣AK7 (21) – E ♠JT6 ♥73 ♦AK432 ♣QJ8 (11)
+    expect(bud('S:JT6 H:73 D:AK432 C:QJ8', seq('2NT', '3C', '3H'), 'S')).toMatchObject({ bid: '4NT', rule: '4NT kvantitativ' })
+    expect(bud('S:Q5 H:AKQ82 D:QJ6 C:AK7', seq('2NT', '3C', '3H', '4NT'), 'N')!.bid).toBe('6NT')
+    expect(bud('S:Q5 H:AKQ82 D:QJ6 C:AK7', seq('2NT', '3C', '3H', '4NT', '6NT'), 'S')?.bid ?? 'P').toBe('P')
+  })
+  it('4NT efter 3NT-svaret är kvantitativt: 21 → 6NT, 20 → pass', () => {
+    expect(bud('S:AKQ H:AJ4 D:KQ43 C:Q32', seq('2NT', '3C', '3NT', '4NT'), 'N')!.bid).toBe('6NT') // 21
+    const n = bud('S:AKQ H:AJ4 D:KQ43 C:J32', seq('2NT', '3C', '3NT', '4NT'), 'N') // 20
+    expect(n === undefined || n.bid === 'P').toBe(true)
   })
   it('4♣ (båda + slamintresse) → öppnarens 4♠ → svararen 4NT RKC (13 + 20 = 33)', () => {
     const S = 'S:KJ43 H:QJ43 D:K4 C:K32' // 13
@@ -268,6 +291,9 @@ describe('Puppet Stayman – slamporten efter fit (beslut 4 + 6)', () => {
     expect(bud(S, seq('2NT', '3C', '3D', '4C', '4S'), 'S')!.bid).toBe('5S')
     expect(bud('S:AQ42 H:AK5 D:AQ3 C:K54', seq('2NT', '3C', '3D', '4C', '4S', '5S'), 'N')!.bid).toBe('6S') // 21
     expect(bud('S:AQ42 H:AK5 D:AQ3 C:J54', seq('2NT', '3C', '3D', '4C', '4S', '5S'), 'N')!.bid).toBe('P') // 20
+  })
+  it('systems on 2♣–2♦–2NT: 3-korts stöd + 11 hp mot 3♥ (33 mot 22) → 3♠ = trumf satt', () => {
+    expect(bud('S:K43 H:Q42 D:A543 C:K32', seq('2C', '2D', '2NT', '3C', '3H'), 'S')).toMatchObject({ bid: '3S', rule: 'Puppet: trumf satt, slamintresse' })
   })
 })
 
@@ -306,9 +332,18 @@ describe('Puppet Stayman – betydelser (budförklaringar läses ur budet)', () 
     expect(m(seq('2NT', '3D', '3H', '3S')).rule).toBe('transfer: 4 spader')
     expect(m(seq('2NT', '3H', '3S', '4H')).rule).toBe('transfer: 5 hjärter')
   })
-  it('svararens 4♦ efter 2NT–3♣–3♥ (5 hjärter) läses som kontrollbud med hjärter som trumf', () => {
-    const r = m(seq('2NT', '3C', '3H', '4D'))
-    expect(r.rule).toBe('cue-bid')
+  it('svararens 3♠ efter 2NT–3♣–3♥ (5 hjärter) = hjärter satt med slamintresse; öppnarens 4♦ därefter = kontrollbud', () => {
+    expect(m(seq('2NT', '3C', '3H', '3S')).rule).toBe('Puppet: trumf satt, slamintresse')
+    expect(m(seq('2NT', '3C', '3H', '3S', '4D')).rule).toBe('cue-bid')
+    expect(m(seq('2NT', '3C', '3S', '4H')).rule).toBe('Puppet: trumf satt, slamintresse')
+  })
+  it('4NT direkt över ett Puppet-svar är kvantitativt (3♦, 3♥, 3NT) — inte essfråga', () => {
+    expect(m(seq('2NT', '3C', '3D', '4NT')).rule).toBe('4NT kvantitativ')
+    expect(m(seq('2NT', '3C', '3H', '4NT')).rule).toBe('4NT kvantitativ')
+    expect(m(seq('2NT', '3C', '3NT', '4NT')).rule).toBe('4NT kvantitativ')
+  })
+  it('4NT över öppnarens 4♠ (4-4-fiten efter 3♦–3♥) är essfråga i spader', () => {
+    expect(m(seq('2NT', '3C', '3D', '3H', '4S', '4NT')).rule).toBe('1430 RKC')
   })
   it('samma struktur efter 2♣–2♦–2NT', () => {
     expect(m(seq('2C', '2D', '2NT', '3C')).rule).toBe('Puppet Stayman')

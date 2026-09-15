@@ -365,7 +365,7 @@ export function respondToOvercallNTSystemsOn(hand: Hand, f: AuctionFacts): Resol
   if (phase === 'choose') {
     const rule = puppetPlacementRule(ours[3].bid)
     if (!rule) return null
-    const c = openerChoosesAfterSystemsOn(hand, puppetAsk, { call: ours[3].bid, rule, explanation: '' })
+    const c = openerChoosesAfterSystemsOn(hand, puppetAsk, { call: ours[3].bid, rule, explanation: '' }, 18)
     if (!c) return null
     if (c.call === 'P') return { seat: f.seat, bid: 'P', rule: c.rule, explanation: c.explanation }
     return mk(c.call, c.rule, c.explanation)

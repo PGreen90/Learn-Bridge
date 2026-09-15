@@ -385,13 +385,6 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   const rebidSuit = suitOf(rebid.call)
   const majorTrump = isMajorSuit(trump)
 
-  // Puppet Stayman över 2NT (2026-09-15, beslut 4): öppnarens 5-korts högfärg
-  // + kaptenens 3+ stöd = utgång etablerad; cue-ronden är gratis under 4M och
-  // omdömet ligger på att gå förbi (kaptenen räknar hp mot visade 20).
-  if (openCall === '2NT' && response.rule === PUPPET.ask && rebid.rule === PUPPET.answer && rebidSuit === trump && majorTrump) {
-    return { ctx: { partnerMin: 20, gameForcing: true, hpOnly: true } }
-  }
-
   // Stark 2♣ + positivt svar (§4.4): trumf funnen → kaptenen räknar mot visade 22+
   // med cue-ronden öppen; egen solid färg utan fit → bara driv (4NT).
   if (openCall === '2C' && response.rule === '2♣-positivt') {
@@ -491,9 +484,6 @@ export function slamContextAfterThird(openCall: string, response: ResponseResult
   if (openCall === '2NT' && response.rule === PUPPET.ask && PUPPET_PLACEMENTS.has(second.rule) && third.call === `4${LETTER[trump]}` && isMajorSuit(trump)) {
     return { ctx: { partnerMin: 20, inviteCall: `5${LETTER[trump]}`, gameForcing: true, hpOnly: true } }
   }
-  if (openCall === '2C' && response.call === '2D' && second.rule === PUPPET.ask && third.rule === PUPPET.answer && suitOf(third.call) === trump && isMajorSuit(trump)) {
-    return { ctx: { partnerMin: 22, gameForcing: true, hpOnly: true } }
-  }
   if (second.rule === '2/1: försenat stöd' && openerSuit && !isMajorSuit(openerSuit) && trump === openerSuit) {
     return {
       ctx: {
@@ -516,7 +506,6 @@ function slamTrumpAfterThird(openCall: string, response: ResponseResult, second:
   const openerSuit = suitOf(openCall)
   const respSuit = suitOf(response.call)
   if (openCall === '2NT' && response.rule === PUPPET.ask && PUPPET_PLACEMENTS.has(second.rule) && /^4[HS]$/.test(third.call)) return suitOf(third.call)
-  if (openCall === '2C' && response.call === '2D' && second.rule === PUPPET.ask && third.rule === PUPPET.answer && (third.call === '3H' || third.call === '3S')) return suitOf(third.call)
   if (second.rule === '2/1: försenat stöd' && openerSuit && !isMajorSuit(openerSuit)) return openerSuit
   if (second.rule === 'New Minor Forcing' && respSuit && isMajorSuit(respSuit) && suitOf(third.call) === respSuit) return respSuit
   return null
@@ -578,9 +567,6 @@ function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid:
     }
     return null
   }
-  // Puppet Stayman över 2NT (2026-09-15): öppnarens 3♥/3♠ visade en 5-korts
-  // högfärg — kaptenens kontrollbud/4NT över svaret har den som trumf.
-  if (openCall === '2NT' && response.rule === PUPPET.ask && rebid.rule === PUPPET.answer && (rebid.call === '3H' || rebid.call === '3S')) return rebidSuit
   if (response.rule === 'Jacoby 2NT' && openerSuit && isMajorSuit(openerSuit)) return openerSuit
   if (response.rule === 'inverterad minor' && openerSuit && !isMajorSuit(openerSuit)) return openerSuit
   // 1NT-återbudet: inga slambud direkt över sangen utom Gerber 4♣/kvantitativ
@@ -742,17 +728,6 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
 
   // Hopphöjning av min högfärg (1x–1M–3M, visade 16–18 med 4-korts stöd).
   const respMajor = response.call === '1H' ? 'hearts' : response.call === '1S' ? 'spades' : null
-  // Puppet Stayman över 2NT (2026-09-15): öppnaren visade en 5-korts högfärg
-  // (3♥/3♠) och jag har 3+ stöd → slamporten (cue-ronden gratis under utgång,
-  // 4NT vid 33+); annars placeras utgången i den vanliga kedjan nedan.
-  if (openCall === '2NT' && response.rule === PUPPET.ask && rebid.rule === PUPPET.answer && (rebid.call === '3H' || rebid.call === '3S')) {
-    const t = suitOf(rebid.call)!
-    if (rl[t] >= 3) {
-      const slam = slamStep(t)
-      if (slam) return slam
-    }
-  }
-
   if (rebid.rule === 'hopphöjning (inbjudan)' && respMajor && suitOf(rebid.call) === respMajor) {
     const slam = slamStep(respMajor)
     if (slam) return slam
@@ -1070,16 +1045,9 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
     return { turn: { call: 'P', rule: 'svararens pass', explanation: `Öppnaren placerade utgången i ${SYM[t]} → pass.` }, plan: { kind: 'call' } }
   }
 
-  // Systems on efter 2♣–2♦–2NT: svararen placerar (Puppet / 4M / 3NT / pass);
-  // öppnarens 5-korts högfärg + 3+ stöd → slamporten mot visade 22.
+  // Systems on efter 2♣–2♦–2NT: svararen placerar (Puppet / 4M / 3NT / pass;
+  // trumfsättningen 3♠/4♥ med slamvärden går genom slamraden, prefix 6).
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') {
-    if (second.rule === PUPPET.ask && third.rule === PUPPET.answer && (third.call === '3H' || third.call === '3S')) {
-      const t = suitOf(third.call)!
-      if (lengths(hand)[t] >= 3) {
-        const slam = slamStep(t)
-        if (slam) return slam
-      }
-    }
     const p = responderRebidIn2NTAuction(second, third, hand, 22)
     return p ? { turn: p, plan: { kind: 'call' } } : null
   }
@@ -1216,7 +1184,7 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
  */
 export function openerFourthDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, second: ResponseResult, fourth: ResponseResult, hand: Hand): ResponseResult | null {
   if (fourth.call === 'P') return null
-  if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') return openerChoosesAfterSystemsOn(hand, second, fourth)
+  if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') return openerChoosesAfterSystemsOn(hand, second, fourth, 24)
   // Efter partnerns andra negativa (2♣–2♦–2M–2NT, §5b beslut 6) placerade
   // partnern kontraktet (preferens/höjning) — inget krav finns, jag passar.
   if (openCall === '2C' && response.call === '2D' && rebid.rule === 'rebid: krav-färg' && second.rule === 'andra negativa') {
@@ -1286,6 +1254,27 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
   if (!response || !rebid) return null
   const openerSuit = suitOf(openCall)
   const first = ours[3].bid
+
+  // Puppet Stayman (2026-09-15, sondens fynd): efter öppnarens 5-korts högfärg
+  // (3♥/3♠) sätter kaptenen trumfen med den andra högfärgen (3♠ / 4♥) =
+  // slamintresse; öppnaren öppnar cue-ronden (`partnerStarts`) eller stannar i
+  // 4M; kaptenen räknar hp mot visade 20 (33+ → 4NT, 31–32 → 5M). 4NT DIREKT
+  // över svaret är kvantitativt (ingen slamsekvens) — förr lästes det som
+  // essfråga och öppnaren svarade 5♦ (frö 20265815/20271194).
+  if (openCall === '2NT' && response.rule === PUPPET.ask && rebid.rule === PUPPET.answer && (rebid.call === '3H' || rebid.call === '3S')) {
+    const t = suitOf(rebid.call)!
+    const agree = rebid.call === '3H' ? '3S' : '4H'
+    if (first !== agree) return null
+    const ctx: SlamContext = { partnerMin: 20, inviteCall: `5${LETTER[t]}`, gameForcing: true, hpOnly: true }
+    return { kind: 'slam', captain, prefix: 4, setup: { trump: t, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+  }
+  if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT' && ours.length >= 6 && ours[3].bid === '3C' && (ours[4].bid === '3H' || ours[4].bid === '3S')) {
+    const t: Suit = ours[4].bid === '3H' ? 'hearts' : 'spades'
+    const agree = ours[4].bid === '3H' ? '3S' : '4H'
+    if (ours[5].bid !== agree) return null
+    const ctx: SlamContext = { partnerMin: 22, inviteCall: `5${LETTER[t]}`, gameForcing: true, hpOnly: true }
+    return { kind: 'slam', captain, prefix: 6, setup: { trump: t, lastCall: agree, ctx, partnerStarts: true }, sofar: sofarFrom(6) }
+  }
 
   // §5b beslut 3 (2026-09-05): reverse + kaptenens BILLIGA höjning av reversens
   // högfärg (1♦–1♠–2♥–3♥) = stark, utgångskrav, slamintresse. Öppnaren öppnar
