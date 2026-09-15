@@ -35,6 +35,8 @@ export const PUPPET = {
   bothSlam: 'Puppet: båda, slamintresse',
   /** Kaptenens trumfsättning efter öppnarens 5-korts: 3♠ över 3♥, 4♥ över 3♠ (slamintresse; sondens fynd 2026-09-15). */
   agree: 'Puppet: trumf satt, slamintresse',
+  texas: 'Texas (2NT)',
+  transfer: 'transfer (2NT)',
   choose: 'väljer utgång efter Puppet',
   transferFourSpades: 'transfer: 4 spader',
   transferFiveHearts: 'transfer: 5 hjärter',
@@ -82,11 +84,12 @@ export function respondTo2NT(hand: Hand, openerMin = 20): ResponseResult {
   if (major) {
     const L = len[major]
     const sym = SYM[major]
-    // Texas: 6+ kort, ren utgång (utgångsstyrka utan slamintresse) → sätt direkt.
-    if (L >= 6 && p >= game && p < slamInvite) {
+    // Texas: 6+ kort och utgångsvärden → sätt direkt. Slamhanden (33+) frågar
+    // 4NT (RKC i högfärgen) över fullföljningen; 31–32 nöjer sig med utgång.
+    if (L >= 6 && p >= game) {
       const call = major === 'hearts' ? '4D' : '4H'
       const shown = major === 'hearts' ? '4♦' : '4♥'
-      return { call, rule: 'Texas (2NT)', explanation: `6+ ${sym} → ${shown} (Texas — transfer till ${sym}, utgång utan slamiver).` }
+      return { call, rule: 'Texas (2NT)', explanation: `6+ ${sym} → ${shown} (Texas — transfer till ${sym}, utgång${p >= slam ? '; sedan 4NT som essfråga' : ' utan slamiver'}).` }
     }
     // Transfer på 3-läget: 3♦ → ♥, 3♥ → ♠. Svag = signoff i delkontrakt, slam = 11+.
     const call = major === 'hearts' ? '3D' : '3H'

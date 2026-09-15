@@ -351,6 +351,101 @@ describe('Puppet Stayman – betydelser (budförklaringar läses ur budet)', () 
   })
 })
 
+describe('Puppet Stayman – slamvägarna kompletta (ägardirektiv 2026-09-15 kväll: "gör klart slamvägar")', () => {
+  // ---- 2♣–2♦–2NT (22–24): samma vägar som över 2NT-öppningen, mot 22 ----
+  it('2♣-vägen: 4♣ (båda + slam) → öppnarens 4♠ → 4NT RKC (11 + 22 = 33)', () => {
+    const S = 'S:KJ43 H:QJ43 D:K4 C:Q32' // 11
+    const N = 'S:AQ42 H:AK5 D:AQ3 C:KQ4' // 24
+    expect(bud(S, seq('2C', '2D', '2NT', '3C', '3D'), 'S')!.bid).toBe('4C')
+    expect(bud(N, seq('2C', '2D', '2NT', '3C', '3D', '4C'), 'N')!.bid).toBe('4S')
+    expect(bud(S, seq('2C', '2D', '2NT', '3C', '3D', '4C', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
+  })
+  it('2♣-vägen: 3♥ (4 spader) → öppnarens 4♠ → 4NT med 33, pass med 30', () => {
+    expect(bud('S:KJ43 H:Q42 D:K43 C:Q32', seq('2C', '2D', '2NT', '3C', '3D', '3H', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
+    const s = bud('S:KJ43 H:J42 D:K43 C:432', seq('2C', '2D', '2NT', '3C', '3D', '3H', '4S'), 'S') // 8 → 30
+    expect(s === undefined || s.bid === 'P').toBe(true)
+  })
+  it('2♣-vägen: trumfsättning 3♠ efter 3♥ → öppnaren cue:ar eller stannar, kaptenen fortsätter', () => {
+    const n = bud('S:AQ H:AQJ43 D:KQ4 C:AQ2', seq('2C', '2D', '2NT', '3C', '3H', '3S'), 'N')
+    expect(n && ['4C', '4D', '4H'].includes(n.bid)).toBe(true)
+  })
+  // ---- Efter öppnarens 3NT på min högfärgsvisning: sangtrappan ----
+  it('2NT–3♣–3♦–3♥–3NT (ingen fit): 11 hp → 4NT kvantitativ; öppnaren 21 → 6NT, 20 → pass; 13 hp → 6NT; 8 → pass', () => {
+    expect(bud('S:KJ43 H:KQ4 D:K43 C:432', seq('2NT', '3C', '3D', '3H', '3NT'), 'S')).toMatchObject({ bid: '4NT', rule: '4NT kvantitativ' })
+    expect(bud('S:AK4 H:AJ43 D:AQ4 C:K32', seq('2NT', '3C', '3D', '3H', '3NT', '4NT'), 'N')!.bid).toBe('6NT') // 21
+    const n = bud('S:AK4 H:AJ43 D:AQ4 C:Q32', seq('2NT', '3C', '3D', '3H', '3NT', '4NT'), 'N') // 20
+    expect(n === undefined || n.bid === 'P').toBe(true)
+    expect(bud('S:KJ43 H:KQ4 D:KQ43 C:432', seq('2NT', '3C', '3D', '3H', '3NT'), 'S')!.bid).toBe('6NT')
+    const s = bud('S:KJ43 H:Q42 D:K43 C:432', seq('2NT', '3C', '3D', '3H', '3NT'), 'S')
+    expect(s === undefined || s.bid === 'P').toBe(true)
+  })
+  it('2♣-vägen efter öppnarens 3NT: 9 hp (31 mot 22) → 4NT kvantitativ; öppnaren 23 → 6NT, 22 → pass', () => {
+    expect(bud('S:KJ43 H:KQ4 D:643 C:432', seq('2C', '2D', '2NT', '3C', '3D', '3H', '3NT'), 'S')).toMatchObject({ bid: '4NT', rule: '4NT kvantitativ' })
+    expect(bud('S:AK4 H:AJ43 D:AQ4 C:AJ2', seq('2C', '2D', '2NT', '3C', '3D', '3H', '3NT', '4NT'), 'N')!.bid).toBe('6NT') // 23
+    const n = bud('S:AK4 H:AJ43 D:AQ4 C:A32', seq('2C', '2D', '2NT', '3C', '3D', '3H', '3NT', '4NT'), 'N') // 22
+    expect(n === undefined || n.bid === 'P').toBe(true)
+  })
+  // ---- Transfervägarna ----
+  it('6+ högfärg med slamvärden → Texas, sedan 4NT RKC över fullföljningen; öppnaren svarar', () => {
+    const S = 'S:AQ8432 H:K3 D:A3 C:K32' // 16
+    expect(bud(S, seq('2NT'), 'S')).toMatchObject({ bid: '4H', rule: 'Texas (2NT)' })
+    expect(bud('S:KJ5 H:AQ4 D:KQ42 C:AQ4', seq('2NT', '4H'), 'N')!.bid).toBe('4S')
+    expect(bud(S, seq('2NT', '4H', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
+    const n = bud('S:KJ5 H:AQ4 D:KQ42 C:AQ4', seq('2NT', '4H', '4S', '4NT'), 'N')
+    expect(n && ['5C', '5D', '5H', '5S'].includes(n.bid)).toBe(true)
+  })
+  it('6+ högfärg med 11–12 → Texas och pass över fullföljningen (fast arrival)', () => {
+    const S = 'S:KQ8432 H:K3 D:43 C:K32' // 11
+    expect(bud(S, seq('2NT'), 'S')!.bid).toBe('4H')
+    const s = bud(S, seq('2NT', '4H', '4S'), 'S')
+    expect(s === undefined || s.bid === 'P').toBe(true)
+  })
+  it('exakt 5-korts, 11–12 → transfer och 4NT kvantitativ; öppnaren med max + 3-korts stöd → 6♥, max utan stöd → 6NT, min → pass', () => {
+    const S = 'S:K3 H:KJ432 D:Q43 C:K32' // 11
+    expect(bud(S, seq('2NT', '3D', '3H'), 'S')).toMatchObject({ bid: '4NT', rule: '4NT kvantitativ' })
+    expect(bud('S:AQ4 H:Q43 D:AK43 C:AQ2', seq('2NT', '3D', '3H', '4NT'), 'N')!.bid).toBe('6H') // 21, 3 hjärter
+    expect(bud('S:AQ43 H:Q4 D:AK43 C:AQ2', seq('2NT', '3D', '3H', '4NT'), 'N')!.bid).toBe('6NT') // 21, 2 hjärter
+    const n = bud('S:AQ43 H:Q4 D:AK43 C:AJ2', seq('2NT', '3D', '3H', '4NT'), 'N') // 20
+    expect(n === undefined || n.bid === 'P').toBe(true)
+  })
+  it('exakt 5-korts, 13+ → transfer och 6NT', () => {
+    expect(bud('S:K3 H:KJ432 D:K43 C:K32', seq('2NT', '3D', '3H'), 'S')!.bid).toBe('6NT')
+  })
+  it('5♥4♠ med 13: transfer, 3♠, öppnarens 4♠ → 4NT RKC; med 8 → pass', () => {
+    expect(bud('S:Q543 H:KJ432 D:A4 C:K3', seq('2NT', '3D', '3H', '3S', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
+    const s = bud('S:Q543 H:KJ432 D:K4 C:43', seq('2NT', '3D', '3H', '3S', '4S'), 'S')
+    expect(s === undefined || s.bid === 'P').toBe(true)
+  })
+  it('5-5 med 13: transfer, 4♥, öppnarens 4♠ → 4NT RKC', () => {
+    expect(bud('S:KJ432 H:AJ543 D:A4 C:4', seq('2NT', '3H', '3S', '4H', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
+  })
+  // ---- 2NT-inklivet: inga färgslamvägar (bara kvantitativt) ----
+  it('över 2NT-inklivet: 17 hp med 3 hjärter mot 3♥ → 4♥ (ingen trumfsättning där), båda högfärgerna → 4♦ (aldrig 4♣)', () => {
+    const h = [call('W', '2S'), call('N', '2NT'), P('E'), call('S', '3C'), P('W')]
+    expect(bud('S:K98 H:Q84 D:AK6 C:AJ94', [...h, call('N', '3H'), P('E')], 'S')!.bid).toBe('4H')
+    expect(bud('S:KJ98 H:QJ84 D:AK6 C:A9', [...h, call('N', '3D'), P('E')], 'S')!.bid).toBe('4D')
+  })
+})
+
+describe('Puppet Stayman – betydelser för slamvägarna', () => {
+  const m = (hist: ResolvedCall[]) => meaningOf(hist, hist.length - 2)
+  it('4NT över transferns fullföljning = kvantitativt (exakt 5-korts); 4NT över Texas-fullföljningen = essfråga i högfärgen', () => {
+    expect(m(seq('2NT', '3D', '3H', '4NT')).rule).toBe('4NT kvantitativ')
+    expect(m(seq('2NT', '4H', '4S', '4NT')).rule).toBe('1430 RKC')
+    expect(m(seq('2NT', '4H', '4S', '4NT')).text).toMatch(/spader/)
+  })
+  it('öppnarens 6♥ på den kvantitativa 4NT efter transfer = accepterar med stöd', () => {
+    expect(m(seq('2NT', '3D', '3H', '4NT', '6H')).rule).toBe('accepterar slaminbjudan')
+  })
+  it('4NT efter öppnarens 3NT på min högfärgsvisning = kvantitativt', () => {
+    expect(m(seq('2NT', '3C', '3D', '3H', '3NT', '4NT')).rule).toBe('4NT kvantitativ')
+    expect(m(seq('2C', '2D', '2NT', '3C', '3D', '3H', '3NT', '4NT')).rule).toBe('4NT kvantitativ')
+  })
+  it('4NT över öppnarens 4♠ i 2♣-vägen = essfråga i spader', () => {
+    expect(m(seq('2C', '2D', '2NT', '3C', '3D', '4C', '4S', '4NT')).rule).toBe('1430 RKC')
+  })
+})
+
 describe('Puppet Stayman – regelregistret', () => {
   it('3♣ är krav och alertpliktigt; svaren likaså (3NT-svaret ej krav)', () => {
     expect(forcingOf('Puppet Stayman')).toBe('krav-1-rond')

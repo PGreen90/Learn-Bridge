@@ -150,4 +150,8 @@ Filer: `responses-2nt.ts`, `responder-rebids.ts`, `strong-2nt-systemson.ts`,
 | 4♥ efter 3♥–3♠ | 4♥ — 5 spader och 5 hjärter: partnern väljer 4♥ eller 4♠. |
 | 3♠ efter 3♣–3♥ | 3♠ — hjärter är trumf (partnerns 5-korts), slamintresse. Säger inget om spader. Partnern visar en kontroll under 4♥ eller stannar i 4♥. |
 | 4NT efter Puppet-svar | 4 sang — kvantitativ slaminbjudan utan högfärgsfit efter Puppet Stayman: bjud 6 sang med maximum, passa med minimum. |
+| 4NT efter transfer | 4 sang — kvantitativ slaminbjudan efter transfern: exakt 5-korts hjärter, jämn hand. Partnern bjuder 6 hjärter med maximum och 3-korts stöd, 6 sang med maximum, passar annars. |
+| 4NT efter Texas | 4 sang — essfråga (1430 RKC) med spader som trumf (Texas visade 6+). Partnern svarar i steg: 5♣ = 1/4 nyckelkort, 5♦ = 0/3, 5♥ = 2 utan trumfdam, 5♠ = 2 med. |
+| 4♦/4♥ över 2NT | 4♥ — Texas-transfer: 6+ spader med utgångsstyrka; partnern bjuder 4 spader (med slamvärden följer 4 sang som essfråga). Säger inget om hjärter. |
+| 4NT efter öppnarens 3NT | 4 sang — kvantitativ slaminbjudan: partnern valde 3 sang på min högfärgsvisning (ingen fit). Bjud 6 sang med maximum, passa med minimum. |
 

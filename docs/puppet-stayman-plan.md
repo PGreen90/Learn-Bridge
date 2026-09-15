@@ -20,9 +20,15 @@
 > snittförlust 259,8 → 246,7. Fynd 1 lagat: 4NT över ett Puppet-svar var essfråga
 > i motorns läsning → nu kvantitativt; slam med stöd via 3♠/4♥-trumfsättningen.
 >
-> **Medvetet kvar (SENARE):** 4♣-slamvägen efter 2♣–2♦–2NT (där går båda-
-> högfärgerna alltid 4♦ och slamletningen efter öppnarens 4M saknar rad) ·
-> slamport över 2NT-inklivet · Muppet.
+> **Slamvägarna kompletta (ägardirektiv samma kväll, "gör klart slamvägar"):**
+> 2♣–2♦–2NT har alla vägar (4♣, placering → 4M → 4NT/5M, trumfsättning, kvantitativ
+> 4NT efter 3NT via ny rad *svar4*); efter öppnarens 3NT på högfärgsvisningen
+> 4NT/6NT; transfer: exakt 5-korts 11–12 → 4NT kvantitativ, 13+ → 6NT; 6+ går
+> Texas och frågar 4NT RKC i slamzonen; 5♥4♠/5-5 → 4NT/5M över öppnarens 4M.
+> Över 2NT-inklivet medvetet INGA färgslamvägar (motståndarna har öppnat;
+> slamraden gäller ostört) — bara kvantitativt.
+>
+> **Medvetet kvar (SENARE):** Muppet (ägarbeslut 8: nej).
 
 ## 1. Varför bytet är motiverat i rebidz
 

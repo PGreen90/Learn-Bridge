@@ -356,7 +356,8 @@ export function respondToOvercallNTSystemsOn(hand: Hand, f: AuctionFacts): Resol
 
   if (phase === 'rebid' && ours[1].bid === '3C') {
     const answer: ResponseResult = { call: ours[2].bid, rule: ours[2].bid === '3NT' ? PUPPET.answerNone : PUPPET.answer, explanation: '' }
-    const r = responderRebidIn2NTAuction(puppetAsk, answer, hand, OVERCALL_NT_MIN)
+    // Inga färgslamvägar över inklivet (motståndarna har öppnat — slamraden gäller ostört): bara kvantitativt 4NT.
+    const r = responderRebidIn2NTAuction(puppetAsk, answer, hand, OVERCALL_NT_MIN, false)
     if (!r) return null
     if (r.call === 'P') return { seat: f.seat, bid: 'P', rule: r.rule, explanation: r.explanation }
     return mk(r.call, r.rule, r.explanation)

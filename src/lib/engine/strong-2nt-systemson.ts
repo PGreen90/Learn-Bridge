@@ -70,6 +70,14 @@ export function openerChoosesAfterSystemsOn(hand: Hand, resp: ResponseResult, pl
   }
 
   if (resp.rule === 'transfer (2NT)') {
+    // Kvantitativ 4NT efter transfern (exakt 5-korts, jämn): max + 3-korts stöd → 6 i högfärgen, max → 6NT, annars pass.
+    if (place.call === '4NT') {
+      const m = fiveCardMajorShown(resp)!
+      if (hcp(hand) < openerMax) return { call: 'P', rule: 'rebid: pass', explanation: 'Minimum mot partnerns kvantitativa 4NT → pass.' }
+      if (oLen[m] >= 3) return { call: `6${BID[m]}`, rule: 'accepterar slaminbjudan', explanation: `Maximum med 3-korts stöd i partnerns 5-korts ${SYM[m]} → 6${SYM[m]}.` }
+      return { call: '6NT', rule: 'accepterar slaminbjudan', explanation: 'Maximum utan stöd → 6NT.' }
+    }
+    if (place.call === '6NT') return { call: 'P', rule: 'rebid: pass', explanation: 'Partnern satte 6NT → pass.' }
     if (place.rule === PUPPET.transferFourSpades || (place.call === '3S' && resp.call === '3D')) {
       if (oLen.spades >= 4) return { call: '4S', rule: 'väljer högfärgsutgång', explanation: 'partnern visade 5 hjärter och 4 spader; 4-korts spader → 4♠ (4-4-fit).' }
       if (oLen.hearts >= 3) return { call: '4H', rule: 'väljer högfärgsutgång', explanation: 'partnern visade 5 hjärter och 4 spader; 3-korts hjärter → 4♥ (5-3-fit).' }
