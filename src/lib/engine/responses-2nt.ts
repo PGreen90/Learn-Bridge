@@ -33,6 +33,8 @@ export const PUPPET = {
   fourHearts: 'Puppet: 4 hjärter',
   both: 'Puppet: båda högfärgerna',
   bothSlam: 'Puppet: båda, slamintresse',
+  /** Kaptenens trumfsättning efter öppnarens 5-korts: 3♠ över 3♥, 4♥ över 3♠ (slamintresse; sondens fynd 2026-09-15). */
+  agree: 'Puppet: trumf satt, slamintresse',
   choose: 'väljer utgång efter Puppet',
   transferFourSpades: 'transfer: 4 spader',
   transferFiveHearts: 'transfer: 5 hjärter',

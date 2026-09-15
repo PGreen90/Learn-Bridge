@@ -10,14 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — BYGGD & GRÖN, väntar ägarens PCD
+### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — LIVE `2620287`, fynd 1 väntar PCD
 **Ägarbeslut 2026-09-15 (alla åtta i `docs/puppet-stayman-plan.md`):** 3♣ över
 2NT (även 2♣–2♦–2NT och vårt 2NT-inkliv) = Puppet Stayman: 3♥/3♠ = 5-korts,
 3♦ = 4-korts finns, 3NT = ingen; efter 3♦ bjuder svararen högfärgen hen INTE
 har, 4♦ = båda, 4♣ = båda + slam. Krav: utgångsvärden + en 3-korts högfärg.
 Smolen över 2NT borta (5♥4♠ transfer + 3♠ · 5♠4♥ 3♣ + 4♦ · 5-5 transfer + 4♥).
 Slamport efter Puppet-fit byggd. Systemboken **§4.3b**, facit
-`puppet-stayman.test.ts`, sviten grön. **Nästa: PCD → live-prov i budlådan.**
+`puppet-stayman.test.ts`. Hälsokoll klar (`puppet.probe.test.ts`, 44→46 % rätt);
+fynd 1 (4NT kvantitativt) byggt. **Nästa: PCD → live-prov.**
 
 **Nyss klart (2026-09-14): GAMBLING 3NT** KLAR & LIVE (mergepunkt `8e327b3`),
 ägarens live-prov kvar. Aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför),
@@ -26,7 +27,7 @@ Kod `src/lib/engine/gambling-3nt.ts`, facit `gambling-3nt.test.ts`, systemboken
 §3.1 + §4.4. Fortsättningen = SENARE, låg prio (ägarbeslut 2026-09-15).
 
 **Parallellt ägarsteg:** live-prov vid ett vänner-bord av bordens etapp 1–3
-(genomgången · facit/par-raden · DD-claimen med OK/spela klart) + Gambling 3NT
+(genomgången · facit/par-raden · DD-claimen) + Gambling 3NT
 i appen. Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
 
 **Nyss klart (2026-09-15): KORTREGELN** — bara träkarlen ligger i färgkolumner,

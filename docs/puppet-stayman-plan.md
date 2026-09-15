@@ -15,6 +15,11 @@
 > 7) **Puppet även över 2NT-inklivet**, trösklar mot 15–18 (utgång från 9) ·
 > 8) ingen Muppet.
 >
+> **Hälsokoll samma kväll (Puppet-sonden, `puppet.probe.test.ts`):** 282 givar via
+> 2NT–3♣ ur 20 000, DD-dömda; samma givar med gamla koden: rätt 44,0 % → 46,1 %,
+> snittförlust 259,8 → 246,7. Fynd 1 lagat: 4NT över ett Puppet-svar var essfråga
+> i motorns läsning → nu kvantitativt; slam med stöd via 3♠/4♥-trumfsättningen.
+>
 > **Medvetet kvar (SENARE):** 4♣-slamvägen efter 2♣–2♦–2NT (där går båda-
 > högfärgerna alltid 4♦ och slamletningen efter öppnarens 4M saknar rad) ·
 > slamport över 2NT-inklivet · Muppet.

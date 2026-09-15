@@ -261,6 +261,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'Puppet: 4 hjärter': 'krav-1-rond',
   'Puppet: båda högfärgerna': 'krav-1-rond',
   'Puppet: båda, slamintresse': 'slamintresse',
+  'Puppet: trumf satt, slamintresse': 'slamintresse',
   'väljer utgång efter Puppet': 'avslut',
   'Jacoby-transfer': 'krav-1-rond',
   'transfer (2NT)': 'krav-1-rond',

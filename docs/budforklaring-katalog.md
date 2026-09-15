@@ -148,4 +148,6 @@ Filer: `responses-2nt.ts`, `responder-rebids.ts`, `strong-2nt-systemson.ts`,
 | öppnarens 4♠/4♥/3NT | 4♠ — partnern visade 4 spader och jag har 4: utgång i 4-4-fiten. / 3 sang — partnern visade 4 spader, jag har inte 4: till spel i sang. |
 | 3♠ efter 3♦–3♥ | 3♠ — 5 hjärter och 4 spader, utgångskrav: partnern bjuder 4♠ med 4 spader, 4♥ med 3 hjärter, annars 3 sang. |
 | 4♥ efter 3♥–3♠ | 4♥ — 5 spader och 5 hjärter: partnern väljer 4♥ eller 4♠. |
+| 3♠ efter 3♣–3♥ | 3♠ — hjärter är trumf (partnerns 5-korts), slamintresse. Säger inget om spader. Partnern visar en kontroll under 4♥ eller stannar i 4♥. |
+| 4NT efter Puppet-svar | 4 sang — kvantitativ slaminbjudan utan högfärgsfit efter Puppet Stayman: bjud 6 sang med maximum, passa med minimum. |
 

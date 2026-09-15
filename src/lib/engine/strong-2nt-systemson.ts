@@ -16,7 +16,7 @@
 // efter transfer + andra högfärgen (3♠ = 5♥4♠, 4♥ = 5-5).
 
 import type { Hand, Suit } from '../../types/bridge'
-import { lengths } from './hand'
+import { hcp, lengths } from './hand'
 import { betterFourCardMajor, PUPPET, respondTo2NT } from './responses-2nt'
 import type { ResponseResult } from './responses'
 
@@ -46,11 +46,17 @@ export function systemsOnFirstStep(responderHand: Hand): ResponseResult | null {
  *    efter transfer + 4♥ (5-5): 4♠ med fler spader än hjärter, annars står 4♥;
  *  · efter 3NT-erbjudandet efter en transfer (exakt 5-korts högfärg): 4 i
  *    högfärgen med 3+ stöd (5-3-fit), annars står 3NT.
- * `resp` = svararens bud över sangen, `place` = svararens placering. null =
+ * `resp` = svararens bud över sangen, `place` = svararens placering,
+ * `openerMax` = mitt visade maximum (21 / 24 / 18 — styr accepten av 4NT). null =
  * inget val att göra (redan placerat).
  */
-export function openerChoosesAfterSystemsOn(hand: Hand, resp: ResponseResult, place: ResponseResult): ResponseResult | null {
+export function openerChoosesAfterSystemsOn(hand: Hand, resp: ResponseResult, place: ResponseResult, openerMax = 21): ResponseResult | null {
   const oLen = lengths(hand)
+  // Kvantitativ 4NT direkt över mitt Puppet-svar (3♦/3♥/3♠/3NT): maximum → 6NT, annars pass. 6NT står.
+  if (resp.rule === PUPPET.ask && place.call === '4NT') {
+    return hcp(hand) >= openerMax ? { call: '6NT', rule: 'accepterar slaminbjudan', explanation: 'Maximum mot partnerns kvantitativa 4NT → 6NT.' } : { call: 'P', rule: 'rebid: pass', explanation: 'Minimum mot partnerns kvantitativa 4NT → pass.' }
+  }
+  if (resp.rule === PUPPET.ask && place.call === '6NT') return { call: 'P', rule: 'rebid: pass', explanation: 'Partnern satte 6NT → pass.' }
   const game = (m: Suit, why: string): ResponseResult => ({ call: `4${BID[m]}`, rule: PUPPET.choose, explanation: `${why} → 4${SYM[m]}.` })
 
   if (resp.rule === PUPPET.ask) {

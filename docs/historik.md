@@ -2830,3 +2830,25 @@ utgångskrav, annars lästes kaptenens cue inte), `preempt-defense-continuations
 `npx tsc` + hela `npm test` gröna. Medvetet SENARE: 4♣-slamvägen efter
 2♣–2♦–2NT, slamport över 2NT-inklivet, Muppet. CLAUDE.md kortades (fyra äldre
 "nyss klart"-block → pekare) för att hålla 16 kB-vakten.
+
+**Hälsokollen samma kväll (ägarfrågan "vad är bäst för systemets hälsa?"):**
+tre mätningar. (1) Revisorn 1000 givar före/efter bytet (gamla koden i ett git
+worktree på `50a6be6`): 21,2 % · 267,52 → 21,3 % · 267,45 — helheten oförändrad,
+som väntat (få 2NT-auktioner per 1000 givar). (2) Ny riktad sond
+`puppet.probe.test.ts` (PUPPET=1): skannar tills 300 givar går via 2NT–P–3♣
+(2NT-öppning, 2♣–2♦–2NT, direkt 2NT-inkliv — checkback och balansering
+utesluts) och dömer varje mot DD-par med revisorns `judgeDeal`; läge B
+(PUPPET_SEEDS) bjuder samma frön med en annan kod. Samma 282 givar: gamla
+koden 44,0 % rätt · 259,8 p/giv, Puppet 46,1 % · 246,7. (3) Fynd 1 ur sondens
+dyraste givar: 4NT direkt över ett Puppet-svar (3♦/3♥) lästes av öppnaren som
+essfråga (frö 20265815: 5♦ i stället för pass; 20271194: 6♥ på 5-2). Rot: min
+egen slamrad läste kaptenens 4NT över 3♥ som RKC i hjärter, och betydelselagrets
+"naket 4NT" föll till ruter. Fix (facit före fix i `puppet-stayman.test.ts`):
+4NT över alla Puppet-svar = kvantitativt (öppnaren 6NT med max via
+`openerChoosesAfterSystemsOn`, nytt argument `openerMax` 21/24/18); slam med
+stöd går via trumfsättningen **3♠ över 3♥ / 4♥ över 3♠** (`PUPPET.agree`),
+öppnaren öppnar cue-ronden (`slamSituation` prefix 4 med `partnerStarts`,
+prefix 6 efter 2♣–2♦–2NT); betydelselagret läser trumfsättningen och 4NT före
+slamzonen (`puppetAsked`) och `naturalSuits` sätter trumfen vid 3♠/4♥. Övriga
+dyra sondgivar är DD-tur (lillslam på 28 hp) eller principiella (storslam
+kräver visshet) — ärliga missar, inga fler systemfel.

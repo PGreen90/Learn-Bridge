@@ -672,7 +672,16 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
       }
       // Öppnaren visade en 5-korts högfärg (3♥/3♠).
       const target = suitOfCall(rebid.call)
-      if (target && len[target] >= 3) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `3+ stöd i partnerns 5-korts ${SYM[target]} → 4${SYM[target]} (utgång).` }
+      if (target && len[target] >= 3) {
+        // Slamvärden (31+ mot visade minimum): sätt trumfen med den andra
+        // högfärgen (3♠ över 3♥, 4♥ över 3♠) — öppnaren öppnar cue-ronden eller
+        // stannar i 4M. Aldrig 4NT direkt: det är kvantitativt (sondens fynd).
+        if (p >= slamInvite) {
+          const call = target === 'hearts' ? '3S' : '4H'
+          return { call, rule: PUPPET.agree, explanation: `3+ stöd i partnerns 5-korts ${SYM[target]} och slamvärden → ${call === '3S' ? '3♠' : '4♥'} (sätter ${SYM[target]} som trumf, slamintresse; partnern visar en kontroll eller stannar i 4${SYM[target]}).` }
+        }
+        return { call: `4${BID[target]}`, rule: 'utgång', explanation: `3+ stöd i partnerns 5-korts ${SYM[target]} → 4${SYM[target]} (utgång).` }
+      }
       return ntLadder('Ingen fit i partnerns 5-korts högfärg')
     }
 
