@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — LIVE `2620287` + `df05c03`
+### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — LIVE `2620287`/`df05c03`/`0207209`
 **Ägarbeslut 2026-09-15 (alla åtta i `docs/puppet-stayman-plan.md`):** 3♣ över
 2NT (även 2♣–2♦–2NT och vårt 2NT-inkliv) = Puppet Stayman: 3♥/3♠ = 5-korts,
 3♦ = 4-korts finns, 3NT = ingen; efter 3♦ bjuder svararen högfärgen hen INTE
@@ -18,7 +18,7 @@ har, 4♦ = båda, 4♣ = båda + slam. Krav: utgångsvärden + en 3-korts högf
 Smolen över 2NT borta (5♥4♠ transfer + 3♠ · 5♠4♥ 3♣ + 4♦ · 5-5 transfer + 4♥).
 Slamport efter Puppet-fit byggd. Systemboken **§4.3b**, facit
 `puppet-stayman.test.ts`. Sond `puppet.probe.test.ts`: 44→46 % rätt; fynd 1 LIVE.
-Slamvägarna kompletta (2♣-vägen, Texas, transfer) — **väntar PCD.**
+Slamvägarna kompletta (2♣-vägen, Texas, transfer) LIVE. **Nästa: ägarens live-prov.**
 
 **Nyss klart (2026-09-14): GAMBLING 3NT** KLAR & LIVE (mergepunkt `8e327b3`),
 ägarens live-prov kvar. Aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför),
