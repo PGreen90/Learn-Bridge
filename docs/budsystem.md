@@ -33,7 +33,7 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force) ·
 | **1NT** | — | 15–17 hp | Balanserad. Konv: Stayman, Smolen, Jacoby, Minor Suit Stayman, Texas |
 | **2♣** | — | 22+ hp | Stark, konventionell (krav) |
 | **2♦ / 2♥ / 2♠** | 6 | 6–11 hp | Svaga tvåöppningar |
-| **2NT** | — | 20–21 hp | Balanserad |
+| **2NT** | — | 20–21 hp | Balanserad (får ha 5-korts högfärg). Konv: **Puppet Stayman** (§4.3b), transfers, Texas, minorfråga, Gerber |
 | **3♣ / 3♦ / 3♥ / 3♠** | 7+ | svag | Spärröppning |
 | **3NT** | 7+ (lf) | solid AKQ, inget A/K utanför | **Gambling 3NT** (§3.1) — alert |
 | **4♣ / 4♦** | lång färg | spärr | Naturlig spärröppning |
@@ -625,6 +625,88 @@ förnekar 4-korts hf. Frågar efter öppnarens 4-korts minor:
 
 Svararen passar med minimum, bjuder naturligt med mer, eller cue-bid mot slam.
 
+### 4.3b Svar på 2NT (20–21 hp, balanserad) — Puppet Stayman
+*(Ägardirektiv 2026-09-15. Gäller också efter 2♣–2♦–**2NT (22–24)** — samma
+struktur, trösklarna två steg lägre — och, med trösklar mot 15–18, efter vårt
+direkta 2NT-inkliv över deras svaga tvåa/spärr (§7.7).)*
+
+2NT har inte 1NT:s svarsstruktur: mittemot 20–21 räcker **5 hp** för utgång, så
+det finns inga inbjudningsbud. Öppnaren får vara **5-3-3-2 med en 5-korts
+högfärg**, och därför är 3♣ **Puppet Stayman** — frågan gäller FÖRST en
+5-korts högfärg, i andra hand en 4-korts. (Vanlig Stayman hittade bara 4-4.)
+
+#### Översikt
+| Svar | Betydelse | Konvention |
+|---|---|---|
+| Pass | 0–4 hp | naturligt |
+| 3♣ | 5+ hp och **minst en 3-korts högfärg** (ingen egen 5-korts): frågar efter öppnarens 5-korts, annars 4-korts högfärg | Puppet Stayman ● |
+| 3♦ | transfer till ♥ (5+ ♥) | transfer ● |
+| 3♥ | transfer till ♠ (5+ ♠) | transfer ● |
+| 3♠ | 5-4+ i lågfärgerna, slamintresse (11+) | minorfråga ● |
+| 3NT | 5–10 hp utan 3-korts högfärg — till spel | naturligt |
+| 4♣ | 13+ balanserad utan 4-korts högfärg — essfråga (§6.4) | Gerber ● |
+| 4♦ / 4♥ | 6+ ♥ / 6+ ♠, ren utgång | Texas ● |
+| 4NT | 11–12 balanserad utan 3-korts högfärg — kvantitativ | naturligt |
+| 6NT | 13+ balanserad utan 3-korts högfärg | till spel |
+
+Prioritet när flera passar: transfer (5+ högfärg) → Puppet med 4-korts högfärg
+→ minorfrågan → Puppet med 3-korts högfärg → sangtrappan. Gerber-handen (13+
+utan 4-korts högfärg) frågar 4♣ direkt.
+
+#### Puppet Stayman (3♣)
+**Öppnarens svar:**
+| Svar | Betydelse |
+|---|---|
+| 3♦ | ingen 5-korts högfärg, men **minst en 4-korts** |
+| 3♥ | **5 hjärter** |
+| 3♠ | **5 spader** |
+| 3NT | varken 4- eller 5-korts högfärg (ej krav) |
+
+**Svararens fortsättning efter 3♦** — svararen bjuder den högfärg hen **inte**
+har, så att den starka handen blir spelförare i 4-4-fiten:
+| Svararens bud | Betydelse | Öppnaren |
+|---|---|---|
+| 3♥ | 4 **spader** (inte 4 hjärter) | 4♠ med 4 spader, annars 3NT |
+| 3♠ | 4 **hjärter** (inte 4 spader) | 4♥ med 4 hjärter, annars 3NT |
+| 4♦ | **båda** högfärgerna (4-4 eller 5♠-4♥), ingen slamambition | bjuder sin 4-korts högfärg — fiten är garanterad; med 4-4 den **bättre** (flest hp, lika → 4♥) |
+| 4♣ | båda högfärgerna **med slamintresse** (11+) | bjuder sin högfärg på 4-läget; svararen frågar 4NT (13+) eller inbjuder 5M (11–12) |
+| 3NT | ingen 4-korts högfärg (letade 5-3) | till spel |
+| 4NT / 6NT | ingen 4-korts högfärg, 11–12 / 13+ | kvantitativ / till spel |
+
+**Efter 3♥/3♠ (öppnarens 5-korts):** 3+ stöd → 4 i högfärgen; annars 3NT (11–12
+→ 4NT kvantitativ, 13+ → 6NT). Med stöd och slamvärden är utgången etablerad:
+**kontrollbuden är gratis under 4M** (§6.2; t.ex. 2NT–3♣–3♥–4♦ = ruterkontroll
+med hjärter som trumf) och kaptenen räknar hp mot visade 20 — **33+ driver**
+(4NT RKC), annars stannar paret i utgång.
+
+**Efter 3NT:** pass; 11–12 → 4NT kvantitativ; 13+ → 6NT.
+
+#### 5-4 och 5-5 i högfärgerna (Smolen finns INTE över 2NT)
+Smolen och Puppet använder samma bud efter 3♣–3♦ med olika betydelse, så
+Smolen är borta över 2NT (kvar över 1NT). I stället:
+| Hand | Väg |
+|---|---|
+| **5♥ + 4♠** | transfer 3♦ → 3♥, sedan **3♠** = 4 spader, utgångskrav (under 3NT). Öppnaren: 4♠ med 4 spader · 4♥ med 3 hjärter · annars 3NT |
+| **5♠ + 4♥** | **3♣** Puppet: 3♠ → 4♠ · 3♥ → 4♥ · 3♦ → **4♦** (båda; öppnaren väljer, fit garanterad) · 3NT → pass |
+| **5-5** | transfer 3♥ → 3♠, sedan **4♥** = 5+ hjärter också; öppnaren bjuder 4♠ med fler spader än hjärter, annars står 4♥ (en balanserad hand har aldrig dubbelton i båda) |
+| svag 5-4 (0–4) | transfer till 5-färgen, signoff |
+
+*Varför hybriden:* vägen via transfer + 4♥ för 5♠4♥ passerar 3NT och kan
+tvinga fram en 4-3-fit; vägen via 3♣ + 4♦ för 5♥4♠ tappar 5-3-fiten när
+öppnaren har tre hjärter utan 4-korts högfärg. Hybriden undviker båda.
+
+#### Transfer (3♦ / 3♥) — fortsättning
+| Svararens andra bud | Betydelse |
+|---|---|
+| Pass | 0–4 hp, signoff |
+| 3♠ (efter 3♦–3♥) | 5 ♥ + 4 ♠, utgångskrav (se ovan) |
+| 4♥ (efter 3♥–3♠) | 5 ♠ + 5 ♥, öppnaren väljer |
+| 3NT | exakt 5-korts högfärg, balanserad — öppnaren väljer 3NT eller 4M (3+ stöd) |
+| 4M | 6+ i högfärgen, utgång |
+
+*Historik:* 3♣ var vanlig Stayman (4-korts) med Smolen från 2026-07-01 till
+2026-09-15. Facit: `puppet-stayman.test.ts`, `responses-2nt.test.ts`.
+
 ### 4.4 Svar på 2♣ (stark, konstgjord)
 2♣ lovar **stark balanserad** (22+ hp) eller **stark obalanserad** som klarar
 substanskraven (2026-08-31): **minst 9 spelstick** om längsta färgen är en
@@ -653,8 +735,9 @@ stick** (t.ex. tre ess) öppnar också 2♣. Krav. Balanserade ranger: 22–24
 | 3NT | 25–27 hp, balanserad | ej krav — svararen (0–7) passar; 33 nås inte mot visade 25 |
 | 4NT | 28–30 hp, balanserad | ej krav — svararen passar med 0–4, 6NT med 5+ (7NT med 9+) |
 
-- Efter **2NT (22–24)** använder svararen NT-konventionerna (Stayman, transfers
-  m.m.) precis som över 1NT, fast med 22–24 hp mittemot.
+- Efter **2NT (22–24)** använder svararen 2NT-konventionerna (**Puppet Stayman**,
+  transfers, Texas, minorfråga — §4.3b) precis som över en 2NT-öppning, fast med
+  22–24 hp mittemot (utgång redan från 3 hp).
 - **2♣–2NT (positivt, 8+ balanserad)** mittemot en balanserad **25+**: öppnaren
   vet slammen (25 + 8 = 33) och bjuder **6NT** direkt, **7NT** med 29+ (37).
   Kaptenen på svararsidan räknar annars bara mot visade 22 (2026-09-14).
@@ -2303,9 +2386,11 @@ spel) — förr "tvingade" ett felläst rondkrav fram 3♣/3♠ ur catch-allen.
   3♥ före 4♣ efter (2♦)–3♦), aldrig en onödig nivåhöjning på hackor.
 - **Systems on efter det direkta 2NT-inklivet (15–18, live-prov 2026-09-11):**
   över partnerns naturliga 2NT-inkliv svarar man som över en 2NT-öppning, men med
-  lite mer (inklivet är 15–18, inte 20–21): **3♦ = transfer till hjärter**,
-  **3♥ = transfer till spader**, **3NT = till spel** (9+, balanserad utan
-  5-korts högfärg), pass = svag. Inklivaren fullföljer transfern med **3 i
+  lite mer (inklivet är 15–18, inte 20–21): **3♣ = Puppet Stayman** (9+ och
+  minst en 3-korts högfärg; svar och fortsättning som i §4.3b, trösklarna mot
+  15–18 — sedan 2026-09-15), **3♦ = transfer till hjärter**, **3♥ = transfer
+  till spader**, **3NT = till spel** (9+, balanserad utan 3-korts högfärg),
+  pass = svag. Inklivaren fullföljer transfern med **3 i
   högfärgen**, eller **super-accept 4 i högfärgen** med maximum (17–18) och
   3-korts stöd. Efter en enkel fullföljning bjuder advancern om: **pass** (~6–8,
   stannar i 3-läget), **3NT** (~9–10, lovar stopp i deras färg → inklivaren väljer
@@ -4743,3 +4828,19 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   `auction-advancer-balansinkliv.test.ts` (bricka 12 exakt + varianter).
   Bricka 12 landar nu i 1♥ av N (`DUMP_TAVLING=2026-09-14:12 npx vitest run
   src/lib/engine/speldump.probe.test.ts`).
+
+- **2026-09-15 — Puppet Stayman över 2NT (ägardirektiv, ny §4.3b):** 3♣ över
+  2NT (och efter 2♣–2♦–2NT samt över vårt direkta 2NT-inkliv) frågar efter
+  öppnarens **5-korts** högfärg först (3♥/3♠), sedan 4-korts (3♦ = minst en,
+  3NT = ingen); efter 3♦ bjuder svararen högfärgen hen INTE har (3♥ = 4 spader,
+  3♠ = 4 hjärter), 4♦ = båda (öppnaren väljer sin bättre), 4♣ = båda +
+  slamintresse. Krav för 3♣: utgångsvärden + minst en 3-korts högfärg (ägar-
+  beslut: inget annat). **Smolen över 2NT borta** (kvar över 1NT): 5♥4♠ går
+  transfer + 3♠, 5♠4♥ går 3♣ + 4♦, 5-5 transfer + 4♥. Två luckor i den gamla
+  motorn stängda: slamporten efter Puppet-fit (14 hp + 4-korts stannade i 4M;
+  nu cue-runda under utgång / 4NT vid 33+ / 5M-inbjudan 31–32 efter 4♣) och 5-5
+  i högfärgerna (hjärtern visades aldrig). Kod: `responses-2nt.ts`,
+  `responder-rebids.ts`, `strong-2nt-systemson.ts`, `auction-decide.ts`
+  (slamraderna), `auction-meaning.ts` (betydelserna + utgångskrav efter 3♣),
+  `preempt-defense-continuations.ts` (inklivet), `rules.ts`. Facit
+  `puppet-stayman.test.ts` (facit före fix). Plan: `docs/puppet-stayman-plan.md`.

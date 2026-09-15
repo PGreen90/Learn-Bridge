@@ -13,7 +13,7 @@
 | 2♣ | 22+ / stark, konstgjord (krav) |
 | 2♦ / 2♥ / 2♠ | svaga tvåor, 6-korts, 6–11 hp |
 | 2NT | 20–21 balanserad |
-| 3-läget / 4-läget | spärr · 3NT 25–27 |
+| 3-läget / 4-läget | spärr · 3NT = Gambling |
 
 ## Svar på 1♥ / 1♠
 - Ny färg 1-steg · semi-forcing 1NT · 2/1 GF
@@ -31,6 +31,12 @@
 - **2♣** Stayman · **2♦→♥, 2♥→♠** Jacoby · **2♠** Minor Suit Stayman
 - **Smolen** (1NT–2♣–2♦–3♥/3♠) · **Texas** 4♦/4♥
 - 2NT 8–9 (inbjudan) · 3NT 10–15
+
+## Svar på 2NT (20–21) — även efter 2♣–2♦–2NT
+- **3♣ Puppet Stayman** (5+ hp, minst en 3-korts hf): 3♥/3♠ = 5-korts · 3♦ = 4-korts finns · 3NT = ingen
+- efter 3♦: bjud hf du INTE har (3♥ = 4 ♠, 3♠ = 4 ♥) · 4♦ = båda · 4♣ = båda + slam
+- **3♦→♥, 3♥→♠** transfer (5♥4♠: transfer + 3♠ · 5-5: transfer + 4♥) · **3♠** minorfråga · **Texas** 4♦/4♥
+- 3NT till spel (ingen 3-korts hf) · 4♣ Gerber (13+) · 4NT kvantitativ 11–12 · ingen Smolen över 2NT
 
 ## Stark 2♣
 - **2♦ väntebud**; positiva svar 8+ med 5+ färg

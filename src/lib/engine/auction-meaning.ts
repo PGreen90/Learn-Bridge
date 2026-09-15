@@ -21,6 +21,7 @@
 import type { Bid, Forcing, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { forcingOf, isAlertRule, ruleInfo } from './rules'
+import { PUPPET } from './responses-2nt'
 
 /** Hur säker tolkningen är. Visas för användaren så hen vet hur mycket att lita på. */
 export type Confidence = 'säker' | 'trolig' | 'gissning'
@@ -1158,13 +1159,16 @@ function interpretOvercallNTSystemsOn(seat: Seat, cb: ParsedBid, prior: Resolved
 
   // Advancerns svar på 2NT-inklivet.
   if (ourBids.length === 1 && seat === advancer) {
+    if (same(cb, 3, 'C')) return R(PUPPET.ask, `3♣ — Puppet Stayman över partnerns 2NT-inkliv: frågar efter en 5-korts högfärg (svar 3♥/3♠), i andra hand en 4-korts (3♦ = minst en, 3NT = ingen). Utgångsvärden mot 15–18 och minst en 3-korts högfärg. Säger inget om klöver.`)
     if (same(cb, 3, 'D')) return R('2NT-inkliv: transfer', `3♦ — transfer till hjärter (5+ ♥): systems on över partnerns 2NT-inkliv. Partnern bjuder 3♥.`)
     if (same(cb, 3, 'H')) return R('2NT-inkliv: transfer', `3♥ — transfer till spader (5+ ♠): systems on över partnerns 2NT-inkliv. Partnern bjuder 3♠.`)
-    if (same(cb, 3, 'NT')) return R('2NT-inkliv: till spel', `3 sang — till spel: balanserad utan 5-korts högfärg mittemot partnerns 15–18.`)
+    if (same(cb, 3, 'NT')) return R('2NT-inkliv: till spel', `3 sang — till spel: balanserad utan 3-korts högfärg mittemot partnerns 15–18.`)
     return null
   }
-  // Inklivaren fullföljer transfern.
+  const puppet = same(parseBid(ourBids[1]?.bid ?? '') ?? { level: 0, strain: 'NT' }, 3, 'C')
+  // Inklivaren svarar på Puppet Stayman / fullföljer transfern.
   if (ourBids.length === 2 && seat === overcaller) {
+    if (puppet) return puppetAnswerMeaning(cb)
     const t = parseBid(ourBids[1].bid)
     if (!t || t.level !== 3 || (t.strain !== 'D' && t.strain !== 'H')) return null
     const target = t.strain === 'D' ? 'H' : 'S'
@@ -1173,13 +1177,21 @@ function interpretOvercallNTSystemsOn(seat: Seat, cb: ParsedBid, prior: Resolved
     if (same(cb, 4, target)) return R('2NT-inkliv: super-accept', `4${SYMBOL[target]} — super-accept: maximum (17–18) med 3-korts stöd → hopp till utgång.`)
     return null
   }
-  // Advancerns rebud efter enkel fullföljning (3♥/3♠).
+  // Advancerns rebud efter Puppet-svaret / efter enkel fullföljning (3♥/3♠).
   if (ourBids.length === 3 && seat === advancer) {
     const c = parseBid(ourBids[2].bid)
-    if (!c || c.level !== 3 || (c.strain !== 'H' && c.strain !== 'S')) return null
+    if (!c) return null
+    if (puppet) return puppetContinuationMeaning(cb, c, '15–18')
+    if (c.level !== 3 || (c.strain !== 'H' && c.strain !== 'S')) return null
     if (same(cb, 3, 'NT')) return R('2NT-inkliv: inbjudan', `3 sang — inbjudan med stopp i deras färg: partnern väljer 3 sang eller utgång i högfärgen.`)
     if (same(cb, 4, c.strain)) return R('2NT-inkliv: utgång', `4${SYMBOL[c.strain]} — utgång: 6-korts ${c.strain === 'H' ? 'hjärter' : 'spader'}.`)
     return null
+  }
+  // Inklivarens val efter advancerns Puppet-placering.
+  if (ourBids.length === 4 && seat === overcaller && puppet) {
+    const a = parseBid(ourBids[2].bid)
+    const place = parseBid(ourBids[3].bid)
+    if (a && place) return puppetChoiceMeaning(cb, { level: 3, strain: 'C' }, a, place)
   }
   return null
 }
@@ -1480,6 +1492,9 @@ function conventionalTrump(u: Undisturbed): string | null {
 
 /** Är vår sida i utgångskrav (läst ur buden)? */
 function gameForced(u: Undisturbed, seat: Seat, prior: ResolvedCall[]): boolean {
+  // Puppet Stayman över 2 sang (2026-09-15): 3♣ lovar utgångsvärden → utgångskrav
+  // (även efter 2♣–2♦–2NT, där sangen i sig inte var krav).
+  if (puppetAsked(u)) return true
   const open = u.bids[0].cb
   const resp = u.bids[1]?.cb
   if (same(open, 2, 'C')) {
@@ -1663,6 +1678,20 @@ function naturalNTBase(u: Undisturbed): number {
   return -1
 }
 
+/** Bjöd svararen 3♣ Puppet Stayman över en 2-lägessang (2NT-öppning / 2♣–2♦–2NT)? */
+function puppetAsked(u: Undisturbed): boolean {
+  const k = naturalNTBase(u)
+  return k >= 0 && u.bids[k].cb.level === 2 && u.bids.length > k + 1 && same(u.bids[k + 1].cb, 3, 'C')
+}
+
+/** Puppet Stayman där öppnaren svarade 3♥/3♠ (5-korts högfärg): svararens nya färg under utgång är då ett kontrollbud som sätter den. */
+function puppetFiveCardShown(u: Undisturbed): boolean {
+  if (!puppetAsked(u)) return false
+  const k = naturalNTBase(u)
+  const a = u.bids[k + 2]?.cb
+  return !!a && a.level === 3 && (a.strain === 'H' || a.strain === 'S')
+}
+
 // ---- Slamzonen: essfrågor, cue-bud, kvantitativa bud, avslut ---------------
 
 function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall[]): CallInterpretation | null {
@@ -1761,7 +1790,7 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   // 4-lägesbud över 3NT under utgång i partnerns färg (regeln i impliedCueTrump).
   if (!trump && gf && seat === u.responder) {
     const ps = [...u.bids].reverse().find((b) => b.seat === PARTNER[seat] && partnerS.has(b.cb.strain))?.cb.strain ?? null
-    const balanced = u.bids.length > 1 && same(u.bids[0].cb, 2, 'C') && same(u.bids[1].cb, 2, 'NT')
+    const balanced = (u.bids.length > 1 && same(u.bids[0].cb, 2, 'C') && same(u.bids[1].cb, 2, 'NT')) || puppetFiveCardShown(u)
     const t = impliedCueTrump(cb, ps, partnerS, own, balanced)
     if (t) {
       return R('cue-bid', `Kontrollbud ${B(cb)} — sätter partnerns ${NAME[t]} som trumf och visar kontroll (ess/renons) i ${name}, slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${gameIn(t).level}${SYMBOL[t]}.`)
@@ -1866,6 +1895,13 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
           if ((same(r, L + 1, 'D') || same(r, L + 1, 'H')) && cb.level >= L + 1) return true // fullföljd transfer / superaccept
           if (same(r, 2, 'S') && L === 1 && isMajor(cb.strain)) return true // MSS: stoppvisning
         }
+        // Puppet Stayman över 2 sang (2026-09-15): svararens fortsättning efter
+        // 3♦ är konstlad (3♥ = 4 spader, 3♠ = 4 hjärter, 4♦/4♣ = båda).
+        if (k === ntBase + 3 && L === 2) {
+          const r = u.bids[ntBase + 1].cb
+          const a = u.bids[ntBase + 2].cb
+          if (same(r, 3, 'C') && same(a, 3, 'D') && (cb.level === 3 || (cb.level === 4 && (cb.strain === 'C' || cb.strain === 'D')))) return true
+        }
       }
       if (open.level === 1 && isMajor(open.strain)) {
         if (k === 1 && cb.level === 3 && cb.strain !== open.strain) return true // Bergen / tvetydig splinter
@@ -1949,7 +1985,10 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
   if (m === 1 && !meOpener) {
     // Svararens första bud över sangen.
     if (cb.level === L + 1) {
-      if (cb.strain === 'C') return R(L === 1 ? 'Stayman' : 'Stayman (2NT)', `${B(cb)} — Stayman: frågar efter partnerns 4-korts högfärg (svar ${L + 1}♦ = ingen, ${L + 1}♥/${L + 1}♠ = den högfärgen). Säger inget om klöver.`)
+      if (cb.strain === 'C') {
+        if (L === 1) return R('Stayman', `2♣ — Stayman: frågar efter partnerns 4-korts högfärg (svar 2♦ = ingen, 2♥/2♠ = den högfärgen). Säger inget om klöver.`)
+        return R(PUPPET.ask, `3♣ — Puppet Stayman: frågar efter partnerns 5-korts högfärg (svar 3♥/3♠), i andra hand en 4-korts (3♦ = minst en, 3NT = ingen). Lovar utgångsvärden och minst en 3-korts högfärg. Säger inget om klöver.`)
+      }
       if (cb.strain === 'D' || cb.strain === 'H') {
         const target = cb.strain === 'D' ? 'hjärter' : 'spader'
         return R(L === 1 ? 'Jacoby-transfer' : 'transfer (2NT)', `${B(cb)} — Jacoby-transfer: visar 5+ ${target}, partnern bjuder ${target} (säger inget om ${name}).`)
@@ -1979,9 +2018,14 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
     // Sangöppnarens svar på svararens konvention.
     const r = rel[1].cb
     if (same(r, L + 1, 'C')) {
-      if (cb.level === L + 1 && cb.strain === 'D') return R('Stayman-svar', `${B(cb)} — svar på Stayman: ingen 4-korts högfärg. Säger inget om ruter.`)
-      if (cb.level === L + 1 && cb.strain === 'H') return R('Stayman-svar', `${B(cb)} — svar på Stayman: 4 hjärter (kan ha 4 spader också).`)
-      if (cb.level === L + 1 && cb.strain === 'S') return R('Stayman-svar', `${B(cb)} — svar på Stayman: 4 spader, förnekar 4 hjärter.`)
+      if (L === 1) {
+        if (cb.level === 2 && cb.strain === 'D') return R('Stayman-svar', `2♦ — svar på Stayman: ingen 4-korts högfärg. Säger inget om ruter.`)
+        if (cb.level === 2 && cb.strain === 'H') return R('Stayman-svar', `2♥ — svar på Stayman: 4 hjärter (kan ha 4 spader också).`)
+        if (cb.level === 2 && cb.strain === 'S') return R('Stayman-svar', `2♠ — svar på Stayman: 4 spader, förnekar 4 hjärter.`)
+      } else {
+        const a = puppetAnswerMeaning(cb)
+        if (a) return a
+      }
     }
     if (same(r, L + 1, 'D') || same(r, L + 1, 'H')) {
       const target = r.strain === 'D' ? 'H' : 'S'
@@ -2023,10 +2067,13 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
     const mine = rel[1].cb
     const ans = rel[2].cb
     if (same(mine, L + 1, 'C')) {
-      // Efter Stayman.
+      // Efter Stayman (1NT) / Puppet Stayman (2NT).
+      if (L === 2) {
+        const c = puppetContinuationMeaning(cb, ans, mot)
+        if (c) return c
+      }
       if (ans.strain === 'D') {
         if (cb.level === L + 1 && isMajor(cb.strain) && L === 1) return R('inbjudan', `${B(cb)} — 5-korts ${name} (5-4 i högfärgerna), inbjudan (8–9 hp).`)
-        if (cb.level === L + 1 && isMajor(cb.strain) && L === 2) return R('Smolen', `${B(cb)} — Smolen över 2 sang: 4 ${name} och 5 ${NAME[otherMajor(cb.strain)]}, utgångskrav. Partnern bjuder 4 ${NAME[otherMajor(cb.strain)]} med 3-korts stöd, annars 3 sang.`)
         if (cb.level === L + 2 && isMajor(cb.strain) && L === 1) return R('Smolen', `${B(cb)} — Smolen: 4 ${name} och 5 ${NAME[otherMajor(cb.strain)]}, utgångskrav. Partnern bjuder 4 ${NAME[otherMajor(cb.strain)]} med 3-korts stöd, annars 3 sang.`)
       }
       if (isMajor(ans.strain) && cb.strain === ans.strain) {
@@ -2045,6 +2092,10 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
         if (isGameLevel(cb)) return R('till spel', `${B(cb)} — 6+ ${name}, utgång till spel.`)
         return R('inbjudan', `${B(cb)} — 6+ ${name}, inbjudan till utgång.`)
       }
+      // Över 2 sang (Puppet-strukturen, 2026-09-15): 5♥4♠ visar spadern med 3♠
+      // under 3 sang; 5-5 visar hjärtern med 4♥ (öppnaren väljer högfärg).
+      if (L === 2 && target === 'H' && same(cb, 3, 'S')) return R(PUPPET.transferFourSpades, `3♠ — 5 hjärter och 4 spader, utgångskrav: partnern bjuder 4♠ med 4 spader, 4♥ med 3 hjärter, annars 3 sang.`)
+      if (L === 2 && target === 'S' && same(cb, 4, 'H')) return R(PUPPET.transferFiveHearts, `4♥ — 5 spader och 5 hjärter: partnern väljer 4♥ eller 4♠.`)
       // 3 sang före inbjudan: över 2 sang är L + 1 = 3, och 3 sang är till spel.
       if (same(cb, 3, 'NT')) return R('till spel', `3 sang — 5 ${NAME[target]}, balanserad utgångshand; partnern väljer 3 sang eller 4 ${NAME[target]}.`)
       if (same(cb, L + 1, 'NT')) return R('inbjudan', `${B(cb)} — 5 ${NAME[target]}, balanserad, inbjudan (8–9 hp). Partnern väljer sang eller ${NAME[target]}.`)
@@ -2068,6 +2119,11 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
 
   if (m === 4 && meOpener) {
     const inv = rel[3].cb
+    if (L === 2) {
+      // Puppet-strukturen över 2 sang: öppnarens val efter svararens placering.
+      const c = puppetChoiceMeaning(cb, rel[1].cb, rel[2].cb, inv)
+      if (c) return c
+    }
     if (isGameLevel(cb)) return R('accepterar inbjudan', `${B(cb)} — accepterar partnerns inbjudan (mer än minimum).`)
     if (cb.strain === inv.strain || (isMajor(cb.strain) && cb.level === 3)) return R('avböjer inbjudan: rättelse', `${B(cb)} — minimum: avböjer inbjudan och rättar till ${name} som slutkontrakt (3-korts stöd). Partnern passar.`)
     return null
@@ -2079,6 +2135,73 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
   return null
 }
 
+// ---- Puppet Stayman över 2 sang (ägardirektiv 2026-09-15) -------------------
+// Delas av sangsystemet (2NT-öppning / 2♣–2♦–2NT) och systems on efter vårt
+// 2NT-inkliv. Texterna beskriver budets LÖFTE, aldrig handen.
+
+/** Öppnarens svar på 3♣ (Puppet Stayman). */
+function puppetAnswerMeaning(cb: ParsedBid): CallInterpretation | null {
+  if (same(cb, 3, 'D')) return R(PUPPET.answer, `3♦ — svar på Puppet Stayman: minst en 4-korts högfärg, ingen 5-korts. Partnern bjuder den högfärg hen INTE har (3♥ = 4 spader, 3♠ = 4 hjärter, 4♦ = båda). Säger inget om ruter.`)
+  if (same(cb, 3, 'H')) return R(PUPPET.answer, `3♥ — svar på Puppet Stayman: 5 hjärter.`)
+  if (same(cb, 3, 'S')) return R(PUPPET.answer, `3♠ — svar på Puppet Stayman: 5 spader.`)
+  if (same(cb, 3, 'NT')) return R(PUPPET.answerNone, `3 sang — svar på Puppet Stayman: varken 4- eller 5-korts högfärg. Till spel (partnern kan gå vidare med slamvärden).`)
+  return null
+}
+
+/** Svararens fortsättning efter öppnarens Puppet-svar (`ans`). */
+function puppetContinuationMeaning(cb: ParsedBid, ans: ParsedBid, mot: string): CallInterpretation | null {
+  if (same(ans, 3, 'D')) {
+    if (same(cb, 3, 'H')) return R(PUPPET.fourSpades, `3♥ — Puppet: 4 spader, inte 4 hjärter (bjuder högfärgen jag inte har, så partnern blir spelförare). Partnern bjuder 4♠ med 4 spader, annars 3 sang.`)
+    if (same(cb, 3, 'S')) return R(PUPPET.fourHearts, `3♠ — Puppet: 4 hjärter, inte 4 spader (bjuder högfärgen jag inte har). Partnern bjuder 4♥ med 4 hjärter, annars 3 sang.`)
+    if (same(cb, 4, 'D')) return R(PUPPET.both, `4♦ — Puppet: båda högfärgerna, ingen slamambition. Partnern bjuder sin 4-korts högfärg (fiten är garanterad).`)
+    if (same(cb, 4, 'C')) return R(PUPPET.bothSlam, `4♣ — Puppet: båda högfärgerna med slamintresse. Partnern bjuder sin 4-korts högfärg på 4-läget; sedan essfråga eller inbjudan. Säger inget om klöver.`)
+    if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — ingen 4-korts högfärg (letade en 5-3-fit): till spel mittemot ${mot}.`)
+    if (same(cb, 4, 'NT')) return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan utan högfärgsfit: bjud 6 sang med maximum, passa med minimum.`)
+    if (same(cb, 6, 'NT')) return R('6NT till spel', `6 sang — lillslam i sang, ingen högfärgsfit.`)
+    return null
+  }
+  if (same(ans, 3, 'H') || same(ans, 3, 'S')) {
+    if (cb.strain === ans.strain && cb.level === 4) return R('till spel', `${B(cb)} — utgång i partnerns 5-korts ${NAME[ans.strain]} (3+ stöd).`)
+    if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — ingen fit i partnerns 5-korts ${NAME[ans.strain]}: till spel.`)
+    if (same(cb, 4, 'NT')) return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan utan fit i partnerns ${NAME[ans.strain]}: bjud 6 sang med maximum.`)
+    if (same(cb, 6, 'NT')) return R('6NT till spel', `6 sang — lillslam i sang.`)
+    return null
+  }
+  if (same(ans, 3, 'NT')) {
+    if (same(cb, 4, 'NT')) return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan över partnerns 3 sang: bjud 6 sang med maximum.`)
+    if (same(cb, 6, 'NT')) return R('6NT till spel', `6 sang — lillslam i sang.`)
+  }
+  return null
+}
+
+/** Öppnarens val efter svararens placering i Puppet-strukturen (`resp` = svararens första bud, `ans` = mitt svar, `place` = svararens placering). */
+function puppetChoiceMeaning(cb: ParsedBid, resp: ParsedBid, ans: ParsedBid, place: ParsedBid): CallInterpretation | null {
+  if (same(resp, 3, 'C') && same(ans, 3, 'D')) {
+    if (same(place, 3, 'H')) {
+      if (same(cb, 4, 'S')) return R(PUPPET.choose, `4♠ — partnern visade 4 spader och jag har 4: utgång i 4-4-fiten.`)
+      if (same(cb, 3, 'NT')) return R(PUPPET.choose, `3 sang — partnern visade 4 spader, jag har inte 4: till spel i sang.`)
+    }
+    if (same(place, 3, 'S')) {
+      if (same(cb, 4, 'H')) return R(PUPPET.choose, `4♥ — partnern visade 4 hjärter och jag har 4: utgång i 4-4-fiten.`)
+      if (same(cb, 3, 'NT')) return R(PUPPET.choose, `3 sang — partnern visade 4 hjärter, jag har inte 4: till spel i sang.`)
+    }
+    if ((same(place, 4, 'D') || same(place, 4, 'C')) && cb.level === 4 && isMajor(cb.strain)) {
+      return R(PUPPET.choose, `${B(cb)} — partnern visade båda högfärgerna${same(place, 4, 'C') ? ' med slamintresse' : ''}: min 4-korts ${NAME[cb.strain]} blir trumf${same(place, 4, 'C') ? ' (partnern går vidare)' : ', till spel'}.`)
+    }
+    return null
+  }
+  if (same(resp, 3, 'D') && same(ans, 3, 'H') && same(place, 3, 'S')) {
+    if (same(cb, 4, 'S')) return R('väljer högfärgsutgång', `4♠ — partnern visade 5 hjärter och 4 spader; 4-korts spader → 4-4-fiten.`)
+    if (same(cb, 4, 'H')) return R('väljer högfärgsutgång', `4♥ — partnern visade 5 hjärter och 4 spader; 3-korts hjärter → 5-3-fiten.`)
+    if (same(cb, 3, 'NT')) return R('till spel', `3 sang — partnern visade 5 hjärter och 4 spader; varken 3 hjärter eller 4 spader.`)
+    return null
+  }
+  if (same(resp, 3, 'H') && same(ans, 3, 'S') && same(place, 4, 'H')) {
+    if (same(cb, 4, 'S')) return R('väljer högfärgsutgång', `4♠ — partnern visade 5 spader och 5 hjärter; fler spader än hjärter.`)
+    return null
+  }
+  return null
+}
 // ---- Stark 2♣ (§4.4) --------------------------------------------------------
 
 function afterStrongTwoClubs(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterpretation | null {

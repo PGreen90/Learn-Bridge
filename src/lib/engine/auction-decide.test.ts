@@ -237,10 +237,10 @@ describe('familj 4a – svararens andra bud: läget "jag svarade, partnern gav �
     expect(c).toMatchObject({ bid: '3S', rule: 'svararens signoff' })
   })
 
-  it('systems on efter 2♣–2♦–2NT: Stayman ur egen hand', () => {
+  it('systems on efter 2♣–2♦–2NT: Puppet Stayman ur egen hand', () => {
     const h = 'S:KJ74 H:9863 D:75 C:842' // 4-4 i högfärgerna, 4 hp — mot 22–24 räcker det
     const c = bud(h, hist('2C', '2D', '2NT'), 'S')!.call
-    expect(c).toMatchObject({ bid: '3C', rule: 'Stayman (2NT)' })
+    expect(c).toMatchObject({ bid: '3C', rule: 'Puppet Stayman' })
   })
 
   it('slamporten (Jacoby-fit): kaptenens första steg ur egen hand, samma bud som manusets sekvens', () => {
@@ -575,19 +575,19 @@ describe('familj 5 – svararens tredje bud (raden svar3) och öppnarens fjärde
     expect(bud('S:K3 H:Q74 D:KJ74 C:AQ93', h4, 'S')!.call).toMatchObject({ bid: '5D', rule: 'höjning till utgång' })
   })
 
-  it('systems on efter 2♣–2♦–2NT går genom raderna: Stayman-svar (tredje), placering (svar3), Smolen-valet (fjärde)', () => {
+  it('systems on efter 2♣–2♦–2NT går genom raderna: Puppet-svar (tredje), placering (svar3), öppnarens val (fjärde) — Puppet sedan 2026-09-15', () => {
     const h: ResolvedCall[] = [{ seat: 'N', bid: '2C' }, P('E'), { seat: 'S', bid: '2D' }, P('W'), { seat: 'N', bid: '2NT' }, P('E'), { seat: 'S', bid: '3C' }, P('W')]
-    const svar = bud('S:AK4 H:KQ85 D:AK4 C:AQ2', h, 'N')!
+    const svar = bud('S:AK4 H:KQ85 D:AK4 C:AQ2', h, 'N')! // 4 hjärter, ingen 5-korts → 3♦
     expect(svar.källa).toBe('tabell:tredje')
-    expect(svar.call).toMatchObject({ bid: '3H', rule: 'Stayman-svar' })
+    expect(svar.call).toMatchObject({ bid: '3D', rule: 'Puppet-svar' })
     const h2: ResolvedCall[] = [...h, { seat: 'N', bid: '3D' }, P('E')]
-    const smolen = bud('S:KJ742 H:Q985 D:73 C:63', h2, 'S')!
-    expect(smolen.källa).toBe('tabell:svar3')
-    expect(smolen.call).toMatchObject({ bid: '3H', rule: 'Smolen' })
-    const h3: ResolvedCall[] = [...h2, { seat: 'S', bid: '3H' }, P('W')]
-    const val = bud('S:AQ5 H:KJ6 D:AKJ4 C:AK2', h3, 'N')!
+    const bada = bud('S:KJ742 H:Q985 D:73 C:63', h2, 'S')! // 5♠4♥ → 4♦ (båda; Smolen över 2NT är borta)
+    expect(bada.källa).toBe('tabell:svar3')
+    expect(bada.call).toMatchObject({ bid: '4D', rule: 'Puppet: båda högfärgerna' })
+    const h3: ResolvedCall[] = [...h2, { seat: 'S', bid: '4D' }, P('W')]
+    const val = bud('S:AQ5 H:KJ64 D:AK4 C:AK2', h3, 'N')! // 4 hjärter → 4♥
     expect(val.källa).toBe('tabell:fjärde')
-    expect(val.call).toMatchObject({ bid: '4S', rule: 'väljer utgång efter Smolen' })
+    expect(val.call).toMatchObject({ bid: '4H', rule: 'väljer utgång efter Puppet' })
   })
 
   it('2NT-öppningen: Smolen-valet och 3NT-erbjudandet avgörs i raden tredje', () => {

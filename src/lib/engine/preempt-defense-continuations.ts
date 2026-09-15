@@ -17,6 +17,10 @@ import { bidValue, cheapestBidIn, legalCalls, prettyBid, SWE_SYM } from './aucti
 import { answerPreemptInterference } from './contested-openings'
 import { conventionalDefense, defendPreempt } from './defense-conventional'
 import { hcp, lengths } from './hand'
+import { PUPPET, puppetAnswer } from './responses-2nt'
+import { responderRebidIn2NTAuction } from './responder-rebids'
+import { openerChoosesAfterSystemsOn } from './strong-2nt-systemson'
+import type { ResponseResult } from './responses'
 import { side } from './play'
 
 // ============================================================================
@@ -272,26 +276,48 @@ function ourNTOvercallOfPreempt(f: AuctionFacts): Seat | null {
  *  'rebid'    – advancern bjuder om efter inklivarens enkla fullföljning (3♥/3♠).
  * Allt ostört. null = ingen.
  */
-export function overcallNTSystemsOnSeat(f: AuctionFacts): 'advance' | 'complete' | 'rebid' | null {
+export function overcallNTSystemsOnSeat(f: AuctionFacts): 'advance' | 'complete' | 'rebid' | 'choose' | null {
   const overcaller = ourNTOvercallOfPreempt(f)
   if (overcaller === null) return null
   const advancer = PARTNER[overcaller]
   const ours = f.ourContractBids
   if (ours.length === 1 && f.seat === advancer && f.lastNonPass === ours[0]) return 'advance'
+  const puppet = ours.length >= 2 && ours[1].seat === advancer && ours[1].bid === '3C'
   if (ours.length === 2 && f.seat === overcaller && ours[1].seat === advancer && f.lastNonPass === ours[1]) {
+    if (puppet) return 'complete'
     const t = parseContractBid(ours[1].bid)
     return t && t.level === 3 && (t.strain === 'D' || t.strain === 'H') ? 'complete' : null
   }
   if (ours.length === 3 && f.seat === advancer && ours[2].seat === overcaller && f.lastNonPass === ours[2]) {
+    if (puppet) return /^3(D|H|S|NT)$/.test(ours[2].bid) ? 'rebid' : null
     const c = parseContractBid(ours[2].bid)
     return c && c.level === 3 && (c.strain === 'H' || c.strain === 'S') ? 'rebid' : null
   }
+  if (puppet && ours.length === 4 && f.seat === overcaller && ours[3].seat === advancer && f.lastNonPass === ours[3]) return 'choose'
   return null
 }
+
+/** Svararens Puppet-placering läst ur BUDET (aldrig ur handen). */
+function puppetPlacementRule(bid: string): string | null {
+  switch (bid) {
+    case '3H': return PUPPET.fourSpades
+    case '3S': return PUPPET.fourHearts
+    case '4D': return PUPPET.both
+    case '4C': return PUPPET.bothSlam
+    default: return null
+  }
+}
+
+/** Advancern räknar mot inklivets 15–18 som mot 16: utgång från 9 hp (ägarspec 2026-09-11). */
+const OVERCALL_NT_MIN = 16
 
 /**
  * Systems-on-budet efter vårt 2NT-inkliv, ur EGEN hand + auktionsläget. null när
  * regeln inte ger ett bud (svag advancer passar; olagligt → gamla lagret).
+ * Puppet Stayman (ägarbeslut 2026-09-15, beslut 7): 3♣ som över en 2NT-öppning,
+ * med samma svar och fortsättning (`responderRebidIn2NTAuction` /
+ * `openerChoosesAfterSystemsOn`) — trösklarna mot 15–18 i stället för 20–21.
+ * Transfer-grenen är ägarspecen från 2026-09-11 (super-accept, 3NT-inbjudan).
  */
 export function respondToOvercallNTSystemsOn(hand: Hand, f: AuctionFacts): ResolvedCall | null {
   const phase = overcallNTSystemsOnSeat(f)
@@ -300,19 +326,27 @@ export function respondToOvercallNTSystemsOn(hand: Hand, f: AuctionFacts): Resol
   const mk = (bid: string, rule: string, explanation: string): ResolvedCall | null =>
     legal.includes(bid as Bid) ? { seat: f.seat, bid: bid as Bid, rule, explanation } : null
   const len = lengths(hand)
+  const ours = f.ourContractBids
+  const puppetAsk: ResponseResult = { call: '3C', rule: PUPPET.ask, explanation: '' }
 
   if (phase === 'advance') {
     if (len.hearts >= 5 && len.hearts >= len.spades)
       return mk('3D', '2NT-inkliv: transfer', 'Transfer till hjärter (5+ ♥) – systems on över partnerns 2NT-inkliv.')
     if (len.spades >= 5)
       return mk('3H', '2NT-inkliv: transfer', 'Transfer till spader (5+ ♠) – systems on över partnerns 2NT-inkliv.')
-    if (hcp(hand) >= 9)
-      return mk('3NT', '2NT-inkliv: till spel', 'Till spel: 9+ hp balanserad utan 5-korts högfärg mittemot partnerns 15–18.')
+    if (hcp(hand) >= 25 - OVERCALL_NT_MIN && (len.spades >= 3 || len.hearts >= 3))
+      return mk('3C', PUPPET.ask, 'Utgångsvärden mot 15–18 och minst en 3-korts högfärg → 3♣ (Puppet Stayman: frågar efter partnerns 5-korts högfärg, i andra hand en 4-korts).')
+    if (hcp(hand) >= 25 - OVERCALL_NT_MIN)
+      return mk('3NT', '2NT-inkliv: till spel', 'Till spel: 9+ hp balanserad utan 3-korts högfärg mittemot partnerns 15–18.')
     return null // för svag → pass
   }
 
   if (phase === 'complete') {
-    const t = parseContractBid(f.ourContractBids[1].bid)!
+    if (ours[1].bid === '3C') {
+      const a = puppetAnswer(hand)
+      return mk(a.call, a.rule, a.explanation)
+    }
+    const t = parseContractBid(ours[1].bid)!
     const tgt = TRANSFER_TARGET[t.strain]
     if (!tgt) return null
     if (hcp(hand) >= 17 && len[tgt.suit] >= 3)
@@ -320,8 +354,25 @@ export function respondToOvercallNTSystemsOn(hand: Hand, f: AuctionFacts): Resol
     return mk(`3${tgt.letter}`, '2NT-inkliv: fullföljd transfer', `Fullföljer transfern till ${SWE_SYM[tgt.letter]}.`)
   }
 
+  if (phase === 'rebid' && ours[1].bid === '3C') {
+    const answer: ResponseResult = { call: ours[2].bid, rule: ours[2].bid === '3NT' ? PUPPET.answerNone : PUPPET.answer, explanation: '' }
+    const r = responderRebidIn2NTAuction(puppetAsk, answer, hand, OVERCALL_NT_MIN)
+    if (!r) return null
+    if (r.call === 'P') return { seat: f.seat, bid: 'P', rule: r.rule, explanation: r.explanation }
+    return mk(r.call, r.rule, r.explanation)
+  }
+
+  if (phase === 'choose') {
+    const rule = puppetPlacementRule(ours[3].bid)
+    if (!rule) return null
+    const c = openerChoosesAfterSystemsOn(hand, puppetAsk, { call: ours[3].bid, rule, explanation: '' })
+    if (!c) return null
+    if (c.call === 'P') return { seat: f.seat, bid: 'P', rule: c.rule, explanation: c.explanation }
+    return mk(c.call, c.rule, c.explanation)
+  }
+
   // rebid efter enkel fullföljning (3♥/3♠)
-  const compl = parseContractBid(f.ourContractBids[2].bid)!
+  const compl = parseContractBid(ours[2].bid)!
   const major: Suit = compl.strain === 'H' ? 'hearts' : 'spades'
   const theirSuit = theirPreemptOpening(f)?.suit
   if (len[major] >= 6)

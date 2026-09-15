@@ -227,7 +227,7 @@ export function ntResponseRule(openLevel: number, bid: string): string | null {
     }
   }
   switch (bid) {
-    case '3C': return 'Stayman (2NT)'
+    case '3C': return 'Puppet Stayman'
     case '3D': case '3H': return 'transfer (2NT)'
     case '3S': return 'minorfråga (2NT)'
     case '4D': case '4H': return 'Texas (2NT)'

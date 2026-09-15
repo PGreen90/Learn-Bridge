@@ -11,7 +11,7 @@
 
 | Fil | 🟢/📘/📦 | Öppna den när … |
 |---|---|---|
-| **budsystem.md** (327 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
+| **budsystem.md** (333 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
 | **status.md** (45 kB) | 📘 | du ska röra **budmotorns kod**. Sök rubriken "Budmotorns beslutsfunktion — tre steg i ett beslut" = arkitekturkontraktet: motorn är EN beslutsfunktion per stol (`decideCall` → beslutstabellen `auction-decide.ts`, betydelse→fakta→val); ny budlogik = en ny tabellrad. |
 | **systemrevisorn.md** (75 kB) | 🟢 | du jobbar i mätspåret. Riggen, hur man kör den, **alla mätningar #1–#25**, förskanningarna (etapp 6 + **etapp 7 missad lillslam**) och mönsteranalyserna bakom varje fix. |
 | **speldiagnos.md** | 🟢 | du jobbar i SPELDIAGNOSEN (byggd 2026-08-12): bottarna spelar hela givar, per-kort-DD-facit larmar, `/speldiagnos` klassar (systemfel/ärlig miss) och rapporterar till ägaren. Riggen, kommandona, principen "RÄTT — inte max stick", S-serien. |
@@ -28,6 +28,7 @@
 | **utspel-diagnos.md** | 🟢 | Komplett diagnos av bottarnas **utspel** (trick 1 + mitt-i-given): vilka regler som finns, att utspelet ignorerar budgivningen, hålen mot doktrin (A–G) och den beslutade byggordningen. Öppna den när utspelsspåret återupptas. |
 | **utspel-teori.md** | 📘 | Den källförankrade bridgeteorin bakom utspelet (Pavlicek/Walker/Cohen/bridgebum): holdings→utspel-tabeller (färg + NT), tenass-principen, aktiv/passiv, budgivningens roll, Lightner, slam + konventionsvalen. VAD som är rätt bridge — bygg utspelskoden mot den här. |
 | **arbetsrutiner.md** | 🟢 | 🟢-checklistan vid sessionsstart och 🔴-checklistan vid sessionsslut. Följs varje gång. |
+| **puppet-stayman-plan.md** | 🟢 | **Puppet Stayman över 2NT (ägardirektiv 2026-09-15, FÖRBEREDD — inget byggt):** konventionen (källor), varför den passar rebidz (2NT får ha 5-3-3-2), 5-4-hålet och lösningen, grindbesluten med rekommendation, exempelhänder, kodkartan och körordningen. Öppna den FÖRST när Puppet-bytet byggs. |
 | **motorbyte-plan.md** | 🟢 | **Motorbytet (ägarbeslut 2026-09-04, KLART & LIVE 2026-09-11; kvar bara etapp 6):** budmotorn gick från förskrivet manus + detektorkedja till EN beslutsfunktion per stol (betydelse → fakta → val). Diagnosen, målbilden, skyddsnätet (auktionsdiff, revisor, kikvakt), etapp 0–6 och grindbesluten. Öppna den FÖRST vid allt motorarbete. |
 | **beslut-b-plan.md** | 🟢 | **Masterplanen för Beslut B (ägarbeslut 2026-08-08):** konton → daglig 12-givarstävling → realtidsbord. Etapperna 0–4, besluten som är tagna (Supabase, lösenord, ordningen), beslutsgrindarna som återstår, GDPR/säkerhetsdetaljerna. Öppna den när Beslut B-arbetet fortsätter. |
 | **bord-plan.md** | 🟢 | **Realtidsborden "Spela med vänner" (Beslut B etapp 4, LIVE 2026-08-17/18):** ägarbesluten, serverdomare-arkitekturen (händelseloggen, hjärtslaget, den visuella vridningen), händelsetyperna, delleveranserna 4A–4D och medvetet-kvar-listan. Öppna den vid ALLT bordsarbete. |
@@ -47,7 +48,7 @@
 
 | Fil | | Innehåll |
 |---|---|---|
-| **historik.md** (190 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
+| **historik.md** (193 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
 | **arbetslista.md** | 📦 | Byggordningen FAS 0–12 (genomförd). Punkt 28 = bakgrunden till vår egen DDS-lösare. Kvar som arkiv; NU/NÄST styrs av CLAUDE.md. |
 | **tp-arbetslista.md** | 📦 | TP-stegen A–F. **Alla klara 2026-07-03** — filen innehåller gamla "⬜ Kvar att bygga"-rubriker som är överspelade av notisen högst upp. |
 | **off-book-syd.md** | 📦 | Hur det gamla manus-/detektorlagret svarade när ägaren bjöd utanför den förberäknade linjen. Arkiverad vid motorbytet (2026-09-11) — beteendet bor nu i beslutstabellens rad `partner-färg`. |

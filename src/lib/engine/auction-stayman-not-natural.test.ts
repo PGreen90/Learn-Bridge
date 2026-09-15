@@ -67,7 +67,7 @@ describe('5♣-ryckaren: partnerns Stayman är ingen klöverfärg och 3NT-avslut
     expect(contract).toMatchObject({ level: 3, strain: 'NT' })
   })
 
-  it('frö 20260965: 2NT–3♣(Stayman)–3♦–3NT ska stå — öppnaren rycker inte 5♣', () => {
+  it('frö 20260965: 2NT–3♣(Puppet Stayman)–3NT ska stå — öppnaren rycker inte 5♣', () => {
     const d = deal('felfarg-20260965', 'W', 'none', {
       N: 'S:J53 H:KJ8 D:Q92 C:9853',
       E: 'S:AKT H:A94 D:K87 C:AK74',

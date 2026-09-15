@@ -10,49 +10,48 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — GAMBLING 3NT: KLAR & LIVE 2026-09-14 (mergepunkt `8e327b3`) — ägarens live-prov kvar
-**Ägarbeslut 2026-09-14 (ja på alla fem):** 3NT-öppningen = **Gambling** i
-aggressiv stil (solid 7+ lågfärg med AKQ, inget A/K utanför, ingen renons, ingen
-4-korts sidofärg) · 25–27 balanserad → 2♣–2♦–3NT, 28–30 → 4NT · svar v1: pass med
-håll / 4♣ & 5♣ pass-eller-rätta / 4M naturligt · försvar v1: pass eller naturlig
-4M · samma betydelse i alla sitsar. Kod `src/lib/engine/gambling-3nt.ts`, facit
-`gambling-3nt.test.ts`, systemboken §3.1 + §4.4. Fortsättningen = SENARE, låg
-prio (ägarbeslut 2026-09-15). Provfrön i `docs/senare.md`.
+### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — BYGGD & GRÖN, väntar ägarens PCD
+**Ägarbeslut 2026-09-15 (alla åtta i `docs/puppet-stayman-plan.md`):** 3♣ över
+2NT (även 2♣–2♦–2NT och vårt 2NT-inkliv) = Puppet Stayman: 3♥/3♠ = 5-korts,
+3♦ = 4-korts finns, 3NT = ingen; efter 3♦ bjuder svararen högfärgen hen INTE
+har, 4♦ = båda, 4♣ = båda + slam. Krav: utgångsvärden + en 3-korts högfärg.
+Smolen över 2NT borta (5♥4♠ transfer + 3♠ · 5♠4♥ 3♣ + 4♦ · 5-5 transfer + 4♥).
+Slamport efter Puppet-fit byggd. Systemboken **§4.3b**, facit
+`puppet-stayman.test.ts`, sviten grön. **Nästa: PCD → live-prov i budlådan.**
+
+**Nyss klart (2026-09-14): GAMBLING 3NT** KLAR & LIVE (mergepunkt `8e327b3`),
+ägarens live-prov kvar. Aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför),
+25–27 bal → 2♣–2♦–3NT, 28–30 → 4NT; svar pass/4♣/5♣/4M; försvar pass eller 4M.
+Kod `src/lib/engine/gambling-3nt.ts`, facit `gambling-3nt.test.ts`, systemboken
+§3.1 + §4.4. Fortsättningen = SENARE, låg prio (ägarbeslut 2026-09-15).
 
 **Parallellt ägarsteg:** live-prov vid ett vänner-bord av bordens etapp 1–3
 (genomgången · facit/par-raden · DD-claimen med OK/spela klart) + Gambling 3NT
 i appen. Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
 
-**Nyss klart (2026-09-15): KORTREGELN** — endast träkarlen ligger i färg-
-kolumner, spelföraren alltid i kortrad (ägarbeslut; Syd-träkarlen låg förr som
-kortrad, två kolumnhänder ryms inte på mobil) + ⋮/i-knapparna svävar mjukt ner
-under Nords kortrad när raden är för bred (`useSvavandeMeny.ts`). Facit
-`syd-trakarl.test.tsx` + `BordSpel.test.tsx`, detalj `docs/historik.md` 2026-09-15.
+**Nyss klart (2026-09-15): KORTREGELN** — bara träkarlen ligger i färgkolumner,
+spelföraren alltid i kortrad (ägarbeslut) + ⋮/i-knapparna svävar ner under Nords
+kortrad när raden är för bred (`useSvavandeMeny.ts`). Facit `syd-trakarl.test.tsx`
++ `BordSpel.test.tsx`, detalj `docs/historik.md` 2026-09-15.
 
-**Nyss klart (2026-09-14, ALLT LIVE): BORDENS SENARE-LISTA** i ordningen
-1) rondgenomgången per giv (`5088526`) → 2) DD-jämförelsen (`1af5972`;
-`bridge-dds` WASM buntad i api/bord.js, servern bakar in `dd` i giv-klar) →
-3) claim vid bordet (`5dc1524`; ägarens modell: DD föreslår vid stickstart,
-varje människa utom träkarlen svarar OK/spela klart, alla OK → giv-klar, ett
-nej → spela vidare, 60 s → auto-OK). Manuell claim/"ge upp" medvetet utanför
-(kandidater i `docs/bord-plan.md`). Detalj: `docs/bord-plan.md`
-delleveranserna + `docs/historik.md` 2026-09-14.
+**Nyss klart (2026-09-14, ALLT LIVE): BORDENS SENARE-LISTA** — 1) rondgenomgången
+per giv (`5088526`) · 2) DD-jämförelsen (`1af5972`; `bridge-dds` WASM buntad i
+api/bord.js) · 3) claim vid bordet (`5dc1524`; DD föreslår vid stickstart, varje
+människa svarar OK/spela klart, ett nej → spela vidare, 60 s → auto-OK). Manuell
+claim/"ge upp" medvetet utanför. Detalj: `docs/bord-plan.md` + `docs/historik.md`.
 
-**Nyss klart (2026-09-14, LIVE `e57e6a9`): STICKVÄNTAN** på alla spelbara ytor —
-sticket ligger kvar tills du trycker när du leder (hand efter 2 s), guldringen
-2/3/4 s när boten leder. Facit `stickvantan.test.tsx`, tider i `tempo.ts`,
-detalj `docs/historik.md` 2026-09-14 (även motorbytets slut + 403-fixen).
+**Nyss klart (2026-09-14, LIVE `e57e6a9`): STICKVÄNTAN** — sticket ligger kvar
+tills du trycker när du leder, guldringen när boten leder. Facit
+`stickvantan.test.tsx`, tider i `tempo.ts`, detalj `docs/historik.md` 2026-09-14.
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
-sju etapper (två tryck · 40 %-regeln + "7/12" · se alla spelares givar · konto-
-räknaren + GDPR · `daily_standings` + nattlig finalisering · `?dag=` · historik-
-sidan + medaljtabellen). Detalj: `docs/beslut-b-plan.md` "Påbyggnad 3" +
-`docs/historik.md` 2026-09-13; delade vyer `src/pages/tavling/TavlingDelar.tsx`.
+sju etapper (två tryck · 40 %-regeln · alla spelares givar · konto-räknaren +
+GDPR · `daily_standings` · `?dag=` · historik + medaljer). Detalj:
+`docs/beslut-b-plan.md` "Påbyggnad 3" + `docs/historik.md` 2026-09-13.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
-(revisionen KLAR & LIVE 2026-08-19, batch 1–7 deployade): syna katalogen
-`docs/budforklaring-katalog.md`, peka på en rad → Claude byter ordagrant +
-deployar.
+(KLAR & LIVE 2026-08-19): syna `docs/budforklaring-katalog.md`, peka på en
+rad → Claude byter ordagrant + deployar.
 
 ---
 
@@ -89,12 +88,9 @@ deployar.
   2026-08-03): vid utgång etablerad (GF) + agreed trumf cue:ar motorn fritt
   under utgång; poängomdömet ligger på att gå FÖRBI utgången.
 
-**Klart tidigare — detaljerna bor i `docs/historik.md`, INTE här:** faceliften
-yta 1–4 · Lebensohl lager 1 · utspelet hål A–G (teori `docs/utspel-teori.md`,
-förfining `docs/utspel-diagnos.md`) · etapp 7 "missad lillslam"
-(`docs/systemrevisorn.md`) · mätetapperna E1–E7, B13, F1–F6
-(`docs/budsystem-revision.md`) · stora granskningen · Beslut B etapp 0–2 ·
-felrapporterna. M19 (frö 20260952) lagad 2026-09-13.
+**Klart tidigare** — allt i `docs/historik.md` (faceliften yta 1–4 · Lebensohl
+lager 1 · utspelet hål A–G · etapp 7 "missad lillslam" · mätetapperna E1–E7,
+B13, F1–F6 · stora granskningen · Beslut B etapp 0–2 · felrapporterna · M19).
 
 > **ÄRLIG INFERENS (grundprincip, LIVE — styr ALLA bottbeslut, bud OCH spel):**
 > bottarna tänker som människor — egen hand + vad budgivningen och spelet

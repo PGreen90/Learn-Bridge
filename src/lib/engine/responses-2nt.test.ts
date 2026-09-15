@@ -7,6 +7,8 @@ import {
 import { buildAuction } from './auction'
 import type { Deal } from '../../types/bridge'
 
+// Sedan 2026-09-15 är 3♣ över 2NT Puppet Stayman (ägardirektiv; hela
+// strukturen låses i `puppet-stayman.test.ts`). Här ligger grundsvaren.
 const r2 = (notation: string) => respondTo2NT(parseHand(notation))
 
 describe('respondTo2NT – svararens svar på 2NT (20–21)', () => {
@@ -14,12 +16,16 @@ describe('respondTo2NT – svararens svar på 2NT (20–21)', () => {
     expect(r2('S:432 H:543 D:6432 C:765').call).toBe('P') // 0 hp
   })
 
-  it('3NT till spel utan högfärg, utgångsvärden', () => {
-    expect(r2('S:K43 H:Q42 D:K543 C:432').call).toBe('3NT') // 8 hp, ingen 4-korts hf
+  it('3♣ Puppet Stayman med 3-korts högfärg och utgångsvärden (letar partnerns 5-korts)', () => {
+    expect(r2('S:K43 H:Q42 D:K543 C:432')).toMatchObject({ call: '3C', rule: 'Puppet Stayman' }) // 8 hp, 3-3
   })
 
-  it('3♣ Stayman med 4-korts högfärg', () => {
-    expect(r2('S:KJ43 H:Q4 D:K543 C:432').call).toBe('3C') // 9 hp, 4 spader
+  it('3NT till spel utan 3-korts högfärg', () => {
+    expect(r2('S:K4 H:Q4 D:K5432 C:5432').call).toBe('3NT') // 8 hp, 2-2 i högfärgerna
+  })
+
+  it('3♣ Puppet Stayman med 4-korts högfärg', () => {
+    expect(r2('S:KJ43 H:Q4 D:K543 C:432')).toMatchObject({ call: '3C', rule: 'Puppet Stayman' }) // 9 hp, 4 spader
   })
 
   it('3♦ transfer med 5-korts hjärter', () => {
@@ -48,34 +54,39 @@ describe('respondTo2NT – svararens svar på 2NT (20–21)', () => {
     expect(r2('S:AQ8432 H:K3 D:A3 C:K32').call).toBe('3H') // 16 hp, 6 spader, slam → transfer
   })
 
-  it('5-4 i högfärgerna → 3♣ Stayman', () => {
-    expect(r2('S:KJ432 H:Q543 D:K4 C:43').call).toBe('3C') // 9 hp, 5-4 hf
+  it('5♠4♥ → 3♣ Puppet; 5♥4♠ → 3♦ transfer (hybriden, beslut 2)', () => {
+    expect(r2('S:KJ432 H:Q543 D:K4 C:43').call).toBe('3C')
+    expect(r2('S:Q543 H:KJ432 D:K4 C:43').call).toBe('3D')
   })
 
   it('3♠ minorfråga med 5-4 minorer och slamvärden', () => {
     expect(r2('S:43 H:K3 D:AQ43 C:KQ432').call).toBe('3S') // 14 hp, 5-4 minorer
   })
 
-  it('4NT kvantitativ med 11 balanserad utan högfärg', () => {
-    expect(r2('S:K43 H:KQ4 D:K543 C:432').call).toBe('4NT') // 11 hp
+  it('4NT kvantitativ med 11 balanserad utan 3-korts högfärg', () => {
+    expect(r2('S:K4 H:KQ D:K65432 C:543').call).toBe('4NT') // 11 hp
   })
 
-  it('6NT med 13+ balanserad utan högfärg', () => {
-    expect(r2('S:KQ4 H:KQ4 D:K543 C:Q32').call).toBe('6NT') // 15 hp
+  it('6NT med 13+ balanserad utan 3-korts högfärg', () => {
+    expect(r2('S:KQ H:KQ D:K65432 C:Q43').call).toBe('6NT') // 15 hp
   })
 })
 
 describe('openerRebidAfter2NTResponse – öppnaren fullföljer', () => {
-  const stayman = respondTo2NT(parseHand('S:KJ43 H:Q4 D:K543 C:432'))
+  const puppet = respondTo2NT(parseHand('S:KJ43 H:Q4 D:K543 C:432'))
   const transferH = respondTo2NT(parseHand('S:K3 H:KJ432 D:Q43 C:432'))
-  const quant = respondTo2NT(parseHand('S:K43 H:KQ4 D:K543 C:432')) // 11 hp → 4NT
+  const quant = respondTo2NT(parseHand('S:K4 H:KQ D:K65432 C:543')) // 11 hp → 4NT
 
-  it('Stayman-svar 3♥ med 4 hjärter', () => {
-    expect(openerRebidAfter2NTResponse(stayman, parseHand('S:A43 H:AQ43 D:KQ4 C:AQ2'))!.call).toBe('3H') // 21
+  it('Puppet-svar 3♦ med 4 hjärter (ingen 5-korts)', () => {
+    expect(openerRebidAfter2NTResponse(puppet, parseHand('S:A43 H:AQ43 D:KQ4 C:AQ2'))!.call).toBe('3D') // 21
   })
 
-  it('Stayman-svar 3♦ utan högfärg', () => {
-    expect(openerRebidAfter2NTResponse(stayman, parseHand('S:KQ4 H:KQ4 D:KQ43 C:AQ2'))!.call).toBe('3D') // 21
+  it('Puppet-svar 3♥ med 5 hjärter', () => {
+    expect(openerRebidAfter2NTResponse(puppet, parseHand('S:A4 H:AQ432 D:KQ4 C:AQ2'))!.call).toBe('3H') // 21
+  })
+
+  it('Puppet-svar 3NT utan högfärg', () => {
+    expect(openerRebidAfter2NTResponse(puppet, parseHand('S:KQ4 H:KQ4 D:KQ43 C:AQ2'))!.call).toBe('3NT') // 21
   })
 
   it('fullföljer transfer 3♦ → 3♥', () => {
