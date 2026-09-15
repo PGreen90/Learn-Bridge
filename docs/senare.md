@@ -9,9 +9,15 @@
 
 ## ⚪ SENARE
 
-### Gambling 3NT — nästa lager (v1 KLAR 2026-09-14, budsystem §3.1)
+### Gambling 3NT — nästa lager (v1 LIVE 2026-09-14, budsystem §3.1) — LÅG PRIO, framtida småfix (ägarbeslut 2026-09-15)
 v1 är öppningen (aggressiv stil), svaren pass/4♣/5♣/4M, öppnarens rättelse och
-ett minimalt försvar. Kvar, i ungefärlig nyttoordning:
+ett minimalt försvar. **Ägarbeslut 2026-09-15: fortsättningen byggs inte nu** —
+låg prioritet, tas som småfix när tillfälle ges. Facit-frön (appens `?giv=`,
+Syd = människan) ur skanningen 2026-09-15: försvar 3970 (Syd 19 hp balanserad
+passar mot deras 3NT — straff-X saknas), 1370 (Syd ♠Q8 ♥AQJ96 ♦2 ♣AKQ32 passar —
+takeout saknas), 16669 (Syd ♠AKJT753 9 hp passar — v1 kräver 12+ för 4M);
+partnern öppnar 2853/10444/6536/12977; Syd öppnar själv 4053/1293/17088.
+Kvar, i ungefärlig nyttoordning:
 - **Slamfrågan 4♦** över Gambling 3NT (öppnaren visar singelton 4♥/4♠/4NT-steg
   eller semi-balanserad) — bridgebums "approach #2".
 - **Öppnarens svar på kvantitativ 4NT** (idag passar hen; med 8-korts färg

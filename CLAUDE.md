@@ -16,8 +16,8 @@ aggressiv stil (solid 7+ lågfärg med AKQ, inget A/K utanför, ingen renons, in
 4-korts sidofärg) · 25–27 balanserad → 2♣–2♦–3NT, 28–30 → 4NT · svar v1: pass med
 håll / 4♣ & 5♣ pass-eller-rätta / 4M naturligt · försvar v1: pass eller naturlig
 4M · samma betydelse i alla sitsar. Kod `src/lib/engine/gambling-3nt.ts`, facit
-`gambling-3nt.test.ts`, systemboken §3.1 + §4.4. Utanför v1 (4♦-slamfrågan,
-4NT-svaret, Klinger-försvaret, 2♣-linjens färgslam mot 25+): `docs/senare.md`.
+`gambling-3nt.test.ts`, systemboken §3.1 + §4.4. Fortsättningen = SENARE, låg
+prio (ägarbeslut 2026-09-15). Provfrön i `docs/senare.md`.
 
 **Parallellt ägarsteg:** live-prov vid ett vänner-bord av bordens etapp 1–3
 (genomgången · facit/par-raden · DD-claimen med OK/spela klart) + Gambling 3NT
@@ -38,8 +38,7 @@ sticket ligger kvar tills du trycker när du leder (hand efter 2 s), guldringen
 detalj `docs/historik.md` 2026-09-14 (även motorbytets slut + 403-fixen).
 
 **Nyss klart (2026-09-14, LIVE `0d44eeb`): bricka 12-rapporten** — advancern
-efter balansinkliv passar med fit (aldrig ny färg), tävlar 2♥ när de bjuder
-vidare; inklivaren rättar till egen färg (budsystem §7.1/§9, facit
+efter balansinkliv passar med fit, tävlar när de bjuder vidare (§7.1/§9, facit
 `auction-advancer-balansinkliv.test.ts`).
 
 **Nyss klart (2026-09-13, ALLT LIVE): LIVSKVALITETSSVEPET i Dagens tävling** —
@@ -122,7 +121,8 @@ engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · de
 starka dubblaren säljer given i rond 2 · **svep: partnerskapsplikter i konkurrens**
 (preferens/fritt bud/höjning på visad längd, ägarbeslut 2026-09-02 efter
 felrapport #55–#56) · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
-rondgenomgångens per-kort-motivering · 2♣-öppningens bredare översyn forts.
+rondgenomgångens per-kort-motivering · **Gambling 3NT nästa lager** (låg prio,
+småfix: 4♦-slamfråga · 4NT-svar · Klinger-försvar) · 2♣-öppningens bredare översyn forts.
 (steg 1 substanskraven KLAR 2026-08-31; kvar: kravnivån + balanserad/
 distributionell + 6-5-samspelet).
 

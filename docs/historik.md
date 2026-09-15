@@ -2746,3 +2746,15 @@ alertlistan. Det gamla `respondTo3NT`/`openerRebidAfter3NTResponse` rivet.
 Systemboken §3.1 (ny) + §4.4 + §9; SENARE-listan fick "Gambling 3NT — nästa
 lager". Rättelse under bygget: exempelhanden ♣AKJT763 utan dam öppnar **3♣**
 (spärr), inte 1♣ som först sades till ägaren.
+
+## 2026-09-15 — Gambling 3NT: provfrön + ägarbeslut om fortsättningen
+
+Sessionsslutet dagen efter bygget. En tillfällig probe skannade fröna 1–17 088
+(`dealFromSeed` = appens `?giv=`) och hittade 22 givar där någon öppnar Gambling
+3NT — fröna står i `docs/senare.md` under "Gambling 3NT — nästa lager". Två
+fynd bekräftade v1-luckorna: bottarna passar mot deras 3NT även med 19 hp
+balanserat (frö 3970) och med 17 hp 5-5 (frö 1370) — Klinger-försvaret saknas.
+**Ägarbeslut:** fortsättningen byggs inte nu, låg prioritet, sparas som framtida
+småfix. CLAUDE.md-rubriken sattes till KLAR & LIVE (`8e327b3`) och pushades
+separat (grön deploy). Nästa: ägarens live-prov (borden etapp 1–3 + Gambling 3NT
+i appen), sedan väljer ägaren nästa NU ur 🟢 NÄST.
