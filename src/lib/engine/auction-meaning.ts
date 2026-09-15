@@ -1711,6 +1711,34 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   // Puppet Stayman (2026-09-15): kaptenens trumfsättning efter öppnarens 5-korts
   // högfärg (3♠ över 3♥ / 4♥ över 3♠) och det KVANTITATIVA 4NT direkt över ett
   // Puppet-svar — läses före allt annat i slamzonen (annars blev 4NT en essfråga).
+  // Transfer över 2 sang fullföljd: 4NT = kvantitativt (exakt 5-korts, jämn), 6NT till spel.
+  // Texas fullföljd: 4NT = essfråga i högfärgen (6+ kort, trumfen är känd).
+  {
+    const k = naturalNTBase(u)
+    if (k >= 0 && u.bids[k].cb.level === 2 && n === k + 3 && seat === u.responder) {
+      const r = u.bids[k + 1].cb
+      const c = u.bids[k + 2].cb
+      if ((same(r, 3, 'D') && same(c, 3, 'H')) || (same(r, 3, 'H') && same(c, 3, 'S'))) {
+        if (same(cb, 4, 'NT')) return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan efter transfern: exakt 5-korts ${NAME[c.strain]}, jämn hand. Partnern bjuder 6 ${NAME[c.strain]} med maximum och 3-korts stöd, 6 sang med maximum, passar annars.`)
+        if (same(cb, 6, 'NT')) return R('6NT till spel', `6 sang — lillslam i sang efter transfern (exakt 5-korts, jämn hand i slamzonen).`)
+      }
+      if ((same(r, 4, 'D') && same(c, 4, 'H')) || (same(r, 4, 'H') && same(c, 4, 'S'))) {
+        if (same(cb, 4, 'NT')) return R('1430 RKC', `4 sang — essfråga (1430 RKC) med ${NAME[c.strain]} som trumf (Texas visade 6+). Partnern svarar i steg: 5♣ = 1/4 nyckelkort, 5♦ = 0/3, 5♥ = 2 utan trumfdam, 5♠ = 2 med.`)
+      }
+    }
+    // Öppnarens accept av den kvantitativa 4NT efter transfern: 6 i högfärgen (max + 3-korts stöd) eller 6 sang.
+    if (k >= 0 && u.bids[k].cb.level === 2 && n === k + 4 && seat === u.opener && same(last, 4, 'NT') && cb.level === 6) {
+      const r = u.bids[k + 1].cb
+      const c = u.bids[k + 2].cb
+      if ((same(r, 3, 'D') && same(c, 3, 'H')) || (same(r, 3, 'H') && same(c, 3, 'S'))) {
+        return R('accepterar slaminbjudan', `${B(cb)} — accepterar den kvantitativa slaminbjudan (maximum${cb.strain !== 'NT' ? ', med 3-korts stöd i partnerns 5-korts' : ''}).`)
+      }
+    }
+    // Öppnarens 3 sang på svararens högfärgsvisning (Puppet 3♥/3♠/4♦/4♣, transfer + 3♠/4♥) → 4NT är kvantitativt.
+    if (k >= 0 && u.bids[k].cb.level === 2 && seat === u.responder && same(last, 3, 'NT') && partnerLast && n === k + 5 && same(cb, 4, 'NT')) {
+      return R('4NT kvantitativ', `4 sang — kvantitativ slaminbjudan: partnern valde 3 sang på min högfärgsvisning (ingen fit). Bjud 6 sang med maximum, passa med minimum.`)
+    }
+  }
   if (puppetAsked(u) && n === naturalNTBase(u) + 3 && seat === u.responder) {
     const a = u.bids[n - 1].cb
     if (same(a, 3, 'H') && same(cb, 3, 'S')) return R(PUPPET.agree, `3♠ — hjärter är trumf (partnerns 5-korts), slamintresse. Säger inget om spader. Partnern visar en kontroll under 4♥ eller stannar i 4♥.`)
@@ -2030,7 +2058,7 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
     if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — till spel: balanserad utgångshand mittemot ${mot}, ingen 4-korts högfärg att leta.`)
     if (cb.level === 4 && (cb.strain === 'D' || cb.strain === 'H')) {
       const target = cb.strain === 'D' ? 'hjärter' : 'spader'
-      return R(L === 1 ? 'Texas' : 'Texas (2NT)', `${B(cb)} — Texas-transfer: 6+ ${target} med utgångsstyrka utan slamintresse; partnern bjuder 4 ${target}. Säger inget om ${name}.`)
+      return R(L === 1 ? 'Texas' : 'Texas (2NT)', `${B(cb)} — Texas-transfer: 6+ ${target} med utgångsstyrka; partnern bjuder 4 ${target}${L === 2 ? ' (med slamvärden följer 4 sang som essfråga)' : ' — utan slamintresse'}. Säger inget om ${name}.`)
     }
     if (same(cb, 4, 'S') || same(cb, 4, 'H')) return N(`${B(cb)} — till spel: lång ${name}, utgång utan slamintresse.`, 'avslut')
     if (cb.level === 5 && isMinor(cb.strain)) return N(`${B(cb)} — till spel i ${name}.`, 'avslut')
@@ -2146,6 +2174,8 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
       // Puppet-strukturen över 2 sang: öppnarens val efter svararens placering.
       const c = puppetChoiceMeaning(cb, rel[1].cb, rel[2].cb, inv)
       if (c) return c
+      // Svararens kvantitativa 4NT efter transfern: 6 i högfärgen / 6 sang = accept, pass = avböjer.
+      if (same(inv, 4, 'NT') && cb.level === 6) return R('accepterar slaminbjudan', `${B(cb)} — accepterar den kvantitativa slaminbjudan (maximum${cb.strain !== 'NT' ? ', med 3-korts stöd' : ''}).`)
     }
     if (isGameLevel(cb)) return R('accepterar inbjudan', `${B(cb)} — accepterar partnerns inbjudan (mer än minimum).`)
     if (cb.strain === inv.strain || (isMajor(cb.strain) && cb.level === 3)) return R('avböjer inbjudan: rättelse', `${B(cb)} — minimum: avböjer inbjudan och rättar till ${name} som slutkontrakt (3-korts stöd). Partnern passar.`)

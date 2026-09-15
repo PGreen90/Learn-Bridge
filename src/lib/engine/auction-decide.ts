@@ -331,8 +331,27 @@ export function thirdAsSeen(f: AuctionFacts, index: number): ResponseResult {
 }
 
 const STRONG_2C_SHOWN_MIN = 22
+/** Sangtrappan när öppnaren valde 3NT på svararens högfärgsvisning: 33+ → 6NT, 31–32 → 4NT kvantitativ, annars null (pass). */
+function ntLadderAfterNoFit(hand: Hand, shownMin: number): ResponseResult | null {
+  const total = hcp(hand) + shownMin
+  if (total >= 33) return { call: '6NT', rule: '6NT till spel', explanation: `Ingen högfärgsfit; slamzon (${total} mot visade ${shownMin}) → 6NT.` }
+  if (total >= 31) return { call: '4NT', rule: '4NT kvantitativ', explanation: `Ingen högfärgsfit; slaminbjudan → 4NT (kvantitativ: 6NT med maximum).` }
+  return null
+}
 /** Svararens Puppet-placeringar efter 3♣–3♦ (2NT-öppningen) — öppnarens 4M efter dem sätter trumfen. */
 const PUPPET_PLACEMENTS = new Set<string>([PUPPET.fourSpades, PUPPET.fourHearts, PUPPET.both, PUPPET.bothSlam])
+/** Svararens transfer-placeringar (5♥4♠: 3♠ · 5-5: 4♥) — öppnarens 4M efter dem sätter trumfen på samma sätt. */
+const TRANSFER_PLACEMENTS = new Set<string>([PUPPET.transferFourSpades, PUPPET.transferFiveHearts])
+/** Har svararen visat en högfärg via Puppet/transfer så att öppnarens 4M-placering (`third`) sätter trumfen? */
+function puppetPlacedFit(openCall: string, response: ResponseResult, second: ResponseResult, third: ResponseResult): Suit | null {
+  if (openCall !== '2NT' || !/^4[HS]$/.test(third.call)) return null
+  const placed = (response.rule === PUPPET.ask && PUPPET_PLACEMENTS.has(second.rule)) || (response.rule === PUPPET.transfer && TRANSFER_PLACEMENTS.has(second.rule))
+  return placed ? suitOf(third.call) : null
+}
+/** Svararen visade en högfärg (Puppet 3♥/3♠/4♦/4♣ eller transfer + 3♠/4♥) och öppnaren valde 3NT — ingen fit. */
+function puppetPlacedNoFit(response: ResponseResult, second: ResponseResult, third: ResponseResult): boolean {
+  return third.call === '3NT' && ((response.rule === PUPPET.ask && PUPPET_PLACEMENTS.has(second.rule)) || (response.rule === PUPPET.transfer && TRANSFER_PLACEMENTS.has(second.rule)))
+}
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
 const isMajorSuit = (s: Suit) => s === 'hearts' || s === 'spades'
@@ -384,6 +403,11 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   const respSuit = suitOf(response.call)
   const rebidSuit = suitOf(rebid.call)
   const majorTrump = isMajorSuit(trump)
+
+  // Texas över 2NT fullföljd: 6+ högfärg är trumf (öppnaren lovar 2+); 4NT = RKC.
+  if (openCall === '2NT' && response.rule === PUPPET.texas && rebid.rule === 'fullföljd Texas' && rebidSuit === trump && majorTrump) {
+    return { ctx: { partnerMin: 20, gameForcing: true, hpOnly: true } }
+  }
 
   // Stark 2♣ + positivt svar (§4.4): trumf funnen → kaptenen räknar mot visade 22+
   // med cue-ronden öppen; egen solid färg utan fit → bara driv (4NT).
@@ -481,7 +505,7 @@ export function slamContextAfterThird(openCall: string, response: ResponseResult
   // (2NT-öppningen) → trumfen satt på utgångsnivå; kaptenen räknar hp mot
   // visade 20: 33+ → 4NT, 31–32 → 5M-inbjudan. Efter 2♣–2♦–2NT visade
   // öppnarens 3♥/3♠ en 5-korts högfärg → samma port som över 2NT, mot 22.
-  if (openCall === '2NT' && response.rule === PUPPET.ask && PUPPET_PLACEMENTS.has(second.rule) && third.call === `4${LETTER[trump]}` && isMajorSuit(trump)) {
+  if (puppetPlacedFit(openCall, response, second, third) === trump) {
     return { ctx: { partnerMin: 20, inviteCall: `5${LETTER[trump]}`, gameForcing: true, hpOnly: true } }
   }
   if (second.rule === '2/1: försenat stöd' && openerSuit && !isMajorSuit(openerSuit) && trump === openerSuit) {
@@ -505,7 +529,7 @@ export function slamContextAfterThird(openCall: string, response: ResponseResult
 function slamTrumpAfterThird(openCall: string, response: ResponseResult, second: ResponseResult, third: ResponseResult): Suit | null {
   const openerSuit = suitOf(openCall)
   const respSuit = suitOf(response.call)
-  if (openCall === '2NT' && response.rule === PUPPET.ask && PUPPET_PLACEMENTS.has(second.rule) && /^4[HS]$/.test(third.call)) return suitOf(third.call)
+  { const t = puppetPlacedFit(openCall, response, second, third); if (t) return t }
   if (second.rule === '2/1: försenat stöd' && openerSuit && !isMajorSuit(openerSuit)) return openerSuit
   if (second.rule === 'New Minor Forcing' && respSuit && isMajorSuit(respSuit) && suitOf(third.call) === respSuit) return respSuit
   return null
@@ -567,6 +591,7 @@ function slamTrumpFromAuction(openCall: string, response: ResponseResult, rebid:
     }
     return null
   }
+  if (openCall === '2NT' && response.rule === PUPPET.texas && rebid.rule === 'fullföljd Texas' && firstSlamCall === '4NT') return rebidSuit
   if (response.rule === 'Jacoby 2NT' && openerSuit && isMajorSuit(openerSuit)) return openerSuit
   if (response.rule === 'inverterad minor' && openerSuit && !isMajorSuit(openerSuit)) return openerSuit
   // 1NT-återbudet: inga slambud direkt över sangen utom Gerber 4♣/kvantitativ
@@ -724,6 +749,15 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
   ) {
     const slam = slamStep(openerSuit)
     if (slam) return slam
+  }
+
+  // Texas över 2NT fullföljd (2026-09-15, slamvägarna): 6+ högfärg — slamzonen
+  // (33+ mot visade 20) frågar 4NT i högfärgen, annars står utgången (pass).
+  if (openCall === '2NT' && response.rule === PUPPET.texas && rebid.rule === 'fullföljd Texas') {
+    const t = suitOf(rebid.call)!
+    const slam = slamStep(t)
+    if (slam) return slam
+    return { turn: { call: 'P', rule: 'svararens pass', explanation: `Texas placerade utgången i ${SYM[t]}; under slamzonen → pass.` }, plan: { kind: 'final' } }
   }
 
   // Hopphöjning av min högfärg (1x–1M–3M, visade 16–18 med 4-korts stöd).
@@ -1038,11 +1072,22 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
   // Puppet Stayman över 2NT-öppningen (2026-09-15): öppnaren placerade 4M efter
   // min Puppet-fortsättning → slamporten (4NT vid 33+, 5M-inbjudan 31–32),
   // annars pass — utgången står.
-  if (openCall === '2NT' && response.rule === PUPPET.ask && PUPPET_PLACEMENTS.has(second.rule) && /^4[HS]$/.test(third.call)) {
-    const t = suitOf(third.call)!
-    const slam = slamStep(t)
-    if (slam) return slam
-    return { turn: { call: 'P', rule: 'svararens pass', explanation: `Öppnaren placerade utgången i ${SYM[t]} → pass.` }, plan: { kind: 'call' } }
+  {
+    const t = puppetPlacedFit(openCall, response, second, third)
+    if (t) {
+      const slam = slamStep(t)
+      if (slam) return slam
+      return { turn: { call: 'P', rule: 'svararens pass', explanation: `Öppnaren placerade utgången i ${SYM[t]} → pass.` }, plan: { kind: 'call' } }
+    }
+  }
+  // Öppnaren valde 3NT på min högfärgsvisning (ingen fit): sangtrappan mot visade 20.
+  if (openCall === '2NT' && puppetPlacedNoFit(response, second, third)) {
+    const q = ntLadderAfterNoFit(hand, 20)
+    return q ? { turn: q, plan: { kind: 'call' } } : { turn: { call: 'P', rule: 'svararens pass', explanation: 'Ingen fit och under slamzonen → 3NT står.' }, plan: { kind: 'call' } }
+  }
+  // Texas fullföljd (2NT–4♦/4♥–4M): slamzonen frågar 4NT i högfärgen, annars står utgången.
+  if (openCall === '2NT' && response.rule === PUPPET.texas && rebid.rule === 'fullföljd Texas') {
+    return null // (svar2-raden tar Texas: öppnarens fullföljning är partnerns ANDRA bud — se responderSecondDecision)
   }
 
   // Systems on efter 2♣–2♦–2NT: svararen placerar (Puppet / 4M / 3NT / pass;
@@ -1267,6 +1312,35 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
     if (first !== agree) return null
     const ctx: SlamContext = { partnerMin: 20, inviteCall: `5${LETTER[t]}`, gameForcing: true, hpOnly: true }
     return { kind: 'slam', captain, prefix: 4, setup: { trump: t, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+  }
+  // 2♣–2♦–2NT: öppnarens 4M efter svararens högfärgsvisning (Puppet 3♥/3♠/4♦/4♣
+  // eller transfer + 3♠/4♥) sätter trumfen — kaptenens första slambud är ours[7]
+  // (4NT vid 33+ mot 22, 5M-inbjudan 31–32). Texas fullföljd: kaptenens 4NT är
+  // ours[5]. Öppnarens 3NT på högfärgsvisningen → 4NT är KVANTITATIVT.
+  if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT' && ours.length >= 5) {
+    const b3 = ours[3].bid, b4 = ours[4].bid
+    if ((b3 === '4D' || b3 === '4H') && b4 === (b3 === '4D' ? '4H' : '4S')) {
+      if (ours.length >= 6 && ours[5].bid !== '4NT') return null
+      const t: Suit = b3 === '4D' ? 'hearts' : 'spades'
+      return { kind: 'slam', captain, prefix: 5, setup: { trump: t, lastCall: b4, ctx: { partnerMin: 22, gameForcing: true, hpOnly: true } }, sofar: sofarFrom(5) }
+    }
+    if (ours.length >= 7) {
+      const b5 = ours[5].bid, b6 = ours[6].bid
+      const puppetShow = b3 === '3C' && b4 === '3D' && ['3H', '3S', '4C', '4D'].includes(b5)
+      const transferShow = (b3 === '3D' && b4 === '3H' && b5 === '3S') || (b3 === '3H' && b4 === '3S' && b5 === '4H')
+      if (puppetShow || transferShow) {
+        if (/^4[HS]$/.test(b6)) {
+          const t = suitOf(b6)!
+          return { kind: 'slam', captain, prefix: 7, setup: { trump: t, lastCall: b6, ctx: { partnerMin: 22, inviteCall: `5${LETTER[t]}`, gameForcing: true, hpOnly: true } }, sofar: sofarFrom(7) }
+        }
+        if (b6 === '3NT' && (ours.length === 7 || ours[7].bid === '4NT')) return { kind: 'kvantitativ', captain, prefix: 7, partnerMin: 22, sofar: sofarFrom(7) }
+      }
+    }
+  }
+  // 2NT-öppningen: öppnarens 3NT på min högfärgsvisning → kaptenens 4NT är kvantitativt (partnern dömer mot 20).
+  if (openCall === '2NT' && ours.length >= 5 && ours[4].bid === '3NT' && (ours.length === 5 || ours[5].bid === '4NT')) {
+    const second = secondAsSeen(f, at(3))
+    if (second && puppetPlacedNoFit(response, second, thirdAsSeen(f, at(4)))) return { kind: 'kvantitativ', captain, prefix: 5, partnerMin: 20, sofar: sofarFrom(5) }
   }
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT' && ours.length >= 6 && ours[3].bid === '3C' && (ours[4].bid === '3H' || ours[4].bid === '3S')) {
     const t: Suit = ours[4].bid === '3H' ? 'hearts' : 'spades'
@@ -1639,6 +1713,28 @@ const TABELL: Row[] = [
       if (!dec) return null
       const t = dec.turn
       return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain }
+    },
+  },
+  // Puppet-slamvägarna (2026-09-15): svararens FJÄRDE bud i 2♣–2♦–2NT-vägen
+  // efter öppnarens 3NT på högfärgsvisningen — sangtrappan mot visade 22.
+  {
+    id: 'svar4',
+    läge: (f) =>
+      f.opening !== null &&
+      f.role === 'svarare' &&
+      f.ourContractBids.length === 7 &&
+      f.theirContractBids.length === 0 &&
+      f.ourContractBids.every((c, i) => c.seat === (i % 2 === 0 ? f.partner : f.seat)) &&
+      f.lastNonPass === f.ourContractBids[6] &&
+      quietOrDoubledResponse(f),
+    välj: ({ hand, facts }) => {
+      const b = facts.ourContractBids.map((c) => c.bid)
+      if (b[0] !== '2C' || b[1] !== '2D' || b[2] !== '2NT' || b[6] !== '3NT') return null
+      const puppetShow = b[3] === '3C' && b[4] === '3D' && ['3H', '3S', '4C', '4D'].includes(b[5])
+      const transferShow = (b[3] === '3D' && b[4] === '3H' && b[5] === '3S') || (b[3] === '3H' && b[4] === '3S' && b[5] === '4H')
+      if (!puppetShow && !transferShow) return null
+      const q = ntLadderAfterNoFit(hand, 22)
+      return q ? { seat: facts.seat, bid: q.call as Bid, rule: q.rule, explanation: q.explanation } : { seat: facts.seat, bid: 'P' as Bid, rule: 'svararens pass', explanation: 'Ingen fit och under slamzonen → 3NT står.' }
     },
   },
   // Familj 5 — öppnarens fjärde bud (systems on efter 2♣–2♦–2NT). Vår sida

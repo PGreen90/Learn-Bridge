@@ -50,8 +50,8 @@ describe('respondTo2NT – svararens svar på 2NT (20–21)', () => {
     expect(r2('S:KQ8432 H:K3 D:43 C:432').call).toBe('4H') // 8 hp, 6 spader → ♠
   })
 
-  it('6-korts högfärg men slamvärden → transfer (ej Texas)', () => {
-    expect(r2('S:AQ8432 H:K3 D:A3 C:K32').call).toBe('3H') // 16 hp, 6 spader, slam → transfer
+  it('6-korts högfärg med slamvärden → Texas (sedan 4NT som essfråga; slamvägarna 2026-09-15)', () => {
+    expect(r2('S:AQ8432 H:K3 D:A3 C:K32').call).toBe('4H') // 16 hp, 6 spader → Texas, 4NT efteråt
   })
 
   it('5♠4♥ → 3♣ Puppet; 5♥4♠ → 3♦ transfer (hybriden, beslut 2)', () => {

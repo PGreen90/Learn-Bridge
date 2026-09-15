@@ -645,7 +645,7 @@ högfärg**, och därför är 3♣ **Puppet Stayman** — frågan gäller FÖRST
 | 3♠ | 5-4+ i lågfärgerna, slamintresse (11+) | minorfråga ● |
 | 3NT | 5–10 hp utan 3-korts högfärg — till spel | naturligt |
 | 4♣ | 13+ balanserad utan 4-korts högfärg — essfråga (§6.4) | Gerber ● |
-| 4♦ / 4♥ | 6+ ♥ / 6+ ♠, ren utgång | Texas ● |
+| 4♦ / 4♥ | 6+ ♥ / 6+ ♠, utgångsvärden (slamhanden frågar 4NT efteråt) | Texas ● |
 | 4NT | 11–12 balanserad utan 3-korts högfärg — kvantitativ | naturligt |
 | 6NT | 13+ balanserad utan 3-korts högfärg | till spel |
 
@@ -685,6 +685,12 @@ och öppnaren svarade 5♦ — frö 20265815.)*
 
 **Efter 3NT:** pass; 11–12 → 4NT kvantitativ; 13+ → 6NT.
 
+**Efter öppnarens 3NT på min högfärgsvisning** (3♥/3♠/4♦ → 3NT, eller transfer +
+3♠ → 3NT): ingen fit — 11–12 → 4NT kvantitativ (öppnaren 6NT med maximum),
+13+ → 6NT, annars pass. **Efter öppnarens 4M** (fiten hittad): 13+ → 4NT RKC,
+11–12 → 5M-inbjudan, annars pass — samma sak efter 4♣/4♦ och efter transfer +
+3♠/4♥.
+
 #### 5-4 och 5-5 i högfärgerna (Smolen finns INTE över 2NT)
 Smolen och Puppet använder samma bud efter 3♣–3♦ med olika betydelse, så
 Smolen är borta över 2NT (kvar över 1NT). I stället:
@@ -705,8 +711,19 @@ tvinga fram en 4-3-fit; vägen via 3♣ + 4♦ för 5♥4♠ tappar 5-3-fiten n�
 | Pass | 0–4 hp, signoff |
 | 3♠ (efter 3♦–3♥) | 5 ♥ + 4 ♠, utgångskrav (se ovan) |
 | 4♥ (efter 3♥–3♠) | 5 ♠ + 5 ♥, öppnaren väljer |
-| 3NT | exakt 5-korts högfärg, balanserad — öppnaren väljer 3NT eller 4M (3+ stöd) |
-| 4M | 6+ i högfärgen, utgång |
+| 3NT | exakt 5-korts högfärg, balanserad, 5–10 hp — öppnaren väljer 3NT eller 4M (3+ stöd) |
+| 4NT | exakt 5-korts, jämn, **11–12** — kvantitativ: öppnaren bjuder 6M med maximum och 3-korts stöd, 6NT med maximum, passar annars |
+| 6NT | exakt 5-korts, jämn, 13+ |
+| 4M | 6+ i högfärgen (svag hand som ändå vill spela utgång; med utgångsvärden går 6+ via Texas) |
+
+**Texas (4♦/4♥) och slam:** 6+ högfärg med utgångsvärden går alltid Texas. Över
+fullföljningen står utgången — utom i slamzonen (13+ mot 20, 11+ mot 22), där
+svararen frågar **4NT = RKC i högfärgen** (trumfen är känd: 6+ mot öppnarens 2+).
+
+**Slamvägarna gäller lika efter 2♣–2♦–2NT** (mot visade 22: utgång från 3,
+inbjudan från 9, slam från 11). **Över 2NT-inklivet** finns inga färgslamvägar
+(motståndarna har öppnat): trumfsättningen 3♠/4♥ och 4♣ används inte där —
+bara 4M, 4♦ och kvantitativ 4NT.
 
 *Historik:* 3♣ var vanlig Stayman (4-korts) med Smolen från 2026-07-01 till
 2026-09-15. Facit: `puppet-stayman.test.ts`, `responses-2nt.test.ts`.
@@ -4858,3 +4875,17 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
   gamla koden (git worktree 50a6be6, PUPPET_SEEDS): rätt kontrakt 44,0 % → 46,1 %,
   snittförlust 259,8 → 246,7 p/giv. Revisorn 1000 givar före/efter: 21,2 % · 267,52
   → 21,3 % · 267,45 (`REVISOR=1 npx vitest run src/lib/engine/revisor.probe.test.ts`).
+
+- **2026-09-15 (kväll) — Puppet: slamvägarna kompletta (ägardirektiv "gör
+  klart slamvägar"):** (1) 2♣–2♦–2NT har nu samma slamvägar som 2NT-öppningen
+  — 4♣/placering → öppnarens 4M → 4NT RKC (33) / 5M-inbjudan (31–32), trumf-
+  sättningen 3♠/4♥, kvantitativ 4NT efter öppnarens 3NT (ny tabellrad *svar4*);
+  (2) efter öppnarens 3NT på högfärgsvisningen: 4NT kvantitativ (31–32) / 6NT
+  (33+); (3) transfervägarna: exakt 5-korts jämn 11–12 → 4NT kvantitativ
+  (öppnaren 6M med max + 3-korts stöd, 6NT med max, annars pass), 13+ → 6NT;
+  6+ högfärg går alltid Texas (även med slamvärden) och frågar 4NT RKC över
+  fullföljningen i slamzonen; 5♥4♠/5-5 efter öppnarens 4M → 4NT/5M; (4) över
+  2NT-inklivet inga färgslamvägar (`slamRoutes=false`). Kod: `responses-2nt.ts`,
+  `responder-rebids.ts`, `strong-2nt-systemson.ts`, `auction-decide.ts`
+  (`puppetPlacedFit`/`puppetPlacedNoFit`, `ntLadderAfterNoFit`, slamraderna prefix
+  5/7, raden *svar4*), `auction-meaning.ts`. Facit `puppet-stayman.test.ts`.

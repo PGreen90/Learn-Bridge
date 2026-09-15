@@ -638,7 +638,7 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
 //  · efter transfer: 3♠ = 5♥ + 4♠ (utgångskrav under 3NT), 4♥ = 5♠ + 5♥
 //    (öppnaren väljer), 4M med 6+, annars 3NT (öppnaren väljer 3NT / 4M).
 // Minorfråga/slam = §6. `openerMin` = 20 (2NT-öppning), 22 (2♣–2♦–2NT), 16 (2NT-inkliv).
-export function responderRebidIn2NTAuction(response: ResponseResult, rebid: ResponseResult, hand: Hand, openerMin = 20): ResponseResult | null {
+export function responderRebidIn2NTAuction(response: ResponseResult, rebid: ResponseResult, hand: Hand, openerMin = 20, slamRoutes = true): ResponseResult | null {
   const p = hcp(hand)
   const len = lengths(hand)
   const sp = len.spades
@@ -658,7 +658,7 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
       if (rebid.call === '3D') {
         // Öppnaren har minst en 4-korts högfärg, ingen 5-korts.
         if (sp >= 4 && he >= 4) {
-          if (p >= slamInvite) return { call: '4C', rule: PUPPET.bothSlam, explanation: `Båda högfärgerna och slamintresse → 4♣ (öppnaren bjuder sin högfärg på 4-läget).` }
+          if (p >= slamInvite && slamRoutes) return { call: '4C', rule: PUPPET.bothSlam, explanation: `Båda högfärgerna och slamintresse → 4♣ (öppnaren bjuder sin högfärg på 4-läget).` }
           return { call: '4D', rule: PUPPET.both, explanation: `Båda högfärgerna → 4♦ (öppnaren bjuder sin 4-korts högfärg — fiten är garanterad).` }
         }
         if (sp >= 4) return { call: '3H', rule: PUPPET.fourSpades, explanation: `4 spader → 3♥ (Puppet: bjuder högfärgen jag inte har; öppnaren bjuder 4♠ med 4 spader, annars 3NT).` }
@@ -676,7 +676,7 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
         // Slamvärden (31+ mot visade minimum): sätt trumfen med den andra
         // högfärgen (3♠ över 3♥, 4♥ över 3♠) — öppnaren öppnar cue-ronden eller
         // stannar i 4M. Aldrig 4NT direkt: det är kvantitativt (sondens fynd).
-        if (p >= slamInvite) {
+        if (p >= slamInvite && slamRoutes) {
           const call = target === 'hearts' ? '3S' : '4H'
           return { call, rule: PUPPET.agree, explanation: `3+ stöd i partnerns 5-korts ${SYM[target]} och slamvärden → ${call === '3S' ? '3♠' : '4♥'} (sätter ${SYM[target]} som trumf, slamintresse; partnern visar en kontroll eller stannar i 4${SYM[target]}).` }
         }
@@ -692,7 +692,11 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
       if (len[target] >= 6) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `6+ ${SYM[target]} → 4${SYM[target]} (utgång).` }
       if (target === 'hearts' && sp >= 4) return { call: '3S', rule: PUPPET.transferFourSpades, explanation: `5 ♥ och 4 ♠ → 3♠ (naturligt, utgångskrav: öppnaren väljer 4♠ / 4♥ / 3NT).` }
       if (target === 'spades' && he >= 5) return { call: '4H', rule: PUPPET.transferFiveHearts, explanation: `5 ♠ och 5 ♥ → 4♥ (öppnaren väljer 4♥ eller 4♠).` }
-      // Exakt 5-korts högfärg, GF → 3NT (öppnaren väljer 3NT eller 4 i färgen).
+      // Exakt 5-korts högfärg: slamzon → 6NT; slaminbjudan → 4NT kvantitativ
+      // (öppnaren: 6M med max och 3-korts stöd, 6NT med max, annars pass);
+      // annars 3NT (öppnaren väljer 3NT eller 4 i färgen).
+      if (slamRoutes && p >= slam) return { call: '6NT', rule: '6NT till spel', explanation: `5 ${SYM[target]}, jämn hand i slamzonen → 6NT.` }
+      if (slamRoutes && p >= slamInvite) return { call: '4NT', rule: '4NT kvantitativ', explanation: `5 ${SYM[target]}, jämn hand med slaminbjudan → 4NT (kvantitativ; öppnaren bjuder 6${SYM[target]} med maximum och 3-korts stöd, 6NT med maximum, passar annars).` }
       return { call: '3NT', rule: 'till spel', explanation: `5 ${SYM[target]} → 3NT (öppnaren väljer 3NT/4 i färgen).` }
     }
 

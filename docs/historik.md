@@ -2852,3 +2852,24 @@ prefix 6 efter 2♣–2♦–2NT); betydelselagret läser trumfsättningen och 4
 slamzonen (`puppetAsked`) och `naturalSuits` sätter trumfen vid 3♠/4♥. Övriga
 dyra sondgivar är DD-tur (lillslam på 28 hp) eller principiella (storslam
 kräver visshet) — ärliga missar, inga fler systemfel.
+
+**Slamvägarna kompletta (ägardirektiv samma kväll: "gör klart slamvägar,
+komplett puppet"):** inventering per läge och bygge med facit före fix
+(`puppet-stayman.test.ts`, blocket "slamvägarna kompletta"). 2♣–2♦–2NT fick
+samma vägar som 2NT-öppningen: 4♣/placering → öppnarens 4M → kaptenens 4NT
+(33 mot 22) eller 5M (31–32) via `slamSituation` prefix 7, trumfsättningen
+3♠/4♥ (prefix 6, byggd tidigare), Texas + 4NT (prefix 5) och kvantitativ 4NT
+efter öppnarens 3NT genom en NY tabellrad *svar4* (svararens fjärde bud fanns
+inte som rad förut) + `kind: 'kvantitativ'` i slamraden för öppnarens svar.
+Efter öppnarens 3NT på högfärgsvisningen (2NT-vägen): `ntLadderAfterNoFit`
+(31–32 → 4NT, 33+ → 6NT). Transfervägarna: exakt 5-korts jämn 11–12 → 4NT
+kvantitativ (öppnaren 6M med max + 3-korts stöd, 6NT med max, annars pass),
+13+ → 6NT; 6+ högfärg går alltid Texas (förr transfer med slamvärden — som
+dog i 3NT) och frågar 4NT RKC över fullföljningen i slamzonen; 5♥4♠ och 5-5
+→ 4NT/5M över öppnarens 4M (`puppetPlacedFit` täcker både Puppet- och
+transferplaceringarna). Över 2NT-inklivet medvetet inga färgslamvägar
+(`slamRoutes=false` — slamraden gäller ostört) — bara kvantitativt.
+Betydelselagret: 4NT efter transfer = kvantitativt, efter Texas = RKC i
+högfärgen, efter öppnarens 3NT = kvantitativt; öppnarens 6M/6NT = accept.
+Lärdom från kvällen: fyra av fem röda facit var MINA felräknade testhänder
+(♣AJ2 = 5, inte 3) — räkna hp med en funktion, inte i huvudet.
