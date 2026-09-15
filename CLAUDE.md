@@ -18,7 +18,7 @@ har, 4♦ = båda, 4♣ = båda + slam. Krav: utgångsvärden + en 3-korts högf
 Smolen över 2NT borta (5♥4♠ transfer + 3♠ · 5♠4♥ 3♣ + 4♦ · 5-5 transfer + 4♥).
 Slamport efter Puppet-fit byggd. Systemboken **§4.3b**, facit
 `puppet-stayman.test.ts`. Sond `puppet.probe.test.ts`: 44→46 % rätt; fynd 1 LIVE.
-Slamvägarna kompletta (2♣-vägen, Texas, transfer) LIVE. **Nästa: ägarens live-prov.**
+Slamvägarna kompletta LIVE. **Nästa: ägarens live-prov.**
 
 **Nyss klart (2026-09-14): GAMBLING 3NT** KLAR & LIVE (mergepunkt `8e327b3`),
 ägarens live-prov kvar. Aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför),
