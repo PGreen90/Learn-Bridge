@@ -106,10 +106,10 @@ describe('responderSecondBidAfter2C – svararens andra bud', () => {
 })
 
 describe('buildAuction – 2♣ end-to-end (inkoppling)', () => {
-  it('bygger 2♣ – 2♦ – 2NT + systems-on: 4-4 spaderfit via Stayman → 4♠', () => {
+  it('bygger 2♣ – 2♦ – 2NT + systems-on: 4-4 spaderfit via Puppet Stayman → 4♠', () => {
     // Systems-on (2026-07-07): efter öppnarens 2NT-återbud (22–24) använder
-    // svararen Stayman/transfer precis som mot en 2NT-öppning. Här har N ♠AKQ4 och
-    // S ♠9532 → 4-4 spaderfit hittas via Stayman i stället för att stanna i 2NT.
+    // svararen Puppet Stayman/transfer precis som mot en 2NT-öppning. Här har N ♠AKQ4 och
+    // S ♠9532 → 4-4 spaderfit hittas via Puppet (3♦ = 4-korts finns, 3♥ = 4 spader) i stället för att stanna i 2NT.
     const deal: Deal = {
       id: 'test',
       board: 1,
@@ -123,7 +123,7 @@ describe('buildAuction – 2♣ end-to-end (inkoppling)', () => {
       },
     }
     const a = buildAuction(deal)
-    expect(a?.turns.slice(0, 6).map((t) => t.call)).toEqual(['2C', '2D', '2NT', '3C', '3S', '4S'])
+    expect(a?.turns.slice(0, 7).map((t) => t.call)).toEqual(['2C', '2D', '2NT', '3C', '3D', '3H', '4S'])
     expect(a?.openerSeat).toBe('N')
     expect(a?.responderSeat).toBe('S')
   })

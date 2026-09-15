@@ -2790,3 +2790,43 @@ stilla, stapeln inuti flyttas; vald färg fryser mätningen så knapparna inte
 studsar vid varje två-trycks-spel); menyn och ⓘ-overlayen följer med. Facit i
 `syd-trakarl.test.tsx` (rektanglarna mockas — jsdom har ingen layout). Uppmätt
 i browsern på 380 px: sänkta vid 13–11 kort, uppe igen från 10 kort.
+
+## 2026-09-15 — Puppet Stayman över 2NT (ägardirektiv, byggd samma dag)
+**Direktivet:** "2NT-svaren skall bli Puppet Stayman. Lär dig om denna,
+förbered bytet." Konventionen lästes in (bridgebum som huvudkälla, Wikipedia,
+Larry Cohen, Porthcawl), planen `docs/puppet-stayman-plan.md` skrevs med åtta
+grindbeslut och exempelhänder, ägaren tog besluten på eftermiddagen och bygget
+gjordes direkt (facit före fix: `puppet-stayman.test.ts`, 71 fall).
+
+**Varför det passar rebidz:** 2NT-öppningen får vara 5-3-3-2 med en 5-korts
+högfärg (`isBalanced`), men den gamla 3♣-Stayman hittade bara 4-4-fiten. En
+sond mot den gamla motorn fann dessutom två luckor som stängdes i samma bygge:
+14 hp + 4-korts högfärg mot 2NT stannade i 4M efter Stayman-fit (ingen slamport),
+och 5-5 i högfärgerna efter transfer slutade i 3NT (hjärtern visades aldrig).
+
+**Strukturen (systemboken §4.3b):** 3♣ = utgångsvärden + minst en 3-korts
+högfärg (ägarbeslut: inget annat krav). Öppnaren 3♥/3♠ = 5-korts, 3♦ = minst en
+4-korts, 3NT = ingen. Efter 3♦ bjuder svararen högfärgen hen INTE har (3♥ =
+4 spader, 3♠ = 4 hjärter) så öppnaren blir spelförare; 4♦ = båda (öppnaren
+bjuder sin bättre 4-korts, lika → 4♥), 4♣ = båda + slamintresse (öppnarens 4M
+→ 4NT vid 33+, 5M-inbjudan 31–32). Smolen över 2NT är borta — ägarens fråga
+"funkar inte Smolen?" fick svaret att Smolen och Puppet använder samma bud efter
+3♣–3♦ med olika betydelse, och att Puppets 3♦ lovar en 4-korts så 4♦ gör
+Smolens jobb. Hybriden för 5-4: 5♥4♠ = transfer + 3♠ (under 3NT), 5♠4♥ = 3♣ +
+4♦, 5-5 = transfer + 4♥. Slamporten efter Puppet-fit: cue-runda gratis under
+4M, 4NT vid 33+ (hp mot visade 20/22). Samma struktur efter 2♣–2♦–2NT (mot 22)
+och över vårt direkta 2NT-inkliv (mot 15–18, utgång från 9 hp).
+
+**Kod:** `responses-2nt.ts` (regel-id:n i `PUPPET`, `puppetAnswer`,
+`betterFourCardMajor`), `responder-rebids.ts`, `strong-2nt-systemson.ts`,
+`auction-decide.ts` (slamraderna: `slamContextFor`/`slamTrumpFromAuction` efter
+3♥/3♠, `slamContextAfterThird`/`slamTrumpAfterThird` efter öppnarens 4M,
+`PUPPET_PLACEMENTS`), `auction-meaning.ts` (betydelserna + `puppetAsked` =
+utgångskrav, annars lästes kaptenens cue inte), `preempt-defense-continuations.ts`
+(inklivets faser advance/complete/rebid/choose), `rules.ts`,
+`overcall-continuations.ts`. Gamla facit som medvetet bytte: `responses-2nt.test.ts`,
+`responder-rebids.test.ts`, `responses-2c.test.ts` (2♣–2♦–2NT–3♣–3♦–3♥–4♠),
+`auction-decide.test.ts`, `auction-stayman-not-natural.test.ts` (rubrik).
+`npx tsc` + hela `npm test` gröna. Medvetet SENARE: 4♣-slamvägen efter
+2♣–2♦–2NT, slamport över 2NT-inklivet, Muppet. CLAUDE.md kortades (fyra äldre
+"nyss klart"-block → pekare) för att hålla 16 kB-vakten.

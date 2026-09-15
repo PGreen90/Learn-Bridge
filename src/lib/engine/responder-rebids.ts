@@ -11,6 +11,7 @@ import { splinterShortSuits, type Major, type ResponseResult } from './responses
 import { responderSecondBidAfter2C } from './responses-2c'
 import { responderPlaceAfterOgust, suitOfWeakTwo } from './responses-weak2'
 import { responderAnswerDrury } from './responses-drury'
+import { PUPPET } from './responses-2nt'
 
 const BID: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
 const SYM: Record<Suit, string> = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
@@ -625,32 +626,54 @@ export function responderRebidIn1NTAuction(response: ResponseResult, rebid: Resp
 }
 
 // === FAS 5 punkt 24: svararens andra bud efter en 2NT-öppning ================
-// 2NT (20–21) är GF-schema (inga inbjudningsbud). Efter Stayman/transfer placerar
-// svararen kontraktet på utgångsnivå: höj funnen fit → utgång, ingen fit → 3NT,
-// 5-4 i högfärgerna efter 3♦ → Smolen (speglar 1NT-varianten: bjud 4-korts hf,
-// visa 5 i den andra – starka handen blir spelförare). Minorfråga/slam = §6.
+// 2NT (20–21) är GF-schema (inga inbjudningsbud). Efter Puppet Stayman/transfer
+// placerar svararen kontraktet på utgångsnivå (ägardirektiv 2026-09-15,
+// `docs/puppet-stayman-plan.md`):
+//  · efter 3♦ (öppnaren har en 4-korts, ingen 5-korts): bjud den högfärg du
+//    INTE har (3♥ = 4 spader, 3♠ = 4 hjärter) så öppnaren blir spelförare;
+//    4♦ = båda (öppnaren väljer, fit garanterad), 4♣ = båda + slamintresse;
+//    utan 4-korts (letade 5-3) sangtrappan (3NT / 4NT / 6NT);
+//  · efter 3♥/3♠ (5-korts): 4M med 3+ stöd (slamporten ligger i beslutstabellen),
+//    annars sangtrappan; efter 3NT: pass / 4NT kvantitativ / 6NT;
+//  · efter transfer: 3♠ = 5♥ + 4♠ (utgångskrav under 3NT), 4♥ = 5♠ + 5♥
+//    (öppnaren väljer), 4M med 6+, annars 3NT (öppnaren väljer 3NT / 4M).
+// Minorfråga/slam = §6. `openerMin` = 20 (2NT-öppning), 22 (2♣–2♦–2NT), 16 (2NT-inkliv).
 export function responderRebidIn2NTAuction(response: ResponseResult, rebid: ResponseResult, hand: Hand, openerMin = 20): ResponseResult | null {
   const p = hcp(hand)
   const len = lengths(hand)
   const sp = len.spades
   const he = len.hearts
   const game = 25 - openerMin // svag transfer (signoff) under utgångsstyrka
+  const slamInvite = 31 - openerMin
+  const slam = 33 - openerMin
   const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${why} → pass.` })
+  const ntLadder = (why: string): ResponseResult => {
+    if (p >= slam) return { call: '6NT', rule: '6NT till spel', explanation: `${why}; slamzon → 6NT.` }
+    if (p >= slamInvite) return { call: '4NT', rule: '4NT kvantitativ', explanation: `${why}; slaminbjudan → 4NT (kvantitativ).` }
+    return { call: '3NT', rule: 'till spel', explanation: `${why} → 3NT.` }
+  }
 
   switch (response.rule) {
-    case 'Stayman (2NT)': {
+    case PUPPET.ask: {
       if (rebid.call === '3D') {
-        // Öppnaren förnekade 4-korts högfärg.
-        if ((sp === 5 && he === 4) || (he === 5 && sp === 4)) {
-          const call = sp === 5 ? '3H' : '3S' // bjud 4-korts hf → visar 5 i den andra
-          return { call, rule: 'Smolen', explanation: `5-4 i högfärgerna → ${SYM[suitOfCall(call)!]} (Smolen över 2NT, utgångskrav).` }
+        // Öppnaren har minst en 4-korts högfärg, ingen 5-korts.
+        if (sp >= 4 && he >= 4) {
+          if (p >= slamInvite) return { call: '4C', rule: PUPPET.bothSlam, explanation: `Båda högfärgerna och slamintresse → 4♣ (öppnaren bjuder sin högfärg på 4-läget).` }
+          return { call: '4D', rule: PUPPET.both, explanation: `Båda högfärgerna → 4♦ (öppnaren bjuder sin 4-korts högfärg — fiten är garanterad).` }
         }
-        return { call: '3NT', rule: 'till spel', explanation: `Utgångsvärden utan fit → 3NT.` }
+        if (sp >= 4) return { call: '3H', rule: PUPPET.fourSpades, explanation: `4 spader → 3♥ (Puppet: bjuder högfärgen jag inte har; öppnaren bjuder 4♠ med 4 spader, annars 3NT).` }
+        if (he >= 4) return { call: '3S', rule: PUPPET.fourHearts, explanation: `4 hjärter → 3♠ (Puppet: bjuder högfärgen jag inte har; öppnaren bjuder 4♥ med 4 hjärter, annars 3NT).` }
+        return ntLadder('Ingen 4-korts högfärg (letade en 5-3-fit)')
       }
-      // Öppnaren visade en högfärg (3♥/3♠).
+      if (rebid.call === '3NT') {
+        if (p >= slam) return { call: '6NT', rule: '6NT till spel', explanation: `Ingen högfärgsfit; slamzon → 6NT.` }
+        if (p >= slamInvite) return { call: '4NT', rule: '4NT kvantitativ', explanation: `Ingen högfärgsfit; slaminbjudan → 4NT (kvantitativ).` }
+        return pass('öppnaren har ingen högfärg, 3NT står')
+      }
+      // Öppnaren visade en 5-korts högfärg (3♥/3♠).
       const target = suitOfCall(rebid.call)
-      if (target && len[target] >= 4) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `Fit → 4${SYM[target]} (utgång).` }
-      return { call: '3NT', rule: 'till spel', explanation: `Utgångsvärden utan fit → 3NT.` }
+      if (target && len[target] >= 3) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `3+ stöd i partnerns 5-korts ${SYM[target]} → 4${SYM[target]} (utgång).` }
+      return ntLadder('Ingen fit i partnerns 5-korts högfärg')
     }
 
     case 'transfer (2NT)': {
@@ -658,6 +681,8 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
       // Svag (signoff i delkontrakt) → passa den fullföljda transfern.
       if (p < game) return pass('svag – transfern var ett signoff i delkontrakt')
       if (len[target] >= 6) return { call: `4${BID[target]}`, rule: 'utgång', explanation: `6+ ${SYM[target]} → 4${SYM[target]} (utgång).` }
+      if (target === 'hearts' && sp >= 4) return { call: '3S', rule: PUPPET.transferFourSpades, explanation: `5 ♥ och 4 ♠ → 3♠ (naturligt, utgångskrav: öppnaren väljer 4♠ / 4♥ / 3NT).` }
+      if (target === 'spades' && he >= 5) return { call: '4H', rule: PUPPET.transferFiveHearts, explanation: `5 ♠ och 5 ♥ → 4♥ (öppnaren väljer 4♥ eller 4♠).` }
       // Exakt 5-korts högfärg, GF → 3NT (öppnaren väljer 3NT eller 4 i färgen).
       return { call: '3NT', rule: 'till spel', explanation: `5 ${SYM[target]} → 3NT (öppnaren väljer 3NT/4 i färgen).` }
     }

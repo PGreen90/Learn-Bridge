@@ -28,6 +28,7 @@ const ALERT_RULE_PREFIXES: string[] = [
   'transfer', // "transfer (2NT)"
   'Texas',
   'Stayman', // ask + svar (hela Stayman-sekvensen)
+  'Puppet', // Puppet Stayman över 2NT (2026-09-15): fråga, svar och fortsättning (3♥ = 4 spader …)
   'Minor Suit Stayman',
   'minorfråga (2NT)',
   'Bergen',
@@ -253,9 +254,18 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // ---- NT-konventioner (§4.3) ----
   Stayman: 'krav-1-rond',
   'Stayman-svar': 'ej-krav',
-  'Stayman (2NT)': 'krav-1-rond',
+  'Puppet Stayman': 'krav-1-rond',
+  'Puppet-svar': 'krav-1-rond',
+  'Puppet-svar: ingen högfärg': 'ej-krav',
+  'Puppet: 4 spader': 'krav-1-rond',
+  'Puppet: 4 hjärter': 'krav-1-rond',
+  'Puppet: båda högfärgerna': 'krav-1-rond',
+  'Puppet: båda, slamintresse': 'slamintresse',
+  'väljer utgång efter Puppet': 'avslut',
   'Jacoby-transfer': 'krav-1-rond',
   'transfer (2NT)': 'krav-1-rond',
+  'transfer: 4 spader': 'krav-1-rond', // 5♥4♠ efter 2NT–3♦–3♥ (Puppet-strukturen)
+  'transfer: 5 hjärter': 'ej-krav', // 5-5 efter 2NT–3♥–3♠: öppnaren passar eller rättar till 4♠
   Texas: 'krav-1-rond',
   'Texas (2NT)': 'krav-1-rond',
   Smolen: 'utgangskrav',

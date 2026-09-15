@@ -36,6 +36,7 @@ const LEVANDE = [
   'docs/kortspel.md',
   'docs/motorbyte-plan.md',
   'docs/oversikt.md',
+  'docs/puppet-stayman-plan.md',
   'docs/senare.md',
   'docs/speldiagnos.md',
   'docs/status.md',

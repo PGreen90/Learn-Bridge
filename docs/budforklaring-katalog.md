@@ -130,3 +130,22 @@ texten (overcalls.ts:344, rebids.ts:756) är SANG-bud (2NT/3NT) som renderas rä
 
 Rule-namn (t.ex. "2-över-1 GF", "rebid: stöd (GF)") står medvetet KVAR oförändrade
 — de vaktas av alerts/regelsvep och visas bara som chip, inte i förklaringstexten.
+
+## Batch 8 — Puppet Stayman över 2NT  ·  🆕 NYA TEXTER 2026-09-15 (ägaren synar)
+Filer: `responses-2nt.ts`, `responder-rebids.ts`, `strong-2nt-systemson.ts`,
+`auction-meaning.ts` (budlådans förklaringar). Texterna beskriver budets löfte.
+
+| Bud | Förklaring i budlådan (betydelselagret) |
+|---|---|
+| 3♣ över 2NT | 3♣ — Puppet Stayman: frågar efter partnerns 5-korts högfärg (svar 3♥/3♠), i andra hand en 4-korts (3♦ = minst en, 3NT = ingen). Lovar utgångsvärden och minst en 3-korts högfärg. Säger inget om klöver. |
+| 3♦ (svar) | 3♦ — svar på Puppet Stayman: minst en 4-korts högfärg, ingen 5-korts. Partnern bjuder den högfärg hen INTE har (3♥ = 4 spader, 3♠ = 4 hjärter, 4♦ = båda). Säger inget om ruter. |
+| 3♥ / 3♠ (svar) | 3♥ — svar på Puppet Stayman: 5 hjärter. / 3♠ — … 5 spader. |
+| 3NT (svar) | 3 sang — svar på Puppet Stayman: varken 4- eller 5-korts högfärg. Till spel (partnern kan gå vidare med slamvärden). |
+| 3♥ efter 3♦ | 3♥ — Puppet: 4 spader, inte 4 hjärter (bjuder högfärgen jag inte har, så partnern blir spelförare). Partnern bjuder 4♠ med 4 spader, annars 3 sang. |
+| 3♠ efter 3♦ | 3♠ — Puppet: 4 hjärter, inte 4 spader (bjuder högfärgen jag inte har). Partnern bjuder 4♥ med 4 hjärter, annars 3 sang. |
+| 4♦ efter 3♦ | 4♦ — Puppet: båda högfärgerna, ingen slamambition. Partnern bjuder sin 4-korts högfärg (fiten är garanterad). |
+| 4♣ efter 3♦ | 4♣ — Puppet: båda högfärgerna med slamintresse. Partnern bjuder sin 4-korts högfärg på 4-läget; sedan essfråga eller inbjudan. Säger inget om klöver. |
+| öppnarens 4♠/4♥/3NT | 4♠ — partnern visade 4 spader och jag har 4: utgång i 4-4-fiten. / 3 sang — partnern visade 4 spader, jag har inte 4: till spel i sang. |
+| 3♠ efter 3♦–3♥ | 3♠ — 5 hjärter och 4 spader, utgångskrav: partnern bjuder 4♠ med 4 spader, 4♥ med 3 hjärter, annars 3 sang. |
+| 4♥ efter 3♥–3♠ | 4♥ — 5 spader och 5 hjärter: partnern väljer 4♥ eller 4♠. |
+
