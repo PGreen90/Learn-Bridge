@@ -47,8 +47,8 @@ function ToggleRow({
         aria-checked={on}
         aria-label={label}
         onClick={onToggle}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-          on ? 'bg-emerald-600' : 'bg-line-strong'
+        className={`focus-ring relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+          on ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-line-strong hover:bg-ink-faint'
         }`}
       >
         <span
@@ -82,9 +82,9 @@ function ChoiceRow<T extends string>({
             key={o.value}
             type="button"
             onClick={() => onChange(o.value)}
-            className={`rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
+            className={`focus-ring rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
               value === o.value
-                ? 'bg-emerald-700 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-control text-ink-soft hover:bg-hover-veil'
             }`}
           >

@@ -67,7 +67,7 @@ export function DagensArkiv({ now = new Date() }: { now?: Date }) {
             aria-label="Föregående månad"
             onClick={() => step(-1)}
             disabled={shownKey <= minKey}
-            className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-line text-ink transition-colors hover:bg-panel disabled:opacity-30"
+            className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-line text-ink transition-colors hover:bg-panel disabled:opacity-30"
           >
             ‹
           </button>
@@ -77,7 +77,7 @@ export function DagensArkiv({ now = new Date() }: { now?: Date }) {
             aria-label="Nästa månad"
             onClick={() => step(1)}
             disabled={shownKey >= maxKey}
-            className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-line text-ink transition-colors hover:bg-panel disabled:opacity-30"
+            className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-line text-ink transition-colors hover:bg-panel disabled:opacity-30"
           >
             ›
           </button>
@@ -100,7 +100,7 @@ export function DagensArkiv({ now = new Date() }: { now?: Date }) {
               return (
                 <div
                   key={i + 1}
-                  className="flex aspect-square items-center justify-center rounded-lg text-sm text-ink-muted opacity-40"
+                  className="flex aspect-square items-center justify-center rounded-lg text-sm text-ink-faint"
                 >
                   {i + 1}
                 </div>
@@ -117,7 +117,7 @@ export function DagensArkiv({ now = new Date() }: { now?: Date }) {
                     ? `Giv #${nr} — ${entry.myTricks} av 13 stick${entry.late ? ' (spelad i efterhand)' : ''}`
                     : `Giv #${nr} — ospelad`
                 }
-                className={`flex aspect-square flex-col items-center justify-center rounded-lg ring-1 transition-all hover:-translate-y-0.5 ${
+                className={`focus-ring flex aspect-square flex-col items-center justify-center rounded-lg ring-1 transition-all hover:-translate-y-0.5 ${
                   isToday ? 'ring-2 ring-gold-400' : 'ring-line'
                 } ${entry ? 'bg-emerald-700/10' : 'hover:bg-panel'}`}
               >

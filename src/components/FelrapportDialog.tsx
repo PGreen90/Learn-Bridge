@@ -114,6 +114,7 @@ export function FelrapportDialog({
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           disabled={sending}
+          aria-label="Beskriv vad som kändes fel"
           placeholder="Beskriv gärna med egna ord vad som kändes fel …"
           className="mt-3 w-full rounded-lg border border-line-strong p-2 text-sm text-ink focus:border-emerald-500 focus:outline-none disabled:opacity-60"
         />

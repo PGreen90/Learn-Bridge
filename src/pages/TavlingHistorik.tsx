@@ -156,7 +156,7 @@ function Medaljtabell({ medaljer }: { medaljer: Medaljrad[] }) {
           </tbody>
         </table>
       )}
-      <p className="text-center text-[11px] text-emerald-100/50">
+      <p className="text-center text-[11px] text-emerald-100/60">
         Topp 5 · guld/silver/brons = plats 1/2/3 en tävlingsdag med minst två spelare · datorspelare
         räknas inte i medaljtabellen.
       </p>
@@ -194,7 +194,7 @@ function Daglista({ dagar, onVälj }: { dagar: HistorikDag[]; onVälj: (dag: str
             >
               <span className="text-emerald-50">
                 <span className="text-emerald-100/60">#{d.nummer}</span> · {kortDatum(d.dag)}
-                {!d.slutlig && <span className="ml-1 text-[11px] text-emerald-100/50">(provisorisk)</span>}
+                {!d.slutlig && <span className="ml-1 text-[11px] text-emerald-100/60">(provisorisk)</span>}
               </span>
               <span className="flex items-center gap-2 tabular-nums">
                 {d.du ? (
@@ -207,7 +207,7 @@ function Daglista({ dagar, onVälj }: { dagar: HistorikDag[]; onVälj: (dag: str
                     <span className="font-semibold text-gold-200">{d.du.snitt.toFixed(1)} %</span>
                   </>
                 ) : (
-                  <span className="text-emerald-100/50">spelade inte</span>
+                  <span className="text-emerald-100/60">spelade inte</span>
                 )}
                 <span className="text-gold-300/70">›</span>
               </span>
@@ -390,14 +390,14 @@ function Bricklista({
                     <span className="ml-1 text-gold-300/70">›</span>
                   </td>
                   <td className="px-2 py-1.5">
-                    {spelad ? <Kontraktscell k={k} /> : <span className="text-emerald-100/40">spelade inte</span>}
+                    {spelad ? <Kontraktscell k={k} /> : <span className="text-emerald-100/60">spelade inte</span>}
                   </td>
                   <td className="px-2 py-1.5 text-center tabular-nums text-emerald-50">{spelad ? resultatText(k) : ''}</td>
                   <td className="py-1.5 pl-2 text-right tabular-nums">
                     {procent !== undefined ? (
                       <span className="font-semibold text-gold-200">{procent.toFixed(0)} %</span>
                     ) : (
-                      <span className="text-emerald-100/40">{spelad ? '—' : ''}</span>
+                      <span className="text-emerald-100/60">{spelad ? '—' : ''}</span>
                     )}
                   </td>
                 </tr>
@@ -406,7 +406,7 @@ function Bricklista({
           </tbody>
         </table>
       </div>
-      <p className="text-center text-[11px] text-emerald-100/45">Tryck på en giv för fältets resultat.</p>
+      <p className="text-center text-[11px] text-emerald-100/60">Tryck på en giv för fältets resultat.</p>
     </div>
   )
 }

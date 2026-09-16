@@ -24,7 +24,7 @@ export function BiddingPractice() {
             <button
               key={s.id}
               onClick={() => setScope(s.id)}
-              className={`text-left rounded-xl border p-3 transition-colors ${
+              className={`focus-ring text-left rounded-xl border p-3 transition-colors ${
                 scope === s.id
                   ? 'border-emerald-500 bg-accent-soft'
                   : 'border-line bg-panel hover:bg-control-hover'
@@ -47,7 +47,7 @@ export function BiddingPractice() {
               <Link
                 key={t.id}
                 to={`/budtraning/${t.id}`}
-                className="flex items-center justify-between rounded-xl border border-line p-4 hover:bg-control-hover transition-colors"
+                className="focus-ring flex items-center justify-between rounded-xl border border-line p-4 hover:bg-control-hover transition-colors"
               >
                 <div>
                   <div className="flex items-center gap-1.5 font-semibold text-ink">

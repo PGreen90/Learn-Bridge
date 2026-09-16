@@ -349,7 +349,7 @@ export function Bord() {
           {stolKort('N')}
           <div />
           {stolKort('W')}
-          <div className="px-2 text-center text-xs text-rose-100/50">
+          <div className="px-2 text-center text-xs text-rose-100/60">
             {meta.status === 'lobby'
               ? 'Lediga stolar fylls med bottar vid start'
               : 'Bordet spelar — ta en ledig stol så hoppar du in'}
@@ -396,7 +396,7 @@ export function Bord() {
           )}
         </div>
         {meta.duArAgare && meta.status === 'lobby' && (
-          <p className="text-xs text-rose-100/50">
+          <p className="text-xs text-rose-100/60">
             Tomma stolar fylls med bottar när du startar. "Sätt bot här" låser en stol som bot
             redan nu, så ingen annan tar den.
           </p>

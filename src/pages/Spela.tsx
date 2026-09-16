@@ -95,7 +95,7 @@ export function Spela() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader title="Budvisning">
         Titta-läge: motorn delar ut en giv och budar alla fyra händerna enligt
         systemboken. Klicka på ett lagt bud för att se vad det betyder.

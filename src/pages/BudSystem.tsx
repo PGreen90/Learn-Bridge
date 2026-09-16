@@ -152,7 +152,7 @@ function CollapseButton({ label }: { label: string }) {
           d.open = false
           d.querySelector('summary')?.scrollIntoView({ block: 'nearest' })
         }}
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-white/5 hover:text-ink"
+        className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-white/5 hover:text-ink"
       >
         ▲
       </button>
@@ -209,17 +209,18 @@ export function BudSystem() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            aria-label="Sök i budsystemet"
             placeholder="Sök i systemet, t.ex. Stayman, spärr, 1NT …"
             className="w-full rounded-xl border border-line-strong bg-control py-2.5 pl-10 pr-10 text-sm
               placeholder:text-ink-faint focus:border-emerald-500 focus:outline-none focus:ring-2
-              
+
               "
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 text-ink-faint hover:bg-panel-2 hover:text-ink-soft"
+              className="focus-ring absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 text-ink-faint hover:bg-panel-2 hover:text-ink-soft"
               aria-label="Rensa sökningen"
             >
               ✕
@@ -246,7 +247,7 @@ export function BudSystem() {
             open={q ? true : undefined}
             className="group rounded-xl border border-line bg-panel shadow-sm"
           >
-            <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-semibold text-accent-strong [&::-webkit-details-marker]:hidden">
+            <summary className="focus-ring flex cursor-pointer select-none list-none items-center justify-between rounded-xl px-4 py-3 font-semibold text-accent-strong [&::-webkit-details-marker]:hidden">
               <span className="flex items-baseline gap-2">
                 {kap && (
                   <span className="font-brand text-lg font-semibold leading-none text-gold-600 dark:text-gold-300">
@@ -277,7 +278,7 @@ export function BudSystem() {
                       open={q ? true : undefined}
                       className="group/sub rounded-lg border border-line bg-panel-2"
                     >
-                      <summary className="flex cursor-pointer select-none list-none items-center justify-between px-3 py-2 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
+                      <summary className="focus-ring flex cursor-pointer select-none list-none items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
                         <span>
                           <Highlight text={sub.title} q={q} />
                         </span>

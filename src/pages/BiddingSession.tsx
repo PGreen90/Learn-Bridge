@@ -45,7 +45,7 @@ function Session({ themeId }: { themeId: string }) {
     return (
       <div className="space-y-6">
         <Panel className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Klart! 🎉</h1>
+          <h1 className="text-2xl font-semibold mb-2">Klart! 🎉</h1>
           <p className="text-lg text-ink-soft mb-1">
             {/* Guld = belöning (faceliften 2026-08-02): slutpoängen i guldserifen. */}
             Du fick{' '}
@@ -132,7 +132,7 @@ function Session({ themeId }: { themeId: string }) {
       {/* Tunn sidhuvud-rad: tema, framsteg och avbryt. */}
       <div className="flex items-center justify-between gap-3 px-1">
         <div>
-          <h1 className="text-lg font-bold leading-tight">{theme.title}</h1>
+          <h1 className="text-lg font-semibold leading-tight">{theme.title}</h1>
           <p className="text-xs text-ink-muted">
             Fråga {exIndex + 1} av {exercises.length}
           </p>

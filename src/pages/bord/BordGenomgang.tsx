@@ -107,7 +107,7 @@ export function BordGenomgang({
 
       <PlayReplay key={deal.id} deal={deal} contract={contract} tricks={tricks} calls={calls} tone="vanner" />
 
-      <p className="px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-center text-[11px] text-rose-100/50">
+      <p className="px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-center text-[11px] text-rose-100/60">
         Stega sticken med pilarna. Tryck på ett bud för dess betydelse.
       </p>
     </div>

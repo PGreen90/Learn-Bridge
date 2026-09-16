@@ -118,7 +118,7 @@ export function MenuToggleRow({
         type="button"
         onClick={onToggle}
         aria-label={label}
-        className={`rounded-full px-3 py-0.5 text-xs font-bold ${
+        className={`focus-ring rounded-full px-3 py-0.5 text-xs font-bold ${
           on ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
         }`}
       >
@@ -147,7 +147,7 @@ export function MenuTempoRow({
             type="button"
             onClick={() => onChange(s)}
             aria-label={`Tempo ${SPEED_LABEL[s]}`}
-            className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+            className={`focus-ring rounded-full px-2 py-0.5 text-xs font-bold ${
               speed === s ? 'bg-emerald-600 text-white' : 'bg-panel-2 text-ink-muted ring-1 ring-line'
             }`}
           >

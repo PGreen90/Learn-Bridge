@@ -27,7 +27,7 @@ export function BidOptions({ options, chosen, answer, onChoose }: Props) {
             key={opt}
             disabled={answered}
             onClick={() => onChoose(opt)}
-            className={`flex h-11 min-w-16 items-center justify-center rounded-lg px-3 text-lg font-bold shadow-sm transition-all ${bidChipTone(opt)} ${
+            className={`focus-ring flex h-11 min-w-16 items-center justify-center rounded-lg px-3 text-lg font-bold shadow-sm transition-all ${bidChipTone(opt)} ${
               answered ? '' : 'cursor-pointer hover:brightness-105'
             } ${extra}`}
           >

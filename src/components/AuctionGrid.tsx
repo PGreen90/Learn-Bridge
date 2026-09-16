@@ -128,7 +128,7 @@ export function AuctionGrid({
         {cells.map((cell, i) => (
           <div key={i} className={`flex items-center justify-center ${dense ? 'h-5' : 'h-6'}`}>
             {cell ? (
-              <button type="button" onClick={() => setSelected((s) => (s === i ? null : i))}>
+              <button type="button" className="focus-ring rounded-md" onClick={() => setSelected((s) => (s === i ? null : i))}>
                 <BidChip
                   bid={cell.bid}
                   small={dense}
@@ -165,7 +165,7 @@ export function AuctionGrid({
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="absolute right-1.5 top-1.5 z-10 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-900/45 text-xl leading-none text-white shadow-lg ring-1 ring-white/40 backdrop-blur-md transition-colors hover:bg-slate-900/60"
+              className="focus-ring absolute right-1.5 top-1.5 z-10 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-900/45 text-xl leading-none text-white shadow-lg ring-1 ring-white/40 backdrop-blur-md transition-colors hover:bg-slate-900/60"
               aria-label="Stäng"
             >
               {/* Glansdager: ljus topp som tonar ut → blank glas-look. */}

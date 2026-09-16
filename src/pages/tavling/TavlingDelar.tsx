@@ -32,8 +32,8 @@ export function resultatText(k?: GivKontrakt | null): string {
 /** Kontraktscellen: nivå + färgsymbol (spader svart) + ev. dubbling + säte.
  *  `null` = utpassad giv; `undefined` = äldre framsteg utan kontraktsfält. */
 export function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
-  if (k === null) return <span className="text-emerald-100/50">Passad</span>
-  if (!k) return <span className="text-emerald-100/40">—</span>
+  if (k === null) return <span className="text-emerald-100/60">Passad</span>
+  if (!k) return <span className="text-emerald-100/60">—</span>
   return (
     <span className="inline-flex items-center gap-0.5 text-emerald-50">
       <span className="tabular-nums">{k.level}</span>
@@ -43,7 +43,7 @@ export function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
         <SuitSymbol suit={k.strain} />
       )}
       {k.doubled && <span className="font-semibold text-danger">{k.doubled}</span>}
-      <span className="ml-1 text-xs text-emerald-100/50">{SÄTE_SV[k.declarer]}</span>
+      <span className="ml-1 text-xs text-emerald-100/60">{SÄTE_SV[k.declarer]}</span>
     </span>
   )
 }
@@ -84,7 +84,7 @@ export function DinStällning({ resultat, total }: { resultat: TopplistaResultat
         </div>
       </div>
       {spelade < total && (
-        <p className="mt-2 text-center text-[11px] text-emerald-100/50">
+        <p className="mt-2 text-center text-[11px] text-emerald-100/60">
           Ospelade givar räknas som {provisoriskProcent ?? 40} % tills du spelat dem.
         </p>
       )}
@@ -189,7 +189,7 @@ export function Resultattabell({
                       </span>
                     ) : (
                       <span
-                        className="text-emerald-100/40"
+                        className="text-emerald-100/60"
                         title={
                           inne
                             ? 'Given är inne men inte poängsatt än — räknas som 40 % i snittet tills fler spelat den'
@@ -206,7 +206,7 @@ export function Resultattabell({
           </tbody>
         </table>
       </div>
-      <p className="text-center text-[11px] text-emerald-100/45">Tryck på en giv för fältets resultat.</p>
+      <p className="text-center text-[11px] text-emerald-100/60">Tryck på en giv för fältets resultat.</p>
     </div>
   )
 }
@@ -267,7 +267,7 @@ export function GivDetalj({
               <Button variant="secondary" onClick={onÖvning}>
                 🔄 Spela given igen — övning
               </Button>
-              <p className="text-[11px] text-emerald-100/50">Övning räknas inte i tävlingen.</p>
+              <p className="text-[11px] text-emerald-100/60">Övning räknas inte i tävlingen.</p>
             </>
           )}
           <button
@@ -340,11 +340,11 @@ export function TravellerTabell({ data, onVälj }: { data: GivResultatSvar; onV�
         </table>
       </div>
       {ensam && (
-        <p className="text-center text-[11px] text-emerald-100/50">
+        <p className="text-center text-[11px] text-emerald-100/60">
           Väntar på fler spelare på den här given.
         </p>
       )}
-      <p className="text-center text-[11px] text-emerald-100/45">
+      <p className="text-center text-[11px] text-emerald-100/60">
         Tryck på en spelare för att se hur given bjöds och spelades.
       </p>
     </div>
@@ -355,7 +355,7 @@ export function TravellerTabell({ data, onVälj }: { data: GivResultatSvar; onV�
  *  har någon tävling/svarar — översikten fungerar ändå. */
 export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
   if (!resultat) {
-    return <p className="text-center text-xs text-emerald-100/50">Hämtar ställningen …</p>
+    return <p className="text-center text-xs text-emerald-100/60">Hämtar ställningen …</p>
   }
   if (resultat.status !== 'ok') return null
   const { topplista, poängsattaGivar, storlek, provisoriskProcent, slutlig } = resultat.data
@@ -388,7 +388,7 @@ export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }
                     {rad.namn}
                     {rad.jag && <span className="text-xs text-gold-300/80">(du)</span>}
                     {/* Spelade givar (Påbyggnad 3): "7/12" — äldre svar saknar fältet. */}
-                    <span className="text-xs tabular-nums text-emerald-100/50" title="Spelade givar">
+                    <span className="text-xs tabular-nums text-emerald-100/60" title="Spelade givar">
                       {rad.spelade ?? rad.antalGivar}/{storlek}
                     </span>
                   </span>
@@ -397,7 +397,7 @@ export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }
               )
             })}
           </ol>
-          <p className="text-center text-[11px] text-emerald-100/50">
+          <p className="text-center text-[11px] text-emerald-100/60">
             Ospelade givar räknas som {provisoriskProcent ?? 40} % tills de spelats ·{' '}
             {poängsattaGivar} {poängsattaGivar === 1 ? 'giv' : 'givar'} poängsatt
             {poängsattaGivar === 1 ? '' : 'a'} · {slutlig ? 'slutlig' : 'provisorisk'}
@@ -406,7 +406,7 @@ export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }
       )}
       {/* Öppen redovisning (trebottarna, ägar-ja 2026-09-01): datorspelarna har
           människonamn och pekas aldrig ut — men att de finns sägs rakt ut. */}
-      <p className="text-center text-[11px] text-emerald-100/50">
+      <p className="text-center text-[11px] text-emerald-100/60">
         I tävlingen deltar även datorspelare.
       </p>
     </div>

@@ -72,7 +72,7 @@ function SkapaBordDialog({
   }
 
   const valKnapp = (aktiv: boolean) =>
-    `rounded-lg px-3 py-1.5 text-sm font-medium ring-1 transition-colors ${
+    `focus-ring rounded-lg px-3 py-1.5 text-sm font-medium ring-1 transition-colors ${
       aktiv
         ? 'bg-emerald-600 text-white ring-emerald-600'
         : 'bg-control text-ink ring-control-line hover:bg-control-hover'

@@ -24,7 +24,7 @@ export function NotFound() {
         </p>
         <Link
           to="/"
-          className="mt-1 rounded-xl bg-gold-400 px-6 py-3 font-display font-bold text-emerald-950 shadow-md transition-all hover:-translate-y-0.5 hover:bg-gold-300 active:scale-[0.98]"
+          className="focus-ring mt-1 rounded-xl bg-gold-400 px-6 py-3 font-display font-bold text-emerald-950 shadow-md transition-all hover:-translate-y-0.5 hover:bg-gold-300 active:scale-[0.98]"
         >
           ← Till start
         </Link>

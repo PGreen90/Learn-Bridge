@@ -50,7 +50,7 @@
   --color-ink: light-dark(#0f172a, #f1f5f9); /* primärtext */
   --color-ink-soft: light-dark(#475569, #94a3b8); /* brödtext */
   --color-ink-muted: light-dark(#64748b, #94a3b8); /* sekundärtext */
-  --color-ink-faint: light-dark(#94a3b8, #64748b); /* ledtrådar/etiketter */
+  --color-ink-faint: light-dark(#6b7688, #8a9aad); /* ledtrådar/etiketter — AA-lyft (designgranskning): förr #94a3b8/#64748b föll under 4.5:1 */
   /* Kanter: grönskuggad hårlinje (aldrig blågrå) — ljust läge ≈ slate-200 i ton. */
   --color-line: light-dark(rgb(3 21 16 / 0.1), rgb(209 250 229 / 0.1));
   --color-line-strong: light-dark(rgb(3 21 16 / 0.2), rgb(209 250 229 / 0.15));
@@ -198,6 +198,21 @@
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
+}
+
+/* Delad tangentbordsfokus-ring (designgranskning 2026-09-15): en tydlig guldring
+   som syns lika bra på vita paneler, på emerald-filten OCH på de färgkodade
+   budrutorna — där webbläsarens egen "auto"-ring annars nästan smälter in i
+   rutans egen kulör (mätt: lila ring på lila chip). Läggs på handrullade
+   kontroller som inte går via <Button>/<PlayingCard> (som har egen fokusstil).
+   Bara :focus-visible → musklick ger ingen ring, tangentbord gör det. */
+.focus-ring:focus-visible {
+  /* Literal guld (gold-400) — inte var(--color-gold-400): byggets CSS-processor
+     (Lightning CSS) tappar var-referensen inuti outline-genvägen så färgen föll
+     tillbaka till currentColor. Guld-400 är ett fast varumärkesvärde. */
+  outline: 2px solid #d9b556;
+  outline-offset: 2px;
+  border-radius: inherit;
 }
 
 /* Mörkt läge styrs av klassen "dark" på <html> (togglas i sidhuvudet och sätts

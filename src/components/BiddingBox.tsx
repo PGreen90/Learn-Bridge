@@ -37,7 +37,7 @@ function BoxChip({
       type="button"
       disabled={!ok}
       onClick={onClick}
-      className={`relative flex h-12 items-center justify-center rounded-lg text-lg font-bold shadow-sm transition-all active:scale-95 ${bidChipTone(bid)} ${
+      className={`focus-ring relative flex h-12 items-center justify-center rounded-lg text-lg font-bold shadow-sm transition-all active:scale-95 ${bidChipTone(bid)} ${
         /* Valt bud: guldring + startsidans roterande guldbåge (gold-frame,
            6 s/varv — ägarbeslut 2026-08-02: samma "levande guld" som hero-korten).
            Ringen ligger INUTI knappen (ring-inset, ägarbeslut 2026-08-02: chipet
@@ -202,7 +202,7 @@ export function BiddingBox({
           type="button"
           disabled={!selected}
           onClick={confirm}
-          className="flex h-12 items-center justify-center rounded-lg bg-sky-500 text-lg font-bold text-white shadow-sm transition-all hover:bg-sky-400 active:scale-95 disabled:opacity-30 disabled:shadow-none"
+          className="focus-ring flex h-12 items-center justify-center rounded-lg bg-sky-500 text-lg font-bold text-white shadow-sm transition-all hover:bg-sky-400 active:scale-95 disabled:opacity-30 disabled:shadow-none"
         >
           OK
         </button>

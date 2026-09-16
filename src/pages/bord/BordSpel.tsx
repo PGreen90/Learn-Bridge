@@ -828,7 +828,7 @@ export function BordSpel({
             <button
               type="button"
               onClick={() => setVisaRapport(true)}
-              className="text-[11px] font-medium text-rose-100/50 underline underline-offset-2 hover:text-rose-100/80"
+              className="text-[11px] font-medium text-rose-100/60 underline underline-offset-2 hover:text-rose-100/80"
             >
               Kändes något fel? Rapportera given
             </button>
@@ -970,7 +970,7 @@ export function BordSpel({
             <button
               type="button"
               onClick={() => setVisaRapport(true)}
-              className="mt-2 text-[11px] font-medium text-rose-100/50 underline underline-offset-2 hover:text-rose-100/80"
+              className="mt-2 text-[11px] font-medium text-rose-100/60 underline underline-offset-2 hover:text-rose-100/80"
             >
               Kändes något fel? Rapportera given
             </button>

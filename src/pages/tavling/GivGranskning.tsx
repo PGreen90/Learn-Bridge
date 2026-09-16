@@ -93,7 +93,7 @@ export function GivGranskning({
         {onRapport && harKort && (
           <Button onClick={onRapport}>Rondgenomgång med förklaringar →</Button>
         )}
-        <p className="text-center text-[11px] text-emerald-100/50">
+        <p className="text-center text-[11px] text-emerald-100/60">
           Stega sticken med pilarna. Tryck på ett bud för dess betydelse.
         </p>
       </div>

@@ -63,7 +63,7 @@ const MODE_ICONS: Record<string, ReactNode> = {
 // Alla fyra knappar är likvärdiga (ägarbeslut 2026-07-31: ingen förmarkering av
 // "Spela kort", ingen "Börja här"-markering).
 const CARD =
-  'group relative block rounded-2xl bg-emerald-950/30 p-4 text-left ring-1 ring-emerald-50/10 gold-frame-hover transition-all hover:-translate-y-0.5 hover:bg-emerald-950/45 active:scale-[0.99]'
+  'focus-ring group relative block rounded-2xl bg-emerald-950/30 p-4 text-left ring-1 ring-emerald-50/10 gold-frame-hover transition-all hover:-translate-y-0.5 hover:bg-emerald-950/45 active:scale-[0.99]'
 
 /** Guld linje-ikon i en tonad ruta (mot det gröna filtet). */
 function ModeIcon({ icon }: { icon: string }) {
@@ -109,7 +109,7 @@ function TavlingCard() {
   return (
     <Link
       to="/spela-kort/tavling"
-      className="gold-frame group relative block w-full max-w-xl rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
+      className="focus-ring gold-frame group relative block w-full max-w-xl rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
     >
       <div className="flex items-center gap-3">
         <ModeIcon icon="calendar" />

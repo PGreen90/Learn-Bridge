@@ -64,7 +64,7 @@ export function Layout() {
     <button
       type="button"
       onClick={() => setTheme(toggleTheme())}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-base hover:bg-white/10 transition-colors"
+      className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-base hover:bg-white/10 transition-colors"
       aria-label={theme === 'dark' ? 'Byt till ljust läge' : 'Byt till mörkt läge'}
       title={theme === 'dark' ? 'Ljust läge' : 'Mörkt läge'}
     >
@@ -76,7 +76,7 @@ export function Layout() {
     // Aktiv flik: diskret guldmarkering (mjuk guldton + guldtext + fin guldkant)
     // i stället för den skrikiga vita pillen (ägarbeslut 2026-07-31). Inaktiva
     // länkar något dämpade så den aktiva sticker ut lugnt; guldton vid hover.
-    return `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+    return `focus-ring px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
       isActive
         ? 'bg-gold-400/15 text-gold-100 ring-1 ring-inset ring-gold-400/30'
         : 'text-white/80 hover:bg-white/10 hover:text-gold-100'
@@ -87,7 +87,7 @@ export function Layout() {
     // Glasmenyns länkar (2026-08-02): EGEN färgsättning skild från emerald-
     // barens vita — iOS-materialens grej är mörk text på ljust glas (ljust
     // läge) resp. ljus text på mörkt glas. text-ink följer läget via tokens.
-    return `block rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+    return `focus-ring block rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
       isActive
         ? 'bg-gold-400/20 text-gold-700 ring-1 ring-inset ring-gold-400/30 dark:text-gold-200'
         : 'text-ink hover:bg-hover-veil'
@@ -97,7 +97,7 @@ export function Layout() {
   // Kontopillret i topbaren: guldkantad så det står lugnt skilt från de vita
   // navlänkarna. Samma stil för "Logga in" och för visningsnamnet.
   function accountPillClass(isActive: boolean): string {
-    return `ml-1 rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset ring-gold-400/40 transition-colors ${
+    return `focus-ring ml-1 rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset ring-gold-400/40 transition-colors ${
       isActive ? 'bg-gold-400/15 text-gold-100' : 'text-white/90 hover:bg-white/10 hover:text-gold-100'
     }`
   }
@@ -154,7 +154,7 @@ export function Layout() {
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-white/10 transition-colors"
+              className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-white/10 transition-colors"
               aria-label={menuOpen ? 'Stäng menyn' : 'Öppna menyn'}
               aria-expanded={menuOpen}
             >
@@ -248,7 +248,7 @@ export function Layout() {
             <button
               type="button"
               onClick={() => nyVersion.update()}
-              className="rounded-lg bg-emerald-700 px-3 py-1 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+              className="focus-ring rounded-lg bg-emerald-600 px-3 py-1 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
             >
               Uppdatera
             </button>
@@ -270,7 +270,7 @@ export function Layout() {
             {/* "Est." (ägarbeslut 2026-08-02, valt framför "grundat"/"sedan"):
                 klubbskyltarnas graverade stämpel — och behöver aldrig
                 översättas när engelskan kommer (Fas 5). */}
-            <p className="text-xs text-ink-faint">
+            <p className="text-xs text-ink-muted">
               © <span className="font-brand text-sm">rebidz</span> · Est. 2026 ·
               v{pkg.version} ·{' '}
               <NavLink to="/om" className="underline underline-offset-2 hover:text-ink">
