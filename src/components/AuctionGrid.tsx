@@ -132,7 +132,7 @@ export function AuctionGrid({
                 <BidChip
                   bid={cell.bid}
                   small={dense}
-                  className={`cursor-pointer hover:brightness-110 ${
+                  className={`cursor-pointer hover:brightness-105 ${
                     selected === i ? 'ring-2 ring-sky-300' : ''
                   }`}
                 />

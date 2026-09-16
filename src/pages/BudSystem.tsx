@@ -152,7 +152,7 @@ function CollapseButton({ label }: { label: string }) {
           d.open = false
           d.querySelector('summary')?.scrollIntoView({ block: 'nearest' })
         }}
-        className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-white/5 hover:text-ink"
+        className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-hover-veil hover:text-ink"
       >
         ▲
       </button>

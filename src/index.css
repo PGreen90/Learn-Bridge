@@ -68,7 +68,24 @@
   --color-control: light-dark(#ffffff, #0b3529); /* sekundärknapp-yta */
   --color-control-hover: light-dark(#f2f6f3, rgb(11 53 41 / 0.7));
   --color-control-line: light-dark(rgb(3 21 16 / 0.15), rgb(209 250 229 / 0.15));
-  --color-hover-veil: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.1)); /* ghost-hover */
+
+  /* ===== HOVER-ROLLER (designgranskning 2026-09-16) ======================
+     EN vokabulär för alla hover-tillstånd, så koden slutar strö egna
+     brightness/opacity/white-veil-varianter. Fyra roller:
+       • bg-hover-veil    — genomskinlig "ghost"-knapp på en TEMAyta (menyval,
+                            ghost-Button, kollaps-ikoner). Temaanpassad slöja.
+       • bg-control-hover — SOLID sekundärkontroll (bg-control) kliver upp en
+                            ton (secondary-Button, val-piller, lobbyn).
+       • bg-white/10      — kontroll PÅ den mörka emerald-baren (sidhuvudet).
+                            Fast ljus slöja; baren är alltid mörk så samma i
+                            båda lägena. (Egen token onödig — värdet är redan
+                            enhetligt på de fyra ställena.)
+       • hover:brightness-105 — färgkodade budchips (BidOptions/BiddingBox/
+                            AuctionGrid) ljusnar. INGEN egen bg-hover.
+     Filtsidornas translucenta knappar mörknar sin EGNA bas (t.ex.
+     emerald-950/60 → /80) — basrelativt, kan inte bli en enskild token; det
+     mönstret hålls oförändrat och internt enhetligt (Play /80, tabeller /30). */
+  --color-hover-veil: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.1)); /* ghost-hover på temayta */
 
   /* Fyrfärgsleken i LÖPTEXT (SuitSymbol): ljusare i mörkt läge så blå/grön
      inte drunknar. Kortens tryck (PlayingCard) använder INTE dessa — kortens
