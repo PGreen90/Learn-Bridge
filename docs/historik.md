@@ -2873,3 +2873,30 @@ Betydelselagret: 4NT efter transfer = kvantitativt, efter Texas = RKC i
 högfärgen, efter öppnarens 3NT = kvantitativt; öppnarens 6M/6NT = accept.
 Lärdom från kvällen: fyra av fem röda facit var MINA felräknade testhänder
 (♣AJ2 = 5, inte 3) — räkna hp med en funktion, inte i huvudet.
+
+## 2026-09-16 — Designpass: granskningens åtgärder (kontrast, fokusring, filt-text, konsekvens)
+
+Ägarinitierad read-only-designgranskning → byggd och ägargodkänd via sida-vid-
+sida-artefakt (före/efter) innan PCD. Inga logikändringar — bara färg-, kontur-
+och opacitetsvärden + ett par klass-/vikttweaks. Mergepunkt `5e62517`, LIVE.
+
+- **P0 kontrast:** token `ink-faint` lyft till AA — ljust `#94a3b8→#6b7688`
+  (2,56→4,59:1), mörkt `#64748b→#8a9aad` (2,84→4,7:1); hierarkin muted>faint
+  behållen. Sidfotens text flyttad `ink-faint→ink-muted` (solid AA på sidytan).
+- **P1 fokusring:** ny delad `.focus-ring` (guld, bara `:focus-visible`) på ~20
+  handrullade kontroller (budlådan, auktionsrutan, budval, inställningsreglagen,
+  budträningskorten, arkivpilarna/dagrutorna, budsystemets sektioner, spelmenyns
+  tempo/toggle, vänner-lobbyn, startkorten, navlänkarna, headerknapparna,
+  404-CTA). Byggfynd: Lightning CSS tappar `var(--color-gold-400)` inuti
+  `outline`-genvägen → literalt guld `#d9b556` (kommenterat i `index.css`).
+- **P1 filt-mikrotext:** 18 sub-AA-etiketter i tävlings-/bordvyerna `/50→/60`.
+- **P2/P3:** primärgrönt enat till `emerald-600` (segmentkontrollen +
+  Uppdatera-pillret matchar `<Button>`); rubrikvikt `font-semibold` i
+  budträningsrunnern; `space-y-4→6` i Budvisning; `aria-label` på budsystemets
+  sök + felrapportens textruta; toggle-hover; arkivets dubbeldämpade celler.
+
+**Medvetet uteställt** (liten vinst mot bred, otestbar spridning — föreslagna som
+egen verifierad omgång): hover-token-konsolidering + aggressiv radie-likriktning
+över filtsidorna. Två av mina egna review-fynd utgick som feldiagnoser (auth-
+rubriken var inte centrerad; `rounded-3xl` är `Felt`-defaulten). Hela sviten grön
+(`npm test`), tsc rent.
