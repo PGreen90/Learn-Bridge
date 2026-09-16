@@ -10,17 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — PUPPET STAYMAN ÖVER 2NT (ägardirektiv 2026-09-15) — LIVE, senast `0207209`
-**Ägarbeslut 2026-09-15 (alla åtta i `docs/puppet-stayman-plan.md`):** 3♣ över
-2NT (även 2♣–2♦–2NT och vårt 2NT-inkliv) = Puppet Stayman: 3♥/3♠ = 5-korts,
-3♦ = 4-korts finns, 3NT = ingen; efter 3♦ bjuder svararen högfärgen hen INTE
-har, 4♦ = båda, 4♣ = båda + slam. Krav: utgångsvärden + en 3-korts högfärg.
-Smolen över 2NT borta (5♥4♠ transfer + 3♠ · 5♠4♥ 3♣ + 4♦ · 5-5 transfer + 4♥).
-Slamport efter Puppet-fit byggd. Systemboken **§4.3b**, facit
-`puppet-stayman.test.ts`. Sond `puppet.probe.test.ts`: 44→46 % rätt; fynd 1 LIVE.
-Slamvägarna kompletta LIVE. **Nästa: ägarens live-prov.**
+### 🔵 NU — LEDIGT: ägaren väljer nästa ur 🟢 NÄST
+Föregående NU **Puppet Stayman över 2NT** är **KLART & LIVE** — live-provet
+godkänt av ägaren 2026-09-16 (ägardirektiv 2026-09-15; systemboken **§4.3b**,
+facit `puppet-stayman.test.ts`, mekaniken i `docs/puppet-stayman-plan.md`,
+mergepunkt `0207209`). Nästa NU väljs ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** Gambling 3NT
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** designgranskningen
+(kontrast/fokusring/filt-text `5e62517` + hover-vokabulär `261e62a`) · Puppet
+Stayman över 2NT (`0207209`) · Gambling 3NT
 (`8e327b3`, `gambling-3nt.ts`, systemboken §3.1+§4.4; forts. SENARE) · kortregeln
 (bara träkarlen i färgkolumner, `useSvavandeMeny.ts`) · bordens SENARE-lista
 (rondgenomgång `5088526` · DD-jämförelse `1af5972` · claim `5dc1524`,

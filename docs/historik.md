@@ -2900,3 +2900,26 @@ egen verifierad omgång): hover-token-konsolidering + aggressiv radie-likriktnin
 över filtsidorna. Två av mina egna review-fynd utgick som feldiagnoser (auth-
 rubriken var inte centrerad; `rounded-3xl` är `Felt`-defaulten). Hela sviten grön
 (`npm test`), tsc rent.
+
+## 2026-09-16 — Hover-konsolidering: dokumenterad vokabulär + två stragglare (designgranskning P2-3)
+
+Andra omgången ur designgranskningen (efter kontrast/fokusring/filt-text-passet
+samma dag). Inventering av alla `hover:`-mönster visade att systemet redan var
+till största del roll-konsekvent — de semantiska tokens fanns (`hover-veil`,
+`control-hover`) och `brightness-105` var redan chip-standard. Ingen churn för
+sakens skull; smal, verifierbar konsolidering. Mergepunkt `261e62a`, LIVE.
+
+- **`index.css`:** ny dokumenterad HOVER-ROLLER-vokabulär (en sanning) — fyra
+  roller: `bg-hover-veil` (ghost på temayta), `bg-control-hover` (solid
+  sekundärkontroll), `bg-white/10` (kontroll på emerald-baren), `brightness-105`
+  (färgkodade chips). Filtsidornas translucenta knappar mörknar sin EGNA bas
+  (t.ex. emerald-950/60 → /80) — basrelativt, kan inte bli en enskild token;
+  mönstret hålls oförändrat och är internt enhetligt (Play /80, tabeller /30).
+- **`BudSystem`:** kollaps-knappens `hover:bg-white/5` → `hover:bg-hover-veil`.
+  Verklig bugg: en vit slöja på vit panel var osynlig i ljust läge.
+- **`AuctionGrid`:** budchip `hover:brightness-110` → `105` (i linje med de
+  övriga chipsen i BiddingBox/BidOptions).
+
+Medvetet uteställt: en ny `bg-brand-hover`-token drogs tillbaka (Tailwind v4
+genererade den inte utan serveromstart — skör; `bg-white/10` är redan enhetligt
+på de fyra ställena). Inga logikändringar. Hela sviten grön (`npm test`), tsc rent.
