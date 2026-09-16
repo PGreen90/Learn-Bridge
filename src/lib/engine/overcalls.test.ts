@@ -53,6 +53,16 @@ describe('overcall – inkliv över deras 1-läges öppning (§7.1–7.2)', () =
   it('ovanlig 2NT över (1♠): två lägsta objudna (klöver+ruter)', () => {
     expect(o('S:3 H:32 D:KQ543 C:KJ542', '1S')).toBe('2NT') // 5-5 minorer
   })
+  // Felrapport #63 (bricka 3, 2026-09-09): 1♦–2NT med ♠Q6 ♥KQT32 ♦A ♣KT543
+  // (5-5 hjärter+klöver). Ägaren "det skall stå ovanlig 2NT". Rapporten skrevs
+  // före motorbytets familj-arbete; nu ger inklivet regel + förklaring som säger
+  // ovanlig 2NT (två lägsta objudna = ♣+♥ över 1♦), inte en naturlig 2NT.
+  it('felrapport #63: ovanlig 2NT över (1♦) med 5-5 ♥+♣ — regel + förklaring säger "ovanlig"', () => {
+    const r = overcall(parseHand('S:Q6 H:KQT32 D:A C:KT543'), '1D')
+    expect(r.call).toBe('2NT')
+    expect(r.rule).toBe('ovanlig 2NT')
+    expect(r.explanation).toMatch(/ovanlig/)
+  })
   it('upplysningsdubbling över (1♥): kort i färgen, stöd i övriga, 12+', () => {
     expect(o('S:KQ43 H:3 D:KQ52 C:Q432', '1H')).toBe('X') // 12 hp, singel hjärter
   })

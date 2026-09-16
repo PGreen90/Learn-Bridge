@@ -577,6 +577,17 @@ export function openerReopensBalancing(hand: Hand, f: AuctionFacts): Kunskap | n
     call: 'X', rule: 'öppnarens återöppningsdubbling (extra, utpassningssits)',
     explanation: `För bra för att sälja given → återöppningsdubbling.`,
   }
+  // Egen 5-korts öppningsfärg och KORT (≤2) i deras färg → bjud om den (felrapport
+  // #66, ägarbeslut 2026-09-16). Pass säljer given för billigt; korthet i deras
+  // färg gör en fit trolig (partnern sitter ofta med längd/värden i övrigt). Med
+  // 3+ i deras färg (fiten osannolik) säljs given fortfarande.
+  if (len[SUIT_OF_LETTER[open.strain]] >= 5 && len[theirSuit] <= 2) {
+    const rebid = cheapestBidIn(history, seat, open.strain)
+    if (rebid && legal.includes(rebid)) return {
+      call: rebid, rule: 'öppnaren tävlar i utpassningssits (egen 5+ färg)',
+      explanation: `5+ ${SWE_SYM[open.strain]} och kort i ${SWE_SYM[theirStrain]} → ${prettyBid(rebid)} (sälj inte given; korthet i deras färg gör fit trolig).`,
+    }
+  }
   return null
 }
 

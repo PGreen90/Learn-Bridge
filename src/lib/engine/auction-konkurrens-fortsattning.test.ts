@@ -112,6 +112,26 @@ describe('öppnarens svar på negativ dubbling: minimum lyfter inte till sang', 
     expect(r.call).toBe('2NT')
   })
 
+  // Felrapport #69 (bricka 2): 1♦–(2♣)–X–P med BALANSERAD 18–19 + klöverstopp.
+  // Förr bjöd öppnaren 2NT (samma bud som 15) och kunde sedan inte visa styrkan
+  // → passade svararens 3♦ med 19 hp (missad utgång). Nu HOPPAR den balanserade
+  // 18–19-handen till 3NT direkt (både 3NT och 5♦ går hem DD). Obalanserad 18
+  // (raden ovan, 5-korts ruter) bjuder fortfarande 2NT.
+  it('felrapport #69: balanserad 18–19 med stopp HOPPAR till 3NT', () => {
+    const r = openerAnswerNegativeDouble(parseHand('S:KT H:AK8 D:AK42 C:Q862'), 'diamonds', '2C')
+    expect(r.call).toBe('3NT')
+  })
+  it('felrapport #69 (hela given via decideCall): Väst bjuder 3NT över den negativa dubblingen', () => {
+    const d = deal('felrapport-69', 'E', 'ns', {
+      N: 'S:7652 H:432 D:Q C:AKJ75',
+      E: 'S:A843 H:QJ9 D:T9653 C:9',
+      S: 'S:QJ9 H:T765 D:J87 C:T43',
+      W: 'S:KT H:AK8 D:AK42 C:Q862',
+    })
+    const H = [call('E', 'P'), call('S', 'P'), call('W', '1D'), call('N', '2C'), call('E', 'X'), call('S', 'P')]
+    expect(decideCall(d, H, 'W').bid).toBe('3NT')
+  })
+
   it('enhet: sang på 1-LÄGET kräver inget extra (1♦–(1♠)–X utan högfärg)', () => {
     // 13 hp, inget 4-korts hjärter, spaderstopp → 1NT som förr.
     const r = openerAnswerNegativeDouble(parseHand('S:KJ3 H:Q42 D:AQ432 C:432'), 'diamonds', '1S')

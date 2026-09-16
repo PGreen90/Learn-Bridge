@@ -441,7 +441,14 @@ function suitHcp(hand: Hand, suit: Suit): number {
 export function openerThirdBidAfterInvertedBrake(hand: Hand, m: Suit, shownSuit: Suit | null): ResponseResult {
   const p = hcp(hand)
   const side = RANK.filter((s) => s !== m)
-  if (p <= 14) {
+  // Uppgradera för ÄKTA korthet i en känd 9-korts minorfit (felrapport #68):
+  // en singel/renons i en sidofärg är ruffvärde som gör en 14:a värd ett driv.
+  // Dubbelton räknas INTE (en platt 3-2-3-5 passar fortfarande), och trumflängd
+  // räknas inte (den är redan förväntad) — bara singel (+2) / renons (+4).
+  const len = lengths(hand)
+  const shortnessLyft = side.reduce((sum, s) => sum + (len[s] === 0 ? 4 : len[s] === 1 ? 2 : 0), 0)
+  const effektiv = p + shortnessLyft
+  if (effektiv <= 14) {
     return { call: 'P', rule: 'rebid: pass', explanation: `Minimum (12–14) mot svararens broms → pass, delkontraktet står.` }
   }
   if (side.every((s) => hasStopper(hand, s))) {

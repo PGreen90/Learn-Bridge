@@ -96,6 +96,7 @@ const ALL_ENGINE_RULES: string[] = [
   'öppnarens höjning (konkurrens)', 'öppnaren tävlar (egen 6+ färg)', 'öppnaren tävlar (stödjer partnern)',
   'öppnaren tävlar efter partnerns pass (egen 6+ färg)', 'öppnarens återöppningsdubbling (partnern passade)',
   'öppnarens återöppningsdubbling (utpassningssits)', 'öppnaren tävlar i utpassningssits (egen 6+ färg)',
+  'öppnaren tävlar i utpassningssits (egen 5+ färg)',
   'öppnarens återöppningsdubbling (extra, utpassningssits)',
   'återbud i konkurrens: egen 6+ färg', 'återbud i konkurrens: sang', 'återbud i konkurrens: sang (18–19)',
   'återbud i konkurrens: ny färg', 'återbud i konkurrens: reverse', 'återbud i konkurrens: egen färg (minimum)',

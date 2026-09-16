@@ -487,3 +487,40 @@ describe('Puppet Stayman – systems on över vårt 2NT-inkliv (beslut 7, 15–1
     expect(meaningOf([...h, call('S', '3C')], 3).rule).toBe('Puppet Stayman')
   })
 })
+
+// Felrapport #62 (bricka 1, 2026-09-09): ägaren "3 ruter skall betyda minst en
+// 4 korts högfärg". Auktionen var 2♣–2♦–2NT(22–24)–3♣–3♦ med den öppnande handen
+// ♠AK3 ♥AKJ ♦AJ64 ♣K63 (3-3-4-3, INGEN 4-korts högfärg). Rapporten skrevs FÖRE
+// Puppet Stayman byggdes (§4.3b, 2026-09-15): då kördes vanlig Stayman där
+// 3♦ = ingen högfärg, så öppnaren bjöd 3♦. Med Puppet (systems on över 2♣–2♦–2NT)
+// visar 3♦ minst en 4-korts högfärg — så öppnaren utan högfärg bjuder nu 3NT, och
+// den betydelse ägaren efterfrågade är den som gäller. Detta låser resolutionen.
+describe('felrapport #62 – Puppet över 2♣–2♦–2NT: 3♦ lovar en 4-korts högfärg', () => {
+  const h = [
+    call('N', 'P'), call('E', 'P'), call('S', 'P'), call('W', '2C'),
+    call('N', 'P'), call('E', '2D'), call('S', 'P'), call('W', '2NT'),
+    call('N', 'P'), call('E', '3C'), call('S', 'P'),
+  ]
+  it('öppnaren utan 4-korts högfärg (♠AK3 ♥AKJ ♦AJ64 ♣K63) bjuder 3NT, inte 3♦', () => {
+    expect(bud('S:AK3 H:AKJ D:AJ64 C:K63', h, 'W')).toMatchObject({ bid: '3NT', rule: 'Puppet-svar: ingen högfärg' })
+  })
+  it('3♦-svaret lovar minst en 4-korts högfärg (betydelsen ägaren efterfrågade)', () => {
+    const with3D = [...h, call('W', '3D')]
+    expect(meaningOf(with3D, with3D.length - 1).text).toMatch(/minst en 4-korts högfärg/)
+  })
+})
+
+// Felrapport #67 (bricka 1, 2026-09-09): samma som #62 men över en 2NT-ÖPPNING.
+// Öst öppnar 2NT med ♠AK5 ♥642 ♦AKQ6 ♣A64 (3-3 i högfärgerna = ingen 4-korts),
+// Väst 3♣ Puppet. Rapporten skrevs före Puppet-bygget; nu bjuder öppnaren utan
+// högfärg 3NT och 3♦ lovar en 4-korts högfärg.
+describe('felrapport #67 – Puppet över 2NT-öppning: 3♦ lovar en 4-korts högfärg', () => {
+  const h = [call('N', 'P'), call('E', '2NT'), call('S', 'P'), call('W', '3C'), call('S', 'P')]
+  it('öppnaren utan 4-korts högfärg (♠AK5 ♥642 ♦AKQ6 ♣A64) bjuder 3NT, inte 3♦', () => {
+    expect(bud('S:AK5 H:642 D:AKQ6 C:A64', h, 'E')).toMatchObject({ bid: '3NT', rule: 'Puppet-svar: ingen högfärg' })
+  })
+  it('3♦-svaret lovar minst en 4-korts högfärg', () => {
+    const with3D = [...h, call('E', '3D')]
+    expect(meaningOf(with3D, with3D.length - 1).text).toMatch(/minst en 4-korts högfärg/)
+  })
+})

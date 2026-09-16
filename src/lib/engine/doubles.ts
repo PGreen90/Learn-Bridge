@@ -141,10 +141,17 @@ export function openerAnswerNegativeDouble(hand: Hand, ourOpen: Suit, theirCall:
   //    som SISTA utväg i steg 3c nedan.
   if (hasStopper(hand, their) && (theirLevel === 1 || p >= 15)) {
     const ntLevel = theirLevel // NT rankar över alla färger → alltid samma nivå
+    // Balanserad 18–19 HOPPAR ett steg i sang (felrapport #69): annars bjuds
+    // samma 2NT som med 15, öppnaren kan inte visa styrkan, och en säker utgång
+    // missas. Bara balanserad hand (en 5-korts sidofärg beskrivs hellre naturligt
+    // — obalanserad 18 stannar på 2NT). Hoppet är utgång, partnern får passa.
+    const jump = isBalanced(hand) && p >= 18 ? 1 : 0
     return {
-      call: `${ntLevel}NT`,
+      call: `${ntLevel + jump}NT`,
       rule: 'svar på negativ dubbling',
-      explanation: `Ingen fjärde högfärg men stopp i deras färg → ${ntLevel} sang.`,
+      explanation: jump
+        ? `Balanserad 18–19 med stopp i deras färg → ${ntLevel + jump} sang (hoppande, utgång).`
+        : `Ingen fjärde högfärg men stopp i deras färg → ${ntLevel} sang.`,
     }
   }
 

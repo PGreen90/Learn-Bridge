@@ -92,4 +92,20 @@ describe('Öppnarens återöppning i utpassningssits (1M–(inkliv)–P–P)', (
     })
     expect(decideCall(deal, H, 'S').bid).toBe('P')
   })
+
+  // ---- FACIT (felrapport #66): 1♣–(1♦)–P–P, öppnaren 14 hp, 5 klöver, BARA 2
+  // kort i deras färg → bjud om klövern (2♣). Förr föll den mellan grenarna
+  // (2 ruter = ej ≤1 → X; 5 klöver = ej 6+ → rebjud; 14 = ej 15+ → X) och sålde
+  // given på 1♦. Ägarbeslut 2026-09-16: pass är för billigt; kort i deras färg +
+  // egen 5+ färg → tävla. 3 kort i deras färg (raden ovan) säljer fortfarande.
+  it('14 hp, 2 kort i deras färg, 5 klöver → tävlar 2♣ (felrapport #66)', () => {
+    const H = [call('S', '1C'), call('W', '1D'), call('N', 'P'), call('E', 'P')]
+    const deal = dealOf('S', {
+      N: 'S:QT93 H:72 D:953 C:KT98',
+      E: 'S:A642 H:T643 D:Q4 C:J43',
+      S: 'S:KJ8 H:KJ5 D:T6 C:AQ762',   // 14 hp, 2 ruter (kort), 5 klöver
+      W: 'S:75 H:AQ98 D:AKJ872 C:5',
+    })
+    expect(decideCall(deal, H, 'S').bid).toBe('2C')
+  })
 })

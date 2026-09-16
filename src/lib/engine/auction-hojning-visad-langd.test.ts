@@ -14,12 +14,20 @@
 // Kör om svepet: $env:PLIKT='1'; npx vitest run src/lib/engine/pliktsvep.probe.test.ts
 
 import { describe, expect, it } from 'vitest'
-import type { Seat } from '../../types/bridge'
+import type { Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
+import { parseHand } from '../bidding'
 import { dealFromSeed } from './revisor'
 import { decideCall } from './auction-live'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
+
+function dealOf(dealer: Seat, vul: Deal['vulnerability'], hands: Record<Seat, string>): Deal {
+  return {
+    id: 't', dealer, vulnerability: vul, board: 3,
+    hands: { N: parseHand(hands.N), E: parseHand(hands.E), S: parseHand(hands.S), W: parseHand(hands.W) },
+  }
+}
 
 describe('K3 (a) – advancern höjer partnerns 1-lägesinkliv på 3-korts stöd', () => {
   it('frö 20261314: 1♥–(1♠)–2♥: Väst (♠A75, 10 hp) höjer 2♠ — inte pass', () => {
@@ -115,5 +123,22 @@ describe('K3 (c) – svararen över ovanlig 2NT / Michaels', () => {
     const deal = dealFromSeed(20261162)
     const c = decideCall(deal, [call('W', '1H'), call('N', '2NT')], 'E')
     expect(c.bid).toBe('4H')
+  })
+
+  // Felrapport #61 (bricka 3): 1♥–(2♥ Michaels = spader + minor). Nord har
+  // ♠Q9832 ♥AJ74 ♦T2 ♣Q9 = 9 hp, som med två dubbletonger räknades till 11
+  // stödpoäng → 4♥ direkt. Men ♠Q sitter i VÄSTS visade spaderfärg (under AK)
+  // och är död; efter avdrag för honnören i deras färg är Nord under 10 →
+  // tävlande 3♥, inte utgång (ägarbeslut 2026-09-16).
+  it('frö felrapport #61: 1♥–(2♥ Michaels): Nord (♠Q9832 ♥AJ74, ♠Q i deras färg) tävlar 3♥, inte 4♥', () => {
+    const deal = dealOf('S', 'ew', {
+      N: 'S:Q9832 H:AJ74 D:T2 C:Q9',
+      E: 'S:J H:852 D:543 C:T87643',
+      S: 'S:T7 H:KQT96 D:Q96 C:KJ5',
+      W: 'S:AK654 H:3 D:AKJ87 C:A2',
+    })
+    const c = decideCall(deal, [call('S', '1H'), call('W', '2H')], 'N')
+    expect(c.bid).toBe('3H')
+    expect(c.rule).toBe('konkurrenshöjning')
   })
 })

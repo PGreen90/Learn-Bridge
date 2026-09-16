@@ -363,6 +363,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'öppnarens återöppningsdubbling (partnern passade)': 'krav-1-rond',
   'öppnarens återöppningsdubbling (utpassningssits)': 'krav-1-rond',
   'öppnaren tävlar i utpassningssits (egen 6+ färg)': 'ej-krav',
+  'öppnaren tävlar i utpassningssits (egen 5+ färg)': 'ej-krav',
   'öppnarens återöppningsdubbling (extra, utpassningssits)': 'krav-1-rond',
   'återbud i konkurrens: egen 6+ färg': 'ej-krav',
   'återbud i konkurrens: sang': 'ej-krav',

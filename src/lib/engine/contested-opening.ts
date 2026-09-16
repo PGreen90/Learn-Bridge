@@ -34,7 +34,7 @@ import { bidValue, cheapestBidIn, legalCalls, prettyBid, SWE_SYM } from './aucti
 import { answerSupportDouble, negativeDouble, openerAnswerNegativeDouble, supportDouble, supportDoublerRebid } from './doubles'
 import { pointsWithFloor } from './evaluation'
 import { raiseWithFit } from './fit-raise'
-import { hcp, isBalanced, lengths } from './hand'
+import { hcp, isBalanced, lengths, suitHcp } from './hand'
 import { hasStopper } from './overcalls'
 import type { Kunskap } from './overcall-continuations'
 import { side } from './play'
@@ -412,11 +412,31 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
   if (twoSuiter && isMajorOpening) {
     const support = len[openerSuit]
     const sp = pointsWithFloor(hand, openerSuit, 'support')
-    if (support >= 4 && sp.points >= 10) {
-      return { call: `4${LETTER[openerSuit]}` as Bid, rule: 'höjning till utgång', explanation: `4+ stöd och ${sp.text} mot deras tvåfärgsinkliv → 4${SUIT_SYM[openerSuit]} direkt.` }
+    // Honnörer i motståndarnas VISADE färg är döda på vår sida (felrapport #61:
+    // 1♥–(2♥ Michaels) med ♠Q9832 — Nords ♠Q sitter under Västs AK i deras egen
+    // 5-korts spaderfärg). Diskontera dem innan höjningens styrka döms, så en
+    // hand vars poäng till stor del ligger i deras färg inte hoppar till utgång.
+    // BARA över Michaels: cuen i vår högfärg visar KONKRET den andra högfärgen
+    // (över 1♥ = spader, över 1♠ = hjärter). Ovanlig 2NT visar båda minorerna,
+    // men de höjningarna dömdes redan av ägaren (frö 20262025/20263327) med full
+    // stödpoäng — de rör vi inte här.
+    const isMichaels = ovSuit === openerSuit
+    const otherMajor: Suit = openerSuit === 'hearts' ? 'spades' : 'hearts'
+    const shownSuits: Suit[] = isMichaels ? [otherMajor] : []
+    const deadHcp = shownSuits.reduce((sum, s) => sum + suitHcp(hand, s), 0)
+    const effPoints = sp.points - deadHcp
+    const workingHp = sp.hp - deadHcp
+    const effText =
+      deadHcp === 0
+        ? sp.text
+        : effPoints > workingHp
+          ? `${workingHp} arbetande hp (${effPoints} med fördelning, efter avdrag för honnör i deras färg)`
+          : `${workingHp} arbetande hp (efter avdrag för honnör i deras färg)`
+    if (support >= 4 && effPoints >= 10) {
+      return { call: `4${LETTER[openerSuit]}` as Bid, rule: 'höjning till utgång', explanation: `4+ stöd och ${effText} mot deras tvåfärgsinkliv → 4${SUIT_SYM[openerSuit]} direkt.` }
     }
-    if (support >= 4 || (support === 3 && sp.points >= 10)) {
-      return { call: `3${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${support >= 4 ? '4+ stöd (9 trumf)' : `3-korts stöd med ${sp.text}`} mot deras tvåfärgsinkliv → 3${SUIT_SYM[openerSuit]} (tävlande höjning, ej krav).` }
+    if (support >= 4 || (support === 3 && effPoints >= 10)) {
+      return { call: `3${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${support >= 4 ? '4+ stöd (9 trumf)' : `3-korts stöd med ${effText}`} mot deras tvåfärgsinkliv → 3${SUIT_SYM[openerSuit]} (tävlande höjning, ej krav).` }
     }
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt mot deras tvåfärgsinkliv → pass.` }
   }

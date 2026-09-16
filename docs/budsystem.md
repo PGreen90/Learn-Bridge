@@ -411,7 +411,9 @@ Tre preciseringar (B13):
   (10–12) svarar svararen **3m = "bara minimum"** (ej krav). Öppnaren passar
   med 12–14 (delkontraktet står) men **driver med 15+**: 3NT när egna handen
   täcker alla tre sidofärgerna, annars en andra stopp-visning under 3NT om en
-  ryms, annars 5 i lf. Efter en andra stopp-visning bjuder svararen 3NT när
+  ryms, annars 5 i lf. En **14:a med singel/renons** i en sidofärg **uppgraderas
+  till driv** (ruffvärde i den kända 9-korts fiten; singel +2, renons +4 —
+  dubbelton och trumflängd räknas inte, felrapport #68); en platt 14:a passar. Efter en andra stopp-visning bjuder svararen 3NT när
   resten är täckt, annars 5 i lf. Med 13+ bromsar svararen inte utan
   fortsätter mot utgång direkt (3NT när övriga sidofärger är täckta, annars
   5 i lf). Så visas styrkan ärligt i två steg — precis som riktiga par gör.
@@ -1418,7 +1420,8 @@ färg bakom sig och väntar på att du ska återöppna). Gäller **även 1-läge
 | **X (återöppning)** | **kort (singel/renons) i deras färg** → takeout; partnern kan **konvertera till straff** genom att passa |
 | **bjud om egen färg** (t.ex. 2♠) | **egen 6+ färg** → tävla, sälj inte med en 6-korts färg |
 | **X (återöppning)** | 15+ hp (extra) även utan kort i deras färg |
-| Pass | jämn minimum, längd i deras färg, ingen 6-korts färg → sälj (partnern hade en chans) |
+| **bjud om egen färg** (t.ex. 2♣) | **egen 5-korts öppningsfärg OCH kort (≤2) i deras färg** → tävla (felrapport #66); korthet gör en fit trolig, partnern sitter ofta med längd/värden i övrigt |
+| Pass | jämn minimum, **3+ i deras färg**, ingen egen längd → sälj (partnern hade en chans) |
 
 **Balanseringsfilosofi:** i utpassningssitsen är partnern **markerad med värden**
 (annars hade motståndarna budat vidare), så en återöppning på **kort i deras färg** är
@@ -2259,7 +2262,10 @@ dubblarens eget flöde (X + egen färg).
   bra på minimum med stopp, men på **2-läget+** kräver sangen **extra (~15+)** —
   en minimiöppnare visar hellre (utan nivåhöjning, i ordning) en **annan objuden
   4+ färg**, sedan sitt **5-korts återbud** (t.ex. 1♦–(2♣)–X–P–**2♦**), och tar
-  sang-med-stopp först som sista utväg.
+  sang-med-stopp först som sista utväg. En **balanserad 18–19 med stopp HOPPAR**
+  ett steg i sang (t.ex. 1♦–(2♣)–X–P–**3NT**, felrapport #69) — annars bjuds
+  samma 2NT som med 15 och styrkan kan aldrig visas, så en säker utgång missas;
+  en obalanserad 18 (5-korts sidofärg) stannar på 2NT och beskriver formen.
   **Egen 6-korts högfärg rebjuds FÖRE sang (provspels-fynd frö 20260797):** har
   öppnaren en **6-korts högfärg** (och inte 4-korts stöd i den högfärg X:et lovar)
   visas den — billigast med minimum, **hoppande med 16+** — före ett sang-bud. En
@@ -2517,6 +2523,16 @@ oavsett poäng. Bara efter en högfärgsöppning; efter 1♣/1♦ gäller de gam
 reglerna. "Unusual vs unusual" (cue i deras färger som limithöjning+) spelas
 inte.
 
+**Döda honnörer i deras visade färg diskonteras (felrapport #61, ägarbeslut
+2026-09-16).** Efter en **Michaels**-cue är den ena visade färgen känd (över 1♥ =
+spader, över 1♠ = hjärter), och den ligger normalt hos motståndarna 5-korts.
+Honnörer vi själva har där är döda — de sitter under inklivarens ess/kung. Innan
+höjningens styrka döms drar vi därför bort honnörspoängen i den färgen: `1♥–(2♥
+Michaels)` med ♠Q9832 ♥AJ74 ♦T2 ♣Q9 räknades förr till 11 stödpoäng (9 hp + två
+dubbletonger) och hoppade till 4♥, men ♠Q är död → 7 arbetande hp, 9 stödpoäng →
+**3♥ (tävlande), inte utgång**. Avdraget gäller bara Michaels (den kända färgen);
+ovanlig 2NT (båda minorerna) räknas med full stödpoäng som förr.
+
 **(f) De dubblar vårt svar — systems on (motorbytet etapp 4 familj 2,
 2026-09-08).** Efter 1♦–(P)–1♥–(X) tar dubblingen ingen budyta: **öppnaren
 ger sitt vanliga återbud** (1NT 12–14, enkel höjning, rebud, reverse …) och
@@ -2712,6 +2728,38 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-16 — Felrapport #69: öppnaren hoppar 3NT med balanserad 18–19 efter
+  negativ dubbling (§7.4; ägarbeslut).** `1♦–(2♣)–X–P` bjöd samma 2NT med 15 som
+  med 19, öppnaren kunde inte visa styrkan och passade svararens 3♦ (missad
+  utgång). Nu hoppar en BALANSERAD 18–19 med stopp i deras färg direkt till 3NT
+  (både 3NT och 5♦ går hem DD). En obalanserad 18 (5-korts sidofärg) bjuder
+  fortfarande 2NT. Kod `doubles.ts` (`openerAnswerNegativeDouble`), facit
+  `auction-konkurrens-fortsattning.test.ts` ("felrapport #69").
+- **2026-09-16 — Felrapport #68: öppnaren uppgraderar för singel över inverterad
+  broms (§5.2; ägarbeslut).** `1♦–2♦–2♥(stopp)–3♦(broms)`: en 14 hp-hand med
+  SINGEL i en sidofärg och 5-korts trumf i en 9-korts fit drev förr inte (rå hp
+  ≤ 14 → pass). Nu läggs ruffvärde till (singel +2, renons +4; dubbelton och
+  trumflängd räknas inte) → 14 + singel driver utgång (5♦ när 3NT är otäckt).
+  Den platta 3-2-3-5:an passar fortfarande. Kod `rebids.ts`
+  (`openerThirdBidAfterInvertedBrake`), facit `auction-decide.test.ts`.
+- **2026-09-16 — Felrapport #66: öppnaren tävlar med egen 5+ färg i utpassnings-
+  sitsen (§7.8/§5.9; ägarbeslut).** `1m–(inkliv)–P–P` tillbaka till öppnaren:
+  förr täckte grenarna bara ≤1 i deras färg (→X), 6+ egen färg (→rebjud) och
+  15+ (→X); en 14 hp-hand med 5-korts färg och 2 i deras färg föll mellan och
+  sålde given. Nu: egen 5+ öppningsfärg OCH kort (≤2) i deras färg → bjud om den
+  (pass är för billigt; korthet gör fit trolig). 3+ i deras färg säljer
+  fortfarande. Kod `contested-continuations.ts` (`openerReopensBalancing`), facit
+  `auction-opener-reopen-balancing.test.ts` ("felrapport #66").
+- **2026-09-16 — Felrapport #61: döda honnörer i deras Michaels-färg diskonteras
+  (§7.8 e; ägarbeslut).** `1♥–(2♥ Michaels)` med ♠Q9832 ♥AJ74 ♦T2 ♣Q9 hoppade
+  till 4♥ (9 hp + två dubbletonger = 11 stödpoäng ≥ 10). Men ♠Q sitter i Västs
+  visade 5-korts spaderfärg (under AK) och är död. Nu dras honnörspoängen i
+  Michaels KÄNDA färg (över 1♥ = spader, över 1♠ = hjärter) bort innan höjningens
+  styrka döms → 7 arbetande hp, 9 stödpoäng → **3♥ tävlande**, inte utgång.
+  Avdraget gäller bara Michaels; ovanlig 2NT (båda minorerna) räknas som förr, så
+  de äldre 2NT-låsen (frö 20262025/20263327) står orörda. Kod
+  `contested-opening.ts` (`contestedResponse`, tvåfärgsgrenen), facit
+  `auction-hojning-visad-langd.test.ts` ("frö felrapport #61").
 - **2026-09-14 — Gambling 3NT ersätter "3NT = 25–27 balanserad" (§3.1, §4.4;
   ägarbeslut, ja på alla fem punkterna).** Stil: aggressiv (solid 7+ lågfärg med
   AKQ, inget A/K utanför, ingen renons, ingen 4-korts sidofärg), samma betydelse

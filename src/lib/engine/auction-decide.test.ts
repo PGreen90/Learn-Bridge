@@ -380,6 +380,16 @@ describe('familj 4b – öppnarens tredje bud: läget "jag öppnade, partnern sv
     expect(bud('S:KQ2 H:KJ3 D:AJ5 C:KQ86', hist('1C', '2C', '2D', '3C'), 'N')!.call).toMatchObject({ bid: '3NT', rule: '3NT till spel' })
   })
 
+  // Felrapport #68 (bricka 12): 1♦–2♦(inverterad)–2♥(stopp)–3♦(broms). Öppnaren
+  // ♠3 ♥AK52 ♦KJ963 ♣K92 = 14 hp men SINGEL spader + 5-korts trumf i en 9-korts
+  // fit → uppgraderas till driv. 3NT otäckt (♠3 utan stopp, motparten lång i
+  // spader) → 5♦. Förr passade den på rå 14 hp. Den platta 3-2-3-5:an ovan (bara
+  // dubbelton) passar fortfarande — bara singel/renons uppgraderar.
+  it('felrapport #68: 14 hp MED singel spader driver 5♦ över bromsen (ej pass)', () => {
+    expect(bud('S:3 H:AK52 D:KJ963 C:K92', hist('1D', '2D', '2H', '3D'), 'N')!.call)
+      .toMatchObject({ bid: '5D', rule: 'höjning till utgång' })
+  })
+
   it('2/1 med försenat stöd: öppnaren beskriver på 3m; ett hopp till 4m är trumf satt + slamdriv (§5b beslut 12) — öppnaren öppnar cue-ronden ur slamraden (här 5♦: ingen kontroll utanför trumfen att visa)', () => {
     const h = 'S:K72 H:Q3 D:AQJ54 C:K86'
     const t = bud(h, hist('1D', '2C', '2NT', '3D'), 'N')!.call
