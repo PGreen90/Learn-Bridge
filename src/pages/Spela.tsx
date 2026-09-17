@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type { Deal, Hand, Seat } from '../types/bridge'
-import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
+import { parseHand, SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import { dealRandom } from '../lib/engine/deal'
 import { classifyOpening, isVulnerable } from '../lib/engine/openings'
 import { dealWithAuction } from '../lib/engine/auction'
@@ -46,6 +47,29 @@ function buildFullAuction(deal: Deal): ResolvedCall[] {
 /** Partnern mittemot. */
 const PARTNER: Record<Seat, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
 
+// DEV-bara giv-laddare (felrapport-granskning): budvisningen kan öppna en EXAKT
+// giv via query-param, t.ex. `#/budvisning?d=E&v=ns&n=KQT7.AQ8.AKJ3.J6&…`. Varje
+// hand skrivs spader.hjärter.ruter.klöver (PBN-likt, renons = tomt). Bara i dev –
+// i den byggda appen ignoreras parametrarna helt (import.meta.env.DEV).
+function dealFromParams(sp: URLSearchParams): Deal | null {
+  if (!import.meta.env.DEV) return null
+  const parse = (k: string): Hand | null => {
+    const v = sp.get(k)
+    if (!v) return null
+    const [S = '', H = '', D = '', C = ''] = v.split('.')
+    try {
+      return parseHand(`S:${S || '-'} H:${H || '-'} D:${D || '-'} C:${C || '-'}`)
+    } catch {
+      return null
+    }
+  }
+  const N = parse('n'), E = parse('e'), S = parse('s'), W = parse('w')
+  if (!N || !E || !S || !W) return null
+  const dealer = (sp.get('d') as Seat) || 'N'
+  const vulnerability = (sp.get('v') as Deal['vulnerability']) || 'none'
+  return { id: 'dev-felrapport', board: 1, dealer, vulnerability, hands: { N, E, S, W } }
+}
+
 /** En hands kort i solfjäderordning (♠ ♥ ♣ ♦, som HandFan) för sidostaplarna. */
 function fanCards(hand: Hand) {
   return HAND_SUITS.flatMap((suit) => bySuit(hand, suit))
@@ -61,7 +85,8 @@ function HpTag({ label, hand }: { label: string; hand: Hand }) {
 }
 
 export function Spela() {
-  const [deal, setDeal] = useState<Deal>(() => dealRandom())
+  const [searchParams] = useSearchParams()
+  const [deal, setDeal] = useState<Deal>(() => dealFromParams(searchParams) ?? dealRandom())
   const [openSurvey, setOpenSurvey] = useState<OpeningSurvey | null>(null)
   const [respSurvey, setRespSurvey] = useState<ResponseSurvey | null>(null)
   // Antal bud som hittills lagts på bordet (uppspelningen).

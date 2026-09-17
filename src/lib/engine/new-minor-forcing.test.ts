@@ -54,6 +54,14 @@ describe('NMF steg 1 – svararens New Minor Forcing-bud', () => {
   it('4-korts högfärg + 13 hp → ingen NMF → 3NT', () => {
     expect(nmf('S:82 H:AQ97 D:KQ84 C:Q84', 'clubs', 'hearts')).toBe('3NT')
   })
+
+  // Felrapport #73 (ägarbeslut 2026-09-17): med SLAMVÄRDEN (19+ hp) och en
+  // 4-korts högfärg håller svararen budgivningen LÅG via NMF i stället för att
+  // hoppa 4NT kvantitativt — utgång är känd, så utforska öppnarens min/max +
+  // dolda fit först. 1♣–1♠–1NT med ♠KQT7 ♥AQ8 ♦AKJ3 ♣J6 (20 hp) → 2♦.
+  it('felrapport #73: 4-korts högfärg + 20 hp (slamzon) → 2♦ NMF, inte 4NT', () => {
+    expect(nmf('S:KQT7 H:AQ8 D:AKJ3 C:J6', 'clubs', 'spades')).toBe('2D')
+  })
 })
 
 // =============================================================================
@@ -69,17 +77,20 @@ function oa(notation: string, opened: Suit, responderMajor: Suit, nmfMinor: Suit
 }
 
 describe('NMF steg 2 – öppnarens svar på New Minor Forcing', () => {
-  // 1) 4-korts ANDRA högfärg. 1♦–1♠–1NT–2♣ → öppnaren visar 4 hjärter → 2♥.
+  // Min/max delas vid 12 / 13–14 (felrapport #73, ägarbeslut 2026-09-17): 13 är
+  // accept-värt maximum (som den kvantitativa 4NT-accepten), 12 är dött minimum.
+  // 1) 4-korts ANDRA högfärg: alltid billigast (2♥) — ingen min/max här, ett hopp
+  //    skulle äta upp utrymmet svararens minor-höjning behöver.
   it('4-korts andra högfärg → 2♥', () => {
     expect(oa('S:K3 H:AJ85 D:A9763 C:Q4', 'diamonds', 'spades', 'clubs', 'hearts')).toBe('2H')
   })
 
   // 2) 3-korts stöd i svararens högfärg. 1♣–1♥–1NT–2♦.
-  it('3-korts stöd, minimum (13) → 2♥', () => {
-    expect(oa('S:K73 H:K85 D:Q4 C:AJ932', 'clubs', 'hearts', 'diamonds', 'spades')).toBe('2H')
+  it('3-korts stöd, minimum (12) → 2♥', () => {
+    expect(oa('S:KJ3 H:K85 D:42 C:AJ932', 'clubs', 'hearts', 'diamonds', 'spades')).toBe('2H')
   })
-  it('3-korts stöd, maximum (14) → hopp 3♥', () => {
-    expect(oa('S:Q73 H:K85 D:A4 C:AJ932', 'clubs', 'hearts', 'diamonds', 'spades')).toBe('3H')
+  it('3-korts stöd, maximum (13) → hopp 3♥', () => {
+    expect(oa('S:K73 H:K85 D:Q4 C:AJ932', 'clubs', 'hearts', 'diamonds', 'spades')).toBe('3H')
   })
 
   // 3) NT med stopp i den objudna färgen (spader). 1♣–1♥–1NT–2♦.
@@ -101,12 +112,12 @@ describe('NMF steg 2 – öppnarens svar på New Minor Forcing', () => {
   })
 
   // Integration: i en LEVANDE auktion svarar öppnaren NMF (passar aldrig bort det).
-  it('decideCall: öppnaren (Nord) svarar 2♥ på partnerns NMF, passar inte', () => {
+  it('decideCall: öppnaren (Nord) svarar 3♥ på partnerns NMF (13 = maximum), passar inte', () => {
     const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
     const deal: Deal = {
       id: 't', dealer: 'N', vulnerability: 'none', board: 1,
       hands: {
-        N: parseHand('S:K73 H:K85 D:Q4 C:AJ932'), // öppnaren: 3-korts stöd, min
+        N: parseHand('S:K73 H:K85 D:Q4 C:AJ932'), // öppnaren: 3-korts stöd, 13 = max → hopp 3♥
         S: parseHand('S:A82 H:AQ976 D:K5 C:84'), // svararen: 5-korts hjärter, NMF
         E: parseHand('S:QJ96 H:JT D:JT9762 C:7'),
         W: parseHand('S:T54 H:432 D:A83 C:KQT6'),
@@ -116,7 +127,7 @@ describe('NMF steg 2 – öppnarens svar på New Minor Forcing', () => {
       call('N', '1C'), call('E', 'P'), call('S', '1H'), call('W', 'P'),
       call('N', '1NT'), call('E', 'P'), call('S', '2D'), call('W', 'P'),
     ]
-    expect(decideCall(deal, history, 'N').bid).toBe('2H')
+    expect(decideCall(deal, history, 'N').bid).toBe('3H')
   })
 })
 

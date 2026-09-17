@@ -77,11 +77,15 @@ export function openerRebidAfter1LevelResponse(hand: Hand, opened: Suit, respond
   // 3. Reverse: 16+, en högre ny färg (4+) med längre första färg → 2 i den högre.
   // TP-steg E (ägarbeslut 2026-07-03): styrkan räknas i max(hp, startpoäng) –
   // form (längd/kvalitetsfärger) får LYFTA in i reverse-zonen, aldrig under hp.
+  // Reverse-tröskeln: 17 startpoäng (felrapport #74). Formen får fortfarande LYFTA
+  // in i zonen (TP-steg E), men en 13 hp 5-4-hand som bara når 16 är för svag för
+  // ett reverse-krav — den rebjuder sin färg. De låsta revers-händerna (18–19
+  // startpoäng) står orörda.
   const sp = pointsWithFloor(hand, null, 'starting')
-  if (sp.points >= 16) {
+  if (sp.points >= 17) {
     for (const z of RANK) {
       if (z !== opened && z !== responderSuit && rankOf(z) > rankOf(opened) && len[z] >= 4 && len[opened] > len[z]) {
-        return { call: `2${BID[z]}`, rule: 'reverse', explanation: `16+, längre ${SYM[opened]} + 4+ ${SYM[z]} → 2${SYM[z]} (reverse, krav).` }
+        return { call: `2${BID[z]}`, rule: 'reverse', explanation: `17+, längre ${SYM[opened]} + 4+ ${SYM[z]} → 2${SYM[z]} (reverse, krav).` }
       }
     }
   }
@@ -922,13 +926,20 @@ export function openerAnswerNMF(
   const p = hcp(hand)
   const len = lengths(hand)
   const rule = 'svar på New Minor Forcing'
-  const max = p >= 14
+  // Min/max delas vid 12 / 13–14 (felrapport #73, ägarbeslut 2026-09-17): en
+  // 1NT-återbjudare som ACCEPTERAR en inbjudan har 13–14, en död 12:a avböjer.
+  // Samma tröskel som den kvantitativa 4NT-accepten (13), så svararens starka
+  // hand kan skilja "död 12" (→ utgång) från "13–14" (→ slam) via NMF. Förr var
+  // maximum 14 (13 visades som minimum), vilket gömde accept-värda 13-händer.
+  const max = p >= 13
   const styrka = max ? 'maximum' : 'minimum'
   // Billigaste nivån över NMF-budet (som ligger på 2-läget).
   const cheap = (s: Suit) => (rankOf(s) > rankOf(nmfMinor) ? 2 : 3)
   const otherMajor: Suit = responderMajor === 'hearts' ? 'spades' : 'hearts'
 
-  // 1) 4-korts ANDRA högfärg (ej öppningsfärgen – den är redan visad).
+  // 1) 4-korts ANDRA högfärg (ej öppningsfärgen – den är redan visad): billigast,
+  //    utan min/max (ett hopp här åt upp utrymmet svararens minor-höjning behöver).
+  //    Svararens slamhand som möter detta antar minimum (håller lågt, felrapport #73).
   if (otherMajor !== opened && len[otherMajor] >= 4) {
     const call = `${cheap(otherMajor)}${BID[otherMajor]}`
     return { call, rule, explanation: `4+ ${SYM[otherMajor]} → ${pretty(call)} (visar den andra högfärgen på NMF).` }

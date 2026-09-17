@@ -296,6 +296,19 @@ export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1,
   const lvl = rankIdx(best) > rankIdx(theirSuit) ? theirLevel : theirLevel + 1
   const cueLevel = theirLevel + 1 // cue i deras färg = ett steg upp över öppningen
 
+  // Fördelningsstark utgångshand med 5+ korts HÖGFÄRG över en dubblad spärr/svag
+  // tvåa (felrapport #70): hoppa utgång i högfärgen. Partnerns X lovar 3+ i en
+  // objuden högfärg (8-korts fit trolig), och en renons/singel är äkta ruffvärde
+  // som balanseringsrabatten inte får radera. Rå hp (ej graded): en 12:a med
+  // renons + 5-korts spader vill spela utgång även mot en balansering. Platta
+  // händer (ingen singel/renons) faller igenom till invit/färgbud som förr.
+  const unbidMajor = (['spades', 'hearts'] as Suit[]).filter((s) => !bidSuits.includes(s))
+  const bestMajor = unbidMajor.sort((a, b) => len[b] - len[a])[0]
+  const hasShort = RANK_ORDER.some((s) => len[s] <= 1)
+  if (theirLevel >= 2 && bestMajor && len[bestMajor] >= 5 && hasShort && p >= 11) {
+    return { call: `4${BID[bestMajor]}`, rule: 'höjning till utgång', explanation: `5+ ${SYM[bestMajor]} och renons/singel med utgångsvärden → 4${SYM[bestMajor]} (partnerns X lovar stöd, korthet ger ruffvärde).${rabatt}` }
+  }
+
   // 12+ → cue deras färg (utgångskrav, låter partnern beskriva vidare) — men
   // BARA medan det finns rum (deras öppning på 1–2-läget). Över en dubblad
   // spärr/spärrhöjning (3-läget) är ett cue på 4-läget meningslöst och kan

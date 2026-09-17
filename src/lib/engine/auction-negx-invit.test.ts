@@ -83,7 +83,31 @@ const HISTORY_1139: ResolvedCall[] = [
   call('E', '2D'), call('S', 'P'),
 ]
 
+// Felrapport #71: S öppnar 1♣, W kliver in 1♦, N negativ-dubblar (4+ spader),
+// S svarar tvingat 1♥ — N (12 hp, jämn 4-3-3-3, ruterstopp) ska bjuda 2NT (invit
+// mot 3NT), inte 3♣ (höjer partnerns klöver mot 5♣ på 986). 26 hp = missad utgång.
+const HANDS_71 = {
+  N: 'S:AJ32 H:KJ3 D:QJ6 C:986',
+  E: 'S:K864 H:T762 D:92 C:QT5',
+  S: 'S:75 H:AQ98 D:874 C:AKJ2',
+  W: 'S:QT9 H:54 D:AKT53 C:743',
+}
+const HISTORY_71: ResolvedCall[] = [
+  call('S', '1C'), call('W', '1D'), call('N', 'X'), call('E', 'P'),
+  call('S', '1H'), call('W', 'P'),
+]
+
 describe('negativ-dubblarens invit-fortsättning (fix 5b)', () => {
+  it('felrapport #71: N (12 hp jämn med ruterstopp) bjuder 2NT, inte 3♣', () => {
+    const d = deal('felrapport-71', 'S', 'ns', HANDS_71)
+    expect(decideCall(d, HISTORY_71, 'N').bid).toBe('2NT')
+  })
+  it('felrapport #71: S (14 hp) accepterar 2NT-inbjudan → 3NT (missad utgång nådd)', () => {
+    const d = deal('felrapport-71', 'S', 'ns', HANDS_71)
+    const hist = [...HISTORY_71, call('N', '2NT'), call('E', 'P')]
+    expect(decideCall(d, hist, 'S').bid).toBe('3NT')
+  })
+
   it('frö 20261354-läget: E (10 hp, 5-korts ruter) bjuder 3♦ över 2♠, passar inte', () => {
     const d = deal('felfarg-20261354-pos', 'W', 'ew', HANDS_1354)
     expect(decideCall(d, HISTORY_1354, 'E').bid).toBe('3D')

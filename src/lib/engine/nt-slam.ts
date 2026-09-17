@@ -91,6 +91,12 @@ export function gerberRebidFirstStep(responderHand: Hand): SlamTurn | null {
   const p = hcp(responderHand)
   if (p >= 21) return { role: 'svarare', call: '4C', rule: 'Gerber', explanation: `Balanserad, slamläge → 4♣ (Gerber, frågar ess).` }
   if (p >= 19) {
+    // Slaminbjudande jämn hand (19–20): har svararen en 4-korts HÖGFÄRG (den hen
+    // bjöd på 1-läget) håller vi budgivningen LÅG via New Minor Forcing i stället
+    // för att hoppa 4NT kvantitativt (felrapport #73, ägarbeslut 2026-09-17) —
+    // utgång är känd, så utforska öppnarens min/max + dolda fit först. `null` →
+    // flödet faller till NMF. Utan 4-korts högfärg (svarade 1♦) → 4NT kvantitativt.
+    if (len.hearts >= 4 || len.spades >= 4) return null
     return {
       role: 'svarare',
       call: '4NT',

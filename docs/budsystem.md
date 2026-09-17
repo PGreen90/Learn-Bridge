@@ -944,12 +944,15 @@ placera kontraktet. Tre styrkenivåer styr valet:
 
 **Principer:**
 - **Reverse** = att rebjuda en *högre* ny färg på 2-läget än sin första (t.ex.
-  1♦–1♠–2♥). Lovar **extra** (~16+ hp) och längre första färg. Krav 1 rond.
+  1♦–1♠–2♥). Lovar **extra** (~17+ startpoäng) och längre första färg. Krav 1 rond.
+  En 5-4-hand som är för svag för reverse rebjuder oklart-1NT:an (felrapport #74),
+  som låter svararens NMF hitta den dolda 4-korts högfärgen om en fit finns.
 - **Hoppskift i ny färg** (t.ex. 1♦–1♠–3♣) = 19+ hp, utgångskrav.
 - **TP-steg E (ägarbeslut 2026-07-03):** styrkenivåerna för reverse/hoppskift
   räknas i **max(hp, startpoäng)** – form (längd + kvalitetsfärger) får LYFTA
-  in i reverse- (≥16) och hoppskiftszonen (≥19), aldrig sänka under hp. En
-  6-4:a med 15 hp och två kvalitetsfärger reverserar; en platt hand följer hp.
+  in i reverse- (≥17, höjt från 16 i felrapport #74) och hoppskiftszonen (≥19),
+  aldrig sänka under hp. En 6-4:a med 15 hp / 19 startpoäng reverserar; en 13 hp
+  5-4:a som bara når 16 startpoäng är för svag och rebjuder sin färg.
   Svararen får **aldrig passa** ett hoppskift: hon placerar kontraktet
   (4M med 3-korts stöd / 3NT med stopp i fjärde färgen / 5m med fit).
   Källa: bridgebum.com ("16+ points", inte strikt HCP).
@@ -1268,10 +1271,14 @@ var reservfallet** ("oklart", §5.2 steg 7) — det är fortfarande ett 1NT-åte
 och svararen behandlar det likadant (systemfel #2, 2026-08-07; förr föll de
 auktionerna ur systemet och kravet kunde passas, frö 20261317).
 
-**Öppnarens svar** (prioritetsordning):
-1. **4-korts andra högfärg** → bjud den (jagar 4-4).
-2. **3-korts stöd** i din högfärg → `2M` (minimum) / hopp `3M` (maximum).
-3. **Stopp i den objudna färgen** → `2NT` (min) / `3NT` (max).
+**Öppnarens svar** (prioritetsordning). Min/max delas vid **12 / 13–14**
+(felrapport #73, ägarbeslut 2026-09-17): 13 är ett accept-värt maximum (samma
+tröskel som den kvantitativa 4NT-accepten), 12 är dött minimum — så svararens
+starka hand kan skilja "död 12" (→ utgång) från "13–14" (→ slam):
+1. **4-korts andra högfärg** → bjud den billigast (jagar 4-4; visar inte min/max
+   här — ett hopp skulle äta upp svararens minor-höjningsutrymme).
+2. **3-korts stöd** i din högfärg → `2M` (minimum 12) / hopp `3M` (maximum 13–14).
+3. **Stopp i den objudna färgen** → `2NT` (min 12) / `3NT` (max 13–14).
 4. **4 kort i NMF-lågfärgen** → höj den (`3m`).
 5. Inget av ovan → **rebjud egen färg** (nödutväg – NMF är krav, pass förbjudet).
 
@@ -1295,18 +1302,22 @@ placeringen ovan — slam med känd färg går aldrig via 4♣/4NT direkt över 
 1NT-återbud visar **12–14**. Du (kaptenen) räknar **din egen hand i hp mot det
 visade intervallet** — aldrig partnerns faktiska kort, och kortfärger lyfter
 inte värderingen (partnern har bara sagt "sang"). Fyra vägar, i den ordningen:
-1. **Färg att visa** — 6+ egen högfärg (5-korts högfärg går NMF som alltid)
-   eller 5+ kort i öppnarens lågfärg → **New Minor Forcing** och sedan
-   färgvisningen ovan (`3M` / `3m`); slammen frågas med **4NT RKC i den satta
-   trumfen**. Slam med känd färg går **aldrig** via 4♣/4NT direkt över sangen.
+1. **Färg att visa** — 6+ egen högfärg, 5+ kort i öppnarens lågfärg, ELLER (ny,
+   felrapport #73) en **4-korts högfärg med slamvärden (19+)** → **New Minor
+   Forcing** och sedan färgvisningen ovan (`3M` / `3m`); slammen frågas med
+   **4NT RKC i den satta trumfen**. Slam med känd färg går **aldrig** via
+   4♣/4NT direkt över sangen. Den 4-korts-högfärgs-handen håller budgivningen
+   LÅG via NMF (utgång är känd) och landar sedan **3NT mot en död 12:a** men
+   **6NT mot ett accept-värt 13–14** (utforskningen avslöjar öppnarens min/max).
 2. **Jämn hand utan färg att visa, sikte på sang, 21+ hp** (kan räkna 33 mot
    partnerns minimum 12) → **Gerber 4♣** (§6.4: 4♣ är Gerber även över ett
    NT-*återbud*) — mot ett så snävt intervall är essen det verkliga okända,
    styrkan räknar du själv: placerar **6NT** (stannar i 4NT om två ess saknas;
    7NT bara med alla ess + storslamszon mot minimum).
-3. **Jämn hand på gränsen, 19–20 hp** (slam bara om öppnaren har max) →
-   **kvantitativ 4NT**: öppnaren bjuder 6NT med 13–14, passar med 12. **4NT
-   direkt över sang-återbudet är alltid kvantitativt** (som i standard-2/1).
+3. **Jämn hand UTAN högfärg (1♦-svar), på gränsen 19–20 hp** (slam bara om
+   öppnaren har max) → **kvantitativ 4NT**: öppnaren bjuder 6NT med 13–14, passar
+   med 12. **4NT direkt över sang-återbudet är alltid kvantitativt** (som i
+   standard-2/1). (En 19–20-hand MED 4-korts högfärg går i stället NMF, punkt 1.)
 4. Ingen slamambition → **3NT** (eller NMF-vägen till utgång).
 Direkta inbjudningar `5M` / `4♦` / `4♣` över sangen finns inte: 4♣ är Gerber
 (§6.4) och 5M/4♦ ersattes av NMF-vägen (2026-09-05; förr fanns "Gerber med
@@ -2728,6 +2739,44 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-17 — Felrapport #73: 4-korts högfärg + slamvärden går via NMF (håll
+  lågt), och NMF:s min/max delas nu vid 12/13–14 (§5.7; ägarbeslut).** Förr hoppade
+  en jämn 19–20 med 4-korts högfärg direkt 4NT kvantitativt — som avböjt strandade
+  i den fula 4NT (ägaren: fel; håll budgivningen låg när utgång är känd). Nu bjuder
+  den NMF (`2♦/2♣`) och utforskar: öppnarens NMF-svar delar min/max vid **12 /
+  13–14** (13 = accept-värt, som 4NT-accepten; förr 13 = minimum), så svararen
+  landar **3NT mot en död 12:a** men når **6NT mot 13–14**. #73: 1♣–1♠–1NT–2♦–2♥–
+  3NT (par; DD: 6NT bet). Slam-facit (20 + 4 ess mot 13 → 6NT) bevarat via stöd-
+  hoppet. Kod `rebids.ts` (`openerAnswerNMF` 13=max), `responder-rebids.ts`
+  (`newMinorForcingBid` 4-korts-slamgren + `responderPlaceAfterNMF` slamsteg),
+  `nt-slam.ts` (`gerberRebidFirstStep` lämnar 4-korts-högfärgshanden till NMF).
+  Facit `new-minor-forcing.test.ts`, `auction-slam-1nt-rebid.test.ts`,
+  `auction-decide.test.ts`, `motorbyte-facit.test.ts`.
+- **2026-09-17 — Felrapport #74: reverse-tröskeln 16→17 startpoäng (§5.2;
+  ägarbeslut).** 1♣–1♠ med ♠T3 ♥KJT7 ♦95 ♣AKQ82 = 13 hp 5-4 (16 startp.)
+  reverserade 2♥ — för svag. Tröskeln höjd till 17 (de låsta revers-händerna
+  ligger på 18–19, TP-steg E orört). Handen rebjuder då oklart-1NT:an (samma
+  design som frö 20261317: NMF hittar 4-korts hjärtern om svararen har fit; här
+  driver Syd 3NT — utgång i stället för det gamla 4♣). Kod `rebids.ts`, facit
+  `rebids.test.ts` ("felrapport #74").
+- **2026-09-17 — Felrapport #72: 6-korts högfärg svarar på 5 hp (§5.1; ägarbeslut).**
+  Ostört sänks svarsgolvet från 6 till 5 hp när svararen har en 6+ korts högfärg
+  — budgivningen hålls låg (1♠, inte hoppspärr). Den tävlande hoppspärren (när
+  motståndet är inne) byggs separat. Kod `responses.ts` (`respondToMinor`), facit
+  `responses.test.ts`.
+- **2026-09-17 — Felrapport #71: öppnaren accepterar negativ-dubblarens 2NT-invit,
+  + dubblaren väljer 2NT före minor-preferens (§7.4; ägarbeslut).** 1♣–(1♦)–X–1♥–
+  P–2NT dog i 2NT (öppnaren passade 14 hp — ingen regel). Nu: en jämn dubblare med
+  stopp bjuder 2NT (inte 3♣ på 3 hackor i öppnarens minor — 3NT slår 5m), och
+  öppnaren accepterar med maximum (14+) → 3NT. Kod `contested-opening.ts`
+  (`negativeDoublerContinues`, ny `openerAnswersNegativeInvit`), facit
+  `auction-negx-invit.test.ts`.
+- **2026-09-17 — Felrapport #70: fördelningsstark utgångshand hoppar 4M över dubblad
+  spärr (§7.3; ägarbeslut).** 3♥–P–P–X–P med ♠K7432 ♥KJ92 ♦AJ98 ♣— (12 hp, 5
+  spader, klöverrenons) bjöd 3♠ (balanseringsrabatten −3 → minimum). Nu: en 5+ korts
+  högfärg + renons/singel + 11+ hp hoppar 4♠ (partnerns X lovar stöd; korthet är
+  ruffvärde rabatten inte får radera). Platta händer utan korthet passar/inviterar
+  som förr. Kod `doubles.ts` (`answerTakeoutDouble`), facit `doubles.test.ts`.
 - **2026-09-16 — Felrapport #69: öppnaren hoppar 3NT med balanserad 18–19 efter
   negativ dubbling (§7.4; ägarbeslut).** `1♦–(2♣)–X–P` bjöd samma 2NT med 15 som
   med 19, öppnaren kunde inte visa styrkan och passade svararens 3♦ (missad

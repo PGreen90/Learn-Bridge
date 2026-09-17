@@ -347,7 +347,7 @@ describe('familj 4b – öppnarens tredje bud: läget "jag öppnade, partnern sv
   })
 
   it('New Minor Forcing besvaras ur egen hand, lika för människans och botens 2♣', () => {
-    const h = 'S:K73 H:A2 D:AQ864 C:T93' // 13 hp, 3-korts spaderstöd, minimum → 2♠
+    const h = 'S:K73 H:A2 D:AJ864 C:T93' // 12 hp, 3-korts spaderstöd, minimum → 2♠
     const människa = bud(h, hist('1D', '1S', '1NT', '2C'), 'N')!.call
     expect(människa).toMatchObject({ bid: '2S', rule: 'svar på New Minor Forcing' })
     const bot = bud(h, [{ seat: 'N', bid: '1D' }, P('E'), { seat: 'S', bid: '1S', rule: 'ny färg (1-läget)' }, P('W'), { seat: 'N', bid: '1NT', rule: '1NT (12–14)' }, P('E'), { seat: 'S', bid: '2C', rule: 'New Minor Forcing' }, P('W')], 'N')!.call
@@ -650,11 +650,16 @@ describe('familj 6 – manuset avgör inga bud i ostörda auktioner (bot mot bot
     expect(decideCallTraced(d3, h3, 'S')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6S', rule: 'slaminbjudan: accept' } })
   })
 
-  it('1m–1M–1NT: 4NT direkt är kvantitativt (öppnaren dömer på sin hand); egen självbärande färg går via NMF, aldrig Gerber (§5.7, beslut 1)', () => {
-    const h: ResolvedCall[] = [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1H' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')]
-    // Jämn 20 hp → kvantitativ 4NT; Nord med 13 accepterar (6NT), med 12 passar.
-    expect(bud('S:A32 H:AK75 D:A64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' })
-    const h4 = [...h, { seat: 'S', bid: '4NT' } as ResolvedCall, P('W')]
+  it('1m–1M–1NT: 4-korts högfärg + slamvärden går via NMF (håller lågt), inte 4NT (felrapport #73); handen UTAN högfärg (1♦-svar) inbjuder kvantitativt 4NT och öppnaren dömer; egen självbärande färg → NMF, aldrig Gerber (§5.7, beslut 1)', () => {
+    // 4-korts hjärter + 20 hp: NMF (2♦), inte längre 4NT kvantitativt (ägarbeslut
+    // 2026-09-17: utgång är känd → håll budgivningen låg och utforska först).
+    const hM: ResolvedCall[] = [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1H' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')]
+    expect(bud('S:A32 H:AK75 D:A64 C:AJ2', hM, 'S')!.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' })
+    // Utan 4-korts högfärg (1♦-svar), jämn 20 hp → 4NT kvantitativt; Nord med 13
+    // accepterar (6NT), med 12 passar. (Inget att leta med NMF → 4NT som förr.)
+    const hD: ResolvedCall[] = [{ seat: 'N', bid: '1C' }, P('E'), { seat: 'S', bid: '1D' }, P('W'), { seat: 'N', bid: '1NT' }, P('E')]
+    expect(bud('S:A2 H:A64 D:AK75 C:AJ32', hD, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' })
+    const h4 = [...hD, { seat: 'S', bid: '4NT' } as ResolvedCall, P('W')]
     expect(bud('S:KQ5 H:Q64 D:KJ2 C:Q943', h4, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: '6NT', rule: 'kvantitativ 4NT: accept' } })
     expect(bud('S:KQ5 H:J64 D:KJ2 C:Q943', h4, 'N')).toMatchObject({ källa: 'tabell:slam', call: { bid: 'P', rule: 'kvantitativ 4NT: avböjer' } })
     // 6-korts spader + 21 hp → 2♦ New Minor Forcing (§5b beslut 1, 2026-09-05): färgen visas

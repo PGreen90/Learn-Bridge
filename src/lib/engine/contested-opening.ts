@@ -650,7 +650,13 @@ export function negativeDoublerContinues(hand: Hand, f: AuctionFacts): Kunskap |
   if (p < 10 && !(p >= 9 && hasSix)) return null // under invitzonen → pass som förr
 
   // 1. Invit-preferens: 3+ stöd i partnerns ÖPPNINGSFÄRG när svaret var en annan.
-  if (suitAnswer && answer.strain !== open.strain && len[SUIT_OF_LETTER[open.strain]] >= 3) {
+  // MEN inte i en MINOR när handen är balanserad med stopp i deras färg (felrapport
+  // #71): då är 3NT rätt utgång (9 stick), inte 5m (11) — så en jämn hand med
+  // stopp bjuder hellre 2NT (steg 3 nedan). Öppnade partnern en HÖGFÄRG går
+  // preferensen före (4M slår 3NT).
+  const openerMinor = open.strain === 'C' || open.strain === 'D'
+  const preferNTOverMinor = openerMinor && isBalanced(hand) && hasStopper(hand, theirSuit)
+  if (suitAnswer && !preferNTOverMinor && answer.strain !== open.strain && len[SUIT_OF_LETTER[open.strain]] >= 3) {
     const cheapest = cheapestBidIn(history, seat, open.strain)
     if (cheapest) {
       const lvl = Math.min(Number(cheapest[0]) + (p >= 11 ? 1 : 0), 3)
@@ -684,6 +690,30 @@ export function negativeDoublerContinues(hand: Hand, f: AuctionFacts): Kunskap |
     }
   }
   return null
+}
+
+/**
+ * ÖPPNAREN svarar negativ-dubblarens 2NT-INBJUDAN (felrapport #71). Efter
+ * 1m–(inkliv)–X–P–1y–P–2NT står öppnaren i tur: mitt återbud visade 12–15, så
+ * jag accepterar utgången (3NT) med maximum (14+), passar med minimum (12–13).
+ * Förr fanns ingen regel → öppnaren passade en 14:a och 3NT missades.
+ */
+export function openerAnswersNegativeInvit(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const open = f.opening
+  if (!open || open.seat !== f.seat || open.level !== 1 || open.strain === 'NT') return null
+  // Partnern (negativ-dubblaren) dubblade tidigare och har nu bjudit 2NT (invit).
+  if (!f.history.some((c) => c.seat === PARTNER[f.seat] && c.bid === 'X')) return null
+  const last = f.lastNonPass
+  if (!last || last.seat !== PARTNER[f.seat] || last.bid !== '2NT') return null
+  // Min tur: inget kontraktsbud efter partnerns 2NT.
+  const idx = f.history.lastIndexOf(last)
+  if (f.history.slice(idx + 1).some((c) => c.bid !== 'P')) return null
+  const legal = legalCalls(f.history, f.seat)
+  if (hcp(hand) >= 14 && legal.includes('3NT' as Bid)) return {
+    call: '3NT', rule: 'svar på negativ dubbling',
+    explanation: `Maximum (14–15) mot partnerns 2NT-inbjudan → 3NT (till spel).`,
+  }
+  return { call: 'P', rule: 'pass', explanation: `Minimum (12–13) mot partnerns 2NT-inbjudan → pass, delkontraktet står.` }
 }
 
 // ============================================================================

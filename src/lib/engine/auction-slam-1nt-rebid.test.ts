@@ -42,6 +42,23 @@ describe('FACIT: slam efter 1NT-återbud (F1 familj A)', () => {
     // låser här bara att paret NÅR slammen – att den håller är bekräftat.
   })
 
+  it('felrapport #73: 4-korts högfärg + 20 hp mittemot en DÖD 12:a → NMF utforskar och landar 3NT (par), inte 4NT/slam', () => {
+    // Nord 20 hp (♠KQT7 ♥AQ8 ♦AKJ3 ♣J6, 4 spader → 1♠), Syd 12 hp minimum. NMF 2♦
+    // → Syd visar 4 hjärter billigt (= minimum) → Nord ser den döda 12:an och
+    // stannar i 3NT (DD-facit: 6NT är bet, 3NT+2 = par). Håll budgivningen låg när
+    // utgång är känd (ägarbeslut 2026-09-17); 4NT kvantitativt vore fel här.
+    const deal = dealOf('E', {
+      N: 'S:KQT7 H:AQ8 D:AKJ3 C:J6',
+      E: 'S:93 H:T62 D:T62 C:Q9742',
+      S: 'S:AJ5 H:J974 D:Q84 C:A85',
+      W: 'S:8642 H:K53 D:975 C:KT3',
+    })
+    const contract = contractFromCalls(simulateAuction(deal))
+    expect(contract).not.toBeNull()
+    expect(contract!.level).toBe(3)
+    expect(contract!.strain).toBe('NT')
+  })
+
   it('1♣–1♥–1NT: 4-korts klöverfit går inte att VETA → ÄRLIG MISS, paret stannar i utgång', () => {
     // Ärliga slamportar (ägarbeslut 2026-07-07): S har bara 4 klöver — öppningen
     // 1♣ lovar 3+, så en 8-korts fit är INTE säker på egen hand. Förr hittade

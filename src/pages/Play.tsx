@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { Deal, Seat, Suit } from '../types/bridge'
-import { SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
+import { parseHand, SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
 import { dummyOf, type Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
@@ -33,7 +33,7 @@ import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
 import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
-import { gameFromDeal, gameFromSeed, useGame, type Game } from './play/useGame'
+import { gameFromDeal, gameFromSeed, seatDealSouth, useGame, type Game } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
 import type { TavlingSpel } from './play/tavling-mode'
 import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
@@ -68,6 +68,35 @@ function parseUrlSeat(): Seat | null {
   return m ? (m[1] as Seat) : null
 }
 
+/** DEV-bara: en EXAKT giv ur adressen (felrapport-granskning), fria händer i
+ *  stället för ett frö. Format `?n=KQT7.AQ8.AKJ3.J6&e=…&s=…&w=…&d=E&v=ns` (varje
+ *  hand spader.hjärter.ruter.klöver, PBN-likt). Kombinera med `?sitt=N` för att
+ *  bjuda den handen själv. Ignoreras helt i den byggda appen (import.meta.env.DEV). */
+function parseUrlHands(): Deal | null {
+  if (!import.meta.env.DEV) return null
+  const grab = (k: string) => {
+    const m = window.location.hash.match(new RegExp(`[?&]${k}=([^&]+)`))
+    return m ? decodeURIComponent(m[1]) : null
+  }
+  const toHand = (v: string | null) => {
+    if (!v) return null
+    const [S = '', H = '', D = '', C = ''] = v.split('.')
+    try {
+      return parseHand(`S:${S || '-'} H:${H || '-'} D:${D || '-'} C:${C || '-'}`)
+    } catch {
+      return null
+    }
+  }
+  const N = toHand(grab('n')), E = toHand(grab('e')), S = toHand(grab('s')), W = toHand(grab('w'))
+  if (!N || !E || !S || !W) return null
+  return {
+    id: 'dev-felrapport', board: 1,
+    dealer: (grab('d') as Seat) || 'N',
+    vulnerability: (grab('v') as Deal['vulnerability']) || 'none',
+    hands: { N, E, S, W },
+  }
+}
+
 /** Dagen ur adressen (#/spela-kort/dagens?dag=3): en arkivgiv ur kalendern
  *  (kalenderarkivet 2026-08-03). Bara dagar som funnits (1 … i dag) godtas —
  *  allt annat faller tillbaka på dagens giv. */
@@ -84,6 +113,13 @@ function parseUrlDay(): number | null {
  *  `nr` = det aktiva givnumret i dagens giv-läget (arkivdag eller i dag). */
 function initialGame(daily: boolean, nr: number | null, sitt: Seat | null): { game: Game | null; plays: SavedGame['plays'] } {
   const urlSeed = daily ? null : parseUrlSeed()
+  // Dev: en EXAKT giv ur adressen (fria händer, felrapport-granskning) startar
+  // färskt och roteras så vald stol (?sitt=) sitter i Syd — då bjuds den handen
+  // själv. Går före fröet och den sparade given.
+  if (!daily) {
+    const devDeal = parseUrlHands()
+    if (devDeal) return { game: gameFromDeal(seatDealSouth(devDeal, sitt ?? 'S')), plays: [] }
+  }
   // Dev: en roterad giv (?sitt=) startar ALLTID färskt ur fröet — den sparade
   // pågående given är oroterad och hör inte hit.
   if (!daily && sitt && urlSeed !== null) return { game: gameFromSeed(urlSeed, 0, sitt), plays: [] }

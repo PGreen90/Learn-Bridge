@@ -185,7 +185,11 @@ export function respondToMinor(hand: Hand, opened: Minor, passed = false): Respo
     return { call: `3${m}`, rule: 'inverterad minor, svag', explanation: passed ? `Under 6 hp, 5+ stöd (passad hand) → 3${msym} (svag spärrhöjning).` : `0–6 hp, 5+ stöd → 3${msym} (svag spärrhöjning).` }
   }
 
-  if (p < 6) return { call: 'P', rule: 'pass', explanation: `För svagt för att svara → pass.` }
+  // Svarsgolvet: 6 hp – MEN sänkt till 5 hp med en 6+ korts högfärg (felrapport
+  // #72, ägarbeslut 2026-09-16): en lång högfärg är för värdefull att gömma, och
+  // budgivningen hålls låg (1♥/1♠, inte hoppspärr — den gäller bara i konkurrens).
+  const sixMajor = len.hearts >= 6 || len.spades >= 6
+  if (p < 6 && !(p === 5 && sixMajor)) return { call: 'P', rule: 'pass', explanation: `För svagt för att svara → pass.` }
 
   // ---- Svagt hoppskift AVSKAFFAT (ägarbeslut 2026-07-06, felrapport #31) ----
   // Tidigare hoppade svararen till 2♥/2♠ med en svag 6-korts högfärg. Men när

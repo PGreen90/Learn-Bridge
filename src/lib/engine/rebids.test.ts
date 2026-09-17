@@ -80,6 +80,18 @@ describe('openerRebidAfter1LevelResponse', () => {
     expect(reb('S:3 H:AQ85 D:AKJ85 C:K42', 'diamonds', 'spades')).toBe('2H') // 17 hp, 5-4
   })
 
+  // Felrapport #74 (bricka 5): 1♣–1♠ med ♠T3 ♥KJT7 ♦95 ♣AKQ82 = 13 hp, 5-4, bara
+  // 16 startpoäng. Reverserade förr 2♥ (tröskel 16), men 13 hp 5-4 är för svag för
+  // en reverse (ägaren: "för svag för revers"). Tröskeln höjd till 17 — de låsta
+  // revers-händerna ligger på 18–19, så de står. Nord rebjuder då oklart-1NT:an
+  // (samma design som frö 20261317: låter NMF hitta 4-korts hjärtern om svararen
+  // har fit; här driver Syd 3NT). Facit låser att reverset är BORTA.
+  it('felrapport #74: 13 hp 5-4 (16 startp.) reverserar INTE (rebjuder 1NT, ej 2♥)', () => {
+    const call = reb('S:T3 H:KJT7 D:95 C:AKQ82', 'clubs', 'spades')
+    expect(call).not.toBe('2H')
+    expect(call).toBe('1NT')
+  })
+
   it('1NT (12–14) balanserad utan högfärg/stöd', () => {
     expect(reb('S:KJ3 H:A2 D:Q852 C:K642', 'clubs', 'hearts')).toBe('1NT') // 13 hp
   })

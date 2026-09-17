@@ -727,7 +727,14 @@ function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: nu
   // lågfärgen efteråt (3m = stöd, slamintresse, utgångskrav). Slam med känd
   // färg går aldrig via 4♣ (Gerber är den jämna handen utan färg, §5.7).
   const minorRoute = (opened === 'clubs' || opened === 'diamonds') && len[opened] >= 5 && p >= NMF_SLAM_ZONE_HP
-  if (!minorRoute) {
+  // SLAMZONS-handen med bara en 4-korts högfärg (felrapport #73, ägarbeslut
+  // 2026-09-17): utgång är känd, så håll budgivningen LÅG via NMF i stället för
+  // att hoppa 4NT kvantitativt. NMF utforskar öppnarens dolda 3-stöd / 4-korts
+  // andra högfärg och visar samtidigt min/max (13+ = accept-värd), så svararen
+  // landar 3NT mot en död 12 men når 6NT mot ett 13–14-maximum. Bara med
+  // slamvärden (19+); en ren utgångshand (13–18) bjuder 3NT som förut.
+  const slamZoneFourCard = len[responderSuit] === 4 && p >= NMF_SLAM_ZONE_HP
+  if (!minorRoute && !slamZoneFourCard) {
     if (len[responderSuit] < 5) return null // 5-3-fit kräver 5-korts högfärg
     if (p < 11) return null // inbjudande+ värden
   }
@@ -739,13 +746,12 @@ function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: nu
     : suitHcp(hand, 'diamonds') > suitHcp(hand, 'clubs') ? 'diamonds' : 'clubs'
 
   const call = `2${BID[nmfMinor]}`
-  return {
-    call,
-    rule: 'New Minor Forcing',
-    explanation: len[responderSuit] >= 5
-      ? `5+ ${SYM[responderSuit]}, 11+ hp – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens dolda 3-stöd i ${SYM[responderSuit]} eller egen 4+ högfärg.`
-      : `5+ ${SYM[opened]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens hand och höjer sedan ${SYM[opened]} (§5.7).`,
-  }
+  const explanation = len[responderSuit] >= 5
+    ? `5+ ${SYM[responderSuit]}, 11+ hp – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens dolda 3-stöd i ${SYM[responderSuit]} eller egen 4+ högfärg.`
+    : minorRoute
+      ? `5+ ${SYM[opened]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens hand och höjer sedan ${SYM[opened]} (§5.7).`
+      : `4-korts ${SYM[responderSuit]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, krav): utgång är känd, så budgivningen hålls låg och utforskar öppnarens hand (min/max) innan slammen placeras.`
+  return { call, rule: 'New Minor Forcing', explanation }
 }
 
 // Svararens PLACERING efter öppnarens NMF-svar (§5.7, steg 3). Svararen visade
@@ -776,6 +782,22 @@ export function responderPlaceAfterNMF(
   const ownSix: ResponseResult | null = game && len[responderMajor] >= 6
     ? { call: `4${rM}`, rule, explanation: `6+ ${SYM[responderMajor]} (öppnarens sang lovar 2+ kort) → utgång 4${SYM[responderMajor]}.` }
     : null
+
+  // Slamvärden (19+, felrapport #73): NMF-utforskningen är klar och öppnarens
+  // svarsnivå har visat min (billigt = död 12) eller max (hopp/3NT = accept-värd
+  // 13–14). Svararen räknar sina hp + öppnarens golv (13 vid max, annars 12) mot
+  // 33: når slam mot ett maximum, stannar i utgång (nedan) mot en död 12:a. En
+  // 5-3-fit i egen 5-korts högfärg spelas som 6M, annars balanserad 6NT.
+  if (p >= NMF_SLAM_ZONE_HP && !ownSix && len[opened] < 5) {
+    const total = p + (openerMax ? 13 : 12)
+    if (total >= 33) {
+      if (answer.strain === rM && len[responderMajor] >= 5) {
+        return { call: `6${rM}`, rule, explanation: `5-3-fit i ${SYM[responderMajor]} + slamzon (${total}) → 6${SYM[responderMajor]}.` }
+      }
+      return { call: '6NT', rule, explanation: `Slamzon (${total} mot öppnarens ${openerMax ? 'maximum 13–14' : 'minimum'}) → 6NT.` }
+    }
+    // total < 33 → utgång via placeringen nedan (3NT / 4M).
+  }
 
   // 1) Öppnaren visade STÖD i din högfärg → 5-3-fit.
   if (answer.strain === rM) {

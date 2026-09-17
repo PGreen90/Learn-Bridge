@@ -134,6 +134,18 @@ describe('answerTakeoutDouble (§7.3)', () => {
     const h = parseHand('S:J9 H:J982 D:T93 C:A832') // 4-4: A832 klöver > J982 hjärter
     expect(answerTakeoutDouble(h, 'spades', 3).call).toBe('4C')
   })
+  // Felrapport #70 (bricka 2): 3♥–P–P–X(balansering)–P–?. Syd ♠K7432 ♥KJ92 ♦AJ98
+  // ♣— = 12 hp, 5 spader, KLÖVERRENONS. Bjöd förr 3♠ (rabatten −3 → minimum), men
+  // en 5-korts högfärg + renons/singel + utgångsvärden hoppar utgång: partnerns X
+  // lovar 3+ spader (8-korts fit) och renongen är ruffvärde → 4♠ (ägarbeslut).
+  it('felrapport #70: 5-korts högfärg + renons + 11+ hp över dubblad spärr → 4♠', () => {
+    const h = parseHand('S:K7432 H:KJ92 D:AJ98 C:-')
+    expect(answerTakeoutDouble(h, 'hearts', 3, ['hearts'], true).call).toBe('4S')
+  })
+  it('felrapport #70: platt hand utan singel/renons hoppar INTE (3♠ som förr)', () => {
+    const h = parseHand('S:AQ43 H:432 D:AQ42 C:32') // 12 hp, 4 spader, ingen korthet
+    expect(answerTakeoutDouble(h, 'hearts', 3).call).toBe('3S')
+  })
 })
 
 // Straffdubblingen (ägarbeslut 2026-07-04, poängarbetet): 2+ säkra trumfstick

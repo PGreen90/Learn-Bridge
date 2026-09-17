@@ -551,7 +551,7 @@ describe('§5b beslut 1 – 4♣ över 1NT-återbudet är Gerber bara utan färg
     const h = [call('N', '1D'), P('E'), call('S', '1S'), P('W'), call('N', '1NT'), P('E')]
     const syd2 = 'S:AKQ4 H:A6 D:KQ863 C:J2' // 19 hp, 5 ruter mot öppnarens 3+
     expect(bud(syd2, h, 'S')!.call).toMatchObject({ bid: '2C', rule: 'New Minor Forcing' })
-    const nord2 = 'S:J7 H:KQ3 D:AT72 C:QJ42' // 13 hp
+    const nord2 = 'S:72 H:KQ3 D:AT72 C:QJ42' // 12 hp (minimum → 2NT, ej 3NT-hopp)
     const h2 = [...h, call('S', '2C'), P('W')]
     expect(bud(nord2, h2, 'N')!.call.bid).toBe('2NT')
     const h3 = [...h2, call('N', '2NT'), P('E')]
@@ -578,11 +578,15 @@ describe('§5b beslut 1 – 4♣ över 1NT-återbudet är Gerber bara utan färg
     expect(decideCall(deal, h5, 'S')).toMatchObject({ bid: '4H', rule: 'cue-bid' }) // 19+12 = 31: cue-ronden över 4♣
   })
 
-  it('jämn hand utan färg: 22 hp → 4♣ Gerber, 20 → kvantitativ 4NT, 5-korts högfärg → NMF (aldrig Gerber)', () => {
+  it('jämn hand utan färg: 22 hp → 4♣ Gerber; 20 med 4-korts högfärg → NMF (felrapport #73); 5-korts högfärg → NMF (aldrig Gerber); UTAN högfärg (1♦-svar) 20 → kvantitativ 4NT', () => {
     const h = [call('N', '1C'), P('E'), call('S', '1H'), P('W'), call('N', '1NT'), P('E')]
-    expect(bud('S:AK2 H:AK75 D:K64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4C', rule: 'Gerber' }) // 22 hp
-    expect(bud('S:A32 H:AK75 D:A64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' }) // 20 hp
+    expect(bud('S:AK2 H:AK75 D:K64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '4C', rule: 'Gerber' }) // 22 hp, jämn utan 5-färg → Gerber
+    // 20 hp MED 4-korts hjärter: håller lågt via NMF (ägarbeslut 2026-09-17), inte 4NT.
+    expect(bud('S:A32 H:AK75 D:A64 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' }) // 20 hp, 4 hjärter
     expect(bud('S:AK2 H:AK753 D:K6 C:AJ2', h, 'S')!.call).toMatchObject({ bid: '2D', rule: 'New Minor Forcing' }) // 22 hp, 5 hjärter
+    // UTAN 4-korts högfärg (1♦-svar): inget att leta → 4NT kvantitativt som förr.
+    const hd = [call('N', '1C'), P('E'), call('S', '1D'), P('W'), call('N', '1NT'), P('E')]
+    expect(bud('S:A2 H:A64 D:AK75 C:AJ32', hd, 'S')!.call).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' }) // 20 hp, ingen högfärg
   })
 })
 

@@ -10,6 +10,19 @@ function respM(notation: string, opened: Minor): string {
   return respondToMinor(parseHand(notation), opened).call
 }
 
+// Felrapport #72 (bricka 6): 1♣–?, Nord ♠JT9764 ♥KJ ♦T832 ♣6 = 5 hp, 6 spader.
+// Passade förr (golv 6 hp), men med 6+ högfärg sänks kravet till 5 hp (ägarbeslut
+// 2026-09-16) och budgivningen hålls låg → 1♠ (inte hoppspärr; den gäller bara i
+// konkurrens, en separat funktion). En riktigt svag hand utan lång färg passar än.
+describe('felrapport #72 – 6-korts högfärg svarar på 5 hp', () => {
+  it('5 hp med 6 spader → 1♠ (sänkt golv), inte pass', () => {
+    expect(respM('S:JT9764 H:KJ D:T832 C:6', 'clubs')).toBe('1S')
+  })
+  it('5 hp utan lång färg passar fortfarande', () => {
+    expect(respM('S:J43 H:Q65 D:T832 C:762', 'clubs')).toBe('P')
+  })
+})
+
 describe('respondToMajor', () => {
   it('pass med för svag hand', () => {
     expect(resp('S:9532 H:863 D:9742 C:Q3', 'hearts')).toBe('P') // 2 hp
