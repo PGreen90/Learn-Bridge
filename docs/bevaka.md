@@ -1,5 +1,26 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Tredje hand högt — generalisera "rätt kort", inte bara "billigast" (2026-09-17, felrapport #75 + ägardirektiv)
+- **Lagat nu (#75):** tredje-hands-högt (`defenderThirdHandHigh`) körs numera även
+  när den öppna TRÄKARLEN (andra hand) SLOG partnerns utspel, i både sang och
+  trumf. Förr föll boten till "vinn billigast" och la ett kort som den dolda
+  spelföraren gick över (Nords ♥7 föll för Östs dolda ♥J). Facit i
+  `play-bot-third-hand.test.ts` ("Felrapport #75").
+- **Ägardirektiv (SENARE-kandidat, godkänt 2026-09-17):** generalisera valet så
+  det ALLTID väger fyra saker och varken slösar ett för högt kort ELLER underspelar
+  ett för lågt: (1) vad partnern spelade UT, (2) den öppna träkarlen — även den som
+  ligger FÖRE mig i sticket (spela bara högt nog att slå det som faktiskt kan slå
+  mig), (3) mina egna kort, (4) en *hyfsad uppskattning av de dolda korten*, seedad
+  ur budgivningen när den antyder något. Alltså: lägsta kort som verkligen gör
+  jobbet givet allt synligt + budstödd gissning om det dolda.
+- **Nuläge/varning:** dagens tumregel är trubbig — `thirdHandHonor` tar *lägsta
+  honnören* bland vinnarna och kollar INTE om den slår de dolda korten (kan
+  underspela en icke-sammanhängande tenass, t.ex. AQT → T som föll för dold J).
+  Den FULLA fyra-input-räkningen är exakt vad Monte-Carlo-lagret redan gör vid ≤8
+  kort (budseeded handmodell); generaliseringen ska approximera samma sak vid
+  9–13 kort. Rör spelmotorn brett → eget arbetssteg, byggs test-drivet med
+  DD-mätning per beteenderegel (som speldiagnosens metod), inte som en lapp.
+
 ## Motorbytets slutförande — elva regler i ett svep (2026-09-13, ägarbesked "gör klart budmotorn")
 - Facit-kön tömd + de sista kända hålen (budsystem §9 2026-09-13): flykten över
   deras X av vårt 1NT är avslut · DONT-dubblaren visar enfärgen själv ·

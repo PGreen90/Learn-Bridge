@@ -1389,28 +1389,21 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
         }
       }
     }
-    // TREDJE HAND HÖGT (§8.6, felrapport #34): partnern ledde och en DOLD
-    // motståndare (spelföraren) spelar EFTER mig. Då duger inte den billigaste
-    // vinnaren – han går över den lika billigt (Nord ♥5 → Öst ♥9). Jag pressar
-    // fram hans honnör med min LÄGSTA honnör (`thirdHandHonor` – snålar med
-    // sekvensen och behåller en gaffel över honom). Bara den DOLDA spelföraren
-    // (inte den öppna träkarlen) bakom mig: syns bordet sköts finessvalet av
-    // grenen ovan. **Bara i sang** (som spelförarplanen #32): i trumfkontrakt är
-    // honnörstvånget osunt – att vinna ett sidostick tidigt sätter försvararen på
-    // lead rakt in i spelförarens ruffhand (uppmätt −1 i 5♦, seed 20260761).
-    const partnerLed = side(state.currentTrick[0].seat) === side(seat)
-    if (state.trump === null && iAmDefender && partnerLed && !dummyPlaysAfterUs && state.currentTrick.length === 2) {
-      const honor = thirdHandHonor(winners.filter((c) => c.suit === led))
-      if (honor) {
-        return {
-          card: honor,
-          reason:
-            'Tredje hand högt (§8.6): partnern ledde och spelföraren spelar efter mig – jag ' +
-            'lägger min lägsta honnör och pressar fram hans, i stället för att ge honom ' +
-            'sticket billigt med ett spotkort (men slösar aldrig en honnör högre än nödvändigt).',
-        }
-      }
-    }
+    // TREDJE HAND HÖGT (§8.6, felrapport #34 + #75): partnern ledde lågt och en
+    // DOLD motståndare (spelföraren) spelar EFTER mig. Då duger inte den
+    // billigaste vinnaren – han går över den lika billigt (Nord ♥5 → Öst ♥9,
+    // felrapport #34; Nords ♥7 föll för Östs dolda ♥J, felrapport #75). Jag tar
+    // mästaren / pressar fram hans honnör med min LÄGSTA honnör
+    // (`defenderThirdHandHigh` – snålar med sekvensen och behåller en gaffel).
+    // Gäller när den öppna TRÄKARLEN redan spelat (dummyPlaysAfterUs=false) – syns
+    // bordet efter mig sköts finessvalet av grenen ovan – och även när träkarlen
+    // som ANDRA hand SLOG partnerns utspel (bestCard = träkarlens kort, #75).
+    // Både i sang och i TRUMF (ägarbeslut 2026-08-18 efter A/B-mätning: den gamla
+    // "−1 i trumf, seed 20260761"-noteringen replikerade inte – netto neutralt-
+    // till-bättre försvar över 209 trumfgivar; samma regel som partnern-vinner-
+    // grenen ovan använder).
+    const thirdHigh = defenderThirdHandHigh(state, seat, legal, led, bestCard)
+    if (thirdHigh) return thirdHigh
     // Speldiagnosen S2 (frö 20260730): spelförarsidans tredje hand ser båda
     // händerna och följer FÄRGKOMBINATIONEN (t.ex. damen ur Q753 mot KJ982 —
     // inte "billigaste vinnaren" sjuan) när simuleringen är strikt bättre.

@@ -2073,8 +2073,13 @@ Två sätt att visa **5-5** (eller bättre) direkt:
   - cue av deras **minor** (t.ex. (1♣)–2♣) = **båda högfärgerna**.
   - cue av deras **högfärg** (t.ex. (1♠)–2♠) = **andra högfärgen + en minor**.
 - **Ovanlig 2NT** (hopp till 2NT) = de **två lägsta objudna färgerna**.
+  - **Golv 8 hp** (ägarbeslut 2026-09-17, felrapport #76): formen (5-5) ensam
+    räcker inte. Med bara någon enstaka poäng tvingar tvåfärgsbudet partnern upp
+    på 3-läget utan vare sig försvar eller stickstyrka, så under 8 hp **passar**
+    handen. Taket är öppet (5-5 är svag *eller* stark). Golvet är flatt – till
+    skillnad från de enkla §7-inkliven "lånar" formbudet ingen kung i balansering.
 
-**Styrkezoner:** spela "två zoner" – antingen **svag** (spärr-aktig, ~6–11 hp)
+**Styrkezoner:** spela "två zoner" – antingen **svag** (spärr-aktig, ~8–11 hp)
 eller **stark** (utgångsvilja), undvik mellanläget.
 
 **Advancer (ägarbeslut 2026-07-01):** ger **preferens till den av partnerns visade
@@ -2739,6 +2744,13 @@ toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
 ## 9. Ändringslogg
+- **2026-09-17 — Felrapport #76: ovanlig 2NT kräver 8+ hp (§7.2; ägarbeslut).**
+  Nord (♠64 ♥T8432 ♦J ♣T9543 = 5-5 hjärter+klöver men **1 hp**) bjöd ovanlig 2NT
+  över (1♦) — formen ensam triggade budet utan poängkrav, alldeles för aggressivt
+  (tvingar partnern upp på 3-läget utan försvar/stickstyrka). Golv **8 hp** (flatt,
+  ingen kungalån-relief i balansering); taket öppet (svag *eller* stark). Kod
+  `overcalls.ts` (`overcall`, regel "ovanlig 2NT"). Facit `overcalls.test.ts`
+  (1 hp passar + 8 hp-vakt bjuder 2NT), `auction-live.test.ts` (live-auktionen).
 - **2026-09-17 — Felrapport #73: 4-korts högfärg + slamvärden går via NMF (håll
   lågt), och NMF:s min/max delas nu vid 12/13–14 (§5.7; ägarbeslut).** Förr hoppade
   en jämn 19–20 med 4-korts högfärg direkt 4NT kvantitativt — som avböjt strandade

@@ -90,10 +90,14 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   const unbid = RANK_ORDER.filter((s) => s !== their)
   const relief = balancing ? 3 : 0 // "låna en kung" – sänk HP-golven i balansering
 
-  // 1) Ovanlig 2NT: 5-5 i de två lägsta objudna färgerna.
+  // 1) Ovanlig 2NT: 5-5 i de två lägsta objudna färgerna, MED värden. Formen
+  // ensam räcker inte (felrapport #76: 1 HP tvingar partnern upp på 3-läget utan
+  // vare sig försvar eller stickstyrka). Golv 8 HP (ägarbeslut 2026-09-17) – ett
+  // flatt golv, formbudet "lånar" ingen kung i balansering (se doc ovan). Taket
+  // är öppet – 5-5 är "svag eller stark" (den starka 17+-varianten bjuder 2NT).
   const twoLowest = unbid.slice(0, 2)
-  if (len[twoLowest[0]] >= 5 && len[twoLowest[1]] >= 5) {
-    return { call: '2NT', rule: 'ovanlig 2NT', explanation: `5-5 i ${SYM[twoLowest[0]]}+${SYM[twoLowest[1]]} → 2NT (ovanlig, två lägsta objudna).` }
+  if (len[twoLowest[0]] >= 5 && len[twoLowest[1]] >= 5 && p >= 8) {
+    return { call: '2NT', rule: 'ovanlig 2NT', explanation: `5-5 i ${SYM[twoLowest[0]]}+${SYM[twoLowest[1]]} (8+ hp) → 2NT (ovanlig, två lägsta objudna).` }
   }
 
   // 2) Michaels cue-bud (5-5).

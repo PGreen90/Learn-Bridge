@@ -184,7 +184,6 @@ describe('Felrapport #51 – tredje hand tar mästaren bakom dold spelförare', 
   // Vakt: håller partnern själv mästaren (leder ess), ska jag INTE slösa en egen
   // honnör över partnerns vinnande stick – markera lågt som förr.
   it('övertar INTE när partnern redan lett färgens mästare', () => {
-    // Öst leder ♥A (mästaren), Syd lågt – Väst med ♥K bör markera, inte ta över.
     const alt = {
       hands: {
         N: parse('SAKT HT DJ963 CKT962'),
@@ -198,5 +197,59 @@ describe('Felrapport #51 – tredje hand tar mästaren bakom dold spelförare', 
     s = playCard(s, H('2')) // Syd lågt
     const pick = botCardReasoned(s, 'W').card
     expect(pick).not.toEqual(H('K')) // slösar inte kungen över partnerns ess
+  })
+})
+
+// Felrapport #75 (github.com/PGreen90/Learn-Bridge/issues/75): 4♦ av Öst.
+// Syd (partnern) leder LÅGT ♥2, den öppna träkarlen (Väst) lägger ♥6 och SLÅR
+// utspelet – men den DOLDA spelföraren (Öst, ♥J singel) spelar EFTER Nord. Nord
+// satt med ♥K754 och la ♥7 ("vinn billigast") som föll för Östs dolda ♥J. Facit:
+// tredje hand högt även när TRÄKARLEN (andra hand) slog partnerns utspel – Nord
+// tar med kungen (DDS: spelföraren hålls till 7 stick, ♥7 släpper 8) och kommer
+// in för en klöverruff till åt Syd. Buggen: tredje-hand-högt kördes bara när
+// partnern "vann" sticket ELLER i sang; slog träkarlen partnern i ett
+// trumfkontrakt föll boten till "billigaste vinnaren".
+describe('Felrapport #75 – tredje hand högt när träkarlen slog partnern (trumf)', () => {
+  const deal = {
+    hands: {
+      N: parse('S8 HK754 DQ72 CKJ652'),
+      E: parse('SQJT4 HJ DT98654 C43'),
+      S: parse('SK97632 HT32 DAJ3 C7'),
+      W: parse('SA5 HAQ986 DK CAQT98'),
+    } as Record<Seat, Card[]>,
+  }
+  const contract: Contract = { declarer: 'E', strain: 'diamonds', level: 4 }
+  const D = (r: Rank): Card => ({ suit: 'diamonds', rank: r })
+  const CL = (r: Rank): Card => ({ suit: 'clubs', rank: r })
+
+  /** Fram till Nords val i stick 3: S ♥2, träkarlen (Väst) ♥6 slår – Öst dold 4:e. */
+  function atNordThirdHand() {
+    let s = startPlay(deal as any, contract)
+    // stick 1: S ♣7, V ♣8, N ♣J, Ö ♣3 → Nord vinner
+    s = playCard(s, CL('7')); s = playCard(s, CL('8')); s = playCard(s, CL('J')); s = playCard(s, CL('3'))
+    // stick 2: N ♣5, Ö ♣4, S ♦3 (ruff), V ♣9 → Syd vinner (klöverruff #1)
+    s = playCard(s, CL('5')); s = playCard(s, CL('4')); s = playCard(s, D('3')); s = playCard(s, CL('9'))
+    // stick 3: S ♥2, V ♥6 (slår) → Nord 3:e hand, Öst (dold ♥J) 4:e
+    s = playCard(s, H('2')); s = playCard(s, H('6'))
+    return s
+  }
+
+  it('DDS mekanism-lås: Nords ♥K håller spelföraren till 7 stick, ♥7 släpper 8', () => {
+    const s = atNordThirdHand()
+    const declRemaining = (c: Card) => {
+      const t = playCard(s, c)
+      return doubleDummyDeclarerRemaining(t.hands, 'diamonds', 'E', t.currentTrick, t.toAct, Infinity)
+    }
+    expect(declRemaining(H('K'))).toBe(7) // tredje hand högt → en klöverruff till
+    expect(declRemaining(H('7'))).toBe(8) // billigaste vinnaren (buggen) → ett stick bort
+  })
+
+  it('tumregeln spelar tredje hand HÖGT (kungen), inte ♥7', () => {
+    expect(botCardReasoned(atNordThirdHand(), 'N').card).toEqual(H('K'))
+  })
+
+  it('SKARPA boten (appen) lägger också kungen vid 11 kort', () => {
+    // 11 kort ligger över Monte-Carlo-fönstret (≤8) → samma tumregel-lager.
+    expect(botCardSmart(atNordThirdHand(), 'N', [])).toEqual(H('K'))
   })
 })

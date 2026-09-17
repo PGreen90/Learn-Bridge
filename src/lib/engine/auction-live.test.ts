@@ -340,6 +340,21 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     // tautologisk. De beteende-testerna kring off-book-svaret nedan står kvar.)
   })
 
+  // Felrapport #76 (bricka 12, 2026-09-17): Väst öppnade 1♦ och Nord (♠64
+  // ♥T8432 ♦J ♣T9543 = 5-5 hjärter+klöver men BARA 1 HP) bjöd ovanlig 2NT — allt
+  // för aggressivt. Ägaren satte golvet 8 HP. Live ska Nord passa här.
+  describe('felrapport #76 – ovanlig 2NT kräver värden (golv 8 HP)', () => {
+    it('Nord med 5-5 men 1 HP passar över Västs 1♦', () => {
+      const deal = dealOf('W', {
+        N: 'S:64 H:T8432 D:J C:T9543',
+        E: 'S:KJ83 H:KQ6 D:A8 C:K762',
+        S: 'S:QT5 H:J D:KT7532 C:AJ8',
+        W: 'S:A972 H:A975 D:Q964 C:Q',
+      })
+      expect(decideCall(deal, [call('W', '1D')], 'N').bid).toBe('P')
+    })
+  })
+
   // Straffdubbling (ägarbeslut 2026-07-04, poängarbetet): boten dubblar
   // motståndarnas höga färgkontrakt med trumfstack + styrka — men BARA när
   // X:et inte kan läsas som en konventionell dubbling (vår sida har redan

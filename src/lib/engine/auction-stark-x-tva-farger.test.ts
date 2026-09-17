@@ -122,11 +122,14 @@ describe('F6/C14: linjen passar aldrig ut ett ostört tvåfärgsinkliv (låser #
   // passar inte längre 2NT — svararen höjer 4♠ med 4-korts stöd och 10+
   // stödpoäng. Öst har därför fått ♠JT + 7-korts hjärter så passet består och
   // preferensplikten prövas; det gamla läget låses separat nedan.)
+  // Felrapport #76 (2026-09-17): ovanlig 2NT kräver nu 8+ hp. Nord (förr 7 hp)
+  // har fått ♥Q i stället för ♥3 (♥Q lånad från Väst, som behåller 12 hp + 8
+  // spader → öppnar 1♠ som förr) så formbudet lever kvar och linjelåset består.
   const TVAFARG = dealOf('W', {
-    N: 'S:65 H:3 D:QJT97 C:A8643',
+    N: 'S:65 H:Q D:QJT97 C:A8643',
     E: 'S:JT H:KJ98752 D:A2 C:J9',
     S: 'S:3 H:AT6 D:K86543 C:QT2',
-    W: 'S:AKQ98742 H:Q4 D:- C:K75',
+    W: 'S:AKQ98742 H:43 D:- C:K75',
   })
 
   it('linjen 1♠–2NT–P fortsätter med Syds preferens 3♦ och lämnas öppen', () => {
@@ -140,9 +143,11 @@ describe('F6/C14: linjen passar aldrig ut ett ostört tvåfärgsinkliv (låser #
   })
 
   it('K3: svararen med ♠AJT2 och 11 hp höjer 4♠ över 2NT i linjen — och linjen lämnas öppen', () => {
+    // #76-golvet: Nord (förr 7 hp) har fått ♣J i stället för ♣3 (lånad från Öst,
+    // som behåller sin utgångshöjning) → 8 hp, ovanlig 2NT lever kvar.
     const deal = dealOf('W', {
-      N: 'S:65 H:3 D:QJT97 C:A8643',
-      E: 'S:AJT2 H:KJ872 D:A2 C:J9',
+      N: 'S:65 H:3 D:QJT97 C:AJ864',
+      E: 'S:AJT2 H:KJ872 D:A2 C:93',
       S: 'S:3 H:AT6 D:K86543 C:QT2',
       W: 'S:KQ9874 H:Q954 D:- C:K75',
     })

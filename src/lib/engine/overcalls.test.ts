@@ -63,6 +63,19 @@ describe('overcall – inkliv över deras 1-läges öppning (§7.1–7.2)', () =
     expect(r.rule).toBe('ovanlig 2NT')
     expect(r.explanation).toMatch(/ovanlig/)
   })
+  // Felrapport #76 (bricka 12, 2026-09-17): 1♦–2NT med ♠64 ♥T8432 ♦J ♣T9543 —
+  // 5-5 hjärter+klöver men bara 1 HP. Ägaren: "ovanlig 2NT med 1 hcp … lite väl
+  // aggressivt … föreslår minst 8hcp". Facit: formen räcker inte — under 8 HP
+  // passar handen (den saknar både försvar och stickstyrka att tvinga partnern
+  // upp på 3-läget). Golvet 8 HP; 5-5 med 8+ bjuder fortfarande ovanlig 2NT.
+  it('felrapport #76: 5-5 i två lägsta men 1 HP passar (golvet 8 HP)', () => {
+    const r = overcall(parseHand('S:64 H:T8432 D:J C:T9543'), '1D')
+    expect(r.call).toBe('P') // aldrig 2NT på 1 HP
+  })
+  it('felrapport #76-vakt: 5-5 med precis 8 HP bjuder fortfarande ovanlig 2NT', () => {
+    // ♥KQ432 (5) + ♣KJ432 (5) = 8 HP → formbudet lever kvar över golvet.
+    expect(o('S:3 H:KQ432 D:32 C:KJ432', '1D')).toBe('2NT')
+  })
   it('upplysningsdubbling över (1♥): kort i färgen, stöd i övriga, 12+', () => {
     expect(o('S:KQ43 H:3 D:KQ52 C:Q432', '1H')).toBe('X') // 12 hp, singel hjärter
   })
