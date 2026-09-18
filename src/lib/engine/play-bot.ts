@@ -808,11 +808,53 @@ function defenderThirdHandHigh(state: PlayState, seat: Seat, legal: Hand, led: S
   )
   if (!unseenBeatsLed) return null // partnern vinner redan säkert → kryp/markera
 
-  const myWin = legal.filter((c) => c.suit === led && beats(c, bestCard, led, state.trump))
+  const allaVinnare = legal.filter((c) => c.suit === led && beats(c, bestCard, led, state.trump))
+  // T-serien regel B (2026-09-18): vinner PARTNERNS kort just nu, är ett eget
+  // kort bara värt att lägga om något OSETT kort ligger mellan partnerns kort och
+  // mitt — annars är de likvärdiga mot spelföraren (samma osedda kort slår båda),
+  // och att gå över krockar bara två honnörer i ett stick (♠K på partnerns ♠Q
+  // när esset är ute: frö 20260751). Likvärdiga kort sållas bort.
+  const partnerVinner =
+    bestCard.suit === state.currentTrick[0].card.suit && bestCard.rank === state.currentTrick[0].card.rank
+  const sedd = (r: Rank) => mineRanks.has(r) || dummyRanks.has(r) || playedRanks.has(r)
+  const myWin = partnerVinner
+    ? allaVinnare.filter((c) =>
+        ALL_RANKS.some((r) => rankVal(r) > rankVal(bestCard.rank) && rankVal(r) < rankVal(c.rank) && !sedd(r)),
+      )
+    : allaVinnare
   if (myWin.length === 0) return null
   // 1) Mästaren (säkert stick): ta den billigaste – i både sang och trumf.
   const masters = myWin.filter((c) => isSureWinner(c, state.hands[seat], played))
   if (masters.length > 0) {
+    // T-serien regel C (2026-09-18): "att casha mästaren kan aldrig kosta"
+    // stämmer INTE när bordet har en SYNLIG honnör under min mästare och jag har
+    // en lägre honnör (kn+) som slår sticket: den lägre honnören pressar fram
+    // spelförarens mellanhonnör (eller vinner), och mästaren sitter kvar ÖVER
+    // bordets honnör (AJ4 över bordets K → kn; A direkt gav spelföraren både K
+    // och D, frö 20260812). Utan lägre honnör eller utan bordshonnör tas
+    // mästaren som förr.
+    // Mästaren måste sitta DIREKT över bordets honnör (första kortet under den
+    // som varken är mitt eller spelat ligger på bordet): med en osedd honnör
+    // emellan (AJ73 över bordets Q542, kungen ute) faller den lägre honnören
+    // för spelförarens mellankort utan att bordets honnör fångas (frö 20261287).
+    const lagstaMastare = lowest(masters)
+    const direktUnder = ALL_RANKS.slice(0, rankVal(lagstaMastare.rank))
+      .reverse()
+      .find((r) => !mineRanks.has(r) && !playedRanks.has(r))
+    const bordsHonnorUnder =
+      direktUnder !== undefined && rankVal(direktUnder) >= rankVal('J') && dummyRanks.has(direktUnder)
+    const lagreHonnorer = myWin.filter(
+      (c) => rankVal(c.rank) >= rankVal('J') && rankVal(c.rank) < rankVal(lagstaMastare.rank) && !masters.includes(c),
+    )
+    if (bordsHonnorUnder && lagreHonnorer.length > 0) {
+      return {
+        card: lowest(lagreHonnorer),
+        reason:
+          'Tredje hand högt (§8.6): bordet har en honnör under min mästare – jag lägger min lägre ' +
+          'honnör (den pressar fram spelförarens mellankort eller vinner) och sparar mästaren ' +
+          'ÖVER bordets honnör i stället för att casha den och göra bordets honnör god.',
+      }
+    }
     return {
       card: lowest(masters),
       reason:
@@ -825,6 +867,50 @@ function defenderThirdHandHigh(state: PlayState, seat: Seat, legal: Hand, led: S
   // funktionsdoc): pressa fram spelförarens honnör med min lägsta honnör.
   const honor = thirdHandHonor(myWin)
   if (honor) {
+    // T-serien regel A (2026-09-18): lägsta honnören får inte UNDERSPELA.
+    // Bordet har redan lagt (fjärde hand = dold spelförare), så bara OSEDDA
+    // högre kort kan slå mig: inte mina, inte bordets, inte spelade — och inte
+    // dem partnern VISAT med sitt öppningsutspel (honnörsutspel = topp av
+    // touchérande sekvens → honnören under sitter hos partnern). Kan min lägsta
+    // honnör slås av ett osett kort men jag har ett kort som INGET osett kort
+    // slår, lägger jag det lägsta sådana (KJ → K när damen är osedd och esset
+    // ligger på bordet; QT → Q när partnerns ess-utspel lovat kungen). Finns
+    // inget sådant kort står honnörstvånget kvar (AQT → T: gaffeln behålls).
+    const hosPartnern = new Set<Rank>()
+    const oppning = state.completedTricks[0]?.cards[0] ?? state.currentTrick[0]
+    if (oppning.seat === leaderSeat && oppning.card.suit === led && rankVal(oppning.card.rank) >= rankVal('J')) {
+      hosPartnern.add(ALL_RANKS[rankVal(oppning.card.rank) - 1])
+    }
+    const kanSlas = (c: Card) =>
+      ALL_RANKS.some(
+        (r) =>
+          rankVal(r) > rankVal(c.rank) &&
+          !mineRanks.has(r) && !dummyRanks.has(r) && !playedRanks.has(r) && !hosPartnern.has(r),
+      )
+    if (kanSlas(honor)) {
+      const haller = myWin.filter((c) => !kanSlas(c))
+      if (haller.length > 0) {
+        return {
+          card: lowest(haller),
+          reason:
+            'Tredje hand högt (§8.6): min lägsta honnör kan slås av ett kort jag inte sett – jag ' +
+            'lägger i stället mitt lägsta kort som INGET osett kort kan slå (bordet har redan ' +
+            'lagt, och det partnern visat med utspelet räknas med).',
+        }
+      }
+    }
+    // T-serien regel B2 (2026-09-18): honnören sitter som GARD över bordets
+    // honnör — första kortet under den som varken är mitt eller spelat ligger på
+    // bordet — OCH den kan slås av ett osett kort. Då dödar honnören bordets kort
+    // så länge jag behåller den, medan pressen spenderar garden på ett stick jag
+    // kanske ändå förlorar (Q ur Q642 över bordets AJ95, K ur K6 över QJT3,
+    // J ur KJ762 över QT85). Kryp i stället. En honnör som INGET osett kort kan
+    // slå vinner sticket säkert och läggs alltid (felrapport #75: ♥K över
+    // bordets ♥AQ — esset ligger synligt och är förbi i sticket).
+    const under = ALL_RANKS.slice(0, rankVal(honor.rank))
+      .reverse()
+      .find((r) => !mineRanks.has(r) && !playedRanks.has(r))
+    if (kanSlas(honor) && under !== undefined && dummyRanks.has(under)) return null
     return {
       card: honor,
       reason:
@@ -926,7 +1012,30 @@ function defenderWinOverVisibleDummy(
   const dummyBest = dummyLed.reduce((a, b) => (rankVal(b.rank) > rankVal(a.rank) ? b : a))
   if (!beats(dummyBest, bestCard, led, state.trump)) return null // träkarlen slår inte partnern → kryp
   const mineWin = legal.filter((c) => beats(c, dummyBest, led, state.trump))
-  if (mineWin.length === 0) return null
+  if (mineWin.length === 0) {
+    // T-serien regel D (2026-09-18): jag kan inte slå bordets topp — men allt är
+    // synligt (spelföraren har lagt, bordet spelar sist). Skulle bordet annars
+    // vinna BILLIGT (med ett kort under knekt) och jag har ett kort som bara
+    // bordets HONNÖRER (kn+) går över, lägger jag det lägsta sådana: bordet
+    // tvingas spendera honnören i stället för att ta sticket gratis (♠8 ur T982
+    // mot bordets K76, frö 20260885; ♠2 lät ♠6 vinna).
+    const HONNOR = rankVal('J')
+    const bordetsSlagare = dummyLed.filter((c) => beats(c, bestCard, led, state.trump))
+    const billigast = bordetsSlagare.reduce((a, b) => (rankVal(b.rank) < rankVal(a.rank) ? b : a))
+    if (rankVal(billigast.rank) >= HONNOR) return null // bordet måste ändå spendera en honnör
+    const tvingar = legal.filter(
+      (c) =>
+        c.suit === led &&
+        dummyLed.every((d) => rankVal(d.rank) < rankVal(c.rank) || rankVal(d.rank) >= HONNOR),
+    )
+    if (tvingar.length === 0) return null
+    return {
+      card: lowest(tvingar),
+      reason:
+        'Jag ser träkarlen: jag kan inte vinna sticket, men lägger ett kort som bara bordets ' +
+        'honnör går över – bordet får spendera den i stället för att vinna sticket billigt.',
+    }
+  }
   return {
     card: lowest(mineWin),
     reason:

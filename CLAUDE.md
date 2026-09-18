@@ -18,8 +18,10 @@ fyra saker och varken slösa ett för högt kort eller underspela ett för lågt
 (`thirdHandHonor` = lägsta honnören) är trubbig; den fulla räkningen gör MC redan
 vid ≤8 kort, så jobbet är att approximera den vid 9–13 kort. Rör spelmotorn brett
 → test-drivet, DD-mätning per beteenderegel (speldiagnosens metod). Spec +
-varningar: `docs/bevaka.md` (översta posten). **Första steget: kort plan +
-mätrigg till ägaren FÖRE bygge.**
+varningar: `docs/bevaka.md` (översta posten). **Läge 2026-09-18: rigg + regel
+A–D byggda & mätta (T0/T1 i `docs/speldiagnos.md`, §8.6); kvar: ägarens
+live-prov + beslut om punkt 4 fullt ut (budseedad gissning, i dag bara
+utspelsinferens).**
 Föregående NU **Puppet Stayman över 2NT** är KLART & LIVE (2026-09-16, `0207209`).
 
 **Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** designgranskningen

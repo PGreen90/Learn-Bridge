@@ -354,3 +354,39 @@ samma innehåll skrivs alltid till `revisor-output/tredjehand-latest.json`):
   ska sitta kvar över bordets K (20260812), Q ur Q642 (20260776) · **kryp
   bakom synligt bord** — T982 mot bordets K76 efter mig, la 2:an (20260885).
   Klassningen systemfel/ärlig miss görs i nästa runda, inte av siffrorna.
+
+### T1 — regel A, B, B2, C, D (2026-09-18, ägarbesked "kör på, helt autonomt A–D")
+
+Klassningen av T0:s fem värsta larm (alla systemfel, fyra mönster) står i
+`revisor-output/tredjehand-rapport-2026-09-18.md`; reglerna i
+`docs/budsystem.md` §8.6. En regel i taget, facit FÖRE fix
+(`play-bot-third-hand.test.ts`), ommätning efter varje — samma kommando som T0.
+
+Tumregel-fönstrets kostnad på T0:s 200 givar, steg för steg (stick / larm):
+T0 **22 / 17** → A **17 / 14** → C **12 / 10** → B **10 / 9** → B2 **7 / 6** →
+D **4 / 4**. Varje steg: noll nya larm i tumregel-fönstret som kan föras till
+regelns eget beslut (ett MC-larm sent i frö 20260812 är en omtärnad linje).
+
+**Validering på osedda givar** (fyra regler trimmade på samma 200 givar kan vara
+överanpassning — därför 400 färska frön, ny kod mot baslinjen via `git stash`):
+
+```
+Bash:  TREDJEHAND=1 TREDJEHAND_BILLIG=1 TREDJEHAND_DEALS=400 TREDJEHAND_OFFSET=200 npx vitest run src/lib/engine/tredjehand.probe.test.ts
+```
+
+- Baslinjen: tumregel 773 lägen · 37 larm · **44** stick. Ny kod: 773 · 29 ·
+  **35**. MC-fönstret 43 → 40 (omtärningsbrus — reglerna rör inte MC).
+- **Läsning (ärlig):** vinsten håller utanför träningsgivarna men är mindre
+  (−20 % mot −82 % in-sample) — väntat, och skälet till att valideringen gjordes.
+  Tre "nya" tumregel-larm granskades: alla tre är omtärnade linjer (läget fanns
+  inte, eller såg annorlunda ut, i baslinjen) — inget är en regels eget beslut.
+- **Två fynd på vägen:** (1) regel C lagar en REGRESSION från #75-fixen — den
+  gamla sang-grenen tog lägsta honnören även när en mästare fanns; efter #75 gick
+  mästar-grenen före (♣A ur AJ4, frö 20260812). Inget facit låste det. (2) Första
+  B2-versionen bröt #75-facit (♥K över bordets ♥AQ är också "gard") — skillnaden
+  är att en honnör som INGET osett kort kan slå vinner sticket säkert; bara
+  slagbara gardar sparas. Första C-versionen släppte dessutom fram AJ73 över
+  bordets Q542 (kungen osedd emellan, frö 20261287) — stramad till "mästaren
+  DIREKT över bordets honnör".
+- **Kvar i tumregel-fönstret (T0-givarna, 4 stick):** markering/sak-lägen utanför
+  tredje-hand-högt (frön 20260722, 20260777, 20260839, 20260892) — inte denna NU.

@@ -2743,7 +2743,46 @@ kvarvarande motståndare visat renons i färgen (han kan ruffa – ett bortkasta
 toppkort i en ruff är ingen vinst). Facit: `play-bot-third-hand.test.ts`
 (DDS-låst: tredje hand lågt släpper spelföraren ett extra stick).
 
+**Rätt kort — varken för högt eller för lågt (2026-09-18, ägardirektiv efter
+felrapport #75).** Valet väger fyra saker: partnerns utspel, träkarlen (även när
+den redan lagt före mig), egen hand och vad som är OSETT. Bordet har lagt, så
+bara osedda högre kort kan slå mig — mina, bordets och spelade kort kan det inte,
+och inte heller dem partnern visat med sitt öppningsutspel (honnörsutspel = topp
+av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf och sang:
+- **Träkarlen slog partnerns utspel (#75):** regeln gäller även då — ♥K ur K754
+  när bordet lagt ♥6 ur AQ986 och spelföraren sitter dold sist (♥7 föll för ♥J).
+- **A — underspela inte:** kan min lägsta honnör slås av ett osett kort men jag
+  har ett kort som INGET osett kort slår, läggs det lägsta sådana. K-kn → **K**
+  när damen är osedd och esset ligger på bordet; D-10 → **D** när partnerns
+  ess-utspel lovat kungen. Finns inget sådant kort står lägsta honnören kvar
+  (A-D-10 → 10, gaffeln behålls).
+- **B — gå inte över partnerns vinnande kort med ett likvärdigt:** ligger inget
+  osett kort mellan partnerns kort och mitt (K på partnerns D när esset är ute)
+  löser mitt kort inget — samma ess slår båda. Jag kryper/markerar.
+- **B2 — spendera inte garden:** en honnör som sitter direkt över bordets honnör
+  (D över bordets E-kn, K över D-kn-10) och som KAN slås av ett osett kort
+  sparas; den dödar bordets kort så länge jag har den. En honnör som inget osett
+  kort kan slå vinner sticket säkert och läggs alltid (#75).
+- **C — spara mästaren över bordets honnör:** sitter mitt ess direkt över bordets
+  kung och jag har en lägre honnör (kn+) som slår sticket, läggs den — esset
+  behåller greppet om kungen (E-kn-4 över bordets K-10 → **kn**).
+- **D — tvinga bordets honnör när allt är synligt:** spelar bordet sist, har
+  spelföraren redan lagt och jag inte kan slå bordets topp, lägger jag mitt lägsta
+  kort som bara bordets honnörer går över (♠8 ur 10-9-8-2 mot bordets K-7-6) —
+  bordet får spendera kungen i stället för att vinna på sexan.
+
+Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
+
 ## 9. Ändringslogg
+- **2026-09-18 — Tredje hand högt generaliserad (§8.6; ägardirektiv, NU).**
+  Regel A (underspela inte det osedda), B (övertar inte partnerns kort med ett
+  likvärdigt), B2 (spendera inte garden över bordets honnör), C (spara mästaren
+  direkt över bordets honnör — lagar även en regression från #75-fixen, som lät
+  mästar-grenen gå före den gamla sang-grenens "lägsta honnören") och D (tvinga
+  bordets honnör när allt är synligt). Kod `play-bot.ts`
+  (`defenderThirdHandHigh`, `defenderWinOverVisibleDummy`). Facit
+  `play-bot-third-hand.test.ts` ("T-serien regel A/B/B2/C/D", frön 20260770,
+  20260819, 20260751, 20260776, 20260812, 20260885). Mätning: `docs/speldiagnos.md` T1.
 - **2026-09-17 — Felrapport #76: ovanlig 2NT kräver 8+ hp (§7.2; ägarbeslut).**
   Nord (♠64 ♥T8432 ♦J ♣T9543 = 5-5 hjärter+klöver men **1 hp**) bjöd ovanlig 2NT
   över (1♦) — formen ensam triggade budet utan poängkrav, alldeles för aggressivt
