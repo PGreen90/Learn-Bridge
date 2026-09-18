@@ -24,7 +24,9 @@ live-prov + beslut om punkt 4 fullt ut (budseedad gissning, i dag bara
 utspelsinferens).**
 Föregående NU **Puppet Stayman över 2NT** är KLART & LIVE (2026-09-16, `0207209`).
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** designgranskningen
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** systems on +
+stulet bud efter stört 1NT (#77, `90aeea1`, `docs/1nt-systems-on-plan.md`, §7.5) ·
+designgranskningen
 (kontrast/fokusring/filt-text `5e62517` + hover-vokabulär `261e62a`) · Puppet
 Stayman över 2NT (`0207209`) · Gambling 3NT
 (`8e327b3`, `gambling-3nt.ts`, systemboken §3.1+§4.4; forts. SENARE) · kortregeln

@@ -2923,3 +2923,35 @@ sakens skull; smal, verifierbar konsolidering. Mergepunkt `261e62a`, LIVE.
 Medvetet uteställt: en ny `bg-brand-hover`-token drogs tillbaka (Tailwind v4
 genererade den inte utan serveromstart — skör; `bg-white/10` är redan enhetligt
 på de fyra ställena). Inga logikändringar. Hela sviten grön (`npm test`), tsc rent.
+
+## 2026-09-17/18 — Felrapporter #75–#77, tredje hand högt generaliserad, systems on efter stört 1NT
+
+**Felrapport #75 (spel) + #76 (bud)** — `341920d`, LIVE. #75: Nord la ♥7 "vinn
+billigast" när träkarlen slagit partnerns utspel i ett trumfkontrakt; tredje hand
+högt gäller nu även där. #76: ovanlig 2NT fick golvet 8 hp (ägarbeslut).
+
+**Tredje hand högt generaliserad (NU 2026-09-18)** — riggen `a651744`/`ed785a6`,
+reglerna `037403b`, LIVE. Ägardirektiv: kortvalet väger partnerns utspel,
+träkarlen (även den som lagt före mig), egen hand och det osedda — varken för
+högt eller för lågt. Byggt: mätrigg (`tredjehand.probe`, DD-poäng per lagligt
+kort via `solveAllCards`) och regel A (underspela inte), B (övertar inte partnerns
+kort med ett likvärdigt), B2 (spendera inte en slagbar gard över bordets honnör),
+C (spara mästaren direkt över bordets honnör — lagade en regression från #75) och
+D (tvinga bordets honnör när allt är synligt). Mätning och ärlig läsning
+(in-sample mot osedda givar): `docs/speldiagnos.md` "T-serien"; regler §8.6.
+**Kvar:** ägarens live-prov + beslut om punkt 4 fullt ut (budseedad gissning).
+
+**Felrapport #77 → systems on + stulet bud efter vårt 1NT i konkurrens** —
+`90aeea1`, LIVE. Ägarens egen struktur, varje detalj ett svar på en direkt fråga
+(`docs/1nt-systems-on-plan.md`, §7.5): EN struktur mot alla inkliv; Lebensohl
+efter vårt 1NT, värde-X mot DONT (facit #39/#43) och flykten över deras X rivna.
+Mätt med stört-1NT-sonden mot den gamla strukturen; tre läckor visades, ägaren
+behöll två medvetet och stramade åt straff-X (8+ hp och 3+ kort i deras färg).
+
+**Ny rutin (ägardirektiv 2026-09-18):** vid hål i en budstruktur — visa hålen och
+FRÅGA ägaren hur detaljerna ska byggas; föreslå aldrig en egen färdig struktur som
+utgångspunkt (`docs/arbetsrutiner.md` 🙋, `/felrapporter`-kommandot).
+
+**Lärdom (docs-vakten):** en gitignorad mätfil som råkar finnas lokalt döljer ett
+rött bygge i Actions — kör vakten med `revisor-output/` bortflyttad före push;
+genererade mätfiler hör hemma i vaktens `GENERERADE`-set.
