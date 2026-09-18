@@ -6,7 +6,9 @@
   trumf. Förr föll boten till "vinn billigast" och la ett kort som den dolda
   spelföraren gick över (Nords ♥7 föll för Östs dolda ♥J). Facit i
   `play-bot-third-hand.test.ts` ("Felrapport #75").
-- **Ägardirektiv (SENARE-kandidat, godkänt 2026-09-17):** generalisera valet så
+- **NU sedan 2026-09-18** — riggen byggd: `tredjehand.probe.test.ts`, T0-baslinjen
+  och kommandot i `docs/speldiagnos.md` "T-serien".
+- **Ägardirektiv (godkänt 2026-09-17):** generalisera valet så
   det ALLTID väger fyra saker och varken slösar ett för högt kort ELLER underspelar
   ett för lågt: (1) vad partnern spelade UT, (2) den öppna träkarlen — även den som
   ligger FÖRE mig i sticket (spela bara högt nog att slå det som faktiskt kan slå

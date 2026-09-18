@@ -14,8 +14,8 @@
 //   DealerPar-poängen är NS-orienterad (positiv när N/S äger par-resultatet).
 
 import { Dds, loadDds, type DealPbn } from 'bridge-dds'
-import type { Deal, Hand, Rank, Seat, Suit, Vulnerability } from '../../types/bridge'
-import { NEXT_SEAT, type Contract, type Strain, type Trick } from './play'
+import type { Card, Deal, Hand, Rank, Seat, Suit, Vulnerability } from '../../types/bridge'
+import { NEXT_SEAT, type Contract, type PlayState, type Strain, type Trick } from './play'
 import type { DDSolver } from './revisor'
 
 const RANK_DESC: Rank[] = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2']
@@ -103,4 +103,51 @@ export function dealToAnalysePbn(deal: Deal, contract: Contract): DealPbn {
  */
 export function analyseSpel(dds: Dds, deal: Deal, contract: Contract, tricks: Trick[]): number[] {
   return dds.AnalysePlayPBN(dealToAnalysePbn(deal, contract), { cards: playTraceToPbn(tricks) }).tricks
+}
+
+// ---------- Tredje-hand-riggen: DD-poäng för VARJE lagligt kort i en ställning ----------
+// SolveBoardPBN löser en pågående ställning (kvarvarande kort + korten som redan
+// ligger i sticket) och ger per kort hur många av de återstående sticken SIDAN
+// VID DRAGET tar om det kortet läggs. Konventionerna är odokumenterade i paketets
+// typer och låses empiriskt i revisor-dds-solve.test.ts (#75-läget).
+
+const DDS_RANK: Record<Rank, number> = {
+  '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, J: 11, Q: 12, K: 13, A: 14,
+}
+const RANK_BY_DDS: Record<number, Rank> = Object.fromEntries(
+  (Object.entries(DDS_RANK) as [Rank, number][]).map(([r, n]) => [n, r]),
+) as Record<number, Rank>
+
+/** Ställningen i SolveBoardPBN-form: trumf, sticket ledare, korten på bordet, kvarvarande kort. */
+export function stateToSolvePbn(state: PlayState): DealPbn {
+  return {
+    trump: STRAIN_IDX[state.contract.strain],
+    first: SEAT_IDX[state.leader],
+    currentTrickSuit: state.currentTrick.map((pc) => STRAIN_IDX[pc.card.suit]),
+    currentTrickRank: state.currentTrick.map((pc) => DDS_RANK[pc.card.rank]),
+    remainCards: dealToPbn({ hands: state.hands } as Deal),
+  }
+}
+
+export interface KortPoang {
+  card: Card
+  /** Återstående stick (inkl. det pågående) för sidan vid draget om kortet läggs. */
+  score: number
+}
+
+/**
+ * DD-poäng för varje lagligt kort åt platsen vid draget. DDS returnerar bara det
+ * högsta av likvärdiga kort med en bitmask (`equals`, bit r = rang r är
+ * likvärdig) — masken expanderas så varje lagligt kort får sin poäng.
+ */
+export function solveAllCards(dds: Dds, state: PlayState): KortPoang[] {
+  const fut = dds.SolveBoardPBN(stateToSolvePbn(state), -1, 3, 0) // target −1 = max, solutions 3 = alla kort
+  const out: KortPoang[] = []
+  for (let i = 0; i < fut.cards; i++) {
+    const suit = PBN_SUITS[fut.suit[i]]
+    const ranks = [fut.rank[i]]
+    for (let r = 2; r <= 14; r++) if ((fut.equals[i] >> r) & 1) ranks.push(r)
+    for (const r of ranks) out.push({ card: { suit, rank: RANK_BY_DDS[r] }, score: fut.score[i] })
+  }
+  return out
 }

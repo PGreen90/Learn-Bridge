@@ -34,6 +34,7 @@ på VISAD information, aldrig på facit) till hela kedjan:
 | `src/lib/engine/revisor-dds.ts` | `analyseSpel` — per-kort-DD-facit via bridge-dds `AnalysePlayPBN` (49 värden för en full giv: värde 0 = före utspelet, värde i = efter kort i; DDS analyserar t.o.m. kort 48, sista sticket är tvunget). Konventionerna låsta av `revisor-dds-analyse.test.ts`. |
 | `src/lib/engine/speldom.ts` | `bedomSpel` — attribuerar varje DD-rörelse till kort/säte/roll (utspel/spelförare/försvar); `helDom` — delar upp givens tapp i budtapp (par vs kontraktet vid DD-spel) och speltapp (DD-spel vs faktiskt spel). Facit: `speldom.test.ts`. |
 | `src/lib/engine/speldiagnos.ts` | Aggregatorn `korSpeldiagnos` + `formatSpeldiagnos`. Facit: `speldiagnos.test.ts`. |
+| `src/lib/engine/tredjehand.probe.test.ts` | **Tredje-hand-riggen** (NU 2026-09-18): varje försvarar-tredje-hand-läge jämförs mot DD-poängen för VARJE lagligt kort (`solveAllCards` i `revisor-dds.ts` runt `SolveBoardPBN`; konventionen låst i `revisor-dds-solve.test.ts`). Delar upp på tumregel-fönstret (9–13 kort) / MC (≤8), vem som spelar efter mig (dold spelförare / öppen träkarl), riktning (överspel/underspel) och hållmönster. Se T-serien nedan. |
 
 **Mätkörningen** (skriver JSON + läsbar rapport till `revisor-output/`, gitignorad):
 
@@ -304,3 +305,52 @@ fixdetaljerna: `docs/bot-hjarna.md` "runda 6".
 - **Metodlärdom:** två beteenderegler mättes först IHOP och kunde inte
   attribueras — mät en i taget (omkörningen ovan gjordes om med bara fix 2).
 - Bevakning ur rundan: MC-beslut på få samplade lägen (`docs/bevaka.md`).
+
+## T-serien — tredje hand högt: generaliseringen (NU 2026-09-18)
+
+> Riggen mäter EN sak: försvararens kortval som **tredje hand** (partnern ledde,
+> två kort ligger) mot DD-poängen för varje lagligt kort. Samma givuniversum
+> som S-serien. Ägarens spec (fyra inputs: partnerns utspel · träkarlen även den
+> som ligger FÖRE mig · egen hand · budseedad gissning om det dolda; varken för
+> högt eller för lågt) står i `docs/bevaka.md`.
+
+**Mätkörningen:**
+
+```
+Bash:  TREDJEHAND=1 TREDJEHAND_DEALS=200 TREDJEHAND_BILLIG=1 TREDJEHAND_OUT=tredjehand-t0-billig.json npx vitest run src/lib/engine/tredjehand.probe.test.ts
+```
+
+Rattar: `TREDJEHAND_DEALS` (200) · `TREDJEHAND_SEED` (20260721) · `TREDJEHAND_OFFSET`
+· `TREDJEHAND_BILLIG=1` (tumregler hela vägen) · `TREDJEHAND_EXEMPEL` (12) ·
+`TREDJEHAND_OUT`. Rapport + JSON i `revisor-output/` (läsbar rapport:
+`revisor-output/tredjehand-latest.txt`).
+
+**Varför BILLIG duger för fönstret som räknas:** MC kickar in först vid ≤8 kort,
+så i tumregel-fönstret (9–13 kort = stick 1–5) är BILLIG-linjen **identisk** med
+skarp körning — samma lägen, samma val, sekunder i stället för 20–40 min.
+Bara MC-fönstrets rader skiljer sig från skarp körning (lagret klassas alltid
+ur standard-fönstret, oavsett körläge). DD ser alla kort: en kostnad är en
+larmklocka att granska, aldrig en dom.
+
+### T0 — nollmätning före generaliseringen (2026-09-18)
+
+200 givar, frö 20260721, BILLIG. Kommandot ovan; siffrorna ur
+`revisor-output/tredjehand-t0-billig.json`:
+
+- **722** försvarar-tredje-hands-lägen · **27** larm (kostnad > 0) · **32** stick.
+- **Tumregel-fönstret (målet): 390 lägen · 17 larm · 22 stick.** MC: 332 · 10 · 10.
+- Tyngdpunkten: **dold spelförare efter mig · trumf** — 209 lägen · 12 larm ·
+  15 stick. Övriga rutor 1–3 stick var.
+- **Båda riktningarna finns** (tumregel): överspel 9 larm/11 stick ·
+  underspel 6/9 · annat 2/2 — bekräftar ägarens "varken för högt eller för lågt".
+- Per regel (tumregel): honnörstvånget "Tredje hand högt (§8.6): partnern
+  ledde…" 87 lägen · 8 larm · 11 stick · mästaren (#51) 34 · 4 · 5 · "partnern
+  vinner – kastar lågt" 65 · 3 · 4. Regeln fyrar alltså 121 gånger, är oftast
+  rätt, men bär 16 av fönstrets 22 stick.
+- Mönster i värsta exemplen (frön för `DUMP_SPEL`): **underspel av icke-
+  sammanhängande honnörer** — KJ→J (20260770), QT→T (20260819): "lägsta
+  honnören" kollar inte om den slår det dolda · **överspel** — K ur KT763
+  över partnerns vinnande Q (20260751), A ur AJ4 när J räcker och esset
+  ska sitta kvar över bordets K (20260812), Q ur Q642 (20260776) · **kryp
+  bakom synligt bord** — T982 mot bordets K76 efter mig, la 2:an (20260885).
+  Klassningen systemfel/ärlig miss görs i nästa runda, inte av siffrorna.
