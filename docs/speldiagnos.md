@@ -334,8 +334,8 @@ larmklocka att granska, aldrig en dom.
 
 ### T0 — nollmätning före generaliseringen (2026-09-18)
 
-200 givar, frö 20260721, BILLIG. Kommandot ovan; siffrorna ur
-`revisor-output/tredjehand-t0-billig.json`:
+200 givar, frö 20260721, BILLIG. Kommandot ovan (OUT-namnet i kommandot;
+samma innehåll skrivs alltid till `revisor-output/tredjehand-latest.json`):
 
 - **722** försvarar-tredje-hands-lägen · **27** larm (kostnad > 0) · **32** stick.
 - **Tumregel-fönstret (målet): 390 lägen · 17 larm · 22 stick.** MC: 332 · 10 · 10.
