@@ -102,7 +102,7 @@ S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
-subagent-användning · Lebensohl nästa lager · fler budträningsgivar +
+subagent-användning · störda 1NT-auktioner nästa lager · fler budträningsgivar +
 tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den
 starka dubblaren säljer given i rond 2 · **svep: partnerskapsplikter i konkurrens**

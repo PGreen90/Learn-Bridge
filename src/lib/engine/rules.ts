@@ -75,7 +75,9 @@ const ALERT_RULE_PREFIXES: string[] = [
   'responsiv dubbling',
   'stöddubbling',
   'Jordan 2NT',
-  'Lebensohl',
+  'stulet bud', // X = budet motståndaren tog (Stayman/överföring) över vårt 1NT
+  'värde-X med högfärg',
+  'överföring på 3-läget',
   'DONT',
   'Mathe',
   'Ogust',
@@ -395,11 +397,6 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'höjning efter negativ dubbling (inbjudan)': 'inbjudan',
   'höjning efter negativ dubbling (enkel)': 'ej-krav',
   straffdubbling: 'ej-krav',
-  // Lebensohl
-  'Lebensohl 2NT (svag)': 'ej-krav',
-  'Lebensohl direkt 3-läge (krav)': 'utgangskrav',
-  'Lebensohl cue (Stayman, krav)': 'utgangskrav',
-  'Lebensohl 2NT (slow → 3NT, visar stopp)': 'utgangskrav',
   '3NT direkt (förnekar stopp)': 'avslut',
   // DONT
   'DONT tvåfärg': 'ej-krav',
@@ -484,8 +481,6 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'upplysningsdubbling (stark)': 'krav-1-rond',
   'fritt svar på upplysningsdubbling': 'ej-krav',
   'straff/värden': 'ej-krav',
-  'öppnarens svar på värde-X': 'ej-krav',
-  'svar på öppnarens värde-X-fortsättning': 'ej-krav',
   'redubbling (värden)': 'krav-1-rond',
   'svar på stöddubbling': 'ej-krav',
   'dubblaren höjer (inbjudan)': 'inbjudan',
@@ -497,7 +492,17 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'tvångssvar (utan stöd)': 'krav-1-rond',
   'svar på tvåfärgs-cue': 'utgangskrav',
   // Naturliga inkliv / höjningar / avslut:
-  'naturligt (to play)': 'ej-krav',
+  // Systems on efter vårt 1NT i konkurrens (ägarens spec 2026-09-18, §7.5):
+  'stulet bud: Stayman': 'krav-1-rond',
+  'stulet bud: överföring': 'krav-1-rond',
+  'värde-X med högfärg (stört 1NT)': 'krav-1-rond',
+  'överföring på 3-läget (stört 1NT)': 'krav-1-rond',
+  'svar på värde-X (stört 1NT)': 'ej-krav',
+  'fullföljd överföring (3-läget)': 'ej-krav',
+  'placerar efter värde-X-svaret': 'avslut',
+  'straff-X (andra ronden)': 'ej-krav',
+  'återöppning med högfärg (1NT)': 'ej-krav',
+  'utgångsval: rättar till högfärgen': 'avslut',
   'naturligt inkliv (1NT)': 'ej-krav',
   '2NT-inkliv (12–15)': 'ej-krav',
   'stödhöjning – utgång': 'avslut',
@@ -505,7 +510,6 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'stödhöjning – hopphöjning (inbjudan)': 'inbjudan',
   'accepterar (minimum)': 'avslut',
   'accepterar utgång': 'avslut',
-  'placerar utgång efter öppnarens 2NT': 'avslut',
   'cue-advancerns dom (3NT)': 'avslut',
   // Jordan-fortsättningar:
   'Jordan: utgång': 'avslut',
@@ -515,12 +519,6 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'DONT pass-eller-rätta': 'ej-krav',
   'DONT: rättelse (tvåfärg)': 'ej-krav',
   'DONT: rättelse': 'ej-krav',
-  // Lebensohl-fortsättningar (över deras inkliv av vårt 1NT):
-  'Lebensohl 3NT (utgång)': 'avslut',
-  'Lebensohl 3NT (öppnaren väljer utgång)': 'avslut',
-  'Lebensohl 3♣ (tvunget relä-svar)': 'ej-krav',
-  'Lebensohl 3-läge (svag, rättar)': 'ej-krav',
-  'Lebensohl naturligt 2-läge': 'ej-krav',
 }
 
 /** Kravnivå (§2) för ett bud givet dess regel, eller undefined om okänd. */

@@ -29,6 +29,11 @@ som innehåller HELA given maskinläsbart. Din uppgift: läs rapporterna,
      verifiera att motorn bjuder som i rapportens `budgivning:`-rad. Lås det
      RÄTTA budet som facit — fråga ägaren om rätt bud är oklart
      (ägarbeslut går före gissning, se CLAUDE.md).
+     **Är felet ett hål i en hel budstruktur** (fler händer än den rapporterade
+     saknar väg)? Föreslå då INTE en egen färdig struktur: visa hålen med
+     typhänder och **fråga ägaren hur detaljerna ska byggas** (konvention, vad
+     varje bud betyder, gränser) med konkreta svarsalternativ — bygg först när
+     svaren finns (regeln i `docs/arbetsrutiner.md`, ägardirektiv 2026-09-18).
    - **Datorn spelade korten fel:** återskapa ställningen med `startPlay` +
      `playCard` (`src/lib/engine/play.ts`) fram till det ifrågasatta sticket
      och lås rätt kort/sticksumma som facit (DDS/Monte-Carlo-verktygen finns

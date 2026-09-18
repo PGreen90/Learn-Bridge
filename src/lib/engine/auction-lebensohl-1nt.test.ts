@@ -5,10 +5,9 @@ import { parseHand } from '../bidding'
 import { buildAuction } from './auction'
 import { decideCall } from './auction-live'
 
-// Lebensohl EFTER VÅRT 1NT — integrationsfacit (§7.5, Lager 1). Bevisar att
-// verktygen NÅS i en levande auktion: motståndarens naturliga inkliv modelleras,
-// svararen spelar Lebensohl (skild från DONT via rule), och öppnaren fullföljer
-// reläet. Motpolen: ett DONT-inkliv (utan naturlig rule) ska INTE trigga Lebensohl.
+// Naturligt inkliv över vårt 1NT — integrationsfacit (§7.5). Motståndarens
+// naturliga inkliv modelleras; svararen spelar ägarens struktur 2026-09-18
+// (systems on + stulet bud) — Lebensohl-kärnan är riven.
 
 function call(seat: Seat, bid: string, rule?: string): ResolvedCall {
   return rule ? { seat, bid, rule } : { seat, bid }
@@ -54,35 +53,35 @@ describe('Lebensohl efter 1NT – motståndarens naturliga inkliv modelleras', (
   })
 })
 
-describe('Lebensohl efter 1NT – svararen spelar konventionen (skild från DONT)', () => {
-  it('svag med lång klöver → 2NT-relä, öppnaren 3♣, svararen passar', () => {
+// Ägarens spec 2026-09-18 (felrapport #77): Lebensohl efter vårt 1NT är RIVEN —
+// EN struktur mot alla inkliv (systems on + stulet bud), oavsett om inklivet är
+// naturligt eller DONT. Samma händer som Lebensohl-faciten, nya svar.
+describe('efter 1NT – (naturligt 2x): systems on, ingen Lebensohl', () => {
+  it('svag med lång klöver → pass (2NT-reläet finns inte längre); öppnaren passar ut', () => {
     const s1 = call('S', '1NT')
-    const w = decideCall(DEAL_RELAY, [s1], 'W')          // 2♠ naturligt
-    const n = decideCall(DEAL_RELAY, [s1, w], 'N')       // Lebensohl 2NT
-    expect(n.bid).toBe('2NT')
-    const e = call('E', 'P')
-    const s2 = decideCall(DEAL_RELAY, [s1, w, n, e], 'S') // öppnaren tvingas 3♣
-    expect(s2.bid).toBe('3C')
-    const w2 = call('W', 'P')
-    const n2 = decideCall(DEAL_RELAY, [s1, w, n, e, s2, w2], 'N') // klöver → passar
-    expect(n2.bid).toBe('P')
+    const w = decideCall(DEAL_RELAY, [s1], 'W') // 2♠ naturligt
+    const n = decideCall(DEAL_RELAY, [s1, w], 'N')
+    expect(n.bid).toBe('P')
+    const s2 = decideCall(DEAL_RELAY, [s1, w, n, call('E', 'P')], 'S') // återöppning: ingen 5+ högfärg
+    expect(s2.bid).toBe('P')
   })
 
-  it('utgångskrav med egen 5-färg → direkt 3-läge', () => {
-    expect(respAfterNatural('S:A2 H:KQ3 D:832 C:KQT94', '2S').bid).toBe('3C')
+  it('utgångsvärden, jämn med spaderstopp → 3NT (jämna vägen)', () => {
+    expect(respAfterNatural('S:A2 H:KQ3 D:832 C:KQT94', '2S').bid).toBe('3NT')
   })
 
-  it('jämn utgångshand → direkt 3NT', () => {
-    expect(respAfterNatural('S:KQ42 H:KJ5 D:QT4 C:A32', '2H').bid).toBe('3NT')
+  it('värden med fyrkorts spader över deras 2♥ → X (8+ med fyrkorts högfärg)', () => {
+    expect(respAfterNatural('S:KQ42 H:KJ5 D:QT4 C:A32', '2H')).toMatchObject({ bid: 'X', rule: 'värde-X med högfärg (stört 1NT)' })
   })
 
-  it('svag utan färg → passar (försvarar deras inkliv)', () => {
+  it('svag utan färg → passar', () => {
     expect(respAfterNatural('S:842 H:973 D:9532 C:J86', '2S').bid).toBe('P')
   })
 
-  it('DISKRIMINATOR: samma 2♠ UTAN naturlig rule (DONT) triggar INTE Lebensohl-reläet', () => {
+  it('EN struktur: samma 2♠ med eller utan naturlig rule ger samma svar', () => {
     const deal = dealOf('S', { S: S_1NT, N: 'S:42 H:762 D:54 C:QJT876', E: FILL, W: FILL })
-    const bid = decideCall(deal, [call('S', '1NT'), call('W', '2S')], 'N')
-    expect(bid.bid).not.toBe('2NT') // faller till gamla DONT-vägen, ej Lebensohl
+    const dont = decideCall(deal, [call('S', '1NT'), call('W', '2S')], 'N').bid
+    const nat = decideCall(deal, [call('S', '1NT'), call('W', '2S', NAT)], 'N').bid
+    expect(dont).toBe(nat)
   })
 })

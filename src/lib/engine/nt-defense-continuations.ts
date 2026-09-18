@@ -14,10 +14,10 @@ import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { isGameOrHigher, parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
-import { answerNTInterference } from './contested-openings'
 import { advanceDONT, dontOvercall } from './dont'
 import { hcp, lengths } from './hand'
-import { lebensohlAfter1NT, lebensohlAfter1NTRebid, naturalNTOvercall } from './lebensohl'
+import { naturalNTOvercall } from './lebensohl'
+import { systemsOnAfterOur1NT } from './nt-systems-on'
 import { side } from './play'
 
 // ============================================================================
@@ -154,182 +154,6 @@ export function ourNTContestedSeat(f: AuctionFacts): boolean {
   return f.history.some((c) => side(c.seat) !== side(f.seat) && c.bid !== 'P')
 }
 
-/** Motståndaren störde vårt 1NT med DONT/X och svararen ska svara (deras DONT-bud), annars null. */
-function ntInterferenceToAnswer(f: AuctionFacts): string | null {
-  const { seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (side(open.seat) !== side(seat)) return null
-  if (seat !== PARTNER[open.seat]) return null
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 1) return null
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || side(lastNonPass.seat) === side(seat)) return null
-  if (!['X', '2C', '2D', '2H', '2S'].includes(lastNonPass.bid)) return null
-  return lastNonPass.bid
-}
-
-/** Öppnarens tur efter partnerns värde-X över deras 2-lägesstörning (DONT) av vårt 1NT? */
-function ntValueDoubleOpenerToAnswer(f: AuctionFacts): { theirStrain: string } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (open.seat !== seat) return null
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 1) return null
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
-  let doubled: { level: number; strain: string; call: ResolvedCall } | null = null
-  for (let i = history.length - 1; i >= 0; i--) {
-    const cb = parseContractBid(history[i].bid)
-    if (cb) { doubled = { level: cb.level, strain: cb.strain, call: history[i] }; break }
-  }
-  if (!doubled || side(doubled.call.seat) === side(seat) || doubled.level !== 2) return null
-  if (!doubled.call.rule?.startsWith('DONT')) return null
-  return { theirStrain: doubled.strain }
-}
-
-/** Öppnarens beskrivande svar på värde-X: 5-korts färg om den finns, annars 2NT. */
-function answerNTValueDoubleOpener(hand: Hand, f: AuctionFacts): ResolvedCall | null {
-  const { history, seat } = f
-  const ctx = ntValueDoubleOpenerToAnswer(f)
-  if (!ctx) return null
-  const len = lengths(hand)
-  const theirSuit = SUIT_OF_LETTER[ctx.theirStrain]
-  let five: Suit | null = null
-  for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
-    if (s !== theirSuit && len[s] >= 5) { five = s; break }
-  }
-  if (five) {
-    const bid = cheapestBidIn(history, seat, letterOfSuit(five))
-    if (bid) return { seat, bid, rule: 'öppnarens svar på värde-X', explanation: `5+ ${SWE_SYM[letterOfSuit(five)]} → ${prettyBid(bid)} (visar färgen; 2NT hade förnekat 5-kort).` }
-  }
-  const nt = '2NT' as Bid
-  if (!legalCalls(history, seat).includes(nt)) return null
-  return { seat, bid: nt, rule: 'öppnarens svar på värde-X', explanation: 'balanserad 15–17 utan 5+ färg → 2NT (förnekar 5+; partnern placerar: pass 8–10, 3NT 11+).' }
-}
-
-/** Dubblarens (svararens) tur efter att öppnaren beskrivit med 2NT/5-korts färg? */
-function ntValueDoubleDoublerToAnswer(f: AuctionFacts): { openerBid: string } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (side(open.seat) !== side(seat) || seat !== PARTNER[open.seat]) return null
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 2) return null
-  const myLastNonPass = [...history.filter((c) => c.seat === seat)].reverse().find((c) => c.bid !== 'P')
-  if (!myLastNonPass || myLastNonPass.bid !== 'X') return null
-  const openerBids = history.filter((c) => c.seat === open.seat && parseContractBid(c.bid))
-  if (openerBids.length !== 2) return null
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== open.seat) return null
-  return { openerBid: openerBids[1].bid }
-}
-
-/** Svararen placerar efter öppnarens värde-X-svar (3NT 11+/pass; fit → höj). */
-function answerNTValueDoubleDoubler(hand: Hand, f: AuctionFacts): ResolvedCall | null {
-  const { history, seat } = f
-  const ctx = ntValueDoubleDoublerToAnswer(f)
-  if (!ctx) return null
-  const p = hcp(hand)
-  const len = lengths(hand)
-  const legal = legalCalls(history, seat)
-  const strong = p >= 11
-  const openerCb = parseContractBid(ctx.openerBid as Bid)
-  if (!openerCb) return null
-  if (openerCb.strain !== 'NT') {
-    const openerSuit = SUIT_OF_LETTER[openerCb.strain]
-    const isMajor = openerSuit === 'hearts' || openerSuit === 'spades'
-    if (isMajor && len[openerSuit] >= 3) {
-      const bid = `${strong ? 4 : 3}${openerCb.strain}` as Bid
-      if (legal.includes(bid)) return { seat, bid, rule: 'svar på öppnarens värde-X-fortsättning', explanation: `3+ stöd i ${SWE_SYM[openerCb.strain]} → ${prettyBid(bid)} (${strong ? 'utgång' : 'inbjudan'}).` }
-    }
-    if (strong && legal.includes('3NT' as Bid)) return { seat, bid: '3NT', rule: 'svar på öppnarens värde-X-fortsättning', explanation: `Utgångsvärden utan fit → 3NT.` }
-    return { seat, bid: 'P', rule: 'pass', explanation: `Inget bättre → pass (${ctx.openerBid} står).` }
-  }
-  if (strong && legal.includes('3NT' as Bid)) return { seat, bid: '3NT', rule: 'placerar utgång efter öppnarens 2NT', explanation: `Utgångsvärden mitt emot öppnarens 15–17 → 3NT.` }
-  return { seat, bid: 'P', rule: 'pass', explanation: `Minimum (8–10) → pass, 2NT står.` }
-}
-
-/** Motståndarens naturliga inkliv över VÅRT 1NT (färg + budarens plats), annars null. */
-function naturalOvercallOf1NT(f: AuctionFacts): { suit: Suit; seat: Seat } | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.strain !== 'NT' || open.level !== 1) return null
-  if (side(open.seat) !== side(seat)) return null
-  const over = history.find((c) => c.rule === 'naturligt inkliv (1NT)' && side(c.seat) !== side(seat))
-  if (!over) return null
-  const m = /^2([CDHS])$/.exec(over.bid)
-  if (!m) return null
-  return { suit: SUIT_OF_LETTER[m[1]], seat: over.seat }
-}
-
-/** Svararens FÖRSTA Lebensohl-bud över deras naturliga inkliv. */
-function lebensohl1NTFirstToAnswer(f: AuctionFacts): Suit | null {
-  const { seat } = f
-  const open = f.opening
-  if (!open || seat !== PARTNER[open.seat]) return null
-  const nat = naturalOvercallOf1NT(f)
-  if (!nat) return null
-  if (f.ourContractBids.length !== 1) return null
-  const lastNonPass = f.lastNonPass
-  if (!lastNonPass || lastNonPass.seat !== nat.seat) return null
-  return nat.suit
-}
-
-/** Öppnaren tvingas 3♣ över svararens 2NT-relä. */
-function lebensohl1NTRelayComplete(f: AuctionFacts): ResolvedCall | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.seat !== seat) return null
-  if (!naturalOvercallOf1NT(f)) return null
-  const partnerBids = history.filter((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
-  if (partnerBids.length === 0 || partnerBids[partnerBids.length - 1].bid !== '2NT') return null
-  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
-  if (ourBids.length !== 1) return null
-  if (!legalCalls(history, seat).includes('3C' as Bid)) return null
-  return { seat, bid: '3C' as Bid, rule: 'Lebensohl 3♣ (tvunget relä-svar)', explanation: 'partnerns 2NT var Lebensohl-relä → jag måste bjuda 3♣.' }
-}
-
-/** Svararens rättelse efter öppnarens tvungna 3♣. */
-function lebensohl1NTRebidToAnswer(f: AuctionFacts): Suit | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || seat !== PARTNER[open.seat]) return null
-  const nat = naturalOvercallOf1NT(f)
-  if (!nat) return null
-  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
-  if (ourBids.length !== 1 || ourBids[0].bid !== '2NT') return null
-  const openerBids = history.filter((c) => c.seat === open.seat && parseContractBid(c.bid))
-  if (openerBids[openerBids.length - 1]?.bid !== '3C') return null
-  return nat.suit
-}
-
-/** Öppnarens fortsättning efter svararens DIREKTA 3-läges krav (GF), annars null. */
-function lebensohl1NTGFToAnswer(f: AuctionFacts): Suit | null {
-  const { history, seat } = f
-  const open = f.opening
-  if (!open || open.seat !== seat) return null
-  if (!naturalOvercallOf1NT(f)) return null
-  const partnerBids = history.filter((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
-  if (partnerBids.length !== 1) return null
-  const m = /^3([CDHS])$/.exec(partnerBids[0].bid)
-  if (!m) return null
-  const ourBids = history.filter((c) => c.seat === seat && parseContractBid(c.bid))
-  if (ourBids.length !== 1) return null
-  return SUIT_OF_LETTER[m[1]]
-}
-
-/** Öppnarens svar på Lebensohl-kravet (major-fit → utgång, annars 3NT). */
-function lebensohl1NTOpenerAnswerGF(hand: Hand, gfSuit: Suit): { call: string; rule: string; explanation: string } {
-  const len = lengths(hand)
-  const isMajor = gfSuit === 'hearts' || gfSuit === 'spades'
-  if (isMajor && len[gfSuit] >= 3) {
-    return { call: `4${letterOfSuit(gfSuit)}`, rule: 'Lebensohl höjer krav till utgång', explanation: `Stöd i partnerns ${SWE_SYM[letterOfSuit(gfSuit)]} → 4${SWE_SYM[letterOfSuit(gfSuit)]}.` }
-  }
-  return { call: '3NT', rule: 'Lebensohl 3NT (öppnaren väljer utgång)', explanation: 'inget bättre än 3NT över partnerns krav.' }
-}
-
 /** Deras FÄRGflykt efter vårt 1NT + partnerns värde-XX (vi äger handen), annars null. */
 function runoutAfterOurRedouble(f: AuctionFacts): { suit: Suit; level: number } | null {
   const { history, seat } = f
@@ -362,28 +186,12 @@ function answerRunout(f: AuctionFacts): ResolvedCall | null {
  * (DONT-svaret), och värde-X-flödet sist. null → det gamla lagret.
  */
 export function respondToOurNTInterference(hand: Hand, f: AuctionFacts): ResolvedCall | null {
-  const asCall = (r: { call: string; rule: string; explanation: string }): ResolvedCall =>
-    ({ seat: f.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation })
-
   const runout = answerRunout(f)
   if (runout) return runout
 
-  const leb1 = lebensohl1NTFirstToAnswer(f)
-  if (leb1) return asCall(lebensohlAfter1NT(hand, leb1))
-
-  const relay = lebensohl1NTRelayComplete(f)
-  if (relay) return relay
-
-  const lebRebid = lebensohl1NTRebidToAnswer(f)
-  if (lebRebid) return asCall(lebensohlAfter1NTRebid(hand, lebRebid))
-
-  const lebGF = lebensohl1NTGFToAnswer(f)
-  if (lebGF) return asCall(lebensohl1NTOpenerAnswerGF(hand, lebGF))
-
-  const inter = ntInterferenceToAnswer(f)
-  if (inter) return asCall(answerNTInterference(hand, inter))
-
-  return answerNTValueDoubleOpener(hand, f) ?? answerNTValueDoubleDoubler(hand, f)
+  // Ägarens struktur 2026-09-18 (felrapport #77): systems on + stulet bud mot ALLA
+  // inkliv i direkt sits — ersatte Lebensohl-stegen, DONT-svaret och värde-X-flödet.
+  return systemsOnAfterOur1NT(hand, f)
 }
 
 /**

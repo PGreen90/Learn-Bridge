@@ -19,8 +19,8 @@ const ALL_ENGINE_RULES: string[] = [
   'Gerber', 'Gerber: stannar', 'Jacoby 2NT', 'Jacoby-transfer', 'Jacoby: 3NT',
   'Jacoby: kortfärg', 'Jacoby: minimum', 'Jacoby: sidofärg', 'Jacoby: slamintresse',
   'Jordan 2NT',
-  'Lebensohl 2NT (slow → 3NT, visar stopp)', 'Lebensohl 2NT (svag)',
-  'Lebensohl cue (Stayman, krav)', 'Lebensohl direkt 3-läge (krav)', 'MSS-svar',
+  
+  'MSS-svar',
   'Mathe 1NT (minorer)', 'Mathe X (högfärger)', 'Michaels', 'Minor Suit Stayman',
   'Minor Suit Stayman: höjning',
   'NT med stopp', 'NT-svar', 'Ogust', 'Ogust: max/bra', 'Ogust: max/dålig',
@@ -108,17 +108,17 @@ const ALL_ENGINE_RULES: string[] = [
   // Etapp 4 familj 9 (2026-09-10): störda regler som fick kravnivå i registret
   // (betydelsesvepet stört; auction-meaning.probe.test.ts).
   'svar på negativ dubbling', 'upplysningsdubbling (stark)', 'fritt svar på upplysningsdubbling',
-  'straff/värden', 'öppnarens svar på värde-X', 'svar på öppnarens värde-X-fortsättning',
+  'straff/värden', 
   'redubbling (värden)', 'svar på stöddubbling', 'dubblaren höjer (inbjudan)',
   'dubblaren accepterar inbjudan', 'dubblaren bjuder utgång', 'dubblarens svar på cue',
   'starkt återbud', 'starkt återbud (lägsta)', 'tvångssvar (utan stöd)', 'svar på tvåfärgs-cue',
-  'naturligt (to play)', 'naturligt inkliv (1NT)', '2NT-inkliv (12–15)',
+  'stulet bud: Stayman', 'stulet bud: överföring', 'värde-X med högfärg (stört 1NT)', 'överföring på 3-läget (stört 1NT)', 'svar på värde-X (stört 1NT)', 'fullföljd överföring (3-läget)', 'placerar efter värde-X-svaret', 'straff-X (andra ronden)', 'återöppning med högfärg (1NT)', 'utgångsval: rättar till högfärgen', 'naturligt inkliv (1NT)', '2NT-inkliv (12–15)',
   'stödhöjning – utgång', 'stödhöjning – enkel höjning (minimum)', 'stödhöjning – hopphöjning (inbjudan)',
-  'accepterar (minimum)', 'accepterar utgång', 'placerar utgång efter öppnarens 2NT', 'cue-advancerns dom (3NT)',
+  'accepterar (minimum)', 'accepterar utgång', 'cue-advancerns dom (3NT)',
   'Jordan: utgång', 'Jordan: minimum', 'Jordan: höjning till utgång',
   'DONT pass-eller-rätta', 'DONT: rättelse (tvåfärg)', 'DONT: rättelse',
-  'Lebensohl 3NT (utgång)', 'Lebensohl 3NT (öppnaren väljer utgång)', 'Lebensohl 3♣ (tvunget relä-svar)',
-  'Lebensohl 3-läge (svag, rättar)', 'Lebensohl naturligt 2-läge',
+  
+  
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

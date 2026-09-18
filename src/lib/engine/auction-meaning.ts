@@ -64,7 +64,97 @@ export function meaningOf(history: ResolvedCall[], index: number): Meaning {
   return { ...d, alert: isAlertRule(d.rule), källa: 'härledd' }
 }
 
+/**
+ * SYSTEMS ON EFTER VÅRT 1NT I KONKURRENS (ägarens spec 2026-09-18, §7.5,
+ * docs/1nt-systems-on-plan.md). Vårt 1NT har störts av ETT bud i direkt sits (X
+ * eller ett 2-lägesbud) och motståndarna är därefter tysta. Specialfallen tolkas
+ * uttryckligen (stulet bud, värde-X över 2♥/2♠, överföring på 3-läget, sang med
+ * stopp, straff-X i andra ronden, återöppningen). Allt annat VIRTUALISERAS:
+ * deras bud → pass, stulet X → budet det stal, och den vanliga tolkaren läser
+ * auktionen som ostörd — det är precis vad "systems on" betyder.
+ */
+function interpretOur1NTContested(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 1 || open.cb.strain !== 'NT' || SIDE[open.seat] !== SIDE[call.seat]) return null
+  const i = prior.findIndex((c) => c.seat === open.seat && c.bid === '1NT')
+  const inter = prior[i + 1]
+  if (!inter || SIDE[inter.seat] === SIDE[open.seat]) return null
+  if (inter.bid !== 'X' && !/^2[CDHS]$/.test(inter.bid)) return null
+  if (call.bid === 'P') return null // ett pass kan vara 8+ utan stopp — läses av pass-tolkaren
+  const responder = PARTNER[open.seat]
+  const rest = prior.slice(i + 2)
+  const their = inter.bid === 'X' ? 'dubbling' : `${inter.bid[0]}${SYMBOL[inter.bid[1]]}`
+  const overMajor = inter.bid === '2H' || inter.bid === '2S'
+  const annan = inter.bid === '2H' ? 'S' : 'H'
+
+  // Straff-X i andra ronden: svararen passade inklivet först.
+  if (call.bid === 'X' && call.seat === responder && rest[0]?.seat === responder && rest[0].bid === 'P') {
+    return R('straff-X (andra ronden)', `Dubbling (straff) — jag passade deras inkliv över vårt 1 sang med värden (8+ hp) och dubblar nu när budgivningen kommit tillbaka.`)
+  }
+  if (rest.some((c) => SIDE[c.seat] !== SIDE[open.seat] && c.bid !== 'P')) return null // de bjöd vidare → övriga lager
+
+  // --- Svararens FÖRSTA bud -------------------------------------------------
+  if (call.seat === responder && rest.length === 0) {
+    if (call.bid === 'X') {
+      if (inter.bid === '2C') return R('stulet bud: Stayman', `Dubbling = Stayman (stulet bud) — motståndaren bjöd 2♣ som jag ville bjuda; frågar efter partnerns 4-korts högfärg. Inte straff.`)
+      if (inter.bid === '2D') return R('stulet bud: överföring', `Dubbling = överföring till hjärter (stulet bud) — motståndaren bjöd 2♦ som jag ville bjuda; visar 5+ hjärter, partnern bjuder 2♥. Inte straff.`)
+      if (overMajor) return R('värde-X med högfärg (stört 1NT)', `Dubbling — värden (8+ hp) och en fyrkorts ${NAME[annan]}; partnern svarar ${NAME[annan]} med fit, annars sang. Inte straff.`)
+      return null
+    }
+    if (call.bid === 'XX') return R('straff/värden', `Redubbling — värden (8+ hp), jämn hand: vi äger given mitt emot 15–17.`)
+    const cb = parseBid(call.bid)
+    if (!cb) return null
+    if (overMajor && cb.level === 3 && (cb.strain === 'D' || cb.strain === 'H')) {
+      const target = cb.strain === 'D' ? 'hjärter' : 'spader'
+      return R('överföring på 3-läget (stört 1NT)', `3${SYMBOL[cb.strain]} — överföring till ${target}: 5+ ${target} och 8+ hp (2-lägesöverföringen gick förlorad under deras ${their}); partnern bjuder 3 ${target}. Säger inget om ${NAME[cb.strain]}.`)
+    }
+    if (inter.bid !== 'X' && cb.strain === 'NT' && cb.level === 2) return R('2NT inbjudan', `2 sang — inbjudan: 8–9 hp, jämn hand med trolig stopp i deras färg.`)
+    if (inter.bid !== 'X' && cb.strain === 'NT' && cb.level === 3) return R('3NT till spel', `3 sang — till spel: 10+ hp, jämn hand med trolig stopp i deras färg.`)
+  }
+
+  // --- Öppnarens återöppning: svararen passade, inkliv passat runt ------------
+  if (call.seat === open.seat && rest.length === 2 && rest.every((c) => c.bid === 'P')) {
+    const cb = parseBid(call.bid)
+    if (cb && cb.level === 2 && isMajor(cb.strain)) {
+      return R('återöppning med högfärg (1NT)', `2${SYMBOL[cb.strain]} — återöppning: 5+ ${NAME[cb.strain]} i 1 sang-handen, till spel (partnern passade deras inkliv).`)
+    }
+    return null
+  }
+
+  // --- Öppnarens svar på de två nya svarsbuden --------------------------------
+  const resp = rest[0]
+  if (resp && resp.seat === responder && call.seat === open.seat && rest.length === 2) {
+    const cb = parseBid(call.bid)
+    if (cb && resp.bid === 'X' && overMajor) {
+      if (cb.strain === annan) return R('svar på värde-X (stört 1NT)', `${cb.level}${SYMBOL[cb.strain]} — fit: fyrkorts ${NAME[annan]} mitt emot partnerns visade fyra (lägsta nivå; säger inget om styrkan — partnern placerar).`)
+      if (cb.strain === 'NT') return R('svar på värde-X (stört 1NT)', `${cb.level} sang — ingen fit i ${NAME[annan]}: ${cb.level === 2 ? 'minimum' : 'maximum'}; partnern placerar.`)
+    }
+    if (cb && overMajor && (resp.bid === '3D' || resp.bid === '3H') && cb.level === 3) {
+      return R('fullföljd överföring (3-läget)', `3${SYMBOL[cb.strain]} — fullföljer partnerns överföring (säger inget om egen längd eller styrka; partnern avgör nivån).`)
+    }
+  }
+
+  // --- Allt annat: läs auktionen som OSTÖRD (systems on) ----------------------
+  const stolen = inter.bid === '2C' || inter.bid === '2D' ? inter.bid : null
+  if (resp && resp.seat === responder && resp.bid === 'X' && !stolen) return null // värde-X-vägens senare bud: övriga lager
+  if (overMajor && resp && (resp.bid === '3D' || resp.bid === '3H')) return null // 3-lägesöverföringens senare bud
+  const virtuell = prior.map((c, k) => {
+    if (k === i + 1) return { ...c, bid: 'P' as Bid, rule: undefined }
+    if (k === i + 2 && c.bid === 'X' && stolen) return { ...c, bid: stolen as Bid, rule: undefined }
+    return c
+  })
+  if (call.bid === 'X' || call.bid === 'XX') return null
+  const d = deriveUndisturbed(call, virtuell)
+  return { ...d, text: `${d.text} (Systems on: deras ${their} över vårt 1 sang ändrar inte systemet.)` }
+}
+
 function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
+  const contested = interpretOur1NTContested(call, prior)
+  if (contested) return contested
+  return deriveUndisturbed(call, prior)
+}
+
+function deriveUndisturbed(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
   if (call.bid === 'P') return interpretPass(call.seat, prior)
   if (call.bid === 'X') return interpretDouble(call.seat, prior)
   if (call.bid === 'XX') return interpretRedouble(call.seat, prior)
@@ -929,24 +1019,11 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
       forcing: 'inbjudan',
     }
   }
-  // Flykt över deras X av VÅR 1 sang (§7.5, systems off efter X): svararens
-  // färg på 2-läget är naturlig, till spel — ett AVSLUT, inte ett rondkrav
-  // (motorbytets slutförande 2026-09-13, facit-kön B frö 20270254: öppnaren
-  // "tvingades" höja flykten ur catch-allen).
+  // (Flykten över deras X av vårt 1 sang finns inte längre: systems on sedan
+  // 2026-09-18 — läses av interpretOur1NTContested.)
   {
     const o = opening(prior)
     const ours = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && c.bid !== 'P')
-    const theirs = prior.filter((c) => SIDE[c.seat] !== SIDE[seat] && c.bid !== 'P')
-    if (
-      o && o.seat === PARTNER[seat] && o.cb.level === 1 && o.cb.strain === 'NT' && cb.level === 2 &&
-      ours.length === 1 && theirs.length === 1 && theirs[0].bid === 'X'
-    ) {
-      return {
-        text: `Flykt ${cb.level}${sym} — naturlig färg till spel över deras dubbling av vårt 1 sang (svag hand, 5+ ${name}). Ej krav.`,
-        confidence: 'trolig',
-        forcing: 'avslut',
-      }
-    }
     // Svag rymning över partnerns 2 sang-återbud i KONKURRENS (fältfynd
     // 2026-09-10, ägarbeslut B; byggd 2026-09-13): svararen som bara passat
     // bjuder 3 i en högfärg = 5+ kort, för svag för sang — till spel (avslut).
@@ -1118,12 +1195,6 @@ function interpretCompetitive2NT(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     return R('Jordan 2NT', `2 sang (Jordan) — konstlad höjning av partnerns ${NAME[open.cb.strain]}: limithöjning eller bättre (10+ med stöd), krav till minst 3 i färgen. Säger inget om sang.`)
   }
 
-  // Lebensohl 2NT: partnern öppnade 1NT, motståndaren klev in i färg, JAG
-  // (svararen) bjuder 2NT (relä till 3♣). Öппnaren själv bjuder inte Lebensohl.
-  if (open.cb.strain === 'NT' && open.cb.level === 1 && open.seat === partner && oppOvercalled) {
-    return R('Lebensohl 2NT (svag)', `2 sang (Lebensohl) — relä till 3♣: antingen en svag hand som vill spela 3 i en lågfärg, eller upptakten till en stopp-visning. Konstlat.`)
-  }
-
   // Motståndarna öppnade och vår sida är ännu OBJUDEN (inte ens en dubbling).
   if (SIDE[open.seat] !== SIDE[seat] && !ownSideActed(seat, prior) && open.cb.strain !== 'NT') {
     const preempt = open.cb.level >= 3 || (open.cb.level === 2 && open.cb.strain !== 'C')
@@ -1208,7 +1279,6 @@ function interpretNTDefenseSuit(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]
   if (cb.strain === 'NT') return null
   const open = opening(prior)
   if (!open || open.cb.strain !== 'NT' || open.cb.level !== 1) return null
-  const partner = PARTNER[seat]
 
   // DONT — försvar mot DERAS 1NT-öppning. Vår sidas FÖRSTA aktion sätter DONT
   // igång (X = enfärg, 2♣/2♦/2♥ = tvåfärg; 2♠ är NATURLIG spaderöverkliv, inte
@@ -1235,16 +1305,6 @@ function interpretNTDefenseSuit(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]
     return null
   }
 
-  // Lebensohl — störning av VÅRT 1NT (partnern öppnade 1NT, de klev in i färg).
-  // Bara svararens DIREKTA 3-lägesbud (jag har inte passat bort turen först).
-  if (open.seat === partner) {
-    const theyOvercalled = prior.some((c) => SIDE[c.seat] !== SIDE[seat] && parseBid(c.bid))
-    const ownContracts = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
-    const iPassed = prior.some((c) => c.seat === seat && c.bid === 'P')
-    if (theyOvercalled && !iPassed && ownContracts.length === 1 && cb.level === 3 && !isCueOfOpponentSuit(seat, cb.strain, prior)) {
-      return R('Lebensohl direkt 3-läge (krav)', `${cb.level}${SYMBOL[cb.strain]} (Lebensohl, direkt 3-läge) — naturlig, 5+ ${NAME[cb.strain]} och utgångskrav över deras inkliv. Konstlat systemläge.`)
-    }
-  }
   return null
 }
 

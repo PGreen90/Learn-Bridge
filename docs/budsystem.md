@@ -1505,7 +1505,7 @@ game try** (§4.1), **inverterade minorhöjningar** (§4.2), samt **Stayman**, *
 2♦ väntebud** (§4.4), **Ogust** på svaga tvåor (§4.5), samt **1430 RKC
 Blackwood**, **cue-bid**, **Sjöbergs 5NT**, **Gerber**, **Exclusion Blackwood**, **fjärde färg krav** och **Drury**
 (tvåvägs Reverse) (§6), samt försvar/konkurrens (§7): **DONT** mot 1NT,
-**Takeout Double**, **negativa/responsiva/stöddubblingar**, **Lebensohl**,
+**Takeout Double**, **negativa/responsiva/stöddubblingar**, **systems on + stulet bud** efter stört 1NT,
 **Michaels + ovanlig 2NT** och **Mathe** – beslutade 2026-06-26. Källor: bridgebum.com,
 svenskbridge.se.
 
@@ -2360,34 +2360,47 @@ dubblarens eget flöde (X + egen färg).
   bjuds sang med stopp, egen 6+ färg eller preferens till svararens högfärg.
   Svararens **utgångsbud står alltid**.
 
-### 7.5 Lebensohl efter vårt 1NT
-När partnern öppnat 1NT (15–17) och **högerhand kliver in naturligt** på 2-läget
-(t.ex. 2♠ = spader) skiljer svararen svaga tävlingshänder från utgångsvilliga med
-**2NT-reläet**.
+### 7.5 Vårt 1NT störs — systems on + stulet bud (ägarens struktur 2026-09-18)
+När partnern öppnat 1NT (15–17) och **högerhand kliver in** — med dubbling eller ett
+bud på 2-läget, **naturligt eller konstgjort spelar ingen roll** — gäller EN
+struktur: **systemet står kvar** (systems on), och har motståndaren bjudit just det
+bud du ville bjuda betyder **dubbling "det budet"** (*stulet bud*).
 
-Motståndaren klivar in naturligt med en **stark enfärgshand** (6+ kort, 11–15 hp).
-Svagare och tvåfärgade händer stör i stället med **DONT** (§7.6) — och samma
-uppdelning gäller vårt eget försvar mot deras 1NT: en stark enfärgshand bjuds
-naturligt, resten med DONT.
+| Deras bud | Svararens verktyg |
+|---|---|
+| **X** | Hela systemet som ostört: Stayman, överföringar, 2♠ (Minor Suit Stayman), 3-läget, Texas, 4NT. **XX = värden 8+**, jämn hand — vi äger given. |
+| **2♣** | **X = Stayman** (stulet bud). 2♦/2♥ = överföringar, 2♠ = MSS, Texas m.m. som ostört. |
+| **2♦** | **X = överföring till hjärter** (stulet bud, även svag hand). 2♥ = överföring till spader, 2♠ = MSS. Stayman är tappad: en hand med fyrkorts högfärg går **jämna vägen** (nedan). |
+| **2♥ / 2♠** | **X = värden 8+ med fyrkorts (andra) högfärg.** Femkorts+ högfärg och 8+ hp → **överföring på 3-läget: 3♦ = hjärter, 3♥ = spader**. **2♠ över deras 2♥ = MSS.** Svag hand (0–7) **passar**. |
+| **3-läget och högre** | X = straff/värden. |
 
-**Svararens svar:**
-- **Pass** — svag hand utan egen färg: vi försvarar deras inkliv (lagligt, det är
-  motpartens bud).
-- **Naturligt 2-läge** (t.ex. 2♠ över deras 2♥) — svag hand med en högre högfärg
-  som ryms på 2-läget; vi tävlar om delkontraktet.
-- **2NT = relä** — svag hand vars färg kräver 3-läget. Reläet tvingar öppnaren att
-  bjuda **3♣**; sedan **passar** vi (om färgen är klöver) eller **rättar** till vår
-  färg på 3-läget, och öppnaren lägger upp. Så stannar vi lågt utan att lova värden.
-- **Direkt bud på 3-läget** (utan att gå via 2NT) — **utgångskrav** med egen 5+ färg.
-- **Direkt 3NT** — jämn utgångshand; öppnaren har 15–17 med stopp i deras färg.
+**Gäller över alla 2-lägesinkliv:**
+- **Texas** (4♦ = hjärter, 4♥ = spader; 6+ kort, utgångsvärden utan slamintresse)
+  står alltid kvar. *Felrapport #77: ♠Q87 ♥KQT985 ♦Q2 ♣JT över 1NT–(2♣) → **4♦**,
+  öppnaren 4♥.*
+- **Jämna vägen** — jämn hand med värden och inget systembud: med **trolig stopp**
+  i deras färg **2NT (8–9) / 3NT (10+)**; **utan stopp pass först**, och **straff-X
+  i andra ronden** om budgivningen kommer tillbaka — kräver **8+ hp och minst tre
+  kort i färgen de spelar**.
+- Bud som ligger ÖVER deras bud behåller sin ostörda betydelse.
 
-**Öppnaren** bjuder tvunget **3♣** över reläet, och höjer partnerns direkta
-3-lägeskrav till utgång (fyra i högfärgen med stöd, annars 3NT).
+**Öppnaren:**
+- Efter ett **stulet bud** svarar öppnaren exakt som ostört (2♦/2♥/2♠ på Stayman,
+  fullföljer överföringen).
+- Efter **X = 8+ med fyrkorts högfärg**: med fit **alltid lägsta nivå** i den
+  högfärgen (2♠ resp. 3♥ — säger inget om styrkan), utan fit **2NT (minimum) /
+  3NT (maximum)**. **Aldrig straffpass** — svararen placerar: 4M med 10+, inbjudan
+  3♠ med 8–9 när utrymmet finns, annars pass; över 2NT 3NT med 10+.
+- Efter **överföringen på 3-läget**: **alltid bara 3M**. Svararen passar med 8–9,
+  bjuder 3NT med fem kort / 4M med sex kort och 10+; öppnaren rättar 3NT till 4M
+  med tre stöd.
+- **Återöppning** (1NT – 2x – pass – pass): öppnaren **passar**, utom med en
+  **femkorts högfärg som går att bjuda på 2-läget**.
 
-> Detta är **kärnan** (första steget). Finare behandlingar planeras och spelas
-> ännu **inte**: upplysningsdubbling (takeout) i läget, "slow shows" för stopp i
-> jämna händer, cue-bud som Stayman efter en fyrkorts högfärg, och Lebensohl mot
-> *konstgjorda* inkliv (DONT/Landy). Räkna alltså bara med kärnan ovan vid bordet.
+> Ersatte 2026-09-18 både Lebensohl-kärnan (2NT-relä, direkt 3-läge = krav) och
+> värde-X:et mot DONT. Avgränsning: strukturen gäller inkliv i **direkt sits**;
+> blandar sig även fjärde hand i efter svararens bud tar de allmänna
+> konkurrensreglerna över.
 
 ### 7.6 Mot motståndarnas 1NT — DONT
 DONT (Disturb Opponents' NoTrump): visa alla en- och tvåfärgshänder på 2-läget
@@ -2493,21 +2506,9 @@ spel) — förr "tvingade" ett felläst rondkrav fram 3♣/3♠ ur catch-allen.
 Konkurrensen går åt båda håll: bjuder *vi* konstgjort/spärrartat och en
 motståndare stör, svarar partnern med ett riktigt beslut i stället för att passa.
 
-**(a) De stör vårt 1NT med DONT** (deras X-relä eller ett 2-lägesbud):
-- **X / XX = straff/värden** (8+ hp utan egen långfärg). Vi äger ofta handen mitt
-  emot 15–17, så vi dubblar dem hellre än flyr. Deras X-relä bemöts med **XX**, ett
-  färgbud med **X**.
-- **Egen 5+ färg = naturligt "to play"** (konkurrerar). Ett 3-lägesbud kräver 6+ kort.
-- Annars **pass**.
-- **Öppnarens fortsättning efter partnerns värde-X (2NT-relä, felrapport #43).**
-  Värde-X:et har en bred range (8+), så öppnaren kan inte blint bjuda utgång
-  (15+8 = 23 räcker inte). Mot ett **DONT-tvåfärgsinkliv** (konstgjort, som de flyr
-  ifrån) säljer öppnaren inte given med pass utan **beskriver**: en **5-korts färg**
-  visas (naturligt), annars **2NT** (förnekar 5-kort). Svararen **placerar**:
-  **pass med 8–10**, **3NT med 11+** (över en visad färg: höj med fit, annars 3NT/pass).
-  Så når paret utgången när svararen låg i toppen av sitt X. Mot ett **naturligt**
-  inkliv står i stället försvaret/passen kvar (felrapport #39: 2♥X är rätt straff,
-  3NT går bet) – reläet firar bara mot DONT.
+**(a) De stör vårt 1NT** (dubbling eller ett 2-lägesbud, naturligt som konstgjort):
+se **§7.5 — systems on + stulet bud** (ägarens struktur 2026-09-18). Den gamla
+uppdelningen (värde-X mot DONT, Lebensohl mot naturliga inkliv) är riven.
 
 **(b) De stör vår svaga tvåa / spärr** (takeout-X eller ett inkliv):
 - Deras **upplysningsdubbling → XX = värden/straffintresse** (10+ hp).
@@ -2774,6 +2775,23 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-18 — Felrapport #77: systems on + stulet bud efter vårt 1NT i konkurrens
+  (§7.5; ägarens struktur, varje detalj ägarens svar på en direkt fråga).** 1NT–(2♣
+  DONT)–? med ♠Q87 ♥KQT985 ♦Q2 ♣JT bjöd 2♥ "to play" — varje hand med 5+ färg fick
+  samma tävlingsbud oavsett styrka. Ägaren: *systems on; X = budet motståndaren
+  tog; här Texas 4♦*. **EN struktur mot alla inkliv**: X av 2♣ = Stayman, X av 2♦ =
+  hjärteröverföring, över 2♥/2♠ X = 8+ med fyrkorts högfärg + överföring på 3-läget
+  (3♦→♥, 3♥→♠), jämna vägen (2NT/3NT med stopp, annars pass och straff-X i andra
+  ronden), XX = värden över deras X, Texas alltid kvar; öppnaren svarar stulet bud
+  som ostört, värde-X med fit på lägsta nivå / annars 2NT-3NT, 3-lägesöverföringen
+  med bara 3M, och återöppnar bara med 5+ högfärg på 2-läget. **Rivet:** Lebensohl-
+  kärnan efter vårt 1NT (§7.5 gamla), värde-X:et mot DONT + öppnarens 2NT-relä
+  (#43) och straffen på 2♥X (#39-facit), flykten över deras X (nu överföring/MSS).
+  Fortsättningarna under störning fanns inte alls förr (öppnaren svarade 3NT på en
+  överföring och 5♦ på Texas). Kod `nt-systems-on.ts` (ny), raden *vårt-1nt-stört*
+  i `nt-defense-continuations.ts`, betydelselagret `interpretOur1NTContested`
+  (virtualiserar historiken). Facit `nt-systems-on.test.ts`. Plan:
+  `docs/1nt-systems-on-plan.md`.
 - **2026-09-18 — Tredje hand högt generaliserad (§8.6; ägardirektiv, NU).**
   Regel A (underspela inte det osedda), B (övertar inte partnerns kort med ett
   likvärdigt), B2 (spendera inte garden över bordets honnör), C (spara mästaren
@@ -3800,8 +3818,9 @@ Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
   `answerNTValueDoubleDoubler`, `auction-live.ts`): mot ett **DONT**-inkliv beskriver
   öppnaren (5-korts färg, annars 2NT som förnekar 5-kort) och svararen placerar
   (pass 8–10 / 3NT 11+). **Enbart mot DONT** – mot ett naturligt inkliv står försvaret
-  kvar (felrapport #39-facit skyddat, egen diskriminator-test). Facit:
-  `auction-1nt-value-double.test.ts`.
+  kvar (felrapport #39-facit skyddat, egen diskriminator-test). *(Riven 2026-09-18:
+  X över deras 2-lägesbud är inte längre straff/värden — systems on + stulet bud,
+  §7.5; facit-filen borttagen.)*
 - **2026-08-04 (felrapport #45)** – **Negativ dubbling som visar BÅDA högfärgerna
   (kod §7.4, bara förklaringstext).** När motståndaren klev in i en lågfärg så att
   båda högfärgerna är objudna (1♣–(2♦)–X) och svararen har 4+ i båda, fastnade

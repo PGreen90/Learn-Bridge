@@ -340,6 +340,21 @@ describe('decideCall – bot-hjärnan återskapar motorns systemlinje', () => {
     // tautologisk. De beteende-testerna kring off-book-svaret nedan står kvar.)
   })
 
+  // Felrapport #77: Nord 1NT, Öst 2♣ (DONT) — Syd med 10 hp + sex hjärter bjuder
+  // Texas 4♦ (ägaren: systems on; hela strukturen i nt-systems-on.test.ts).
+  describe('felrapport #77 – 1NT–(2♣ DONT): utgångsvärden + 6 hjärter → Texas 4♦', () => {
+    it('Syd bjuder Texas 4♦ och Nord fullföljer 4♥', () => {
+      const deal = dealOf('N', {
+        N: 'S:K62 H:A6 D:J963 C:AK84',
+        E: 'S:AT93 H:- D:AK84 C:76532',
+        S: 'S:Q87 H:KQT985 D:Q2 C:JT',
+        W: 'S:J54 H:J7432 D:T75 C:Q9',
+      })
+      expect(decideCall(deal, [call('N', '1NT'), call('E', '2C')], 'S').bid).toBe('4D')
+      expect(decideCall(deal, [call('N', '1NT'), call('E', '2C'), call('S', '4D'), call('W', 'P')], 'N').bid).toBe('4H')
+    })
+  })
+
   // Felrapport #76 (bricka 12, 2026-09-17): Väst öppnade 1♦ och Nord (♠64
   // ♥T8432 ♦J ♣T9543 = 5-5 hjärter+klöver men BARA 1 HP) bjöd ovanlig 2NT — allt
   // för aggressivt. Ägaren satte golvet 8 HP. Live ska Nord passa här.
@@ -1062,17 +1077,19 @@ describe('Fynd #2 delbit 2 – försvar mot deras svaga tvåor/spärrar', () => 
 // störning av vårt 2♣ modelleras aldrig → skulle bli död kod). Detta är
 // integrationsfacit som bevisar att verktygen NÅS i en levande auktion.
 describe('Fynd #2 delbit 4 – svar när motståndaren stör vår öppning', () => {
-  it('vårt 1NT störs av DONT (2♥) → svararen dubblar (straff/värden)', () => {
+  // Ägarens struktur 2026-09-18: X över deras 2♥ lovar fyrkorts spader. Jämn hand
+  // med värden men UTAN stopp (♥Q2) och utan fyrkorts spader passar först — straff-X
+  // kommer i andra ronden om budgivningen kommer tillbaka.
+  it('vårt 1NT störs av DONT (2♥) → jämn 11 hp utan stopp/fyrkorts spader passar först', () => {
     const deal = dealOf('S', {
       S: 'S:A83 H:K84 D:AQ76 C:K92',    // 16 hp, jämn → 1NT
       W: 'S:KJ64 H:AJ973 D:4 C:T65',    // 5-4 hjärter+spader, 9 hp → DONT 2♥
-      N: 'S:Q92 H:Q2 D:KJ53 C:QJ84',    // 11 hp, ingen 5-färg → straff-X
+      N: 'S:Q92 H:Q2 D:KJ53 C:QJ84',    // 11 hp, ingen 5-färg, inget hjärterstopp → pass
       E: 'S:T75 H:T65 D:T982 C:A73',
     })
     expect(buildAuction(deal)?.turns[0].call).toBe('1NT')
     expect(buildAuction(deal)?.turns[1].call).toBe('2H') // DONT-störningen modelleras
-    expect(decideCall(deal, [call('S', '1NT'), call('W', '2H')], 'N'))
-      .toMatchObject({ bid: 'X', rule: 'straff/värden' })
+    expect(decideCall(deal, [call('S', '1NT'), call('W', '2H')], 'N').bid).toBe('P')
   })
 
   it('vår svaga 2♠ störs av takeout-X → svararen redubblar (värden, 10+)', () => {

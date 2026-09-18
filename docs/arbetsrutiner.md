@@ -39,6 +39,19 @@ minnet. Gäller varje sådant tillfälle, inte bara vid sessionsslut.
 *(Rättat 2026-07-25: regeln pekade på `docs/arbetslista.md`, som är arkiv sedan
 kartan flyttade till CLAUDE.md — två dokument gav motstridiga besked.)*
 
+## 🙋 Regel: fråga ägaren om DETALJERNA innan en budstruktur byggs (2026-09-18)
+När ett fel visar sig vara ett **hål i en budstruktur** (inte bara ett enstaka
+felbud) ska Claude **inte** föreslå en egen färdig struktur. Claude ska:
+1. laga/låsa det ägaren uttryckligen sagt (facit på den rapporterade given),
+2. visa hålen konkret (typhänder → vad motorn bjuder i dag),
+3. **fråga ägaren hur detaljerna ska byggas** — vilken konvention, vad varje bud
+   ska betyda, gränser/nivåer — med konkreta svarsalternativ, och
+4. bygga först när svaren finns. Ett eget förslag får nämnas som ETT alternativ,
+   aldrig som utgångspunkt.
+*(Bakgrund: felrapport #77 — Claude föreslog "Lebensohl även mot DONT" när ägaren
+ville ha systems on + stulet bud. Ägaren: "du borde fråga mig om hur jag vill
+bygga detaljer".)*
+
 ## 🔴 Sessionsavslut (avsluta smart & noggrant)
 > Mål: inget lämnas trasigt, allt är sparat, och nästa start blir lätt.
 

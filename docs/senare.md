@@ -118,24 +118,20 @@ står). Ägarbeslut 2026-08-07: för liten vinst för risken — parkerad tills
 mätspåret pekar hit igen. Återupptas den: facit-först med 20261272, och tänk på
 att cue i konkurrens läcker utspelsinfo (samma princip som §6.10).
 
-### Lebensohl — nästa lager (kärnan KLAR 2026-07-30)
-**KLART (Lager 1, §7.5):** Lebensohl efter vårt 1NT är inkopplad och live —
-skulden "byggd men ej inkopplad" är stängd (regelsvepet gick 0 → hela
-konversationen, `lebensohl.ts` bortlyft ur `MEDVETET_EJ_INKOPPLAD`). Steg noll
-(motståndarens naturliga inkliv över 1NT) + svararens kärna + öppnarens 3♣-relä.
-Facit: `lebensohl.test.ts` + `auction-lebensohl-1nt.test.ts`.
+### Störda 1NT-auktioner — nästa lager (systems on BYGGD 2026-09-18)
+**Lebensohl efter vårt 1NT är RIVEN** (ägarens struktur efter felrapport #77):
+systems on + stulet bud mot alla inkliv i direkt sits — spec och alla ägarsvar i
+`docs/1nt-systems-on-plan.md`, systemboken §7.5, facit `nt-systems-on.test.ts`.
 
-**KVAR (senare lager, avgränsade bort ur Lager 1 — spelas ej än):**
-- **Takeout-dubblingen** i läget (ägarbeslut 2026-07-30: X = takeout) — kräver att
-  öppnaren svarar dubblingen.
-- **"Slow shows"** för stopp i jämna händer (2NT→3NT visar stopp, direkt 3NT
-  förnekar) + **cue-bud som Stayman** efter en fyrkorts högfärg — kräver att
-  öppnaren svarar cuet.
-- **Lebensohl mot konstgjorda inkliv** (vår DONT / Landy / Multi-Landy) —
-  bridgebums sista avsnitt; överlappar dagens `answerNTInterference`.
-- **Lebensohl efter partnerns takeout av en svag tvåa** (det gamla läge (a)) —
-  advancern svarar i dag nivåmedvetet via `answerTakeoutDouble`, inte Lebensohl;
-  §7.7 är märkt. Kräver egen omgång (det generiska svaret duger tills vidare).
+**KVAR (ej byggt, väntar på ägarens detaljbeslut — fråga, gissa inte):**
+- **Fjärde hand blandar sig i** efter svararens bud (1NT–2♣–X–2♦–?): i dag tar
+  de allmänna konkurrensreglerna över.
+- **Inkliv i balanseringssits** (1NT–pass–pass–2x) och **3-lägesinkliv** (specen
+  säger X = straff/värden; ingen egen rad byggd än).
+- **Svag hand med lång lågfärg över deras X:** under systems on finns ingen flykt
+  till 2♣/2♦ (2♣ är Stayman, 2♦ överföring) — handen passar.
+- **Lebensohl efter partnerns takeout av en svag tvåa** — advancern svarar i dag
+  nivåmedvetet via `answerTakeoutDouble`; §7.7 är märkt. Egen omgång.
 
 ### Felrapport #36 — större kort på mobil — STÄNGD 2026-07-30 ("löst på annat sätt")
 Ägaren har stora fingrar och ville ha större tryckytor. **Utfall:** vi mätte att

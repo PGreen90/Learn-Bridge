@@ -230,13 +230,13 @@ describe('etapp 4 familj 6 – försvar mot 1NT: DONT-dubblarens fortsättning',
     const hist = [call('N', 'P'), call('E', '1NT'), call('S', 'X'), call('W', '2D'), call('N', 'P'), call('E', 'P')]
     expect(decideCall(deal, hist, 'S').bid).toBe('2S')
   })
-  // Samma giv, öppnarens stol: partnerns 2♦ över DONT-X:et är en flykt till spel —
-  // inget rondkrav (förr tvingade `auctionForce` fram 3♣ ur catch-allen).
-  it('frö 20272187: 1NT–(X DONT)–2♦–P–?: Öst (öppnaren) passar partnerns flykt — inte 3♣', () => {
+  // Samma giv, öppnarens stol. Ägarens struktur 2026-09-18 (felrapport #77):
+  // systems on över deras X — partnerns 2♦ är en ÖVERFÖRING till hjärter, inte en
+  // flykt; öppnaren fullföljer 2♥ (förr: pass av en naturlig flykt).
+  it('frö 20272187: 1NT–(X DONT)–2♦–P–?: Öst (öppnaren) fullföljer överföringen 2♥ (systems on)', () => {
     const deal = dealFromSeed(20272187)
     const hist = [call('N', 'P'), call('E', '1NT'), call('S', 'X'), call('W', '2D'), call('N', 'P')]
-    expect(auctionFacts(hist, 'E').force).toBeNull()
-    expect(decideCall(deal, hist, 'E').bid).toBe('P')
+    expect(decideCall(deal, hist, 'E')).toMatchObject({ bid: '2H', rule: 'fullföljd transfer' })
   })
 })
 
@@ -367,15 +367,19 @@ describe('etapp 4 familj 6 – försvar mot 1NT: DONT, naturligt inkliv, Lebenso
     expect(t?.källa).toBe('tabell:dont-advance')
     expect(t!.call).toMatchObject({ bid: '2C', rule: 'DONT relä' })
   })
-  // Del 3 — störning över VÅRT 1NT (raden *vårt-1nt-stört*): Lebensohl + värde-X.
-  it('frö 20270003: 1NT–(2♠ naturligt)–?: svararen spelar Lebensohl 2NT', () => {
+  // Del 3 — störning över VÅRT 1NT (raden *vårt-1nt-stört*). Ägarens struktur
+  // 2026-09-18: systems on + stulet bud mot ALLA inkliv — Lebensohl är riven, så
+  // den svaga handen (6 hp, 5-5 i lågfärgerna) passar deras naturliga 2♠.
+  it('frö 20270003: 1NT–(2♠ naturligt)–?: svag hand passar (inget Lebensohl-relä längre)', () => {
     const hist: ResolvedCall[] = [call('E', '1NT'), { seat: 'S', bid: '2S', rule: 'naturligt inkliv (1NT)' }]
     const t = decideCallTraced(dealFromSeed(20270003), hist, 'W')
     expect(t.källa).toBe('tabell:vårt-1nt-stört')
-    expect(t.call.bid).toBe('2NT')
+    expect(t.call.bid).toBe('P')
   })
-  it('frö 20270163: 1NT–(2♥ DONT)–X(värde)–P–?: öppnaren beskriver 2NT (förnekar 5-kort)', () => {
-    const hist: ResolvedCall[] = [call('N', '1NT'), { seat: 'E', bid: '2H', rule: 'DONT tvåfärg' }, { seat: 'S', bid: 'X', rule: 'straff/värden' }, call('W', 'P')]
+  // X över deras 2♥ = värden 8+ med fyrkorts spader (ägarens struktur 2026-09-18):
+  // öppnaren utan spaderfit svarar 2NT med minimum (förr: "värde-X, förnekar 5-kort").
+  it('frö 20270163: 1NT–(2♥)–X(8+, fyrkorts ♠)–P–?: öppnaren utan fit, minimum → 2NT', () => {
+    const hist: ResolvedCall[] = [call('N', '1NT'), { seat: 'E', bid: '2H', rule: 'DONT tvåfärg' }, { seat: 'S', bid: 'X', rule: 'värde-X med högfärg (stört 1NT)' }, call('W', 'P')]
     const t = decideCallTraced(dealFromSeed(20270163), hist, 'N')
     expect(t.källa).toBe('tabell:vårt-1nt-stört')
     expect(t.call.bid).toBe('2NT')
@@ -1334,10 +1338,12 @@ describe('etapp 4 familj 9 — betydelselagret på störda auktioner', () => {
     expect(m([call('E', '1NT'), call('S', '2S')], 1).alert).toBe(false)
   })
 
-  it('2NT-konventioner i konkurrens: Jordan (inbjudan+alert), ovanlig 2NT (ej krav+alert), Lebensohl 2NT (ej krav+alert)', () => {
+  // (2NT över deras inkliv av VÅRT 1NT är sedan 2026-09-18 en NATURLIG inbjudan med
+  // stopp — Lebensohl-reläet är rivet, ägarens struktur efter felrapport #77.)
+  it('2NT i konkurrens: Jordan (inbjudan+alert), ovanlig 2NT (ej krav+alert), 2NT över stört 1NT (naturlig inbjudan)', () => {
     expect(m([call('E', '1S'), call('S', 'X'), call('W', '2NT')], 2)).toMatchObject({ rule: 'Jordan 2NT', forcing: 'inbjudan', alert: true })
     expect(m([call('S', 'P'), call('W', 'P'), call('N', 'P'), call('E', '1S'), call('S', '2NT')], 4)).toMatchObject({ rule: 'ovanlig 2NT', forcing: 'ej-krav', alert: true })
-    expect(m([call('E', '1NT'), call('S', '2S'), call('W', '2NT')], 2)).toMatchObject({ rule: 'Lebensohl 2NT (svag)', alert: true })
+    expect(m([call('E', '1NT'), call('S', '2S'), call('W', '2NT')], 2)).toMatchObject({ rule: '2NT inbjudan', forcing: 'inbjudan', alert: false })
   })
 
   it('dubblingsfamiljen ur auktionen: negativ och upplysning = krav 1 rond + alert; kooperativ/straff = ej krav utan alert', () => {
@@ -1362,7 +1368,6 @@ describe('etapp 4 familj 9 — betydelselagret på störda auktioner', () => {
     expect(isAlertRule('cue-höjningens fortsättning')).toBe(false)
     expect(isAlertRule('cue: avslut')).toBe(false)
     expect(forcingOf('svar på negativ dubbling')).toBe('ej-krav')
-    expect(forcingOf('naturligt (to play)')).toBe('ej-krav')
     expect(forcingOf('dubblaren höjer (inbjudan)')).toBe('inbjudan')
   })
 })
@@ -1482,16 +1487,18 @@ describe('etapp 5 slutkärnan – kända rester (facit-kö)', () => {
   // läste svararens färg efter en SANG-öppning som ett naturligt rondkrav (nu
   // undantaget: transfer/Stayman/flykt är aldrig krav-ny-färg), och betydelsen
   // av flykten över deras X är nu ett avslut (partnerSignedOff → catch-allen tiger).
-  it('B: 1NT–(X DONT)–2♠(flykt)–P → öppnaren passar, höjer inte till 3♠ (frö 20270254/20270765)', () => {
+  // OMSKRIVEN 2026-09-18 (ägarens struktur, felrapport #77): över deras X är
+  // systemet PÅ — 2♠ är Minor Suit Stayman, ingen flykt. Öppnaren svarar MSS
+  // (3♣/3♦) och partnern har INTE signat av. (Förr: flykt = avslut → pass.)
+  it('B: 1NT–(X DONT)–2♠ = MSS (systems on) → öppnaren svarar 3♣/3♦ (frö 20270254/20270765)', () => {
     for (const seed of [20270254, 20270765]) {
       const deal = dealFromSeed(seed)
       const hist = seed === 20270254
         ? [P('N'), P('E'), call('S', '1NT'), call('W', 'X'), call('N', '2S'), P('E')]
         : [call('S', '1NT'), call('W', 'X'), call('N', '2S'), P('E')]
       const f = auctionFacts(hist, 'S')
-      expect(f.force, `frö ${seed}`).toBeNull()
-      expect(f.partnerSignedOff, `frö ${seed}`).toBe(true)
-      expect(decideCall(deal, hist, 'S').bid, `frö ${seed}`).toBe('P')
+      expect(f.partnerSignedOff, `frö ${seed}`).toBe(false)
+      expect(decideCall(deal, hist, 'S'), `frö ${seed}`).toMatchObject({ bid: seed === 20270254 ? '3C' : '3D', rule: 'MSS-svar' })
     }
   })
   // LANDAD 2026-09-13: den RESPONSIVA dubblaren väger partnerns tvingade svar

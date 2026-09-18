@@ -23,7 +23,7 @@ describe('isAlertRule – flaggar konstgjorda bud', () => {
       'Michaels',
       'ovanlig 2NT',
       'negativ dubbling',
-      'Lebensohl 2NT (svag)',
+      'stulet bud: Stayman',
       'DONT tvåfärg',
       'Mathe X (högfärger)',
       'Ogust',
