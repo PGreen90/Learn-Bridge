@@ -10,11 +10,17 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — LEDIGT: ägaren väljer nästa ur 🟢 NÄST
-Föregående NU **Puppet Stayman över 2NT** är **KLART & LIVE** — live-provet
-godkänt av ägaren 2026-09-16 (ägardirektiv 2026-09-15; systemboken **§4.3b**,
-facit `puppet-stayman.test.ts`, mekaniken i `docs/puppet-stayman-plan.md`,
-mergepunkt `0207209`). Nästa NU väljs ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
+### 🔵 NU — Tredje hand högt: generalisera "rätt kort" (ägarbeslut 2026-09-18)
+Efter felrapport #75 (LIVE `341920d`): tredje-hands-högt-valet ska ALLTID väga
+fyra saker och varken slösa ett för högt kort eller underspela ett för lågt —
+(1) partnerns utspel, (2) den öppna träkarlen (även den som ligger FÖRE mig),
+(3) egen hand, (4) budseedad uppskattning av de dolda korten. Dagens tumregel
+(`thirdHandHonor` = lägsta honnören) är trubbig; den fulla räkningen gör MC redan
+vid ≤8 kort, så jobbet är att approximera den vid 9–13 kort. Rör spelmotorn brett
+→ test-drivet, DD-mätning per beteenderegel (speldiagnosens metod). Spec +
+varningar: `docs/bevaka.md` (översta posten). **Första steget: kort plan +
+mätrigg till ägaren FÖRE bygge.**
+Föregående NU **Puppet Stayman över 2NT** är KLART & LIVE (2026-09-16, `0207209`).
 
 **Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** designgranskningen
 (kontrast/fokusring/filt-text `5e62517` + hover-vokabulär `261e62a`) · Puppet
