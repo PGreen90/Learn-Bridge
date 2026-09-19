@@ -370,6 +370,17 @@ describe('claimen — förslag, svar och bokföring (etapp 3)', () => {
     expect(handelser.some((h) => h.typ === 'claim-forslag')).toBe(false)
   })
 
+  // Ägarbeslut 2026-09-19: datorn gör aldrig anspråk åt en MÄNSKLIG spelförare —
+  // sitter en människa på spelförarens stol föreslås ingen claim, given spelas ut.
+  test('mänsklig spelförare → inget förslag, given spelas klart', () => {
+    const forsta = spelaTillClaim(HUMANS)
+    const spelforare = forsta.lage.contract!.declarer
+    expect(HUMANS.has(spelforare)).toBe(false) // grundfallet ovan: en bot spelför
+    const { handelser, lage } = spelaTillClaim(new Set<Seat>([spelforare]))
+    expect(lage.givKlar).toBe(true)
+    expect(handelser.some((h) => h.typ === 'claim-forslag')).toBe(false)
+  })
+
   test('utan claim-kontroll föreslås aldrig någon claim (spelet är opåverkat)', () => {
     const handelser = spelaGiv(GIV, HUMANS)
     expect(handelser.some((h) => h.typ === 'claim-forslag')).toBe(false)

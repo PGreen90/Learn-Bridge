@@ -170,18 +170,21 @@ export function usePlayTable(
   // Auto Claim är AKTUELL: ett nytt stick ska börja och spelförarsidan kan
   // OMÖJLIGT förlora fler stick (oavsett spelsätt). Räknas synkront ur
   // ställningen så bottarna står stilla redan under svepet och andetaget —
-  // inte först när frågan väl visas. Gäller både dig och datorn som spelförare;
-  // slås av/på i ⋮-menyn. Ett "Spela klart" stänger den för resten av given.
+  // inte först när frågan väl visas. Slås av/på i ⋮-menyn; ett "Spela klart"
+  // stänger den för resten av given. ALLTID AV för en mänsklig spelförare
+  // (ägarbeslut 2026-09-19): datorn gör aldrig anspråk åt dig — din väg är den
+  // manuella claimen (⋮ → Claim tricks).
   const claimDue = useMemo(
     () =>
       autoClaim &&
+      !controls(contract, contract.declarer) &&
       !claimDeclined &&
       !claimed &&
       !pendingClaim &&
       !isComplete(play) &&
       play.currentTrick.length === 0 &&
       autoClaimAvailable(play),
-    [play, autoClaim, claimDeclined, claimed, pendingClaim],
+    [play, contract, autoClaim, claimDeclined, claimed, pendingClaim],
   )
 
   // Sticksvepet startar när ett NYTT stick blivit klart (motorn har redan tömt

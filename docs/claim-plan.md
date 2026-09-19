@@ -9,7 +9,12 @@ vände upp alla fyra händer på en gång.
 
 - **Frågan:** när boten eller auto-claimen vill claima visas
   "[Väderstreck] gör anspråk på resten (N stick)" med **OK** / **Spela klart**.
-  Är det din egen sida som spelför: "Du tar resten (N stick) — claima?".
+- **Mänsklig spelförare → auto-claimen är ALLTID AV** (ägarjustering 2026-09-19,
+  efter första live-provet): datorn gör aldrig anspråk åt en människa. I Spela
+  kort gäller det när DIN sida spelför (Nord eller Syd — du styr båda; vägen är
+  den manuella claimen ⋮ → Claim tricks). Vid vänner-bordet föreslår servern
+  ingen claim när en människa sitter på spelförarens stol — hen spelar sin hand
+  (bordet har ingen manuell claim; kandidat i `docs/bord-plan.md`).
 - **Endast frågeläge.** Inget "Direkt"-läge (struket av ägaren; byggs bara om
   ägaren ber om det). Av/på-knappen "Auto Claim" i ⋮-menyn är kvar som förut.
 - **Ingen timer svarar åt spelaren** (samma princip som claim-revealen,
@@ -49,8 +54,9 @@ detaljerna står i `docs/bord-plan.md`.
 ## Facit
 
 `src/pages/play/claimfraga.test.tsx` (flödet) · `claimreveal.test.tsx` ·
-`syd-trakarl.test.tsx` (texten "Du tar resten") · `claim.test.ts` och
-`bord-motor.test.ts` (ett stick kvar) · `BordSpel.test.tsx` (bordets text).
+`syd-trakarl.test.tsx` (frågans text + mänsklig spelförare → ingen fråga) ·
+`claim.test.ts` och `bord-motor.test.ts` (ett stick kvar · mänsklig spelförare) ·
+`BordSpel.test.tsx` (bordets text).
 
 ## Medvetet utanför (SENARE — `docs/senare.md`)
 

@@ -21,7 +21,11 @@ import { ms } from './tempo'
 // stickräkningen i claim-modulen behålls äkta.
 vi.mock('../../lib/engine/claim', async (importOriginal) => {
   const mod = await importOriginal<typeof import('../../lib/engine/claim')>()
-  return { ...mod, autoClaimAvailable: vi.fn(() => false) }
+  return {
+    ...mod,
+    autoClaimAvailable: vi.fn(() => false),
+    adjudicateClaim: vi.fn(() => ({ verdict: 'godkänd' })),
+  }
 })
 
 // Nord spelar 2♣ → Öst (bot) spelar ut, SYD är träkarl men du styr både S och N.
@@ -101,24 +105,46 @@ describe('Syd träkarl — Nord spelförare styrs av dig och given fastnar inte'
   })
 
   it('claim-revealen lägger upp ÄVEN de dolda motståndarhänderna (V+Ö-högarna)', async () => {
-    // Auto-claim aktuell → frågan efter andetaget (2026-09-19; Nord spelför =
-    // DIN sida → "Du tar resten") → OK → pendingClaim → ALLA händer ska ligga
-    // uppe, en i taget: Nord upptill, Syd nertill och BÅDA motståndarhögarna på
-    // sina sidor (vridna kort = rotate-90/-rotate-90 finns bara i sidohögarna).
+    // Nord spelför = DIN sida → auto-claimen är AV (ägarbeslut 2026-09-19:
+    // datorn gör aldrig anspråk åt en mänsklig spelförare) — revealen nås via
+    // den manuella claimen (⋮ → Claim tricks). ALLA händer ska ligga uppe, en i
+    // taget: Nord upptill, Syd nertill och BÅDA motståndarhögarna på sina sidor
+    // (vridna kort = rotate-90/-rotate-90 finns bara i sidohögarna).
     vi.mocked(autoClaimAvailable).mockReturnValue(true)
     const { container } = renderTable()
-    await advance(ms('claimBeat', 'normal'))
-    expect(screen.getByText(/Du tar resten \(13 stick\) — claima\?/)).toBeInTheDocument()
+    await advance(ms('claimBeat', 'normal') * 5)
+    expect(screen.queryByRole('group', { name: 'Claim' })).toBeNull()
     expect(screen.queryByText(/korten ligger uppe/)).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'OK' }))
+
+    fireEvent.click(screen.getByLabelText('Meny'))
+    fireEvent.click(screen.getByText('Claim tricks', { selector: 'button' }))
+    fireEvent.click(screen.getAllByRole('button').find((b) => b.textContent?.startsWith('13'))!)
     await advance(ms('revealStep', 'normal'))
     await advance(ms('revealStep', 'normal'))
 
-    expect(screen.getByText(/korten ligger uppe/)).toBeInTheDocument()
-    // Vem tar resten + hur många skrivs ut (ägarönskemål 2026-08-03): Nord är
-    // spelförare och inget stick är spelat än → hela resten (13 stick).
-    expect(screen.getByText(/Nord tar resten \(13 stick\)/)).toBeInTheDocument()
+    expect(screen.getByText(/Claim godkänd — korten ligger uppe/)).toBeInTheDocument()
     expect(container.querySelectorAll('.rotate-90, .-rotate-90').length).toBe(26)
+  })
+})
+
+describe('Datorn spelför — frågan namnger väderstrecket (claim-ombygget 2026-09-19)', () => {
+  it('"Väst gör anspråk på resten (13 stick)" → OK → "Väst tar resten"', async () => {
+    vi.mocked(autoClaimAvailable).mockReturnValue(true)
+    render(
+      <PlayTable
+        deal={{ ...DEAL, dealer: 'W' as const }}
+        contract={{ declarer: 'W', strain: 'clubs', level: 1 }}
+        calls={[]}
+        onNewGame={() => {}}
+        bidHelp={false}
+        onToggleBidHelp={() => {}}
+      />,
+    )
+    await advance(ms('claimBeat', 'normal'))
+    expect(screen.getByText(/Väst gör anspråk på resten \(13 stick\)/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }))
+    // Vem tar resten + hur många skrivs ut (ägarönskemål 2026-08-03).
+    expect(screen.getByText(/Väst tar resten \(13 stick\)/)).toBeInTheDocument()
   })
 })
 

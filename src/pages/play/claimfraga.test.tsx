@@ -112,6 +112,24 @@ describe('claim-frågan — andetag, fråga, inga bottar under tiden', () => {
   })
 })
 
+describe('mänsklig spelförare — auto-claimen är alltid AV (ägarbeslut 2026-09-19)', () => {
+  // Datorn gör aldrig anspråk åt en människa: spelför DIN sida (Nord eller Syd —
+  // du styr båda händerna) ställs ingen fråga, hur säkra sticken än är. Den
+  // manuella claimen (⋮ → Claim tricks) är din väg.
+  for (const declarer of ['N', 'S'] as const) {
+    it(`${declarer} spelför → ingen fråga, ingen reveal, spelet rullar`, async () => {
+      vi.mocked(autoClaimAvailable).mockReturnValue(true)
+      const kontrakt: Contract = { declarer, strain: 'clubs', level: 1 }
+      const { result } = renderHook(() => usePlayTable({ ...DEAL_BOT_VINNER, dealer: declarer }, kontrakt, []))
+      await advance(ms('claimBeat', 'normal') * 5)
+      expect(result.current.claimOffer).toBeNull()
+      expect(result.current.pendingClaim).toBeNull()
+      // Bottarna står inte och väntar på en claim som aldrig kommer: utspelet görs.
+      expect(result.current.play.currentTrick.length).toBe(1)
+    })
+  }
+})
+
 describe('claim-frågan — sista sticket får sitt svep FÖRE frågan', () => {
   it('bot vinner sticket: hold → slide → andetag → fråga (aldrig under svepet)', async () => {
     vi.mocked(autoClaimAvailable).mockImplementation(efterForstaSticket)

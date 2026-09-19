@@ -37,7 +37,7 @@ import { gameFromDeal, gameFromSeed, seatDealSouth, useGame, type Game } from '.
 import { usePlayTable } from './play/usePlayTable'
 import type { TavlingSpel } from './play/tavling-mode'
 import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
-import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT, controls } from './play/common'
+import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
 import { useSvavandeMeny } from './play/useSvavandeMeny'
@@ -940,7 +940,8 @@ export function PlayTable({
               ↩ Ångra mitt senaste kort
             </Button>
           )}
-          {/* Auto Claim av/på: gäller både dig och datorn som spelförare. */}
+          {/* Auto Claim av/på: gäller bara när DATORN spelför — för en mänsklig
+              spelförare är den alltid av (ägarbeslut 2026-09-19). */}
           <MenuToggleRow
             label="Auto Claim"
             hint="säkra stick tas automatiskt"
@@ -1258,9 +1259,8 @@ export function PlayTable({
           className="overlay-in absolute left-1/2 bottom-[16%] z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-emerald-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25"
         >
           <span className="whitespace-nowrap text-xs font-semibold text-gold-200">
-            {controls(contract, claimOffer.seat)
-              ? `Du tar resten (${remainingTricks(play)} stick) — claima?`
-              : `${SEAT_LABEL[claimOffer.seat]} gör anspråk på resten (${remainingTricks(play)} stick)`}
+            {/* Alltid en DATOR-spelförare: auto-claimen är av när din sida spelför. */}
+            {SEAT_LABEL[claimOffer.seat]} gör anspråk på resten ({remainingTricks(play)} stick)
           </span>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={declineClaimOffer}>

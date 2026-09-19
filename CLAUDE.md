@@ -15,8 +15,8 @@ Användarna: "datorn claimar för hastigt, det bara blinkar till". Auto-claimen
 ställer nu FRÅGAN "[Väderstreck] gör anspråk på resten" (OK / Spela klart, endast
 frågeläge, ingen timer) efter sticksvepet + ett andetag; händerna läggs upp en i
 taget; ett stick kvar claimas aldrig; samma ruta vid vänner-bordet. Plan + flöde +
-facit: **`docs/claim-plan.md`**. **Läge 2026-09-19: byggt & grönt lokalt; kvar:
-ägarens syn i appen + PCD.** Delclaim "X stick" · visa varför · snabbläge = SENARE.
+facit: **`docs/claim-plan.md`**. Mänsklig spelförare → auto-claim ALLTID av.
+**Läge 2026-09-19: LIVE (`9389da9`); kvar: ägarens live-prov.** Delclaim "X stick" · visa varför · snabbläge = SENARE.
 
 **Parallellt ägarsteg — Tredje hand högt** (föregående NU, regel A–D + riggen LIVE
 `037403b`, T0/T1 i `docs/speldiagnos.md` §8.6, spec `docs/bevaka.md`): live-prov +
