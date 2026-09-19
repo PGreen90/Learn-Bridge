@@ -431,8 +431,9 @@ export function drivFram(
       break
     }
     // Vid varje stickstart: vill DD claima? (Ägarbeslut 2026-09-14: då gör den
-    // det, och människorna får välja OK eller spela klart.)
-    if (!lage.claim && st.currentTrick.length === 0 && miljo.claimKontroll?.(st)) {
+    // det, och människorna får välja OK eller spela klart.) Ett enda stick kvar
+    // claimas aldrig (2026-09-19): korten är tvingade — sticket spelas ut.
+    if (!lage.claim && st.currentTrick.length === 0 && remainingTricks(st) > 1 && miljo.claimKontroll?.(st)) {
       const total = declarerTricksWon(st) + remainingTricks(st)
       const claim = { total, stol: contract!.declarer }
       nya.push({ giv: givNr, typ: 'claim-forslag', seat: contract!.declarer, data: claim })

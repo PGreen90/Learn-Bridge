@@ -101,12 +101,18 @@ describe('Syd träkarl — Nord spelförare styrs av dig och given fastnar inte'
   })
 
   it('claim-revealen lägger upp ÄVEN de dolda motståndarhänderna (V+Ö-högarna)', async () => {
-    // Auto-claim slår till direkt → pendingClaim → ALLA händer ska ligga uppe:
-    // Nord upptill, Syd nertill och BÅDA motståndarhögarna på sina sidor
-    // (vridna kort = rotate-90/-rotate-90 finns bara i sidohögarna).
+    // Auto-claim aktuell → frågan efter andetaget (2026-09-19; Nord spelför =
+    // DIN sida → "Du tar resten") → OK → pendingClaim → ALLA händer ska ligga
+    // uppe, en i taget: Nord upptill, Syd nertill och BÅDA motståndarhögarna på
+    // sina sidor (vridna kort = rotate-90/-rotate-90 finns bara i sidohögarna).
     vi.mocked(autoClaimAvailable).mockReturnValue(true)
     const { container } = renderTable()
-    await advance(0)
+    await advance(ms('claimBeat', 'normal'))
+    expect(screen.getByText(/Du tar resten \(13 stick\) — claima\?/)).toBeInTheDocument()
+    expect(screen.queryByText(/korten ligger uppe/)).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }))
+    await advance(ms('revealStep', 'normal'))
+    await advance(ms('revealStep', 'normal'))
 
     expect(screen.getByText(/korten ligger uppe/)).toBeInTheDocument()
     // Vem tar resten + hur många skrivs ut (ägarönskemål 2026-08-03): Nord är

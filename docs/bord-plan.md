@@ -179,6 +179,11 @@ bord som stått stilla > 2 h innan det globala taket räknas.
   claims, spelet opåverkat. Facit `claim-dd.test.ts` (riktiga lösaren),
   claim-blocket i `bord-motor.test.ts` (stubbad dom: förslag, paus, svar,
   bokföring, nej-vägen, direktbokföring), röktest i `BordSpel.test.tsx`.
+  **Claim-ombygget 2026-09-19 (`docs/claim-plan.md`):** dialogen är nu en
+  icke-modal ruta på filten ("[Väderstreck] gör anspråk på resten (N stick)" ·
+  OK / Spela klart) som kommer efter sticksvepet + `claimBeat`; kortklick är
+  spärrade medan den väntar, och ett enda stick kvar claimas aldrig
+  (`remainingTricks(st) > 1` i `drivFram`). Servermodellen i övrigt orörd.
 
 ## Medvetet utanför v1 (kandidater till SENARE)
 
