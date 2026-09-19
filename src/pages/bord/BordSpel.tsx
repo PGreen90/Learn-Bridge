@@ -518,11 +518,11 @@ export function BordSpel({
   // runt rutan, samma ruta och ordval som i Spela kort. Frågan kommer först när
   // sista sticket svepts undan (presentationskön + claimBeat i useBordSpel).
   const claimKvar = claimAktiv ? 13 - Math.floor(lage!.kort.length / 4) : 0
-  const claimMin = claimAktiv && lage!.claim!.stol === minStol
-  const claimAnsprak = !claimAktiv
+  // Spelföraren är alltid en BOT här: servern föreslår aldrig en claim åt en
+  // mänsklig spelförare (ägarbeslut 2026-09-19, bord-motor.ts).
+  const claimText = !claimAktiv
     ? ''
-    : `${claimMin ? 'Du' : SEAT_LABEL[vridStol(minStol)(lage!.claim!.stol)]} gör anspråk på resten (${claimKvar} stick)`
-  const claimText = claimMin ? `Du tar resten (${claimKvar} stick) — claima?` : claimAnsprak
+    : `${SEAT_LABEL[vridStol(minStol)(lage!.claim!.stol)]} gör anspråk på resten (${claimKvar} stick)`
   const claimDialog = jagSkaSvara && (
     <div
       role="group"
@@ -542,7 +542,7 @@ export function BordSpel({
   )
   const claimRad = claimAktiv && !jagSkaSvara && (
     <p className="mx-auto mt-1 max-w-md rounded-lg bg-red-950/50 px-3 py-1 text-center text-xs text-rose-100/80 ring-1 ring-rose-50/15">
-      {claimAnsprak} — väntar på att alla svarar.
+      {claimText} — väntar på att alla svarar.
     </p>
   )
 
