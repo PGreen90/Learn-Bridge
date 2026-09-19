@@ -44,6 +44,11 @@ export const BASE = {
   sweepHint: 2000,
   /** Själva svepet mot vinnarens sida (etapp 2). */
   sweepSlide: 450,
+  /** Claim-frågan (ägarbeslut 2026-09-19): andetaget mellan att sista sticket
+   *  svepts undan och att "[Väderstreck] gör anspråk på resten" visas. */
+  claimBeat: 600,
+  /** Claim-revealen: pausen mellan att händerna läggs upp, en i taget. */
+  revealStep: 260,
   /** Bordets uttoning innan resultatdialogen (etapp 5). Claim-revealen har
    *  INGEN tid — korten ligger kvar tills spelaren går vidare (ägarbeslut). */
   resultOutro: 500,

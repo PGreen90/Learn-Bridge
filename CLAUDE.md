@@ -10,19 +10,17 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Tredje hand högt: generalisera "rätt kort" (ägarbeslut 2026-09-18)
-Efter felrapport #75 (LIVE `341920d`): tredje-hands-högt-valet ska ALLTID väga
-fyra saker och varken slösa ett för högt kort eller underspela ett för lågt —
-(1) partnerns utspel, (2) den öppna träkarlen (även den som ligger FÖRE mig),
-(3) egen hand, (4) budseedad uppskattning av de dolda korten. Dagens tumregel
-(`thirdHandHonor` = lägsta honnören) är trubbig; den fulla räkningen gör MC redan
-vid ≤8 kort, så jobbet är att approximera den vid 9–13 kort. Rör spelmotorn brett
-→ test-drivet, DD-mätning per beteenderegel (speldiagnosens metod). Spec +
-varningar: `docs/bevaka.md` (översta posten). **Läge 2026-09-18: rigg + regel
-A–D byggda & mätta (T0/T1 i `docs/speldiagnos.md`, §8.6); kvar: ägarens
-live-prov + beslut om punkt 4 fullt ut (budseedad gissning, i dag bara
-utspelsinferens).**
-Föregående NU **Puppet Stayman över 2NT** är KLART & LIVE (2026-09-16, `0207209`).
+### 🔵 NU — Claim-ombygget: frågan i stället för klippet (ägarbeslut 2026-09-19)
+Användarna: "datorn claimar för hastigt, det bara blinkar till". Auto-claimen
+ställer nu FRÅGAN "[Väderstreck] gör anspråk på resten" (OK / Spela klart, endast
+frågeläge, ingen timer) efter sticksvepet + ett andetag; händerna läggs upp en i
+taget; ett stick kvar claimas aldrig; samma ruta vid vänner-bordet. Plan + flöde +
+facit: **`docs/claim-plan.md`**. **Läge 2026-09-19: byggt & grönt lokalt; kvar:
+ägarens syn i appen + PCD.** Delclaim "X stick" · visa varför · snabbläge = SENARE.
+
+**Parallellt ägarsteg — Tredje hand högt** (föregående NU, regel A–D + riggen LIVE
+`037403b`, T0/T1 i `docs/speldiagnos.md` §8.6, spec `docs/bevaka.md`): live-prov +
+beslut om punkt 4 (budseedad gissning, i dag bara utspelsinferens).
 
 **Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** systems on +
 stulet bud efter stört 1NT (#77, `90aeea1`, `docs/1nt-systems-on-plan.md`, §7.5) ·
@@ -110,7 +108,8 @@ engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · de
 starka dubblaren säljer given i rond 2 · **svep: partnerskapsplikter i konkurrens**
 (preferens/fritt bud/höjning på visad längd, ägarbeslut 2026-09-02 efter
 felrapport #55–#56) · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
-rondgenomgångens per-kort-motivering · **Gambling 3NT nästa lager** (låg prio,
+rondgenomgångens per-kort-motivering · claim nästa lager (delclaim "X stick") ·
+**Gambling 3NT nästa lager** (låg prio,
 småfix: 4♦-slamfråga · 4NT-svar · Klinger-försvar) · 2♣-öppningens bredare översyn forts.
 (steg 1 substanskraven KLAR 2026-08-31; kvar: kravnivån + balanserad/
 distributionell + 6-5-samspelet).

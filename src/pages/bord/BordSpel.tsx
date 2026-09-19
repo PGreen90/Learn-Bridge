@@ -514,27 +514,35 @@ export function BordSpel({
   const claimAktiv = !!lage && lage.fas === 'spel' && !!lage.claim && !lage.claim.avbojd && !!lage.contract
   const jagSkaSvara =
     claimAktiv && lage!.claim!.svar[minStol] === undefined && dummyOf(lage!.contract!) !== minStol && redo
+  // Claim-frågan (ägarbeslut 2026-09-19): INTE en modal — korten ligger synliga
+  // runt rutan, samma ruta och ordval som i Spela kort. Frågan kommer först när
+  // sista sticket svepts undan (presentationskön + claimBeat i useBordSpel).
+  const claimKvar = claimAktiv ? 13 - Math.floor(lage!.kort.length / 4) : 0
+  const claimMin = claimAktiv && lage!.claim!.stol === minStol
+  const claimAnsprak = !claimAktiv
+    ? ''
+    : `${claimMin ? 'Du' : SEAT_LABEL[vridStol(minStol)(lage!.claim!.stol)]} gör anspråk på resten (${claimKvar} stick)`
+  const claimText = claimMin ? `Du tar resten (${claimKvar} stick) — claima?` : claimAnsprak
   const claimDialog = jagSkaSvara && (
-    <Dialog className="w-full max-w-sm p-6">
-      <h2 className="text-lg font-semibold text-ink">Claim: spelföraren tar resten</h2>
-      <p className="mt-2 text-sm text-ink-soft">
-        Med perfekt spel är resten av sticken säkra för spelföraren (
-        {SEAT_LABEL[vridStol(minStol)(lage!.claim!.stol)]}, totalt {lage!.claim!.total} stick). Godkänn så
-        bokförs given direkt, eller spela klart handen.
-      </p>
-      <div className="mt-4 flex justify-end gap-2">
+    <div
+      role="group"
+      aria-label="Claim"
+      className="overlay-in absolute left-1/2 bottom-[16%] z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-red-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25"
+    >
+      <span className="whitespace-nowrap text-xs font-semibold text-gold-200">{claimText}</span>
+      <div className="flex gap-2">
         <Button variant="secondary" disabled={skickar} onClick={() => void gorDrag({ typ: 'claim-svar', ok: false })}>
           Spela klart
         </Button>
-        <Button disabled={skickar} onClick={() => void gorDrag({ typ: 'claim-svar', ok: true })}>
-          OK, bokför given
+        <Button autoFocus disabled={skickar} onClick={() => void gorDrag({ typ: 'claim-svar', ok: true })}>
+          OK
         </Button>
       </div>
-    </Dialog>
+    </div>
   )
   const claimRad = claimAktiv && !jagSkaSvara && (
     <p className="mx-auto mt-1 max-w-md rounded-lg bg-red-950/50 px-3 py-1 text-center text-xs text-rose-100/80 ring-1 ring-rose-50/15">
-      Claim föreslagen: spelföraren tar resten ({lage!.claim!.total} stick) — väntar på att alla svarar.
+      {claimAnsprak} — väntar på att alla svarar.
     </p>
   )
 
@@ -1008,7 +1016,9 @@ export function BordSpel({
     return (c: Card) => {
       // `redo` i stället för `aktuell`: ett klick mitt i sticksvepet hoppar
       // över svepet och agerar direkt ("korten fastnar"-fyndet 2026-08-17).
-      if (!redo || !spel) return
+      // Medan claim-frågan väntar på svar ligger korten stilla (servern avvisar
+      // ändå kortdrag då — spärren här sparar spelaren felraden).
+      if (!redo || !spel || claimAktiv) return
       if (sweep) hoppaOverSvep()
       const s = spel.state
       if (s.toAct !== seatV) return

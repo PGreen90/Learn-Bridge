@@ -361,6 +361,15 @@ describe('claimen — förslag, svar och bokföring (etapp 3)', () => {
     expect(typer.indexOf('claim-forslag')).toBe(typer.length - 2)
   })
 
+  // Ägarbeslut 2026-09-19: ett enda stick kvar claimas aldrig — korten är
+  // tvingade, frågan vore bara ett avbrott. Kontrollen säger ja först vid
+  // sista stickstarten → inget förslag, given spelas ut.
+  test('ett enda stick kvar → inget förslag, given spelas klart', () => {
+    const { handelser, lage } = spelaTillClaim(HUMANS, (st) => st.completedTricks.length >= 12)
+    expect(lage.givKlar).toBe(true)
+    expect(handelser.some((h) => h.typ === 'claim-forslag')).toBe(false)
+  })
+
   test('utan claim-kontroll föreslås aldrig någon claim (spelet är opåverkat)', () => {
     const handelser = spelaGiv(GIV, HUMANS)
     expect(handelser.some((h) => h.typ === 'claim-forslag')).toBe(false)

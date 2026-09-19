@@ -57,6 +57,8 @@ describe('claim-revealen — korten ligger kvar tills spelaren går vidare', () 
     expect(result.current.pendingClaim).toEqual({ total: 9, auto: false })
     expect(result.current.claimed).toBeNull()
     expect(result.current.done).toBe(false)
+    // Händerna läggs upp en i taget (revealStep, 2026-09-19) — sedan ligger alla.
+    for (let i = 0; i < 3; i++) await advance(ms('revealStep', 'normal'))
     for (const seat of ['N', 'E', 'S', 'W'] as const) {
       expect(result.current.isFaceUp(seat)).toBe(true)
     }
@@ -85,8 +87,10 @@ describe('claim-revealen — korten ligger kvar tills spelaren går vidare', () 
     vi.mocked(autoClaimAvailable).mockReturnValue(true)
     const { result } = renderHook(() => usePlayTable(DEAL, CONTRACT, []))
 
-    // Effekten slår till direkt (nytt stick ska börja) → reveal, inte klipp —
-    // och den ligger kvar tills spelaren går vidare.
+    // Frågan först (claimfraga.test.tsx), OK → reveal, inte klipp — och den
+    // ligger kvar tills spelaren går vidare.
+    await advance(ms('claimBeat', 'normal'))
+    act(() => result.current.acceptClaimOffer())
     expect(result.current.pendingClaim?.auto).toBe(true)
     expect(result.current.claimed).toBeNull()
     await advance(ms('botDelay', 'normal') * 20)

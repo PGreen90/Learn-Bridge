@@ -202,7 +202,8 @@ describe('BordSpel — röktest', () => {
       h('claim-forslag', 'E', { total: 13, stol: 'E' }),
     ]
     rendera()
-    expect(await screen.findByText(/Claim: spelföraren tar resten/)).toBeTruthy()
+    // Icke-modal fråga med väderstrecket (2026-09-19) — jag är alltid Syd visuellt.
+    expect(await screen.findByText(/Öst gör anspråk på resten \(13 stick\)/)).toBeTruthy()
     const { skickaDrag } = await import('../../lib/backend/bord')
     fireEvent.click(screen.getByText('Spela klart'))
     expect(vi.mocked(skickaDrag)).toHaveBeenCalledWith('ABC234', expect.any(Number), { typ: 'claim-svar', ok: false })
@@ -221,7 +222,7 @@ describe('BordSpel — röktest', () => {
       h('claim-svar', 'S', { ok: true }),
     ]
     rendera()
-    expect(await screen.findByText(/Claim föreslagen: spelföraren tar resten \(13 stick\)/)).toBeTruthy()
+    expect(await screen.findByText(/Öst gör anspråk på resten \(13 stick\) — väntar på att alla svarar/)).toBeTruthy()
     expect(screen.queryByText('Spela klart')).toBeNull()
     cleanup()
 

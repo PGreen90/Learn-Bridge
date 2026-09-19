@@ -9,6 +9,16 @@
 
 ## ⚪ SENARE
 
+### Claim — nästa lager (claim-ombygget 2026-09-19, `docs/claim-plan.md`)
+- **Delclaim "X stick"** (ägarens idé): "[Väderstreck] gör anspråk på X stick". Kräver
+  en regel för NÄR den får lösa ut (DD-värdet är känt i varje läge — rimligen bara
+  när utfallet är detsamma hur sidan än spelar) och en text som säger vilka stick
+  som skänks. v1 gäller bara "resten".
+- **Visa varför:** efter OK glöder de vinnande korten, eller en rad som "bara höga
+  trumf kvar".
+- **Snabbläge ("Direkt"):** struket av ägaren 2026-09-19 ("ber om det om jag saknar
+  det") — föreslå det inte igen.
+
 ### Gambling 3NT — nästa lager (v1 LIVE 2026-09-14, budsystem §3.1) — LÅG PRIO, framtida småfix (ägarbeslut 2026-09-15)
 v1 är öppningen (aggressiv stil), svaren pass/4♣/5♣/4M, öppnarens rättelse och
 ett minimalt försvar. **Ägarbeslut 2026-09-15: fortsättningen byggs inte nu** —

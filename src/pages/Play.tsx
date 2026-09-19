@@ -37,7 +37,7 @@ import { gameFromDeal, gameFromSeed, seatDealSouth, useGame, type Game } from '.
 import { usePlayTable } from './play/usePlayTable'
 import type { TavlingSpel } from './play/tavling-mode'
 import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
-import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
+import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT, controls } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
 import { useSvavandeMeny } from './play/useSvavandeMeny'
@@ -369,6 +369,9 @@ export function PlayTable({
     toggleAutoClaim,
     pendingClaim,
     finishClaimReveal,
+    claimOffer,
+    acceptClaimOffer,
+    declineClaimOffer,
     showResult,
     speed,
     setSpeed,
@@ -1244,6 +1247,31 @@ export function PlayTable({
       {/* Claim-revealen (etapp 5, ägarbeslut 2026-07-28): alla händer ligger
           öppna och STANNAR KVAR — precis som vid ett riktigt bord — tills
           spelaren själv går vidare med knappen. Ingen timer, inget klipp. */}
+      {/* Claim-frågan (ägarbeslut 2026-09-19): INTE en modal — korten ligger
+          synliga runt rutan. Samma plats som reveal-rutan, så OK → "Visa
+          resultatet" är två tryck på samma ställe. OK har fokus (Enter/mellanslag);
+          ingen timer svarar åt spelaren. */}
+      {claimOffer && !pendingClaim && (
+        <div
+          role="group"
+          aria-label="Claim"
+          className="overlay-in absolute left-1/2 bottom-[16%] z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-emerald-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25"
+        >
+          <span className="whitespace-nowrap text-xs font-semibold text-gold-200">
+            {controls(contract, claimOffer.seat)
+              ? `Du tar resten (${remainingTricks(play)} stick) — claima?`
+              : `${SEAT_LABEL[claimOffer.seat]} gör anspråk på resten (${remainingTricks(play)} stick)`}
+          </span>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={declineClaimOffer}>
+              Spela klart
+            </Button>
+            <Button autoFocus onClick={acceptClaimOffer}>
+              OK
+            </Button>
+          </div>
+        </div>
+      )}
       {pendingClaim && (
         <div className="overlay-in absolute left-1/2 bottom-[16%] z-30 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-emerald-950/85 px-4 py-3 shadow-xl ring-1 ring-gold-400/25">
           <span className="whitespace-nowrap text-xs font-semibold text-white">

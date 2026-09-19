@@ -67,7 +67,9 @@ export function adjudicateClaim(
  */
 export function autoClaimAvailable(state: PlayState, maxNodes = 250_000): boolean {
   if (state.currentTrick.length > 0) return false
-  if (remainingTricks(state) === 0) return false
+  // Ett enda stick kvar claimas aldrig (ägarbeslut 2026-09-19): korten är
+  // tvingade, så en fråga där vore bara ett avbrott — sticket spelas ut.
+  if (remainingTricks(state) <= 1) return false
   return sureWinAllRemaining(
     state.hands,
     state.contract.strain,

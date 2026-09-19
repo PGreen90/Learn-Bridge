@@ -65,6 +65,8 @@ export function avtackningsPaus(nasta: BordHandelse, egen: boolean, tempo: PlayS
   if (nasta.typ === 'bud') return egen ? 0 : auto ? 300 : ms('budDelay', tempo)
   if (nasta.typ === 'kort') return egen ? 0 : ms('bordKort', tempo)
   if (nasta.typ === 'giv-klar' || nasta.typ === 'facit') return ms('resultOutro', tempo)
+  // Claim-frågan (2026-09-19): ett andetag efter att sista sticket svepts undan.
+  if (nasta.typ === 'claim-forslag') return ms('claimBeat', tempo)
   return 0
 }
 
@@ -243,6 +245,9 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
       // tog min stol vid frånvaro, eller jag spelade från en annan flik) →
       // sticket är över på riktigt: svep och gå vidare utan tryck.
       if (nasta.typ === 'kort') setSweep({ trick: sweep.trick, phase: 'slide' })
+      // Claimen är föreslagen (2026-09-19): sticket väntar inte på mitt tryck —
+      // bot-pausen med ringen, sedan svep, sedan frågan (som i Spela kort).
+      if (nasta.typ === 'claim-forslag') setSweep({ trick: sweep.trick, phase: 'hold', holdMs: sweepHoldMs(tempo) })
       return
     }
     if (sweep) return

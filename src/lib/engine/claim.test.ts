@@ -58,6 +58,24 @@ describe('autoClaimAvailable – "omöjligt att förlora"', () => {
     expect(autoClaimAvailable(onlyMasterTrumps('E'))).toBe(true)
   })
 
+  // Ägarbeslut 2026-09-19: ett enda stick kvar claimas aldrig — korten är
+  // tvingade, frågan vore bara ett avbrott. Sticket spelas ut.
+  it('ett enda stick kvar → ingen claim, fast sticket är säkert', () => {
+    const s = state({
+      declarer: 'S',
+      strain: 'hearts',
+      hands: {
+        S: [C('hearts', 'A')],
+        N: [C('spades', '2')],
+        E: [C('spades', 'A')],
+        W: [C('diamonds', 'A')],
+      },
+      toAct: 'S',
+      tricksNS: 12,
+    })
+    expect(autoClaimAvailable(s)).toBe(false)
+  })
+
   // Ägarens exempel 2: tre ess + kungen i en av färgerna (sang), egen hand inne.
   it('tre ess + kung i sang på egen hand → claimbart', () => {
     const s = state({
