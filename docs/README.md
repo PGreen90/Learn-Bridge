@@ -50,7 +50,7 @@
 
 | Fil | | Innehåll |
 |---|---|---|
-| **historik.md** (199 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
+| **historik.md** (206 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
 | **arbetslista.md** | 📦 | Byggordningen FAS 0–12 (genomförd). Punkt 28 = bakgrunden till vår egen DDS-lösare. Kvar som arkiv; NU/NÄST styrs av CLAUDE.md. |
 | **tp-arbetslista.md** | 📦 | TP-stegen A–F. **Alla klara 2026-07-03** — filen innehåller gamla "⬜ Kvar att bygga"-rubriker som är överspelade av notisen högst upp. |
 | **off-book-syd.md** | 📦 | Hur det gamla manus-/detektorlagret svarade när ägaren bjöd utanför den förberäknade linjen. Arkiverad vid motorbytet (2026-09-11) — beteendet bor nu i beslutstabellens rad `partner-färg`. |

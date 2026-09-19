@@ -2955,3 +2955,28 @@ utgångspunkt (`docs/arbetsrutiner.md` 🙋, `/felrapporter`-kommandot).
 **Lärdom (docs-vakten):** en gitignorad mätfil som råkar finnas lokalt döljer ett
 rött bygge i Actions — kör vakten med `revisor-output/` bortflyttad före push;
 genererade mätfiler hör hemma i vaktens `GENERERADE`-set.
+## 2026-09-19 — Claim-ombygget: frågan i stället för klippet
+
+Användarna: "datorn claimar för hastigt, det bara blinkar till". Roten var inte
+botens tempo utan ett hårt klipp — auto-claimen löste ut i samma bildruta som
+fjärde kortet landade, släckte sticksvepet och vände upp alla händer på en gång.
+Mergepunkter `9389da9` (ombygget) + `9231d05` (ägarjusteringen), LIVE; ägarens
+live-prov godkänt samma dag ("Allt bra"). Plan, flöde och facit: `docs/claim-plan.md`.
+
+- **Frågan:** efter sticksvepet + andetaget `claimBeat` visas den icke-modala
+  rutan "[Väderstreck] gör anspråk på resten (N stick)" — OK / Spela klart, ingen
+  timer, korten synliga. Bottarna står stilla från det att claimen är aktuell
+  (`claimDue`). "Spela klart" stänger frågan för resten av given.
+- **Revealen** lägger upp de dolda händerna en i taget (`revealStep`).
+- **Ett enda stick kvar claimas aldrig** (motorn + bordsservern).
+- **Mänsklig spelförare → auto-claimen alltid av** (ägarjustering efter första
+  live-provet): datorn gör aldrig anspråk åt en människa; manuell "Claim tricks"
+  är vägen i Spela kort, och bordsservern föreslår ingen claim åt en människa.
+- **Vänner-bordet:** samma ruta och ordval i stället för den modala dialogen som
+  täckte korten; frågan väntar ut svepet, kortklick spärrade medan den väntar.
+- **Bifynd:** ett klick mitt i en kortflygning + släckt svep lämnade en
+  kvarhängande flygklon över bordet — `skipSweep` avslutar nu flygningen.
+
+Ägarbeslut: endast frågeläge (snabbläget struket — byggs bara på begäran).
+SENARE (`docs/senare.md`): delclaim "X stick", "visa varför". Kandidat vid
+borden: manuell claim — en mänsklig spelförare spelar i dag ut alla kort där.
