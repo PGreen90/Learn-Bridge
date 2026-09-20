@@ -51,8 +51,10 @@ import {
 
 const DATUM = process.env.GRANSKA_TAVLING ?? ''
 const OMPROVA_FLYTTADE = process.env.OMPROVA_FLYTTADE === '1'
-/** Så många motorversioner före tävlingsdagens slut är kandidater för ostämplade inskick. */
-const KANDIDATFONSTER = 12
+/** Så många motorversioner FÖRE tävlingsdagen tas med som kandidater (kvardröjande klienter). */
+const ALDRE_KANDIDATER = 4
+/** Det som ÄR spelmotorn: en commit som inte rör de här sökvägarna har samma motor. */
+const MOTORVAGAR = ['src/lib/engine', 'src/lib/bidding.ts', 'src/types']
 
 /** En hemlighet ur miljön eller .env.local — utan att någonsin skrivas ut. */
 function lasHemlighet(namn: string): string | null {
@@ -68,9 +70,10 @@ function lasHemlighet(namn: string): string | null {
 const git = (args: string, cwd = process.cwd()) =>
   execSync(`git ${args}`, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
 
-/** Motorns identitet i en commit = trädhashen för src/lib (docs-/UI-commits
- *  delar motor med sin förälder och behöver aldrig ett eget omprov). */
-const motortrad = (sha: string) => git(`rev-parse ${sha}:src/lib`)
+/** Motorns identitet i en commit = hasharna för MOTORVAGAR (docs-, UI- och
+ *  backend-commits delar motor med sin förälder och behöver inget eget omprov). */
+const motortrad = (sha: string) =>
+  git(`rev-parse ${MOTORVAGAR.map((v) => `${sha}:${v}`).join(' ')}`).split(/\s+/).join('+')
 
 interface Rad {
   id: string
@@ -150,19 +153,25 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
     if (attOmprova.length) {
       const headTrad = motortrad('HEAD')
       const kandaCommits = new Set(git('rev-list HEAD').split('\n'))
-      const dagslut = new Date(new Date(`${DATUM}T00:00:00Z`).getTime() + 27 * 3600_000).toISOString()
+      // Kandidatordningen (lärdom 2026-09-20, omprovet av 09-13: sex nyare
+      // versioner åt upp taket innan den rätta hann prövas): FÖRST motorn som var
+      // live när tävlingsdagen började — den spelade bottarnas nattspel och de
+      // tidiga människorna — SEDAN dagens deployer i tidsordning, SIST några äldre
+      // (kvardröjande klienter). Dygnet i UTC med marginal för Stockholms-tid.
+      const t0 = new Date(`${DATUM}T00:00:00Z`).getTime()
+      const dagstart = new Date(t0 - 2 * 3600_000).toISOString()
+      const dagslut = new Date(t0 + 27 * 3600_000).toISOString()
+      const logg = (flaggor: string) =>
+        git(`log --first-parent --format=%H ${flaggor} HEAD -- ${MOTORVAGAR.join(' ')}`).split('\n').filter(Boolean)
+      const fore = logg(`-n ${ALDRE_KANDIDATER + 1} --until=${dagstart}`)
+      const under = logg(`--reverse --since=${dagstart} --until=${dagslut}`)
       const settaTrad = new Set([headTrad])
-      const kandidater = git(
-        `log --first-parent --format=%H -n ${KANDIDATFONSTER} --until=${dagslut} HEAD -- src/lib`,
-      )
-        .split('\n')
-        .filter(Boolean)
-        .filter((sha) => {
-          const trad = motortrad(sha)
-          if (settaTrad.has(trad)) return false
-          settaTrad.add(trad)
-          return true
-        })
+      const kandidater = [...fore.slice(0, 1), ...under, ...fore.slice(1)].filter((sha) => {
+        const trad = motortrad(sha)
+        if (settaTrad.has(trad)) return false
+        settaTrad.add(trad)
+        return true
+      })
 
       // Två commits med samma motorträd (stämpel från en docs-deploy + kandidaten
       // före den) delar utfall — listan krymper bara, så det första svaret räcker.

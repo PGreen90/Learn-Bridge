@@ -116,7 +116,7 @@ export interface Versionsdom {
 }
 
 /** Nattjobbets tidsbudget: så många äldre versioner prövas som mest. */
-export const MAX_VERSIONER = 6
+export const MAX_VERSIONER = 8
 
 /**
  * Döm de inskick som avvek mot HEAD. Ordningen: inskickens STÄMPLAR först (det

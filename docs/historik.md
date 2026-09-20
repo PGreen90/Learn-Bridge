@@ -3007,3 +3007,9 @@ Rapporterna: `gh run download <körning> -n tavlingsgranskning-rapporter`.
   workflow-körning per datum med "ompröva flyttade"), inte med blind SQL.
 - Facit först: `tavlingsgranskning.test.ts` (buggen återskapad: inskick spelat
   med äldre motor ska INTE flyttas).
+- **Lärdom ur första skarpa omprovet (samma dag):** 09-12 och 09-18 friades helt,
+  men för 09-13 åt dagens många commits upp versionstaket innan rätt motor hann
+  prövas (inget nytt flyttades — de sex stod bara kvar). Kandidatordningen är
+  därför: motorn som var live när tävlingsdagen BÖRJADE först, sedan dagens
+  deployer i tidsordning, sist några äldre; och motorns identitet snävades till
+  spelmotorns egna sökvägar (backend-/UI-commits räknas inte som ny motor).
