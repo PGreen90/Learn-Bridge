@@ -1,5 +1,16 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Nattgranskningen är versionsmedveten (2026-09-20, systemkontrollen)
+- **Lagat:** spelmotor-deployer mitt på en tävlingsdag fällde ärliga inskick i
+  nattgranskningen (spelade med gårdagens motor, granskade med dagens). Nu bär
+  inskicken en motorstämpel och avvikare prövas om mot äldre versioner —
+  `docs/beslut-b-plan.md` etapp 3 + `docs/historik.md` 2026-09-20.
+- **Bevaka:** nattrapporten efter nästa spelmotor-deploy. Väntat: raden "friade
+  av äldre motorversion: N" i stället för fynd. Fynd som ÄNDÅ dyker upp en sådan
+  dag = läs rapporten noga (antingen riktig avvikelse eller ett hål i omprovet);
+  "ej jämförbara" = omprovet havererade (motorns API bröts mellan versionerna
+  eller `npm ci` föll) — då har inget flyttats, men det ska lagas.
+
 ## Tredje hand högt — generalisera "rätt kort", inte bara "billigast" (2026-09-17, felrapport #75 + ägardirektiv)
 - **Lagat nu (#75):** tredje-hands-högt (`defenderThirdHandHigh`) körs numera även
   när den öppna TRÄKARLEN (andra hand) SLOG partnerns utspel, i både sang och

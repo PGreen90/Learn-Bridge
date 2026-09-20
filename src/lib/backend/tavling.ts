@@ -65,6 +65,9 @@ export interface GivResultat {
    *  aldrig kom fram kan skickas om exakt. `undefined` = äldre framsteg (då
    *  räknas sticken ur kontraktet, se `inskickUrFramsteg`). */
   declarerTricks?: number
+  /** Motorstämpeln given spelades med — sparas så en OMSÄNDNING (kanske efter
+   *  en app-uppdatering) bär spelögonblickets version, inte sändningens. */
+  motor?: string
 }
 
 /** Framstegen i dagens tävling — vilka givar som är klara, per tävlingsnummer.
@@ -188,6 +191,10 @@ export interface TavlingInskick {
   plays: Card[]
   /** Spelförarens stick (contractResult) — verifieras mot serverns omspelning. */
   declarerTricks: number
+  /** Motorstämpeln (2026-09-20): commit-SHA för bygget given SPELADES med —
+   *  nattgranskningen spelar om botkorten mot exakt den motorversionen.
+   *  Utelämnad i utvecklingsbyggen. */
+  motor?: string
 }
 
 /** Serverns utfall: 'godkand'/'avvisad'/'granskning' (validering), 'redan'
@@ -242,7 +249,13 @@ export function inskickUrFramsteg(r: GivResultat): TavlingInskick | null {
     r.declarerTricks ??
     (r.kontrakt === null ? 0 : r.kontrakt ? 6 + r.kontrakt.level + r.kontrakt.diff : null)
   if (declarerTricks === null) return null
-  return { board: r.board, history: r.history, plays: r.plays, declarerTricks }
+  return {
+    board: r.board,
+    history: r.history,
+    plays: r.plays,
+    declarerTricks,
+    ...(r.motor ? { motor: r.motor } : {}),
+  }
 }
 
 /** Ska den här lokalt bokförda given skickas (om)? Sant för ett inskick som

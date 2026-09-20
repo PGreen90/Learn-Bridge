@@ -9,6 +9,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 // src/deploy-config.test.ts.
 export default defineConfig({
   base: '/',
+  // MOTORSTÄMPELN (2026-09-20): byggets commit-SHA bakas in, och varje
+  // tävlingsinskick bär den (src/lib/build.ts) — nattgranskningen spelar om mot
+  // EXAKT den motorversion given spelades med. GITHUB_SHA finns i Actions-bygget
+  // (ci-deploy.yml); lokalt blir den 'dev' (ingen stämpel).
+  define: {
+    __BUILD_SHA__: JSON.stringify(process.env.GITHUB_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev'),
+  },
   plugins: [
     react(),
     tailwindcss(),

@@ -35,6 +35,7 @@ import { Play } from './Play'
 import { RondRapportView } from './play/RondRapport'
 import { byggGranskning } from './play/granska-tavling'
 import type { TavlingSpel } from './play/tavling-mode'
+import { MOTORSTAMPEL } from '../lib/build'
 import { GivGranskning } from './tavling/GivGranskning'
 import {
   DinStällning,
@@ -250,12 +251,14 @@ export function DagensTavling() {
       board: giv.deal.board,
       total: tavling.storlek,
       sista: kvarEfterDenna === 0,
-      onResultat: (r, inskick) => {
+      onResultat: (r, oStamplat) => {
+        // Motorstämpeln sätts HÄR, i spelögonblicket (inte vid sändningen) — se build.ts.
+        const inskick = MOTORSTAMPEL ? { ...oStamplat, motor: MOTORSTAMPEL } : oStamplat
         // BOKFÖR i samma stund given är klar (ersätt ev. tidigare rad för samma
         // bricka). Läser/ skriver framstegRef så navigeringen efteråt ser den
         // uppdaterade listan även om React ännu inte hunnit rendera om. Auktionen
         // + korten sparas med (steg 5) så rondgenomgången kan återskapas.
-        const rad: GivResultat = { ...r, history: inskick.history, plays: inskick.plays, declarerTricks: inskick.declarerTricks }
+        const rad: GivResultat = { ...r, history: inskick.history, plays: inskick.plays, declarerTricks: inskick.declarerTricks, motor: inskick.motor }
         const base = framstegRef.current?.klara ?? []
         const klara = [...base.filter((k) => k.board !== r.board), rad]
         const nytt: TavlingFramsteg = { nummer: tavling.nummer, klara }

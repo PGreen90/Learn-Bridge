@@ -191,6 +191,10 @@ describe('inskickUrFramsteg / behöverSkickasOm — tappade inskick skickas om',
       board: 3, history: [], plays: kort, declarerTricks: 10,
     })
   })
+  test('motorstämpeln från SPELÖGONBLICKET följer med omsändningen (2026-09-20)', () => {
+    const motor = 'a'.repeat(40)
+    expect(inskickUrFramsteg({ ...bas, history: [], plays: kort, declarerTricks: 10, motor })?.motor).toBe(motor)
+  })
   test('äldre framsteg utan sparade stick: räknas ur kontraktet (6 + nivå + resultat); utpassad = 0', () => {
     expect(inskickUrFramsteg({ ...bas, history: [], plays: kort, kontrakt })?.declarerTricks).toBe(10)
     expect(inskickUrFramsteg({ ...bas, history: [], plays: [], kontrakt: null })?.declarerTricks).toBe(0)
