@@ -17,7 +17,8 @@ svarar på vad).
 fullt ut (budseedad gissning av de dolda korten — i dag bara utspelsinferens).
 Väljer ägaren annat ur 🟢 NÄST flyttas detta till "parallellt ägarsteg".
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** claim-ombygget
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** nattgranskningen
+versionsmedveten (motorstämpel + omprov, systemkontrollen 09-20, `docs/bevaka.md`) · claim-ombygget
 (frågan "[Väderstreck] gör anspråk på resten", `9389da9`+`9231d05`, `docs/claim-plan.md`) · systems on +
 stulet bud efter stört 1NT (#77, `90aeea1`, `docs/1nt-systems-on-plan.md`, §7.5) ·
 designgranskningen

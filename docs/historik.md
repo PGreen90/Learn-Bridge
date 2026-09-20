@@ -2980,3 +2980,30 @@ live-prov godkänt samma dag ("Allt bra"). Plan, flöde och facit: `docs/claim-p
 Ägarbeslut: endast frågeläge (snabbläget struket — byggs bara på begäran).
 SENARE (`docs/senare.md`): delclaim "X stick", "visa varför". Kandidat vid
 borden: manuell claim — en mänsklig spelförare spelar i dag ut alla kort där.
+
+## 2026-09-20 — Systemkontrollen: nattgranskningen blev versionsmedveten
+
+Bred systemkontroll på ägarens begäran (tester, typkontroll, felrapporter,
+Actions, live-sajten — allt grönt) hittade ETT riktigt fel, i nattrapporterna:
+djupgranskningen spelade om gårdagens inskick med den motor som låg på main när
+granskningen körde. Varje spelmotor-deploy mitt på en tävlingsdag fällde därför
+de inskick som spelats FÖRE deployen (bottarnas nattspel, tidiga människor) —
+de flyttades till 'granskning' och föll ur topplista, historik och medaljer.
+Belägget: fynd fanns bara för tävlingsdagarna 09-12, 09-13, 09-17 och 09-18 —
+exakt dagarna kring spelmotor-commitarna `a1061da`, `341920d` och `037403b` —
+och vartenda fynd gällde tredje kortet i ett stick, precis det commitarna ändrade.
+Rapporterna: `gh run download <körning> -n tavlingsgranskning-rapporter`.
+
+- **Motorstämpeln:** byggets commit-SHA bakas in (`vite.config.ts` `define` →
+  `src/lib/build.ts`), sätts på inskicket i SPELÖGONBLICKET (sparas i det lokala
+  framsteget så en omsändning bär rätt version) och lagras i `payload.motor`
+  (`skicka-in.ts`, strikt form). Botjobbet stämplar med sin `GITHUB_SHA`.
+- **Omprovet:** avvikelse mot dagens motor → omspelning i ett git-arbetsträd per
+  äldre motorversion (stämpeln först, sedan de senaste versionerna på main;
+  motorns identitet = trädhashen för `src/lib`). Flytt bara om ingen version lade
+  korten. Provat lokalt mot commiten före `a1061da` med påhittad hemlighet: den
+  gamla motorn avvek på just ett tredje-hands-kort — fenomenet i miniatyr.
+- **Återställningen** av de felflyttade inskicken sker med SAMMA dom (manuell
+  workflow-körning per datum med "ompröva flyttade"), inte med blind SQL.
+- Facit först: `tavlingsgranskning.test.ts` (buggen återskapad: inskick spelat
+  med äldre motor ska INTE flyttas).

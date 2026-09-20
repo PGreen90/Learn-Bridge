@@ -13,6 +13,7 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
+import { giltigMotorstampel } from '../src/lib/engine/tavlingsgranskning'
 import { validera, type Inskick } from './_lib/validera'
 import { kvotOk } from './_lib/kvot'
 import { restGet, restPost } from './_lib/supabase-rest'
@@ -83,6 +84,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       plays: Array.isArray(body.plays) ? body.plays : [],
       declarerTricks: typeof body.declarerTricks === 'number' ? body.declarerTricks : -1,
     }
+    // Motorstämpeln (2026-09-20): byggets commit-SHA — sparas BARA i strikt form
+    // (40 hex) och påverkar aldrig valideringen. Nattgranskningen litar inte på
+    // den: en stämpel som inte är en commit på main ignoreras där.
+    const motor = giltigMotorstampel((body as { motor?: unknown }).motor)
+      ? ((body as { motor?: unknown }).motor as string)
+      : null
 
     // 3) Dagens tävling.
     const today = stockholmDateISO()
@@ -115,7 +122,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       declarer_tricks: v.giltig && !v.passad ? v.declarerTricks : null,
       passed_out: v.giltig ? v.passad : false,
       reason: v.giltig ? null : v.skäl,
-      payload: { history: inskick.history, plays: inskick.plays, declarerTricks: inskick.declarerTricks },
+      payload: {
+        history: inskick.history,
+        plays: inskick.plays,
+        declarerTricks: inskick.declarerTricks,
+        ...(motor ? { motor } : {}),
+      },
     }
     // Skrivningen med omförsök på transienta fel (2026-09-13: två brickor
     // tappades tyst på ett dygn när ETT fetch mot Supabase föll). Den unika

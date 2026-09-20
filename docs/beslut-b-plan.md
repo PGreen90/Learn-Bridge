@@ -302,6 +302,18 @@ dag den behövs) · djupa botkortsgranskningen körs **nattligt i Actions**
 status 'granskning') · granskningsverktyget är **rapporten i nattvakten**
 (artefakt), inget eget UI.*
 
+> **Versionsmedveten sedan 2026-09-20.** "Exakt" gäller per MOTORVERSION: ett
+> inskick som avviker mot dagens motor prövas om mot de versioner som varit live
+> — inskickets **motorstämpel** först (`payload.motor` = byggets commit-SHA,
+> satt av klienten i spelögonblicket och av botjobbet), sedan de senaste
+> motorversionerna på main — var och en i ett eget git-arbetsträd
+> (`tavlingsomprov.probe.test.ts`). Bara om INGEN version lade korten flyttas
+> inskicket; ett havererat omprov ger "ej jämförbart", aldrig en flytt. En stämpel
+> som inte är en commit på main ignoreras (ingen genväg förbi granskningen).
+> Domslogik + facit: `tavlingsgranskning.ts` + `tavlingsgranskning.test.ts`. Manuell körning av
+> workflowen kan ange datum + "ompröva flyttade" (återställer felflyttade inskick
+> och skriver om den dagens ställning). Bakgrund: `docs/historik.md` 2026-09-20.
+
 - Byggt: rate limits på tävlingens endpoints (`skicka-in`, `topplista`,
   `giv-resultat`, `dagens-logg` — bordens `api_kvot`/`kvot_okning` återanvänds;
   inloggningen skyddas av Supabases egna limits) · Dagens giv-loggen

@@ -45,6 +45,7 @@ import { join } from 'node:path'
 import { playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
 import { validera } from '../../../api-src/_lib/validera'
 import { nivaSmartOpts, TAVLINGSBOTTAR, type Tavlingsbot } from './botniva'
+import { giltigMotorstampel } from './tavlingsgranskning'
 import { spelaBotGiv } from './botspelare'
 
 const DATUM = process.env.BOT_TAVLING ?? ''
@@ -203,7 +204,15 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
         declarer_tricks: v.giltig && !v.passad ? v.declarerTricks : null,
         passed_out: v.giltig ? v.passad : false,
         reason: v.giltig ? null : v.skäl,
-        payload: { history: inskick.history, plays: inskick.plays, declarerTricks: inskick.declarerTricks },
+        // Motorstämpeln: nattjobbets commit (GITHUB_SHA i Actions) — så ett
+        // spelmotor-byte senare samma dag inte fäller bottarnas inskick i
+        // nattgranskningen (tavlingsgranskning.ts).
+        payload: {
+          history: inskick.history,
+          plays: inskick.plays,
+          declarerTricks: inskick.declarerTricks,
+          ...(giltigMotorstampel(process.env.GITHUB_SHA) ? { motor: process.env.GITHUB_SHA } : {}),
+        },
       }
       await rest(`daily_results?on_conflict=set_id,board,user_id`, {
         method: 'POST',

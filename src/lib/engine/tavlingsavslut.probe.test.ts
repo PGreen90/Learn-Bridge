@@ -30,6 +30,10 @@ import { byggStallning, MIN_PER_GIV } from './tavlingsavslut'
 const AKTIV = process.env.AVSLUTA_TAVLING === '1'
 /** Så många av de senaste dagarna skrivs alltid om (utöver saknade). */
 const OMSKRIV_DAGAR = 3
+/** En ÄLDRE dag som också ska skrivas om (YYYY-MM-DD) — nattgranskningens manuella
+ *  omprövning av en gammal dag (2026-09-20) återställer inskick, och ställningen
+ *  för just den dagen måste då räknas om fast den ligger utanför tredagarsfönstret. */
+const OMSKRIV_DATUM = /^\d{4}-\d{2}-\d{2}$/.test(process.env.OMSKRIV_DATUM ?? '') ? process.env.OMSKRIV_DATUM! : null
 
 /** En hemlighet ur miljön eller .env.local — utan att någonsin skrivas ut. */
 function lasHemlighet(namn: string): string | null {
@@ -92,7 +96,9 @@ it.skipIf(!AKTIV)('tävlingsavslutet: slutlig ställning → daily_standings', {
     (await restAlla<{ set_id: string }>('daily_standings?select=set_id')).map((r) => r.set_id),
   )
   const grans = dagarFore(idag, OMSKRIV_DAGAR)
-  const attGora = sets.filter((s) => !harStallning.has(s.id) || s.comp_date >= grans)
+  const attGora = sets.filter(
+    (s) => !harStallning.has(s.id) || s.comp_date >= grans || s.comp_date === OMSKRIV_DATUM,
+  )
   rader.push(`${sets.length} avslutade dagar · ${harStallning.size} med ställning · ${attGora.length} att skriva.`)
 
   let skrivna = 0
