@@ -24,7 +24,7 @@ import { hcp, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import { ntResponseRule } from './overcall-continuations'
 import { side } from './play'
-import { openerRebidAfter1NTResponse } from './rebids'
+import { openerRebidAfter1NTResponse, openerThirdBidIn1NTAuction } from './rebids'
 import { responderRebidIn1NTAuction } from './responder-rebids'
 import { respondTo1NT } from './responses-nt'
 import type { ResponseResult } from './responses'
@@ -296,7 +296,8 @@ function responderSecondTurn(hand: Hand, f: AuctionFacts, l: Lage): ResolvedCall
 }
 
 // ---------------------------------------------------------------------------
-// Öppnarens tredje tur (de två nya vägarna: inbjudan efter värde-X, utgångsval)
+// Öppnarens tredje tur (de två nya vägarna: inbjudan efter värde-X, utgångsval —
+// och i övrigt systembuden exakt som ostört)
 // ---------------------------------------------------------------------------
 
 function openerThirdTurn(hand: Hand, f: AuctionFacts, l: Lage): ResolvedCall | null {
@@ -321,7 +322,29 @@ function openerThirdTurn(hand: Hand, f: AuctionFacts, l: Lage): ResolvedCall | n
       ? { seat, bid: `4${letterOfSuit(mal)}` as Bid, rule: 'utgångsval: rättar till högfärgen', explanation: `Partnern visade fem ${sym(mal)}; 3+ stöd → 4${sym(mal)}.` }
       : { seat, bid: 'P', rule: 'rebid: pass', explanation: `Bara två ${sym(mal)} → pass (3NT står).` }
   }
-  return null
+  // Stulet bud / systembud: mitt tredje bud exakt som ostört (live-fynd 2026-09-20,
+  // tävlingsbricka 9: utan den här vägen läste reservlogiken partnerns transferbud
+  // som naturlig färg och "höjde" till 4♥ över 2NT-inbjudan).
+  const v = virtuelltSvar(l)
+  if (!v) return null
+  // 3NT efter fullföljd transfer = utgångsval (ostört: answerTransferGameChoice,
+  // felrapport #13): 4M med 3+ stöd, annars står 3NT.
+  if (v.rule === 'Jacoby-transfer' && partners.bid === '3NT') {
+    const mal: Suit = v.call === '2D' ? 'hearts' : 'spades'
+    if (mitt.bid !== `2${letterOfSuit(mal)}`) return null
+    return len[mal] >= 3
+      ? { seat, bid: `4${letterOfSuit(mal)}` as Bid, rule: 'utgångsval: rättar till högfärgen', explanation: `Partnern visade fem ${sym(mal)} och utgångsvärden; 3+ stöd → 4${sym(mal)}.` }
+      : { seat, bid: 'P', rule: 'rebid: pass', explanation: `Bara två ${sym(mal)} → pass (3NT står).` }
+  }
+  const res = openerThirdBidIn1NTAuction(
+    v,
+    { call: mitt.bid, rule: mitt.rule ?? '', explanation: '' },
+    { call: partners.bid, rule: partners.rule ?? '', explanation: '' },
+    hand,
+  )
+  if (!res) return null
+  if (res.call !== 'P' && !legalCalls(f.history, seat).includes(res.call as Bid)) return null
+  return asCall(seat, res)
 }
 
 /**

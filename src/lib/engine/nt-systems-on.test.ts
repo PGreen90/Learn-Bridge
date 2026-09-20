@@ -140,3 +140,36 @@ describe('pass först, straff-X i andra ronden · öppnarens återöppning', () 
     expect(decideCall(d, [call('N', '1NT'), call('E', '2D'), call('S', 'P'), call('W', 'P')], 'N').bid).toBe('2S')
   })
 })
+
+// Ägarens live-fynd 2026-09-20 (tävlingsbricka 9): 1NT–(2♣ DONT)–2♥–P–2♠–P–2NT–P
+// och öppnaren bjöd 4♥ — raden för öppnarens tredje bud kräver tysta
+// motståndare, så reservlogiken läste transferbudet 2♥ som NATURLIG hjärter.
+// Systems on gäller hela vägen: öppnarens tredje bud exakt som ostört.
+describe('öppnarens tredje bud efter deras inkliv – exakt som ostört', () => {
+  const efterTransferInvit = (N: string) => {
+    const d = giv('S:KJ985 H:Q62 D:9 C:K642', N)
+    const h = [call('N', '1NT'), call('E', '2C'), call('S', '2H'), call('W', 'P'), call('N', '2S'), call('E', 'P'), call('S', '2NT'), call('W', 'P')]
+    return decideCall(d, h, 'N')
+  }
+  it('bricka 9: 15 hp, två spader → PASS (inte 4♥ – 2♥ var en transfer)', () => {
+    expect(efterTransferInvit('S:AT H:AK98 D:QT86 C:Q95').bid).toBe('P')
+  })
+  it('minimum med 3-korts spader → rättar till 3♠', () => {
+    expect(efterTransferInvit('S:AT3 H:AK98 D:QT8 C:Q95').bid).toBe('3S')
+  })
+  it('maximum utan spaderstöd → 3NT · maximum med 3-korts spader → 4♠', () => {
+    expect(efterTransferInvit('S:AT H:AK98 D:KQ86 C:Q95').bid).toBe('3NT')
+    expect(efterTransferInvit('S:AT3 H:AK98 D:KQ8 C:Q95').bid).toBe('4S')
+  })
+  it('3NT efter fullföljd transfer = utgångsval: 3-korts spader → 4♠, två → pass (som ostört, felrapport #13)', () => {
+    const d = (N: string) => giv('S:KJ985 H:Q62 D:A9 C:K64', N)
+    const h = [call('N', '1NT'), call('E', '2C'), call('S', '2H'), call('W', 'P'), call('N', '2S'), call('E', 'P'), call('S', '3NT'), call('W', 'P')]
+    expect(decideCall(d('S:AT3 H:AK98 D:QT8 C:Q95'), h, 'N').bid).toBe('4S')
+    expect(decideCall(d('S:AT H:AK98 D:QT86 C:Q95'), h, 'N')).toMatchObject({ bid: 'P', rule: 'rebid: pass' })
+  })
+  it('stulet bud: X = Stayman över 2♣, 2♥-svar, 3♥-inbjudan → minimum passar, maximum 4♥', () => {
+    const h = [call('N', '1NT'), call('E', '2C'), call('S', 'X'), call('W', 'P'), call('N', '2H'), call('E', 'P'), call('S', '3H'), call('W', 'P')]
+    expect(decideCall(giv('S:K985 H:Q962 D:9 C:K642', 'S:AT H:AK98 D:QT86 C:Q95'), h, 'N').bid).toBe('P')
+    expect(decideCall(giv('S:K985 H:Q962 D:9 C:K642', 'S:AT H:AK98 D:KQ86 C:Q95'), h, 'N').bid).toBe('4H')
+  })
+})
