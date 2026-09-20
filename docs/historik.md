@@ -3013,3 +3013,14 @@ Rapporterna: `gh run download <körning> -n tavlingsgranskning-rapporter`.
   därför: motorn som var live när tävlingsdagen BÖRJADE först, sedan dagens
   deployer i tidsordning, sist några äldre; och motorns identitet snävades till
   spelmotorns egna sökvägar (backend-/UI-commits räknas inte som ny motor).
+
+## 2026-09-20 — Ägarens live-fynd: 4♥ efter transfer + 2NT över stört 1NT
+
+Tävlingsbricka 9: 1NT–(2♣ DONT)–2♥–P–2♠–P–2NT–P och öppnaren bjöd 4♥ (dubblat).
+Regeln saknades — tabellraden för öppnarens tredje bud gäller bara tysta
+motståndare och systems on-modulen (#77) hade bara sina två nya vägar, så
+reservlogiken läste transferbudet som naturlig hjärter. Lagat i `nt-systems-on.ts`
+(`openerThirdTurn`): tredje budet exakt som ostört, plus 3NT-utgångsvalet efter
+fullföljd överföring (grannhål av samma sort, hittat vid kontrollen av fixen).
+Facit i `nt-systems-on.test.ts`; systemboken §7.5 + §9. Nattens förscreening hade
+flaggat brickan ("fel färg") — värt att läsa de larmen även när de oftast är brus.

@@ -2387,6 +2387,13 @@ bud du ville bjuda betyder **dubbling "det budet"** (*stulet bud*).
 **Öppnaren:**
 - Efter ett **stulet bud** svarar öppnaren exakt som ostört (2♦/2♥/2♠ på Stayman,
   fullföljer överföringen).
+- **Systems on gäller hela vägen** — även öppnarens *tredje* bud är exakt som
+  ostört. Efter överföring + **2NT-inbjudan** (fem kort, 8–9): minimum utan
+  3-korts stöd **passar**, minimum med stöd rättar till **3M**, maximum bjuder
+  **3NT** utan stöd / **4M** med stöd. Efter överföring + **3NT** (utgångsval):
+  **4M med 3+ stöd**, annars pass. Efter Stayman (även X = stulet bud) +
+  inbjudan: pass / utgång efter styrka. *Tävlingsbricka 9, 2026-09-20:
+  1NT–(2♣)–2♥–2♠–2NT med ♠AT ♥AK98 ♦QT86 ♣Q95 (15 hp, två spader) → **pass**.*
 - Efter **X = 8+ med fyrkorts högfärg**: med fit **alltid lägsta nivå** i den
   högfärgen (2♠ resp. 3♥ — säger inget om styrkan), utan fit **2NT (minimum) /
   3NT (maximum)**. **Aldrig straffpass** — svararen placerar: 4M med 10+, inbjudan
@@ -2775,6 +2782,17 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-20 — Ägarens live-fynd (tävlingsbricka 9): öppnarens tredje bud efter
+  stört 1NT (§7.5).** 1NT–(2♣ DONT)–2♥–P–2♠–P–2NT–P och öppnaren (♠AT ♥AK98 ♦QT86
+  ♣Q95) bjöd **4♥**. Regeln saknades: tabellraden för öppnarens tredje bud gäller
+  bara när motståndarna varit tysta, och systems on-modulen hade bara de två nya
+  vägarna (inbjudan efter värde-X, 3-lägesöverföringens utgångsval) — så
+  reservlogiken läste transferbudet 2♥ som naturlig hjärter och "höjde med fit".
+  Nu: öppnarens tredje bud **exakt som ostört** (`openerThirdBidIn1NTAuction` via
+  det virtuella svaret — gäller även X = stulet bud), och 3NT efter fullföljd
+  överföring = utgångsval (4M med 3+ stöd, som ostört #13). Här: 15 hp, två
+  spader → **pass**. Kod `nt-systems-on.ts` (`openerThirdTurn`), facit i
+  `nt-systems-on.test.ts`.
 - **2026-09-18 — Felrapport #77: systems on + stulet bud efter vårt 1NT i konkurrens
   (§7.5; ägarens struktur, varje detalj ägarens svar på en direkt fråga).** 1NT–(2♣
   DONT)–? med ♠Q87 ♥KQT985 ♦Q2 ♣JT bjöd 2♥ "to play" — varje hand med 5+ färg fick
