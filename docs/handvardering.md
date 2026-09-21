@@ -109,6 +109,20 @@ I NT: bara steg 1–2 (ingen kortfärg).
 
 ---
 
+### Budgivningens nedvärdering — oskyddade honnörer i DERAS färg (2026-09-20)
+Ägardirektiv (störd överföring efter vårt 1NT, systemboken §7.5): en **dam utan
+ess/kung** bredvid sig (−2) eller en **knekt utan högre honnör** (−1) i en färg
+**motståndarna bjudit** räknas bort — honnörerna sitter bakom. Ess, kung och en
+skyddad dam (AQ/KQ) behålls. Måttet: `unguardedHonorsInTheirSuit` i
+`evaluation.ts`. Används i dag bara i `nt-transfer-stord.ts`.
+
+> **Ägarprincip 2026-09-21 — "nedgradera aldrig" gäller BARA öppningsläget.** När
+> handen värderas för att ÖPPNA får TP aldrig sänka den (en 12 hp-hand öppnar
+> alltid). I en budgivning — särskilt i konkurrens — är det helt naturligt att
+> värdera OM handen, upp OCH ner, efter vad som bjudits. Golvet `pointsWithFloor`
+> (`max(hp, mått)`) används i dag även i svar och återbud; **översynen av det är
+> nästa NU** (kartan i `CLAUDE.md`).
+
 ## ARKITEKTUR
 
 Ny **ren modul** `src/lib/engine/evaluation.ts`, byggd test-drivet i samma stil

@@ -148,7 +148,57 @@ function interpretOur1NTContested(call: ResolvedCall, prior: ResolvedCall[]): Ca
   return { ...d, text: `${d.text} (Systems on: deras ${their} över vårt 1 sang ändrar inte systemet.)` }
 }
 
+/**
+ * STÖRD ÖVERFÖRING efter vårt 1NT (ägarens regler 2026-09-20, systemboken §7.5):
+ * fjärde hand bjuder en FÄRG efter svararens överföring — 1NT–(pass/X/2x)–
+ * överföring–(färgbud). Öppnaren tävlar med 3–4 korts stöd (utgång med 16+ med
+ * fördelning), svararen går till utgång med 8+ hp / 10+ med fördelning. Speglar
+ * beslutet i nt-transfer-stord.ts; utan den här läsaren tolkades överföringsbudet
+ * som naturlig färg ("ny färg", "kort i partnerns hjärter").
+ */
+function interpretDisturbedTransfer(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 1 || open.cb.strain !== 'NT' || SIDE[open.seat] !== SIDE[call.seat]) return null
+  const i = prior.findIndex((c) => c.seat === open.seat && c.bid === '1NT')
+  const [inter, resp, fjarde] = [prior[i + 1], prior[i + 2], prior[i + 3]]
+  if (!inter || !resp || !fjarde || resp.seat !== PARTNER[open.seat]) return null
+  let M: 'H' | 'S' | null = null
+  if (inter.bid === 'P' || inter.bid === 'X' || inter.bid === '2C') M = resp.bid === '2D' ? 'H' : resp.bid === '2H' ? 'S' : null
+  else if (inter.bid === '2D') M = resp.bid === 'X' ? 'H' : resp.bid === '2H' ? 'S' : null
+  if (!M) return null
+  const fcb = parseBid(fjarde.bid)
+  if (!fcb || fcb.strain === 'NT' || fcb.strain === M || SIDE[fjarde.seat] === SIDE[open.seat]) return null
+  const rest = prior.slice(i + 4)
+  const cb = parseBid(call.bid)
+  const their = `${fcb.level}${SYMBOL[fcb.strain]}`
+
+  // Öppnarens tur direkt efter deras färgbud.
+  if (call.seat === open.seat && rest.length === 0) {
+    if (call.bid === 'P') return R('pass', `Pass — ingen plikt att tävla över deras ${their}: högst två kort i partnerns ${NAME[M]} (eller minimum när deras bud tagit 3-läget).`)
+    if (!cb || cb.strain !== M) return null
+    if (cb.level === 4) return R('störd överföring: utgång', `4${SYMBOL[M]} — utgång: 3–4 korts stöd i partnerns ${NAME[M]} och 16+ med fördelning (oskyddade honnörer i deras färg räknas bort).`)
+    return R('störd överföring: tävlar', `${cb.level}${SYMBOL[M]} — tävlar över deras ${their}: 3–4 korts stöd i partnerns ${NAME[M]}, under 16 med fördelning. Ingen inbjudan — partnern går till utgång med 8+ hp (eller 10+ med fördelning), annars pass.`)
+  }
+  // Svararens tur när budet kommit tillbaka: [öppnarens bud, pass].
+  if (call.seat === PARTNER[open.seat] && rest.length === 2 && rest[0].seat === open.seat && rest[1].bid === 'P') {
+    const ocb = parseBid(rest[0].bid)
+    const tavlade = !!ocb && ocb.strain === M && ocb.level < 4
+    if (call.bid === 'P' && tavlade) return R('svararens pass', `Pass — överföringen var till spel: under 8 hp och under 10 med fördelning.`)
+    if (cb && cb.strain === M && cb.level === 4) {
+      return tavlade
+        ? R('störd överföring: till utgång', `4${SYMBOL[M]} — till utgång: partnern visade 3–4 korts stöd, och jag har 8+ hp eller 10+ med fördelning.`)
+        : rest[0].bid === 'P' ? R('störd överföring: till utgång', `4${SYMBOL[M]} — till utgång på egen färg: 6+ ${NAME[M]} och 8+ hp eller 10+ med fördelning (partnern passade = högst två kort).`) : null
+    }
+    if (call.bid === '3NT' && rest[0].bid === 'P') {
+      return R('störd överföring: till utgång', `3 sang — till utgång: exakt fem ${NAME[M]} och 8+ hp eller 10+ med fördelning (partnern passade = högst två kort i ${NAME[M]}).`)
+    }
+  }
+  return null
+}
+
 function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
+  const disturbed = interpretDisturbedTransfer(call, prior)
+  if (disturbed) return disturbed
   const contested = interpretOur1NTContested(call, prior)
   if (contested) return contested
   return deriveUndisturbed(call, prior)

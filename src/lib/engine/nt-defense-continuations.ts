@@ -18,6 +18,7 @@ import { advanceDONT, dontOvercall } from './dont'
 import { hcp, lengths } from './hand'
 import { naturalNTOvercall } from './lebensohl'
 import { systemsOnAfterOur1NT } from './nt-systems-on'
+import { stordOverforing } from './nt-transfer-stord'
 import { side } from './play'
 
 // ============================================================================
@@ -191,7 +192,9 @@ export function respondToOurNTInterference(hand: Hand, f: AuctionFacts): Resolve
 
   // Ägarens struktur 2026-09-18 (felrapport #77): systems on + stulet bud mot ALLA
   // inkliv i direkt sits — ersatte Lebensohl-stegen, DONT-svaret och värde-X-flödet.
-  return systemsOnAfterOur1NT(hand, f)
+  // Fjärde hand bjuder en färg efter svararens överföring (ägarens regler
+  // 2026-09-20, tävlingsbricka 5) — gäller även när 1NT självt var ostört.
+  return stordOverforing(hand, f) ?? systemsOnAfterOur1NT(hand, f)
 }
 
 /**

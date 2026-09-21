@@ -2404,6 +2404,27 @@ bud du ville bjuda betyder **dubbling "det budet"** (*stulet bud*).
 - **Återöppning** (1NT – 2x – pass – pass): öppnaren **passar**, utom med en
   **femkorts högfärg som går att bjuda på 2-läget**.
 
+**Fjärde hand kliver in efter överföringen** (ägarens regler 2026-09-20) —
+1NT–(pass/X/2x)–överföring–(**färgbud**), lika om 1NT självt var ostört:
+- **Öppnaren med 3–4 korts stöd** i den överförda färgen låter **poängen styra**,
+  räknade **med fördelning** och med **oskyddade honnörer i deras färg
+  borträknade** (en dam utan ess/kung bredvid sig −2, en knekt utan högre honnör
+  −1 — budgivningen har visat att de sitter illa): **under 16 → tävlar** med lägsta
+  bud i färgen (3M), **16+ → utgång (4M)**. Har deras bud redan tagit 3-läget
+  passar minimihanden. 3M är **ingen inbjudan** — det är plikten att tävla med fit.
+- **Öppnaren utan stöd** (högst två kort) **passar**; straffdubblingen med säkra
+  trumfstick i deras färg finns kvar.
+- **Svararen:** var överföringen **till spel** (målet var 2M) är svararen **tyst**.
+  Med **8+ hp eller 10+ med fördelning** tar svararen oss **till utgång** — 4M över
+  partnerns tävlingsbud. Har partnern **passat** (högst två kort): **4M med
+  sexkorts färg, 3NT med fem kort**.
+- **Öppnarens X är straff** — säkra trumfstick i deras färg, ingen konstgjord
+  betydelse.
+- **Dubblar fjärde hand själva överföringsbudet: systems on** — öppnaren
+  fullföljer som vanligt.
+- *Tävlingsbricka 5, 2026-09-20: 1NT–(2♣)–2♥–(3♣) med ♠AKT9 ♥K8 ♦KJ87 ♣Q63 →
+  18 med fördelning − 2 för ♣Q = 16 → **4♠** (förr pass, 3♣ fick spela).*
+
 > Ersatte 2026-09-18 både Lebensohl-kärnan (2NT-relä, direkt 3-läge = krav) och
 > värde-X:et mot DONT. Avgränsning: strukturen gäller inkliv i **direkt sits**;
 > blandar sig även fjärde hand i efter svararens bud tar de allmänna
@@ -2782,6 +2803,20 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-20 — Ägarens live-fynd (tävlingsbricka 5): störd överföring efter vårt
+  1NT (§7.5; ägarens regler, svar på direkta frågor).** 1NT–(2♣)–2♥–(3♣) och
+  öppnaren passade med ♠AKT9 och 16 hp — regeln saknades (även när 1NT var ostört:
+  1NT–P–2♥–(3♣)), och utan spaderstöd "höjde" reservlogiken överföringsbudet till
+  4♥. Nu: öppnaren med 3–4 korts stöd tävlar 3M under 16 / bjuder 4M med 16+
+  (poäng med fördelning, oskyddade honnörer i deras färg borträknade — nytt mått
+  `unguardedHonorsInTheirSuit`; ägarprincip 2026-09-21: "nedgradera aldrig" gäller
+  bara öppningsläget — i en budgivning värderas handen om, upp och ner); utan stöd pass
+  (straff-X med trumfstick kvar). Svararen: till spel → tyst; 8+ hp eller 10+ med
+  fördelning → 4M. Fjärde hands X av överföringsbudet = systems on. Kod
+  `nt-transfer-stord.ts` (ny, via raden *vårt-1nt-stört*), betydelselagret
+  `interpretDisturbedTransfer`, facit `nt-transfer-stord.test.ts`. Ägarbeslut
+  2026-09-21 på följdfrågorna: **öppnarens X = straff**; svararens **femkortshand
+  med utgångsvärden efter öppnarens pass → 3NT** (sexkorts → 4M).
 - **2026-09-20 — Ägarens live-fynd (tävlingsbricka 9): öppnarens tredje bud efter
   stört 1NT (§7.5).** 1NT–(2♣ DONT)–2♥–P–2♠–P–2NT–P och öppnaren (♠AT ♥AK98 ♦QT86
   ♣Q95) bjöd **4♥**. Regeln saknades: tabellraden för öppnarens tredje bud gäller
