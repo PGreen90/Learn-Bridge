@@ -10,19 +10,18 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Omvärdering i budgivningen: översyn av "nedgradera aldrig"
-Ägarbeslut 2026-09-21: golvet "TP får aldrig nedgradera" gäller BARA när handen
-värderas för att ÖPPNA. I en budgivning — särskilt i konkurrens — värderas handen
-om, upp OCH ner, efter vad som bjudits. Uppdrag: kartlägg var `pointsWithFloor`
-(`max(hp, mått)`) och liknande golv används utanför öppningsläget, visa ägaren
-fynden med exempelhänder, och rätta efter hens besked. Start: `docs/handvardering.md`
-(principrutan) + måttet `unguardedHonorsInTheirSuit`.
+### 🔵 NU — Ovanlig 2NT: fortsättningen (ägarbeslut 2026-09-22)
+Ägaren skriver sin struktur; Claude frågar om detaljerna och bygger med facit
+först — förebild Michaels-fortsättningen (`michaels-continuations.ts`, §7.2).
+**Allt förberett i `docs/ovanlig-2nt-plan.md`** (dagens beteende provat, bridgebum,
+frågorna, byggkartan, lärdomarna) — läs den först.
 
 **Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
 `docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
 punkt 4 (budseedad gissning av de dolda korten).
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** stört 1NT: öppnarens
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** Michaels-fortsättningen
+(09-22, §7.2: två högsta objudna · avslut/cue/spärr · 14/15–17/18+) · stört 1NT: öppnarens
 tredje bud + störd överföring (live-fynd 09-20, §7.5, `nt-transfer-stord.ts`) ·
 nattgranskningen versionsmedveten (motorstämpel + omprov, `docs/bevaka.md`) · claim-ombygget
 (frågan "[Väderstreck] gör anspråk på resten", `9389da9`+`9231d05`, `docs/claim-plan.md`) · systems on +
@@ -98,9 +97,12 @@ något känns fel i spel, eller när en ny fix ska läggas till. Senast
 S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
+1. **Omvärdering i budgivningen** (ägarprincip 2026-09-21: "nedgradera aldrig"
+   gäller BARA öppningsläget). Kartlagt — väntar på ägarens svar på två frågor
+   (`docs/handvardering.md` principrutan; mätningen i minnet).
+2. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
    ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
-2. **Bordens kandidater efter live-provet** — manuell claim · "ge upp" ·
+3. **Bordens kandidater efter live-provet** — manuell claim · "ge upp" ·
    per-kort-DD i genomgången (`docs/bord-plan.md` "Medvetet utanför v1").
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
