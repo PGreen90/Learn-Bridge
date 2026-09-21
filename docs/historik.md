@@ -3024,3 +3024,17 @@ reservlogiken läste transferbudet som naturlig hjärter. Lagat i `nt-systems-on
 fullföljd överföring (grannhål av samma sort, hittat vid kontrollen av fixen).
 Facit i `nt-systems-on.test.ts`; systemboken §7.5 + §9. Nattens förscreening hade
 flaggat brickan ("fel färg") — värt att läsa de larmen även när de oftast är brus.
+
+## 2026-09-20 — Ägarens live-fynd: störd överföring efter vårt 1NT (tävlingsbricka 5)
+
+1NT–(2♣)–2♥–(3♣) och öppnaren passade med ♠AKT9 och 16 hp; 3♣ fick spela.
+Regeln saknades — också när 1NT självt var ostört — och utan spaderstöd "höjde"
+reservlogiken överföringsbudet till 4♥ (samma felläsning som bricka 9 samma dag).
+Ägaren gav reglerna på direkta frågor: 3–4 korts stöd → poängen styr (med
+fördelning, oskyddade honnörer i deras färg borträknade): under 16 tävlar 3M, 16+
+4M; svararen tyst när överföringen var till spel, 8+ hp eller 10+ med fördelning →
+utgång; fjärde hands X av överföringsbudet = systems on. Kod `nt-transfer-stord.ts`
++ `interpretDisturbedTransfer` (betydelselagret) + måttet
+`unguardedHonorsInTheirSuit`; facit `nt-transfer-stord.test.ts`; systemboken §7.5
++ §9, `docs/handvardering.md`. Följdfrågorna besvarade 2026-09-21: öppnarens X =
+straff; svararens femkortshand med utgångsvärden efter öppnarens pass → 3NT.

@@ -177,6 +177,15 @@ const asCall = (seat: Seat, r: { call: string; rule: string; explanation: string
 
 function openerSecondTurn(hand: Hand, f: AuctionFacts, l: Lage): ResolvedCall | null {
   const { seat, history } = f
+  // Fjärde hand DUBBLAR överföringsbudet → systems on (ägarbeslut 2026-09-20):
+  // öppnaren fullföljer som ostört. (Fjärde hands FÄRGbud: nt-transfer-stord.ts.)
+  if (l.after.length === 1 && l.after[0].bid === 'X') {
+    const v = virtuelltSvar(l)
+    if (!v || v.rule !== 'Jacoby-transfer') return null
+    const res = openerRebidAfter1NTResponse(v, hand)
+    if (!res || (res.call !== 'P' && !legalCalls(history, seat).includes(res.call as Bid))) return null
+    return asCall(seat, { ...res, explanation: `${res.explanation} (systems on – deras X ändrar inget)` })
+  }
   if (l.after.length !== 1 || l.after[0].bid !== 'P') return null // fjärde hand blandade sig i → utanför
   const legal = legalCalls(history, seat)
   const p = hcp(hand)

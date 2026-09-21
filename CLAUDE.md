@@ -10,15 +10,21 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Tredje hand högt: ägarens live-prov + beslut om punkt 4
-Åter NU 2026-09-19 (claim-ombygget sköts emellan och är stängt). Regel A–D + riggen
-är LIVE (`037403b`; T0/T1 i `docs/speldiagnos.md`, §8.6; spec + varningar överst i
-`docs/bevaka.md`). **Kvar är bara ägarsteg:** live-prov, och beslutet om punkt 4
-fullt ut (budseedad gissning av de dolda korten — i dag bara utspelsinferens).
-Väljer ägaren annat ur 🟢 NÄST flyttas detta till "parallellt ägarsteg".
+### 🔵 NU — Omvärdering i budgivningen: översyn av "nedgradera aldrig"
+Ägarbeslut 2026-09-21: golvet "TP får aldrig nedgradera" gäller BARA när handen
+värderas för att ÖPPNA. I en budgivning — särskilt i konkurrens — värderas handen
+om, upp OCH ner, efter vad som bjudits. Uppdrag: kartlägg var `pointsWithFloor`
+(`max(hp, mått)`) och liknande golv används utanför öppningsläget, visa ägaren
+fynden med exempelhänder, och rätta efter hens besked. Start: `docs/handvardering.md`
+(principrutan) + måttet `unguardedHonorsInTheirSuit`.
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** nattgranskningen
-versionsmedveten (motorstämpel + omprov, systemkontrollen 09-20, `docs/bevaka.md`) · claim-ombygget
+**Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
+`docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
+punkt 4 (budseedad gissning av de dolda korten).
+
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** stört 1NT: öppnarens
+tredje bud + störd överföring (live-fynd 09-20, §7.5, `nt-transfer-stord.ts`) ·
+nattgranskningen versionsmedveten (motorstämpel + omprov, `docs/bevaka.md`) · claim-ombygget
 (frågan "[Väderstreck] gör anspråk på resten", `9389da9`+`9231d05`, `docs/claim-plan.md`) · systems on +
 stulet bud efter stört 1NT (#77, `90aeea1`, `docs/1nt-systems-on-plan.md`, §7.5) ·
 designgranskningen

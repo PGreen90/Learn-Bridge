@@ -219,6 +219,25 @@ export function wastedHonorsOppositeShortness(hand: Hand, partnerShortSuit: Suit
 }
 
 /**
+ * Oskyddade honnörer i MOTSTÅNDARNAS bjudna färg (ägardirektiv 2026-09-20, störd
+ * överföring efter vårt 1NT): en dam utan ess/kung bredvid sig, eller en knekt utan
+ * högre honnör, i en färg de bjudit tar sällan stick — honnörerna sitter bakom. Damen
+ * tappar sina 2, knekten sin 1. Ess och kung behålls, liksom en skyddad dam (AQ/KQ).
+ *
+ * Returnerar POÄNGEN att DRA IFRÅN (aldrig negativ). Rent mått — budlagret avgör var
+ * det används. Ägarprincip 2026-09-21: "nedgradera aldrig" gäller bara ÖPPNINGS-
+ * läget — i en budgivning (särskilt i konkurrens) värderas handen om, upp och ner.
+ */
+export function unguardedHonorsInTheirSuit(hand: Hand, theirSuit: Suit): number {
+  const ranks = ranksBySuit(hand)[theirSuit]
+  const has = (r: Rank) => ranks.includes(r)
+  let deduct = 0
+  if (has('Q') && !has('A') && !has('K')) deduct += 2
+  if (has('J') && !has('A') && !has('K') && !has('Q')) deduct += 1
+  return deduct
+}
+
+/**
  * Spelstick (eng. *playing tricks*): ungefär hur många stick handen tar på EGEN
  * hand som spelförare, driven av långa starka färger – inte bara honnörspoäng.
  * Svarar på frågan "hur nära utgång är jag själv?", vilket är måttet
