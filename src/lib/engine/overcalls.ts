@@ -106,10 +106,12 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
       return { call: `2${BID[their]}`, rule: 'Michaels', explanation: `5-5 i högfärgerna → 2${SYM[their]} (Michaels cue).` }
     }
   } else {
+    // Ägarbeslut 2026-09-22: Michaels visar ALLTID de två HÖGSTA objudna färgerna
+    // (över en högfärg = den andra högfärgen + RUTER); ovanlig 2NT tar de två
+    // lägsta. Högfärg + klöver visas alltså inte med ett tvåfärgsbud.
     const otherMajor: Suit = their === 'hearts' ? 'spades' : 'hearts'
-    const bestMinor: Suit = len.clubs >= len.diamonds ? 'clubs' : 'diamonds'
-    if (len[otherMajor] >= 5 && len[bestMinor] >= 5) {
-      return { call: `2${BID[their]}`, rule: 'Michaels', explanation: `5-5 ${SYM[otherMajor]} + minor → 2${SYM[their]} (Michaels cue).` }
+    if (len[otherMajor] >= 5 && len.diamonds >= 5) {
+      return { call: `2${BID[their]}`, rule: 'Michaels', explanation: `5-5 ${SYM[otherMajor]} + ${SYM.diamonds} (de två högsta objudna) → 2${SYM[their]} (Michaels cue).` }
     }
   }
 
@@ -306,34 +308,18 @@ export function advanceTwoSuiter(hand: Hand, partnerCall: string, theirSuit: Sui
 
   // Vilka färger LOVAR partnern konkret?
   let known: Suit[]
-  let unknownMinor = false
   if (partnerCall === '2NT') {
     known = unbid.slice(0, 2) // ovanlig 2NT = de två lägsta objudna (båda kända)
   } else if (isMinor(theirSuit)) {
     known = ['hearts', 'spades'] // Michaels över deras minor = båda högfärgerna
   } else {
-    known = [theirSuit === 'hearts' ? 'spades' : 'hearts'] // andra högfärgen …
-    unknownMinor = true // … + en OKÄND minor
+    // Ägarbeslut 2026-09-22: Michaels = de två HÖGSTA objudna → andra högfärgen + ruter (båda kända).
+    known = [theirSuit === 'hearts' ? 'spades' : 'hearts', 'diamonds']
   }
 
   const passContested: ResponseResult = { call: 'P', rule: 'pass', explanation: 'motståndarna är inne → pass (partnern kan bjuda igen och visa sin färg).' }
 
-  // Michaels över deras högfärg: känd högfärg + ospecificerad minor.
-  if (unknownMinor) {
-    const major = known[0]
-    if (len[major] >= 3) {
-      const call = cheapestBid(major, over)
-      return guarded({ call, rule: 'advance tvåfärg (preferens)', explanation: `3+ ${SYM[major]} → ${call[0]}${SYM[major]} (preferens till partnerns högfärg).` }, major)
-    }
-    // Ingen högfärgsfit. Contested + svag → passa (partnern rättar sedan sin minor).
-    if (contested && p < 8) return passContested
-    // Ostört: aldrig passa → 3♣ pass-eller-rätta (partnern passar/rättar till sin minor).
-    const pc = cheapestBid('clubs', over)
-    if (contested && Number(pc[0]) >= 5) return { call: 'P', rule: 'pass', explanation: `ingen högfärgsfit och pass-eller-rätta skulle hamna på 5-läget → pass (spelrum för pass i konkurrens).` }
-    return { call: pc, rule: 'advance tvåfärg (pass-eller-rätta minor)', explanation: `ingen högfärgsfit → ${pc[0]}♣ (pass-eller-rätta; partnern passar med ♣, rättar till ♦).` }
-  }
-
-  // Båda färgerna kända (Michaels över minor / ovanlig 2NT): bjud den vi är
+  // Båda färgerna är alltid kända (Michaels = två högsta objudna, 2NT = två lägsta): bjud den vi är
   // längst i (lika längd → högre rankad = högfärgen).
   let best = known[0]
   for (const s of known) {

@@ -74,11 +74,19 @@ const ALL_ENGINE_RULES: string[] = [
   // §5b beslut 13 (2026-09-07): öppnarens svar på svararens naturliga nya färg efter 2/1.
   '2/1: svar på ny färg', '2/1: placerar utgång',
   // Etapp 4 familj 1 (2026-09-08): inkliv och advance i tabellen (overcalls.ts, overcall-continuations.ts, competitive-slam.ts).
-  'fit-jump', 'advance tvåfärg (preferens)', 'advance tvåfärg (pass-eller-rätta minor)',
+  'fit-jump', 'advance tvåfärg (preferens)', 
   'tvåfärgsinkliv: flykt', 'tvåfärgsinkliv: bjuder vidare (stark)', 'stöd åt advancern',
+  // Michaels-fortsättningen, ostörd (michaels-continuations.ts, 2026-09-22).
+  'advance Michaels: cue (utgångsintresse)', 'advance Michaels: spärrhöjning', 'advance Michaels: 3NT', 'advance Michaels: egen färg',
+  'advance Michaels: utgång', 
+  'Michaels: passar avslutet', 'Michaels: inbjudan', 'Michaels: utgång', 'Michaels: svag efter cue',
+  'Michaels: stark efter cue', 'Michaels: accepterar inbjudan',
+  'Michaels: avböjer inbjudan', 'Michaels: utgång efter cue', 'Michaels: stannar efter cue',
+  // Störd överföring efter vårt 1NT (nt-transfer-stord.ts, 2026-09-20/21).
+  'störd överföring: tävlar', 'störd överföring: utgång', 'störd överföring: till utgång',
   'inklivaren svarar cue-höjning (utgång)', 'inklivaren svarar cue-höjning (minimum)', 'överklivaren tävlar (cue-höjning)',
   'inklivaren svarar fit-jump (utgång)', 'inklivaren svarar fit-jump (minimum)',
-  'tvåfärgsinkliv: passar pass-eller-rätta', 'tvåfärgsinkliv: rättar till ruter',
+  
   'advancern tävlar till fiten (lagen om totala stick)', 'advancern bjuder utgång med fit (konkurrens)',
   'cue-höjningens fortsättning', 'cue-höjningens fortsättning (limit stannar)',
   'konkurrens-slaminvit (RKC)', 'konkurrens-slam: placering', 'konkurrens-slam: stopp',

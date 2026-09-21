@@ -196,7 +196,90 @@ function interpretDisturbedTransfer(call: ResolvedCall, prior: ResolvedCall[]): 
   return null
 }
 
+/**
+ * MICHAELS-FORTSÄTTNINGEN, ostörd (bridgebum + ägarens besked 2026-09-22, §7.2).
+ * Speglar besluten i michaels-continuations.ts. Utan läsaren förklarades
+ * advancerns tvingade preferens som "höjning — du har stöd" och inklivarens
+ * inbjudan likadant.
+ */
+function interpretMichaelsContinuation(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 1 || open.cb.strain === 'NT' || SIDE[open.seat] === SIDE[call.seat]) return null
+  const oi = prior.findIndex((c) => c.seat === open.seat && parseBid(c.bid))
+  const ci = prior.findIndex((c, i) => i > oi && c.bid !== 'P')
+  if (ci < 0) return null
+  const cue = prior[ci]
+  if (SIDE[cue.seat] !== SIDE[call.seat] || cue.bid !== `2${open.cb.strain}`) return null
+  const tail = prior.slice(ci + 1)
+  if (tail.some((c) => SIDE[c.seat] !== SIDE[call.seat] && c.bid !== 'P')) return null
+  const ours = tail.filter((c) => SIDE[c.seat] === SIDE[call.seat])
+  const T = open.cb.strain
+  const overMinor = T === 'C' || T === 'D'
+  const M = overMinor ? null : T === 'H' ? 'S' : 'H'
+  const visad = (st: string) => (overMinor ? st === 'H' || st === 'S' : st === M)
+  const lag = !overMinor // Michaels över högfärg visar även RUTER (två högsta objudna)
+  const adv = PARTNER[cue.seat]
+  const cb = parseBid(call.bid)
+  const billigast = overMinor || T === 'H' ? 2 : 3
+  const b = (n: number, st: string) => n + SYMBOL[st]
+
+  // Advancerns första tur.
+  if (call.seat === adv && ours.length === 0) {
+    if (!cb) return null
+    if (cb.strain === T && cb.level === 3) return R('advance Michaels: cue (utgångsintresse)', b(3, T) + ' — cue: utgångsintresse med 8+ hp och 3+ stöd i ' + (overMinor ? 'en av partnerns högfärger' : 'partnerns ' + NAME[M!]) + '. Krav — partnern visar sin styrka (svag: billigaste färgen på lägsta nivå).')
+    const fjarde = ['C', 'D', 'H', 'S'].find((st) => st !== T && !(overMinor ? st === 'H' || st === 'S' : st === M || st === 'D'))
+    if (cb.strain === fjarde && cb.level <= 3) return R('advance Michaels: egen färg', b(cb.level, cb.strain) + ' — egen färg: sex kort eller fler i ' + NAME[cb.strain] + ' och högst ETT kort i båda partnerns färger. Naturligt, ej krav.')
+    if (call.bid === '3NT') return R('advance Michaels: 3NT', '3 sang — avslut: stark jämn hand utan stöd i partnerns högfärg' + (overMinor ? 'er' : '') + ', med stopp i deras ' + NAME[T] + '.')
+    if (lag && cb.strain === 'D' && cb.level === 3) return R('advance tvåfärg (preferens)', '3♦ — preferens till partnerns ruter: avslut. Budet är tvingat (partnern får inte passa Michaels) och kan ha 0 poäng.')
+    if (visad(cb.strain)) {
+      if (cb.level === billigast) return R('advance tvåfärg (preferens)', b(cb.level, cb.strain) + ' — preferens till partnerns ' + NAME[cb.strain] + ' på lägsta nivå: avslut. Budet är tvingat (partnern får inte passa Michaels) och kan ha 0 poäng; med utgångsintresse hade jag cue-bjudit.')
+      if (cb.level === billigast + 1 && cb.level < 4) return R('advance Michaels: spärrhöjning', b(cb.level, cb.strain) + ' — spärrhopp: fyrkorts stöd i partnerns ' + NAME[cb.strain] + ' och en svag hand (under 8 hp). Ingen inbjudan.')
+      if (cb.level === 4) return R('advance Michaels: utgång', b(4, cb.strain) + ' — utgång: stöd i partnerns ' + NAME[cb.strain] + ' och 12+ hp.')
+    }
+    return null
+  }
+  const acb = ours[0] ? parseBid(ours[0].bid) : null
+  if (!acb) return null
+  const advCue = acb.strain === T && acb.level === 3
+
+  // Inklivarens andra tur.
+  if (call.seat === cue.seat && ours.length === 1) {
+    if (advCue) {
+      if (!cb) return null
+      const svagt = overMinor ? call.bid === '3H' : call.bid === '3S'
+      if (svagt) return R('Michaels: svag efter cue', b(cb.level, cb.strain) + ' — svag Michaels (under 11 hp): billigaste färgen på lägsta nivå som svar på partnerns cue.' + (overMinor ? ' Säger inget om vilken högfärg som är bäst.' : ''))
+      return R('Michaels: stark efter cue', b(cb.level, cb.strain) + ' — stark Michaels (11+ hp) som svar på partnerns cue: utgångskrav' + (cb.level === 4 ? ', med egen bärande ' + NAME[cb.strain] : ' — partnern väljer utgång i sin fit') + '.')
+    }
+    if (lag && ours[0].bid === '3D' && call.bid === 'P') return R('Michaels: passar avslutet', 'Pass — partnerns preferens till ruter var tvingad och kan vara 0 poäng.')
+    if (!visad(acb.strain)) return null
+    const sparr = acb.level > billigast
+    if (call.bid === 'P') return R('Michaels: passar avslutet', sparr ? 'Pass — partnerns hopp var spärr; under 16 hp.' : 'Pass — partnerns preferens var tvingad och kan vara 0 poäng; under 15 hp.')
+    if (!cb || cb.strain !== acb.strain) return null
+    if (cb.level === 4) return R('Michaels: utgång', sparr ? b(4, cb.strain) + ' — utgång: 16+ hp mot partnerns fyrkorts stöd.' : b(4, cb.strain) + ' — utgång på egen hand: 18+ hp och 5-5 (partnerns preferens kan vara 0 poäng).')
+    if (cb.level === acb.level + 1) return R('Michaels: inbjudan', b(cb.level, cb.strain) + ' — inbjudan: 15–17 hp. Partnerns preferens var tvingad (kan vara 0 poäng); hon bjuder utgång med 8+ hp, passar annars.')
+    return null
+  }
+  // Advancerns andra tur.
+  if (call.seat === adv && ours.length === 2) {
+    const bcb = parseBid(ours[1].bid)
+    if (!bcb) return null
+    if (advCue && cb && visad(cb.strain)) {
+      return cb.level === 4
+        ? R('Michaels: utgång efter cue', b(4, cb.strain) + ' — utgång i min fit efter cuen.')
+        : R('Michaels: stannar efter cue', b(cb.level, cb.strain) + ' — till spel: partnern visade en svag Michaels, och min fit är ' + NAME[cb.strain] + '.')
+    }
+    if (advCue && call.bid === 'P') return R('Michaels: stannar efter cue', 'Pass — partnern visade en svag Michaels och budet ligger i min fit.')
+    if (!advCue && visad(acb.strain) && bcb.strain === acb.strain && bcb.level === acb.level + 1 && bcb.level < 4) {
+      if (call.bid === 'P') return R('Michaels: avböjer inbjudan', 'Pass — avböjer partnerns inbjudan: under 8 hp.')
+      if (cb && cb.strain === acb.strain && cb.level === 4) return R('Michaels: accepterar inbjudan', b(4, cb.strain) + ' — accepterar partnerns inbjudan (15–17 hp) med 8+ hp.')
+    }
+  }
+  return null
+}
+
 function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
+  const michaels = interpretMichaelsContinuation(call, prior)
+  if (michaels) return michaels
   const disturbed = interpretDisturbedTransfer(call, prior)
   if (disturbed) return disturbed
   const contested = interpretOur1NTContested(call, prior)
@@ -259,12 +342,13 @@ function opening(prior: ResolvedCall[]): { seat: Seat; cb: ParsedBid } | null {
 
 /**
  * Vilka färger en Michaels-cue visar, givet öppningsfärgen.
- *  - över 1♥ → spader (+ en minor)   - över 1♠ → hjärter (+ en minor)
+ *  - över 1♥ → spader + ruter   - över 1♠ → hjärter + ruter (ägarbeslut
+ *    2026-09-22: alltid de två HÖGSTA objudna; ovanlig 2NT = de två lägsta)
  *  - över 1♣/1♦ → BÅDA högfärgerna (♥ och ♠)
  */
 function michaelsSuits(openerStrain: string): string[] {
-  if (openerStrain === 'H') return ['S']
-  if (openerStrain === 'S') return ['H']
+  if (openerStrain === 'H') return ['S', 'D']
+  if (openerStrain === 'S') return ['H', 'D']
   if (openerStrain === 'C' || openerStrain === 'D') return ['H', 'S']
   return []
 }
@@ -330,8 +414,8 @@ function ownSideHasBid(seat: Seat, prior: ResolvedCall[]): boolean {
 /** Färgerna en Michaels-cue visar, i läsbar svensk form (för texten). */
 function michaelsPhrase(openerStrain: string): string {
   const suits = michaelsSuits(openerStrain)
-  if (suits.length === 2) return `båda högfärgerna (${NAME[suits[0]]} och ${NAME[suits[1]]})`
-  return `${NAME[suits[0]]} och en lågfärg`
+  const bada = suits[0] === 'H' && suits[1] === 'S'
+  return bada ? `båda högfärgerna (${NAME[suits[0]]} och ${NAME[suits[1]]})` : `${NAME[suits[0]]} och ${NAME[suits[1]]} (de två högsta objudna färgerna)`
 }
 
 /**

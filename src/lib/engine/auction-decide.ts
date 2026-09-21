@@ -152,6 +152,7 @@ import { defendTheirGambling3NT, defendTheirGambling3NTSeat, respondToGambling3N
 import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
+import { michaelsContinues } from './michaels-continuations'
 import { advancerActsInCompetition, advancerFitPass, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
 import { raiseWithFit } from './fit-raise'
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, dontDoublerShowsSuit, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
@@ -160,7 +161,7 @@ import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterAnswersPassOrCorrect, twoSuiterContinues } from './overcall-continuations'
+import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
@@ -1799,6 +1800,9 @@ const TABELL: Row[] = [
       }
       const t = twoSuiterAdvanceSeat(facts)
       if (t) {
+        // Ostörd Michaels: bridgebum-strukturen (avslut / cue / spärr / 3NT / 2NT-fråga).
+        const m = t.contested ? null : michaelsContinues(hand, facts)
+        if (m) return asCall(facts.seat, m)
         const r = advanceTwoSuiter(hand, t.partnerCall, t.theirSuit, t.contested, facts.lastContract!.bid)
         return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
       }
@@ -1839,13 +1843,13 @@ const TABELL: Row[] = [
     välj: ({ hand, facts }) => {
       const k =
         penaltyDoubleFirst(hand, facts) ??
+        michaelsContinues(hand, facts) ??
         overcallerAnswersCue(hand, facts) ??
         overcallerCompetesAfterCue(hand, facts) ??
         overcallerAnswersFitJump(hand, facts) ??
         overcallerRaisesAdvance(hand, facts) ??
         overcallerAnswersAdvance(hand, facts) ??
         overcallerCorrectsToOwnSuit(hand, facts) ??
-        twoSuiterAnswersPassOrCorrect(hand, facts) ??
         twoSuiterContinues(hand, facts) ??
         overcallerPrefersAdvancerSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts)
@@ -1871,6 +1875,7 @@ const TABELL: Row[] = [
     välj: ({ hand, facts }) => {
       const k =
         penaltyDoubleFirst(hand, facts) ??
+        michaelsContinues(hand, facts) ??
         advancerRebidsAfter1NTOvercall(hand, facts) ??
         advancerPrefersOvercallSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts) ??

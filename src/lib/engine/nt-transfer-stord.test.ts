@@ -32,6 +32,11 @@ describe('öppnaren efter överföring + fjärde hands färgbud', () => {
     // 18 med fördelning − 2 för ♣Q i deras färg = 16 → utgång.
     expect(oppnaren('S:AKT9 H:K8 D:KJ87 C:Q63', STORT)).toMatchObject({ bid: '4S', rule: 'störd överföring: utgång' })
   })
+  it('förklaringstexten namnger färgen (eget fel 2026-09-21: symboluppslaget gav "undefined")', () => {
+    const r = oppnaren('S:AKT9 H:K82 D:K87 C:Q63', STORT)
+    expect(r.explanation).toContain('partnerns ♠')
+    expect(r.explanation).not.toContain('undefined')
+  })
   it('minimum med fyrkorts stöd → tävlar 3♠', () => {
     expect(oppnaren('S:AKT9 H:K82 D:K87 C:Q63', STORT)).toMatchObject({ bid: '3S', rule: 'störd överföring: tävlar' })
   })
