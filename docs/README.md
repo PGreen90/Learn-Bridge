@@ -11,7 +11,7 @@
 
 | Fil | 🟢/📘/📦 | Öppna den när … |
 |---|---|---|
-| **budsystem.md** (352 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
+| **budsystem.md** (360 kB) | 📘 | du ska ändra eller slå upp en **budregel**. Systemboken i paragrafform. **Appens Budsystem-sida renderar den här filen live för ägaren** — varje regeländring MÅSTE skrivas in här. §9 = ändringslogg (visas inte på sidan). |
 | **status.md** (45 kB) | 📘 | du ska röra **budmotorns kod**. Sök rubriken "Budmotorns beslutsfunktion — tre steg i ett beslut" = arkitekturkontraktet: motorn är EN beslutsfunktion per stol (`decideCall` → beslutstabellen `auction-decide.ts`, betydelse→fakta→val); ny budlogik = en ny tabellrad. |
 | **systemrevisorn.md** (75 kB) | 🟢 | du jobbar i mätspåret. Riggen, hur man kör den, **alla mätningar #1–#25**, förskanningarna (etapp 6 + **etapp 7 missad lillslam**) och mönsteranalyserna bakom varje fix. |
 | **speldiagnos.md** | 🟢 | du jobbar i SPELDIAGNOSEN (byggd 2026-08-12): bottarna spelar hela givar, per-kort-DD-facit larmar, `/speldiagnos` klassar (systemfel/ärlig miss) och rapporterar till ägaren. Riggen, kommandona, principen "RÄTT — inte max stick", S-serien. |
@@ -32,6 +32,7 @@
 | **1nt-systems-on-plan.md** | 🟢 | **Systems on efter vårt 1NT i konkurrens (ägarens spec 2026-09-18, felrapport #77, BYGGD):** stulet bud (X = budet de tog) över 2♣/2♦, X = 8+ med fyrkorts högfärg över 2♥/2♠, överföring på 3-läget, jämna vägen, öppnarens svar och återöppning — varje rad är ägarens svar på en direkt fråga. Öppna den vid allt arbete med störda 1NT-auktioner. |
 | **motorbyte-plan.md** | 🟢 | **Motorbytet (ägarbeslut 2026-09-04, KLART & LIVE 2026-09-11; kvar bara etapp 6):** budmotorn gick från förskrivet manus + detektorkedja till EN beslutsfunktion per stol (betydelse → fakta → val). Diagnosen, målbilden, skyddsnätet (auktionsdiff, revisor, kikvakt), etapp 0–6 och grindbesluten. Öppna den FÖRST vid allt motorarbete. |
 | **beslut-b-plan.md** | 🟢 | **Masterplanen för Beslut B (ägarbeslut 2026-08-08):** konton → daglig 12-givarstävling → realtidsbord. Etapperna 0–4, besluten som är tagna (Supabase, lösenord, ordningen), beslutsgrindarna som återstår, GDPR/säkerhetsdetaljerna. Öppna den när Beslut B-arbetet fortsätter. |
+| **ovanlig-2nt-plan.md** | 🟢 | **Ovanlig 2NT — fortsättningen (NU sedan 2026-09-22, FÖRBEREDD, ej byggd):** vad motorn gör i dag (provat), bridgebums struktur, frågorna till ägaren, var det byggs (kartan från Michaels-bygget) och lärdomarna från Michaels-dagen. **Läs den först i nästa session.** |
 | **claim-plan.md** | 🟢 | **Claim-ombygget (ägarbeslut 2026-09-19):** frågan "[Väderstreck] gör anspråk på resten" i stället för direktklippet — flödet (svep → andetag → fråga → händerna en i taget), endast frågeläge, ett stick kvar claimas aldrig, samma ruta vid vänner-bordet; delclaim/visa varför/snabbläge = SENARE. Öppna den vid allt claim-arbete. |
 | **bord-plan.md** | 🟢 | **Realtidsborden "Spela med vänner" (Beslut B etapp 4, LIVE 2026-08-17/18):** ägarbesluten, serverdomare-arkitekturen (händelseloggen, hjärtslaget, den visuella vridningen), händelsetyperna, delleveranserna 4A–4D och medvetet-kvar-listan. Öppna den vid ALLT bordsarbete. |
 | **framtid-multiplayer-plattform.md** | 📘 | Beslut A (klart: Vercel + domän + PWA) vs **Beslut B** (konton/multiplayer/tävlingar). Teknikunderlaget bakom Beslut B; själva planen bor nu i `beslut-b-plan.md`. |
@@ -50,7 +51,7 @@
 
 | Fil | | Innehåll |
 |---|---|---|
-| **historik.md** (208 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
+| **historik.md** (212 kB) | 📦 | **Allt färdigt arbete**, nyast sist. Etapp 3/4/5/6-loggen, ÄRLIGA SLAMPORTAR-bygget, felrapporter #1–#39, UI-overhaulen, Steg A. Slå upp här när du undrar *varför* något byggdes som det gjordes. |
 | **arbetslista.md** | 📦 | Byggordningen FAS 0–12 (genomförd). Punkt 28 = bakgrunden till vår egen DDS-lösare. Kvar som arkiv; NU/NÄST styrs av CLAUDE.md. |
 | **tp-arbetslista.md** | 📦 | TP-stegen A–F. **Alla klara 2026-07-03** — filen innehåller gamla "⬜ Kvar att bygga"-rubriker som är överspelade av notisen högst upp. |
 | **off-book-syd.md** | 📦 | Hur det gamla manus-/detektorlagret svarade när ägaren bjöd utanför den förberäknade linjen. Arkiverad vid motorbytet (2026-09-11) — beteendet bor nu i beslutstabellens rad `partner-färg`. |

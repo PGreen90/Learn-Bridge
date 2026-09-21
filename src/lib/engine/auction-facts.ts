@@ -376,7 +376,15 @@ export function agreedTrump(history: ResolvedCall[], seat: Seat): Suit | null {
     )
   const mine = strainsOf(seat)
   const partners = strainsOf(PARTNER[seat])
-  const agreed = [...mine].filter((st) => partners.has(st))
+  // En färg MOTSTÅNDARNA bjöd först är aldrig vår trumf: våra bud i den är cue-bud
+  // (live-fynd 2026-09-22: (1♦)–2♦ Michaels–3♦ cue lästes som "ruter överenskommen",
+  // och essfrågans svar räknade nyckelkort med ruter som trumf). Ordningen avgör —
+  // bjöd VI färgen först och de cue:ar den senare står vår överenskommelse kvar.
+  const forstBjudenAvDem = (st: string): boolean => {
+    const forsta = history.find((c) => parseContractBid(c.bid)?.strain === st)
+    return !!forsta && forsta.seat !== seat && forsta.seat !== PARTNER[seat]
+  }
+  const agreed = [...mine].filter((st) => partners.has(st) && !forstBjudenAvDem(st))
   if (agreed.length === 0) return null
   for (let i = history.length - 1; i >= 0; i--) {
     const cb = parseContractBid(history[i].bid)

@@ -113,7 +113,9 @@ describe('raden *advance*: tvåfärgspreferens även när de höjt sin färg —
   it('ostört: aldrig pass (som förut) — 1♦–(2♦ Michaels)–P → högfärgspreferens', () => {
     const t = decideCallTraced(ensam('N', 'S:K95 H:J82 D:J43 C:T943', 'E'), [call('E', '1D'), call('S', '2D'), call('W', 'P')], 'N')
     expect(t.källa).toBe('tabell:advance')
-    expect(t.call).toMatchObject({ bid: '2S', rule: 'advance tvåfärg (preferens)' })
+    // 2026-09-22 (bridgebum + ägarbesked): lika längd (3-3) → den BILLIGARE färgen,
+    // hjärter — flyktvägen till spader finns kvar. Förr 2♠ ("lika → högfärgen").
+    expect(t.call).toMatchObject({ bid: '2H', rule: 'advance tvåfärg (preferens)' })
   })
 })
 
@@ -146,12 +148,11 @@ describe('raden *inkliv2*: inklivaren svarar fit-jumpen och Michaels-svaret på 
     expect(decideCallTraced(ensam('S', 'S:32 H:KQJ84 D:983 C:762', 'E'), hist, 'S').call).toMatchObject({ bid: '3H', rule: 'inklivaren svarar fit-jump (minimum)' })
     expect(decideCallTraced(ensam('S', 'S:32 H:KQJ84 D:A83 C:K62', 'E'), hist, 'S').call).toMatchObject({ bid: '4H', rule: 'inklivaren svarar fit-jump (utgång)' })
   })
-  it('frö 20272323: 1♠–(2♠ Michaels)–3♠–(4♣ p/c)–P: Nord (♣J9854 ♦KJ) passar — inte 5♣; med ruter rättas till 4♦', () => {
-    const hist = [call('W', '1S'), call('N', '2S'), call('E', '3S'), call('S', '4C'), call('W', 'P')]
-    const t = decideCallTraced(dealFromSeed(20272323), hist, 'N')
-    expect(t.källa).toBe('tabell:inkliv2')
-    expect(t.call).toMatchObject({ bid: 'P', rule: 'tvåfärgsinkliv: passar pass-eller-rätta' })
-    expect(decideCallTraced(ensam('N', 'S:K H:J5432 D:J9854 C:KJ', 'W'), hist, 'N').call).toMatchObject({ bid: '4D', rule: 'tvåfärgsinkliv: rättar till ruter' })
+  // Ägarbeslut 2026-09-22: Michaels = de två HÖGSTA objudna (över 1♠ = hjärter + RUTER).
+  // Pass-eller-rätta-svaret (frö 20272323) är rivet — hjärter + KLÖVER är inte längre Michaels.
+  it('frö 20272323: Nord (hjärter + klöver) över 1♠ bjuder INTE Michaels · hjärter + ruter gör det', () => {
+    expect(decideCallTraced(dealFromSeed(20272323), [call('W', '1S')], 'N').call.bid).not.toBe('2S')
+    expect(decideCallTraced(ensam('N', 'S:K H:J5432 D:KJ954 C:K2', 'W'), [call('W', '1S')], 'N').call).toMatchObject({ bid: '2S', rule: 'Michaels' })
   })
 })
 

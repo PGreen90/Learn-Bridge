@@ -3038,3 +3038,28 @@ utgång; fjärde hands X av överföringsbudet = systems on. Kod `nt-transfer-st
 `unguardedHonorsInTheirSuit`; facit `nt-transfer-stord.test.ts`; systemboken §7.5
 + §9, `docs/handvardering.md`. Följdfrågorna besvarade 2026-09-21: öppnarens X =
 straff; svararens femkortshand med utgångsvärden efter öppnarens pass → 3NT.
+
+## 2026-09-22 — Ägarens live-fynd: Michaels-fortsättningen (tävlingsbricka 4)
+
+(1♦)–P–P–2♦–P–2♠ och motorn ville bjuda 4♠ på 15 hp (även på 11 hp). Regeln
+saknades: reservlogiken "höjning på visad längd" läste advancerns tvingade
+preferens som ett fritt bud med värden — samma felläsning som gav 4♥ på
+överföringsbuden 09-20. Ägaren pekade på bridgebum och gav trösklarna; hela den
+ostörda strukturen byggd i `michaels-continuations.ts` (avslut som kan vara 0 · cue 8+
+med 3+ stöd · spärrhopp · 3NT · inklivaren 14/15–17/18+ · accept med 8+ · svaren på cuen), betydelselagret och
+regelregistret. Facit först (`michaels-continuations.test.ts`); ett äldre facit
+ändrat med flit (3-3 i högfärgerna → 2♥, den billigare). Systemboken §7.2 + §9.
+**Ny definition samma dag (ägarbeslut):** Michaels = ALLTID de två högsta objudna
+färgerna (över högfärg = andra högfärgen + ruter), ovanlig 2NT = de två lägsta;
+3♣ pass-eller-rätta, inklivarens svar på det och den nyss byggda 2NT-frågan revs.
+Högfärg + klöver kliver in naturligt.
+Ägarens sista besked: egen sexkortsfärg bara med högst ett kort i båda partnerns
+färger; slamutredningen är systems on (den vanliga konkurrens-slamraden). Provet av
+slamvägen hittade två fel till: min egen "partnern har placerat → pass" svalde
+essfrågan, och faktalagrets `agreedTrump` läste de två cue-buden i deras ruter som
+överenskommen trumf (nyckelkorten räknades med fel trumf) — båda rättade. Bifynd: "partnerns undefined" i
+gårdagens störd överföring-texter, rättat.
+
+**Mönstret att bevaka:** tre live-fynd på tre dagar (4♥ på transferbud ×2, 4♠ på
+Michaels-preferens) har samma rot — reservlogiken läser ett KONSTGJORT eller
+TVINGAT partnerbud som naturlig färg med värden och höjer till utgång.

@@ -528,39 +528,16 @@ function isJump(history: ResolvedCall[], c: ResolvedCall): boolean {
   return cb.level > minLevel
 }
 
-/**
- * Mitt MICHAELS över deras högfärg (andra högfärgen + en okänd lågfärg) fick
- * partnerns pass-eller-rätta i klöver (§7.2) och motståndarna passade: passa
- * med klöver som min lågfärg, rätta till ruter annars. Förr saknades regeln
- * (det gamla lagret "höjde" klövern, frö 20272323: 4♣ → 5♣ med ♣J9854).
- */
-export function twoSuiterAnswersPassOrCorrect(hand: Hand, f: AuctionFacts): Kunskap | null {
-  const open = theirOneSuitOpening(f)
-  if (!open || (open.suit !== 'hearts' && open.suit !== 'spades')) return null
-  const ourBids = f.ourContractBids
-  if (ourBids.length !== 2 || ourBids[0].seat !== f.seat || ourBids[1].seat !== f.partner) return null
-  if (ourBids[0].bid !== `2${open.strain}`) return null // mitt Michaels-cue
-  const pc = parseContractBid(ourBids[1].bid)!
-  if (pc.strain !== 'C') return null // partnerns pass-eller-rätta = klöver
-  if (f.history.slice(f.history.indexOf(ourBids[1]) + 1).some((c) => c.bid !== 'P')) return null
-  const len = lengths(hand)
-  if (len.clubs >= len.diamonds) {
-    return { call: 'P', rule: 'tvåfärgsinkliv: passar pass-eller-rätta', explanation: `Partnerns ${prettyBid(ourBids[1].bid)} var pass-eller-rätta; min lågfärg är klöver → pass.` }
-  }
-  const bid = cheapestBidIn(f.history, f.seat, 'D')
-  if (!bid) return null
-  return { call: bid, rule: 'tvåfärgsinkliv: rättar till ruter', explanation: `Partnerns ${prettyBid(ourBids[1].bid)} var pass-eller-rätta; min lågfärg är ruter → ${prettyBid(bid)}.` }
-}
-
 // ---- Det egna tvåfärgsinklivets fortsättning ------------------------------
 
 /**
  * Mitt TVÅFÄRGSINKLIV (Michaels-cue / ovanlig 2NT) är vår sidas enda
  * kontraktsbud över deras 1-läges färgöppning, med bara pass före det på vår
- * sida. Returnerar de färger inklivet VISADE (ur egen hand för den okända
- * minorn) och vad som hänt efter det.
+ * sida. Returnerar de färger inklivet VISADE (alltid kända sedan 2026-09-22:
+ * Michaels = de två högsta objudna, ovanlig 2NT = de två lägsta) och vad som
+ * hänt efter det.
  */
-export function ownTwoSuiterSeat(hand: Hand, f: AuctionFacts): { shown: Suit[]; after: ResolvedCall[] } | null {
+export function ownTwoSuiterSeat(_hand: Hand, f: AuctionFacts): { shown: Suit[]; after: ResolvedCall[] } | null {
   const open = theirOneSuitOpening(f)
   if (!open) return null
   const ourBids = f.ourContractBids
@@ -569,7 +546,6 @@ export function ownTwoSuiterSeat(hand: Hand, f: AuctionFacts): { shown: Suit[]; 
   if (!isTwoSuiterBid(mine.bid, open.strain)) return null
   const mineIdx = f.history.indexOf(mine)
   if (!f.history.slice(open.index + 1, mineIdx).every((c) => c.bid === 'P')) return null
-  const len = lengths(hand)
   const unbid = SUIT_STRAINS.filter((st) => st !== open.strain).map((st) => SUIT_OF_LETTER[st])
   let shown: Suit[]
   if (mine.bid === '2NT') {
@@ -578,7 +554,7 @@ export function ownTwoSuiterSeat(hand: Hand, f: AuctionFacts): { shown: Suit[]; 
     shown = ['hearts', 'spades'] // Michaels över minor = båda högfärgerna
   } else {
     const otherMajor: Suit = open.suit === 'hearts' ? 'spades' : 'hearts'
-    shown = [otherMajor, len.clubs >= len.diamonds ? 'clubs' : 'diamonds']
+    shown = [otherMajor, 'diamonds'] // Michaels = de två högsta objudna (ägarbeslut 2026-09-22)
   }
   return { shown, after: f.history.slice(mineIdx + 1) }
 }

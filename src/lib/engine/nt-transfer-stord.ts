@@ -34,7 +34,7 @@ import { hcp, lengths } from './hand'
 import { side } from './play'
 
 const NEXT: Record<Seat, Seat> = { N: 'E', E: 'S', S: 'W', W: 'N' }
-const sym = (s: Suit) => SWE_SYM[s]
+const sym = (s: Suit) => SWE_SYM[letterOfSuit(s)]
 
 /** Gränsen för öppnarens utgångsbud (ägarens regel): 16+ med fördelning. */
 export const STORD_OVERFORING_UTGANG = 16

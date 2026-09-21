@@ -85,7 +85,7 @@ function controlComplete(hand: Hand, trump: Suit): boolean {
  * TRIGGERN (steg 1): den KONTROLL-KOMPLETTA starka kaptenen frågar 4NT (1430 RKC)
  * i stället för att stanna i utgång, när en högfärgsfit hittats i konkurrens.
  */
-export function competitiveSlamTry(hand: Hand, f: AuctionFacts): Kunskap | null {
+export function competitiveSlamTry(hand: Hand, f: AuctionFacts, opts: { partnerShowedExtra?: boolean } = {}): Kunskap | null {
   const { history, seat } = f
   if (!f.opponentsHaveBid) return null // ingen konkurrens
   if (!legalCalls(history, seat).includes('4NT')) return null
@@ -98,7 +98,9 @@ export function competitiveSlamTry(hand: Hand, f: AuctionFacts): Kunskap | null 
   const honestExtra = sp >= 17 || (sp >= 16 && controlCount(hand) >= 3)
   if (!honestExtra) return null
   if (!controlComplete(hand, fit)) return null // steg 1: bara kontroll-komplett
-  if (!partnerShowedJump(history, seat)) return null // partnern måste ha visat extra (hopp)
+  // Partnern måste ha visat extra: ett hopp — eller ett konventionellt styrkebesked
+  // som anroparen känner till (Michaels-inklivarens starka svar på cuen, 2026-09-22).
+  if (!opts.partnerShowedExtra && !partnerShowedJump(history, seat)) return null
 
   return {
     call: '4NT',

@@ -2071,7 +2071,11 @@ lagom och partnern får bjuda vidare med extra).
 Två sätt att visa **5-5** (eller bättre) direkt:
 - **Michaels cue-bud** (cue av deras färg):
   - cue av deras **minor** (t.ex. (1♣)–2♣) = **båda högfärgerna**.
-  - cue av deras **högfärg** (t.ex. (1♠)–2♠) = **andra högfärgen + en minor**.
+  - cue av deras **högfärg** (t.ex. (1♠)–2♠) = **andra högfärgen + ruter**.
+  - **Principen (ägarbeslut 2026-09-22): Michaels visar ALLTID de två HÖGSTA
+    objudna färgerna, ovanlig 2NT de två LÄGSTA.** Båda färgerna är alltså alltid
+    kända. Följd: **högfärg + klöver** över deras högfärg (♠+♣ över 1♥, ♥+♣ över
+    1♠) har inget tvåfärgsbud — den handen kliver in naturligt i högfärgen.
 - **Ovanlig 2NT** (hopp till 2NT) = de **två lägsta objudna färgerna**.
   - **Golv 8 hp** (ägarbeslut 2026-09-17, felrapport #76): formen (5-5) ensam
     räcker inte. Med bara någon enstaka poäng tvingar tvåfärgsbudet partnern upp
@@ -2083,24 +2087,59 @@ Två sätt att visa **5-5** (eller bättre) direkt:
 eller **stark** (utgångsvilja), undvik mellanläget.
 
 **Advancer (ägarbeslut 2026-07-01):** ger **preferens till den av partnerns visade
-färger hon själv är längst i** (lika längd → högfärgen). I en **ostörd** budgivning
+färger hon själv är längst i** (lika längd → högfärgen; över en ostörd Michaels i
+lågfärg → den billigare, se tabellen nedan). I en **ostörd** budgivning
 får hon **aldrig passa** – hon måste ta ut tvåfärgshanden. Är motståndarna inne
-finns **spelrum för pass**, och partnern kan bjuda igen för att visa sin
-**ospecificerade** färg (t.ex. Michaels över deras högfärg, där ena färgen är en
-okänd minor – utan högfärgsfit bjuder advancern då ostört 3♣ pass-eller-rätta).
+finns **spelrum för pass**. Utan högfärgsfit över en Michaels i högfärg ger hon
+preferens till partnerns **ruter** (3♦) — 3♣ pass-eller-rätta finns inte längre,
+färgerna är kända.
+
+**Michaels-fortsättningen, ostörd** (bridgebum.com/michaels + ägarens besked
+2026-09-22; gäller så länge motståndarna är tysta efter Michaels-budet):
+
+| Advancerns bud | Betydelse |
+|---|---|
+| **Preferens på lägsta nivå** (2♥/2♠; 3♥ över deras 1♠) | **Avslut.** Tvingat — kan ha **0 poäng**. Lika längd i partnerns högfärger → den **billigare** (hjärter): flyktvägen till spader finns kvar. |
+| **Cue i deras färg** (3♣/3♦; 3♥ över deras 1♥) | **Utgångsintresse, krav:** 8+ hp och 3+ stöd i en av partnerns högfärger. |
+| **Hopp 3♥/3♠** | **Spärr:** fyrkorts stöd och under 8 hp (lagen om totala stick). Ingen inbjudan. |
+| **3NT** | Avslut: 15+ hp, inget trekorts stöd, stopp i deras färg. |
+| **Egen färg** (den fjärde färgen, lägsta nivå) | **Bara med högst ETT kort i BÅDA partnerns färger** och en egen sexkortsfärg (ägarbeslut 2026-09-22). Naturligt, ej krav — inklivaren passar. Med två kort i någon av partnerns färger ges vanlig preferens. |
+| **3♦** (över Michaels i högfärg, utan högfärgsstöd) | **Preferens till partnerns ruter — avslut**, tvingat, kan ha 0 poäng. Inklivaren passar. |
+| **4♥ över deras 1♠** | Stöd och 12+ hp (preferensen ligger redan på 3-läget, cuen ryms inte). |
+
+**Inklivaren efter avslutet** — partnern kan ha 0 poäng, så det är inklivarens egen
+hand som bär (ägarens trösklar, "låga, med lite chansning"): **t.o.m. 14 hp pass ·
+15–17 inbjudan (3M) · 18+ 4M.** Ligger preferensen redan på 3-läget finns ingen
+inbjudan: 18+ bjuder utgång, annars pass. Advancern **accepterar inbjudan med
+8+ hp.** *Tävlingsbricka 4, 2026-09-22: (1♦)–P–P–2♦–P–2♠ med ♠K9532 ♥AQJ63 ♦Q4 ♣K
+(15 hp) → **3♠**, inte 4♠.*
+
+**Efter advancerns cue** visar inklivaren styrkan: **t.o.m. 10 hp → billigaste
+färgen på lägsta nivå** (3♥ — säger inget om vilken högfärg som är bäst);
+**11+ = utgångskrav: 3♠**, eller **4M direkt med sexkorts högfärg**. Advancern
+placerar sedan kontraktet i sin fit: mot det svaga svaret utgång med 12+ hp,
+annars stopp (pass / 3♠); mot det starka svaret alltid utgång. *(Inklivarens bud
+med 11+ är Claudes förslag på ägarens begäran — bridgebum säger bara "alla andra
+bud är utgångskrav".)*
+
+**Efter spärrhoppet:** 16+ hp → 4M, annars pass.
+
+**Slamutredningen är systems on** (ägarbeslut 2026-09-22) — ingen Michaels-special.
+Den vanliga konkurrens-slamraden (§6.10) gäller: en stark kapten med
+första-rondskontroll i alla sidofärger och känd högfärgsfit frågar **4NT (1430)**.
+Inklivarens **starka svar på cuen** räknas som "partnern har visat extra" (det
+krav som annars uppfylls av ett hopp). Trumfen är högfärgen — **cue-bud i
+motståndarnas färg sätter aldrig trumf**.
+
+*Öppet:* ovanlig 2NT har ingen egen motsvarande struktur än.
 
 **Preferensen gäller även när motståndarna höjt sin egen färg** (motorbytet
 etapp 4 familj 1, 2026-09-08; frö 20262021): efter **1♠–(2NT)–3♠** ger
 advancern preferens **4♣/4♦** — budet hamnar bara ett läge högre. Förr
 passade motorn där (3♣ var olagligt och ingen regel fanns). Spelrummet för
 pass i konkurrens är uttalat: på **4-läget** krävs 4+ kort i färgen ELLER 8+ hp,
-på **5-läget** 4+ kort OCH 8+ hp; pass-eller-rätta-3♣ bjuds inte på 5-läget.
+på **5-läget** 4+ kort OCH 8+ hp.
 *Frö 20270138: 1♥–(2NT)–4♥ med ♣Q2 ♦9 och 10 hp → pass, inte 5♣.*
-
-**Michaels-bjudaren svarar pass-eller-rätta** (samma ändring; regeln saknades —
-frö 20272323: 1♠–(2♠)–3♠–4♣–P–**5♣** med ♣J9854): efter partnerns
-klöver-pass-eller-rätta **passar** inklivaren med klöver som sin lågfärg och
-**rättar till ruter** (billigast) annars.
 
 **Tvåfärgsinklivarens egen fortsättning** (samma ändring; frö 20261162):
 - **Dubblat utan preferens** (felrapport #7): budet är konstgjort och får aldrig
@@ -2803,6 +2842,34 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-22 — Ägarens live-fynd (tävlingsbricka 4): Michaels-fortsättningen
+  (§7.2; bridgebum + ägarens besked).** (1♦)–P–P–2♦–P–2♠ och motorn ville bjuda
+  **4♠** på 15 hp — till och med på 11 hp. Regeln saknades: reservlogiken
+  ("höjning på visad längd") läste advancerns TVINGADE preferens som ett fritt bud
+  med värden. Advancern kunde dessutom aldrig visa värden (alltid lägsta
+  preferens), och buden förklarades som "höjning — du har stöd". Nu hela den
+  ostörda strukturen: avslut (kan ha 0; lika längd → den billigare färgen) · cue
+  = 8+ hp med 3+ stöd · spärrhopp 3M · 3NT · inklivaren efter avslutet t.o.m. 14
+  pass / 15–17 inbjudan / 18+ utgång · advancern accepterar med 8+ · svaren på
+  cuen. Kod `michaels-continuations.ts` (ny; raderna *advance*, *inkliv2*,
+  *advance2*), betydelselagret `interpretMichaelsContinuation`, regelregistret, facit
+  `michaels-continuations.test.ts`. Öppet: slamutredningen vid 16+ hos advancern.
+  **Ny definition samma dag (ägarbeslut):** Michaels visar ALLTID de två högsta
+  objudna färgerna (över en högfärg = andra högfärgen + RUTER), ovanlig 2NT de
+  två lägsta — båda färgerna kända. **Rivet:** 3♣ pass-eller-rätta, inklivarens
+  svar på det (frö 20272323) och den nyss byggda 2NT-frågan; högfärg + klöver
+  kliver in naturligt. Inklivsvillkoret (`overcalls.ts`), advancerns kända färger
+  (`advanceTwoSuiter`), inklivarens visade färger och betydelselagrets
+  `michaelsSuits` följer definitionen. Avdraget för döda honnörer (#61) gäller
+  oförändrat bara Michaels högfärg.
+  **Egen sexkortsfärg** bara med högst ett kort i båda partnerns färger. **Slam =
+  systems on:** den vanliga konkurrens-slamraden, med inklivarens starka cue-svar
+  som visad extra. **Faktalagret rättat:** `agreedTrump` räknade Michaels-cuen +
+  advancerns cue (båda i DERAS ruter) som "ruter överenskommen", så essfrågans svar
+  räknade nyckelkort med fel trumf (♠K räknades inte) — en färg motståndarna bjöd
+  först är nu aldrig vår trumf.
+  **Bifynd:** förklaringstexten i gårdagens `nt-transfer-stord.ts` skrev "partnerns
+  undefined" (fel symboluppslag) — rättat och låst med test.
 - **2026-09-20 — Ägarens live-fynd (tävlingsbricka 5): störd överföring efter vårt
   1NT (§7.5; ägarens regler, svar på direkta frågor).** 1NT–(2♣)–2♥–(3♣) och
   öppnaren passade med ♠AKT9 och 16 hp — regeln saknades (även när 1NT var ostört:

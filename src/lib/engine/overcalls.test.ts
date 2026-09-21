@@ -185,11 +185,14 @@ describe('advanceTwoSuiter – svar på Michaels / ovanlig 2NT (§7.2, ägarbesl
   it('Michaels 2♠: hjärterfit → 3♥ (preferens)', () => {
     expect(a('S:32 H:K432 D:432 C:5432', '2S', 'spades').call).toBe('3H')
   })
-  it('Michaels 2♠: ingen högfärgsfit, ostört → 3♣ (pass-eller-rätta minor)', () => {
-    expect(a('S:432 H:32 D:K432 C:5432', '2S', 'spades').call).toBe('3C')
+  // Ägarbeslut 2026-09-22: Michaels = de två HÖGSTA objudna (över 1♠ = hjärter + RUTER),
+  // båda kända — 3♣ pass-eller-rätta finns inte längre.
+  it('Michaels 2♠: ingen hjärterfit → preferens till partnerns ruter (3♦), även i konkurrens med ruterstöd', () => {
+    expect(a('S:432 H:32 D:K432 C:5432', '2S', 'spades').call).toBe('3D')
+    expect(a('S:432 H:32 D:K432 C:5432', '2S', 'spades', true).call).toBe('3D')
   })
-  it('Michaels 2♠: ingen fit + contested + svag → pass (partnern rättar sin minor)', () => {
-    expect(a('S:432 H:32 D:K432 C:5432', '2S', 'spades', true).call).toBe('P')
+  it('Michaels 2♠: ingen fit i någon av färgerna + contested + svag → pass', () => {
+    expect(a('S:5432 H:32 D:32 C:K5432', '2S', 'spades', true).call).toBe('P')
   })
 
   // Ägarregel: aldrig passa i en ostörd budgivning – även en usel hand tar ut.
