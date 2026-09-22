@@ -153,6 +153,7 @@ import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { michaelsContinues } from './michaels-continuations'
+import { unusual2NTContinues } from './unusual-2nt-continuations'
 import { advancerActsInCompetition, advancerFitPass, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
 import { raiseWithFit } from './fit-raise'
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, dontDoublerShowsSuit, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
@@ -1801,7 +1802,7 @@ const TABELL: Row[] = [
       const t = twoSuiterAdvanceSeat(facts)
       if (t) {
         // Ostörd Michaels: bridgebum-strukturen (avslut / cue / spärr / 3NT / 2NT-fråga).
-        const m = t.contested ? null : michaelsContinues(hand, facts)
+        const m = t.contested ? null : (michaelsContinues(hand, facts) ?? unusual2NTContinues(hand, facts))
         if (m) return asCall(facts.seat, m)
         const r = advanceTwoSuiter(hand, t.partnerCall, t.theirSuit, t.contested, facts.lastContract!.bid)
         return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
@@ -1844,6 +1845,7 @@ const TABELL: Row[] = [
       const k =
         penaltyDoubleFirst(hand, facts) ??
         michaelsContinues(hand, facts) ??
+        unusual2NTContinues(hand, facts) ??
         overcallerAnswersCue(hand, facts) ??
         overcallerCompetesAfterCue(hand, facts) ??
         overcallerAnswersFitJump(hand, facts) ??
@@ -1876,6 +1878,7 @@ const TABELL: Row[] = [
       const k =
         penaltyDoubleFirst(hand, facts) ??
         michaelsContinues(hand, facts) ??
+        unusual2NTContinues(hand, facts) ??
         advancerRebidsAfter1NTOvercall(hand, facts) ??
         advancerPrefersOvercallSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts) ??

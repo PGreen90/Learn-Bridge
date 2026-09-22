@@ -10,11 +10,10 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Ovanlig 2NT: fortsättningen (ägarbeslut 2026-09-22)
-Ägaren skriver sin struktur; Claude frågar om detaljerna och bygger med facit
-först — förebild Michaels-fortsättningen (`michaels-continuations.ts`, §7.2).
-**Allt förberett i `docs/ovanlig-2nt-plan.md`** (dagens beteende provat, bridgebum,
-frågorna, byggkartan, lärdomarna) — läs den först.
+### 🔵 NU — Ovanlig 2NT: fortsättningen (BYGGD 2026-09-21, ej deployad)
+Michaels-mönstret anpassat + ägarens fyra besked (`unusual-2nt-continuations.ts`,
+§7.2, `docs/ovanlig-2nt-plan.md`). Kvar: ägarens PCD + live-prov; sedan väljer
+ägaren nästa NU. Svararen över deras 2NT (4M på självbärande färg) byggd 09-22.
 
 **Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
 `docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om

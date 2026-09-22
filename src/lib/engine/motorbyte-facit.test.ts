@@ -1340,9 +1340,9 @@ describe('etapp 4 familj 9 — betydelselagret på störda auktioner', () => {
 
   // (2NT över deras inkliv av VÅRT 1NT är sedan 2026-09-18 en NATURLIG inbjudan med
   // stopp — Lebensohl-reläet är rivet, ägarens struktur efter felrapport #77.)
-  it('2NT i konkurrens: Jordan (inbjudan+alert), ovanlig 2NT (ej krav+alert), 2NT över stört 1NT (naturlig inbjudan)', () => {
+  it('2NT i konkurrens: Jordan (inbjudan+alert), ovanlig 2NT (krav+alert — partnern får inte passa ostört, 2026-09-21), 2NT över stört 1NT (naturlig inbjudan)', () => {
     expect(m([call('E', '1S'), call('S', 'X'), call('W', '2NT')], 2)).toMatchObject({ rule: 'Jordan 2NT', forcing: 'inbjudan', alert: true })
-    expect(m([call('S', 'P'), call('W', 'P'), call('N', 'P'), call('E', '1S'), call('S', '2NT')], 4)).toMatchObject({ rule: 'ovanlig 2NT', forcing: 'ej-krav', alert: true })
+    expect(m([call('S', 'P'), call('W', 'P'), call('N', 'P'), call('E', '1S'), call('S', '2NT')], 4)).toMatchObject({ rule: 'ovanlig 2NT', forcing: 'krav-1-rond', alert: true })
     expect(m([call('E', '1NT'), call('S', '2S'), call('W', '2NT')], 2)).toMatchObject({ rule: '2NT inbjudan', forcing: 'inbjudan', alert: false })
   })
 

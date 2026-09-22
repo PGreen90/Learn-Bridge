@@ -277,9 +277,92 @@ function interpretMichaelsContinuation(call: ResolvedCall, prior: ResolvedCall[]
   return null
 }
 
+/**
+ * OVANLIG 2NT — FORTSÄTTNINGEN, ostörd (ägarbeslut 2026-09-21/22, §7.2). Speglar
+ * besluten i unusual-2nt-continuations.ts. Utan läsaren förklarades advancerns
+ * tvingade preferens som "ny färg — naturligt, minst 4 kort".
+ */
+function interpretUnusual2NTContinuation(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 1 || open.cb.strain === 'NT' || SIDE[open.seat] === SIDE[call.seat]) return null
+  const oi = prior.findIndex((c) => c.seat === open.seat && parseBid(c.bid))
+  const ci = prior.findIndex((c, i) => i > oi && c.bid !== 'P')
+  if (ci < 0) return null
+  const nt = prior[ci]
+  if (SIDE[nt.seat] !== SIDE[call.seat] || nt.bid !== '2NT') return null
+  const tail = prior.slice(ci + 1)
+  if (tail.some((c) => SIDE[c.seat] !== SIDE[call.seat] && c.bid !== 'P')) return null
+  const ours = tail.filter((c) => SIDE[c.seat] === SIDE[call.seat])
+  const T = open.cb.strain
+  const objudna = ['C', 'D', 'H', 'S'].filter((st) => st !== T)
+  const visade = objudna.slice(0, 2)
+  const fjarde = objudna[2]
+  const hjarter = visade[1] === 'H'
+  const lag = (st: string) => st === 'C' || st === 'D'
+  const adv = PARTNER[nt.seat]
+  const cb = parseBid(call.bid)
+  const b = (n: number, st: string) => n + SYMBOL[st]
+
+  // Advancerns första tur.
+  if (call.seat === adv && ours.length === 0) {
+    if (!cb) return null
+    if (cb.strain === T && cb.level === 3) {
+      return hjarter
+        ? R('advance ovanlig 2NT: cue (utgångsintresse)', b(3, T) + ' — cue: utgångsintresse med 8+ hp och 3+ stöd i partnerns hjärter. Krav — partnern visar sin styrka (svag: billigaste färgen på lägsta nivå; 11+ hp: 4♥).')
+        : R('advance ovanlig 2NT: cue (utgångsintresse)', b(3, T) + ' — cue: utgångsintresse med 11+ hp och 3+ stöd i en av partnerns lågfärger. Krav — partnern visar sin styrka (svag: 4♣; 11+ hp: 4♦ eller 5 i en sexkortsfärg).')
+    }
+    if (cb.strain === fjarde && cb.level === 3) return R('advance ovanlig 2NT: egen färg', b(3, cb.strain) + ' — egen färg: sex kort eller fler i ' + NAME[cb.strain] + ' och högst ETT kort i båda partnerns färger. Naturligt, ej krav.')
+    if (call.bid === '3NT') return R('advance ovanlig 2NT: 3NT', '3 sang — avslut: 15+ hp utan trekorts stöd i partnerns färger, med stopp i deras ' + NAME[T] + '.')
+    if (!visade.includes(cb.strain)) return null
+    if (cb.level === 3) return R('advance tvåfärg (preferens)', b(3, cb.strain) + ' — preferens till partnerns ' + NAME[cb.strain] + ' på lägsta nivå: avslut. Budet är tvingat (partnern får inte passa 2 sang) och kan ha 0 poäng; med utgångsintresse hade jag cue-bjudit.')
+    if (lag(cb.strain) && cb.level === 4) return R('advance ovanlig 2NT: spärrhöjning', b(4, cb.strain) + ' — spärrhopp: fyrkorts stöd i partnerns ' + NAME[cb.strain] + ' och en svag hand (under 8 hp). Ingen inbjudan.')
+    if (lag(cb.strain) && cb.level === 5) return R('advance ovanlig 2NT: utgång', b(5, cb.strain) + ' — utgång: stöd i partnerns ' + NAME[cb.strain] + ' och 12+ hp.')
+    return null
+  }
+  const acb = ours[0] ? parseBid(ours[0].bid) : null
+  if (!acb) return null
+  const advCue = acb.strain === T && acb.level === 3
+
+  // Inklivarens andra tur.
+  if (call.seat === nt.seat && ours.length === 1) {
+    if (advCue) {
+      if (!cb) return null
+      const svagt = hjarter ? cb.level === 3 : call.bid === '4C'
+      if (svagt) return R('efter ovanlig 2NT: svag efter cue', b(cb.level, cb.strain) + ' — svag tvåfärgshand (under 11 hp): billigaste färgen på lägsta nivå som svar på partnerns cue. Säger inget om vilken färg som är bäst.')
+      return R('efter ovanlig 2NT: stark efter cue', b(cb.level, cb.strain) + ' — stark tvåfärgshand (11+ hp) som svar på partnerns cue: utgångskrav' + (call.bid === '4D' ? ' — partnern väljer utgång i sin fit' : cb.level === 5 ? ', med egen sexkorts ' + NAME[cb.strain] : '') + '.')
+    }
+    if (!visade.includes(acb.strain)) return null
+    const hj = acb.strain === 'H'
+    const sparr = !hj && acb.level === 4
+    if (call.bid === 'P') return R('efter ovanlig 2NT: passar avslutet', sparr ? 'Pass — partnerns hopp var spärr; under 16 hp.' : 'Pass — partnerns preferens var tvingad och kan vara 0 poäng; under ' + (hj ? '18' : '17') + ' hp.')
+    if (!cb || cb.strain !== acb.strain) return null
+    if (cb.level === (hj ? 4 : 5)) return R('efter ovanlig 2NT: utgång', sparr ? b(5, cb.strain) + ' — utgång: 16+ hp mot partnerns fyrkorts stöd.' : b(cb.level, cb.strain) + ' — utgång på egen hand: ' + (hj ? '18' : '20') + '+ hp och 5-5 (partnerns preferens kan vara 0 poäng).')
+    if (!hj && acb.level === 3 && cb.level === 4) return R('efter ovanlig 2NT: inbjudan', b(4, cb.strain) + ' — inbjudan: 17–19 hp. Partnerns preferens var tvingad (kan vara 0 poäng); hon bjuder utgång med 8+ hp, passar annars.')
+    return null
+  }
+  // Advancerns andra tur.
+  if (call.seat === adv && ours.length === 2) {
+    const bcb = parseBid(ours[1].bid)
+    if (!bcb) return null
+    if (advCue && cb && visade.includes(cb.strain)) {
+      return cb.level === (cb.strain === 'H' ? 4 : 5)
+        ? R('efter ovanlig 2NT: utgång efter cue', b(cb.level, cb.strain) + ' — utgång i min fit efter cuen.')
+        : R('efter ovanlig 2NT: stannar efter cue', b(cb.level, cb.strain) + ' — till spel: partnern visade en svag tvåfärgshand, och min fit är ' + NAME[cb.strain] + '.')
+    }
+    if (advCue && call.bid === 'P') return R('efter ovanlig 2NT: stannar efter cue', 'Pass — budet ligger i min fit.')
+    if (!advCue && lag(acb.strain) && visade.includes(acb.strain) && acb.level === 3 && bcb.strain === acb.strain && bcb.level === 4) {
+      if (call.bid === 'P') return R('efter ovanlig 2NT: avböjer inbjudan', 'Pass — avböjer partnerns inbjudan: under 8 hp.')
+      if (cb && cb.strain === acb.strain && cb.level === 5) return R('efter ovanlig 2NT: accepterar inbjudan', b(5, cb.strain) + ' — accepterar partnerns inbjudan (17–19 hp) med 8+ hp.')
+    }
+  }
+  return null
+}
+
 function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
   const michaels = interpretMichaelsContinuation(call, prior)
   if (michaels) return michaels
+  const ovanlig = interpretUnusual2NTContinuation(call, prior)
+  if (ovanlig) return ovanlig
   const disturbed = interpretDisturbedTransfer(call, prior)
   if (disturbed) return disturbed
   const contested = interpretOur1NTContested(call, prior)
@@ -1336,7 +1419,7 @@ function interpretCompetitive2NT(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
       return R('2NT-inkliv (15–18)', `2 sang — naturligt 2NT-inkliv över deras ${NAME[open.cb.strain]}: 15–18 hp, balanserad med stopp. Ej krav.`)
     }
     if (open.cb.level === 1) {
-      return R('ovanlig 2NT', `2 sang (ovanlig sang) — tvåfärgshand: de två lägsta objudna färgerna (minst 5–5), svag eller stark. Ej krav.`)
+      return R('ovanlig 2NT', `2 sang (ovanlig sang) — tvåfärgshand: de två lägsta objudna färgerna (minst 5–5), 8+ hp, svag eller stark. Krav — partnern får inte passa ostört, hon väljer en av färgerna.`)
     }
   }
   return null
