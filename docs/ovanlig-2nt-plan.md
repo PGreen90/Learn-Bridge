@@ -1,6 +1,17 @@
-# Ovanlig 2NT — fortsättningen (NU sedan 2026-09-22)
+# Ovanlig 2NT — fortsättningen (BYGGD 2026-09-21)
 
-> **Läget:** förberett, INTE byggt. Ägaren skriver sin struktur i nästa session —
+> **BYGGD 2026-09-21** — ägarens besked: *"ta så mycket från Michaels som går att
+> anpassa hit"* + fyra svar om lågfärgsfiten (inklivaren 16 / 17–19 / 20+ · cuen
+> över 1♥/1♠ kräver 11+ · 3NT som Michaels · spärr 4m + direkt 5m som Michaels).
+> Strukturen står i **systemboken §7.2**; koden i `unusual-2nt-continuations.ts`,
+> facit i `unusual-2nt-continuations.test.ts`. Claudes egna anpassningar (ägaren
+> kan ändra): svaren på lågfärgscuen (4♣ svag / 4♦ stark), 15+ för 5m mot svagt
+> svar, fyrkorts stöd för direkt 5m över en högfärg. **Slam:** poängbekräftad 4NT på 4-läget, även i
+> lågfärg (ägarbesked samma dag). **Svararen över deras 2NT** (frö 20296021, ♠AKQJ865 passade): självbärande högfärg + 12+ → 4M
+> (ägarbeslut 09-22). **Ägarens oro 09-22:** motorn "reagerar svagt" — passar utan regel när ingen rad träffar; se sessionsrapporten.
+> Resten av filen är förarbetet, kvar som bakgrund.
+
+> **Läget före bygget:** förberett, INTE byggt. Ägaren skriver sin struktur i nästa session —
 > **fråga om detaljerna, föreslå ingen egen färdig struktur** (ägardirektiv
 > 2026-09-18). Förebilden är Michaels-fortsättningen som byggdes 2026-09-22
 > (`michaels-continuations.ts`, systemboken §7.2) — samma hål finns här.

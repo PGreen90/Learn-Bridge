@@ -13,7 +13,7 @@ import type { ResolvedCall } from '../bidding'
 import { parseContractBid, PARTNER, STRAINS, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { startingPoints } from './evaluation'
-import { lengths } from './hand'
+import { hcp, lengths } from './hand'
 import { side } from './play'
 import { firstRoundControl, keycards } from './slam'
 import type { Kunskap } from './overcall-continuations'
@@ -112,6 +112,26 @@ export function competitiveSlamTry(hand: Hand, f: AuctionFacts, opts: { partnerS
 }
 
 /**
+ * POÄNGBEKRÄFTAD SLAM PÅ 4-LÄGET (ägarbeslut 2026-09-21: "om poängen är
+ * bekräftade för slam och vi är på 4-nivån — bjud 4NT, systems on"). Kaptens-
+ * regeln: egen hp + partnerns VISADE minimum ≥ 33 → 4NT (1430 RKC) i den kända
+ * trumfen — högfärg som lågfärg. Anroparen känner partnerns minimum och trumfen
+ * ur sin egen struktur (t.ex. ovanlig 2NT: inbjudan 4m = 17+). Samma regelnamn
+ * som konkurrens-slaminvitet, så svaret och placeringen är de vanliga.
+ */
+export function confirmedSlamAsk(hand: Hand, f: AuctionFacts, partnerMin: number, trump: Suit): Kunskap | null {
+  const last = f.lastContract ? parseContractBid(f.lastContract.bid) : null
+  if (!last || last.level !== 4 || last.strain === 'NT') return null // bara på 4-läget, under 4NT
+  if (hcp(hand) + partnerMin < 33) return null
+  if (!legalCalls(f.history, f.seat).includes('4NT')) return null
+  return {
+    call: '4NT',
+    rule: 'konkurrens-slaminvit (RKC)',
+    explanation: `Partnern har visat minst ${partnerMin} hp och vi har fit i ${SWE_SYM[letterOfSuit(trump)]}: tillsammans 33+ → 4NT (1430 RKC), systems on.`,
+  }
+}
+
+/**
  * PLACERINGEN: jag frågade 4NT, partnern har svarat (5-steg). Räkna nyckelkort
  * (egen hand + svarets härledda antal) och placera lillslam bara när summan är
  * ENTYDIG och ≥4; annars stanna i 5 i trumf. Storslam bjuds aldrig här.
@@ -140,6 +160,13 @@ export function competitiveRKCPlace(hand: Hand, f: AuctionFacts): Kunskap | null
     return {
       call: slam, rule: 'konkurrens-slam: placering',
       explanation: `essvaret ${prettyBid(answer.bid)} + min hand = ${own + possible[0]} av 5 nyckelkort (högst ett saknas) → ${prettyBid(slam)} (lillslam).`,
+    }
+  }
+  // Lågfärgstrumf: svaret kan ha gått FÖRBI 5 i trumf — då finns bara slammen kvar.
+  if (!legal.includes(stop) && legal.includes(slam)) {
+    return {
+      call: slam, rule: 'konkurrens-slam: placering',
+      explanation: `essvaret ${prettyBid(answer.bid)} ligger över ${prettyBid(stop)} → ${prettyBid(slam)} (poängen för slam var bekräftade).`,
     }
   }
   if (legal.includes(stop)) {

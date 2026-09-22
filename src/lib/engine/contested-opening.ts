@@ -385,6 +385,12 @@ export function jordanSignoffToAnswer(f: AuctionFacts): { major: Major } | null 
  * öppningen är ovanlig 2NT, 2 i öppningsfärgen är Michaels — aldrig ur
  * motståndarens regeletikett (den finns inte vid bordet).
  */
+/** Antal topphonnörer (A/K/Q) i en färg. */
+function topHonorCount(hand: Hand, suit: Suit): number {
+  const ranks = hand.filter((c) => c.suit === suit).map((c) => c.rank)
+  return (['A', 'K', 'Q'] as const).filter((r) => ranks.includes(r)).length
+}
+
 export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: string): ResponseResult {
   const p = hcp(hand)
   const len = lengths(hand)
@@ -410,6 +416,17 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
   // 20263327: ♠K9874 + 17 stödpoäng passade 2NT). Bara efter 1♥/1♠.
   const twoSuiter = theirCall === '2NT' || ovSuit === openerSuit
   if (twoSuiter && isMajorOpening) {
+    // EGEN SJÄLVBÄRANDE HÖGFÄRG (ägarbeslut 2026-09-22, frö 20296021: 1♥–(2NT) med
+    // ♠AKQJ865 ♥Q4 ♦3 ♣K82 passade — grenen hade bara höjning/pass). "När partnern
+    // öppnat och jag har så stark hand bjuder jag 4♠": öppningsstyrka (12+ hp) och en
+    // färg som spelar utan stöd (6+ med AKQ, eller 7+ med två topphonnörer) → 4M
+    // till spel. Bara över ovanlig 2NT — över Michaels är den andra högfärgen deras.
+    const otherM: Suit = openerSuit === 'hearts' ? 'spades' : 'hearts'
+    const topp = topHonorCount(hand, otherM)
+    const sjalvbarande = (len[otherM] >= 6 && topp === 3) || (len[otherM] >= 7 && topp >= 2)
+    if (theirCall === '2NT' && sjalvbarande && p >= 12) {
+      return { call: `4${LETTER[otherM]}` as Bid, rule: 'utgång på självbärande färg', explanation: `Självbärande ${len[otherM]}-korts ${SUIT_SYM[otherM]} och öppningsstyrka mot deras tvåfärgsinkliv → 4${SUIT_SYM[otherM]} (till spel).` }
+    }
     const support = len[openerSuit]
     const sp = pointsWithFloor(hand, openerSuit, 'support')
     // Honnörer i motståndarnas VISADE färg är döda på vår sida (felrapport #61:

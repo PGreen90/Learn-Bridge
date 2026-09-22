@@ -2087,8 +2087,8 @@ Två sätt att visa **5-5** (eller bättre) direkt:
 eller **stark** (utgångsvilja), undvik mellanläget.
 
 **Advancer (ägarbeslut 2026-07-01):** ger **preferens till den av partnerns visade
-färger hon själv är längst i** (lika längd → högfärgen; över en ostörd Michaels i
-lågfärg → den billigare, se tabellen nedan). I en **ostörd** budgivning
+färger hon själv är längst i** (lika längd → högfärgen; i en **ostörd** budgivning
+efter Michaels eller ovanlig 2NT → den billigare, se tabellerna nedan). I en **ostörd** budgivning
 får hon **aldrig passa** – hon måste ta ut tvåfärgshanden. Är motståndarna inne
 finns **spelrum för pass**. Utan högfärgsfit över en Michaels i högfärg ger hon
 preferens till partnerns **ruter** (3♦) — 3♣ pass-eller-rätta finns inte längre,
@@ -2131,7 +2131,59 @@ Inklivarens **starka svar på cuen** räknas som "partnern har visat extra" (det
 krav som annars uppfylls av ett hopp). Trumfen är högfärgen — **cue-bud i
 motståndarnas färg sätter aldrig trumf**.
 
-*Öppet:* ovanlig 2NT har ingen egen motsvarande struktur än.
+**Fortsättningen efter ovanlig 2NT, ostörd** (ägarbeslut 2026-09-21: *"ta så mycket
+från Michaels som går att anpassa"* + fyra besked om lågfärgsfiten; gäller så länge
+motståndarna är tysta efter 2NT). 2NT visar de två lägsta objudna: över 1♥/1♠ =
+**♣+♦** · över 1♦ = **♣+♥** · över 1♣ = **♦+♥**. **2NT är krav** — partnern får
+aldrig passa ostört.
+
+| Advancerns bud | Betydelse |
+|---|---|
+| **Preferens på lägsta nivå** (3♣/3♦/3♥) | **Avslut.** Tvingat — kan ha **0 poäng**. Med 3+ hjärter väljs hjärter (som Michaels-högfärgen); annars den längre färgen, lika längd → den **billigare**. |
+| **Cue i deras färg — hjärterfit** (3♣ över 1♣, 3♦ över 1♦) | **Utgångsintresse, krav:** 8+ hp och 3+ hjärter (som Michaels). |
+| **Cue i deras färg — lågfärgsfit** (3♥ över 1♥, 3♠ över 1♠) | **Utgångsintresse, krav:** **11+ hp** och 3+ stöd i en lågfärg. Golvet är högre än vid Michaels eftersom cuen ligger **över** preferensnivån och tvingar till 4-läget (ägarbesked). |
+| **Hopp 4♣/4♦** | **Spärr:** fyrkorts stöd och under 8 hp. Ingen inbjudan. |
+| **5♣/5♦ direkt** | Stöd och **12+ hp**. Över deras högfärg krävs **fyrkorts** stöd (med trekorts stöd frågar cuen först); över deras lågfärg, utan hjärterstöd, räcker trekorts stöd — där finns ingen lågfärgscue. |
+| **3NT** | Avslut: 15+ hp, inget trekorts stöd i någon av partnerns färger, stopp i deras färg. |
+| **Egen färg** (den fjärde färgen, 3-läget) | **Bara med högst ETT kort i BÅDA partnerns färger** och en egen sexkortsfärg. Naturligt, ej krav — inklivaren passar. |
+
+**Inklivaren efter avslutet** — partnern kan ha 0 poäng:
+- **Lågfärg** (utgången kräver elva stick — ägarbesked "ett snäpp högre"):
+  **t.o.m. 16 hp pass · 17–19 inbjudan 4m · 20+ 5m.** Advancern **accepterar
+  inbjudan med 8+ hp.**
+- **Hjärter** (preferensen ligger redan på 3-läget, ingen inbjudan ryms): **18+ → 4♥,
+  annars pass** — samma som Michaels över deras 1♠.
+
+**Efter advancerns cue** visar inklivaren styrkan: **t.o.m. 10 hp → billigaste
+färgen på lägsta nivå** (3♦/3♥ vid hjärterfit · **4♣** över deras högfärg);
+**11+ = utgångskrav:** **4♥** vid hjärterfit · över deras högfärg **4♦** (partnern
+väljer utgång i sin fit), eller **5m direkt med sexkorts lågfärg**. Advancern
+placerar sedan kontraktet i sin fit: mot det svaga svaret **4♥ med 12+ hp** /
+**5m med 15+ hp**, annars stopp; mot det starka svaret alltid utgång. *(Svaren på
+lågfärgscuen — 4♣ svag / 4♦ stark — och 15-gränsen är Claudes anpassning av
+Michaels-mönstret; ägaren kan ändra dem.)*
+
+**Efter spärrhoppet 4m:** 16+ hp → 5m, annars pass.
+
+**Slam = systems on** (ägarbeslut 2026-09-21): **är poängen bekräftade för slam och
+vi ligger på 4-läget → 4NT (1430 RKC)** — även med lågfärg som trumf. "Bekräftade"
+är kaptensregeln: egen hp + partnerns **visade minimum** ≥ 33. Exempel: inklivaren
+inbjuder 4♣ (visar 17+) och advancern har 16+ → 4NT; inklivarens starka svar på
+cuen visar 11+. Svaren är de vanliga stegen med den överenskomna färgen som trumf.
+Ligger svaret **över 5 i trumf** (klöver/ruter) finns bara slammen kvar — poängen
+var bekräftade, så den bjuds. Vid hjärterfit gäller dessutom den vanliga
+konkurrens-slamraden (§6.10).
+
+Blandar sig motståndarna i efter 2NT gäller de äldre reglerna (preferens ett läge
+högre, flykt, den starka handen bjuder vidare).
+
+**Svararen över DERAS ovanliga 2NT** (ägarbeslut 2026-09-22, frö 20296021 —
+1♥–(2NT) med ♠AKQJ865 ♥Q4 ♦3 ♣K82 passade): utöver höjningen av partnerns
+högfärg (§7.8 e) bjuder svararen **4 i den andra högfärgen till spel** med
+**öppningsstyrka (12+ hp) och en självbärande färg** — sex kort med AKQ, eller sju
+med minst två av A/K/Q. *"När partnern har öppnat och jag har så stark hand
+bjuder jag 4♠."* Bara över ovanlig 2NT (över Michaels är den andra högfärgen
+deras).
 
 **Preferensen gäller även när motståndarna höjt sin egen färg** (motorbytet
 etapp 4 familj 1, 2026-09-08; frö 20262021): efter **1♠–(2NT)–3♠** ger
@@ -2842,6 +2894,26 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-21 — Ovanlig 2NT: fortsättningen (§7.2; ägarbeslut — "ta så mycket
+  från Michaels som går att anpassa" + fyra besked om lågfärgsfiten).** Förr kunde
+  advancern aldrig visa värden (alltid lägsta preferens, 0 hp som 17 hp), valde den
+  HÖGRE färgen vid lika längd, introducerade aldrig egen färg — och inklivaren
+  **passade utan regel** efter den tvingade preferensen, även med 22 hp och 5-5.
+  Nu hela Michaels-mönstret: preferens = avslut (lika → den billigare) · cue =
+  utgångsintresse (8+ med hjärterfit; **11+** över deras högfärg, där cuen ligger
+  över preferensnivån) · spärrhopp 4m · 5m direkt med 12+ · 3NT 15+ utan stöd ·
+  egen sexkortsfärg bara med högst ett kort i båda. Inklivaren i lågfärg **16 /
+  17–19 / 20+** (ägarbesked, elva stick), i hjärter 18+ → 4♥. Budförklaringarna
+  rättade: **2NT står som krav**, 3♣/3♦/3♥ som **tvingad preferens** (förr "ny
+  färg — naturligt, minst 4 kort"). Ny modul `unusual-2nt-continuations.ts`
+  (krokar i raderna *advance*, *inkliv2*, *advance2*), läsare i betydelselagret,
+  facit `unusual-2nt-continuations.test.ts`. Genomlyst: 8 000 budade givar
+  (`DUMP_RANGE='20290001-20298000'` i `auktionsdump.probe.test.ts`), de ostörda
+  2NT-auktionerna lästa. **Slam (ägarbesked samma dag):** poängen bekräftade (33+
+  mot partnerns visade minimum) och vi på 4-läget → 4NT, systems on, även i lågfärg
+  (`confirmedSlamAsk` i `competitive-slam.ts`; placeringen bjuder slammen när svaret
+  gått förbi 5 i trumf). **Svararen över deras 2NT (ägarbeslut 09-22):** självbärande
+  högfärg + 12+ → 4M (`contested-opening.ts`, regel "utgång på självbärande färg").
 - **2026-09-22 — Ägarens live-fynd (tävlingsbricka 4): Michaels-fortsättningen
   (§7.2; bridgebum + ägarens besked).** (1♦)–P–P–2♦–P–2♠ och motorn ville bjuda
   **4♠** på 15 hp — till och med på 11 hp. Regeln saknades: reservlogiken
