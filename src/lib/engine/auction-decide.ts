@@ -153,6 +153,7 @@ import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { michaelsContinues } from './michaels-continuations'
+import { advanceJumpOvercall, jumpOvercallAdvanceSeat } from './advance-jump-overcall'
 import { unusual2NTContinues } from './unusual-2nt-continuations'
 import { advancerActsInCompetition, advancerFitPass, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
 import { raiseWithFit } from './fit-raise'
@@ -1789,11 +1790,15 @@ const TABELL: Row[] = [
   //    av partnerns visade färger, över det senaste kontraktsbudet (de kan ha
   //    höjt sin egen färg); i konkurrens finns spelrum för pass;
   //  · 1NT-inkliv, svararen passade → sangsystemet (§4.3 systems on).
-  // Hoppinkliv och partnerns svar på deras vidarebud lämnas åt det gamla lagret.
+  //  · svagt hoppinkliv (sunt förnuft-lagret hål 1, 2026-09-22) → `advanceJumpOvercall`:
+  //    3NT 15+ med stopp · ny färg 15+ (ej krav) · null → spärrhöjningen i
+  //    raden *partner-färg* (3+ stöd) — förr pass utan regel utan stöd.
   {
     id: 'advance',
-    läge: (f) => advanceSeat(f) !== null || twoSuiterAdvanceSeat(f) !== null || our1NTOvercall(f)?.overcaller === f.partner,
+    läge: (f) => advanceSeat(f) !== null || twoSuiterAdvanceSeat(f) !== null || our1NTOvercall(f)?.overcaller === f.partner || jumpOvercallAdvanceSeat(f) !== null,
     välj: ({ hand, facts }) => {
+      const hopp = advanceJumpOvercall(hand, facts)
+      if (hopp) return asCall(facts.seat, hopp)
       const a = advanceSeat(facts)
       if (a) {
         const r = advanceOvercall(hand, a.partnerSuit, a.theirSuit, a.level)

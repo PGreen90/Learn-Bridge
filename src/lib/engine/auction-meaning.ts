@@ -358,11 +358,39 @@ function interpretUnusual2NTContinuation(call: ResolvedCall, prior: ResolvedCall
   return null
 }
 
+/**
+ * ADVANCERN ÖVER PARTNERNS SVAGA HOPPINKLIV (sunt förnuft hål 1, ägarbeslut
+ * 2026-09-22, §7.1). Speglar advance-jump-overcall.ts: 3NT = 15+ med stopp;
+ * ny färg = 5+ kort och 15+, ej krav.
+ */
+function interpretJumpOvercallAdvance(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 1 || open.cb.strain === 'NT' || SIDE[open.seat] === SIDE[call.seat]) return null
+  const oi = prior.findIndex((c) => c.seat === open.seat && parseBid(c.bid))
+  if (prior.length !== oi + 3) return null
+  const ov = prior[oi + 1]
+  if (ov.seat !== PARTNER[call.seat] || prior[oi + 2].bid !== 'P') return null
+  const ocb = parseBid(ov.bid)
+  if (!ocb || ocb.strain === 'NT' || ocb.strain === open.cb.strain) return null
+  const order = ['C', 'D', 'H', 'S']
+  const cheapest = order.indexOf(ocb.strain) > order.indexOf(open.cb.strain) ? 1 : 2
+  if (ocb.level !== cheapest + 1) return null
+  const cb = parseBid(call.bid)
+  if (!cb) return null
+  if (call.bid === '3NT') return R('advance hoppinkliv: 3NT', '3 sang — avslut: 15+ hp och stopp i deras ' + NAME[open.cb.strain] + ' mot partnerns svaga hoppinkliv (6+ kort, 6–10 hp).')
+  if (cb.strain !== ocb.strain && cb.strain !== open.cb.strain && cb.strain !== 'NT' && cb.level <= 3) {
+    return R('advance hoppinkliv: ny färg', cb.level + SYMBOL[cb.strain] + ' — ny färg mot partnerns svaga hoppinkliv: 5+ kort och 15+ hp, utan stopp i deras färg. Naturligt, ej krav — partnern höjer med 3+ stöd.')
+  }
+  return null
+}
+
 function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
   const michaels = interpretMichaelsContinuation(call, prior)
   if (michaels) return michaels
   const ovanlig = interpretUnusual2NTContinuation(call, prior)
   if (ovanlig) return ovanlig
+  const hopp = interpretJumpOvercallAdvance(call, prior)
+  if (hopp) return hopp
   const disturbed = interpretDisturbedTransfer(call, prior)
   if (disturbed) return disturbed
   const contested = interpretOur1NTContested(call, prior)

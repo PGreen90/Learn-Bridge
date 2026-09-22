@@ -1870,7 +1870,14 @@ cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
 - **Enkelt inkliv** (1-/2-läget): bra **5+ färg**, ~8–16 hp. Färgkvalitet går
   före poäng.
 - **Hoppinkliv** (t.ex. (1♦)–2♠): **svagt**, 6-korts färg, spärr (som en svag
-  tvåa).
+  tvåa). **Advancern över hoppinklivet** (ägarbeslut 2026-09-22, sunt förnuft-
+  lagret hål 1): **3NT med 15+ hp och stopp** i deras färg (går före höjningen —
+  nio stick på partnerns sexkortsfärg); **ny färg = 5+ kort och 15+ hp, ej krav**
+  (inklivaren höjer med 3+ stöd, annars pass/rättelse till egen färg); **med stöd
+  men utan utgångsintresse: pass** — höjningen behövs inte; bjuder motståndarna
+  3x tävlar advancern **4m** (tävlande, ej invit). *Förr passade advancern utan
+  regel oavsett styrka när stödet saknades, och höjde alltid spärrande med stöd,
+  även på 18 hp med stopp.*
 - **1NT-inkliv:** 15–18 hp, bra stopp i deras färg – **kör samma system som över
   en 1NT-öppning** (Stayman, transfers m.m., §4.3), fast med 15–18 hp. Advancerns
   fortsättning efter Stayman är också densamma: **Smolen** (utgångskrav 5-4 → hopp
@@ -2894,6 +2901,16 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-22 — Sunt förnuft-lagret, hål 1: advancern över partnerns svaga
+  hoppinkliv (§7.1; ägarbeslut).** Bakgrund: ägarens oro att motorn "reagerar
+  svagt" — passar utan regel när ingen tabellrad träffar. Mätriggen
+  `sunt-fornuft.probe.test.ts` (`SUNT=1`, 8 000 givar) klassar varje sådant pass;
+  inga kravbud passas, men advancern över (1♠)–3♣ passade på 16–18 hp utan stöd
+  och höjde till 4♣ på 18 hp med stopp. Nu: 3NT 15+ med stopp · ny färg 5+/15+
+  (ej krav) · med stöd utan utgångsintresse pass (tävlar 4m först när de bjuder
+  3x) · annars pass med motivering. Modul
+  `advance-jump-overcall.ts` (raden *advance*), läsare i betydelselagret, facit
+  `advance-jump-overcall.test.ts`. Plan + byggordning: `docs/sunt-fornuft-plan.md`.
 - **2026-09-21 — Ovanlig 2NT: fortsättningen (§7.2; ägarbeslut — "ta så mycket
   från Michaels som går att anpassa" + fyra besked om lågfärgsfiten).** Förr kunde
   advancern aldrig visa värden (alltid lägsta preferens, 0 hp som 17 hp), valde den
