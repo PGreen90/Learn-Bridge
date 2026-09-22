@@ -1,4 +1,4 @@
-# Ovanlig 2NT — fortsättningen (BYGGD 2026-09-21)
+# Ovanlig 2NT — fortsättningen (KLAR & LIVE 2026-09-22, mergepunkt 275d9fe)
 
 > **BYGGD 2026-09-21** — ägarens besked: *"ta så mycket från Michaels som går att
 > anpassa hit"* + fyra svar om lågfärgsfiten (inklivaren 16 / 17–19 / 20+ · cuen

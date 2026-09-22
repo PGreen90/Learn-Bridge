@@ -10,10 +10,11 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Ovanlig 2NT: fortsättningen (BYGGD 2026-09-21, ej deployad)
+### 🔵 NU — Ovanlig 2NT: fortsättningen (KLAR & LIVE 2026-09-22, `275d9fe`)
 Michaels-mönstret anpassat + ägarens fyra besked (`unusual-2nt-continuations.ts`,
-§7.2, `docs/ovanlig-2nt-plan.md`). Kvar: ägarens PCD + live-prov; sedan väljer
-ägaren nästa NU. Svararen över deras 2NT (4M på självbärande färg) byggd 09-22.
+§7.2, `docs/ovanlig-2nt-plan.md`). Även slam på 4-läget + svararens 4M över deras 2NT.
+Kvar: live-prov. **Ägarens oro 09-22: motorn passar utan regel när ingen rad
+träffar — kandidat till nästa NU: ett sista lager med sunt förnuft.**
 
 **Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
 `docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
