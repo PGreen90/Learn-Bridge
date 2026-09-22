@@ -82,8 +82,8 @@ describe('raden *advance*: advancern svarar på partnerns 2-lägesinkliv med §7
     expect(adv('S:KQ54 H:A32 D:KJ43 C:J2').call).toMatchObject({ bid: '2NT', rule: 'NT-svar' })
     expect(adv('S:K954 H:A32 D:JT43 C:92').call.bid).toBe('P')
   })
-  it('hoppinkliv lämnas åt det gamla lagret (spärrhöjningen)', () => {
-    expect(decideCallTraced(ensam('N', 'S:K95 H:A2 D:J43 C:T9432', 'E'), [call('E', '1C'), call('S', '2S'), call('W', 'P')], 'N').källa).not.toBe('tabell:advance')
+  it('hoppinkliv: advance-jump-overcall.ts i raden advance (sunt förnuft hål 1, 2026-09-22) — 3-korts stöd utan utgångsintresse → pass med fit', () => {
+    expect(decideCallTraced(ensam('N', 'S:K95 H:A2 D:J43 C:T9432', 'E'), [call('E', '1C'), call('S', '2S'), call('W', 'P')], 'N').call).toMatchObject({ bid: 'P', rule: 'pass med fit' })
   })
   it('1-lägesinkliv: advancerns nya färg på billigaste nivån (1♠ över 1♥), källa tabell:advance', () => {
     const t = decideCallTraced(ensam('N', 'S:KQ543 H:2 D:432 C:K432', 'E'), [call('E', '1D'), call('S', '1H'), call('W', 'P')], 'N')

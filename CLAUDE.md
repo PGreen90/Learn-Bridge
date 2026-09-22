@@ -10,11 +10,12 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Ovanlig 2NT: fortsättningen (KLAR & LIVE 2026-09-22, `275d9fe`)
-Michaels-mönstret anpassat + ägarens fyra besked (`unusual-2nt-continuations.ts`,
-§7.2, `docs/ovanlig-2nt-plan.md`). Även slam på 4-läget + svararens 4M över deras 2NT.
-Kvar: live-prov. **Ägarens oro 09-22: motorn passar utan regel när ingen rad
-träffar — kandidat till nästa NU: ett sista lager med sunt förnuft.**
+### 🔵 NU — Sunt förnuft-lagret: motorn ska inte passa blint (ägarbeslut 2026-09-22)
+Ägarens oro: motorn "reagerar svagt" — pass utan regel när ingen rad träffar. Riggen
+`sunt-fornuft.probe.test.ts` (SUNT=1) byggd; hål 1 = advancern över svagt hoppinkliv.
+**Plan, mätning, byggordning + frågorna: `docs/sunt-fornuft-plan.md`** — läs först.
+Nyss LIVE (09-22, `275d9fe`): ovanlig 2NT-fortsättningen (§7.2) + slam på 4-läget +
+svararens 4M över deras 2NT; live-prov = ägarsteg.
 
 **Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
 `docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
