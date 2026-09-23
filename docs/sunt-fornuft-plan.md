@@ -48,6 +48,37 @@ kravbud passas. De misstänkta:
   ANDRA tur när de bjuder vidare (20290750: 15 hp + solid 7-korts klöver passar
   två gånger).
 
+## Kursändring 2026-09-22: resonemangslagret i stället för regel per hål
+Ägaren om XX-handen: *"partnern bjöd inte om klövern → inte 5 klöver; dubblade inte →
+inte 4-4 i objudna; kvar 4♠ 4♣. SÅHÄR vill jag att en dator ska kunna resonera. Behöver
+vi regler? Om jag hela tiden säger hur den ska tänka, hur ska den lära sig?"* Ägaren
+accepterar lång betänketid (budgivning får ta tid); vald form: **budget + tidigt stopp**.
+
+**Metoden** (`resonemang.ts`): slumpa de tre andra händerna · behåll de där motorn
+själv (decideCall) reproducerar varje bud och pass · buda klart varje behållen giv med
+fyra bottar per kandidatbud · dubbeldummy (WASM) · snittpoäng för vår sida · stopp när
+ledaren är >2 standardfel före. Ärlig inferens; väntevärde över allt handen kan vara.
+
+**Klockat 2026-09-22:** hel auktion 0,6 ms · slump+filter 0,03 ms (0,4 % stämmer i
+1♣–X–XX–1♠–P–P) · DD-tabell median 0,25 s, p90 0,8 s. 15 s ≈ 12–35 händer.
+
+**Steg 1 KLART 2026-09-22** — proben `resonemang.probe.test.ts` (`RESONEMANG=1`,
+`RESONEMANG_BUDGET`) på tio pass-utan-regel-lägen: nio får vettiga bud (X/2NT/3♣/3♥/
+4♥/3♠), det tionde (pass över 2♥ efter XX) ser rätt ut; 100 händer gav samma val som
+15 s i alla tio. Rapport `revisor-output/resonemang.txt`. **Två lärdomar:**
+1. **Inferensen = regelboken.** Ägarens 1♣-giv: lagret såg "partnern ♣5,0" — motorns
+   öppnare passar efter XX + deras flykt även med fem klöver, så filtret behöll dem.
+   Ägarens slutsats kräver överenskommelsen "öppnarens pass förnekar 5 klöver". Ägarens
+   roll framöver: sätta överenskommelserna (systemet), inte besluten.
+2. **Partnern måste förstå budet.** XX-handens X över 2♥ gav bara +124 trots att 2♥
+   går bet — partnern läser X som upplysning och bjuder vidare. Betydelser måste stå i
+   systemboken innan ett bud lönar sig i simuleringen.
+
+**Steg 2:** WASM-lösaren (bridge-dds) i webbläsaren — bottarna i "Spela mot datorn"
+budar där; egen TS-lösare klarar inte fulla givar. **Steg 3:** koppla in vid bordet för
+lägen utan regel, budget + tidigt stopp; före det: kör lagret på ett stort urval ur
+mätningen och läs efter dumma bud.
+
 ## Byggordning (ägaren godkände 2026-09-22)
 Principen: **mät → facit → regel**, ett hål i taget. Aldrig en enda catch-all
 som "bjuder på allt" — den skulle förstöra systemriktig tystnad.

@@ -168,6 +168,7 @@ const MEDVETET_EJ_INKOPPLAD: Record<string, string> = {
   'speldiagnos.ts': 'Speldiagnosens aggregator (docs/speldiagnos.md) — körs bara av speldiagnos.probe.test.ts.',
   'botspelare.ts': 'Tävlingsbotens givspelare (beslut-b-plan.md, påbyggnaden) — driftvägen ÄR nattjobbet tavlingsbot.probe.test.ts (Actions); appen spelar via usePlayTable.',
   'botniva.ts': 'Trebottarnas nivårattar (beslut-b-plan.md, påbyggnad 2) — samma driftväg som botspelare.ts: nattjobbet tavlingsbot.probe.test.ts (Actions).',
+  'resonemang.ts': 'Resonemangslagret steg 1 (docs/sunt-fornuft-plan.md) — körs bara av resonemang.probe.test.ts tills steg 3 kopplar in det vid bordet.',
 }
 
 it('dokumentvakten: varje motormodul är inkopplad i produktionskoden', () => {
