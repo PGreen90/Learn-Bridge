@@ -14,7 +14,7 @@ svarar på vad).
 Ägarens oro: motorn "reagerar svagt" — pass utan regel när ingen rad träffar. Riggen
 `sunt-fornuft.probe.test.ts` (SUNT=1) + hål 1 (advancern över svagt hoppinkliv) LIVE `46c2128`.
 **Kursändring 09-22: resonemangslagret** (simulering, regelboken som filter, budget +
-tidigt stopp; `resonemang.ts` + worker) — steg 1–3 BYGGDA 09-23: inkopplat i Spela mot datorn.
+tidigt stopp; `resonemang.ts` + worker) — steg 1–3 LIVE 09-23 (`b6b153f`): inkopplat i Spela mot datorn.
 **Plan, mätning, byggordning + frågorna: `docs/sunt-fornuft-plan.md`** — läs först.
 Nyss LIVE (09-22, `275d9fe`): ovanlig 2NT-fortsättningen (§7.2); live-prov = ägarsteg.
 
