@@ -170,6 +170,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
     picking,
     setPicking,
     search,
+    tanker,
     bidHelp,
     toggleBidHelp,
     onBid,
@@ -256,6 +257,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
       <BiddingPhase
         game={game}
         complete={complete}
+        tanker={tanker}
         onBid={onBid}
         onConfirm={confirmContract}
         onNewGame={onNewGame}

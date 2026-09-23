@@ -79,9 +79,17 @@ i dev och i produktionsbygget (tillfällig sida /dev-wasm, borttagen): identiska
 som i Node på tio frön, median 0,25 s, laddning 0,07 s (byggd) / 3,8 s (dev). Inga
 konsolfel. (Kraschen "null function" från punkt 28 i arbetslistan gäller inte längre —
 nyare Vite/paket.) Bunten växer ~0,5 MB om lösaren tas in; lägg den i egen chunk/webworker.
-**Steg 3:** koppla in vid bordet för
-lägen utan regel, budget + tidigt stopp; före det: kör lagret på ett stort urval ur
-mätningen och läs efter dumma bud.
+**Steg 3 BYGGT 2026-09-23 — inkopplat i "Spela mot datorn":** bottarna (N/Ö/V) i
+`useGame.ts`: ger tabellen `pass (ingen regel)` och läget är värt att tänka på
+(`vardAttTanka`: inte i utgång, 10+ hp / 6-kortsfärg / partnern bjöd + 6+) simulerar
+boten i webworkern `resonemang-worker.ts` (WASM-DD, budget `RESONEMANG_BUDGET_MS`
+= 12 s, tidigt stopp; deterministiskt frö ur giv-id + läge). Bordet visar
+"[Stol] tänker …"; regelnamn `resonemang`, förklaringen = inferensen i klartext.
+Fel/timeout → pass som förr. Verifierat live: 1♣–(X)–XX–(1♠)–P–(P) → Nord tänkte
+~15 s och bjöd 2♦ (proben: 2♥/2♦/X inom felmarginalen), inga konsolfel. `bridge-dds`
+flyttad till dependencies. **Inte** inkopplat: tävlingsbottarna (nattjobbet, Node) och
+borden (server) — de budar fortfarande bara ur tabellen; kandidat till nästa steg.
+Urvalsprovet (`RESONEMANG_URVAL=60`): se `revisor-output/resonemang-urval.txt`.
 
 ## Byggordning (ägaren godkände 2026-09-22)
 Principen: **mät → facit → regel**, ett hål i taget. Aldrig en enda catch-all

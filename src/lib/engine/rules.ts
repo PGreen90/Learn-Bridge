@@ -142,6 +142,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'avböjer inbjudan: rättelse': 'avslut',
   'fullföljd Texas': 'avslut',
   oklart: 'ej-krav',
+  resonemang: 'ej-krav', // resonemangslagret (simulering) — bud utan systemregel, ej krav
 
   // ---- Inbjudningar ----
   inbjudan: 'inbjudan',
