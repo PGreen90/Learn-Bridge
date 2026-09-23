@@ -74,8 +74,12 @@ ledaren är >2 standardfel före. Ärlig inferens; väntevärde över allt hande
    går bet — partnern läser X som upplysning och bjuder vidare. Betydelser måste stå i
    systemboken innan ett bud lönar sig i simuleringen.
 
-**Steg 2:** WASM-lösaren (bridge-dds) i webbläsaren — bottarna i "Spela mot datorn"
-budar där; egen TS-lösare klarar inte fulla givar. **Steg 3:** koppla in vid bordet för
+**Steg 2 KLART 2026-09-23:** WASM-lösaren (bridge-dds 1.4.0) FUNGERAR i webbläsaren, både
+i dev och i produktionsbygget (tillfällig sida /dev-wasm, borttagen): identiska DD-tabeller
+som i Node på tio frön, median 0,25 s, laddning 0,07 s (byggd) / 3,8 s (dev). Inga
+konsolfel. (Kraschen "null function" från punkt 28 i arbetslistan gäller inte längre —
+nyare Vite/paket.) Bunten växer ~0,5 MB om lösaren tas in; lägg den i egen chunk/webworker.
+**Steg 3:** koppla in vid bordet för
 lägen utan regel, budget + tidigt stopp; före det: kör lagret på ett stort urval ur
 mätningen och läs efter dumma bud.
 
