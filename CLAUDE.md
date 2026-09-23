@@ -13,10 +13,10 @@ svarar på vad).
 ### 🔵 NU — Sunt förnuft-lagret: motorn ska inte passa blint (ägarbeslut 2026-09-22)
 Ägarens oro: motorn "reagerar svagt" — pass utan regel när ingen rad träffar. Riggen
 `sunt-fornuft.probe.test.ts` (SUNT=1) + hål 1 (advancern över svagt hoppinkliv) LIVE `46c2128`.
-Näst i ordningen: XX-handen/dubblaren i andra tur · stark hand efter deras 1x–1NT · sista lagret.
+**Kursändring 09-22: resonemangslagret** (simulering, regelboken som filter, budget +
+tidigt stopp; `resonemang.ts` + probe) — steg 1 KLART, steg 2 = WASM-DD i webbläsaren.
 **Plan, mätning, byggordning + frågorna: `docs/sunt-fornuft-plan.md`** — läs först.
-Nyss LIVE (09-22, `275d9fe`): ovanlig 2NT-fortsättningen (§7.2) + slam på 4-läget +
-svararens 4M över deras 2NT; live-prov = ägarsteg.
+Nyss LIVE (09-22, `275d9fe`): ovanlig 2NT-fortsättningen (§7.2); live-prov = ägarsteg.
 
 **Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
 `docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
