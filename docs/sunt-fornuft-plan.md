@@ -89,7 +89,9 @@ Fel/timeout → pass som förr. Verifierat live: 1♣–(X)–XX–(1♠)–P–
 ~15 s och bjöd 2♦ (proben: 2♥/2♦/X inom felmarginalen), inga konsolfel. `bridge-dds`
 flyttad till dependencies. **Inte** inkopplat: tävlingsbottarna (nattjobbet, Node) och
 borden (server) — de budar fortfarande bara ur tabellen; kandidat till nästa steg.
-Urvalsprovet (`RESONEMANG_URVAL=60`): se `revisor-output/resonemang-urval.txt`.
+**Kvar (nästa session):** urvalsprovet (`RESONEMANG=1 RESONEMANG_URVAL=60`, ~15 min
+ensamt på maskinen) hann inte köras klart 09-23 — kör det och läs efter dumma bud;
+sedan ägarens live-prov och frågan om tävlingsbottarna/borden ska få lagret.
 
 ## Byggordning (ägaren godkände 2026-09-22)
 Principen: **mät → facit → regel**, ett hål i taget. Aldrig en enda catch-all
