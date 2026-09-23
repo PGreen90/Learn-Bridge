@@ -11,6 +11,8 @@
 //   3. För varje tänkbart bud: buda klart given med fyra bottar på varje behållen
 //      hand, räkna dubbeldummy-resultatet, ta snittet (poäng för min sida).
 //   4. Sluta tidigt när ledaren är säkert före (budget + tidigt stopp).
+//   5. Pass-spärren (urvalsprovet 2026-09-23): ett bud väljs bara om det slår pass
+//      säkert, parat hand för hand — en ledning inom bruset lämnar tystnaden kvar.
 // Ärlig inferens: bara egen hand + auktionen; slumpen ersätter de dolda korten.
 // Bedömningen är väntevärdet över allt handen KAN vara — inte en DD-dom på en
 // enskild giv (ägarprincip 2026-08-06 gäller oförändrad).
@@ -43,6 +45,22 @@ export interface Kandidat {
   snitt: number
   /** Standardfel för snittet. */
   se: number
+  /** Skillnaden mot pass, parad hand för hand (samma händer), med standardfel. Saknas för pass. */
+  motPass?: { diff: number; se: number }
+}
+
+/** Pass-spärren (urvalsprovet 2026-09-23): ett bud måste slå pass med mer än så här
+ *  många standardfel (parad skillnad), annars är ledningen brus och tystnaden står kvar. */
+export const PASS_MARGINAL = 2
+
+/** Välj bland kandidaterna: det bästa budet (högst snitt) som SÄKERT slår pass; annars pass.
+ *  `spärrad` = budet som ledde i snitt men inte klarade spärren. */
+export function valjMotPass(k: Kandidat[]): { val: Bid; spärrad?: Bid } {
+  const sorterade = [...k].sort((a, b) => b.snitt - a.snitt)
+  const saker = (c: Kandidat) => c.bud === 'P' || (!!c.motPass && c.motPass.diff > PASS_MARGINAL * c.motPass.se)
+  const val = sorterade.find(saker)?.bud ?? ('P' as Bid)
+  const ledare = sorterade[0]?.bud
+  return ledare && ledare !== val && ledare !== 'P' ? { val, spärrad: ledare } : { val }
 }
 
 export interface Resonemang {
@@ -139,17 +157,26 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
   const rand = rng(opts.seed ?? 1)
   const hand = deal.hands[me]
   const buds = kandidater(hand, history, me)
-  const sum = new Map<Bid, { n: number; s: number; s2: number }>(buds.map((b) => [b, { n: 0, s: 0, s2: 0 }]))
+  // s/s2 = budets poäng; d/d2 = skillnaden mot pass på samma hand (parad jämförelse).
+  const sum = new Map<Bid, { n: number; s: number; s2: number; d: number; d2: number }>(
+    buds.map((b) => [b, { n: 0, s: 0, s2: 0, d: 0, d2: 0 }]),
+  )
   const plen: Record<Suit, number> = { spades: 0, hearts: 0, diamonds: 0, clubs: 0 }
   let php = 0, phpMin = 40, phpMax = 0
   let hander = 0, dragningar = 0, stoppadeTidigt = false
 
   const stat = (): Kandidat[] =>
     buds.map((b) => {
-      const { n, s, s2 } = sum.get(b)!
-      const m = n ? s / n : 0
-      const v = n > 1 ? Math.max(0, (s2 - n * m * m) / (n - 1)) : 0
-      return { bud: b, n, snitt: m, se: n > 1 ? Math.sqrt(v / n) : Infinity }
+      const { n, s, s2, d, d2 } = sum.get(b)!
+      const medel = (x: number, x2: number) => {
+        const m = n ? x / n : 0
+        const v = n > 1 ? Math.max(0, (x2 - n * m * m) / (n - 1)) : 0
+        return { m, se: n > 1 ? Math.sqrt(v / n) : Infinity }
+      }
+      const p = medel(s, s2)
+      const kand: Kandidat = { bud: b, n, snitt: p.m, se: p.se }
+      if (b !== 'P') { const q = medel(d, d2); kand.motPass = { diff: q.m, se: q.se } }
+      return kand
     })
 
   while (hander < maxH && dragningar < maxDraws && performance.now() - t0 < budget) {
@@ -158,10 +185,13 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
     if (!stammer(d, history, me)) continue
     hander++
     const solve = opts.oracle(d)
+    const pa = new Map(buds.map((b) => [b, poang(d, history, me, b, solve)]))
+    const passP = pa.get('P' as Bid)!
     for (const b of buds) {
-      const p = poang(d, history, me, b, solve)
+      const p = pa.get(b)!
       const a = sum.get(b)!
       a.n++; a.s += p; a.s2 += p * p
+      a.d += p - passP; a.d2 += (p - passP) ** 2
     }
     const ph = d.hands[PARTNER[me]]
     const l = lengths(ph)
@@ -169,17 +199,18 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
     const h = hcp(ph)
     php += h; phpMin = Math.min(phpMin, h); phpMax = Math.max(phpMax, h)
 
-    // Tidigt stopp: ledaren säkert före tvåan (skillnaden > 2 standardfel).
+    // Tidigt stopp: ledaren säkert före tvåan (skillnaden > 2 standardfel) OCH
+    // ledaren är pass eller klarar pass-spärren — annars kan mer data ändra beslutet.
     if (hander >= minH && hander % 4 === 0 && buds.length > 1) {
       const k = stat().sort((a, b) => b.snitt - a.snitt)
       const diff = k[0].snitt - k[1].snitt
       const se = Math.sqrt(k[0].se ** 2 + k[1].se ** 2)
-      if (diff > 2 * se) { stoppadeTidigt = true; break }
+      if (diff > 2 * se && valjMotPass(k).val === k[0].bud) { stoppadeTidigt = true; break }
     }
   }
 
   const k = stat().sort((a, b) => b.snitt - a.snitt)
-  const val = hander > 0 ? k[0].bud : ('P' as Bid)
+  const { val, spärrad } = hander > 0 ? valjMotPass(k) : { val: 'P' as Bid, spärrad: undefined }
   const partner = {
     langd: Object.fromEntries(SUITS.map((s) => [s, hander ? plen[s] / hander : 0])) as Record<Suit, number>,
     hpMin: hander ? phpMin : 0, hpMax: hander ? phpMax : 0, hpSnitt: hander ? php / hander : 0,
@@ -187,14 +218,17 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
   const form = SUITS.map((s) => `${SWE_SYM[letterOfSuit(s)]}${partner.langd[s].toFixed(1)}`).join(' ')
   const alt = k.slice(0, 3).map((c) => `${prettyBid(c.bud)} ${c.snitt >= 0 ? '+' : ''}${c.snitt.toFixed(0)}`).join(' · ')
   const forklaring = hander
-    ? `Av ${hander} händer som stämmer med budgivningen ser partnern ut att ha ${form} och ${partner.hpMin}–${partner.hpMax} hp (snitt ${partner.hpSnitt.toFixed(0)}). Bästa bud i snitt: ${alt}.`
+    ? `Av ${hander} händer som stämmer med budgivningen ser partnern ut att ha ${form} och ${partner.hpMin}–${partner.hpMax} hp (snitt ${partner.hpSnitt.toFixed(0)}). Bästa bud i snitt: ${alt}.` +
+      (spärrad ? ` ${prettyBid(spärrad)} leder, men inte säkert före pass${val === 'P' ? ' → pass' : ` → ${prettyBid(val)}`}.` : '')
     : `Hittade ingen hand som stämmer med budgivningen på ${dragningar} försök → pass.`
   return { val, kandidater: k, hander, dragningar, ms: performance.now() - t0, stoppadeTidigt, partner, forklaring }
 }
 
 /** Hjälpare för proben: sammanfattning av en kandidatlista. */
 export function kandidatRad(k: Kandidat[]): string {
-  return k.map((c) => `${prettyBid(c.bud)}:${c.snitt >= 0 ? '+' : ''}${c.snitt.toFixed(0)}±${isFinite(c.se) ? c.se.toFixed(0) : '?'}`).join('  ')
+  const z = (c: Kandidat) =>
+    c.motPass && isFinite(c.motPass.se) && c.motPass.se > 0 ? ` (${(c.motPass.diff / c.motPass.se).toFixed(1)}σ)` : ''
+  return k.map((c) => `${prettyBid(c.bud)}:${c.snitt >= 0 ? '+' : ''}${c.snitt.toFixed(0)}±${isFinite(c.se) ? c.se.toFixed(0) : '?'}${z(c)}`).join('  ')
 }
 
 export { SUIT_OF_LETTER }
