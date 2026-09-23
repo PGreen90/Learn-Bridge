@@ -3,7 +3,7 @@
 // Bara presentation — spellogiken bor i useGame.
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { Bid } from '../../types/bridge'
+import type { Bid, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
 import { decideCall, legalCalls, seatToAct, contractFromCalls } from '../../lib/engine/auction-live'
 import { hcp } from '../../lib/engine/hand'
@@ -23,6 +23,7 @@ import type { TavlingSpel } from './tavling-mode'
 export function BiddingPhase({
   game,
   complete,
+  tanker = null,
   onBid,
   onConfirm,
   onNewGame,
@@ -36,6 +37,8 @@ export function BiddingPhase({
 }: {
   game: Game
   complete: boolean
+  /** Stolen som just nu tänker i resonemangslagret (webworkern), eller null. */
+  tanker?: Seat | null
   onBid: (bid: Bid) => void
   onConfirm: () => void
   onNewGame: () => void
@@ -143,6 +146,11 @@ export function BiddingPhase({
             explanations={bidHelp ? 'full' : 'minimal'}
             hiddenHands
           />
+          {tanker && (
+            <div className="mt-1 text-center text-[11px] font-medium text-emerald-100/80" aria-live="polite">
+              {SEAT_LABEL[tanker]} tänker …
+            </div>
+          )}
           <div className="shrink-0 sm:absolute sm:-right-11 sm:top-0">
             <TableMenu
               open={showMenu}

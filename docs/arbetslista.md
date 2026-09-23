@@ -287,3 +287,5 @@
   in i given (få kort kvar = snabbt); tidigt visas "för tung – prova längre in".
   **Möjlig framtida förbättring:** webworker + starkare beskärning (quick tricks)
   för facit redan på utspelet, eller en fungerande WASM-DDS om sådan dyker upp.
+  *(2026-09-23: `bridge-dds` FUNGERAR nu i webbläsaren — verifierat i dev + prod-bygge,
+  används av resonemangslagrets webworker; se `docs/sunt-fornuft-plan.md` steg 2.)*

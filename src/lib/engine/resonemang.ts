@@ -198,3 +198,32 @@ export function kandidatRad(k: Kandidat[]): string {
 }
 
 export { SUIT_OF_LETTER }
+
+/**
+ * Är läget värt att tänka på? Gaten för bordet (steg 3): resonemangslagret körs
+ * bara när ingen tabellrad träffade OCH handen har något att fundera över —
+ * inte i de rena "inget att säga"-passen (mätningens B/F1/J: vi eller de står
+ * redan i utgång, eller handen är tom). Egen hand + auktionen, inget annat.
+ */
+export function vardAttTanka(deal: Deal, history: ResolvedCall[], me: Seat): boolean {
+  const hand = deal.hands[me]
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const longest = Math.max(len.spades, len.hearts, len.diamonds, len.clubs)
+  const contracts = history.filter((c) => parseContractBid(c.bid))
+  const last = contracts[contracts.length - 1]
+  if (!last) return false // öppningsläget har egna regler
+  const cb = parseContractBid(last.bid)!
+  const game = (cb.strain === 'NT' && cb.level >= 3) || ((cb.strain === 'H' || cb.strain === 'S') && cb.level >= 4) || cb.level >= 5
+  if (game && side(last.seat) === side(me)) return false // vi står i utgång+
+  if (game && p < 14) return false // de står i utgång och jag är inte stark
+  const partnerBid = history.some((c) => c.seat === PARTNER[me] && c.bid !== 'P')
+  return p >= 10 || longest >= 6 || (partnerBid && p >= 6)
+}
+
+/** Deterministiskt frö ur given + läget, så samma läge alltid tänker likadant (felrapporter). */
+export function resonemangSeed(deal: Deal, history: ResolvedCall[]): number {
+  let h = 2166136261
+  for (const ch of `${deal.id}|${history.length}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) }
+  return h >>> 0
+}

@@ -40,7 +40,7 @@ const ALL_ENGINE_RULES: string[] = [
   'konkurrenshöjning', 'krav-svar',
   'lättöppning', 'minor-regeln', 'minorfråga (2NT)', 'minorsvar', 'naturligt inkliv', 'negativ dubbling',
   'ny färg (1-läget)', 'ny färg (2-läget)', 'ny färg (GF)', 'ny färg (krav)', 'ny färg', 'ny färg efter 1NT',
-  'oklart', 'ovanlig 2NT', 'pass', 'preferens (GF)', 'preferens', 'rebid: 2NT (18–19)',
+  'oklart', 'ovanlig 2NT', 'pass', 'resonemang', 'preferens (GF)', 'preferens', 'rebid: 2NT (18–19)',
   'rebid: 2NT (22–24)', 'rebid: 3NT (25–27)', 'rebid: 4NT (28–30)', 'rebid: 3NT (GF)', 'rebid: 3NT',
   'rebid: egen färg (GF)', 'rebid: egen färg', 'rebid: feature', 'rebid: hopp (inbjudan)', 'rebid: hoppskift',
   'rebid: krav-färg', 'rebid: ny färg', 'rebid: pass', 'rebid: reverse', 'rebid: signoff',

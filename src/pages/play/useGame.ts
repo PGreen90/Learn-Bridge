@@ -13,6 +13,8 @@ import {
   seatToAct,
 } from '../../lib/engine/auction-live'
 import { interpretCall } from '../../lib/engine/auction-interpret'
+import { decideCallTraced } from '../../lib/engine/auction-live'
+import { resonemangSeed, vardAttTanka } from '../../lib/engine/resonemang'
 import { dealRandom, mulberry32 } from '../../lib/engine/deal'
 import { dailyDeal, dailyDealByNumber } from '../../lib/engine/daily'
 import { matchesTarget, type ContractTarget } from '../../lib/engine/contract-target'
@@ -40,6 +42,9 @@ function randomSeed(): number {
 }
 
 const SEAT_ORDER: Seat[] = ['N', 'E', 'S', 'W']
+
+/** Bottens betänketid i resonemangslagret (ms). Tidigt stopp gör att lätta lägen tar 2–5 s. */
+export const RESONEMANG_BUDGET_MS = 12_000
 
 /** Rotera en giv så att den ursprungliga stolen `sitt` hamnar i SYD (spelaren
  *  budar alltid Syd). Händer, given och zonen roteras konsekvent → en EXAKT
@@ -131,19 +136,55 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number) 
 
   const complete = auctionComplete(game.history)
 
+  // RESONEMANGSLAGRET (sunt förnuft steg 3, 2026-09-23; docs/sunt-fornuft-plan.md):
+  // träffar ingen tabellrad ("pass (ingen regel)") och läget är värt att tänka på,
+  // simulerar boten i en webworker (budget + tidigt stopp) i stället för att passa
+  // blint. `tanker` = stolen som tänker (bordet visar det). Svar som inte längre
+  // gäller (nytt läge) förkastas via reqId; fel/timeout → pass som förr.
+  const [tanker, setTanker] = useState<Seat | null>(null)
+  const resonemangWorker = useRef<Worker | null>(null)
+  const resonemangReq = useRef(0)
+  useEffect(() => {
+    try {
+      resonemangWorker.current = new Worker(new URL('../../lib/engine/resonemang-worker.ts', import.meta.url), { type: 'module' })
+    } catch {
+      resonemangWorker.current = null
+    }
+    return () => { resonemangWorker.current?.terminate(); resonemangWorker.current = null }
+  }, [])
+
   // Datorn budar V/N/Ö när det är deras tur (liten fördröjning, som korten).
   useEffect(() => {
     if (game.phase !== 'bidding' || complete) return
     if (seatToAct(game.deal.dealer, game.history.length) === 'S') return // din tur
+    let reqId = 0
+    let timeout: ReturnType<typeof setTimeout> | undefined
     const id = setTimeout(() => {
-      setGame((g) => {
-        if (g.phase !== 'bidding' || auctionComplete(g.history)) return g
-        const seat = seatToAct(g.deal.dealer, g.history.length)
-        if (seat === 'S') return g
-        return { ...g, history: [...g.history, decideCall(g.deal, g.history, seat)] }
-      })
+      const g = game
+      const seat = seatToAct(g.deal.dealer, g.history.length)
+      const traced = decideCallTraced(g.deal, g.history, seat)
+      const worker = resonemangWorker.current
+      if (traced.källa !== 'pass (ingen regel)' || !worker || !vardAttTanka(g.deal, g.history, seat)) {
+        setGame((cur) => (cur === g ? { ...cur, history: [...cur.history, traced.call] } : cur))
+        return
+      }
+      reqId = ++resonemangReq.current
+      setTanker(seat)
+      const budgetMs = RESONEMANG_BUDGET_MS
+      const done = (call: ResolvedCall) => {
+        if (reqId !== resonemangReq.current) return // nytt läge hann före
+        clearTimeout(timeout)
+        setTanker(null)
+        setGame((cur) => (cur === g ? { ...cur, history: [...cur.history, call] } : cur))
+      }
+      worker.onmessage = (e: MessageEvent<{ reqId: number; call?: ResolvedCall; error?: string }>) => {
+        if (e.data.reqId !== reqId) return
+        done(e.data.call ?? traced.call)
+      }
+      timeout = setTimeout(() => done(traced.call), budgetMs + 8000) // worker svarar inte → pass
+      worker.postMessage({ reqId, deal: g.deal, history: g.history, seat, budgetMs, seed: resonemangSeed(g.deal, g.history) })
     }, 700)
-    return () => clearTimeout(id)
+    return () => { clearTimeout(id); clearTimeout(timeout); if (reqId) { resonemangReq.current++; setTanker(null) } }
   }, [game, complete])
 
   // Budgivningen klar med kontrakt → ägaren BEKRÄFTAR i dialogen
@@ -244,6 +285,7 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number) 
   return {
     game,
     complete,
+    tanker,
     target,
     picking,
     setPicking,

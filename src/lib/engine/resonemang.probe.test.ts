@@ -52,3 +52,37 @@ it.skipIf(!ON)('resonemangslagret på provlägena', async () => {
     writeFileSync('revisor-output/resonemang.txt', rader.join('\n'))
   }
 }, 3_600_000)
+
+// URVALSPROVET (steg 3 a): kör lagret på ett slumpurval ur sunt förnuft-mätningens
+// misstänkta kategorier (revisor-output/sunt-fornuft.json) och skriv en rad per
+// läge, så dumma bud går att hitta genom läsning.
+//   $env:RESONEMANG='1'; $env:RESONEMANG_URVAL='60'; npx vitest run src/lib/engine/resonemang.probe.test.ts
+import { readFileSync } from 'node:fs'
+import { hcp } from './hand'
+const URVAL = Number(process.env.RESONEMANG_URVAL ?? 0)
+
+it.skipIf(!ON || !URVAL)('resonemangslagret på ett urval ur mätningen', async () => {
+  const dds = await getDds()
+  type F = { seed: number; seat: Seat; hand: string; hp: number; auktion: string; kategori: string }
+  const alla = JSON.parse(readFileSync('revisor-output/sunt-fornuft.json', 'utf8')) as F[]
+  const misstankta = alla.filter((x) => /^(D2|E2|G1|G2|N|L|M|F2)/.test(x.kategori) || (/^(H|I)/.test(x.kategori) && x.hp >= 10))
+  let rng = 4242
+  const rand = () => { rng = (rng * 1103515245 + 12345) & 0x7fffffff; return rng / 0x7fffffff }
+  const urval = [...misstankta].sort(() => rand() - 0.5).slice(0, URVAL)
+  const rader = [`Urvalsprovet: ${urval.length} av ${misstankta.length} misstänkta pass utan regel, budget ${BUDGET} ms`, '']
+  const perKat = new Map<string, { n: number; annat: number }>()
+  for (const x of urval) {
+    const deal = dealFromSeed(x.seed)
+    const history = x.auktion.split(' ').map((s) => ({ seat: s[0] as Seat, bid: s.slice(2) })) as ResolvedCall[]
+    const r = resonera(deal, history, x.seat, { oracle: (d) => computeOracle(dds, d).solve, budgetMs: BUDGET, seed: 7 })
+    const k = x.kategori.slice(0, 2).trim()
+    const st = perKat.get(k) ?? { n: 0, annat: 0 }
+    st.n++; if (r.val !== 'P') st.annat++
+    perKat.set(k, st)
+    const pass = r.kandidater.find((c) => c.bud === 'P')
+    rader.push(`${x.seed} ${x.seat} ${formatHand(deal.hands[x.seat])} (${hcp(deal.hands[x.seat])}) [${k}] | ${x.auktion}`)
+    rader.push(`    → ${r.val.padEnd(3)} ${r.hander} händer, ${(r.ms / 1000).toFixed(1)} s${r.stoppadeTidigt ? ' (tidigt stopp)' : ''} · pass ${pass ? (pass.snitt >= 0 ? '+' : '') + pass.snitt.toFixed(0) : '?'} · ${kandidatRad(r.kandidater.slice(0, 4))}`)
+    rader.push(`    ${r.forklaring}`)
+    writeFileSync('revisor-output/resonemang-urval.txt', [...rader, '', ...[...perKat].map(([k, s]) => `${k}: ${s.annat}/${s.n} fick annat än pass`)].join('\n'))
+  }
+}, 3_600_000)
