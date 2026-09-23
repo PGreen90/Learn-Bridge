@@ -89,9 +89,28 @@ Fel/timeout → pass som förr. Verifierat live: 1♣–(X)–XX–(1♠)–P–
 ~15 s och bjöd 2♦ (proben: 2♥/2♦/X inom felmarginalen), inga konsolfel. `bridge-dds`
 flyttad till dependencies. **Inte** inkopplat: tävlingsbottarna (nattjobbet, Node) och
 borden (server) — de budar fortfarande bara ur tabellen; kandidat till nästa steg.
-**Kvar (nästa session):** urvalsprovet (`RESONEMANG=1 RESONEMANG_URVAL=60`, ~15 min
-ensamt på maskinen) hann inte köras klart 09-23 — kör det och läs efter dumma bud;
-sedan ägarens live-prov och frågan om tävlingsbottarna/borden ska få lagret.
+**Urvalsprovet 2026-09-23** (`RESONEMANG=1 RESONEMANG_URVAL=60 RESONEMANG_BUDGET=12000`,
+~10 min, `revisor-output/resonemang-urval.txt`): 29 av 60 fick ett bud, ~19 vettiga och
+~7 dumma. Två rotorsaker:
+1. **Brus valdes före pass** — lagret tog högsta snittet även när ledningen var slump
+   (1NT −63 mot pass −70 på 11 händer). **Lagat: pass-spärren** (`valjMotPass`,
+   `PASS_MARGINAL` = 2, facit `resonemang.test.ts`): ett bud väljs bara om det slår pass
+   med mer än 2 standardfel, parat hand för hand; tidigt stopp bara när beslutet också
+   klarar spärren. Omprovet: 14 av 29 bud → pass, bl.a. alla brusfynd (1NT i levande
+   auktion, 2NT = lågfärgerna med jämn 16, 2♣ i deras färg, 4♠ på partnerns spärrhöjning).
+   Priset: några vettiga bud på 1,0–1,6σ blir pass som förr (2♠-inkliv, X med renons,
+   X av 4♦, 3NT på partnerns 3♣) — mer tid/händer, inte lägre spärr, är botemedlet.
+2. **Budet provas utan att fråga systemet vad det betyder** (kandidaterna = varje
+   4+-färg, X, XX, billigaste sang). Kvar efter spärren: 2♠ på fyrkort med 18 jämn (X är
+   rätt), X av deras 3NT, 2♦ på fyrkort över stark 2♣, XX med 8 hp. **Nästa steg:**
+   regelboken som filter även för det egna budet (betydelsen ska stämma med handen).
+Steg 1-lägena med spärren (`RESONEMANG=1 RESONEMANG_BUDGET=12000`, `revisor-output/resonemang.txt`):
+åtta av tio oförändrade (ägarens 1♣–X–XX-giv bjuder fortfarande, alla bud ~4σ före pass).
+Två blev pass: 19 hp-dubblaren i (P)–P–(1♥)–X–(2♥)–P–(P) (2NT 1,5σ på 35 händer, 2,4σ
+på 100 — tidsbrist, inte fel bud) och 17 hp med AKQT83 efter (3♦)–X–(XX)–P–(P), som nu
+lämnar 3♦XX (AK9 bakom spärröppnaren; 3♠ bara 0,9σ före även på 100 händer — försvarbart).
+Fynd i tabellen, inte i lagret: öppnaren passar 1♦–1♥–1♠–2NT med 16 → egen tabellrad.
+**Kvar:** steg 2 ovan, tabellraden, ägarens live-prov, frågan om tävlingsbottarna/borden.
 
 ## Byggordning (ägaren godkände 2026-09-22)
 Principen: **mät → facit → regel**, ett hål i taget. Aldrig en enda catch-all
