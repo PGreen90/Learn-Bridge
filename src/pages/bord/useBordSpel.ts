@@ -121,7 +121,18 @@ export interface BordSpelet {
   harOspeladLogg: boolean
 }
 
-export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordSpelet {
+export function useBordSpel(
+  kod: string,
+  minStol: Seat,
+  tempo: PlaySpeed,
+  /** Kortflygningen (2026-09-24, samma som spelbordet): anropas SYNKRONT strax
+   *  innan ett kort avtäcks i vyn — egna kort före det optimistiska draget,
+   *  andras när presentationskön släpper fram händelsen — så vyn hinner mäta
+   *  källkortet i handen innan det försvinner därifrån. Stolen är den VERKLIGA. */
+  onKort?: (seat: Seat, card: Card) => void,
+): BordSpelet {
+  const onKortRef = useRef(onKort)
+  onKortRef.current = onKort
   const [events, setEvents] = useState<BordHandelse[]>([])
   const [senasteSeq, setSenasteSeq] = useState(0)
   const [visadeSeq, setVisadeSeq] = useState<number | null>(null)
@@ -253,7 +264,10 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
     if (sweep) return
     const egen = (nasta.typ === 'bud' || nasta.typ === 'kort') && nasta.seat === minStol
     const paus = avtackningsPaus(nasta, egen, tempo)
-    const id = setTimeout(() => setVisadeSeq(nasta.seq), paus)
+    const id = setTimeout(() => {
+      if (nasta.typ === 'kort' && nasta.seat) onKortRef.current?.(nasta.seat, (nasta.data as { card: Card }).card)
+      setVisadeSeq(nasta.seq)
+    }, paus)
     return () => clearTimeout(id)
   }, [events, visadeSeq, sweep, tempo, minStol])
 
@@ -332,6 +346,7 @@ export function useBordSpel(kod: string, minStol: Seat, tempo: PlaySpeed): BordS
             : spelRef.current
               ? vridTillbaka(minStol)(spelRef.current.state.toAct)
               : minStol
+        if (drag.typ === 'kort') onKortRef.current?.(seat, drag.card)
         setVantande({
           seq: senasteSeqRef.current + 1,
           giv: lageRef.current?.giv ?? 0,

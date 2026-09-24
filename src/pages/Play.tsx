@@ -29,7 +29,6 @@ import { SuitText } from '../components/SuitText'
 import { PlayReplay } from '../components/PlayReplay'
 import { AuctionGrid } from '../components/AuctionGrid'
 import { BidChip } from '../components/BidChip'
-import { Felt } from '../components/Felt'
 import { Button } from '../components/Button'
 import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
@@ -37,7 +36,7 @@ import { gameFromDeal, gameFromSeed, seatDealSouth, useGame, type Game } from '.
 import { usePlayTable } from './play/usePlayTable'
 import type { TavlingSpel } from './play/tavling-mode'
 import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
-import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE, VUL_TEXT } from './play/common'
+import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
 import { useSvavandeMeny } from './play/useSvavandeMeny'
@@ -47,6 +46,7 @@ import { BiddingPhase } from './play/BiddingPhase'
 import { ClaimDialog } from './play/ClaimDialog'
 import { RondRapportView } from './play/RondRapport'
 import { FlightLayer } from './play/FlightLayer'
+import { AllaFargerKnapp, hornKnappKlass, ListChip, listKnappKlass, overlayTopp, SpelbordRam } from './play/SpelbordRam'
 import { armSound } from '../lib/sound'
 
 // ===========================================================================
@@ -604,7 +604,7 @@ export function PlayTable({
     selectedSuit !== null,
     play.hands.N.length,
   )
-  const menyOverlayTop = `calc(3rem + env(safe-area-inset-top) + ${menyOffset}px)`
+  const menyOverlayTop = overlayTopp(menyOffset)
 
   // Färdigspelad giv: bordet hinner tona ut (felt-fade-out under resultOutro,
   // showResult väntar ut den) → resultatdialog ovanpå omspelningen (Synrey-stil).
@@ -829,33 +829,16 @@ export function PlayTable({
 
   // Träkarlen: partnern Nord upptill när du spelar, annars motståndarnas träkarl
   // på sin riktiga sida (se toppzonen + mittraden nedan); dolda händer visas inte.
-  return (
-    // --motion-scale: tempovalet skalar spelfasens CSS-animationer (index.css
-    // räknar calc(bastid * var(--motion-scale))). JS-pauserna skalas i tempo.ts.
-    // felt-fade-out: när given är klar tonar hela bordet ut under resultOutro
-    // innan trädet byts till resultatvyn (showResult).
-    <Felt
-      className={`flex min-h-[100dvh] w-full flex-col rounded-none border-transparent shadow-none ${done ? 'felt-fade-out' : ''}`}
-      style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}
-    >
-      {/* Övningsläge (2026-08-12): tydlig pille uppe till vänster — spelaren ska
-          aldrig tro att ett omspel räknas i tävlingen. */}
-      {tavling?.övning && (
-        <div className="absolute left-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20 rounded-full bg-emerald-950/70 px-2.5 py-1 text-[11px] font-semibold text-gold-200 ring-1 ring-gold-400/30">
-          Övning · räknas inte
-        </div>
-      )}
-
-      {/* ⋮ (meny) överst, ⓘ (budgivningen) under den — staplade i appens övre
-          högra hörn (ägarbeslut 2026-07-31). Säker marginal för urtaget nu när
-          headern är borta (immersiv spelvy). Ankaret står stilla; stapeln inuti
-          svävar mjukt ner under Nords kortrad när raden är för bred och upp
-          igen när platsen finns (useSvavandeMeny, ägarbeslut 2026-09-15). */}
-      <div
-        ref={menyAnkareRef}
-        data-bordsmeny-ankare
-        className="absolute right-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20"
-      >
+  // --motion-scale: tempovalet skalar spelfasens CSS-animationer (index.css
+  // räknar calc(bastid * var(--motion-scale))). JS-pauserna skalas i tempo.ts.
+  // felt-fade-out: när given är klar tonar hela bordet ut under resultOutro
+  // innan trädet byts till resultatvyn (showResult).
+  // Spelfasen ritas genom den delade ramen (SpelbordRam, 2026-09-24) — samma
+  // zoner och marginaler som vänner-bordet. Slottarna nedan är innehållet.
+  // Hörnstapeln (⋮ över i) svävar mjukt ner under Nords kortrad när raden är
+  // för bred och upp igen när platsen finns (useSvavandeMeny, ägarbeslut
+  // 2026-09-15); ankaret (ramens hörn-div) står stilla.
+  const horn = (
       <div
         data-bordsmeny
         data-sankt={menyOffset > 0 ? '1' : undefined}
@@ -868,7 +851,7 @@ export function PlayTable({
             setShowMenu((v) => !v)
             setShowInfo(false)
           }}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-950/60 text-lg font-bold text-emerald-50 ring-1 ring-emerald-100/10 transition-colors hover:bg-emerald-950/80 hover:ring-gold-400/40"
+          className={hornKnappKlass('club', 'text-lg')}
           aria-label="Meny"
         >
           ⋮
@@ -879,13 +862,23 @@ export function PlayTable({
             setShowInfo((v) => !v)
             setShowMenu(false)
           }}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-950/60 text-sm font-bold text-emerald-50 ring-1 ring-emerald-100/10 transition-colors hover:bg-emerald-950/80 hover:ring-gold-400/40"
+          className={hornKnappKlass('club', 'text-sm')}
           aria-label="Budgivningen"
         >
           i
         </button>
       </div>
-      </div>
+  )
+
+  const overlays = (
+    <>
+      {/* Övningsläge (2026-08-12): tydlig pille uppe till vänster — spelaren ska
+          aldrig tro att ett omspel räknas i tävlingen. */}
+      {tavling?.övning && (
+        <div className="absolute left-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20 rounded-full bg-emerald-950/70 px-2.5 py-1 text-[11px] font-semibold text-gold-200 ring-1 ring-gold-400/30">
+          Övning · räknas inte
+        </div>
+      )}
 
       {/* Klick utanför stänger ⋮/ⓘ (R3-fynd #6). */}
       {(showMenu || showInfo) && (
@@ -1066,7 +1059,11 @@ export function PlayTable({
           })()}
         </div>
       )}
+    </>
+  )
 
+  const nord = (
+    <>
       {/* Toppzonen: Nord-sidans öppna hand — träkarlen Nord när DU spelar, eller
           spelföraren Nord när Syd är träkarl (du spelar Nords kort i båda fallen).
           Kortregeln (ägarbeslut 2026-09-15): ENDAST träkarlen ligger i kolumner,
@@ -1075,7 +1072,6 @@ export function PlayTable({
           När du försvarar sitter motståndarnas träkarl i stället på sin riktiga
           sida (se mittraden nedan) så man aldrig förväxlar den med partnern.
           Dolda motståndarhänder visas inte alls. */}
-      <div className="flex min-h-16 justify-center pt-[calc(0.75rem+env(safe-area-inset-top))]">
         {northUp &&
           (contract.declarer === 'N' ? (
             // Omslaget mäts av useSvavandeMeny (radens högerkant/underkant).
@@ -1101,71 +1097,48 @@ export function PlayTable({
               registerCardEl={registerCardEl}
             />
           ))}
-      </div>
+    </>
+  )
 
-      {/* Förra sticket bor numera inne i ⓘ-overlayen (som Synrey), inte flytande
-          på bordet — se showInfo nedan. */}
+  // Förra sticket bor inne i ⓘ-overlayen (som Synrey), inte flytande på bordet.
+  // Mittraden (Synrey, ägarbeslut 2026-08-02): när du försvarar flyttar STICKET
+  // mot spelförarens sida och träkarlen brer ut sig som färghögar på sin egen
+  // sida — den öppnade ytan ger större kort. Spelar du själv (träkarlen Nord
+  // upptill) står sticket kvar i mitten. Ramen sköter placeringen (felrapport
+  // #44: mittzonen krymper, sidohögarna kläms aldrig).
+  const mitt = (
+    <TrickCenterLive
+      play={play}
+      thinking={thinking}
+      sweep={sweep}
+      flight={flight}
+      wasFlown={wasFlown}
+      onSkipSweep={advanceSweep}
+      onCardClick={onPlayedCardClick}
+      hasReason={(pc) => !!reasonFor(pc)}
+    />
+  )
 
-      {/* Mittraden (Synrey, ägarbeslut 2026-08-02): när du försvarar flyttar
-          STICKET mot spelförarens sida och träkarlen brer ut sig som färghögar på
-          sin egen sida — den öppnade ytan ger större kort. Spelar du själv
-          (träkarlen Nord upptill) står sticket kvar i mitten som förr.
-          flex-1 centrerar vertikalt. */}
-      {/* När BÅDA sidohögarna visas samtidigt (claim-/auto-claim-revealen) får
-          de tillsammans inte plats med en full mittzon → Öst trycktes förr av
-          skärmkanten (felrapport #44). Mittzonen får min-w-0 så den krymper och
-          lämnar plats; sidohögarna shrink-0 så deras kort aldrig kläms bort. */}
-      <div className="flex flex-1 items-center gap-1 px-1 py-2">
-        {westUp && (
-          <div className="shrink-0">
-            <SideDummyPiles hand={play.hands.W} contract={contract} side="W" registerCardEl={registerCardEl} />
-          </div>
-        )}
-        <div className="flex min-w-0 flex-1 justify-center">
-          <TrickCenterLive
-            play={play}
-            thinking={thinking}
-            sweep={sweep}
-            flight={flight}
-            wasFlown={wasFlown}
-            onSkipSweep={advanceSweep}
-            onCardClick={onPlayedCardClick}
-            hasReason={(pc) => !!reasonFor(pc)}
-          />
-        </div>
-        {eastUp && (
-          <div className="shrink-0">
-            <SideDummyPiles hand={play.hands.E} contract={contract} side="E" registerCardEl={registerCardEl} />
-          </div>
-        )}
-      </div>
-
-      {/* Bricka + zon nere till vänster. */}
-      <div className="px-3 pb-2 text-xs leading-tight text-emerald-50/90">
-        <div>Bricka {deal.board}</div>
-        <div>{VUL_TEXT[deal.vulnerability]}</div>
-      </div>
-
-      {/* Svarta listen: kontraktet + ställningen + facit-knapp (R3-fynd #4:
-          facit ett klick bort på bordet i stället för begravd i ⋮-menyn). */}
-      <div className="flex items-center justify-center gap-2 pb-1.5">
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-950/80 px-3 py-1 shadow ring-1 ring-gold-400/25">
+  // Svarta listen: kontraktet + ställningen + facit-knapp (R3-fynd #4: facit ett
+  // klick bort på bordet i stället för begravd i ⋮-menyn).
+  const list = (
+    <>
+        <ListChip>
           <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
           {contract.doubled && <span className="text-sm font-bold text-red-400">{contract.doubled}</span>}
           <span className="text-sm font-semibold text-emerald-50">
             NS:{play.tricksNS} ÖV:{play.tricksEW}
           </span>
           <span className="text-xs text-emerald-100/55">mål {result.needed}</span>
-        </div>
-        <button
-          type="button"
-          onClick={showFacit}
-          className="rounded-lg bg-emerald-950/60 px-2.5 py-1 text-xs font-semibold text-emerald-50 ring-1 ring-emerald-100/10 transition-colors hover:bg-emerald-950/80 hover:ring-gold-400/40"
-        >
+        </ListChip>
+        <button type="button" onClick={showFacit} className={listKnappKlass('club')}>
           Facit
         </button>
-      </div>
+    </>
+  )
 
+  const underList = (
+    <>
       {/* Facit-resultatet på bordet (ljus text på filten). */}
       {facit !== 'idle' && (
         <p className="px-4 pb-1.5 text-center text-xs leading-relaxed">
@@ -1197,25 +1170,17 @@ export function PlayTable({
           </p>
         )
       )}
+    </>
+  )
 
-      {/* Din hand längst ner (trumf längst till vänster). Säker botten-marginal
-          (hemindikatorn) nu när duken går edge-to-edge. Är SYD träkarl (Nord
-          spelför) ritas handen som färgkolumner — kortregeln: träkarlen i
-          kolumner, spelföraren i kortrad (ägarbeslut 2026-09-15); du spelar
-          korten ändå (controls i common.tsx). Spelar du själv: kortraden. */}
-      <div className="border-t border-emerald-100/10 bg-emerald-950/25 px-2 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+  // Din hand längst ner (trumf längst till vänster). Är SYD träkarl (Nord
+  // spelför) ritas handen som färgkolumner — kortregeln: träkarlen i kolumner,
+  // spelföraren i kortrad (ägarbeslut 2026-09-15); du spelar korten ändå
+  // (controls i common.tsx). Spelar du själv: kortraden.
+  const syd = (
+    <>
         {/* När bara en vald färg visas: väg tillbaka till alla färger (Synrey). */}
-        {selectedSuit && (
-          <div className="flex justify-center pb-1.5">
-            <button
-              type="button"
-              onClick={deselectSuit}
-              className="rounded-full bg-emerald-950/60 px-3 py-1 text-xs font-semibold text-emerald-50 ring-1 ring-gold-400/30 transition-colors hover:bg-emerald-950/80"
-            >
-              ◀ Alla färger
-            </button>
-          </div>
-        )}
+        {selectedSuit && <AllaFargerKnapp onClick={deselectSuit} />}
         {dummyOf(contract) === 'S' ? (
           <SuitColumns
             hand={play.hands.S}
@@ -1236,8 +1201,11 @@ export function PlayTable({
             registerCardEl={registerCardEl}
           />
         )}
-      </div>
+    </>
+  )
 
+  const efter = (
+    <>
       {/* Flyglagret (etapp 3): klonen som flyger hand → stickmitten. Ovanpå
           korten (z-30) men under menyerna (z-40); släpper igenom alla klick. */}
       <FlightLayer
@@ -1295,6 +1263,27 @@ export function PlayTable({
           <Button onClick={finishClaimReveal}>Visa resultatet →</Button>
         </div>
       )}
-    </Felt>
+    </>
+  )
+
+  return (
+    <SpelbordRam
+      tone="club"
+      className={done ? 'felt-fade-out' : ''}
+      style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}
+      hornRef={menyAnkareRef}
+      horn={horn}
+      overlays={overlays}
+      nord={nord}
+      vast={westUp && <SideDummyPiles hand={play.hands.W} contract={contract} side="W" registerCardEl={registerCardEl} />}
+      mitt={mitt}
+      ost={eastUp && <SideDummyPiles hand={play.hands.E} contract={contract} side="E" registerCardEl={registerCardEl} />}
+      board={deal.board}
+      vulnerability={deal.vulnerability}
+      list={list}
+      underList={underList}
+      syd={syd}
+      efter={efter}
+    />
   )
 }

@@ -78,6 +78,27 @@ inget resultat ändras, ingen annan påverkas. Medvetet BARA när du inget har a
 spela: är du motspelare vore "hoppa" = ge upp/concede, vilket är en egen
 SENARE-fråga (bottarna skulle spela klart ditt försvar).
 
+**Bottarna = tävlingens bottar (ägarbeslut 2026-09-24, "Spela med vänner ska
+spela bridge exakt likadant som Dagens tävling").** Servern bjuder med samma
+funktion som tävlingen och nattgranskningen (`botBud`: beslutstabellen, och
+resonemangslagret i standardläget där tabellen saknar regel — DD-oraklet
+`budOrakel()` i `claim-dd.ts` ovanpå den redan buntade `bridge-dds`), i
+`drivFram`, facit-linjen (läge 1) och läge 2:s autobud/givval. Kortspelet kör
+KLIENTENS Monte-Carlo-profil (`SERVER_SMART = {}` → botCardSmarts standard:
+8-kortsfönster, mcBudget) — den strypta serverprofilen är borta. Serverless-
+taket sköts av tidsbudgeten per anrop (`budgetMs`, 5 s): är den slut STANNAR
+`drivFram` före nästa botbeslut (aldrig billigare tumregeldrag) och nästa
+hjärtslag (> 2 s stiltje) fortsätter — ett påbörjat tänkande bud körs alltid
+klart, därför `maxDuration: 60` för `api/bord.js` i `vercel.json` (genrepet
+mätte tänketid per läge: median 3,7 s, 90 % 11 s, längsta 24,6 s — `GENREP=1`,
+`revisor-output/tavling-genrep.txt`). Klienten visar "[Stol] tänker …" i
+budfasen och pulserande ljuskägla i spelet när en bot är i tur och loggen står
+still. Facit: `bord-motor.test.ts` ("tidsbudgeten" + "tänkande bottar vid
+bordet": samma kort som klientvägen beslut för beslut, samma bud som `botBud`,
+styckade anrop = ett svep). Kvar att bevaka: väntetiden vid bordet när två
+lambdor (draget + hjärtslaget) råkar tänka samma läge samtidigt — förloraren
+får 409 på skrivningen, korrekt men dubbelt CPU.
+
 **Klienten är en projektor** (`src/pages/bord/bord-projektion.ts`): händelser →
 läge, med den **visuella vridningen** (du sitter alltid Syd — rotationen är
 enbart rendering; motorns värld är de verkliga stolarna). `useBordSpel.ts`
@@ -184,6 +205,24 @@ bord som stått stilla > 2 h innan det globala taket räknas.
   OK / Spela klart) som kommer efter sticksvepet + `claimBeat`; kortklick är
   spärrade medan den väntar, och ett enda stick kvar claimas aldrig
   (`remainingTricks(st) > 1` i `drivFram`). Servermodellen i övrigt orörd.
+- **"Borden = tävlingen" (2026-09-24, ägarbeslut: "lämna poängräkningen,
+  åtgärda allt annat").** (1) Bottarna: se "Bottarna = tävlingens bottar" under
+  Arkitekturen. (2) Grafiken: spelfasen ritas genom den DELADE ramen
+  `src/pages/play/SpelbordRam.tsx` (zoner, marginaler, hörnknappar, svarta
+  listen, Syd-listen — en sanningskälla för spelbordet OCH vänner-bordet; tonen
+  'vanner' styr bara färgerna på chromet). Bordets topprad, "Din tur"-raden och
+  namnraden på duken är borta: ⋮ och ⓘ i hörnet som spelbordet, kontrakt/stick/
+  giv/ställning i listen, "Hoppa till resultat" där Facit-knappen sitter, vem
+  som sitter var i ⋮-menyn (budfasen) och ⓘ-overlayen (spelfasen). Budfasen
+  fick budstödet (motorns rekommendation ur EGEN hand + full/minimal
+  förklaring, samma sparade val som spelbordet), "[Stol] tänker …"-brickan
+  (`TankerBricka`, delad), "◀ Alla färger" och kortflygningen (`useCardFlight`
+  + `FlightLayer`; kroken `onKort` i `useBordSpel` mäter källkortet synkront
+  före avtäckningen). Röktest `BordSpel.test.tsx`. **Lämnat med flit:**
+  poängräkningen (ägarbeslut), kortförklaringen och Facit-under-spel (båda
+  skulle avslöja dolda händer för en mänsklig motståndare vid bordet) samt
+  Ångra / manuell claim / Ge upp (kräver regler för samtycke vid ett bord med
+  flera människor — ägarfrågor, se Medvetet utanför nedan).
 
 ## Medvetet utanför v1 (kandidater till SENARE)
 
@@ -195,7 +234,14 @@ bord som stått stilla > 2 h innan det globala taket räknas.
 - ~~**Rondgenomgång per giv**~~ — BYGGD 2026-09-14 (SENARE-listan etapp 1,
   se delleveranserna ovan).
 - **Kortförklaringar under spel** ("Varför spelade boten så?") — serverns
-  botresonemang skickas inte till klienten.
+  botresonemang skickas inte till klienten; en bots motivering ("höll upp kungen")
+  skulle avslöja dess hand för människorna vid bordet. Samma skäl stoppar
+  spelbordets Facit-knapp under spel (DD på alla fyra händer).
+- **Ångra / manuell claim / Ge upp** (spelbordets ⋮-meny, 2026-09-24): vid ett
+  bord med flera människor kräver de samtyckesregler — vem får ångra när
+  motståndaren sett kortet, vilka svarar på en människas claim (DD för bottarna,
+  OK/spela klart för människorna — infrastrukturen från DD-claimen finns),
+  behöver partnern godkänna "ge upp"? Ägarfrågor innan bygge.
 - **Kortflygningen och klockor/chatt/kibitzers** — polish respektive
   grindbeslut.
 - **Lokal JWT-verifiering (JWKS)** på heta dragvägen — auth cachas i varm

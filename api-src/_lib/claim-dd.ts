@@ -12,7 +12,8 @@
 import type { Dds } from 'bridge-dds'
 import type { Deal, Seat } from '../../src/types/bridge'
 import { remainingTricks } from '../../src/lib/engine/claim'
-import { dealToPbn, getDds } from '../../src/lib/engine/revisor-dds'
+import { computeOracle, dealToPbn, getDds } from '../../src/lib/engine/revisor-dds'
+import type { BudOrakel } from './bord-motor'
 import { side, type PlayState, type Strain } from '../../src/lib/engine/play'
 
 const STRAIN_IDX: Record<Strain, number> = { spades: 0, hearts: 1, diamonds: 2, clubs: 3, NT: 4 }
@@ -43,6 +44,19 @@ export function spelforarenTarResten(dds: Dds, state: PlayState): boolean {
     return spelforarensStick === kvar
   } catch {
     return false
+  }
+}
+
+/** Resonemangslagrets DD-orakel för bordets bottar (ägarbeslut 2026-09-24:
+ *  bottarna bjuder som i tävlingen). Samma lösare och samma tabelluppslag som
+ *  klientens webworker (resonemang-worker.ts) → samma bud för samma läge.
+ *  null om lösaren inte går att ladda: då bjuder bottarna ur tabellen. */
+export async function budOrakel(): Promise<BudOrakel | null> {
+  try {
+    const dds = await getDds()
+    return (d) => computeOracle(dds, d).solve
+  } catch {
+    return null
   }
 }
 

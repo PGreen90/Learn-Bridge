@@ -1,5 +1,17 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Borden = tävlingen (2026-09-24)
+- **Nytt:** vänner-bordets bottar bjuder (tänkande, DD-orakel på servern) och spelar
+  (klientens MC-profil) exakt som i Dagens tävling; slut tidsbudget → anropet
+  stannar och hjärtslaget fortsätter. Spelfasen ritas genom den delade ramen
+  `SpelbordRam.tsx`. Detalj `docs/bord-plan.md`.
+- **Bevaka:** (1) väntetiden vid bordet när en bot tänker ("[Stol] tänker …" kan stå
+  10–25 s; ett tänkande bud + `maxDuration: 60`); (2) en hel bot-giv (du träkarl)
+  kommer nu i flera hjärtslag — "Hoppa till resultat" landar mitt i given om
+  loggen inte är klar; (3) Vercel-loggen efter första bordet: inga timeouts på
+  `api/bord`; (4) tänkta bud som skiljer sig mellan bordet och samma läge på
+  spelbordet = DD-skillnad WASM Node/webbläsare (samma vakt som nattrapporten).
+
 ## Tänkande bottar i tävlingen (2026-09-24, `241da62`)
 - **Nytt:** bottarna tänker (resonemangslagret) även i Dagens tävling; servern godtar
   tänkta bud (`botbudGodtas`), nattgranskningen räknar om dem (`budAvvikelser`).

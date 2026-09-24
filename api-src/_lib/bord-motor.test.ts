@@ -7,7 +7,14 @@ import { describe, test, expect } from 'vitest'
 import type { Seat } from '../../src/types/bridge'
 import { contractFromCalls, decideCall, seatToAct } from '../../src/lib/engine/auction-live'
 import { botCardSmart } from '../../src/lib/engine/play-bot'
-import { dummyOf } from '../../src/lib/engine/play'
+import { dummyOf, playCard, startPlay } from '../../src/lib/engine/play'
+import { mulberry32 } from '../../src/lib/engine/deal'
+import { botDecisionSeed, playIndexOf } from '../../src/lib/engine/play-seed'
+import { dealFromSeed as revisorGiv } from '../../src/lib/engine/revisor'
+import { botBud, borTanka } from '../../src/lib/engine/resonemang'
+import { hcp as hcpOf } from '../../src/lib/engine/hand'
+import type { Deal } from '../../src/types/bridge'
+import type { ResolvedCall } from '../../src/lib/bidding'
 import { nsScore } from '../../src/lib/engine/matchpoints'
 import { declarerTricksWon, remainingTricks } from '../../src/lib/engine/claim'
 import {
@@ -445,8 +452,8 @@ describe('läge 2 — endast spelföring (4D)', () => {
   })
 })
 
-describe('tidsbudgeten', () => {
-  test('överskriden budget: given spelas ändå färdig (tumregelfallbacken)', () => {
+describe('tidsbudgeten (2026-09-24: slut budget → STANNA, nästa hjärtslag fortsätter)', () => {
+  test('överskriden budget: anropet stannar före nästa beslut, inga tumregeldrag', () => {
     const deal = bordGiv(SEED, GIV)
     const handelser: GivHandelse[] = [bokfor(givStartHandelse(deal, GIV))]
     let klockslag = 0
@@ -454,25 +461,104 @@ describe('tidsbudgeten', () => {
       manniskoStolar: new Set(),
       playSeed: bordPlaySeed(SEED, GIV),
       stallning: { ns: 0, ew: 0 },
+      smart: SNABB,
       budgetMs: 1, // omedelbar övertrassering
       nu: () => (klockslag += 1000),
     })
-    expect(nya[nya.length - 1].typ).toBe('giv-klar')
-    expect(nya.filter((h) => h.typ === 'kort')).toHaveLength(52)
+    // Klockan går 1 s per avläsning: start, sedan första kontrollen (1 s > 1 ms)
+    // → inget beslut alls. Anropet lämnar bara tillbaka det som hann bokföras.
+    expect(nya.filter((h) => h.typ === 'kort' || h.typ === 'bud')).toHaveLength(0)
+    expect(nya.some((h) => h.typ === 'giv-klar')).toBe(false)
   })
 
-  test('serverprofilen (riktig MC-budget) spelar en hel giv färdig', () => {
-    // Riktiga SERVER_SMART — långsammare (MC i slutspelen) men ska hålla gott
-    // och väl inom testets tidsgräns; detta är vaktposten mot en MC-profil som
-    // sväller bortom serverless-budgeten.
+  test('flera anrop i rad (hjärtslagen) spelar given färdig med samma drag som ett enda', () => {
+    const deal = bordGiv(SEED, GIV)
+    const miljo = { manniskoStolar: new Set<Seat>(), playSeed: bordPlaySeed(SEED, GIV), stallning: { ns: 0, ew: 0 }, smart: SNABB }
+    // Referens: ett anrop utan budgetproblem.
+    const ettSvep = drivFram(deal, GIV, [bokfor(givStartHandelse(deal, GIV))], miljo)
+    // Styckat: varje anrop får bara några beslut innan budgeten är slut.
+    const handelser: GivHandelse[] = [bokfor(givStartHandelse(deal, GIV))]
+    let anrop = 0
+    for (;;) {
+      if (anrop++ > 200) throw new Error('given tog aldrig slut')
+      let klockslag = 0
+      const nya = drivFram(deal, GIV, handelser, { ...miljo, budgetMs: 3500, nu: () => (klockslag += 1000) })
+      handelser.push(...nya.map(bokfor))
+      if (handelser[handelser.length - 1].typ === 'giv-klar') break
+    }
+    expect(anrop).toBeGreaterThan(5)
+    const drag = (h: GivHandelse[]) => h.filter((x) => x.typ === 'bud' || x.typ === 'kort').map((x) => JSON.stringify([x.seat, x.data]))
+    expect(drag(handelser.slice(1))).toEqual(drag(ettSvep.map(bokfor)))
+  })
+
+  test('serverprofilen ÄR klientens: samma kort som tävlingens botväg, beslut för beslut', () => {
+    // Ägarbeslut 2026-09-24 ("borden = tävlingen"): ingen strypt profil kvar.
+    expect(SERVER_SMART).toEqual({})
     const deal = bordGiv(SEED, 2)
+    const playSeed = bordPlaySeed(SEED, 2)
     const handelser: GivHandelse[] = [bokfor(givStartHandelse(deal, 2))]
-    const nya = drivFram(deal, 2, handelser, {
-      manniskoStolar: new Set(),
-      playSeed: bordPlaySeed(SEED, 2),
-      stallning: { ns: 0, ew: 0 },
-    })
-    expect(SERVER_SMART.maxCardsForMC).toBe(7)
-    expect(nya[nya.length - 1].typ).toBe('giv-klar')
+    for (let anrop = 0; anrop < 60; anrop++) {
+      const nya = drivFram(deal, 2, handelser, { manniskoStolar: new Set(), playSeed, stallning: { ns: 0, ew: 0 } })
+      handelser.push(...nya.map(bokfor))
+      if (handelser[handelser.length - 1].typ === 'giv-klar') break
+    }
+    expect(handelser[handelser.length - 1].typ).toBe('giv-klar')
+    // Klientvägen (usePlayTable/mc-worker): botCardSmart med { rng } ur samma frö
+    // och INGA andra opts — spelat om kort för kort mot serverns logg.
+    const history = handelser.filter((h) => h.typ === 'bud').map((h) => ({ seat: h.seat as Seat, bid: (h.data as { bid: string }).bid })) as ResolvedCall[]
+    const contract = contractFromCalls(history)!
+    let state = startPlay(deal, contract)
+    const serverKort = handelser.filter((h) => h.typ === 'kort')
+    expect(serverKort.length).toBeGreaterThan(0)
+    for (const h of serverKort) {
+      const rng = mulberry32(botDecisionSeed(playSeed, playIndexOf(state.completedTricks.length, state.currentTrick.length)))
+      const klientens = botCardSmart(state, state.toAct, history, { rng })
+      expect((h.data as { card: unknown }).card).toEqual(klientens)
+      state = playCard(state, klientens)
+    }
+  }, 300_000)
+})
+
+describe('tänkande bottar vid bordet (2026-09-24: samma budfunktion som tävlingen)', () => {
+  // Ägarens 1♣–X–XX-giv (samma fixtur som validera.test/resonemang.test): Nord
+  // saknar tabellrad efter S:1C W:X N:XX E:1S S:P W:P och tänker.
+  const P: Record<string, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
+  const orakel = (d: Deal) => (decl: Seat) => Math.min(13, Math.floor((hcpOf(d.hands[decl]) + hcpOf(d.hands[P[decl]])) / 3))
+  const auk = (s: string) => s.split(' ').map((c) => ({ seat: c[0], bid: c.slice(2) })) as ResolvedCall[]
+  const d0: Deal = { ...revisorGiv(20290770), dealer: 'S' }
+  const h = auk('S:1C W:X N:XX E:1S S:P W:P')
+  const budHandelser = (): GivHandelse[] => [
+    bokfor(givStartHandelse(d0, 1)),
+    ...h.map((c) => ({ typ: 'bud', seat: c.seat, data: { bid: c.bid } }) as GivHandelse),
+  ]
+
+  test('fixturen är ett tänkande läge (tabellen passar utan regel)', () => {
+    expect(borTanka(d0, h, 'N')).toBe(true)
+    expect(decideCall(d0, h, 'N').bid).toBe('P')
+  })
+
+  test('med orakel bjuder bordets bot exakt botBud (resonemangslagret); utan orakel tabellen', () => {
+    const miljo = { manniskoStolar: new Set<Seat>(['S', 'E', 'W']), playSeed: 1, stallning: { ns: 0, ew: 0 }, smart: SNABB }
+    const medOrakel = drivFram(d0, 1, budHandelser(), { ...miljo, oracle: orakel as never })
+    expect(medOrakel[0]).toMatchObject({ typ: 'bud', seat: 'N', data: { bid: botBud(d0, h, 'N', orakel as never).bid } })
+    const utan = drivFram(d0, 1, budHandelser(), miljo)
+    expect(utan[0]).toMatchObject({ typ: 'bud', seat: 'N', data: { bid: 'P' } })
+  })
+
+  test('budhändelsen bär bara budet — aldrig förklaringen (läckvakten)', () => {
+    const miljo = { manniskoStolar: new Set<Seat>(['S', 'E', 'W']), playSeed: 1, stallning: { ns: 0, ew: 0 }, smart: SNABB, oracle: orakel as never }
+    const nya = drivFram(d0, 1, budHandelser(), miljo)
+    expect(Object.keys(nya[0].data as object)).toEqual(['bid'])
+  })
+
+  test('autoAuktion och läge 2 tar samma orakel (facit-linjen och autobuden tänker också)', () => {
+    const linje = autoAuktion(d0, orakel as never)
+    const steg: ResolvedCall[] = []
+    for (const c of linje) {
+      expect(c.bid).toBe(botBud(d0, steg, c.seat, orakel as never).bid)
+      steg.push(c)
+    }
+    const l2 = lage2Giv(SEED, 3, 'S', orakel as never)
+    expect(l2.deal.hands.S).toHaveLength(13)
   })
 })

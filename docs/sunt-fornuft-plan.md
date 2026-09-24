@@ -139,7 +139,11 @@ Fynd i tabellen, inte i lagret: öppnaren passar 1♦–1♥–1♠–2NT med 16
 **Kvar (2026-09-24):** (1) läs första nattgranskningens rapport med tänkande bottar
 (budkontrollen — väntat: inga budavvikelser) · (2) ägarens känsla för väntetiden vid
 bordet (sänk `RESONEMANG_STANDARD.maxHands` till 16 vid behov) · (3) tabellraden
-1♦–1♥–1♠–2NT med 16 (öppnaren passar inviten) · (4) borden (server) har inte lagret.
+1♦–1♥–1♠–2NT med 16 (öppnaren passar inviten) · ~~(4) borden (server) har inte lagret~~
+— **KLART 2026-09-24:** bordets server bjuder med `botBud` + DD-orakel i alla
+vägar (drivFram, facit-linjen, läge 2), stannar vid slut budget i stället för
+tumregler, `maxDuration: 60`; detalj `docs/bord-plan.md` "Bottarna = tävlingens
+bottar". Bevaka: väntetiden vid vänner-bordet.
 
 ## Byggordning (ägaren godkände 2026-09-22)
 Principen: **mät → facit → regel**, ett hål i taget. Aldrig en enda catch-all
