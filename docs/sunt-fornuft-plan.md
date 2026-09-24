@@ -136,7 +136,10 @@ Två blev pass: 19 hp-dubblaren i (P)–P–(1♥)–X–(2♥)–P–(P) (2NT 1
 på 100 — tidsbrist, inte fel bud) och 17 hp med AKQT83 efter (3♦)–X–(XX)–P–(P), som nu
 lämnar 3♦XX (AK9 bakom spärröppnaren; 3♠ bara 0,9σ före även på 100 händer — försvarbart).
 Fynd i tabellen, inte i lagret: öppnaren passar 1♦–1♥–1♠–2NT med 16 → egen tabellrad.
-**Kvar:** tabellraden (1♦–1♥–1♠–2NT), ägarens live-prov, frågan om tävlingsbottarna/borden.
+**Kvar (2026-09-24):** (1) läs första nattgranskningens rapport med tänkande bottar
+(budkontrollen — väntat: inga budavvikelser) · (2) ägarens känsla för väntetiden vid
+bordet (sänk `RESONEMANG_STANDARD.maxHands` till 16 vid behov) · (3) tabellraden
+1♦–1♥–1♠–2NT med 16 (öppnaren passar inviten) · (4) borden (server) har inte lagret.
 
 ## Byggordning (ägaren godkände 2026-09-22)
 Principen: **mät → facit → regel**, ett hål i taget. Aldrig en enda catch-all

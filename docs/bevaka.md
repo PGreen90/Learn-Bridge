@@ -1,5 +1,13 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Tänkande bottar i tävlingen (2026-09-24, `241da62`)
+- **Nytt:** bottarna tänker (resonemangslagret) även i Dagens tävling; servern godtar
+  tänkta bud (`botbudGodtas`), nattgranskningen räknar om dem (`budAvvikelser`).
+  Plan + genrep: `docs/sunt-fornuft-plan.md`, `GENREP=1`.
+- **Bevaka:** (1) nattrapporten — väntat inga "bud N (X): bjöd …, motorn …"-fynd; ett
+  sådant = telefonens bud skilde sig från nattens (läs: DD-skillnad webbläsare/Node
+  eller versionsskev); (2) väntetiden vid bordet på telefon ("[Stol] tänker …").
+
 ## Nattgranskningen är versionsmedveten (2026-09-20, systemkontrollen)
 - **Lagat:** spelmotor-deployer mitt på en tävlingsdag fällde ärliga inskick i
   nattgranskningen (spelade med gårdagens motor, granskade med dagens). Nu bär

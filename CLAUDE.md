@@ -16,7 +16,7 @@ svarar på vad).
 **Kursändring 09-22: resonemangslagret** (simulering, regelboken som filter, budget +
 tidigt stopp; `resonemang.ts` + worker) — steg 1–3 LIVE 09-23 (`b6b153f`): inkopplat i Spela mot datorn.
 **Plan, mätning, byggordning + frågorna: `docs/sunt-fornuft-plan.md`** — läs först.
-Nyss LIVE (09-22, `275d9fe`): ovanlig 2NT-fortsättningen (§7.2); live-prov = ägarsteg.
+LIVE 09-24: pass-spärr + systemfilter · kontrollbud (§6.2) · tänkande bottar i tävlingen (`241da62`).
 
 **Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
 `docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
