@@ -272,6 +272,12 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   `submitTavlingGiv()` i bakgrunden när en giv är klar, brickan märks med utfallet.
   Facit: `validera.test.ts` (ärligt inskick godkänns; bytt giv / manipulerat
   bot-bud / påhittat stickantal / olagligt kort avvisas).
+  **Tänkande bottar (ägarbeslut 2026-09-24):** ett botbud godtas också där boten
+  TÄNKER (tabellen saknar regel + `vardAttTanka`) om budet är ett systemfiltret
+  tillåter (`botbudGodtas`); nattgranskningen räknar om det tänkta budet exakt
+  (`budAvvikelser` + DD, versionsmedvetet) → avvikelse = 'granskning'. Lagret är
+  deterministiskt (`resoneraBot`: bestämt antal händer, frö ur egen hand + auktion),
+  så telefon, server och natt får samma bud. Genrep: `tavling-genrep.probe.test.ts`.
 
 **2b — poäng + topplista — BYGGT & TESTAT (2026-08-11):**
 - Matchpoäng per giv (`src/lib/engine/matchpoints.ts`, ren funktion +

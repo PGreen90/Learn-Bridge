@@ -47,6 +47,8 @@ import { validera } from '../../../api-src/_lib/validera'
 import { nivaSmartOpts, TAVLINGSBOTTAR, type Tavlingsbot } from './botniva'
 import { giltigMotorstampel } from './tavlingsgranskning'
 import { spelaBotGiv } from './botspelare'
+import { botBud } from './resonemang'
+import { computeOracle, getDds } from './revisor-dds'
 
 const DATUM = process.env.BOT_TAVLING ?? ''
 
@@ -62,6 +64,18 @@ function lasHemlighet(namn: string): string | null {
 }
 
 it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async () => {
+  // Tänkande bottar (2026-09-24): samma budfunktion som klientens worker och
+  // nattgranskningen. Auktionen är lika för alla tre nivåer → minnet delas.
+  const dds = await getDds()
+  const budMinne = new Map<string, ReturnType<typeof botBud>>()
+  const tankandeBud = (d: Parameters<typeof botBud>[0], h: Parameters<typeof botBud>[1], s: Parameters<typeof botBud>[2]) => {
+    const k = `${d.board}|${h.map((c) => c.bid).join(',')}`
+    const minne = budMinne.get(k)
+    if (minne) return minne
+    const b = botBud(d, h, s, (x) => computeOracle(dds, x).solve)
+    budMinne.set(k, b)
+    return b
+  }
   expect(/^\d{4}-\d{2}-\d{2}$/.test(DATUM), `BOT_TAVLING måste vara YYYY-MM-DD (fick "${DATUM}")`).toBe(true)
   const secret = lasHemlighet('DAILY_SEED_SECRET')
   const base = lasHemlighet('SUPABASE_URL')
@@ -184,6 +198,7 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
         playSeedForBoard(secret!, DATUM, board),
         board,
         opts,
+        tankandeBud,
       )
       if (!inskick) {
         fynd.push(

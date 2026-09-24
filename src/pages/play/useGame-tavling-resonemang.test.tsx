@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
-// Regressionsfacit (2026-09-24, ägarens giv 4 i tävling #54 fick ✗ "Inskicket
-// avvisades"): resonemangslagret får ALDRIG köra i tävlingen. Servern validerar
-// varje botbud mot regeltabellen (decideCall) — en bot som "tänker" och bjuder
-// annat får hela inskicket avvisat, och alla i fältet ska möta samma bottar.
-// Med `resonera: false` startas ingen resonemangsworker → bottarna budar ur tabellen.
+// `resonera`-valet i useGame (2026-09-24). Historik: tävling #54 giv 4 fick ✗ när
+// den tidsstyrda bottens bud inte gick att räkna om på servern → lagret stängdes
+// av i tävlingen. Sedan standardläget (bestämt antal händer, frö ur egen hand +
+// auktion; servern godtar det tänkta budet, nattgranskningen räknar om det) är
+// lagret på överallt; `resonera: false` finns kvar för att kunna stänga av det.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { gameFromDeal, gameFromSeed, useGame } from './useGame'
 
-describe('useGame — resonemangslagret av i tävlingen', () => {
+describe('useGame — resonera-valet', () => {
   const skapade = vi.fn()
   beforeEach(() => {
     skapade.mockReset()

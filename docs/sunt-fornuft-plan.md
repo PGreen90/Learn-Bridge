@@ -92,8 +92,12 @@ borden (server) — de budar fortfarande bara ur tabellen; kandidat till nästa 
 **Bugg 2026-09-24 (lagad):** lagret körde även i Dagens tävling (samma `useGame`) → en
 bot som tänkte bjöd annat än tabellen och servern (`api-src/_lib/validera.ts`, botbud =
 `decideCall`) avvisade hela inskicket (✗ i "Dina givar", ägarens giv 4 i tävling #54).
-Nu `useGame(…, { resonera: !tavling })` — tävling + övningsläge budar bara ur tabellen
-(facit `useGame-tavling-resonemang.test.tsx`). "[Stol] tänker …" är en flytande bricka på
+Först `useGame(…, { resonera: !tavling })`; samma dag ägarbeslut "bottarna ska tänka även i
+tävlingen" → **standardläget** (`resoneraBot`, `RESONEMANG_STANDARD`: bestämt antal händer
+i stället för sekunder, frö ur egen hand + auktion, slumpen ur leken minus egen hand — samma
+bud på telefonen, servern och i natten) + servern godtar tänkta bud (`botbudGodtas`) +
+nattgranskningens budkontroll (`budAvvikelser`) + tänkande datorspelare och förscreening
+(`botBud`). Genrep `GENREP=1` (`tavling-genrep.probe.test.ts`). "[Stol] tänker …" är en flytande bricka på
 budlådans underkant (ägarbeslut 2026-09-24: budlådan får inte ändra storlek).
 **Urvalsprovet 2026-09-23** (`RESONEMANG=1 RESONEMANG_URVAL=60 RESONEMANG_BUDGET=12000`,
 ~10 min, `revisor-output/resonemang-urval.txt`): 29 av 60 fick ett bud, ~19 vettiga och

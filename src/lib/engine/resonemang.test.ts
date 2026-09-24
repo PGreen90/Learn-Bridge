@@ -138,3 +138,57 @@ describe('sakraStick — försvarsstick som håller med tanke på fördelningen'
     expect(sakraStick(h('S:J32 H:5432 D:5432 C:32'), h('S:AKQ4 H:AKQ3 D:AK C:654'), h('S:T9876 H:- D:QJ C:AKQJT9'), 'spades')).toBe(0)
   })
 })
+
+// Standardläget (2026-09-24, tänkande bottar i tävlingen): ETT bestämt antal
+// händer i stället för sekunder, fröet ur det boten vet, slumpen ur leken minus
+// egen hand — samma läge ger samma bud på telefonen, servern och i natt-
+// granskningen, och de verkliga dolda korten påverkar aldrig beslutet.
+import type { Deal } from '../../types/bridge'
+import { dealFromSeed } from './revisor'
+import { hcp as hcpOf } from './hand'
+import { resoneraBot, resonemangFro } from './resonemang'
+
+describe('resoneraBot — deterministisk och ärlig', () => {
+  // Billigt låtsas-orakel (ingen WASM i enhetstestet): stick ur parets hp.
+  const P: Record<string, 'N' | 'E' | 'S' | 'W'> = { N: 'S', S: 'N', E: 'W', W: 'E' }
+  const orakel = (d: Deal) => (decl: 'N' | 'E' | 'S' | 'W') => Math.min(13, Math.floor((hcpOf(d.hands[decl]) + hcpOf(d.hands[P[decl]])) / 3))
+  const auk = (s: string) => s.split(' ').map((c) => ({ seat: c[0], bid: c.slice(2) })) as ResolvedCall[]
+  const d0 = { ...dealFromSeed(20290770), dealer: 'S' as const }
+  const h = auk('S:1C W:X N:XX E:1S S:P W:P')
+
+  it('samma läge → samma bud och samma antal händer', () => {
+    const a = resoneraBot(d0, h, 'N', orakel as never)
+    const b = resoneraBot(d0, h, 'N', orakel as never)
+    expect(a.val).toBe(b.val)
+    expect(a.hander).toBe(b.hander)
+    expect(a.forklaring).toBe(b.forklaring)
+  })
+
+  it('de dolda korten påverkar aldrig beslutet (Ö/S/V byter händer → samma bud)', () => {
+    const bytt: Deal = { ...d0, hands: { ...d0.hands, E: d0.hands.W, W: d0.hands.S, S: d0.hands.E } }
+    const a = resoneraBot(d0, h, 'N', orakel as never)
+    const b = resoneraBot(bytt, h, 'N', orakel as never)
+    expect(b.val).toBe(a.val)
+    expect(b.forklaring).toBe(a.forklaring)
+  })
+
+  it('fröet beror bara på egen hand + auktionen (inte på giv-id)', () => {
+    expect(resonemangFro({ ...d0, id: 'x' }, h, 'N')).toBe(resonemangFro({ ...d0, id: 'y' }, h, 'N'))
+  })
+})
+
+import { budAvvikelser } from './tavlingsgranskning'
+
+describe('budAvvikelser — nattgranskningens budkontroll', () => {
+  const auk = (s: string) => s.split(' ').map((c) => ({ seat: c[0], bid: c.slice(2) })) as ResolvedCall[]
+  const d = { ...dealFromSeed(20290770), dealer: 'S' as const }
+  const h = auk('S:1C W:X N:XX E:1S S:P W:P N:2H E:P S:P W:P')
+  it('motorns egna bud → inga avvikelser; Syd (människan) jämförs aldrig', () => {
+    const motor = (_d: Deal, prefix: ResolvedCall[], seat: string) => h[prefix.length].bid && (seat === 'S' ? 'XX' : h[prefix.length].bid)
+    expect(budAvvikelser(d, { history: h, plays: [] }, motor as never)).toEqual([])
+  })
+  it('ett botbud motorn inte hade bjudit → avvikelse', () => {
+    const motor = (_d: Deal, prefix: ResolvedCall[]) => (prefix.length === 6 ? 'P' : h[prefix.length].bid)
+    expect(budAvvikelser(d, { history: h, plays: [] }, motor as never)).toEqual(['bud 7 (N): bjöd 2H, motorn P'])
+  })
+})

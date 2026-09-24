@@ -111,3 +111,37 @@ describe('validera — avvisar fusk', () => {
     expect(v.giltig).toBe(false)
   })
 })
+
+// Tänkande bottar i tävlingen (2026-09-24): där regeltabellen saknar regel och
+// läget är värt att tänka på får boten bjuda ur resonemangslagret. Servern gör
+// snabbkontrollen — budet måste vara ett som systemfiltret tillåter med bottens
+// hand — och nattgranskningen räknar om det exakt (budAvvikelser).
+import { dealFromSeed as revisorGiv } from '../../src/lib/engine/revisor'
+import { botbudGodtas } from './validera'
+
+describe('botbudGodtas — tänkande botbud i tävlingen', () => {
+  const auk = (s: string) => s.split(' ').map((c) => ({ seat: c[0], bid: c.slice(2) })) as ResolvedCall[]
+  // Ägarens 1♣–X–XX-giv: Nord (♠4 ♥AJT97 ♦QT64 ♣KJ2) saknar regel och tänker.
+  const d = { ...revisorGiv(20290770), dealer: 'S' as const }
+  const h = auk('S:1C W:X N:XX E:1S S:P W:P')
+
+  test('tabellens eget bud godtas alltid', () => {
+    expect(botbudGodtas(d, h, 'N', decideCall(d, h, 'N').bid)).toBe(true)
+  })
+
+  test('ett bud systemfiltret tillåter (2♥, längsta femkortsfärgen) godtas', () => {
+    expect(botbudGodtas(d, h, 'N', '2H')).toBe(true)
+  })
+
+  test('ett bud systemet inte tillåter (2♦ på fyrkort, 3NT) avvisas', () => {
+    expect(botbudGodtas(d, h, 'N', '2D')).toBe(false)
+    expect(botbudGodtas(d, h, 'N', '3NT')).toBe(false)
+  })
+
+  test('där tabellen HAR en regel godtas bara tabellens bud', () => {
+    const tidig = auk('S:1C')
+    const tabellens = decideCall(d, tidig, 'W').bid
+    const annat = tabellens === 'P' ? '1H' : 'P'
+    expect(botbudGodtas(d, tidig, 'W', annat)).toBe(false)
+  })
+})

@@ -17,7 +17,7 @@
 // Ren logik, ingen I/O — endpointen (api-src/skicka-in.ts) sköter auth + DB.
 // Motorn buntas server-side av scripts/build-api.mjs.
 
-import type { Card } from '../../src/types/bridge'
+import type { Bid, Card, Deal, Seat } from '../../src/types/bridge'
 import type { ResolvedCall } from '../../src/lib/bidding'
 import { dealFromSeed } from '../../src/lib/engine/deal'
 import {
@@ -37,6 +37,7 @@ import {
 import { declarerTricksWon, remainingTricks } from '../../src/lib/engine/claim'
 import { nsScore } from '../../src/lib/engine/matchpoints'
 import { seedForBoard } from './seed'
+import { borTanka, systemKandidater } from '../../src/lib/engine/resonemang'
 
 /** Ett inskick för EN tävlingsgiv. Servern regenererar given själv ur fröet —
  *  därför skickas inte händerna, bara brickan + det spelaren gjorde. */
@@ -60,6 +61,18 @@ function sammaKort(a: Card, b: Card): boolean {
 
 /** Validera ett inskick mot dagens hemliga frö. Returnerar giltig + omräknad
  *  N/S-poäng, eller ogiltig + ett skäl (för granskningsloggen). */
+/**
+ * Är `bid` ett godtagbart botbud i läget? Tabellens eget bud alltid; ett annat bud
+ * bara där boten TÄNKER (tabellen saknar regel och läget är värt det — tänkande
+ * bottar i tävlingen, 2026-09-24) och budet är ett systemfiltret tillåter med
+ * bottens hand. Snabbkontrollen — nattgranskningen räknar om det tänkta budet
+ * exakt (`budAvvikelser`).
+ */
+export function botbudGodtas(deal: Deal, prefix: ResolvedCall[], seat: Seat, bid: string): boolean {
+  if (decideCall(deal, prefix, seat).bid === bid) return true
+  return borTanka(deal, prefix, seat) && systemKandidater(deal.hands[seat], prefix, seat).includes(bid as Bid)
+}
+
 export function validera(secret: string, dateISO: string, inskick: Inskick): Validering {
   const { board, history, plays, declarerTricks } = inskick
   if (!Number.isInteger(board) || board < 1) return fail('ogiltig bricka')
@@ -77,9 +90,8 @@ export function validera(secret: string, dateISO: string, inskick: Inskick): Val
     if (seat === 'S') {
       if (!legalCalls(prefix, 'S').includes(call.bid)) return fail(`olagligt Syd-bud vid index ${i}`)
     } else {
-      const motor = decideCall(deal, prefix, seat)
-      if (motor.bid !== call.bid) {
-        return fail(`boten (${seat}) skulle bjuda ${motor.bid}, inte ${call.bid} (index ${i})`)
+      if (!botbudGodtas(deal, prefix, seat, call.bid)) {
+        return fail(`boten (${seat}) skulle bjuda ${decideCall(deal, prefix, seat).bid}, inte ${call.bid} (index ${i})`)
       }
     }
   }

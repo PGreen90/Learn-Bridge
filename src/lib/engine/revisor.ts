@@ -43,11 +43,15 @@ export function dealFromSeed(seed: number): Deal {
  * ordning tills auktionen är utpassad. Returnerar `null` om auktionen aldrig
  * tar slut (skyddsgräns — ett motorfel värt att räkna separat).
  */
-export function botAuction(deal: Deal, maxCalls = 60): ResolvedCall[] | null {
+export function botAuction(
+  deal: Deal,
+  maxCalls = 60,
+  bud: (deal: Deal, history: ResolvedCall[], seat: Seat) => ResolvedCall = decideCall,
+): ResolvedCall[] | null {
   const history: ResolvedCall[] = []
   while (!auctionComplete(history)) {
     if (history.length >= maxCalls) return null
-    history.push(decideCall(deal, history, seatAt(deal.dealer, history.length)))
+    history.push(bud(deal, history, seatAt(deal.dealer, history.length)))
   }
   return history
 }

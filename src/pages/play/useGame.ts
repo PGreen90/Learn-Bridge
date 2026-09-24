@@ -14,7 +14,7 @@ import {
 } from '../../lib/engine/auction-live'
 import { interpretCall } from '../../lib/engine/auction-interpret'
 import { decideCallTraced } from '../../lib/engine/auction-live'
-import { resonemangSeed, vardAttTanka } from '../../lib/engine/resonemang'
+import { vardAttTanka } from '../../lib/engine/resonemang'
 import { dealRandom, mulberry32 } from '../../lib/engine/deal'
 import { dailyDeal, dailyDealByNumber } from '../../lib/engine/daily'
 import { matchesTarget, type ContractTarget } from '../../lib/engine/contract-target'
@@ -43,8 +43,9 @@ function randomSeed(): number {
 
 const SEAT_ORDER: Seat[] = ['N', 'E', 'S', 'W']
 
-/** Bottens betänketid i resonemangslagret (ms). Tidigt stopp gör att lätta lägen tar 2–5 s. */
-export const RESONEMANG_BUDGET_MS = 12_000
+/** Nödstopp: svarar inte workern alls (krasch) på så här lång tid → pass som förr.
+ *  Själva tänkandet har ingen tidsgräns — det räknar ett bestämt antal händer. */
+export const RESONEMANG_NODSTOPP_MS = 120_000
 
 /** Rotera en giv så att den ursprungliga stolen `sitt` hamnar i SYD (spelaren
  *  budar alltid Syd). Händer, given och zonen roteras konsekvent → en EXAKT
@@ -106,8 +107,9 @@ export interface SearchState {
  *  `initial` (Etapp B): ett färdigt startläge — en återupptagen sparad giv
  *  eller en giv ur ett delat ?giv=frö — i stället för en ny slumpgiv.
  *  `dailyNr` (kalenderarkivet): spela en TIDIGARE dags giv (#nr) i efterhand. */
-/** `resonera: false` = resonemangslagret av (tävlingen: servern validerar varje botbud
- *  mot regeltabellen, och alla i fältet ska möta samma bottar — 2026-09-24). */
+/** `resonera: false` = resonemangslagret av. Standard: på överallt — även i tävlingen,
+ *  där standardläget (bestämt antal händer, frö ur egen hand + auktion) ger samma
+ *  bud som servern och nattgranskningen räknar fram (2026-09-24). */
 export function useGame(daily = false, initial?: Game | null, dailyNr?: number, opts: { resonera?: boolean } = {}) {
   const resonera = opts.resonera ?? true
   const [game, setGame] = useState<Game>(
@@ -174,7 +176,6 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number, 
       }
       reqId = ++resonemangReq.current
       setTanker(seat)
-      const budgetMs = RESONEMANG_BUDGET_MS
       const done = (call: ResolvedCall) => {
         if (reqId !== resonemangReq.current) return // nytt läge hann före
         clearTimeout(timeout)
@@ -185,8 +186,8 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number, 
         if (e.data.reqId !== reqId) return
         done(e.data.call ?? traced.call)
       }
-      timeout = setTimeout(() => done(traced.call), budgetMs + 8000) // worker svarar inte → pass
-      worker.postMessage({ reqId, deal: g.deal, history: g.history, seat, budgetMs, seed: resonemangSeed(g.deal, g.history) })
+      timeout = setTimeout(() => done(traced.call), RESONEMANG_NODSTOPP_MS) // worker svarar inte → pass
+      worker.postMessage({ reqId, deal: g.deal, history: g.history, seat })
     }, 700)
     return () => { clearTimeout(id); clearTimeout(timeout); if (reqId) { resonemangReq.current++; setTanker(null) } }
   }, [game, complete])

@@ -22,7 +22,7 @@ import type { Bid, Card, Deal, Hand, Seat, Suit } from '../../types/bridge'
 import { seatAt, type ResolvedCall } from '../bidding'
 import { parseContractBid, PARTNER, SUIT_OF_LETTER } from './auction-facts'
 import { contractFromCalls } from './auction-contract'
-import { auctionComplete, decideCall } from './auction-live'
+import { auctionComplete, decideCall, decideCallTraced } from './auction-live'
 import { legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
@@ -39,6 +39,8 @@ export interface ResonemangOpts {
   maxHands?: number
   /** Högsta antal slumpdragningar innan vi ger upp (för långa auktioner). */
   maxDraws?: number
+  /** Ingen tidsgräns: bara händer/dragningar räknas (deterministiskt — tävlingen). */
+  utanTid?: boolean
   seed?: number
 }
 
@@ -89,9 +91,17 @@ function rng(seed: number): () => number {
 }
 
 /** Slumpa de 39 okända korten över de tre andra stolarna. */
+const LEK: Card[] = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).flatMap((suit) =>
+  (['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'] as Card['rank'][]).map((rank) => ({ suit, rank })),
+)
+
+/** Slumpa de 39 okända korten över de tre andra stolarna. Utgår från LEKEN minus
+ *  min hand i fast ordning — aldrig från de verkliga dolda händerna — så att
+ *  slumpen (och därmed beslutet) bara beror på egen hand + auktionen (2026-09-24). */
 function slumpaGiv(deal: Deal, me: Seat, rand: () => number): Deal {
   const others = (['N', 'E', 'S', 'W'] as Seat[]).filter((s) => s !== me)
-  const cards: Card[] = others.flatMap((s) => deal.hands[s])
+  const mina = new Set(deal.hands[me].map((c) => `${c.suit}${c.rank}`))
+  const cards: Card[] = LEK.filter((c) => !mina.has(`${c.suit}${c.rank}`))
   for (let i = cards.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1))
     ;[cards[i], cards[j]] = [cards[j], cards[i]]
@@ -218,6 +228,14 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
   const rand = rng(opts.seed ?? 1)
   const hand = deal.hands[me]
   const buds = systemKandidater(hand, history, me)
+  // Systemet tillåter inget annat än pass → inget att simulera (sparar betänketid).
+  if (buds.length === 1) {
+    return {
+      val: 'P' as Bid, kandidater: [], hander: 0, dragningar: 0, ms: performance.now() - t0, stoppadeTidigt: true,
+      partner: { langd: { spades: 0, hearts: 0, diamonds: 0, clubs: 0 }, hpMin: 0, hpMax: 0, hpSnitt: 0 },
+      forklaring: 'Inget bud som systemet tillåter med handen → pass.',
+    }
+  }
   // s/s2 = budets poäng; d/d2 = skillnaden mot pass på samma hand (parad jämförelse).
   const sum = new Map<Bid, { n: number; s: number; s2: number; d: number; d2: number }>(
     buds.map((b) => [b, { n: 0, s: 0, s2: 0, d: 0, d2: 0 }]),
@@ -248,7 +266,7 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
       return kand
     })
 
-  while (hander < maxH && dragningar < maxDraws && performance.now() - t0 < budget) {
+  while (hander < maxH && dragningar < maxDraws && (opts.utanTid || performance.now() - t0 < budget)) {
     dragningar++
     const d = slumpaGiv(deal, me, rand)
     if (!stammer(d, history, me)) continue
@@ -332,8 +350,43 @@ export function vardAttTanka(deal: Deal, history: ResolvedCall[], me: Seat): boo
 }
 
 /** Deterministiskt frö ur given + läget, så samma läge alltid tänker likadant (felrapporter). */
-export function resonemangSeed(deal: Deal, history: ResolvedCall[]): number {
+/**
+ * Lagrets standard (2026-09-24): ETT bestämt antal händer i stället för sekunder,
+ * så att samma läge ger samma bud på telefonen, på servern och i nattgranskningen
+ * — tävlingen kan då validera en tänkande bot. Tidigt stopp räknas på händer.
+ */
+export const RESONEMANG_STANDARD = { minHands: 12, maxHands: 24, maxDraws: 30_000 } as const
+
+/** Slumpfröet ur det boten VET: egen hand, stol, giv, zon och auktionen. */
+export function resonemangFro(deal: Deal, history: ResolvedCall[], seat: Seat): number {
+  const hand = [...deal.hands[seat]].map((c) => `${c.suit[0]}${c.rank}`).sort().join('')
   let h = 2166136261
-  for (const ch of `${deal.id}|${history.length}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) }
+  for (const ch of `${hand}|${seat}|${deal.dealer}|${deal.vulnerability}|${history.map((c) => c.bid).join(',')}`) {
+    h ^= ch.charCodeAt(0)
+    h = Math.imul(h, 16777619)
+  }
   return h >>> 0
+}
+
+/** Ska boten tänka här? Tabellen saknar regel (pass utan regel) och läget är värt det. */
+export function borTanka(deal: Deal, history: ResolvedCall[], seat: Seat): boolean {
+  return decideCallTraced(deal, history, seat).källa === 'pass (ingen regel)' && vardAttTanka(deal, history, seat)
+}
+
+/**
+ * Bottens bud i ett läge: tabellen — eller, där boten tänker och ett orakel finns,
+ * resonemangslagret. EN funktion för klientens worker-väg, datorspelarnas nattspel,
+ * förhandsgranskningen och nattgranskningen, så alla får samma bud.
+ */
+export function botBud(deal: Deal, history: ResolvedCall[], seat: Seat, oracle?: (d: Deal) => DDSolver): ResolvedCall {
+  if (oracle && borTanka(deal, history, seat)) {
+    const r = resoneraBot(deal, history, seat, oracle)
+    return { seat, bid: r.val, rule: 'resonemang', explanation: r.forklaring } as ResolvedCall
+  }
+  return decideCall(deal, history, seat)
+}
+
+/** Bottens tänkande i standardläget — samma svar överallt för samma läge. */
+export function resoneraBot(deal: Deal, history: ResolvedCall[], seat: Seat, oracle: (d: Deal) => DDSolver): Resonemang {
+  return resonera(deal, history, seat, { oracle, ...RESONEMANG_STANDARD, utanTid: true, seed: resonemangFro(deal, history, seat) })
 }
