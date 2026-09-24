@@ -4,6 +4,7 @@
 // alltså inte 5 klöver; dubblade inte, alltså inte 4-4 i de objudna; kvar 4♠ 4♣".
 //
 // Metoden: simulering med den EGNA regelboken som filter.
+//   0. Kandidaterna = bara bud systemet tillåter med handen (systemKandidater).
 //   1. Slumpa händer till de tre andra stolarna, med bara min hand känd.
 //   2. Behåll de händer där motorn själv (decideCall) hade bjudit exakt som
 //      stolen faktiskt gjorde — varje bud OCH varje pass. Det ger den negativa
@@ -23,9 +24,11 @@ import { parseContractBid, PARTNER, SUIT_OF_LETTER } from './auction-facts'
 import { contractFromCalls } from './auction-contract'
 import { auctionComplete, decideCall } from './auction-live'
 import { legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
-import { hcp, lengths } from './hand'
+import { hcp, isBalanced, lengths } from './hand'
+import { hasStopper } from './overcalls'
 import { nsScore } from './matchpoints'
-import { side } from './play'
+import { meaningOf } from './auction-meaning'
+import { side, type Strain } from './play'
 import type { DDSolver } from './revisor'
 
 export interface ResonemangOpts {
@@ -108,26 +111,84 @@ function stammer(d: Deal, history: ResolvedCall[], me: Seat): boolean {
   return true
 }
 
-/** Tänkbara bud: pass, X/XX om lagligt, billigaste bud i varje 4+ färg och i partnerns färg, billigaste sang. */
-function kandidater(hand: Hand, history: ResolvedCall[], me: Seat): Bid[] {
+/** Konventionella bud är tabellens sak — lagret rör dem aldrig (hade handen passat
+ *  konventionen hade tabellen redan bjudit den). Läses ur betydelselagret. */
+const KONVENTION = /michaels|ovanlig|cue/i
+
+/**
+ * Tänkbara bud som SYSTEMET tillåter med handen (ägarbeslut 2026-09-23, "2/1-systemet
+ * är nyckeln"): pass · X (upplysning bara med högst 2 kort i deras färger) · XX med 10+ hp · naturligt färgbud med 5+ kort i
+ * den längsta färgen (lång färg först) eller en höjning av partnerns färg med 3+ ·
+ * billigaste sang med jämn hand och håll i deras färger (eller höjning av partnerns sang) — och aldrig ett bud som betydelselagret läser som konventionellt.
+ */
+export function systemKandidater(hand: Hand, history: ResolvedCall[], me: Seat): Bid[] {
   const legal = legalCalls(history, me)
   const len = lengths(hand)
   const out = new Set<Bid>(['P' as Bid])
-  for (const b of ['X', 'XX'] as Bid[]) if (legal.includes(b)) out.add(b)
-  const partnerSuits = new Set(
-    history.filter((c) => c.seat === PARTNER[me]).map((c) => parseContractBid(c.bid)?.strain).filter((s): s is string => !!s && s !== 'NT'),
-  )
+  if (legal.includes('XX' as Bid) && hcp(hand) >= 10) out.add('XX' as Bid)
+  const farger = (vem: (c: ResolvedCall) => boolean) =>
+    new Set(history.filter(vem).map((c) => parseContractBid(c.bid)?.strain).filter((s): s is string => !!s && s !== 'NT'))
+  const partnerSuits = farger((c) => c.seat === PARTNER[me])
+  const theirSuits = farger((c) => side(c.seat) !== side(me))
+  const mySuits = farger((c) => c.seat === me)
+  const betydelse = (b: Bid) => meaningOf([...history, { seat: me, bid: b } as ResolvedCall], history.length)
+  const konventionell = (b: Bid) => KONVENTION.test(betydelse(b).rule ?? '')
+  // Upplysningsdubbling: högst 2 kort i varje färg de bjudit (ägarbeslut 2026-09-24 —
+  // med längd i deras färg och en egen färg bjuder man färgen, "dubbel finns inte").
+  if (legal.includes('X' as Bid)) {
+    const m = betydelse('X' as Bid)
+    const upplysning = /upplysning|takeout/i.test(`${m.rule ?? ''} ${m.text}`)
+    if (!upplysning || SUITS.every((s) => !theirSuits.has(letterOfSuit(s)) || len[s] <= 2)) out.add('X' as Bid)
+  }
+  // Lång färg först: jämför med de färger jag ännu inte bjudit och som inte är deras.
+  const langst = Math.max(0, ...SUITS.filter((s) => !theirSuits.has(letterOfSuit(s)) && !mySuits.has(letterOfSuit(s))).map((s) => len[s]))
   const cheapest = (strain: string): Bid | null => legal.find((b) => parseContractBid(b)?.strain === strain) ?? null
   for (const s of SUITS) {
     const L = letterOfSuit(s)
-    if (len[s] >= 4 || (partnerSuits.has(L) && len[s] >= 3)) {
-      const b = cheapest(L)
-      if (b && parseContractBid(b)!.level <= 5) out.add(b)
-    }
+    const b = cheapest(L)
+    if (!b || parseContractBid(b)!.level > 5) continue
+    const hojning = partnerSuits.has(L) && len[s] >= 3
+    const egen = len[s] >= 5 && !theirSuits.has(L) && (mySuits.has(L) || len[s] >= langst)
+    if ((hojning || egen) && !konventionell(b)) out.add(b)
   }
   const nt = cheapest('NT')
-  if (nt && parseContractBid(nt)!.level <= 3) out.add(nt)
+  // Naturlig sang: jämn hand med håll i varje färg de bjudit — utom när jag höjer
+  // partnerns sang (då har partnern redan visat sanghanden).
+  const partnerSang = history.some((c) => c.seat === PARTNER[me] && parseContractBid(c.bid)?.strain === 'NT')
+  const sangHand = partnerSang || (isBalanced(hand) && SUITS.every((s) => !theirSuits.has(letterOfSuit(s)) || hasStopper(hand, s)))
+  if (nt && parseContractBid(nt)!.level <= 3 && sangHand && !konventionell(nt)) out.add(nt)
   return [...out]
+}
+
+const RANG: Record<string, number> = { A: 14, K: 13, Q: 12, J: 11, '10': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2 }
+
+/**
+ * Försvarsstick i `jag` som håller mot spelföraren + träkarlen i `strain` (ägarens
+ * princip 2026-09-23: värdera handen mot budgivningen — AK i en färg de är korta i
+ * dubblar man inte med). Sidofärg: toppsekvensen från esset, men i färgkontrakt bara
+ * så många ronder som BÅDA har kort (annars trumfas det). Trumf: ett kort räknas när
+ * deras högre trumf inte är fler än mina lägre (Qxx mot AK = 1).
+ */
+export function sakraStick(jag: Hand, spelforare: Hand, trakarl: Hand, strain: Strain): number {
+  let n = 0
+  for (const s of SUITS) {
+    const mina = jag.filter((c) => c.suit === s).map((c) => RANG[c.rank]).sort((a, b) => b - a)
+    const sf = spelforare.filter((c) => c.suit === s)
+    const tr = trakarl.filter((c) => c.suit === s)
+    if (s === strain) {
+      const deras = [...sf, ...tr].map((c) => RANG[c.rank])
+      for (const v of mina) if (deras.filter((x) => x > v).length <= mina.filter((x) => x < v).length) n++
+    } else {
+      const ronder = strain === 'NT' ? 13 : Math.min(sf.length, tr.length)
+      for (let i = 0; i < mina.length && mina[i] === 14 - i && i < ronder; i++) n++
+    }
+  }
+  return n
+}
+
+/** Deras kontrakt på utgångsnivå eller högre (3NT · 4♥/4♠ · 5♣/5♦). */
+function arUtgang(k: { strain: Strain; level: number }): boolean {
+  return k.strain === 'NT' ? k.level >= 3 : k.strain === 'hearts' || k.strain === 'spades' ? k.level >= 4 : k.level >= 5
 }
 
 function budaKlart(d: Deal, history: ResolvedCall[]): ResolvedCall[] {
@@ -156,7 +217,7 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
   const maxDraws = opts.maxDraws ?? 200_000
   const rand = rng(opts.seed ?? 1)
   const hand = deal.hands[me]
-  const buds = kandidater(hand, history, me)
+  const buds = systemKandidater(hand, history, me)
   // s/s2 = budets poäng; d/d2 = skillnaden mot pass på samma hand (parad jämförelse).
   const sum = new Map<Bid, { n: number; s: number; s2: number; d: number; d2: number }>(
     buds.map((b) => [b, { n: 0, s: 0, s2: 0, d: 0, d2: 0 }]),
@@ -164,6 +225,14 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
   const plen: Record<Suit, number> = { spades: 0, hearts: 0, diamonds: 0, clubs: 0 }
   let php = 0, phpMin = 40, phpMax = 0
   let hander = 0, dragningar = 0, stoppadeTidigt = false
+  // Dubbling av deras utgång = straffbud: X får bara väljas om mina + partnerns säkra
+  // försvarsstick (räknade på händer som stämmer med budgivningen) räcker till bet.
+  const kontrakt = contractFromCalls(history)
+  const straffX = buds.includes('X' as Bid) && !!kontrakt && side(kontrakt.declarer) !== side(me) && arUtgang(kontrakt)
+  const behov = kontrakt ? 8 - kontrakt.level : 0
+  let stickSum = 0
+  const stickSnitt = () => (hander ? stickSum / hander : 0)
+  const tillatna = (k: Kandidat[]) => (straffX && stickSnitt() < behov ? k.filter((c) => c.bud !== 'X') : k)
 
   const stat = (): Kandidat[] =>
     buds.map((b) => {
@@ -194,6 +263,10 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
       a.d += p - passP; a.d2 += (p - passP) ** 2
     }
     const ph = d.hands[PARTNER[me]]
+    if (straffX) {
+      const sf = d.hands[kontrakt!.declarer], tr = d.hands[PARTNER[kontrakt!.declarer]]
+      stickSum += sakraStick(hand, sf, tr, kontrakt!.strain) + sakraStick(ph, sf, tr, kontrakt!.strain)
+    }
     const l = lengths(ph)
     for (const s of SUITS) plen[s] += l[s]
     const h = hcp(ph)
@@ -205,12 +278,12 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
       const k = stat().sort((a, b) => b.snitt - a.snitt)
       const diff = k[0].snitt - k[1].snitt
       const se = Math.sqrt(k[0].se ** 2 + k[1].se ** 2)
-      if (diff > 2 * se && valjMotPass(k).val === k[0].bud) { stoppadeTidigt = true; break }
+      if (diff > 2 * se && valjMotPass(tillatna(k)).val === k[0].bud) { stoppadeTidigt = true; break }
     }
   }
 
   const k = stat().sort((a, b) => b.snitt - a.snitt)
-  const { val, spärrad } = hander > 0 ? valjMotPass(k) : { val: 'P' as Bid, spärrad: undefined }
+  const { val, spärrad } = hander > 0 ? valjMotPass(tillatna(k)) : { val: 'P' as Bid, spärrad: undefined }
   const partner = {
     langd: Object.fromEntries(SUITS.map((s) => [s, hander ? plen[s] / hander : 0])) as Record<Suit, number>,
     hpMin: hander ? phpMin : 0, hpMax: hander ? phpMax : 0, hpSnitt: hander ? php / hander : 0,
@@ -219,6 +292,9 @@ export function resonera(deal: Deal, history: ResolvedCall[], me: Seat, opts: Re
   const alt = k.slice(0, 3).map((c) => `${prettyBid(c.bud)} ${c.snitt >= 0 ? '+' : ''}${c.snitt.toFixed(0)}`).join(' · ')
   const forklaring = hander
     ? `Av ${hander} händer som stämmer med budgivningen ser partnern ut att ha ${form} och ${partner.hpMin}–${partner.hpMax} hp (snitt ${partner.hpSnitt.toFixed(0)}). Bästa bud i snitt: ${alt}.` +
+      (straffX && stickSnitt() < behov
+        ? ` X stryks: i snitt ${stickSnitt().toFixed(1)} säkra försvarsstick, det krävs ${behov} för bet.`
+        : '') +
       (spärrad ? ` ${prettyBid(spärrad)} leder, men inte säkert före pass${val === 'P' ? ' → pass' : ` → ${prettyBid(val)}`}.` : '')
     : `Hittade ingen hand som stämmer med budgivningen på ${dragningar} försök → pass.`
   return { val, kandidater: k, hander, dragningar, ms: performance.now() - t0, stoppadeTidigt, partner, forklaring }
