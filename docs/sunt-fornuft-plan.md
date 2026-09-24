@@ -89,6 +89,12 @@ Fel/timeout → pass som förr. Verifierat live: 1♣–(X)–XX–(1♠)–P–
 ~15 s och bjöd 2♦ (proben: 2♥/2♦/X inom felmarginalen), inga konsolfel. `bridge-dds`
 flyttad till dependencies. **Inte** inkopplat: tävlingsbottarna (nattjobbet, Node) och
 borden (server) — de budar fortfarande bara ur tabellen; kandidat till nästa steg.
+**Bugg 2026-09-24 (lagad):** lagret körde även i Dagens tävling (samma `useGame`) → en
+bot som tänkte bjöd annat än tabellen och servern (`api-src/_lib/validera.ts`, botbud =
+`decideCall`) avvisade hela inskicket (✗ i "Dina givar", ägarens giv 4 i tävling #54).
+Nu `useGame(…, { resonera: !tavling })` — tävling + övningsläge budar bara ur tabellen
+(facit `useGame-tavling-resonemang.test.tsx`). "[Stol] tänker …" är en flytande bricka på
+budlådans underkant (ägarbeslut 2026-09-24: budlådan får inte ändra storlek).
 **Urvalsprovet 2026-09-23** (`RESONEMANG=1 RESONEMANG_URVAL=60 RESONEMANG_BUDGET=12000`,
 ~10 min, `revisor-output/resonemang-urval.txt`): 29 av 60 fick ett bud, ~19 vettiga och
 ~7 dumma. Två rotorsaker:
@@ -102,15 +108,31 @@ borden (server) — de budar fortfarande bara ur tabellen; kandidat till nästa 
    X av 4♦, 3NT på partnerns 3♣) — mer tid/händer, inte lägre spärr, är botemedlet.
 2. **Budet provas utan att fråga systemet vad det betyder** (kandidaterna = varje
    4+-färg, X, XX, billigaste sang). Kvar efter spärren: 2♠ på fyrkort med 18 jämn (X är
-   rätt), X av deras 3NT, 2♦ på fyrkort över stark 2♣, XX med 8 hp. **Nästa steg:**
-   regelboken som filter även för det egna budet (betydelsen ska stämma med handen).
+   rätt), X av deras 3NT, 2♦ på fyrkort över stark 2♣, XX med 8 hp. **Lagat:
+   systemfiltret** (`systemKandidater` + `sakraStick`, facit `resonemang.test.ts`), ägarens
+   besked 2026-09-23 ("2/1-systemet är nyckeln"):
+   - naturligt färgbud = **5+ kort i alla färger, lång färg först**; höjning av partnerns
+     färg med 3+;
+   - **konventionella bud rör lagret aldrig** (Michaels, ovanlig 2NT, cue — läses ur
+     betydelselagret; hade handen passat konventionen hade tabellen bjudit den);
+   - **XX = 10+ hp**; naturlig **sang = jämn hand med håll** i deras färger (utom höjning
+     av partnerns sang);
+   - **upplysningsdubbling = högst 2 kort i varje färg de bjudit** (ägarbeslut 2026-09-24:
+     P P 1♦ P / P 1♥ P 2♥ / P P ? med ♠K43 ♥862 ♦AKQ87 ♣65 — "dubbel finns inte, jag vill
+     bjuda ruter"; för svag för 3-läget med 12, 3♦ med 15 — styrkan avgör simuleringen);
+   - **X av deras utgång = värdera handen mot budgivningen:** mina + partnerns *säkra*
+     försvarsstick, räknade på händerna som stämmer med budgivningen (ess/kung bara så
+     många ronder som både spelföraren och träkarlen har kort — AK i en färg de är
+     korta i räknas inte), ska räcka till bet. Annars stryks X.
+   Omprovet: alla fyra kvarvarande dumma bud borta (X av 3NT stryks: 3,1 säkra stick,
+   det krävs 5). Försvaret mot deras starka 2♣ (ägarens X = utspel klöver) → `docs/senare.md`.
 Steg 1-lägena med spärren (`RESONEMANG=1 RESONEMANG_BUDGET=12000`, `revisor-output/resonemang.txt`):
 åtta av tio oförändrade (ägarens 1♣–X–XX-giv bjuder fortfarande, alla bud ~4σ före pass).
 Två blev pass: 19 hp-dubblaren i (P)–P–(1♥)–X–(2♥)–P–(P) (2NT 1,5σ på 35 händer, 2,4σ
 på 100 — tidsbrist, inte fel bud) och 17 hp med AKQT83 efter (3♦)–X–(XX)–P–(P), som nu
 lämnar 3♦XX (AK9 bakom spärröppnaren; 3♠ bara 0,9σ före även på 100 händer — försvarbart).
 Fynd i tabellen, inte i lagret: öppnaren passar 1♦–1♥–1♠–2NT med 16 → egen tabellrad.
-**Kvar:** steg 2 ovan, tabellraden, ägarens live-prov, frågan om tävlingsbottarna/borden.
+**Kvar:** tabellraden (1♦–1♥–1♠–2NT), ägarens live-prov, frågan om tävlingsbottarna/borden.
 
 ## Byggordning (ägaren godkände 2026-09-22)
 Principen: **mät → facit → regel**, ett hål i taget. Aldrig en enda catch-all

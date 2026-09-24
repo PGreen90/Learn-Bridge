@@ -9,6 +9,15 @@
 
 ## ⚪ SENARE
 
+### Försvar mot deras starka 2♣ (ägaridé 2026-09-24, ur sunt förnuft-lagret)
+Systemet saknar överenskommelser när motståndarna öppnar stark konstgjord 2♣.
+Ägarens tanke: **X = utspelsdubbling ("spela ut klöver")** — vi vinner sällan
+budgivningen mot en stark 2♣. Kvar att bestämma med ägaren: vad 2♦/2♥/2♠, 2NT och
+3♣ betyder (betydelselagret läser i dag 3♣ som Michaels — fel, deras 2♣ är
+konstgjord). Byggs som tabellrad + betydelse + systembok, inte i resonemangslagret
+(simuleringen är dubbeldummy och kan inte värdera ett utspelsbud). Provgiv: frö
+20290813, Öst ♠92 ♥3 ♦AQ95 ♣AJ9875 efter Nords 2♣.
+
 ### Claim — nästa lager (claim-ombygget 2026-09-19, `docs/claim-plan.md`)
 - **Delclaim "X stick"** (ägarens idé): "[Väderstreck] gör anspråk på X stick". Kräver
   en regel för NÄR den får lösa ut (DD-värdet är känt i varje läge — rimligen bara

@@ -115,7 +115,7 @@ engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · de
 starka dubblaren säljer given i rond 2 · **svep: partnerskapsplikter i konkurrens**
 (preferens/fritt bud/höjning på visad längd, ägarbeslut 2026-09-02 efter
 felrapport #55–#56) · bot-hjärnans B2/Steg C · bredare försvarsinferens ·
-rondgenomgångens per-kort-motivering · claim nästa lager (delclaim "X stick") ·
+rondgenomgångens per-kort-motivering · försvar mot stark 2♣ · claim nästa lager (delclaim "X stick") ·
 **Gambling 3NT nästa lager** (låg prio,
 småfix: 4♦-slamfråga · 4NT-svar · Klinger-försvar) · 2♣-öppningens bredare översyn forts.
 (steg 1 substanskraven KLAR 2026-08-31; kvar: kravnivån + balanserad/
