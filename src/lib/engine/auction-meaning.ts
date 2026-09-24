@@ -2162,7 +2162,10 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
     const splinterReply = n === 3 && u.bids[1].cb.level === 3 && isMajor(u.bids[1].cb.strain) && u.bids[1].cb.strain !== u.bids[0].cb.strain && seat === u.responder
     // I partnerns färg är budet ett cue bara när trumfen är satt på riktigt (annars en höjning).
     const inPartnerSuit = partnerS.has(cb.strain)
-    if (ok && !jacobyReply && !splinterReply && (!inPartnerSuit || agreed)) {
+    // Utgång i partnerns högfärg utanför en cue-rond är en PLACERING, inget kontrollbud
+    // (ägarbeslut 2026-09-24: 1♦–1♠–2♣–2♦–2♥–4♥ — partnern placerar med ca 12 hp).
+    const placering = inPartnerSuit && isMajor(cb.strain) && cb.level === 4 && !lastWasCue
+    if (ok && !jacobyReply && !splinterReply && !placering && (!inPartnerSuit || agreed)) {
       const tsym = SYMBOL[trump]
       return R('cue-bid', `Kontrollbud ${B(cb)} — ${NAME[trump]} är trumf, så budet visar kontroll (ess/renons, senare kung/singel) i ${name} och slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${game.level}${tsym}.`)
     }

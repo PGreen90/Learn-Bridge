@@ -1618,6 +1618,36 @@ skulle läsas naturligt). Bjuder **du** själv ett cue i standardordning
 (billigaste först) följer boten med; en cue i annan ordning saknar tills
 vidare en regel (motorn följer inte med).
 
+**Den allmänna regeln** (ägarbeslut 2026-09-24): **när färgen är satt — hög- eller
+lågfärg — är en ny färg på 4-läget alltid ett kontrollbud**, oavsett budföljd, och
+ett kontrollbud **passas aldrig**. Satt = båda har bjudit färgen naturligt
+(inverterad lågfärgshöjning och Staymansvar räknas; Stayman-frågan, överföringar,
+fjärde färg, splinter och kontrollbud räknas inte). Enda kontrollbudet på 3-läget:
+**3♠ när hjärter är satt** (1♣–1♥–3♥–**3♠**). Under 4-läget gäller annars de
+naturliga betydelserna (stoppvisningen under 3NT i lågfärg, §4.2; hjälpfärgsinviten).
+Utgång i en högfärg vi själva bjudit (1♦–1♠–2♣–2♦–2♥–**4♥**) är till spel, inget
+kontrollbud. Svaret: billigaste egna första-rondskontroll på 4-läget, annars trumf
+(4M; i lågfärg 5m).
+
+**Partnern placerar utgången — den starka handen tar chansen** (ägarbeslut
+2026-09-24): när partnern bjuder utgång i en färg vi båda bjudit
+(1♦–1♠–2♣–2♦–2♥–**4♥**) placerar hen kontraktet — troligen ca 12 hp. Har jag en
+stark hand som **inte kunnat visas** (1-öppning i färg, inga egna hopp, reverser
+eller sangbud) räknar jag egen hand (fördelning räknad) mot partnerns ca 12:
+**31+ → 4NT** (1430) och beslutet tas på svaren — **ingen slaminbjudan** här; fyra
+ess och trumfdam i paret är alltid slam, två saknade nyckelkort → 5M. Annars pass. Har jag redan
+visat styrkan (t.ex. 2NT-återbudet 18–19) räknade partnern med den → pass.
+
+**Kontrollbud efter en inbjudan i högfärgstrumf** (ägarbeslut 2026-09-24,
+rondgenomgång): ett kontrollbud i ny färg **över 3M och under 4M** tvingar
+självt till utgång — även när höjningen bara var en inbjudan
+(1♣–1♥–**3♥**–4♣). Det är ett krav och **passas aldrig**: partnern visar
+billigaste egna första-rondskontroll under utgång (4♦ med ess/renons i ruter)
+eller stannar i 4♥. Ett kontrollbud **över** utgången (1♣–1♥–3♥–**4♠**) är också ett
+kontrollbud och passas aldrig, men har liten logisk relevans: partnern stannar i
+**5♥**, så budgivningen aldrig tvingas över 5-läget — vill kaptenen vidare frågar
+hen hellre ess (4NT), särskilt i högfärg.
+
 ### 6.3 Sjöbergs 5NT (kungfråga)
 Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
 storslam (lovar att inga nyckelkort saknas och att trumfdamen är under kontroll).
@@ -2901,6 +2931,29 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-24 — Partnerns placerade utgång: den starka handen frågar 4NT (§6.2;
+  ägarbeslut).** Öppnaren passade partnerns 4♥/4♠ oavsett styrka ("pass (ingen
+  regel)", även med 21 hp). Nu 4NT vid 31+ mot partnerns ca 12 (ingen inbjudan,
+  beslut på svaren) när den egna styrkan inte kunnat visas (`placeringsSituation` i `auction-decide.ts`).
+  Betydelselagret läste 4♥ i 1♦–1♠–2♣–2♦–2♥–4♥ som kontrollbud — nu placering.
+  Facit `auction-placering-4nt.test.ts`.
+- **2026-09-24 — Den allmänna kontrollbudsregeln (§6.2; ägarbeslut).** Kontrollbuden
+  fanns inkopplade budföljd för budföljd; varje budföljd utanför listan var ett hål.
+  Kontrollbudssvepet (`KONTROLL=1 KONTROLL_N=3000`, `kontrollbud.probe.test.ts`):
+  före passades 546 av 851 kontrollbud och 145 fick svar i fel färg; efter 0 pass, 0
+  fel färg. Kod `kontrollbud.ts` (läget ur auktionen) + reserven
+  `kontrollbudsSituation` i `auction-decide.ts` (tar också över när en specifik
+  slamgren saknar svar); kaptenen passar aldrig ett kontrollbud över utgången (5M).
+  Facit `kontrollbud.test.ts`.
+- **2026-09-24 — Kontrollbud efter hopphöjningen passas aldrig (§6.2; ägarens
+  rondgenomgång).** 1♣–1♥–3♥–4♣: öppnaren passade kontrollbudet i 60 av 60 händer
+  ("pass (ingen regel)") och svarade 4♦ med 5♣/5♦/4♠ ur kravbudsreserven — cue-ronden
+  var stängd eftersom hopphöjningen bara är en inbjudan. Nu öppnar ett kontrollbud i
+  högfärgstrumf över 3M (under 4M) cue-ronden själv: öppnaren visar billigaste
+  första-rondskontroll under utgång eller stannar i 4M. Kod `slam-auction.ts`
+  (`cuePhaseTurn`, `slamTurn`), facit `auction-slam-jumpraise-cue.test.ts`. Kontrollbud
+  ÖVER utgången (4♠ efter 3♥): partnern stannar i 5M (ägarbeslut — vill kaptenen
+  vidare frågar hen hellre ess).
 - **2026-09-22 — Sunt förnuft-lagret, hål 1: advancern över partnerns svaga
   hoppinkliv (§7.1; ägarbeslut).** Bakgrund: ägarens oro att motorn "reagerar
   svagt" — passar utan regel när ingen tabellrad träffar. Mätriggen

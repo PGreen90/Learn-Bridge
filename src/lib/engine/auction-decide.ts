@@ -166,6 +166,7 @@ import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, four
 import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
+import { kontrollbudslage, naturligtBud } from './kontrollbud'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
 import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
@@ -1270,6 +1271,8 @@ export interface SlamSituation {
   rebidCall?: string
   /** Sekvensens bud hittills (från och med kaptenens första slambud). */
   sofar: SlamBid[]
+  /** Den allmänna kontrollbudsregeln (inte en specifik slamgren) — kaptenens egen avsikt räknas inte om. */
+  generisk?: boolean
 }
 
 /**
@@ -1278,6 +1281,85 @@ export interface SlamSituation {
  * null = ingen slamsekvens (eller en vars trumf inte går att läsa ur auktionen).
  */
 export function slamSituation(f: AuctionFacts): SlamSituation | null {
+  return slamSituationSpecifik(f) ?? kontrollbudsSituation(f) ?? placeringsSituation(f)
+}
+
+/**
+ * Partnern har PLACERAT utgången (4♥/4♠/5♣/5♦) i en färg jag bjudit naturligt
+ * (ägarbeslut 2026-09-24: 1♦–1♠–2♣–2♦–2♥–4♥ — inget kontrollbud, partnern har
+ * troligen ca 12 hp). Handen som inte kunnat visa sin styrka blir kapten:
+ * kaptensregeln mot partnerns ca 12 (egen hand med fördelning via
+ * `slamCaptainFirstStep`): 31+ → 4NT och beslut på svaren (ingen slaminbjudan —
+ * "4 ess och trumfdam är alltid slam"), annars pass.
+ * Förr passade den starka handen alltid ("pass (ingen regel)"), även med 21 hp.
+ */
+function placeringsSituation(f: AuctionFacts): SlamSituation | null {
+  const open = f.opening
+  if (!open || f.theirContractBids.length > 0) return null
+  if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  const ours = f.ourContractBids
+  if (!ours.length || ours[0].seat !== open.seat || ours[0] !== f.contractBids[0]) return null
+  const p = ours.findIndex((c) => /^(4[HS]|5[CD])$/.test(c.bid))
+  if (p < 1) return null
+  const utg = ours[p]
+  const idx = f.history.indexOf(utg)
+  if (!naturligtBud(f.history, idx)) return null
+  const captain = PARTNER[utg.seat]
+  const trump = suitOf(utg.bid)!
+  const jagBjod = ours.slice(0, p).some((c) => c.seat === captain && suitOf(c.bid) === trump && naturligtBud(f.history, f.history.indexOf(c)))
+  if (!jagBjod) return null
+  // Bara beslutet ÖVER placeringen — efter 4NT tar essfrågans egna rader vid.
+  if (ours.length > p + 1) return null
+  // Styrkan ska INTE ha kunnat visas ("om du sitter på en väldigt stark hand och
+  // inte har kunnat visa det"): öppning 1 i färg, och inga egna hopp, reverser
+  // eller sangbud (2NT-återbudet visade redan 18–19 — partnern räknade med det).
+  if (open.level !== 1 || open.strain === 'NT') return null
+  for (const c of ours.slice(0, p)) {
+    if (c.seat !== captain) continue
+    const i = f.history.indexOf(c)
+    const cb = parseContractBid(c.bid)
+    if (!cb || cb.strain === 'NT') return null
+    if (/reverse|hopp|stark/i.test(meaningOf(f.history, i).rule ?? '')) return null
+    const fore = f.history.slice(0, i).filter((x) => parseContractBid(x.bid)).pop()
+    const minstaNiva = [1, 2, 3, 4, 5, 6, 7].find((l) => !fore || bidRank(`${l}${cb.strain}`) > bidRank(fore.bid))!
+    if (cb.level > minstaNiva) return null // hopp
+  }
+  const sofar: SlamBid[] = []
+  const ctx: SlamContext = { partnerMin: 12, essfragaFran: 31 }
+  return { kind: 'slam', captain, prefix: p + 1, generisk: true, sofar, setup: { trump, lastCall: utg.bid, ctx } }
+}
+
+/**
+ * Den ALLMÄNNA kontrollbudsregeln (ägarbeslut 2026-09-24): färgen satt (båda har
+ * bjudit den naturligt) + en ny färg på 4-läget = kontrollbud, oavsett budföljd.
+ * Reserv när ingen specifik slamgren ovan träffar — förr passades kontrollbudet
+ * i varje budföljd utanför listan (kontrollbudssvepet: 546 av 851 passade).
+ * Kontrollbud tillsvidare bara på 4-läget (`cueTak`); utgångskrav (budet självt
+ * har passerat 3M / 3NT). Ärlig inferens: läget läses bara ur auktionen.
+ */
+function kontrollbudsSituation(f: AuctionFacts): SlamSituation | null {
+  const open = f.opening
+  if (!open || f.theirContractBids.length > 0) return null
+  if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  const ours = f.ourContractBids
+  if (!ours.length || ours[0].seat !== open.seat || ours[0] !== f.contractBids[0]) return null
+  const lage = kontrollbudslage(f.history, f.seat)
+  if (!lage) return null
+  const k = ours.indexOf(f.history[lage.cueIndex])
+  if (k < 1) return null
+  const opener = open.seat
+  const captain = PARTNER[opener]
+  const sofar: SlamBid[] = ours.slice(k).map((c) => ({ role: c.seat === captain ? 'svarare' : 'öppnare', call: c.bid }))
+  const ctx: SlamContext = { partnerMin: 12, gameForcing: true, cueTak: '4S' }
+  return {
+    kind: 'slam', captain, prefix: k, generisk: true, sofar,
+    // partnerStarts bara för kontrollbud UNDER utgång — öppnarens 4♠ i hjärter (över
+    // utgången) besvaras med 5♥ direkt i slamTurn.
+    setup: { trump: lage.trump, lastCall: ours[k - 1].bid, ctx, partnerStarts: ours[k].seat === opener && bidRank(ours[k].bid) < bidRank(lage.trump === 'hearts' || lage.trump === 'spades' ? `4${LETTER[lage.trump]}` : `5${LETTER[lage.trump]}`) },
+  }
+}
+
+function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
   const open = f.opening
   if (!open || f.theirContractBids.length > 0) return null
   if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
@@ -1566,8 +1648,11 @@ const TABELL: Row[] = [
       const sit = read ?? captainOwnSituation(facts, hand)
       if (!sit) return null
       const role: SlamRole = facts.seat === sit.captain ? 'svarare' : 'öppnare'
-      const mine = role === 'svarare' && read ? captainIntent(read, facts, hand) : sit
-      const t = slamSituationTurn(mine, role, hand)
+      const mine = role === 'svarare' && read && !read.generisk ? captainIntent(read, facts, hand) : sit
+      // Den specifika grenen har inget svar (t.ex. öppnarens kontrollbud efter
+      // inverterad minor) → den allmänna kontrollbudsregeln tar över.
+      const allm = read && !read.generisk ? kontrollbudsSituation(facts) : null
+      const t = slamSituationTurn(mine, role, hand) ?? (allm ? slamSituationTurn(allm, facts.seat === allm.captain ? 'svarare' : 'öppnare', hand) : null)
       if (!t) return null
       return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation }
     },

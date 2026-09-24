@@ -101,6 +101,13 @@ export interface SlamContext {
    *  STOPP-letande (§4.2), över 3NT kontrollbud — så budspråken aldrig krockar.
    *  Utelämnat = cue direkt över senaste budet (högfärgslägena). */
   cueFloor?: string
+  /** Högsta tillåtna kontrollbud i cue-ronden (den allmänna regeln 2026-09-24:
+   *  kontrollbud tillsvidare bara på 4-läget → '4S'). Utelämnat = upp till utgång. */
+  cueTak?: string
+  /** Kaptensregelns golv för 4NT (standard 33). Över partnerns placerade utgång
+   *  frågar man ess redan från 31 och avgör på svaren — ingen slaminbjudan där
+   *  (ägarbeslut 2026-09-24: "4 ess och trumfdam är alltid slam"). */
+  essfragaFran?: number
   /**
    * Kaptenen räknar BARA hp (inte stödpoäng) mot partnerns visade minimum —
    * §5.2 "Slam efter 1NT-återbudet": kaptenens egen 6+ högfärg eller 5+ i
@@ -262,6 +269,18 @@ export function slamTurn(role: SlamRole, hand: Hand, setup: SlamSetup, sofar: Sl
   if (sofar.length === 1 && sofar[0].role === CAPTAIN && role !== CAPTAIN && sofar[0].call === gameCallFor(trump)) {
     return { role, call: 'P', rule: 'pass', explanation: `Partnern avslutade i utgång (${sofar[0].call}) → pass.` }
   }
+  // Kaptenens kontrollbud ÖVER utgången i högfärgstrumf (1♣–1♥–3♥–4♠) passas
+  // aldrig — men partnern hakar inte på: stannar i 5M, så budgivningen aldrig
+  // tvingas över 5-läget (ägarbeslut 2026-09-24: vill kaptenen vidare frågar hen
+  // hellre ess).
+  const game0 = gameCallFor(trump)
+  const c0 = sofar[0].call.match(/^([1-7])(C|D|H|S)$/)
+  if (
+    sofar.length === 1 && sofar[0].role !== role && (trump === 'hearts' || trump === 'spades') &&
+    c0 && SUIT_OF_LETTER_[c0[2]] !== trump && bidRank(sofar[0].call) > bidRank(game0) && bidRank(sofar[0].call) < bidRank(`5${LETTER[trump]}`)
+  ) {
+    return { role, call: `5${LETTER[trump]}`, rule: 'cue: avslut', explanation: `Partnerns kontrollbud över utgången (${sofar[0].call[0]}${SYM[SUIT_OF_LETTER_[c0[2]]]}) → 5${SYM[trump]} (stannar på 5-läget).` }
+  }
   const floor = role === CAPTAIN ? captainFloor(hand, trump, ctx, setup.partnerShort) : 0
   const askIdx = sofar.findIndex((b) => b.role === CAPTAIN && b.call === '4NT')
   if (askIdx >= 0) return rkcPhaseTurn(role, hand, trump, ctx, floor, sofar.slice(askIdx + 1))
@@ -337,7 +356,7 @@ export function slamCaptainFirstStep(
       if (cue) return cueTurn('svarare', cue)
     }
   }
-  if (floor >= 33 && !ctx.inviteOnly && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
+  if (floor >= (ctx.essfragaFran ?? 33) && !ctx.inviteOnly && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
   if (floor >= 31 && ctx.inviteCall && bidRank(ctx.inviteCall) > lastRank) return inviteTurn(ctx.inviteCall, trump)
   return null
 }
@@ -432,7 +451,12 @@ function partnerFirstStep(hand: Hand, setup: SlamSetup): SlamTurn {
 
 function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: number, sofar: SlamBid[]): SlamTurn | null {
   const { trump, ctx } = setup
-  if (!ctx.gameForcing) return null
+  // Ett kontrollbud i högfärgstrumf ÖVER 3M (1♣–1♥–3♥–4♣) kan inte stanna under
+  // utgång — budet självt tvingar till 4M, även efter en inbjudan (hopphöjningen).
+  // Förr stängde inbjudan cue-ronden och partnern passade kontrollbudet
+  // (ägarens rondgenomgång 2026-09-24): ett kontrollbud passas aldrig.
+  const overTreM = (trump === 'hearts' || trump === 'spades') && bidRank(sofar[0].call) > bidRank(`3${LETTER[trump]}`)
+  if (!ctx.gameForcing && !overTreM) return null
   const starter: SlamRole = setup.partnerStarts ? 'öppnare' : CAPTAIN
   if (sofar[0].role !== starter || !isCueCall(sofar[0].call, trump)) return null
   const gameRank = bidRank(gameCallFor(trump))
@@ -442,8 +466,9 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
     if (m && isCueCall(b.call, trump)) controlled.add(SUIT_OF_LETTER_[m[2]])
   }
   const lastRank = bidRank(sofar[sofar.length - 1].call)
+  const cueCap = ctx.cueTak ? Math.min(gameRank, bidRank(ctx.cueTak) + 1) : gameRank
 
-  const cue = cheapestFreeCue(hand, trump, lastRank, gameRank, controlled)
+  const cue = cheapestFreeCue(hand, trump, lastRank, cueCap, controlled)
   if (cue) return cueTurn(role, cue)
 
   const game = gameCallFor(trump)
@@ -453,9 +478,15 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
     const uncontrolled = RANK_ORDER.filter((s) => s !== trump && !controlled.has(s) && !firstRoundControl(hand, s))
     const driveFloor = ctx.strictDrive ? 33 : 31
     if (floor >= driveFloor && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
-    return bidRank(game) > lastRank
-      ? { role: 'svarare', call: game, rule: 'cue: avslut', explanation: `otillräckligt för slam → utgång (${game[0]}${SYM[trump]}).` }
-      : { role: 'svarare', call: 'P', rule: 'cue: avslut', explanation: `otillräckligt för slam → passar (${game} står).` }
+    if (bidRank(game) > lastRank) return { role: 'svarare', call: game, rule: 'cue: avslut', explanation: `otillräckligt för slam → utgång (${game[0]}${SYM[trump]}).` }
+    // Partnerns kontrollbud ÖVER utgången passas aldrig (ägarbeslut 2026-09-24) →
+    // billigaste trumfbud (5M).
+    const sist = sofar[sofar.length - 1].call.match(/^([1-7])(C|D|H|S)$/)
+    if (sist && SUIT_OF_LETTER_[sist[2]] !== trump) {
+      const stopp = [5, 6].map((l) => `${l}${LETTER[trump]}`).find((b) => bidRank(b) > lastRank)!
+      return { role: 'svarare', call: stopp, rule: 'cue: avslut', explanation: `Partnerns kontrollbud över utgången passas inte; otillräckligt för slam → ${stopp[0]}${SYM[trump]}.` }
+    }
+    return { role: 'svarare', call: 'P', rule: 'cue: avslut', explanation: `otillräckligt för slam → passar (${game} står).` }
   }
   // Partnern (öppnaren) har inga fler kontroller under utgång → avslutar i
   // utgång; kaptenen får ordet igen och kan ändå driva 4NT över det.
