@@ -12,7 +12,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import type { Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { formatHand } from '../felrapport'
-import { resonera, kandidatRad } from './resonemang'
+import { resonera, resoneraBot, kandidatRad } from './resonemang'
 import { dealFromSeed } from './revisor'
 import { computeOracle, getDds } from './revisor-dds'
 
@@ -69,12 +69,15 @@ it.skipIf(!ON || !URVAL)('resonemangslagret på ett urval ur mätningen', async 
   let rng = 4242
   const rand = () => { rng = (rng * 1103515245 + 12345) & 0x7fffffff; return rng / 0x7fffffff }
   const urval = [...misstankta].sort(() => rand() - 0.5).slice(0, URVAL)
-  const rader = [`Urvalsprovet: ${urval.length} av ${misstankta.length} misstänkta pass utan regel, budget ${BUDGET} ms`, '']
+  const rader = [`Urvalsprovet: ${urval.length} av ${misstankta.length} misstänkta pass utan regel, ${process.env.RESONEMANG_DET === '1' ? 'standardläget (bestämt antal händer)' : `budget ${BUDGET} ms`}`, '']
   const perKat = new Map<string, { n: number; annat: number }>()
   for (const x of urval) {
     const deal = dealFromSeed(x.seed)
     const history = x.auktion.split(' ').map((s) => ({ seat: s[0] as Seat, bid: s.slice(2) })) as ResolvedCall[]
-    const r = resonera(deal, history, x.seat, { oracle: (d) => computeOracle(dds, d).solve, budgetMs: BUDGET, seed: 7 })
+    // RESONEMANG_DET=1: standardläget (bestämt antal händer, samma som bottarna kör).
+    const r = process.env.RESONEMANG_DET === '1'
+      ? resoneraBot(deal, history, x.seat, (d) => computeOracle(dds, d).solve)
+      : resonera(deal, history, x.seat, { oracle: (d) => computeOracle(dds, d).solve, budgetMs: BUDGET, seed: 7 })
     const k = x.kategori.slice(0, 2).trim()
     const st = perKat.get(k) ?? { n: 0, annat: 0 }
     st.n++; if (r.val !== 'P') st.annat++

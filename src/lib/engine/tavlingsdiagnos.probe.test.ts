@@ -32,6 +32,7 @@ import { playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
 import { dealFromSeed } from './deal'
 import { analyseSpel, computeOracle, getDds } from './revisor-dds'
 import { botAuction, judgeDeal, CATEGORY_LABEL } from './revisor'
+import { botBud } from './resonemang'
 import { bedomSpel, helDom, type SpelDom } from './speldom'
 import { spelaMedFro } from './spela-giv'
 import type { Strain } from './play'
@@ -85,7 +86,7 @@ it.skipIf(!START)('tävlingsförscreening', { timeout: 0 }, async () => {
     for (let board = 1; board <= BRICKOR; board++) {
       const deal = dealFromSeed(seedForBoard(secret!, datum, board), board)
       const playSeed = playSeedForBoard(secret!, datum, board)
-      const history = botAuction(deal)
+      const history = botAuction(deal, 60, (d, h, s) => botBud(d, h, s, (x) => computeOracle(dds, x).solve)) // tänkande bottar
       if (!history) {
         haverier.push(`${datum} bricka ${board}: AUKTIONEN TERMINERADE ALDRIG — motorfel, MÅSTE granskas!`)
         json.push({ board, fel: 'auktion-terminerade-aldrig' })

@@ -44,6 +44,26 @@ export function giltigMotorstampel(v: unknown): v is string {
   return typeof v === 'string' && /^[0-9a-f]{40}$/.test(v)
 }
 
+/** Motorns bud i ett läge — tabellen, eller det tänkta budet där boten tänker. */
+export type BudMotor = (deal: Deal, history: ResolvedCall[], seat: Seat) => string
+
+/**
+ * Budkontrollen (tänkande bottar i tävlingen, 2026-09-24): spela om auktionen och
+ * lista de BOTBUD (N/Ö/V — Syd är människan) som inte var `budMotor`s egna.
+ * Servern godtar ett tänkt bud på snabbkontrollen; här räknas det om exakt.
+ */
+export function budAvvikelser(deal: Deal, payload: GranskadPayload | null | undefined, budMotor: BudMotor): string[] {
+  if (!payload || !Array.isArray(payload.history)) return ['payload saknas/trasig — kan inte budas om']
+  const ut: string[] = []
+  for (let i = 0; i < payload.history.length; i++) {
+    const c = payload.history[i]
+    if (c.seat === 'S') continue
+    const motorns = budMotor(deal, payload.history.slice(0, i), c.seat)
+    if (motorns !== c.bid) ut.push(`bud ${i + 1} (${c.seat}): bjöd ${c.bid}, motorn ${motorns}`)
+  }
+  return ut
+}
+
 /**
  * Spela om ett inskick och lista de BOTKORT som inte var `motor`s eget val.
  * Människan är Syd: hen styr S, och N när N/S är spelförande sida — de sätena

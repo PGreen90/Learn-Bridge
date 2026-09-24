@@ -17,7 +17,7 @@
 // (api-src/_lib/seed.ts har HMAC-hemligheten; den hör inte hemma här, modulen
 // ska kunna importeras var som helst utan node:crypto).
 
-import type { Card, Seat } from '../../types/bridge'
+import type { Card, Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { dealFromSeed, mulberry32 } from './deal'
 import { botAuction } from './revisor'
@@ -54,9 +54,11 @@ export function spelaBotGiv(
   playSeed: number,
   board: number,
   nivaOpts: SmartOpts = {},
+  /** Budfunktionen (tänkande bottar: `botBud` med DD-orakel); standard = tabellen. */
+  bud?: (deal: Deal, history: ResolvedCall[], seat: Seat) => ResolvedCall,
 ): BotInskick | null {
   const deal = dealFromSeed(givSeed, board)
-  const history = botAuction(deal)
+  const history = botAuction(deal, 60, bud)
   if (!history) return null
 
   // Utpassad giv: giltigt inskick med 0 kort och 0 stick (validera hanterar den).
