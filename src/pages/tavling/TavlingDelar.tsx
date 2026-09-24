@@ -135,7 +135,9 @@ export function Resultattabell({
           <tbody>
             {rader.map((r) => {
               const mp = mpPerBricka.get(r.board)
-              const avvisad = r.inskickStatus === 'avvisad'
+              // Serverns MP% vinner över den lokala "avvisad"-lappen: en giv som
+              // godkänts i efterhand (rättad i databasen, 2026-09-24) ska visa procent.
+              const avvisad = r.inskickStatus === 'avvisad' && mp === undefined
               // Servern har tagit emot given men den är inte poängsatt än (för få
               // spelare). Då "väntar" — och i snittet räknas den som 40 % tills
               // fler spelat den (Påbyggnad 3; det gamla "preliminärt 100 %"
