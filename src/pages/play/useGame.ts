@@ -106,7 +106,10 @@ export interface SearchState {
  *  `initial` (Etapp B): ett färdigt startläge — en återupptagen sparad giv
  *  eller en giv ur ett delat ?giv=frö — i stället för en ny slumpgiv.
  *  `dailyNr` (kalenderarkivet): spela en TIDIGARE dags giv (#nr) i efterhand. */
-export function useGame(daily = false, initial?: Game | null, dailyNr?: number) {
+/** `resonera: false` = resonemangslagret av (tävlingen: servern validerar varje botbud
+ *  mot regeltabellen, och alla i fältet ska möta samma bottar — 2026-09-24). */
+export function useGame(daily = false, initial?: Game | null, dailyNr?: number, opts: { resonera?: boolean } = {}) {
+  const resonera = opts.resonera ?? true
   const [game, setGame] = useState<Game>(
     () => initial ?? (daily ? newDailyGame(0, dailyNr) : newGame()),
   )
@@ -145,13 +148,14 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number) 
   const resonemangWorker = useRef<Worker | null>(null)
   const resonemangReq = useRef(0)
   useEffect(() => {
+    if (!resonera) return
     try {
       resonemangWorker.current = new Worker(new URL('../../lib/engine/resonemang-worker.ts', import.meta.url), { type: 'module' })
     } catch {
       resonemangWorker.current = null
     }
     return () => { resonemangWorker.current?.terminate(); resonemangWorker.current = null }
-  }, [])
+  }, [resonera])
 
   // Datorn budar V/N/Ö när det är deras tur (liten fördröjning, som korten).
   useEffect(() => {

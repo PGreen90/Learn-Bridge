@@ -146,11 +146,6 @@ export function BiddingPhase({
             explanations={bidHelp ? 'full' : 'minimal'}
             hiddenHands
           />
-          {tanker && (
-            <div className="mt-1 text-center text-[11px] font-medium text-emerald-100/80" aria-live="polite">
-              {SEAT_LABEL[tanker]} tänker …
-            </div>
-          )}
           <div className="shrink-0 sm:absolute sm:-right-11 sm:top-0">
             <TableMenu
               open={showMenu}
@@ -174,7 +169,7 @@ export function BiddingPhase({
       </div>
 
       {/* Budlådan – alltid synlig; otillåtna/inte-din-tur tonas ner. */}
-      <div className="px-2.5 pb-1.5">
+      <div className="relative px-2.5 pb-1.5">
         <BiddingBox
           legal={yourTurn ? legalCalls(game.history, 'S') : []}
           onBid={onBid}
@@ -182,6 +177,17 @@ export function BiddingPhase({
           history={game.history}
           showHelp={bidHelp}
         />
+        {/* "[Stol] tänker …" (resonemangslagret): en FLYTANDE bricka på budlådans
+            underkant (ägarbeslut 2026-09-24) — tar ingen plats i flödet, så varken
+            budlådan eller auktionen ändrar storlek när den kommer och går. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-1.5 z-10 flex translate-y-1/2 justify-center" aria-live="polite">
+          {tanker && (
+            <div className="flex items-center gap-1.5 rounded-full bg-emerald-950/90 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg ring-1 ring-gold-400/30">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-300" aria-hidden />
+              {SEAT_LABEL[tanker]} tänker …
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Din hand som solfjäder + HCP-bricka (Synrey). mt-auto trycker handen till

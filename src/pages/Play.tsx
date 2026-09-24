@@ -179,7 +179,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
     startSameGame,
     pickTarget,
     cancelSearch,
-  } = useGame(daily, restored.game, dailyNr ?? undefined)
+  } = useGame(daily, restored.game, dailyNr ?? undefined, { resonera: !tavling }) // tävling + övning: bara tabellen
 
   // Fröet i adressen håller jämna steg med given (Etapp B): då överlever en
   // omladdning även utan sparning, och adressen går att dela/bokmärka.
