@@ -16,12 +16,16 @@
 // i stället systemiskt ur auktionen (interpretCall), samma läckvakt som
 // spelbordets AuctionGrid.
 //
-// Botarnas kortval på serverless: strypt Monte-Carlo-profil (SERVER_SMART) +
-// total tidsbudget per anrop — överskrids den faller resten av dragen tillbaka
-// på tumreglerna (maxCardsForMC: 0). Ofarligt för korrektheten: vid bordet ÄR
-// serverns drag facit, inget ska reproduceras i efterhand (till skillnad från
-// tävlingsvalideringen). Fröet (bordPlaySeed → botDecisionSeed per beslut)
-// behålls ändå så en giv kan spelas om exakt vid felsökning (spela-giv.ts).
+// Bottarna spelar EXAKT som i Dagens tävling (ägarbeslut 2026-09-24, "borden =
+// tävlingen"): samma budfunktion (botBud — tabellen, och resonemangslagret där
+// tabellen saknar regel och ett DD-orakel finns) och samma Monte-Carlo-profil
+// som klientens spelbord (SERVER_SMART = klientens standard). Serverless-taket
+// hanteras med en tidsbudget per anrop: är den slut STANNAR framdrivningen
+// (inga billigare tumregeldrag) och nästa hjärtslag fortsätter där den slutade
+// — kvaliteten är aldrig lägre än på telefonen, bara utspridd över fler anrop.
+// Fröet (bordPlaySeed → botDecisionSeed per beslut) gör varje kortval
+// reproducerbart (spela-giv.ts); budet i ett tänkande läge är deterministiskt
+// ur egen hand + auktionen (resonemangFro), samma som i tävlingen.
 
 import { createHmac } from 'node:crypto'
 import type { Card, Deal, Seat } from '../../src/types/bridge'
@@ -30,7 +34,6 @@ import { dealFromSeed, mulberry32 } from '../../src/lib/engine/deal'
 import {
   auctionComplete,
   contractFromCalls,
-  decideCall,
   legalCalls,
   seatToAct,
 } from '../../src/lib/engine/auction-live'
@@ -48,6 +51,12 @@ import { botCardSmart, type SmartOpts } from '../../src/lib/engine/play-bot'
 import { botDecisionSeed, playIndexOf } from '../../src/lib/engine/play-seed'
 import { nsScore } from '../../src/lib/engine/matchpoints'
 import { declarerTricksWon, remainingTricks } from '../../src/lib/engine/claim'
+import { botBud } from '../../src/lib/engine/resonemang'
+import type { DDSolver } from '../../src/lib/engine/revisor'
+
+/** DD-orakel för resonemangslagret: en (slumpad) giv → DD-tabellens uppslag.
+ *  Saknas det bjuder bottarna bara ur tabellen (som före 2026-09-24). */
+export type BudOrakel = (d: Deal) => DDSolver
 
 // ---------------------------------------------------------------------------
 // Givarna ur bordsfröet.
@@ -98,13 +107,14 @@ export function roteraDeal(deal: Deal, shift: number): Deal {
 }
 
 /** Motorns hela kanoniska auktion för en giv (facit-genomgången i läge 1 och
- *  läge 2:s autobud): decideCall stol för stol tills auktionen är klar. */
-export function autoAuktion(deal: Deal): ResolvedCall[] {
+ *  läge 2:s autobud): bottens bud stol för stol tills auktionen är klar —
+ *  med orakel tänker bottarna precis som i tävlingen. */
+export function autoAuktion(deal: Deal, oracle?: BudOrakel): ResolvedCall[] {
   const history: ResolvedCall[] = []
   let vakt = 0
   while (!auctionComplete(history) && vakt++ < 60) {
     const seat = seatToAct(deal.dealer, history.length)
-    const call = decideCall(deal, history, seat)
+    const call = botBud(deal, history, seat, oracle)
     history.push({ seat, bid: call.bid })
   }
   return history
@@ -118,10 +128,11 @@ export function lage2Giv(
   seedHex: string,
   givNr: number,
   malStol: Seat,
+  oracle?: BudOrakel,
 ): { deal: Deal; underIndex: number; shift: number } {
   for (let k = 0; k < 20; k++) {
     const ratt = bordGiv(seedHex, givNr, k)
-    const auktion = autoAuktion(ratt)
+    const auktion = autoAuktion(ratt, oracle)
     const contract = contractFromCalls(auktion)
     if (!contract) continue // utpassad — nästa underindex
     const shift = (SEAT_ORDER.indexOf(malStol) - SEAT_ORDER.indexOf(contract.declarer) + 4) % 4
@@ -296,10 +307,12 @@ export function utforDrag(
 // ---------------------------------------------------------------------------
 // Botframdrivningen.
 
-/** Strypt MC-profil för serverless (mot klientens fönster på 8 kort och
- *  budget upp till 30 sampel / 200k noder): mindre fönster, färre sampel.
- *  Facit: bord-motor.test.ts mäter att en hel giv spelas inom tidsbudgeten. */
-export const SERVER_SMART: SmartOpts = { maxCardsForMC: 7, samples: 8, maxNodes: 60_000 }
+/** Serverns MC-profil = KLIENTENS standard (tomt objekt → botCardSmarts egna
+ *  standardvärden: 8-kortsfönster, mcBudget per kortantal). Ägarbeslut
+ *  2026-09-24: bottarna vid bordet spelar exakt som i tävlingen. Tidsbudgeten
+ *  per anrop (nedan) sköter serverless-taket — inte en sämre profil.
+ *  Facit: bord-motor.test.ts jämför serverns kort med klientvägens. */
+export const SERVER_SMART: SmartOpts = {}
 
 export interface DrivMiljo {
   /** Stolar som styrs av en aktiv människa — servern spelar aldrig deras drag.
@@ -315,9 +328,12 @@ export interface DrivMiljo {
    *  Default 'full' (läge 2 spelar också kort — auktionen är redan bokförd). */
   spelform?: 'budgivning' | 'spelforing' | 'full'
   smart?: SmartOpts
-  /** Total tidsbudget för botdragen i DETTA anrop (ms). Överskriden budget →
-   *  resterande drag via tumreglerna (billiga, alltid lagliga). */
+  /** Total tidsbudget för botdragen i DETTA anrop (ms). Är den slut STANNAR
+   *  framdrivningen före nästa botbeslut — resten tar nästa hjärtslag. Ett
+   *  påbörjat beslut (t.ex. ett tänkande bud) körs alltid klart. */
   budgetMs?: number
+  /** DD-orakel för resonemangslagret (bud utan tabellrad). Saknas → tabellen. */
+  oracle?: BudOrakel
   /** Injektbar klocka (test). */
   nu?: () => number
   /** Claimens DD-dom (etapp 3, claim-dd.ts): tar spelförarsidan alla
@@ -379,7 +395,7 @@ export function drivFram(
           nya.push({
             giv: givNr,
             typ: 'facit',
-            data: { hands: deal.hands, contract, systemlinje: autoAuktion(deal) },
+            data: { hands: deal.hands, contract, systemlinje: autoAuktion(deal, miljo.oracle) },
           })
           break
         }
@@ -393,7 +409,8 @@ export function drivFram(
       }
       const seat = seatToAct(deal.dealer, history.length)
       if (miljo.manniskoStolar.has(seat)) break
-      const call = decideCall(deal, history, seat)
+      if (nu() - start > budget) break // budgeten slut → nästa hjärtslag fortsätter
+      const call = botBud(deal, history, seat, miljo.oracle)
       history = [...history, { seat, bid: call.bid }]
       nya.push({ giv: givNr, typ: 'bud', seat, data: { bid: call.bid } })
       continue
@@ -455,11 +472,9 @@ export function drivFram(
     const toAct = st.toAct
     if (miljo.manniskoStolar.has(agerande(contract!, toAct))) break
 
+    if (nu() - start > budget) break // budgeten slut → nästa hjärtslag fortsätter
     const rng = mulberry32(botDecisionSeed(miljo.playSeed, playIndexOf(st.completedTricks.length, st.currentTrick.length)))
-    const profil: SmartOpts =
-      nu() - start > budget
-        ? { maxCardsForMC: 0 } // budgeten slut → tumreglerna resten av anropet
-        : { ...SERVER_SMART, ...miljo.smart, rng }
+    const profil: SmartOpts = { ...SERVER_SMART, ...miljo.smart, rng }
     const card = botCardSmart(st, toAct, history, profil)
     state = playCard(st, card)
     nya.push({ giv: givNr, typ: 'kort', seat: toAct, data: { card } })

@@ -102,9 +102,35 @@ describe('BordSpel — röktest', () => {
     ]
     rendera()
     expect(await screen.findByText('PASS')).toBeTruthy() // budlådan
-    expect(screen.getByText(/Patrik \(du\)/)).toBeTruthy() // namnraden
     expect(screen.getByText(/Giv 1 av 4/)).toBeTruthy() // givbrickan
     expect(screen.getByText('HCP 10')).toBeTruthy() // ess+kung+dam+knekt i MIN_HAND
+    // 2026-09-24 ("borden = tävlingen"): ingen namnrad på duken — budfasen har
+    // exakt spelbordets placeringar. Vem som sitter var bor i ⋮-menyn, där
+    // också budstödet finns (samma val som spelbordet).
+    expect(screen.queryByText(/Patrik \(du\)/)).toBeNull()
+    fireEvent.click(screen.getByLabelText('Meny'))
+    expect(screen.getByText(/Patrik \(du\)/)).toBeTruthy()
+    expect(screen.getByText('Budstöd')).toBeTruthy()
+  })
+
+  test('budfasen: "[Stol] tänker …" när en bot är i tur och loggen står still (2026-09-24)', async () => {
+    seq = 0
+    // Nord (bot) är giv och har inte bjudit än — servern räknar / hjärtslaget driver.
+    svarEvents = [h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' })]
+    rendera()
+    expect(await screen.findByText(/Nord tänker …/)).toBeTruthy()
+  })
+
+  test('budfasen: ingen tänker-bricka när det är MIN tur', async () => {
+    seq = 0
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'N', vulnerability: 'none' }),
+      h('bud', 'N', { bid: '1S' }),
+      h('bud', 'E', { bid: 'P' }),
+    ]
+    rendera()
+    expect((await screen.findAllByText('PASS')).length).toBeGreaterThan(0) // budlådan + Östs pass i auktionen
+    expect(screen.queryByText(/tänker …/)).toBeNull()
   })
 
   test('4C: ägaren ser godkännande-bannern för en väntande begäran', async () => {
@@ -129,9 +155,41 @@ describe('BordSpel — röktest', () => {
       h('bud', 'S', { bid: 'P' }),
       h('bud', 'W', { bid: 'P' }),
     ]
-    rendera()
+    const { container } = rendera()
     expect(await screen.findByText(/Stick: Ni 0 – De 0/)).toBeTruthy()
     expect(screen.getByText(/Giv 1\/4/)).toBeTruthy()
+    // 2026-09-24: spelfasen ritas genom spelbordets ram — hörnknapparna ⋮ och i,
+    // bricka/zon-hörnet och Syd-listen är samma som på spelbordet.
+    expect(screen.getByLabelText('Meny')).toBeTruthy()
+    expect(screen.getByText(/Bricka 1/)).toBeTruthy()
+    expect(container.querySelector('[data-bordsmeny-ankare]')).not.toBeNull()
+    // Vem som sitter var: i ⓘ-overlayen (som auktionen och förra sticket).
+    fireEvent.click(screen.getByLabelText('Budgivningen och förra sticket'))
+    expect(screen.getByText(/Patrik \(du\)/)).toBeTruthy()
+  })
+
+  test('spelfasen: "◀ Alla färger" när en färg är lyft — samma tvåtrycksväg som spelbordet', async () => {
+    seq = 0
+    // Jag (Syd) spelför 1♠; Väst ska spela ut — men här är det redan MIN tur
+    // (Väst spelade ut, träkarlen lagd) så mina kort är klickbara.
+    svarEvents = [
+      h('giv-start', null, { board: 1, dealer: 'S', vulnerability: 'none' }),
+      h('bud', 'S', { bid: '1S' }),
+      h('bud', 'W', { bid: 'P' }),
+      h('bud', 'N', { bid: 'P' }),
+      h('bud', 'E', { bid: 'P' }),
+      h('kort', 'W', { card: kort('hearts', 'K') }),
+      h('trakarl', 'N', { hand: MIN_HAND }),
+    ]
+    const { container } = rendera()
+    await screen.findByText(/Stick: Ni 0 – De 0/)
+    expect(screen.queryByText('◀ Alla färger')).toBeNull()
+    const spelbart = container.querySelector<HTMLButtonElement>('[data-spelbart]')
+    expect(spelbart).not.toBeNull()
+    fireEvent.click(spelbart!)
+    expect(await screen.findByText('◀ Alla färger')).toBeTruthy()
+    fireEvent.click(screen.getByText('◀ Alla färger'))
+    expect(screen.queryByText('◀ Alla färger')).toBeNull()
   })
 
   test('4D läge 1: facit-genomgången renderar jämförelsen + nästa giv', async () => {

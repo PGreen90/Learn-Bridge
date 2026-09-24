@@ -54,7 +54,7 @@ import {
   type NyHandelse,
 } from './_lib/bord-motor'
 import { medDdFacit } from './_lib/dd-facit'
-import { claimKontrollen } from './_lib/claim-dd'
+import { budOrakel, claimKontrollen } from './_lib/claim-dd'
 
 // ---------------------------------------------------------------------------
 // Små hjälpare (samma mönster som skicka-in.ts — funktionerna är medvetet
@@ -412,10 +412,12 @@ async function startaGiv(
     // varje senare anrop återskapar exakt samma deal (dealUrGivStart).
     const manniskor = manniskorIOrdning(stolar)
     const mal = manniskor.length ? manniskor[bord.rotation_pekare % manniskor.length] : 'S'
-    const lage2 = lage2Giv(seed, givNr, mal)
+    // Tänkande bottar även i autobuden (2026-09-24): samma orakel som drivFram.
+    const orakel = (await budOrakel()) ?? undefined
+    const lage2 = lage2Giv(seed, givNr, mal, orakel)
     deal = lage2.deal
     handelser.push(givStartHandelse(deal, givNr, { underIndex: lage2.underIndex, shift: lage2.shift }))
-    for (const c of autoAuktion(deal)) {
+    for (const c of autoAuktion(deal, orakel)) {
       handelser.push({ giv: givNr, typ: 'bud', seat: c.seat, data: { bid: c.bid, auto: true } })
     }
   } else {
@@ -433,6 +435,7 @@ async function startaGiv(
         stallning,
         spelform: bord.spelform,
         claimKontroll: (await claimKontrollen()) ?? undefined,
+        oracle: (await budOrakel()) ?? undefined,
       },
     ),
   )
@@ -491,6 +494,7 @@ async function drivFramOchBokfor(m: Miljo, bordId: string): Promise<void> {
       stallning: stallningInnan,
       spelform: bord.spelform,
       claimKontroll: (await claimKontrollen()) ?? undefined,
+      oracle: (await budOrakel()) ?? undefined,
     }),
     deal,
   )
@@ -1272,6 +1276,7 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
         stallning: stallningInnan,
         spelform: bord.spelform,
         claimKontroll: (await claimKontrollen()) ?? undefined,
+        oracle: (await budOrakel()) ?? undefined,
       }),
     )
     const skrivet = await laggTillHandelser(m, bord.id, await medDdFacit(handelser, deal), basSeq)
@@ -1301,6 +1306,7 @@ async function hanteraDrag(m: Miljo, userId: string, body: unknown, json: Svara)
         stallning: stallningInnan,
         spelform: bord.spelform,
         claimKontroll: (await claimKontrollen()) ?? undefined,
+        oracle: (await budOrakel()) ?? undefined,
       },
     ),
   )

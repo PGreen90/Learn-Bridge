@@ -16,7 +16,8 @@ svarar på vad).
 **Kursändring 09-22: resonemangslagret** (simulering, regelboken som filter, budget +
 tidigt stopp; `resonemang.ts` + worker) — steg 1–3 LIVE 09-23 (`b6b153f`): inkopplat i Spela mot datorn.
 **Plan, mätning, byggordning + frågorna: `docs/sunt-fornuft-plan.md`** — läs först.
-LIVE 09-24: pass-spärr + systemfilter · kontrollbud (§6.2) · tänkande bottar i tävlingen (`241da62`).
+LIVE 09-24: pass-spärr + systemfilter · kontrollbud (§6.2) · tänkande bottar i tävlingen (`241da62`)
+· **borden = tävlingen** (bud/spel/grafik lika; `docs/bord-plan.md` "Bottarna = tävlingens bottar").
 
 **Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
 `docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
@@ -25,22 +26,18 @@ punkt 4 (budseedad gissning av de dolda korten).
 **Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** Michaels-fortsättningen
 (09-22, §7.2: två högsta objudna · avslut/cue/spärr · 14/15–17/18+) · stört 1NT: öppnarens
 tredje bud + störd överföring (live-fynd 09-20, §7.5, `nt-transfer-stord.ts`) ·
-nattgranskningen versionsmedveten (motorstämpel + omprov, `docs/bevaka.md`) · claim-ombygget
-(frågan "[Väderstreck] gör anspråk på resten", `9389da9`+`9231d05`, `docs/claim-plan.md`) · systems on +
-stulet bud efter stört 1NT (#77, `90aeea1`, `docs/1nt-systems-on-plan.md`, §7.5) ·
-designgranskningen
-(kontrast/fokusring/filt-text `5e62517` + hover-vokabulär `261e62a`) · Puppet
-Stayman över 2NT (`0207209`) · Gambling 3NT
+nattgranskningen versionsmedveten (`docs/bevaka.md`) · claim-ombygget
+(`9389da9`, `docs/claim-plan.md`) · systems on efter
+stört 1NT (#77, `90aeea1`, `docs/1nt-systems-on-plan.md`) ·
+designgranskningen (`5e62517`, `261e62a`) · Puppet Stayman över 2NT (`0207209`) · Gambling 3NT
 (`8e327b3`, `gambling-3nt.ts`, systemboken §3.1+§4.4; forts. SENARE) · kortregeln
 (bara träkarlen i färgkolumner, `useSvavandeMeny.ts`) · bordens SENARE-lista
-(rondgenomgång `5088526` · DD-jämförelse `1af5972` · claim `5dc1524`,
-`docs/bord-plan.md`) · stickväntan (`e57e6a9`) · livskvalitetssvepet i Dagens
+(`docs/bord-plan.md`) · stickväntan (`e57e6a9`) · livskvalitetssvepet i Dagens
 tävling (`docs/beslut-b-plan.md` "Påbyggnad 3"). Öppet ägarsteg: live-prov
 Gambling 3NT + bordens etapp 1–3.
 
-**Parallellt ägarsteg:** live-prov vid ett vänner-bord av bordens etapp 1–3
-(genomgången · facit/par-raden · DD-claimen) + Gambling 3NT
-i appen. Sedan väljer ägaren nästa NU ur 🟢 NÄST (regeln i `docs/arbetsrutiner.md`).
+**Parallellt ägarsteg:** live-prov vid ett vänner-bord (tänkande bottar · kortflygning ·
+nya spelfasen · etapp 1–3) + Gambling 3NT. Sedan väljer ägaren nästa NU ur 🟢 NÄST.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (KLAR & LIVE 2026-08-19): syna `docs/budforklaring-katalog.md`, peka på en
@@ -104,8 +101,8 @@ S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
    (`docs/handvardering.md` principrutan; mätningen i minnet).
 2. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
    ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
-3. **Bordens kandidater efter live-provet** — manuell claim · "ge upp" ·
-   per-kort-DD i genomgången (`docs/bord-plan.md` "Medvetet utanför v1").
+3. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
+   (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

@@ -12,13 +12,13 @@
 // Inte i 4B (medvetet): claim/ångra (kräver motpartsgodkännande — SENARE),
 // kortflygningen och ljuden (polish när bordet bevisat sig).
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Card, Deal, Seat } from '../../types/bridge'
 import { SEAT_LABEL } from '../../lib/bidding'
-import { legalCalls } from '../../lib/engine/auction-live'
+import { decideCall, legalCalls } from '../../lib/engine/auction-live'
 import { hcp } from '../../lib/engine/hand'
-import { dummyOf, legalCards, side, type PlayState } from '../../lib/engine/play'
+import { dummyOf, isComplete, legalCards, side, type PlayState } from '../../lib/engine/play'
 import { AuctionGrid } from '../../components/AuctionGrid'
 import { BidChip } from '../../components/BidChip'
 import { BiddingBox } from '../../components/BiddingBox'
@@ -31,8 +31,12 @@ import { HandFan } from '../../components/HandFan'
 import { PlayingCard } from '../../components/PlayingCard'
 import { SideDummyPiles, SouthFan, SuitColumns } from '../play/hands'
 import { LastTrickPanel, TrickCenterLive } from '../play/trick-views'
-import { MenuTempoRow, MenuToggleRow, sameCard, STRAIN_CODE, VUL_TEXT } from '../play/common'
+import { MenuTempoRow, MenuToggleRow, sameCard, STRAIN_CODE } from '../play/common'
 import { ms, type PlaySpeed } from '../play/tempo'
+import { useCardFlight } from '../play/useCardFlight'
+import { FlightLayer } from '../play/FlightLayer'
+import { AllaFargerKnapp, hornKnappKlass, listKnappKlass, ListChip, overlayTopp, RAM_TON, SpelbordRam, TankerBricka } from '../play/SpelbordRam'
+import { loadBidHelp, saveBidHelp } from '../../lib/backend'
 import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
 import { annoteraSystemiskt, verkligaStick, vridStol, vridTillbaka } from './bord-projektion'
@@ -43,56 +47,60 @@ import { useBordSpel } from './useBordSpel'
 /** Visuell stolordning i namnraden: som auktionsrutnätet (V N Ö S). */
 const NAMN_ORDNING: Seat[] = ['W', 'N', 'E', 'S']
 
-function NamnRad({ stolar, minStol }: { stolar: BordStol[]; minStol: Seat }) {
+/** Namn + status per stol, i min synvinkel. 4C: paus/borta = boten spelar
+ *  stolen tills människan är tillbaka. */
+function namnPerStol(stolar: BordStol[], minStol: Seat): Array<{ vis: Seat; text: string }> {
   const verklig = vridTillbaka(minStol)
   const perStol = new Map(stolar.map((s) => [s.stol, s]))
+  return NAMN_ORDNING.map((vis) => {
+    const s = perStol.get(verklig(vis))
+    const namn = s?.namn ?? 'Bot'
+    const suffix = s?.status === 'paus' ? ' · paus' : s?.status === 'borta' ? ' · bot' : ''
+    return { vis, text: `${SEAT_LABEL[vis]}: ${vis === 'S' ? `${namn} (du)` : namn}${suffix}` }
+  })
+}
+
+/** Namnraden på duken (facit- och giv-klar-vyerna). */
+function NamnRad({ stolar, minStol }: { stolar: BordStol[]; minStol: Seat }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-wrap justify-center gap-x-3 gap-y-0.5 pt-1 text-[11px] text-rose-100/60">
-      {NAMN_ORDNING.map((vis) => {
-        const s = perStol.get(verklig(vis))
-        const namn = s?.namn ?? 'Bot'
-        // 4C: paus/borta = boten spelar stolen tills människan är tillbaka.
-        const suffix = s?.status === 'paus' ? ' · paus' : s?.status === 'borta' ? ' · bot' : ''
-        return (
-          <span key={vis} className={vis === 'S' ? 'font-semibold text-gold-200' : ''}>
-            {SEAT_LABEL[vis]}: {vis === 'S' ? `${namn} (du)` : namn}
-            {suffix}
-          </span>
-        )
-      })}
+      {namnPerStol(stolar, minStol).map(({ vis, text }) => (
+        <span key={vis} className={vis === 'S' ? 'font-semibold text-gold-200' : ''}>
+          {text}
+        </span>
+      ))}
     </div>
   )
 }
 
-/** ⋮-menyn vid vänner-bordet (ägarönskemål 2026-08-17): samma mönster som
- *  spelbordets TableMenu — inbjudningslänken, tempot (LOKALT: styr bara hur
- *  snabbt serverns drag visas på DIN skärm), hjälptexten och vägen ut.
- *  Ägaren får dessutom "Avsluta bordet". */
-function BordMeny({
-  open,
-  onToggle,
-  kod,
-  agare,
-  tempoVal,
-  onTempo,
-  ljud,
-  onLjud,
-  kanRapportera,
-  onRapportera,
-  kanPausa,
-  onPaus,
-  onLamnaBord,
-  onAvsluta,
-  children,
-}: {
-  open: boolean
-  onToggle: () => void
+/** Namnlistan i en panel (⋮-menyn i budfasen, ⓘ-overlayen i spelfasen) —
+ *  2026-09-24: bud- och spelfasen har exakt spelbordets placeringar, så vem
+ *  som sitter var bor i panelerna i stället för i en egen rad på duken. */
+function NamnLista({ stolar, minStol }: { stolar: BordStol[]; minStol: Seat }) {
+  return (
+    <ul className="flex flex-wrap justify-center gap-x-3 gap-y-0.5 text-xs text-ink-soft" aria-label="Vid bordet">
+      {namnPerStol(stolar, minStol).map(({ vis, text }) => (
+        <li key={vis} className={vis === 'S' ? 'font-semibold text-ink' : ''}>
+          {text}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+interface BordMenyInnehall {
   kod: string
   agare: boolean
+  stolar: BordStol[]
+  minStol: Seat
   tempoVal: PlaySpeed
   onTempo: (t: PlaySpeed) => void
   ljud: boolean
   onLjud: (on: boolean) => void
+  /** Budstöd av/på (samma val som spelbordet, ägarbeslut 2026-07-28): motorns
+   *  rekommendation i budlådan + full förklaring i auktionsvyerna. */
+  bidHelp: boolean
+  onToggleBidHelp: () => void
   /** Felrapporten kräver hela given — den låses upp när given är klar
    *  (händerna är dolda dessförinnan, av fusksäkerhetsskäl). */
   kanRapportera: boolean
@@ -103,7 +111,36 @@ function BordMeny({
   onLamnaBord: () => void
   onAvsluta: () => void
   children: ReactNode
-}) {
+}
+
+/** ⋮-menyns panel vid vänner-bordet (ägarönskemål 2026-08-17): samma mönster
+ *  som spelbordets meny — inbjudningslänken, vilka som sitter vid bordet,
+ *  tempot (LOKALT: styr bara hur snabbt serverns drag visas på DIN skärm),
+ *  ljud, budstöd, hjälptexten och vägen ut. Ägaren får dessutom "Avsluta
+ *  bordet". `className`/`style` placerar panelen (radflödet i budfasen,
+ *  hörnet i spelfasen — samma platser som spelbordet). */
+function BordMenyPanel({
+  onToggle,
+  className = '',
+  style,
+  kod,
+  agare,
+  stolar,
+  minStol,
+  tempoVal,
+  onTempo,
+  ljud,
+  onLjud,
+  bidHelp,
+  onToggleBidHelp,
+  kanRapportera,
+  onRapportera,
+  kanPausa,
+  onPaus,
+  onLamnaBord,
+  onAvsluta,
+  children,
+}: BordMenyInnehall & { onToggle: () => void; className?: string; style?: CSSProperties }) {
   const navigate = useNavigate()
   const [kopierad, setKopierad] = useState(false)
   function kopieraLank() {
@@ -113,6 +150,77 @@ function BordMeny({
       setTimeout(() => setKopierad(false), 1800)
     })
   }
+  return (
+    <div className={`absolute z-40 w-72 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line ${className}`} style={style}>
+      <Button className="w-full" variant="secondary" onClick={kopieraLank}>
+        {kopierad ? 'Länk kopierad ✓' : 'Kopiera inbjudningslänk'}
+      </Button>
+      <div className="mt-2 rounded-lg bg-panel-2 px-2.5 py-1.5">
+        <NamnLista stolar={stolar} minStol={minStol} />
+      </div>
+      <MenuTempoRow speed={tempoVal} onChange={onTempo} />
+      <MenuToggleRow label="Ljud" hint="diskreta kortljud" on={ljud} onToggle={() => onLjud(!ljud)} />
+      <MenuToggleRow label="Budstöd" hint="motorns hintar och förklaringar" on={bidHelp} onToggle={onToggleBidHelp} />
+      {kanRapportera && (
+        <button
+          type="button"
+          onClick={() => {
+            onToggle()
+            onRapportera()
+          }}
+          className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
+        >
+          Rapportera fel i given
+        </button>
+      )}
+      {kanPausa && (
+        <button
+          type="button"
+          onClick={() => {
+            onToggle()
+            onPaus()
+          }}
+          className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
+        >
+          Ta paus — boten tar över så länge
+        </button>
+      )}
+      <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
+      <button
+        type="button"
+        onClick={() => {
+          onToggle()
+          onLamnaBord()
+        }}
+        className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
+      >
+        Lämna bordet för gott
+      </button>
+      {agare && (
+        <button
+          type="button"
+          onClick={() => {
+            onToggle()
+            onAvsluta()
+          }}
+          className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
+        >
+          Avsluta bordet
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={() => navigate('/spela-med-vanner')}
+        className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-ink-soft transition-opacity hover:opacity-80"
+      >
+        ← Till Spela med vänner
+      </button>
+    </div>
+  )
+}
+
+/** ⋮-menyn i budfasen: knappen i radflödet (som spelbordets TableMenu) + panelen. */
+function BordMeny({ open, onToggle, ...rest }: BordMenyInnehall & { open: boolean; onToggle: () => void }) {
   return (
     <div className="relative shrink-0">
       <button
@@ -126,67 +234,7 @@ function BordMeny({
       {open && (
         <>
           <ClickAway onClose={onToggle} />
-          <div className="absolute right-0 top-11 z-40 w-64 rounded-xl bg-panel p-3 shadow-xl ring-1 ring-line">
-            <Button className="w-full" variant="secondary" onClick={kopieraLank}>
-              {kopierad ? 'Länk kopierad ✓' : 'Kopiera inbjudningslänk'}
-            </Button>
-            <MenuTempoRow speed={tempoVal} onChange={onTempo} />
-            <MenuToggleRow label="Ljud" hint="diskreta kortljud" on={ljud} onToggle={() => onLjud(!ljud)} />
-            {kanRapportera && (
-              <button
-                type="button"
-                onClick={() => {
-                  onToggle()
-                  onRapportera()
-                }}
-                className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
-              >
-                Rapportera fel i given
-              </button>
-            )}
-            {kanPausa && (
-              <button
-                type="button"
-                onClick={() => {
-                  onToggle()
-                  onPaus()
-                }}
-                className="mt-2 w-full rounded-lg bg-panel-2 px-2.5 py-1.5 text-left text-xs font-medium text-ink-soft hover:bg-control-hover"
-              >
-                Ta paus — boten tar över så länge
-              </button>
-            )}
-            <p className="mt-3 text-xs leading-relaxed text-ink-soft">{children}</p>
-            <button
-              type="button"
-              onClick={() => {
-                onToggle()
-                onLamnaBord()
-              }}
-              className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
-            >
-              Lämna bordet för gott
-            </button>
-            {agare && (
-              <button
-                type="button"
-                onClick={() => {
-                  onToggle()
-                  onAvsluta()
-                }}
-                className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-danger transition-opacity hover:opacity-80"
-              >
-                Avsluta bordet
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => navigate('/spela-med-vanner')}
-              className="mt-3 w-full border-t border-line pt-2.5 text-sm font-semibold text-ink-soft transition-opacity hover:opacity-80"
-            >
-              ← Till Spela med vänner
-            </button>
-          </div>
+          <BordMenyPanel onToggle={onToggle} className="right-0 top-11" {...rest} />
         </>
       )}
     </div>
@@ -220,6 +268,21 @@ export function BordSpel({
   const [avslutar, setAvslutar] = useState(false)
   const [stolArbete, setStolArbete] = useState(false)
   const [ljud, setLjud] = useState(isSoundEnabled)
+  // Budstöd av/på — samma sparade val som spelbordet (ägarbeslut 2026-07-28).
+  const [bidHelp, setBidHelp] = useState<boolean>(() => loadBidHelp())
+  function toggleBidHelp() {
+    setBidHelp((v) => {
+      saveBidHelp(!v)
+      return !v
+    })
+  }
+  // Kortflygningen (2026-09-24, som spelbordet): källkortet mäts i den VISUELLA
+  // världen — kroken från useBordSpel ger den verkliga stolen, vrid den.
+  const { flight, beginFlight, endFlight, registerCardEl, wasFlown } = useCardFlight()
+  const onKort = useCallback(
+    (seat: Seat, card: Card) => beginFlight(vridStol(minStol)(seat), card),
+    [beginFlight, minStol],
+  )
   const {
     laddar,
     meta,
@@ -239,7 +302,7 @@ export function BordSpel({
     gaVidareSvep,
     hoppaTillResultat,
     harOspeladLogg,
-  } = useBordSpel(kod, minStol, tempoVal)
+  } = useBordSpel(kod, minStol, tempoVal, onKort)
   // Stickväntan (2026-09-14): mellanslag/Enter går vidare från ett vilande
   // stick — utom när fokus ligger på en knapp eller ett fält.
   useEffect(() => {
@@ -262,6 +325,29 @@ export function BordSpel({
     givNuRef.current = giv
   }, [lage?.giv])
   const [selectedSuit, setSelectedSuit] = useState<Card['suit'] | null>(null)
+
+  /** Spelas den (visuella) stolen av en bot just nu? Bot-stol, eller en människa
+   *  i paus/borta (boten spelar för hen). Okänd stol räknas som bot. */
+  const arBotStol = (seatV: Seat): boolean => {
+    const s = stolar.find((x) => x.stol === vridTillbaka(minStol)(seatV))
+    return !s || s.typ !== 'manniska' || s.status === 'paus' || s.status === 'borta'
+  }
+
+  // Motorns rekommenderade bud för MIN hand (budstödet, som spelbordets
+  // BiddingPhase): decideCall läser bara den egna handen (kikvakten) — de
+  // andra händerna är tomma, inget läcker. Räknas bara när det är min tur.
+  const minTurBud = !!auktion && aktuell && auktion.toAct === 'S'
+  const recommendation = useMemo(() => {
+    if (!minTurBud || !bidHelp || !dinHand || !auktion || !lage) return null
+    const deal: Deal = {
+      id: `bord-${kod}-giv-${lage.giv}`,
+      hands: { N: [], E: [], S: dinHand, W: [] },
+      dealer: auktion.dealer,
+      vulnerability: auktion.vulnerability,
+      board: lage.board,
+    }
+    return decideCall(deal, auktion.calls, 'S')
+  }, [minTurBud, bidHelp, dinHand, auktion, lage, kod])
 
   async function avslutaBordet() {
     setAvslutar(true)
@@ -414,6 +500,35 @@ export function BordSpel({
     </p>
   )
 
+  /** Menyns innehåll — samma i budfasen (knapp i radflödet) och spelfasen (hörnet). */
+  const menyInnehall = {
+    kod,
+    agare: meta?.duArAgare ?? false,
+    stolar,
+    minStol,
+    tempoVal,
+    onTempo: setTempoVal,
+    ljud,
+    onLjud: (on: boolean) => {
+      setLjud(on)
+      setSoundEnabled(on)
+    },
+    bidHelp,
+    onToggleBidHelp: toggleBidHelp,
+    kanRapportera: !!lage,
+    onRapportera: () => setVisaRapport(true),
+    kanPausa: meta?.status === 'spelar' && stolar.find((s) => s.stol === minStol)?.status === 'aktiv',
+    onPaus: () => void korStol('paus-begaran'),
+    onLamnaBord: () => setVisaLamna(true),
+    onAvsluta: () => setVisaAvsluta(true),
+    children: (
+      <>
+        Du sitter alltid <strong>nertill</strong> oavsett stol. När din ruta i auktionen lyser
+        bjuder du i budlådan; i spelet klickar du en färg och sedan kortet. Tempot styr hur
+        snabbt de andras drag visas — bara på din skärm.
+      </>
+    ),
+  }
   const meny = (
     <BordMeny
       open={visaMeny}
@@ -421,29 +536,8 @@ export function BordSpel({
         setVisaMeny((v) => !v)
         setVisaInfo(false)
       }}
-      kod={kod}
-      agare={meta?.duArAgare ?? false}
-      tempoVal={tempoVal}
-      onTempo={setTempoVal}
-      ljud={ljud}
-      onLjud={(on) => {
-        setLjud(on)
-        setSoundEnabled(on)
-      }}
-      kanRapportera={!!lage}
-      onRapportera={() => setVisaRapport(true)}
-      kanPausa={
-        meta?.status === 'spelar' &&
-        stolar.find((s) => s.stol === minStol)?.status === 'aktiv'
-      }
-      onPaus={() => void korStol('paus-begaran')}
-      onLamnaBord={() => setVisaLamna(true)}
-      onAvsluta={() => setVisaAvsluta(true)}
-    >
-      Du sitter alltid <strong>nertill</strong> oavsett stol. När din ruta i auktionen lyser
-      bjuder du i budlådan; i spelet klickar du en färg och sedan kortet. Tempot styr hur
-      snabbt de andras drag visas — bara på din skärm.
-    </BordMeny>
+      {...menyInnehall}
+    />
   )
 
   // 4C: min stols status + de gemensamma närvaro-överläggen.
@@ -681,24 +775,32 @@ export function BordSpel({
               dealer={auktion.dealer}
               vulnerability={auktion.vulnerability}
               activeSeat={aktuell ? auktion.toAct : null}
-              explanations="full"
+              explanations={bidHelp ? 'full' : 'minimal'}
               hiddenHands
             />
             {/* ⋮-menyn: i radflödet på mobil, hängd utanför kolumnen från sm:
                 (samma kringflytande chrome som spelbordets budfas). */}
             <div className="shrink-0 sm:absolute sm:-right-11 sm:top-0">{meny}</div>
           </div>
-          <NamnRad stolar={stolar} minStol={minStol} />
         </div>
         {felRad}
         {vantarRad}
-        <div className="px-2.5 pb-1.5">
+        {/* Budlådan – alltid synlig; otillåtna/inte-din-tur tonas ner. Vem som
+            sitter var bor i ⋮-menyn (2026-09-24) så budfasen har exakt
+            spelbordets placeringar. */}
+        <div className="relative px-2.5 pb-1.5">
           <BiddingBox
             legal={minTur ? legalCalls(auktion.calls, 'S') : []}
             onBid={(bid) => void gorDrag({ typ: 'bud', bid })}
-            recommendation={null}
+            recommendation={recommendation}
             history={auktion.calls}
-            showHelp
+            showHelp={bidHelp}
+          />
+          {/* "[Stol] tänker …": en bot är i tur och loggen står still — servern
+              räknar (resonemangslagret, 2026-09-24) eller nästa hjärtslag driver. */}
+          <TankerBricka
+            tone="vanner"
+            text={auktion.toAct && arBotStol(auktion.toAct) && (redo || skickar) ? `${SEAT_LABEL[auktion.toAct]} tänker …` : null}
           />
         </div>
         <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
@@ -1039,182 +1141,227 @@ export function BordSpel({
   }
 
   const kontraktText = `${st.contract.level}${STRAIN_CODE[st.contract.strain]}`
-  const minTurSpel =
-    aktuell &&
-    (trakarlUppe && st.toAct === dummyV ? st.contract.declarer : st.toAct) === 'S'
+  const agerandeV = trakarlUppe && st.toAct === dummyV ? st.contract.declarer : st.toAct
+  // Bot-hjärnan räknar: en bot (eller en pausad/borta människa som boten
+  // spelar för) är i tur och vyn har hunnit ikapp loggen → servern arbetar
+  // eller nästa hjärtslag driver. Ljuskäglan pulserar, som på spelbordet.
+  const botRaknar = !isComplete(st) && arBotStol(agerandeV) && (redo || skickar)
+  const behover = st.contract.level + 6
 
-  return (
-    <Felt tone="vanner" className={rot}>
-      {/* Toppraden: kontrakt, stick, giv, ställning + ⋮-menyn. */}
-      <div className="px-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))]">
-        <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 text-sm text-rose-100/80">
-          <div className="flex items-center gap-1.5">
-            <BidChip bid={kontraktText} />
-            {st.contract.doubled && (
-              <span className="text-xs font-bold text-rose-300">{st.contract.doubled}</span>
-            )}
-            <span className="text-xs">av {SEAT_LABEL[st.contract.declarer]}</span>
+  // Spelfasen ritas genom den delade ramen (SpelbordRam, 2026-09-24) — exakt
+  // spelbordets zoner och marginaler; bara dukens ton ('vanner') skiljer.
+  const horn = (
+    <div className="flex flex-col gap-1.5">
+      <button
+        type="button"
+        onClick={() => {
+          setVisaMeny((v) => !v)
+          setVisaInfo(false)
+        }}
+        className={hornKnappKlass('vanner', 'text-lg')}
+        aria-label="Meny"
+      >
+        ⋮
+      </button>
+      {/* ⓘ: vilka som sitter vid bordet, auktionen + förra sticket (samma overlay som spelbordet). */}
+      <button
+        type="button"
+        onClick={() => {
+          setVisaInfo((v) => !v)
+          setVisaMeny(false)
+        }}
+        className={hornKnappKlass('vanner', 'text-sm')}
+        aria-label="Budgivningen och förra sticket"
+      >
+        i
+      </button>
+    </div>
+  )
+
+  const overlays = (
+    <>
+      {(visaMeny || visaInfo) && (
+        <ClickAway
+          onClose={() => {
+            setVisaMeny(false)
+            setVisaInfo(false)
+          }}
+        />
+      )}
+      {visaMeny && <BordMenyPanel onToggle={() => setVisaMeny(false)} className="right-2.5" style={{ top: overlayTopp() }} {...menyInnehall} />}
+      {/* ⓘ-overlay: vem som sitter var, budgivningen som ledde till kontraktet +
+          förra sticket i miniatyr + utspelet — samma innehåll och plats som
+          spelbordets overlay. */}
+      {visaInfo && (
+        <div className="absolute left-1/2 z-40 w-full max-w-sm -translate-x-1/2 space-y-2 px-3" style={{ top: overlayTopp() }}>
+          <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+            <NamnLista stolar={stolar} minStol={minStol} />
           </div>
-          <div className="text-xs">
-            Stick: Ni {st.tricksNS} – De {st.tricksEW}
+          <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+            <AuctionGrid
+              calls={auktion.calls}
+              dealer={auktion.dealer}
+              vulnerability={auktion.vulnerability}
+              explanations={bidHelp ? 'full' : 'minimal'}
+              hiddenHands
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs">
-              Giv {lage.giv}/{givar} · {stallningRad(lage.stallning)}
-            </span>
-            {/* ⓘ: auktionen + förra sticket (samma overlay som spelbordet). */}
-            <button
-              type="button"
-              onClick={() => {
-                setVisaInfo((v) => !v)
-                setVisaMeny(false)
-              }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-950/60 text-sm font-bold text-rose-50 ring-1 ring-rose-100/10 transition-colors hover:bg-red-950/80 hover:ring-gold-400/40"
-              aria-label="Budgivningen och förra sticket"
-            >
-              i
-            </button>
-            {meny}
-          </div>
+          {st.completedTricks.length > 0 && (
+            <div className="flex justify-center rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+              <LastTrickPanel
+                trick={st.completedTricks[st.completedTricks.length - 1]}
+                onCardClick={() => {}}
+                hasReason={() => false}
+              />
+            </div>
+          )}
+          {(() => {
+            const utspel = (st.completedTricks[0] ?? { cards: st.currentTrick }).cards[0]
+            if (!utspel) return null
+            return (
+              <div className="flex items-center justify-center gap-2 rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
+                <span className="text-xs font-medium text-ink-muted">Utspel:</span>
+                <PlayingCard card={utspel.card} size="sm" />
+                <span className="text-xs text-ink-soft">av {SEAT_LABEL[utspel.seat]}</span>
+              </div>
+            )
+          })()}
         </div>
-        <NamnRad stolar={stolar} minStol={minStol} />
-        {minTurSpel && (
-          <p className="pt-0.5 text-center text-xs font-semibold text-gold-200">Din tur</p>
-        )}
-        {kanHoppaTillResultat && (
-          <div className="flex justify-center pt-1">
-            <button
-              type="button"
-              onClick={hoppaTillResultat}
-              className="rounded-full bg-red-950/60 px-3 py-1 text-xs font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30 transition-colors hover:bg-red-950/80 hover:ring-gold-400/50"
-            >
-              Hoppa till resultat →
-            </button>
-          </div>
-        )}
-      </div>
+      )}
+    </>
+  )
+
+  // Nord-zonen: träkarlen som färgkolumner NÄR den sitter där — dolda händer
+  // visas inte alls (spelbordets regel). Partnerns hand är dold vid vänner-
+  // bordet även när partnern spelför: hen spelar sina kort själv.
+  const nord = trakarlUppe && dummyV === 'N' && (
+    <SuitColumns
+      hand={st.hands.N}
+      contract={st.contract}
+      play={st}
+      seat="N"
+      onCardClick={klick('N')}
+      selectedSuit={selectedSuit}
+      registerCardEl={registerCardEl}
+    />
+  )
+
+  const mitt = (
+    <TrickCenterLive
+      play={st}
+      thinking={botRaknar}
+      sweep={sweep}
+      flight={flight}
+      wasFlown={wasFlown}
+      onSkipSweep={gaVidareSvep}
+      onCardClick={() => {}}
+      hasReason={() => false}
+    />
+  )
+
+  // Svarta listen: kontraktet + sticken (Ni/De i min synvinkel) + giv och
+  // ställning; "Hoppa till resultat" står där spelbordet har Facit-knappen.
+  const list = (
+    <>
+      <ListChip tone="vanner">
+        <BidChip bid={kontraktText} />
+        {st.contract.doubled && <span className="text-sm font-bold text-red-400">{st.contract.doubled}</span>}
+        <span className="text-xs text-rose-100/70">av {SEAT_LABEL[st.contract.declarer]}</span>
+        <span className="text-sm font-semibold text-rose-50">
+          Stick: Ni {st.tricksNS} – De {st.tricksEW}
+        </span>
+        <span className="text-xs text-rose-100/55">mål {behover}</span>
+      </ListChip>
+      <span className={`rounded-lg ${RAM_TON.vanner.chip} px-2.5 py-1 text-xs font-semibold text-rose-50 ring-1 ring-gold-400/25`}>
+        Giv {lage.giv}/{givar} · {stallningRad(lage.stallning)}
+      </span>
+      {kanHoppaTillResultat && (
+        <button type="button" onClick={hoppaTillResultat} className={listKnappKlass('vanner')}>
+          Hoppa till resultat →
+        </button>
+      )}
+    </>
+  )
+
+  // Textraderna under listen: fel, claimen som väntar på svar, min väntande
+  // begäran och träkarlsbeskedet — samma zon som spelbordets facit/förklaring.
+  const underList = (
+    <>
       {felRad}
       {claimRad}
       {vantarRad}
-
-      {/* ⓘ-overlay: budgivningen som ledde till kontraktet + förra sticket i
-          miniatyr + utspelet — samma innehåll som spelbordets overlay. */}
-      {visaInfo && (
-        <>
-          <ClickAway onClose={() => setVisaInfo(false)} />
-          <div className="absolute left-1/2 top-[calc(3.5rem+env(safe-area-inset-top))] z-40 w-full max-w-sm -translate-x-1/2 space-y-2 px-3">
-            <div className="rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
-              <AuctionGrid
-                calls={auktion.calls}
-                dealer={auktion.dealer}
-                vulnerability={auktion.vulnerability}
-                explanations="full"
-                hiddenHands
-              />
-            </div>
-            {st.completedTricks.length > 0 && (
-              <div className="flex justify-center rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
-                <LastTrickPanel
-                  trick={st.completedTricks[st.completedTricks.length - 1]}
-                  onCardClick={() => {}}
-                  hasReason={() => false}
-                />
-              </div>
-            )}
-            {(() => {
-              const utspel = (st.completedTricks[0] ?? { cards: st.currentTrick }).cards[0]
-              if (!utspel) return null
-              return (
-                <div className="flex items-center justify-center gap-2 rounded-xl bg-panel p-2 shadow-xl ring-1 ring-line">
-                  <span className="text-xs font-medium text-ink-muted">Utspel:</span>
-                  <PlayingCard card={utspel.card} size="sm" />
-                  <span className="text-xs text-ink-muted">{SEAT_LABEL[utspel.seat]}</span>
-                </div>
-              )
-            })()}
-          </div>
-        </>
+      {jagArDummy && (
+        <p className="px-4 pb-1.5 text-center text-xs text-rose-50/90">
+          Du är träkarl — din partner (spelföraren) spelar dina kort.
+        </p>
       )}
+    </>
+  )
 
-      {/* Nord-zonen: träkarlen som färgkolumner NÄR den sitter där — dolda
-          händer visas inte alls (spelbordets regel, Play.tsx). min-h håller
-          zonens plats så bordet inte hoppar när träkarlen läggs upp. */}
-      <div className="flex min-h-16 justify-center pt-1">
-        {trakarlUppe && dummyV === 'N' && (
-          <SuitColumns
-            hand={st.hands.N}
-            contract={st.contract}
-            play={st}
-            seat="N"
-            onCardClick={klick('N')}
-            selectedSuit={selectedSuit}
-          />
-        )}
-      </div>
+  // Syd: din hand — klickbar när du styr den, stilla om du är träkarl.
+  // Träkarlen ritas som färgkolumner precis som Nord-träkarlen (kortregeln,
+  // ägarbeslut 2026-09-15). Spelläget vrids så turen aldrig är Syds: partnern
+  // (spelföraren) spelar korten, inget får bli klickbart.
+  const syd = (
+    <>
+      {selectedSuit && <AllaFargerKnapp tone="vanner" onClick={() => setSelectedSuit(null)} />}
+      {jagArDummy ? (
+        <SuitColumns
+          hand={st.hands.S}
+          contract={st.contract}
+          play={{ ...st, toAct: st.contract.declarer }}
+          seat="S"
+          onCardClick={() => {}}
+          selectedSuit={null}
+          registerCardEl={registerCardEl}
+        />
+      ) : (
+        <SouthFan
+          hand={st.hands.S}
+          contract={st.contract}
+          play={st}
+          onCardClick={klick('S')}
+          selectedSuit={selectedSuit}
+          registerCardEl={registerCardEl}
+        />
+      )}
+    </>
+  )
 
-      {/* Mitten: träkarlen på sin sida (bara när den sitter där) | sticket. */}
-      <div className="flex flex-1 items-center gap-1 px-1 py-2">
-        {trakarlUppe && dummyV === 'W' && (
-          <div className="shrink-0">
-            <SideDummyPiles hand={st.hands.W} contract={st.contract} side="W" />
-          </div>
-        )}
-        <div className="flex min-w-0 flex-1 justify-center">
-          <TrickCenterLive
-            play={st}
-            thinking={skickar}
-            sweep={sweep}
-            onSkipSweep={gaVidareSvep}
-            onCardClick={() => {}}
-            hasReason={() => false}
-          />
-        </div>
-        {trakarlUppe && dummyV === 'E' && (
-          <div className="shrink-0">
-            <SideDummyPiles hand={st.hands.E} contract={st.contract} side="E" />
-          </div>
-        )}
-      </div>
-
-      {/* Bricka + zon nere till vänster (som spelbordet) — zonen i DIN
-          synvinkel (visuella världen), samma som auktionsrutnätet. */}
-      <div className="px-3 pb-2 text-xs leading-tight text-rose-50/90">
-        <div>Bricka {lage.board}</div>
-        <div>{VUL_TEXT[auktion.vulnerability]}</div>
-      </div>
-
-      {/* Syd: din hand — klickbar när du styr den, stilla om du är träkarl.
-          Träkarlen ritas som färgkolumner precis som Nord-träkarlen (Nord är
-          facit, ägarönskemål 2026-09-15). Spelläget vrids så turen aldrig är
-          Syds: partnern (spelföraren) spelar korten, inget får bli klickbart. */}
-      <div className="mt-auto border-t border-rose-100/10 bg-red-950/25 px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom))]">
-        {jagArDummy && (
-          <p className="pb-1 text-center text-xs text-rose-100/60">
-            Du är träkarl — din partner (spelföraren) spelar dina kort.
-          </p>
-        )}
-        {jagArDummy ? (
-          <SuitColumns
-            hand={st.hands.S}
-            contract={st.contract}
-            play={{ ...st, toAct: st.contract.declarer }}
-            seat="S"
-            onCardClick={() => {}}
-            selectedSuit={null}
-          />
-        ) : (
-          <SouthFan
-            hand={st.hands.S}
-            contract={st.contract}
-            play={st}
-            onCardClick={klick('S')}
-            selectedSuit={selectedSuit}
-          />
-        )}
-      </div>
+  const efter = (
+    <>
+      {/* Kortflygningen (2026-09-24, samma som spelbordet): klonen som flyger
+          hand → stickmitten. */}
+      <FlightLayer flight={flight} speed={tempoVal} targetsKey={sweep ? 'svep' : String(st.currentTrick.length)} onDone={endFlight} />
       {narvaroOverlagg}
       {avslutaDialog}
-    </Felt>
+    </>
+  )
+
+  return (
+    <SpelbordRam
+      tone="vanner"
+      horn={horn}
+      overlays={overlays}
+      nord={nord}
+      vast={
+        trakarlUppe && dummyV === 'W' && (
+          <SideDummyPiles hand={st.hands.W} contract={st.contract} side="W" registerCardEl={registerCardEl} />
+        )
+      }
+      mitt={mitt}
+      ost={
+        trakarlUppe && dummyV === 'E' && (
+          <SideDummyPiles hand={st.hands.E} contract={st.contract} side="E" registerCardEl={registerCardEl} />
+        )
+      }
+      board={lage.board}
+      vulnerability={auktion.vulnerability}
+      list={list}
+      underList={underList}
+      syd={syd}
+      efter={efter}
+    />
   )
 }
 
