@@ -651,3 +651,79 @@ describe('felrapport #60 – essfrågesekvensen i konkurrens', () => {
     expect(r.text).toMatch(/lillslam/i)
   })
 })
+
+// Felrapport #80 (bricka 7, 2026-09-24): "Inkliv budförklaring. Se över alla."
+// Budlådans tolkning av Syds egna kandidatbud sent i motståndarnas auktion
+// (P–1♥–P–2♦–P–3♣–P–3♥) kallade 4♣/4♦/4♥ "Michaels cue-bud", 4♠ "hoppinkliv
+// ~7–10 hp" och X "upplysningsdubbling i balansering" — och ett vanligt
+// direkt inkliv (P–1♥–1♠) lästes som "ny färg, minst 4 kort". Facit:
+// inklivsförklaringarna härleds ur sitsen (direkt / balansering / sent, efter
+// att de visat två färger), som boken §7.1.
+describe('felrapport #80 – inklivens förklaringar härleds ur sitsen', () => {
+  it('direkt enkelt inkliv: P–1♥–1♠ = inkliv, 5+ kort, 8–16 hp (inte "ny färg 4+")', () => {
+    const r = interpretCall(h(['S', 'P'], ['W', '1H'], ['N', '1S']), 2)
+    expect(r.text).toMatch(/inkliv/i)
+    expect(r.text).toMatch(/5\+/)
+    expect(r.text).not.toMatch(/minst 4/)
+    expect(r.forcing).toBe('ej-krav')
+  })
+  it('2-lägesinkliv utan hopp: 1♠–2♦ = inkliv, 5+ (oftast 6), 10–16 hp', () => {
+    const r = interpretCall(h(['N', '1S'], ['E', '2D']), 1)
+    expect(r.text).toMatch(/inkliv/i)
+    expect(r.text).toMatch(/10–16/)
+  })
+  it('balansering avgörs av utpassningsläget, inte av att vår sida passat tidigare', () => {
+    // 1♥–P–P–X: Väst i utpassningsläget = balansering.
+    const bal = interpretCall(h(['N', '1H'], ['E', 'P'], ['S', 'P'], ['W', 'X']), 3)
+    expect(bal.text).toMatch(/balansering/)
+    // P–1♥–X: Nord passade som GIVARE men dubblar i direkt sits — ingen balansering.
+    const direkt = interpretCall(h(['N', 'P'], ['E', '1H'], ['S', 'X']), 2)
+    expect(direkt.text).toMatch(/Upplysningsdubbling/)
+    expect(direkt.text).not.toMatch(/balansering/)
+    // Samma sak för 1NT-inklivet: P–1♥–1NT är 15–18, 1♥–P–P–1NT är 11–14.
+    expect(interpretCall(h(['N', 'P'], ['E', '1H'], ['S', '1NT']), 2).text).toMatch(/15–18/)
+    expect(interpretCall(h(['N', '1H'], ['E', 'P'], ['S', 'P'], ['W', '1NT']), 3).text).toMatch(/11–14/)
+  })
+
+  describe('sent i deras auktion: P–1♥–P–2♦–P–3♣–P–3♥ och Syd bjuder', () => {
+    const s80 = h(['S', 'P'], ['W', '1H'], ['N', 'P'], ['E', '2D'], ['S', 'P'], ['W', '3C'], ['N', 'P'], ['E', '3H'])
+    const syd = (bid: string) => interpretCall(h(...s80.map((c) => [c.seat, c.bid] as [ResolvedCall['seat'], string]), ['S', bid]), s80.length)
+    it('3♠ = sent inkliv: lång färg (6+), ej krav — inte "ny färg 4+"', () => {
+      const r = syd('3S')
+      expect(r.text).toMatch(/inkliv/i)
+      expect(r.text).toMatch(/6\+/)
+      expect(r.text).not.toMatch(/minst 4/)
+      expect(r.forcing).toBe('ej-krav')
+    })
+    it('4♣ (deras färg) är INTE Michaels — cue: konstgjort, den/de objudna färgerna', () => {
+      const r = syd('4C')
+      expect(r.text).not.toMatch(/Michaels/)
+      expect(r.text).toMatch(/objudn/)
+    })
+    it('4♠ = spärrinkliv på utgångsnivå (lång färg, till spel/offring), inte "hoppinkliv ~7–10 hp"', () => {
+      const r = syd('4S')
+      expect(r.text).toMatch(/offring|spärr/i)
+      expect(r.text).not.toMatch(/7–10/)
+      expect(r.forcing).toBe('ej-krav')
+    })
+    it('X av deras 3♥ (två färger visade, styrka) = straff/utspelsdirigerande — inte "upplysningsdubbling i balansering"', () => {
+      const r = syd('X')
+      expect(r.text).not.toMatch(/balansering/)
+      expect(r.text).not.toMatch(/Upplysningsdubbling/)
+      expect(r.text).toMatch(/straff|utspel/i)
+    })
+    it('3NT lovar stopp i BÅDA deras färger', () => {
+      const r = syd('3NT')
+      expect(r.text).toMatch(/stopp/)
+      expect(r.text).toMatch(/färger/)
+    })
+  })
+
+  it('efter deras två färger på låg nivå är X fortfarande upplysning: 1♥–P–2♦–X = kort i båda', () => {
+    const r = interpretCall(h(['N', '1H'], ['E', 'P'], ['S', '2D'], ['W', 'X']), 3)
+    expect(r.text).toMatch(/Upplysningsdubbling/)
+    expect(r.text).toMatch(/hjärter/)
+    expect(r.text).toMatch(/ruter/)
+    expect(r.text).not.toMatch(/balansering/)
+  })
+})

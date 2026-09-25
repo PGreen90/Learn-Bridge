@@ -34,7 +34,7 @@ import { bidValue, cheapestBidIn, legalCalls, prettyBid, SWE_SYM } from './aucti
 import { answerSupportDouble, negativeDouble, openerAnswerNegativeDouble, supportDouble, supportDoublerRebid } from './doubles'
 import { pointsWithFloor } from './evaluation'
 import { raiseWithFit } from './fit-raise'
-import { hcp, isBalanced, lengths, suitHcp } from './hand'
+import { hcp, isBalanced, lengths, shape, suitHcp } from './hand'
 import { hasStopper } from './overcalls'
 import type { Kunskap } from './overcall-continuations'
 import { side } from './play'
@@ -504,12 +504,22 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
     // NT med stopp i deras färg – bara mot inkliv på 1–2-läget. Mot ett
     // hoppinkliv på 3-läget vore 2NT OLAGLIGT (under deras bud) och 3NT
     // osunt på bara 8+ → då passar svararen i stället (FAS 1 punkt 3).
-    if (ovLevel <= 2 && isBalanced(hand) && hasStopper(hand, ovSuit) && p >= 8) {
-      // Billigaste NT över ett FÄRGinkliv på nivå `ovLevel` är exakt `ovLevel`:
-      // sang rankar över alla färger, så 1NT är lagligt över (1♠), 2NT över (2♣)
-      // osv. (R1-fynd #1.)
-      const L = ovLevel
-      return { call: `${L}NT` as Bid, rule: 'NT med stopp', explanation: `Balanserad med stopp (8+) → ${L}NT.` }
+    // GRADERAT (felrapport #81: ♠KQ ♥J8 ♦AT42 ♣KQ975 = 15 hp med dubbelt stopp
+    // fick "pass" över 1♥–(2♣) — förr bjöds bara billigaste sang på 8+, aldrig
+    // 3NT, och 5-4-2-2 räknades inte som jämn). Billigaste NT över ett FÄRG-
+    // inkliv på nivå `ovLevel` är exakt `ovLevel` (sang rankar över alla färger,
+    // R1-fynd #1). Över ett 1-lägesinkliv: 1NT 8–10, 2NT 11–12, 3NT 13+. Över
+    // ett 2-lägesinkliv (1NT finns inte): 2NT 10–12, 3NT 13+.
+    const sangduglig = isBalanced(hand) || shape(hand).join('') === '5422'
+    if (ovLevel <= 2 && sangduglig && hasStopper(hand, ovSuit)) {
+      const nt = (L: number, text: string): ResponseResult => ({ call: `${L}NT` as Bid, rule: 'NT med stopp', explanation: text })
+      if (p >= 13) return nt(3, `Jämn hand med stopp i deras ${SUIT_SYM[ovSuit]} och 13+ hp → 3NT (till spel).`)
+      if (ovLevel === 1) {
+        if (p >= 11) return nt(2, `Jämn hand med stopp i deras ${SUIT_SYM[ovSuit]}, 11–12 hp → 2NT (inbjudan).`)
+        if (p >= 8) return nt(1, `Jämn hand med stopp i deras ${SUIT_SYM[ovSuit]}, 8–10 hp → 1NT.`)
+      } else if (p >= 10) {
+        return nt(2, `Jämn hand med stopp i deras ${SUIT_SYM[ovSuit]}, 10–12 hp → 2NT (inbjudan).`)
+      }
     }
     // Fritt bud i en 5+ LÅGFÄRG på 2-läget (§5.5, felrapport #55): 10+ hp,
     // utan fit och utan sang-alternativ — rondkrav, lovar värden men inte utgång.

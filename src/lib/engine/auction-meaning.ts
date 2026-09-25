@@ -930,7 +930,25 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
   // cuen däremot ett starkt krav, inte Michaels (familj 9).
   if (cb.strain !== 'NT' && isCueOfOpponentSuit(seat, cb.strain, prior) && !ownSideActed(seat, prior)) {
     const open = opening(prior)!
-    return R('Michaels', `Michaels cue-bud (${cb.level}${sym}) — tvåfärgshand: ${michaelsPhrase(open.cb.strain)}, oftast 5–5.`)
+    const oppS = opponentSuits(seat, prior)
+    if (open.cb.level === 1 && oppS.size === 1 && cb.strain === open.cb.strain) {
+      return R('Michaels', `Michaels cue-bud (${cb.level}${sym}) — tvåfärgshand: ${michaelsPhrase(open.cb.strain)}, oftast 5–5.`)
+    }
+    // SENT cue (felrapport #80): motståndarna har visat två färger eller mer —
+    // Michaels finns bara direkt över öppningen. Cuet är konstgjort: styrka och
+    // de objudna färgerna; partnern beskriver sin hand. Krav.
+    const unbid = ['S', 'H', 'D', 'C'].filter((s) => !oppS.has(s))
+    const vis =
+      unbid.length === 2
+        ? `tvåfärgshand i de objudna färgerna ${NAME[unbid[0]]} och ${NAME[unbid[1]]} (oftast 5-5)`
+        : unbid.length === 1
+          ? `styrka och den objudna färgen ${NAME[unbid[0]]}`
+          : 'styrka utan klar egen färg (frågar efter stopp för sang)'
+    return {
+      text: `Cue-bud i motståndarnas ${name} (${cb.level}${sym}) — konstgjort (de har visat ${oppS.size} färger, så ingen tvåfärgscue över öppningen): ${vis}. Krav — partnern beskriver sin hand.`,
+      confidence: 'trolig',
+      forcing: 'krav-1-rond',
+    }
   }
 
   // Systems on över partnerns naturliga 1NT (öppning ELLER inkliv): på 2-läget
@@ -1143,6 +1161,13 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     return R('cue (krav)', text)
   }
 
+  // Öppnarens svar på partnerns cue-höjning över den EGNA svaga tvåan
+  // (felrapport #82): egen färg = minimum/utgång, 3NT = maximum med stopp.
+  {
+    const cueAns = weakTwoCueAnswer(seat, cb, prior)
+    if (cueAns) return cueAns
+  }
+
   // Rebjuden egen färg. I konkurrens: svararens fria rebud visar extra
   // (inbjudan); öppnarens/inklivarens rebud är minimum (ej krav). (Familj 9.)
   if (cb.strain !== 'NT' && ownSuits.has(cb.strain)) {
@@ -1170,7 +1195,11 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
         )
       }
     }
-    const stopp = competitive ? ' (lovar stopp i motståndarnas färg)' : ''
+    const stopp = competitive
+      ? opponentSuits(seat, prior).size >= 2
+        ? ' (lovar stopp i motståndarnas färger)'
+        : ' (lovar stopp i motståndarnas färg)'
+      : ''
     // 2NT-KONVENTIONER i konkurrens (familj 9), lästa ur sitsen:
     const nt2 = interpretCompetitive2NT(seat, cb, prior)
     if (nt2) return nt2
@@ -1181,7 +1210,7 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     if (cb.level === 1 && !ownSideHasBid(seat, prior)) {
       const open = opening(prior)!
       const theirSuit = open.cb.strain !== 'NT' ? NAME[open.cb.strain] : 'motståndarnas färg'
-      const balancing = prior.some((c) => c.bid === 'P')
+      const balancing = inBalancingSeat(prior)
       const range = balancing ? '11–14 hp' : '15–18 hp'
       const kind = balancing ? '1NT-inkliv i balansering (återöppning)' : '1NT-inkliv'
       return {
@@ -1250,6 +1279,15 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     const open = opening(prior)
     const jumpOvercall = !!open && SIDE[open.seat] !== SIDE[seat] && !ownSideActed(seat, prior)
     if (jumpOvercall) {
+      // På utgångsnivå (felrapport #80): lång färg, till spel eller offring — inte
+      // det svaga 2-/3-lägeshoppet på ~7–10 hp.
+      if (cb.level >= 4) {
+        return {
+          text: `Spärrinkliv på utgångsnivå i ${name} (${cb.level}${sym}) — lång färg (7+ kort), till spel eller som offring; styrkan ligger i formen, inte i honnörspoängen. Ej krav.`,
+          confidence: 'trolig',
+          forcing: 'ej-krav',
+        }
+      }
       return {
         text: `Hoppinkliv i ${name} (${cb.level}${sym}) — spärrartat inkliv: lång färg (6+ kort, gärna 7) med begränsad styrka (~7–10 hp). Ej krav.`,
         confidence: 'trolig',
@@ -1262,6 +1300,37 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
       text: `Hoppbud i ${name} (${cb.level}${sym}) — lång färg (6+ kort, gärna 7) med begränsad styrka (~7–10 hp)${short}; inbjuder till utgång i ${name}.`,
       confidence: 'trolig',
       forcing: 'inbjudan',
+    }
+  }
+  // INKLIV utan hopp (felrapport #80): motståndarna öppnade och vår sida gör sin
+  // FÖRSTA aktion i en ny färg (inte deras). Direkt eller i balansering = enkelt
+  // inkliv (§7.1: bra 5+ färg, färgkvalitet före poäng); sent — när de redan
+  // visat två färger — lång färg och spelstyrka snarare än poäng. Förr lästes
+  // det som "ny färg, minst 4 kort".
+  {
+    const open = opening(prior)
+    if (open && SIDE[open.seat] !== SIDE[seat] && !ownSideActed(seat, prior) && !isCueOfOpponentSuit(seat, cb.strain, prior)) {
+      const oppS = opponentSuits(seat, prior)
+      if (oppS.size >= 2 || cb.level >= 4) {
+        return {
+          text: `Inkliv i ${name} (${cb.level}${sym}) sent i motståndarnas budgivning — lång färg (6+ kort), spelstyrka snarare än poäng; kan vara en offring. Ej krav.`,
+          confidence: 'trolig',
+          forcing: 'ej-krav',
+        }
+      }
+      const bal = inBalancingSeat(prior)
+      const range =
+        cb.level === 1
+          ? bal ? '5–16 hp (i balansering, "lånad kung")' : '8–16 hp'
+          : cb.level === 2
+            ? bal ? '7–16 hp (i balansering, "lånad kung")' : '10–16 hp'
+            : '~11–16 hp'
+      const langd = cb.level === 1 ? '5+' : '5+ (oftast 6)'
+      return {
+        text: `Inkliv i ${name} (${cb.level}${sym}) — naturligt: bra ${langd} ${name}, ${range}. Färgkvalitet går före poäng. Ej krav.`,
+        confidence: 'trolig',
+        forcing: 'ej-krav',
+      }
     }
   }
   // (Flykten över deras X av vårt 1 sang finns inte längre: systems on sedan
@@ -1368,6 +1437,15 @@ function ownSideActed(seat: Seat, prior: ResolvedCall[]): boolean {
 }
 
 /**
+ * Sitter budgivaren i UTPASSNINGSLÄGET (balansering): de två senaste buden är
+ * pass, så ett pass till hade avslutat budgivningen. (Felrapport #80: förr
+ * räckte det att vår sida passat NÅGON gång — P–1♥–X lästes som balansering.)
+ */
+function inBalancingSeat(prior: ResolvedCall[]): boolean {
+  return prior.length >= 3 && prior[prior.length - 1].bid === 'P' && prior[prior.length - 2].bid === 'P'
+}
+
+/**
  * Passade `seat` EFTER att en motståndare redan klivit in (contract-bud)? Då har
  * hen tackat nej till ett fritt bud och är begränsad — senare färgbud är svar
  * (t.ex. på återöppningsdubbling), inte krav. En pass som given (före inklivet)
@@ -1395,6 +1473,31 @@ function freeResponder(seat: Seat, prior: ResolvedCall[]): boolean {
   // färgbud svar, inte krav.
   if (prior.some((c) => c.seat === seat && c.bid !== 'P')) return false
   return !passedOverOvercall(seat, prior)
+}
+
+/**
+ * Öppnarens svar på partnerns cue över den egna svaga tvåan (felrapport #82:
+ * 2♦–(2♠)–3♠–(P)–?). Partnerns cue = stark höjning (krav); öppnarens egen färg
+ * på lägsta nivå = minimum, på utgångsnivå = utgång, 3NT = maximum med stopp.
+ */
+function weakTwoCueAnswer(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.seat !== seat || open.cb.level !== 2 || open.cb.strain === 'C' || open.cb.strain === 'NT') return null
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
+  if (ours.length !== 2 || ours[1].seat !== PARTNER[seat]) return null
+  const cue = parseBid(ours[1].bid)!
+  if (!isCueOfOpponentSuit(PARTNER[seat], cue.strain, prior.slice(0, prior.indexOf(ours[1])))) return null
+  const deras = NAME[cue.strain]
+  if (cb.strain === open.cb.strain) {
+    const game = (isMajor(cb.strain) && cb.level === 4) || (!isMajor(cb.strain) && cb.level === 5)
+    return game
+      ? { text: `${cb.level}${SYMBOL[cb.strain]} — svar på partnerns cue i deras ${deras} (stark höjning): utgång i ${NAME[cb.strain]}.`, confidence: 'trolig', forcing: 'avslut' }
+      : { text: `${cb.level}${SYMBOL[cb.strain]} — svar på partnerns cue i deras ${deras} (stark höjning): minimum (6–8 hp), lägsta bud i egen färg. Partnern får passa.`, confidence: 'trolig', forcing: 'ej-krav' }
+  }
+  if (cb.strain === 'NT' && cb.level === 3) {
+    return { text: `3 sang — svar på partnerns cue i deras ${deras} (stark höjning): maximum (9–11 hp) med stopp i deras ${deras}; till spel.`, confidence: 'trolig', forcing: 'avslut' }
+  }
+  return null
 }
 
 /** Är jag ÖPPNAREN (min sida öppnade och det första budet var mitt)? */
@@ -1654,13 +1757,25 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
   // (4) UPPLYSNINGSDUBBLING — vår sida har inte bjudit; direkt takeout av
   //     motståndarnas färgbud (även deras spärr på 3-läget) i balansering/direkt.
   if (!ownHasBid && doubledIsOpp && last.cb.strain !== 'NT' && last.cb.level <= 3) {
-    const balancing = prior.some((c) => SIDE[c.seat] === SIDE[seat] && c.bid === 'P')
+    const oppS = [...opponentSuits(seat, prior)]
+    // SEN dubbling (felrapport #80): motståndarna har visat två färger och nått
+    // 3-läget (styrka) — ingen upplysningsdubbling längre utan straff/utspels-
+    // dirigering: styrka i den dubblade färgen. Ej krav.
+    if (oppS.length >= 2 && last.cb.level >= 3) {
+      return {
+        text: `Dubbling av deras ${last.cb.level}${SYMBOL[last.cb.strain]} — straff/utspelsdirigerande: styrka i ${doubledName} (motståndarna har visat två färger och utgångsvärden, så ingen upplysningsdubbling). Partnern får passa.`,
+        confidence: 'trolig',
+        forcing: 'ej-krav',
+      }
+    }
+    const balancing = inBalancingSeat(prior)
     const bal = balancing ? ' i balansering' : ''
     const extra = balancing ? ' (lättare styrka, återöppnar budgivningen)' : ''
+    const kort = oppS.length >= 2 ? `kort i deras ${oppS.map((s) => NAME[s]).join(' och ')}` : `kort i ${doubledName}`
     // Både den direkta/balanserande upplysningsdubblingen och den responsiva (mot
     // motståndarnas höjning efter partnerns dubbling) är krav 1 rond + alert —
     // registrets 'upplysningsdubbling' bär den kravnivån och alerten.
-    return R('upplysningsdubbling', `Upplysningsdubbling${bal} — ber partnern välja färg: kort i ${doubledName}, stöd i de övriga${extra}.`)
+    return R('upplysningsdubbling', `Upplysningsdubbling${bal} — ber partnern välja färg: ${kort}, stöd i de övriga${extra}.`)
   }
 
   // (5) DUBBLING AV 1 SANG. Deras 1NT-ÖPPNING dubblas som DONT (enfärgshand,

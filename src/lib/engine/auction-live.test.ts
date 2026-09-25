@@ -1604,3 +1604,69 @@ describe('felrapport #60 – rättelsen över stoppbudet efter 1-eller-4-svaret'
     expect(decideCall(zero, hist, 'N').bid).toBe('P')
   })
 })
+
+// Felrapport #81 (bricka 8, 2026-09-24): Nord 1♥, Öst 2♣ — Syd (♠KQ ♥J8 ♦AT42
+// ♣KQ975 = 15 hp, dubbelt klöverstopp, ingen 4-korts högfärg, ingen 5-korts
+// fri färg) fick rådet PASS. Ägaren: "Motorn vill att jag ska passa på 15 hp?
+// Fel." Svararens sang med stopp graderas nu som i boken: över ett 2-läges-
+// inkliv 2NT = 10–12, 3NT = 13+; 5-4-2-2 räknas som sangduglig (jämn nog).
+describe('felrapport #81 – 1♥–(2♣): 15 hp med dubbelt stopp → 3NT, inte pass', () => {
+  const deal = dealOf('W', {
+    N: 'S:T93 H:AKQT732 D:Q6 C:2',
+    E: 'S:J75 H:64 D:J53 C:AJT64',
+    S: 'S:KQ H:J8 D:AT42 C:KQ975',
+    W: 'S:A8642 H:95 D:K987 C:83',
+  })
+  const hist = [call('W', 'P'), call('N', '1H'), call('E', '2C')]
+  it('Syd bjuder 3NT (13+ med stopp)', () => {
+    const c = decideCall(deal, hist, 'S')
+    expect(c.bid).toBe('3NT')
+    expect(c.rule).toBe('NT med stopp')
+  })
+  it('samma sits med 11 hp → 2NT (10–12); med 8 hp → pass (2NT lovar 10+)', () => {
+    const elva = { ...deal, hands: { ...deal.hands, S: parseHand('S:J3 H:J8 D:AT42 C:KQ975') } } // 11 hp
+    expect(decideCall(elva, hist, 'S').bid).toBe('2NT')
+    const atta = { ...deal, hands: { ...deal.hands, S: parseHand('S:J43 H:J8 D:T842 C:KQ97') } } // 8 hp
+    expect(decideCall(atta, hist, 'S').bid).toBe('P')
+  })
+})
+
+// Felrapport #82 (bricka 1, 2026-09-25): Nord 2♦ (svag tvåa), Öst 2♠, Syd 3♠
+// (cue = stark höjning, krav) — och Nord PASSADE. Ägaren: "Partner passar min
+// starka höjning i ruter, 3 spader-budet. Helt fel." Kravet får aldrig passas:
+// öppnaren svarar på cuet (minimum → billigaste bud i egen färg, maximum →
+// utgång). Dessutom: svararen med 3+ stöd och 13+ hp CUE:ar själv (förr
+// "spärrhöjning" 3♦ på 17 hp).
+describe('felrapport #82 – svag tvåa, deras inkliv, partnerns cue: öppnaren passar aldrig', () => {
+  const deal = dealOf('N', {
+    N: 'S:652 H:K74 D:AT9743 C:J',
+    E: 'S:QJT9874 H:J862 D:- C:K8',
+    S: 'S:- H:AQ95 D:KQ2 C:AQT743',
+    W: 'S:AK3 H:T3 D:J865 C:9652',
+  })
+  it('Syd (17 hp, 3-korts stöd) cue:ar 3♠ — stark höjning, inte 3♦', () => {
+    const c = decideCall(deal, [call('N', '2D'), call('E', '2S')], 'S')
+    expect(c.bid).toBe('3S')
+    expect(c.rule).toBe('cue (limithöjning+)')
+  })
+  it('Nord (minimum, 7 hp, inget spaderstopp) svarar 4♦ på cuet — aldrig pass', () => {
+    const hist = [call('N', '2D'), call('E', '2S'), call('S', '3S'), call('W', 'P')]
+    const c = decideCall(deal, hist, 'N')
+    expect(c.bid).toBe('4D')
+  })
+  it('Nord med maximum (10 hp) och spaderstopp svarar 3NT', () => {
+    const max = { ...deal, hands: { ...deal.hands, N: parseHand('S:A52 H:K74 D:QT9743 C:J') } } // 10 hp, ♠A
+    const hist = [call('N', '2D'), call('E', '2S'), call('S', '3S'), call('W', 'P')]
+    expect(decideCall(max, hist, 'N').bid).toBe('3NT')
+  })
+  it('högfärg: 2♥–(2♠)–3♠ → öppnaren bjuder 4♥ (utgång)', () => {
+    const hf = dealOf('N', {
+      N: 'S:65 H:KQT974 D:743 C:J2',
+      E: 'S:QJT984 H:2 D:Q98 C:K85',
+      S: 'S:A3 H:AJ5 D:KJ2 C:AQT74',
+      W: 'S:K72 H:863 D:AT65 C:963',
+    })
+    const hist = [call('N', '2H'), call('E', '2S'), call('S', '3S'), call('W', 'P')]
+    expect(decideCall(hf, hist, 'N').bid).toBe('4H')
+  })
+})

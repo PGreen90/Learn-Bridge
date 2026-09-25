@@ -2668,9 +2668,30 @@ uppdelningen (värde-X mot DONT, Lebensohl mot naturliga inkliv) är riven.
 
 **(b) De stör vår svaga tvåa / spärr** (takeout-X eller ett inkliv):
 - Deras **upplysningsdubbling → XX = värden/straffintresse** (10+ hp).
+- Mot ett **färginkliv** med **3+ stöd och 13+ hp → cue i deras färg** = stark
+  höjning (limithöjning eller bättre), **krav** (felrapport #82, 2026-09-25:
+  2♦–(2♠) med ♠– ♥AQ95 ♦KQ2 ♣AQT743 bjöd förr "spärrhöjning" 3♦).
 - Annars **fortsatt spärr**: höj vår färg ett steg med fit (svag tvåa kräver
   3-korts stöd, en spärr räcker med 2) – lagen om totala stick.
 - Annars **pass**.
+
+**Öppnaren svarar partnerns cue — passar aldrig** (felrapport #82: Nord passade
+ut 3♠ på 2♦–(2♠)–3♠). Högfärg: **4M** (utgång; partnern går vidare mot slam med
+kontrollbud om hen vill). Lågfärg: **maximum (9–11 hp) med stopp i deras färg →
+3NT**, maximum utan stopp → **5m**, **minimum (6–8) → lägsta bud i egen färg**
+(4m, partnern får passa). *Nord ♠652 ♥K74 ♦AT9743 ♣J → **4♦**; med ♠A52 och 10
+hp → **3NT**.* (Ägarfråga öppen: ska maximum utan stopp hellre bjuda 4m och
+lämna 5m åt partnern?)
+
+**(h) Svararens sang med stopp över deras färginkliv — graderad** (felrapport
+#81, 2026-09-24: 1♥–(2♣) med ♠KQ ♥J8 ♦AT42 ♣KQ975 = 15 hp fick rådet pass; förr
+bjöds bara billigaste sang på 8+ och aldrig 3NT). Jämn hand = balanserad eller
+5-4-2-2, med stopp i deras färg, utan negativ dubbling/fritt bud i högfärg/fit:
+
+| Inklivet | 1NT | 2NT | 3NT |
+|---|---|---|---|
+| på 1-läget | 8–10 hp | 11–12 hp (inbjudan) | 13+ hp |
+| på 2-läget | — | 10–12 hp (inbjudan) | 13+ hp |
 
 **(c) Straffdubbla deras flykt efter vår XX.** Öppnar vi 1NT, de stör med DONT och
 partnern **redubblar** (XX = *vi äger handen*), så **straffdubblar** vår sida varje
@@ -2931,6 +2952,19 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-25 — Felrapport #78–#82 (fem rapporter).** (#81) Svararens sang med
+  stopp över ett färginkliv graderad 1NT 8–10 / 2NT 11–12 (10–12 över 2-läget) /
+  3NT 13+, 5-4-2-2 sangduglig (§7.8 h, `contested-opening.ts`). (#82) Svararen
+  cue:ar deras inkliv med 3+ stöd och 13+ hp; öppnaren svarar cuet och passar
+  aldrig (§7.8 b, `contested-openings.ts` + `preempt-defense-continuations.ts`,
+  raden *svag2-fortsättning*). (#80) Betydelselagret: inkliv förklaras ur sitsen
+  (direkt / balansering = utpassningsläget / sent efter två visade färger), sent
+  cue är inte Michaels, sen dubbling på 3-läget är straff/utspelsdirigerande,
+  sang lovar stopp i "färger" (`auction-meaning.ts`). (#78/#79) Spelet: Monte-
+  Carlo-lagret väljer lägsta kortet vid lika DD-poäng (`monte-carlo.ts`) och
+  honnörsvakten sakar aldrig honnören själv (`play-bot.ts`). Facit
+  `auction-live.test.ts`, `auction-interpret.test.ts`, `contested-openings.test.ts`,
+  `play-bot-saka-honnor.test.ts`, `monte-carlo-vote.test.ts`.
 - **2026-09-24 — Partnerns placerade utgång: den starka handen frågar 4NT (§6.2;
   ägarbeslut).** Öppnaren passade partnerns 4♥/4♠ oavsett styrka ("pass (ingen
   regel)", även med 21 hp). Nu 4NT vid 31+ mot partnerns ca 12 (ingen inbjudan,

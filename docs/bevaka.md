@@ -1,5 +1,19 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Sakningar när kontraktet är avgjort — RÄTT kort, inte bara max stick (2026-09-25, felrapport #78 + #79)
+- **Lagat:** (1) Monte-Carlo-lagret (`monte-carlo.ts`) tog det FÖRSTA kortet i listan
+  vid lika DD-poäng = det högsta (♠K sakades i 4♥, #78); nu vinner lägsta valör vid
+  lika. (2) Honnörsvakten `defenderGuardDiscard` (`play-bot.ts`) valde en "säker"
+  sakfärg och kastade honnören själv när färgen bara bestod av den (bar ♣K efter
+  esset, #79); vakten sakar nu aldrig J+ — saknas hacka i säker färg står den
+  gamla regeln kvar. Facit `play-bot-saka-honnor.test.ts` + `monte-carlo-vote.test.ts`.
+- **Bevaka:** (1) "billigast vid lika" är en tumregel — en sakning som LÄMNAR
+  en dubbelton-honnör ogarderad kan bli DD-lika i sampeln men fel i verkligheten;
+  (2) MC-lagrets lägsta-kort-val kan bryta mot markeringsläsningen (partnern
+  läser en låg hacka som avskräckande); (3) tumregelbotens sakningar med 9+ kort
+  har fortfarande ingen "behåll mästaren"-regel — vakten avstår bara från att
+  kasta honnören, den vet inte att kortet är mästare.
+
 ## Borden = tävlingen (2026-09-24)
 - **Nytt:** vänner-bordets bottar bjuder (tänkande, DD-orakel på servern) och spelar
   (klientens MC-profil) exakt som i Dagens tävling; slut tidsbudget → anropet

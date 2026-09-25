@@ -19,6 +19,9 @@ import { playedCards, visibleSeats } from './card-counting'
 import { startingPoints } from './evaluation'
 import { hcp, suitHcp } from './hand'
 import { legalCards, playCard, side, type PlayState } from './play'
+
+const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
 import { doubleDummyDeclarerRemaining } from './dds'
 import type { HandModel, SeatConstraint } from './hand-model'
 
@@ -239,7 +242,15 @@ export function chooseCardMonteCarlo(
     }
     if (counted === 0) continue
     const score = total / counted
-    const better = best === null || (maximizeDeclarer ? score > best.score : score < best.score)
+    // Vid LIKA poäng (vanligt när kontraktet redan är avgjort — alla kort ger samma
+    // DD-resultat) vinner det BILLIGASTE kortet, lägst valör. Förr vann det första
+    // i listan, dvs. det högsta i handen, så försvararen sakade ♠K/♦K "som en
+    // nybörjare" fast en hacka var precis lika bra (felrapport #78/#79). RÄTT kort,
+    // inte bara max stick.
+    const better =
+      best === null ||
+      (maximizeDeclarer ? score > best.score : score < best.score) ||
+      (score === best.score && rankVal(card.rank) < rankVal(best.card.rank))
     if (better) best = { card, score, samples: counted }
   }
   return best

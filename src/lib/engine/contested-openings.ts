@@ -38,6 +38,22 @@ export function answerPreemptInterference(
     }
   }
 
+  // Stark höjning (felrapport #82: 2♦–(2♠) med ♠– ♥AQ95 ♦KQ2 ♣AQT743 = 17 hp
+  // fick "spärrhöjning" 3♦): 3+ stöd och 13+ hp → CUE i deras inklivsfärg =
+  // limithöjning eller bättre, krav — öppnaren svarar (minimum → billigaste bud i
+  // vår färg, maximum → utgång/3NT med stopp). Bara mot ett FÄRGinkliv; mot
+  // deras X gäller XX/höjning ovan.
+  const ov = /^([1-7])([CDHS])$/.exec(theirCall)
+  if (ov && support >= 3 && p >= 13) {
+    const lvl = Number(ov[1]) + 1
+    const SYM_L: Record<string, string> = { C: '♣', D: '♦', H: '♥', S: '♠' }
+    return {
+      call: `${lvl}${ov[2]}`,
+      rule: 'cue (limithöjning+)',
+      explanation: `3+ stöd och 13+ hp mot deras inkliv → ${lvl}${SYM_L[ov[2]]} (cue = stark höjning av vår ${SYM[ourSuit]}, krav).`,
+    }
+  }
+
   // Fortsatt spärr: höj vår färg ett steg med fit (lag om totala stick). En svag
   // tvåa (öppnaren 6+) kräver 3-korts stöd (9 trumf); en spärr (7+) räcker 2.
   const needed = ourLevel === 2 ? 3 : 2

@@ -61,45 +61,66 @@ function optimalCards(state: PlayState, seat: Seat, layout: Record<Seat, Hand>):
   return scored.filter((x) => x.s === best).map((x) => x.c)
 }
 
-/**
- * Modell som NAGLAR de dolda platserna till en unik fördelning via renonser:
- * här är Ö renons i allt utom spader → Ö måste få poolens tre spader, V resten.
- * Då blir samplingen exakt = den verkliga given (facit går att räkna för hand).
- */
-function pinEastToSpades(): HandModel {
-  const m = buildHandModel([])
-  m.E.voids.add('hearts')
-  m.E.voids.add('diamonds')
-  m.E.voids.add('clubs')
-  return m
-}
 
 describe('chooseCardMonteCarlo – DDS-röstning över sampeln (Steg 3b)', () => {
-  // 3-korts NT-slutspel, spelförare S, träkarl N, S på lead.
-  // S: ♠A ♠2 ♥A · N: ♥K ♦A ♣A · Ö: ♠KQJ · V: ♥2 ♦2 ♣2.
-  // Leder S ♠2 → Ö vinner och cashar KQJ = 3 stick till motspelet (spelföraren 0).
-  // Bäst för spelföraren = 2 stick (träkarlens ♦A/♣A är strandade utan ingång).
-  // Röstningen ska undvika fällan ♠2 (0 stick).
+  // 3-korts NT-slutspel, spelförare S, träkarl N, S på lead. BLOCKERINGSFÄLLA:
+  // S: ♠A ♠2 ♥K · N (träkarl): ♥A ♦2 ♣2 · Ö: ♠K ♠Q ♥Q · V: ♦3 ♣3 ♣4.
+  // En spader först = 2 stick (spadersticket + ♥A, eller ♥A + bordets sista
+  // kort när alla är renons). Leder S ♥K tvingas ♥A upp i SAMMA stick, bordet
+  // måste sedan leda en hacka till V och ♠A cashas aldrig = 1 stick.
+  // Röstningen ska undvika fällan ♥K (♠A och ♠2 är DD-lika; sedan felrapport
+  // #78/#79 vinner det lägsta av dem).
+  // (Det gamla exemplet — ♠A ♠2 ♥A mot ♠KQJ — var ingen fälla: ♠2 och ♠A gav
+  // båda 2 stick, och testet passerade bara för att ♠A stod först i listan.)
   const live: Record<Seat, Hand> = {
-    S: [C('spades', 'A'), C('spades', '2'), C('hearts', 'A')],
-    N: [C('hearts', 'K'), C('diamonds', 'A'), C('clubs', 'A')],
-    E: [C('spades', 'K'), C('spades', 'Q'), C('spades', 'J')],
-    W: [C('hearts', '2'), C('diamonds', '2'), C('clubs', '2')],
+    S: [C('spades', 'A'), C('spades', '2'), C('hearts', 'K')],
+    N: [C('hearts', 'A'), C('diamonds', '2'), C('clubs', '2')],
+    E: [C('spades', 'K'), C('spades', 'Q'), C('hearts', 'Q')],
+    W: [C('diamonds', '3'), C('clubs', '3'), C('clubs', '4')],
+  }
+  /** Naglar V till ruter+klöver (renons i spader/hjärter) → Ö får ♠K ♠Q ♥Q exakt. */
+  function pinWestToMinors(): HandModel {
+    const m = buildHandModel([])
+    m.W.voids.add('spades')
+    m.W.voids.add('hearts')
+    return m
   }
 
-  it('spelföraren undviker fällan (♠2) och väljer ett optimalt kort', () => {
+  it('spelföraren undviker fällan (♥K) och väljer ett optimalt kort', () => {
     const state = fabricate(live, 'S', 'NT', 'S')
-    const choice = chooseCardMonteCarlo(state, 'S', pinEastToSpades(), { samples: 8 })
+    const choice = chooseCardMonteCarlo(state, 'S', pinWestToMinors(), { samples: 8 })
     expect(choice).not.toBeNull()
-    expect(key(choice!.card)).not.toBe(key(C('spades', '2'))) // inte fällan
+    expect(key(choice!.card)).not.toBe(key(C('hearts', 'K'))) // inte fällan
     const optimal = optimalCards(state, 'S', live).map(key)
-    expect(optimal).toContain(key(choice!.card)) // ett facit-optimalt kort
-    expect(choice!.score).toBe(2) // bästa möjliga (♦A/♣A strandade); fällan gav 0
+    expect(optimal).toContain(key(choice!.card)) // ett facit-optimalt kort (♠A eller ♠2)
+    expect(choice!.score).toBe(2) // fällan ♥K gav 1
+  })
+
+  it('vid LIKA poäng vinner det lägsta kortet (felrapport #78/#79: saka aldrig honnören i onödan)', () => {
+    // Motspelaren Ö ska saka på S:s ♥A (Ö renons i hjärter): ♠K och ♠2 är DD-lika
+    // (spelföraren har resten) → det billigaste kortet, ♠2, inte kungen.
+    const live3: Record<Seat, Hand> = {
+      S: [C('hearts', 'A'), C('hearts', 'K'), C('hearts', 'Q')],
+      N: [C('clubs', 'A'), C('clubs', 'K'), C('clubs', 'Q')],
+      E: [C('spades', 'K'), C('spades', '2'), C('diamonds', '5')],
+      W: [C('diamonds', '2'), C('diamonds', '3'), C('diamonds', '4')],
+    }
+    let state: PlayState = fabricate(live3, 'S', 'NT', 'S')
+    state = playCard(state, C('hearts', 'A')) // S leder
+    state = playCard(state, C('diamonds', '2')) // V sakar
+    state = playCard(state, C('clubs', 'Q')) // N (träkarlen) sakar
+    expect(state.toAct).toBe('E')
+    const m = buildHandModel([])
+    m.W.voids.add('spades')
+    m.W.voids.add('hearts')
+    m.W.voids.add('clubs')
+    const choice = chooseCardMonteCarlo(state, 'E', m, { samples: 6 })!
+    expect(key(choice.card)).toBe(key(C('spades', '2')))
   })
 
   it('poängen som röstningen ger matchar den exakta DDS-poängen (pinnad giv)', () => {
     const state = fabricate(live, 'S', 'NT', 'S')
-    const choice = chooseCardMonteCarlo(state, 'S', pinEastToSpades(), { samples: 6 })!
+    const choice = chooseCardMonteCarlo(state, 'S', pinWestToMinors(), { samples: 6 })!
     expect(choice.score).toBe(exactScore(state, live, choice.card))
   })
 
