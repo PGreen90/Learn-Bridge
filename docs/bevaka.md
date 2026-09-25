@@ -11,6 +11,10 @@
   loggen inte är klar; (3) Vercel-loggen efter första bordet: inga timeouts på
   `api/bord`; (4) tänkta bud som skiljer sig mellan bordet och samma läge på
   spelbordet = DD-skillnad WASM Node/webbläsare (samma vakt som nattrapporten).
+- **Uppvändningen på telefon (samma dag):** giv-klar ska rymmas på 375×812 utan
+  scroll; facit-vyn (läge 1) scrollar medvetet. Skärmdump med klippta kort eller
+  chip som krockar med ⋮/ⓘ = bevaka-fynd (`docs/bord-plan.md` "Automatiska
+  anpassningar").
 
 ## Tänkande bottar i tävlingen (2026-09-24, `241da62`)
 - **Nytt:** bottarna tänker (resonemangslagret) även i Dagens tävling; servern godtar

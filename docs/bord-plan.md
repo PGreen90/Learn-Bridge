@@ -223,6 +223,24 @@ bord som stått stilla > 2 h innan det globala taket räknas.
   skulle avslöja dolda händer för en mänsklig motståndare vid bordet) samt
   Ångra / manuell claim / Ge upp (kräver regler för samtycke vid ett bord med
   flera människor — ägarfrågor, se Medvetet utanför nedan).
+- **Automatiska anpassningar av uppvändningen (2026-09-24, ägarens
+  skärmdump: Öst klippt, panelen en smal spalt, Nords 7-kortsfärg sprängde
+  höjden).** Facit- och giv-klar-vyn går nu också genom `SpelbordRam` och
+  anpassar sig med rena CSS-brytpunkter (`sm:` = 640 px, ingen mätning).
+  Ägarkrav: korten KVAR i sina väderstreck som de spelades — Nord i
+  färgkolumner, Väst/Öst som högar, Syd som kortrad, på alla skärmar. Bred
+  skärm = xl-korten och kontraktsrutan i mitten där sticket låg. Telefon =
+  samma geometri men KOMPAKT (`kompakt`-prop på SuitColumns/SideDummyPiles/
+  HandFan flat): lg-kort 48×64 med tätare överlapp (kolumner 24 px remsa,
+  högar 16 px, kortraden 20 px), kontraktet + resultatet + giv/ställning som
+  en tvåradig chip i toppbandet till vänster om hörnknapparna (min-h så
+  kolumnerna går fria från ⋮/ⓘ), mitten tom (för smal för en ruta). Knapparna
+  (Nästa giv · Genomgång) i listen, claim/facit/par som textrader under den.
+  Mätt i provrigg (fejkat backend via Vite-alias + dev-rutt, borttagen före
+  commit; 375×812, Nord med 7-kortsfärg): giv-klar exakt 812 px hög utan
+  horisontell overflow; facit-vyn (två auktionsrutnät) scrollar på telefon —
+  medvetet, hellre sidscroll än nästlad. Facit `BordSpel.test.tsx` (båda
+  varianterna finns i DOM:en, CSS väljer).
 
 ## Medvetet utanför v1 (kandidater till SENARE)
 

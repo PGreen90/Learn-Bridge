@@ -14,6 +14,7 @@ export function HandFan({
   hand,
   size = 'md',
   flat = false,
+  kompakt = false,
 }: {
   hand: Hand
   size?: 'sm' | 'md' | 'lg'
@@ -21,6 +22,9 @@ export function HandFan({
    *  överlapp över hela raden, inga färgglapp (`size` ignoreras). Används av
    *  budfasen så handen ser likadan ut där som i spelfasen. */
   flat?: boolean
+  /** Kompakt platt rad (uppvändningen på telefon, 2026-09-24): lg-kort 48×64
+   *  med 20 px synlig remsa (-ml-7) → 13 kort = 288 px. Bara med `flat`. */
+  kompakt?: boolean
 }) {
   let dealt = 0 // löpande kortindex över alla färggrupper → utdelningskaskaden
   return (
@@ -32,12 +36,12 @@ export function HandFan({
           <div key={suit} className="flex">
             {cards.map((c, i) => {
               const idx = dealt++
-              const ml = flat ? (idx === 0 ? '' : FLAT_OVERLAP) : i === 0 ? '' : REST_OVERLAP
+              const ml = flat ? (idx === 0 ? '' : kompakt ? '-ml-7' : FLAT_OVERLAP) : i === 0 ? '' : REST_OVERLAP
               return (
                 <PlayingCard
                   key={`${c.suit}${c.rank}`}
                   card={c}
-                  size={flat ? 'xl' : size}
+                  size={flat ? (kompakt ? 'lg' : 'xl') : size}
                   className={`deal-in ${ml}`}
                   style={{ animationDelay: `${idx * 35}ms` }}
                 />
