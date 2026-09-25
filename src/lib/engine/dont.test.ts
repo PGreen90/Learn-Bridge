@@ -43,3 +43,18 @@ describe('advanceDONT', () => {
     expect(advanceDONT(parseHand('S:KJ97 H:KJ72 D:2 C:9843'), '2D').call).toBe('2H')
   })
 })
+
+// Felrapport #83 (2026-09-25): efter partnerns 2♥ (hjärter + spader) passade
+// advancern med ♠AKJT9 ♥A3 — "stöd antas". Med fler spader än hjärter (eller
+// högst två hjärter) väljs spader: 2♠ till spel.
+describe('advanceDONT efter 2♥ (hjärter + spader) – välj den längre högfärgen', () => {
+  it('♠AKJT9 ♥A3 → 2♠', () => {
+    expect(advanceDONT(parseHand('S:AKJT9 H:A3 D:64 C:T876'), '2H').call).toBe('2S')
+  })
+  it('3+ hjärter → pass (stöd i den visade färgen)', () => {
+    expect(advanceDONT(parseHand('S:AKJT H:A32 D:64 C:T876'), '2H').call).toBe('P')
+  })
+  it('två hjärter men lika kort i spader → pass (ingen bättre plats)', () => {
+    expect(advanceDONT(parseHand('S:A3 H:K2 D:QT764 C:T876'), '2H').call).toBe('P')
+  })
+})

@@ -1659,6 +1659,11 @@ describe('felrapport #82 – svag tvåa, deras inkliv, partnerns cue: öppnaren 
     const hist = [call('N', '2D'), call('E', '2S'), call('S', '3S'), call('W', 'P')]
     expect(decideCall(max, hist, 'N').bid).toBe('3NT')
   })
+  it('Nord med maximum (10 hp) UTAN spaderstopp svarar 4♦ — partnern höjer (ägarbeslut 2026-09-25)', () => {
+    const max = { ...deal, hands: { ...deal.hands, N: parseHand('S:652 H:KQ4 D:AT9743 C:J') } } // 10 hp, ♠652
+    const hist = [call('N', '2D'), call('E', '2S'), call('S', '3S'), call('W', 'P')]
+    expect(decideCall(max, hist, 'N').bid).toBe('4D')
+  })
   it('högfärg: 2♥–(2♠)–3♠ → öppnaren bjuder 4♥ (utgång)', () => {
     const hf = dealOf('N', {
       N: 'S:65 H:KQT974 D:743 C:J2',
@@ -1668,5 +1673,30 @@ describe('felrapport #82 – svag tvåa, deras inkliv, partnerns cue: öppnaren 
     })
     const hist = [call('N', '2H'), call('E', '2S'), call('S', '3S'), call('W', 'P')]
     expect(decideCall(hf, hist, 'N').bid).toBe('4H')
+  })
+})
+
+// Felrapport #83 (bricka 8, 2026-09-25): Väst 1NT, Nord (bot) 2♥ "DONT", Syd
+// 2♠ — Nord hade ♠4 ♥QJ9764 ♦QT82 ♣92, alltså inte hjärter+spader. Tabellen
+// passade (6 hp under DONT-golvet) men tänkande lagret bjöd 2♥ som naturlig
+// sexkortsfärg. Låst: tabellen passar, systemfiltret stryker 2♥ (resonemang.test),
+// och advancern med ♠AKJT9 ♥A3 väljer 2♠ över ett äkta 2♥.
+describe('felrapport #83 – DONT 2♥ = hjärter+spader: bjuds inte utan spader; advancern väljer spader', () => {
+  const deal = dealOf('W', {
+    N: 'S:4 H:QJ9764 D:QT82 C:92',
+    E: 'S:875 H:T8 D:J953 C:KQJ5',
+    S: 'S:AKJT9 H:A3 D:64 C:T876',
+    W: 'S:Q632 H:K52 D:AK7 C:A43',
+  })
+  it('Nord passar över 1NT (tabellen: 6 hp, ingen DONT-form för 2♥)', () => {
+    expect(decideCall(deal, [call('W', '1NT')], 'N').bid).toBe('P')
+  })
+  it('Syd bjuder 2♠ över partnerns 2♥ (fem spader, två hjärter) — inte pass', () => {
+    const c = decideCall(deal, [call('W', '1NT'), call('N', '2H'), call('E', 'P')], 'S')
+    expect(c.bid).toBe('2S')
+  })
+  it('Nord passar Syds 2♠ (valet är till spel)', () => {
+    const hist = [call('W', '1NT'), call('N', '2H'), call('E', 'P'), call('S', '2S'), call('W', 'P')]
+    expect(decideCall(deal, hist, 'N').bid).toBe('P')
   })
 })

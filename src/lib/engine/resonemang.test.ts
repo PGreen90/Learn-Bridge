@@ -192,3 +192,15 @@ describe('budAvvikelser — nattgranskningens budkontroll', () => {
     expect(budAvvikelser(d, { history: h, plays: [] }, motor as never)).toEqual(['bud 7 (N): bjöd 2H, motorn P'])
   })
 })
+
+describe('systemKandidater — konventionella bud mot deras 1NT (felrapport #83)', () => {
+  // Nord ♠4 ♥QJ9764 ♦QT82 ♣92 över Västs 1NT: 2♥ är DONT (hjärter + spader) —
+  // ett konventionellt bud handen inte har. Tänkande lagret bjöd ändå 2♥ som
+  // "naturlig sexkortsfärg" (filtret kände bara Michaels/ovanlig/cue).
+  it('2♥ över deras 1NT stryks (DONT = hjärter+spader); bara pass kvar', () => {
+    const k = systemKandidater(parseHand('S:4 H:QJ9764 D:QT82 C:92'), auk('W:1NT'), 'N' as Seat)
+    expect(k).not.toContain('2H')
+    expect(k).not.toContain('2D')
+    expect(k).toEqual(['P'])
+  })
+})
