@@ -28,6 +28,7 @@ export function SuitColumns({
   onCardClick,
   selectedSuit,
   registerCardEl,
+  kompakt = false,
 }: {
   hand: Hand
   contract: Contract
@@ -37,10 +38,13 @@ export function SuitColumns({
   selectedSuit: Suit | null
   /** Kortflygningens ref-register (etapp 3): källkortets läge mäts härifrån. */
   registerCardEl?: RegisterCardEl
+  /** Kompakt (uppvändningen på telefon, ägarbeslut 2026-09-24): lg-kort 48×64
+   *  med 24 px synlig remsa (-mt-10) — bordets geometri ryms på en telefon. */
+  kompakt?: boolean
 }) {
   const { myTurn, legalSet } = turnInfo(play, contract, seat)
   return (
-    <div data-kolumner={seat} className="flex items-start justify-center gap-1.5">
+    <div data-kolumner={seat} className={`flex items-start justify-center ${kompakt ? 'gap-1' : 'gap-1.5'}`}>
       {handSuitsTrumpFirst(contract.strain).map((suit) => {
         const cards = bySuit(hand, suit)
         if (cards.length === 0) return null
@@ -63,10 +67,10 @@ export function SuitColumns({
                   key={`${c.suit}${c.rank}`}
                   ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
-                  size="xl"
+                  size={kompakt ? 'lg' : 'xl'}
                   playable={playable}
                   onClick={playable ? () => onCardClick(c) : undefined}
-                  className={i > 0 ? (spread ? '-mt-7' : '-mt-9') : ''}
+                  className={i > 0 ? (kompakt ? '-mt-10' : spread ? '-mt-7' : '-mt-9') : ''}
                 />
               )
             })}
@@ -93,16 +97,20 @@ export function SideDummyPiles({
   contract,
   side,
   registerCardEl,
+  kompakt = false,
 }: {
   hand: Hand
   contract: Contract
   side: 'W' | 'E'
   registerCardEl?: RegisterCardEl
+  /** Kompakt (uppvändningen på telefon, 2026-09-24): lg-kort (vridna 64×48) med
+   *  16 px valörremsa (-ml-12) — samma proportion som xl-högarna. */
+  kompakt?: boolean
 }) {
   const suits = handSuitsTrumpFirst(contract.strain)
   const rows = side === 'E' ? suits : [...suits].reverse()
   return (
-    <div className={`flex flex-col gap-1 ${side === 'E' ? 'items-end' : 'items-start'}`}>
+    <div className={`flex flex-col ${kompakt ? 'gap-0.5' : 'gap-1'} ${side === 'E' ? 'items-end' : 'items-start'}`}>
       {rows.map((suit) => {
         const cards = bySuit(hand, suit) // högst → lägst
         if (cards.length === 0) return null
@@ -123,13 +131,13 @@ export function SideDummyPiles({
               // (-ml-20 = 80 px → 16 px synlig valörremsa) räknar på rätt bredd.
               <div
                 key={`${c.suit}${c.rank}`}
-                className={`relative flex h-16 w-24 items-center justify-center ${i > 0 ? '-ml-20' : ''}`}
+                className={`relative flex items-center justify-center ${kompakt ? `h-12 w-16 ${i > 0 ? '-ml-12' : ''}` : `h-16 w-24 ${i > 0 ? '-ml-20' : ''}`}`}
                 style={side === 'E' ? { zIndex: cards.length - i } : undefined}
               >
                 <PlayingCard
                   ref={registerCardEl?.(`${c.suit}${c.rank}`)}
                   card={c}
-                  size="xl"
+                  size={kompakt ? 'lg' : 'xl'}
                   className={side === 'E' ? 'rotate-90' : '-rotate-90'}
                 />
               </div>

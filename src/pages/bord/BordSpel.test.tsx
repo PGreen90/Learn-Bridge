@@ -237,10 +237,14 @@ describe('BordSpel — röktest', () => {
         stallning: { ns: 110, ew: 0 },
       }),
     ]
-    rendera()
+    const { container } = rendera()
     expect(await screen.findByText('Nästa giv →')).toBeTruthy()
-    expect(screen.getByText(/8 stick/)).toBeTruthy()
-    expect(screen.getByText(/Ni \+110/)).toBeTruthy()
+    // Resultatraden finns i BÅDA varianterna av uppvändningen (2026-09-24):
+    // telefonens chip i toppbandet och den breda skärmens mittruta — CSS (sm:)
+    // väljer vilken som syns, så DOM:en bär två.
+    expect(screen.getAllByText(/8 stick/)).toHaveLength(2)
+    expect(screen.getAllByText(/Ni \+110/)).toHaveLength(2)
+    expect(container.querySelectorAll('[data-kolumner="N"]')).toHaveLength(2) // Nord i kolumner, kompakt + bred
     // Felrapporten (ägarönskemål 2026-08-17) nås från giv-klar-vyn.
     expect(screen.getByText(/Rapportera given/)).toBeTruthy()
     // Utan spelade kort finns ingen genomgång att öppna.
