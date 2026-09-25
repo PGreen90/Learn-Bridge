@@ -554,7 +554,10 @@ export function doublerAnswersAdvancers2NT(hand: Hand, f: AuctionFacts): Kunskap
 export function ownStrongDoubleRebid(hand: Hand, f: AuctionFacts): Kunskap | null {
   const { history, seat } = f
   const open = f.opening
-  if (!open || side(open.seat) === side(seat) || open.level !== 1) return null
+  // Även över deras SVAGA TVÅA (sunt förnuft-svepet 2026-09-25, frö 20290030:
+  // (2♦)–X–(XX)–3♣–(P) med ♠AQ5 ♥AQT9653 ♦K ♣A3 = 19 hp passade — 3♥ är budet).
+  const weakTwo = open?.level === 2 && open.strain !== 'C' && open.strain !== 'NT'
+  if (!open || side(open.seat) === side(seat) || (open.level !== 1 && !weakTwo)) return null
   // Mitt enda egna icke-pass-bud hittills = X (upplysningsdubblingen).
   const myActions = history.filter((c) => c.seat === seat && c.bid !== 'P')
   if (myActions.length !== 1 || myActions[0].bid !== 'X') return null
@@ -581,6 +584,9 @@ export function ownStrongDoubleRebid(hand: Hand, f: AuctionFacts): Kunskap | nul
     if (!suit || len[s] > len[suit] || (len[s] === len[suit] && st > letterOfSuit(suit))) suit = s
   }
   if (!suit) return null
+  // Över deras svaga tvåa bara med en ÄKTA enfärgshand (6+): med fem kort höjs
+  // partnerns svar i stället (frö 20261449: 4♣ → 5♣ står, 4♠ på AQT54 gjorde det inte).
+  if (weakTwo && len[suit] < 6) return null
 
   const letter = letterOfSuit(suit)
   const legal = legalCalls(history, seat)
@@ -804,6 +810,48 @@ export function answerStrongDoubleGameForce(hand: Hand, f: AuctionFacts): Kunska
 
 export function doubleSideCompetes(hand: Hand, f: AuctionFacts): Kunskap | null {
   return advancerPrefersOvercallSuit(hand, f) ?? advancerCompetesToFit(hand, f)
+}
+
+/**
+ * DUBBLAREN ÅTERÖPPNAR (sunt förnuft-svepet 2026-09-25, frö 20290022: 1♠–X–2♠–P–P
+ * med ♠– ♥AKT3 ♦KJ962 ♣AJ43 = 16 hp passade ut). Mönstret: mitt X var vår sidas
+ * enda aktion, de höjde öppningsfärgen (≤3-läget), partnern passade och det är
+ * utpassningsläge. 16+ hp: en egen 5+ objuden färg bjuds billigast (naturligt, ej
+ * krav — partnern passade bara för att svaret var svagt); annars X igen med högst
+ * två kort i deras färg (upplysning, partnern väljer). Under 16 → pass (explicit).
+ */
+export function doublerReopens(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
+  if (!f.passOut) return null
+  const ourNonPass = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourNonPass.length !== 1 || ourNonPass[0].seat !== seat || ourNonPass[0].bid !== 'X') return null
+  const theirs = f.theirContractBids
+  if (theirs.length !== 2) return null
+  const open = parseContractBid(theirs[0].bid)!
+  const raise = parseContractBid(theirs[1].bid)!
+  if (open.strain === 'NT' || raise.strain !== open.strain || raise.level > 3) return null
+  if (f.lastNonPass !== theirs[1]) return null
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const theirSuit = SUIT_OF_LETTER[open.strain]!
+  if (p < 16) return { call: 'P', rule: 'pass', explanation: `Dubblaren under 16 hp låter deras ${raise.level}${SWE_SYM[open.strain]} stå (partnern passade).` }
+  const legal = legalCalls(history, seat)
+  let suit: Suit | null = null
+  for (const st of SUIT_STRAINS) {
+    const s = SUIT_OF_LETTER[st]!
+    if (s === theirSuit || len[s] < 5) continue
+    if (!suit || len[s] > len[suit]) suit = s
+  }
+  if (suit) {
+    const bid = cheapestBidIn(history, seat, letterOfSuit(suit))
+    if (bid && legal.includes(bid)) {
+      return { call: bid, rule: 'enkelt inkliv', explanation: `16+ hp och egen 5+ ${SWE_SYM[letterOfSuit(suit)]} → bjuder färgen över deras höjning (återöppning, ej krav; partnern passade bara för att svaret var svagt).` }
+    }
+  }
+  if (len[theirSuit] <= 2 && legal.includes('X' as Bid)) {
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `16+ hp och kort i deras ${SWE_SYM[open.strain]} → X igen (upplysning över deras höjning; partnern väljer färg).` }
+  }
+  return null
 }
 
 

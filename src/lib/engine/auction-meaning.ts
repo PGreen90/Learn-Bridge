@@ -397,7 +397,41 @@ function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpret
   if (contested) return contested
   const weakTwo = interpretOurWeakTwoContested(call, prior)
   if (weakTwo) return weakTwo
+  const adv3 = interpretAdvanceOver3LevelOvercall(call, prior)
+  if (adv3) return adv3
   return deriveUndisturbed(call, prior)
+}
+
+/**
+ * Advancern över partnerns 3-LÄGESINKLIV (ej hopp) över deras svaga tvåa, och
+ * inklivarens svar (ägarbeslut 2026-09-25): ny färg = naturlig 5+, 12+, avslag
+ * från partnerns färg; inklivaren bjuder 3NT med stopp / utgång med 3-korts stöd.
+ */
+function interpretAdvanceOver3LevelOvercall(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 2 || open.cb.strain === 'C' || open.cb.strain === 'NT' || SIDE[open.seat] === SIDE[call.seat]) return null
+  const theirs = prior.filter((c) => SIDE[c.seat] !== SIDE[call.seat] && c.bid !== 'P')
+  if (theirs.length !== 1) return null
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[call.seat] && c.bid !== 'P')
+  const ov = ours[0] ? parseBid(ours[0].bid) : null
+  if (!ov || ov.strain === 'NT' || ov.level !== 3) return null
+  const order = ['C', 'D', 'H', 'S']
+  if (order.indexOf(ov.strain) > order.indexOf(open.cb.strain)) return null // hopp, inte lägsta nivå
+  const cb = parseBid(call.bid)
+  if (!cb || cb.strain === 'NT' && ours.length === 1) return null
+  const tname = NAME[open.cb.strain]
+  if (ours.length === 1 && ours[0].seat === PARTNER[call.seat]) {
+    if (cb.strain === 'NT' || cb.strain === ov.strain || cb.strain === open.cb.strain) return null
+    return R('advance 3-lägesinkliv: ny färg', `${cb.level}${SYMBOL[cb.strain]} — naturligt mot partnerns 3-lägesinkliv: ${cb.level >= 4 ? '6+' : '5+'} ${NAME[cb.strain]}, 12+ hp, avslag från partnerns ${NAME[ov.strain]} (högst 2 kort). Partnern bjuder 3NT med stopp i ${tname} eller utgång med 3-korts stöd.`)
+  }
+  if (ours.length === 2 && ours[0].seat === call.seat && ours[1].seat === PARTNER[call.seat]) {
+    const adv = parseBid(ours[1].bid)
+    if (!adv || adv.strain === 'NT' || adv.strain === ov.strain) return null
+    if (cb.strain === 'NT' && cb.level === 3) return R('advance 3-lägesinkliv: svar', `3 sang — stopp i deras ${tname} mot partnerns naturliga ${NAME[adv.strain]}; till spel.`)
+    if (cb.strain === adv.strain) return R('advance 3-lägesinkliv: svar', `${cb.level}${SYMBOL[cb.strain]} — 3+ stöd i partnerns ${NAME[adv.strain]}: utgång.`)
+    if (cb.strain === ov.strain) return R('advance 3-lägesinkliv: svar', `${cb.level}${SYMBOL[cb.strain]} — rebjuder egen färg (6+): inget stopp i ${tname}, inget stöd.`)
+  }
+  return null
 }
 
 /**

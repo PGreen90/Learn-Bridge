@@ -297,9 +297,17 @@ function ourWeakTwoSystemsOnSeat(f: AuctionFacts): { kind: 'ogust' | 'nyfärg' |
   }
   const last = ours[ours.length - 1]
   if (!last || last.seat !== PARTNER[seat]) return null
-  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null // bara pass efter
   const ourSuit = SUIT_OF_LETTER[open.strain]!
   const lastCb = parseContractBid(last.bid)!
+  // Svararens placering när deras inkliv kom EFTER öppnarens Ogust-svar
+  // (tävlingsjämförelsen bricka 1, 2026-09-25: 2♦–P–2NT–P–3♣–(3♠)–? passades):
+  // inklivet är det senaste budet, placeringen läses som ostört (olaglig → vakten
+  // i svaret: utgång/tävlande höjning med fit, annars pass).
+  if (seat === PARTNER[open.seat] && ours.length === 3 && ours[1].seat === seat && ours[1].bid === '2NT' && lastCb.level === 3 &&
+      history.indexOf(theirs[0]) > history.indexOf(last) && f.lastNonPass === theirs[0]) {
+    return { kind: 'placering', ourSuit }
+  }
+  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null // bara pass efter
   if (seat === open.seat && ours.length === 2) {
     if (last.bid === '2NT') return { kind: 'ogust', ourSuit }
     if (lastCb.strain !== 'NT' && lastCb.strain !== open.strain && lastCb.strain !== ov.strain) return { kind: 'nyfärg', ourSuit }
@@ -347,13 +355,141 @@ function answerOurWeakTwoSystemsOn(hand: Hand, f: AuctionFacts, s: { kind: 'ogus
     r = responderPlaceAfterOgust(hand, s.ourSuit, { call: last.bid, rule, explanation: '' })
   }
   if (!r) return null
-  if (r.call !== 'P' && !legal.includes(r.call as Bid)) return null // olagligt → vakterna
+  if (r.call !== 'P' && !legal.includes(r.call as Bid)) {
+    // Placeringen ryms inte över deras inkliv (t.ex. 3♦ under 3♠): med fit och
+    // utgångsvärden utgång, med fit och 13+ tävlande höjning, annars pass.
+    if (s.kind !== 'placering') return null
+    const p = hcp(hand)
+    const stod = lengths(hand)[s.ourSuit]
+    const strain = LETTER_OF_SUIT[s.ourSuit]
+    const game = `${s.ourSuit === 'hearts' || s.ourSuit === 'spades' ? 4 : 5}${strain}` as Bid
+    if (stod >= 3 && p >= 16 && legal.includes(game)) return { seat, bid: game, rule: 'till spel', explanation: `3+ stöd och utgångsvärden (16+) → ${prettyBid(game)} över deras inkliv.` }
+    const cheapest = cheapestBidIn(history, seat, strain)
+    if (stod >= 3 && p >= 13 && cheapest) return { seat, bid: cheapest, rule: 'konkurrenshöjning', explanation: `Fit (3+) och 13+ hp → ${prettyBid(cheapest)} (tävlande över deras inkliv; placeringen ${prettyBid(r.call as Bid)} rymdes inte).` }
+    return { seat, bid: 'P', rule: 'pass', explanation: `Placeringen ${prettyBid(r.call as Bid)} ryms inte över deras inkliv och handen räcker inte högre → pass.` }
+  }
   return { seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation + ' (systems on över deras inkliv)' }
 }
 
-/** Vår sidas läge i preempt-konkurrensens fortsättningar (advancerns cue-svar / svararen efter störning / öppnarens svar på partnerns cue / systems on). */
+/**
+ * Advancern svarar partnerns BALANSERANDE 2NT (12–15, "lånad kung") över deras
+ * svaga tvåa: (2x)–P–P–2NT–(P)–? (sunt förnuft-svepet 2026-09-25, frö 20291006:
+ * Nord med 12 hp passade). 11+ → 3NT; 6+ högfärg med 8+ → 4M; annars pass.
+ */
+function balancing2NTAdvanceSeat(f: AuctionFacts): boolean {
+  const open = f.opening
+  if (!open || open.level !== 2 || open.strain === 'C' || open.strain === 'NT' || side(open.seat) === side(f.seat)) return false
+  const h = f.history
+  const i = open.index
+  return (
+    h.length === i + 5 &&
+    h[i + 1].seat === f.seat && h[i + 1].bid === 'P' &&
+    h[i + 2].bid === 'P' &&
+    h[i + 3].seat === PARTNER[f.seat] && h[i + 3].bid === '2NT' &&
+    h[i + 4].bid === 'P'
+  )
+}
+
+function answerBalancing2NT(hand: Hand, f: AuctionFacts): ResolvedCall {
+  const { seat } = f
+  const p = hcp(hand)
+  const len = lengths(hand)
+  if (p >= 11) return { seat, bid: '3NT', rule: 'till spel', explanation: `11+ hp mot partnerns balanserande 2NT (12–15) → 3NT (till spel).` }
+  for (const m of ['spades', 'hearts'] as Suit[]) {
+    if (len[m] >= 6 && p >= 8) return { seat, bid: `4${m === 'spades' ? 'S' : 'H'}` as Bid, rule: 'till spel', explanation: `6+ ${SWE_SYM[m === 'spades' ? 'S' : 'H']} och 8+ hp mot partnerns balanserande 2NT → utgång i färgen.` }
+  }
+  return { seat, bid: 'P', rule: 'pass', explanation: `Under 11 hp mot partnerns balanserande 2NT (12–15) → pass.` }
+}
+
+/**
+ * ADVANCERN ÖVER PARTNERNS 3-LÄGESINKLIV (ej hopp) ÖVER DERAS SVAGA TVÅA (ägarbeslut
+ * 2026-09-25, sunt förnuft-svepet frö 20290669: Väst 2♠, Nord 3♣, Öst pass, Syd
+ * ♠Q98 ♥AJT853 ♦AJ72 ♣– med 12 hp passade): ny färg = naturlig 5+ (6+ på
+ * 4-läget), 12+ hp, tydligt avslag från partnerns färg (högst 2 kort).
+ * Läget: deras svaga tvåa, partnerns inkliv i färg på 3-läget under deras färg
+ * (= lägsta nivå, inget hopp), deras svarare passade.
+ */
+function advanceOver3LevelOvercallSeat(f: AuctionFacts): { ourSuit: Suit; theirStrain: string } | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.level !== 2 || open.strain === 'C' || open.strain === 'NT' || side(open.seat) === side(seat)) return null
+  if (f.theirContractBids.length !== 1) return null
+  const ours = f.ourContractBids
+  if (ours.length !== 1 || ours[0].seat !== PARTNER[seat]) return null
+  const ov = parseContractBid(ours[0].bid)
+  if (!ov || ov.strain === 'NT' || ov.level !== 3) return null
+  if ((SUIT_STRAINS as readonly string[]).indexOf(ov.strain) > (SUIT_STRAINS as readonly string[]).indexOf(open.strain)) return null // hade rymts på 2-läget = hopp
+  if (f.lastNonPass !== ours[0] || history[history.length - 1].bid !== 'P') return null
+  if (history.some((c) => side(c.seat) !== side(seat) && (c.bid === 'X' || c.bid === 'XX'))) return null
+  return { ourSuit: SUIT_OF_LETTER[ov.strain]!, theirStrain: open.strain }
+}
+
+function advanceOver3LevelOvercall(hand: Hand, f: AuctionFacts, s: { ourSuit: Suit; theirStrain: string }): ResolvedCall | null {
+  const { history, seat } = f
+  const p = hcp(hand)
+  const len = lengths(hand)
+  if (p < 12 || len[s.ourSuit] > 2) return null // stöd/svagare händer: övriga rader
+  const legal = legalCalls(history, seat)
+  let best: Suit | null = null
+  for (const st of SUIT_STRAINS) {
+    const suit = SUIT_OF_LETTER[st]!
+    if (suit === s.ourSuit || st === s.theirStrain || len[suit] < 5) continue
+    if (!best || len[suit] > len[best]) best = suit
+  }
+  if (!best) return null
+  const bid = cheapestBidIn(history, seat, LETTER_OF_SUIT[best])
+  if (!bid || !legal.includes(bid)) return null
+  const level = parseContractBid(bid)!.level
+  if (level > 4 || (level === 4 && len[best] < 6)) return null
+  return {
+    seat, bid, rule: 'advance 3-lägesinkliv: ny färg',
+    explanation: `12+ hp, ${len[best]} ${SWE_SYM[LETTER_OF_SUIT[best]]} och högst 2 kort i partnerns ${SWE_SYM[LETTER_OF_SUIT[s.ourSuit]]} → ${prettyBid(bid)} (naturligt, avslag från partnerns färg; partnern bjuder 3NT med stopp eller utgång med 3-korts stöd).`,
+  }
+}
+
+/** Inklivaren svarar advancerns nya färg (samma läge, en rond senare): 3NT med stopp i deras färg, utgång i advancerns färg med 3+ stöd, annars rebud/pass. */
+function overcallerAnswersAdvanceSeat(f: AuctionFacts): { ourSuit: Suit; advSuit: Suit; theirStrain: string } | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.level !== 2 || open.strain === 'C' || open.strain === 'NT' || side(open.seat) === side(seat)) return null
+  if (f.theirContractBids.length !== 1) return null
+  const ours = f.ourContractBids
+  if (ours.length !== 2 || ours[0].seat !== seat || ours[1].seat !== PARTNER[seat]) return null
+  if (ours[1].rule !== 'advance 3-lägesinkliv: ny färg') {
+    // Läs läget ur buden: mitt inkliv på 3-läget under deras färg, partnerns nya färg.
+    const ov = parseContractBid(ours[0].bid)
+    if (!ov || ov.strain === 'NT' || ov.level !== 3 || (SUIT_STRAINS as readonly string[]).indexOf(ov.strain) > (SUIT_STRAINS as readonly string[]).indexOf(open.strain)) return null
+  }
+  const adv = parseContractBid(ours[1].bid)
+  const ov = parseContractBid(ours[0].bid)!
+  if (!adv || adv.strain === 'NT' || adv.strain === ov.strain || adv.strain === open.strain) return null
+  if (f.lastNonPass !== ours[1] || history[history.length - 1].bid !== 'P') return null
+  return { ourSuit: SUIT_OF_LETTER[ov.strain]!, advSuit: SUIT_OF_LETTER[adv.strain]!, theirStrain: open.strain }
+}
+
+function overcallerAnswersAdvance(hand: Hand, f: AuctionFacts, s: { ourSuit: Suit; advSuit: Suit; theirStrain: string }): ResolvedCall | null {
+  const { history, seat } = f
+  const legal = legalCalls(history, seat)
+  const len = lengths(hand)
+  const advL = LETTER_OF_SUIT[s.advSuit]
+  const deras = SWE_SYM[s.theirStrain]
+  if (hasStopperIn(hand, SUIT_OF_LETTER[s.theirStrain]!) && legal.includes('3NT' as Bid)) {
+    return { seat, bid: '3NT', rule: 'advance 3-lägesinkliv: svar', explanation: `Stopp i deras ${deras} mot partnerns naturliga färg (12+) → 3NT.` }
+  }
+  if (len[s.advSuit] >= 3) {
+    const game = `${s.advSuit === 'hearts' || s.advSuit === 'spades' ? 4 : 5}${advL}` as Bid
+    if (legal.includes(game)) return { seat, bid: game, rule: 'advance 3-lägesinkliv: svar', explanation: `3+ stöd i partnerns ${SWE_SYM[advL]} (12+) → utgång ${prettyBid(game)}.` }
+  }
+  const rebid = cheapestBidIn(history, seat, LETTER_OF_SUIT[s.ourSuit])
+  if (len[s.ourSuit] >= 6 && rebid && legal.includes(rebid) && parseContractBid(rebid)!.level <= 4) {
+    return { seat, bid: rebid, rule: 'advance 3-lägesinkliv: svar', explanation: `Utan stopp i deras ${deras} och utan stöd → rebjuder min ${SWE_SYM[LETTER_OF_SUIT[s.ourSuit]]} (6+).` }
+  }
+  return { seat, bid: 'P', rule: 'pass', explanation: `Utan stopp i deras ${deras}, utan stöd och utan rebud → pass på partnerns naturliga färg.` }
+}
+
+/** Vår sidas läge i preempt-konkurrensens fortsättningar (advancerns cue-svar / svararen efter störning / öppnarens svar på partnerns cue / systems on / balanserande 2NT / advancern över 3-lägesinkliv). */
 export function preemptFollowUpSeat(f: AuctionFacts): boolean {
-  return partnerWeakTwoCueSeat(f) !== null || ownPreemptInterferenceSeat(f) !== null || ourWeakTwoCueSeat(f) !== null || ourWeakTwoSystemsOnSeat(f) !== null
+  return partnerWeakTwoCueSeat(f) !== null || ownPreemptInterferenceSeat(f) !== null || ourWeakTwoCueSeat(f) !== null || ourWeakTwoSystemsOnSeat(f) !== null || balancing2NTAdvanceSeat(f) || advanceOver3LevelOvercallSeat(f) !== null || overcallerAnswersAdvanceSeat(f) !== null
 }
 
 /**
@@ -372,6 +508,16 @@ export function respondInPreemptCompetition(hand: Hand, f: AuctionFacts): Resolv
 
   const systemsOn = ourWeakTwoSystemsOnSeat(f)
   if (systemsOn) return answerOurWeakTwoSystemsOn(hand, f, systemsOn)
+
+  if (balancing2NTAdvanceSeat(f)) return answerBalancing2NT(hand, f)
+
+  const adv3 = advanceOver3LevelOvercallSeat(f)
+  if (adv3) {
+    const r = advanceOver3LevelOvercall(hand, f, adv3)
+    if (r) return r
+  }
+  const ovAns = overcallerAnswersAdvanceSeat(f)
+  if (ovAns) return overcallerAnswersAdvance(hand, f, ovAns)
 
   const inter = ownPreemptInterferenceSeat(f)
   if (inter) {

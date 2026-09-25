@@ -354,6 +354,9 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // Advancern över partnerns svaga hoppinkliv (sunt förnuft hål 1, 2026-09-22, §7.1)
   'advance hoppinkliv: 3NT': 'avslut',
   'advance hoppinkliv: ny färg': 'ej-krav', // svararen över deras ovanliga 2NT (2026-09-22)
+  // Advancern över partnerns 3-lägesinkliv över deras svaga tvåa (ägarbeslut 2026-09-25).
+  'advance 3-lägesinkliv: ny färg': 'krav-1-rond',
+  'advance 3-lägesinkliv: svar': 'avslut',
   // Störd överföring efter vårt 1NT (ägarens regler 2026-09-20/21, §7.5)
   'störd överföring: tävlar': 'ej-krav',
   'störd överföring: utgång': 'avslut',

@@ -5,6 +5,7 @@ import { parseHand } from '../bidding'
 import { auctionFacts } from './auction-facts'
 import { forcedMinimumBid } from './catch-all-continuations'
 import { dealRandom } from './deal'
+import { dealFromSeed } from './revisor'
 import { buildAuction } from './auction'
 
 import {
@@ -1785,5 +1786,100 @@ describe('svag tvåa – partnerns upplysningsdubbling besvaras med längsta obj
     const c = decideCall(deal, hist, 'S')
     expect(c.bid).toBe('2S')
     expect(decideCall(deal, [...hist, c, call('W', 'P')], 'N').bid).toBe('P')
+  })
+})
+
+// Tävlingsjämförelsen 2026-09-25, bricka 1: efter 2♦–P–2NT–P–3♣ klev Öst in
+// med 3♠ och Syd (♠– ♥AQ95 ♦KQ2 ♣AQT743, 17 hp, tre ruter) PASSADE — ingen
+// regel för placering efter Ogust-svar med inkliv emellan. Och ostört stannade
+// samma hand i 3♦ mittemot minimum fast 5♦ stod. Ägarbeslut: 3+ stöd och 16+
+// (eller 13+ mittemot maximum) → utgång i färgen, ostört som stört.
+describe('bricka 1 – placering efter Ogust: utgångsvärden med fit → 5♦, även över deras inkliv', () => {
+  const deal = dealOf('N', {
+    N: 'S:652 H:K74 D:AT9743 C:J',
+    E: 'S:QJT9874 H:J862 D:- C:K8',
+    S: 'S:- H:AQ95 D:KQ2 C:AQT743',
+    W: 'S:AK3 H:T3 D:J865 C:9652',
+  })
+  const ostort = [call('N', '2D'), call('E', 'P'), call('S', '2NT'), call('W', 'P'), call('N', '3C'), call('E', 'P')]
+  const stort = [call('N', '2D'), call('E', 'P'), call('S', '2NT'), call('W', 'P'), call('N', '3C'), call('E', '3S')]
+  it('ostört: 2♦–P–2NT–P–3♣–P → Syd 5♦ (inte 3♦)', () => {
+    expect(decideCall(deal, ostort, 'S').bid).toBe('5D')
+  })
+  it('stört efter svaret: 2♦–P–2NT–P–3♣–(3♠) → Syd 5♦ (inte pass)', () => {
+    expect(decideCall(deal, stort, 'S').bid).toBe('5D')
+  })
+  it('stört efter svaret med 13 hp och fit → tävlande 4♦ när 3♦ inte ryms', () => {
+    const s13 = { ...deal, hands: { ...deal.hands, S: parseHand('S:8 H:AQ95 D:Q92 C:KQT74') } } // 13 hp, tre ruter
+    expect(decideCall(s13, stort, 'S').bid).toBe('4D')
+  })
+})
+
+// Sunt förnuft-svepet 2026-09-25 (SUNT=1, 8000 givar från 20290001): tre hål
+// utan ägarfråga, byggda direkt. Givarna ur svepets frön.
+describe('sunt förnuft-svepet 2026-09-25 – hål 1, 3 och 4', () => {
+  it('hål 1 – svararens fria lågfärgsbud på 3-läget: 1♠–(2♥) med 15 hp och sju klöver → 3♣ (krav)', () => {
+    const deal = dealFromSeed(20290750) // Väst ♠– ♥J98 ♦KJ7 ♣AKQJ982
+    const hist = [call('N', 'P'), call('E', '1S'), call('S', '2H')]
+    const c = decideCall(deal, hist, 'W')
+    expect(c.bid).toBe('3C')
+    expect(c.rule).toBe('fritt bud')
+    // Öppnaren får inte passa det fria budet (rondkrav).
+    expect(decideCall(deal, [...hist, c, call('N', 'P')], 'E').bid).not.toBe('P')
+  })
+  it('hål 3 – partnerns balanserande 2NT över deras svaga tvåa besvaras: 12 hp → 3NT', () => {
+    const deal = dealFromSeed(20291006) // Nord ♠K963 ♥KJ2 ♦KQ6 ♣954
+    const hist = [call('W', '2S'), call('N', 'P'), call('E', 'P'), call('S', '2NT'), call('W', 'P')]
+    expect(decideCall(deal, hist, 'N').bid).toBe('3NT')
+  })
+  it('hål 4a – dubblaren återöppnar med 16 hp när deras höjning passas runt: 1♠–X–2♠–P–P → 3♦', () => {
+    const deal = dealFromSeed(20290022) // Väst ♠– ♥AKT3 ♦KJ962 ♣AJ43
+    const hist = [call('S', '1S'), call('W', 'X'), call('N', '2S'), call('E', 'P'), call('S', 'P')]
+    expect(decideCall(deal, hist, 'W').bid).toBe('3D')
+  })
+  it('hål 4b – den starka dubblaren visar sin färg även över deras svaga tvåa: (2♦)–X–(XX)–3♣–(P) → 3♥', () => {
+    const deal = dealFromSeed(20290030) // Öst ♠AQ5 ♥AQT9653 ♦K ♣A3 (19 hp)
+    const hist = [call('W', 'P'), call('N', '2D'), call('E', 'X'), call('S', 'XX'), call('W', '3C'), call('N', 'P')]
+    const c = decideCall(deal, hist, 'E')
+    expect(c.bid).toBe('3H')
+  })
+})
+
+// Ägarbeslut 2026-09-25 (sunt förnuft-svepet hål 2): advancern över partnerns
+// 3-lägesinkliv över deras svaga tvåa bjuder ny färg = naturlig 5+, 12+ hp,
+// tydligt avslag från partnerns färg. Inklivaren: 3NT med stopp i deras färg,
+// utgång i advancerns färg med 3-korts stöd, annars rebud (6+) eller pass.
+describe('advancern över partnerns 3-lägesinkliv över deras svaga tvåa (hål 2)', () => {
+  it('frö 20290669: Väst 2♠, Nord 3♣, Öst pass → Syd 3♥ (12 hp, sex hjärter, klöverrenons)', () => {
+    const deal = dealFromSeed(20290669) // Syd ♠Q98 ♥AJT853 ♦AJ72 ♣–
+    const hist = [call('W', '2S'), call('N', '3C'), call('E', 'P')]
+    const c = decideCall(deal, hist, 'S')
+    expect(c.bid).toBe('3H')
+    expect(c.rule).toBe('advance 3-lägesinkliv: ny färg')
+    expect(decideCall(deal, [...hist, c, call('W', 'P')], 'N').bid).not.toBe('P')
+  })
+  const base = dealOf('W', {
+    W: 'S:KQJT96 H:74 D:98 C:T52', // 2♠ (svag tvåa)
+    N: 'S:A7 H:K6 D:Q43 C:AKJ983', // 3♣-inklivet
+    E: 'S:832 H:QT9 D:KT65 C:Q64',
+    S: 'S:54 H:AJ8532 D:AJ72 C:7',
+  })
+  const hist = [call('W', '2S'), call('N', '3C'), call('E', 'P'), call('S', '3H'), call('W', 'P')]
+  it('inklivaren med spaderstopp (♠A7) och två hjärter → 3NT', () => {
+    expect(decideCall(base, hist, 'N').bid).toBe('3NT')
+  })
+  it('inklivaren utan stopp men med tre hjärter → 4♥', () => {
+    const tre = { ...base, hands: { ...base.hands, N: parseHand('S:7 H:K64 D:Q43 C:AKJ983') } }
+    expect(decideCall(tre, hist, 'N').bid).toBe('4H')
+  })
+  it('inklivaren utan stopp och utan stöd → rebjuder 4♣ (6+)', () => {
+    const inget = { ...base, hands: { ...base.hands, N: parseHand('S:73 H:K6 D:Q43 C:AKJ983') } }
+    expect(decideCall(inget, hist, 'N').bid).toBe('4C')
+  })
+  it('advancern med 11 hp eller med 3-korts stöd i partnerns färg bjuder inte ny färg', () => {
+    const elva = { ...base, hands: { ...base.hands, S: parseHand('S:54 H:AJ8532 D:J972 C:7') } } // 9 hp
+    expect(decideCall(elva, [call('W', '2S'), call('N', '3C'), call('E', 'P')], 'S').bid).not.toBe('3H')
+    const stod = { ...base, hands: { ...base.hands, S: parseHand('S:5 H:AJ853 D:A72 C:Q74') } } // 12 hp, tre klöver
+    expect(decideCall(stod, [call('W', '2S'), call('N', '3C'), call('E', 'P')], 'S').bid).not.toBe('3H')
   })
 })
