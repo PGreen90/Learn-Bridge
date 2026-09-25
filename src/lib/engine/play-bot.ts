@@ -190,7 +190,10 @@ function defenderGuardDiscard(state: PlayState, seat: Seat, legal: Hand): Card |
       )
     })
 
-  const safe = candidates.filter((c) => !beatableHonorSuit(c.suit))
+  // …och ALDRIG honnören själv (felrapport #79: bar ♣K efter att esset fallit var
+  // en "säker" färg — och vakten kastade kungen). Vakten skyddar honnörer, den
+  // offrar dem inte; finns ingen hacka i en säker färg får den gamla regeln stå.
+  const safe = candidates.filter((c) => !beatableHonorSuit(c.suit) && rankVal(c.rank) < HONOR)
   if (safe.length === 0) return null // allt är skyddsvärt → kan inte göra bättre
   const naive = lowAvoidRuff(legal, state.trump)
   if (!beatableHonorSuit(naive.suit)) return null // naiva lägsta rör ingen honnör → låt gamla regeln stå

@@ -202,9 +202,64 @@ function ownPreemptInterferenceSeat(f: AuctionFacts): { ourSuit: Suit; ourLevel:
   return { ourSuit, ourLevel: open.level, theirCall: lastNonPass.bid }
 }
 
-/** Vår sidas läge i preempt-konkurrensens fortsättningar (advancerns cue-svar / svararen efter störning). */
+/**
+ * Har PARTNERN cue-bjudit deras inklivsfärg över MIN svaga tvåa (felrapport #82:
+ * 2♦–(2♠)–3♠–(P)–?)? Cuet är en stark höjning (limithöjning+, krav) och får
+ * aldrig passas — förr fanns ingen rad, och öppnaren passade ut 3♠. Mönstret:
+ * min svaga tvåa (2♦/2♥/2♠), exakt ett färginkliv av dem, partnerns bud = deras
+ * färg (cue), bara pass efter.
+ */
+function ourWeakTwoCueSeat(f: AuctionFacts): { ourSuit: Suit; theirStrain: string } | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.level !== 2 || open.strain === 'C' || open.strain === 'NT' || open.seat !== seat) return null
+  const ours = f.ourContractBids
+  if (ours.length !== 2 || ours[1].seat !== PARTNER[seat]) return null
+  const theirs = f.theirContractBids
+  if (theirs.length !== 1) return null // exakt ett inkliv av dem
+  const ov = parseContractBid(theirs[0].bid)
+  const cue = parseContractBid(ours[1].bid)
+  if (!ov || !cue || ov.strain === 'NT' || cue.strain !== ov.strain) return null // partnerns bud = deras färg
+  const cueIdx = history.indexOf(ours[1])
+  if (history.slice(cueIdx + 1).some((c) => c.bid !== 'P')) return null // bara pass efter cuet
+  return { ourSuit: SUIT_OF_LETTER[open.strain]!, theirStrain: ov.strain }
+}
+
+/**
+ * Öppnaren svarar partnerns cue-höjning över den egna svaga tvåan (felrapport
+ * #82). Högfärg: 4M (partnerns cue lovar limithöjning+ → utgång, partnern går
+ * vidare mot slam själv). Lågfärg: maximum (9–11 hp) med stopp i deras färg →
+ * 3NT; maximum utan stopp → 5m; minimum (6–8) → billigaste bud i egen färg (4m).
+ * Aldrig pass. Bara lagliga bud (annars null → laglighetsvakten).
+ */
+function answerOurWeakTwoCue(hand: Hand, f: AuctionFacts, s: { ourSuit: Suit; theirStrain: string }): ResolvedCall | null {
+  const { history, seat } = f
+  const legal = legalCalls(history, seat)
+  const strain = LETTER_OF_SUIT[s.ourSuit]
+  const sym = SWE_SYM[strain]
+  const deras = SWE_SYM[s.theirStrain]
+  const p = hcp(hand)
+  const max = p >= 9
+  const pick = (bid: Bid, rule: string, explanation: string): ResolvedCall | null =>
+    legal.includes(bid) ? { seat, bid, rule, explanation } : null
+  if (s.ourSuit === 'hearts' || s.ourSuit === 'spades') {
+    return pick(`4${strain}` as Bid, 'svar på cue (svag tvåa): utgång', `Partnerns cue i deras ${deras} är en stark höjning (krav) → 4${sym} (utgång; partnern går vidare mot slam med kontrollbud om hen vill).`)
+  }
+  if (max && hasStopperIn(hand, SUIT_OF_LETTER[s.theirStrain]!)) {
+    const r = pick('3NT', 'svar på cue (svag tvåa): 3NT', `Partnerns cue i deras ${deras} är en stark höjning (krav): maximum (9–11 hp) med stopp i deras ${deras} → 3NT.`)
+    if (r) return r
+  }
+  if (max) {
+    return pick(`5${strain}` as Bid, 'svar på cue (svag tvåa): utgång', `Partnerns cue i deras ${deras} är en stark höjning (krav): maximum (9–11 hp) utan stopp i deras ${deras} → 5${sym}.`)
+  }
+  const cheapest = cheapestBidIn(history, seat, strain)
+  if (!cheapest) return null
+  return pick(cheapest, 'svar på cue (svag tvåa): minimum', `Partnerns cue i deras ${deras} är en stark höjning (krav): minimum (6–8 hp) → ${prettyBid(cheapest)}, lägsta bud i egen färg. Partnern får passa.`)
+}
+
+/** Vår sidas läge i preempt-konkurrensens fortsättningar (advancerns cue-svar / svararen efter störning / öppnarens svar på partnerns cue). */
 export function preemptFollowUpSeat(f: AuctionFacts): boolean {
-  return partnerWeakTwoCueSeat(f) !== null || ownPreemptInterferenceSeat(f) !== null
+  return partnerWeakTwoCueSeat(f) !== null || ownPreemptInterferenceSeat(f) !== null || ourWeakTwoCueSeat(f) !== null
 }
 
 /**
@@ -217,6 +272,9 @@ export function preemptFollowUpSeat(f: AuctionFacts): boolean {
 export function respondInPreemptCompetition(hand: Hand, f: AuctionFacts): ResolvedCall | null {
   const cue = partnerWeakTwoCueSeat(f)
   if (cue) return answerWeakTwoCue(hand, f, cue.theirStrain)
+
+  const ourCue = ourWeakTwoCueSeat(f)
+  if (ourCue) return answerOurWeakTwoCue(hand, f, ourCue)
 
   const inter = ownPreemptInterferenceSeat(f)
   if (inter) {

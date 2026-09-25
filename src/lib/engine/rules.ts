@@ -305,6 +305,10 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'ovanlig 2NT': 'krav-1-rond',
   'naturligt inkliv': 'ej-krav',
   'cue (limithöjning+)': 'krav-1-rond',
+  // Öppnarens svar på partnerns cue över den egna svaga tvåan (felrapport #82).
+  'svar på cue (svag tvåa): minimum': 'ej-krav',
+  'svar på cue (svag tvåa): utgång': 'avslut',
+  'svar på cue (svag tvåa): 3NT': 'avslut',
   'fritt bud': 'krav-1-rond',
   'höjning av fritt bud': 'ej-krav',
   'höjning av fritt bud (inbjudan)': 'inbjudan',

@@ -126,6 +126,7 @@ const ALL_ENGINE_RULES: string[] = [
   'redubbling (värden)', 'svar på stöddubbling', 'dubblaren höjer (inbjudan)',
   'dubblaren accepterar inbjudan', 'dubblaren bjuder utgång', 'dubblarens svar på cue',
   'starkt återbud', 'starkt återbud (lägsta)', 'tvångssvar (utan stöd)', 'svar på tvåfärgs-cue',
+  'svar på cue (svag tvåa): minimum', 'svar på cue (svag tvåa): utgång', 'svar på cue (svag tvåa): 3NT',
   'stulet bud: Stayman', 'stulet bud: överföring', 'värde-X med högfärg (stört 1NT)', 'överföring på 3-läget (stört 1NT)', 'svar på värde-X (stört 1NT)', 'fullföljd överföring (3-läget)', 'placerar efter värde-X-svaret', 'straff-X (andra ronden)', 'återöppning med högfärg (1NT)', 'utgångsval: rättar till högfärgen', 'naturligt inkliv (1NT)', '2NT-inkliv (12–15)',
   'stödhöjning – utgång', 'stödhöjning – enkel höjning (minimum)', 'stödhöjning – hopphöjning (inbjudan)',
   'accepterar (minimum)', 'accepterar utgång', 'cue-advancerns dom (3NT)',
