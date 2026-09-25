@@ -481,11 +481,12 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
       for (const m of ['spades', 'hearts'] as Suit[]) {
         if (m === openerSuit || m === ovSuit || len[m] < 5) continue
         const L = cheapestLevelAbove(m, ovLevel, ovSuit)
-        if ((L === 1 && p >= 6) || (L === 2 && p >= 10)) {
+        // 3-läget från 12 hp (sunt förnuft-svepet 2026-09-25: förr fanns bara 1–2-läget).
+        if ((L === 1 && p >= 6) || (L === 2 && p >= 10) || (L === 3 && p >= 12)) {
           return {
             call: `${L}${LETTER[m]}` as Bid,
             rule: 'fritt bud',
-            explanation: `5+ ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 1 ? '6' : '10'}+ hp, rondkrav).`,
+            explanation: `5+ ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 1 ? '6' : L === 2 ? '10' : '12'}+ hp, rondkrav).`,
           }
         }
       }
@@ -523,13 +524,16 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
     }
     // Fritt bud i en 5+ LÅGFÄRG på 2-läget (§5.5, felrapport #55): 10+ hp,
     // utan fit och utan sang-alternativ — rondkrav, lovar värden men inte utgång.
+    // …och på 3-LÄGET från 12 hp (sunt förnuft-svepet 2026-09-25, frö 20290750:
+    // 1♠–(2♥) med ♠– ♥J98 ♦KJ7 ♣AKQJ982 = 15 hp passade — 3♣ fanns inte).
     for (const m of ['diamonds', 'clubs'] as Suit[]) {
-      if (m === openerSuit || m === ovSuit || len[m] < 5 || p < 10) continue
-      if (cheapestLevelAbove(m, ovLevel, ovSuit) !== 2) continue
+      if (m === openerSuit || m === ovSuit || len[m] < 5) continue
+      const L = cheapestLevelAbove(m, ovLevel, ovSuit)
+      if (!((L === 2 && p >= 10) || (L === 3 && p >= 12))) continue
       return {
-        call: `2${LETTER[m]}` as Bid,
+        call: `${L}${LETTER[m]}` as Bid,
         rule: 'fritt bud',
-        explanation: `5+ ${SUIT_SYM[m]} → 2${SUIT_SYM[m]} (fritt bud i konkurrens, 10+ hp, rondkrav).`,
+        explanation: `5+ ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 2 ? '10' : '12'}+ hp, rondkrav).`,
       }
     }
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt i konkurrens → pass.` }

@@ -81,7 +81,7 @@ const ALL_ENGINE_RULES: string[] = [
   'advance ovanlig 2NT: utgång',
   'efter ovanlig 2NT: passar avslutet', 'efter ovanlig 2NT: inbjudan', 'efter ovanlig 2NT: utgång', 'efter ovanlig 2NT: svag efter cue',
   'efter ovanlig 2NT: stark efter cue', 'efter ovanlig 2NT: accepterar inbjudan',
-  'efter ovanlig 2NT: avböjer inbjudan', 'efter ovanlig 2NT: utgång efter cue', 'efter ovanlig 2NT: stannar efter cue', 'utgång på självbärande färg', 'advance hoppinkliv: 3NT', 'advance hoppinkliv: ny färg',
+  'efter ovanlig 2NT: avböjer inbjudan', 'efter ovanlig 2NT: utgång efter cue', 'efter ovanlig 2NT: stannar efter cue', 'utgång på självbärande färg', 'advance hoppinkliv: 3NT', 'advance hoppinkliv: ny färg', 'advance 3-lägesinkliv: ny färg', 'advance 3-lägesinkliv: svar',
   // Michaels-fortsättningen, ostörd (michaels-continuations.ts, 2026-09-22).
   'advance Michaels: cue (utgångsintresse)', 'advance Michaels: spärrhöjning', 'advance Michaels: 3NT', 'advance Michaels: egen färg',
   'advance Michaels: utgång', 

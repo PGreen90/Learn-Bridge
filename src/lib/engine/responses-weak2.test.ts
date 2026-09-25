@@ -102,12 +102,15 @@ describe('responderPlaceAfterOgust – svararen placerar', () => {
   // FAS 1 punkt 3 (laglighet): öppnarens Ogust-svar på 2♦ ligger redan på
   // 3-läget, så svararens placering FÅR ALDRIG ligga på eller under svaret.
   describe('2♦: placeringen är alltid laglig (högre än svaret eller pass)', () => {
-    const dHand = parseHand('S:AQ2 H:K84 D:K42 C:KJ32') // 3 ruterstöd, 11+
-    it('min/bra (svar 3♦) → pass (3♦ redan nått) – inte olagligt 3♦', () => {
-      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3D', 'Ogust: min/bra'))?.call).toBe('P')
+    const dHand = parseHand('S:AQ2 H:K84 D:K42 C:KJ32') // 3 ruterstöd, 16 hp jämn → utgångsvärden (ägarbeslut 2026-09-25: 3NT)
+    it('min/bra (svar 3♦) → 3NT (jämn 16 med fit = utgångsvärden; förr pass)', () => {
+      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3D', 'Ogust: min/bra'))?.call).toBe('3NT')
     })
-    it('min/dålig (svar 3♣) → 3♦ (laglig signoff)', () => {
-      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3C', 'Ogust: min/dålig'))?.call).toBe('3D')
+    it('min/dålig (svar 3♣) → 3NT (jämn 16 med fit; förr 3♦-signoff)', () => {
+      expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3C', 'Ogust: min/dålig'))?.call).toBe('3NT')
+    })
+    it('12 hp med fit mittemot minimum → 3♦ (laglig signoff)', () => {
+      expect(responderPlaceAfterOgust(parseHand('S:Q92 H:K84 D:K42 C:KJ32'), 'diamonds', r('3C', 'Ogust: min/dålig'))?.call).toBe('3D')
     })
     it('max/utmärkt (svar 3NT) → pass (3NT redan nått) – inte olagligt 3NT', () => {
       expect(responderPlaceAfterOgust(dHand, 'diamonds', r('3NT', 'Ogust: max/utmärkt'))?.call).toBe('P')
@@ -153,5 +156,27 @@ describe('buildAuction – svag tvåa end-to-end (inkoppling)', () => {
     }
     const a = buildAuction(deal)
     expect(a?.turns.slice(0, 4).map((t) => t.call)).toEqual(['2S', '2NT', '3C', '3NT'])
+  })
+})
+
+
+// Ägarbeslut 2026-09-25 (tävlingsjämförelsen bricka 1): placering efter Ogust
+// med FIT och utgångsvärden → utgång i färgen, även mittemot minimum.
+describe('responderPlaceAfterOgust – utgångsvärden med fit (2026-09-25)', () => {
+  const min = { call: '3C', rule: 'Ogust: min/dålig', explanation: '' }
+  const max = { call: '3H', rule: 'Ogust: max/dålig', explanation: '' }
+  it('17 hp + tre ruter mittemot minimum → 5♦ (förr 3♦)', () => {
+    expect(responderPlaceAfterOgust(parseHand('S:- H:AQ95 D:KQ2 C:AQT743'), 'diamonds', min)?.call).toBe('5D')
+  })
+  it('13 hp + tre ruter mittemot maximum → 5♦; mittemot minimum → 3♦ som förr', () => {
+    const h = parseHand('S:8 H:AQ95 D:Q92 C:KQT74')
+    expect(responderPlaceAfterOgust(h, 'diamonds', max)?.call).toBe('5D')
+    expect(responderPlaceAfterOgust(h, 'diamonds', min)?.call).toBe('3D')
+  })
+  it('16 hp utan fit (två ruter) mittemot minimum → 3♦ som förr (ingen utgång på fit som saknas)', () => {
+    expect(responderPlaceAfterOgust(parseHand('S:AKJ5 H:A843 D:JT C:QJ8'), 'diamonds', min)?.call).toBe('3D')
+  })
+  it('högfärg: 16 hp + tre hjärter mittemot minimum → 4♥ (förr 3♥)', () => {
+    expect(responderPlaceAfterOgust(parseHand('S:AK5 H:Q92 D:KQ74 C:Q83'), 'hearts', min)?.call).toBe('4H')
   })
 })

@@ -139,9 +139,14 @@ export function responderPlaceAfterOgust(hand: Hand, opened: Suit, ogust: Respon
   const sym = SYM[opened]
   const max = ogust.rule === 'Ogust: max/dålig' || ogust.rule === 'Ogust: max/bra' || ogust.rule === 'Ogust: max/utmärkt'
 
+  // UTGÅNGSVÄRDEN MED FIT (ägarbeslut 2026-09-25, tävlingsjämförelsen bricka 1:
+  // ♠– ♥AQ95 ♦KQ2 ♣AQT743 = 17 hp med tre ruter stannade i 3♦ mittemot minimum,
+  // fast 5♦ stod): 3+ stöd och 16+ hp, eller 13+ mittemot maximum → utgång i färgen.
+  const fitGame = len[opened] >= 3 && (p >= 16 || (max && p >= 13))
   if (isMajor(opened)) {
     if (ogust.rule === 'Ogust: max/utmärkt') return { call: `4${bid}`, rule: 'till spel', explanation: `Mittemot max + solid färg → 4${sym}.` }
     if (max) return { call: `4${bid}`, rule: 'till spel', explanation: `Mittemot maximum → 4${sym} (utgång).` }
+    if (fitGame) return { call: `4${bid}`, rule: 'till spel', explanation: `3+ stöd och utgångsvärden (16+) även mittemot minimum → 4${sym}.` }
     // Svararens EGEN styrka kan bära utgång även mittemot en MINIMUM svag tvåa:
     // ~19+ hp + partnerns 6-korts färg ≈ utgång oavsett öppnarens tier (felrapport
     // #22: Öst hade 22 hp och stack i 3♠). Med trumfstöd (3+) → utgång i färgen;
@@ -157,6 +162,13 @@ export function responderPlaceAfterOgust(hand: Hand, opened: Suit, ogust: Respon
   // Minoröppning (2♦): öppnarens Ogust-svar ligger REDAN på 3-läget (3♣–3NT),
   // så svararens placering måste vara LAGLIG (högre än svaret) – annars pass.
   // Förenkling kring exakt slutkontrakt kvarstår (flaggas).
+  // Jämn hand med utgångsvärden: 3NT före 5m (nio stick är närmare än elva).
+  if ((fitGame || max) && isBalanced(hand) && ogust.call !== '3NT') {
+    return { call: '3NT', rule: 'till spel', explanation: `Jämn hand med utgångsvärden mittemot partnerns ${sym} → 3NT.`, uncertain: !fitGame }
+  }
+  if (fitGame && ogust.call !== '3NT') {
+    return { call: `5${bid}`, rule: 'till spel', explanation: `3+ stöd och utgångsvärden (${max ? '13+ mittemot maximum' : '16+'}) → 5${sym}.` }
+  }
   if (max) {
     // Sikta utgång (3NT). Är svaret redan 3NT (max/utmärkt) → passa det.
     return ogust.call === '3NT'

@@ -899,7 +899,13 @@ nästan inget mittemot.
 
 Minnesregel: *"Minors are Minimum, 1-2-1-2-3"* (♣/♦ = minimum; antalet
 topphonnörer följer 1-2-1-2-3). Topphonnörer = ess/kung/dam i trumffärgen.
-Svararen placerar sedan kontraktet utifrån min/max och färgkvalitet.
+Svararen placerar sedan kontraktet utifrån min/max och färgkvalitet. **Med 3+
+stöd och utgångsvärden — 16+ hp, eller 13+ mittemot maximum — placeras utgång
+i färgen** (5m/4M) även mittemot minimum (ägarbeslut 2026-09-25,
+tävlingsjämförelsen bricka 1: ♠– ♥AQ95 ♦KQ2 ♣AQT743 stannade i 3♦ fast 5♦
+stod). Kliver motståndarna in EFTER öppnarens Ogust-svar placerar svararen
+ändå som ostört; ryms inte placeringen (3♦ under deras 3♠) bjuds utgång med
+16+ och fit, tävlande höjning med 13+ och fit, annars pass (§7.8 b).
 
 **Ny färg som krav:** efter t.ex. 2♥–2♠ (krav) visar öppnaren stöd, rebjuder sin
 färg (minimum) eller visar en sidofärg. **Nivågräns (fel färg-spåret fix 4):**
@@ -1232,7 +1238,10 @@ passa, men budgivningen får stanna *under* utgång), aldrig utgångskrav:
 | **Reverse** | 1♣–1♥–(1♠)–2♦ | svararen måste svara |
 
 Ett fritt bud = en **ny egen färg** som du fritt väljer att bjuda över inklivet
-(du kunde ha passat). Det lovar riktiga värden och är rondkrav. Undantag som
+(du kunde ha passat). Det lovar riktiga värden och är rondkrav. **Nivåerna:**
+1-läget från 6 hp, 2-läget från 10, **3-läget från 12** (5+ färg; sunt förnuft-
+svepet 2026-09-25 — förr fanns inget fritt bud alls på 3-läget, så 1♠–(2♥) med
+♠– ♥J98 ♦KJ7 ♣AKQJ982 passade). Undantag som
 *inte* är detta krav: ett **hopp** (kan vara svagt/spärrartat), ett **cue i deras
 färg** (= stödhöjning, sköts separat), en **passad hand** (redan begränsad),
 **X + egen färg** (dubblarens ombud = invit, ej krav — fel färg-spåret fix 5b),
@@ -2598,6 +2607,16 @@ andra sidan **passar** partnerns naturliga flykt över vår dubbling (den är ti
 spel) — förr "tvingade" ett felläst rondkrav fram 3♣/3♠ ur catch-allen.
 
 ### 7.7 Mot konventionella och svaga öppningar
+**Advancern över partnerns 3-lägesinkliv (ej hopp) över deras svaga tvåa**
+(ägarbeslut 2026-09-25, sunt förnuft-svepet frö 20290669: Väst 2♠, Nord 3♣,
+Öst pass, Syd ♠Q98 ♥AJT853 ♦AJ72 ♣– passade): **ny färg = naturlig 5+ (6+ på
+4-läget), 12+ hp, tydligt avslag från partnerns färg** (högst 2 kort), krav en
+rond. **Inklivaren svarar:** stopp i deras färg → **3NT**; 3+ stöd i advancerns
+färg → **utgång** där; annars rebud av egen 6+ färg, sist pass. **Partnerns
+balanserande 2NT** (12–15) besvaras: 11+ → 3NT, 6+ högfärg med 8+ → 4M, annars
+pass. Efter partnerns **svaga hoppinkliv** och deras höjning (1♦–2♠–3♦) passar
+advancern utan 15+ (ägarbeslut samma dag).
+
 > **Takeout-dubblingen** mot deras svaga tvåor och spärrar beskrivs i sin helhet i
 > §7.3 (Takeout Double) – här listas bara de övriga verktygen.
 - **Mot stark 1♣ (Mathe):** X = **båda högfärgerna**, 1NT = **båda minorerna**,
@@ -2983,6 +3002,18 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-25 — Advancern över partnerns 3-lägesinkliv över deras svaga tvåa
+  (§7.7, ägarbeslut).** Ny färg = naturlig 5+/12+ som förnekar stöd; inklivaren
+  3NT med stopp / utgång med 3-korts stöd / rebud / pass
+  (`preempt-defense-continuations.ts`, betydelselagret). Facit `auction-live.test.ts`.
+- **2026-09-25 — Sunt förnuft-svepet, tre hål byggda.** (1) Fritt bud på 3-läget
+  från 12 hp, även lågfärg (§5.5, `contested-opening.ts`). (3) Advancern svarar
+  partnerns balanserande 2NT över deras svaga tvåa: 11+ → 3NT, 6+ högfärg och
+  8+ → 4M, annars pass (`preempt-defense-continuations.ts`). (4) Dubblaren
+  återöppnar med 16+ när deras höjning passas runt (egen 5+ färg, annars X igen
+  med kort i deras färg) och den starka dubblaren (17+) visar sin färg även över
+  deras svaga tvåa (`double-continuations.ts`). Facit `auction-live.test.ts`
+  (frön 20290750, 20291006, 20290022, 20290030).
 - **2026-09-25 — Svararen efter vår svaga tvåa + deras inkliv (ägarens struktur,
   bricka 3).** 2NT = Ogust systems on (krav), 3NT = 18+ med stopp, ny färg =
   5+/12+ som förnekar 2-korts stöd (krav 1 rond), X på 3-läget = straff — även i
@@ -2993,6 +3024,12 @@ Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
   objudna lika långa ≥4-4, förnekar vår färg), öppnaren svarar med sin längsta;
   exakt två kort i vår färg → 3x tävlande. Facit `contested-openings.test.ts`,
   `auction-live.test.ts`, `auction-interpret.test.ts`.
+- **2026-09-25 — Placering efter Ogust med fit och utgångsvärden (§4.5;
+  tävlingsjämförelsen bricka 1).** 3+ stöd och 16+ (13+ mot maximum) → 5m/4M
+  i stället för 3x-signoff (`responses-weak2.ts`); svararen placerar även när
+  deras inkliv kom efter öppnarens Ogust-svar — ryms inte placeringen: utgång
+  16+/tävlande 13+/pass (`preempt-defense-continuations.ts`). Facit
+  `responses-weak2.test.ts`, `auction-live.test.ts`.
 - **2026-09-25 — Felrapport #82 forts. (Ogust-vägen): partnerns kravbud besvaras
   alltid.** Faktumet `partnerSignedOff` läste 4♠-cuet som obestritt utgångsbud →
   Nord passade ut kravet igen. Nu: cue i deras färg ≠ utgång, krav ≠ avslut
