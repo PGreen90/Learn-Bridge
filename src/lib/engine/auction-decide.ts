@@ -132,7 +132,7 @@
 
 import type { Bid, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { forcingCallStillOpen, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
 import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
@@ -2356,7 +2356,40 @@ const TABELL: Row[] = [
     läge: (f) => f.force !== null && !f.partnerSignedOff,
     välj: ({ hand, facts }) => forcedMinimumBid(hand, facts),
   },
+  // ---- Sista vakten: partnerns KRAVBUD besvaras alltid (2026-09-25) ---------
+  // Ägarens krav (felrapport #82 forts.: 2♦–P–2NT–P–3♣–(3♠)–4♠ passades ut):
+  // "detta måste funka i alla lager". Läser betydelselagrets kravnivå på
+  // partnerns senaste bud — krav 1 rond eller utgångskrav, obesvarat av
+  // motståndarna — och tvingar fram ett naturligt minimibud när ingen
+  // positionsrad ovan och inget kravfaktum (`force`) tog budet. Samma kunskap
+  // som *krav-minimibud* (rebjud egen färg → stöd → ny färg → sang).
+  {
+    id: 'krav-svar (vakt)',
+    läge: (f) => f.force === null && !f.partnerSignedOff && partnerForcingBidUnanswered(f),
+    välj: ({ hand, facts }) => forcedMinimumBid(hand, facts),
+  },
 ]
+
+/**
+ * Är partnerns senaste bud (kontraktsbud/X/XX) ett KRAV enligt betydelselagret,
+ * och har ingen motståndare bjudit efter det? Då får stolen inte passa.
+ */
+function partnerForcingBidUnanswered(f: AuctionFacts): boolean {
+  const { history, seat } = f
+  let i = -1
+  for (let k = history.length - 1; k >= 0; k--) {
+    const c = history[k]
+    if (c.seat === PARTNER[seat] && c.bid !== 'P') { i = k; break }
+    if (c.seat === PARTNER[seat] && c.bid === 'P') return false // partnerns senaste call var pass
+  }
+  if (i < 0) return false
+  for (let k = i + 1; k < history.length; k++) {
+    const c = history[k]
+    if (side(c.seat) !== side(seat) && c.bid !== 'P') return false // de bjöd vidare → andra rader
+  }
+  const fz = f.meaning(i).forcing
+  return (fz === 'krav-1-rond' || fz === 'utgangskrav') && forcingCallStillOpen(history, i, seat)
+}
 
 /**
  * Tabellens beslut för stolen i `facts.seat`, eller null när ingen rad täcker

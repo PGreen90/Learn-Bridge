@@ -395,7 +395,72 @@ function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpret
   if (disturbed) return disturbed
   const contested = interpretOur1NTContested(call, prior)
   if (contested) return contested
+  const weakTwo = interpretOurWeakTwoContested(call, prior)
+  if (weakTwo) return weakTwo
   return deriveUndisturbed(call, prior)
+}
+
+/**
+ * VÅR SVAGA TVÅA + DERAS FÄRGINKLIV (ägarens struktur 2026-09-25, §7.8 b):
+ * 2NT = Ogust (systems on, krav) · 3NT = till spel 18+ med stopp · ny färg = 5+,
+ * 12+, förnekar 2-korts stöd, krav 1 rond · X av deras 3-lägesbud = straff.
+ * Cue i deras färg läses av cue-grenen (stark höjning). Senare bud (Ogust-svaret,
+ * placeringen) VIRTUALISERAS: deras inkliv → pass, ostörda tolkaren läser resten.
+ */
+function interpretOurWeakTwoContested(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 2 || open.cb.strain === 'C' || open.cb.strain === 'NT' || SIDE[open.seat] !== SIDE[call.seat]) return null
+  const theirs = prior.filter((c) => SIDE[c.seat] !== SIDE[call.seat] && c.bid !== 'P')
+  if (theirs.length !== 1) return null
+  const ov = parseBid(theirs[0].bid)
+  if (!ov || ov.strain === 'NT') return null // bara ett färginkliv (ingen X)
+  if (call.bid === 'P' || call.bid === 'XX') return null
+  // Vår sidas KONTRAKTSBUD (en egen X räknas inte som bud här).
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[call.seat] && !!parseBid(c.bid))
+  if (ours.some((c) => parseBid(c.bid)?.strain === ov.strain)) return null // cue-sekvens → cue-grenen
+  const responder = PARTNER[open.seat]
+  const wname = NAME[open.cb.strain]
+  const tname = NAME[ov.strain]
+  const unbid = ['S', 'H', 'D', 'C'].filter((s) => s !== open.cb.strain && s !== ov.strain)
+  if (call.bid === 'X') {
+    if (call.seat === responder && ov.level >= 3 && prior[prior.length - 1].seat !== call.seat) {
+      return { text: `Dubbling av deras ${ov.level}${SYMBOL[ov.strain]} — STRAFF: trumfstack i ${tname} och styrka efter partnerns svaga tvåa (dubbling på 3-läget är straff). Partnern får passa.`, confidence: 'trolig', rule: 'straffdubbling', forcing: 'ej-krav' }
+    }
+    // Deras 2-lägesinkliv (ägarbeslut 2026-09-25): upplysning — de två objudna
+    // färgerna lika långa (minst 4-4), förnekar partnerns färg helt.
+    if (call.seat === responder && ov.level === 2 && ours.length === 1 && !prior.some((c) => c.seat === call.seat && c.bid === 'P' && prior.indexOf(c) > prior.indexOf(theirs[0]))) {
+      return R('negativ dubbling', `Upplysningsdubbling — ${NAME[unbid[0]]} och ${NAME[unbid[1]]} lika långa (minst 4-4), högst 1 kort i partnerns ${wname}, 10+ hp; partnern bjuder sin längsta av dem. Krav.`)
+    }
+    return null
+  }
+  const cb = parseBid(call.bid)
+  if (!cb) return null
+  // Öppnarens svar på partnerns upplysningsdubbling: längsta objudna färgen.
+  const lastOurs = [...prior].reverse().find((c) => SIDE[c.seat] === SIDE[call.seat] && c.bid !== 'P')
+  if (call.seat === open.seat && ours.length === 1 && lastOurs?.bid === 'X' && unbid.includes(cb.strain)) {
+    return R('svar på negativ dubbling', `${cb.level}${SYMBOL[cb.strain]} — svar på partnerns upplysningsdubbling: min längsta av ${NAME[unbid[0]]}/${NAME[unbid[1]]}. Ej krav.`)
+  }
+  if (call.seat === responder && ours.length === 1) {
+    if (cb.strain === ov.strain) return null // cue = stark höjning (cue-grenen)
+    if (cb.strain === open.cb.strain && cb.level === 3) {
+      return { text: `3${SYMBOL[cb.strain]} — tävlande höjning över deras inkliv: 2 kort i partnerns ${wname} med värden (10+), eller 3+ som spärr. Ej krav.`, confidence: 'trolig', rule: 'konkurrenshöjning', forcing: 'ej-krav' }
+    }
+    if (cb.level === 2 && cb.strain === 'NT') return R('Ogust', `2 sang — Ogust, systems on över deras inkliv: konstgjord fråga om styrka och färgkvalitet (svar 3♣ = min/dålig, 3♦ = min/bra, 3♥ = max/dålig, 3♠ = max/bra, 3NT = max/utmärkt). Krav. Säger inget om sang.`)
+    if (cb.level === 3 && cb.strain === 'NT') return R('3NT till spel', `3 sang — till spel: 18+ hp med stopp i deras ${tname}.`)
+    if (cb.strain !== 'NT' && cb.strain !== open.cb.strain && cb.level <= 3) {
+      return R('ny färg (krav)', `${cb.level}${SYMBOL[cb.strain]} — naturligt: 5+ ${NAME[cb.strain]}, 12+ hp, förnekar 2-korts stöd i partnerns ${wname} (högst 1 kort). Krav 1 rond.`)
+    }
+    return null
+  }
+  // Senare bud: systems on — läs som ostört (deras inkliv → pass). Bara när
+  // inklivet kom FÖRE svararens svar (annars är det ingen systems-on-sekvens
+  // utan t.ex. 2♦–P–2NT–P–3♣–(3♠)–4♠, där 4♠ är ett cue — cue-grenen).
+  if (ours.length < 2 || prior.indexOf(theirs[0]) > prior.indexOf(ours[1])) return null
+  const virtual = prior.map((c) => (SIDE[c.seat] !== SIDE[call.seat] && c.bid !== 'P' ? { seat: c.seat, bid: 'P' as Bid } : c))
+  const u = undisturbed(call.seat, virtual)
+  if (!u || u.bids.length < 2) return null
+  const m = afterWeakTwo(call.seat, cb, u)
+  return m ? { ...m, text: `${m.text} (systems on över deras inkliv.)` } : null
 }
 
 function deriveUndisturbed(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
