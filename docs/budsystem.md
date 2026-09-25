@@ -2573,7 +2573,12 @@ tvåfärgshänder och svagare enfärgshänder; den starka enfärgshanden bjuder 
 | 2♠ | enbart ♠ (6+), svagare än X följt av 2♠ |
 
 **Advancer:** efter X bjuds 2♣ som pass-eller-rätta; efter ett tvåfärgsbud passar
-man med stöd, annars frågar/rättar nästa steg. Lätta, formstarka händer tillåtna
+man med stöd, annars frågar/rättar nästa steg — efter **2♥ (♥+♠)** väljs
+spader med **högst två hjärter och 4+ spader** (**2♠**, till spel; felrapport
+#83: ♠AKJT9 ♥A3 passade förr), annars pass. **Tänkande lagret bjuder aldrig DONT**
+(eller annan konvention) självt — hade handen passat konventionen hade tabellen
+redan bjudit den (felrapport #83: 2♥ på ♠4 ♥QJ9764 bjöds som "naturlig
+ sexkortsfärg"). Lätta, formstarka händer tillåtna
 – ännu lättare i återbudsläge (balansering).
 
 **DONT-dubblarens egen fortsättning när reläet uteblev (byggd 2026-09-13):**
@@ -2678,10 +2683,10 @@ uppdelningen (värde-X mot DONT, Lebensohl mot naturliga inkliv) är riven.
 **Öppnaren svarar partnerns cue — passar aldrig** (felrapport #82: Nord passade
 ut 3♠ på 2♦–(2♠)–3♠). Högfärg: **4M** (utgång; partnern går vidare mot slam med
 kontrollbud om hen vill). Lågfärg: **maximum (9–11 hp) med stopp i deras färg →
-3NT**, maximum utan stopp → **5m**, **minimum (6–8) → lägsta bud i egen färg**
-(4m, partnern får passa). *Nord ♠652 ♥K74 ♦AT9743 ♣J → **4♦**; med ♠A52 och 10
-hp → **3NT**.* (Ägarfråga öppen: ska maximum utan stopp hellre bjuda 4m och
-lämna 5m åt partnern?)
+3NT**, annars **lägsta bud i egen färg (4m)** — även med maximum utan stopp
+(ägarbeslut 2026-09-25: "låt partnern höja"; partnern höjer till 5m med
+utgångsvärden, passar annars). *Nord ♠652 ♥K74 ♦AT9743 ♣J → **4♦**; med ♠A52
+och 10 hp → **3NT**; med ♥KQ4 (10 hp) men ♠652 → **4♦**.*
 
 **(h) Svararens sang med stopp över deras färginkliv — graderad** (felrapport
 #81, 2026-09-24: 1♥–(2♣) med ♠KQ ♥J8 ♦AT42 ♣KQ975 = 15 hp fick rådet pass; förr
@@ -2952,12 +2957,17 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-25 — Felrapport #83.** Tänkande lagrets systemfilter stryker nu alla
+  konventionella bud (DONT/Stayman/överföring/relä, inte bara Michaels/ovanlig/cue)
+  — Nord bjöd 2♥ "DONT" utan spader (`resonemang.ts`). Advancern väljer spader
+  över partnerns DONT 2♥ med fler spader än hjärter (`dont.ts`, §7.6). Facit
+  `resonemang.test.ts`, `dont.test.ts`, `auction-live.test.ts`.
 - **2026-09-25 — Felrapport #78–#82 (fem rapporter).** (#81) Svararens sang med
   stopp över ett färginkliv graderad 1NT 8–10 / 2NT 11–12 (10–12 över 2-läget) /
   3NT 13+, 5-4-2-2 sangduglig (§7.8 h, `contested-opening.ts`). (#82) Svararen
   cue:ar deras inkliv med 3+ stöd och 13+ hp; öppnaren svarar cuet och passar
   aldrig (§7.8 b, `contested-openings.ts` + `preempt-defense-continuations.ts`,
-  raden *svag2-fortsättning*). (#80) Betydelselagret: inkliv förklaras ur sitsen
+  raden *svag2-fortsättning*; ägarbeslut samma dag: maximum utan stopp → 4m, inte 5m). (#80) Betydelselagret: inkliv förklaras ur sitsen
   (direkt / balansering = utpassningsläget / sent efter två visade färger), sent
   cue är inte Michaels, sen dubbling på 3-läget är straff/utspelsdirigerande,
   sang lovar stopp i "färger" (`auction-meaning.ts`). (#78/#79) Spelet: Monte-

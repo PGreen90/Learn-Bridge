@@ -229,7 +229,8 @@ function ourWeakTwoCueSeat(f: AuctionFacts): { ourSuit: Suit; theirStrain: strin
  * Öppnaren svarar partnerns cue-höjning över den egna svaga tvåan (felrapport
  * #82). Högfärg: 4M (partnerns cue lovar limithöjning+ → utgång, partnern går
  * vidare mot slam själv). Lågfärg: maximum (9–11 hp) med stopp i deras färg →
- * 3NT; maximum utan stopp → 5m; minimum (6–8) → billigaste bud i egen färg (4m).
+ * 3NT; annars (maximum utan stopp, eller minimum) → billigaste bud i egen färg
+ * (4m) och partnern höjer med utgångsvärden (ägarbeslut 2026-09-25).
  * Aldrig pass. Bara lagliga bud (annars null → laglighetsvakten).
  */
 function answerOurWeakTwoCue(hand: Hand, f: AuctionFacts, s: { ourSuit: Suit; theirStrain: string }): ResolvedCall | null {
@@ -249,11 +250,12 @@ function answerOurWeakTwoCue(hand: Hand, f: AuctionFacts, s: { ourSuit: Suit; th
     const r = pick('3NT', 'svar på cue (svag tvåa): 3NT', `Partnerns cue i deras ${deras} är en stark höjning (krav): maximum (9–11 hp) med stopp i deras ${deras} → 3NT.`)
     if (r) return r
   }
-  if (max) {
-    return pick(`5${strain}` as Bid, 'svar på cue (svag tvåa): utgång', `Partnerns cue i deras ${deras} är en stark höjning (krav): maximum (9–11 hp) utan stopp i deras ${deras} → 5${sym}.`)
-  }
+  // Maximum UTAN stopp: 4m, inte 5m (ägarbeslut 2026-09-25: "låt partnern höja").
   const cheapest = cheapestBidIn(history, seat, strain)
   if (!cheapest) return null
+  if (max) {
+    return pick(cheapest, 'svar på cue (svag tvåa): minimum', `Partnerns cue i deras ${deras} är en stark höjning (krav): inget stopp i deras ${deras} för sang → ${prettyBid(cheapest)}, lägsta bud i egen färg. Partnern höjer med utgångsvärden.`)
+  }
   return pick(cheapest, 'svar på cue (svag tvåa): minimum', `Partnerns cue i deras ${deras} är en stark höjning (krav): minimum (6–8 hp) → ${prettyBid(cheapest)}, lägsta bud i egen färg. Partnern får passa.`)
 }
 

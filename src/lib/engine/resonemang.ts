@@ -123,7 +123,9 @@ function stammer(d: Deal, history: ResolvedCall[], me: Seat): boolean {
 
 /** Konventionella bud är tabellens sak — lagret rör dem aldrig (hade handen passat
  *  konventionen hade tabellen redan bjudit den). Läses ur betydelselagret. */
-const KONVENTION = /michaels|ovanlig|cue/i
+// Felrapport #83: även DONT/Stayman/överföringar/reläer — ett 2♥ över deras 1NT är
+// hjärter+spader, ingen "naturlig sexkortsfärg". Regelnamn OCH text prövas.
+const KONVENTION = /michaels|ovanlig|cue|dont|stayman|transfer|överföring|relä|puppet|konstlat|konstgjor/i
 
 /**
  * Tänkbara bud som SYSTEMET tillåter med handen (ägarbeslut 2026-09-23, "2/1-systemet
@@ -142,13 +144,16 @@ export function systemKandidater(hand: Hand, history: ResolvedCall[], me: Seat):
   const theirSuits = farger((c) => side(c.seat) !== side(me))
   const mySuits = farger((c) => c.seat === me)
   const betydelse = (b: Bid) => meaningOf([...history, { seat: me, bid: b } as ResolvedCall], history.length)
-  const konventionell = (b: Bid) => KONVENTION.test(betydelse(b).rule ?? '')
+  const konventionell = (b: Bid) => {
+    const m = betydelse(b)
+    return KONVENTION.test(`${m.rule ?? ''} ${m.text}`)
+  }
   // Upplysningsdubbling: högst 2 kort i varje färg de bjudit (ägarbeslut 2026-09-24 —
   // med längd i deras färg och en egen färg bjuder man färgen, "dubbel finns inte").
   if (legal.includes('X' as Bid)) {
     const m = betydelse('X' as Bid)
     const upplysning = /upplysning|takeout/i.test(`${m.rule ?? ''} ${m.text}`)
-    if (!upplysning || SUITS.every((s) => !theirSuits.has(letterOfSuit(s)) || len[s] <= 2)) out.add('X' as Bid)
+    if ((!upplysning || SUITS.every((s) => !theirSuits.has(letterOfSuit(s)) || len[s] <= 2)) && !konventionell('X' as Bid)) out.add('X' as Bid)
   }
   // Lång färg först: jämför med de färger jag ännu inte bjudit och som inte är deras.
   const langst = Math.max(0, ...SUITS.filter((s) => !theirSuits.has(letterOfSuit(s)) && !mySuits.has(letterOfSuit(s))).map((s) => len[s]))

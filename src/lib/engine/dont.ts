@@ -65,7 +65,13 @@ export function advanceDONT(hand: Hand, partnerCall: string): ResponseResult {
     const relaySym = partnerCall === '2C' ? '2♦' : '2♥'
     return { call: relay, rule: 'DONT pass-eller-rätta', explanation: `Korthet i ${SYM[shown]} → ${relaySym} (pass-eller-rätta: partnern rättar till sin högre färg).` }
   }
-  // Efter 2♥ (hjärter+spader) eller 2♠ (enfärg): passa (förenkling – stöd antas;
-  // 2♥ säger inget om vilken högfärg som är längst, så vi rör den inte).
+  // Efter 2♥ (hjärter+spader): med högst två hjärter och 4+ spader väljs
+  // spader — 2♠ till spel (felrapport #83: ♠AKJT9 ♥A3 passade 2♥). Annars
+  // passa (3-2 räcker inte: 2♥ säger inget om vilken högfärg partnern har
+  // längst, så vi rör den inte i onödan).
+  if (partnerCall === '2H' && len.hearts <= 2 && len.spades >= 4) {
+    return { call: '2S', rule: 'DONT pass-eller-rätta', explanation: `Högst två hjärter och 4+ spader mot partnerns 2♥ (♥+♠) → 2♠ (till spel).` }
+  }
+  // Efter 2♥ med hjärterstöd, eller 2♠ (enfärg): passa.
   return { call: 'P', rule: 'pass', explanation: 'stöd i partnerns visade färg → pass.' }
 }
