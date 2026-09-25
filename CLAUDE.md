@@ -37,7 +37,7 @@ tävling (`docs/beslut-b-plan.md` "Påbyggnad 3"). Öppet ägarsteg: live-prov
 Gambling 3NT + bordens etapp 1–3.
 
 **Parallellt ägarsteg:** live-prov vid ett vänner-bord (tänkande bottar · kortflygning ·
-nya spelfasen · etapp 1–3) + Gambling 3NT. Sedan väljer ägaren nästa NU ur 🟢 NÄST.
+nya spelfasen · uppvändningen på telefon · etapp 1–3) + Gambling 3NT. Sedan väljer ägaren nästa NU ur 🟢 NÄST.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (KLAR & LIVE 2026-08-19): syna `docs/budforklaring-katalog.md`, peka på en
