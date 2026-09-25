@@ -302,8 +302,12 @@ export function partnerGameBidStandsUnopposed(history: ResolvedCall[], seat: Sea
     if (c.seat !== PARTNER[seat]) continue
     const cb = parseContractBid(c.bid)
     if (!cb) continue
+    // Ett CUE i motståndarnas färg är inget utgångsbud (felrapport #82 forts.,
+    // 2026-09-25: 2♦–P–2NT–P–3♣–(3♠)–4♠ — partnerns 4♠ är en stark höjning av
+    // ruter, inte "utgång i spader"; öppnaren passade ut kravet).
+    const cue = cb.strain !== 'NT' && opponentsBidStrain(history.slice(0, idx), seat, cb.strain)
     const trickScore = cb.level * (cb.strain === 'C' || cb.strain === 'D' ? 20 : 30) + (cb.strain === 'NT' ? 10 : 0)
-    partnerGameAt = trickScore >= 100 ? idx : -1 // senaste budet räknas
+    partnerGameAt = !cue && trickScore >= 100 ? idx : -1 // senaste budet räknas
   }
   if (partnerGameAt < 0) return false
   return !history.some((c, idx) => idx > partnerGameAt && side(c.seat) !== side(seat) && parseContractBid(c.bid))
@@ -348,10 +352,28 @@ export function partnerSignedOff(
     if (side(c.seat) === side(seat)) continue
     if (parseContractBid(c.bid) || c.bid === 'X' || c.bid === 'XX') return false
   }
-  // 3) Betydelsens kravnivå är ett avslut.
-  if (meaning(i).forcing === 'avslut') return true
+  // 3) Betydelsens kravnivå är ett avslut — eller ett KRAV: då har partnern
+  //    inte avslutat oavsett nivå (ett cue på 4-läget är krav, inte utgång;
+  //    felrapport #82 forts. 2026-09-25).
+  const fz = meaning(i).forcing
+  if (fz === 'avslut') return true
+  if ((fz === 'krav-1-rond' || fz === 'utgangskrav') && forcingCallStillOpen(history, i, seat)) return false
   // 4) Annars: partnerns senaste kontraktsbud är utgång+ och obestritt.
   return partnerGameBidStandsUnopposed(history, seat)
+}
+
+/**
+ * Är kravet i partnerns bud `i` fortfarande ÖPPET — dvs. budet är under utgång,
+ * eller ett CUE i motståndarnas färg (som aldrig är ett kontraktsförslag), eller
+ * en dubbling? Ett naturligt bud på utgångsnivå uppfyller ett utgångskrav och
+ * räknas som kandidat till avslut (steg 4), även om betydelsen bär etiketten
+ * "utgångskravet står".
+ */
+export function forcingCallStillOpen(history: ResolvedCall[], i: number, seat: Seat): boolean {
+  const cb = parseContractBid(history[i].bid)
+  if (!cb) return true // X/XX
+  if (cb.strain !== 'NT' && opponentsBidStrain(history.slice(0, i), seat, cb.strain)) return true // cue
+  return !isGameOrHigher(history[i].bid)
 }
 
 /** Har motståndarsidan bjudit `strain` som kontraktsbud? (då är det inte en egen färg) */

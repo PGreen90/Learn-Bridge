@@ -1212,6 +1212,14 @@ bjuder en egen väg:
 Minimibudet väljs naturligt: rebjud en egen 5+ färg → stöd partnern (3+ kort) →
 ny färg → billigaste sang.
 
+**Generell vakt (2026-09-25, ägarens krav "detta måste funka i alla lager"):**
+sist i beslutstabellen ligger raden *krav-svar (vakt)*: är partnerns senaste bud
+ett **krav enligt budförklaringen** (krav 1 rond / utgångskrav), obesvarat av
+motståndarna, och ingen regel tog budet, tvingas samma naturliga minimibud fram.
+Och ett **cue i deras färg räknas aldrig som ett utgångsbud** (faktumet
+`partnerSignedOff`): 2♦–P–2NT–P–3♣–(3♠)–**4♠** passades förr ut som "utgång i
+spader".
+
 **I konkurrens (motståndarna har klivit in) gäller krav också — men mildare.**
 Ett inkliv "lånar" utrymme, så ett fritt 2-över-1 lovar värden **utan att lova
 utgång**. Därför är alla krav i störd budgivning **rondkrav** (partnern får inte
@@ -2671,17 +2679,35 @@ motståndare stör, svarar partnern med ett riktigt beslut i stället för att p
 se **§7.5 — systems on + stulet bud** (ägarens struktur 2026-09-18). Den gamla
 uppdelningen (värde-X mot DONT, Lebensohl mot naturliga inkliv) är riven.
 
-**(b) De stör vår svaga tvåa / spärr** (takeout-X eller ett inkliv):
+**(b) De stör vår svaga tvåa / spärr** (takeout-X eller ett inkliv). Ägarens
+struktur 2026-09-25 (bricka 3: ♠AKJ5 ♥A843 ♦JT ♣QJ8 = 16 hp passade 2♦–(2♥)
+och sedan deras 3♥ — "varför bjuder inte Nord?"):
 - Deras **upplysningsdubbling → XX = värden/straffintresse** (10+ hp).
 - Mot ett **färginkliv** med **3+ stöd och 13+ hp → cue i deras färg** = stark
   höjning (limithöjning eller bättre), **krav** (felrapport #82, 2026-09-25:
   2♦–(2♠) med ♠– ♥AQ95 ♦KQ2 ♣AQT743 bjöd förr "spärrhöjning" 3♦).
+- **2NT = Ogust, systems on, krav** — samma trösklar som ostört (11+ med 3+ stöd,
+  15+ utan fit), när 2NT ryms över inklivet. Öppnaren svarar i Ogust-stegen
+  som ostört och svararen placerar som ostört (deras inkliv läses bort).
+- **3NT = till spel, 18+ hp med stopp** i deras färg.
+- **Ny färg = naturlig 5+, 12+ hp, förnekar 2-korts stöd** i vår färg (högst 1
+  kort), **krav 1 rond** — öppnaren stöder/rebjuder som ostört.
+- **Dubbling av deras bud på 3-läget = straff** (4+ kort i deras färg och 12+,
+  eller 3 kort och 15+) — även i andra ronden efter ett pass.
+- **Dubbling av deras 2-lägesinkliv = upplysning** (ägarbeslut 2026-09-25): de
+  två objudna färgerna **lika långa, minst 4-4**, **förnekar vår färg helt**
+  (högst 1 kort), 10+ hp; ber partnern bjuda sin **längsta** av dem (öppnaren
+  svarar på lägsta nivå, ej krav). *2♦–(2♥)–X med ♠KQ84 ♥9532 ♦7 ♣AJ86;
+  öppnaren med ♠T94 ♣A7 svarar 2♠.*
+- **Exakt två kort i vår färg** (som annars hade dubblat): **3x = tävlande
+  höjning, ej krav** — dubblingen förnekar stöd, så tvåkortsstödet visas här.
 - Annars **fortsatt spärr**: höj vår färg ett steg med fit (svag tvåa kräver
   3-korts stöd, en spärr räcker med 2) – lagen om totala stick.
 - Annars **pass**.
 
 **Öppnaren svarar partnerns cue — passar aldrig** (felrapport #82: Nord passade
-ut 3♠ på 2♦–(2♠)–3♠). Högfärg: **4M** (utgång; partnern går vidare mot slam med
+ut 3♠ på 2♦–(2♠)–3♠; och igen 4♠ på 2♦–P–2NT–P–3♣–(3♠)–4♠ — gäller alltså
+även när Ogust hunnit före inklivet; över ett 4-lägescue är svaret 5m/4M). Högfärg: **4M** (utgång; partnern går vidare mot slam med
 kontrollbud om hen vill). Lågfärg: **maximum (9–11 hp) med stopp i deras färg →
 3NT**, annars **lägsta bud i egen färg (4m)** — även med maximum utan stopp
 (ägarbeslut 2026-09-25: "låt partnern höja"; partnern höjer till 5m med
@@ -2957,6 +2983,23 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-25 — Svararen efter vår svaga tvåa + deras inkliv (ägarens struktur,
+  bricka 3).** 2NT = Ogust systems on (krav), 3NT = 18+ med stopp, ny färg =
+  5+/12+ som förnekar 2-korts stöd (krav 1 rond), X på 3-läget = straff — även i
+  andra ronden (§7.8 b, `contested-openings.ts`). Öppnarens Ogust-/nyfärgssvar
+  och svararens placering spelas systems on över inklivet
+  (`preempt-defense-continuations.ts`); betydelselagret läser sekvensen som ostört
+  (`auction-meaning.ts`). Samma dag: X av deras 2-lägesinkliv = upplysning (två
+  objudna lika långa ≥4-4, förnekar vår färg), öppnaren svarar med sin längsta;
+  exakt två kort i vår färg → 3x tävlande. Facit `contested-openings.test.ts`,
+  `auction-live.test.ts`, `auction-interpret.test.ts`.
+- **2026-09-25 — Felrapport #82 forts. (Ogust-vägen): partnerns kravbud besvaras
+  alltid.** Faktumet `partnerSignedOff` läste 4♠-cuet som obestritt utgångsbud →
+  Nord passade ut kravet igen. Nu: cue i deras färg ≠ utgång, krav ≠ avslut
+  (`auction-facts.ts`); svag-två-cue-raden gäller även efter Ogust
+  (`preempt-defense-continuations.ts`); ny sista rad *krav-svar (vakt)* i
+  `auction-decide.ts` tvingar ett naturligt minimibud på varje kravbud från
+  partnern som ingen rad tog (§5.5). Facit `auction-live.test.ts`.
 - **2026-09-25 — Felrapport #83.** Tänkande lagrets systemfilter stryker nu alla
   konventionella bud (DONT/Stayman/överföring/relä, inte bara Michaels/ovanlig/cue)
   — Nord bjöd 2♥ "DONT" utan spader (`resonemang.ts`). Advancern väljer spader

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseHand } from '../bidding'
+import { auctionFacts } from './auction-facts'
+import { forcedMinimumBid } from './catch-all-continuations'
 import { dealRandom } from './deal'
 import { buildAuction } from './auction'
 
@@ -1698,5 +1700,90 @@ describe('felrapport #83 – DONT 2♥ = hjärter+spader: bjuds inte utan spader
   it('Nord passar Syds 2♠ (valet är till spel)', () => {
     const hist = [call('W', '1NT'), call('N', '2H'), call('E', 'P'), call('S', '2S'), call('W', 'P')]
     expect(decideCall(deal, hist, 'N').bid).toBe('P')
+  })
+})
+
+// Felrapport #82, fortsättning (skärmdump 2026-09-25, samma bricka 1 via Ogust):
+// 2♦–P–2NT–P–3♣–(3♠)–4♠–P–PASS. Nord passade ut kravet igen — faktumet
+// `partnerSignedOff` läste 4♠ som "utgång i spader, obestritt". Ägaren: "detta
+// måste funka i alla lager". Tre lås: faktumet (cue ≠ utgång, krav ≠ avslut),
+// den specifika svag-två-cue-raden (även efter Ogust) och den generella vakten
+// sist i tabellen (partnerns kravbud besvaras alltid).
+describe('felrapport #82 forts. – partnerns cue efter Ogust passas aldrig ut', () => {
+  const deal = dealOf('N', {
+    N: 'S:652 H:K74 D:AT9743 C:J',
+    E: 'S:QJT9874 H:J862 D:- C:K8',
+    S: 'S:- H:AQ95 D:KQ2 C:AQT743',
+    W: 'S:AK3 H:T3 D:J865 C:9652',
+  })
+  const hist = [call('N', '2D'), call('E', 'P'), call('S', '2NT'), call('W', 'P'), call('N', '3C'), call('E', '3S'), call('S', '4S'), call('W', 'P')]
+  it('faktumet: partnern har INTE avslutat med ett cue på 4-läget', () => {
+    expect(auctionFacts(hist, 'N').partnerSignedOff).toBe(false)
+  })
+  it('Nord svarar 5♦ (lägsta bud i egen färg), aldrig pass', () => {
+    const c = decideCall(deal, hist, 'N')
+    expect(c.bid).toBe('5D')
+  })
+  it('den generella vakten: ett kravbud från partnern utan egen rad → naturligt minimibud, aldrig pass', () => {
+    // Samma läge men tabellens specifika rad kringgås inte här — vi kontrollerar
+    // vakten direkt: partnerns kravbud + inget kravfaktum + inget avslut → bud.
+    const f = auctionFacts(hist, 'N')
+    expect(f.force).toBeNull()
+    expect(forcedMinimumBid(deal.hands.N, f)?.bid).toBe('5D')
+  })
+})
+
+// Bricka 3 (skärmdump 2026-09-25): Syd 2♦, Väst 2♥, Nord (♠AKJ5 ♥A843 ♦JT ♣QJ8,
+// 16 hp) passade — och passade igen över Västs 3♥. Ägaren: "Varför bjuder inte
+// Nord? Har massa poäng!" Ägarens struktur (§7.8 b): 2NT Ogust systems on, 3NT
+// 18+, ny färg 5+/12+ utan stöd, X på 3-läget = straff.
+describe('bricka 3 – svararen agerar över deras inkliv efter vår svaga tvåa', () => {
+  const deal = dealOf('S', {
+    N: 'S:AKJ5 H:A843 D:JT C:QJ8',
+    E: 'S:Q87632 H:- D:K7 C:K9632',
+    S: 'S:T94 H:J7 D:A96532 C:A7',
+    W: 'S:- H:KQT9652 D:Q84 C:T54',
+  })
+  it('Nord bjuder 2NT (Ogust) över 2♥ — 16 hp, ingen fit', () => {
+    const c = decideCall(deal, [call('S', '2D'), call('W', '2H')], 'N')
+    expect(c.bid).toBe('2NT')
+    expect(c.rule).toBe('Ogust')
+  })
+  it('Syd svarar Ogust systems on: 3♥ = maximum (9 hp), dålig färg', () => {
+    const hist = [call('S', '2D'), call('W', '2H'), call('N', '2NT'), call('E', 'P')]
+    expect(decideCall(deal, hist, 'S').bid).toBe('3H')
+  })
+  it('Nord placerar 3NT mittemot maximum', () => {
+    const hist = [call('S', '2D'), call('W', '2H'), call('N', '2NT'), call('E', 'P'), call('S', '3H'), call('W', 'P')]
+    expect(decideCall(deal, hist, 'N').bid).toBe('3NT')
+  })
+  it('passade Nord första ronden: över deras 3♥ dubblar Nord för straff, och Syd passar', () => {
+    const hist = [call('S', '2D'), call('W', '2H'), call('N', 'P'), call('E', '2S'), call('S', 'P'), call('W', '3H')]
+    const c = decideCall(deal, hist, 'N')
+    expect(c.bid).toBe('X')
+    expect(c.rule).toBe('straffdubbling')
+    expect(decideCall(deal, [...hist, c, call('E', 'P')], 'S').bid).toBe('P')
+  })
+})
+
+// Ägarbeslut 2026-09-25: upplysningsdubbling av deras 2-lägesinkliv över vår
+// svaga tvåa — öppnaren svarar med sin längsta av de två objudna färgerna.
+describe('svag tvåa – partnerns upplysningsdubbling besvaras med längsta objudna färgen', () => {
+  const deal = dealOf('S', {
+    N: 'S:KQ84 H:9532 D:7 C:AJ86', // 10 hp, 4-4 i spader/klöver, singel ruter → X
+    E: 'S:J7632 H:K D:KQ3 C:K9532',
+    S: 'S:T94 H:J7 D:A96532 C:A7', // tre spader, två klöver → 2♠
+    W: 'S:A5 H:AQT864 D:JT8 C:QT4',
+  })
+  it('Nord dubblar 2♥ (upplysning)', () => {
+    const c = decideCall(deal, [call('S', '2D'), call('W', '2H')], 'N')
+    expect(c.bid).toBe('X')
+    expect(c.rule).toBe('negativ dubbling')
+  })
+  it('Syd svarar 2♠ (tre spader, två klöver) — ej krav, Nord passar', () => {
+    const hist = [call('S', '2D'), call('W', '2H'), call('N', 'X'), call('E', 'P')]
+    const c = decideCall(deal, hist, 'S')
+    expect(c.bid).toBe('2S')
+    expect(decideCall(deal, [...hist, c, call('W', 'P')], 'N').bid).toBe('P')
   })
 })

@@ -727,3 +727,52 @@ describe('felrapport #80 – inklivens förklaringar härleds ur sitsen', () => 
     expect(r.text).not.toMatch(/balansering/)
   })
 })
+
+// Ägarens struktur 2026-09-25 efter vår svaga tvåa + deras inkliv (bricka 3).
+describe('vår svaga tvåa + deras inkliv – förklaringarna följer ägarens struktur', () => {
+  it('2NT = Ogust (systems on), krav', () => {
+    const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', '2NT']), 2)
+    expect(r.text).toMatch(/Ogust/)
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+  it('3NT = till spel, 18+ med stopp', () => {
+    expect(interpretCall(h(['S', '2D'], ['W', '2H'], ['N', '3NT']), 2).text).toMatch(/18\+/)
+  })
+  it('ny färg = 5+, 12+, förnekar 2-korts stöd, krav 1 rond', () => {
+    const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', '2S']), 2)
+    expect(r.text).toMatch(/5\+/)
+    expect(r.text).toMatch(/12\+/)
+    expect(r.text).toMatch(/förnekar/)
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+  it('X av deras 3♥ i andra ronden = straff, inte upplysning', () => {
+    const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', 'P'], ['E', '2S'], ['S', 'P'], ['W', '3H'], ['N', 'X']), 6)
+    expect(r.text).toMatch(/straff/i)
+    expect(r.text).not.toMatch(/upplysning/i)
+  })
+  it('öppnarens Ogust-svar läses systems on (3♥ = max/dålig, inte cue)', () => {
+    const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', '2NT'], ['E', 'P'], ['S', '3H']), 4)
+    expect(r.text).toMatch(/max/i)
+    expect(r.text).toMatch(/dålig/)
+  })
+})
+
+describe('vår svaga tvåa + deras 2-lägesinkliv – dubblingen är upplysning (2026-09-25)', () => {
+  it('X = upplysning: två objudna lika långa (4-4), förnekar partnerns färg, krav', () => {
+    const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', 'X']), 2)
+    expect(r.text).toMatch(/Upplysningsdubbling/)
+    expect(r.text).toMatch(/4-4/)
+    expect(r.text).toMatch(/ruter/)
+    expect(r.forcing).toBe('krav-1-rond')
+  })
+  it('öppnarens 2♠ på dubblingen = min längsta objudna färg, ej krav', () => {
+    const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', 'X'], ['E', 'P'], ['S', '2S']), 4)
+    expect(r.text).toMatch(/längsta/)
+    expect(r.forcing).toBe('ej-krav')
+  })
+  it('3♦ över inklivet = tävlande höjning, ej krav', () => {
+    const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', '3D']), 2)
+    expect(r.text).toMatch(/tävlande/)
+    expect(r.forcing).toBe('ej-krav')
+  })
+})
