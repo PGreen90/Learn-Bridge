@@ -1,8 +1,8 @@
 # Dagens IMP — en andra daglig tävling räknad i IMP (ägarbeslut 2026-09-26)
 
-> **Status: BYGGD I KOD — etapp 0–4 KLARA 2026-09-26 på grenen `dagens-imp`
-> (0013 körd av ägaren). Kvar: deploy (PCD), 0014, första natten med IMP-set,
-> ägarens live-prov (etapp 5).** Levande dokument för hela bygget.
+> **Status: LIVE 2026-09-26 (mergepunkt `186aa45`, 0013 + 0014 körda, första
+> IMP-setet #56 skapat via manuell cron, bottarna spelade det på 9 min 16 s).
+> Kvar: ägarens live-prov + första schemalagda natten.** Levande dokument för hela bygget.
 > Masterplanens ram: `docs/beslut-b-plan.md` (etapp 2 lade grunden: konton →
 > daglig 12-givarstävling → topplista). Det här dokumentet är kartan för att
 > lägga **en tävling till** bredvid den: samma dag, tolv NYA givar, räknade i
@@ -292,4 +292,11 @@ Varje deploy med egen `--no-ff`-mergepunkt (rollback-regeln i CLAUDE.md).
   mellan formerna; TavlingDelar/GivGranskning/TavlingHistorik visar IMP med
   tecken och enhet, historiken har växlingen MP% / IMP; startsidan har två
   kort). Committat på grenen `dagens-imp`. Kvar: PCD + 0014 + live-prov.
+- **2026-09-26 (LIVE)** — PCD: mergepunkt `186aa45`, Actions grön, rebidz.com
+  aliasad. Ägaren körde 0014 och triggade cronen i Vercel-dashboarden (CRON_SECRET
+  är känslig i Vercel → går inte att hämta med `vercel env pull`; manuell körning =
+  dashboardens Run-knapp). IMP-set #56: tolv givar, skilda från MP-setets.
+  Botjobbet (workflow_dispatch): MP-steget 4 s (allt redan inne), IMP-steget
+  **9 min 16 s** för 36 botgivar → taket 150 min har god marginal. Första
+  ställningen: +10,5 / +0,5 / −11,0 (summa 0 ✓), 12 poängsatta givar.
 - **2026-09-26 (senare)** — **etapp 0 KLAR** (`imp.ts` + facit, form-strategin i `matchpoints.ts`, travellern/slutställningen/giv-resultat per form; MP-facit orörda i värde) och **etapp 1 KLAR i kod** (`fronyckel` i `seed.ts` + facit som låser MP-nyckeln = datumet; migration 0013 + 0014; cronen skapar båda seten, MP först och IMP-fel stoppar aldrig MP). Hela sviten grön (`npm test`).
