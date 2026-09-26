@@ -35,9 +35,10 @@ concurrency:
 jobs:
   botspel:
     runs-on: ubuntu-latest
-    # ~40 s per giv × 12 givar × 3 bottar + marginal (delade CI-kärnor är
-    # långsammare; motståndarsätena kör standardmotorns MC på alla nivåer).
-    timeout-minutes: 90
+    # ~40 s per giv × 12 givar × 3 bottar × 2 tävlingar (Dagens IMP, 2026-09-26)
+    # + marginal (delade CI-kärnor är långsammare; motståndarsätena kör
+    # standardmotorns MC på alla nivåer). Mät första natten med IMP.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -57,6 +58,22 @@ jobs:
           IDAG=$(TZ=Europe/Stockholm date +%F)
           echo "Bottarna spelar $IDAG (Europe/Stockholm)"
           BOT_TAVLING=$IDAG \
+            npx vitest run src/lib/engine/tavlingsbot.probe.test.ts
+
+      # Dagens IMP (ägarbeslut 2026-09-26): samma bottar, IMP-tävlingens egna
+      # tolv givar. Körs även om MP-steget blev rött (if: always()) — de två
+      # tävlingarna ska aldrig fälla varandra. Grönt med besked tills
+      # migration 0014 släppt IMP-setet (docs/imp-tavling-plan.md).
+      - name: Spela dagens IMP-tävling som bottarna
+        if: always()
+        env:
+          DAILY_SEED_SECRET: ${{ secrets.DAILY_SEED_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          IDAG=$(TZ=Europe/Stockholm date +%F)
+          echo "Bottarna spelar IMP-tävlingen $IDAG (Europe/Stockholm)"
+          BOT_TAVLING=$IDAG TAVLING_FORM=imp \
             npx vitest run src/lib/engine/tavlingsbot.probe.test.ts
 
       - name: Ladda upp rapporten (även vid rött)

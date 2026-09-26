@@ -2,7 +2,7 @@
 // tillåtna, framtid/ogiltigt avvisat — morgondagens givar får aldrig lämnas ut.
 
 import { describe, test, expect } from 'vitest'
-import { lasDag } from './tavlingsdag'
+import { lasDag, lasForm } from './tavlingsdag'
 
 // 2026-09-13 kl 10:00 UTC = 12:00 i Stockholm (sommartid).
 const NU = new Date('2026-09-13T10:00:00Z')
@@ -36,5 +36,20 @@ describe('lasDag', () => {
     for (const s of ['igår', '2026-9-1', '20260912', '2026-02-30', '2026-13-01', "2026-09-12' or 1=1"]) {
       expect(lasDag(url(`?dag=${encodeURIComponent(s)}`), NU)).toBe('ogiltig')
     }
+  })
+})
+
+describe('lasForm — tävlingsformen (Dagens IMP, 2026-09-26)', () => {
+  test('saknas/tom → mp (alla gamla klienter menar MP-tävlingen)', () => {
+    expect(lasForm(null)).toBe('mp')
+    expect(lasForm(undefined)).toBe('mp')
+    expect(lasForm('')).toBe('mp')
+  })
+  test('mp/imp → den formen; allt annat → ogiltig', () => {
+    expect(lasForm('mp')).toBe('mp')
+    expect(lasForm('imp')).toBe('imp')
+    expect(lasForm('IMP')).toBe('ogiltig')
+    expect(lasForm('butler')).toBe('ogiltig')
+    expect(lasForm(7)).toBe('ogiltig')
   })
 })

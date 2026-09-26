@@ -10,10 +10,10 @@ import handler from './tavling-historik'
 
 const BAS = 'https://exempel.supabase.co'
 
-function fakeReq(metod = 'GET', token?: string): IncomingMessage {
+function fakeReq(metod = 'GET', token?: string, url = '/api/tavling-historik'): IncomingMessage {
   const req = Readable.from([]) as unknown as { method: string; url: string; headers: Record<string, string> }
   req.method = metod
-  req.url = '/api/tavling-historik'
+  req.url = url
   req.headers = token ? { authorization: `Bearer ${token}` } : {}
   return req as unknown as IncomingMessage
 }
@@ -29,6 +29,7 @@ type Dag = {
 type Svar = {
   ok: boolean
   fel?: string
+  form?: string
   dagar?: Dag[]
   medaljer?: Array<{ namn: string; guld: number; silver: number; brons: number; jag: boolean }>
 }
@@ -78,6 +79,7 @@ const STANDINGS = [
 
 function mockaFetch({ authOk = true, kvotOk = true, standingsFinns = true } = {}) {
   const resultatAnrop: string[] = []
+  const setAnrop: string[] = []
   const fn = vi.fn(async (url: string, init?: RequestInit) => {
     const svar = (json: unknown, ok = true, status = 200) => ({ ok, status, json: async () => json, text: async () => '' })
     if (url.includes('/auth/v1/user')) return authOk ? svar({ id: 'user-a' }) : svar({}, false, 401)
@@ -85,7 +87,10 @@ function mockaFetch({ authOk = true, kvotOk = true, standingsFinns = true } = {}
     // Range-sidor: allt ryms på första sidan (testet är litet).
     const range = (init?.headers as Record<string, string> | undefined)?.Range ?? '0-999'
     if (!range.startsWith('0-')) return svar([])
-    if (url.includes('daily_sets?')) return svar(SETS)
+    if (url.includes('daily_sets?')) {
+      setAnrop.push(url)
+      return svar(SETS)
+    }
     if (url.includes('daily_standings?')) return standingsFinns ? svar(STANDINGS) : svar('relation saknas', false, 404)
     if (url.includes('daily_results?')) {
       resultatAnrop.push(url)
@@ -109,7 +114,7 @@ function mockaFetch({ authOk = true, kvotOk = true, standingsFinns = true } = {}
     }
     return svar([])
   })
-  return { fn, resultatAnrop }
+  return { fn, resultatAnrop, setAnrop }
 }
 
 beforeEach(() => {
@@ -196,5 +201,38 @@ describe('tavling-historik — dagslistan och medaljtabellen', () => {
     const dagar = body.dagar!
     expect(dagar.filter((d) => d.antalSpelare !== null)).toHaveLength(3)
     expect(dagar[4]).toEqual({ dag: '2026-09-08', nummer: 1, storlek: 12, antalSpelare: null, slutlig: false, du: null })
+  })
+})
+
+describe('tavling-historik — Dagens IMP (?form=imp, 2026-09-26)', () => {
+  test('utan ?form= = MP-formens dagar', async () => {
+    const { fn, setAnrop } = mockaFetch()
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('GET', 't'), res)
+    expect(setAnrop[0]).toContain('form=eq.mp')
+    expect(svar().body.form).toBe('mp')
+  })
+
+  test('?form=imp: IMP-formens set, ofrusen dag räknad som IMP-summa (två vinster à 450 → +20)', async () => {
+    const { fn, setAnrop } = mockaFetch()
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('GET', 't', '/api/tavling-historik?form=imp'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(setAnrop[0]).toContain('form=eq.imp')
+    expect(body.form).toBe('imp')
+    const dag5 = body.dagar!.find((d) => d.nummer === 5)!
+    expect(dag5.du).toEqual({ placering: 1, snitt: 20, spelade: 2 })
+    // Frusna dagar läses som de är — talet är IMP-summan där (formen säger det).
+    expect(body.dagar!.find((d) => d.nummer === 1)!.du).toEqual({ placering: 2, snitt: 55.25, spelade: 12 })
+  })
+
+  test('okänd form → 400', async () => {
+    vi.stubGlobal('fetch', mockaFetch().fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('GET', 't', '/api/tavling-historik?form=x'), res)
+    expect(svar().status).toBe(400)
   })
 })

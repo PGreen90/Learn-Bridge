@@ -23,6 +23,8 @@ const UT = process.env.OMPROV_UT ?? ''
 it.skipIf(!IN || !UT)('omprov av inskick mot den här commitens motor', { timeout: 0 }, async () => {
   const secret = process.env.DAILY_SEED_SECRET
   if (!secret) throw new Error('DAILY_SEED_SECRET saknas i omprovets miljö')
+  // `datum` är sedan Dagens IMP (2026-09-26) FRÖNYCKELN: datumet för MP,
+  // "datum#imp" för IMP. seedForBoard hashar strängen rakt av i alla versioner.
   const { datum, inskick } = JSON.parse(readFileSync(IN, 'utf8')) as {
     datum: string
     inskick: Array<{ id: string; board: number; payload: GranskadPayload | null }>

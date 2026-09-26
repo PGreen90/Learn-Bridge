@@ -6,6 +6,7 @@
 // och får ALDRIG lämnas ut i förväg.
 
 import { stockholmDateISO } from '../../src/lib/engine/daily'
+import type { TavlingsForm } from '../../src/lib/engine/matchpoints'
 
 export interface Tavlingsdag {
   /** ISO-datum (YYYY-MM-DD, Stockholmsdygn). */
@@ -28,4 +29,13 @@ export function lasDag(url: URL, nu: Date = new Date()): Tavlingsdag | 'ogiltig'
   if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== rå) return 'ogiltig'
   if (rå > idag) return 'ogiltig'
   return { dag: rå, idag: rå === idag }
+}
+
+/** Tolka tävlingsformen (Dagens IMP, ägarbeslut 2026-09-26) ur `?form=` eller
+ *  ur en kropps-sträng: saknas/tom → 'mp' (bakåtkompatibelt — alla gamla
+ *  klienter menar MP-tävlingen), 'mp'/'imp' → den formen, allt annat →
+ *  'ogiltig' (→ 400 hos kallaren). */
+export function lasForm(rå: unknown): TavlingsForm | 'ogiltig' {
+  if (rå === null || rå === undefined || rå === '') return 'mp'
+  return rå === 'mp' || rå === 'imp' ? rå : 'ogiltig'
 }

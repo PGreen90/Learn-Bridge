@@ -22,12 +22,15 @@ type Rad = {
   namn: string
   jag: boolean
   kontrakt: { level: number; strain: string; declarer: string; diff: number } | null
-  procent: number
+  form?: string
+  tal?: number
+  procent?: number
+  imp?: number
   history: Array<{ seat: string; bid: string; rule?: string; explanation?: string }>
   plays: Array<{ suit: string; rank: string }>
   declarerTricks: number | null
 }
-type Svar = { ok: boolean; fel?: string; board?: number; resultat?: Rad[] }
+type Svar = { ok: boolean; fel?: string; form?: string; board?: number; resultat?: Rad[] }
 
 function fakeRes(): { res: ServerResponse; svar: () => { status: number; body: Svar; text: string } } {
   let status = 0
@@ -168,5 +171,36 @@ describe('giv-resultat — tidigare dagar (?dag=, Påbyggnad 3)', () => {
     const { res, svar } = fakeRes()
     await handler(fakeReq('/api/giv-resultat?board=3&dag=2099-01-01', 't'), res)
     expect(svar().status).toBe(400)
+  })
+})
+
+describe('giv-resultat — Dagens IMP (?form=imp, 2026-09-26)', () => {
+  test('MP som förr utan ?form=: procent per rad, form mp', async () => {
+    vi.stubGlobal('fetch', mockaFetch())
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3', 't'), res)
+    const { body } = svar()
+    expect(body.form).toBe('mp')
+    const b = body.resultat!.find((r) => r.namn === 'Gunnar52')!
+    expect(b).toMatchObject({ form: 'mp', tal: 100, procent: 100 })
+    expect(b.imp).toBeUndefined()
+  })
+
+  test('?form=imp: cross-IMP per rad (450 mot 420 = 30 → ±1 IMP), IMP-setet slås upp', async () => {
+    const fn = mockaFetch()
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3&form=imp', 't'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(body.form).toBe('imp')
+    const setUrl = fn.mock.calls.map((c) => String(c[0])).find((u) => u.includes('daily_sets?'))!
+    expect(setUrl).toContain('form=eq.imp')
+    const b = body.resultat!.find((r) => r.namn === 'Gunnar52')!
+    expect(b).toMatchObject({ form: 'imp', tal: 1, imp: 1 })
+    expect(b.procent).toBeUndefined()
+    expect(body.resultat!.find((r) => r.namn === 'Green')!.imp).toBe(-1)
+    // Sorterad bäst först.
+    expect(body.resultat!.map((r) => r.namn)).toEqual(['Gunnar52', 'Green'])
   })
 })

@@ -18,12 +18,13 @@ import { contractFromCalls } from '../src/lib/engine/auction-live'
 import {
   aggregeraTopplista,
   PROVISORISK_PROCENT,
+  strategiFor,
   type Tävlingsrad,
 } from '../src/lib/engine/matchpoints'
 import { MIN_PER_GIV } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
-import { lasDag } from './_lib/tavlingsdag'
+import { lasDag, lasForm } from './_lib/tavlingsdag'
 
 /** Vem kallar? Verifiera en valfri inloggnings-token mot Supabase och lämna
  *  tillbaka user-id, eller null (ingen/ogiltig token = anonym — endpointen
@@ -66,13 +67,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   try {
     // Idag som standard; `?dag=` för en tidigare dag (historiken, Påbyggnad 3).
-    const valdDag = lasDag(new URL(req.url ?? '', 'http://x'))
+    const url = new URL(req.url ?? '', 'http://x')
+    const valdDag = lasDag(url)
     if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    // MP eller IMP (`?form=`, saknas = MP; Dagens IMP, 2026-09-26). Formen
+    // väljer set och räkning (strategin i matchpoints.ts).
+    const form = lasForm(url.searchParams.get('form'))
+    if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
+    const strategi = strategiFor(form)
     const today = valdDag.dag
     const sets = (await restGet(
       base,
       key,
-      `daily_sets?comp_date=eq.${today}&select=id,daily_number,size`,
+      `daily_sets?comp_date=eq.${today}&form=eq.${form}&select=id,daily_number,size`,
     )) as Array<{ id: string; daily_number: number; size: number }>
     if (!sets.length) {
       return json(404, { ok: false, fel: valdDag.idag ? 'Ingen tävling idag' : 'Ingen tävling den dagen' })
@@ -118,7 +125,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }))
     // Tillsvidare-snittet räknas mot tävlingens storlek (40 % per ospelad giv,
     // Påbyggnad 3) — samma tal för listan och kallarens eget kort.
-    const agg = aggregeraTopplista(rader, MIN_PER_GIV, meId, set.size)
+    const agg = aggregeraTopplista(rader, MIN_PER_GIV, meId, set.size, strategi)
 
     // Kontrakt + resultat per giv för kallaren (steg 4-fix). Servern är
     // auktoritativ: den läser `declarer_tricks` + auktionen ur den lagrade
@@ -202,6 +209,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     return json(200, {
       ok: true,
+      form,
       nummer: set.daily_number,
       dag: today,
       idag: valdDag.idag,
@@ -210,6 +218,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       poängsattaGivar: agg.poängsattaGivar,
       minPerGiv: MIN_PER_GIV,
       provisoriskProcent: PROVISORISK_PROCENT,
+      // Formens tillsvidare-tal per ospelad giv: 40 (MP%) resp. 0 (IMP).
+      provisoriskt: strategi.provisoriskt,
       topplista,
       // Personliga fält — bara med när en giltig token skickats (annars null/[]).
       du: agg.du,
