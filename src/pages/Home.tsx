@@ -111,7 +111,7 @@ function TavlingCard({ to, titel, text }: { to: string; titel: string; text: str
   return (
     <Link
       to={to}
-      className="focus-ring gold-frame group relative block w-full max-w-xl rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
+      className="focus-ring gold-frame group relative block h-full w-full rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
     >
       <div className="flex items-center gap-3">
         <ModeIcon icon="calendar" />
@@ -152,17 +152,21 @@ export function Home() {
 
         {/* Dagens tävlingar — FLAGGSKEPPEN (Beslut B etapp 2 + Dagens IMP
             2026-09-26): 12 givar var, samma för alla, tävla på topplistan.
-            Ersätter den fria "Dagens giv" (dold enligt grindbeslutet). */}
-        <TavlingCard
-          to="/spela-kort/tavling"
-          titel="Dagens MP%"
-          text="Samma 12 givar för alla i dag — spela mot datorn och tävla på topplistan."
-        />
-        <TavlingCard
-          to="/spela-kort/tavling?form=imp"
-          titel="Dagens IMP"
-          text="Tolv egna givar räknade i IMP — utgång och slam väger tungt, övertricken lite."
-        />
+            Ersätter den fria "Dagens giv" (dold enligt grindbeslutet). Sida vid
+            sida på bredare skärm, MP% till vänster och IMP till höger (ägarens
+            skiss 2026-09-26); på telefon under varandra. */}
+        <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
+          <TavlingCard
+            to="/spela-kort/tavling"
+            titel="Dagens MP%"
+            text="Samma 12 givar för alla i dag — spela mot datorn och tävla på topplistan."
+          />
+          <TavlingCard
+            to="/spela-kort/tavling?form=imp"
+            titel="Dagens IMP"
+            text="Tolv egna givar räknade i IMP — utgång och slam väger tungt, övertricken lite."
+          />
+        </div>
 
         {/* Menyknapparna: vägen in i appen, en per del. */}
         <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
