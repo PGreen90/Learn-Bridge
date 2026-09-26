@@ -21,6 +21,8 @@ function fakeReq(token?: string, url = '/api/topplista'): IncomingMessage {
 type Rad = { namn: string; snitt: number; antalGivar: number; spelade: number; jag: boolean }
 type Svar = {
   ok: boolean
+  form?: string
+  provisoriskt?: number
   dag?: string
   idag?: boolean
   slutlig?: boolean
@@ -173,5 +175,39 @@ describe('topplista — tidigare dagar (?dag=, Påbyggnad 3)', () => {
       await handler(fakeReq('t', `/api/topplista${q}`), res)
       expect(svar().status).toBe(400)
     }
+  })
+})
+
+describe('topplista — Dagens IMP (?form=imp, 2026-09-26)', () => {
+  test('utan ?form= slås MP-setet upp', async () => {
+    const { fn, setAnrop } = mockaFetch()
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('t'), res)
+    expect(setAnrop[0]).toContain('form=eq.mp')
+    expect(svar().body.form).toBe('mp')
+    expect(svar().body.provisoriskt).toBe(40)
+  })
+
+  test('?form=imp: IMP-setet, summan av cross-IMP (7 vinster à 450 = +10 → +70), 0 per ospelad', async () => {
+    const { fn, setAnrop } = mockaFetch()
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('token-1', '/api/topplista?form=imp'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(setAnrop[0]).toContain('form=eq.imp')
+    expect(body.form).toBe('imp')
+    expect(body.provisoriskt).toBe(0)
+    expect(body.topplista[0]).toEqual({ namn: 'Green', snitt: 70, antalGivar: 7, spelade: 7, jag: true })
+    expect(body.topplista[1].snitt).toBe(-70)
+    expect(body.du).toEqual({ placering: 1, snitt: 70, antalGivar: 7, spelade: 7 })
+  })
+
+  test('okänd form → 400', async () => {
+    vi.stubGlobal('fetch', mockaFetch().fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('t', '/api/topplista?form=butler'), res)
+    expect(svar().status).toBe(400)
   })
 })

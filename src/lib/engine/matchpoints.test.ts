@@ -92,8 +92,8 @@ describe('aggregeraTopplista', () => {
     expect(agg.du).toEqual({ placering: 1, snitt: 50, antalGivar: 2, spelade: 2 })
     // Per giv, i brickordning: giv 1 topp (100 %), giv 2 botten (0 %).
     expect(agg.dinaGivar).toEqual([
-      { board: 1, mp: 1, max: 1, procent: 100 },
-      { board: 2, mp: 0, max: 1, procent: 0 },
+      { board: 1, form: 'mp', tal: 100, mp: 1, max: 1, procent: 100 },
+      { board: 2, form: 'mp', tal: 0, mp: 0, max: 1, procent: 0 },
     ])
   })
 
@@ -121,7 +121,7 @@ describe('aggregeraTopplista', () => {
     // a har SPELAT två givar men bara giv 2 är poängsatt (0 %); giv 1 räknas som
     // 40 tills fler spelat den: (0 + 40) / 2 = 20. b: (100 + 40) / 2 = 70 → a tvåa.
     expect(agg.du).toEqual({ placering: 2, snitt: 20, antalGivar: 1, spelade: 2 })
-    expect(agg.dinaGivar).toEqual([{ board: 2, mp: 0, max: 1, procent: 0 }])
+    expect(agg.dinaGivar).toEqual([{ board: 2, form: 'mp', tal: 0, mp: 0, max: 1, procent: 0 }])
   })
 
   test('kallare utan någon poängsatt giv: står på listan med 40 % (tillsvidare)', () => {

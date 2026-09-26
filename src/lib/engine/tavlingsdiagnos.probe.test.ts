@@ -28,7 +28,7 @@ import { expect, it } from 'vitest'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { formatHand } from '../felrapport'
-import { playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
+import { fronyckel, playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
 import { dealFromSeed } from './deal'
 import { analyseSpel, computeOracle, getDds } from './revisor-dds'
 import { botAuction, judgeDeal, CATEGORY_LABEL } from './revisor'
@@ -76,26 +76,31 @@ it.skipIf(!START)('tävlingsförscreening', { timeout: 0 }, async () => {
   // rapportfiler alltid hinner skrivas innan en röd körning avbryter.
   const haverierAlla: string[] = []
 
-  for (let dag = 0; dag < DAGAR; dag++) {
+  // Per dag och tävlingsform (Dagens IMP, 2026-09-26): MP-givarna ur datumet
+  // som förr, IMP-givarna ur frönyckeln "datum#imp". Rapportfilerna för MP
+  // heter som förr; IMP får suffixet "-imp".
+  for (let dag = 0; dag < DAGAR; dag++) for (const form of ['mp', 'imp'] as const) {
     const datum = datumPlus(START, dag)
-    const rader: string[] = [`=== TÄVLINGSFÖRSCREENING ${datum} (${BRICKOR} brickor, alla säten = bot) ===`]
+    const nyckel = fronyckel(datum, form)
+    const suffix = form === 'imp' ? '-imp' : ''
+    const rader: string[] = [`=== TÄVLINGSFÖRSCREENING ${datum} ${form.toUpperCase()} (${BRICKOR} brickor, alla säten = bot) ===`]
     const larm: string[] = []
     const haverier: string[] = []
     const json: unknown[] = []
 
     for (let board = 1; board <= BRICKOR; board++) {
-      const deal = dealFromSeed(seedForBoard(secret!, datum, board), board)
-      const playSeed = playSeedForBoard(secret!, datum, board)
+      const deal = dealFromSeed(seedForBoard(secret!, nyckel, board), board)
+      const playSeed = playSeedForBoard(secret!, nyckel, board)
       const history = botAuction(deal, 60, (d, h, s) => botBud(d, h, s, (x) => computeOracle(dds, x).solve)) // tänkande bottar
       if (!history) {
-        haverier.push(`${datum} bricka ${board}: AUKTIONEN TERMINERADE ALDRIG — motorfel, MÅSTE granskas!`)
+        haverier.push(`${datum} ${form.toUpperCase()} bricka ${board}: AUKTIONEN TERMINERADE ALDRIG — motorfel, MÅSTE granskas!`)
         json.push({ board, fel: 'auktion-terminerade-aldrig' })
         continue
       }
       const oracle = computeOracle(dds, deal)
       const verdict = judgeDeal(deal, history, oracle.solve, board, oracle.parNS)
       if (!verdict) {
-        haverier.push(`${datum} bricka ${board}: DD-oraklet kunde inte lösa given — granska!`)
+        haverier.push(`${datum} ${form.toUpperCase()} bricka ${board}: DD-oraklet kunde inte lösa given — granska!`)
         json.push({ board, fel: 'olosbar' })
         continue
       }
@@ -132,8 +137,8 @@ it.skipIf(!START)('tävlingsförscreening', { timeout: 0 }, async () => {
     rader.push(larm.length === 0 ? 'Inga mjuka larm — dagen ser ren ut.' : `LARM (${larm.length}, klassas i /speldiagnos — gör aldrig körningen röd):\n  ` + larm.join('\n  '))
     const text = rader.join('\n')
     console.log('\n' + text + '\n')
-    writeFileSync(join(process.cwd(), 'revisor-output', `tavlingsdiagnos-${datum}.json`), JSON.stringify({ datum, haverier, larm, brickor: json }, null, 2), 'utf8')
-    writeFileSync(join(process.cwd(), 'revisor-output', `tavlingsdiagnos-${datum}.txt`), text, 'utf8')
+    writeFileSync(join(process.cwd(), 'revisor-output', `tavlingsdiagnos-${datum}${suffix}.json`), JSON.stringify({ datum, form, haverier, larm, brickor: json }, null, 2), 'utf8')
+    writeFileSync(join(process.cwd(), 'revisor-output', `tavlingsdiagnos-${datum}${suffix}.txt`), text, 'utf8')
     haverierAlla.push(...haverier)
   }
 

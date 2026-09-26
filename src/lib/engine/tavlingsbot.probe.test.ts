@@ -42,7 +42,7 @@ import { expect, it } from 'vitest'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import { join } from 'node:path'
-import { playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
+import { fronyckel, playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
 import { validera } from '../../../api-src/_lib/validera'
 import { nivaSmartOpts, TAVLINGSBOTTAR, type Tavlingsbot } from './botniva'
 import { giltigMotorstampel } from './tavlingsgranskning'
@@ -51,6 +51,12 @@ import { botBud } from './resonemang'
 import { computeOracle, getDds } from './revisor-dds'
 
 const DATUM = process.env.BOT_TAVLING ?? ''
+/** Vilken av dagens två tävlingar (Dagens IMP, 2026-09-26): TAVLING_FORM=imp
+ *  → IMP-tävlingen (egna givar ur frönyckeln "datum#imp"), annars MP som förr.
+ *  Nattjobbet kör proben en gång per form. */
+const FORM = process.env.TAVLING_FORM === 'imp' ? 'imp' : 'mp'
+const NYCKEL = DATUM ? fronyckel(DATUM, FORM) : ''
+const SUFFIX = FORM === 'imp' ? '-imp' : ''
 
 /** En hemlighet ur miljön eller .env.local — utan att någonsin skrivas ut. */
 function lasHemlighet(namn: string): string | null {
@@ -164,14 +170,21 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
 
   // 1) Dagens tävling MÅSTE finnas — saknas den har Vercel-cronen fallerat,
   //    och det ska bli rött (mejl till ägaren), inte tyst grönt.
-  const sets = (await rest(`daily_sets?comp_date=eq.${DATUM}&select=id,size`)) as Array<{
+  const sets = (await rest(`daily_sets?comp_date=eq.${DATUM}&form=eq.${FORM}&select=id,size`)) as Array<{
     id: string
     size: number
   }>
+  if (FORM === 'imp' && !sets.length) {
+    // IMP-setet finns först när migration 0014 släppt den gamla "en per dag"-
+    // nyckeln (docs/imp-tavling-plan.md, deploy-sekvensen). Tills dess: grönt
+    // med besked — MP-setet är kärnjobbet och vaktas av raden nedan.
+    console.log(`Ingen IMP-tävling ${DATUM} än (0014 ej körd?) — inget att spela.`)
+    return
+  }
   expect(sets.length, `Ingen tävling ${DATUM} — har givgenereringen (Vercel-cron) fallerat?`).toBeGreaterThan(0)
   const set = sets[0]
 
-  const rader: string[] = [`=== TREBOTTARNA ${DATUM} ===`]
+  const rader: string[] = [`=== TREBOTTARNA ${DATUM} (${FORM.toUpperCase()}-tävlingen) ===`]
   const fynd: string[] = []
 
   for (const bot of TAVLINGSBOTTAR) {
@@ -194,19 +207,19 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
         continue
       }
       const inskick = spelaBotGiv(
-        seedForBoard(secret!, DATUM, board),
-        playSeedForBoard(secret!, DATUM, board),
+        seedForBoard(secret!, NYCKEL, board),
+        playSeedForBoard(secret!, NYCKEL, board),
         board,
         opts,
         tankandeBud,
       )
       if (!inskick) {
         fynd.push(
-          `${bot.namn} bricka ${board}: auktionen skenade — inget botinskick (motorbugg, repro: frö ur ${DATUM}:${board})`,
+          `${bot.namn} bricka ${board}: auktionen skenade — inget botinskick (motorbugg, repro: frö ur ${NYCKEL}:${board})`,
         )
         continue
       }
-      const v = validera(secret!, DATUM, inskick)
+      const v = validera(secret!, NYCKEL, inskick)
       if (!v.giltig) {
         fynd.push(`${bot.namn} bricka ${board}: botinskicket AVVISADES av validera — motorbugg: ${v.skäl}`)
       }
@@ -248,11 +261,11 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
 
   mkdirSync(join(process.cwd(), 'revisor-output'), { recursive: true })
   writeFileSync(
-    join(process.cwd(), 'revisor-output', `tavlingsbot-${DATUM}.json`),
-    JSON.stringify({ datum: DATUM, bottar: TAVLINGSBOTTAR.map((b) => b.namn), fynd }, null, 2),
+    join(process.cwd(), 'revisor-output', `tavlingsbot-${DATUM}${SUFFIX}.json`),
+    JSON.stringify({ datum: DATUM, form: FORM, bottar: TAVLINGSBOTTAR.map((b) => b.namn), fynd }, null, 2),
   )
   writeFileSync(
-    join(process.cwd(), 'revisor-output', `tavlingsbot-${DATUM}.txt`),
+    join(process.cwd(), 'revisor-output', `tavlingsbot-${DATUM}${SUFFIX}.txt`),
     rader.join('\n') + '\n',
   )
   console.log(rader.join('\n'))

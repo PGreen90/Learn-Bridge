@@ -1,6 +1,8 @@
 // Beslut B etapp 2 (steg 2) — servergenererade tävlingsgivar.
 //
-// Skapar dagens 12 givar med hemligt HMAC-frö och lagrar dem i databasen. Körs
+// Skapar dagens TVÅ tävlingar (Dagens MP% + Dagens IMP, ägarbeslut 2026-09-26,
+// docs/imp-tavling-plan.md) med 12 givar var ur hemligt HMAC-frö och lagrar dem
+// i databasen — varje form med sin egen frönyckel (seed.ts). Körs
 // av ett schemalagt jobb (Vercel-cron, se vercel.json) strax efter midnatt
 // svensk tid, men är IDEMPOTENT: körs den om samma dag skapas inga dubbletter
 // (unika nycklar + "ignore-duplicates"), så en extra körning är ofarlig.
@@ -18,8 +20,15 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO, dailyNumber } from '../src/lib/engine/daily'
 import { genereraGivar } from './_lib/generera'
+import { fronyckel } from './_lib/seed'
+import type { TavlingsForm } from '../src/lib/engine/matchpoints'
 
 const TÄVLINGSSTORLEK = 12
+
+/** Dagens två tävlingar, i den ordning de skapas. MP FÖRST: den får aldrig
+ *  falla för att IMP-setet inte kan skapas (t.ex. innan migration 0014 släppt
+ *  den gamla "en per dag"-nyckeln — då faller IMP-raden tyst, se nedan). */
+const FORMER: TavlingsForm[] = ['mp', 'imp']
 
 /** Ett PostgREST-anrop mot en tabell med service-nyckeln. Kastar vid fel.
  *  onConflict = den unika kolumn(erna) upserten ska slå samman på (annars
@@ -82,35 +91,47 @@ export default async function handler(
   try {
     const dateISO = stockholmDateISO()
     const nummer = dailyNumber()
-    const deals = genereraGivar(seedSecret, dateISO, TÄVLINGSSTORLEK)
 
-    // 3) Tävlingsdagen (idempotent upsert på unik comp_date) → hämta dess id.
-    const sets = (await rest(
-      base,
-      key,
-      'daily_sets',
-      [{ comp_date: dateISO, size: TÄVLINGSSTORLEK, daily_number: nummer }],
-      'resolution=merge-duplicates,return=representation',
-      'comp_date',
-    )) as Array<{ id: string }>
-    const setId = sets?.[0]?.id
-    if (!setId) throw new Error('daily_sets gav inget id tillbaka')
-
-    // 4) Givarna (idempotent: unik (set_id, board) → dubbletter ignoreras).
-    await rest(
-      base,
-      key,
-      'daily_deals',
-      deals.map((d) => ({
-        set_id: setId,
-        board: d.board,
-        dealer: d.dealer,
-        vulnerability: d.vulnerability,
-        hands: d.hands,
-      })),
-      'resolution=ignore-duplicates,return=minimal',
-      'set_id,board',
-    )
+    // 3+4) Per form: tävlingsdagen (idempotent upsert på unik (comp_date, form),
+    //      migration 0013) → dess id → givarna (idempotent: unik (set_id, board)
+    //      → dubbletter ignoreras). MP först; ett fel på IMP-setet stoppar
+    //      ALDRIG MP-setet — det rapporteras i svaret i stället (och nästa
+    //      körning tar det, cronen är idempotent).
+    const utfall: Record<string, { antalGivar: number; brickor: number[] } | { fel: string }> = {}
+    for (const form of FORMER) {
+      try {
+        const deals = genereraGivar(seedSecret, fronyckel(dateISO, form), TÄVLINGSSTORLEK)
+        const sets = (await rest(
+          base,
+          key,
+          'daily_sets',
+          [{ comp_date: dateISO, form, size: TÄVLINGSSTORLEK, daily_number: nummer }],
+          'resolution=merge-duplicates,return=representation',
+          'comp_date,form',
+        )) as Array<{ id: string }>
+        const setId = sets?.[0]?.id
+        if (!setId) throw new Error('daily_sets gav inget id tillbaka')
+        await rest(
+          base,
+          key,
+          'daily_deals',
+          deals.map((d) => ({
+            set_id: setId,
+            board: d.board,
+            dealer: d.dealer,
+            vulnerability: d.vulnerability,
+            hands: d.hands,
+          })),
+          'resolution=ignore-duplicates,return=minimal',
+          'set_id,board',
+        )
+        utfall[form] = { antalGivar: deals.length, brickor: deals.map((d) => d.board) }
+      } catch (err) {
+        // MP-setet är kärnjobbet — dess fel går hela vägen ut som 500.
+        if (form === 'mp') throw err
+        utfall[form] = { fel: String(err instanceof Error ? err.message : err) }
+      }
+    }
 
     // 5) Bordsstädningen (Beslut B etapp 4D): den dagliga cronen grovstädar
     //    vänner-borden — färdiga/avslutade bord äldre än ett dygn raderas
@@ -137,12 +158,15 @@ export default async function handler(
     }
 
     // Svaret läcker ALDRIG händerna — bara att jobbet lyckades.
+    const mp = utfall.mp as { antalGivar: number; brickor: number[] }
     return json(200, {
       ok: true,
       tävlingsdag: dateISO,
       nummer,
-      antalGivar: deals.length,
-      brickor: deals.map((d) => d.board),
+      // Bakåtkompatibla fält = MP-setet; `former` bär båda.
+      antalGivar: mp.antalGivar,
+      brickor: mp.brickor,
+      former: utfall,
       stadadeBord: stadade,
     })
   } catch (err) {

@@ -18,6 +18,7 @@ import type { Tävlingsrad } from '../src/lib/engine/matchpoints'
 import { byggStallning, MIN_PER_GIV, raknaMedaljer } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet, restGetAlla } from './_lib/supabase-rest'
+import { lasForm } from './_lib/tavlingsdag'
 
 /** Så många ofrusna dagar räknas i farten (resten listas utan siffror). */
 const I_FARTEN_MAX = 3
@@ -64,12 +65,18 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       return json(429, { ok: false, fel: 'För många anrop — vänta en liten stund' })
     }
 
+    // MP eller IMP (`?form=`, saknas = MP; Dagens IMP, 2026-09-26): dagslistan
+    // OCH medaljtabellen per form (ägarbeslut: en medaljtabell per form).
+    const form = lasForm(new URL(req.url ?? '', 'http://x').searchParams.get('form'))
+    if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
+
     const idag = stockholmDateISO()
     const sets = await restGetAlla<SetRad>(
       base,
       key,
-      `daily_sets?comp_date=lt.${idag}&select=id,comp_date,daily_number,size&order=comp_date.desc`,
+      `daily_sets?comp_date=lt.${idag}&form=eq.${form}&select=id,comp_date,daily_number,size&order=comp_date.desc`,
     )
+    const setIds = new Set(sets.map((s) => s.id))
 
     // Frusna ställningar. Tabellen kan saknas tills migration 0012 körts →
     // tom lista (historiken räknas då i farten för de senaste dagarna).
@@ -83,6 +90,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     } catch {
       standings = []
     }
+    // Bara den valda formens dagar (en frusen ställning hör alltid till ett
+    // avslutat set, så listan ovan är komplett för formen).
+    standings = standings.filter((r) => setIds.has(r.set_id))
     const perSet = new Map<string, StandingRad[]>()
     for (const r of standings) {
       const lista = perSet.get(r.set_id) ?? []
@@ -118,7 +128,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         `daily_results?set_id=eq.${set.id}&status=eq.godkand&select=board,user_id,ns_score`,
       )) as Array<{ board: number; user_id: string; ns_score: number | null }>
       const rader: Tävlingsrad[] = results.map((r) => ({ board: r.board, spelare: r.user_id, poäng: r.ns_score ?? 0 }))
-      const st = byggStallning(rader, MIN_PER_GIV, set.size)
+      const st = byggStallning(rader, MIN_PER_GIV, set.size, form)
       const min = st.find((r) => r.spelare === meId)
       dagar.push({
         dag: set.comp_date,
@@ -159,7 +169,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       jag: m.spelare === meId,
     }))
 
-    return json(200, { ok: true, idag, dagar, medaljer })
+    return json(200, { ok: true, form, idag, dagar, medaljer })
   } catch (err) {
     return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })
   }

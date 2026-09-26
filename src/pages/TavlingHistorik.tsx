@@ -12,15 +12,24 @@
 //     Övningsläget ("Spela given igen") finns även här — det skickar aldrig in.
 //
 // Kräver konto (som tävlingen). Under /spela-kort så vyn är immersiv.
+//
+// Dagens IMP (ägarbeslut 2026-09-26): `?form=imp` visar IMP-tävlingens dagar
+// och medaljtabell (en medaljtabell per form); utan parameter MP% som förr.
+// Listvyn har en växling MP% / IMP.
 
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
 import {
+  enhetText,
   fetchDagensTavling,
   fetchTavlingHistorik,
   fetchTopplista,
+  formTitel,
+  givTal,
+  talText,
+  type TavlingsForm,
   type BrickaRad,
   type HistorikDag,
   type HistorikResultat,
@@ -50,6 +59,8 @@ export function TavlingHistorik() {
   const { loading: authLoading, signedIn } = useAuth()
   const [params, setParams] = useSearchParams()
   const dag = params.get('dag')
+  const form: TavlingsForm = params.get('form') === 'imp' ? 'imp' : 'mp'
+  const formParam: Record<string, string> = form === 'imp' ? { form: 'imp' } : {}
 
   if (authLoading) return null
   if (!signedIn) {
@@ -68,25 +79,40 @@ export function TavlingHistorik() {
       </Skärm>
     )
   }
-  if (dag) return <Dagvy dag={dag} onTillbaka={() => setParams({})} />
-  return <Listvy onVäljDag={(d) => setParams({ dag: d })} />
+  if (dag) return <Dagvy key={`${form}-${dag}`} dag={dag} form={form} onTillbaka={() => setParams(formParam)} />
+  return (
+    <Listvy
+      key={form}
+      form={form}
+      onVäljDag={(d) => setParams({ ...formParam, dag: d })}
+      onVäljForm={(f) => setParams(f === 'imp' ? { form: 'imp' } : {})}
+    />
+  )
 }
 
 // ---------------------------------------------------------------------------
 // Listvyn: medaljtabellen + dagarna
 // ---------------------------------------------------------------------------
 
-function Listvy({ onVäljDag }: { onVäljDag: (dag: string) => void }) {
+function Listvy({
+  form,
+  onVäljDag,
+  onVäljForm,
+}: {
+  form: TavlingsForm
+  onVäljDag: (dag: string) => void
+  onVäljForm: (form: TavlingsForm) => void
+}) {
   const [historik, setHistorik] = useState<HistorikResultat | null>(null)
   useEffect(() => {
     let active = true
-    fetchTavlingHistorik().then((h) => {
+    fetchTavlingHistorik(form).then((h) => {
       if (active) setHistorik(h)
     })
     return () => {
       active = false
     }
-  }, [])
+  }, [form])
 
   return (
     <Skärm>
@@ -96,6 +122,27 @@ function Listvy({ onVäljDag }: { onVäljDag: (dag: string) => void }) {
           <p className="text-sm text-emerald-100/70">Alla dagar sparas — och medaljerna räknas.</p>
         </header>
 
+        {/* Växlingen MP% / IMP (Dagens IMP, 2026-09-26): dagarna OCH
+            medaljtabellen hör till en form i taget. */}
+        <div className="flex justify-center gap-2" role="tablist" aria-label="Tävlingsform">
+          {(['mp', 'imp'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              role="tab"
+              aria-selected={f === form}
+              onClick={() => onVäljForm(f)}
+              className={`rounded-full px-4 py-1.5 text-sm font-semibold ring-1 transition-colors ${
+                f === form
+                  ? 'bg-gold-400/20 text-gold-100 ring-gold-400/50'
+                  : 'bg-emerald-950/40 text-emerald-100/70 ring-emerald-100/10 hover:bg-emerald-900/40'
+              }`}
+            >
+              {formTitel(f)}
+            </button>
+          ))}
+        </div>
+
         {!historik ? (
           <p className="text-center text-sm text-emerald-100/60">Hämtar historiken …</p>
         ) : historik.status !== 'ok' ? (
@@ -103,16 +150,16 @@ function Listvy({ onVäljDag }: { onVäljDag: (dag: string) => void }) {
         ) : (
           <>
             <Medaljtabell medaljer={historik.data.medaljer} />
-            <Daglista dagar={historik.data.dagar} onVälj={onVäljDag} />
+            <Daglista dagar={historik.data.dagar} form={form} onVälj={onVäljDag} />
           </>
         )}
 
         <div className="flex flex-col items-center gap-2">
           <Link
-            to="/spela-kort/tavling"
+            to={form === 'imp' ? '/spela-kort/tavling?form=imp' : '/spela-kort/tavling'}
             className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
           >
-            ← Dagens tävling
+            ← {formTitel(form)}
           </Link>
           <HemLänk />
         </div>
@@ -165,7 +212,7 @@ function Medaljtabell({ medaljer }: { medaljer: Medaljrad[] }) {
 }
 
 /** Alla avslutade dagar, nyast först, med din placering. */
-function Daglista({ dagar, onVälj }: { dagar: HistorikDag[]; onVälj: (dag: string) => void }) {
+function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: TavlingsForm; onVälj: (dag: string) => void }) {
   if (dagar.length === 0) {
     return <p className="text-center text-sm text-emerald-100/70">Inga avslutade tävlingsdagar än.</p>
   }
@@ -204,7 +251,7 @@ function Daglista({ dagar, onVälj }: { dagar: HistorikDag[]; onVälj: (dag: str
                       {placeringText(d.du.placering)}
                       {d.antalSpelare !== null && <span className="text-emerald-100/60"> av {d.antalSpelare}</span>}
                     </span>
-                    <span className="font-semibold text-gold-200">{d.du.snitt.toFixed(1)} %</span>
+                    <span className="font-semibold text-gold-200">{talText(d.du.snitt, form, 1)} {enhetText(form)}</span>
                   </>
                 ) : (
                   <span className="text-emerald-100/60">spelade inte</span>
@@ -223,7 +270,7 @@ function Daglista({ dagar, onVälj }: { dagar: HistorikDag[]; onVälj: (dag: str
 // Dagvyn: en avslutad dag — ställning, brickor, traveller, genomgång, övning
 // ---------------------------------------------------------------------------
 
-function Dagvy({ dag, onTillbaka }: { dag: string; onTillbaka: () => void }) {
+function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onTillbaka: () => void }) {
   const [tavling, setTavling] = useState<TavlingsResultat | null>(null)
   const [topplista, setTopplista] = useState<TopplistaResultat | null>(null)
   const [detaljBoard, setDetaljBoard] = useState<number | null>(null)
@@ -236,16 +283,16 @@ function Dagvy({ dag, onTillbaka }: { dag: string; onTillbaka: () => void }) {
     setTopplista(null)
     setDetaljBoard(null)
     setGranska(null)
-    fetchDagensTavling(dag).then((t) => {
+    fetchDagensTavling(dag, form).then((t) => {
       if (active) setTavling(t)
     })
-    fetchTopplista(dag).then((t) => {
+    fetchTopplista(dag, form).then((t) => {
       if (active) setTopplista(t)
     })
     return () => {
       active = false
     }
-  }, [dag])
+  }, [dag, form])
 
   if (!tavling) {
     return (
@@ -277,6 +324,7 @@ function Dagvy({ dag, onTillbaka }: { dag: string; onTillbaka: () => void }) {
       const spel: TavlingSpel = {
         giv,
         nummer: t.nummer,
+        form,
         board: giv.deal.board,
         total: t.storlek,
         sista: false,
@@ -287,7 +335,7 @@ function Dagvy({ dag, onTillbaka }: { dag: string; onTillbaka: () => void }) {
         onNästa: () => setÖvningBoard(null),
         onÖversikt: () => setÖvningBoard(null),
       }
-      return <Play key={`historik-ovning-${t.nummer}-${giv.deal.board}`} tavling={spel} />
+      return <Play key={`historik-ovning-${form}-${t.nummer}-${giv.deal.board}`} tavling={spel} />
     }
   }
 
@@ -303,6 +351,7 @@ function Dagvy({ dag, onTillbaka }: { dag: string; onTillbaka: () => void }) {
       <GivDetalj
         board={detaljBoard}
         dag={dag}
+        form={form}
         onBack={() => setDetaljBoard(null)}
         onGranska={(rad) => setGranska({ board: detaljBoard, rad })}
         onÖvning={() => setÖvningBoard(detaljBoard)}
@@ -315,13 +364,13 @@ function Dagvy({ dag, onTillbaka }: { dag: string; onTillbaka: () => void }) {
       <div className="w-full max-w-xl space-y-6">
         <header className="flex items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-emerald-50">
-            Tävling <span className="text-gold-300">#{t.nummer}</span>
+            {form === 'imp' ? 'IMP' : 'MP%'} <span className="text-gold-300">#{t.nummer}</span>
           </h1>
           <span className="text-sm text-emerald-100/70">{kortDatum(t.dag)}</span>
         </header>
 
         <DinStällning resultat={topplista} total={t.storlek} />
-        <Bricklista tavling={t} topplista={topplista} onÖppna={setDetaljBoard} />
+        <Bricklista tavling={t} topplista={topplista} form={form} onÖppna={setDetaljBoard} />
         <TopplistaVy resultat={topplista} />
 
         <div className="flex flex-col items-center gap-2">
@@ -341,14 +390,17 @@ function Dagvy({ dag, onTillbaka }: { dag: string; onTillbaka: () => void }) {
 function Bricklista({
   tavling,
   topplista,
+  form,
   onÖppna,
 }: {
   tavling: { givar: Array<{ deal: { board: number } }> }
   topplista: TopplistaResultat | null
+  form: TavlingsForm
   onÖppna: (board: number) => void
 }) {
   const data = topplista?.status === 'ok' ? topplista.data : null
-  const mp = new Map(data?.dinaGivar.map((g) => [g.board, g.procent]) ?? [])
+  const imp = form === 'imp'
+  const mp = new Map(data?.dinaGivar.map((g) => [g.board, givTal(g)]) ?? [])
   const kontrakt = new Map(data?.dinaInskick.map((i) => [i.board, i.kontrakt]) ?? [])
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
@@ -360,7 +412,7 @@ function Bricklista({
               <th className="py-1 pr-2 text-left font-medium">Giv</th>
               <th className="px-2 py-1 text-left font-medium">Ditt kontrakt</th>
               <th className="px-2 py-1 text-center font-medium">Resultat</th>
-              <th className="py-1 pl-2 text-right font-medium">Din MP%</th>
+              <th className="py-1 pl-2 text-right font-medium">{imp ? 'Dina IMP' : 'Din MP%'}</th>
             </tr>
           </thead>
           <tbody>
@@ -395,7 +447,9 @@ function Bricklista({
                   <td className="px-2 py-1.5 text-center tabular-nums text-emerald-50">{spelad ? resultatText(k) : ''}</td>
                   <td className="py-1.5 pl-2 text-right tabular-nums">
                     {procent !== undefined ? (
-                      <span className="font-semibold text-gold-200">{procent.toFixed(0)} %</span>
+                      <span className="font-semibold text-gold-200">
+                        {talText(procent, form, imp ? 1 : 0)}{imp ? '' : ' %'}
+                      </span>
                     ) : (
                       <span className="text-emerald-100/60">{spelad ? '—' : ''}</span>
                     )}

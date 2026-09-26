@@ -9,9 +9,14 @@
 //
 // Framstegen sparas LOKALT i Led 1 (per enhet, backend-lagret). Led 2 flyttar
 // inskicket till kontot på servern och lägger till validering + topplista.
+//
+// Dagens IMP (ägarbeslut 2026-09-26, docs/imp-tavling-plan.md): samma sida bär
+// BÅDA tävlingarna — `?form=imp` är IMP-tävlingen (egna givar, egen ställning,
+// eget framsteg i localStorage), utan parameter MP% som förr. Formen går med i
+// varje hämtning och inskick; sidan monteras om (key) när den byts.
 
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
 import { loadTavlingFramsteg, saveTavlingFramsteg } from '../lib/backend'
@@ -23,11 +28,14 @@ import {
   inskickUrFramsteg,
   slåIhopFramsteg,
   submitTavlingGiv,
+  formTitel,
   type BrickaRad,
   type DagensTavling as TavlingData,
   type GivResultat,
   type InskickStatus,
   type TavlingFramsteg,
+  type TavlingInskick,
+  type TavlingsForm,
   type TavlingsResultat,
   type TopplistaResultat,
 } from '../lib/backend/tavling'
@@ -54,7 +62,16 @@ function förstaOspelade(tavling: TavlingData, klara: GivResultat[]): number | n
   return i === -1 ? null : i
 }
 
+/** Sidan: läser tävlingsformen ur `?form=` och monterar om innehållet när den
+ *  byts (key), så framsteg/spelläge/ställning aldrig läcker mellan MP och IMP. */
 export function DagensTavling() {
+  const [params] = useSearchParams()
+  const form: TavlingsForm = params.get('form') === 'imp' ? 'imp' : 'mp'
+  return <DagensTavlingInner key={form} form={form} />
+}
+
+function DagensTavlingInner({ form }: { form: TavlingsForm }) {
+  const titel = formTitel(form)
   const { loading: authLoading, signedIn } = useAuth()
   // null = laddar; annars utfallet av hämtningen.
   const [resultat, setResultat] = useState<TavlingsResultat | null>(null)
@@ -92,22 +109,22 @@ export function DagensTavling() {
     if (!signedIn) return
     let active = true
     setResultat(null)
-    fetchDagensTavling().then((r) => {
+    fetchDagensTavling(undefined, form).then((r) => {
       if (active) setResultat(r)
     })
     return () => {
       active = false
     }
-  }, [signedIn])
+  }, [signedIn, form])
 
   // När tävlingen laddats: läs in lokala framsteg (bara om de hör till DAGENS
   // tävlingsnummer — gårdagens framsteg återupptas aldrig).
   useEffect(() => {
     if (!resultat || resultat.status !== 'ok') return
     const nummer = resultat.tavling.nummer
-    const sparat = loadTavlingFramsteg()
+    const sparat = loadTavlingFramsteg(form)
     setFramsteg(sparat && sparat.nummer === nummer ? sparat : { nummer, klara: [] })
-  }, [resultat])
+  }, [resultat, form])
 
   // OMSÄNDNING (2026-09-13): ett inskick som aldrig kom fram (nätfel, tillfälligt
   // serverfel → status 'fel', eller sidan laddades om mitt i → inget svar)
@@ -118,7 +135,7 @@ export function DagensTavling() {
   useEffect(() => {
     if (!resultat || resultat.status !== 'ok') return
     const nummer = resultat.tavling.nummer
-    const f = framstegRef.current?.nummer === nummer ? framstegRef.current : loadTavlingFramsteg()
+    const f = framstegRef.current?.nummer === nummer ? framstegRef.current : loadTavlingFramsteg(form)
     if (!f || f.nummer !== nummer) return
     const osända = f.klara.filter(behöverSkickasOm)
     if (osända.length === 0) return
@@ -126,7 +143,7 @@ export function DagensTavling() {
     ;(async () => {
       const statusar = new Map<number, InskickStatus>()
       for (const rad of osända) {
-        const inskick = inskickUrFramsteg(rad)
+        const inskick = inskickUrFramsteg(rad, form)
         if (!inskick) continue
         const svar = await submitTavlingGiv(inskick)
         statusar.set(rad.board, svar.status)
@@ -139,7 +156,7 @@ export function DagensTavling() {
         )
         const nf: TavlingFramsteg = { ...prev, klara }
         framstegRef.current = nf
-        saveTavlingFramsteg(nf)
+        saveTavlingFramsteg(nf, form)
         return nf
       })
       if ([...statusar.values()].some((s) => s !== 'fel')) setOmsäntNonce((n) => n + 1)
@@ -147,14 +164,14 @@ export function DagensTavling() {
     return () => {
       active = false
     }
-  }, [resultat, uppdateraNonce])
+  }, [resultat, uppdateraNonce, form])
 
   // Hämta topplistan när översikten visas (och efter varje giv man kommer
   // tillbaka från) — den uppdateras löpande under dagen.
   useEffect(() => {
     if (!resultat || resultat.status !== 'ok' || spelIndex !== null) return
     let active = true
-    fetchTopplista().then((t) => {
+    fetchTopplista(undefined, form).then((t) => {
       if (active) {
         setTopplista(t)
         setUppdaterar(false)
@@ -163,7 +180,7 @@ export function DagensTavling() {
     return () => {
       active = false
     }
-  }, [resultat, spelIndex, uppdateraNonce, omsäntNonce])
+  }, [resultat, spelIndex, uppdateraNonce, omsäntNonce, form])
 
   // --- Grindar: konto krävs -------------------------------------------------
   if (authLoading) {
@@ -173,9 +190,12 @@ export function DagensTavling() {
     return (
       <Skärm>
         <div className="max-w-sm space-y-4 text-center">
-          <h1 className="text-2xl font-semibold text-emerald-50">Dagens tävling</h1>
+          <h1 className="text-2xl font-semibold text-emerald-50">{titel}</h1>
           <p className="text-emerald-100/80">
-            Samma 12 givar för alla varje dag. I tävlingen deltar även datorspelare.
+            {form === 'imp'
+              ? 'Samma 12 givar för alla varje dag, räknade i IMP. '
+              : 'Samma 12 givar för alla varje dag. '}
+            I tävlingen deltar även datorspelare.
             För att spela tävlingen och komma med på topplistan behöver du ett konto.
           </p>
           <div className="flex flex-col items-center gap-2">
@@ -197,13 +217,13 @@ export function DagensTavling() {
 
   // --- Laddar / fel / ingen tävling ----------------------------------------
   if (!resultat) {
-    return <Skärm><p className="text-emerald-100/80">Hämtar dagens tävling …</p></Skärm>
+    return <Skärm><p className="text-emerald-100/80">Hämtar {titel} …</p></Skärm>
   }
   if (resultat.status === 'ingen') {
     return (
       <Skärm>
         <div className="max-w-sm space-y-3 text-center">
-          <h1 className="text-2xl font-semibold text-emerald-50">Dagens tävling</h1>
+          <h1 className="text-2xl font-semibold text-emerald-50">{titel}</h1>
           <p className="text-emerald-100/80">
             Dagens givar är inte klara än. De skapas strax efter midnatt — titta in
             om en liten stund.
@@ -217,7 +237,7 @@ export function DagensTavling() {
     return (
       <Skärm>
         <div className="max-w-sm space-y-3 text-center">
-          <h1 className="text-2xl font-semibold text-emerald-50">Dagens tävling</h1>
+          <h1 className="text-2xl font-semibold text-emerald-50">{titel}</h1>
           <p className="text-emerald-100/80">{resultat.fel}</p>
           <HemLänk />
         </div>
@@ -248,12 +268,18 @@ export function DagensTavling() {
     const spel: TavlingSpel = {
       giv,
       nummer: tavling.nummer,
+      form,
       board: giv.deal.board,
       total: tavling.storlek,
       sista: kvarEfterDenna === 0,
       onResultat: (r, oStamplat) => {
-        // Motorstämpeln sätts HÄR, i spelögonblicket (inte vid sändningen) — se build.ts.
-        const inskick = MOTORSTAMPEL ? { ...oStamplat, motor: MOTORSTAMPEL } : oStamplat
+        // Motorstämpeln sätts HÄR, i spelögonblicket (inte vid sändningen) — se
+        // build.ts. Formen går med så servern väljer rätt set + frönyckel.
+        const inskick: TavlingInskick = {
+          ...oStamplat,
+          form,
+          ...(MOTORSTAMPEL ? { motor: MOTORSTAMPEL } : {}),
+        }
         // BOKFÖR i samma stund given är klar (ersätt ev. tidigare rad för samma
         // bricka). Läser/ skriver framstegRef så navigeringen efteråt ser den
         // uppdaterade listan även om React ännu inte hunnit rendera om. Auktionen
@@ -263,7 +289,7 @@ export function DagensTavling() {
         const klara = [...base.filter((k) => k.board !== r.board), rad]
         const nytt: TavlingFramsteg = { nummer: tavling.nummer, klara }
         framstegRef.current = nytt
-        saveTavlingFramsteg(nytt)
+        saveTavlingFramsteg(nytt, form)
         setFramsteg(nytt)
         // Skicka in i bakgrunden; märk raden med serverns svar när det kommer.
         submitTavlingGiv(inskick).then((svar) => {
@@ -274,7 +300,7 @@ export function DagensTavling() {
             )
             const nf: TavlingFramsteg = { ...f, klara: uppd }
             framstegRef.current = nf
-            saveTavlingFramsteg(nf)
+            saveTavlingFramsteg(nf, form)
             return nf
           })
         })
@@ -284,7 +310,7 @@ export function DagensTavling() {
       onNästa: () => setSpelIndex(null),
       onÖversikt: () => setSpelIndex(null),
     }
-    return <Play key={`tavling-${tavling.nummer}-${giv.deal.board}`} tavling={spel} />
+    return <Play key={`tavling-${form}-${tavling.nummer}-${giv.deal.board}`} tavling={spel} />
   }
 
   // --- Din egen rondgenomgång med förklaringar (steg 5), öppnad ur genomgången.
@@ -358,6 +384,7 @@ export function DagensTavling() {
     const övningsSpel: TavlingSpel = {
       giv,
       nummer: tavling.nummer,
+      form,
       board: giv.deal.board,
       total: tavling.storlek,
       sista: false,
@@ -369,7 +396,7 @@ export function DagensTavling() {
       onÖversikt: () => setÖvningIndex(null),
     }
     return (
-      <Play key={`ovning-${tavling.nummer}-${giv.deal.board}`} tavling={övningsSpel} />
+      <Play key={`ovning-${form}-${tavling.nummer}-${giv.deal.board}`} tavling={övningsSpel} />
     )
   }
 
@@ -378,6 +405,7 @@ export function DagensTavling() {
     return (
       <GivDetalj
         board={detaljBoard}
+        form={form}
         onBack={() => setDetaljBoard(null)}
         onGranska={(rad) => setGranska({ board: detaljBoard, rad })}
         onÖvning={() => {
@@ -400,10 +428,21 @@ export function DagensTavling() {
             för att raden ska rymmas på telefon. */}
         <header className="flex items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-emerald-50">
-            Dagens tävling <span className="text-gold-300">#{tavling.nummer}</span>
+            {titel} <span className="text-gold-300">#{tavling.nummer}</span>
           </h1>
           <Nedrakning />
         </header>
+
+        {/* Den andra dagliga tävlingen (Dagens IMP, 2026-09-26) — en länk, så man
+            aldrig undrar var den andra formen tog vägen. */}
+        <div className="-mt-3 flex justify-center">
+          <Link
+            to={form === 'imp' ? '/spela-kort/tavling' : '/spela-kort/tavling?form=imp'}
+            className="text-xs font-semibold text-emerald-100/70 underline underline-offset-2 hover:text-emerald-50"
+          >
+            {form === 'imp' ? 'Till Dagens MP% →' : 'Till Dagens IMP →'}
+          </Link>
+        </div>
 
         {/* Spela nästa ospelade giv. Progress-stapeln + 12-rutnätet + "allt klart"-
             kortet borttagna (ägaren 2026-08-11 — kändes onödiga i alla lägen). Är
@@ -419,13 +458,13 @@ export function DagensTavling() {
 
         {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
         <DinStällning resultat={topplista} total={tavling.storlek} />
-        <Resultattabell klara={klara} topplista={topplista} onÖppna={setDetaljBoard} />
+        <Resultattabell klara={klara} topplista={topplista} onÖppna={setDetaljBoard} form={form} />
         <TopplistaVy resultat={topplista} />
 
         {/* Tidigare dagar + medaljtabellen (Påbyggnad 3, etapp D3). */}
         <div className="flex justify-center">
           <Link
-            to="/spela-kort/tavling/historik"
+            to={form === 'imp' ? '/spela-kort/tavling/historik?form=imp' : '/spela-kort/tavling/historik'}
             className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
           >
             Tidigare tävlingar & medaljer →

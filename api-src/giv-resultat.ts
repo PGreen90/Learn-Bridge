@@ -20,7 +20,7 @@ import type { ResolvedCall } from '../src/lib/bidding'
 import { byggBrickresultat, type Brickrad } from '../src/lib/engine/brickresultat'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
-import { lasDag } from './_lib/tavlingsdag'
+import { lasDag, lasForm } from './_lib/tavlingsdag'
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const json = (status: number, data: unknown) => {
@@ -58,11 +58,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     // Dagens tävling — eller en tidigare dag via `?dag=` (historiken).
     const valdDag = lasDag(url)
     if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    // MP eller IMP (`?form=`, saknas = MP; Dagens IMP, 2026-09-26).
+    const form = lasForm(url.searchParams.get('form'))
+    if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
     const today = valdDag.dag
     const sets = (await restGet(
       base,
       key,
-      `daily_sets?comp_date=eq.${today}&select=id`,
+      `daily_sets?comp_date=eq.${today}&form=eq.${form}&select=id`,
     )) as Array<{ id: string }>
     if (!sets.length) {
       return json(404, { ok: false, fel: valdDag.idag ? 'Ingen tävling idag' : 'Ingen tävling den dagen' })
@@ -96,7 +99,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       history: Array.isArray(r.payload?.history) ? r.payload!.history! : [],
       plays: Array.isArray(r.payload?.plays) ? r.payload!.plays! : [],
     }))
-    const resultat = byggBrickresultat(rader)
+    const resultat = byggBrickresultat(rader, form)
 
     // Visningsnamn för spelarna. MEDVETET ingen bot-flagga i svaret
     // (trebottarna, ägarbeslut 2026-09-01): bottarna har människonamn och pekas
@@ -115,20 +118,23 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     return json(200, {
       ok: true,
+      form,
       board,
-      resultat: resultat.map((r) => ({
-        namn: profil.get(r.spelare) ?? '—',
-        jag: r.spelare === meId,
-        kontrakt: r.kontrakt,
-        nsScore: r.nsScore,
-        procent: r.procent,
+      resultat: resultat.map(({ spelare, kontrakt, nsScore, history, plays, declarerTricks, ...tal }) => ({
+        namn: profil.get(spelare) ?? '—',
+        jag: spelare === meId,
+        kontrakt,
+        nsScore,
+        // Formens tal (Dagens IMP, 2026-09-26): MP → form/tal/mp/max/procent
+        // (procent som förr), IMP → form/tal/imp.
+        ...tal,
         // Påbyggnad 3 (2026-09-13): auktion (kompakt) + spelade kort + spelförar-
         // stick per spelare, så vem som helst kan stega igenom hur given bjöds
         // och spelades — även bottarnas. Bara efter att man själv spelat brickan
         // (grinden ovan), så inget läcker i förväg.
-        history: r.history,
-        plays: r.plays,
-        declarerTricks: r.declarerTricks,
+        history,
+        plays,
+        declarerTricks,
       })),
     })
   } catch (err) {

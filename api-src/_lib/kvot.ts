@@ -8,7 +8,7 @@
 
 /** Taken per handling: { fönsterlängd i sekunder, max anrop per fönster }.
  *  Hjärtslaget självbegränsas till 1/5 s i klienten — taket 20/min ger marge.
- *  Tävlingen (etapp 3): 12 givar per dag gör 20 inskick/min till ett generöst
+ *  Tävlingen (etapp 3): 12 givar per dag och tävling — två tävlingar sedan Dagens IMP 2026-09-26 gör 20 inskick/min till ett generöst
  *  tak för en människa och ett hårt för ett skript. */
 export const KVOTER = {
   skapa: { fonsterSek: 600, tak: 5 },

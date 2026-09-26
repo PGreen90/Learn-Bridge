@@ -6,8 +6,12 @@ import { describe, test, expect } from 'vitest'
 import type { Card, Suit, Rank } from '../../types/bridge'
 import {
   behöverSkickasOm,
+  enhetText,
+  formTitel,
+  givTal,
   inskickUrFramsteg,
   slåIhopFramsteg,
+  talText,
   tavlingFromResponse,
   type DinInskick,
   type GivKontrakt,
@@ -210,5 +214,43 @@ describe('inskickUrFramsteg / behöverSkickasOm — tappade inskick skickas om',
     expect(behöverSkickasOm({ ...komplett, inskickStatus: 'godkand' })).toBe(false)
     expect(behöverSkickasOm({ ...komplett, inskickStatus: 'avvisad' })).toBe(false)
     expect(behöverSkickasOm({ ...bas, inskickStatus: 'fel' })).toBe(false)
+  })
+})
+
+describe('Dagens IMP (2026-09-26) — formen i klienten', () => {
+  test('tavlingFromResponse: form ur svaret (saknas = mp) och eget id-prefix för IMP-givar', () => {
+    const mp = tavlingFromResponse(svar())
+    expect(mp.form).toBe('mp')
+    expect(mp.givar[0].deal.id).toBe('tavling-9-1')
+    const imp = tavlingFromResponse(svar({ form: 'imp' }))
+    expect(imp.form).toBe('imp')
+    expect(imp.givar[0].deal.id).toBe('tavling-imp-9-1')
+    expect(imp.givar[1].deal.id).toBe('tavling-imp-9-2')
+  })
+
+  test('inskickUrFramsteg bär formen när den ges (annars som förr)', () => {
+    const r: GivResultat = { board: 3, myTricks: 9, win: true, headline: '', scoreLabel: null, history: [], plays: [], declarerTricks: 9 }
+    expect(inskickUrFramsteg(r, 'imp')).toEqual({ board: 3, history: [], plays: [], declarerTricks: 9, form: 'imp' })
+    expect(inskickUrFramsteg(r)).toEqual({ board: 3, history: [], plays: [], declarerTricks: 9 })
+  })
+
+  test('talText: MP utan tecken, IMP med tecken (noll utan), enheten per form', () => {
+    expect(talText(62.5, 'mp', 1)).toBe('62.5')
+    expect(talText(100, undefined, 0)).toBe('100')
+    expect(talText(14.5, 'imp', 1)).toBe('+14.5')
+    expect(talText(-3, 'imp', 1)).toBe('−3.0')
+    expect(talText(0, 'imp', 1)).toBe('0.0')
+    expect(talText(-0.04, 'imp', 1)).toBe('0.0')
+    expect(enhetText('mp')).toBe('%')
+    expect(enhetText('imp')).toBe('IMP')
+    expect(formTitel('mp')).toBe('Dagens MP%')
+    expect(formTitel('imp')).toBe('Dagens IMP')
+  })
+
+  test('givTal läser tal, annars procent (äldre MP-svar), annars imp', () => {
+    expect(givTal({ tal: 10, imp: 10 })).toBe(10)
+    expect(givTal({ procent: 75 })).toBe(75)
+    expect(givTal({ imp: -2 })).toBe(-2)
+    expect(givTal({})).toBeUndefined()
   })
 })

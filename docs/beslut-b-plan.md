@@ -217,6 +217,9 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
 - **Paus mitt i de 12 givarna:** JA — får pausa och fortsätta senare samma dag.
 - **Fler tävlingslängder:** SENARE — schemat byggs med storlek som kolumn så
   8/16/24 kan läggas till utan ombyggnad; separata serier vs nästlade avgörs då.
+  **Svar 2026-09-26 (Dagens IMP):** separata serier — `daily_sets.form`
+  (`'mp' | 'imp'`) med unik `(comp_date, form)`; allt annat hänger på
+  `set_id`. Hela bygget: `docs/imp-tavling-plan.md`.
 
 **2a — givar + inskick:**
 - **Förarbete (fynd från etapp 0) — KLART & LIVE-VERIFIERAT 2026-08-10.** api-
@@ -626,3 +629,14 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   där (de var med). Fotnoten på medaljtabellen säger det. Facit:
   `tavlingsavslut.test.ts` + `tavling-historik.test.ts`. Ägarsteget `0012` +
   första nattkörningen KLARA 2026-09-13 (18 dagar frusna, 16 tomma).
+- **2026-09-26: DAGENS IMP — EN ANDRA DAGLIG TÄVLING** (ägarbeslut; hela
+  planen i `docs/imp-tavling-plan.md`). Tolv egna givar per dag (frönyckeln
+  "datum#imp" i `seed.ts` — MP-nyckeln ÄR datumet, facit låser att gamla frön
+  aldrig flyttar sig), räknade i IMP: WBF-tabellen + cross-IMP (`imp.ts`),
+  summa över givarna, 0 IMP per ospelad giv, medaljtabell per form. Schemat:
+  `daily_sets.form` (0013 lägger till + ny unik nyckel, 0014 släpper den gamla
+  EFTER deploy). Alla endpoints tar `?form=` (saknas = MP, exakt som förr),
+  nattjobben kör en gång per form, klienten bär formen i `?form=imp`, egen
+  framstegsnyckel och eget deal-id. MP-räkningen ändras INTE (ägarbeslut samma
+  dag: ingen Neuberg, ingen ändring). Facit: `imp.test.ts`, `seed.test.ts`,
+  formtester i varje endpoint- och sidfacit.

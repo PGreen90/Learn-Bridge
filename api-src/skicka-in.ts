@@ -16,7 +16,9 @@ import { stockholmDateISO } from '../src/lib/engine/daily'
 import { giltigMotorstampel } from '../src/lib/engine/tavlingsgranskning'
 import { validera, type Inskick } from './_lib/validera'
 import { kvotOk } from './_lib/kvot'
+import { fronyckel } from './_lib/seed'
 import { restGet, restPost } from './_lib/supabase-rest'
+import { lasForm } from './_lib/tavlingsdag'
 
 /** Läs och tolka JSON-kroppen ur en Node-request (Vercel parsar inte åt oss här). */
 function readJson(req: IncomingMessage): Promise<unknown> {
@@ -91,14 +93,17 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       ? ((body as { motor?: unknown }).motor as string)
       : null
 
-    // 3) Dagens tävling.
+    // 3) Dagens tävling — MP eller IMP (`form` i kroppen, saknas = MP;
+    //    Dagens IMP, 2026-09-26). Formen väljer set OCH frönyckel.
+    const form = lasForm((body as { form?: unknown }).form)
+    if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
     const today = stockholmDateISO()
     const sets = (await restGet(
       base,
       key,
-      `daily_sets?comp_date=eq.${today}&select=id`,
+      `daily_sets?comp_date=eq.${today}&form=eq.${form}&select=id`,
     )) as Array<{ id: string }>
-    if (!sets.length) return json(404, { ok: false, fel: 'Ingen tävling idag' })
+    if (!sets.length) return json(404, { ok: false, fel: form === 'imp' ? 'Ingen IMP-tävling idag' : 'Ingen tävling idag' })
     const setId = sets[0].id
 
     // 4) Ett inskick per giv — det första står.
@@ -112,7 +117,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     // 5) Validera + skriv (service-nyckeln, efter validering).
-    const v = validera(secret, today, inskick)
+    const v = validera(secret, fronyckel(today, form), inskick)
     const rad = {
       set_id: setId,
       board: inskick.board,
@@ -142,12 +147,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         `daily_results?set_id=eq.${setId}&board=eq.${inskick.board}&user_id=eq.${userId}&select=status,ns_score,reason`,
       )) as Array<{ status: string; ns_score: number | null; reason: string | null }>
       const s = star[0]
-      return json(200, { ok: true, status: s?.status ?? rad.status, nsScore: s?.ns_score ?? null, skäl: s?.reason ?? null })
+      return json(200, { ok: true, form, status: s?.status ?? rad.status, nsScore: s?.ns_score ?? null, skäl: s?.reason ?? null })
     }
     if (!skriv.ok) throw new Error(`skriv daily_results: ${skriv.status} ${await skriv.text()}`)
 
     return json(200, {
       ok: true,
+      form,
       status: rad.status,
       nsScore: rad.ns_score,
       skäl: rad.reason,

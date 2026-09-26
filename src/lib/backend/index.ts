@@ -21,6 +21,7 @@
 //     läser dem synkront i dag måste skrivas om till await/effekt vid det bytet.
 
 import { clearAllProgress, loadValue, saveValue } from '../storage'
+import type { TavlingsForm } from '../engine/matchpoints'
 import type { Theme } from '../theme'
 import type { PlaySpeed } from '../../pages/play/tempo'
 import type { ContractTarget } from '../engine/contract-target'
@@ -129,11 +130,16 @@ export function saveSpelHistorik(list: SpelResultat[]): void {
  *  klarat, per tävlingsnummer. Kallaren kontrollerar att `nummer` stämmer med
  *  dagens tävling innan framstegen används (en ny dag börjar rent). LOKALT i
  *  Led 1; Led 2 flyttar inskicket till servern. null = inget sparat. */
-export function loadTavlingFramsteg(): TavlingFramsteg | null {
-  return loadValue<TavlingFramsteg | null>('tavling-framsteg', null)
+export function loadTavlingFramsteg(form: TavlingsForm = 'mp'): TavlingFramsteg | null {
+  return loadValue<TavlingFramsteg | null>(framstegNyckel(form), null)
 }
-export function saveTavlingFramsteg(framsteg: TavlingFramsteg): void {
-  saveValue('tavling-framsteg', framsteg)
+export function saveTavlingFramsteg(framsteg: TavlingFramsteg, form: TavlingsForm = 'mp'): void {
+  saveValue(framstegNyckel(form), framsteg)
+}
+/** En framstegsplats per tävlingsform (Dagens IMP, 2026-09-26): MP-nyckeln är
+ *  orörd (`tavling-framsteg`), IMP-serien bor bredvid. */
+function framstegNyckel(form: TavlingsForm): string {
+  return form === 'imp' ? 'tavling-framsteg-imp' : 'tavling-framsteg'
 }
 
 /** Ett budtemas senaste poäng ({correct, total}) — nyckeln `theme:<themeId>`. */

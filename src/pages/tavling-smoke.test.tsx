@@ -57,8 +57,8 @@ function tavlingsSpel(
 describe('Spela kort — tävlingsläget', () => {
   it('visar tävlingsbrickan i stället för målväljaren', () => {
     render(<Play tavling={tavlingsSpel(705, 3, 12, false)} />)
-    // Guldbrickan "Tävling · Giv 3/12" ersätter "Mål:"-knappen.
-    expect(screen.getByText(/Tävling · Giv 3\/12/)).toBeInTheDocument()
+    // Guldbrickan "Dagens MP% · Giv 3/12" ersätter "Mål:"-knappen.
+    expect(screen.getByText(/Dagens MP% · Giv 3\/12/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Mål:/ })).not.toBeInTheDocument()
   })
 

@@ -38,7 +38,7 @@ import { execSync } from 'node:child_process'
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
+import { fronyckel, playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
 import { dealFromSeed } from './deal'
 import { botCardSmart } from './play-bot'
 import { botBud } from './resonemang'
@@ -53,6 +53,13 @@ import {
 } from './tavlingsgranskning'
 
 const DATUM = process.env.GRANSKA_TAVLING ?? ''
+/** Vilken av dagens två tävlingar (Dagens IMP, 2026-09-26): TAVLING_FORM=imp
+ *  → IMP-tävlingen, annars MP som förr. Frönyckeln (NYCKEL) ersätter datumet i
+ *  alla fröanrop — för MP ÄR den datumet, så gamla dagar omprovas oförändrat.
+ *  Nattjobbet kör proben en gång per form. */
+const FORM = process.env.TAVLING_FORM === 'imp' ? 'imp' : 'mp'
+const NYCKEL = DATUM ? fronyckel(DATUM, FORM) : ''
+const SUFFIX = FORM === 'imp' ? '-imp' : ''
 const OMPROVA_FLYTTADE = process.env.OMPROVA_FLYTTADE === '1'
 /** Så många motorversioner FÖRE tävlingsdagen tas med som kandidater (kvardröjande klienter). */
 const ALDRE_KANDIDATER = 4
@@ -111,8 +118,8 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
 
   // 1) Dagens set + inskicken: de godkända, och (OMPROVA_FLYTTADE) de en tidigare
   //    nattgranskning flyttat.
-  const sets = (await rest(`daily_sets?comp_date=eq.${DATUM}&select=id`)) as Array<{ id: string }>
-  const rader: string[] = [`=== NATTLIG DJUPGRANSKNING ${DATUM} ===`]
+  const sets = (await rest(`daily_sets?comp_date=eq.${DATUM}&form=eq.${FORM}&select=id`)) as Array<{ id: string }>
+  const rader: string[] = [`=== NATTLIG DJUPGRANSKNING ${DATUM} (${FORM.toUpperCase()}-tävlingen) ===`]
   const fynd: string[] = []
   let granskade = 0
   let flyttade = 0
@@ -121,7 +128,7 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
   let ejJamforbara = 0
 
   if (!sets.length) {
-    rader.push('Ingen tävling den dagen — inget att granska.')
+    rader.push(`Ingen ${FORM === 'imp' ? 'IMP-tävling' : 'tävling'} den dagen — inget att granska.`)
   } else {
     const kolumner = 'select=id,board,status,payload'
     const inskick = (await rest(
@@ -145,8 +152,8 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
     const aterstall: string[] = []
     for (const rad of inskick) {
       granskade++
-      const deal = dealFromSeed(seedForBoard(secret!, DATUM, rad.board), rad.board)
-      const playSeed = playSeedForBoard(secret!, DATUM, rad.board)
+      const deal = dealFromSeed(seedForBoard(secret!, NYCKEL, rad.board), rad.board)
+      const playSeed = playSeedForBoard(secret!, NYCKEL, rad.board)
       // Buden först (tänkande bottar, 2026-09-24: det tänkta budet räknas om exakt),
       // sedan korten — båda mot DAGENS motor; avvikelse → omprov mot äldre versioner.
       const avvikelser = [...budAvvikelser(deal, rad.payload, budMotor), ...botAvvikelser(deal, playSeed, rad.payload, botCardSmart)]
@@ -202,7 +209,10 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
           writeFileSync(
             infil,
             JSON.stringify({
-              datum: DATUM,
+              // Frönyckeln (inte datumet): äldre motorversioners seed.ts hashar
+              // strängen rakt av, så MP (= datumet) och IMP ("datum#imp") går
+              // båda att omprova i vilket arbetsträd som helst.
+              datum: NYCKEL,
               inskick: lista.map((i) => ({ id: i.id, board: i.board, payload: radPerId.get(i.id)!.payload })),
             }),
           )
@@ -250,7 +260,7 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
         fynd.push(`bricka ${f.board}, inskick ${f.id}: ${f.avvikelser.join(' · ')} (ingen av ${f.provade} äldre versioner lade korten)`)
         if (radPerId.get(f.id)!.status === 'granskning') continue // redan flyttat — står kvar
         // Flytta till granskning med skälet — ägaren läser rapporten.
-        const skal = `nattgranskning ${DATUM}: ${f.avvikelser.slice(0, 3).join(' · ')}`
+        const skal = `nattgranskning ${DATUM}${SUFFIX}: ${f.avvikelser.slice(0, 3).join(' · ')}`
         await rest(`daily_results?id=eq.${f.id}`, {
           method: 'PATCH',
           body: JSON.stringify({ status: 'granskning', reason: skal }),
@@ -281,11 +291,11 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
 
   mkdirSync(join(process.cwd(), 'revisor-output'), { recursive: true })
   writeFileSync(
-    join(process.cwd(), 'revisor-output', `tavlingsgranskning-${DATUM}.json`),
-    JSON.stringify({ datum: DATUM, granskade, flyttade, friade, aterstallda, ejJamforbara, fynd }, null, 2),
+    join(process.cwd(), 'revisor-output', `tavlingsgranskning-${DATUM}${SUFFIX}.json`),
+    JSON.stringify({ datum: DATUM, form: FORM, granskade, flyttade, friade, aterstallda, ejJamforbara, fynd }, null, 2),
   )
   writeFileSync(
-    join(process.cwd(), 'revisor-output', `tavlingsgranskning-${DATUM}.txt`),
+    join(process.cwd(), 'revisor-output', `tavlingsgranskning-${DATUM}${SUFFIX}.txt`),
     rader.join('\n') + '\n',
   )
   console.log(rader.join('\n'))

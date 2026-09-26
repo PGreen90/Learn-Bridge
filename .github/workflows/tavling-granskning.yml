@@ -44,7 +44,8 @@ concurrency:
 jobs:
   granskning:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Två tävlingar per dag sedan Dagens IMP (2026-09-26) → dubbla inskick.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v7
         with:
@@ -74,6 +75,49 @@ jobs:
           fi
           echo "Granskar $DAG (Europe/Stockholm) · ompröva flyttade: ${OMPROVA_FLYTTADE:-nej}"
           GRANSKA_TAVLING=$DAG \
+            npx vitest run src/lib/engine/tavlingsgranskning.probe.test.ts
+
+      # Dagens IMP (2026-09-26): samma granskning av IMP-tävlingens inskick.
+      # Körs även om MP-granskningen fick rött (if: always()).
+      - name: Granska gårdagens IMP-inskick
+        if: always()
+        env:
+          DAILY_SEED_SECRET: ${{ secrets.DAILY_SEED_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          INDATA_DATUM: ${{ inputs.datum }}
+          OMPROVA_FLYTTADE: ${{ inputs.omprova_flyttade && '1' || '' }}
+        run: |
+          DAG="$INDATA_DATUM"
+          if [ -z "$DAG" ]; then DAG=$(TZ=Europe/Stockholm date -d 'yesterday' +%F); fi
+          if ! echo "$DAG" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}
+      # Påbyggnad 3 (2026-09-13): den SLUTLIGA ställningen för avslutade dagar →
+      # daily_standings (historiken + medaljtabellen). Körs EFTER granskningen
+      # (statusflyttar ska inte räknas) och även om den fick fynd (if: always()).
+      # Idempotent: fyller saknade dagar + skriver om de tre senaste.
+      - name: Avsluta gårdagens tävling (slutlig ställning → daily_standings)
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Manuell omprövning av en äldre dag → skriv om just den dagens ställning.
+          OMSKRIV_DATUM: ${{ inputs.datum }}
+        run: AVSLUTA_TAVLING=1 npx vitest run src/lib/engine/tavlingsavslut.probe.test.ts
+
+      - name: Ladda upp rapporten (även vid rött)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tavlingsgranskning-rapporter
+          path: |
+            revisor-output/tavlingsgranskning-*
+            revisor-output/tavlingsavslut-*
+          retention-days: 30
+; then
+            echo "Ogiltigt datum: $DAG"; exit 1
+          fi
+          echo "Granskar IMP-tävlingen $DAG (Europe/Stockholm)"
+          GRANSKA_TAVLING=$DAG TAVLING_FORM=imp \
             npx vitest run src/lib/engine/tavlingsgranskning.probe.test.ts
 
       # Påbyggnad 3 (2026-09-13): den SLUTLIGA ställningen för avslutade dagar →

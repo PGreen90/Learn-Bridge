@@ -28,10 +28,10 @@ describe('byggBrickresultat', () => {
     const res = byggBrickresultat(rader)
     // B bäst (430 > 420) → först, 100 %.
     expect(res[0].spelare).toBe('B')
-    expect(res[0].procent).toBe(100)
+    expect(res[0]).toMatchObject({ form: 'mp', tal: 100, procent: 100 })
     expect(res[0].kontrakt).toEqual({ level: 3, strain: 'NT', declarer: 'S', doubled: undefined, diff: 1 })
     expect(res[1].spelare).toBe('A')
-    expect(res[1].procent).toBe(0)
+    expect(res[1]).toMatchObject({ procent: 0 })
     expect(res[1].kontrakt).toEqual({ level: 4, strain: 'spades', declarer: 'S', doubled: undefined, diff: 0 })
   })
 
@@ -44,8 +44,8 @@ describe('byggBrickresultat', () => {
     const b = res.find((r) => r.spelare === 'B')!
     expect(b.kontrakt).toBeNull()
     // A (+100) slår B (0) → A 100 %, B 0 %.
-    expect(res.find((r) => r.spelare === 'A')!.procent).toBe(100)
-    expect(b.procent).toBe(0)
+    expect(res.find((r) => r.spelare === 'A')!).toMatchObject({ procent: 100 })
+    expect(b).toMatchObject({ procent: 0 })
   })
 
   test('motståndarnas kontrakt (Ö/V spelförare) tolkas med rätt säte', () => {

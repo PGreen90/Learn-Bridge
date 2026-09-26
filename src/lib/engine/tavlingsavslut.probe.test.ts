@@ -89,8 +89,10 @@ it.skipIf(!AKTIV)('tävlingsavslutet: slutlig ställning → daily_standings', {
   const rader: string[] = [`=== TÄVLINGSAVSLUT ${idag} (dagar före idag, Stockholm) ===`]
 
   // 1) Alla avslutade dagar + vilka som redan har en ställning.
-  const sets = await restAlla<{ id: string; comp_date: string; size: number; daily_number: number }>(
-    `daily_sets?comp_date=lt.${idag}&select=id,comp_date,size,daily_number&order=comp_date.asc`,
+  // Båda formerna (Dagens IMP, 2026-09-26): varje set fryses med SIN räkning —
+  // MP-snitt i procent eller IMP-summa — i samma snitt-kolumn.
+  const sets = await restAlla<{ id: string; comp_date: string; size: number; daily_number: number; form: 'mp' | 'imp' }>(
+    `daily_sets?comp_date=lt.${idag}&select=id,comp_date,size,daily_number,form&order=comp_date.asc,form.asc`,
   )
   const harStallning = new Set(
     (await restAlla<{ set_id: string }>('daily_standings?select=set_id')).map((r) => r.set_id),
@@ -112,10 +114,10 @@ it.skipIf(!AKTIV)('tävlingsavslutet: slutlig ställning → daily_standings', {
       spelare: r.user_id,
       poäng: r.ns_score ?? 0,
     }))
-    const stallning = byggStallning(tavlingsrader, MIN_PER_GIV, set.size)
+    const stallning = byggStallning(tavlingsrader, MIN_PER_GIV, set.size, set.form ?? 'mp')
     if (!stallning.length) {
       tomma++
-      rader.push(`${set.comp_date} (#${set.daily_number}): inga godkända inskick — ingen ställning.`)
+      rader.push(`${set.comp_date} (#${set.daily_number} ${(set.form ?? 'mp').toUpperCase()}): inga godkända inskick — ingen ställning.`)
       // En tidigare skriven ställning för dagen är då fel — rensa den.
       if (harStallning.has(set.id)) await rest(`daily_standings?set_id=eq.${set.id}`, { method: 'DELETE' })
       continue
@@ -142,7 +144,7 @@ it.skipIf(!AKTIV)('tävlingsavslutet: slutlig ställning → daily_standings', {
     skrivna++
     const etta = stallning[0]
     rader.push(
-      `${set.comp_date} (#${set.daily_number}): ${stallning.length} spelare · etta ${etta.snitt.toFixed(1)} % (${etta.spelade}/${set.size} givar)`,
+      `${set.comp_date} (#${set.daily_number} ${(set.form ?? 'mp').toUpperCase()}): ${stallning.length} spelare · etta ${etta.snitt.toFixed(1)} ${set.form === 'imp' ? 'IMP' : '%'} (${etta.spelade}/${set.size} givar)`,
     )
   }
   rader.push(`Skrivna dagar: ${skrivna} · tomma: ${tomma}`)

@@ -10,34 +10,23 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Sunt förnuft-lagret: motorn ska inte passa blint (ägarbeslut 2026-09-22)
-Ägarens oro: motorn "reagerar svagt" — pass utan regel när ingen rad träffar. Riggen
-`sunt-fornuft.probe.test.ts` (SUNT=1) + hål 1 (advancern över svagt hoppinkliv) LIVE `46c2128`.
-**Kursändring 09-22: resonemangslagret** (simulering, regelboken som filter, budget +
-tidigt stopp; `resonemang.ts` + worker) — steg 1–3 LIVE 09-23 (`b6b153f`): inkopplat i Spela mot datorn.
-**Plan, mätning, byggordning + frågorna: `docs/sunt-fornuft-plan.md`** — läs först.
-LIVE 09-24: pass-spärr + systemfilter · kontrollbud (§6.2) · tänkande bottar i tävlingen (`241da62`)
-· **borden = tävlingen** (bud/spel/grafik lika; `docs/bord-plan.md` "Bottarna = tävlingens bottar").
+### 🔵 NU — Dagens IMP: en andra daglig tävling räknad i IMP (ägarbeslut 2026-09-26)
+Tolv NYA givar per dag, egen ställning + historik, IMP-tabellen + cross-IMP. **Hela planen —
+ägarfrågorna (5 st), kartan, etapp 0–5, deploy-sekvensen 0013 → deploy → 0014:
+`docs/imp-tavling-plan.md`** — läs först. MP-tävlingen rörs INTE (ingen Neuberg, ägarbeslut
+09-26). Status: etapp 0–4 BYGGDA i kod på grenen `dagens-imp` (0013 körd); kvar PCD → 0014 →
+första IMP-natten → ägarens live-prov.
 
-**Parallellt ägarsteg — tredje hand högt:** regel A–D + riggen LIVE (`037403b`,
-`docs/speldiagnos.md` T-serien, `docs/bevaka.md`); kvar live-prov + beslutet om
-punkt 4 (budseedad gissning av de dolda korten).
+**Parallella ägarsteg (live-prov):** sunt förnuft-lagret (resonemangslagret steg 1–3 +
+pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje hand högt (regel
+A–D LIVE `037403b`, kvar beslutet om budseedad gissning; `docs/speldiagnos.md` T-serien) ·
+vänner-bordet = tävlingen (`docs/bord-plan.md`) · Gambling 3NT.
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** Michaels-fortsättningen
-(09-22, §7.2: två högsta objudna · avslut/cue/spärr · 14/15–17/18+) · stört 1NT: öppnarens
-tredje bud + störd överföring (live-fynd 09-20, §7.5, `nt-transfer-stord.ts`) ·
-nattgranskningen versionsmedveten (`docs/bevaka.md`) · claim-ombygget
-(`9389da9`, `docs/claim-plan.md`) · systems on efter
-stört 1NT (#77, `90aeea1`, `docs/1nt-systems-on-plan.md`) ·
-designgranskningen (`5e62517`, `261e62a`) · Puppet Stayman över 2NT (`0207209`) · Gambling 3NT
-(`8e327b3`, `gambling-3nt.ts`, systemboken §3.1+§4.4; forts. SENARE) · kortregeln
-(bara träkarlen i färgkolumner, `useSvavandeMeny.ts`) · bordens SENARE-lista
-(`docs/bord-plan.md`) · stickväntan (`e57e6a9`) · livskvalitetssvepet i Dagens
-tävling (`docs/beslut-b-plan.md` "Påbyggnad 3"). Öppet ägarsteg: live-prov
-Gambling 3NT + bordens etapp 1–3.
-
-**Parallellt ägarsteg:** live-prov vid ett vänner-bord (tänkande bottar · kortflygning ·
-nya spelfasen · uppvändningen på telefon · etapp 1–3) + Gambling 3NT. Sedan väljer ägaren nästa NU ur 🟢 NÄST.
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** Ogust-placering + sunt
+förnuft-svepets hål (`0c5cc37`) · svag tvåa i konkurrens (`24e883c`) · Michaels-fortsättningen
+(§7.2) · stört 1NT: tredje bud + störd överföring (§7.5) · nattgranskningen versionsmedveten ·
+claim-ombygget (`docs/claim-plan.md`) · systems on efter stört 1NT (#77) · Puppet Stayman över
+2NT · Gambling 3NT (`gambling-3nt.ts`) · bordens SENARE-lista · livskvalitetssvepet.
 
 **Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
 (KLAR & LIVE 2026-08-19): syna `docs/budforklaring-katalog.md`, peka på en

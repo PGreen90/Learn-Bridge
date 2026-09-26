@@ -32,6 +32,7 @@ vi.mock('../lib/backend/tavling', async (importActual) => {
 })
 
 import { DagensTavling } from './DagensTavling'
+import { saveTavlingFramsteg } from '../lib/backend'
 
 /** En tävlingsgiv med bricknummer `board` (giltig giv ur ett klientfrö). */
 function giv(board: number) {
@@ -321,7 +322,7 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     fireEvent.click(knappar[0])
     expect(await screen.findByText('Hela fältets resultat')).toBeInTheDocument()
     // Dagens tävling → ingen dag-parameter (historiken skickar sin dag).
-    expect(givResultatMock).toHaveBeenCalledWith(1, undefined)
+    expect(givResultatMock).toHaveBeenCalledWith(1, undefined, 'mp')
     // Din rad markeras och motståndaren listas.
     expect(screen.getByText('Testkonto')).toBeInTheDocument()
     expect(screen.getByText(/\(du\)/)).toBeInTheDocument()
@@ -428,5 +429,41 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     )
     // Gårdagens framsteg ignoreras → börjar om: "Starta tävlingen".
     expect(await screen.findByRole('button', { name: /Starta tävlingen/ })).toBeInTheDocument()
+  })
+})
+
+describe('Dagens IMP (2026-09-26) — ?form=imp är den andra tävlingen', () => {
+  it('hämtar IMP-tävlingen, visar rubriken "Dagens IMP" och sparar framsteget under egen nyckel', async () => {
+    auth.signedIn = true
+    fetchMock.mockResolvedValue({ status: 'ok', tavling: { ...TÄVLING, form: 'imp' } })
+    // MP-framsteg för samma nummer får INTE läcka in i IMP-serien.
+    saveTavlingFramsteg({ nummer: 9, klara: [{ board: 1, myTricks: 9, win: true, headline: '', scoreLabel: null }] })
+    render(
+      <MemoryRouter initialEntries={['/spela-kort/tavling?form=imp']}>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    // Vänta in ÖVERSIKTEN (rubriken med numret) — laddningstexten är flyktig.
+    expect(await screen.findByRole('heading', { name: /Dagens IMP #9/ })).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith(undefined, 'imp')
+    await screen.findByRole('button', { name: /Starta tävlingen/ })
+    expect(topplistaMock).toHaveBeenCalledWith(undefined, 'imp')
+    // IMP-serien börjar rent trots MP-framsteget: "Starta", inte "Fortsätt – giv 2".
+    expect(screen.queryByRole('button', { name: /Fortsätt/ })).not.toBeInTheDocument()
+    expect(localStorage.getItem('learnbridge:tavling-framsteg-imp')).toBeNull()
+    expect(screen.getByRole('link', { name: /Till Dagens MP%/ })).toHaveAttribute('href', '/spela-kort/tavling')
+  })
+
+  it('utan ?form= är det MP-tävlingen som förr, med länk till IMP', async () => {
+    auth.signedIn = true
+    fetchMock.mockResolvedValue(ok())
+    render(
+      <MemoryRouter initialEntries={['/spela-kort/tavling']}>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByRole('heading', { name: /Dagens MP% #9/ })).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith(undefined, 'mp')
+    expect(await screen.findByRole('link', { name: /Till Dagens IMP/ })).toHaveAttribute('href', '/spela-kort/tavling?form=imp')
   })
 })

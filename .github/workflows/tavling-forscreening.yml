@@ -27,7 +27,8 @@ concurrency:
 jobs:
   forscreening:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 24 brickor per dag sedan Dagens IMP (2026-09-26) — två dagar screenas.
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
