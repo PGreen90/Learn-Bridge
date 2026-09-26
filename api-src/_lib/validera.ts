@@ -73,13 +73,15 @@ export function botbudGodtas(deal: Deal, prefix: ResolvedCall[], seat: Seat, bid
   return borTanka(deal, prefix, seat) && systemKandidater(deal.hands[seat], prefix, seat).includes(bid as Bid)
 }
 
-export function validera(secret: string, dateISO: string, inskick: Inskick): Validering {
+/* `nyckel` = frönyckeln (`fronyckel(dag, form)` i seed.ts) — MP-tävlingen ger
+ *  datumet som förr, IMP-tävlingen "datum#imp" (Dagens IMP, 2026-09-26). */
+export function validera(secret: string, nyckel: string, inskick: Inskick): Validering {
   const { board, history, plays, declarerTricks } = inskick
   if (!Number.isInteger(board) || board < 1) return fail('ogiltig bricka')
   if (!Array.isArray(history) || !Array.isArray(plays)) return fail('inskicket saknar auktion/kort')
 
   // 1. Regenerera given ur fröet — allt nedan replayas mot DEN, inte klientens.
-  const deal = dealFromSeed(seedForBoard(secret, dateISO, board), board)
+  const deal = dealFromSeed(seedForBoard(secret, nyckel, board), board)
 
   // 2. Auktionen: budordning, Syds lagliga bud, bot-bud = motorns.
   for (let i = 0; i < history.length; i++) {

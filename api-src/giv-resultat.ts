@@ -116,19 +116,21 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return json(200, {
       ok: true,
       board,
-      resultat: resultat.map((r) => ({
-        namn: profil.get(r.spelare) ?? '—',
-        jag: r.spelare === meId,
-        kontrakt: r.kontrakt,
-        nsScore: r.nsScore,
-        procent: r.procent,
+      resultat: resultat.map(({ spelare, kontrakt, nsScore, history, plays, declarerTricks, ...tal }) => ({
+        namn: profil.get(spelare) ?? '—',
+        jag: spelare === meId,
+        kontrakt,
+        nsScore,
+        // Formens tal (Dagens IMP, 2026-09-26): MP → form/tal/mp/max/procent
+        // (procent som förr), IMP → form/tal/imp.
+        ...tal,
         // Påbyggnad 3 (2026-09-13): auktion (kompakt) + spelade kort + spelförar-
         // stick per spelare, så vem som helst kan stega igenom hur given bjöds
         // och spelades — även bottarnas. Bara efter att man själv spelat brickan
         // (grinden ovan), så inget läcker i förväg.
-        history: r.history,
-        plays: r.plays,
-        declarerTricks: r.declarerTricks,
+        history,
+        plays,
+        declarerTricks,
       })),
     })
   } catch (err) {

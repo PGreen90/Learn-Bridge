@@ -14,7 +14,7 @@
 //
 // Ren aritmetik utan I/O — facit: tavlingsavslut.test.ts.
 
-import { aggregeraTopplista, type Tävlingsrad } from './matchpoints'
+import { aggregeraTopplista, strategiFor, type TavlingsForm, type Tävlingsrad } from './matchpoints'
 
 /** Minst så många spelare på en giv för att den ska ge poäng (delas av den
  *  levande topplistan och slutställningen — EN sanning). */
@@ -30,9 +30,15 @@ export interface StällningsRad {
 }
 
 /** Slutställningen för EN dag ur dagens godkända rader: sorterad bäst först,
- *  placering = 1 + antalet med STRIKT högre snitt (delad rang). */
-export function byggStallning(rader: Tävlingsrad[], minPerGiv: number, storlek: number): StällningsRad[] {
-  const { topplista } = aggregeraTopplista(rader, minPerGiv, null, storlek)
+ *  placering = 1 + antalet med STRIKT högre tal (delad rang). `form` (Dagens
+ *  IMP, 2026-09-26) väljer räkningen; utelämnad = MP som förr. */
+export function byggStallning(
+  rader: Tävlingsrad[],
+  minPerGiv: number,
+  storlek: number,
+  form: TavlingsForm = 'mp',
+): StällningsRad[] {
+  const { topplista } = aggregeraTopplista(rader, minPerGiv, null, storlek, strategiFor(form))
   return topplista.map((p) => ({
     spelare: p.spelare,
     placering: 1 + topplista.filter((o) => o.snitt > p.snitt).length,
