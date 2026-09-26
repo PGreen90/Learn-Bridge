@@ -152,8 +152,11 @@ describe('familj 3 – öppnarens återbud: läget "jag öppnade, partnern svara
   it('träffar bara öppnaren, efter öppning – pass – svar – pass', () => {
     expect(bud(opener, hist('2S'), 'N')?.källa).toBe('tabell:återbud')
     // Inkliv eller X någonstans → inte den här raden (etapp 4: familj 4:s
-    // *öppnaren-stört* tar det inklämda läget; deras X + höjning har ingen regel än).
-    expect(bud(opener, [{ seat: 'N', bid: '1S' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '2S' }, P('W')], 'N')).toBeNull()
+    // *öppnaren-stört* tar det inklämda läget; deras X + höjning = partnerns
+    // konkurrenshöjning, öppnaren passar under utgång — felrapport #84).
+    const efterX = bud(opener, [{ seat: 'N', bid: '1S' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: '2S' }, P('W')], 'N')
+    expect(efterX?.källa).toBe('tabell:öppnaren-stört')
+    expect(efterX?.call.bid).toBe('P')
     expect(bud(opener, [{ seat: 'N', bid: '1S' }, P('E'), { seat: 'S', bid: '2S' }, { seat: 'W', bid: '3C' }], 'N')?.källa).toBe('tabell:öppnaren-stört')
     // Svararen passade → inget återbud att ta (auktionen dör eller balanseras).
     expect(bud(opener, hist('P'), 'N')).toBeNull()

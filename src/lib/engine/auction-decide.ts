@@ -167,7 +167,7 @@ import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCor
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
-import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
+import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerAfterCompetitiveRaise, openerRebidsAfterTheirDouble, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
 import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
@@ -2179,7 +2179,11 @@ const TABELL: Row[] = [
         openerAnswersNegativeInvit(hand, facts) ??
         openerReopensAfterPartnerPass(hand, facts) ??
         openerReopensBalancing(hand, facts) ??
-        answerPartnersCue(hand, facts)
+        answerPartnersCue(hand, facts) ??
+        // Felrapport #84: partnerns konkurrenshöjning (pass under utgång) och
+        // 6+-rebudet efter deras X + partnerns pass — FÖRE familj 5:s catch-all.
+        openerAfterCompetitiveRaise(hand, facts) ??
+        openerRebidsAfterTheirDouble(hand, facts)
       if (k) return asCall(facts.seat, k)
       // Familj 5 (b): öppnaren efter deras X + höjning — höj med fit / egen färg /
       // sang (samma kunskap som `offBookResponse`; kravvakten körs efter för null).

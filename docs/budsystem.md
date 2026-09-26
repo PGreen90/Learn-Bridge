@@ -2265,7 +2265,13 @@ sin bästa objudna färg**; den är alltså en *upplysning*, inte ett straff. Kr
 - Kort i deras färg (**max 2**), **3+ kort i var och en av de tre objudna
   färgerna**, från **10 hp**.
 - Har du en egen bra **5-korts färg** inkliver du hellre naturligt – då är det
-  inget takeout-läge. Jämna händer utan korthet i deras färg dubblar aldrig.
+  inget takeout-läge.
+- **Jämn öppningshand med tre kort i deras färg (felrapport #84, 2026-09-26):**
+  en 4-3-3-3 med **12+ hp** och stöd i alla tre objudna färgerna **dubblar
+  också** — den har ingen annan väg in (för svag för 1NT-inklivet, eller utan
+  stopp, och ingen 5-korts färg). Under 12 hp passar den jämna handen som
+  förut. *P–(1♣)–? med ♠AKQ9 ♥QT4 ♦K82 ♣642 (14 hp) → X; förr pass, och 2♠ av
+  motståndarna gick tre bet ospelat.*
 
 **Den starka handen (17+ hp) – dubbla först, visa färgen sedan:**
 - En hand med **17+ hp** är **för stark för ett enkelt inkliv**: partnern kan
@@ -2821,6 +2827,22 @@ advancern vidare över 2NT gäller det vanliga konkurrensomdömet i stället.
 (14 hp = 15 stödpoäng), W dubblade, N bjöd Jordan 2NT med 14 hp — och S passade.
 2NT spelades med 9-korts hjärterfit och 28 hp ihop.*
 
+**(h) Öppnaren efter partnerns konkurrenshöjning, och efter deras X + partnerns
+pass (felrapport #84, 2026-09-26).** Partnerns enkla höjning av vår öppningsfärg
+efter deras dubbling eller inkliv (1x–(X)–2x, 1x–(1y)–2x) är en
+**konkurrenshöjning: 6–9 med stöd, ej krav**. Öppnaren **passar under
+utgångsvärden** — aldrig en ny 4-korts färg på 2-läget (förr 1♣–(X)–2♣–(P)–2♠ på
+♠J832 ♥KJ7 ♦A76 ♣K83, 13 hp, och partnern höjde till 3♠ på 8 hp). Med äkta extra:
+högfärg **18+ stödpoäng → 4M**; lågfärg **18–19 balanserad med håll i deras
+visade färger → 2NT (inbjudan)**, **20+ → 3NT**. Utgångsförsöken 15–17 (Bergen
+2NT / 3M / hjälpfärg) i konkurrens är **inte byggda** — ägarfråga i
+`docs/senare.md`. Ostörd höjning: §4.1.
+
+Efter **deras upplysningsdubbling, partnerns pass och advancerns svar**
+(1♥–(X)–P–(1♠)) rebjuder öppnaren **6+ i öppningsfärgen billigast** (ej krav,
+"extra längd"); förr passade ♠6 ♥K85432 ♦AK7 ♣KQ3 utan regel. Övriga händer
+passar som förut.
+
 ## 8. Markeringar & utspel
 > Försvarsspelets signaler. Vi spelar räkningstunga, lågtvetydiga metoder som
 > passar 2/1:s precisionsfilosofi.
@@ -3002,6 +3024,15 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-26 — Felrapport #84: offshape-X + öppnarens svar på konkurrenshöjningen
+  (§7.3, §7.4h).** (1) Jämn öppningshand (12+, 4-3-3-3) med TRE kort i deras färg
+  dubblar (`overcalls.ts` regel 4b; förr krävdes max 2 — ♠AKQ9 ♥QT4 ♦K82 ♣642
+  passade 1♣). (2) Öppnaren efter partnerns konkurrenshöjning (6–9) passar under
+  utgång, 18+ → utgång/2NT/3NT (`openerAfterCompetitiveRaise`; förr catch-all-2♠
+  på 13 hp). (3) Efter deras X + partnerns pass + advancerns svar rebjuds 6+ färg
+  (`openerRebidsAfterTheirDouble`). Facit `overcalls.test.ts`, `auction-live.test.ts`;
+  frö 20261375 landar nu i 2♥, felrapport #23-given i 3♠ (ett steg upp, öppnaren
+  rebjuder 7-korts klöver).
 - **2026-09-25 — Advancern över partnerns 3-lägesinkliv över deras svaga tvåa
   (§7.7, ägarbeslut).** Ny färg = naturlig 5+/12+ som förnekar stöd; inklivaren
   3NT med stopp / utgång med 3-korts stöd / rebud / pass

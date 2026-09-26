@@ -140,12 +140,21 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   // 10 hp – men BARA med perfekt form (max 2 i deras färg + stöd i alla
   // objudna + INGEN egen 5-korts färg, då inkliver vi hellre). Med
   // öppningsstyrka (12+) räcker som förut även en hand med 5-korts färg.
-  // Jämna händer utan korthet dubblar aldrig.
+  // Jämna händer utan korthet dubblar bara med öppningsstyrka (4b).
   const shortTheirs = len[their] <= 2
   const supportUnbid = unbid.every((s) => len[s] >= 3)
   const longestUnbid = Math.max(...unbid.map((s) => len[s]))
   if (shortTheirs && supportUnbid && ((fp.points >= 12 - relief && longestUnbid <= 5) || (fp.points >= 10 - relief && longestUnbid <= 4))) {
     return { call: 'X', rule: 'upplysningsdubbling', explanation: `10+ hp, korthet i ${SYM[their]}, stöd i övriga → X (upplysning).` }
+  }
+  // 4b) Jämn ÖPPNINGSHAND med TRE kort i deras färg (felrapport #84, 2026-09-26):
+  //     ♠AKQ9 ♥QT4 ♦K82 ♣642 (14 hp) passade över 1♣ och 2♠ gick tre bet. Med
+  //     stöd i alla objudna är handen 4-3-3-3 – ingen 5-korts färg att kliva in
+  //     med, för svag för 1NT-inklivet (eller utan stopp) – så X är enda vägen
+  //     in. Offshape-X:et kräver öppningsstyrka (12+, kungalånet gäller); under
+  //     12 passar den jämna handen som förut (ägarbeslut 2026-07-03, H1).
+  if (len[their] === 3 && supportUnbid && fp.points >= 12 - relief) {
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `12+ hp, jämn hand med tre kort i ${SYM[their]} och stöd i alla objudna → X (upplysning).` }
   }
 
   // 5) Enkelt inkliv: bra 5+ färg, 8–16 hp (golv 8→5 i balansering; golvet

@@ -260,6 +260,13 @@ stod kvar som stale. Sedan 2026-08-08 låst med linjebyggstest
 (`auction-stark-x-tva-farger.test.ts`).
 
 ### Övrigt
+- **Öppnarens utgångsförsök efter partnerns konkurrenshöjning (felrapport #84,
+  2026-09-26):** efter 1x–(X)–2x–(P) / 1x–(1y)–2x–(P) passar öppnaren nu under
+  18 och bjuder utgång/2NT/3NT med 18+ (budsystem §7.4h). Hålet: **15–17** har
+  inget utgångsförsök (Bergen 2NT / 3M / hjälpfärgsförsök) — svararens svar på
+  försöken i konkurrens saknas också. **Ägarfråga:** vilken struktur (samma som
+  ostört §4.1, eller enklare 3M = inbjudan)? Byggs som tabellrad i
+  `openerAfterCompetitiveRaise` + svararens rad.
 - **Svårighetsnivåer på bottarna** (ägarbeslut: SENARE, ej del av FAS 11 MED).
 - **Bot-hjärnans B2 (cash-ordning) + Steg C (rätta räkningen)** — villkorade: byggs
   bara om en facit-giv bevisar behovet (`docs/bot-hjarna.md`).

@@ -1290,7 +1290,10 @@ describe('Felrapport #23 – 17+ stark enfärgshand: upplysningsdubbling + stark
     expect(n.rule).toBe('tvångssvar (utan stöd)')
   })
 
-  it('hela auktionen landar i 2♠ av Syd (17 hp / 20 TP < 22 → lägsta nivå, ej 4♠)', () => {
+  it('hela auktionen landar i 3♠ av Syd (17 hp / 20 TP < 22 → lägsta nivå, ej 4♠)', () => {
+    // Felrapport #84 (2026-09-26): öppnaren Öst rebjuder nu sin 7-korts klöver
+    // (2♣) över Nords tvångssvar, så Syds starka återbud blir 2♠, Nords tvångssvar
+    // 3♦ och Syds rebud lägst = 3♠ (förr 2♠, när Öst passade utan regel).
     const order: Seat[] = ['N', 'E', 'S', 'W']
     let h: ResolvedCall[] = [call('N', 'P')]
     let idx = order.indexOf('E')
@@ -1304,7 +1307,7 @@ describe('Felrapport #23 – 17+ stark enfärgshand: upplysningsdubbling + stark
     }
     const contractBids = h.filter((c) => /^[1-7](C|D|H|S|NT)$/.test(c.bid))
     const last = contractBids[contractBids.length - 1]
-    expect(last.bid).toBe('2S')
+    expect(last.bid).toBe('3S')
     expect(last.seat).toBe('S')
   })
 })
@@ -1881,5 +1884,81 @@ describe('advancern över partnerns 3-lägesinkliv över deras svaga tvåa (hål
     expect(decideCall(elva, [call('W', '2S'), call('N', '3C'), call('E', 'P')], 'S').bid).not.toBe('3H')
     const stod = { ...base, hands: { ...base.hands, S: parseHand('S:5 H:AJ853 D:A72 C:Q74') } } // 12 hp, tre klöver
     expect(decideCall(stod, [call('W', '2S'), call('N', '3C'), call('E', 'P')], 'S').bid).not.toBe('3H')
+  })
+})
+
+// Felrapport #84 (bricka 7, 2026-09-26): P – (1♣) – ? med Nord ♠AKQ9 ♥QT4 ♦K82
+// ♣642 (14 hp, 4-3-3-3). Nord passade och 2♠ av Öst gick 3 bet. Ägaren: "Varför
+// bjuder inte nord take out dubbel? Shape och poäng stämmer för take out."
+// Regel 4 i `overcall` krävde max 2 kort i deras färg; en jämn öppningshand med
+// tre kort i deras färg och stöd i alla objudna dubblar nu från 12 hp (§7.3).
+describe('felrapport #84 – jämn 14:a med tre kort i deras färg dubblar 1♣', () => {
+  const deal = dealOf('S', {
+    N: 'S:AKQ9 H:QT4 D:K82 C:642',
+    E: 'S:T765 H:A65 D:Q93 C:Q95',
+    S: 'S:4 H:9832 D:JT54 C:AJT7',
+    W: 'S:J832 H:KJ7 D:A76 C:K83',
+  })
+  const hist = [call('S', 'P'), call('W', '1C')]
+  it('Nord dubblar (upplysning)', () => {
+    const c = decideCall(deal, hist, 'N')
+    expect(c.bid).toBe('X')
+    expect(c.rule).toBe('upplysningsdubbling')
+  })
+  it('Syd svarar tvunget i billigaste 4-kortsfärg (1♥) efter Östs pass', () => {
+    expect(decideCall(deal, [...hist, call('N', 'X'), call('E', 'P')], 'S').bid).toBe('1H')
+  })
+})
+
+// Felrapport #84 forts. — hålen som Nords X blottlade på ÖPPNARSIDAN:
+// (1) 1♣–(X)–2♣–(P): Väst (13 hp, 4-3-3-3) föll till familj 5:s catch-all, som
+//     behandlade öppnaren som "utan fit" och bjöd 2♠ ("ny färg på 2-läget");
+//     Öst höjde sedan till 3♠ på 8 hp. Partnerns höjning är en konkurrenshöjning
+//     (6–9, ej krav): öppnaren passar under utgångsvärden.
+// (2) 1♥–(X)–P–(1♠): öppnaren med 6+ i öppningsfärgen passade (frö 20261375,
+//     ♠6 ♥K85432 ♦AK7 ♣KQ3) — rebjuder nu 2♥ (extra längd, ej krav).
+describe('felrapport #84 forts. – öppnaren efter partnerns konkurrenshöjning / efter deras X och partnerns pass', () => {
+  const rapport = dealOf('S', {
+    N: 'S:AKQ9 H:QT4 D:K82 C:642',
+    E: 'S:T765 H:A65 D:Q93 C:Q95',
+    S: 'S:4 H:9832 D:JT54 C:AJT7',
+    W: 'S:J832 H:KJ7 D:A76 C:K83',
+  })
+  const histRapport = [call('S', 'P'), call('W', '1C'), call('N', 'X'), call('E', '2C'), call('S', 'P')]
+  it('1♣–(X)–2♣–(P): öppnaren (13 hp) passar — ingen ny färg på 2-läget', () => {
+    const c = decideCall(rapport, histRapport, 'W')
+    expect(c.bid).toBe('P')
+    expect(c.rule).toBe('rebid: pass')
+  })
+  it('1♣–(X)–2♣–(P): 18–19 balanserad → 2NT (inbjudan); 20+ → 3NT', () => {
+    const arton = { ...rapport, hands: { ...rapport.hands, W: parseHand('S:AJ83 H:KJ7 D:AQ6 C:K83') } } // 18 hp
+    expect(decideCall(arton, histRapport, 'W')).toMatchObject({ bid: '2NT', rule: 'rebid: 2NT (18–19)' })
+    const tjugo = { ...rapport, hands: { ...rapport.hands, W: parseHand('S:AJ83 H:KQ7 D:AQ6 C:KQ3') } } // 21 hp
+    expect(decideCall(tjugo, histRapport, 'W')).toMatchObject({ bid: '3NT', rule: 'rebid: 3NT' })
+  })
+  it('1♥–(X)–2♥–(P): 13 hp passar; 18+ stödpoäng → 4♥', () => {
+    const hf = dealOf('W', {
+      W: 'S:J83 H:KQJ72 D:A76 C:K8',
+      N: 'S:AKQ95 H:T4 D:K82 C:642',
+      E: 'S:T76 H:A65 D:Q93 C:Q975',
+      S: 'S:42 H:983 D:JT54 C:AJT3',
+    })
+    const hist = [call('W', '1H'), call('N', 'X'), call('E', '2H'), call('S', 'P')]
+    expect(decideCall(hf, hist, 'W')).toMatchObject({ bid: 'P', rule: 'rebid: pass' })
+    const stark = { ...hf, hands: { ...hf.hands, W: parseHand('S:A3 H:KQJ72 D:AK76 C:K8') } } // 19 hp
+    expect(decideCall(stark, hist, 'W')).toMatchObject({ bid: '4H', rule: 'rebid: utgång' })
+  })
+  it('1♥–(X)–P–(1♠): öppnaren med 6+ hjärter rebjuder 2♥ (frö 20261375)', () => {
+    const fro = dealOf('E', {
+      N: 'S:K32 H:J D:J98432 C:642',
+      E: 'S:Q9875 H:Q97 D:5 C:A875',
+      S: 'S:6 H:K85432 D:AK7 C:KQ3',
+      W: 'S:AJT4 H:AT6 D:QT6 C:JT9',
+    })
+    const hist = [call('E', 'P'), call('S', '1H'), call('W', 'X'), call('N', 'P'), call('E', '1S')]
+    expect(decideCall(fro, hist, 'S')).toMatchObject({ bid: '2H', rule: 'återbud i konkurrens: egen 6+ färg' })
+    // Med bara 5 hjärter (minimum) passar öppnaren som förut.
+    const fem = { ...fro, hands: { ...fro.hands, S: parseHand('S:64 H:K8543 D:AK7 C:KQ3') } }
+    expect(decideCall(fem, hist, 'S').bid).toBe('P')
   })
 })

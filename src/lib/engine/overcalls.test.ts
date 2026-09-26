@@ -130,6 +130,29 @@ describe('overcall – inkliv över deras 1-läges öppning (§7.1–7.2)', () =
       expect(o('S:KJT98 H:76 D:Q97 C:A76', '1H')).toBe('1S') // 10 hp, 5 spader
     })
   })
+
+  // Felrapport #84 (bricka 7, 2026-09-26): Nord ♠AKQ9 ♥QT4 ♦K82 ♣642 (14 hp,
+  // 4-3-3-3) PASSADE över 1♣. Ägaren: "Shape och poäng stämmer för take out."
+  // Regeln krävde max 2 kort i deras färg — men en jämn ÖPPNINGSHAND (12+) med
+  // tre kort i deras färg och stöd i alla objudna dubblar (offshape-X); den har
+  // ingen annan väg in (för svag för 1NT-inkliv, ingen 5-korts färg).
+  describe('jämn öppningshand med tre kort i deras färg dubblar från 12 (felrapport #84)', () => {
+    it('14 hp, 4-3-3-3 med tre klöver över 1♣ → X', () => {
+      const res = overcall(parseHand('S:AKQ9 H:QT4 D:K82 C:642'), '1C')
+      expect(res.call).toBe('X')
+      expect(res.rule).toBe('upplysningsdubbling')
+    })
+    it('12 hp jämn med tre i deras färg → X; 11 hp → pass (golvet 12, H1 står kvar)', () => {
+      expect(o('S:KQ92 H:KJ4 D:K82 C:642', '1C')).toBe('X') // 12 hp
+      expect(o('S:KQ92 H:K74 D:K82 C:642', '1C')).toBe('P') // 11 hp
+    })
+    it('16 hp 4-3-3-3 utan stopp i deras färg → X (inte pass: 1NT-inklivet kräver stopp)', () => {
+      expect(o('S:AKQ9 H:KJ4 D:K82 C:642', '1C')).toBe('X') // 16 hp
+    })
+    it('dubbelton i en OBJUDEN färg ger ingen X (4-4-3-2 med tre i deras) → pass under 1NT-fönstret', () => {
+      expect(o('S:AKQ9 H:QT42 D:K8 C:642', '1C')).toBe('P') // 13 hp, två ruter
+    })
+  })
 })
 
 describe('advanceOvercall – svar på partnerns inkliv (§7.1)', () => {

@@ -1870,7 +1870,7 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
     const balancing = inBalancingSeat(prior)
     const bal = balancing ? ' i balansering' : ''
     const extra = balancing ? ' (lättare styrka, återöppnar budgivningen)' : ''
-    const kort = oppS.length >= 2 ? `kort i deras ${oppS.map((s) => NAME[s]).join(' och ')}` : `kort i ${doubledName}`
+    const kort = oppS.length >= 2 ? `kort i deras ${oppS.map((s) => NAME[s]).join(' och ')}` : `kort i ${doubledName} (högst tre)`
     // Både den direkta/balanserande upplysningsdubblingen och den responsiva (mot
     // motståndarnas höjning efter partnerns dubbling) är krav 1 rond + alert —
     // registrets 'upplysningsdubbling' bär den kravnivån och alerten.

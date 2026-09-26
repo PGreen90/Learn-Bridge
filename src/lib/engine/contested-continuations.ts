@@ -984,3 +984,84 @@ export function responderEscapesOverStrong2NT(hand: Hand, f: AuctionFacts): Kuns
     explanation: `Partnerns 2NT i konkurrens visar 18–19 balanserat; en svag hand med 5+ ${SWE_SYM[major]} spelar hellre 3${SWE_SYM[major]} än sang → 3${SWE_SYM[major]} (till spel, ej krav).`,
   }
 }
+
+// ============================================================================
+// Felrapport #84 (2026-09-26): öppnaren efter partnerns konkurrenshöjning, och
+// efter deras upplysningsdubbling + partnerns pass + advancerns svar
+// ============================================================================
+
+/**
+ * PARTNERN HÖJDE MIN FÄRGÖPPNING ENKELT (2x) efter deras dubbling eller inkliv,
+ * och det är min tur (RHO passade). Höjningen är en KONKURRENSHÖJNING (6–9 med
+ * stöd, ej krav) — öppnaren passar under utgångsvärden och går vidare bara med
+ * äkta extra: högfärg 18+ stödpoäng → utgång; lågfärg 18–19 balanserad med håll
+ * i deras visade färger → 2NT (inbjudan, så läser betydelselagret budet),
+ * 20+ → 3NT. Förr föll läget till familj 5:s catch-all (`partnerSuitResponse`),
+ * som behandlade öppnaren som "utan fit" och bjöd en ny 4-korts färg på 2-läget
+ * på 13 hp (1♣–(X)–2♣–(P)–2♠ i felrapport #84; partnern höjde sedan till 3♠).
+ * Utgångsförsöken (15–17: Bergen 2NT / 3M / hjälpfärg) är MEDVETET inte byggda
+ * här — svararens svar på dem i konkurrens saknas, och strukturen är en
+ * ägarfråga (`docs/senare.md`). Ostörd höjning ägs av `rebids.ts`.
+ */
+export function openerAfterCompetitiveRaise(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.strain === 'NT' || open.level !== 1 || open.seat !== seat) return null
+  const ourBids = f.ourContractBids
+  if (ourBids.length !== 2 || ourBids[0].seat !== seat || ourBids[1].seat !== PARTNER[seat]) return null
+  const raise = parseContractBid(ourBids[1].bid)
+  if (!raise || raise.strain !== open.strain || raise.level !== 2) return null
+  // Höjningen är senaste kontraktsbudet, bara pass efter den (min tur) …
+  const last = f.contractBids[f.contractBids.length - 1]
+  if (last !== ourBids[1]) return null
+  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null
+  // … och de agerade (dubbling/inkliv) FÖRE höjningen — annars är det ostört.
+  const raiseIdx = history.indexOf(ourBids[1])
+  if (!history.slice(0, raiseIdx).some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')) return null
+  const suit = SUIT_OF_LETTER[open.strain]
+  const legal = legalCalls(history, seat)
+  const pass: Kunskap = { call: 'P', rule: 'rebid: pass', explanation: `Under utgångsvärden mittemot partnerns konkurrenshöjning (6–9, ej krav) → pass (delkontraktet står).` }
+  if (open.strain === 'H' || open.strain === 'S') {
+    const { points: bp } = pointsWithFloor(hand, suit, 'bergen')
+    const game = `4${open.strain}` as Bid
+    if (bp >= 18 && legal.includes(game)) {
+      return { call: game, rule: 'rebid: utgång', explanation: `Utgångsvärden (18+ stödpoäng) med fiten mittemot partnerns konkurrenshöjning (6–9) → ${prettyBid(game)}.` }
+    }
+    return pass
+  }
+  const p = hcp(hand)
+  const theirSuits = [...f.theirStrains].filter((s) => s !== 'NT').map((s) => SUIT_OF_LETTER[s])
+  if (isBalanced(hand) && theirSuits.every((s) => hasStopper(hand, s))) {
+    if (p >= 20 && legal.includes('3NT' as Bid)) {
+      return { call: '3NT', rule: 'rebid: 3NT', explanation: `20+ balanserad med håll mittemot partnerns konkurrenshöjning (6–9) → 3NT (till spel).` }
+    }
+    if (p >= 18 && legal.includes('2NT' as Bid)) {
+      return { call: '2NT', rule: 'rebid: 2NT (18–19)', explanation: `18–19 balanserad med håll mittemot partnerns konkurrenshöjning (6–9) → 2NT (inbjudan).` }
+    }
+  }
+  return pass
+}
+
+/**
+ * DE DUBBLADE MIN FÄRGÖPPNING, PARTNERN PASSADE, ADVANCERN SVARADE (1x–(X)–P–(1y))
+ * och det är min tur: med 6+ i öppningsfärgen rebjuds den billigast (ej krav —
+ * "extra längd", så läser betydelselagret rebudet). Förr föll läget till
+ * fallback-passet: frö 20261375, ♠6 ♥K85432 ♦AK7 ♣KQ3 passade 1♠ efter
+ * 1♥–(X)–P–(1♠). Bara 6+-rebudet byggs; övriga händer passar som förut.
+ * `openerReopensAfterPartnerPass` utesluter uttryckligen dubblade auktioner.
+ */
+export function openerRebidsAfterTheirDouble(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.strain === 'NT' || open.level !== 1 || open.seat !== seat) return null
+  if (f.ourContractBids.length !== 1) return null
+  const after = history.slice(history.indexOf(f.ourContractBids[0]) + 1)
+  if (after.length !== 3 || after[0].bid !== 'X' || after[1].bid !== 'P') return null
+  const adv = parseContractBid(after[2].bid)
+  if (!adv || isGameOrHigher(after[2].bid as Bid)) return null
+  if (adv.strain === open.strain) return null // advancerns cue i MIN färg (krav hos dem) — inget rebud över det (frö 20260772)
+  if (lengths(hand)[SUIT_OF_LETTER[open.strain]] < 6) return null
+  const rebid = cheapestBidIn(history, seat, open.strain)
+  if (!rebid || !legalCalls(history, seat).includes(rebid)) return null
+  return { call: rebid, rule: 'återbud i konkurrens: egen 6+ färg', explanation: `De dubblade och partnern passade; 6+ ${SWE_SYM[open.strain]} → ${prettyBid(rebid)} (rebud, extra längd, ej krav).` }
+}
