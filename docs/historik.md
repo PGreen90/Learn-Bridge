@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-09-26 (Dagens IMP — en andra daglig tävling, KLAR & LIVE samma dag)
+
+Ägarbeslut på morgonen efter frågan "hur räknas MP%?": MP-räkningen är den
+officiella partävlingsräkningen (1-poängsskalan, samma procent som förbundets
+2-poängsskala) och ändras INTE (Neuberg avförd). I stället byggdes **Dagens IMP**:
+tolv egna givar per dag (frönyckel "datum#imp" — MP-fröna byte-identiska, låst av
+facit), WBF:s IMP-tabell + cross-IMP (`imp.ts`), summa över givarna, 0 IMP per
+ospelad giv, medaljtabell per form, namnen "Dagens MP%"/"Dagens IMP". Schemat:
+`daily_sets.form` (0013 lägg till + ny unik nyckel → deploy → 0014 släpp gamla).
+Alla endpoints `?form=`, nattjobben en gång per form, klienten `?form=imp` med
+eget framsteg och deal-id. Fem etapper på en dag, mergepunkt `186aa45`; första
+IMP-setet #56 via manuell cron (CRON_SECRET är känslig i Vercel → dashboardens
+Run-knapp), bottarna spelade det på 9 min 16 s. Ägarens live-prov godkänt;
+startsidans kort sida vid sida (`298bbdb`). Hela planen: `docs/imp-tavling-plan.md`.
+
+---
+
 ## 2026-08-08 (F6 — stark 17+ enfärg efter två bjudna färger, C5/C14 stängda — KÖRORDNINGEN F1–F6 KLAR)
 
 **F6 KLAR** (körordningens sista punkt — därmed är hela F1–F6-serien ur

@@ -10,12 +10,12 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Dagens IMP: en andra daglig tävling räknad i IMP (ägarbeslut 2026-09-26)
-Tolv NYA givar per dag, egen ställning + historik, IMP-tabellen + cross-IMP. **Hela planen —
-ägarfrågorna (5 st), kartan, etapp 0–5, deploy-sekvensen 0013 → deploy → 0014:
-`docs/imp-tavling-plan.md`** — läs först. MP-tävlingen rörs INTE (ingen Neuberg, ägarbeslut
-09-26). Status: etapp 0–4 BYGGDA i kod på grenen `dagens-imp` (0013 körd); kvar PCD → 0014 →
-första IMP-natten → ägarens live-prov.
+### 🔵 NU — tomt: Dagens IMP KLAR & LIVE 2026-09-26 — ägaren väljer nästa NU ur 🟢 NÄST
+**Dagens IMP** (andra dagliga tävlingen: tolv egna givar, cross-IMP, summa, medaljer per form)
+LIVE `186aa45` + startsidans två kort `298bbdb`; 0013/0014 körda, första IMP-setet #56 spelat
+av bottarna (9 min), ägarens live-prov godkänt. Plan + lärdomar: `docs/imp-tavling-plan.md`.
+MP-räkningen rörs INTE (ingen Neuberg — ägarbeslut 09-26). Bevaka: första schemalagda IMP-natten
+(cron 01:05 · bottar 01:45 · granskning 01:30) och historikens IMP-flik dagen efter.
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret (resonemangslagret steg 1–3 +
 pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje hand högt (regel
