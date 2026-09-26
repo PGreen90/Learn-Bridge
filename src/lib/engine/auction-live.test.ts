@@ -3,6 +3,7 @@ import type { Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseHand } from '../bidding'
 import { auctionFacts } from './auction-facts'
+import { meaningOf } from './auction-meaning'
 import { forcedMinimumBid } from './catch-all-continuations'
 import { dealRandom } from './deal'
 import { dealFromSeed } from './revisor'
@@ -1960,5 +1961,62 @@ describe('felrapport #84 forts. – öppnaren efter partnerns konkurrenshöjning
     // Med bara 5 hjärter (minimum) passar öppnaren som förut.
     const fem = { ...fro, hands: { ...fro.hands, S: parseHand('S:64 H:K8543 D:AK7 C:KQ3') } }
     expect(decideCall(fem, hist, 'S').bid).toBe('P')
+  })
+})
+
+// Felrapport #85 + #86 (bricka 8, 2026-09-26): 1♦–(1♥)–P–(2♥)–X–? Nord (boten)
+// ♠AKQ4 ♥QJ8542 ♦A65 ♣— bjöd 2♠ ur catch-all-regeln ("ny färg, 4+ kort") och
+// passade sedan ägarens 3♥ med 16 hp. Ägarens struktur (svar på tre frågor
+// 2026-09-26): inklivaren efter advancerns ENKLA höjning: <16 pass · 16–17 med
+// 4-korts sidofärg → ny färg = utgångsförsök (5+ inklivsfärg, 4 i nya, EJ krav)
+// · 16–17 utan → 3M (utgångsinvit) · 18+ (totalpoäng) → 4M. Advancern: 3M =
+// minimum 6–7 (inklivaren passar), 4M = maximum 8–9.
+describe('felrapport #85/#86 – inklivaren efter advancerns enkla höjning (ägarens struktur)', () => {
+  const deal = dealOf('W', {
+    N: 'S:AKQ4 H:QJ8542 D:A65 C:-',
+    E: 'S:J63 H:93 D:874 C:Q9653',
+    S: 'S:982 H:T76 D:KJ3 C:AJ74',
+    W: 'S:T75 H:AK D:QT92 C:KT82',
+  })
+  const tillX = [call('W', '1D'), call('N', '1H'), call('E', 'P'), call('S', '2H'), call('W', 'X')]
+  const med = (N: string) => ({ ...deal, hands: { ...deal.hands, N: parseHand(N) } })
+
+  it('rapportens Nord (16 hp, 19 totalpoäng) bjuder 4♥ direkt', () => {
+    expect(decideCall(deal, tillX, 'N')).toMatchObject({ bid: '4H', rule: 'inklivaren till utgång' })
+  })
+  it('16–17 med 4-korts sidofärg → ny färg = utgångsförsök (5+♥, 4♠, 16+, ej krav)', () => {
+    const c = decideCall(med('S:AKQ4 H:QJ854 D:K65 C:32'), tillX, 'N') // 15 hp / 17 totalpoäng, 5-4 (16 hp med 5-4 blir 18 TP → 4♥)
+    expect(c.bid).toBe('2S')
+    expect(c.rule).toBe('inklivarens utgångsförsök (ny färg)')
+    expect(c.explanation).toContain('16+')
+    expect(c.explanation).toContain('5+ ♥')
+  })
+  it('16–17 utan sidofärg → 3♥ (utgångsinvit); under 16 → pass', () => {
+    expect(decideCall(med('S:AJ H:AKJ85 D:K65 C:432'), tillX, 'N')).toMatchObject({ bid: '3H', rule: 'inklivarens utgångsinvit' }) // 16 hp
+    expect(decideCall(med('S:A4 H:KQJ85 D:K65 C:432'), tillX, 'N')).toMatchObject({ bid: 'P', rule: 'inklivaren passar höjningen' }) // 13 hp
+  })
+  it('advancern på utgångsförsöket 2♠: 8–9 → 4♥, 6–7 → 3♥; inklivaren passar 3♥', () => {
+    const efter2S = [...tillX, call('N', '2S'), call('E', 'P')]
+    expect(decideCall(deal, efter2S, 'S')).toMatchObject({ bid: '4H', rule: 'advancern accepterar utgångsförsöket' }) // 9 hp
+    const svag = { ...deal, hands: { ...deal.hands, S: parseHand('S:982 H:T76 D:J83 C:QJ74') } } // 6 hp
+    expect(decideCall(svag, efter2S, 'S')).toMatchObject({ bid: '3H', rule: 'advancern avböjer utgångsförsöket' })
+    const n = decideCall(med('S:AKQ4 H:QJ854 D:K65 C:32'), [...efter2S, call('S', '3H'), call('W', 'P')], 'N')
+    expect(n.bid).toBe('P')
+  })
+  it('advancern på utgångsinviten 3♥: 8–9 → 4♥, 6–7 → pass', () => {
+    const efter3H = [...tillX, call('N', '3H'), call('E', 'P')]
+    expect(decideCall(deal, efter3H, 'S').bid).toBe('4H')
+    const svag = { ...deal, hands: { ...deal.hands, S: parseHand('S:982 H:T76 D:J83 C:QJ74') } }
+    expect(decideCall(svag, efter3H, 'S').bid).toBe('P')
+  })
+  it('betydelselagret: 2♠ = utgångsförsök 16+ (ej krav), advancerns 3♥ = minimum (avslut)', () => {
+    const h = [...tillX, call('N', '2S'), call('E', 'P'), call('S', '3H')]
+    const tva = meaningOf(h, 5)
+    expect(tva.text).toContain('16+')
+    expect(tva.forcing).toBe('ej-krav')
+    const tre = meaningOf(h, 7)
+    expect(tre.text).toContain('minimum')
+    expect(tre.forcing).toBe('avslut')
+    expect(meaningOf([...tillX, call('N', '3H')], 5).forcing).toBe('inbjudan')
   })
 })

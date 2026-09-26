@@ -2027,6 +2027,23 @@ med 6+ kort, aldrig förbi utgång). Med 3+ kort i advancerns färg passar/höje
 inklivaren som förut (5-3 räcker). *Bricka 12: …–(1♥)–P–(1♠)–P → **2♥** med
 ♠53 ♥AT965 (förr pass, i 4-2:an).*
 
+**Inklivaren efter advancerns enkla höjning (felrapport #85/#86, ägarens
+struktur 2026-09-26).** Efter 1x–(1M)–P–(2M) — även med deras dubbling emellan
+— lovar höjningen **6–9 med stöd**. Inklivaren (totalpoäng, som inklivsgolven):
+- **under 16 → pass**;
+- **16–17 med en 4-korts sidofärg** (inte deras) under 3M → **ny färg =
+  utgångsförsök**: 5+ i inklivsfärgen och 4 i den nya, **ej krav**;
+- **16–17 utan sidofärg → 3M = utgångsinvit**;
+- **18+ → 4M direkt** (försöket kan avböjas, så en utgångshand frågar inte).
+
+Advancern svarar på försöket/inviten: **3M = minimum (6–7), avslut** —
+inklivaren passar; **4M = maximum (8–9)**; på 3M-inviten pass eller 4M. Bara
+högfärgsinkliv. *Bricka 8: 1♦–(1♥)–P–(2♥)–X–? med ♠AKQ4 ♥QJ8542 ♦A65 ♣— (16 hp,
+19 totalpoäng) → **4♥**; med ♠AKQ4 ♥QJ854 ♦K65 ♣32 (17 TP) → **2♠** (försök), och
+advancern ♠982 ♥T76 ♦KJ3 ♣AJ74 (9) → **4♥**. Förr bjöd motorn 2♠ ur sista
+utvägen ("ny färg, 4+ kort"), läste partnerns 3♥ som en spärrande "lagen om
+totala stick"-höjning och passade den med 16 hp.*
+
 **Inklivarens andra färg = "välj" (felrapport #56).** Kliver partnern in och
 bjuder sedan en **ny färg** (t.ex. 1♥–(1♠)–3♥–P–P–**4♦**) visar hen två färger
 och ber advancern **välja** — det är inget styrkebud att passa på poäng.
@@ -3024,6 +3041,13 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-26 — Felrapport #85/#86: inklivaren efter advancerns enkla höjning
+  (§7.1, ägarens struktur).** <16 pass · 16–17 med 4-korts sidofärg → ny färg =
+  utgångsförsök (5+/4, ej krav) · 16–17 utan → 3M invit · 18+ → 4M; advancern
+  3M = minimum/4M = maximum (`overcallerAfterSimpleRaise`,
+  `advancerAnswersOvercallerTry`, `overcallerAfterTryAnswer`; betydelselagret
+  läser alla fyra buden). Förr catch-all-2♠ + pass på 3♥ med 16 hp. Facit
+  `auction-live.test.ts`.
 - **2026-09-26 — Felrapport #84: offshape-X + öppnarens svar på konkurrenshöjningen
   (§7.3, §7.4h).** (1) Jämn öppningshand (12+, 4-3-3-3) med TRE kort i deras färg
   dubblar (`overcalls.ts` regel 4b; förr krävdes max 2 — ♠AKQ9 ♥QT4 ♦K82 ♣642

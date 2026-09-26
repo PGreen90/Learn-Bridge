@@ -1198,6 +1198,24 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     return R('cue-bid', `Kontrollbud (${cb.level}${sym}) — ${NAME[majorFit]} är redan trumf (8-korts fit), så ${cb.level}${sym} visar första-rondskontroll (ess eller renons) i ${name} och slamintresse. Partnern cue:ar tillbaka en egen kontroll eller stannar i 4${SYMBOL[majorFit]}.`)
   }
 
+  // Inklivarens utgångsförsök efter advancerns ENKLA höjning, och advancerns
+  // svar (felrapport #85/#86, ägarbeslut 2026-09-26). Läses FÖRE de generiska
+  // höjnings-/nyfärgsläsarna (förr: "ny färg 4+" resp. "lagen om totala stick").
+  const tryCtx = overcallerAfterRaiseContext(seat, prior)
+  if (tryCtx) {
+    const M = tryCtx.major
+    if (cb.strain === M && cb.level === 3) return R('inklivarens utgångsinvit', `${cb.level}${sym} — utgångsinvit: 16–17 hp utan 4-korts sidofärg mittemot din höjning (6–9). Partnern bjuder 4${SYMBOL[M]} med 8–9, passar med 6–7.`)
+    if (cb.strain === M && cb.level === 4) return R('inklivaren till utgång', `${cb.level}${sym} — 18+ totalpoäng mittemot din höjning (6–9). Till spel.`)
+    if (cb.strain !== 'NT' && cb.strain !== M && !tryCtx.theirs.has(cb.strain) && bidRank(cb) < bidRank({ level: 3, strain: M })) {
+      return R('inklivarens utgångsförsök (ny färg)', `${cb.level}${sym} — utgångsförsök: 16+ hp, 5+ ${NAME[M]} och 4 ${name}. Ej krav: partnern bjuder 3${SYMBOL[M]} med minimum (6–7) och 4${SYMBOL[M]} med maximum (8–9).`)
+    }
+  }
+  const ansCtx = advancerAnswersTryContext(seat, prior)
+  if (ansCtx && cb.strain === ansCtx.major) {
+    if (cb.level === 3) return R('advancern avböjer utgångsförsöket', `${cb.level}${sym} — avböjer partnerns utgångsförsök: minimum (6–7) för höjningen. Avslut.`)
+    if (cb.level === 4) return R('advancern accepterar utgångsförsöket', `${cb.level}${sym} — accepterar partnerns ${ansCtx.invite ? 'utgångsinvit' : 'utgångsförsök'}: maximum (8–9) för höjningen. Till spel.`)
+  }
+
   // Stöd/höjning i partnerns visade färg.
   if (cb.strain !== 'NT' && partnerSuits.has(cb.strain)) {
     const comp = competitive ? ' Samtidigt tar du budet vidare i konkurrensen.' : ''
@@ -1495,6 +1513,52 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     // naturliga och ej krav; helt ostört är en ny färg krav 1 rond. (Familj 9.)
     forcing: opponentsInterfered(seat, prior) ? (freeResponder(seat, prior) || openerReverse ? 'krav-1-rond' : 'ej-krav') : 'krav-1-rond',
   }
+}
+
+/**
+ * Inklivaren efter advancerns ENKLA höjning (felrapport #85/#86): jag klev in
+ * naturligt på 1-läget i en HÖGFÄRG över deras färgöppning, partnern höjde
+ * enkelt (2M) och det är senaste kontraktsbudet; vår sida har inte dubblat.
+ */
+function overcallerAfterRaiseContext(seat: Seat, prior: ResolvedCall[]): { major: string; theirs: Set<string> } | null {
+  const open = opening(prior)
+  if (!open || SIDE[open.seat] === SIDE[seat] || open.cb.strain === 'NT') return null
+  if (prior.some((c) => SIDE[c.seat] === SIDE[seat] && (c.bid === 'X' || c.bid === 'XX'))) return null
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
+  if (ours.length !== 2 || ours[0].seat !== seat || ours[1].seat !== PARTNER[seat]) return null
+  const mine = parseBid(ours[0].bid)!
+  const adv = parseBid(ours[1].bid)!
+  const theirs = opponentSuits(seat, prior)
+  if (mine.level !== 1 || (mine.strain !== 'H' && mine.strain !== 'S') || theirs.has(mine.strain)) return null
+  if (adv.strain !== mine.strain || adv.level !== 2) return null
+  const last = lastContract(prior)
+  if (!last || last.seat !== PARTNER[seat]) return null
+  return { major: mine.strain, theirs }
+}
+
+/**
+ * Advancern svarar på inklivarens utgångsförsök/utgångsinvit (felrapport
+ * #85/#86): partnern klev in 1M, jag höjde 2M, partnern bjöd ny färg under 3M
+ * (försök) eller 3M (invit) som senaste kontraktsbud.
+ */
+function advancerAnswersTryContext(seat: Seat, prior: ResolvedCall[]): { major: string; invite: boolean } | null {
+  const open = opening(prior)
+  if (!open || SIDE[open.seat] === SIDE[seat] || open.cb.strain === 'NT') return null
+  if (prior.some((c) => SIDE[c.seat] === SIDE[seat] && (c.bid === 'X' || c.bid === 'XX'))) return null
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
+  if (ours.length !== 3 || ours[0].seat !== PARTNER[seat] || ours[1].seat !== seat || ours[2].seat !== PARTNER[seat]) return null
+  const oc = parseBid(ours[0].bid)!
+  const raise = parseBid(ours[1].bid)!
+  const tryBid = parseBid(ours[2].bid)!
+  const theirs = opponentSuits(seat, prior)
+  if (oc.level !== 1 || (oc.strain !== 'H' && oc.strain !== 'S') || theirs.has(oc.strain)) return null
+  if (raise.strain !== oc.strain || raise.level !== 2) return null
+  const invite = tryBid.strain === oc.strain && tryBid.level === 3
+  const newSuit = tryBid.strain !== 'NT' && tryBid.strain !== oc.strain && !theirs.has(tryBid.strain) && bidRank(tryBid) < bidRank({ level: 3, strain: oc.strain })
+  if (!invite && !newSuit) return null
+  const last = lastContract(prior)
+  if (!last || last.seat !== PARTNER[seat]) return null
+  return { major: oc.strain, invite }
 }
 
 /** Rankar `a` direkt över `b` på samma nivå (för hopp-bedömning)? */

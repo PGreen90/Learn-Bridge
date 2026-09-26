@@ -363,6 +363,13 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'störd överföring: till utgång': 'avslut',
   'tvåfärgsinkliv: bjuder vidare (stark)': 'ej-krav',
   'stöd åt advancern': 'ej-krav',
+  // Inklivaren efter advancerns enkla höjning (felrapport #85/#86, 2026-09-26)
+  'inklivarens utgångsförsök (ny färg)': 'ej-krav',
+  'inklivarens utgångsinvit': 'inbjudan',
+  'inklivaren till utgång': 'avslut',
+  'inklivaren passar höjningen': 'avslut',
+  'advancern accepterar utgångsförsöket': 'avslut',
+  'advancern avböjer utgångsförsöket': 'avslut',
   'inklivaren svarar cue-höjning (utgång)': 'avslut',
   'inklivaren svarar cue-höjning (minimum)': 'ej-krav',
   'inklivaren svarar fit-jump (utgång)': 'avslut',

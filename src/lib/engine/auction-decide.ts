@@ -163,7 +163,7 @@ import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
+import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
@@ -1939,6 +1939,9 @@ const TABELL: Row[] = [
         overcallerAnswersCue(hand, facts) ??
         overcallerCompetesAfterCue(hand, facts) ??
         overcallerAnswersFitJump(hand, facts) ??
+        // Felrapport #85/#86: efter advancerns enkla höjning (försök/invit/utgång/pass)
+        overcallerAfterSimpleRaise(hand, facts) ??
+        overcallerAfterTryAnswer(hand, facts) ??
         overcallerRaisesAdvance(hand, facts) ??
         overcallerAnswersAdvance(hand, facts) ??
         overcallerCorrectsToOwnSuit(hand, facts) ??
@@ -1970,6 +1973,7 @@ const TABELL: Row[] = [
         michaelsContinues(hand, facts) ??
         unusual2NTContinues(hand, facts) ??
         advancerRebidsAfter1NTOvercall(hand, facts) ??
+        advancerAnswersOvercallerTry(hand, facts) ??
         advancerPrefersOvercallSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts) ??
         cueBidderContinues(hand, facts, 'inklivare')

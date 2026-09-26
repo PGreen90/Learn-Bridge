@@ -76,6 +76,9 @@ const ALL_ENGINE_RULES: string[] = [
   // Etapp 4 familj 1 (2026-09-08): inkliv och advance i tabellen (overcalls.ts, overcall-continuations.ts, competitive-slam.ts).
   'fit-jump', 'advance tvåfärg (preferens)', 
   'tvåfärgsinkliv: flykt', 'tvåfärgsinkliv: bjuder vidare (stark)', 'stöd åt advancern',
+  // Inklivaren efter advancerns enkla höjning (felrapport #85/#86)
+  'inklivarens utgångsförsök (ny färg)', 'inklivarens utgångsinvit', 'inklivaren till utgång',
+  'inklivaren passar höjningen', 'advancern accepterar utgångsförsöket', 'advancern avböjer utgångsförsöket',
   // Ovanlig 2NT-fortsättningen, ostörd (unusual-2nt-continuations.ts, 2026-09-21/22).
   'advance ovanlig 2NT: cue (utgångsintresse)', 'advance ovanlig 2NT: spärrhöjning', 'advance ovanlig 2NT: 3NT', 'advance ovanlig 2NT: egen färg',
   'advance ovanlig 2NT: utgång',

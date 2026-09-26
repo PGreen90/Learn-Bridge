@@ -837,3 +837,125 @@ export function overcallerPrefersAdvancerSuit(hand: Hand, f: AuctionFacts): Kuns
     explanation: `Partnern visade ${SWE_SYM[first.strain]} (5+) och ${SWE_SYM[second.strain]} och bad mig välja — minst lika bra stöd i den första → ${prettyBid(bid)} (preferens, ej krav).`,
   }
 }
+
+// ============================================================================
+// Inklivaren efter advancerns ENKLA höjning (felrapport #85/#86, ägarbeslut
+// 2026-09-26) — och advancerns svar på utgångsförsöket
+// ============================================================================
+
+/**
+ * Läget: mitt naturliga 1-lägesinkliv i en HÖGFÄRG, partnerns enkla höjning
+ * (2M) som senaste kontraktsbud (deras eventuella X däremellan spelar ingen
+ * roll). Returnerar högfärgen, annars null.
+ */
+function simpleRaiseOfMyMajor(f: AuctionFacts): string | null {
+  const t = overcallerSecondTurn(f)
+  if (!t) return null
+  const mine = parseContractBid(t.mine.bid)!
+  const adv = parseContractBid(t.adv.bid)!
+  if (mine.level !== 1 || !isMajorStrain(mine.strain)) return null
+  if (adv.strain !== mine.strain || adv.level !== 2) return null
+  if (f.lastContract !== t.adv) return null
+  return mine.strain
+}
+
+/**
+ * INKLIVAREN EFTER PARTNERNS ENKLA HÖJNING (ägarens struktur, felrapport #85/#86):
+ * höjningen lovar 6–9 med stöd. Under 16 totalpoäng → pass. 16–17 med en
+ * 4-korts sidofärg (inte deras) under 3M → **ny färg = utgångsförsök** som
+ * visar 5+ inklivsfärg och 4 i den nya, EJ krav (advancern: 3M = minimum 6–7,
+ * 4M = maximum 8–9). 16–17 utan sidofärg → **3M = utgångsinvit**. 18+ → 4M
+ * direkt (försöket kan avböjas, så en utgångshand frågar inte). Förr föll
+ * läget till catch-all-regeln: ♠AKQ4 ♥QJ8542 ♦A65 ♣— bjöd 2♠ "ny färg 4+" och
+ * passade sedan partnerns 3♥. Bara högfärgsinkliv (lågfärg = SENARE).
+ */
+export function overcallerAfterSimpleRaise(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const M = simpleRaiseOfMyMajor(f)
+  if (!M) return null
+  const tp = pointsWithFloor(hand, null, 'starting').points
+  const legal = legalCalls(f.history, f.seat)
+  const game = `4${M}` as Bid
+  const invite = `3${M}` as Bid
+  if (tp >= 18) {
+    if (!legal.includes(game)) return null
+    return { call: game, rule: 'inklivaren till utgång', explanation: `18+ totalpoäng mittemot partnerns enkla höjning (6–9) → ${prettyBid(game)} (till spel).` }
+  }
+  if (tp >= 16) {
+    const len = lengths(hand)
+    const side = SUIT_STRAINS.filter((st) => st !== M && !f.theirStrains.has(st) && len[SUIT_OF_LETTER[st]] >= 4)
+      .sort((a, b) => len[SUIT_OF_LETTER[b]] - len[SUIT_OF_LETTER[a]] || SUIT_STRAINS.indexOf(a) - SUIT_STRAINS.indexOf(b))
+    for (const st of side) {
+      const bid = cheapestBidIn(f.history, f.seat, st)
+      if (!bid || !legal.includes(bid)) continue
+      const cb = parseContractBid(bid)!
+      if (bidValue(cb.level, cb.strain) >= bidValue(3, M)) continue
+      return {
+        call: bid, rule: 'inklivarens utgångsförsök (ny färg)',
+        explanation: `16+ hp, 5+ ${SWE_SYM[M]} och 4 ${SWE_SYM[st]} → ${prettyBid(bid)} (utgångsförsök, ej krav: 3${SWE_SYM[M]} = minimum 6–7, 4${SWE_SYM[M]} = maximum 8–9).`,
+      }
+    }
+    if (legal.includes(invite)) {
+      return { call: invite, rule: 'inklivarens utgångsinvit', explanation: `16–17 utan 4-korts sidofärg mittemot partnerns enkla höjning (6–9) → ${prettyBid(invite)} (utgångsinvit: 4${SWE_SYM[M]} med 8–9).` }
+    }
+  }
+  return { call: 'P', rule: 'inklivaren passar höjningen', explanation: `Under 16 totalpoäng mittemot partnerns enkla höjning (6–9) → pass.` }
+}
+
+/**
+ * INKLIVAREN när advancern AVBÖJT utgångsförsöket (ny färg) med 3M (minimum
+ * 6–7): pass. Vår sidas fyra kontraktsbud = mitt 1M, partnerns 2M, mitt försök,
+ * partnerns 3M — och 3M är senaste kontraktsbud.
+ */
+export function overcallerAfterTryAnswer(hand: Hand, f: AuctionFacts): Kunskap | null {
+  if (!theirOneSuitOpening(f)) return null
+  const ours = f.ourContractBids
+  if (ours.length !== 4 || ours[0].seat !== f.seat || ours[1].seat !== f.partner || ours[2].seat !== f.seat || ours[3].seat !== f.partner) return null
+  if (f.history.some((c) => side(c.seat) === side(f.seat) && (c.bid === 'X' || c.bid === 'XX'))) return null
+  const mine = parseContractBid(ours[0].bid)!
+  if (mine.level !== 1 || !isMajorStrain(mine.strain) || f.theirStrains.has(mine.strain)) return null
+  const raise = parseContractBid(ours[1].bid)!
+  if (raise.strain !== mine.strain || raise.level !== 2) return null
+  const tryBid = parseContractBid(ours[2].bid)!
+  if (tryBid.strain === mine.strain || tryBid.strain === 'NT' || f.theirStrains.has(tryBid.strain)) return null
+  const ans = parseContractBid(ours[3].bid)!
+  if (ans.strain !== mine.strain || ans.level !== 3) return null
+  if (f.lastContract !== ours[3]) return null
+  void hand
+  return { call: 'P', rule: 'rebid: pass', explanation: `Partnern avböjde utgångsförsöket (3${SWE_SYM[mine.strain]} = minimum 6–7) → pass.` }
+}
+
+/**
+ * ADVANCERN SVARAR PÅ INKLIVARENS UTGÅNGSFÖRSÖK (ägarbeslut 2026-09-26): jag
+ * höjde partnerns 1M-inkliv enkelt (2M, 6–9); partnern bjöd en ny färg under 3M
+ * (försök, 16+ med 5-4) eller 3M (invit, 16–17). Maximum (8+ stödpoäng) → 4M;
+ * minimum → 3M över försöket, pass över inviten. Förr passade advancern
+ * försöket (catch-all) och 3M lästes som "lagen om totala stick".
+ */
+export function advancerAnswersOvercallerTry(hand: Hand, f: AuctionFacts): Kunskap | null {
+  if (!theirOneSuitOpening(f)) return null
+  const ours = f.ourContractBids
+  if (ours.length !== 3 || ours[0].seat !== f.partner || ours[1].seat !== f.seat || ours[2].seat !== f.partner) return null
+  if (f.history.some((c) => side(c.seat) === side(f.seat) && (c.bid === 'X' || c.bid === 'XX'))) return null
+  const oc = parseContractBid(ours[0].bid)!
+  if (oc.level !== 1 || !isMajorStrain(oc.strain) || f.theirStrains.has(oc.strain)) return null
+  const raise = parseContractBid(ours[1].bid)!
+  if (raise.strain !== oc.strain || raise.level !== 2) return null
+  const tryBid = parseContractBid(ours[2].bid)!
+  const M = oc.strain
+  const invite = tryBid.strain === M && tryBid.level === 3
+  const newSuit = tryBid.strain !== 'NT' && tryBid.strain !== M && !f.theirStrains.has(tryBid.strain) && bidValue(tryBid.level, tryBid.strain) < bidValue(3, M)
+  if (!invite && !newSuit) return null
+  if (f.lastContract !== ours[2]) return null
+  const sp = pointsWithFloor(hand, SUIT_OF_LETTER[M], 'support').points
+  const legal = legalCalls(f.history, f.seat)
+  const game = `4${M}` as Bid
+  if (sp >= 8 && legal.includes(game)) {
+    return { call: game, rule: 'advancern accepterar utgångsförsöket', explanation: `Maximum (8–9 stödpoäng) mittemot partnerns ${invite ? 'utgångsinvit' : 'utgångsförsök'} → ${prettyBid(game)} (utgång).` }
+  }
+  if (newSuit) {
+    const back = `3${M}` as Bid
+    if (!legal.includes(back)) return null
+    return { call: back, rule: 'advancern avböjer utgångsförsöket', explanation: `Minimum (6–7) mittemot partnerns utgångsförsök → ${prettyBid(back)} (avslut).` }
+  }
+  return { call: 'P', rule: 'advancern avböjer utgångsförsöket', explanation: `Minimum (6–7) mittemot partnerns utgångsinvit → pass.` }
+}
