@@ -1,6 +1,8 @@
 # Dagens IMP — en andra daglig tävling räknad i IMP (ägarbeslut 2026-09-26)
 
-> **Status: BYGGS — etapp 0 (motorn) + etapp 1 (schema + frön) KLARA i kod 2026-09-26, ej committade/deployade; 0013 väntar på ägaren.** Levande dokument för hela bygget.
+> **Status: BYGGD I KOD — etapp 0–4 KLARA 2026-09-26 på grenen `dagens-imp`
+> (0013 körd av ägaren). Kvar: deploy (PCD), 0014, första natten med IMP-set,
+> ägarens live-prov (etapp 5).** Levande dokument för hela bygget.
 > Masterplanens ram: `docs/beslut-b-plan.md` (etapp 2 lade grunden: konton →
 > daglig 12-givarstävling → topplista). Det här dokumentet är kartan för att
 > lägga **en tävling till** bredvid den: samma dag, tolv NYA givar, räknade i
@@ -191,8 +193,9 @@ deploy-sekvensen nedan. Båda idempotenta, döps "0013"/"0014" i Supabase
   kolumner — avgörs i etapp 4 med ägaren), dagvyn `?dag=&form=`.
 - `pages/Home.tsx` — korten "Dagens MP%" och "Dagens IMP"; `App.tsx` —
   ingen ny route behövs (`?form=` på befintliga), men en tydlig länk.
-- `lib/backend/account.ts` — dataexporten tar med setets `form`;
-  kontoräknaren "tävling N" räknar båda (medvetet).
+- `lib/backend/account.ts` — MEDVETET orörd: dataexporten bär `set_id` (formen
+  går att slå upp ur setet; `daily_sets` har inga läspolicys för klienter, så
+  en inbäddning hade blivit null), kontoräknaren "tävling N" räknar båda formerna.
 
 **Tester som låser dagens nyckling** (uppdateras i takt): `giv-resultat.test`,
 `tavling-historik.test`, `topplista.test`, `tavlingsdag.test`,
@@ -271,4 +274,22 @@ Varje deploy med egen `--no-ff`-mergepunkt (rollback-regeln i CLAUDE.md).
   medaljtabell per form · namnen "Dagens MP%" / "Dagens IMP". Fråga 1
   (cross-IMP/Butler) väntar på förklaring → beslut.
 - **2026-09-26 (kväll)** — fråga 1: **cross-IMP** (ägarbeslut). Alla fem klara → etapp 0 påbörjad.
+- **2026-09-26 (etapp 2–4)** — **etapp 2 KLAR** (`lasForm` i `tavlingsdag.ts`;
+  alla fem endpoints slår upp `(comp_date, form)`, validerar mot frönyckeln,
+  svarar med `form`; topplistan räknar med formens strategi; historik +
+  medaljer per form; formtester i varje endpoint-facit). **Etapp 3 KLAR**
+  (botspelaren + nattgranskningen tar `TAVLING_FORM`, ymlen kör dem en gång
+  per form med `if: always()`, IMP-steget grönt med besked tills 0014;
+  omprovet får frönyckeln i stället för datumet — fungerar i äldre
+  arbetsträd eftersom seed.ts hashar strängen rakt av; avslutet fryser varje
+  set med sin räkning; förscreeningen spelar 24 brickor per dag, IMP-filerna
+  får suffixet `-imp`; timeouts 150/75/50 min). Lokalt prov av
+  förscreeningen 2026-09-28: båda formernas givar genereras och spelas.
+  **Etapp 4 KLAR** (`tavling.ts`: `form` i alla hämtare, `talText`/
+  `enhetText`/`formTitel`/`givTal`, IMP-givar med id `tavling-imp-N-B`;
+  framstegsnyckeln `tavling-framsteg-imp`; `TavlingSpel.form` → etiketten
+  "Dagens IMP · Giv 3/12"; DagensTavling monteras om per `?form=` (key), länk
+  mellan formerna; TavlingDelar/GivGranskning/TavlingHistorik visar IMP med
+  tecken och enhet, historiken har växlingen MP% / IMP; startsidan har två
+  kort). Committat på grenen `dagens-imp`. Kvar: PCD + 0014 + live-prov.
 - **2026-09-26 (senare)** — **etapp 0 KLAR** (`imp.ts` + facit, form-strategin i `matchpoints.ts`, travellern/slutställningen/giv-resultat per form; MP-facit orörda i värde) och **etapp 1 KLAR i kod** (`fronyckel` i `seed.ts` + facit som låser MP-nyckeln = datumet; migration 0013 + 0014; cronen skapar båda seten, MP först och IMP-fel stoppar aldrig MP). Hela sviten grön (`npm test`).

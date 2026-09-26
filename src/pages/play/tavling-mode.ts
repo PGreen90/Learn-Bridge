@@ -6,13 +6,16 @@
 // modul så att både spelskärmen och "Dagens tävling"-sidan kan importera typen
 // utan importcykel.
 
-import type { GivResultat, TavlingInskick, TavlingsGiv } from '../../lib/backend/tavling'
+import type { GivResultat, TavlingInskick, TavlingsForm, TavlingsGiv } from '../../lib/backend/tavling'
 
 export interface TavlingSpel {
   /** Given att spela + play-fröet (deterministiska bottar för valideringen). */
   giv: TavlingsGiv
   /** Tävlingens löpnummer (samma som daily_number på servern). */
   nummer: number
+  /** Tävlingsformen (Dagens IMP, 2026-09-26): 'imp' = IMP-tävlingen. Saknas =
+   *  MP. Styr etiketten i spelskärmen; inskicket får formen av kallaren. */
+  form?: TavlingsForm
   /** Vilken giv i serien detta är (1..total). */
   board: number
   /** Antal givar i tävlingen (12 nu). */

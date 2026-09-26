@@ -10,7 +10,11 @@ import { Felt } from '../../components/Felt'
 import { SuitSymbol } from '../../components/SuitSymbol'
 import type { Seat } from '../../types/bridge'
 import {
+  enhetText,
   fetchGivResultat,
+  givTal,
+  talText,
+  type TavlingsForm,
   type BrickaRad,
   type GivKontrakt,
   type GivResultat,
@@ -48,6 +52,11 @@ export function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
   )
 }
 
+/** "40 %" (MP) eller "0 IMP" (IMP): formens tillsvidare-tal per ospelad giv. */
+function provisorisktText(form: TavlingsForm | undefined, provisoriskProcent?: number, provisoriskt?: number): string {
+  return form === 'imp' ? `${provisoriskt ?? 0} IMP` : `${provisoriskProcent ?? 40} %`
+}
+
 /** Ditt eget läge överst i ställningen (UI-polish steg 3): placering + snitt-MP%.
  *  Visas så fort servern har minst ett inskick från dig (Påbyggnad 3: alla med
  *  inskick står på listan — ospelade givar räknas som 40 % tills de spelats, så
@@ -55,7 +64,7 @@ export function Kontraktscell({ k }: { k?: GivKontrakt | null }) {
  *  skickat in något alls är kortet tyst. */
 export function DinStällning({ resultat, total }: { resultat: TopplistaResultat | null; total: number }) {
   if (!resultat || resultat.status !== 'ok') return null
-  const { du, topplista, provisoriskProcent } = resultat.data
+  const { du, topplista, provisoriskProcent, provisoriskt, form } = resultat.data
   if (!du) return null
 
   const { placering, snitt } = du
@@ -78,14 +87,14 @@ export function DinStällning({ resultat, total }: { resultat: TopplistaResultat
         <div className="w-px self-stretch bg-emerald-100/10" />
         <div className="flex flex-col items-center justify-center">
           <span className="font-brand text-4xl leading-none text-gold-200 tabular-nums">
-            {snitt.toFixed(1)}<span className="text-2xl"> %</span>
+            {talText(snitt, form, 1)}<span className="text-2xl"> {enhetText(form)}</span>
           </span>
           <span className="mt-1 text-xs text-emerald-100/60">{`${spelade}/${total} givar`}</span>
         </div>
       </div>
       {spelade < total && (
         <p className="mt-2 text-center text-[11px] text-emerald-100/60">
-          Ospelade givar räknas som {provisoriskProcent ?? 40} % tills du spelat dem.
+          Ospelade givar räknas som {provisorisktText(form, provisoriskProcent, provisoriskt)} tills du spelat dem.
         </p>
       )}
     </div>
@@ -100,11 +109,15 @@ export function Resultattabell({
   klara,
   topplista,
   onÖppna,
+  form,
 }: {
   klara: GivResultat[]
   topplista: TopplistaResultat | null
   /** Klick på en giv → öppna dess detaljvy (travellern, steg 6). */
   onÖppna: (board: number) => void
+  /** Tävlingsformen (Dagens IMP): styr rubrik och talformat även innan
+   *  ställningen laddats. Utelämnad = MP. */
+  form?: TavlingsForm
 }) {
   if (klara.length === 0) return null
   const mpPerBricka = new Map<number, number>()
@@ -112,9 +125,12 @@ export function Resultattabell({
   // före kontraktssparningen. `undefined` i mappen = servern sa inget (då
   // används det lokalt sparade kontraktet som reserv).
   const kontraktPerBricka = new Map<number, GivKontrakt | null>()
+  const tavlingsForm: TavlingsForm = topplista?.status === 'ok' ? topplista.data.form : (form ?? 'mp')
+  const imp = tavlingsForm === 'imp'
   if (topplista?.status === 'ok') {
     for (const g of topplista.data.dinaGivar) {
-      mpPerBricka.set(g.board, g.procent)
+      const tal = givTal(g)
+      if (tal !== undefined) mpPerBricka.set(g.board, tal)
       if (g.kontrakt !== undefined) kontraktPerBricka.set(g.board, g.kontrakt)
     }
   }
@@ -129,7 +145,7 @@ export function Resultattabell({
               <th className="py-1 pr-2 text-left font-medium">Giv</th>
               <th className="px-2 py-1 text-left font-medium">Kontrakt</th>
               <th className="px-2 py-1 text-center font-medium">Resultat</th>
-              <th className="py-1 pl-2 text-right font-medium">Din MP%</th>
+              <th className="py-1 pl-2 text-right font-medium">{imp ? 'Dina IMP' : 'Din MP%'}</th>
             </tr>
           </thead>
           <tbody>
@@ -179,7 +195,9 @@ export function Resultattabell({
                     {avvisad ? (
                       <span className="text-danger" title="Inskicket avvisades">✗</span>
                     ) : mp !== undefined ? (
-                      <span className="font-semibold text-gold-200">{mp.toFixed(0)} %</span>
+                      <span className="font-semibold text-gold-200">
+                        {talText(mp, tavlingsForm, imp ? 1 : 0)}{imp ? '' : ' %'}
+                      </span>
                     ) : r.inskickStatus === 'fel' ? (
                       // Inskicket kom aldrig fram (2026-09-13): sägs rakt ut, och
                       // skickas om vid sidöppning / uppdatera-knappen.
@@ -194,7 +212,7 @@ export function Resultattabell({
                         className="text-emerald-100/60"
                         title={
                           inne
-                            ? 'Given är inne men inte poängsatt än — räknas som 40 % i snittet tills fler spelat den'
+                            ? `Given är inne men inte poängsatt än — räknas som ${imp ? '0 IMP' : '40 %'} i ställningen tills fler spelat den`
                             : 'Väntar på serverns bekräftelse'
                         }
                       >
@@ -220,6 +238,7 @@ export function Resultattabell({
 export function GivDetalj({
   board,
   dag,
+  form,
   onBack,
   onGranska,
   onÖvning,
@@ -227,6 +246,8 @@ export function GivDetalj({
   board: number
   /** Tävlingsdag (YYYY-MM-DD) för historiken; utelämnad = dagens tävling. */
   dag?: string
+  /** Tävlingsformen (Dagens IMP); utelämnad = MP. */
+  form?: TavlingsForm
   onBack: () => void
   /** Klick på en spelares rad → stega igenom hur hen bjöd och spelade given. */
   onGranska: (rad: BrickaRad) => void
@@ -237,13 +258,13 @@ export function GivDetalj({
   useEffect(() => {
     let active = true
     setUtfall(null)
-    fetchGivResultat(board, dag).then((u) => {
+    fetchGivResultat(board, dag, form).then((u) => {
       if (active) setUtfall(u)
     })
     return () => {
       active = false
     }
-  }, [board, dag])
+  }, [board, dag, form])
 
   return (
     <Skärm>
@@ -258,7 +279,7 @@ export function GivDetalj({
         ) : utfall.status !== 'ok' ? (
           <p className="text-center text-sm text-emerald-100/70">{utfall.fel}</p>
         ) : (
-          <TravellerTabell data={utfall.data} onVälj={onGranska} />
+          <TravellerTabell data={utfall.data} onVälj={onGranska} form={utfall.data.form ?? form} />
         )}
 
         <div className="flex flex-col items-center gap-3">
@@ -286,11 +307,21 @@ export function GivDetalj({
 
 /** Travellern: en rad per spelare på brickan (bäst MP% först), din rad markerad.
  *  Varje rad är klickbar (Påbyggnad 3) → "Så spelade X given". */
-export function TravellerTabell({ data, onVälj }: { data: GivResultatSvar; onVälj: (rad: BrickaRad) => void }) {
+export function TravellerTabell({
+  data,
+  onVälj,
+  form,
+}: {
+  data: GivResultatSvar
+  onVälj: (rad: BrickaRad) => void
+  /** Tävlingsformen (Dagens IMP); utelämnad = MP. */
+  form?: TavlingsForm
+}) {
   if (data.resultat.length === 0) {
     return <p className="text-center text-sm text-emerald-100/70">Inga resultat än.</p>
   }
   const ensam = data.resultat.length < 2
+  const imp = (data.form ?? form) === 'imp'
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
       <div className="overflow-x-auto">
@@ -300,7 +331,7 @@ export function TravellerTabell({ data, onVälj }: { data: GivResultatSvar; onV�
               <th className="py-1 pr-2 text-left font-medium">Spelare</th>
               <th className="px-2 py-1 text-left font-medium">Kontrakt</th>
               <th className="px-2 py-1 text-center font-medium">Resultat</th>
-              <th className="py-1 pl-2 text-right font-medium">MP%</th>
+              <th className="py-1 pl-2 text-right font-medium">{imp ? 'IMP' : 'MP%'}</th>
             </tr>
           </thead>
           <tbody>
@@ -333,7 +364,7 @@ export function TravellerTabell({ data, onVälj }: { data: GivResultatSvar; onV�
                   {resultatText(r.kontrakt)}
                 </td>
                 <td className="py-1.5 pl-2 text-right font-semibold tabular-nums text-gold-200">
-                  {r.procent.toFixed(0)} %
+                  {talText(givTal(r) ?? 0, imp ? 'imp' : 'mp', imp ? 1 : 0)}{imp ? '' : ' %'}
                 </td>
               </tr>
               )
@@ -360,7 +391,7 @@ export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }
     return <p className="text-center text-xs text-emerald-100/60">Hämtar ställningen …</p>
   }
   if (resultat.status !== 'ok') return null
-  const { topplista, poängsattaGivar, storlek, provisoriskProcent, slutlig } = resultat.data
+  const { topplista, poängsattaGivar, storlek, provisoriskProcent, provisoriskt, slutlig, form } = resultat.data
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
       <h2 className="text-center font-brand text-lg text-gold-200">Ställningen</h2>
@@ -394,13 +425,13 @@ export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }
                       {rad.spelade ?? rad.antalGivar}/{storlek}
                     </span>
                   </span>
-                  <span className="font-semibold text-gold-200">{rad.snitt.toFixed(1)} %</span>
+                  <span className="font-semibold text-gold-200">{talText(rad.snitt, form, 1)} {enhetText(form)}</span>
                 </li>
               )
             })}
           </ol>
           <p className="text-center text-[11px] text-emerald-100/60">
-            Ospelade givar räknas som {provisoriskProcent ?? 40} % tills de spelats ·{' '}
+            Ospelade givar räknas som {provisorisktText(form, provisoriskProcent, provisoriskt)} tills de spelats ·{' '}
             {poängsattaGivar} {poängsattaGivar === 1 ? 'giv' : 'givar'} poängsatt
             {poängsattaGivar === 1 ? '' : 'a'} · {slutlig ? 'slutlig' : 'provisorisk'}
           </p>

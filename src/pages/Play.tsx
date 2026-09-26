@@ -270,7 +270,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
           tavling
             ? tavling.övning
               ? `Övning · Giv ${tavling.board} — räknas inte`
-              : `Tävling · Giv ${tavling.board}/${tavling.total}`
+              : `${tavling.form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'} · Giv ${tavling.board}/${tavling.total}`
             : daily
               ? `Dagens giv #${dailyNr}`
               : undefined

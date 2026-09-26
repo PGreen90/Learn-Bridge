@@ -13,7 +13,38 @@
 import type { Card, Deal, Seat, Vulnerability } from '../../types/bridge'
 import type { Strain } from '../engine/play'
 import type { ResolvedCall } from '../bidding'
+import type { TavlingsForm } from '../engine/matchpoints'
 import { getCurrentSession } from './auth'
+
+// Dagens IMP (ägarbeslut 2026-09-26, docs/imp-tavling-plan.md): två tävlingar
+// per dag — MP% (som förr) och IMP (tolv egna givar, cross-IMP, summa). Alla
+// hämtare tar `form`; utelämnad = MP, och MP-anropen ser ut exakt som förr.
+export type { TavlingsForm }
+
+/** Ett tal i tävlingens enhet, UTAN enheten: MP "62" / "62.5", IMP med tecken
+ *  "+14.5" / "−3.0" (noll utan tecken). Enheten: `enhetText`. */
+export function talText(tal: number, form: TavlingsForm | undefined, decimaler: number): string {
+  if (form !== 'imp') return tal.toFixed(decimaler)
+  const abs = Math.abs(tal).toFixed(decimaler)
+  if (Number(abs) === 0) return abs
+  return tal > 0 ? `+${abs}` : `−${abs}`
+}
+
+/** Enheten efter talet: "%" (MP) eller "IMP". */
+export function enhetText(form: TavlingsForm | undefined): string {
+  return form === 'imp' ? 'IMP' : '%'
+}
+
+/** Rubriken för en tävlingsform i gränssnittet (ägarbeslut 2026-09-26). */
+export function formTitel(form: TavlingsForm | undefined): string {
+  return form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'
+}
+
+/** Talet på EN giv ur ett serversvar, oavsett form: `tal` (nya svar), annars
+ *  `procent` (äldre MP-svar) eller `imp`. undefined = inget tal. */
+export function givTal(g: { tal?: number; procent?: number; imp?: number }): number | undefined {
+  return g.tal ?? g.procent ?? g.imp
+}
 
 /** Kompakt kontrakt + resultat för resultattabellen (UI-polish steg 4). Räcker
  *  för att rita "4♠Ö −1" utan att spara hela given. */
@@ -38,6 +69,8 @@ export interface DagensTavling {
   nummer: number
   dag: string
   storlek: number
+  /** Tävlingsformen (Dagens IMP, 2026-09-26). Saknas = MP. */
+  form?: TavlingsForm
   givar: TavlingsGiv[]
 }
 
@@ -95,10 +128,14 @@ function isCard(x: unknown): x is Card {
   return typeof c === 'object' && c !== null && typeof c.suit === 'string' && typeof c.rank === 'string'
 }
 
-/** `?dag=YYYY-MM-DD` för en tidigare tävlingsdag (historiken, Påbyggnad 3);
- *  utelämnad → idag. `first` = om det blir första query-parametern. */
-function dagQuery(dag?: string, first = true): string {
-  return dag ? `${first ? '?' : '&'}dag=${encodeURIComponent(dag)}` : ''
+/** Query-strängen till tävlings-API:erna: `dag=YYYY-MM-DD` för en tidigare
+ *  tävlingsdag (historiken, Påbyggnad 3; utelämnad → idag) och `form=imp` för
+ *  IMP-tävlingen (utelämnad/mp → ingen parameter, så MP-anropen är som förr). */
+function tavlingQuery(dag?: string, form?: TavlingsForm, extra: string[] = []): string {
+  const delar = [...extra]
+  if (dag) delar.push(`dag=${encodeURIComponent(dag)}`)
+  if (form === 'imp') delar.push('form=imp')
+  return delar.length ? `?${delar.join('&')}` : ''
 }
 
 /** Ren översättning: serverns JSON → DagensTavling. Kastar vid trasig form så
@@ -119,6 +156,7 @@ export function tavlingFromResponse(data: unknown): DagensTavling {
     throw new Error('Tävlingssvaret saknar nummer/dag/storlek')
   }
   if (!Array.isArray(rå)) throw new Error('Tävlingssvaret saknar givar')
+  const form: TavlingsForm = d.form === 'imp' ? 'imp' : 'mp'
 
   const givar: TavlingsGiv[] = rå.map((g) => {
     const row = g as Record<string, unknown>
@@ -148,7 +186,9 @@ export function tavlingFromResponse(data: unknown): DagensTavling {
       mappade[s] = h as Card[]
     }
     const deal: Deal = {
-      id: `tavling-${nummer}-${board}`,
+      // IMP-tävlingens givar får eget id-prefix så de aldrig blandas ihop med
+      // MP-tävlingens samma dag (sparade kort, React-nycklar, felrapporter).
+      id: form === 'imp' ? `tavling-imp-${nummer}-${board}` : `tavling-${nummer}-${board}`,
       hands: mappade,
       dealer: dealer as Seat,
       vulnerability: vulnerability as Vulnerability,
@@ -157,16 +197,16 @@ export function tavlingFromResponse(data: unknown): DagensTavling {
     return { deal, playSeed }
   })
 
-  return { nummer, dag, storlek, givar }
+  return { nummer, dag, storlek, form, givar }
 }
 
 /** Hämta dagens tävling från servern. Nätverksfel och trasiga svar fångas och
  *  översätts till { status: 'fel' } så sidan kan visa en vänlig ruta. 404 =
  *  ingen tävling genererad för idag än (status 'ingen'). */
-export async function fetchDagensTavling(dag?: string): Promise<TavlingsResultat> {
+export async function fetchDagensTavling(dag?: string, form?: TavlingsForm): Promise<TavlingsResultat> {
   let res: Response
   try {
-    res = await fetch(`/api/dagens-tavling${dagQuery(dag)}`, { headers: { Accept: 'application/json' } })
+    res = await fetch(`/api/dagens-tavling${tavlingQuery(dag, form)}`, { headers: { Accept: 'application/json' } })
   } catch {
     return { status: 'fel', fel: 'Kunde inte nå servern. Kontrollera nätet och försök igen.' }
   }
@@ -195,6 +235,9 @@ export interface TavlingInskick {
    *  nattgranskningen spelar om botkorten mot exakt den motorversionen.
    *  Utelämnad i utvecklingsbyggen. */
   motor?: string
+  /** Tävlingsformen (Dagens IMP, 2026-09-26): 'imp' → IMP-tävlingens set och
+   *  frönyckel på servern. Utelämnad = MP. */
+  form?: TavlingsForm
 }
 
 /** Serverns utfall: 'godkand'/'avvisad'/'granskning' (validering), 'redan'
@@ -243,7 +286,7 @@ export async function submitTavlingGiv(inskick: TavlingInskick): Promise<Inskick
  * skicka). Spelförarsticken: det sparade värdet, annars ur kontraktet
  * (6 + nivå + resultat); en utpassad giv (kontrakt null) har 0 kort och 0 stick.
  */
-export function inskickUrFramsteg(r: GivResultat): TavlingInskick | null {
+export function inskickUrFramsteg(r: GivResultat, form?: TavlingsForm): TavlingInskick | null {
   if (!r.history || !r.plays) return null
   const declarerTricks =
     r.declarerTricks ??
@@ -255,6 +298,7 @@ export function inskickUrFramsteg(r: GivResultat): TavlingInskick | null {
     plays: r.plays,
     declarerTricks,
     ...(r.motor ? { motor: r.motor } : {}),
+    ...(form ? { form } : {}),
   }
 }
 
@@ -294,12 +338,17 @@ export interface DinPlacering {
   spelade?: number
 }
 
-/** Kallarens matchpoäng på EN spelad, poängsatt giv (till resultattabellen). */
+/** Kallarens tal på EN spelad, poängsatt giv (till resultattabellen). MP-svar
+ *  bär mp/max/procent, IMP-svar bär imp; `tal` finns i alla nya svar (läs det
+ *  med `givTal`, som även förstår äldre svar med bara procent). */
 export interface DinGiv {
   board: number
-  mp: number
-  max: number
-  procent: number
+  form?: TavlingsForm
+  tal?: number
+  mp?: number
+  max?: number
+  procent?: number
+  imp?: number
   /** Kontrakt + resultat ur serverns data (auktoritativt — fylls även för givar
    *  spelade före kontraktssparningen / på annan enhet). `null` = utpassad; kan
    *  saknas i äldre svar. */
@@ -318,12 +367,16 @@ export interface DinInskick {
 
 export interface Topplista {
   nummer: number
+  /** Tävlingsformen talen räknats i (Dagens IMP, 2026-09-26). */
+  form: TavlingsForm
   storlek: number
   /** Antal givar med minst `minPerGiv` spelare (de som ger poäng). */
   poängsattaGivar: number
   minPerGiv: number
   /** Tillsvidare-procenten per ospelad giv (40). Saknas i äldre svar. */
   provisoriskProcent?: number
+  /** Formens tillsvidare-tal per ospelad giv: 40 (MP%) eller 0 (IMP). */
+  provisoriskt?: number
   /** Tävlingsdagen (YYYY-MM-DD) och om det är dagens tävling. Saknas i äldre svar. */
   dag?: string
   idag?: boolean
@@ -349,14 +402,14 @@ export type TopplistaResultat =
  *  själva listan (bara visningsnamn + procent lämnas ut), men skickar vi med
  *  inloggnings-token svarar servern DESSUTOM med kallarens egna siffror
  *  (`du` + `dinaGivar`, UI-polish steg 2). Är man utloggad förblir de null/tom. */
-export async function fetchTopplista(dag?: string): Promise<TopplistaResultat> {
+export async function fetchTopplista(dag?: string, form?: TavlingsForm): Promise<TopplistaResultat> {
   const session = await getCurrentSession()
   const token = session?.access_token
   const headers: Record<string, string> = { Accept: 'application/json' }
   if (token) headers.Authorization = `Bearer ${token}`
   let res: Response
   try {
-    res = await fetch(`/api/topplista${dagQuery(dag)}`, { headers })
+    res = await fetch(`/api/topplista${tavlingQuery(dag, form)}`, { headers })
   } catch {
     return { status: 'fel', fel: 'Kunde inte nå servern.' }
   }
@@ -367,10 +420,12 @@ export async function fetchTopplista(dag?: string): Promise<TopplistaResultat> {
     // Bakåtkompatibelt: äldre svar (eller anonyma) saknar de personliga fälten.
     const data: Topplista = {
       nummer: raw.nummer ?? 0,
+      form: raw.form === 'imp' ? 'imp' : 'mp',
       storlek: raw.storlek ?? 0,
       poängsattaGivar: raw.poängsattaGivar ?? 0,
       minPerGiv: raw.minPerGiv ?? 2,
       provisoriskProcent: raw.provisoriskProcent ?? 40,
+      provisoriskt: raw.provisoriskt,
       dag: raw.dag,
       idag: raw.idag,
       slutlig: raw.slutlig ?? false,
@@ -424,7 +479,8 @@ export function slåIhopFramsteg(lokala: GivResultat[], server: DinInskick[]): G
 // Led 4 — travellern (hela fältets resultat på EN giv, steg 6)
 // ===========================================================================
 
-/** En spelares rad i travellern på en giv: kontrakt + N/S-poäng + MP%.
+/** En spelares rad i travellern på en giv: kontrakt + N/S-poäng + talet
+ *  (MP% eller cross-IMP efter form — läs det med `givTal`).
  *  Ingen bot-flagga (trebottarna 2026-09-01): bottarna har människonamn och
  *  pekas aldrig ut — servern skickar den inte ens. */
 export interface BrickaRad {
@@ -434,7 +490,12 @@ export interface BrickaRad {
   /** Kontraktet spelaren nådde, eller null (utpassad giv). */
   kontrakt: GivKontrakt | null
   nsScore: number
-  procent: number
+  form?: TavlingsForm
+  tal?: number
+  /** MP-svar: procenten på brickan. Saknas i IMP-svar. */
+  procent?: number
+  /** IMP-svar: cross-IMP på brickan. Saknas i MP-svar. */
+  imp?: number
   /** Påbyggnad 3 (2026-09-13): spelarens auktion (kompakt: säte + bud + regel,
    *  utan förklaringstext — klienten tolkar om systemiskt), spelade kort och
    *  spelförarstick → genomgången "Så spelade X given". Saknas i äldre svar. */
@@ -445,6 +506,7 @@ export interface BrickaRad {
 
 export interface GivResultatSvar {
   board: number
+  form?: TavlingsForm
   /** Alla spelares resultat på brickan, bäst MP% först. */
   resultat: BrickaRad[]
 }
@@ -455,13 +517,13 @@ export type GivResultatUtfall =
 
 /** Hämta hela fältets resultat på en giv (travellern). Kräver inloggning OCH att
  *  man själv spelat brickan (servern nekar annars — ingen tjuvkik). */
-export async function fetchGivResultat(board: number, dag?: string): Promise<GivResultatUtfall> {
+export async function fetchGivResultat(board: number, dag?: string, form?: TavlingsForm): Promise<GivResultatUtfall> {
   const session = await getCurrentSession()
   const token = session?.access_token
   if (!token) return { status: 'fel', fel: 'Inte inloggad.' }
   let res: Response
   try {
-    res = await fetch(`/api/giv-resultat?board=${board}${dagQuery(dag, false)}`, {
+    res = await fetch(`/api/giv-resultat${tavlingQuery(dag, form, [`board=${board}`])}`, {
       headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
     })
   } catch {
@@ -511,6 +573,8 @@ export interface Medaljrad {
 }
 
 export interface TavlingHistorik {
+  /** Tävlingsformen (dagar OCH medaljer per form, ägarbeslut 2026-09-26). */
+  form: TavlingsForm
   /** Avslutade dagar, nyast först. */
   dagar: HistorikDag[]
   medaljer: Medaljrad[]
@@ -522,13 +586,13 @@ export type HistorikResultat =
 
 /** Hämta tävlingshistoriken (tidigare dagar med din placering) + medaljtabellen.
  *  Kräver inloggning. Fel översätts till { status: 'fel' }. */
-export async function fetchTavlingHistorik(): Promise<HistorikResultat> {
+export async function fetchTavlingHistorik(form?: TavlingsForm): Promise<HistorikResultat> {
   const session = await getCurrentSession()
   const token = session?.access_token
   if (!token) return { status: 'fel', fel: 'Inte inloggad.' }
   let res: Response
   try {
-    res = await fetch('/api/tavling-historik', {
+    res = await fetch(`/api/tavling-historik${tavlingQuery(undefined, form)}`, {
       headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
     })
   } catch {
@@ -537,7 +601,10 @@ export async function fetchTavlingHistorik(): Promise<HistorikResultat> {
   if (!res.ok) return { status: 'fel', fel: `Servern svarade ${res.status}.` }
   try {
     const raw = (await res.json()) as Partial<TavlingHistorik>
-    return { status: 'ok', data: { dagar: raw.dagar ?? [], medaljer: raw.medaljer ?? [] } }
+    return {
+      status: 'ok',
+      data: { form: raw.form === 'imp' ? 'imp' : 'mp', dagar: raw.dagar ?? [], medaljer: raw.medaljer ?? [] },
+    }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
   }

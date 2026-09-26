@@ -143,8 +143,8 @@ describe('tävlingshistoriken', () => {
     renderSida()
     fireEvent.click(await screen.findByTitle('Visa tävling #41'))
     expect(await screen.findByText('Ställningen')).toBeInTheDocument()
-    expect(tavlingMock).toHaveBeenCalledWith('2026-09-11')
-    expect(topplistaMock).toHaveBeenCalledWith('2026-09-11')
+    expect(tavlingMock).toHaveBeenCalledWith('2026-09-11', 'mp')
+    expect(topplistaMock).toHaveBeenCalledWith('2026-09-11', 'mp')
     expect(screen.getByText(/slutlig/)).toBeInTheDocument()
     // Bricklistan: giv 1 spelad (kontrakt ♠), giv 2 "spelade inte" — båda klickbara.
     expect(screen.getByText('Givarna')).toBeInTheDocument()
@@ -160,7 +160,7 @@ describe('tävlingshistoriken', () => {
 
     fireEvent.click(screen.getAllByTitle('Visa fältets resultat')[0])
     expect(await screen.findByText('Hela fältets resultat')).toBeInTheDocument()
-    expect(givResultatMock).toHaveBeenCalledWith(1, '2026-09-11')
+    expect(givResultatMock).toHaveBeenCalledWith(1, '2026-09-11', 'mp')
 
     fireEvent.click(screen.getByTitle('Se hur Anna spelade given'))
     expect(await screen.findByText('Så spelade Anna giv 1')).toBeInTheDocument()

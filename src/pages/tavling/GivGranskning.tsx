@@ -18,7 +18,7 @@ import { PlayReplay } from '../../components/PlayReplay'
 import type { Deal } from '../../types/bridge'
 import type { ResolvedCall } from '../../lib/bidding'
 import { interpretCall } from '../../lib/engine/auction-interpret'
-import type { BrickaRad } from '../../lib/backend/tavling'
+import { enhetText, givTal, talText, type BrickaRad } from '../../lib/backend/tavling'
 import { byggGranskning } from '../play/granska-tavling'
 import { Kontraktscell, resultatText } from './TavlingDelar'
 
@@ -62,7 +62,9 @@ export function GivGranskning({
         <span className="flex shrink-0 items-center gap-2 tabular-nums">
           <Kontraktscell k={rad.kontrakt} />
           <span>{resultatText(rad.kontrakt)}</span>
-          <span className="font-semibold text-gold-200">{rad.procent.toFixed(0)} %</span>
+          <span className="font-semibold text-gold-200">
+            {talText(givTal(rad) ?? 0, rad.form, rad.form === 'imp' ? 1 : 0)} {enhetText(rad.form)}
+          </span>
         </span>
       </div>
 

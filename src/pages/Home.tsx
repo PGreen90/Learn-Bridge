@@ -101,28 +101,28 @@ function ModeCard({
   )
 }
 
-/** Dagens tävling-kortet (Beslut B etapp 2): brett flaggskepp ovanför
- *  menyknapparna. Den fria "Dagens giv" är dold sedan tävlingen ersatte den
- *  (grindbeslut 2026-08-10 — daily.ts + delningskoden finns kvar, bara
- *  avlänkad). Konto krävs; själva grinden sitter på tävlingssidan. */
-function TavlingCard() {
+/** Tävlingskorten (Beslut B etapp 2): breda flaggskepp ovanför menyknapparna.
+ *  Två sedan Dagens IMP (ägarbeslut 2026-09-26): "Dagens MP%" (som förr) och
+ *  "Dagens IMP" (tolv egna givar räknade i IMP). Den fria "Dagens giv" är dold
+ *  sedan tävlingen ersatte den (grindbeslut 2026-08-10 — daily.ts +
+ *  delningskoden finns kvar, bara avlänkad). Konto krävs; själva grinden
+ *  sitter på tävlingssidan. */
+function TavlingCard({ to, titel, text }: { to: string; titel: string; text: string }) {
   return (
     <Link
-      to="/spela-kort/tavling"
+      to={to}
       className="focus-ring gold-frame group relative block w-full max-w-xl rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
     >
       <div className="flex items-center gap-3">
         <ModeIcon icon="calendar" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 font-semibold text-emerald-50">
-            Dagens tävling
+            {titel}
             <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
               12 givar
             </span>
           </div>
-          <div className="text-sm text-emerald-100/70">
-            Samma 12 givar för alla i dag — spela mot datorn och tävla på topplistan.
-          </div>
+          <div className="text-sm text-emerald-100/70">{text}</div>
         </div>
       </div>
     </Link>
@@ -150,10 +150,19 @@ export function Home() {
         {/* Taglinen (ägarbeslut 2026-08-02): kort och koncis — tre ord. */}
         <p className="max-w-md text-lg text-emerald-50/90">Träna, spela, tävla</p>
 
-        {/* Dagens tävling — FLAGGSKEPPET (Beslut B etapp 2): 12 givar, samma för
-            alla, tävla på topplistan. Ersätter den fria "Dagens giv" (dold enligt
-            grindbeslutet). Enda kortet med den roterande guldramen (gold-frame). */}
-        <TavlingCard />
+        {/* Dagens tävlingar — FLAGGSKEPPEN (Beslut B etapp 2 + Dagens IMP
+            2026-09-26): 12 givar var, samma för alla, tävla på topplistan.
+            Ersätter den fria "Dagens giv" (dold enligt grindbeslutet). */}
+        <TavlingCard
+          to="/spela-kort/tavling"
+          titel="Dagens MP%"
+          text="Samma 12 givar för alla i dag — spela mot datorn och tävla på topplistan."
+        />
+        <TavlingCard
+          to="/spela-kort/tavling?form=imp"
+          titel="Dagens IMP"
+          text="Tolv egna givar räknade i IMP — utgång och slam väger tungt, övertricken lite."
+        />
 
         {/* Menyknapparna: vägen in i appen, en per del. */}
         <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">

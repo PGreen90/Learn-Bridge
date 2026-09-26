@@ -14,7 +14,8 @@ svarar på vad).
 Tolv NYA givar per dag, egen ställning + historik, IMP-tabellen + cross-IMP. **Hela planen —
 ägarfrågorna (5 st), kartan, etapp 0–5, deploy-sekvensen 0013 → deploy → 0014:
 `docs/imp-tavling-plan.md`** — läs först. MP-tävlingen rörs INTE (ingen Neuberg, ägarbeslut
-09-26). Status: PLANERAD, inget byggt.
+09-26). Status: etapp 0–4 BYGGDA i kod på grenen `dagens-imp` (0013 körd); kvar PCD → 0014 →
+första IMP-natten → ägarens live-prov.
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret (resonemangslagret steg 1–3 +
 pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje hand högt (regel
