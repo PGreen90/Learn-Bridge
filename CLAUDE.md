@@ -22,7 +22,8 @@ pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje h
 A–D LIVE `037403b`, kvar beslutet om budseedad gissning; `docs/speldiagnos.md` T-serien) ·
 vänner-bordet = tävlingen (`docs/bord-plan.md`) · Gambling 3NT.
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** Ogust-placering + sunt
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** felrapport #84–#86
+(offshape-X 12+ · öppnaren efter konkurrenshöjning · inklivaren efter höjning, §7.1/§7.3/§7.4h) · Ogust-placering + sunt
 förnuft-svepets hål (`0c5cc37`) · svag tvåa i konkurrens (`24e883c`) · Michaels-fortsättningen
 (§7.2) · stört 1NT: tredje bud + störd överföring (§7.5) · nattgranskningen versionsmedveten ·
 claim-ombygget (`docs/claim-plan.md`) · systems on efter stört 1NT (#77) · Puppet Stayman över

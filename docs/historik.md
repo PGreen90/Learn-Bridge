@@ -27,6 +27,26 @@ startsidans kort sida vid sida (`298bbdb`). Hela planen: `docs/imp-tavling-plan.
 
 ---
 
+## 2026-09-26 (Felrapport #84–#86 — tre strukturbyggen i konkurrenslagret, LIVE samma dag)
+
+Tre rapporter från ägarens spel, alla lagade med facit före fix och deployade
+(`195ac8d`, `2e9fff4`). **#84 (bricka 7):** ♠AKQ9 ♥QT4 ♦K82 ♣642 passade 1♣ —
+upplysningsdubblingen krävde max två kort i deras färg. Nu dubblar en jämn
+öppningshand (12+, 4-3-3-3) med tre kort i deras färg (§7.3; golv 12 bekräftat
+av ägaren). Fixen blottlade två öppnarhål: efter partnerns konkurrenshöjning
+bjöd catch-all-regeln ny 4-kortsfärg på 13 hp (nu pass under 18, 18+ →
+4M/2NT/3NT, §7.4h; utgångsförsök 15–17 = ägarfråga i senare.md) och efter deras
+X + partnerns pass + advancerns svar passade öppnaren med 6+ färg (nu rebud).
+**#85/#86 (bricka 8):** inklivarens andra bud efter advancerns enkla höjning
+saknade regel helt (catch-all 2♠, sedan pass på 3♥ med 16 hp). Ägarens
+struktur via tre frågor: <16 pass · 16–17 med 4-korts sidofärg → ny färg =
+utgångsförsök (5+/4, ej krav) · 16–17 utan → 3M invit · 18+ → 4M; advancern
+3M = minimum, 4M = maximum (§7.1, bara högfärgsinkliv). Betydelselagret läser
+alla buden. Lärdom: när en fix öppnar en auktion som aldrig uppstod förut,
+sondera hela given stol för stol — hålen ligger ett steg längre fram.
+
+---
+
 ## 2026-08-08 (F6 — stark 17+ enfärg efter två bjudna färger, C5/C14 stängda — KÖRORDNINGEN F1–F6 KLAR)
 
 **F6 KLAR** (körordningens sista punkt — därmed är hela F1–F6-serien ur
