@@ -1379,6 +1379,15 @@ hand:
 | **enkel höjning** | minimum **med fit** → tävla |
 | Pass | minimum utan lång färg eller fit → sälj inte, men höj inte heller |
 
+**Partnerns svar var TVINGAT av din egen (återöppnings)dubbling — felrapport
+#87 (2026-09-28):** i **1♦–(2♠)–P–(P)–X–(P)–3♣–(3♠)–?** lovar 3♣ **noll** hp,
+inte 6+, så tabellen ovan gäller inte: **ingen cue, inget utgångskrav.** Med fit
+räknar öppnaren Bergenpoäng mot ett svar som kan vara tomt: **27+ → lågfärgs-
+utgång (5m) / 24+ → 4M**, **21+ → inbjudande höjning** (billigaste höjningen,
+ej krav — partnern går vidare med maximum), annars **pass** — spärren står.
+*Bricka 9: ♠— ♥A874 ♦AJ753 ♣AKT8 (16 hp, 25 Bergenpoäng) cue-bjöd 4♠ och
+tvingade partnern till 5♣ bet; nu 4♣.*
+
 **Står partnerns fria högfärgsbud kvar (de passar) — felrapport #55:** budet
 lovar **5+** (den negativa dubblingen tar 4-kortsfallet), så öppnaren höjer på
 **3-korts stöd** med samma skala som §5.2: **12–15 enkel höjning, 16–18
@@ -2460,6 +2469,20 @@ dubblarens eget flöde (X + egen färg).
   högfärgerna är objudna (t.ex. 1♣–(2♦)–X), visar X:et **båda** högfärgerna,
   minst 4-4 — förklaringen nämner då bägge (felrapport #45). Öppnaren svarar som
   på en upplysningsdubbling.
+  **Bjuder fjärde hand vidare över dubblingen (felrapport #88, ägarens struktur
+  2026-09-28), t.ex. 1♦–(2♣)–X–(3♣)–?, svarar öppnaren ÄNDÅ** — dubblingen ber
+  om ett svar och att tiga kan bli dyrt ("nästan som att passa på en högfärgs-
+  fråga eller överföring"). I ordning: **(1) objuden 4-korts högfärg → bjud den**
+  billigast (kan vara minimum, ej krav); **(2) annars egen 5+ öppningsfärg →
+  rebjud den**; **(3) annars X — "visa din hand"** (krav 1 rond). Gäller på
+  3-läget och lägre; över deras 4-läge dömer de vanliga utgångsreglerna.
+  **Dubblaren visar sin hand på X:et** (öppnaren kan vara minimum — aldrig
+  utgångsblås): 4+ stöd i öppningsfärgen → billigaste höjningen (högfärg: 4M
+  från 13 stödpoäng, renons/singel räknas); annars egen 5+ objuden färg
+  (högfärg även på 4-läget om de tryckt upp den); annars sang med stopp i
+  **båda** deras färger; annars 4-korts objuden färg; annars pass (straff).
+  *Bricka 7: Väst ♠T ♥AK96 ♦AT742 ♣953 passade 3♣ — nu 3♥, och Öst (♠A865
+  ♥T754 ♦KQ985 ♣—) höjer till 4♥.*
   **Öppnarens sang-svar (fel färg-spåret fix 4):** sang på **1-läget** (1NT) går
   bra på minimum med stopp, men på **2-läget+** kräver sangen **extra (~15+)** —
   en minimiöppnare visar hellre (utan nivåhöjning, i ordning) en **annan objuden
@@ -3059,6 +3082,20 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-28 — Felrapport #88 (§7.4, ägarens struktur).** Öppnaren svarar på
+  partnerns negativa dubbling även när fjärde hand bjudit vidare: 4-korts
+  högfärg / 5+ egen färg / X "visa din hand" (3-läget och lägre); ny tabellrad
+  `negativ-x-öppnaren-efter-deras-bud` (`contested-opening.ts`
+  `answerNegativeDoubleOverTheirBid`), läsaren namnger båda buden. Facit
+  `auction-negx-efter-deras-bud.test.ts`.
+- **2026-09-28 — Felrapport #87 + #89.** (#87, §5.8) Öppnarens rond två när
+  partnerns svar var TVINGAT av min egen återöppningsdubbling (1♦–(2♠)–P–(P)–
+  X–(P)–3♣–(3♠)): ingen cue/utgångskrav mot ett svar som kan vara noll —
+  Bergenpoäng 27+ → 5m (24+ → 4M), 21+ → inbjudande höjning, annars pass
+  (`contested-continuations.ts` `openerRondTwoInCompetition`; facit
+  `auction-opener-reopen-passed.test.ts`). (#89, spel) Monte-Carlo-lagret
+  jämför alla kort på SAMMA samplade lägen (`monte-carlo.ts`; facit
+  `play-bot-partner-vinner.test.ts`, `docs/bevaka.md`). #88 väntar ägarbesked.
 - **2026-09-28 — Svagt hoppskift 1♥–2♠ + svararens semi-forcing 2♠ efter
   1♥–1♠–2♥ (§4.1, §5.2; ägarens struktur ur omvärderingsfrågan, läge 2).**
   Julibeslutet "inget svagt hoppskift" (felrapport #31) rivet för exakt 1♥–2♠:

@@ -456,6 +456,41 @@ export function openerRondTwoInCompetition(hand: Hand, f: AuctionFacts): Kunskap
   const tp = fitStrain ? pointsWithFloor(hand, SUIT_OF_LETTER[fitStrain], 'bergen').points : hcp(hand)
   const isMajorFit = fitStrain !== null && isMajorStrain(fitStrain)
 
+  // Felrapport #87 (2026-09-28): partnerns svar var TVINGAT av min egen
+  // (återöppnings)dubbling — 1♦–(2♠)–P–(P)–X–(P)–3♣ lovar 0 hp, inte 6+. Då
+  // är cue/utgångskrav fel: Nord (♠— ♥A874 ♦AJ753 ♣AKT8, 16 hp) cue-bjöd 4♠
+  // över deras 3♠ och partnern tvingades till 5♣ bet. Räkna partnern sex poäng
+  // lägre: utgång först med 24+ stödpoäng, inbjudande höjning från 21, annars
+  // pass (spärren står — partnern har visat ingenting). Aldrig cue.
+  const respIdx = history.indexOf(ourBids[1])
+  const forcedByMyX = (() => {
+    for (let i = respIdx - 1; i >= 0; i--) {
+      if (history[i].bid === 'P') continue
+      return history[i].seat === seat && history[i].bid === 'X'
+    }
+    return false
+  })()
+  if (forcedByMyX) {
+    if (!fitStrain) return null // ingen fit mot ett tvingat svar → gamla lagret (pass)
+    // Bergenpoäng räknar renons/sidofärger generöst (rapportens hand = 25); mot
+    // ett svar som kan vara noll kräver lågfärgsutgången (11 stick) 27, hög-
+    // färgsutgången 24. Inbjudan från 21. Under det står spärren.
+    const gameBid = `${isMajorFit ? 4 : 5}${fitStrain}` as Bid
+    if (tp >= (isMajorFit ? 24 : 27) && legal.includes(gameBid)) return {
+      call: gameBid, rule: 'öppnaren bjuder utgång i konkurrens',
+      explanation: `Utgångsvärden även mot partnerns tvingade svar (0+) med ${SWE_SYM[fitStrain]}-fit → ${prettyBid(gameBid)}.`,
+    }
+    const raise = cheapestBidIn(history, seat, fitStrain)
+    if (tp >= 21 && raise && legal.includes(raise) && parseContractBid(raise)!.level < (isMajorFit ? 4 : 5)) return {
+      call: raise, rule: 'öppnarens inbjudande höjning (konkurrens)',
+      explanation: `Partnerns ${SWE_SYM[fitStrain]} var ett tvingat svar på min dubbling (0+ hp) — med stor fit och extra höjer jag till ${prettyBid(raise)} (inbjudan, ej krav).`,
+    }
+    return {
+      call: 'P', rule: 'öppnaren passar i konkurrens',
+      explanation: `Partnerns ${SWE_SYM[fitStrain]} var ett tvingat svar på min dubbling (0+ hp) — utan extra att höja på passar jag.`,
+    }
+  }
+
   if (tp >= 18) {
     if (isMajorFit && legal.includes(`4${fitStrain}` as Bid)) return {
       call: `4${fitStrain}`, rule: 'öppnaren bjuder utgång i konkurrens',

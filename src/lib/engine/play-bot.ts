@@ -1615,6 +1615,30 @@ export function botCardSmartReasoned(
   }
   if (cardsLeft > maxCards) return botCardReasoned(state, seat)
 
+  // Felrapport #89 (2026-09-28): FJÄRDE hand i försvaret när partnern REDAN
+  // vinner sticket. Att gå över partnerns vinnare är rätt bara som AVBLOCKERING
+  // (kort hand, t.ex. Kx, som annars fastnar under partnerns LÅNGA färg). Det
+  // kräver att partnern faktiskt VISAT längd — öppningsutspelet i sang. Har
+  // spelföraren själv angripit färgen (ledde ♦A sedan ♦2 ur handen) är längden
+  // hans, och att "avblockera" skänker honom färgen: Nord ♦K6 över Syds
+  // vinnande ♦Q (bricka 10) gjorde Östs ♦T98 goda. Monte-Carlo med 8–12 sampel
+  // kan råka ge partnern längden (hand-modellen läser inte spelförarens
+  // färgval) och rösta på kungen — människoregeln går före: kryp, om inte
+  // partnern ledde ut i färgen (då får MC väga avblockeringen).
+  if (state.currentTrick.length === 3 && side(seat) !== side(state.contract.declarer)) {
+    const winner = currentWinner(state.currentTrick, state.trump)
+    const led = state.currentTrick[0].card.suit
+    const mineInLed = state.hands[seat].filter((c) => c.suit === led)
+    const opening = state.completedTricks[0]?.cards[0] ?? state.currentTrick[0]
+    const partnerShowedLength = state.trump === null && opening.seat === PARTNER_SEAT[seat] && opening.card.suit === led
+    if (winner === PARTNER_SEAT[seat] && mineInLed.length > 0 && (mineInLed.length >= 3 || !partnerShowedLength)) {
+      return {
+        card: lowest(mineInLed),
+        reason: 'Partnern vinner redan sticket och jag är sist – jag går inte över partnerns vinnare (avblockering bara när partnern visat längd i färgen), så jag kryper.',
+      }
+    }
+  }
+
   const model = buildHandModel(calls, { voids: shownVoids(state) })
   // Signalavkodning (pt 50): skärp modellen med det öppningsutspelet avslöjar
   // (längd + ev. touchérande honnör), sett ur den agerande platsens synvinkel.

@@ -226,21 +226,39 @@ export function chooseCardMonteCarlo(
   const declSide = side(state.contract.declarer)
   const maximizeDeclarer = side(seat) === declSide
 
-  let best: MonteCarloChoice | null = null
-  for (const card of legal) {
-    let total = 0
-    let counted = 0
-    for (const layout of layouts) {
+  // Varje kort räknas på VARJE läge; ett läge där lösaren inte hann inom
+  // nodbudgeten ger null. Felrapport #89 (2026-09-28): förr jämfördes kortens
+  // medel över OLIKA lägesmängder — kortet som förenklar ställningen (♦K över
+  // partnerns vinnande ♦Q) hann oftare inom budgeten och vann på en annan
+  // uppsättning lägen än hackan. Nu jämförs alla kort på samma lägen: bara de
+  // lägen där ALLA kort löstes räknas; löstes inget läge för alla kort faller vi
+  // tillbaka på kortets egna lösta lägen (som förr) hellre än på ingenting.
+  const results = legal.map((card) =>
+    layouts.map((layout) => {
       const next = playCard({ ...state, hands: layout }, card)
       const dd = doubleDummyDeclarerRemaining(
         next.hands, next.contract.strain, next.contract.declarer, next.currentTrick, next.toAct, maxNodes,
       )
-      if (dd === null) continue // för tung ställning → hoppa detta sampel
+      if (dd === null) return null // för tung ställning → hoppa detta sampel
       const banked = declSide === 'NS' ? next.tricksNS : next.tricksEW
-      total += banked + dd
+      return banked + dd
+    }),
+  )
+  const commonLayouts = layouts.map((_, i) => i).filter((i) => results.every((r) => r[i] !== null))
+  const useCommon = commonLayouts.length > 0
+
+  let best: MonteCarloChoice | null = null
+  legal.forEach((card, ci) => {
+    let total = 0
+    let counted = 0
+    const idx = useCommon ? commonLayouts : layouts.map((_, i) => i)
+    for (const i of idx) {
+      const v = results[ci][i]
+      if (v === null) continue
+      total += v
       counted++
     }
-    if (counted === 0) continue
+    if (counted === 0) return
     const score = total / counted
     // Vid LIKA poäng (vanligt när kontraktet redan är avgjort — alla kort ger samma
     // DD-resultat) vinner det BILLIGASTE kortet, lägst valör. Förr vann det första
@@ -252,6 +270,6 @@ export function chooseCardMonteCarlo(
       (maximizeDeclarer ? score > best.score : score < best.score) ||
       (score === best.score && rankVal(card.rank) < rankVal(best.card.rank))
     if (better) best = { card, score, samples: counted }
-  }
+  })
   return best
 }

@@ -1487,6 +1487,24 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     return { text: `Ny färg ${name} (${cb.level}${sym}) efter din negativa dubbling — inbjudande med värden och egen längd.`, confidence: 'trolig', forcing: 'inbjudan' }
   }
 
+  // Öppnarens svar på partnerns NEGATIVA dubbling när fjärde hand bjudit vidare
+  // (felrapport #88, ägarens struktur 2026-09-28): 1x–(y)–X–(z)–bud = svaret på
+  // dubblingen — 4+ i en objuden högfärg, kan vara minimum. Ej krav.
+  {
+    const open = opening(prior)
+    const ourBids = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && !!parseBid(c.bid))
+    const partnerX = prior.filter((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
+    const theirBids = prior.filter((c) => SIDE[c.seat] !== SIDE[seat] && !!parseBid(c.bid))
+    if (
+      open && open.seat === seat && open.cb.level === 1 && open.cb.strain !== 'NT' &&
+      ourBids.length === 1 && partnerX.length === 1 && partnerX[0].bid === 'X' &&
+      theirBids.length === 2 && prior.indexOf(theirBids[1]) > prior.indexOf(partnerX[0]) &&
+      theirBids[0].bid !== '1NT' && cb.strain !== open.cb.strain && isMajor(cb.strain)
+    ) {
+      return R('svar på negativ dubbling', `${B(cb)} — svar på partnerns negativa dubbling trots deras ${theirBids[1].bid.replace('C', '♣').replace('D', '♦').replace('H', '♥').replace('S', '♠')}: 4+ ${name}, kan vara minimum. Ej krav.`, 'ej-krav')
+    }
+  }
+
   // Ett fritt bud i ny färg på 2-läget i konkurrens lovar 5+ (med 4 kort dubblar
   // man för att visa färgen) — live-prov 2026-09-12. Ett 1-läges fritt bud, och
   // ostörda nya färger, är 4+.
@@ -1901,6 +1919,17 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
       bidRank(last.cb) <= bidRank({ level: 2, strain: pcb.strain })
     ) {
       return R('stöddubbling', `Stöddubbling — visar exakt 3-korts stöd i partnerns ${NAME[pcb.strain]} (med 4-korts stöd höjer man färgen i stället).`)
+    }
+  }
+
+  // (2b) ÖPPNARENS DUBBLING EFTER PARTNERNS NEGATIVA DUBBLING när fjärde hand
+  //      bjudit vidare (felrapport #88): "visa din hand" — varken 4-korts
+  //      högfärg eller 5+ i öppningsfärgen. Krav 1 rond.
+  if (open && open.seat === seat && open.cb.level === 1 && open.cb.strain !== 'NT' && ours.length === 1 && doubledIsOpp && last.cb.strain !== 'NT') {
+    const partnerX = prior.filter((c) => c.seat === partner && c.bid !== 'P')
+    const theirBids = prior.filter((c) => SIDE[c.seat] !== SIDE[seat] && !!parseBid(c.bid))
+    if (partnerX.length === 1 && partnerX[0].bid === 'X' && theirBids.length === 2 && prior.indexOf(theirBids[1]) > prior.indexOf(partnerX[0]) && theirBids[0].bid !== '1NT') {
+      return R('öppnarens dubbling (visa din hand)', `Dubbling — svar på partnerns negativa dubbling trots deras ${last.cb.level}${SYMBOL[last.cb.strain]}: varken en fjärde högfärg eller 5+ i öppningsfärgen; partnern beskriver sin hand. Krav 1 rond.`)
     }
   }
 

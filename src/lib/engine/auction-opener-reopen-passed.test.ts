@@ -67,3 +67,31 @@ describe('Öppnarens rond-2 när partnern PASSAT inklivet (1-färg–(inkliv)–
     expect(decideCall(deal, HDX, 'S').bid).toBe('P')
   })
 })
+
+// ---- Felrapport #87 (2026-09-28): öppnarens rond två när partnerns svar var ----
+// ---- TVINGAT av min egen återöppningsdubbling ------------------------------
+// Bricka 9, Nord giv, ÖV i zon: 1♦–(2♠)–P–(P)–X–(P)–3♣–(3♠)–? Nord ♠— ♥A874
+// ♦AJ753 ♣AKT8 (16 hp) cue-bjöd 4♠ ("utgångskrav, hjälp mig välja utgång") fast
+// Syds 3♣ var ett tvingat svar på dubblingen (0+ hp) — Syd pressades till 5♣ bet.
+// Rätt: partnern räknas sex poäng lägre än ett fritt svar → inbjudande höjning
+// 4♣ (ej krav); utgång (5♣) först med 24+ stödpoäng; minimum passar. Aldrig cue.
+describe('Felrapport #87: öppnaren efter partnerns TVINGADE svar på min återöppningsdubbling', () => {
+  const H87 = [call('N', '1D'), call('E', '2S'), call('S', 'P'), call('W', 'P'), call('N', 'X'), call('E', 'P'), call('S', '3C'), call('W', '3S')]
+  const dealWith = (N: string) => dealOf('N', {
+    N,
+    E: 'S:KJT962 H:K5 D:T984 C:4',
+    S: 'S:843 H:QT6 D:K62 C:QJ96',
+    W: 'S:AQ75 H:J932 D:Q C:7532',
+  })
+  it('rapportens hand (16 hp, renons i deras färg, 4-korts stöd) → 4♣ (inbjudan), inte cue 4♠', () => {
+    const r = decideCall(dealWith('S:- H:A874 D:AJ753 C:AKT8'), H87, 'N')
+    expect(r.bid).toBe('4C')
+    expect(r.rule).toBe('öppnarens inbjudande höjning (konkurrens)')
+  })
+  it('utgångsvärden även mot ett tvingat svar (24+ stödpoäng) → 5♣', () => {
+    expect(decideCall(dealWith('S:- H:AK74 D:AKJ53 C:AKT8'), H87, 'N').bid).toBe('5C') // 22 hp + renons
+  })
+  it('minimum med fit (13 hp) → pass, spärren står', () => {
+    expect(decideCall(dealWith('S:2 H:K874 D:AJ753 C:KQT8'), H87, 'N').bid).toBe('P') // 13 hp → 13+3 = 16 sp, justerat 10
+  })
+})

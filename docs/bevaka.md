@@ -1,5 +1,26 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Monte-Carlo röstar bara på GEMENSAMMA lägen (2026-09-28, felrapport #89)
+- **Lagat:** Nord (♦K65) gick över partnerns redan vinnande ♦Q som fjärde hand i
+  1NT (bricka 10) — tumreglerna säger "partnern vinner, kasta lågt", men MC-lagret
+  med 8 kort kvar (12 sampel, 110 000 noder) valde ♦K ungefär en gång på tio.
+  Orsak: `chooseCardMonteCarlo` räknade varje korts medel över de lägen där
+  lösaren HANN inom nodbudgeten — olika mängder per kort. ♦K förenklar
+  ställningen (hinner oftare), ♦6 föll bort på just de tunga lägen där den var
+  bättre. Nu jämförs alla kort på samma lägen (bara lägen där ALLA kort löstes);
+  löstes inget läge för alla står den gamla räkningen kvar. Det räckte för två
+  av tre felfrön; på det tredje gav samplingen Öst för få ruter, och när partnern
+  har längden är ♦K faktiskt rätt (avblockering av ♦K6). Men längden var
+  spelförarens (Öst ledde ♦A sedan ♦2). Därför också en människoregel före MC
+  (`play-bot.ts` `botCardSmartReasoned`): fjärde hand i försvaret med partnern
+  vinnande kryper alltid — avblockering över partnerns vinnare bara när partnern
+  visat längd med sitt öppningsutspel i sang. Facit `play-bot-partner-vinner.test.ts`.
+- **Bevaka:** (1) med bantad budget (8 kort) kan antalet gemensamma lägen bli
+  litet — hänger ihop med "MC-beslut på FÅ samplade lägen" nedan; (2) hand-
+  modellen vet inte att en spelförare som leder ♦A sedan ♦2 har LÅNG ruter —
+  samplingen gav Öst 0–2 ruter i 9 av 12 lägen fast han hade fem (inferens ur
+  spelförarens färgval = bot-hjärnans bredare försvarsinferens, SENARE).
+
 ## Sakningar när kontraktet är avgjort — RÄTT kort, inte bara max stick (2026-09-25, felrapport #78 + #79)
 - **Lagat:** (1) Monte-Carlo-lagret (`monte-carlo.ts`) tog det FÖRSTA kortet i listan
   vid lika DD-poäng = det högsta (♠K sakades i 4♥, #78); nu vinner lägsta valör vid

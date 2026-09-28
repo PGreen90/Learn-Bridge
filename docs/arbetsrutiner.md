@@ -52,6 +52,20 @@ felbud) ska Claude **inte** föreslå en egen färdig struktur. Claude ska:
 ville ha systems on + stulet bud. Ägaren: "du borde fråga mig om hur jag vill
 bygga detaljer".)*
 
+## 🔢 Regel: händer som visas för ägaren räknas med KOD (2026-09-28)
+Poäng och kortantal för en hand som visas för ägaren (felrapporter, exempelgivar,
+budtabeller) räknas **aldrig i huvudet och ärvs aldrig från ett tidigare svar** —
+de räknas med motorns egna funktioner (`hcp(parseHand(...))`, `src/lib/engine/hand.ts`)
+varje gång. Innan en tabell med fyra händer skrivs kontrolleras att de **summerar
+till 40 hp och 13 kort var**; stämmer det inte visas ingenting förrän felet är hittat.
+Samma disciplin gäller påståenden om vad ett bud *lovar*: kolla systemboken (t.ex. att
+negativ dubbling visar "typiskt" de objudna högfärgerna — en 4-4-fit är alltså
+**inte känd** för partnern) innan ett läge beskrivs som känt.
+*(Bakgrund: felrapport #88 — hp-raden 12/16/6/5 summerade till 39, rätt var
+11/15/9/5; Östs 9 hp hade räknats till 6 och upprepats i tre svar. Ägaren:
+"ett kritiskt fel, det får inte hända". Regeln står också i
+`.claude/commands/felrapporter.md` och i minnet.)*
+
 ## 🔴 Sessionsavslut (avsluta smart & noggrant)
 > Mål: inget lämnas trasigt, allt är sparat, och nästa start blir lätt.
 
