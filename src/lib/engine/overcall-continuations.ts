@@ -791,6 +791,74 @@ export function penaltyDoubleFirst(hand: Hand, f: AuctionFacts): Kunskap | null 
   return { call: 'X', rule: ans.rule, explanation: ans.explanation }
 }
 
+/**
+ * Läge (felrapport #90, 2026-09-28): jag klev in naturligt i färg över deras
+ * öppning, de bjöd vidare (höjning/ny färg) och PARTNERN DUBBLADE det budet —
+ * kooperativt/responsivt: värden, "partnern väljer". Dubblingen är auktionens
+ * senaste icke-pass, partnerns enda besked, vår sida har bara mitt inkliv och
+ * deras sida exakt öppningen + budet över inklivet.
+ */
+export function advancerDoubledTheirBidSeat(f: AuctionFacts): { mySuit: Suit; theirSuit: Suit; theirLast: string } | null {
+  const open = f.opening
+  if (!open || f.weOpened || f.role !== 'inklivare') return null
+  const ourBids = f.ourContractBids
+  if (ourBids.length !== 1 || ourBids[0].seat !== f.seat) return null
+  const mine = parseContractBid(ourBids[0].bid)
+  if (!mine || mine.strain === 'NT') return null
+  const partnerCalls = f.history.filter((c) => c.seat === f.partner && c.bid !== 'P')
+  if (partnerCalls.length !== 1 || partnerCalls[0].bid !== 'X') return null
+  if (f.lastNonPass !== partnerCalls[0]) return null
+  const theirBids = f.theirContractBids
+  if (theirBids.length !== 2 || f.history.indexOf(theirBids[1]) < f.history.indexOf(ourBids[0])) return null
+  const theirLast = parseContractBid(theirBids[1].bid)
+  if (!theirLast || theirLast.strain === 'NT') return null
+  return { mySuit: SUIT_OF_LETTER[mine.strain], theirSuit: SUIT_OF_LETTER[theirLast.strain], theirLast: theirBids[1].bid }
+}
+
+/**
+ * INKLIVAREN efter partnerns dubbling av deras bud (felrapport #90, bricka 8:
+ * (2♦)–2♥–(3♦)–X–P–? Nord ♠Q84 ♥KQJ8762 ♦— ♣Q97 PASSADE 3♦ dubblat med
+ * renons i ruter och sju hjärter). Ägaren: "med så lång hjärter och noll
+ * ruter måste han bjuda hjärter". Dubblingen är kooperativ — partnern har
+ * värden och låter mig välja: kort i deras färg (högst en) eller 6+ egen färg →
+ * jag sitter INTE kvar utan rebjuder färgen: högfärgsutgång med 7+ kort eller
+ * 6+ och 11+ hp (partnern visade ~10+), annars billigast. Med 2+ i deras färg
+ * och högst fem egna sitter jag kvar (straff).
+ */
+export function overcallerAfterAdvancersDouble(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const s = advancerDoubledTheirBidSeat(f)
+  if (!s) return null
+  const len = lengths(hand)
+  const p = hcp(hand)
+  const legal = legalCalls(f.history, f.seat)
+  const my = letterOfSuit(s.mySuit)
+  const their = letterOfSuit(s.theirSuit)
+  const short = len[s.theirSuit] <= 1
+  const long = len[s.mySuit] >= 6
+  if (!short && !long) {
+    return {
+      call: 'P', rule: 'inklivaren sitter kvar på partnerns dubbling',
+      explanation: `Partnerns dubbling visar värden och låter mig välja: med ${len[s.theirSuit]} kort i deras ${SWE_SYM[their]} och bara ${len[s.mySuit]} i min ${SWE_SYM[my]} sitter jag kvar → pass (straff).`,
+    }
+  }
+  const isMajor = my === 'H' || my === 'S'
+  const game = `4${my}` as Bid
+  if (isMajor && (len[s.mySuit] >= 7 || (len[s.mySuit] >= 6 && p >= 11)) && legal.includes(game)) {
+    return {
+      call: game, rule: 'inklivaren drar ur partnerns dubbling',
+      explanation: `Partnerns dubbling visar värden — jag sitter inte kvar med ${len[s.theirSuit]} kort i deras ${SWE_SYM[their]} och ${len[s.mySuit]} ${SWE_SYM[my]}: ${prettyBid(game)} (utgång).`,
+    }
+  }
+  const cheapest = cheapestBidIn(f.history, f.seat, my)
+  if (cheapest && legal.includes(cheapest)) {
+    return {
+      call: cheapest, rule: 'inklivaren drar ur partnerns dubbling',
+      explanation: `Partnerns dubbling visar värden — jag sitter inte kvar med ${len[s.theirSuit]} kort i deras ${SWE_SYM[their]}: rebjuder ${SWE_SYM[my]} (${prettyBid(cheapest)}, ej krav).`,
+    }
+  }
+  return null
+}
+
 /** Kunskap → ett beslutat bud för stolen (tabellradernas form). */
 export function asCall(seat: Seat, k: Kunskap): ResolvedCall {
   return { seat, bid: k.call as Bid, rule: k.rule, explanation: k.explanation }
