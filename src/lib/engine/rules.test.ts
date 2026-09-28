@@ -83,6 +83,8 @@ const ALL_ENGINE_RULES: string[] = [
   'rebjuden färg (semi-forcing)', 'rebid: egen färg (inbjudan)',
   // Öppnarens svar på negativ dubbling när fjärde hand bjudit vidare (felrapport #88).
   'öppnarens dubbling (visa din hand)', 'visar handen efter öppnarens dubbling',
+  // Inklivaren efter partnerns dubbling av deras bud över inklivet (felrapport #90).
+  'inklivaren drar ur partnerns dubbling', 'inklivaren sitter kvar på partnerns dubbling',
   // Ovanlig 2NT-fortsättningen, ostörd (unusual-2nt-continuations.ts, 2026-09-21/22).
   'advance ovanlig 2NT: cue (utgångsintresse)', 'advance ovanlig 2NT: spärrhöjning', 'advance ovanlig 2NT: 3NT', 'advance ovanlig 2NT: egen färg',
   'advance ovanlig 2NT: utgång',

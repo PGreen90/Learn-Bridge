@@ -2071,6 +2071,14 @@ advancern ♠982 ♥T76 ♦KJ3 ♣AJ74 (9) → **4♥**. Förr bjöd motorn 2♠
 utvägen ("ny färg, 4+ kort"), läste partnerns 3♥ som en spärrande "lagen om
 totala stick"-höjning och passade den med 16 hp.*
 
+**Inklivaren efter partnerns dubbling av deras bud över inklivet (felrapport
+#90, 2026-09-28).** I (2♦)–2♥–(3♦)–**X**–P–? är partnerns dubbling kooperativ:
+värden, kort i deras färg — "partnern väljer". Inklivaren sitter **inte** kvar
+med **högst en i deras färg eller 6+ egen färg**: rebjuder färgen — **utgång
+med 7+ kort, eller 6+ och 11+ hp**, annars billigast. Med 2+ i deras färg och
+högst fem egna står dubblingen (pass = straff). *Bricka 8: Nord ♠Q84 ♥KQJ8762
+♦— ♣Q97 passade 3♦ X — nu 4♥.*
+
 **Inklivarens andra färg = "välj" (felrapport #56).** Kliver partnern in och
 bjuder sedan en **ny färg** (t.ex. 1♥–(1♠)–3♥–P–P–**4♦**) visar hen två färger
 och ber advancern **välja** — det är inget styrkebud att passa på poäng.
@@ -3082,6 +3090,14 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-28 — Felrapport #90 (§7.1).** Inklivaren efter partnerns
+  (kooperativa) dubbling av deras bud över inklivet, (2♦)–2♥–(3♦)–X–P–?:
+  kort i deras färg (≤1) eller 6+ egen färg → drar ur (högfärgsutgång med 7+
+  eller 6+ och 11+ hp, annars billigaste rebud); annars sitter kvar (straff).
+  Nord ♠Q84 ♥KQJ8762 ♦— ♣Q97 passade förr 3♦ X, nu 4♥. Ny tabellrad
+  `inklivaren-efter-partnerns-x` (`overcall-continuations.ts`
+  `overcallerAfterAdvancersDouble`). Facit
+  `auction-inklivaren-efter-advancerns-x.test.ts`.
 - **2026-09-28 — Felrapport #88 (§7.4, ägarens struktur).** Öppnaren svarar på
   partnerns negativa dubbling även när fjärde hand bjudit vidare: 4-korts
   högfärg / 5+ egen färg / X "visa din hand" (3-läget och lägre); ny tabellrad
