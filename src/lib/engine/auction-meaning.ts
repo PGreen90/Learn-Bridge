@@ -2927,6 +2927,10 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       if (u.responderPassed) return R('semi-forcing 1NT', `1 sang — semi-forcing, passad hand: 6–11 hp utan Drury-höjning (limithöjningen hade gått via 2♣/2♦). Naturligt, ej krav — öppnaren får passa med minimum balanserad hand.`)
       return R('semi-forcing 1NT', `1 sang — semi-forcing: 6–11 hp, ingen 2-över-1 (kan dölja en 3-korts limithöjning). Öppnaren får passa bara med minimum balanserad hand.`)
     }
+    // Svagt hoppskift 1♥–2♠ (ägarens struktur 2026-09-28; §4.1): spärr, till spel.
+    if (same(cb, 2, 'S') && M === 'H' && !u.responderPassed) {
+      return R('svagt hoppskift', `2♠ — svagt hoppskift: 6+ spader, 5–8 hp och högst två hjärter. Spärr, ej krav — öppnaren går vidare bara med 18+ startpoäng (två spader) eller 16+ med tre.`)
+    }
     if (cb.level === 2 && cb.strain !== 'NT' && cb.strain !== M && !rankAbove(cb.strain, M)) {
       if (u.responderPassed) {
         if (isMinor(cb.strain)) return R('Drury', `${B(cb)} — Drury (passad hand): limithöjning av ${mname} (~10–12 hp) med ${cb.strain === 'C' ? 'exakt 3' : '4+'} trumf. Säger inget om ${name}.`)
@@ -3383,7 +3387,14 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
     return R('inbjudan (limithöjning)', `${B(cb)} — hopp till ${name}: stöd och inbjudan (10–12).`)
   }
   if (cb.strain === resp.strain) {
-    if (cb.level === minLevelOver(reb, cb.strain)) return R('rebjuden färg', `${B(cb)} — rebjuder ${name}: 6+ kort, högst ~10 hp. Öppnaren får passa.`)
+    if (cb.level === minLevelOver(reb, cb.strain)) {
+      // 1♥–1♠–2♥–2♠ (ägarens struktur 2026-09-28, §5.2): 5+ spader, 10+ hp,
+      // semi-forcing — öppnaren passar bara med 12–13 och högst två spader.
+      if (isMajor(open.strain) && reb.strain === open.strain && reb.level === 2 && isMajor(cb.strain)) {
+        return R('rebjuden färg (semi-forcing)', `${B(cb)} — rebjuder ${name}: 5+ kort, 10+ hp. Semi-forcing — öppnaren passar bara med minimum (12–13) och högst två ${name}; med tre stöd 3${SYMBOL[cb.strain]}/4${SYMBOL[cb.strain]}, med 14–15 och två kort 3${SYMBOL[open.strain]}.`)
+      }
+      return R('rebjuden färg', `${B(cb)} — rebjuder ${name}: 6+ kort, högst ~10 hp. Öppnaren får passa.`)
+    }
     return R('rebjuden färg (inbjudan)', `${B(cb)} — hoppinvit i egen ${name}: 6+ kort, 11–12 hp. Inbjudan.`)
   }
   // Ny färg (ej fjärde färg / NMF).
@@ -3407,6 +3418,12 @@ function openerThirdAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed, _p
     if (cb.strain === resp.strain) return R('svar på fjärde färg', `${B(cb)} — svar på fjärde färg: 3-korts stöd i partnerns ${name}. Utgångskravet står.`, 'utgangskrav')
     if (cb.strain === 'NT') return R('svar på fjärde färg', `${B(cb)} — svar på fjärde färg: stopp i ${NAME[w.strain]}.`, below(cb, 'utgangskrav'))
     return R('svar på fjärde färg', `${B(cb)} — svar på fjärde färg: ${cb.strain === w.strain ? `4 kort i ${name}` : `extra längd i ${name}`}. Utgångskravet står.`, 'utgangskrav')
+  }
+  // Efter partnerns semi-forcing 2♠ (1♥–1♠–2♥–2♠; ägarens struktur 2026-09-28):
+  // 3♠ = tre spader med minimum, 3♥ = två spader men 14–15 (6+ hjärter), 4♠ = utgång (ovan).
+  if (isMajor(open.strain) && reb.strain === open.strain && reb.level === 2 && w.strain === resp.strain && isMajor(resp.strain) && w.level === 2) {
+    if (cb.strain === resp.strain && cb.level === 3) return R('rebid: stöd', `${B(cb)} — tre ${name} mot partnerns semi-forcing 2${SYMBOL[resp.strain]}, minimum (12–13). Ej krav — partnern bjuder 4${SYMBOL[resp.strain]} med 12.`)
+    if (cb.strain === open.strain && cb.level === 3) return R('rebid: egen färg (inbjudan)', `${B(cb)} — 6+ ${name} och 14–15 mot partnerns semi-forcing 2${SYMBOL[resp.strain]} (högst två ${NAME[resp.strain]}). Inbjudan.`)
   }
   const invite = same(w, 2, 'NT') || (w.strain !== 'NT' && isJumpOver(reb, w) && (w.strain === reb.strain || w.strain === open.strain || w.strain === resp.strain))
   if (invite) return R('rebid: stanna', `${B(cb)} — avböjer inbjudan, stannar under utgång.`)

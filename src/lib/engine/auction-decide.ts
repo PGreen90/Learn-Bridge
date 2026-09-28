@@ -137,7 +137,7 @@ import { meaningOf } from './auction-meaning'
 import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
 import { classifyOpening } from './openings'
-import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNaturalThirdSuit, openerAnswerNMF, openerSecondBid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterPassedBrake, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
+import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNaturalThirdSuit, openerAnswerNMF, openerSecondBid, openerThirdAfterSemiForcingRebid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterPassedBrake, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
 import { NMF_SLAM_ZONE_HP, responderPlaceAfter2NTCheckback, responderPlaceAfterNMF, responderRebidIn2NTAuction, responderSecondBid } from './responder-rebids'
 import { openerRebidAfter2NTResponse, PUPPET } from './responses-2nt'
 import { respondToGerber } from './slam'
@@ -959,6 +959,13 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
     if (t) return t
   }
 
+  // Partnerns SEMI-FORCING rebud av sin högfärg efter mitt 2M-återbud
+  // (1♥–1♠–2♥–2♠; ägarens struktur 2026-09-28): 5+ kort, 10+ hp — jag passar
+  // bara med minimum och högst två kort.
+  if (second.rule === 'rebjuden färg (semi-forcing)' && openerSuit && isMajorSuit(openerSuit) && respSuit && isMajorSuit(respSuit)) {
+    return openerThirdAfterSemiForcingRebid(hand, openerSuit as 'hearts' | 'spades', respSuit)
+  }
+
   // Min enkla höjning av partnerns 1M + partnerns 3M-inbjudan: öppnaren
   // svarar alltid (systemfel #3 delfix 4b).
   if ((response.call === '1H' || response.call === '1S') && rebid.rule === 'enkel höjning' && second.rule === 'inbjudan' && second.call === `3${response.call[1]}`) {
@@ -1065,6 +1072,28 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
     if (!c) return null
     const first = slamCaptainFirstStep(hand, trump, third.call, c.ctx)
     return first ? { turn: asResponse(first), plan: { kind: 'slam', setup: { trump, lastCall: third.call, ctx: c.ctx } } } : null
+  }
+
+  // Mitt semi-forcing 2♠ (1♥–1♠–2♥–2♠, 5+ spader, 10+; ägarens struktur
+  // 2026-09-28) — öppnaren svarade: 3♠ = tre spader men minimum → 4♠ bara med
+  // 12; 3♥ = två spader men 14–15 → 4♥ med två hjärter och 12, 3NT med 12 utan,
+  // annars pass. Utgång (4♠) står.
+  if (second.rule === 'rebjuden färg (semi-forcing)' && openerSuit && respSuit && isMajorSuit(openerSuit) && isMajorSuit(respSuit)) {
+    const p = hcp(hand)
+    const len = lengths(hand)
+    const pass = (why: string): ThirdDecision => ({ turn: { call: 'P', rule: 'svararens pass', explanation: `${why} → pass.` }, plan: { kind: 'call' } })
+    if (third.call === `3${LETTER[respSuit]}`) {
+      return p >= 12
+        ? { turn: { call: `4${LETTER[respSuit]}` as ResponseResult['call'], rule: 'utgång', explanation: `Öppnaren visade tre ${SYM[respSuit]} (minimum) och jag har 12 → 4${SYM[respSuit]}.` }, plan: { kind: 'call' } }
+        : pass(`Öppnaren visade tre ${SYM[respSuit]} men minimum, jag har 10–11`)
+    }
+    if (third.call === `3${LETTER[openerSuit]}`) {
+      if (p < 12) return pass(`Öppnaren har 14–15 med 6+ ${SYM[openerSuit]}, jag har 10–11`)
+      return len[openerSuit] >= 2
+        ? { turn: { call: `4${LETTER[openerSuit]}` as ResponseResult['call'], rule: 'utgång', explanation: `Öppnaren har 14–15 med 6+ ${SYM[openerSuit]}, jag har 12 och två kort → 4${SYM[openerSuit]}.` }, plan: { kind: 'call' } }
+        : { turn: { call: '3NT', rule: 'till spel', explanation: `Öppnaren har 14–15 med 6+ ${SYM[openerSuit]}, jag har 12 men bara en ${SYM[openerSuit]} → 3NT.` }, plan: { kind: 'call' } }
+    }
+    if (third.call.startsWith('4')) return pass('Öppnaren bjöd utgång')
   }
 
   // Min inbjudan i ny färg på 3-läget efter semi-forcing 1NT (§5b beslut 11):

@@ -911,9 +911,26 @@ export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSu
       if (nmf) return nmf
       return ntLadder()
     }
-    case 'rebjuden färg':
+    case 'rebjuden färg': {
+      // Efter 1♥–1♠–2♥ (öppnaren 6+ hjärter, 12–15) — ägarens struktur
+      // 2026-09-28 (omvärderingsfrågan läge 2): 2NT (11–12) FÖRNEKAR 3-korts
+      // stöd, så tre hjärter höjs i stället (3♥ inbjudan / 4♥ med 13+); 2♠ =
+      // 5+ spader och 10+ hp, SEMI-FORCING (öppnaren passar bara med 12–13 och
+      // högst två spader); 5-korts spader med 6–9 passar ("vi har visat våra
+      // händer till bästa förmåga"). 13+ med fem spader utan hjärterstöd går
+      // sangtrappan som förut (3NT).
+      const openedMajor = opened === 'hearts' || opened === 'spades'
+      if (openedMajor && yMaj && len[opened] >= 3) {
+        if (p >= 13) return { call: `4${BID[opened]}`, rule: 'utgång', explanation: `3+ stöd i partnerns rebjudna ${SYM[opened]} (6+ kort) och utgångsvärden → 4${SYM[opened]}.` }
+        if (p >= 11) return { call: `3${BID[opened]}`, rule: 'inbjudan', explanation: `3+ stöd i partnerns rebjudna ${SYM[opened]} (6+ kort), 11–12 → 3${SYM[opened]} (inbjudan).` }
+      }
+      if (openedMajor && yMaj && len[y] >= 5 && p >= 10 && p <= 12) {
+        return { call: `2${BID[y]}`, rule: 'rebjuden färg (semi-forcing)', explanation: `5+ ${SYM[y]} och 10+ hp → 2${SYM[y]} (semi-forcing: öppnaren passar bara med minimum och högst två ${SYM[y]}).` }
+      }
       if (len[opened] >= 2 && p <= 10) return pass(`preferens ${SYM[opened]}`)
+      if (p <= 9) return pass('minimum')
       return ntLadder()
+    }
     case 'hopp i egen färg (inbjudan)':
       return p >= 8 ? { call: '3NT', rule: 'till spel', explanation: `Accepterar → 3NT.` } : pass('minimum')
 

@@ -10,12 +10,17 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt: Dagens IMP KLAR & LIVE 2026-09-26 — ägaren väljer nästa NU ur 🟢 NÄST
-**Dagens IMP** (andra dagliga tävlingen: tolv egna givar, cross-IMP, summa, medaljer per form)
-LIVE `186aa45` + startsidans två kort `298bbdb`; 0013/0014 körda, första IMP-setet #56 spelat
-av bottarna (9 min), ägarens live-prov godkänt. Plan + lärdomar: `docs/imp-tavling-plan.md`.
-MP-räkningen rörs INTE (ingen Neuberg — ägarbeslut 09-26). Bevaka: första schemalagda IMP-natten
-(cron 01:05 · bottar 01:45 · granskning 01:30) och historikens IMP-flik dagen efter.
+### 🔵 NU — Omvärderingsfrågan → systembyggen (ägarens svar 2026-09-27/28)
+**Läge 2 BYGGT, väntar PCD:** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥) +
+svararens semi-forcing 2♠ efter 1♥–1♠–2♥ (5+ ♠, 10+; 2NT förnekar 3-stöd) +
+öppnarens fortsättning; facit `auction-svagt-hoppskift-2s.test.ts`, §4.1/§5.2.
+**Ägarsvar 09-28, att bygga efter PCD:** rad 3 STÄNGD (3♦ står; nytt: 18–19
+6-3-2-2 → 2NT) · läge 3 = 1♠–1NT–2♦: 2♠ = 10–11 m. 3 stöd, svag pass (även
+5-2), 4♦ = dubbelanpassning m. ÄKTA ruterkontroll; **Jacoby 2NT = 12+ & 3+ stöd** ·
+hål D steg 2 (NÄST 1, alla svar i senare.md; Kxx ≠ kontroll).
+Golvet `pointsWithFloor` BEHÅLLS överallt (rad 1–6). Inga ägarfrågor öppna.
+Detalj: `docs/handvardering.md` principrutan + minnet. Dagens IMP LIVE `186aa45`
+(bevaka första IMP-natten: cron 01:05 · bottar 01:45 · granskning 01:30).
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret (resonemangslagret steg 1–3 +
 pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje hand högt (regel
@@ -86,9 +91,9 @@ något känns fel i spel, eller när en ny fix ska läggas till. Senast
 S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### 🟢 NÄST (max 3, i ordning)
-1. **Omvärdering i budgivningen** (ägarprincip 2026-09-21: "nedgradera aldrig"
-   gäller BARA öppningsläget). Kartlagt — väntar på ägarens svar på två frågor
-   (`docs/handvardering.md` principrutan; mätningen i minnet).
+1. **Hål D steg 2 — öppnarens fortsättning efter svararens cue i konkurrens**
+   (AVPARKERAD 2026-09-28): 3NT 14–15 m. stopp, annars kontrollbud, aldrig hopp
+   till utgång när kontrollbud under utgång finns; detaljfrågor i `docs/senare.md`.
 2. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
    ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
 3. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
@@ -110,7 +115,7 @@ distributionell + 6-5-samspelet).
 
 ### 🅿️ PARKERAT (väg INTE in i beslut — full beskrivning i `docs/senare.md`)
 DDS-facit på tunga fulla givar · §7-försvarets bredd i konkurrens · "framkalla slutbud"-väljaren ·
-Mathe mot stark konstgjord 1♣ · hål D steg 2 (cue-frontend i konkurrens).
+Mathe mot stark konstgjord 1♣.
 
 ## Arbetsrutiner (följ varje gång)
 - **Vid sessionsstart:** följ 🟢-checklistan i `docs/arbetsrutiner.md`.

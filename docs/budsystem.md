@@ -154,12 +154,13 @@ har 25+ balanserad mittemot ett positivt färgsvar.
   partnerns värdering slår fel åt båda hållen. Sådana händer svarar **Jacoby
   2NT** i stället. En singel **dam** får splintras (drar sällan ett stick
   själv), och en **renons** splintras alltid.
-- **Svagt hoppskift avskaffat** (ägarbeslut 2026-07-06, felrapport #31). När
-  partnern har öppnat håller svararen **budgivningen låg**: en svag 6-korts
-  spader över 1♥ svarar **1♠** (rondkrav), inte 2♠. Grundregeln – bjud den nya
-  färgen billigast så partnern får utrymme att beskriva sin hand (ett hopp
-  berövar t.ex. 1NT). Med en riktigt svag hand rebjuder svararen sedan sin
-  färg billigt / passar.
+- **Svagt hoppskift 1♥–2♠** (ägarens struktur 2026-09-28; river julibeslutet
+  2026-07-06/felrapport #31 för exakt denna följd): **6+ spader, 5–8 hp och
+  högst två hjärter** → 2♠. Spärren säger "kort i din färg", stänger Väst från
+  ett balanserande 1-lägesinkliv och är till spel: öppnaren går vidare bara
+  med **16+ och tre spader** eller **18+ startpoäng med två** (4♠), annars pass.
+  Med 9+ hp, tre hjärter eller kortare spader svarar handen som förut 1♠
+  (rondkrav) / 2♥. Över 1♣/1♦ gäller julibeslutet fortfarande (§4.2).
 
 #### Svar på 1♥
 | Svar | Betydelse | Kravnivå | Konvention |
@@ -168,6 +169,7 @@ har 25+ balanserad mittemot ett positivt färgsvar.
 | 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts limithöjning) | Semi-krav | Semi-forcing 1NT ● |
 | 2♣ / 2♦ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
 | 2♥ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
+| 2♠ | 6+ ♠, 5–8 hp, högst två ♥ — spärr | Avslut/spärr | svagt hoppskift |
 | 2NT | 4+ stöd, 13+ hp, balanserad (ingen kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
 | 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
@@ -1065,6 +1067,22 @@ singel spader (≈18 stödpoäng) — 26 hp på 9-korts fit stannade i 3♥.*
 | rebjuda egen färg (1♥–1♠–2♥) | 6+ kort, minimum 12–15 |
 | hopp i egen färg (1♥–1♠–3♥) | 6+ kort, **16+** startpoäng, inbjudan |
 | hopp till utgång i egen HÖGfärg (1♥–1♠–4♥) | 6+ kort, **19+** startpoäng |
+
+**Svararens andra bud efter 1♥–1♠–2♥** (ägarens struktur 2026-09-28,
+omvärderingsfrågan läge 2): öppnaren har visat 6+ hjärter och 12–15.
+
+| Svararens bud | Betydelse |
+|---|---|
+| pass | 6–9 hp, även med fem spader — "vi har visat våra händer" |
+| 2♠ | **5+ spader, 10+ hp — semi-forcing:** öppnaren passar bara med 12–13 och högst två spader |
+| 2NT | 11–12 balanserad, **förnekar 3-korts hjärterstöd**, inbjuder 3NT |
+| 3♥ / 4♥ | 3+ hjärter (6-3-fit): 11–12 inbjudan / 13+ utgång |
+| 3NT | 13+ utan hjärterstöd |
+
+**Öppnarens tredje bud på 2♠:** tre spader → 3♠ (12–13, ej krav) eller 4♠
+(14–15); högst två spader → pass (12–13) eller **3♥** (14–15, 6+ hjärter,
+inbjudan). Svararen placerar sedan: 4♠ efter 3♠ bara med 12; efter 3♥ pass med
+10–11, 4♥ med 12 och två hjärter, 3NT med 12 och singel.
 
 **Stegen väger STARTPOÄNG, inte råa hp (etapp 7 hål 1, 2026-07-28).** Samma mått
 som reversen och hoppskiftet i samma återbudsläge — en 6-korts färg ger
@@ -3041,6 +3059,19 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-28 — Svagt hoppskift 1♥–2♠ + svararens semi-forcing 2♠ efter
+  1♥–1♠–2♥ (§4.1, §5.2; ägarens struktur ur omvärderingsfrågan, läge 2).**
+  Julibeslutet "inget svagt hoppskift" (felrapport #31) rivet för exakt 1♥–2♠:
+  6+ ♠, 5–8 hp, ≤2 ♥ = spärr (öppnaren vidare bara med 16+/3 stöd eller 18+
+  startpoäng/2 kort). Efter 1♥–1♠–2♥: 2♠ = 5+ ♠, 10+ hp, semi-forcing (förr
+  läste läsaren "6+, högst 10" och motorn bjöd 2NT på ♠KQ953 ♥4 ♦KJ72 ♣Q84);
+  2NT förnekar 3-stöd (3♥/4♥ med tre hjärter); 5-korts 6–9 passar. Öppnarens
+  tredje bud (3♠/4♠/pass/3♥) + svararens placering. Kod: `responses.ts`,
+  `rebids.ts` (`openerThirdAfterSemiForcingRebid`), `responder-rebids.ts`,
+  `auction-decide.ts`, `auction-meaning.ts`, `rules.ts`. Facit
+  `auction-svagt-hoppskift-2s.test.ts`. Omvärderingsfrågans övriga svar:
+  golvet `pointsWithFloor` BEHÅLLS i svar och upplysnings-X (ägarsvar 2026-09-27
+  rad 1, 2, 4, 5, 6) — bara öppnarens hoppåterbud (rad 3) är öppet.
 - **2026-09-26 — Felrapport #85/#86: inklivaren efter advancerns enkla höjning
   (§7.1, ägarens struktur).** <16 pass · 16–17 med 4-korts sidofärg → ny färg =
   utgångsförsök (5+/4, ej krav) · 16–17 utan → 3M invit · 18+ → 4M; advancern

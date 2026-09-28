@@ -171,6 +171,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'ny färg efter 1NT': 'ej-krav',
   'rebid: ny färg': 'ej-krav',
   'rebjuden färg': 'ej-krav',
+  'rebjuden färg (semi-forcing)': 'semi-krav', // 1♥–1♠–2♥–2♠: 5+ spader, 10+ hp (ägarens struktur 2026-09-28)
+  'rebid: egen färg (inbjudan)': 'inbjudan', // öppnarens 3♥ efter partnerns semi-forcing 2♠: 6+ kort, 14–15
   'rebid: egen färg': 'ej-krav',
   'rebid: stöd': 'ej-krav',
   'rebid: feature': 'ej-krav',

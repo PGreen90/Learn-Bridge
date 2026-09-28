@@ -567,18 +567,50 @@ export function openerRebidAfterLimitedResponse(hand: Hand, response: ResponseRe
       return pass
     }
     case 'svagt hoppskift': {
+      // Partnerns spärr (1♥–2♠: 6+ kort, 5–8 hp, högst två i min färg; ägarens
+      // struktur 2026-09-28): jag går vidare bara med 3+ stöd och 16+, eller
+      // med två kort och 18+ startpoäng ("18+ TP med 2 spader kan partnern
+      // bjuda 4♠"). Allt annat passar — spärren är till spel.
       const s = suitOfCall(response.call)
-      if (s && len[s] >= 3 && p >= 16) {
+      if (s) {
         const isMajor = s === 'hearts' || s === 'spades'
-        return isMajor
-          ? { call: `4${BID[s]}`, rule: 'rebid: utgång', explanation: `Stöd → 4${SYM[s]} (utgång).` }
-          : { call: '3NT', rule: 'rebid: 3NT', explanation: `Stark → 3NT.` }
+        const sp = pointsWithFloor(hand, null, 'starting')
+        if (len[s] >= 3 && p >= 16) {
+          return isMajor
+            ? { call: `4${BID[s]}`, rule: 'rebid: utgång', explanation: `3+ stöd och 16+ mot partnerns spärr → 4${SYM[s]} (utgång).` }
+            : { call: '3NT', rule: 'rebid: 3NT', explanation: `Stark → 3NT.` }
+        }
+        if (isMajor && len[s] === 2 && sp.points >= 18) {
+          return { call: `4${BID[s]}`, rule: 'rebid: utgång', explanation: `Två ${SYM[s]} men 18+ startpoäng mot partnerns spärr (6+ kort) → 4${SYM[s]} (utgång).` }
+        }
       }
-      return pass
+      return { call: 'P', rule: 'rebid: pass', explanation: `Partnerns spärr (5–8 hp, 6+ kort) är till spel — under 16 med stöd / 18 startpoäng utan → pass.` }
     }
     default:
       return pass
   }
+}
+
+/**
+ * Öppnarens tredje bud efter partnerns SEMI-FORCING rebud av sin högfärg
+ * (1♥–1♠–2♥–2♠; ägarens struktur 2026-09-28, §5.2): 2♠ lovar 5+ spader och
+ * 10+ hp. Mitt 2♥ visade 6+ hjärter och 12–15. Med tre spader: 3♠ på 12–13,
+ * 4♠ på 14–15. Med högst två: pass på 12–13, 3♥ på 14–15 (inbjudan) — partnern
+ * placerar (pass / 4♥ med två hjärter / 3NT).
+ */
+export function openerThirdAfterSemiForcingRebid(hand: Hand, M: Major, respSuit: Suit): ResponseResult {
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const max = p >= 14
+  if (len[respSuit] >= 3) {
+    return max
+      ? { call: `4${BID[respSuit]}`, rule: 'rebid: utgång', explanation: `Tre ${SYM[respSuit]} och 14–15 mot partnerns semi-forcing 2${SYM[respSuit]} (5+ kort, 10+) → 4${SYM[respSuit]}.` }
+      : { call: `3${BID[respSuit]}`, rule: 'rebid: stöd', explanation: `Tre ${SYM[respSuit]} men minimum (12–13) mot partnerns semi-forcing 2${SYM[respSuit]} → 3${SYM[respSuit]} (ej krav, partnern bjuder utgång med 12).` }
+  }
+  if (max) {
+    return { call: `3${BID[M]}`, rule: 'rebid: egen färg (inbjudan)', explanation: `Högst två ${SYM[respSuit]} men 14–15 med 6+ ${SYM[M]} → 3${SYM[M]} (inbjudan — partnern placerar).` }
+  }
+  return { call: 'P', rule: 'rebid: pass', explanation: `Minimum (12–13) och högst två ${SYM[respSuit]} mot partnerns semi-forcing 2${SYM[respSuit]} → pass.` }
 }
 
 // === Punkt 9: öppnarens fullföljanden efter 1NT-svar, §4.3 ==================

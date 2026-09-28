@@ -79,6 +79,8 @@ const ALL_ENGINE_RULES: string[] = [
   // Inklivaren efter advancerns enkla höjning (felrapport #85/#86)
   'inklivarens utgångsförsök (ny färg)', 'inklivarens utgångsinvit', 'inklivaren till utgång',
   'inklivaren passar höjningen', 'advancern accepterar utgångsförsöket', 'advancern avböjer utgångsförsöket',
+  // Svararens semi-forcing 2♠ efter 1♥–1♠–2♥ + öppnarens 3♥ på den (ägarens struktur 2026-09-28).
+  'rebjuden färg (semi-forcing)', 'rebid: egen färg (inbjudan)',
   // Ovanlig 2NT-fortsättningen, ostörd (unusual-2nt-continuations.ts, 2026-09-21/22).
   'advance ovanlig 2NT: cue (utgångsintresse)', 'advance ovanlig 2NT: spärrhöjning', 'advance ovanlig 2NT: 3NT', 'advance ovanlig 2NT: egen färg',
   'advance ovanlig 2NT: utgång',
