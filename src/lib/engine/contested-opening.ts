@@ -594,6 +594,147 @@ export function answerPartnersNegativeDouble(hand: Hand, f: AuctionFacts): Kunsk
 }
 
 /**
+ * Läge (felrapport #88, ägarens struktur 2026-09-28): jag öppnade 1 i färg, de
+ * klev in i färg, partnern dubblade negativt och FJÄRDE hand bjöd vidare
+ * (höjde / ny färg) — partnerns X är obesvarat och jag är i tur. Exakt ett
+ * inkliv + ett bud från dem, bara öppningen från oss, partnerns enda besked = X.
+ */
+export function negativeDoubleOverbidToAnswer(f: AuctionFacts): { ourOpen: Suit; theirOvercall: string; theirLast: string } | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.seat !== seat || open.level !== 1) return null
+  const ourOpen = SUIT_OF_LETTER[open.strain]
+  if (!ourOpen) return null // 1NT-öppning → X:et är något annat än negativt
+  if (f.ourContractBids.length !== 1) return null
+  const partnerCalls = history.filter((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
+  if (partnerCalls.length !== 1 || partnerCalls[0].bid !== 'X') return null
+  const xIdx = history.indexOf(partnerCalls[0])
+  const last = f.lastNonPass
+  if (!last || side(last.seat) === side(seat) || history.indexOf(last) < xIdx) return null
+  const lastCb = parseContractBid(last.bid)
+  if (!lastCb || lastCb.strain === 'NT') return null
+  const theirBids = f.theirContractBids
+  if (theirBids.length !== 2 || history.indexOf(theirBids[0]) > xIdx) return null
+  if (parseContractBid(theirBids[0].bid)!.strain === 'NT') return null // 1NT-inkliv → X:et var straff
+  return { ourOpen, theirOvercall: theirBids[0].bid, theirLast: last.bid }
+}
+
+/**
+ * Öppnarens svar på partnerns negativa dubbling när FJÄRDE hand bjudit vidare
+ * (felrapport #88, bricka 7: 1♦–(2♣)–X–(3♣)–? Väst ♠T ♥AK96 ♦AT742 ♣953
+ * passade — 5♦ stod). Ägarens regel: dubblingen ber om ett svar, och tiga kan
+ * bli dyrt — "nästan som att passa på en högfärgsfråga eller överföring".
+ * I ordning: (1) objuden 4-korts högfärg → bjud den billigast; (2) annars egen
+ * 5+ öppningsfärg → rebjud den; (3) annars X — "visa din hand". (1)/(2) bara
+ * på 3-läget eller lägre (på 4-läget dömer de vanliga utgångsreglerna).
+ */
+export function answerNegativeDoubleOverTheirBid(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const n = negativeDoubleOverbidToAnswer(f)
+  if (!n) return null
+  const { history, seat } = f
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  const theirSuits = new Set([parseBid(n.theirOvercall).suit, parseBid(n.theirLast).suit])
+  const lowEnough = (bid: string) => parseContractBid(bid)!.level <= 3
+  for (const m of ['hearts', 'spades'] as Suit[]) {
+    if (m === n.ourOpen || theirSuits.has(m) || len[m] < 4) continue
+    const bid = cheapestBidIn(history, seat, LETTER[m])
+    if (bid && legal.includes(bid) && lowEnough(bid)) return {
+      call: bid, rule: 'svar på negativ dubbling',
+      explanation: `Partnerns negativa dubbling ber om svar även efter deras ${prettyBid(n.theirLast)}: 4+ ${SUIT_SYM[m]} → ${prettyBid(bid)} (kan vara minimum).`,
+    }
+  }
+  if (len[n.ourOpen] >= 5) {
+    const bid = cheapestBidIn(history, seat, LETTER[n.ourOpen])
+    if (bid && legal.includes(bid) && lowEnough(bid)) return {
+      call: bid, rule: 'svar på negativ dubbling',
+      explanation: `Partnerns negativa dubbling ber om svar även efter deras ${prettyBid(n.theirLast)}: ingen fjärde högfärg men 5+ ${SUIT_SYM[n.ourOpen]} → ${prettyBid(bid)} (kan vara minimum).`,
+    }
+  }
+  if (legal.includes('X' as Bid)) return {
+    call: 'X', rule: 'öppnarens dubbling (visa din hand)',
+    explanation: `Partnerns negativa dubbling ber om svar; jag har varken en 4-korts högfärg eller 5+ i öppningsfärgen → X (visa din hand).`,
+  }
+  return null
+}
+
+/**
+ * Läge: jag negativ-dubblade partnerns 1-läges färgöppning, fjärde hand bjöd
+ * vidare och öppnaren svarade med X ("visa din hand", felrapport #88). Mitt enda
+ * besked = X, vår sida bara öppningen, deras sida exakt två färgbud, partnerns X
+ * är senaste icke-pass och kom efter deras andra bud.
+ */
+export function showHandToAnswer(f: AuctionFacts): { ourOpen: Suit; theirSuits: Suit[] } | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.seat !== PARTNER[seat] || open.level !== 1) return null
+  const ourOpen = SUIT_OF_LETTER[open.strain]
+  if (!ourOpen) return null
+  if (f.ourContractBids.length !== 1) return null
+  const myCalls = history.filter((c) => c.seat === seat && c.bid !== 'P')
+  if (myCalls.length !== 1 || myCalls[0].bid !== 'X') return null
+  const last = f.lastNonPass
+  if (!last || last.seat !== PARTNER[seat] || last.bid !== 'X') return null
+  const theirBids = f.theirContractBids
+  if (theirBids.length !== 2) return null
+  const xIdx = history.indexOf(myCalls[0])
+  if (history.indexOf(theirBids[0]) > xIdx || history.indexOf(theirBids[1]) < xIdx || history.indexOf(last) < history.indexOf(theirBids[1])) return null
+  const theirSuits = theirBids.map((c) => parseBid(c.bid).suit).filter((s): s is Suit => s !== null)
+  if (theirSuits.length !== 2) return null // sanginkliv → X:en är straff
+  return { ourOpen, theirSuits }
+}
+
+/**
+ * Negativ-dubblaren VISAR SIN HAND på öppnarens X (felrapport #88): partnern har
+ * varken en fjärde högfärg eller 5+ i öppningsfärgen och kan vara minimum, så
+ * jag beskriver — aldrig en utgångsblås på stödpoäng (FIX 6 mönster 1, frö
+ * 20261090: 5♣ på 10 hp). I ordning: (1) 4+ stöd i öppningsfärgen → billigaste
+ * höjningen (13+ hp → 4M med högfärgsfit); (2) egen 5+ objuden färg; (3) 4-korts
+ * objuden färg; (4) sang med stopp i båda deras färger; (5) pass (straff).
+ */
+export function showHandAfterOpenersDouble(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const n = showHandToAnswer(f)
+  if (!n) return null
+  const { history, seat } = f
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  const rule = 'visar handen efter öppnarens dubbling'
+  const isMajorSuit = (s: Suit) => s === 'hearts' || s === 'spades'
+  // Färgbud på 3-läget eller lägre; en 5-korts HÖGFÄRG får även visas på 4-läget
+  // (deras 4♣ tryckte upp den — motorbytets facit frö 20272221: 4♠ på ♠KQT53).
+  const ok = (bid: string | null, maxLevel = 3): bid is string => !!bid && legal.includes(bid as Bid) && parseContractBid(bid)!.level <= maxLevel
+  const unbid = RANK_ORDER.filter((s) => s !== n.ourOpen && !n.theirSuits.includes(s))
+  if (len[n.ourOpen] >= 4) {
+    // Stödpoäng mot den kända fiten (renons/singel räknas — frö 20271643:
+    // ♠AT963 ♥Q6432 ♦K87 ♣— = 14 → 4♥, inte 3♥); högfärgsutgång från 13.
+    const sp = pointsWithFloor(hand, n.ourOpen, 'support').points
+    if (isMajorSuit(n.ourOpen) && sp >= 13 && legal.includes(`4${LETTER[n.ourOpen]}` as Bid)) return {
+      call: `4${LETTER[n.ourOpen]}`, rule, explanation: `Öppnaren bad mig visa handen: 4+ stöd i ${SUIT_SYM[n.ourOpen]} och utgångsvärden (${sp} stödpoäng) → 4${SUIT_SYM[n.ourOpen]}.`,
+    }
+    const raise = cheapestBidIn(history, seat, LETTER[n.ourOpen])
+    if (ok(raise)) return { call: raise, rule, explanation: `Öppnaren bad mig visa handen: 4+ stöd i ${SUIT_SYM[n.ourOpen]} → ${prettyBid(raise)} (höjning, ej krav — öppnaren kan vara minimum).` }
+  }
+  const suitBid = (min: number): Kunskap | null => {
+    for (const s of [...unbid].reverse()) {
+      if (len[s] < min) continue
+      const bid = cheapestBidIn(history, seat, LETTER[s])
+      if (ok(bid, min >= 5 && isMajorSuit(s) ? 4 : 3)) return { call: bid, rule, explanation: `Öppnaren bad mig visa handen: ${min}+ ${SUIT_SYM[s]} → ${prettyBid(bid)} (naturligt, ej krav).` }
+    }
+    return null
+  }
+  const five = suitBid(5)
+  if (five) return five
+  // Sang med stopp i BÅDA deras färger går före en 4-kortsfärg (mer beskrivande).
+  if (n.theirSuits.every((s) => hasStopper(hand, s))) {
+    const nt = cheapestBidIn(history, seat, 'NT')
+    if (ok(nt)) return { call: nt, rule, explanation: `Öppnaren bad mig visa handen: stopp i båda deras färger → ${prettyBid(nt)} (naturligt, ej krav).` }
+  }
+  const four = suitBid(4)
+  if (four) return four
+  return { call: 'P', rule, explanation: `Öppnaren bad mig visa handen: ingen färg att visa och inget stopp → pass (straff).` }
+}
+
+/**
  * Negativ-dubblarens andra tur (§7.4): först höjningen av partnerns svar med
  * fit (`raiseWithFit` — samma dom som det gamla lagrets catch-all gav), sedan
  * invit-fortsättningen för 9–12-handen (fel färg-spåret fix 5b) och den svaga

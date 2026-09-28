@@ -22,6 +22,11 @@ som innehåller HELA given maskinläsbart. Din uppgift: läs rapporterna,
 
 3. **FACIT FÖRE FIX — alltid.** Återskapa given som ett test INNAN du rör
    någon kod:
+   - **Poäng och kortantal räknas med KOD, aldrig i huvudet** (ägarkrav
+     2026-09-28 efter #88, där hp-raden 12/16/6/5 summerade till 39): kör
+     `hcp(parseHand(...))` för varje hand du visar ägaren och kontrollera att
+     de fyra händerna summerar till 40 hp och 13 kort var INNAN tabellen
+     skrivs. Siffror ur ett tidigare svar räknas om, de ärvs inte.
    - Händerna parsas med `parseHand` (`src/lib/bidding.ts`) — formatet i
      `hand`-raderna är exakt det `parseHand` läser.
    - **Felaktig budgivning / fel budförklaring:** bygg auktionen med

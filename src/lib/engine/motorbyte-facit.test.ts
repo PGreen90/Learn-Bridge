@@ -303,7 +303,9 @@ describe('etapp 4 familj 5 – balansering & återöppning: advancern/öppnaren/
     const deal = dealFromSeed(20271643)
     const hist = [call('S', 'P'), call('W', '1H'), call('N', '2C'), call('E', 'X'), call('S', '3C'), call('W', 'X'), call('N', 'P')]
     const t = decideCallTraced(deal, hist, 'E')
-    expect(t.källa).toBe('tabell:svararen-stört')
+    // Raden bytte namn 2026-09-28 (felrapport #88): öppnarens X efter fjärde hands
+    // bud = "visa din hand", och dubblaren beskriver på stödpoäng (14 → 4♥).
+    expect(t.källa).toBe('tabell:negativ-dubblaren-visar-handen')
     expect(t.call.bid).toBe('4H')
   })
   // (c) K1-resten utan fit: den forcerande andra dubblingen måste besvaras — Syd
@@ -312,7 +314,9 @@ describe('etapp 4 familj 5 – balansering & återöppning: advancern/öppnaren/
     const deal = dealFromSeed(20272221)
     const hist = [call('W', 'P'), call('N', '1H'), call('E', '3C'), call('S', 'X'), call('W', '4C'), call('N', 'X'), call('E', 'P')]
     const t = decideCallTraced(deal, hist, 'S')
-    expect(t.källa).toBe('tabell:svararen-stört')
+    // Raden bytte namn 2026-09-28 (felrapport #88): 5-korts högfärg visas även på
+    // 4-läget när deras 4♣ tryckt upp den.
+    expect(t.källa).toBe('tabell:negativ-dubblaren-visar-handen')
     expect(t.call.bid).toBe('4S')
   })
 })

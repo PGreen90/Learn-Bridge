@@ -168,7 +168,7 @@ import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerAfterCompetitiveRaise, openerRebidsAfterTheirDouble, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
-import { answerJordan, answerPartnersNegativeDouble, answerPartnersSupportDouble, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
+import { answerJordan, answerNegativeDoubleOverTheirBid, answerPartnersNegativeDouble, answerPartnersSupportDouble, negativeDoubleOverbidToAnswer, showHandAfterOpenersDouble, showHandToAnswer, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -2148,6 +2148,27 @@ const TABELL: Row[] = [
     läge: (f) => negativeDoubleToAnswer(f) !== null,
     välj: ({ hand, facts }) => {
       const k = answerPartnersNegativeDouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Öppnarens svar på den negativa dubblingen när FJÄRDE hand bjudit vidare
+  // (felrapport #88, ägarens struktur 2026-09-28): 4-korts högfärg / 5+ egen
+  // färg / X "visa din hand" — aldrig tiga.
+  {
+    id: 'negativ-x-öppnaren-efter-deras-bud',
+    läge: (f) => negativeDoubleOverbidToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = answerNegativeDoubleOverTheirBid(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Negativ-dubblaren visar sin hand på öppnarens X (felrapport #88): höjning
+  // med stöd, egen färg, sang med stopp, annars pass — aldrig utgångsblås.
+  {
+    id: 'negativ-dubblaren-visar-handen',
+    läge: (f) => showHandToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = showHandAfterOpenersDouble(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },

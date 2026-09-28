@@ -11,10 +11,10 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — Omvärderingsfrågan → systembyggen (ägarens svar 2026-09-27/28)
-**Läge 2 BYGGT, väntar PCD:** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥) +
+**Läge 2 LIVE `16e26fe` (09-28):** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥) +
 svararens semi-forcing 2♠ efter 1♥–1♠–2♥ (5+ ♠, 10+; 2NT förnekar 3-stöd) +
 öppnarens fortsättning; facit `auction-svagt-hoppskift-2s.test.ts`, §4.1/§5.2.
-**Ägarsvar 09-28, att bygga efter PCD:** rad 3 STÄNGD (3♦ står; nytt: 18–19
+**Nästa bygge (läge 3-paketet), ägarsvar 09-28:** rad 3 STÄNGD (3♦ står; nytt: 18–19
 6-3-2-2 → 2NT) · läge 3 = 1♠–1NT–2♦: 2♠ = 10–11 m. 3 stöd, svag pass (även
 5-2), 4♦ = dubbelanpassning m. ÄKTA ruterkontroll; **Jacoby 2NT = 12+ & 3+ stöd** ·
 hål D steg 2 (NÄST 1, alla svar i senare.md; Kxx ≠ kontroll).

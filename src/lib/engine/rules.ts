@@ -172,6 +172,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'rebid: ny färg': 'ej-krav',
   'rebjuden färg': 'ej-krav',
   'rebjuden färg (semi-forcing)': 'semi-krav', // 1♥–1♠–2♥–2♠: 5+ spader, 10+ hp (ägarens struktur 2026-09-28)
+  'öppnarens dubbling (visa din hand)': 'krav-1-rond', // 1x–(y)–X–(z)–X: ingen 4-korts högfärg, ingen 5+ öppningsfärg — partnern beskriver (felrapport #88)
+  'visar handen efter öppnarens dubbling': 'ej-krav', // negativ-dubblarens beskrivning på den (felrapport #88)
   'rebid: egen färg (inbjudan)': 'inbjudan', // öppnarens 3♥ efter partnerns semi-forcing 2♠: 6+ kort, 14–15
   'rebid: egen färg': 'ej-krav',
   'rebid: stöd': 'ej-krav',
