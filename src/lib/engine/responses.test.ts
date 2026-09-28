@@ -74,10 +74,13 @@ describe('respondToMajor', () => {
     expect(resp('S:KQ85 H:73 D:Q842 C:K53', 'hearts')).toBe('1S') // 10 hp, ingen fit
   })
 
-  // Ägarbeslut 2026-07-06 (felrapport #31): INGET svagt hoppskift. När partnern
-  // öppnat håller svararen budgivningen låg → 6-korts spader svarar 1♠, inte 2♠.
-  it('svag 6-korts spader över 1♥ → 1♠ (INTE 2♠ hoppskift)', () => {
-    expect(resp('S:KQ9742 H:3 D:Q842 C:53', 'hearts')).toBe('1S') // 7 hp, 6 spader
+  // Ägarbeslut 2026-07-06 (felrapport #31): INGET svagt hoppskift — RIVET för
+  // exakt 1♥–2♠ 2026-09-28 (ägarens struktur: 6+ spader, 5–8 hp, högst två
+  // hjärter = spärr; facit auction-svagt-hoppskift-2s.test.ts). Med 9 hp eller
+  // tre hjärter svarar handen fortfarande 1♠.
+  it('svag 6-korts spader över 1♥ → 2♠ (svagt hoppskift, sedan 2026-09-28)', () => {
+    expect(resp('S:KQ9742 H:3 D:Q842 C:53', 'hearts')).toBe('2S') // 7 hp, 6 spader, singel hjärter
+    expect(resp('S:KQ9742 H:3 D:Q842 C:K3', 'hearts')).toBe('1S') // 9 hp → för starkt för spärren
   })
 
   it('2-över-1 (2♦) med 12+ och 5-korts färg över 1♠', () => {

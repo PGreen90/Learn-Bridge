@@ -120,8 +120,28 @@ skyddad dam (AQ/KQ) behålls. Måttet: `unguardedHonorsInTheirSuit` i
 > handen värderas för att ÖPPNA får TP aldrig sänka den (en 12 hp-hand öppnar
 > alltid). I en budgivning — särskilt i konkurrens — är det helt naturligt att
 > värdera OM handen, upp OCH ner, efter vad som bjudits. Golvet `pointsWithFloor`
-> (`max(hp, mått)`) används i dag även i svar och återbud; **översynen av det är
-> nästa NU** (kartan i `CLAUDE.md`).
+> (`max(hp, mått)`) används i dag även i svar och återbud.
+>
+> **Utfall 2026-09-27/28 (ägarens svar):** golvet **behålls** hos svararen mot
+> partnerns öppning (Jacoby 2NT, 2/1, Drury, game try-accept) och i
+> upplysningsdubblingen (formen avgör). **Rad 3 STÄNGD 2026-09-28:** öppnarens
+> hoppåterbud står kvar (♠KJ ♥Q8 ♦AK9764 ♣K103 efter 1♦–1♠ → 3♦, "lovar 6+ och
+> 16+, vilket är sant — det räcker för motorn"); reverse 17 / hoppskift 19
+> startpoäng oförändrade (Larry Cohens artiklar: "counting useful distribution" =
+> vårt startpoängsmått). Enda nya: **18–19 med 6-3-2-2 räknas som balanserad och
+> återbjuder 2NT, inte 3♦** (♠KJ ♥Q8 ♦AKJ764 ♣K103; "vi vill visa styrkan") — att
+> bygga. **Läge 3 (1♠–1NT–2♦), ägarsvar 2026-09-28:** 2♠ = exakt 10–11 med tre
+> spader · svag hand passar 2♦ (även 5-2) · 4♦ = dubbelanpassning (tre spader +
+> ruterfit) med ÄKTA ruterkontroll (ess/singel/KQ), utgångskrav · 12 hp med tre
+> spader bjuder INTE 1NT. **Ägarbeslut 2026-09-28 (slutligt): Jacoby 2NT = 12+
+> hp och 3+ trumfstöd, alltid** (i dag 4+ och 13+) — "öppnar upp
+> budgivningsmöjligheter". 3-korts stöd med 12+ går alltså Jacoby, inte 2/1;
+> splintern går före som förut; 1NT = 6–11 rakt igenom.
+> **Golvet `pointsWithFloor` rörs alltså INTE.** Omvärdering efter
+> vad som bjudits ville ägaren INTE ha som poängjusteringar utan som
+> systemstruktur: svagt hoppskift 1♥–2♠ + semi-forcing 2♠ (budsystem §4.1/§5.2,
+> byggt 2026-09-28) och öppnarens kontrollbud efter cue i konkurrens (hål D
+> steg 2, `docs/senare.md`).
 
 ## ARKITEKTUR
 

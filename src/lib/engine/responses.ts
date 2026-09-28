@@ -92,6 +92,16 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   // + 4 trumf → splinter), men en platt övervärderad hand stannar på hp-golvet.
   const { points: sp } = pointsWithFloor(hand, opened, 'support')
 
+  // ---- Svagt hoppskift 1♥–2♠ (ägarens struktur 2026-09-28; river julibeslutet
+  //      2026-07-06/felrapport #31 för EXAKT denna följd — över 1♣/1♦ svarar en
+  //      svag 6-korts högfärg fortfarande billigast på 1-läget). 6+ spader, 5–8
+  //      hp, högst två hjärter: spärren säger "kort i din färg", stänger Väst
+  //      från ett balanserande 1-lägesinkliv och partnern går bara vidare med
+  //      18+ startpoäng (två spader) eller 16+ med tre (rebids.ts). ----
+  if (opened === 'hearts' && len.spades >= 6 && len.hearts <= 2 && p >= 5 && p <= 8) {
+    return { call: '2S', rule: 'svagt hoppskift', explanation: `6+ ♠, 5–8 hp, högst två ♥ → 2♠ (svagt hoppskift, spärr — ej krav).` }
+  }
+
   if (p < 6) return { call: 'P', rule: 'pass', explanation: `För svagt för att svara → pass.` }
 
   // ---- Fit: 4+ stöd (stödpoäng styr nivån). Bergen/Jacoby/splinter bor HÄR –
@@ -123,10 +133,10 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
   }
 
   // ---- Ny färg på 1-läget: bara spader över 1♥ ----
-  // Ägarbeslut 2026-07-06 (felrapport #31): INGET svagt hoppskift till 2♠.
-  // När partnern har öppnat håller svararen budgivningen LÅG och bjuder den nya
-  // färgen billigast (rondkrav) → partnern får utrymme att beskriva sin hand
-  // (ett hopp berövar t.ex. 1NT). En svag 6-korts spader svarar alltså 1♠, inte 2♠.
+  // Ägarbeslut 2026-07-06 (felrapport #31): håll budgivningen LÅG och bjud den
+  // nya färgen billigast (rondkrav) → partnern får utrymme att beskriva sin hand.
+  // Sedan 2026-09-28 gäller det över 1♥ bara händer som INTE passar spärren ovan
+  // (9+ hp, tre hjärter eller kortare spader): 6-korts spader med 9 hp svarar 1♠.
   if (opened === 'hearts') {
     if (len.spades >= 4) return { call: '1S', rule: 'ny färg (1-läget)', explanation: `4+ ♠ → 1♠ (krav 1 rond).` }
   }
