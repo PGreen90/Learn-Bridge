@@ -8,7 +8,7 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { notrumpPoints, pointsWithFloor, startingPoints } from './evaluation'
-import { hcp, isBalanced, lengths } from './hand'
+import { hasRealControl, hcp, isBalanced, lengths, shape } from './hand'
 import { hasStopper } from './overcalls'
 import type { Major, ResponseResult } from './responses'
 import { openerRebidAfter2C } from './responses-2c'
@@ -91,8 +91,11 @@ export function openerRebidAfter1LevelResponse(hand: Hand, opened: Suit, respond
   }
 
   // 4. Balanserad utan högfärg att visa: NT-stegen (15–17 hade öppnat 1NT).
-  if (bal) {
-    if (p >= 18 && p <= 19) return { call: '2NT', rule: '2NT (18–19)', explanation: `Balanserad (18–19 hp) → 2NT (inbjuder 3NT).` }
+  //    Ägarbeslut 2026-09-28 (läge 3): 6-3-2-2 med 18–19 "sträcker sig" till
+  //    balanserad — 2NT visar styrkan, 3♦ hade bara sagt 16+ (♠KJ ♥Q8 ♦AKJ764 ♣K103).
+  const sixThreeTwoTwo = shape(hand).join('') === '6322' && len[opened] === 6
+  if (bal || (sixThreeTwoTwo && p >= 18 && p <= 19)) {
+    if (p >= 18 && p <= 19) return { call: '2NT', rule: '2NT (18–19)', explanation: `${bal ? 'Balanserad' : '6-3-2-2, räknas som balanserad'} (18–19 hp) → 2NT (inbjuder 3NT).` }
     return { call: '1NT', rule: '1NT (12–14)', explanation: `Balanserad (12–14 hp) → 1NT.` }
   }
 
@@ -1075,10 +1078,20 @@ export function openerThirdBidAfterSemiForcing1NT(
   const mSym = SYM[M]
   const { points: bp } = pointsWithFloor(hand, M, 'bergen')
 
-  // 3M = svararens limithöjning (3-korts stöd, 10–12).
-  if (second.call === `3${mBid}`) {
-    if (bp >= 15) return { call: `4${mBid}`, rule: 'accepterar inbjudan', explanation: `Utgångsvärden mittemot limithöjningen → 4${mSym}.` }
-    return { call: 'P', rule: 'pass', explanation: `Minimum → passar inbjudan (3${mSym}).` }
+  // 3M = svararens limithöjning efter mitt 2M-rebud (6+), eller 2M efter min
+  // nya färg = exakt 10–11 med tre stöd (ägarbeslut 2026-09-28, läge 3).
+  if (second.call === `3${mBid}` || (second.call === `2${mBid}` && second.rule.startsWith('inbjudan'))) {
+    if (bp >= 15) return { call: `4${mBid}`, rule: 'accepterar inbjudan', explanation: `Utgångsvärden mittemot partnerns 3-korts stöd (10–11) → 4${mSym}.` }
+    return { call: 'P', rule: 'pass', explanation: `Minimum → passar partnerns ${second.call === `2${mBid}` ? `2${mSym} (3 stöd, 10–11)` : `inbjudan (3${mSym})`}.` }
+  }
+  // Dubbelanpassning (ägarbeslut 2026-09-28): partnerns 4 i min andra färg = 3
+  // trumf + 4+ i andrafärgen med äkta kontroll, utgångskrav med min högfärg som
+  // trumf. Minimum (≤14) → 4M; 15+ med hjärterkontroll (ess/singel/renons/KQ)
+  // under 4♠ → kontrollbud, annars 4M.
+  if (second.rule === 'dubbelanpassning') {
+    const cueSuit: Suit | null = M === 'spades' && hasRealControl(hand, 'hearts') ? 'hearts' : null
+    if (bp >= 15 && cueSuit) return { call: `4${BID[cueSuit]}`, rule: 'kontrollbud', explanation: `Extra (15+) mot partnerns dubbelanpassning → 4${SYM[cueSuit]} (kontrollbud i ${SYM[cueSuit]}).` }
+    return { call: `4${mBid}`, rule: 'utgång', explanation: `Partnerns dubbelanpassning satte ${SYM[M]} som trumf${bp >= 15 ? ', inget kontrollbud under utgång att visa' : ', minimum'} → 4${mSym}.` }
   }
 
   // Svararens EGEN färg efter 1NT (§5.1, felrapport #59): till spel — svag

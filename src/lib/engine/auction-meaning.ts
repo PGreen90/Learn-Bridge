@@ -2971,7 +2971,7 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
     if (same(cb, 2, 'NT')) {
       return u.responderPassed
         ? R('inbjudan', `2 sang — 11–12 hp balanserad, passad hand: inbjudan.`)
-        : R('Jacoby 2NT', `2 sang — Jacoby 2NT: 4+ ${mname}, 13+ hp, balanserad (ingen kortfärg). Utgångskrav med slamintresse. Säger inget om sang.`)
+        : R('Jacoby 2NT', `2 sang — Jacoby 2NT: 3+ ${mname} (oftast 4+), 12+ hp, ingen splintervärdig kortfärg. Utgångskrav med slamintresse. Säger inget om sang.`)
     }
     // Passad hand (§6.7, §5b beslut 9): Bergen är AV — 3♣/3♦ naturliga, 3M spärr.
     if (u.responderPassed && (same(cb, 3, 'C') || same(cb, 3, 'D'))) return R('ny färg', `${B(cb)} — naturligt, passad hand: 6+ ${name}, svag (6–9). Ej krav.`)
@@ -3083,9 +3083,16 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
         if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången efter reversen.`)
         return R('krav-svar', `${B(cb)} — svar på partnerns reverse (16+): ${cb.strain === 'NT' ? 'balanserat, inget stöd' : cb.strain === M ? `preferens till ${mname}` : `${name}`}. Krav 1 rond.`)
       }
-      if (same(cb, 2, M)) return R('preferens', `${B(cb)} — preferens till ${mname} (2–3 kort), svag hand. Ej krav.`)
-      if (same(cb, 3, M)) return R('inbjudan (limithöjning)', `${B(cb)} — 3-korts limithöjning: 10–12 hp med stöd i ${mname}. Inbjudan.`)
+      // Läge 3 (ägarbeslut 2026-09-28): 2M efter öppnarens nya färg = exakt 10–11
+      // med tre trumf (den svaga handen passar i stället); 4 i öppnarens andra
+      // LÅGFÄRG = dubbelanpassning (3 trumf + 4+ där med äkta kontroll), utgångskrav.
+      if (same(cb, 2, M)) {
+        if (reb.strain !== M && reb.strain !== 'NT') return R('inbjudan (limithöjning)', `${B(cb)} — 3-korts stöd i ${mname}, exakt 10–11 hp (svagare passar, 12+ bjöd Jacoby). Ej krav — öppnaren passar med minimum, går till utgång med 15+.`)
+        return R('preferens', `${B(cb)} — preferens till ${mname} (2–3 kort), svag hand. Ej krav.`)
+      }
+      if (same(cb, 3, M)) return R('inbjudan (limithöjning)', `${B(cb)} — 3-korts stöd, 10–11 hp, inbjudan mot partnerns 6+ ${mname}.`)
       if (same(cb, 4, M)) return R('utgång', `${B(cb)} — utgång i ${mname}.`)
+      if (cb.level === 4 && isMinor(cb.strain) && cb.strain === reb.strain) return R('dubbelanpassning', `${B(cb)} — dubbelanpassning: 3 ${mname} och 4+ ${name} med äkta kontroll (ess, singel, renons eller KQ). Utgångskrav med ${mname} som trumf — öppnaren bjuder 4${msym} eller ett kontrollbud.`)
       if (same(cb, 2, 'NT')) return R('inbjudan', `2 sang — 11–12 hp balanserad, inbjudan.`)
       if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — till spel.`)
       if (cb.strain === reb.strain && !isGameLevel(cb)) return R('inbjudan', `${B(cb)} — höjer partnerns ${name}: 11–12 hp med stöd, inbjudan.`)
@@ -3145,8 +3152,15 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   }
 
   if (n === 4 && isOpener && same(resp, 1, 'NT') && b[2].cb.level === 2 && b[2].cb.strain !== 'NT') {
-    // Öppnarens svar på svararens inbjudan i ny färg på 3-läget (§5b beslut 11).
     const inv = b[3].cb
+    // Öppnarens svar på dubbelanpassningen (läge 3, 2026-09-28): 4M = utgång
+    // (minimum / inget kontrollbud under utgång), 4♥ under 4♠ = kontrollbud.
+    if (inv.level === 4 && isMinor(inv.strain) && inv.strain === b[2].cb.strain) {
+      if (same(cb, 4, M)) return R('utgång', `${B(cb)} — utgång i ${mname} på partnerns dubbelanpassning: minimum, eller inget kontrollbud att visa under utgång.`)
+      if (M === 'S' && same(cb, 4, 'H')) return R('kontrollbud', `4♥ — kontrollbud (ess, singel, renons eller KQ i hjärter) med extra (15+) på partnerns dubbelanpassning; ${mname} är trumf.`)
+      return null
+    }
+    // Öppnarens svar på svararens inbjudan i ny färg på 3-läget (§5b beslut 11).
     if (inv.level === 3 && inv.strain !== 'NT' && inv.strain !== M && inv.strain !== b[2].cb.strain) {
       if (same(cb, 3, M)) return R('rebid: egen färg', `${B(cb)} — rättelse: 6+ ${mname} utan tolerans för partnerns ${NAME[inv.strain]}. Ej krav.`)
       if (cb.strain === inv.strain && isGameLevel(cb)) return R('accepterar inbjudan', `${B(cb)} — accepterar inbjudan: maximum (14–15) med stöd eller bra dubbelton i ${NAME[inv.strain]}.`)

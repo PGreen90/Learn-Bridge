@@ -31,6 +31,18 @@ export function shape(hand: Hand): number[] {
   return Object.values(lengths(hand)).sort((a, b) => b - a)
 }
 
+/**
+ * ÄKTA kontroll i en färg (ägarens definition 2026-09-28): ess, renons, singel
+ * eller kung och dam tillsammans. En ensam kung (Kxx) räknas INTE — bara om
+ * man till 100 % vet var esset sitter, vilket motorn aldrig gör i v1.
+ */
+export function hasRealControl(hand: Hand, suit: Suit): boolean {
+  const ranks = hand.filter((c) => c.suit === suit).map((c) => c.rank)
+  if (ranks.length <= 1) return true
+  if (ranks.includes('A')) return true
+  return ranks.includes('K') && ranks.includes('Q')
+}
+
 /** Balanserad = 4-3-3-3, 4-4-3-2 eller 5-3-3-2 (ingen singel/renons). */
 export function isBalanced(hand: Hand): boolean {
   const s = shape(hand).join('')

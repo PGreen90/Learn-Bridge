@@ -85,6 +85,8 @@ const ALL_ENGINE_RULES: string[] = [
   'öppnarens dubbling (visa din hand)', 'visar handen efter öppnarens dubbling',
   // Inklivaren efter partnerns dubbling av deras bud över inklivet (felrapport #90).
   'inklivaren drar ur partnerns dubbling', 'inklivaren sitter kvar på partnerns dubbling',
+  // Läge 3-paketet (ägarbeslut 2026-09-28): dubbelanpassningen 4♦ och öppnarens kontrollbud på den.
+  'dubbelanpassning', 'kontrollbud',
   // Ovanlig 2NT-fortsättningen, ostörd (unusual-2nt-continuations.ts, 2026-09-21/22).
   'advance ovanlig 2NT: cue (utgångsintresse)', 'advance ovanlig 2NT: spärrhöjning', 'advance ovanlig 2NT: 3NT', 'advance ovanlig 2NT: egen färg',
   'advance ovanlig 2NT: utgång',

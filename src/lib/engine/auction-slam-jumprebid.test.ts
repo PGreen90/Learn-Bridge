@@ -52,7 +52,12 @@ describe('FACIT: slam efter hopp-återbud i minor (felrapport #29, ärliga porta
     const calls = simulateAuction(deal)
     const contract = contractFromCalls(calls)
     expect(contract).not.toBeNull()
-    expect(contract!.level).toBeGreaterThanOrEqual(6) // slam via inbjudan + accept
-    expect(contract!.strain).toBe('clubs')
+    // FACIT UPPDATERAT 2026-09-28 (läge 3, ägarbeslut): Nord ♠73 ♥AQ3 ♦AJ ♣AQJT94
+    // är 18 hp med 6-3-2-2 och återbjuder nu 2NT (18–19, "räknas som balanserad")
+    // i stället för 3♣ — Syd placerar 3NT. Klöverslammen via 3♣–4♣–6♣ nås inte
+    // längre på den här given (noterat i docs/senare.md som uppföljning).
+    expect(calls.map((c) => c.bid)).toContain('2NT')
+    expect(contract!.level).toBe(3)
+    expect(contract!.strain).toBe('NT')
   })
 })

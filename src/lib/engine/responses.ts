@@ -112,8 +112,11 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
       const sym = opened === 'hearts' ? '3♠' : '3♥'
       return { call, rule: 'tvetydig splinter', explanation: `4+ stöd + kortfärg → ${sym} (tvetydig splinter, utgångskrav).` }
     }
-    if (sp >= 13) {
-      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `4+ stöd, ingen splintervärdig kortfärg → 2NT (Jacoby, utgångskrav).` }
+    // Ägarbeslut 2026-09-28 (läge 3-paketet): Jacoby 2NT = 12+ HP "hela tiden"
+    // (formstarka 13+ stödpoäng som förut). Sonden visade att 12 STÖDpoäng
+    // släppte igenom 9 hp-händer (frö 20270727) — hp-golvet är ägarens.
+    if (p >= 12 || sp >= 13) {
+      return { call: '2NT', rule: 'Jacoby 2NT', explanation: `4+ stöd, 12+ hp, ingen splintervärdig kortfärg → 2NT (Jacoby, utgångskrav).` }
     }
     if (support === 4) {
       if (sp >= 10) return { call: '3D', rule: 'Bergen limit', explanation: `4 stöd (limithöjning) → 3♦ (Bergen).` }
@@ -127,9 +130,12 @@ export function respondToMajor(hand: Hand, opened: Major): ResponseResult {
 
   // ---- 3-korts stöd (stödpoäng styr; korthet lyfter mot limithöjning) ----
   if (support === 3) {
+    // Ägarbeslut 2026-09-28 (läge 3-paketet): Jacoby 2NT lovar 3+ trumf och 12+
+    // hp "hela tiden" — 3-korts stöd med utgångsvärden går Jacoby, inte 2/1
+    // eller 1NT ("öppnar upp budgivningsmöjligheter"; 2♣ på tre kort ljuger mer).
+    if (p >= 12) return { call: '2NT', rule: 'Jacoby 2NT', explanation: `3 stöd, 12+ hp → 2NT (Jacoby, utgångskrav; lovar 3+ trumf).` }
     if (sp <= 9) return { call: `2${M}`, rule: 'enkel höjning', explanation: `3 stöd (6–9) → 2${MSYM} (enkel höjning).` }
-    if (sp <= 12) return { call: '1NT', rule: 'semi-forcing 1NT', explanation: `3-korts limithöjning (10–12) → 1NT (semi-forcing), höjer sedan.` }
-    // 13+ stödpoäng med 3 stöd → faller vidare till 2/1.
+    return { call: '1NT', rule: 'semi-forcing 1NT', explanation: `3-korts stöd med 10–11 → 1NT (semi-forcing), höjer sedan till 2${MSYM}.` }
   }
 
   // ---- Ny färg på 1-läget: bara spader över 1♥ ----

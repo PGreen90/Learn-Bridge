@@ -5,7 +5,7 @@
 // stannar (som tidigare) tills regeln finns.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { hcp, isBalanced, lengths, suitHcp } from './hand'
+import { hasRealControl, hcp, isBalanced, lengths, suitHcp } from './hand'
 import { pointsWithFloor } from './evaluation'
 import { splinterShortSuits, type Major, type ResponseResult } from './responses'
 import { responderSecondBidAfter2C } from './responses-2c'
@@ -496,7 +496,16 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
 
   // Naturlig ny färg (2♣/2♦, eller 2♥ över 1♠) – ej krav.
   if (rs && rs !== M) {
-    if (len[M] >= 3 && p >= 10) return { call: `3${mBid}`, rule: 'inbjudan (limithöjning)', explanation: `3+ stöd → 3${mSym} (limithöjning).` }
+    // Ägarbeslut 2026-09-28 (läge 3): 3-korts stöd med 10–11 → 2M (exakt 10–11,
+    // "avancera långsamt" — 12+ gick Jacoby direkt). Öppnaren passar med
+    // minimum, bjuder utgång med 15+ Bergenpoäng. Dubbelanpassning (4+ i
+    // öppnarens andra färg med äkta kontroll) → 4 i den färgen, utgångskrav.
+    if (len[M] >= 3 && p >= 10) {
+      if (rs !== 'hearts' && rs !== 'spades' && len[rs] >= 4 && hasRealControl(hand, rs)) {
+        return { call: `4${BID[rs]}`, rule: 'dubbelanpassning', explanation: `3 ${SYM[M]} och 4+ ${SYM[rs]} med kontroll (ess/singel/KQ) → 4${SYM[rs]} (dubbelanpassning, utgångskrav — sätter ${SYM[M]} som trumf).` }
+      }
+      return { call: `2${mBid}`, rule: 'inbjudan (limithöjning)', explanation: `3 stöd, exakt 10–11 → 2${mSym} (öppnaren passar med minimum, går till utgång med extra).` }
+    }
     const inv = inviteSuit()
     if (inv) return inv
     if (len[rs] >= 4 && p <= 10) return pass(`stöd i ${SYM[rs]}`)
@@ -516,10 +525,11 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
     })
     const six = ownSuitAtTwo(6)
     if (six) return newSuit(six)
-    if (len[M] >= 2 && rankOf(M) > rankOf(rs)) return { call: `2${mBid}`, rule: 'preferens', explanation: `Preferens → 2${mSym}.` }
     const five = ownSuitAtTwo(5)
     if (five) return newSuit(five)
-    return pass('inget bättre')
+    // Ägarbeslut 2026-09-28: den svaga handen "får stanna" — ingen 2M-preferens
+    // på dubbelton (2M är nu exakt 10–11 med tre stöd); öppnarens andra färg står.
+    return pass('svag hand utan egen färg — öppnarens andra färg står')
   }
 
   return null

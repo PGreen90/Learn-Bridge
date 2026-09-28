@@ -128,8 +128,8 @@ describe('punkt 10 – svararens andra bud efter semi-forcing 1NT', () => {
     expect(r10('S:KJ4 H:7 D:Q852 C:J8642', 'hearts', '2C', 'rebid: ny färg')).toBe('P') // 5 hp, 5 klöver
   })
 
-  it('öppnaren bjuder ny minor 2♦ – preferens till högfärgen', () => {
-    expect(r10('S:Q842 H:K7 D:73 C:J8642', 'hearts', '2D', 'rebid: ny färg')).toBe('2H') // 6 hp, 2 hjärter
+  it('öppnaren bjuder ny minor 2♦ – den svaga handen "får stanna" (läge 3, 2026-09-28: 2M = exakt 10–11 med tre stöd)', () => {
+    expect(r10('S:Q842 H:K7 D:73 C:J8642', 'hearts', '2D', 'rebid: ny färg')).toBe('P') // 6 hp, 2 hjärter — förr preferens 2♥
   })
 
   it('hoppskift (GF) utan fit → 3NT', () => {
@@ -449,8 +449,8 @@ describe('felrapport #59 – svararens egen färg efter 1NT–2♣ (§5.1)', () 
   it('6-korts ruter går före 2-korts preferens (2♦, inte 2♠)', () => {
     expect(r10('S:K3 H:Q94 D:KJT852 C:T3', 'spades', '2C', 'rebid: ny färg')).toBe('2D')
   })
-  it('5-korts ruter med 2-korts stöd → preferensen 2♠ står kvar', () => {
-    expect(r10('S:K3 H:Q943 D:KJT85 C:T3', 'spades', '2C', 'rebid: ny färg')).toBe('2S')
+  it('5-korts ruter med 2-korts stöd → egen 2♦ (ingen 2♠-preferens sedan läge 3, 2026-09-28)', () => {
+    expect(r10('S:K3 H:Q943 D:KJT85 C:T3', 'spades', '2C', 'rebid: ny färg')).toBe('2D')
   })
   it('efter 1♥–1NT–2♦ finns inget 2-läge kvar → oförändrat (pass)', () => {
     expect(r10('S:Q84 H:7 D:73 C:KJ8642', 'hearts', '2D', 'rebid: ny färg')).toBe('P')
