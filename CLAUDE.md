@@ -14,11 +14,12 @@ svarar på vad).
 **Läge 2 LIVE `16e26fe` (09-28):** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥) +
 svararens semi-forcing 2♠ efter 1♥–1♠–2♥ (5+ ♠, 10+; 2NT förnekar 3-stöd) +
 öppnarens fortsättning; facit `auction-svagt-hoppskift-2s.test.ts`, §4.1/§5.2.
-**Nästa bygge (läge 3-paketet), ägarsvar 09-28:** rad 3 STÄNGD (3♦ står; nytt: 18–19
-6-3-2-2 → 2NT) · läge 3 = 1♠–1NT–2♦: 2♠ = 10–11 m. 3 stöd, svag pass (även
-5-2), 4♦ = dubbelanpassning m. ÄKTA ruterkontroll; **Jacoby 2NT = 12+ & 3+ stöd** ·
-hål D steg 2 (NÄST 1, alla svar i senare.md; Kxx ≠ kontroll).
-Golvet `pointsWithFloor` BEHÅLLS överallt (rad 1–6). Inga ägarfrågor öppna.
+**Läge 3-paketet BYGGT, väntar PCD (09-28):** Jacoby 2NT = 12+ hp & 3+ stöd ·
+1♠–1NT–2♦: 2♠ = 10–11 m. 3 stöd, svag pass, 4♦ = dubbelanpassning m. ÄKTA
+kontroll · 18–19 på 6-3-2-2 → 2NT · lucka lagad (4M-placering efter Jacoby).
+Sond `jacoby.probe.test.ts` (JACOBY=1): 1 500 givar, ~25 ändrade; uppföljningar
+i `docs/senare.md` (öppnarens slamdriv efter Jacoby-signoff · 6-3-2-2 utan
+håll · sidofärg dold). Golvet `pointsWithFloor` BEHÅLLS överallt. Sedan NÄST 1.
 Detalj: `docs/handvardering.md` principrutan + minnet. Dagens IMP LIVE `186aa45`
 (bevaka första IMP-natten: cron 01:05 · bottar 01:45 · granskning 01:30).
 
@@ -147,6 +148,8 @@ projektets resa erfaren & trygg (ägarens egna ord 2026-08-13).
 - Ägaren vill ge **mänsklig input i konkreta budsituationer** — fråga hellre än
   gissa.
 - Säg aldrig "monster" om en bra hand (ägarbeslut 2026-07-05) — skriv "stark hand".
+- **Poäng/kortantal på händer som visas räknas ALLTID med kod** (`hcp(parseHand)`),
+  aldrig i huvudet; summakoll 40/13 (ägarkrav 2026-09-28 efter tre felräkningar).
 - **Kritisk motpart, inte medhållare:** säg emot när en idé är svag och motivera
   varför, var ärlig om egna fel, rikta kritiken dit det gäller. Men var kalibrerad:
   säg lika tydligt när ägaren har rätt. Ingen kritik för sakens skull.

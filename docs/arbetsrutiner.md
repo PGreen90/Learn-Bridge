@@ -62,9 +62,22 @@ Samma disciplin gäller påståenden om vad ett bud *lovar*: kolla systemboken (
 negativ dubbling visar "typiskt" de objudna högfärgerna — en 4-4-fit är alltså
 **inte känd** för partnern) innan ett läge beskrivs som känt.
 *(Bakgrund: felrapport #88 — hp-raden 12/16/6/5 summerade till 39, rätt var
-11/15/9/5; Östs 9 hp hade räknats till 6 och upprepats i tre svar. Ägaren:
-"ett kritiskt fel, det får inte hända". Regeln står också i
-`.claude/commands/felrapporter.md` och i minnet.)*
+11/15/9/5; Östs 9 hp hade räknats till 6 och upprepats i tre svar. Samma dag
+en tredje felräkning: ♠KJ ♥Q8 ♦AKJ764 ♣K103 kallades 18 hp, är 17 — ägaren
+fattade ett beslut på fel siffra. Ägaren: "väldigt oroväckande, gör inte om
+detta". Regeln står också i `CLAUDE.md`, `.claude/commands/felrapporter.md`
+och i minnet.)*
+
+**Så räknas det (kopiera, kör, läs av — innan handen skrivs i svaret):**
+```
+cat > src/lib/engine/tmp-hp.test.ts <<'EOF'
+import { it } from 'vitest'; import { writeFileSync } from 'node:fs'
+import { parseHand } from '../bidding'; import { hcp } from './hand'
+const hs = ['S:KJ H:Q8 D:AKJ764 C:KT3']   // ← händerna som ska visas
+it('hp', () => writeFileSync(process.env.TEMP + '/hp.txt', hs.map((h) => `${h}: ${hcp(parseHand(h))} hp, ${parseHand(h).length} kort`).join('\n')))
+EOF
+npx vitest run src/lib/engine/tmp-hp.test.ts >/dev/null 2>&1; rm src/lib/engine/tmp-hp.test.ts; cat "$TEMP/hp.txt"
+```
 
 ## 🔴 Sessionsavslut (avsluta smart & noggrant)
 > Mål: inget lämnas trasigt, allt är sparat, och nästa start blir lätt.

@@ -135,12 +135,16 @@ har 25+ balanserad mittemot ett positivt färgsvar.
   3-läget (standard): **3♣** = 7–9 hp (konstruktiv), **3♦** = 10–12 hp
   (limit/inbjudan), **3 i hf** = 0–6 hp (spärr). Bygger på lagen om
   totala stick (9 trumfer → 3-läget).
-- Med **3-korts** stöd: enkel höjning till 2-läget (6–9 hp). En **3-korts
-  limithöjning** (10–12 hp) går via semi-forcing 1NT och sedan hopp till 3 i
-  hf nästa vända (Bergen kräver exakt 4 trumf).
-- **Jacoby 2NT** = balanserad GF-höjning, 4+ trumf, 13+ hp, ingen
-  **splintervärdig** kortfärg. Hit hör även GF-händer vars enda korthet är en
-  **singel A/K** (se splinterregeln nedan).
+- Med **3-korts** stöd: enkel höjning till 2-läget (6–9 hp). Med **10–11 hp**
+  går handen via semi-forcing 1NT och bjuder sedan **2 i högfärgen** nästa
+  vända (= exakt 10–11, tre trumf; "avancera långsamt", ägarbeslut 2026-09-28).
+  Med **12+** bjuds Jacoby 2NT direkt (nedan). Bergen kräver exakt 4 trumf.
+- **Jacoby 2NT** = GF-höjning, **3+ trumf, 12+ hp** (ägarbeslut 2026-09-28:
+  "12+ hela tiden, lovar 3–4+ trumfstöd — öppnar upp budgivningsmöjligheter";
+  förr 4+ och 13+), ingen **splintervärdig** kortfärg. Hit hör även GF-händer
+  vars enda korthet är en **singel A/K** (se splinterregeln nedan), och 3-korts
+  stöd med utgångsvärden även med egen 5-korts sidofärg (2/1 finns kvar för
+  händer utan trekortsstöd).
 - **Balanserad inbjudan utan stöd** (≈11–12 hp, högst 3-korts trumf) går via
   semi-forcing 1NT och sedan 2NT nästa vända – direkt 2NT är Jacoby.
 - **Splinter** (4+ stöd + kort färg, ~12+ hp, GF) visas med den **tvetydiga
@@ -166,11 +170,11 @@ har 25+ balanserad mittemot ett positivt färgsvar.
 | Svar | Betydelse | Kravnivå | Konvention |
 |---|---|---|---|
 | 1♠ | 4+ ♠, 6+ hp | Krav (1 rond) | naturligt |
-| 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts limithöjning) | Semi-krav | Semi-forcing 1NT ● |
-| 2♣ / 2♦ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
+| 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts stöd med 10–11) | Semi-krav | Semi-forcing 1NT ● |
+| 2♣ / 2♦ | ny färg 4+ (oftast 5+), 12+ hp, utan 3-korts stöd | Utgångskrav | 2-över-1 GF |
 | 2♥ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
 | 2♠ | 6+ ♠, 5–8 hp, högst två ♥ — spärr | Avslut/spärr | svagt hoppskift |
-| 2NT | 4+ stöd, 13+ hp, balanserad (ingen kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
+| 2NT | 3+ stöd, 12+ hp (ingen splintervärdig kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
 | 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
 | 3♥ | 4 trumf, 0–6 hp (spärr) | Avslut/spärr | Bergen-spärr ● |
@@ -181,10 +185,10 @@ har 25+ balanserad mittemot ett positivt färgsvar.
 #### Svar på 1♠
 | Svar | Betydelse | Kravnivå | Konvention |
 |---|---|---|---|
-| 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts limithöjning) | Semi-krav | Semi-forcing 1NT ● |
-| 2♣ / 2♦ / 2♥ | ny färg 4+ (oftast 5+), 12+ hp | Utgångskrav | 2-över-1 GF |
+| 1NT | 6–11 hp, ingen 2/1 (inkl. 3-korts stöd med 10–11) | Semi-krav | Semi-forcing 1NT ● |
+| 2♣ / 2♦ / 2♥ | ny färg 4+ (oftast 5+), 12+ hp, utan 3-korts stöd | Utgångskrav | 2-över-1 GF |
 | 2♠ | 3 stöd, 6–9 hp | Ej krav | naturligt (enkel höjning) |
-| 2NT | 4+ stöd, 13+ hp, balanserad | Utgångskrav, slamintresse | Jacoby 2NT ● |
+| 2NT | 3+ stöd, 12+ hp (ingen splintervärdig kortfärg) | Utgångskrav, slamintresse | Jacoby 2NT ● |
 | 3♣ | 4 trumf, 7–9 hp (konstruktiv) | Inbjudan | Bergen ● |
 | 3♦ | 4 trumf, 10–12 hp (limit) | Inbjudan | Bergen ● |
 | 3♥ | 4+ stöd, singel (ej A/K) el. renons (okänd färg), 12+ hp | Utgångskrav, slamintresse | Tvetydig splinter ● |
@@ -194,8 +198,22 @@ har 25+ balanserad mittemot ett positivt färgsvar.
 
 **Fortsättning efter semi-forcing 1NT:** Öppnaren får passa med minimum
 balanserat. Bjuder svararen därefter en ny färg lovar det 5+ kort och
-**förnekar** stöd i öppnarens färg(er). Annars kan svararen visa preferens i
-öppnarens färger.
+**förnekar** stöd i öppnarens färg(er).
+
+**Svararens andra bud efter 1M–1NT–2x (ny färg) — läge 3-paketet, ägarbeslut
+2026-09-28:**
+| Svararens bud | Betydelse |
+|---|---|
+| pass | svag hand — "får stanna" i öppnarens andra färg, även i 5-2 (ingen 2M-preferens på dubbelton) |
+| 2M | **exakt 10–11 med tre trumf** ("avancera långsamt"; 12+ bjöd Jacoby direkt). Öppnaren passar med minimum, 4M med 15+ Bergenpoäng |
+| 2NT | 11–12 balanserad utan stöd, inbjudan |
+| ny färg på 2-läget | 5+ (oftast 6), svag, till spel |
+| ny färg på 3-läget | 6+, 10–11, inbjudan (§5b beslut 11) |
+| **4 i öppnarens andra lågfärg** (1♠–1NT–2♦–**4♦**) | **dubbelanpassning:** tre trumf + 4+ i färgen med **äkta kontroll** (ess, singel, renons eller KQ) — utgångskrav med högfärgen som trumf |
+
+Öppnaren på dubbelanpassningen: **4M** med minimum (eller utan kontrollbud
+under utgång); med **15+ och äkta hjärterkontroll** under 4♠ → **4♥**
+(kontrollbud). Svararen (10–11) bjuder sedan 4M — inget slamintresse.
 
 **Svararens nya färg på 3-läget efter 1M–1NT–2x** (ägarbeslut 2026-09-05,
 motorbytet §5b beslut 11; t.ex. 1♠–1NT–2♠–3♥, 1♠–1NT–2♣–3♦, 1♥–1NT–2♦–3♣):
@@ -282,8 +300,9 @@ hackor mittemot kort är guld. Är handen ren från slöseri och stark nog →
 utgång.
 
 #### Jacoby 2NT — fortsättning
-Svararens **2NT** = 4+ trumf, **13+ hp** (varav minst 11 hp i honnör), GF,
-ingen kortfärg. Bra 3-korts stöd (2 av de tre topphonnörerna) godtas.
+Svararens **2NT** = **3+ trumf, 12+ hp**, GF, ingen splintervärdig kortfärg
+(ägarbeslut 2026-09-28; förr 4+ trumf och 13+). Öppnarens återbud nedan
+räknar med minst tre trumf hos partnern.
 
 **Öppnarens återbud** (prioritet: 5-korts sidofärg → kortfärg → 3NT → 4 i
 trumf → 3 i trumf):
@@ -1034,7 +1053,8 @@ en inbjudan från svararen får aldrig lämnas obesvarad. Öppnaren dömer på
 
 | Svararens inbjudan | Öppnarens svar |
 |---|---|
-| 3♥/3♠ (limithöjning, 3-korts stöd) | 15+ Bergenp. → **4M** · annars pass |
+| 2M efter vår **nya färg** (3-korts stöd, exakt 10–11; läge 3, 2026-09-28) | 15+ Bergenp. → **4M** · annars pass |
+| 3M efter vårt **2M-återbud** (3-korts stöd, 10–11) | 15+ Bergenp. → **4M** · annars pass |
 | 2NT efter vårt **2M-återbud** (6+ kort) | 15+ Bergenp. → **4M** · annars **3M** — sang spelas aldrig när vi lovat sex kort |
 | 2NT efter en **ny färg** (5-4-handen) | 14+ hp → **3NT** · annars pass |
 
@@ -3090,6 +3110,23 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-28 — Läge 3-paketet (§4.1, §5.1, §5.2; ägarens beslut ur
+  omvärderingsfrågan 2026-09-27/28).** (1) **Jacoby 2NT = 12+ hp och 3+ trumf**
+  "hela tiden" (förr 4+ och 13+; formstarka 13+ stödpoäng som förut) — 3-korts
+  stöd med utgångsvärden går Jacoby, inte 2/1 eller 1NT. (2) Efter 1M–1NT–2x:
+  **2M = exakt 10–11 med tre trumf** (öppnaren passar med minimum, 4M med 15+
+  Bergenpoäng); **den svaga handen får stanna** (ingen 2M-preferens på
+  dubbelton); **4 i öppnarens andra lågfärg = dubbelanpassning** (3 trumf + 4+
+  där med äkta kontroll: ess/singel/renons/KQ), utgångskrav — öppnaren 4M eller
+  4♥-kontrollbud med 15+ och hjärterkontroll, svararen 4M. (3) **6-3-2-2 med
+  18–19 återbjuder 2NT** (räknas som balanserad). (4) Lucka lagad: efter Jacoby
+  och öppnarens sidofärgs-/kortfärgsbud placerar svararen utan slamzon 4M —
+  förr bjöd kravvakten "ny färg" på 4-/5-läget. Mätt med Jacoby-sonden
+  (`jacoby.probe.test.ts`, JACOBY=1) på 1 500 givar: 25 auktioner ändrade.
+  Kod: `responses.ts`, `responder-rebids.ts`, `rebids.ts`, `auction-decide.ts`,
+  `auction-meaning.ts`, `hand.ts` (`hasRealControl`), `rules.ts`. Facit
+  `auction-lage3-paketet.test.ts` + uppdaterade `responses.test.ts`,
+  `responder-rebids.test.ts`, `auction-slam-jumprebid.test.ts`.
 - **2026-09-28 — Felrapport #90 (§7.1).** Inklivaren efter partnerns
   (kooperativa) dubbling av deras bud över inklivet, (2♦)–2♥–(3♦)–X–P–?:
   kort i deras färg (≤1) eller 6+ egen färg → drar ur (högfärgsutgång med 7+

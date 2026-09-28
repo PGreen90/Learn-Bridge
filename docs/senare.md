@@ -123,6 +123,18 @@ verklighetens ~1 %) i `tvaklover-oversyn.probe.test.ts` (gate:ad `TVAKLOVER=1`).
 (låst regel). Facit-först. Spellärdom ur Lawrence-artikeln (dummy reversal) hör
 till speldiagnosens låda, inte hit.
 
+### Uppföljningar efter läge 3-paketet (2026-09-28, Jacoby-sonden)
+- **Öppnarens slamdriv efter svararens Jacoby-signoff:** 1♥–2NT–3♦–4♥ med
+  ♠A43 ♥AKT72 ♦J ♣AQ95 (18 hp + singel) passar 4♥ fast 6♥ står (frö 20271425;
+  förr via 1♠-svaret + hoppskift 3♣ → 6♥). Kaptensregeln mot visade 12: 18+
+  form ≥ 33 → öppnaren borde driva. Ägarfråga + bygge.
+- **2NT-återbudet på 6-3-2-2 utan stopp i dubbeltonerna:** ♠73 ♥AQ3 ♦AJ
+  ♣AQJT94 (18) återbjuder nu 2NT och 6♣ (via 3♣–4♣) nås inte (facit
+  `auction-slam-jumprebid.test.ts`). Ska 2NT kräva håll i dubbeltonerna?
+- **Jacoby med 3 trumf + 5-korts sidofärg** döljer sidofärgen: 1♠–2NT–4♦–4♠ med
+  ♠A64 ♥KQ9742 ♦8 ♣AJ6 mittemot ♠KQ972 ♥6 ♦AKJT7 ♣K5 stannar i 4♠, 6♠ står
+  (frö 20271201; förr 2♥-vägen). Följer av ägarens "hela tiden" — bevaka.
+
 ### Hål D steg 2 — cue-frontend i konkurrenslagret (AVPARKERAD 2026-09-28 → 🟢 NÄST 1)
 **Ägarens struktur 2026-09-28** (omvärderingsfrågan läge 4/5, t.ex. 1♥–(2♦)–3♦):
 efter svararens cue-höjning är Nords styrka INTE avgörande — Nord är skyldig att

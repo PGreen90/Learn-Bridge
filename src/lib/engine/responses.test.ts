@@ -131,10 +131,12 @@ describe('respondToMajor', () => {
       expect(r.rule).toContain('splinter')
     })
 
-    it('3-korts stöd med GF-styrka bjuder ALDRIG Jacoby 2NT', () => {
-      // 15 hp men bara 3 hjärter → faller till 2/1, inte Jacoby (kräver 4+).
-      const r = respondToMajor(parseHand('S:AQ3 H:K74 D:AKJ2 C:Q53'), 'hearts')
-      expect(r.rule).not.toBe('Jacoby 2NT')
+    it('3-korts stöd med 12+ hp bjuder Jacoby 2NT (ägarbeslut 2026-09-28: 3+ trumf, 12+ "hela tiden")', () => {
+      // Förr: 15 hp med 3 hjärter föll till 2/1 (Jacoby krävde 4+ och 13+).
+      expect(respondToMajor(parseHand('S:AQ3 H:K74 D:AKJ2 C:Q53'), 'hearts').rule).toBe('Jacoby 2NT')
+      expect(respondToMajor(parseHand('S:QJ7 H:K853 D:Q64 C:A53'), 'spades').rule).toBe('Jacoby 2NT') // 12 hp, 3-4-3-3
+      expect(respondToMajor(parseHand('S:K85 H:7 D:AQ953 C:K642'), 'spades').rule).toBe('Jacoby 2NT') // 12 hp, 3 trumf + 5-korts sidofärg
+      expect(respondToMajor(parseHand('S:QJ7 H:K853 D:64 C:A853'), 'spades').call).toBe('1NT') // 10 hp → 1NT, sedan 2♠
     })
   })
 })

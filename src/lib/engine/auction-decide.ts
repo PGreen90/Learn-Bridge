@@ -803,6 +803,16 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
   if ((majorFit || minorFit) && openerSuit) {
     const slam = slamStep(openerSuit)
     if (slam) return slam
+    // Ingen slamzon mot öppnarens visade minimum → placera UTGÅNGEN (läge 3,
+    // 2026-09-28; Jacoby-sonden frön 20270045/20270296/20271311): förr fanns
+    // inget bud här och kravvakten bjöd "ny färg" på 4-/5-läget (4♠ över 4♦ i
+    // hjärter → 5♥ bet). Öppnarens 4M står redan; allt under det placeras i 4M.
+    if (majorFit) {
+      const game = `4${LETTER[openerSuit]}` as ResponseResult['call']
+      if (rebid.call !== game && bidRank(rebid.call) < bidRank(game)) {
+        return { turn: { call: game, rule: 'utgång', explanation: `Öppnarens ${rebid.call} efter min Jacoby 2NT visade inget som räcker till slam mot mina värden → ${game[0]}${SYM[openerSuit]} (utgång).` }, plan: { kind: 'call' } }
+      }
+    }
   }
 
   // Exclusion efter splinter + relä (öppnarens slamintresse, visat minimum 15).
@@ -954,7 +964,7 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
 
   // Efter semi-forcing 1NT: inbjudan (3M/2NT/höjning) eller svararens egen
   // färg till spel (etapp 5 fix 2, felrapport #59).
-  if ((openCall === '1H' || openCall === '1S') && response.rule === 'semi-forcing 1NT' && (second.rule.startsWith('inbjudan') || second.rule === 'ny färg efter 1NT')) {
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'semi-forcing 1NT' && (second.rule.startsWith('inbjudan') || second.rule === 'ny färg efter 1NT' || second.rule === 'dubbelanpassning')) {
     const t = openerThirdBidAfterSemiForcing1NT(hand, openerSuit as 'hearts' | 'spades', rebid, second)
     if (t) return t
   }
@@ -1094,6 +1104,15 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
         : { turn: { call: '3NT', rule: 'till spel', explanation: `Öppnaren har 14–15 med 6+ ${SYM[openerSuit]}, jag har 12 men bara en ${SYM[openerSuit]} → 3NT.` }, plan: { kind: 'call' } }
     }
     if (third.call.startsWith('4')) return pass('Öppnaren bjöd utgång')
+  }
+
+  // Min dubbelanpassning 4♦ (läge 3, ägarbeslut 2026-09-28): öppnaren bjöd
+  // 4♠ (utgång står) eller ett kontrollbud (4♥) — jag har 10–11 (12+ gick
+  // Jacoby), inget slamintresse → 4♠.
+  if ((openCall === '1H' || openCall === '1S') && response.rule === 'semi-forcing 1NT' && second.rule === 'dubbelanpassning' && openerSuit) {
+    const game = `4${LETTER[openerSuit]}`
+    if (third.call === game) return { turn: { call: 'P', rule: 'svararens pass', explanation: `Öppnaren satte utgången ${SYM[openerSuit]} på min dubbelanpassning → pass.` }, plan: { kind: 'call' } }
+    if (bidRank(third.call) < bidRank(game)) return { turn: { call: game as ResponseResult['call'], rule: 'utgång', explanation: `Öppnarens kontrollbud (${third.call}) efter min dubbelanpassning — med 10–11 har jag inget slamintresse → ${game.replace(LETTER[openerSuit], SYM[openerSuit])}.` }, plan: { kind: 'call' } }
   }
 
   // Min inbjudan i ny färg på 3-läget efter semi-forcing 1NT (§5b beslut 11):

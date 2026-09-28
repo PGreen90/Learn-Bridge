@@ -19,6 +19,8 @@ import type { Forcing } from '../../types/bridge'
 // namn (t.ex. "Stayman" täcker "Stayman-svar").
 
 const ALERT_RULE_PREFIXES: string[] = [
+  'dubbelanpassning', // 4 i öppnarens andra lågfärg efter 1M–1NT–2m = trumfsättning i högfärgen (läge 3, 2026-09-28)
+  'kontrollbud', // öppnarens 4♥ på dubbelanpassningen
   'tvetydig splinter',
   'splinter-relä',
   'splinter: kortfärg',
@@ -175,6 +177,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'öppnarens dubbling (visa din hand)': 'krav-1-rond', // 1x–(y)–X–(z)–X: ingen 4-korts högfärg, ingen 5+ öppningsfärg — partnern beskriver (felrapport #88)
   'visar handen efter öppnarens dubbling': 'ej-krav', // negativ-dubblarens beskrivning på den (felrapport #88)
   'inklivaren drar ur partnerns dubbling': 'ej-krav', // (2♦)–2♥–(3♦)–X–P–3♥/4♥: kort i deras färg / 6+ egen (felrapport #90)
+  dubbelanpassning: 'utgangskrav', // 1♠–1NT–2♦–4♦: 3 trumf + 4+ i öppnarens andra färg med äkta kontroll (läge 3, ägarbeslut 2026-09-28)
+  kontrollbud: 'slamintresse', // öppnarens 4♥ på dubbelanpassningen (15+ med hjärterkontroll)
   'inklivaren sitter kvar på partnerns dubbling': 'avslut',
   'rebid: egen färg (inbjudan)': 'inbjudan', // öppnarens 3♥ efter partnerns semi-forcing 2♠: 6+ kort, 14–15
   'rebid: egen färg': 'ej-krav',
