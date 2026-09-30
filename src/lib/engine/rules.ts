@@ -386,6 +386,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'inklivaren svarar fit-jump (minimum)': 'ej-krav',
   'överklivaren tävlar (cue-höjning)': 'ej-krav',
   'advancern tävlar till fiten (lagen om totala stick)': 'ej-krav',
+  'inklivaren tävlar till fiten (lagen om totala stick)': 'ej-krav', // felrapport #93: 6+ kort över deras fortsättning efter höjningen
   'advancern bjuder utgång med fit (konkurrens)': 'avslut',
   'cue-höjningens fortsättning': 'avslut',
   'cue-höjningens fortsättning (limit stannar)': 'avslut',

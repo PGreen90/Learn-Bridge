@@ -1162,6 +1162,16 @@ Singel hjärter → inget NT → 5♣.*
 Öppnaren kan även **splintra** (hopp i ny färg, t.ex. 1♣–1♥–3♠/4♦) för att visa
 4 stöd + kortfärg + extra styrka, på samma sätt som svararen gör i §4.1.
 
+**Slam i EGEN färg efter öppnarens hoppskift (felrapport #94, ägarbeslut
+2026-09-30).** Hoppskiftet (1♦–1♥–3♣) visar 19+ och utgångskrav. Svararen med
+**6+ i sin egen 1-lägeshögfärg** räknar **egna hp + 19**: **33+ → 4NT (1430 RKC)
+direkt**, med egen färg som trumf — "kan vi spela 7NT, vad saknas för det?" —
+och placerar slammen i sin färg (6M; 7 bara med visshet). Under 33 placeras
+utgången i egen färg som förr (4M = till spel). Partnern läser ett naket 4NT i
+hoppskiftets färg (§5b beslut 14) — med dessa poäng spelar frågefärgen ingen
+roll (ägaren). *Bricka 4: ♠K54 ♥AKQJT973 ♦Q ♣7 (15 hp) → **4NT**, 5♦ (0/3) →
+**6♥** (förr 4♥ med 13 stick på bordet).*
+
 **Slam efter öppnarens hopphöjning (F1 familj C — ärliga portar).** Öppnaren
 hopphöjde din högfärg (**1x–1M–3M**, visar **16–18** med 4-korts stöd) → trumfen
 är redan bestämd. Du (kaptenen) räknar **din egen hand mot det visade
@@ -2103,6 +2113,13 @@ struktur 2026-09-26).** Efter 1x–(1M)–P–(2M) — även med deras dubbling 
   utgångsförsök**: 5+ i inklivsfärgen och 4 i den nya, **ej krav**;
 - **16–17 utan sidofärg → 3M = utgångsinvit**;
 - **18+ → 4M direkt** (försöket kan avböjas, så en utgångshand frågar inte).
+
+**Bjuder öppnaren vidare efter höjningen** (1♣–(1♥)–2♣–(2♥)–2♠/3♣–?; felrapport
+#93, ägarbeslut 2026-09-30 "Syd får inte passa"): höjningen lovar 3+ stöd, så med
+**sexkorts inklivsfärg** har vi nio trumf → **3M tävlande, ej krav** (lagen om
+totala stick). **18+ → 4M**. Femkorts under 18 → pass (åtta trumf räcker inte
+till 3-läget). Ligger deras bud över 3M finns bara 4M (18+). *Bricka 2:
+♠KT73 ♥KQ7632 ♦K6 ♣A (15 hp) → **3♥** (förr pass utan regel).*
 
 Advancern svarar på försöket/inviten: **3M = minimum (6–7), avslut** —
 inklivaren passar; **4M = maximum (8–9)**; på 3M-inviten pass eller 4M. Bara
@@ -3140,6 +3157,16 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-30 — Felrapport #93 + #94.** (#93, §7.1) Inklivaren när öppnaren
+  bjuder vidare efter partnerns höjning: sexkorts inklivsfärg → 3M tävlande,
+  18+ → 4M, annars pass (`overcall-continuations.ts`
+  `overcallerCompetesAfterRaise`, ny regel `inklivaren tävlar till fiten (lagen
+  om totala stick)`; facit `auction-inklivaren-tavlar-efter-hojning.test.ts`).
+  Resonemangslagret hade bjudit X/3♥ här — det tänker bara åt bottarna, inte i
+  budhjälpen. (#94, §5.2) Svararen med 6+ egen högfärg och 33+ mot hoppskiftets
+  19 frågar 4NT direkt med egen färg som trumf (`auction-decide.ts`
+  `slamContextFor` + `responderSecondDecision`; facit
+  `auction-hoppskift-egen-farg-slam.test.ts`; rapportens giv når 6♥).
 - **2026-09-29/30 — Felrapport #91 (§5.7, ägarens struktur).** New Minor Forcing är
   **utgångskrav, 13+ rena hp** (förr 11+ = inbjudan eller bättre). 11–12 med
   femkorts högfärg → 2NT; med sexkorts → 4M direkt; öppnaren på 2NT: pass (12)
