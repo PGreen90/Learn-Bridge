@@ -10,15 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Hål D steg 2 BYGGD 2026-09-30, väntar ägarens PCD (sedan NÄST 0 → 1–2)
+### 🔵 NU — tomt (Hål D steg 2 LIVE `fda630c` 2026-09-30) — nästa: NÄST 0, sedan 1–2
 **Hål D steg 2 = cue-höjningens fortsättning i högfärg** (ägarens struktur 2026-09-28,
 §7.8 c): 1M–(inkliv)–cue → öppnaren ≤12 3M · 14–15 bal.+stopp 3NT · 13+ billigaste
 äkta kontrollbud (ess/singel/renons/KQ) · aldrig hopp till 4M över ett cue; svararen
 cue:ar egen kontroll oavsett styrka, 16+ frågar 4NT när alla sidofärger är
 kontrollerade. Kod `cue-raise-continuations.ts` + läsaren `cue-raise-sequence.ts`,
-facit `auction-cue-hojning-fortsattning.test.ts` (21 tester). Lokalt grönt; INTE
-pushat. Öppna ägarfrågor: svararens val efter 3NT (pass med jämn trekortshand /
-4M med 4+ trumf — Claudes tolkning) · ska öppnaren själv någonsin fråga 4NT?
+facit `auction-cue-hojning-fortsattning.test.ts` (21 tester). Auktionsdiff 3 000 givar:
+27 ändrade, alla i läget. Öppna ägarfrågor (bekräfta/ändra): svararens val efter 3NT
+(pass jämn 3-korts / 4M med 4+ trumf — Claudes tolkning) · öppnaren frågar aldrig 4NT själv.
 
 **Sessionen 2026-09-30 (allt LIVE, detalj `docs/historik.md`):** felrapport #91–#94 ·
 budhjälpen tänker (gul fyrkant) · uteslutningsmetoden i RKC (0/3 mot 16+ = 3) ·

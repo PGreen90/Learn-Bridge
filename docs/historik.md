@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-09-30 (Hål D steg 2 — cue-höjningens fortsättning i högfärg, BYGGD, väntar PCD)
+## 2026-09-30 (Hål D steg 2 — cue-höjningens fortsättning i högfärg, LIVE `fda630c`)
 
 **Vad:** ägarens struktur 2026-09-28 (omvärderingsfrågan läge 4/5) byggd som tabell-
 rader: efter 1M–(inkliv)–cue (limithöjning+) svarar öppnaren ≤12 → 3M · 14–15
