@@ -10,25 +10,23 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Omvärderingsfrågan → systembyggen (ägarens svar 2026-09-27/28)
-**Läge 2 LIVE `16e26fe` (09-28):** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥) +
-svararens semi-forcing 2♠ efter 1♥–1♠–2♥ (5+ ♠, 10+; 2NT förnekar 3-stöd) +
-öppnarens fortsättning; facit `auction-svagt-hoppskift-2s.test.ts`, §4.1/§5.2.
-**Läge 3-paketet BYGGT, väntar PCD (09-28):** Jacoby 2NT = 12+ hp & 3+ stöd ·
-1♠–1NT–2♦: 2♠ = 10–11 m. 3 stöd, svag pass, 4♦ = dubbelanpassning m. ÄKTA
-kontroll · 18–19 på 6-3-2-2 → 2NT · lucka lagad (4M-placering efter Jacoby).
-Sond `jacoby.probe.test.ts` (JACOBY=1): 1 500 givar, ~25 ändrade; uppföljningar
-i `docs/senare.md` (öppnarens slamdriv efter Jacoby-signoff · 6-3-2-2 utan
-håll · sidofärg dold). Golvet `pointsWithFloor` BEHÅLLS överallt. Sedan NÄST 1.
-Detalj: `docs/handvardering.md` principrutan + minnet. Dagens IMP LIVE `186aa45`
-(bevaka första IMP-natten: cron 01:05 · bottar 01:45 · granskning 01:30).
+### 🔵 NU — tomt (sessionsslut 2026-09-28) — nästa gång: NÄST 0, sedan 1–3
+**Omvärderingsfrågan HELT LEVERERAD:** golvet `pointsWithFloor` behålls överallt;
+läge 2 LIVE `16e26fe` (svagt hoppskift 1♥–2♠ + semi-forcing 2♠ efter 1♥–1♠–2♥),
+läge 3 LIVE `cfce6a5` (Jacoby 2NT = 12+ hp & 3+ stöd · 1♠–1NT–2♦: 2♠ = 10–11,
+svag pass, 4♦ dubbelanpassning m. äkta kontroll · 2NT på 6-3-2-2 · 4M-placering
+efter Jacoby). Sond `jacoby.probe.test.ts` (JACOBY=1). Uppföljningar i
+`docs/senare.md`. Dagens IMP LIVE `186aa45` (bevaka första IMP-natten).
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret (resonemangslagret steg 1–3 +
 pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje hand högt (regel
 A–D LIVE `037403b`, kvar beslutet om budseedad gissning; `docs/speldiagnos.md` T-serien) ·
 vänner-bordet = tävlingen (`docs/bord-plan.md`) · Gambling 3NT.
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** felrapport #84–#86
+**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** felrapport #87–#90
+(tvingat svar efter egen X · öppnaren svarar på negativ X trots höjning · MC på
+gemensamma lägen + fjärde hand går ej över partnern · inklivaren drar ur partnerns X) ·
+regeln "händer räknas med kod" · felrapport #84–#86
 (offshape-X 12+ · öppnaren efter konkurrenshöjning · inklivaren efter höjning, §7.1/§7.3/§7.4h) · Ogust-placering + sunt
 förnuft-svepets hål (`0c5cc37`) · svag tvåa i konkurrens (`24e883c`) · Michaels-fortsättningen
 (§7.2) · stört 1NT: tredje bud + störd överföring (§7.5) · nattgranskningen versionsmedveten ·
@@ -92,6 +90,7 @@ något känns fel i spel, eller när en ny fix ska läggas till. Senast
 S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### 🟢 NÄST (max 3, i ordning)
+0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
 1. **Hål D steg 2 — öppnarens fortsättning efter svararens cue i konkurrens**
    (AVPARKERAD 2026-09-28): 3NT 14–15 m. stopp, annars kontrollbud, aldrig hopp
    till utgång när kontrollbud under utgång finns; detaljfrågor i `docs/senare.md`.

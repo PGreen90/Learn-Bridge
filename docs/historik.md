@@ -3100,3 +3100,35 @@ gårdagens störd överföring-texter, rättat.
 **Mönstret att bevaka:** tre live-fynd på tre dagar (4♥ på transferbud ×2, 4♠ på
 Michaels-preferens) har samma rot — reservlogiken läser ett KONSTGJORT eller
 TVINGAT partnerbud som naturlig färg med värden och höjer till utgång.
+
+## 2026-09-27/28 — Omvärderingsfrågan levererad som systemstruktur; felrapport #87–#90; regeln "händer räknas med kod"
+
+Ägaren besvarade golvmätningens frågor (rad 1–6 + fem exempellägen). Utfall:
+golvet `pointsWithFloor` behålls överallt (svararen mot partnerns öppning,
+upplysnings-X, öppnarens hoppåterbud) — omvärdering "efter vad som bjudits" ville
+ägaren inte ha som poängjusteringar utan som systemstruktur:
+- **Läge 2 (LIVE `16e26fe`):** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥; julibeslutet
+  #31 rivet för exakt den följden) + svararens semi-forcing 2♠ efter 1♥–1♠–2♥ (5+ ♠,
+  10+; 2NT förnekar 3-stöd) + öppnarens fortsättning. Facit
+  `auction-svagt-hoppskift-2s.test.ts`; §4.1/§5.2.
+- **Läge 3-paketet (LIVE `cfce6a5`):** Jacoby 2NT = 12+ hp & 3+ trumf "hela tiden";
+  1M–1NT–2x: 2M = exakt 10–11 m. tre stöd, svag hand passar, 4 i öppnarens andra
+  lågfärg = dubbelanpassning m. äkta kontroll (`hasRealControl`); 6-3-2-2 m. 18–19 →
+  2NT; lucka lagad (4M-placering efter Jacoby när slamzon saknas — förr kravvakten).
+  Mätt med `jacoby.probe.test.ts` (JACOBY=1, git-stash A/B, DD via `computeOracle`):
+  25 av 1 500 auktioner ändrade, 3 bättre, 4 sämre (två slammar via Jacoby-vägen
+  missas — uppföljningar i `docs/senare.md`). Facit `auction-lage3-paketet.test.ts`.
+- **Hål D steg 2 avparkerad** (ägarens struktur: ≤12 → 3M, 13+ kontrollbud, 3NT 14–15
+  m. stopp, Kxx ≠ kontroll, Syd 16+ frågar 4NT när allt är kontrollerat) → NÄST 1.
+- **Felrapport #87–#90 (LIVE `e9a9d2e` + `32dd1f0`):** #87 öppnarens rond två efter
+  eget tvingat svar (ingen cue, Bergen 27/24/21); #88 öppnaren svarar på negativ X
+  trots fjärde hands bud (4-korts högfärg / 5+ egen / X "visa din hand") + dubblaren
+  beskriver; #89 Monte-Carlo röstar på gemensamma lägen + fjärde hand går inte över
+  partnerns vinnare (avblockering bara när partnern visat längd); #90 inklivaren drar
+  ur partnerns kooperativa X med kort i deras färg / 6+ egen.
+- **Kritiskt fel, tre gånger:** hp räknade i huvudet (Öst 6 → 9; 4-4-fiten "känd";
+  hand d 18 → 17, ägaren beslutade på fel siffra). Ägaren: "det får inte hända",
+  "gör inte om detta". Regel i `CLAUDE.md`, `docs/arbetsrutiner.md` (🔢, med
+  kommandot), `/felrapporter` och minnet: händer som visas räknas ALLTID med kod,
+  summakoll 40/13.
+Nästa gång: NÄST 0 /felrapporter, sedan hål D steg 2 (NÄST 1), speldiagnos, borden.
