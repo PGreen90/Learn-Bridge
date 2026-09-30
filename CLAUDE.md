@@ -10,20 +10,22 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt (sessionsslut 2026-09-28) — nästa gång: NÄST 0, sedan 1–3
-**Omvärderingsfrågan HELT LEVERERAD:** golvet `pointsWithFloor` behålls överallt;
-läge 2 LIVE `16e26fe` (svagt hoppskift 1♥–2♠ + semi-forcing 2♠ efter 1♥–1♠–2♥),
-läge 3 LIVE `cfce6a5` (Jacoby 2NT = 12+ hp & 3+ stöd · 1♠–1NT–2♦: 2♠ = 10–11,
-svag pass, 4♦ dubbelanpassning m. äkta kontroll · 2NT på 6-3-2-2 · 4M-placering
-efter Jacoby). Sond `jacoby.probe.test.ts` (JACOBY=1). Uppföljningar i
-`docs/senare.md`. Dagens IMP LIVE `186aa45` (bevaka första IMP-natten).
+### 🔵 NU — tomt (sessionsslut 2026-09-30) — nästa gång: NÄST 0, sedan 1–3
+**Sessionen 2026-09-30 (allt LIVE, detalj `docs/historik.md`):** felrapport #91–#94
+(NMF = utgångskrav 13+ hp med 2NT/4M-vägar + passad hands naturliga lågfärg ·
+"eget bud"-etiketten dolde människans bud för botpartnern · inklivaren tävlar 3M
+med sex kort när öppnaren bjuder vidare · 4NT direkt i egen 6+ högfärg efter
+hoppskift) · **budhjälpen tänker** (resonemangslagret åt människan, gul fyrkant =
+resonemang, grön prick = tabellen) · uteslutningsmetoden i RKC (0/3 mot 16+ = 3,
+#94-given når 7♥) · docs-vakten mäter LF. Omvärderingsfrågan LEVERERAD (läge 2
+`16e26fe`, läge 3 `cfce6a5`). Bevaka: budhjälpens väntetid vid bordet.
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret (resonemangslagret steg 1–3 +
 pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje hand högt (regel
 A–D LIVE `037403b`, kvar beslutet om budseedad gissning; `docs/speldiagnos.md` T-serien) ·
 vänner-bordet = tävlingen (`docs/bord-plan.md`) · Gambling 3NT.
 
-**Nyss klart (sep -26, allt LIVE — detalj `docs/historik.md`):** felrapport #87–#90
+**Nyss klart (sep -26…28, allt LIVE — detalj `docs/historik.md`):** felrapport #87–#90
 (tvingat svar efter egen X · öppnaren svarar på negativ X trots höjning · MC på
 gemensamma lägen + fjärde hand går ej över partnern · inklivaren drar ur partnerns X) ·
 regeln "händer räknas med kod" · felrapport #84–#86

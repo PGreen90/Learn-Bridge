@@ -10,6 +10,42 @@
 
 ---
 
+## 2026-09-29/30 (Felrapport #91–#94 + budhjälpen tänker — fyra mergepunkter, allt LIVE)
+
+**#92 (`793f204`, tvådelat):** (1) systemfyndet — bordets etikett `eget bud` på
+människans avvikande bud lästes av betydelselagret som en regel utan kravnivå, så
+botpartnern såg inget krav i människans återöppningsdubbling (2♦X gick hem). Nu
+härleds ett "eget bud" ur auktionen (`EGET_BUD`, `auction-meaning.ts`). Lärdom:
+reproducera bordsfel med bordets rule-etiketter, inte nakna historiker. (2) Svaret
+på 1NT-öppnarens återöppnings-X (§7.5): längsta färg / straffpass med längd+honnörer
+(`trapPassHolding` delas med §5.9).
+
+**#91 (`793f204`, ägarens struktur 2026-09-29):** New Minor Forcing = **utgångskrav,
+13+ rena hp** (förr 11+); 11–12 med fem kort → 2NT, sex kort → 4M direkt; öppnaren på
+2NT bara pass/3NT; passad hands lågfärg naturlig (5-4, 8+, partnern väljer 2M med 3+).
+Placeringen efter NMF passar aldrig under utgång. Auktionsdiff 3 000 givar: 15 ändrade,
+alla de nya vägarna. Tre äldre facit uppdaterade. `e3b1c4c`: docs-vakten mäter
+kB-siffran radslutsoberoende (Actions blev rött på CRLF/LF-skillnaden vid ~400 kB).
+
+**#93 + #94 (`fb08d75`):** inklivaren när öppnaren bjuder vidare efter partnerns
+höjning — sexkorts inklivsfärg tävlar 3M, 18+ 4M (`overcallerCompetesAfterRaise`;
+diff 21 ändrade, alla från pass utan regel). Svararen med 6+ egen högfärg och
+hp + 19 ≥ 33 efter hoppskiftet frågar 4NT direkt med egen färg som trumf.
+
+**Budhjälpen tänker + uteslutningsmetoden (`e5fa0ce`):** ägarens fråga "varför grep
+inte resonemangslagret in?" i #93 — det tänkte bara åt bottarna. Nu räknas
+`useGame.rekommendation` i samma worker: gul fyrkant + RESONEMANG för
+resonemangsbud, grön prick + MOTORNS BUD för tabellen; "Budhjälpen tänker …".
+Verifierat live i dev (1♣–P–1NT–P–P → gul fyrkant på 2♥). RKC: "0 eller 3" mot
+visade 16+ läses som 3 med visshet (ägaren: "ren matte"; reservationen om
+KQJ-händer står i §5.2) → #94-given 1♦–1♥–3♣–4NT–5♦–5NT–6♦–7♥. 5-5-handen med
+11–12 (2NT även med renons) → `docs/senare.md`.
+
+Testläget: `npm test` (242 filer gröna vid sessionsslut). Minnen: nmf-utgangskrav,
+eget-bud-tolkas-ur-auktionen, uteslutningsmetoden-rkc, motorn-passar-utan-regel.
+
+---
+
 ## 2026-09-26 (Dagens IMP — en andra daglig tävling, KLAR & LIVE samma dag)
 
 Ägarbeslut på morgonen efter frågan "hur räknas MP%?": MP-räkningen är den
