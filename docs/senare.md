@@ -142,41 +142,6 @@ till speldiagnosens låda, inte hit.
   ♠A64 ♥KQ9742 ♦8 ♣AJ6 mittemot ♠KQ972 ♥6 ♦AKJT7 ♣K5 stannar i 4♠, 6♠ står
   (frö 20271201; förr 2♥-vägen). Följer av ägarens "hela tiden" — bevaka.
 
-### Hål D steg 2 — cue-frontend i konkurrenslagret (AVPARKERAD 2026-09-28 → 🟢 NÄST 1)
-**Ägarens struktur 2026-09-28** (omvärderingsfrågan läge 4/5, t.ex. 1♥–(2♦)–3♦):
-efter svararens cue-höjning är Nords styrka INTE avgörande — Nord är skyldig att
-ge Syd chansen att fortsätta beskriva: 3NT med 14–15 och stopp i deras färg
-(att föredra), annars **kontrollbud** (3♠/4♣/4♦); **aldrig hopp till utgång när
-ett kontrollbud under utgång finns**. Syd cue:ar vidare (4♣) eller stannar (4♥);
-Nords 4♥ efter Syds cue = inget mer att visa. Syd med 16+ frågar 4NT ("ofta
-essfråga även med känslan att det kan vara fel"). I dag: 3♥ min / 4♥ max, aldrig
-3NT eller cue (`contested-continuations.ts` 'svar på cue-höjning').
-**Ägarens detaljsvar 2026-09-28 (exempelrundan):** Nord med **≤12 hp → 3♥**
-(minimum, avslag); **13+ → kontrollbud**, finns ingen kontroll → utgång; **3NT
-med 14–15 och stopp** (partnern väljer slutbud/kontroll/4♥). Kontroll = **ess,
-singel, renons eller kung+dam tillsammans** (♠AQ5 → 3♠; ♠K85 ensam kung räknas
-inte). Exempel: ♠K85 ♥AQ964 ♦K73 ♣84 (12) → 3♥ · ♠KQ5 ♥AQ964 ♦KJ3 ♣Q4 (15) →
-3NT · ♠AQ5 ♥KQ964 ♦872 ♣K4 (13) → 3♠ · ♠AQ85 ♥AKJ64 ♦3 ♣K84 (17) → 3♠ (aldrig
-4♥ direkt). Syd efter Nords kontrollbud: **cue:ar sin egen kontroll oavsett
-styrka** (♠K84 ♥Q73 ♦A6 ♣QJ965, 11 hp → 4♦, inte 4♥); Nords 4♥ därefter = inget
-mer att visa. **4NT i konkurrens under slamporten:** Syd med 16+ frågar 4NT när
-alla sidofärger är kontrollerade mellan oss (♠K84 ♥KQ7 ♦A6 ♣AJ965: 4♣, sedan
-4NT efter 4♥ — "vi klarar 5-läget, inklivaren har resten av poängen = vi vet
-vem vi maskar"). **Kxx är inte kontroll** — bara om man till 100 % vet var
-esset sitter (v1: aldrig). Bakgrund nedan.
-Steg 1 (kontroll-komplett 4NT, budsystem.md §6.10) landade 2026-08-07: kaptenen
-med äkta extra + förstarundskontroll i ALLA sidofärger frågar 4NT direkt.
-**Steg 2** skulle täcka de kontroll-OFULLSTÄNDIGA händerna — kaptenen har äkta
-extra men saknar kontroll i en sidofärg och behöver en **cue-rond i konkurrens**
-för att hitta partnerns kontroll innan 4NT. Bedömdes redan 2026-08-05 som stort
-och regressionsbenäget; efter facitstädningen (20260947 → splinterspåret,
-20261274 stale) är den kvarvarande ärliga kärnan **~1–2 givar** (exempel:
-**20261272** — Nord ♠A752 ♥AKJ65 ♦A2 ♣96, 16 hp + tre ess, spaderfit efter
-3♣-hoppinkliv + negativ dubbling, saknar ♣-kontroll och stannar i 4♠ fast 6♠
-står). Ägarbeslut 2026-08-07: för liten vinst för risken — parkerad tills
-mätspåret pekar hit igen. Återupptas den: facit-först med 20261272, och tänk på
-att cue i konkurrens läcker utspelsinfo (samma princip som §6.10).
-
 ### Störda 1NT-auktioner — nästa lager (systems on BYGGD 2026-09-18)
 **Lebensohl efter vårt 1NT är RIVEN** (ägarens struktur efter felrapport #77):
 systems on + stulet bud mot alla inkliv i direkt sits — spec och alla ägarsvar i

@@ -1985,8 +1985,11 @@ konservativ: **6M bara när essvaret är entydigt** och summan nyckelkort ≥4,
 annars stopp i 5M. **Storslam bjuds aldrig** från konkurrensläget.
 
 Händer med äkta extra men **ofullständiga** kontroller (de skulle behöva en
-cue-rond för att hitta partnerns kontroll) täcks INTE av steg 1 — den
-cue-frontenden är parkerad (ägarbeslut 2026-08-07, se ändringsloggen).
+cue-rond för att hitta partnerns kontroll) täcks INTE av steg 1. **Steg 2**
+(byggt 2026-09-30) täcker dem i **cue-höjningsläget** — kontrollbudsronden efter
+1M–(inkliv)–cue och svararens 4NT med 16+ när alla sidofärger är kontrollerade
+mellan oss, se **§7.8 c**. Övriga konkurrensfitar (negativ dubbling + höjning,
+fritt svar) har fortfarande bara steg 1:s kontroll-kompletta 4NT.
 
 *Bakgrund (etapp 7 hål D): frö 20260877 ur mätningen — Syd ♠KJT ♥A73 ♦AK97 ♣A95
 (19 bal) dubblade starkt över 1♥, partnern svarade FRITT 3♠, och Syd höjde till
@@ -2878,6 +2881,41 @@ kontrollbud om hen vill). Lågfärg: **maximum (9–11 hp) med stopp i deras fä
 utgångsvärden, passar annars). *Nord ♠652 ♥K74 ♦AT9743 ♣J → **4♦**; med ♠A52
 och 10 hp → **3NT**; med ♥KQ4 (10 hp) men ♠652 → **4♦**.*
 
+**(c) Cue-höjningen av vår 1♥/1♠ — fortsättningen** (ägarens struktur 2026-09-28,
+Hål D steg 2, byggd 2026-09-30; t.ex. 1♥–(2♦)–3♦, motståndarna tiger). Svararens
+cue lovar limithöjning eller bättre med 3+ stöd (§7.1). Öppnarens **styrka är inte
+avgörande** — hen är skyldig att ge partnern chansen att fortsätta beskriva, och
+**hoppar aldrig till utgång när ett kontrollbud under utgång finns**:
+- **≤12 hp → 3M** (minimum, avslag; partnern passar med limitvärden, går annars
+  vidare 3NT/4M som förut).
+- **14–15 hp, balanserad, stopp i deras färg → 3NT** (att föredra). Partnern
+  väljer: **pass** (jämn hand, trekortsstöd), **4M** (4+ trumf eller ojämn hand)
+  eller **kontrollbud** (16+, slamintresse).
+- **13+ hp → kontrollbud**, det billigaste: **äkta kontroll = ess, singel, renons
+  eller kung och dam tillsammans** (♠AQ5 → 3♠; ♠K85 ensam kung räknas INTE — Kxx
+  är kontroll bara om man till 100 % vet var esset sitter, vilket motorn aldrig
+  gör). Även deras färg kan kontrollbjudas (4♦ med ♦A6 eller singel). Finns
+  ingen kontroll → **4M**.
+- **Kontrollbudsronden:** svararen **cue:ar sin egen kontroll oavsett styrka**
+  (♠K84 ♥Q73 ♦A6 ♣QJ965, 12 hp → 4♦ på öppnarens 3♠, inte 4♥); en överhoppad
+  färg förnekar kontroll. Öppnaren visar sin nästa kontroll ovanför partnerns cue,
+  annars **4M = inget mer att visa**. Svararen utan ny kontroll **stannar i 4M**.
+- **4NT (1430 RKC) under slamporten:** svararen med **16+ hp** frågar 4NT när
+  **alla sidofärger är kontrollerade mellan oss** (kontrollbjudna av någon av oss
+  eller äkta kontroll i egen hand) — "vi klarar 5-läget, inklivaren har resten av
+  poängen". Öppnaren svarar i 1430-stegen, svararen placerar (6M bara vid
+  entydigt essvar, §6.10). Kontrollbud före 4NT: ♠K84 ♥KQ7 ♦A6 ♣AJ965 (17) bjuder
+  4♣ på 3♠ och 4NT först efter öppnarens 4♥.
+
+*Exempel (hp med kod): ♠K85 ♥AQ964 ♦K73 ♣84 (12) → 3♥ · ♠KQ5 ♥AJ964 ♦KT3 ♣Q4 (15)
+→ 3NT · ♠AQ5 ♥KQ964 ♦872 ♣K4 (14) → 3♠ · ♠AQ85 ♥AKJ64 ♦3 ♣K84 (17) → 3♠, aldrig
+4♥ · ♠KJ54 ♥AQ964 ♦73 ♣KJ (14, bara ensamma kungar) → 4♥. Hel auktion: Nord ♠AQ5
+♥AJT96 ♦83 ♣K42, Syd ♠K84 ♥KQ7 ♦A6 ♣AJ965: 1♥–(2♦)–3♦–P–3♠–P–4♣–P–4♥–P–4NT–P–5♥–P–6♥.*
+Lågfärgsöppningens svar på cue-höjningen är oförändrat (3NT-vägen före 5m, §5).
+Bjuder eller dubblar motståndarna efter cuet tar konkurrensreglerna över (§7.1).
+Kod: `cue-raise-continuations.ts` (läsaren `cue-raise-sequence.ts` delas med
+betydelselagret), facit `auction-cue-hojning-fortsattning.test.ts`.
+
 **(h) Svararens sang med stopp över deras färginkliv — graderad** (felrapport
 #81, 2026-09-24: 1♥–(2♣) med ♠KQ ♥J8 ♦AT42 ♣KQ975 = 15 hp fick rådet pass; förr
 bjöds bara billigaste sang på 8+ och aldrig 3NT). Jämn hand = balanserad eller
@@ -3163,6 +3201,20 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-30 — Hål D steg 2: cue-höjningens fortsättning i högfärg (§7.8 c,
+  §6.10; ägarens struktur 2026-09-28).** Efter 1M–(inkliv)–cue svarar öppnaren
+  ≤12 → 3M, 14–15 balanserad med stopp → 3NT, 13+ → billigaste äkta kontrollbud
+  (ess/singel/renons/KQ, `hasRealControl`), ingen kontroll → 4M — aldrig hopp
+  till utgång över ett kontrollbud (förr 3M/4M på 15-gränsen). Svararen cue:ar
+  egen kontroll oavsett styrka, stannar i 4M, eller frågar 4NT (1430 RKC) med 16+
+  när alla sidofärger är kontrollerade mellan oss; öppnaren svarar i stegen och
+  passar avslutet. Betydelselagret härleder människans bud i sekvensen (3♠ =
+  kontrollbud, 4NT = RKC i trumfen). Ny modul `cue-raise-continuations.ts` +
+  läsaren `cue-raise-sequence.ts`; tabellraderna *öppnaren-stört*/*svararen-stört*
+  frågar dem först; nya regler i registret (`svar på cue-höjning: kontrollbud`
+  alertas). Facit `auction-cue-hojning-fortsattning.test.ts` (ägarens exempel, hp
+  med kod — två av exempelhänderna var felräknade i anteckningen: 17 resp. 14 hp).
+  Lågfärgens svar (3NT-vägen före 5m) orört.
 - **2026-09-30 — Uteslutningsmetoden i RKC (§5.2/§6.1) + budhjälpen tänker.**
   (1) "0 eller 3" mot visade 16+ = 3 med visshet → storslamsvägen öppen
   (`slam-auction.ts` `partnerKeycardsFromAnswer`; #94-given når 7♥). (2)

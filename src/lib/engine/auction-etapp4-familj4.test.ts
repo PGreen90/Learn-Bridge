@@ -110,7 +110,11 @@ describe('raden *öppnaren-stört*: öppnarens återbud när de stört', () => {
     expect(t.call).toMatchObject({ bid: '2S', rule: 'öppnaren tävlar (stödjer partnern)' })
   })
   it('flyttat: svaret på cue-höjningen, den maximala dubblingen, återöppningen A och B', () => {
-    expect(decideCallTraced(ensam('N', 'S:63 H:AQJ85 D:K84 C:K74'), [call('N', '1H'), call('E', '2D'), call('S', '3D'), call('W', 'P')], 'N').call).toMatchObject({ bid: '3H', rule: 'svar på cue-höjning' })
+    // Hål D steg 2 (2026-09-30, §7.8 c): 13 hp utan äkta kontroll (ensamma kungar, ♦K84 är
+    // inte kontroll) → 4♥, inte längre 3♥; minimisvaret 3♥ gäller ≤12 hp (facit i
+    // auction-cue-hojning-fortsattning.test.ts).
+    expect(decideCallTraced(ensam('N', 'S:63 H:AQJ85 D:K84 C:K74'), [call('N', '1H'), call('E', '2D'), call('S', '3D'), call('W', 'P')], 'N').call).toMatchObject({ bid: '4H', rule: 'svar på cue-höjning: utgång (ingen kontroll)' })
+    expect(decideCallTraced(ensam('N', 'S:63 H:AQJ85 D:K84 C:J74'), [call('N', '1H'), call('E', '2D'), call('S', '3D'), call('W', 'P')], 'N').call).toMatchObject({ bid: '3H', rule: 'svar på cue-höjning' })
     expect(decideCallTraced(ensam('N', 'S:63 H:AQJ85 D:K84 C:KQ4'), [call('N', '1H'), call('E', '2D'), call('S', '2H'), call('W', '3D')], 'N').call).toMatchObject({ bid: 'X', rule: 'maximal dubbling (game try)' })
     expect(decideCallTraced(ensam('N', 'S:63 H:84 D:A5 C:AQJ854'), [call('N', '1C'), call('E', '1S'), call('S', 'P'), call('W', '2S')], 'N').call).toMatchObject({ bid: '3C', rule: 'öppnaren tävlar efter partnerns pass (egen 6+ färg)' })
     expect(decideCallTraced(ensam('N', 'S:AQJ85 H:6 D:K984 C:K74'), [call('N', '1S'), call('E', '2H'), call('S', 'P'), call('W', 'P')], 'N').call).toMatchObject({ bid: 'X', rule: 'öppnarens återöppningsdubbling (utpassningssits)' })
