@@ -9,6 +9,13 @@
 
 ## ⚪ SENARE
 
+### 5-5-handen med 11–12 efter 1m–1M–1NT (fynd 2026-09-29, NMF-ombyggnaden #91)
+Sedan NMF = utgångskrav (13+) går inbjudningshanden 2NT — även **5-5 med renons**
+(frö 20271330: ♠Q82 ♥KT742 ♦— ♣AKT98, 11 hp → 2NT → 3NT mot 13). Ägaren 2026-09-30:
+"bra" att lägga i SENARE. Kandidat: den andra färgen naturligt som inbjudan (t.ex.
+3♣ = 5-5, 11–12, ej krav) — kräver ägarens besked om betydelse och öppnarens svar
+(§5.7). Facit-rigg: `auction-nmf-utgangskrav.test.ts`.
+
 ### Försvar mot deras starka 2♣ (ägaridé 2026-09-24, ur sunt förnuft-lagret)
 Systemet saknar överenskommelser när motståndarna öppnar stark konstgjord 2♣.
 Ägarens tanke: **X = utspelsdubbling ("spela ut klöver")** — vi vinner sällan

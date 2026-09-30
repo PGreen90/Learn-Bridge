@@ -150,6 +150,11 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number, 
   const [tanker, setTanker] = useState<Seat | null>(null)
   const resonemangWorker = useRef<Worker | null>(null)
   const resonemangReq = useRef(0)
+  // BUDHJÄLPENS REKOMMENDATION till människan (Syd), knuten till budhistorikens
+  // längd `n` så ett gammalt svar aldrig visas för ett nytt läge. Ägarbeslut
+  // 2026-09-30 (felrapport #93): saknar tabellen regel tänker budhjälpen i samma
+  // worker som bottarna (gul fyrkant i budlådan, "Budhjälpen tänker …").
+  const [rekommendation, setRekommendation] = useState<{ n: number; call: ResolvedCall } | null>(null)
   useEffect(() => {
     if (!resonera) return
     try {
@@ -193,6 +198,41 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number, 
     return () => { clearTimeout(id); clearTimeout(timeout); if (reqId) { resonemangReq.current++; setTanker(null) } }
   }, [game, complete])
 
+  // Budhjälpen till människan: tabellens bud direkt — eller, när tabellen saknar
+  // regel och läget är värt att tänka på, resonemangslagrets bud ur workern
+  // (samma standardläge som bottarna: bestämt antal händer, deterministiskt frö).
+  // Budstöd av → ingen beräkning alls. Fel/timeout → tabellens pass som förr.
+  useEffect(() => {
+    if (game.phase !== 'bidding' || complete || !bidHelp || seatToAct(game.deal.dealer, game.history.length) !== 'S') {
+      setRekommendation(null)
+      return
+    }
+    const g = game
+    const traced = decideCallTraced(g.deal, g.history, 'S')
+    const worker = resonemangWorker.current
+    if (traced.källa !== 'pass (ingen regel)' || !worker || !vardAttTanka(g.deal, g.history, 'S')) {
+      setRekommendation({ n: g.history.length, call: traced.call })
+      return
+    }
+    const reqId = ++resonemangReq.current
+    setRekommendation(null)
+    setTanker('S')
+    let timeout: ReturnType<typeof setTimeout> | undefined
+    const done = (call: ResolvedCall) => {
+      if (reqId !== resonemangReq.current) return
+      clearTimeout(timeout)
+      setTanker(null)
+      setRekommendation({ n: g.history.length, call })
+    }
+    worker.onmessage = (e: MessageEvent<{ reqId: number; call?: ResolvedCall; error?: string }>) => {
+      if (e.data.reqId !== reqId) return
+      done(e.data.call ?? traced.call)
+    }
+    timeout = setTimeout(() => done(traced.call), RESONEMANG_NODSTOPP_MS)
+    worker.postMessage({ reqId, deal: g.deal, history: g.history, seat: 'S' })
+    return () => { clearTimeout(timeout); resonemangReq.current++; setTanker(null) }
+  }, [game, complete, bidHelp])
+
   // Budgivningen klar med kontrakt → ägaren BEKRÄFTAR i dialogen
   // ("1♠ spelas av Syd – Bekräfta", som Synrey) innan kortspelet börjar.
   function confirmContract() {
@@ -210,9 +250,9 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number, 
       if (seatToAct(g.deal.dealer, g.history.length) !== 'S') return g
       if (!legalCalls(g.history, 'S').includes(bid)) return g
       // Fäst budets betydelse så det blir klickbart i auktionsvyn. Stämmer ditt
-      // bud med motorns systemlinje får det den äkta förklaringen; annars märks
-      // det som ett eget bud utanför systemet (motorn kan inte tolka det).
-      const sys = decideCall(g.deal, g.history, 'S')
+      // bud med motorns systemlinje (eller budhjälpens tänkta bud) får det den
+      // äkta förklaringen; annars märks det som ett eget bud utanför systemet.
+      const sys = rekommendation && rekommendation.n === g.history.length ? rekommendation.call : decideCall(g.deal, g.history, 'S')
       let call: ResolvedCall
       if (sys.bid === bid) {
         call = { seat: 'S', bid, rule: sys.rule, explanation: sys.explanation ?? 'Motorns rekommenderade bud.' }
@@ -292,6 +332,8 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number, 
     game,
     complete,
     tanker,
+    /** Budhjälpens bud för läget just nu (null = av, inte din tur, eller tänker). */
+    rekommendation: rekommendation && rekommendation.n === game.history.length ? rekommendation.call : null,
     target,
     picking,
     setPicking,
