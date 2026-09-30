@@ -136,7 +136,10 @@ it('dokumentvakten: kB-siffrorna i docs/README.md stämmer', () => {
   for (const m of läs('docs/README.md').matchAll(/\*\*([a-z\-./]+\.md)\*\*\s*\((\d+)\s*kB\)/g)) {
     const fil = m[1].includes('/') ? m[1] : 'docs/' + m[1]
     const påstått = Number(m[2])
-    const faktiskt = Math.round(statSync(fil).size / 1024)
+    // Radslutsoberoende (LF): lokalt ligger filerna med CRLF, Actions kör på
+    // Linux med LF — vid ~400 kB blev skillnaden 6 kB och spräckte toleransen
+    // (2026-09-30). Mät därför byte-storleken med radsluten normaliserade.
+    const faktiskt = Math.round(Buffer.byteLength(läs(fil).replace(/\r\n/g, '\n'), 'utf8') / 1024)
     if (Math.abs(faktiskt - påstått) > 5) fel.push(`${fil}: dokumentet säger ${påstått} kB, filen är ${faktiskt} kB`)
   }
   expect(fel).toEqual([])
