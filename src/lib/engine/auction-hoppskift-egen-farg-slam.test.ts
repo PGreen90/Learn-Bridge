@@ -34,13 +34,14 @@ describe('felrapport #94 – svararen med lång egen färg efter öppnarens hopp
   it('rapportens Öst (15 hp, åtta hjärter) → 4NT RKC, inte 4♥', () => {
     expect(ost('S:K54 H:AKQJT973 D:Q C:7').bid).toBe('4NT')
   })
-  it('hela auktionen landar i hjärterslam (minst 6♥)', () => {
+  it('hela auktionen landar i 7♥ — 5♦ (0/3) mot visade 19+ läses som 3 med visshet (uteslutningsmetoden, ägarbeslut 2026-09-30)', () => {
     const h: ResolvedCall[] = []
     let guard = 0
     while (!auctionComplete(h) && guard++ < 40) h.push(decideCall(RAPPORT, h, seatToAct(RAPPORT.dealer, h.length)))
+    expect(h.filter((c) => c.bid !== 'P').map((c) => c.bid)).toEqual(['1D', '1H', '3C', '4NT', '5D', '5NT', '6D', '7H'])
     const k = contractFromCalls(h)!
     expect(k.strain).toBe('hearts')
-    expect(k.level).toBeGreaterThanOrEqual(6)
+    expect(k.level).toBe(7)
   })
   it('sex hjärter men bara 9 hp (28 mot visade 19) → ingen essfråga, 4♥ som förr', () => {
     expect(ost('S:854 H:AQJT97 D:Q6 C:73').bid).toBe('4H')

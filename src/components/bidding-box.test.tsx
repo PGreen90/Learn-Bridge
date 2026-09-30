@@ -95,3 +95,25 @@ describe('BiddingBox', () => {
     expect(screen.queryByText(/Motorn hade valt/)).not.toBeInTheDocument()
   })
 })
+
+describe('BiddingBox – resonemangslagrets bud (ägarbeslut 2026-09-30, felrapport #93)', () => {
+  it('ett resonemangsbud märks med gul fyrkant i stället för grön prick, och etiketten RESONEMANG', () => {
+    render(
+      <BiddingBox
+        legal={['P', '3H', 'X']}
+        onBid={() => {}}
+        recommendation={{ seat: 'S', bid: '3H', rule: 'resonemang', explanation: 'Av 16 händer …' }}
+      />,
+    )
+    expect(screen.getByTitle('Resonemangslagrets bud')).toBeInTheDocument()
+    expect(screen.queryByTitle('Motorns rekommenderade bud')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '3♥' }))
+    expect(screen.getByText('RESONEMANG')).toBeInTheDocument()
+    expect(screen.queryByText('MOTORNS BUD')).not.toBeInTheDocument()
+  })
+  it('tabellens bud har fortfarande den gröna pricken', () => {
+    render(<BiddingBox legal={['P', '1C']} onBid={() => {}} recommendation={{ seat: 'S', bid: '1C', rule: 'öppning', explanation: 'x' }} />)
+    expect(screen.getByTitle('Motorns rekommenderade bud')).toBeInTheDocument()
+    expect(screen.queryByTitle('Resonemangslagrets bud')).not.toBeInTheDocument()
+  })
+})

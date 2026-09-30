@@ -18,6 +18,7 @@ import { FelrapportDialog } from '../../components/FelrapportDialog'
 import { HandFan } from '../../components/HandFan'
 import { MenuToggleRow, STRAIN_CODE } from './common'
 import { TankerBricka } from './SpelbordRam'
+import type { ResolvedCall } from '../../lib/bidding'
 import type { Game } from './useGame'
 import type { TavlingSpel } from './tavling-mode'
 
@@ -25,6 +26,7 @@ export function BiddingPhase({
   game,
   complete,
   tanker = null,
+  recommendation: recommendationProp,
   onBid,
   onConfirm,
   onNewGame,
@@ -38,8 +40,12 @@ export function BiddingPhase({
 }: {
   game: Game
   complete: boolean
-  /** Stolen som just nu tänker i resonemangslagret (webworkern), eller null. */
+  /** Stolen som just nu tänker i resonemangslagret (webworkern), eller null;
+   *  'S' = budhjälpen tänker åt dig. */
   tanker?: Seat | null
+  /** Budhjälpens bud ur useGame (tabellen eller resonemangslagret). Utelämnad →
+   *  tabellens bud räknas här (äldre anropare). */
+  recommendation?: ResolvedCall | null
   onBid: (bid: Bid) => void
   onConfirm: () => void
   onNewGame: () => void
@@ -82,10 +88,11 @@ export function BiddingPhase({
   // räknas om när given eller budhistoriken ändras – inte vid orelaterade
   // omritningar (t.ex. när menyn eller felrapport-dialogen öppnas).
   // Budstöd av → beräknas inte alls (display-only; onBid gör sin egen decideCall).
-  const recommendation = useMemo(
-    () => (yourTurn && bidHelp ? decideCall(game.deal, game.history, 'S') : null),
-    [yourTurn, bidHelp, game.deal, game.history],
+  const tabellensBud = useMemo(
+    () => (yourTurn && bidHelp && recommendationProp === undefined ? decideCall(game.deal, game.history, 'S') : null),
+    [yourTurn, bidHelp, recommendationProp, game.deal, game.history],
   )
+  const recommendation = recommendationProp === undefined ? tabellensBud : yourTurn && bidHelp ? recommendationProp : null
 
   // Tangentbord (fynd #21): Enter bekräftar kontraktdialogen — budlådans egna
   // tangenter bor i BiddingBox (dess lyssnare är avstängd när auktionen är klar).
@@ -180,7 +187,7 @@ export function BiddingPhase({
         />
         {/* "[Stol] tänker …" (resonemangslagret): en FLYTANDE bricka på budlådans
             underkant (ägarbeslut 2026-09-24) — delad med vänner-bordet. */}
-        <TankerBricka text={tanker ? `${SEAT_LABEL[tanker]} tänker …` : null} />
+        <TankerBricka text={tanker === 'S' ? 'Budhjälpen tänker …' : tanker ? `${SEAT_LABEL[tanker]} tänker …` : null} />
       </div>
 
       {/* Din hand som solfjäder + HCP-bricka (Synrey). mt-auto trycker handen till

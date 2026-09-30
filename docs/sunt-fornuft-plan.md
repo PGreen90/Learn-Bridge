@@ -136,6 +136,16 @@ Två blev pass: 19 hp-dubblaren i (P)–P–(1♥)–X–(2♥)–P–(P) (2NT 1
 på 100 — tidsbrist, inte fel bud) och 17 hp med AKQT83 efter (3♦)–X–(XX)–P–(P), som nu
 lämnar 3♦XX (AK9 bakom spärröppnaren; 3♠ bara 0,9σ före även på 100 händer — försvarbart).
 Fynd i tabellen, inte i lagret: öppnaren passar 1♦–1♥–1♠–2NT med 16 → egen tabellrad.
+**Budhjälpen tänker (ägarbeslut 2026-09-30, felrapport #93):** människans (Syds)
+rekommendation räknas nu i `useGame` (`rekommendation`) — tabellens bud direkt, eller,
+när tabellen ger `pass (ingen regel)` och `vardAttTanka`, resonemangslagrets bud ur
+samma worker som bottarna (standardläget, deterministiskt frö). Budlådan visar en
+**gul fyrkant** (i stället för grön prick) och etiketten RESONEMANG; brickan säger
+"Budhjälpen tänker …". Följer spelaren budet får det etiketten `resonemang` (inte
+"eget bud"). Budstöd av → ingen beräkning. Bakgrund: #93 (1♣–(1♥)–2♣–(2♥)–2♠–?)
+där lagret hade sagt X/3♥ (+359/+286 mot pass +96 på 100 händer) men tabellen
+"pass" visades för ägaren. Facit `useGame-budhjalp-resonemang.test.tsx`.
+
 **Kvar (2026-09-24):** (1) läs första nattgranskningens rapport med tänkande bottar
 (budkontrollen — väntat: inga budavvikelser) · (2) ägarens känsla för väntetiden vid
 bordet (sänk `RESONEMANG_STANDARD.maxHands` till 16 vid behov) · (3) tabellraden

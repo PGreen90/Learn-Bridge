@@ -173,6 +173,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
     tanker,
     bidHelp,
     toggleBidHelp,
+    rekommendation,
     onBid,
     confirmContract,
     startNewGame,
@@ -258,6 +259,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
         game={game}
         complete={complete}
         tanker={tanker}
+        recommendation={rekommendation}
         onBid={onBid}
         onConfirm={confirmContract}
         onNewGame={onNewGame}

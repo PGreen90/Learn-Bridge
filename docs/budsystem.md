@@ -1187,6 +1187,12 @@ Svarets inbyggda tvetydighet (0 eller 3 / 1 eller 4) löses med egen hand; går 
 inte antas det höga mot en visad 15+-hand (en stark hand är i praktiken aldrig
 nyckelkortslös), annars det låga — då **rättar partnern med det höga antalet
 själv upp till 6** (klassisk mekanik: "med 3, bjud vidare över stoppbudet").
+**Uteslutningsmetoden (ägarbeslut 2026-09-30, felrapport #94):** har partnern
+visat **16+ hp** är "0 eller 3" **3 med visshet** — en sådan hand kan inte vara
+nyckelkortslös — och räknas därför som grund för **storslam** (5NT-frågan när
+alla fem nyckelkort + trumfdam finns i storslamszonen). "1 eller 4" förblir en
+inferens (ett ess med 16+ är fullt möjligt). *Bricka 4: 1♦–1♥–3♣–4NT–5♦–5NT–6♦–
+**7♥** med ♠K54 ♥AKQJT973 ♦Q ♣7 mot hoppskiftets 19+.*
 
 ### 5.3 I en 2/1 GF-budgivning
 Efter ett **2/1-svar** (t.ex. 1♥–2♣) är utgång redan säkrad. Då gäller:
@@ -3157,6 +3163,13 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-30 — Uteslutningsmetoden i RKC (§5.2/§6.1) + budhjälpen tänker.**
+  (1) "0 eller 3" mot visade 16+ = 3 med visshet → storslamsvägen öppen
+  (`slam-auction.ts` `partnerKeycardsFromAnswer`; #94-given når 7♥). (2)
+  Budhjälpen till människan använder resonemangslagret när tabellen saknar regel
+  (gul fyrkant i budlådan, "Budhjälpen tänker …"; `useGame.ts`
+  `rekommendation`, `BiddingBox.tsx`; facit `useGame-budhjalp-resonemang.test.tsx`,
+  `bidding-box.test.tsx`). Ingen systemregel — bara vem som får tänka.
 - **2026-09-30 — Felrapport #93 + #94.** (#93, §7.1) Inklivaren när öppnaren
   bjuder vidare efter partnerns höjning: sexkorts inklivsfärg → 3M tävlande,
   18+ → 4M, annars pass (`overcall-continuations.ts`

@@ -188,6 +188,12 @@ function partnerKeycardsFromAnswer(
   }
   const low = Math.min(...possible)
   const high = Math.max(...possible)
+  // Uteslutningsmetoden (ägarbeslut 2026-09-30, felrapport #94): har partnern
+  // visat 16+ hp kan hen inte vara nyckelkortslös — '0 eller 3' ÄR 3, med
+  // visshet (grunden för storslam). (Strikt går 19–24 hp utan ess att bygga av
+  // KQJ-kombinationer, men det är så osannolikt att ägaren räknar det som
+  // omöjligt.) 1-eller-4 förblir en inferens: ett ess med 16+ är fullt möjligt.
+  if (low === 0 && partnerMin >= 16) return { assumed: 3, low: 3, high: 3, certain: true }
   // Mänsklig inferens: en visad 15+-hand är i praktiken aldrig nyckelkortslös →
   // anta det höga alternativet. (Gäller inte 2-eller-5: 5 är för extremt att anta.)
   const assumeHigh = partnerMin >= 15 && high <= 4

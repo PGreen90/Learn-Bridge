@@ -6,6 +6,9 @@
 //
 // Motorns rekommenderade bud markeras med en liten grön prick och får sin äkta
 // förklaring; egna bud tolkas ur auktionen (tolkande lagret) så raden aldrig är tom.
+// Kommer budet ur RESONEMANGSLAGRET (regel 'resonemang' — tabellen saknade regel
+// och budhjälpen simulerade) är märket i stället en GUL FYRKANT (ägarbeslut
+// 2026-09-30, felrapport #93).
 
 import { useEffect, useState } from 'react'
 import type { Bid } from '../types/bridge'
@@ -29,7 +32,8 @@ function BoxChip({
   bid: Bid
   ok: boolean
   selected: boolean
-  recommended: boolean
+  /** false = inget märke · 'tabell' = grön prick · 'resonemang' = gul fyrkant. */
+  recommended: false | 'tabell' | 'resonemang'
   onClick: () => void
 }) {
   return (
@@ -46,10 +50,16 @@ function BoxChip({
         selected ? 'ring-2 ring-inset ring-gold-400 brightness-105 gold-frame' : ''
       } disabled:opacity-25 disabled:shadow-none ${ok ? 'cursor-pointer hover:brightness-105' : ''}`}
     >
-      {recommended && !selected && (
+      {recommended === 'tabell' && !selected && (
         <span
           className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-emerald-600 ring-1 ring-white"
           title="Motorns rekommenderade bud"
+        />
+      )}
+      {recommended === 'resonemang' && !selected && (
+        <span
+          className="absolute top-1 right-1 h-2 w-2 bg-amber-400 ring-1 ring-white"
+          title="Resonemangslagrets bud"
         />
       )}
       <BidChipContent bid={bid} />
@@ -161,6 +171,7 @@ export function BiddingBox({
   })
 
   const isRec = selected !== null && selected === recBid
+  const recKind: false | 'tabell' | 'resonemang' = recBid ? (recommendation?.rule === 'resonemang' ? 'resonemang' : 'tabell') : false
   // Egna bud (ej motorns rekommendation) tolkas ur auktionen – aldrig tomt.
   const selInterp =
     selected !== null && !isRec ? interpretCall([...history, { seat: 'S', bid: selected }], history.length) : null
@@ -186,7 +197,7 @@ export function BiddingBox({
                 bid={bid}
                 ok={allowed.has(bid)}
                 selected={selected === bid}
-                recommended={bid === recBid}
+                recommended={bid === recBid && recKind}
                 onClick={() => choose(bid)}
               />
             )
@@ -195,9 +206,9 @@ export function BiddingBox({
       </div>
 
       <div className="grid grid-cols-4 gap-1">
-        <BoxChip bid="X" ok={allowed.has('X')} selected={selected === 'X'} recommended={recBid === 'X'} onClick={() => choose('X')} />
-        <BoxChip bid="XX" ok={allowed.has('XX')} selected={selected === 'XX'} recommended={recBid === 'XX'} onClick={() => choose('XX')} />
-        <BoxChip bid="P" ok={allowed.has('P')} selected={selected === 'P'} recommended={recBid === 'P'} onClick={() => choose('P')} />
+        <BoxChip bid="X" ok={allowed.has('X')} selected={selected === 'X'} recommended={recBid === 'X' && recKind} onClick={() => choose('X')} />
+        <BoxChip bid="XX" ok={allowed.has('XX')} selected={selected === 'XX'} recommended={recBid === 'XX' && recKind} onClick={() => choose('XX')} />
+        <BoxChip bid="P" ok={allowed.has('P')} selected={selected === 'P'} recommended={recBid === 'P' && recKind} onClick={() => choose('P')} />
         <button
           type="button"
           disabled={!selected}
@@ -215,7 +226,8 @@ export function BiddingBox({
           du ser motorns val men bjuder som du vill. */}
       {showHelp && selected && (
         <p className="px-1 text-xs leading-snug text-emerald-50/90">
-          {isRec && <span className="mr-1 rounded bg-emerald-600 px-1 text-[10px] font-bold text-white">MOTORNS BUD</span>}
+          {isRec && recKind === 'resonemang' && <span className="mr-1 rounded bg-amber-400 px-1 text-[10px] font-bold text-emerald-950">RESONEMANG</span>}
+          {isRec && recKind === 'tabell' && <span className="mr-1 rounded bg-emerald-600 px-1 text-[10px] font-bold text-white">MOTORNS BUD</span>}
           {selAlert && <span className="mr-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">ALERT</span>}
           <SuitText>{selExpl}</SuitText>
           {recBid && selected !== recBid && (
