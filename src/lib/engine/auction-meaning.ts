@@ -45,12 +45,26 @@ export interface Meaning extends CallInterpretation {
 }
 
 /**
+ * Etiketten på människans bud när det avviker från motorns val (`useGame.onBid`).
+ * Det är INGEN regel: budet betyder det auktionen säger, så betydelsen härleds
+ * (felrapport #92 — förr lästes etiketten som en regel utan kravnivå, och
+ * partnern passade människans kravbud).
+ */
+export const EGET_BUD = 'eget bud'
+
+/**
  * Betydelsen av bud nr `index` i `history`. Läser BARA auktionen — aldrig en
  * hand — vilket kikvakten (`kikvakt.test.ts`) låser fast.
  */
 export function meaningOf(history: ResolvedCall[], index: number): Meaning {
   const call = history[index]
   const prior = history.slice(0, index)
+
+  // Människans egna bud: härled ur auktionen, men behåll bordets förklaringstext.
+  if (call.rule === EGET_BUD) {
+    const d = deriveMeaning({ seat: call.seat, bid: call.bid } as ResolvedCall, prior)
+    return { ...d, text: call.explanation?.trim() || d.text, alert: isAlertRule(d.rule), källa: 'härledd' }
+  }
 
   // (1) Motorn satte en regel → använd dess förklaring + kravnivå (säker).
   if (call.rule) {
@@ -2249,19 +2263,31 @@ function afterNMFSuitShow(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterp
 }
 
 /**
- * New Minor Forcing (§5.7): efter 1x–1M–1NT bjuder svararen en obruten lågfärg
- * på 2-läget. Gäller ÄVEN passad hand (etapp 4 familj 3, 2026-09-08: den
- * ostörda linjen bjöd NMF som passad hand med 11 hp — frö 20270269 — medan
- * läsaren nekade och öppnarens svar föll ur tabellen; boken §5.7 utesluter
- * inte passad hand, och en passad 11:a har fortfarande sin inbjudan att ställa).
+ * Svararens nya lågfärg på 2-läget efter 1x–1M–1NT — formen bakom både New
+ * Minor Forcing (opassad hand) och passad hands naturliga lågfärg.
  */
-function isNMF(u: Undisturbed, cb: ParsedBid): boolean {
+function isNewMinorShape(u: Undisturbed, cb: ParsedBid): boolean {
   // `cb` är (kandidaten till) svararens ANDRA bud — anropas både när det bjuds
   // (n = 3) och senare i auktionen med u.bids[3].
   if (u.bids.length < 3 || cb.level !== 2 || !isMinor(cb.strain)) return false
   const [open, resp, reb] = u.bids.map((b) => b.cb)
   if (!same(reb, 1, 'NT') || resp.level !== 1 || !isMajor(resp.strain)) return false
   return cb.strain !== open.strain
+}
+
+/**
+ * New Minor Forcing (§5.7): efter 1x–1M–1NT bjuder svararen en obruten lågfärg
+ * på 2-läget — konstgjort, UTGÅNGSKRAV (13+ hp; ägarbeslut 2026-09-29,
+ * felrapport #91). Gäller INTE passad hand: den kan inte ha utgångskrav, så
+ * lågfärgen är då naturlig (`isPassedHandNewMinor`).
+ */
+function isNMF(u: Undisturbed, cb: ParsedBid): boolean {
+  return !u.responderPassed && isNewMinorShape(u, cb)
+}
+
+/** Passad hands NATURLIGA nya lågfärg efter 1x–1M–1NT: 5-4, 8+ hp, ej krav. */
+function isPassedHandNewMinor(u: Undisturbed, cb: ParsedBid): boolean {
+  return u.responderPassed && isNewMinorShape(u, cb)
 }
 
 function undisturbedMeaning(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall[]): CallInterpretation | null {
@@ -3408,10 +3434,11 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
   }
   if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
   if (jumpShift) return N(`${B(cb)} — naturligt efter hoppskiftet; utgångskravet står.`, 'utgangskrav')
-  if (isNMF(u, cb)) return R('New Minor Forcing', `${B(cb)} — New Minor Forcing: konstgjort, krav. Frågar efter 3-korts stöd i min högfärg eller en dold 4-korts högfärg. Säger inget om ${name}.`)
+  if (isNMF(u, cb)) return R('New Minor Forcing', `${B(cb)} — New Minor Forcing: konstgjort, utgångskrav (13+ hp). Frågar efter 3-korts stöd i min högfärg eller en dold 4-korts högfärg. Säger inget om ${name}.`)
+  if (isPassedHandNewMinor(u, cb)) return R('ny lågfärg (passad hand)', `${B(cb)} — naturligt, passad hand: 5+ ${NAME[resp.strain]} och 4+ ${name}, 8+ hp. Ej krav — partnern väljer färg och stannar lågt.`)
   if (isFourthSuit(u, cb)) return R('fjärde färg krav', `${B(cb)} — fjärde färg: konstgjort, ber partnern beskriva (stopp för 3 sang / gömd fit). Utgångskrav. Säger inget om ${name}.`)
   if (cb.strain === 'NT') {
-    if (cb.level === 2) return R('inbjudan', `2 sang — 11–12 hp balanserad, inbjudan.`)
+    if (cb.level === 2) return R('inbjudan', same(reb, 1, 'NT') && isMajor(resp.strain) ? `2 sang — 11–12 hp, inbjudan (kan ha femkorts ${NAME[resp.strain]}). Partnern passar med minimum, bjuder 3 sang med maximum.` : `2 sang — 11–12 hp balanserad, inbjudan.`)
     return null
   }
   if (raised) {
@@ -3450,12 +3477,15 @@ function openerThirdAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed, _p
   const [open, resp, reb, w] = u.bids.map((x) => x.cb)
   const name = NAME[cb.strain]
   if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
+  if (isPassedHandNewMinor(u, w) && cb.level === 2 && cb.strain === resp.strain) {
+    return R('preferens (passad hands lågfärg)', `${B(cb)} — väljer partnerns ${name}: 3+ kort. Partnern (passad hand) visade 5+ ${name} och 4+ ${NAME[w.strain]}; till spel.`)
+  }
   if (isNMF(u, w)) {
-    if (cb.strain === resp.strain) return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: 3-korts stöd i partnerns ${name}${cb.level === 2 ? ' (minimum)' : ' (maximum)'}.`, 'ej-krav')
-    if (cb.strain === 'NT') return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: stopp i den objudna färgen, inget stöd${cb.level === 2 ? ' (minimum)' : ' (maximum)'}.`, 'ej-krav')
-    if (cb.strain === w.strain) return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: 4 kort i ${name}.`, 'ej-krav')
-    if (cb.strain === open.strain) return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: inget av det efterfrågade, rebjuder egen ${name}.`, 'ej-krav')
-    return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: 4-korts ${name} (jagar 4-4).`, 'ej-krav')
+    if (cb.strain === resp.strain) return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: 3-korts stöd i partnerns ${name}${cb.level === 2 ? ' (minimum)' : ' (maximum)'}. Utgångskravet står.`)
+    if (cb.strain === 'NT') return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: stopp i den objudna färgen, inget stöd${cb.level === 2 ? ' (minimum)' : ' (maximum)'}. Utgångskravet står.`)
+    if (cb.strain === w.strain) return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: 4 kort i ${name}. Utgångskravet står.`)
+    if (cb.strain === open.strain) return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: inget av det efterfrågade, rebjuder egen ${name}. Utgångskravet står.`)
+    return R('svar på New Minor Forcing', `${B(cb)} — svar på NMF: 4-korts ${name} (jagar 4-4). Utgångskravet står.`)
   }
   if (isFourthSuit(u, w)) {
     if (cb.strain === resp.strain) return R('svar på fjärde färg', `${B(cb)} — svar på fjärde färg: 3-korts stöd i partnerns ${name}. Utgångskravet står.`, 'utgangskrav')

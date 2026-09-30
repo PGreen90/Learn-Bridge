@@ -489,9 +489,13 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // ---- Regler som saknade kravnivå (betydelsesvepet, motorbytet etapp 1) ----
   // Ostörda sekvenser: NMF (§5.7), checkback (§5.2), fjärde färg (§6.6),
   // 2/1-fortsättningar (§5.3), inbjudningar, slaminbjudan (§5.2), kravsteget.
-  'New Minor Forcing': 'krav-1-rond',
-  'svar på New Minor Forcing': 'ej-krav',
+  // NMF = utgångskrav (ägarbeslut 2026-09-29, felrapport #91; förr krav 1 rond).
+  'New Minor Forcing': 'utgangskrav',
+  'svar på New Minor Forcing': 'utgangskrav',
   'placering efter NMF': 'avslut',
+  // Passad hand efter 1x–1M–1NT: nya lågfärgen är naturlig (5-4, 8+), partnern väljer.
+  'ny lågfärg (passad hand)': 'ej-krav',
+  'preferens (passad hands lågfärg)': 'avslut',
   // §5b beslut 1 (2026-09-05): färgvisningen efter NMF utan stöd — svararens
   // 3M/3m (slamintresse, utgångskrav) och öppnarens svar (4M / 3NT-förslag / 4m).
   'NMF: rebjuder egen högfärg': 'utgangskrav',

@@ -25,7 +25,7 @@
 //     1x–(P)–1y–(inkliv) finns i botauktionerna först nu, när RHO:s inkliv
 //     över svaret bjuds (raden *inkliv-över-svaret*, `overcallOfResponse`).
 
-import type { Bid, Hand } from '../../types/bridge'
+import type { Bid, Hand, Suit } from '../../types/bridge'
 import { isGameOrHigher, parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { bidValue, cheapestBidIn, legalCalls, prettyBid, SWE_SYM } from './auction-rules'
 import { pointsWithFloor } from './evaluation'
@@ -925,6 +925,17 @@ export function responderAnswersReopeningDouble(hand: Hand, f: AuctionFacts): Ku
 }
 
 /**
+ * Räcker innehavet i deras färg till STRAFFPASS på partnerns upplysande
+ * dubbling? Längd OCH honnörer: 4+ kort med 4+ hp i färgen, eller 5+ kort med
+ * 3+ (§5.9). Delas med svaret på 1NT-öppnarens återöppningsdubbling (§7.5).
+ */
+export function trapPassHolding(hand: Hand, theirSuit: Suit): boolean {
+  const n = lengths(hand)[theirSuit]
+  const trump = suitHcp(hand, theirSuit)
+  return (n >= 4 && trump >= 4) || (n >= 5 && trump >= 3)
+}
+
+/**
  * Själva svaret på partnerns upplysande (återöppnings-)dubbling, utan
  * tur-guarden: partnern öppnade 1 i färg, partnerns senaste bud är X med ett
  * motståndarkontrakt i färg under utgång som senaste kontraktsbud, bara pass
@@ -947,10 +958,9 @@ export function answerReopeningDoubleCore(hand: Hand, f: AuctionFacts): Kunskap 
   const legal = legalCalls(history, seat)
   const theirSuit = SUIT_OF_LETTER[tb.strain]
   const p = hcp(hand)
-  // Trap pass: längd OCH honnörer i deras färg (4+ kort med 4+ hp i färgen,
-  // eller 5+ kort med 3+) — fyra hackor är ingen straff, då svarar jag.
-  const trump = suitHcp(hand, theirSuit)
-  if ((len[theirSuit] >= 4 && trump >= 4) || (len[theirSuit] >= 5 && trump >= 3)) return {
+  // Trap pass: längd OCH honnörer i deras färg — fyra hackor är ingen straff,
+  // då svarar jag.
+  if (trapPassHolding(hand, theirSuit)) return {
     call: 'P', rule: 'straffpass (återöppningsdubbling)',
     explanation: `Partnerns återöppningsdubbling är upplysande, men med ${len[theirSuit]} kort och honnörer i deras ${SWE_SYM[tb.strain]} passar jag för straff.`,
   }

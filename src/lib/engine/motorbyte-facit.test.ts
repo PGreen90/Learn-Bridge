@@ -200,17 +200,17 @@ describe('etapp 4 familj 3 – när de stör vår öppning (LANDAD 2026-09-08)',
     const deal = dealFromSeed(20270007)
     expect(decideCall(deal, [call('N', '1C'), call('E', '1H')], 'S')).toMatchObject({ bid: '1S', rule: 'fritt bud' })
   })
-  // Bifynd (den ostörda linjen): passad hands NMF. Förr dolde manusets
-  // kik-rond given (RHO klev in); nu bjuder Syd (11 hp, 5 hjärter, passad
-  // i andra hand) 2♣ = NMF över 1NT, och öppnaren svarar ur raden *tredje* —
-  // betydelselagret nekade förr NMF för passad hand, så svaret föll ur tabellen.
-  it('frö 20270269: P–P–P–1♦–P–1♥–P–1NT–P–2♣(NMF, passad hand)–P–?: Nord (♠QT7 ♥A32 ♦8764 ♣AQ4) visar 3-korts hjärterstöd 2♥ ur tabellen', () => {
+  // Bifynd (den ostörda linjen): passad hands 2♣ över 1NT-återbudet. Öppnaren
+  // svarar ur raden *tredje*. ÄNDRAT 2026-09-29 (ägarbeslut, felrapport #91):
+  // en passad hand kan inte ha utgångskrav, så 2♣ är NATURLIGT (5-4, 8+, ej
+  // krav) och öppnaren VÄLJER färg — 3+ hjärter → 2♥ (förr NMF-svaret 2♥).
+  it('frö 20270269: P–P–P–1♦–P–1♥–P–1NT–P–2♣(naturligt, passad hand)–P–?: Nord (♠QT7 ♥A32 ♦8764 ♣AQ4) väljer hjärtern 2♥ ur tabellen', () => {
     const deal = dealFromSeed(20270269)
     const hist = [call('E', 'P'), call('S', 'P'), call('W', 'P'), call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', 'P'), call('N', '1NT'), call('E', 'P'), call('S', '2C'), call('W', 'P')]
     const t = decideCallTraced(deal, hist, 'N')
     expect(t.källa).toBe('tabell:tredje')
-    expect(t.call.bid).toBe('2H')
-    expect(meaningOf(hist, 9).rule).toBe('New Minor Forcing')
+    expect(t.call).toMatchObject({ bid: '2H', rule: 'preferens (passad hands lågfärg)' })
+    expect(meaningOf(hist, 9).rule).toBe('ny lågfärg (passad hand)')
   })
 })
 

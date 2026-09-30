@@ -6,15 +6,20 @@ import { parseHand } from '../bidding'
 import { responderRebidColorAuction, responderPlaceAfterNMF } from './responder-rebids'
 import { openerAnswerNMF } from './rebids'
 import { decideCall } from './auction-live'
+import { hcp } from './hand'
 
 // =============================================================================
 // FACIT: New Minor Forcing (NMF) — steg 1: SVARARENS NMF-bud  (2026-07-05)
 // -----------------------------------------------------------------------------
 // Efter 1m–1M(1-läget)–1NT (öppnarens 1NT-rebud = 12–14 bal) hoppade svararen förr
 // rakt till sang-stegen och tappade en dold 5-3-högfärgsfit. NMF: med 5-korts
-// högfärg + inbjudande+ värden (11+) bjuder svararen den OANVÄNDA lågfärgen (2♣/2♦)
-// konstgjort & tvingande. Efter 1♥–1♠–1NT är båda lågfärgerna lediga → bjud den
-// STARKARE (antyder stopp). Ägarbeslut 2026-07-05.
+// högfärg bjuder svararen den OANVÄNDA lågfärgen (2♣/2♦) konstgjort & tvingande.
+// Efter 1♥–1♠–1NT är båda lågfärgerna lediga → bjud den STARKARE (antyder
+// stopp). Ägarbeslut 2026-07-05.
+//
+// ÄNDRAT 2026-09-29 (ägarbeslut, felrapport #91): NMF = UTGÅNGSKRAV, 13+ rena
+// hp (förr 11+ = inbjudan eller bättre). Inbjudningshanden 11–12 går 2NT, med
+// sexkorts högfärg 4M direkt. Hela strukturen: auction-nmf-utgangskrav.test.ts.
 // =============================================================================
 
 const REBID_1NT = '1NT (12–14)' // öppnarens 1NT-rebud (exakt regelsträng)
@@ -26,23 +31,33 @@ function nmf(notation: string, opened: Suit, responderSuit: Suit): string {
 
 describe('NMF steg 1 – svararens New Minor Forcing-bud', () => {
   // 1♣–1♥–1NT: oanvänd lågfärg = ruter → 2♦.
-  it('1♣–1♥–1NT, 5-korts hjärter + 12 hp → 2♦ (NMF)', () => {
-    expect(nmf('S:842 H:AQ976 D:K5 C:K84', 'clubs', 'hearts')).toBe('2D')
+  it('1♣–1♥–1NT, 5-korts hjärter + 13 hp → 2♦ (NMF)', () => {
+    expect(hcp(parseHand('S:Q42 H:AQ976 D:K5 C:K84'))).toBe(14)
+    expect(hcp(parseHand('S:J42 H:AQ976 D:K5 C:K84'))).toBe(13)
+    expect(nmf('S:J42 H:AQ976 D:K5 C:K84', 'clubs', 'hearts')).toBe('2D')
   })
 
   // 1♦–1♥–1NT: oanvänd lågfärg = klöver → 2♣.
-  it('1♦–1♥–1NT, 5-korts hjärter + 12 hp → 2♣ (NMF)', () => {
-    expect(nmf('S:842 H:AQ976 D:K5 C:K84', 'diamonds', 'hearts')).toBe('2C')
+  it('1♦–1♥–1NT, 5-korts hjärter + 13 hp → 2♣ (NMF)', () => {
+    expect(nmf('S:J42 H:AQ976 D:K5 C:K84', 'diamonds', 'hearts')).toBe('2C')
+  })
+
+  // Inbjudningshanden (12 hp) går INTE NMF längre — 2NT (ägarbeslut 2026-09-29).
+  it('1♣–1♥–1NT, 5-korts hjärter + 12 hp → 2NT (inbjudan), inte NMF', () => {
+    expect(hcp(parseHand('S:842 H:AQ976 D:K5 C:K84'))).toBe(12)
+    expect(nmf('S:842 H:AQ976 D:K5 C:K84', 'clubs', 'hearts')).toBe('2NT')
   })
 
   // 1♥–1♠–1NT: båda lågfärger lediga → bjud den starkare. Här starkast ruter.
   it('1♥–1♠–1NT, 5-korts spader, starkare ruter → 2♦ (NMF)', () => {
-    expect(nmf('S:AQ976 H:54 D:KJ4 C:Q83', 'hearts', 'spades')).toBe('2D')
+    expect(hcp(parseHand('S:AQ976 H:54 D:KJ4 C:K83'))).toBe(13)
+    expect(nmf('S:AQ976 H:54 D:KJ4 C:K83', 'hearts', 'spades')).toBe('2D')
   })
 
   // 1♥–1♠–1NT: starkare klöver → 2♣.
   it('1♥–1♠–1NT, 5-korts spader, starkare klöver → 2♣ (NMF)', () => {
-    expect(nmf('S:AQ976 H:54 D:Q83 C:KJ4', 'hearts', 'spades')).toBe('2C')
+    expect(hcp(parseHand('S:AQ976 H:54 D:K83 C:KJ4'))).toBe(13)
+    expect(nmf('S:AQ976 H:54 D:K83 C:KJ4', 'hearts', 'spades')).toBe('2C')
   })
 
   // För svag (9 hp) → inte NMF, gamla sang-stegen gäller (pass med minimum).
@@ -134,8 +149,9 @@ describe('NMF steg 2 – öppnarens svar på New Minor Forcing', () => {
 // =============================================================================
 // FACIT: NMF — steg 3: SVARARENS placering efter öppnarens svar
 // -----------------------------------------------------------------------------
-// Svararen (13+ = utgångskrav, 11–12 = inbjudan) placerar kontraktet: stöd → 4M
-// (utgång) eller pass (inbjudan mot minimum); sang → 3NT/pass. Terminala bud.
+// NMF är utgångskrav (ägarbeslut 2026-09-29, felrapport #91): svararen placerar
+// ALLTID utgång — stöd → 4M, 6+ egen högfärg → 4M, annars 3NT. Aldrig pass
+// under utgång, inte ens för stolen som bjudit NMF på mindre än 13.
 // =============================================================================
 
 function place(
@@ -159,21 +175,25 @@ describe('NMF steg 3 – svararens placering', () => {
   it('stöd, öppnaren minimum (2♥) + utgångsvärden (14) → 4♥', () => {
     expect(place('S:K2 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2H')).toBe('4H')
   })
-  // Stöd (2♥ min): bara inbjudan → pass (delkontrakt).
-  it('stöd, öppnaren minimum (2♥) + bara inbjudan (11) → pass', () => {
-    expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2H')).toBe('P')
+  // Stöd (2♥ min): NMF var utgångskrav → 4♥ även på 11 (förr pass i delkontrakt).
+  it('stöd, öppnaren minimum (2♥), svararen 11 → 4♥ (aldrig pass under utgång)', () => {
+    expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2H')).toBe('4H')
   })
-  // Stöd (3♥ max hopp): inbjudan räcker mot maximum → 4♥.
-  it('stöd, öppnaren maximum (3♥) + inbjudan (11) → 4♥', () => {
+  // Stöd (3♥ max hopp) → 4♥.
+  it('stöd, öppnaren maximum (3♥) → 4♥', () => {
     expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '3H')).toBe('4H')
   })
   // Sang (2NT min): utgångsvärden → 3NT.
   it('sang 2NT (min) + utgångsvärden (14) → 3NT', () => {
     expect(place('S:K2 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2NT')).toBe('3NT')
   })
-  // Sang (2NT min): bara inbjudan → pass.
-  it('sang 2NT (min) + bara inbjudan (11) → pass', () => {
-    expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2NT')).toBe('P')
+  // Sang (2NT min): NMF var utgångskrav → 3NT även på 11 (förr pass).
+  it('sang 2NT (min), svararen 11 → 3NT (aldrig pass under utgång)', () => {
+    expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '2NT')).toBe('3NT')
+  })
+  // Felrapport #91: öppnaren höjde den KONSTGJORDA NMF-färgen → aldrig pass.
+  it('öppnaren höjde NMF-lågfärgen (3♦), fem hjärter → 3NT, inte pass', () => {
+    expect(place('S:82 H:AQ976 D:Q85 C:K84', 'hearts', 'spades', 'diamonds', 'clubs', 'spades', '3D')).toBe('3NT')
   })
   // 6-korts högfärg + utgångsvärden utan stöd → 4M (§5b beslut 1, 2026-09-05: "rebjud färgen"),
   // inte 3NT: öppnarens 1NT lovar 2+ kort, så 6+ egen högfärg är en 8-korts fit på egen hand.

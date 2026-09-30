@@ -19,7 +19,8 @@
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseContractBid, PARTNER, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
-import { legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
+import { cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
+import { trapPassHolding } from './contested-continuations'
 import { hcp, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import { ntResponseRule } from './overcall-continuations'
@@ -242,11 +243,47 @@ function openerSecondTurn(hand: Hand, f: AuctionFacts, l: Lage): ResolvedCall | 
 // Svararens andra tur
 // ---------------------------------------------------------------------------
 
+/**
+ * Svaret på 1NT-ÖPPNARENS ÅTERÖPPNINGSDUBBLING (felrapport #92, ägarens regel
+ * 2026-09-29): 1NT–(2x)–pass–(pass)–X–(pass). Dubblingen är upplysande — jag
+ * bjuder min LÄNGSTA färg utanför deras, billigast (lika långa: högfärgen före
+ * lågfärgen), och sitter bara kvar med längd OCH honnörer i deras färg
+ * (straffpass, samma mått som §5.9). Motorns egen öppnare återöppnar aldrig med
+ * X (ägarbeslut 2026-09-18), så läget uppstår när en människa sitter öppnare.
+ */
+function answerOpenersReopeningDouble(hand: Hand, f: AuctionFacts, l: Lage): ResolvedCall | null {
+  const { seat, history } = f
+  if (l.inter.bid === 'X') return null
+  if (l.after.length !== 3 || l.after[0].bid !== 'P' || l.after[2].bid !== 'P') return null
+  if (l.after[1].seat !== l.opener || l.after[1].bid !== 'X') return null
+  const their = parseContractBid(l.inter.bid as Bid)!
+  const theirSuit = SUIT_OF_LETTER[their.strain]
+  const len = lengths(hand)
+  if (trapPassHolding(hand, theirSuit)) {
+    return { seat, bid: 'P', rule: 'straffpass (återöppningsdubbling)', explanation: `Partnerns återöppningsdubbling är upplysande, men med ${len[theirSuit]} kort och honnörer i deras ${sym(theirSuit)} passar jag för straff.` }
+  }
+  const legal = legalCalls(history, seat)
+  const order: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs'] // lika långa: högfärg före lågfärg
+  const cands = order.filter((s) => s !== theirSuit).sort((a, b) => len[b] - len[a])
+  for (const s of cands) {
+    const bid = cheapestBidIn(history, seat, letterOfSuit(s))
+    if (bid && legal.includes(bid)) {
+      return { seat, bid, rule: 'svar på återöppningsdubbling', explanation: `Partnerns återöppningsdubbling är upplysande → ${prettyBid(bid)} (längsta färg utanför deras ${sym(theirSuit)}, ej krav).` }
+    }
+  }
+  return null
+}
+
 function responderSecondTurn(hand: Hand, f: AuctionFacts, l: Lage): ResolvedCall | null {
   const { seat, history } = f
   const legal = legalCalls(history, seat)
   const p = hcp(hand)
   const len = lengths(hand)
+
+  if (l.resp.bid === 'P') {
+    const svar = answerOpenersReopeningDouble(hand, f, l)
+    if (svar) return svar
+  }
 
   // Straff-X i andra ronden: jag passade deras inkliv med värden (inget stopp,
   // inget systembud); budgivningen har kommit tillbaka och de spelar på 2–3-läget.

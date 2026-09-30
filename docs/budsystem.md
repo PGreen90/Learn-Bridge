@@ -1314,17 +1314,38 @@ din hand"*.
 | 1♦–1♥–1NT | **2♣** |
 | 1♥–1♠–1NT | **2♣ / 2♦** (bjud den starkare = antyder stopp) |
 
-**Krav:** 5-korts högfärg + inbjudande eller mer (**11+ hp**; 13+ = utgångskrav).
-NMF får också användas av handen med **5+ kort i öppnarens lågfärg och
-slamvärden (19+ hp)** — den höjer lågfärgen i nästa rond (se "Färgvisning med
-slamvärden" nedan; ägarbeslut 2026-09-05, §9). Ostört läge; störs 1NT-rebudet
-gäller andra verktyg. Priset: du ger upp det naturliga svaga 2-budet i
-NMF-lågfärgen. **Gäller även passad hand** (motorbytet etapp 4 familj 3,
-2026-09-08): en passad 11:a med 5-korts högfärg ställer samma fråga — Drury
-tar bara höjningarna. NMF gäller **även när öppnarens 1NT
-var reservfallet** ("oklart", §5.2 steg 7) — det är fortfarande ett 1NT-återbud
-och svararen behandlar det likadant (systemfel #2, 2026-08-07; förr föll de
-auktionerna ur systemet och kravet kunde passas, frö 20261317).
+**Krav: 5-korts högfärg + UTGÅNGSKRAV — 13+ rena hp** (ägarbeslut 2026-09-29,
+felrapport #91; förr 11+ = inbjudan eller bättre). NMF får också användas av
+handen med **5+ kort i öppnarens lågfärg och slamvärden (19+ hp)** — den höjer
+lågfärgen i nästa rond (se "Färgvisning med slamvärden" nedan; ägarbeslut
+2026-09-05, §9). Ostört läge; störs 1NT-rebudet gäller andra verktyg. Priset:
+du ger upp det naturliga svaga 2-budet i NMF-lågfärgen. NMF gäller **även när
+öppnarens 1NT var reservfallet** ("oklart", §5.2 steg 7) — det är fortfarande
+ett 1NT-återbud och svararen behandlar det likadant (systemfel #2, 2026-08-07;
+förr föll de auktionerna ur systemet och kravet kunde passas, frö 20261317).
+
+**Inbjudningshanden (11–12 hp) går inte NMF:**
+
+| Svararens hand efter 1m–1M–1NT | Bud |
+|---|---|
+| 11–12 hp, **femkorts** högfärg | **2NT** — inbjudan (kan alltså dölja fem kort i högfärgen) |
+| 11–12 hp, **sexkorts** högfärg | **4M direkt** — 1NT lovar två kort, så 6-2-fiten är känd |
+| 13+ hp, femkorts högfärg | **NMF** (utgångskrav) |
+
+Öppnaren svarar på **2NT-inbjudan** med **pass (minimum 12) eller 3NT (maximum
+13–14)** — oavsett stöd i partnerns högfärg (ägarbeslut 2026-09-29: en 5-3-fit
+i högfärgen får ibland spelas i sang, priset för enkelheten).
+
+**Passad hand** (ägarens regel 2026-09-29): en passad hand kan inte ha utgångskrav,
+så den nya lågfärgen är **naturlig** — **5+ i högfärgen och 4+ i lågfärgen, 8+ hp,
+ej krav**. Budet ber partnern **välja färg och stanna lågt**: öppnaren bjuder
+**2M med 3+ kort** i högfärgen, annars **passar** i lågfärgen; svararen passar
+sedan. Under 8 hp är den passade handen tyst (vi spelar 1NT); 11–12 utan lågfärg
+att visa → 2NT som opassad. (Förr gällde NMF även passad hand — rivet.)
+
+*Felrapport #91 (bricka 11, 2026-09-28): 1♦–1♠–1NT med ♠AQT865 ♥KJ98 ♦J ♣97
+(11 hp, sex spader) → **4♠ direkt**. Förr NMF 2♣ → 3♣ → pass i en konstgjord
+färg med två små klöver.*
 
 **Öppnarens svar** (prioritetsordning). Min/max delas vid **12 / 13–14**
 (felrapport #73, ägarbeslut 2026-09-17): 13 är ett accept-värt maximum (samma
@@ -1337,11 +1358,11 @@ starka hand kan skilja "död 12" (→ utgång) från "13–14" (→ slam):
 4. **4 kort i NMF-lågfärgen** → höj den (`3m`).
 5. Inget av ovan → **rebjud egen färg** (nödutväg – NMF är krav, pass förbjudet).
 
-**Din placering:** har öppnaren visat **stöd** → `4M` med utgångsvärden (eller mot
-öppnarens maximum), annars pass i delkontrakt. Visade öppnaren **sang/ingen fit**
-→ `3NT` med utgångsvärden, annars pass — men med **6+ kort i din högfärg** →
-`4M` (öppnarens sang lovar 2+ kort, så fiten är säker på egen hand). Kort sagt:
-13+ når alltid utgång; 11–12 når utgång bara när öppnaren visat maximum.
+**Din placering — alltid utgång (NMF var utgångskrav, pass under utgång är
+förbjudet):** har öppnaren visat **stöd** → `4M`. Visade öppnaren **sang/ingen
+fit** (2NT, höjd NMF-lågfärg eller rebjuden egen färg) → `3NT` — men med **6+ kort
+i din högfärg** → `4M` (öppnarens sang lovar 2+ kort, så fiten är säker på egen
+hand). Öppnarens min/max (hopp/3NT = maximum) används av slamräkningen nedan.
 
 **Färgvisning med slamvärden (19+ hp; ägarbeslut 2026-09-05).** Visade öppnaren
 inget stöd rebjuder du **`3M` = 6+ kort, slamintresse, utgångskrav** — öppnaren
@@ -2640,6 +2661,15 @@ bud du ville bjuda betyder **dubbling "det budet"** (*stulet bud*).
   med tre stöd.
 - **Återöppning** (1NT – 2x – pass – pass): öppnaren **passar**, utom med en
   **femkorts högfärg som går att bjuda på 2-läget**.
+- **Svaret på öppnarens återöppningsdubbling** (1NT – 2x – pass – pass – **X** –
+  pass; felrapport #92, ägarens regel 2026-09-29): dubblingen är **upplysande**.
+  Svararen bjuder sin **längsta färg utanför deras**, billigast (lika långa:
+  högfärgen före lågfärgen) — och sitter bara kvar med **längd och honnörer i
+  deras färg** (fyra kort med 4+ hp i färgen, eller fem kort med 3+ =
+  straffpass, samma mått som §5.9). Datorns egen öppnare återöppnar inte med
+  dubbling; regeln gäller när du själv gör det. *Bricka 10, 2026-09-29:
+  1NT–(2♦)–P–(P)–X–(P) med ♠84 ♥J95 ♦K5 ♣J98542 → **3♣** (förr pass, 2♦X gick
+  hem).*
 
 **Fjärde hand kliver in efter överföringen** (ägarens regler 2026-09-20) —
 1NT–(pass/X/2x)–överföring–(**färgbud**), lika om 1NT självt var ostört:
@@ -3110,6 +3140,27 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-09-29/30 — Felrapport #91 (§5.7, ägarens struktur).** New Minor Forcing är
+  **utgångskrav, 13+ rena hp** (förr 11+ = inbjudan eller bättre). 11–12 med
+  femkorts högfärg → 2NT; med sexkorts → 4M direkt; öppnaren på 2NT: pass (12)
+  / 3NT (13–14) oavsett stöd. Passad hand: nya lågfärgen naturlig (5-4, 8+, ej
+  krav), öppnaren väljer 2M med 3+ annars pass. Svararens placering efter NMF
+  passar aldrig under utgång. Kod `responder-rebids.ts` (`NMF_GAME_FORCE_HP`,
+  `passedHandNewMinor`, `responderPlaceAfterNMF`), `auction-decide.ts`
+  (`openerThirdDecision`: 2NT-inbjudan + passad hands lågfärg), betydelselagret
+  (`isNMF` opassad, `isPassedHandNewMinor`), registret (NMF + svaren =
+  utgångskrav; nya regler `ny lågfärg (passad hand)`, `preferens (passad hands
+  lågfärg)`). Facit `auction-nmf-utgangskrav.test.ts`; tre äldre facit
+  uppdaterade (new-minor-forcing, auction-decide, motorbyte-facit frö 20270269).
+- **2026-09-29 — Felrapport #92 (§7.5 + betydelselagret).** (1) Svaret på
+  1NT-öppnarens återöppningsdubbling, 1NT–(2x)–P–(P)–X–(P): längsta färg
+  utanför deras billigast, straffpass bara med längd + honnörer i deras färg
+  (`nt-systems-on.ts` `answerOpenersReopeningDouble`; måttet delas med §5.9
+  via `trapPassHolding`). (2) **Människans egna bud tolkas ur auktionen:**
+  bordets etikett "eget bud" lästes av betydelselagret som en regel utan
+  kravnivå, så partnern såg inget krav i ett avvikande bud — nu härleds
+  betydelsen som för ett omärkt bud (`auction-meaning.ts` `EGET_BUD`). Facit
+  `auction-svar-ateroppnings-x-1nt.test.ts`.
 - **2026-09-28 — Läge 3-paketet (§4.1, §5.1, §5.2; ägarens beslut ur
   omvärderingsfrågan 2026-09-27/28).** (1) **Jacoby 2NT = 12+ hp och 3+ trumf**
   "hela tiden" (förr 4+ och 13+; formstarka 13+ stödpoäng som förut) — 3-korts

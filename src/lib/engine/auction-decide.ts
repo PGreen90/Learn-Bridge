@@ -631,7 +631,7 @@ export interface SecondDecision {
  * partnerns återbud, båda som de ses i auktionen. null = ingen regel (det
  * gamla lagret tar vid).
  */
-export function responderSecondDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, hand: Hand): SecondDecision | null {
+export function responderSecondDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, hand: Hand, passed = false): SecondDecision | null {
   if (rebid.call === 'P') return null
   const openerSuit = suitOf(openCall)
   const rl = lengths(hand)
@@ -855,7 +855,7 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
     }
   }
 
-  const second = responderSecondBid(openCall, response, rebid, hand)
+  const second = responderSecondBid(openCall, response, rebid, hand, passed)
   return second ? { turn: second, plan: { kind: 'call' } } : null
 }
 
@@ -929,7 +929,28 @@ export function openerThirdDecision(openCall: string, response: ResponseResult, 
     }
   }
 
-  // New Minor Forcing (§5.7, krav): öppnaren svarar alltid.
+  // Partnerns 2NT-INBJUDAN över mitt 1NT-återbud (1x–1y–1NT–2NT, 11–12; kan
+  // dölja en femkorts högfärg): bara pass / 3NT, oavsett stöd (ägarbeslut
+  // 2026-09-29, felrapport #91). Min/max delas vid 12 / 13–14 som i §5.7.
+  if (second.rule === 'inbjudan' && second.call === '2NT' && rebid.call === '1NT' && response.call.startsWith('1') && openerSuit) {
+    return hcp(hand) >= 13
+      ? { call: '3NT', rule: 'accepterar sanginbjudan', explanation: `Maximum (13–14) mot partnerns 2NT-inbjudan → 3NT.` }
+      : { call: 'P', rule: 'rebid: pass', explanation: `Minimum (12) mot partnerns 2NT-inbjudan → pass.` }
+  }
+
+  // PASSAD hands naturliga lågfärg efter mitt 1NT-återbud (1x–1M–1NT–2m,
+  // ägarens regel 2026-09-29): jag väljer färg och stannar lågt — 3+ kort i
+  // partnerns högfärg → 2M, annars pass i lågfärgen.
+  if (second.rule === 'ny lågfärg (passad hand)' && respSuit && isMajorSuit(respSuit)) {
+    const minor = suitOf(second.call)
+    const rule = 'preferens (passad hands lågfärg)'
+    if (lengths(hand)[respSuit] >= 3) {
+      return { call: `2${LETTER[respSuit]}` as ResponseResult['call'], rule, explanation: `Partnern (passad hand) visade 5+ ${SYM[respSuit]} och 4+ ${minor ? SYM[minor] : 'lågfärgen'}; med 3+ ${SYM[respSuit]} väljer jag 2${SYM[respSuit]}.` }
+    }
+    return { call: 'P', rule, explanation: `Partnern (passad hand) visade 5+ ${SYM[respSuit]} och 4+ ${minor ? SYM[minor] : 'lågfärgen'}; med högst två ${SYM[respSuit]} passar jag i lågfärgen.` }
+  }
+
+  // New Minor Forcing (§5.7, utgångskrav): öppnaren svarar alltid.
   if (second.rule === 'New Minor Forcing' && openerSuit && respSuit && isMajorSuit(respSuit)) {
     const nmfMinor = suitOf(second.call)
     if (nmfMinor) {
@@ -1192,8 +1213,8 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
   if (second.rule === 'New Minor Forcing' && openerSuit && respSuit && isMajorSuit(respSuit)) {
     const nmfMinor = suitOf(second.call)
     if (!nmfMinor) return null
-    // Cue-ronden är gratis bara i UTGÅNGSKRAV: NMF med 11–12 var en inbjudan,
-    // så bara 13+ (GF) går in i slamsekvensen; annars placeras kontraktet.
+    // Cue-ronden är gratis bara i UTGÅNGSKRAV: NMF lovar 13+ (ägarbeslut
+    // 2026-09-29), hp-spärren står kvar för stolen som bjudit NMF på mindre.
     if (suitOf(third.call) === respSuit && lengths(hand)[respSuit] >= 5 && hcp(hand) >= 13) {
       const slam = slamStep(respSuit)
       if (slam) return slam
@@ -1790,7 +1811,7 @@ const TABELL: Row[] = [
       const response = partnerResponseAsSeen(facts, facts.history.indexOf(facts.ourContractBids[1]))
       const rebid = rebidAsSeen(facts, facts.history.indexOf(facts.ourContractBids[2]))
       if (!response || !rebid) return null
-      const dec = responderSecondDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, hand)
+      const dec = responderSecondDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, hand, facts.passedHand[facts.seat])
       if (!dec) return null
       const t = dec.turn
       return { seat: facts.seat, bid: t.call, rule: t.rule, explanation: t.explanation, uncertain: t.uncertain }
