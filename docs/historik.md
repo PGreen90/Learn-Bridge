@@ -10,6 +10,48 @@
 
 ---
 
+## 2026-09-30 (Hål D steg 2 — cue-höjningens fortsättning i högfärg, BYGGD, väntar PCD)
+
+**Vad:** ägarens struktur 2026-09-28 (omvärderingsfrågan läge 4/5) byggd som tabell-
+rader: efter 1M–(inkliv)–cue (limithöjning+) svarar öppnaren ≤12 → 3M · 14–15
+balanserad med stopp → 3NT · 13+ → billigaste äkta kontrollbud (ess/singel/renons/KQ,
+`hasRealControl`; Kxx räknas inte) · ingen kontroll → 4M — aldrig hopp till utgång
+över ett kontrollbud. Svararen cue:ar egen kontroll oavsett styrka, stannar i 4M
+eller frågar 4NT (1430 RKC, regeln `konkurrens-slaminvit (RKC)` så placeringen
+återanvänds) med 16+ när alla sidofärger är kontrollerade mellan oss; öppnaren
+svarar i stegen och passar avslutet. Systembok §7.8 c + §6.10, ändringslogg §9.
+
+**Kod:** läsaren `cue-raise-sequence.ts` (ren auktion, delas av tabellen och
+betydelselagret — inget beroende på faktalagret, som importerar betydelselagret),
+kunskapen `cue-raise-continuations.ts` (`openerInCueRaise`/`raiserInCueRaise`, först
+i raderna *öppnaren-stört*/*svararen-stört*; efter det billiga 3M lämnas ordet till
+`cueBidderContinues` som förut), betydelselagret `cueRaiseFortsattning` (människans
+3♠ = kontrollbud, 4♦ i deras färg = kontrollbud inte ny cue, 4NT = RKC i trumfen),
+registret (nio regler, kontrollbudet alertas). Lågfärgens svar (3NT-vägen före 5m,
+2026-07-21) orört.
+
+**Facit:** `auction-cue-hojning-fortsattning.test.ts` (21 tester: ägarens exempel,
+kontrollbudsronden, 3NT-fortsättningen, hel botauktion 1♥–(2♦)–3♦–3♠–4♣–4♥–4NT–5♥–6♥,
+betydelselagret). Två av ägarens exempelhänder i anteckningen var felräknade
+(♠KQ5 ♥AQ964 ♦KJ3 ♣Q4 = 17, inte 15; ♠AQ5 ♥KQ964 ♦872 ♣K4 = 14, inte 13) — hp
+räknas nu med kod i testet. Äldre facit i `auction-etapp4-familj4.test.ts`
+uppdaterat: 13 hp utan kontroll → 4♥ (förr 3♥). Lärdom (igen): bash-backticks i
+dubbelcitat körde filnamn som kommandon och tömde CLAUDE.md-rader — skript till
+fil, kolla `git status` efter `??`.
+
+**Auktionsdiff 3 000 givar (frön 20270001–20273000, gammal motor via git stash →
+`node scripts/auktionsdiff.mjs`):** 27 ändrade auktioner, 14 samma bud/ny regel,
+alla 27 i cue-höjningsläget (klass a): 13–15-öppnare som förr återgick 3M eller hoppade
+4M går nu via kontrollbud till samma utgång; ett fall (20272755) tar 3NT-vägen och
+rättas till 4♥ med fyra trumf. Inget 4NT tände (16+ med alla kontroller är sällsynt).
+**Konsekvens att veta om:** 13–14 hp mittemot en limithöjare stannade förr i 3M
+(t.ex. 20271186, ♠A532 ♥AJT952 ♦A2 ♣9 + ♠KJT ♥873 ♦Q9 ♣AJ653); nu är cuet
+utgångskrav → 4♥. Det följer av ägarens "13+ → kontrollbud".
+
+**Claudes tolkningar att bekräfta:** svararen efter öppnarens 3NT passar med jämn
+trekortshand, rättar till 4M med 4+ trumf/ojämn hand, cue:ar med 16+; öppnaren
+frågar aldrig själv 4NT i sekvensen (ägaren: "Syd med 16+ frågar").
+
 ## 2026-09-29/30 (Felrapport #91–#94 + budhjälpen tänker — fyra mergepunkter, allt LIVE)
 
 **#92 (`793f204`, tvådelat):** (1) systemfyndet — bordets etikett `eget bud` på

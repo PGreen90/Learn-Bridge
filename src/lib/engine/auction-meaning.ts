@@ -22,6 +22,7 @@ import type { Bid, Forcing, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { forcingOf, isAlertRule, ruleInfo } from './rules'
 import { PUPPET } from './responses-2nt'
+import { cueRaiseSequenceIn, cueRaiseSteg } from './cue-raise-sequence'
 
 /** Hur säker tolkningen är. Visas för användaren så hen vet hur mycket att lita på. */
 export type Confidence = 'säker' | 'trolig' | 'gissning'
@@ -1277,6 +1278,15 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     }
   }
 
+  // Hål D steg 2 (2026-09-30, §7.8 c): buden EFTER partnerns cue-höjning av vår
+  // högfärgsöppning — öppnarens svar, kontrollbudsronden, essfrågan och
+  // avsluten. Ligger före cue-blocket: höjarens 4♦ i deras färg är här ett
+  // kontrollbud, inte en ny cue-höjning.
+  {
+    const cr = cueRaiseFortsattning(seat, cb, prior)
+    if (cr) return cr
+  }
+
   // Äkta cue i motståndarnas färg när vår sida redan bjudit = stark höjning av
   // partnerns färg. Advancerns/svararens cue-höjning av partnerns färg är en
   // konstlad limithöjning+ (krav 1 rond, alertpliktig); öppnarens och den
@@ -1691,6 +1701,54 @@ function weakTwoCueAnswer(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): Cal
   }
   if (cb.strain === 'NT' && cb.level === 3) {
     return { text: `3 sang — svar på partnerns cue i deras ${deras} (stark höjning): maximum (9–11 hp) med stopp i deras ${deras}; till spel.`, confidence: 'trolig', forcing: 'avslut' }
+  }
+  return null
+}
+
+/**
+ * Hål D steg 2 (ägarens struktur 2026-09-28, §7.8 c): vår sidas bud EFTER
+ * partnerns cue-höjning av vår 1♥/1♠-öppning, lästa ur auktionen ensam
+ * (`cue-raise-sequence.ts` — samma läsare som beslutstabellen). Öppnarens
+ * första svar: 3M = minimum, 3NT = 14–15 med stopp, ny färg under 4M =
+ * kontrollbud (13+), 4M = ingen kontroll. Sedan kontrollbud från båda, 4M =
+ * inget mer att visa / stannar, 4NT = 1430 RKC i trumfen. Höjarens bud efter
+ * öppnarens billiga 3M tolkas som förut (null här).
+ */
+function cueRaiseFortsattning(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInterpretation | null {
+  const bid = `${cb.level}${cb.strain}`
+  const seq = cueRaiseSequenceIn([...prior, { seat, bid }], seat)
+  if (!seq || seq.after.length === 0) return null
+  const last = seq.after[seq.after.length - 1]
+  if (last.seat !== seat || last.bid !== bid) return null
+  const steg = cueRaiseSteg(bid, seq)
+  const M = NAME[seq.trumpStrain]
+  const msym = SYMBOL[seq.trumpStrain]
+  const deras = NAME[seq.theirStrain]
+  const kontroll = cb.strain === 'NT' ? '' : `(ess, singel, renons eller KQ i ${NAME[cb.strain]})`
+  if (seat === seq.opener) {
+    if (seq.after.length === 1) {
+      if (steg === 'minimum') return R('svar på cue-höjning', `${B(cb)} — svar på partnerns cue i deras ${deras} (limithöjning eller bättre): minimum (högst 12 hp), billigaste bud i ${M}. Partnern får passa med limitvärden.`)
+      if (steg === '3NT') return R('svar på cue-höjning: 3NT (14–15)', `3 sang — svar på partnerns cue-höjning: 14–15 balanserad med stopp i deras ${deras}. Partnern väljer pass, 4${msym} eller ett kontrollbud.`)
+      if (steg === 'kontrollbud') return R('svar på cue-höjning: kontrollbud', `${B(cb)} — kontrollbud ${kontroll} på partnerns cue-höjning: 13+ hp, ${M} är trumf. Utgångskrav — partnern cue:ar sin egen kontroll eller stannar i 4${msym}.`)
+      if (steg === 'utgång') return R('svar på cue-höjning: utgång (ingen kontroll)', `${B(cb)} — utgång på partnerns cue-höjning: 13+ hp men ingen äkta kontroll (ess, singel, renons eller KQ) att visa.`)
+      return null
+    }
+    if (steg === 'kontrollbud') return R('kontrollbud efter cue-höjning', `${B(cb)} — kontrollbud ${kontroll}; ${M} är trumf. Partnern väljer 4${msym} eller 4 sang.`)
+    if (steg === 'utgång') return R('cue-höjning: inget mer att visa', `${B(cb)} — inget mer att visa efter kontrollbuden. Partnern frågar 4 sang med 16+ hp och alla sidofärger kontrollerade mellan oss, annars pass.`)
+    return null
+  }
+  // Höjaren (cue-bjudaren).
+  const prev = seq.after[seq.after.length - 2]
+  const prevSteg = prev ? cueRaiseSteg(prev.bid, seq) : null
+  if (steg === 'kontrollbud') {
+    return R('kontrollbud efter cue-höjning', prevSteg === '3NT'
+      ? `${B(cb)} — kontrollbud ${kontroll} över öppnarens 3 sang: slamintresse (16+ hp), ${M} är trumf.`
+      : `${B(cb)} — kontrollbud ${kontroll}: visar min kontroll oavsett styrka; ${M} är trumf.`)
+  }
+  if (steg === '4NT') return R('1430 RKC', `4 sang — essfråga (1430 RKC) med ${M} som trumf: 16+ hp och alla sidofärger kontrollerade mellan oss. Partnern svarar i steg: 5♣ = 1/4 nyckelkort, 5♦ = 0/3, 5♥ = 2 utan trumfdam, 5♠ = 2 med.`)
+  if (steg === 'utgång') {
+    if (prevSteg === '3NT') return R('cue-höjning: rättar till trumf', `${B(cb)} — rättar till ${M} över öppnarens 3 sang (4+ trumf eller ojämn hand); till spel.`)
+    if (prevSteg === 'kontrollbud' || prevSteg === 'utgång') return R('cue-höjning: stannar i utgång', `${B(cb)} — stannar i utgång efter kontrollbuden: ingen ny kontroll att visa, inget slamintresse.`)
   }
   return null
 }

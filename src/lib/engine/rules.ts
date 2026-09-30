@@ -60,6 +60,7 @@ const ALERT_RULE_PREFIXES: string[] = [
   // för det breda 'cue' (familj 9: registret alertade fortsättningarna av misstag).
   'cue-bid',
   'cue (',
+  'svar på cue-höjning: kontrollbud', // Hål D steg 2: öppnarens kontrollbud på cue-höjningen (konstlat)
   // Övriga cue-BUD i konkurrens är också konstlade och alertpliktiga (familj 9:
   // registret alertade dem inte tidigare). Deras SVAR ('svar på … cue') och
   // FORTSÄTTNINGAR ('cue-höjningens fortsättning') är naturliga → alertas inte.
@@ -406,6 +407,17 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'X (stark/takeout)': 'krav-1-rond',
   // Öppnarens och svararens fortsättning när de stört (etapp 4 familj 4, 2026-09-08)
   'svar på cue-höjning': 'ej-krav',
+  // Hål D steg 2 (2026-09-30, §7.8 c): cue-höjningen av vår högfärg — öppnarens
+  // svar, kontrollbudsronden och avsluten (`cue-raise-continuations.ts`).
+  'svar på cue-höjning: 3NT (14–15)': 'ej-krav',
+  'svar på cue-höjning: kontrollbud': 'utgangskrav',
+  'svar på cue-höjning: utgång (ingen kontroll)': 'avslut',
+  'kontrollbud efter cue-höjning': 'utgangskrav',
+  'cue-höjning: inget mer att visa': 'avslut',
+  'cue-höjning: stannar i utgång': 'avslut',
+  'cue-höjning: rättar till trumf': 'avslut',
+  'cue-höjning: passar 3NT': 'avslut',
+  'cue-höjning: avslutat': 'avslut',
   'öppnaren bjuder utgång i konkurrens': 'avslut',
   'öppnaren bjuder 3NT i konkurrens': 'avslut',
   'maximal dubbling (game try)': 'inbjudan',

@@ -10,34 +10,24 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt (sessionsslut 2026-09-30) — nästa gång: NÄST 0, sedan 1–3
-**Sessionen 2026-09-30 (allt LIVE, detalj `docs/historik.md`):** felrapport #91–#94
-(NMF = utgångskrav 13+ hp med 2NT/4M-vägar + passad hands naturliga lågfärg ·
-"eget bud"-etiketten dolde människans bud för botpartnern · inklivaren tävlar 3M
-med sex kort när öppnaren bjuder vidare · 4NT direkt i egen 6+ högfärg efter
-hoppskift) · **budhjälpen tänker** (resonemangslagret åt människan, gul fyrkant =
-resonemang, grön prick = tabellen) · uteslutningsmetoden i RKC (0/3 mot 16+ = 3,
-#94-given når 7♥) · docs-vakten mäter LF. Omvärderingsfrågan LEVERERAD (läge 2
-`16e26fe`, läge 3 `cfce6a5`). Bevaka: budhjälpens väntetid vid bordet.
+### 🔵 NU — Hål D steg 2 BYGGD 2026-09-30, väntar ägarens PCD (sedan NÄST 0 → 1–2)
+**Hål D steg 2 = cue-höjningens fortsättning i högfärg** (ägarens struktur 2026-09-28,
+§7.8 c): 1M–(inkliv)–cue → öppnaren ≤12 3M · 14–15 bal.+stopp 3NT · 13+ billigaste
+äkta kontrollbud (ess/singel/renons/KQ) · aldrig hopp till 4M över ett cue; svararen
+cue:ar egen kontroll oavsett styrka, 16+ frågar 4NT när alla sidofärger är
+kontrollerade. Kod `cue-raise-continuations.ts` + läsaren `cue-raise-sequence.ts`,
+facit `auction-cue-hojning-fortsattning.test.ts` (21 tester). Lokalt grönt; INTE
+pushat. Öppna ägarfrågor: svararens val efter 3NT (pass med jämn trekortshand /
+4M med 4+ trumf — Claudes tolkning) · ska öppnaren själv någonsin fråga 4NT?
 
-**Parallella ägarsteg (live-prov):** sunt förnuft-lagret (resonemangslagret steg 1–3 +
-pass-spärr/systemfilter LIVE 09-23/24, `docs/sunt-fornuft-plan.md`) · tredje hand högt (regel
-A–D LIVE `037403b`, kvar beslutet om budseedad gissning; `docs/speldiagnos.md` T-serien) ·
-vänner-bordet = tävlingen (`docs/bord-plan.md`) · Gambling 3NT.
+**Sessionen 2026-09-30 (allt LIVE, detalj `docs/historik.md`):** felrapport #91–#94 ·
+budhjälpen tänker (gul fyrkant) · uteslutningsmetoden i RKC (0/3 mot 16+ = 3) ·
+omvärderingsfrågan levererad. Bevaka: budhjälpens väntetid vid bordet.
 
-**Nyss klart (sep -26…28, allt LIVE — detalj `docs/historik.md`):** felrapport #87–#90
-(tvingat svar efter egen X · öppnaren svarar på negativ X trots höjning · MC på
-gemensamma lägen + fjärde hand går ej över partnern · inklivaren drar ur partnerns X) ·
-regeln "händer räknas med kod" · felrapport #84–#86
-(offshape-X 12+ · öppnaren efter konkurrenshöjning · inklivaren efter höjning, §7.1/§7.3/§7.4h) · Ogust-placering + sunt
-förnuft-svepets hål (`0c5cc37`) · svag tvåa i konkurrens (`24e883c`) · Michaels-fortsättningen
-(§7.2) · stört 1NT: tredje bud + störd överföring (§7.5) · nattgranskningen versionsmedveten ·
-claim-ombygget (`docs/claim-plan.md`) · systems on efter stört 1NT (#77) · Puppet Stayman över
-2NT · Gambling 3NT (`gambling-3nt.ts`) · bordens SENARE-lista · livskvalitetssvepet.
-
-**Parallellt pending ägarsteg:** budförklaringarnas ordval-granskning
-(KLAR & LIVE 2026-08-19): syna `docs/budforklaring-katalog.md`, peka på en
-rad → Claude byter ordagrant + deployar.
+**Parallella ägarsteg (live-prov):** sunt förnuft-lagret (`docs/sunt-fornuft-plan.md`) ·
+tredje hand högt (regel A–D LIVE `037403b`; `docs/speldiagnos.md` T-serien) ·
+vänner-bordet = tävlingen (`docs/bord-plan.md`) · Gambling 3NT · budförklaringarnas
+ordval (`docs/budforklaring-katalog.md`: peka på en rad → Claude byter + deployar).
 
 ---
 
@@ -93,13 +83,10 @@ S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Hål D steg 2 — öppnarens fortsättning efter svararens cue i konkurrens**
-   (AVPARKERAD 2026-09-28): 3NT 14–15 m. stopp, annars kontrollbud, aldrig hopp
-   till utgång när kontrollbud under utgång finns; detaljfrågor i `docs/senare.md`.
-2. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
-   ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
-3. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
-   (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
+1. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
+   ur runda 6: MC-på-få-lägen ().
+2. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
+   (samtyckesregler = ägarfrågor) · per-kort-DD ( "Medvetet utanför v1").
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

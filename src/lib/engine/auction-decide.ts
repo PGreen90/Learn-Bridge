@@ -167,6 +167,7 @@ import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCor
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
+import { openerInCueRaise, raiserInCueRaise } from './cue-raise-continuations'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerAfterCompetitiveRaise, openerRebidsAfterTheirDouble, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
 import { answerJordan, answerNegativeDoubleOverTheirBid, answerPartnersNegativeDouble, answerPartnersSupportDouble, negativeDoubleOverbidToAnswer, showHandAfterOpenersDouble, showHandToAnswer, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
@@ -2296,6 +2297,10 @@ const TABELL: Row[] = [
     läge: (f) => openerContestedSeat(f),
     välj: ({ hand, facts }) => {
       const k =
+        // Hål D steg 2 (2026-09-30): cue-höjningen av vår HÖGFÄRG — svaret,
+        // kontrollbudsronden, essfrågans svar (`cue-raise-continuations.ts`);
+        // lågfärgens svar står kvar i `openerAnswersCueRaise`.
+        openerInCueRaise(hand, facts) ??
         openerAnswersCueRaise(hand, facts) ??
         openerCompetesAfterRaise(hand, facts) ??
         openerStrongNTAfterMinorRaise(hand, facts) ??
@@ -2328,6 +2333,9 @@ const TABELL: Row[] = [
         responderAnswersReopeningDouble(hand, facts) ??
         responderAnswersNTInvite(hand, facts) ??
         responderAfterFreeBidRaise(hand, facts) ??
+        // Hål D steg 2: höjaren efter öppnarens 3NT/kontrollbud/4M (efter det
+        // billiga 3M lämnar den ordet till `cueRaiserContinues` som förut).
+        raiserInCueRaise(hand, facts) ??
         cueRaiserContinues(hand, facts) ??
         answerPartnersCue(hand, facts) ??
         negativeDoublerCue(hand, facts) ??

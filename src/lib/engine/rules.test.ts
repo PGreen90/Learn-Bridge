@@ -117,6 +117,10 @@ const ALL_ENGINE_RULES: string[] = [
   'straffdubbling',
   // Öppnarens och svararens fortsättning när de stört (etapp 4 familj 4, 2026-09-08; contested-continuations.ts, overcalls.ts)
   'svar på cue-höjning', 'öppnaren bjuder utgång i konkurrens', 'öppnaren bjuder 3NT i konkurrens', 'maximal dubbling (game try)',
+  // Hål D steg 2 (2026-09-30; cue-raise-continuations.ts): cue-höjningens fortsättning i högfärg
+  'svar på cue-höjning: 3NT (14–15)', 'svar på cue-höjning: kontrollbud', 'svar på cue-höjning: utgång (ingen kontroll)',
+  'kontrollbud efter cue-höjning', 'cue-höjning: inget mer att visa', 'cue-höjning: stannar i utgång',
+  'cue-höjning: rättar till trumf', 'cue-höjning: passar 3NT', 'cue-höjning: avslutat',
   'öppnaren konkurrerar (6:e trumfen)', 'öppnaren passar i konkurrens', 'accepterar game-try', 'avböjer game-try',
   'avböjer sanginbjudan', 'öppnarens 3NT i konkurrens', 'öppnarens 2NT-inbjudan i konkurrens',
   'öppnarens cue (utgångskrav i konkurrens)', 'öppnarens cue (extra i konkurrens)', 'öppnarens inbjudande höjning (konkurrens)',
