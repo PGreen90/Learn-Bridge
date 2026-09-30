@@ -561,13 +561,13 @@ describe('familj 5 – slamraden: läget "en slamsekvens pågår" (ostört, kapt
 })
 
 describe('familj 5 – svararens tredje bud (raden svar3) och öppnarens fjärde (raden fjärde)', () => {
-  it('NMF: öppnaren visade 3-stöd → GF-kaptenen cue:ar (gratis under utgång); inbjudningshanden (11–12) placerar i stället', () => {
+  it('NMF: öppnaren visade 3-stöd → GF-kaptenen cue:ar (gratis under utgång); utan slamvärden placeras utgången (NMF = utgångskrav, aldrig pass)', () => {
     const h: ResolvedCall[] = [{ seat: 'N', bid: '1D' }, P('E'), { seat: 'S', bid: '1S' }, P('W'), { seat: 'N', bid: '1NT' }, P('E'), { seat: 'S', bid: '2C' }, P('W'), { seat: 'N', bid: '2S' }, P('E')]
     const gf = bud('S:KQJ74 H:AK3 D:AQ3 C:32', h, 'S')! // 19 hp + visade 12 ≥ 30, GF → billigaste kontroll (♦A) cue:as 3♦
     expect(gf.källa).toBe('tabell:svar3')
     expect(gf.call).toMatchObject({ bid: '3D', rule: 'cue-bid' })
-    const inv = bud('S:KQ742 H:A42 D:T7 C:Q83', h, 'S')! // 11 hp: inbjudan mot minimum → pass
-    expect(inv.call).toMatchObject({ bid: 'P', rule: 'placering efter NMF' })
+    const inv = bud('S:KQ742 H:A42 D:T7 C:Q83', h, 'S')! // 11 hp som ändå bjudit NMF: utgångskravet står → 4♠ (förr pass; ägarbeslut 2026-09-29, felrapport #91)
+    expect(inv.call).toMatchObject({ bid: '4S', rule: 'placering efter NMF' })
     expect(bud('S:KQ742 H:AQ2 D:T7 C:Q83', h, 'S')!.call).toMatchObject({ bid: '4S', rule: 'placering efter NMF' }) // 13 hp: under 30 → utgången
   })
 

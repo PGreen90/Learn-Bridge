@@ -51,7 +51,7 @@ function hasStopper(hand: Hand, suit: Suit): boolean {
 }
 
 /** Svararens andra bud. null = ingen regel för sekvensen än. */
-export function responderSecondBid(openCall: string, response: ResponseResult, rebid: ResponseResult, hand: Hand): ResponseResult | null {
+export function responderSecondBid(openCall: string, response: ResponseResult, rebid: ResponseResult, hand: Hand, passed = false): ResponseResult | null {
   if (rebid.call === 'P') return null
 
   // Punkt 10 – efter semi-forcing 1NT (1♥/1♠–1NT–…).
@@ -73,7 +73,7 @@ export function responderSecondBid(openCall: string, response: ResponseResult, r
   if (['1C', '1D', '1H', '1S'].includes(openCall) && response.rule === 'ny färg (1-läget)') {
     const opened = suitOfCall(openCall)
     const responderSuit = suitOfCall(response.call)
-    if (opened && responderSuit) return responderRebidColorAuction(hand, opened, responderSuit, rebid)
+    if (opened && responderSuit) return responderRebidColorAuction(hand, opened, responderSuit, rebid, passed)
   }
 
   // FAS 3 punkt 14 – svararen visar kortfärgen efter tvetydig splinter + relä.
@@ -717,10 +717,13 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
 
 // === New Minor Forcing (§5.7) ================================================
 // Efter 1m–1M(1-läget)–1NT kan öppnarens 1NT dölja 3-korts stöd i svararens
-// högfärg (eller en egen 4-korts högfärg). Med en 5-korts högfärg + inbjudande+
-// värden (11+) bjuder svararen den OANVÄNDA lågfärgen konstgjort & tvingande och
-// frågar efter den dolda passningen, i stället för att gissa sang och tappa en
-// 5-3-fit. Efter 1♥–1♠–1NT är båda lågfärgerna lediga → bjud den starkare
+// högfärg (eller en egen 4-korts högfärg). Med en 5-korts högfärg + UTGÅNGS-
+// värden (13+ rena hp — ägarbeslut 2026-09-29, felrapport #91; förr 11+ =
+// inbjudan eller bättre) bjuder svararen den OANVÄNDA lågfärgen konstgjort &
+// tvingande och frågar efter den dolda passningen, i stället för att gissa sang
+// och tappa en 5-3-fit. Inbjudningshanden (11–12) går 2NT, med sexkorts
+// högfärg 4M direkt; PASSAD hand bjuder lågfärgen naturligt
+// (`passedHandNewMinor`). Efter 1♥–1♠–1NT är båda lågfärgerna lediga → bjud den starkare
 // (mest hp, antyder stopp); vid lika den billigaste (klöver). Ägarbeslut 2026-07-05.
 /**
  * Slamzonen mot öppnarens 1NT-återbud räknad i hp (§5.2): 19 + visade 12 = 31.
@@ -728,6 +731,8 @@ export function responderRebidIn2NTAuction(response: ResponseResult, rebid: Resp
  * färgvisning efter öppnarens NMF-svar (3M / 3m).
  */
 export const NMF_SLAM_ZONE_HP = 19
+/** NMF är utgångskrav: 13+ rena hp (ägarbeslut 2026-09-29, felrapport #91). */
+export const NMF_GAME_FORCE_HP = 13
 
 function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: number): ResponseResult | null {
   if (responderSuit !== 'hearts' && responderSuit !== 'spades') return null // NMF jagar en HÖGfärgsfit
@@ -746,7 +751,7 @@ function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: nu
   const slamZoneFourCard = len[responderSuit] === 4 && p >= NMF_SLAM_ZONE_HP
   if (!minorRoute && !slamZoneFourCard) {
     if (len[responderSuit] < 5) return null // 5-3-fit kräver 5-korts högfärg
-    if (p < 11) return null // inbjudande+ värden
+    if (p < NMF_GAME_FORCE_HP) return null // utgångskrav
   }
 
   const freeMinors = (['clubs', 'diamonds'] as Suit[]).filter((m) => m !== opened && m !== responderSuit)
@@ -757,17 +762,35 @@ function newMinorForcingBid(hand: Hand, opened: Suit, responderSuit: Suit, p: nu
 
   const call = `2${BID[nmfMinor]}`
   const explanation = len[responderSuit] >= 5
-    ? `5+ ${SYM[responderSuit]}, 11+ hp – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens dolda 3-stöd i ${SYM[responderSuit]} eller egen 4+ högfärg.`
+    ? `5+ ${SYM[responderSuit]}, 13+ hp – ${pretty(call)} = New Minor Forcing (konstgjort, utgångskrav): frågar öppnarens dolda 3-stöd i ${SYM[responderSuit]} eller egen 4+ högfärg.`
     : minorRoute
-      ? `5+ ${SYM[opened]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, krav): frågar öppnarens hand och höjer sedan ${SYM[opened]} (§5.7).`
-      : `4-korts ${SYM[responderSuit]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, krav): utgång är känd, så budgivningen hålls låg och utforskar öppnarens hand (min/max) innan slammen placeras.`
+      ? `5+ ${SYM[opened]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, utgångskrav): frågar öppnarens hand och höjer sedan ${SYM[opened]} (§5.7).`
+      : `4-korts ${SYM[responderSuit]} och slamvärden – ${pretty(call)} = New Minor Forcing (konstgjort, utgångskrav): utgång är känd, så budgivningen hålls låg och utforskar öppnarens hand (min/max) innan slammen placeras.`
   return { call, rule: 'New Minor Forcing', explanation }
 }
 
-// Svararens PLACERING efter öppnarens NMF-svar (§5.7, steg 3). Svararen visade
-// 11+ via NMF: 13+ = utgångskrav, 11–12 = inbjudan. Öppnarens svar visade min/max
-// (hopp/3NT = maximum). Terminala bud: stöd → 4M (utgång) / pass (inbjudan mot
-// minimum); sang → 3NT / pass; annars 3NT med utgångsvärden, annars pass.
+/**
+ * PASSAD hands nya lågfärg efter 1x–1M–1NT (ägarens regel 2026-09-29,
+ * felrapport #91): en passad hand kan inte ha utgångskrav, så lågfärgen är
+ * NATURLIG — 5+ i högfärgen, 4+ i lågfärgen, 8+ hp, ej krav. Partnern väljer
+ * mellan färgerna och stannar lågt. Under 8 hp är handen tyst (vi spelar 1NT).
+ */
+function passedHandNewMinor(hand: Hand, opened: Suit, responderSuit: Suit, p: number): ResponseResult | null {
+  if (responderSuit !== 'hearts' && responderSuit !== 'spades') return null
+  const len = lengths(hand)
+  if (len[responderSuit] < 5 || p < 8) return null
+  const minor = (['clubs', 'diamonds'] as Suit[])
+    .filter((m) => m !== opened && len[m] >= 4)
+    .sort((a, b) => len[b] - len[a])[0]
+  if (!minor) return null
+  const call = `2${BID[minor]}`
+  return { call, rule: 'ny lågfärg (passad hand)', explanation: `Passad hand: 5+ ${SYM[responderSuit]} och 4+ ${SYM[minor]}, 8+ hp → ${pretty(call)} (naturligt, ej krav – partnern väljer färg och stannar lågt).` }
+}
+
+// Svararens PLACERING efter öppnarens NMF-svar (§5.7, steg 3). NMF är
+// UTGÅNGSKRAV (ägarbeslut 2026-09-29, felrapport #91) — svararen passar aldrig
+// under utgång. Öppnarens svar visade min/max (hopp/3NT = maximum; används av
+// slamräkningen). Terminala bud: stöd → 4M; 6+ egen högfärg → 4M; annars 3NT.
 export function responderPlaceAfterNMF(
   hand: Hand,
   responderMajor: Suit,
@@ -780,16 +803,14 @@ export function responderPlaceAfterNMF(
   const p = hcp(hand)
   const len = lengths(hand)
   const rule = 'placering efter NMF'
-  const game = p >= 13 // 13+ = utgångskrav; 11–12 = inbjudan
   const openerMax = answer.level >= 3 // hopp / 3NT = maximum
-  const toGame = game || openerMax
   const rM = BID[responderMajor]
   const pass = (why: string): ResponseResult => ({ call: 'P', rule, explanation: `${why} → pass.` })
   // §5b beslut 1 (2026-09-05, "rebjud färgen"): 6+ egen högfärg utan visat stöd
   // → 4M med utgångsvärden, inte 3NT — öppnarens sang lovar 2+ kort, så fiten
   // är säker på egen hand. Slamhanden (19+) har redan visat färgen med 3M i
   // `responderThirdDecision` innan placeringen når hit.
-  const ownSix: ResponseResult | null = game && len[responderMajor] >= 6
+  const ownSix: ResponseResult | null = len[responderMajor] >= 6
     ? { call: `4${rM}`, rule, explanation: `6+ ${SYM[responderMajor]} (öppnarens sang lovar 2+ kort) → utgång 4${SYM[responderMajor]}.` }
     : null
 
@@ -811,33 +832,30 @@ export function responderPlaceAfterNMF(
 
   // 1) Öppnaren visade STÖD i din högfärg → 5-3-fit.
   if (answer.strain === rM) {
-    if (toGame) return { call: `4${rM}`, rule, explanation: `5-3-fit i ${SYM[responderMajor]}${openerMax ? ' + öppnarens maximum' : ''} → utgång 4${SYM[responderMajor]}.` }
-    return pass(`inbjudan mittemot öppnarens minimum – ${SYM[responderMajor]}-delkontrakt räcker`)
+    return { call: `4${rM}`, rule, explanation: `5-3-fit i ${SYM[responderMajor]}${openerMax ? ' + öppnarens maximum' : ''} → utgång 4${SYM[responderMajor]}.` }
   }
 
   // 2) Öppnaren visade den ANDRA högfärgen (4 kort, minimum).
   if (otherMajor !== opened && answer.strain === BID[otherMajor]) {
     if (len[otherMajor] >= 4) {
-      if (toGame) return { call: `4${BID[otherMajor]}`, rule, explanation: `4-4-fit i ${SYM[otherMajor]} → utgång.` }
-      return pass(`4-4-fit men bara inbjudan mittemot minimum`)
+      return { call: `4${BID[otherMajor]}`, rule, explanation: `4-4-fit i ${SYM[otherMajor]} → utgång.` }
     }
     if (ownSix) return ownSix
-    if (game) return { call: '3NT', rule, explanation: `Utgångsvärden, ingen högfärgsfit → 3NT.` }
-    return pass('ingen fit, bara inbjudan')
+    return { call: '3NT', rule, explanation: `Utgångskrav, ingen högfärgsfit → 3NT.` }
   }
 
   // 3) Öppnaren bjöd sang (2NT minimum / 3NT maximum).
   if (answer.strain === 'NT') {
     if (ownSix) return ownSix
     if (answer.level >= 3) return pass('öppnaren bjöd redan 3NT')
-    if (game) return { call: '3NT', rule, explanation: `Utgångsvärden → 3NT.` }
-    return pass('inbjudan mittemot minimum')
+    return { call: '3NT', rule, explanation: `Utgångskrav → 3NT.` }
   }
 
   // 4) Öppnaren höjde NMF-lågfärgen / rebjöd egen färg (ingen högfärgspassning).
+  // NMF-lågfärgen är konstgjord: svararen passar ALDRIG här (felrapport #91 —
+  // 3♣ passades med två små klöver och sex spader).
   if (ownSix) return ownSix
-  if (game) return { call: '3NT', rule, explanation: `Utgångsvärden, ingen högfärgsfit → 3NT.` }
-  return pass('ingen fit, bara inbjudan')
+  return { call: '3NT', rule, explanation: `Utgångskrav, ingen högfärgsfit → 3NT.` }
 }
 
 // Svararens PLACERING efter öppnarens svar på 3♣-CHECKBACK (§5.2). Svararen har
@@ -862,7 +880,7 @@ export function responderPlaceAfter2NTCheckback(hand: Hand, responderMajor: Suit
 
 // === Punkt 12: svararens andra bud i färgauktioner (fjärde färg krav), §6.6 ==
 
-export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSuit: Suit, rebid: ResponseResult): ResponseResult | null {
+export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSuit: Suit, rebid: ResponseResult, passed = false): ResponseResult | null {
   const p = hcp(hand)
   const len = lengths(hand)
   const y = responderSuit
@@ -916,7 +934,18 @@ export function responderRebidColorAuction(hand: Hand, opened: Suit, responderSu
     // (systemfel #2, frö 20261317: utan detta nåddes aldrig NMF och svararen
     // lämnades att passa den framtvingade fortsättningen).
     case '1NT (12–14)': {
-      // New Minor Forcing först (5-korts högfärg + 11+), annars sang-stegen.
+      // Ägarens struktur 2026-09-29 (felrapport #91): NMF = utgångskrav (13+
+      // rena hp, 5-korts högfärg). Inbjudningshanden 11–12: sexkorts högfärg →
+      // 4M direkt (1NT lovar 2+ kort), annars 2NT. Passad hand: nya lågfärgen
+      // är naturlig (5-4, 8+, ej krav).
+      if (yMaj && len[y] >= 6 && p >= 11 && p < NMF_GAME_FORCE_HP) {
+        return { call: `4${BID[y]}`, rule: 'utgång', explanation: `6+ ${SYM[y]} och 11–12 hp mot partnerns 1NT (lovar 2+ ${SYM[y]}) → 4${SYM[y]} direkt.` }
+      }
+      if (passed) {
+        const natural = passedHandNewMinor(hand, opened, y, p)
+        if (natural) return natural
+        return ntLadder()
+      }
       const nmf = newMinorForcingBid(hand, opened, y, p)
       if (nmf) return nmf
       return ntLadder()

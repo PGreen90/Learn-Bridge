@@ -13,6 +13,7 @@ import {
   seatToAct,
 } from '../../lib/engine/auction-live'
 import { interpretCall } from '../../lib/engine/auction-interpret'
+import { EGET_BUD } from '../../lib/engine/auction-meaning'
 import { decideCallTraced } from '../../lib/engine/auction-live'
 import { vardAttTanka } from '../../lib/engine/resonemang'
 import { dealRandom, mulberry32 } from '../../lib/engine/deal'
@@ -220,7 +221,7 @@ export function useGame(daily = false, initial?: Game | null, dailyNr?: number, 
         // Tolkningslagret läser auktionen och ger en bästa-möjliga förklaring.
         const interp = interpretCall([...g.history, { seat: 'S', bid }], g.history.length)
         const tag = interp.confidence === 'gissning' ? ' (osäker tolkning)' : ''
-        call = { seat: 'S', bid, rule: 'eget bud', explanation: `Eget bud. ${interp.text}${tag}` }
+        call = { seat: 'S', bid, rule: EGET_BUD, explanation: `Eget bud. ${interp.text}${tag}` }
       }
       return { ...g, history: [...g.history, call] }
     })
