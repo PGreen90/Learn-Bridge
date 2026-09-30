@@ -55,6 +55,7 @@ const ALL_ENGINE_RULES: string[] = [
   // betydelsesvepet, motorbytet etapp 1, 2026-09-04).
   'New Minor Forcing', 'svar på New Minor Forcing', 'placering efter NMF',
   'ny lågfärg (passad hand)', 'preferens (passad hands lågfärg)',
+  'inklivaren tävlar till fiten (lagen om totala stick)',
   '2NT-checkback', 'svar på 2NT-checkback', 'placering efter 2NT-checkback',
   '2NT-återbud (5-3-jakt)', 'svar på 2NT-återbud (5-3-jakt)',
   'svar på fjärde färg', 'fjärde färg: placerar utgång', 'fjärde färg: utgång i fit',

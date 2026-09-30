@@ -19,7 +19,7 @@
 
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { parseContractBid, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
+import { isGameOrHigher, parseContractBid, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { bidValue, cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { dummyPoints, pointsWithFloor } from './evaluation'
 import { hcp, lengths } from './hand'
@@ -967,6 +967,42 @@ export function overcallerAfterSimpleRaise(hand: Hand, f: AuctionFacts): Kunskap
     }
   }
   return { call: 'P', rule: 'inklivaren passar höjningen', explanation: `Under 16 totalpoäng mittemot partnerns enkla höjning (6–9) → pass.` }
+}
+
+/**
+ * INKLIVAREN NÄR ÖPPNAREN BJUDER VIDARE EFTER PARTNERNS ENKLA HÖJNING
+ * (felrapport #93, ägarbeslut 2026-09-30): 1♣–(1♥)–2♣–(2♥)–2♠–?. Höjningen
+ * lovar 3+ stöd, så med SEXKORTS inklivsfärg har vi nio trumf → tävla 3M (lagen
+ * om totala stick, ej krav) — "Syd får inte passa". 18+ totalpoäng → 4M som i
+ * det ostörda fallet. Femkorts under 18 → pass (åtta trumf räcker inte till
+ * 3-läget). Ligger deras bud över 3M står bara 4M (18+) till buds.
+ */
+export function overcallerCompetesAfterRaise(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const t = overcallerSecondTurn(f)
+  if (!t) return null
+  const mine = parseContractBid(t.mine.bid)!
+  const adv = parseContractBid(t.adv.bid)!
+  if (mine.level !== 1 || !isMajorStrain(mine.strain)) return null
+  if (adv.strain !== mine.strain || adv.level !== 2) return null
+  const their = f.lastContract
+  if (!their || side(their.seat) === side(f.seat) || f.history.indexOf(their) < f.history.indexOf(t.adv)) return null
+  if (f.lastNonPass !== their) return null // deras X efter höjningen är ett annat läge
+  if (isGameOrHigher(their.bid as Bid)) return null
+  const M = mine.strain
+  const legal = legalCalls(f.history, f.seat)
+  const tp = pointsWithFloor(hand, null, 'starting').points
+  const game = `4${M}` as Bid
+  if (tp >= 18 && legal.includes(game)) {
+    return { call: game, rule: 'inklivaren till utgång', explanation: `18+ totalpoäng mittemot partnerns höjning (3+ stöd) → ${prettyBid(game)} trots deras ${prettyBid(their.bid as Bid)}.` }
+  }
+  const compete = `3${M}` as Bid
+  if (lengths(hand)[SUIT_OF_LETTER[M]] >= 6 && legal.includes(compete)) {
+    return {
+      call: compete, rule: 'inklivaren tävlar till fiten (lagen om totala stick)',
+      explanation: `Partnerns höjning lovar 3+ ${SWE_SYM[M]} och jag har sex → nio trumf: tävlar ${prettyBid(compete)} över deras ${prettyBid(their.bid as Bid)} (lagen om totala stick, ej krav).`,
+    }
+  }
+  return { call: 'P', rule: 'inklivaren passar höjningen', explanation: `Bara fem ${SWE_SYM[M]} (åtta trumf) och under 18 totalpoäng mot deras ${prettyBid(their.bid as Bid)} → pass.` }
 }
 
 /**

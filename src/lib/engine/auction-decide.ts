@@ -163,7 +163,7 @@ import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
+import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
@@ -462,6 +462,17 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   const respMajor = response.call === '1H' ? 'hearts' : response.call === '1S' ? 'spades' : null
   if (rebid.rule === 'hopphöjning (inbjudan)' && respMajor && rebidSuit === respMajor && trump === respMajor) {
     return { ctx: { partnerMin: 16, inviteCall: `5${LETTER[respMajor]}` } }
+  }
+
+  // Hoppskift (19+, utgångskrav) + svararens EGEN 1-lägeshögfärg som trumf
+  // (felrapport #94, ägarbeslut 2026-09-30): "kan vi spela 7NT, vad saknas?" —
+  // med lång egen färg och 33+ mot visade 19 ställs essfrågan direkt. Ingen
+  // inbjudan under 33 (då placeras utgången i egen färg som förr); partnern
+  // läser ett naket 4NT i hoppskiftets färg (§5b beslut 14) — kaptenen placerar
+  // ändå i sin egen färg via `captainIntent`, och med dessa poäng spelar
+  // frågefärgen ingen roll (ägaren).
+  if (rebid.rule === 'hoppskift' && respSuit && isMajorSuit(respSuit) && trump === respSuit && response.call.startsWith('1')) {
+    return { ctx: { partnerMin: 19, gameForcing: true } }
   }
 
   // Reverse (16+) / hoppskift (19+): trumf = öppnarens andra eller första färg.
@@ -781,6 +792,14 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
     // §5b beslut 14 (2026-09-06): ett naket 4NT frågar i den SENAST bjudna färgen
     // (reversens/hoppskiftets); med fit bara i öppnarens FÖRSTA färg visas
     // slamintresset med inbjudningsbudet (`inviteOnly` i kontexten).
+    // Felrapport #94 (ägarbeslut 2026-09-30): 6+ i EGEN högfärg och slamzon
+    // (hp + visade 19 ≥ 33) → essfrågan direkt med egen färg som trumf.
+    const rs = suitOf(response.call)
+    const ownMajor = rs && isMajorSuit(rs) && response.call.startsWith('1') && rl[rs] >= 6 ? rs : null
+    if (rebid.rule === 'hoppskift' && ownMajor && hcp(hand) + 19 >= 33) {
+      const slam = slamStep(ownMajor)
+      if (slam) return slam
+    }
     const firstSuitMin = rebid.rule === 'reverse' || openerSuit === 'hearts' || openerSuit === 'spades' ? 3 : 4
     const reverseMajorFit = rebid.rule === 'reverse' && secondSuit !== null && isMajorSuit(secondSuit) && rl[secondSuit] >= 4
     const trumpC = reverseMajorFit
@@ -2010,6 +2029,8 @@ const TABELL: Row[] = [
         overcallerAnswersFitJump(hand, facts) ??
         // Felrapport #85/#86: efter advancerns enkla höjning (försök/invit/utgång/pass)
         overcallerAfterSimpleRaise(hand, facts) ??
+        // Felrapport #93: öppnaren bjöd vidare efter höjningen → tävla 3M med sex kort
+        overcallerCompetesAfterRaise(hand, facts) ??
         overcallerAfterTryAnswer(hand, facts) ??
         overcallerRaisesAdvance(hand, facts) ??
         overcallerAnswersAdvance(hand, facts) ??
