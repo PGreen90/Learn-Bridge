@@ -1101,6 +1101,11 @@ function shouldDrawTrumps(state: PlayState, seat: Seat): boolean {
   for (const c of playedCards(state)) if (c.suit === trump) seen.add(c.rank)
   const unseen = ALL_RANKS.filter((r) => !seen.has(r))
   if (unseen.length === 0) return false // trumfen är redan dragen
+  // Speldiagnosen runda 7 (frö 20260786, 2026-09-30): utan TRUMFMAJORITET dras
+  // ingen trumf — med lika många eller färre trumf än de osedda är den långa
+  // trumfen deras, och varje varv kostar ett eget trumfstick (Nord ♠AT4 mot Syd
+  // ♠K53 = sex trumf mot sju: styrkeprovet på rangerna sa "vinner", DD −4).
+  if (ours.length <= unseen.length) return false
   const o = ours.map((c) => c.rank).sort((a, b) => rankVal(b) - rankVal(a))
   const p = [...unseen].sort((a, b) => rankVal(b) - rankVal(a))
   let wins = 0
@@ -1180,6 +1185,42 @@ function declarerThirdHandSuitCard(
     }
   }
   return best // null = inget kort strikt bättre än billigaste vinnaren
+}
+
+/**
+ * HOLDUP i försvaret (speldiagnosen runda 7, frö 20260901, 2026-09-30): spel-
+ * föraren angriper träkarlens LÅNGA färg (4+ kort med kungen synlig på bordet)
+ * och bordet har INGEN synlig sidoingång (ingen säker vinnare utanför färgen).
+ * Sitter jag bakom med esset och minst två hackor tar jag inte esset i färgens
+ * FÖRSTA varv — jag håller upp, så att esset faller på spelförarens sista kort
+ * i färgen och bordets längd dör utan ingång (Nord ♦A72 tog esset på ♦9 mot
+ * ♦KQJ654 och Öst kom in på bordet med ♦3: DD −3). Bara sang, bara när
+ * motståndarna ledde färgen och partnern inte redan vinner sticket. Ärlig
+ * information: bordets synliga kort, det ledda kortet och att färgen är ny.
+ */
+function defenderHoldUp(state: PlayState, seat: Seat, legal: Hand, led: Suit): CardChoice | null {
+  if (state.trump !== null) return null
+  if (side(seat) === side(state.contract.declarer)) return null
+  if (side(state.leader) === side(seat)) return null
+  const mine = legal.filter((c) => c.suit === led)
+  if (mine.length < 3 || !mine.some((c) => c.rank === 'A')) return null
+  const tidigare = state.completedTricks.flatMap((t) => t.cards.map((pc) => pc.card))
+  if (tidigare.some((c) => c.suit === led)) return null // bara färgens första varv
+  if (currentWinner(state.currentTrick, state.trump) === PARTNER_SEAT[seat]) return null
+  const dummy = dummyOf(state.contract)
+  const dummyCur = state.currentTrick.find((pc) => pc.seat === dummy)?.card
+  const dummyInSuit = state.hands[dummy].filter((c) => c.suit === led)
+  if (dummyInSuit.length + (dummyCur?.suit === led ? 1 : 0) < 4) return null
+  if (!dummyInSuit.some((c) => c.rank === 'K')) return null // färgen är bordets: kungen står kvar där
+  const visible = [...state.hands[seat], ...state.hands[dummy]]
+  const played = playedCards(state)
+  if (state.hands[dummy].some((c) => c.suit !== led && isSureWinner(c, visible, played))) return null // sidoingång finns
+  return {
+    card: lowest(mine),
+    reason:
+      'Jag håller upp esset: bordets långa färg saknar sidoingång, så jag tar esset först när ' +
+      'spelföraren spelat sitt sista kort i färgen – då dör bordets längd.',
+  }
 }
 
 /**
@@ -1483,6 +1524,10 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
   // Tredje/fjärde hand: vinn billigast möjligt om något slår, annars kasta lågt.
   const winners = legal.filter((c) => beats(c, bestCard, led, state.trump))
   if (winners.length > 0) {
+    // Holdup (speldiagnosen runda 7): försvaret tar inte esset i första varvet av
+    // bordets långa färg utan sidoingång — se `defenderHoldUp`.
+    const holdUp = defenderHoldUp(state, seat, legal, led)
+    if (holdUp) return holdUp
     // Träkarlen spelar EFTER oss (motspel, tredje hand) → öppen information:
     // "billigast" måste hålla även mot bordets bästa svar, annars går bordets
     // hacka över vår (felrapport #1: V slog ♥3 med ♥4, bordets ♥5 vann).

@@ -1,5 +1,17 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Speldiagnosen runda 7: trumfmajoritet + holdup (2026-09-30, LIVE 2026-10-01)
+- **Lagat:** (1) trumf dras bara med fler trumf än de osedda
+  (`shouldDrawTrumps`, frö 20260786: sex mot sju drog trumf, −4); (2) försvaret
+  håller upp esset första varvet mot bordets 4+-färg med kungen och utan synlig
+  sidoingång, bara i sang (`defenderHoldUp`, frö 20260901, −3). Mätpunkt S7 i
+  `docs/speldiagnos.md`; facit `play-bot-trumfmajoritet.test.ts`, `play-bot-holdup.test.ts`.
+- **Bevaka:** (1) när trumf inte dras faller spelföraren till "längsta färg"-
+  ledningen, som är svag (20260818 −1) — fynd B; (2) holdup-regeln kryper bara
+  första varvet: mot en 3-kortsfärg hos spelföraren kan esset behöva hållas två
+  gånger (räkna partnerns markering — inte byggt); (3) fynd D: försvaret
+  fortsätter utspelsfärgen in i spelförarens visade längd (20260907 −5) — ägarfråga.
+
 ## Monte-Carlo röstar bara på GEMENSAMMA lägen (2026-09-28, felrapport #89)
 - **Lagat:** Nord (♦K65) gick över partnerns redan vinnande ♦Q som fjärde hand i
   1NT (bricka 10) — tumreglerna säger "partnern vinner, kasta lågt", men MC-lagret

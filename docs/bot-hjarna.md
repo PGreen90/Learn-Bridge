@@ -42,6 +42,35 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
 
 Se `docs/status.md` för detaljer.
 
+## Speldiagnosen runda 7 (2026-09-30 → mätpunkt S7): två smala fixar, LIVE 2026-10-01
+
+Rundan på dagens motor (rapporten `revisor-output/speldiagnos-rapport-2026-09-30.md`)
+byggde två kandidater facit-först och mätte dem EN i taget (S6-lärdomen):
+
+1. **Fix A — trumf dras bara med trumfmajoritet (`shouldDrawTrumps`, frö 20260786):**
+   styrkeprovet jämförde rangerna men glömde längden — Nord ♠AT4 mot Syd ♠K53
+   (sex trumf mot sju, en DONT-rättelse) drog trumf och tappade fyra stick. Nu
+   krävs fler trumf än de osedda. Mätt: 20260786 +1 stick, 20260818 −1 (där
+   råkade dragningen fungera och reservledningen "längsta färg" ur ♣T62 kostade
+   i stället) → netto ±0 på 200 givar. Behålls som bridgemässigt rätt; det
+   svaga reservvalet är **fynd B** (nästa runda). Facit
+   `play-bot-trumfmajoritet.test.ts`.
+2. **Fix F — holdup mot bordets långa färg utan ingång (`defenderHoldUp`, frö
+   20260901):** försvararen bakom bordets ♦KQJ654 (ingen sidohonnör synlig) tog
+   ♦A på första varvet; spelföraren kom in på bordet med sin andra ruter. Regeln
+   (bara sang, motståndarna ledde, färgens första varv, A + två hackor, bordet 4+
+   med kungen, ingen säker vinnare utanför färgen på bordet, partnern vinner inte
+   redan) kryper. Mätt: bara fröet ändrat, 12 → 9 stick. Facit
+   `play-bot-holdup.test.ts` (DDS-låst mekanismslut + motexempel med ingång).
+
+**Fynd B — spelförarsidans färgval ser bara den EGNA handen (frön 20260836 −4,
+20260852 −3, 20260898 −3):** cash ur kort hand blockerar parets långfärg, träkarlen
+leder sin egen sekvens fast spelföraren har åtta ruter, `establishLongSuit`s
+guard 3 spärrar färger som rullar utan att släppa ledningen, och `suitTricks`
+övervärderar svaga innehav (♠K ur ♠KT3 in i ♠AQ). Egen runda: DD-mätning per
+alternativ i varje frö FÖRE bygge. Fynd D (försvaret fortsätter utspelsfärgen
+in i spelförarens visade längd, 20260907 −5) är en ägarfråga om doktrinen §8.
+
 ## Speldiagnosen runda 6 (2026-09-01 → mätpunkt S6): en fix behållen, en förkastad
 
 Granskningsrundan på S5-koden (rapporten
