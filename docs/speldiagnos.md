@@ -334,7 +334,7 @@ enklast `DUMP_SPEL=<frö>` per giv.
   till en egen runda med DD-mätning per alternativ (S6-lärdomen). Fynd D
   (försvaret fortsätter utspelsfärgen in i visad längd, 20260907) = ägarfråga.
 
-### S8 — fynd B: parets färg i sang, byggd på DD-mätning per alternativ (2026-10-01)
+### S8 — fynd B: parets färg i sang, byggd på DD-mätning per alternativ (2026-10-01, LIVE `889fac3`)
 
 Samma 200 givar och kommando som S0 (OUT-namn `speldiagnos-s8c-<a|b|c|d>.json`;
 jämförelsebas `s7F` = läget efter S7). Fixdetaljerna: `docs/bot-hjarna.md` "runda 8".

@@ -10,13 +10,13 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — Speldiagnos fynd B "parets färg i sang" BYGGD & MÄTT 2026-10-01 (S8), väntar ägarens PCD
+### 🔵 NU — tomt (fynd B "parets färg i sang" LIVE `889fac3` 2026-10-01, S8) — nästa: NÄST 0, sedan 1
 **Mätpunkt S8 i `docs/speldiagnos.md`, detalj `docs/bot-hjarna.md` "runda 8".** I sang
 (9+ kort) leder spelförarsidan parets bästa färg ur BÅDA händerna + "höga kort från
 korta handen" (`declarerPartnershipSuitLead`, `declarerShortHandHonor`; facit
 `play-bot-parets-farg.test.ts`). Byggd på DD-mätning per alternativ (fynd B-riggen
 `fyndb.probe.test.ts` + `fyndb-utvardera.probe.test.ts`): netto +18 stick åt spelföraren
-på 200 givar, tio givar sämre (−14). Lokalt, EJ pushat. Runda 7 (fix A + F) LIVE `55d8cd3`,
+på 200 givar, tio givar sämre (−14). Runda 7 (fix A + F) LIVE `55d8cd3`,
 Hål D steg 2 LIVE `fda630c`; fynd D (försvaret fortsätter utspelsfärgen) bevakas.
 **Hål D steg 2 = cue-höjningens fortsättning i högfärg** (ägarens struktur 2026-09-28,
 §7.8 c): 1M–(inkliv)–cue → öppnaren ≤12 3M · 14–15 bal.+stopp 3NT · 13+ billigaste

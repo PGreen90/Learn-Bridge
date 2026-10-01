@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-01 (Speldiagnos fynd B — parets färg i sang, mätpunkt S8)
+## 2026-10-01 (Speldiagnos fynd B — parets färg i sang, mätpunkt S8, LIVE `889fac3`)
 
 **Vad:** spelförarsidan valde färg ur den hand som råkade vara inne (♣4 ur ♣8542
 fast paret hade ♥KQ962 mot ♥54; bordets ♣K fast spelföraren hade åtta ruter; ♠K
