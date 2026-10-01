@@ -315,6 +315,29 @@ describe('felrapport #17 – avblockning: led inte honnör in i medspelarens sin
       hand: east, seat: 'E', declarer: 'E', leader: 'E',
       otherHands: { W: dummy }, completedTricks: [doneTrick('E')],
     })
+    // Fynd B (2026-10-01): med 10 kort kvar leder spelföraren nu PARETS färg i
+    // sang — hjärtern (♥J984 mot ♥AKQT62) rullar tio stick — och "högt från korta
+    // handen" (♥J) så färgen inte blockeras. Spadern rörs inte; #17-låset på själva
+    // avblockeringen ligger i 8-kortsläget nedan (där den gamla vägen gäller).
+    const card = botCard(st, 'E')
+    expect(card).toEqual(C('hearts', 'J'))
+  })
+
+  it('8 kort kvar (under parets-färg-fönstret): ♠KQ53 leds LÅGT mot singel-♠A, ej ♠K', () => {
+    const east: Hand = [
+      C('spades', 'K'), C('spades', 'Q'), C('spades', '5'), C('spades', '3'),
+      C('hearts', 'J'), C('hearts', '9'),
+      C('diamonds', '7'), C('clubs', '10'),
+    ]
+    const dummy: Hand = [
+      C('spades', 'A'),
+      C('hearts', 'Q'), C('hearts', '10'), C('hearts', '6'), C('hearts', '2'),
+      C('diamonds', '8'), C('clubs', '9'), C('clubs', '8'),
+    ]
+    const st = state({
+      hand: east, seat: 'E', declarer: 'E', leader: 'E',
+      otherHands: { W: dummy }, completedTricks: [doneTrick('E')],
+    })
     const card = botCard(st, 'E')
     expect(card.suit).toBe('spades')
     expect(card.rank).toBe('3') // lägsta spadern – aldrig K/Q in i singel-essen

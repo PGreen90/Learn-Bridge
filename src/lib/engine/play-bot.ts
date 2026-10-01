@@ -637,6 +637,96 @@ function suitTricks(ourDesc: Rank[], oppDesc: Rank[]): number {
 }
 
 /**
+ * PARETS FÄRG I SANG (speldiagnosen fynd B, 2026-10-01; docs/bot-hjarna.md
+ * "runda 8"). Spelförarsidan SER båda sina händer, men ledningsvalet såg bara
+ * handen som råkade vara inne: reservledningen "längsta färg" ledde ♣4 ur ♣8542
+ * mot bordets ♣T6 fast paret hade ♥KQ962 mot ♥54 (frö 20260836, −4), bordet
+ * ledde sin egen ♣KQJ-sekvens fast spelföraren satt med åtta ruter (20260852,
+ * −3), och plan #32 valde ♠K ur ♠KT3 in i ♠AQ (20260898, −3).
+ *
+ * Regeln: i SANG, på lead i tumregel-fönstret (9+ kort), värderas varje färg den
+ * ledande handen kan leda ur BÅDA händerna — beräknade stick (`suitTricks` mot
+ * de osedda korten), längd och utvecklingsvinst (stick utöver de omedelbara
+ * säkra vinnarna). Har den bästa färgen minst ett stick att utveckla leds DEN,
+ * med standardteknik för kortet: toppen av en sekvens, högt från korta handen
+ * (avblockering), annars lågt mot partnerns honnörer. Finns inget att utveckla
+ * står de gamla reglerna kvar (cash/sekvens/reserv).
+ *
+ * Byggd på DD-mätning per alternativ (S6-lärdomen), inte på hypotes: över
+ * S-seriens 200 givar kostade spelförarsidans 141 ledningsval i sang 50 stick
+ * med de gamla reglerna och 25 med den här (`fyndb.probe.test.ts` +
+ * `fyndb-utvardera.probe.test.ts`). I TRUMFkontrakt var samma regel SÄMRE än
+ * dagens (89 → 120) — därför bara sang. Ärlig information: egen hand,
+ * träkarlen och spelade kort.
+ */
+function declarerPartnershipSuitLead(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+  if (state.trump !== null) return null
+  if (side(seat) !== side(state.contract.declarer)) return null
+  if (state.currentTrick.length !== 0) return null
+  if (state.hands[seat].length <= 8) return null // mätt i tumregel-fönstret; ≤8 kort äger Monte-Carlo
+  const dummy = dummyOf(state.contract)
+  const partner = seat === dummy ? state.contract.declarer : dummy
+  const ours = [...state.hands[seat], ...state.hands[partner]]
+  const played = playedCards(state)
+  const suitsAll: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+  let best: { suit: Suit; v: number; gain: number } | null = null
+  for (const s of suitsAll) {
+    if (!legal.some((c) => c.suit === s)) continue
+    const inSuit = ours.filter((c) => c.suit === s)
+    const seen = new Set<Rank>([...inSuit, ...played.filter((c) => c.suit === s)].map((c) => c.rank))
+    const oppDesc = RANK_LOW_TO_HIGH.filter((r) => !seen.has(r)).sort((a, b) => rankVal(b) - rankVal(a))
+    const ourDesc = inSuit.map((c) => c.rank).sort((a, b) => rankVal(b) - rankVal(a))
+    const tricks = suitTricks(ourDesc, oppDesc)
+    const sure = inSuit.filter((c) => isSureWinner(c, ours, played)).length
+    const gain = tricks - sure
+    const v = tricks + 0.25 * inSuit.length + 0.5 * gain
+    if (!best || v > best.v) best = { suit: s, v, gain }
+  }
+  if (!best || best.gain < 1) return null
+  const mine = legal.filter((c) => c.suit === best.suit)
+  const his = state.hands[partner].filter((c) => c.suit === best.suit)
+  const md = mine.map((c) => c.rank).sort((a, b) => rankVal(b) - rankVal(a))
+  const topMine = rankVal(md[0])
+  const topHis = his.length > 0 ? Math.max(...his.map((c) => rankVal(c.rank))) : -1
+  let card: Card
+  let hur: string
+  if (md.length >= 2 && rankVal(md[0]) - rankVal(md[1]) === 1 && topMine >= rankVal('10')) {
+    card = highest(mine)
+    hur = 'toppen av min sekvens'
+  } else if (mine.length < his.length && topMine >= rankVal('10') && topHis > topMine) {
+    card = highest(mine)
+    hur = 'högt från den korta handen, så färgen inte blockeras'
+  } else if (topHis > topMine) {
+    card = lowest(mine)
+    hur = 'lågt mot partnerns honnörer'
+  } else if (mine.length > his.length && his.some((c) => rankVal(c.rank) >= rankVal('10'))) {
+    // Jag har färgens topp i den LÅNGA handen och partnern (korta handen) har en
+    // honnör: höga kort från korta handen först — lågt mot den, toppen sparas
+    // som ingång till längden (frö 20260900: ♠A ur ♠A8742 mot ♠KT cashades
+    // först, sedan ♦A och ♣A — ingångarna brann, −3).
+    card = lowest(mine)
+    hur = 'lågt mot den korta handens honnör – höga kort från korta handen först'
+  } else {
+    const sureMine = mine.filter((c) => isSureWinner(c, ours, played))
+    card = sureMine.length > 0 ? highest(sureMine) : lowest(mine)
+    hur = sureMine.length > 0 ? 'min säkra vinnare i färgen' : 'lågt för att knäcka deras spärr'
+  }
+  // Avblockeringen (felrapport #17) gäller även här: aldrig en honnör in i
+  // partnerns högre singel — då leds lågt och singeln vinner sticket ändå.
+  const avblockat = unblockLead(state, seat, card)
+  if (avblockat !== card) {
+    card = avblockat
+    hur = 'lågt, så min honnör inte krossas under partnerns singel'
+  }
+  return {
+    card,
+    reason:
+      'Jag ser båda våra händer och leder parets bästa färg – den som ger flest stick ' +
+      `att utveckla tillsammans, inte bara min egen längsta: ${hur}.`,
+  }
+}
+
+/**
  * Spelförarplan FÖRE cashandet (felrapport #32, docs/bot-hjarna.md
  * "förberedelsen vid 9–13 kort"): är spelförarsidan inne och har en LÅNG färg som
  * behöver etableras – en near-solid längd där motståndarna håller en spärr (t.ex.
@@ -923,6 +1013,39 @@ function defenderThirdHandHigh(state: PlayState, seat: Seat, legal: Hand, led: S
     }
   }
   return null
+}
+
+/**
+ * KORTA HANDEN LÄGGER SIN HONNÖR (speldiagnosen fynd B, 2026-10-01): andra
+ * halvan av "höga kort från korta handen först". När partnern på spelförarsidan
+ * leder en HACKA i sang mot min kortare hand och jag har en säker vinnare i
+ * färgen, tar jag sticket med den — i stället för att krypa bakom partnerns
+ * hacka och låta fjärde hand gå över (frö 20260867: Nord ledde ♣7 ur ♣AJT87
+ * mot bordets ♣K3, bordet kröp med ♣3 "partnern vinner redan" och Väst tog
+ * sticket med ♣Q). Bara sang, tredje hand, tumregel-fönstret (9+ kort) — samma
+ * ram som `declarerPartnershipSuitLead`, som leder hackan.
+ */
+function declarerShortHandHonor(state: PlayState, seat: Seat, legal: Hand, led: Suit): CardChoice | null {
+  if (state.trump !== null) return null
+  if (side(seat) !== side(state.contract.declarer)) return null
+  if (state.currentTrick.length !== 2) return null
+  if (state.hands[seat].length <= 8) return null
+  const partner = PARTNER_SEAT[seat]
+  const first = state.currentTrick[0]
+  if (first.seat !== partner || rankVal(first.card.rank) >= rankVal('10')) return null // partnern ledde en hacka
+  const mine = legal.filter((c) => c.suit === led)
+  if (mine.length === 0) return null
+  const his = state.hands[partner].filter((c) => c.suit === led)
+  if (mine.length > his.length) return null // jag är den LÅNGA handen — då gäller de vanliga reglerna
+  const ours = [...state.hands[seat], ...state.hands[partner]]
+  const sure = mine.filter((c) => isSureWinner(c, ours, playedCards(state)))
+  if (sure.length === 0) return null
+  return {
+    card: lowest(sure),
+    reason:
+      'Partnern ledde lågt mot min korta hand – jag tar sticket med min säkra vinnare ' +
+      '(höga kort från korta handen först), så färgen kan rullas från den långa handen sedan.',
+  }
 }
 
 /**
@@ -1242,6 +1365,10 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     }
     // Spelförarsidan: etablera en lång färg (knäck motståndarnas spärr) FÖRE du
     // cashar sidovinnarna – annars bränns stoppen/entréerna (felrapport #32).
+    // Fynd B (2026-10-01): i sang väljs färgen ur BÅDA händerna när parets bästa
+    // färg har stick att utveckla — före plan #32, cash och reservledningen.
+    const parets = declarerPartnershipSuitLead(state, seat, legal)
+    if (parets) return parets
     const establish = establishLongSuit(state, seat, legal)
     if (establish) return establish
 
@@ -1351,6 +1478,9 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // …MEN spelförarsidan gömmer sig inte bakom partnerns SLAGBARA kort: kan en
     // motståndare som spelar efter mig gå över, går jag själv upp och vinner
     // billigast (felrapport #48).
+    // Fynd B: partnern ledde en hacka mot min korta hand i sang → säkra vinnaren läggs.
+    const kortHand = declarerShortHandHonor(state, seat, legal, led)
+    if (kortHand) return kortHand
     const winOver = winOverBeatablePartner(state, seat, legal, led, bestCard)
     if (winOver) return winOver
     // Försvararen ser TRÄKARLEN bakom sig och kryper inte ett stick som träkarlen

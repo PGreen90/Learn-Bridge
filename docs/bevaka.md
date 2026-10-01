@@ -1,5 +1,17 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Parets färg i sang — spelförarsidans ledningsval (2026-10-01, speldiagnos fynd B, S8)
+- **Lagat:** i sang (9+ kort) leder spelförarsidan den färg som ger PARET flest
+  stick att utveckla, inte den egna handens längsta/högsta (`declarerPartnershipSuitLead`),
+  med "höga kort från korta handen" i båda led (`declarerShortHandHonor`). Netto
+  +18 stick på S-seriens 200 givar. Facit `play-bot-parets-farg.test.ts`.
+- **Bevaka:** (1) spelföraren i sang kan nu släppa ledningen för att sätta upp en
+  färg medan motståndarna har en egen färg att ta (regeln räknar inte stopp —
+  mätt netto plus, men enskilda givar går åt fel håll: 20260752, 20260920);
+  (2) tredje hand på spelförarsidan vinner ibland för billigt efter en riktig
+  ledning mot honnörerna (20260752 ♠6, 20260826 ♣T); (3) trumfkontraktens
+  ledningsval är orörda (störst kvarvarande läcka, 89 stick i mätningen).
+
 ## Speldiagnosen runda 7: trumfmajoritet + holdup (2026-09-30, LIVE 2026-10-01)
 - **Lagat:** (1) trumf dras bara med fler trumf än de osedda
   (`shouldDrawTrumps`, frö 20260786: sex mot sju drog trumf, −4); (2) försvaret

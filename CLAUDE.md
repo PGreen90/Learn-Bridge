@@ -10,13 +10,14 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt (speldiagnos runda 7 LIVE 2026-10-01) — nästa: NÄST 0, sedan fynd B
-**Rapport `revisor-output/speldiagnos-rapport-2026-09-30.md`, mätpunkt S7 i
-`docs/speldiagnos.md`, detalj `docs/bot-hjarna.md` "runda 7".** Ägarbeslut 2026-10-01
-("litar på ditt omdöme"): fix A trumfmajoritet (`shouldDrawTrumps`, netto ±0) + fix F
-holdup mot bordets långa färg utan ingång (`defenderHoldUp`, 20260901 12→9) LIVE;
-fynd B (spelförarsidans färgval ur BÅDA händerna, −4/−3/−3) = NÄST 1; fynd D (försvaret
-fortsätter utspelsfärgen in i visad längd) bevakas. Hål D steg 2 LIVE `fda630c` 09-30.
+### 🔵 NU — Speldiagnos fynd B "parets färg i sang" BYGGD & MÄTT 2026-10-01 (S8), väntar ägarens PCD
+**Mätpunkt S8 i `docs/speldiagnos.md`, detalj `docs/bot-hjarna.md` "runda 8".** I sang
+(9+ kort) leder spelförarsidan parets bästa färg ur BÅDA händerna + "höga kort från
+korta handen" (`declarerPartnershipSuitLead`, `declarerShortHandHonor`; facit
+`play-bot-parets-farg.test.ts`). Byggd på DD-mätning per alternativ (fynd B-riggen
+`fyndb.probe.test.ts` + `fyndb-utvardera.probe.test.ts`): netto +18 stick åt spelföraren
+på 200 givar, tio givar sämre (−14). Lokalt, EJ pushat. Runda 7 (fix A + F) LIVE `55d8cd3`,
+Hål D steg 2 LIVE `fda630c`; fynd D (försvaret fortsätter utspelsfärgen) bevakas.
 **Hål D steg 2 = cue-höjningens fortsättning i högfärg** (ägarens struktur 2026-09-28,
 §7.8 c): 1M–(inkliv)–cue → öppnaren ≤12 3M · 14–15 bal.+stopp 3NT · 13+ billigaste
 äkta kontrollbud (ess/singel/renons/KQ) · aldrig hopp till 4M över ett cue; svararen
@@ -89,10 +90,10 @@ S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Speldiagnos fynd B — spelförarsidans färgval ur BÅDA händerna** (frön 20260836/
-   20260852/20260898; DD-mätning per alternativ FÖRE bygge; fynd G ingår).
-2. **Speldiagnosens nästa runda** — nya granskningsvarv på S6-koden; kandidat
-   ur runda 6: MC-på-få-lägen (`docs/bevaka.md`).
+1. **Spelförarsidans ledningsval i TRUMFkontrakt** — största kvarvarande läckan (89 stick
+   i fynd B-riggen, övre gräns 19); "parets färg" var sämre där, ny idé + offline-mätning.
+2. **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: tredje hand
+   vinner för billigt på spelförarsidan, MC-på-få-lägen (`docs/bevaka.md`).
 3. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
    (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
 
