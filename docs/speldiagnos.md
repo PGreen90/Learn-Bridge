@@ -306,6 +306,33 @@ fixdetaljerna: `docs/bot-hjarna.md` "runda 6".
   attribueras — mät en i taget (omkörningen ovan gjordes om med bara fix 2).
 - Bevakning ur rundan: MC-beslut på få samplade lägen (`docs/bevaka.md`).
 
+### S7 — runda 7 på dagens motor: två smala fixar byggda, mätta & LIVE (2026-09-30/10-01, ägarbeslut "litar på ditt omdöme")
+
+Samma 200 givar och kommando som S0 (OUT-namn `speldiagnos-s7-<a|b|c|d>.json`
+= baslinjen, `s7A` = med fix A, `s7F` = med fix A + F). Rundans rapport:
+`revisor-output/speldiagnos-rapport-2026-09-30.md`; fixdetaljerna
+`docs/bot-hjarna.md` "runda 7". Jämförelse: `node <skript>` över JSON-filerna —
+enklast `DUMP_SPEL=<frö>` per giv.
+
+- **Baslinjen mot S6:** bud 42/200 rätt, snitt 248 p (S6 35/200, 259 p) —
+  motorbytet + felrapport #77–#94 + Hål D steg 2. 103/200 givar har annat
+  kontrakt/spel än i S6, så råsiffrorna är inte jämförbara; på de 138 givar med
+  SAMMA kontrakt: förare 173 → 181, försvar 161 → 158, utspel 44 → 45 — spelet
+  i stort oförändrat. Rent spelade 28/200 (S6 23). Rå: förare 272, försvar 177,
+  utspel 66.
+- **Fix A "trumf dras bara med trumfmajoritet"** (`shouldDrawTrumps`, frö
+  20260786, facit `play-bot-trumfmajoritet.test.ts`): två givar ändrade —
+  20260786 4 → 5 stick, 20260818 7 → 6 (reservledningen "längsta färg" är
+  svag = fynd B). Netto ±0 (förare 273, försvar 178). Behålls som bridgemässigt
+  rätt om ägaren säger ja.
+- **Fix F "holdup mot bordets långa färg utan ingång"** (`defenderHoldUp`, frö
+  20260901, facit `play-bot-holdup.test.ts`): en giv ändrad — fröet, 12 → 9
+  stick (DD 8). Förare 274, försvar 176. Inga andra givar rörda.
+- **Fynd B (spelförarsidans färgval ur den egna handen i stället för parets;
+  frön 20260836/20260852/20260898, −4/−3/−3)** är rundans största och lämnas
+  till en egen runda med DD-mätning per alternativ (S6-lärdomen). Fynd D
+  (försvaret fortsätter utspelsfärgen in i visad längd, 20260907) = ägarfråga.
+
 ## T-serien — tredje hand högt: generaliseringen (NU 2026-09-18)
 
 > Riggen mäter EN sak: försvararens kortval som **tredje hand** (partnern ledde,

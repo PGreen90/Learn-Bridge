@@ -10,6 +10,21 @@
 
 ---
 
+## 2026-09-30/10-01 (Speldiagnosens runda 7 — fix A + F LIVE, mätpunkt S7)
+
+**Vad:** rundan på dagens motor (rapport `revisor-output/speldiagnos-rapport-2026-09-30.md`):
+baslinjen visar budet klart bättre än S6 (42/200 rätt, 248 p mot 35/200, 259 p) och
+spelet oförändrat på givar med samma kontrakt. Två smala fixar byggdes facit-först och
+mättes EN i taget: **A** trumf dras bara med trumfmajoritet (`shouldDrawTrumps`, frö
+20260786 −4; netto ±0 på 200 givar — reservledningen är svag = fynd B) och **F** holdup
+mot bordets långa färg utan ingång (`defenderHoldUp`, frö 20260901, 12→9 stick, inga
+andra givar rörda). Facit `play-bot-trumfmajoritet.test.ts`, `play-bot-holdup.test.ts`.
+Ägaren frågade "är du säker?" — svaret: säker på bridgen i A och mekanismen i F, inte
+på nettovinsten av A; B (spelförarsidans färgval ur BÅDA händerna, −4/−3/−3) byggs INTE
+på hypotes utan väntar DD-mätning per alternativ (S6-lärdomen) → NÄST 1. Fynd D
+(försvaret fortsätter utspelsfärgen in i spelförarens visade längd) bevakas.
+Mätpunkt S7 i `docs/speldiagnos.md`, detalj `docs/bot-hjarna.md` "runda 7".
+
 ## 2026-09-30 (Hål D steg 2 — cue-höjningens fortsättning i högfärg, LIVE `fda630c`)
 
 **Vad:** ägarens struktur 2026-09-28 (omvärderingsfrågan läge 4/5) byggd som tabell-
