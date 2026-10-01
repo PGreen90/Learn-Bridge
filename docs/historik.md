@@ -10,6 +10,28 @@
 
 ---
 
+## 2026-10-01 (Speldiagnos fynd B — parets färg i sang, mätpunkt S8)
+
+**Vad:** spelförarsidan valde färg ur den hand som råkade vara inne (♣4 ur ♣8542
+fast paret hade ♥KQ962 mot ♥54; bordets ♣K fast spelföraren hade åtta ruter; ♠K
+ur ♠KT3 in i ♠AQ). Ny regel i SANG, 9+ kort: färgen väljs ur båda händerna när
+den har stick att utveckla, kortet med standardteknik, och korta handen lägger
+sin säkra vinnare (`declarerPartnershipSuitLead`, `declarerShortHandHonor`).
+
+**Metoden (ny, återanvändbar):** fynd B-riggen sparar varje ledningsval med
+ställning + DD per kort (`fyndb.probe.test.ts`), och kandidatregler räknas
+offline mot facit (`fyndb-utvardera.probe.test.ts`) före bygge. Den visade att
+den första hypotesen ("parets färg överallt") var SÄMRE än dagens bot (146 mot
+139 stick) — bättre i sang, sämre i trumf — och att ett eget fel i utvärderaren
+(motståndarnas kort i fel ordning) hade gett fel siffror om det inte upptäckts.
+
+**Mätt:** 536 ledningsval kostade 139 stick (övre gräns 24). Efter regeln:
+spelförarens faktiska stick netto +18 på 200 givar, flaggade förarstick
+274 → 263, tio givar sämre (−14). Tre iterationer mätta var för sig. Äldre facit
+ändrat: felrapport #17-ställningen (10 kort) leder nu ♥J i parets tiokortsfärg;
+#17-låset på avblockeringen ligger kvar i ett 8-kortsläge och gäller även inne i
+nya regeln. Trumfkontraktens ledningsval (89 stick) är orörda = nästa kandidat.
+
 ## 2026-09-30/10-01 (Speldiagnosens runda 7 — fix A + F LIVE, mätpunkt S7)
 
 **Vad:** rundan på dagens motor (rapport `revisor-output/speldiagnos-rapport-2026-09-30.md`):

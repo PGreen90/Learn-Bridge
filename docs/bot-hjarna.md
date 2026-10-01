@@ -42,6 +42,43 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
 
 Se `docs/status.md` för detaljer.
 
+## Speldiagnosen runda 8 (2026-10-01 → mätpunkt S8): parets färg i sang — fynd B
+
+**Metoden är nyheten:** i stället för att bygga på en hypotes (S6-lärdomen)
+sparades VARJE ledningsval på spelförarsidan i 9–13-kortsfönstret över S-seriens
+200 givar med hela ställningen och DD-poäng per lagligt kort
+(`fyndb.probe.test.ts`), och kandidatregler räknades mot det facit offline
+(`fyndb-utvardera.probe.test.ts`) innan något byggdes in. Första kandidaten
+("parets färg överallt") visade sig SÄMRE än dagens bot — precis det en
+hypotes-byggd regel hade missat. Uppdelningen sang/trumf gav beskedet: bättre i
+sang, sämre i trumf.
+
+**Regeln (`play-bot.ts`):**
+1. `declarerPartnershipSuitLead` — sang, spelförarsidan på lead, 9+ kort: varje
+   färg den ledande handen har värderas ur BÅDA händerna (`suitTricks` mot de
+   osedda korten + längd + utvecklingsvinst = stick utöver de omedelbara säkra
+   vinnarna). Har bästa färgen ≥ 1 stick att utveckla leds den, före plan #32,
+   cash och reservledningen; annars står de gamla reglerna kvar. Kortet: toppen
+   av en sekvens · högt från korta handen (avblockering) · lågt mot partnerns
+   honnörer · toppen i den LÅNGA handen och honnör i den korta → lågt mot den ·
+   annars säkra vinnaren. `unblockLead` (felrapport #17) gäller även här.
+2. `declarerShortHandHonor` — andra halvan av "höga kort från korta handen":
+   när partnern leder en hacka mot min kortare hand och jag har en säker vinnare
+   i färgen tas sticket med den (annars kröp tredje hand bakom hackan, frö
+   20260867).
+
+**Mätt (S8):** netto +18 stick åt spelföraren på 200 givar, flaggade förarstick
+274 → 263. Tre iterationer mättes var för sig (grundregeln +16 · med "lågt mot
+korta handens honnör" +17 · med korta handens honnör +18).
+
+**Kvar / ärliga begränsningar:** (a) trumfkontrakten är orörda — där kostar
+ledningsvalen 89 stick och "parets färg" gör det värre (man ska oftast dra
+trumf/casha); (b) stickvärderingen räknar längdstick även när ledningen måste
+släppas flera gånger (förlusttak prövat offline: sämre); (c) tio givar blev
+sämre (−14), bl.a. maskar som sprack (20260781) och tredje hand som vann för
+billigt efter en riktig ledning (20260752, 20260826) — det senare är ett eget
+fynd i `declarerThirdHandSuitCard`.
+
 ## Speldiagnosen runda 7 (2026-09-30 → mätpunkt S7): två smala fixar, LIVE 2026-10-01
 
 Rundan på dagens motor (rapporten `revisor-output/speldiagnos-rapport-2026-09-30.md`)

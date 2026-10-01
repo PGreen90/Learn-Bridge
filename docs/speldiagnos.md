@@ -34,6 +34,7 @@ på VISAD information, aldrig på facit) till hela kedjan:
 | `src/lib/engine/revisor-dds.ts` | `analyseSpel` — per-kort-DD-facit via bridge-dds `AnalysePlayPBN` (49 värden för en full giv: värde 0 = före utspelet, värde i = efter kort i; DDS analyserar t.o.m. kort 48, sista sticket är tvunget). Konventionerna låsta av `revisor-dds-analyse.test.ts`. |
 | `src/lib/engine/speldom.ts` | `bedomSpel` — attribuerar varje DD-rörelse till kort/säte/roll (utspel/spelförare/försvar); `helDom` — delar upp givens tapp i budtapp (par vs kontraktet vid DD-spel) och speltapp (DD-spel vs faktiskt spel). Facit: `speldom.test.ts`. |
 | `src/lib/engine/speldiagnos.ts` | Aggregatorn `korSpeldiagnos` + `formatSpeldiagnos`. Facit: `speldiagnos.test.ts`. |
+| `src/lib/engine/fyndb.probe.test.ts` + `fyndb-utvardera.probe.test.ts` | **Fynd B-riggen** (2026-10-01): varje ledningsval på spelförarsidan i tumregel-fönstret (9–13 kort) sparas med hela ställningen + DD-poäng per lagligt kort (`FYNDB=1 FYNDB_DEALS=50 FYNDB_OFFSET=<0/50/100/150> FYNDB_OUT=fyndb-<a/b/c/d>.json`); utvärderaren (`FYNDB_EVAL=1`) räknar vad KANDIDATREGLER hade kostat mot facit utan omspel — reglerna prövas offline FÖRE bygge. Se S8 nedan. |
 | `src/lib/engine/tredjehand.probe.test.ts` | **Tredje-hand-riggen** (NU 2026-09-18): varje försvarar-tredje-hand-läge jämförs mot DD-poängen för VARJE lagligt kort (`solveAllCards` i `revisor-dds.ts` runt `SolveBoardPBN`; konventionen låst i `revisor-dds-solve.test.ts`). Delar upp på tumregel-fönstret (9–13 kort) / MC (≤8), vem som spelar efter mig (dold spelförare / öppen träkarl), riktning (överspel/underspel) och hållmönster. Se T-serien nedan. |
 
 **Mätkörningen** (skriver JSON + läsbar rapport till `revisor-output/`, gitignorad):
@@ -332,6 +333,34 @@ enklast `DUMP_SPEL=<frö>` per giv.
   frön 20260836/20260852/20260898, −4/−3/−3)** är rundans största och lämnas
   till en egen runda med DD-mätning per alternativ (S6-lärdomen). Fynd D
   (försvaret fortsätter utspelsfärgen in i visad längd, 20260907) = ägarfråga.
+
+### S8 — fynd B: parets färg i sang, byggd på DD-mätning per alternativ (2026-10-01)
+
+Samma 200 givar och kommando som S0 (OUT-namn `speldiagnos-s8c-<a|b|c|d>.json`;
+jämförelsebas `s7F` = läget efter S7). Fixdetaljerna: `docs/bot-hjarna.md` "runda 8".
+
+- **Mätningen FÖRE bygget (fynd B-riggen, kommandon i riggtabellen ovan):**
+  spelförarsidans 536 ledningsval i 9–13-kortsfönstret kostade **139 stick**
+  mot DD — hälften av sidans alla flaggade stick — och oftast var FÄRGEN fel,
+  inte kortet (övre gräns med rätt färg: 24). Per skäl: "cashar säker vinnare"
+  60, reservledningen "längsta färg" 35, trumfdragningen 27, plan #32 12.
+- **Kandidaterna offline:** den naiva "parets färg överallt" var SÄMRE än
+  dagens bot (146 mot 139) — bättre i sang (50 → 24) men klart sämre i
+  trumfkontrakt (89 → 122). Vald: bara SANG och bara när parets bästa färg har
+  minst ett stick att utveckla (114). Förlusttak och förlustavdrag prövades och
+  gav inget.
+- **Fixen (`declarerPartnershipSuitLead` + `declarerShortHandHonor`, facit
+  `play-bot-parets-farg.test.ts`):** färgen väljs ur BÅDA händerna; kortet med
+  standardteknik (toppen av sekvens, högt från korta handen, lågt mot partnerns
+  honnörer, lågt mot korta handens honnör när toppen sitter i den långa handen);
+  korta handen lägger sin säkra vinnare när partnern leder en hacka mot den.
+- **Riktig mätning (s7F → s8c):** spelförarens faktiska stick **netto +18**
+  (+32 på 17 givar, −14 på 10; 27 sanggivar ändrade), flaggade förarstick
+  **274 → 263**, försvar 176 → 183 (försvaret möter andra linjer), rent spelade
+  28 → 30, summa |spelat − DD| 188 → 184. Fröna: 20260836 4 → 7 stick, 20260898
+  7 → 10, 20260852 8 → 9. Sämst: 20260752 (8 → 6), 20260781, 20260826, 20260920.
+- **Inte åtgärdat:** trumfkontraktens ledningsval (89 stick, övre gräns 19) —
+  där behövs en annan idé än "parets färg"; nästa kandidat.
 
 ## T-serien — tredje hand högt: generaliseringen (NU 2026-09-18)
 
