@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt (felrapport #95 lagad 2026-10-02) — ägaren väljer nästa: kandidaterna nedan eller NÄST 1
+### 🔵 NU — tomt (felrapport #95 LIVE `a5bae94` 2026-10-02) — ägaren väljer nästa: kandidaterna nedan eller NÄST 1
 **Felrapport #95** (damfrågan 5♦ och svaret 6♣ förklarades "placerar utgången"):
 betydelselagret läser nu damfrågan + svaren, Exclusion, Gerber (svar, stopp, kungfråga)
 och RKC-svaret efter Jacoby. Budfel i damfrågan lagade: ingen fråga över 5-trumf eller

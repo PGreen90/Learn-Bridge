@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-02 (Felrapport #95 — trumfdam-frågan: förklaringarna + tre budfel)
+## 2026-10-02 (Felrapport #95 — trumfdam-frågan: förklaringarna + tre budfel, LIVE `a5bae94`)
 
 **Rapporten:** Syd frågar 4NT, får 5♣, ställer damfrågan 5♦; Nord svarar riktigt 6♣
 (trumfdam + klöverkung) men båda buden förklarades "placerar utgången i ruter/klöver".
