@@ -808,18 +808,67 @@ function openerNewSuitAfter1NTResponse(seat: Seat, cb: ParsedBid, prior: Resolve
  * frågaren därefter stannat i 5-trumf. null = ingen essfråga, eller
  * motståndarna har bjudit in i sekvensen.
  */
-function rkcSequence(seat: Seat, prior: ResolvedCall[]): { asker: Seat; trump: string; answer?: ParsedBid; signoff: boolean } | null {
+function rkcSequence(
+  seat: Seat,
+  prior: ResolvedCall[],
+): { asker: Seat; trump: string; answer?: ParsedBid; signoff: boolean; queenAsk?: ParsedBid; queenAnswer?: ParsedBid; bidsAfter: number } | null {
   const askIdx = prior.findIndex((c) => c.bid === '4NT' && SIDE[c.seat] === SIDE[seat])
   if (askIdx < 0) return null
   const asker = prior[askIdx].seat
   const before = prior.slice(0, askIdx)
-  const trump = agreedSuit(asker, before) ?? askTrumpFallback(asker, before)
+  // Trumfen är den 4NT-förklaringen SJÄLV anger (Jacoby-fiten, Texas, cue-höjningen
+  // … — #95-granskningen: efter 1♥–2NT–4♦–4NT lästes ruter som trumf och stoppet
+  // 5♥ som damfråga). Bara när den läsningen saknas gäller den enkla härledningen.
+  const fyraSang = deriveMeaning({ seat: asker, bid: '4NT' } as ResolvedCall, before)
+  // Ett 4NT i Gerber-dialogen (svaret "3 ess" eller stoppet) är ingen essfråga —
+  // miljonsvepet: 2NT–4♣–4NT–5♣ (kungfrågan) lästes som ett RKC-svar.
+  if (fyraSang.rule?.startsWith('Gerber')) return null
+  const named = RKC_TRUMP_I_TEXT.exec(fyraSang.text)
+  const trump = named ? STRAIN_OF_NAME[named[1]] : (agreedSuit(asker, before) ?? askTrumpFallback(asker, before))
   if (!trump) return null
   const after = prior.slice(askIdx + 1).filter((c) => parseBid(c.bid))
   if (after.some((c) => SIDE[c.seat] !== SIDE[seat])) return null
   const answer = after[0] && after[0].seat === PARTNER[asker] ? parseBid(after[0].bid)! : undefined
   const signoff = !!(answer && after[1] && after[1].seat === asker && after[1].bid === `5${trump}`)
-  return { asker, trump, answer, signoff }
+  // Trumfdam-frågan (§6.1): frågarens nästa bud = billigaste icke-trumf över
+  // ett 5♣/5♦-svar; partnerns bud därefter är damsvaret.
+  const ask = answer ? queenAskOver(trump, answer) : null
+  const asked = !!(ask && after[1] && after[1].seat === asker && after[1].bid === `${ask.level}${ask.strain}`)
+  const queenAsk = asked ? ask! : undefined
+  const queenAnswer = asked && after[2] && after[2].seat === PARTNER[asker] ? parseBid(after[2].bid)! : undefined
+  return { asker, trump, answer, signoff, queenAsk, queenAnswer, bidsAfter: after.length }
+}
+
+/**
+ * Exclusion-läget (§6.5): ostört 1M – 3 i andra högfärgen (tvetydig splinter) –
+ * relä (3NT över 1♥–3♠, 3♠ över 1♠–3♥). `rest` = kontraktsbuden därefter
+ * (hoppet 5x, stegsvaret, placeringen). null = inte den sekvensen.
+ */
+function exclusionSequence(prior: ResolvedCall[]): { trump: string; opener: Seat; responder: Seat; rest: ParsedBid[] } | null {
+  if (prior.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  const cbs = prior.filter((c) => parseBid(c.bid)).map((c) => ({ seat: c.seat, cb: parseBid(c.bid)! }))
+  if (cbs.length < 3 || cbs.some((b) => SIDE[b.seat] !== SIDE[cbs[0].seat])) return null
+  const [open, resp, relay] = cbs
+  const M = open.cb.strain
+  if (open.cb.level !== 1 || (M !== 'H' && M !== 'S')) return null
+  if (resp.seat !== PARTNER[open.seat] || resp.cb.level !== 3 || resp.cb.strain !== (M === 'H' ? 'S' : 'H')) return null
+  if (relay.seat !== open.seat || relay.cb.level !== 3 || relay.cb.strain !== (M === 'H' ? 'NT' : 'S')) return null
+  return { trump: M, opener: open.seat, responder: resp.seat, rest: cbs.slice(3).map((b) => b.cb) }
+}
+
+/** Så anger varje 4NT-essfrågetext sin trumf ("essfråga (1430 RKC) med hjärter som
+ *  trumf") — `rkcSequence` läser trumfen härifrån, så frasen måste stå kvar. */
+const RKC_TRUMP_I_TEXT = /essfråga \(1430 RKC\) med (klöver|ruter|hjärter|spader) som trumf/
+const STRAIN_OF_NAME: Record<string, string> = { klöver: 'C', ruter: 'D', hjärter: 'H', spader: 'S' }
+
+/** Trumfdam-frågan över nyckelkortssvaret `answer`: billigaste färgbud över ett
+ *  5♣/5♦-svar som ligger UNDER stoppbudet 5-trumf (annars kan damen inte nekas i
+ *  5-trumf — då finns ingen fråga, se `queenAskCall` i rkc-asker-continuations.ts). */
+function queenAskOver(trump: string, answer: ParsedBid): ParsedBid | null {
+  if (answer.level !== 5 || (answer.strain !== 'C' && answer.strain !== 'D')) return null
+  const order = ['C', 'D', 'H', 'S']
+  const strain = order.slice(order.indexOf(answer.strain) + 1).find((s) => s !== trump)
+  return strain && rankAbove(trump, strain) ? { level: 5, strain } : null
 }
 
 /**
@@ -987,6 +1036,25 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
         return R('1430 RKC', `5${sym} — svar på essfrågan: ${step[cb.strain]} (1430 RKC, ${NAME[rkc.trump]} som trumf). Säger inget om ${name}.`)
       }
     }
+    // Trumfdam-frågan och dess svar (§6.1) — felrapport #95: frågan 5♦ och
+    // svaret 6♣ (dam + klöverkung) lästes som "placerar utgången i ruter/klöver".
+    const ask = rkc.answer ? queenAskOver(rkc.trump, rkc.answer) : null
+    if (ask && rkc.bidsAfter === 1 && seat === rkc.asker && same(cb, ask.level, ask.strain)) {
+      return R(
+        'trumfdam-fråga',
+        `5${sym} — trumfdam-fråga: har du damen i ${NAME[rkc.trump]}? Svar: 5${tsym} = nej · 5 sang = ja, utan sidokung · annan färg = ja, plus kungen i den färgen. Säger inget om ${name}.`,
+      )
+    }
+    if (rkc.queenAsk && rkc.bidsAfter === 2 && seat === PARTNER[rkc.asker] && cb.level <= 6) {
+      if (same(cb, 5, rkc.trump)) return R('trumfdam: nej', `5${tsym} — svar på trumfdam-frågan: ingen trumfdam (tillbaka till trumf).`)
+      if (same(cb, 5, 'NT')) return R('trumfdam: ja, ingen sidokung', `5 sang — svar på trumfdam-frågan: trumfdam, men ingen sidokung att visa. Säger inget om sang.`)
+      if (cb.strain !== 'NT' && (cb.level === 5 || rankAbove(rkc.trump, cb.strain))) {
+        return R('trumfdam: ja + kung', `${cb.level}${sym} — svar på trumfdam-frågan: trumfdam och kungen i ${name}.`)
+      }
+    }
+    if (rkc.queenAnswer && rkc.bidsAfter === 3 && seat === rkc.asker && same(cb, 6, rkc.trump) && rkc.queenAnswer.strain !== rkc.trump) {
+      return R('slamavslut', `6${tsym} — lillslam: trumfdamen visad.`)
+    }
     if (rkc.answer && !rkc.signoff && seat === rkc.asker && cb.strain === rkc.trump) {
       if (cb.level === 5) {
         return R(
@@ -1003,6 +1071,32 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     if (rkc.answer && rkc.signoff && seat === PARTNER[rkc.asker] && cb.level === 6 && cb.strain === rkc.trump) {
       const high = rkc.answer.strain === 'C' ? '4' : rkc.answer.strain === 'D' ? '3' : '5'
       return R('RKC: rättelse', `6${tsym} — rättelse över stoppbudet: svaret 5${SYMBOL[rkc.answer.strain]} var tvetydigt och jag har det höga antalet (${high} nyckelkort).`)
+    }
+  }
+
+  // Exclusion (§6.5) efter tvetydig splinter + relä — #95-granskningen: hoppet
+  // 5x lästes som "hoppbud, lång färg" / slaminbjudan och stegsvaren som utgång.
+  const exc = cb.level >= 5 ? exclusionSequence(prior) : null
+  if (exc) {
+    const tname = NAME[exc.trump]
+    const [ask, answer] = exc.rest
+    if (!ask && seat === exc.responder && cb.level === 5 && cb.strain !== 'NT' && cb.strain !== exc.trump) {
+      return R(
+        'Exclusion',
+        `5${sym} — Exclusion: renons i ${name}, frågar efter nyckelkort med ${tname} som trumf — esset i ${name} räknas inte. ` +
+          `Partnern svarar i steg: 1:a = 1/4 nyckelkort, 2:a = 0/3, 3:e = 2 utan trumfdam, 4:e = 2 med. Säger inget om längd i ${name}.`,
+      )
+    }
+    const frågad = !!ask && ask.level === 5 && ask.strain !== 'NT' && ask.strain !== exc.trump
+    if (frågad && !answer && seat === exc.opener) {
+      const step = bidRank(cb) - bidRank(ask)
+      const steg = ['1 eller 4 nyckelkort', '0 eller 3 nyckelkort', '2 nyckelkort utan trumfdam', '2 nyckelkort med trumfdam'][step - 1]
+      if (steg) {
+        return R('Exclusion', `${B(cb)} — svar på Exclusion (steg ${step}): ${steg}, esset i ${NAME[ask.strain]} borträknat (${tname} som trumf). Säger inget om ${name}.`)
+      }
+    }
+    if (frågad && answer && exc.rest.length === 2 && seat === exc.responder && same(cb, 5, exc.trump)) {
+      return R('Exclusion: stopp', `5${SYMBOL[exc.trump]} — stopp efter Exclusion-svaret: två nyckelkort saknas.`)
     }
   }
 
@@ -2473,6 +2567,20 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
     const ess: Record<string, string> = { D: '0 eller 4 ess', H: '1 ess', S: '2 ess', NT: '3 ess' }
     if (ess[cb.strain]) return R('Gerber', `${B(cb)} — svar på Gerber: ${ess[cb.strain]}. Säger inget om ${cb.strain === 'NT' ? 'sang' : name}.`)
   }
+  // Gerbers kungfråga 5♣ efter ess-svaret, och svaren på den (§6.4) —
+  // #95-granskningen: 5♣ lästes som "stannar i utgång efter kontrollbuden".
+  const gerberAt = (k: number) =>
+    k >= 1 && same(u.bids[k].cb, 4, 'C') && !trump && !jumpRaise2over1(k) && u.bids[k - 1].seat !== u.bids[k].seat && u.bids[k - 1].cb.strain === 'NT' && u.bids[k - 1].cb.level <= 2 && isNaturalNT(u, k - 1)
+  if (gerberAt(n - 2) && u.bids[n - 2].seat === seat && partnerLast && last.level === 4 && last.strain !== 'NT' && same(cb, 4, 'NT')) {
+    return R('Gerber: stannar', `4 sang — stannar efter Gerber-svaret: två ess saknas. Till spel, ingen essfråga.`)
+  }
+  if (gerberAt(n - 2) && u.bids[n - 2].seat === seat && partnerLast && last.level === 4 && same(cb, 5, 'C')) {
+    return R('Gerber kungfråga', `5♣ — kungfråga (Gerber) efter ess-svaret. Partnern svarar 5♦ = 0/4 kungar, 5♥ = 1, 5♠ = 2, 5 sang = 3. Säger inget om klöver.`)
+  }
+  if (gerberAt(n - 3) && partnerLast && same(last, 5, 'C') && cb.level === 5) {
+    const kungar: Record<string, string> = { D: '0 eller 4 kungar', H: '1 kung', S: '2 kungar', NT: '3 kungar' }
+    if (kungar[cb.strain]) return R('Gerber kungfråga', `${B(cb)} — svar på Gerbers kungfråga: ${kungar[cb.strain]}. Säger inget om ${cb.strain === 'NT' ? 'sang' : name}.`)
+  }
 
   // 4NT: kvantitativt över partnerns sangöppning/3NT utan trumf — annars essfråga
   // (över ett 1NT/2NT-ÅTERBUD med egen visad färg som trumf, §5.7).
@@ -2612,6 +2720,7 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
   const ntBase = naturalNTBase(u)
   let agreed: string | null = null
   let trump: string | null = null
+  let gerber = -1 // index för Gerber 4♣ (frågan + svaren efter den är konstlade)
   const lastSuit = new Map<Seat, string>()
   u.bids.forEach((b, k) => {
     const cb = b.cb
@@ -2669,6 +2778,17 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
         cues.add(k)
         return
       }
+    }
+    // Gerber 4♣ direkt över partnerns naturliga 1NT/2NT (öppning ELLER återbud,
+    // §6.4) är konstlad, liksom ess-svaren, kungfrågan 5♣ och kungsvaren — annars
+    // "enas" paret om klöver/svarsfärgen och svaren läses som kontrollbud/utgång
+    // (#95-granskningen: 1♣–1♥–1NT–4♣–4♥ = "placerar utgången i hjärter").
+    if (gerber >= 0 && k > gerber && cb.level <= 5) return
+    const prev = k >= 1 ? u.bids[k - 1] : null
+    const hopphöjning2över1 = k === 3 && same(open, 1, 'C') && same(u.bids[1].cb, 2, 'D') && same(u.bids[2].cb, 2, 'NT') && !u.responderPassed
+    if (same(cb, 4, 'C') && !trump && prev && prev.seat !== b.seat && prev.cb.strain === 'NT' && prev.cb.level <= 2 && isNaturalNT(u, k - 1) && !hopphöjning2över1) {
+      gerber = k
+      return
     }
     if (artificial()) return
     const above3NT = bidRank(cb) > bidRank({ level: 3, strain: 'NT' })

@@ -10,26 +10,26 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt (fynd B "parets färg i sang" LIVE `889fac3` 2026-10-01, S8) — nästa: NÄST 0, sedan 1
-**Mätpunkt S8 i `docs/speldiagnos.md`, detalj `docs/bot-hjarna.md` "runda 8".** I sang
-(9+ kort) leder spelförarsidan parets bästa färg ur BÅDA händerna + "höga kort från
-korta handen" (`declarerPartnershipSuitLead`, `declarerShortHandHonor`; facit
-`play-bot-parets-farg.test.ts`). Byggd på DD-mätning per alternativ (fynd B-riggen
-`fyndb.probe.test.ts` + `fyndb-utvardera.probe.test.ts`): netto +18 stick åt spelföraren
-på 200 givar, tio givar sämre (−14). Runda 7 (fix A + F) LIVE `55d8cd3`,
-Hål D steg 2 LIVE `fda630c`; fynd D (försvaret fortsätter utspelsfärgen) bevakas.
-**Hål D steg 2 = cue-höjningens fortsättning i högfärg** (ägarens struktur 2026-09-28,
-§7.8 c): 1M–(inkliv)–cue → öppnaren ≤12 3M · 14–15 bal.+stopp 3NT · 13+ billigaste
-äkta kontrollbud (ess/singel/renons/KQ) · aldrig hopp till 4M över ett cue; svararen
-cue:ar egen kontroll oavsett styrka, 16+ frågar 4NT när alla sidofärger är
-kontrollerade. Kod `cue-raise-continuations.ts` + läsaren `cue-raise-sequence.ts`,
-facit `auction-cue-hojning-fortsattning.test.ts` (21 tester). Auktionsdiff 3 000 givar:
-27 ändrade, alla i läget. Öppna ägarfrågor (bekräfta/ändra): svararens val efter 3NT
-(pass jämn 3-korts / 4M med 4+ trumf — Claudes tolkning) · öppnaren frågar aldrig 4NT själv.
+### 🔵 NU — tomt (felrapport #95 lagad 2026-10-02) — ägaren väljer nästa: kandidaterna nedan eller NÄST 1
+**Felrapport #95** (damfrågan 5♦ och svaret 6♣ förklarades "placerar utgången"):
+betydelselagret läser nu damfrågan + svaren, Exclusion, Gerber (svar, stopp, kungfråga)
+och RKC-svaret efter Jacoby. Budfel i damfrågan lagade: ingen fråga över 5-trumf eller
+efter 5♥-svaret (frågebudet 5♠ spelades som slutbud) · svararen läser trumfen före sitt
+eget stegsvar · dam på längd bara vid bevisad 10-korts fit. Facit
+`auction-interpret.test.ts` + `auction-slam-rkc-asker.test.ts`.
+**Ägarbeslut 2026-10-02 (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
+fråga efter damen när det går · 5 nyckelkort = alltid slam (med dam: sök storslam) ·
+4 + dam = alltid slam · 4 utan dam = sök slam, inget måste.
+**NU-kandidater (detalj + kommandon `docs/bevaka.md`):** (1) bygg besluten fullt ut —
+kaptenen efter hoppskift (#94) räknar ännu svaret i egen färg, kaptenen-svararen frågar
+aldrig efter damen; (2) budförklarings-svepet — betydelsesvepet (en miljon givar) är
+noll på ostörda standardfrön, rött på störda; störst: responsiv dubbling läses som
+upplysningsdubbling. Flera mönster är budfrågor — fråga ägaren, bygg inte på gissning.
 
-**Sessionen 2026-09-30 (allt LIVE, detalj `docs/historik.md`):** felrapport #91–#94 ·
-budhjälpen tänker (gul fyrkant) · uteslutningsmetoden i RKC (0/3 mot 16+ = 3) ·
-omvärderingsfrågan levererad. Bevaka: budhjälpens väntetid vid bordet.
+**Senast LIVE (detalj `docs/historik.md`):** fynd B "parets färg i sang" `889fac3`
+(S8, `docs/speldiagnos.md`) · runda 7 `55d8cd3` · Hål D steg 2 `fda630c` (§7.8 c; öppna
+ägarfrågor: svararens val efter 3NT · öppnaren frågar aldrig 4NT själv) · felrapport
+#91–#94, budhjälpen tänker, uteslutningsmetoden i RKC (2026-09-30).
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret (`docs/sunt-fornuft-plan.md`) ·
 tredje hand högt (regel A–D LIVE `037403b`; `docs/speldiagnos.md` T-serien) ·

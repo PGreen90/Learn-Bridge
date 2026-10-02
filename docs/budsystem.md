@@ -1639,6 +1639,23 @@ sätter alltid trumfen först (höjning, kontrollbud i ny färg) och frågar nak
 4NT bara i den senast bjudna färgen — tvetydigheten uppstår bara efter en
 människas bud.
 
+**4NT gäller alltid den senast ÄKTA bjudna färgen (ägarbeslut 2026-10-02).**
+Konventioner, kontrollbud och andra konstlade bud räknas inte — bara färger som
+bjudits naturligt. Regeln gäller lika för den som frågar och den som svarar.
+*(Byggläge: svararen och förklaringarna följer regeln; kaptenen som efter ett
+hoppskift frågar med egen 6+ högfärg räknar ännu svaret i sin egen färg —
+står som nästa bygge i `docs/bevaka.md`.)*
+
+**Slambeslutet efter svaret (ägarbeslut 2026-10-02) — fråga efter damen när
+det går:**
+| Nyckelkort i paret | Trumfdam | Beslut |
+|---|---|---|
+| 5 | ja | sök storslam |
+| 5 | nej | alltid lillslam |
+| 4 | ja | alltid lillslam |
+| 4 | nej | sök slam, inget måste |
+| färre | — | stanna i 5-trumf |
+
 **Svar (1430-varianten):**
 | Svar | Nyckelkort |
 |---|---|
@@ -1656,6 +1673,17 @@ människas bud.
 - **Trumfdam-fråga:** efter 5♣/5♦-svar frågar billigaste icke-trumf om trumfdam.
   Svar: återgå till trumf = **ingen** dam; annat färgbud = **dam + kung** i den
   färgen; 5NT = dam **utan** sidokungar.
+- **Damfrågan finns bara när den ryms under 5 i trumf** (2026-10-02): spader
+  trumf → 5♦ över 5♣ och 5♥ över 5♦; hjärter trumf → 5♦ över 5♣. Ligger
+  billigaste steget **över** 5-trumf (hjärter trumf efter 5♦-svaret, all
+  lågfärgstrumf) kan partnern inte neka i 5-trumf — budet är då **inte**
+  damfrågan, för någon av er. Efter **5♥/5♠-svaret** finns heller ingen fråga:
+  svaret har redan nekat resp. visat damen. Med **fyra** nyckelkort, utan fråga
+  och utan säkrad dam stannar frågaren i 5-trumf (pass om svaret var 5-trumf);
+  med **alla fem** bjuds lillslammen ändå (tabellen ovan).
+- **Svararen läser trumfen som den var när hen svarade på essfrågan** — det
+  konstgjorda stegsvaret (5♣ efter en 1♣-öppning) är aldrig en färg. Damen visas
+  på längd bara vid bevisad 10-korts fit, som i essvaret.
 - **Frågaren ställer damfrågan när damen avgör slammen.** Saknas exakt ett
   nyckelkort (storslam är ute) men **trumfdamen är inte säkrad** — du håller den
   inte, paret har inte bevisat 10+ trumf, och svaret var inte 5♠ — då är valet
@@ -3201,6 +3229,34 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-02 — Felrapport #95: trumfdam-frågan och slamfrågornas förklaringar
+  (§6.1, §6.4, §6.5).** Rapporten: Syd frågar 4NT, får 5♣, ställer damfrågan 5♦ och
+  Nord svarar riktigt 6♣ (dam + klöverkung) — men båda buden förklarades "placerar
+  utgången i ruter/klöver". **Betydelselagret** läser nu hela sekvensen: damfrågan,
+  de tre svaren (5-trumf = nej · 5NT = dam utan sidokung · färg = dam + kungen
+  där) och slutbudet; trumfen tas ur 4NT-förklaringen själv (efter Jacoby 2NT
+  lästes fel färg). Ägarens "se över alla variationer" kördes som betydelsesvepet
+  över 100 000 givar: samma fel fanns i **Exclusion** (hoppet 5x lästes som "hoppbud,
+  lång färg", stegsvaren som utgång), **Gerber** (4♥ = ett ess lästes som utgång
+  när hjärter var svararens färg; kungfrågan 5♣ och dess svar saknades) och
+  **RKC-svaret efter Jacoby** — alla lagade; elva regler fick kravnivå i registret.
+  **Tre budfel i samma konvention** hittades med auktionsdiffen (30 000 givar,
+  elva ändrade, alla här): (1) boten "frågade" damen över 5-trumf och efter
+  5♥-svaret — nekandet var olagligt, partnern passade och frågebudet 5♠ spelades;
+  nu regeln ovan. (2) Svararen läste trumfen efter sitt eget stegsvar (1♣-öppning
+  + 5♣-svar = "klöver överenskommen") och passade damfrågan; trumfen förankras nu
+  före svaret (`slamAskTrumpAtAnswer`, gäller även kungfrågan och rättelsen).
+  (3) Damsvaret visade damen på 5+ egen längd; nu bara vid bevisad 10-korts fit.
+  Facit `auction-interpret.test.ts` (#95 + granskningen),
+  `auction-slam-rkc-asker.test.ts`. **Ägarbeslut samma dag:** (a) 4NT gäller
+  alltid den senast ÄKTA bjudna färgen — konventioner och kontrollbud räknas inte;
+  (b) slamtabellen i §6.1 (5 nyckelkort = alltid slam, 4 + dam = alltid slam, 4
+  utan dam = sök slam utan tvång; fråga efter damen när det går). Byggt nu:
+  frågaren bjuder lillslam med alla fem nyckelkort även när damen nekats.
+  Svepet kördes därefter över en miljon givar (listan mättar; två Gerber-fel till
+  lagade: 4NT-stoppet och kungfrågan efter svaret "3 ess"). Kvar, ej lagat:
+  kaptenen efter hoppskift räknar svaret i egen färg (bryter mot (a)), kaptenen-
+  svararen frågar inte efter damen, och svepets lista — `docs/bevaka.md`.
 - **2026-09-30 — Hål D steg 2: cue-höjningens fortsättning i högfärg (§7.8 c,
   §6.10; ägarens struktur 2026-09-28).** Efter 1M–(inkliv)–cue svarar öppnaren
   ≤12 → 3M, 14–15 balanserad med stopp → 3NT, 13+ → billigaste äkta kontrollbud

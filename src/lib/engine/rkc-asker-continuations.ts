@@ -35,7 +35,7 @@ import { bidValue, letterOfSuit, SWE_SYM } from './auction-rules'
 import { lengths } from './hand'
 import { side } from './play'
 import { keycards, respondToQueenAsk } from './slam'
-import { partnerShownTrumpLength, slamAskTrump } from './slam-answer-continuations'
+import { partnerShownTrumpLength, slamAskTrumpAtAnswer } from './slam-answer-continuations'
 import type { Kunskap } from './overcall-continuations'
 
 /** Budets rang (1♣=… ; pass/X/XX = -1) för lagligt-jämförelser. */
@@ -68,18 +68,21 @@ function askerTrump(f: AuctionFacts, myAskIdx: number): Suit | null {
   return f.jacobyTrump ?? null
 }
 
-/** Damfrågan: billigaste steg över nyckelkortssvaret som är icke-trumf och inte
- *  5NT (kungfrågan). null = inget frågeutrymme (svaret nådde 5NT). */
+/**
+ * Damfrågan: billigaste färgbud över ett TVETYDIGT nyckelkortssvar (5♣/5♦) som
+ * ligger UNDER stoppbudet 5-trumf. null = ingen fråga finns:
+ *  · svaret var 5♥/5♠ — det har redan nekat/visat damen;
+ *  · billigaste steget ligger över 5-trumf (hjärter trumf, svar 5♦ → 5♠; all
+ *    lågfärgstrumf) — partnern kan då inte neka i 5-trumf, så budet avgör
+ *    ingenting. Ett sådant bud är INTE damfrågan, varken för frågaren eller
+ *    svararen (felrapport #95-granskningen: förr "frågade" boten ändå, det
+ *    olagliga nekandet blev pass, och frågebudet 5♠/5♦ spelades som slutbud).
+ */
 function queenAskCall(trump: Suit, answerBid: string): string | null {
-  const trumpL = letterOfSuit(trump)
-  const start = rank(answerBid)
-  for (const b of ['5C', '5D', '5H', '5S', '5NT']) {
-    if (b === '5NT') return null
-    if (rank(b) <= start) continue
-    if (b === `5${trumpL}`) continue // = stoppbudet i trumf, inte frågan
-    return b
-  }
-  return null
+  if (answerBid !== '5C' && answerBid !== '5D') return null
+  const signoff = `5${letterOfSuit(trump)}`
+  const ask = ['5D', '5H', '5S'].find((b) => rank(b) > rank(answerBid) && b !== signoff)
+  return ask && rank(ask) < rank(signoff) ? ask : null
 }
 
 /** Partnerns nyckelkort ur svaret + egen räkning (konservativt: det låga
@@ -114,18 +117,27 @@ function placeAfterKeycards(hand: Hand, trump: Suit, f: AuctionFacts, answerBid:
     return { call: `6${L}`, rule: 'slamavslut', explanation: `svaret gick förbi stoppnivån → 6${SYM}.` }
   }
 
-  // Högst ett nyckelkort saknas. Är trumfdamen säkrad → lillslam; annars fråga.
+  // Ägarens slamregel (2026-10-02): 5 nyckelkort = alltid slam, även utan damen
+  // (med damen söks storslam — som den här vägen inte bjuder, se AVGRÄNSNING);
+  // 4 nyckelkort + dam = alltid slam; 4 utan dam = "sök slam, inget måste".
+  if (total >= 5) {
+    return { call: `6${L}`, rule: 'slamavslut', explanation: `alla fem nyckelkort → 6${SYM} (lillslam), med eller utan trumfdamen.` }
+  }
   if (queenSecured(hand, trump, f, answerBid)) {
     return { call: `6${L}`, rule: 'slamavslut', explanation: `ett nyckelkort saknas, trumfdamen säkrad → 6${SYM} (lillslam).` }
   }
+  // Fyra nyckelkort och damen inte säkrad → den avgör slammen. Finns frågan (se
+  // `queenAskCall`) ställs den; annars stannar vi i utgång.
   const ask = queenAskCall(trump, answerBid)
   if (ask) {
     const askSym = `${ask[0]}${SWE_SYM[ask[1] as 'C' | 'D' | 'H' | 'S']}`
     return { call: ask, rule: 'trumfdam-fråga', explanation: `Alla nyckelkort utom ett — men trumfdamen är inte säkrad → ${askSym} frågar damen; visas den bjuds 6${SYM}, annars står 5${SYM}.` }
   }
-  // Inget frågeutrymme kvar → utan säkrad dam stannar vi i utgång.
-  if (rank(signoff) > rank(answerBid)) return { call: signoff, rule: 'RKC: stopp', explanation: `trumfdamen inte säkrad och ingen fråga ryms → stannar i 5${SYM}.` }
-  return { call: `6${L}`, rule: 'slamavslut', explanation: `svaret gick förbi frågenivån → 6${SYM}.` }
+  // Ingen fråga att ställa → utan säkrad dam stannar vi i utgång.
+  const varför = answerBid === '5H' ? 'svaret nekade trumfdamen' : 'trumfdamen är inte säkrad och ingen fråga ryms'
+  if (answerBid === signoff) return { call: 'P', rule: 'RKC: stopp', explanation: `${varför} → passar; 5${SYM} står.` }
+  if (rank(signoff) > rank(answerBid)) return { call: signoff, rule: 'RKC: stopp', explanation: `${varför} → stannar i 5${SYM}.` }
+  return { call: `6${L}`, rule: 'slamavslut', explanation: `svaret gick förbi stoppnivån → 6${SYM}.` }
 }
 
 /** FRÅGAREN placerar efter DAMSVARET (fas 3). */
@@ -192,7 +204,7 @@ function answerQueenAsk(hand: Hand, f: AuctionFacts): Kunskap | null {
 
   const partnerAskIdx = f.history.findIndex((c) => c.seat === partner && c.bid === '4NT')
   if (partnerAskIdx < 0) return null
-  const trump = slamAskTrump(f)
+  const trump = slamAskTrumpAtAnswer(f)
   if (!trump) return null
 
   // Mitt nyckelkortssvar (5♣/5♦ — bara de tvetydiga svaren kan följas av en
@@ -201,7 +213,7 @@ function answerQueenAsk(hand: Hand, f: AuctionFacts): Kunskap | null {
   if (!myAnswer || (myAnswer.bid !== '5C' && myAnswer.bid !== '5D')) return null
   const ask = queenAskCall(trump, myAnswer.bid)
   if (!ask || last.bid !== ask) return null
-  return respondToQueenAsk(hand, trump)
+  return respondToQueenAsk(hand, trump, lengths(hand)[trump] + partnerShownTrumpLength(f, trump))
 }
 
 /** Läget för raden: partnerns senaste icke-pass är ett 5/6-lägesbud och vår

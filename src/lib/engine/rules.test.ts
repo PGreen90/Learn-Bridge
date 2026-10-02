@@ -149,7 +149,11 @@ const ALL_ENGINE_RULES: string[] = [
   'accepterar (minimum)', 'accepterar utgång', 'cue-advancerns dom (3NT)',
   'Jordan: utgång', 'Jordan: minimum', 'Jordan: höjning till utgång',
   'DONT pass-eller-rätta', 'DONT: rättelse (tvåfärg)', 'DONT: rättelse',
-  
+  // Betydelsesvepet 2026-10-02 (felrapport #95): regler motorn producerade utan
+  // kravnivå i registret — damfrågan, Exclusion-stoppet och placeringar.
+  'trumfdam-fråga', 'RKC: dam nekad', 'Exclusion: stopp', 'kvantitativ 4NT: accept',
+  'reverse: 3NT', 'reverse: utgång i fiten', 'till spel (3NT)', '2♣: lillslam på solid egen färg',
+  'accepterar slamtrevare', 'slamhöjning av 3NT', 'slaminbjudan: avböjer',
   
 ]
 

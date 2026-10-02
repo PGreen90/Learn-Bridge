@@ -26,7 +26,7 @@
 // samma företräde som detektorerna hade när linjen tog slut.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { openingBid, PARTNER, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { auctionFacts, openingBid, PARTNER, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { legalCalls, letterOfSuit, SWE_SYM } from './auction-rules'
 import { hcp, lengths, suitHcp } from './hand'
 import type { Kunskap } from './overcall-continuations'
@@ -69,6 +69,23 @@ export function slamAskTrump(f: AuctionFacts): Suit | null {
     return SUIT_OF_LETTER[cb.strain]
   }
   return null
+}
+
+/**
+ * Trumfen partnerns essfråga gällde NÄR JAG SVARADE på den — läst ur auktionen
+ * FÖRE mitt stegsvar. Efter svaret kan `agreedTrump` förorenas av själva svaret:
+ * 1♣–1♥–2♥–4♥–4NT–5♣ "enas" om klöver (öppnarens 1♣ + mitt konstgjorda 5♣), och
+ * damfrågan besvarades då med klöver som trumf (#95-granskningen: olagligt 5♣ →
+ * pass på frågebudet). Allt EFTER essvaret — damsvaret, kungsvaret, rättelsen —
+ * läser trumfen härifrån.
+ */
+export function slamAskTrumpAtAnswer(f: AuctionFacts): Suit | null {
+  const { history, seat } = f
+  const askIdx = history.findIndex((c) => c.seat === PARTNER[seat] && c.bid === '4NT')
+  if (askIdx < 0) return null
+  const answerIdx = history.findIndex((c, i) => i > askIdx && c.seat === seat && c.bid !== 'P')
+  if (answerIdx < 0) return slamAskTrump(f)
+  return slamAskTrump(auctionFacts(history.slice(0, answerIdx), seat))
 }
 
 /**
@@ -118,7 +135,7 @@ export function answerKingAsk(hand: Hand, f: AuctionFacts): Kunskap | null {
   const lastNonPass = f.lastNonPass
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== '5NT') return null
   if (!history.some((c) => c.seat === PARTNER[seat] && c.bid === '4NT')) return null
-  const trump = slamAskTrump(f)
+  const trump = slamAskTrumpAtAnswer(f)
   if (!trump) return null
   return respondToKingAsk(hand, trump)
 }
@@ -143,7 +160,7 @@ export function rkcCorrection(hand: Hand, f: AuctionFacts): Kunskap | null {
   while (j >= 0 && history[j].bid === 'P') j--
   const ask = history[j]
   if (!ask || ask.seat !== PARTNER[seat] || ask.bid !== '4NT') return null
-  const trump = slamAskTrump(f)
+  const trump = slamAskTrumpAtAnswer(f)
   if (!trump || lastNonPass.bid !== `5${letterOfSuit(trump)}`) return null
   const high = answer.bid === '5C' ? 4 : 3
   if (keycards(hand, trump) !== high) return null

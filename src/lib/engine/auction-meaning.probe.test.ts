@@ -11,6 +11,13 @@
 //   $env:BETYDELSE='1'; npx vitest run src/lib/engine/auction-meaning.probe.test.ts
 //   $env:BETYDELSE_RANGE='20270001-20273000'   (standard — samma frön som auktionsdumpen)
 //
+//   $env:BETYDELSE_RANGE='20270001-21270000'   (en miljon givar, ~10 min — brett svep, felrapport #95)
+//   $env:BETYDELSE_OUT='revisor-output/betydelsesvep-1M.txt'   (egen utfil, så standardkörningen inte skrivs över)
+//
+// En tredje, INFORMATIV axel (utanför grinden): FÖRVÄXLAD KONVENTION — motorns
+// regel och den härledda är båda konstlade men olika konventioner. Den fångar
+// det kravnivå + alert inte ser (rätt märken, fel text).
+//
 // Utdata: revisor-output/betydelsesvep.txt
 import { it, expect } from 'vitest'
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -55,6 +62,13 @@ interface Hål {
   nyckel: string
   antal: number
   exempel: string
+}
+
+/** Samma konvention under två namn? ("Stayman-svar"/"Stayman", "Jacoby 2NT"/"Jacoby: 3NT"). */
+function sammaFamilj(a: string, b: string): boolean {
+  if (a === b || a.startsWith(b) || b.startsWith(a)) return true
+  const första = (s: string) => s.split(/[\s:(–-]/)[0].toLowerCase()
+  return första(a) === första(b)
 }
 
 /**
@@ -157,6 +171,8 @@ it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
     pass: new Map<string, Hål>(), // pass med regel: härledd kravnivå ≠ registrets
     kända: new Map<string, Hål>(), // kända motoravvikelser (facit i motorbyte-facit.test.ts)
     undantag: new Map<string, Hål>(), // störda undantag (dokumenterade, utanför grinden)
+    förväxling: new Map<string, Hål>(), // konstlat bud läst som en ANNAN konvention (ostört)
+    förväxlingStört: new Map<string, Hål>(),
   }
   const bumpa = (m: Map<string, Hål>, nyckel: string, exempel: string) => {
     const h = m.get(nyckel)
@@ -224,6 +240,14 @@ it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
         if (lugn) bumpa(hål.alert, key, ex)
         else bumpStört(hål.alertStört, key, ex)
       }
+      // TREDJE AXELN (2026-10-02, felrapport #95): FÖRVÄXLAD KONVENTION. Motorns
+      // regel och den härledda är båda konstlade men olika konventioner — då kan
+      // kravnivå och alert stämma fast texten är fel (Gerbers 4♦-svar lästes
+      // "Kontrollbud" utan att de två första axlarna larmade). Informativ,
+      // utanför grinden: listan granskas, den nollställs inte mekaniskt.
+      if (regAlert && m.alert && m.rule && !sammaFamilj(call.rule, m.rule)) {
+        bumpa(lugn ? hål.förväxling : hål.förväxlingStört, `${call.rule} → läst som ${m.rule}`, ex)
+      }
     })
   }
 
@@ -266,11 +290,17 @@ it.skipIf(!ON)('betydelsesvepet', { timeout: 0 }, () => {
     '=== STÖRDA UNDANTAG (utanför grinden, dokumenterade) ===',
     ...lista(hål.undantag),
     '',
+    `=== FÖRVÄXLAD KONVENTION (ostört, informativ): ${summa(hål.förväxling)} bud i ${hål.förväxling.size} mönster ===`,
+    ...lista(hål.förväxling),
+    '',
+    `=== FÖRVÄXLAD KONVENTION (stört, informativ): ${summa(hål.förväxlingStört)} bud i ${hål.förväxlingStört.size} mönster ===`,
+    ...lista(hål.förväxlingStört),
+    '',
     '=== PASS MED REGEL ===',
     ...lista(hål.pass),
   ]
   mkdirSync('revisor-output', { recursive: true })
-  writeFileSync('revisor-output/betydelsesvep.txt', rader.join('\n'), 'utf8')
+  writeFileSync(process.env.BETYDELSE_OUT ?? 'revisor-output/betydelsesvep.txt', rader.join('\n'), 'utf8')
 
   // GRINDEN: ostörda OCH störda auktioner ska vara noll på det avgörbara. De
   // störda undantagen (kortberoende/cue-nivå/Lebensohl/motoravvikelse) är listade

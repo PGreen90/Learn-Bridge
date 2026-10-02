@@ -10,6 +10,53 @@
 
 ---
 
+## 2026-10-02 (Felrapport #95 — trumfdam-frågan: förklaringarna + tre budfel)
+
+**Rapporten:** Syd frågar 4NT, får 5♣, ställer damfrågan 5♦; Nord svarar riktigt 6♣
+(trumfdam + klöverkung) men båda buden förklarades "placerar utgången i ruter/klöver".
+Ägaren: "se över inte bara denna utan alla budförklaringar i alla variationer".
+
+**Orsaken:** betydelselagret (`auction-meaning.ts`) kände essfrågan, stegsvaren,
+stoppet och rättelsen (#60) — men inte damfrågan eller dess svar. De föll till den
+allmänna raden för bud på utgångsnivå.
+
+**Lagat i förklaringarna:** damfrågan, de tre damsvaren och slutbudet · trumfen läses
+ur 4NT-förklaringen själv (efter Jacoby 2NT lästes fel färg, så 5♠-svaret blev
+"slaminbjudan") · Exclusion efter splinter-relä (hoppet, stegsvaren, stoppet) ·
+Gerbers ess-svar när svaret råkar vara svararens färg, kungfrågan 5♣ och dess svar ·
+elva regler fick kravnivå i registret.
+
+**Metoden för "alla variationer":** betydelsesvepet (`auction-meaning.probe.test.ts`)
+jämför den härledda förklaringens kravnivå och alert med motorns regel på varje
+botbud. Det hade inte körts sedan grinden sattes och var rött. Kört över 100 000
+givar gav det listan; fråga-och-svar-konventionerna på 4–6-läget lagades, resten
+(kontrollbud mot naturligt, störda auktioner) står i `docs/bevaka.md`.
+
+**Tre budfel hittade på vägen** (auktionsdiff 30 000 givar: elva ändrade, alla i
+damfrågan): (1) boten ställde "damfrågan" över 5-trumf och efter 5♥-svaret; nekandet
+var olagligt → pass, och frågebudet 5♠ blev slutkontrakt i sex av givarna. (2)
+Svararen läste trumfen efter sitt eget stegsvar (1♣-öppning + 5♣-svar = "klöver")
+och passade damfrågan 5♦/5♥ i fyra givar. (3) Damsvaret visade damen på 5+ egen
+längd. Ny regel i §6.1: damfrågan finns bara när den ryms under 5 i trumf.
+
+**Miljonsvepet (ägarkrav: "stöttepelaren måste vara stadig"):** betydelsesvepet
+kördes över en miljon givar och auktionsdiffen över ytterligare 200 000 (59 ändrade,
+alla i dam-/kungfrågan). Listan mättar — 87 mönster vid 100 000 givar, 116 vid en
+miljon, de nya högst 21 gånger per miljon. Två Gerber-fel till lagade (4NT-stoppet
+läst som essfråga, kungfrågan efter svaret "3 ess"). Ny tredje axel i svepet,
+förväxlad konvention, som ser rätt märken med fel text.
+
+**Ägarbeslut samma dag:** 4NT gäller alltid den senast ÄKTA bjudna färgen
+(konventioner och kontrollbud räknas inte) · fråga efter damen när det går · 5
+nyckelkort = alltid slam (med dam: sök storslam) · 4 + dam = alltid slam · 4 utan dam =
+sök slam, inget måste. Byggt: lillslam med alla fem nyckelkort även utan damen.
+Inte byggt: kaptenen efter hoppskift (#94) och kaptenen-svararens damfråga
+(`docs/bevaka.md`).
+
+**Lärdom:** registret (`rules.ts`) är inte kosmetika — kravnivån läses av partnern.
+En tillagd rad ('krav – billigaste bud' = utgångskrav) ändrade en budgivning och
+togs bort igen; auktionsdiffen fångade den.
+
 ## 2026-10-01 (Speldiagnos fynd B — parets färg i sang, mätpunkt S8, LIVE `889fac3`)
 
 **Vad:** spelförarsidan valde färg ur den hand som råkade vara inne (♣4 ur ♣8542

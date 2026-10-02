@@ -304,6 +304,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'Gerber kungfråga': 'slamintresse',
   'Gerber: stannar': 'avslut',
   Exclusion: 'slamintresse',
+  'Exclusion: stopp': 'avslut',
+  'trumfdam-fråga': 'slamintresse',
   'trumfdam: nej': 'slamintresse',
   'trumfdam: ja, ingen sidokung': 'slamintresse',
   'trumfdam: ja + kung': 'slamintresse',
@@ -548,6 +550,17 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'krav – sang': 'utgangskrav',
   'stöd-cue (slamintresse)': 'slamintresse',
   'RKC: stopp': 'avslut',
+  'RKC: dam nekad': 'avslut',
+  'kvantitativ 4NT: accept': 'avslut',
+  // Regler som saknade kravnivå (betydelsesvepet 2026-10-02, felrapport #95):
+  // placeringar på utgångs-/slamnivå.
+  'reverse: 3NT': 'avslut',
+  'reverse: utgång i fiten': 'avslut',
+  'till spel (3NT)': 'avslut',
+  '2♣: lillslam på solid egen färg': 'avslut',
+  'accepterar slamtrevare': 'avslut',
+  'slamhöjning av 3NT': 'avslut',
+  'slaminbjudan: avböjer': 'avslut',
 
   // ---- Störda regler som saknade kravnivå (betydelsesvepet, etapp 4 familj 9) ----
   // Konkurrens/försvar-fortsättningar som motorn producerade men registret inte

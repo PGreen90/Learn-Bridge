@@ -85,3 +85,107 @@ describe('RKC-frågaren: trumfdamen avgör (öppnaren frågar) — Bricka 14', (
     expect(decideCall(deal, hist, 'S').bid).toBe('6S')
   })
 })
+
+// Felrapport #95 (bricka 4, 2026-10-01): människan (Syd) frågar 4NT och ställer
+// damfrågan 5♦; Nord svarar 6♣ (dam + klöverkung) — budet var rätt, förklaringen
+// fel (låst i auction-interpret.test.ts). Här låses budvägen.
+describe('felrapport #95 – damfrågan besvaras rätt (given ur rapporten)', () => {
+  const deal: Deal = {
+    id: 'felrapport-95', dealer: 'W', vulnerability: 'all', board: 4,
+    hands: {
+      N: parseHand('S:J7 H:KQ7543 D:64 C:KQJ'),
+      E: parseHand('S:Q98 H:J92 D:987 C:AT93'),
+      S: parseHand('S:AK654 H:A8 D:AKJ C:654'),
+      W: parseHand('S:T32 H:T6 D:QT532 C:872'),
+    },
+  }
+  const fram: ResolvedCall[] = [
+    call('W', 'P'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2H'), call('E', 'P'),
+    call('S', '4NT'), call('W', 'P'), call('N', '5C'), call('E', 'P'), call('S', '5D'), call('W', 'P'),
+  ]
+  it('Nord visar trumfdam + klöverkung med 6♣', () => {
+    expect(decideCall(deal, fram, 'N')).toMatchObject({ bid: '6C', rule: 'trumfdam: ja + kung' })
+  })
+  it('Syd bjuder 6♥ på den visade damen', () => {
+    expect(decideCall(deal, [...fram, call('N', '6C'), call('E', 'P')], 'S').bid).toBe('6H')
+  })
+})
+
+// Granskningen efter #95: när billigaste icke-trumf hamnar ÖVER 5-trumf (hjärter
+// trumf och svaret 5♦ → 5♠) finns inget frågeutrymme — nekandet "tillbaka till
+// 5♥" är olagligt. Förr frågade boten ändå, och partnern utan dam PASSADE 5♠
+// (frågebudet blev slutbud). Regeln nu: damfrågan finns bara UNDER 5-trumf —
+// frågaren stannar i 5♥, och ett 5♠ där är inte damfrågan för någon av stolarna.
+describe('damfrågan utan frågeutrymme (hjärter trumf, svar 5♦)', () => {
+  const SYD_HJ = 'S:AK H:AK752 D:AKQ7 C:32'
+  const UTAN_DAM = 'S:J93 H:J84 D:JT9 C:KJ54'
+  const AUKTION_HJ: ResolvedCall[] = [
+    call('S', '2C'), call('W', 'P'), call('N', '2D'), call('E', 'P'),
+    call('S', '2H'), call('W', 'P'), call('N', '4H'), call('E', 'P'),
+    call('S', '4NT'), call('W', 'P'), call('N', '5D'), call('E', 'P'),
+  ]
+
+  it('frågaren frågar inte över 5♥ — stannar i 5♥ (damen osäkrad, ett nyckelkort saknas)', () => {
+    expect(decideCall(dealNS(UTAN_DAM, SYD_HJ), AUKTION_HJ, 'S')).toMatchObject({ bid: '5H', rule: 'RKC: stopp' })
+  })
+  it('ett 5♠ över 5♥ läses inte som damfråga av svararen (inget damsvar)', () => {
+    const hist = [...AUKTION_HJ, call('S', '5S'), call('W', 'P')]
+    expect(decideCall(dealNS(UTAN_DAM, SYD_HJ), hist, 'N').rule ?? '').not.toMatch(/trumfdam/)
+  })
+})
+
+// Auktionsdiffen efter #95-fixen (30 000 givar) visade tre fel till i samma
+// konvention — alla låsta här med givarna ur diffen.
+describe('#95-granskningen – damfrågans övriga kantfall', () => {
+  const giv = (dealer: 'N' | 'E' | 'S' | 'W', n: string, e: string, s: string, w: string): Deal => ({
+    id: 'granskning-95', dealer, vulnerability: 'all', board: 1,
+    hands: { N: parseHand(n), E: parseHand(e), S: parseHand(s), W: parseHand(w) },
+  })
+
+  // Frö 20291537: 1♣–1♥–2♥–4♥–4NT–5♣–5♦. Svararens eget 5♣-svar + öppnarens 1♣
+  // "enades" om klöver → damfrågan besvarades med klöver som trumf (olagligt 5♣
+  // → PASS på frågebudet 5♦). Trumfen läses nu ur läget före svaret: hjärter.
+  const KLÖVERÖPPNING = giv('S', 'S:KJ96 H:KQJ4 D:K853 C:9', 'S:QT H:75 D:AJT974 C:Q73', 'S:A843 H:AT32 D:- C:AK862', 'S:752 H:986 D:Q62 C:JT54')
+  const TILL_SVARET: ResolvedCall[] = [
+    call('S', '1C'), call('W', 'P'), call('N', '1H'), call('E', 'P'), call('S', '2H'), call('W', 'P'),
+    call('N', '4H'), call('E', 'P'), call('S', '4NT'), call('W', 'P'), call('N', '5C'), call('E', 'P'),
+  ]
+  it('damfrågan besvaras med HJÄRTER som trumf efter 1♣-öppning (dam + kung, inte pass/6♣)', () => {
+    const d = decideCall(KLÖVERÖPPNING, [...TILL_SVARET, call('S', '5D'), call('W', 'P')], 'N')
+    expect(d.rule).toBe('trumfdam: ja + kung')
+    expect(d.bid).toBe('6D')
+  })
+  it('kungfrågan 5NT besvaras också med hjärter som trumf (7♥ med två sidokungar, inte 7♣)', () => {
+    expect(decideCall(KLÖVERÖPPNING, [...TILL_SVARET, call('S', '5NT'), call('W', 'P')], 'N').bid).toBe('7H')
+  })
+
+  // Frö 20286504: 1♠–2♥–3♥–4♥–4NT–5♥ (två nyckelkort UTAN trumfdam). Ett
+  // nyckelkort saknas och damen är redan nekad → utgången står. Förr "frågade"
+  // Syd damen med 5♠ över 5♥ fast svaret redan nekat den.
+  it('5♥-svaret har nekat damen: frågaren passar 5♥ (ett nyckelkort saknas), ingen 5♠-fråga', () => {
+    const deal = giv('S', 'S:- H:AJT65 D:K62 C:AQJ74', 'S:T53 H:Q2 D:A74 C:KT965', 'S:AKQJ82 H:K973 D:T8 C:8', 'S:9764 H:84 D:QJ953 C:32')
+    const hist: ResolvedCall[] = [
+      call('S', '1S'), call('W', 'P'), call('N', '2H'), call('E', 'P'), call('S', '3H'), call('W', 'P'),
+      call('N', '4H'), call('E', 'P'), call('S', '4NT'), call('W', 'P'), call('N', '5H'), call('E', 'P'),
+    ]
+    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: 'P', rule: 'RKC: stopp' })
+  })
+
+  // Ägarens slamregel (2026-10-02): "5 ess utan dam alltid slam". Förr ställdes
+  // damfrågan även med alla fem nyckelkort, och ett nekande passades i 5-trumf.
+  it('alla fem nyckelkort → lillslam direkt (2♣–2♦–2♠–4♠–4NT–5♣, damen osäkrad)', () => {
+    const deal = dealNS('S:J93 H:J84 D:QT97 C:A65', SYD)
+    const hist = [...AUKTION.slice(0, 10), call('N', '5C'), call('E', 'P')]
+    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: '6S', rule: 'slamavslut' })
+  })
+  // Frö 20270470: fem nyckelkort mellan händerna, 5♥-svaret nekar damen → 6♥ ändå.
+  it('fem nyckelkort och damen nekad med 5♥ → 6♥ (inte pass)', () => {
+    const deal = giv('E', 'S:J8754 H:QT D:854 C:932', 'S:AKQT H:K83 D:AT3 C:QT6', 'S:63 H:9752 D:KQJ62 C:J4', 'S:92 H:AJ64 D:97 C:AK875')
+    const hist: ResolvedCall[] = [
+      call('E', '1C'), call('S', 'P'), call('W', '1H'), call('N', 'P'), call('E', '1S'), call('S', 'P'),
+      call('W', '2D'), call('N', 'P'), call('E', '2H'), call('S', 'P'), call('W', '4H'), call('N', 'P'),
+      call('E', '4NT'), call('S', 'P'), call('W', '5H'), call('N', 'P'),
+    ]
+    expect(decideCall(deal, hist, 'E')).toMatchObject({ bid: '6H', rule: 'slamavslut' })
+  })
+})

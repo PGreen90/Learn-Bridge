@@ -80,9 +80,13 @@ export function respondToRKC(hand: Hand, trump: Suit, knownCombinedLen?: number)
     : { call: '5H', rule: '1430 RKC', explanation: `${kc} nyckelkort utan trumfdam → 5♥.` }
 }
 
-/** Svar på trumfdam-frågan (billigaste icke-trumf efter 5♣/5♦). §6.1. */
-export function respondToQueenAsk(hand: Hand, trump: Suit): ResponseResult {
-  if (!hasTrumpQueen(hand, trump)) {
+/**
+ * Svar på trumfdam-frågan (billigaste icke-trumf UNDER 5-trumf efter 5♣/5♦). §6.1.
+ * `knownCombinedLen` som i `hasTrumpQueen`: längd ersätter damen bara vid
+ * bevisad 10-korts fit (samma ärliga regel som i RKC-svaret).
+ */
+export function respondToQueenAsk(hand: Hand, trump: Suit, knownCombinedLen?: number): ResponseResult {
+  if (!hasTrumpQueen(hand, trump, knownCombinedLen)) {
     return { call: `5${LETTER[trump]}`, rule: 'trumfdam: nej', explanation: `ingen trumfdam → tillbaka till trumf (5${SYM[trump]}).` }
   }
   // Dam finns: visa billigaste sidokung, annars 5NT (dam utan sidokung).
