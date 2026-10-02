@@ -1,5 +1,69 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Damfrågan + slamfrågornas förklaringar (2026-10-02, felrapport #95)
+- **Lagat:** damfrågan, damsvaren, Exclusion, Gerbers svar/kungfråga och
+  RKC-svaret efter Jacoby förklaras som konvention (förr "placerar utgången i …").
+  Tre budfel i damfrågan lagade: ingen fråga över 5-trumf eller efter 5♥-svaret
+  (förr spelades frågebudet 5♠ som slutbud), svararen läser trumfen före sitt
+  eget stegsvar, damen visas på längd bara vid bevisad 10-korts fit. §6.1.
+- **Ägarbeslut 2026-10-02 (bok §6.1):** 4NT gäller alltid den senast ÄKTA
+  bjudna färgen (konventioner/kontrollbud räknas inte) · fråga efter damen när
+  det går · 5 nyckelkort + dam = sök storslam · 5 utan dam = alltid slam · 4 +
+  dam = alltid slam · 4 utan dam = sök slam, inget måste.
+- **Byggt av besluten:** frågaren bjuder lillslam med alla fem nyckelkort även
+  när damen nekats/inte går att fråga efter.
+- **INTE byggt — nästa bygge:** (1) **Kaptenen efter hoppskift (#94) frågar i
+  EGEN färg**, partnern svarar i den senast bjudna — bryter mot beslutet. Frö
+  20437408: 1♥–1♠–3♣–3♦–3♥–4NT–5♠–5NT → 7♠ på ♠AJT743 mot singel ♠6 (♠KQ
+  ute); svaret 5♠ räknade hjärterkungen och hjärterdamen. Frö 20473033: stoppet
+  5♠ passas med alla nyckelkort i hjärter. Följden av beslutet: den som vill
+  fråga i egen färg måste bjuda den naturligt först — bekräfta med ägaren, det
+  ändrar #94. (2) **Svararen-som-kapten** (`captainPlaceAfterRKC`) frågar aldrig
+  efter damen och bjuder 6 med fyra nyckelkort oavsett; frågaren stannar i 5
+  med fyra utan dam. "Sök slam, inget måste" behöver ett mått för boten
+  (trumflängd? extra värden?) — ägarfråga. I 6 av 23 "ingen fråga"-givar hade
+  partnern damen (auktionsdiffen nedan). (3) Billigaste sidokung visas i FÄRGordning (6♦ före 5♠),
+  inte billigaste bud. (4) Damen nekas nu på 9 kända trumf (6 egna + höjning =
+  3): frö 20485999 stannar i 5♥ med tio trumf i verkligheten.
+- **Auktionsdiffen för #95** (före/efter motorfixen): 30 000 + 200 000 givar,
+  11 + 59 ändrade, alla i dam-/kungfrågan. Återskapa: spara baslinjen med
+  ändringarna undanstoppade (`git stash`), `$env:DUMP_RANGE='20300001-20350000';
+  $env:DUMP_OUT='revisor-output/före.json'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`,
+  samma efter `git stash pop`, sedan `node scripts/auktionsdiff.mjs före.json efter.json`.
+- **Budförklarings-svepet är inte klart.** Betydelsesvepet jämför den härledda
+  förklaringen med motorns regel på varje botbud, på tre axlar: kravnivå, alert
+  och (ny 2026-10-02, informativ) FÖRVÄXLAD KONVENTION — båda konstlade men olika
+  konventioner, det de två första axlarna inte ser. Kört över **en miljon givar**
+  (2026-10-02): ostörda standardfrön är noll; över miljonen återstår på ostörda
+  auktioner 23 kravnivå- och 14 alertmönster, på störda 43 + 21 och 13 regler
+  utan kravnivå. Listan MÄTTAR: 87 mönster vid 100 000 givar, 116 vid en miljon;
+  de 29 som kom till förekommer högst 21 gånger per miljon — de stora syntes redan
+  vid 100 000. Störst, i ordning (antal per miljon givar):
+  1. **Responsiv dubbling läses som vanlig upplysningsdubbling** (13 000;
+     (1♦)–X–(2♦)–X) — rätt märken, men texten nämner inte responsiv.
+  2. **Spärrhöjning i konkurrens** (5 500; 2♦–(2♠)–3♦: motorn "avslut", läsaren
+     "tävlande höjning, ej krav").
+  3. **Cue-buden i konkurrens** läses alla som "stark höjning, minst limit"
+     (5 000 sammanlagt; öppnarens cue, negativ-dubblarens cue, stöd-cue, stark
+     tvåfärgs-cue över svag tvåa).
+  4. **Motorn bjuder ett naturligt kravbud, läsaren ser ett kontrollbud**
+     ("krav – rebjuder egen färg/ny färg/stödjer partnern", 2 500) och omvänt
+     (cue-bid läst som utgång/naturligt, 530).
+  5. **Regler i konkurrens utan kravnivå** (stark dubblare: fortsätter,
+     negativ-dubblaren accepterar inbjudan, rättelse till inklivsfärgen … 10 000).
+  6. **4 i lågfärg som slaminbjudan** läses "stöd/inbjudan 10–12/preferens,
+     svag hand" (1 100) · **2NT efter reverse** ("krav-svar" mot "11–12
+     inbjudan", 670) · **svar på game try** (600) · **Stayman följt av 2♠**
+     ("signoff" mot "inbjudan 8–9", 110).
+  Varje mönster är en fråga om vem som har rätt — motor eller läsare — och flera
+  är budfrågor för ägaren. Registrets kravnivå läses av partnern, så en rättad
+  registerrad kan ändra budgivningen (mät med auktionsdiffen).
+  Kör: `$env:BETYDELSE='1'; npx vitest run src/lib/engine/auction-meaning.probe.test.ts`
+  (standardfrön, 3 000 givar) · en miljon: lägg till
+  `$env:BETYDELSE_RANGE='20270001-21270000'; $env:BETYDELSE_OUT='revisor-output/betydelsesvep-1M.txt'`
+  (cirka tio minuter). Svepet ser bara bottarnas egna budvägar — en budföljd som
+  bara en människa väljer mäts inte, hur många givar som än körs.
+
 ## Parets färg i sang — spelförarsidans ledningsval (2026-10-01, speldiagnos fynd B, S8)
 - **Lagat:** i sang (9+ kort) leder spelförarsidan den färg som ger PARET flest
   stick att utveckla, inte den egna handens längsta/högsta (`declarerPartnershipSuitLead`),

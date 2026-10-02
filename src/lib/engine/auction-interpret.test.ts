@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { ResolvedCall } from '../bidding'
 import { interpretCall, interpretLastCall } from './auction-interpret'
 import { ruleInfo } from './rules'
+import { meaningOf } from './auction-meaning'
 
 // Facit för tolkningslagret (arbetsregel A). Kärnlöftet: ALDRIG tom förklaring.
 // Vi testar betydelse via nyckelord (robustare än exakt textmatchning).
@@ -774,5 +775,156 @@ describe('vår svaga tvåa + deras 2-lägesinkliv – dubblingen är upplysning 
     const r = interpretCall(h(['S', '2D'], ['W', '2H'], ['N', '3D']), 2)
     expect(r.text).toMatch(/tävlande/)
     expect(r.forcing).toBe('ej-krav')
+  })
+})
+
+// Felrapport #95 (bricka 4, 2026-10-01): Syd frågar 4NT, får 5♣ och ställer
+// trumfdam-frågan 5♦; Nord svarar riktigt 6♣ (dam + klöverkung) — men båda buden
+// förklarades "placerar utgången i ruter/klöver". Facit: hela damfrågesekvensen
+// (§6.1) läses som konvention — frågan, de tre svarstyperna och slutbudet.
+describe('felrapport #95 – trumfdam-frågan och svaren är konvention, inte utgångsbud', () => {
+  const bas: Array<[ResolvedCall['seat'], string]> = [
+    ['W', 'P'], ['N', '1H'], ['E', 'P'], ['S', '1S'], ['W', 'P'], ['N', '2H'], ['E', 'P'],
+    ['S', '4NT'], ['W', 'P'], ['N', '5C'], ['E', 'P'], ['S', '5D'], ['W', 'P'],
+  ]
+  const medSvar = (svar: string) => h(...bas, ['N', svar])
+
+  it('5♦ över 5♣-svaret = trumfdam-frågan (hjärter trumf), slamintresse och alert', () => {
+    const m = meaningOf(h(...bas.slice(0, 12)), 11)
+    expect(m.text).toMatch(/trumfdam/i)
+    expect(m.text).toMatch(/fråg/i)
+    expect(m.text).not.toMatch(/placerar/i)
+    expect(m.text).toMatch(/Säger inget om ruter/)
+    expect(m.forcing).toBe('slamintresse')
+    expect(m.alert).toBe(true)
+  })
+  it('6♣ = trumfdam + klöverkung (rapportens bud)', () => {
+    const m = meaningOf(medSvar('6C'), 13)
+    expect(m.text).toMatch(/trumfdam/i)
+    expect(m.text).toMatch(/kungen i klöver/)
+    expect(m.text).not.toMatch(/placerar/i)
+    expect(m.forcing).toBe('slamintresse')
+    expect(m.alert).toBe(true)
+  })
+  it('5♠ = trumfdam + spaderkung (kung över trumfen visas på 5-läget)', () => {
+    const r = interpretCall(medSvar('5S'), 13)
+    expect(r.text).toMatch(/trumfdam/i)
+    expect(r.text).toMatch(/kungen i spader/)
+  })
+  it('5 sang = trumfdam utan sidokung (inte Sjöbergs kungfråga)', () => {
+    const r = interpretCall(medSvar('5NT'), 13)
+    expect(r.text).toMatch(/trumfdam/i)
+    expect(r.text).toMatch(/ingen sidokung/)
+    expect(r.text).not.toMatch(/kungfråga/i)
+  })
+  it('5♥ = ingen trumfdam (tillbaka till trumf)', () => {
+    const r = interpretCall(medSvar('5H'), 13)
+    expect(r.text).toMatch(/ingen trumfdam/i)
+    expect(r.text).not.toMatch(/placerar/i)
+  })
+  it('frågarens 6♥ efter visad dam = lillslam på damen', () => {
+    const r = interpretCall(h(...bas, ['N', '6C'], ['E', 'P'], ['S', '6H']), 15)
+    expect(r.text).toMatch(/lillslam/i)
+    expect(r.text).toMatch(/trumfdamen visad/)
+  })
+  it('spader trumf, svar 5♣: 5♦ frågar och 5♠ nekar damen', () => {
+    const s = h(
+      ['W', '1S'], ['N', 'P'], ['E', '2C'], ['S', 'P'], ['W', '2S'], ['N', 'P'], ['E', '3H'], ['S', 'P'], ['W', '3S'], ['N', 'P'],
+      ['E', '4S'], ['S', 'P'], ['W', '4NT'], ['N', 'P'], ['E', '5C'], ['S', 'P'], ['W', '5D'], ['N', 'P'], ['E', '5S'],
+    )
+    expect(interpretCall(s, 16).text).toMatch(/trumfdam/i)
+    expect(interpretCall(s, 18).text).toMatch(/ingen trumfdam/i)
+  })
+  it('damfrågan finns bara UNDER 5-trumf: 5♠ över 5♦-svaret med hjärter som trumf är ingen damfråga', () => {
+    const s = h(
+      ['S', '2C'], ['W', 'P'], ['N', '2D'], ['E', 'P'], ['S', '2H'], ['W', 'P'], ['N', '4H'], ['E', 'P'],
+      ['S', '4NT'], ['W', 'P'], ['N', '5D'], ['E', 'P'], ['S', '5S'],
+    )
+    expect(interpretCall(s, 12).text).not.toMatch(/trumfdam-fråga/i)
+  })
+  it('stoppbudet 5♥ över 5♣-svaret är fortfarande stopp, inte damfråga', () => {
+    const r = interpretCall(h(...bas.slice(0, 11), ['S', '5H']), 11)
+    expect(r.text).toMatch(/stopp/i)
+    expect(r.forcing).toBe('avslut')
+  })
+})
+
+// Granskningen efter #95 ("se över alla variationer"): samma fel — ett
+// konventionsbud läst som utgång/naturligt — fanns i fler fråga-och-svar-
+// sekvenser på 4–6-läget. Hittade med betydelsesvepet över 100 000 givar.
+describe('#95-granskningen – fler slamfrågor lästes som utgångsbud', () => {
+  it('essfrågan efter Jacoby 2NT gäller högfärgen: 5♠-svaret och stoppet 5♥ läses rätt', () => {
+    // 1♠–2NT–3NT–4NT–5♠: förr "slaminbjudan i spader".
+    const a = interpretCall(h(['N', '1S'], ['E', 'P'], ['S', '2NT'], ['W', 'P'], ['N', '3NT'], ['E', 'P'], ['S', '4NT'], ['W', 'P'], ['N', '5S']), 8)
+    expect(a.text).toMatch(/svar på essfrågan/)
+    expect(a.text).toMatch(/med trumfdam/)
+    // 1♥–2NT–4♦–4NT–5♣–5♥: trumfen är hjärter (inte ruter) → 5♥ är stopp, inte damfråga.
+    const b = interpretCall(h(['N', '1H'], ['E', 'P'], ['S', '2NT'], ['W', 'P'], ['N', '4D'], ['E', 'P'], ['S', '4NT'], ['W', 'P'], ['N', '5C'], ['E', 'P'], ['S', '5H']), 10)
+    expect(b.text).toMatch(/stopp/i)
+    expect(b.text).not.toMatch(/trumfdam-fråga/)
+  })
+
+  describe('Exclusion efter tvetydig splinter + relä (§6.5)', () => {
+    const exc = h(['S', '1S'], ['W', 'P'], ['N', '3H'], ['E', 'P'], ['S', '3S'], ['W', 'P'], ['N', '5C'], ['E', 'P'], ['S', '5H'], ['W', 'P'], ['N', '5S'])
+    it('5♣ = Exclusion: renons i klöver, nyckelkortsfråga med spader som trumf', () => {
+      const m = meaningOf(exc.slice(0, 7), 6)
+      expect(m.text).toMatch(/Exclusion/)
+      expect(m.text).toMatch(/renons i klöver/)
+      expect(m.text).toMatch(/spader som trumf/)
+      expect(m.text).not.toMatch(/Hoppbud|lång färg/)
+      expect(m.forcing).toBe('slamintresse')
+      expect(m.alert).toBe(true)
+    })
+    it('5♥ = stegsvar (steg 2: 0 eller 3), inte hjärter', () => {
+      const r = interpretCall(exc.slice(0, 9), 8)
+      expect(r.text).toMatch(/steg 2/)
+      expect(r.text).toMatch(/0 eller 3/)
+      expect(r.text).toMatch(/Säger inget om hjärter/)
+    })
+    it('5♠ av kaptenen = stopp (två nyckelkort saknas)', () => {
+      const r = interpretCall(exc, 10)
+      expect(r.text).toMatch(/stopp/i)
+      expect(r.forcing).toBe('avslut')
+    })
+    it('kortfärgssvaret 4♣ följt av 5♥ är INTE Exclusion (ingen 5-lägesfråga ställd)', () => {
+      const r = interpretCall(h(['S', '1H'], ['W', 'P'], ['N', '3S'], ['E', 'P'], ['S', '3NT'], ['W', 'P'], ['N', '4C'], ['E', 'P'], ['S', '4H'], ['W', 'P'], ['N', '5H']), 10)
+      expect(r.text).not.toMatch(/Exclusion/)
+    })
+  })
+
+  describe('Gerber över 1NT-återbudet (§6.4): svaren och kungfrågan', () => {
+    const g = h(['W', '1C'], ['N', 'P'], ['E', '1H'], ['S', 'P'], ['W', '1NT'], ['N', 'P'], ['E', '4C'], ['S', 'P'], ['W', '4H'], ['N', 'P'], ['E', '5C'], ['S', 'P'], ['W', '5S'])
+    it('4♥ = ett ess — även när hjärter är svararens egen färg (förr "placerar utgången i hjärter")', () => {
+      const r = interpretCall(g.slice(0, 9), 8)
+      expect(r.text).toMatch(/svar på Gerber/)
+      expect(r.text).toMatch(/1 ess/)
+    })
+    it('4♦ efter 1♣-öppning = 0 eller 4 ess, inget kontrollbud', () => {
+      const r = interpretCall(h(['W', '1C'], ['N', 'P'], ['E', '1S'], ['S', 'P'], ['W', '1NT'], ['N', 'P'], ['E', '4C'], ['S', 'P'], ['W', '4D']), 8)
+      expect(r.text).toMatch(/svar på Gerber/)
+      expect(r.text).not.toMatch(/Kontrollbud/i)
+    })
+    it('5♣ = kungfrågan (förr "stannar i utgång efter kontrollbuden")', () => {
+      const m = meaningOf(g.slice(0, 11), 10)
+      expect(m.text).toMatch(/kungfråga/)
+      expect(m.forcing).toBe('slamintresse')
+      expect(m.alert).toBe(true)
+    })
+    it('5♠ = två kungar', () => {
+      const r = interpretCall(g, 12)
+      expect(r.text).toMatch(/2 kungar/)
+    })
+    // Miljonsvepet (2026-10-02): Gerber över 2NT-öppningen.
+    it('4 sang efter ess-svaret = stannar (två ess saknas), ingen essfråga', () => {
+      const r = interpretCall(h(['S', '2NT'], ['W', 'P'], ['N', '4C'], ['E', 'P'], ['S', '4D'], ['W', 'P'], ['N', '4NT']), 6)
+      expect(r.text).toMatch(/stannar/)
+      expect(r.text).not.toMatch(/1430 RKC/)
+      expect(r.forcing).toBe('avslut')
+    })
+    it('5♣ efter svaret 4 sang (3 ess) = kungfrågan, inte ett RKC-svar', () => {
+      const r = interpretCall(h(['N', '2NT'], ['E', 'P'], ['S', '4C'], ['W', 'P'], ['N', '4NT'], ['E', 'P'], ['S', '5C']), 6)
+      expect(r.text).toMatch(/kungfråga/)
+      expect(r.text).not.toMatch(/nyckelkort/)
+    })
   })
 })
