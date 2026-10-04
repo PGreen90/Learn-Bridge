@@ -34,14 +34,27 @@ describe('felrapport #94 – svararen med lång egen färg efter öppnarens hopp
   it('rapportens Öst (15 hp, åtta hjärter) → 4NT RKC, inte 4♥', () => {
     expect(ost('S:K54 H:AKQJT973 D:Q C:7').bid).toBe('4NT')
   })
-  it('hela auktionen landar i 7♥ — 5♦ (0/3) mot visade 19+ läses som 3 med visshet (uteslutningsmetoden, ägarbeslut 2026-09-30)', () => {
+  // Ägarbeslut 2026-10-02: "4NT gäller alltid den senast ÄKTA bjudna färgen" —
+  // här klöver (hoppskiftet), för frågaren OCH svararen. Öst räknar därför svaret
+  // i klöver, som Väst gav det: 5♦ = 3 (uteslutningsmetoden) + eget hjärteress =
+  // fyra av de fem nyckelkorten (♠A ♥A ♦A ♣A ♣K). Vilket som saknas — ett ess
+  // eller klöverkungen — går inte att veta → lillslam i egen färg, inte storslam.
+  // Förr räknade Öst i hjärter (eget ess + kung = 2, plus 3 = "alla fem") och
+  // bjöd 7♥ på ett svar som aldrig lovat det (samma fel gav 7♠ med ♠KQ ute på
+  // frö 20437408).
+  it('hela auktionen landar i 6♥ — svaret räknas i klöver (senast äkta bjudna färg), kontraktet läggs i hjärter', () => {
     const h: ResolvedCall[] = []
     let guard = 0
     while (!auctionComplete(h) && guard++ < 40) h.push(decideCall(RAPPORT, h, seatToAct(RAPPORT.dealer, h.length)))
-    expect(h.filter((c) => c.bid !== 'P').map((c) => c.bid)).toEqual(['1D', '1H', '3C', '4NT', '5D', '5NT', '6D', '7H'])
+    expect(h.filter((c) => c.bid !== 'P').map((c) => c.bid)).toEqual(['1D', '1H', '3C', '4NT', '5D', '6H'])
     const k = contractFromCalls(h)!
     expect(k.strain).toBe('hearts')
-    expect(k.level).toBe(7)
+    expect(k.level).toBe(6)
+  })
+  it('essfrågan säger själv vilken färg den räknas i (klöver) och var kontraktet läggs (hjärter)', () => {
+    const c = ost('S:K54 H:AKQJT973 D:Q C:7')
+    expect(c.explanation).toMatch(/♣ som trumf/)
+    expect(c.explanation).toMatch(/placeras i ♥/)
   })
   it('sex hjärter men bara 9 hp (28 mot visade 19) → ingen essfråga, 4♥ som förr', () => {
     expect(ost('S:854 H:AQJT97 D:Q6 C:73').bid).toBe('4H')

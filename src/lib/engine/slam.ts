@@ -81,6 +81,52 @@ export function respondToRKC(hand: Hand, trump: Suit, knownCombinedLen?: number)
 }
 
 /**
+ * Damfrågan (§6.1): billigaste färgbud över ett TVETYDIGT nyckelkortssvar (5♣/5♦)
+ * som ligger UNDER stoppbudet 5-trumf. null = ingen fråga finns:
+ *  · svaret var 5♥/5♠ — det har redan nekat/visat damen;
+ *  · billigaste steget ligger över 5-trumf (hjärter trumf, svar 5♦ → 5♠; all
+ *    lågfärgstrumf) — partnern kan då inte neka i 5-trumf, så budet avgör
+ *    ingenting och är INTE damfrågan, varken för frågaren eller svararen
+ *    (felrapport #95-granskningen).
+ */
+export function queenAskBid(trump: Suit, answerBid: string): string | null {
+  if (answerBid !== '5C' && answerBid !== '5D') return null
+  const signoff = `5${LETTER[trump]}`
+  const ask = ['5D', '5H', '5S'].find((b) => LADDER.indexOf(b) > LADDER.indexOf(answerBid) && b !== signoff)
+  return ask && LADDER.indexOf(ask) < LADDER.indexOf(signoff) ? ask : null
+}
+
+/** Fyra nyckelkort, damen okänd och omöjlig att fråga efter: lillslam från så här många KÄNDA trumf (ägarbeslut 2026-10-04). */
+export const SLAM_PÅ_FYRA_FRÅN_TRUMF = 8
+
+/** Vad kaptenen gör efter nyckelkortssvaret — ägarens slamtabell (2026-10-02, §6.1). */
+export type SlamVal = 'sök-storslam' | 'lillslam' | 'fråga-dam' | 'stanna'
+
+/**
+ * ÄGARENS SLAMTABELL (2026-10-02): fråga efter damen när det går.
+ *   5 nyckelkort + dam → sök storslam · 5 utan dam → alltid lillslam
+ *   4 + dam → alltid lillslam · 4 utan säkrad dam → "sök slam, inget måste":
+ *     1. går damen att fråga efter → FRÅGA (svaret avgör: visad → slam, nekad →
+ *        stanna; Bricka 14, ägarbeslut 2026-09-12);
+ *     2. har svaret redan NEKAT damen (5♥) → stanna;
+ *     3. går den inte att fråga efter → lillslam med 8+ KÄNDA trumf (ägarbeslut
+ *        2026-10-04: "8 kända trumf räcker"), annars stanna.
+ *   färre → stanna.
+ * `damSäkrad` = hållen, visad i svaret (5♠) eller bevisad 10-korts fit — med tio
+ * trumf i paret räknas damen som hållen, av båda stolarna.
+ */
+export function slamValEfterSvar(nyckelkort: number, damSäkrad: boolean, kändaTrumf: number, kanFråga: boolean, damNekad = false): SlamVal {
+  if (nyckelkort >= 5) return damSäkrad ? 'sök-storslam' : 'lillslam'
+  if (nyckelkort === 4) {
+    if (damSäkrad) return 'lillslam'
+    if (kanFråga) return 'fråga-dam'
+    if (damNekad) return 'stanna'
+    return kändaTrumf >= SLAM_PÅ_FYRA_FRÅN_TRUMF ? 'lillslam' : 'stanna'
+  }
+  return 'stanna'
+}
+
+/**
  * Svar på trumfdam-frågan (billigaste icke-trumf UNDER 5-trumf efter 5♣/5♦). §6.1.
  * `knownCombinedLen` som i `hasTrumpQueen`: längd ersätter damen bara vid
  * bevisad 10-korts fit (samma ärliga regel som i RKC-svaret).

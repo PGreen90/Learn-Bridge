@@ -114,6 +114,13 @@ export function partnerShownTrumpLength(f: AuctionFacts, trump: Suit): number {
     return open.level + 4 // spärr (3→7, 4→8)
   }
   if (f.jacobyTrump === trump) return 4 // partnern satte fiten med Jacoby 2NT (4+ stöd)
+  // Partnern bjöd färgen SJÄLV, före mig (egen färg, inte en höjning): 4+ —
+  // 5+ när hen öppnade stark 2♣ (rebudet där är en egen 5+ färg).
+  // (Slamtabellen 2026-10-02: förr räknades en egen färg som en höjning, golv 3.)
+  const först = f.history.find((c) => parseContractBid(c.bid)?.strain === L)
+  if (först && först.seat === partner) {
+    return open && open.seat === partner && open.level === 2 && open.strain === 'C' ? 5 : 4
+  }
   return 3 // partnern har agreed trumf (höjning) → golv 3
 }
 

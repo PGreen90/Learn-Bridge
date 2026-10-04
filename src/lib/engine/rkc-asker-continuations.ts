@@ -30,12 +30,12 @@
 // seat-agnostisk.
 
 import type { Hand, Suit } from '../../types/bridge'
-import { parseContractBid, PARTNER, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { auctionFacts, parseContractBid, PARTNER, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { bidValue, letterOfSuit, SWE_SYM } from './auction-rules'
 import { lengths } from './hand'
 import { side } from './play'
-import { keycards, respondToQueenAsk } from './slam'
-import { partnerShownTrumpLength, slamAskTrumpAtAnswer } from './slam-answer-continuations'
+import { keycards, queenAskBid, respondToQueenAsk, slamValEfterSvar } from './slam'
+import { partnerShownTrumpLength, slamAskTrump, slamAskTrumpAtAnswer } from './slam-answer-continuations'
 import type { Kunskap } from './overcall-continuations'
 
 /** Budets rang (1♣=… ; pass/X/XX = -1) för lagligt-jämförelser. */
@@ -56,6 +56,10 @@ const heldQueen = (hand: Hand, trump: Suit) => hand.some((c) => c.suit === trump
  * Jacoby-fiten (naturlig trumf utan färgbud) är den enda undantagsvägen.
  */
 function askerTrump(f: AuctionFacts, myAskIdx: number): Suit | null {
+  // Ägarbeslut 2026-10-02: frågare och svarare läser SAMMA färg — den partnern
+  // räknar i när hen svarar (`slamAskTrump` sedd från partnerns stol vid frågan).
+  const partnerns = slamAskTrump(auctionFacts(f.history.slice(0, myAskIdx + 1), PARTNER[f.seat]))
+  if (partnerns) return partnerns
   for (let i = myAskIdx - 1; i >= 0; i--) {
     const c = f.history[i]
     if (side(c.seat) !== side(f.seat)) continue
@@ -68,22 +72,8 @@ function askerTrump(f: AuctionFacts, myAskIdx: number): Suit | null {
   return f.jacobyTrump ?? null
 }
 
-/**
- * Damfrågan: billigaste färgbud över ett TVETYDIGT nyckelkortssvar (5♣/5♦) som
- * ligger UNDER stoppbudet 5-trumf. null = ingen fråga finns:
- *  · svaret var 5♥/5♠ — det har redan nekat/visat damen;
- *  · billigaste steget ligger över 5-trumf (hjärter trumf, svar 5♦ → 5♠; all
- *    lågfärgstrumf) — partnern kan då inte neka i 5-trumf, så budet avgör
- *    ingenting. Ett sådant bud är INTE damfrågan, varken för frågaren eller
- *    svararen (felrapport #95-granskningen: förr "frågade" boten ändå, det
- *    olagliga nekandet blev pass, och frågebudet 5♠/5♦ spelades som slutbud).
- */
-function queenAskCall(trump: Suit, answerBid: string): string | null {
-  if (answerBid !== '5C' && answerBid !== '5D') return null
-  const signoff = `5${letterOfSuit(trump)}`
-  const ask = ['5D', '5H', '5S'].find((b) => rank(b) > rank(answerBid) && b !== signoff)
-  return ask && rank(ask) < rank(signoff) ? ask : null
-}
+/** Damfrågan — delad med kaptensvägen (`queenAskBid` i slam.ts). */
+const queenAskCall = queenAskBid
 
 /** Partnerns nyckelkort ur svaret + egen räkning (konservativt: det låga
  *  alternativet när svaret är tvetydigt — svararens rättelse backar upp). */
@@ -117,19 +107,18 @@ function placeAfterKeycards(hand: Hand, trump: Suit, f: AuctionFacts, answerBid:
     return { call: `6${L}`, rule: 'slamavslut', explanation: `svaret gick förbi stoppnivån → 6${SYM}.` }
   }
 
-  // Ägarens slamregel (2026-10-02): 5 nyckelkort = alltid slam, även utan damen
-  // (med damen söks storslam — som den här vägen inte bjuder, se AVGRÄNSNING);
-  // 4 nyckelkort + dam = alltid slam; 4 utan dam = "sök slam, inget måste".
-  if (total >= 5) {
-    return { call: `6${L}`, rule: 'slamavslut', explanation: `alla fem nyckelkort → 6${SYM} (lillslam), med eller utan trumfdamen.` }
-  }
-  if (queenSecured(hand, trump, f, answerBid)) {
-    return { call: `6${L}`, rule: 'slamavslut', explanation: `ett nyckelkort saknas, trumfdamen säkrad → 6${SYM} (lillslam).` }
-  }
-  // Fyra nyckelkort och damen inte säkrad → den avgör slammen. Finns frågan (se
-  // `queenAskCall`) ställs den; annars stannar vi i utgång.
+  // Ägarens slamtabell (2026-10-02, §6.1; `slamValEfterSvar`): 5 nyckelkort =
+  // alltid slam (storslam söks inte på den här vägen, se AVGRÄNSNING) · 4 + dam =
+  // alltid slam · 4 utan dam = "sök slam, inget måste": damfrågan när den finns;
+  // annars lillslam med 8+ kända trumf — men stopp när 5♥-svaret nekat damen.
+  const kända = lengths(hand)[trump] + partnerShownTrumpLength(f, trump)
   const ask = queenAskCall(trump, answerBid)
-  if (ask) {
+  const val = slamValEfterSvar(total, queenSecured(hand, trump, f, answerBid), kända, ask !== null, answerBid === '5H')
+  if (val === 'sök-storslam' || val === 'lillslam') {
+    const varför = total >= 5 ? 'alla fem nyckelkort' : queenSecured(hand, trump, f, answerBid) ? 'ett nyckelkort saknas, trumfdamen säkrad' : `ett nyckelkort saknas, damen osäkrad men ${kända}+ kända trumf`
+    return { call: `6${L}`, rule: 'slamavslut', explanation: `${varför} → 6${SYM} (lillslam).` }
+  }
+  if (val === 'fråga-dam' && ask) {
     const askSym = `${ask[0]}${SWE_SYM[ask[1] as 'C' | 'D' | 'H' | 'S']}`
     return { call: ask, rule: 'trumfdam-fråga', explanation: `Alla nyckelkort utom ett — men trumfdamen är inte säkrad → ${askSym} frågar damen; visas den bjuds 6${SYM}, annars står 5${SYM}.` }
   }

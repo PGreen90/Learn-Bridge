@@ -10,21 +10,42 @@
   bjudna färgen (konventioner/kontrollbud räknas inte) · fråga efter damen när
   det går · 5 nyckelkort + dam = sök storslam · 5 utan dam = alltid slam · 4 +
   dam = alltid slam · 4 utan dam = sök slam, inget måste.
-- **Byggt av besluten:** frågaren bjuder lillslam med alla fem nyckelkort även
-  när damen nekats/inte går att fråga efter.
-- **INTE byggt — nästa bygge:** (1) **Kaptenen efter hoppskift (#94) frågar i
-  EGEN färg**, partnern svarar i den senast bjudna — bryter mot beslutet. Frö
-  20437408: 1♥–1♠–3♣–3♦–3♥–4NT–5♠–5NT → 7♠ på ♠AJT743 mot singel ♠6 (♠KQ
-  ute); svaret 5♠ räknade hjärterkungen och hjärterdamen. Frö 20473033: stoppet
-  5♠ passas med alla nyckelkort i hjärter. Följden av beslutet: den som vill
-  fråga i egen färg måste bjuda den naturligt först — bekräfta med ägaren, det
-  ändrar #94. (2) **Svararen-som-kapten** (`captainPlaceAfterRKC`) frågar aldrig
-  efter damen och bjuder 6 med fyra nyckelkort oavsett; frågaren stannar i 5
-  med fyra utan dam. "Sök slam, inget måste" behöver ett mått för boten
-  (trumflängd? extra värden?) — ägarfråga. I 6 av 23 "ingen fråga"-givar hade
-  partnern damen (auktionsdiffen nedan). (3) Billigaste sidokung visas i FÄRGordning (6♦ före 5♠),
-  inte billigaste bud. (4) Damen nekas nu på 9 kända trumf (6 egna + höjning =
-  3): frö 20485999 stannar i 5♥ med tio trumf i verkligheten.
+- **Byggt av besluten (2026-10-03):** frågare och svarare räknar alltid samma
+  färg (kaptenen räknar i partnerns läsning, placerar i egen färg bara när den
+  bär sig själv; trumfvakten stoppar en fråga partnern läser som kvantitativ) ·
+  slamtabellen + damfrågan i BÅDA vägarna · fyra nyckelkort utan säkrad dam:
+  fråga när det går (nekad → stanna), annars slam med 8+ kända trumf (ägarbeslut
+  2026-10-04) · tio kända trumf räknas som trumfdam av båda stolarna. Facit
+  `auction-slamtabell.test.ts`.
+- **Bevaka:** (1) **#94-given slutar i 6♥, inte 7♥.** Svaret räknas i klöver;
+  vilket av de fem nyckelkorten som saknas (ett ess eller ♣K) går inte att veta.
+  Storslam bjuds inte när kontraktet läggs i en annan färg än räknefärgen.
+  (2) **Stoppet "på damen" lyfts ibland ändå:** stannar kaptenen i 5-trumf efter
+  ett tvetydigt svar läser partnern det som "pass med det låga, bjud med det
+  höga" och lyfter till 6 med det höga antalet (frö 20300173). Slammen bjuds då
+  ändå — stoppet biter bara efter 5♥-svaret eller när partnern har det låga.
+  (3) **Slamtabellens pris, mätt:** på 200 000 givar ändrades 139 slutkontrakt;
+  94 slammar bjuds inte längre — 46 gick bet på double-dummy, 48 stod (DD hittar
+  alltid damen, så siffran smickrar slammen); nästan alla är damfrågor som
+  nekats. Gränsen 8 kända trumf är EN siffra (`SLAM_PÅ_FYRA_FRÅN_TRUMF` i
+  `slam.ts`) och gäller bara när damen inte går att fråga efter. Mät med
+  `slamtabell-dd.probe.test.ts` (kommandot står i filen).
+  Storslam: 24 bjuds inte längre (5 bet, 19 stod — de byggde på "dam på
+  längd"), 6 nya via damfrågan (alla står).
+  (4) Billigaste sidokung visas i FÄRGordning (6♦ före 5♠), inte billigaste bud.
+  (5) "Kända trumf" är golv: en höjning räknas som 3, en egen färg som 4.
+- **"Gärna kontrollbud före essfrågan" (ägaren 2026-10-04) — INTE byggt, mätt:**
+  bara 886 av 2 675 essfrågor (200 000 givar) föregås av ett kontrollbud. Störst
+  utan: stark 2♣ + positivt svar + återbud (595 — går rakt på 4NT), essfrågan
+  över partnerns utgångsplacering (222, där ryms inget kontrollbud), hopphöjning
+  och hopp i egen färg (122), Jacoby minimum (72). NU-kandidat; siffran skrivs av
+  trumfsonden (sista avsnittet i `revisor-output/rkc-trumf.txt`).
+- **Trumfsonden** (frågare mot svarare, ska vara 0):
+  `$env:RKCTRUMF='1'; npx vitest run src/lib/engine/rkc-trumf.probe.test.ts`
+  (200 000 givar, cirka en minut). Den skriver också hur ofta bottarnas essfrågor
+  avviker från den rena regeln "senast äkta bjudna färg" — mest fit-auktioner
+  där trumfen satts tidigare (Jacoby, inverterad minor) och motorns egna
+  etiketter ("krav – ny färg" för det partnern läser som kontrollbud).
 - **Auktionsdiffen för #95** (före/efter motorfixen): 30 000 + 200 000 givar,
   11 + 59 ändrade, alla i dam-/kungfrågan. Återskapa: spara baslinjen med
   ändringarna undanstoppade (`git stash`), `$env:DUMP_RANGE='20300001-20350000';
