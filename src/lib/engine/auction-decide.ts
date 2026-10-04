@@ -477,7 +477,9 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
     // Ägarbeslut 2026-10-02: 4NT gäller den senast ÄKTA bjudna färgen —
     // hoppskiftets. Kaptenen RÄKNAR därför svaret i den (som partnern), men
     // placerar i sin egen färg. Förr räknade kaptenen i egen färg (frö 20333311).
-    return { ctx: { partnerMin: 19, gameForcing: true, countIn: rebidSuit ?? undefined } }
+    // Ingen trumf är överenskommen här → inga kontrollbud (ett bud i öppnarens färg vore
+    // en preferens, inte en kontroll): essfrågan direkt.
+    return { ctx: { partnerMin: 19, countIn: rebidSuit ?? undefined } }
   }
 
   // Reverse (16+) / hoppskift (19+): trumf = öppnarens andra eller första färg.

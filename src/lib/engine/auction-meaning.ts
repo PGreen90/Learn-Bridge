@@ -1304,7 +1304,7 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     cb.level === 4 &&
     bidRank(cb) < bidRank({ level: 4, strain: majorFit })
   ) {
-    return R('cue-bid', `Kontrollbud (${cb.level}${sym}) — ${NAME[majorFit]} är redan trumf (8-korts fit), så ${cb.level}${sym} visar första-rondskontroll (ess eller renons) i ${name} och slamintresse. Partnern cue:ar tillbaka en egen kontroll eller stannar i 4${SYMBOL[majorFit]}.`)
+    return R('cue-bid', `Kontrollbud (${cb.level}${sym}) — ${NAME[majorFit]} är redan trumf (8-korts fit), så ${cb.level}${sym} visar kontroll (ess, kung-dam, singel eller renons — motståndarna kan inte ta två raka stick) i ${name} och slamintresse. Partnern cue:ar tillbaka en egen kontroll eller stannar i 4${SYMBOL[majorFit]}.`)
   }
 
   // Inklivarens utgångsförsök efter advancerns ENKLA höjning, och advancerns
@@ -2636,7 +2636,7 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
     const balanced = (u.bids.length > 1 && same(u.bids[0].cb, 2, 'C') && same(u.bids[1].cb, 2, 'NT')) || puppetFiveCardShown(u)
     const t = impliedCueTrump(cb, ps, partnerS, own, balanced)
     if (t) {
-      return R('cue-bid', `Kontrollbud ${B(cb)} — sätter partnerns ${NAME[t]} som trumf och visar kontroll (ess/renons) i ${name}, slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${gameIn(t).level}${SYMBOL[t]}.`)
+      return R('cue-bid', `Kontrollbud ${B(cb)} — sätter partnerns ${NAME[t]} som trumf och visar kontroll (ess, kung-dam, singel eller renons — motståndarna kan inte ta två raka stick) i ${name}, slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${gameIn(t).level}${SYMBOL[t]}.`)
     }
   }
 
@@ -2666,7 +2666,7 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
     const placering = inPartnerSuit && isMajor(cb.strain) && cb.level === 4 && !lastWasCue
     if (ok && !jacobyReply && !splinterReply && !placering && (!inPartnerSuit || agreed)) {
       const tsym = SYMBOL[trump]
-      return R('cue-bid', `Kontrollbud ${B(cb)} — ${NAME[trump]} är trumf, så budet visar kontroll (ess/renons, senare kung/singel) i ${name} och slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${game.level}${tsym}.`)
+      return R('cue-bid', `Kontrollbud ${B(cb)} — ${NAME[trump]} är trumf, så budet visar kontroll (ess, kung-dam, singel eller renons — motståndarna kan inte ta två raka stick) i ${name} och slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${game.level}${tsym}.`)
     }
   }
   return null
@@ -3328,7 +3328,7 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
     if (same(resp, 2, 'NT') && !u.responderPassed) {
       // Svararens fortsättning efter Jacoby 2NT + öppnarens beskrivning.
       if (same(cb, 4, M)) return R('utgång', `${B(cb)} — placerar utgången i ${mname}, inget slamintresse.`)
-      if (cb.strain !== 'NT' && cb.strain !== M) return R('cue-bid', `Kontrollbud ${B(cb)} — första-rondskontroll (ess/renons) i ${name}, slamintresse mot ${mname}trumfen.`)
+      if (cb.strain !== 'NT' && cb.strain !== M) return R('cue-bid', `Kontrollbud ${B(cb)} — kontroll (ess, kung-dam, singel eller renons — motståndarna kan inte ta två raka stick) i ${name}, slamintresse mot ${mname}trumfen.`)
       if (same(cb, 3, M)) return N(`${B(cb)} — minimum för Jacoby 2NT, inget slamintresse; partnern placerar.`, 'utgangskrav')
       if (same(cb, 3, 'NT')) return N(`3 sang — förslag till spel i sang trots fiten.`, 'avslut')
       return null

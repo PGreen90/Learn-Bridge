@@ -87,7 +87,7 @@ describe('slamInvestigation – kanske-zonen (31–32): inbjudan, partnern döme
 })
 
 describe('buildAuction – slam växer fram via Jacoby 2NT (cue-bud återinförda 2026-08-03)', () => {
-  it('1S–2NT–3S–4D–4H–4NT–5D–5H–6D–6S: cue-ronden (♦A, ♥A) före RKC, damfrågan före 6S', () => {
+  it('1S–2NT–3S–4C–4H–4NT–5D–5H–6D–6S: kontrollbuden (♣K-D, ♥A) före RKC, damfrågan före 6S', () => {
     const deal: Deal = {
       id: 'slam-jacoby',
       dealer: 'N',
@@ -101,12 +101,14 @@ describe('buildAuction – slam växer fram via Jacoby 2NT (cue-bud återinförd
       },
     }
     const a = buildAuction(deal)!
-    // GF (Jacoby 2NT): cue fritt under utgång — Syd ♦A (4♦), Nord ♥A (4♥), bara
-    // klöver saknar första-rondskontroll → 4NT RKC. Fyra nyckelkort i paret och
+    // GF (Jacoby 2NT): kontrollbud fritt under utgång — Syd visar billigaste
+    // kontroll, klöver (K-D: motståndarna kan inte ta två raka stick; ägarens
+    // definition 2026-10-04), Nord ♥A (4♥ — hoppar över ruter, ♦K2 är ingen
+    // kontroll); Syd håller rutern själv → 4NT RKC. Fyra nyckelkort i paret och
     // Syd håller inte spaderdamen → "fråga efter dam när man kan" (ägarbeslut
     // 2026-10-02): 5♥ frågar, Nord visar dam + ruterkung (6♦) → 6♠ (samma slutbud).
-    expect(a.turns.slice(0, 10).map((t) => t.call)).toEqual(['1S', '2NT', '3S', '4D', '4H', '4NT', '5D', '5H', '6D', '6S'])
-    expect(a.turns.filter((t) => t.rule === 'cue-bid').map((t) => t.call)).toEqual(['4D', '4H'])
+    expect(a.turns.slice(0, 10).map((t) => t.call)).toEqual(['1S', '2NT', '3S', '4C', '4H', '4NT', '5D', '5H', '6D', '6S'])
+    expect(a.turns.filter((t) => t.rule === 'cue-bid').map((t) => t.call)).toEqual(['4C', '4H'])
   })
 })
 

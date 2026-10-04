@@ -42,10 +42,9 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { bergenPoints, dummyPoints, wastedHonorsOppositeShortness } from './evaluation'
-import { hcp, lengths } from './hand'
+import { hasRealControl, hcp, lengths } from './hand'
 import {
   exclusionKeycards,
-  firstRoundControl,
   hasTrumpQueen,
   keycards,
   queenAskBid,
@@ -331,7 +330,7 @@ const cueTurn = (role: SlamRole, cue: { call: string; suit: Suit }): SlamTurn =>
   role,
   call: cue.call,
   rule: 'cue-bid',
-  explanation: `första-rondskontroll i ${SYM[cue.suit]} → ${cue.call[0]}${SYM[cue.suit]}.`,
+  explanation: `kontroll i ${SYM[cue.suit]} (ess, kung-dam, singel eller renons) → ${cue.call[0]}${SYM[cue.suit]}.`,
 })
 const rkcAskTurn = (ctx: SlamContext, trump: Suit): SlamTurn => ({
   role: 'svarare',
@@ -409,7 +408,7 @@ function cheapestBidInSuit(suit: Suit, lastRank: number): string | null {
   return null
 }
 
-/** Billigaste GRATIS cue: första-rondskontroll i en sidofärg vars bud ligger
+/** Billigaste GRATIS cue: äkta kontroll (`hasRealControl`) i en sidofärg vars bud ligger
  *  över `lastRank` men UNDER utgång (`gameRank`). Redan visade färger (`shown`)
  *  hoppas över — ingen re-cue:ar en kontroll. null = ingen gratis cue. */
 function cheapestFreeCue(
@@ -422,7 +421,11 @@ function cheapestFreeCue(
   let best: { call: string; suit: Suit } | null = null
   for (const s of RANK_ORDER) {
     if (s === trump || shown.has(s)) continue
-    if (!firstRoundControl(hand, s)) continue
+    // KONTROLL = motståndarna kan inte ta två raka stick i färgen: ess, kung och
+    // dam, singel eller renons (ägarens definition 2026-09-28, bekräftad
+    // 2026-10-04 — förr räknades bara ess/renons, så en hand med singel eller
+    // K-D hoppade över kontrollbudet och gick rakt på 4NT).
+    if (!hasRealControl(hand, s)) continue
     const call = cheapestBidInSuit(s, lastRank)
     if (!call || bidRank(call) >= gameRank) continue // saknas eller når/passerar utgång
     if (!best || bidRank(call) < bidRank(best.call)) best = { call, suit: s }
@@ -502,7 +505,7 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
   if (role === CAPTAIN) {
     // Kaptenen avgör: driv förbi utgången eller avslut. Okontrollerad sidofärg
     // = varken visad (av någon) eller kontrollerad på kaptenens EGEN hand.
-    const uncontrolled = RANK_ORDER.filter((s) => s !== trump && !controlled.has(s) && !firstRoundControl(hand, s))
+    const uncontrolled = RANK_ORDER.filter((s) => s !== trump && !controlled.has(s) && !hasRealControl(hand, s))
     const driveFloor = ctx.strictDrive ? 33 : 31
     if (floor >= driveFloor && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx, trump)
     if (bidRank(game) > lastRank) return { role: 'svarare', call: game, rule: 'cue: avslut', explanation: `otillräckligt för slam → utgång (${game[0]}${SYM[trump]}).` }

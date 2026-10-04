@@ -76,20 +76,21 @@ describe('kaptenen (svararen) frågar efter damen i stället för att bjuda 6 di
   // (tre egna + öppnarens fem) → damfrågan 5♥. Förr 6♠ direkt.
   it('fyra nyckelkort, åtta kända trumf, damen osäkrad → 5♥ frågar; damen visas → 6♠', () => {
     const d = giv('E', 'S:JT92 H:A85 D:Q6 C:K962', 'S:754 H:KQT6 D:832 C:AQ8', 'S:- H:J9742 D:JT94 C:JT75', 'S:AKQ863 H:3 D:AK75 C:43')
-    expect(bud(d)).toEqual(['W:2C', 'E:2NT', 'W:3S', 'E:4C', 'W:4D', 'E:4NT', 'W:5D', 'E:5H', 'W:6D', 'E:6S'])
+    expect(bud(d)).toEqual(['W:2C', 'E:2NT', 'W:3S', 'E:4C', 'W:4D', 'E:4H', 'W:4S', 'E:4NT', 'W:5D', 'E:5H', 'W:6D', 'E:6S'])
   })
 })
 
 describe('4NT gäller den senast äkta bjudna färgen — frågare och svarare räknar samma', () => {
-  // Frö 20437408: Nord frågade förr i EGEN spader medan Syd svarade i hjärter
-  // (5♠ = hjärterkung + hjärterdam) → 7♠ på ♠AJT743 mot singel, ♠KQ ute.
-  // Nu räknar Nord i hjärter (som Syd), och spadern bär sig inte själv → 6♥.
-  it('egen färg som inte bär sig själv → kontraktet läggs i partnerns färg (6♥, inte 7♠)', () => {
+  // Frö 20437408: Nord frågade förr i EGEN spader medan Syd svarade i en annan
+  // färg → 7♠ på ♠AJT743 mot singel, ♠KQ ute. Nu gäller frågan den senast äkta
+  // bjudna färgen (klöver, hoppskiftet) för båda, och spadern bär sig inte
+  // själv → kontraktet läggs i partnerns färg: 6♣ (♣QJ mot ♣AK843).
+  it('egen färg som inte bär sig själv → kontraktet läggs i partnerns färg (6♣, inte 7♠)', () => {
     const d = giv('S', 'S:AJT743 H:A3 D:AJT C:QJ', 'S:KQ5 H:7652 D:Q653 C:T2', 'S:6 H:KQJ84 D:K2 C:AK843', 'S:982 H:T9 D:9874 C:9765')
     const h = botAuction(d)!
-    expect(contractFromCalls(h)).toMatchObject({ level: 6, strain: 'hearts' })
+    expect(contractFromCalls(h)).toMatchObject({ level: 6, strain: 'clubs' })
     const ask = h.find((c) => c.bid === '4NT')!
-    expect(ask.explanation).toMatch(/♥ som trumf/)
+    expect(ask.explanation).toMatch(/♣ som trumf/)
   })
   // Frö 20279551: samma budväg, men Nords spader är ♠AKQJ53 — bär sig själv.
   // Svaret räknas i hjärter (alla fem nyckelkort) och kontraktet läggs i spader.
