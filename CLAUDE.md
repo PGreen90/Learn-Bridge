@@ -10,21 +10,22 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt (felrapport #95 LIVE `a5bae94` 2026-10-02) — ägaren väljer nästa: kandidaterna nedan eller NÄST 1
-**Felrapport #95** (damfrågan 5♦ och svaret 6♣ förklarades "placerar utgången"):
-betydelselagret läser nu damfrågan + svaren, Exclusion, Gerber (svar, stopp, kungfråga)
-och RKC-svaret efter Jacoby. Budfel i damfrågan lagade: ingen fråga över 5-trumf eller
-efter 5♥-svaret (frågebudet 5♠ spelades som slutbud) · svararen läser trumfen före sitt
-eget stegsvar · dam på längd bara vid bevisad 10-korts fit. Facit
-`auction-interpret.test.ts` + `auction-slam-rkc-asker.test.ts`.
-**Ägarbeslut 2026-10-02 (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
-fråga efter damen när det går · 5 nyckelkort = alltid slam (med dam: sök storslam) ·
-4 + dam = alltid slam · 4 utan dam = sök slam, inget måste.
-**NU-kandidater (detalj + kommandon `docs/bevaka.md`):** (1) bygg besluten fullt ut —
-kaptenen efter hoppskift (#94) räknar ännu svaret i egen färg, kaptenen-svararen frågar
-aldrig efter damen; (2) budförklarings-svepet — betydelsesvepet (en miljon givar) är
-noll på ostörda standardfrön, rött på störda; störst: responsiv dubbling läses som
-upplysningsdubbling. Flera mönster är budfrågor — fråga ägaren, bygg inte på gissning.
+### 🔵 NU — tomt (ägarbesluten om 4NT + slamtabellen byggda 2026-10-04, EJ pushade) — ägaren väljer nästa
+**Ägarbeslut 2026-10-02 (bok §6.1), byggda fullt ut:** 4NT gäller alltid den senast
+ÄKTA bjudna färgen — frågare och svarare räknar samma (kaptenen räknar i partnerns
+läsning, placerar i egen färg bara när den bär sig själv; trumfvakten) · slamtabellen
+i båda vägarna: 5 nyckelkort = alltid slam (med dam: sök storslam) · 4 + dam = slam ·
+4 utan dam = damfrågan när den finns, annars slam med 8+ kända trumf · tio kända
+trumf räknas som trumfdam. Facit
+`auction-slamtabell.test.ts`; trumfsonden `rkc-trumf.probe.test.ts` = 0.
+**Följder att känna till:** #94-given slutar i 6♥ (inte 7♥) · 94 slammar på 200 000
+givar bjuds inte längre (46 bet, 48 stod på DD). Detalj + mätkommandon `docs/bevaka.md`.
+**Felrapport #95** LIVE `a5bae94` (damfrågans förklaring + tre budfel).
+Ägarens grundregel 2026-10-04: **fråga så mycket budgivningen tillåter, gärna kontrollbud före.**
+**NU-kandidater:** (1) kontrollbud före essfrågan — bara var tredje essfråga föregås av
+ett (störst: stark 2♣ + positivt svar går rakt på 4NT); (2) budförklarings-svepet
+(noll på ostörda standardfrön, rött på störda; störst: responsiv dubbling läses som
+upplysningsdubbling). Budfrågor → fråga ägaren, bygg inte på gissning.
 
 **Senast LIVE (detalj `docs/historik.md`):** fynd B "parets färg i sang" `889fac3`
 (S8, `docs/speldiagnos.md`) · runda 7 `55d8cd3` · Hål D steg 2 `fda630c` (§7.8 c; öppna

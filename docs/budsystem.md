@@ -1641,20 +1641,36 @@ människas bud.
 
 **4NT gäller alltid den senast ÄKTA bjudna färgen (ägarbeslut 2026-10-02).**
 Konventioner, kontrollbud och andra konstlade bud räknas inte — bara färger som
-bjudits naturligt. Regeln gäller lika för den som frågar och den som svarar.
-*(Byggläge: svararen och förklaringarna följer regeln; kaptenen som efter ett
-hoppskift frågar med egen 6+ högfärg räknar ännu svaret i sin egen färg —
-står som nästa bygge i `docs/bevaka.md`.)*
+bjudits naturligt. Regeln gäller lika för den som frågar och den som svarar:
+**båda räknar nyckelkorten i samma färg.**
+- **Kaptenen med en egen lång färg** (t.ex. 1♦–1♥–3♣–**4NT** med sex hjärter och
+  slamvärden): frågan gäller **klöver** — hoppskiftets färg, den senast äkta
+  bjudna. Partnern svarar i klöver och kaptenen räknar svaret i klöver, men
+  **placerar kontraktet i sin egen färg** — om den bär sig själv (8+ kort, eller
+  6+ med två av ess/kung/dam). Bär den sig inte spelas kontraktet i partnerns
+  färg. På den här vägen ställs varken damfråga eller kungfråga (svaren skulle
+  gälla räknefärgen, inte kontraktet), så storslam bjuds inte.
+- **Är sidans senaste naturliga bud sang** är 4NT kvantitativt (§6.8) — då
+  bjuder kaptenen sin färg naturligt först.
 
 **Slambeslutet efter svaret (ägarbeslut 2026-10-02) — fråga efter damen när
-det går:**
+det går.** Grundregeln (ägaren 2026-10-04): **fråga alltid så mycket som
+budgivningen tillåter, och gärna kontrollbud före essfrågan.** Gäller vem som än
+frågade:
 | Nyckelkort i paret | Trumfdam | Beslut |
 |---|---|---|
-| 5 | ja | sök storslam |
-| 5 | nej | alltid lillslam |
-| 4 | ja | alltid lillslam |
-| 4 | nej | sök slam, inget måste |
+| 5 | säkrad | sök storslam (5NT kungfråga i storslamszon, annars lillslam) |
+| 5 | inte säkrad | alltid lillslam — i storslamszon frågas damen först när det går: dam + sidokung → storslam |
+| 4 | säkrad | alltid lillslam |
+| 4 | inte säkrad | **fråga efter damen om det går** (visad → lillslam, nekad → stanna) · går den inte att fråga efter: **8+ kända trumf → lillslam**, annars stanna · har svaret (5♥) redan nekat damen: stanna |
 | färre | — | stanna i 5-trumf |
+
+*Säkrad dam* = du håller den, svaret visade den (5♠), eller paret har bevisligen
+10+ trumf. **Tio kända trumf räknas som trumfdam av båda stolarna** (ägaren
+2026-10-04): öppnar du 1♠ och partnern svarar Jacoby 2NT med fem trumf har ni
+tio ihop — partnern svarar då "med dam" på essfrågan (5♠) och "ja" på damfrågan,
+även utan damen. *Kända trumf* = din egen längd + partnerns **visade** längd (öppnad
+högfärg 5, egen bjuden färg 4 — 5 efter stark 2♣ — höjning 3, Jacoby 4).
 
 **Svar (1430-varianten):**
 | Svar | Nyckelkort |
@@ -3229,6 +3245,28 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-03 — Ägarbesluten om 4NT-färgen och slamtabellen byggda fullt ut
+  (§6.1).** (1) **Samma trumf för frågare och svarare.** Trumfsonden
+  (`rkc-trumf.probe.test.ts`, 200 000 givar) fann 10 essfrågor av 2 412 där de
+  två räknade olika färg: efter hoppskift frågade kaptenen i EGEN färg (#94)
+  medan partnern svarade i hoppskiftets, och konkurrens-slammens placering läste
+  trumfen ur partnerns stegsvar. Nu räknar kaptenen alltid i den färg partnern
+  läser (`countIn`), placerar i egen färg bara när den bär sig själv, och
+  trumfvakten (`rkcTrumfvakt`) stoppar en essfråga partnern skulle läsa som
+  kvantitativ. Sonden: 0 av 2 338. **#94-given slutar nu i 6♥, inte 7♥** — svaret
+  räknas i klöver, och vilket nyckelkort som saknas går inte att veta. (2)
+  **Slamtabellen i båda vägarna.** Kaptenen-svararen bjöd förr 6 med fyra
+  nyckelkort utan att titta på damen; nu frågar hen efter damen när det går
+  (nekad → stanna), och när det inte går räcker 8 kända trumf för lillslam
+  (ägarbeslut 2026-10-04). Tio kända trumf räknas som trumfdam av båda stolarna,
+  även i slamradens svar. "Kända trumf" räknar partnerns EGEN färg som 4–5 (förr
+  golv 3). Med alla fem nyckelkort i storslamszon söks storslammen via damfrågan
+  (dam + sidokung → 7). Auktionsdiff 200 000 givar: 407 ändrade budgivningar, 141
+  ändrade slutkontrakt; double-dummy: 94 lillslammar bjuds inte längre (46 gick
+  bet, 48 stod — DD hittar alltid damen, så "stod" är överskattat), 9 nya (3
+  står); 24 storslammar bjuds inte längre (5 gick bet, 19 stod — de byggde på
+  "dam på längd"), 6 nya (alla står). Facit `auction-slamtabell.test.ts`;
+  #94-facit uppdaterat.
 - **2026-10-02 — Felrapport #95: trumfdam-frågan och slamfrågornas förklaringar
   (§6.1, §6.4, §6.5).** Rapporten: Syd frågar 4NT, får 5♣, ställer damfrågan 5♦ och
   Nord svarar riktigt 6♣ (dam + klöverkung) — men båda buden förklarades "placerar
@@ -3254,9 +3292,8 @@ Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
   utan dam = sök slam utan tvång; fråga efter damen när det går). Byggt nu:
   frågaren bjuder lillslam med alla fem nyckelkort även när damen nekats.
   Svepet kördes därefter över en miljon givar (listan mättar; två Gerber-fel till
-  lagade: 4NT-stoppet och kungfrågan efter svaret "3 ess"). Kvar, ej lagat:
-  kaptenen efter hoppskift räknar svaret i egen färg (bryter mot (a)), kaptenen-
-  svararen frågar inte efter damen, och svepets lista — `docs/bevaka.md`.
+  lagade: 4NT-stoppet och kungfrågan efter svaret "3 ess"). Besluten byggdes
+  fullt ut 2026-10-03 (posten ovan); kvar är svepets lista — `docs/bevaka.md`.
 - **2026-09-30 — Hål D steg 2: cue-höjningens fortsättning i högfärg (§7.8 c,
   §6.10; ägarens struktur 2026-09-28).** Efter 1M–(inkliv)–cue svarar öppnaren
   ≤12 → 3M, 14–15 balanserad med stopp → 3NT, 13+ → billigaste äkta kontrollbud

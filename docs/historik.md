@@ -10,6 +10,39 @@
 
 ---
 
+## 2026-10-03 (Ägarbesluten om 4NT-färgen och slamtabellen — byggda fullt ut)
+
+**Besluten (2026-10-02):** 4NT gäller alltid den senast äkta bjudna färgen · fråga
+efter damen när det går · 5 nyckelkort = alltid slam (med dam: sök storslam) · 4 +
+dam = alltid slam · 4 utan dam = sök slam, inget måste. Måttet (ägaren 2026-10-04):
+fråga efter damen när det går; går det inte räcker 8 kända trumf; tio kända trumf
+räknas som trumfdam av båda stolarna.
+
+**Mätt först:** en ny sond (`rkc-trumf.probe.test.ts`) jämför för varje essfråga
+vilken färg frågaren och svararen räknar i. 10 av 2 412 på 200 000 givar räknade
+olika — sex efter hoppskift (#94-regeln: kaptenen frågade i egen färg), fyra i
+konkurrens-slam (placeringen läste trumfen ur partnerns stegsvar).
+
+**Byggt:** kaptenen räknar alltid svaret i den färg partnern läste frågan i och
+placerar i egen färg bara när den bär sig själv (annars i partnerns) · trumfvakten
+i beslutstabellen · slamtabellen som EN funktion (`slamValEfterSvar`) för båda
+vägarna · damfrågan i kaptensvägen · "kända trumf" räknar partnerns egen färg som
+4–5 · damen på längd bara vid bevisad 10-korts fit även i slamradens svar.
+
+**Vägvalet som inte höll:** ägaren hade sagt ja till "bjud egen färg naturligt
+först, fråga 4NT rundan efter". Byggt så landade #94-given i 4♥ — öppnaren bjöd
+4♣ emellan, och då gäller nästa 4NT klöver igen. Lösningen blev i stället att
+frågan ställs direkt men RÄKNAS i hoppskiftets färg av båda. #94 slutar i 6♥.
+
+**Ägarens grundregel 2026-10-04:** "fråga alltid så mycket som budgivningen
+tillåter och gärna kontrollbud före". Byggt: damfrågan söker storslammen med alla
+fem nyckelkort i storslamszon. Mätt, inte byggt: bara 886 av 2 675 essfrågor
+föregås av ett kontrollbud (störst: stark 2♣ + positivt svar går rakt på 4NT).
+
+**Utfall:** trumfsonden 0 av 2 364. Auktionsdiff 200 000 givar: 407 ändrade,
+141 ändrade slutkontrakt; DD: 94 lillslammar bort (46 bet, 48 stod), 9 nya (3
+står); 24 storslammar bort (5 bet, 19 stod), 6 nya (alla står).
+
 ## 2026-10-02 (Felrapport #95 — trumfdam-frågan: förklaringarna + tre budfel, LIVE `a5bae94`)
 
 **Rapporten:** Syd frågar 4NT, får 5♣, ställer damfrågan 5♦; Nord svarar riktigt 6♣

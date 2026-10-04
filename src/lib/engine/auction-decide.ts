@@ -132,7 +132,7 @@
 
 import type { Bid, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { forcingCallStillOpen, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { auctionFacts, forcingCallStillOpen, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
 import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
@@ -160,7 +160,8 @@ import { raiseWithFit } from './fit-raise'
 import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendTheirNT, defendTheirNTSeat, ntDefenseFollowUpSeat, dontDoublerShowsSuit, ourNTContestedSeat, respondToOurNTInterference } from './nt-defense-continuations'
 import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preemptFollowUpSeat, respondInPreemptCompetition, respondToOvercallNTSystemsOn } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
-import { slamAnswerContinuation, slamAnswerSeat } from './slam-answer-continuations'
+import { partnerShownTrumpLength, slamAnswerContinuation, slamAnswerSeat, slamAskTrump } from './slam-answer-continuations'
+import { legalCalls } from './auction-rules'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
 import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
@@ -473,7 +474,10 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   // ändå i sin egen färg via `captainIntent`, och med dessa poäng spelar
   // frågefärgen ingen roll (ägaren).
   if (rebid.rule === 'hoppskift' && respSuit && isMajorSuit(respSuit) && trump === respSuit && response.call.startsWith('1')) {
-    return { ctx: { partnerMin: 19, gameForcing: true } }
+    // Ägarbeslut 2026-10-02: 4NT gäller den senast ÄKTA bjudna färgen —
+    // hoppskiftets. Kaptenen RÄKNAR därför svaret i den (som partnern), men
+    // placerar i sin egen färg. Förr räknade kaptenen i egen färg (frö 20333311).
+    return { ctx: { partnerMin: 19, gameForcing: true, countIn: rebidSuit ?? undefined } }
   }
 
   // Reverse (16+) / hoppskift (19+): trumf = öppnarens andra eller första färg.
@@ -1737,7 +1741,27 @@ const TABELL: Row[] = [
       const sit = read ?? captainOwnSituation(facts, hand)
       if (!sit) return null
       const role: SlamRole = facts.seat === sit.captain ? 'svarare' : 'öppnare'
-      const mine = role === 'svarare' && read && !read.generisk ? captainIntent(read, facts, hand) : sit
+      const mine0 = role === 'svarare' && read && !read.generisk ? captainIntent(read, facts, hand) : sit
+      // Kaptenen räknar parets KÄNDA trumf (egen längd + partnerns visade) —
+      // ägarens slamtabell (10 = damen räknas som hållen, 8 = slam på fyra
+      // nyckelkort). Gäller båda stolarna: svararen visar damen på tio kända trumf.
+      // … och räknar nyckelkorten i den färg partnern FAKTISKT läste essfrågan i
+      // (`countIn`) — "4NT gäller den senast äkta bjudna färgen" för båda.
+      const mittAsk = facts.history.findIndex((c) => c.seat === facts.seat && c.bid === '4NT')
+      const lästAv = mittAsk >= 0 ? partnernsRkcTrumf(auctionFacts(facts.history.slice(0, mittAsk), facts.seat), facts.history[mittAsk]) : null
+      const mine: SlamSituation = mine0.kind === 'slam' && mine0.setup
+        ? {
+            ...mine0,
+            setup: {
+              ...mine0.setup,
+              ctx: {
+                ...mine0.setup.ctx,
+                knownTrumps: lengths(hand)[mine0.setup.trump] + partnerShownTrumpLength(facts, mine0.setup.trump),
+                ...(role === 'svarare' && lästAv && lästAv !== mine0.setup.trump ? { countIn: lästAv } : {}),
+              },
+            },
+          }
+        : mine0
       // Den specifika grenen har inget svar (t.ex. öppnarens kontrollbud efter
       // inverterad minor) → den allmänna kontrollbudsregeln tar över.
       const allm = read && !read.generisk ? kontrollbudsSituation(facts) : null
@@ -2539,7 +2563,60 @@ export function decideFromTable(hand: Hand, facts: AuctionFacts, vulnerable: boo
   for (const row of TABELL) {
     if (!row.läge(facts)) continue
     const call = row.välj({ hand, facts, vulnerable })
-    if (call) return { call, källa: `tabell:${row.id}` }
+    if (!call) continue
+    const vaktad = rkcTrumfvakt(call, facts)
+    if (vaktad) return { call: vaktad, källa: vaktad === call ? `tabell:${row.id}` : `tabell:${row.id} (trumfvakt)` }
   }
   return null
+}
+
+const SUIT_OF_SYM: Record<string, Suit> = { '♣': 'clubs', '♦': 'diamonds', '♥': 'hearts', '♠': 'spades' }
+
+/**
+ * Trumfen PARTNERN läser i mitt 4NT: slamradens lästa situation när den svarar
+ * (kanonisk slamsekvens), annars `slamAskTrump` (raden slam-forts) — samma
+ * ordning som tabellen frågar i. null = partnern läser ingen essfråga.
+ */
+function partnernsRkcTrumf(facts: AuctionFacts, call: ResolvedCall): Suit | null {
+  const fP = auctionFacts([...facts.history, call], PARTNER[facts.seat])
+  const sit = slamSituation(fP)
+  if (sit?.kind === 'slam' && sit.setup) return sit.setup.trump
+  return slamAskTrump(fP)
+}
+
+/**
+ * TRUMFVAKTEN (ägarbeslut 2026-10-02, §6.1: "4NT gäller alltid den senast ÄKTA
+ * bjudna färgen" — för frågaren OCH svararen). Kaptenens essfråga säger vilken
+ * trumf den menar ("… ♠ som trumf" i förklaringen). Läser partnern en ANNAN
+ * färg bjuds frågan inte: kaptenen bjuder sin trumf naturligt först (då är den
+ * senast äkta bjudna färg rundan efter), eller — om inget sådant bud ryms under
+ * 4NT — avstår, och raderna efter får ordet. Förr frågade kaptenen efter
+ * hoppskift i EGEN färg medan partnern svarade i hoppskiftets (felrapport #94;
+ * frö 20437408: 7♠ med ♠KQ ute). Returnerar budet oförändrat när allt stämmer.
+ */
+function rkcTrumfvakt(call: ResolvedCall, facts: AuctionFacts): ResolvedCall | null {
+  if (call.bid !== '4NT' || call.rule !== '1430 RKC') return call
+  const m = /([♣♦♥♠]) som trumf/.exec(call.explanation ?? '')
+  if (!m) return call
+  const min = SUIT_OF_SYM[m[1]]
+  const partnerns = partnernsRkcTrumf(facts, call)
+  if (partnerns === min) return call
+  // Partnern läser en annan FÄRG: frågan står kvar, men räknas i partnerns färg
+  // (slamraden sätter `countIn` när svaret kommer) och kontraktet placeras i min.
+  const placeras = /placeras i ([♣♦♥♠])/.exec(call.explanation ?? '')
+  const egen = placeras ? SUIT_OF_SYM[placeras[1]] : min
+  if (partnerns) {
+    return { ...call, explanation: `Slamzon → 4NT (frågar nyckelkort, ${SYM[partnerns]} som trumf — den senast äkta bjudna färgen; kontraktet placeras i ${SYM[egen]}).` }
+  }
+  // Partnern läser INGEN essfråga (sidans senaste bud var sang → kvantitativt).
+  const legal = legalCalls(facts.history, facts.seat)
+  const bud = [1, 2, 3, 4].map((n) => `${n}${LETTER[egen]}` as ResolvedCall['bid']).find((b) => legal.includes(b))
+  if (!bud) return null
+  const spel = isGameOrHigher(bud)
+  return {
+    seat: facts.seat,
+    bid: bud,
+    rule: spel ? 'utgång' : 'sätter trumfen före essfrågan',
+    explanation: `Slamzon, men ett 4NT nu vore kvantitativt (sidans senaste bud var sang). Bjuder ${SYM[egen]} naturligt först${spel ? ' (utgång)' : '; essfrågan kommer rundan efter'}.`,
+  }
 }

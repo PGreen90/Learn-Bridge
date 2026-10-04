@@ -115,7 +115,7 @@ describe('felrapport #95 – damfrågan besvaras rätt (given ur rapporten)', ()
 // trumf och svaret 5♦ → 5♠) finns inget frågeutrymme — nekandet "tillbaka till
 // 5♥" är olagligt. Förr frågade boten ändå, och partnern utan dam PASSADE 5♠
 // (frågebudet blev slutbud). Regeln nu: damfrågan finns bara UNDER 5-trumf —
-// frågaren stannar i 5♥, och ett 5♠ där är inte damfrågan för någon av stolarna.
+// ett 5♠ där är inte damfrågan för någon av stolarna.
 describe('damfrågan utan frågeutrymme (hjärter trumf, svar 5♦)', () => {
   const SYD_HJ = 'S:AK H:AK752 D:AKQ7 C:32'
   const UTAN_DAM = 'S:J93 H:J84 D:JT9 C:KJ54'
@@ -125,8 +125,10 @@ describe('damfrågan utan frågeutrymme (hjärter trumf, svar 5♦)', () => {
     call('S', '4NT'), call('W', 'P'), call('N', '5D'), call('E', 'P'),
   ]
 
-  it('frågaren frågar inte över 5♥ — stannar i 5♥ (damen osäkrad, ett nyckelkort saknas)', () => {
-    expect(decideCall(dealNS(UTAN_DAM, SYD_HJ), AUKTION_HJ, 'S')).toMatchObject({ bid: '5H', rule: 'RKC: stopp' })
+  // Ägarbeslut 2026-10-04: går damen inte att fråga efter räcker åtta KÄNDA
+  // trumf (fem egna + höjningens tre) för lillslam på fyra nyckelkort.
+  it('frågaren frågar inte över 5♥ — åtta kända trumf → 6♥ direkt', () => {
+    expect(decideCall(dealNS(UTAN_DAM, SYD_HJ), AUKTION_HJ, 'S')).toMatchObject({ bid: '6H', rule: 'slamavslut' })
   })
   it('ett 5♠ över 5♥ läses inte som damfråga av svararen (inget damsvar)', () => {
     const hist = [...AUKTION_HJ, call('S', '5S'), call('W', 'P')]

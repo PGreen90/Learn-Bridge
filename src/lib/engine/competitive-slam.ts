@@ -10,13 +10,16 @@
 
 import type { Bid, Hand, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { parseContractBid, PARTNER, STRAINS, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { auctionFacts, parseContractBid, PARTNER, STRAINS, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { senastAktaFarg } from './kontrollbud'
 import { legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { startingPoints } from './evaluation'
 import { hcp, lengths } from './hand'
 import { side } from './play'
 import { firstRoundControl, keycards } from './slam'
 import type { Kunskap } from './overcall-continuations'
+
+const SUIT_OF_SYMBOL: Record<string, Suit> = { '♣': 'clubs', '♦': 'diamonds', '♥': 'hearts', '♠': 'spades' }
 
 /** Antal kontroller (A = 2, K = 1) — grovt mått på "extra på riktigt". */
 function controlCount(hand: Hand): number {
@@ -94,6 +97,10 @@ export function competitiveSlamTry(hand: Hand, f: AuctionFacts, opts: { partnerS
   }
   const fit = competitiveMajorFit(f, hand)
   if (!fit) return null
+  // 4NT gäller den senast ÄKTA bjudna färgen (ägarbeslut 2026-10-02): har paret
+  // enats om en ANNAN färg läser partnern frågan i den (frö 20378286: 2♣–4♣ var
+  // överenskommet, kaptenen menade spader och stannade i 5♠) → ingen fråga här.
+  if (f.agreedTrump && f.agreedTrump !== fit) return null
   const sp = startingPoints(hand).startingPoints
   const honestExtra = sp >= 17 || (sp >= 16 && controlCount(hand) >= 3)
   if (!honestExtra) return null
@@ -145,7 +152,13 @@ export function competitiveRKCPlace(hand: Hand, f: AuctionFacts): Kunskap | null
   const answer = after.find((c) => c.seat === PARTNER[seat] && parseContractBid(c.bid))
   if (!answer) return null
 
-  const trump = competitiveMajorFit(f, hand) ?? f.agreedTrump
+  // Trumfen läses ur läget FÖRE frågan: partnerns stegsvar (5♠ = två nyckelkort
+  // med dam) är ingen färg (frö 20316913: stoppet lades i 5♠ med hjärter som trumf).
+  // Min egen fråga sa vilken trumf den gällde ("… ♥ som trumf" / "agreed ♠" /
+  // "fit i ♦") — den gäller; annars härleds den ur läget före frågan.
+  const sagd = /(?:agreed|fit i|med) ([♣♦♥♠])/.exec(history[askIdx].explanation ?? '')
+  const före = auctionFacts(history.slice(0, askIdx), seat)
+  const trump = (sagd ? SUIT_OF_SYMBOL[sagd[1]] : null) ?? competitiveMajorFit(före, hand) ?? före.agreedTrump ?? senastAktaFarg(history, seat, askIdx)
   if (!trump) return null
 
   const own = keycards(hand, trump)

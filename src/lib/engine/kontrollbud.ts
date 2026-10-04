@@ -42,6 +42,32 @@ export const naturligt = (m: { alert: boolean; rule?: string }): boolean =>
 /** Är bud nr `i` i auktionen ett naturligt färgbud (bjuder färgen på riktigt)? */
 export const naturligtBud = (history: ResolvedCall[], i: number): boolean => naturligt(meaningOf(history, i))
 
+/**
+ * SENAST ÄKTA BJUDNA FÄRG (ägarbeslut 2026-10-02, §6.1): den färg ett 4NT
+ * gäller. Går bakåt från index `fore` över `seat`s sidas bud och hoppar över
+ * allt konstlat — konventioner, kontrollbud, cue i motståndarnas färg. Första
+ * naturliga färgbudet avgör. Är sidans senaste naturliga bud SANG är 4NT
+ * kvantitativt (§6.8) → null. Samma läsning för den som frågar och den som svarar.
+ */
+export function senastAktaFarg(history: ResolvedCall[], seat: Seat, fore = history.length): Suit | null {
+  const vi = new Set<Seat>([seat, PARTNER[seat]])
+  // En färg motståndarna bjöd FÖRST är aldrig vår: våra bud i den är cue-bud.
+  const derasFörst = (strain: string): boolean => {
+    const första = history.find((x) => parseContractBid(x.bid)?.strain === strain)
+    return !!första && !vi.has(första.seat)
+  }
+  for (let i = fore - 1; i >= 0; i--) {
+    const c = history[i]
+    if (!vi.has(c.seat)) continue
+    const cb = parseContractBid(c.bid)
+    if (!cb) continue
+    if (cb.strain !== 'NT' && derasFörst(cb.strain)) continue
+    if (!naturligt(meaningOf(history, i))) continue
+    return cb.strain === 'NT' ? null : SUIT_OF_LETTER[cb.strain]
+  }
+  return null
+}
+
 /** Den färg paret satt (båda bjudit den naturligt) före index `fore`, och var den sattes. */
 export function sattFarg(history: ResolvedCall[], seat: Seat, fore = history.length): { trump: Suit; index: number } | null {
   const vi = new Set<Seat>([seat, PARTNER[seat]])

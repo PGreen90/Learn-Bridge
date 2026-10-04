@@ -48,9 +48,12 @@ import {
   firstRoundControl,
   hasTrumpQueen,
   keycards,
+  queenAskBid,
   respondToExclusion,
   respondToKingAsk,
+  respondToQueenAsk,
   respondToRKC,
+  slamValEfterSvar,
 } from './slam'
 
 const LETTER: Record<Suit, string> = { clubs: 'C', diamonds: 'D', hearts: 'H', spades: 'S' }
@@ -148,6 +151,22 @@ export interface SlamContext {
    * mittemot ett balanserat minimum.
    */
   strictDrive?: boolean
+  /**
+   * KÄNDA trumf i paret sett från kaptenen: egen längd + partnerns VISADE längd
+   * (sätts av slamraden ur auktionen). Styr ägarens slamtabell (2026-10-02):
+   * damen är säkrad på längd först vid 10, och fyra nyckelkort utan dam bjuder
+   * lillslam med 8+. Sätts för BÅDA stolarna (svararen visar damen på tio kända
+   * trumf). Utelämnat = egen längd + golvet 3.
+   */
+  knownTrumps?: number
+  /**
+   * Essfrågan RÄKNAS i den här färgen — den senast äkta bjudna, den partnern
+   * läser 4NT i (ägarbeslut 2026-10-02) — medan kontraktet PLACERAS i
+   * uppsättningens trumf (kaptenens egen långa högfärg efter hoppskift, #94).
+   * Frågare och svarare räknar då samma nyckelkort. Ingen damfråga och ingen
+   * kungfråga på den här vägen: svaren skulle gälla räknefärgen, inte kontraktet.
+   */
+  countIn?: Suit
 }
 
 /**
@@ -314,11 +333,13 @@ const cueTurn = (role: SlamRole, cue: { call: string; suit: Suit }): SlamTurn =>
   rule: 'cue-bid',
   explanation: `första-rondskontroll i ${SYM[cue.suit]} → ${cue.call[0]}${SYM[cue.suit]}.`,
 })
-const rkcAskTurn = (ctx: SlamContext): SlamTurn => ({
+const rkcAskTurn = (ctx: SlamContext, trump: Suit): SlamTurn => ({
   role: 'svarare',
   call: '4NT',
   rule: '1430 RKC',
-  explanation: `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort).`,
+  explanation: ctx.countIn && ctx.countIn !== trump
+    ? `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort, ${SYM[ctx.countIn]} som trumf — den senast bjudna färgen; kontraktet placeras i ${SYM[trump]}).`
+    : `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort, ${SYM[trump]} som trumf).`,
 })
 const inviteTurn = (invite: string, trump: Suit): SlamTurn => ({
   role: 'svarare',
@@ -362,7 +383,7 @@ export function slamCaptainFirstStep(
       if (cue) return cueTurn('svarare', cue)
     }
   }
-  if (floor >= (ctx.essfragaFran ?? 33) && !ctx.inviteOnly && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
+  if (floor >= (ctx.essfragaFran ?? 33) && !ctx.inviteOnly && bidRank('4NT') > lastRank) return rkcAskTurn(ctx, trump)
   if (floor >= 31 && ctx.inviteCall && bidRank(ctx.inviteCall) > lastRank) return inviteTurn(ctx.inviteCall, trump)
   return null
 }
@@ -483,7 +504,7 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
     // = varken visad (av någon) eller kontrollerad på kaptenens EGEN hand.
     const uncontrolled = RANK_ORDER.filter((s) => s !== trump && !controlled.has(s) && !firstRoundControl(hand, s))
     const driveFloor = ctx.strictDrive ? 33 : 31
-    if (floor >= driveFloor && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx)
+    if (floor >= driveFloor && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx, trump)
     if (bidRank(game) > lastRank) return { role: 'svarare', call: game, rule: 'cue: avslut', explanation: `otillräckligt för slam → utgång (${game[0]}${SYM[trump]}).` }
     // Partnerns kontrollbud ÖVER utgången passas aldrig (ägarbeslut 2026-09-24) →
     // billigaste trumfbud (5M).
@@ -509,7 +530,10 @@ function rkcPhaseTurn(role: SlamRole, hand: Hand, trump: Suit, ctx: SlamContext,
   const signOff = `5${LETTER[trump]}`
   if (after.length === 0) {
     if (role === CAPTAIN) return null
-    const answer = respondToRKC(hand, trump)
+    // Med tio KÄNDA trumf i paret räknas damen som hållen (ägaren 2026-10-04:
+    // 1M–2NT Jacoby med fem trumf = 10 ihop → svara som med dam). Kända = egen
+    // längd + partnerns visade (`ctx.knownTrumps`, satt av slamraden).
+    const answer = respondToRKC(hand, trump, ctx.knownTrumps ?? lengths(hand)[trump] + 3)
     return { role, call: answer.call, rule: answer.rule, explanation: answer.explanation }
   }
   const answer = after[0].call
@@ -522,31 +546,99 @@ function rkcPhaseTurn(role: SlamRole, hand: Hand, trump: Suit, ctx: SlamContext,
       return { role, call: k.call, rule: k.rule, explanation: k.explanation }
     }
     if (place === signOff) return signoffCorrection(hand, trump, answer)
+    // Damfrågan (§6.1): tio kända trumf i paret räknas som trumfdam.
+    if (place === queenAskBid(trump, answer)) {
+      const q = respondToQueenAsk(hand, trump, ctx.knownTrumps ?? lengths(hand)[trump] + 3)
+      return { role, call: q.call, rule: q.rule, explanation: q.explanation }
+    }
     return null
   }
   if (after.length === 3 && place === '5NT' && role === CAPTAIN) return captainAfterKingAnswer(after[2].call, trump)
+  if (after.length === 3 && role === CAPTAIN && place === queenAskBid(trump, answer)) {
+    const svar = after[2].call
+    const egna = keycards(hand, trump)
+    const härlett = partnerKeycardsFromAnswer(answer, egna, ctx.partnerMin)
+    if (härlett.certain && egna + härlett.assumed === 5) {
+      // Alla fem nyckelkort: frågan sökte storslammen. Dam + sidokung → 7;
+      // dam utan kung eller ingen dam → lillslammen (5 nyckelkort = alltid slam).
+      const kungVisad = svar !== signOff && svar !== '5NT'
+      const mål = kungVisad && floor >= 37 ? `7${LETTER[trump]}` : `6${LETTER[trump]}`
+      if (bidRank(mål) > bidRank(svar)) {
+        return {
+          role: 'svarare', call: mål, rule: 'slamavslut',
+          explanation: kungVisad ? `alla fem nyckelkort, trumfdamen och en sidokung visade → storslam (7${SYM[trump]}).` : svar === signOff ? `alla fem nyckelkort men ingen trumfdam → 6${SYM[trump]} (lillslam).` : `alla fem nyckelkort och trumfdamen, men ingen sidokung → 6${SYM[trump]} (lillslam).`,
+        }
+      }
+      return { role: 'svarare', call: 'P', rule: 'slamavslut', explanation: `partnern nådde redan nivån → pass.` }
+    }
+    if (svar === signOff) return { role: 'svarare', call: 'P', rule: 'RKC: dam nekad', explanation: `trumfdamen nekad → utgång är taket, 5${SYM[trump]} står.` }
+    if (bidRank(`6${LETTER[trump]}`) > bidRank(svar)) return { role: 'svarare', call: `6${LETTER[trump]}`, rule: 'slamavslut', explanation: `trumfdamen visad → 6${SYM[trump]} (lillslam).` }
+    return { role: 'svarare', call: 'P', rule: 'slamavslut', explanation: `trumfdamen visad; partnern nådde redan nivån → pass.` }
+  }
   return null
 }
 
 /** Kaptenen placerar på 1430-svaret + egen hand + partnerns visade minimum. */
-function captainPlaceAfterRKC(hand: Hand, trump: Suit, ctx: SlamContext, floor: number, answerCall: string): SlamTurn {
-  const own = keycards(hand, trump)
+/** Bär färgen sig själv som trumf utan stöd? 8+ kort, eller 6+ med två av A/K/Q. */
+function självgående(hand: Hand, suit: Suit): boolean {
+  const len = lengths(hand)[suit]
+  const toppar = hand.filter((c) => c.suit === suit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q')).length
+  return len >= 8 || (len >= 6 && toppar >= 2)
+}
+
+function captainPlaceAfterRKC(hand: Hand, trump: Suit, ctx: SlamContext, floor: number, answerCall: string, utanKungfråga = false): SlamTurn {
+  // Nyckelkorten räknas i den färg PARTNERN svarade i (`countIn`), kontraktet
+  // placeras i `trump` — men bara om min egen färg bär sig själv. Annars spelas
+  // kontraktet i räknefärgen (partnerns äkta färg), med den vanliga tabellen och
+  // utan storslamssök (frö 20437408: ♠AJT743 mot singel blev 7♠ med ♠KQ ute).
+  if (ctx.countIn && ctx.countIn !== trump && !självgående(hand, trump)) {
+    return captainPlaceAfterRKC(hand, ctx.countIn, { ...ctx, countIn: undefined, knownTrumps: undefined }, floor, answerCall, true)
+  }
+  const egenFärg = !!ctx.countIn && ctx.countIn !== trump
+  const own = keycards(hand, ctx.countIn ?? trump)
   const derived = partnerKeycardsFromAnswer(answerCall, own, ctx.partnerMin)
   const total = own + derived.assumed
-  // Trumfdamen: egen hand eller 5♠-svaret (2/5 MED dam). Aldrig partnerns kort.
-  const queenKnown = hasTrumpQueen(hand, trump) || answerCall === '5S'
+  // Trumfdamen: hållen, visad i 5♠-svaret (2/5 MED dam) eller bevisad 10-korts
+  // fit (egen längd + partnerns VISADE). Aldrig partnerns kort, aldrig antagen
+  // på egen längd ensam (ägarbeslut 2026-09-12, nu även här).
+  const known = egenFärg ? lengths(hand)[trump] : (ctx.knownTrumps ?? lengths(hand)[trump] + 3)
+  // Egen lång färg som kontrakt: svarets damstatus gäller räknefärgen — damen
+  // är säkrad bara om jag håller den själv eller färgen är 8+ kort.
+  const queenKnown = hand.some((c) => c.suit === trump && c.rank === 'Q') || (egenFärg ? known >= 8 : answerCall === '5S' || known >= 10)
   const signOff = `5${LETTER[trump]}`
+
+  // ÄGARENS SLAMTABELL (2026-10-02, §6.1): 5 nyckelkort = alltid slam (med dam
+  // söks storslam) · 4 + dam = alltid slam · 4 utan dam = "sök slam, inget
+  // måste": damfrågan när den finns; annars lillslam med 8+ kända trumf — men
+  // stopp när svaret (5♥) redan nekat damen.
+  const ask = egenFärg ? null : queenAskBid(trump, answerCall)
+  const val = slamValEfterSvar(total, queenKnown, known, ask !== null, answerCall === '5H')
+  // "Fråga alltid så mycket som budgivningen tillåter" (ägaren 2026-10-04): med
+  // alla fem nyckelkort i storslamszon och damen okänd men frågbar söks
+  // storslammen via damfrågan — visad dam + sidokung → 7, annars 6.
+  if (total === 5 && derived.certain && !queenKnown && ask && floor >= 37 && !utanKungfråga) {
+    return { role: 'svarare', call: ask, rule: 'trumfdam-fråga', explanation: `Alla fem nyckelkort och storslamszon — men trumfdamen är inte säkrad → ${ask[0]}${SYM[SUIT_OF_LETTER_[ask[1]]]} frågar damen; dam + sidokung ger 7${SYM[trump]}, annars 6${SYM[trump]}.` }
+  }
+  if (val === 'fråga-dam' && ask) {
+    return { role: 'svarare', call: ask, rule: 'trumfdam-fråga', explanation: `Alla nyckelkort utom ett — men trumfdamen är inte säkrad → ${ask[0]}${SYM[SUIT_OF_LETTER_[ask[1]]]} frågar damen; visas den bjuds 6${SYM[trump]}, annars står 5${SYM[trump]}.` }
+  }
+  if (val === 'stanna' && total >= 4) {
+    const varför = answerCall === '5H' ? 'ett nyckelkort saknas och svaret nekade trumfdamen' : 'ett nyckelkort saknas, trumfdamen är inte säkrad och ingen fråga ryms'
+    if (answerCall === signOff) return { role: 'svarare', call: 'P', rule: 'RKC: stopp', explanation: `${varför} → passar; 5${SYM[trump]} står.` }
+    if (bidRank(signOff) > bidRank(answerCall)) return { role: 'svarare', call: signOff, rule: 'RKC: stopp', explanation: `${varför} → stannar i 5${SYM[trump]}.` }
+    // Svaret gick förbi 5-trumf → slammen är det enda som återstår (nedan).
+  }
 
   if (total >= 4) {
     // Storslam kräver visshet: entydigt alla fem nyckelkort + dam + storslamszon
     // mot partnerns visade MINIMUM (aldrig hopp om att partnern har maximum).
-    if (floor >= 37 && derived.certain && total === 5 && queenKnown) {
+    if (floor >= 37 && derived.certain && total === 5 && queenKnown && !egenFärg && !utanKungfråga) {
       return { role: 'svarare', call: '5NT', rule: 'Sjöberg 5NT', explanation: `alla fem nyckelkort + trumfdam, storslamszon → 5NT (frågar kungar).` }
     }
     const why = derived.certain
       ? total === 4
-        ? `ett nyckelkort saknas → 6${SYM[trump]} (lillslam).`
-        : `alla fem nyckelkort men ingen säker storslamszon → 6${SYM[trump]} (lillslam).`
+        ? `ett nyckelkort saknas, ${queenKnown ? 'trumfdamen säkrad' : `${known}+ kända trumf`} → 6${SYM[trump]} (lillslam).`
+        : `alla fem nyckelkort${queenKnown ? ' men ingen säker storslamszon' : ''} → 6${SYM[trump]} (lillslam).`
       : `svaret visar ${derived.low} eller ${derived.high}; partnerns visade ${ctx.partnerMin}+ talar för ${derived.assumed} → 6${SYM[trump]}.`
     return { role: 'svarare', call: `6${LETTER[trump]}`, rule: 'slamavslut', explanation: why }
   }
