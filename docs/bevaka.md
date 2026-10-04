@@ -45,9 +45,13 @@
   "man behöver inte ha alla kontroller för att bjuda 4NT" (ägaren) — kaptenen i
   klar slamzon frågar så snart hen inte har fler kontrollbud. Mätt mot steg 1:
   73 nya slammar (57 står, 16 bet), 35 bjuds inte längre (16 bet, 19 stod);
-  essfrågor efter kontrollbud 1 353 av 2 918. **Kvar:** essfrågan över
-  partnerns utgångsplacering (inget kontrollbud ryms), hopphöjning/hopp i egen
-  färg, Jacoby minimum, 3-korts stöd i lågfärg (går fortfarande rakt på 4NT).
+  essfrågor efter kontrollbud 1 353 av 2 918. **Steg 3 byggt:** efter
+  hopphöjningen (1m–1M–3M) visar kaptenen sin billigaste kontroll; slamläsarna
+  tål deras dubbling av svaret. Mätt mot steg 2: 21 slammar bort (14 bet, 7
+  stod), 13 nya (7 står, 6 bet); essfrågor efter kontrollbud 1 504 av 2 989.
+  Några givar slutar nu i 5M i stället för 4M (kontrollbud över utgången).
+  **Kvar:** hopp i egen färg (1m–1M–3m), Jacoby minimum, 3-korts stöd i
+  lågfärg; över partnerns utgångsplacering ryms inget kontrollbud.
   **Bevaka:** i slamzonen 31–32 gäller fortfarande "högst en okontrollerad
   sidofärg" för essfrågan; bara 33+ frågar oavsett.
 - **Trumfsonden** (frågare mot svarare, ska vara 0):

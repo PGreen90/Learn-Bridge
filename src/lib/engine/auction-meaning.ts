@@ -3623,6 +3623,11 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
   if (raised) {
     // Öppnaren höjde min färg (1x–1y–2y).
     if (cb.strain === resp.strain) return R('inbjudan', `${B(cb)} — höjer vidare efter partnerns höjning: inbjudan till utgång (10–12 stödpoäng).`)
+    // Hjärter satt på 3-läget (1x–1♥–3♥): 3♠ är ett kontrollbud — det enda på
+    // 3-läget (ägarbeslut 2026-09-24), inte ett utgångsförsök.
+    if (same(reb, 3, 'H') && same(cb, 3, 'S')) {
+      return R('cue-bid', `Kontrollbud 3♠ — hjärter är trumf, så budet visar kontroll (ess, kung-dam, singel eller renons — motståndarna kan inte ta två raka stick) i spader och slamintresse. Partnern visar en egen kontroll eller stannar i 4♥.`)
+    }
     return N(`${B(cb)} — ny färg efter partnerns höjning: utgångsförsök som visar värden i ${name}. Krav.`, 'krav-1-rond')
   }
   if (reb.strain !== 'NT' && cb.strain === reb.strain && reb.strain !== open.strain) {

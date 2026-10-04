@@ -135,6 +135,26 @@ describe('tio kända trumf räknas som trumfdam (Jacoby med fem trumf mot 1♠-�
   })
 })
 
+// Kontrollbud före essfrågan, steg 3 (2026-10-04): efter hopphöjningen
+// (1m–1M–3M) visar kaptenen med slamintresse sin billigaste kontroll i stället
+// för 4NT eller 5M-inbjudan direkt.
+describe('kontrollbud före essfrågan: efter hopphöjningen (1m–1M–3M)', () => {
+  // Frö 20386322: 1♦–1♥–(X)–3♥. Väst visar spaderkontrollen med 3♠; förr kände
+  // öppnaren inte igen kontrollbudet när motståndarna dubblat svaret, och
+  // budgivningen slutade i 5♣.
+  it('kontrollbudet känns igen även när motståndarna dubblat svaret — paret landar i hjärter', () => {
+    const d = giv('E', 'S:K872 H:93 D:987 C:AK96', 'S:96 H:AK72 D:AKJ52 C:J8', 'S:QT3 H:654 D:T643 C:T43', 'S:AJ54 H:QJT8 D:Q C:Q752')
+    const h = botAuction(d)!
+    expect(h.find((c) => c.seat === 'W' && c.bid === '3S')?.rule).toBe('cue-bid')
+    expect(contractFromCalls(h)?.strain).toBe('hearts')
+  })
+  // Frö 20446339: 1♦–1♠–(X)–3♠–4♦ (renons i öppnarens ruter). Förr passades 4♦.
+  it('ett kontrollbud i öppnarens första färg passas inte — paret landar i spader', () => {
+    const d = giv('S', 'S:AJ863 H:KT5 D:- C:JT965', 'S:74 H:Q732 D:A82 C:A842', 'S:KQT9 H:AJ4 D:K6543 C:K', 'S:52 H:986 D:QJT97 C:Q73')
+    expect(contractFromCalls(botAuction(d)!)?.strain).toBe('spades')
+  })
+})
+
 // Ägarbeslut 2026-10-04: "Fråga alltid så mycket som budgivningen tillåter och
 // gärna kontrollbud före det." Med 4-korts stöd i öppnarens lågfärg efter stark
 // 2♣ sätter svararen trumfen först (4m) i stället för 4NT direkt.

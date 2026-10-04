@@ -3260,6 +3260,17 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-04 — Kontrollbud före essfrågan, steg 3: efter hopphöjningen
+  (§6.2).** Efter 1m–1M–3M (16–18, 4-korts stöd) gick kaptenen rakt på 4NT eller
+  5M-inbjudan. Nu visar hen med slamintresse sin billigaste kontroll först (3♠
+  över 3♥, annars på 4-läget); kontrollbudet etablerar utgången. Slamradens
+  läsare tål nu motståndarnas dubbling av svaret (budraden fortsatte redan som
+  ostörd, men partnern kände inte igen kontrollbudet — en giv slutade i 5♣, en
+  annan passades i 4♦). Förklaringen: 3♠ efter 1x–1♥–3♥ är kontrollbud, inte
+  utgångsförsök. Mätt mot steg 2, 200 000 givar: 261 ändrade budgivningar, 47
+  ändrade slutkontrakt; DD: 21 slammar bjuds inte längre (14 gick bet, 7 stod),
+  13 nya (7 står, 6 bet). Essfrågor efter kontrollbud: 1 353 av 2 918 → 1 504
+  av 2 989.
 - **2026-10-04 — Kontrollbud före essfrågan, steg 2: trumfen först i lågfärg
   (§6.2).** Efter 2♣ + positivt svar + öppnarens lågfärg på 3-läget gick
   svararen rakt på 4NT ("cue-utrymmet är trångt"). Nu sätter 4-korts stöd
