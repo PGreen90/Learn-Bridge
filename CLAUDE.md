@@ -10,22 +10,20 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-### 🔵 NU — tomt (ägarbesluten om 4NT + slamtabellen byggda 2026-10-04, EJ pushade) — ägaren väljer nästa
-**Ägarbeslut 2026-10-02 (bok §6.1), byggda fullt ut:** 4NT gäller alltid den senast
-ÄKTA bjudna färgen — frågare och svarare räknar samma (kaptenen räknar i partnerns
-läsning, placerar i egen färg bara när den bär sig själv; trumfvakten) · slamtabellen
-i båda vägarna: 5 nyckelkort = alltid slam (med dam: sök storslam) · 4 + dam = slam ·
-4 utan dam = damfrågan när den finns, annars slam med 8+ kända trumf · tio kända
-trumf räknas som trumfdam. Facit
-`auction-slamtabell.test.ts`; trumfsonden `rkc-trumf.probe.test.ts` = 0.
-**Följder att känna till:** #94-given slutar i 6♥ (inte 7♥) · 94 slammar på 200 000
-givar bjuds inte längre (46 bet, 48 stod på DD). Detalj + mätkommandon `docs/bevaka.md`.
-**Felrapport #95** LIVE `a5bae94` (damfrågans förklaring + tre budfel).
-Ägarens grundregel 2026-10-04: **fråga så mycket budgivningen tillåter, gärna kontrollbud före.**
-**NU-kandidater:** (1) kontrollbud före essfrågan — bara var tredje essfråga föregås av
-ett (störst: stark 2♣ + positivt svar går rakt på 4NT); (2) budförklarings-svepet
-(noll på ostörda standardfrön, rött på störda; störst: responsiv dubbling läses som
-upplysningsdubbling). Budfrågor → fråga ägaren, bygg inte på gissning.
+### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
+**Läget, mätt:** bara 886 av 2 675 essfrågor på 200 000 givar föregås av ett kontrollbud
+(trumfsonden `rkc-trumf.probe.test.ts`, sista avsnittet i utfilen). Störst utan: stark 2♣
++ positivt svar + återbud går rakt på 4NT (595) — börja där · hopphöjning/hopp i egen färg
+(122) · Jacoby minimum (72). Över partnerns utgångsplacering ryms inget kontrollbud (222).
+Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
+(`slamtabell-dd.probe.test.ts`) efter varje; budfrågor → fråga ägaren.
+
+**Byggt & LIVE `2776fa5` (2026-10-04, bok §6.1):** 4NT gäller alltid den senast ÄKTA
+bjudna färgen — frågare och svarare räknar samma (kaptenen räknar i partnerns läsning,
+placerar i egen färg bara när den bär sig själv; trumfvakten) · slamtabellen i båda
+vägarna: 5 nyckelkort = alltid slam · 4 + dam = slam · 4 utan dam = damfrågan när den
+finns, annars slam med 8+ kända trumf · tio kända trumf räknas som trumfdam. #94-given
+slutar i 6♥ (inte 7♥). Felrapport #95 LIVE `a5bae94`. Detalj `docs/bevaka.md`.
 
 **Senast LIVE (detalj `docs/historik.md`):** fynd B "parets färg i sang" `889fac3`
 (S8, `docs/speldiagnos.md`) · runda 7 `55d8cd3` · Hål D steg 2 `fda630c` (§7.8 c; öppna
@@ -99,7 +97,7 @@ S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
    (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
-FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
+**budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/bevaka.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
 subagent-användning · störda 1NT-auktioner nästa lager · fler budträningsgivar +
 tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den

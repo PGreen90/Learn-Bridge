@@ -3245,7 +3245,7 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
-- **2026-10-03 — Ägarbesluten om 4NT-färgen och slamtabellen byggda fullt ut
+- **2026-10-04 — Ägarbesluten om 4NT-färgen och slamtabellen byggda fullt ut
   (§6.1).** (1) **Samma trumf för frågare och svarare.** Trumfsonden
   (`rkc-trumf.probe.test.ts`, 200 000 givar) fann 10 essfrågor av 2 412 där de
   två räknade olika färg: efter hoppskift frågade kaptenen i EGEN färg (#94)

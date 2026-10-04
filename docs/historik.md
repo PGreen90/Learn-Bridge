@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-03 (Ägarbesluten om 4NT-färgen och slamtabellen — byggda fullt ut)
+## 2026-10-03/04 (Ägarbesluten om 4NT-färgen och slamtabellen — byggda fullt ut, LIVE `2776fa5`)
 
 **Besluten (2026-10-02):** 4NT gäller alltid den senast äkta bjudna färgen · fråga
 efter damen när det går · 5 nyckelkort = alltid slam (med dam: sök storslam) · 4 +
