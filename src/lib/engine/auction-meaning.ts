@@ -2264,7 +2264,8 @@ function conventionalTrump(u: Undisturbed): string | null {
     if (u.responderPassed && resp.level === 2 && isMinor(resp.strain)) return open.strain // Drury
   }
   if (open.level === 1 && isMinor(open.strain) && resp.strain === open.strain) return open.strain // inverterad
-  if (open.level >= 2 && open.strain !== 'NT' && resp.strain === open.strain) return open.strain
+  // Stark 2♣ är konstlad: 2♣–3♣ (positivt, egen klöver) är ingen höjning av öppningsfärgen.
+  if (open.level >= 2 && open.strain !== 'NT' && !same(open, 2, 'C') && resp.strain === open.strain) return open.strain
   return null
 }
 

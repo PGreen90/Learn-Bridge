@@ -108,7 +108,8 @@ export function partnerShownTrumpLength(f: AuctionFacts, trump: Suit): number {
   const partner = PARTNER[f.seat]
   const L = letterOfSuit(trump)
   const open = openingBid(f.history)
-  if (open && open.seat === partner && open.strain === L) {
+  // Stark 2♣ är konstlad — öppningen visar ingen klöver (förr: 'svag tvåa' = 6 kort).
+  if (open && open.seat === partner && open.strain === L && !(open.level === 2 && L === 'C')) {
     if (open.level === 1) return trump === 'hearts' || trump === 'spades' ? 5 : trump === 'diamonds' ? 4 : 3
     if (open.level === 2) return 6 // svag tvåa
     return open.level + 4 // spärr (3→7, 4→8)

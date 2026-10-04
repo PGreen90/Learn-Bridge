@@ -497,9 +497,16 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
   }
   const lastRank = bidRank(sofar[sofar.length - 1].call)
   const cueCap = ctx.cueTak ? Math.min(gameRank, bidRank(ctx.cueTak) + 1) : gameRank
+  const game4NT = '4NT'
 
   const cue = cheapestFreeCue(hand, trump, lastRank, cueCap, controlled)
-  if (cue) return cueTurn(role, cue)
+  // Kontrollbuden är till för att hinnas med FÖRE essfrågan — de får aldrig
+  // stänga ute den (ägaren 2026-10-04: "man behöver inte ha alla kontroller för
+  // att bjuda 4NT"). I lågfärgstrumf ligger utgången över 4NT: bjuder kaptenen
+  // 4♠ har partnern inget kontrollbud kvar under 4NT och ronden dör i 5m (frö
+  // 20270088). Kaptenen i klar slamzon frågar därför i stället för det budet.
+  const stängerUteFrågan = role === CAPTAIN && !!cue && bidRank(game4NT) < gameRank && bidRank(cue.call) >= bidRank('4S') && floor >= 33 && bidRank(game4NT) > lastRank
+  if (cue && !stängerUteFrågan) return cueTurn(role, cue)
 
   const game = gameCallFor(trump)
   if (role === CAPTAIN) {
@@ -508,6 +515,20 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
     const uncontrolled = RANK_ORDER.filter((s) => s !== trump && !controlled.has(s) && !hasRealControl(hand, s))
     const driveFloor = ctx.strictDrive ? 33 : 31
     if (floor >= driveFloor && uncontrolled.length <= 1 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx, trump)
+    // "Fråga alltid så mycket som budgivningen tillåter" (ägaren 2026-10-04): i
+    // klar drivzon (33+) ställs essfrågan så snart kaptenen inte har fler
+    // kontrollbud att visa — OAVSETT om någon färg saknar kontroll ("man behöver
+    // inte ha alla kontroller för att bjuda 4NT"). Förr stannade kaptenen i
+    // utgång när en färg var ovisad (frö 20260830) eller överhoppad (20270088).
+    if (floor >= 33 && bidRank('4NT') > lastRank) return rkcAskTurn(ctx, trump)
+    // Kontrollbuden har gått FÖRBI 4NT (lågfärgstrumf: 4m–4♦–4♠–5♣ …) — essfrågan
+    // ryms inte längre. Är varje sidofärg kontrollerad och värdena räcker för
+    // drivzonen bjuds lillslammen på kontrollerna (ägaren 2026-10-04: kontrollbud
+    // före essfrågan; utan detta dog ronden i 5m med slammen på bordet).
+    const slamCall = `6${LETTER[trump]}`
+    if (floor >= 33 && uncontrolled.length === 0 && bidRank('4NT') <= lastRank && bidRank(slamCall) > lastRank) {
+      return { role: 'svarare', call: slamCall, rule: 'slamavslut', explanation: `alla sidofärger kontrollerade och slamzon; essfrågan ryms inte efter kontrollbuden → ${slamCall[0]}${SYM[trump]} (lillslam).` }
+    }
     if (bidRank(game) > lastRank) return { role: 'svarare', call: game, rule: 'cue: avslut', explanation: `otillräckligt för slam → utgång (${game[0]}${SYM[trump]}).` }
     // Partnerns kontrollbud ÖVER utgången passas aldrig (ägarbeslut 2026-09-24) →
     // billigaste trumfbud (5M).

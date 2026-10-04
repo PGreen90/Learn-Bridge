@@ -134,3 +134,27 @@ describe('tio kända trumf räknas som trumfdam (Jacoby med fem trumf mot 1♠-�
     expect(svar).toMatchObject({ bid: '5S', rule: 'trumfdam: nej' })
   })
 })
+
+// Ägarbeslut 2026-10-04: "Fråga alltid så mycket som budgivningen tillåter och
+// gärna kontrollbud före det." Med 4-korts stöd i öppnarens lågfärg efter stark
+// 2♣ sätter svararen trumfen först (4m) i stället för 4NT direkt.
+describe('kontrollbud före essfrågan: trumfen sätts först i lågfärg (stark 2♣)', () => {
+  // Frö 20270088: 2♣–2♠–3♣. Nord har ♣JT95 och slamvärden mot visade 22+.
+  const d88 = giv('E', 'S:AQJ32 H:Q8 D:J8 C:JT95', 'S:K976 H:A543 D:QT6 C:82', 'S:54 H:K9 D:AK93 C:AKQ63', 'S:T8 H:JT762 D:7542 C:74')
+  it('4-korts stöd → 4♣ sätter trumfen; öppnaren visar sin billigaste kontroll', () => {
+    const b = bud(d88)
+    expect(b.slice(0, 5)).toEqual(['S:2C', 'N:2S', 'S:3C', 'N:4C', 'S:4D'])
+  })
+  // Ägaren 2026-10-04: "man behöver inte ha alla kontroller för att bjuda 4NT".
+  // Hjärtern är okontrollerad hos båda (K9 mot Q8), men Nord frågar ändå — och i
+  // stället för kontrollbudet 4♠, som inte lämnar plats för essfrågan i lågfärg.
+  it('kaptenen frågar 4NT i stället för ett kontrollbud som stänger ute frågan → 6♣', () => {
+    expect(bud(d88)).toEqual(['S:2C', 'N:2S', 'S:3C', 'N:4C', 'S:4D', 'N:4NT', 'S:5D', 'N:6C'])
+  })
+  // Frö 20271697: 2♣–3♣–3♦–4♦–4♥–4♠–5♣: kontrollbuden passerar 4NT, alla
+  // sidofärger är kontrollerade → lillslammen bjuds på kontrollerna.
+  it('kontrollbuden går förbi 4NT med allt kontrollerat → 6♦', () => {
+    const d = giv('E', 'S:- H:K64 D:9753 C:KQT876', 'S:KT763 H:Q93 D:8 C:A942', 'S:AJ H:AJ82 D:AKQJ62 C:J', 'S:Q98542 H:T75 D:T4 C:53')
+    expect(contractFromCalls(botAuction(d)!)).toMatchObject({ level: 6, strain: 'diamonds' })
+  })
+})

@@ -1731,6 +1731,18 @@ naturligt utan visar en **kontroll**:
 - Att hoppa över en färg förnekar kontroll där – så partnern ser var det läcker.
 - **Fråga alltid så mycket som budgivningen tillåter, och gärna kontrollbud före
   essfrågan** (ägaren 2026-10-04).
+- **Trumfen sätts först när kontrollbuden annars inte ryms** (ägarbeslut
+  2026-10-04): efter stark 2♣ + positivt svar + öppnarens egen lågfärg på
+  3-läget höjer svararen med **4-korts stöd** till **4m** — trumfen är satt och
+  öppnaren visar sin billigaste kontroll. (Med 3-korts stöd som förut: 4NT i
+  klar slamzon.) *2♣–2♠–3♣–**4♣**–4♦–4♠ …*
+- **Man behöver inte ha alla kontroller för att bjuda 4NT** (ägaren 2026-10-04).
+  Kontrollbuden ska hinnas med FÖRE essfrågan — de får aldrig stänga ute den.
+  Kaptenen i klar slamzon (33+) frågar 4NT så snart hen inte har fler
+  kontrollbud att visa, även när en färg saknar kontroll. I lågfärgstrumf
+  (utgången ligger över 4NT) frågar kaptenen hellre än att bjuda ett kontrollbud
+  som inte lämnar partnern plats under 4NT (4♠). Har kontrollbuden ändå gått
+  förbi 4NT och varje sidofärg är kontrollerad bjuds lillslammen på kontrollerna.
 
 Cue-bids används för att leta slam **innan** 1430 RKC: när båda visat kontroller
 i sidofärgerna och inget hål syns, frågar 4NT efter nyckelkorten.
@@ -3248,6 +3260,19 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-04 — Kontrollbud före essfrågan, steg 2: trumfen först i lågfärg
+  (§6.2).** Efter 2♣ + positivt svar + öppnarens lågfärg på 3-läget gick
+  svararen rakt på 4NT ("cue-utrymmet är trångt"). Nu sätter 4-korts stöd
+  trumfen med 4m och öppnaren öppnar kontrollbudsronden. Ägarens regel "man
+  behöver inte ha alla kontroller för att bjuda 4NT": kaptenen i klar slamzon
+  frågar så snart hen inte har fler kontrollbud (förr stannade hen i utgång när
+  en färg var ovisad eller överhoppad), frågar hellre än att bjuda ett
+  kontrollbud som stänger ute 4NT i lågfärg, och bjuder 6m på kontrollerna när
+  buden ändå passerat 4NT. Förklaringslagret: 2♣–3♣ är inget trumfstöd.
+  "Kända trumf": stark 2♣ visar ingen klöver (räknades som svag tvåa, 6 kort).
+  Mätt mot steg 1, 200 000 givar: 183 ändrade budgivningar, 127 ändrade
+  slutkontrakt; DD: 73 nya slammar (57 står, 16 bet), 35 bjuds inte längre (16
+  bet, 19 stod). Essfrågor efter kontrollbud: 1 213 av 2 826 → 1 353 av 2 918.
 - **2026-10-04 — Kontrollbudets definition i slamraden (§6.2).** En kontroll =
   motståndarna kan inte ta två raka stick: ess, kung-dam, singel eller renons.
   Slamradens kontrollbudsrond räknade bara ess/renons ("första-rondskontroll"),

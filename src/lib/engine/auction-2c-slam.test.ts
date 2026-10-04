@@ -130,9 +130,11 @@ describe('etapp 4 familj B fix 1: kaptensmatte + RKC efter positivt svar på 2�
     expect(contractFromCalls(history!)).toMatchObject({ level: 6, strain: 'clubs' })
   })
 
-  it('frö 20261469-läget: N (4-korts ruterstöd) frågar 4NT, blastar inte 5♦', () => {
+  // Ägarbeslut 2026-10-04 ("gärna kontrollbud före essfrågan"): med 4-korts stöd
+  // i öppnarens lågfärg sätts trumfen först (4♦), kontrollbuden går, sedan 4NT.
+  it('frö 20261469-läget: N (4-korts ruterstöd) sätter trumfen med 4♦ — varken 4NT direkt eller 5♦', () => {
     const d = deal('2cslam-20261469-pos', 'S', 'none', HANDS_1469)
-    expect(decideCall(d, HISTORY_1469, 'N').bid).toBe('4NT')
+    expect(decideCall(d, HISTORY_1469, 'N')).toMatchObject({ bid: '4D', rule: 'sätter trumfen (slamintresse)' })
   })
 
   it('frö 20261469 hela auktionen: lillslam 6♦ nås (exakt par)', () => {
@@ -142,9 +144,9 @@ describe('etapp 4 familj B fix 1: kaptensmatte + RKC efter positivt svar på 2�
     expect(contractFromCalls(history!)).toMatchObject({ level: 6, strain: 'diamonds' })
   })
 
-  it('frö 20260830-läget: W (ruterfit) frågar 4NT, blastar inte 5♦', () => {
+  it('frö 20260830-läget: W (4-korts ruterfit) sätter trumfen med 4♦ — varken 4NT direkt eller 5♦', () => {
     const d = deal('2cslam-20260830-pos', 'W', 'all', HANDS_830)
-    expect(decideCall(d, HISTORY_830, 'W').bid).toBe('4NT')
+    expect(decideCall(d, HISTORY_830, 'W')).toMatchObject({ bid: '4D', rule: 'sätter trumfen (slamintresse)' })
   })
 
   it('frö 20260830 hela auktionen: 6♦ nås (storslam kräver visshet → inte 7♦)', () => {

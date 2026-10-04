@@ -693,6 +693,21 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
       const majorTrump = isMajorSuit(trump2C)
       const gameCall = majorTrump ? `4${LETTER[trump2C]}` : `5${LETTER[trump2C]}`
       const slam = slamStep(trump2C)
+      // Ägarbeslut 2026-10-04 ("gärna kontrollbud före essfrågan"): med 4-korts
+      // stöd i öppnarens LÅGFÄRG sätts trumfen först — 4m — och öppnaren öppnar
+      // kontrollbudsronden, i stället för 4NT direkt (förr gick lågfärgen rakt på
+      // essfrågan: "cue-utrymmet är trångt"). Med bara 3-korts stöd som förut.
+      const fyraM = `4${LETTER[trump2C]}`
+      if (slam && !majorTrump && rebid.rule === 'rebid: egen färg (GF)' && rebid.call === `3${LETTER[trump2C]}` && rl[trump2C] >= 4 && (slam.turn.call === '4NT' || slam.turn.call === fyraM)) {
+        return {
+          turn: {
+            call: fyraM as ResponseResult['call'],
+            rule: 'sätter trumfen (slamintresse)',
+            explanation: `4+ stöd i partnerns ${SYM[trump2C]} och slamintresse mot visade ${STRONG_2C_SHOWN_MIN}+ → ${fyraM[0]}${SYM[trump2C]} sätter trumfen; partnern visar sin billigaste kontroll, essfrågan kommer efter kontrollbuden.`,
+          },
+          plan: { kind: 'slam', setup: { trump: trump2C, lastCall: fyraM, ctx: { partnerMin: STRONG_2C_SHOWN_MIN, gameForcing: true }, partnerStarts: true } },
+        }
+      }
       if (slam) return slam
       // Fast arrival (§5b beslut 7): 3+ stöd i öppnarens högfärg utan kontrollbud
       // i ny färg att visa → utgången direkt, ingen slamambition.
@@ -1528,6 +1543,17 @@ function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
     if (ours[5].bid !== agree) return null
     const ctx: SlamContext = { partnerMin: 22, inviteCall: `5${LETTER[t]}`, gameForcing: true, hpOnly: true }
     return { kind: 'slam', captain, prefix: 6, setup: { trump: t, lastCall: agree, ctx, partnerStarts: true }, sofar: sofarFrom(6) }
+  }
+
+  // Stark 2♣ + positivt svar + öppnarens egen LÅGFÄRG på 3-läget, och kaptenen
+  // höjer till 4m (ägarbeslut 2026-10-04): trumfen är satt, öppnaren öppnar
+  // kontrollbudsronden (billigaste kontroll under 5m, annars 5m).
+  if (openCall === '2C' && response.rule === '2♣-positivt' && rebid.rule === 'rebid: egen färg (GF)') {
+    const rs = suitOf(rebid.call)
+    if (rs && !isMajorSuit(rs) && rebid.call === `3${LETTER[rs]}` && first === `4${LETTER[rs]}`) {
+      const ctx: SlamContext = { partnerMin: STRONG_2C_SHOWN_MIN, gameForcing: true }
+      return { kind: 'slam', captain, prefix: 4, setup: { trump: rs, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+    }
   }
 
   // §5b beslut 3 (2026-09-05): reverse + kaptenens BILLIGA höjning av reversens
