@@ -551,6 +551,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'stöd-cue (slamintresse)': 'slamintresse',
   'RKC: stopp': 'avslut',
   'sätter trumfen före essfrågan': 'krav-1-rond',
+  'sätter trumfen (slamintresse)': 'utgangskrav',
   'RKC: dam nekad': 'avslut',
   'kvantitativ 4NT: accept': 'avslut',
   // Regler som saknade kravnivå (betydelsesvepet 2026-10-02, felrapport #95):

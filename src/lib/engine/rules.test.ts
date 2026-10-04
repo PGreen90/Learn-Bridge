@@ -154,6 +154,7 @@ const ALL_ENGINE_RULES: string[] = [
   'trumfdam-fråga', 'RKC: dam nekad', 'Exclusion: stopp', 'kvantitativ 4NT: accept',
   'reverse: 3NT', 'reverse: utgång i fiten', 'till spel (3NT)', '2♣: lillslam på solid egen färg',
   'accepterar slamtrevare', 'slamhöjning av 3NT', 'slaminbjudan: avböjer',
+  'sätter trumfen (slamintresse)', // 2♣–pos–3m–4m: trumfen först, kontrollbuden efter (ägarbeslut 2026-10-04)
   'sätter trumfen före essfrågan', // trumfvakten (ägarbeslut 2026-10-02: 4NT = senast äkta bjudna färg)
   
 ]

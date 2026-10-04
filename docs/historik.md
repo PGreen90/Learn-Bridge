@@ -10,7 +10,20 @@
 
 ---
 
-## 2026-10-04 (Kontrollbud före essfrågan, steg 1 — kontrollens definition i slamraden)
+## 2026-10-04 (Kontrollbud före essfrågan, steg 2 — trumfen först i lågfärg)
+
+**Ägarens ja:** efter 2♣ + positivt svar + öppnarens lågfärg höjer svararen med
+4-korts stöd till 4m i stället för 4NT direkt. Första bygget tappade slammar:
+kaptenen stannade i 5m när en färg var ovisad eller överhoppad, och i lågfärg gick
+kontrollbuden förbi 4NT. **Ägaren rättade:** "man behöver inte ha alla kontroller
+för att bjuda 4NT" — kontrollbuden ska hinnas med före frågan, aldrig stänga ute
+den. Kaptenen i klar slamzon frågar nu så snart hen inte har fler kontrollbud.
+
+**Mätt mot steg 1 (200 000 givar):** 183 ändrade budgivningar, 127 ändrade
+slutkontrakt; DD: 73 nya slammar (57 står, 16 bet), 35 bjuds inte längre (16 bet,
+19 stod). Essfrågor efter kontrollbud: 1 213 av 2 826 → 1 353 av 2 918.
+
+## 2026-10-04 (Kontrollbud före essfrågan, steg 1 — kontrollens definition i slamraden, LIVE `d26ebdb`)
 
 **Ägaren:** "en kontroll = motståndet kan inte ta två raka stick i den färg man
 lovar kontroll: ess, kung och dam, singelton eller renons." Slamradens

@@ -40,10 +40,16 @@
   kontrollbud gick från 886 av 2 675 till 1 213 av 2 826 (200 000 givar; siffran
   skrivs av trumfsonden, sista avsnittet i `revisor-output/rkc-trumf.txt`).
   DD mot föregående version: 114 nya slammar (80 står, 34 bet), 71 bjuds inte
-  längre (33 bet, 38 stod). **Kvar:** svararen som går rakt på 4NT utan att
-  sätta trumfen först (2♣–2♠–3♣–4NT med klöverstöd — ägarfråga: höja till 4♣
-  först?), essfrågan över partnerns utgångsplacering (inget kontrollbud ryms),
-  hopphöjning/hopp i egen färg, Jacoby minimum.
+  längre (33 bet, 38 stod). **Steg 2 byggt:** efter 2♣ + positivt svar +
+  öppnarens lågfärg sätter 4-korts stöd trumfen med 4m (ägarens ja 2026-10-04);
+  "man behöver inte ha alla kontroller för att bjuda 4NT" (ägaren) — kaptenen i
+  klar slamzon frågar så snart hen inte har fler kontrollbud. Mätt mot steg 1:
+  73 nya slammar (57 står, 16 bet), 35 bjuds inte längre (16 bet, 19 stod);
+  essfrågor efter kontrollbud 1 353 av 2 918. **Kvar:** essfrågan över
+  partnerns utgångsplacering (inget kontrollbud ryms), hopphöjning/hopp i egen
+  färg, Jacoby minimum, 3-korts stöd i lågfärg (går fortfarande rakt på 4NT).
+  **Bevaka:** i slamzonen 31–32 gäller fortfarande "högst en okontrollerad
+  sidofärg" för essfrågan; bara 33+ frågar oavsett.
 - **Trumfsonden** (frågare mot svarare, ska vara 0):
   `$env:RKCTRUMF='1'; npx vitest run src/lib/engine/rkc-trumf.probe.test.ts`
   (200 000 givar, cirka en minut). Den skriver också hur ofta bottarnas essfrågor
