@@ -34,12 +34,16 @@
   längd"), 6 nya via damfrågan (alla står).
   (4) Billigaste sidokung visas i FÄRGordning (6♦ före 5♠), inte billigaste bud.
   (5) "Kända trumf" är golv: en höjning räknas som 3, en egen färg som 4.
-- **"Gärna kontrollbud före essfrågan" (ägaren 2026-10-04) — INTE byggt, mätt:**
-  bara 886 av 2 675 essfrågor (200 000 givar) föregås av ett kontrollbud. Störst
-  utan: stark 2♣ + positivt svar + återbud (595 — går rakt på 4NT), essfrågan
-  över partnerns utgångsplacering (222, där ryms inget kontrollbud), hopphöjning
-  och hopp i egen färg (122), Jacoby minimum (72). NU-kandidat; siffran skrivs av
-  trumfsonden (sista avsnittet i `revisor-output/rkc-trumf.txt`).
+- **"Gärna kontrollbud före essfrågan" (ägaren 2026-10-04) — NU, steg 1 byggt:**
+  slamradens kontrollbud följer ägarens definition (ess, kung-dam, singel eller
+  renons; förr bara ess/renons). Andelen essfrågor som föregås av ett
+  kontrollbud gick från 886 av 2 675 till 1 213 av 2 826 (200 000 givar; siffran
+  skrivs av trumfsonden, sista avsnittet i `revisor-output/rkc-trumf.txt`).
+  DD mot föregående version: 114 nya slammar (80 står, 34 bet), 71 bjuds inte
+  längre (33 bet, 38 stod). **Kvar:** svararen som går rakt på 4NT utan att
+  sätta trumfen först (2♣–2♠–3♣–4NT med klöverstöd — ägarfråga: höja till 4♣
+  först?), essfrågan över partnerns utgångsplacering (inget kontrollbud ryms),
+  hopphöjning/hopp i egen färg, Jacoby minimum.
 - **Trumfsonden** (frågare mot svarare, ska vara 0):
   `$env:RKCTRUMF='1'; npx vitest run src/lib/engine/rkc-trumf.probe.test.ts`
   (200 000 givar, cirka en minut). Den skriver också hur ofta bottarnas essfrågor

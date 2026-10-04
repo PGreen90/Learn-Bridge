@@ -628,7 +628,10 @@ describe('§5b beslut 3 – fast arrival efter reverse: 3M stark (GF, cue-ronden
     const h3 = [...h, call('S', '3H'), P('W')]
     expect(bud('S:A3 H:KQ72 D:AKJ85 C:Q4', h3, 'N')!.call).toMatchObject({ bid: '3S', rule: 'cue-bid' })
     expect(bud('S:K3 H:KQ72 D:AKJ85 C:Q4', h3, 'N')!.call).toMatchObject({ bid: '4D', rule: 'cue-bid' })
-    expect(bud('S:K3 H:KQ72 D:KQJ85 C:K4', h3, 'N')!.call).toMatchObject({ bid: '4H', rule: 'cue: avslut' })
+    // K-D i ruter ÄR en kontroll (ägarens definition 2026-10-04) → 4♦; först utan
+    // ess, kung-dam, singel eller renons under utgång avslutas det i 4♥.
+    expect(bud('S:K3 H:KQ72 D:KQJ85 C:K4', h3, 'N')!.call).toMatchObject({ bid: '4D', rule: 'cue-bid' })
+    expect(bud('S:K3 H:KQ72 D:KJT85 C:K4', h3, 'N')!.call).toMatchObject({ bid: '4H', rule: 'cue: avslut' })
   })
 
   it('hela sekvensen: 3♥ → 4♦ (cue) → 4NT (kaptenen 17 + 16 = 33, bara klövern okontrollerad) → 5♠ (två nyckelkort + dam) → 6♥', () => {
@@ -1289,10 +1292,11 @@ describe('§5b beslut 16 – lågfärgsfit i utgångskrav: 5m är utgången, inb
   // 1♦–2♣–2NT–3♦ (försenat stöd) – 4♦ (öppnaren: kravet står, ingen sang) — kaptenen (Syd) mot visade 12.
   const h4D = [call('N', '1D'), P('E'), call('S', '2C'), P('W'), call('N', '2NT'), P('E'), call('S', '3D'), P('W'), call('N', '4D'), P('E')]
 
-  it('kaptenen med 31–32 visar billigaste kontroll över 4♦ (4♥ med ♥A, 4♠ med ♠A); utan första-rondskontroll → 5♦ (systemriktig miss); 33+ frågar 4NT direkt', () => {
+  it('kaptenen med 31–32 visar billigaste kontroll över 4♦ (4♥ med ♥A, 4♠ med ♠A, 4♥ med ♥K-D); utan kontroll → 5♦ (systemriktig miss); 33+ frågar 4NT direkt', () => {
     expect(bud('S:K54 H:A43 D:KQ76 C:AQJ', h4D, 'S')!.call).toMatchObject({ bid: '4H', rule: 'cue-bid' }) // 19 jämn → 31
     expect(bud('S:A54 H:K43 D:KQ76 C:AQJ', h4D, 'S')!.call).toMatchObject({ bid: '4S', rule: 'cue-bid' })
-    expect(bud('S:KQ4 H:KQJ D:KQ76 C:QJT', h4D, 'S')!.call).toMatchObject({ bid: '5D', rule: 'höjning till utgång' }) // 19 men inga ess
+    expect(bud('S:KQ4 H:KQJ D:KQ76 C:QJT', h4D, 'S')!.call).toMatchObject({ bid: '4H', rule: 'cue-bid' }) // K-D i hjärter = kontroll (ägarens definition 2026-10-04)
+    expect(bud('S:KJ4 H:KJT D:KQJ6 C:KJ9', h4D, 'S')!.call).toMatchObject({ bid: '5D', rule: 'höjning till utgång' }) // inga ess, ingen K-D, ingen kortfärg
     expect(bud('S:A54 H:AJ3 D:KQ76 C:AQJ', h4D, 'S')!.call).toMatchObject({ bid: '4NT', rule: '1430 RKC' }) // 21 → 33
   })
 

@@ -11,10 +11,11 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
-**Läget, mätt:** bara 886 av 2 675 essfrågor på 200 000 givar föregås av ett kontrollbud
-(trumfsonden `rkc-trumf.probe.test.ts`, sista avsnittet i utfilen). Störst utan: stark 2♣
-+ positivt svar + återbud går rakt på 4NT (595) — börja där · hopphöjning/hopp i egen färg
-(122) · Jacoby minimum (72). Över partnerns utgångsplacering ryms inget kontrollbud (222).
+**Steg 1 byggt 2026-10-04 (EJ pushat):** slamradens kontrollbud följer ägarens definition
+— ess, kung-dam, singel eller renons (förr bara ess/renons). Essfrågor efter ett
+kontrollbud: 886 av 2 675 → 1 213 av 2 826 (trumfsonden `rkc-trumf.probe.test.ts`).
+**Kvar:** svararen går rakt på 4NT utan att sätta trumfen (2♣–2♠–3♣–4NT med klöverstöd —
+ägarfråga: höja först?) · hopphöjning/hopp i egen färg · Jacoby minimum.
 Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
 (`slamtabell-dd.probe.test.ts`) efter varje; budfrågor → fråga ägaren.
 

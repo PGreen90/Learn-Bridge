@@ -10,6 +10,18 @@
 
 ---
 
+## 2026-10-04 (Kontrollbud före essfrågan, steg 1 — kontrollens definition i slamraden)
+
+**Ägaren:** "en kontroll = motståndet kan inte ta två raka stick i den färg man
+lovar kontroll: ess, kung och dam, singelton eller renons." Slamradens
+kontrollbudsrond räknade bara ess och renons, så händer med singel eller K-D gick
+rakt på 4NT. Nu samma definition som i cue-höjningen (`hasRealControl`).
+
+**Mätt (200 000 givar mot föregående version):** 905 ändrade budgivningar, 239
+ändrade slutkontrakt; DD: 114 nya slammar (80 står, 34 bet), 71 bjuds inte längre
+(33 bet, 38 stod). Essfrågor efter minst ett kontrollbud: 886 av 2 675 → 1 213 av
+2 826. Trumfsonden 0. Sju äldre facit uppdaterade (K-D och singel är kontroller).
+
 ## 2026-10-03/04 (Ägarbesluten om 4NT-färgen och slamtabellen — byggda fullt ut, LIVE `2776fa5`)
 
 **Besluten (2026-10-02):** 4NT gäller alltid den senast äkta bjudna färgen · fråga

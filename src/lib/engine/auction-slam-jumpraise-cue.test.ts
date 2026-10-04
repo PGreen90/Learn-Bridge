@@ -89,7 +89,9 @@ describe('FACIT: kontrollbud efter 1♣–1♥–3♥ passas aldrig', () => {
     for (const d of hander) {
       const svar = decideCall(d, [...PRE, { seat: 'S', bid: '4C' }, { seat: 'W', bid: 'P' }] as ResolvedCall[], 'N').bid
       const ruter = d.hands.N.filter((c) => c.suit === 'diamonds')
-      const kontroll = ruter.length === 0 || ruter.some((c) => c.rank === 'A')
+      // Kontroll = motståndarna kan inte ta två raka stick: ess, kung-dam, singel
+      // eller renons (ägarens definition, 2026-10-04 — förr bara ess/renons).
+      const kontroll = ruter.length <= 1 || ruter.some((c) => c.rank === 'A') || (ruter.some((c) => c.rank === 'K') && ruter.some((c) => c.rank === 'Q'))
       expect(svar).toBe(kontroll ? '4D' : '4H')
     }
   })

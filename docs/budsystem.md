@@ -1724,10 +1724,13 @@ högfärg 5, egen bjuden färg 4 — 5 efter stark 2♣ — höjning 3, Jacoby 4
 ### 6.2 Cue-bid (kontrollbud)
 När **trumf är överenskommen i en kravbudgivning** är ett bud i ny färg inte
 naturligt utan visar en **kontroll**:
-- **Första-rondskontroll** (ess eller renons) visas först, **billigaste först**
-  och uppåt.
-- Nästa omgång kan visa **andra-rondskontroll** (kung eller singleton).
+- **En kontroll = motståndarna kan inte ta två raka stick i färgen** (ägarens
+  definition 2026-09-28, bekräftad 2026-10-04): **ess, kung och dam
+  tillsammans, singel eller renons**. En ensam kung räknas inte.
+- Kontrollerna visas **billigaste först** och uppåt.
 - Att hoppa över en färg förnekar kontroll där – så partnern ser var det läcker.
+- **Fråga alltid så mycket som budgivningen tillåter, och gärna kontrollbud före
+  essfrågan** (ägaren 2026-10-04).
 
 Cue-bids används för att leta slam **innan** 1430 RKC: när båda visat kontroller
 i sidofärgerna och inget hål syns, frågar 4NT efter nyckelkorten.
@@ -3245,6 +3248,17 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-04 — Kontrollbudets definition i slamraden (§6.2).** En kontroll =
+  motståndarna kan inte ta två raka stick: ess, kung-dam, singel eller renons.
+  Slamradens kontrollbudsrond räknade bara ess/renons ("första-rondskontroll"),
+  så en hand med singel eller K-D hoppade över kontrollbudet och gick rakt på
+  4NT (frö 20270550: 2♣–2♠–3♠–4NT med klöversingel). Nu samma definition som i
+  cue-höjningen (`hasRealControl`); förklaringarna säger samma sak. Utan
+  överenskommen trumf (kaptenens egen färg efter hoppskift) bjuds inga
+  kontrollbud. Auktionsdiff 200 000 givar mot föregående version: 905 ändrade
+  budgivningar, 239 ändrade slutkontrakt; double-dummy: 114 nya slammar (80 står,
+  34 går bet), 71 bjuds inte längre (33 gick bet, 38 stod). Andelen essfrågor som
+  föregås av ett kontrollbud: 886 av 2 675 → 1 213 av 2 826.
 - **2026-10-04 — Ägarbesluten om 4NT-färgen och slamtabellen byggda fullt ut
   (§6.1).** (1) **Samma trumf för frågare och svarare.** Trumfsonden
   (`rkc-trumf.probe.test.ts`, 200 000 givar) fann 10 essfrågor av 2 412 där de

@@ -50,7 +50,7 @@ it.skipIf(!ON)('rkc-trumfsonden', { timeout: 0 }, () => {
   let frågor = 0
   let jämförbara = 0
   let efterKontrollbud = 0
-  const utanKontrollbud = new Map<string, number>()
+  const utanKontrollbud = new Map<string, { antal: number; frön: number[] }>()
   const olika = new Map<string, { antal: number; exempel: string }>()
   // Andra mätningen: REGELN mot frågarens placering — följer bottarnas egna
   // essfrågor ägarens regel "senast äkta bjudna färg"?
@@ -69,7 +69,8 @@ it.skipIf(!ON)('rkc-trumfsonden', { timeout: 0 }, () => {
     if (medKontrollbud) efterKontrollbud++
     else {
       const väg = history.slice(0, i).filter((c) => c.bid !== 'P').map((c) => c.rule ?? '?').join(' → ')
-      utanKontrollbud.set(väg, (utanKontrollbud.get(väg) ?? 0) + 1)
+      const u = utanKontrollbud.get(väg)
+      if (u) { u.antal++; if (u.frön.length < 6) u.frön.push(seed) } else utanKontrollbud.set(väg, { antal: 1, frön: [seed] })
     }
     const svarIdx = history.findIndex((c, k) => k > i && c.seat === PARTNER[asker] && c.bid !== 'P')
     if (svarIdx < 0) continue
@@ -114,7 +115,7 @@ it.skipIf(!ON)('rkc-trumfsonden', { timeout: 0 }, () => {
     ...[...regelbrott.entries()].sort((x, y) => y[1].antal - x[1].antal).map(([k, h]) => `  [${String(h.antal).padStart(4)}×] ${k}
           ${h.exempel}`))
   rader.push('', `KONTROLLBUD FÖRE ESSFRÅGAN: ${efterKontrollbud} av ${frågor} essfrågor föregicks av minst ett kontrollbud. Vanligaste vägarna UTAN:`, '',
-    ...[...utanKontrollbud.entries()].sort((x, y) => y[1] - x[1]).slice(0, 15).map(([k, n]) => `  [${String(n).padStart(4)}×] ${k}`))
+    ...[...utanKontrollbud.entries()].sort((x, y) => y[1].antal - x[1].antal).slice(0, 15).map(([k, u]) => `  [${String(u.antal).padStart(4)}×] ${k}   (frön ${u.frön.join(', ')})`))
   mkdirSync('revisor-output', { recursive: true })
   writeFileSync('revisor-output/rkc-trumf.txt', rader.join('\n'), 'utf8')
   expect(antal, 'frågare och svarare ska läsa samma trumf (se revisor-output/rkc-trumf.txt)').toBe(0)
