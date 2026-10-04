@@ -11,13 +11,12 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
-**Steg 1 LIVE `d26ebdb`:** slamradens kontrollbud följer ägarens definition — ess,
-kung-dam, singel eller renons. **Steg 2 LIVE `11b41e7`:** 2♣ + positivt svar
-+ öppnarens lågfärg → 4-korts stöd sätter trumfen med 4m; "man behöver inte ha alla
-kontroller för att bjuda 4NT". **Steg 3 byggt (EJ pushat):** kontrollbud efter
-hopphöjningen (1m–1M–3M). Essfrågor efter kontrollbud: 886 av 2 675 → 1 504 av 2 989
-(trumfsonden `rkc-trumf.probe.test.ts`). **Kvar:** hopp i egen färg · Jacoby minimum ·
-3-korts stöd i lågfärg (`docs/bevaka.md`).
+**Steg 1–3 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`): slamradens kontrollbud följer ägarens
+definition (ess, kung-dam, singel, renons) · 2♣ + positivt svar + öppnarens lågfärg →
+4-korts stöd sätter trumfen med 4m · "man behöver inte ha alla kontroller för att bjuda
+4NT" · kontrollbud efter hopphöjningen (1m–1M–3M). Essfrågor efter kontrollbud: 886 av
+2 675 → 1 504 av 2 989 (trumfsonden `rkc-trumf.probe.test.ts`). **Kvar:** hopp i egen
+färg (1m–1M–3m) · Jacoby minimum · 3-korts stöd i lågfärg (`docs/bevaka.md`).
 Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
 (`slamtabell-dd.probe.test.ts`) efter varje; budfrågor → fråga ägaren.
 

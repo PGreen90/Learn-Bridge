@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-04 (Kontrollbud före essfrågan, steg 3 — efter hopphöjningen)
+## 2026-10-04 (Kontrollbud före essfrågan, steg 3 — efter hopphöjningen, LIVE `90812ec`)
 
 Efter 1m–1M–3M visar kaptenen med slamintresse sin billigaste kontroll i stället
 för 4NT/5M direkt. Mätningen avslöjade ett gammalt hål: när motståndarna dubblat
