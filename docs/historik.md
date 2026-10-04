@@ -10,6 +10,18 @@
 
 ---
 
+## 2026-10-04 (Kontrollbud före essfrågan, steg 3 — efter hopphöjningen)
+
+Efter 1m–1M–3M visar kaptenen med slamintresse sin billigaste kontroll i stället
+för 4NT/5M direkt. Mätningen avslöjade ett gammalt hål: när motståndarna dubblat
+svaret fortsatte budraden som ostörd, men slamradens läsare gav upp vid dubblingen
+— partnern kände inte igen kontrollbudet (frö 20386322 slutade i 5♣, 20446339
+passades i 4♦). Läsarna tål nu den dubblingen.
+
+**Mätt mot steg 2 (200 000 givar):** 261 ändrade budgivningar, 47 ändrade
+slutkontrakt; DD: 21 slammar bort (14 bet, 7 stod), 13 nya (7 står, 6 bet).
+Essfrågor efter kontrollbud: 1 353 av 2 918 → 1 504 av 2 989.
+
 ## 2026-10-04 (Kontrollbud före essfrågan, steg 2 — trumfen först i lågfärg, LIVE `11b41e7`)
 
 **Ägarens ja:** efter 2♣ + positivt svar + öppnarens lågfärg höjer svararen med

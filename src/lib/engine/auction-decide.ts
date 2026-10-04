@@ -463,7 +463,10 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   // Hopphöjning av min högfärg (1x–1M–3M, visade 16–18 med 4-korts stöd).
   const respMajor = response.call === '1H' ? 'hearts' : response.call === '1S' ? 'spades' : null
   if (rebid.rule === 'hopphöjning (inbjudan)' && respMajor && rebidSuit === respMajor && trump === respMajor) {
-    return { ctx: { partnerMin: 16, inviteCall: `5${LETTER[respMajor]}` } }
+    // Kontrollbud före essfrågan (ägaren 2026-10-04): kaptenen med slamintresse visar
+    // sin billigaste kontroll över 3M — budet självt etablerar utgången (ett
+    // kontrollbud över 3M kan inte stanna under 4M), därav gameForcing.
+    return { ctx: { partnerMin: 16, inviteCall: `5${LETTER[respMajor]}`, gameForcing: true } }
   }
 
   // Hoppskift (19+, utgångskrav) + svararens EGEN 1-lägeshögfärg som trumf
@@ -1406,7 +1409,7 @@ export function slamSituation(f: AuctionFacts): SlamSituation | null {
 function placeringsSituation(f: AuctionFacts): SlamSituation | null {
   const open = f.opening
   if (!open || f.theirContractBids.length > 0) return null
-  if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  if (!quietOrDoubledResponse(f)) return null // ostört — eller bara deras X av svaret, som linjen bjuder över
   const ours = f.ourContractBids
   if (!ours.length || ours[0].seat !== open.seat || ours[0] !== f.contractBids[0]) return null
   const p = ours.findIndex((c) => /^(4[HS]|5[CD])$/.test(c.bid))
@@ -1450,7 +1453,7 @@ function placeringsSituation(f: AuctionFacts): SlamSituation | null {
 function kontrollbudsSituation(f: AuctionFacts): SlamSituation | null {
   const open = f.opening
   if (!open || f.theirContractBids.length > 0) return null
-  if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  if (!quietOrDoubledResponse(f)) return null // ostört — eller bara deras X av svaret, som linjen bjuder över
   const ours = f.ourContractBids
   if (!ours.length || ours[0].seat !== open.seat || ours[0] !== f.contractBids[0]) return null
   const lage = kontrollbudslage(f.history, f.seat)
@@ -1472,7 +1475,7 @@ function kontrollbudsSituation(f: AuctionFacts): SlamSituation | null {
 function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
   const open = f.opening
   if (!open || f.theirContractBids.length > 0) return null
-  if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  if (!quietOrDoubledResponse(f)) return null // ostört — eller bara deras X av svaret, som linjen bjuder över
   const ours = f.ourContractBids
   if (ours.length < 2 || ours[0].seat !== open.seat || ours[0] !== f.contractBids[0]) return null
   const opener = open.seat
@@ -1718,7 +1721,7 @@ function captainIntent(sit: SlamSituation, f: AuctionFacts, hand: Hand): SlamSit
 function captainOwnSituation(f: AuctionFacts, hand: Hand): SlamSituation | null {
   const open = f.opening
   if (!open || f.theirContractBids.length > 0) return null
-  if (f.history.some((c) => c.bid === 'X' || c.bid === 'XX')) return null
+  if (!quietOrDoubledResponse(f)) return null // ostört — eller bara deras X av svaret, som linjen bjuder över
   const ours = f.ourContractBids
   const captain = PARTNER[open.seat]
   if (f.seat !== captain || ours.length < 5 || ours.length % 2 === 0) return null // kaptenens tur efter sitt första slamsteg
