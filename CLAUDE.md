@@ -12,7 +12,7 @@ svarar på vad).
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
 **Steg 1 LIVE `d26ebdb`:** slamradens kontrollbud följer ägarens definition — ess,
-kung-dam, singel eller renons. **Steg 2 byggt 2026-10-04 (EJ pushat):** 2♣ + positivt svar
+kung-dam, singel eller renons. **Steg 2 LIVE `11b41e7`:** 2♣ + positivt svar
 + öppnarens lågfärg → 4-korts stöd sätter trumfen med 4m; "man behöver inte ha alla
 kontroller för att bjuda 4NT". Essfrågor efter kontrollbud: 886 av 2 675 → 1 353 av 2 918
 (trumfsonden `rkc-trumf.probe.test.ts`). **Kvar:** hopphöjning/hopp i egen färg · Jacoby

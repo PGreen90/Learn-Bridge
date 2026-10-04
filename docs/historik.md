@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-04 (Kontrollbud före essfrågan, steg 2 — trumfen först i lågfärg)
+## 2026-10-04 (Kontrollbud före essfrågan, steg 2 — trumfen först i lågfärg, LIVE `11b41e7`)
 
 **Ägarens ja:** efter 2♣ + positivt svar + öppnarens lågfärg höjer svararen med
 4-korts stöd till 4m i stället för 4NT direkt. Första bygget tappade slammar:
