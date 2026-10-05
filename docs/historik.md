@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-05 (Nattgranskningen stod still i nio dygn — trasig arbetsflödesfil)
+## 2026-10-05 (Nattgranskningen stod still i nio dygn — trasig arbetsflödesfil, LIVE `24304a6`)
 
 **Ägarens rapport:** "mina historiska resultat har försvunnit … samt att det står
 provisorisk". Tävlingsdagarna 26 sep–1 okt visade "spelade inte", allt från 26 sep
@@ -6738,6 +6738,11 @@ toppnycklar, inget skräp i kolumn 0, jämna citat, inga dubblerade steg — den
 på den trasiga filen) · historiken säger "inte sammanräknad än" om en ofrusen dag
 utan ställning. Avslutssteget är självläkande och fyller alla saknade dagar vid
 första körningen.
+
+**Ikapp:** nattjobbet kördes för hand samma dag — 18 ställningar frysta (26 sep–4
+okt, MP + IMP), gårdagens 95 + 63 inskick granskade utan avvikelser.
+Djupgranskningen i efterhand startad för 3 och 2 okt; 26 sep–1 okt återstår
+(`docs/bevaka.md`).
 
 **Lärdom:** deploygrinden kör inte arbetsflödena, och en röd "startup failure"
 mejlas inte som ett haveri i jobbet. Titta på `gh run list --workflow=tavling-granskning.yml`

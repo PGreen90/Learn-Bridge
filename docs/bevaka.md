@@ -818,10 +818,19 @@
 `); flödet kördes inte på nio dygn, så ingen dag frystes
   ("provisorisk", "spelade inte"). Filen är återställd och
   `src/workflow-vakt.test.ts` vaktar arbetsflödesfilerna i deploygrinden.
-- **Bevaka:** (1) djupgranskningen (omspelet av inskicken) kördes aldrig för
-  26 sep–3 okt — körs i efterhand en dag i taget med `gh workflow run
-  tavling-granskning.yml -f datum=ÅÅÅÅ-MM-DD`; (2) kontrollera efter en natt att
-  schemakörningen blev grön: `gh run list --workflow=tavling-granskning.yml --limit 3`.
+- **Läget 2026-10-05:** nattjobbet kört för hand och grönt — 18 ställningar
+  frysta (26 sep–4 okt, MP + IMP), gårdagens granskning utan avvikelser.
+- **KVAR — djupgranskningen i efterhand:** startade för 3 okt och 2 okt (köade på
+  GitHub vid sessionsslutet — kontrollera att båda blev gröna). **Inte startade:
+  26, 27, 28, 29, 30 sep och 1 okt.** En dag i taget (flödet tillåter bara en
+  väntande körning, ca 40 min per dag):
+  `gh workflow run tavling-granskning.yml -f datum=2026-10-01` osv. Raden
+  "Granskade: … flyttade till 'granskning': N" i loggen säger om något hittades;
+  dagens ställning skrivs om automatiskt.
+- **Bevaka:** (1) första schemalagda körningen natten till 2026-10-06:
+  `gh run list --workflow=tavling-granskning.yml --limit 3` ska visa en grön
+  `schedule`; (2) 1 okt IMP har bara 4 spelare och ettan 3 av 12 givar — inte
+  närmare kontrollerat.
 
 ## Damfrågan + slamfrågornas förklaringar (2026-10-02, felrapport #95)
 - **Lagat:** damfrågan, damsvaren, Exclusion, Gerbers svar/kungfråga och

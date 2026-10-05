@@ -10,6 +10,11 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-05): nattgranskningen var trasig 26 sep–4 okt
+> (lagad, LIVE `24304a6`). Kontrollera att nattens schemakörning blev grön och kör
+> djupgranskningen i efterhand för de dagar som återstår — `docs/bevaka.md`, översta
+> punkten. Sedan ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan eller "trumfen satt"?
+
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
 **Steg 1–3 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`): slamradens kontrollbud följer ägarens
 definition (ess, kung-dam, singel, renons) · 2♣ + positivt svar + öppnarens lågfärg →
@@ -32,10 +37,9 @@ slutar i 6♥ (inte 7♥). Felrapport #95 LIVE `a5bae94`. Detalj `docs/bevaka.md
 ägarfrågor: svararens val efter 3NT · öppnaren frågar aldrig 4NT själv) · felrapport
 #91–#94, budhjälpen tänker, uteslutningsmetoden i RKC (2026-09-30).
 
-**Parallella ägarsteg (live-prov):** sunt förnuft-lagret (`docs/sunt-fornuft-plan.md`) ·
-tredje hand högt (regel A–D LIVE `037403b`; `docs/speldiagnos.md` T-serien) ·
-vänner-bordet = tävlingen (`docs/bord-plan.md`) · Gambling 3NT · budförklaringarnas
-ordval (`docs/budforklaring-katalog.md`: peka på en rad → Claude byter + deployar).
+**Parallella ägarsteg (live-prov):** sunt förnuft-lagret · tredje hand högt (T-serien) ·
+vänner-bordet = tävlingen · Gambling 3NT · budförklaringarnas ordval
+(`docs/budforklaring-katalog.md`). Detalj: `docs/bevaka.md`.
 
 ---
 
