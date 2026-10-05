@@ -362,7 +362,14 @@ export function BordSpel({
 
   // Nollställ färgvalet när turen går vidare (samma princip som budlådan).
   const toActV = spel?.state.toAct ?? null
-  useEffect(() => setSelectedSuit(null), [toActV])
+  // Nollställs UNDER renderingen (inte i en effekt): en effekt körs en stund
+  // efter att den nya turen ritats, och ett tryck som hann före fick sitt
+  // färgval raderat i efterhand (flakigt test i Actions 2026-10-04).
+  const [forraToActV, setForraToActV] = useState(toActV)
+  if (forraToActV !== toActV) {
+    setForraToActV(toActV)
+    setSelectedSuit(null)
+  }
 
   // Ljudmotorn väcks i en riktig användargest (autoplay-policyn) — billig och
   // idempotent, precis som på spelbordet.
