@@ -253,6 +253,11 @@ function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: Tavlin
                     </span>
                     <span className="font-semibold text-gold-200">{talText(d.du.snitt, form, 1)} {enhetText(form)}</span>
                   </>
+                ) : !d.slutlig && d.antalSpelare === null ? (
+                  // En ofrusen dag utanför fönstret som räknas i farten: ställningen
+                  // är inte sammanräknad än — säg det, inte "spelade inte" (2026-10-05:
+                  // nattjobbet stod still i nio dygn och spelarna trodde resultaten var borta).
+                  <span className="text-emerald-100/60">inte sammanräknad än</span>
                 ) : (
                   <span className="text-emerald-100/60">spelade inte</span>
                 )}

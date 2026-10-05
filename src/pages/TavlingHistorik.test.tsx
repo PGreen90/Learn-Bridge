@@ -59,6 +59,8 @@ beforeEach(() => {
         { dag: '2026-09-12', nummer: 42, storlek: 12, antalSpelare: 5, slutlig: true, du: { placering: 2, snitt: 55.3, spelade: 12 } },
         { dag: '2026-09-11', nummer: 41, storlek: 12, antalSpelare: 4, slutlig: true, du: { placering: 1, snitt: 61, spelade: 12 } },
         { dag: '2026-09-10', nummer: 40, storlek: 12, antalSpelare: 3, slutlig: false, du: null },
+        // Ofrusen dag utanför fönstret som räknas i farten: ingen ställning alls än.
+        { dag: '2026-09-09', nummer: 39, storlek: 12, antalSpelare: null, slutlig: false, du: null },
       ],
       medaljer: [
         { namn: 'Anna', guld: 3, silver: 1, brons: 0, jag: false },
@@ -137,6 +139,10 @@ describe('tävlingshistoriken', () => {
     expect(screen.getByTitle('Visa tävling #41')).toHaveTextContent('🥇')
     expect(screen.getByTitle('Visa tävling #40')).toHaveTextContent('spelade inte')
     expect(screen.getByTitle('Visa tävling #40')).toHaveTextContent('provisorisk')
+    // #39 är inte sammanräknad än (nattjobbet har inte fryst den) — då får det
+    // inte stå "spelade inte": spelarna trodde resultaten var borta (2026-10-05).
+    expect(screen.getByTitle('Visa tävling #39')).toHaveTextContent('inte sammanräknad än')
+    expect(screen.getByTitle('Visa tävling #39')).not.toHaveTextContent('spelade inte')
   })
 
   it('dagvyn (klick på en dag): hämtar den dagen, visar ställningen (slutlig) och alla brickor', async () => {
