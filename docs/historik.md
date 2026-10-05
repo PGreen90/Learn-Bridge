@@ -10,6 +10,6739 @@
 
 ---
 
+## 2026-10-05 (Nattgranskningen stod still i nio dygn — trasig arbetsflödesfil)
+
+**Ägarens rapport:** "mina historiska resultat har försvunnit … samt att det står
+provisorisk". Tävlingsdagarna 26 sep–1 okt visade "spelade inte", allt från 26 sep
+"(provisorisk)".
+
+**Orsaken:** `.github/workflows/tavling-granskning.yml` blev ogiltig YAML i
+Dagens IMP-commiten `67b632c` (2026-09-26): en rad kapades vid `
+
+Efter 1m–1M–3M visar kaptenen med slamintresse sin billigaste kontroll i stället
+för 4NT/5M direkt. Mätningen avslöjade ett gammalt hål: när motståndarna dubblat
+svaret fortsatte budraden som ostörd, men slamradens läsare gav upp vid dubblingen
+— partnern kände inte igen kontrollbudet (frö 20386322 slutade i 5♣, 20446339
+passades i 4♦). Läsarna tål nu den dubblingen.
+
+**Mätt mot steg 2 (200 000 givar):** 261 ändrade budgivningar, 47 ändrade
+slutkontrakt; DD: 21 slammar bort (14 bet, 7 stod), 13 nya (7 står, 6 bet).
+Essfrågor efter kontrollbud: 1 353 av 2 918 → 1 504 av 2 989.
+
+## 2026-10-04 (Kontrollbud före essfrågan, steg 2 — trumfen först i lågfärg, LIVE `11b41e7`)
+
+**Ägarens ja:** efter 2♣ + positivt svar + öppnarens lågfärg höjer svararen med
+4-korts stöd till 4m i stället för 4NT direkt. Första bygget tappade slammar:
+kaptenen stannade i 5m när en färg var ovisad eller överhoppad, och i lågfärg gick
+kontrollbuden förbi 4NT. **Ägaren rättade:** "man behöver inte ha alla kontroller
+för att bjuda 4NT" — kontrollbuden ska hinnas med före frågan, aldrig stänga ute
+den. Kaptenen i klar slamzon frågar nu så snart hen inte har fler kontrollbud.
+
+**Mätt mot steg 1 (200 000 givar):** 183 ändrade budgivningar, 127 ändrade
+slutkontrakt; DD: 73 nya slammar (57 står, 16 bet), 35 bjuds inte längre (16 bet,
+19 stod). Essfrågor efter kontrollbud: 1 213 av 2 826 → 1 353 av 2 918.
+
+## 2026-10-04 (Kontrollbud före essfrågan, steg 1 — kontrollens definition i slamraden, LIVE `d26ebdb`)
+
+**Ägaren:** "en kontroll = motståndet kan inte ta två raka stick i den färg man
+lovar kontroll: ess, kung och dam, singelton eller renons." Slamradens
+kontrollbudsrond räknade bara ess och renons, så händer med singel eller K-D gick
+rakt på 4NT. Nu samma definition som i cue-höjningen (`hasRealControl`).
+
+**Mätt (200 000 givar mot föregående version):** 905 ändrade budgivningar, 239
+ändrade slutkontrakt; DD: 114 nya slammar (80 står, 34 bet), 71 bjuds inte längre
+(33 bet, 38 stod). Essfrågor efter minst ett kontrollbud: 886 av 2 675 → 1 213 av
+2 826. Trumfsonden 0. Sju äldre facit uppdaterade (K-D och singel är kontroller).
+
+## 2026-10-03/04 (Ägarbesluten om 4NT-färgen och slamtabellen — byggda fullt ut, LIVE `2776fa5`)
+
+**Besluten (2026-10-02):** 4NT gäller alltid den senast äkta bjudna färgen · fråga
+efter damen när det går · 5 nyckelkort = alltid slam (med dam: sök storslam) · 4 +
+dam = alltid slam · 4 utan dam = sök slam, inget måste. Måttet (ägaren 2026-10-04):
+fråga efter damen när det går; går det inte räcker 8 kända trumf; tio kända trumf
+räknas som trumfdam av båda stolarna.
+
+**Mätt först:** en ny sond (`rkc-trumf.probe.test.ts`) jämför för varje essfråga
+vilken färg frågaren och svararen räknar i. 10 av 2 412 på 200 000 givar räknade
+olika — sex efter hoppskift (#94-regeln: kaptenen frågade i egen färg), fyra i
+konkurrens-slam (placeringen läste trumfen ur partnerns stegsvar).
+
+**Byggt:** kaptenen räknar alltid svaret i den färg partnern läste frågan i och
+placerar i egen färg bara när den bär sig själv (annars i partnerns) · trumfvakten
+i beslutstabellen · slamtabellen som EN funktion (`slamValEfterSvar`) för båda
+vägarna · damfrågan i kaptensvägen · "kända trumf" räknar partnerns egen färg som
+4–5 · damen på längd bara vid bevisad 10-korts fit även i slamradens svar.
+
+**Vägvalet som inte höll:** ägaren hade sagt ja till "bjud egen färg naturligt
+först, fråga 4NT rundan efter". Byggt så landade #94-given i 4♥ — öppnaren bjöd
+4♣ emellan, och då gäller nästa 4NT klöver igen. Lösningen blev i stället att
+frågan ställs direkt men RÄKNAS i hoppskiftets färg av båda. #94 slutar i 6♥.
+
+**Ägarens grundregel 2026-10-04:** "fråga alltid så mycket som budgivningen
+tillåter och gärna kontrollbud före". Byggt: damfrågan söker storslammen med alla
+fem nyckelkort i storslamszon. Mätt, inte byggt: bara 886 av 2 675 essfrågor
+föregås av ett kontrollbud (störst: stark 2♣ + positivt svar går rakt på 4NT).
+
+**Utfall:** trumfsonden 0 av 2 364. Auktionsdiff 200 000 givar: 407 ändrade,
+141 ändrade slutkontrakt; DD: 94 lillslammar bort (46 bet, 48 stod), 9 nya (3
+står); 24 storslammar bort (5 bet, 19 stod), 6 nya (alla står).
+
+## 2026-10-02 (Felrapport #95 — trumfdam-frågan: förklaringarna + tre budfel, LIVE `a5bae94`)
+
+**Rapporten:** Syd frågar 4NT, får 5♣, ställer damfrågan 5♦; Nord svarar riktigt 6♣
+(trumfdam + klöverkung) men båda buden förklarades "placerar utgången i ruter/klöver".
+Ägaren: "se över inte bara denna utan alla budförklaringar i alla variationer".
+
+**Orsaken:** betydelselagret (`auction-meaning.ts`) kände essfrågan, stegsvaren,
+stoppet och rättelsen (#60) — men inte damfrågan eller dess svar. De föll till den
+allmänna raden för bud på utgångsnivå.
+
+**Lagat i förklaringarna:** damfrågan, de tre damsvaren och slutbudet · trumfen läses
+ur 4NT-förklaringen själv (efter Jacoby 2NT lästes fel färg, så 5♠-svaret blev
+"slaminbjudan") · Exclusion efter splinter-relä (hoppet, stegsvaren, stoppet) ·
+Gerbers ess-svar när svaret råkar vara svararens färg, kungfrågan 5♣ och dess svar ·
+elva regler fick kravnivå i registret.
+
+**Metoden för "alla variationer":** betydelsesvepet (`auction-meaning.probe.test.ts`)
+jämför den härledda förklaringens kravnivå och alert med motorns regel på varje
+botbud. Det hade inte körts sedan grinden sattes och var rött. Kört över 100 000
+givar gav det listan; fråga-och-svar-konventionerna på 4–6-läget lagades, resten
+(kontrollbud mot naturligt, störda auktioner) står i `docs/bevaka.md`.
+
+**Tre budfel hittade på vägen** (auktionsdiff 30 000 givar: elva ändrade, alla i
+damfrågan): (1) boten ställde "damfrågan" över 5-trumf och efter 5♥-svaret; nekandet
+var olagligt → pass, och frågebudet 5♠ blev slutkontrakt i sex av givarna. (2)
+Svararen läste trumfen efter sitt eget stegsvar (1♣-öppning + 5♣-svar = "klöver")
+och passade damfrågan 5♦/5♥ i fyra givar. (3) Damsvaret visade damen på 5+ egen
+längd. Ny regel i §6.1: damfrågan finns bara när den ryms under 5 i trumf.
+
+**Miljonsvepet (ägarkrav: "stöttepelaren måste vara stadig"):** betydelsesvepet
+kördes över en miljon givar och auktionsdiffen över ytterligare 200 000 (59 ändrade,
+alla i dam-/kungfrågan). Listan mättar — 87 mönster vid 100 000 givar, 116 vid en
+miljon, de nya högst 21 gånger per miljon. Två Gerber-fel till lagade (4NT-stoppet
+läst som essfråga, kungfrågan efter svaret "3 ess"). Ny tredje axel i svepet,
+förväxlad konvention, som ser rätt märken med fel text.
+
+**Ägarbeslut samma dag:** 4NT gäller alltid den senast ÄKTA bjudna färgen
+(konventioner och kontrollbud räknas inte) · fråga efter damen när det går · 5
+nyckelkort = alltid slam (med dam: sök storslam) · 4 + dam = alltid slam · 4 utan dam =
+sök slam, inget måste. Byggt: lillslam med alla fem nyckelkort även utan damen.
+Inte byggt: kaptenen efter hoppskift (#94) och kaptenen-svararens damfråga
+(`docs/bevaka.md`).
+
+**Lärdom:** registret (`rules.ts`) är inte kosmetika — kravnivån läses av partnern.
+En tillagd rad ('krav – billigaste bud' = utgångskrav) ändrade en budgivning och
+togs bort igen; auktionsdiffen fångade den.
+
+## 2026-10-01 (Speldiagnos fynd B — parets färg i sang, mätpunkt S8, LIVE `889fac3`)
+
+**Vad:** spelförarsidan valde färg ur den hand som råkade vara inne (♣4 ur ♣8542
+fast paret hade ♥KQ962 mot ♥54; bordets ♣K fast spelföraren hade åtta ruter; ♠K
+ur ♠KT3 in i ♠AQ). Ny regel i SANG, 9+ kort: färgen väljs ur båda händerna när
+den har stick att utveckla, kortet med standardteknik, och korta handen lägger
+sin säkra vinnare (`declarerPartnershipSuitLead`, `declarerShortHandHonor`).
+
+**Metoden (ny, återanvändbar):** fynd B-riggen sparar varje ledningsval med
+ställning + DD per kort (`fyndb.probe.test.ts`), och kandidatregler räknas
+offline mot facit (`fyndb-utvardera.probe.test.ts`) före bygge. Den visade att
+den första hypotesen ("parets färg överallt") var SÄMRE än dagens bot (146 mot
+139 stick) — bättre i sang, sämre i trumf — och att ett eget fel i utvärderaren
+(motståndarnas kort i fel ordning) hade gett fel siffror om det inte upptäckts.
+
+**Mätt:** 536 ledningsval kostade 139 stick (övre gräns 24). Efter regeln:
+spelförarens faktiska stick netto +18 på 200 givar, flaggade förarstick
+274 → 263, tio givar sämre (−14). Tre iterationer mätta var för sig. Äldre facit
+ändrat: felrapport #17-ställningen (10 kort) leder nu ♥J i parets tiokortsfärg;
+#17-låset på avblockeringen ligger kvar i ett 8-kortsläge och gäller även inne i
+nya regeln. Trumfkontraktens ledningsval (89 stick) är orörda = nästa kandidat.
+
+## 2026-09-30/10-01 (Speldiagnosens runda 7 — fix A + F LIVE, mätpunkt S7)
+
+**Vad:** rundan på dagens motor (rapport `revisor-output/speldiagnos-rapport-2026-09-30.md`):
+baslinjen visar budet klart bättre än S6 (42/200 rätt, 248 p mot 35/200, 259 p) och
+spelet oförändrat på givar med samma kontrakt. Två smala fixar byggdes facit-först och
+mättes EN i taget: **A** trumf dras bara med trumfmajoritet (`shouldDrawTrumps`, frö
+20260786 −4; netto ±0 på 200 givar — reservledningen är svag = fynd B) och **F** holdup
+mot bordets långa färg utan ingång (`defenderHoldUp`, frö 20260901, 12→9 stick, inga
+andra givar rörda). Facit `play-bot-trumfmajoritet.test.ts`, `play-bot-holdup.test.ts`.
+Ägaren frågade "är du säker?" — svaret: säker på bridgen i A och mekanismen i F, inte
+på nettovinsten av A; B (spelförarsidans färgval ur BÅDA händerna, −4/−3/−3) byggs INTE
+på hypotes utan väntar DD-mätning per alternativ (S6-lärdomen) → NÄST 1. Fynd D
+(försvaret fortsätter utspelsfärgen in i spelförarens visade längd) bevakas.
+Mätpunkt S7 i `docs/speldiagnos.md`, detalj `docs/bot-hjarna.md` "runda 7".
+
+## 2026-09-30 (Hål D steg 2 — cue-höjningens fortsättning i högfärg, LIVE `fda630c`)
+
+**Vad:** ägarens struktur 2026-09-28 (omvärderingsfrågan läge 4/5) byggd som tabell-
+rader: efter 1M–(inkliv)–cue (limithöjning+) svarar öppnaren ≤12 → 3M · 14–15
+balanserad med stopp → 3NT · 13+ → billigaste äkta kontrollbud (ess/singel/renons/KQ,
+`hasRealControl`; Kxx räknas inte) · ingen kontroll → 4M — aldrig hopp till utgång
+över ett kontrollbud. Svararen cue:ar egen kontroll oavsett styrka, stannar i 4M
+eller frågar 4NT (1430 RKC, regeln `konkurrens-slaminvit (RKC)` så placeringen
+återanvänds) med 16+ när alla sidofärger är kontrollerade mellan oss; öppnaren
+svarar i stegen och passar avslutet. Systembok §7.8 c + §6.10, ändringslogg §9.
+
+**Kod:** läsaren `cue-raise-sequence.ts` (ren auktion, delas av tabellen och
+betydelselagret — inget beroende på faktalagret, som importerar betydelselagret),
+kunskapen `cue-raise-continuations.ts` (`openerInCueRaise`/`raiserInCueRaise`, först
+i raderna *öppnaren-stört*/*svararen-stört*; efter det billiga 3M lämnas ordet till
+`cueBidderContinues` som förut), betydelselagret `cueRaiseFortsattning` (människans
+3♠ = kontrollbud, 4♦ i deras färg = kontrollbud inte ny cue, 4NT = RKC i trumfen),
+registret (nio regler, kontrollbudet alertas). Lågfärgens svar (3NT-vägen före 5m,
+2026-07-21) orört.
+
+**Facit:** `auction-cue-hojning-fortsattning.test.ts` (21 tester: ägarens exempel,
+kontrollbudsronden, 3NT-fortsättningen, hel botauktion 1♥–(2♦)–3♦–3♠–4♣–4♥–4NT–5♥–6♥,
+betydelselagret). Två av ägarens exempelhänder i anteckningen var felräknade
+(♠KQ5 ♥AQ964 ♦KJ3 ♣Q4 = 17, inte 15; ♠AQ5 ♥KQ964 ♦872 ♣K4 = 14, inte 13) — hp
+räknas nu med kod i testet. Äldre facit i `auction-etapp4-familj4.test.ts`
+uppdaterat: 13 hp utan kontroll → 4♥ (förr 3♥). Lärdom (igen): bash-backticks i
+dubbelcitat körde filnamn som kommandon och tömde CLAUDE.md-rader — skript till
+fil, kolla `git status` efter `??`.
+
+**Auktionsdiff 3 000 givar (frön 20270001–20273000, gammal motor via git stash →
+`node scripts/auktionsdiff.mjs`):** 27 ändrade auktioner, 14 samma bud/ny regel,
+alla 27 i cue-höjningsläget (klass a): 13–15-öppnare som förr återgick 3M eller hoppade
+4M går nu via kontrollbud till samma utgång; ett fall (20272755) tar 3NT-vägen och
+rättas till 4♥ med fyra trumf. Inget 4NT tände (16+ med alla kontroller är sällsynt).
+**Konsekvens att veta om:** 13–14 hp mittemot en limithöjare stannade förr i 3M
+(t.ex. 20271186, ♠A532 ♥AJT952 ♦A2 ♣9 + ♠KJT ♥873 ♦Q9 ♣AJ653); nu är cuet
+utgångskrav → 4♥. Det följer av ägarens "13+ → kontrollbud".
+
+**Claudes tolkningar att bekräfta:** svararen efter öppnarens 3NT passar med jämn
+trekortshand, rättar till 4M med 4+ trumf/ojämn hand, cue:ar med 16+; öppnaren
+frågar aldrig själv 4NT i sekvensen (ägaren: "Syd med 16+ frågar").
+
+## 2026-09-29/30 (Felrapport #91–#94 + budhjälpen tänker — fyra mergepunkter, allt LIVE)
+
+**#92 (`793f204`, tvådelat):** (1) systemfyndet — bordets etikett `eget bud` på
+människans avvikande bud lästes av betydelselagret som en regel utan kravnivå, så
+botpartnern såg inget krav i människans återöppningsdubbling (2♦X gick hem). Nu
+härleds ett "eget bud" ur auktionen (`EGET_BUD`, `auction-meaning.ts`). Lärdom:
+reproducera bordsfel med bordets rule-etiketter, inte nakna historiker. (2) Svaret
+på 1NT-öppnarens återöppnings-X (§7.5): längsta färg / straffpass med längd+honnörer
+(`trapPassHolding` delas med §5.9).
+
+**#91 (`793f204`, ägarens struktur 2026-09-29):** New Minor Forcing = **utgångskrav,
+13+ rena hp** (förr 11+); 11–12 med fem kort → 2NT, sex kort → 4M direkt; öppnaren på
+2NT bara pass/3NT; passad hands lågfärg naturlig (5-4, 8+, partnern väljer 2M med 3+).
+Placeringen efter NMF passar aldrig under utgång. Auktionsdiff 3 000 givar: 15 ändrade,
+alla de nya vägarna. Tre äldre facit uppdaterade. `e3b1c4c`: docs-vakten mäter
+kB-siffran radslutsoberoende (Actions blev rött på CRLF/LF-skillnaden vid ~400 kB).
+
+**#93 + #94 (`fb08d75`):** inklivaren när öppnaren bjuder vidare efter partnerns
+höjning — sexkorts inklivsfärg tävlar 3M, 18+ 4M (`overcallerCompetesAfterRaise`;
+diff 21 ändrade, alla från pass utan regel). Svararen med 6+ egen högfärg och
+hp + 19 ≥ 33 efter hoppskiftet frågar 4NT direkt med egen färg som trumf.
+
+**Budhjälpen tänker + uteslutningsmetoden (`e5fa0ce`):** ägarens fråga "varför grep
+inte resonemangslagret in?" i #93 — det tänkte bara åt bottarna. Nu räknas
+`useGame.rekommendation` i samma worker: gul fyrkant + RESONEMANG för
+resonemangsbud, grön prick + MOTORNS BUD för tabellen; "Budhjälpen tänker …".
+Verifierat live i dev (1♣–P–1NT–P–P → gul fyrkant på 2♥). RKC: "0 eller 3" mot
+visade 16+ läses som 3 med visshet (ägaren: "ren matte"; reservationen om
+KQJ-händer står i §5.2) → #94-given 1♦–1♥–3♣–4NT–5♦–5NT–6♦–7♥. 5-5-handen med
+11–12 (2NT även med renons) → `docs/senare.md`.
+
+Testläget: `npm test` (242 filer gröna vid sessionsslut). Minnen: nmf-utgangskrav,
+eget-bud-tolkas-ur-auktionen, uteslutningsmetoden-rkc, motorn-passar-utan-regel.
+
+---
+
+## 2026-09-26 (Dagens IMP — en andra daglig tävling, KLAR & LIVE samma dag)
+
+Ägarbeslut på morgonen efter frågan "hur räknas MP%?": MP-räkningen är den
+officiella partävlingsräkningen (1-poängsskalan, samma procent som förbundets
+2-poängsskala) och ändras INTE (Neuberg avförd). I stället byggdes **Dagens IMP**:
+tolv egna givar per dag (frönyckel "datum#imp" — MP-fröna byte-identiska, låst av
+facit), WBF:s IMP-tabell + cross-IMP (`imp.ts`), summa över givarna, 0 IMP per
+ospelad giv, medaljtabell per form, namnen "Dagens MP%"/"Dagens IMP". Schemat:
+`daily_sets.form` (0013 lägg till + ny unik nyckel → deploy → 0014 släpp gamla).
+Alla endpoints `?form=`, nattjobben en gång per form, klienten `?form=imp` med
+eget framsteg och deal-id. Fem etapper på en dag, mergepunkt `186aa45`; första
+IMP-setet #56 via manuell cron (CRON_SECRET är känslig i Vercel → dashboardens
+Run-knapp), bottarna spelade det på 9 min 16 s. Ägarens live-prov godkänt;
+startsidans kort sida vid sida (`298bbdb`). Hela planen: `docs/imp-tavling-plan.md`.
+
+---
+
+## 2026-09-26 (Felrapport #84–#86 — tre strukturbyggen i konkurrenslagret, LIVE samma dag)
+
+Tre rapporter från ägarens spel, alla lagade med facit före fix och deployade
+(`195ac8d`, `2e9fff4`). **#84 (bricka 7):** ♠AKQ9 ♥QT4 ♦K82 ♣642 passade 1♣ —
+upplysningsdubblingen krävde max två kort i deras färg. Nu dubblar en jämn
+öppningshand (12+, 4-3-3-3) med tre kort i deras färg (§7.3; golv 12 bekräftat
+av ägaren). Fixen blottlade två öppnarhål: efter partnerns konkurrenshöjning
+bjöd catch-all-regeln ny 4-kortsfärg på 13 hp (nu pass under 18, 18+ →
+4M/2NT/3NT, §7.4h; utgångsförsök 15–17 = ägarfråga i senare.md) och efter deras
+X + partnerns pass + advancerns svar passade öppnaren med 6+ färg (nu rebud).
+**#85/#86 (bricka 8):** inklivarens andra bud efter advancerns enkla höjning
+saknade regel helt (catch-all 2♠, sedan pass på 3♥ med 16 hp). Ägarens
+struktur via tre frågor: <16 pass · 16–17 med 4-korts sidofärg → ny färg =
+utgångsförsök (5+/4, ej krav) · 16–17 utan → 3M invit · 18+ → 4M; advancern
+3M = minimum, 4M = maximum (§7.1, bara högfärgsinkliv). Betydelselagret läser
+alla buden. Lärdom: när en fix öppnar en auktion som aldrig uppstod förut,
+sondera hela given stol för stol — hålen ligger ett steg längre fram.
+
+---
+
+## 2026-08-08 (F6 — stark 17+ enfärg efter två bjudna färger, C5/C14 stängda — KÖRORDNINGEN F1–F6 KLAR)
+
+**F6 KLAR** (körordningens sista punkt — därmed är hela F1–F6-serien ur
+`docs/budsystem-revision.md` stängd). Två delar:
+
+- **C5 (stark 17+ enfärg efter två bjudna färger):** en 17+ hand med egen 5+
+  objuden färg upplysningsdubblar nu även när motståndarna bjudit TVÅ
+  1-lägesfärger (t.ex. 1♦–P–1♥) och visar färgen på nästa varv. Roten till
+  hålet (senare.md 2026-07-05): den kanoniska linjen (`buildAuction`)
+  modellerade aldrig den ronden, så spelarens pass låg INBAKAT i linjen och
+  `decideCall` följde det — live-detektorn `maybeTakeoutOfResponse` (som bara
+  gjorde 4-4) nåddes aldrig on-book. Fixen: linjen modellerar den starka
+  dubblingen (rondkrav, linjen lämnas öppen) och handbedömningen delas mellan
+  linjen och budlådan via nya `takeoutOfResponse` (`overcalls.ts`).
+  Fortsättningen (tvångssvaret + `ownStrongDoubleRebid` + stödstegen) fanns
+  redan och var tvåfärgsmedveten — verifierad i facit. **Den vanliga
+  4-4-dubblingen är MEDVETET fortsatt live-only** (att träda in den ändrar en
+  stor andel ostörda linjer — eget ägarbeslut om spel kräver det; vaktad i
+  facit + `docs/bevaka.md`).
+- **C14 (linjen passar ut ostörda tvåfärgsinkliv):** visade sig **redan lagad
+  i roten 2026-07-04** (felrapport #14 trädde in `advanceTwoSuiter` i linjens
+  konkurrensrond) — revisionens 🔴 och senare.md-punkten var stale sedan dess.
+  Nu låst med linjebyggstest (buildAuction-nivå, inte bara decideCall).
+
+Facit `auction-stark-x-tva-farger.test.ts` (7 fall: linjen, on-book-X:et,
+tvångssvaret, det starka återbudet, off-book-detektorn, 4-4-vakten,
+C14-linjebygget). Boken §7.3 + §9. Mätning M31 (`docs/systemrevisorn.md`).
+Hela sviten grön (`npm test`).
+
+## 2026-08-08 (F5 — 6-5-återbudet + 2♣-strain-valet verifierade, A3/E2 stängda)
+
+**F5 KLAR** (körordningens näst sista punkt). Verifiering i spel: probe över
+4 000 seedade givar + kodspårning. Fyra fynd, alla facit-låsta FÖRE fix:
+
+- **A3 (6-5-återbudet):** mönstret 16+ 6m+5M är sällsynt vid bordet (10
+  händer/16 000 — nästan alla öppnar 2♣ på 8½+ spelstick, resten sitter i
+  konkurrens), så verifieringen är enhetsfacit (`auction-65-rebid.test.ts`):
+  reversen efter 1-lägessvar och 2/1 fanns och låstes; **efter 1NT-svaret
+  gömdes högfärgen i 3m-rebudet** → ny reverse-gren i
+  `openerRebidAfterLimitedResponse` (1NT förnekar bara 4-korts högfärg —
+  5-3-fiten hittas via reversen). Boken §3.
+- **E2 (2♣-strain-valet):** proben visade 2♣-auktioner som dog i 5♣/6♣ trots
+  8+ högfärgsfit. Tre rotorsaker (`auction-2c-strain.test.ts`, riktiga frön):
+  **(1)** svararens egen 5-korts minor sprängde 3NT förbi en 4-korts högfärg
+  som rymdes under (frö 20261040: nu 3♥, förr 4♣ → 5♣) —
+  `responderSecondBidAfter2C`; **(2)** forcerade stegen läste det KONSTGJORDA
+  2♣-öppningsbudet som "egen bjuden klöver" och rebjöd billigast-först — nu
+  exkluderas 2♣ och högfärger rebjuds före minorer (frön 20262070/20261885:
+  3♠ på den äkta 6-korts spadern) — `forcedMinimumBid`; **(3)** fit-räkningen
+  räknade 2♣ + ett senare klöverbud som "två klöverbud → 6+, dubbelton
+  räcker" och höjde 4♣→5♣ på ♣xx — `fitLengthNeeded`. Boken §4.4.
+- Mätning M30 (`docs/systemrevisorn.md`). Hela sviten grön (`npm test`).
+  Kvar i körordningen: bara F6.
+
+## 2026-08-07 natt (F4 — TP till §7-inkliven, D9 stängd)
+
+**F4 KLAR** (körordningens nästa steg efter F3; ägarbeslutet från 2026-07-05
+vid "låna en kung" infriat). §7-lagret räknade rå HP — TP nådde aldrig
+försvarsbesluten. Nu läser inklivsgolven totalpoäng, additivt ovanpå
+kungalånet (TP = formspak, kungen = sitsspak, som beslutat).
+
+- **Enkelt inkliv + upplysnings-X** (`overcall`, `overcalls.ts`): golven
+  (8/12/10; −3 i balansering) läser `max(hp, startpoäng)` — en formstark
+  7:a med KQJ109-femma (9 startp.) kliver in, en 9:a med kvalitetsfärg och
+  perfekt X-form (10 startp.) dubblar.
+- **Två vakter på lyftet:** *kvalitetsvakten* — lyftet kräver 3+ av topp-5 i
+  inklivsfärgen ("färgkvalitet går före poäng"; utan den störde en 5-5-hand
+  med QJ975 på 6 hp sönder 6NT-facitgiven frö 20261020, upptäckt av
+  `auction-3nt-stopp.test.ts` i sviten). *Spärrvakten* — 6+ färg med rå
+  6–10 hp förblir svagt hoppinkliv. Rå HP behålls i 1NT-fönstren, taket 16
+  och 17+-styrningen.
+- **Advancern** (`advanceOvercall`): cue (11+) och fit-jump (10+) läser
+  stödpoäng `max(hp, dummyPoints)` — samma mått som live-höjningarna
+  (`raiseWithFit`) redan använde; on-book-linjen ikapp.
+- **Facit FÖRE fix** (`overcall-tp.test.ts`): fem lyft bevisade röda →
+  gröna; vakterna + rå-HP-lägena låsta. Hela sviten grön (`npm test`).
+- Boken §7.1 + §9; bevakning (a) straffas TP-inkliven, (b) X-svararen/DONT/
+  svaga tvåor räknar ännu rå HP (`docs/bevaka.md`). Kvar som bevakning i
+  `docs/senare.md`. Mätning M29 (`docs/systemrevisorn.md`).
+
+## 2026-08-07 sen kväll (F3 — advancer-rabatten generaliserad, C12 stängd)
+
+**F3 KLAR** (körordningens nästa steg direkt efter F2). Fix 5a byggde
+advancer-rabatten enbart för balanseringar över svaga tvåor/spärrar; över deras
+1-lägesöppning värderade advancern fortfarande partnerns balansering som ett
+direktinkliv — samma lånade kung räknades två gånger och delkontraktsvärden
+blåstes till utgång.
+
+- **Höjningen:** `partnerBalancedOverPreempt` generaliserad till
+  `partnerBalanced` (kravet "öppning på 2-läget+" borttaget) — höjningar av
+  balansinklivet räknar stödpoäng −3 med tak på 3-läget utan äkta
+  utgångsvärden efter rabatten (`raiseWithFit`).
+- **X-svaret:** `takeoutDoubleToAnswer` flaggar utpassningsmönstret (öppning,
+  P, P, partnerns X) och `answerTakeoutDouble` graderar cue (12+) och hopp
+  (9–11) på hp −3. Direkt sits orörd (regressionsvakt i facitet).
+- **Facit FÖRE fix** (`auction-advancer-rabatt.test.ts`): 11 sp höjde
+  invit-3♠ där 2♠ räcker, 14 sp blåste 4♠, 10 hp hoppade på X:et, 13 hp
+  cue:ade — alla fyra överbuden bevisade röda, sedan gröna. Ett gammalt facit
+  uppdaterat i linje med nya systemet (frö 20261375: W:s 4♠ på 13 sp mot en
+  8 hp-balansering var själva felet — nu 2♠, given köps i 3♥; B13-prejudikatet).
+- Boken §7.1 (generella regeln) + §7.7-hänvisning + §9; bevakning: NT-svar och
+  nya färger efter balansering räknar ännu inte rabatten (`docs/bevaka.md`).
+  Mätning M28 (`docs/systemrevisorn.md`).
+
+## 2026-08-07 sen kväll (F2 — datadriven detektorkedja, E1 stängd)
+
+**F2 KLAR** (🟢 NÄST punkt 1; R2 Fynd #1, körordningens sista arkitekturpunkt
+före fler konkurrenskonventioner). Ren beteendebevarande refaktor — inga
+budändringar, hela sviten grön före/efter (`npm test`).
+
+- **Kedjan är DATA nu:** `decideCall`:s två listor (tvingande svar +
+  konkurrenskedjan) är modul-nivå-konstanter `FORCED_DETECTORS` /
+  `CONTESTED_DETECTORS` i `auction-live.ts`. Varje detektor är ett objekt
+  `{ id, before?, run }` där `before` = id:n som måste ligga senare i kedjan.
+  Ordningskraven som förut bara fanns i "Måste ligga FÖRE …"-kommentarer är
+  alltså maskinläsbara fält (kommentarerna står kvar som förklaring).
+- **Kedjevakten** (`src/lib/engine/detector-chain.test.ts`): sviten blir röd om
+  ett id dubbleras, ett före-krav pekar på en detektor som inte finns, eller
+  listordningen bryter ett före-krav — plus att `offBookResponse` alltid ligger
+  näst sist och `honorForce` sist. En felplacerad ny konvention fångas nu i
+  deploygrinden i stället för i spel.
+- **Delad kontext:** detektorerna får `DetectorCtx` (deal/history/seat/hand)
+  i stället för att varje closure fångar sina egna variabler. R2:s "på
+  sikt"-steg 2 (ett `auctionFacts`-lager som förberäknar öppnare/roller/trumf
+  så detektorerna slipper re-skanna history) är MEDVETET inte byggt — det görs
+  när behovet uppstår, inte spekulativt.
+- E1 i `docs/budsystem-revision.md` 🔴→🟢; E3 (systemrevisorn) var redan byggd
+  sedan etapp 2 → F2 som helhet KLAR.
+
+## 2026-08-07 kväll (B13 — inverterad minor-återbuden + cue-lägena, M27)
+
+**B13 STÄNGD** (🟢 NÄST punkt 1, blottad av ärliga portar): öppnarens återbud
+efter den starka inverterade höjningen 1m–2m var grova. Facit FÖRE fix
+(`auction-inverterad-rebud.test.ts`, 11 tester), källa bridgebum (inverted
+minors), boken §4.2/§6.2/§9, mätning M27 (`docs/systemrevisorn.md`).
+
+- **Äkta stopp:** stopp-visningen krävde 4+ KORT utan honnörskrav (♠9642
+  "visade spaderstopp" → 3NT föll på utspelet). Nu motorns honnörsstopp
+  (A/Kx/Qxx/J10xx), billigaste först.
+- **Graderingen:** 3m är strikt 12–14; en hand med 15+ bjuder ALLTID krav.
+  Utan äkta sidostopp bjuds bästa sidofärgen som "fantomstopp" — SAMMA bud och
+  regel som stopp-visningen (ärliga portar: partnern kan inte och ska inte
+  kunna skilja dem åt); styrkan visas i nästa bud. Kärnfallet 17 hp + 6m som
+  dog i "3m minimum" (28 hp ihop utan utgång) är borta.
+- **Bromsen + andra växeln:** svararen med 10–12 svarar 3m ("bara minimum") på
+  stopp-visningen; öppnaren passar 12–14 och driver 15+ (3NT vid full täckning
+  / andra stoppen under 3NT / 5m). Min-mot-min-överbuden (tvingad utgång på
+  22–26) och de passade 27+-utgångarna försvann samtidigt.
+- **Cue-lägena (kvar sedan 2026-08-03):** cue-ronden inkopplad för minorfiten
+  och 2♣-grenen (agreed trumf). Två minorregler: cue först ÖVER 3NT (under =
+  stopp-letande, §4.2), och i klar drivzon (33+) direkt-4NT — frö 20261469
+  visade hur cue-ronden annars åt upp 4NT-utrymmet (5♦ i stället för 6♦).
+  Under bygget hittades och stoppades även en design-miss: en separat regel
+  "stark sidofärg" hade gett samma BUD två avläsbara betydelser (dold info via
+  regelnamnet) — den slogs ihop med stopp-visningen före leverans.
+- Tre gamla facit uppdaterade i linje med nya systemet (billigaste äkta stopp
+  2♥ före längd-2♠; broms i stället för tvingad 5♦; 2♣-grenens kaptener cue:ar
+  på vägen mot 6♥/6♦).
+
+## 2026-08-07 (sex etapper på en dag — hål D landad + fem systemfixar, M22–M26)
+
+**🏗️ GODKÄND ETAPPLAN KÖRD E1→E7** (planfil `vi-jobbar-vidare-med-dreamy-
+salamander.md`; alla ägarbeslut togs löpande i sessionen). Varje etapp:
+facit-test FÖRE fix, hela sviten grön, egen `--no-ff`-merge, revisor-mätning
+(frö 20260721) — **dagens serie M22–M26: par-avvikelse 269,67 → 264,77
+(≈ −4 900 p per 1 000 givar), rätt kontrakt 19,0 → 19,7 %** (detalj per mätning
+i `docs/systemrevisorn.md`).
+
+- **E1 — hål D steg 1 LANDAD** (låg ocommittad sedan 2026-08-05): kontroll-
+  komplett 4NT i konkurrenslagret (§6.10). Facitstädning per ägarbeslut: 947 →
+  splinterspåret, 1274 struken (stale premiss), 1272 parkerad med **steg 2
+  (cue-frontend) — PARKERAD** (`docs/senare.md`).
+- **E2 — splinterregeln:** singel A/K → Jacoby 2NT (§4.1, källor bridgebum +
+  BBO-konsensus; dam FÅR splintras — ägarbeslut efter källdykning). Fixar frö
+  20260947. M22: −1 170 p.
+- **E3 — Jordan 2NT-fortsättningen** (systemfel #4): öppnaren passar aldrig;
+  3M/4M på stödpoäng ≤14/15+, bjudaren höjer avslutet med 13+ (§7.8d, frö
+  20260739 → 4♥). M23: −740 p.
+- **E4 — starka återbud** (systemfel #3): graderat 6-korts-rebud (11–12 hopp,
+  13+ fjärde färg), öppnarens invit-accept 14+ stödpoäng, reverse-handen 18+
+  driver (§5.2/§6.6; frön 20261323 → 3NT, 20260982 → 4♥, 20261111 → 5♣).
+  M24: −1 480 p, rätt kontrakt +0,4 %-enheter.
+- **E5 — 2/1: högfärgen visas i återbudet** (§4.2/§5.3, §9-löftet 2026-08-06
+  infriat): egen 4-korts högfärg som TREDJE färg bjuds naturligt under 3NT;
+  som fjärde färg förblir budet konventionellt (lärdom ur facit felrapport #4).
+  M25: −710 p.
+- **E6 — oklart-återbudet** (systemfel #2, översyn med ägargodkänd klassning):
+  'oklart'-1NT routas till NMF-maskineriet (frö 20261317: begravd hjärterfit →
+  4♥) + öppnaren rebjuder 5-korts färg i stället för skev 1NT med singel i
+  partnerns färg (frö 20260878). 1155/1492/1228 klassade rätt/medvetet-OK.
+  M26: −800 p.
+- **E7 — dokumentationssvepet:** denna post + bevaka.md (nya poster + Lebensohl-
+  skulden rättad mot koden), budsystem-revision.md (F1-tabellen var stale — alla
+  fyra familjer byggda sedan etapp 4), utspel-diagnos.md (netto-A/B klar),
+  CLAUDE.md-kartan.
+
+Ej pushat vid sessionens slut — väntar på ägarens PCD-klartecken.
+
+## 2026-08-06 (fjärde färg-fortsättningen + 2/1-regeln — spanarens fynd #1)
+
+**🧭 SVARAREN PASSAR ALDRIG SIN EGEN FJÄRDE FÄRG (mergepunkter `3bee0e9` +
+`015e6bf`).** Spanar-agentens största fynd (frö 20260743: 33 hp dog i 2NT när
+fjärde färg-kravet passades). Ny `placeGameAfterFourthSuit` (`auction-live.ts`):
+svararen placerar utgång efter besvarad fjärde färg — 3NT eller 4M om öppnaren
+höjt högfärgen; gated till modesta händer (<18 hp) så starka händer fortsätter
+slamvägen. Tänder på 7/1000 givar. Facit
+`auction-fjarde-farg-fortsattning.test.ts`; boken §6.6 + §9.
+
+**📚 2/1 GF MED 5-KORTS KLÖVER FÖRE 4-KORTS HÖGFÄRG ÖVER 1♦ (mergepunkt
+`36c7541`, källbelagt).** Kortaste vägen till game force: 12+ med 5♣ + 4-korts
+högfärg svarar 2♣ över 1♦ (9–11 väljer 1-läget). Källor: Couchman +
+Porthcawl-tutorialen. Ny gren i `respondToMinor`; boken §4.2 + §9. Återbudet
+(visa högfärgen) togs separat — byggt 2026-08-07 (E5 ovan). Samma dag
+noterades ägarregeln "splintra ej singelhonnör" (byggd 2026-08-07, E2) och
+947-korrigeringen (hör hemma i Jacoby-spåret, inte konkurrenslagret).
+
+## 2026-08-05 (netto-A/B-mätning av det budstyrda utspelet)
+
+**📏 UTSPELET GER ETT LITET MEN STATISTISKT SÄKERSTÄLLT FÖRSVARSLYFT — mätt, inte
+gissat.** Den aggregerade stickeffekten av hål A–G (`openingLeadWithAuction`) mättes
+mot det gamla budblinda utspelet med en ny gated probe,
+`src/lib/engine/lead-quality.probe.test.ts` (`LEADAB=1`). Riggen isolerar EXAKT
+utspelskortet: varje giv spelas ut av bot-hjärnan två gånger, identiskt i allt utom
+trick 1 (budstyrt vs budblindt), under samma nollställda slump; givar där
+utspelskortet inte ändras hoppas över (bidrar 0). Reproducera (en process, ~3 h)
+eller parallellt i fyra fröskivor (LEADAB_SEED + LEADAB_OUT), ~1,5 h väggklocka:
+```
+LEADAB=1 LEADAB_DEALS=1000 npx vitest run src/lib/engine/lead-quality.probe.test.ts
+```
+**Resultat (frö 20260729, 997 spelbara givar):** 525 fick ändrat utspel; spelförar-
+stick budstyrt 4636 vs budblindt 4727, **netto −91** (negativt = färre
+spelförarstick = bättre försvar), snitt −0,17/ändrad giv. Riktning: 190 bättre, 170
+sämre, 165 lika. **t = −2,54, 95 %-KI för snittet [−0,31, −0,04] och för totalen
+[−161, −21] — noll uteslutet.** Vinsten sitter mest i sang (led partnerns/lång färg
+i stället för blint spotkort: `20261305` 3NT ♠A→♦3, `20261492` 2NT ♠Q→♥J, båda −6);
+värsta förlusten kvar `20260805` 3NT ♣8→♥5 (+4). **VIKTIG RÄTTELSE:** en tidigare
+120-givarskörning gav netto −5 och tolkades som "stickneutralt" — det var
+underpowered. Med ~1000 givar framträder en liten, verklig, FÖRDELAKTIG effekt.
+Förbehåll: effekten är liten och mätningen är INTERN (vår bot som spelförare mot vår
+egen försvarsmotor), inte mot expertfacit. **Ägarbeslut 2026-08-05:** vi nöjer oss
+med utspelet tillsvidare — ingen förfining nu (resultatet bekräftar att det förtjänar
+sin plats). Förfiningsspåret (NT-färgvalet, "led partnerns färg"-ivern, aktiv/passiv
+mot trumf) ligger kvar i `docs/senare.md`.
+
+## 2026-08-04 (sen kväll — utspel hål E + A + G + C + D)
+
+**🃏 BUDSTYRT UTSPEL: HÅL E, A, G, C, D KLARA (pushas på PCD) — HELA UTSPELS-
+BYGGET A–G FÄRDIGT.** Resten av byggordningen ur `docs/utspel-diagnos.md`, mot
+teorin i `docs/utspel-teori.md`. **Hål E:** NT-färgvalet blev "längst OCH starkast"
+(`bestByLenStrengthMajor`). **Hål A (störst):** utspelet var helt budblint —
+`botCardSmartReasoned` slängde `calls` på trick 1. Nu läser motspelarens utspel
+auktionen (`analyzeAuctionForLead` + `openingLeadWithAuction`): partnerns bjudna
+färg först, mot NT längsta objudna, mot trumf passivt. **Hål G:** ess-regeln
+generaliserad till alla tenasser (`unsafeToLead`) — ägarens ursprungliga poäng:
+♠KJ843 leds inte bort mot 4♥ (→ passivt ♦3) men attackeras mot 3NT (→ ♠3). Byggt
+med A eftersom det kräver aktiv/passiv-kontext. **Hål C:** trumfutspel
+(`trumpLeadCard`, 2/4→lägsta, 3→mitten) i korsruff-läge (3+ bjudna motståndarfärger)
++ passiv utväg framför att bryta en tenass. **Hål D:** singel-för-ruff med korta
+trumf. Budvägen gäller BARA `botCardSmart` (appens väg); `botCard`/`botCardReasoned`
+är budblinda som förr. Facit FÖRE fix i `play-bot.test.ts` (ägarens giv + partner-
+färg + undvik-deras + C/D) och `signals.test.ts`. Hela sviten grön (`npm test`), 0
+regressioner. **Kvar att FÖRFINA (ej hål):** aggregerad netto-A/B (`PLAYQ`-proben,
+git-stash); aktiv/passiv idag passivt-som-default mot trumf (aktivt-när-bordet-har-
+lång-sidofärg ej detekterat); Lightner-dubblingar; artificiella bud skiljs ej från
+naturliga i budläsningen (första passet, ofarligt i vanliga 2/1-auktioner).
+
+## 2026-08-04 (kväll — utspel hål B + F)
+
+**🃏 UTSPEL HÅL B (inre sekvenser) + HÅL F (ess-regeln överallt): KLARA (pushas på
+PCD).** Först stegen i den beslutade byggordningen ur `docs/utspel-diagnos.md`, byggda
+mot den källförankrade teorin (`docs/utspel-teori.md`). **Hål B:** `honorLead`
+(`signals.ts`) kände bara igen topp-sekvenser (touch från högsta kortet), så
+K-kn-10-x föll till lågt spotkort. Nu känns även **inre/brutna sekvenser** igen — en
+hög honnör (kn+) med ett glapp ner till en sammanhängande löpa (≥2 kort, topp 10+) →
+led toppen av den inre löpan (Kkn10→kn, K109→10, D109→10, Akn10→kn, ADkn10→D, ADkn→D).
+Ren mekanik i `signals.ts` (ny hjälpare `runLengthFrom`). **Hål F:** ess-regeln
+(underled aldrig ett ess mot trumf) gällde bara trick 1; kortvalet bröts ut till en
+gemensam `chooseLeadCard` som nu även mitt-i-given-utspelet använder. Död
+`openingLead`-funktion borttagen. Facit FÖRE fix i `signals.test.ts` (inre sekvenser +
+negativa fall som KknX/Kkn9 → null) och `play-bot.test.ts` (hål F mitt-i-given +
+NT-vakt). Hela sviten grön (`npm test`), 0 regressioner. **Kvar (byggordningen):** hål
+E (skilj NT-färgvalet), sedan hål A+G (budgivningen + tenass-undvikande, där ägarens
+KJxxx-poäng hör hemma).
+
+## 2026-08-04
+
+**🃏 UTSPELSBUGGEN (♣AQJxx mot slam): LAGAD (pushas på ägarens PCD).** Ägaren
+rapporterade att boten underledde sitt ess på utspelet mot slam. Orsak: utspelet
+gick via ren längsta-färg-doktrin (`openingLead` → `leadFromSuit`), så ♣AQJxx
+(udda 5-korts utan sekvens) föll till spotkortsutspel (5:e bästa) och ledde LÅGT
+under esset — mot ett trumfkontrakt förödande (spelförarens singel-kung blir
+gratis, esset dör oanvänt). Kommentaren i `botCardReasoned` lovade "man underleder
+inte ess på utspelet" men koden gjorde ändå det. Ny `openingLeadChoice` i
+`play-bot.ts`: mot **färgkontrakt** väljs den längsta färg som INTE kräver ett
+ess-underspel (en ♠KQJ2-sekvens vinner över att underleda ♣AQJxx); har varje färg
+ett oskyddat ess **cashas** esset i längsta färgen. **NT oförändrat** (klassisk
+längsta-färg-doktrin — ess-underspel/4:e bästa är normalt i sang). Facit FÖRE fix:
+`play-bot.test.ts` ("utspel mot trumfkontrakt – underled aldrig ett ess", 3 fall:
+byte till sekvens, forced-ess-cash, NT-vakten). Hela sviten grön (`npm test`,
+0 regressioner), `tsc` ren. Regel införd i `docs/budsystem.md §8.3` + §9-loggen.
+
+## 2026-08-03
+
+**🧰 GRANSKNINGSPUTSEN: KALENDERARKIV + RESULTATHISTORIK + TANGENTBORD —
+BYGGDA (förmiddagen; pushas först på ägarens PCD):** ägaren valde putsen ur
+"NÄSTA GÅNG"-listan. Tre delar, alla testdrivna (facit före fix) och
+webbläsarverifierade:
+- **Kalenderarkivet för Dagens giv** (`/spela-kort/dagens/arkiv`,
+  `DagensArkiv.tsx`): månadskalender från premiären 2026-08-02 — spelade dagar
+  visar dina stick i guldserif, missade dagar spelas i EFTERHAND via
+  `#/spela-kort/dagens?dag=N` (dagen ingår i Plays React-nyckel i `App.tsx` så
+  ett dagbyte monterar om sidan), framtida dagar är låsta. **Ärlighetsregeln:**
+  efterhandsspel bokförs med `late` i `daily-log` och räknas ALDRIG in i
+  streaken — ett igenfyllt hål väcker inte en bruten svit (facit
+  `daily.test.ts` + `dagens-arkiv.test.tsx`). Delningstexten bär nu `?dag=N`
+  så en delad länk öppnar RÄTT giv även i morgon (förr fick mottagaren
+  morgondagens giv). Diskret länk på startsidan under flaggskeppskortet.
+- **Resultathistoriken för frispelet** (granskningens fynd #4 "fritt spel
+  sparar ingenting alls"): varje färdigspelad FRI giv bokförs i
+  `spel-historik` (`spel-historik.ts`: nyast först, tak 50, strukturvakten
+  `validHistorik`; facit `spel-historik.test.ts`) med frö, kontrakt och
+  resultat ur ditt perspektiv → sidan `/spela-kort/historik`
+  (`SpelHistorik.tsx`) listar dem med "Spela om →" (`?giv=frö` ger exakt samma
+  kort). Länk i resultatdialogen. Verifierad end-to-end i webbläsaren med
+  autospelaren (riktig giv spelades klart och bokfördes korrekt).
+- **Tangentbordsstyrning på dator** (fynd #21 "tangentbord på desktop saknas
+  helt"): budlådan styrs med siffra + färgbokstav (N = sang, S = spader,
+  H = hjärter, R/D = ruter, K/C = klöver), P = pass, X = dubbelt, Enter = OK,
+  Esc rensar — samma tvåstegsflöde som klicken (facit
+  `bidding-box-keyboard.test.tsx`); Enter bekräftar även kontraktdialogen.
+  Spelfasen: ←/→ (och ↑/↓) flyttar fokus mellan de spelbara korten
+  (`data-spelbart` + guld fokusring i `PlayingCard`), Enter spelar det
+  fokuserade kortet. Hjälptexterna i båda ⋮-menyerna beskriver tangenterna.
+Lärdom vid verifieringen: React 18 batchar setState från vanliga
+window-lyssnare — läs av DOM:en efter en timeout, inte synkront efter
+`dispatchEvent`, annars ser verifieringen falskt rött.
+
+**🎁 SMÅÖNSKEMÅL SAMMA FÖRMIDDAG (parallella sessioner, pushade ihop med
+putsen):** rundpass ger nu **"Spela om given"** bredvid "Ny giv" (samma frö —
+man kan öppna budgivningen själv den här gången; facit i
+`play-smoke.test.tsx`), och claim-revealen **namnger vem som tar resten**
+("Nord tar resten (13 stick)" i stället för bara "korten ligger uppe"; facit i
+`syd-trakarl.test.tsx`).
+
+**🧠 ETAPP B+C+D UR GRANSKNINGEN — BYGGDA (morgonen, gren per etapp, ägarens
+"PCD, sen kör vi Etapp B + C + D"):** Etapp A deployades först (Actions grön,
+rebidz.com verifierad med og-taggar + bild). Sedan:
+- **ETAPP B "Appen som minns":** resultatloggen `daily-log` (givnummer →
+  {myTricks}) + `dailyStreak` (Wordle-regeln: streaken lever tills en hel dag
+  missats) — 🔥-bricka på startsidans kort + i resultatdialogen. Delnings-
+  texten SPOILERFRI (🟩/⬛-rutrad med dina stick; kontrakt/facit avslöjas
+  aldrig — facit i `daily.test.ts`). **Giv-frö**: alla fria givar (även
+  målsökta) får ett mulberry32-frö synligt i adressen
+  (`#/spela-kort?giv=…`) — delbart/bokmärkbart/återskapbart (verifierat:
+  samma hand ur enbart adressen). **"Spela om given"** i resultatdialogen
+  (samma frö, round-räknare i bordets nyckel; loggen skrivs aldrig över av
+  omspel). **Pågående giv sparas löpande** (`pagaende-giv`, schemaversion
+  v:1, `lib/engine/resume.ts` + `resume.test.ts`) och återupptas vid
+  omladdning/telefonlås — motorn bygger upp läget via playCard-replay;
+  korrupt/gammal sparning ignoreras tyst; rensas när given är klar.
+- **ETAPP C "Spelbordets förtroende":** **Informationsläckan LAGAD**
+  (granskningens buggfynd): under levande giv förklaras andras bud av
+  tolkningslagret med regel/förklaring bortskalade — tolkningen läser enbart
+  auktionen, aldrig korten (`hiddenHands` i AuctionGrid, på i budfasen +
+  spelets ⓘ; egna bud, budvisningen och efterhandsvyerna oförändrade; facit
+  i `auction-grid.test.tsx`). OBS: tolkningens regeletikett kan i sällsynta
+  lägen avvika från motorns interna regelnamn — den beskriver vad auktionen
+  VISAR. Kortspelets "varför"-förklaringar behölls medvetet (pedagogiken är
+  poängen; omprövas om det känns som kik). **Ångra** (`play-undo.ts` +
+  facit): backa till före ditt senaste kort, bottarnas svar ospelas,
+  ⋮-menyknapp. **Ge upp** som motspelare (resten till spelföraren, via
+  claim-revealen med egen text). **Resultatrubriken ur ditt perspektiv**
+  (`resultHeadline` i scoring.ts + facit): "Ni satte kontraktet! 1 bet" i
+  guld i stället för rött. **Höjdbudgeten**: budfasens fot −6 px luft →
+  uppmätt exakt 812 px på 375×812 (även med förklaringsraden öppen).
+- **ETAPP D "Vägen in":** **Om rebidz** (`/om`): du sitter alltid Syd, 2/1,
+  lägena, tipsen — nås via "Ny här? Så funkar rebidz →" på startsidan
+  (diskret rad UNDER korten; ägarbeslutet om likvärdiga menykort orört) och
+  sidfotens "Om rebidz". **Inställningar-sidan städad**: Utseende
+  (Ljust/Mörkt/**Följ systemet** — gick inte att återfå förr, `themeChoice`/
+  `setThemeChoice` i theme.ts) + Spelet (Budstöd/Ljud/Auto Claim/Tempo, samma
+  lagringsnycklar som ⋮-menyn) + Nollställ; ägarens GitHub-verktyg hopfällt
+  längst ner. **Par-poäng i resultatet SKJUTS** medvetet (kräver DD-tabell i
+  webworker — hör ihop med auto-facit-spåret i `docs/senare.md`).
+Allt verifierat i webbläsaren (375×812): spara/återuppta genom omladdning,
+ångra 7→0 kort, ge upp-flödet, spoilerfri delning, streak-brickan, adress-
+fröets determinism, Inställningar, inga konsolfel. Läraren: teckenkodnings-
+fällan i PowerShell (Get/Set-Content förstör åäö) bet två gånger —
+dokumentfixar görs med Edit-verktyget, punkt.
+
+## 2026-08-02
+
+**🛡️ STORA GRANSKNINGEN + ETAPP A "SKYDDSNÄTET" — BYGGD (natten mot 3/8, gren
+`etapp-a-skyddsnatet`):** Ägaren bad om en kritisk helhetsgranskning
+(funktionellt + visuellt). Claude spelade igenom Dagens giv i webbläsaren,
+skärmdumpade alla sidor och lät två kodgranskare gå igenom repot. Rapporten
+(26 numrerade fynd + beslutad körordning Etapp A–D) ligger i planfilen
+`~/.claude/plans/hidden-questing-creek.md`; kärnfynden i korthet:
+appen *glömmer allt* (ingen streak/historik/spara pågående giv), *saknar
+skyddsnät* (ingen felfångare; deploy kunde ge vit sida i öppna flikar),
+delningslänken visades som tom ruta (inga og:-taggar), och **en
+informationsläcka**: klick på motståndarbud i historiken visar deras FAKTISKA
+hp (`doubles.ts` m.fl. bygger förklaringen av handen, inte intervallet).
+Ägaren godkände körordningen; **Etapp A byggdes direkt:**
+- **Felfångaren** `ErrorBoundary.tsx` ytterst i `main.tsx`: felskärm med
+  "Ladda om"-knapp + väg hem; chunk-fel (trasig lat-laddning efter deploy)
+  laddar om automatiskt EN gång (vaktflagga i sessionStorage; rensas i
+  componentDidMount — inte render, React kan göra om en misslyckad rendering).
+  Facit: `error-boundary.test.tsx`.
+- **PWA-uppdateringen** bytte `autoUpdate` → `prompt`: ny version tar inte
+  längre över tyst mitt i en session (det kunde utlösa chunk-felen). I stället
+  visar Layout en diskret glaspill "Ny version finns — Uppdatera"
+  (`pwa-update.ts` registrerar och skickar window-händelsen i
+  `lib/sw-events.ts`; pwa-update importeras BARA från main.tsx så testerna
+  slipper den virtuella modulen).
+- **Länkförhandsvisningen:** og:-/twitter-taggar i `index.html` +
+  `public/og-image.jpg` (1200×630, genereras repeterbart av
+  `scripts/generate-og-image.ps1` — smaragd, guldspader, ordmärket, taglinen).
+- **woff2 i precachen** (`globPatterns`): guldserifen överlever offline.
+  Manifestet fick `id: '/'` (stabil identitet för hemskärmsinstallationer).
+- **Falska "✓ Kopierat"-kvittot** i `Play.tsx`: sätts nu bara när
+  urklippsskrivningen faktiskt lyckades.
+- Vakttester: `deploy-config.test.ts` låser og:-taggarna + bildfilen + woff2.
+**Kvar ur granskningen (ägaren väljer ordning):** Etapp B "appen som minns"
+(streak, resultatlogg, spara pågående giv, giv-frö i URL, spoilerfri delning),
+Etapp C "spelbordets förtroende" (informationsläckan, ångra, ge upp som
+motspelare, resultat ur spelarens perspektiv, ~7 px höjdbudget), Etapp D
+"vägen in" (onboarding, Inställningar-städning, par-poäng i resultatet).
+
+**🎨 FACELIFT YTA 4 + EXKLUSIVITETSSVEPET + DAGENS GIV — KLART (sen kväll;
+ägaren godkände hela förslagslistan "kör på helt autonomt, visa innan PCD"):**
+- **Sidhuvudena på de inre sidorna** (Budträning/Budvisning/Budsystem/
+  Inställningar): gemensam `PageHeader` — rubrik i klubbserifen (30 px) +
+  kort guldhårlinje som ekar menyradens guldlinje. De vita rubrikpanelerna
+  borta; alla fyra sidor ser likadana ut.
+- **Kortbaksidan bär monogrammet:** brandens guldspader (`BrandMark bare`) i
+  mitten av den befintliga emerald-baksidan (`PlayingCard`).
+- **Dagens giv (Wordle-mekaniken, förtitt på Fas 3 — ingen backend):**
+  datumet är fröet (`daily.ts`: `dailySeed` = ååååmmdd lokal tid,
+  `mulberry32` flyttad till `deal.ts` så modulen är lätt nog för startsidans
+  chunk; revisorn återexporterar). Alla spelar SAMMA giv varje dag; premiären
+  2026-08-02 = #1. Rutt `/spela-kort/dagens` (egna React-key:ar så Play
+  monteras om vid lägesbyte), guldbricka "Dagens giv #N" ersätter Mål-knappen
+  i kompassrutan, resultatdialogen får **"Dela resultatet"** (navigator.share
+  på telefon, urklipp på dator) med delbar text + länk. Startsidan har
+  flaggskeppskortet med den ständigt roterande guldramen + "Spelad ✓"-bricka
+  (localStorage `daily-played`). Facit: `daily.test.ts` (determinism, frö,
+  löpnummer, deltext).
+- **Boken som klubbok:** kapitelnumren som §-numrering i guldserif,
+  anfang (`.md-anfang`, CSS `::first-letter`) på sektionsintron,
+  guldhårlinje under öppnad kapitelrubrik.
+- **Guld = belöning:** Budträningens "Senast"-poäng, sessionens slutpoäng och
+  spelets poängrad (bara när N/S fick poängen) i guldserif; tema med alla rätt
+  får en liten guldspader i temalistan.
+- **Småsakerna:** laddindikatorn är nu guldspadern som andas (`gold-pulse`),
+  primärknappar får ett engångs guld-skimmer vid hover (`btn-shimmer`,
+  "levande guld"-familjen), och alla icke-immersiva sidor har en sidfot med
+  klubbsignatur (guldhårlinje + "rebidz" i serifen). Allt respekterar
+  "minskad rörelse".
+- **Mobilmenyn som iPhone-glas (ägarens önskan samma kväll):** ☰-listan är
+  nu en frostad glas-dropdown med ÄKTA iOS-material (tre ägariterationer:
+  "50 %" → "ljust läge inte bra" → "får inte iphone-känslan"; lärdomen: mörk
+  emerald-platta + vit text tvingar upp opaciteten och dödar glaset — iOS
+  kör LJUST glas med MÖRK text i ljust läge): ljust = `bg-white/65` + mörk
+  `text-ink`, mörkt = `bg-club-900/55` + ljus text (egen `menuLinkClass`,
+  skild från emerald-barens vita), `backdrop-blur-2xl` + mättnad + guld-
+  hårlinje, glid 360 ms (ägargodkänt)) som SVÄVAR över sidinnehållet (absolut position — sidan
+  trycks inte längre ner) och glider ner mjukt ur knappen (`menu-drop`,
+  respekterar minskad rörelse). Osynligt heltäckande lager bakom → klick
+  utanför stänger. Verifierat i 375 px-vyn: innehållet flyttas 0 px.
+- **Taglinen:** först byggdes vallgravsraden ("Bridgeappen som förklarar
+  **varje bud**" i guld) — ägaren underkände den samma kväll: heron säger nu
+  kort och koncist **"Träna, spela, tävla"**. Sidfoten blev på ägarens begäran
+  "© rebidz · Est. 2026 · v-nummer" (ägaren valde "Est." framför
+  "grundat"/"sedan" — klubbskyltarnas stämpel), där versionen läses ur
+  `package.json` (bumpad 0.0.0 → 1.0.0 — appen är i drift; låsfilen synkad
+  med `npm install --package-lock-only` så `npm ci` i deploygrinden inte
+  bryter). Inga regressioner: hela sviten grön (`npm test`).
+
+**🎨 BUDLÅDAN (FACELIFT FAS 1 YTA 3) — KLAR (ägarbeslut i tur och ordning
+under sessionen, kväll):**
+- **Budfasens kortrad = spelfasens** (skulden från pass 4 inlöst): `HandFan`
+  fick ett `flat`-läge som ritar samma sammanhängande rad som `SouthFan` i
+  vila — fasta xl-kort 64×96, ETT jämnt överlapp utan färgglapp. Måtten bor i
+  delade `FLAT_OVERLAP` (`cardLayout.ts`, 13 kort = 349 px) som båda läser.
+  Budträning/budvisning behåller färggrupperingen. HCP-brickan svävar nu på
+  avdelarlinjen (hade annars krockat med den bredare raden).
+- **Mål-knappen bor i kompassrutan** (ny `footer`-plats i `CompassPanel`;
+  Bricka/zon uppflyttade direkt under rosen). Nya KORTA måletiketter
+  (`describeTargetShort` i `contract-target.ts`) så texten aldrig blir fler än
+  två rader i den smala rutan — fulltexterna kvar i kontraktväljaren.
+- **Betydelse-raden + "Motorn hade valt" på EN rad UNDER X/XX/PASS/OK**
+  (ägaren ville ha hjälpen under knapparna; sammanslagningen sparar en rad
+  på höjden och knapparna flyttar sig aldrig när hjälpen dyker upp).
+- **Valt bud: guldring INUTI knappen** (`ring-inset` — chipet växer inte och
+  lyfts inte; mätt i DOM: valt och ovalt chip båda 66×48) **+ startsidans
+  roterande guldbåge** (`gold-frame`, 6 s/varv — ringen och bågen ligger i
+  samma 2 px-band; "minskad rörelse" respekteras via samma CSS). OK-knappen
+  förblev himmelsblå (ägarbeslut efter guldtest). Luften i rutnätet trimmades
+  i två varv (4 → 6 → 4 px) — 4 px funkar när inget sticker ut ur knappen.
+- **Symmetrin (ägarfeedback efter första deployen samma kväll):** raden
+  ovanför är exakt budlådans bredd (`max-w-md`) — kompassens vänsterkant och
+  auktionens högerkant går i LINJE med budlådan (först låstes den till 576 px;
+  ägaren ville ha kanterna i linje). ⋮-menyn ligger i radflödet på mobil men
+  hängs UTANFÖR kolumnen till höger från `sm:` (kringflytande chrome som i
+  spelfasen) så den inte stjäl bredd från auktionen; en mellanvariant med ⋮ i
+  kompassrutans hörn underkändes. HCP-brickan är låst till samma kolumn
+  (högerkant = budlådans högerkant) i stället för skärmhörnet. På vägen lagades
+  ett 10 px-linjeringsfel (dubbel padding: `px` låg innanför `max-w-md` i raden
+  men utanför i budlådan).
+- **Höjd/bredd-budgeten:** hela vyn (rutnät, förklaring, kortrad) ryms på
+  exakt 812 px-mobil även i värsta fallet (3-raders förklaring); breddgolvet
+  är 352 px (kortraden 349) — moderna telefoner är ≥ 360.
+- **🐛 På köpet:** budvalet nollställs vid ny giv (`useEffect` på
+  `history.length` i `BiddingBox.tsx`) — förr överlevde markeringen in i nästa
+  giv, och med två-tryck-OK kunde ETT tryck bjuda det gamla valet.
+Verifierat i dev-browsern (mobil 375/352 px + desktop, konsolen ren), tsc +
+hela sviten grön (`npm test`).
+
+**🐛 SYD SOM TRÄKARL — REGRESSION FRÅN FACELIFTEN, LAGAD & LIVE (merge `b6279c6`):**
+när NORD vann budgivningen (Syd träkarl) ritades Nords öppna hand aldrig — pass 2
+bytte `northOpen=isFaceUp('N')` mot `dummyAtTop = dummy==='N'` och tappade fallet.
+Eftersom du styr båda NS-händerna (`controls`) och ingen bot spelar åt Nord frös
+given för evigt på Nords tur. Samma refaktorering hade tappat claim-revealens
+"alla händer läggs upp" (bara träkarlens hög ritades). Fix: toppzonen ritar Nords
+hand så fort den är öppen (träkarl ELLER spelförare Nord) och V/Ö-högarna ritas
+via `isFaceUp` → claim-revealen visar åter alla fyra. Facit-test FÖRE fixen:
+`syd-trakarl.test.tsx`. Verifierat live i dev-browsern (2♥/2♣ av Nord, sticket
+bokfördes där det förr frös).
+
+**🎨 SPELBORDET PASS 4 — kortraden + fasta kortstorlekar + stickhögen + dubbla
+hörnindex (ägarbeslut i tur och ordning under sessionen):**
+- **Syds kortrad utan färgglapp:** ETT jämnt överlapp över hela raden (förr la
+  varje ny färg ett helt kort → 400 px och overflow på mobil). Remsan exakt
+  23,75 px → 13 kort spänner 349 px (5 px marginal per sida, ägarens tal).
+- **Fast kortstorlek "C" för alla händer:** `xl` = 64×96 på ALLA skärmbredder
+  (2:3 ≈ riktigt bridgekort; ägaren valde C ur tre uppritade alternativ). Nords
+  kolumner: xl med fast 60 px-remsa (täckta kort läste som stubbar vid gamla
+  50 %-överlappet). V/Ö-högarna: xl vridna (96×64), remsa 16 px.
+- **Stickhögen:** mittytan 192 → 160 px, korten samlade med 25 % överlapp och
+  z-index i spelordning (senast spelat överst, som vid riktigt bord). Stickkorten
+  fick den förut oanvända `lg` (fast 48×64) så överlappet stämmer på desktop.
+- **Dubbla hörnindex:** valör + symbol även upp-och-ner i nedre högra hörnet på
+  ALLA kort (riktig kortlek). Mittsymbolen åter centrerad; döda `mirrorCorners`
+  borttagen — vridna kort får nu index i synliga remsan åt båda håll. Gamla
+  "ETT hörnindex"-beslutet hävt: kollisionsrisken på småkort finns inte längre.
+- Parkerat till budlåde-passet: budfasens kortrad (`HandFan`) behåller färgglapp
+  tills budlådans storlek ses över (ägarbeslut, se `docs/senare.md`).
+
+**🎉 MOBILSVEP ÖVER ALLA SIDOR (Fas 0 b, KLART) → HELA FAS 0 KLAR:** varje sida
+(Hem, Budträning + övning, Budvisning, Budsystem, Inställningar, Spela kort:
+budfas + bord) gicks igenom i 375 px-bredd med en overflow-detektor (JS som mäter
+element bredare än skärmen) + skärmbild. **Resultat: appen var redan mobil-ren** —
+ingen sidled-overflow, inga avklippta knappar, god luft och stora tryckytor. Enda
+fyndet: de breda svarstabellerna på Budsystem (Svar/Betydelse/Kravnivå/Konvention)
+är bredare än en telefon. De var INTE trasiga — `.md table` scrollar redan i sidled
+— men den 4:e kolumnen saknade visuell antydan (kändes "budget", ägarord). **Fix:**
+`ScrollTable` (react-markdown `table`-override) wrappar tabellen i en scroll-behållare
+och en `ResizeObserver` sätter klassen `is-scrollable` BARA när innehållet är bredare
+än rutan → CSS ritar en mjuk toningsskugga vid högerkanten ("det finns mer →").
+Verifierat: mobil 46/56 tabeller får skuggan (smala slipper), svep visar Konvention;
+desktop 0 skuggor (allt får plats). tsc rent, hela sviten grön. En teständring på
+vägen (redundant wrapper) backades. **Med detta är Fas 0 (a bottarnas kortspel, b
+mobilen, c teknisk härdning) helt klar** — grunden håller för främmande ögon; näst
+i konkurrensplanen: Fas 1 (faceliften) eller ett budmotor-NU.
+
+**Budsystem — "fäll ihop"-pil (ägarönskemål 2026-07-30, samma push):** varje
+dropdown (både sektioner och undersektioner, 50 st) fick en ▲-knapp längst ner till
+höger som stänger sektionen och tar rubriken i vy igen — så man slipper scrolla upp
+till rubriken efter en lång sektion. `CollapseButton` i `BudSystem.tsx`; stänger sin
+närmaste `<details>` via `closest('details').open = false`. Verifierat i ljust + mörkt
+läge.
+
+**🎉 SÄKRA ZONER VID BORDET (Fas 0 b, KLART):** utredningen visade att planens
+"ingen hantering av säkra zoner" var **inaktuell** — `index.html` har redan
+`viewport-fit=cover` + `black-translucent` statusrad, och `Layout.tsx` skjuter redan
+in topp (`env(safe-area-inset-top)` på sidhuvudet) och botten
+(`env(safe-area-inset-bottom)` på innehållsytan). Spelbordet ligger inuti den
+botten-paddade ytan och når inte ens skärmkanten på mobil, så kortraden kan inte
+gömmas under hemindikatorn. Enda faktiska luckan: **vänster/höger** (liggande läge /
+sidourtag), nu tillagt på `<main>` via `pl/pr-[max(1rem,env(safe-area-inset-left/right))]`
+— aldrig mindre än 1rem i stående, växer med insättningen på riktig telefon.
+Verifierat: stående mobil oförändrad (computed padding 16 px, botten 24 px), tsc rent,
+hela sviten grön. Slutverifiering görs på ägarens iPhone. Ärlig kalibrering: liten
+komplettering, inte ett stort hål.
+
+**🎉 KONSEKVENT KORTRAD I ALLA VYER (Fas 0 b, KLART & live, merge `347d2c3`):**
+handen ritas nu likadant överallt. **Bakgrund:** felrapport #36 bad om "större kort"
+på mobil (stora fingrar). Vi mätte i DOM:en: 13 kort à 48 px fyller en 375 px-rad
+nästan helt (~336 px) — man får inte plats med ~44 px tryckyta per kort på en rad
+utan två rader (ägaren avvisade) eller bredare skärm. Ägaren tyckte storleken vid
+bordet känns bra på max; den **verkliga** smärtan var att handens kortrad var mer
+ihoptryckt i **budgivningen** (`HandFan`: tät solfjäder, `-ml-7`, ~288 px) och sedan
+*expanderade* när kortspelet började (`SouthFan`: färggrupperad, ~336 px) — den
+skillnaden mellan vyer "känns budget". **Fix:** `HandFan` ritar nu samma
+färggrupperade kortrad som `SouthFan` (färgerna i grupper med luft emellan, samma
+`md`-storlek), och överlappet bor i en delad konstant `REST_OVERLAP` (`cardLayout.ts`)
+som båda läser → kan aldrig glida isär igen. Påverkar budgivning, budträning och
+budvisning (alla använde `HandFan`); spelbordet oförändrat. Verifierat i webbläsaren
+i alla fyra vyerna (inga konsolfel), hela sviten grön. **Felrapport #36 stängd**
+"löst på annat sätt" (korten gjordes alltså inte större — upplevelsen blev konsekvent).
+Kvar i Fas 0 b: mobilsvep + säkra zoner vid bordet. Ägarbeslut: samma look överallt =
+proffskänsla. Detalj: `docs/konkurrensplan.md` Fas 0 b + `docs/senare.md`.
+
+**🎉 KONKURRENSPLANEN FAS 0 c — TEKNISK HÄRDNING (KLART & live):** två småfixar
+som gör grunden redo för främmande ögon. **(1) 404-sida:** `NotFound.tsx`
+(varumärkt: grönt filt, guldknapp "← Till start") + en catch-all-route
+`<Route path="*">` sist i `App.tsx`, så felskrivna/döda adresser landar mjukt i
+stället för på en tom sida. Facit `not-found.test.tsx` renderar hela `App` mot en
+påhittad hash och mot en riktig (Budträning, liten lat-chunk — vald för att
+Budsystem-bokens 345 kB-chunk gav falsk CPU-svält-timeout i full svit). **(2)
+Route-baserad kod-uppdelning:** sidorna importeras nu med `React.lazy` (Home direkt-
+laddad — landningssidan; resten lazy), Suspense-gräns + snurr-fallback runt
+`<Outlet/>` i `Layout.tsx`. Första-laddningens JS gick från en enda ~889 kB-fil
+till en 247 kB-entry (gzip 276 → 79 kB); Budsystem-boken (345 kB) och Spela kort
+(88 kB) laddas först när man går dit. Siffror från `npm run build` (läs
+`dist/assets/`). Verifierat i webbläsaren: alla rutter laddar sina chunkar utan
+konsolfel; hela sviten grön. Fas 0 a (#32/#34) + c klara; kvar i Fas 0: **b)
+mobilen #36**. Detalj: `docs/konkurrensplan.md` Fas 0.
+
+**🎉 DEPLOYGRINDEN FLYTTAD TILL GITHUB ACTIONS (KLART, deployen verifierad grön +
+aliasad rebidz.com):** de återkommande "myntkast"-röda deployerna knäckta vid roten.
+**Orsaken:** `vercel.json` körde hela testsviten (`npx tsc && npm test && npm run
+build`) som byggkommando på Vercels CPU-svultna byggare → tidskänsliga DDS-tester
+slog slumpvis i sina tidsgränser. Band-aids i `b777abb`/`2b6934a` (seedning + höjda
+gränser) räckte inte — fel MILJÖ, inte fel kod: samma bygge (`81456df`) gick Ready
+på 1m44 medan mitt `67e59f9` föll på 2m7 med identisk workload. **Fixen:** ny
+workflow `.github/workflows/ci-deploy.yml` kör `tsc + npm test` på `ubuntu-latest`
+och deployar till Vercel-produktion (`vercel deploy --prebuilt --prod` via
+`VERCEL_TOKEN`-hemlighet) BARA om allt är grönt; Vercels egen Git-auto-deploy
+frånkopplad; `vercel.json` bygger nu bara (`npm run build`). Garantin "rött test →
+ingen publicering" bevarad, på en maskin som inte slumpfäller; CRLF-fällan i
+docs-vakt försvann (körs på Linux/LF nu). Verifierat två gånger: grön Actions →
+"Aliased … Ready", andra körningen 1m9s (dubbelkörningen borta). Commits `81083a5`
++ `cb5fe13`. Tre GitHub-hemligheter: `VERCEL_TOKEN`/`VERCEL_ORG_ID`/
+`VERCEL_PROJECT_ID`. Levande docs + `deploy-verifiering`-skillen + minnet
+uppdaterade; historik/audit orörd. Detalj: CLAUDE.md "Hosting & deploy".
+
+**🎉 FELRAPPORT #34 – FÖRSVARET SPELAR TREDJE HAND HÖGT (KLART, konkurrensplanens
+Fas 0 a, hela sviten grön via `npm test`, tsc rent):** motpolen till #32 –
+spelförar-planen blev en motspels-plan. **Buggen:** tredje/fjärde-hand-grenen i
+`play-bot.ts` la billigaste vinnaren även när den DOLDA spelföraren spelade efter
+försvararen; i felrapportens giv (1NT av Öst) satt Nord med ♥KJ1065, partnern
+ledde ♥3, träkarlen la ♥4 – Nord la ♥5 och Öst vann gratis på ♥9 där en honnör
+hade tvingat fram Östs ess. Felet sker redan i trick 1 (13 kort), långt över
+Monte-Carlo-fönstret (≤8), så tumregel-lagret måste kunna det. **Facit före fix**
+(`play-bot-third-hand.test.ts`): en DDS-låst klassisk finess (träkarl lågt,
+spelföraren håller finess-knekten, försvarets K/D delade) där tredje hand LÅGT
+släpper spelföraren ett extra stick (DDS: högt = 1, lågt = 2) + själva
+felrapportens giv. **Fixen:** `thirdHandHonor` – är jag försvarare i **sang**,
+ledde partnern och står bara spelföraren (ej den öppna träkarlen) bakom mig,
+lägger jag min **lägsta** honnör (10+). Att välja lägsta är hela poängen: ur en
+gaffel (A-D-10) ska esset ligga kvar över spelförarens kung, inte krossas på
+partnerns låga utspel. **Två fällor upptäckta och lagade under bygget** (via
+enskild-giv-spårning mot mätriggen): (1) första versionen spelade *högsta* kortet
+och krossade ett ess på en tenass → −1 (seed 20260732); rättat till lägsta
+honnören. (2) I trumfkontrakt satte ett vunnet sidostick försvararen på lead in i
+ruffhanden → −1 (5♦, seed 20260761); regeln begränsades till sang, precis som #32.
+**Netto** (`play-establish.probe`, `ESTABLISH=1`, 40 seedade givar frö 20260729,
+A/B via `git stash`): 374 → 374, oförändrad summa (ingen giv bytte utfall) – noll
+regressioner, men den rapporterade given DDS-bevisat lagad. Mönstret (försvarare
+tredje hand med honnör i sang, bara dold spelförare bakom) är sällsynt i
+slumpgivar. Ren tumregelmodul, spelmotorn (`play.ts`) orörd, inga nya beroenden.
+
+## 2026-07-29
+
+**🎉 FELRAPPORT #32 – SPELFÖRAREN ETABLERAR LÅNG FÄRG (KLART, konkurrensplanens
+Fas 0 a, hela sviten grön via `npm test`, tsc rent):** första spelförar-planen i
+bot-hjärnan. Buggen: i sang cashade boten sina sidoess (stopp + entréer) FÖRE den
+knäckte spärren i sin långa färg – när spärren väl föll var motståndarnas honnörer
+goda och försvaret rullade hem. Felet sker vid 9–13 kort, OVANFÖR
+Monte-Carlo-fönstret (≤8), så MC hann aldrig laga en redan förstörd position; det
+är därför tumregel-lagret måste kunna planera. **Facit före fix:** ett DDS-låst
+3NT-slutläge (`play-bot-establish.test.ts`) där perfekt spel ger 7 av 11 men både
+tumregeln och den skarpa boten tog 3 (mekanism-lås: varje cashat sidoess före
+rutern degraderade DDS-facit 7 → 6 → 4). **Fixen:** `establishLongSuit` +
+`suitTricks` i `play-bot.ts`, anropad i on-lead-grenen före cashandet – etablerar
+den långa färgen (knäcker spärren) när spelförarsidan har full kontroll (varje
+annan färg stoppad, ≥2 stick att vinna). Ärlig räkning (spelförare + träkarl,
+inget tjuvkik). Boten tar nu 7 på facit-given. **Begränsad till sang med flit:**
+en första A/B-mätning fyrade även i trumfkontrakt och tappade då stick (4♠-givar)
+eftersom "säkra vinnare" kan ruffas och färg etableras genom ruff – guarden
+`state.trump !== null → return null` löste det. **Netto-mätning** (deterministisk,
+`play-establish.probe.test.ts` gatad `ESTABLISH=1`, 40 seedade givar frö 20260729,
+A/B via `git stash` av play-bot.ts): baslinje 366 → med fixen 374, **netto +8
+spelförarstick, noll trumf-regressioner** (enda −1 kvar är en 3NT-giv, inom
+MC-samplingsbruset). Ren motor-/tumregelmodul, spelmotorn (`play.ts`) orörd, inga
+nya beroenden. **Kvar i spåret:** #34 (försvaret, tredje-hand-högt) – nästa
+naturliga NU i Fas 0 a.
+
+**🎉 RONDGENOMGÅNGEN (after action report) BYGGD i fyra etapper (2026-07-29,
+mergepunkt `a28ff5e`, hela sviten grön via `npm test`):** efter en
+färdigspelad giv i Spela kort kan spelaren öppna en komplett genomgång i tre
+hopfällbara kapitel (ägarkrav: dropdowns, ingen textvägg). **Etapp 1 —
+textmotorn:** ren modul `src/lib/engine/rond-rapport.ts` (`buildRondRapport`)
+bygger hela rapporten som data: varje bud förklarat (motorns regel när den
+finns, annars `interpretCall` med ärlig osäkerhetsgradering — även nakna pass),
+varje stick berättat (utspel, trumfningar/sakningar, löpande ställning, max 4
+rader) och resultatet med ton (beröm/läxa/neutral). Perspektivet följer
+`controls()`: Syd = "du", Nord = "Nord (dina kort)" när NS spelför, "Nord (din
+partner)" i försvar. **Etapp 2 — vyn:** `src/pages/play/RondRapport.tsx`
+(native `<details>`-kapitel som Spela-sidans fördjupning; Resultatet öppet som
+default; tryck på botkort visar `botReasons`-motiveringen), `reviewing`-state i
+`usePlayTable`, knappar i resultatdialogen + under omspelningen. **Etapp 3 —
+DD-domen:** `src/lib/engine/rond-dd.ts` (`analyzeDd`) räknar facit per
+stickgräns BAKIFRÅN med vår egen lösare (sprängd nodbudget avbryter ärligt →
+"analysen når från stick X"), i webworkern `rapport-worker.ts` via
+`useDdAnalys` (inline-reserv). ⚠-rader på stick där facit rörde sig + dom i
+resultatet ("med perfekt spel fanns N stick…"/"ni tog fler än facit — bra
+jobbat") + upplysning när en manuell claim tog färre stick än facit säkrar.
+**Lärdom (StrictMode):** en kör-en-gång-ref i hooken lämnade analysen ostartad
+för alltid vid dev-ommonteringen — effekten gjordes omstartbar i stället.
+Spelmotorn orörd, inga nya beroenden. Verifierad i webbläsaren (två hela givar:
+ÖV-kontrakt med claim + NS-kontrakt med DD-dom). **Etapp 4 (ägarens feedback
+efter eget test, samma dag):** utspelsregeln (§8.3) skrivs ut i utspelsraden
+läst ur utspelarens faktiska kort (topp av honnörssekvens/singel för alla;
+längdmarkeringarna 3:e/5:e/dubbelton BARA för motspelets öppningsutspel —
+UDCA/Lavinthal läggs inte av botarna ännu och förklaras därför inte); stickets
+kort läggs i väderstrecken som vid bordet (N/S/V/Ö med sätesbokstäver); ⚠ är
+röd i både rubrik och rad. Detalj: `docs/kortspel.md` "Rondgenomgången" +
+`docs/status.md`.
+
+## 2026-07-04
+
+**🎉 Felrapport #14–#19 LAGADE & LIVE (2026-07-04, commits `6aa110d` +
+`513ebb3`, testsvit 1668 grön, issues #14–#19 stängda):** sex rapporter från
+Spela kort, var och en facit-låst (testet föll före, grönt efter), inga
+on-book-lås rörda.
+**#14** ovanlig 2NT/Michaels passades ut — linjebygget (`auction.ts`) ger nu
+advancern preferens, så tvåfärgsinkliv stängs inte längre för tidigt (den kända
+SENARE-punkten "kanoniska linjen passar ut ostörda tvåfärgsinkliv" åtgärdad i
+roten). **#15** inklivaren passade advancerns NYA färg — gör nu en enkel
+stödhöjning (3-korts fit mot en 5+ färg, `overcallerRaiseAdvance` i
+`auction-live.ts`). **#16** öppnaren passade partnerns cue-höjning i
+motståndarfärg — svarar nu (minimum = billigaste återbud, 15+ = utgång;
+`partnerCueRaiseToAnswer`). **#17 (bud)** 2♣-öppnaren gömde 6-korts hjärter
+bakom 3NT — visar nu en egen 5+ färg naturligt över ett 2NT-positivt svar
+(`openerRebidAfter2C` i `responses-2c.ts`; ägarbeslut: 5-korts räcker, inget
+hopp). **#17 (spel)** spelboten ledde ♠K rakt in i träkarlens singel-♠A →
+avblockningsregel `unblockLead` (`play-bot.ts`): leder spelförarsidan en färg
+där den synliga medspelaren har en högre singel spelas lågt i stället; gäller
+både tumregel-boten och bot-hjärnans DDS-val. **#18** tvåfärgs-cuen mot deras
+svaga tvåa cue-bjöd på 6 hp och spelades i deras färg → golv 15 hp
+(`defense-conventional.ts`) + advancern måste svara en äkta stark cue
+(`partnerWeakTwoCueToAnswer`). **#19** svararen passade en REBJUDEN 6-korts
+högfärg — 2-korts stöd räcker nu som fit mot en färg partnern bjudit två gånger
+(`fitLengthNeeded`), så dubbletonen höjs till utgång 4♥.
+**Bevaka i spel (kortlivat):** advancern besvarar nu ovanlig 2NT/Michaels och
+tvåfärgs-cue; inklivaren stöttar advancerns nya färg; öppnaren svarar
+cue-höjningar; 2♣-öppnaren visar 5+ färg före 3NT; svararen höjer dubbletonen
+mot en rebjuden högfärg; spelboten avblockerar (leder inte honnör in i
+medspelarens singel). Säg till om något känns fel vid bordet.
+
+**🎉 POÄNGSYSTEMET KLART & LIVE (2026-07-04, testsvit 1626 grön, bygget ok,
+verifierat i webbläsaren — resultatdialog "8 bet (1 stick). Ö/V +800";
+committat/pushat av parallellsessionen i `0864224` + `26b4267`):**
+ägarönskemål, full tävlingspoäng i Spela kort. **(1) X/XX in i slutkontraktet** (gamla SENARE-fyndet, nu löst):
+`Contract` fick `doubled?: 'X' | 'XX'`; `contractFromCalls`
+(auction-contract.ts) läser dubblingen (nollställs av nytt bud); X/XX-märke i
+bekräftelsedialogen, svarta kontrakt-listen, omspelningen och felrapportens
+kontrakttext. **(2) `scoring.ts`** — hela poängtabellen (trickpoäng
+20/30/40+30 dubblat ×2/×4, delkontrakt 50, utgång 300/500 på DUBBLADE
+trickpoäng, slam 500/750 + 1000/1500, insult 50/100, övertrick 20/30 /
+100/200 / 200/400, straffar 50/100-serien + dubblade 100-300-500(+300) resp.
+200-500-800(+300), redubblat ×2) — VARJE cell i ägarens poängguide facit-låst
+i `scoring.test.ts` (4♥=420/620, 3 dubblade straff i zon=800, 2♥X hemma=470/670
+osv.). **(3) Resultatdialogen** visar vem som fick poängen i samma ruta som
+resultatet, t.ex. **"Ö/V +420"** (`scoreLine`, zonen från brickan).
+**Ägarbeslut:** BARA per giv — löpande ställning väntar tills tävlingar/
+matcher finns; poängen visas bara i resultatdialogen. **(4) Bottarna
+straffdubblar** (ägarbeslut): `penaltyDouble` (doubles.ts, 2+ säkra
+trumfstick i deras färg + 10+ hp) via `maybePenaltyDouble` (auction-live.ts)
+— bara färgkontrakt på 3-läget+, och BARA när vår sida gjort 2+ kontraktsbud
+(då kan X:et omöjligt läsas som upplysning/negativt/tvåfärgssvar — de
+detektorerna kräver max ett eget kontraktsbud). **Bevaka:** bottarna kan nu
+straffdubbla ÄGAREN vid offringar på 3-läget+ — säg till om det känns för
+aggressivt. **Sidofynd lagat:** #13-koden (transfer-utgångsvalet) refererade
+saknade `SYM_OF_LETTER` (kraschade decideCall i vissa lägen) → kartan tillagd
+i auction-live.ts.
+
+**🎉 Felrapport #10–#13 LAGADE & LIVE (2026-07-04, commit `26b4267`, testsvit
+1626, deploy grön, issues #10–#13 stängda):** **#10** 4NT är essfråga även
+UTAN överenskommen trumf när sidans senaste naturliga bud var en FÄRG (t.ex.
+4NT på partnerns 3♠-spärr) — kvantitativt bara över sang (`slamAskTrump`,
+`auction-live.ts`; samma regel i tolkningslagret via `askTrumpFallback`).
+**#11** partnerns cue i motståndarnas färg passas aldrig ut — känns nu igen
+även på 3-läget och över X/deras egen höjning (`partnerTwoSuiterToAnswer`);
+Nord ger preferens (3♠). **#12** kortspel: andra hand med LÖPANDE toppvinnare
+(2+ säkra) går upp med billigaste säkra vinnaren i stället för att "maska"
+(♥8 ur AKQT98 lät knekten vinna); ensamt säkert kort ligger kvar lågt
+(hold-up orörd), visad renons hos kommande spelare → lågt (`play-bot.ts`).
+**#13** partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG: 4M med 3+
+stöd, annars pass — transferns relä läses aldrig som naturlig färg
+(`transferGameChoiceToAnswer`, ligger FÖRE det generella off-book-svaret).
+Alla fyra givarna facit-låsta EXAKT ur rapporterna. **Samma push:**
+parallellsessionens poängräkning + X/XX i kontraktet (`scoring.ts` enligt
+ägarens poängguide) som egen commit `0864224`. **Bevaka:** bottarna svarar
+på essfrågor utan formell trumf, går upp med toppsekvenser som andra hand
+och väljer 4M/pass efter transfer-3NT.
+
+## 2026-07-03
+
+**🎉 CLAIM TRICKS + AUTO CLAIM KLART (2026-07-03 kväll, testsvit 1560,
+committat i `8914903`):** ägarönskemål, två funktioner.
+**(1) Manuell claim** — ⋮-menyn (spelfasen) har knappen "Claim tricks" (bara
+när DIN sida är spelförare). Dialogen listar sidans TOTALA stick i given
+(redan vunna → vunna+återstående) med kontrakt/±-etikett; DDS-lösaren dömer
+mot PERFEKT motspel (`adjudicateClaim`, `claim.ts` + `doubleDummyDeclarer-
+Remaining`). Godkänd → given avslutas med det claimade resultatet
+(resultatdialogen visar "Claim godkänd"); annars **"Claim nekad — går inte
+att säkra"** och man spelar vidare; för tung ställning → "spela ett stick
+till". **(2) Auto Claim** — av/på-knapp i SAMMA meny (sparas i localStorage,
+`learnbridge:autoClaim`, PÅ som standard). När ett nytt stick ska börja och
+spelförarsidan OMÖJLIGT kan förlora fler stick OAVSETT spelsätt (t.ex. bara
+höga trumf kvar, eller idel toppkort) stängs given automatiskt — gäller BÅDE
+dig och datorn som spelförare. Strängare mått än manuell claim: ny lösare
+`sureWinAllRemaining` (`dds.ts`) prövar ALLA lagliga kort för alla fyra
+spelare → sant bara om varenda linje vinner varje stick (en fungerande mask
+går att spela hem = manuell claim OK, men går också att spela bort = aldrig
+Auto Claim). DDS-lösarens `legalMoves`/`key` utlyfta till modulnivå
+(`legalMovesFor`/`positionKey`) och delas — inga dubbletter. Facit-lås:
+`claim.test.ts` (15 fall, ägarens båda exempel + mask-skillnaden + symmetri
+för bot-spelförare + nodbudget). Bottarna pausar medan claim-dialogen är öppen.
+
+**🎉 Felrapport #6, #7 & #9 LAGADE (2026-07-03 kväll, testsvit 1545):**
+**#6 motspel:** motspelaren cashar aldrig en ENSAM säker vinnare i färsk färg
+(torrt ess göder spelförarens honnörer) — bara löpande toppar (2+) eller i
+redan attackerad färg; annars fortsätts utspelfärgen §8 (`play-bot.ts`).
+**#7 budgivning:** advancerns preferenssvar på Michaels/ovanlig 2NT
+(`advanceTwoSuiter`, FAS 10) inkopplat i live-flödet + NY flyktregel: eget
+DUBBLAT tvåfärgsinkliv passas aldrig ut — fly till längsta visade färgen
+(`auction-live.ts`). **#9 slam:** partnerns 4NT med överenskommen trumf
+(båda bjudit färgen) besvaras ALLTID som 1430 RKC (`respondToRKC`), 5NT =
+kungfrågan (Sjöberg); tolkningslagret visar öppnarens 2♥/3♥/4♥ efter negativ
+dubbling som graderade SVAR (inte spärr) och 4NT som essfråga
+(`auction-interpret.ts`). Alla givar facit-låsta EXAKT ur rapporterna.
+**Nytt fynd → ⚪ SENARE:** kanoniska linjen (`auction.ts`) kan fortfarande
+passa ut ett OSTÖRT tvåfärgsinkliv (1♠–2NT–P–P–P) — bryter "aldrig pass
+ostört"; bara förbyggda linjer, inte budlådan. **Bevaka:** bottarna svarar nu
+på Michaels och essfrågor även i fria auktioner; motspelarna sparar torra ess.
+
+**🎉 Systemgranskning + städning KLAR (2026-07-03 kväll, testsvit 1537 grön,
+EJ committad — ägaren sköter commit/push själv):** full granskning av
+budcykeln/bot-tillståndet på ägarens begäran. Resultat: `decideCall` är
+tillståndslös (räknar om allt ur historiken varje tur — inget bot-tillstånd
+kan bli inaktuellt), inga races i `Play.tsx` (funktionell setState +
+dubbelkoll i uppdateraren), lagligheten vaktas av `legalCalls`. **Åtgärdat:**
+dubblettkopian av kontraktshärledningen borttagen — `contractFromCalls` bor
+nu ENBART i `auction-contract.ts` (re-export i `auction-live.ts`,
+`finalContract` delegerar); `*.tsbuildinfo` gitignorerad. **Nytt fynd →
+⚪ SENARE:** X/XX följer inte med in i slutkontraktet. (OBS: ägarens prompt
+talade om "bid retractions"/auktionssajt — utrett och avfärdat tillsammans,
+bud kan aldrig dras tillbaka i bridge.)
+
+**🎉 UI-pass i Spela kort KLART (2026-07-03, testsvit 1537 grön, bygget ok):**
+fem ägarönskemål på mobilen. (1) **Kortens symboler flöt ihop** på spelade
+kort → `PlayingCard.tsx` har nu ETT hörnindex (det nedvända borttaget
+ÖVERALLT), mittsymbolen knuffad diagonalt bort från hörnet, essets pip ett
+snäpp mindre. (2) **Stäng-krysset** i förklaringspopupen 44×44 px
+(`AuctionGrid.tsx`). (3) **iPhone-safe-area**: `viewport-fit=cover`
+(`index.html`) + botten-marginal `env(safe-area-inset-bottom)` och mindre
+mobilluft (`Layout.tsx`). (4) **Alla ramar/borders på korten borttagna**
+(ägarbeslut — även gröna "spelbar"-ringen; ospelbara tonas fortfarande ner)
+och **Nords träkarlskolumner expanderar VERTIKALT** när färgen väljs
+(`-mt-3` i st.f. `-mt-7`, `Play.tsx`), samma tanke som Syds solfjäder.
+(5) **👍-turmarkören ersatt av mjuk ljuskägla** (spotlight): radiellt vitt
+ljus m. `mix-blend-mode: screen` bakom aktiv spelares bokstav i sticket,
+tonar 0,7 s vid turbyte, pulserar när bot-hjärnan räknar
+(`TrickCenterLive`, `Play.tsx`). Gula vinnarringen i sticket är KVAR
+(markering, ej ram — ägaren sa inget om den).
+(6) **"Förra sticket"-panel** uppe i hörnet (`LastTrickPanel`, `Play.tsx`):
+senaste färdiga sticket i kompassläge, vinnaren gulmarkerad; förminskad 75 %
+och flyttar till VÄNSTRA hörnet när Öst-träkarlen tar högersidan (annars
+låg den ovanpå pågående stickets V/Ö-kort på 375 px — luriga överlappet
+syntes som "mörkt kort"). (7) **Tryck på spelat kort → förklaring**: alla
+bottars kort på bordet (mitten + förra sticket) klickbara, motiveringen i
+raden under listen; frasen "X spelade Y Varför?" ersatt med "Tryck på
+spelat kort för förklaring" (`botReasons`/`PlayedCardView`, `Play.tsx`).
+(8) **Färgsymboler i löptext ALLTID fyrfärgade** (ägarbeslut):
+`SuitText.tsx` (delad) + rehype-plugin i `BudSystem.tsx` (markdown-boken,
+inkl. rubriker/sökträffar); inkopplad i förklaringspopupen, budlådans
+betydelserad, kortförklaringen, Budvisningens listor och budträningens
+facit.
+
+**🎉 Felrapport #5 LAGAD & LIVE (2026-07-03, commits `7e68178` + `1125213`,
+testsvit 1537):** bricka 8 — motorn ville passa ut given trots klar
+balansering, och Nord höjde inte partnerns inkliv. Två rötter: (a)
+**balansering byggd** — fjärde hand får hela §7-arsenalen i utpassningsläget,
+både i kanoniska linjen (`auction.ts`, lämnar auktionen öppen) och off-book
+(`maybeOvercall`, `auction-live.ts`); samma krav som direkt sits ("låna en
+kung"-lättnaden = senare förfining, ⚪); (b) **`divergedFromLine`** räknar nu
+ett riktigt bud BORTOM en stängd linje som off-book (modellen trodde given
+var utpassad → partnerns svarslogik kopplades aldrig in). Given facit-låst
+EXAKT ur rapporten (1♦–P–P–1♥–P–2♥–P–P–P). **Ägarbeslut (exempelhänder
+H1–H4): AGGRESSIV upplysningsdubbling** — golv 10 hp med perfekt form (max 2
+i deras färg + stöd i alla objudna + ingen egen 5-korts färg; 12+ som förut),
+`overcalls.ts` + budsystem §7.1/§7.3. **Bevaka:** bottarna balanserar nu även
+MOT ägaren (symmetriskt — korrekt bridge, säg till om det känns fel i spel).
+
+**🎉 TP-steg E & F KLARA (2026-07-03, testsvit 1528 — hela TP-arbetslistan
+A–F därmed komplett):** ägarbeslut efter exempelhänder + bridgebum-bekräftat.
+**E — reverse/hoppskift på TP:** styrkan i `max(hp, startpoäng)`
+(`pointsWithFloor` fick kind `'starting'`); reverse ≥16, hoppskift ≥19
+(utgångskrav). Byggda luckor: öppnarens **hoppskift efter 1-lägessvar
+saknades helt** (19-poängare rebjöd "2♣ minimum, ej krav"!) — nytt fack
+`hoppskift` i `rebids.ts` + `rules.ts`; **svararens fortsättning** efter
+hoppskiftet (placera kontraktet — 4M/3NT/5m, ALDRIG pass) + pass-vakt efter
+reverse utan preferens (→ 2NT kravsvar) i `responder-rebids.ts`.
+**F — lättöppning 3:e/4:e hand:** `classifyOpening(hand, vulnerable,
+seatOrder)`, positionen trådad i `buildAuction`. 3:e hand: 1M med 10–11 hp
+(sårbar 11) + bra 5+ högfärg (≥2 topphonnörer A/K/Q) — aldrig lätt
+minor/1NT; Drury (§6.7, redan byggd) skyddar svaret. 4:e hand: **regeln om
+15** (hp + spader ≥ 15 → öppna, annars passas given ut; ingen spärr/svag
+tvåa i 4:e hand under golvet). Facit FÖRE fix (13 låsta fel bevisade), +16
+tester, on-book orört. Docs uppdaterade (budsystem §3+§5, tp-arbetslista,
+handvardering, status).
+
+## 2026-07-02
+
+**🎉 Felrapport #1–4 LAGADE & LIVE (2026-07-02 kväll, commits `9a6b09e` +
+`df5bf21`, testsvit 1507):** felrapporteringskedjan bevisad end-to-end fyra
+gånger. #1 motspel: tredje hand vinner nu högt nog att TRÄKARLEN (som spelar
+efter, öppen information) inte går över (`play-bot.ts`). #2–4 budgivning,
+gemensam rot **kravbud passades bort**: (a) öppnarens svar på **negativ
+dubbling** byggt (`openerAnswerNegativeDouble`, `doubles.ts` §7.3 — aldrig
+pass) + **spärrhöjning** av partnerns hoppinkliv med 3-korts stöd
+(`auction-live.ts`, hoppinkliv lovar 6+); (b) öppnarens svar på **fjärde
+färg** byggt (`openerAnswerFourthSuit`, `rebids.ts` §6.6-prioriteten);
+(c) svararens **2/1 GF-fortsättning** byggd (`responderRebidIn2over1Auction`,
+`responder-rebids.ts` §5.3 fast arrival — facket saknades helt i
+`responderSecondBid`). Alla fyra givarna facit-låsta EXAKT ur rapporterna.
+**Ägarbeslut:** /felrapporter lämnar alltid STANDARDRAPPORT (vad hände /
+anledning / fix / test) — inskrivet i kommandofilen. **Bevaka:** Öst-läget
+över spärrhöjningen (1♣–2♥–X–3♥ → konkurrera 3♠ eller passa?) är ett NYTT
+frivilligt läge — boten passar; ägarbeslut om det känns fel i spel.
+
+**🎉 🎨 DESIGNLYFTET KLART & LIVE (2026-07-02, commit `186a362`, testsvit
+1484):** appen heter **RebidZ** (ägarens eget namn; konfliktkollat — fritt
+bland appar/bolag/domäner; **påminn ägaren köpa rebidz.com/.se**). Ägaren ser
+business-potential → designen håller produktnivå. Stil: eget & snyggare än
+Synrey (gröna bordet + layouten behållna). Repo/URL byts INTE.
+**Alla fyra stegen byggda, verifierade & deployade:**
+**Steg 1 ✅** designgrunden — Inter (brödtext) + Space Grotesk (rubriker/
+ordmärke), självhostade @fontsource; guld-tokens (`--color-gold-*`) +
+`--font-display` i `index.css` @theme; RebidZ-ordmärke i sidhuvudet;
+sidtitel + meta description. **Steg 2 ✅** korten & bordet —
+`PlayingCard.tsx`: gradient-framsida, Space Grotesk-index, stort ess-pip,
+RebidZ-baksida (smaragd + guldram; vilande tills utdelningsanimation);
+`Felt.tsx`: ljus uppifrån + SVG-brus (filtväv) + kantdjup. **Steg 3 ✅**
+rörelse — spelade kort glider in från spelarens håll (`card-in-n/s/w/e`),
+utdelningskaskad (`deal-in`, 35 ms/kort), sidbyten tonar (`page-in`),
+tryckrespons (`active:scale`), allt av vid `prefers-reduced-motion`.
+**Steg 4 ✅** identitet — `BrandMark.tsx` (guldspader på smaragd) i sidhuvud
++ hero; `public/favicon.svg` (Vite rebaser sökvägen, verifierat 200);
+`theme-color`; ny startsida: hero på filtet (logotyp, tagline, dekorativ
+solfjäder, guld-CTA) + lägeskorten. Mobil 375 px verifierad överallt.
+**Omtag 2 (ägarens logo-vision, samma dag):** namnet skrivs **rebidz —
+ALLTID gemener** (ägarbeslut). Ordmärket = Fraunces-serif i guldgradient
+med **spader som prick över i:et** (5 px över i:et vid herostorlek,
+em-skalat — ägarbeslut) i **tunn guldram** (`Wordmark framed`,
+`BrandMark.tsx`). **Klubbtema på ALLA flikar:** `club`-färgtokens
+(`index.css`) — gröna ytor i båda lägena (aldrig slate på stora ytor),
+guldlinje under sidhuvudet, alla h1 i varumärkesserifen, paneler/kort/
+detaljer/sökfält smaragdtonade (Panel, Home, Spela, BudSystem,
+BiddingPractice, Button secondary).
+
+**🎉 Felrapportering i Spela kort KLAR & LIVE (2026-07-02, testsvit 1481,
+commit `05d922e`):** dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela
+given + auktionen + sticken följer med som förifylld **GitHub-issue**
+(etiketten `felrapport` skapad i repot). Kommandot **`/felrapporter`**
+(`.claude/commands/felrapporter.md`) läser rapporterna via `gh`, återskapar
+given som test (FACIT FÖRE FIX), lagar och stänger issuen. Byggt:
+`src/lib/felrapport.ts` (rapportformatet, test-låst i `felrapport.test.ts` —
+händerna i `parseHand`-format så given alltid kan återskapas exakt),
+`FelrapportDialog.tsx`, inkopplad i `Play.tsx` (resultatdialogen,
+omspelningsvyn och utpassad giv).
+
+**🎉 🧠 Avancerad kortspelsteknik KLAR & pushad (2026-07-02, testsvit 1474):**
+MED-scopet (slutkast/inkast + skvis) levererat i två steg, FACIT FÖRE FIX,
+ingen tjuvkik. Trappan + design-lärdomarna i `docs/bot-hjarna.md`.
+**Steg A** (`play-bot-technique.test.ts`): tre DDS-verifierade facit-givar
+bevisar att MC-fönstret EXEKVERAR teknikerna — A0 korsruff m. lönnkast
+(MC 6/6, tumregel 5), A1 slutkast (MC 5, tumregel 4; Östs VISADE ruterrenons
+låser ♦K hos Väst i samplingen = äkta inferens), A2 enkel skvis (MC 4,
+tumregel 3). **Steg B** = luckan FÖRE MC-fönstret (9–13 kort): B0-facit
+(9-korts skvis: Nords första sakning vid 9 kort avgör — rätt kast 6, ♠5 = 5)
++ **B1 kast-vakt** (`guardedDiscard`, `play-bot.ts`): spelförarsidans
+sakningar vaktar lastbärande kort via ärlig räkning i stället för "kasta
+lägst"; vakten ensam lyfte gamla 6-korts-referensen 2→3. Robust över seedar
+1–10. (Testräkningen: vitest 4 räknar varje it.each-fall — gamla "testsvit
+729" var samma svit i annan räknebas.) Villkorade B2 (cash-ordning) + Steg C
+(rätta räkningen) = ⚪ SENARE, byggs bara vid bevisat behov (facit-giv).
+
+### FAS 12 — UI (sista fasen i felsökningsplanen)
+
+FAS 12 UI levererat & live 2026-07-02, commits `a654c0e`→`b653808`. Tre trådar:
+1. ✅ **Felsökningsplanens punkt 54–56 KLARA** (2026-07-02, testsvit 729):
+   budförklaringar (54) + alert (55) fanns redan i `AuctionView` (klickbara bud,
+   A-markör + ALERT-badge). Byggd lucka (56): **kravnivå-etikett** i
+   förklaringspanelen — `FORCING_LABEL` (`rules.ts`, facit-låst) + färgkodad
+   badge, och panelen läser kravnivå + alert ur **ETT** `ruleInfo`-anrop (samma
+   regel, aldrig två källor). Verifierat i webbläsaren: "Krav 1 rond"+ALERT på
+   negativ dubbling, "Ej krav" på svag tvåöppning. Båda flikarna täcks
+   (budträning + spel går genom samma `AuctionView`).
+2. **Synrey-riktningen (ägarbeslut + 5 skärmdumpar 2026-07-02):** efterapa
+   Synrey Bridge så nära det går. **Steg 1 ✅ KLART & live** (commit `3aa3186`):
+   budlådan kopierad rakt av (NT/♠/♥/♦/♣-rutnät, X/XX/PASS/OK, välj→OK),
+   kompasspanel, auktionsrutnät m. färgchips + vit förklarings-popup,
+   fyrfärgslek (`suitColors.ts`), minimal budfas (⋮-meny, HCP-bricka, dolda
+   motståndare), omspelningen helt omgjord (alla händer uppe, trumf VÄNSTER
+   via `handSuitsTrumpFirst`, » spelar sticket ett kort i taget m. animation,
+   « bakåt, svart kontrakt-list). **Steg 2 ✅ KLART & live** (commit `adf647a`,
+   ägarverifierat mot Synrey-bilder): spelvyn — motståndare helt dolda,
+   kolumnträkarl, 👍-turmarkering, ⓘ/⋮-overlays, resultatdialog → omspelning;
+   `SideStack` = Ö/V-kort vridna 90° med valörindex IN mot mitten (Öst speglad
+   via `mirrorCorners`). **Steg 3 ✅ KLART & live** (commit `20c7166`):
+   (a) "spelas av Syd"-bekräftelsedialog efter budgivningen (auto-hoppet borta,
+   `confirmContract`); (b) budträningen på grönt filt (`AuctionGrid` m. teal
+   turmarkering, budalternativ som Synrey-chips i `BidOptions`, handsolfjäder +
+   HCP·TP-bricka, vitt facit-kort); (c) Budvisningen: auktionen på filt m.
+   `AuctionGrid`, alla bud som `BidChip`; (d) mobilfinish (kompass w-24 på
+   mobil, responsiva rubriker — alla vyer utan overflow på 375 px). Delade
+   `HandFan`; döda `AuctionView` borttagen (allt går via `AuctionGrid`).
+3. ✅ **Förfiningspasset (2026-07-02, ALLT live):**
+   (a) **Mörkt/ljust läge**: sol/måne-knapp i sidhuvudet, valet i localStorage,
+   följer systemet som standard; `dark:`-varianter på allt runt spelborden
+   (`src/lib/theme.ts`; klassen sätts i `index.html` FÖRE laddning = ingen vit
+   blink); **1 s-toning** vid växling (`.theme-fade`, aktiv bara under bytet).
+   (b) **Mobilmeny**: sidhuvudet en rad på <640 px, ☰ fäller ut menyn.
+   (c) **Ny startsida**: fyra klickbara lägeskort, Spela kort främst (grön ram).
+   (d) **Sök i Budsystem**: filtrerar sektioner medan man skriver, träffar fälls
+   ut, rubrikträffar gulmarkeras, träffantal visas.
+   (e) **`Felt.tsx`**: EN sanningskälla för gröna bordet (5 kopior ersatta).
+   (f) **♠ SVART överallt** (ägarbeslut): kort, chips, löptext — allt via
+   `suitColors.ts` (ljusare löptextvariant i mörkt läge, ALDRIG på korten).
+   (g) **Budvisningen HELT ombyggd** (ägarbeslut: "så likt Spela kort som
+   möjligt"): ETT bord, alla fyra händer öppna — N/S spegelsymmetri (md-kort +
+   mörka remsor), V/Ö sidostaplar, hp-brickor vid alla händer; auktionen i
+   mitten spelas upp bud för bud (700 ms, pulserande turmarkering, klick →
+   förklaringspopup m. kravnivå/ALERT); byggd med **LEVANDE budmotorn**
+   (`buildFullAuction` via `decideCall` — auktionen bjuds ALLTID klart,
+   "… auktionen fortsätter"-texten borta för gott); poäng/steg-för-steg +
+   hålfinnare hopfällda under bordet; ryms på EN mobilskärm. Tätare
+   `AuctionGrid` (delas av alla vyer).
+   **Känt:** `play-bot-smart.test.ts` slumpflaggar sällsynt (Monte Carlo,
+   ej relaterat) — ägaren startade stabiliseringsuppgift i egen session.
+
+## 2026-07-01
+
+### FAS 11 — Bot-hjärnan (kortspel/motspel-förfining)
+
+Pushad (testsvit 727, commit e20b7ac). **OMSTRUKTURERAD** (start 2026-07-01).
+Ägaren pekade ut den riktiga smärtan: bottarna tar t.ex. 10 stick
+där 13 var kalla — usel stickföring, "kryper under i onödan". FAS 11 (signaler)
+löser INTE det. Så FAS 11 blev ett större epos: **expertspel via ärlig enkeldummy-
+inferens** — bottarna ska läsa bordet (räkna de 40 HP:na, dra bort budvisning +
+fallna kort). **Järnprincip: ingen tjuvkik** (DDS ser alla händer = fusk; används
+i stället över *troliga* händer via Monte Carlo). **Färdplan i `docs/bot-hjarna.md`.**
+Trappan (test-låst, FACIT FÖRE FIX):
+- **Steg 1 ✅ KLAR & live** — ärlig stickföring i `play-bot.ts`: cash:a säkra
+  vinnare, kryp aldrig under. 1a (sang+trumf) + 1b (sidofärg när trumfen är
+  räknad via `card-counting.ts`: `unseenTrumpCount`). Testsvit 659.
+- **Steg 2 ✅ KLAR & live** — hand-modellen `hand-model.ts` (ryggraden):
+  tolkar auktionen till HP-spann + färglängder + renonser per plats. Del 1
+  (HP-liggare), del 2 (längder), del 3 (svaga öppningar + svararens golv 6+/12+).
+  Testsvit 680.
+- **Steg 3 ✅ KLAR & live** (2026-07-01, testsvit 697) — **Monte-Carlo-DDS**
+  (`monte-carlo.ts`). **3a** `sampleLayouts` delar ärligt ut de osedda korten till de
+  två dolda händerna så varje giv stämmer med hand-modellen (renonser/längd/HP,
+  skärpt av redan spelade kort per plats). **3b** `chooseCardMonteCarlo` kör DDS
+  ärligt på sampeln och röstar fram kortet med bäst snitt (max stick åt spelföraren,
+  min som motspelare). **3c** `botCardSmart` (`play-bot.ts`) inkopplad i `Play.tsx`:
+  MC i slutspelet (≤7 kort, seedad ur auktionen + `shownVoids`), annars tumregler
+  (öppningsutspel / tung giv / ett-lagligt-kort → fallback, tidigt spel orört).
+  Bevisat: 6-korts-slutspel 2→3 stick, facit nått utan tjuvkik.
+- **Svansen ✅ KLAR & live** (2026-07-02, testsvit 727): **pt 47–49** facit-granskning
+  av `signals.ts` mot §8 (14 facit-lås). **pt 50 signalavkodning** (`signal-decode.ts`):
+  motspelaren läser botens öppningsutspel → hand-modellen (längd ≥4 + touchérande
+  honnör när entydig); modellen fick per-färg-HP `suitHcp`. **"Varför?"-knapp**
+  (`botCardReasoned` + `Play.tsx`). **Webworker + tänjt MC-fönster** (`mc-worker.ts`,
+  adaptiv `mcBudget`, 7 → 8 kort, ingen UI-frys; uppmätt 7 kort ~2 s, 8 kort ~3,7 s).
+  pt 51 DDS-gräns = känd, bekräftad. **Kvar (SENARE):** avancerad teknik
+  (slutkast/inkast/squeeze), svårighetsnivåer.
+**Scope (ägarbeslut 2026-07-01):** MED = "Varför?"-knapp (botten förklarar draget)
++ avancerad teknik (slutkast/inkast/squeeze). SENARE = svårighetsnivåer.
+
+### FAS 10 — Försvarsbud (§7)
+
+Pushad (testsvit 644, commit 3208482). **🎉 KLAR** (2026-07-01, testsvit 644).
+Facit-granskning §7.1–7.6: alla verktyg (`overcalls.ts`, `doubles.ts`,
+`lebensohl.ts`, `dont.ts`, `defense-conventional.ts`) lästa mot systemboken →
+**svaren matchar facit**, väl testtäckta (overcalls 24, doubles 15,
+defense-conventional 14, dont 7, lebensohl 6). **Byggd lucka:** `advanceTwoSuiter`
+(`overcalls.ts`) – advancerns svar på partnerns tvåfärgsinkliv (Michaels / ovanlig
+2NT), som saknades helt. **Ägarbeslut 2026-07-01:** preferens till den av partnerns
+visade färger advancern är längst i (lika längd → högfärgen); **aldrig pass ostört**;
+contested → pass tillåtet (partnern rebjuder sin ospecificerade färg; Michaels över
+högfärg utan hf-fit → ostört 3♣ pass-eller-rätta). Facit i `overcalls.test.ts`.
+
+### FAS 9 — Passad hand: Drury
+
+Pushad (testsvit 635, i commit 3208482). **🎉 KLAR** (2026-07-01, testsvit 635, pushad).
+Facit-granskning §6.7: Drury-basen (`responses-drury.ts`) matchar systemboken exakt
+(2♣ = 3 trumf, 2♦ = 4+ trumf, 10–12 hp; öppnarens 2M signoff / 3M utgångsförsök /
+4M utgång). **Byggd lucka (auktionen dog förut):** `responderAnswerDrury` –
+svararens (passade handen) placering efter öppnarens Drury-återbud, inkopplad i
+`responderSecondBid` (`responder-rebids.ts`). **Ägarbeslut 2026-07-01:** accepterar
+3M-utgångsförsöket med **stödpoäng ≥ 11** (`pointsWithFloor(..., 'support')`, samma
+`max(hp, dummyPoints)`-omvärdering som Steg B/C – 4+ trumf + korta sidofärger lyfter
+toppen av 10–12), annars pass; 2M-signoff / 4M-utgång passas alltid. Sidoeffekt:
+signoff-auktioner stängs nu med svararens pass (`1♥–2♣–2♥–P`) i stället för att
+lämnas öppna. E2e `1♥–2♦–3♥–4♥`. Facit i `responses-drury.test.ts`.
+
+### FAS 8 — Slamsystem
+
+Pushat (testsvit 630). **🎉 KLAR** (2026-07-01, testsvit 630). Punkt 1 (MSS-slam) +
+facit-granskning §6.1–6.5 (testsvit 621) + punkt 2 (Gerber över 2NT) + punkt 3
+(Exclusion när renons rankar över trumf) — allt pushat (commit `340028a`).
+- ✅ **Punkt 3 Exclusion när renons rankar över trumf** (2026-07-01): nivåbailen
+  (`voidSuit >= trump → null`) borttagen ur `exclusionInvestigation`
+  (`slam-auction.ts`). Enda inkopplade fallet är **hjärter trumf + spaderrenons →
+  5♠** (lagligt över 3NT-relät). Öppnarens högsta stegsvar (steg 4) landar på
+  exakt **6♥**; vill svararen bara ha lillslam **passar** hon (i stället för att
+  olagligt bjuda om 6♥). Storslam-grenen bjuder 7♥ som förut. E2e
+  `1H–3♠–3NT–5♠–6♥–7♥`. Facit i `slam-auction.test.ts`.
+- ✅ **Punkt 2 Gerber över 2NT** (2026-07-01): `gerber2NTInvestigation` (`nt-slam.ts`),
+  inkopplad i `auction.ts` som 2NT-blocket (speglar 1NT-Gerber-blocket). En
+  balanserad slamsäker svarare (**13+ hp** mittemot 20–21 ≈ 33+) frågar ess med
+  **4♣ Gerber** i stället för att blint blåsa 6NT: stannar i 4NT om två ess saknas,
+  6NT med ett ess ute, storslam 7NT via 5♣-kungfrågan (≈37+). 11–12 stannar som
+  kvantitativ 4NT (`respondTo2NT`, orört). Delad `buildGerberSequence` med
+  1NT-grenen. E2e `2NT–4♣–4♠–6NT`. Facit i `nt-slam.test.ts`.
+- ✅ **Punkt 1 MSS-slam** (2026-07-01): slamfortsättning efter `1NT–2♠–3♣/3♦`
+  (minorfit garanterad). Ny `mssMinorFitContinuation` (`slam-auction.ts`),
+  inkopplad i `auction.ts`; döda 4-minor-grenen bort ur `responder-rebids.ts`.
+  **Ägarbeslut: NT om säkert, annars minor.** NT-säkert (alla hf har A/K/Q +
+  ingen svararrenons) → 6NT (33–36) / 7NT (37+), för svagt → 3NT. NT osäkert
+  (gapande hf / renons) → minor-slam via `slamInvestigation` (cue→RKC→6/7m), för
+  svagt → 5m. Hela arsenalen (cue/RKC/Sjöberg). E2e `1NT–2♠–3♣–4NT–5♦–6NT`.
+- ✅ **Facit-granskning §6.1–6.5** (2026-07-01): alla sex slamverktyg i `slam.ts`
+  lästa mot systemboken → **inget fel i svaren**, koden matchar facit exakt (1430
+  RKC, trumfdamfråga, cue-bud, Sjöbergs 5NT, Gerber ess/kung, Exclusion). Täppte
+  två luckor i facit-LÅSNINGEN (tester): Gerber kungfrågan (3 grenar olåsta) +
+  Exclusion steg 3–4. La till 6 facit-lås i `slam.test.ts`. Ingen kodändring.
+
+### FAS 6 + 7 (testsvit 612)
+
+FAS 6 (facit + `npm test`):
+- ✅ **26 Minor-regeln** verifierad + facit-låst (3-3♣/4-4♦/5-5♦/längsta minorn).
+- ✅ **27 Inverterade minorer:** **svararens fortsättning byggd**
+  (`responderRebidAfterInvertedMinor`) – auktionen dog förut vid öppnarens återbud.
+  Placerar mot 3NT (2NT→3NT m. 11+, stopp-visning→3NT om täckt annars 5m, 3m
+  minimum→3NT bara m. 13+ & båda hf stoppade, 3NT→pass). E2e `1♦–2♦–2NT–3NT`.
+- ✅ **28 Svaga hoppskift** verifierade. **Ägarbeslut:** inget 1♦–3♣ (behåll 1NT).
+
+FAS 7 (facit + `npm test`):
+- ✅ **29 Svaga tvåor + 30 Ogust** verifierade (redan väl täckta).
+- ✅ **31 Spärröppningar:** **öppnarens feature-visning byggd** (`rebid: feature`,
+  maximum utan stöd visar yttre A/K). **Ägarbeslut:** svag stödhand pressar INTE
+  (bara utgångsvärden höjer).
+- ✅ **32 Regel 2-3-4 (ägarbeslut, öppningsstruktur):** kvalitetsgrind på
+  spärröppningen (`topHonorCount` i `openings.ts`), sårbarhets-modulerad.
+  Topphonnörer A/K/Q: 3-läget ej sårbar ≥1/sårbar ≥2; 4-läget valfri/≥1. Skräp
+  spärrar aldrig. **12 HP-golvet orört.** Facit i `openings.test.ts`.
+
+### FAS 5 — NT-systemet
+
+**🎉 KLAR (2026-07-01, testsvit 587, pushat+deployat).**
+Punkt **19–25 klara**. FAS 5 var facit-granskning + luckor.
+- ✅ **19 Stayman:** lagad inbjudnings-5-4-lucka (naturlig 2♥/2♠) + **garbage
+  Stayman** (svag exakt 4-4 hf + kort klöver → 2♣, passar svaret). Ägarbeslut.
+- ✅ **20 Smolen** verifierad. ✅ **22 Texas** verifierad.
+- ✅ **21 Jacoby-transfer:** kärnan verifierad + **5-5-högfärgsschema** (ägarbeslut:
+  transferriktningen kodar styrkan – svag→2♣, inbj→2♦→2♠, GF→2♥→3♥).
+- ✅ **24 2NT-systemet:** turerna 1–3 verifierade + **svararens turn 4 byggd**
+  (`responderRebidIn2NTAuction`: minorfit→utgång, ingen fit→3NT, Smolen över 2NT).
+- ✅ **25 3NT-öppningen** verifierad.
+- ✅ **23 Minor Suit Stayman:** svararens turn 4 byggd
+  (`responderRebidIn1NTAuction`, case `Minor Suit Stayman`). Fit hittas alltid när
+  öppnaren visar en minor (svararen har alltid 4+ i båda). Ägarbeslut: **3NT som
+  standard**, höj minorn (`Minor Suit Stayman: höjning`) **bara med slamintresse
+  ~16+**; ingen fit→3NT. Fortsatt cue/RKC + öppnarens 3♥/3♠-stopp & 4♣/4♦-max =
+  **FAS 8**. Facit i `responder-rebids.test.ts`.
+
+### FAS 4 (autonom körning – besluten för granskning)
+
+- ✅ **Punkt 16 — HP/TP/LTC-karta:** motorn kör HP + TP; **LTC finns inte**.
+  Beslut: inför inte LTC (TP täcker det). Karta i `docs/handvardering.md`.
+- ✅ **Punkt 17 — stödvärdering verifierad:** fitpoäng/distributionsvärde/kortfärger
+  isolerade + låsta (`evaluation.test.ts`); Bergens asymmetri bekräftad.
+- ✅ **Punkt 18 — slamvärdering:** `wastedHonorsOppositeShortness` nedvärderar
+  K/D mot partnerns kortfärg (ess behålls), inkopplat i `slamInvestigation` via
+  Jacoby-kortfärg. Knyter ihop FAS 3-svansen.
+- ✅ **Steg C-2 — minorhöjningar på TP:** längd/sidofärg lyfter, aldrig korthet
+  (minorfit siktar 3NT). `responses.ts`.
+- ✅ **Steg C-3 — sang-accepter på TP:** 3NT-accepter på startpoäng. `rebids.ts`.
+- ✅ **Steg D — sang-nudge (komplett):** bra 14 (ingen 5-korts färg) → 1NT
+  (`openings.ts`). 5-korts minor öppnar minorn, 5-korts major öppnar 1M.
+  **Sårbarheten modulerar tröskeln:** ej sårbar = aggressiv (startp. ≥15), sårbar
+  = passiv (≥16). `isVulnerable` trådad via `buildAuction`. Facit i `openings.test.ts`.
+
+### FAS 3
+
+- ✅ **Punkt 11 — Gemensam fitklassificering** (klar 2026-07-01): `classifyFit`
+  (`evaluation.ts`) ger EN sanningskälla för fitens kvalitet: `none / two / three /
+  good-three / four / five-plus`. "Bra 3-stöd" = 3 trumf med trumfhonnör (E/K/D)
+  ELLER kort sidofärg (singel/renons). Facit i `evaluation.test.ts`.
+- ✅ **Punkt 12 — Bergen aldrig med 3 stöd** (klar 2026-07-01): Bergen-grinden går
+  nu via `classifyFit(...).hasFourPlus` i `respondToMajor` (`responses.ts`) →
+  strukturellt omöjligt att fyra Bergen/Jacoby/splinter med 3 stöd. Intervall
+  bekräftade (3♣ = 7–9, 3♦ = 10–12, 3M = 0–6). Facit i `responses.test.ts`.
+- ✅ **Punkt 13 — Jacoby 2NT** (klar 2026-07-01): rätt stöd (4+ via `hasFourPlus`),
+  "ingen kortfärg" garanteras av ordningen (splinter-kollen först → hand med
+  singel/renons splintrar i stället). Facit i `responses.test.ts`.
+- ✅ **Punkt 14 — Splinter kortfärg** (klar 2026-07-01): efter tvetydig splinter +
+  relä visar svararen singelns färg **upp-the-line** (ägarbeslut: billigaste steg =
+  lägsta möjliga kortfärg, 4♣/4♦/4♥) via `responderRevealSplinterShortness`.
+  Renons går redan via Exclusion. Öppnarens honnörsnedvärdering mot kortfärgen =
+  FAS 4 punkt 18. Hela kedjan verifierad (1♥–3♠–3NT–4♦).
+- ✅ **Punkt 15 — Bergen game try** (klar 2026-07-01): triggern (1M–2M–2NT) fanns
+  och använder rätt mått (**TP/Bergenpoäng 15–17**, ej rå HP/LTC). Svararen svarar
+  nu (fanns inte förut) enligt **Bergens äkta variant** (ägarbeslut): visa KORTHET
+  upp-the-line (3 sidofärg), annars platt 3M signoff / 4M accept via
+  `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
+
+---
+
+## 2026-07-05 → 2026-07-07 — äldre NU-lägesrapporter (flyttade från CLAUDE.md 2026-07-07)
+
+> **OBS:** ögonblicksbilder från när de skrevs — statusrader som "EJ PUSHAT",
+> "#29 kvar öppen" osv. var sanna DÅ men är inaktuella nu (allt nedan är
+> pushat & live; felrapport #1–#34 är stängda eller medvetet uppskjutna).
+> F1-familjernas beskrivningar av kontroll-gates/slamzon på parets faktiska
+> poäng beskriver KIK-ERAN — ersatta av de ärliga slamportarna 2026-07-07
+> (mergepunkt `1ce2982`, se budsystem.md §6).
+
+**F1 — bredda slam-utforskningen (PAUSAD 2026-07-07 kväll, se NU ovan).** Kom ur ägarens
+budsystem-djupdykning (två färgkodade listor, se chatt): slam var bara inkopplat
+i fem auktionsformer; hela GF-familjer (2♣, hoppskift/reverse, 1NT-återbud, 2/1
+med fit) saknade slam-drivning. En probe (40 000 givar, DD-lösta) delade upp
+missarna i **fyra familjer: A** (efter 1NT-återbud), **B** (efter stark 2♣),
+**C** (efter öppnaren visat extra: hoppskift/hopphöjning/reverse — störst), **D**
+(Jacoby 2NT-läcka: hängande cue). Byggs facit-först, en familj i taget.
+**Familj A HELT KLAR** (jämn del LIVE, obalanserad del byggd & testad — se PCD-status):
+efter `1m–1M–1NT` driver svararen med slamvärden (≥33 stödpoäng): **jämn** →
+Gerber 4♣ → 6NT (`gerberRebidInvestigation`); **obalanserad med färgfit** (6+ egen
+hf / 8+ korts fit) → trumf via `familyAFitTrump` → `slamInvestigation` (skipCueRound
++ kontroll-gate) → 6 i färgen. Båda i `buildAuction`; `nt-slam.ts` + `slam-auction.ts`.
+Facit `auction-slam-1nt-rebid.test.ts` (2 givar: 6NT + 6♣, DD-verifierade). budsystem.md
+§5.7 + §9.
+**Familj D KLAR (slam-quirken stängd):** den hängande cuen (Jacoby 2NT → cue → RKC
+lade två svararbud i rad → live-lagret passade delkontraktet) är lagad i
+`slamInvestigation` (`slam-auction.ts`): cue-ronden läggs bara som ett KOMPLETT par
+(svarare + öppnare), annars rakt på 4NT. Probe: **0 "två-i-rad" i 200 000 auktioner**
+(var >0). Facit `auction-slam-jacoby-cue.test.ts` (1♥–2NT → 7♥). Den parkerade
+slam-quirken är därmed LÖST. **1087 test gröna, tsc rent.**
+**Familj C — HOPPHÖJNING KLAR (2026-07-07):** efter `1x–1M–3M` (öppnaren
+hopphöjer svararens högfärg, 16–18 + 4 stöd) är trumfen redan överenskommen →
+`buildAuction` kopplar in `slamInvestigation` (svararens hf trumf, cue-rond som
+Jacoby-fiten, INTE skipCueRound) efter hopphöjningen. Portar: slamzon (≥33
+stödpoäng), ≥4 nyckelkort, `pairControlsSideSuits` (motorn går ändå
+deterministiskt vidare till 4NT → gaten krävs som #29). Probe (300 000 givar,
+DD): 41 slamzon-stopp av 1 563 hopphöjningar. Make-rate-probe (250 000): drev slam
+328 ggr, 16/18 DD-lösta höll (2 bet på exakt ett stick, finess) = 88,9 %. Facit
+`auction-slam-jumpraise.test.ts` (1♥–1♠–3♠ → 6♠, 1♣–1♠–3♠ → 6♠, båda DD 13).
+budsystem.md §5.2 + §9. **1089 test gröna, tsc rent.**
+**KVAR i F1:** Familj B (2♣), C:s systerfall **reverse** (`1♣–1♥–2♦`) + **hoppskift**
+(`1♦–1♠–3♣`) — störst men rörigare (ingen överenskommen trumf; vissa reverse-
+auktioner kollapsar t.o.m. under utgång, eget problem). Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-07): tre mobil-UI-fixar (ägarstyrt SIDOSPÅR, INTE F1).**
+Ingen budlogik rörd; desktop helt oförändrat via `sm:`-brytpunkten (≥640px).
+(1) **Större spelkort på mobil** (mergepunkt `1760ea3`): Syds hand större (48×64);
+ny responsiv `smPlus`-storlek i `PlayingCard.tsx` (40×56 mobil / 28×40 desktop)
+för **träkarlen** (norr, `SuitColumns` i `Play.tsx`) + **sidohänderna Ö/V**
+(`SideStack.tsx`, både spelvyn och Budvisningen). Träkarlens kolumner glesare på
+höjden (24px syns/kort mot 12 förr, ägarbegäran). Syds utfällning pressar ihop
+nedtonade färger på mobil så inga kort klipps utanför kanten. (2) **Budförklaringens
+kryss** (`AuctionGrid.tsx`, mergepunkt `642ab36`): krysset kunde knuffas utanför
+bild (rubrikraden överflödade) → förankrat absolut i bubblans övre högra hörn +
+rubriken radbryter; **tryck var som helst utanför bubblan stänger** (genomskinlig
+helskärmsyta); krysset 36×36 med **iPhone-glaskänsla** (backdrop-blur, ljus kant,
+glansdager). Gäller även ⓘ-rutan under kortspelet (samma komponent). Hela sviten
+grön, tsc rent, båda Vercel-deployerna gröna.
+
+**Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
+**#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
+på 28 hp) — `raiseWithFit` (`auction-live.ts`) räknade "inbjudande hopp" = partnerns
+nivå +2. Nu kapas inbjudande/enkla höjningar vid utgångsnivån och advancern passar
+när partnern nått utgång. Facit `auction-advancer-cap.test.ts`. **#32 (budgivning):**
+ägarregel för **6-5** (6-korts lågfärg + 5-korts högfärg) — 12–15 öppnar högfärgen,
+16+ öppnar lågfärgen (reverse:ar in högfärgen); `openings.ts`, facit i
+`openings.test.ts`, budsystem.md §3. **#32-spelfelet + #34-försvaret = UPPSKJUTNA**
+(spelmotor-kvalitet, se ⚪ SENARE + `docs/bot-hjarna.md`; ägarbeslut 2026-07-07).
+**1084 test gröna, tsc rent.** #32/#33/#34 stängda. Se 👀 Bevaka.
+
+**Föregående (2026-07-07): slam efter hopp-återbud i minor (STÄNGER #29).**
+`/felrapporter` #29 ("hur hittar vi slammen?"): N ♣AQJT94 öppnade 1♣, S svarade
+1♠, N hoppade 3♣ (16–18, 6+ klöver) → boten stannade i **3NT** trots en **KALL
+slam** (6♣/6NT/7 = 13 stick DD). Nu driver paret slam: efter `1m–1M–3m` med
+svararens fit (3+ i minoren) kopplar `buildAuction` in `slamInvestigation`
+(minoren trumf, `skipCueRound`) → 4NT RKC → 6♣. Cue-ronden hoppas över (ingen
+explicit trumf-överenskommelse före frågan), i stället en **kontroll-gate**
+(`pairControlsSideSuits`: ess eller korthet i varje sidofärg) som hindrar
+RKC-blast med två snabba förlorare i en objuden färg (bevisat i probe: sänkte
+nådda slam 85→63, tog bort de grova bet-slammen). Slamzon (≥33) + nyckelkort
+(≥4/5) hindrar överbud på icke-slamhänder. Facit `auction-slam-jumprebid.test.ts`.
+budsystem.md §9. **1080 test gröna, tsc rent.** #29 stängd. Se 👀 Bevaka.
+
+**Föregående (2026-07-07): systems-on över 2♣–2♦–2NT.**
+Efter öppnarens 2NT-återbud (22–24) använder svararen nu **Stayman (3♣) +
+transfers (3♦/3♥) + Texas** precis som mot en naturlig 2NT-öppning, för att
+hitta 4-4- och 5-3-högfärgsfit i stället för att blint bjuda 3NT. Svararen bjöd
+2♦ (0–7 hp) → poänggränserna sänks två steg (utgång från 3 hp). Återanvänder
+2NT-svarsmaskineriet via en `openerMin`-param (default 20 → naturlig 2NT
+byte-identisk): `respondTo2NT`/`openerRebidAfter2NTResponse`/
+`responderRebidIn2NTAuction`, hopbyggt i `strong-2nt-systemson.ts`, inkopplat i
+`buildAuction`. Effekt: **~30 % av alla 2♣–2♦–2NT når nu 4♥/4♠** (förr 3NT); svaga
+5-färger signar av 3♥/3♠. Facit i `auction-2c-gameforce.test.ts`. budsystem.md §9.
+**1079 test gröna, tsc rent.** Se 👀 Bevaka.
+
+**Föregående (2026-07-07): 2♣-öppningen håller sitt utgångskrav.**
+Kom ur `/felrapporter` #29 ("hur hittar vi slammen?"): en utforskningsprob
+(300 000 givar) visade att **~64 % av alla ostörda 2♣-öppningar dog i
+DELKONTRAKT** (82 % av stoppen hade 23+ hp = rena kravbrott) — större fynd än
+#29. Roten: `auctionForce` (`auction-live.ts`) spårade 2/1 + rondkrav men INTE
+2♣-öppningens game-force (`buildAuction` bygger bara ett par bud av 2♣-linjen
+och överlämnar resten, som passades bort). Fix (facit-först): (1) ny 2♣-gren i
+`auctionForce` (game-krav tills utgång; undantag `2♣–2♦–2NT` = inbjudande);
+(2) `respondToStrong2NTRebid` (off-book-fallback) + systems-on on-book (ovan).
+Delkontrakt-andelen föll **63,9 % → 1,7 %** (resten legitima). Mergepunkt `b20d81f`.
+
+**Öppna felrapporter: INGA.** #28 (4♠ ej bugg), #29 (slam efter hopp-återbud),
+#32 (6-5-öppning byggd; spelfel uppskjutet), #33 (7♦-hoppet kapat), #34 (försvar
+uppskjutet) — alla STÄNGDA 2026-07-07. **NU är åter öppet — ägaren väljer nästa
+sak** (järnregeln: exakt en).
+
+**Öppna felrapporter efter detta:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
+4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — ägaren tog
+2♣-fixen (ett symptom) först; slam-letningen efter starkt hopp-återbud väntar på
+ägarbeslut om riktning. **#32/#33/#34** (spelfel/budgivning) ännu ej lästa.
+**NU är åter öppet — ägaren väljer nästa sak** (järnregeln: exakt en).
+
+**Senast klart & LIVE (2026-07-06, mergepunkt `b1fdd6c`): två UI-fixar.**
+(1) **Tunn kortram** — 1px svart med **20 % opacitet** (`border-black/20` på
+`base` i `PlayingCard.tsx`) → mjuk grå separation mellan korten. Ägarbeslut som
+ersätter det ramfria beslutet 2026-07-03; opaciteten valdes efter att ägaren såg
+helsvart och bad om "gråare, inte lika solid". (2) **Mjukare Auto-Claim** —
+resultat-/claimrutan poppade förr upp blixtsnabbt; nu tonar bakgrunden in
+(`overlay-in` 200ms) och rutan tonar in + lyfts en aning (`dialog-in` 260ms),
+nya keyframes i `index.css`, klasser på overlayn i `Play.tsx`; respekterar
+`prefers-reduced-motion`. Rena className/CSS-ändringar, ingen budlogik rörd.
+1071 test gröna, tsc rent, Vercel-deploy grön.
+
+**KVAR av ägarens 4-punktslista (2026-07-06 — han bad förbereda alla fyra, tog
+punkt 2+4 nu):** **Punkt 1** = fler budträningsgivar + en "Vill du träna något
+speciellt?"-dropdown (data i `src/data/exercises/*.json` + `EXERCISES_BY_THEME`
+i `bidding.ts`; facit bör knytas till motorns egna svar så det aldrig lär ut fel).
+**Punkt 3** = sondera budsystemet på djupet (STORT eget spår: håller reglerna,
+off-book-tolkning "vad kan detta bud betyda", R2:s datadrivna detektorkedja).
+Ägaren väljer vilken som blir nästa 🔵 NU.
+
+**Senast klart & LIVE (2026-07-06): `/felrapporter` — #31 + #30 lagade & stängda.**
+- **#31 (svagt hoppskift avskaffat):** Nord hoppade till 2♥ på 1♦ med ♠7 ♥KT6432
+  ♦Q4 ♣A986 (9 hp). Ägarprincip: **när partnern öppnat håller svararen budgivningen
+  LÅG** — bjud nya färgen billigast (1♥, rondkrav), ett hopp berövar partnern
+  utrymme (t.ex. 1NT). `respondToMajor`/`respondToMinor` (`responses.ts`) faller nu
+  till 1-lägessvaret; öppnarens hantering av ett MANUELLT hoppskift orörd.
+  Mergepunkt `86a295c`. Docs: budsystem.md §4.1/§4.2/§9.
+- **#30 (stark jämn hand når utgång efter minorhöjning i konkurrens):** Väst (19 hp
+  jämnt) nådde bara 2♥ efter `1♦–(1♠)–2♦`. Två fixar (ägarbeslut, båda vägarna):
+  (1) **öppnings-uppgradering** — jämn 19 med startpoäng ≥20 öppnar **2NT**
+  (`openings.ts`); fixar den rapporterade given (2NT→3NT). (2) **återbudsfix** —
+  `openerStrongNTAfterMinorRaise` + `answerOpenerNTInvite` (`auction-live.ts`): 3NT
+  (20+) / 2NT-inbjudan (18–19) med stopp, höjaren accepterar med maximum. Mergepunkt
+  `603f86c`. Docs: budsystem.md §3, §5.10, §9. Se 👀 Bevaka.
+- **1071 test gröna, tsc rent, båda deployerna gröna.**
+
+**KVAR ÖPPNA FELRAPPORTER (ägaren sköt upp 2026-07-06 — ta en i taget vid
+`/felrapporter`):** **#28** ("aggressivt av syd, analysera" — Syd bjöd 4♠ med
+renons + 5-5; bedömningsfråga) och **#29** ("Annat — hur hittar vi slammen?" i N/S;
+förbättringsfråga). Båda är analys/bedömning snarare än tydliga buggar.
+
+**Senast klart & LIVE (2026-07-05, mergepunkt `1a2da2e`): felrapport skickas
+DIREKT utan att öppna GitHub** (var SENARE-punkten "PAT-i-localStorage"). Ägaren
+sparar en snäv fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN
+gång i Inställningar; då POST:ar `FelrapportDialog` rapporten direkt via GitHubs API
+(`submitFelrapport` i `src/lib/felrapport.ts`), knappen blir "Skicka rapport ✓" +
+kvitto. Utan nyckel = oförändrat (öppnar förifylld GitHub-sida). Nyckeln lagras i
+`src/lib/github-token.ts` under egen nyckel `rebidz:felrapport-token` (utanför
+`learnbridge:`-prefixet → "Nollställ framsteg" rör den ej); samma nyckel funkar på
+flera enheter. Fel → svenskt meddelande + reservknapp "Öppna på GitHub →". 1061
+test gröna, tsc rent, deploy grön, **bevisat skarpt av ägaren (issue #31)**.
+
+**Del 3 (PWA) KLAR & LIVE (2026-07-05):** appen är nu installerbar ("Lägg till på
+hemskärmen" på iPhone/Android, egen guld-spader-ikon på emerald) + fungerar
+offline. `vite-plugin-pwa` (autoUpdate) genererar service worker + `manifest.webmanifest`
+vid Vercel-bygget; `index.html` har apple-touch-icon + iPhone-taggar; ikoner i
+`public/` (192/512/maskable/apple-touch). Verifierat i webbläsaren mot skarpa
+bygget (SW registrerad scope `/`, manifest laddat, inga konsolfel). 1052 test
+gröna. Mergepunkt `565bbc8`. Ikonerna genererades ur `public/favicon.svg`-designen
+(engångsskript m. `sharp`, borttaget efteråt; `sharp` ej kvar i deps).
+**Uppföljning (2026-07-05, mergepunkt `43640e2`):** sidhuvudet fick
+`pt-[env(safe-area-inset-top)]` (`Layout.tsx`) – i PWA-helskärm på iPhone låg
+toppen annars under statusraden (klocka/batteri). Marginal = enhetens statusrad
+(0 i vanlig webbläsare). Bekräftat lagom av ägaren på hans iPhone. `<main>` hade
+redan motsvarande safe-area i botten.
+
+**Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
+Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
+learn-bridge-projektet (Production). `rebidz.com` = huvudadress (visar appen,
+HTTPS ✅); `www.rebidz.com` → 308 till rebidz.com. Ren Vercel-konfig, ingen
+kodändring. **Nya publika adressen att dela = https://rebidz.com** (gamla
+`learn-bridge-topaz.vercel.app` lever kvar som reserv).
+
+**Del 1 KLAR & LIVE (2026-07-05):** hosting flyttad från GitHub Pages till
+**Vercel** (repo & felrapport-URL stannar `Learn-Bridge` på GitHub). Konkret
+gjort: Vite `base` `/Learn-Bridge/` → `/` (`vite.config.ts`); vakttestet
+`src/deploy-config.test.ts` låser nu `/`; ny `vercel.json` kör test-/typgrinden
+(`npx tsc && npm test && npm run build`) så trasig kod aldrig går live — samma
+skydd som förr; gamla Pages-workflowen (`deploy.yml`) INAKTIVERAD (push-triggern
+borttagen, `workflow_dispatch`-endast, filen kvar som referens). 1052 tester
+gröna. Mergepunkter `79fd1d0` (flytten) + `18efe8b` (Pages av).
+
+**⚠️ Två ärliga varningar (upprepa för ägaren):** (1) Steg A förbättrar INTE
+boten — bara var appen bor; bot-utvecklingen är ett SEPARAT framtida NU. (2)
+`/felrapporter` överlever flytten OFÖRÄNDRAT (`src/lib/felrapport.ts` bygger bara
+en länk till `github.com/PGreen90/Learn-Bridge/issues/new`; repot stannar).
+
+**Föregående NU (bredare flerronds-konkurrens A+B+C, R1 Fynd #2 sista delbit) är
+KLAR, PUSHAD & i synk med origin** (git verifierat 2026-07-05 — den gamla "EJ
+PUSHAT"-noten nedan är inaktuell). Ägaren överrörde järnregeln medvetet och bad
+om alla tre bekräftade fel i EN session.
+
+**Senast klart (2026-07-05, EJ PUSHAT — inväntar PCD): bredare flerronds-
+konkurrens (A+B+C).** Metod: en utforskningsprob körde 4000 slumpgivar genom hela
+den levande auktionen, plockade ut äkta flerronds-konkurrenser och blottade tre
+bekräftade fel (verkliga händer lästa som facit). Alla tre byggda facit-först:
+- **A — öppnaren säljer i rond 2 när partnern PASSADE inklivet + RHO konkurrerade**
+  (`1♣–(1♠)–P–(2♠)`): ny `openerReopensAfterPartnerPass` (`auction-live.ts`) – egen
+  6+ färg → tävla; 15+ & kort i deras färg → återöppnings-X. Vakt: ingen
+  motståndar-X + motståndarna ≥2 kontraktsbud (skiljer från felrapport #23).
+- **B — öppnaren säljer i utpassningssitsen** (`1♠–(2♥)–P–P`): partnern trap-passar,
+  öppnaren återöppnar. `openerReopensBalancing` (`auction-live.ts`) – kort i deras
+  färg → X (partnern konverterar till straff), egen 6+ → rebjud, 15+ → X. **Kärnfix
+  i `auction.ts`:** `buildAuction` STÄNGDE linjen (`open=false`) så snart svararen
+  passade ett inkliv → contested-blocket hoppades över. Nu `finish(true)` (öppen,
+  som takeout-X/Michaels-grenarna) → decideCall äger fortsättningen. Invariant-testen
+  hoppar över öppna linjer → inget on-book-brott.
+- **C — advancern tävlar upp till fiten** (`1♠–(2♥)–2♠–?`): ett 2-läges inkliv lovar
+  6+ → 3-korts stöd = 9-korts fit. `advancerCompetesToFit` (`auction-live.ts`, före
+  off-book-svaret) – tävla 3M (lagen om totala stick), 13+ stödpoäng → utgång, svag
+  → pass. (Skilt från `raiseWithFit` som krävde 4-korts stöd och hade bjudit 4M.)
+
+Facit: `auction-opener-reopen-passed.test.ts` (A, 3), `auction-opener-reopen-
+balancing.test.ts` (B, 4), `auction-advancer-compete-fit.test.ts` (C, 2) – alla röda
+före fixen. **1052 tester gröna, tsc rent.** budsystem.md §5.9 + §7.1. Verifierat
+end-to-end i proben: #159→3♣, #56/#552→2♥ dubblat (straff), #263→3♥. Se 👀 Bevaka.
+
+**Kvar/öppet efter detta:** R2:s förslag att göra detektorkedjan i `decideCall`
+datadriven (~28 steg nu) står kvar som ett EGET framtida NU – väg in det innan fler
+konkurrenslägen staplas på (`docs/status.md` "Budmotorns tre auktionslager").
+
+---
+**Föregående NU-historik (KLARA & LIVE):**
+Föregående NU ("låna en kung" i balansering, §7.1) är **KLAR & LIVE**.
+
+**Senast klart & LIVE (2026-07-05, commit `f36d058`, deploy grön):
+"Låna en kung" i balanseringssits (§7.1).** I utpassningsläget (deras
+1-lägesöppning + två pass) är partnern markerad med värden, så §7-inklivets
+HP-golv sänks med **en kung (−3)**: enkelt inkliv 8→5, upplysnings-X 12→9 (form
+10→7), 1NT-inkliv 15–18 → **11–14** (klassisk återöppnings-1NT). **Flat HP-lättnad
+— §7-lagret behåller rå HP; TP-i-§7 avvisades medvetet (ortogonalt: TP=formspak,
+kung=sitsspak, och TP lyfter inte de PLATTA händer balansering finns till för).**
+`overcall` (`overcalls.ts`) fick en `balancing`-flagga; trådad från BÅDE
+`maybeOvercall` (`auction-live.ts`, live) OCH `buildAuction` (`auction.ts`,
+on-book balanseringsgren — annars passades given ut med open=false och nådde
+aldrig live). Direkt sits **exakt oförändrad** (relief=0). Facit
+`overcall-balancing.test.ts` (6: enhet + integration; direkt-sits-kontroller
+bevisar seat-specificiteten). 1043 tester gröna, tsc rent, deploy grön.
+budsystem.md §7.1. Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-05, commit `112f0fc`, deploy grön): Öppnarens
+rond-2 i störd auktion efter partnerns NYA FÄRG / 1NT (§5.8).** Systerfallet till
+delbit 6 (§5.4, som gällde partnerns *höjning*). Roten
+(bevisad i utforskning): så snart motståndarna bjöd om över partnerns fria svar
+passade öppnaren bort ÄVEN starka händer (rondkravet är tekniskt av då). Ny
+detektor `openerRondTwoInCompetition` (`auction-live.ts`, före `maybePenaltyDouble`
++ off-book-svaret). Ägarbeslut 2026-07-05: **visa extra med CUE i deras färg +
+naturliga hopp**; trösklar speglar delbit 6 (**15+ = extra, 18+ = utgång, 6:e
+kortet = tävla**). 18+ högfärgsfit → 4M; 18+ jämn m. stopp → 3NT; 15–17 högfärgsfit
+→ inbjudande hopphöjning; 15+ i övrigt → **cue** (hitta rätt utgång); minimum m.
+egen 6+ färg/fit → tävla; annars pass. Styrka = stödpoäng med fit, annars ren hp
+(så en lång svag färg inte blåser upp handen). Facit
+`auction-opener-competition-response.test.ts` (9, röda före fixen). 1037 tester
+gröna, tsc rent, deploy grön. Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-05, commit `a989a08`, deploy grön): Störda krav
+(§5.5).** Steg 1 hedrade krav bara OSTÖRT; nu även i KONKURRENS. `auctionForce`
+(`auction-live.ts`) fick en egen gren (`competitionForce` + `isJumpBid`): ett
+**fritt bud (ny färg, ej hopp, ej cue)** och en **reverse** i störd auktion är
+**RONDKRAV** — partnern tvingas svara via `honorForce` i stället för att passa.
+Aldrig utgångskrav i konkurrens (ägarbeslut: ett inkliv "lånar" utrymme → 2/1
+lovar värden men ej garanterad utgång). Passad svarare / hopp / cue undantas.
+Facit: `foundation-forcing-competition.test.ts` (störda A/B/C, röda före fixen) +
+`.stress.test.ts` (10 000 seedade givar; rondkravet utlöstes 146 ggr, passades
+aldrig). Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-05, commit `ca04175`, deploy grön): New Minor
+Forcing (§5.7).** Efter `1m–1M–1NT` bjuder svararen (5-korts högfärg + 11+) den
+oanvända lågfärgen (2♣/2♦, konstgjort krav); öppnaren svarar (5 prioriteringar,
+passar aldrig); svararen placerar (13+ når alltid utgång). `responder-rebids.ts`
+(`newMinorForcingBid`, `responderPlaceAfterNMF`), `rebids.ts` (`openerAnswerNMF`),
+`auction-live.ts` (`nmfToAnswer` + `nmfPlacementToAnswer` tvångssvarare). Facit
+`new-minor-forcing.test.ts` (21). End-to-end: `1♣–1♥–1NT–2♦–3♥–4♥` hittar 5-3-fit.
+
+**Senast klart & LIVE (2026-07-05, commit `eca5ff0`): budsystemets grunder steg 1.**
+`auctionForce`/`honorForce` → krav passas aldrig OSTÖRT (2/1, ny färg, reverse);
+`raiseWithFit` → minorfit + utgångsvärden når utgång (3NT/5m). Facit
+`foundation-forcing.test.ts` A–D. budsystem.md §5.5+§5.6. **Detta NU utvidgar det
+till konkurrens.**
+
+---
+**HISTORIK nedan (tidigare sessioner, KLARA & LIVE — behandla ej som pågående):**
+Kontraktväljaren (KLAR & LIVE):
+
+**ALLA TRE DELSTEG BYGGDA & VERIFIERADE (2026-07-05, ej pushat):**
+- **(1) Filtret + motor-fix.** `contract-target.ts` (`matchesTarget` +
+  `simulateAuction`). **Under bygget upptäcktes att motorn ALDRIG nådde 5♣/5♦**
+  (0 av 30 000) – äkta lucka, inte att kontraktet är ovanligt. **Lagat**
+  (ägarregel: utforska bara med en svag färg): svararen med lågfärgsfit + en
+  osparrad färg går inverterad 2m i stället för att chansa 3NT och landar i 5m
+  (`responses.ts` `hasWeakSideSuit`, `responder-rebids.ts` inverterad-minimum →
+  5m). Nu nås 5♣/5♦ ~1 per 54. `budsystem.md` §4.2 uppdaterad.
+- **(2) Sökaren.** `dealForTarget` (slumpa tills match, tak 60 000, null-fallback).
+- **(3) Menyn i `Play.tsx`.** "Mål:"-pill → `ScenarioPicker` (7 scenariokort),
+  batchad sökning (300/tick, setTimeout → fryser aldrig) med `SearchOverlay`
+  ("Söker … N prövade" + Avbryt + ge-upp-väg), målet sparas i localStorage
+  (`play-target`), "Ny giv" letar på samma mål. Random = som förr.
+
+996 tester gröna, tsc rent, verifierat i webbläsaren (pill, väljare, sökning för
+lågfärg + storslam, ren konsol). **Kontraktväljaren = KLAR & LIVE, inga öppna
+punkter (ägaren godkände 2026-07-05).**
+
+**NÄSTA GÅNG (ägarbeslut 2026-07-05): 🔵 NU blir "Budsystemets grunder — varför
+de faller".** Ägaren vill gräva i budsystemets FUNDAMENT och förstå varför de
+brister (inte laga en rapport i taget utan hitta rot-mönstren). Startpunkt:
+felrapport #26 + #27 (nyss lagade) visade samma rot — motorn hedrar
+utgångskrav/rondkrav i sin FÖRPLANERADE linje men tappar dem OFF-BOOK (när
+ägaren öppnar/bjuder en annan hand än motorn valt). Fråga ägaren vilka
+grundregler som känts opålitliga i spel och bygg facit-givar som blottar
+mönstret innan något byggs om. (Kontraktväljaren = KLAR & LIVE, se nedan — inga
+öppna punkter kvar.)
+
+**Senast klart & LIVE (2026-07-05):** felrapport #26 + #27 lagade, pushade,
+deploy grön (commit `f9531b2`). Båda samma rot: utgångskrav passades OFF-BOOK.
+#26 → `answerCueBidderRebid` (cue-bjudaren fullföljer efter öppnarens svar);
+#27 → `answerTwoOverOneRaise` (svararen sätter utgång efter 2/1 som öppnaren
+höjt). 998 tester gröna. Se 👀 Bevaka. **Detta är den direkta ingången till
+nästa NU** (off-book-krav = ett grund-mönster som faller).
+
+**Senast klart & LIVE (2026-07-05, mergepunkt `1bec779`):** starka
+upplysningsdubblingens **flerronds-fortsättning** byggd, test-låst & pushad
+(`auction-live.ts`: `strongDoubleContext` + `advanceStrongDoubleRebid` +
+`strongDoublerSecondRebid` + `answerStrongDoubleGameForce`). Game-hoppet borttaget
+(kan bli katastrof mot 0 hp); partnern tvångssvarar (stödstege / utan stöd egen
+färg); den starka handen dömer game på TP (**6+ & 22+ TP → hopp till 3-läget**,
+annars lägsta nivå); partnern svarar 3-hoppet (utgång m. 1–2 stöd / 3NT nekar).
+TP-tröskel 22 = ägarval efter 6 exempelhänder. Ordet "monster" bannlyst. 976
+tester gröna, tsc rent, deploy grön. **Öppen finslipning (ägaren, i spel):** den
+starka handens dom EFTER en stödhöjning körs på en konservativ default – se
+👀 Bevaka.
+**NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln). Bra
+kandidater: **nästa delbit av R1 #2** (se "Kvar" nedan) eller en punkt ur R6:s
+handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
+
+**Senast klart & live (2026-07-05, dok-synk – commits `8d2d413` + `70660fb`):**
+ägarmandat *"all ändring i Budsystemet ska gå att läsa på hemsidan."* Budsystem-
+sidan läser `docs/budsystem.md` direkt (§9 Ändringslogg är dold), så live-regler
+som förr bara låg i kod/ändringslogg skrevs nu in i läsbara sektioner: **§7.3
+Takeout Double** (egen sektion; ordet för den starka 17+-handen borttaget på ägarens begäran – skriv "bra/stark hand"),
+**§5.4** öppnarens rond-2 i inklämt läge (delbit 6), **§7.8** när motståndarna
+stör vår öppning (delbit 4+5). Ingen kodändring – bottarna bjuder som förut.
+
+**Läget (2026-07-04, audit session 9 avslutad):** Hela revisionen R1–R6 KLAR +
+live (0 KRITISK, 2 HÖG båda i R1, 27/32 fynd lagade; slutrapport
+`docs/audit/SLUTRAPPORT.md`). Därefter startade R1 Fynd #2 (bredda störd
+budgivning) och **delbit 6 är byggd, mergad (`ce7f1cd`) och LIVE.**
+
+**Delbit 6 (LIVE):** öppnarens rond-2 i det INKLÄMDA konkurrensläget efter
+partnerns enkla högfärgshöjning (`1M–(inkliv)–2M–(deras inklämda bud)`): pass
+(minimum) · 3M (6:e trumf, lagen om totala stick) · **X = MAXIMAL DUBBLING (game
+try, 15–17)** · 4M (utgång, 18+); partnern svarar X:et 4M (accept, 8+ stöd) /
+3M (avböj). Två detektorer i `decideCall`, FÖRE `maybePenaltyDouble` (X reserverat
+för game try där — konventionens kända avvägning). Facit:
+`auction-opener-competition.test.ts` (7 integrationstester). Se 👀 Bevaka nedan.
+
+**Sidospår klart & live (2026-07-04, mergepunkt `213d90e`):** felrapportering
+inkopplad i **Budvisningen** (`Spela.tsx`) — knappen "Rapportera fel →" dyker upp
+så snart auktionen budats färdigt (korten spelas aldrig där, så inga stick följer
+med; kontraktet härleds ur buden). Samma `FelrapportDialog` som i Spela kort, men
+med valfri bud-specifik text ("Rapportera fel i budgivningen" +
+`BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
+
+**Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 (§5.8)~~ +
+~~balanseringens "låna en kung"~~ + ~~bredare flerronds-konkurrens (A+B+C, §5.9 +
+§7.1)~~ (ALLA KLARA 2026-07-05; A+B+C ej pushat än). **R1 Fynd #2 är därmed i
+praktiken helt genomarbetat** — bara delbit 3 (Mathe mot stark 1♣) förblir medvetet
+PARKERAD (irrelevant tills vi lägger till fler budsystem).
+
+**Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
+kräver webworker). (R3 #8 "Förra sticket" = OK/klar, ägarbeslut 2026-07-05 —
+struken.) Se ⚪ SENARE nedan.
+
+## 2026-07-07 → 2026-07-21 — flyttat från CLAUDE.md 2026-07-21
+
+**✅ Etapp 1 KLAR & LIVE 2026-07-20 (budgivningen mot perfekt): felrapporterna
+betade.** #35 (fel dubblare utsedd → 5♠-blåsan), #37 (öppnarens svar på
+sang-inbjudan byggt, §4.3), #38 (återöppning även efter 1-läges inkliv) lagade +
+test-låsta; #39 = inget fel (DD-facit: straffen +500 slår 3NT som går 2 bet) —
+test-låst. Issues stängda, mergepunkt `da7bdc5`, deploy grön, 1106 test.
+- **#35** — Öst höjer partnerns 4♠ till 5♠ på en redan begränsad
+  minimihand (balanserings-X + 1♠ var redan hela handen) → 3 bet.
+- **#37** — 1NT-öppnaren (17 hp, FEM hjärter) avvisar 3♥-inbjudan efter
+  Stayman-hittad fit och bjuder 3NT i st.f. 4♥; dessutom felaktig
+  beskrivning av 3NT-budet.
+- **#38** — passad svarare (11 hp, ♦KQ864 + ♠KJ42) passar ut `1♣–(1♠)`
+  → Ö/V säljer given i 1♠ trots ~25 hp och Västs solida klöver.
+- **#39** — efter vår 1NT + deras 2♥-inkliv blir W:s X ståendes som
+  straff → Ö/V (25 hp) missar 3NT.
+- **#36** (större kort på mobil) är UI, inte bud → ⚪ SENARE.
+
+**✅ Etapp 2 KLAR 2026-07-21** — Systemrevisorn byggd (`revisor.ts` +
+`revisor-dds.ts` + REVISOR-gated probe; DD-facit via npm-paketet
+`bridge-dds` = Bo Haglunds lösare i WASM som dev-beroende, med RIKTIG
+par-poäng) och **baslinjen mätt** (1 000 givar, frö 20260721): **exakt par
+15,9 %, snitt-tapp 300 p/giv; topplista: fel färg-bet 65k p > missad
+lillslam 56k > missad utgång 46k > missad storslam 38k > billig offring
+35k** — hela mätningen + läsanvisning i `docs/systemrevisorn.md`.
+
+**Senast klart & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, deploy grön):
+ÄRLIGA SLAMPORTAR — tjuvkiken borttagen.** Ägarbeslut efter Fables
+totalgranskning: bottarna bjuder som MÄNNISKOR — varje budbeslut fattas på
+EGEN hand + vad partnern VISAT via buden (intervall/löften), ALDRIG på
+partnerns faktiska kort; hellre missa en slam än kika. Gäller även
+facit-linjen/Budvisningen (samma `buildAuction`). Ägarens två systemval:
+(1) **inbjudningar i kanske-zonen** (31–32 mot visat minimum; kvantitativ 4NT
+över sang, 5M/4m i trumf; partnern accepterar över blott minimum),
+(2) **ingen kontrollkoll** (lita på poängen + nyckelkortssvaret;
+`pairControlsSideSuits` och motorns auto-cue-rond BORTTAGNA — cue-ronden bar
+bara gaten och orsakade gamla slam-quirken). Byggt: `slam-auction.ts`
+omskriven (**kaptensregeln**: egen hand + visat minimum ≥33 driv / 31–32
+inbjudan; nyckelkort HÄRLEDS ur svaret + egen hand; tvetydighet → anta högt
+mot visad 15+, annars lågt + PARTNER-RÄTTELSE till 6; storslam kräver
+visshet), `nt-slam.ts` (Gerber härleder ur svaren; ny kvantitativ
+4NT-inbjudan 19–20 mot 1NT-återbudet), `auction.ts` (visade intervall per
+återbudsregel: 1NT-återbud 12, hopphöjning/hopp-återbud 16, Jacoby/inverterad
+per rebid, splinter-relä 15, MSS 15); `familyAFitTrump` läser BARA svararens
+hand (6+ egen hf / 5+ i öppnarens minor; gömda 4-4-fits jagas ej). **Kända
+ÄRLIGA MISSER (medvetna, test-låsta):** #29-originalgiven stannar i 3NT
+(13 hp mot visade 16–18 < zonen); familj A-givens 4-korts minorfit drivs ej.
+Slamfrekvens (probe 60 000 givar): lillslam ~1/120, storslam ~1/4300 —
+mänskligt. **Blottad systemlucka → B13 i revisionen:** inverterad
+minor-återbud är grova (17 hp + 6m visas som "minimum") → ärliga misser där.
+Docs: budsystem.md §5.2/§5.7/§6 (principen)/§6.2-motoranmärkning/§9;
+budsystem-revision.md B8–B13. **1090 test gröna, tsc rent, deploy grön.**
+
+**F1 — bredda slam-utforskningen (PAUSAD → etapp 4 i NU-planen).** En probe (40 000 givar,
+DD-lösta) delade slam-missarna i fyra familjer. **KLARA & LIVE:** **A** (efter
+`1m–1M–1NT`: jämn → Gerber 21+/kvantitativ 4NT 19–20; obalanserad med säker
+fit på egen hand → 4NT RKC), **C:s hopphöjning** (`1x–1M–3M` → driv 17+/
+inbjudan 5M 15–16), **D** (hängande cue-quirken stängd — auto-cue-ronden är
+numera helt borttagen). Alla styrs av de ärliga portarna ovan (äldre
+beskrivningar i historiken med kontroll-gates/parets faktiska poäng =
+kik-eran, gäller inte längre). **KVAR (= etapp 4):** familj **B** (2♣) +
+C:s systerfall **reverse** (`1♣–1♥–2♦`) och **hoppskift** (`1♦–1♠–3♣`) —
+störst men rörigast (ingen överenskommen trumf; vissa reverse-auktioner
+kollapsar t.o.m. under utgång, eget problem). Byggs på det ärliga mönstret.
+
+**Avslutade SENARE/PARKERAT-poster (flyttade hit 2026-07-21):**
+- ~~**Dubblingar (X/XX) in i slutkontraktet**~~ **KLAR 2026-07-04** (commit
+  `0864224`, parallellsession): X/XX följer med genom `contractFromCalls` och
+  poängräkningen (`scoring.ts` enligt ägarens poängguide) är byggd.
+- ~~**Felrapportering: PAT-i-localStorage-varianten**~~ **KLAR & LIVE 2026-07-05**
+  (skicka issuen direkt från appen utan att öppna GitHub). Ägaren sparar en snäv
+  fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN gång i
+  Inställningar (`src/lib/github-token.ts`, egen lagringsnyckel `rebidz:felrapport-token`
+  utanför `learnbridge:`-prefixet → överlever "Nollställ framsteg"). Finns nyckel →
+  `FelrapportDialog` skickar direkt via GitHubs API (`submitFelrapport` i
+  `felrapport.ts`, POST `.../issues`), knappen blir "Skicka rapport ✓" + kvitto;
+  saknas nyckel → oförändrat (öppnar förifylld GitHub-sida). Fel → svenskt
+  meddelande + reservknapp "Öppna på GitHub →". Samma nyckel kan användas på flera
+  enheter. 1061 test gröna.
+- FAS 9 Passad hand, FAS 10 Försvarsbud, FAS 11 Kortspel = **KLARA & pushade**
+  (historik — inte återstående arbete).
+- ~~**Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC)~~ **LÖST 2026-07-07** (F1 familj
+  D; slutgiltigt genom att motorns auto-cue-rond togs bort helt med de ärliga
+  slamportarna samma kväll). Facit `auction-slam-jacoby-cue.test.ts`. Behandla
+  inte längre som parkerad.
+
+### Bevaka-arkiv — fulltexter (komprimerade till en rad var i CLAUDE.md 2026-07-21)
+
+- **Advancern hoppar inte förbi utgång (#33, 2026-07-07, LIVE):** när du och
+  din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
+  längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦
+  över partnerns 5♦). **Bevaka:** passar boten lagom (den saknar ännu slam-drivning
+  som advancer — med äkta slamvärden kan den nöja sig med utgång; säg till om den
+  borde utforskat slam).
+- **6-5-öppning (#32, 2026-07-07, LIVE):** med 6-korts lågfärg + 5-korts
+  högfärg öppnar boten nu **högfärgen med 12–15**, men **lågfärgen med 16+** (för att
+  reverse:a in högfärgen). **Bevaka:** (a) väljer den rätt (öppnar 1♦ på rätt starka
+  6-5, 1♠/1♥ på minimum)? (b) *återbudet* efter en 16+ 1♦-öppning — visar den 6-5:an
+  begripligt (reverse in i högfärgen), eller blir fortsättningen konstig? Säg till om
+  6-5:an tappas bort i rond 2.
+- **2♣ dör inte längre i delkontrakt + systems-on (2026-07-07, LIVE):**
+  öppnar din bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång
+  (förr dog ~64 % i delkontrakt). **Efter `2♣–2♦–2NT`** (öppnaren 22–24) använder
+  svararen nu **Stayman/transfer** som mot en 2NT-öppning → hittar 4♥/4♠-fit i
+  stället för att blint bjuda 3NT. **Bevaka:** (a) hittar paret rätt högfärgsfit
+  lagom ofta, och landar det inte i fel strng? (b) svaga händer med 5-korts högfärg
+  signar av i 3♥/3♠ (rätt), 0–2 hp passar 2NT (rätt) — säg till om något känns fel.
+  (c) I ANDRA 2♣-auktioner (positivt svar, färgrebud) garanterar kravlogiken utgång
+  men den forcerade minimi-stegen väljer inte alltid finaste färgen (t.ex. 5♣ där
+  4♠ var bättre) — säg till om en sådan känns trubbig. (d) Slam-utforskning efter
+  2♣ är fortfarande tunn (uppföljning knyter an till #29).
+- **Inget svagt hoppskift längre (#31, 2026-07-06, LIVE):** svarar du på
+  partnerns öppning med en svag 6-korts högfärg bjuder boten nu **1♥/1♠** (lågt,
+  rondkrav), aldrig 2♥/2♠. **Bevaka:** håller boten budgivningen lagom låg, eller
+  borde en riktigt svag spärrig hand ibland fått hoppa? (Ägarprincip: håll låg när
+  partnern öppnat.) Öppnaren förklarar fortfarande ett MANUELLT hoppskift rätt om du
+  själv hoppar.
+- **Stark jämn hand efter minorhöjning i konkurrens (#30, 2026-07-06, LIVE):**
+  (a) en jämn 19 med extra kvalitet (ess/kvalitetsfärger, startpoäng ≥20) öppnar nu
+  **2NT** i stället för 1 i färg — **bevaka** att den inte blåser upp platta 19:or.
+  (b) När din minor höjs i konkurrens visar öppnaren styrka i sang (3NT 20+ /
+  2NT-inbjudan 18–19 med stopp); höjaren accepterar 3NT från **8 hp**. **Bevaka:** når
+  paret 3NT lagom ofta, eller för lätt/tungt? Säg till om accept-golvet (8) känns fel.
+- **Flerronds-konkurrens A+B+C (§5.9 + §7.1, 2026-07-05, LIVE):** störda
+  auktioner säljs inte längre billigt i rond 2+. (A) Öppnar du 1 i färg, de kliver in,
+  partnern PASSAR och de konkurrerar (`1♣–(1♠)–P–(2♠)`) → du tävlar nu (egen 6+ färg,
+  eller X med kort i deras färg) i stället för att passa. (B) Samma men de passar också
+  (`1♠–(2♥)–P–P`) → du återöppnar i utpassningssitsen (X med kort i deras färg → **din
+  partner kan konvertera till straff**; egen 6+ → rebjud). (C) Din partner klev in på
+  2-läget och de hittade sin fit (`1♠–(2♥)–2♠`) → du (advancern) tävlar nu **3♥** med
+  3-korts stöd (9-korts fit, lagen om totala stick). **Bevaka:** (a) återöppnar/tävlar
+  boten lagom ofta, eller väcker den given för lätt? (b) C:s golv är **~8 stödpoäng** –
+  en riktigt svag hand med 9-korts fit passar (medvetet, tävlar inte på en bust); vill
+  du ha renodlad "lag om totala stick" (tävla nästan alltid med fiten) → säg till, det
+  är en trösklsjustering. (c) B:s partner som trap-passar och konverterar till straff –
+  slår det rätt (blir det verkligen en straff, inte en flykt som får spela billigt)?
+- **"Låna en kung" i balansering (§7.1, 2026-07-05, LIVE):** i
+  utpassningsläget (deras 1-lägesöppning + två pass) kliver boten nu in ~3 hp
+  lättare — enkelt inkliv från 5 hp, upplysnings-X från 9 (form 7), återöppnings-1NT
+  11–14. **Bevaka:** (a) balanserar boten lagom ofta, eller väcker den given på för
+  skräpiga händer? (b) 2-läges-inkliv på ~5 hp kan bli aggressivt (lättnaden gäller
+  även där) — säg till om det svider. (c) advancern (som svarar balanseringen) vet
+  ännu INTE att partnern kan vara en kung lättare → kan övervärdera tillbaka; en
+  "advancer-rabatt" är en möjlig uppföljning. (d) den starka 15–18 jämna handen i
+  balansering dubblar först (om form) i stället för 1NT; saknar den form (lång i
+  deras färg) kan den passa — ovanlig kant, säg till om den dyker upp.
+- **Öppnarens rond-2 i konkurrens efter partnerns ny färg / 1NT (§5.8, 2026-07-05,
+  LIVE):** öppnar du 1 i färg, partnern svarar en fri ny färg / 1NT
+  och motståndarna bjuder om (t.ex. `1♥–(1♠)–2♣–(2♠)`), passar öppnaren inte längre
+  bort en stark hand. Extra visas med **cue i deras färg** (15+, hitta rätt utgång),
+  18+ med högfärgsfit → 4M, 18+ jämn m. stopp → 3NT, 15–17 m. högfärgsfit →
+  inbjudande hopphöjning; minimum tävlar med en egen 6+ färg eller en fit, annars
+  pass. **Bevaka:** (a) cue:ar boten lagom ofta (inte varje 15-poängare som borde
+  passat)? (b) hittar den rätt utgång efter cuet, eller överbjuder den? (c) medvetet
+  bortval: i det här läget väljs **cue framför straffdubbling** på extra-händer –
+  säg till om en straffdubbling av deras bud borde ha varit rätt i stället.
+- **Störda krav = RONDKRAV (§5.5, 2026-07-05):** klev en motståndare in och du
+  gjorde ett **fritt bud** (ny färg, t.ex. `1♦–(1♠)–2♣`) eller öppnaren **reverse:ade**
+  (`1♣–1♥–(1♠)–2♦`), så passar din partner inte längre — hen tvingas svara med ett
+  naturligt minimibud (`competitionForce`/`honorForce`). Men bara **rondkrav**: buden
+  får stanna UNDER utgång (ett inkliv "lånar" utrymme). **Bevaka:** (a) svarar boten
+  förnuftigt (rätt naturligt bud, inte ett tvångsbud som låter konstigt)? (b) driver
+  den ALDRIG till utgång i onödan här (2/1 i konkurrens lovar värden men ej utgång)?
+  Hopp, cue i deras färg och en passad svarare undantas medvetet — säg till om ett av
+  dem borde ha tvingat fram ett svar ändå.
+- **Utgångskrav får aldrig passas OFF-BOOK (felrapport #26 + #27, 2026-07-05):**
+  två luckor där boten passade en KRAV-auktion när du bjudit off-book
+  (motorn hade planerat en annan linje). (1) **#26** – efter din cue-höjning
+  (1♣–2♥–3♥) fullföljer din partner nu utgångskravet efter öppnarens svar
+  (`answerCueBidderRebid`): 3NT med stopp i deras färg, annars utgång i den
+  överenskomna färgen. (2) **#27** – efter ett äkta 2-över-1 (utgångskrav) som
+  öppnaren höjer sätter svararen nu minst utgång även off-book
+  (`answerTwoOverOneRaise`) – uppstod när Syd öppnade den svagare handen så
+  motorns on-book 2/1-fortsättning aldrig fyrade. Bara off-book berörs; on-book
+  orört. **Bevaka:** når boten rätt utgång (4M/3NT/5m) och blåser den aldrig för
+  högt? Säg till om den t.ex. borde utforskat slam i stället för att bara sätta
+  utgång.
+- **Lågfärgsutgång 5♣/5♦ nu nåbar (Kontraktväljaren delsteg 1, 2026-07-05):**
+  motorn kunde förr aldrig bjuda 5♣/5♦ (valde alltid 3NT). Nu, efter inverterad
+  minor: en svarare med lågfärgsfit + en **osparrad färg** utforskar via 2m och
+  landar i **5m** när paret inte kan hålla alla färger (i stället för att chansa
+  3NT). Ägarregel: utforska bara med en **riktigt svag** färg (♠xx/♥xxx utan
+  honnör). **Bevaka:** (a) drar boten till 5m när 3NT egentligen var säkert? (b)
+  chansar den fortfarande 3NT med en helt öppen färg? Trösklar i `responses.ts`
+  (`hasWeakSideSuit`) + `responder-rebids.ts` (inverterad-minimum → 5m).
+- **Motspelarens kast-vakt + 1NT-återbudsförklaring (felrapport #24 + #25,
+  2026-07-05):** (1) **spelfel #25** – en försvarare som sakar blottar inte
+  längre en honnör i onödan: ny "motspelarens kast-vakt" (`play-bot.ts`
+  `defenderGuardDiscard`) sakar hellre ur en färg UTAN skyddsvärd honnör (en J+
+  som ännu kan slås av ett högre ospelat kort), ärligt räknat ur egen hand +
+  träkarl. Löser bara honnörs-blottning; bredare försvarsinferens (kasta rätt när
+  partnerns hand är okänd) är fortsatt SENARE. Säg till om vakten någon gång
+  behåller fel kort. (2) **budförklaring #24** – öppnarens 1NT-återbud efter
+  färgöppning beskrivs nu som "balanserad minimihand ~12–14 hp" (ej "svag");
+  ingen ändrad budgivning, bara texten (`auction-interpret.ts`).
+- **Takeout-doublingar (felrapport #23 + stark-hand-fortsättning + tvåfärgs-X,
+  2026-07-05):** (1) en **17+ stark enfärgshand** upplysningsdubblar en öppning
+  och visar sedan sin färg via ett **starkt återbud** — färgen **billigast (rondkrav,
+  inget hopp)**; hopp-till-utgång är borttaget (kan bli katastrof mot 0 hp). Hela
+  **flerronds-fortsättningen är nu byggd & test-låst**: partnern tvångssvarar
+  (stödstege m. 3-korts stöd: enkel/hopp/utgång/cue efter hp — annars egen 5+ /
+  näst längsta objudna färg), den starka handen dömer game på TP (**6+ färg & 22+ TP
+  → hopp till 3-läget = utgångskrav**, annars lägsta nivå), partnern svarar 3-hoppet
+  (utgång m. 1–2 stöd / 3NT nekar). **⚠️ Bevaka särskilt:** den starka handens dom
+  EFTER en **stödhöjning** (partnern visade fit) körs på en medvetet **konservativ
+  default** (accepterar utgång med tydligt tillägg: hopphöjning→18+ hp, enkel
+  höjning→21+; cue→utgång som minimum; slam-utforskning ej byggd) — ägaren ville
+  finslipa detta i spel, säg till om trösklarna känns fel. (2) När motståndarna
+  bjudit **två färger** (1♦–P–1♥) dubblar en **4-4-hand (10+)** de objudna färgerna;
+  advancern svarar aldrig i deras egen färg. Regler i `docs/budsystem.md` §7.3.
+- **Öppnarens rond-2 i inklämt konkurrensläge (R1 Fynd #2 delbit 6):** efter
+  `1M–(inkliv)–2M–(deras inklämda bud)` passar öppnaren inte längre blint. Med
+  minimum + 6:e trumf konkurrerar den 3M; med utgångsintresse (~15–17) dubblar den
+  (**X = maximal dubbling = game try**, INTE straff i det läget); med 18+ bjuder den
+  4M. Partnern svarar X:et 4M (max) / 3M (min). Golv: 15+ = game try, 18+ = utgång
+  (speglar den ostörda openerRebidAfterSimpleRaise). Säg till om X-som-game-try
+  känns fel, eller om golven bör justeras.
+- **DONT mot deras 1NT (R1 Fynd #2 delbit 1):** bottarna stör nu deras
+  1NT-öppning med DONT (X/2-läget) — golv 8 hp direkt, 6 hp balansering. Säg till
+  om det känns för aggressivt/passivt.
+- **Försvar mot deras svaga tvåor/spärrar (R1 Fynd #2 delbit 2):** bottarna
+  kliver nu in mot motståndarnas svaga 2♦/2♥/2♠ och spärrar (3-läget+) — takeout-X,
+  2NT (15–18), cue, naturligt, 3NT. Golv för takeout-X: 12 hp ej sårbar / 13 sårbar
+  direkt, 10 hp balansering; mot spärr 14 hp (medvetet stramare — säg till om du
+  vill lätta även spärr-balanseringen).
+- **Svar när motståndaren stör VÅR öppning (R1 Fynd #2 delbit 4):** när du
+  öppnar 1NT och en motståndare stör med DONT svarar din bot-partner nu (X/XX =
+  straff/värden från 8 hp, egen 5+ färg = naturligt, annars pass) i stället för att
+  passa. När du öppnar en svag tvåa/spärr och de takeout-dubblar redubblar partnern
+  med 10+ (värden) eller höjer spärrartat med fit. Säg till om golven (8 / 10)
+  känns fel.
+- **Straffdubbla flykten efter vår XX (R1 Fynd #2 delbit 5):** öppnar du
+  1NT, de stör med DONT och din bot-partner redubblar (XX = vi äger handen), så
+  flyr motståndarna undan till en färg STRAFFDUBBLAR din sida dem nu — varje steg,
+  tills de får spela dubblat — i stället för att passa flykten. Utlöses bara efter
+  vårt 1NT + XX (inte efter svaga tvåor/spärrar — där äger vi inte handen). Säg
+  till om det känns för aggressivt att dubbla varje flyktbud.
+
+## 2026-07-21 → 2026-07-25 — "Budgivningen mot perfekt" etapp 3/5/4 (flyttat från CLAUDE.md 2026-07-25)
+
+> Detta är NU-loggen som växte fram i CLAUDE.md under de tre etapperna. Mätsiffrorna
+> och mönsteranalyserna i full detalj: `docs/systemrevisorn.md` (Mätning #1–#14).
+> Alla regeländringar är dessutom skrivna i `docs/budsystem.md` (§9 = ändringslogg).
+
+**Ägarbeslut 2026-07-20:** designen lades HELT åt sidan (facelift-spåret → PARKERAT).
+Fullt fokus på budgivningen.
+
+### Etapp 3 — FEL FÄRG-SPÅRET (ägarbeslut 2026-07-21, KLAR 2026-07-22)
+Största posten i revisorns baslinje: "fel färg — bet fast facit fanns i annan
+strain" (148/1000 givar, 65 110 p). Arbetssätt: hämta exemplen ur `revisor-output/`
+(frö 20260721 återskapar dem), hitta MÖNSTREN (inte enskilda givar), laga mönster
+för mönster test-låst, kör om mätningen med samma frö.
+
+- **Fix 1 (2026-07-21) "5♣-ryckaren"** (budsystem.md §5.6/§9): live-lagret läste
+  Stayman-2♣ som klöverfärg och drog partnerns 3NT till 5♣. Facit-test
+  `auction-stayman-not-natural.test.ts`.
+- **Fix 2 (2026-07-21) "2♣-kravets finaste färg"** (§4.4/§9): (a) svararen efter
+  `2♣–2♦–3m` visar billigaste 4-korts högfärg under 3NT i st.f. blint 3NT från fel
+  hand (`responses-2c.ts`); (b) dubbelton-"fit" mot partnerns tvingade ombud slår
+  aldrig en egen visad 6+ färg (`raiseWithFit`-vakt). Facit-test
+  `auction-2c-finest-suit.test.ts`. Mätning #3: exakt par 16,8 %, fel färg-bet
+  138/58 530.
+- **Fix 3 (2026-07-21) "cue-höjning i minor → 3NT före 5m"** (NY §5.11 + §9;
+  `answerCueRaise` i `auction-live.ts`): öppnaren med jämn hand + stopp i deras
+  cuade färg bjuder 3NT direkt i st.f. att alltid återgå billigast. Facit-test
+  `auction-cueraise-3nt.test.ts`. Mätning #4: 17,0 %, snitt 291, fel färg 136/57 020.
+- **Fix 4 (2026-07-21) "tre konkurrens-fortsättningar"** (§4.5/§7.4/§7.7 + §9):
+  (a) advancerns cue-svar väljer billigaste nivån vid lika långa färger; (b) öppnaren
+  svarar inte negativ dubbling med sang på minimum, och dubbelton-höjningar av
+  tvingade ombud kräver längdbevis + utgångsvärden; (c) ny färg som krav på 3-läget
+  mot svag tvåa kräver 15+. Facit: `auction-konkurrens-fortsattning.test.ts` (15 fall).
+  Mätning #5: 17,2 %, fel färg 130/54 880. Fixen EXPONERADE två luckor som förr
+  maskerades av fel som råkade trilla rätt (balansering över deras svaga tvåor +
+  negativ-dubblarens invit-fortsättning).
+- **Fix 5 (2026-07-22) de två exponerade luckorna** (§7.3/§7.4/§7.7 + §9):
+  **(5a)** balansering över deras svaga tvåor byggd — "låna en kung" fullt ut i
+  utpassningsläget (naturligt 2-lägesinkliv från 7 hp, offshape-X ≤3 kort i deras
+  färg, 2NT 12–15) + advancer-rabatt (−3 sp, 3-lägestak). Facit-test
+  `auction-balansering-svag2.test.ts`. **(5b)** ny detektor `negativeDoublerContinues`:
+  dubblaren i 9–12-zonen bjuder vidare över öppnarens tvingade svar; X + egen färg =
+  EJ krav (`competitionForce` justerad). Facit-test `auction-negx-invit.test.ts`.
+  Mätning #6/#7: snitt-tapp 290,8, fel färg 130/53 450, exakt par 16,9 %.
+- **Fix 6 (2026-07-22) fyra mönster ur mönsterjakt #2** (§5.5/§5.9/§5.11/§7.1 + §9):
+  (1) höjning mot partner som just PASSAT = bara tävlande billigast; (2) svararens
+  bud i öppnarens färg är en HÖJNING, inte "ny färg = rondkrav"; (3) öppnaren tävlar
+  aldrig över deras UTGÅNG efter partnerns pass; (4) cue-höjaren med bara limit-värden
+  passar öppnarens minimum-återgång. Facit-test `auction-felfarg-fix6.test.ts`.
+  **Mätning #8: snitt-tapp 289,5 (M7: 290,8 — största klivet), fel färg 121/47 590.**
+
+**ETAPP 3 KLAR (2026-07-22):** fel färg-bet 148→121 givar, 65 110→47 590 p (−27 %)
+över sex fixar; resten är DD-brus + etapp 4/5-material. Snitt-tapp 300→289,5.
+
+### Etapp 5 — MISSAD UTGÅNG (startad 2026-07-22, KLAR 2026-07-24)
+- **Fix 1+2 (2026-07-24) de två MEKANISKA kandidaterna** (§6.6/§5.1 + §9):
+  **(1)** svararens höjning av öppnarens ANDRA färg graderas efter stödpoäng
+  (under 10 = billigast, 10–12 = hopphöjning/inbjudan, 13+ = utgång) — förr sa en
+  13-hand samma 2♠ som en 6-hand (frön 20260748/20261646). **(2)** öppnaren BESVARAR
+  svararens inbjudan efter semi-forcing 1NT (ny `openerThirdBidAfterSemiForcing1NT`):
+  15+ Bergenpoäng → utgång, 2NT rättas alltid till högfärgen när återbudet lovat sex
+  kort, 2NT efter ny färg = äkta sanginbjudan (frö 20260843). Facit-test FÖRE fix:
+  `auction-missad-utgang.test.ts` (18 fall). **Mätning #9+#10: 289,5 → 288,1 p/giv,
+  missad utgång 158/53 050 → 153/51 040.** Enda posten som växte: "för högt" (+2).
+- **Fix 3 (2026-07-24) ÄGARENS svar på värderings-golven** (§4.3 + §9):
+  (a) 3M-invitens golv på platt 12 hp BEHÅLLS (ägarval — de givarna är DD-smickrade);
+  (b) 1NT-öppnarens 2NT-accept på 15 = "kvalitets-15": ny `notrumpPoints`
+  (`evaluation.ts`) = startpoäng +1 för tät A-K-D-klump och UTAN flathets-avdraget;
+  används både direkt och efter Stayman/transfer. Platt quack-15 avböjer.
+  **Mätning #11: 288,0 p/giv, missad utgång 151/50 640, exakt par 17,1 %.**
+
+**ETAPP 5 KLAR i sin mekaniska+golv-del** (158→151 givar). Resten av posten är
+DD-smickrade tunna utgångar som medvetet INTE jagas.
+
+### Etapp 4 — F1-RESTEN: slam efter 2♣ + reverse/hoppskift (ägarbeslut 2026-07-24, KLAR 2026-07-25)
+Byggd på de ärliga slamportarnas mönster: kaptensregeln mot VISADE intervall,
+aldrig partnerns kort. Angrep topplistans största post (missad lillslam).
+
+- **Familj B fix 1 (2026-07-24) kaptensmatte + RKC efter positivt svar på 2♣**
+  (§4.4 + §9): när trumf är funnen (öppnaren stödjer svararens färg, eller svararen
+  har 3+ i öppnarens färgrebud) räknar svararen sin hand mot visade 22 → driv 33+
+  (4NT RKC), inbjudan 31–32, annars utgång. Facit `auction-2c-slam.test.ts` (11 fall).
+  **Mätning #12: 287,9, missad lillslam 87→83 (59 000→56 400).** Känd ärlig kostnad:
+  två 33-poängsslammar med facit enbart i sang går DD-bet i färgen.
+- **Familj B fix 2 (2026-07-24) slamzon utan trumf** (§4.4 + §9): kaptenen med 33+
+  mot visade 22 utan fit frågar RKC i egen självbärande 6+ färg (två topphonnörer);
+  6NT direkt bara efter 3NT-återbudet (visad balans). Första utkastet blåste 6NT
+  efter färg-återbud — DD-skanning fångade frö 20261107 (13 hp spelstick → 6NT fyra
+  bet) och regeln stramades åt med fröet som vakt. Facit (18 fall).
+  **Mätning #13: 287,4, missad lillslam 87→82. FAMILJ B KLAR.**
+- **Familj C-resten (2026-07-25)** (§5/§5.1 + §9): **(1)** semi-forcing-hoppskiftets
+  svar placerar utgång — fit i hoppskiftets färg går före preferensen (4♥ på K942,
+  frö 20260799 som förr dog i 3♠-pass under kravet; minorfit → 3NT bara med håll,
+  annars 5m), 3-korts M-preferens med utgångsvärden lyfts till 4M; **(2)** ny slamport
+  efter 1-lägessvarens reverse (visade 16) och hoppskift (visade 19): kaptensmatte när
+  trumf är säkrad på egen kunskap → driv 33+/inbjudan 31–32 (frö 20260937: `1♣–1♠–2♥`
+  → 6♣ med 13 stick). Facit `auction-hoppskift-slam.test.ts` (10 fall, syntetiska
+  slamgivar DD-verifierade). **Mätning #14: 287,2, missad utgång 151→149.**
+
+**ETAPP 4 KLAR (M11→M14): snitt-tapp 288,0 → 287,2, missad lillslam 87→82
+(59 000→55 410), storslam −1 250 p; ärlig kostnad ~4 tunna 33-slammar som går en
+DD-bet.** DD-skanning av alla 18 slam i mätfröna: 10 står, resten tunna-men-ärliga
++ 2 kända frisits-fall.
+
+### Etapp 1 + 2 (bakgrund till spåret)
+- **Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38 lagade +
+  test-låsta, #39 = inget fel (test-låst), #36 (UI) → SENARE. Mergepunkt `da7bdc5`.
+- **Etapp 2 KLAR 2026-07-21: Systemrevisorn byggd + baslinje mätt.** Återanvändbar
+  rigg (samma frö = samma givar): motorn bjuder alla fyra händerna, `bridge-dds`
+  (WASM, dev-beroende) ger DD-tabell + riktig par-poäng, `judgeDeal` kategoriserar.
+  Baslinje (1 000 givar, frö 20260721): exakt par 15,9 %, snitt-tapp 300 p/giv;
+  topplista fel färg 65k > missad lillslam 56k > missad utgång 46k > missad storslam
+  38k > billig offring 35k.
+
+## Den stora genomgången + dokumentvakten (2026-07-25)
+**Varför:** ägaren sa *"något känns fel"* och bad om en genomgång av alla filer —
+dagen efter att `status.md` faktakollats. Den här gången kontrollerades inget
+dokument mot ett annat dokument, bara mot koden, git-historiken och körningar.
+
+**Tre fynd som betydde något:**
+1. **Siffran som aldrig var sann.** Revisionen R1 (2026-07-04) angav baslinjen
+   "1626 tester gröna (92 filer)". Vid exakt den commiten (`b0a5a0d`) hade repot
+   **48 testfiler** med ca 841 test-block. Siffran spreds till fem filer — och när
+   nästa revision (R4) upptäckte att siffrorna inte gick ihop blev slutsatsen en
+   *arbetsregel* om att testantal är historiska tidsstämplar som inte ska synkas.
+   Felet förklarades alltså bort med en regel som förbjöd kontroll. Regeln är nu
+   ersatt av **sifferregeln**: en siffra får stå i ett levande dokument bara om
+   kommandot som återskapar den står bredvid. Rättelse inskriven i R1-rapporten.
+2. **`status.md` beskrev en raderad komponent.** Rubriken "Auktionsvyn
+   (`src/components/AuctionView.tsx`)" pekade på en fil som togs bort i FAS 12 —
+   `historik.md` sa det själv. Överlevde flera manuella genomgångar.
+3. **Lebensohl hade aldrig varit inkopplad.** `lebensohl.ts` är byggd,
+   enhetstestad och beskriven i systemboken §7.5 — men ingen produktionsfil
+   importerar den. Ett nytt **regelsvep** (motorn bjuder 3 000 givar, räknar
+   regelnamn) gav 0 Lebensohl-bud medan Ogust gav 29 och Drury 12. Boken lovade
+   ett verktyg bordet inte kan. §7.5 + `bevaka.md` märkta; inkopplingen ligger i
+   SENARE.
+
+**Vad som höll för granskning:** mätspåret är exakt (Mätning #14 stämde rad för
+rad mot rå-datan i `revisor-output/`), deploygrinden kör verkligen
+`npx tsc && npm test && npm run build`, `base: '/'` är låst, Pages-workflowen
+avstängd, inga TODO:s i koden, inga oavsiktligt skippade tester.
+
+**Skyddet som byggdes (`src/docs-vakt.test.ts`, kör i deploygrinden):** docs får
+inte peka på kod som saknas · inga oreproducerbara testantal i levande dokument ·
+CLAUDE.md får inte växa förbi 16 kB · kB-siffrorna i docs-indexet kontrolleras
+mot filerna · indexet måste vara komplett · **kopplingsvakten**: en motormodul
+som ingen produktionsfil importerar ger rött test, och undantagslistan måste
+stämma i BÅDA riktningar (en modul som kopplats in måste bort ur listan). Båda
+larmen provkördes skarpt innan de godkändes. Dessutom `regelsvep.probe.test.ts`
+(SVEP-gated) som svar på frågan "vilka regler använder motorn faktiskt?".
+
+## Etapp 6 — billig offring, fyra hål (2026-07-27 → 2026-07-28)
+**🎉 ETAPP 6 KLAR & LIVE.** Posten "billig offring" (baslinje ~125 givar,
+~34 300 p) visade sig till 93 % vara **utgångar och slammar vi aldrig bjöd**
+bakom motståndarnas köpta kontrakt — inte missade straffdubblingar.
+Förskanningen (2026-07-25) fann fyra hål; ägarordning 1 → 2 → 3 → mätning → 4.
+Allt facit-först, alla mål DD-verifierade före fix, samma frö 20260721:
+- **Hål 1 (2026-07-27, Mätning #15):** stöddubblingen besvarades aldrig →
+  `answerSupportDouble`/`supportDoublerRebid`, facit
+  `auction-stoddubbling-svar.test.ts`. Pass på stöd-X = medvetet straffpass.
+- **Hål 2 (2026-07-27, Mätning #16):** svaret på upplysnings-X försvann när
+  RHO bjöd över → `advancerFreeBidAfterDouble`/`doublerAnswersCue`/
+  `doublerRaisesAdvance`, facit `auction-upplysningsx-svar.test.ts`. Största
+  enskilda klivet i spåret (−7,3 p/giv).
+- **Hål 3 (2026-07-27, Mätning #17):** taket i försvaret mot svaga tvåor →
+  `defendWeakTwo` fick 3NT till spel (19 direkt/16 balansering, stark minor
+  15+) och 17+-X:et som aldrig säljer given, facit
+  `auction-svagtva-tak.test.ts`.
+- **Hål 4 (2026-07-28, Mätning #18, ägarbeslut med exempelhänder):** deras
+  öppning + spärrhöjning (`2♠–P–3♠`/`1♣–P–3♣`) stängde auktionen helt (en
+  21-poängare passade ut `2♦–P–3♦`) → `raisedPreemptToDefend` i budlådan
+  överstyr linjens inbakade försvarspass; `defendPreempt` fick
+  balansering ("låna en kung", bara 3-läget) och `raised` (3NT 19/16);
+  `answerTakeoutDouble` cue-bjuder aldrig över dubblad spärr (3NT med stopp)
+  och väljer honnörsstarkare färg på lika längd vid tvingade 3-lägessvar.
+  Ägarbeslut: tunna fördelningsutgångar (6♣ på 19 hp) jagas INTE —
+  gränsvakter i facit-testet `auction-sparrhojning-svar.test.ts`.
+  Mätvarvet fångade tre följdfel (tunna direkta 3NT, lånad kung på 4-läget,
+  utpassat cue) som lagades innan något gick live.
+**Facit för etappen (M14 → M18):** billig offring 125/34 300 → 113/30 570,
+par-avvikelse 287,2 → 276,3 p/giv, rätt kontrakt 17,1 → 18,2 %. Hela spåret
+sedan baslinjen: 300 → 276,3 p/giv, 15,9 → 18,2 %. Detalj + alla mätningar:
+`docs/systemrevisorn.md`.
+
+## Underhåll: hälsokoll av uppsättningen + deploygrinden lagad (2026-07-28)
+
+Inget budrelaterat — men två fynd som påverkade allt annat arbete. Mergepunkter
+`ebdb958` (städning + namnregel) och `4b9fa66` (deploygrinden).
+
+**1. Namnet är gemener.** Ägaren bekräftade 2026-07-28: *"endast små bokstäver
+är korrekt"*. Logotypen (`BrandMark.tsx`) och `<title>` var redan rätt, men fyra
+ställen som användaren ser bröt mot regeln: `index.html`s
+`apple-mobile-web-app-title` (ikonnamnet på iPhones hemskärm), PWA-manifestets
+`name` + `short_name` i `vite.config.ts` (installationsdialogen), en löptextrad
+i `src/pages/Settings.tsx` och `README.md`s rubrik. Alla rättade och verifierade
+live (`https://rebidz.com/manifest.webmanifest` svarar `"short_name":"rebidz"`).
+Kodkommentarer och arkivfiler lämnades medvetet. Regeln står nu utskriven i
+`CLAUDE.md` ("ALLTID GEMENER … skriv aldrig 'RebidZ'").
+
+**2. DEPLOYGRINDEN VAR ETT MYNTKAST — viktigaste fyndet.** Deployen av `ebdb958`
+föll utan att något var fel med koden. Två oberoende orsaker, båda i testerna:
+
+- `divergesOnlyByPreemptWake` (undantaget hål 4 införde) jämförde bara det
+  **överlappande prefixet** av linjen och den uppspelade auktionen. Linjen
+  slutar med de inbakade försvarspassen och stannar där — så när väckningen kom
+  EFTER linjens sista bud var prefixen identiska, loopen hittade ingen skillnad
+  och svarade "verklig avvikelse". Träffade 7 av 4 000 givar. Nu godtas båda
+  formerna (väckning inne i linjen + väckning i svansen) med villkoren kvar
+  hårda. Mätt efter fixen: av 965 kvalificerade givar undantas 14, kontrolleras
+  951, slipper 0 igenom.
+- Konsistenstesterna körde på `dealRandom()`, alltså färska slumpgivar varje
+  körning → slumpvis rött ungefär var tredje körning, oavsett vad som pushades.
+  Nu seedade givar (frö 1–4 000), samma mönster som `legality.test.ts` och
+  `tp-invariant.test.ts`. Ett rött test återskapas med `dealFromSeed(<frö>)`.
+- Dessutom timeoutade `docs-vakt.test.ts` ("varje motormodul är inkopplad")
+  slumpvis: `readFileSync` låg inne i filter-loopen, ~90 moduler × ~150 filer =
+  över 13 000 läsningar av samma innehåll, knappt under 5-sekundersgränsen.
+  Läser varje fil en gång i stället — 5 000 ms (timeout) → 24 ms.
+
+**Lärdomen:** ett sanktionerat undantag i ett test måste täcka HELA formen av det
+som sanktionerats, annars blir grinden opålitlig — och en grind man inte kan lita
+på slutar man läsa. Volymtester i det här repot ska vara seedade, aldrig
+`dealRandom()`, just för att ett rött test ska gå att återskapa.
+
+**3. Sessionskontexten bantad.** `CLAUDE.md` 13,3 → 11,7 kB (bort med det som går
+att läsa ur koden: teknisk stack = `package.json`, projektstruktur = `ls`,
+kommandon = scripts; övningsreceptet flyttat till färdigheten
+`.claude/skills/lagga-till-ovningar/`, som `.gitignore` nu släpper igenom).
+Utanför repot: nio minnesfiler som upprepade `CLAUDE.md` raderade, och minnet om
+deployverifiering rättat från GitHub Pages till Vercel.
+
+**Öppen bridgefråga (ägarens bedömning, ej fel):** har den väckande dubblingen
+rätt golv när advancern tvingas svara? Det genomgångna exemplet talar FÖR
+dagens golv: frö 1781, Öst balanserar X på 14 hp över `1♣–P–3♣`, Väst svarar 3♦
+på 10 hp med `♦AQ62` — 24 hp tillsammans, sunt. (Första bedömningen sa 12 respektive
+5 hp; det var felräknat och rättades samma dag när dumpen lästes — påminnelse om
+att läsa siffran ur körningen, aldrig ur minnet.) Se hål 4-punkten i
+`docs/bevaka.md` för vilken form som faktiskt är värd att leta efter.
+
+## Budstöd På/Av i Spela kort (2026-07-28, kväll)
+
+Ägarönskemål, ren UI-funktion (inga budregler rörda). Mergepunkt `3d43655`,
+deploy grön, verifierad live.
+
+En **"Budstöd"-rad i bordets ⋮-meny** (både budfasen och spelfasen), På/Av-
+pillerknapp enligt Auto Claim-mönstret, sparas som `learnbridge:bidHelp`
+(state i `useGame.ts` så båda faserna + omspelningen läser samma val).
+
+**Av-läget (tre ägarbeslut samma kväll):** (1) budlådan döljer ALL hjälp —
+pricken, "MOTORNS BUD"-förklaringen och "Motorn hade valt"-raden (`showHelp`-
+prop i `BiddingBox.tsx`; rekommendationen beräknas inte ens, den var
+display-only). (2) Förklarings-popupen i auktionsvyn blir minimal: chip +
+kort regelnamn (versaliserad `rule`) + **ALERT-märket behålls** — som vid
+riktigt bord där konstlade bud alltid alerteras; kravmärke och långtext döljs
+(`explanations: 'full' | 'minimal'` i `AuctionGrid.tsx`, trådas genom
+ⓘ-overlayen och `PlayReplay.tsx`). (3) Knappen bor i ⋮-menyn, inte på
+Inställningar-sidan. Träningssidorna (Spela, Budträning) skickar ingen prop
+och behåller alltid full förklaring.
+
+Facit-test skrevs före koden: åtta nya (budlådans av-läge, ny
+`auction-grid.test.tsx` för full/minimal/fallback utan regel/"Eget bud",
+persistens i `play-smoke.test.tsx`). Hela sviten grön (`npm test`).
+
+## Känsla i kortspelet — etapp 1: tempogrunden (2026-07-28, sen kväll)
+
+Nytt NU på ägarbeslut 2026-07-28 (Etapp 7 missad lillslam pausad → överst i
+NÄST med läget bevarat). Hela spåret planerades i en frågerunda samma kväll:
+full kortflygning, sticksvep till vinnaren, justerbart tempo, claim-reveal,
+diskreta ljud, guldglow vid hemgång — fem etapper, UI-lagret enbart, inga nya
+beroenden. Etapp 1 = skelettet:
+
+- **`src/pages/play/tempo.ts` (ny):** enda sanningen om spelfasens tider —
+  `BASE` (botDelay 750, mcFloor 500, + kommande etappers tider) och `ms(key,
+  speed)` som skalar med `SPEED_FACTOR` (Lugn 1.45 / Normal 1 / Snabb 0.55).
+- **Temporad i ⋮-menyn** (spelfasen): Lugn/Normal/Snabb, sparas som
+  `learnbridge:playSpeed` (autoClaim-mönstret i `usePlayTable.ts`). Menyradernas
+  markup fanns i tre kopior → delade `MenuToggleRow`/`MenuTempoRow` i
+  `play/common.tsx` (Play.tsx + BiddingPhase.tsx använder dem nu).
+- **CSS-skalning:** spelbordets Felt sätter `--motion-scale`; `card-in-*` och
+  `deal-in` i `index.css` kör `calc(bastid * var(--motion-scale, 1))` —
+  fallback 1 gör att alla vyer utanför bordet behåller sin bastid.
+- **MC-golvet:** Monte-Carlo-svar från webworkern läggs tidigast efter
+  `ms('mcFloor', speed)` — blixtsnabba svar teleporterade tidigare in kortet.
+  Watchdogen (15 s) skalas inte.
+- **Key-fixen (förutsättning för etapp 2–3):** seat-wrapprarna i
+  `TrickCenterLive` och `PlayReplay`s `TrickCenter` saknade React-keys → DOM-
+  noden återanvändes mellan stick och inglidningen tändes inte om. Nu key på
+  kortet (`suit+rank`).
+- **Facit:** `src/pages/play/tempo.test.tsx` — seedad giv (`dealFromSeed(1)`),
+  skalningen, persistensen och att botens paus faktiskt följer tempovalet.
+  Alla tider importeras från `tempo.ts` (sifferregeln).
+
+**Grindfynd på köpet:** hela sviten föll slumpvis på DEN HÄR maskinen — även på
+orörd `main` (verifierat med stash). Full parallellism svälte de tunga DDS-
+testerna på CPU så deras timeouts small (samma klass av myntkast-grind som
+lagades tidigare samma dag, fast CPU-svält i stället för slumpgivar). Fix:
+`maxWorkers: 4` i `vite.config.ts` (obegränsat = rött, 50 % = rött, 4 = grönt,
+provat i tur och ordning). Verifiera med: `npm test`.
+
+**Efterspel (samma kväll):** etapp 1-deployen (`e67fb31`) föll ÄNDÅ på Vercel —
+molnbyggaren har färre kärnor än ägarens maskin och två tunga test slog i sina
+tidsgränser trots arbetartaket. Läxan: en tidsgräns ska fånga HÄNGNINGAR, inte
+straffa långsamma maskiner. Grindfix (`9de46f9`): global `testTimeout: 60_000`
+i `vite.config.ts` + de tunga DDS-svepens egna 30 s → 120 s (`play-bot`,
+`tp-invariant`, `legality`, `dds`). Deployen därefter grön — etapp 1 live.
+
+## Känsla i kortspelet — etapp 2: sticksvepet (2026-07-28, sen kväll)
+
+Största enskilda känslolyftet: ett färdigt stick försvinner inte längre pladask
+— det ligger kvar en stund med pulserande vinnarglow ('hold'), sveps sedan ihop
+mot vinnarens sida ('slide') och försvinner. Allt UI-fas ovanpå motorn
+(`play.ts` orörd):
+
+- **Fasmaskinen** (`usePlayTable.ts`): `sweep: { trick, phase: 'hold'|'slide' }
+  | null`. Nytt stick upptäcks med ref-jämförelse av `completedTricks.length`
+  (StrictMode-säker), hold `ms('sweepHold')` → slide `ms('sweepSlide')` → null.
+  Rena `setTimeout` — deterministiskt med fake timers.
+- **Gates:** botarna och auto-claim VÄNTAR medan `sweep !== null`; `done`
+  väntar också ut svepet så även SISTA sticket får sitt ögonblick innan
+  resultatdialogen. Klick (kort eller stickytan) hoppar över svepet
+  (`skipSweep`) — otåliga blockeras aldrig.
+- **Renderingen** (`trick-views.tsx`): gamla "förra sticket ligger kvar tills
+  nästa kort"-fallbacken är BORTA — mitten visar pågående stick, svepande stick
+  eller inget; historiken bor i Förra sticket-panelen (som nu döljs under
+  svepet och dyker upp efteråt). Korten sveps som grupp med
+  `trick-sweep-{n|s|w|e}` efter vinnarsäte; vinnarkortet får `winner-glow`.
+- **CSS** (`index.css`): fyra svep-keyframes (bastid 450 ms — MÅSTE matcha
+  `BASE.sweepSlide`) + `winner-glow`, alla skalade av `--motion-scale` och med
+  i reduced-motion-listan.
+- **Facit:** `src/pages/play/sticksvep.test.tsx` — seedad giv, hela fasmaskinen
+  + bot-gaten + skipSweep, alla tider från `tempo.ts`.
+
+Mergepunkt `1fed694`, Vercel-deployen Ready, svep-koden verifierad i livesidans
+JS-paket. Livekontroll i dev-servern före pushen: fasloggen visade glow →
+`trick-sweep-w` (Väst vann sticket) → rensat → Förra sticket-panelen framme.
+
+## Känsla i kortspelet — etapp 3: kortflygningen (2026-07-28, natt)
+
+Största etappen, levererad ensam: spelade kort teleporterar inte längre — en
+klon FLYGER från handen till kortets plats i sticket (WAAPI, `el.animate`),
+och det riktiga kortet står dolt på plats tills klonen landat. Spelmotorn
+orörd, inga nya beroenden:
+
+- **`src/pages/play/useCardFlight.ts` (ny):** flygtillståndet. Ref-register
+  (kortnyckel → DOM-element, stabil callback per nyckel), `beginFlight(seat,
+  card)` som mäter källkortets `getBoundingClientRect()` SYNKRONT före
+  `setPlay` (efteråt är kortet borta ur handen), `flown`-mängden som stoppar
+  dubbel inglidning efter landning. `canFly`-vakten (WAAPI finns + inte
+  reduced motion) gör att jsdom och rörelsekänsliga får fallbacken `card-in-*`
+  — fallback-vägen ÄR testvägen.
+- **`src/pages/play/FlightLayer.tsx` (ny):** overlay i Felt (`z-30`,
+  pointer-events-none) som ställer klonen i mål (`data-flight-target`-wrappern
+  i stickmitten) och animerar från källan: mittpunktsmatematik (rotationssäker),
+  skala källstorlek→sm (Syds md-kort 1.4→1), statisk rotation per säte (V 90°,
+  Ö −90°), husets easing, tid `ms('flight', speed)` = temposkalad. Dold hand →
+  start strax utanför sätets bordskant, redan slutvriden.
+- **Fjärde kortet (kluringen):** när sticket fullbordas är mitten tom EN
+  commit (svepet sätts i effekt efteråt) → landningsplatsen saknas när
+  FlightLayer mäter. Löst med två delar: sveputkiket i `usePlayTable.ts` blev
+  `useLayoutEffect` (svepet ritas före paint — tog samtidigt bort en gammal
+  enrutersblinkning) och FlightLayer väntar + mäter om när `targetsKey`
+  (stickmittens innehåll) ändras.
+- **Kopplingarna:** `PlayingCard` fick `ref`-prop (React 19 = vanlig prop);
+  `SouthFan`/`SuitColumns`/`SideStack` registrerar sina kort; `TrickCenterLive`
+  märker landningsplatserna, gömmer kortet i luften via wrapper-style (INTE
+  kortets klass — `transition-all` hade tonat) och hoppar över `card-in` för
+  flugna kort; flygstart i `usePlayTable` före `setPlay` i både `onPlay`
+  (människan) och botens `apply`.
+- **Facit:** `src/pages/play/kortflygning.test.tsx` — seedad giv, WAAPI stubbat
+  (jsdom saknar det): fallbacken utan stub, flygstart för bot + människa,
+  stale-id-skydd, dolt/visat kort i stickmitten, FlightLayer-animationens tid
+  från `tempo.ts` och vänta-mät-om-vägen för fjärde kortet.
+
+Mergepunkt `e602a01`. Livekontroll i dev-servern före pushen (instrumenterad
+`Element.prototype.animate`):
+alla fyra källtyperna flög rätt — Väst från vänsterkanten (rot 90°), träkarlen
+Nord från kolumnerna (mätt källa), Öst från högerkanten (rot −90°), Syd från
+solfjädern (skala 1.4) — fjärde kortet fick sin flygning via svep-omritningen,
+landade kort synliga utan `card-in`, inga konsolfel, temposkalningen bekräftad
+(sparat Snabb-val gav 154 ms = 280 × 0,55).
+
+## Känsla i kortspelet — etapp 4: ljuden (2026-07-28, natt)
+
+Kortspelet är inte längre stumt: tre diskreta, SYNTETISERADE ljud via Web
+Audio — inga ljudfiler, inga nya beroenden, ingen PWA-ändring. Standard PÅ,
+"Ljud"-rad i spelfasens ⋮-meny (sparas som `learnbridge:sound`):
+
+- **`src/lib/sound.ts` (ny):** recepten (allt gain ≤ 0.15) — **card** 50 ms
+  brusknäpp genom lågpass 1,8 kHz (kort mot filtduk), **sweep** 200 ms brus
+  genom bandpass som glider 400→1200 Hz (svischet), **deal** tre tick med
+  stigande ton. `armSound()` skapar/väcker AudioContext — får bara ske i en
+  användargest (autoplay-policyn), därför kopplad till `pointerdown` på HELA
+  Play-sidan: budfasens klick armerar motorn så giv-klar-ticken hörs redan
+  när första bordet dukas. Utan Web Audio (jsdom) no-op:ar allt tyst — ett
+  ljud får aldrig kunna krascha spelet.
+- **Hook-punkterna i `usePlayTable.ts` (en per ljud, alla ref-jämförda =
+  StrictMode-säkra):** *card* — en enda krok som räknar totalt lagda kort
+  (`completedTricks.length*4 + currentTrick.length`) och därmed fångar både
+  människans och botens kort, även det fjärde (3 → 4 när sticket bokförs);
+  *sweep* — när svepet går in i slide-fasen (ref på sticket);
+  *deal* — `setTimeout(ms('dealSoundDelay'))` vid bordets mount (kaskadens
+  slut), ljudvalet läses via ref så av-slag hinner verka.
+- **Facit:** `src/pages/play/ljud.test.tsx` — seedad giv, `playSound` mockad
+  (jsdom kan inte spela ändå) men persistensen äkta: standard PÅ, toggle
+  sparas och överlever omladdning, kortknäpp+giv-klar+svisch i rätt ordning,
+  fyra knäppar för ett helt stick, och total tystnad med ljudet Av.
+
+Mergepunkt `3762481`. Livekontroll i dev-servern före pushen (instrumenterade `AudioBufferSourceNode`/
+`OscillatorNode.start`): ljudmotorn `running` redan i budfasen (pointerdown-
+armeringen), sedan exakt rätt sekvens — knäpp (Västs utspel) → tre tick (given
+klar) → tre knäppar (N/Ö/S) → svisch (svepet); med ljudet Av rullade spelet
+vidare med tom ljudlogg. Inga konsolfel.
+
+## Känsla i kortspelet — etapp 5: claim-reveal + resultatövergång + guldglow (2026-07-28, natt) · SPÅRET KLART
+
+Sista etappen — avsluten. Tre delar, allt UI-fas ovanpå motorn (`claim.ts` orörd):
+
+- **Claim-revealen** (`pendingClaim` i `usePlayTable.ts`): en godkänd claim
+  (manuell `onClaim` eller auto-claim-effekten) committas inte direkt — alla
+  händer läggs upp öppna (`isFaceUp` → true för alla säten) med panel
+  "Claim godkänd/Auto Claim — korten ligger uppe" + knappen "Visa resultatet →".
+  **Ägarbeslut under bygget (samma kväll):** ursprungsplanens timer
+  (`claimReveal` 2500 ms) VÄCKTES och togs bort — vyn ska ligga kvar precis
+  som vid ett riktigt bord tills spelaren själv går vidare
+  (`finishClaimReveal`, enda vägen framåt). `BASE.claimReveal` utgick ur
+  `tempo.ts`. Botarna, auto-claim, `onPlay` OCH `onCardClick` är låsta under
+  revealen — inget kan röras av misstag.
+- **Resultatövergången:** `done` byter inte längre träd direkt — bordet får
+  `felt-fade-out` (bastid 500 ms = `BASE.resultOutro`, temposkalad) och först
+  när `showResult`-timern gått tar resultatvyn över. Inget hårt klipp.
+- **Guldglowen:** `result-made-glow` på resultatdialogen vid `result.made` —
+  engångs guldsvällning + diagonalt skimmer, lagt på `::before`/`::after` så
+  dialogens egen `dialog-in`-animation inte skrivs över; statiskt
+  bakgrundsläge parkerar skimret osynligt vid reduced motion. Bet = sobert
+  (ägarbeslut: inget konfetti). Allt i reduced-motion-listan.
+- **Facit:** `src/pages/play/claimreveal.test.tsx` — claim-domen mockad
+  (DDS-domen har egna tester i `claim.test.ts`): revealen ligger kvar långt
+  förbi alla speltimers, botarna gateade, bara knappen avslutar, auto-claim
+  går via revealen, resultatvyn väntar ut uttoningen.
+
+Mergepunkt `5f29949`. Livekontroll i dev-servern före pushen (händelselogg +
+autospelare): bet-giv
+gav reveal → uttoning → sobert resultat utan glow; hemgångsgiv gav reveal
+(låg kvar 69 s tills knappen trycktes, ställningen frusen, 9 öppna sidokort) →
+uttoning → "Hemma! 11 stick (+2)" MED guldglow. Inga konsolfel.
+
+**Därmed är hela "känsla i kortspelet"-spåret (etapp 1–5) klart och NU-platsen
+ledig — ägaren väljer nästa NU ur NÄST/SENARE.** Samlad beskrivning av spåret:
+`docs/kortspel.md` avsnittet "Tempo, animationer och ljud".
+
+---
+
+## 2026-08-11/12 — Tävlingen klar & städad (flyttat från CLAUDE.md NU)
+
+- **Etapp 2 (dagliga tävlingen) komplett & live:** hela kedjan konton →
+  inskick → topplista/matchpoäng; migrationerna `0005`+`0006` körda; alla
+  testkonton raderade i Supabase (resultaten kaskaderar bort).
+- **Tävlings-UI:** 6 polishsteg (nedräkning · server-MP · `DinStällning` ·
+  `Resultattabell` · rondgenomgång · traveller) + server-driven framsteg
+  (`dinaInskick` i `/api/topplista` + `slåIhopFramsteg` → samma bild på alla
+  enheter) + preliminärt 100 %/1:a för ensam spelare. MP är STANDARD
+  (topp = 100 %, snitt 50 %).
+- **Mobil-städ:** översikten rensad (progress/rutnät/allt-klart-kort bort,
+  ⟳-uppdatera-knapp, topprad på en rad, "N/12 givar").
+- **"Spela given igen" (övning), a24a369:** omspel i giv-detaljvyn med
+  `övning`-flagga och `onResultat` som no-op → MP% orört; bugg lagad
+  (`startSameGame` → `gameFromDeal`).
+- Felrapporterna #46/#47/#48 lagade (27c6450).
+
+## 2026-08-12 — Speldiagnosen: riggen byggd (steg 1–7)
+
+Ägarbeslut efter första tävlingsdagen (3 fel på 12 givar hos 3 användare):
+bygg bottar som spelar, felsöker och rapporterar — ägaren bekräftar innan
+reparation. Plan + bygge samma dag; hela riggen i `docs/speldiagnos.md`.
+Bärande princip: **RÄTT, inte max antal stick** — DD-facit är larmklocka,
+klassningen (systemfel/ärlig miss/oklart) görs i `/speldiagnos`-agentsteget.
+Nyckelfynd under bygget: bridge-dds `AnalysePlayPBN` (oanvänt tills nu) ger
+DD-facit efter varje lagt kort; spåret har 49 värden (t.o.m. kort 48 — sista
+sticket är tvunget), låst i `revisor-dds-analyse.test.ts`. De fyra kopierade
+helgivslooparna ersattes av `spela-giv.ts` (per-beslut-frön via
+`botDecisionSeed` → körningar 100 % reproducerbara ur fröet). `.env` visade
+sig vara SPÅRAD av git → tävlingshemligheten ska alltid till `.env.local`
+(gitignorad via `*.local`).
+
+## 2026-09-01…03 — Trebottarna, felrapporterna #54–#57 och pliktsvepet K1–K5 (flyttat från CLAUDE.md NU)
+
+- **2026-09-01:** speldiagnosens runda 6 ("andra hand ser bordet" behållen,
+  trumfplans-kandidaten byggd-mätt-förkastad, MC-på-få-lägen bevakas —
+  `docs/speldiagnos.md` §S6). Bot-deltagaren rebidz-bot KLAR & LIVE + ALLA
+  Beslut B-etapper (0–4) levererade (migrationerna 0009–0011 + secrets).
+  Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+- **2026-09-02 — trebottarna i nivåer (mergepunkt `fe2ffb3`):** Gunnar52
+  (expert), Lasse68 (medel), Emma03 (nybörjare) spelar dagens tävling varje
+  natt; all nivåskillnad i SYDS kortspel (`botniva.ts` + `spelaBotGiv`),
+  N/Ö/V standardmotorn. Rattarna netto-mätta (`botniva.probe.test.ts`,
+  kommandot i filhuvudet): medel = MC-fönster 4 + 8 sampel + ingen avkodning,
+  nybörjare = ingen MC. 🤖 borta ur UI och API-svar; info-raden "I tävlingen
+  deltar även datorspelare". Live-verifierad samma dag. Detalj:
+  `docs/beslut-b-plan.md` Påbyggnad 2.
+- **2026-09-02 — felrapporterna #54–#57 (mergepunkt `4898958`):** fritt bud i
+  5+ högfärg i stället för negativ X (+ öppnarens 3-korts höjning och
+  fortsättningen), advancerns preferens när inklivaren visat två färger,
+  tolkningstexter för spärr/svag tvåa/2♣ och Stayman-svaren. Ägarens ord:
+  säg "regeln saknades", inte "off-book".
+- **2026-09-02/03 — pliktsvepet K1–K5 (mergepunkter `842809b`, `e7a3931`):**
+  ägarval "grund först". Riggen `pliktsvep.probe.test.ts` (`$env:PLIKT='1'`)
+  prövar varje pass i störda auktioner mot plikterna. K1 inklivaren svarar
+  advancerns cue-höjning ostört (12 → 0 av 1539 störda), K3 höjning på visad
+  längd — 3-korts höjning av 1-lägesinkliv från 6 hp, svararen över
+  1NT-inkliv (2M / X = straff 10+) och ovanlig 2NT/Michaels (3M tävlande, 4M
+  med 10+ stödpoäng) (92 → 5), K2 negativ-dubblarens svaga preferens (8 → 2),
+  K5 öppnaren höjer fritt 2♣/2♦ (5♣-blåsningen borta). Boken §5.8, §7.1,
+  §7.4, §7.8 e, §9. Kvar i `docs/bevaka.md`: frö 20262632 (egen 8-korts färg
+  vs 3-korts minorfit) och motståndarnas fortsättning efter våra höjningar.
+- **2026-09-03 — felrapport #58 (2-över-1-kravet syntes inte):** bricka 4,
+  1♦–P–2♣ (människan) –P– 2NT. Syds 2♣ avvek från motorns linje (inverterad
+  2♦), så Nords återbud byggdes som ett svarar-bud utan regel ("2 sang 11–12,
+  inget stöd") och förklaringarna sade "krav 1 rond" resp. "18–19, inbjuder".
+  Ny detektor `openerRebidAfterPartnersTwoOverOne` (§5.3-återbudet via
+  `openerRebidAfter2over1`, regel + kravnivå), tolkningslagret känner igen
+  2/1 och märker hela auktionen under utgång som utgångskrav, regeltabellen
+  fick `rebid: 2NT (GF)`/`rebid: ny färg (GF)`. Felrapporter som skickas mitt
+  i budgivningen skriver "budgivning pågår" (inte "passades ut"). Ägarbeslut
+  ur samma giv: 2/1 går FÖRE inverterad höjning med 12+ och egen 5-kortsfärg
+  ("game force först, stödet visas i nästa rond") — försenat stöd 3m med
+  slamintresse → öppnarens 3NT-förslag/4m → slamutredningen; bricka 4 →
+  6♦. Boken §4.2, §5.3, §9. Facit: `auction-2over1-aterbud-offbook.test.ts`,
+  `responses.test.ts`.
+- **2026-09-04 — felrapporterna #59 + #60:** **(#59, bricka 6)** 1♠–1NT–2♣–P
+  med ♠A ♥QJ943 ♦KJT852 ♣T. Boken §5.1 hade regeln (ny färg efter 1NT = 5+
+  kort, inget stöd) men koden saknade den → "inget bättre, pass" och 2♣ på
+  4-1. 1NT var systemriktigt (9 hp < 2/1). Ny regel `ny färg efter 1NT`
+  (`responder-rebids.ts`, 6+ kort före 2-korts preferens), öppnaren passar
+  (`rebids.ts`), kravminnet läser inte budet som rondkrav (`auctionForce`).
+  Tolkningslagret: 1M–1NT–2x lästes som Stayman → nu "återbud i ny färg, 3+,
+  ej krav"; svararens 2y = egen färg till spel. **(#60, bricka 9)**
+  1♥–(3♦)–4♦–P–4♥–P–4NT–P–5♣–P–5♥–P–P med fyra nyckelkort: rättelsen över
+  stoppbudet fanns bara i den kanoniska linjen. Ny detektor
+  `rkcSignoffCorrection` i budlådan (regel `RKC: rättelse`), tolkningslagret
+  läser hela essfrågesekvensen. Boken §5.1, §6.1, §9. Mergepunkt `d3b7961`.
+  Facit: `responder-rebids.test.ts`, `auction-live.test.ts`,
+  `auction-interpret.test.ts`, `rules.test.ts`. Lärdom: repots filer är CRLF,
+  Write/heredoc ger LF — flerradiga skriptankare måste konverteras.
+
+## 2026-09-04 — Motorbytet beslutat: från manus till fyra spelare (pliktsvepet pausat)
+
+Ägaren begärde en total genomgång av "den kanoniska linjen": budgivningen
+kändes overklig och oren, felen kom i jämn ström. Genomgången visade att motorn
+skriver ett MANUS (`buildAuction` ser hela given, modellerar en konkurrensrond)
+som `decideCall` spelar upp, och att 70 detektorer i en ordningskritisk kedja
+tar över när manuset tar slut. Varje söm har gett en ström av felrapporter, samma
+beslut finns på två ställen, och manusets slamfunktioner tar båda parhänderna
+som indata. R2 pekade ut avsaknaden av auktionsläge redan 2026-07; vi lappade.
+
+**Ägarbeslut:** motorbytet är NU. Planen (diagnos, målbild, skyddsnät, etapp
+0–6, grindbeslut) bor i `docs/motorbyte-plan.md`. Pliktsvepet pausat (K1/K3/
+K2/K5 live; resterna blir facit i etapp 4). Ägaren vill ha en etapp per
+session; nästa session = etapp 0 (rigg + baslinjer).
+
+## 2026-09-11/12 — Motorbytet etapp 6: efterkontrollen klar + live-provets första fynd (flyttat från CLAUDE.md NU 2026-09-13)
+
+Efterkontrollen KLAR 2026-09-11 (alla riggar gröna, bordet testkört). Därefter
+🚪 ägarens live-prov: ägaren provspelar och rapporterar fel; Claude lagar
+test-drivet (facit + auktionsdiff + grind) och PCD:ar var för sig.
+
+**Åtta hål lagade & LIVE 2026-09-11/12:** cue-rond+överbudsrättelse · systems-on
+efter 2NT-inkliv · 2♣-återbudet 5+ · Smolen/garbage över 1NT-inkliv ·
+RKC-trumfdamen ärlig (bevisad 10-fit) · konkurrens-fritt-bud (öppnarens 5-4/2NT +
+svararens fortsättning, `1e298d2`) · **RKC-frågaren seat-agnostisk**
+(öppnaren-som-kapten frågar trumfdam med 5♥ i st.f. PASS;
+`rkc-asker-continuations.ts`, damfrågan avgör lillslam-mot-utgång,
+storslamsgrenen SENARE) · **dubblarens cue-höjning är krav** (advancern svarar
+2M/3M/2NT/3NT på dubblarens cue i st.f. att passa ut den;
+`advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`, §7.3, slam-över-max
+SENARE). Detaljerna: [[motorbytet-manus-till-spelare]] + budsystem §9.
+
+**Dessutom (Claudes provspelning 2026-09-12, systemrevisorn 1000 givar):** tre
+systemfel lagade & LIVE — negativ-dubblingssvar (6-korts högfärg före sang) ·
+inverterad minors 2NT-stoppkrav · Michaels-cue i egen färg ≠ cue-höjning. Detalj:
+budsystem §9 + `auction-revisor-fynd-2026-09-12.test.ts`. Följd-fynd (bevaka.md):
+negativ-dubblaren accepterar inte invit-hoppet — metodval, väntar ägaren.
+
+**Nyss klart dessförinnan (2026-09-01…03):** speldiagnosens runda 6 · rebidz-bot +
+alla Beslut B-etapper · trebottarna Gunnar52/Lasse68/Emma03 LIVE (nivå bara i
+Syds kortspel, `botniva.ts`) · felrapporterna #54–#60 (`4898958`, 2026-09-03/04) ·
+pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+
+## 2026-09-13 — Livskvalitetssvepet i Dagens tävling påbörjat (etapp A: två tryck alltid)
+
+Ägaren kom med fem önskemål runt tävlingen och kontot (planen med etapp A–E +
+D1–D3 och ägarbesluten: `docs/beslut-b-plan.md`, "Påbyggnad — tävlingens
+livskvalitet"). Kartläggningen visade att hela auktionen + alla spelade kort
+redan sparas per spelare (`daily_results.payload`) och att ingen tävlingsdata
+raderas — historiken finns, bara läsvägar och UI saknas.
+
+**Etapp A KLAR:** ett-trycks-genvägen för singeltons (facelift pass 3, 2026-08-02)
+gav feltryck vid bordet → borttagen i både Spela kort (`usePlayTable.onCardClick`)
+och vänbordet (`BordSpel.klick`). Två tryck gäller nu alltid: första väljer
+färgen, andra spelar. Bottarna oberörda (egna vägar). Facit `play/tvatryck.test.tsx`
+(seedad giv där Syd håller en singelton på utspel); `syd-trakarl.test.tsx` klickar
+nu ovillkorligt två gånger.
+
+## 2026-09-13 — Livskvalitetssvepet etapp B: tillsvidare-procenten + "7/12"
+
+Ägarbeslut: snitt = (Σ MP% på poängsatta givar + 40 × ej poängsatta) / storlek —
+klubbens "medel minus" för ospelad bricka; identiskt med det gamla snittet när
+alla 12 är inne, och samma tal styr ordningen i Ställningen för alla. Byggt:
+`provisorisktSnitt()`/`PROVISORISK_PROCENT` i `matchpoints.ts`, `spelade` per
+spelare (räknas ur ALLA inskick, även opoängsatta), obligatorisk `storlek` i
+`aggregeraTopplista`; endpointen `topplista.ts` lämnar `spelade` +
+`provisoriskProcent`; UI: "7/12" per rad i Ställningen, "spelade/12" + 40 %-not
+i Din ställning, "preliminärt 100 %"-cellen ersatt av "väntar" (räknas som 40 %).
+Alla med minst ett inskick står nu på listan. Facit: `matchpoints.test.ts`,
+ny `api-src/topplista.test.ts` (endpoint-skalet + vakten att `is_bot` aldrig
+serialiseras), `DagensTavling.test.tsx`.
+
+## 2026-09-13 — Livskvalitetssvepet etapp C: se hur vilken spelare som helst bjöd och spelade
+
+Datat fanns redan (`daily_results.payload` bär auktion + kort för alla, även
+bottarna); bara läsvägen och vyn saknades. Servern (`giv-resultat.ts`) skickar
+nu `history` (kompakt: säte + bud + regelnamn — `kompaktHistorik` strippar den
+hand-byggda förklaringstexten), `plays` och `declarerTricks` per rad, bakom
+samma 403-grind som förr (du måste själv ha spelat brickan). Klienten: varje
+rad i travellern är klickbar → `GivGranskning` ("Så spelade X given"): sticken
+återskapas med `byggGranskning` och stegas i `PlayReplay` (perspektivfri — rätt
+för andras händer); auktionens förklaringar tolkas systemiskt ur buden
+(`interpretCall`), lika för alla. Din egen rad leder vidare till
+`RondRapportView`, som nu läser serverns payload före localStorage → egen
+genomgång fungerar på annan enhet (cross-device-luckan stängd). Kontraktscellen
+lyft till `tavling/TavlingDelar.tsx` (delas med historiksidan i D3). Facit:
+`brickresultat.test.ts`, ny `api-src/giv-resultat.test.ts` (401/400/429/403,
+passthrough, ingen `explanation`/`is_bot` i svaret), `DagensTavling.test.tsx`.
+
+## 2026-09-13 — Livskvalitetssvepet etapp E: "Spelade givar" på Mitt konto + exporten
+
+Ägarbeslut: räkna tävlingsgivar + Dagens giv (serverdata, exakt från dag ett);
+fritt spel mot datorn finns bara lokalt och räknas inte. Ingen ny endpoint:
+`fetchSpeladeGivar()` i `src/lib/backend/account.ts` gör två count-frågor
+(head) mot de egna raderna — RLS-policyerna "läs egna resultat"/"läs egen
+dagslogg" släpper ändå bara igenom `auth.uid()`, men frågan filtrerar
+uttryckligen. Tävlingsgivar = status godkand + granskning (avvisade är ingen
+giv). `Konto.tsx` visar raden "Spelade givar" med totalen och underraden
+"tävling N · dagens giv M" ("…" under laddning, "—" vid fel — sidan blockeras
+aldrig). GDPR: `exportMyData()` (kommentaren sade sedan etapp 2 att den skulle
+utökas) tar nu med tävlingsresultaten inkl. payload, dagsloggen och
+placeringarna (`daily_standings`, null tills 0012 körts). Facit: nya
+`account.test.ts` (hånad supabase-klient: vilka frågor + hopsättning) och
+`Konto.test.tsx`. Lärdom: `mockReset`/`mockClear` i `beforeEach` fick vitest 4
+att fälla felfallet trots sidans `.catch` — varje test sätter sin egen mock.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D1: `daily_standings` + nattlig finalisering
+
+Grunden för tävlingshistoriken och medaljtabellen. Vägval: en FRYST ställning
+per dag i tabell (inte "räkna allt i farten" — obegränsad växt och medaljer
+som kunde ändras i efterhand — och inte "lat finalisering vid första anrop",
+som kunde frysa dagen före granskningens statusflyttar). Skrivs av nattjobbet
+i `tavling-granskning.yml` som ett steg EFTER djupgranskningen, `if: always()`
+så fynd aldrig blockerar det. Proben `tavlingsavslut.probe.test.ts` tar alla
+dagar före idag (Stockholm) utan ställning + skriver om de tre senaste —
+självläkande vid röd natt, fyller hela historiken vid första körningen —
+upsert `on_conflict=set_id,user_id` med `merge-duplicates`, och tar bort
+spelare som fallit ur en dags ställning. Rena modulen `tavlingsavslut.ts`:
+`byggStallning` (samma aggregat som den levande listan → siffran som fryses är
+den man såg) och `raknaMedaljer` (delad rang kan ge två guld; bottar uteslutna
+men deras placeringar räknas som de var, så silver bakom en bot förblir
+silver; sortering guld → silver → brons → namn). `MIN_PER_GIV` flyttad hit och
+delas med `topplista.ts`. Migration `0012` = ägarsteg; kod och export tål att
+tabellen saknas tills dess.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D2: historik-API:t
+
+Läsvägarna till tidigare tävlingsdagar. `lasDag` (`api-src/_lib/tavlingsdag.ts`)
+tolkar `?dag=`: saknas → idag (Stockholmsdygnet), giltigt datum ≤ idag → den
+dagen, framtid/ogiltigt → 400 — förscreeningen lägger morgondagens givar i
+databasen i förväg och de får aldrig lämnas ut. De tre läs-endpointsen tar
+parametern; `topplista` svarar dessutom `slutlig` (finns en frusen rad i
+`daily_standings`) och `giv-resultat` släpper tjuvkiks-grinden för avslutade
+dagar (inget att kika på). Ny `tavling-historik.ts`: dagslistan nyast först
+med din placering ur `daily_standings`; ofrusna dagar (i regel gårdagen före
+nattjobbet) räknas i farten med `byggStallning`, men högst tre så anropet
+inte växer med historiken; medaljtabellen via `raknaMedaljer` med bottarna
+uteslutna server-side (`profiles.is_bot` läses men serialiseras aldrig —
+vaktat i facit). `restGetAlla` läser `daily_standings` sida för sida (Range).
+Klienten fick `dag?`-parametrar + `fetchTavlingHistorik()`; UI:t kommer i D3.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D3: historiksidan + medaljtabellen (svepet KLART)
+
+Sista etappen. `src/pages/TavlingHistorik.tsx` (rutt `spela-kort/tavling/
+historik`, immersiv som tävlingen, konto krävs): listvyn visar medaljtabellen
+(topp 5 i guld/silver/brons, din rad markerad, "datorspelare räknas inte i
+medaljtabellen" sagt rakt ut) och alla avslutade dagar nyast först med din
+placering ("2:a av 5 · 55,3 %" eller "spelade inte"; ofrusna dagar märkta
+provisorisk). Dagvyn via `?dag=YYYY-MM-DD` (delbar djuplänk): Din ställning,
+bricklistan (ditt kontrakt/resultat/MP% där du spelade, annars "spelade
+inte" — alla klickbara), ställningen märkt "slutlig", travellern med `dag`,
+genomgången "Så spelade X given" och övningsläget (skickar aldrig in). För att
+båda sidorna ska dela vyerna lyftes `DinStällning`, `Resultattabell`,
+`GivDetalj` (nu med `dag?` + valfri `onÖvning`), `TravellerTabell`,
+`TopplistaVy` (fotnot "slutlig"/"provisorisk"), `Skärm` och `HemLänk` ur
+`DagensTavling.tsx` till `tavling/TavlingDelar.tsx` — sidan behåller bara
+flödet. Länk "Tidigare tävlingar & medaljer →" under Ställningen. Facit:
+`TavlingHistorik.test.tsx` (utloggad · listvy · dagvy · djuplänk → traveller →
+spelare → genomgång → tillbaka hela vägen). Därmed är alla fem ägarönskemålen
+från 2026-09-13 levererade; kvar = ägarsteget migration `0012` + första
+nattkörningen som fyller historiken.
+
+## 2026-09-13 — Migration 0012 körd, historiken fylld, medalj kräver två spelare
+
+Ägaren körde `0012`; `workflow_dispatch` på tavling-granskning skrev
+slutställningar för alla 34 avslutade dagar (18 med inskick, 16 tomma). Första
+körningen avslöjade en regellucka: fem solodagar i augusti (ägarens testrundor
+före bottarna) gav en ensam spelare "guld" med 40 % på 1–7 givar. Ägarbeslut:
+en medalj kräver minst två spelare i dagens ställning (samma tanke som
+poänggränsen per giv). `raknaMedaljer(placeringar med set, uteslut, topp,
+minSpelare = MIN_SPELARE_FOR_MEDALJ)` — bottar räknas som spelare i gränsen.
+Facit utökade; fotnoten på medaljtabellen säger regeln.
+
+## 2026-09-13 — Motorbytet slutfört: facit-kön tömd, invit-hoppet, M19, Smolen efter 1NT
+
+Ägaren: "liveproven är klara. gör klart budmotorn." Etapp 6 stängdes och de
+kända resterna byggdes test-drivet i ett svep — facit före fix, baslinje-dumpar
+på `c4d7ac7` före första kodändringen, auktions- och avvikelsediff klassad per
+mönster, hela sviten grön. Elva regler (budsystem §9 2026-09-13, planens logg):
+flykten över deras X av vårt 1NT är avslut (force-faktumet läste den som
+rondkrav) · DONT-dubblaren visar enfärgen själv · inklivarens preferens (K2) ·
+återöppningssvaret undviker deras färger · responsiv-dubblaren väger partnerns
+tvingade svar · den starka dubblaren utan egen färg (M19) · negativ-dubblaren
+accepterar invit-hoppet (8+ TP) · svag rymning 3M över 2NT i konkurrens · 2♣-
+linjens lillslam på solid egen färg · öppnarens Smolen-/5-4-svar efter
+1NT–2♣–2♦ · kikvakten skarp för hela auktionen. Kvar som SENARE: kontrerad
+checkback.
+
+**Lärdomar:** (1) auktionsdiffen avslöjade två hål facit-kön inte kände till
+(Smolen-svaret saknades efter 1NT; deras cue i VÅR färg räknades som "deras
+färg") — diffen är grinden, inte facit-testerna ensamma. (2) Två av reglerna
+fick först för brett grepp (force-avsmalningen tog 4♦ efter transfer; responsiv-
+trösklarna glömde att partnern är dubblaren med 12+) — mät, smalna av, mät igen,
+innan docs skrivs.
+
+## 2026-09-13 — Tappade tävlingsinskick: omförsök på servern + omsändning i klienten (ägarrapport "403")
+
+Ägaren: användares givar registreras inte som de ska, felkod 403. Datat i
+`daily_results` visade inga avvisade rader men två brickor som saknades helt
+mitt i annars kompletta sviter (Fernstedt 10, Oskar 11). Kedjan: given bokförs
+lokalt när den blir klar och skickas in EN gång i bakgrunden; faller det
+(`skicka-in.ts` gjorde ett enda fetch mot Supabase utan omförsök, och
+klienten skickade aldrig om) står given som spelad lokalt medan servern saknar
+den — travellern (`giv-resultat.ts`) svarar då 403 "du har inte spelat given".
+Fix: `restPost` med omförsök i `api-src/_lib/supabase-rest.ts` (409 vid
+unik-krock = första försöket landade → raden som står returneras),
+`skicka-in.ts` på den delade `restGet`/`restPost`; klienten sparar
+spelförarsticken i framsteget, `inskickUrFramsteg`/`behöverSkickasOm`
+(`tavling.ts`) bygger om inskicket, och `DagensTavling` skickar om osända
+givar vid sidöppning och uppdatera-knappen; raden visar "ej inskickad", och
+403-texten i travellern förklarar läget. Facit: `supabase-rest.test.ts`,
+`tavling.test.ts`, `DagensTavling-flode.test.tsx`. Deploy-skevheten (PWA:n
+byter inte version mitt i en session, servern validerar botbud med ny motor)
+finns kvar som mekanism men slog inte här: botauktionerna på dagens och
+gårdagens 24 brickor var identiska före/efter morgonens deploy.
+
+## 2026-09-14 — Bricka 12: advancern efter balansinkliv + inklivarens rättelse (ägarrapport)
+
+Ägaren rapporterade dagens bricka 12: 1♦–P–P–(1♥)–P–**1♠** på ♠KQ42 ♥QJ32 ♦J2 ♣653
+(ny färg trots 4-korts stöd), och Nord passade 1♠ med ♠53 ♥AT965 → 1♠ i en 4-2
+i stället för 1♥ i 9-korts fiten. Roten: advancer-raden täckte bara direkt sits;
+balanserings-advancern föll till catch-allen (`partner-färg`), vars "utan fit"-
+gren tände fast fiten fanns (rabatten −3 gjorde höjningen "för svag"). Och
+inklivaren hade ingen regel för advancerns nya färg på 1-läget. Byggt test-
+drivet (facit före fix): ny rad `advance-balans`, `advancerFitPass` (fit →
+pass, aldrig ny färg), tävlande 2-lägeshöjning från 6 hp när de bjuder vidare,
+`overcallerCorrectsToOwnSuit` (≤ 2 kort i advancerns färg → tillbaka till egen
+5+). Budsystem §7.1 + §9. Facit `auction-advancer-balansinkliv.test.ts`; hela
+sviten grön (`npm test`). Bricka 12 landar nu i 1♥ av N.
+
+## 2026-09-14 — Stickväntan: sticket ligger kvar tills du trycker (ägarbeslut)
+
+Ägaren: "när ett stick är spelat försvinner det för snabbt från bordets mitt".
+Byggt på alla spelbara ytor (Spela kort `usePlayTable`, vänner-bordet
+`useBordSpel`) med EN mekanism: svepet startar i `'vanta'` när DU leder nästa
+stick (vinnaren är en plats du styr — `svepStartFas`/`jagLederNasta`) och står
+stilla tills du trycker på stickytan (mellanslag/Enter går också); den pekande
+handen (`StickHint`, CSS `stick-hint`) tänds efter `sweepHint` (2 s). Leder
+boten: `'hold'` under `SWEEP_HOLD` — ägarens uppföljning samma dag: en tunn
+guldring runt hela stickhögen (utanför pillren, ägarens skiss) fylls medurs i
+exakt bot-pausen, 2/3/4 s för snabb/normal/lugn (`SWEEP_HOLD` i `tempo.ts`,
+runda tal i stället för det faktor-skalade `sweepHold` 900; ringens CSS-tid
+sätts inline ur `sweep.holdMs` så ring och timer slutar samtidigt; ringen
+tonar in 0,5 s och ut 0,5 s SOM DEL av pausen — `RING_FADE_MS`, två
+opacitetsanimationer med ut-fasen fördröjd paus − 0,5 s) — och svep.
+Ett tryck går alltid vidare, även under botens paus
+(`advanceSweep`/`gaVidareSvep`); klick på ett kort hoppar över som förut.
+Sista sticket väntar aldrig (resultatet kommer av sig självt). Bugg ur ägarens
+skärmbild: auto-claim startade i samma ögonblick som sticket blev klart och
+handen hängde kvar över claim-revealen → `pendingClaim` släcker svepet. Bordet: väntar jag men loggen redan har nästa kort (boten tog min
+stol vid frånvaro) sveps sticket av sig självt. Facit `stickvantan.test.tsx`
+(frö 2 = vi vinner, frö 1 = boten vinner; proben: spela första sticket med
+usePlayTable och läs vinnaren); befintliga svep-/ljud-/flygtester orörda gröna.
+Browser-verifierat i Spela kort (handen syns efter 2 s, trycket sveper; ringen
+mätt med getBoundingClientRect vid 375×812, 504×909 och 1280×700: 200 px,
+ingen överlapp med kort utanför stickytan, ingen klippning). Ej automattestat:
+bordets kö-vakt (kräver hook-rigg med mockad backend).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 1: rondgenomgången per giv
+
+Ägaren valde NÄST 1 (bordens SENARE-lista) och godkände körordningen
+rondgenomgång → DD-jämförelse → claim. Etapp 1 byggd samma dag, facit före
+kod: ren modul `src/pages/bord/bord-genomgang.ts` (`byggBordGenomgang`:
+bordets projicerade givläge → hela given ur giv-klar-revealen, kontraktet,
+sticken ur korthändelserna via `verkligaStick`, buden systemiskt förklarade via
+`annoteraSystemiskt`; null när given inte är klar/utpassad), vyn
+`BordGenomgang.tsx` (topprad med kontrakt/stick/poäng, namnraden i verkliga
+stolar, `PlayReplay` som fick en `tone`-prop för den vinröda duken) och knappen
+"Genomgång av given →" i BordSpels giv-klar-vy för alla vid bordet; en effekt
+stänger genomgången när `lage.giv` byts. Ingen serverändring. Facit
+`bord-genomgang.test.ts` (motorns genomspelning som facit för sticken) +
+röktest i `BordSpel.test.tsx` (knapp → vy → tillbaka). Bordet kan inte
+provspelas lokalt (serverfunktionerna bara i molnet) → ägarens live-prov efter
+deploy. Kvar i NU: etapp 2 (DD-jämförelsen, WASM-provet först) och etapp 3
+(claim, designfrågor med ägaren före kod).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 2: DD-jämförelsen
+
+Spiken först: kan `bridge-dds` (Bo Haglunds lösare som WebAssembly) buntas i
+Vercel-funktionen? Ja — WASM:en ligger inbäddad som base64 i paketets JS, så
+esbuild med API-buntningens inställningar gav en självständig bunt (+569 kB);
+under Node laddade lösaren på 12 ms och räknade en full tabell på 5–150 ms.
+Därmed valdes serverräkning vid giv-klar (inte nattlig efterberäkning). Byggt
+facit före kod: `api-src/_lib/dd-facit.ts` (`beraknaDdFacit`: tabell + par via
+`getDds`/`dealToPbn` ur revisor-dds; `medDdFacit`: giv-klar för spelad giv får
+`data.dd`, lösarfel → orörd händelse), inkopplad i `bord.ts` vid alla tre
+bokföringsvägar (`startaGiv` blev async). Delad ren läsare
+`src/lib/engine/dd-facit.ts` (`ddStick`, `ddJamforelse`, `parText` med
+lösarens kontraktsform "4S-NS" → "4♠ NS"); `DdFacitRad` i giv-klar-vyn och
+genomgången. Ingen schemaändring, ingen ändring av webbläsarappens beroenden
+(paketet når bara serverbunten). Facit `api-src/_lib/dd-facit.test.ts`,
+`src/lib/engine/dd-facit.test.ts`, röktest i `BordSpel.test.tsx`; buntnings-
+testet kör den riktiga bygget och importerar api/bord.js under Node. Live-prov
+är ägarsteget (bordet kan inte provspelas lokalt). Kvar i NU: etapp 3 (claim
+vid bordet — designfrågor med ägaren före kod).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 3: claimen vid bordet
+
+Designfrågorna först (DD-dom eller motpartsgodkännande · ge upp · auto-claim);
+ägarens svar satte modellen: "när DD vill claima ska den göra det, men
+människan ska få möjlighet att spela klart handen = OK på claimen eller spela
+klart". Byggt facit före kod: `api-src/_lib/claim-dd.ts`
+(`spelforarenTarResten`: SolveBoardPBN på de återstående korten från
+stickstartet, exakt och på millisekunder; `claimKontrollen` ger en synkron
+funktion som `drivFram` får injicerad), bord-motorns `claim-forslag`/
+`claim-svar`-projektion (`ClaimLage`, `claimSvarande` = aktiva människor utom
+träkarlen, `claimGodkand`), pausen (kortdrag avvisas medan claimen väntar),
+bokföringen (giv-klar med claimens total + `claim` i datat, direkt när ingen
+behöver svara), nej-vägen (spelet fortsätter, aldrig nytt förslag), dragvägen
+`claim-svar` i `bord.ts` och hjärtslagets auto-OK efter 60 s
+(`claimAutoSvar`). Klienten: `BordClaim` i projektionen, dialogen "OK, bokför
+given" / "Spela klart" för den som ska svara, väntanraden för de andra, notisen
+i giv-klar-vyn. Manuell claim och "ge upp" medvetet utanför. Facit
+`claim-dd.test.ts` (riktiga lösaren: alla toppkort → ja, ett säkert
+försvarsstick → nej, aldrig mitt i ett stick, även när spelföraren själv leder),
+claim-blocket i `bord-motor.test.ts`, röktest i `BordSpel.test.tsx`. Live-prov
+vid bordet är ägarsteget. Därmed är HELA bordens SENARE-lista (etapp 1–3)
+byggd samma dag.
+
+## 2026-09-14 — Gambling 3NT ersätter "3NT = 25–27 balanserad" (ägarbeslut, byggd samma dag)
+
+Startade med ägarens fråga "P P P 3NT — vad betyder 3NT?" och beslutet att bygga
+om 3NT-öppningen till **Gambling 3NT**. Fem grindbeslut togs FÖRE bygget (alla
+ja): aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför, ingen renons, ingen
+4-korts sidofärg) · 25–27 balanserad → 2♣–2♦–3NT och 28–30 → 4NT · svar v1
+pass/4♣/5♣ pass-eller-rätta/4M · försvar v1 pass eller naturlig 4M · samma
+betydelse i alla sitsar. Exempelhänder visades före bygget (öppningsstrukturen).
+
+Byggt test-drivet (facit `gambling-3nt.test.ts` FÖRE koden): ny modul
+`gambling-3nt.ts` (öppning, svar, öppnarens rättelse, försvaret som tabellrad
+`försvar-gambling-3nt`), `openings.ts` anropar den före 1-läget och spärren,
+`responses-2c.ts` (3NT = 25–27, 4NT = 28–30, 6NT/7NT direkt över positivt 2NT
+med 25+/29+), `auction-decide.ts` (svararens 6NT/7NT/pass efter 2♣–2♦–3NT/4NT),
+betydelselagret (`afterGambling3NT`, 3NT-öppningen är inte längre sangsystemets
+bas, 2♣–2♦–4NT läses före slamzonen så det inte blir "RKC"), regelregistret +
+alertlistan. Det gamla `respondTo3NT`/`openerRebidAfter3NTResponse` rivet.
+Systemboken §3.1 (ny) + §4.4 + §9; SENARE-listan fick "Gambling 3NT — nästa
+lager". Rättelse under bygget: exempelhanden ♣AKJT763 utan dam öppnar **3♣**
+(spärr), inte 1♣ som först sades till ägaren.
+
+## 2026-09-15 — Gambling 3NT: provfrön + ägarbeslut om fortsättningen
+
+Sessionsslutet dagen efter bygget. En tillfällig probe skannade fröna 1–17 088
+(`dealFromSeed` = appens `?giv=`) och hittade 22 givar där någon öppnar Gambling
+3NT — fröna står i `docs/senare.md` under "Gambling 3NT — nästa lager". Två
+fynd bekräftade v1-luckorna: bottarna passar mot deras 3NT även med 19 hp
+balanserat (frö 3970) och med 17 hp 5-5 (frö 1370) — Klinger-försvaret saknas.
+**Ägarbeslut:** fortsättningen byggs inte nu, låg prioritet, sparas som framtida
+småfix. CLAUDE.md-rubriken sattes till KLAR & LIVE (`8e327b3`) och pushades
+separat (grön deploy). Nästa: ägarens live-prov (borden etapp 1–3 + Gambling 3NT
+i appen), sedan väljer ägaren nästa NU ur 🟢 NÄST.
+
+## 2026-09-15 — Kortregeln: träkarlen i kolumner, spelföraren i kortrad (ägarönskemål)
+
+Ägarens observation: när Syd spelför ligger Nord-träkarlen i fyra lodräta
+färgkolumner, men när Syd är träkarl låg Syds kort som en vågrät kortrad.
+Första bygget lade Syd-träkarlen i kolumner och lät spelföraren Nord ligga kvar
+i kolumner — uppmätt på 375×812: sidan blev 993 px hög (två kolumnhänder à
+336 px vid 5-kortsfärg), och inte ens den tätaste läsbara remsan (44 px,
+valörhörnet är 39 px) räckte. **Ägarbeslut:** Nord och Syd ligger aldrig i
+kolumner samtidigt — ENDAST träkarlen i kolumner, spelföraren ALLTID i kortrad.
+
+Byggt test-drivet (facit i `syd-trakarl.test.tsx` + `BordSpel.test.tsx` FÖRE
+koden): `SuitColumns` bär `data-kolumner=<stol>`; `SouthFan` fick `seat`
+(default Syd) så samma kortrad ritar spelföraren Nord upptill; `Play.tsx` ritar
+Nord som kortrad när Nord spelför och Syd-träkarlen som kolumner nertill (du
+spelar korten som förut, två tryck); `BordSpel.tsx` ritar Syd-träkarlen som
+stilla kolumner (spelläget vrids så turen aldrig är Syds → inget klickbart).
+Uppmätt efter bygget: sidhöjd 818 px på 375×812 (samma budget som förr med
+Nord-träkarlen i kolumner). Känd kosmetisk rest: ⋮/i-knapparna uppe till höger
+täcker högra delen av Nord-radens sista kort (valörhörnet syns, kortet är
+klickbart i sin vänstra del) — kortraden är 349 px bred på 375 px skärm.
+Hela sviten grön (`npm test`).
+
+**Påbyggnad samma dag — svävande menyknappar (ägarbeslut, alternativ 3):** i
+stället för att flytta ⋮/i permanent sänks knapparna mjukt (transform,
+500 ms ease-in-out, avstängd vid reducerad rörelse) till 8 px under Nords
+kortrad när raden når in under dem, och svävar tillbaka upp när Nords hand
+krympt så platsen finns. Ren DOM-geometri i `useSvavandeMeny.ts` (ankaret står
+stilla, stapeln inuti flyttas; vald färg fryser mätningen så knapparna inte
+studsar vid varje två-trycks-spel); menyn och ⓘ-overlayen följer med. Facit i
+`syd-trakarl.test.tsx` (rektanglarna mockas — jsdom har ingen layout). Uppmätt
+i browsern på 380 px: sänkta vid 13–11 kort, uppe igen från 10 kort.
+
+## 2026-09-15 — Puppet Stayman över 2NT (ägardirektiv, byggd samma dag)
+**Direktivet:** "2NT-svaren skall bli Puppet Stayman. Lär dig om denna,
+förbered bytet." Konventionen lästes in (bridgebum som huvudkälla, Wikipedia,
+Larry Cohen, Porthcawl), planen `docs/puppet-stayman-plan.md` skrevs med åtta
+grindbeslut och exempelhänder, ägaren tog besluten på eftermiddagen och bygget
+gjordes direkt (facit före fix: `puppet-stayman.test.ts`, 71 fall).
+
+**Varför det passar rebidz:** 2NT-öppningen får vara 5-3-3-2 med en 5-korts
+högfärg (`isBalanced`), men den gamla 3♣-Stayman hittade bara 4-4-fiten. En
+sond mot den gamla motorn fann dessutom två luckor som stängdes i samma bygge:
+14 hp + 4-korts högfärg mot 2NT stannade i 4M efter Stayman-fit (ingen slamport),
+och 5-5 i högfärgerna efter transfer slutade i 3NT (hjärtern visades aldrig).
+
+**Strukturen (systemboken §4.3b):** 3♣ = utgångsvärden + minst en 3-korts
+högfärg (ägarbeslut: inget annat krav). Öppnaren 3♥/3♠ = 5-korts, 3♦ = minst en
+4-korts, 3NT = ingen. Efter 3♦ bjuder svararen högfärgen hen INTE har (3♥ =
+4 spader, 3♠ = 4 hjärter) så öppnaren blir spelförare; 4♦ = båda (öppnaren
+bjuder sin bättre 4-korts, lika → 4♥), 4♣ = båda + slamintresse (öppnarens 4M
+→ 4NT vid 33+, 5M-inbjudan 31–32). Smolen över 2NT är borta — ägarens fråga
+"funkar inte Smolen?" fick svaret att Smolen och Puppet använder samma bud efter
+3♣–3♦ med olika betydelse, och att Puppets 3♦ lovar en 4-korts så 4♦ gör
+Smolens jobb. Hybriden för 5-4: 5♥4♠ = transfer + 3♠ (under 3NT), 5♠4♥ = 3♣ +
+4♦, 5-5 = transfer + 4♥. Slamporten efter Puppet-fit: cue-runda gratis under
+4M, 4NT vid 33+ (hp mot visade 20/22). Samma struktur efter 2♣–2♦–2NT (mot 22)
+och över vårt direkta 2NT-inkliv (mot 15–18, utgång från 9 hp).
+
+**Kod:** `responses-2nt.ts` (regel-id:n i `PUPPET`, `puppetAnswer`,
+`betterFourCardMajor`), `responder-rebids.ts`, `strong-2nt-systemson.ts`,
+`auction-decide.ts` (slamraderna: `slamContextFor`/`slamTrumpFromAuction` efter
+3♥/3♠, `slamContextAfterThird`/`slamTrumpAfterThird` efter öppnarens 4M,
+`PUPPET_PLACEMENTS`), `auction-meaning.ts` (betydelserna + `puppetAsked` =
+utgångskrav, annars lästes kaptenens cue inte), `preempt-defense-continuations.ts`
+(inklivets faser advance/complete/rebid/choose), `rules.ts`,
+`overcall-continuations.ts`. Gamla facit som medvetet bytte: `responses-2nt.test.ts`,
+`responder-rebids.test.ts`, `responses-2c.test.ts` (2♣–2♦–2NT–3♣–3♦–3♥–4♠),
+`auction-decide.test.ts`, `auction-stayman-not-natural.test.ts` (rubrik).
+`npx tsc` + hela `npm test` gröna. Medvetet SENARE: 4♣-slamvägen efter
+2♣–2♦–2NT, slamport över 2NT-inklivet, Muppet. CLAUDE.md kortades (fyra äldre
+"nyss klart"-block → pekare) för att hålla 16 kB-vakten.
+
+**Hälsokollen samma kväll (ägarfrågan "vad är bäst för systemets hälsa?"):**
+tre mätningar. (1) Revisorn 1000 givar före/efter bytet (gamla koden i ett git
+worktree på `50a6be6`): 21,2 % · 267,52 → 21,3 % · 267,45 — helheten oförändrad,
+som väntat (få 2NT-auktioner per 1000 givar). (2) Ny riktad sond
+`puppet.probe.test.ts` (PUPPET=1): skannar tills 300 givar går via 2NT–P–3♣
+(2NT-öppning, 2♣–2♦–2NT, direkt 2NT-inkliv — checkback och balansering
+utesluts) och dömer varje mot DD-par med revisorns `judgeDeal`; läge B
+(PUPPET_SEEDS) bjuder samma frön med en annan kod. Samma 282 givar: gamla
+koden 44,0 % rätt · 259,8 p/giv, Puppet 46,1 % · 246,7. (3) Fynd 1 ur sondens
+dyraste givar: 4NT direkt över ett Puppet-svar (3♦/3♥) lästes av öppnaren som
+essfråga (frö 20265815: 5♦ i stället för pass; 20271194: 6♥ på 5-2). Rot: min
+egen slamrad läste kaptenens 4NT över 3♥ som RKC i hjärter, och betydelselagrets
+"naket 4NT" föll till ruter. Fix (facit före fix i `puppet-stayman.test.ts`):
+4NT över alla Puppet-svar = kvantitativt (öppnaren 6NT med max via
+`openerChoosesAfterSystemsOn`, nytt argument `openerMax` 21/24/18); slam med
+stöd går via trumfsättningen **3♠ över 3♥ / 4♥ över 3♠** (`PUPPET.agree`),
+öppnaren öppnar cue-ronden (`slamSituation` prefix 4 med `partnerStarts`,
+prefix 6 efter 2♣–2♦–2NT); betydelselagret läser trumfsättningen och 4NT före
+slamzonen (`puppetAsked`) och `naturalSuits` sätter trumfen vid 3♠/4♥. Övriga
+dyra sondgivar är DD-tur (lillslam på 28 hp) eller principiella (storslam
+kräver visshet) — ärliga missar, inga fler systemfel.
+
+**Slamvägarna kompletta (ägardirektiv samma kväll: "gör klart slamvägar,
+komplett puppet"):** inventering per läge och bygge med facit före fix
+(`puppet-stayman.test.ts`, blocket "slamvägarna kompletta"). 2♣–2♦–2NT fick
+samma vägar som 2NT-öppningen: 4♣/placering → öppnarens 4M → kaptenens 4NT
+(33 mot 22) eller 5M (31–32) via `slamSituation` prefix 7, trumfsättningen
+3♠/4♥ (prefix 6, byggd tidigare), Texas + 4NT (prefix 5) och kvantitativ 4NT
+efter öppnarens 3NT genom en NY tabellrad *svar4* (svararens fjärde bud fanns
+inte som rad förut) + `kind: 'kvantitativ'` i slamraden för öppnarens svar.
+Efter öppnarens 3NT på högfärgsvisningen (2NT-vägen): `ntLadderAfterNoFit`
+(31–32 → 4NT, 33+ → 6NT). Transfervägarna: exakt 5-korts jämn 11–12 → 4NT
+kvantitativ (öppnaren 6M med max + 3-korts stöd, 6NT med max, annars pass),
+13+ → 6NT; 6+ högfärg går alltid Texas (förr transfer med slamvärden — som
+dog i 3NT) och frågar 4NT RKC över fullföljningen i slamzonen; 5♥4♠ och 5-5
+→ 4NT/5M över öppnarens 4M (`puppetPlacedFit` täcker både Puppet- och
+transferplaceringarna). Över 2NT-inklivet medvetet inga färgslamvägar
+(`slamRoutes=false` — slamraden gäller ostört) — bara kvantitativt.
+Betydelselagret: 4NT efter transfer = kvantitativt, efter Texas = RKC i
+högfärgen, efter öppnarens 3NT = kvantitativt; öppnarens 6M/6NT = accept.
+Lärdom från kvällen: fyra av fem röda facit var MINA felräknade testhänder
+(♣AJ2 = 5, inte 3) — räkna hp med en funktion, inte i huvudet.
+
+## 2026-09-16 — Designpass: granskningens åtgärder (kontrast, fokusring, filt-text, konsekvens)
+
+Ägarinitierad read-only-designgranskning → byggd och ägargodkänd via sida-vid-
+sida-artefakt (före/efter) innan PCD. Inga logikändringar — bara färg-, kontur-
+och opacitetsvärden + ett par klass-/vikttweaks. Mergepunkt `5e62517`, LIVE.
+
+- **P0 kontrast:** token `ink-faint` lyft till AA — ljust `#94a3b8→#6b7688`
+  (2,56→4,59:1), mörkt `#64748b→#8a9aad` (2,84→4,7:1); hierarkin muted>faint
+  behållen. Sidfotens text flyttad `ink-faint→ink-muted` (solid AA på sidytan).
+- **P1 fokusring:** ny delad `.focus-ring` (guld, bara `:focus-visible`) på ~20
+  handrullade kontroller (budlådan, auktionsrutan, budval, inställningsreglagen,
+  budträningskorten, arkivpilarna/dagrutorna, budsystemets sektioner, spelmenyns
+  tempo/toggle, vänner-lobbyn, startkorten, navlänkarna, headerknapparna,
+  404-CTA). Byggfynd: Lightning CSS tappar `var(--color-gold-400)` inuti
+  `outline`-genvägen → literalt guld `#d9b556` (kommenterat i `index.css`).
+- **P1 filt-mikrotext:** 18 sub-AA-etiketter i tävlings-/bordvyerna `/50→/60`.
+- **P2/P3:** primärgrönt enat till `emerald-600` (segmentkontrollen +
+  Uppdatera-pillret matchar `<Button>`); rubrikvikt `font-semibold` i
+  budträningsrunnern; `space-y-4→6` i Budvisning; `aria-label` på budsystemets
+  sök + felrapportens textruta; toggle-hover; arkivets dubbeldämpade celler.
+
+**Medvetet uteställt** (liten vinst mot bred, otestbar spridning — föreslagna som
+egen verifierad omgång): hover-token-konsolidering + aggressiv radie-likriktning
+över filtsidorna. Två av mina egna review-fynd utgick som feldiagnoser (auth-
+rubriken var inte centrerad; `rounded-3xl` är `Felt`-defaulten). Hela sviten grön
+(`npm test`), tsc rent.
+
+## 2026-09-16 — Hover-konsolidering: dokumenterad vokabulär + två stragglare (designgranskning P2-3)
+
+Andra omgången ur designgranskningen (efter kontrast/fokusring/filt-text-passet
+samma dag). Inventering av alla `hover:`-mönster visade att systemet redan var
+till största del roll-konsekvent — de semantiska tokens fanns (`hover-veil`,
+`control-hover`) och `brightness-105` var redan chip-standard. Ingen churn för
+sakens skull; smal, verifierbar konsolidering. Mergepunkt `261e62a`, LIVE.
+
+- **`index.css`:** ny dokumenterad HOVER-ROLLER-vokabulär (en sanning) — fyra
+  roller: `bg-hover-veil` (ghost på temayta), `bg-control-hover` (solid
+  sekundärkontroll), `bg-white/10` (kontroll på emerald-baren), `brightness-105`
+  (färgkodade chips). Filtsidornas translucenta knappar mörknar sin EGNA bas
+  (t.ex. emerald-950/60 → /80) — basrelativt, kan inte bli en enskild token;
+  mönstret hålls oförändrat och är internt enhetligt (Play /80, tabeller /30).
+- **`BudSystem`:** kollaps-knappens `hover:bg-white/5` → `hover:bg-hover-veil`.
+  Verklig bugg: en vit slöja på vit panel var osynlig i ljust läge.
+- **`AuctionGrid`:** budchip `hover:brightness-110` → `105` (i linje med de
+  övriga chipsen i BiddingBox/BidOptions).
+
+Medvetet uteställt: en ny `bg-brand-hover`-token drogs tillbaka (Tailwind v4
+genererade den inte utan serveromstart — skör; `bg-white/10` är redan enhetligt
+på de fyra ställena). Inga logikändringar. Hela sviten grön (`npm test`), tsc rent.
+
+## 2026-09-17/18 — Felrapporter #75–#77, tredje hand högt generaliserad, systems on efter stört 1NT
+
+**Felrapport #75 (spel) + #76 (bud)** — `341920d`, LIVE. #75: Nord la ♥7 "vinn
+billigast" när träkarlen slagit partnerns utspel i ett trumfkontrakt; tredje hand
+högt gäller nu även där. #76: ovanlig 2NT fick golvet 8 hp (ägarbeslut).
+
+**Tredje hand högt generaliserad (NU 2026-09-18)** — riggen `a651744`/`ed785a6`,
+reglerna `037403b`, LIVE. Ägardirektiv: kortvalet väger partnerns utspel,
+träkarlen (även den som lagt före mig), egen hand och det osedda — varken för
+högt eller för lågt. Byggt: mätrigg (`tredjehand.probe`, DD-poäng per lagligt
+kort via `solveAllCards`) och regel A (underspela inte), B (övertar inte partnerns
+kort med ett likvärdigt), B2 (spendera inte en slagbar gard över bordets honnör),
+C (spara mästaren direkt över bordets honnör — lagade en regression från #75) och
+D (tvinga bordets honnör när allt är synligt). Mätning och ärlig läsning
+(in-sample mot osedda givar): `docs/speldiagnos.md` "T-serien"; regler §8.6.
+**Kvar:** ägarens live-prov + beslut om punkt 4 fullt ut (budseedad gissning).
+
+**Felrapport #77 → systems on + stulet bud efter vårt 1NT i konkurrens** —
+`90aeea1`, LIVE. Ägarens egen struktur, varje detalj ett svar på en direkt fråga
+(`docs/1nt-systems-on-plan.md`, §7.5): EN struktur mot alla inkliv; Lebensohl
+efter vårt 1NT, värde-X mot DONT (facit #39/#43) och flykten över deras X rivna.
+Mätt med stört-1NT-sonden mot den gamla strukturen; tre läckor visades, ägaren
+behöll två medvetet och stramade åt straff-X (8+ hp och 3+ kort i deras färg).
+
+**Ny rutin (ägardirektiv 2026-09-18):** vid hål i en budstruktur — visa hålen och
+FRÅGA ägaren hur detaljerna ska byggas; föreslå aldrig en egen färdig struktur som
+utgångspunkt (`docs/arbetsrutiner.md` 🙋, `/felrapporter`-kommandot).
+
+**Lärdom (docs-vakten):** en gitignorad mätfil som råkar finnas lokalt döljer ett
+rött bygge i Actions — kör vakten med `revisor-output/` bortflyttad före push;
+genererade mätfiler hör hemma i vaktens `GENERERADE`-set.
+## 2026-09-19 — Claim-ombygget: frågan i stället för klippet
+
+Användarna: "datorn claimar för hastigt, det bara blinkar till". Roten var inte
+botens tempo utan ett hårt klipp — auto-claimen löste ut i samma bildruta som
+fjärde kortet landade, släckte sticksvepet och vände upp alla händer på en gång.
+Mergepunkter `9389da9` (ombygget) + `9231d05` (ägarjusteringen), LIVE; ägarens
+live-prov godkänt samma dag ("Allt bra"). Plan, flöde och facit: `docs/claim-plan.md`.
+
+- **Frågan:** efter sticksvepet + andetaget `claimBeat` visas den icke-modala
+  rutan "[Väderstreck] gör anspråk på resten (N stick)" — OK / Spela klart, ingen
+  timer, korten synliga. Bottarna står stilla från det att claimen är aktuell
+  (`claimDue`). "Spela klart" stänger frågan för resten av given.
+- **Revealen** lägger upp de dolda händerna en i taget (`revealStep`).
+- **Ett enda stick kvar claimas aldrig** (motorn + bordsservern).
+- **Mänsklig spelförare → auto-claimen alltid av** (ägarjustering efter första
+  live-provet): datorn gör aldrig anspråk åt en människa; manuell "Claim tricks"
+  är vägen i Spela kort, och bordsservern föreslår ingen claim åt en människa.
+- **Vänner-bordet:** samma ruta och ordval i stället för den modala dialogen som
+  täckte korten; frågan väntar ut svepet, kortklick spärrade medan den väntar.
+- **Bifynd:** ett klick mitt i en kortflygning + släckt svep lämnade en
+  kvarhängande flygklon över bordet — `skipSweep` avslutar nu flygningen.
+
+Ägarbeslut: endast frågeläge (snabbläget struket — byggs bara på begäran).
+SENARE (`docs/senare.md`): delclaim "X stick", "visa varför". Kandidat vid
+borden: manuell claim — en mänsklig spelförare spelar i dag ut alla kort där.
+
+## 2026-09-20 — Systemkontrollen: nattgranskningen blev versionsmedveten
+
+Bred systemkontroll på ägarens begäran (tester, typkontroll, felrapporter,
+Actions, live-sajten — allt grönt) hittade ETT riktigt fel, i nattrapporterna:
+djupgranskningen spelade om gårdagens inskick med den motor som låg på main när
+granskningen körde. Varje spelmotor-deploy mitt på en tävlingsdag fällde därför
+de inskick som spelats FÖRE deployen (bottarnas nattspel, tidiga människor) —
+de flyttades till 'granskning' och föll ur topplista, historik och medaljer.
+Belägget: fynd fanns bara för tävlingsdagarna 09-12, 09-13, 09-17 och 09-18 —
+exakt dagarna kring spelmotor-commitarna `a1061da`, `341920d` och `037403b` —
+och vartenda fynd gällde tredje kortet i ett stick, precis det commitarna ändrade.
+Rapporterna: `gh run download <körning> -n tavlingsgranskning-rapporter`.
+
+- **Motorstämpeln:** byggets commit-SHA bakas in (`vite.config.ts` `define` →
+  `src/lib/build.ts`), sätts på inskicket i SPELÖGONBLICKET (sparas i det lokala
+  framsteget så en omsändning bär rätt version) och lagras i `payload.motor`
+  (`skicka-in.ts`, strikt form). Botjobbet stämplar med sin `GITHUB_SHA`.
+- **Omprovet:** avvikelse mot dagens motor → omspelning i ett git-arbetsträd per
+  äldre motorversion (stämpeln först, sedan de senaste versionerna på main;
+  motorns identitet = trädhashen för `src/lib`). Flytt bara om ingen version lade
+  korten. Provat lokalt mot commiten före `a1061da` med påhittad hemlighet: den
+  gamla motorn avvek på just ett tredje-hands-kort — fenomenet i miniatyr.
+- **Återställningen** av de felflyttade inskicken sker med SAMMA dom (manuell
+  workflow-körning per datum med "ompröva flyttade"), inte med blind SQL.
+- Facit först: `tavlingsgranskning.test.ts` (buggen återskapad: inskick spelat
+  med äldre motor ska INTE flyttas).
+- **Lärdom ur första skarpa omprovet (samma dag):** 09-12 och 09-18 friades helt,
+  men för 09-13 åt dagens många commits upp versionstaket innan rätt motor hann
+  prövas (inget nytt flyttades — de sex stod bara kvar). Kandidatordningen är
+  därför: motorn som var live när tävlingsdagen BÖRJADE först, sedan dagens
+  deployer i tidsordning, sist några äldre; och motorns identitet snävades till
+  spelmotorns egna sökvägar (backend-/UI-commits räknas inte som ny motor).
+
+## 2026-09-20 — Ägarens live-fynd: 4♥ efter transfer + 2NT över stört 1NT
+
+Tävlingsbricka 9: 1NT–(2♣ DONT)–2♥–P–2♠–P–2NT–P och öppnaren bjöd 4♥ (dubblat).
+Regeln saknades — tabellraden för öppnarens tredje bud gäller bara tysta
+motståndare och systems on-modulen (#77) hade bara sina två nya vägar, så
+reservlogiken läste transferbudet som naturlig hjärter. Lagat i `nt-systems-on.ts`
+(`openerThirdTurn`): tredje budet exakt som ostört, plus 3NT-utgångsvalet efter
+fullföljd överföring (grannhål av samma sort, hittat vid kontrollen av fixen).
+Facit i `nt-systems-on.test.ts`; systemboken §7.5 + §9. Nattens förscreening hade
+flaggat brickan ("fel färg") — värt att läsa de larmen även när de oftast är brus.
+
+## 2026-09-20 — Ägarens live-fynd: störd överföring efter vårt 1NT (tävlingsbricka 5)
+
+1NT–(2♣)–2♥–(3♣) och öppnaren passade med ♠AKT9 och 16 hp; 3♣ fick spela.
+Regeln saknades — också när 1NT självt var ostört — och utan spaderstöd "höjde"
+reservlogiken överföringsbudet till 4♥ (samma felläsning som bricka 9 samma dag).
+Ägaren gav reglerna på direkta frågor: 3–4 korts stöd → poängen styr (med
+fördelning, oskyddade honnörer i deras färg borträknade): under 16 tävlar 3M, 16+
+4M; svararen tyst när överföringen var till spel, 8+ hp eller 10+ med fördelning →
+utgång; fjärde hands X av överföringsbudet = systems on. Kod `nt-transfer-stord.ts`
++ `interpretDisturbedTransfer` (betydelselagret) + måttet
+`unguardedHonorsInTheirSuit`; facit `nt-transfer-stord.test.ts`; systemboken §7.5
++ §9, `docs/handvardering.md`. Följdfrågorna besvarade 2026-09-21: öppnarens X =
+straff; svararens femkortshand med utgångsvärden efter öppnarens pass → 3NT.
+
+## 2026-09-22 — Ägarens live-fynd: Michaels-fortsättningen (tävlingsbricka 4)
+
+(1♦)–P–P–2♦–P–2♠ och motorn ville bjuda 4♠ på 15 hp (även på 11 hp). Regeln
+saknades: reservlogiken "höjning på visad längd" läste advancerns tvingade
+preferens som ett fritt bud med värden — samma felläsning som gav 4♥ på
+överföringsbuden 09-20. Ägaren pekade på bridgebum och gav trösklarna; hela den
+ostörda strukturen byggd i `michaels-continuations.ts` (avslut som kan vara 0 · cue 8+
+med 3+ stöd · spärrhopp · 3NT · inklivaren 14/15–17/18+ · accept med 8+ · svaren på cuen), betydelselagret och
+regelregistret. Facit först (`michaels-continuations.test.ts`); ett äldre facit
+ändrat med flit (3-3 i högfärgerna → 2♥, den billigare). Systemboken §7.2 + §9.
+**Ny definition samma dag (ägarbeslut):** Michaels = ALLTID de två högsta objudna
+färgerna (över högfärg = andra högfärgen + ruter), ovanlig 2NT = de två lägsta;
+3♣ pass-eller-rätta, inklivarens svar på det och den nyss byggda 2NT-frågan revs.
+Högfärg + klöver kliver in naturligt.
+Ägarens sista besked: egen sexkortsfärg bara med högst ett kort i båda partnerns
+färger; slamutredningen är systems on (den vanliga konkurrens-slamraden). Provet av
+slamvägen hittade två fel till: min egen "partnern har placerat → pass" svalde
+essfrågan, och faktalagrets `agreedTrump` läste de två cue-buden i deras ruter som
+överenskommen trumf (nyckelkorten räknades med fel trumf) — båda rättade. Bifynd: "partnerns undefined" i
+gårdagens störd överföring-texter, rättat.
+
+**Mönstret att bevaka:** tre live-fynd på tre dagar (4♥ på transferbud ×2, 4♠ på
+Michaels-preferens) har samma rot — reservlogiken läser ett KONSTGJORT eller
+TVINGAT partnerbud som naturlig färg med värden och höjer till utgång.
+
+## 2026-09-27/28 — Omvärderingsfrågan levererad som systemstruktur; felrapport #87–#90; regeln "händer räknas med kod"
+
+Ägaren besvarade golvmätningens frågor (rad 1–6 + fem exempellägen). Utfall:
+golvet `pointsWithFloor` behålls överallt (svararen mot partnerns öppning,
+upplysnings-X, öppnarens hoppåterbud) — omvärdering "efter vad som bjudits" ville
+ägaren inte ha som poängjusteringar utan som systemstruktur:
+- **Läge 2 (LIVE `16e26fe`):** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥; julibeslutet
+  #31 rivet för exakt den följden) + svararens semi-forcing 2♠ efter 1♥–1♠–2♥ (5+ ♠,
+  10+; 2NT förnekar 3-stöd) + öppnarens fortsättning. Facit
+  `auction-svagt-hoppskift-2s.test.ts`; §4.1/§5.2.
+- **Läge 3-paketet (LIVE `cfce6a5`):** Jacoby 2NT = 12+ hp & 3+ trumf "hela tiden";
+  1M–1NT–2x: 2M = exakt 10–11 m. tre stöd, svag hand passar, 4 i öppnarens andra
+  lågfärg = dubbelanpassning m. äkta kontroll (`hasRealControl`); 6-3-2-2 m. 18–19 →
+  2NT; lucka lagad (4M-placering efter Jacoby när slamzon saknas — förr kravvakten).
+  Mätt med `jacoby.probe.test.ts` (JACOBY=1, git-stash A/B, DD via `computeOracle`):
+  25 av 1 500 auktioner ändrade, 3 bättre, 4 sämre (två slammar via Jacoby-vägen
+  missas — uppföljningar i `docs/senare.md`). Facit `auction-lage3-paketet.test.ts`.
+- **Hål D steg 2 avparkerad** (ägarens struktur: ≤12 → 3M, 13+ kontrollbud, 3NT 14–15
+  m. stopp, Kxx ≠ kontroll, Syd 16+ frågar 4NT när allt är kontrollerat) → NÄST 1.
+- **Felrapport #87–#90 (LIVE `e9a9d2e` + `32dd1f0`):** #87 öppnarens rond två efter
+  eget tvingat svar (ingen cue, Bergen 27/24/21); #88 öppnaren svarar på negativ X
+  trots fjärde hands bud (4-korts högfärg / 5+ egen / X "visa din hand") + dubblaren
+  beskriver; #89 Monte-Carlo röstar på gemensamma lägen + fjärde hand går inte över
+  partnerns vinnare (avblockering bara när partnern visat längd); #90 inklivaren drar
+  ur partnerns kooperativa X med kort i deras färg / 6+ egen.
+- **Kritiskt fel, tre gånger:** hp räknade i huvudet (Öst 6 → 9; 4-4-fiten "känd";
+  hand d 18 → 17, ägaren beslutade på fel siffra). Ägaren: "det får inte hända",
+  "gör inte om detta". Regel i `CLAUDE.md`, `docs/arbetsrutiner.md` (🔢, med
+  kommandot), `/felrapporter` och minnet: händer som visas räknas ALLTID med kod,
+  summakoll 40/13.
+Nästa gång: NÄST 0 /felrapporter, sedan hål D steg 2 (NÄST 1), speldiagnos, borden.
+` och resten av
+filen klistrades in en gång till (ersättningssträngen `
+
+Efter 1m–1M–3M visar kaptenen med slamintresse sin billigaste kontroll i stället
+för 4NT/5M direkt. Mätningen avslöjade ett gammalt hål: när motståndarna dubblat
+svaret fortsatte budraden som ostörd, men slamradens läsare gav upp vid dubblingen
+— partnern kände inte igen kontrollbudet (frö 20386322 slutade i 5♣, 20446339
+passades i 4♦). Läsarna tål nu den dubblingen.
+
+**Mätt mot steg 2 (200 000 givar):** 261 ändrade budgivningar, 47 ändrade
+slutkontrakt; DD: 21 slammar bort (14 bet, 7 stod), 13 nya (7 står, 6 bet).
+Essfrågor efter kontrollbud: 1 353 av 2 918 → 1 504 av 2 989.
+
+## 2026-10-04 (Kontrollbud före essfrågan, steg 2 — trumfen först i lågfärg, LIVE `11b41e7`)
+
+**Ägarens ja:** efter 2♣ + positivt svar + öppnarens lågfärg höjer svararen med
+4-korts stöd till 4m i stället för 4NT direkt. Första bygget tappade slammar:
+kaptenen stannade i 5m när en färg var ovisad eller överhoppad, och i lågfärg gick
+kontrollbuden förbi 4NT. **Ägaren rättade:** "man behöver inte ha alla kontroller
+för att bjuda 4NT" — kontrollbuden ska hinnas med före frågan, aldrig stänga ute
+den. Kaptenen i klar slamzon frågar nu så snart hen inte har fler kontrollbud.
+
+**Mätt mot steg 1 (200 000 givar):** 183 ändrade budgivningar, 127 ändrade
+slutkontrakt; DD: 73 nya slammar (57 står, 16 bet), 35 bjuds inte längre (16 bet,
+19 stod). Essfrågor efter kontrollbud: 1 213 av 2 826 → 1 353 av 2 918.
+
+## 2026-10-04 (Kontrollbud före essfrågan, steg 1 — kontrollens definition i slamraden, LIVE `d26ebdb`)
+
+**Ägaren:** "en kontroll = motståndet kan inte ta två raka stick i den färg man
+lovar kontroll: ess, kung och dam, singelton eller renons." Slamradens
+kontrollbudsrond räknade bara ess och renons, så händer med singel eller K-D gick
+rakt på 4NT. Nu samma definition som i cue-höjningen (`hasRealControl`).
+
+**Mätt (200 000 givar mot föregående version):** 905 ändrade budgivningar, 239
+ändrade slutkontrakt; DD: 114 nya slammar (80 står, 34 bet), 71 bjuds inte längre
+(33 bet, 38 stod). Essfrågor efter minst ett kontrollbud: 886 av 2 675 → 1 213 av
+2 826. Trumfsonden 0. Sju äldre facit uppdaterade (K-D och singel är kontroller).
+
+## 2026-10-03/04 (Ägarbesluten om 4NT-färgen och slamtabellen — byggda fullt ut, LIVE `2776fa5`)
+
+**Besluten (2026-10-02):** 4NT gäller alltid den senast äkta bjudna färgen · fråga
+efter damen när det går · 5 nyckelkort = alltid slam (med dam: sök storslam) · 4 +
+dam = alltid slam · 4 utan dam = sök slam, inget måste. Måttet (ägaren 2026-10-04):
+fråga efter damen när det går; går det inte räcker 8 kända trumf; tio kända trumf
+räknas som trumfdam av båda stolarna.
+
+**Mätt först:** en ny sond (`rkc-trumf.probe.test.ts`) jämför för varje essfråga
+vilken färg frågaren och svararen räknar i. 10 av 2 412 på 200 000 givar räknade
+olika — sex efter hoppskift (#94-regeln: kaptenen frågade i egen färg), fyra i
+konkurrens-slam (placeringen läste trumfen ur partnerns stegsvar).
+
+**Byggt:** kaptenen räknar alltid svaret i den färg partnern läste frågan i och
+placerar i egen färg bara när den bär sig själv (annars i partnerns) · trumfvakten
+i beslutstabellen · slamtabellen som EN funktion (`slamValEfterSvar`) för båda
+vägarna · damfrågan i kaptensvägen · "kända trumf" räknar partnerns egen färg som
+4–5 · damen på längd bara vid bevisad 10-korts fit även i slamradens svar.
+
+**Vägvalet som inte höll:** ägaren hade sagt ja till "bjud egen färg naturligt
+först, fråga 4NT rundan efter". Byggt så landade #94-given i 4♥ — öppnaren bjöd
+4♣ emellan, och då gäller nästa 4NT klöver igen. Lösningen blev i stället att
+frågan ställs direkt men RÄKNAS i hoppskiftets färg av båda. #94 slutar i 6♥.
+
+**Ägarens grundregel 2026-10-04:** "fråga alltid så mycket som budgivningen
+tillåter och gärna kontrollbud före". Byggt: damfrågan söker storslammen med alla
+fem nyckelkort i storslamszon. Mätt, inte byggt: bara 886 av 2 675 essfrågor
+föregås av ett kontrollbud (störst: stark 2♣ + positivt svar går rakt på 4NT).
+
+**Utfall:** trumfsonden 0 av 2 364. Auktionsdiff 200 000 givar: 407 ändrade,
+141 ändrade slutkontrakt; DD: 94 lillslammar bort (46 bet, 48 stod), 9 nya (3
+står); 24 storslammar bort (5 bet, 19 stod), 6 nya (alla står).
+
+## 2026-10-02 (Felrapport #95 — trumfdam-frågan: förklaringarna + tre budfel, LIVE `a5bae94`)
+
+**Rapporten:** Syd frågar 4NT, får 5♣, ställer damfrågan 5♦; Nord svarar riktigt 6♣
+(trumfdam + klöverkung) men båda buden förklarades "placerar utgången i ruter/klöver".
+Ägaren: "se över inte bara denna utan alla budförklaringar i alla variationer".
+
+**Orsaken:** betydelselagret (`auction-meaning.ts`) kände essfrågan, stegsvaren,
+stoppet och rättelsen (#60) — men inte damfrågan eller dess svar. De föll till den
+allmänna raden för bud på utgångsnivå.
+
+**Lagat i förklaringarna:** damfrågan, de tre damsvaren och slutbudet · trumfen läses
+ur 4NT-förklaringen själv (efter Jacoby 2NT lästes fel färg, så 5♠-svaret blev
+"slaminbjudan") · Exclusion efter splinter-relä (hoppet, stegsvaren, stoppet) ·
+Gerbers ess-svar när svaret råkar vara svararens färg, kungfrågan 5♣ och dess svar ·
+elva regler fick kravnivå i registret.
+
+**Metoden för "alla variationer":** betydelsesvepet (`auction-meaning.probe.test.ts`)
+jämför den härledda förklaringens kravnivå och alert med motorns regel på varje
+botbud. Det hade inte körts sedan grinden sattes och var rött. Kört över 100 000
+givar gav det listan; fråga-och-svar-konventionerna på 4–6-läget lagades, resten
+(kontrollbud mot naturligt, störda auktioner) står i `docs/bevaka.md`.
+
+**Tre budfel hittade på vägen** (auktionsdiff 30 000 givar: elva ändrade, alla i
+damfrågan): (1) boten ställde "damfrågan" över 5-trumf och efter 5♥-svaret; nekandet
+var olagligt → pass, och frågebudet 5♠ blev slutkontrakt i sex av givarna. (2)
+Svararen läste trumfen efter sitt eget stegsvar (1♣-öppning + 5♣-svar = "klöver")
+och passade damfrågan 5♦/5♥ i fyra givar. (3) Damsvaret visade damen på 5+ egen
+längd. Ny regel i §6.1: damfrågan finns bara när den ryms under 5 i trumf.
+
+**Miljonsvepet (ägarkrav: "stöttepelaren måste vara stadig"):** betydelsesvepet
+kördes över en miljon givar och auktionsdiffen över ytterligare 200 000 (59 ändrade,
+alla i dam-/kungfrågan). Listan mättar — 87 mönster vid 100 000 givar, 116 vid en
+miljon, de nya högst 21 gånger per miljon. Två Gerber-fel till lagade (4NT-stoppet
+läst som essfråga, kungfrågan efter svaret "3 ess"). Ny tredje axel i svepet,
+förväxlad konvention, som ser rätt märken med fel text.
+
+**Ägarbeslut samma dag:** 4NT gäller alltid den senast ÄKTA bjudna färgen
+(konventioner och kontrollbud räknas inte) · fråga efter damen när det går · 5
+nyckelkort = alltid slam (med dam: sök storslam) · 4 + dam = alltid slam · 4 utan dam =
+sök slam, inget måste. Byggt: lillslam med alla fem nyckelkort även utan damen.
+Inte byggt: kaptenen efter hoppskift (#94) och kaptenen-svararens damfråga
+(`docs/bevaka.md`).
+
+**Lärdom:** registret (`rules.ts`) är inte kosmetika — kravnivån läses av partnern.
+En tillagd rad ('krav – billigaste bud' = utgångskrav) ändrade en budgivning och
+togs bort igen; auktionsdiffen fångade den.
+
+## 2026-10-01 (Speldiagnos fynd B — parets färg i sang, mätpunkt S8, LIVE `889fac3`)
+
+**Vad:** spelförarsidan valde färg ur den hand som råkade vara inne (♣4 ur ♣8542
+fast paret hade ♥KQ962 mot ♥54; bordets ♣K fast spelföraren hade åtta ruter; ♠K
+ur ♠KT3 in i ♠AQ). Ny regel i SANG, 9+ kort: färgen väljs ur båda händerna när
+den har stick att utveckla, kortet med standardteknik, och korta handen lägger
+sin säkra vinnare (`declarerPartnershipSuitLead`, `declarerShortHandHonor`).
+
+**Metoden (ny, återanvändbar):** fynd B-riggen sparar varje ledningsval med
+ställning + DD per kort (`fyndb.probe.test.ts`), och kandidatregler räknas
+offline mot facit (`fyndb-utvardera.probe.test.ts`) före bygge. Den visade att
+den första hypotesen ("parets färg överallt") var SÄMRE än dagens bot (146 mot
+139 stick) — bättre i sang, sämre i trumf — och att ett eget fel i utvärderaren
+(motståndarnas kort i fel ordning) hade gett fel siffror om det inte upptäckts.
+
+**Mätt:** 536 ledningsval kostade 139 stick (övre gräns 24). Efter regeln:
+spelförarens faktiska stick netto +18 på 200 givar, flaggade förarstick
+274 → 263, tio givar sämre (−14). Tre iterationer mätta var för sig. Äldre facit
+ändrat: felrapport #17-ställningen (10 kort) leder nu ♥J i parets tiokortsfärg;
+#17-låset på avblockeringen ligger kvar i ett 8-kortsläge och gäller även inne i
+nya regeln. Trumfkontraktens ledningsval (89 stick) är orörda = nästa kandidat.
+
+## 2026-09-30/10-01 (Speldiagnosens runda 7 — fix A + F LIVE, mätpunkt S7)
+
+**Vad:** rundan på dagens motor (rapport `revisor-output/speldiagnos-rapport-2026-09-30.md`):
+baslinjen visar budet klart bättre än S6 (42/200 rätt, 248 p mot 35/200, 259 p) och
+spelet oförändrat på givar med samma kontrakt. Två smala fixar byggdes facit-först och
+mättes EN i taget: **A** trumf dras bara med trumfmajoritet (`shouldDrawTrumps`, frö
+20260786 −4; netto ±0 på 200 givar — reservledningen är svag = fynd B) och **F** holdup
+mot bordets långa färg utan ingång (`defenderHoldUp`, frö 20260901, 12→9 stick, inga
+andra givar rörda). Facit `play-bot-trumfmajoritet.test.ts`, `play-bot-holdup.test.ts`.
+Ägaren frågade "är du säker?" — svaret: säker på bridgen i A och mekanismen i F, inte
+på nettovinsten av A; B (spelförarsidans färgval ur BÅDA händerna, −4/−3/−3) byggs INTE
+på hypotes utan väntar DD-mätning per alternativ (S6-lärdomen) → NÄST 1. Fynd D
+(försvaret fortsätter utspelsfärgen in i spelförarens visade längd) bevakas.
+Mätpunkt S7 i `docs/speldiagnos.md`, detalj `docs/bot-hjarna.md` "runda 7".
+
+## 2026-09-30 (Hål D steg 2 — cue-höjningens fortsättning i högfärg, LIVE `fda630c`)
+
+**Vad:** ägarens struktur 2026-09-28 (omvärderingsfrågan läge 4/5) byggd som tabell-
+rader: efter 1M–(inkliv)–cue (limithöjning+) svarar öppnaren ≤12 → 3M · 14–15
+balanserad med stopp → 3NT · 13+ → billigaste äkta kontrollbud (ess/singel/renons/KQ,
+`hasRealControl`; Kxx räknas inte) · ingen kontroll → 4M — aldrig hopp till utgång
+över ett kontrollbud. Svararen cue:ar egen kontroll oavsett styrka, stannar i 4M
+eller frågar 4NT (1430 RKC, regeln `konkurrens-slaminvit (RKC)` så placeringen
+återanvänds) med 16+ när alla sidofärger är kontrollerade mellan oss; öppnaren
+svarar i stegen och passar avslutet. Systembok §7.8 c + §6.10, ändringslogg §9.
+
+**Kod:** läsaren `cue-raise-sequence.ts` (ren auktion, delas av tabellen och
+betydelselagret — inget beroende på faktalagret, som importerar betydelselagret),
+kunskapen `cue-raise-continuations.ts` (`openerInCueRaise`/`raiserInCueRaise`, först
+i raderna *öppnaren-stört*/*svararen-stört*; efter det billiga 3M lämnas ordet till
+`cueBidderContinues` som förut), betydelselagret `cueRaiseFortsattning` (människans
+3♠ = kontrollbud, 4♦ i deras färg = kontrollbud inte ny cue, 4NT = RKC i trumfen),
+registret (nio regler, kontrollbudet alertas). Lågfärgens svar (3NT-vägen före 5m,
+2026-07-21) orört.
+
+**Facit:** `auction-cue-hojning-fortsattning.test.ts` (21 tester: ägarens exempel,
+kontrollbudsronden, 3NT-fortsättningen, hel botauktion 1♥–(2♦)–3♦–3♠–4♣–4♥–4NT–5♥–6♥,
+betydelselagret). Två av ägarens exempelhänder i anteckningen var felräknade
+(♠KQ5 ♥AQ964 ♦KJ3 ♣Q4 = 17, inte 15; ♠AQ5 ♥KQ964 ♦872 ♣K4 = 14, inte 13) — hp
+räknas nu med kod i testet. Äldre facit i `auction-etapp4-familj4.test.ts`
+uppdaterat: 13 hp utan kontroll → 4♥ (förr 3♥). Lärdom (igen): bash-backticks i
+dubbelcitat körde filnamn som kommandon och tömde CLAUDE.md-rader — skript till
+fil, kolla `git status` efter `??`.
+
+**Auktionsdiff 3 000 givar (frön 20270001–20273000, gammal motor via git stash →
+`node scripts/auktionsdiff.mjs`):** 27 ändrade auktioner, 14 samma bud/ny regel,
+alla 27 i cue-höjningsläget (klass a): 13–15-öppnare som förr återgick 3M eller hoppade
+4M går nu via kontrollbud till samma utgång; ett fall (20272755) tar 3NT-vägen och
+rättas till 4♥ med fyra trumf. Inget 4NT tände (16+ med alla kontroller är sällsynt).
+**Konsekvens att veta om:** 13–14 hp mittemot en limithöjare stannade förr i 3M
+(t.ex. 20271186, ♠A532 ♥AJT952 ♦A2 ♣9 + ♠KJT ♥873 ♦Q9 ♣AJ653); nu är cuet
+utgångskrav → 4♥. Det följer av ägarens "13+ → kontrollbud".
+
+**Claudes tolkningar att bekräfta:** svararen efter öppnarens 3NT passar med jämn
+trekortshand, rättar till 4M med 4+ trumf/ojämn hand, cue:ar med 16+; öppnaren
+frågar aldrig själv 4NT i sekvensen (ägaren: "Syd med 16+ frågar").
+
+## 2026-09-29/30 (Felrapport #91–#94 + budhjälpen tänker — fyra mergepunkter, allt LIVE)
+
+**#92 (`793f204`, tvådelat):** (1) systemfyndet — bordets etikett `eget bud` på
+människans avvikande bud lästes av betydelselagret som en regel utan kravnivå, så
+botpartnern såg inget krav i människans återöppningsdubbling (2♦X gick hem). Nu
+härleds ett "eget bud" ur auktionen (`EGET_BUD`, `auction-meaning.ts`). Lärdom:
+reproducera bordsfel med bordets rule-etiketter, inte nakna historiker. (2) Svaret
+på 1NT-öppnarens återöppnings-X (§7.5): längsta färg / straffpass med längd+honnörer
+(`trapPassHolding` delas med §5.9).
+
+**#91 (`793f204`, ägarens struktur 2026-09-29):** New Minor Forcing = **utgångskrav,
+13+ rena hp** (förr 11+); 11–12 med fem kort → 2NT, sex kort → 4M direkt; öppnaren på
+2NT bara pass/3NT; passad hands lågfärg naturlig (5-4, 8+, partnern väljer 2M med 3+).
+Placeringen efter NMF passar aldrig under utgång. Auktionsdiff 3 000 givar: 15 ändrade,
+alla de nya vägarna. Tre äldre facit uppdaterade. `e3b1c4c`: docs-vakten mäter
+kB-siffran radslutsoberoende (Actions blev rött på CRLF/LF-skillnaden vid ~400 kB).
+
+**#93 + #94 (`fb08d75`):** inklivaren när öppnaren bjuder vidare efter partnerns
+höjning — sexkorts inklivsfärg tävlar 3M, 18+ 4M (`overcallerCompetesAfterRaise`;
+diff 21 ändrade, alla från pass utan regel). Svararen med 6+ egen högfärg och
+hp + 19 ≥ 33 efter hoppskiftet frågar 4NT direkt med egen färg som trumf.
+
+**Budhjälpen tänker + uteslutningsmetoden (`e5fa0ce`):** ägarens fråga "varför grep
+inte resonemangslagret in?" i #93 — det tänkte bara åt bottarna. Nu räknas
+`useGame.rekommendation` i samma worker: gul fyrkant + RESONEMANG för
+resonemangsbud, grön prick + MOTORNS BUD för tabellen; "Budhjälpen tänker …".
+Verifierat live i dev (1♣–P–1NT–P–P → gul fyrkant på 2♥). RKC: "0 eller 3" mot
+visade 16+ läses som 3 med visshet (ägaren: "ren matte"; reservationen om
+KQJ-händer står i §5.2) → #94-given 1♦–1♥–3♣–4NT–5♦–5NT–6♦–7♥. 5-5-handen med
+11–12 (2NT även med renons) → `docs/senare.md`.
+
+Testläget: `npm test` (242 filer gröna vid sessionsslut). Minnen: nmf-utgangskrav,
+eget-bud-tolkas-ur-auktionen, uteslutningsmetoden-rkc, motorn-passar-utan-regel.
+
+---
+
+## 2026-09-26 (Dagens IMP — en andra daglig tävling, KLAR & LIVE samma dag)
+
+Ägarbeslut på morgonen efter frågan "hur räknas MP%?": MP-räkningen är den
+officiella partävlingsräkningen (1-poängsskalan, samma procent som förbundets
+2-poängsskala) och ändras INTE (Neuberg avförd). I stället byggdes **Dagens IMP**:
+tolv egna givar per dag (frönyckel "datum#imp" — MP-fröna byte-identiska, låst av
+facit), WBF:s IMP-tabell + cross-IMP (`imp.ts`), summa över givarna, 0 IMP per
+ospelad giv, medaljtabell per form, namnen "Dagens MP%"/"Dagens IMP". Schemat:
+`daily_sets.form` (0013 lägg till + ny unik nyckel → deploy → 0014 släpp gamla).
+Alla endpoints `?form=`, nattjobben en gång per form, klienten `?form=imp` med
+eget framsteg och deal-id. Fem etapper på en dag, mergepunkt `186aa45`; första
+IMP-setet #56 via manuell cron (CRON_SECRET är känslig i Vercel → dashboardens
+Run-knapp), bottarna spelade det på 9 min 16 s. Ägarens live-prov godkänt;
+startsidans kort sida vid sida (`298bbdb`). Hela planen: `docs/imp-tavling-plan.md`.
+
+---
+
+## 2026-09-26 (Felrapport #84–#86 — tre strukturbyggen i konkurrenslagret, LIVE samma dag)
+
+Tre rapporter från ägarens spel, alla lagade med facit före fix och deployade
+(`195ac8d`, `2e9fff4`). **#84 (bricka 7):** ♠AKQ9 ♥QT4 ♦K82 ♣642 passade 1♣ —
+upplysningsdubblingen krävde max två kort i deras färg. Nu dubblar en jämn
+öppningshand (12+, 4-3-3-3) med tre kort i deras färg (§7.3; golv 12 bekräftat
+av ägaren). Fixen blottlade två öppnarhål: efter partnerns konkurrenshöjning
+bjöd catch-all-regeln ny 4-kortsfärg på 13 hp (nu pass under 18, 18+ →
+4M/2NT/3NT, §7.4h; utgångsförsök 15–17 = ägarfråga i senare.md) och efter deras
+X + partnerns pass + advancerns svar passade öppnaren med 6+ färg (nu rebud).
+**#85/#86 (bricka 8):** inklivarens andra bud efter advancerns enkla höjning
+saknade regel helt (catch-all 2♠, sedan pass på 3♥ med 16 hp). Ägarens
+struktur via tre frågor: <16 pass · 16–17 med 4-korts sidofärg → ny färg =
+utgångsförsök (5+/4, ej krav) · 16–17 utan → 3M invit · 18+ → 4M; advancern
+3M = minimum, 4M = maximum (§7.1, bara högfärgsinkliv). Betydelselagret läser
+alla buden. Lärdom: när en fix öppnar en auktion som aldrig uppstod förut,
+sondera hela given stol för stol — hålen ligger ett steg längre fram.
+
+---
+
+## 2026-08-08 (F6 — stark 17+ enfärg efter två bjudna färger, C5/C14 stängda — KÖRORDNINGEN F1–F6 KLAR)
+
+**F6 KLAR** (körordningens sista punkt — därmed är hela F1–F6-serien ur
+`docs/budsystem-revision.md` stängd). Två delar:
+
+- **C5 (stark 17+ enfärg efter två bjudna färger):** en 17+ hand med egen 5+
+  objuden färg upplysningsdubblar nu även när motståndarna bjudit TVÅ
+  1-lägesfärger (t.ex. 1♦–P–1♥) och visar färgen på nästa varv. Roten till
+  hålet (senare.md 2026-07-05): den kanoniska linjen (`buildAuction`)
+  modellerade aldrig den ronden, så spelarens pass låg INBAKAT i linjen och
+  `decideCall` följde det — live-detektorn `maybeTakeoutOfResponse` (som bara
+  gjorde 4-4) nåddes aldrig on-book. Fixen: linjen modellerar den starka
+  dubblingen (rondkrav, linjen lämnas öppen) och handbedömningen delas mellan
+  linjen och budlådan via nya `takeoutOfResponse` (`overcalls.ts`).
+  Fortsättningen (tvångssvaret + `ownStrongDoubleRebid` + stödstegen) fanns
+  redan och var tvåfärgsmedveten — verifierad i facit. **Den vanliga
+  4-4-dubblingen är MEDVETET fortsatt live-only** (att träda in den ändrar en
+  stor andel ostörda linjer — eget ägarbeslut om spel kräver det; vaktad i
+  facit + `docs/bevaka.md`).
+- **C14 (linjen passar ut ostörda tvåfärgsinkliv):** visade sig **redan lagad
+  i roten 2026-07-04** (felrapport #14 trädde in `advanceTwoSuiter` i linjens
+  konkurrensrond) — revisionens 🔴 och senare.md-punkten var stale sedan dess.
+  Nu låst med linjebyggstest (buildAuction-nivå, inte bara decideCall).
+
+Facit `auction-stark-x-tva-farger.test.ts` (7 fall: linjen, on-book-X:et,
+tvångssvaret, det starka återbudet, off-book-detektorn, 4-4-vakten,
+C14-linjebygget). Boken §7.3 + §9. Mätning M31 (`docs/systemrevisorn.md`).
+Hela sviten grön (`npm test`).
+
+## 2026-08-08 (F5 — 6-5-återbudet + 2♣-strain-valet verifierade, A3/E2 stängda)
+
+**F5 KLAR** (körordningens näst sista punkt). Verifiering i spel: probe över
+4 000 seedade givar + kodspårning. Fyra fynd, alla facit-låsta FÖRE fix:
+
+- **A3 (6-5-återbudet):** mönstret 16+ 6m+5M är sällsynt vid bordet (10
+  händer/16 000 — nästan alla öppnar 2♣ på 8½+ spelstick, resten sitter i
+  konkurrens), så verifieringen är enhetsfacit (`auction-65-rebid.test.ts`):
+  reversen efter 1-lägessvar och 2/1 fanns och låstes; **efter 1NT-svaret
+  gömdes högfärgen i 3m-rebudet** → ny reverse-gren i
+  `openerRebidAfterLimitedResponse` (1NT förnekar bara 4-korts högfärg —
+  5-3-fiten hittas via reversen). Boken §3.
+- **E2 (2♣-strain-valet):** proben visade 2♣-auktioner som dog i 5♣/6♣ trots
+  8+ högfärgsfit. Tre rotorsaker (`auction-2c-strain.test.ts`, riktiga frön):
+  **(1)** svararens egen 5-korts minor sprängde 3NT förbi en 4-korts högfärg
+  som rymdes under (frö 20261040: nu 3♥, förr 4♣ → 5♣) —
+  `responderSecondBidAfter2C`; **(2)** forcerade stegen läste det KONSTGJORDA
+  2♣-öppningsbudet som "egen bjuden klöver" och rebjöd billigast-först — nu
+  exkluderas 2♣ och högfärger rebjuds före minorer (frön 20262070/20261885:
+  3♠ på den äkta 6-korts spadern) — `forcedMinimumBid`; **(3)** fit-räkningen
+  räknade 2♣ + ett senare klöverbud som "två klöverbud → 6+, dubbelton
+  räcker" och höjde 4♣→5♣ på ♣xx — `fitLengthNeeded`. Boken §4.4.
+- Mätning M30 (`docs/systemrevisorn.md`). Hela sviten grön (`npm test`).
+  Kvar i körordningen: bara F6.
+
+## 2026-08-07 natt (F4 — TP till §7-inkliven, D9 stängd)
+
+**F4 KLAR** (körordningens nästa steg efter F3; ägarbeslutet från 2026-07-05
+vid "låna en kung" infriat). §7-lagret räknade rå HP — TP nådde aldrig
+försvarsbesluten. Nu läser inklivsgolven totalpoäng, additivt ovanpå
+kungalånet (TP = formspak, kungen = sitsspak, som beslutat).
+
+- **Enkelt inkliv + upplysnings-X** (`overcall`, `overcalls.ts`): golven
+  (8/12/10; −3 i balansering) läser `max(hp, startpoäng)` — en formstark
+  7:a med KQJ109-femma (9 startp.) kliver in, en 9:a med kvalitetsfärg och
+  perfekt X-form (10 startp.) dubblar.
+- **Två vakter på lyftet:** *kvalitetsvakten* — lyftet kräver 3+ av topp-5 i
+  inklivsfärgen ("färgkvalitet går före poäng"; utan den störde en 5-5-hand
+  med QJ975 på 6 hp sönder 6NT-facitgiven frö 20261020, upptäckt av
+  `auction-3nt-stopp.test.ts` i sviten). *Spärrvakten* — 6+ färg med rå
+  6–10 hp förblir svagt hoppinkliv. Rå HP behålls i 1NT-fönstren, taket 16
+  och 17+-styrningen.
+- **Advancern** (`advanceOvercall`): cue (11+) och fit-jump (10+) läser
+  stödpoäng `max(hp, dummyPoints)` — samma mått som live-höjningarna
+  (`raiseWithFit`) redan använde; on-book-linjen ikapp.
+- **Facit FÖRE fix** (`overcall-tp.test.ts`): fem lyft bevisade röda →
+  gröna; vakterna + rå-HP-lägena låsta. Hela sviten grön (`npm test`).
+- Boken §7.1 + §9; bevakning (a) straffas TP-inkliven, (b) X-svararen/DONT/
+  svaga tvåor räknar ännu rå HP (`docs/bevaka.md`). Kvar som bevakning i
+  `docs/senare.md`. Mätning M29 (`docs/systemrevisorn.md`).
+
+## 2026-08-07 sen kväll (F3 — advancer-rabatten generaliserad, C12 stängd)
+
+**F3 KLAR** (körordningens nästa steg direkt efter F2). Fix 5a byggde
+advancer-rabatten enbart för balanseringar över svaga tvåor/spärrar; över deras
+1-lägesöppning värderade advancern fortfarande partnerns balansering som ett
+direktinkliv — samma lånade kung räknades två gånger och delkontraktsvärden
+blåstes till utgång.
+
+- **Höjningen:** `partnerBalancedOverPreempt` generaliserad till
+  `partnerBalanced` (kravet "öppning på 2-läget+" borttaget) — höjningar av
+  balansinklivet räknar stödpoäng −3 med tak på 3-läget utan äkta
+  utgångsvärden efter rabatten (`raiseWithFit`).
+- **X-svaret:** `takeoutDoubleToAnswer` flaggar utpassningsmönstret (öppning,
+  P, P, partnerns X) och `answerTakeoutDouble` graderar cue (12+) och hopp
+  (9–11) på hp −3. Direkt sits orörd (regressionsvakt i facitet).
+- **Facit FÖRE fix** (`auction-advancer-rabatt.test.ts`): 11 sp höjde
+  invit-3♠ där 2♠ räcker, 14 sp blåste 4♠, 10 hp hoppade på X:et, 13 hp
+  cue:ade — alla fyra överbuden bevisade röda, sedan gröna. Ett gammalt facit
+  uppdaterat i linje med nya systemet (frö 20261375: W:s 4♠ på 13 sp mot en
+  8 hp-balansering var själva felet — nu 2♠, given köps i 3♥; B13-prejudikatet).
+- Boken §7.1 (generella regeln) + §7.7-hänvisning + §9; bevakning: NT-svar och
+  nya färger efter balansering räknar ännu inte rabatten (`docs/bevaka.md`).
+  Mätning M28 (`docs/systemrevisorn.md`).
+
+## 2026-08-07 sen kväll (F2 — datadriven detektorkedja, E1 stängd)
+
+**F2 KLAR** (🟢 NÄST punkt 1; R2 Fynd #1, körordningens sista arkitekturpunkt
+före fler konkurrenskonventioner). Ren beteendebevarande refaktor — inga
+budändringar, hela sviten grön före/efter (`npm test`).
+
+- **Kedjan är DATA nu:** `decideCall`:s två listor (tvingande svar +
+  konkurrenskedjan) är modul-nivå-konstanter `FORCED_DETECTORS` /
+  `CONTESTED_DETECTORS` i `auction-live.ts`. Varje detektor är ett objekt
+  `{ id, before?, run }` där `before` = id:n som måste ligga senare i kedjan.
+  Ordningskraven som förut bara fanns i "Måste ligga FÖRE …"-kommentarer är
+  alltså maskinläsbara fält (kommentarerna står kvar som förklaring).
+- **Kedjevakten** (`src/lib/engine/detector-chain.test.ts`): sviten blir röd om
+  ett id dubbleras, ett före-krav pekar på en detektor som inte finns, eller
+  listordningen bryter ett före-krav — plus att `offBookResponse` alltid ligger
+  näst sist och `honorForce` sist. En felplacerad ny konvention fångas nu i
+  deploygrinden i stället för i spel.
+- **Delad kontext:** detektorerna får `DetectorCtx` (deal/history/seat/hand)
+  i stället för att varje closure fångar sina egna variabler. R2:s "på
+  sikt"-steg 2 (ett `auctionFacts`-lager som förberäknar öppnare/roller/trumf
+  så detektorerna slipper re-skanna history) är MEDVETET inte byggt — det görs
+  när behovet uppstår, inte spekulativt.
+- E1 i `docs/budsystem-revision.md` 🔴→🟢; E3 (systemrevisorn) var redan byggd
+  sedan etapp 2 → F2 som helhet KLAR.
+
+## 2026-08-07 kväll (B13 — inverterad minor-återbuden + cue-lägena, M27)
+
+**B13 STÄNGD** (🟢 NÄST punkt 1, blottad av ärliga portar): öppnarens återbud
+efter den starka inverterade höjningen 1m–2m var grova. Facit FÖRE fix
+(`auction-inverterad-rebud.test.ts`, 11 tester), källa bridgebum (inverted
+minors), boken §4.2/§6.2/§9, mätning M27 (`docs/systemrevisorn.md`).
+
+- **Äkta stopp:** stopp-visningen krävde 4+ KORT utan honnörskrav (♠9642
+  "visade spaderstopp" → 3NT föll på utspelet). Nu motorns honnörsstopp
+  (A/Kx/Qxx/J10xx), billigaste först.
+- **Graderingen:** 3m är strikt 12–14; en hand med 15+ bjuder ALLTID krav.
+  Utan äkta sidostopp bjuds bästa sidofärgen som "fantomstopp" — SAMMA bud och
+  regel som stopp-visningen (ärliga portar: partnern kan inte och ska inte
+  kunna skilja dem åt); styrkan visas i nästa bud. Kärnfallet 17 hp + 6m som
+  dog i "3m minimum" (28 hp ihop utan utgång) är borta.
+- **Bromsen + andra växeln:** svararen med 10–12 svarar 3m ("bara minimum") på
+  stopp-visningen; öppnaren passar 12–14 och driver 15+ (3NT vid full täckning
+  / andra stoppen under 3NT / 5m). Min-mot-min-överbuden (tvingad utgång på
+  22–26) och de passade 27+-utgångarna försvann samtidigt.
+- **Cue-lägena (kvar sedan 2026-08-03):** cue-ronden inkopplad för minorfiten
+  och 2♣-grenen (agreed trumf). Två minorregler: cue först ÖVER 3NT (under =
+  stopp-letande, §4.2), och i klar drivzon (33+) direkt-4NT — frö 20261469
+  visade hur cue-ronden annars åt upp 4NT-utrymmet (5♦ i stället för 6♦).
+  Under bygget hittades och stoppades även en design-miss: en separat regel
+  "stark sidofärg" hade gett samma BUD två avläsbara betydelser (dold info via
+  regelnamnet) — den slogs ihop med stopp-visningen före leverans.
+- Tre gamla facit uppdaterade i linje med nya systemet (billigaste äkta stopp
+  2♥ före längd-2♠; broms i stället för tvingad 5♦; 2♣-grenens kaptener cue:ar
+  på vägen mot 6♥/6♦).
+
+## 2026-08-07 (sex etapper på en dag — hål D landad + fem systemfixar, M22–M26)
+
+**🏗️ GODKÄND ETAPPLAN KÖRD E1→E7** (planfil `vi-jobbar-vidare-med-dreamy-
+salamander.md`; alla ägarbeslut togs löpande i sessionen). Varje etapp:
+facit-test FÖRE fix, hela sviten grön, egen `--no-ff`-merge, revisor-mätning
+(frö 20260721) — **dagens serie M22–M26: par-avvikelse 269,67 → 264,77
+(≈ −4 900 p per 1 000 givar), rätt kontrakt 19,0 → 19,7 %** (detalj per mätning
+i `docs/systemrevisorn.md`).
+
+- **E1 — hål D steg 1 LANDAD** (låg ocommittad sedan 2026-08-05): kontroll-
+  komplett 4NT i konkurrenslagret (§6.10). Facitstädning per ägarbeslut: 947 →
+  splinterspåret, 1274 struken (stale premiss), 1272 parkerad med **steg 2
+  (cue-frontend) — PARKERAD** (`docs/senare.md`).
+- **E2 — splinterregeln:** singel A/K → Jacoby 2NT (§4.1, källor bridgebum +
+  BBO-konsensus; dam FÅR splintras — ägarbeslut efter källdykning). Fixar frö
+  20260947. M22: −1 170 p.
+- **E3 — Jordan 2NT-fortsättningen** (systemfel #4): öppnaren passar aldrig;
+  3M/4M på stödpoäng ≤14/15+, bjudaren höjer avslutet med 13+ (§7.8d, frö
+  20260739 → 4♥). M23: −740 p.
+- **E4 — starka återbud** (systemfel #3): graderat 6-korts-rebud (11–12 hopp,
+  13+ fjärde färg), öppnarens invit-accept 14+ stödpoäng, reverse-handen 18+
+  driver (§5.2/§6.6; frön 20261323 → 3NT, 20260982 → 4♥, 20261111 → 5♣).
+  M24: −1 480 p, rätt kontrakt +0,4 %-enheter.
+- **E5 — 2/1: högfärgen visas i återbudet** (§4.2/§5.3, §9-löftet 2026-08-06
+  infriat): egen 4-korts högfärg som TREDJE färg bjuds naturligt under 3NT;
+  som fjärde färg förblir budet konventionellt (lärdom ur facit felrapport #4).
+  M25: −710 p.
+- **E6 — oklart-återbudet** (systemfel #2, översyn med ägargodkänd klassning):
+  'oklart'-1NT routas till NMF-maskineriet (frö 20261317: begravd hjärterfit →
+  4♥) + öppnaren rebjuder 5-korts färg i stället för skev 1NT med singel i
+  partnerns färg (frö 20260878). 1155/1492/1228 klassade rätt/medvetet-OK.
+  M26: −800 p.
+- **E7 — dokumentationssvepet:** denna post + bevaka.md (nya poster + Lebensohl-
+  skulden rättad mot koden), budsystem-revision.md (F1-tabellen var stale — alla
+  fyra familjer byggda sedan etapp 4), utspel-diagnos.md (netto-A/B klar),
+  CLAUDE.md-kartan.
+
+Ej pushat vid sessionens slut — väntar på ägarens PCD-klartecken.
+
+## 2026-08-06 (fjärde färg-fortsättningen + 2/1-regeln — spanarens fynd #1)
+
+**🧭 SVARAREN PASSAR ALDRIG SIN EGEN FJÄRDE FÄRG (mergepunkter `3bee0e9` +
+`015e6bf`).** Spanar-agentens största fynd (frö 20260743: 33 hp dog i 2NT när
+fjärde färg-kravet passades). Ny `placeGameAfterFourthSuit` (`auction-live.ts`):
+svararen placerar utgång efter besvarad fjärde färg — 3NT eller 4M om öppnaren
+höjt högfärgen; gated till modesta händer (<18 hp) så starka händer fortsätter
+slamvägen. Tänder på 7/1000 givar. Facit
+`auction-fjarde-farg-fortsattning.test.ts`; boken §6.6 + §9.
+
+**📚 2/1 GF MED 5-KORTS KLÖVER FÖRE 4-KORTS HÖGFÄRG ÖVER 1♦ (mergepunkt
+`36c7541`, källbelagt).** Kortaste vägen till game force: 12+ med 5♣ + 4-korts
+högfärg svarar 2♣ över 1♦ (9–11 väljer 1-läget). Källor: Couchman +
+Porthcawl-tutorialen. Ny gren i `respondToMinor`; boken §4.2 + §9. Återbudet
+(visa högfärgen) togs separat — byggt 2026-08-07 (E5 ovan). Samma dag
+noterades ägarregeln "splintra ej singelhonnör" (byggd 2026-08-07, E2) och
+947-korrigeringen (hör hemma i Jacoby-spåret, inte konkurrenslagret).
+
+## 2026-08-05 (netto-A/B-mätning av det budstyrda utspelet)
+
+**📏 UTSPELET GER ETT LITET MEN STATISTISKT SÄKERSTÄLLT FÖRSVARSLYFT — mätt, inte
+gissat.** Den aggregerade stickeffekten av hål A–G (`openingLeadWithAuction`) mättes
+mot det gamla budblinda utspelet med en ny gated probe,
+`src/lib/engine/lead-quality.probe.test.ts` (`LEADAB=1`). Riggen isolerar EXAKT
+utspelskortet: varje giv spelas ut av bot-hjärnan två gånger, identiskt i allt utom
+trick 1 (budstyrt vs budblindt), under samma nollställda slump; givar där
+utspelskortet inte ändras hoppas över (bidrar 0). Reproducera (en process, ~3 h)
+eller parallellt i fyra fröskivor (LEADAB_SEED + LEADAB_OUT), ~1,5 h väggklocka:
+```
+LEADAB=1 LEADAB_DEALS=1000 npx vitest run src/lib/engine/lead-quality.probe.test.ts
+```
+**Resultat (frö 20260729, 997 spelbara givar):** 525 fick ändrat utspel; spelförar-
+stick budstyrt 4636 vs budblindt 4727, **netto −91** (negativt = färre
+spelförarstick = bättre försvar), snitt −0,17/ändrad giv. Riktning: 190 bättre, 170
+sämre, 165 lika. **t = −2,54, 95 %-KI för snittet [−0,31, −0,04] och för totalen
+[−161, −21] — noll uteslutet.** Vinsten sitter mest i sang (led partnerns/lång färg
+i stället för blint spotkort: `20261305` 3NT ♠A→♦3, `20261492` 2NT ♠Q→♥J, båda −6);
+värsta förlusten kvar `20260805` 3NT ♣8→♥5 (+4). **VIKTIG RÄTTELSE:** en tidigare
+120-givarskörning gav netto −5 och tolkades som "stickneutralt" — det var
+underpowered. Med ~1000 givar framträder en liten, verklig, FÖRDELAKTIG effekt.
+Förbehåll: effekten är liten och mätningen är INTERN (vår bot som spelförare mot vår
+egen försvarsmotor), inte mot expertfacit. **Ägarbeslut 2026-08-05:** vi nöjer oss
+med utspelet tillsvidare — ingen förfining nu (resultatet bekräftar att det förtjänar
+sin plats). Förfiningsspåret (NT-färgvalet, "led partnerns färg"-ivern, aktiv/passiv
+mot trumf) ligger kvar i `docs/senare.md`.
+
+## 2026-08-04 (sen kväll — utspel hål E + A + G + C + D)
+
+**🃏 BUDSTYRT UTSPEL: HÅL E, A, G, C, D KLARA (pushas på PCD) — HELA UTSPELS-
+BYGGET A–G FÄRDIGT.** Resten av byggordningen ur `docs/utspel-diagnos.md`, mot
+teorin i `docs/utspel-teori.md`. **Hål E:** NT-färgvalet blev "längst OCH starkast"
+(`bestByLenStrengthMajor`). **Hål A (störst):** utspelet var helt budblint —
+`botCardSmartReasoned` slängde `calls` på trick 1. Nu läser motspelarens utspel
+auktionen (`analyzeAuctionForLead` + `openingLeadWithAuction`): partnerns bjudna
+färg först, mot NT längsta objudna, mot trumf passivt. **Hål G:** ess-regeln
+generaliserad till alla tenasser (`unsafeToLead`) — ägarens ursprungliga poäng:
+♠KJ843 leds inte bort mot 4♥ (→ passivt ♦3) men attackeras mot 3NT (→ ♠3). Byggt
+med A eftersom det kräver aktiv/passiv-kontext. **Hål C:** trumfutspel
+(`trumpLeadCard`, 2/4→lägsta, 3→mitten) i korsruff-läge (3+ bjudna motståndarfärger)
++ passiv utväg framför att bryta en tenass. **Hål D:** singel-för-ruff med korta
+trumf. Budvägen gäller BARA `botCardSmart` (appens väg); `botCard`/`botCardReasoned`
+är budblinda som förr. Facit FÖRE fix i `play-bot.test.ts` (ägarens giv + partner-
+färg + undvik-deras + C/D) och `signals.test.ts`. Hela sviten grön (`npm test`), 0
+regressioner. **Kvar att FÖRFINA (ej hål):** aggregerad netto-A/B (`PLAYQ`-proben,
+git-stash); aktiv/passiv idag passivt-som-default mot trumf (aktivt-när-bordet-har-
+lång-sidofärg ej detekterat); Lightner-dubblingar; artificiella bud skiljs ej från
+naturliga i budläsningen (första passet, ofarligt i vanliga 2/1-auktioner).
+
+## 2026-08-04 (kväll — utspel hål B + F)
+
+**🃏 UTSPEL HÅL B (inre sekvenser) + HÅL F (ess-regeln överallt): KLARA (pushas på
+PCD).** Först stegen i den beslutade byggordningen ur `docs/utspel-diagnos.md`, byggda
+mot den källförankrade teorin (`docs/utspel-teori.md`). **Hål B:** `honorLead`
+(`signals.ts`) kände bara igen topp-sekvenser (touch från högsta kortet), så
+K-kn-10-x föll till lågt spotkort. Nu känns även **inre/brutna sekvenser** igen — en
+hög honnör (kn+) med ett glapp ner till en sammanhängande löpa (≥2 kort, topp 10+) →
+led toppen av den inre löpan (Kkn10→kn, K109→10, D109→10, Akn10→kn, ADkn10→D, ADkn→D).
+Ren mekanik i `signals.ts` (ny hjälpare `runLengthFrom`). **Hål F:** ess-regeln
+(underled aldrig ett ess mot trumf) gällde bara trick 1; kortvalet bröts ut till en
+gemensam `chooseLeadCard` som nu även mitt-i-given-utspelet använder. Död
+`openingLead`-funktion borttagen. Facit FÖRE fix i `signals.test.ts` (inre sekvenser +
+negativa fall som KknX/Kkn9 → null) och `play-bot.test.ts` (hål F mitt-i-given +
+NT-vakt). Hela sviten grön (`npm test`), 0 regressioner. **Kvar (byggordningen):** hål
+E (skilj NT-färgvalet), sedan hål A+G (budgivningen + tenass-undvikande, där ägarens
+KJxxx-poäng hör hemma).
+
+## 2026-08-04
+
+**🃏 UTSPELSBUGGEN (♣AQJxx mot slam): LAGAD (pushas på ägarens PCD).** Ägaren
+rapporterade att boten underledde sitt ess på utspelet mot slam. Orsak: utspelet
+gick via ren längsta-färg-doktrin (`openingLead` → `leadFromSuit`), så ♣AQJxx
+(udda 5-korts utan sekvens) föll till spotkortsutspel (5:e bästa) och ledde LÅGT
+under esset — mot ett trumfkontrakt förödande (spelförarens singel-kung blir
+gratis, esset dör oanvänt). Kommentaren i `botCardReasoned` lovade "man underleder
+inte ess på utspelet" men koden gjorde ändå det. Ny `openingLeadChoice` i
+`play-bot.ts`: mot **färgkontrakt** väljs den längsta färg som INTE kräver ett
+ess-underspel (en ♠KQJ2-sekvens vinner över att underleda ♣AQJxx); har varje färg
+ett oskyddat ess **cashas** esset i längsta färgen. **NT oförändrat** (klassisk
+längsta-färg-doktrin — ess-underspel/4:e bästa är normalt i sang). Facit FÖRE fix:
+`play-bot.test.ts` ("utspel mot trumfkontrakt – underled aldrig ett ess", 3 fall:
+byte till sekvens, forced-ess-cash, NT-vakten). Hela sviten grön (`npm test`,
+0 regressioner), `tsc` ren. Regel införd i `docs/budsystem.md §8.3` + §9-loggen.
+
+## 2026-08-03
+
+**🧰 GRANSKNINGSPUTSEN: KALENDERARKIV + RESULTATHISTORIK + TANGENTBORD —
+BYGGDA (förmiddagen; pushas först på ägarens PCD):** ägaren valde putsen ur
+"NÄSTA GÅNG"-listan. Tre delar, alla testdrivna (facit före fix) och
+webbläsarverifierade:
+- **Kalenderarkivet för Dagens giv** (`/spela-kort/dagens/arkiv`,
+  `DagensArkiv.tsx`): månadskalender från premiären 2026-08-02 — spelade dagar
+  visar dina stick i guldserif, missade dagar spelas i EFTERHAND via
+  `#/spela-kort/dagens?dag=N` (dagen ingår i Plays React-nyckel i `App.tsx` så
+  ett dagbyte monterar om sidan), framtida dagar är låsta. **Ärlighetsregeln:**
+  efterhandsspel bokförs med `late` i `daily-log` och räknas ALDRIG in i
+  streaken — ett igenfyllt hål väcker inte en bruten svit (facit
+  `daily.test.ts` + `dagens-arkiv.test.tsx`). Delningstexten bär nu `?dag=N`
+  så en delad länk öppnar RÄTT giv även i morgon (förr fick mottagaren
+  morgondagens giv). Diskret länk på startsidan under flaggskeppskortet.
+- **Resultathistoriken för frispelet** (granskningens fynd #4 "fritt spel
+  sparar ingenting alls"): varje färdigspelad FRI giv bokförs i
+  `spel-historik` (`spel-historik.ts`: nyast först, tak 50, strukturvakten
+  `validHistorik`; facit `spel-historik.test.ts`) med frö, kontrakt och
+  resultat ur ditt perspektiv → sidan `/spela-kort/historik`
+  (`SpelHistorik.tsx`) listar dem med "Spela om →" (`?giv=frö` ger exakt samma
+  kort). Länk i resultatdialogen. Verifierad end-to-end i webbläsaren med
+  autospelaren (riktig giv spelades klart och bokfördes korrekt).
+- **Tangentbordsstyrning på dator** (fynd #21 "tangentbord på desktop saknas
+  helt"): budlådan styrs med siffra + färgbokstav (N = sang, S = spader,
+  H = hjärter, R/D = ruter, K/C = klöver), P = pass, X = dubbelt, Enter = OK,
+  Esc rensar — samma tvåstegsflöde som klicken (facit
+  `bidding-box-keyboard.test.tsx`); Enter bekräftar även kontraktdialogen.
+  Spelfasen: ←/→ (och ↑/↓) flyttar fokus mellan de spelbara korten
+  (`data-spelbart` + guld fokusring i `PlayingCard`), Enter spelar det
+  fokuserade kortet. Hjälptexterna i båda ⋮-menyerna beskriver tangenterna.
+Lärdom vid verifieringen: React 18 batchar setState från vanliga
+window-lyssnare — läs av DOM:en efter en timeout, inte synkront efter
+`dispatchEvent`, annars ser verifieringen falskt rött.
+
+**🎁 SMÅÖNSKEMÅL SAMMA FÖRMIDDAG (parallella sessioner, pushade ihop med
+putsen):** rundpass ger nu **"Spela om given"** bredvid "Ny giv" (samma frö —
+man kan öppna budgivningen själv den här gången; facit i
+`play-smoke.test.tsx`), och claim-revealen **namnger vem som tar resten**
+("Nord tar resten (13 stick)" i stället för bara "korten ligger uppe"; facit i
+`syd-trakarl.test.tsx`).
+
+**🧠 ETAPP B+C+D UR GRANSKNINGEN — BYGGDA (morgonen, gren per etapp, ägarens
+"PCD, sen kör vi Etapp B + C + D"):** Etapp A deployades först (Actions grön,
+rebidz.com verifierad med og-taggar + bild). Sedan:
+- **ETAPP B "Appen som minns":** resultatloggen `daily-log` (givnummer →
+  {myTricks}) + `dailyStreak` (Wordle-regeln: streaken lever tills en hel dag
+  missats) — 🔥-bricka på startsidans kort + i resultatdialogen. Delnings-
+  texten SPOILERFRI (🟩/⬛-rutrad med dina stick; kontrakt/facit avslöjas
+  aldrig — facit i `daily.test.ts`). **Giv-frö**: alla fria givar (även
+  målsökta) får ett mulberry32-frö synligt i adressen
+  (`#/spela-kort?giv=…`) — delbart/bokmärkbart/återskapbart (verifierat:
+  samma hand ur enbart adressen). **"Spela om given"** i resultatdialogen
+  (samma frö, round-räknare i bordets nyckel; loggen skrivs aldrig över av
+  omspel). **Pågående giv sparas löpande** (`pagaende-giv`, schemaversion
+  v:1, `lib/engine/resume.ts` + `resume.test.ts`) och återupptas vid
+  omladdning/telefonlås — motorn bygger upp läget via playCard-replay;
+  korrupt/gammal sparning ignoreras tyst; rensas när given är klar.
+- **ETAPP C "Spelbordets förtroende":** **Informationsläckan LAGAD**
+  (granskningens buggfynd): under levande giv förklaras andras bud av
+  tolkningslagret med regel/förklaring bortskalade — tolkningen läser enbart
+  auktionen, aldrig korten (`hiddenHands` i AuctionGrid, på i budfasen +
+  spelets ⓘ; egna bud, budvisningen och efterhandsvyerna oförändrade; facit
+  i `auction-grid.test.tsx`). OBS: tolkningens regeletikett kan i sällsynta
+  lägen avvika från motorns interna regelnamn — den beskriver vad auktionen
+  VISAR. Kortspelets "varför"-förklaringar behölls medvetet (pedagogiken är
+  poängen; omprövas om det känns som kik). **Ångra** (`play-undo.ts` +
+  facit): backa till före ditt senaste kort, bottarnas svar ospelas,
+  ⋮-menyknapp. **Ge upp** som motspelare (resten till spelföraren, via
+  claim-revealen med egen text). **Resultatrubriken ur ditt perspektiv**
+  (`resultHeadline` i scoring.ts + facit): "Ni satte kontraktet! 1 bet" i
+  guld i stället för rött. **Höjdbudgeten**: budfasens fot −6 px luft →
+  uppmätt exakt 812 px på 375×812 (även med förklaringsraden öppen).
+- **ETAPP D "Vägen in":** **Om rebidz** (`/om`): du sitter alltid Syd, 2/1,
+  lägena, tipsen — nås via "Ny här? Så funkar rebidz →" på startsidan
+  (diskret rad UNDER korten; ägarbeslutet om likvärdiga menykort orört) och
+  sidfotens "Om rebidz". **Inställningar-sidan städad**: Utseende
+  (Ljust/Mörkt/**Följ systemet** — gick inte att återfå förr, `themeChoice`/
+  `setThemeChoice` i theme.ts) + Spelet (Budstöd/Ljud/Auto Claim/Tempo, samma
+  lagringsnycklar som ⋮-menyn) + Nollställ; ägarens GitHub-verktyg hopfällt
+  längst ner. **Par-poäng i resultatet SKJUTS** medvetet (kräver DD-tabell i
+  webworker — hör ihop med auto-facit-spåret i `docs/senare.md`).
+Allt verifierat i webbläsaren (375×812): spara/återuppta genom omladdning,
+ångra 7→0 kort, ge upp-flödet, spoilerfri delning, streak-brickan, adress-
+fröets determinism, Inställningar, inga konsolfel. Läraren: teckenkodnings-
+fällan i PowerShell (Get/Set-Content förstör åäö) bet två gånger —
+dokumentfixar görs med Edit-verktyget, punkt.
+
+## 2026-08-02
+
+**🛡️ STORA GRANSKNINGEN + ETAPP A "SKYDDSNÄTET" — BYGGD (natten mot 3/8, gren
+`etapp-a-skyddsnatet`):** Ägaren bad om en kritisk helhetsgranskning
+(funktionellt + visuellt). Claude spelade igenom Dagens giv i webbläsaren,
+skärmdumpade alla sidor och lät två kodgranskare gå igenom repot. Rapporten
+(26 numrerade fynd + beslutad körordning Etapp A–D) ligger i planfilen
+`~/.claude/plans/hidden-questing-creek.md`; kärnfynden i korthet:
+appen *glömmer allt* (ingen streak/historik/spara pågående giv), *saknar
+skyddsnät* (ingen felfångare; deploy kunde ge vit sida i öppna flikar),
+delningslänken visades som tom ruta (inga og:-taggar), och **en
+informationsläcka**: klick på motståndarbud i historiken visar deras FAKTISKA
+hp (`doubles.ts` m.fl. bygger förklaringen av handen, inte intervallet).
+Ägaren godkände körordningen; **Etapp A byggdes direkt:**
+- **Felfångaren** `ErrorBoundary.tsx` ytterst i `main.tsx`: felskärm med
+  "Ladda om"-knapp + väg hem; chunk-fel (trasig lat-laddning efter deploy)
+  laddar om automatiskt EN gång (vaktflagga i sessionStorage; rensas i
+  componentDidMount — inte render, React kan göra om en misslyckad rendering).
+  Facit: `error-boundary.test.tsx`.
+- **PWA-uppdateringen** bytte `autoUpdate` → `prompt`: ny version tar inte
+  längre över tyst mitt i en session (det kunde utlösa chunk-felen). I stället
+  visar Layout en diskret glaspill "Ny version finns — Uppdatera"
+  (`pwa-update.ts` registrerar och skickar window-händelsen i
+  `lib/sw-events.ts`; pwa-update importeras BARA från main.tsx så testerna
+  slipper den virtuella modulen).
+- **Länkförhandsvisningen:** og:-/twitter-taggar i `index.html` +
+  `public/og-image.jpg` (1200×630, genereras repeterbart av
+  `scripts/generate-og-image.ps1` — smaragd, guldspader, ordmärket, taglinen).
+- **woff2 i precachen** (`globPatterns`): guldserifen överlever offline.
+  Manifestet fick `id: '/'` (stabil identitet för hemskärmsinstallationer).
+- **Falska "✓ Kopierat"-kvittot** i `Play.tsx`: sätts nu bara när
+  urklippsskrivningen faktiskt lyckades.
+- Vakttester: `deploy-config.test.ts` låser og:-taggarna + bildfilen + woff2.
+**Kvar ur granskningen (ägaren väljer ordning):** Etapp B "appen som minns"
+(streak, resultatlogg, spara pågående giv, giv-frö i URL, spoilerfri delning),
+Etapp C "spelbordets förtroende" (informationsläckan, ångra, ge upp som
+motspelare, resultat ur spelarens perspektiv, ~7 px höjdbudget), Etapp D
+"vägen in" (onboarding, Inställningar-städning, par-poäng i resultatet).
+
+**🎨 FACELIFT YTA 4 + EXKLUSIVITETSSVEPET + DAGENS GIV — KLART (sen kväll;
+ägaren godkände hela förslagslistan "kör på helt autonomt, visa innan PCD"):**
+- **Sidhuvudena på de inre sidorna** (Budträning/Budvisning/Budsystem/
+  Inställningar): gemensam `PageHeader` — rubrik i klubbserifen (30 px) +
+  kort guldhårlinje som ekar menyradens guldlinje. De vita rubrikpanelerna
+  borta; alla fyra sidor ser likadana ut.
+- **Kortbaksidan bär monogrammet:** brandens guldspader (`BrandMark bare`) i
+  mitten av den befintliga emerald-baksidan (`PlayingCard`).
+- **Dagens giv (Wordle-mekaniken, förtitt på Fas 3 — ingen backend):**
+  datumet är fröet (`daily.ts`: `dailySeed` = ååååmmdd lokal tid,
+  `mulberry32` flyttad till `deal.ts` så modulen är lätt nog för startsidans
+  chunk; revisorn återexporterar). Alla spelar SAMMA giv varje dag; premiären
+  2026-08-02 = #1. Rutt `/spela-kort/dagens` (egna React-key:ar så Play
+  monteras om vid lägesbyte), guldbricka "Dagens giv #N" ersätter Mål-knappen
+  i kompassrutan, resultatdialogen får **"Dela resultatet"** (navigator.share
+  på telefon, urklipp på dator) med delbar text + länk. Startsidan har
+  flaggskeppskortet med den ständigt roterande guldramen + "Spelad ✓"-bricka
+  (localStorage `daily-played`). Facit: `daily.test.ts` (determinism, frö,
+  löpnummer, deltext).
+- **Boken som klubbok:** kapitelnumren som §-numrering i guldserif,
+  anfang (`.md-anfang`, CSS `::first-letter`) på sektionsintron,
+  guldhårlinje under öppnad kapitelrubrik.
+- **Guld = belöning:** Budträningens "Senast"-poäng, sessionens slutpoäng och
+  spelets poängrad (bara när N/S fick poängen) i guldserif; tema med alla rätt
+  får en liten guldspader i temalistan.
+- **Småsakerna:** laddindikatorn är nu guldspadern som andas (`gold-pulse`),
+  primärknappar får ett engångs guld-skimmer vid hover (`btn-shimmer`,
+  "levande guld"-familjen), och alla icke-immersiva sidor har en sidfot med
+  klubbsignatur (guldhårlinje + "rebidz" i serifen). Allt respekterar
+  "minskad rörelse".
+- **Mobilmenyn som iPhone-glas (ägarens önskan samma kväll):** ☰-listan är
+  nu en frostad glas-dropdown med ÄKTA iOS-material (tre ägariterationer:
+  "50 %" → "ljust läge inte bra" → "får inte iphone-känslan"; lärdomen: mörk
+  emerald-platta + vit text tvingar upp opaciteten och dödar glaset — iOS
+  kör LJUST glas med MÖRK text i ljust läge): ljust = `bg-white/65` + mörk
+  `text-ink`, mörkt = `bg-club-900/55` + ljus text (egen `menuLinkClass`,
+  skild från emerald-barens vita), `backdrop-blur-2xl` + mättnad + guld-
+  hårlinje, glid 360 ms (ägargodkänt)) som SVÄVAR över sidinnehållet (absolut position — sidan
+  trycks inte längre ner) och glider ner mjukt ur knappen (`menu-drop`,
+  respekterar minskad rörelse). Osynligt heltäckande lager bakom → klick
+  utanför stänger. Verifierat i 375 px-vyn: innehållet flyttas 0 px.
+- **Taglinen:** först byggdes vallgravsraden ("Bridgeappen som förklarar
+  **varje bud**" i guld) — ägaren underkände den samma kväll: heron säger nu
+  kort och koncist **"Träna, spela, tävla"**. Sidfoten blev på ägarens begäran
+  "© rebidz · Est. 2026 · v-nummer" (ägaren valde "Est." framför
+  "grundat"/"sedan" — klubbskyltarnas stämpel), där versionen läses ur
+  `package.json` (bumpad 0.0.0 → 1.0.0 — appen är i drift; låsfilen synkad
+  med `npm install --package-lock-only` så `npm ci` i deploygrinden inte
+  bryter). Inga regressioner: hela sviten grön (`npm test`).
+
+**🎨 BUDLÅDAN (FACELIFT FAS 1 YTA 3) — KLAR (ägarbeslut i tur och ordning
+under sessionen, kväll):**
+- **Budfasens kortrad = spelfasens** (skulden från pass 4 inlöst): `HandFan`
+  fick ett `flat`-läge som ritar samma sammanhängande rad som `SouthFan` i
+  vila — fasta xl-kort 64×96, ETT jämnt överlapp utan färgglapp. Måtten bor i
+  delade `FLAT_OVERLAP` (`cardLayout.ts`, 13 kort = 349 px) som båda läser.
+  Budträning/budvisning behåller färggrupperingen. HCP-brickan svävar nu på
+  avdelarlinjen (hade annars krockat med den bredare raden).
+- **Mål-knappen bor i kompassrutan** (ny `footer`-plats i `CompassPanel`;
+  Bricka/zon uppflyttade direkt under rosen). Nya KORTA måletiketter
+  (`describeTargetShort` i `contract-target.ts`) så texten aldrig blir fler än
+  två rader i den smala rutan — fulltexterna kvar i kontraktväljaren.
+- **Betydelse-raden + "Motorn hade valt" på EN rad UNDER X/XX/PASS/OK**
+  (ägaren ville ha hjälpen under knapparna; sammanslagningen sparar en rad
+  på höjden och knapparna flyttar sig aldrig när hjälpen dyker upp).
+- **Valt bud: guldring INUTI knappen** (`ring-inset` — chipet växer inte och
+  lyfts inte; mätt i DOM: valt och ovalt chip båda 66×48) **+ startsidans
+  roterande guldbåge** (`gold-frame`, 6 s/varv — ringen och bågen ligger i
+  samma 2 px-band; "minskad rörelse" respekteras via samma CSS). OK-knappen
+  förblev himmelsblå (ägarbeslut efter guldtest). Luften i rutnätet trimmades
+  i två varv (4 → 6 → 4 px) — 4 px funkar när inget sticker ut ur knappen.
+- **Symmetrin (ägarfeedback efter första deployen samma kväll):** raden
+  ovanför är exakt budlådans bredd (`max-w-md`) — kompassens vänsterkant och
+  auktionens högerkant går i LINJE med budlådan (först låstes den till 576 px;
+  ägaren ville ha kanterna i linje). ⋮-menyn ligger i radflödet på mobil men
+  hängs UTANFÖR kolumnen till höger från `sm:` (kringflytande chrome som i
+  spelfasen) så den inte stjäl bredd från auktionen; en mellanvariant med ⋮ i
+  kompassrutans hörn underkändes. HCP-brickan är låst till samma kolumn
+  (högerkant = budlådans högerkant) i stället för skärmhörnet. På vägen lagades
+  ett 10 px-linjeringsfel (dubbel padding: `px` låg innanför `max-w-md` i raden
+  men utanför i budlådan).
+- **Höjd/bredd-budgeten:** hela vyn (rutnät, förklaring, kortrad) ryms på
+  exakt 812 px-mobil även i värsta fallet (3-raders förklaring); breddgolvet
+  är 352 px (kortraden 349) — moderna telefoner är ≥ 360.
+- **🐛 På köpet:** budvalet nollställs vid ny giv (`useEffect` på
+  `history.length` i `BiddingBox.tsx`) — förr överlevde markeringen in i nästa
+  giv, och med två-tryck-OK kunde ETT tryck bjuda det gamla valet.
+Verifierat i dev-browsern (mobil 375/352 px + desktop, konsolen ren), tsc +
+hela sviten grön (`npm test`).
+
+**🐛 SYD SOM TRÄKARL — REGRESSION FRÅN FACELIFTEN, LAGAD & LIVE (merge `b6279c6`):**
+när NORD vann budgivningen (Syd träkarl) ritades Nords öppna hand aldrig — pass 2
+bytte `northOpen=isFaceUp('N')` mot `dummyAtTop = dummy==='N'` och tappade fallet.
+Eftersom du styr båda NS-händerna (`controls`) och ingen bot spelar åt Nord frös
+given för evigt på Nords tur. Samma refaktorering hade tappat claim-revealens
+"alla händer läggs upp" (bara träkarlens hög ritades). Fix: toppzonen ritar Nords
+hand så fort den är öppen (träkarl ELLER spelförare Nord) och V/Ö-högarna ritas
+via `isFaceUp` → claim-revealen visar åter alla fyra. Facit-test FÖRE fixen:
+`syd-trakarl.test.tsx`. Verifierat live i dev-browsern (2♥/2♣ av Nord, sticket
+bokfördes där det förr frös).
+
+**🎨 SPELBORDET PASS 4 — kortraden + fasta kortstorlekar + stickhögen + dubbla
+hörnindex (ägarbeslut i tur och ordning under sessionen):**
+- **Syds kortrad utan färgglapp:** ETT jämnt överlapp över hela raden (förr la
+  varje ny färg ett helt kort → 400 px och overflow på mobil). Remsan exakt
+  23,75 px → 13 kort spänner 349 px (5 px marginal per sida, ägarens tal).
+- **Fast kortstorlek "C" för alla händer:** `xl` = 64×96 på ALLA skärmbredder
+  (2:3 ≈ riktigt bridgekort; ägaren valde C ur tre uppritade alternativ). Nords
+  kolumner: xl med fast 60 px-remsa (täckta kort läste som stubbar vid gamla
+  50 %-överlappet). V/Ö-högarna: xl vridna (96×64), remsa 16 px.
+- **Stickhögen:** mittytan 192 → 160 px, korten samlade med 25 % överlapp och
+  z-index i spelordning (senast spelat överst, som vid riktigt bord). Stickkorten
+  fick den förut oanvända `lg` (fast 48×64) så överlappet stämmer på desktop.
+- **Dubbla hörnindex:** valör + symbol även upp-och-ner i nedre högra hörnet på
+  ALLA kort (riktig kortlek). Mittsymbolen åter centrerad; döda `mirrorCorners`
+  borttagen — vridna kort får nu index i synliga remsan åt båda håll. Gamla
+  "ETT hörnindex"-beslutet hävt: kollisionsrisken på småkort finns inte längre.
+- Parkerat till budlåde-passet: budfasens kortrad (`HandFan`) behåller färgglapp
+  tills budlådans storlek ses över (ägarbeslut, se `docs/senare.md`).
+
+**🎉 MOBILSVEP ÖVER ALLA SIDOR (Fas 0 b, KLART) → HELA FAS 0 KLAR:** varje sida
+(Hem, Budträning + övning, Budvisning, Budsystem, Inställningar, Spela kort:
+budfas + bord) gicks igenom i 375 px-bredd med en overflow-detektor (JS som mäter
+element bredare än skärmen) + skärmbild. **Resultat: appen var redan mobil-ren** —
+ingen sidled-overflow, inga avklippta knappar, god luft och stora tryckytor. Enda
+fyndet: de breda svarstabellerna på Budsystem (Svar/Betydelse/Kravnivå/Konvention)
+är bredare än en telefon. De var INTE trasiga — `.md table` scrollar redan i sidled
+— men den 4:e kolumnen saknade visuell antydan (kändes "budget", ägarord). **Fix:**
+`ScrollTable` (react-markdown `table`-override) wrappar tabellen i en scroll-behållare
+och en `ResizeObserver` sätter klassen `is-scrollable` BARA när innehållet är bredare
+än rutan → CSS ritar en mjuk toningsskugga vid högerkanten ("det finns mer →").
+Verifierat: mobil 46/56 tabeller får skuggan (smala slipper), svep visar Konvention;
+desktop 0 skuggor (allt får plats). tsc rent, hela sviten grön. En teständring på
+vägen (redundant wrapper) backades. **Med detta är Fas 0 (a bottarnas kortspel, b
+mobilen, c teknisk härdning) helt klar** — grunden håller för främmande ögon; näst
+i konkurrensplanen: Fas 1 (faceliften) eller ett budmotor-NU.
+
+**Budsystem — "fäll ihop"-pil (ägarönskemål 2026-07-30, samma push):** varje
+dropdown (både sektioner och undersektioner, 50 st) fick en ▲-knapp längst ner till
+höger som stänger sektionen och tar rubriken i vy igen — så man slipper scrolla upp
+till rubriken efter en lång sektion. `CollapseButton` i `BudSystem.tsx`; stänger sin
+närmaste `<details>` via `closest('details').open = false`. Verifierat i ljust + mörkt
+läge.
+
+**🎉 SÄKRA ZONER VID BORDET (Fas 0 b, KLART):** utredningen visade att planens
+"ingen hantering av säkra zoner" var **inaktuell** — `index.html` har redan
+`viewport-fit=cover` + `black-translucent` statusrad, och `Layout.tsx` skjuter redan
+in topp (`env(safe-area-inset-top)` på sidhuvudet) och botten
+(`env(safe-area-inset-bottom)` på innehållsytan). Spelbordet ligger inuti den
+botten-paddade ytan och når inte ens skärmkanten på mobil, så kortraden kan inte
+gömmas under hemindikatorn. Enda faktiska luckan: **vänster/höger** (liggande läge /
+sidourtag), nu tillagt på `<main>` via `pl/pr-[max(1rem,env(safe-area-inset-left/right))]`
+— aldrig mindre än 1rem i stående, växer med insättningen på riktig telefon.
+Verifierat: stående mobil oförändrad (computed padding 16 px, botten 24 px), tsc rent,
+hela sviten grön. Slutverifiering görs på ägarens iPhone. Ärlig kalibrering: liten
+komplettering, inte ett stort hål.
+
+**🎉 KONSEKVENT KORTRAD I ALLA VYER (Fas 0 b, KLART & live, merge `347d2c3`):**
+handen ritas nu likadant överallt. **Bakgrund:** felrapport #36 bad om "större kort"
+på mobil (stora fingrar). Vi mätte i DOM:en: 13 kort à 48 px fyller en 375 px-rad
+nästan helt (~336 px) — man får inte plats med ~44 px tryckyta per kort på en rad
+utan två rader (ägaren avvisade) eller bredare skärm. Ägaren tyckte storleken vid
+bordet känns bra på max; den **verkliga** smärtan var att handens kortrad var mer
+ihoptryckt i **budgivningen** (`HandFan`: tät solfjäder, `-ml-7`, ~288 px) och sedan
+*expanderade* när kortspelet började (`SouthFan`: färggrupperad, ~336 px) — den
+skillnaden mellan vyer "känns budget". **Fix:** `HandFan` ritar nu samma
+färggrupperade kortrad som `SouthFan` (färgerna i grupper med luft emellan, samma
+`md`-storlek), och överlappet bor i en delad konstant `REST_OVERLAP` (`cardLayout.ts`)
+som båda läser → kan aldrig glida isär igen. Påverkar budgivning, budträning och
+budvisning (alla använde `HandFan`); spelbordet oförändrat. Verifierat i webbläsaren
+i alla fyra vyerna (inga konsolfel), hela sviten grön. **Felrapport #36 stängd**
+"löst på annat sätt" (korten gjordes alltså inte större — upplevelsen blev konsekvent).
+Kvar i Fas 0 b: mobilsvep + säkra zoner vid bordet. Ägarbeslut: samma look överallt =
+proffskänsla. Detalj: `docs/konkurrensplan.md` Fas 0 b + `docs/senare.md`.
+
+**🎉 KONKURRENSPLANEN FAS 0 c — TEKNISK HÄRDNING (KLART & live):** två småfixar
+som gör grunden redo för främmande ögon. **(1) 404-sida:** `NotFound.tsx`
+(varumärkt: grönt filt, guldknapp "← Till start") + en catch-all-route
+`<Route path="*">` sist i `App.tsx`, så felskrivna/döda adresser landar mjukt i
+stället för på en tom sida. Facit `not-found.test.tsx` renderar hela `App` mot en
+påhittad hash och mot en riktig (Budträning, liten lat-chunk — vald för att
+Budsystem-bokens 345 kB-chunk gav falsk CPU-svält-timeout i full svit). **(2)
+Route-baserad kod-uppdelning:** sidorna importeras nu med `React.lazy` (Home direkt-
+laddad — landningssidan; resten lazy), Suspense-gräns + snurr-fallback runt
+`<Outlet/>` i `Layout.tsx`. Första-laddningens JS gick från en enda ~889 kB-fil
+till en 247 kB-entry (gzip 276 → 79 kB); Budsystem-boken (345 kB) och Spela kort
+(88 kB) laddas först när man går dit. Siffror från `npm run build` (läs
+`dist/assets/`). Verifierat i webbläsaren: alla rutter laddar sina chunkar utan
+konsolfel; hela sviten grön. Fas 0 a (#32/#34) + c klara; kvar i Fas 0: **b)
+mobilen #36**. Detalj: `docs/konkurrensplan.md` Fas 0.
+
+**🎉 DEPLOYGRINDEN FLYTTAD TILL GITHUB ACTIONS (KLART, deployen verifierad grön +
+aliasad rebidz.com):** de återkommande "myntkast"-röda deployerna knäckta vid roten.
+**Orsaken:** `vercel.json` körde hela testsviten (`npx tsc && npm test && npm run
+build`) som byggkommando på Vercels CPU-svultna byggare → tidskänsliga DDS-tester
+slog slumpvis i sina tidsgränser. Band-aids i `b777abb`/`2b6934a` (seedning + höjda
+gränser) räckte inte — fel MILJÖ, inte fel kod: samma bygge (`81456df`) gick Ready
+på 1m44 medan mitt `67e59f9` föll på 2m7 med identisk workload. **Fixen:** ny
+workflow `.github/workflows/ci-deploy.yml` kör `tsc + npm test` på `ubuntu-latest`
+och deployar till Vercel-produktion (`vercel deploy --prebuilt --prod` via
+`VERCEL_TOKEN`-hemlighet) BARA om allt är grönt; Vercels egen Git-auto-deploy
+frånkopplad; `vercel.json` bygger nu bara (`npm run build`). Garantin "rött test →
+ingen publicering" bevarad, på en maskin som inte slumpfäller; CRLF-fällan i
+docs-vakt försvann (körs på Linux/LF nu). Verifierat två gånger: grön Actions →
+"Aliased … Ready", andra körningen 1m9s (dubbelkörningen borta). Commits `81083a5`
++ `cb5fe13`. Tre GitHub-hemligheter: `VERCEL_TOKEN`/`VERCEL_ORG_ID`/
+`VERCEL_PROJECT_ID`. Levande docs + `deploy-verifiering`-skillen + minnet
+uppdaterade; historik/audit orörd. Detalj: CLAUDE.md "Hosting & deploy".
+
+**🎉 FELRAPPORT #34 – FÖRSVARET SPELAR TREDJE HAND HÖGT (KLART, konkurrensplanens
+Fas 0 a, hela sviten grön via `npm test`, tsc rent):** motpolen till #32 –
+spelförar-planen blev en motspels-plan. **Buggen:** tredje/fjärde-hand-grenen i
+`play-bot.ts` la billigaste vinnaren även när den DOLDA spelföraren spelade efter
+försvararen; i felrapportens giv (1NT av Öst) satt Nord med ♥KJ1065, partnern
+ledde ♥3, träkarlen la ♥4 – Nord la ♥5 och Öst vann gratis på ♥9 där en honnör
+hade tvingat fram Östs ess. Felet sker redan i trick 1 (13 kort), långt över
+Monte-Carlo-fönstret (≤8), så tumregel-lagret måste kunna det. **Facit före fix**
+(`play-bot-third-hand.test.ts`): en DDS-låst klassisk finess (träkarl lågt,
+spelföraren håller finess-knekten, försvarets K/D delade) där tredje hand LÅGT
+släpper spelföraren ett extra stick (DDS: högt = 1, lågt = 2) + själva
+felrapportens giv. **Fixen:** `thirdHandHonor` – är jag försvarare i **sang**,
+ledde partnern och står bara spelföraren (ej den öppna träkarlen) bakom mig,
+lägger jag min **lägsta** honnör (10+). Att välja lägsta är hela poängen: ur en
+gaffel (A-D-10) ska esset ligga kvar över spelförarens kung, inte krossas på
+partnerns låga utspel. **Två fällor upptäckta och lagade under bygget** (via
+enskild-giv-spårning mot mätriggen): (1) första versionen spelade *högsta* kortet
+och krossade ett ess på en tenass → −1 (seed 20260732); rättat till lägsta
+honnören. (2) I trumfkontrakt satte ett vunnet sidostick försvararen på lead in i
+ruffhanden → −1 (5♦, seed 20260761); regeln begränsades till sang, precis som #32.
+**Netto** (`play-establish.probe`, `ESTABLISH=1`, 40 seedade givar frö 20260729,
+A/B via `git stash`): 374 → 374, oförändrad summa (ingen giv bytte utfall) – noll
+regressioner, men den rapporterade given DDS-bevisat lagad. Mönstret (försvarare
+tredje hand med honnör i sang, bara dold spelförare bakom) är sällsynt i
+slumpgivar. Ren tumregelmodul, spelmotorn (`play.ts`) orörd, inga nya beroenden.
+
+## 2026-07-29
+
+**🎉 FELRAPPORT #32 – SPELFÖRAREN ETABLERAR LÅNG FÄRG (KLART, konkurrensplanens
+Fas 0 a, hela sviten grön via `npm test`, tsc rent):** första spelförar-planen i
+bot-hjärnan. Buggen: i sang cashade boten sina sidoess (stopp + entréer) FÖRE den
+knäckte spärren i sin långa färg – när spärren väl föll var motståndarnas honnörer
+goda och försvaret rullade hem. Felet sker vid 9–13 kort, OVANFÖR
+Monte-Carlo-fönstret (≤8), så MC hann aldrig laga en redan förstörd position; det
+är därför tumregel-lagret måste kunna planera. **Facit före fix:** ett DDS-låst
+3NT-slutläge (`play-bot-establish.test.ts`) där perfekt spel ger 7 av 11 men både
+tumregeln och den skarpa boten tog 3 (mekanism-lås: varje cashat sidoess före
+rutern degraderade DDS-facit 7 → 6 → 4). **Fixen:** `establishLongSuit` +
+`suitTricks` i `play-bot.ts`, anropad i on-lead-grenen före cashandet – etablerar
+den långa färgen (knäcker spärren) när spelförarsidan har full kontroll (varje
+annan färg stoppad, ≥2 stick att vinna). Ärlig räkning (spelförare + träkarl,
+inget tjuvkik). Boten tar nu 7 på facit-given. **Begränsad till sang med flit:**
+en första A/B-mätning fyrade även i trumfkontrakt och tappade då stick (4♠-givar)
+eftersom "säkra vinnare" kan ruffas och färg etableras genom ruff – guarden
+`state.trump !== null → return null` löste det. **Netto-mätning** (deterministisk,
+`play-establish.probe.test.ts` gatad `ESTABLISH=1`, 40 seedade givar frö 20260729,
+A/B via `git stash` av play-bot.ts): baslinje 366 → med fixen 374, **netto +8
+spelförarstick, noll trumf-regressioner** (enda −1 kvar är en 3NT-giv, inom
+MC-samplingsbruset). Ren motor-/tumregelmodul, spelmotorn (`play.ts`) orörd, inga
+nya beroenden. **Kvar i spåret:** #34 (försvaret, tredje-hand-högt) – nästa
+naturliga NU i Fas 0 a.
+
+**🎉 RONDGENOMGÅNGEN (after action report) BYGGD i fyra etapper (2026-07-29,
+mergepunkt `a28ff5e`, hela sviten grön via `npm test`):** efter en
+färdigspelad giv i Spela kort kan spelaren öppna en komplett genomgång i tre
+hopfällbara kapitel (ägarkrav: dropdowns, ingen textvägg). **Etapp 1 —
+textmotorn:** ren modul `src/lib/engine/rond-rapport.ts` (`buildRondRapport`)
+bygger hela rapporten som data: varje bud förklarat (motorns regel när den
+finns, annars `interpretCall` med ärlig osäkerhetsgradering — även nakna pass),
+varje stick berättat (utspel, trumfningar/sakningar, löpande ställning, max 4
+rader) och resultatet med ton (beröm/läxa/neutral). Perspektivet följer
+`controls()`: Syd = "du", Nord = "Nord (dina kort)" när NS spelför, "Nord (din
+partner)" i försvar. **Etapp 2 — vyn:** `src/pages/play/RondRapport.tsx`
+(native `<details>`-kapitel som Spela-sidans fördjupning; Resultatet öppet som
+default; tryck på botkort visar `botReasons`-motiveringen), `reviewing`-state i
+`usePlayTable`, knappar i resultatdialogen + under omspelningen. **Etapp 3 —
+DD-domen:** `src/lib/engine/rond-dd.ts` (`analyzeDd`) räknar facit per
+stickgräns BAKIFRÅN med vår egen lösare (sprängd nodbudget avbryter ärligt →
+"analysen når från stick X"), i webworkern `rapport-worker.ts` via
+`useDdAnalys` (inline-reserv). ⚠-rader på stick där facit rörde sig + dom i
+resultatet ("med perfekt spel fanns N stick…"/"ni tog fler än facit — bra
+jobbat") + upplysning när en manuell claim tog färre stick än facit säkrar.
+**Lärdom (StrictMode):** en kör-en-gång-ref i hooken lämnade analysen ostartad
+för alltid vid dev-ommonteringen — effekten gjordes omstartbar i stället.
+Spelmotorn orörd, inga nya beroenden. Verifierad i webbläsaren (två hela givar:
+ÖV-kontrakt med claim + NS-kontrakt med DD-dom). **Etapp 4 (ägarens feedback
+efter eget test, samma dag):** utspelsregeln (§8.3) skrivs ut i utspelsraden
+läst ur utspelarens faktiska kort (topp av honnörssekvens/singel för alla;
+längdmarkeringarna 3:e/5:e/dubbelton BARA för motspelets öppningsutspel —
+UDCA/Lavinthal läggs inte av botarna ännu och förklaras därför inte); stickets
+kort läggs i väderstrecken som vid bordet (N/S/V/Ö med sätesbokstäver); ⚠ är
+röd i både rubrik och rad. Detalj: `docs/kortspel.md` "Rondgenomgången" +
+`docs/status.md`.
+
+## 2026-07-04
+
+**🎉 Felrapport #14–#19 LAGADE & LIVE (2026-07-04, commits `6aa110d` +
+`513ebb3`, testsvit 1668 grön, issues #14–#19 stängda):** sex rapporter från
+Spela kort, var och en facit-låst (testet föll före, grönt efter), inga
+on-book-lås rörda.
+**#14** ovanlig 2NT/Michaels passades ut — linjebygget (`auction.ts`) ger nu
+advancern preferens, så tvåfärgsinkliv stängs inte längre för tidigt (den kända
+SENARE-punkten "kanoniska linjen passar ut ostörda tvåfärgsinkliv" åtgärdad i
+roten). **#15** inklivaren passade advancerns NYA färg — gör nu en enkel
+stödhöjning (3-korts fit mot en 5+ färg, `overcallerRaiseAdvance` i
+`auction-live.ts`). **#16** öppnaren passade partnerns cue-höjning i
+motståndarfärg — svarar nu (minimum = billigaste återbud, 15+ = utgång;
+`partnerCueRaiseToAnswer`). **#17 (bud)** 2♣-öppnaren gömde 6-korts hjärter
+bakom 3NT — visar nu en egen 5+ färg naturligt över ett 2NT-positivt svar
+(`openerRebidAfter2C` i `responses-2c.ts`; ägarbeslut: 5-korts räcker, inget
+hopp). **#17 (spel)** spelboten ledde ♠K rakt in i träkarlens singel-♠A →
+avblockningsregel `unblockLead` (`play-bot.ts`): leder spelförarsidan en färg
+där den synliga medspelaren har en högre singel spelas lågt i stället; gäller
+både tumregel-boten och bot-hjärnans DDS-val. **#18** tvåfärgs-cuen mot deras
+svaga tvåa cue-bjöd på 6 hp och spelades i deras färg → golv 15 hp
+(`defense-conventional.ts`) + advancern måste svara en äkta stark cue
+(`partnerWeakTwoCueToAnswer`). **#19** svararen passade en REBJUDEN 6-korts
+högfärg — 2-korts stöd räcker nu som fit mot en färg partnern bjudit två gånger
+(`fitLengthNeeded`), så dubbletonen höjs till utgång 4♥.
+**Bevaka i spel (kortlivat):** advancern besvarar nu ovanlig 2NT/Michaels och
+tvåfärgs-cue; inklivaren stöttar advancerns nya färg; öppnaren svarar
+cue-höjningar; 2♣-öppnaren visar 5+ färg före 3NT; svararen höjer dubbletonen
+mot en rebjuden högfärg; spelboten avblockerar (leder inte honnör in i
+medspelarens singel). Säg till om något känns fel vid bordet.
+
+**🎉 POÄNGSYSTEMET KLART & LIVE (2026-07-04, testsvit 1626 grön, bygget ok,
+verifierat i webbläsaren — resultatdialog "8 bet (1 stick). Ö/V +800";
+committat/pushat av parallellsessionen i `0864224` + `26b4267`):**
+ägarönskemål, full tävlingspoäng i Spela kort. **(1) X/XX in i slutkontraktet** (gamla SENARE-fyndet, nu löst):
+`Contract` fick `doubled?: 'X' | 'XX'`; `contractFromCalls`
+(auction-contract.ts) läser dubblingen (nollställs av nytt bud); X/XX-märke i
+bekräftelsedialogen, svarta kontrakt-listen, omspelningen och felrapportens
+kontrakttext. **(2) `scoring.ts`** — hela poängtabellen (trickpoäng
+20/30/40+30 dubblat ×2/×4, delkontrakt 50, utgång 300/500 på DUBBLADE
+trickpoäng, slam 500/750 + 1000/1500, insult 50/100, övertrick 20/30 /
+100/200 / 200/400, straffar 50/100-serien + dubblade 100-300-500(+300) resp.
+200-500-800(+300), redubblat ×2) — VARJE cell i ägarens poängguide facit-låst
+i `scoring.test.ts` (4♥=420/620, 3 dubblade straff i zon=800, 2♥X hemma=470/670
+osv.). **(3) Resultatdialogen** visar vem som fick poängen i samma ruta som
+resultatet, t.ex. **"Ö/V +420"** (`scoreLine`, zonen från brickan).
+**Ägarbeslut:** BARA per giv — löpande ställning väntar tills tävlingar/
+matcher finns; poängen visas bara i resultatdialogen. **(4) Bottarna
+straffdubblar** (ägarbeslut): `penaltyDouble` (doubles.ts, 2+ säkra
+trumfstick i deras färg + 10+ hp) via `maybePenaltyDouble` (auction-live.ts)
+— bara färgkontrakt på 3-läget+, och BARA när vår sida gjort 2+ kontraktsbud
+(då kan X:et omöjligt läsas som upplysning/negativt/tvåfärgssvar — de
+detektorerna kräver max ett eget kontraktsbud). **Bevaka:** bottarna kan nu
+straffdubbla ÄGAREN vid offringar på 3-läget+ — säg till om det känns för
+aggressivt. **Sidofynd lagat:** #13-koden (transfer-utgångsvalet) refererade
+saknade `SYM_OF_LETTER` (kraschade decideCall i vissa lägen) → kartan tillagd
+i auction-live.ts.
+
+**🎉 Felrapport #10–#13 LAGADE & LIVE (2026-07-04, commit `26b4267`, testsvit
+1626, deploy grön, issues #10–#13 stängda):** **#10** 4NT är essfråga även
+UTAN överenskommen trumf när sidans senaste naturliga bud var en FÄRG (t.ex.
+4NT på partnerns 3♠-spärr) — kvantitativt bara över sang (`slamAskTrump`,
+`auction-live.ts`; samma regel i tolkningslagret via `askTrumpFallback`).
+**#11** partnerns cue i motståndarnas färg passas aldrig ut — känns nu igen
+även på 3-läget och över X/deras egen höjning (`partnerTwoSuiterToAnswer`);
+Nord ger preferens (3♠). **#12** kortspel: andra hand med LÖPANDE toppvinnare
+(2+ säkra) går upp med billigaste säkra vinnaren i stället för att "maska"
+(♥8 ur AKQT98 lät knekten vinna); ensamt säkert kort ligger kvar lågt
+(hold-up orörd), visad renons hos kommande spelare → lågt (`play-bot.ts`).
+**#13** partnerns 3NT efter fullföljd transfer = VÄLJ UTGÅNG: 4M med 3+
+stöd, annars pass — transferns relä läses aldrig som naturlig färg
+(`transferGameChoiceToAnswer`, ligger FÖRE det generella off-book-svaret).
+Alla fyra givarna facit-låsta EXAKT ur rapporterna. **Samma push:**
+parallellsessionens poängräkning + X/XX i kontraktet (`scoring.ts` enligt
+ägarens poängguide) som egen commit `0864224`. **Bevaka:** bottarna svarar
+på essfrågor utan formell trumf, går upp med toppsekvenser som andra hand
+och väljer 4M/pass efter transfer-3NT.
+
+## 2026-07-03
+
+**🎉 CLAIM TRICKS + AUTO CLAIM KLART (2026-07-03 kväll, testsvit 1560,
+committat i `8914903`):** ägarönskemål, två funktioner.
+**(1) Manuell claim** — ⋮-menyn (spelfasen) har knappen "Claim tricks" (bara
+när DIN sida är spelförare). Dialogen listar sidans TOTALA stick i given
+(redan vunna → vunna+återstående) med kontrakt/±-etikett; DDS-lösaren dömer
+mot PERFEKT motspel (`adjudicateClaim`, `claim.ts` + `doubleDummyDeclarer-
+Remaining`). Godkänd → given avslutas med det claimade resultatet
+(resultatdialogen visar "Claim godkänd"); annars **"Claim nekad — går inte
+att säkra"** och man spelar vidare; för tung ställning → "spela ett stick
+till". **(2) Auto Claim** — av/på-knapp i SAMMA meny (sparas i localStorage,
+`learnbridge:autoClaim`, PÅ som standard). När ett nytt stick ska börja och
+spelförarsidan OMÖJLIGT kan förlora fler stick OAVSETT spelsätt (t.ex. bara
+höga trumf kvar, eller idel toppkort) stängs given automatiskt — gäller BÅDE
+dig och datorn som spelförare. Strängare mått än manuell claim: ny lösare
+`sureWinAllRemaining` (`dds.ts`) prövar ALLA lagliga kort för alla fyra
+spelare → sant bara om varenda linje vinner varje stick (en fungerande mask
+går att spela hem = manuell claim OK, men går också att spela bort = aldrig
+Auto Claim). DDS-lösarens `legalMoves`/`key` utlyfta till modulnivå
+(`legalMovesFor`/`positionKey`) och delas — inga dubbletter. Facit-lås:
+`claim.test.ts` (15 fall, ägarens båda exempel + mask-skillnaden + symmetri
+för bot-spelförare + nodbudget). Bottarna pausar medan claim-dialogen är öppen.
+
+**🎉 Felrapport #6, #7 & #9 LAGADE (2026-07-03 kväll, testsvit 1545):**
+**#6 motspel:** motspelaren cashar aldrig en ENSAM säker vinnare i färsk färg
+(torrt ess göder spelförarens honnörer) — bara löpande toppar (2+) eller i
+redan attackerad färg; annars fortsätts utspelfärgen §8 (`play-bot.ts`).
+**#7 budgivning:** advancerns preferenssvar på Michaels/ovanlig 2NT
+(`advanceTwoSuiter`, FAS 10) inkopplat i live-flödet + NY flyktregel: eget
+DUBBLAT tvåfärgsinkliv passas aldrig ut — fly till längsta visade färgen
+(`auction-live.ts`). **#9 slam:** partnerns 4NT med överenskommen trumf
+(båda bjudit färgen) besvaras ALLTID som 1430 RKC (`respondToRKC`), 5NT =
+kungfrågan (Sjöberg); tolkningslagret visar öppnarens 2♥/3♥/4♥ efter negativ
+dubbling som graderade SVAR (inte spärr) och 4NT som essfråga
+(`auction-interpret.ts`). Alla givar facit-låsta EXAKT ur rapporterna.
+**Nytt fynd → ⚪ SENARE:** kanoniska linjen (`auction.ts`) kan fortfarande
+passa ut ett OSTÖRT tvåfärgsinkliv (1♠–2NT–P–P–P) — bryter "aldrig pass
+ostört"; bara förbyggda linjer, inte budlådan. **Bevaka:** bottarna svarar nu
+på Michaels och essfrågor även i fria auktioner; motspelarna sparar torra ess.
+
+**🎉 Systemgranskning + städning KLAR (2026-07-03 kväll, testsvit 1537 grön,
+EJ committad — ägaren sköter commit/push själv):** full granskning av
+budcykeln/bot-tillståndet på ägarens begäran. Resultat: `decideCall` är
+tillståndslös (räknar om allt ur historiken varje tur — inget bot-tillstånd
+kan bli inaktuellt), inga races i `Play.tsx` (funktionell setState +
+dubbelkoll i uppdateraren), lagligheten vaktas av `legalCalls`. **Åtgärdat:**
+dubblettkopian av kontraktshärledningen borttagen — `contractFromCalls` bor
+nu ENBART i `auction-contract.ts` (re-export i `auction-live.ts`,
+`finalContract` delegerar); `*.tsbuildinfo` gitignorerad. **Nytt fynd →
+⚪ SENARE:** X/XX följer inte med in i slutkontraktet. (OBS: ägarens prompt
+talade om "bid retractions"/auktionssajt — utrett och avfärdat tillsammans,
+bud kan aldrig dras tillbaka i bridge.)
+
+**🎉 UI-pass i Spela kort KLART (2026-07-03, testsvit 1537 grön, bygget ok):**
+fem ägarönskemål på mobilen. (1) **Kortens symboler flöt ihop** på spelade
+kort → `PlayingCard.tsx` har nu ETT hörnindex (det nedvända borttaget
+ÖVERALLT), mittsymbolen knuffad diagonalt bort från hörnet, essets pip ett
+snäpp mindre. (2) **Stäng-krysset** i förklaringspopupen 44×44 px
+(`AuctionGrid.tsx`). (3) **iPhone-safe-area**: `viewport-fit=cover`
+(`index.html`) + botten-marginal `env(safe-area-inset-bottom)` och mindre
+mobilluft (`Layout.tsx`). (4) **Alla ramar/borders på korten borttagna**
+(ägarbeslut — även gröna "spelbar"-ringen; ospelbara tonas fortfarande ner)
+och **Nords träkarlskolumner expanderar VERTIKALT** när färgen väljs
+(`-mt-3` i st.f. `-mt-7`, `Play.tsx`), samma tanke som Syds solfjäder.
+(5) **👍-turmarkören ersatt av mjuk ljuskägla** (spotlight): radiellt vitt
+ljus m. `mix-blend-mode: screen` bakom aktiv spelares bokstav i sticket,
+tonar 0,7 s vid turbyte, pulserar när bot-hjärnan räknar
+(`TrickCenterLive`, `Play.tsx`). Gula vinnarringen i sticket är KVAR
+(markering, ej ram — ägaren sa inget om den).
+(6) **"Förra sticket"-panel** uppe i hörnet (`LastTrickPanel`, `Play.tsx`):
+senaste färdiga sticket i kompassläge, vinnaren gulmarkerad; förminskad 75 %
+och flyttar till VÄNSTRA hörnet när Öst-träkarlen tar högersidan (annars
+låg den ovanpå pågående stickets V/Ö-kort på 375 px — luriga överlappet
+syntes som "mörkt kort"). (7) **Tryck på spelat kort → förklaring**: alla
+bottars kort på bordet (mitten + förra sticket) klickbara, motiveringen i
+raden under listen; frasen "X spelade Y Varför?" ersatt med "Tryck på
+spelat kort för förklaring" (`botReasons`/`PlayedCardView`, `Play.tsx`).
+(8) **Färgsymboler i löptext ALLTID fyrfärgade** (ägarbeslut):
+`SuitText.tsx` (delad) + rehype-plugin i `BudSystem.tsx` (markdown-boken,
+inkl. rubriker/sökträffar); inkopplad i förklaringspopupen, budlådans
+betydelserad, kortförklaringen, Budvisningens listor och budträningens
+facit.
+
+**🎉 Felrapport #5 LAGAD & LIVE (2026-07-03, commits `7e68178` + `1125213`,
+testsvit 1537):** bricka 8 — motorn ville passa ut given trots klar
+balansering, och Nord höjde inte partnerns inkliv. Två rötter: (a)
+**balansering byggd** — fjärde hand får hela §7-arsenalen i utpassningsläget,
+både i kanoniska linjen (`auction.ts`, lämnar auktionen öppen) och off-book
+(`maybeOvercall`, `auction-live.ts`); samma krav som direkt sits ("låna en
+kung"-lättnaden = senare förfining, ⚪); (b) **`divergedFromLine`** räknar nu
+ett riktigt bud BORTOM en stängd linje som off-book (modellen trodde given
+var utpassad → partnerns svarslogik kopplades aldrig in). Given facit-låst
+EXAKT ur rapporten (1♦–P–P–1♥–P–2♥–P–P–P). **Ägarbeslut (exempelhänder
+H1–H4): AGGRESSIV upplysningsdubbling** — golv 10 hp med perfekt form (max 2
+i deras färg + stöd i alla objudna + ingen egen 5-korts färg; 12+ som förut),
+`overcalls.ts` + budsystem §7.1/§7.3. **Bevaka:** bottarna balanserar nu även
+MOT ägaren (symmetriskt — korrekt bridge, säg till om det känns fel i spel).
+
+**🎉 TP-steg E & F KLARA (2026-07-03, testsvit 1528 — hela TP-arbetslistan
+A–F därmed komplett):** ägarbeslut efter exempelhänder + bridgebum-bekräftat.
+**E — reverse/hoppskift på TP:** styrkan i `max(hp, startpoäng)`
+(`pointsWithFloor` fick kind `'starting'`); reverse ≥16, hoppskift ≥19
+(utgångskrav). Byggda luckor: öppnarens **hoppskift efter 1-lägessvar
+saknades helt** (19-poängare rebjöd "2♣ minimum, ej krav"!) — nytt fack
+`hoppskift` i `rebids.ts` + `rules.ts`; **svararens fortsättning** efter
+hoppskiftet (placera kontraktet — 4M/3NT/5m, ALDRIG pass) + pass-vakt efter
+reverse utan preferens (→ 2NT kravsvar) i `responder-rebids.ts`.
+**F — lättöppning 3:e/4:e hand:** `classifyOpening(hand, vulnerable,
+seatOrder)`, positionen trådad i `buildAuction`. 3:e hand: 1M med 10–11 hp
+(sårbar 11) + bra 5+ högfärg (≥2 topphonnörer A/K/Q) — aldrig lätt
+minor/1NT; Drury (§6.7, redan byggd) skyddar svaret. 4:e hand: **regeln om
+15** (hp + spader ≥ 15 → öppna, annars passas given ut; ingen spärr/svag
+tvåa i 4:e hand under golvet). Facit FÖRE fix (13 låsta fel bevisade), +16
+tester, on-book orört. Docs uppdaterade (budsystem §3+§5, tp-arbetslista,
+handvardering, status).
+
+## 2026-07-02
+
+**🎉 Felrapport #1–4 LAGADE & LIVE (2026-07-02 kväll, commits `9a6b09e` +
+`df5bf21`, testsvit 1507):** felrapporteringskedjan bevisad end-to-end fyra
+gånger. #1 motspel: tredje hand vinner nu högt nog att TRÄKARLEN (som spelar
+efter, öppen information) inte går över (`play-bot.ts`). #2–4 budgivning,
+gemensam rot **kravbud passades bort**: (a) öppnarens svar på **negativ
+dubbling** byggt (`openerAnswerNegativeDouble`, `doubles.ts` §7.3 — aldrig
+pass) + **spärrhöjning** av partnerns hoppinkliv med 3-korts stöd
+(`auction-live.ts`, hoppinkliv lovar 6+); (b) öppnarens svar på **fjärde
+färg** byggt (`openerAnswerFourthSuit`, `rebids.ts` §6.6-prioriteten);
+(c) svararens **2/1 GF-fortsättning** byggd (`responderRebidIn2over1Auction`,
+`responder-rebids.ts` §5.3 fast arrival — facket saknades helt i
+`responderSecondBid`). Alla fyra givarna facit-låsta EXAKT ur rapporterna.
+**Ägarbeslut:** /felrapporter lämnar alltid STANDARDRAPPORT (vad hände /
+anledning / fix / test) — inskrivet i kommandofilen. **Bevaka:** Öst-läget
+över spärrhöjningen (1♣–2♥–X–3♥ → konkurrera 3♠ eller passa?) är ett NYTT
+frivilligt läge — boten passar; ägarbeslut om det känns fel i spel.
+
+**🎉 🎨 DESIGNLYFTET KLART & LIVE (2026-07-02, commit `186a362`, testsvit
+1484):** appen heter **RebidZ** (ägarens eget namn; konfliktkollat — fritt
+bland appar/bolag/domäner; **påminn ägaren köpa rebidz.com/.se**). Ägaren ser
+business-potential → designen håller produktnivå. Stil: eget & snyggare än
+Synrey (gröna bordet + layouten behållna). Repo/URL byts INTE.
+**Alla fyra stegen byggda, verifierade & deployade:**
+**Steg 1 ✅** designgrunden — Inter (brödtext) + Space Grotesk (rubriker/
+ordmärke), självhostade @fontsource; guld-tokens (`--color-gold-*`) +
+`--font-display` i `index.css` @theme; RebidZ-ordmärke i sidhuvudet;
+sidtitel + meta description. **Steg 2 ✅** korten & bordet —
+`PlayingCard.tsx`: gradient-framsida, Space Grotesk-index, stort ess-pip,
+RebidZ-baksida (smaragd + guldram; vilande tills utdelningsanimation);
+`Felt.tsx`: ljus uppifrån + SVG-brus (filtväv) + kantdjup. **Steg 3 ✅**
+rörelse — spelade kort glider in från spelarens håll (`card-in-n/s/w/e`),
+utdelningskaskad (`deal-in`, 35 ms/kort), sidbyten tonar (`page-in`),
+tryckrespons (`active:scale`), allt av vid `prefers-reduced-motion`.
+**Steg 4 ✅** identitet — `BrandMark.tsx` (guldspader på smaragd) i sidhuvud
++ hero; `public/favicon.svg` (Vite rebaser sökvägen, verifierat 200);
+`theme-color`; ny startsida: hero på filtet (logotyp, tagline, dekorativ
+solfjäder, guld-CTA) + lägeskorten. Mobil 375 px verifierad överallt.
+**Omtag 2 (ägarens logo-vision, samma dag):** namnet skrivs **rebidz —
+ALLTID gemener** (ägarbeslut). Ordmärket = Fraunces-serif i guldgradient
+med **spader som prick över i:et** (5 px över i:et vid herostorlek,
+em-skalat — ägarbeslut) i **tunn guldram** (`Wordmark framed`,
+`BrandMark.tsx`). **Klubbtema på ALLA flikar:** `club`-färgtokens
+(`index.css`) — gröna ytor i båda lägena (aldrig slate på stora ytor),
+guldlinje under sidhuvudet, alla h1 i varumärkesserifen, paneler/kort/
+detaljer/sökfält smaragdtonade (Panel, Home, Spela, BudSystem,
+BiddingPractice, Button secondary).
+
+**🎉 Felrapportering i Spela kort KLAR & LIVE (2026-07-02, testsvit 1481,
+commit `05d922e`):** dialog efter varje giv ("Kändes given rätt?"): kategori + fritext, hela
+given + auktionen + sticken följer med som förifylld **GitHub-issue**
+(etiketten `felrapport` skapad i repot). Kommandot **`/felrapporter`**
+(`.claude/commands/felrapporter.md`) läser rapporterna via `gh`, återskapar
+given som test (FACIT FÖRE FIX), lagar och stänger issuen. Byggt:
+`src/lib/felrapport.ts` (rapportformatet, test-låst i `felrapport.test.ts` —
+händerna i `parseHand`-format så given alltid kan återskapas exakt),
+`FelrapportDialog.tsx`, inkopplad i `Play.tsx` (resultatdialogen,
+omspelningsvyn och utpassad giv).
+
+**🎉 🧠 Avancerad kortspelsteknik KLAR & pushad (2026-07-02, testsvit 1474):**
+MED-scopet (slutkast/inkast + skvis) levererat i två steg, FACIT FÖRE FIX,
+ingen tjuvkik. Trappan + design-lärdomarna i `docs/bot-hjarna.md`.
+**Steg A** (`play-bot-technique.test.ts`): tre DDS-verifierade facit-givar
+bevisar att MC-fönstret EXEKVERAR teknikerna — A0 korsruff m. lönnkast
+(MC 6/6, tumregel 5), A1 slutkast (MC 5, tumregel 4; Östs VISADE ruterrenons
+låser ♦K hos Väst i samplingen = äkta inferens), A2 enkel skvis (MC 4,
+tumregel 3). **Steg B** = luckan FÖRE MC-fönstret (9–13 kort): B0-facit
+(9-korts skvis: Nords första sakning vid 9 kort avgör — rätt kast 6, ♠5 = 5)
++ **B1 kast-vakt** (`guardedDiscard`, `play-bot.ts`): spelförarsidans
+sakningar vaktar lastbärande kort via ärlig räkning i stället för "kasta
+lägst"; vakten ensam lyfte gamla 6-korts-referensen 2→3. Robust över seedar
+1–10. (Testräkningen: vitest 4 räknar varje it.each-fall — gamla "testsvit
+729" var samma svit i annan räknebas.) Villkorade B2 (cash-ordning) + Steg C
+(rätta räkningen) = ⚪ SENARE, byggs bara vid bevisat behov (facit-giv).
+
+### FAS 12 — UI (sista fasen i felsökningsplanen)
+
+FAS 12 UI levererat & live 2026-07-02, commits `a654c0e`→`b653808`. Tre trådar:
+1. ✅ **Felsökningsplanens punkt 54–56 KLARA** (2026-07-02, testsvit 729):
+   budförklaringar (54) + alert (55) fanns redan i `AuctionView` (klickbara bud,
+   A-markör + ALERT-badge). Byggd lucka (56): **kravnivå-etikett** i
+   förklaringspanelen — `FORCING_LABEL` (`rules.ts`, facit-låst) + färgkodad
+   badge, och panelen läser kravnivå + alert ur **ETT** `ruleInfo`-anrop (samma
+   regel, aldrig två källor). Verifierat i webbläsaren: "Krav 1 rond"+ALERT på
+   negativ dubbling, "Ej krav" på svag tvåöppning. Båda flikarna täcks
+   (budträning + spel går genom samma `AuctionView`).
+2. **Synrey-riktningen (ägarbeslut + 5 skärmdumpar 2026-07-02):** efterapa
+   Synrey Bridge så nära det går. **Steg 1 ✅ KLART & live** (commit `3aa3186`):
+   budlådan kopierad rakt av (NT/♠/♥/♦/♣-rutnät, X/XX/PASS/OK, välj→OK),
+   kompasspanel, auktionsrutnät m. färgchips + vit förklarings-popup,
+   fyrfärgslek (`suitColors.ts`), minimal budfas (⋮-meny, HCP-bricka, dolda
+   motståndare), omspelningen helt omgjord (alla händer uppe, trumf VÄNSTER
+   via `handSuitsTrumpFirst`, » spelar sticket ett kort i taget m. animation,
+   « bakåt, svart kontrakt-list). **Steg 2 ✅ KLART & live** (commit `adf647a`,
+   ägarverifierat mot Synrey-bilder): spelvyn — motståndare helt dolda,
+   kolumnträkarl, 👍-turmarkering, ⓘ/⋮-overlays, resultatdialog → omspelning;
+   `SideStack` = Ö/V-kort vridna 90° med valörindex IN mot mitten (Öst speglad
+   via `mirrorCorners`). **Steg 3 ✅ KLART & live** (commit `20c7166`):
+   (a) "spelas av Syd"-bekräftelsedialog efter budgivningen (auto-hoppet borta,
+   `confirmContract`); (b) budträningen på grönt filt (`AuctionGrid` m. teal
+   turmarkering, budalternativ som Synrey-chips i `BidOptions`, handsolfjäder +
+   HCP·TP-bricka, vitt facit-kort); (c) Budvisningen: auktionen på filt m.
+   `AuctionGrid`, alla bud som `BidChip`; (d) mobilfinish (kompass w-24 på
+   mobil, responsiva rubriker — alla vyer utan overflow på 375 px). Delade
+   `HandFan`; döda `AuctionView` borttagen (allt går via `AuctionGrid`).
+3. ✅ **Förfiningspasset (2026-07-02, ALLT live):**
+   (a) **Mörkt/ljust läge**: sol/måne-knapp i sidhuvudet, valet i localStorage,
+   följer systemet som standard; `dark:`-varianter på allt runt spelborden
+   (`src/lib/theme.ts`; klassen sätts i `index.html` FÖRE laddning = ingen vit
+   blink); **1 s-toning** vid växling (`.theme-fade`, aktiv bara under bytet).
+   (b) **Mobilmeny**: sidhuvudet en rad på <640 px, ☰ fäller ut menyn.
+   (c) **Ny startsida**: fyra klickbara lägeskort, Spela kort främst (grön ram).
+   (d) **Sök i Budsystem**: filtrerar sektioner medan man skriver, träffar fälls
+   ut, rubrikträffar gulmarkeras, träffantal visas.
+   (e) **`Felt.tsx`**: EN sanningskälla för gröna bordet (5 kopior ersatta).
+   (f) **♠ SVART överallt** (ägarbeslut): kort, chips, löptext — allt via
+   `suitColors.ts` (ljusare löptextvariant i mörkt läge, ALDRIG på korten).
+   (g) **Budvisningen HELT ombyggd** (ägarbeslut: "så likt Spela kort som
+   möjligt"): ETT bord, alla fyra händer öppna — N/S spegelsymmetri (md-kort +
+   mörka remsor), V/Ö sidostaplar, hp-brickor vid alla händer; auktionen i
+   mitten spelas upp bud för bud (700 ms, pulserande turmarkering, klick →
+   förklaringspopup m. kravnivå/ALERT); byggd med **LEVANDE budmotorn**
+   (`buildFullAuction` via `decideCall` — auktionen bjuds ALLTID klart,
+   "… auktionen fortsätter"-texten borta för gott); poäng/steg-för-steg +
+   hålfinnare hopfällda under bordet; ryms på EN mobilskärm. Tätare
+   `AuctionGrid` (delas av alla vyer).
+   **Känt:** `play-bot-smart.test.ts` slumpflaggar sällsynt (Monte Carlo,
+   ej relaterat) — ägaren startade stabiliseringsuppgift i egen session.
+
+## 2026-07-01
+
+### FAS 11 — Bot-hjärnan (kortspel/motspel-förfining)
+
+Pushad (testsvit 727, commit e20b7ac). **OMSTRUKTURERAD** (start 2026-07-01).
+Ägaren pekade ut den riktiga smärtan: bottarna tar t.ex. 10 stick
+där 13 var kalla — usel stickföring, "kryper under i onödan". FAS 11 (signaler)
+löser INTE det. Så FAS 11 blev ett större epos: **expertspel via ärlig enkeldummy-
+inferens** — bottarna ska läsa bordet (räkna de 40 HP:na, dra bort budvisning +
+fallna kort). **Järnprincip: ingen tjuvkik** (DDS ser alla händer = fusk; används
+i stället över *troliga* händer via Monte Carlo). **Färdplan i `docs/bot-hjarna.md`.**
+Trappan (test-låst, FACIT FÖRE FIX):
+- **Steg 1 ✅ KLAR & live** — ärlig stickföring i `play-bot.ts`: cash:a säkra
+  vinnare, kryp aldrig under. 1a (sang+trumf) + 1b (sidofärg när trumfen är
+  räknad via `card-counting.ts`: `unseenTrumpCount`). Testsvit 659.
+- **Steg 2 ✅ KLAR & live** — hand-modellen `hand-model.ts` (ryggraden):
+  tolkar auktionen till HP-spann + färglängder + renonser per plats. Del 1
+  (HP-liggare), del 2 (längder), del 3 (svaga öppningar + svararens golv 6+/12+).
+  Testsvit 680.
+- **Steg 3 ✅ KLAR & live** (2026-07-01, testsvit 697) — **Monte-Carlo-DDS**
+  (`monte-carlo.ts`). **3a** `sampleLayouts` delar ärligt ut de osedda korten till de
+  två dolda händerna så varje giv stämmer med hand-modellen (renonser/längd/HP,
+  skärpt av redan spelade kort per plats). **3b** `chooseCardMonteCarlo` kör DDS
+  ärligt på sampeln och röstar fram kortet med bäst snitt (max stick åt spelföraren,
+  min som motspelare). **3c** `botCardSmart` (`play-bot.ts`) inkopplad i `Play.tsx`:
+  MC i slutspelet (≤7 kort, seedad ur auktionen + `shownVoids`), annars tumregler
+  (öppningsutspel / tung giv / ett-lagligt-kort → fallback, tidigt spel orört).
+  Bevisat: 6-korts-slutspel 2→3 stick, facit nått utan tjuvkik.
+- **Svansen ✅ KLAR & live** (2026-07-02, testsvit 727): **pt 47–49** facit-granskning
+  av `signals.ts` mot §8 (14 facit-lås). **pt 50 signalavkodning** (`signal-decode.ts`):
+  motspelaren läser botens öppningsutspel → hand-modellen (längd ≥4 + touchérande
+  honnör när entydig); modellen fick per-färg-HP `suitHcp`. **"Varför?"-knapp**
+  (`botCardReasoned` + `Play.tsx`). **Webworker + tänjt MC-fönster** (`mc-worker.ts`,
+  adaptiv `mcBudget`, 7 → 8 kort, ingen UI-frys; uppmätt 7 kort ~2 s, 8 kort ~3,7 s).
+  pt 51 DDS-gräns = känd, bekräftad. **Kvar (SENARE):** avancerad teknik
+  (slutkast/inkast/squeeze), svårighetsnivåer.
+**Scope (ägarbeslut 2026-07-01):** MED = "Varför?"-knapp (botten förklarar draget)
++ avancerad teknik (slutkast/inkast/squeeze). SENARE = svårighetsnivåer.
+
+### FAS 10 — Försvarsbud (§7)
+
+Pushad (testsvit 644, commit 3208482). **🎉 KLAR** (2026-07-01, testsvit 644).
+Facit-granskning §7.1–7.6: alla verktyg (`overcalls.ts`, `doubles.ts`,
+`lebensohl.ts`, `dont.ts`, `defense-conventional.ts`) lästa mot systemboken →
+**svaren matchar facit**, väl testtäckta (overcalls 24, doubles 15,
+defense-conventional 14, dont 7, lebensohl 6). **Byggd lucka:** `advanceTwoSuiter`
+(`overcalls.ts`) – advancerns svar på partnerns tvåfärgsinkliv (Michaels / ovanlig
+2NT), som saknades helt. **Ägarbeslut 2026-07-01:** preferens till den av partnerns
+visade färger advancern är längst i (lika längd → högfärgen); **aldrig pass ostört**;
+contested → pass tillåtet (partnern rebjuder sin ospecificerade färg; Michaels över
+högfärg utan hf-fit → ostört 3♣ pass-eller-rätta). Facit i `overcalls.test.ts`.
+
+### FAS 9 — Passad hand: Drury
+
+Pushad (testsvit 635, i commit 3208482). **🎉 KLAR** (2026-07-01, testsvit 635, pushad).
+Facit-granskning §6.7: Drury-basen (`responses-drury.ts`) matchar systemboken exakt
+(2♣ = 3 trumf, 2♦ = 4+ trumf, 10–12 hp; öppnarens 2M signoff / 3M utgångsförsök /
+4M utgång). **Byggd lucka (auktionen dog förut):** `responderAnswerDrury` –
+svararens (passade handen) placering efter öppnarens Drury-återbud, inkopplad i
+`responderSecondBid` (`responder-rebids.ts`). **Ägarbeslut 2026-07-01:** accepterar
+3M-utgångsförsöket med **stödpoäng ≥ 11** (`pointsWithFloor(..., 'support')`, samma
+`max(hp, dummyPoints)`-omvärdering som Steg B/C – 4+ trumf + korta sidofärger lyfter
+toppen av 10–12), annars pass; 2M-signoff / 4M-utgång passas alltid. Sidoeffekt:
+signoff-auktioner stängs nu med svararens pass (`1♥–2♣–2♥–P`) i stället för att
+lämnas öppna. E2e `1♥–2♦–3♥–4♥`. Facit i `responses-drury.test.ts`.
+
+### FAS 8 — Slamsystem
+
+Pushat (testsvit 630). **🎉 KLAR** (2026-07-01, testsvit 630). Punkt 1 (MSS-slam) +
+facit-granskning §6.1–6.5 (testsvit 621) + punkt 2 (Gerber över 2NT) + punkt 3
+(Exclusion när renons rankar över trumf) — allt pushat (commit `340028a`).
+- ✅ **Punkt 3 Exclusion när renons rankar över trumf** (2026-07-01): nivåbailen
+  (`voidSuit >= trump → null`) borttagen ur `exclusionInvestigation`
+  (`slam-auction.ts`). Enda inkopplade fallet är **hjärter trumf + spaderrenons →
+  5♠** (lagligt över 3NT-relät). Öppnarens högsta stegsvar (steg 4) landar på
+  exakt **6♥**; vill svararen bara ha lillslam **passar** hon (i stället för att
+  olagligt bjuda om 6♥). Storslam-grenen bjuder 7♥ som förut. E2e
+  `1H–3♠–3NT–5♠–6♥–7♥`. Facit i `slam-auction.test.ts`.
+- ✅ **Punkt 2 Gerber över 2NT** (2026-07-01): `gerber2NTInvestigation` (`nt-slam.ts`),
+  inkopplad i `auction.ts` som 2NT-blocket (speglar 1NT-Gerber-blocket). En
+  balanserad slamsäker svarare (**13+ hp** mittemot 20–21 ≈ 33+) frågar ess med
+  **4♣ Gerber** i stället för att blint blåsa 6NT: stannar i 4NT om två ess saknas,
+  6NT med ett ess ute, storslam 7NT via 5♣-kungfrågan (≈37+). 11–12 stannar som
+  kvantitativ 4NT (`respondTo2NT`, orört). Delad `buildGerberSequence` med
+  1NT-grenen. E2e `2NT–4♣–4♠–6NT`. Facit i `nt-slam.test.ts`.
+- ✅ **Punkt 1 MSS-slam** (2026-07-01): slamfortsättning efter `1NT–2♠–3♣/3♦`
+  (minorfit garanterad). Ny `mssMinorFitContinuation` (`slam-auction.ts`),
+  inkopplad i `auction.ts`; döda 4-minor-grenen bort ur `responder-rebids.ts`.
+  **Ägarbeslut: NT om säkert, annars minor.** NT-säkert (alla hf har A/K/Q +
+  ingen svararrenons) → 6NT (33–36) / 7NT (37+), för svagt → 3NT. NT osäkert
+  (gapande hf / renons) → minor-slam via `slamInvestigation` (cue→RKC→6/7m), för
+  svagt → 5m. Hela arsenalen (cue/RKC/Sjöberg). E2e `1NT–2♠–3♣–4NT–5♦–6NT`.
+- ✅ **Facit-granskning §6.1–6.5** (2026-07-01): alla sex slamverktyg i `slam.ts`
+  lästa mot systemboken → **inget fel i svaren**, koden matchar facit exakt (1430
+  RKC, trumfdamfråga, cue-bud, Sjöbergs 5NT, Gerber ess/kung, Exclusion). Täppte
+  två luckor i facit-LÅSNINGEN (tester): Gerber kungfrågan (3 grenar olåsta) +
+  Exclusion steg 3–4. La till 6 facit-lås i `slam.test.ts`. Ingen kodändring.
+
+### FAS 6 + 7 (testsvit 612)
+
+FAS 6 (facit + `npm test`):
+- ✅ **26 Minor-regeln** verifierad + facit-låst (3-3♣/4-4♦/5-5♦/längsta minorn).
+- ✅ **27 Inverterade minorer:** **svararens fortsättning byggd**
+  (`responderRebidAfterInvertedMinor`) – auktionen dog förut vid öppnarens återbud.
+  Placerar mot 3NT (2NT→3NT m. 11+, stopp-visning→3NT om täckt annars 5m, 3m
+  minimum→3NT bara m. 13+ & båda hf stoppade, 3NT→pass). E2e `1♦–2♦–2NT–3NT`.
+- ✅ **28 Svaga hoppskift** verifierade. **Ägarbeslut:** inget 1♦–3♣ (behåll 1NT).
+
+FAS 7 (facit + `npm test`):
+- ✅ **29 Svaga tvåor + 30 Ogust** verifierade (redan väl täckta).
+- ✅ **31 Spärröppningar:** **öppnarens feature-visning byggd** (`rebid: feature`,
+  maximum utan stöd visar yttre A/K). **Ägarbeslut:** svag stödhand pressar INTE
+  (bara utgångsvärden höjer).
+- ✅ **32 Regel 2-3-4 (ägarbeslut, öppningsstruktur):** kvalitetsgrind på
+  spärröppningen (`topHonorCount` i `openings.ts`), sårbarhets-modulerad.
+  Topphonnörer A/K/Q: 3-läget ej sårbar ≥1/sårbar ≥2; 4-läget valfri/≥1. Skräp
+  spärrar aldrig. **12 HP-golvet orört.** Facit i `openings.test.ts`.
+
+### FAS 5 — NT-systemet
+
+**🎉 KLAR (2026-07-01, testsvit 587, pushat+deployat).**
+Punkt **19–25 klara**. FAS 5 var facit-granskning + luckor.
+- ✅ **19 Stayman:** lagad inbjudnings-5-4-lucka (naturlig 2♥/2♠) + **garbage
+  Stayman** (svag exakt 4-4 hf + kort klöver → 2♣, passar svaret). Ägarbeslut.
+- ✅ **20 Smolen** verifierad. ✅ **22 Texas** verifierad.
+- ✅ **21 Jacoby-transfer:** kärnan verifierad + **5-5-högfärgsschema** (ägarbeslut:
+  transferriktningen kodar styrkan – svag→2♣, inbj→2♦→2♠, GF→2♥→3♥).
+- ✅ **24 2NT-systemet:** turerna 1–3 verifierade + **svararens turn 4 byggd**
+  (`responderRebidIn2NTAuction`: minorfit→utgång, ingen fit→3NT, Smolen över 2NT).
+- ✅ **25 3NT-öppningen** verifierad.
+- ✅ **23 Minor Suit Stayman:** svararens turn 4 byggd
+  (`responderRebidIn1NTAuction`, case `Minor Suit Stayman`). Fit hittas alltid när
+  öppnaren visar en minor (svararen har alltid 4+ i båda). Ägarbeslut: **3NT som
+  standard**, höj minorn (`Minor Suit Stayman: höjning`) **bara med slamintresse
+  ~16+**; ingen fit→3NT. Fortsatt cue/RKC + öppnarens 3♥/3♠-stopp & 4♣/4♦-max =
+  **FAS 8**. Facit i `responder-rebids.test.ts`.
+
+### FAS 4 (autonom körning – besluten för granskning)
+
+- ✅ **Punkt 16 — HP/TP/LTC-karta:** motorn kör HP + TP; **LTC finns inte**.
+  Beslut: inför inte LTC (TP täcker det). Karta i `docs/handvardering.md`.
+- ✅ **Punkt 17 — stödvärdering verifierad:** fitpoäng/distributionsvärde/kortfärger
+  isolerade + låsta (`evaluation.test.ts`); Bergens asymmetri bekräftad.
+- ✅ **Punkt 18 — slamvärdering:** `wastedHonorsOppositeShortness` nedvärderar
+  K/D mot partnerns kortfärg (ess behålls), inkopplat i `slamInvestigation` via
+  Jacoby-kortfärg. Knyter ihop FAS 3-svansen.
+- ✅ **Steg C-2 — minorhöjningar på TP:** längd/sidofärg lyfter, aldrig korthet
+  (minorfit siktar 3NT). `responses.ts`.
+- ✅ **Steg C-3 — sang-accepter på TP:** 3NT-accepter på startpoäng. `rebids.ts`.
+- ✅ **Steg D — sang-nudge (komplett):** bra 14 (ingen 5-korts färg) → 1NT
+  (`openings.ts`). 5-korts minor öppnar minorn, 5-korts major öppnar 1M.
+  **Sårbarheten modulerar tröskeln:** ej sårbar = aggressiv (startp. ≥15), sårbar
+  = passiv (≥16). `isVulnerable` trådad via `buildAuction`. Facit i `openings.test.ts`.
+
+### FAS 3
+
+- ✅ **Punkt 11 — Gemensam fitklassificering** (klar 2026-07-01): `classifyFit`
+  (`evaluation.ts`) ger EN sanningskälla för fitens kvalitet: `none / two / three /
+  good-three / four / five-plus`. "Bra 3-stöd" = 3 trumf med trumfhonnör (E/K/D)
+  ELLER kort sidofärg (singel/renons). Facit i `evaluation.test.ts`.
+- ✅ **Punkt 12 — Bergen aldrig med 3 stöd** (klar 2026-07-01): Bergen-grinden går
+  nu via `classifyFit(...).hasFourPlus` i `respondToMajor` (`responses.ts`) →
+  strukturellt omöjligt att fyra Bergen/Jacoby/splinter med 3 stöd. Intervall
+  bekräftade (3♣ = 7–9, 3♦ = 10–12, 3M = 0–6). Facit i `responses.test.ts`.
+- ✅ **Punkt 13 — Jacoby 2NT** (klar 2026-07-01): rätt stöd (4+ via `hasFourPlus`),
+  "ingen kortfärg" garanteras av ordningen (splinter-kollen först → hand med
+  singel/renons splintrar i stället). Facit i `responses.test.ts`.
+- ✅ **Punkt 14 — Splinter kortfärg** (klar 2026-07-01): efter tvetydig splinter +
+  relä visar svararen singelns färg **upp-the-line** (ägarbeslut: billigaste steg =
+  lägsta möjliga kortfärg, 4♣/4♦/4♥) via `responderRevealSplinterShortness`.
+  Renons går redan via Exclusion. Öppnarens honnörsnedvärdering mot kortfärgen =
+  FAS 4 punkt 18. Hela kedjan verifierad (1♥–3♠–3NT–4♦).
+- ✅ **Punkt 15 — Bergen game try** (klar 2026-07-01): triggern (1M–2M–2NT) fanns
+  och använder rätt mått (**TP/Bergenpoäng 15–17**, ej rå HP/LTC). Svararen svarar
+  nu (fanns inte förut) enligt **Bergens äkta variant** (ägarbeslut): visa KORTHET
+  upp-the-line (3 sidofärg), annars platt 3M signoff / 4M accept via
+  `responderAnswerBergenGameTry`. Facit i `responder-rebids.test.ts`.
+
+---
+
+## 2026-07-05 → 2026-07-07 — äldre NU-lägesrapporter (flyttade från CLAUDE.md 2026-07-07)
+
+> **OBS:** ögonblicksbilder från när de skrevs — statusrader som "EJ PUSHAT",
+> "#29 kvar öppen" osv. var sanna DÅ men är inaktuella nu (allt nedan är
+> pushat & live; felrapport #1–#34 är stängda eller medvetet uppskjutna).
+> F1-familjernas beskrivningar av kontroll-gates/slamzon på parets faktiska
+> poäng beskriver KIK-ERAN — ersatta av de ärliga slamportarna 2026-07-07
+> (mergepunkt `1ce2982`, se budsystem.md §6).
+
+**F1 — bredda slam-utforskningen (PAUSAD 2026-07-07 kväll, se NU ovan).** Kom ur ägarens
+budsystem-djupdykning (två färgkodade listor, se chatt): slam var bara inkopplat
+i fem auktionsformer; hela GF-familjer (2♣, hoppskift/reverse, 1NT-återbud, 2/1
+med fit) saknade slam-drivning. En probe (40 000 givar, DD-lösta) delade upp
+missarna i **fyra familjer: A** (efter 1NT-återbud), **B** (efter stark 2♣),
+**C** (efter öppnaren visat extra: hoppskift/hopphöjning/reverse — störst), **D**
+(Jacoby 2NT-läcka: hängande cue). Byggs facit-först, en familj i taget.
+**Familj A HELT KLAR** (jämn del LIVE, obalanserad del byggd & testad — se PCD-status):
+efter `1m–1M–1NT` driver svararen med slamvärden (≥33 stödpoäng): **jämn** →
+Gerber 4♣ → 6NT (`gerberRebidInvestigation`); **obalanserad med färgfit** (6+ egen
+hf / 8+ korts fit) → trumf via `familyAFitTrump` → `slamInvestigation` (skipCueRound
++ kontroll-gate) → 6 i färgen. Båda i `buildAuction`; `nt-slam.ts` + `slam-auction.ts`.
+Facit `auction-slam-1nt-rebid.test.ts` (2 givar: 6NT + 6♣, DD-verifierade). budsystem.md
+§5.7 + §9.
+**Familj D KLAR (slam-quirken stängd):** den hängande cuen (Jacoby 2NT → cue → RKC
+lade två svararbud i rad → live-lagret passade delkontraktet) är lagad i
+`slamInvestigation` (`slam-auction.ts`): cue-ronden läggs bara som ett KOMPLETT par
+(svarare + öppnare), annars rakt på 4NT. Probe: **0 "två-i-rad" i 200 000 auktioner**
+(var >0). Facit `auction-slam-jacoby-cue.test.ts` (1♥–2NT → 7♥). Den parkerade
+slam-quirken är därmed LÖST. **1087 test gröna, tsc rent.**
+**Familj C — HOPPHÖJNING KLAR (2026-07-07):** efter `1x–1M–3M` (öppnaren
+hopphöjer svararens högfärg, 16–18 + 4 stöd) är trumfen redan överenskommen →
+`buildAuction` kopplar in `slamInvestigation` (svararens hf trumf, cue-rond som
+Jacoby-fiten, INTE skipCueRound) efter hopphöjningen. Portar: slamzon (≥33
+stödpoäng), ≥4 nyckelkort, `pairControlsSideSuits` (motorn går ändå
+deterministiskt vidare till 4NT → gaten krävs som #29). Probe (300 000 givar,
+DD): 41 slamzon-stopp av 1 563 hopphöjningar. Make-rate-probe (250 000): drev slam
+328 ggr, 16/18 DD-lösta höll (2 bet på exakt ett stick, finess) = 88,9 %. Facit
+`auction-slam-jumpraise.test.ts` (1♥–1♠–3♠ → 6♠, 1♣–1♠–3♠ → 6♠, båda DD 13).
+budsystem.md §5.2 + §9. **1089 test gröna, tsc rent.**
+**KVAR i F1:** Familj B (2♣), C:s systerfall **reverse** (`1♣–1♥–2♦`) + **hoppskift**
+(`1♦–1♠–3♣`) — störst men rörigare (ingen överenskommen trumf; vissa reverse-
+auktioner kollapsar t.o.m. under utgång, eget problem). Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-07): tre mobil-UI-fixar (ägarstyrt SIDOSPÅR, INTE F1).**
+Ingen budlogik rörd; desktop helt oförändrat via `sm:`-brytpunkten (≥640px).
+(1) **Större spelkort på mobil** (mergepunkt `1760ea3`): Syds hand större (48×64);
+ny responsiv `smPlus`-storlek i `PlayingCard.tsx` (40×56 mobil / 28×40 desktop)
+för **träkarlen** (norr, `SuitColumns` i `Play.tsx`) + **sidohänderna Ö/V**
+(`SideStack.tsx`, både spelvyn och Budvisningen). Träkarlens kolumner glesare på
+höjden (24px syns/kort mot 12 förr, ägarbegäran). Syds utfällning pressar ihop
+nedtonade färger på mobil så inga kort klipps utanför kanten. (2) **Budförklaringens
+kryss** (`AuctionGrid.tsx`, mergepunkt `642ab36`): krysset kunde knuffas utanför
+bild (rubrikraden överflödade) → förankrat absolut i bubblans övre högra hörn +
+rubriken radbryter; **tryck var som helst utanför bubblan stänger** (genomskinlig
+helskärmsyta); krysset 36×36 med **iPhone-glaskänsla** (backdrop-blur, ljus kant,
+glansdager). Gäller även ⓘ-rutan under kortspelet (samma komponent). Hela sviten
+grön, tsc rent, båda Vercel-deployerna gröna.
+
+**Senast klart & LIVE (2026-07-07): felrapport #33 + #32/#34 (STÄNGER #32/#33/#34).**
+**#33 (budgivning):** advancern hoppade till **7♦** över partnerns 5♦ (grand slam
+på 28 hp) — `raiseWithFit` (`auction-live.ts`) räknade "inbjudande hopp" = partnerns
+nivå +2. Nu kapas inbjudande/enkla höjningar vid utgångsnivån och advancern passar
+när partnern nått utgång. Facit `auction-advancer-cap.test.ts`. **#32 (budgivning):**
+ägarregel för **6-5** (6-korts lågfärg + 5-korts högfärg) — 12–15 öppnar högfärgen,
+16+ öppnar lågfärgen (reverse:ar in högfärgen); `openings.ts`, facit i
+`openings.test.ts`, budsystem.md §3. **#32-spelfelet + #34-försvaret = UPPSKJUTNA**
+(spelmotor-kvalitet, se ⚪ SENARE + `docs/bot-hjarna.md`; ägarbeslut 2026-07-07).
+**1084 test gröna, tsc rent.** #32/#33/#34 stängda. Se 👀 Bevaka.
+
+**Föregående (2026-07-07): slam efter hopp-återbud i minor (STÄNGER #29).**
+`/felrapporter` #29 ("hur hittar vi slammen?"): N ♣AQJT94 öppnade 1♣, S svarade
+1♠, N hoppade 3♣ (16–18, 6+ klöver) → boten stannade i **3NT** trots en **KALL
+slam** (6♣/6NT/7 = 13 stick DD). Nu driver paret slam: efter `1m–1M–3m` med
+svararens fit (3+ i minoren) kopplar `buildAuction` in `slamInvestigation`
+(minoren trumf, `skipCueRound`) → 4NT RKC → 6♣. Cue-ronden hoppas över (ingen
+explicit trumf-överenskommelse före frågan), i stället en **kontroll-gate**
+(`pairControlsSideSuits`: ess eller korthet i varje sidofärg) som hindrar
+RKC-blast med två snabba förlorare i en objuden färg (bevisat i probe: sänkte
+nådda slam 85→63, tog bort de grova bet-slammen). Slamzon (≥33) + nyckelkort
+(≥4/5) hindrar överbud på icke-slamhänder. Facit `auction-slam-jumprebid.test.ts`.
+budsystem.md §9. **1080 test gröna, tsc rent.** #29 stängd. Se 👀 Bevaka.
+
+**Föregående (2026-07-07): systems-on över 2♣–2♦–2NT.**
+Efter öppnarens 2NT-återbud (22–24) använder svararen nu **Stayman (3♣) +
+transfers (3♦/3♥) + Texas** precis som mot en naturlig 2NT-öppning, för att
+hitta 4-4- och 5-3-högfärgsfit i stället för att blint bjuda 3NT. Svararen bjöd
+2♦ (0–7 hp) → poänggränserna sänks två steg (utgång från 3 hp). Återanvänder
+2NT-svarsmaskineriet via en `openerMin`-param (default 20 → naturlig 2NT
+byte-identisk): `respondTo2NT`/`openerRebidAfter2NTResponse`/
+`responderRebidIn2NTAuction`, hopbyggt i `strong-2nt-systemson.ts`, inkopplat i
+`buildAuction`. Effekt: **~30 % av alla 2♣–2♦–2NT når nu 4♥/4♠** (förr 3NT); svaga
+5-färger signar av 3♥/3♠. Facit i `auction-2c-gameforce.test.ts`. budsystem.md §9.
+**1079 test gröna, tsc rent.** Se 👀 Bevaka.
+
+**Föregående (2026-07-07): 2♣-öppningen håller sitt utgångskrav.**
+Kom ur `/felrapporter` #29 ("hur hittar vi slammen?"): en utforskningsprob
+(300 000 givar) visade att **~64 % av alla ostörda 2♣-öppningar dog i
+DELKONTRAKT** (82 % av stoppen hade 23+ hp = rena kravbrott) — större fynd än
+#29. Roten: `auctionForce` (`auction-live.ts`) spårade 2/1 + rondkrav men INTE
+2♣-öppningens game-force (`buildAuction` bygger bara ett par bud av 2♣-linjen
+och överlämnar resten, som passades bort). Fix (facit-först): (1) ny 2♣-gren i
+`auctionForce` (game-krav tills utgång; undantag `2♣–2♦–2NT` = inbjudande);
+(2) `respondToStrong2NTRebid` (off-book-fallback) + systems-on on-book (ovan).
+Delkontrakt-andelen föll **63,9 % → 1,7 %** (resten legitima). Mergepunkt `b20d81f`.
+
+**Öppna felrapporter: INGA.** #28 (4♠ ej bugg), #29 (slam efter hopp-återbud),
+#32 (6-5-öppning byggd; spelfel uppskjutet), #33 (7♦-hoppet kapat), #34 (försvar
+uppskjutet) — alla STÄNGDA 2026-07-07. **NU är åter öppet — ägaren väljer nästa
+sak** (järnregeln: exakt en).
+
+**Öppna felrapporter efter detta:** **#28** analyserad & STÄNGD 2026-07-07 (Syds
+4♠ var korrekt offensivt bud, ej bugg). **#29** kvar öppen — ägaren tog
+2♣-fixen (ett symptom) först; slam-letningen efter starkt hopp-återbud väntar på
+ägarbeslut om riktning. **#32/#33/#34** (spelfel/budgivning) ännu ej lästa.
+**NU är åter öppet — ägaren väljer nästa sak** (järnregeln: exakt en).
+
+**Senast klart & LIVE (2026-07-06, mergepunkt `b1fdd6c`): två UI-fixar.**
+(1) **Tunn kortram** — 1px svart med **20 % opacitet** (`border-black/20` på
+`base` i `PlayingCard.tsx`) → mjuk grå separation mellan korten. Ägarbeslut som
+ersätter det ramfria beslutet 2026-07-03; opaciteten valdes efter att ägaren såg
+helsvart och bad om "gråare, inte lika solid". (2) **Mjukare Auto-Claim** —
+resultat-/claimrutan poppade förr upp blixtsnabbt; nu tonar bakgrunden in
+(`overlay-in` 200ms) och rutan tonar in + lyfts en aning (`dialog-in` 260ms),
+nya keyframes i `index.css`, klasser på overlayn i `Play.tsx`; respekterar
+`prefers-reduced-motion`. Rena className/CSS-ändringar, ingen budlogik rörd.
+1071 test gröna, tsc rent, Vercel-deploy grön.
+
+**KVAR av ägarens 4-punktslista (2026-07-06 — han bad förbereda alla fyra, tog
+punkt 2+4 nu):** **Punkt 1** = fler budträningsgivar + en "Vill du träna något
+speciellt?"-dropdown (data i `src/data/exercises/*.json` + `EXERCISES_BY_THEME`
+i `bidding.ts`; facit bör knytas till motorns egna svar så det aldrig lär ut fel).
+**Punkt 3** = sondera budsystemet på djupet (STORT eget spår: håller reglerna,
+off-book-tolkning "vad kan detta bud betyda", R2:s datadrivna detektorkedja).
+Ägaren väljer vilken som blir nästa 🔵 NU.
+
+**Senast klart & LIVE (2026-07-06): `/felrapporter` — #31 + #30 lagade & stängda.**
+- **#31 (svagt hoppskift avskaffat):** Nord hoppade till 2♥ på 1♦ med ♠7 ♥KT6432
+  ♦Q4 ♣A986 (9 hp). Ägarprincip: **när partnern öppnat håller svararen budgivningen
+  LÅG** — bjud nya färgen billigast (1♥, rondkrav), ett hopp berövar partnern
+  utrymme (t.ex. 1NT). `respondToMajor`/`respondToMinor` (`responses.ts`) faller nu
+  till 1-lägessvaret; öppnarens hantering av ett MANUELLT hoppskift orörd.
+  Mergepunkt `86a295c`. Docs: budsystem.md §4.1/§4.2/§9.
+- **#30 (stark jämn hand når utgång efter minorhöjning i konkurrens):** Väst (19 hp
+  jämnt) nådde bara 2♥ efter `1♦–(1♠)–2♦`. Två fixar (ägarbeslut, båda vägarna):
+  (1) **öppnings-uppgradering** — jämn 19 med startpoäng ≥20 öppnar **2NT**
+  (`openings.ts`); fixar den rapporterade given (2NT→3NT). (2) **återbudsfix** —
+  `openerStrongNTAfterMinorRaise` + `answerOpenerNTInvite` (`auction-live.ts`): 3NT
+  (20+) / 2NT-inbjudan (18–19) med stopp, höjaren accepterar med maximum. Mergepunkt
+  `603f86c`. Docs: budsystem.md §3, §5.10, §9. Se 👀 Bevaka.
+- **1071 test gröna, tsc rent, båda deployerna gröna.**
+
+**KVAR ÖPPNA FELRAPPORTER (ägaren sköt upp 2026-07-06 — ta en i taget vid
+`/felrapporter`):** **#28** ("aggressivt av syd, analysera" — Syd bjöd 4♠ med
+renons + 5-5; bedömningsfråga) och **#29** ("Annat — hur hittar vi slammen?" i N/S;
+förbättringsfråga). Båda är analys/bedömning snarare än tydliga buggar.
+
+**Senast klart & LIVE (2026-07-05, mergepunkt `1a2da2e`): felrapport skickas
+DIREKT utan att öppna GitHub** (var SENARE-punkten "PAT-i-localStorage"). Ägaren
+sparar en snäv fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN
+gång i Inställningar; då POST:ar `FelrapportDialog` rapporten direkt via GitHubs API
+(`submitFelrapport` i `src/lib/felrapport.ts`), knappen blir "Skicka rapport ✓" +
+kvitto. Utan nyckel = oförändrat (öppnar förifylld GitHub-sida). Nyckeln lagras i
+`src/lib/github-token.ts` under egen nyckel `rebidz:felrapport-token` (utanför
+`learnbridge:`-prefixet → "Nollställ framsteg" rör den ej); samma nyckel funkar på
+flera enheter. Fel → svenskt meddelande + reservknapp "Öppna på GitHub →". 1061
+test gröna, tsc rent, deploy grön, **bevisat skarpt av ägaren (issue #31)**.
+
+**Del 3 (PWA) KLAR & LIVE (2026-07-05):** appen är nu installerbar ("Lägg till på
+hemskärmen" på iPhone/Android, egen guld-spader-ikon på emerald) + fungerar
+offline. `vite-plugin-pwa` (autoUpdate) genererar service worker + `manifest.webmanifest`
+vid Vercel-bygget; `index.html` har apple-touch-icon + iPhone-taggar; ikoner i
+`public/` (192/512/maskable/apple-touch). Verifierat i webbläsaren mot skarpa
+bygget (SW registrerad scope `/`, manifest laddat, inga konsolfel). 1052 test
+gröna. Mergepunkt `565bbc8`. Ikonerna genererades ur `public/favicon.svg`-designen
+(engångsskript m. `sharp`, borttaget efteråt; `sharp` ej kvar i deps).
+**Uppföljning (2026-07-05, mergepunkt `43640e2`):** sidhuvudet fick
+`pt-[env(safe-area-inset-top)]` (`Layout.tsx`) – i PWA-helskärm på iPhone låg
+toppen annars under statusraden (klocka/batteri). Marginal = enhetens statusrad
+(0 i vanlig webbläsare). Bekräftat lagom av ägaren på hans iPhone. `<main>` hade
+redan motsvarande safe-area i botten.
+
+**Del 2 KLAR & LIVE (2026-07-05):** egen domän **https://rebidz.com** köpt via
+Vercel (auto-DNS, auto-förnyelse 5 juli 2027, WHOIS-privacy) + kopplad till
+learn-bridge-projektet (Production). `rebidz.com` = huvudadress (visar appen,
+HTTPS ✅); `www.rebidz.com` → 308 till rebidz.com. Ren Vercel-konfig, ingen
+kodändring. **Nya publika adressen att dela = https://rebidz.com** (gamla
+`learn-bridge-topaz.vercel.app` lever kvar som reserv).
+
+**Del 1 KLAR & LIVE (2026-07-05):** hosting flyttad från GitHub Pages till
+**Vercel** (repo & felrapport-URL stannar `Learn-Bridge` på GitHub). Konkret
+gjort: Vite `base` `/Learn-Bridge/` → `/` (`vite.config.ts`); vakttestet
+`src/deploy-config.test.ts` låser nu `/`; ny `vercel.json` kör test-/typgrinden
+(`npx tsc && npm test && npm run build`) så trasig kod aldrig går live — samma
+skydd som förr; gamla Pages-workflowen (`deploy.yml`) INAKTIVERAD (push-triggern
+borttagen, `workflow_dispatch`-endast, filen kvar som referens). 1052 tester
+gröna. Mergepunkter `79fd1d0` (flytten) + `18efe8b` (Pages av).
+
+**⚠️ Två ärliga varningar (upprepa för ägaren):** (1) Steg A förbättrar INTE
+boten — bara var appen bor; bot-utvecklingen är ett SEPARAT framtida NU. (2)
+`/felrapporter` överlever flytten OFÖRÄNDRAT (`src/lib/felrapport.ts` bygger bara
+en länk till `github.com/PGreen90/Learn-Bridge/issues/new`; repot stannar).
+
+**Föregående NU (bredare flerronds-konkurrens A+B+C, R1 Fynd #2 sista delbit) är
+KLAR, PUSHAD & i synk med origin** (git verifierat 2026-07-05 — den gamla "EJ
+PUSHAT"-noten nedan är inaktuell). Ägaren överrörde järnregeln medvetet och bad
+om alla tre bekräftade fel i EN session.
+
+**Senast klart (2026-07-05, EJ PUSHAT — inväntar PCD): bredare flerronds-
+konkurrens (A+B+C).** Metod: en utforskningsprob körde 4000 slumpgivar genom hela
+den levande auktionen, plockade ut äkta flerronds-konkurrenser och blottade tre
+bekräftade fel (verkliga händer lästa som facit). Alla tre byggda facit-först:
+- **A — öppnaren säljer i rond 2 när partnern PASSADE inklivet + RHO konkurrerade**
+  (`1♣–(1♠)–P–(2♠)`): ny `openerReopensAfterPartnerPass` (`auction-live.ts`) – egen
+  6+ färg → tävla; 15+ & kort i deras färg → återöppnings-X. Vakt: ingen
+  motståndar-X + motståndarna ≥2 kontraktsbud (skiljer från felrapport #23).
+- **B — öppnaren säljer i utpassningssitsen** (`1♠–(2♥)–P–P`): partnern trap-passar,
+  öppnaren återöppnar. `openerReopensBalancing` (`auction-live.ts`) – kort i deras
+  färg → X (partnern konverterar till straff), egen 6+ → rebjud, 15+ → X. **Kärnfix
+  i `auction.ts`:** `buildAuction` STÄNGDE linjen (`open=false`) så snart svararen
+  passade ett inkliv → contested-blocket hoppades över. Nu `finish(true)` (öppen,
+  som takeout-X/Michaels-grenarna) → decideCall äger fortsättningen. Invariant-testen
+  hoppar över öppna linjer → inget on-book-brott.
+- **C — advancern tävlar upp till fiten** (`1♠–(2♥)–2♠–?`): ett 2-läges inkliv lovar
+  6+ → 3-korts stöd = 9-korts fit. `advancerCompetesToFit` (`auction-live.ts`, före
+  off-book-svaret) – tävla 3M (lagen om totala stick), 13+ stödpoäng → utgång, svag
+  → pass. (Skilt från `raiseWithFit` som krävde 4-korts stöd och hade bjudit 4M.)
+
+Facit: `auction-opener-reopen-passed.test.ts` (A, 3), `auction-opener-reopen-
+balancing.test.ts` (B, 4), `auction-advancer-compete-fit.test.ts` (C, 2) – alla röda
+före fixen. **1052 tester gröna, tsc rent.** budsystem.md §5.9 + §7.1. Verifierat
+end-to-end i proben: #159→3♣, #56/#552→2♥ dubblat (straff), #263→3♥. Se 👀 Bevaka.
+
+**Kvar/öppet efter detta:** R2:s förslag att göra detektorkedjan i `decideCall`
+datadriven (~28 steg nu) står kvar som ett EGET framtida NU – väg in det innan fler
+konkurrenslägen staplas på (`docs/status.md` "Budmotorns tre auktionslager").
+
+---
+**Föregående NU-historik (KLARA & LIVE):**
+Föregående NU ("låna en kung" i balansering, §7.1) är **KLAR & LIVE**.
+
+**Senast klart & LIVE (2026-07-05, commit `f36d058`, deploy grön):
+"Låna en kung" i balanseringssits (§7.1).** I utpassningsläget (deras
+1-lägesöppning + två pass) är partnern markerad med värden, så §7-inklivets
+HP-golv sänks med **en kung (−3)**: enkelt inkliv 8→5, upplysnings-X 12→9 (form
+10→7), 1NT-inkliv 15–18 → **11–14** (klassisk återöppnings-1NT). **Flat HP-lättnad
+— §7-lagret behåller rå HP; TP-i-§7 avvisades medvetet (ortogonalt: TP=formspak,
+kung=sitsspak, och TP lyfter inte de PLATTA händer balansering finns till för).**
+`overcall` (`overcalls.ts`) fick en `balancing`-flagga; trådad från BÅDE
+`maybeOvercall` (`auction-live.ts`, live) OCH `buildAuction` (`auction.ts`,
+on-book balanseringsgren — annars passades given ut med open=false och nådde
+aldrig live). Direkt sits **exakt oförändrad** (relief=0). Facit
+`overcall-balancing.test.ts` (6: enhet + integration; direkt-sits-kontroller
+bevisar seat-specificiteten). 1043 tester gröna, tsc rent, deploy grön.
+budsystem.md §7.1. Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-05, commit `112f0fc`, deploy grön): Öppnarens
+rond-2 i störd auktion efter partnerns NYA FÄRG / 1NT (§5.8).** Systerfallet till
+delbit 6 (§5.4, som gällde partnerns *höjning*). Roten
+(bevisad i utforskning): så snart motståndarna bjöd om över partnerns fria svar
+passade öppnaren bort ÄVEN starka händer (rondkravet är tekniskt av då). Ny
+detektor `openerRondTwoInCompetition` (`auction-live.ts`, före `maybePenaltyDouble`
++ off-book-svaret). Ägarbeslut 2026-07-05: **visa extra med CUE i deras färg +
+naturliga hopp**; trösklar speglar delbit 6 (**15+ = extra, 18+ = utgång, 6:e
+kortet = tävla**). 18+ högfärgsfit → 4M; 18+ jämn m. stopp → 3NT; 15–17 högfärgsfit
+→ inbjudande hopphöjning; 15+ i övrigt → **cue** (hitta rätt utgång); minimum m.
+egen 6+ färg/fit → tävla; annars pass. Styrka = stödpoäng med fit, annars ren hp
+(så en lång svag färg inte blåser upp handen). Facit
+`auction-opener-competition-response.test.ts` (9, röda före fixen). 1037 tester
+gröna, tsc rent, deploy grön. Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-05, commit `a989a08`, deploy grön): Störda krav
+(§5.5).** Steg 1 hedrade krav bara OSTÖRT; nu även i KONKURRENS. `auctionForce`
+(`auction-live.ts`) fick en egen gren (`competitionForce` + `isJumpBid`): ett
+**fritt bud (ny färg, ej hopp, ej cue)** och en **reverse** i störd auktion är
+**RONDKRAV** — partnern tvingas svara via `honorForce` i stället för att passa.
+Aldrig utgångskrav i konkurrens (ägarbeslut: ett inkliv "lånar" utrymme → 2/1
+lovar värden men ej garanterad utgång). Passad svarare / hopp / cue undantas.
+Facit: `foundation-forcing-competition.test.ts` (störda A/B/C, röda före fixen) +
+`.stress.test.ts` (10 000 seedade givar; rondkravet utlöstes 146 ggr, passades
+aldrig). Se 👀 Bevaka.
+
+**Senast klart & LIVE (2026-07-05, commit `ca04175`, deploy grön): New Minor
+Forcing (§5.7).** Efter `1m–1M–1NT` bjuder svararen (5-korts högfärg + 11+) den
+oanvända lågfärgen (2♣/2♦, konstgjort krav); öppnaren svarar (5 prioriteringar,
+passar aldrig); svararen placerar (13+ når alltid utgång). `responder-rebids.ts`
+(`newMinorForcingBid`, `responderPlaceAfterNMF`), `rebids.ts` (`openerAnswerNMF`),
+`auction-live.ts` (`nmfToAnswer` + `nmfPlacementToAnswer` tvångssvarare). Facit
+`new-minor-forcing.test.ts` (21). End-to-end: `1♣–1♥–1NT–2♦–3♥–4♥` hittar 5-3-fit.
+
+**Senast klart & LIVE (2026-07-05, commit `eca5ff0`): budsystemets grunder steg 1.**
+`auctionForce`/`honorForce` → krav passas aldrig OSTÖRT (2/1, ny färg, reverse);
+`raiseWithFit` → minorfit + utgångsvärden når utgång (3NT/5m). Facit
+`foundation-forcing.test.ts` A–D. budsystem.md §5.5+§5.6. **Detta NU utvidgar det
+till konkurrens.**
+
+---
+**HISTORIK nedan (tidigare sessioner, KLARA & LIVE — behandla ej som pågående):**
+Kontraktväljaren (KLAR & LIVE):
+
+**ALLA TRE DELSTEG BYGGDA & VERIFIERADE (2026-07-05, ej pushat):**
+- **(1) Filtret + motor-fix.** `contract-target.ts` (`matchesTarget` +
+  `simulateAuction`). **Under bygget upptäcktes att motorn ALDRIG nådde 5♣/5♦**
+  (0 av 30 000) – äkta lucka, inte att kontraktet är ovanligt. **Lagat**
+  (ägarregel: utforska bara med en svag färg): svararen med lågfärgsfit + en
+  osparrad färg går inverterad 2m i stället för att chansa 3NT och landar i 5m
+  (`responses.ts` `hasWeakSideSuit`, `responder-rebids.ts` inverterad-minimum →
+  5m). Nu nås 5♣/5♦ ~1 per 54. `budsystem.md` §4.2 uppdaterad.
+- **(2) Sökaren.** `dealForTarget` (slumpa tills match, tak 60 000, null-fallback).
+- **(3) Menyn i `Play.tsx`.** "Mål:"-pill → `ScenarioPicker` (7 scenariokort),
+  batchad sökning (300/tick, setTimeout → fryser aldrig) med `SearchOverlay`
+  ("Söker … N prövade" + Avbryt + ge-upp-väg), målet sparas i localStorage
+  (`play-target`), "Ny giv" letar på samma mål. Random = som förr.
+
+996 tester gröna, tsc rent, verifierat i webbläsaren (pill, väljare, sökning för
+lågfärg + storslam, ren konsol). **Kontraktväljaren = KLAR & LIVE, inga öppna
+punkter (ägaren godkände 2026-07-05).**
+
+**NÄSTA GÅNG (ägarbeslut 2026-07-05): 🔵 NU blir "Budsystemets grunder — varför
+de faller".** Ägaren vill gräva i budsystemets FUNDAMENT och förstå varför de
+brister (inte laga en rapport i taget utan hitta rot-mönstren). Startpunkt:
+felrapport #26 + #27 (nyss lagade) visade samma rot — motorn hedrar
+utgångskrav/rondkrav i sin FÖRPLANERADE linje men tappar dem OFF-BOOK (när
+ägaren öppnar/bjuder en annan hand än motorn valt). Fråga ägaren vilka
+grundregler som känts opålitliga i spel och bygg facit-givar som blottar
+mönstret innan något byggs om. (Kontraktväljaren = KLAR & LIVE, se nedan — inga
+öppna punkter kvar.)
+
+**Senast klart & LIVE (2026-07-05):** felrapport #26 + #27 lagade, pushade,
+deploy grön (commit `f9531b2`). Båda samma rot: utgångskrav passades OFF-BOOK.
+#26 → `answerCueBidderRebid` (cue-bjudaren fullföljer efter öppnarens svar);
+#27 → `answerTwoOverOneRaise` (svararen sätter utgång efter 2/1 som öppnaren
+höjt). 998 tester gröna. Se 👀 Bevaka. **Detta är den direkta ingången till
+nästa NU** (off-book-krav = ett grund-mönster som faller).
+
+**Senast klart & LIVE (2026-07-05, mergepunkt `1bec779`):** starka
+upplysningsdubblingens **flerronds-fortsättning** byggd, test-låst & pushad
+(`auction-live.ts`: `strongDoubleContext` + `advanceStrongDoubleRebid` +
+`strongDoublerSecondRebid` + `answerStrongDoubleGameForce`). Game-hoppet borttaget
+(kan bli katastrof mot 0 hp); partnern tvångssvarar (stödstege / utan stöd egen
+färg); den starka handen dömer game på TP (**6+ & 22+ TP → hopp till 3-läget**,
+annars lägsta nivå); partnern svarar 3-hoppet (utgång m. 1–2 stöd / 3NT nekar).
+TP-tröskel 22 = ägarval efter 6 exempelhänder. Ordet "monster" bannlyst. 976
+tester gröna, tsc rent, deploy grön. **Öppen finslipning (ägaren, i spel):** den
+starka handens dom EFTER en stödhöjning körs på en konservativ default – se
+👀 Bevaka.
+**NÄSTA GÅNG börjar vi med:** ägaren pekar ut nästa NU (en sak, järnregeln). Bra
+kandidater: **nästa delbit av R1 #2** (se "Kvar" nedan) eller en punkt ur R6:s
+handlingsplan (`docs/audit/SLUTRAPPORT.md`) / NÄST-listan.
+
+**Senast klart & live (2026-07-05, dok-synk – commits `8d2d413` + `70660fb`):**
+ägarmandat *"all ändring i Budsystemet ska gå att läsa på hemsidan."* Budsystem-
+sidan läser `docs/budsystem.md` direkt (§9 Ändringslogg är dold), så live-regler
+som förr bara låg i kod/ändringslogg skrevs nu in i läsbara sektioner: **§7.3
+Takeout Double** (egen sektion; ordet för den starka 17+-handen borttaget på ägarens begäran – skriv "bra/stark hand"),
+**§5.4** öppnarens rond-2 i inklämt läge (delbit 6), **§7.8** när motståndarna
+stör vår öppning (delbit 4+5). Ingen kodändring – bottarna bjuder som förut.
+
+**Läget (2026-07-04, audit session 9 avslutad):** Hela revisionen R1–R6 KLAR +
+live (0 KRITISK, 2 HÖG båda i R1, 27/32 fynd lagade; slutrapport
+`docs/audit/SLUTRAPPORT.md`). Därefter startade R1 Fynd #2 (bredda störd
+budgivning) och **delbit 6 är byggd, mergad (`ce7f1cd`) och LIVE.**
+
+**Delbit 6 (LIVE):** öppnarens rond-2 i det INKLÄMDA konkurrensläget efter
+partnerns enkla högfärgshöjning (`1M–(inkliv)–2M–(deras inklämda bud)`): pass
+(minimum) · 3M (6:e trumf, lagen om totala stick) · **X = MAXIMAL DUBBLING (game
+try, 15–17)** · 4M (utgång, 18+); partnern svarar X:et 4M (accept, 8+ stöd) /
+3M (avböj). Två detektorer i `decideCall`, FÖRE `maybePenaltyDouble` (X reserverat
+för game try där — konventionens kända avvägning). Facit:
+`auction-opener-competition.test.ts` (7 integrationstester). Se 👀 Bevaka nedan.
+
+**Sidospår klart & live (2026-07-04, mergepunkt `213d90e`):** felrapportering
+inkopplad i **Budvisningen** (`Spela.tsx`) — knappen "Rapportera fel →" dyker upp
+så snart auktionen budats färdigt (korten spelas aldrig där, så inga stick följer
+med; kontraktet härleds ur buden). Samma `FelrapportDialog` som i Spela kort, men
+med valfri bud-specifik text ("Rapportera fel i budgivningen" +
+`BIDDING_REPORT_CATEGORIES`). Detaljer: `docs/status.md`.
+
+**Kvar av R1 #2 (kommande delbitar, ägarstyrt):** ~~öppnarens rond-2 (§5.8)~~ +
+~~balanseringens "låna en kung"~~ + ~~bredare flerronds-konkurrens (A+B+C, §5.9 +
+§7.1)~~ (ALLA KLARA 2026-07-05; A+B+C ej pushat än). **R1 Fynd #2 är därmed i
+praktiken helt genomarbetat** — bara delbit 3 (Mathe mot stark 1♣) förblir medvetet
+PARKERAD (irrelevant tills vi lägger till fler budsystem).
+
+**Öppna SENARE-poster ur revisionen:** R3 #3 del 2 (auto-facit på hela given —
+kräver webworker). (R3 #8 "Förra sticket" = OK/klar, ägarbeslut 2026-07-05 —
+struken.) Se ⚪ SENARE nedan.
+
+## 2026-07-07 → 2026-07-21 — flyttat från CLAUDE.md 2026-07-21
+
+**✅ Etapp 1 KLAR & LIVE 2026-07-20 (budgivningen mot perfekt): felrapporterna
+betade.** #35 (fel dubblare utsedd → 5♠-blåsan), #37 (öppnarens svar på
+sang-inbjudan byggt, §4.3), #38 (återöppning även efter 1-läges inkliv) lagade +
+test-låsta; #39 = inget fel (DD-facit: straffen +500 slår 3NT som går 2 bet) —
+test-låst. Issues stängda, mergepunkt `da7bdc5`, deploy grön, 1106 test.
+- **#35** — Öst höjer partnerns 4♠ till 5♠ på en redan begränsad
+  minimihand (balanserings-X + 1♠ var redan hela handen) → 3 bet.
+- **#37** — 1NT-öppnaren (17 hp, FEM hjärter) avvisar 3♥-inbjudan efter
+  Stayman-hittad fit och bjuder 3NT i st.f. 4♥; dessutom felaktig
+  beskrivning av 3NT-budet.
+- **#38** — passad svarare (11 hp, ♦KQ864 + ♠KJ42) passar ut `1♣–(1♠)`
+  → Ö/V säljer given i 1♠ trots ~25 hp och Västs solida klöver.
+- **#39** — efter vår 1NT + deras 2♥-inkliv blir W:s X ståendes som
+  straff → Ö/V (25 hp) missar 3NT.
+- **#36** (större kort på mobil) är UI, inte bud → ⚪ SENARE.
+
+**✅ Etapp 2 KLAR 2026-07-21** — Systemrevisorn byggd (`revisor.ts` +
+`revisor-dds.ts` + REVISOR-gated probe; DD-facit via npm-paketet
+`bridge-dds` = Bo Haglunds lösare i WASM som dev-beroende, med RIKTIG
+par-poäng) och **baslinjen mätt** (1 000 givar, frö 20260721): **exakt par
+15,9 %, snitt-tapp 300 p/giv; topplista: fel färg-bet 65k p > missad
+lillslam 56k > missad utgång 46k > missad storslam 38k > billig offring
+35k** — hela mätningen + läsanvisning i `docs/systemrevisorn.md`.
+
+**Senast klart & LIVE (2026-07-07 kväll, mergepunkt `1ce2982`, deploy grön):
+ÄRLIGA SLAMPORTAR — tjuvkiken borttagen.** Ägarbeslut efter Fables
+totalgranskning: bottarna bjuder som MÄNNISKOR — varje budbeslut fattas på
+EGEN hand + vad partnern VISAT via buden (intervall/löften), ALDRIG på
+partnerns faktiska kort; hellre missa en slam än kika. Gäller även
+facit-linjen/Budvisningen (samma `buildAuction`). Ägarens två systemval:
+(1) **inbjudningar i kanske-zonen** (31–32 mot visat minimum; kvantitativ 4NT
+över sang, 5M/4m i trumf; partnern accepterar över blott minimum),
+(2) **ingen kontrollkoll** (lita på poängen + nyckelkortssvaret;
+`pairControlsSideSuits` och motorns auto-cue-rond BORTTAGNA — cue-ronden bar
+bara gaten och orsakade gamla slam-quirken). Byggt: `slam-auction.ts`
+omskriven (**kaptensregeln**: egen hand + visat minimum ≥33 driv / 31–32
+inbjudan; nyckelkort HÄRLEDS ur svaret + egen hand; tvetydighet → anta högt
+mot visad 15+, annars lågt + PARTNER-RÄTTELSE till 6; storslam kräver
+visshet), `nt-slam.ts` (Gerber härleder ur svaren; ny kvantitativ
+4NT-inbjudan 19–20 mot 1NT-återbudet), `auction.ts` (visade intervall per
+återbudsregel: 1NT-återbud 12, hopphöjning/hopp-återbud 16, Jacoby/inverterad
+per rebid, splinter-relä 15, MSS 15); `familyAFitTrump` läser BARA svararens
+hand (6+ egen hf / 5+ i öppnarens minor; gömda 4-4-fits jagas ej). **Kända
+ÄRLIGA MISSER (medvetna, test-låsta):** #29-originalgiven stannar i 3NT
+(13 hp mot visade 16–18 < zonen); familj A-givens 4-korts minorfit drivs ej.
+Slamfrekvens (probe 60 000 givar): lillslam ~1/120, storslam ~1/4300 —
+mänskligt. **Blottad systemlucka → B13 i revisionen:** inverterad
+minor-återbud är grova (17 hp + 6m visas som "minimum") → ärliga misser där.
+Docs: budsystem.md §5.2/§5.7/§6 (principen)/§6.2-motoranmärkning/§9;
+budsystem-revision.md B8–B13. **1090 test gröna, tsc rent, deploy grön.**
+
+**F1 — bredda slam-utforskningen (PAUSAD → etapp 4 i NU-planen).** En probe (40 000 givar,
+DD-lösta) delade slam-missarna i fyra familjer. **KLARA & LIVE:** **A** (efter
+`1m–1M–1NT`: jämn → Gerber 21+/kvantitativ 4NT 19–20; obalanserad med säker
+fit på egen hand → 4NT RKC), **C:s hopphöjning** (`1x–1M–3M` → driv 17+/
+inbjudan 5M 15–16), **D** (hängande cue-quirken stängd — auto-cue-ronden är
+numera helt borttagen). Alla styrs av de ärliga portarna ovan (äldre
+beskrivningar i historiken med kontroll-gates/parets faktiska poäng =
+kik-eran, gäller inte längre). **KVAR (= etapp 4):** familj **B** (2♣) +
+C:s systerfall **reverse** (`1♣–1♥–2♦`) och **hoppskift** (`1♦–1♠–3♣`) —
+störst men rörigast (ingen överenskommen trumf; vissa reverse-auktioner
+kollapsar t.o.m. under utgång, eget problem). Byggs på det ärliga mönstret.
+
+**Avslutade SENARE/PARKERAT-poster (flyttade hit 2026-07-21):**
+- ~~**Dubblingar (X/XX) in i slutkontraktet**~~ **KLAR 2026-07-04** (commit
+  `0864224`, parallellsession): X/XX följer med genom `contractFromCalls` och
+  poängräkningen (`scoring.ts` enligt ägarens poängguide) är byggd.
+- ~~**Felrapportering: PAT-i-localStorage-varianten**~~ **KLAR & LIVE 2026-07-05**
+  (skicka issuen direkt från appen utan att öppna GitHub). Ägaren sparar en snäv
+  fine-grained GitHub-nyckel (Issues: read/write på Learn-Bridge) EN gång i
+  Inställningar (`src/lib/github-token.ts`, egen lagringsnyckel `rebidz:felrapport-token`
+  utanför `learnbridge:`-prefixet → överlever "Nollställ framsteg"). Finns nyckel →
+  `FelrapportDialog` skickar direkt via GitHubs API (`submitFelrapport` i
+  `felrapport.ts`, POST `.../issues`), knappen blir "Skicka rapport ✓" + kvitto;
+  saknas nyckel → oförändrat (öppnar förifylld GitHub-sida). Fel → svenskt
+  meddelande + reservknapp "Öppna på GitHub →". Samma nyckel kan användas på flera
+  enheter. 1061 test gröna.
+- FAS 9 Passad hand, FAS 10 Försvarsbud, FAS 11 Kortspel = **KLARA & pushade**
+  (historik — inte återstående arbete).
+- ~~**Slam-quirken** (~0,25 %, Jacoby 2NT→cue→RKC)~~ **LÖST 2026-07-07** (F1 familj
+  D; slutgiltigt genom att motorns auto-cue-rond togs bort helt med de ärliga
+  slamportarna samma kväll). Facit `auction-slam-jacoby-cue.test.ts`. Behandla
+  inte längre som parkerad.
+
+### Bevaka-arkiv — fulltexter (komprimerade till en rad var i CLAUDE.md 2026-07-21)
+
+- **Advancern hoppar inte förbi utgång (#33, 2026-07-07, LIVE):** när du och
+  din bot-partner tävlar/cue-bjuder efter en upplysningsdubbling höjer boten inte
+  längre förbi utgång på inbjudningsvärden (förr kunde en "inbjudande hopp" bli 7♦
+  över partnerns 5♦). **Bevaka:** passar boten lagom (den saknar ännu slam-drivning
+  som advancer — med äkta slamvärden kan den nöja sig med utgång; säg till om den
+  borde utforskat slam).
+- **6-5-öppning (#32, 2026-07-07, LIVE):** med 6-korts lågfärg + 5-korts
+  högfärg öppnar boten nu **högfärgen med 12–15**, men **lågfärgen med 16+** (för att
+  reverse:a in högfärgen). **Bevaka:** (a) väljer den rätt (öppnar 1♦ på rätt starka
+  6-5, 1♠/1♥ på minimum)? (b) *återbudet* efter en 16+ 1♦-öppning — visar den 6-5:an
+  begripligt (reverse in i högfärgen), eller blir fortsättningen konstig? Säg till om
+  6-5:an tappas bort i rond 2.
+- **2♣ dör inte längre i delkontrakt + systems-on (2026-07-07, LIVE):**
+  öppnar din bot-partner en stark 2♣ drivs auktionen nu alltid till minst utgång
+  (förr dog ~64 % i delkontrakt). **Efter `2♣–2♦–2NT`** (öppnaren 22–24) använder
+  svararen nu **Stayman/transfer** som mot en 2NT-öppning → hittar 4♥/4♠-fit i
+  stället för att blint bjuda 3NT. **Bevaka:** (a) hittar paret rätt högfärgsfit
+  lagom ofta, och landar det inte i fel strng? (b) svaga händer med 5-korts högfärg
+  signar av i 3♥/3♠ (rätt), 0–2 hp passar 2NT (rätt) — säg till om något känns fel.
+  (c) I ANDRA 2♣-auktioner (positivt svar, färgrebud) garanterar kravlogiken utgång
+  men den forcerade minimi-stegen väljer inte alltid finaste färgen (t.ex. 5♣ där
+  4♠ var bättre) — säg till om en sådan känns trubbig. (d) Slam-utforskning efter
+  2♣ är fortfarande tunn (uppföljning knyter an till #29).
+- **Inget svagt hoppskift längre (#31, 2026-07-06, LIVE):** svarar du på
+  partnerns öppning med en svag 6-korts högfärg bjuder boten nu **1♥/1♠** (lågt,
+  rondkrav), aldrig 2♥/2♠. **Bevaka:** håller boten budgivningen lagom låg, eller
+  borde en riktigt svag spärrig hand ibland fått hoppa? (Ägarprincip: håll låg när
+  partnern öppnat.) Öppnaren förklarar fortfarande ett MANUELLT hoppskift rätt om du
+  själv hoppar.
+- **Stark jämn hand efter minorhöjning i konkurrens (#30, 2026-07-06, LIVE):**
+  (a) en jämn 19 med extra kvalitet (ess/kvalitetsfärger, startpoäng ≥20) öppnar nu
+  **2NT** i stället för 1 i färg — **bevaka** att den inte blåser upp platta 19:or.
+  (b) När din minor höjs i konkurrens visar öppnaren styrka i sang (3NT 20+ /
+  2NT-inbjudan 18–19 med stopp); höjaren accepterar 3NT från **8 hp**. **Bevaka:** når
+  paret 3NT lagom ofta, eller för lätt/tungt? Säg till om accept-golvet (8) känns fel.
+- **Flerronds-konkurrens A+B+C (§5.9 + §7.1, 2026-07-05, LIVE):** störda
+  auktioner säljs inte längre billigt i rond 2+. (A) Öppnar du 1 i färg, de kliver in,
+  partnern PASSAR och de konkurrerar (`1♣–(1♠)–P–(2♠)`) → du tävlar nu (egen 6+ färg,
+  eller X med kort i deras färg) i stället för att passa. (B) Samma men de passar också
+  (`1♠–(2♥)–P–P`) → du återöppnar i utpassningssitsen (X med kort i deras färg → **din
+  partner kan konvertera till straff**; egen 6+ → rebjud). (C) Din partner klev in på
+  2-läget och de hittade sin fit (`1♠–(2♥)–2♠`) → du (advancern) tävlar nu **3♥** med
+  3-korts stöd (9-korts fit, lagen om totala stick). **Bevaka:** (a) återöppnar/tävlar
+  boten lagom ofta, eller väcker den given för lätt? (b) C:s golv är **~8 stödpoäng** –
+  en riktigt svag hand med 9-korts fit passar (medvetet, tävlar inte på en bust); vill
+  du ha renodlad "lag om totala stick" (tävla nästan alltid med fiten) → säg till, det
+  är en trösklsjustering. (c) B:s partner som trap-passar och konverterar till straff –
+  slår det rätt (blir det verkligen en straff, inte en flykt som får spela billigt)?
+- **"Låna en kung" i balansering (§7.1, 2026-07-05, LIVE):** i
+  utpassningsläget (deras 1-lägesöppning + två pass) kliver boten nu in ~3 hp
+  lättare — enkelt inkliv från 5 hp, upplysnings-X från 9 (form 7), återöppnings-1NT
+  11–14. **Bevaka:** (a) balanserar boten lagom ofta, eller väcker den given på för
+  skräpiga händer? (b) 2-läges-inkliv på ~5 hp kan bli aggressivt (lättnaden gäller
+  även där) — säg till om det svider. (c) advancern (som svarar balanseringen) vet
+  ännu INTE att partnern kan vara en kung lättare → kan övervärdera tillbaka; en
+  "advancer-rabatt" är en möjlig uppföljning. (d) den starka 15–18 jämna handen i
+  balansering dubblar först (om form) i stället för 1NT; saknar den form (lång i
+  deras färg) kan den passa — ovanlig kant, säg till om den dyker upp.
+- **Öppnarens rond-2 i konkurrens efter partnerns ny färg / 1NT (§5.8, 2026-07-05,
+  LIVE):** öppnar du 1 i färg, partnern svarar en fri ny färg / 1NT
+  och motståndarna bjuder om (t.ex. `1♥–(1♠)–2♣–(2♠)`), passar öppnaren inte längre
+  bort en stark hand. Extra visas med **cue i deras färg** (15+, hitta rätt utgång),
+  18+ med högfärgsfit → 4M, 18+ jämn m. stopp → 3NT, 15–17 m. högfärgsfit →
+  inbjudande hopphöjning; minimum tävlar med en egen 6+ färg eller en fit, annars
+  pass. **Bevaka:** (a) cue:ar boten lagom ofta (inte varje 15-poängare som borde
+  passat)? (b) hittar den rätt utgång efter cuet, eller överbjuder den? (c) medvetet
+  bortval: i det här läget väljs **cue framför straffdubbling** på extra-händer –
+  säg till om en straffdubbling av deras bud borde ha varit rätt i stället.
+- **Störda krav = RONDKRAV (§5.5, 2026-07-05):** klev en motståndare in och du
+  gjorde ett **fritt bud** (ny färg, t.ex. `1♦–(1♠)–2♣`) eller öppnaren **reverse:ade**
+  (`1♣–1♥–(1♠)–2♦`), så passar din partner inte längre — hen tvingas svara med ett
+  naturligt minimibud (`competitionForce`/`honorForce`). Men bara **rondkrav**: buden
+  får stanna UNDER utgång (ett inkliv "lånar" utrymme). **Bevaka:** (a) svarar boten
+  förnuftigt (rätt naturligt bud, inte ett tvångsbud som låter konstigt)? (b) driver
+  den ALDRIG till utgång i onödan här (2/1 i konkurrens lovar värden men ej utgång)?
+  Hopp, cue i deras färg och en passad svarare undantas medvetet — säg till om ett av
+  dem borde ha tvingat fram ett svar ändå.
+- **Utgångskrav får aldrig passas OFF-BOOK (felrapport #26 + #27, 2026-07-05):**
+  två luckor där boten passade en KRAV-auktion när du bjudit off-book
+  (motorn hade planerat en annan linje). (1) **#26** – efter din cue-höjning
+  (1♣–2♥–3♥) fullföljer din partner nu utgångskravet efter öppnarens svar
+  (`answerCueBidderRebid`): 3NT med stopp i deras färg, annars utgång i den
+  överenskomna färgen. (2) **#27** – efter ett äkta 2-över-1 (utgångskrav) som
+  öppnaren höjer sätter svararen nu minst utgång även off-book
+  (`answerTwoOverOneRaise`) – uppstod när Syd öppnade den svagare handen så
+  motorns on-book 2/1-fortsättning aldrig fyrade. Bara off-book berörs; on-book
+  orört. **Bevaka:** når boten rätt utgång (4M/3NT/5m) och blåser den aldrig för
+  högt? Säg till om den t.ex. borde utforskat slam i stället för att bara sätta
+  utgång.
+- **Lågfärgsutgång 5♣/5♦ nu nåbar (Kontraktväljaren delsteg 1, 2026-07-05):**
+  motorn kunde förr aldrig bjuda 5♣/5♦ (valde alltid 3NT). Nu, efter inverterad
+  minor: en svarare med lågfärgsfit + en **osparrad färg** utforskar via 2m och
+  landar i **5m** när paret inte kan hålla alla färger (i stället för att chansa
+  3NT). Ägarregel: utforska bara med en **riktigt svag** färg (♠xx/♥xxx utan
+  honnör). **Bevaka:** (a) drar boten till 5m när 3NT egentligen var säkert? (b)
+  chansar den fortfarande 3NT med en helt öppen färg? Trösklar i `responses.ts`
+  (`hasWeakSideSuit`) + `responder-rebids.ts` (inverterad-minimum → 5m).
+- **Motspelarens kast-vakt + 1NT-återbudsförklaring (felrapport #24 + #25,
+  2026-07-05):** (1) **spelfel #25** – en försvarare som sakar blottar inte
+  längre en honnör i onödan: ny "motspelarens kast-vakt" (`play-bot.ts`
+  `defenderGuardDiscard`) sakar hellre ur en färg UTAN skyddsvärd honnör (en J+
+  som ännu kan slås av ett högre ospelat kort), ärligt räknat ur egen hand +
+  träkarl. Löser bara honnörs-blottning; bredare försvarsinferens (kasta rätt när
+  partnerns hand är okänd) är fortsatt SENARE. Säg till om vakten någon gång
+  behåller fel kort. (2) **budförklaring #24** – öppnarens 1NT-återbud efter
+  färgöppning beskrivs nu som "balanserad minimihand ~12–14 hp" (ej "svag");
+  ingen ändrad budgivning, bara texten (`auction-interpret.ts`).
+- **Takeout-doublingar (felrapport #23 + stark-hand-fortsättning + tvåfärgs-X,
+  2026-07-05):** (1) en **17+ stark enfärgshand** upplysningsdubblar en öppning
+  och visar sedan sin färg via ett **starkt återbud** — färgen **billigast (rondkrav,
+  inget hopp)**; hopp-till-utgång är borttaget (kan bli katastrof mot 0 hp). Hela
+  **flerronds-fortsättningen är nu byggd & test-låst**: partnern tvångssvarar
+  (stödstege m. 3-korts stöd: enkel/hopp/utgång/cue efter hp — annars egen 5+ /
+  näst längsta objudna färg), den starka handen dömer game på TP (**6+ färg & 22+ TP
+  → hopp till 3-läget = utgångskrav**, annars lägsta nivå), partnern svarar 3-hoppet
+  (utgång m. 1–2 stöd / 3NT nekar). **⚠️ Bevaka särskilt:** den starka handens dom
+  EFTER en **stödhöjning** (partnern visade fit) körs på en medvetet **konservativ
+  default** (accepterar utgång med tydligt tillägg: hopphöjning→18+ hp, enkel
+  höjning→21+; cue→utgång som minimum; slam-utforskning ej byggd) — ägaren ville
+  finslipa detta i spel, säg till om trösklarna känns fel. (2) När motståndarna
+  bjudit **två färger** (1♦–P–1♥) dubblar en **4-4-hand (10+)** de objudna färgerna;
+  advancern svarar aldrig i deras egen färg. Regler i `docs/budsystem.md` §7.3.
+- **Öppnarens rond-2 i inklämt konkurrensläge (R1 Fynd #2 delbit 6):** efter
+  `1M–(inkliv)–2M–(deras inklämda bud)` passar öppnaren inte längre blint. Med
+  minimum + 6:e trumf konkurrerar den 3M; med utgångsintresse (~15–17) dubblar den
+  (**X = maximal dubbling = game try**, INTE straff i det läget); med 18+ bjuder den
+  4M. Partnern svarar X:et 4M (max) / 3M (min). Golv: 15+ = game try, 18+ = utgång
+  (speglar den ostörda openerRebidAfterSimpleRaise). Säg till om X-som-game-try
+  känns fel, eller om golven bör justeras.
+- **DONT mot deras 1NT (R1 Fynd #2 delbit 1):** bottarna stör nu deras
+  1NT-öppning med DONT (X/2-läget) — golv 8 hp direkt, 6 hp balansering. Säg till
+  om det känns för aggressivt/passivt.
+- **Försvar mot deras svaga tvåor/spärrar (R1 Fynd #2 delbit 2):** bottarna
+  kliver nu in mot motståndarnas svaga 2♦/2♥/2♠ och spärrar (3-läget+) — takeout-X,
+  2NT (15–18), cue, naturligt, 3NT. Golv för takeout-X: 12 hp ej sårbar / 13 sårbar
+  direkt, 10 hp balansering; mot spärr 14 hp (medvetet stramare — säg till om du
+  vill lätta även spärr-balanseringen).
+- **Svar när motståndaren stör VÅR öppning (R1 Fynd #2 delbit 4):** när du
+  öppnar 1NT och en motståndare stör med DONT svarar din bot-partner nu (X/XX =
+  straff/värden från 8 hp, egen 5+ färg = naturligt, annars pass) i stället för att
+  passa. När du öppnar en svag tvåa/spärr och de takeout-dubblar redubblar partnern
+  med 10+ (värden) eller höjer spärrartat med fit. Säg till om golven (8 / 10)
+  känns fel.
+- **Straffdubbla flykten efter vår XX (R1 Fynd #2 delbit 5):** öppnar du
+  1NT, de stör med DONT och din bot-partner redubblar (XX = vi äger handen), så
+  flyr motståndarna undan till en färg STRAFFDUBBLAR din sida dem nu — varje steg,
+  tills de får spela dubblat — i stället för att passa flykten. Utlöses bara efter
+  vårt 1NT + XX (inte efter svaga tvåor/spärrar — där äger vi inte handen). Säg
+  till om det känns för aggressivt att dubbla varje flyktbud.
+
+## 2026-07-21 → 2026-07-25 — "Budgivningen mot perfekt" etapp 3/5/4 (flyttat från CLAUDE.md 2026-07-25)
+
+> Detta är NU-loggen som växte fram i CLAUDE.md under de tre etapperna. Mätsiffrorna
+> och mönsteranalyserna i full detalj: `docs/systemrevisorn.md` (Mätning #1–#14).
+> Alla regeländringar är dessutom skrivna i `docs/budsystem.md` (§9 = ändringslogg).
+
+**Ägarbeslut 2026-07-20:** designen lades HELT åt sidan (facelift-spåret → PARKERAT).
+Fullt fokus på budgivningen.
+
+### Etapp 3 — FEL FÄRG-SPÅRET (ägarbeslut 2026-07-21, KLAR 2026-07-22)
+Största posten i revisorns baslinje: "fel färg — bet fast facit fanns i annan
+strain" (148/1000 givar, 65 110 p). Arbetssätt: hämta exemplen ur `revisor-output/`
+(frö 20260721 återskapar dem), hitta MÖNSTREN (inte enskilda givar), laga mönster
+för mönster test-låst, kör om mätningen med samma frö.
+
+- **Fix 1 (2026-07-21) "5♣-ryckaren"** (budsystem.md §5.6/§9): live-lagret läste
+  Stayman-2♣ som klöverfärg och drog partnerns 3NT till 5♣. Facit-test
+  `auction-stayman-not-natural.test.ts`.
+- **Fix 2 (2026-07-21) "2♣-kravets finaste färg"** (§4.4/§9): (a) svararen efter
+  `2♣–2♦–3m` visar billigaste 4-korts högfärg under 3NT i st.f. blint 3NT från fel
+  hand (`responses-2c.ts`); (b) dubbelton-"fit" mot partnerns tvingade ombud slår
+  aldrig en egen visad 6+ färg (`raiseWithFit`-vakt). Facit-test
+  `auction-2c-finest-suit.test.ts`. Mätning #3: exakt par 16,8 %, fel färg-bet
+  138/58 530.
+- **Fix 3 (2026-07-21) "cue-höjning i minor → 3NT före 5m"** (NY §5.11 + §9;
+  `answerCueRaise` i `auction-live.ts`): öppnaren med jämn hand + stopp i deras
+  cuade färg bjuder 3NT direkt i st.f. att alltid återgå billigast. Facit-test
+  `auction-cueraise-3nt.test.ts`. Mätning #4: 17,0 %, snitt 291, fel färg 136/57 020.
+- **Fix 4 (2026-07-21) "tre konkurrens-fortsättningar"** (§4.5/§7.4/§7.7 + §9):
+  (a) advancerns cue-svar väljer billigaste nivån vid lika långa färger; (b) öppnaren
+  svarar inte negativ dubbling med sang på minimum, och dubbelton-höjningar av
+  tvingade ombud kräver längdbevis + utgångsvärden; (c) ny färg som krav på 3-läget
+  mot svag tvåa kräver 15+. Facit: `auction-konkurrens-fortsattning.test.ts` (15 fall).
+  Mätning #5: 17,2 %, fel färg 130/54 880. Fixen EXPONERADE två luckor som förr
+  maskerades av fel som råkade trilla rätt (balansering över deras svaga tvåor +
+  negativ-dubblarens invit-fortsättning).
+- **Fix 5 (2026-07-22) de två exponerade luckorna** (§7.3/§7.4/§7.7 + §9):
+  **(5a)** balansering över deras svaga tvåor byggd — "låna en kung" fullt ut i
+  utpassningsläget (naturligt 2-lägesinkliv från 7 hp, offshape-X ≤3 kort i deras
+  färg, 2NT 12–15) + advancer-rabatt (−3 sp, 3-lägestak). Facit-test
+  `auction-balansering-svag2.test.ts`. **(5b)** ny detektor `negativeDoublerContinues`:
+  dubblaren i 9–12-zonen bjuder vidare över öppnarens tvingade svar; X + egen färg =
+  EJ krav (`competitionForce` justerad). Facit-test `auction-negx-invit.test.ts`.
+  Mätning #6/#7: snitt-tapp 290,8, fel färg 130/53 450, exakt par 16,9 %.
+- **Fix 6 (2026-07-22) fyra mönster ur mönsterjakt #2** (§5.5/§5.9/§5.11/§7.1 + §9):
+  (1) höjning mot partner som just PASSAT = bara tävlande billigast; (2) svararens
+  bud i öppnarens färg är en HÖJNING, inte "ny färg = rondkrav"; (3) öppnaren tävlar
+  aldrig över deras UTGÅNG efter partnerns pass; (4) cue-höjaren med bara limit-värden
+  passar öppnarens minimum-återgång. Facit-test `auction-felfarg-fix6.test.ts`.
+  **Mätning #8: snitt-tapp 289,5 (M7: 290,8 — största klivet), fel färg 121/47 590.**
+
+**ETAPP 3 KLAR (2026-07-22):** fel färg-bet 148→121 givar, 65 110→47 590 p (−27 %)
+över sex fixar; resten är DD-brus + etapp 4/5-material. Snitt-tapp 300→289,5.
+
+### Etapp 5 — MISSAD UTGÅNG (startad 2026-07-22, KLAR 2026-07-24)
+- **Fix 1+2 (2026-07-24) de två MEKANISKA kandidaterna** (§6.6/§5.1 + §9):
+  **(1)** svararens höjning av öppnarens ANDRA färg graderas efter stödpoäng
+  (under 10 = billigast, 10–12 = hopphöjning/inbjudan, 13+ = utgång) — förr sa en
+  13-hand samma 2♠ som en 6-hand (frön 20260748/20261646). **(2)** öppnaren BESVARAR
+  svararens inbjudan efter semi-forcing 1NT (ny `openerThirdBidAfterSemiForcing1NT`):
+  15+ Bergenpoäng → utgång, 2NT rättas alltid till högfärgen när återbudet lovat sex
+  kort, 2NT efter ny färg = äkta sanginbjudan (frö 20260843). Facit-test FÖRE fix:
+  `auction-missad-utgang.test.ts` (18 fall). **Mätning #9+#10: 289,5 → 288,1 p/giv,
+  missad utgång 158/53 050 → 153/51 040.** Enda posten som växte: "för högt" (+2).
+- **Fix 3 (2026-07-24) ÄGARENS svar på värderings-golven** (§4.3 + §9):
+  (a) 3M-invitens golv på platt 12 hp BEHÅLLS (ägarval — de givarna är DD-smickrade);
+  (b) 1NT-öppnarens 2NT-accept på 15 = "kvalitets-15": ny `notrumpPoints`
+  (`evaluation.ts`) = startpoäng +1 för tät A-K-D-klump och UTAN flathets-avdraget;
+  används både direkt och efter Stayman/transfer. Platt quack-15 avböjer.
+  **Mätning #11: 288,0 p/giv, missad utgång 151/50 640, exakt par 17,1 %.**
+
+**ETAPP 5 KLAR i sin mekaniska+golv-del** (158→151 givar). Resten av posten är
+DD-smickrade tunna utgångar som medvetet INTE jagas.
+
+### Etapp 4 — F1-RESTEN: slam efter 2♣ + reverse/hoppskift (ägarbeslut 2026-07-24, KLAR 2026-07-25)
+Byggd på de ärliga slamportarnas mönster: kaptensregeln mot VISADE intervall,
+aldrig partnerns kort. Angrep topplistans största post (missad lillslam).
+
+- **Familj B fix 1 (2026-07-24) kaptensmatte + RKC efter positivt svar på 2♣**
+  (§4.4 + §9): när trumf är funnen (öppnaren stödjer svararens färg, eller svararen
+  har 3+ i öppnarens färgrebud) räknar svararen sin hand mot visade 22 → driv 33+
+  (4NT RKC), inbjudan 31–32, annars utgång. Facit `auction-2c-slam.test.ts` (11 fall).
+  **Mätning #12: 287,9, missad lillslam 87→83 (59 000→56 400).** Känd ärlig kostnad:
+  två 33-poängsslammar med facit enbart i sang går DD-bet i färgen.
+- **Familj B fix 2 (2026-07-24) slamzon utan trumf** (§4.4 + §9): kaptenen med 33+
+  mot visade 22 utan fit frågar RKC i egen självbärande 6+ färg (två topphonnörer);
+  6NT direkt bara efter 3NT-återbudet (visad balans). Första utkastet blåste 6NT
+  efter färg-återbud — DD-skanning fångade frö 20261107 (13 hp spelstick → 6NT fyra
+  bet) och regeln stramades åt med fröet som vakt. Facit (18 fall).
+  **Mätning #13: 287,4, missad lillslam 87→82. FAMILJ B KLAR.**
+- **Familj C-resten (2026-07-25)** (§5/§5.1 + §9): **(1)** semi-forcing-hoppskiftets
+  svar placerar utgång — fit i hoppskiftets färg går före preferensen (4♥ på K942,
+  frö 20260799 som förr dog i 3♠-pass under kravet; minorfit → 3NT bara med håll,
+  annars 5m), 3-korts M-preferens med utgångsvärden lyfts till 4M; **(2)** ny slamport
+  efter 1-lägessvarens reverse (visade 16) och hoppskift (visade 19): kaptensmatte när
+  trumf är säkrad på egen kunskap → driv 33+/inbjudan 31–32 (frö 20260937: `1♣–1♠–2♥`
+  → 6♣ med 13 stick). Facit `auction-hoppskift-slam.test.ts` (10 fall, syntetiska
+  slamgivar DD-verifierade). **Mätning #14: 287,2, missad utgång 151→149.**
+
+**ETAPP 4 KLAR (M11→M14): snitt-tapp 288,0 → 287,2, missad lillslam 87→82
+(59 000→55 410), storslam −1 250 p; ärlig kostnad ~4 tunna 33-slammar som går en
+DD-bet.** DD-skanning av alla 18 slam i mätfröna: 10 står, resten tunna-men-ärliga
++ 2 kända frisits-fall.
+
+### Etapp 1 + 2 (bakgrund till spåret)
+- **Etapp 1 KLAR & LIVE 2026-07-20: felrapporterna betade** — #35/#37/#38 lagade +
+  test-låsta, #39 = inget fel (test-låst), #36 (UI) → SENARE. Mergepunkt `da7bdc5`.
+- **Etapp 2 KLAR 2026-07-21: Systemrevisorn byggd + baslinje mätt.** Återanvändbar
+  rigg (samma frö = samma givar): motorn bjuder alla fyra händerna, `bridge-dds`
+  (WASM, dev-beroende) ger DD-tabell + riktig par-poäng, `judgeDeal` kategoriserar.
+  Baslinje (1 000 givar, frö 20260721): exakt par 15,9 %, snitt-tapp 300 p/giv;
+  topplista fel färg 65k > missad lillslam 56k > missad utgång 46k > missad storslam
+  38k > billig offring 35k.
+
+## Den stora genomgången + dokumentvakten (2026-07-25)
+**Varför:** ägaren sa *"något känns fel"* och bad om en genomgång av alla filer —
+dagen efter att `status.md` faktakollats. Den här gången kontrollerades inget
+dokument mot ett annat dokument, bara mot koden, git-historiken och körningar.
+
+**Tre fynd som betydde något:**
+1. **Siffran som aldrig var sann.** Revisionen R1 (2026-07-04) angav baslinjen
+   "1626 tester gröna (92 filer)". Vid exakt den commiten (`b0a5a0d`) hade repot
+   **48 testfiler** med ca 841 test-block. Siffran spreds till fem filer — och när
+   nästa revision (R4) upptäckte att siffrorna inte gick ihop blev slutsatsen en
+   *arbetsregel* om att testantal är historiska tidsstämplar som inte ska synkas.
+   Felet förklarades alltså bort med en regel som förbjöd kontroll. Regeln är nu
+   ersatt av **sifferregeln**: en siffra får stå i ett levande dokument bara om
+   kommandot som återskapar den står bredvid. Rättelse inskriven i R1-rapporten.
+2. **`status.md` beskrev en raderad komponent.** Rubriken "Auktionsvyn
+   (`src/components/AuctionView.tsx`)" pekade på en fil som togs bort i FAS 12 —
+   `historik.md` sa det själv. Överlevde flera manuella genomgångar.
+3. **Lebensohl hade aldrig varit inkopplad.** `lebensohl.ts` är byggd,
+   enhetstestad och beskriven i systemboken §7.5 — men ingen produktionsfil
+   importerar den. Ett nytt **regelsvep** (motorn bjuder 3 000 givar, räknar
+   regelnamn) gav 0 Lebensohl-bud medan Ogust gav 29 och Drury 12. Boken lovade
+   ett verktyg bordet inte kan. §7.5 + `bevaka.md` märkta; inkopplingen ligger i
+   SENARE.
+
+**Vad som höll för granskning:** mätspåret är exakt (Mätning #14 stämde rad för
+rad mot rå-datan i `revisor-output/`), deploygrinden kör verkligen
+`npx tsc && npm test && npm run build`, `base: '/'` är låst, Pages-workflowen
+avstängd, inga TODO:s i koden, inga oavsiktligt skippade tester.
+
+**Skyddet som byggdes (`src/docs-vakt.test.ts`, kör i deploygrinden):** docs får
+inte peka på kod som saknas · inga oreproducerbara testantal i levande dokument ·
+CLAUDE.md får inte växa förbi 16 kB · kB-siffrorna i docs-indexet kontrolleras
+mot filerna · indexet måste vara komplett · **kopplingsvakten**: en motormodul
+som ingen produktionsfil importerar ger rött test, och undantagslistan måste
+stämma i BÅDA riktningar (en modul som kopplats in måste bort ur listan). Båda
+larmen provkördes skarpt innan de godkändes. Dessutom `regelsvep.probe.test.ts`
+(SVEP-gated) som svar på frågan "vilka regler använder motorn faktiskt?".
+
+## Etapp 6 — billig offring, fyra hål (2026-07-27 → 2026-07-28)
+**🎉 ETAPP 6 KLAR & LIVE.** Posten "billig offring" (baslinje ~125 givar,
+~34 300 p) visade sig till 93 % vara **utgångar och slammar vi aldrig bjöd**
+bakom motståndarnas köpta kontrakt — inte missade straffdubblingar.
+Förskanningen (2026-07-25) fann fyra hål; ägarordning 1 → 2 → 3 → mätning → 4.
+Allt facit-först, alla mål DD-verifierade före fix, samma frö 20260721:
+- **Hål 1 (2026-07-27, Mätning #15):** stöddubblingen besvarades aldrig →
+  `answerSupportDouble`/`supportDoublerRebid`, facit
+  `auction-stoddubbling-svar.test.ts`. Pass på stöd-X = medvetet straffpass.
+- **Hål 2 (2026-07-27, Mätning #16):** svaret på upplysnings-X försvann när
+  RHO bjöd över → `advancerFreeBidAfterDouble`/`doublerAnswersCue`/
+  `doublerRaisesAdvance`, facit `auction-upplysningsx-svar.test.ts`. Största
+  enskilda klivet i spåret (−7,3 p/giv).
+- **Hål 3 (2026-07-27, Mätning #17):** taket i försvaret mot svaga tvåor →
+  `defendWeakTwo` fick 3NT till spel (19 direkt/16 balansering, stark minor
+  15+) och 17+-X:et som aldrig säljer given, facit
+  `auction-svagtva-tak.test.ts`.
+- **Hål 4 (2026-07-28, Mätning #18, ägarbeslut med exempelhänder):** deras
+  öppning + spärrhöjning (`2♠–P–3♠`/`1♣–P–3♣`) stängde auktionen helt (en
+  21-poängare passade ut `2♦–P–3♦`) → `raisedPreemptToDefend` i budlådan
+  överstyr linjens inbakade försvarspass; `defendPreempt` fick
+  balansering ("låna en kung", bara 3-läget) och `raised` (3NT 19/16);
+  `answerTakeoutDouble` cue-bjuder aldrig över dubblad spärr (3NT med stopp)
+  och väljer honnörsstarkare färg på lika längd vid tvingade 3-lägessvar.
+  Ägarbeslut: tunna fördelningsutgångar (6♣ på 19 hp) jagas INTE —
+  gränsvakter i facit-testet `auction-sparrhojning-svar.test.ts`.
+  Mätvarvet fångade tre följdfel (tunna direkta 3NT, lånad kung på 4-läget,
+  utpassat cue) som lagades innan något gick live.
+**Facit för etappen (M14 → M18):** billig offring 125/34 300 → 113/30 570,
+par-avvikelse 287,2 → 276,3 p/giv, rätt kontrakt 17,1 → 18,2 %. Hela spåret
+sedan baslinjen: 300 → 276,3 p/giv, 15,9 → 18,2 %. Detalj + alla mätningar:
+`docs/systemrevisorn.md`.
+
+## Underhåll: hälsokoll av uppsättningen + deploygrinden lagad (2026-07-28)
+
+Inget budrelaterat — men två fynd som påverkade allt annat arbete. Mergepunkter
+`ebdb958` (städning + namnregel) och `4b9fa66` (deploygrinden).
+
+**1. Namnet är gemener.** Ägaren bekräftade 2026-07-28: *"endast små bokstäver
+är korrekt"*. Logotypen (`BrandMark.tsx`) och `<title>` var redan rätt, men fyra
+ställen som användaren ser bröt mot regeln: `index.html`s
+`apple-mobile-web-app-title` (ikonnamnet på iPhones hemskärm), PWA-manifestets
+`name` + `short_name` i `vite.config.ts` (installationsdialogen), en löptextrad
+i `src/pages/Settings.tsx` och `README.md`s rubrik. Alla rättade och verifierade
+live (`https://rebidz.com/manifest.webmanifest` svarar `"short_name":"rebidz"`).
+Kodkommentarer och arkivfiler lämnades medvetet. Regeln står nu utskriven i
+`CLAUDE.md` ("ALLTID GEMENER … skriv aldrig 'RebidZ'").
+
+**2. DEPLOYGRINDEN VAR ETT MYNTKAST — viktigaste fyndet.** Deployen av `ebdb958`
+föll utan att något var fel med koden. Två oberoende orsaker, båda i testerna:
+
+- `divergesOnlyByPreemptWake` (undantaget hål 4 införde) jämförde bara det
+  **överlappande prefixet** av linjen och den uppspelade auktionen. Linjen
+  slutar med de inbakade försvarspassen och stannar där — så när väckningen kom
+  EFTER linjens sista bud var prefixen identiska, loopen hittade ingen skillnad
+  och svarade "verklig avvikelse". Träffade 7 av 4 000 givar. Nu godtas båda
+  formerna (väckning inne i linjen + väckning i svansen) med villkoren kvar
+  hårda. Mätt efter fixen: av 965 kvalificerade givar undantas 14, kontrolleras
+  951, slipper 0 igenom.
+- Konsistenstesterna körde på `dealRandom()`, alltså färska slumpgivar varje
+  körning → slumpvis rött ungefär var tredje körning, oavsett vad som pushades.
+  Nu seedade givar (frö 1–4 000), samma mönster som `legality.test.ts` och
+  `tp-invariant.test.ts`. Ett rött test återskapas med `dealFromSeed(<frö>)`.
+- Dessutom timeoutade `docs-vakt.test.ts` ("varje motormodul är inkopplad")
+  slumpvis: `readFileSync` låg inne i filter-loopen, ~90 moduler × ~150 filer =
+  över 13 000 läsningar av samma innehåll, knappt under 5-sekundersgränsen.
+  Läser varje fil en gång i stället — 5 000 ms (timeout) → 24 ms.
+
+**Lärdomen:** ett sanktionerat undantag i ett test måste täcka HELA formen av det
+som sanktionerats, annars blir grinden opålitlig — och en grind man inte kan lita
+på slutar man läsa. Volymtester i det här repot ska vara seedade, aldrig
+`dealRandom()`, just för att ett rött test ska gå att återskapa.
+
+**3. Sessionskontexten bantad.** `CLAUDE.md` 13,3 → 11,7 kB (bort med det som går
+att läsa ur koden: teknisk stack = `package.json`, projektstruktur = `ls`,
+kommandon = scripts; övningsreceptet flyttat till färdigheten
+`.claude/skills/lagga-till-ovningar/`, som `.gitignore` nu släpper igenom).
+Utanför repot: nio minnesfiler som upprepade `CLAUDE.md` raderade, och minnet om
+deployverifiering rättat från GitHub Pages till Vercel.
+
+**Öppen bridgefråga (ägarens bedömning, ej fel):** har den väckande dubblingen
+rätt golv när advancern tvingas svara? Det genomgångna exemplet talar FÖR
+dagens golv: frö 1781, Öst balanserar X på 14 hp över `1♣–P–3♣`, Väst svarar 3♦
+på 10 hp med `♦AQ62` — 24 hp tillsammans, sunt. (Första bedömningen sa 12 respektive
+5 hp; det var felräknat och rättades samma dag när dumpen lästes — påminnelse om
+att läsa siffran ur körningen, aldrig ur minnet.) Se hål 4-punkten i
+`docs/bevaka.md` för vilken form som faktiskt är värd att leta efter.
+
+## Budstöd På/Av i Spela kort (2026-07-28, kväll)
+
+Ägarönskemål, ren UI-funktion (inga budregler rörda). Mergepunkt `3d43655`,
+deploy grön, verifierad live.
+
+En **"Budstöd"-rad i bordets ⋮-meny** (både budfasen och spelfasen), På/Av-
+pillerknapp enligt Auto Claim-mönstret, sparas som `learnbridge:bidHelp`
+(state i `useGame.ts` så båda faserna + omspelningen läser samma val).
+
+**Av-läget (tre ägarbeslut samma kväll):** (1) budlådan döljer ALL hjälp —
+pricken, "MOTORNS BUD"-förklaringen och "Motorn hade valt"-raden (`showHelp`-
+prop i `BiddingBox.tsx`; rekommendationen beräknas inte ens, den var
+display-only). (2) Förklarings-popupen i auktionsvyn blir minimal: chip +
+kort regelnamn (versaliserad `rule`) + **ALERT-märket behålls** — som vid
+riktigt bord där konstlade bud alltid alerteras; kravmärke och långtext döljs
+(`explanations: 'full' | 'minimal'` i `AuctionGrid.tsx`, trådas genom
+ⓘ-overlayen och `PlayReplay.tsx`). (3) Knappen bor i ⋮-menyn, inte på
+Inställningar-sidan. Träningssidorna (Spela, Budträning) skickar ingen prop
+och behåller alltid full förklaring.
+
+Facit-test skrevs före koden: åtta nya (budlådans av-läge, ny
+`auction-grid.test.tsx` för full/minimal/fallback utan regel/"Eget bud",
+persistens i `play-smoke.test.tsx`). Hela sviten grön (`npm test`).
+
+## Känsla i kortspelet — etapp 1: tempogrunden (2026-07-28, sen kväll)
+
+Nytt NU på ägarbeslut 2026-07-28 (Etapp 7 missad lillslam pausad → överst i
+NÄST med läget bevarat). Hela spåret planerades i en frågerunda samma kväll:
+full kortflygning, sticksvep till vinnaren, justerbart tempo, claim-reveal,
+diskreta ljud, guldglow vid hemgång — fem etapper, UI-lagret enbart, inga nya
+beroenden. Etapp 1 = skelettet:
+
+- **`src/pages/play/tempo.ts` (ny):** enda sanningen om spelfasens tider —
+  `BASE` (botDelay 750, mcFloor 500, + kommande etappers tider) och `ms(key,
+  speed)` som skalar med `SPEED_FACTOR` (Lugn 1.45 / Normal 1 / Snabb 0.55).
+- **Temporad i ⋮-menyn** (spelfasen): Lugn/Normal/Snabb, sparas som
+  `learnbridge:playSpeed` (autoClaim-mönstret i `usePlayTable.ts`). Menyradernas
+  markup fanns i tre kopior → delade `MenuToggleRow`/`MenuTempoRow` i
+  `play/common.tsx` (Play.tsx + BiddingPhase.tsx använder dem nu).
+- **CSS-skalning:** spelbordets Felt sätter `--motion-scale`; `card-in-*` och
+  `deal-in` i `index.css` kör `calc(bastid * var(--motion-scale, 1))` —
+  fallback 1 gör att alla vyer utanför bordet behåller sin bastid.
+- **MC-golvet:** Monte-Carlo-svar från webworkern läggs tidigast efter
+  `ms('mcFloor', speed)` — blixtsnabba svar teleporterade tidigare in kortet.
+  Watchdogen (15 s) skalas inte.
+- **Key-fixen (förutsättning för etapp 2–3):** seat-wrapprarna i
+  `TrickCenterLive` och `PlayReplay`s `TrickCenter` saknade React-keys → DOM-
+  noden återanvändes mellan stick och inglidningen tändes inte om. Nu key på
+  kortet (`suit+rank`).
+- **Facit:** `src/pages/play/tempo.test.tsx` — seedad giv (`dealFromSeed(1)`),
+  skalningen, persistensen och att botens paus faktiskt följer tempovalet.
+  Alla tider importeras från `tempo.ts` (sifferregeln).
+
+**Grindfynd på köpet:** hela sviten föll slumpvis på DEN HÄR maskinen — även på
+orörd `main` (verifierat med stash). Full parallellism svälte de tunga DDS-
+testerna på CPU så deras timeouts small (samma klass av myntkast-grind som
+lagades tidigare samma dag, fast CPU-svält i stället för slumpgivar). Fix:
+`maxWorkers: 4` i `vite.config.ts` (obegränsat = rött, 50 % = rött, 4 = grönt,
+provat i tur och ordning). Verifiera med: `npm test`.
+
+**Efterspel (samma kväll):** etapp 1-deployen (`e67fb31`) föll ÄNDÅ på Vercel —
+molnbyggaren har färre kärnor än ägarens maskin och två tunga test slog i sina
+tidsgränser trots arbetartaket. Läxan: en tidsgräns ska fånga HÄNGNINGAR, inte
+straffa långsamma maskiner. Grindfix (`9de46f9`): global `testTimeout: 60_000`
+i `vite.config.ts` + de tunga DDS-svepens egna 30 s → 120 s (`play-bot`,
+`tp-invariant`, `legality`, `dds`). Deployen därefter grön — etapp 1 live.
+
+## Känsla i kortspelet — etapp 2: sticksvepet (2026-07-28, sen kväll)
+
+Största enskilda känslolyftet: ett färdigt stick försvinner inte längre pladask
+— det ligger kvar en stund med pulserande vinnarglow ('hold'), sveps sedan ihop
+mot vinnarens sida ('slide') och försvinner. Allt UI-fas ovanpå motorn
+(`play.ts` orörd):
+
+- **Fasmaskinen** (`usePlayTable.ts`): `sweep: { trick, phase: 'hold'|'slide' }
+  | null`. Nytt stick upptäcks med ref-jämförelse av `completedTricks.length`
+  (StrictMode-säker), hold `ms('sweepHold')` → slide `ms('sweepSlide')` → null.
+  Rena `setTimeout` — deterministiskt med fake timers.
+- **Gates:** botarna och auto-claim VÄNTAR medan `sweep !== null`; `done`
+  väntar också ut svepet så även SISTA sticket får sitt ögonblick innan
+  resultatdialogen. Klick (kort eller stickytan) hoppar över svepet
+  (`skipSweep`) — otåliga blockeras aldrig.
+- **Renderingen** (`trick-views.tsx`): gamla "förra sticket ligger kvar tills
+  nästa kort"-fallbacken är BORTA — mitten visar pågående stick, svepande stick
+  eller inget; historiken bor i Förra sticket-panelen (som nu döljs under
+  svepet och dyker upp efteråt). Korten sveps som grupp med
+  `trick-sweep-{n|s|w|e}` efter vinnarsäte; vinnarkortet får `winner-glow`.
+- **CSS** (`index.css`): fyra svep-keyframes (bastid 450 ms — MÅSTE matcha
+  `BASE.sweepSlide`) + `winner-glow`, alla skalade av `--motion-scale` och med
+  i reduced-motion-listan.
+- **Facit:** `src/pages/play/sticksvep.test.tsx` — seedad giv, hela fasmaskinen
+  + bot-gaten + skipSweep, alla tider från `tempo.ts`.
+
+Mergepunkt `1fed694`, Vercel-deployen Ready, svep-koden verifierad i livesidans
+JS-paket. Livekontroll i dev-servern före pushen: fasloggen visade glow →
+`trick-sweep-w` (Väst vann sticket) → rensat → Förra sticket-panelen framme.
+
+## Känsla i kortspelet — etapp 3: kortflygningen (2026-07-28, natt)
+
+Största etappen, levererad ensam: spelade kort teleporterar inte längre — en
+klon FLYGER från handen till kortets plats i sticket (WAAPI, `el.animate`),
+och det riktiga kortet står dolt på plats tills klonen landat. Spelmotorn
+orörd, inga nya beroenden:
+
+- **`src/pages/play/useCardFlight.ts` (ny):** flygtillståndet. Ref-register
+  (kortnyckel → DOM-element, stabil callback per nyckel), `beginFlight(seat,
+  card)` som mäter källkortets `getBoundingClientRect()` SYNKRONT före
+  `setPlay` (efteråt är kortet borta ur handen), `flown`-mängden som stoppar
+  dubbel inglidning efter landning. `canFly`-vakten (WAAPI finns + inte
+  reduced motion) gör att jsdom och rörelsekänsliga får fallbacken `card-in-*`
+  — fallback-vägen ÄR testvägen.
+- **`src/pages/play/FlightLayer.tsx` (ny):** overlay i Felt (`z-30`,
+  pointer-events-none) som ställer klonen i mål (`data-flight-target`-wrappern
+  i stickmitten) och animerar från källan: mittpunktsmatematik (rotationssäker),
+  skala källstorlek→sm (Syds md-kort 1.4→1), statisk rotation per säte (V 90°,
+  Ö −90°), husets easing, tid `ms('flight', speed)` = temposkalad. Dold hand →
+  start strax utanför sätets bordskant, redan slutvriden.
+- **Fjärde kortet (kluringen):** när sticket fullbordas är mitten tom EN
+  commit (svepet sätts i effekt efteråt) → landningsplatsen saknas när
+  FlightLayer mäter. Löst med två delar: sveputkiket i `usePlayTable.ts` blev
+  `useLayoutEffect` (svepet ritas före paint — tog samtidigt bort en gammal
+  enrutersblinkning) och FlightLayer väntar + mäter om när `targetsKey`
+  (stickmittens innehåll) ändras.
+- **Kopplingarna:** `PlayingCard` fick `ref`-prop (React 19 = vanlig prop);
+  `SouthFan`/`SuitColumns`/`SideStack` registrerar sina kort; `TrickCenterLive`
+  märker landningsplatserna, gömmer kortet i luften via wrapper-style (INTE
+  kortets klass — `transition-all` hade tonat) och hoppar över `card-in` för
+  flugna kort; flygstart i `usePlayTable` före `setPlay` i både `onPlay`
+  (människan) och botens `apply`.
+- **Facit:** `src/pages/play/kortflygning.test.tsx` — seedad giv, WAAPI stubbat
+  (jsdom saknar det): fallbacken utan stub, flygstart för bot + människa,
+  stale-id-skydd, dolt/visat kort i stickmitten, FlightLayer-animationens tid
+  från `tempo.ts` och vänta-mät-om-vägen för fjärde kortet.
+
+Mergepunkt `e602a01`. Livekontroll i dev-servern före pushen (instrumenterad
+`Element.prototype.animate`):
+alla fyra källtyperna flög rätt — Väst från vänsterkanten (rot 90°), träkarlen
+Nord från kolumnerna (mätt källa), Öst från högerkanten (rot −90°), Syd från
+solfjädern (skala 1.4) — fjärde kortet fick sin flygning via svep-omritningen,
+landade kort synliga utan `card-in`, inga konsolfel, temposkalningen bekräftad
+(sparat Snabb-val gav 154 ms = 280 × 0,55).
+
+## Känsla i kortspelet — etapp 4: ljuden (2026-07-28, natt)
+
+Kortspelet är inte längre stumt: tre diskreta, SYNTETISERADE ljud via Web
+Audio — inga ljudfiler, inga nya beroenden, ingen PWA-ändring. Standard PÅ,
+"Ljud"-rad i spelfasens ⋮-meny (sparas som `learnbridge:sound`):
+
+- **`src/lib/sound.ts` (ny):** recepten (allt gain ≤ 0.15) — **card** 50 ms
+  brusknäpp genom lågpass 1,8 kHz (kort mot filtduk), **sweep** 200 ms brus
+  genom bandpass som glider 400→1200 Hz (svischet), **deal** tre tick med
+  stigande ton. `armSound()` skapar/väcker AudioContext — får bara ske i en
+  användargest (autoplay-policyn), därför kopplad till `pointerdown` på HELA
+  Play-sidan: budfasens klick armerar motorn så giv-klar-ticken hörs redan
+  när första bordet dukas. Utan Web Audio (jsdom) no-op:ar allt tyst — ett
+  ljud får aldrig kunna krascha spelet.
+- **Hook-punkterna i `usePlayTable.ts` (en per ljud, alla ref-jämförda =
+  StrictMode-säkra):** *card* — en enda krok som räknar totalt lagda kort
+  (`completedTricks.length*4 + currentTrick.length`) och därmed fångar både
+  människans och botens kort, även det fjärde (3 → 4 när sticket bokförs);
+  *sweep* — när svepet går in i slide-fasen (ref på sticket);
+  *deal* — `setTimeout(ms('dealSoundDelay'))` vid bordets mount (kaskadens
+  slut), ljudvalet läses via ref så av-slag hinner verka.
+- **Facit:** `src/pages/play/ljud.test.tsx` — seedad giv, `playSound` mockad
+  (jsdom kan inte spela ändå) men persistensen äkta: standard PÅ, toggle
+  sparas och överlever omladdning, kortknäpp+giv-klar+svisch i rätt ordning,
+  fyra knäppar för ett helt stick, och total tystnad med ljudet Av.
+
+Mergepunkt `3762481`. Livekontroll i dev-servern före pushen (instrumenterade `AudioBufferSourceNode`/
+`OscillatorNode.start`): ljudmotorn `running` redan i budfasen (pointerdown-
+armeringen), sedan exakt rätt sekvens — knäpp (Västs utspel) → tre tick (given
+klar) → tre knäppar (N/Ö/S) → svisch (svepet); med ljudet Av rullade spelet
+vidare med tom ljudlogg. Inga konsolfel.
+
+## Känsla i kortspelet — etapp 5: claim-reveal + resultatövergång + guldglow (2026-07-28, natt) · SPÅRET KLART
+
+Sista etappen — avsluten. Tre delar, allt UI-fas ovanpå motorn (`claim.ts` orörd):
+
+- **Claim-revealen** (`pendingClaim` i `usePlayTable.ts`): en godkänd claim
+  (manuell `onClaim` eller auto-claim-effekten) committas inte direkt — alla
+  händer läggs upp öppna (`isFaceUp` → true för alla säten) med panel
+  "Claim godkänd/Auto Claim — korten ligger uppe" + knappen "Visa resultatet →".
+  **Ägarbeslut under bygget (samma kväll):** ursprungsplanens timer
+  (`claimReveal` 2500 ms) VÄCKTES och togs bort — vyn ska ligga kvar precis
+  som vid ett riktigt bord tills spelaren själv går vidare
+  (`finishClaimReveal`, enda vägen framåt). `BASE.claimReveal` utgick ur
+  `tempo.ts`. Botarna, auto-claim, `onPlay` OCH `onCardClick` är låsta under
+  revealen — inget kan röras av misstag.
+- **Resultatövergången:** `done` byter inte längre träd direkt — bordet får
+  `felt-fade-out` (bastid 500 ms = `BASE.resultOutro`, temposkalad) och först
+  när `showResult`-timern gått tar resultatvyn över. Inget hårt klipp.
+- **Guldglowen:** `result-made-glow` på resultatdialogen vid `result.made` —
+  engångs guldsvällning + diagonalt skimmer, lagt på `::before`/`::after` så
+  dialogens egen `dialog-in`-animation inte skrivs över; statiskt
+  bakgrundsläge parkerar skimret osynligt vid reduced motion. Bet = sobert
+  (ägarbeslut: inget konfetti). Allt i reduced-motion-listan.
+- **Facit:** `src/pages/play/claimreveal.test.tsx` — claim-domen mockad
+  (DDS-domen har egna tester i `claim.test.ts`): revealen ligger kvar långt
+  förbi alla speltimers, botarna gateade, bara knappen avslutar, auto-claim
+  går via revealen, resultatvyn väntar ut uttoningen.
+
+Mergepunkt `5f29949`. Livekontroll i dev-servern före pushen (händelselogg +
+autospelare): bet-giv
+gav reveal → uttoning → sobert resultat utan glow; hemgångsgiv gav reveal
+(låg kvar 69 s tills knappen trycktes, ställningen frusen, 9 öppna sidokort) →
+uttoning → "Hemma! 11 stick (+2)" MED guldglow. Inga konsolfel.
+
+**Därmed är hela "känsla i kortspelet"-spåret (etapp 1–5) klart och NU-platsen
+ledig — ägaren väljer nästa NU ur NÄST/SENARE.** Samlad beskrivning av spåret:
+`docs/kortspel.md` avsnittet "Tempo, animationer och ljud".
+
+---
+
+## 2026-08-11/12 — Tävlingen klar & städad (flyttat från CLAUDE.md NU)
+
+- **Etapp 2 (dagliga tävlingen) komplett & live:** hela kedjan konton →
+  inskick → topplista/matchpoäng; migrationerna `0005`+`0006` körda; alla
+  testkonton raderade i Supabase (resultaten kaskaderar bort).
+- **Tävlings-UI:** 6 polishsteg (nedräkning · server-MP · `DinStällning` ·
+  `Resultattabell` · rondgenomgång · traveller) + server-driven framsteg
+  (`dinaInskick` i `/api/topplista` + `slåIhopFramsteg` → samma bild på alla
+  enheter) + preliminärt 100 %/1:a för ensam spelare. MP är STANDARD
+  (topp = 100 %, snitt 50 %).
+- **Mobil-städ:** översikten rensad (progress/rutnät/allt-klart-kort bort,
+  ⟳-uppdatera-knapp, topprad på en rad, "N/12 givar").
+- **"Spela given igen" (övning), a24a369:** omspel i giv-detaljvyn med
+  `övning`-flagga och `onResultat` som no-op → MP% orört; bugg lagad
+  (`startSameGame` → `gameFromDeal`).
+- Felrapporterna #46/#47/#48 lagade (27c6450).
+
+## 2026-08-12 — Speldiagnosen: riggen byggd (steg 1–7)
+
+Ägarbeslut efter första tävlingsdagen (3 fel på 12 givar hos 3 användare):
+bygg bottar som spelar, felsöker och rapporterar — ägaren bekräftar innan
+reparation. Plan + bygge samma dag; hela riggen i `docs/speldiagnos.md`.
+Bärande princip: **RÄTT, inte max antal stick** — DD-facit är larmklocka,
+klassningen (systemfel/ärlig miss/oklart) görs i `/speldiagnos`-agentsteget.
+Nyckelfynd under bygget: bridge-dds `AnalysePlayPBN` (oanvänt tills nu) ger
+DD-facit efter varje lagt kort; spåret har 49 värden (t.o.m. kort 48 — sista
+sticket är tvunget), låst i `revisor-dds-analyse.test.ts`. De fyra kopierade
+helgivslooparna ersattes av `spela-giv.ts` (per-beslut-frön via
+`botDecisionSeed` → körningar 100 % reproducerbara ur fröet). `.env` visade
+sig vara SPÅRAD av git → tävlingshemligheten ska alltid till `.env.local`
+(gitignorad via `*.local`).
+
+## 2026-09-01…03 — Trebottarna, felrapporterna #54–#57 och pliktsvepet K1–K5 (flyttat från CLAUDE.md NU)
+
+- **2026-09-01:** speldiagnosens runda 6 ("andra hand ser bordet" behållen,
+  trumfplans-kandidaten byggd-mätt-förkastad, MC-på-få-lägen bevakas —
+  `docs/speldiagnos.md` §S6). Bot-deltagaren rebidz-bot KLAR & LIVE + ALLA
+  Beslut B-etapper (0–4) levererade (migrationerna 0009–0011 + secrets).
+  Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+- **2026-09-02 — trebottarna i nivåer (mergepunkt `fe2ffb3`):** Gunnar52
+  (expert), Lasse68 (medel), Emma03 (nybörjare) spelar dagens tävling varje
+  natt; all nivåskillnad i SYDS kortspel (`botniva.ts` + `spelaBotGiv`),
+  N/Ö/V standardmotorn. Rattarna netto-mätta (`botniva.probe.test.ts`,
+  kommandot i filhuvudet): medel = MC-fönster 4 + 8 sampel + ingen avkodning,
+  nybörjare = ingen MC. 🤖 borta ur UI och API-svar; info-raden "I tävlingen
+  deltar även datorspelare". Live-verifierad samma dag. Detalj:
+  `docs/beslut-b-plan.md` Påbyggnad 2.
+- **2026-09-02 — felrapporterna #54–#57 (mergepunkt `4898958`):** fritt bud i
+  5+ högfärg i stället för negativ X (+ öppnarens 3-korts höjning och
+  fortsättningen), advancerns preferens när inklivaren visat två färger,
+  tolkningstexter för spärr/svag tvåa/2♣ och Stayman-svaren. Ägarens ord:
+  säg "regeln saknades", inte "off-book".
+- **2026-09-02/03 — pliktsvepet K1–K5 (mergepunkter `842809b`, `e7a3931`):**
+  ägarval "grund först". Riggen `pliktsvep.probe.test.ts` (`$env:PLIKT='1'`)
+  prövar varje pass i störda auktioner mot plikterna. K1 inklivaren svarar
+  advancerns cue-höjning ostört (12 → 0 av 1539 störda), K3 höjning på visad
+  längd — 3-korts höjning av 1-lägesinkliv från 6 hp, svararen över
+  1NT-inkliv (2M / X = straff 10+) och ovanlig 2NT/Michaels (3M tävlande, 4M
+  med 10+ stödpoäng) (92 → 5), K2 negativ-dubblarens svaga preferens (8 → 2),
+  K5 öppnaren höjer fritt 2♣/2♦ (5♣-blåsningen borta). Boken §5.8, §7.1,
+  §7.4, §7.8 e, §9. Kvar i `docs/bevaka.md`: frö 20262632 (egen 8-korts färg
+  vs 3-korts minorfit) och motståndarnas fortsättning efter våra höjningar.
+- **2026-09-03 — felrapport #58 (2-över-1-kravet syntes inte):** bricka 4,
+  1♦–P–2♣ (människan) –P– 2NT. Syds 2♣ avvek från motorns linje (inverterad
+  2♦), så Nords återbud byggdes som ett svarar-bud utan regel ("2 sang 11–12,
+  inget stöd") och förklaringarna sade "krav 1 rond" resp. "18–19, inbjuder".
+  Ny detektor `openerRebidAfterPartnersTwoOverOne` (§5.3-återbudet via
+  `openerRebidAfter2over1`, regel + kravnivå), tolkningslagret känner igen
+  2/1 och märker hela auktionen under utgång som utgångskrav, regeltabellen
+  fick `rebid: 2NT (GF)`/`rebid: ny färg (GF)`. Felrapporter som skickas mitt
+  i budgivningen skriver "budgivning pågår" (inte "passades ut"). Ägarbeslut
+  ur samma giv: 2/1 går FÖRE inverterad höjning med 12+ och egen 5-kortsfärg
+  ("game force först, stödet visas i nästa rond") — försenat stöd 3m med
+  slamintresse → öppnarens 3NT-förslag/4m → slamutredningen; bricka 4 →
+  6♦. Boken §4.2, §5.3, §9. Facit: `auction-2over1-aterbud-offbook.test.ts`,
+  `responses.test.ts`.
+- **2026-09-04 — felrapporterna #59 + #60:** **(#59, bricka 6)** 1♠–1NT–2♣–P
+  med ♠A ♥QJ943 ♦KJT852 ♣T. Boken §5.1 hade regeln (ny färg efter 1NT = 5+
+  kort, inget stöd) men koden saknade den → "inget bättre, pass" och 2♣ på
+  4-1. 1NT var systemriktigt (9 hp < 2/1). Ny regel `ny färg efter 1NT`
+  (`responder-rebids.ts`, 6+ kort före 2-korts preferens), öppnaren passar
+  (`rebids.ts`), kravminnet läser inte budet som rondkrav (`auctionForce`).
+  Tolkningslagret: 1M–1NT–2x lästes som Stayman → nu "återbud i ny färg, 3+,
+  ej krav"; svararens 2y = egen färg till spel. **(#60, bricka 9)**
+  1♥–(3♦)–4♦–P–4♥–P–4NT–P–5♣–P–5♥–P–P med fyra nyckelkort: rättelsen över
+  stoppbudet fanns bara i den kanoniska linjen. Ny detektor
+  `rkcSignoffCorrection` i budlådan (regel `RKC: rättelse`), tolkningslagret
+  läser hela essfrågesekvensen. Boken §5.1, §6.1, §9. Mergepunkt `d3b7961`.
+  Facit: `responder-rebids.test.ts`, `auction-live.test.ts`,
+  `auction-interpret.test.ts`, `rules.test.ts`. Lärdom: repots filer är CRLF,
+  Write/heredoc ger LF — flerradiga skriptankare måste konverteras.
+
+## 2026-09-04 — Motorbytet beslutat: från manus till fyra spelare (pliktsvepet pausat)
+
+Ägaren begärde en total genomgång av "den kanoniska linjen": budgivningen
+kändes overklig och oren, felen kom i jämn ström. Genomgången visade att motorn
+skriver ett MANUS (`buildAuction` ser hela given, modellerar en konkurrensrond)
+som `decideCall` spelar upp, och att 70 detektorer i en ordningskritisk kedja
+tar över när manuset tar slut. Varje söm har gett en ström av felrapporter, samma
+beslut finns på två ställen, och manusets slamfunktioner tar båda parhänderna
+som indata. R2 pekade ut avsaknaden av auktionsläge redan 2026-07; vi lappade.
+
+**Ägarbeslut:** motorbytet är NU. Planen (diagnos, målbild, skyddsnät, etapp
+0–6, grindbeslut) bor i `docs/motorbyte-plan.md`. Pliktsvepet pausat (K1/K3/
+K2/K5 live; resterna blir facit i etapp 4). Ägaren vill ha en etapp per
+session; nästa session = etapp 0 (rigg + baslinjer).
+
+## 2026-09-11/12 — Motorbytet etapp 6: efterkontrollen klar + live-provets första fynd (flyttat från CLAUDE.md NU 2026-09-13)
+
+Efterkontrollen KLAR 2026-09-11 (alla riggar gröna, bordet testkört). Därefter
+🚪 ägarens live-prov: ägaren provspelar och rapporterar fel; Claude lagar
+test-drivet (facit + auktionsdiff + grind) och PCD:ar var för sig.
+
+**Åtta hål lagade & LIVE 2026-09-11/12:** cue-rond+överbudsrättelse · systems-on
+efter 2NT-inkliv · 2♣-återbudet 5+ · Smolen/garbage över 1NT-inkliv ·
+RKC-trumfdamen ärlig (bevisad 10-fit) · konkurrens-fritt-bud (öppnarens 5-4/2NT +
+svararens fortsättning, `1e298d2`) · **RKC-frågaren seat-agnostisk**
+(öppnaren-som-kapten frågar trumfdam med 5♥ i st.f. PASS;
+`rkc-asker-continuations.ts`, damfrågan avgör lillslam-mot-utgång,
+storslamsgrenen SENARE) · **dubblarens cue-höjning är krav** (advancern svarar
+2M/3M/2NT/3NT på dubblarens cue i st.f. att passa ut den;
+`advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`, §7.3, slam-över-max
+SENARE). Detaljerna: [[motorbytet-manus-till-spelare]] + budsystem §9.
+
+**Dessutom (Claudes provspelning 2026-09-12, systemrevisorn 1000 givar):** tre
+systemfel lagade & LIVE — negativ-dubblingssvar (6-korts högfärg före sang) ·
+inverterad minors 2NT-stoppkrav · Michaels-cue i egen färg ≠ cue-höjning. Detalj:
+budsystem §9 + `auction-revisor-fynd-2026-09-12.test.ts`. Följd-fynd (bevaka.md):
+negativ-dubblaren accepterar inte invit-hoppet — metodval, väntar ägaren.
+
+**Nyss klart dessförinnan (2026-09-01…03):** speldiagnosens runda 6 · rebidz-bot +
+alla Beslut B-etapper · trebottarna Gunnar52/Lasse68/Emma03 LIVE (nivå bara i
+Syds kortspel, `botniva.ts`) · felrapporterna #54–#60 (`4898958`, 2026-09-03/04) ·
+pliktsvepet K1–K5. Grindbeslut kvar: Nivå 2 i tävlingen VÄNTAR (trigger ej nådd).
+
+## 2026-09-13 — Livskvalitetssvepet i Dagens tävling påbörjat (etapp A: två tryck alltid)
+
+Ägaren kom med fem önskemål runt tävlingen och kontot (planen med etapp A–E +
+D1–D3 och ägarbesluten: `docs/beslut-b-plan.md`, "Påbyggnad — tävlingens
+livskvalitet"). Kartläggningen visade att hela auktionen + alla spelade kort
+redan sparas per spelare (`daily_results.payload`) och att ingen tävlingsdata
+raderas — historiken finns, bara läsvägar och UI saknas.
+
+**Etapp A KLAR:** ett-trycks-genvägen för singeltons (facelift pass 3, 2026-08-02)
+gav feltryck vid bordet → borttagen i både Spela kort (`usePlayTable.onCardClick`)
+och vänbordet (`BordSpel.klick`). Två tryck gäller nu alltid: första väljer
+färgen, andra spelar. Bottarna oberörda (egna vägar). Facit `play/tvatryck.test.tsx`
+(seedad giv där Syd håller en singelton på utspel); `syd-trakarl.test.tsx` klickar
+nu ovillkorligt två gånger.
+
+## 2026-09-13 — Livskvalitetssvepet etapp B: tillsvidare-procenten + "7/12"
+
+Ägarbeslut: snitt = (Σ MP% på poängsatta givar + 40 × ej poängsatta) / storlek —
+klubbens "medel minus" för ospelad bricka; identiskt med det gamla snittet när
+alla 12 är inne, och samma tal styr ordningen i Ställningen för alla. Byggt:
+`provisorisktSnitt()`/`PROVISORISK_PROCENT` i `matchpoints.ts`, `spelade` per
+spelare (räknas ur ALLA inskick, även opoängsatta), obligatorisk `storlek` i
+`aggregeraTopplista`; endpointen `topplista.ts` lämnar `spelade` +
+`provisoriskProcent`; UI: "7/12" per rad i Ställningen, "spelade/12" + 40 %-not
+i Din ställning, "preliminärt 100 %"-cellen ersatt av "väntar" (räknas som 40 %).
+Alla med minst ett inskick står nu på listan. Facit: `matchpoints.test.ts`,
+ny `api-src/topplista.test.ts` (endpoint-skalet + vakten att `is_bot` aldrig
+serialiseras), `DagensTavling.test.tsx`.
+
+## 2026-09-13 — Livskvalitetssvepet etapp C: se hur vilken spelare som helst bjöd och spelade
+
+Datat fanns redan (`daily_results.payload` bär auktion + kort för alla, även
+bottarna); bara läsvägen och vyn saknades. Servern (`giv-resultat.ts`) skickar
+nu `history` (kompakt: säte + bud + regelnamn — `kompaktHistorik` strippar den
+hand-byggda förklaringstexten), `plays` och `declarerTricks` per rad, bakom
+samma 403-grind som förr (du måste själv ha spelat brickan). Klienten: varje
+rad i travellern är klickbar → `GivGranskning` ("Så spelade X given"): sticken
+återskapas med `byggGranskning` och stegas i `PlayReplay` (perspektivfri — rätt
+för andras händer); auktionens förklaringar tolkas systemiskt ur buden
+(`interpretCall`), lika för alla. Din egen rad leder vidare till
+`RondRapportView`, som nu läser serverns payload före localStorage → egen
+genomgång fungerar på annan enhet (cross-device-luckan stängd). Kontraktscellen
+lyft till `tavling/TavlingDelar.tsx` (delas med historiksidan i D3). Facit:
+`brickresultat.test.ts`, ny `api-src/giv-resultat.test.ts` (401/400/429/403,
+passthrough, ingen `explanation`/`is_bot` i svaret), `DagensTavling.test.tsx`.
+
+## 2026-09-13 — Livskvalitetssvepet etapp E: "Spelade givar" på Mitt konto + exporten
+
+Ägarbeslut: räkna tävlingsgivar + Dagens giv (serverdata, exakt från dag ett);
+fritt spel mot datorn finns bara lokalt och räknas inte. Ingen ny endpoint:
+`fetchSpeladeGivar()` i `src/lib/backend/account.ts` gör två count-frågor
+(head) mot de egna raderna — RLS-policyerna "läs egna resultat"/"läs egen
+dagslogg" släpper ändå bara igenom `auth.uid()`, men frågan filtrerar
+uttryckligen. Tävlingsgivar = status godkand + granskning (avvisade är ingen
+giv). `Konto.tsx` visar raden "Spelade givar" med totalen och underraden
+"tävling N · dagens giv M" ("…" under laddning, "—" vid fel — sidan blockeras
+aldrig). GDPR: `exportMyData()` (kommentaren sade sedan etapp 2 att den skulle
+utökas) tar nu med tävlingsresultaten inkl. payload, dagsloggen och
+placeringarna (`daily_standings`, null tills 0012 körts). Facit: nya
+`account.test.ts` (hånad supabase-klient: vilka frågor + hopsättning) och
+`Konto.test.tsx`. Lärdom: `mockReset`/`mockClear` i `beforeEach` fick vitest 4
+att fälla felfallet trots sidans `.catch` — varje test sätter sin egen mock.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D1: `daily_standings` + nattlig finalisering
+
+Grunden för tävlingshistoriken och medaljtabellen. Vägval: en FRYST ställning
+per dag i tabell (inte "räkna allt i farten" — obegränsad växt och medaljer
+som kunde ändras i efterhand — och inte "lat finalisering vid första anrop",
+som kunde frysa dagen före granskningens statusflyttar). Skrivs av nattjobbet
+i `tavling-granskning.yml` som ett steg EFTER djupgranskningen, `if: always()`
+så fynd aldrig blockerar det. Proben `tavlingsavslut.probe.test.ts` tar alla
+dagar före idag (Stockholm) utan ställning + skriver om de tre senaste —
+självläkande vid röd natt, fyller hela historiken vid första körningen —
+upsert `on_conflict=set_id,user_id` med `merge-duplicates`, och tar bort
+spelare som fallit ur en dags ställning. Rena modulen `tavlingsavslut.ts`:
+`byggStallning` (samma aggregat som den levande listan → siffran som fryses är
+den man såg) och `raknaMedaljer` (delad rang kan ge två guld; bottar uteslutna
+men deras placeringar räknas som de var, så silver bakom en bot förblir
+silver; sortering guld → silver → brons → namn). `MIN_PER_GIV` flyttad hit och
+delas med `topplista.ts`. Migration `0012` = ägarsteg; kod och export tål att
+tabellen saknas tills dess.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D2: historik-API:t
+
+Läsvägarna till tidigare tävlingsdagar. `lasDag` (`api-src/_lib/tavlingsdag.ts`)
+tolkar `?dag=`: saknas → idag (Stockholmsdygnet), giltigt datum ≤ idag → den
+dagen, framtid/ogiltigt → 400 — förscreeningen lägger morgondagens givar i
+databasen i förväg och de får aldrig lämnas ut. De tre läs-endpointsen tar
+parametern; `topplista` svarar dessutom `slutlig` (finns en frusen rad i
+`daily_standings`) och `giv-resultat` släpper tjuvkiks-grinden för avslutade
+dagar (inget att kika på). Ny `tavling-historik.ts`: dagslistan nyast först
+med din placering ur `daily_standings`; ofrusna dagar (i regel gårdagen före
+nattjobbet) räknas i farten med `byggStallning`, men högst tre så anropet
+inte växer med historiken; medaljtabellen via `raknaMedaljer` med bottarna
+uteslutna server-side (`profiles.is_bot` läses men serialiseras aldrig —
+vaktat i facit). `restGetAlla` läser `daily_standings` sida för sida (Range).
+Klienten fick `dag?`-parametrar + `fetchTavlingHistorik()`; UI:t kommer i D3.
+
+## 2026-09-13 — Livskvalitetssvepet etapp D3: historiksidan + medaljtabellen (svepet KLART)
+
+Sista etappen. `src/pages/TavlingHistorik.tsx` (rutt `spela-kort/tavling/
+historik`, immersiv som tävlingen, konto krävs): listvyn visar medaljtabellen
+(topp 5 i guld/silver/brons, din rad markerad, "datorspelare räknas inte i
+medaljtabellen" sagt rakt ut) och alla avslutade dagar nyast först med din
+placering ("2:a av 5 · 55,3 %" eller "spelade inte"; ofrusna dagar märkta
+provisorisk). Dagvyn via `?dag=YYYY-MM-DD` (delbar djuplänk): Din ställning,
+bricklistan (ditt kontrakt/resultat/MP% där du spelade, annars "spelade
+inte" — alla klickbara), ställningen märkt "slutlig", travellern med `dag`,
+genomgången "Så spelade X given" och övningsläget (skickar aldrig in). För att
+båda sidorna ska dela vyerna lyftes `DinStällning`, `Resultattabell`,
+`GivDetalj` (nu med `dag?` + valfri `onÖvning`), `TravellerTabell`,
+`TopplistaVy` (fotnot "slutlig"/"provisorisk"), `Skärm` och `HemLänk` ur
+`DagensTavling.tsx` till `tavling/TavlingDelar.tsx` — sidan behåller bara
+flödet. Länk "Tidigare tävlingar & medaljer →" under Ställningen. Facit:
+`TavlingHistorik.test.tsx` (utloggad · listvy · dagvy · djuplänk → traveller →
+spelare → genomgång → tillbaka hela vägen). Därmed är alla fem ägarönskemålen
+från 2026-09-13 levererade; kvar = ägarsteget migration `0012` + första
+nattkörningen som fyller historiken.
+
+## 2026-09-13 — Migration 0012 körd, historiken fylld, medalj kräver två spelare
+
+Ägaren körde `0012`; `workflow_dispatch` på tavling-granskning skrev
+slutställningar för alla 34 avslutade dagar (18 med inskick, 16 tomma). Första
+körningen avslöjade en regellucka: fem solodagar i augusti (ägarens testrundor
+före bottarna) gav en ensam spelare "guld" med 40 % på 1–7 givar. Ägarbeslut:
+en medalj kräver minst två spelare i dagens ställning (samma tanke som
+poänggränsen per giv). `raknaMedaljer(placeringar med set, uteslut, topp,
+minSpelare = MIN_SPELARE_FOR_MEDALJ)` — bottar räknas som spelare i gränsen.
+Facit utökade; fotnoten på medaljtabellen säger regeln.
+
+## 2026-09-13 — Motorbytet slutfört: facit-kön tömd, invit-hoppet, M19, Smolen efter 1NT
+
+Ägaren: "liveproven är klara. gör klart budmotorn." Etapp 6 stängdes och de
+kända resterna byggdes test-drivet i ett svep — facit före fix, baslinje-dumpar
+på `c4d7ac7` före första kodändringen, auktions- och avvikelsediff klassad per
+mönster, hela sviten grön. Elva regler (budsystem §9 2026-09-13, planens logg):
+flykten över deras X av vårt 1NT är avslut (force-faktumet läste den som
+rondkrav) · DONT-dubblaren visar enfärgen själv · inklivarens preferens (K2) ·
+återöppningssvaret undviker deras färger · responsiv-dubblaren väger partnerns
+tvingade svar · den starka dubblaren utan egen färg (M19) · negativ-dubblaren
+accepterar invit-hoppet (8+ TP) · svag rymning 3M över 2NT i konkurrens · 2♣-
+linjens lillslam på solid egen färg · öppnarens Smolen-/5-4-svar efter
+1NT–2♣–2♦ · kikvakten skarp för hela auktionen. Kvar som SENARE: kontrerad
+checkback.
+
+**Lärdomar:** (1) auktionsdiffen avslöjade två hål facit-kön inte kände till
+(Smolen-svaret saknades efter 1NT; deras cue i VÅR färg räknades som "deras
+färg") — diffen är grinden, inte facit-testerna ensamma. (2) Två av reglerna
+fick först för brett grepp (force-avsmalningen tog 4♦ efter transfer; responsiv-
+trösklarna glömde att partnern är dubblaren med 12+) — mät, smalna av, mät igen,
+innan docs skrivs.
+
+## 2026-09-13 — Tappade tävlingsinskick: omförsök på servern + omsändning i klienten (ägarrapport "403")
+
+Ägaren: användares givar registreras inte som de ska, felkod 403. Datat i
+`daily_results` visade inga avvisade rader men två brickor som saknades helt
+mitt i annars kompletta sviter (Fernstedt 10, Oskar 11). Kedjan: given bokförs
+lokalt när den blir klar och skickas in EN gång i bakgrunden; faller det
+(`skicka-in.ts` gjorde ett enda fetch mot Supabase utan omförsök, och
+klienten skickade aldrig om) står given som spelad lokalt medan servern saknar
+den — travellern (`giv-resultat.ts`) svarar då 403 "du har inte spelat given".
+Fix: `restPost` med omförsök i `api-src/_lib/supabase-rest.ts` (409 vid
+unik-krock = första försöket landade → raden som står returneras),
+`skicka-in.ts` på den delade `restGet`/`restPost`; klienten sparar
+spelförarsticken i framsteget, `inskickUrFramsteg`/`behöverSkickasOm`
+(`tavling.ts`) bygger om inskicket, och `DagensTavling` skickar om osända
+givar vid sidöppning och uppdatera-knappen; raden visar "ej inskickad", och
+403-texten i travellern förklarar läget. Facit: `supabase-rest.test.ts`,
+`tavling.test.ts`, `DagensTavling-flode.test.tsx`. Deploy-skevheten (PWA:n
+byter inte version mitt i en session, servern validerar botbud med ny motor)
+finns kvar som mekanism men slog inte här: botauktionerna på dagens och
+gårdagens 24 brickor var identiska före/efter morgonens deploy.
+
+## 2026-09-14 — Bricka 12: advancern efter balansinkliv + inklivarens rättelse (ägarrapport)
+
+Ägaren rapporterade dagens bricka 12: 1♦–P–P–(1♥)–P–**1♠** på ♠KQ42 ♥QJ32 ♦J2 ♣653
+(ny färg trots 4-korts stöd), och Nord passade 1♠ med ♠53 ♥AT965 → 1♠ i en 4-2
+i stället för 1♥ i 9-korts fiten. Roten: advancer-raden täckte bara direkt sits;
+balanserings-advancern föll till catch-allen (`partner-färg`), vars "utan fit"-
+gren tände fast fiten fanns (rabatten −3 gjorde höjningen "för svag"). Och
+inklivaren hade ingen regel för advancerns nya färg på 1-läget. Byggt test-
+drivet (facit före fix): ny rad `advance-balans`, `advancerFitPass` (fit →
+pass, aldrig ny färg), tävlande 2-lägeshöjning från 6 hp när de bjuder vidare,
+`overcallerCorrectsToOwnSuit` (≤ 2 kort i advancerns färg → tillbaka till egen
+5+). Budsystem §7.1 + §9. Facit `auction-advancer-balansinkliv.test.ts`; hela
+sviten grön (`npm test`). Bricka 12 landar nu i 1♥ av N.
+
+## 2026-09-14 — Stickväntan: sticket ligger kvar tills du trycker (ägarbeslut)
+
+Ägaren: "när ett stick är spelat försvinner det för snabbt från bordets mitt".
+Byggt på alla spelbara ytor (Spela kort `usePlayTable`, vänner-bordet
+`useBordSpel`) med EN mekanism: svepet startar i `'vanta'` när DU leder nästa
+stick (vinnaren är en plats du styr — `svepStartFas`/`jagLederNasta`) och står
+stilla tills du trycker på stickytan (mellanslag/Enter går också); den pekande
+handen (`StickHint`, CSS `stick-hint`) tänds efter `sweepHint` (2 s). Leder
+boten: `'hold'` under `SWEEP_HOLD` — ägarens uppföljning samma dag: en tunn
+guldring runt hela stickhögen (utanför pillren, ägarens skiss) fylls medurs i
+exakt bot-pausen, 2/3/4 s för snabb/normal/lugn (`SWEEP_HOLD` i `tempo.ts`,
+runda tal i stället för det faktor-skalade `sweepHold` 900; ringens CSS-tid
+sätts inline ur `sweep.holdMs` så ring och timer slutar samtidigt; ringen
+tonar in 0,5 s och ut 0,5 s SOM DEL av pausen — `RING_FADE_MS`, två
+opacitetsanimationer med ut-fasen fördröjd paus − 0,5 s) — och svep.
+Ett tryck går alltid vidare, även under botens paus
+(`advanceSweep`/`gaVidareSvep`); klick på ett kort hoppar över som förut.
+Sista sticket väntar aldrig (resultatet kommer av sig självt). Bugg ur ägarens
+skärmbild: auto-claim startade i samma ögonblick som sticket blev klart och
+handen hängde kvar över claim-revealen → `pendingClaim` släcker svepet. Bordet: väntar jag men loggen redan har nästa kort (boten tog min
+stol vid frånvaro) sveps sticket av sig självt. Facit `stickvantan.test.tsx`
+(frö 2 = vi vinner, frö 1 = boten vinner; proben: spela första sticket med
+usePlayTable och läs vinnaren); befintliga svep-/ljud-/flygtester orörda gröna.
+Browser-verifierat i Spela kort (handen syns efter 2 s, trycket sveper; ringen
+mätt med getBoundingClientRect vid 375×812, 504×909 och 1280×700: 200 px,
+ingen överlapp med kort utanför stickytan, ingen klippning). Ej automattestat:
+bordets kö-vakt (kräver hook-rigg med mockad backend).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 1: rondgenomgången per giv
+
+Ägaren valde NÄST 1 (bordens SENARE-lista) och godkände körordningen
+rondgenomgång → DD-jämförelse → claim. Etapp 1 byggd samma dag, facit före
+kod: ren modul `src/pages/bord/bord-genomgang.ts` (`byggBordGenomgang`:
+bordets projicerade givläge → hela given ur giv-klar-revealen, kontraktet,
+sticken ur korthändelserna via `verkligaStick`, buden systemiskt förklarade via
+`annoteraSystemiskt`; null när given inte är klar/utpassad), vyn
+`BordGenomgang.tsx` (topprad med kontrakt/stick/poäng, namnraden i verkliga
+stolar, `PlayReplay` som fick en `tone`-prop för den vinröda duken) och knappen
+"Genomgång av given →" i BordSpels giv-klar-vy för alla vid bordet; en effekt
+stänger genomgången när `lage.giv` byts. Ingen serverändring. Facit
+`bord-genomgang.test.ts` (motorns genomspelning som facit för sticken) +
+röktest i `BordSpel.test.tsx` (knapp → vy → tillbaka). Bordet kan inte
+provspelas lokalt (serverfunktionerna bara i molnet) → ägarens live-prov efter
+deploy. Kvar i NU: etapp 2 (DD-jämförelsen, WASM-provet först) och etapp 3
+(claim, designfrågor med ägaren före kod).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 2: DD-jämförelsen
+
+Spiken först: kan `bridge-dds` (Bo Haglunds lösare som WebAssembly) buntas i
+Vercel-funktionen? Ja — WASM:en ligger inbäddad som base64 i paketets JS, så
+esbuild med API-buntningens inställningar gav en självständig bunt (+569 kB);
+under Node laddade lösaren på 12 ms och räknade en full tabell på 5–150 ms.
+Därmed valdes serverräkning vid giv-klar (inte nattlig efterberäkning). Byggt
+facit före kod: `api-src/_lib/dd-facit.ts` (`beraknaDdFacit`: tabell + par via
+`getDds`/`dealToPbn` ur revisor-dds; `medDdFacit`: giv-klar för spelad giv får
+`data.dd`, lösarfel → orörd händelse), inkopplad i `bord.ts` vid alla tre
+bokföringsvägar (`startaGiv` blev async). Delad ren läsare
+`src/lib/engine/dd-facit.ts` (`ddStick`, `ddJamforelse`, `parText` med
+lösarens kontraktsform "4S-NS" → "4♠ NS"); `DdFacitRad` i giv-klar-vyn och
+genomgången. Ingen schemaändring, ingen ändring av webbläsarappens beroenden
+(paketet når bara serverbunten). Facit `api-src/_lib/dd-facit.test.ts`,
+`src/lib/engine/dd-facit.test.ts`, röktest i `BordSpel.test.tsx`; buntnings-
+testet kör den riktiga bygget och importerar api/bord.js under Node. Live-prov
+är ägarsteget (bordet kan inte provspelas lokalt). Kvar i NU: etapp 3 (claim
+vid bordet — designfrågor med ägaren före kod).
+
+## 2026-09-14 — Bordens SENARE-lista etapp 3: claimen vid bordet
+
+Designfrågorna först (DD-dom eller motpartsgodkännande · ge upp · auto-claim);
+ägarens svar satte modellen: "när DD vill claima ska den göra det, men
+människan ska få möjlighet att spela klart handen = OK på claimen eller spela
+klart". Byggt facit före kod: `api-src/_lib/claim-dd.ts`
+(`spelforarenTarResten`: SolveBoardPBN på de återstående korten från
+stickstartet, exakt och på millisekunder; `claimKontrollen` ger en synkron
+funktion som `drivFram` får injicerad), bord-motorns `claim-forslag`/
+`claim-svar`-projektion (`ClaimLage`, `claimSvarande` = aktiva människor utom
+träkarlen, `claimGodkand`), pausen (kortdrag avvisas medan claimen väntar),
+bokföringen (giv-klar med claimens total + `claim` i datat, direkt när ingen
+behöver svara), nej-vägen (spelet fortsätter, aldrig nytt förslag), dragvägen
+`claim-svar` i `bord.ts` och hjärtslagets auto-OK efter 60 s
+(`claimAutoSvar`). Klienten: `BordClaim` i projektionen, dialogen "OK, bokför
+given" / "Spela klart" för den som ska svara, väntanraden för de andra, notisen
+i giv-klar-vyn. Manuell claim och "ge upp" medvetet utanför. Facit
+`claim-dd.test.ts` (riktiga lösaren: alla toppkort → ja, ett säkert
+försvarsstick → nej, aldrig mitt i ett stick, även när spelföraren själv leder),
+claim-blocket i `bord-motor.test.ts`, röktest i `BordSpel.test.tsx`. Live-prov
+vid bordet är ägarsteget. Därmed är HELA bordens SENARE-lista (etapp 1–3)
+byggd samma dag.
+
+## 2026-09-14 — Gambling 3NT ersätter "3NT = 25–27 balanserad" (ägarbeslut, byggd samma dag)
+
+Startade med ägarens fråga "P P P 3NT — vad betyder 3NT?" och beslutet att bygga
+om 3NT-öppningen till **Gambling 3NT**. Fem grindbeslut togs FÖRE bygget (alla
+ja): aggressiv stil (solid 7+ lågfärg AKQ, inget A/K utanför, ingen renons, ingen
+4-korts sidofärg) · 25–27 balanserad → 2♣–2♦–3NT och 28–30 → 4NT · svar v1
+pass/4♣/5♣ pass-eller-rätta/4M · försvar v1 pass eller naturlig 4M · samma
+betydelse i alla sitsar. Exempelhänder visades före bygget (öppningsstrukturen).
+
+Byggt test-drivet (facit `gambling-3nt.test.ts` FÖRE koden): ny modul
+`gambling-3nt.ts` (öppning, svar, öppnarens rättelse, försvaret som tabellrad
+`försvar-gambling-3nt`), `openings.ts` anropar den före 1-läget och spärren,
+`responses-2c.ts` (3NT = 25–27, 4NT = 28–30, 6NT/7NT direkt över positivt 2NT
+med 25+/29+), `auction-decide.ts` (svararens 6NT/7NT/pass efter 2♣–2♦–3NT/4NT),
+betydelselagret (`afterGambling3NT`, 3NT-öppningen är inte längre sangsystemets
+bas, 2♣–2♦–4NT läses före slamzonen så det inte blir "RKC"), regelregistret +
+alertlistan. Det gamla `respondTo3NT`/`openerRebidAfter3NTResponse` rivet.
+Systemboken §3.1 (ny) + §4.4 + §9; SENARE-listan fick "Gambling 3NT — nästa
+lager". Rättelse under bygget: exempelhanden ♣AKJT763 utan dam öppnar **3♣**
+(spärr), inte 1♣ som först sades till ägaren.
+
+## 2026-09-15 — Gambling 3NT: provfrön + ägarbeslut om fortsättningen
+
+Sessionsslutet dagen efter bygget. En tillfällig probe skannade fröna 1–17 088
+(`dealFromSeed` = appens `?giv=`) och hittade 22 givar där någon öppnar Gambling
+3NT — fröna står i `docs/senare.md` under "Gambling 3NT — nästa lager". Två
+fynd bekräftade v1-luckorna: bottarna passar mot deras 3NT även med 19 hp
+balanserat (frö 3970) och med 17 hp 5-5 (frö 1370) — Klinger-försvaret saknas.
+**Ägarbeslut:** fortsättningen byggs inte nu, låg prioritet, sparas som framtida
+småfix. CLAUDE.md-rubriken sattes till KLAR & LIVE (`8e327b3`) och pushades
+separat (grön deploy). Nästa: ägarens live-prov (borden etapp 1–3 + Gambling 3NT
+i appen), sedan väljer ägaren nästa NU ur 🟢 NÄST.
+
+## 2026-09-15 — Kortregeln: träkarlen i kolumner, spelföraren i kortrad (ägarönskemål)
+
+Ägarens observation: när Syd spelför ligger Nord-träkarlen i fyra lodräta
+färgkolumner, men när Syd är träkarl låg Syds kort som en vågrät kortrad.
+Första bygget lade Syd-träkarlen i kolumner och lät spelföraren Nord ligga kvar
+i kolumner — uppmätt på 375×812: sidan blev 993 px hög (två kolumnhänder à
+336 px vid 5-kortsfärg), och inte ens den tätaste läsbara remsan (44 px,
+valörhörnet är 39 px) räckte. **Ägarbeslut:** Nord och Syd ligger aldrig i
+kolumner samtidigt — ENDAST träkarlen i kolumner, spelföraren ALLTID i kortrad.
+
+Byggt test-drivet (facit i `syd-trakarl.test.tsx` + `BordSpel.test.tsx` FÖRE
+koden): `SuitColumns` bär `data-kolumner=<stol>`; `SouthFan` fick `seat`
+(default Syd) så samma kortrad ritar spelföraren Nord upptill; `Play.tsx` ritar
+Nord som kortrad när Nord spelför och Syd-träkarlen som kolumner nertill (du
+spelar korten som förut, två tryck); `BordSpel.tsx` ritar Syd-träkarlen som
+stilla kolumner (spelläget vrids så turen aldrig är Syds → inget klickbart).
+Uppmätt efter bygget: sidhöjd 818 px på 375×812 (samma budget som förr med
+Nord-träkarlen i kolumner). Känd kosmetisk rest: ⋮/i-knapparna uppe till höger
+täcker högra delen av Nord-radens sista kort (valörhörnet syns, kortet är
+klickbart i sin vänstra del) — kortraden är 349 px bred på 375 px skärm.
+Hela sviten grön (`npm test`).
+
+**Påbyggnad samma dag — svävande menyknappar (ägarbeslut, alternativ 3):** i
+stället för att flytta ⋮/i permanent sänks knapparna mjukt (transform,
+500 ms ease-in-out, avstängd vid reducerad rörelse) till 8 px under Nords
+kortrad när raden når in under dem, och svävar tillbaka upp när Nords hand
+krympt så platsen finns. Ren DOM-geometri i `useSvavandeMeny.ts` (ankaret står
+stilla, stapeln inuti flyttas; vald färg fryser mätningen så knapparna inte
+studsar vid varje två-trycks-spel); menyn och ⓘ-overlayen följer med. Facit i
+`syd-trakarl.test.tsx` (rektanglarna mockas — jsdom har ingen layout). Uppmätt
+i browsern på 380 px: sänkta vid 13–11 kort, uppe igen från 10 kort.
+
+## 2026-09-15 — Puppet Stayman över 2NT (ägardirektiv, byggd samma dag)
+**Direktivet:** "2NT-svaren skall bli Puppet Stayman. Lär dig om denna,
+förbered bytet." Konventionen lästes in (bridgebum som huvudkälla, Wikipedia,
+Larry Cohen, Porthcawl), planen `docs/puppet-stayman-plan.md` skrevs med åtta
+grindbeslut och exempelhänder, ägaren tog besluten på eftermiddagen och bygget
+gjordes direkt (facit före fix: `puppet-stayman.test.ts`, 71 fall).
+
+**Varför det passar rebidz:** 2NT-öppningen får vara 5-3-3-2 med en 5-korts
+högfärg (`isBalanced`), men den gamla 3♣-Stayman hittade bara 4-4-fiten. En
+sond mot den gamla motorn fann dessutom två luckor som stängdes i samma bygge:
+14 hp + 4-korts högfärg mot 2NT stannade i 4M efter Stayman-fit (ingen slamport),
+och 5-5 i högfärgerna efter transfer slutade i 3NT (hjärtern visades aldrig).
+
+**Strukturen (systemboken §4.3b):** 3♣ = utgångsvärden + minst en 3-korts
+högfärg (ägarbeslut: inget annat krav). Öppnaren 3♥/3♠ = 5-korts, 3♦ = minst en
+4-korts, 3NT = ingen. Efter 3♦ bjuder svararen högfärgen hen INTE har (3♥ =
+4 spader, 3♠ = 4 hjärter) så öppnaren blir spelförare; 4♦ = båda (öppnaren
+bjuder sin bättre 4-korts, lika → 4♥), 4♣ = båda + slamintresse (öppnarens 4M
+→ 4NT vid 33+, 5M-inbjudan 31–32). Smolen över 2NT är borta — ägarens fråga
+"funkar inte Smolen?" fick svaret att Smolen och Puppet använder samma bud efter
+3♣–3♦ med olika betydelse, och att Puppets 3♦ lovar en 4-korts så 4♦ gör
+Smolens jobb. Hybriden för 5-4: 5♥4♠ = transfer + 3♠ (under 3NT), 5♠4♥ = 3♣ +
+4♦, 5-5 = transfer + 4♥. Slamporten efter Puppet-fit: cue-runda gratis under
+4M, 4NT vid 33+ (hp mot visade 20/22). Samma struktur efter 2♣–2♦–2NT (mot 22)
+och över vårt direkta 2NT-inkliv (mot 15–18, utgång från 9 hp).
+
+**Kod:** `responses-2nt.ts` (regel-id:n i `PUPPET`, `puppetAnswer`,
+`betterFourCardMajor`), `responder-rebids.ts`, `strong-2nt-systemson.ts`,
+`auction-decide.ts` (slamraderna: `slamContextFor`/`slamTrumpFromAuction` efter
+3♥/3♠, `slamContextAfterThird`/`slamTrumpAfterThird` efter öppnarens 4M,
+`PUPPET_PLACEMENTS`), `auction-meaning.ts` (betydelserna + `puppetAsked` =
+utgångskrav, annars lästes kaptenens cue inte), `preempt-defense-continuations.ts`
+(inklivets faser advance/complete/rebid/choose), `rules.ts`,
+`overcall-continuations.ts`. Gamla facit som medvetet bytte: `responses-2nt.test.ts`,
+`responder-rebids.test.ts`, `responses-2c.test.ts` (2♣–2♦–2NT–3♣–3♦–3♥–4♠),
+`auction-decide.test.ts`, `auction-stayman-not-natural.test.ts` (rubrik).
+`npx tsc` + hela `npm test` gröna. Medvetet SENARE: 4♣-slamvägen efter
+2♣–2♦–2NT, slamport över 2NT-inklivet, Muppet. CLAUDE.md kortades (fyra äldre
+"nyss klart"-block → pekare) för att hålla 16 kB-vakten.
+
+**Hälsokollen samma kväll (ägarfrågan "vad är bäst för systemets hälsa?"):**
+tre mätningar. (1) Revisorn 1000 givar före/efter bytet (gamla koden i ett git
+worktree på `50a6be6`): 21,2 % · 267,52 → 21,3 % · 267,45 — helheten oförändrad,
+som väntat (få 2NT-auktioner per 1000 givar). (2) Ny riktad sond
+`puppet.probe.test.ts` (PUPPET=1): skannar tills 300 givar går via 2NT–P–3♣
+(2NT-öppning, 2♣–2♦–2NT, direkt 2NT-inkliv — checkback och balansering
+utesluts) och dömer varje mot DD-par med revisorns `judgeDeal`; läge B
+(PUPPET_SEEDS) bjuder samma frön med en annan kod. Samma 282 givar: gamla
+koden 44,0 % rätt · 259,8 p/giv, Puppet 46,1 % · 246,7. (3) Fynd 1 ur sondens
+dyraste givar: 4NT direkt över ett Puppet-svar (3♦/3♥) lästes av öppnaren som
+essfråga (frö 20265815: 5♦ i stället för pass; 20271194: 6♥ på 5-2). Rot: min
+egen slamrad läste kaptenens 4NT över 3♥ som RKC i hjärter, och betydelselagrets
+"naket 4NT" föll till ruter. Fix (facit före fix i `puppet-stayman.test.ts`):
+4NT över alla Puppet-svar = kvantitativt (öppnaren 6NT med max via
+`openerChoosesAfterSystemsOn`, nytt argument `openerMax` 21/24/18); slam med
+stöd går via trumfsättningen **3♠ över 3♥ / 4♥ över 3♠** (`PUPPET.agree`),
+öppnaren öppnar cue-ronden (`slamSituation` prefix 4 med `partnerStarts`,
+prefix 6 efter 2♣–2♦–2NT); betydelselagret läser trumfsättningen och 4NT före
+slamzonen (`puppetAsked`) och `naturalSuits` sätter trumfen vid 3♠/4♥. Övriga
+dyra sondgivar är DD-tur (lillslam på 28 hp) eller principiella (storslam
+kräver visshet) — ärliga missar, inga fler systemfel.
+
+**Slamvägarna kompletta (ägardirektiv samma kväll: "gör klart slamvägar,
+komplett puppet"):** inventering per läge och bygge med facit före fix
+(`puppet-stayman.test.ts`, blocket "slamvägarna kompletta"). 2♣–2♦–2NT fick
+samma vägar som 2NT-öppningen: 4♣/placering → öppnarens 4M → kaptenens 4NT
+(33 mot 22) eller 5M (31–32) via `slamSituation` prefix 7, trumfsättningen
+3♠/4♥ (prefix 6, byggd tidigare), Texas + 4NT (prefix 5) och kvantitativ 4NT
+efter öppnarens 3NT genom en NY tabellrad *svar4* (svararens fjärde bud fanns
+inte som rad förut) + `kind: 'kvantitativ'` i slamraden för öppnarens svar.
+Efter öppnarens 3NT på högfärgsvisningen (2NT-vägen): `ntLadderAfterNoFit`
+(31–32 → 4NT, 33+ → 6NT). Transfervägarna: exakt 5-korts jämn 11–12 → 4NT
+kvantitativ (öppnaren 6M med max + 3-korts stöd, 6NT med max, annars pass),
+13+ → 6NT; 6+ högfärg går alltid Texas (förr transfer med slamvärden — som
+dog i 3NT) och frågar 4NT RKC över fullföljningen i slamzonen; 5♥4♠ och 5-5
+→ 4NT/5M över öppnarens 4M (`puppetPlacedFit` täcker både Puppet- och
+transferplaceringarna). Över 2NT-inklivet medvetet inga färgslamvägar
+(`slamRoutes=false` — slamraden gäller ostört) — bara kvantitativt.
+Betydelselagret: 4NT efter transfer = kvantitativt, efter Texas = RKC i
+högfärgen, efter öppnarens 3NT = kvantitativt; öppnarens 6M/6NT = accept.
+Lärdom från kvällen: fyra av fem röda facit var MINA felräknade testhänder
+(♣AJ2 = 5, inte 3) — räkna hp med en funktion, inte i huvudet.
+
+## 2026-09-16 — Designpass: granskningens åtgärder (kontrast, fokusring, filt-text, konsekvens)
+
+Ägarinitierad read-only-designgranskning → byggd och ägargodkänd via sida-vid-
+sida-artefakt (före/efter) innan PCD. Inga logikändringar — bara färg-, kontur-
+och opacitetsvärden + ett par klass-/vikttweaks. Mergepunkt `5e62517`, LIVE.
+
+- **P0 kontrast:** token `ink-faint` lyft till AA — ljust `#94a3b8→#6b7688`
+  (2,56→4,59:1), mörkt `#64748b→#8a9aad` (2,84→4,7:1); hierarkin muted>faint
+  behållen. Sidfotens text flyttad `ink-faint→ink-muted` (solid AA på sidytan).
+- **P1 fokusring:** ny delad `.focus-ring` (guld, bara `:focus-visible`) på ~20
+  handrullade kontroller (budlådan, auktionsrutan, budval, inställningsreglagen,
+  budträningskorten, arkivpilarna/dagrutorna, budsystemets sektioner, spelmenyns
+  tempo/toggle, vänner-lobbyn, startkorten, navlänkarna, headerknapparna,
+  404-CTA). Byggfynd: Lightning CSS tappar `var(--color-gold-400)` inuti
+  `outline`-genvägen → literalt guld `#d9b556` (kommenterat i `index.css`).
+- **P1 filt-mikrotext:** 18 sub-AA-etiketter i tävlings-/bordvyerna `/50→/60`.
+- **P2/P3:** primärgrönt enat till `emerald-600` (segmentkontrollen +
+  Uppdatera-pillret matchar `<Button>`); rubrikvikt `font-semibold` i
+  budträningsrunnern; `space-y-4→6` i Budvisning; `aria-label` på budsystemets
+  sök + felrapportens textruta; toggle-hover; arkivets dubbeldämpade celler.
+
+**Medvetet uteställt** (liten vinst mot bred, otestbar spridning — föreslagna som
+egen verifierad omgång): hover-token-konsolidering + aggressiv radie-likriktning
+över filtsidorna. Två av mina egna review-fynd utgick som feldiagnoser (auth-
+rubriken var inte centrerad; `rounded-3xl` är `Felt`-defaulten). Hela sviten grön
+(`npm test`), tsc rent.
+
+## 2026-09-16 — Hover-konsolidering: dokumenterad vokabulär + två stragglare (designgranskning P2-3)
+
+Andra omgången ur designgranskningen (efter kontrast/fokusring/filt-text-passet
+samma dag). Inventering av alla `hover:`-mönster visade att systemet redan var
+till största del roll-konsekvent — de semantiska tokens fanns (`hover-veil`,
+`control-hover`) och `brightness-105` var redan chip-standard. Ingen churn för
+sakens skull; smal, verifierbar konsolidering. Mergepunkt `261e62a`, LIVE.
+
+- **`index.css`:** ny dokumenterad HOVER-ROLLER-vokabulär (en sanning) — fyra
+  roller: `bg-hover-veil` (ghost på temayta), `bg-control-hover` (solid
+  sekundärkontroll), `bg-white/10` (kontroll på emerald-baren), `brightness-105`
+  (färgkodade chips). Filtsidornas translucenta knappar mörknar sin EGNA bas
+  (t.ex. emerald-950/60 → /80) — basrelativt, kan inte bli en enskild token;
+  mönstret hålls oförändrat och är internt enhetligt (Play /80, tabeller /30).
+- **`BudSystem`:** kollaps-knappens `hover:bg-white/5` → `hover:bg-hover-veil`.
+  Verklig bugg: en vit slöja på vit panel var osynlig i ljust läge.
+- **`AuctionGrid`:** budchip `hover:brightness-110` → `105` (i linje med de
+  övriga chipsen i BiddingBox/BidOptions).
+
+Medvetet uteställt: en ny `bg-brand-hover`-token drogs tillbaka (Tailwind v4
+genererade den inte utan serveromstart — skör; `bg-white/10` är redan enhetligt
+på de fyra ställena). Inga logikändringar. Hela sviten grön (`npm test`), tsc rent.
+
+## 2026-09-17/18 — Felrapporter #75–#77, tredje hand högt generaliserad, systems on efter stört 1NT
+
+**Felrapport #75 (spel) + #76 (bud)** — `341920d`, LIVE. #75: Nord la ♥7 "vinn
+billigast" när träkarlen slagit partnerns utspel i ett trumfkontrakt; tredje hand
+högt gäller nu även där. #76: ovanlig 2NT fick golvet 8 hp (ägarbeslut).
+
+**Tredje hand högt generaliserad (NU 2026-09-18)** — riggen `a651744`/`ed785a6`,
+reglerna `037403b`, LIVE. Ägardirektiv: kortvalet väger partnerns utspel,
+träkarlen (även den som lagt före mig), egen hand och det osedda — varken för
+högt eller för lågt. Byggt: mätrigg (`tredjehand.probe`, DD-poäng per lagligt
+kort via `solveAllCards`) och regel A (underspela inte), B (övertar inte partnerns
+kort med ett likvärdigt), B2 (spendera inte en slagbar gard över bordets honnör),
+C (spara mästaren direkt över bordets honnör — lagade en regression från #75) och
+D (tvinga bordets honnör när allt är synligt). Mätning och ärlig läsning
+(in-sample mot osedda givar): `docs/speldiagnos.md` "T-serien"; regler §8.6.
+**Kvar:** ägarens live-prov + beslut om punkt 4 fullt ut (budseedad gissning).
+
+**Felrapport #77 → systems on + stulet bud efter vårt 1NT i konkurrens** —
+`90aeea1`, LIVE. Ägarens egen struktur, varje detalj ett svar på en direkt fråga
+(`docs/1nt-systems-on-plan.md`, §7.5): EN struktur mot alla inkliv; Lebensohl
+efter vårt 1NT, värde-X mot DONT (facit #39/#43) och flykten över deras X rivna.
+Mätt med stört-1NT-sonden mot den gamla strukturen; tre läckor visades, ägaren
+behöll två medvetet och stramade åt straff-X (8+ hp och 3+ kort i deras färg).
+
+**Ny rutin (ägardirektiv 2026-09-18):** vid hål i en budstruktur — visa hålen och
+FRÅGA ägaren hur detaljerna ska byggas; föreslå aldrig en egen färdig struktur som
+utgångspunkt (`docs/arbetsrutiner.md` 🙋, `/felrapporter`-kommandot).
+
+**Lärdom (docs-vakten):** en gitignorad mätfil som råkar finnas lokalt döljer ett
+rött bygge i Actions — kör vakten med `revisor-output/` bortflyttad före push;
+genererade mätfiler hör hemma i vaktens `GENERERADE`-set.
+## 2026-09-19 — Claim-ombygget: frågan i stället för klippet
+
+Användarna: "datorn claimar för hastigt, det bara blinkar till". Roten var inte
+botens tempo utan ett hårt klipp — auto-claimen löste ut i samma bildruta som
+fjärde kortet landade, släckte sticksvepet och vände upp alla händer på en gång.
+Mergepunkter `9389da9` (ombygget) + `9231d05` (ägarjusteringen), LIVE; ägarens
+live-prov godkänt samma dag ("Allt bra"). Plan, flöde och facit: `docs/claim-plan.md`.
+
+- **Frågan:** efter sticksvepet + andetaget `claimBeat` visas den icke-modala
+  rutan "[Väderstreck] gör anspråk på resten (N stick)" — OK / Spela klart, ingen
+  timer, korten synliga. Bottarna står stilla från det att claimen är aktuell
+  (`claimDue`). "Spela klart" stänger frågan för resten av given.
+- **Revealen** lägger upp de dolda händerna en i taget (`revealStep`).
+- **Ett enda stick kvar claimas aldrig** (motorn + bordsservern).
+- **Mänsklig spelförare → auto-claimen alltid av** (ägarjustering efter första
+  live-provet): datorn gör aldrig anspråk åt en människa; manuell "Claim tricks"
+  är vägen i Spela kort, och bordsservern föreslår ingen claim åt en människa.
+- **Vänner-bordet:** samma ruta och ordval i stället för den modala dialogen som
+  täckte korten; frågan väntar ut svepet, kortklick spärrade medan den väntar.
+- **Bifynd:** ett klick mitt i en kortflygning + släckt svep lämnade en
+  kvarhängande flygklon över bordet — `skipSweep` avslutar nu flygningen.
+
+Ägarbeslut: endast frågeläge (snabbläget struket — byggs bara på begäran).
+SENARE (`docs/senare.md`): delclaim "X stick", "visa varför". Kandidat vid
+borden: manuell claim — en mänsklig spelförare spelar i dag ut alla kort där.
+
+## 2026-09-20 — Systemkontrollen: nattgranskningen blev versionsmedveten
+
+Bred systemkontroll på ägarens begäran (tester, typkontroll, felrapporter,
+Actions, live-sajten — allt grönt) hittade ETT riktigt fel, i nattrapporterna:
+djupgranskningen spelade om gårdagens inskick med den motor som låg på main när
+granskningen körde. Varje spelmotor-deploy mitt på en tävlingsdag fällde därför
+de inskick som spelats FÖRE deployen (bottarnas nattspel, tidiga människor) —
+de flyttades till 'granskning' och föll ur topplista, historik och medaljer.
+Belägget: fynd fanns bara för tävlingsdagarna 09-12, 09-13, 09-17 och 09-18 —
+exakt dagarna kring spelmotor-commitarna `a1061da`, `341920d` och `037403b` —
+och vartenda fynd gällde tredje kortet i ett stick, precis det commitarna ändrade.
+Rapporterna: `gh run download <körning> -n tavlingsgranskning-rapporter`.
+
+- **Motorstämpeln:** byggets commit-SHA bakas in (`vite.config.ts` `define` →
+  `src/lib/build.ts`), sätts på inskicket i SPELÖGONBLICKET (sparas i det lokala
+  framsteget så en omsändning bär rätt version) och lagras i `payload.motor`
+  (`skicka-in.ts`, strikt form). Botjobbet stämplar med sin `GITHUB_SHA`.
+- **Omprovet:** avvikelse mot dagens motor → omspelning i ett git-arbetsträd per
+  äldre motorversion (stämpeln först, sedan de senaste versionerna på main;
+  motorns identitet = trädhashen för `src/lib`). Flytt bara om ingen version lade
+  korten. Provat lokalt mot commiten före `a1061da` med påhittad hemlighet: den
+  gamla motorn avvek på just ett tredje-hands-kort — fenomenet i miniatyr.
+- **Återställningen** av de felflyttade inskicken sker med SAMMA dom (manuell
+  workflow-körning per datum med "ompröva flyttade"), inte med blind SQL.
+- Facit först: `tavlingsgranskning.test.ts` (buggen återskapad: inskick spelat
+  med äldre motor ska INTE flyttas).
+- **Lärdom ur första skarpa omprovet (samma dag):** 09-12 och 09-18 friades helt,
+  men för 09-13 åt dagens många commits upp versionstaket innan rätt motor hann
+  prövas (inget nytt flyttades — de sex stod bara kvar). Kandidatordningen är
+  därför: motorn som var live när tävlingsdagen BÖRJADE först, sedan dagens
+  deployer i tidsordning, sist några äldre; och motorns identitet snävades till
+  spelmotorns egna sökvägar (backend-/UI-commits räknas inte som ny motor).
+
+## 2026-09-20 — Ägarens live-fynd: 4♥ efter transfer + 2NT över stört 1NT
+
+Tävlingsbricka 9: 1NT–(2♣ DONT)–2♥–P–2♠–P–2NT–P och öppnaren bjöd 4♥ (dubblat).
+Regeln saknades — tabellraden för öppnarens tredje bud gäller bara tysta
+motståndare och systems on-modulen (#77) hade bara sina två nya vägar, så
+reservlogiken läste transferbudet som naturlig hjärter. Lagat i `nt-systems-on.ts`
+(`openerThirdTurn`): tredje budet exakt som ostört, plus 3NT-utgångsvalet efter
+fullföljd överföring (grannhål av samma sort, hittat vid kontrollen av fixen).
+Facit i `nt-systems-on.test.ts`; systemboken §7.5 + §9. Nattens förscreening hade
+flaggat brickan ("fel färg") — värt att läsa de larmen även när de oftast är brus.
+
+## 2026-09-20 — Ägarens live-fynd: störd överföring efter vårt 1NT (tävlingsbricka 5)
+
+1NT–(2♣)–2♥–(3♣) och öppnaren passade med ♠AKT9 och 16 hp; 3♣ fick spela.
+Regeln saknades — också när 1NT självt var ostört — och utan spaderstöd "höjde"
+reservlogiken överföringsbudet till 4♥ (samma felläsning som bricka 9 samma dag).
+Ägaren gav reglerna på direkta frågor: 3–4 korts stöd → poängen styr (med
+fördelning, oskyddade honnörer i deras färg borträknade): under 16 tävlar 3M, 16+
+4M; svararen tyst när överföringen var till spel, 8+ hp eller 10+ med fördelning →
+utgång; fjärde hands X av överföringsbudet = systems on. Kod `nt-transfer-stord.ts`
++ `interpretDisturbedTransfer` (betydelselagret) + måttet
+`unguardedHonorsInTheirSuit`; facit `nt-transfer-stord.test.ts`; systemboken §7.5
++ §9, `docs/handvardering.md`. Följdfrågorna besvarade 2026-09-21: öppnarens X =
+straff; svararens femkortshand med utgångsvärden efter öppnarens pass → 3NT.
+
+## 2026-09-22 — Ägarens live-fynd: Michaels-fortsättningen (tävlingsbricka 4)
+
+(1♦)–P–P–2♦–P–2♠ och motorn ville bjuda 4♠ på 15 hp (även på 11 hp). Regeln
+saknades: reservlogiken "höjning på visad längd" läste advancerns tvingade
+preferens som ett fritt bud med värden — samma felläsning som gav 4♥ på
+överföringsbuden 09-20. Ägaren pekade på bridgebum och gav trösklarna; hela den
+ostörda strukturen byggd i `michaels-continuations.ts` (avslut som kan vara 0 · cue 8+
+med 3+ stöd · spärrhopp · 3NT · inklivaren 14/15–17/18+ · accept med 8+ · svaren på cuen), betydelselagret och
+regelregistret. Facit först (`michaels-continuations.test.ts`); ett äldre facit
+ändrat med flit (3-3 i högfärgerna → 2♥, den billigare). Systemboken §7.2 + §9.
+**Ny definition samma dag (ägarbeslut):** Michaels = ALLTID de två högsta objudna
+färgerna (över högfärg = andra högfärgen + ruter), ovanlig 2NT = de två lägsta;
+3♣ pass-eller-rätta, inklivarens svar på det och den nyss byggda 2NT-frågan revs.
+Högfärg + klöver kliver in naturligt.
+Ägarens sista besked: egen sexkortsfärg bara med högst ett kort i båda partnerns
+färger; slamutredningen är systems on (den vanliga konkurrens-slamraden). Provet av
+slamvägen hittade två fel till: min egen "partnern har placerat → pass" svalde
+essfrågan, och faktalagrets `agreedTrump` läste de två cue-buden i deras ruter som
+överenskommen trumf (nyckelkorten räknades med fel trumf) — båda rättade. Bifynd: "partnerns undefined" i
+gårdagens störd överföring-texter, rättat.
+
+**Mönstret att bevaka:** tre live-fynd på tre dagar (4♥ på transferbud ×2, 4♠ på
+Michaels-preferens) har samma rot — reservlogiken läser ett KONSTGJORT eller
+TVINGAT partnerbud som naturlig färg med värden och höjer till utgång.
+
+## 2026-09-27/28 — Omvärderingsfrågan levererad som systemstruktur; felrapport #87–#90; regeln "händer räknas med kod"
+
+Ägaren besvarade golvmätningens frågor (rad 1–6 + fem exempellägen). Utfall:
+golvet `pointsWithFloor` behålls överallt (svararen mot partnerns öppning,
+upplysnings-X, öppnarens hoppåterbud) — omvärdering "efter vad som bjudits" ville
+ägaren inte ha som poängjusteringar utan som systemstruktur:
+- **Läge 2 (LIVE `16e26fe`):** svagt hoppskift 1♥–2♠ (6+ ♠, 5–8 hp, ≤2 ♥; julibeslutet
+  #31 rivet för exakt den följden) + svararens semi-forcing 2♠ efter 1♥–1♠–2♥ (5+ ♠,
+  10+; 2NT förnekar 3-stöd) + öppnarens fortsättning. Facit
+  `auction-svagt-hoppskift-2s.test.ts`; §4.1/§5.2.
+- **Läge 3-paketet (LIVE `cfce6a5`):** Jacoby 2NT = 12+ hp & 3+ trumf "hela tiden";
+  1M–1NT–2x: 2M = exakt 10–11 m. tre stöd, svag hand passar, 4 i öppnarens andra
+  lågfärg = dubbelanpassning m. äkta kontroll (`hasRealControl`); 6-3-2-2 m. 18–19 →
+  2NT; lucka lagad (4M-placering efter Jacoby när slamzon saknas — förr kravvakten).
+  Mätt med `jacoby.probe.test.ts` (JACOBY=1, git-stash A/B, DD via `computeOracle`):
+  25 av 1 500 auktioner ändrade, 3 bättre, 4 sämre (två slammar via Jacoby-vägen
+  missas — uppföljningar i `docs/senare.md`). Facit `auction-lage3-paketet.test.ts`.
+- **Hål D steg 2 avparkerad** (ägarens struktur: ≤12 → 3M, 13+ kontrollbud, 3NT 14–15
+  m. stopp, Kxx ≠ kontroll, Syd 16+ frågar 4NT när allt är kontrollerat) → NÄST 1.
+- **Felrapport #87–#90 (LIVE `e9a9d2e` + `32dd1f0`):** #87 öppnarens rond två efter
+  eget tvingat svar (ingen cue, Bergen 27/24/21); #88 öppnaren svarar på negativ X
+  trots fjärde hands bud (4-korts högfärg / 5+ egen / X "visa din hand") + dubblaren
+  beskriver; #89 Monte-Carlo röstar på gemensamma lägen + fjärde hand går inte över
+  partnerns vinnare (avblockering bara när partnern visat längd); #90 inklivaren drar
+  ur partnerns kooperativa X med kort i deras färg / 6+ egen.
+- **Kritiskt fel, tre gånger:** hp räknade i huvudet (Öst 6 → 9; 4-4-fiten "känd";
+  hand d 18 → 17, ägaren beslutade på fel siffra). Ägaren: "det får inte hända",
+  "gör inte om detta". Regel i `CLAUDE.md`, `docs/arbetsrutiner.md` (🔢, med
+  kommandot), `/felrapporter` och minnet: händer som visas räknas ALLTID med kod,
+  summakoll 40/13.
+Nästa gång: NÄST 0 /felrapporter, sedan hål D steg 2 (NÄST 1), speldiagnos, borden.
+` i ett JS-`replace`
+betyder "texten efter träffen"). GitHub kör då inte flödet alls — varken på schemat
+eller för hand; enda spåret är en röd "startup failure" per push. Nattgranskningen
+och den slutliga ställningen (`daily_standings`) skrevs därför inte på nio dygn.
+Inga resultat var borta: historiken visar siffror bara för frysta dagar + de tre
+senaste, och resten fick texten "spelade inte".
+
+**Lagat:** filen återställd · ny vakt i deploygrinden (`src/workflow-vakt.test.ts`:
+toppnycklar, inget skräp i kolumn 0, jämna citat, inga dubblerade steg — den faller
+på den trasiga filen) · historiken säger "inte sammanräknad än" om en ofrusen dag
+utan ställning. Avslutssteget är självläkande och fyller alla saknade dagar vid
+första körningen.
+
+**Lärdom:** deploygrinden kör inte arbetsflödena, och en röd "startup failure"
+mejlas inte som ett haveri i jobbet. Titta på `gh run list --workflow=tavling-granskning.yml`
+när något med tävlingshistoriken ser fel ut.
+
 ## 2026-10-04 (Kontrollbud före essfrågan, steg 3 — efter hopphöjningen, LIVE `90812ec`)
 
 Efter 1m–1M–3M visar kaptenen med slamintresse sin billigaste kontroll i stället
