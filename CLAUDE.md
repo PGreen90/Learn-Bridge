@@ -25,12 +25,9 @@ färg (1m–1M–3m) · Jacoby minimum · 3-korts stöd i lågfärg (`docs/bevak
 Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
 (`slamtabell-dd.probe.test.ts`) efter varje; budfrågor → fråga ägaren.
 
-**Byggt & LIVE `2776fa5` (2026-10-04, bok §6.1):** 4NT gäller alltid den senast ÄKTA
-bjudna färgen — frågare och svarare räknar samma (kaptenen räknar i partnerns läsning,
-placerar i egen färg bara när den bär sig själv; trumfvakten) · slamtabellen i båda
-vägarna: 5 nyckelkort = alltid slam · 4 + dam = slam · 4 utan dam = damfrågan när den
-finns, annars slam med 8+ kända trumf · tio kända trumf räknas som trumfdam. #94-given
-slutar i 6♥ (inte 7♥). Felrapport #95 LIVE `a5bae94`. Detalj `docs/bevaka.md`.
+**LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen (frågare
+och svarare räknar samma) · slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
+= damfrågan, annars 8+ kända trumf · tio kända trumf = trumfdam. #94 slutar i 6♥.
 
 **Senast LIVE (detalj `docs/historik.md`):** fynd B "parets färg i sang" `889fac3`
 (S8, `docs/speldiagnos.md`) · runda 7 `55d8cd3` · Hål D steg 2 `fda630c` (§7.8 c; öppna
