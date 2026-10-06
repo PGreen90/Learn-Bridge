@@ -109,6 +109,19 @@ describe('buildIssueBody', () => {
     expect(body).toContain('Nord borde inte öppnat 1NT.')
   })
 
+  // Ägarbeslut 2026-10-06: rapporten har ett eget fält "Rätt bud + varför".
+  // Ifyllt = facit för /felrapporter; tomt = tydligt markerat, så kommandot
+  // vet att det måste fråga ägaren i stället för att gissa.
+  it('skriver "Rätt bud + varför" som egen rad när ägaren fyllt i det', () => {
+    const withExpected = buildIssueBody({ ...input, expected: '1♠ – fem spader, 1NT lovar balanserad hand' })
+    expect(withExpected).toContain('**Rätt bud + varför:** 1♠ – fem spader, 1NT lovar balanserad hand')
+  })
+
+  it('markerar "Rätt bud + varför" som inte angivet när fältet är tomt', () => {
+    expect(body).toContain('**Rätt bud + varför:** _(inte angivet)_')
+    expect(buildIssueBody({ ...input, expected: '   ' })).toContain('**Rätt bud + varför:** _(inte angivet)_')
+  })
+
   it('utpassad giv rapporteras utan kontrakt och stick', () => {
     const passedOut = buildIssueBody({ ...input, contract: null, tricks: [] })
     expect(passedOut).toContain('kontrakt: utpassad')

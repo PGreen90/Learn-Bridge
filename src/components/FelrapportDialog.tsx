@@ -43,6 +43,7 @@ export function FelrapportDialog({
 }) {
   const [category, setCategory] = useState<string>(categories[0])
   const [description, setDescription] = useState('')
+  const [expected, setExpected] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -50,7 +51,7 @@ export function FelrapportDialog({
 
   /** Fallback: öppna den förifyllda GitHub-sidan (som förr). */
   function openIssue() {
-    const url = felrapportUrl({ deal, calls, contract, tricks, category, description })
+    const url = felrapportUrl({ deal, calls, contract, tricks, category, description, expected })
     window.open(url, '_blank', 'noopener')
     onClose()
   }
@@ -61,7 +62,7 @@ export function FelrapportDialog({
     setStatus('sending')
     setErrorMsg('')
     try {
-      await submitFelrapport({ deal, calls, contract, tricks, category, description }, token)
+      await submitFelrapport({ deal, calls, contract, tricks, category, description, expected }, token)
       setStatus('sent')
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : 'Något gick fel.')
@@ -118,6 +119,24 @@ export function FelrapportDialog({
           placeholder="Beskriv gärna med egna ord vad som kändes fel …"
           className="mt-3 w-full rounded-lg border border-line-strong p-2 text-sm text-ink focus:border-emerald-500 focus:outline-none disabled:opacity-60"
         />
+
+        {/* Ägarbeslut 2026-10-06: "Rätt bud + varför" är det som gör en fix hållbar —
+            ifyllt blir det facit för /felrapporter, tomt tvingar kommandot att fråga. */}
+        <label className="mt-3 block text-xs font-semibold text-ink-soft" htmlFor="felrapport-ratt">
+          Rätt bud + varför
+        </label>
+        <textarea
+          id="felrapport-ratt"
+          value={expected}
+          onChange={(e) => setExpected(e.target.value)}
+          rows={2}
+          disabled={sending}
+          placeholder="T.ex. 3♥ – visar fem spader och fyra hjärter. Eller: ♠A – ta sticket, annars tappas det."
+          className="mt-1 w-full rounded-lg border border-line-strong p-2 text-sm text-ink focus:border-emerald-500 focus:outline-none disabled:opacity-60"
+        />
+        <p className="mt-1 text-xs leading-relaxed text-ink-muted">
+          Det här fältet gör att felet kan låsas som facit direkt. Tomt → Claude frågar dig.
+        </p>
 
         {status === 'error' && (
           <p className="mt-2 rounded-lg bg-rose-50 p-2 text-xs leading-relaxed text-rose-700">

@@ -40,6 +40,12 @@ export interface FelrapportInput {
   /** Vald kategori (ur REPORT_CATEGORIES eller BIDDING_REPORT_CATEGORIES). */
   category: string
   description: string
+  /**
+   * "Rätt bud + varför" (ägarbeslut 2026-10-06): vad som BORDE ha hänt och
+   * skälet. Ifyllt är det facit för /felrapporter; tomt markeras tydligt i
+   * rapporten så kommandot frågar ägaren i stället för att gissa.
+   */
+  expected?: string
 }
 
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
@@ -135,12 +141,14 @@ export function buildIssueTitle(input: FelrapportInput): string {
 }
 
 export function buildIssueBody(input: FelrapportInput): string {
-  const { deal, calls, contract, tricks, category, description } = input
+  const { deal, calls, contract, tricks, category, description, expected } = input
 
   const lines: string[] = []
   lines.push(`**Kategori:** ${category}`)
   lines.push('')
   lines.push(description.trim() || '_(ingen beskrivning)_')
+  lines.push('')
+  lines.push(`**Rätt bud + varför:** ${expected?.trim() || '_(inte angivet)_'}`)
   lines.push('')
   lines.push(`**Bricka ${deal.board}** · Giv: ${SEAT_LABEL[deal.dealer]} · ${VUL_TEXT[deal.vulnerability]}`)
   if (contract) {

@@ -19,6 +19,11 @@ som innehåller HELA given maskinläsbart. Din uppgift: läs rapporterna,
    `gh issue view <nummer> --repo PGreen90/Learn-Bridge`
    Kategorin + ägarens fritext säger vad som kändes fel; det maskinläsbara
    blocket (se format nedan) innehåller hela given.
+   **Raden "Rätt bud + varför"** (fält i formuläret sedan 2026-10-06) är
+   ägarens facit: står där ett bud/kort + skäl, lås DET som facit (och säg
+   ifrån om det strider mot `docs/budsystem.md` — ägaren avgör, men ska veta).
+   Står där "_(inte angivet)_" (eller rapporten är äldre än fältet): fråga
+   ägaren vad rätt bud/kort är innan facit skrivs — gissa aldrig.
 
 3. **FACIT FÖRE FIX — alltid.** Återskapa given som ett test INNAN du rör
    någon kod:
