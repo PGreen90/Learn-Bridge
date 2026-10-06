@@ -1,5 +1,14 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+> **ÖVERSYN BESLUTAD 2026-10-06 (ägarbeslut): den här listan ses över FÖRE allt
+> annat arbete.** Bakgrund: listan har vuxit till ~180 rader utan att någon vaktar
+> dem, och ägaren upplever att samma saker anmärks på igen. Mätt 2026-10-06: 0 av 99
+> felrapporter säger "igen" — så hålen sitter i obevakade principer, inte i
+> rapporterna. **Metod, rad för rad:** (1) lagad, eller redan vaktad av facit/sond →
+> stryk; (2) verklig regel utan vakt → skriv facit-test eller sond, raden står kvar
+> tills vakten finns; (3) bara en notis → flytta till `docs/senare.md` eller stryk.
+> Målet: en lista som är en VAKT, inte en backlogg. Beslut per rad tas med ägaren.
+
 ## Tredje hand i sang: ♠8 under partnerns ♠7 fast ♠A fanns (2026-10-06, bifynd i felrapport #96)
 - **Läget:** 2NT av Väst, bricka 11 (giv Syd, ingen i zon), stick 11. Nord
   ♠A98 kvar, Syd leder ♠7, Väst ♠6 — Nord la **♠8**, Öst vann på ♠Q. DD: ♠A och

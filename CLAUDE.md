@@ -10,10 +10,10 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-06): nattgranskningen går av sig själv igen
-> (schemakörningen grön, efterhandsgranskningen 26 sep–4 okt KLAR, 0 fynd). Börja med
-> /felrapporter, sedan ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan eller
-> "trumfen satt"?
+> **NÄSTA SESSION BÖRJAR MED** (ägarbeslut 2026-10-06): **översynen av `docs/bevaka.md`
+> FÖRE allt annat** (före /felrapporter och NU) — metoden står överst i den filen.
+> Sedan /felrapporter, sedan ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan
+> eller "trumfen satt"?
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
 **Steg 1–3 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`): slamradens kontrollbud följer ägarens
