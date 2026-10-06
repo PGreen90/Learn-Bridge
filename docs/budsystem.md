@@ -3222,9 +3222,24 @@ boten hellre lågt utan markering. Bottarna på **spelförarsidan** markerar ald
 **Bottarna LÄSER också markeringar (Steg 5).** Bot-hjärnan (Monte-Carlo) tolkar
 det entydiga, säkra fallet: en **avskräckande** attityd på partnerns färg (ett
 högt spotkort) betyder att markeraren saknar dam+ i färgen, så samplaren slutar
-lägga dam/kung där. Bara bottarnas markeringar avkodas (aldrig människans, vars
-metod vi inte känner). Uppmuntran (tvetydig: dam+ *eller* kort färg) och räkning
-(paritet) avkodas inte ännu. Uppmätt spelstyrka (bot-mot-bot, 20 seedade givar):
+lägga dam/kung där. Uppmuntran (tvetydig: dam+ *eller* kort färg) och räkning
+(paritet) avkodas inte ännu.
+
+**Även människans markeringar läses (felrapport #96, ägarbeslut 2026-10-06).**
+Förr avkodades bara bottarnas kort ("människans metod känner vi inte"); nu antar
+bottarna att människan spelar samma §8-system som de själva — rondgenomgången
+förklarar ju redan hennes kort med samma regler. Öppningsutspelets *doktrin*
+(längsta färg) antas fortfarande bara för bottar.
+
+**Partnerns Lavinthal-sak lyds (samma beslut).** Partnerns **första sak** i given
+ber om en färg: **högt kort (7+) = den högsta** av de andra färgerna (alla utom
+sakfärgen och trumfen — i sang tre färger), **lågt (5 eller lägre) = den lägsta**;
+en sexa säger inget. När motspelaren sedan är inne **spelar hen den önskade
+färgen — esset först om hen har det, annars enligt utspelsdoktrinen** — före
+fortsättningen av utspelsfärgen (partnern var renons i den). Bot-hjärnan ger
+dessutom partnern minst en dam i den önskade färgen. *Bricka 11 (2NT av Väst):
+Syd sakade ♥7 på Nords ruterutspel; Nord inne på ♣K fortsatte förr ruter — nu
+♠A och sedan spader.* Uppmätt spelstyrka (bot-mot-bot, 20 seedade givar):
 avkodningen sänkte spelförarens stick netto (bättre försvar), inom bruset –
 `play-quality.probe.test.ts` (gatad).
 
@@ -3286,6 +3301,13 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-06 — Felrapport #96: bottarna läser människans markeringar och lyder
+  partnerns Lavinthal-sak (§8.5).** Syds ♥7-sak på stick 1 (= spader) lästes
+  aldrig; Nord fortsatte ruter där partnern var renons. `partnerLavinthalRequest`
+  (signal-decode) avkodar partnerns första sak (7+ hög, ≤5 låg) exakt som
+  encodern lägger den; `defenderFollowsPartnerLavinthal` (play-bot) spelar
+  färgen, esset först. Attitydläsningen gäller nu också människans kort. Facit
+  `play-bot-lavinthal-las.test.ts`.
 - **2026-10-06 — Felrapport #98: redubblarens andra bud (§7.8 d).** Efter
   1♥–(X)–XX–(1♠)–P–(P) bjöd redubblaren 2♥ ("partnern har passat (minimum)") på
   14 stödpoäng. Ny rad: 13+ stödpoäng → 4M, 10–12 → 3M (öppnaren lyfter med

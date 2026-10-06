@@ -181,7 +181,10 @@ describe('signalavkodning – ATTITYD under spelet (Steg 5b): avskräckning → 
     expect(model.W.suitHcp.hearts.max).toBe(10)
   })
 
-  it('människans (Syd) markering avkodas ALDRIG', () => {
+  // Felrapport #96 (ägarbeslut 2026-10-06): även människans markeringar läses —
+  // antagandet är att hon spelar appens §8-system. Förr orört; `humanSeat: 'S'`
+  // stänger fortfarande av det (för tester/experiment).
+  it('människans (Syd) avskräckning läses också — men inte med humanSeat satt', () => {
     // Ö/V spelför → N/S försvarar. Nord leder ♥, Syd (människan) följer ♥9.
     const trick: Trick = {
       leader: 'N',
@@ -197,6 +200,8 @@ describe('signalavkodning – ATTITYD under spelet (Steg 5b): avskräckning → 
       leader: 'N', toAct: 'E', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
     }
     const model = applySignalReads(buildHandModel([]), state, 'E')
-    expect(model.S.suitHcp.hearts.max).toBe(10) // orört
+    expect(model.S.suitHcp.hearts.max).toBe(1) // ♥9 = avskräckning: ingen dam+
+    const off = applySignalReads(buildHandModel([]), state, 'E', { humanSeat: 'S' })
+    expect(off.S.suitHcp.hearts.max).toBe(10) // avstängd läsning → orört
   })
 })

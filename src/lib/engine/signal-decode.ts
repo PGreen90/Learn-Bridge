@@ -20,12 +20,13 @@
 
 import type { Card, Rank, Seat, Suit } from '../../types/bridge'
 import { playedCards, visibleSeats } from './card-counting'
-import { side, type PlayState } from './play'
+import { PARTNER_SEAT, side, type PlayState } from './play'
 import type { HandModel } from './hand-model'
 import { lenMin, suitHcpCeil, suitHcpFloor } from './hand-model'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
+const SUIT_RANK_LOW_TO_HIGH: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
 const HCP_BY_RANK: Partial<Record<Rank, number>> = { A: 4, K: 3, Q: 2, J: 1 }
 const hcpOf = (r: Rank) => HCP_BY_RANK[r] ?? 0
 
@@ -127,17 +128,20 @@ function clampSeat(model: HandModel, seat: Seat, suit: Suit): void {
  * kort färg) och avkodas inte. Räkning (paritet) hör till samplar-arbetet och
  * tas separat.
  *
- * Järnprincip (ingen tjuvkik): bara botarnas markeringar avkodas (deterministisk
- * §8.5), aldrig människans (`opts.humanSeat`, default 'S'), och aldrig den
- * agerande platsens egen hand (den samplas inte).
+ * Järnprincip (ingen tjuvkik): bara ärligt synliga kort avkodas, aldrig den
+ * agerande platsens egen hand (den samplas inte). Sedan felrapport #96
+ * (ägarbeslut 2026-10-06) läses ÄVEN människans markeringar — antagandet är att
+ * hon spelar appens §8-system (`opts.humanSeat` finns kvar bara för tester som
+ * vill stänga av det). Partnerns Lavinthal-sak höjer dessutom honnörsgolvet i
+ * den önskade färgen (minst en dam) — `partnerLavinthalRequest`.
  */
 export function applySignalReads(
   model: HandModel,
   state: PlayState,
   seat: Seat,
-  opts: { humanSeat?: Seat } = {},
+  opts: { humanSeat?: Seat | null } = {},
 ): HandModel {
-  const humanSeat = opts.humanSeat ?? 'S'
+  const humanSeat = opts.humanSeat === undefined ? null : opts.humanSeat
   const declarer = state.contract.declarer
   const LO = rankVal('8')
   const HI = rankVal('10')
@@ -148,7 +152,7 @@ export function applySignalReads(
     for (const pc of trick.cards) {
       const s = pc.seat
       if (side(s) === side(declarer)) continue // bara motspelet markerar
-      if (s === humanSeat || s === seat) continue // aldrig människan/egen hand
+      if (s === seat || (humanSeat !== null && s === humanSeat)) continue // aldrig egen hand
       if (s === leader || s === trick.winner) continue // utspel / vinnare markerar inte
       if (pc.card.suit !== ledSuit) continue // bara när platsen följde färg
       if (side(leader) !== side(s)) continue // attityd bara på PARTNERNS färg
@@ -160,5 +164,42 @@ export function applySignalReads(
       }
     }
   }
+  // Partnerns Lavinthal-sak: den önskade färgen bär minst en dam.
+  const wanted = partnerLavinthalRequest(state, seat)
+  if (wanted) {
+    suitHcpFloor(model[PARTNER_SEAT[seat]], wanted, 2)
+    clampSeat(model, PARTNER_SEAT[seat], wanted)
+  }
   return model
 }
+
+/**
+ * Partnerns LAVINTHAL-SAK (§8.2/§8.5), läst ur `seat`s synvinkel (felrapport
+ * #96, ägarbeslut 2026-10-06 — bottarna läser även människans markeringar,
+ * under antagandet att hon spelar appens §8-system). Partnerns FÖRSTA sak i
+ * given (följde inte färg, trumfade inte) ber om en färg: ett högt kort (7+)
+ * = den HÖGSTA av de andra färgerna, ett lågt (5 eller lägre) = den LÄGSTA —
+ * exakt så som encodern `defenderFirstDiscardSignal` väljer bland alla färger
+ * utom sakfärgen och trumfen (i sang alltså tre färger). En sexa är oläsbar.
+ * Bara motspelet markerar: spelförarsidan läser inget.
+ */
+export function partnerLavinthalRequest(state: PlayState, seat: Seat): Suit | null {
+  const declarer = state.contract.declarer
+  if (side(seat) === side(declarer)) return null
+  const partner = PARTNER_SEAT[seat]
+  for (const trick of state.completedTricks) {
+    const led = trick.cards[0]?.card.suit
+    if (!led) continue
+    const pc = trick.cards.find((c) => c.seat === partner)
+    if (!pc || pc.card.suit === led) continue
+    if (state.trump !== null && pc.card.suit === state.trump) return null // stöld, inte sak
+    const r = rankVal(pc.card.rank)
+    const others = SUIT_RANK_LOW_TO_HIGH.filter((s) => s !== pc.card.suit && s !== state.trump)
+    if (others.length < 2) return null
+    if (r >= rankVal('7')) return others[others.length - 1]
+    if (r <= rankVal('5')) return others[0]
+    return null // sexan säger inget säkert
+  }
+  return null
+}
+
