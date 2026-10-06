@@ -7,8 +7,12 @@
   ett stick (spelföraren 7 → 8, enda DD-förlusten i hela försvaret). Händerna
   står i issue #96. Hör till T-serien (tredje hand högt) — inte lagat.
 - **Själva rapporten (#96)** gällde att Nord inte läste Syds Lavinthal-sak
-  (♥7 på stick 1 = spader). Design: bottarna avkodar aldrig människans
-  markeringar (§8.5), och Lavinthal avkodas inte alls. Ägarfråga ställd.
+  (♥7 på stick 1 = spader). LAGAD 2026-10-06 (ägarbeslut: bottarna läser
+  människans markeringar, §8.5): partnerns första sak avkodas (7+ hög / ≤5 låg)
+  och lyds när motspelaren är inne (esset först). **Bevaka:** (1) läsningen
+  antar att människan spelar §8 — en "slarvig" sakning styr nu partnerns
+  utspel; (2) sexan är oläsbar; (3) attitydläsningen (högt spotkort = ingen
+  dam+) gäller nu även Syds kort i bot-hjärnan.
 
 ## Nattgranskningen stod still 26 sep–4 okt (2026-10-05)
 - **Lagat:** `tavling-granskning.yml` var ogiltig YAML sedan Dagens IMP-commiten

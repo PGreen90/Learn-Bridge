@@ -17,7 +17,7 @@ import type { ResolvedCall } from '../bidding'
 import { currentWinner, dummyOf, legalCards, PARTNER_SEAT, side, type PlayState } from './play'
 import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats } from './card-counting'
 import { buildHandModel } from './hand-model'
-import { applyOpeningLeadSignal, applySignalReads } from './signal-decode'
+import { applyOpeningLeadSignal, applySignalReads, partnerLavinthalRequest } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
 import { defensiveSignalCard, honorLead, leadFromSuit } from './signals'
 
@@ -271,6 +271,7 @@ function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardC
 
 const HCP_OF: Partial<Record<Rank, number>> = { A: 4, K: 3, Q: 2, J: 1 }
 const SUIT_RANK_LOW_TO_HIGH: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+const SUIT_NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', hearts: 'hjärter', spades: 'spader' }
 
 /**
  * Lavinthal-sak (markeringar Steg 3, docs/budsystem.md §8.2): FÖRSTA gången en
@@ -281,6 +282,25 @@ const SUIT_RANK_LOW_TO_HIGH: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
  * spelförarsidan, utspel, följer färg, bara trumf, inte första saket, eller
  * ingen frihet i den säkra färgen. Läser bara egen hand (ingen tjuvkik).
  */
+/**
+ * Motspelaren på lead lyder partnerns Lavinthal-sak (felrapport #96): leder den
+ * önskade färgen — esset först om det finns, annars `leadFromSuit` (topp av
+ * sekvens / lågt). Null när ingen begäran finns eller färgen är slut.
+ */
+function defenderFollowsPartnerLavinthal(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+  if (side(seat) === side(state.contract.declarer)) return null
+  const wanted = partnerLavinthalRequest(state, seat)
+  if (!wanted) return null
+  const inSuit = legal.filter((c) => c.suit === wanted)
+  if (inSuit.length === 0) return null
+  const ace = inSuit.find((c) => c.rank === 'A')
+  const card = ace ?? leadFromSuit(inSuit)
+  return {
+    card,
+    reason: `Partnerns markering (§8.2, Lavinthal-sak) bad om ${SUIT_NAME[wanted]} – jag spelar den färgen${ace ? ', esset först' : ''}.`,
+  }
+}
+
 function defenderFirstDiscardSignal(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
   if (side(seat) === side(state.contract.declarer)) return null // bara motspelet
   if (state.currentTrick.length === 0) return null // utspel, inte sak
@@ -1415,6 +1435,15 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     if (!defender) {
       const seq = continueEstablishSequence(state, seat, legal)
       if (seq) return seq
+    }
+    // Felrapport #96 (ägarbeslut 2026-10-06): PARTNERNS LAVINTHAL-SAK lyds. Har
+    // partnern sakat och bett om en färg (högt = högsta av de andra, lågt =
+    // lägsta, §8.2) spelar jag den när jag är inne — esset först om jag har det
+    // ("dra esset och spela sedan ett till"), annars enligt utspelsdoktrinen.
+    // Går före fortsättningen av utspelsfärgen: partnern var ju renons i den.
+    if (signalsOn) {
+      const lav = defenderFollowsPartnerLavinthal(state, seat, legal)
+      if (lav) return lav
     }
     // Motspelets utspelfärg (trick 1, om den leddes av vår sida) fortsätts före
     // allt annat – partnerns honnörer sitter ofta bakom den.
