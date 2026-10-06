@@ -396,6 +396,12 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
   const len = lengths(hand)
   const { level: ovLevel, suit: ovSuit } = parseBid(theirCall)
   const isMajorOpening = openerSuit === 'hearts' || openerSuit === 'spades'
+  // Minsta stöd för att HÖJA partnerns öppningsfärg i konkurrens (felrapport #97,
+  // ägarbeslut 2026-10-06): en lågfärg kräver fyra kort precis som ostört (1m–2m),
+  // en högfärg tre. Gäller konkurrenshöjningen (6–9) och höjningen över deras X —
+  // INTE cuen (limithöjning+, 10+): den är svararens enda väg med 10+ utan annat
+  // bud (frö 20260769: 1♣–(1♦) med ♠AQ4 ♥A42 ♦J864 ♣Q95 passade annars 1♦). Förr höjdes 1♦–(1NT) till 2♦ på ♦J83 (bricka 10, 2026-10-04).
+  const minStod = isMajorOpening ? 3 : 4
 
   // Mot ett 1NT-INKLIV (pliktsvepet K3 b, ägarbeslut 2026-09-02): förr fanns
   // inget svar alls, så svararen passade med 4-korts stöd (frö 20260732:
@@ -403,8 +409,8 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
   // deras 15–18); 3+ stöd och 6–9 → 2M (konkurrenshöjning); annars pass.
   if (theirCall === '1NT') {
     if (p >= 10) return { call: 'X', rule: 'straffdubbling', explanation: `10+ hp mot deras 1NT-inkliv → X (straff – vi har balansen).` }
-    if (len[openerSuit] >= 3 && p >= 6) {
-      return { call: `2${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `3+ stöd (6–9) → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning över deras 1NT).` }
+    if (len[openerSuit] >= minStod && p >= 6) {
+      return { call: `2${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${minStod}+ stöd (6–9) → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning över deras 1NT).` }
     }
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt mot deras 1NT-inkliv → pass.` }
   }
@@ -498,9 +504,9 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
       return { call: `${L}${LETTER[ovSuit]}` as Bid, rule: 'cue (limithöjning+)', explanation: `10+ hp, 3+ stöd → cue ${SUIT_SYM[ovSuit]} (limithöjning+, krav).` }
     }
     // Konkurrenshöjning: 3+ stöd i öppnarens färg, 6–9 (spärr/konkurrens, ej inbjudan).
-    if (len[openerSuit] >= 3 && p >= 6) {
+    if (len[openerSuit] >= minStod && p >= 6) {
       const L = cheapestLevelAbove(openerSuit, ovLevel, ovSuit)
-      return { call: `${L}${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `3+ stöd (6–9) → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
+      return { call: `${L}${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${minStod}+ stöd (6–9) → ${L}${SUIT_SYM[openerSuit]} (konkurrens).` }
     }
     // NT med stopp i deras färg – bara mot inkliv på 1–2-läget. Mot ett
     // hoppinkliv på 3-läget vore 2NT OLAGLIGT (under deras bud) och 3NT
@@ -550,7 +556,7 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
       return { call: '2NT', rule: 'Jordan 2NT', explanation: `10+ hp, 4+ trumf → 2NT (Jordan, limithöjning+ med fit).` }
     }
     if (p >= 10) return { call: 'XX', rule: 'redubbling', explanation: `10+ hp → XX (redubbling, lovar styrka).` }
-    if (len[openerSuit] >= 3) return { call: `2${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `3+ stöd → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning).` }
+    if (len[openerSuit] >= minStod) return { call: `2${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${minStod}+ stöd → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning).` }
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt → pass.` }
   }
 

@@ -97,6 +97,38 @@ describe('K3 (b) – svararen över ett 1NT-inkliv', () => {
     expect(c.bid).toBe('X')
     expect(c.rule).toBe('straffdubbling')
   })
+
+  // Felrapport #97 (2026-10-04, bricka 10): 1♦–(1NT) med ♦J83 och 8 hp höjdes
+  // till 2♦. Ägaren: "för att partner skall få bjuda stöd i lågfärgsöppning så
+  // krävs minst 4 korts stöd" — samma golv som ostört (1m–2m = 4+). Gäller alla
+  // svararens höjningar i konkurrens: över 1NT, över färginkliv (höjning OCH
+  // cue = limithöjning+) och över deras X.
+  const R97 = dealOf('E', 'all', { N: 'S:T74 H:K62 D:J83 C:A752', E: 'S:98632 H:T854 D:T6 C:KT', S: 'S:AJ H:J93 D:A972 C:Q984', W: 'S:KQ5 H:AQ7 D:KQ54 C:J63' })
+  it('felrapport #97: 1♦–(1NT) med trekorts ruterstöd (8 hp) → pass, inte 2♦', () => {
+    const c = decideCall(R97, [call('E', 'P'), call('S', '1D'), call('W', '1NT')], 'N')
+    expect(c.bid).toBe('P')
+  })
+  it('samma hand med fyra ruter (♦J83 → ♦J832, ♣A75) → 2♦ som förr', () => {
+    const d = dealOf('E', 'all', { N: 'S:T74 H:K62 D:J832 C:A75', E: 'S:98632 H:T854 D:T6 C:KT', S: 'S:AJ H:J93 D:A97 C:Q9842', W: 'S:KQ5 H:AQ7 D:KQ54 C:J63' })
+    const c = decideCall(d, [call('E', 'P'), call('S', '1D'), call('W', '1NT')], 'N')
+    expect(c.bid).toBe('2D')
+    expect(c.rule).toBe('konkurrenshöjning')
+  })
+  it('1♦–(1♠) med trekorts ruter och 8 hp → ingen konkurrenshöjning (negativ X på 4 hjärter går före — här utan: pass/1NT)', () => {
+    // ♠T74 ♥K62 ♦J83 ♣A752: utan 4-korts högfärg och utan stopp blir det pass.
+    const c = decideCall(R97, [call('E', 'P'), call('S', '1D'), call('W', '1S')], 'N')
+    expect(c.bid).not.toBe('2D')
+  })
+  it("1♦–(1♠) med trekorts ruter och 11 hp → cuen (limithöjning+) får fortfarande bjudas på tre kort — svararens enda väg med 10+ utan annat bud", () => {
+    const d = dealOf('E', 'all', { N: 'S:T74 H:K62 D:J83 C:AK52', E: 'S:98632 H:T854 D:T6 C:7', S: 'S:AJ H:J93 D:A972 C:Q984', W: 'S:KQ5 H:AQ7 D:KQ54 C:JT63' })
+    const c = decideCall(d, [call('E', 'P'), call('S', '1D'), call('W', '1S')], 'N')
+    expect(c.bid).toBe("2S")
+  })
+  it('1♦–(X) med trekorts ruter och 7 hp → pass, inte 2♦', () => {
+    const d = dealOf('E', 'all', { N: 'S:T74 H:Q62 D:J83 C:A752', E: 'S:98632 H:T854 D:T6 C:KT', S: 'S:AJ H:KJ9 D:A972 C:Q984', W: 'S:KQ5 H:A73 D:KQ54 C:J63' })
+    const c = decideCall(d, [call('E', 'P'), call('S', '1D'), call('W', 'X')], 'N')
+    expect(c.bid).toBe('P')
+  })
 })
 
 describe('K3 (c) – svararen över ovanlig 2NT / Michaels', () => {

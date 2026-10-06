@@ -48,10 +48,12 @@ function finalOf(d: Deal) {
 describe('advancern svarar när de bjuder över upplysningsdubblingen (etapp 6 hål 2)', () => {
   it('frö 20261519: (1♣)–X–(2♣) → advancern (15 hp) cue-bjuder 3♣; dubblaren visar högfärgen och utgången nås', () => {
     const d = deal('offring-20261519', 'S', 'ew', {
-      N: 'S:T8 H:Q74 D:K9652 C:T63',
+      // Felrapport #97 (2026-10-06): höjningen över X kräver nu 4 kort i lågfärg —
+      // Nords ♦2 och Västs ♣7 bytta så Nord höjer 2♣ som förr (premissen i testet).
+      N: 'S:T8 H:Q74 D:K965 C:T763',
       E: 'S:K52 H:A65 D:AQJ74 C:J8',
       S: 'S:Q764 H:KT8 D:- C:KQ9542',
-      W: 'S:AJ93 H:J932 D:T83 C:A7',
+      W: 'S:AJ93 H:J932 D:T832 C:A',
     })
     const { contract, bids } = finalOf(d)
     expect(bids).toContain('3C')
@@ -76,8 +78,9 @@ describe('advancern svarar när de bjuder över upplysningsdubblingen (etapp 6 h
 
   it('frö 20260759: (1♣)–X–(2♣) → advancern (9 hp, 5 spader) hoppar 3♠ (inbjudan) — spaderdelkontrakt för Ö/V', () => {
     const d = deal('offring-20260759', 'E', 'ew', {
-      N: 'S:Q8 H:A984 D:7652 C:T63',
-      E: 'S:J9743 H:K76 D:T3 C:AJ9',
+      // Felrapport #97 (2026-10-06): Nords ♦2 och Östs ♣9 bytta — Nord höjer 2♣ med fyra kort.
+      N: 'S:Q8 H:A984 D:765 C:T963',
+      E: 'S:J9743 H:K76 D:T32 C:AJ',
       S: 'S:AT H:T3 D:QJ98 C:KQ872',
       W: 'S:K652 H:QJ52 D:AK4 C:54',
     })
