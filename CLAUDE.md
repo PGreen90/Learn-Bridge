@@ -10,10 +10,10 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-05): nattgranskningen var trasig 26 sep–4 okt
-> (lagad, LIVE `24304a6`). Kontrollera att nattens schemakörning blev grön och kör
-> djupgranskningen i efterhand för de dagar som återstår — `docs/bevaka.md`, översta
-> punkten. Sedan ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan eller "trumfen satt"?
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-06): kolla att nattgranskningens
+> `schedule`-körning gått grön (`gh run list --workflow=tavling-granskning.yml --event
+> schedule --limit 3`; efterhandsgranskningen 26 sep–4 okt är KLAR, 0 fynd). Sedan
+> /felrapporter, sedan ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan eller "trumfen satt"?
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
 **Steg 1–3 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`): slamradens kontrollbud följer ägarens
@@ -29,10 +29,10 @@ Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
 och svarare räknar samma) · slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
 = damfrågan, annars 8+ kända trumf · tio kända trumf = trumfdam. #94 slutar i 6♥.
 
-**Senast LIVE (detalj `docs/historik.md`):** fynd B "parets färg i sang" `889fac3`
-(S8, `docs/speldiagnos.md`) · runda 7 `55d8cd3` · Hål D steg 2 `fda630c` (§7.8 c; öppna
-ägarfrågor: svararens val efter 3NT · öppnaren frågar aldrig 4NT själv) · felrapport
-#91–#94, budhjälpen tänker, uteslutningsmetoden i RKC (2026-09-30).
+**Senast LIVE (detalj `docs/historik.md`):** felrapport #96–#100 (2026-10-06: bottarna
+läser människans markeringar + Lavinthal · redubblarens andra bud · stoppfrågan) · fynd B
+"parets färg i sang" `889fac3` · Hål D steg 2 `fda630c` (öppna ägarfrågor: svararens val
+efter 3NT · öppnaren frågar aldrig 4NT själv) · #91–#94, uteslutningsmetoden i RKC.
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret · tredje hand högt (T-serien) ·
 vänner-bordet = tävlingen · Gambling 3NT · budförklaringarnas ordval

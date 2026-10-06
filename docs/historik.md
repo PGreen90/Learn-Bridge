@@ -10,6 +10,34 @@
 
 ---
 
+## 2026-10-06 (Felrapport #96–#100 + nattgranskningen ikapp, LIVE df1e164 · 7d86726 · 6cd01e8 · a8a334a)
+
+**Efterhandsgranskningen klar:** alla nio dagar 26 sep–4 okt djupgranskade (MP + IMP),
+0 inskick flyttade; många friade av äldre motorversion (26 sep: 51 + 31). Kedjan kördes
+av ett skript som startar nästa dag först när ingen körning är aktiv.
+
+**Fem felrapporter lagade samma dag, alla med facit före fix:**
+- **#97** lågfärgsstöd i konkurrens kräver fyra kort (konkurrenshöjning över 1NT/
+  färginkliv + höjning över X; cuen behåller tre — annars passade 12 hp-händer utan
+  annat bud). §7.8 e.
+- **#98** redubblarens andra bud efter 1M–(X)–XX–(färg)–P–(P): 13+ stödpoäng → 4M,
+  10–12 → 3M (öppnaren lyfter med 14+), utan stöd 4+ bra kort i deras färg → straff-X
+  (öppnaren passar; förr lästes X:et som negativ dubbling → flykt). §7.8 d.
+- **#99** 3-korts stöd med 13+ stödpoäng → 4M direkt över deras tvåfärgsinkliv
+  (ägarens "enkla vägen"; unusual vs unusual spelas inte). §7.8 e.
+- **#96** bottarna läser människans markeringar (ägarbeslut: antagandet att hon spelar
+  §8) och lyder partnerns Lavinthal-sak (första saket: 7+ hög / ≤5 låg; esset först).
+  Bifynd stick 11 (tredje hand ♠8 under partnerns ♠7 med ♠A kvar) i bevaka. §8.5.
+- **#100** 3NT lovar stopp i deras färg även med fit i partnerns lågfärg: utan stopp
+  stoppfråge-cue (en gång; partnern 3NT med stopp, annars färg, aldrig sang utan stopp),
+  sedan 5m; betydelselagret förklarar cuen som fråga. Tre äldre facit följer strukturen
+  (frö 20261354 slutar nu i 3NT via cuen, förr 5♦). §7.4.
+
+**Lärdom (igen):** backticks i dubbelcitat åt två doktextfragment — text med backticks
+skrivs med Edit-verktyget, aldrig via node -e i bash.
+
+---
+
 ## 2026-10-05 (Flakigt test i deploygrinden — "◀ Alla färger" vid vänner-bordet, LIVE `6763e20`)
 
 Testet i `src/pages/bord/BordSpel.test.tsx` föll ibland i Actions på oförändrad kod.
