@@ -10,10 +10,9 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (ägarbeslut 2026-10-06): **översynen av `docs/bevaka.md`
-> FÖRE allt annat** (före /felrapporter och NU) — metoden står överst i den filen.
-> Sedan /felrapporter, sedan ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan
-> eller "trumfen satt"?
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-06): bevaka-översynen KLAR (listan är en vakt:
+> frö + måltestfil, regeln i `docs/arbetsrutiner.md`). Börja med /felrapporter, sedan
+> ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan eller "trumfen satt"?
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
 **Steg 1–3 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`): slamradens kontrollbud följer ägarens
@@ -85,22 +84,22 @@ B13, F1–F6 · stora granskningen · Beslut B etapp 0–2 · felrapporterna · 
 > Detalj: `docs/budsystem.md` §5.2/§5.7/§6 + `docs/bot-hjarna.md`.
 
 ### 👀 Bevaka i spel
-Hela listan (nyast först): **`docs/bevaka.md`** — läs den när ägaren säger att
-något känns fel i spel, eller när en ny fix ska läggas till. Senast
-(2026-09-01, speldiagnos fynd 3): MC-beslut på FÅ samplade lägen · dessförinnan
-S5-fixarna (MC-urfallet stängt) och 6-5-handens utbjudning.
+**`docs/bevaka.md` är en VAKT sedan 2026-10-06:** bara rader med frö/giv +
+måltestfil (`it.todo`), regeln i `docs/arbetsrutiner.md`. Just nu två: fynd D
+(byt färg när spelföraren visat längd, frö 20260907) · #96 ♠8 (T-serien). Kända
+hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
 1. **Spelförarsidans ledningsval i TRUMFkontrakt** — största kvarvarande läckan (89 stick
    i fynd B-riggen, övre gräns 19); "parets färg" var sämre där, ny idé + offline-mätning.
-2. **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: tredje hand
-   vinner för billigt på spelförarsidan, MC-på-få-lägen (`docs/bevaka.md`).
+2. **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: fynd D (byt
+   färg), tredje hand för billigt, MC-på-få-lägen (`docs/senare.md`).
 3. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
    (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
-**budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/bevaka.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
+**budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
 subagent-användning · störda 1NT-auktioner nästa lager · fler budträningsgivar +
 tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den

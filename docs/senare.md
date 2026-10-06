@@ -9,6 +9,71 @@
 
 ## ⚪ SENARE
 
+### Ur bevaka-översynen 2026-10-06 — kända hål utan giv (ingen vakt möjlig än)
+Flyttade från `docs/bevaka.md` när listan gjordes om till en vakt (bara rader
+med frö + måltestfil får stå där). Varje punkt är ett verkligt hål; den som får
+en giv eller ett frö flyttas tillbaka till bevaka med testfil.
+- **Slam efter upplysningsdubbling:** advancern hoppar aldrig förbi utgång (#33,
+  2026-07-07), och dubblaren driver aldrig slam över advancerns maximum efter
+  cue-höjningen (`advancerAnswersCueRaise`/`doublerPlacesAfterCueRaise`,
+  2026-09-12). Kandidat: cue/RKC för dubblaren i slamzon ≈30+.
+- **Storslam på RKC-frågarens öppnarväg:** `rkc-asker-continuations.ts` tar alltid
+  lillslam när ett nyckelkort saknas och bjuder aldrig 7 (medveten avgränsning,
+  kvar i koden 2026-10-06). Svarare-som-kapten-vägen har storslam (5NT-kungfråga).
+- **6-5-handen — hinner motorn visa sjätte kortet?** (ägarnotering 2026-08-24.)
+  Lågfärgen öppnas (`minor-regeln`), högfärgen visas sedan lågfärgen igen — kräver
+  tre bud av öppnaren och lågfärgen har bara lovat 5. Sond-idé: auktionsdump på
+  6-5-händer (`auktionsdump.probe.test.ts`) och räkna hur ofta formen halvvisas.
+- **Rå HP i stället för TP:** X-svararen (`answerTakeoutDouble`), DONT och
+  försvaret mot svaga tvåor räknar rå hp (F4b, 2026-08-07); balanseringens
+  NT-svar och nya färger räknar inte advancer-rabatten (F3b). Osäkert vad som
+  kvarstår efter motorbytet — kontrollera i tabellraderna före bygge.
+- **Spelmotorn, kandidater till speldiagnosens nästa runda (NÄST 2):** holdup
+  två varv mot spelförarens 3-kortsfärg (`defenderHoldUp` kryper bara första
+  varvet, runda 7) · "behåll mästaren"-regel för tumregelboten med 9+ kort
+  (`defenderGuardDiscard` vet inte att kortet är mästare, #78/#79) · tredje
+  hand på spelförarsidan vinner för billigt efter ledning mot honnörerna
+  (20260752 ♠6, 20260826 ♣T) · MC-beslut på ensiffrigt antal samplade lägen
+  (20260894, stick 6). Fynd D har giv och står i bevaka.
+- **Bottarnas läsning av människans markeringar (#96, 2026-10-06):** antar att
+  människan spelar §8 — en slarvig sakning styr partnerns utspel; sexan är
+  oläsbar; attitydläsningen gäller nu även Syds kort. Ingen giv där det slagit fel.
+- **Budförklarings-svepet (betydelsesvepet) — mönsterlistan**, flyttad hit från
+  bevaka 2026-10-06 (CLAUDE.md ⚪ SENARE pekar hit):
+  - **Budförklarings-svepet är inte klart.** Betydelsesvepet jämför den härledda
+    förklaringen med motorns regel på varje botbud, på tre axlar: kravnivå, alert
+    och (ny 2026-10-02, informativ) FÖRVÄXLAD KONVENTION — båda konstlade men olika
+    konventioner, det de två första axlarna inte ser. Kört över **en miljon givar**
+    (2026-10-02): ostörda standardfrön är noll; över miljonen återstår på ostörda
+    auktioner 23 kravnivå- och 14 alertmönster, på störda 43 + 21 och 13 regler
+    utan kravnivå. Listan MÄTTAR: 87 mönster vid 100 000 givar, 116 vid en miljon;
+    de 29 som kom till förekommer högst 21 gånger per miljon — de stora syntes redan
+    vid 100 000. Störst, i ordning (antal per miljon givar):
+    1. **Responsiv dubbling läses som vanlig upplysningsdubbling** (13 000;
+       (1♦)–X–(2♦)–X) — rätt märken, men texten nämner inte responsiv.
+    2. **Spärrhöjning i konkurrens** (5 500; 2♦–(2♠)–3♦: motorn "avslut", läsaren
+       "tävlande höjning, ej krav").
+    3. **Cue-buden i konkurrens** läses alla som "stark höjning, minst limit"
+       (5 000 sammanlagt; öppnarens cue, negativ-dubblarens cue, stöd-cue, stark
+       tvåfärgs-cue över svag tvåa).
+    4. **Motorn bjuder ett naturligt kravbud, läsaren ser ett kontrollbud**
+       ("krav – rebjuder egen färg/ny färg/stödjer partnern", 2 500) och omvänt
+       (cue-bid läst som utgång/naturligt, 530).
+    5. **Regler i konkurrens utan kravnivå** (stark dubblare: fortsätter,
+       negativ-dubblaren accepterar inbjudan, rättelse till inklivsfärgen … 10 000).
+    6. **4 i lågfärg som slaminbjudan** läses "stöd/inbjudan 10–12/preferens,
+       svag hand" (1 100) · **2NT efter reverse** ("krav-svar" mot "11–12
+       inbjudan", 670) · **svar på game try** (600) · **Stayman följt av 2♠**
+       ("signoff" mot "inbjudan 8–9", 110).
+    Varje mönster är en fråga om vem som har rätt — motor eller läsare — och flera
+    är budfrågor för ägaren. Registrets kravnivå läses av partnern, så en rättad
+    registerrad kan ändra budgivningen (mät med auktionsdiffen).
+    Kör: `$env:BETYDELSE='1'; npx vitest run src/lib/engine/auction-meaning.probe.test.ts`
+    (standardfrön, 3 000 givar) · en miljon: lägg till
+    `$env:BETYDELSE_RANGE='20270001-21270000'; $env:BETYDELSE_OUT='revisor-output/betydelsesvep-1M.txt'`
+    (cirka tio minuter). Svepet ser bara bottarnas egna budvägar — en budföljd som
+    bara en människa väljer mäts inte, hur många givar som än körs.
+
 ### 5-5-handen med 11–12 efter 1m–1M–1NT (fynd 2026-09-29, NMF-ombyggnaden #91)
 Sedan NMF = utgångskrav (13+) går inbjudningshanden 2NT — även **5-5 med renons**
 (frö 20271330: ♠Q82 ♥KT742 ♦— ♣AKT98, 11 hp → 2NT → 3NT mot 13). Ägaren 2026-09-30:

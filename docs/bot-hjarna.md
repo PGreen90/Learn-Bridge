@@ -106,7 +106,10 @@ leder sin egen sekvens fast spelföraren har åtta ruter, `establishLongSuit`s
 guard 3 spärrar färger som rullar utan att släppa ledningen, och `suitTricks`
 övervärderar svaga innehav (♠K ur ♠KT3 in i ♠AQ). Egen runda: DD-mätning per
 alternativ i varje frö FÖRE bygge. Fynd D (försvaret fortsätter utspelsfärgen
-in i spelförarens visade längd, 20260907 −5) är en ägarfråga om doktrinen §8.
+in i spelförarens visade längd, 20260907 −5) avgjordes av ägaren 2026-10-06: §8
+"fortsätt partnerns färg" viker när spelföraren visat stopp/längd i färgen via
+budet och partnerns utspelskort är en hög hacka utan positivt sak — byt till
+motståndarnas svaghet. Facit `play-bot-byt-farg.test.ts` (`it.todo`).
 
 ## Speldiagnosen runda 6 (2026-09-01 → mätpunkt S6): en fix behållen, en förkastad
 

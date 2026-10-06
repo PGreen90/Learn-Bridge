@@ -10,6 +10,93 @@
 
 ---
 
+## 2026-10-06 (bevaka-översynen + felrapportens fält "Rätt bud + varför", LIVE 2f7ab5d)
+
+**Felrapportformuläret** fick fältet "Rätt bud + varför" (ägarbeslut 2026-10-06):
+ifyllt = facit för /felrapporter, tomt skrivs "_(inte angivet)_" så kommandot frågar
+i stället för att gissa. Bakgrund: ägarens känsla "jag anmärker på samma saker igen";
+mätt samma dag: 0 av 99 felrapporter säger "igen", ungefär en tredjedel anger vad
+som borde ha hänt (`gh issue list --repo PGreen90/Learn-Bridge --label felrapport
+--state all --limit 200 --json body`).
+
+**Bevaka-översynen (ägarbeslut: FÖRE allt annat):** 48 avsnitt → 36 strukna (lagade
+och facit-vaktade, eller historik; fyra "kvar, ej byggt"-rader — pliktsvepets frön
+20261162/20262021/20262632 och rymningen till 3♥ — hade redan gröna facit i
+`motorbyte-facit.test.ts`), sju hål till `docs/senare.md` "Ur bevaka-översynen",
+två rader kvar med `it.todo`-facit (fynd D `play-bot-byt-farg.test.ts`, #96 ♠8
+`play-bot-third-hand.test.ts`). Ny regel i `docs/arbetsrutiner.md`: en bevaka-rad
+kräver frö/giv + måltestfil. **Fynd D avgjort av ägaren** (frö 20260907): byt färg
+när spelföraren visat längd i utspelsfärgen — DD efter stick 1: hjärter lågt 9,
+♠K 8 (kommandot i testfilen). Bevaka-raden "stoppet på damen lyfts ändå" (frö
+20300173) reproducerar inte efter 8+-trumf-regeln 2026-10-04 — motorn bjuder 6♥
+direkt (`DUMP=20300173 npx vitest run src/lib/engine/auktionsdump.probe.test.ts`).
+
+**Kontrollbudsloggen (flyttad från bevaka.md, NU-arbetets dagbok t.o.m. steg 3):**
+- **Lagat:** damfrågan, damsvaren, Exclusion, Gerbers svar/kungfråga och
+  RKC-svaret efter Jacoby förklaras som konvention (förr "placerar utgången i …").
+  Tre budfel i damfrågan lagade: ingen fråga över 5-trumf eller efter 5♥-svaret
+  (förr spelades frågebudet 5♠ som slutbud), svararen läser trumfen före sitt
+  eget stegsvar, damen visas på längd bara vid bevisad 10-korts fit. §6.1.
+- **Ägarbeslut 2026-10-02 (bok §6.1):** 4NT gäller alltid den senast ÄKTA
+  bjudna färgen (konventioner/kontrollbud räknas inte) · fråga efter damen när
+  det går · 5 nyckelkort + dam = sök storslam · 5 utan dam = alltid slam · 4 +
+  dam = alltid slam · 4 utan dam = sök slam, inget måste.
+- **Byggt av besluten (2026-10-03):** frågare och svarare räknar alltid samma
+  färg (kaptenen räknar i partnerns läsning, placerar i egen färg bara när den
+  bär sig själv; trumfvakten stoppar en fråga partnern läser som kvantitativ) ·
+  slamtabellen + damfrågan i BÅDA vägarna · fyra nyckelkort utan säkrad dam:
+  fråga när det går (nekad → stanna), annars slam med 8+ kända trumf (ägarbeslut
+  2026-10-04) · tio kända trumf räknas som trumfdam av båda stolarna. Facit
+  `auction-slamtabell.test.ts`.
+- **Bevaka:** (1) **#94-given slutar i 6♥, inte 7♥.** Svaret räknas i klöver;
+  vilket av de fem nyckelkorten som saknas (ett ess eller ♣K) går inte att veta.
+  Storslam bjuds inte när kontraktet läggs i en annan färg än räknefärgen.
+  (2) **Stoppet "på damen" lyfts ibland ändå:** stannar kaptenen i 5-trumf efter
+  ett tvetydigt svar läser partnern det som "pass med det låga, bjud med det
+  höga" och lyfter till 6 med det höga antalet (frö 20300173). Slammen bjuds då
+  ändå — stoppet biter bara efter 5♥-svaret eller när partnern har det låga.
+  (3) **Slamtabellens pris, mätt:** på 200 000 givar ändrades 139 slutkontrakt;
+  94 slammar bjuds inte längre — 46 gick bet på double-dummy, 48 stod (DD hittar
+  alltid damen, så siffran smickrar slammen); nästan alla är damfrågor som
+  nekats. Gränsen 8 kända trumf är EN siffra (`SLAM_PÅ_FYRA_FRÅN_TRUMF` i
+  `slam.ts`) och gäller bara när damen inte går att fråga efter. Mät med
+  `slamtabell-dd.probe.test.ts` (kommandot står i filen).
+  Storslam: 24 bjuds inte längre (5 bet, 19 stod — de byggde på "dam på
+  längd"), 6 nya via damfrågan (alla står).
+  (4) Billigaste sidokung visas i FÄRGordning (6♦ före 5♠), inte billigaste bud.
+  (5) "Kända trumf" är golv: en höjning räknas som 3, en egen färg som 4.
+- **"Gärna kontrollbud före essfrågan" (ägaren 2026-10-04) — NU, steg 1 byggt:**
+  slamradens kontrollbud följer ägarens definition (ess, kung-dam, singel eller
+  renons; förr bara ess/renons). Andelen essfrågor som föregås av ett
+  kontrollbud gick från 886 av 2 675 till 1 213 av 2 826 (200 000 givar; siffran
+  skrivs av trumfsonden, sista avsnittet i `revisor-output/rkc-trumf.txt`).
+  DD mot föregående version: 114 nya slammar (80 står, 34 bet), 71 bjuds inte
+  längre (33 bet, 38 stod). **Steg 2 byggt:** efter 2♣ + positivt svar +
+  öppnarens lågfärg sätter 4-korts stöd trumfen med 4m (ägarens ja 2026-10-04);
+  "man behöver inte ha alla kontroller för att bjuda 4NT" (ägaren) — kaptenen i
+  klar slamzon frågar så snart hen inte har fler kontrollbud. Mätt mot steg 1:
+  73 nya slammar (57 står, 16 bet), 35 bjuds inte längre (16 bet, 19 stod);
+  essfrågor efter kontrollbud 1 353 av 2 918. **Steg 3 byggt:** efter
+  hopphöjningen (1m–1M–3M) visar kaptenen sin billigaste kontroll; slamläsarna
+  tål deras dubbling av svaret. Mätt mot steg 2: 21 slammar bort (14 bet, 7
+  stod), 13 nya (7 står, 6 bet); essfrågor efter kontrollbud 1 504 av 2 989.
+  Några givar slutar nu i 5M i stället för 4M (kontrollbud över utgången).
+  **Kvar:** hopp i egen färg (1m–1M–3m), Jacoby minimum, 3-korts stöd i
+  lågfärg; över partnerns utgångsplacering ryms inget kontrollbud.
+  **Bevaka:** i slamzonen 31–32 gäller fortfarande "högst en okontrollerad
+  sidofärg" för essfrågan; bara 33+ frågar oavsett.
+- **Trumfsonden** (frågare mot svarare, ska vara 0):
+  `$env:RKCTRUMF='1'; npx vitest run src/lib/engine/rkc-trumf.probe.test.ts`
+  (200 000 givar, cirka en minut). Den skriver också hur ofta bottarnas essfrågor
+  avviker från den rena regeln "senast äkta bjudna färg" — mest fit-auktioner
+  där trumfen satts tidigare (Jacoby, inverterad minor) och motorns egna
+  etiketter ("krav – ny färg" för det partnern läser som kontrollbud).
+- **Auktionsdiffen för #95** (före/efter motorfixen): 30 000 + 200 000 givar,
+  11 + 59 ändrade, alla i dam-/kungfrågan. Återskapa: spara baslinjen med
+  ändringarna undanstoppade (`git stash`), `$env:DUMP_RANGE='20300001-20350000';
+  $env:DUMP_OUT='revisor-output/före.json'; npx vitest run src/lib/engine/auktionsdump.probe.test.ts`,
+  samma efter `git stash pop`, sedan `node scripts/auktionsdiff.mjs före.json efter.json`.
+
 ## 2026-10-06 (Felrapport #96–#100 + nattgranskningen ikapp, LIVE df1e164 · 7d86726 · 6cd01e8 · a8a334a)
 
 **Efterhandsgranskningen klar:** alla nio dagar 26 sep–4 okt djupgranskade (MP + IMP),
