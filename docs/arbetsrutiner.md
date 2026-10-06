@@ -39,6 +39,18 @@ minnet. Gäller varje sådant tillfälle, inte bara vid sessionsslut.
 *(Rättat 2026-07-25: regeln pekade på `docs/arbetslista.md`, som är arkiv sedan
 kartan flyttade till CLAUDE.md — två dokument gav motstridiga besked.)*
 
+## 👀 Regel: en bevaka-rad kräver frö/giv + måltestfil (2026-10-06)
+`docs/bevaka.md` är en **vakt**, inte en backlogg (ägarbeslut 2026-10-06 efter
+översynen: 48 avsnitt, 36 strukna, fyra "ej byggt"-rader hade redan gröna facit).
+En rad får bara skrivas när den har (1) ett frö eller en giv och (2) namnet på
+testfilen den ska landa i — helst som ett `it.todo` med position och förväntat
+kort/bud redan skrivet. Raden stryks när testet blir `it` (eller en sond vaktar
+principen). "Säg till om det känns fel"-rader, gränsfrågor och mätnoteringar
+skrivs inte där: gränser och doktrin i `docs/budsystem.md`/`docs/bot-hjarna.md`,
+mätningar i `docs/historik.md`, kända hål utan giv i `docs/senare.md`.
+Bakgrund: ägarens känsla "jag anmärker på samma saker igen" — mätt 2026-10-06:
+0 av 99 felrapporter säger "igen", så hålen sitter i obevakade principer.
+
 ## 🙋 Regel: fråga ägaren om DETALJERNA innan en budstruktur byggs (2026-09-18)
 När ett fel visar sig vara ett **hål i en budstruktur** (inte bara ett enstaka
 felbud) ska Claude **inte** föreslå en egen färdig struktur. Claude ska:

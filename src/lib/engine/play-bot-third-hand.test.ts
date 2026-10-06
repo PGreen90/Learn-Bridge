@@ -407,3 +407,48 @@ describe('T-serien regel D – tvinga fram bordets honnör när allt är synligt
     expect(botCardReasoned(s, 'E').card).toEqual(c('spades', '8'))
   })
 })
+
+// Bifynd i felrapport #96 (2026-10-06, bevaka-översynen): tredje hand i SANG med
+// ess + hackor, träkarlen (öppen, spelar EFTER mig) har damen. 2NT av Väst,
+// stick 11: Syd leder ♠7, Väst ♠6 — Nord (♠A98) la ♠8 och träkarlen (Öst) vann
+// på ♠Q. Rätt: ♠A och sedan ♠9 (Syd ♠KJ över Östs ♠32) ger NS alla tre sista
+// sticken; ♠8 kostade ett stick (enda DD-förlusten i hela försvaret).
+// Hör till T-serien (tredje hand högt: väg träkarlen som ligger EFTER mig) —
+// `it.todo` tills regeln byggs; byt till `it` när den landar.
+describe('Felrapport #96, stick 11 — tredje hand går upp med esset över träkarlens dam (T-serien)', () => {
+  const stick11: PlayState = {
+    contract: { declarer: 'W', strain: 'NT', level: 2 },
+    trump: null,
+    hands: {
+      S: parse('SKJ7'), // partnern leder ♠7
+      W: parse('ST6 HT'), // dold spelförare
+      N: parse('SA98'), // jag: esset + hackor, träkarlens ♠Q ligger EFTER mig
+      E: parse('SQ32'), // TRÄKARLEN
+    } as Record<Seat, Card[]>,
+    leader: 'S',
+    toAct: 'S',
+    currentTrick: [],
+    completedTricks: [],
+    tricksNS: 3,
+    tricksEW: 7,
+  }
+  const c = (su: Suit, r: Rank): Card => ({ suit: su, rank: r })
+
+  it.todo('Nord lägger ♠A (inte ♠8) när träkarlen efter mig har ♠Q', () => {
+    let s = playCard(stick11, c('spades', '7'))
+    s = playCard(s, c('spades', '6'))
+    expect(s.toAct).toBe('N')
+    expect(botCardSmart(s, 'N')).toEqual(c('spades', 'A'))
+  })
+
+  it.todo('DD-lås: ♠A håller spelföraren på 0 av 3, ♠8 släpper 1', () => {
+    let s = playCard(stick11, c('spades', '7'))
+    s = playCard(s, c('spades', '6'))
+    const efter = (card: Card) => {
+      const hands = { ...s.hands, N: s.hands.N.filter((x) => !(x.suit === card.suit && x.rank === card.rank)) } as Record<Seat, Card[]>
+      return doubleDummyDeclarerRemaining(hands, 'NT', 'W', [...s.currentTrick, { seat: 'N', card }], 'E', 1_000_000)
+    }
+    expect(efter(c('spades', 'A'))).toBe(0)
+    expect(efter(c('spades', '8'))).toBe(1)
+  })
+})

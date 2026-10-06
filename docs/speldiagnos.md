@@ -332,7 +332,10 @@ enklast `DUMP_SPEL=<frö>` per giv.
 - **Fynd B (spelförarsidans färgval ur den egna handen i stället för parets;
   frön 20260836/20260852/20260898, −4/−3/−3)** är rundans största och lämnas
   till en egen runda med DD-mätning per alternativ (S6-lärdomen). Fynd D
-  (försvaret fortsätter utspelsfärgen in i visad längd, 20260907) = ägarfråga.
+  (försvaret fortsätter utspelsfärgen in i visad längd, 20260907): **ägarbeslut
+  2026-10-06 — byt färg** (ta hänsyn till budgivningen, leta motståndarnas svaghet;
+  ♠K sedan ♠Q, DD 8 mot hjärterfortsättningens 9); facit `play-bot-byt-farg.test.ts`
+  (`it.todo`), byggs i nästa runda med DD-mätning per alternativ.
 
 ### S8 — fynd B: parets färg i sang, byggd på DD-mätning per alternativ (2026-10-01, LIVE `889fac3`)
 
