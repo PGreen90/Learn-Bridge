@@ -1,5 +1,15 @@
 # 👀 Bevaka i spel — aktiva noteringar
 
+## Tredje hand i sang: ♠8 under partnerns ♠7 fast ♠A fanns (2026-10-06, bifynd i felrapport #96)
+- **Läget:** 2NT av Väst, bricka 11 (giv Syd, ingen i zon), stick 11. Nord
+  ♠A98 kvar, Syd leder ♠7, Väst ♠6 — Nord la **♠8**, Öst vann på ♠Q. DD: ♠A och
+  sedan ♠9 (Syd ♠KJ5 över Östs ♠Q3) ger NS alla tre sista sticken; ♠8 kostade
+  ett stick (spelföraren 7 → 8, enda DD-förlusten i hela försvaret). Händerna
+  står i issue #96. Hör till T-serien (tredje hand högt) — inte lagat.
+- **Själva rapporten (#96)** gällde att Nord inte läste Syds Lavinthal-sak
+  (♥7 på stick 1 = spader). Design: bottarna avkodar aldrig människans
+  markeringar (§8.5), och Lavinthal avkodas inte alls. Ägarfråga ställd.
+
 ## Nattgranskningen stod still 26 sep–4 okt (2026-10-05)
 - **Lagat:** `tavling-granskning.yml` var ogiltig YAML sedan Dagens IMP-commiten
   (kapad rad vid `$'`); flödet kördes inte på nio dygn, så ingen dag frystes
@@ -7,17 +17,19 @@
   `src/workflow-vakt.test.ts` vaktar arbetsflödesfilerna i deploygrinden.
 - **Läget 2026-10-05:** nattjobbet kört för hand och grönt — 18 ställningar
   frysta (26 sep–4 okt, MP + IMP), gårdagens granskning utan avvikelser.
-- **KVAR — djupgranskningen i efterhand:** startade för 3 okt och 2 okt (köade på
-  GitHub vid sessionsslutet — kontrollera att båda blev gröna). **Inte startade:
-  26, 27, 28, 29, 30 sep och 1 okt.** En dag i taget (flödet tillåter bara en
-  väntande körning, ca 40 min per dag):
-  `gh workflow run tavling-granskning.yml -f datum=2026-10-01` osv. Raden
-  "Granskade: … flyttade till 'granskning': N" i loggen säger om något hittades;
-  dagens ställning skrivs om automatiskt.
+- **Djupgranskningen i efterhand KLAR (2026-10-05/06):** alla nio dagar 26 sep–4 okt
+  körda (MP + IMP), alla gröna, **0 inskick flyttade till 'granskning'**. Många
+  inskick friades av äldre motorversion (26 sep: 51 MP + 31 IMP; 28 sep: 45 + 33) —
+  väntat, motorn deployades flera gånger de dagarna. Längsta körningen 1 h 28 min
+  (2 okt) — under taket på 75 min jobbtid men nära; kolla
+  `gh run list --workflow=tavling-granskning.yml --limit 10` om en dag blir röd
+  med "timed out". Kedjan kördes av ett skript som bara startar nästa dag när ingen
+  körning är aktiv (en ny väntande körning avbryter annars en väntande
+  schemakörning).
 - **Bevaka:** (1) första schemalagda körningen natten till 2026-10-06:
-  `gh run list --workflow=tavling-granskning.yml --limit 3` ska visa en grön
-  `schedule`; (2) 1 okt IMP har bara 4 spelare och ettan 3 av 12 givar — inte
-  närmare kontrollerat.
+  `gh run list --workflow=tavling-granskning.yml --event schedule --limit 3` ska
+  visa en grön `schedule` (GitHub startar den ofta 3–5 h efter 01:30 UTC); (2) 1 okt
+  IMP har bara 4 spelare och ettan 3 av 12 givar — inte närmare kontrollerat.
 
 ## Damfrågan + slamfrågornas förklaringar (2026-10-02, felrapport #95)
 - **Lagat:** damfrågan, damsvaren, Exclusion, Gerbers svar/kungfråga och

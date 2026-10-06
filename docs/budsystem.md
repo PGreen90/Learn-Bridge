@@ -3009,6 +3009,17 @@ oavsett poäng. Bara efter en högfärgsöppning; efter 1♣/1♦ gäller de gam
 reglerna. "Unusual vs unusual" (cue i deras färger som limithöjning+) spelas
 inte.
 
+**Stöd i en LÅGFÄRG kräver fyra kort — även i konkurrens (felrapport #97,
+ägarbeslut 2026-10-06).** Svararens höjningar av partnerns öppningsfärg när de
+stört — konkurrenshöjningen (6–9) över 1NT-inkliv och färginkliv, och höjningen
+över deras X — kräver **3+ kort i en högfärg** men **4+ kort i en lågfärg**,
+samma golv som ostört (1♣/1♦–2m = 4+). `1♦–(1NT)` med ♠T74 ♥K62 ♦J83 ♣A752
+(8 hp) är **pass**, inte 2♦ (bricka 10, 2026-10-04); med ♦J832 höjs 2♦. **Cuen
+i deras färg (limithöjning+, 10+) får fortfarande bjudas på tre kort** — den är
+svararens enda väg med 10+ utan annat bud (♠AQ4 ♥A42 ♦J864 ♣Q95 efter 1♣–(1♦)
+hade annars passat; öppnaren svarar 3NT med stopp, och limit mot minimum passar
+återgången 3m).
+
 **Döda honnörer i deras visade färg diskonteras (felrapport #61, ägarbeslut
 2026-09-16).** Efter en **Michaels**-cue är den ena visade färgen känd (över 1♥ =
 spader, över 1♠ = hjärter), och den ligger normalt hos motståndarna 5-korts.
@@ -3260,6 +3271,14 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-06 — Felrapport #97: lågfärgsstöd i konkurrens kräver fyra kort
+  (§7.8 e).** Svararens konkurrenshöjning över 1NT-inkliv och färginkliv samt
+  höjningen över deras X krävde 3+ stöd oavsett färg; 1♦–(1NT) höjdes till 2♦
+  på ♦J83. Nu 4+ i lågfärg (som ostört), 3+ i högfärg kvar. Cuen
+  (limithöjning+) behåller 3+ — med fyrkortskrav passade 12 hp-händer utan
+  annat bud (frö 20260769). Facit `auction-hojning-visad-langd.test.ts`; två
+  seedade givar i `auction-upplysningsx-svar.test.ts` fick ett fjärde
+  klöverkort så premissen (höjning över X) står kvar.
 - **2026-10-04 — Kontrollbud före essfrågan, steg 3: efter hopphöjningen
   (§6.2).** Efter 1m–1M–3M (16–18, 4-korts stöd) gick kaptenen rakt på 4NT eller
   5M-inbjudan. Nu visar hen med slamintresse sin billigaste kontroll först (3♠
