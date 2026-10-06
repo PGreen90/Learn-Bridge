@@ -156,6 +156,8 @@ const ALL_ENGINE_RULES: string[] = [
   'accepterar slamtrevare', 'slamhöjning av 3NT', 'slaminbjudan: avböjer',
   'sätter trumfen (slamintresse)', // 2♣–pos–3m–4m: trumfen först, kontrollbuden efter (ägarbeslut 2026-10-04)
   'sätter trumfen före essfrågan', // trumfvakten (ägarbeslut 2026-10-02: 4NT = senast äkta bjudna färg)
+  // Felrapport #98 (2026-10-06): redubblarens andra bud efter 1M–(X)–XX–(färg)–P–(P).
+  'redubblaren: utgång', 'redubblaren: inbjudan', 'redubblaren: straffdubbling',
   
 ]
 

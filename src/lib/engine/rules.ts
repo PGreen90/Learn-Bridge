@@ -128,6 +128,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'svararens signoff': 'avslut',
   accepterar: 'avslut',
   'accepterar inbjudan': 'avslut',
+  'redubblaren: utgång': 'avslut',
   'accepterar slaminbjudan': 'avslut',
   'höjning till utgång': 'avslut',
   'spärr till utgång': 'avslut',
@@ -150,6 +151,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   // ---- Inbjudningar ----
   inbjudan: 'inbjudan',
   'inbjudan (limithöjning)': 'inbjudan',
+  'redubblaren: inbjudan': 'inbjudan', // 3M efter 1M–(X)–XX–(färg)–P: 10–12 stödpoäng (felrapport #98)
   'inbjudan (ny färg)': 'inbjudan', // ny färg på 3-läget efter 1M–1NT–2x: 6+ kort, 10–11 (§5.1, §5b beslut 11)
   '2NT inbjudan': 'inbjudan',
   '2NT (18–19)': 'inbjudan',
@@ -201,6 +203,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'rebid: krav-färg': 'krav-1-rond',
   'krav-svar': 'krav-1-rond',
   redubbling: 'krav-1-rond',
+  'redubblaren: straffdubbling': 'ej-krav',
 
   // ---- Utgångskrav (GF) ----
   '2-över-1 GF': 'utgangskrav',

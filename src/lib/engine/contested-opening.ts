@@ -237,6 +237,10 @@ export function negativeDoubleToAnswer(
 
   // Vår sida får bara ha öppningen som kontraktsbud (annars är X:et inte negativt).
   if (f.ourContractBids.length !== 1) return null
+  // Har partnern redan REDUBBLAT (1M–(X)–XX) är hens senare X STRAFF, aldrig
+  // negativ (felrapport #98, 2026-10-06: öppnaren flydde till 2♣ på partnerns
+  // straff-X av 1♠). Straffdubblingen passas av `openerAfterRedoubler` nedan.
+  if (history.some((c) => c.bid === 'XX' && c.seat === PARTNER[seat])) return null
 
   // Deras inkliv = senaste kontraktsbudet i historiken, från motståndarsidan, i färg.
   let theirCall: string | null = null
@@ -457,6 +461,13 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
           : `${workingHp} arbetande hp (efter avdrag för honnör i deras färg)`
     if (support >= 4 && effPoints >= 10) {
       return { call: `4${LETTER[openerSuit]}` as Bid, rule: 'höjning till utgång', explanation: `4+ stöd och ${effText} mot deras tvåfärgsinkliv → 4${SUIT_SYM[openerSuit]} direkt.` }
+    }
+    // Felrapport #99 (ägarbeslut 2026-10-06, 'enkla vägen'): 3-korts stöd med
+    // UTGÅNGSVÄRDEN (13+ stödpoäng) → 4M direkt — öppnaren har 5+. Förr nådde
+    // ♠732 ♥KJ3 ♦AQJT ♣A84 (15 hp) bara 3♠ (tävlande, ej krav) efter 1♠–(2NT).
+    // Unusual vs unusual (cue som limithöjning+) spelas fortfarande inte.
+    if (support === 3 && effPoints >= 13) {
+      return { call: `4${LETTER[openerSuit]}` as Bid, rule: 'höjning till utgång', explanation: `3-korts stöd och ${effText} (utgångsvärden) mot deras tvåfärgsinkliv → 4${SUIT_SYM[openerSuit]} direkt.` }
     }
     if (support >= 4 || (support === 3 && effPoints >= 10)) {
       return { call: `3${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${support >= 4 ? '4+ stöd (9 trumf)' : `3-korts stöd med ${effText}`} mot deras tvåfärgsinkliv → 3${SUIT_SYM[openerSuit]} (tävlande höjning, ej krav).` }
@@ -892,6 +903,117 @@ export function openerAnswersNegativeInvit(hand: Hand, f: AuctionFacts): Kunskap
     explanation: `Maximum (14–15) mot partnerns 2NT-inbjudan → 3NT (till spel).`,
   }
   return { call: 'P', rule: 'pass', explanation: `Minimum (12–13) mot partnerns 2NT-inbjudan → pass, delkontraktet står.` }
+}
+
+// ============================================================================
+// Kunskap — redubblarens andra bud (felrapport #98, ägarbeslut 2026-10-06)
+// ============================================================================
+
+/**
+ * Redubblarens stol: partnern öppnade 1 i färg, LHO dubblade (upplysning), jag
+ * redubblade (10+), de flydde till en FÄRG, partnern passade och det är min tur
+ * direkt efter (bara pass sedan flykten). Partnerns pass efter vår XX är inget
+ * minimum — det säger "inget eget att säga, du bestämmer" — så redubblaren
+ * får aldrig tolka det som ett avslut (förr föll budet till fit-höjningens
+ * "partnern har passat (minimum) → 2M").
+ */
+export function redoublerSeat(f: AuctionFacts): { openerSuit: Suit; theirSuit: Suit; escape: ResolvedCall } | null {
+  const open = f.opening
+  if (!open || open.seat !== f.partner || open.level !== 1) return null
+  const openerSuit = SUIT_OF_LETTER[open.strain]
+  if (!openerSuit) return null
+  const h = f.history
+  const i = open.index
+  // Exakt: öppning, deras X, min XX, deras färgbud, partnerns pass, (deras pass), min tur.
+  if (h.length !== i + 5 && h.length !== i + 6) return null
+  if (h[i + 1]?.bid !== 'X' || h[i + 2]?.bid !== 'XX' || h[i + 2].seat !== f.seat) return null
+  const escape = h[i + 3]
+  if (!escape || side(escape.seat) === side(f.seat)) return null
+  const cb = parseContractBid(escape.bid)
+  if (!cb || cb.strain === 'NT') return null
+  const theirSuit = SUIT_OF_LETTER[cb.strain]
+  if (!theirSuit) return null
+  if (h[i + 4]?.bid !== 'P' || h[i + 4].seat !== f.partner) return null
+  if (h.length === i + 6 && h[i + 5].bid !== 'P') return null
+  return { openerSuit, theirSuit, escape }
+}
+
+/**
+ * Redubblarens andra bud när de flytt och partnern passat (§7.8 b):
+ *   · stöd i partnerns HÖGFÄRG (3+): 13+ stödpoäng → 4M (utgång), 10–12 → 3M
+ *     (inbjudan). 2M bjuds aldrig — XX lovade redan 10+.
+ *   · utan stöd men 4+ bra kort i färgen de flydde till (minst 5 hp där) → X
+ *     (straff; vi äger given efter XX).
+ *   · annars null → de vanliga vägarna (fritt bud i egen färg, sang, pass).
+ * Lågfärgsöppning: bara straffdubblingen (höjningens utgång 3NT/5m läses av
+ * de vanliga reglerna).
+ */
+export function redoublerContinues(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const s = redoublerSeat(f)
+  if (!s) return null
+  const { openerSuit, theirSuit, escape } = s
+  const len = lengths(hand)
+  const isMajor = openerSuit === 'hearts' || openerSuit === 'spades'
+  const sym = SUIT_SYM[openerSuit]
+  if (isMajor && len[openerSuit] >= 3) {
+    const sp = pointsWithFloor(hand, openerSuit, 'support')
+    const bid = (L: number) => `${L}${LETTER[openerSuit]}` as Bid
+    if (sp.points >= 13) {
+      return lawful(f, { call: bid(4), rule: 'redubblaren: utgång', explanation: `Efter vår XX (10+) är partnerns pass inget minimum; ${len[openerSuit]}-korts stöd och ${sp.text} = utgångsvärden → 4${sym}.` })
+    }
+    return lawful(f, { call: bid(3), rule: 'redubblaren: inbjudan', explanation: `Efter vår XX (10+) är partnerns pass inget minimum; ${len[openerSuit]}-korts stöd och ${sp.text} → 3${sym} (inbjudan — 4${sym} med 14+).` })
+  }
+  if (len[theirSuit] >= 4 && suitHcp(hand, theirSuit) >= 5) {
+    return lawful(f, { call: 'X', rule: 'redubblaren: straffdubbling', explanation: `Vi äger given efter XX; ${len[theirSuit]} kort med honnörer i deras ${SUIT_SYM[theirSuit]} → X (straff på ${prettyBid(escape.bid)}).` })
+  }
+  return null
+}
+
+/**
+ * Öppnarens stol efter redubblarens andra bud: jag öppnade 1 i färg, de
+ * dubblade, partnern redubblade, de flydde i färg, jag passade, (de passade)
+ * och partnerns bud (3M/4M/X) är auktionens senaste icke-pass.
+ */
+export function openerAfterRedoublerSeat(f: AuctionFacts): { openerSuit: Suit; partnerCall: ResolvedCall } | null {
+  const open = f.opening
+  if (!open || open.seat !== f.seat || open.level !== 1) return null
+  const openerSuit = SUIT_OF_LETTER[open.strain]
+  if (!openerSuit) return null
+  const h = f.history
+  const i = open.index
+  if (h[i + 1]?.bid !== 'X' || h[i + 2]?.bid !== 'XX' || h[i + 2].seat !== f.partner) return null
+  const escape = h[i + 3]
+  if (!escape || side(escape.seat) === side(f.seat) || !parseContractBid(escape.bid)) return null
+  if (h[i + 4]?.bid !== 'P' || h[i + 4].seat !== f.seat) return null
+  const last = f.lastNonPass
+  if (!last || last.seat !== f.partner || h.indexOf(last) <= i + 4) return null
+  // Partnerns bud ska vara hens ANDRA (XX + detta) och inget av oss emellan.
+  if (h.slice(i + 5, h.indexOf(last)).some((c) => c.bid !== 'P')) return null
+  return { openerSuit, partnerCall: last }
+}
+
+/**
+ * Öppnaren efter redubblarens andra bud (felrapport #98): partnerns X är
+ * STRAFF → pass; 3M = inbjudan (10–12 stödpoäng) → 4M med 14+ TP, annars
+ * pass; 4M = till spel → pass.
+ */
+export function openerAfterRedoubler(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const s = openerAfterRedoublerSeat(f)
+  if (!s) return null
+  const { openerSuit, partnerCall } = s
+  const sym = SUIT_SYM[openerSuit]
+  if (partnerCall.bid === 'X') {
+    return { call: 'P', rule: 'pass', explanation: `Partnerns X efter vår XX är straff — vi äger given → pass.` }
+  }
+  const cb = parseContractBid(partnerCall.bid)
+  if (!cb || SUIT_OF_LETTER[cb.strain] !== openerSuit) return null
+  if (cb.level >= 4) return { call: 'P', rule: 'pass', explanation: `Partnerns ${prettyBid(partnerCall.bid)} efter XX är utgång till spel → pass.` }
+  if (cb.level !== 3) return null
+  const sp = pointsWithFloor(hand, openerSuit, 'bergen')
+  if (sp.points >= 14) {
+    return lawful(f, { call: `4${LETTER[openerSuit]}` as Bid, rule: 'accepterar inbjudan', explanation: `Partnerns 3${sym} efter XX inbjuder (10–12 stödpoäng); med ${sp.text} → 4${sym}.` })
+  }
+  return { call: 'P', rule: 'pass', explanation: `Partnerns 3${sym} efter XX inbjuder (10–12 stödpoäng); utan 14+ → pass.` }
 }
 
 // ============================================================================

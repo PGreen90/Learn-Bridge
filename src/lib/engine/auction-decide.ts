@@ -170,7 +170,7 @@ import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDoubl
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
 import { openerInCueRaise, raiserInCueRaise } from './cue-raise-continuations'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerAfterCompetitiveRaise, openerRebidsAfterTheirDouble, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
-import { answerJordan, answerNegativeDoubleOverTheirBid, answerPartnersNegativeDouble, answerPartnersSupportDouble, negativeDoubleOverbidToAnswer, showHandAfterOpenersDouble, showHandToAnswer, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
+import { answerJordan, answerNegativeDoubleOverTheirBid, answerPartnersNegativeDouble, answerPartnersSupportDouble, negativeDoubleOverbidToAnswer, showHandAfterOpenersDouble, showHandToAnswer, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, openerAfterRedoubler, openerAfterRedoublerSeat, redoublerContinues, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -2242,6 +2242,16 @@ const TABELL: Row[] = [
   },
   // Öppnarens stöddubbling: 1x–(P)–1M–(färginkliv) med exakt 3 stöd → X.
   // Annars null: öppnarens övriga konkurrensåterbud är familj 4:s.
+  // Öppnaren efter redubblarens andra bud (felrapport #98): partnerns X är
+  // straff (pass), 3M inbjudan (4M med 14+), 4M till spel.
+  {
+    id: 'öppnaren-efter-xx',
+    läge: (f) => openerAfterRedoublerSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = openerAfterRedoubler(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
   {
     id: 'stöd-x',
     läge: (f) => supportDoubleSeat(f) !== null,
@@ -2384,6 +2394,8 @@ const TABELL: Row[] = [
     läge: (f) => responderContestedSeat(f),
     välj: ({ hand, facts }) => {
       const k =
+        // Felrapport #98: redubblarens andra bud (partnerns pass efter XX är inget minimum).
+        redoublerContinues(hand, facts) ??
         responderAnswersMaximal(hand, facts) ??
         responderAnswersReopeningDouble(hand, facts) ??
         responderAnswersNTInvite(hand, facts) ??

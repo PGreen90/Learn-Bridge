@@ -3000,8 +3000,8 @@ med 4–5 trumf (`1♠–(2NT)–P` på ♠K9874 och 17 stödpoäng).
 | **1M–(1NT)** | **X** | **10+ hp** = straff — vi har balansen mot deras 15–18 |
 | | **2M** | 3+ stöd, **6–9 hp** — konkurrenshöjning |
 | | pass | annars |
-| **1M–(2NT / Michaels-cue)** | **4M** | 4+ stöd och **10+ stödpoäng** — direkt utgång |
-| | **3M** | 4+ stöd (9 trumf), svagare — **tävlande** höjning, inte spärr; eller 3-korts stöd med 10+ |
+| **1M–(2NT / Michaels-cue)** | **4M** | 4+ stöd och **10+ stödpoäng**, eller **3-korts stöd och 13+ stödpoäng** (felrapport #99, ägarbeslut 2026-10-06) — direkt utgång |
+| | **3M** | 4+ stöd (9 trumf), svagare — **tävlande** höjning, inte spärr; eller 3-korts stöd med 10–12 |
 | | pass | annars |
 
 Motståndarna har visat 5-5, så lagen om totala stick bär 3M med nio trumf
@@ -3073,6 +3073,21 @@ advancern vidare över 2NT gäller det vanliga konkurrensomdömet i stället.
 *Bakgrund (systemfel #4, frö 20260739): S öppnade 1♥ med ♠A73 ♥KQ542 ♦J72 ♣A7
 (14 hp = 15 stödpoäng), W dubblade, N bjöd Jordan 2NT med 14 hp — och S passade.
 2NT spelades med 9-korts hjärterfit och 28 hp ihop.*
+
+**Redubblarens andra bud — 1M–(X)–XX–(deras färg)–P–(P)–? (felrapport #98,
+ägarbeslut 2026-10-06).** Öppnarens pass efter vår XX är **inget minimum** — det
+betyder "inget eget att säga, du bestämmer". Redubblaren (10+ visat) väljer:
+
+| Redubblarens bud | Betydelse |
+|---|---|
+| **4M** | 3+ stöd och **13+ stödpoäng** — utgång till spel |
+| **3M** | 3+ stöd och **10–12 stödpoäng** — inbjudan; öppnaren lyfter med **14+** (Bergenpoäng), annars pass |
+| **X** | utan stöd: **4+ kort med honnörer** (5+ hp) i färgen de flydde till — **straff**, vi äger given; öppnaren passar |
+| annars | de vanliga vägarna (fritt bud, sang, pass) |
+
+2M bjuds aldrig — XX lovade redan 10+. *Bricka 2 (2026-10-06): Väst ♠AKJ86 ♥765
+♦642 ♣A2 (12 hp, 14 stödpoäng) efter 1♥–(X)–XX–(1♠)–P–(P) bjöd förr 2♥ "partnern
+har passat (minimum)"; nu 4♥.* Efter lågfärgsöppning gäller bara straffdubblingen.
 
 **(h) Öppnaren efter partnerns konkurrenshöjning, och efter deras X + partnerns
 pass (felrapport #84, 2026-09-26).** Partnerns enkla höjning av vår öppningsfärg
@@ -3271,6 +3286,16 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-06 — Felrapport #98: redubblarens andra bud (§7.8 d).** Efter
+  1♥–(X)–XX–(1♠)–P–(P) bjöd redubblaren 2♥ ("partnern har passat (minimum)") på
+  14 stödpoäng. Ny rad: 13+ stödpoäng → 4M, 10–12 → 3M (öppnaren lyfter med
+  14+), utan stöd 4+ bra kort i deras färg → straff-X (öppnaren passar; förr
+  lästes X:et som negativ dubbling och öppnaren flydde till 2♣). Facit
+  `auction-hojning-visad-langd.test.ts`.
+- **2026-10-06 — Felrapport #99: 3-korts stöd med utgångsvärden över deras
+  tvåfärgsinkliv (§7.8 e).** 1♠–(2NT) med ♠732 och 15 hp nådde bara 3♠ (ej
+  krav). Nu 13+ stödpoäng → 4M direkt (ägarens "enkla vägen"; unusual vs
+  unusual spelas fortfarande inte).
 - **2026-10-06 — Felrapport #97: lågfärgsstöd i konkurrens kräver fyra kort
   (§7.8 e).** Svararens konkurrenshöjning över 1NT-inkliv och färginkliv samt
   höjningen över deras X krävde 3+ stöd oavsett färg; 1♦–(1NT) höjdes till 2♦

@@ -18,7 +18,7 @@ import type { Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { parseHand } from '../bidding'
 import { dealFromSeed } from './revisor'
-import { decideCall } from './auction-live'
+import { auctionComplete, contractFromCalls, decideCall, seatToAct } from './auction-live'
 
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 
@@ -172,5 +172,64 @@ describe('K3 (c) – svararen över ovanlig 2NT / Michaels', () => {
     const c = decideCall(deal, [call('S', '1H'), call('W', '2H')], 'N')
     expect(c.bid).toBe('3H')
     expect(c.rule).toBe('konkurrenshöjning')
+  })
+
+  // Felrapport #99 (2026-10-06, bricka 1): 1♠–(2NT ovanlig) med ♠732 ♥KJ3 ♦AQJT
+  // ♣A84 (15 hp) fick bara 3♠ (tävlande, ej krav) — 3-korts stöd nådde aldrig
+  // utgång. Ägarbeslut 2026-10-06 ("enkla vägen"): 3-korts stöd med utgångs-
+  // värden (13+ stödpoäng) → 4M direkt, som 4-korts stöd med 10+ redan gör.
+  const R99 = dealOf('N', 'none', { N: 'S:KQJ854 H:A62 D:42 C:Q3', E: 'S:- H:QT7 D:K8653 C:KT652', S: 'S:732 H:KJ3 D:AQJT C:A84', W: 'S:AT96 H:9854 D:97 C:J97' })
+  it('felrapport #99: 1♠–(2NT) med trekorts stöd och 15 hp → 4♠ direkt', () => {
+    const c = decideCall(R99, [call('N', '1S'), call('E', '2NT')], 'S')
+    expect(c.bid).toBe('4S')
+  })
+  it('samma läge med 11 hp (♦AQJT → ♦QJT9, ♣A84 → ♣K84) → 3♠ tävlande som förr', () => {
+    const d = dealOf('N', 'none', { N: 'S:KQJ854 H:A62 D:42 C:Q3', E: 'S:- H:QT7 D:K8653 C:AT652', S: 'S:732 H:KJ3 D:QJT9 C:K84', W: 'S:AT96 H:9854 D:A7 C:J97' })
+    const c = decideCall(d, [call('N', '1S'), call('E', '2NT')], 'S')
+    expect(c.bid).toBe('3S')
+  })
+})
+
+// Felrapport #98 (2026-10-06, bricka 2): 1♥–(X)–XX–(1♠)–P–(P)–? Väst ♠AKJ86
+// ♥765 ♦642 ♣A2 (12 hp, 14 stödpoäng) bjöd 2♥ med skälet "partnern har passat
+// (minimum)". Men öppnarens pass efter vår XX är inget minimum — det säger
+// "inget eget att säga, du bestämmer". Ägarbeslut 2026-10-06: redubblarens
+// andra bud med stöd i öppningshögfärgen = 13+ stödpoäng → 4M, 10–12 → 3M
+// (invit); utan stöd men 4+ bra kort i färgen de flydde till → X (straff).
+describe('felrapport #98 – redubblarens andra bud efter 1M–(X)–XX–(deras färg)–P–(P)', () => {
+  const R98 = dealOf('E', 'ns', { N: 'S:7543 H:QJ2 D:Q83 C:Q76', E: 'S:2 H:KT984 D:AJ7 C:KT93', S: 'S:QT9 H:A3 D:KT95 C:J854', W: 'S:AKJ86 H:765 D:642 C:A2' })
+  const HIST = [call('E', '1H'), call('S', 'X'), call('W', 'XX'), call('N', '1S'), call('E', 'P'), call('S', 'P')]
+  it('rapportens Väst (14 stödpoäng, tre hjärter) → 4♥, inte 2♥', () => {
+    const c = decideCall(R98, HIST, 'W')
+    expect(c.bid).toBe('4H')
+  })
+  it('hela auktionen slutar i 4♥ av Öst', () => {
+    const h = [...HIST]
+    let guard = 0
+    while (!auctionComplete(h) && guard++ < 30) h.push(decideCall(R98, h, seatToAct(R98.dealer, h.length)))
+    const k = contractFromCalls(h)!
+    expect(k.strain).toBe('hearts')
+    expect(k.level).toBe(4)
+    expect(k.declarer).toBe('E')
+  })
+  it('10–12 stödpoäng med stöd (♠KQJ86 ♥765 ♦642 ♣A2 = 10 hp, 12 stödpoäng) → 3♥ invit', () => {
+    const d = dealOf('E', 'ns', { N: 'S:7543 H:QJ2 D:Q83 C:Q76', E: 'S:2 H:KT984 D:AJ7 C:KT93', S: 'S:AT9 H:A3 D:KT95 C:J854', W: 'S:KQJ86 H:765 D:642 C:A2' })
+    const c = decideCall(d, HIST, 'W')
+    expect(c.bid).toBe('3H')
+  })
+  it('utan stöd men ♠AKJ86 i färgen de flydde till → X (straff)', () => {
+    const d = dealOf('E', 'ns', { N: 'S:7543 H:QJ2 D:Q83 C:Q76', E: 'S:2 H:KT984 D:AJ7 C:KT93', S: 'S:QT9 H:A73 D:KT95 C:J85', W: 'S:AKJ86 H:65 D:642 C:A42' })
+    const c = decideCall(d, HIST, 'W')
+    expect(c.bid).toBe('X')
+    // Öppnaren läser X:et som STRAFF (förr 'svar på negativ dubbling' → 2♣) → pass.
+    const o = decideCall(d, [...HIST, c, call('N', 'P')], 'E')
+    expect(o.bid).toBe('P')
+  })
+  it('öppnaren efter 3♥-inviten: 15 Bergenpoäng (5-4-3-1, 11 hp) → 4♥; 12 hp jämn → pass', () => {
+    const d = dealOf('E', 'ns', { N: 'S:7543 H:QJ2 D:Q83 C:Q76', E: 'S:2 H:KT984 D:AJ7 C:KT93', S: 'S:AT9 H:A3 D:KT95 C:J854', W: 'S:KQJ86 H:765 D:642 C:A2' })
+    const h = [...HIST, call('W', '3H'), call('N', 'P')]
+    expect(decideCall(d, h, 'E').bid).toBe('4H')
+    const flat = dealOf('E', 'ns', { N: 'S:7543 H:QJ2 D:Q83 C:Q76', E: 'S:92 H:KT984 D:AJ7 C:KT3', S: 'S:AT H:A3 D:KT95 C:J9854', W: 'S:KQJ86 H:765 D:642 C:A2' })
+    expect(decideCall(flat, h, 'E').bid).toBe('P')
   })
 })
