@@ -13,6 +13,7 @@ import { parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFa
 import { bidValue, cheapestBidIn, legalCalls, prettyBid, SWE_SYM } from './auction-rules'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
+import { hasStopper } from './overcalls'
 import { side } from './play'
 
 /**
@@ -294,10 +295,29 @@ export function raiseWithFit(
   // motorn alltid på ett inbjudande hopp för minor – aldrig utgång.)
   if (!isMajor && sp >= 13) {
     const legal = legalCalls(history, seat)
-    if (isBalanced(hand) && legal.includes('3NT' as Bid)) {
+    // Felrapport #100 (2026-10-06): 3NT lovar stopp i VARJE färg motståndarna
+    // bjudit — förr räckte 'balanserad' (♦64 efter 1♣–(1♦)–X–P–2♣ gav 3NT).
+    // Utan stopp frågar cuen i deras färg (partnern bjuder 3NT med stopp, annars
+    // färg — samma struktur som negativ-dubblarens cue), sist minorutgången.
+    const theirSuits = [...f.theirStrains].map((st) => SUIT_OF_LETTER[st]).filter((x): x is NonNullable<typeof x> => !!x)
+    const stoppAlla = theirSuits.every((su) => hasStopper(hand, su))
+    if (isBalanced(hand) && stoppAlla && legal.includes('3NT' as Bid)) {
       return {
         seat, bid: '3NT' as Bid,
-        explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden, balanserad → 3NT.`,
+        explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden, balanserad med stopp i deras färg → 3NT.`,
+      }
+    }
+    if (!stoppAlla && theirSuits.length === 1) {
+      const theirStrain = [...f.theirStrains][0]
+      const cue = cheapestBidIn(history, seat, theirStrain)
+      // Frågan ställs EN gång: har jag redan cue-bjudit och partnern nekat stopp
+      // (färgsvar) går vi till minorutgången, inte en ny cue.
+      const alreadyCued = history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === theirStrain)
+      if (!alreadyCued && cue && legal.includes(cue) && bidValue(parseContractBid(cue)!.level, theirStrain) < bidValue(3, 'NT')) {
+        return {
+          seat, bid: cue,
+          explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden men inget stopp i deras ${SWE_SYM[theirStrain]} → cue ${prettyBid(cue)} (partnern bjuder 3NT med stopp, annars färg).`,
+        }
       }
     }
     const gameBid = `5${partnerSuit.strain}` as Bid

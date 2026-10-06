@@ -928,3 +928,28 @@ describe('#95-granskningen – fler slamfrågor lästes som utgångsbud', () => 
     })
   })
 })
+
+// Felrapport #100 (2026-10-06): negativ-dubblarens cue är en STOPPFRÅGA, inte en
+// slamhöjning — och svaret på den (sang = stopp, färg = inget stopp) är inget
+// "rebjud, ej krav". 3NT utan stopp bjuds inte längre, så löftet i förklaringen
+// ("lovar stopp i motståndarnas färg") håller.
+describe('felrapport #100 – stoppfrågan efter negativ dubbling förklaras som fråga och svar', () => {
+  const hist = h(['S', '1C'], ['W', '1D'], ['N', 'X'], ['E', 'P'], ['S', '2C'], ['W', 'P'], ['N', '2D'], ['E', 'P'], ['S', '3C'], ['W', 'P'], ['N', '5C'])
+  it('2♦ = stoppfråga: utgångsvärden utan stopp, partnern 3NT med stopp annars färg', () => {
+    const r = interpretCall(hist, 6)
+    expect(r.text).toMatch(/stoppfråga/)
+    expect(r.text).toMatch(/3NT med stopp/)
+    expect(r.text).not.toMatch(/slam/)
+    expect(r.forcing).toBe('utgangskrav')
+  })
+  it('3♣ = svar på stoppfrågan: inget stopp, partnern placerar (krav)', () => {
+    const r = interpretCall(hist, 8)
+    expect(r.text).toMatch(/inget stopp/)
+    expect(r.forcing).not.toBe('ej-krav')
+  })
+  it('3NT som svar = stopp i deras färg, till spel', () => {
+    const r = interpretCall(h(['S', '1C'], ['W', '1D'], ['N', 'X'], ['E', 'P'], ['S', '2C'], ['W', 'P'], ['N', '2D'], ['E', 'P'], ['S', '3NT']), 8)
+    expect(r.text).toMatch(/stopp i motståndarnas ruter/)
+    expect(r.forcing).toBe('avslut')
+  })
+})

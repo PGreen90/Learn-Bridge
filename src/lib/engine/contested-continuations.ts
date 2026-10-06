@@ -668,6 +668,15 @@ export function answerPartnersCue(hand: Hand, f: AuctionFacts): Kunskap | null {
     const bid = cheapestBidIn(history, seat, st)
     if (bid && legal.includes(bid)) return { call: bid, rule, explanation: `${note}; stöd i partnerns ${SWE_SYM[st]} → ${prettyBid(bid)} (krav, partnern placerar).` }
   }
+  // Felrapport #100 (2026-10-06): utan stopp bjuds ALDRIG sang — jag rebjuder
+  // min senast bjudna färg billigast (partnern har visat fit för den eller
+  // placerar själv). Förr föll svaret till 'billigaste sang' utan stopp.
+  const myLast = [...f.ourContractBids].reverse().find((c) => c.seat === seat && parseContractBid(c.bid)!.strain !== 'NT')
+  if (myLast) {
+    const st = parseContractBid(myLast.bid)!.strain
+    const again = cheapestBidIn(history, seat, st)
+    if (again && legal.includes(again)) return { call: again, rule, explanation: `${note}; inget stopp i deras färg → ${prettyBid(again)} (rebjuder min färg, partnern placerar).` }
+  }
   const nt = (['2NT', '3NT'] as Bid[]).find((b) => legal.includes(b))
   if (nt) return { call: nt, rule, explanation: `${note}; inget stopp och ingen färg att visa → ${prettyBid(nt)} (billigaste sang).` }
   return null

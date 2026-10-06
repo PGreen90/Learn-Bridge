@@ -234,7 +234,11 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
     })
     // Dubbelton-vakten prövas på den explicita X-sekvensen (raden *negativ-dubblaren*):
     const hist: ResolvedCall[] = [{ seat: 'W', bid: '1C' }, { seat: 'N', bid: '1D' }, { seat: 'E', bid: 'X' }, { seat: 'S', bid: 'P' }, { seat: 'W', bid: '2C' }, { seat: 'N', bid: 'P' }]
-    expect(decideCall(d, hist, 'E').bid).toBe('5C')
+    // Felrapport #100 (2026-10-06): utan stopp i deras ♦ frågar cuen 2♦ först
+    // (partnern 3NT med stopp, annars färg) — 5♣ kommer efter partnerns 3♣.
+    expect(decideCall(d, hist, 'E').bid).toBe('2D')
+    const efter: ResolvedCall[] = [...hist, { seat: 'E', bid: '2D' }, { seat: 'S', bid: 'P' }, { seat: 'W', bid: '3C' }, { seat: 'N', bid: 'P' }]
+    expect(decideCall(d, efter, 'E').bid).toBe('5C')
     // Botauktionen: sedan 2026-09-02 bjuder Öst det fria budet 1♠ (fem spader) i
     // stället för X, och sedan motorbytets familj 4 (2026-09-08) sätter svararen
     // utgång i sin egen 6-korts högfärg (4♠) före dubbelton-stödet till 2♣.
@@ -256,6 +260,8 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
     })
     const history = botAuction(d)
     expect(history).not.toBeNull()
+    // Felrapport #100 (2026-10-06): Väst (13 stödpoäng, ♣96) cue-bjuder 3♣ i stället
+    // för 3NT utan stopp; Öst (♣4) rebjuder 3♦ → 5♦. Ruterkontrakt som förr, på 5-läget.
     expect(contractFromCalls(history!)).toMatchObject({ strain: 'diamonds', declarer: 'E' })
   })
 
