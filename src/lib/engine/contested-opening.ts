@@ -775,6 +775,10 @@ export function negativeDoublerContinues(hand: Hand, f: AuctionFacts): Kunskap |
   if (raise) {
     const lvl = parseContractBid(raise.bid)!.level
     const gameLvl = answer.strain === 'H' || answer.strain === 'S' ? 4 : 5
+    // Felrapport #100: fit-höjningens stoppfråge-cue i deras färg bär cue-regeln.
+    if (parseContractBid(raise.bid)!.strain === theirCb.strain) {
+      return { call: raise.bid, rule: 'negativ-dubblarens cue (utgångskrav)', explanation: raise.explanation ?? '' }
+    }
     const grad = lvl >= gameLvl || raise.bid === '3NT' ? 'utgång' : /inbjudande/.test(raise.explanation ?? '') ? 'inbjudan' : 'enkel'
     return { call: raise.bid, rule: `höjning efter negativ dubbling (${grad})`, explanation: raise.explanation ?? '' }
   }

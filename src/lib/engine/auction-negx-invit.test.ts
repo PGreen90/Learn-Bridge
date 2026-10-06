@@ -143,14 +143,18 @@ describe('negativ-dubblarens invit-fortsättning (fix 5b)', () => {
 })
 
 describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () => {
-  it('frö 20261354: dubblarens 3♦ höjs av öppnaren — ruterkontrakt E/W, inte 2♠', () => {
+  it('frö 20261354: dubblarens 3♦ lyfts av öppnaren — utgång för E/W via stoppfrågan, inte 2♠', () => {
     // Par 5♦-EW 600: öppnaren (15 hp + 4-korts ruterstöd + singel hjärter) har
-    // utgångsvärden mot inviten.
+    // utgångsvärden mot inviten. Felrapport #100 (2026-10-06): utan hjärterstopp
+    // frågar öppnaren med cuen 3♥ i stället för att höja blint; Öst (♥AT5) har
+    // stopp → 3NT. Förr 5♦ direkt.
     const d = deal('felfarg-20261354', 'W', 'ew', HANDS_1354)
     const history = botAuction(d)
     expect(history).not.toBeNull()
     const contract = contractFromCalls(history!)
-    expect(contract?.strain).toBe('diamonds')
+    expect(history!.map((c) => c.bid)).toContain('3H')
+    expect(contract?.strain).toBe('NT')
+    expect(contract?.level).toBe(3)
     expect(contract?.declarer).toBe('E')
     expect(contract!.level).toBeGreaterThanOrEqual(3)
   })

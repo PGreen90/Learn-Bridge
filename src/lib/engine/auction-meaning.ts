@@ -1381,6 +1381,17 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     if (cr) return cr
   }
 
+  // Felrapport #100 (2026-10-06): NEGATIV-DUBBLARENS STOPPFRÅGA. Partnern
+  // öppnade 1 i färg, jag dubblade negativt, partnern svarade i färg — min cue
+  // i deras färg är ingen slamhöjning utan en FRÅGA: utgångsvärden utan stopp
+  // i deras färg; partnern bjuder 3NT med stopp, annars färg. Och partnerns
+  // svar på den frågan: sang = stopp, färg = inget stopp (frågaren placerar).
+  {
+    const sf = stoppfragan(seat, cb, prior)
+    if (sf) return sf
+  }
+
+
   // Äkta cue i motståndarnas färg när vår sida redan bjudit = stark höjning av
   // partnerns färg. Advancerns/svararens cue-höjning av partnerns färg är en
   // konstlad limithöjning+ (krav 1 rond, alertpliktig); öppnarens och den
@@ -1808,6 +1819,47 @@ function weakTwoCueAnswer(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): Cal
  * inget mer att visa / stannar, 4NT = 1430 RKC i trumfen. Höjarens bud efter
  * öppnarens billiga 3M tolkas som förut (null här).
  */
+/**
+ * Felrapport #100: negativ-dubblarens cue som STOPPFRÅGA, och svaret på den.
+ * Mönstret: partnern (öppnaren) öppnade 1 i färg, LHO klev in i färg, jag
+ * dubblade, partnern svarade i färg (vår sidas två kontraktsbud), och nu
+ * (a) cue-bjuder jag deras färg → fråga, eller (b) partnern cue-bjöd nyss och
+ * jag (öppnaren) svarar: sang = stopp, egen färg = inget stopp.
+ */
+function stoppfragan(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 1 || open.cb.strain === 'NT') return null
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid as Bid))
+  const theirs = prior.filter((c) => SIDE[c.seat] !== SIDE[seat] && parseBid(c.bid as Bid))
+  if (theirs.length !== 1) return null
+  const theirStrain = parseBid(theirs[0].bid as Bid)!.strain
+  if (theirStrain === 'NT') return null
+  const tsym = SYMBOL[theirStrain]
+  // (a) Dubblaren frågar.
+  if (open.seat === PARTNER[seat] && cb.strain === theirStrain) {
+    const mine = prior.filter((c) => c.seat === seat && c.bid !== 'P')
+    if (mine.length !== 1 || mine[0].bid !== 'X') return null
+    if (ours.length !== 2 || ours[1].seat !== PARTNER[seat] || parseBid(ours[1].bid as Bid)!.strain === 'NT') return null
+    return {
+      text: `Cue-bud i motståndarnas ${NAME[theirStrain]} (${cb.level}${tsym}) — stoppfråga efter den negativa dubblingen: utgångsvärden men inget stopp i ${tsym}. Krav — partnern bjuder 3NT med stopp i ${tsym}, annars sin färg.`,
+      confidence: 'trolig',
+      forcing: 'utgangskrav',
+      rule: 'negativ-dubblarens cue (utgångskrav)',
+    }
+  }
+  // (b) Öppnaren svarar på frågan.
+  if (open.seat === seat && ours.length === 3 && ours[2].seat === PARTNER[seat] && parseBid(ours[2].bid as Bid)!.strain === theirStrain) {
+    const dbl = prior.filter((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
+    if (dbl.length !== 2 || dbl[0].bid !== 'X') return null
+    if (prior[prior.length - 1].bid !== 'P' || prior[prior.length - 2] !== ours[2]) return null
+    if (cb.strain === 'NT') {
+      return { text: `${cb.level} sang — svar på partnerns stoppfråga: stopp i motståndarnas ${NAME[theirStrain]}; till spel.`, confidence: 'trolig', forcing: 'avslut', rule: 'svar på partnerns cue' }
+    }
+    return { text: `${cb.level}${SYMBOL[cb.strain]} — svar på partnerns stoppfråga: inget stopp i ${tsym}, visar ${NAME[cb.strain]} i stället. Partnern placerar kontraktet (krav).`, confidence: 'trolig', forcing: 'krav-1-rond', rule: 'svar på partnerns cue' }
+  }
+  return null
+}
+
 function cueRaiseFortsattning(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInterpretation | null {
   const bid = `${cb.level}${cb.strain}`
   const seq = cueRaiseSequenceIn([...prior, { seat, bid }], seat)

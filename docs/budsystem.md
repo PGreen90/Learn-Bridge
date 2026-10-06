@@ -2659,7 +2659,12 @@ dubblarens eget flöde (X + egen färg).
   med ♠54 ♥AJ54 ♦AJ6 ♣KJ98 (förr bjöd motorn 2♣ på fyra kort).* Ojämna 13+-
   händer utan stopp **cue-bjuder deras färg = utgångskrav** (motorbytet etapp
   4 familj 4, 2026-09-08): partnern bjuder 3NT med stopp, annars färg. *1♦–
-  (1♠)–X–P–2♣–P med ♠63 ♥AQJ85 ♦KQ84 ♣A7 → **2♠**.*
+  (1♠)–X–P–2♣–P med ♠63 ♥AQJ85 ♦KQ84 ♣A7 → **2♠**.* **Samma sak med fit i
+  partnerns lågfärg (felrapport #100, 2026-10-06):** 3NT lovar alltid stopp i
+  deras färg — utan stopp frågar dubblaren med cuen (en gång), partnern bjuder
+  3NT med stopp och rebjuder annars sin färg (aldrig sang utan stopp), sedan
+  5m. *1♣–(1♦)–X–P–2♣–P med ♠QJ72 ♥QJT5 ♦64 ♣AJT → **2♦**, inte 3NT; partnern
+  ♦K-singel → 3♣ → 5♣.*
   **Dubblarens svar på öppnarens invit-hopp (byggd 2026-09-13, bevaka
   2026-09-12):** öppnarens **hopp** i färg (egen 6-korts färg rebjuden, eller
   4-korts stöd i dubblarens visade högfärg) visar **16–18 och inbjuder**;
@@ -3301,6 +3306,14 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
 ## 9. Ändringslogg
+- **2026-10-06 — Felrapport #100: 3NT lovar stopp i deras färg även med fit i
+  partnerns lågfärg (§7.4).** Fit-höjningens minorgren gav 3NT på "balanserad
+  + utgångsvärden" utan att se på deras färg (1♣–(1♦)–X–P–2♣–P–3NT på ♦64).
+  Nu: stopp i varje färg de bjudit, annars cue i deras färg (frågan ställs en
+  gång; partnern 3NT med stopp, annars färg), sist 5m. Cue-svaret bjuder aldrig
+  sang utan stopp — rebjuder sin färg. Tre äldre facit uppdaterade (frön
+  20260771, 20261351, 20261354: stoppfrågan före 5m, 3NT när partnern har
+  stoppet). Facit `auction-felrapport-100.test.ts`.
 - **2026-10-06 — Felrapport #96: bottarna läser människans markeringar och lyder
   partnerns Lavinthal-sak (§8.5).** Syds ♥7-sak på stick 1 (= spader) lästes
   aldrig; Nord fortsatte ruter där partnern var renons. `partnerLavinthalRequest`
