@@ -30,10 +30,11 @@
   med "timed out". Kedjan kördes av ett skript som bara startar nästa dag när ingen
   körning är aktiv (en ny väntande körning avbryter annars en väntande
   schemakörning).
-- **Bevaka:** (1) första schemalagda körningen natten till 2026-10-06:
-  `gh run list --workflow=tavling-granskning.yml --event schedule --limit 3` ska
-  visa en grön `schedule` (GitHub startar den ofta 3–5 h efter 01:30 UTC); (2) 1 okt
-  IMP har bara 4 spelare och ettan 3 av 12 givar — inte närmare kontrollerat.
+- **Schemat går igen:** första `schedule`-körningen efter lagningen (natten till
+  2026-10-06) grön — startade 07:45 UTC, sex timmar efter cron (GitHub-fördröjning,
+  arbetsflödet `active`); 5 okt: 114 + 48 granskade, 0 flyttade.
+- **Bevaka:** 1 okt IMP har bara 4 spelare och ettan 3 av 12 givar — inte närmare
+  kontrollerat.
 
 ## Damfrågan + slamfrågornas förklaringar (2026-10-02, felrapport #95)
 - **Lagat:** damfrågan, damsvaren, Exclusion, Gerbers svar/kungfråga och
