@@ -1792,6 +1792,62 @@ export function mcBudget(cardsLeft: number): { samples: number; maxNodes: number
  *  • handen är större än `maxCardsForMC` (tidiga, tunga ställningar = för långsamt;
  *    vinsten ligger ändå i slutspelet: stickföring, ingångar, slutkast).
  */
+const SUIT_GLYPH: Record<Suit, string> = { spades: '♠', hearts: '♥', diamonds: '♦', clubs: '♣' }
+
+/**
+ * §8.7 (felrapport #101 + ägarens hårddragning 2026-10-07): försvararen på
+ * utspel tar sin MÄSTARE i en sidofärg i två lägen —
+ *  (a) betsticket: exakt ett stick fattas för bet;
+ *  (b) träkarlen (öppen) har bara ETT kort kvar i färgen: då är det förbjudet
+ *      att spela lågt i färgen från handen — byt färg eller (nio gånger av tio)
+ *      ta mästaren; vi tar den.
+ * Ärlig räkning: "mästare" = alla högre kort spelade eller på egen hand
+ * (`isSureWinner`), träkarlen kan inte stjäla (följer färg eller saknar trumf),
+ * spelföraren har inte visat renons i färgen medan osedd trumf finns. Null =
+ * regeln gäller inte (då väger andra regler/Monte-Carlo helheten).
+ */
+function defenderCashesSettingTrick(state: PlayState, seat: Seat): CardChoice | null {
+  if (state.currentTrick.length !== 0) return null
+  const declarer = state.contract.declarer
+  if (side(seat) === side(declarer)) return null
+  const ours = side(seat) === 'NS' ? state.tricksNS : state.tricksEW
+  const forBet = 8 - state.contract.level // stick försvaret behöver för en bet
+  const settingTrick = ours === forBet - 1
+  const trump = state.trump
+  const dummyHand = state.hands[dummyOf(state.contract)]
+  const voids = shownVoids(state)
+  const played = playedCards(state)
+  const mine = state.hands[seat]
+  for (const card of legalCards(state, seat)) {
+    if (card.suit === trump) continue
+    if (!isSureWinner(card, mine, played)) continue
+    const dummyInSuit = dummyHand.filter((c) => c.suit === card.suit).length
+    if (trump !== null) {
+      const dummyHasTrump = dummyHand.some((c) => c.suit === trump)
+      if (dummyInSuit === 0 && dummyHasTrump) continue
+      if (voids[declarer].has(card.suit) && unseenTrumpCount(state, seat) > 0) continue
+    }
+    const kort = `${SUIT_GLYPH[card.suit]}${card.rank}`
+    if (settingTrick) {
+      return {
+        card,
+        reason:
+          `Ett stick till sätter kontraktet och ${kort} är ett säkert stick – ` +
+          'jag tar det nu, innan spelföraren hinner saka bort sin förlorare (§8.7).',
+      }
+    }
+    if (dummyInSuit === 1) {
+      return {
+        card,
+        reason:
+          `Träkarlen har bara ett kort kvar i färgen och ${kort} är mästaren – jag spelar aldrig lågt ` +
+          'i den färgen nu; jag tar sticket medan det går (§8.7).',
+      }
+    }
+  }
+  return null
+}
+
 export function botCardSmartReasoned(
   state: PlayState,
   seat: Seat,
@@ -1817,6 +1873,14 @@ export function botCardSmartReasoned(
     }
     return botCardReasoned(state, seat)
   }
+  // Felrapport #101 (2026-10-07, §8.7): behöver försvaret EXAKT ett stick till
+  // för bet och jag har ett SÄKERT stick på utspel — ta det nu. Monte-Carlo
+  // röstade på ♥7 (double-dummy lika bra, men bygger på att spelföraren inte
+  // kan undkomma sin klöverförlorare) och ibland på en låg klöver (−1); en
+  // människa tar betsticket när det finns: "sista chansen" innan det sakas bort.
+  const cash = defenderCashesSettingTrick(state, seat)
+  if (cash) return cash
+
   if (cardsLeft > maxCards) return botCardReasoned(state, seat)
 
   // Felrapport #89 (2026-09-28): FJÄRDE hand i försvaret när partnern REDAN

@@ -3305,7 +3305,38 @@ av sekvens → honnören under sitter hos partnern). Fem tillägg, alla i trumf 
 
 Mätt med tredje-hand-riggen (`docs/speldiagnos.md` "T-serien", T1).
 
+### 8.7 Motspelsteknik — ta det säkra stick som sätter kontraktet (2026-10-07, felrapport #101)
+Behöver försvaret **exakt ett stick till för bet** och försvararen på utspel har
+ett **säkert stick** — mästaren i en sidofärg (alla högre kort är spelade eller på
+egen hand), träkarlen kan inte stjäla (följer färg eller saknar trumf) och
+spelföraren har inte visat renons i färgen — så **tar hon det nu**. Det är sista
+chansen: väntar man kan spelföraren saka bort sin förlorare eller pressa fram
+den. Regeln går före bot-hjärnans Monte-Carlo, som bara ser double-dummy-lika
+alternativ (på #101-given var ♥7 "lika bra" som ♣Q men byggde på att
+spelföraren inte kunde undkomma klöverförloraren; en låg klöver gav hemgång).
+Exempel (4♠ av Öst, sex stick spelade, försvaret har tre): Nord ♥Q97 ♦Q ♣Q62,
+♣A och ♣K borta, träkarlen har klöver → **♣Q** direkt.
+
+**Hårddragningen (ägaren 2026-10-07):** ser försvararen att träkarlen har **bara
+ett kort kvar** i en färg där hon själv håller mästaren, är det **förbjudet att
+spela lågt** i den färgen från handen — byt färg eller, nio gånger av tio, ta
+mästaren. Bottarna tar den (samma ärliga villkor: träkarlen kan inte stjäla,
+spelföraren inte visad renons). Det gäller oavsett stickläget; är det dessutom
+betsticket är det tvingande. Behövs fler stick och träkarlen har fler kort i
+färgen väger helheten som förr.
+
 ## 9. Ändringslogg
+- **2026-10-07 — Felrapport #101: ta det säkra stick som sätter kontraktet
+  (§8.7).** Nord (bot) på utspel med tre stick tagna mot 4♠ och ♣Q som mästare
+  (♣A/♣K borta, träkarlen följer) — Monte-Carlo röstade på ♥7 eller en låg klöver
+  i stället för betsticket. Ny människoregel före MC i `botCardSmartReasoned`
+  (`defenderCashesSettingTrick`, play-bot.ts): exakt ett stick kvar till bet +
+  säkert stick (ärlig räkning: `isSureWinner`, träkarlen kan inte stjäla,
+  spelföraren ej visad renons) → ta det. **Hårddragning samma dag (ägaren):** har
+  träkarlen bara ett kort kvar i färgen får försvararen aldrig spela lågt i den
+  från handen — mästaren tas även när det inte är betsticket. Facit
+  `play-bot-satt-kontraktet.test.ts` (DD: ♣Q → 9, låg klöver → 10; samma läge med
+  två stick tagna → ♣Q ändå).
 - **2026-10-06 — Felrapport #100: 3NT lovar stopp i deras färg även med fit i
   partnerns lågfärg (§7.4).** Fit-höjningens minorgren gav 3NT på "balanserad
   + utgångsvärden" utan att se på deras färg (1♣–(1♦)–X–P–2♣–P–3NT på ♦64).
