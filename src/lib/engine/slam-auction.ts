@@ -505,7 +505,14 @@ function cuePhaseTurn(role: SlamRole, hand: Hand, setup: SlamSetup, floor: numbe
   // att bjuda 4NT"). I lågfärgstrumf ligger utgången över 4NT: bjuder kaptenen
   // 4♠ har partnern inget kontrollbud kvar under 4NT och ronden dör i 5m (frö
   // 20270088). Kaptenen i klar slamzon frågar därför i stället för det budet.
-  const stängerUteFrågan = role === CAPTAIN && !!cue && bidRank(game4NT) < gameRank && bidRank(cue.call) >= bidRank('4S') && floor >= 33 && bidRank(game4NT) > lastRank
+  // Steg 4 (2026-10-07): samma vakt i inbjudningszonen 31–32 när drivvillkoret
+  // (högst en okontrollerad sidofärg) redan håller — annars cue:ar kaptenen 4♠,
+  // partnern 5♣ och frågan är borta (1♦–1♠–3♦–4♦–4♥–4♠–5♣–5♦ med 12 stick).
+  const okontrolleradeNu = RANK_ORDER.filter((s) => s !== trump && !controlled.has(s) && !hasRealControl(hand, s))
+  const driveFloorNu = ctx.strictDrive ? 33 : 31
+  const stängerUteFrågan =
+    role === CAPTAIN && !!cue && bidRank(game4NT) < gameRank && bidRank(cue.call) >= bidRank('4S') && bidRank(game4NT) > lastRank &&
+    (floor >= 33 || (floor >= driveFloorNu && okontrolleradeNu.length <= 1))
   if (cue && !stängerUteFrågan) return cueTurn(role, cue)
 
   const game = gameCallFor(trump)

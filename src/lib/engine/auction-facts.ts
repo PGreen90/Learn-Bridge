@@ -389,15 +389,33 @@ export function opponentsBidStrain(history: ResolvedCall[], seat: Seat, strain: 
  * (senast bjudna om flera). null när ingen fit är överenskommen.
  */
 export function agreedTrump(history: ResolvedCall[], seat: Seat): Suit | null {
-  const strainsOf = (s: Seat) =>
-    new Set(
-      history
-        .filter((c) => c.seat === s)
-        .map((c) => parseContractBid(c.bid)?.strain)
-        .filter((st): st is string => !!st && st !== 'NT'),
-    )
-  const mine = strainsOf(seat)
-  const partners = strainsOf(PARTNER[seat])
+  const vi = new Set<Seat>([seat, PARTNER[seat]])
+  // Ett KONTROLLBUD är ingen bjuden färg (steg 4, 2026-10-07: 1♦–1♥–3♦–4♦–4♥
+  // "enade" paret om hjärter — öppnarens cue 4♥ + svararens 1♥ — och damfrågan
+  // besvarades med hjärter som trumf). Kandidat = ett 4-lägesbud i en färg
+  // bjudaren själv inte bjudit, under utgången i en färg paret redan enats om
+  // (eller 3♠ när hjärter är satt); betydelselagret avgör om det är ett
+  // kontrollbud (1♦–1♠–2♣–2♦–2♥–4♥ är en naturlig utgångshöjning — räknas).
+  // Bara kandidaterna frågar betydelselagret, så kostnaden är försumbar.
+  const STRAIN_ORDER = ['C', 'D', 'H', 'S', 'NT']
+  const rankOf = (level: number, strain: string) => level * 5 + STRAIN_ORDER.indexOf(strain)
+  const gameLevel = (st: string) => (st === 'H' || st === 'S' ? 4 : 5)
+  const bjudna: Record<Seat, Set<string>> = { N: new Set(), E: new Set(), S: new Set(), W: new Set() }
+  history.forEach((c, i) => {
+    if (!vi.has(c.seat)) return
+    const cb = parseContractBid(c.bid)
+    if (!cb || cb.strain === 'NT') return
+    const satt = [...bjudna[seat]].filter((st) => bjudna[PARTNER[seat]].has(st))
+    const ny = !bjudna[c.seat].has(cb.strain) && !satt.includes(cb.strain)
+    const kandidat =
+      ny && satt.length > 0 &&
+      ((cb.level === 4 && satt.some((st) => rankOf(cb.level, cb.strain) < rankOf(gameLevel(st), st))) ||
+        (cb.level === 3 && cb.strain === 'S' && satt.includes('H')))
+    if (kandidat && /cue|kontrollbud/i.test(meaningOf(history, i).rule ?? '')) return
+    bjudna[c.seat].add(cb.strain)
+  })
+  const mine = bjudna[seat]
+  const partners = bjudna[PARTNER[seat]]
   // En färg MOTSTÅNDARNA bjöd först är aldrig vår trumf: våra bud i den är cue-bud
   // (live-fynd 2026-09-22: (1♦)–2♦ Michaels–3♦ cue lästes som "ruter överenskommen",
   // och essfrågans svar räknade nyckelkort med ruter som trumf). Ordningen avgör —

@@ -1617,8 +1617,9 @@ VISAT via buden**, aldrig på partnerns faktiska kort:
   (fråga nyckelkort/ess). 31–32 (slam bara om partnern har extra) → **inbjudan**
   (kvantitativ 4NT över sang; 5M/4m med trumf) — partnern accepterar med **mer än
   blott minimum**. Under det: nöj dig med utgång.
-  *Exempel:* efter hopp-återbudet **1m–1M–3m** (visar 16–18, 6+ färg) driver
-  svararen med 3+ stöd från **17** stödpoäng och bjuder in med 4m på **15–16**.
+  *Exempel:* efter hopp-återbudet **1m–1M–3m** (visar 16–18, 6+ färg) bjuder
+  svararen med 3+ stöd och **15+** stödpoäng **4m** = trumfen satt (§6.2, steg 4);
+  kontrollbuden följer, 4NT i slamzon, annars 5m. Under 15: 3NT eller pass.
 - **Härledning:** ess-/nyckelkortssvaren läses mot egen hand (5♣ = "1 eller 4":
   har jag redan 2 är det 1). Går tvetydigheten inte att lösa antas det **höga**
   mot en visad 15+-hand, annars det **låga** — och då **rättar partnern med det
@@ -1736,6 +1737,20 @@ naturligt utan visar en **kontroll**:
   3-läget höjer svararen med **4-korts stöd** till **4m** — trumfen är satt och
   öppnaren visar sin billigaste kontroll. (Med 3-korts stöd som förut: 4NT i
   klar slamzon.) *2♣–2♠–3♣–**4♣**–4♦–4♠ …*
+- **Kontrollbud före essfrågan gäller i ALLA sammanhang** (ägaren 2026-10-07):
+  båda partners är skyldiga varandra att visa kontroller. Det betyder inte att vi
+  ska till slam, men vi skall visa vår hand. **Att hoppa från 4 till 6 utan att
+  fråga ess är förbjudet.** (Byggt: 1m–1M–3m–4m, steg 4. Kvar att bygga om: de
+  gamla 4m-inbjudningarnas accept rakt till 6m efter stark 2♣, MSS och
+  reverse/hoppskift — nästa steg i NU.)
+- **4m efter öppnarens hopp i egen lågfärg (1m–1M–3m–4m)** = **träff i trumf och
+  föredrar färgen före sang** (öppnaren har visat 16+ och sex kort; "jag tror vi
+  presterar bättre i lågfärgen" — ägaren 2026-10-07). Utgångskrav, 3+ stöd och
+  15+ stödpoäng. Efter 4m: **kontrollbud** (öppnaren börjar, billigaste först),
+  **4NT** när kaptenen är i slamzon, eller **5m** utan kontroller och inget mer
+  att visa. Förr var 4m en inbjudan som öppnaren accepterade rakt till 6m.
+  *1♦–1♠–3♦–**4♦**–4♥ (kontroll) –4♠ (kontroll) –5♣ (kontroll) –5♦ (avslut)* ·
+  *1♦–1♠–3♦–**4♦**–4♥–4NT–5♦–6♦.*
 - **Man behöver inte ha alla kontroller för att bjuda 4NT** (ägaren 2026-10-04).
   Kontrollbuden ska hinnas med FÖRE essfrågan — de får aldrig stänga ute den.
   Kaptenen i klar slamzon (33+) frågar 4NT så snart hen inte har fler
@@ -3326,6 +3341,24 @@ betsticket är det tvingande. Behövs fler stick och träkarlen har fler kort i
 färgen väger helheten som förr.
 
 ## 9. Ändringslogg
+- **2026-10-07 — Kontrollbud före essfrågan, steg 4: efter hopp i egen lågfärg
+  (§6.2).** Ägarbeslut: 4m efter 1m–1M–3m = träff i trumf och föredrar färgen
+  före sang — utgångskrav (3+ stöd, 15+ stödpoäng); öppnaren öppnar
+  kontrollbudsronden, kaptenen frågar 4NT i slamzon eller stannar i 5m. Förr:
+  15–16 → 4m som inbjudan med accept rakt till 6m utan ess- eller kontrollkoll,
+  17+ → 4NT direkt. Dessutom principen "kontrollbud före essfrågan gäller i alla
+  sammanhang" och "hoppa 4→6 utan essfråga är förbjudet" (§6.2). Betydelselagret:
+  4m = "sätter trumfen (krav)" (förr "preferens"). Tre sidofynd ur
+  auktionsdiffen, alla låsta i samma facit: (1) 1m–1NT–3m–4m är den svaga
+  sangsvararens höjning, inte trumfsättning (öppnaren passar); (2) ett
+  kontrollbud är ingen bjuden färg — facts-lagrets `agreedTrump` räknade
+  öppnarens cue 4♥ + svararens 1♥ som "hjärter överenskommen" och damfrågan
+  besvarades i fel färg (5♥ efter kaptenens 5♦-stopp); (3) kaptenen på 31–32
+  med högst en okontrollerad sidofärg frågar 4NT hellre än ett 4♠-kontrollbud
+  som stänger ute frågan (samma vakt som i 33+-zonen; förr 4♥–4♠–5♣–5♦ med
+  tolv stick). Facit `auction-hopp-egen-farg.test.ts`; betydelsesvepet 0 på
+  ostörda standardfrön; mätt mot föregående version med auktionsdiffen
+  (50 000 givar) + `slamtabell-dd.probe.test.ts` — siffrorna i historiken.
 - **2026-10-07 — Felrapport #101: ta det säkra stick som sätter kontraktet
   (§8.7).** Nord (bot) på utspel med tre stick tagna mot 4♠ och ♣Q som mästare
   (♣A/♣K borta, träkarlen följer) — Monte-Carlo röstade på ♥7 eller en låg klöver

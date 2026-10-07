@@ -155,6 +155,7 @@ const ALL_ENGINE_RULES: string[] = [
   'reverse: 3NT', 'reverse: utgång i fiten', 'till spel (3NT)', '2♣: lillslam på solid egen färg',
   'accepterar slamtrevare', 'slamhöjning av 3NT', 'slaminbjudan: avböjer',
   'sätter trumfen (slamintresse)', // 2♣–pos–3m–4m: trumfen först, kontrollbuden efter (ägarbeslut 2026-10-04)
+  'sätter trumfen (krav)', // 1m–1M–3m–4m: träff + föredrar färgen, kontrollbuden efter (ägarbeslut 2026-10-07)
   'sätter trumfen före essfrågan', // trumfvakten (ägarbeslut 2026-10-02: 4NT = senast äkta bjudna färg)
   // Felrapport #98 (2026-10-06): redubblarens andra bud efter 1M–(X)–XX–(färg)–P–(P).
   'redubblaren: utgång', 'redubblaren: inbjudan', 'redubblaren: straffdubbling',

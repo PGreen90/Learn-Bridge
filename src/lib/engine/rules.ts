@@ -555,6 +555,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'RKC: stopp': 'avslut',
   'sätter trumfen före essfrågan': 'krav-1-rond',
   'sätter trumfen (slamintresse)': 'utgangskrav',
+  'sätter trumfen (krav)': 'utgangskrav', // 4m efter 1m–1M–3m (steg 4, 2026-10-07)
   'RKC: dam nekad': 'avslut',
   'kvantitativ 4NT: accept': 'avslut',
   // Regler som saknade kravnivå (betydelsesvepet 2026-10-02, felrapport #95):
