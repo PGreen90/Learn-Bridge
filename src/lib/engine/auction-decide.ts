@@ -134,6 +134,7 @@ import type { Bid, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { auctionFacts, forcingCallStillOpen, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
+import { dummyPoints } from './evaluation'
 import { hcp, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
 import { classifyOpening } from './openings'
@@ -451,13 +452,16 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   }
 
   // Hopp i egen minor (1m–1M–3m, visade 16–18 med 6+) + 3+ fit → slamport.
+  // Ägarbeslut 2026-10-07 (steg 4): 4m är TRÄFF + föredrar färgen före sang —
+  // utgångskrav, ingen inbjudan; kontrollbuden (båda) kommer efter 4m, sedan
+  // 4NT eller 5m. Förr: 4m = inbjudan som öppnaren accepterade rakt till 6m.
   if (
     (openCall === '1C' || openCall === '1D') &&
     response.rule === 'ny färg (1-läget)' &&
     rebid.rule === 'hopp i egen färg (inbjudan)' &&
     openerSuit && rebidSuit === openerSuit && trump === openerSuit
   ) {
-    return { ctx: { partnerMin: 16, inviteCall: `4${LETTER[openerSuit]}` } }
+    return { ctx: { partnerMin: 16, gameForcing: true } }
   }
 
   // Hopphöjning av min högfärg (1x–1M–3M, visade 16–18 med 4-korts stöd).
@@ -780,6 +784,11 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
   }
 
   // Hopp i egen minor (1m–1M–3m, visade 16–18 med 6+) + 3+ fit → slamport.
+  // Ägarbeslut 2026-10-07 (kontrollbud före essfrågan, steg 4): med 3+ stöd och
+  // 31+ ihop (stödpoäng golvade vid hp mot visade 16) bjuder svararen 4m =
+  // träff i trumf + föredrar färgen före sang, utgångskrav. Öppnaren öppnar
+  // kontrollbudsronden (partnerStarts); kaptenen frågar 4NT i slamzon eller
+  // stannar i 5m. Förr: 4m = inbjudan (6m direkt vid accept), 17+ → 4NT direkt.
   if (
     (openCall === '1C' || openCall === '1D') &&
     response.rule === 'ny färg (1-läget)' &&
@@ -787,8 +796,19 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
     openerSuit && suitOf(rebid.call) === openerSuit &&
     rl[openerSuit] >= 3
   ) {
-    const slam = slamStep(openerSuit)
-    if (slam) return slam
+    const c = slamContextFor(openCall, response, rebid, openerSuit)
+    const floor = Math.max(hcp(hand), dummyPoints(hand, openerSuit).dummyPoints) + (c?.ctx.partnerMin ?? 16)
+    if (c && floor >= 31) {
+      const fyraM = `4${LETTER[openerSuit]}`
+      return {
+        turn: {
+          call: fyraM as ResponseResult['call'],
+          rule: 'sätter trumfen (krav)',
+          explanation: `3+ stöd i partnerns ${SYM[openerSuit]} och ${floor}+ ihop mot visade 16–18 → ${fyraM[0]}${SYM[openerSuit]} sätter trumfen (föredrar färgen före sang, krav). Partnern visar sin billigaste kontroll; essfrågan kommer efter kontrollbuden, annars 5${SYM[openerSuit]}.`,
+        },
+        plan: { kind: 'slam', setup: { trump: openerSuit, lastCall: fyraM, ctx: c.ctx, partnerStarts: true } },
+      }
+    }
   }
 
   // Texas över 2NT fullföljd (2026-09-15, slamvägarna): 6+ högfärg — slamzonen
@@ -1497,6 +1517,20 @@ function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
   if (!response || !rebid) return null
   const openerSuit = suitOf(openCall)
   const first = ours[3].bid
+
+  // Hopp i egen lågfärg + svararens 4m (1m–1M–3m–4m; ägarbeslut 2026-10-07,
+  // steg 4): 4m sätter trumfen (träff, föredrar färgen före sang, krav).
+  // Öppnaren öppnar kontrollbudsronden (partnerStarts), kaptenen räknar mot
+  // visade 16. Förr lästes 4m som slaminbjudan (accept = 6m direkt).
+  if (
+    (openCall === '1C' || openCall === '1D') &&
+    response.rule === 'ny färg (1-läget)' &&
+    rebid.rule === 'hopp i egen färg (inbjudan)' &&
+    openerSuit && suitOf(rebid.call) === openerSuit && first === `4${LETTER[openerSuit]}`
+  ) {
+    const ctx: SlamContext = { partnerMin: 16, gameForcing: true }
+    return { kind: 'slam', captain, prefix: 4, setup: { trump: openerSuit, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+  }
 
   // Puppet Stayman (2026-09-15, sondens fynd): efter öppnarens 5-korts högfärg
   // (3♥/3♠) sätter kaptenen trumfen med den andra högfärgen (3♠ / 4♥) =

@@ -3688,6 +3688,12 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
     if (cb.level === minLevelOver(reb, cb.strain)) return R('höjning', `${B(cb)} — höjer partnerns ${name}: 4+ stöd, under 10 stödpoäng. Ej krav.`)
     return R('hopphöjning (inbjudan)', `${B(cb)} — hopphöjning av partnerns ${name}: 4+ stöd, 10–12 stödpoäng. Inbjudan.`)
   }
+  // Öppnaren hoppade i egen LÅGFÄRG (1m–1M–3m: 16–18, 6+); svararens 4m
+  // (ägarbeslut 2026-10-07): träff i trumf och föredrar färgen före sang —
+  // utgångskrav, kontrollbuden kommer efter. Inte preferens, inte inbjudan.
+  if (isMinor(open.strain) && reb.strain === open.strain && reb.level === 3 && resp.level === 1 && resp.strain !== 'NT' && cb.strain === open.strain && cb.level === 4) {
+    return R('sätter trumfen (krav)', `${B(cb)} — 3+ stöd i partnerns ${name} och föredrar färgen före sang mot visade 16–18 med sex kort. Sätter trumfen, utgångskrav: partnern visar sin billigaste kontroll (ess, kung-dam, singel eller renons), sedan essfråga eller 5${SYMBOL[cb.strain]}.`, 'utgangskrav')
+  }
   if (cb.strain === open.strain) {
     if (cb.level === minLevelOver(reb, cb.strain)) return R('preferens', `${B(cb)} — preferens till partnerns ${name} (oftast 2–3 kort), svag hand. Ej krav.`)
     return R('inbjudan (limithöjning)', `${B(cb)} — hopp till ${name}: stöd och inbjudan (10–12).`)
