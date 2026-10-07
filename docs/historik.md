@@ -10,6 +10,19 @@
 
 ---
 
+## 2026-10-07 (Felrapport #101 — försvararen tar mästaren, LIVE 01c7a7e)
+
+**§8.7, två lager, före Monte-Carlo** (`defenderCashesSettingTrick`, play-bot.ts):
+(a) fattas exakt ett stick för bet och försvararen på utspel har mästaren i en
+sidofärg → ta den; (b) ägarens hårddragning samma dag: har träkarlen bara ett kort
+kvar i färgen får försvararen aldrig spela lågt i den från handen → mästaren tas
+oavsett stickläge ("byt färg eller, nio av tio, ta damen"). Ärliga villkor:
+`isSureWinner`, träkarlen kan inte stjäla, spelföraren ej visad renons. Given: 4♠
+av Öst, Nord ♥Q97 ♦Q ♣Q62 efter sex stick — MC röstade ♥7 (DD lika, men bygger på
+att spelföraren inte undkommer klöverförloraren) eller låg klöver (DD 10). Facit
+`play-bot-satt-kontraktet.test.ts`. Nettomätning över speldiagnosens givar INTE
+körd (regeln bedömd smal) — kör `play-quality.probe` om bordet säger emot.
+
 ## 2026-10-06 (bevaka-översynen + felrapportens fält "Rätt bud + varför", LIVE 2f7ab5d)
 
 **Felrapportformuläret** fick fältet "Rätt bud + varför" (ägarbeslut 2026-10-06):

@@ -28,8 +28,8 @@ Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
 och svarare räknar samma) · slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
 = damfrågan, annars 8+ kända trumf · tio kända trumf = trumfdam. #94 slutar i 6♥.
 
-**Senast LIVE (detalj `docs/historik.md`):** felrapport #96–#100 (2026-10-06: bottarna
-läser människans markeringar + Lavinthal · redubblarens andra bud · stoppfrågan) · fynd B
+**Senast LIVE (detalj `docs/historik.md`):** #101 (2026-10-07, §8.7: försvararen tar
+mästaren — betsticket / träkarlen har ett kort kvar) · #96–#100 (markeringar · stoppfrågan) · fynd B
 "parets färg i sang" `889fac3` · Hål D steg 2 `fda630c` (öppna ägarfrågor: svararens val
 efter 3NT · öppnaren frågar aldrig 4NT själv) · #91–#94, uteslutningsmetoden i RKC.
 
