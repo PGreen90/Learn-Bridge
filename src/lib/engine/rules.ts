@@ -534,6 +534,9 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'svar på fjärde färg': 'utgangskrav',
   'fjärde färg: placerar utgång': 'avslut',
   'fjärde färg: utgång i fit': 'avslut',
+  'fjärde färg: 2NT (krav)': 'utgangskrav', // felrapport #103: fyra kort mot partnerns tre, 18+, slamintresse
+  'fjärde färg: 3NT (minimum)': 'avslut',
+  'fjärde färg: 4NT (maximum)': 'slamintresse',
   '2/1: fortsättning': 'utgangskrav',
   '2/1 utgångskrav': 'avslut', // svararen sätter utgång efter öppnarens höjning av 2/1-högfärgen (felrapport #27; beslutstabellen familj 4a)
   'rebjuden färg (inbjudan)': 'inbjudan',
@@ -559,6 +562,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'sätter trumfen (slamintresse)': 'utgangskrav',
   'sätter trumfen (krav)': 'utgangskrav', // 4m efter 1m–1M–3m (steg 4, 2026-10-07)
   'RKC: dam nekad': 'avslut',
+  'kvantitativ 4NT': 'slamintresse', // över partnerns naturliga sang: 31–32 mot visat minimum (Gerber överallt, 2026-10-09)
   'kvantitativ 4NT: accept': 'avslut',
   // Regler som saknade kravnivå (betydelsesvepet 2026-10-02, felrapport #95):
   // placeringar på utgångs-/slamnivå.

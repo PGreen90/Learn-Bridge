@@ -35,8 +35,11 @@ describe('FACIT: slam efter hopp-återbud i minor (felrapport #29, ärliga porta
     const calls = simulateAuction(deal)
     const contract = contractFromCalls(calls)
     expect(contract).not.toBeNull()
-    expect(contract!.level).toBe(3)
-    expect(contract!.strain).toBe('NT') // ärlig utgång, ingen slamblast på kik
+    // 2026-10-09 (Gerber överallt): Nord återbjuder 2NT (18–19) och Syds 13 + 18 = 31
+    // är kaptensregelns inbjudningszon → kvantitativ 4NT; Nord (18, minimum) passar.
+    expect(calls.map((c) => c.bid)).toContain('4NT')
+    expect(contract!.level).toBe(4)
+    expect(contract!.strain).toBe('NT') // ärlig miss av slammen, ingen slamblast på kik
   })
 
   it('med riktiga slamvärden (15 hp + fit = inbjudningszon): 1♣–1♠–3♣–4♣ → öppnaren accepterar → 6♣', () => {
@@ -57,7 +60,10 @@ describe('FACIT: slam efter hopp-återbud i minor (felrapport #29, ärliga porta
     // i stället för 3♣ — Syd placerar 3NT. Klöverslammen via 3♣–4♣–6♣ nås inte
     // längre på den här given (noterat i docs/senare.md som uppföljning).
     expect(calls.map((c) => c.bid)).toContain('2NT')
-    expect(contract!.level).toBe(3)
+    // 2026-10-09 (Gerber överallt, ägarbeslut): Syds 15 + visade 18 = 33 → Gerber 4♣
+    // över 2NT-återbudet, och slammen nås i sang (6NT) — uppföljningen i senare.md stängd.
+    expect(calls.map((c) => c.bid)).toContain('4C')
+    expect(contract!.level).toBe(6)
     expect(contract!.strain).toBe('NT')
   })
 })

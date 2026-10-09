@@ -182,6 +182,11 @@ export function rkcCorrection(hand: Hand, f: AuctionFacts): Kunskap | null {
 }
 
 /**
+ * HISTORISK (2026-10-09): ersatt av tabellraden gerber-sang — kaptenen frågar
+ * Gerber 4♣ över partnerns 3NT i stället för att hoppa ("Gerber går alltid före
+ * kvant och hoppbud", ägaren). Behålls som dokumentation av #42-beslutet; ingen
+ * rad anropar den längre.
+ *
  * Höjer partnerns naturliga 3NT till 6NT (felrapport #42, §5.2) när kaptenens
  * egen hand + partnerns visade minimum når slamzonen (33). Smal med flit:
  *  - partnerns 3NT ska vara auktionens SENASTE bud (ingen har bjudit över),
@@ -315,7 +320,6 @@ export function slamAnswerContinuation(hand: Hand, f: AuctionFacts): Kunskap | n
     answer3NTStopTry(hand, f) ??
     answerRKC(hand, f) ??
     answerKingAsk(hand, f) ??
-    rkcCorrection(hand, f) ??
-    raise3NTToSlam(hand, f)
+    rkcCorrection(hand, f)
   )
 }

@@ -47,10 +47,13 @@ const upTo3NT: ResolvedCall[] = [
 ]
 
 describe('Felrapport #42 – kvantitativ höjning av partnerns naturliga 3NT', () => {
-  it('Nord höjer 3NT till 6NT (21 hp mot partnerns visade 12+ = 33)', () => {
+  // Ägarbeslut 2026-10-09 ("Gerber går alltid före kvant och hoppbud"): slamzonen
+  // nås, men Nord frågar ess med 4♣ först och placerar 6NT på svaret — hoppet
+  // 3NT→6NT är borta. Facit för Gerber-dialogen: auction-gerber-overallt.test.ts.
+  it('Nord frågar Gerber 4♣ över 3NT (21 hp mot partnerns visade 12+ = 33) — inget hopp till 6NT', () => {
     const n = decideCall(deal, upTo3NT, 'N')
-    expect(n.bid).toBe('6NT')
-    expect(n.rule).toBe('slamhöjning av 3NT')
+    expect(n.bid).toBe('4C')
+    expect(n.rule).toBe('Gerber')
   })
 
   it('hela bot-auktionen landar i slam i stället för 3NT', () => {
@@ -62,13 +65,15 @@ describe('Felrapport #42 – kvantitativ höjning av partnerns naturliga 3NT', (
 
   // Tröskeln låses åt andra hållet: 20 hp = 32 mot visat minimum → under
   // drivzonen, kaptenen passar 3NT (hellre systemriktig miss än gambling).
-  it('20 hp (32 mot visat minimum) passar 3NT – tröskeln 21 står', () => {
+  // 2026-10-09: 31–32 mot visat minimum är kaptensregelns inbjudningszon → 4NT
+  // kvantitativt (förr pass; drivzonen 33 står).
+  it('20 hp (32 mot visat minimum) inbjuder 4NT kvantitativt – drivzonen 33 står', () => {
     const svagare: Deal = {
       ...deal,
       id: 'felrapport-42-under',
       hands: { ...deal.hands, N: parseHand('S:K H:AQ93 D:AKT74 C:KJ7') }, // 20 hp
     }
-    expect(decideCall(svagare, upTo3NT, 'N').bid).toBe('P')
+    expect(decideCall(svagare, upTo3NT, 'N')).toMatchObject({ bid: '4NT', rule: 'kvantitativ 4NT' })
   })
 
   // Partnern måste ha ÖPPNAT för att 12-golvet ska vara ärligt. Har hen bara

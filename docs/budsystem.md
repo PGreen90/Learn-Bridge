@@ -991,8 +991,11 @@ placera kontraktet. Tre styrkenivåer styr valet:
   hoppskift 19) när en trumf är säkrad på egen kunskap — 4+ egna kort i
   öppnarens andra färg, eller 3+ i öppnarens första (som lovar 5+ vid
   reverse och högfärgsöppning; 4+ krävs mot hoppskiftets minoröppning):
-  **33+ → driv** (4NT RKC), **31–32 → slaminbjudan** (öppnaren accepterar
-  med mer än blott minimum, dömt på egna Bergenpoäng), annars vanliga
+  i **högfärgstrumf**: **33+ → driv** (4NT RKC), **31–32 → slaminbjudan 5M**
+  (öppnaren accepterar med mer än blott minimum, dömt på egna Bergenpoäng);
+  i **lågfärgstrumf** (steg 5, 2026-10-09): **31+ → 4m sätter trumfen (krav)**
+  — öppnaren visar sin billigaste kontroll, kaptenen cue:ar/frågar 4NT/stannar
+  i 5m (§6.2; förr 4m = inbjudan med accept rakt till 6m). Annars vanliga
   utgångsflödet. **Undantag (ägarbeslut 2026-09-05, §6.6):** efter en reverse
   i **högfärg** med 4+ stöd frågas inte 4NT direkt — svararen höjer först
   (billigt = stark, hopp = svag, fast arrival) och cue-ronden öppnas av
@@ -1749,9 +1752,9 @@ naturligt utan visar en **kontroll**:
 - **Kontrollbud före essfrågan gäller i ALLA sammanhang** (ägaren 2026-10-07):
   båda partners är skyldiga varandra att visa kontroller. Det betyder inte att vi
   ska till slam, men vi skall visa vår hand. **Att hoppa från 4 till 6 utan att
-  fråga ess är förbjudet.** (Byggt: 1m–1M–3m–4m, steg 4. Kvar att bygga om: de
-  gamla 4m-inbjudningarnas accept rakt till 6m efter stark 2♣, MSS och
-  reverse/hoppskift — nästa steg i NU.)
+  fråga ess är förbjudet.** (Byggt: 1m–1M–3m–4m, steg 4; reverse/hoppskift,
+  steg 5. Stark 2♣ gick redan via kontrollbud + 4NT. Kvar att bygga om: MSS,
+  inverterad minor och de störda lägena — nästa steg i NU.)
 - **4m efter öppnarens hopp i egen lågfärg (1m–1M–3m–4m)** = **träff i trumf och
   föredrar färgen före sang** (öppnaren har visat 16+ och sex kort; "jag tror vi
   presterar bättre i lågfärgen" — ägaren 2026-10-07). Utgångskrav, 3+ stöd och
@@ -1760,6 +1763,16 @@ naturligt utan visar en **kontroll**:
   att visa. Förr var 4m en inbjudan som öppnaren accepterade rakt till 6m.
   *1♦–1♠–3♦–**4♦**–4♥ (kontroll) –4♠ (kontroll) –5♣ (kontroll) –5♦ (avslut)* ·
   *1♦–1♠–3♦–**4♦**–4♥–4NT–5♦–6♦.*
+- **4m efter reverse/hoppskift i en av öppnarens lågfärger (steg 5, 2026-10-09)**
+  — samma mönster: **4m sätter trumfen (krav)** med 31+ ihop (stödpoäng golvade
+  vid hp mot visade 16 efter reverse, 19 efter hoppskift; 3+ stöd i öppnarens
+  första färg efter reverse, 4+ i andrafärgen och i hoppskiftets minoröppning).
+  Öppnaren visar sin billigaste kontroll — även i egen visad färg
+  (1♦–1♠–3♣–4♣–**4♦** = ruterkontroll) och i partnerns högfärg
+  (1♣–1♥–2♦–4♦–**4♥** = hjärterkontroll, ingen placering) — sedan 4NT i slamzon
+  eller 5m. Förr: 31–32 = inbjudan med accept rakt till 6m, 33+ = 4NT direkt.
+  *1♣–1♠–2♥–**4♣**–4♦–4♥–4♠–4NT–5♠–6♣* · *1♦–1♥–3♣–**4♣**–4♦–4♥–5♣* (ingen
+  slamzon → utgång).
 - **Man behöver inte ha alla kontroller för att bjuda 4NT** (ägaren 2026-10-04).
   Kontrollbuden ska hinnas med FÖRE essfrågan — de får aldrig stänga ute den.
   Kaptenen i klar slamzon (33+) frågar 4NT så snart hen inte har fler
@@ -1796,9 +1809,9 @@ förbi 4m är cue-ronden** (ägarbeslut 2026-09-05, motorbytet §5b beslut 16):
 billigaste kontroll (4♥/4♠ över 4♦; 4♦/4♥/4♠ över 4♣), partnern cue:ar
 tillbaka med extra eller bjuder 5m med minimum, 33+ frågar 4NT direkt — och
 handen utan billig kontroll bjuder 5m, en systemriktig miss (4NT som
-inbjudan kolliderar med essfrågan; Minorwood är en senare fråga). Reverse/hoppskift väntar på
-egen trumf-agreement-analys (där är trumfen inferrerad, inte bjuden — ett cue
-skulle läsas naturligt). Bjuder **du** själv ett cue i standardordning
+inbjudan kolliderar med essfrågan; Minorwood är en senare fråga). Reverse/hoppskift
+i lågfärg följer sedan 2026-10-09 samma mönster via 4m (steg 5 i §6.2 ovan).
+Bjuder **du** själv ett cue i standardordning
 (billigaste först) följer boten med; en cue i annan ordning saknar tills
 vidare en regel (motorn följer inte med).
 
@@ -1847,12 +1860,25 @@ Poängen: att veta exakt vilken kung partnern har avgör om en sidofärg ger nog
 med stick för storslam (t.ex. K-D mittemot ess).
 
 ### 6.4 Gerber (ess-fråga över NT)
-**4♣** är Gerber – ess-fråga – men **endast som hopp direkt över en naturlig
-NT-öppning eller NT-återbud** (1NT, 2NT). Används för balanserade slamhänder där
-NT är "trumf" (mot ett färgkontrakt används i stället 1430 RKC). Över ett
-1NT-*återbud* frågar bara den **jämna handen utan färg att visa** (§5.7): en
-egen färg visas först via New Minor Forcing och slammen går via 4NT RKC i den
-satta trumfen — Gerber frågar aldrig för en färg (ägarbeslut 2026-09-05).
+**4♣ direkt över partnerns naturliga sang är Gerber – ess-fråga – överallt där
+sang är etablerad som utgång** (ägarbeslut 2026-10-09: "Gerber går alltid före
+kvant och hoppbud; gerber skall vara fullt aktivt i alla budgivningar där NT är
+etablerat som utgång"): över 1NT/2NT-öppningen, över 1NT- och 2NT-återbudet och
+över **varje naturligt 3NT** (öppnarens eller svararens, placering eller
+återbud). Den svaga handen som satte 3NT vet inget om partnerns styrka — därför
+frågar kaptenen (vilken stol som helst) ess *före* ett hopp till 6NT. Används
+för slamhänder där NT är "trumf" (mot ett färgkontrakt används i stället 1430
+RKC). Över ett 1NT-/2NT-*återbud* frågar bara den **jämna handen utan 5-korts
+färg att visa** (§5.7): en egen färg visas först via New Minor Forcing/checkback
+och slammen går via 4NT RKC i den satta trumfen — Gerber frågar aldrig för en
+färg (ägarbeslut 2026-09-05).
+
+**Kaptensregeln styr frågan:** egen hand + partnerns **visade minimum** ≥ 33 →
+**4♣**; 31–32 → **kvantitativ 4NT** (partnern bjuder 6NT med mer än minimum);
+under det står utgången. Visat minimum för sangbudet: 2NT-återbud 18 · 3NT som
+öppnarens placering 12 · svararens 3NT 13 (efter 2NT-återbud eller hoppskift 6,
+efter reverse eller öppnarens 16–18-inbjudan 8) · svararens 2NT 11. Stark 2♣
+har sitt eget sangsystem (§4.4) och står utanför.
 
 **Ess-svar:**
 | Svar | Ess |
@@ -1870,8 +1896,12 @@ satta trumfen — Gerber frågar aldrig för en färg (ägarbeslut 2026-09-05).
 | 5♠ | 2 |
 | 5NT | 3 |
 
-**När 4♣ INTE är Gerber:** om budet inte är ett hopp, eller inte kommer direkt
-över NT – då är 4♣ naturligt (klöver) eller cue-bid.
+**När 4♣ INTE är Gerber:** om budet inte kommer direkt över partnerns naturliga
+sang, om en trumffärg redan är satt (då är 4♣ ett kontrollbud, §6.2 — t.ex. över
+NMF:s 3NT-förslag med lågfärgsfit eller efter inverterad minor), eller om
+budgivaren själv redan bjudit klöver två gånger (1♣–1♥–3♣–3NT–4♣ är naturligt).
+Öppnarens 3-korts stöd på fjärde färg sätter ingen trumf (§6.6) — ett 4♣ över
+ett senare 3NT är Gerber.
 
 ### 6.5 Exclusion Blackwood (5-läges-voidwood) — *avancerad/valfri*
 När **trumf är överenskommen** i en slamriktad budgivning är ett **hopp till
@@ -1910,6 +1940,18 @@ beslut 2).
 2. rebjuda en färg för extra längd (6-4 / 5-5),
 3. bjuda NT med stopp i fjärde färgen,
 4. (sällan) höja fjärde färgen med 4 kort.
+
+**Svararens fortsättning när öppnaren visade 3-korts stöd (felrapport #103,
+ägarbeslut 2026-10-09).** Stödet lovar **tre** kort (med fyra hade öppnaren höjt
+direkt), så svararen med **bara fyra** i högfärgen har ingen 8-kortsfit:
+**3NT** = vanlig utgångshand, till spel; **2NT** = **18+, krav med slamintresse**
+— öppnaren bjuder **3NT med minimum (12–14)** och **4NT med maximum (15–17)**,
+och svararen placerar **6NT** på 33+ ihop; över öppnarens 3NT (minimum) frågar
+21+ **Gerber 4♣** och 19–20 inbjuder **4NT** (§6.4), annars pass. **4M** bara
+med **5+ kort**.
+*1♣–1♥–1♠–2♦–2♥–**3NT** (♥AQ65, 16 hp)* · *1♣–1♥–1♠–2♦–2♥–**2NT**–4NT–6NT*
+*(♥AQ65 med 20 hp mot öppnarens 16).* Förr bjöd svararen 4M så fort öppnaren
+stödde, oavsett egen längd (4♥ på en 4-3-fit).
 
 **När fjärde färg INTE gäller:** passad hand, motståndarna stör, alla fyra färger
 bjudna på 1-läget, eller svararen redan gjort hoppskift / 2-över-1 (beslut 13:
@@ -2006,17 +2048,20 @@ det inte automatiskt sista ordet. Kaptensregeln (§5.2, ärliga slamportar) gäl
 Har partnern **öppnat på 1-läget i en färg** är det visade minimet **12 hp** (den
 låsta regeln: en 12-poängshand öppnar alltid). Tröskeln blir därmed:
 
-| Egen hand | Aktion över partnerns 3NT |
+| Egen hand | Aktion över partnerns 3NT (ägarbeslut 2026-10-09: Gerber först) |
 |---|---|
-| **21+ hp** | **6NT** — slamzonen (33) nås redan mot partnerns minimum |
-| 20 eller mindre | pass — 3NT står (hellre systemriktig miss än gambling) |
+| **21+ hp** | **4♣ Gerber** — slamzonen (33) nås redan mot partnerns minimum; 6NT på ess-svaret, 4NT-stopp om två ess saknas |
+| **19–20 hp** | **4NT kvantitativt** (31–32) — partnern bjuder 6NT med mer än minimum, passar annars |
+| 18 eller mindre | pass — 3NT står (hellre systemriktig miss än gambling) |
 
 Villkoren är medvetet smala: partnerns 3NT ska vara auktionens **senaste bud**,
 motståndarna ska ha varit **tysta** (deras bud kan göra 3NT till ett tävlingsbud
 i stället för en styrkevisning), och den egna handen får inte ha **renons** —
 vild fördelning hör inte hemma i 6NT. Sangöppningar har sina egna portar
-(kvantitativ 4NT och Gerber, §4.3/§6.4). **Ingen kontrollkoll** (ägarbeslut) och
-**storslam kräver visshet** → taket är 6NT.
+(kvantitativ 4NT och Gerber, §4.3/§6.4). Samma regel gäller **öppnaren** över
+svararens naturliga 3NT (visat minimum 13 efter 1x–3NT, se §6.4). Essen kollas
+via Gerber; **storslam kräver visshet** (5♣ kungfråga, §6.4) → taket är annars 6NT.
+*(Förr, 2026-08-07…2026-10-09: 21+ hoppade rakt till 6NT utan essfråga.)*
 
 *Bakgrund (felrapport #42): auktionen 1♣–1♥–1♠–2♦–2♥–3♦–3NT passades ut med 21 hp
 mittemot öppningshanden. Slamportarna satt bara i den kanoniska linjens namngivna
@@ -3400,7 +3445,60 @@ spelföraren inte visad renons). Det gäller oavsett stickläget; är det dessut
 betsticket är det tvingande. Behövs fler stick och träkarlen har fler kort i
 färgen väger helheten som förr.
 
+**Renons genom räkning (2026-10-09, felrapport #102):** "spelföraren har inte
+visat renons" betyder också *räknad* renons. Ligger alla färgens återstående
+kort synliga i egen hand + träkarlen (13 − spelade − egna − bordets = 0 osedda)
+kan ingen dold hand följa färg — spelföraren stjäl mästaren, och den är inget
+säkert stick. Exempel (4♥ av Väst, åtta stick spelade, försvaret har tre):
+Nord ♦KT65 ♣T, bordet ♦Q4, sju ruter spelade och partnern sakade redan på
+ruter → ♦K stjäls; rätt är **♣T** (partnern ledde ♣Q = ♣J bakom, Väst måste
+följa med ♣8), som sätter kontraktet.
+
 ## 9. Ändringslogg
+- **2026-10-09 — Gerber överallt där sang är etablerad utgång (§6.4, §6.8,
+  §6.6).** Ägarbeslut: "Gerber går alltid före kvant och hoppbud … fullt aktivt
+  i alla budgivningar där NT är etablerat som utgång." Förr fanns Gerber bara
+  som hopp över 1NT/2NT-öppningen och 1NT-återbudet; över 2NT-återbudet
+  svarade öppnaren inte (pass utan regel) och svararen frågade aldrig, över 3NT
+  var 4♣ inte Gerber (lästes som kontrollbud/naturligt) och kaptenen hoppade
+  rakt till 6NT (#42). Nu: tabellraden *gerber-sang* (kaptenen = vilken stol
+  som helst: 33+ mot visat minimum → 4♣, 31–32 → kvantitativ 4NT) och den
+  generiska Gerber-/kvantitativ-läsningen i `slamSituation`; betydelselagret
+  läser 4♣ över 2NT/3NT som Gerber (utom med egen klöver två gånger) och
+  räknar inte 3-korts-stödet på fjärde färg som satt trumf. Gamla lås
+  uppdaterade: #42 (4♣ → 6NT), #29 (13 + 18 → 4NT; 15 + 18 → Gerber → 6NT),
+  frö 20260743 (19 + 13 → 4NT → 6NT). Facit `auction-gerber-overallt.test.ts`.
+  Mätt (auktionsdiff + DD-dom, siffror i historiken): fler slammar bjuds och de
+  flesta står.
+- **2026-10-09 — Felrapport #103: fjärde färg + 3-korts stöd, fyra kort räcker
+  inte för 4M (§6.6).** Raden "fjärde färg: utgång i fit" bjöd 4♥ så fort
+  öppnaren stödde — på rapportens giv en 4-3-fit (♥AQ65 mot ♥K94). Ägarbeslut:
+  med bara fyra kort 3NT till spel (4M kräver 5+), 2NT = 18+ krav med
+  slamintresse; öppnaren 3NT med minimum, 4NT med maximum; svararen 6NT på 33+.
+  Betydelselagret läser alla fem buden. Facit `auction-felrapport-103.test.ts`.
+- **2026-10-09 — Kontrollbud före essfrågan, steg 5 (budväg 1): 4m efter
+  reverse/hoppskift sätter trumfen (§5.2, §6.2).** Skannern
+  `slaminbjudan-4m.probe.test.ts` (STEG5=1) fann var 4m-inbjudningar med
+  accept rakt till 6m fanns kvar: reverse/hoppskift var den klart största
+  budvägen (stark 2♣ gick redan via kontrollbud + 4NT). Nu: 4m i en av
+  öppnarens lågfärger = "sätter trumfen (krav)" med 31+ ihop, öppnaren öppnar
+  kontrollbudsronden, kaptenen frågar 4NT/stannar i 5m; betydelselagret läser
+  därefter varje nytt 4-lägesbud under 5m som kontrollbud — även i egen visad
+  färg och i partnerns högfärg (hålet fanns också efter steg 4:s 1♣–1♥–3♣–4♣–4♥,
+  som lästes "placerar utgången i hjärter"; lagat i samma svep). Facit
+  `auction-kontrollbud-steg5.test.ts` (åtta frön), det gamla låset
+  "hoppskift-driv frågar 4NT direkt" uppdaterat. Mätt: auktionsdiff +
+  slamtabellens DD-dom + betydelsesvepet — siffrorna i historiken. Kvar: MSS,
+  inverterad minor, störda lägen; sidofynd frö 20569345 (16 hp svarar 1NT på 1♦,
+  `it.todo`).
+- **2026-10-09 — Felrapport #102: mästaren är inget säkert stick mot en räknad
+  renons (§8.7).** Försvarsregeln "ta det säkra stick som sätter kontraktet"
+  kollade bara VISAD renons (sakning i färgen). På #102-given (4♥ av Väst,
+  bricka 5) låg alla återstående ruter i Nords hand + träkarlen, så Väst var
+  renons genom räkning — Nord tog ändå ♦K, Väst stal och kontraktet gick hem.
+  Nu räknar regeln färgen (13 − spelade − egna − bordets = 0 osedda ⇒ renons)
+  och Monte-Carlo väljer ♣T (bet). Facit `play-bot-satt-kontraktet.test.ts`
+  ("Felrapport #102"), DD-låst med `doubleDummyDeclarerRemaining`.
 - **2026-10-08 — Negativ dubbling enligt experterna (§7.4, §5.8).** Ägarbeslut
   efter källgenomgång (Cohen, Walker, Pavlicek, bridgebum, Wikipedia/BWS):
   1♣–(1♦)–X = båda högfärgerna 4-4, en ensam fyrkorts bjuds 1♥/1♠ (fyra kort)

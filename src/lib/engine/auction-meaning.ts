@@ -2418,6 +2418,28 @@ function twoOverOneMajorRaise(u: Undisturbed): boolean {
   return b[3].seat === u.responder && same(b[3].cb, 3, reb.strain)
 }
 
+/**
+ * Svararens 4m som SATTE trumfen i en av öppnarens lågfärger (kontrollbud före
+ * essfrågan, steg 4–5, 2026-10-07/09): efter öppnarens hopp i egen lågfärg
+ * (1m–1M–3m–4m), reverse (1m–1M–2x–4m) eller hoppskift (1x–1y–3z–4m). Därefter
+ * är varje nytt 4-lägesbud under 5m ett kontrollbud — även i egen visad färg
+ * (1♦–1♠–3♣–4♣–4♦ = ruterkontroll) och i partnerns högfärg (1♣–1♥–3♣–4♣–4♥ är
+ * en hjärterkontroll, ingen placering av utgången).
+ */
+function minorTrumpSetAt4(u: Undisturbed): boolean {
+  const b = u.bids
+  if (b.length < 4) return false
+  const [open, resp, reb, four] = b.map((x) => x.cb)
+  if (open.level !== 1 || open.strain === 'NT' || resp.level !== 1 || reb.strain === 'NT') return false
+  if (b[3].seat !== u.responder || four.level !== 4 || !isMinor(four.strain)) return false
+  const jumpOwnMinor = isMinor(open.strain) && reb.strain === open.strain && reb.level === 3 && resp.strain !== 'NT'
+  const reverse = reb.level === 2 && reb.strain !== open.strain && reb.strain !== resp.strain && rankAbove(reb.strain, open.strain)
+  const jumpShift = reb.strain !== open.strain && reb.strain !== resp.strain && isJumpOver(resp, reb)
+  if (jumpOwnMinor) return four.strain === open.strain
+  if (reverse || jumpShift) return four.strain === open.strain || four.strain === reb.strain
+  return false
+}
+
 /** Fjärde färg (§6.6): tre färger bjudna av oss, detta är den fjärde, inte alla på 1-läget, opassad hand, ingen reverse före. */
 function isFourthSuit(u: Undisturbed, cb: ParsedBid): boolean {
   if (u.bids.length < 3 || cb.strain === 'NT' || u.responderPassed) return false
@@ -2447,6 +2469,44 @@ function nmfSuitShown(u: Undisturbed): string | null {
   if (cb.level !== 3) return null
   if (cb.strain === resp.strain && b[4].cb.strain !== resp.strain) return resp.strain
   if (cb.strain === open.strain && isMinor(open.strain)) return open.strain
+  return null
+}
+
+/**
+ * Fjärde färg + öppnarens 3-korts stöd i svararens högfärg (1♣–1♥–1♠–2♦–2♥;
+ * felrapport #103, ägarbeslut 2026-10-09): svararens femte bud — 4M = 5+ kort,
+ * 3NT = bara fyra kort, till spel, 2NT = bara fyra kort men 18+ (krav,
+ * slamintresse); öppnarens sjätte — 3NT minimum, 4NT maximum; svararens
+ * sjunde — 6NT.
+ */
+function afterFourthSuitSupport(seat: Seat, cb: ParsedBid, u: Undisturbed): CallInterpretation | null {
+  const b = u.bids
+  const n = b.length
+  if (n < 5 || u.responderPassed) return null
+  const [open, resp, reb, four, five] = b.map((x) => x.cb)
+  if (open.level !== 1 || open.strain === 'NT' || resp.level !== 1 || resp.strain === 'NT' || !isMajor(resp.strain)) return null
+  if (reb.level !== 1 || reb.strain === 'NT' || reb.strain === open.strain || reb.strain === resp.strain) return null
+  const fourthSuit = four.level === 2 && four.strain !== 'NT' && four.strain !== open.strain && four.strain !== resp.strain && four.strain !== reb.strain
+  if (!fourthSuit || b[3].seat !== u.responder) return null
+  if (!(five.level === 2 && five.strain === resp.strain && b[4].seat === u.opener)) return null
+  const sym = SYMBOL[resp.strain]
+  if (n === 5 && seat === u.responder) {
+    if (same(cb, 2, 'NT')) return R('fjärde färg: 2NT (krav)', `2 sang — partnerns stöd lovar tre ${NAME[resp.strain]}, jag har bara fyra: ingen fit. 18+ hp, krav med slamintresse — partnern bjuder 3 sang med minimum (12–14), 4 sang med maximum (15–17).`, 'utgangskrav')
+    if (same(cb, 3, 'NT')) return R('fjärde färg: placerar utgång', `3 sang — partnerns stöd lovar tre ${NAME[resp.strain]}, jag har bara fyra: ingen 8-kortsfit. Till spel.`, 'avslut')
+    if (same(cb, 4, resp.strain)) return R('fjärde färg: utgång i fit', `4${sym} — 5+ ${NAME[resp.strain]} mot partnerns tre: utgång i fiten.`, 'avslut')
+    return null
+  }
+  if (n === 6 && seat === u.opener && same(b[5].cb, 2, 'NT')) {
+    if (same(cb, 3, 'NT')) return R('fjärde färg: 3NT (minimum)', `3 sang — minimum (12–14) på partnerns 2 sang-krav. Till spel.`, 'avslut')
+    if (same(cb, 4, 'NT')) return R('fjärde färg: 4NT (maximum)', `4 sang — maximum (15–17) på partnerns 2 sang-krav (18+): partnern placerar 6 sang.`, 'slamintresse')
+    return null
+  }
+  if (n === 7 && seat === u.responder && same(b[5].cb, 2, 'NT') && same(b[6].cb, 4, 'NT') && same(cb, 6, 'NT')) {
+    return R('slamavslut', `6 sang — partnern visade maximum (15–17) mot mina 18+: 33+ ihop.`, 'avslut')
+  }
+  if (n === 7 && seat === u.responder && same(b[5].cb, 2, 'NT') && same(b[6].cb, 3, 'NT') && same(cb, 6, 'NT')) {
+    return R('slamhöjning av 3NT', `6 sang — partnern visade minimum (3 sang, 12–14), men 21+ mot visade 12 är 33: kaptensregeln driver.`, 'avslut')
+  }
   return null
 }
 
@@ -2618,17 +2678,21 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   const partnerNT = partnerLast && last.strain === 'NT' && isNaturalNT(u, n - 1)
   // 1♣–2♦–2NT–4♣ är ingen Gerber utan hopphöjningen i 2/1 (§5b beslut 12).
   const jumpRaise2over1 = (k: number) => k === 3 && same(u.bids[0].cb, 1, 'C') && u.bids[1].cb.level === 2 && u.bids[1].cb.strain === 'D' && same(u.bids[2].cb, 2, 'NT') && !u.responderPassed
-  if (partnerNT && !trump && last.level <= 2 && same(cb, 4, 'C') && !jumpRaise2over1(n)) {
+  // Ägarbeslut 2026-10-09: Gerber överallt där sang är utgången — även över ett
+  // naturligt 3NT (den svaga handen som satte 3NT vet inget om partnerns styrka).
+  // Naturligt bara när budgivaren själv redan bjudit klöver två gånger.
+  const ownClubsTwice = (k: number) => u.bids.slice(0, k).filter((x) => x.seat === u.bids[k]?.seat && x.cb.strain === 'C').length >= 2
+  if (partnerNT && !trump && last.level <= 3 && same(cb, 4, 'C') && !jumpRaise2over1(n) && u.bids.slice(0, n).filter((x) => x.seat === seat && x.cb.strain === 'C').length < 2) {
     return R('Gerber', `4♣ — Gerber: essfråga över partnerns sang. Partnern svarar 4♦ = 0/4 ess, 4♥ = 1, 4♠ = 2, 4NT = 3. Säger inget om klöver.`)
   }
-  if (n >= 2 && same(last, 4, 'C') && partnerLast && !trump && !jumpRaise2over1(n - 1) && u.bids[n - 2].seat === seat && u.bids[n - 2].cb.strain === 'NT' && u.bids[n - 2].cb.level <= 2 && isNaturalNT(u, n - 2) && cb.level === 4) {
+  if (n >= 2 && same(last, 4, 'C') && partnerLast && !trump && !jumpRaise2over1(n - 1) && !ownClubsTwice(n - 1) && u.bids[n - 2].seat === seat && u.bids[n - 2].cb.strain === 'NT' && u.bids[n - 2].cb.level <= 3 && isNaturalNT(u, n - 2) && cb.level === 4) {
     const ess: Record<string, string> = { D: '0 eller 4 ess', H: '1 ess', S: '2 ess', NT: '3 ess' }
     if (ess[cb.strain]) return R('Gerber', `${B(cb)} — svar på Gerber: ${ess[cb.strain]}. Säger inget om ${cb.strain === 'NT' ? 'sang' : name}.`)
   }
   // Gerbers kungfråga 5♣ efter ess-svaret, och svaren på den (§6.4) —
   // #95-granskningen: 5♣ lästes som "stannar i utgång efter kontrollbuden".
   const gerberAt = (k: number) =>
-    k >= 1 && same(u.bids[k].cb, 4, 'C') && !trump && !jumpRaise2over1(k) && u.bids[k - 1].seat !== u.bids[k].seat && u.bids[k - 1].cb.strain === 'NT' && u.bids[k - 1].cb.level <= 2 && isNaturalNT(u, k - 1)
+    k >= 1 && same(u.bids[k].cb, 4, 'C') && !trump && !jumpRaise2over1(k) && !ownClubsTwice(k) && u.bids[k - 1].seat !== u.bids[k].seat && u.bids[k - 1].cb.strain === 'NT' && u.bids[k - 1].cb.level <= 3 && isNaturalNT(u, k - 1)
   if (gerberAt(n - 2) && u.bids[n - 2].seat === seat && partnerLast && last.level === 4 && last.strain !== 'NT' && same(cb, 4, 'NT')) {
     return R('Gerber: stannar', `4 sang — stannar efter Gerber-svaret: två ess saknas. Till spel, ingen essfråga.`)
   }
@@ -2702,7 +2766,8 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   // (Är trumfen satt av båda och partnern just cue:at svarar motorn med cue även i en
   // egen visad färg: 1♥–1♠–1NT–2♦–2♠–3♦–3♥. Utan pågående cue-rond är egen färg naturlig.)
   // Efter reverse + stark höjning (§5b beslut 3) öppnar öppnaren cue-ronden — även i egen visad färg (1♦–1♠–2♥–3♥–4♦).
-  if (trump && cb.strain !== 'NT' && cb.strain !== trump && n >= 2 && ((agreed && lastWasCue) || !own.has(cb.strain) || (n >= 4 && reverseMajorRaise(u)))) {
+  // Efter svararens trumfsättande 4m (steg 4–5) är varje 4-lägesbud under 5m ett kontrollbud, även i egen visad färg.
+  if (trump && cb.strain !== 'NT' && cb.strain !== trump && n >= 2 && ((agreed && lastWasCue) || !own.has(cb.strain) || (n >= 4 && (reverseMajorRaise(u) || minorTrumpSetAt4(u))))) {
     const game = gameIn(trump)
     const belowGame = bidRank(cb) < bidRank(game)
     // En cue-rond kan pressas FÖRBI utgången: har partnern just cue:at och
@@ -2721,7 +2786,8 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
     const inPartnerSuit = partnerS.has(cb.strain)
     // Utgång i partnerns högfärg utanför en cue-rond är en PLACERING, inget kontrollbud
     // (ägarbeslut 2026-09-24: 1♦–1♠–2♣–2♦–2♥–4♥ — partnern placerar med ca 12 hp).
-    const placering = inPartnerSuit && isMajor(cb.strain) && cb.level === 4 && !lastWasCue
+    // — men inte när svararens 4m redan satte lågfärgen som trumf (1♣–1♥–3♣–4♣–4♥ = kontroll).
+    const placering = inPartnerSuit && isMajor(cb.strain) && cb.level === 4 && !lastWasCue && !minorTrumpSetAt4(u)
     if (ok && !jacobyReply && !splinterReply && !placering && (!inPartnerSuit || agreed)) {
       const tsym = SYMBOL[trump]
       return R('cue-bid', `Kontrollbud ${B(cb)} — ${NAME[trump]} är trumf, så budet visar kontroll (ess, kung-dam, singel eller renons — motståndarna kan inte ta två raka stick) i ${name} och slamintresse. Partnern cue:ar en egen kontroll eller stannar i ${game.level}${tsym}.`)
@@ -2844,7 +2910,8 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
     if (gerber >= 0 && k > gerber && cb.level <= 5) return
     const prev = k >= 1 ? u.bids[k - 1] : null
     const hopphöjning2över1 = k === 3 && same(open, 1, 'C') && same(u.bids[1].cb, 2, 'D') && same(u.bids[2].cb, 2, 'NT') && !u.responderPassed
-    if (same(cb, 4, 'C') && !trump && prev && prev.seat !== b.seat && prev.cb.strain === 'NT' && prev.cb.level <= 2 && isNaturalNT(u, k - 1) && !hopphöjning2över1) {
+    const egnaKlöver = u.bids.slice(0, k).filter((x) => x.seat === b.seat && x.cb.strain === 'C').length
+    if (same(cb, 4, 'C') && !trump && prev && prev.seat !== b.seat && prev.cb.strain === 'NT' && prev.cb.level <= 3 && isNaturalNT(u, k - 1) && !hopphöjning2över1 && egnaKlöver < 2) {
       gerber = k
       return
     }
@@ -2853,7 +2920,7 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
     // Kontrollbud med satt trumf.
     // Efter reverse + stark höjning (§5b beslut 3) är även ett 4-lägesbud i EGEN
     // visad färg ett kontrollbud (1♦–1♠–2♥–3♥–4♦ = ruterkontroll, inte ruter).
-    const cueInOwnSuit = k >= 4 && (reverseMajorRaise(u) || twoOverOneMajorRaise(u))
+    const cueInOwnSuit = k >= 4 && (reverseMajorRaise(u) || twoOverOneMajorRaise(u) || minorTrumpSetAt4(u))
     if (trump && cb.strain !== trump && ((agreed && cues.has(k - 1)) || !mine.has(cb.strain) || cueInOwnSuit) && k >= 2) {
       const belowGame = bidRank(cb) < bidRank(gameIn(trump))
       if (belowGame && ((isMajor(trump) && (cb.level === 4 || (cb.level === 3 && gf))) || (isMinor(trump) && above3NT))) {
@@ -2874,6 +2941,11 @@ function naturalSuits(u: Undisturbed, gf: boolean): NaturalSuits {
     }
     mine.add(cb.strain)
     lastSuit.set(b.seat, cb.strain)
+    // Öppnarens svar på fjärde färg i svararens högfärg lovar TRE kort (§6.6) —
+    // ingen 8-kortsfit är känd, så ingen trumf sätts (felrapport #103; ett
+    // senare 4♣ över 3NT är Gerber, inte ett kontrollbud med högfärgen som trumf).
+    const fjärdeFärgsStöd = k === 4 && b.seat === u.opener && cb.level === 2 && cb.strain === u.bids[1].cb.strain && isMajor(cb.strain) && u.bids[3].cb.level === 2 && u.bids[3].cb.strain !== 'NT' && isFourthSuit(u, u.bids[3].cb)
+    if (fjärdeFärgsStöd) return
     if (theirs.has(cb.strain)) {
       agreed = cb.strain
       trump = cb.strain
@@ -3436,6 +3508,8 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   if (n >= 5) {
     const nmf = afterNMFSuitShow(seat, cb, u)
     if (nmf) return nmf
+    const ff = afterFourthSuitSupport(seat, cb, u)
+    if (ff) return ff
   }
   if (n >= 4) return lateUndisturbed(seat, cb, u, prior)
   return null
@@ -3531,6 +3605,8 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
   if (n >= 5) {
     const nmf = afterNMFSuitShow(seat, cb, u)
     if (nmf) return nmf
+    const ff = afterFourthSuitSupport(seat, cb, u)
+    if (ff) return ff
   }
   if (n === 4 && isOpener && same(resp, 2, m) && u.responderPassed) {
     // Öppnarens tredje bud efter passad hands enkla höjning + bromsen (§4.2 "Passad hand").
@@ -3651,9 +3727,11 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
   const reverse = !raised && reb.level === 2 && reb.strain !== 'NT' && reb.strain !== open.strain && rankAbove(reb.strain, open.strain)
   const jumpShift = !raised && reb.strain !== 'NT' && reb.strain !== open.strain && isJumpOver(resp, reb)
 
-  // Slamport efter reversen (§5): hopphöjning till 4m i öppnarens andra färg = slaminbjudan.
-  if (reverse && cb.level === 4 && isMinor(cb.strain) && cb.strain === reb.strain) {
-    return R('slaminbjudan', `${B(cb)} — hopphöjning av ${name} efter reversen: slaminbjudan (31–32 mot visade 16). Partnern accepterar med extra.`)
+  // Steg 5 (2026-10-09): 4m i en av öppnarens LÅGFÄRGER efter reversen sätter
+  // trumfen (krav) — kontrollbuden kommer efter, sedan essfråga eller 5m.
+  // Förr: slaminbjudan med accept rakt till 6m (förbjudet sedan 2026-10-07).
+  if (reverse && cb.level === 4 && isMinor(cb.strain) && (cb.strain === reb.strain || cb.strain === open.strain)) {
+    return R('sätter trumfen (krav)', `${B(cb)} — stöd i partnerns ${name} efter reversen (16+) och slamintresse. Sätter trumfen, utgångskrav: partnern visar sin billigaste kontroll (ess, kung-dam, singel eller renons), sedan essfråga eller 5${SYMBOL[cb.strain]}.`, 'utgangskrav')
   }
   // §5b beslut 3 (2026-09-05): fast arrival efter reverse i HÖGFÄRG — billig
   // höjning = stark (utgångskrav, slamintresse), hopp till utgång = svag.
@@ -3665,8 +3743,10 @@ function responderSecondAfterOneLevel(_seat: Seat, cb: ParsedBid, u: Undisturbed
   // färger (3m fanns) = slaminbjudan — samma steg som kaptenens `inviteTurn`
   // (etapp 4 familj 3, 2026-09-08: frö 20270453, 1♦–1♠–3♣–4♦ låg förr dold
   // bakom manusets kik-rond; läsaren sa "naturligt, utgångskravet står").
-  if (jumpShift && cb.level === 4 && isMinor(cb.strain) && (cb.strain === open.strain || cb.strain === reb.strain) && isJumpOver(reb, cb)) {
-    return R('slaminbjudan', `${B(cb)} — hopphöjning av ${name} efter hoppskiftet: slaminbjudan (slam bara om partnern har extra). Partnern accepterar med mer än minimum.`)
+  // Steg 5 (2026-10-09): 4m i en av öppnarens LÅGFÄRGER efter hoppskiftet sätter
+  // trumfen (krav) — kontrollbuden kommer efter, sedan essfråga eller 5m.
+  if (jumpShift && cb.level === 4 && isMinor(cb.strain) && (cb.strain === open.strain || cb.strain === reb.strain)) {
+    return R('sätter trumfen (krav)', `${B(cb)} — stöd i partnerns ${name} efter hoppskiftet (19+) och slamintresse. Sätter trumfen, utgångskrav: partnern visar sin billigaste kontroll (ess, kung-dam, singel eller renons), sedan essfråga eller 5${SYMBOL[cb.strain]}.`, 'utgangskrav')
   }
   if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången${cb.strain === 'NT' ? ' i sang' : ` i ${name}`}.`)
   if (jumpShift) return N(`${B(cb)} — naturligt efter hoppskiftet; utgångskravet står.`, 'utgangskrav')

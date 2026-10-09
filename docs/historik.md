@@ -10,6 +10,53 @@
 
 ---
 
+## 2026-10-09 (Felrapport #102 + #103 + kontrollbud före essfrågan steg 5, budväg 1; byggt, deploy väntar på ägarens klartecken)
+**#103 (§6.6):** fjärde färg + öppnarens 3-korts stöd gav 4M på en 4-3-fit. Ägarbeslut:
+fyra kort → 3NT till spel (4M kräver 5+), 2NT = 18+ krav med slamintresse, öppnaren
+3NT min/4NT max, svararen 6NT på 33+. Auktionsdiff mot steg 5-dumpen (samma 50 000
+frön, kommandot nedan): **18** ändrade — alla 4♥→3NT (två av dem hade nått 6♥ på 4-3)
+och ett 18+-fall 3♥→2NT→3NT. Facit `auction-felrapport-103.test.ts`.
+
+**#102 (§8.7):** Nord tog ♦K in i en renons som var känd genom räkning (alla
+återstående ruter låg i egen hand + bordet) — regeln "ta det säkra stick som
+sätter kontraktet" såg bara VISAD renons. Nu räknas färgen; Monte-Carlo väljer
+♣T (bet). Facit `play-bot-satt-kontraktet.test.ts` ("Felrapport #102").
+
+**Gerber överallt (§6.4, ägarbeslut samma dag):** 4♣ över partnerns naturliga
+2NT-återbud eller 3NT = Gerber, kaptenen frågar med 33+ mot visat minimum, 31–32
+inbjuder 4NT. Auktionsdiff mot #103-dumpen (samma 50 000 frön, kommandot nedan):
+**79** ändrade; slamtabellens DD-dom: **33** nya slammar (30 står, 3 bet), **44**
+övriga ändringar (3NT → 4NT-inbjudan avböjd: 42 hem, 2 bet). Stark 2♣ undantogs
+efter första mätningen (svararens 3NT där visar nästan inget — 97 bet-slammar).
+
+**Steg 5, budväg 1 (reverse/hoppskift → lågfärgstrumf).** Skannern
+`STEG5=1 S5_FROM=20276001 S5_TO=20576000 npx vitest run
+src/lib/engine/slaminbjudan-4m.probe.test.ts` (rapport
+`revisor-output/slaminbjudan-4m.txt`) fann **302** auktioner med 4m-
+slaminbjudan på 300 000 frön: **233** efter reverse/hoppskift (alla med accept
+rakt till 6m), **40** efter stark 2♣ (gick redan kontrollbud → 4NT → 6m, inget
+att laga), **12** MSS, **7** inverterad minor, **6** störda (upplysningsdubbling
+mellan), **1** reverse efter 1NT-svar (sidofyndet frö 20569345, `it.todo`).
+Bygget speglar steg 4: svararens 4m = "sätter trumfen (krav)" (31+ ihop,
+`auction-decide.ts` svararens andra bud + `slamSituation`-raden, prefix 4,
+`partnerStarts`), slamkontexten utan `inviteCall` i lågfärg, betydelselagret
+`minorTrumpSetAt4` (öppnarens kontrollbud i egen visad färg och i partnerns
+högfärg efter 4m). Mätt:
+- Auktionsdiff `DUMP_RANGE=20276001-20326000 DUMP_OUT=<fil> npx vitest run
+  src/lib/engine/auktionsdump.probe.test.ts` före/efter +
+  `node scripts/auktionsdiff.mjs <före> <efter>`: **56 av 50 000** ändrade,
+  alla i reverse/hoppskift-lägena (4m → kontrollbud → 4NT → 6m, eller 5m).
+- Slamtabellens DD-dom `SLAMDD_FORE=<före> SLAMDD_EFTER=<efter> npx vitest run
+  src/lib/engine/slamtabell-dd.probe.test.ts`: **4** ändrade slutkontrakt —
+  2 slam bort som gick bet (rätt att stanna), 2 slam bort som stod (frön
+  20288825 och 20289177: 29 resp. 27–28 hp ihop, systemriktiga missar).
+- Betydelsesvepet `BETYDELSE=1 npx vitest run
+  src/lib/engine/auction-meaning.probe.test.ts`: **0** avvikelser på ostörda.
+Gamla kartsiffran "essfrågor efter kontrollbud 886/2 675 → 1 623/3 076" (steg 4,
+`rkc-trumf.probe.test.ts`, RKCTRUMF=1) flyttad hit från CLAUDE.md.
+
+---
+
 ## 2026-10-08 (Stödsvepet — höjningar lovar sina trumf; byggt, deploy väntar på ägarens klartecken)
 Ägarfrågan "vad lovar en höjning i stöd?" besvarades ur boken + koden och
 MÄTTES: ny sond `src/lib/engine/stodsvep.probe.test.ts` (`STOD=1 npx vitest run
