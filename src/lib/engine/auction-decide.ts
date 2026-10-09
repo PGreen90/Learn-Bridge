@@ -135,7 +135,7 @@ import type { ResolvedCall } from '../bidding'
 import { auctionFacts, forcingCallStillOpen, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
 import { dummyPoints } from './evaluation'
-import { hcp, lengths } from './hand'
+import { hcp, isBalanced, lengths } from './hand'
 import { gerberAsk, gerberRebidFirstStep, gerberTurn, quantitativeAnswer } from './nt-slam'
 import { classifyOpening } from './openings'
 import { openerAfterDelayedMinorSupport, openerAnswer2NTCheckback, openerAnswer2NTMajorSeek, openerAnswerFourthSuit, openerAnswerNaturalThirdSuit, openerAnswerNMF, openerSecondBid, openerThirdAfterSemiForcingRebid, openerThirdBidAfterInvertedBrake, openerThirdBidAfterOwnRaise, openerThirdBidAfterPassedBrake, openerThirdBidAfterReverse, openerThirdBidAfterSemiForcing1NT, openerThirdBidIn1NTAuction } from './rebids'
@@ -249,6 +249,54 @@ export function responseDecision(openCall: string, hand: Hand, responderPassed =
  * (t.ex. ett "oklart" 1NT-svar ser ut som vilket 1NT-svar som helst).
  * null = betydelselagret namnger inte budet → ingen regel att dispatcha på.
  */
+/**
+ * Partnerns naturliga, icke-krävande sang som Gerber frågas över (ägarbeslut
+ * 2026-10-09: "Gerber går alltid före kvant och hoppbud … fullt aktivt i alla
+ * budgivningar där NT är etablerat som utgång"). Partnerns senaste bud är 2NT
+ * eller 3NT, naturligt och inte krav enligt betydelselagret, ingen trumf satt,
+ * motståndarna tysta. 1NT/2NT-ÖPPNINGEN, 2♣–2♦–2NT och 1NT-ÅTERBUDET har egna
+ * sangsystem (Stayman/transfer/NMF/Gerber) och lämnas åt dem. Returnerar
+ * sangbudets nivå och partnerns VISADE minimum, annars null.
+ */
+export function gerberOverPartnerNT(f: AuctionFacts): { level: 2 | 3; shownMin: number } | null {
+  const last = f.lastNonPass
+  if (!last || last.seat !== f.partner || !(last.bid === '2NT' || last.bid === '3NT')) return null
+  if (f.theirContractBids.length > 0 || !quietOrDoubledResponse(f)) return null
+  if (f.jacobyTrump) return null
+  const open = f.opening
+  if (!open || open.strain === 'NT') return null
+  const k = f.ourContractBids.indexOf(last)
+  if (k <= 0) return null
+  // Stark 2♣ har sitt eget sangsystem (2♣–2♦–2NT systems on, Puppet, 3NT = 25–27);
+  // svararens 3NT där visar nästan inget — hela familjen lämnas utanför.
+  if (open.level === 2 && open.strain === 'C') return null
+  const idx = f.history.indexOf(last)
+  const naken = f.history.map((c) => ({ seat: c.seat, bid: c.bid }) as ResolvedCall)
+  const m = meaningOf(naken, idx)
+  if (m.alert || m.forcing === 'utgangskrav' || m.forcing === 'krav-1-rond' || m.forcing === 'slamintresse') return null
+  const rule = m.rule ?? ''
+  if (/Jacoby|inverterad|Ogust|Gambling|Puppet|checkback|andra negativa|MSS|Stayman|Lebensohl|Texas|transfer/i.test(rule)) return null
+  // Är ett 4♣ här Gerber enligt betydelselagret (naturlig sang, ingen satt trumf,
+  // ingen egen klöverfärg)? Samma läsare som partnern använder — en enda sanning.
+  const prov = meaningOf([...naken, { seat: f.seat, bid: '4C' } as ResolvedCall], naken.length)
+  if (prov.rule !== 'Gerber') return null
+  const level: 2 | 3 = last.bid === '2NT' ? 2 : 3
+  const partnerIsOpener = last.seat === open.seat
+  // Partnerns VISADE minimum för sangbudet (undre gräns, aldrig gissad styrka):
+  //  öppnaren: 2NT 18–19 → 18 · passad höjning 3NT 18+ → 18 · 'rebid: 3NT' (16+ mot lång lågfärg) och reverse: 3NT → 16 · annars 12;
+  //  svararen: 2NT = 11–12 → 11 · direkt 3NT = 13–15 → 13 · 3NT efter 2NT-återbud/hoppskift → 6,
+  //  efter reverse eller öppnarens 16–18-inbjudan (hopp i egen färg/hopphöjning) → 8, annars 13 (1x–1y–1z–3NT = 13–15).
+  let shownMin: number
+  if (partnerIsOpener) shownMin = /18–19|passad höjning: 3NT/.test(rule) ? 18 : rule === 'rebid: 3NT' || /reverse: 3NT/.test(rule) ? 16 : 12
+  else if (level === 2) shownMin = 11
+  else if (k === 1) shownMin = 13
+  else {
+    const reb = f.ourContractBids.length > 2 ? rebidAsSeen(f, f.history.indexOf(f.ourContractBids[2]))?.rule ?? '' : ''
+    shownMin = /18–19|hoppskift/.test(reb) ? 6 : /reverse|inbjudan/.test(reb) ? 8 : 13
+  }
+  return { level, shownMin }
+}
+
 export function partnerResponseAsSeen(f: AuctionFacts, index: number): ResponseResult | null {
   const naken = f.history.map((c) => ({ seat: c.seat, bid: c.bid }) as ResolvedCall)
   const m = meaningOf(naken, index)
@@ -491,9 +539,15 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
 
   // Reverse (16+) / hoppskift (19+): trumf = öppnarens andra eller första färg.
   if ((rebid.rule === 'reverse' || rebid.rule === 'hoppskift') && rebidSuit && openerSuit && (trump === rebidSuit || trump === openerSuit)) {
-    // Öppnarens FÖRSTA färg är inte senast bjuden: naket 4NT läses i den andra
-    // (§5b beslut 14) → bara inbjudningsbudet, som namnger trumfen.
-    return { ctx: { partnerMin: rebid.rule === 'hoppskift' ? 19 : 16, inviteCall: majorTrump ? `5${LETTER[trump]}` : `4${LETTER[trump]}`, inviteOnly: trump === openerSuit && trump !== rebidSuit } }
+    const partnerMin = rebid.rule === 'hoppskift' ? 19 : 16
+    // Lågfärgstrumf (kontrollbud före essfrågan, steg 5, 2026-10-09): 4m sätter
+    // trumfen (krav) och öppnaren öppnar kontrollbudsronden; kaptenen frågar 4NT
+    // efter kontrollbuden eller stannar i 5m. Förr: 4m = inbjudan med accept
+    // rakt till 6m — "4→6 utan essfråga är förbjudet" (ägarbeslut 2026-10-07).
+    if (!majorTrump) return { ctx: { partnerMin, gameForcing: true } }
+    // Högfärg: öppnarens FÖRSTA färg är inte senast bjuden: naket 4NT läses i den
+    // andra (§5b beslut 14) → bara inbjudningsbudet, som namnger trumfen.
+    return { ctx: { partnerMin, inviteCall: `5${LETTER[trump]}`, inviteOnly: trump === openerSuit && trump !== rebidSuit } }
   }
 
   // Överenskommen trumf via Jacoby 2NT / inverterad minor → kaptenen räknar
@@ -854,7 +908,27 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
         : openerSuit && rl[openerSuit] >= firstSuitMin
           ? openerSuit
           : null
-    if (trumpC) {
+    if (trumpC && !isMajorSuit(trumpC)) {
+      // Lågfärgstrumf (steg 5, 2026-10-09): med 31+ ihop (stödpoäng golvade vid
+      // hp mot visade 16/19) bjuder svararen 4m = sätter trumfen (krav).
+      // Öppnaren öppnar kontrollbudsronden (partnerStarts); kaptenen frågar 4NT
+      // i slamzon efter kontrollbuden eller stannar i 5m. Förr: 4m = inbjudan
+      // (accept = 6m direkt), 33+ → 4NT direkt utan kontrollbud.
+      const c = slamContextFor(openCall, response, rebid, trumpC)
+      const floor = Math.max(hcp(hand), dummyPoints(hand, trumpC).dummyPoints) + (c?.ctx.partnerMin ?? 16)
+      const fyraM = `4${LETTER[trumpC]}`
+      if (c && floor >= 31 && bidRank(fyraM) > bidRank(rebid.call)) {
+        const stod = trumpC === openerSuit ? `${firstSuitMin}+` : '4+'
+        return {
+          turn: {
+            call: fyraM as ResponseResult['call'],
+            rule: 'sätter trumfen (krav)',
+            explanation: `${stod} stöd i partnerns ${SYM[trumpC]} och ${floor}+ ihop mot visade ${c.ctx.partnerMin}+ → ${fyraM[0]}${SYM[trumpC]} sätter trumfen (krav). Partnern visar sin billigaste kontroll; essfrågan kommer efter kontrollbuden, annars 5${SYM[trumpC]}.`,
+          },
+          plan: { kind: 'slam', setup: { trump: trumpC, lastCall: fyraM, ctx: c.ctx, partnerStarts: true } },
+        }
+      }
+    } else if (trumpC) {
       const slam = slamStep(trumpC)
       if (slam) return slam
     }
@@ -1316,8 +1390,22 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
   // öppnaren min högfärg → 4 i den, annars 3NT. Bara MODESTA utgångshänder;
   // 18+ har slamintresse och går den gamla vägen (felrapport #42).
   if (second.rule === 'fjärde färg krav' && respSuit) {
-    if (isGameOrHigher(third.call) || hcp(hand) >= 18) return null
-    if (isMajorSuit(respSuit) && suitOf(third.call) === respSuit && bidRank(`4${LETTER[respSuit]}`) > bidRank(third.call)) {
+    if (isGameOrHigher(third.call)) return null
+    // Felrapport #103 (ägarbeslut 2026-10-09): öppnarens stöd efter fjärde färg
+    // lovar TRE kort — med bara fyra egna finns ingen 8-kortsfit. Vanlig
+    // utgångshand (under 18) → 3NT till spel; 18+ → 2NT = krav med
+    // slamintresse (öppnaren 3NT med minimum, 4NT med maximum). 4M bara med 5+.
+    const stodd = isMajorSuit(respSuit) && suitOf(third.call) === respSuit && third.rule === 'svar på fjärde färg'
+    if (stodd && lengths(hand)[respSuit] <= 4) {
+      if (hcp(hand) >= 18 && bidRank('2NT') > bidRank(third.call)) {
+        return { turn: { call: '2NT', rule: 'fjärde färg: 2NT (krav)', explanation: `Partnern visade 3-korts stöd i ${SYM[respSuit]} men jag har bara fyra — ingen fit. 18+ hp → 2NT: krav med slamintresse; partnern bjuder 3NT med minimum (12–14), 4NT med maximum (15–17).` }, plan: { kind: 'call' } }
+      }
+      if (hcp(hand) < 18 && bidRank('3NT') > bidRank(third.call)) {
+        return { turn: { call: '3NT', rule: 'fjärde färg: placerar utgång', explanation: `Partnern visade 3-korts stöd i ${SYM[respSuit]} men jag har bara fyra kort — ingen 8-kortsfit → 3NT (till spel).` }, plan: { kind: 'call' } }
+      }
+    }
+    if (hcp(hand) >= 18) return null
+    if (isMajorSuit(respSuit) && suitOf(third.call) === respSuit && lengths(hand)[respSuit] >= 5 && bidRank(`4${LETTER[respSuit]}`) > bidRank(third.call)) {
       return { turn: { call: `4${LETTER[respSuit]}` as ResponseResult['call'], rule: 'fjärde färg: utgång i fit', explanation: `Fjärde färg var krav; partnern höjde min ${SYM[respSuit]} → utgång 4${SYM[respSuit]}.` }, plan: { kind: 'call' } }
     }
     if (bidRank('3NT') <= bidRank(third.call)) return null // öppnaren ligger redan över 3NT (hoppande fjärde färg) → gamla lagret
@@ -1364,8 +1452,15 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
  * och 3NT-erbjudandet i systems on efter 2♣–2♦–2NT. `second` = partnerns
  * bud över 2NT, `fourth` = partnerns placering. null = ingen regel.
  */
-export function openerFourthDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, second: ResponseResult, fourth: ResponseResult, hand: Hand): ResponseResult | null {
+export function openerFourthDecision(openCall: string, response: ResponseResult, rebid: ResponseResult, second: ResponseResult, fourth: ResponseResult, hand: Hand, third?: ResponseResult): ResponseResult | null {
   if (fourth.call === 'P') return null
+  // Felrapport #103 (ägarbeslut 2026-10-09): partnerns 2NT efter min 3-korts-
+  // stödvisning på fjärde färgen = krav med slamintresse (18+, bara fyra kort i
+  // högfärgen). Jag dömer på min hand: minimum (12–14) → 3NT, maximum (15–17) → 4NT.
+  if (second.rule === 'fjärde färg krav' && third?.rule === 'svar på fjärde färg' && suitOf(third.call) === suitOf(response.call) && fourth.call === '2NT') {
+    if (hcp(hand) >= 15) return { call: '4NT', rule: 'fjärde färg: 4NT (maximum)', explanation: `Partnerns 2NT = krav med slamintresse (18+); jag har maximum (15–17) → 4NT, partnern placerar 6NT.` }
+    return { call: '3NT', rule: 'fjärde färg: 3NT (minimum)', explanation: `Partnerns 2NT = krav med slamintresse (18+); jag har minimum (12–14) → 3NT (till spel).` }
+  }
   if (openCall === '2C' && response.call === '2D' && rebid.call === '2NT') return openerChoosesAfterSystemsOn(hand, second, fourth, 24)
   // Efter partnerns andra negativa (2♣–2♦–2M–2NT, §5b beslut 6) placerade
   // partnern kontraktet (preferens/höjning) — inget krav finns, jag passar.
@@ -1511,6 +1606,19 @@ function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
     if (resp?.rule === 'Gerber') return { kind: 'gerber', captain, prefix: 1, partnerMin: openCall === '1NT' ? 15 : 20, sofar: sofarFrom(1) }
     return null
   }
+  // Gerber / kvantitativ 4NT över partnerns naturliga 2NT-återbud eller 3NT
+  // (ägarbeslut 2026-10-09, "Gerber överallt där sang är utgång"): frågaren kan
+  // vara vilken stol som helst; dialogens roller räknas från frågaren
+  // (`svarare` = frågaren). Läses ur fakta före frågan — aldrig ur händerna.
+  for (let k = 2; k < ours.length; k++) {
+    if (ours[k].bid !== '4C' && ours[k].bid !== '4NT') continue
+    const fK = auctionFacts(f.history.slice(0, f.history.indexOf(ours[k])), ours[k].seat)
+    const g = gerberOverPartnerNT(fK)
+    if (!g) continue
+    const asker = ours[k].seat
+    const sofar: SlamBid[] = ours.slice(k).map((c) => ({ role: c.seat === asker ? 'svarare' : 'öppnare', call: c.bid }))
+    return { kind: ours[k].bid === '4C' ? 'gerber' : 'kvantitativ', captain: asker, prefix: k, partnerMin: g.shownMin, sofar, generisk: true }
+  }
   if (ours.length < 4) return null
   const response = partnerResponseAsSeen(f, at(1))
   const rebid = rebidAsSeen(f, at(2))
@@ -1530,6 +1638,19 @@ function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
   ) {
     const ctx: SlamContext = { partnerMin: 16, gameForcing: true }
     return { kind: 'slam', captain, prefix: 4, setup: { trump: openerSuit, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+  }
+
+  // Reverse (16+) / hoppskift (19+) + svararens 4m i en av öppnarens LÅGFÄRGER
+  // (kontrollbud före essfrågan, steg 5, 2026-10-09): 4m sätter trumfen (krav);
+  // öppnaren öppnar kontrollbudsronden (partnerStarts), kaptenen räknar mot
+  // visade 16/19. Förr lästes 4m som slaminbjudan (accept = 6m direkt).
+  if ((rebid.rule === 'reverse' || rebid.rule === 'hoppskift') && response.call.startsWith('1') && /^4[CD]$/.test(first)) {
+    const rs = suitOf(rebid.call)
+    const t = [rs, openerSuit].find((s) => s && !isMajorSuit(s) && first === `4${LETTER[s]}`) ?? null
+    if (t) {
+      const ctx: SlamContext = { partnerMin: rebid.rule === 'hoppskift' ? 19 : 16, gameForcing: true }
+      return { kind: 'slam', captain, prefix: 4, setup: { trump: t, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+    }
   }
 
   // Puppet Stayman (2026-09-15, sondens fynd): efter öppnarens 5-korts högfärg
@@ -1849,6 +1970,27 @@ const TABELL: Row[] = [
       return k ? asCall(facts.seat, k) : null
     },
   },
+  // Gerber överallt där sang är etablerad utgång (ägarbeslut 2026-10-09): över
+  // partnerns naturliga 2NT-återbud eller naturliga 3NT frågar kaptenen — vilken
+  // stol som helst — 4♣ med 33+ mot partnerns visade minimum, FÖRE kvantitativ
+  // 4NT och före hopp till 6NT; 31–32 inbjuder 4NT. Över 2NT-återbudet bara den
+  // jämna handen utan 5-korts färg (en färg visas via checkback först). Ligger
+  // före positionsraderna så den svaga handens 3NT aldrig passas av en slamhand.
+  {
+    id: 'gerber-sang',
+    läge: (f) => f.opening !== null && gerberOverPartnerNT(f) !== null,
+    välj: ({ hand, facts }) => {
+      const g = gerberOverPartnerNT(facts)!
+      const len = lengths(hand)
+      if (RANK.some((s) => len[s] === 0)) return null
+      if (g.level === 2 && (!isBalanced(hand) || RANK.some((s) => len[s] >= 5))) return null
+      const legal = legalCalls(facts.history, facts.seat)
+      const floor = hcp(hand) + g.shownMin
+      if (floor >= 33 && legal.includes('4C')) return { seat: facts.seat, bid: '4C' as Bid, rule: 'Gerber', explanation: `Sang är utgången och ${hcp(hand)} + partnerns visade ${g.shownMin} ≥ 33 → 4♣ (Gerber: frågar ess före slammen).` }
+      if (floor >= 31 && legal.includes('4NT')) return { seat: facts.seat, bid: '4NT' as Bid, rule: 'kvantitativ 4NT', explanation: `Sang är utgången och ${hcp(hand)} + partnerns visade ${g.shownMin} = ${floor} (31–32) → 4NT (kvantitativ: partnern bjuder 6NT med mer än minimum).` }
+      return null
+    },
+  },
   // Familj 1 — öppningen. Ingen har öppnat (inga kontraktsbud; X/XX kan inte
   // komma före ett bud), så stolen är i öppningsposition. Positionen styr
   // lättöppningen i 3:e hand och regeln om 15 i 4:e (systemboken §3).
@@ -1995,6 +2137,19 @@ const TABELL: Row[] = [
       quietOrDoubledResponse(f),
     välj: ({ hand, facts }) => {
       const b = facts.ourContractBids.map((c) => c.bid)
+      // Felrapport #103: efter min 2NT (krav, slamintresse) på fjärde färg +
+      // öppnarens stöd dömde öppnaren — 3NT = minimum (jag passar), 4NT = maximum
+      // (15+; med mina 18+ är det 33+ → 6NT).
+      if (b[5] === '2NT' && (b[6] === '3NT' || b[6] === '4NT')) {
+        const at4 = (i: number) => facts.history.indexOf(facts.ourContractBids[i])
+        const second4 = secondAsSeen(facts, at4(3))
+        if (second4?.rule === 'fjärde färg krav') {
+          // 21+ mot visade 12 (33) frågar Gerber i raden gerber-sang före denna; här bara passet.
+          if (b[6] === '3NT') return { seat: facts.seat, bid: 'P' as Bid, rule: 'svararens pass', explanation: 'Partnern visade minimum (3NT) på mitt 2NT-krav → pass.' }
+          if (hcp(hand) + 15 >= 33) return { seat: facts.seat, bid: '6NT' as Bid, rule: 'slamavslut', explanation: `Partnern visade maximum (4NT, 15–17) på mitt 2NT-krav; ${hcp(hand)} + 15 ≥ 33 → 6NT.` }
+          return { seat: facts.seat, bid: 'P' as Bid, rule: 'svararens pass', explanation: 'Partnerns 4NT (maximum) räcker inte till 33 ihop → pass.' }
+        }
+      }
       if (b[0] !== '2C' || b[1] !== '2D' || b[2] !== '2NT' || b[6] !== '3NT') return null
       const puppetShow = b[3] === '3C' && b[4] === '3D' && ['3H', '3S', '4C', '4D'].includes(b[5])
       const transferShow = (b[3] === '3D' && b[4] === '3H' && b[5] === '3S') || (b[3] === '3H' && b[4] === '3S' && b[5] === '4H')
@@ -2023,7 +2178,8 @@ const TABELL: Row[] = [
       const second = secondAsSeen(facts, at(3))
       const fourth = thirdAsSeen(facts, at(5))
       if (!response || !rebid || !second || !fourth) return null
-      const r = openerFourthDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, second, fourth, hand)
+      const third = thirdAsSeen(facts, at(4))
+      const r = openerFourthDecision(`${facts.opening!.level}${facts.opening!.strain}`, response, rebid, second, fourth, hand, third ?? undefined)
       if (!r) return null
       return { seat: facts.seat, bid: r.call, rule: r.rule, explanation: r.explanation, uncertain: r.uncertain }
     },

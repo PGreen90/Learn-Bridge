@@ -144,7 +144,9 @@ export function placeGameAfterFourthSuit(hand: Hand, facts: AuctionFacts): Resol
   const myFirst = contractBids.find((c) => c.seat === seat)!
   const myStrain = parseContractBid(myFirst.bid)!.strain
   const lastStrain = parseContractBid(last.bid)!.strain
-  if ((myStrain === 'H' || myStrain === 'S') && lastStrain === myStrain) {
+  // Felrapport #103: öppnarens stöd lovar tre kort — 4M bara med 5+ egna, annars 3NT.
+  const mySuit = myStrain === 'H' ? 'hearts' : myStrain === 'S' ? 'spades' : null
+  if (mySuit && lastStrain === myStrain && hand.filter((c) => c.suit === mySuit).length >= 5) {
     const gameBid = `4${myStrain}` as Bid
     if (legal.includes(gameBid)) return {
       seat, bid: gameBid, rule: 'fjärde färg: utgång i fit',

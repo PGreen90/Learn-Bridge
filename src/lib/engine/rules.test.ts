@@ -16,7 +16,7 @@ const ALL_ENGINE_RULES: string[] = [
   'Bergen konstruktiv', 'Bergen limit', 'Bergen spärr', 'DONT 2♠ (spader)',
   'DONT X (enfärg)', 'DONT relä', 'DONT tvåfärg', 'Drury', 'Drury: lätt öppning',
   'Drury: riktig öppning', 'Drury: utgångsförsök', 'Exclusion', 'Gerber kungfråga',
-  'Gerber', 'Gerber: stannar', 'Jacoby 2NT', 'Jacoby-transfer', 'Jacoby: 3NT',
+  'Gerber', 'kvantitativ 4NT', 'Gerber: stannar', 'Jacoby 2NT', 'Jacoby-transfer', 'Jacoby: 3NT',
   'Jacoby: kortfärg', 'Jacoby: minimum', 'Jacoby: sidofärg', 'Jacoby: slamintresse',
   'Jordan 2NT',
   
@@ -58,7 +58,7 @@ const ALL_ENGINE_RULES: string[] = [
   'inklivaren tävlar till fiten (lagen om totala stick)',
   '2NT-checkback', 'svar på 2NT-checkback', 'placering efter 2NT-checkback',
   '2NT-återbud (5-3-jakt)', 'svar på 2NT-återbud (5-3-jakt)',
-  'svar på fjärde färg', 'fjärde färg: placerar utgång', 'fjärde färg: utgång i fit',
+  'svar på fjärde färg', 'fjärde färg: placerar utgång', 'fjärde färg: utgång i fit', 'fjärde färg: 2NT (krav)', 'fjärde färg: 3NT (minimum)', 'fjärde färg: 4NT (maximum)',
   '2/1: fortsättning', 'rebjuden färg (inbjudan)', 'hopphöjning (inbjudan)',
   'inbjudan antagen', 'accepterar sanginbjudan', 'väljer högfärgsutgång', 'väljer utgång efter Smolen',
   'Drury: accepterar utgångsförsök', 'slaminbjudan', 'slaminbjudan: accept',

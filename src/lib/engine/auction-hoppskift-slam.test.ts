@@ -162,9 +162,14 @@ const HISTORY_REV: ResolvedCall[] = [
 ]
 
 describe('familj C del 2: slamport efter hoppskift/reverse på 1-lägessvar', () => {
-  it('hoppskift-driv: N (16 stödp. mot visade 19) frågar 4NT', () => {
+  // Steg 5 (2026-10-09, "kontrollbud före essfrågan gäller alla sammanhang"):
+  // 35 ihop är slamzon, men kontrollbuden kommer FÖRE essfrågan — 4♣ sätter
+  // trumfen, öppnaren visar ♦ (4♦), N ♥ (4♥), öppnaren avslutar 5♣ och N bjuder
+  // 6♣ på kontrollerna (alla sidofärger täckta, 4NT rymdes inte). Förr 4NT direkt.
+  it('hoppskift-driv: N (16 stödp. mot visade 19) sätter trumfen med 4♣ — kontrollbuden före essfrågan', () => {
     const d = deal('cslam-hopp-drive-pos', 'S', 'none', HANDS_HOPP_DRIVE)
-    expect(decideCall(d, HISTORY_HOPP, 'N').bid).toBe('4NT')
+    expect(decideCall(d, HISTORY_HOPP, 'N')).toMatchObject({ bid: '4C', rule: 'sätter trumfen (krav)' })
+    expect(botAuction(d)!.filter((c) => c.bid !== 'P').map((c) => c.bid)).toEqual(['1D', '1S', '3C', '4C', '4D', '4H', '5C', '6C'])
   })
 
   it('hoppskift-driv hela auktionen: 6♣ nås', () => {

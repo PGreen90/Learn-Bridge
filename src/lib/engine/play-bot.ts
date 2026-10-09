@@ -1803,8 +1803,11 @@ const SUIT_GLYPH: Record<Suit, string> = { spades: '♠', hearts: '♥', diamond
  *      ta mästaren; vi tar den.
  * Ärlig räkning: "mästare" = alla högre kort spelade eller på egen hand
  * (`isSureWinner`), träkarlen kan inte stjäla (följer färg eller saknar trumf),
- * spelföraren har inte visat renons i färgen medan osedd trumf finns. Null =
- * regeln gäller inte (då väger andra regler/Monte-Carlo helheten).
+ * spelföraren är inte renons i färgen medan osedd trumf finns — varken VISAD
+ * renons (sakning) eller renons GENOM RÄKNING (felrapport #102, 2026-10-09:
+ * alla färgens återstående kort ligger synliga i egen hand + träkarlen → ingen
+ * dold hand kan följa färg; spelföraren stjäl). Null = regeln gäller inte (då
+ * väger andra regler/Monte-Carlo helheten).
  */
 function defenderCashesSettingTrick(state: PlayState, seat: Seat): CardChoice | null {
   if (state.currentTrick.length !== 0) return null
@@ -1825,7 +1828,13 @@ function defenderCashesSettingTrick(state: PlayState, seat: Seat): CardChoice | 
     if (trump !== null) {
       const dummyHasTrump = dummyHand.some((c) => c.suit === trump)
       if (dummyInSuit === 0 && dummyHasTrump) continue
-      if (voids[declarer].has(card.suit) && unseenTrumpCount(state, seat) > 0) continue
+      // Spelföraren renons? Visad (sakade i färgen) ELLER räknad: 13 − spelade
+      // − mina − träkarlens = 0 osedda kort i färgen (#102: ♦KT65 mot bordets
+      // ♦Q4, sju ruter spelade → Väst kan inte ha någon ruter kvar).
+      const unseenInSuit =
+        13 - played.filter((c) => c.suit === card.suit).length - mine.filter((c) => c.suit === card.suit).length - dummyInSuit
+      const declarerVoid = voids[declarer].has(card.suit) || unseenInSuit === 0
+      if (declarerVoid && unseenTrumpCount(state, seat) > 0) continue
     }
     const kort = `${SUIT_GLYPH[card.suit]}${card.rank}`
     if (settingTrick) {

@@ -10,24 +10,24 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-07): /felrapporter, sedan NU steg 5: de gamla
-> 4m-inbjudningarnas accept rakt till 6m (stark 2♣ · MSS · reverse/hoppskift) bryter
-> mot "4→6 utan essfråga är förbjudet" — bygg om via kontrollbud/4NT, facit först.
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-09): /felrapporter, sedan NU steg 5 budväg 2
+> (MSS/inverterad minor; skannern `slaminbjudan-4m.probe`, STEG5=1). Byggt 2026-10-09,
+> PCD om ej gjort: #102 · #103 · steg 5 budväg 1 · Gerber överallt (§6.4).
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
-**Steg 1–4 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`, `6e8290a`): kontrollbud = ess,
+**Steg 1–4 LIVE** (mergepunkter i historiken): kontrollbud = ess,
 kung-dam, singel, renons · 2♣-vägen: 4-korts stöd sätter trumfen 4m · "alla kontroller
-behövs inte för 4NT" · kontrollbud efter 1m–1M–3M · **steg 4 (2026-10-07):** 4m efter
-1m–1M–3m = träff + föredrar färgen, krav → kontrollbud/4NT/5m; "gäller ALLA sammanhang",
-"4→6 utan essfråga förbjudet"; kaptenen 31–32 frågar hellre än stänger ute frågan.
-Essfrågor efter kontrollbud: 886/2 675 → 1 623/3 076 (`rkc-trumf.probe.test.ts`).
-**Kvar:** 4m-inbjudans accept 6m i andra lägen (steg 5) · Jacoby minimum · 3-korts stöd i lågfärg.
-Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
-(`slamtabell-dd.probe.test.ts`) efter varje; budfrågor → fråga ägaren.
+behövs inte för 4NT" · kontrollbud efter 1m–1M–3M · steg 4: 4m efter 1m–1M–3m = träff,
+krav → kontrollbud/4NT/5m; "gäller ALLA sammanhang", "4→6 utan essfråga förbjudet".
+**Steg 5 budväg 1 BYGGD 2026-10-09:** 4m efter reverse/hoppskift i
+lågfärg sätter trumfen; facit `auction-kontrollbud-steg5.test.ts`.
+**Kvar:** steg 5 budväg 2 MSS · inverterad minor · störda · Jacoby minimum · 3-korts stöd i lågfärg.
+Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom efter varje;
+budfrågor → fråga ägaren.
 
-**LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen (frågare
-och svarare räknar samma) · slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
-= damfrågan, annars 8+ kända trumf · tio kända trumf = trumfdam. #94 slutar i 6♥.
+**LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
+slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
+= damfrågan, annars 8+ kända trumf · tio kända trumf = trumfdam.
 
 **Senast LIVE (detalj `docs/historik.md`):** 2026-10-08/09 stödsvepet (STOD=1: höjningar
 lovar sina trumf, 3 lögner + ägarbeslut A–D) · upprepad upplysningsdubbling + 3-läges-X

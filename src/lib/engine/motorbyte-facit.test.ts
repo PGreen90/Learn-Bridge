@@ -483,8 +483,9 @@ describe('etapp 4 familj 8 – slam-svarssvepet: RKC/kung/rättelse/3NT-höjning
     const d = deal({ N: 'S:K H:AQ93 D:AKT74 C:KQ7', E: 'S:Q7643 H:754 D:J92 C:62', S: 'S:AJ98 H:KJT D:53 C:AT43', W: 'S:T52 H:862 D:Q86 C:J985' }, 'S')
     const hist = [call('S', '1C'), call('W', 'P'), call('N', '1H'), call('E', 'P'), call('S', '1S'), call('W', 'P'), call('N', '2D'), call('E', 'P'), call('S', '2H'), call('W', 'P'), call('N', '3D'), call('E', 'P'), call('S', '3NT'), call('W', 'P')]
     const t = decideCallTraced(d, hist, 'N')
-    expect(t.källa).toBe('tabell:slam-forts')
-    expect(t.call).toMatchObject({ bid: '6NT', rule: 'slamhöjning av 3NT' })
+    // 2026-10-09 (Gerber överallt): essfrågan FÖRE hoppet — 4♣ ur raden gerber-sang, 6NT på svaret.
+    expect(t.källa).toBe('tabell:gerber-sang')
+    expect(t.call).toMatchObject({ bid: '4C', rule: 'Gerber' })
   })
 
   // 3NT-stoppen (etapp 7 hål 2, frö 20261020): öppnaren (20 hp, löpande klöver)

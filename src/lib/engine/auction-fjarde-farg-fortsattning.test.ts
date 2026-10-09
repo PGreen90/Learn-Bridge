@@ -17,9 +17,10 @@ describe('fjärde färg (krav): svararen placerar utgång, passar aldrig', () =>
     const calls = botAuction(dealFromSeed(20260743))!
     const contract = contractFromCalls(calls)
     expect(contract).not.toBeNull()
-    // Utgång nådd – inte utpassad i 2NT.
+    // Utgång nådd – inte utpassad i 2NT. 2026-10-09 (Gerber överallt, kaptensregeln):
+    // öppnaren (19) inbjuder 4NT mot svararens visade 13 (32), svararen (14) accepterar → 6NT.
     expect(contract!.level).toBeGreaterThanOrEqual(3)
-    expect(contract).toMatchObject({ level: 3, strain: 'NT' })
+    expect(contract).toMatchObject({ level: 6, strain: 'NT' })
     // Svararen (E) får inte ha passat sitt eget fjärde färg-krav.
     const eBids = calls.filter((c) => c.seat === 'E').map((c) => c.bid)
     expect(eBids).toContain('3NT')
