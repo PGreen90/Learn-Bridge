@@ -22,7 +22,7 @@ och ett 18+-fall 3♥→2NT→3NT. Facit `auction-felrapport-103.test.ts`.
 sätter kontraktet" såg bara VISAD renons. Nu räknas färgen; Monte-Carlo väljer
 ♣T (bet). Facit `play-bot-satt-kontraktet.test.ts` ("Felrapport #102").
 
-**Steg 5 budväg 2 (MSS + inverterad minor → 4m sätter trumfen):** skannern
+**Steg 5 budväg 2 (MSS + inverterad minor → 4m sätter trumfen; LIVE c56b468):** skannern
 `STEG5=1 S5_FROM=20276001 S5_TO=20576000 npx vitest run
 src/lib/engine/slaminbjudan-4m.probe.test.ts` efter budväg 1: **62** kvar (40 stark
 2♣ = redan kontrollbud, 13 MSS, 9 inverterad minor); efter budväg 2: **40**, alla
