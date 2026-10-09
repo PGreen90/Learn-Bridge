@@ -3105,6 +3105,10 @@ function overNaturalNT(seat: Seat, cb: ParsedBid, u: Undisturbed, k: number): Ca
     }
     if (same(mine, 2, 'S') && L === 1) {
       if (same(cb, 3, 'NT')) return R('till spel', `3 sang — till spel efter Minor Suit Stayman.`)
+      // Efter Minor Suit Stayman + öppnarens 3m: 4m sätter trumfen (krav) — steg 5 budväg 2a (2026-10-09).
+      if (cb.level === 4 && isMinor(cb.strain) && rel.length === 4 && same(rel[1].cb, 2, 'S') && rel[2].cb.strain === cb.strain) {
+        return R('sätter trumfen (krav)', `${B(cb)} — sätter ${name} som trumf efter Minor Suit Stayman: utgångskrav, slamintresse. Partnern visar sin billigaste kontroll, sedan essfråga eller 5${SYMBOL[cb.strain]}.`, 'utgangskrav')
+      }
       if (isMinor(cb.strain)) return N(`${B(cb)} — ${isGameLevel(cb) ? 'utgång i' : 'naturligt, sätter'} ${name} som trumf${isGameLevel(cb) ? '' : ' — utgångskrav'}.`, below(cb, 'utgangskrav'))
     }
     if (same(mine, 3, 'S') && L === 2) {
@@ -3593,7 +3597,7 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       if (same(cb, 3, 'NT')) return R('inverterad: 3NT', `3 sang — övriga sidofärger täckta, till spel.`)
       if (cb.strain !== 'NT' && cb.strain !== m && !isGameLevel(cb) && bidRank(cb) < bidRank({ level: 3, strain: 'NT' })) return R('inverterad: stopp-visning', `${B(cb)} — visar stopp i ${name}, letar 3 sang. Krav 1 rond.`)
       if (same(cb, 5, m)) return R('utgång', `${B(cb)} — lågfärgsutgång: stoppen räcker inte till 3 sang.`)
-      if (same(cb, 4, m)) return N(`${B(cb)} — sätter ${mname} som trumf över 3 sang, slamintresse.`, 'slamintresse')
+      if (same(cb, 4, m)) return R('sätter trumfen (krav)', `${B(cb)} — sätter ${mname} som trumf efter den inverterade höjningen: utgångskrav, slamintresse. Partnern visar sin billigaste kontroll, sedan essfråga eller 5${SYMBOL[m]}.`, 'utgangskrav')
       return null
     }
     if (resp.level === 2 && isMinor(resp.strain) && resp.strain !== m && !u.responderPassed) return responderSecondAfter2over1(seat, cb, u, prior)
@@ -3619,7 +3623,7 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
     if (same(cb, 3, 'NT')) return R('inverterad: 3NT', `3 sang — sidofärgerna täckta, till spel.`)
     if (same(cb, 5, m)) return R('utgång', `${B(cb)} — lågfärgsutgång: stoppen räcker inte till 3 sang.`)
     if (cb.strain !== 'NT' && cb.strain !== m && bidRank(cb) < bidRank({ level: 3, strain: 'NT' })) return R('inverterad: stopp-visning', `${B(cb)} — andra stopp-visningen (15+): visar stopp i ${name}, letar 3 sang. Krav 1 rond.`)
-    if (same(cb, 4, m)) return N(`${B(cb)} — sätter ${mname} som trumf över 3 sang, slamintresse.`, 'slamintresse')
+    if (same(cb, 4, m)) return R('sätter trumfen (krav)', `${B(cb)} — sätter ${mname} som trumf efter den inverterade höjningen: utgångskrav, slamintresse. Partnern visar sin billigaste kontroll, sedan essfråga eller 5${SYMBOL[m]}.`, 'utgangskrav')
   }
   if (n >= 4) return lateUndisturbed(seat, cb, u, prior)
   return null

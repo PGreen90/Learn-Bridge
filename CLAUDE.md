@@ -10,18 +10,18 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-09): /felrapporter, sedan NU steg 5 budväg 2
-> (MSS/inverterad minor; skannern `slaminbjudan-4m.probe`, STEG5=1). LIVE 6cf8200
-> (2026-10-09): #102 · #103 · steg 5 budväg 1 · Gerber överallt (§6.4).
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-09): /felrapporter, sedan NU-resten:
+> Jacoby minimum · 3-korts stöd i lågfärg (ägarfrågor först). LIVE 2026-10-09:
+> #102 · #103 · steg 5 budväg 1+2 · Gerber överallt (§6.4) — PCD budväg 2 om ej gjort.
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
 **Steg 1–4 LIVE** (mergepunkter i historiken): kontrollbud = ess,
 kung-dam, singel, renons · 2♣-vägen: 4-korts stöd sätter trumfen 4m · "alla kontroller
 behövs inte för 4NT" · kontrollbud efter 1m–1M–3M · steg 4: 4m efter 1m–1M–3m = träff,
 krav → kontrollbud/4NT/5m; "gäller ALLA sammanhang", "4→6 utan essfråga förbjudet".
-**Steg 5 budväg 1 LIVE 6cf8200 (2026-10-09):** 4m efter reverse/hoppskift i
-lågfärg sätter trumfen; facit `auction-kontrollbud-steg5.test.ts`.
-**Kvar:** steg 5 budväg 2 MSS · inverterad minor · störda · Jacoby minimum · 3-korts stöd i lågfärg.
+**Steg 5 KLART 2026-10-09** (budväg 1 LIVE 6cf8200; budväg 2 MSS + inverterad minor
+byggd): 4m sätter trumfen överallt, skannern `slaminbjudan-4m.probe` (STEG5=1) tom.
+**Kvar:** Jacoby minimum · 3-korts stöd i lågfärg.
 Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom efter varje;
 budfrågor → fråga ägaren.
 
