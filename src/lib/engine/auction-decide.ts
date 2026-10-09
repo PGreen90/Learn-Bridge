@@ -559,7 +559,9 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
     return {
       ctx: {
         partnerMin: SHOWN_MIN[rebid.rule] ?? 12,
-        inviteCall: majorFit ? `5${LETTER[openerSuit]}` : `4${LETTER[openerSuit]}`,
+        // Lågfärgsfit (steg 5 budväg 2b, 2026-10-09): ingen 4m-inbjudan med accept
+        // rakt till 6m — 4m sätter trumfen (krav), se svararens andra bud.
+        inviteCall: majorFit ? `5${LETTER[openerSuit]}` : undefined,
         gameForcing: true,
         cueFloor: minorFit ? '3NT' : undefined,
       },
@@ -940,6 +942,27 @@ export function responderSecondDecision(openCall: string, response: ResponseResu
   const minorFit = response.rule === 'inverterad minor' && (openerSuit === 'clubs' || openerSuit === 'diamonds')
   if ((majorFit || minorFit) && openerSuit) {
     const slam = slamStep(openerSuit)
+    if (minorFit) {
+      // Kontrollbud före essfrågan (steg 5 budväg 2b, 2026-10-09): har kaptenen
+      // ett kontrollbud över 3NT cue:ar hon som förut; annars sätter 4m trumfen
+      // (krav) med 31+ ihop — öppnaren visar sin billigaste kontroll, kaptenen
+      // frågar 4NT eller stannar i 5m. Förr: 4m = inbjudan (accept = 6m direkt),
+      // 33+ utan cue → 4NT direkt.
+      if (slam && slam.turn.rule === 'cue-bid') return slam
+      const c = slamContextFor(openCall, response, rebid, openerSuit)
+      const floor = Math.max(hcp(hand), dummyPoints(hand, openerSuit).dummyPoints) + (c?.ctx.partnerMin ?? 12)
+      const fyraM = `4${LETTER[openerSuit]}`
+      if (c && floor >= 31 && rebid.call !== fyraM && bidRank(fyraM) > bidRank(rebid.call)) {
+        return {
+          turn: {
+            call: fyraM as ResponseResult['call'],
+            rule: 'sätter trumfen (krav)',
+            explanation: `Inverterad fit och ${floor}+ ihop mot visade ${c.ctx.partnerMin}+ → ${fyraM[0]}${SYM[openerSuit]} sätter trumfen (krav). Partnern visar sin billigaste kontroll; essfrågan kommer efter kontrollbuden, annars 5${SYM[openerSuit]}.`,
+          },
+          plan: { kind: 'slam', setup: { trump: openerSuit, lastCall: fyraM, ctx: c.ctx, partnerStarts: true } },
+        }
+      }
+    }
     if (slam) return slam
     // Ingen slamzon mot öppnarens visade minimum → placera UTGÅNGEN (läge 3,
     // 2026-09-28; Jacoby-sonden frön 20270045/20270296/20271311): förr fanns
@@ -1743,6 +1766,13 @@ function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
   // trumf satt + slamdriv (4+ stöd, 33+ mot visade 12, ingen sanghand).
   // Öppnaren öppnar cue-ronden (billigaste kontroll under 5m, annars 5m);
   // kaptenen fortsätter (cue/4NT/avslut). Boten själv bjuder det billiga 3m.
+  // Inverterad minor + svararens 4m (steg 5 budväg 2b, 2026-10-09): trumfen satt,
+  // öppnaren öppnar kontrollbudsronden; kaptenen räknar mot återbudets visade
+  // minimum. Förr lästes 4m som slaminbjudan (accept = 6m direkt).
+  if (openerSuit && !isMajorSuit(openerSuit) && response.rule === 'inverterad minor' && first === `4${LETTER[openerSuit]}` && rebid.call !== first) {
+    const ctx: SlamContext = { partnerMin: SHOWN_MIN[rebid.rule] ?? 12, gameForcing: true, cueFloor: '3NT' }
+    return { kind: 'slam', captain, prefix: 4, setup: { trump: openerSuit, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }
+  }
   if (openerSuit && !isMajorSuit(openerSuit) && response.rule === '2-över-1 GF' && rebid.call === '2NT' && first === `4${LETTER[openerSuit]}`) {
     const ctx: SlamContext = { partnerMin: 12, gameForcing: true }
     return { kind: 'slam', captain, prefix: 4, setup: { trump: openerSuit, lastCall: first, ctx, partnerStarts: true }, sofar: sofarFrom(4) }

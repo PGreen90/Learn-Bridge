@@ -851,7 +851,11 @@ function ntUnsafe(responderHand: Hand): boolean {
   return MAJORS.some((m) => rl[m] === 0 || (rl[m] <= 2 && !hasTopHonor(responderHand, m)))
 }
 
-const mssSlamCtx = (minor: Suit): SlamContext => ({ partnerMin: OPENER_1NT_MIN, inviteCall: `4${LETTER[minor]}` })
+// Steg 5 budväg 2a (2026-10-09): ingen 4m-inbjudan med accept rakt till 6m längre —
+// 4m sätter trumfen (krav) och öppnaren öppnar kontrollbudsronden (`mssTrumpSetup`).
+const mssSlamCtx = (_minor: Suit): SlamContext => ({ partnerMin: OPENER_1NT_MIN })
+/** Uppsättningen efter kaptenens trumfsättande 4m: öppnaren visar sin billigaste kontroll, kaptenen räknar mot 15. */
+const mssTrumpSetup = (minor: Suit): SlamSetup => ({ trump: minor, lastCall: `4${LETTER[minor]}`, ctx: { partnerMin: OPENER_1NT_MIN, gameForcing: true }, partnerStarts: true })
 /** Uppsättningen för MSS-slammen ur auktionen: minorn är trumf, kaptenen räknar mot 15. */
 export const mssSetup = (minor: Suit, openerRebidCall: string): SlamSetup => ({ trump: minor, lastCall: openerRebidCall, ctx: mssSlamCtx(minor) })
 
@@ -862,6 +866,19 @@ export const mssSetup = (minor: Suit, openerRebidCall: string): SlamSetup => ({ 
  */
 export function mssFirstStep(responderHand: Hand, minor: Suit, openerRebidCall: string): SlamTurn {
   if (ntUnsafe(responderHand)) {
+    // Kontrollbud före essfrågan (steg 5 budväg 2a, 2026-10-09): med 31+ ihop
+    // (stödpoäng golvade vid hp mot visade 15) sätter 4m trumfen (krav) —
+    // öppnaren visar sin billigaste kontroll, kaptenen frågar 4NT eller stannar
+    // i 5m. Förr: 31–32 = inbjudan med accept rakt till 6m, 33+ = 4NT direkt.
+    const floor = Math.max(hcp(responderHand), dummyPoints(responderHand, minor).dummyPoints) + OPENER_1NT_MIN
+    if (floor >= 31) {
+      return {
+        role: 'svarare',
+        call: `4${LETTER[minor]}`,
+        rule: 'sätter trumfen (krav)',
+        explanation: `NT osäkert (högfärgslucka) och ${floor}+ ihop mot visade 15 → 4${SYM[minor]} sätter trumfen (krav). Partnern visar sin billigaste kontroll; essfrågan kommer efter kontrollbuden, annars 5${SYM[minor]}.`,
+      }
+    }
     const slam = slamCaptainFirstStep(responderHand, minor, openerRebidCall, mssSlamCtx(minor))
     if (slam) return slam
     return {
@@ -900,6 +917,9 @@ export function mssTurn(role: SlamRole, hand: Hand, minor: Suit, openerRebidCall
   const first = sofar[0]
   if (first.role !== CAPTAIN) return null
   if (first.call === '3NT' || first.call === `5${LETTER[minor]}`) return null // placerat
+  // Kaptenens trumfsättande 4m (steg 5 budväg 2a): kontrollbudsronden med
+  // öppnaren först, sedan 4NT/5m — samma motor som efter 1m–1M–3m–4m.
+  if (first.call === `4${LETTER[minor]}`) return slamTurn(role, hand, mssTrumpSetup(minor), sofar.slice(1))
   if (role !== CAPTAIN || ntUnsafe(hand)) return slamTurn(role, hand, setup, sofar)
 
   // NT-säkra vägen: 4NT → svar → 6NT / 5m / 6m; 5NT → kungsvar → 6NT / 7NT.

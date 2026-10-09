@@ -442,11 +442,14 @@ Tre preciseringar (B13):
 **Slamzonen (cue-ronden, §6.2):** med minorfiten satt och slamaritmetik
 (kaptenens hand + öppnarens visade minimum ≥ 30) körs kontrollbuden — men
 **först ÖVER 3NT**: under 3NT betyder nya färger stopp-letande, över 3NT
-kontrollbud, så de två budspråken aldrig krockar. I **klar drivzon (33+)**
-hoppas cue-ronden över i minortrumf och kaptenen frågar 4NT direkt —
-lågfärgsutgången 5m ligger ÖVER 4NT, och cue-bud får inte äta upp
-frågeutrymmet. Den **svaga höjningen** (1m–3m) är avslutande – öppnaren
-passar utan extra styrka.
+kontrollbud, så de två budspråken aldrig krockar. Har kaptenen **inget
+kontrollbud att visa** över 3NT (eller är hon i klar drivzon) sätter hon
+**4m = trumfen (krav)** med 31+ ihop mot öppnarens visade minimum (steg 5
+budväg 2, 2026-10-09): öppnaren visar sin billigaste kontroll, kaptenen frågar
+4NT eller stannar i 5m. Förr var 4m en inbjudan som öppnaren accepterade rakt
+till 6m, och 33+ frågade 4NT direkt utan kontrollbud. *1♣–2♣–3NT–**4♣**–4♦ …*
+Den **svaga höjningen** (1m–3m) är avslutande – öppnaren passar utan extra
+styrka.
 
 **3NT eller 5 i lf? (stopp-utbytet, ägarregel 2026-07-05).** Ett 2/1-par
 föredrar 3NT (färre stick), men bara när paret tillsammans kan **hålla alla fyra
@@ -646,7 +649,12 @@ förnekar 4-korts hf. Frågar efter öppnarens 4-korts minor:
 | 3NT | ingen 4-korts minor, maximum, båda hf stoppade |
 | 4♣ / 4♦ | 4+ i minorn, maximum |
 
-Svararen passar med minimum, bjuder naturligt med mer, eller cue-bid mot slam.
+Svararen passar med minimum eller bjuder naturligt med mer. **Slam i minorn**
+(steg 5 budväg 2, 2026-10-09): den NT-osäkra handen (högfärgslucka) med **31+
+ihop mot visade 15** bjuder **4m = sätter trumfen (krav)** — öppnaren visar sin
+billigaste kontroll, svararen frågar 4NT eller stannar i 5m. Förr var 4m en
+inbjudan som öppnaren accepterade rakt till 6m. Den NT-säkra handen frågar 4NT
+direkt (slam i sang). *1NT–2♠–3♣–**4♣**–4♦–4♥–4NT …*
 
 ### 4.3b Svar på 2NT (20–21 hp, balanserad) — Puppet Stayman
 *(Ägardirektiv 2026-09-15. Gäller också efter 2♣–2♦–**2NT (22–24)** — samma
@@ -1753,8 +1761,9 @@ naturligt utan visar en **kontroll**:
   båda partners är skyldiga varandra att visa kontroller. Det betyder inte att vi
   ska till slam, men vi skall visa vår hand. **Att hoppa från 4 till 6 utan att
   fråga ess är förbjudet.** (Byggt: 1m–1M–3m–4m, steg 4; reverse/hoppskift,
-  steg 5. Stark 2♣ gick redan via kontrollbud + 4NT. Kvar att bygga om: MSS,
-  inverterad minor och de störda lägena — nästa steg i NU.)
+  MSS och inverterad minor, steg 5. Stark 2♣ gick redan via kontrollbud + 4NT.
+  Skannern `slaminbjudan-4m.probe.test.ts` visar inga 4m-inbjudningar med
+  accept rakt till 6m kvar.)
 - **4m efter öppnarens hopp i egen lågfärg (1m–1M–3m–4m)** = **träff i trumf och
   föredrar färgen före sang** (öppnaren har visat 16+ och sex kort; "jag tror vi
   presterar bättre i lågfärgen" — ägaren 2026-10-07). Utgångskrav, 3+ stöd och
@@ -3455,6 +3464,14 @@ ruter → ♦K stjäls; rätt är **♣T** (partnern ledde ♣Q = ♣J bakom, V�
 följa med ♣8), som sätter kontraktet.
 
 ## 9. Ändringslogg
+- **2026-10-09 — Kontrollbud före essfrågan, steg 5 budväg 2: 4m efter Minor
+  Suit Stayman och inverterad minor sätter trumfen (§4.2, §4.3, §6.2).** Samma
+  mönster som steg 4–5a: svararens 4m med 31+ ihop = "sätter trumfen (krav)",
+  öppnaren öppnar kontrollbudsronden, kaptenen 4NT/5m. Förr accepterade
+  öppnaren inbjudan rakt till 6m; i klar drivzon frågades 4NT utan kontrollbud.
+  Skannern (STEG5=1) efter bygget: bara stark 2♣ kvar, som redan går via
+  kontrollbud. Facit `auction-kontrollbud-steg5b.test.ts` (åtta frön). Mätt med
+  auktionsdiff + DD-dom — siffrorna i historiken.
 - **2026-10-09 — Gerber överallt där sang är etablerad utgång (§6.4, §6.8,
   §6.6).** Ägarbeslut: "Gerber går alltid före kvant och hoppbud … fullt aktivt
   i alla budgivningar där NT är etablerat som utgång." Förr fanns Gerber bara

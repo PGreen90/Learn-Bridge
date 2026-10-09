@@ -22,6 +22,16 @@ och ett 18+-fall 3♥→2NT→3NT. Facit `auction-felrapport-103.test.ts`.
 sätter kontraktet" såg bara VISAD renons. Nu räknas färgen; Monte-Carlo väljer
 ♣T (bet). Facit `play-bot-satt-kontraktet.test.ts` ("Felrapport #102").
 
+**Steg 5 budväg 2 (MSS + inverterad minor → 4m sätter trumfen):** skannern
+`STEG5=1 S5_FROM=20276001 S5_TO=20576000 npx vitest run
+src/lib/engine/slaminbjudan-4m.probe.test.ts` efter budväg 1: **62** kvar (40 stark
+2♣ = redan kontrollbud, 13 MSS, 9 inverterad minor); efter budväg 2: **40**, alla
+stark 2♣. Auktionsdiff mot Gerber-dumpen (samma 50 000 frön): **30** ändrade
+MSS-/inverterad-auktioner (resten av diffens 47 var Gerber-svepets justering av
+visat minimum efter 16–18-inbjudningar, redan live i 6cf8200). DD-dom på
+MSS-/inverterad-givarna: **2** slammar bort som stod (frön 20285493, 20289572:
+kaptenen under 31 efter kontrollbuden — systemriktiga missar), inga nya.
+
 **Gerber överallt (§6.4, ägarbeslut samma dag):** 4♣ över partnerns naturliga
 2NT-återbud eller 3NT = Gerber, kaptenen frågar med 33+ mot visat minimum, 31–32
 inbjuder 4NT. Auktionsdiff mot #103-dumpen (samma 50 000 frön, kommandot nedan):
