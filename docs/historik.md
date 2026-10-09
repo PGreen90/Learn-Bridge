@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-09 (Felrapport #102 + #103 + kontrollbud före essfrågan steg 5, budväg 1; byggt, deploy väntar på ägarens klartecken)
+## 2026-10-09 (Felrapport #102 + #103 + kontrollbud steg 5 budväg 1 + Gerber överallt — LIVE, mergepunkt 6cf8200)
 **#103 (§6.6):** fjärde färg + öppnarens 3-korts stöd gav 4M på en 4-3-fit. Ägarbeslut:
 fyra kort → 3NT till spel (4M kräver 5+), 2NT = 18+ krav med slamintresse, öppnaren
 3NT min/4NT max, svararen 6NT på 33+. Auktionsdiff mot steg 5-dumpen (samma 50 000
