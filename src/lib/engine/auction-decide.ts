@@ -167,11 +167,11 @@ import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
 import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
-import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
+import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, advancerAnswersSecondDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerDoublesAgain, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
 import { openerInCueRaise, raiserInCueRaise } from './cue-raise-continuations'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerAfterCompetitiveRaise, openerRebidsAfterTheirDouble, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
-import { answerJordan, answerNegativeDoubleOverTheirBid, answerPartnersNegativeDouble, answerPartnersSupportDouble, negativeDoubleOverbidToAnswer, showHandAfterOpenersDouble, showHandToAnswer, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, openerAfterRedoubler, openerAfterRedoublerSeat, redoublerContinues, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
+import { negativeDoublerAnswersCue, negativeDoublerCueSeat, openerPreferenceSeat, openerShowsOtherMajorAfterPreference, answerJordan, answerNegativeDoubleOverTheirBid, answerPartnersNegativeDouble, answerPartnersSupportDouble, negativeDoubleOverbidToAnswer, showHandAfterOpenersDouble, showHandToAnswer, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, openerAfterRedoubler, openerAfterRedoublerSeat, redoublerContinues, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
 export interface DecidedCall extends ResolvedCall {
@@ -2225,6 +2225,7 @@ const TABELL: Row[] = [
       const k =
         doublerPlacesAfterCueRaise(hand, facts) ??
         answerCueAfterDouble(hand, facts) ??
+        doublerDoublesAgain(hand, facts) ?? // deras rebud över partnerns påtvingade svar, <4 stöd: X igen (2026-10-08)
         doublerWeighsAdvance(hand, facts) ??
         ownStrongDoubleRebid(hand, facts) ??
         strongDoublerWithoutSuit(hand, facts) ??
@@ -2248,6 +2249,7 @@ const TABELL: Row[] = [
     },
     välj: ({ hand, facts }) => {
       const k =
+        advancerAnswersSecondDouble(hand, facts) ?? // upprepad X = aldrig pass (ägarbeslut 2026-10-08)
         advancerAnswersCueRaise(hand, facts) ??
         answerCueAfterDouble(hand, facts) ??
         advanceStrongDoubleRebid(hand, facts) ??
@@ -2335,6 +2337,16 @@ const TABELL: Row[] = [
       return k ? asCall(facts.seat, k) : null
     },
   },
+  // Öppnaren efter negativ-dubblarens preferens till öppningsfärgen (experterna,
+  // 2026-10-08): preferensen visade den ANDRA högfärgen — bjud den med fyra, annars pass.
+  {
+    id: 'negativ-x-öppnaren-efter-preferens',
+    läge: (f) => openerPreferenceSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = openerShowsOtherMajorAfterPreference(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
   // Negativ-dubblaren visar sin hand på öppnarens X (felrapport #88): höjning
   // med stöd, egen färg, sang med stopp, annars pass — aldrig utgångsblås.
   {
@@ -2349,9 +2361,9 @@ const TABELL: Row[] = [
   // eller partnerns invit-hopp (`negativeDoublerAnswersJump`, slutförandet 2026-09-13).
   {
     id: 'negativ-dubblaren',
-    läge: (f) => negativeDoublerSeat(f) !== null || negativeDoublerJumpSeat(f) !== null,
+    läge: (f) => negativeDoublerSeat(f) !== null || negativeDoublerJumpSeat(f) !== null || negativeDoublerCueSeat(f) !== null,
     välj: ({ hand, facts }) => {
-      const k = negativeDoublerContinues(hand, facts) ?? negativeDoublerAnswersJump(hand, facts)
+      const k = negativeDoublerAnswersCue(hand, facts) ?? negativeDoublerContinues(hand, facts) ?? negativeDoublerAnswersJump(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },

@@ -2117,12 +2117,17 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
   ) {
     const oppSuits = opponentSuits(seat, prior)
     const majors = ['H', 'S'].filter((m) => m !== open.cb.strain && !oppSuits.has(m))
+    // Experterna (2026-10-08): på 1-läget lovar X:et BÅDA högfärgerna (minst 4-4);
+    // över ett 2-lägesinkliv bara MINST EN av dem (9+ hp), och öppnaren hoppar
+    // inte i en högfärg dubblaren kanske saknar.
     const shown =
       majors.length === 2
-        ? 'båda de objudna högfärgerna (hjärter och spader)'
+        ? last.cb.level === 1
+          ? 'båda de objudna högfärgerna (minst 4-4; en ensam fyrkorts bjuds naturligt)'
+          : 'minst en fyrkorts högfärg (hjärter eller spader), 9+ hp'
         : majors.length === 1
           ? `4+ ${NAME[majors[0]]} (den objudna högfärgen)`
-          : 'de objudna färgerna'
+          : 'de objudna färgerna (minst 4-4 i lågfärgerna)'
     return R('negativ dubbling', `Negativ dubbling — visar ${shown} och ungefär svarsstyrka; takeout-artad, ber partnern välja färg (INTE straff).`)
   }
 

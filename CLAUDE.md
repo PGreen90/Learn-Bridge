@@ -10,17 +10,18 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-06): bevaka-översynen KLAR (listan är en vakt:
-> frö + måltestfil, regeln i `docs/arbetsrutiner.md`). Börja med /felrapporter, sedan
-> ägarfrågan i NU: 4m efter hopp i egen färg — inbjudan eller "trumfen satt"?
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-07): /felrapporter, sedan NU steg 5: de gamla
+> 4m-inbjudningarnas accept rakt till 6m (stark 2♣ · MSS · reverse/hoppskift) bryter
+> mot "4→6 utan essfråga är förbjudet" — bygg om via kontrollbud/4NT, facit först.
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
-**Steg 1–3 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`): slamradens kontrollbud följer ägarens
-definition (ess, kung-dam, singel, renons) · 2♣ + positivt svar + öppnarens lågfärg →
-4-korts stöd sätter trumfen med 4m · "man behöver inte ha alla kontroller för att bjuda
-4NT" · kontrollbud efter hopphöjningen (1m–1M–3M). Essfrågor efter kontrollbud: 886 av
-2 675 → 1 504 av 2 989 (trumfsonden `rkc-trumf.probe.test.ts`). **Kvar:** hopp i egen
-färg (1m–1M–3m) · Jacoby minimum · 3-korts stöd i lågfärg (`docs/bevaka.md`).
+**Steg 1–4 LIVE** (`d26ebdb`, `11b41e7`, `90812ec`, `6e8290a`): kontrollbud = ess,
+kung-dam, singel, renons · 2♣-vägen: 4-korts stöd sätter trumfen 4m · "alla kontroller
+behövs inte för 4NT" · kontrollbud efter 1m–1M–3M · **steg 4 (2026-10-07):** 4m efter
+1m–1M–3m = träff + föredrar färgen, krav → kontrollbud/4NT/5m; "gäller ALLA sammanhang",
+"4→6 utan essfråga förbjudet"; kaptenen 31–32 frågar hellre än stänger ute frågan.
+Essfrågor efter kontrollbud: 886/2 675 → 1 623/3 076 (`rkc-trumf.probe.test.ts`).
+**Kvar:** 4m-inbjudans accept 6m i andra lägen (steg 5) · Jacoby minimum · 3-korts stöd i lågfärg.
 Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
 (`slamtabell-dd.probe.test.ts`) efter varje; budfrågor → fråga ägaren.
 
@@ -28,10 +29,12 @@ Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom
 och svarare räknar samma) · slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
 = damfrågan, annars 8+ kända trumf · tio kända trumf = trumfdam. #94 slutar i 6♥.
 
-**Senast LIVE (detalj `docs/historik.md`):** #101 (2026-10-07, §8.7: försvararen tar
-mästaren — betsticket / träkarlen har ett kort kvar) · #96–#100 (markeringar · stoppfrågan) · fynd B
-"parets färg i sang" `889fac3` · Hål D steg 2 `fda630c` (öppna ägarfrågor: svararens val
-efter 3NT · öppnaren frågar aldrig 4NT själv) · #91–#94, uteslutningsmetoden i RKC.
+**Senast LIVE (detalj `docs/historik.md`):** 2026-10-08/09 stödsvepet (STOD=1: höjningar
+lovar sina trumf, 3 lögner + ägarbeslut A–D) · upprepad upplysningsdubbling + 3-läges-X
+· negativ dubbling enligt experterna (§7.4; DD-dom `auktionsdiff-dd.probe`, DDDIFF=1) ·
+#101 (§8.7: försvararen tar mästaren) · #96–#100 · fynd B "parets färg i sang" ·
+Hål D steg 2 (öppna ägarfrågor: svararens val efter 3NT · öppnaren frågar aldrig 4NT
+själv) · #91–#94, uteslutningsmetoden i RKC.
 
 **Parallella ägarsteg (live-prov):** sunt förnuft-lagret · tredje hand högt (T-serien) ·
 vänner-bordet = tävlingen · Gambling 3NT · budförklaringarnas ordval

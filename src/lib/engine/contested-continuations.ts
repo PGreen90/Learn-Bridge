@@ -261,7 +261,9 @@ export function openerRaisesFreeBid(hand: Hand, f: AuctionFacts): Kunskap | null
   if (!ctx) return null
   const strain = ctx.free.strain
   const suit = SUIT_OF_LETTER[strain]
-  if (lengths(hand)[suit] < 3) return null
+  // Experterna 2026-10-08: 1♣–(1♦)–1♥/1♠ lovar fyra kort → höjning kräver fyra; annars 5+ → tre.
+  const need = ctx.promised === 4 ? 4 : 3
+  if (lengths(hand)[suit] < need) return null
   const tp = hcp(hand)
   const legal = legalCalls(history, seat)
   const simple = cheapestBidIn(history, seat, strain)
@@ -272,34 +274,34 @@ export function openerRaisesFreeBid(hand: Hand, f: AuctionFacts): Kunskap | null
     const theirStrain = parseContractBid(ctx.contracts[1].bid)!.strain
     if (tp >= 14 && hasStopper(hand, SUIT_OF_LETTER[theirStrain]) && legal.includes('3NT' as Bid)) return {
       call: '3NT', rule: 'höjning av fritt bud (utgång)',
-      explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]} (10+ hp); stöd, utgångsvärden och stopp i deras ${SWE_SYM[theirStrain]} → 3NT (rätt utgång före 5${SWE_SYM[strain]}).`,
+      explanation: `Partnerns fria bud lovar ${ctx.promised}+ ${SWE_SYM[strain]} (10+ hp); stöd, utgångsvärden och stopp i deras ${SWE_SYM[theirStrain]} → 3NT (rätt utgång före 5${SWE_SYM[strain]}).`,
     }
     const jump = `${simpleLevel + 1}${strain}` as Bid
     if (tp >= 14 && simpleLevel + 1 <= 4 && legal.includes(jump)) return {
       call: jump, rule: 'höjning av fritt bud (inbjudan)',
-      explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]}; stöd och extra utan stopp i deras ${SWE_SYM[theirStrain]} → hopphöjning ${prettyBid(jump)} (inbjudan till 5${SWE_SYM[strain]}).`,
+      explanation: `Partnerns fria bud lovar ${ctx.promised}+ ${SWE_SYM[strain]}; stöd och extra utan stopp i deras ${SWE_SYM[theirStrain]} → hopphöjning ${prettyBid(jump)} (inbjudan till 5${SWE_SYM[strain]}).`,
     }
     if (!legal.includes(simple)) return null
     return {
       call: simple, rule: 'höjning av fritt bud',
-      explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]} (10+ hp); 3+ stöd → ${prettyBid(simple)} (enkel höjning, minimum 12–13).`,
+      explanation: `Partnerns fria bud lovar ${ctx.promised}+ ${SWE_SYM[strain]} (10+ hp); ${need}+ stöd → ${prettyBid(simple)} (enkel höjning, minimum 12–13).`,
     }
   }
   const game = `4${strain}` as Bid
   const gameFloor = ctx.free.level >= 2 ? 14 : 19
   if (tp >= gameFloor && legal.includes(game)) return {
     call: game, rule: 'höjning av fritt bud (utgång)',
-    explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]} (${ctx.free.level >= 2 ? '10+ hp' : '6+ hp'}); 3+ stöd och utgångsvärden → ${prettyBid(game)}.`,
+    explanation: `Partnerns fria bud lovar ${ctx.promised}+ ${SWE_SYM[strain]} (${ctx.free.level >= 2 ? '10+ hp' : '6+ hp'}); ${need}+ stöd och utgångsvärden → ${prettyBid(game)}.`,
   }
   const jump = `${simpleLevel + 1}${strain}` as Bid
   if (tp >= 16 && simpleLevel + 1 <= 4 && legal.includes(jump)) return {
     call: jump, rule: 'höjning av fritt bud (inbjudan)',
-    explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]}; 3+ stöd och extra (16–18) → hopphöjning ${prettyBid(jump)} (inbjudan).`,
+    explanation: `Partnerns fria bud lovar ${ctx.promised}+ ${SWE_SYM[strain]}; ${need}+ stöd och extra (16–18) → hopphöjning ${prettyBid(jump)} (inbjudan).`,
   }
   if (!legal.includes(simple)) return null
   return {
     call: simple, rule: 'höjning av fritt bud',
-    explanation: `Partnerns fria bud lovar 5+ ${SWE_SYM[strain]}; 3+ stöd → ${prettyBid(simple)} (enkel höjning, minimum 12–15).`,
+    explanation: `Partnerns fria bud lovar ${ctx.promised}+ ${SWE_SYM[strain]}; ${need}+ stöd → ${prettyBid(simple)} (enkel höjning, minimum 12–15).`,
   }
 }
 
@@ -450,7 +452,7 @@ export function openerRondTwoInCompetition(hand: Hand, f: AuctionFacts): Kunskap
 
   let fitStrain: string | null = null
   if (respStrain) {
-    const promised = f.freeBid?.free.strain === respStrain || resp.level >= 2 ? 5 : 4
+    const promised = f.freeBid?.free.strain === respStrain ? f.freeBid.promised : resp.level >= 2 ? 5 : 4
     if (len[SUIT_OF_LETTER[respStrain]] >= (promised === 5 ? 3 : 4)) fitStrain = respStrain
   }
   const tp = fitStrain ? pointsWithFloor(hand, SUIT_OF_LETTER[fitStrain], 'bergen').points : hcp(hand)
@@ -652,7 +654,7 @@ export function answerPartnersCue(hand: Hand, f: AuctionFacts): Kunskap | null {
     .map((c) => parseContractBid(c.bid)!.strain)
   const open = f.opening!
   for (const st of partnerSuits) {
-    const promised5 = (open.seat === f.partner && open.strain === st && isMajorStrain(st)) || f.freeBid?.free.strain === st
+    const promised5 = (open.seat === f.partner && open.strain === st && isMajorStrain(st)) || (f.freeBid?.free.strain === st && f.freeBid.promised === 5)
     if (isMajorStrain(st) && len[SUIT_OF_LETTER[st]] >= (promised5 ? 3 : 4) && legal.includes(`4${st}` as Bid)) {
       return { call: `4${st}`, rule, explanation: `${note}; ${len[SUIT_OF_LETTER[st]]}-korts stöd i partnerns ${SWE_SYM[st]} → utgång 4${SWE_SYM[st]}.` }
     }

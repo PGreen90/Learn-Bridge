@@ -26,8 +26,15 @@ describe('negativeDouble (§7.3)', () => {
   it('null utan objuden 4-korts högfärg', () => {
     expect(negativeDouble(parseHand('S:32 H:K3 D:KQ43 C:5432'), 'diamonds', '1S')).toBeNull()
   })
-  it('gäller även inkliv på 2-läget: 1♦–(2♣)–X med 4 hjärter', () => {
-    expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '2C')?.call).toBe('X')
+  it('gäller även inkliv på 2-läget: 1♦–(2♣)–X med 4 hjärter från 7 hp (svaret ryms på 2-läget), 1♦–(2♠) kräver 9 (Pavlicek, 2026-10-09)', () => {
+    expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '2C')?.call).toBe('X') // 8 hp
+    expect(negativeDouble(parseHand('S:32 H:KQ43 D:J32 C:5432'), 'diamonds', '2C')).toBeNull() // 6 hp: för svagt
+    expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:5432'), 'diamonds', '2S')).toBeNull() // 8 hp, svaret på 3-läget
+    expect(negativeDouble(parseHand('S:32 H:KQ43 D:K32 C:J432'), 'diamonds', '2S')?.call).toBe('X') // 9 hp
+  })
+  it('1♣–(1♦)–X lovar båda högfärgerna (4-4); en ensam 4-korts högfärg dubblar inte (experterna 2026-10-08)', () => {
+    expect(negativeDouble(parseHand('S:KJ84 H:Q93 D:65 C:K752'), 'clubs', '1D')).toBeNull()
+    expect(negativeDouble(parseHand('S:KJ84 H:AQ93 D:65 C:752'), 'clubs', '1D')?.call).toBe('X')
   })
   // Felrapport #45 (bricka 3): 1♣–(2♦)–X med BÅDA objudna högfärgerna 4+
   // (Syd 5-4 i spader–hjärter). X:et visar båda högfärgerna – förklaringen

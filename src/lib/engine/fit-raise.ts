@@ -15,6 +15,7 @@ import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
 import { hasStopper } from './overcalls'
 import { side } from './play'
+import { isAlertRule } from './rules'
 
 /**
  * Var partnerns färg ett HOPP-inkliv över motståndarnas öppning? Ett svagt
@@ -136,6 +137,10 @@ export function fitLengthNeeded(f: AuctionFacts, partnerSuit: { strain: string; 
     const cb = parseContractBid(c.bid)
     if (c.seat !== PARTNER[seat] || cb?.strain !== partnerSuit.strain) return false
     if (c === firstContractCall && c.bid === '2C') return false // konstgjord stark 2♣
+    // Stödsvepet 2026-10-08: ett KONSTGJORT bud (alert-regel, t.ex. 2♦-väntebudet
+    // efter 2♣) är ingen färg — utan detta räknades 2♣–2♦–2♥–3♦ som "ruter två
+    // gånger = 6+" och öppnaren höjde 5♦ på dubbelton (frö 20262497).
+    if (isAlertRule(c.rule)) return false
     for (let i = idx - 1; i >= 0; i--) {
       if (history[i].bid === 'P') continue
       // Speldiagnosen S0 (frö 20260772): ett färgbud som SVARAR PÅ MIN CUE

@@ -201,10 +201,15 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
     // svar på Östs negativa dubbling (lovar bara 5) — utan vakten höjde Öst till
     // 3♦ på ♦85 ("rebjuden färg = 6+"). 2♦ en bet (−50) är praktiskt optimum;
     // par 1♠ blev onåbart i och med Nords 2♣-inkliv.
+    // Experternas negativa dubbling (2026-10-08/09): Östs 8 hp dubblar (7+ när
+    // svaret ryms på 2-läget), Väst svarar billigt 2♦ och Öst höjer INTE på
+    // dubbelton — låst på budföljden steg för steg.
     const d = deal('felfarg-20260763', 'S', 'none', HANDS_763)
-    const history = botAuction(d)
-    expect(history).not.toBeNull()
-    expect(contractFromCalls(history!)).toMatchObject({ level: 2, strain: 'diamonds', declarer: 'W' })
+    expect(decideCall(d, HISTORY_763.slice(0, 3), 'E').bid).toBe('X') // 8 hp, 5 spader: X (för svag för 2♠)
+    expect(decideCall(d, HISTORY_763, 'W').bid).toBe('2D')
+    const h = [...HISTORY_763, call('W', '2D'), call('N', 'P')]
+    expect(decideCall(d, h, 'E').bid).not.toBe('3D')
+    expect(decideCall(d, h, 'E').bid).toBe('P')
   })
 
   it('frö 20261621 (regressionsvakt): tvingat 2♥-ombud efter 1♥-ÖPPNING höjs på dubbelton', () => {

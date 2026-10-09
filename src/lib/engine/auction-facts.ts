@@ -75,6 +75,12 @@ export interface FreeBidFact {
   free: { strain: string; level: number }
   /** Auktionens kontraktsbud i ordning (öppning, inkliv, fritt bud, …). */
   contracts: ResolvedCall[]
+  /**
+   * Vad det fria budet lovar i längd: 5 som regel (med fyra kort dubblar man),
+   * men 4 när båda högfärgerna är objudna på 1-läget (1♣–(1♦)–1♥/1♠ — experterna
+   * 2026-10-08: dubblingen lovar då båda högfärgerna, en ensam fyrkorts bjuds).
+   */
+  promised: 4 | 5
 }
 
 export interface StrongDoubleFact {
@@ -712,7 +718,9 @@ export function freeBidContext(history: ResolvedCall[], seat: Seat): FreeBidFact
   if (fb.level !== cheapest) return null // ett hopp är inget fritt bud
   const responderActions = history.filter((c) => c.seat === responder && c.bid !== 'P')
   if (responderActions[0] !== free) return null // t.ex. X först → inte ett fritt bud
-  return { opener: open.seat, responder, free: fb, contracts }
+  const bothMajorsUnbid = (open.strain === 'C' || open.strain === 'D') && ovb.level === 1 && (ovb.strain === 'C' || ovb.strain === 'D')
+  const promised: 4 | 5 = bothMajorsUnbid && fb.level === 1 && (fb.strain === 'H' || fb.strain === 'S') ? 4 : 5
+  return { opener: open.seat, responder, free: fb, contracts, promised }
 }
 
 /**

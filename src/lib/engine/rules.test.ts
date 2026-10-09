@@ -159,7 +159,11 @@ const ALL_ENGINE_RULES: string[] = [
   'sätter trumfen före essfrågan', // trumfvakten (ägarbeslut 2026-10-02: 4NT = senast äkta bjudna färg)
   // Felrapport #98 (2026-10-06): redubblarens andra bud efter 1M–(X)–XX–(färg)–P–(P).
   'redubblaren: utgång', 'redubblaren: inbjudan', 'redubblaren: straffdubbling',
-  
+  // Upprepad upplysningsdubbling (ägarbeslut 2026-10-08, provspel frö 20275065).
+  'upprepad upplysningsdubbling', 'svar på upprepad dubbling',
+  // Negativ dubbling enligt experterna (2026-10-08).
+  'cue efter negativ dubbling (krav)', 'svar på cue efter negativ dubbling',
+  'negativ-dubblarens preferens (visar andra högfärgen)', 'svar på negativ dubbling (andra högfärgen)',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {
