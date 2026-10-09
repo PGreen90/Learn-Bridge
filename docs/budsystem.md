@@ -864,7 +864,10 @@ lite på fötterna och håller utgångskravet.
   Utan stöd och utan rebud: ny färg under 3NT (5+, eller 4-korts högfärg —
   finaste färgen före sangen), annars **3NT** direkt (5-3-3-2 bjuder sang även
   med bra färg). Öppnaren **rättar 3NT till 4M med 6+** i sin högfärg, annars
-  står 3NT.
+  står 3NT. **Öppnarens stöd för svararens nya färg (2♣–2♦–2x–3y) kräver tre
+  kort** — det konstgjorda 2♦-väntebudet är ingen ruterfärg (stödsvepet
+  2026-10-08: förr räknades 2♦ + 3♦ som "ruter två gånger = 6+" och öppnaren
+  höjde 5♦ på dubbelton; nu rebjuder hon sin bra 5-korts eller bjuder sang).
 - Svararens **enkla stödhöjning** under 3NT efter sitt positiva svar
   (2♣–2♥–2♠–3♠) = slamintresse; **höjning direkt till utgång** = minimum utan
   slamintresse (på 4-läget visas slamintresset med kontrollbudet i ny färg,
@@ -1039,6 +1042,9 @@ billigast som förut.
 **Svararens andra bud:** preferens till öppnarens färg (svag), pass på en
 naturlig minorrebid med stöd, eller höjning/NT som visar 11–12 (inbjudan). En
 ny färg av svararen efter 1NT lovar 5+ kort och förnekar stöd (se §4.1-noten).
+**Öppnarens hopp 3M (6+, 16–18, inbjudan) accepteras med 8+ hp och minst två
+trumf** (8-korts fit); med singelton passar svararen oavsett poäng (stödsvepet
+2026-10-08 — förr 4♠ på ♠Q ♥JT98764 ♦J97 ♣AT, 8 hp).
 
 **Svararens egen färg på 2-läget** (t.ex. 1♠–1NT–2♣–**2♦**/**2♥**; felrapport
 #59): naturligt, **5+ kort (oftast 6)**, svag hand utan stöd — **till spel**,
@@ -1448,7 +1454,10 @@ tvingade partnern till 5♣ bet; nu 4♣.*
 **Står partnerns fria högfärgsbud kvar (de passar) — felrapport #55:** budet
 lovar **5+** (den negativa dubblingen tar 4-kortsfallet), så öppnaren höjer på
 **3-korts stöd** med samma skala som §5.2: **12–15 enkel höjning, 16–18
-hopphöjning (inbjudan), 19+ utgång.** Svararen räknar sedan **Bergenpoäng**
+hopphöjning (inbjudan), 19+ utgång.** **Undantag (experterna, 2026-10-08):
+över 1♦ efter lågfärgsöppning (1♣–(1♦)–1♥/1♠) lovar det fria budet bara
+fyra** — dubblingen hade lovat båda högfärgerna — så öppnaren höjer och tävlar
+bara med **fyra** kort (§7.4). Svararen räknar sedan **Bergenpoäng**
 mot den kända fiten (längden i egen trumf räknas): **14+ → utgång, 12–13 →
 inbjudan 3M** (öppnaren antar med 14+ stödpoäng), annars pass. *Giv 2:
 1♦–(1♥)–1♠–P–2♠–P–4♠ med ♠KQ87432 mittemot ♠AJ9 — 11 stick; förr 2♣ med 6.*
@@ -2572,7 +2581,27 @@ talar **fritt efter värden och form**:
 icke-hoppet (~6–9)** höjs till utgång först med **19+** (högfärg) / 21+
 (lågfärg) och får en **enkel höjning (inbjudan)** med 16–18; **flykten över XX
 höjs aldrig** (den lovar inga poäng). Med 17+ hp gäller som förut den starka
-dubblarens eget flöde (X + egen färg).
+dubblarens eget flöde (X + egen färg). **Dubblarens höjning lovar fit mot vad
+svaret visade** (ägarbeslut 2026-10-08, stödsvepet: "höjningen måste vara 4+,
+annars riskerar vi en 4-3-fit"): mot det **påtvingade svaret** (lovar fyra kort)
+kräver enkel höjning, accept, utgång och den tävlande höjningen på lagen om
+totala stick **4+ stöd** — med tre kort passar dubblaren (förr höjde hen på
+"3+"). Mot det **fria svaret** (hoppbud, "lång färg", 6–8 med 5+ — alltid 5+
+kort) räcker tre (8-korts fit). *1♦–(X)–P–1♠–P med ♠Q85 ♥AJ98 ♦9 ♣AKT87 (14
+hp) → pass, förr 2♠; men 1♣–(X)–2♣–3♠(fritt hopp)–P med ♠Q63 ♥AKQJT ♦6543 ♣2
+→ 4♠ står.*
+
+**Upprepad upplysningsdubbling (ägarbeslut 2026-10-08, provspel frö 20275065).**
+Efter partnerns **påtvingade** svar bjuder motståndarna igen (**1♠–X–P–2♥–2♠–?**).
+Dubblaren får inte sälja given: utan fit (4+ mot det påtvingade svaret, 3+ mot
+ett fritt) och utan den starka enfärgshandens egen färg **dubblar hen igen** =
+upprepad upplysning, lovar bara **egen öppning (13+ hp)** och trolig fördelning
+(**högst två kort** i var och en av deras färger). Inte över deras utgångsbud,
+och inte när partnerns svar var en flykt över deras redubbling (då försvarar vi).
+**Partnern får aldrig passa:** med två lika långa objudna färger bjuds **nästa
+färg**, med **fem kort** i den första bjuds den igen, med en längre annan objuden
+färg bjuds den; ingen sang. *Öst ♠A8 ♥AT2 ♦AKT9 ♣AQ43 (21 hp) → X igen; Väst ♠J63
+♥J8753 ♦J3 ♣J62 → 3♥ (fem kort). Förr passade båda och 2♠ fick stå.*
 - **Partnerns 2NT (9–11 med stopp) höjs till 3NT med 14+ hp** hos dubblaren
   (motorbytet etapp 4 familj 2, frö 20270004: ♠54 ♥AJ54 ♦AJ6 ♣KJ98 passade förr
   — regeln saknades); med mindre nöjer sig dubblaren.
@@ -2608,16 +2637,32 @@ dubblarens eget flöde (X + egen färg).
   **konkurrenshöjning** (6–9, billigaste nivå) eller **cue i deras färg**
   (limithöjning+, 10+, krav), även med en egen 4-korts högfärg vid sidan (stödet
   går före att leta en sidofärg). Gäller bara högfärgsöppning; efter 1♣/1♦
-  dubblar svararen som vanligt (en minor 'stöds' inte på samma sätt). **Exakt fyra, inte fem (felrapport #55):**
-  kan den objudna högfärgen bjudas på **1-läget** visar X:et exakt 4 kort — med
-  **5+ bjuder svararen färgen** (t.ex. 1♦–(1♥)–**1♠** = 5+ ♠, fritt bud och
-  rondkrav, 6+ hp). Måste färgen upp på **2-läget** bjuds den med 5+ bara från
-  **10 hp** (fritt 2-över-1, §5.5); svagare händer dubblar och visar färgen
-  senare. 5-4 i **båda** högfärgerna mot ett 2-lägesinkliv dubblar fortfarande
-  (X:et hittar 4-4-fiten). Klev de in i en **lågfärg** så att **båda**
-  högfärgerna är objudna (t.ex. 1♣–(2♦)–X), visar X:et **båda** högfärgerna,
-  minst 4-4 — förklaringen nämner då bägge (felrapport #45). Öppnaren svarar som
-  på en upplysningsdubbling.
+  dubblar svararen som vanligt (en minor 'stöds' inte på samma sätt).
+  **Vad dubblingen lovar — enligt experterna (ägarbeslut 2026-10-08; Cohen,
+  Walker, Pavlicek, bridgebum, BWS-enkäterna):**
+  - **1♣–(1♦)–X = båda högfärgerna, minst 4-4.** En ensam fyrkorts högfärg
+    bjuds naturligt med **1♥/1♠ (fyra kort räcker där)**; med 5-4 bjuds den
+    femkorts först. Öppnaren höjer det fria 1-lägesbudet över 1♦ bara med
+    **fyra** kort (§5.8).
+  - **En högfärg objuden, 1m–(1♥)–X = exakt fyra spader**, 1♠ = 5+ (felrapport
+    #55). Över 1♠ visar X fyra eller fler hjärter.
+  - **Båda objudna men inklivet på 2-läget, 1♦–(2♣)–X = minst EN fyrkorts
+    högfärg**, inte båda. Femkorts högfärg: bjud den med **10+** (fritt
+    2-över-1, §5.5), dubbla med 9, annars pass. 5-4 i båda dubblar.
+  - **Ingen högfärg objuden, 1♥–(1♠)–X = minst 4-4 i lågfärgerna.**
+  - **Styrka (Pavlicek, ägarbeslut 2026-10-09): 6+ över ett 1-lägesinkliv, 7+
+    när öppnaren kan svara i en objuden färg på 2-läget (1♦–(2♣)), 9+ när svaret
+    tvingas upp på 3-läget (1♦–(2♠), 3-lägesinkliv).** Cohens 9–10 över alla
+    2-lägesinkliv provades först och kostade 9 poäng/giv i DD-domen (§9).
+  **Öppnarens svar på den tvetydiga dubblingen (1♦–(2♣)–X):** hoppa aldrig i en
+  högfärg dubblaren kanske saknar (Walker). **13–15: bjud din högfärg utan
+  hopp** (billigast med båda); **16+: cue i deras färg (krav)** — dubblaren
+  visar sin högfärg (fyra+), annars egen 5+ färg, 3NT med stopp, annars
+  öppningsfärgen. **Bjöd öppnaren fel högfärg** (dubblaren har högst två där
+  och fyra i den andra) ger dubblaren **preferens till öppningsfärgen = visar
+  den andra högfärgen** (Pavlicek); öppnaren bjuder den med fyra, annars
+  passar hen (preferensen är ej krav). *1♦–(2♣)–X–P–2♥–P–3♦–P–3♠.* Övriga svar
+  som på en upplysningsdubbling.
   **Bjuder fjärde hand vidare över dubblingen (felrapport #88, ägarens struktur
   2026-09-28), t.ex. 1♦–(2♣)–X–(3♣)–?, svarar öppnaren ÄNDÅ** — dubblingen ber
   om ett svar och att tiga kan bli dyrt ("nästan som att passa på en högfärgs-
@@ -2684,7 +2729,11 @@ dubblarens eget flöde (X + egen färg).
   2026-09-12):** öppnarens **hopp** i färg (egen 6-korts färg rebjuden, eller
   4-korts stöd i dubblarens visade högfärg) visar **16–18 och inbjuder**;
   dubblaren accepterar med **8+ TP** (stödpoäng med 3+ stöd, annars startpoäng —
-  TP lyfter aldrig ner) → 4M, annars pass. Lågfärgshopp: 3NT med stopp i deras
+  TP lyfter aldrig ner) → 4M, annars pass. **Accepten kräver fit** (stödsvepet
+  2026-10-08): **två kort** mot öppnarens egna 6-korts färg (8 trumf), **fyra**
+  i "min visade högfärg" (hoppet antog att dubblingen lovade fyra) — utan fit
+  pass, oavsett poäng (förr 4♠ på renons: 1♠–(2♦)–X–P–3♠–P med ♠– ♥8632 ♦K85
+  ♣A97543). Lågfärgshopp: 3NT med stopp i deras
   färg (8+), 5m med 4+ stöd (10+), annars pass. Acceptgränsen 8 är Claudes
   bokförslag — ägaren justerar vid behov. *1♥–(2♦)–X–P–3♥–P–**4♥** med ♠AK43
   ♥94 ♦94 ♣85432 (förr pass i 3♥ med kall utgång).*
@@ -2699,6 +2748,8 @@ dubblarens eget flöde (X + egen färg).
   upplysningsdubblingen (12–15) — jag räknar mot 12: i högfärg **13+ stödpoäng →
   utgång**, 10–12 → höjning (inbjudan); i lågfärg bara 13+ → en nivå; annars
   **pass** (förr hoppade motorn "inbjudande" till 5♣ på 10 hp, frö 20271014).
+  **Höjning och utgång kräver 4+ stöd** (ägarbeslut 2026-10-08, stödsvepet):
+  partnerns val lovar fyra kort — med tre passar jag (förr 3♠ på ♠Q93).
 - **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
   3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
   längdinfo i konkurrens.
@@ -2914,7 +2965,16 @@ advancern utan 15+ (ägarbeslut samma dag).
     kvar (en lånad kung på 4-läget köpte bara dyra uppoffringar).
   Tvingas partnern svara på dubblingen på **3-läget eller högre** väljs på lika
   färglängd den **honnörsstarkare** färgen (A832 före J982) — på 1–2-läget
-  gäller som förr högfärg först. Höjningar *förbi* 3-läget (t.ex. `2♠–P–4♠`)
+  gäller som förr högfärg först.
+  **Dubblingen över deras spärrhöjning i direkt läge är starkare (ägarbeslut
+  2026-10-08, provspel frö 20272831):** **bra 13+ med fördelning** (13+
+  startpoäng), **högst två kort** i deras färg, stöd i övriga och ingen egen
+  5-kortsfärg (den kliver in naturligt). Balanseringen behåller kungalånet (11,
+  tre kort ok). **Svararen hoppar direkt till 4M** med **5+ högfärg, 7+ hp och
+  kontroll i deras färg** — förlorar högst ett stick: ess, kung, dam, singel
+  eller renons — det är konkurrens, vi släpper inte deras 4 i färgen. Utan
+  kontroll eller under 7 gäller det påtvingade 3M. *(2♦)–P–(3♦)–X–P: Syd ♠QT2
+  ♥97652 ♦A8 ♣J53 (7 hp) → 4♥, förr 3♥.* Höjningar *förbi* 3-läget (t.ex. `2♠–P–4♠`)
   lämnas medvetet tysta — att väcka på 4-läget lovar mer än fönstren har.
 
 ### 7.8 När motståndarna stör vår egen öppning
@@ -3341,6 +3401,55 @@ betsticket är det tvingande. Behövs fler stick och träkarlen har fler kort i
 färgen väger helheten som förr.
 
 ## 9. Ändringslogg
+- **2026-10-08 — Negativ dubbling enligt experterna (§7.4, §5.8).** Ägarbeslut
+  efter källgenomgång (Cohen, Walker, Pavlicek, bridgebum, Wikipedia/BWS):
+  1♣–(1♦)–X = båda högfärgerna 4-4, en ensam fyrkorts bjuds 1♥/1♠ (fyra kort)
+  och öppnaren höjer den bara med fyra (facts-lagrets `freeBid.promised`);
+  över 2-lägesinkliv kräver X 9+ hp; den tvetydiga 1♦–(2♣)–X lovar minst en
+  högfärg → öppnaren bjuder utan hopp (13–15) eller cue:ar (16+, nya regler
+  `cue efter negativ dubbling (krav)` / `svar på cue efter negativ dubbling`),
+  fel högfärg rättas med preferens till öppningsfärgen (`negativ-dubblarens
+  preferens (visar andra högfärgen)` / `svar på negativ dubbling (andra
+  högfärgen)`). Bakgrund: stödsvepets frö 20265329; i 20 000 givar svarade
+  öppnaren i fel högfärg 119 av 212 gånger på tvetydiga dubblingar. Facit
+  `auction-negativ-x-experter.test.ts`. **DD-dom** (ny sond
+  `auktionsdiff-dd.probe.test.ts`, DDDIFF=1: dömer varje ändrat slutkontrakt i
+  auktionsdiffen med dubbeldummy): Cohens 9-golv kostade i snitt 9 poäng/giv
+  på de 269 givar där 6–8 hp förr dubblade (115 bättre, 127 sämre) — källorna
+  är delade (bridgebum 6, Pavlicek 7, Cohen 9–10); **ägarbeslut 2026-10-09:
+  Pavliceks 7/9 efter svarets nivå** (7 när öppnaren kan svara på 2-läget, 9
+  när svaret tvingas till 3-läget). Sidofynd: hand-
+  modellen läste öppnarens "egen 5+ färg"-rebud som sex kort (`hand-model.ts`).
+- **2026-10-08 — Stödsvepet: höjningar lovar sina trumf (§4.4, §5.1, §7.3,
+  §7.4).** Ny sond `stodsvep.probe.test.ts` (`STOD=1`): varje stödbud i bot-
+  auktionerna prövas mot facit (fit = 8 trumf: löftet = 8 − partnerns lovade
+  längd, etikettspecifika löften för Jacoby/Bergen/Drury/inverterad) och mot
+  förklaringstextens eget längdlöfte. Tre lögner lagade: (1) negativ-dubblaren
+  accepterade öppnarens invit-hopp till 4M på 0–1 trumf (§7.4, nu fit-krav);
+  (2) 1M–1NT–3M accepterades på singelton (§5.1, nu 2+ trumf); (3) 2♦-väntebudet
+  räknades som ruterbud i fit-raise, så 2♣–2♦–2x–3♦ höjdes 5♦ på dubbelton
+  (§4.4, konstgjorda bud är ingen färg). Ägarbeslut: dubblarens höjning/accept/
+  utgång (upplysande och responsiv) kräver **4+ stöd mot ett påtvingat svar**
+  (lovar 4); mot det fria svaret (alltid 5+) räcker tre (§7.3, §7.4); spärr-
+  höjning av 3-spärren med två kort står; efter Ogust utan fit får signoff ske
+  på 1+. Facit `auction-stodsvep.test.ts`. **Öppen fråga:** negativ dubbling med
+  bara EN 4-korts högfärg (1♦–(2♣)–X med ♠T ♥KT97) läses av öppnaren som fyra
+  spader.
+- **2026-10-08 — Upprepad upplysningsdubbling + dubbling över deras spärr-
+  höjning (§7.3, §7.6).** Ägarens provspel av stödsvepets 17+-fall: (1) efter
+  partnerns påtvingade svar och deras rebud (1♠–X–P–2♥–2♠) dubblar dubblaren
+  igen utan fit — lovar bara öppning (13+) och högst två i deras färg; partnern
+  passar aldrig (lika långa → nästa färg, fem kort → samma färg igen, längre
+  annan färg → den). Vakter: inte över utgång, inte efter deras XX-flykt, inte
+  den starka enfärgshanden (X + egen färg), inte när partnerns andra X är en
+  straffdubbling (auktionsdiffen gav 5♣/5♦ "svar" på straff-X av 4♠ — läget
+  läses strikt: partnerns bud = exakt två X). (2) Över deras spärrhöjning i
+  direkt läge: X = bra 13+ med fördelning (startpoäng), högst två i deras färg,
+  ingen egen 5-kortsfärg (förr 14 hp); svararen hoppar 4M med 5+ högfärg, 7+ hp
+  och kontroll (A/K/D/singel/renons) i deras färg. Nya regler i registret:
+  `upprepad upplysningsdubbling` (krav 1 rond, alert), `svar på upprepad
+  dubbling`. Facit `auction-upprepad-x.test.ts`; auktionsdiff 20 000 givar mot
+  versionen före stödsvepet = bara de nya och stödsvepets regler.
 - **2026-10-07 — Kontrollbud före essfrågan, steg 4: efter hopp i egen lågfärg
   (§6.2).** Ägarbeslut: 4m efter 1m–1M–3m = träff i trumf och föredrar färgen
   före sang — utgångskrav (3+ stöd, 15+ stödpoäng); öppnaren öppnar

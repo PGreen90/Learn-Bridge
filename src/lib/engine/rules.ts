@@ -74,6 +74,8 @@ const ALERT_RULE_PREFIXES: string[] = [
   'ovanlig 2NT',
   '2NT-inkliv: transfer', // systems on efter vårt 2NT-inkliv (konstgjord transfer)
   'upplysningsdubbling',
+  'upprepad upplysningsdubbling', // X igen efter partnerns påtvingade svar + deras rebud (2026-10-08)
+  'cue efter negativ dubbling', // öppnarens cue (16+) på den tvetydiga negativa dubblingen (2026-10-08)
   'negativ dubbling',
   'responsiv dubbling',
   'stöddubbling',
@@ -576,6 +578,14 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'svar på negativ dubbling': 'ej-krav',
   'upplysningsdubbling (stark)': 'krav-1-rond',
   'fritt svar på upplysningsdubbling': 'ej-krav',
+  'upprepad upplysningsdubbling': 'krav-1-rond', // partnern får aldrig passa (2026-10-08)
+  'svar på upprepad dubbling': 'ej-krav',
+  // Negativ dubbling enligt experterna (2026-10-08): öppnarens cue på den tvetydiga
+  // dubblingen (16+), dubblarens svar, preferensen som visar andra högfärgen.
+  'cue efter negativ dubbling (krav)': 'krav-1-rond',
+  'svar på cue efter negativ dubbling': 'ej-krav',
+  'negativ-dubblarens preferens (visar andra högfärgen)': 'ej-krav',
+  'svar på negativ dubbling (andra högfärgen)': 'ej-krav',
   'straff/värden': 'ej-krav',
   'redubbling (värden)': 'krav-1-rond',
   'svar på stöddubbling': 'ej-krav',

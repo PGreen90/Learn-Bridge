@@ -473,8 +473,17 @@ export function doublerWeighsAdvance(hand: Hand, f: AuctionFacts): Kunskap | nul
   const xxEscape = history.some((c, i) => i < advIdx && c.bid === 'XX' && side(c.seat) !== side(seat))
   if (xxEscape) return decline('Partnerns flykt över redubblingen var tvingad (lovar inga poäng) – pass.')
 
+  // Ägarbeslut 2026-10-08 (stödsvepet): partnerns PÅTVINGADE svar ('färgbud')
+  // lovar bara 4 kort, så dubblarens höjning/accept/utgång kräver 4+ stöd —
+  // tre kort riskerar en 4-3-fit (förr "3+", t.ex. 2♠ på ♠Q85 i frö 20262689).
+  // Det FRIA svaret (motståndaren bjöd mellan min X och partnerns färg) lovar
+  // alltid 5+ (doubles.ts: hoppbud, "lång färg", 6–8 med 5+) → tre kort är
+  // 8-korts fit. Läses ur auktionen, inte ur etiketten (nakna historiker i facit).
   const support = lengths(hand)[advSuit]
-  if (support < 3) return decline(`Utan stöd i partnerns ${SWE_SYM[letterOfSuit(advSuit)]} – pass.`)
+  const myDoubleIdx = history.findIndex((c, i) => i < advIdx && c.seat === seat && c.bid === 'X')
+  const theyBidBetween = history.slice(myDoubleIdx + 1, advIdx).some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')
+  const needed = theyBidBetween ? 3 : 4
+  if (support < needed) return decline(`Utan ${needed}-korts stöd i partnerns ${SWE_SYM[letterOfSuit(advSuit)]} (${support} kort mot ${needed === 3 ? 'fem' : 'fyra'} lovade) – pass.`)
 
   // Hopp eller ej: partnerns svar mot billigaste möjliga nivån vid den punkten.
   let prevLevel = 0
@@ -510,7 +519,7 @@ export function doublerWeighsAdvance(hand: Hand, f: AuctionFacts): Kunskap | nul
   if (sp >= 16) {
     const raise = cheapestBidIn(history, seat, letterOfSuit(advSuit))
     if (raise && parseContractBid(raise)!.level < (isMajor ? 4 : 5) && legal.includes(raise)) {
-      return { call: raise, rule: 'dubblaren höjer (inbjudan)', explanation: `Inbjudan med 3+ stöd → ${prettyBid(raise)} (mot partnerns fria svar).` }
+      return { call: raise, rule: 'dubblaren höjer (inbjudan)', explanation: `Inbjudan med ${needed}+ stöd → ${prettyBid(raise)} (mot partnerns ${needed === 3 ? 'fria' : 'påtvingade'} svar).` }
     }
   }
   return decline(`Minimum – partnerns fria svar lovar ~6–9, utgång kräver mer.`)
@@ -880,7 +889,9 @@ export function responsiveDoublerWeighsAnswer(hand: Hand, f: AuctionFacts): Kuns
   const isMajor = suit === 'hearts' || suit === 'spades'
   const legal = legalCalls(history, seat)
   const sym = SWE_SYM[cb.strain]
-  if (support >= 3) {
+  // Ägarbeslut 2026-10-08 (stödsvepet): höjningen kräver 4+ stöd (förr 3+ —
+  // 3♠ på ♠Q93 i frö 20262449 riskerade en 4-3-fit).
+  if (support >= 4) {
     const sp = dummyPoints(hand, suit).dummyPoints
     const gameBid = `${isMajor ? 4 : 5}${cb.strain}` as Bid
     if (sp >= 13 && isMajor && legal.includes(gameBid)) return {
@@ -993,5 +1004,104 @@ export function strongDoublerWithoutSuit(hand: Hand, f: AuctionFacts): Kunskap |
   const shows = nt === '3NT' ? '22+ (eller utgång ihop)' : nt === '2NT' ? '20–21' : '18–19'
   return {
     call: nt, rule, explanation: `Stark dubbling utan egen färg: jämn hand med stopp i deras färg → ${prettyBid(nt)} (${shows} hp, ej krav — partnern höjer med värden).`,
+  }
+}
+
+// ============================================================================
+// Upprepad upplysningsdubbling (ägarbeslut 2026-10-08, provspel frö 20275065)
+// ============================================================================
+
+/**
+ * Dubblaren efter partnerns PÅTVINGADE svar och DERAS rebud (1♠–X–P–2♥–2♠–?):
+ * sälj inte given. X igen = upprepad upplysningsdubbling — lovar bara egen
+ * öppning (13+ hp) och trolig fördelning (högst två kort i var och en av deras
+ * färger). Partnern väljer (`advancerAnswersSecondDouble`). Före: den starka
+ * dubblaren utan egen färg tiger här (strongDoublerWithoutSuit kräver att de
+ * passat), så 21 hp passade 2♠. Under 13, eller med tre+ i deras färg → null
+ * (raden fortsätter; straffdubblingen/tävla till fiten/pass).
+ */
+export function doublerDoublesAgain(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
+  const ourNonPass = history.filter((c) => side(c.seat) === side(seat) && c.bid !== 'P')
+  if (ourNonPass.length !== 2 || ourNonPass[0].seat !== seat || ourNonPass[0].bid !== 'X') return null
+  const advCall = ourNonPass[1]
+  if (advCall.seat !== PARTNER[seat] || !parseContractBid(advCall.bid) || isGameOrHigher(advCall.bid as Bid)) return null
+  const last = f.lastNonPass
+  if (!last || side(last.seat) === side(seat) || history.indexOf(last) < history.indexOf(advCall)) return null
+  const lastCb = parseContractBid(last.bid)
+  if (!lastCb || lastCb.strain === 'NT' || isGameOrHigher(last.bid as Bid)) return null
+  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null
+  // Partnerns svar var en FLYKT över deras redubbling (lovar inga poäng) → vi
+  // försvarar deras rebud, dubblar inte igen (facit frö 20260934).
+  if (history.some((c, i) => i < history.indexOf(advCall) && c.bid === 'XX' && side(c.seat) !== side(seat))) return null
+  if (hcp(hand) < 13) return null
+  const len = lengths(hand)
+  // Den starka enfärgshanden (17+ med egen 5+ objuden färg) visar färgen i
+  // stället (`ownStrongDoubleRebid`, felrapport #23) — X igen är för händer utan den.
+  if (hcp(hand) >= 17 && SUIT_STRAINS.some((st) => !f.theirStrains.has(st) && len[SUIT_OF_LETTER[st]] >= 5)) return null
+  // Fit i partnerns svarsfärg → höjningen/tävlan (doublerWeighsAdvance), inte X:
+  // 4+ mot det påtvingade svaret (lovar 4), 3+ mot det fria (de bjöd mellan min
+  // X och svaret → 5+).
+  const myDoubleIdx = history.indexOf(ourNonPass[0])
+  const advIdx = history.indexOf(advCall)
+  const freeAnswer = history.slice(myDoubleIdx + 1, advIdx).some((c) => side(c.seat) !== side(seat) && c.bid !== 'P')
+  if (len[SUIT_OF_LETTER[parseContractBid(advCall.bid)!.strain]!] >= (freeAnswer ? 3 : 4)) return null
+  const theirSuits = [...f.theirStrains].map((st) => SUIT_OF_LETTER[st]).filter((s): s is Suit => !!s)
+  if (theirSuits.some((s) => len[s] > 2)) return null
+  if (!legalCalls(history, seat).includes('X' as Bid)) return null
+  const their = theirSuits.map((s) => SWE_SYM[letterOfSuit(s)]).join('/')
+  return {
+    call: 'X', rule: 'upprepad upplysningsdubbling',
+    explanation: `Deras ${prettyBid(last.bid)} över partnerns påtvingade svar → X igen (upprepad upplysning: egen öppning 13+ och kort i deras ${their}, högst två). Partnern väljer färg — aldrig pass.`,
+  }
+}
+
+/**
+ * Partnerns svar på den UPPREPADE dubblingen (aldrig pass): med fem kort i den
+ * först bjudna färgen bjuds den igen (visar 5), med två lika långa objudna
+ * färger bjuds NÄSTA färg, med en längre annan objuden färg bjuds den. Ingen
+ * sang (ägarbeslut 2026-10-08).
+ */
+export function advancerAnswersSecondDouble(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const { history, seat } = f
+  const last = f.lastNonPass
+  if (!last || last.seat !== PARTNER[seat] || last.bid !== 'X') return null
+  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null
+  // Läget läses strikt ur auktionen: partnerns ENDA bud är två X (upplysning +
+  // upprepning), mitt enda bud är svaret på den första, och den andra dubblingen
+  // sitter på ett bud UNDER utgång. Allt annat (partnerns straff-X av deras 4♠
+  // efter ett eget inkliv, det starka återbudets X …) är ingen upprepad
+  // upplysning — auktionsdiffen 2026-10-08 visade 5♣/5♦ "svar" på straffdubblingar.
+  const partnerNonPass = history.filter((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
+  if (partnerNonPass.length !== 2 || partnerNonPass.some((c) => c.bid !== 'X')) return null
+  const myNonPass = history.filter((c) => c.seat === seat && c.bid !== 'P')
+  if (myNonPass.length !== 1 || !parseContractBid(myNonPass[0].bid)) return null
+  const mine = myNonPass
+  if (history.indexOf(mine[0]) < history.indexOf(partnerNonPass[0])) return null // mitt bud ska svara på första X
+  const doubled = [...history.slice(0, history.indexOf(last))].reverse().find((c) => c.bid !== 'P')
+  if (!doubled || side(doubled.seat) === side(seat) || !parseContractBid(doubled.bid) || isGameOrHigher(doubled.bid as Bid)) return null
+  const firstCb = parseContractBid(mine[0].bid)!
+  if (firstCb.strain === 'NT') return null
+  const len = lengths(hand)
+  const first = SUIT_OF_LETTER[firstCb.strain]!
+  const unbid = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).filter((s) => !f.theirStrains.has(letterOfSuit(s)) && s !== first)
+  const RANK: Record<Suit, number> = { clubs: 0, diamonds: 1, hearts: 2, spades: 3 }
+  const others = unbid.sort((a, b) => len[b] - len[a] || RANK[b] - RANK[a])
+  let suit: Suit = first
+  let why = `${len[first]} kort i min ${SWE_SYM[firstCb.strain]} — bjuder den igen (fem kort)`
+  if (len[first] < 5 && others[0] && len[others[0]] > len[first]) {
+    suit = others[0]
+    why = `${SWE_SYM[letterOfSuit(suit)]} är längre (${len[suit]} mot ${len[first]})`
+  } else if (len[first] < 5 && others[0] && len[others[0]] === len[first]) {
+    suit = others[0]
+    why = `lika långa (${len[first]}-${len[first]}) → nästa färg ${SWE_SYM[letterOfSuit(suit)]}`
+  } else if (len[first] < 5) {
+    why = `${SWE_SYM[firstCb.strain]} är fortfarande min längsta (${len[first]} kort)`
+  }
+  const bid = cheapestBidIn(history, seat, letterOfSuit(suit))
+  if (!bid || !legalCalls(history, seat).includes(bid)) return null
+  return {
+    call: bid, rule: 'svar på upprepad dubbling',
+    explanation: `Partnerns upprepade upplysningsdubbling (13+, kort i deras färg) får aldrig passas: ${why} → ${prettyBid(bid)}.`,
   }
 }

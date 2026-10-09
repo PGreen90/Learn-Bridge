@@ -453,7 +453,12 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
     if (p >= 11) return { call: '2NT', rule: 'inbjudan', explanation: `Inbjudningsstyrka → 2NT (inbjudan).` }
     return pass('preferens, minimum')
   }
-  if (call === `3${mBid}`) return p >= 8 ? { call: `4${mBid}`, rule: 'accepterar', explanation: `Accepterar → 4${mSym}.` } : pass('minimum')
+  // Öppnarens hopp 3M = 6+ kort, inbjudan. Accepten kräver 8+ OCH två trumf
+  // (8-korts fit) — stödsvepet 2026-10-08: 4♠ på singelton (frö 20263082).
+  if (call === `3${mBid}`) {
+    if (len[M] < 2) return pass(`ingen fit (${len[M]} ${mSym} mot partnerns sex)`)
+    return p >= 8 ? { call: `4${mBid}`, rule: 'accepterar', explanation: `8+ och 2+ ${mSym} mot partnerns sex → 4${mSym} (accepterar).` } : pass('minimum')
+  }
 
   // Öppnaren bjöd 2NT (18–19).
   if (call === '2NT') return p >= 7 ? { call: '3NT', rule: 'till spel', explanation: `Utgångsvärden mittemot 18–19 → 3NT.` } : pass('minimum balanserad')

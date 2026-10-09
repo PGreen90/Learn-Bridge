@@ -10,6 +10,62 @@
 
 ---
 
+## 2026-10-08 (Stödsvepet — höjningar lovar sina trumf; byggt, deploy väntar på ägarens klartecken)
+Ägarfrågan "vad lovar en höjning i stöd?" besvarades ur boken + koden och
+MÄTTES: ny sond `src/lib/engine/stodsvep.probe.test.ts` (`STOD=1 npx vitest run
+src/lib/engine/stodsvep.probe.test.ts`, 20 000 givar, rapport i
+`revisor-output/stodsvep.txt`). Varje stödbud prövas mot facit (fit = 8 trumf:
+löftet = 8 − partnerns lovade längd, etikettlöften för Jacoby/Bergen/Drury/
+inverterad) och mot förklaringstextens eget längdlöfte (0 förklaringsfel).
+Tre lögner lagade med facit först (`auction-stodsvep.test.ts`): negativ-
+dubblarens accept på 0–1 trumf (`contested-opening.ts`), 1M–1NT–3M-accepten på
+singelton (`responder-rebids.ts`), 2♦-väntebudet räknat som ruterbud i
+`fit-raise.ts` (5♦ på dubbelton). Ägarbeslut: dubblarens höjning/accept/utgång
+kräver 4+ mot ett påtvingat svar (fritt svar = 5+ → tre räcker; läses ur
+auktionen, inte etiketten), spärrhöjning av 3-spärr med 2 står, Ogust-signoff
+på 1+ står. Auktionsdiff mot föregående version (frö 20260721–20280720, dump +
+`scripts/auktionsdiff.mjs`): ändrade bud = bara de fem reglerna. Sondens
+restlista: 5 bud (dubblarens egna "krav – ny färg"-fall). Ägarens provspel av
+17+-fallen (frön 20275065, 20272831) gav två nya regler samma dag: **upprepad
+upplysningsdubbling** (dubblaren X igen efter partnerns påtvingade svar + deras
+rebud, 13+ och högst två i deras färg; partnern passar aldrig) och **dubbling
+över deras spärrhöjning** = bra 13+ med fördelning, svararen hoppar 4M med 5+
+högfärg, 7+ och kontroll i deras färg — facit `auction-upprepad-x.test.ts`,
+§7.3/§7.6. Den öppna frågan (negativ dubbling med EN högfärg) löstes samma
+dag **enligt experterna** (källgenomgång Cohen/Walker/Pavlicek/bridgebum/BWS,
+ägarbeslut): 1♣–(1♦)–X = 4-4, ensam fyrkorts bjuds 1M (öppnaren höjer med
+fyra, `freeBid.promised`), 9+ över 2-lägesinkliv, tvetydig 1♦–(2♣)–X → utan
+hopp / cue 16+ / preferens visar andra högfärgen — facit
+`auction-negativ-x-experter.test.ts`, §7.4. Ny sond `auktionsdiff-dd.probe.test.ts`
+(DDDIFF=1) dömer auktionsdiffen med DD: med Cohens 9-golv netto −1700 poäng på
+631 ändrade slutkontrakt (284 bättre, 262 sämre), 9-golvet ensamt −2300 på 269
+givar; ägarbeslut 2026-10-09 → Pavliceks 7/9 efter svarets nivå, då −880 på 428
+kontrakt (200 bättre, 163 sämre), se §9. Sidofynd: `raiseWithFit`
+(fit-raise.ts) sätter ingen regeletikett; hand-modellen läste "egen 5+ färg"
+som sex kort (lagat).
+
+## 2026-10-07 (Kontrollbud före essfrågan, steg 4 — 4m efter hopp i egen lågfärg, LIVE 6e8290a)
+
+**Ägarbeslut (tre):** "kontrollbud före essfrågan" gäller i ALLA sammanhang — båda är
+skyldiga att visa kontroller, utan att det betyder slam · att hoppa 4→6 utan essfråga
+är förbjudet · 4m efter 1m–1M–3m = träff i trumf och föredrar färgen före sang (16+ och
+sex kort visade), sedan kontrollbud, 4NT eller 5m. **Byggt:** svararens 4m (3+ stöd, 15+
+stödpoäng) = 'sätter trumfen (krav)', öppnaren öppnar kontrollbudsronden
+(`partnerStarts`), kaptenen 4NT i slamzon annars 5m (auction-decide.ts: slamContextFor,
+responderSecondDecision, slamSituationSpecifik; auction-meaning.ts; rules.ts). Förr:
+15–16 → 4m-inbjudan med accept rakt till 6m, 17+ → 4NT direkt. **Sidofynd ur diffen:**
+1m–1NT–3m–4m är ingen trumfsättning · ett kontrollbud är ingen bjuden färg
+(`agreedTrump` frågar betydelselagret för 4-lägeskandidater — förr svarade Väst 5♥ på en
+inbillad damfråga i hjärter) · kaptenen på 31–32 med högst en okontrollerad sidofärg
+frågar 4NT hellre än ett 4♠ som stänger ute frågan (slam-auction.ts, samma vakt som 33+;
+gäller alla lågfärgsrundor). **Mätt** (auktionsdiff 20300001–20350000 + DD-dom
+`slamtabell-dd.probe.test.ts`): 31 ändrade budgivningar, 14 ändrade slutkontrakt — 4
+slammar bort (3 stod via det förbjudna 4→6, 1 bet), 10 nya (7 står, 3 bet).
+Trumfsonden 0 olika trumf; essfrågor efter kontrollbud 1 504/2 989 → 1 623/3 076.
+Betydelsesvepet 0 på ostörda. Facit `auction-hopp-egen-farg.test.ts` (6 lås).
+**Nästa (steg 5):** 4m-inbjudans accept 6m i övriga lägen (stark 2♣, MSS,
+reverse/hoppskift) → via kontrollbud/4NT.
+
 ## 2026-10-07 (Felrapport #101 — försvararen tar mästaren, LIVE 01c7a7e)
 
 **§8.7, två lager, före Monte-Carlo** (`defenderCashesSettingTrick`, play-bot.ts):

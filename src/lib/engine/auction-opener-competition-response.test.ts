@@ -58,9 +58,15 @@ describe('Öppnarens rond-2 i konkurrens efter partnerns 1-lägessvar (1♣–(1
     expect(decideCall(deal, A_HISTORY, 'S').bid).toBe('P')
   })
 
-  it('minimum med 3-korts hjärter → tävlar 2♥ (fritt högfärgsbud lovar 5+, felrapport #55)', () => {
-    // 13 hp, 3-korts hjärter: 1♥ över (1♦) är ett fritt bud = 5+ (X hade visat 4) → 5-3-fit.
+  it('minimum med 3-korts hjärter → pass (1♣–(1♦)–1♥ lovar 4+ sedan experterna 2026-10-08; förr 5+)', () => {
+    // 13 hp, 3-korts hjärter: över 1♦ lovar dubblingen BÅDA högfärgerna, så 1♥
+    // är en ensam fyrkorts — tre kort är ingen säker fit (4-3). Förr (felrapport
+    // #55) lovade 1♥ fem och öppnaren tävlade 2♥ på tre.
     const deal = dealOf('S', { ...A_CTX, S: 'S:AJ3 H:Q94 D:842 C:AQ54' })
+    expect(decideCall(deal, A_HISTORY, 'S').bid).toBe('P')
+  })
+  it('minimum med 4-korts hjärter → tävlar 2♥ (fyra mot fyra = fit)', () => {
+    const deal = dealOf('S', { ...A_CTX, S: 'S:AJ3 H:Q942 D:84 C:AQ54' })
     expect(decideCall(deal, A_HISTORY, 'S').bid).toBe('2H')
   })
 })

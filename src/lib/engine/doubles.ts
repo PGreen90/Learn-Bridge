@@ -36,10 +36,23 @@ export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): Re
   if (!their) return null
   const p = hcp(hand)
   const len = lengths(hand)
-  if (p < 6) return null
+  // Experterna (ägarbeslut 2026-10-08/09, Pavlicek): 6+ över ett 1-lägesinkliv,
+  // 7+ när öppnaren kan svara i en objuden färg på 2-läget, 9+ när svaret
+  // tvingas upp på 3-läget. (Cohens 9–10 över alla 2-lägesinkliv kostade i
+  // DD-domen 9 poäng/giv på 269 givar — bok §9 2026-10-08.)
+  const overcallLevel = Number(theirCall[0])
+  const unbidSuits = RANK_ORDER.filter((s) => s !== ourOpen && s !== their)
+  const cheapestAnswer = Math.min(...unbidSuits.map((s) => (rankIdx(s) > rankIdx(their) ? overcallLevel : overcallLevel + 1)))
+  const minHcp = overcallLevel === 1 ? 6 : cheapestAnswer >= 3 ? 9 : 7
+  if (p < minHcp) return null
 
   const unbidMajors = (['hearts', 'spades'] as Suit[]).filter((s) => s !== ourOpen && s !== their)
   const fourPlus = unbidMajors.filter((m) => len[m] >= 4)
+  // 1♣–(1♦)–X lovar BÅDA högfärgerna, minst 4-4 (Cohen, Walker, Pavlicek, BWS
+  // 80 %): med en ensam 4-korts högfärg bjuds den naturligt på 1-läget (fyra
+  // kort räcker där — contested-opening.ts). Förr dubblade motorn ändå, och
+  // öppnaren gissade högfärg (fel 119 av 212 gånger i 20 000 givar).
+  if (unbidMajors.length === 2 && overcallLevel === 1 && fourPlus.length < 2) return null
 
   // Felrapport #55: X:et visar EXAKT fyra kort i en objuden högfärg som kan
   // bjudas på 1-läget — med 5+ bjuder svararen färgen själv (fritt bud, §5.5).
@@ -67,7 +80,8 @@ export function negativeDouble(hand: Hand, ourOpen: Suit, theirCall: string): Re
   }
   for (const m of unbidMajors) {
     if (len[m] >= 4) {
-      return { call: 'X', rule: 'negativ dubbling', explanation: `6+ hp, 4+ ${SYM[m]} → X (negativ dubbling, visar objuden högfärg).` }
+      const lovar = unbidMajors.length === 2 ? 'minst EN 4-korts högfärg (♥ eller ♠)' : `4+ ${SYM[m]}`
+      return { call: 'X', rule: 'negativ dubbling', explanation: `${overcallLevel >= 2 ? 9 : 6}+ hp, ${lovar} → X (negativ dubbling, visar ${unbidMajors.length === 2 ? 'minst en objuden högfärg — partnern bjuder sin utan hopp, cue:ar med 16+' : 'objuden högfärg'}).` }
     }
   }
 
@@ -106,9 +120,22 @@ export function openerAnswerNegativeDouble(hand: Hand, ourOpen: Suit, theirCall:
 
   // 1. Objuden högfärg (den dubblingen lovar 4+ kort i) – bjud den med 4+ stöd.
   const unbidMajors = (['hearts', 'spades'] as Suit[]).filter((s) => s !== ourOpen && s !== their)
+  // TVETYDIG dubbling (experterna, ägarbeslut 2026-10-08): över ett 2-lägesinkliv
+  // med BÅDA högfärgerna objudna lovar X:et bara EN av dem. Öppnaren får då aldrig
+  // hoppa i en högfärg dubblaren kanske saknar (Walker): 13–15 bjuder sin
+  // högfärg utan hopp (billigast med båda), 16+ cue:ar deras färg och låter
+  // dubblaren visa sin (Pavlicek: cuet = "nog för utgång, bjud vidare").
+  const ambiguous = unbidMajors.length === 2 && theirLevel >= 2
+  if (ambiguous && p >= 16 && unbidMajors.some((m) => len[m] >= 4)) {
+    return {
+      call: `${theirLevel + 1}${BID[their]}`,
+      rule: 'cue efter negativ dubbling (krav)',
+      explanation: `16+ hp mot partnerns negativa dubbling, som bara lovar EN av högfärgerna → cue ${theirLevel + 1}${SYM[their]} (krav): visa din högfärg, jag hoppar inte i en du kanske saknar.`,
+    }
+  }
   for (const m of unbidMajors) {
     if (len[m] >= 4) {
-      const lvl = cheapLevel(m) + (p >= 16 ? 1 : 0)
+      const lvl = cheapLevel(m) + (p >= 16 && !ambiguous ? 1 : 0)
       const strength = p >= 16 ? '16+ (extra styrka, hoppande)' : 'minimum (12–15)'
       return {
         call: `${lvl}${BID[m]}`,
@@ -307,6 +334,15 @@ export function answerTakeoutDouble(hand: Hand, theirSuit: Suit, theirLevel = 1,
   const hasShort = RANK_ORDER.some((s) => len[s] <= 1)
   if (theirLevel >= 2 && bestMajor && len[bestMajor] >= 5 && hasShort && p >= 11) {
     return { call: `4${BID[bestMajor]}`, rule: 'höjning till utgång', explanation: `5+ ${SYM[bestMajor]} och renons/singel med utgångsvärden → 4${SYM[bestMajor]} (partnerns X lovar stöd, korthet ger ruffvärde).${rabatt}` }
+  }
+  // Ägarbeslut 2026-10-08 (provspel frö 20272831): dubblingen på 3-LÄGET är
+  // starkare (bra 13+ med fördelning, högst två i deras färg), så svararen med
+  // 5+ högfärg, 7+ hp och KONTROLL i deras färg — förlorar högst ett stick: A,
+  // K, D, singel eller renons — hoppar direkt till 4M. Konkurrens: vi släpper
+  // inte deras 4 i färgen. Utan kontroll eller under 7 → påtvingat 3M nedan.
+  const control = len[theirSuit] <= 1 || hand.some((c) => c.suit === theirSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q'))
+  if (theirLevel >= 3 && bestMajor && len[bestMajor] >= 5 && graded >= 7 && control) {
+    return { call: `4${BID[bestMajor]}`, rule: 'höjning till utgång', explanation: `5+ ${SYM[bestMajor]}, 7+ hp och kontroll i deras ${SYM[theirSuit]} (högst ett stick bort) mot partnerns 3-lägesdubbling (bra 13+) → 4${SYM[bestMajor]} — vi släpper inte deras 4${SYM[theirSuit]}.${rabatt}` }
   }
 
   // 12+ → cue deras färg (utgångskrav, låter partnern beskriva vidare) — men

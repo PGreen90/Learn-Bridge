@@ -7,6 +7,7 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { hcp, isBalanced, lengths } from './hand'
+import { startingPoints } from './evaluation'
 import type { ResponseResult } from './responses'
 import { hasStopper } from './overcalls'
 
@@ -167,6 +168,15 @@ export function defendPreempt(hand: Hand, theirSuit: Suit, level: number, balanc
   const ntFloor = raised ? (balancing ? 16 : 19) : 16
   if (level === 3 && isBalanced(hand) && p >= ntFloor && hasStopper(hand, theirSuit)) {
     return { call: '3NT', rule: '3NT till spel', explanation: `Balanserad med stopp i ${SYM[theirSuit]} → 3NT.` }
+  }
+  // Över deras SPÄRRHÖJNING i direkt läge (ägarbeslut 2026-10-08, provspel frö
+  // 20272831): dubblingen är starkare — "bra 13+ med fördelning" = 13+
+  // startpoäng, högst två kort i deras färg, stöd i övriga. Svararen får då
+  // hoppa 4M med 5+ högfärg, 7+ och kontroll (doubles.ts). Balanseringen
+  // behåller kungalånet (11, tre kort ok).
+  // Med en egen 5+ färg kliver handen in naturligt (facit frö 20260729, 13 hp 5-5).
+  if (raised && !borrow && len[theirSuit] <= 2 && RANK_ORDER.every((s) => s === theirSuit || len[s] >= 3) && !longestOther(len, theirSuit, 5) && startingPoints(hand).startingPoints >= 13) {
+    return { call: 'X', rule: 'upplysningsdubbling', explanation: `Bra 13+ med fördelning (startpoäng), högst två i ${SYM[theirSuit]}, stöd i övriga → X över deras spärrhöjning (takeout; partnern hoppar 4M med 5+ högfärg, 7+ och kontroll).` }
   }
   // Upplysningsdubbling (takeout): kort i deras färg, stöd i övriga, 14+ (högre nivå).
   if (isTakeout(hand, theirSuit, borrow ? 11 : 14, borrow ? 3 : 2)) {

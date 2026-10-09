@@ -215,7 +215,11 @@ function forcedRebid(rule: string | undefined): boolean {
   return (
     rule.startsWith('svar på negativ dubbling') ||
     rule.startsWith('tvångssvar') ||
-    rule.startsWith('starkt återbud (')
+    rule.startsWith('starkt återbud (') ||
+    // Öppnarens tävlande/utpassningsrebud märkt "egen 5+ färg" lovar fem, inte
+    // sex (frö 20260731 sedan experternas negativa dubbling 2026-10-08: Syd
+    // dubblar inte längre på 8 hp, Nord rebjuder 2♠ i utpassningssits på AKJ76).
+    rule.includes('(egen 5+ färg)')
   )
 }
 

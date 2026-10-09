@@ -495,15 +495,22 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
     // cue/höjning säger mer). Förr saknades grenen helt: med 7-korts spader
     // efter 1♦–(1♥) dubblade svararen negativt (lovar 4) och passade sedan.
     if (!openerMajorFit) {
-      for (const m of ['spades', 'hearts'] as Suit[]) {
-        if (m === openerSuit || m === ovSuit || len[m] < 5) continue
+      // Experterna (2026-10-08): över 1♣–(1♦) lovar X:et båda högfärgerna, så en
+      // ENSAM 4-korts högfärg bjuds naturligt på 1-läget — fyra kort räcker där.
+      // (Över 1♥ visar X exakt fyra spader och 1♠ fem, som förut.)
+      const bothMajorsUnbid = !isMajorOpening && ovLevel === 1 && (ovSuit === 'clubs' || ovSuit === 'diamonds')
+      // Längsta högfärgen först (5-4: den femkorts), lika längd → spader.
+      const majorsByLength = (['spades', 'hearts'] as Suit[]).sort((a, b) => len[b] - len[a])
+      for (const m of majorsByLength) {
+        if (m === openerSuit || m === ovSuit || len[m] < (bothMajorsUnbid ? 4 : 5)) continue
         const L = cheapestLevelAbove(m, ovLevel, ovSuit)
         // 3-läget från 12 hp (sunt förnuft-svepet 2026-09-25: förr fanns bara 1–2-läget).
         if ((L === 1 && p >= 6) || (L === 2 && p >= 10) || (L === 3 && p >= 12)) {
+          const lovar = bothMajorsUnbid && L === 1 ? '4+' : '5+'
           return {
             call: `${L}${LETTER[m]}` as Bid,
             rule: 'fritt bud',
-            explanation: `5+ ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 1 ? '6' : L === 2 ? '10' : '12'}+ hp, rondkrav).`,
+            explanation: `${lovar} ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 1 ? '6' : L === 2 ? '10' : '12'}+ hp, rondkrav${lovar === '4+' ? '; dubblingen hade lovat båda högfärgerna' : ''}).`,
           }
         }
       }
@@ -817,6 +824,23 @@ export function negativeDoublerContinues(hand: Hand, f: AuctionFacts): Kunskap |
     }
   }
 
+  // Experterna (ägarbeslut 2026-10-08, Pavlicek): efter den TVETYDIGA dubblingen
+  // (lågfärgsöppning, 2-lägesinkliv, båda högfärgerna objudna) bjöd öppnaren
+  // utan hopp en högfärg jag saknar (högst två) fast jag har fyra i den andra →
+  // preferens till öppningsfärgen = "jag visade den ANDRA högfärgen"; öppnaren
+  // bjuder den med fyra kort (`openerShowsOtherMajorAfterPreference`).
+  if (suitAnswer && (open.strain === 'C' || open.strain === 'D') && theirCb.level >= 2 && (answer.strain === 'H' || answer.strain === 'S')) {
+    const other = answer.strain === 'H' ? 'spades' : 'hearts'
+    const theirIsMajor = theirCb.strain === 'H' || theirCb.strain === 'S'
+    if (!theirIsMajor && len[SUIT_OF_LETTER[answer.strain]] <= 2 && len[other] >= 4) {
+      const pref = cheapestBidIn(history, seat, open.strain)
+      if (pref && Number(pref[0]) <= 3 && legal.includes(pref)) return {
+        call: pref, rule: 'negativ-dubblarens preferens (visar andra högfärgen)',
+        explanation: `Partnerns ${prettyBid(answerCall.bid)} var inte min högfärg (högst två kort) — preferens ${prettyBid(pref)} till öppningsfärgen visar att dubblingen hade ${SWE_SYM[other === 'spades' ? 'S' : 'H']} (fyra kort). Partnern bjuder den med fyra.`,
+      }
+    }
+  }
+
   // Pliktsvepet K2 (2026-09-02): SVAG PREFERENS till öppningsfärgen. Partnerns
   // tvingade svar på min dubbling landade i en färg jag stöder sämre än
   // öppningsfärgen (frö 20262871: 1♦–(1♠)–X–P–2♣ med ♦K752 ♣73 → 2♦, förr pass).
@@ -1067,6 +1091,15 @@ export function negativeDoublerAnswersJump(hand: Hand, f: AuctionFacts): Kunskap
   }
   if (answer.strain === 'H' || answer.strain === 'S') {
     const game = `4${answer.strain}` as Bid
+    // Stödsvepet 2026-10-08: accepten kräver FIT — två kort mot partnerns egna
+    // 6-korts (8 trumf), fyra i "min visade högfärg" (partnern lovade 4 — har jag
+    // inte fyra var dubblingen tolkad fel, och 4M på 7 trumf är ingen rättelse).
+    // Förr räknades bara poäng: 4♠ på renons (frö 20267446).
+    const fit = answer.strain === open.strain ? support >= 2 : support >= 4
+    if (!fit) return {
+      call: 'P', rule: 'negativ-dubblaren avböjer inbjudan',
+      explanation: `Partnerns hopp ${prettyBid(answerCall.bid)} visar 16–18 med ${shown} och inbjuder utgång; utan fit (${support} ${sym}) → pass.`,
+    }
     if (pts >= 8 && legal.includes(game)) return {
       call: game, rule: 'negativ-dubblaren accepterar inbjudan',
       explanation: `Partnerns hopp ${prettyBid(answerCall.bid)} visar 16–18 med ${shown} och inbjuder utgång; med 8+ → 4${sym}.`,
@@ -1084,4 +1117,109 @@ export function negativeDoublerAnswersJump(hand: Hand, f: AuctionFacts): Kunskap
     explanation: `Partnerns hopp ${prettyBid(answerCall.bid)} visar 16–18 med ${shown} och inbjuder; med 4+ stöd och 10+ → 5${sym}.`,
   }
   return decline
+}
+
+// ============================================================================
+// Negativ dubbling enligt experterna (ägarbeslut 2026-10-08): öppnarens cue på
+// den tvetydiga dubblingen, och öppnarens högfärg efter dubblarens preferens.
+// ============================================================================
+
+/**
+ * Läge: jag dubblade negativt (mitt enda bud) över deras 2+-lägesinkliv i färg
+ * mot partnerns lågfärgsöppning, och partnern CUE:ade deras färg (16+, krav —
+ * "visa din högfärg"); bara pass sedan. Returnerar färgerna läget bygger på.
+ */
+export function negativeDoublerCueSeat(f: AuctionFacts): { ourOpen: Suit; theirSuit: Suit; cueCall: ResolvedCall } | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.seat !== PARTNER[seat] || open.level !== 1 || !SUIT_OF_LETTER[open.strain]) return null
+  const ourOpen = SUIT_OF_LETTER[open.strain]
+  if (ourOpen === 'hearts' || ourOpen === 'spades') return null
+  const mine = history.filter((c) => c.seat === seat && c.bid !== 'P')
+  if (mine.length !== 1 || mine[0].bid !== 'X') return null
+  const theirs = f.theirContractBids
+  if (theirs.length !== 1) return null
+  const ov = parseContractBid(theirs[0].bid)
+  if (!ov || ov.strain === 'NT' || ov.level < 2) return null
+  const last = f.lastNonPass
+  if (!last || last.seat !== PARTNER[seat]) return null
+  const cb = parseContractBid(last.bid)
+  if (!cb || cb.strain !== ov.strain || history.indexOf(last) < history.indexOf(mine[0])) return null
+  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null
+  return { ourOpen, theirSuit: SUIT_OF_LETTER[ov.strain], cueCall: last }
+}
+
+/**
+ * Dubblaren svarar på öppnarens cue (krav — aldrig pass): sin 4+ högfärg
+ * (längsta, lika → billigast), annars egen 5+ färg, annars 3NT med stopp i
+ * deras färg, annars öppningsfärgen (Pavlicek: cuet ber mig bjuda vidare).
+ */
+export function negativeDoublerAnswersCue(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const n = negativeDoublerCueSeat(f)
+  if (!n) return null
+  const { history, seat } = f
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  const rule = 'svar på cue efter negativ dubbling'
+  const ok = (bid: string | null): bid is string => !!bid && legal.includes(bid as Bid)
+  const majors = (['hearts', 'spades'] as Suit[]).filter((m) => m !== n.theirSuit && len[m] >= 4).sort((a, b) => len[b] - len[a])
+  if (majors[0]) {
+    const bid = cheapestBidIn(history, seat, LETTER[majors[0]])
+    if (ok(bid)) return { call: bid, rule, explanation: `Partnerns cue bad mig visa högfärgen: ${len[majors[0]]} ${SUIT_SYM[majors[0]]} → ${prettyBid(bid)} (krav uppfyllt, partnern placerar).` }
+  }
+  const five = RANK_ORDER.filter((s) => s !== n.theirSuit && s !== n.ourOpen && len[s] >= 5).sort((a, b) => len[b] - len[a])[0]
+  if (five) {
+    const bid = cheapestBidIn(history, seat, LETTER[five])
+    if (ok(bid)) return { call: bid, rule, explanation: `Partnerns cue bad mig visa handen: ingen 4-korts högfärg, egen 5+ ${SUIT_SYM[five]} → ${prettyBid(bid)}.` }
+  }
+  if (hasStopper(hand, n.theirSuit) && ok('3NT')) return { call: '3NT', rule, explanation: `Partnerns cue bad mig visa handen: ingen 4-korts högfärg men stopp i deras ${SUIT_SYM[n.theirSuit]} → 3NT.` }
+  const back = cheapestBidIn(history, seat, LETTER[n.ourOpen])
+  if (ok(back)) return { call: back, rule, explanation: `Partnerns cue bad mig visa handen: ingen högfärg att visa, inget stopp → tillbaka till ${SUIT_SYM[n.ourOpen]} (${prettyBid(back)}).` }
+  return null
+}
+
+/**
+ * Läge: jag öppnade 1 i lågfärg, de klev in i färg på 2+-läget, partnern
+ * dubblade negativt (tvetydigt — en av högfärgerna), jag svarade en högfärg
+ * utan hopp, och partnern gav preferens till min öppningsfärg (= visade den
+ * ANDRA högfärgen, Pavlicek). Bara pass sedan.
+ */
+export function openerPreferenceSeat(f: AuctionFacts): { ourOpen: Suit; answered: Suit; other: Suit } | null {
+  const { history, seat } = f
+  const open = f.opening
+  if (!open || open.seat !== seat || open.level !== 1 || !SUIT_OF_LETTER[open.strain]) return null
+  const ourOpen = SUIT_OF_LETTER[open.strain]
+  if (ourOpen === 'hearts' || ourOpen === 'spades') return null
+  const theirs = f.theirContractBids
+  if (theirs.length !== 1) return null
+  const ov = parseContractBid(theirs[0].bid)
+  if (!ov || ov.strain === 'NT' || ov.level < 2 || ov.strain === 'H' || ov.strain === 'S') return null
+  const partnerCalls = history.filter((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
+  if (partnerCalls.length !== 2 || partnerCalls[0].bid !== 'X') return null
+  const mine = history.filter((c) => c.seat === seat && c.bid !== 'P')
+  if (mine.length !== 2) return null
+  const ans = parseContractBid(mine[1].bid)
+  if (!ans || (ans.strain !== 'H' && ans.strain !== 'S') || ans.level !== ov.level) return null // utan hopp
+  const pref = parseContractBid(partnerCalls[1].bid)
+  if (!pref || pref.strain !== open.strain) return null
+  if (f.lastNonPass !== partnerCalls[1]) return null
+  const answered = SUIT_OF_LETTER[ans.strain]
+  return { ourOpen, answered, other: answered === 'hearts' ? 'spades' : 'hearts' }
+}
+
+/** Öppnaren efter dubblarens preferens: den ANDRA högfärgen med fyra kort, annars pass (preferensen var ej krav). */
+export function openerShowsOtherMajorAfterPreference(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const n = openerPreferenceSeat(f)
+  if (!n) return null
+  const { history, seat } = f
+  const len = lengths(hand)
+  const legal = legalCalls(history, seat)
+  if (len[n.other] >= 4) {
+    const bid = cheapestBidIn(history, seat, LETTER[n.other])
+    if (bid && Number(bid[0]) <= 4 && legal.includes(bid)) return {
+      call: bid, rule: 'svar på negativ dubbling (andra högfärgen)',
+      explanation: `Partnerns preferens till ${SUIT_SYM[n.ourOpen]} visade att dubblingen hade ${SUIT_SYM[n.other]}, inte ${SUIT_SYM[n.answered]} — jag har fyra ${SUIT_SYM[n.other]} → ${prettyBid(bid)}.`,
+    }
+  }
+  return { call: 'P', rule: 'pass', explanation: `Partnerns preferens till ${SUIT_SYM[n.ourOpen]} visade ${SUIT_SYM[n.other]} (fyra kort), men jag har inte fyra där → pass i öppningsfärgen (preferensen var ej krav).` }
 }

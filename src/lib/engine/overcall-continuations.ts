@@ -19,7 +19,7 @@
 
 import type { Bid, Hand, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { isGameOrHigher, parseContractBid, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
+import { isGameOrHigher, parseContractBid, PARTNER, SUIT_OF_LETTER, SUIT_STRAINS, type AuctionFacts } from './auction-facts'
 import { bidValue, cheapestBidIn, legalCalls, letterOfSuit, prettyBid, SWE_SYM } from './auction-rules'
 import { dummyPoints, pointsWithFloor } from './evaluation'
 import { hcp, lengths } from './hand'
@@ -686,7 +686,19 @@ export function advancerCompetesToFit(hand: Hand, f: AuctionFacts): Kunskap | nu
   if (f.history.some((c) => c.seat === f.seat && parseContractBid(c.bid)?.strain === partnerSuit.strain)) return null
 
   const suit = SUIT_OF_LETTER[partnerSuit.strain]
-  if (lengths(hand)[suit] < 3) return null
+  // Ägarbeslut 2026-10-08 (stödsvepet): var partnerns färg ett PÅTVINGAT svar
+  // på min upplysningsdubbling ('färgbud', lovar bara 4 kort) kräver höjningen
+  // 4+ — tre kort riskerar 4-3 (förr 4♠ på ♠Q87 i frö 20260825). Det FRIA
+  // svaret (motståndaren bjöd mellan min X och partnerns färg; doubles.ts: alltid
+  // 5+ — hoppbud, "lång färg", 6–8 med 5+) och ett inkliv (6+) höjs som förut
+  // på tre. Läses ur auktionen, inte ur etiketten (nakna historiker i facit).
+  const partnerSuitIdx = f.history.findIndex((c) => c.seat === PARTNER[f.seat] && parseContractBid(c.bid)?.strain === partnerSuit.strain)
+  const ourLastBeforeSuit = [...f.history.slice(0, partnerSuitIdx)].reverse().find((c) => side(c.seat) === side(f.seat) && c.bid !== 'P')
+  const theyBidBetween = f.history
+    .slice(f.history.indexOf(ourLastBeforeSuit!) + 1, partnerSuitIdx)
+    .some((c) => side(c.seat) !== side(f.seat) && c.bid !== 'P')
+  const forcedAnswerToMyDouble = ourLastBeforeSuit?.seat === f.seat && ourLastBeforeSuit.bid === 'X' && !theyBidBetween
+  if (lengths(hand)[suit] < (forcedAnswerToMyDouble ? 4 : 3)) return null
   const sp = dummyPoints(hand, suit).dummyPoints
   if (sp < 8) return null
 
