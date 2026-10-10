@@ -10,6 +10,22 @@
 
 ---
 
+## 2026-10-10 (Felrapport #104 stick 1: spelförarens hold-up i sang; byggt, deploy väntar på ägarens klartecken)
+Ägaren: "man skall ducka första sticket och hålla på esset ett varv, detta är standard
+för att störa kommunikationen mellan motparter i ett NT-kontrakt." Ny regel
+`declarerHoldUp` (§8.9, play-bot.ts; andra samt tredje/fjärde hand på spelförarsidan):
+esset som enda stopp (ingen K/Q/J i våra händer) duckas i färgens första varv, aldrig
+som betstick, aldrig med en löpande sidofärg (7+ med AKQ / 8+ med AK + Q eller J).
+Första versionen (utan knekt- och löpande-färg-undantagen) kostade 2 stick på frön
+20260803 (♣AJ3) och 20260852 (♦AKJ98732) — snävad samma dag. Facit
+`play-bot-spelforarens-holdup.test.ts`, DD-låst med bridge-dds (`analyseSpel`:
+♣6 10 stick, ♣A 7). Speldiagnosen 200 givar frö 20260721 (samma kommando som ovan),
+mot lågmask-körningen: spelförartapp **254 → 256**, försvarstapp **234 → 236**, bara
+**2** givar ändrade — regeln är sällsynt i slumpgivar och mätningen är brus; den
+bärs av ägarens teknikregel och DD-låset på rapportens giv. Bevaka-raden struken.
+
+---
+
 ## 2026-10-10 (Felrapport #104: spelförarsidans tredje hand — ingen lågmask mot en dold hand bakom; byggt, deploy väntar på ägarens klartecken)
 Ägarens skärmbild från Dagens tävling bricka 2 (återskapad med `DUMP_TAVLING=2026-10-10:2
 npx vitest run src/lib/engine/speldump.probe.test.ts`): bordet la ♦7 ur A74 "billigast"
