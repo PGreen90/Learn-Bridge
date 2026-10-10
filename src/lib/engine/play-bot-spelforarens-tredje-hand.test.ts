@@ -96,9 +96,6 @@ describe('Felrapport #104 — spelförarsidans tredje hand med en dold försvara
     }
   })
 
-  // Samma giv, stick 1: Väst tog ♣A direkt på Syds ♣K ("vinner billigast"). Speldumpen
-  // (DUMP_TAVLING=2026-10-10:2) flaggar ♣A som −3 i DD mot att hålla upp (Syd har sju
-  // klöver, Nord två — hålla upp en gång gör Nord renons och dödar färgen när Syd
-  // saknar ingång). Spelförarens hold-up är en egen regel som inte finns: bevaka.
-  it.todo('felrapport #104, stick 1: Väst håller upp ♣A på Syds ♣K (spelförarens hold-up i sang, DD −3) — tävling 2026-10-10 bricka 2')
+  // Samma giv, stick 1 (Västs ♣A på Syds ♣K): spelförarens hold-up i sang — byggd samma
+  // dag, facit i play-bot-spelforarens-holdup.test.ts (§8.9).
 })

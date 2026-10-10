@@ -3478,7 +3478,30 @@ Syd fick in sig och körde sju klöver, 3NT −3 i stället för +1. Ägaren: "d
 av lågmask ser jag datorn göra ofta, blir sällan bra för dem." DD: ♦A 7 stick,
 ♦7 6.* Fjärde hand och motspelet (§8.6) berörs inte.
 
+### 8.9 Spelförarens hold-up i sang (2026-10-10, felrapport #104 stick 1)
+**Ägarens regel:** "man skall ducka första sticket och hålla på esset ett varv,
+detta är standard för att störa kommunikationen mellan motparter i ett
+NT-kontrakt." Leder motståndarna en färg där **esset på spelförarsidans hand är
+vårt enda stopp** (ingen kung eller dam i någon av våra händer) och det är
+färgens **första varv**, så **duckar** spelförarsidan med en hacka: den korta
+handen blir renons när färgen fortsätter och den långa handen får inte in sig via
+partnern. Villkor: bara sang, esset plus minst en hacka, ducken får inte vara
+betsticket, partnerns kort i sticket vinner det inte ändå, ingen knekt i färgen
+(AJx maskar hellre, speldiagnosens frö 20260803) och ingen löpande sidofärg i våra
+händer (7+ kort med AKQ eller 8+ med AK och dam/knekt — då finns sticken redan,
+frö 20260852).
+*Bakgrund (Dagens tävling 2026-10-10 bricka 2, 3NT av Väst): Nord ♣4, bordet ♣5,
+Syd ♣K — Väst tog ♣A direkt; Syd (sju klöver) fick in sig på ♦8 och körde färgen,
+3NT −3. Håller Väst upp är Nord (två klöver) renons: DD 10 stick mot 7.*
+
 ## 9. Ändringslogg
+- **2026-10-10 — Felrapport #104 stick 1: spelförarens hold-up i sang (§8.9).**
+  Ägaren: "ducka första sticket och håll på esset ett varv, standard för att
+  störa kommunikationen." Ny regel `declarerHoldUp` (play-bot.ts, andra och
+  tredje/fjärde hand): esset som enda stopp duckas i färgens första varv, aldrig
+  som betstick. Facit `play-bot-spelforarens-holdup.test.ts` (DD-låst med
+  bridge-dds: ♣6 10 stick, ♣A 7). Bevaka-raden struken. Mätt med speldiagnosen
+  (200 givar) — siffrorna i historiken.
 - **2026-10-10 — Felrapport #104 (ägarens skärmbild): spelförarsidans tredje hand
   "vann billigast" mot en dold hand bakom (§8.8).** Bordets ♦7 ur A74 över Nords
   ♦6 föll för Syds ♦8 — regeln "billigaste vinnaren" tog ingen hänsyn till den

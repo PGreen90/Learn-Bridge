@@ -1331,6 +1331,53 @@ function declarerThirdHandSuitCard(
 }
 
 /**
+ * SPELFÖRARENS HOLD-UP i sang (felrapport #104 stick 1, ägarbeslut 2026-10-10:
+ * "man skall ducka första sticket och hålla på esset ett varv, detta är standard
+ * för att störa kommunikationen mellan motparter i ett NT-kontrakt"). Mot-
+ * ståndarna ledde en färg där esset på min hand är vår sidas ENDA stopp (ingen
+ * kung eller dam i någon av våra händer) och det är färgens FÖRSTA varv: jag
+ * duckar med ett hackkort så att den som sitter kort i färgen blir renons när
+ * den fortsätter — den långa handen får inte in sig via partnern. Villkor:
+ * sang · jag står på spelförarsidan · esset + minst en hacka på handen · ducken
+ * får inte vara betsticket · ingen av våra andra kort i sticket vinner det ändå
+ * (då behövs ingen duck) · ingen knekt i färgen (AJx maskar hellre) · ingen
+ * löpande sidofärg (7+ med AKQ / 8+ med AK + dam eller knekt). Väst ♣A6 mot Syds sju klöver
+ * (Nord två): esset direkt gav Syd ingången senare, DD −3. Null = regeln gäller inte.
+ */
+function declarerHoldUp(state: PlayState, seat: Seat, legal: Hand, led: Suit): CardChoice | null {
+  if (state.trump !== null) return null
+  if (side(seat) !== side(state.contract.declarer)) return null
+  if (side(state.leader) === side(seat)) return null
+  const mine = legal.filter((c) => c.suit === led)
+  if (mine.length < 2 || !mine.some((c) => c.rank === 'A')) return null
+  if (state.completedTricks.some((t) => t.cards.some((pc) => pc.card.suit === led))) return null // bara färgens första varv
+  const partner = PARTNER_SEAT[seat]
+  const partnerCur = state.currentTrick.find((pc) => pc.seat === partner)?.card
+  const ours = [...state.hands[seat], ...state.hands[partner], ...(partnerCur ? [partnerCur] : [])]
+  if (ours.some((c) => c.suit === led && (c.rank === 'K' || c.rank === 'Q' || c.rank === 'J'))) return null // fler stopp finns (AJx kan maska): ingen hold-up
+  // Löpande färg i våra händer (7+ kort med AKQ, eller 8+ med AK och dam/knekt):
+  // sticken finns redan — ingen förbindelse att störa, bara tempo att tappa
+  // (speldiagnosen frö 20260852: 1NT med ♦AKJ98732, hold-up i hjärter kostade 2).
+  // ♦KT932 + ♦A74 (felrapport #104) saknar dam och knekt och löper INTE.
+  for (const suit of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
+    if (suit === led) continue
+    const i = ours.filter((c) => c.suit === suit)
+    const har = (r: Rank) => i.some((c) => c.rank === r)
+    if (har('A') && har('K') && ((i.length >= 7 && har('Q')) || (i.length >= 8 && (har('Q') || har('J'))))) return null
+  }
+  if (currentWinner(state.currentTrick, state.trump) === partner) return null // partnerns kort tar sticket ändå
+  const theirs = side(seat) === 'NS' ? state.tricksEW : state.tricksNS
+  if (theirs + 1 > 7 - state.contract.level) return null // ducken vore betsticket
+  const hackor = mine.filter((c) => c.rank !== 'A')
+  return {
+    card: lowest(hackor),
+    reason:
+      'Jag håller upp esset ett varv – det är vårt enda stopp i färgen, och genom att ducka första ' +
+      'sticket bryter jag motståndarnas förbindelse: den korta handen blir renons när färgen fortsätter.',
+  }
+}
+
+/**
  * HOLDUP i försvaret (speldiagnosen runda 7, frö 20260901, 2026-09-30): spel-
  * föraren angriper träkarlens LÅNGA färg (4+ kort med kungen synlig på bordet)
  * och bordet har INGEN synlig sidoingång (ingen säker vinnare utanför färgen).
@@ -1540,6 +1587,8 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
   // läggs fortfarande lågt – hold-up/andra hand lågt-doktrinen består. Har en
   // kvarvarande spelare visat renons i färgen kan honnören ruffas → lågt.
   if (state.currentTrick.length === 1) {
+    const dhu = declarerHoldUp(state, seat, legal, led)
+    if (dhu) return dhu
     const sure = legal.filter((c) => c.suit === led && isSureWinner(c, legal, playedCards(state)))
     // Speldiagnosen S0 (frö 20260731): "säker vinnare" räknas mot UTESTÅENDE
     // kort — men kortet som redan ligger i sticket måste också slås, annars
@@ -1685,6 +1734,8 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
   if (winners.length > 0) {
     // Holdup (speldiagnosen runda 7): försvaret tar inte esset i första varvet av
     // bordets långa färg utan sidoingång — se `defenderHoldUp`.
+    const dHoldUp = declarerHoldUp(state, seat, legal, led)
+    if (dHoldUp) return dHoldUp
     const holdUp = defenderHoldUp(state, seat, legal, led)
     if (holdUp) return holdUp
     // Träkarlen spelar EFTER oss (motspel, tredje hand) → öppen information:
