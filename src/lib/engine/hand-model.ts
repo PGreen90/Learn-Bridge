@@ -148,7 +148,7 @@ export function buildHandModel(
     } else if (partnerBidSuit(c.seat, suit, prior) || opponentBidSuit(c.seat, suit, prior)) {
       // höjning av partnerns färg / cue i motståndarnas → ingen egen längd-inferens
     } else {
-      lenMin(model[c.seat], suit, 4) // ny naturlig färg → 4+
+      lenMin(model[c.seat], suit, overcallLength(c.rule) ?? 4) // ny naturlig färg → 4+ (inkliv: 5+/6+)
     }
   })
 
@@ -221,6 +221,15 @@ function forcedRebid(rule: string | undefined): boolean {
     // dubblar inte längre på 8 hp, Nord rebjuder 2♠ i utpassningssits på AKJ76).
     rule.includes('(egen 5+ färg)')
   )
+}
+
+/** Inklivets längdlöfte ur regelnamnet (avblockeringen 2026-10-10: Syd måste
+ *  veta att 1♠-inklivet är femkortsfärg för att räkna spadern). Enkelt/naturligt
+ *  inkliv = 5+, svagt hoppinkliv = 6+. Okänd regel → null (4+-golvet gäller). */
+function overcallLength(rule: string | undefined): number | null {
+  if (rule === 'enkelt inkliv' || rule === 'naturligt inkliv') return 5
+  if (rule === 'hoppinkliv') return 6
+  return null
 }
 
 function bidSuitBefore(seat: Seat, suit: Suit, prior: ResolvedCall[]): boolean {

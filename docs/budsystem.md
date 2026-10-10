@@ -3494,7 +3494,38 @@ frö 20260852).
 Syd ♣K — Väst tog ♣A direkt; Syd (sju klöver) fick in sig på ♦8 och körde färgen,
 3NT −3. Håller Väst upp är Nord (två klöver) renons: DD 10 stick mot 7.*
 
+### 8.10 Avblockering — gör partnerns kort stora (2026-10-10)
+**Ägarens regel:** "räkna spadern som är kvar — man vet att partnern har fem från
+början — och släng kneckten så partnerns kort blir stora." När jag ska lägga ett
+kort i en färg (följa färg, eller leda den mitt i given) **räknar jag färgen**:
+egen hand, den öppna handen, korten som fallit och det budgivningen visat om de
+dolda händernas längd (enkelt inkliv = 5+, hoppinkliv = 6+, högfärgsöppning = 5+,
+öppningsutspelet i sang = 4+). Jag spelar färgen till slut på **varje fördelning
+som räkningen tillåter** och lägger ett **högre kort** än det vanliga valet när
+det **aldrig ger färre stick och ibland fler**. Det gäller båda sidor: försvararen
+som slänger kneckten under spelförarens dam, och spelföraren som kastar esset
+under bordets kung när bordet saknar ingång.
+Villkor: bara äkta avblockering — kortet får inte ta ett stick som det vanliga
+valet lämnar åt motståndarna (hold-up, ducka och mask avgörs av sina egna regler,
+§8.6–§8.9) — och **aldrig i trumffärgen** (trumfen är också värd stöld i andra
+färger). Kan räkningen inte utesluta att mitt kort är ett stopp, till exempel
+när partnern inte har bjudit färgen och spelföraren kan ha tian, behåller jag kortet.
+*Bakgrund (Dagens tävling 2026-10-10 bricka 7, 1NT av Öst efter 1♣–1♠–1NT): Syd
+♠J865 spelade ut ♠6, Nord ♠K och ♠A, sedan ♠4 till Östs ♠Q — Syd la ♠8 och
+behöll kneckten. Nord har fem spader (inklivet), träkarlen hade en, Syd fyra →
+Öst är slut när damen faller, och Nords ♠T9 är stora om Syds kneckt är borta.
+Öst släppte in Nord på ♦A: med kneckten slängd 1NT+1, med kneckten kvar +3.*
+
 ## 9. Ändringslogg
+- **2026-10-10 — Avblockering (§8.10, ägarens bricka 7).** Ny enfärgs-lösare
+  `unblock.ts` efter bottens vanliga kortval (`botCardSmartReasoned`): mina
+  olikvärda högre kort i färgen provas på alla fördelningar som hand-modellen
+  tillåter, i tre ingångslägen, och byts in bara vid dominans (aldrig färre
+  stick, ibland fler). Hand-modellen läser nu inklivets längd (enkelt/naturligt
+  inkliv 5+, hoppinkliv 6+ i stället för 4+). Facit
+  `play-bot-avblockering.test.ts` (bricka 7 + spelförarens ess under bordets
+  kung + negativfallet utan inkliv). Mätriggen `avblock.probe.test.ts`
+  (AVBLOCK=1) — siffrorna i historiken.
 - **2026-10-10 — Felrapport #104 stick 1: spelförarens hold-up i sang (§8.9).**
   Ägaren: "ducka första sticket och håll på esset ett varv, standard för att
   störa kommunikationen." Ny regel `declarerHoldUp` (play-bot.ts, andra och

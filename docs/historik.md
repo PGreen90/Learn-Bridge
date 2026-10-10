@@ -10,6 +10,32 @@
 
 ---
 
+## 2026-10-10 (NU: avblockering — §8.10, ägarens bricka 7; BYGGD, ej pushad)
+Ägaren om Dagens tävling bricka 7 (återskapad med `DUMP_TAVLING=2026-10-10:7 npx vitest
+run src/lib/engine/speldump.probe.test.ts`): "Syd måste veta att det är rätt att göra en
+unblock — räkna spader, partnern har fem från början, släng spaderkneckten så partnerns
+kort blir stora." 1NT av Öst efter 1♣–1♠–1NT; Syd la ♠8 under Östs ♠Q och behöll ♠J
+→ 1NT+3. **Bygget:** enfärgs-lösaren `unblock.ts` körs efter bottens vanliga val
+(`botCardSmartReasoned`) och byter till ett HÖGRE kort i samma färg när det dominerar:
+aldrig färre stick (netto i färgen) på någon fördelning hand-modellen tillåter, i tre
+ingångslägen (partnern/jag/båda har en sidoingång), strikt fler någonstans. Avgränsning:
+tar aldrig ett stick som baskortet lämnar åt motståndarna (första versionen körde över
+hold-upen §8.9 — facit-testet fångade det), aldrig i trumffärgen (alla förluster i
+trumffärgen kom från trumfens stöldvärde). Hand-modellen läser nu inklivets längd
+(enkelt/naturligt 5+, hoppinkliv 6+). Prestanda: alfa-beta inne i sticket + minne vid
+stickets början, nodtak 200k (snitt ≈ 4 ms/beslut, max ≈ 0,14 s under full last).
+**Mätt:** riggen `AVBLOCK=1 AVBLOCK_DEALS=50 AVBLOCK_OFFSET=<0…550> AVBLOCK_BILLIG=1
+npx vitest run src/lib/engine/avblock.probe.test.ts` — 400 givar (offset 0–350) valde
+variant ABC (275 byten, DD 72 vinst / 7 förlust, netto +94 stick; AB +96 med 9
+förluster, A +89 med 13); validering på osedda 200 givar (offset 400–550): ABC 118
+byten, 32/3, netto +40. Speldiagnosen 200 givar frö 20260721 före/efter (`SPELDIAG=1
+SPELDIAG_DEALS=50 SPELDIAG_OFFSET=<0|50|100|150> SPELDIAG_OUT=speldiagnos-avb-<bas|slut>-<a–d>.json
+npx vitest run src/lib/engine/speldiagnos.probe.test.ts`, baslinjen i ett git-arbetsträd på
+749cd06): spelförartapp **256 → 242**, försvarstapp **236 → 221**, 50 givar ändrade.
+Bricka 7 spelas nu 1NT jämnt (Syd ♠J i stick 3). Facit `play-bot-avblockering.test.ts`.
+
+---
+
 ## 2026-10-10 (Felrapport #104 stick 1: spelförarens hold-up i sang — LIVE, mergepunkt 3947636)
 Ägaren: "man skall ducka första sticket och hålla på esset ett varv, detta är standard
 för att störa kommunikationen mellan motparter i ett NT-kontrakt." Ny regel
