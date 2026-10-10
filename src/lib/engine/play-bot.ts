@@ -19,6 +19,7 @@ import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats }
 import { buildHandModel } from './hand-model'
 import { applyOpeningLeadSignal, applySignalReads, partnerLavinthalRequest } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
+import { avblockering } from './unblock'
 import { defensiveSignalCard, honorLead, leadFromSuit } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -1950,6 +1951,24 @@ export function botCardSmartReasoned(
   seat: Seat,
   calls: ResolvedCall[] = [],
   opts: SmartOpts = {},
+): CardChoice {
+  const choice = botCardSmartBase(state, seat, calls, opts)
+  // AVBLOCKERING (ägaren 2026-10-10, bricka 7): efter det vanliga valet räknar
+  // enfärgs-lösaren färgen på alla fördelningar budgivningen + spelet tillåter
+  // och byter till ett kort i samma färg bara om det aldrig är sämre och ibland
+  // bättre (unblock.ts). Öppningsutspelet rörs inte (utspelsdoktrinen, §8.3).
+  if (state.completedTricks.length === 0 && state.currentTrick.length === 0) return choice
+  if (legalCards(state, seat).length < 2) return choice
+  const model = buildHandModel(calls, { voids: shownVoids(state) })
+  applyOpeningLeadSignal(model, state, seat, { budstyrt: budstyrtOpeningLead(state, calls) })
+  return avblockering(state, seat, choice.card, model) ?? choice
+}
+
+export function botCardSmartBase(
+  state: PlayState,
+  seat: Seat,
+  calls: ResolvedCall[],
+  opts: SmartOpts,
 ): CardChoice {
   const legal = legalCards(state, seat)
   if (legal.length === 1) return { card: legal[0], reason: 'Bara ett lagligt kort att spela.' }
