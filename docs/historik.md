@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-10 (Felrapport #104 stick 1: spelförarens hold-up i sang; byggt, deploy väntar på ägarens klartecken)
+## 2026-10-10 (Felrapport #104 stick 1: spelförarens hold-up i sang — LIVE, mergepunkt 3947636)
 Ägaren: "man skall ducka första sticket och hålla på esset ett varv, detta är standard
 för att störa kommunikationen mellan motparter i ett NT-kontrakt." Ny regel
 `declarerHoldUp` (§8.9, play-bot.ts; andra samt tredje/fjärde hand på spelförarsidan):
@@ -26,7 +26,7 @@ bärs av ägarens teknikregel och DD-låset på rapportens giv. Bevaka-raden str
 
 ---
 
-## 2026-10-10 (Felrapport #104: spelförarsidans tredje hand — ingen lågmask mot en dold hand bakom; byggt, deploy väntar på ägarens klartecken)
+## 2026-10-10 (Felrapport #104: spelförarsidans tredje hand — ingen lågmask mot en dold hand bakom — LIVE, mergepunkt fe86140)
 Ägarens skärmbild från Dagens tävling bricka 2 (återskapad med `DUMP_TAVLING=2026-10-10:2
 npx vitest run src/lib/engine/speldump.probe.test.ts`): bordet la ♦7 ur A74 "billigast"
 över Nords ♦6 och Syds ♦8 vann — 3NT −3 i stället för +1 (DD ♦A 7 stick, ♦7 6).
