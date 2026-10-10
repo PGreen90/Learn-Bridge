@@ -10,6 +10,22 @@
 
 ---
 
+## 2026-10-10 (5♥/5♠ är aldrig en slaminbjudan — NU-punkten "Jacoby minimum" löst; byggt, deploy väntar på ägarens klartecken)
+Ägarbeslut: 5M används inte som inbjudan, med tillräckliga poäng frågar man ess.
+Skannern (samma som `slaminbjudan-4m.probe` men för 5♥/5♠, tillfällig kopia):
+**422** 5M-inbjudningar på 300 000 frön (20276001–20576000), alla med accept rakt
+till 6M — Jacoby minimum 124, stark 2♣ 64 + 34, Jacoby sidofärg 61, Puppet 59,
+splinter-relä 54, NMF-fit 5, Texas 5, hopphöjning 4, 2♣–2♦–2NT 4, övrigt 8.
+Ändringen sitter centralt i `slamCaptainFirstStep` (slam-auction.ts): 31+ mot
+visat minimum → 4NT (strictDrive 33), ingen `inviteTurn` längre; `inviteAnswer`
+kvar för en människas 5M. Auktionsdiff mot steg 5-dumpen (samma 50 000 frön,
+kommandot nedan): **101** ändrade; slamtabellens DD-dom: **35** ändrade
+slutkontrakt — 6 slammar bort som gick bet, 20 nya som står, 9 nya som går bet.
+Facit `auction-5m-ingen-inbjudan.test.ts` (tio frön); elva gamla lås uppdaterade.
+3-korts stöd i lågfärg efter 2♣ lämnas som förut (ägaren: "annars ser det bra ut").
+
+---
+
 ## 2026-10-09 (Felrapport #102 + #103 + kontrollbud steg 5 budväg 1 + Gerber överallt — LIVE, mergepunkt 6cf8200)
 **#103 (§6.6):** fjärde färg + öppnarens 3-korts stöd gav 4M på en 4-3-fit. Ägarbeslut:
 fyra kort → 3NT till spel (4M kräver 5+), 2NT = 18+ krav med slamintresse, öppnaren

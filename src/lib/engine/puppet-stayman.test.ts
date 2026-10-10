@@ -285,12 +285,12 @@ describe('Puppet Stayman – slamporten efter fit (beslut 4 + 6) — sondens fyn
     expect(bud(N, seq('2NT', '3C', '3D', '4C'), 'N')!.bid).toBe('4S')
     expect(bud(S, seq('2NT', '3C', '3D', '4C', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
   })
-  it('4♣ med 11 hp (31 mot 20) → efter öppnarens 4♠ inbjudan 5♠; öppnaren med maximum går till 6♠', () => {
+  // 2026-10-10: 5♠ är aldrig inbjudan — 31 mot 20 frågar 4NT, nyckelkorten avgör.
+  it('4♣ med 11 hp (31 mot 20) → efter öppnarens 4♠ frågar svararen 4NT; öppnaren svarar nyckelkort', () => {
     const S = 'S:KJ43 H:QJ43 D:K4 C:Q32' // 11
     expect(bud(S, seq('2NT', '3C', '3D'), 'S')!.bid).toBe('4C')
-    expect(bud(S, seq('2NT', '3C', '3D', '4C', '4S'), 'S')!.bid).toBe('5S')
-    expect(bud('S:AQ42 H:AK5 D:AQ3 C:K54', seq('2NT', '3C', '3D', '4C', '4S', '5S'), 'N')!.bid).toBe('6S') // 21
-    expect(bud('S:AQ42 H:AK5 D:AQ3 C:J54', seq('2NT', '3C', '3D', '4C', '4S', '5S'), 'N')!.bid).toBe('P') // 20
+    expect(bud(S, seq('2NT', '3C', '3D', '4C', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
+    expect(bud('S:AQ42 H:AK5 D:AQ3 C:K54', seq('2NT', '3C', '3D', '4C', '4S', '4NT'), 'N')!.rule).toBe('1430 RKC') // 21, tre ess
   })
   it('systems on 2♣–2♦–2NT: 3-korts stöd + 11 hp mot 3♥ (33 mot 22) → 3♠ = trumf satt', () => {
     expect(bud('S:K43 H:Q42 D:A543 C:K32', seq('2C', '2D', '2NT', '3C', '3H'), 'S')).toMatchObject({ bid: '3S', rule: 'Puppet: trumf satt, slamintresse' })
@@ -394,11 +394,10 @@ describe('Puppet Stayman – slamvägarna kompletta (ägardirektiv 2026-09-15 kv
     const n = bud('S:KJ5 H:AQ4 D:KQ42 C:AQ4', seq('2NT', '4H', '4S', '4NT'), 'N')
     expect(n && ['5C', '5D', '5H', '5S'].includes(n.bid)).toBe(true)
   })
-  it('6+ högfärg med 11–12 → Texas och pass över fullföljningen (fast arrival)', () => {
+  it('6+ högfärg med 11–12 → Texas; över fullföljningen frågar 31 mot 20 ess (4NT) — 5M är aldrig inbjudan (2026-10-10)', () => {
     const S = 'S:KQ8432 H:K3 D:43 C:K32' // 11
     expect(bud(S, seq('2NT'), 'S')!.bid).toBe('4H')
-    const s = bud(S, seq('2NT', '4H', '4S'), 'S')
-    expect(s === undefined || s.bid === 'P').toBe(true)
+    expect(bud(S, seq('2NT', '4H', '4S'), 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
   })
   it('exakt 5-korts, 11–12 → transfer och 4NT kvantitativ; öppnaren med max + 3-korts stöd → 6♥, max utan stöd → 6NT, min → pass', () => {
     const S = 'S:K3 H:KJ432 D:Q43 C:K32' // 11

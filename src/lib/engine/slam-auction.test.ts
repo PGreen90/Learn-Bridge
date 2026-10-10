@@ -69,20 +69,20 @@ describe('slamInvestigation – ärlig RKC (driv-zonen: egen hand + visat minimu
   })
 })
 
-describe('slamInvestigation – kanske-zonen (31–32): inbjudan, partnern dömer på SIN hand', () => {
+describe('slamInvestigation – kanske-zonen (31–32): essfrågan, inte 5M-inbjudan (ägarbeslut 2026-10-10)', () => {
   const responder = parseHand('S:J762 H:KQ5 D:AQ6 C:K84') // 16 hp jämnt → 16+16 = 32
 
-  it('partnern över blott minimum → accepterar 6', () => {
-    const opener = parseHand('S:AKQ85 H:A43 D:K72 C:92') // 17 – mer än visat minimum 16
+  it('kaptenen frågar 4NT med 32 — även när kontexten bär en gammal inviteCall', () => {
+    const opener = parseHand('S:AKQ85 H:A43 D:K72 C:92') // 17
     const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16, inviteCall: '5S' })!
-    expect(turns.map((t) => t.call)).toEqual(['5S', '6S'])
-    expect(turns[0].rule).toBe('slaminbjudan')
-    expect(turns[1].rule).toBe('slaminbjudan: accept')
+    expect(turns[0]).toMatchObject({ call: '4NT', rule: '1430 RKC' })
+    expect(turns.map((t) => t.rule)).not.toContain('slaminbjudan')
   })
 
-  it('ingen inbjudningsväg i läget (inviteCall saknas) → null', () => {
+  it('utan inviteCall: samma 4NT', () => {
     const opener = parseHand('S:AKQ85 H:A43 D:K72 C:92')
-    expect(slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })).toBeNull()
+    const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })!
+    expect(turns[0]).toMatchObject({ call: '4NT', rule: '1430 RKC' })
   })
 })
 

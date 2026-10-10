@@ -289,8 +289,8 @@ motorn):
 billigaste kontrollbud under utgången, eller avslutar 4M — direkt när handen
 är full av honnörer mittemot kortheten (K/D/J där räknas bort; minimum kvar →
 4M). Svararen (kaptenen, 12+) räknar sina stödpoäng mot öppnarens visade
-minimum 12: cue:ar tillbaka gratis, driver 4NT med 33+ och kontrollerna
-räknade, inbjuder 5M med 31–32 över öppnarens 4M-avslut, annars utgång.
+minimum 12: cue:ar tillbaka gratis, frågar 4NT med 31+ över öppnarens 4M-avslut
+(5M är aldrig en inbjudan, ägarbeslut 2026-10-10), annars utgång.
 
 **Slamvärdering (nyckeln):** *nedvärdera honnörer mittemot den korta färgen.*
 Kung eller dam mittemot singleton/renons är nästan värdelös ("slöseri"); ess och
@@ -700,7 +700,7 @@ har, så att den starka handen blir spelförare i 4-4-fiten:
 | 3♥ | 4 **spader** (inte 4 hjärter) | 4♠ med 4 spader, annars 3NT |
 | 3♠ | 4 **hjärter** (inte 4 spader) | 4♥ med 4 hjärter, annars 3NT |
 | 4♦ | **båda** högfärgerna (4-4 eller 5♠-4♥), ingen slamambition | bjuder sin 4-korts högfärg — fiten är garanterad; med 4-4 den **bättre** (flest hp, lika → 4♥) |
-| 4♣ | båda högfärgerna **med slamintresse** (11+) | bjuder sin högfärg på 4-läget; svararen frågar 4NT (13+) eller inbjuder 5M (11–12) |
+| 4♣ | båda högfärgerna **med slamintresse** (11+) | bjuder sin högfärg på 4-läget; svararen frågar 4NT (11+ = 31 mot visade 20; 5M är aldrig inbjudan) |
 | 3NT | ingen 4-korts högfärg (letade 5-3) | till spel |
 | 4NT / 6NT | ingen 4-korts högfärg, 11–12 / 13+ | kvantitativ / till spel |
 
@@ -708,8 +708,8 @@ har, så att den starka handen blir spelförare i 4-4-fiten:
 → 4NT kvantitativ, 13+ → 6NT). Med stöd och **slamvärden (11+)** sätter
 svararen trumfen med den andra högfärgen — **3♠ över 3♥, 4♥ över 3♠** (säger
 inget om den färgen) — och öppnaren öppnar cue-ronden (billigaste kontroll
-under 4M, §6.2) eller stannar i 4M; kaptenen räknar hp mot visade 20: **33+
-driver** (4NT RKC), 31–32 inbjuder 5M, annars utgång. **4NT direkt över ett
+under 4M, §6.2) eller stannar i 4M; kaptenen räknar hp mot visade 20: **31+
+frågar** 4NT RKC (5M är aldrig inbjudan, 2026-10-10), annars utgång. **4NT direkt över ett
 Puppet-svar är alltid kvantitativt** (ingen fit): öppnaren bjuder 6NT med
 maximum, passar annars. *(Sondens fynd 2026-09-15: förr lästes 4NT som essfråga
 och öppnaren svarade 5♦ — frö 20265815.)*
@@ -718,9 +718,9 @@ och öppnaren svarade 5♦ — frö 20265815.)*
 
 **Efter öppnarens 3NT på min högfärgsvisning** (3♥/3♠/4♦ → 3NT, eller transfer +
 3♠ → 3NT): ingen fit — 11–12 → 4NT kvantitativ (öppnaren 6NT med maximum),
-13+ → 6NT, annars pass. **Efter öppnarens 4M** (fiten hittad): 13+ → 4NT RKC,
-11–12 → 5M-inbjudan, annars pass — samma sak efter 4♣/4♦ och efter transfer +
-3♠/4♥.
+13+ → 6NT, annars pass. **Efter öppnarens 4M** (fiten hittad): 11+ → 4NT RKC
+(31 mot visade 20; 5M är aldrig inbjudan, 2026-10-10), annars pass — samma sak
+efter 4♣/4♦ och efter transfer + 3♠/4♥.
 
 #### 5-4 och 5-5 i högfärgerna (Smolen finns INTE över 2NT)
 Smolen och Puppet använder samma bud efter 3♣–3♦ med olika betydelse, så
@@ -835,9 +835,8 @@ lite på fötterna och håller utgångskravet.
   öppnarens naturliga färgrebud) räknar **svararen (kaptenen)** sin egen hand
   mot 2♣-öppningens **visade minimum 22** (22+ hp balanserad eller ~9+
   spelstick ≈ samma spelvärde): **33+ → driv** med **1430 RKC Blackwood**
-  (ess + trumfdam, detaljer i §6); **31–32 → slaminbjudan** (5M i högfärg
-  när öppnaren stödde svararens färg, stödhöjningen i minor) som öppnaren
-  accepterar med mer än blott minimum (dömt på egna Bergenpoäng); annars sätts
+  (ess + trumfdam, detaljer i §6) — **även 31–32** (ägarbeslut 2026-10-10: 5M
+  är aldrig en inbjudan; i lågfärg sätter 4m trumfen först, §6.2); annars sätts
   utgången. Efter öppnarens **egen högfärg** (2♣–3♦–3M) finns ingen 5M-
   inbjudan — där visas slamintresset med kontrollbud i ny färg, och handen
   utan kontrollbud att visa bjuder 4M direkt (regeln nedan). Manuella
@@ -999,8 +998,8 @@ placera kontraktet. Tre styrkenivåer styr valet:
   hoppskift 19) när en trumf är säkrad på egen kunskap — 4+ egna kort i
   öppnarens andra färg, eller 3+ i öppnarens första (som lovar 5+ vid
   reverse och högfärgsöppning; 4+ krävs mot hoppskiftets minoröppning):
-  i **högfärgstrumf**: **33+ → driv** (4NT RKC), **31–32 → slaminbjudan 5M**
-  (öppnaren accepterar med mer än blott minimum, dömt på egna Bergenpoäng);
+  i **högfärgstrumf**: **31+ → 4NT RKC** (5M är aldrig en inbjudan, ägarbeslut
+  2026-10-10; förr 31–32 = 5M-inbjudan med accept rakt till 6M);
   i **lågfärgstrumf** (steg 5, 2026-10-09): **31+ → 4m sätter trumfen (krav)**
   — öppnaren visar sin billigaste kontroll, kaptenen cue:ar/frågar 4NT/stannar
   i 5m (§6.2; förr 4m = inbjudan med accept rakt till 6m). Annars vanliga
@@ -1196,8 +1195,8 @@ minimumet 16** — aldrig partnerns faktiska kort:
 - **17+ stödpoäng** (17+16 ≥ 33) → **driv**: fråga nyckelkort (**1430 RKC**) och
   placera **6 i högfärgen** (7 bara med *visshet*: entydigt alla fem nyckelkort +
   trumfdam + storslamszon även mot minimum).
-- **15–16 stödpoäng** (slam bara om partnern har extra) → **inbjudan 5M**:
-  öppnaren accepterar 6M med mer än blott minimum (17–18), passar annars.
+- **15–16 stödpoäng** (31–32 ihop) → **också 4NT** (ägarbeslut 2026-10-10: 5M är
+  aldrig en inbjudan; nyckelkorten avgör — två saknade → 5M).
 - Under det → vanlig väg (acceptera 4M med utgångsvärden, annars pass).
 Visar nyckelkortssvaret att **två nyckelkort saknas** stannar kaptenen i **5M**.
 Svarets inbyggda tvetydighet (0 eller 3 / 1 eller 4) löses med egen hand; går det
@@ -1634,9 +1633,11 @@ svenskbridge.se.
 följer samma mänskliga regel — varje beslut fattas på **egen hand + vad partnern
 VISAT via buden**, aldrig på partnerns faktiska kort:
 - **Kaptensregeln:** egen hand + partnerns visade **minimum** ≥ 33 → **driv**
-  (fråga nyckelkort/ess). 31–32 (slam bara om partnern har extra) → **inbjudan**
-  (kvantitativ 4NT över sang; 5M/4m med trumf) — partnern accepterar med **mer än
-  blott minimum**. Under det: nöj dig med utgång.
+  (fråga nyckelkort/ess). 31–32 (slam bara om partnern har extra) → i **sang**
+  kvantitativ 4NT (partnern accepterar med mer än blott minimum); med **trumf**
+  frågas 4NT även här — **5♥/5♠ är aldrig en inbjudan** (ägarbeslut 2026-10-10:
+  "har man tillräckligt med poäng ska man essfråga"), och i lågfärg sätter 4m
+  trumfen först (§6.2). Under 31: nöj dig med utgång.
   *Exempel:* efter hopp-återbudet **1m–1M–3m** (visar 16–18, 6+ färg) bjuder
   svararen med 3+ stöd och **15+** stödpoäng **4m** = trumfen satt (§6.2, steg 4);
   kontrollbuden följer, 4NT i slamzon, annars 5m. Under 15: 3NT eller pass.
@@ -3464,6 +3465,21 @@ ruter → ♦K stjäls; rätt är **♣T** (partnern ledde ♣Q = ♣J bakom, V�
 följa med ♣8), som sätter kontraktet.
 
 ## 9. Ändringslogg
+- **2026-10-10 — 5♥/5♠ är aldrig en slaminbjudan (§5.2, §4.1, §4.3b, §5.3, §6).**
+  Ägarbeslut: "5 hjärter/spader är ett bud som inte skall användas som invit. Om
+  man har tillräckligt med poäng så ska man essfråga." Kaptenen i kanske-zonen
+  (31–32 mot partnerns visade minimum) bjöd förr 5M och partnern accepterade
+  rakt till 6M utan esskontroll — i alla högfärgslägen (Jacoby minimum/sidofärg,
+  stark 2♣, Puppet, Texas, splinter-relä, hopphöjning, NMF-fit; skannat 300 000
+  frön: 422 sådana auktioner). Nu frågar kaptenen 4NT från 31 (strikt drivzon
+  33 efter 2/1-höjningen) och placerar på nyckelkorten; `inviteOnly` (trumf =
+  öppnarens första färg efter reverse) hindrar inte frågan (samma lösning som
+  #94). Jacoby minimum (1M–2NT–4M) är därmed löst; 3-korts stöd i lågfärg efter
+  2♣ står kvar som förut (4NT direkt i slamzon, ägarens "annars ser det bra
+  ut"). Elva gamla lås uppdaterade (2♣-inbjudan, NMF-fit, reverse-höjning,
+  2♣–3♦–3M fast arrival, Puppet/Texas, slamInvestigation). Facit
+  `auction-5m-ingen-inbjudan.test.ts`. Mätt med auktionsdiff + DD-dom — siffrorna
+  i historiken.
 - **2026-10-09 — Kontrollbud före essfrågan, steg 5 budväg 2: 4m efter Minor
   Suit Stayman och inverterad minor sätter trumfen (§4.2, §4.3, §6.2).** Samma
   mönster som steg 4–5a: svararens 4m med 31+ ihop = "sätter trumfen (krav)",
