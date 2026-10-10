@@ -10,18 +10,18 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-09): /felrapporter, sedan NU-resten:
-> Jacoby minimum · 3-korts stöd i lågfärg (ägarfrågor först). LIVE 2026-10-09:
-> #102 · #103 · steg 5 budväg 1 (6cf8200) + 2 (c56b468) · Gerber överallt (§6.4).
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-10): /felrapporter; NU "kontrollbud före
+> essfrågan" är KLAR (5M-beslutet byggt 2026-10-10, PCD om ej gjort) → visa
+> NÄST/SENARE och låt ägaren välja nästa NU.
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
-**Steg 1–4 LIVE** (mergepunkter i historiken): kontrollbud = ess,
-kung-dam, singel, renons · 2♣-vägen: 4-korts stöd sätter trumfen 4m · "alla kontroller
-behövs inte för 4NT" · kontrollbud efter 1m–1M–3M · steg 4: 4m efter 1m–1M–3m = träff,
-krav → kontrollbud/4NT/5m; "gäller ALLA sammanhang", "4→6 utan essfråga förbjudet".
+**Steg 1–4 LIVE:** kontrollbud = ess, kung-dam, singel, renons · 2♣-vägen 4m med 4-korts
+stöd · "alla kontroller behövs inte för 4NT" · steg 4: 4m efter 1m–1M–3m = träff, krav →
+kontrollbud/4NT/5m; "gäller ALLA sammanhang", "4→6 utan essfråga förbjudet".
 **Steg 5 KLART & LIVE 2026-10-09** (budväg 1 6cf8200; budväg 2 MSS + inverterad minor
 c56b468): 4m sätter trumfen överallt, skannern `slaminbjudan-4m.probe` (STEG5=1) tom.
-**Kvar:** Jacoby minimum · 3-korts stöd i lågfärg.
+**2026-10-10:** 5♥/5♠ aldrig inbjudan → 31+ frågar 4NT; 3-korts stöd i lågfärg efter
+2♣ står (4NT direkt). **NU KLAR.**
 Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom efter varje;
 budfrågor → fråga ägaren.
 
@@ -82,8 +82,9 @@ B13, F1–F6 · stora granskningen · Beslut B etapp 0–2 · felrapporterna · 
 > **ÄRLIG INFERENS (grundprincip, LIVE — styr ALLA bottbeslut, bud OCH spel):**
 > bottarna tänker som människor — egen hand + vad budgivningen och spelet
 > VISAT, aldrig dolda kort eller motorns facit; hellre systemriktig miss än
-> kik. Slamporten (2026-07-07): kaptensregeln ≥33 driv / 31–32 inbjudan mot
-> visat minimum; ingen kontrollkoll (ägarbeslut); storslam kräver visshet.
+> kik. Slamporten: kaptensregeln 31+ mot visat minimum → 4NT (5♥/5♠ är ALDRIG
+> inbjudan, ägarbeslut 2026-10-10; i sang kvantitativ 4NT 31–32, Gerber 33+);
+> ingen kontrollkoll (ägarbeslut); storslam kräver visshet.
 > Detalj: `docs/budsystem.md` §5.2/§5.7/§6 + `docs/bot-hjarna.md`.
 
 ### 👀 Bevaka i spel

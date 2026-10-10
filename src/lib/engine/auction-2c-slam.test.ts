@@ -301,9 +301,11 @@ const HANDS_INVIT_DECLINE = {
 }
 
 describe('etapp 4 familj B fix 1: inbjudningszonen 31–32', () => {
-  it('kaptenen med ~31 ihop bjuder in med 5♥ (inte RKC, inte bara 4♥)', () => {
+  // Ägarbeslut 2026-10-10: 5♥/5♠ är aldrig en inbjudan — med 31+ mot visat minimum
+  // frågar kaptenen 4NT och placerar på nyckelkorten (förr 5♥-inbjudan, accept = 6♥).
+  it('kaptenen med ~31 ihop frågar 4NT (ingen 5♥-inbjudan, inte bara 4♥)', () => {
     const d = deal('2cslam-invit-pos', 'E', 'none', HANDS_INVIT_ACCEPT)
-    expect(decideCall(d, HISTORY_INVIT, 'W').bid).toBe('5H')
+    expect(decideCall(d, HISTORY_INVIT, 'W')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
   })
 
   it('öppnaren med 23 (mer än blott minimum) accepterar → 6♥', () => {
@@ -313,10 +315,12 @@ describe('etapp 4 familj B fix 1: inbjudningszonen 31–32', () => {
     expect(contractFromCalls(history!)).toMatchObject({ level: 6, strain: 'hearts' })
   })
 
-  it('öppnaren med blott 22 avböjer → 5♥ står', () => {
+  it('öppnaren med blott 22: ingen inbjudan att avböja — nyckelkorten avgör (fyra + trumfdam → 6♥)', () => {
     const d = deal('2cslam-invit-decline', 'E', 'none', HANDS_INVIT_DECLINE)
     const history = botAuction(d)
     expect(history).not.toBeNull()
-    expect(contractFromCalls(history!)).toMatchObject({ level: 5, strain: 'hearts' })
+    expect(history!.map((c) => c.bid)).toContain('4NT')
+    expect(history!.map((c) => c.rule)).not.toContain('slaminbjudan')
+    expect(contractFromCalls(history!)).toMatchObject({ level: 6, strain: 'hearts' })
   })
 })

@@ -542,7 +542,7 @@ describe('§5b beslut 1 – 4♣ över 1NT-återbudet är Gerber bara utan färg
     expect(bud('S:AQJ976 H:K4 D:K52 C:32', h2, 'S')!.call.bid).toBe('4S') // 13 hp
   })
 
-  it('frö 20270949: 1♣–1♥–1NT: Nord (♠A98 ♥AKQT72 ♦AQT9 ♣–, 20 hp) bjuder 2♦ NMF — inte 5♥; sedan 3♥, Syd 4♥, Nord inbjuder 5♥ (20+12 = 32)', () => {
+  it('frö 20270949: 1♣–1♥–1NT: Nord (♠A98 ♥AKQT72 ♦AQT9 ♣–, 20 hp) bjuder 2♦ NMF — inte 5♥; sedan 3♥, Syd 4♥, Nord frågar 4NT (20+12 = 32; 5♥ är aldrig inbjudan, 2026-10-10)', () => {
     const deal = dealFromSeed(20270949)
     const h = [P('E'), call('S', '1C'), P('W'), call('N', '1H'), P('E'), call('S', '1NT'), P('W')]
     expect(decideCall(deal, h, 'N').bid).toBe('2D')
@@ -553,7 +553,7 @@ describe('§5b beslut 1 – 4♣ över 1NT-återbudet är Gerber bara utan färg
     const h4 = [...h3, call('N', '3H'), P('E')]
     expect(decideCall(deal, h4, 'S').bid).toBe('4H')
     const h5 = [...h4, call('S', '4H'), P('W')]
-    expect(decideCall(deal, h5, 'N').bid).toBe('5H')
+    expect(decideCall(deal, h5, 'N').bid).toBe('4NT')
   })
 
   it('5+ kort i öppnarens lågfärg + slamvärden (19+) → NMF, sedan 3♦ (stöd, slamintresse); öppnaren beskriver (3NT-förslag / 4♦); kaptenen cue:ar över 4♦', () => {
@@ -655,10 +655,10 @@ describe('§5b beslut 3 – fast arrival efter reverse: 3M stark (GF, cue-ronden
     expect(decideCall(deal, h4b, 'S').bid).toBe('P')
   })
 
-  it('efter öppnarens 4♥-avslut driver kaptenen ändå med 33+ (4NT) och inbjuder med 31–32 (5♥)', () => {
+  it('efter öppnarens 4♥-avslut driver kaptenen ändå med 33+ (4NT) och frågar även med 31–32 (5♥ är aldrig inbjudan, 2026-10-10)', () => {
     const h4b = [...h, call('S', '3H'), P('W'), call('N', '4H'), P('E')]
     expect(bud('S:AQ84 H:AJ85 D:A2 C:K63', h4b, 'S')!.call.bid).toBe('4NT') // 18 + 16 = 34
-    expect(bud('S:KQ84 H:AJ85 D:Q2 C:K63', h4b, 'S')!.call.bid).toBe('5H') // 15 hp + dubbelton = 16, + 16 = 32
+    expect(bud('S:KQ84 H:AJ85 D:Q2 C:K63', h4b, 'S')!.call.bid).toBe('4NT') // 15 hp + dubbelton = 16, + 16 = 32 — förr 5♥-inbjudan
     const h5 = [...h4b, call('S', '5H'), P('W')]
     expect(bud('S:K3 H:KQ72 D:KQJ85 C:K4', h5, 'N')!.call.rule).toMatch(/^slaminbjudan: /) // öppnaren dömer på sina Bergenpoäng
   })
@@ -696,23 +696,25 @@ describe('§5b beslut 7 – 4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
     expect(decideCallTraced(deal, hist, 'S')).toMatchObject({ källa: 'tabell:svar2', call: { bid: '4D', rule: '2♣: rebud egen färg (GF)' } })
   })
 
-  it('frö 20271411: Syd (♠J75 ♥J53 ♦AK942 ♣T9) bjuder 4♠ direkt — 3-stöd utan kontrollbud i ny färg = fast arrival, inte cue 4♦; 4♠ blir slutbudet', () => {
+  // 2026-10-10: 9 + visade 22 = 31 → essfrågan direkt (5M är aldrig inbjudan; fast
+  // arrival gäller bara under 31). Nords svar + nekad trumfdam → 5♠.
+  it('frö 20271411: Syd (♠J75 ♥J53 ♦AK942 ♣T9, 31 mot 22) frågar 4NT — inte cue 4♦; nekad trumfdam → 5♠', () => {
     const deal = dealFromSeed(20271411)
     const hist = [call('N', '2C'), P('E'), call('S', '3D'), P('W'), call('N', '3S'), P('E')]
-    expect(decideCall(deal, hist, 'S').bid).toBe('4S')
+    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: '4NT', rule: '1430 RKC' })
     const kontrakt = spelaKlart(deal).filter((b) => b !== 'P')
-    expect(kontrakt[kontrakt.length - 1]).toBe('4S')
+    expect(kontrakt[kontrakt.length - 1]).toBe('5S')
   })
 
   it('3-stöd + slamintresse: kontrollbud i NY färg — 4♣ över 3♥ och 3♠ (♣A), 4♥ över 3♠ (♥A); den egna rutern cue:as aldrig', () => {
     expect(bud('S:J75 H:J53 D:AK942 C:A9', hS, 'S')!.call).toMatchObject({ bid: '4C', rule: 'cue-bid' })
     expect(bud('S:J75 H:J53 D:AK942 C:A9', hH, 'S')!.call).toMatchObject({ bid: '4C', rule: 'cue-bid' })
     expect(bud('S:J75 H:A53 D:KQ942 C:T9', hS, 'S')!.call).toMatchObject({ bid: '4H', rule: 'cue-bid' })
-    expect(bud('S:J75 H:J53 D:AK942 C:T9', hH, 'S')!.call.bid).toBe('4H') // ♦A är i egen färg → ingen cue → 4♥
+    expect(bud('S:J75 H:J53 D:AK942 C:T9', hH, 'S')!.call.bid).toBe('4NT') // ♦A är i egen färg → ingen cue; 31 mot 22 → essfrågan (2026-10-10)
   })
 
-  it('ny färg på 3-läget är naturlig, inte cue: med ♠A och 3 hjärter över 3♥ (32 mot visade 22) bjuds 4♥ (fast arrival), aldrig 3♠ som kontrollbud', () => {
-    expect(bud('S:A75 H:J53 D:KJ942 C:T9', hH, 'S')!.call.bid).toBe('4H')
+  it('ny färg på 3-läget är naturlig, inte cue: med ♠A och 3 hjärter över 3♥ (31 mot visade 22) frågas 4NT, aldrig 3♠ som kontrollbud', () => {
+    expect(bud('S:A75 H:J53 D:KJ942 C:T9', hH, 'S')!.call.bid).toBe('4NT')
   })
 
   it('33+ mot visade 22 utan kontrollbud i ny färg → 4NT direkt (essfråga i öppnarens färg)', () => {

@@ -340,12 +340,6 @@ const rkcAskTurn = (ctx: SlamContext, trump: Suit): SlamTurn => ({
     ? `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort, ${SYM[ctx.countIn]} som trumf — den senast bjudna färgen; kontraktet placeras i ${SYM[trump]}).`
     : `Slamzon mot partnerns visade ${ctx.partnerMin}+ → 4NT (frågar nyckelkort, ${SYM[trump]} som trumf).`,
 })
-const inviteTurn = (invite: string, trump: Suit): SlamTurn => ({
-  role: 'svarare',
-  call: invite,
-  rule: 'slaminbjudan',
-  explanation: `Slaminbjudningszon (slam bara om partnern har extra) → ${invite[0]}${SYM[trump]} (inbjuder slam).`,
-})
 
 /** Kaptenens första gratis cue: billigaste första-rondskontroll över `lastCall` (och cue-golvet) under utgång. */
 function captainFirstCue(responderHand: Hand, trump: Suit, lastCall: string | undefined, ctx: SlamContext): { call: string; suit: Suit } | null {
@@ -362,8 +356,12 @@ function captainFirstCue(responderHand: Hand, trump: Suit, lastCall: string | un
  * 2026-07-07 "ärliga slamportar" + cue-ronden 2026-08-03 + B13 2026-08-07):
  *  • GF + trumf klar + floor ≥ 30 → billigaste gratis cue under utgång (utom i
  *    minortrumf i klar drivzon, där 4NT går direkt: cue-utrymmet är trångt);
- *  • floor ≥ 33 → 4NT RKC;  • floor 31–32 → slaminbjudan (`ctx.inviteCall`);
- *  • annars null (ingen slamhand → den vanliga kedjan).
+ *  • floor ≥ 31 → 4NT RKC (ägarbeslut 2026-10-10: 5♥/5♠ är aldrig en inbjudan —
+ *    "om man har tillräckligt med poäng så ska man essfråga"; i strikt drivzon
+ *    (`strictDrive`, 2/1-höjningen mot visade 12) först från 33);
+ *  • annars null (ingen slamhand → utgången står).
+ *  `ctx.inviteCall` är historisk (5M-inbjudan) och bjuds inte längre; `inviteAnswer`
+ *  finns kvar så partnern svarar en människa som ändå bjuder 5M.
  */
 export function slamCaptainFirstStep(
   responderHand: Hand,
@@ -382,8 +380,12 @@ export function slamCaptainFirstStep(
       if (cue) return cueTurn('svarare', cue)
     }
   }
-  if (floor >= (ctx.essfragaFran ?? 33) && !ctx.inviteOnly && bidRank('4NT') > lastRank) return rkcAskTurn(ctx, trump)
-  if (floor >= 31 && ctx.inviteCall && bidRank(ctx.inviteCall) > lastRank) return inviteTurn(ctx.inviteCall, trump)
+  // Essfrågan från 31 (strikt drivzon: 33). `inviteOnly` (trumf = öppnarens FÖRSTA
+  // färg efter reverse/hoppskift) hindrar inte längre frågan: partnern läser 4NT
+  // i den senast äkta bjudna färgen och kaptenen räknar likadant men placerar i
+  // sin egen (`captainIntent`/`countIn`, samma lösning som felrapport #94).
+  const askFrom = ctx.strictDrive ? 33 : (ctx.essfragaFran ?? 31)
+  if (floor >= askFrom && bidRank('4NT') > lastRank) return rkcAskTurn(ctx, trump)
   return null
 }
 
