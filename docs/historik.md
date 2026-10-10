@@ -10,6 +10,22 @@
 
 ---
 
+## 2026-10-10 (Felrapport #104: spelförarsidans tredje hand — ingen lågmask mot en dold hand bakom; byggt, deploy väntar på ägarens klartecken)
+Ägarens skärmbild från Dagens tävling bricka 2 (återskapad med `DUMP_TAVLING=2026-10-10:2
+npx vitest run src/lib/engine/speldump.probe.test.ts`): bordet la ♦7 ur A74 "billigast"
+över Nords ♦6 och Syds ♦8 vann — 3NT −3 i stället för +1 (DD ♦A 7 stick, ♦7 6).
+Regeln (§8.8, `play-bot.ts` tredje-hand-grenen): spelförarsidans tredje hand med en
+dold försvarare bakom spelar billigaste SÄKRA vinnaren, annars en ÄKTA mask mot ett
+enda saknat kort, annars toppen (lägsta av likvärdiga). Första versionen (bara säkra
+vinnare) gick upp med esset mot en äkta mask (frö 20260767, −3) — snävad samma dag.
+Mätt med speldiagnosen, 200 givar frö 20260721 före/efter (`SPELDIAG=1 SPELDIAG_DEALS=200
+npx vitest run src/lib/engine/speldiagnos.probe.test.ts`, jämförda per giv ur
+`revisor-output/speldiagnos-<stämpel>.json`): spelförartapp **262 → 254**, försvarstapp
+**243 → 234** (Monte-Carlo-kaskader gör att 17 givar ändras åt båda håll; nettot är
+det som räknas). Facit `play-bot-spelforarens-tredje-hand.test.ts` (DD-låst) + den
+äkta masken (frö 20260767). Bevaka: Västs ♣A i stick 1 (spelförarens hold-up, DD −3).
+
+---
 ## 2026-10-10 (5♥/5♠ är aldrig en slaminbjudan — NU "kontrollbud före essfrågan" KLAR; LIVE, mergepunkt c6dc011)
 Ägarbeslut: 5M används inte som inbjudan, med tillräckliga poäng frågar man ess.
 Skannern (samma som `slaminbjudan-4m.probe` men för 5♥/5♠, tillfällig kopia):

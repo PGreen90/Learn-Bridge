@@ -89,8 +89,8 @@ B13, F1–F6 · stora granskningen · Beslut B etapp 0–2 · felrapporterna · 
 
 ### 👀 Bevaka i spel
 **`docs/bevaka.md` är en VAKT sedan 2026-10-06:** bara rader med frö/giv +
-måltestfil (`it.todo`), regeln i `docs/arbetsrutiner.md`. Just nu två: fynd D
-(byt färg när spelföraren visat längd, frö 20260907) · #96 ♠8 (T-serien). Kända
+måltestfil (`it.todo`), regeln i `docs/arbetsrutiner.md`. Just nu tre: fynd D
+(byt färg, frö 20260907) · #96 ♠8 (T-serien) · #104 spelförarens hold-up. Kända
 hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
@@ -98,7 +98,7 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 1. **Spelförarsidans ledningsval i TRUMFkontrakt** — största kvarvarande läckan (89 stick
    i fynd B-riggen, övre gräns 19); "parets färg" var sämre där, ny idé + offline-mätning.
 2. **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: fynd D (byt
-   färg), tredje hand för billigt, MC-på-få-lägen (`docs/senare.md`).
+   färg), spelförarens hold-up (#104, bevaka), MC-på-få-lägen (`docs/senare.md`).
 3. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
    (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
 

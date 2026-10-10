@@ -1732,6 +1732,43 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
           'stick i färgen totalt – att vinna billigast skulle skänka bort en honnör senare.',
       }
     }
+    // SPELFÖRARSIDANS TREDJE HAND med en DOLD försvarare bakom (felrapport #104,
+    // Dagens tävling 2026-10-10 bricka 2 — ägaren: "denna typ av lågmask ser jag
+    // datorn göra ofta, blir sällan bra för dem"): bordets ♦7 ur A74 "vann billigast"
+    // över Nords ♦6 men föll för Syds ♦8, som fick in sig och körde klövern. En
+    // "lågmask" är ett kort som FLERA osedda kort kan gå över (♦7 mot 8, J och Q).
+    // Billigast får bara vara (a) ett säkert stick — alla högre kort sedda — eller
+    // (b) en ÄKTA mask mot ett enda saknat kort (♥J ur AJ87 när bara ♥K är ute,
+    // frö 20260767; damen ur KQ2 mot esset). Annars går vi upp med toppen (lägsta
+    // av likvärdiga). Fjärde hand och motspelet berörs inte.
+    if (!iAmDefender && state.currentTrick.length === 2) {
+      const ours = [...state.hands[seat], ...state.hands[PARTNER_SEAT[seat]]]
+      const played = playedCards(state)
+      const seen = (r: Rank) => played.some((c) => c.suit === led && c.rank === r) || ours.some((c) => c.suit === led && c.rank === r)
+      const oseddaOver = (c: Card) => RANK_LOW_TO_HIGH.slice(rankVal(c.rank) + 1).filter((r) => !seen(r)).length
+      const hallbara = winners.filter((c) => c.suit === led && oseddaOver(c) <= 1)
+      if (hallbara.length > 0) {
+        const card = lowest(hallbara)
+        return {
+          card,
+          reason: oseddaOver(card) === 0
+            ? 'Spelförarsidans tredje hand: jag vinner med det billigaste kort som försvararen bakom inte kan gå över.'
+            : 'Spelförarsidans tredje hand: äkta mask – bara ett saknat kort kan gå över, så jag masar; en lågmask mot flera osedda kort gör jag aldrig.',
+        }
+      }
+      // Inget hållbart kort: upp med toppen — det LÄGSTA kortet i toppsekvensen.
+      const sorted = [...winners].sort((a, b) => rankVal(b.rank) - rankVal(a.rank))
+      let top = sorted[0]
+      for (let i = 1; i < sorted.length; i++) {
+        const between = RANK_LOW_TO_HIGH.slice(rankVal(sorted[i].rank) + 1, rankVal(top.rank))
+        if (!between.every(seen)) break
+        top = sorted[i]
+      }
+      return {
+        card: top,
+        reason: 'Spelförarsidans tredje hand: inget säkert stick finns – jag går upp med mitt högsta (lägsta av likvärdiga) så försvararen bakom inte vinner billigt.',
+      }
+    }
     return { card: lowest(winners), reason: 'Jag vinner sticket så billigt som möjligt.' }
   }
   const guarded = guardedDiscard(state, seat, legal)
