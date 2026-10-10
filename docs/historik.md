@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-10 (5♥/5♠ är aldrig en slaminbjudan — NU-punkten "Jacoby minimum" löst; byggt, deploy väntar på ägarens klartecken)
+## 2026-10-10 (5♥/5♠ är aldrig en slaminbjudan — NU "kontrollbud före essfrågan" KLAR; LIVE, mergepunkt c6dc011)
 Ägarbeslut: 5M används inte som inbjudan, med tillräckliga poäng frågar man ess.
 Skannern (samma som `slaminbjudan-4m.probe` men för 5♥/5♠, tillfällig kopia):
 **422** 5M-inbjudningar på 300 000 frön (20276001–20576000), alla med accept rakt

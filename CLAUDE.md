@@ -11,7 +11,7 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-10-10): /felrapporter; NU "kontrollbud före
-> essfrågan" är KLAR (5M-beslutet byggt 2026-10-10, PCD om ej gjort) → visa
+> essfrågan" är KLAR & LIVE (5M-beslutet c6dc011, 2026-10-10) → visa
 > NÄST/SENARE och låt ägaren välja nästa NU.
 
 ### 🔵 NU — kontrollbud före essfrågan (ägarbeslut 2026-10-04: "fråga så mycket budgivningen tillåter, gärna kontrollbud före")
@@ -21,7 +21,7 @@ kontrollbud/4NT/5m; "gäller ALLA sammanhang", "4→6 utan essfråga förbjudet"
 **Steg 5 KLART & LIVE 2026-10-09** (budväg 1 6cf8200; budväg 2 MSS + inverterad minor
 c56b468): 4m sätter trumfen överallt, skannern `slaminbjudan-4m.probe` (STEG5=1) tom.
 **2026-10-10:** 5♥/5♠ aldrig inbjudan → 31+ frågar 4NT; 3-korts stöd i lågfärg efter
-2♣ står (4NT direkt). **NU KLAR.**
+2♣ står (4NT direkt). **NU KLAR & LIVE c6dc011.**
 Arbetssätt: facit först, EN budväg i taget, auktionsdiff + DD-dom efter varje;
 budfrågor → fråga ägaren.
 
