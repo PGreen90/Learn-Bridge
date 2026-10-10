@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-10 (NU: avblockering — §8.10, ägarens bricka 7; BYGGD, ej pushad)
+## 2026-10-10 (NU: avblockering — §8.10, ägarens bricka 7 — LIVE, mergepunkt 40f28f6)
 Ägaren om Dagens tävling bricka 7 (återskapad med `DUMP_TAVLING=2026-10-10:7 npx vitest
 run src/lib/engine/speldump.probe.test.ts`): "Syd måste veta att det är rätt att göra en
 unblock — räkna spader, partnern har fem från början, släng spaderkneckten så partnerns

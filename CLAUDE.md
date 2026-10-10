@@ -10,15 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-10): /felrapporter; sedan NU (avblockering) —
-> byggd + mätt, väntar på ägarens PCD om den inte redan är LIVE (kolla `git log`).
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-10): /felrapporter; NU avblockering är LIVE
+> 40f28f6 → ägaren live-provar; visa NÄST/SENARE och låt ägaren välja nästa NU.
 
 ### 🔵 NU — avblockering (ägaren 2026-10-10, Dagens tävling bricka 7: "släng kneckten så partnerns kort blir stora")
 Enfärgs-lösaren `unblock.ts` (§8.10) efter bottens kortval: högre kort i samma färg
 när det aldrig ger färre stick på någon fördelning budgivningen + spelet tillåter
 (tre ingångslägen), aldrig i trumffärgen, aldrig ett stick från motståndarna;
 inkliv = 5+ i hand-modellen. Facit `play-bot-avblockering.test.ts`; riggen
-`avblock.probe` (AVBLOCK=1); speldiagnosen före/efter i `docs/historik.md`.
+`avblock.probe` (AVBLOCK=1); speldiagnosen före/efter i `docs/historik.md`. **LIVE 40f28f6.**
 **Kontrollbud före essfrågan KLAR & LIVE c6dc011** (detalj i historiken).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
