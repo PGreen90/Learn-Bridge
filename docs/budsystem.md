@@ -3464,7 +3464,29 @@ Nord ♦KT65 ♣T, bordet ♦Q4, sju ruter spelade och partnern sakade redan på
 ruter → ♦K stjäls; rätt är **♣T** (partnern ledde ♣Q = ♣J bakom, Väst måste
 följa med ♣8), som sätter kontraktet.
 
+### 8.8 Spelförarsidans tredje hand — inget "billigaste stick" mot en dold hand bakom (2026-10-10, felrapport #104)
+När spelförarsidan (bordet eller spelföraren) är **tredje hand** och en **dold
+försvarare spelar sist**, får "vinna billigast" bara betyda (a) ett **säkert
+stick** — alla högre kort i färgen är spelade eller sitter i våra två händer —
+eller (b) en **äkta mask mot ett enda saknat kort** (♥J ur AJ87 när bara ♥K är
+ute; damen ur KQ2 mot esset). Ett kort som **flera osedda kort** kan gå över är en
+**lågmask** och spelas aldrig; då går vi **upp med vårt högsta** (lägsta av
+likvärdiga).
+*Bakgrund (ägarens skärmbild, Dagens tävling 2026-10-10 bricka 2): 3NT av Väst,
+Väst ♦2 mot bordets ♦A74, Nord ♦6 — bordet la ♦7 "billigast" och Syds ♦8 vann;
+Syd fick in sig och körde sju klöver, 3NT −3 i stället för +1. Ägaren: "denna typ
+av lågmask ser jag datorn göra ofta, blir sällan bra för dem." DD: ♦A 7 stick,
+♦7 6.* Fjärde hand och motspelet (§8.6) berörs inte.
+
 ## 9. Ändringslogg
+- **2026-10-10 — Felrapport #104 (ägarens skärmbild): spelförarsidans tredje hand
+  "vann billigast" mot en dold hand bakom (§8.8).** Bordets ♦7 ur A74 över Nords
+  ♦6 föll för Syds ♦8 — regeln "billigaste vinnaren" tog ingen hänsyn till den
+  dolda fjärde handen. Nu: billigaste SÄKRA vinnaren (alla högre kort sedda),
+  annars högsta. Facit `play-bot-spelforarens-tredje-hand.test.ts` (DD-låst);
+  bevaka: Västs ♣A i stick 1 (spelförarens hold-up, DD −3) som `it.todo` i
+  samma fil. Mätt med speldiagnosen (200 givar, före/efter) — siffrorna i
+  historiken.
 - **2026-10-10 — 5♥/5♠ är aldrig en slaminbjudan (§5.2, §4.1, §4.3b, §5.3, §6).**
   Ägarbeslut: "5 hjärter/spader är ett bud som inte skall användas som invit. Om
   man har tillräckligt med poäng så ska man essfråga." Kaptenen i kanske-zonen

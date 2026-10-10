@@ -17,6 +17,18 @@
 
 ## Väntar på vakt (nyast först)
 
+### Spelförarens hold-up i sang: Väst tog ♣A på Syds ♣K (felrapport #104, stick 1)
+- **Läget:** Dagens tävling 2026-10-10 bricka 2, 3NT av Väst (giv Öst, NS i zon).
+  Nord ♣4 (partnerns inklivsfärg), bordet ♣5, Syd ♣K, Väst ♣A "billigast". Syd
+  har sju klöver och Nord två: håller Väst upp en gång är Nord renons och Syds
+  klöver död utan ingång. Speldumpen (`DUMP_TAVLING=2026-10-10:2 npx vitest run
+  src/lib/engine/speldump.probe.test.ts`) flaggar ♣A som −3 (DD 10 → 7).
+  Hp räknade med kod: N 8 · E 11 · S 8 · W 13.
+- **Vakt:** `src/lib/engine/play-bot-spelforarens-tredje-hand.test.ts` (`it.todo`
+  "stick 1: Väst håller upp ♣A"). Spelförarens hold-up finns som regel bara för
+  försvaret (`defenderHoldUp`); spelförarsidan saknar den — kandidat för
+  speldiagnosens nästa runda (NÄST 2).
+
 ### Fynd D — byt färg när spelföraren visat längd i utspelsfärgen (frö 20260907, ägarbeslut 2026-10-06)
 - **Regeln (ägarens ord):** den som vinner första sticket i partnerns utspelsfärg
   fortsätter INTE färgen när spelföraren visat stopp och längd i den via
