@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-11 (NU: stöd i partnerns lågfärg — ägarbeslut; BYGGD, ej pushad)
+## 2026-10-11 (NU: stöd i partnerns lågfärg — ägarbeslut — LIVE, mergepunkt fafc747)
 Ägarens regel: lovar partnerns bud 3+ (1♣/1♦) ska stödet lova 4+; lovar det 5+
 (inkliv) räcker 3+. Stödsvepet (`STOD=1 npx vitest run src/lib/engine/stodsvep.probe.test.ts`,
 20 000 givar) visade regeln redan uppfylld för inverterad/enkel höjning,
