@@ -61,19 +61,18 @@ function finalOf(d: Deal, prefix: string[]) {
 }
 
 describe('stöddubblingen besvaras (etapp 6 hål 1)', () => {
-  it('frö 20260884: 1♦–(P)–1♠–(2♥)–X → svararen invithöjer 3♦, öppnaren (16 hp, 6 ruter) lyfter till 5♦', () => {
+  it('frö 20260884: 1♦–(P)–1♠–(2♥)–X → svararen 3♠ (4-3, ingen känd fit), öppnaren (16 hp, stopp i ♥) spelar 3NT (ägarbeslut 2026-10-11)', () => {
     const d = deal('offring-20260884', 'N', 'ns', {
       N: 'S:T9 H:874 D:A53 C:QT843',
       E: 'S:A854 H:932 D:KT8 C:K72',
       S: 'S:J762 H:QJT65 D:6 C:A96',
       W: 'S:KQ3 H:AK D:QJ9742 C:J5',
     })
-    const { contract, bids, källor } = finalOf(d, ['P', 'P', 'P', '1D', 'P', '1S', '2H'])
+    const { contract, källor } = finalOf(d, ['P', 'P', 'P', '1D', 'P', '1S', '2H'])
     expect(källor[0]).toBe('W:X<tabell:stöd-x>')
-    expect(källor[2]).toBe('E:3D<tabell:stöd-x-svar>')
-    expect(källor[4]).toBe('W:5D<tabell:stöd-x-öppnaren>')
-    expect(bids).toContain('3D')
-    expect(contract).toMatchObject({ level: 5, strain: 'diamonds' })
+    expect(källor[2]).toBe('E:3S<tabell:stöd-x-svar>')
+    expect(källor[4]).toBe('W:3NT<tabell:stöd-x-öppnaren>')
+    expect(contract).toMatchObject({ level: 3, strain: 'NT' })
   })
 
   it('frö 20261005: 1♣–(P)–1♥–(2♦)–X → svararen (15 hp, dubbelhåll i ruter) bjuder 3NT', () => {

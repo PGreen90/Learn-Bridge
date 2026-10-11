@@ -10,6 +10,30 @@
 
 ---
 
+## 2026-10-11 (NU: stöd i partnerns lågfärg — ägarbeslut; BYGGD, ej pushad)
+Ägarens regel: lovar partnerns bud 3+ (1♣/1♦) ska stödet lova 4+; lovar det 5+
+(inkliv) räcker 3+. Stödsvepet (`STOD=1 npx vitest run src/lib/engine/stodsvep.probe.test.ts`,
+20 000 givar) visade regeln redan uppfylld för inverterad/enkel höjning,
+konkurrenshöjningar och ~1 000 inklivshöjningar; avvikelserna: cuen efter 1m på tre
+kort (~110), svaret på stöddubblingen i lågfärg på tre, höjning av det påtvingade
+svaret på återöppnings-X på tre, kravets minimibud. **Ägarbesluten:** cuen = 4+
+(limit+) eller 12+ utan naturligt bud (inget stöd, GF), 10–11 utan stopp → 1NT
+("11 eller mindre 1NT, 12+ cue"); stöddubblingssvaret stannar i högfärgen om inte
+lågfärgen är känd längre, med fem i högfärgen 4M direkt, stöddubblaren spelar 3NT
+mot 4-3 med stopp ("vetskapen om fitten finns ej, då spelar vi NT"); påtvingat svar
+på återöppnings-X höjs med 4+; preferensen efter 1♦–1♥–2♣ står (5+/4+), efter
+1♣–1♥–1♠ med två klöver → 1NT; §7.8 (d) rättad till 4+. **Insnävning efter
+DD-domen:** första versionen gjorde om "fritt bud"-faktumet (−11 860 poäng, ~150
+kollateralt ändrade återbud), lät 1NT gälla 0–1 klöver och 8–9 hp — snävat till
+ägarens exakta beslut. Auktionsdiff 20 000 givar mot 749cd06+ecbb801-baslinjen i
+git-arbetsträd (`DUMP_RANGE=20260721-20280720 npx vitest run src/lib/engine/auktionsdump.probe.test.ts`
++ `node scripts/auktionsdiff.mjs` + `DDDIFF=1 npx vitest run src/lib/engine/auktionsdiff-dd.probe.test.ts`):
+**224 ändrade auktioner, 198 ändrade slutkontrakt, DD netto +1690 poäng (90 bättre,
+57 sämre)**. Kvarvarande hål: 10–11 med tre kort efter ett 2-lägesinkliv (1NT finns
+inte) passar. Facit `auction-lagfargsstod.test.ts`.
+
+---
+
 ## 2026-10-10 (NU: avblockering — §8.10, ägarens bricka 7 — LIVE, mergepunkt 40f28f6)
 Ägaren om Dagens tävling bricka 7 (återskapad med `DUMP_TAVLING=2026-10-10:7 npx vitest
 run src/lib/engine/speldump.probe.test.ts`): "Syd måste veta att det är rätt att göra en

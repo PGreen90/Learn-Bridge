@@ -275,13 +275,20 @@ export function forcedMinimumBid(hand: Hand, f: AuctionFacts): ResolvedCall | nu
     }
   }
 
-  // 2) Stöd partnerns visade färg (3+ kort).
+  // 2) Stöd partnerns visade färg (3+ kort). Är färgen partnerns 1♣/1♦-öppning
+  // och har hen inte bjudit den igen lovar den bara 3 kort → stödet kräver 4+
+  // (ägarbeslut 2026-10-11, stödsvepet frö 20272577).
   const ps = f.partnerLastSuit
-  if (ps && len[SUIT_OF_LETTER[ps.strain]] >= 3) {
+  const bara1mOppning =
+    ps !== null && (ps.strain === 'C' || ps.strain === 'D') &&
+    f.opening?.seat === f.partner && f.opening.level === 1 && f.opening.strain === ps.strain &&
+    history.filter((c) => c.seat === f.partner && parseContractBid(c.bid)?.strain === ps.strain).length === 1
+  const stodKrav = bara1mOppning ? 4 : 3
+  if (ps && len[SUIT_OF_LETTER[ps.strain]] >= stodKrav) {
     const bid = cheapestBidIn(history, seat, ps.strain)
     if (bid) return {
       seat, bid, rule: 'krav – stödjer partnern',
-      explanation: `Auktionen är krav – jag får inte passa. Stöder partnerns ${SWE_SYM[ps.strain]} (3+ kort).`,
+      explanation: `Auktionen är krav – jag får inte passa. Stöder partnerns ${SWE_SYM[ps.strain]} (${stodKrav}+ kort).`,
     }
   }
 

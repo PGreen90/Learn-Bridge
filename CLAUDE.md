@@ -10,16 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-10): /felrapporter; NU avblockering är LIVE
-> 40f28f6 → ägaren live-provar; visa NÄST/SENARE och låt ägaren välja nästa NU.
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-11): /felrapporter; NU stöd i lågfärg —
+> byggd + mätt, väntar på ägarens PCD om den inte redan är LIVE (kolla `git log`).
 
-### 🔵 NU — avblockering (ägaren 2026-10-10, Dagens tävling bricka 7: "släng kneckten så partnerns kort blir stora")
-Enfärgs-lösaren `unblock.ts` (§8.10) efter bottens kortval: högre kort i samma färg
-när det aldrig ger färre stick på någon fördelning budgivningen + spelet tillåter
-(tre ingångslägen), aldrig i trumffärgen, aldrig ett stick från motståndarna;
-inkliv = 5+ i hand-modellen. Facit `play-bot-avblockering.test.ts`; riggen
-`avblock.probe` (AVBLOCK=1); speldiagnosen före/efter i `docs/historik.md`. **LIVE 40f28f6.**
-**Kontrollbud före essfrågan KLAR & LIVE c6dc011** (detalj i historiken).
+### 🔵 NU — stöd i partnerns lågfärg (ägarbeslut 2026-10-11: "lovar bud 1 3+ ska stödet lova 4+; inkliv 5+ → 3+")
+Cuen efter 1m = 4+ (limit+) eller 12+ utan stöd (GF), 10–11 utan stopp → 1NT ·
+stöddubblingssvaret: högfärgen före lågfärgen, 4M direkt med fem, öppnaren 3NT mot
+4-3 · påtvingat svar på återöppnings-X höjs med 4+ · 1♣–1♥–1♠ med två klöver → 1NT
+(§6.6/§7.4/§7.8). Facit `auction-lagfargsstod.test.ts`; stödsvepet (STOD=1) rent.
+**Avblockering (§8.10) LIVE 40f28f6** · kontrollbud före essfrågan LIVE c6dc011.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam

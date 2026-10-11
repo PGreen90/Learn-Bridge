@@ -195,10 +195,12 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
     expect(contractFromCalls(history!)).toMatchObject({ level: 2, strain: 'hearts', declarer: 'S' })
   })
 
-  it('frö 20260906: ruterdelkontrakt på 3-läget, inte 5♦ bet', () => {
+  it('frö 20260906: aldrig 5♦ bet — Syd (3 ruter, 5 klöver) bjuder 2♣ fritt bud, inte cue på tre ruter (ägarbeslut 2026-10-11)', () => {
     const d = deal('felfarg-20260906', 'E', 'all', HANDS_906)
     const history = botAuction(d)
     expect(history).not.toBeNull()
-    expect(contractFromCalls(history!)).toMatchObject({ level: 3, strain: 'diamonds', declarer: 'N' })
+    expect(history!.find((c) => c.seat === 'S' && c.bid !== 'P')?.bid).toBe('2C')
+    const k = contractFromCalls(history!)
+    expect(k?.strain === 'diamonds' && k.level >= 5).toBe(false)
   })
 })

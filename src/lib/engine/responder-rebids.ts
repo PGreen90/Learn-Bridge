@@ -1094,6 +1094,13 @@ function fourthSuit(hand: Hand, x: Suit, y: Suit, second: Suit, rebid: ResponseR
   // 4. Inbjudan balanserad.
   if (bal && p >= 11) return { call: '2NT', rule: 'inbjudan', explanation: `Balanserad inbjudan → 2NT.` }
   // 5. Preferens till öppnarens första färg, annars pass.
+  // Visade öppnaren sin andra färg på 1-LÄGET (1♣–1♥–1♠) är första färgen inte
+  // känd längre — 1♣ kan vara tre kort — så en svag hand med bara två kort där
+  // bjuder 1NT (6–10, ingen fit) i stället för preferens på en möjlig 5-kortsfit
+  // (ägarbeslut 2026-10-11). Efter 1♦–1♥–2♣ (5+/4+) står preferensen på två kort.
+  if (rebid.rule === 'ny färg (1-läget)' && len[x] === 2 && p <= 10) {
+    return { call: '1NT', rule: '1NT (6–10)', explanation: `6–10 hp utan fit — öppnarens ${SYM[x]} kan vara tre kort, så ingen preferens på två → 1NT.` }
+  }
   if (len[x] >= 2) {
     const call = bidAbove(x, rebid.call)
     return { call, rule: 'preferens', explanation: `Preferens → ${pretty(call)}.` }

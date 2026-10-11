@@ -123,7 +123,8 @@ function facitFor(c: Ctx): number | undefined {
   // Ägarbeslut D (2026-10-08): Ogust med 15+ utan fit, sedan signoff/utgång i
   // partnerns svaga tvåa på 1+ kort — syftet var att pröva färgen för 3NT.
   if (c.target.rule === 'svag tvåa' && c.ogustAsked) return 1
-  if (r === 'cue (limithöjning+)') return 3
+  // Ägarbeslut 2026-10-11: cuen mot vår 1♣/1♦-öppning lovar 4+; mot högfärg/inkliv 3+.
+  if (r === 'cue (limithöjning+)') return (c.target.strain === 'C' || c.target.strain === 'D') && (c.target.rule === 'minor-regeln' || c.target.rule === 'regeln om 15') ? 4 : 3
   // Fjärde färg / NMF / checkback frågar efter 3-korts stöd i svararens 5+ högfärg
   if (r === 'svar på fjärde färg' || r === 'svar på New Minor Forcing' || r.startsWith('svar på 2NT-')) return 3
   // Partnerns löfte känt → fit = 8 trumf. Rebjuden färg (bjuden ≥2 gånger) = 6+.
@@ -137,7 +138,8 @@ function facitFor(c: Ctx): number | undefined {
 
 // Bud i partnerns färg som INTE är höjningar (preferens, kontrollbud i partnerns
 // sidofärg, RKC-svar) – inventeras men prövas inte.
-const EJ_HÖJNING = /preferens|cue-bid|kontrollbud|RKC|Blackwood|trumfdam|svar på återöppningsdubbling|svar på dubblarens cue|checkback|placering/i
+// 'cue (utgångskrav)' = 12+ utan naturligt bud, lovar inget stöd (ägarbeslut 2026-10-11).
+const EJ_HÖJNING = /preferens|cue-bid|cue (utgångskrav)|kontrollbud|RKC|Blackwood|trumfdam|svar på återöppningsdubbling|svar på dubblarens cue|checkback|placering/i
 // Partnerns bud som INTE är en egen färg (överföringar fullföljer MIN färg).
 const EJ_PARTNERFÄRG = /transfer|överföring/i
 

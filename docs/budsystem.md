@@ -1459,7 +1459,10 @@ räknar öppnaren Bergenpoäng mot ett svar som kan vara tomt: **27+ → lågfä
 utgång (5m) / 24+ → 4M**, **21+ → inbjudande höjning** (billigaste höjningen,
 ej krav — partnern går vidare med maximum), annars **pass** — spärren står.
 *Bricka 9: ♠— ♥A874 ♦AJ753 ♣AKT8 (16 hp, 25 Bergenpoäng) cue-bjöd 4♠ och
-tvingade partnern till 5♣ bet; nu 4♣.*
+tvingade partnern till 5♣ bet; nu 4♣.* Står partnerns påtvingade svar (ingen
+mer konkurrens) höjer öppnaren det **bara med 4+ kort** — svaret lovar fyra, inte
+fem, "då det dubblas är det tydligt att öppnaren inte hade 5+" (ägarbeslut
+2026-10-11, samma princip som dubblarens beslut A 2026-10-08).
 
 **Står partnerns fria högfärgsbud kvar (de passar) — felrapport #55:** budet
 lovar **5+** (den negativa dubblingen tar 4-kortsfallet), så öppnaren höjer på
@@ -1969,6 +1972,14 @@ efter 2/1 är svararens nya färg naturlig). Efter öppnarens **reverse** gälle
 den (se exemplet ovan): öppnaren svarar med samma prioritet — 3-korts stöd i
 svararens högfärg, extra längd, 3NT med håll, höjning av fjärde färgen med
 fyra kort — och svararen placerar (4M i fiten, annars 3NT).
+
+**Svag hand utan fit: preferens eller 1NT (ägarbeslut 2026-10-11).** Efter
+**1♦–1♥–2♣** har öppnaren 5+ ruter och 4+ klöver — rutern kan vara längre (6-4) —
+så en svag hand går **tillbaka till första färgen med två kort** (2♦), även med
+tre klöver. Efter **1♣–1♥–1♠** kan klövern vara bara tre kort, så en svag hand
+(6–10) med **exakt två** i öppnarens första färg och ingen fit bjuder **1NT**
+i stället för preferens på en möjlig 5-kortsfit. *1♣–1♥–1♠–**1NT** med ♠AJ7
+♥T7532 ♦T98 ♣J4 (6 hp; förr 2♣).*
 
 **Fit i öppnarens ANDRA färg = vanlig höjningsstege** (etapp 5, 2026-07-24).
 Har svararen 4+ kort i den färg öppnaren visade i rond 2 (t.ex. 1♣–1♥–1♠) höjer
@@ -2816,14 +2827,25 @@ färg bjuds den; ingen sang. *Öst ♠A8 ♥AT2 ♦AKT9 ♣AQ43 (21 hp) → X ig
     högfärg (5-3-fiten är känd); **3NT** med stopp i deras färg och minst
     dubbelton i öppnarens färg; annars **4M på 4-3-fiten** (kort sidofärg ger
     stölder på den korta handen).
-  - **Inbjudande (10–12):** **3M** med femkorts högfärg; egen **6+ sidofärg**
-    billigast (naturligt); **invithöjning 3 i öppnarens färg** med stöd
-    (4+ kort, eller 3 med honnör); **2NT** med stopp i deras färg.
+  - **Inbjudande (10–12):** **3M** med femkorts högfärg — men efter vår
+    **lågfärgsöppning 4M direkt** med fem (så att 3M där alltid är fyra kort);
+    egen **6+ sidofärg** billigast (naturligt); **invithöjning 3 i öppnarens
+    färg** med stöd (4+ kort, eller 3 med honnör) — efter lågfärgsöppningen bara
+    när **lågfärgen är längre än högfärgen**; **2NT** med stopp i deras färg;
+    annars (lågfärgsöppning) **3M på 4-3-fiten**.
   - **Minimum:** **2M** med femkorts högfärg, annars **billig preferens** till
-    öppnarens färg, sista utväg 2M på 4-3-fiten.
+    öppnarens färg (efter lågfärgsöppning bara när lågfärgen är längre), sista
+    utväg 2M på 4-3-fiten.
+  **Högfärgen före lågfärgen (ägarbeslut 2026-10-11):** öppnarens 1♣/1♦ lovar
+  bara tre kort, så lågfärgen väljs bara när den är **känd längre** — vid 3-4 i
+  båda är högfärgens 4-3 bättre. *1♣–(P)–1♥–(1♠)–X–(P)–**3♥** med ♠6 ♥K642
+  ♦KJ963 ♣A74 (förr 3♣ på tre klöver).*
   **Öppnarens fortsättning:** svararens 2-lägessvar och preferenser är minimum
   och får passas; **2NT/3M/invithöjning accepteras med 15+** (Bergenpoäng när
-  fit finns — jämn hand med stopp väljer 3NT framför 5m). Svararens **nya färg
+  fit finns — jämn hand med stopp väljer 3NT framför 5m). Efter vår
+  **lågfärgsöppning** är svararens **3M bara fyra kort** — 4-3 är ingen känd fit,
+  så med 15+ och **stopp i deras färg bjuds 3NT**, utan stopp 4M (ägarbeslut
+  2026-10-11: "vetskapen om fitten finns ej, då spelar vi NT"). Svararens **nya färg
   är ett fritt bud i konkurrens = rondkrav** (§5.5) och passas aldrig: med
   3-korts stöd (färgen lovar 6+) höjs den — till utgång med 15+ — och utan stöd
   bjuds sang med stopp, egen 6+ färg eller preferens till svararens högfärg.
@@ -3149,11 +3171,21 @@ inte.
 stört — konkurrenshöjningen (6–9) över 1NT-inkliv och färginkliv, och höjningen
 över deras X — kräver **3+ kort i en högfärg** men **4+ kort i en lågfärg**,
 samma golv som ostört (1♣/1♦–2m = 4+). `1♦–(1NT)` med ♠T74 ♥K62 ♦J83 ♣A752
-(8 hp) är **pass**, inte 2♦ (bricka 10, 2026-10-04); med ♦J832 höjs 2♦. **Cuen
-i deras färg (limithöjning+, 10+) får fortfarande bjudas på tre kort** — den är
-svararens enda väg med 10+ utan annat bud (♠AQ4 ♥A42 ♦J864 ♣Q95 efter 1♣–(1♦)
-hade annars passat; öppnaren svarar 3NT med stopp, och limit mot minimum passar
-återgången 3m).
+(8 hp) är **pass**, inte 2♦ (bricka 10, 2026-10-04); med ♦J832 höjs 2♦.
+
+**Cuen efter vår lågfärgsöppning (ägarbeslut 2026-10-11 — ersätter undantaget
+från 2026-10-06).** "I cue-situationen är det viktigare att förmedla poängen än
+stödet." Cuen i deras färg är antingen **limithöjning eller bättre med 4+ stöd**
+(10+), eller **12+ utan naturligt bud** — då lovar den **inget stöd** och är
+**utgångskrav** (öppnaren svarar som §5.11: 3NT med stopp, annars billigaste
+återgång; cue-bjudaren fortsätter till utgång). **10–11 med tre kort i
+lågfärgen, utan stopp och utan annat bud → 1NT** ("11 eller mindre 1NT, 12+
+cue"; bara över ett 1-lägesinkliv — 8–9 passar). Ett naturligt bud går alltid
+först: fritt bud i en 5-kortsfärg, sang med stopp, negativ dubbling.
+*1♦–(1♠)–**2♠** med ♠862 ♥AK5 ♦KJ7 ♣Q943 (13 hp, utgångskrav) · samma form med
+10–11 hp → **1NT** · ♠JT ♥QJ9 ♦Q72 ♣AJ942 → **2♣** (fritt bud, förr cue på tre
+ruter).* Kliver de in i **vår egen** lågfärg vore "cuen" en höjning — där gäller
+inte 12+-cuen. Efter vår **inkliv** (5+) räcker fortfarande 3+ för cuen (§7.1).
 
 **Döda honnörer i deras visade färg diskonteras (felrapport #61, ägarbeslut
 2026-09-16).** Efter en **Michaels**-cue är den ena visade färgen känd (över 1♥ =
@@ -3188,7 +3220,7 @@ Efter **1M–(X)** är svararens **2NT Jordan/Truscott**: konstgjord
 blir därmed ren spärr. Källa: bridgebum (jordan_2nt.php). **Bara efter
 högfärgsöppningen** (motorbytet etapp 4 familj 3, 2026-09-08): efter
 **1♣/1♦–(X)** gäller (b) — **XX med 10+** (även med stöd), annars höjning med
-3+ eller pass. Förr bjöd motorn "Jordan" även över lågfärgen, och öppnaren hade
+**4+** (lågfärgen lovar bara tre) eller pass. Förr bjöd motorn "Jordan" även över lågfärgen, och öppnaren hade
 inget svar: 2NT passades ut.
 
 **Öppnaren passar aldrig Jordan** (den visar tvåsidig styrka och väntar på
@@ -3517,6 +3549,16 @@ behöll kneckten. Nord har fem spader (inklivet), träkarlen hade en, Syd fyra �
 Öst släppte in Nord på ♦A: med kneckten slängd 1NT+1, med kneckten kvar +3.*
 
 ## 9. Ändringslogg
+- **2026-10-11 — Stöd i partnerns lågfärg (ägarbeslut).** Regeln: lovar
+  partnerns bud 3+ (1♣/1♦) ska stödet lova 4+; lovar det 5+ (inkliv) räcker 3+.
+  Stödsvepet (`STOD=1`, 20 000 givar) visade regeln redan uppfylld nästan
+  överallt; ändrat: cuen efter 1m (4+ som höjning, annars 12+ utan stöd =
+  utgångskrav; 10–11 utan stopp → 1NT), svaret på stöddubblingen (högfärgen före
+  lågfärgen; 4M direkt med fem), stöddubblarens 3NT mot 4-3, höjning av det
+  påtvingade svaret på återöppningsdubblingen (4+), kravets minimibud (4+ mot
+  1m), preferensen efter 1♣–1♥–1♠ (två klöver → 1NT), rättelsen i §7.8 (d).
+  Facit `auction-lagfargsstod.test.ts`. Auktionsdiff + DD-dom 20 000 givar —
+  siffrorna i historiken.
 - **2026-10-10 — Avblockering (§8.10, ägarens bricka 7).** Ny enfärgs-lösare
   `unblock.ts` efter bottens vanliga kortval (`botCardSmartReasoned`): mina
   olikvärda högre kort i färgen provas på alla fördelningar som hand-modellen

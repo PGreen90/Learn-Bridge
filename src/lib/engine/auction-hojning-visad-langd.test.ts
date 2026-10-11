@@ -119,10 +119,10 @@ describe('K3 (b) – svararen över ett 1NT-inkliv', () => {
     const c = decideCall(R97, [call('E', 'P'), call('S', '1D'), call('W', '1S')], 'N')
     expect(c.bid).not.toBe('2D')
   })
-  it("1♦–(1♠) med trekorts ruter och 11 hp → cuen (limithöjning+) får fortfarande bjudas på tre kort — svararens enda väg med 10+ utan annat bud", () => {
+  it("1♦–(1♠) med trekorts ruter och 11 hp utan spaderstopp → 1NT (ägarbeslut 2026-10-11: cuen kräver 4+ i lågfärg eller 12+; '11 eller mindre 1NT')", () => {
     const d = dealOf('E', 'all', { N: 'S:T74 H:K62 D:J83 C:AK52', E: 'S:98632 H:T854 D:T6 C:7', S: 'S:AJ H:J93 D:A972 C:Q984', W: 'S:KQ5 H:AQ7 D:KQ54 C:JT63' })
     const c = decideCall(d, [call('E', 'P'), call('S', '1D'), call('W', '1S')], 'N')
-    expect(c.bid).toBe("2S")
+    expect(c.bid).toBe('1NT')
   })
   it('1♦–(X) med trekorts ruter och 7 hp → pass, inte 2♦', () => {
     const d = dealOf('E', 'all', { N: 'S:T74 H:Q62 D:J83 C:A752', E: 'S:98632 H:T854 D:T6 C:KT', S: 'S:AJ H:KJ9 D:A972 C:Q984', W: 'S:KQ5 H:A73 D:KQ54 C:J63' })

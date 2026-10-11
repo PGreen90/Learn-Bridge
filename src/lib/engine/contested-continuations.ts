@@ -262,7 +262,17 @@ export function openerRaisesFreeBid(hand: Hand, f: AuctionFacts): Kunskap | null
   const strain = ctx.free.strain
   const suit = SUIT_OF_LETTER[strain]
   // Experterna 2026-10-08: 1♣–(1♦)–1♥/1♠ lovar fyra kort → höjning kräver fyra; annars 5+ → tre.
-  const need = ctx.promised === 4 ? 4 : 3
+  // Var budet det PÅTVINGADE svaret på min (återöppnings)dubbling lovar det bara
+  // fyra — "då det dubblas är det tydligt att öppnaren inte hade 5+" (ägarbeslut
+  // 2026-10-11, samma princip som beslut A 2026-10-08) → höjningen kräver 4+.
+  const freeIdx = history.indexOf(ctx.contracts[2])
+  let forcedByMyX = false
+  for (let i = freeIdx - 1; i >= 0; i--) {
+    if (history[i].bid === 'P') continue
+    forcedByMyX = history[i].seat === seat && history[i].bid === 'X'
+    break
+  }
+  const need = ctx.promised === 4 || forcedByMyX ? 4 : 3
   if (lengths(hand)[suit] < need) return null
   const tp = hcp(hand)
   const legal = legalCalls(history, seat)
