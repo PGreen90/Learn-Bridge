@@ -402,9 +402,11 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
   const isMajorOpening = openerSuit === 'hearts' || openerSuit === 'spades'
   // Minsta stöd för att HÖJA partnerns öppningsfärg i konkurrens (felrapport #97,
   // ägarbeslut 2026-10-06): en lågfärg kräver fyra kort precis som ostört (1m–2m),
-  // en högfärg tre. Gäller konkurrenshöjningen (6–9) och höjningen över deras X —
-  // INTE cuen (limithöjning+, 10+): den är svararens enda väg med 10+ utan annat
-  // bud (frö 20260769: 1♣–(1♦) med ♠AQ4 ♥A42 ♦J864 ♣Q95 passade annars 1♦). Förr höjdes 1♦–(1NT) till 2♦ på ♦J83 (bricka 10, 2026-10-04).
+  // en högfärg tre. Gäller konkurrenshöjningen (6–9), höjningen över deras X och
+  // — sedan ägarbeslutet 2026-10-11 — även cuen som limithöjning+ (10+). En hand
+  // med 12+ utan naturligt bud cue-bjuder ändå, men då utan stödlöfte; samma hand
+  // med 10–11 bjuder 1NT (se slutet av färginklivsgrenen). Förr höjdes 1♦–(1NT)
+  // till 2♦ på ♦J83 (bricka 10, 2026-10-04).
   const minStod = isMajorOpening ? 3 : 4
 
   // Mot ett 1NT-INKLIV (pliktsvepet K3 b, ägarbeslut 2026-09-02): förr fanns
@@ -515,11 +517,12 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
         }
       }
     }
-    // Limithöjning eller bättre (§7.1): cue i DERAS färg med 3+ stöd och 10+ hp
-    // (krav). Skiljer en inbjudande+ höjning från den rena konkurrenshöjningen.
-    if (len[openerSuit] >= 3 && p >= 10) {
+    // Limithöjning eller bättre (§7.1): cue i DERAS färg med stöd och 10+ hp
+    // (krav) — 3+ i en högfärg, 4+ i en lågfärg (ägarbeslut 2026-10-11). Skiljer
+    // en inbjudande+ höjning från den rena konkurrenshöjningen.
+    if (len[openerSuit] >= minStod && p >= 10) {
       const L = ovLevel + 1 // billigaste cue av deras färg ligger en nivå över inklivet
-      return { call: `${L}${LETTER[ovSuit]}` as Bid, rule: 'cue (limithöjning+)', explanation: `10+ hp, 3+ stöd → cue ${SUIT_SYM[ovSuit]} (limithöjning+, krav).` }
+      return { call: `${L}${LETTER[ovSuit]}` as Bid, rule: 'cue (limithöjning+)', explanation: `10+ hp, ${minStod}+ stöd → cue ${SUIT_SYM[ovSuit]} (limithöjning+, krav).` }
     }
     // Konkurrenshöjning: 3+ stöd i öppnarens färg, 6–9 (spärr/konkurrens, ej inbjudan).
     if (len[openerSuit] >= minStod && p >= 6) {
@@ -558,6 +561,22 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
         call: `${L}${LETTER[m]}` as Bid,
         rule: 'fritt bud',
         explanation: `5+ ${SUIT_SYM[m]} → ${L}${SUIT_SYM[m]} (fritt bud i konkurrens, ${L === 2 ? '10' : '12'}+ hp, rondkrav).`,
+      }
+    }
+    // Efter vår LÅGFÄRGSöppning utan naturligt bud (ägarbeslut 2026-10-11: "i
+    // cue-situationen är det viktigare att förmedla poängen än stödet"): 12+ →
+    // cue = utgångskrav UTAN stödlöfte (öppnaren visar stopp/handtyp, §5.11);
+    // 10–11 med tre kort i öppnarens lågfärg → 1NT även utan stopp i deras färg
+    // ("11 eller mindre 1NT, 12+ cue" — händerna som förut cue-bjöd på tre kort;
+    // 8–9 passar som förut). 1NT finns bara över ett 1-lägesinkliv.
+    // (Inte när de klev in i VÅR färg — då vore "cuen" en höjning av lågfärgen.)
+    if (!isMajorOpening && ovSuit !== openerSuit) {
+      if (p >= 12) {
+        const L = ovLevel + 1
+        return { call: `${L}${LETTER[ovSuit]}` as Bid, rule: 'cue (utgångskrav)', explanation: `12+ hp utan naturligt bud → cue ${SUIT_SYM[ovSuit]} (utgångskrav; lovar inte stöd — partnern visar stopp i deras färg eller sin handtyp).` }
+      }
+      if (ovLevel === 1 && p >= 10 && len[openerSuit] >= 3) {
+        return { call: '1NT', rule: 'NT utan stopp', explanation: `10–11 hp och tre kort i partnerns ${SUIT_SYM[openerSuit]}, utan stopp i deras ${SUIT_SYM[ovSuit]} och utan annat bud → 1NT (visar poängen; stödet räcker inte till en höjning).` }
       }
     }
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt i konkurrens → pass.` }

@@ -759,7 +759,10 @@ export function cueBidderContinues(hand: Hand, f: AuctionFacts, who: 'öppnare' 
   const theirSuit = SUIT_OF_LETTER[info.theirStrain]
   if (parseContractBid(f.lastContract!.bid)!.strain === info.agreedStrain) {
     const sp = dummyPoints(hand, SUIT_OF_LETTER[info.agreedStrain]).dummyPoints
-    if (sp < 13) return {
+    // Efter vår lågfärgsöppning är cuen med 12+ hp utgångskrav även utan stöd
+    // (ägarbeslut 2026-10-11) — den handen får aldrig stanna på minimiåtergången.
+    const gfUtanStod = who === 'öppnare' && !isMajorStrain(info.agreedStrain) && hcp(hand) >= 12 && lengths(hand)[SUIT_OF_LETTER[info.agreedStrain]] < 4
+    if (sp < 13 && !gfUtanStod) return {
       call: 'P', rule: 'cue-höjningens fortsättning (limit stannar)',
       explanation: `Min cue lovade limithöjning eller bättre; partnern återgick billigast (minimum) och jag har bara limit-värden → pass.`,
     }

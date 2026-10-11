@@ -164,6 +164,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
 
   // ---- Naturliga, ej krav ----
   '1NT (12–14)': 'ej-krav',
+  '1NT (6–10)': 'ej-krav', // svararen efter 1♣–1♥–1♠ utan fit och med två klöver (ägarbeslut 2026-10-11)
   'gap-hand 1NT': 'ej-krav',
   'rebid: 2NT (22–24)': 'ej-krav',
   'rebid: 3NT (25–27)': 'ej-krav',
@@ -190,6 +191,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'rebid: stöd': 'ej-krav',
   'rebid: feature': 'ej-krav',
   'NT med stopp': 'ej-krav',
+  'NT utan stopp': 'ej-krav', // 1m–(1x)–1NT med 8–11 och tre kort i lågfärgen (ägarbeslut 2026-10-11)
   'NT-svar': 'ej-krav',
   'andra negativa': 'ej-krav',
   'fullföljd transfer': 'ej-krav',
@@ -323,6 +325,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'ovanlig 2NT': 'krav-1-rond',
   'naturligt inkliv': 'ej-krav',
   'cue (limithöjning+)': 'krav-1-rond',
+  // 12+ utan naturligt bud efter vår lågfärgsöppning — lovar inte stöd (ägarbeslut 2026-10-11).
+  'cue (utgångskrav)': 'utgangskrav',
   // Öppnarens svar på partnerns cue över den egna svaga tvåan (felrapport #82).
   'svar på cue (svag tvåa): minimum': 'ej-krav',
   'svar på cue (svag tvåa): utgång': 'avslut',

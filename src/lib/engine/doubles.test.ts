@@ -202,15 +202,19 @@ describe('answerSupportDouble (svar på stöddubblingen, etapp 6 hål 1)', () =>
   it('utgångsvärden med SINGEL i partnerns färg → 4M på 4-3 (Moysian), inte 3NT (frö 20261274)', () => {
     expect(answerSupportDouble(parseHand('S:KJ73 H:A83 D:8 C:KQJ52'), 'spades', 'diamonds', '2H').call).toBe('4S')
   })
-  it('inbjudan (10–12) med 5-korts högfärg → 3M', () => {
+  it('10–12 med 5-korts högfärg efter LÅGFÄRGSöppning → 4M direkt (3M = bara fyra kort, ägarbeslut 2026-10-11)', () => {
     // 1♦–(P)–1♥–(1♠)–X: 10 hp, 5 hjärter.
-    expect(answerSupportDouble(parseHand('S:743 H:KQ852 D:96 C:A82'), 'hearts', 'diamonds', '1S').call).toBe('3H')
+    expect(answerSupportDouble(parseHand('S:743 H:KQ852 D:96 C:A82'), 'hearts', 'diamonds', '1S').call).toBe('4H')
+  })
+  it('inbjudan (10–12) med 5-korts högfärg efter HÖGFÄRGSöppning → 3M (oförändrat)', () => {
+    // 1♥–(P)–1♠–(2♣)–X: 10 hp, 5 spader.
+    expect(answerSupportDouble(parseHand('S:KQ852 H:743 D:96 C:A82'), 'spades', 'hearts', '2C').call).toBe('3S')
   })
   it('inbjudan med egen 6-korts sidofärg → färgen billigast (frö 20261658)', () => {
     expect(answerSupportDouble(parseHand('S:AQ74 H:K6 D:J C:T98752'), 'spades', 'diamonds', '2H').call).toBe('3C')
   })
-  it('inbjudan med honnörsstöd (3 kort) i öppnarens färg → invithöjning 3m (frö 20260884)', () => {
-    expect(answerSupportDouble(parseHand('S:A854 H:932 D:KT8 C:K72'), 'spades', 'diamonds', '2H').call).toBe('3D')
+  it('inbjudan, 4 spader och 3 ruter → 3♠ på 4-3, inte 3♦ (lågfärgen inte känd längre, ägarbeslut 2026-10-11; frö 20260884)', () => {
+    expect(answerSupportDouble(parseHand('S:A854 H:932 D:KT8 C:K72'), 'spades', 'diamonds', '2H').call).toBe('3S')
   })
   it('inbjudan, jämnt med stopp (utan trumfstack) → 2NT', () => {
     // Hjärter E32 = stopp men bara ETT trumfstick → inget straffpass.
@@ -222,9 +226,12 @@ describe('answerSupportDouble (svar på stöddubblingen, etapp 6 hål 1)', () =>
   it('minimum med 5-korts högfärg → 2M', () => {
     expect(answerSupportDouble(parseHand('S:J8542 H:963 D:Q4 C:K72'), 'spades', 'diamonds', '2H').call).toBe('2S')
   })
-  it('minimum med stöd → billig preferens 2m', () => {
-    // 1♦–(P)–1♠–(2♣)–X: 5 hp, 4-korts ruter, 2♦ finns kvar.
-    expect(answerSupportDouble(parseHand('S:9854 H:762 D:Q543 C:K2'), 'spades', 'diamonds', '2C').call).toBe('2D')
+  it('minimum, 4-4 i spader och ruter → 2♠ på 4-3 (vid lika är högfärgen bättre, ägarbeslut 2026-10-11)', () => {
+    // 1♦–(P)–1♠–(2♣)–X: 5 hp, 4-korts ruter — lågfärgen är inte känd längre.
+    expect(answerSupportDouble(parseHand('S:9854 H:762 D:Q543 C:K2'), 'spades', 'diamonds', '2C').call).toBe('2S')
+  })
+  it('minimum med FEM ruter → billig preferens 2♦ (lågfärgen känd längre)', () => {
+    expect(answerSupportDouble(parseHand('S:9854 H:76 D:Q5432 C:K2'), 'spades', 'diamonds', '2C').call).toBe('2D')
   })
   it('minimum utan stöd → 2M på 4-3 (påtvingat, billigast)', () => {
     expect(answerSupportDouble(parseHand('S:9854 H:762 D:53 C:KQ42'), 'spades', 'diamonds', '2H').call).toBe('2S')

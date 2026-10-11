@@ -546,6 +546,11 @@ export function answerSupportDouble(hand: Hand, myMajor: Suit, openerSuit: Suit,
 
   // Stödpoäng räknas bara med äkta 8-kortsfit (5+ egna trumf mot visade 3).
   const fp = len[myMajor] >= 5 ? pointsWithFloor(hand, myMajor, 'support') : null
+  // Öppnarens LÅGFÄRG (3+) väljs framför högfärgens 4-3 bara när den är känd
+  // längre — vid lika (3-4 i båda) är högfärgen bättre (ägarbeslut 2026-10-11).
+  // Efter en högfärgsöppning (5+) gäller den gamla preferensen.
+  const openerMinor = openerSuit === 'clubs' || openerSuit === 'diamonds'
+  const minorLonger = !openerMinor || len[openerSuit] > len[myMajor]
   const points = fp ? fp.points : p
 
   // Utgångsvärden (13+): kaptenen sätter utgången mot visat minimum.
@@ -573,6 +578,16 @@ export function answerSupportDouble(hand: Hand, myMajor: Suit, openerSuit: Suit,
 
   // Inbjudande (10–12): visa handtypen en nivå under utgång.
   if (points >= 10) {
+    // Efter vår LÅGFÄRGSöppning betyder 3M exakt fyra kort (4-3, ingen känd fit) —
+    // med fem bjuds utgången direkt (ägarbeslut 2026-10-11: "om öst hade haft 5
+    // spader så bjuder den troligtvis 4 spader direkt"), så 3M aldrig blir tvetydigt.
+    if (openerMinor && len[myMajor] >= 5) {
+      return {
+        call: `4${BID[myMajor]}`,
+        rule: 'svar på stöddubbling',
+        explanation: `10–12 stödpoäng med 5+ ${SYM[myMajor]} mot visade 3 → 4${SYM[myMajor]} (5-3-fit; 3${SYM[myMajor]} vore bara fyra kort).`,
+      }
+    }
     if (len[myMajor] >= 5) {
       return {
         call: `3${BID[myMajor]}`,
@@ -590,7 +605,7 @@ export function answerSupportDouble(hand: Hand, myMajor: Suit, openerSuit: Suit,
       }
     }
     const honorSupport = hand.some((c) => c.suit === openerSuit && (c.rank === 'A' || c.rank === 'K' || c.rank === 'Q'))
-    if (len[openerSuit] >= 4 || (len[openerSuit] === 3 && honorSupport)) {
+    if (minorLonger && (len[openerSuit] >= 4 || (len[openerSuit] === 3 && honorSupport))) {
       return {
         call: `3${BID[openerSuit]}`,
         rule: 'svar på stöddubbling',
@@ -604,6 +619,13 @@ export function answerSupportDouble(hand: Hand, myMajor: Suit, openerSuit: Suit,
         explanation: `10–12 hp jämnt med stopp i deras ${SYM[theirSuit]} → 2NT (inbjudan).`,
       }
     }
+    if (openerMinor) {
+      return {
+        call: `3${BID[myMajor]}`,
+        rule: 'svar på stöddubbling',
+        explanation: `10–12 hp med 4 ${SYM[myMajor]} mot visade 3 → 3${SYM[myMajor]} (inbjudan på 4-3-fiten — lågfärgen är inte känd längre).`,
+      }
+    }
   }
 
   // Minimum (påtvingat svar — dubblingen får inte dö).
@@ -614,7 +636,7 @@ export function answerSupportDouble(hand: Hand, myMajor: Suit, openerSuit: Suit,
       explanation: `Minimum med 5+ ${SYM[myMajor]} → 2${SYM[myMajor]} (5-3-fit).`,
     }
   }
-  if (len[openerSuit] >= 3 && cheapLevel(openerSuit) <= 2) {
+  if (minorLonger && len[openerSuit] >= 3 && cheapLevel(openerSuit) <= 2) {
     return {
       call: `${cheapLevel(openerSuit)}${BID[openerSuit]}`,
       rule: 'svar på stöddubbling',
@@ -676,6 +698,19 @@ export function supportDoublerRebid(
   // Partnerns egen högfärg: 2M = minimum (passbart), 3M = inbjudan i 5-3-fiten.
   if (answerSuit === partnerMajor) {
     if (level <= 2) return pass(`Partnerns 2${SYM[partnerMajor]} är minimum – pass.`)
+    // Efter min LÅGFÄRGSöppning är 3M exakt fyra kort: 4-3 är ingen känd fit, så
+    // med 15+ och stopp i deras färg spelar vi sang (ägarbeslut 2026-10-11:
+    // "vetskapen om fitten finns ej, då spelar vi NT"); utan stopp 4M på 4-3.
+    const minorOpen = myOpenedSuit === 'clubs' || myOpenedSuit === 'diamonds'
+    if (minorOpen && level === 3) {
+      if (p >= 15 && hasStopper(hand, theirSuit)) {
+        return { call: '3NT', rule: RULE, explanation: `15+ med stopp i deras ${SYM[theirSuit]} – partnerns 3${SYM[partnerMajor]} är bara fyra kort (4-3, ingen känd fit) → 3NT.` }
+      }
+      if (p >= 15) {
+        return { call: `4${BID[partnerMajor]}`, rule: RULE, explanation: `15+ utan stopp i deras ${SYM[theirSuit]} → 4${SYM[partnerMajor]} på 4-3-fiten.` }
+      }
+      return pass(`Under 15 – avböjer inbjudan.`)
+    }
     const fp = pointsWithFloor(hand, partnerMajor, 'bergen')
     if (fp.points >= 15) {
       return { call: `4${BID[partnerMajor]}`, rule: RULE, explanation: `15+ med 3 stöd i 5-3-fiten → 4${SYM[partnerMajor]}.` }
