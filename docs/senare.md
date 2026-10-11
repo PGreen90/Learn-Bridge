@@ -74,6 +74,16 @@ en giv eller ett frö flyttas tillbaka till bevaka med testfil.
     (cirka tio minuter). Svepet ser bara bottarnas egna budvägar — en budföljd som
     bara en människa väljer mäts inte, hur många givar som än körs.
 
+### Lågfärgsstödet — två kvarvarande hål (NU 2026-10-11, LIVE fafc747)
+- **10–11 med tre kort i öppnarens lågfärg efter deras 2-lägesinkliv** (1♦–(2♠)–?)
+  utan stopp och utan annat bud: 1NT finns inte, cuen kräver nu 4+ eller 12+ → boten
+  passar (auktionsdiffen: "cue (limithöjning+) 3D → pass", 2 kontrakt, DD −800).
+  Ägarfråga: vad bjuder handen?
+- **Svararen passar öppnarens nya färg på 1-läget med 0–1 kort i första färgen**
+  (1♣–1♥–1♠–P), fast §5-tabellen kallar 1♠ "krav 1 rond". Upptäckt när 1NT-regeln
+  först var för bred (25 kontrakt, DD −830 för 1NT där) — ägarbeslutet 2026-10-11
+  gällde bara två kort. Ägarfråga: är budet krav, och vad bjuder den svaga handen?
+
 ### 5-5-handen med 11–12 efter 1m–1M–1NT (fynd 2026-09-29, NMF-ombyggnaden #91)
 Sedan NMF = utgångskrav (13+) går inbjudningshanden 2NT — även **5-5 med renons**
 (frö 20271330: ♠Q82 ♥KT742 ♦— ♣AKT98, 11 hp → 2NT → 3NT mot 13). Ägaren 2026-09-30:
