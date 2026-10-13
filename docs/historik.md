@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-13 (Nattkedjans härdning — ägarbeslut "mer stabilt och pålitligt"; BYGGD, ej pushad)
+## 2026-10-13 (Nattkedjans härdning — ägarbeslut "mer stabilt och pålitligt" — LIVE, mergepunkt cee4291; provkörning av botspelet grön: båda seten "fanns redan", 12/12 inne)
 Morgonen 2026-10-13 visade appen "Dagens givar är inte klara än" kl 06:20.
 `gh run list`: botspelet rött kl 05:54 ("Ingen tävling 2026-10-13 — har
 givgenereringen fallerat?"), förscreeningen grön (den räknar givarna ur fröet och

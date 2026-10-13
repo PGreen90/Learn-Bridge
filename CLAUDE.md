@@ -11,10 +11,10 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-10-13): kolla att nattkedjan gick (`gh run list
-> --limit 6`: generering → bottar → granskning); sedan /felrapporter; NU är härdningen —
-> väntar på ägarens PCD om den inte redan är LIVE (kolla `git log`).
+> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU är TOM
+> (härdningen LIVE cee4291) → visa NÄST/SENARE, ägaren väljer nästa NU.
 
-### 🔵 NU — nattkedjans härdning (ägarbeslut 2026-10-13: "mer stabilt och pålitligt")
+### 🔵 NU — TOM (senast: nattkedjans härdning, ägarbeslut 2026-10-13 "mer stabilt och pålitligt", LIVE cee4291)
 2026-10-13 kom ingen tävling (cronens enda databasanrop föll, inget försökte om).
 Nu: delad `api-src/_lib/sakerstall-tavling.ts` med omförsök (cron + bottar) ·
 bottarna LÄKER en saknad tävling själva (gul varning, aldrig rött) · reservkörning
