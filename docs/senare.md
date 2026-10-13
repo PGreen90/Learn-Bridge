@@ -74,6 +74,18 @@ en giv eller ett frö flyttas tillbaka till bevaka med testfil.
     (cirka tio minuter). Svepet ser bara bottarnas egna budvägar — en budföljd som
     bara en människa väljer mäts inte, hur många givar som än körs.
 
+### Tävlingsvyn vid nätavbrott: "väntar" säger fel sak (fynd 2026-10-13, Olivers skärmbild)
+Ett sex minuters nätavbrott på spelarens telefon (Vercel-loggen: tre uppdatera-tryck
+nådde servern och besvarades, svaren kom aldrig tillbaka; två inskick lämnade aldrig
+telefonen) visades som fyra "väntar" + två "ej inskickad" — samma ord "väntar" som för
+"inne men inte poängsatt än", och ingen rad sa att servern inte nåddes. Appen gjorde
+rätt (sparade lokalt, skickade om när nätet kom tillbaka, inget gick förlorat) men
+både spelaren och ägaren läste det som ett appfel. Förslag: när `fetchTopplista` ger
+`status: 'fel'` → en rad "Kunde inte nå servern — försöker igen om 5 s", automatiska
+omförsök med växande paus, och ett annat ord än "väntar" på raderna under tiden
+(`src/pages/DagensTavling.tsx`, `src/pages/tavling/TavlingDelar.tsx`). Ägaren
+valde inte NU/SENARE vid sessionsslutet 2026-10-13 — fråga.
+
 ### Lågfärgsstödet — två kvarvarande hål (NU 2026-10-11, LIVE fafc747)
 - **10–11 med tre kort i öppnarens lågfärg efter deras 2-lägesinkliv** (1♦–(2♠)–?)
   utan stopp och utan annat bud: 1NT finns inte, cuen kräver nu 4+ eller 12+ → boten
