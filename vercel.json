@@ -3,7 +3,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/bord.js": { "maxDuration": 60 }
+    "api/bord.js": {
+      "maxDuration": 60
+    },
+    "api/generera-dagens-givar.js": {
+      "maxDuration": 60
+    }
   },
   "crons": [
     {

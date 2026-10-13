@@ -14,10 +14,17 @@ name: Tävlingsbottarna (nattligt botspel)
 #
 # Idempotent: allt är deterministiskt ur (hemlighet, datum, bricka) och redan
 # inskickade brickor hoppas över — en extra körning (workflow_dispatch) är
-# ofarlig.
+# ofarlig. Därför finns också en RESERVKÖRNING 02:30 UTC (04:30/03:30 svensk
+# tid; nattkedjans härdning 2026-10-13): kostar en minut när allt redan är
+# inne, men fångar en missad första (GitHub kan förskjuta scheman flera timmar,
+# och en Supabase-hicka vid 23:45 ska inte lämna tävlingen utan bottar).
 #
-# RÖD körning = haveri (nät/DB/motorfel/ingen tävling genererad) → GitHub
-# mejlar ägaren. Fynd (avvisade botinskick = motorbuggar) gör ALDRIG körningen
+# Självläkning (samma härdning): saknas dagens tävling — Vercel-cronen 23:05 UTC
+# fallerade — skapar proben set + givar själv ur samma frö (api-src/_lib/
+# sakerstall-tavling.ts) och märker körningen med en gul varning. Rött är
+# reserverat för äkta haveri.
+#
+# RÖD körning = haveri (nät/DB/motorfel) → GitHub mejlar ägaren. Fynd (avvisade botinskick = motorbuggar) gör ALDRIG körningen
 # röd — de är rapport, inte larm.
 #
 # Hemligheter (Settings → Secrets → Actions): DAILY_SEED_SECRET +
@@ -26,6 +33,7 @@ name: Tävlingsbottarna (nattligt botspel)
 on:
   schedule:
     - cron: '45 23 * * *'
+    - cron: '30 2 * * *'
   workflow_dispatch:
 
 concurrency:

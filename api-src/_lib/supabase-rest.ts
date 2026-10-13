@@ -14,8 +14,10 @@ const sov = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /**
  * GET mot Supabase PostgREST med omförsök. `forsok` = max antal försök
- * (standard 3: paus 200 ms → 400 ms mellan). Kastar på 4xx direkt och efter
- * sista försöket vid ihållande 5xx/429/nätfel.
+ * (standard 3), `pausMs` = grundpausen som växer linjärt (standard 200:
+ * 200 ms → 400 ms mellan). Nattkedjan (2026-10-13) tar fler försök med längre
+ * paus — en Supabase-hicka kan vara längre än ett par hundra millisekunder.
+ * Kastar på 4xx direkt och efter sista försöket vid ihållande 5xx/429/nätfel.
  */
 export async function restGet(
   base: string,
@@ -23,6 +25,7 @@ export async function restGet(
   pathWithQuery: string,
   forsok = 3,
   extraHeaders: Record<string, string> = {},
+  pausMs = 200,
 ): Promise<unknown> {
   for (let i = 1; ; i++) {
     let r: Response
@@ -32,14 +35,14 @@ export async function restGet(
       })
     } catch (e) {
       if (i >= forsok) throw e
-      await sov(200 * i)
+      await sov(pausMs * i)
       continue
     }
     if (r.ok) return r.json()
     const transient = r.status === 429 || r.status >= 500
     if (transient && i < forsok) {
       await r.text().catch(() => undefined) // töm kroppen innan nästa försök
-      await sov(200 * i)
+      await sov(pausMs * i)
       continue
     }
     throw new Error(`${pathWithQuery}: ${r.status} ${await r.text()}`)
@@ -87,6 +90,7 @@ export async function restPost(
   body: unknown,
   forsok = 3,
   extraHeaders: Record<string, string> = {},
+  pausMs = 200,
 ): Promise<Response> {
   for (let i = 1; ; i++) {
     let r: Response
@@ -104,13 +108,13 @@ export async function restPost(
       })
     } catch (e) {
       if (i >= forsok) throw e
-      await sov(200 * i)
+      await sov(pausMs * i)
       continue
     }
     const transient = r.status === 429 || r.status >= 500
     if (transient && i < forsok) {
       await r.text().catch(() => undefined)
-      await sov(200 * i)
+      await sov(pausMs * i)
       continue
     }
     return r

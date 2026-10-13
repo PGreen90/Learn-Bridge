@@ -232,6 +232,22 @@ koden) — sätts när Resend + mejlmallarna konfigureras.
   (En tillfällig motorprov-endpoint bevisade först buntningen live på
   `https://rebidz.com/api/motorprov`; den togs bort när hämtningsvägen fanns.)
   Kvar att bunta in när de behövs: `decideCall`/`rebuildPlay`/`botCardSmart`/`scoring`.
+- **Nattkedjan härdad 2026-10-13 (ägarbeslut: "mer stabilt och pålitligt").**
+  Natten till 2026-10-13 kom ingen tävling: cronens egen `rest()` gjorde ETT
+  databasanrop och kastade på första 5xx, Vercel-cronen körs en gång per dygn
+  utan omförsök, och Vercel sparar körloggen bara en kort stund (orsaken gick
+  inte att läsa i efterhand). Tre lager nu: (1) skrivningen bor i den delade
+  `api-src/_lib/sakerstall-tavling.ts` med omförsök (`restGet`/`restPost`,
+  `forsok` + `pausMs`), och `vercel.json` ger funktionen `maxDuration: 60`;
+  (2) **självläkning**: nattbottarna anropar samma funktion innan de spelar —
+  finns tävlingen är det två verkningslösa skrivningar, saknas den skapas set +
+  givar ur samma frö (identiska givar) och körningen får en gul `::warning`;
+  (3) **reservkörning** av botspelet 02:30 UTC (idempotent — kostar en minut när
+  allt är inne). Facit: `api-src/_lib/sakerstall-tavling.test.ts`,
+  `api-src/generera-dagens-givar.test.ts`, lås i `src/deploy-config.test.ts` +
+  `src/workflow-vakt.test.ts`. Manuell räddning av en dag (båda idempotenta):
+  `MSYS_NO_PATHCONV=1 npx vercel crons run /api/generera-dagens-givar --scope rebidz --project learn-bridge`
+  och `gh workflow run tavling-botspelare.yml`.
 - **Giv-genereringen — KLAR & LIVE-VERIFIERAD 2026-08-10.** Ett schemalagt
   serverjobb (`api-src/generera-dagens-givar.ts`, Vercel-cron `5 23 * * *` UTC =
   strax efter midnatt svensk tid året runt, även DST) genererar dagens 12 givar
@@ -383,7 +399,9 @@ och man har alltid någon att mäta sig mot.
   människors inskick — boten har ingen egen poängväg. Avvisat botinskick =
   motorbugg → FYND i rapporten, aldrig rött.
 - `.github/workflows/tavling-botspelare.yml` — cron 23:45 UTC (efter
-  givgenereringens 23:05); idempotent, samma tre secrets som nattgranskningen.
+  givgenereringens 23:05) **+ reservkörning 02:30 UTC** (2026-10-13); idempotent,
+  samma tre secrets som nattgranskningen. Saknas dagens tävling läker proben den
+  själv (`sakerstallTavling`, gul varning) — rött är reserverat för äkta haveri.
 - Topplistan + travellern skickar `bot`-flaggan (ur `profiles.is_bot`);
   klienten märker raden med 🤖 ("Datorspelare").
 

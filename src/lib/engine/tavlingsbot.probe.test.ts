@@ -33,8 +33,10 @@
 //     om via service-nyckeln (UPDATE-granten, migration 0011); namnbytet slår
 //     igenom retroaktivt eftersom listorna slår upp namn via id.
 //
-// RÖD körning = enbart haveri (nät/DB/motorfel/ingen tävling) → GitHub mejlar
-// ägaren. Fynd (avvisade/skenande givar) gör ALDRIG körningen röd.
+// RÖD körning = enbart haveri (nät/DB/motorfel) → GitHub mejlar ägaren. Fynd
+// (avvisade/skenande givar) gör ALDRIG körningen röd. Saknas dagens tävling
+// (Vercel-cronen fallerade) LÄKER proben den själv — se steg 1 nedan
+// (nattkedjans härdning 2026-10-13) — och märker körningen med en gul varning.
 //
 // Utdata: konsolen + revisor-output/tavlingsbot-<datum>.{json,txt} (gitignorat).
 
@@ -43,7 +45,9 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import { join } from 'node:path'
 import { fronyckel, playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
+import { sakerstallTavling } from '../../../api-src/_lib/sakerstall-tavling'
 import { validera } from '../../../api-src/_lib/validera'
+import { dailyNumber } from './daily'
 import { nivaSmartOpts, TAVLINGSBOTTAR, type Tavlingsbot } from './botniva'
 import { giltigMotorstampel } from './tavlingsgranskning'
 import { spelaBotGiv } from './botspelare'
@@ -168,23 +172,30 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
     return id
   }
 
-  // 1) Dagens tävling MÅSTE finnas — saknas den har Vercel-cronen fallerat,
-  //    och det ska bli rött (mejl till ägaren), inte tyst grönt.
-  const sets = (await rest(`daily_sets?comp_date=eq.${DATUM}&form=eq.${FORM}&select=id,size`)) as Array<{
-    id: string
-    size: number
-  }>
-  if (FORM === 'imp' && !sets.length) {
-    // IMP-setet finns först när migration 0014 släppt den gamla "en per dag"-
-    // nyckeln (docs/imp-tavling-plan.md, deploy-sekvensen). Tills dess: grönt
-    // med besked — MP-setet är kärnjobbet och vaktas av raden nedan.
-    console.log(`Ingen IMP-tävling ${DATUM} än (0014 ej körd?) — inget att spela.`)
-    return
+  // 1) Dagens tävling ska finnas — och saknas den LÄKER vi den själva (natt-
+  //    kedjans härdning 2026-10-13). Samma delade funktion som Vercel-cronen,
+  //    samma hemlighet och frönyckel → exakt samma givar; idempotent, så finns
+  //    tävlingen är det två verkningslösa skrivningar. Natten till 2026-10-13
+  //    skrev cronen inget, körningen blev röd kl 05:54 med "Ingen tävling" och
+  //    tävlingsdagen stod tom tills ägaren såg det. Nu räddas dagen av sig
+  //    själv; att cronen föll syns som gul varning i körningen + i rapporten.
+  //    Tävlingsnumret ankras vid 12 UTC på DATUM (samma Stockholmsdygn, som
+  //    dailyDateFromNumber) — identiskt med vad cronen hade satt.
+  const nummer = dailyNumber(new Date(`${DATUM}T12:00:00Z`))
+  const set = await sakerstallTavling(base!, key!, secret!, DATUM, nummer, FORM, { forsok: 6, pausMs: 1000 })
+  if (set.skapad) {
+    console.log(
+      `::warning title=Självläkning ${DATUM} ${FORM}::Tävlingen saknades — givgenereringen (Vercel-cron 23:05 UTC) måste ha fallerat. Nattbottarna skapade set + ${set.size} givar själva.`,
+    )
   }
-  expect(sets.length, `Ingen tävling ${DATUM} — har givgenereringen (Vercel-cron) fallerat?`).toBeGreaterThan(0)
-  const set = sets[0]
 
   const rader: string[] = [`=== TREBOTTARNA ${DATUM} (${FORM.toUpperCase()}-tävlingen) ===`]
+  if (set.skapad) {
+    rader.push(
+      `SJÄLVLÄKNING: tävlingen saknades när bottarna kom — givgenereringen (Vercel-cron 23:05 UTC) fallerade. ` +
+        `Set + ${set.size} givar skapades här ur samma frö (api-src/_lib/sakerstall-tavling.ts).`,
+    )
+  }
   const fynd: string[] = []
 
   for (const bot of TAVLINGSBOTTAR) {
@@ -262,7 +273,7 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
   mkdirSync(join(process.cwd(), 'revisor-output'), { recursive: true })
   writeFileSync(
     join(process.cwd(), 'revisor-output', `tavlingsbot-${DATUM}${SUFFIX}.json`),
-    JSON.stringify({ datum: DATUM, form: FORM, bottar: TAVLINGSBOTTAR.map((b) => b.namn), fynd }, null, 2),
+    JSON.stringify({ datum: DATUM, form: FORM, sjalvlakning: set.skapad, bottar: TAVLINGSBOTTAR.map((b) => b.namn), fynd }, null, 2),
   )
   writeFileSync(
     join(process.cwd(), 'revisor-output', `tavlingsbot-${DATUM}${SUFFIX}.txt`),
