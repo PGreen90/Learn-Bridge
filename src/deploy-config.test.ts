@@ -6,6 +6,7 @@ import indexHtmlSource from '../index.html?raw'
 // ?url på en fil i public/ ger dess adress — men för att vakta att FILEN
 // finns räcker inte det (adressen blir en sträng oavsett). fs används i stället.
 import { existsSync } from 'node:fs'
+import vercelJson from '../vercel.json'
 
 // R5-fynd #2 (uppdaterat vid Vercel-flytten 2026-07-05): Vite `base` MÅSTE
 // matcha var appen serveras, annars blir HELA sidan blank. På Vercel serveras
@@ -44,5 +45,19 @@ describe('deploy-konfiguration', () => {
   test('service workern lämnar /api/* orört (denylist + NetworkOnly)', () => {
     expect(viteConfigSource).toContain('navigateFallbackDenylist')
     expect(viteConfigSource).toContain("handler: 'NetworkOnly'")
+  })
+})
+
+// Nattkedjans härdning (2026-10-13): givgenereringen gör nu omförsök mot
+// databasen (sakerstallTavling) och får inte strypas av Vercels korta
+// standardtidsgräns mitt i ett omförsök — då står dagen utan tävling igen.
+describe('vercel.json: givgenereringen har tid att försöka om', () => {
+  test('api/generera-dagens-givar.js har maxDuration ≥ 30 s', () => {
+    const fn = (vercelJson as { functions?: Record<string, { maxDuration?: number }> }).functions?.['api/generera-dagens-givar.js']
+    expect(fn?.maxDuration ?? 0).toBeGreaterThanOrEqual(30)
+  })
+  test('cronen för givgenereringen står kvar', () => {
+    const crons = (vercelJson as { crons?: Array<{ path: string }> }).crons ?? []
+    expect(crons.map((c) => c.path)).toContain('/api/generera-dagens-givar')
   })
 })

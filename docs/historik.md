@@ -10,6 +10,32 @@
 
 ---
 
+## 2026-10-13 (Nattkedjans härdning — ägarbeslut "mer stabilt och pålitligt"; BYGGD, ej pushad)
+Morgonen 2026-10-13 visade appen "Dagens givar är inte klara än" kl 06:20.
+`gh run list`: botspelet rött kl 05:54 ("Ingen tävling 2026-10-13 — har
+givgenereringen fallerat?"), förscreeningen grön (den räknar givarna ur fröet och
+märker inte en tom databas), gårdagens körning grön på samma kod. Vercel-cronen
+23:05 UTC hade inte skrivit något; loggen var redan borta (Vercel sparar den kort),
+så orsaken gick inte att läsa — mest troligt ett övergående databasfel: cronens
+`rest()` gjorde ETT anrop och kastade på första 5xx, och ingenting senare i
+kedjan kunde laga dagen. **Räddning för hand:** `MSYS_NO_PATHCONV=1 npx vercel
+crons run /api/generera-dagens-givar --scope rebidz --project learn-bridge` (Git
+Bash gör annars om sökvägen till en Windows-sökväg) gav båda seten nr 73; sedan
+`gh workflow run tavling-botspelare.yml` (grön). **Härdningen, tre lager:** (1)
+delad `api-src/_lib/sakerstall-tavling.ts` — läs set, upsert set, insert givar,
+alla via `restGet`/`restPost` som fick `pausMs` (bakåtkompatibelt 6:e argument);
+cronen anropar den med `forsok 4, pausMs 500` och `vercel.json` ger funktionen
+60 s; (2) självläkning i `tavlingsbot.probe.test.ts`: samma funktion med
+`forsok 6, pausMs 1000` före spelet; `skapad: true` → `::warning` i körningen +
+rad i rapporten + `sjalvlakning` i JSON, aldrig rött; (3) reservkörning
+`30 2 * * *` i `tavling-botspelare.yml`. Facit före fix: handler-testet
+återskapade exakt nattens fel (`daily_sets: 503` → 500) innan fixen. Lås:
+`deploy-config.test.ts` (maxDuration ≥ 30, cronen kvar), `workflow-vakt.test.ts`
+(två scheman). Första regex-låset tappade sitt `\\` genom skalet och matchade
+ingenting — kontrollera alltid vad ett skript faktiskt skrev.
+
+---
+
 ## 2026-10-11 (NU: stöd i partnerns lågfärg — ägarbeslut — LIVE, mergepunkt fafc747)
 Ägarens regel: lovar partnerns bud 3+ (1♣/1♦) ska stödet lova 4+; lovar det 5+
 (inkliv) räcker 3+. Stödsvepet (`STOD=1 npx vitest run src/lib/engine/stodsvep.probe.test.ts`,

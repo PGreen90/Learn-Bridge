@@ -7,6 +7,12 @@
 // svensk tid, men är IDEMPOTENT: körs den om samma dag skapas inga dubbletter
 // (unika nycklar + "ignore-duplicates"), så en extra körning är ofarlig.
 //
+// Härdad 2026-10-13 (natten då ingen tävling kom): själva skrivningen bor i den
+// delade `sakerstallTavling` (_lib/sakerstall-tavling.ts) med omförsök på
+// 5xx/429/nätfel — och nattbottarna anropar samma funktion innan de spelar, så
+// faller cronen ändå läker botspelet dagen. vercel.json ger funktionen 60 s så
+// omförsöken inte stryps.
+//
 // Skriver till databasen med SERVICE-nyckeln (kringgår radskyddet) via Supabase
 // REST-API med fetch — inget npm-beroende, så den buntade funktionen förblir
 // självständig. Service-nyckeln och fröet bor BARA i serverns miljövariabler.
@@ -19,46 +25,13 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO, dailyNumber } from '../src/lib/engine/daily'
-import { genereraGivar } from './_lib/generera'
-import { fronyckel } from './_lib/seed'
+import { sakerstallTavling } from './_lib/sakerstall-tavling'
 import type { TavlingsForm } from '../src/lib/engine/matchpoints'
-
-const TÄVLINGSSTORLEK = 12
 
 /** Dagens två tävlingar, i den ordning de skapas. MP FÖRST: den får aldrig
  *  falla för att IMP-setet inte kan skapas (t.ex. innan migration 0014 släppt
  *  den gamla "en per dag"-nyckeln — då faller IMP-raden tyst, se nedan). */
 const FORMER: TavlingsForm[] = ['mp', 'imp']
-
-/** Ett PostgREST-anrop mot en tabell med service-nyckeln. Kastar vid fel.
- *  onConflict = den unika kolumn(erna) upserten ska slå samman på (annars
- *  antar PostgREST primärnyckeln, och vår upsert på comp_date/(set_id,board)
- *  krockar i stället för att bli idempotent). */
-async function rest(
-  base: string,
-  key: string,
-  table: string,
-  body: unknown,
-  prefer: string,
-  onConflict?: string,
-): Promise<unknown> {
-  const q = onConflict ? `?on_conflict=${encodeURIComponent(onConflict)}` : ''
-  const r = await fetch(`${base}/rest/v1/${table}${q}`, {
-    method: 'POST',
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      'Content-Type': 'application/json',
-      Prefer: prefer,
-    },
-    body: JSON.stringify(body),
-  })
-  if (!r.ok) {
-    throw new Error(`${table}: ${r.status} ${await r.text()}`)
-  }
-  const text = await r.text()
-  return text ? JSON.parse(text) : null
-}
 
 export default async function handler(
   req: IncomingMessage,
@@ -92,44 +65,22 @@ export default async function handler(
     const dateISO = stockholmDateISO()
     const nummer = dailyNumber()
 
-    // 3+4) Per form: tävlingsdagen (idempotent upsert på unik (comp_date, form),
-    //      migration 0013) → dess id → givarna (idempotent: unik (set_id, board)
-    //      → dubbletter ignoreras). MP först; ett fel på IMP-setet stoppar
-    //      ALDRIG MP-setet — det rapporteras i svaret i stället (och nästa
-    //      körning tar det, cronen är idempotent).
-    const utfall: Record<string, { antalGivar: number; brickor: number[] } | { fel: string }> = {}
+    // 3+4) Per form: set + givar via den delade, idempotenta och omförsökande
+    //      sakerstallTavling (2026-10-13). MP först; ett fel på IMP-setet stoppar
+    //      ALDRIG MP-setet — det rapporteras i svaret i stället (nästa anrop,
+    //      cronen eller nattbottarnas självläkning, tar det).
+    const utfall: Record<string, { antalGivar: number; brickor: number[]; skapad: boolean } | { fel: string }> = {}
     for (const form of FORMER) {
       try {
-        const deals = genereraGivar(seedSecret, fronyckel(dateISO, form), TÄVLINGSSTORLEK)
-        const sets = (await rest(
-          base,
-          key,
-          'daily_sets',
-          [{ comp_date: dateISO, form, size: TÄVLINGSSTORLEK, daily_number: nummer }],
-          'resolution=merge-duplicates,return=representation',
-          'comp_date,form',
-        )) as Array<{ id: string }>
-        const setId = sets?.[0]?.id
-        if (!setId) throw new Error('daily_sets gav inget id tillbaka')
-        await rest(
-          base,
-          key,
-          'daily_deals',
-          deals.map((d) => ({
-            set_id: setId,
-            board: d.board,
-            dealer: d.dealer,
-            vulnerability: d.vulnerability,
-            hands: d.hands,
-          })),
-          'resolution=ignore-duplicates,return=minimal',
-          'set_id,board',
-        )
-        utfall[form] = { antalGivar: deals.length, brickor: deals.map((d) => d.board) }
+        const set = await sakerstallTavling(base, key, seedSecret, dateISO, nummer, form, { forsok: 4, pausMs: 500 })
+        utfall[form] = { antalGivar: set.brickor.length, brickor: set.brickor, skapad: set.skapad }
+        console.log(`[generera-dagens-givar] ${dateISO} ${form}: ${set.skapad ? 'skapad' : 'fanns redan'} (${set.brickor.length} givar)`)
       } catch (err) {
         // MP-setet är kärnjobbet — dess fel går hela vägen ut som 500.
         if (form === 'mp') throw err
-        utfall[form] = { fel: String(err instanceof Error ? err.message : err) }
+        const fel = String(err instanceof Error ? err.message : err)
+        utfall[form] = { fel }
+        console.error(`[generera-dagens-givar] ${dateISO} ${form} FEL: ${fel}`)
       }
     }
 
@@ -158,7 +109,7 @@ export default async function handler(
     }
 
     // Svaret läcker ALDRIG händerna — bara att jobbet lyckades.
-    const mp = utfall.mp as { antalGivar: number; brickor: number[] }
+    const mp = utfall.mp as { antalGivar: number; brickor: number[]; skapad: boolean }
     return json(200, {
       ok: true,
       tävlingsdag: dateISO,
@@ -170,6 +121,10 @@ export default async function handler(
       stadadeBord: stadade,
     })
   } catch (err) {
-    return json(500, { ok: false, fel: String(err instanceof Error ? err.message : err) })
+    // Loggraden är det enda spår som finns kvar när dagen gick fel — Vercel
+    // sparar körloggar bara en kort stund, så den ska säga VAR det small.
+    const fel = String(err instanceof Error ? err.message : err)
+    console.error(`[generera-dagens-givar] HAVERI: ${fel}`)
+    return json(500, { ok: false, fel })
   }
 }

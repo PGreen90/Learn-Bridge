@@ -47,3 +47,16 @@ describe('arbetsflödesvakten: varje fil i .github/workflows har hel grundform',
     })
   }
 })
+
+// Nattkedjans härdning (2026-10-13): botspelet är idempotent (redan inskickade
+// brickor hoppas över), så en ANDRA schemalagd körning kostar en minut när allt
+// är inne — men fångar en missad första (GitHub kan förskjuta scheman timmar,
+// och en Supabase-hicka vid 23:45 UTC ska inte lämna tävlingen utan bottar).
+describe('nattbottarna har två schemalagda körningar', () => {
+  test('tavling-botspelare.yml: 23:45 UTC och en reserv på morgonen', () => {
+    const text = readFileSync(join(KATALOG, 'tavling-botspelare.yml'), 'utf8')
+    const crons = [...text.matchAll(/^\s+- cron: '([^']+)'/gm)].map((m) => m[1])
+    expect(crons).toContain('45 23 * * *')
+    expect(crons.length, 'reservkörningen saknas').toBeGreaterThanOrEqual(2)
+  })
+})
