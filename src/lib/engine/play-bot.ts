@@ -14,7 +14,7 @@
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Rank } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { currentWinner, dummyOf, legalCards, PARTNER_SEAT, side, type PlayState } from './play'
+import { currentWinner, dummyOf, legalCards, NEXT_SEAT, PARTNER_SEAT, side, type PlayState } from './play'
 import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats } from './card-counting'
 import { buildHandModel } from './hand-model'
 import { applyOpeningLeadSignal, applySignalReads, partnerLavinthalRequest } from './signal-decode'
@@ -1415,6 +1415,56 @@ function defenderHoldUp(state: PlayState, seat: Seat, legal: Hand, led: Suit): C
 }
 
 /**
+ * §8.11 b (felrapport #106): leder jag `suit` UPP MOT träkarlens styrka? Sant när
+ * jag är motspelare, träkarlen spelar SIST i sticket (sitter till höger om mig),
+ * har minst två kort i färgen varav färgens mästare (säker vinnare – ärlig
+ * räkning mot det som fallit + det jag ser), och minst lika många kort som jag.
+ * Då får bordet välja billigast efter att både jag och partnern lagt – ♠Q7 upp
+ * mot ♠AJ94 skänker ett stick (DD 0 mot 1).
+ */
+function leadsUpToDummyStrength(state: PlayState, seat: Seat, suit: Suit): boolean {
+  if (side(seat) === side(state.contract.declarer)) return false
+  const dummy = dummyOf(state.contract)
+  if (NEXT_SEAT[dummy] !== seat) return false // bordet spelar sist bara när det sitter till höger om mig
+  const bordet = state.hands[dummy].filter((c) => c.suit === suit)
+  const mina = state.hands[seat].filter((c) => c.suit === suit)
+  if (bordet.length < 2 || bordet.length < mina.length) return false
+  const visible = [...state.hands[seat], ...state.hands[dummy]]
+  const played = playedCards(state)
+  return bordet.some((c) => isSureWinner(c, visible, played))
+}
+
+/**
+ * Partnerns senaste BYTESFÄRG: den färg (≠ utspelsfärgen) partnern senast ledde
+ * fritt (på lead i ett avslutat stick). Null om partnern aldrig bytt.
+ */
+function partnerSwitchSuit(state: PlayState, seat: Seat, openingSuit: Suit): Suit | null {
+  const partner = PARTNER_SEAT[seat]
+  for (let i = state.completedTricks.length - 1; i >= 1; i--) {
+    const first = state.completedTricks[i].cards[0]
+    if (first && first.seat === partner && first.card.suit !== openingSuit) return first.card.suit
+  }
+  return null
+}
+
+/**
+ * §8.11 a (felrapport #105): spelar träkarlen NÄST (sitter till vänster om mig)
+ * och slår hans LÄGSTA kort i färgen mitt högsta, är sticket bordets vad jag än
+ * lägger (partnern kan inte gå över det kortet med något lägre än bordets lägsta
+ * heller, så bara en stöld räddar sticket – och då är honnören lika bortkastad).
+ * Då leds LÄGSTA kortet så honnören sparas: ♥2, inte ♥J, in i ett ensamt ♥A.
+ */
+function dummyWinsWhateverILead(state: PlayState, seat: Seat, mineInSuit: Hand): boolean {
+  if (side(seat) === side(state.contract.declarer)) return false
+  const dummy = dummyOf(state.contract)
+  if (NEXT_SEAT[seat] !== dummy) return false
+  const suit = mineInSuit[0].suit
+  const bordet = state.hands[dummy].filter((c) => c.suit === suit)
+  if (bordet.length === 0) return false
+  return rankVal(lowest(bordet).rank) > rankVal(highest(mineInSuit).rank)
+}
+
+/**
  * Tumregel-valet MED förklaring. Samma logik som `botCard` men returnerar också
  * en klartextsmotivering ("Varför?"). Beskrivningarna följer nybörjardoktrinen.
  */
@@ -1495,13 +1545,37 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     }
     // Motspelets utspelfärg (trick 1, om den leddes av vår sida) fortsätts före
     // allt annat – partnerns honnörer sitter ofta bakom den.
+    // §8.11 b (felrapport #106): aldrig UPP MOT träkarlens synliga styrka i
+    // färgen (bordet spelar sist och håller mästaren + längd) — då fortsätts i
+    // stället partnerns senaste bytesfärg, annars faller valet vidare.
     const t1 = state.completedTricks[0]?.cards[0]
-    const attackSuit = defender && t1 && side(t1.seat) === side(seat) ? t1.card.suit : null
+    const openingSuit = defender && t1 && side(t1.seat) === side(seat) ? t1.card.suit : null
+    let attackSuit: Suit | null = null
+    let attackReason = 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.'
+    if (openingSuit !== null && legal.some((c) => c.suit === openingSuit)) {
+      if (!leadsUpToDummyStrength(state, seat, openingSuit)) attackSuit = openingSuit
+      else {
+        const byte = partnerSwitchSuit(state, seat, openingSuit)
+        if (byte !== null && legal.some((c) => c.suit === byte) && !leadsUpToDummyStrength(state, seat, byte)) {
+          attackSuit = byte
+          attackReason =
+            'Jag fortsätter INTE utspelsfärgen: träkarlen spelar sist och har färgens mästare med längd, så varje kort ' +
+            'där går rakt upp i bordets styrka (§8.11). Jag spelar partnerns bytesfärg i stället.'
+        }
+      }
+    }
     const attack = attackSuit !== null ? legal.filter((c) => c.suit === attackSuit) : []
     if (attack.length > 0) {
+      // §8.11 a (felrapport #105): spelar träkarlen näst och slår hans LÄGSTA
+      // kort i färgen allt jag har, är sticket bordets vad jag än lägger – lägg
+      // lägsta kortet och spara honnören (♥2, inte ♥J, in i ett ensamt ♥A).
+      const forlorat = dummyWinsWhateverILead(state, seat, attack)
       return {
-        card: unblockLead(state, seat, leadFromSuit(attack)),
-        reason: 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.',
+        card: forlorat ? lowest(attack) : unblockLead(state, seat, leadFromSuit(attack)),
+        reason: forlorat
+          ? 'Jag fortsätter motspelets utspelfärg men lägger lägsta kortet: träkarlen spelar näst och hans kort i ' +
+            'färgen slår allt jag har, så sticket är bordets vad jag än lägger – honnören sparas och växer (§8.11).'
+          : attackReason,
       }
     }
     // Speldiagnosen S2 (frö 20260731): trumfled in i en KÄND gaffel undviks —

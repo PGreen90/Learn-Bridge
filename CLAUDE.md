@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-13): kolla att nattkedjan gick (`gh run list
+> **NÄSTA SESSION BÖRJAR MED** (2026-10-25): kolla att nattkedjan gick (`gh run list
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU är TOM
 > (härdningen LIVE cee4291) → visa NÄST/SENARE, ägaren väljer nästa NU.
 

@@ -3548,7 +3548,37 @@ behöll kneckten. Nord har fem spader (inklivet), träkarlen hade en, Syd fyra �
 Öst är slut när damen faller, och Nords ♠T9 är stora om Syds kneckt är borta.
 Öst släppte in Nord på ♦A: med kneckten slängd 1NT+1, med kneckten kvar +3.*
 
+### 8.11 Fortsättningen av utspelsfärgen — titta på bordet först (2026-10-25, felrapport #105/#106)
+När jag som motspelare är inne mitt i given fortsätter jag vår sidas utspelsfärg
+(§8) — men först **tittar jag på träkarlens synliga kort** i den färgen. Två vakter:
+- **(a) Bordet spelar näst och slår allt jag har** (hans lägsta kort i färgen är
+  högre än mitt högsta): sticket är bordets vad jag än lägger, så jag lägger
+  **lägsta kortet** och sparar honnören — den växer till ett stick när bordets
+  kort är borta. *Exempel (felrapport #105, 3♣ av Väst, bricka 7):* Nord ♥J2 mot
+  träkarlens ensamma ♥A — **♥2**, inte ♥J; knekten blir stor över Västs ♥T43 när
+  esset fallit. Ägaren: "Spela låg hjärter istället så växer knekt till att bli stor."
+- **(b) Bordet spelar sist och har färgens styrka** (minst två kort, färgens
+  mästare och minst lika många kort som jag): jag leder **inte upp mot den** —
+  varje kort där går rakt in i bordets styrka och bordet väljer billigast efter
+  att både jag och partnern lagt. I stället fortsätter jag **partnerns senaste
+  bytesfärg** (den färg partnern själv bytte till); har partnern inte bytt gäller
+  de vanliga utspelsreglerna. *Exempel (felrapport #106, 3NT av Öst, bricka 10):*
+  Nord ♠Q7 upp mot träkarlens ♠AJ94 efter Syds ♠5-utspel — double-dummy ger
+  spader 0 stick för NS, hjärter/klöver 1. Partnern hade bytt till ♥6 → Nord
+  spelar **hjärter**, inte ♠Q. Ägaren: "Nord lägger sin spader dam och gör
+  bordets kort stora, det är inte ett bra spel."
+Bara ärlig information används: egen hand, träkarlen och korten som fallit.
+Vakterna gäller tumregelspelet (fler kort kvar än Monte-Carlo-fönstret); facit
+`play-bot-fortsatt-utspelsfarg.test.ts`.
+
 ## 9. Ändringslogg
+- **2026-10-25 — Fortsättningen av utspelsfärgen tittar på bordet (§8.11,
+  felrapport #105/#106).** Två vakter i regeln "fortsätt motspelets utspelsfärg":
+  (a) bordet spelar näst och hans lägsta kort slår mitt högsta → lägsta kortet,
+  spara honnören (♥2, inte ♥J, in i ensamt ♥A); (b) bordet spelar sist med
+  färgens mästare + längd → led inte upp mot den, fortsätt partnerns bytesfärg
+  (hjärter, inte ♠Q upp mot ♠AJ94; DD 1 mot 0). Facit
+  `play-bot-fortsatt-utspelsfarg.test.ts` (DD-låset via bridge-dds).
 - **2026-10-11 — Stöd i partnerns lågfärg (ägarbeslut).** Regeln: lovar
   partnerns bud 3+ (1♣/1♦) ska stödet lova 4+; lovar det 5+ (inkliv) räcker 3+.
   Stödsvepet (`STOD=1`, 20 000 givar) visade regeln redan uppfylld nästan

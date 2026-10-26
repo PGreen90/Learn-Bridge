@@ -10,6 +10,24 @@
 
 ---
 
+## 2026-10-25 (/felrapporter #105 + #106 — fortsättningen av utspelsfärgen tittar på bordet, §8.11)
+Nattkedjan grön (förscreening · bottar ×2 · granskning, `gh run list --limit 6`).
+Tre öppna rapporter. **#105** (3♣ av Väst, bricka 7): Nord ledde ♥J ur ♥J2 rakt in i
+träkarlens ensamma ♥A — regeln "fortsätt motspelets utspelsfärg" valde kortet
+med `leadFromSuit` utan att se bordet. **#106** (3NT av Öst, bricka 10): Nord
+fortsatte "utspelsfärgen" med ♠Q ur ♠Q7 upp mot träkarlens ♠AJ94 (bordet spelar
+sist; DD 0 stick mot 1 för hjärter/klöver). Båda i tumregelspelet (9 kort kvar >
+MC-fönstret 8). Fix i `play-bot.ts`: (a) bordet spelar näst och hans lägsta kort
+slår mitt högsta → lägsta kortet; (b) bordet spelar sist med färgens mästare +
+längd → led inte upp mot den, fortsätt partnerns bytesfärg. Facit
+`play-bot-fortsatt-utspelsfarg.test.ts` (DD-lås via bridge-dds). Bok §8.11.
+**#104** (1♥–(1♠)–?, Syd ♠JT94 ♥— ♦KQ65 ♣J8432, 7 hp): motorn bjuder och
+förklarar X som **negativ dubbling** (4-4+ i lågfärgerna) — ägarens rad "Dubbel
+här skall vara stöd inte take out" — ägaren 2026-10-26: "räkna med att jag har fel" → stängd, inget fel. Fynd på
+samma giv: efter 1♥–(1♠)–X–P–2♦–P hoppar Syd till **4♦** ("höjning efter negativ
+dubbling (inbjudan)"): `dummyPoints` räknar hjärterrenonsen +4 (= antal trumf)
+fast partnern ÖPPNADE 1♥ → 11 stödpoäng på 7 hp. Ej lagat — parkerat i senare.md.
+
 ## 2026-10-13 (Nattkedjans härdning — ägarbeslut "mer stabilt och pålitligt" — LIVE, mergepunkt cee4291; provkörning av botspelet grön: båda seten "fanns redan", 12/12 inne)
 Morgonen 2026-10-13 visade appen "Dagens givar är inte klara än" kl 06:20.
 `gh run list`: botspelet rött kl 05:54 ("Ingen tävling 2026-10-13 — har
