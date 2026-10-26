@@ -74,6 +74,18 @@ en giv eller ett frö flyttas tillbaka till bevaka med testfil.
     (cirka tio minuter). Svepet ser bara bottarnas egna budvägar — en budföljd som
     bara en människa väljer mäts inte, hur många givar som än körs.
 
+### Stödpoäng för renons i partnerns ÖPPNADE färg (fynd 2026-10-26, ur felrapport #104)
+Given (bricka 5, giv Nord, NS i zon): 1♥ (N) – 1♠ (E) – X (S, negativ dubbling) –
+P – 2♦ (N, svar på dubblingen) – P – **4♦** (S). Syd ♠JT94 ♥— ♦KQ65 ♣J8432 har
+7 hp, men `dummyPoints` (`evaluation.ts`) räknar hjärterrenonsen **+4** (= antal
+trumf) fast partnern öppnade 1♥ → 11 stödpoäng → raden "höjning efter negativ
+dubbling (inbjudan)" hoppar till 4♦. En renons i partnerns egen långa färg gör
+hans honnörer där värdelösa — den ska knappast räknas som plus. Rimligt facit:
+pass eller högst 3♦. **Ägarfråga före bygge** (budstruktur): ska korthet i
+partnerns bjudna färg nollas, halveras eller räknas fullt? Återskapa med
+`decideCall` på rapportens giv (issue #104, stängd 2026-10-26 som "inget fel" för
+själva dubblingen).
+
 ### Tävlingsvyn vid nätavbrott: "väntar" säger fel sak (fynd 2026-10-13, Olivers skärmbild)
 Ett sex minuters nätavbrott på spelarens telefon (Vercel-loggen: tre uppdatera-tryck
 nådde servern och besvarades, svaren kom aldrig tillbaka; två inskick lämnade aldrig
