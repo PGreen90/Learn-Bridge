@@ -10,6 +10,24 @@
 
 ---
 
+## 2026-10-27 (NU: ångra bara ett kort + återuppta given exakt — ägarval, ändrat spår efter fynd T)
+Ägarens två justeringar. **(1) Ångra = feltryck, ett steg:** `canUndo(state, humanSeats,
+undoFloor)` i `play-undo.ts` — efter ett ångra ligger golvet vid läget man backade
+till, kort under golvet kan inte ångras, ett nytt eget kort går att ångra igen (bara
+det). Golvet bor i `usePlayTable` och följer med i sparningen (`SavedGame.undoFloor`)
+så en omladdning inte låser upp det. **(2) Tävlingsgivar sparas löpande** — förr
+sparades de aldrig (bara frispel/Dagens giv), så en stängd app eller "till
+översikten" gav omspel av hela given med facit. Nu: `SparadTavlingsgiv` per form
+(`tavling-pagaende`/`-imp`, `loadTavlingPagaende`/`saveTavlingPagaende`), sparas i
+bud- och spelfasen, rensas när given är klar; `initialTavlingGame` i Play.tsx
+återupptar när nummer + bricka stämmer; översiktens "Fortsätt" pekar på den
+pågående given ("(pågår)"). Övningsläget rör aldrig luckan. Facit:
+`play-undo.test.ts`, `resume.test.ts`, `angra-ett-steg.test.tsx`,
+`aterupptagning-tavling.test.tsx`; verifierat i webbläsaren (frispel: ångra →
+knappen borta → omladdning → fortfarande borta → nytt kort → tillbaka).
+Kvar: luckan är enhetslokal — samma tävlingsgiv kan spelas om på en annan enhet
+(senare.md, kräver serverlagring enligt Beslut B-grindarna).
+
 ## 2026-10-26/27 (NU: spelförarsidans ledningsval i trumfkontrakt — fynd T byggd, mätt & LIVE, mergepunkt 6fd85bb; ägarbeslut "behåll" 2026-10-27)
 Ägaren valde NÄST 1 som NU. Nytt fynd B-dataset på dagens motor (`fyndb2-*`), ny
 trumf-analys + kandidatrigg `fyndt-utvardera.probe.test.ts` (FYNDT=1). Vinnare offline:

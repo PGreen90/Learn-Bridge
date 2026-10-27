@@ -14,9 +14,26 @@ function sequence(state: PlayState) {
   return [...state.completedTricks.flatMap((t) => t.cards), ...state.currentTrick]
 }
 
-/** Finns något att ångra — har någon av dina platser lagt ett kort? */
-export function canUndo(state: PlayState, humanSeats: Seat[]): boolean {
-  return sequence(state).some((pc) => humanSeats.includes(pc.seat))
+/**
+ * Finns något att ångra — har någon av dina platser lagt ett kort SEDAN golvet?
+ *
+ * `undoFloor` (ägarbeslut 2026-10-27): ångra är till för FELTRYCK, bara ett
+ * steg bakåt och aldrig kedjat. Efter ett ångra ligger golvet vid läget man
+ * backade till (`undoFloorAfter`); kort under golvet kan inte ångras, så man
+ * kan inte backa stick för stick och titta hur korten föll. Först när ett nytt
+ * eget kort lagts (på eller över golvet) går det att ångra igen — det kortet.
+ */
+export function canUndo(state: PlayState, humanSeats: Seat[], undoFloor = 0): boolean {
+  const seq = sequence(state)
+  for (let i = seq.length - 1; i >= 0; i--) {
+    if (humanSeats.includes(seq[i].seat)) return i >= undoFloor
+  }
+  return false
+}
+
+/** Golvet efter ett ångra: antalet kort i läget man backade till. */
+export function undoFloorAfter(prev: PlayState): number {
+  return sequence(prev).length
 }
 
 /**

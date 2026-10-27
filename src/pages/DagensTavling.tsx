@@ -19,7 +19,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
-import { loadTavlingFramsteg, saveTavlingFramsteg } from '../lib/backend'
+import { loadTavlingFramsteg, loadTavlingPagaende, saveTavlingFramsteg } from '../lib/backend'
+import { validSparadTavlingsgiv } from '../lib/engine/resume'
 import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
 import {
   fetchDagensTavling,
@@ -418,7 +419,15 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
 
   // --- Översikten -----------------------------------------------------------
   const antalKlara = klara.length
-  const nästa = förstaOspelade(tavling, klara)
+  // En PÅGÅENDE giv (ägarbeslut 2026-10-27): lämnade man en giv mitt i (eller
+  // appen stängdes) tar "Fortsätt" en tillbaka till exakt den given — Play
+  // återupptar läget ur sparningen. Annars första ospelade som förut.
+  const pagaende = loadTavlingPagaende(form)
+  const pagaendeIndex =
+    validSparadTavlingsgiv(pagaende) && pagaende.nummer === tavling.nummer && !klara.some((k) => k.board === pagaende.board)
+      ? tavling.givar.findIndex((g) => g.deal.board === pagaende.board)
+      : -1
+  const nästa = pagaendeIndex >= 0 ? pagaendeIndex : förstaOspelade(tavling, klara)
 
   return (
     <Skärm>
@@ -451,7 +460,11 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
         {nästa !== null && (
           <div className="flex justify-center">
             <Button onClick={() => setSpelIndex(nästa)}>
-              {antalKlara === 0 ? 'Starta tävlingen →' : `Fortsätt – giv ${tavling.givar[nästa].deal.board} →`}
+              {pagaendeIndex >= 0
+                ? `Fortsätt – giv ${tavling.givar[nästa].deal.board} (pågår) →`
+                : antalKlara === 0
+                  ? 'Starta tävlingen →'
+                  : `Fortsätt – giv ${tavling.givar[nästa].deal.board} →`}
             </Button>
           </div>
         )}

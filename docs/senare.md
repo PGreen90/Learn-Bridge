@@ -86,6 +86,15 @@ partnerns bjudna färg nollas, halveras eller räknas fullt? Återskapa med
 `decideCall` på rapportens giv (issue #104, stängd 2026-10-26 som "inget fel" för
 själva dubblingen).
 
+### Pågående tävlingsgiv på SERVERN (hål kvar efter 2026-10-27)
+Den pågående tävlingsgiven sparas lokalt per enhet (`tavling-pagaende[-imp]`), så
+en avbruten giv återupptas exakt på SAMMA enhet. Kvar: starta given på telefonen,
+se korten, och spela om den från början på datorn (ingen sparning där). Stängs
+bara med serverlagring av halvspelade givar (auktion + kort hittills, per konto +
+tävlingsnummer + bricka) — ett backend-steg som går via Beslut B-grindarna
+(`docs/beslut-b-plan.md`). Alternativ billigare spärr: servern avvisar inskick
+för en bricka som redan "öppnats" på en annan enhet. Ägarbeslut.
+
 ### Tävlingsvyn vid nätavbrott: "väntar" säger fel sak (fynd 2026-10-13, Olivers skärmbild)
 Ett sex minuters nätavbrott på spelarens telefon (Vercel-loggen: tre uppdatera-tryck
 nådde servern och besvarades, svaren kom aldrig tillbaka; två inskick lämnade aldrig
