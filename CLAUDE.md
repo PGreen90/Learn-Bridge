@@ -12,14 +12,13 @@ svarar på vad).
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-10-25): kolla att nattkedjan gick (`gh run list
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU är TOM
-> (härdningen LIVE cee4291) → visa NÄST/SENARE, ägaren väljer nästa NU.
+> (fynd T LIVE, ägarbeslut 2026-10-27) → visa NÄST/SENARE, ägaren väljer nästa NU.
 
-### 🔵 NU — TOM (senast: nattkedjans härdning, ägarbeslut 2026-10-13 "mer stabilt och pålitligt", LIVE cee4291)
-2026-10-13 kom ingen tävling (cronens enda databasanrop föll, inget försökte om).
-Nu: delad `api-src/_lib/sakerstall-tavling.ts` med omförsök (cron + bottar) ·
-bottarna LÄKER en saknad tävling själva (gul varning, aldrig rött) · reservkörning
-02:30 UTC · `vercel.json` 60 s. Detalj + manuell räddning: `docs/beslut-b-plan.md`.
-**Lågfärgsstöd LIVE fafc747** · avblockering LIVE 40f28f6 · kontrollbud LIVE c6dc011.
+### 🔵 NU — TOM (senast: fynd T, stöld i korta trumfhanden, ägarbeslut "behåll" 2026-10-27, LIVE — se historik)
+Spelförarsidans ledningsval i trumf: stöld i korta trumfhanden före trumfdragning +
+stjälhanden fullföljer (§8.12). Offline 82 → 75 stick (6/0), helspel netto +3, flaggor
+±0. Nästa kandidater (trumfdragningens följ · T2 lågt mot gaffel): `docs/speldiagnos.md` S9.
+Senast LIVE: felrapport #105/#106 (§8.11) 01b1e34 · nattkedjans härdning cee4291.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
@@ -91,11 +90,9 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Spelförarsidans ledningsval i TRUMFkontrakt** — största kvarvarande läckan (89 stick
-   i fynd B-riggen, övre gräns 19); "parets färg" var sämre där, ny idé + offline-mätning.
-2. **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: fynd D (byt
+1. **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: fynd D (byt
    färg), MC-på-få-lägen (`docs/senare.md`).
-3. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
+2. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
    (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)

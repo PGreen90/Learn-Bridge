@@ -748,6 +748,89 @@ function declarerPartnershipSuitLead(state: PlayState, seat: Seat, legal: Hand):
 }
 
 /**
+ * STÖLD I DEN KORTA TRUMFHANDEN (fynd T, speldiagnosens S9, 2026-10-26; bok
+ * §8.12). Spelförarsidan på lead i ett trumfkontrakt, i tumregel-fönstret (9+
+ * kort): är partnern (den synliga handen på vår sida) RENONS i en sidofärg, har
+ * trumf kvar och inte FLER trumf än jag, har vår sida trumfmajoritet mot de
+ * osedda, och har jag en riktig förlorare där (högst en nia som inte är säker
+ * vinnare) — då leds förloraren till stöld, före trumfdragningen, cashandet och
+ * reservledningen. En stöld i den korta handen är
+ * ett extra stick (den långa handens trumf ger sina stick ändå); drar man trumf
+ * först försvinner stölden, och cashar man först hinner motståndarna saka.
+ * Mätt offline på fynd B-riggens dataset (`fyndt-utvardera.probe.test.ts`, T1d):
+ * 6 lägen bättre, 0 sämre på dagens motor (82 → 75 stick), samma på datasetet
+ * från 2026-10-01. Ärlig information: egen hand, träkarlen, spelade kort.
+ * Facit `play-bot-stold-korta-handen.test.ts`.
+ */
+function declarerRuffInShortHand(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+  const trump = state.trump
+  if (trump === null) return null
+  if (side(seat) !== side(state.contract.declarer)) return null
+  if (state.currentTrick.length !== 0) return null
+  if (state.hands[seat].length <= 8) return null // ≤8 kort äger Monte-Carlo
+  const dummy = dummyOf(state.contract)
+  const partner = seat === dummy ? state.contract.declarer : dummy
+  const ours = [...state.hands[seat], ...state.hands[partner]]
+  const played = playedCards(state)
+  const myTrumps = state.hands[seat].filter((c) => c.suit === trump).length
+  const hisTrumps = state.hands[partner].filter((c) => c.suit === trump).length
+  if (hisTrumps === 0 || hisTrumps > myTrumps) return null
+  // Trumfmajoritet: med fler trumf ute än vi har ihop (svag trumf, t.ex. 853 mot 97
+  // när sju är ute) blir stölden en överstöld – då gäller de gamla reglerna.
+  // Offline-mätt lika bra som utan villkoret (T1g = T1d) och sunt.
+  if (unseenTrumpCount(state, seat) > myTrumps + hisTrumps) return null
+  const loser = (c: Card) => c.suit !== trump && rankVal(c.rank) <= rankVal('9') && !isSureWinner(c, ours, played)
+  const suitsAll: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades']
+  let best: { suit: Suit; n: number } | null = null
+  for (const s of suitsAll) {
+    if (s === trump) continue
+    if (state.hands[partner].some((c) => c.suit === s)) continue // partnern måste vara renons
+    const mine = legal.filter((c) => c.suit === s && loser(c))
+    if (mine.length === 0) continue
+    const n = state.hands[seat].filter((c) => c.suit === s).length
+    if (!best || n > best.n) best = { suit: s, n }
+  }
+  if (!best) return null
+  const card = lowest(legal.filter((c) => c.suit === best!.suit && loser(c)))
+  return {
+    card,
+    reason:
+      'Jag spelar en förlorare till stöld i den korta trumfhanden: partnern är renons och har trumf kvar ' +
+      '(inte fler än jag), så stölden är ett extra stick — det tar jag före trumfdragningen, annars försvinner det (§8.12).',
+  }
+}
+
+/**
+ * STJÄLHANDEN FULLFÖLJER (fynd T, §8.12): partnern på spelförarsidan ledde ett kort
+ * i en sidofärg som "vinner" sticket just nu, men jag är renons med trumf och en
+ * motståndare spelar EFTER mig. Är partnerns kort inte ett säkert stick (ett
+ * högre kort i färgen är osett) stjäl jag — annars tar fjärde hand sticket och
+ * stölden, som ledningen var till för, går förlorad. Partnerns SÄKRA vinnare
+ * stjäls aldrig (då sakas som förr). Lägsta trumfen: en högre trumf sparas till
+ * dragningen. Ärlig räkning: egen hand, partnerns (synliga) hand, spelade kort.
+ */
+function declarerRuffsPartnersLoser(state: PlayState, seat: Seat, legal: Hand, led: Suit, bestCard: Card): CardChoice | null {
+  const trump = state.trump
+  if (trump === null || led === trump || bestCard.suit === trump) return null
+  if (side(seat) !== side(state.contract.declarer)) return null
+  if (legal.some((c) => c.suit === led)) return null // inte renons
+  const myTrumps = legal.filter((c) => c.suit === trump)
+  if (myTrumps.length === 0) return null
+  const SEATS_ALL: Seat[] = ['N', 'E', 'S', 'W']
+  const oppAfterMe = SEATS_ALL.some((s) => side(s) !== side(seat) && !state.currentTrick.some((pc) => pc.seat === s))
+  if (!oppAfterMe) return null // jag är sist: partnern vinner säkert
+  const ours = [...state.hands[seat], ...state.hands[PARTNER_SEAT[seat]]]
+  const played = [...playedCards(state), ...state.currentTrick.map((pc) => pc.card)]
+  if (isSureWinner(bestCard, ours, played)) return null
+  return {
+    card: lowest(myTrumps),
+    reason:
+      'Partnern spelade en förlorare mot min renons – jag stjäl (lågt) i stället för att saka: partnerns kort ' +
+      'håller bara tills motståndaren bakom mig lägger, och stölden är sticket vi spelade för (§8.12).',
+  }
+}
+
+/**
  * Spelförarplan FÖRE cashandet (felrapport #32, docs/bot-hjarna.md
  * "förberedelsen vid 9–13 kort"): är spelförarsidan inne och har en LÅNG färg som
  * behöver etableras – en near-solid längd där motståndarna håller en spärr (t.ex.
@@ -1489,6 +1572,10 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     if (parets) return parets
     const establish = establishLongSuit(state, seat, legal)
     if (establish) return establish
+    // Fynd T (§8.12, 2026-10-26): i TRUMF stjäls förlorarna i den korta
+    // trumfhanden FÖRE trumfdragning och cash.
+    const stold = declarerRuffInShortHand(state, seat, legal)
+    if (stold) return stold
 
     // Mitt i given och inne: cash:a säkra vinnare uppifrån i stället för att leda
     // lågt ur längsta färgen (annars tas 10 stick där 13 var kalla).
@@ -1626,6 +1713,12 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
 
   // Partnern leder redan sticket → slösa inte, kasta lågt (ruffa aldrig partnern).
   if (side(bestSeat) === side(seat)) {
+    // Fynd T (§8.12, 2026-10-26): partnern ledde en FÖRLORARE mot min renons för
+    // stöld — jag stjäl när partnerns kort inte är ett säkert stick och en
+    // motståndare spelar efter mig (partnern "vinner" bara tills fjärde hand
+    // lägger). Mätningen S9: utan detta sakade stjälhanden (frö 20260764, −2).
+    const stjal = declarerRuffsPartnersLoser(state, seat, legal, led, bestCard)
+    if (stjal) return stjal
     // …MEN spelförarsidan gömmer sig inte bakom partnerns SLAGBARA kort: kan en
     // motståndare som spelar efter mig gå över, går jag själv upp och vinner
     // billigast (felrapport #48).
@@ -1856,6 +1949,15 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
         reason:
           'Jag ser båda våra händer och spelar färgkombinationen: det här kortet ger flest ' +
           'stick i färgen totalt – att vinna billigast skulle skänka bort en honnör senare.',
+      }
+    }
+    // Fynd T (§8.12): en STÖLD är ett stick i sig — spelförarsidans tredje hand
+    // renons i ledd sidofärg stjäl LÅGT och går inte "upp med toppen" (frö
+    // 20260778: ♠J i stället för ♠5 lät motståndarnas ♠T9 växa, −2).
+    if (!iAmDefender && state.trump !== null && led !== state.trump && !legal.some((c) => c.suit === led) && winners.every((c) => c.suit === state.trump)) {
+      return {
+        card: lowest(winners),
+        reason: 'Jag stjäl så billigt som möjligt: trumfen vinner sticket, och mina högre trumf sparas till trumfdragningen (§8.12).',
       }
     }
     // SPELFÖRARSIDANS TREDJE HAND med en DOLD försvarare bakom (felrapport #104,

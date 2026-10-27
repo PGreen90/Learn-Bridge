@@ -10,6 +10,17 @@
 
 ---
 
+## 2026-10-26/27 (NU: spelförarsidans ledningsval i trumfkontrakt — fynd T byggd, mätt & LIVE; ägarbeslut "behåll" 2026-10-27)
+Ägaren valde NÄST 1 som NU. Nytt fynd B-dataset på dagens motor (`fyndb2-*`), ny
+trumf-analys + kandidatrigg `fyndt-utvardera.probe.test.ts` (FYNDT=1). Vinnare offline:
+T1d/T1g "stöld i den korta trumfhanden före trumfdragning" (82 → 75 stick, 6/0, samma
+på datasetet 2026-10-01). Byggd som `declarerRuffInShortHand` (§8.12). Helmätning 1
+(bara ledningen) netto −1 → spårningen visade att stjälhanden sakade/stal högt →
+fix 2 `declarerRuffsPartnersLoser` + stöld lågt i tredje hand. Helmätning 2 netto
++3 (6 givar/4), flaggor ±0: neutralt-positivt — ägaren valde "behåll" 2026-10-27, PCD. T2 (lågt mot
+gaffel) mätt blandat, ej byggd. Allt i `docs/speldiagnos.md` S9; jämförelsen
+`scripts/jamfor-speldiagnos.mjs`.
+
 ## 2026-10-25 (/felrapporter #105 + #106 — fortsättningen av utspelsfärgen tittar på bordet, §8.11)
 Nattkedjan grön (förscreening · bottar ×2 · granskning, `gh run list --limit 6`).
 Tre öppna rapporter. **#105** (3♣ av Väst, bricka 7): Nord ledde ♥J ur ♥J2 rakt in i
