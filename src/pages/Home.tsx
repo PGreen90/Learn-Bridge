@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
+import { useAuth } from '../components/AuthProvider'
 
 // Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
 // oss för mycket"): varumärkesblocket överst (frameless guldspader + tvåfärgat
@@ -94,7 +95,7 @@ function ModeCard({
         <ModeIcon icon={icon} />
         <div className="min-w-0">
           <div className="font-semibold text-emerald-50">{title}</div>
-          <div className="text-sm text-emerald-100/70">{description}</div>
+          <div className="text-sm text-emerald-100/90">{description}</div>
         </div>
       </div>
     </Link>
@@ -106,8 +107,13 @@ function ModeCard({
  *  "Dagens IMP" (tolv egna givar räknade i IMP). Den fria "Dagens giv" är dold
  *  sedan tävlingen ersatte den (grindbeslut 2026-08-10 — daily.ts +
  *  delningskoden finns kvar, bara avlänkad). Konto krävs; själva grinden
- *  sitter på tävlingssidan. */
+ *  sitter på tävlingssidan — men kortet FÖRVARNAR (impeccable-provet
+ *  2026-10-27): utloggad visar pillret "Kräver konto" i stället för "12 givar",
+ *  så ingen trycker in i tävlingen och först där möts av inloggningen. Under
+ *  sessionskontrollen visas "12 givar" så pillret inte blinkar. */
 function TavlingCard({ to, titel, text }: { to: string; titel: string; text: string }) {
+  const { loading, signedIn } = useAuth()
+  const pill = !loading && !signedIn ? 'Kräver konto' : '12 givar'
   return (
     <Link
       to={to}
@@ -119,10 +125,10 @@ function TavlingCard({ to, titel, text }: { to: string; titel: string; text: str
           <div className="flex items-center gap-2 font-semibold text-emerald-50">
             {titel}
             <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
-              12 givar
+              {pill}
             </span>
           </div>
-          <div className="text-sm text-emerald-100/70">{text}</div>
+          <div className="text-sm text-emerald-100/90">{text}</div>
         </div>
       </div>
     </Link>
@@ -147,8 +153,11 @@ export function Home() {
         <h1 className="text-5xl sm:text-6xl">
           <Wordmark />
         </h1>
-        {/* Taglinen (ägarbeslut 2026-08-02): kort och koncis — tre ord. */}
-        <p className="max-w-md text-lg text-emerald-50/90">Träna, spela, tävla</p>
+        {/* Taglinen (ägarbeslut 2026-08-02): kort och koncis — tre ord.
+            24 px + full opacitet (impeccable-provet 2026-10-27): den sitter i
+            filtets ljusaste zon där 18 px/90 % bara nådde 3,7:1; som "stor
+            text" (≥ 24 px) gäller 3:1 och den ligger på ~4,1:1. */}
+        <p className="max-w-md text-2xl text-emerald-50">Träna, spela, tävla</p>
 
         {/* Dagens tävlingar — FLAGGSKEPPEN (Beslut B etapp 2 + Dagens IMP
             2026-09-26): 12 givar var, samma för alla, tävla på topplistan.
@@ -198,7 +207,7 @@ export function Home() {
 
         {/* Vägen in för nya ögon (Etapp D): en diskret rad under korten —
             korten förblir likvärdiga (ägarbeslut: ingen "Börja här"-markering). */}
-        <p className="text-sm text-emerald-100/70">
+        <p className="text-sm text-emerald-100">
           Ny här?{' '}
           <Link to="/om" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
             Så funkar rebidz →

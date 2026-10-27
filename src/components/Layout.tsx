@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
 import { NY_VERSION_EVENT, type NyVersionDetail } from '../lib/sw-events'
@@ -30,11 +30,29 @@ function PageLoading() {
 }
 
 /** Appens ram: topbar med meny + ytan där varje sida visas (Outlet).
- *  På mobil (< 640 px) döljs länkraden bakom en ☰-knapp som fäller ut menyn;
- *  på större skärmar visas länkarna i rad som vanligt. */
+ *  Under 1024 px (lg) döljs länkraden bakom en ☰-knapp som fäller ut menyn;
+ *  från 1024 px visas länkarna i rad. Gränsen flyttades från 640 px
+ *  (impeccable-provet 2026-10-27): hela länkraden mäter ~843 px, så mellan
+ *  640 och ~1000 px bröts den till två rader på alla skärmar. */
 export function Layout() {
   const [theme, setTheme] = useState(currentTheme)
   const [menuOpen, setMenuOpen] = useState(false)
+  // Mobilmenyns tangentbordsstöd (impeccable-provet 2026-10-27): Escape stänger
+  // menyn och fokus går tillbaka till ☰; vid öppning flyttas fokus till första
+  // länken så tangentbords- och skärmläsaranvändare hamnar inne i menyn.
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (!menuOpen) return
+    menuRef.current?.querySelector<HTMLAnchorElement>('a')?.focus()
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setMenuOpen(false)
+      menuButtonRef.current?.focus()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [menuOpen])
   // "Ny version finns"-raden (Etapp A 2026-08-02): pwa-update.ts skickar en
   // window-händelse när en ny version av appen väntar. null = ingen rad.
   const [nyVersion, setNyVersion] = useState<NyVersionDetail | null>(null)
@@ -117,7 +135,10 @@ export function Layout() {
           man tar sig ut via "Avsluta spel" i ⋮-menyn. Övriga sidor har headern. */}
       {!immersive && (
       <header className="relative border-b border-gold-400/40 bg-brand-bar text-white shadow pt-[env(safe-area-inset-top)]">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+        {/* Sidhuvudet är bredare (max-w-5xl) än sidspalten (max-w-3xl) så hela
+            länkraden ryms på EN rad från 1024 px; innehållet under behåller
+            sin smala spalt. */}
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Logotypen + ordmärket (tvåfärgat guldserif-skimmer, spader-prick på
               i:et, frameless). "re"/"z" ärver text-white från baren. */}
           <NavLink to="/" className="flex items-center gap-2 whitespace-nowrap">
@@ -126,7 +147,7 @@ export function Layout() {
           </NavLink>
 
           {/* Större skärmar: alla länkar i rad. */}
-          <nav className="hidden sm:flex flex-wrap items-center gap-1 ml-auto">
+          <nav aria-label="Huvudmeny" className="hidden lg:flex flex-wrap items-center gap-1 ml-auto">
             {NAV.map((item) => (
               <NavLink
                 key={item.to}
@@ -148,15 +169,17 @@ export function Layout() {
             {themeButton}
           </nav>
 
-          {/* Mobil: temaknappen + ☰ som fäller ut menyn. */}
-          <div className="ml-auto flex items-center gap-1 sm:hidden">
+          {/* Mobil/surfplatta (< 1024 px): temaknappen + ☰ som fäller ut menyn. */}
+          <div className="ml-auto flex items-center gap-1 lg:hidden">
             {themeButton}
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-white/10 transition-colors"
               aria-label={menuOpen ? 'Stäng menyn' : 'Öppna menyn'}
               aria-expanded={menuOpen}
+              aria-controls="mobilmeny"
             >
               {menuOpen ? '✕' : '☰'}
             </button>
@@ -168,22 +191,28 @@ export function Layout() {
             — trycker aldrig ner sidan) och glider ner mjukt ur ☰-knappen
             (menu-drop). Glaset: halvgenomskinlig brand-bar + backdrop-blur, så
             innehållet bakom skymtar suddigt igenom. Guldhårlinje i ramen.
-            Klick utanför (det osynliga heltäckande lagret) stänger; val av
-            sida stänger som förr. */}
+            Klick utanför (det osynliga heltäckande lagret) stänger, liksom
+            Escape (se effekten ovan); val av sida stänger som förr. Lagret är
+            en ren klickyta utan tangentbordsfokus — förr var det en knapp som
+            skärmläsaren läste som ett andra "Stäng menyn" bredvid ✕. */}
         {menuOpen && (
           <>
-            <button
-              type="button"
-              aria-label="Stäng menyn"
+            <div
+              aria-hidden
               onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 z-30 cursor-default sm:hidden"
+              className="fixed inset-0 z-30 cursor-default lg:hidden"
             />
             {/* iOS-materialen (ägarfeedback 2026-08-02 "får inte iphone-
                 känslan"): ljust läge = LJUST glas (vit/65) med mörk text —
                 som iOS:s egna menyer — mörkt läge = mörkt glas (club-900/55)
                 med ljus text. Då kan glaset vara riktigt genomskinligt utan
                 att texten blir oläslig, och blur-2xl ger ordentlig frost. */}
-            <nav className="menu-drop absolute right-3 top-full z-40 mt-2 flex w-60 flex-col gap-1 rounded-2xl bg-white/65 p-2 shadow-xl ring-1 ring-gold-400/30 backdrop-blur-2xl backdrop-saturate-150 dark:bg-club-900/55 sm:hidden">
+            <nav
+              id="mobilmeny"
+              ref={menuRef}
+              aria-label="Huvudmeny"
+              className="menu-drop absolute right-3 top-full z-40 mt-2 flex w-60 flex-col gap-1 rounded-2xl bg-white/65 p-2 shadow-xl ring-1 ring-gold-400/30 backdrop-blur-2xl backdrop-saturate-150 dark:bg-club-900/55 lg:hidden"
+            >
               {NAV.map((item) => (
                 <NavLink
                   key={item.to}

@@ -49,7 +49,7 @@
   --color-panel-2: light-dark(#edf2ee, #0b3529); /* dämpad yta, hover (grönskuggad ljusgrå/club-800) */
   --color-ink: light-dark(#0f172a, #f1f5f9); /* primärtext */
   --color-ink-soft: light-dark(#475569, #94a3b8); /* brödtext */
-  --color-ink-muted: light-dark(#64748b, #94a3b8); /* sekundärtext */
+  --color-ink-muted: light-dark(#5f6b7f, #94a3b8); /* sekundärtext — ljust läge sänkt #64748b→#5f6b7f (impeccable-provet 2026-10-27): på sidytan club-50 gav det gamla 4,36:1, det nya 4,94:1 (AA 4,5) */
   --color-ink-faint: light-dark(#6b7688, #8a9aad); /* ledtrådar/etiketter — AA-lyft (designgranskning): förr #94a3b8/#64748b föll under 4.5:1 */
   /* Kanter: grönskuggad hårlinje (aldrig blågrå) — ljust läge ≈ slate-200 i ton. */
   --color-line: light-dark(rgb(3 21 16 / 0.1), rgb(209 250 229 / 0.1));
