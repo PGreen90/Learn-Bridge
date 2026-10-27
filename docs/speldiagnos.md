@@ -366,6 +366,50 @@ jämförelsebas `s7F` = läget efter S7). Fixdetaljerna: `docs/bot-hjarna.md` "r
 - **Inte åtgärdat:** trumfkontraktens ledningsval (89 stick, övre gräns 19) —
   där behövs en annan idé än "parets färg"; nästa kandidat.
 
+### S9 — fynd T: trumfkontraktens ledningsval — stöld i den korta trumfhanden (2026-10-26, NU, GRINDBESLUT)
+
+Fortsättning på S8:s "inte åtgärdat". Fixdetaljerna: bok §8.12, facit
+`play-bot-stold-korta-handen.test.ts`. Jämförelsebas = dagens motor före fixen
+(`s9a`), 200 givar, samma kommandon som S0 (OUT-namn `speldiagnos-s9<a|b|c>-<a|b|c|d>.json`).
+
+- **Nytt dataset på dagens motor:** `FYNDB=1 FYNDB_DEALS=50 FYNDB_OFFSET=<0|50|100|150>
+  FYNDB_OUT=fyndb2-<a|b|c|d>.json npx vitest run src/lib/engine/fyndb.probe.test.ts`
+  (4 skivor parallellt, ~15 min). 510 ledningsval, varav **377 i trumf kostade 82
+  stick** (datasetet 2026-10-01: 395/89).
+- **Analysen** (`FYNDT=1 FYNDT_FILES=fyndb2 npx vitest run
+  src/lib/engine/fyndt-utvardera.probe.test.ts` → `revisor-output/fyndt-utvardering-fyndb2.txt`):
+  per skäl kostar "cashar säker vinnare" 35 (154 lägen), "drar trumf" 25 (149) och
+  reservledningen "längsta färg" 21 (71). Största cellen: boten leder TRUMF när DD vill
+  ha en sidofärg (18 lägen/23 stick på gamla datasetet) — oftast lågt mot partnerns
+  honnörskombination eller en stöld.
+- **Kandidater offline (samma körning, bot = 82):** T1 stöld i korta handen strikt 77
+  (5 bättre/0 sämre) · T1b partnern ≤ lika många trumf 74 (7/0, men två singel-
+  honnörer ledda till stöld på gamla datasetet) · **T1d = T1b + riktig förlorare (≤9, ej
+  säker vinnare) 75 (6/0)**, identiskt på gamla datasetet (89 → 82, 6/0) · T1g = T1d +
+  trumfmajoritet **exakt samma siffror** (vald: stoppar överstöld med svag trumf) ·
+  T1e/T1f "säker stöld" 79/78 (tappar vinsten — DD tar stölden även med trumf ute) ·
+  T2 lågt mot partnerns honnörskombination 71 (21/14), T2b bara gaffel ≥3 kort 72
+  (16/10) — blandat, timing mot trumfdragningen oklar, EJ byggd · T3 cash med ≤1 trumf
+  ute 80 (6/6) · T4 parets färg i trumf 138 (bekräftar S8) · T5 trumfdragningens kort
+  med fynd B-teknik 82 (1/1).
+- **Helmätning 1 (bara ledningen, `s9b`): netto −1** (5 givar fler, 5 färre), förar-
+  flaggor 237 → 242. Spårningen (`DUMP_SPEL=20260764,20260778`) visade varför: **stölden
+  togs aldrig** — stjälhanden sakade när partnerns förlorare "vann" sticket tillfälligt
+  (fjärde hand bakom), och stal med ♠J ("upp med toppen", §8.8) där ♠5 räckte.
+- **Fix 2 "stjälhanden fullföljer"** (`declarerRuffsPartnersLoser` + stöld lågt i
+  tredje hand; DD per kort i facit-testet: 20260764 stöld 10 mot sak 8, 20260778 ♠5 = 7
+  mot ♠J = 5).
+- **Helmätning 2 (hela fixen, `s9c`, `node scripts/jamfor-speldiagnos.mjs s9a s9c`):**
+  spelförarens faktiska stick **netto +3** (6 givar fler, 4 färre; 20260756 10 → 12,
+  20260908 8 → 10), förarflaggor 237 → 238, försvar 150 → 154, rent spelade 35 → 33,
+  summa |spelat − DD| 171 → 172. **Neutralt till svagt positivt** — systemriktig teknik
+  utan mätbar förlust. **Ägarbeslut 2026-10-27: behåll** (PCD).
+- **Nästa kandidater (ur spårningen):** (i) **trumfdragningens följ:** Syd kröp med ♠4
+  under partnerns ♠6 fast Väst bakom hade ♠7 (`winOverBeatablePartner` avstår när en
+  motståndare redan följt färg; frö 20260764 stick 3, −1); (ii) T2 "lågt mot gaffel"
+  behöver en timingregel mot trumfdragningen; (iii) 20260764 stick 5: andra stölden
+  var DD-fel (−1) — när är EN stöld nog?
+
 ## T-serien — tredje hand högt: generaliseringen (NU 2026-09-18)
 
 > Riggen mäter EN sak: försvararens kortval som **tredje hand** (partnern ledde,

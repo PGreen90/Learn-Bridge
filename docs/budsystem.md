@@ -3571,7 +3571,42 @@ Bara ärlig information används: egen hand, träkarlen och korten som fallit.
 Vakterna gäller tumregelspelet (fler kort kvar än Monte-Carlo-fönstret); facit
 `play-bot-fortsatt-utspelsfarg.test.ts`.
 
+### 8.12 Spelförarsidan i trumf: stöld i den korta trumfhanden först (2026-10-26, fynd T)
+När spelförarsidan är inne i ett **trumfkontrakt** och jag ser båda våra händer
+tittar jag efter en **stöld i den korta trumfhanden** innan jag drar trumf eller
+cashar: är partnern **renons i en sidofärg**, har trumf kvar och **inte fler trumf
+än jag**, har vår sida **trumfmajoritet** mot de osedda trumfen, och har jag en
+**riktig förlorare** i färgen (högst en nia som inte är
+säker vinnare) — då spelar jag förloraren till stöld. En stöld i den korta handen
+är ett extra stick (den långa handens trumf ger sina stick ändå); drar jag trumf
+först försvinner stölden, och cashar jag först hinner motståndarna saka. En stöld
+i den LÅNGA trumfhanden räknas inte (den ger inget extra), och en honnör leds
+aldrig till stöld; med fler trumf ute än vi har ihop (svag trumf) avstår jag —
+stölden blir lätt en överstöld. *Exempel (frö 20260764, 4♠ av Nord, stick 3):* Syd (träkarlen)
+♠QJ94 ♥AT95 ♦K75 mot Nords ♠T86 ♥– ♦964 ♣K9732 — ♥5 till stöld i Nord (DD 8
+stick) i stället för att dra trumf med ♠Q (7).
+Bara ärlig information: egen hand, träkarlen och spelade kort. Gäller tumregel-
+spelet (fler kort kvar än Monte-Carlo-fönstret). Byggd på DD-mätning per
+alternativ före bygge (fynd B-riggens dataset, `fyndt-utvardera.probe.test.ts`
+kandidat T1d: 6 lägen bättre, 0 sämre på två dataset); facit
+`play-bot-stold-korta-handen.test.ts`.
+**Stjälhanden fullföljer** (helmätningen S9 visade att ledningen var värdelös
+utan detta — stölden togs aldrig): (a) har partnern spelat en förlorare mot min
+renons och "vinner" sticket bara tills motståndaren bakom mig lägger (partnerns
+kort är inget säkert stick), **stjäl jag** i stället för att saka; partnerns
+säkra vinnare stjäls aldrig. (b) En stöld är ett stick i sig: spelförarsidans
+tredje hand som är renons **stjäl lågt** och går inte "upp med toppen" (§8.8 är
+en färgregel, inte en stöldregel — frö 20260778: ♠J i stället för ♠5 lät
+motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — Nord stjäl
+med ♠2 (DD 10) i stället för att saka ♣2 (8).
+
 ## 9. Ändringslogg
+- **2026-10-26 — Stöld i den korta trumfhanden först (§8.12, fynd T, NU
+  "spelförarsidans ledningsval i trumfkontrakt").** Spelförarsidan på lead i
+  trumf leder en riktig förlorare (≤9, ej säker vinnare) till stöld när partnern
+  är renons, har trumf och inte fler än jag (och vi har trumfmajoritet) — före trumfdragning, cash och
+  reservledning. Mätt offline (T1d): 82 → 75 stick på dagens motor, 89 → 82 på
+  datasetet 2026-10-01, 0 lägen sämre. Facit `play-bot-stold-korta-handen.test.ts`.
 - **2026-10-25 — Fortsättningen av utspelsfärgen tittar på bordet (§8.11,
   felrapport #105/#106).** Två vakter i regeln "fortsätt motspelets utspelsfärg":
   (a) bordet spelar näst och hans lägsta kort slår mitt högsta → lägsta kortet,

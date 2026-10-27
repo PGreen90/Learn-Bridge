@@ -739,10 +739,13 @@ describe('speldiagnos runda 4 – spelföraren drar trumf när kombinationen vin
         C('clubs', '7'), C('clubs', '4'),
       ],
       otherHands: {
+        // Träkarlen har en spader kvar (♠3): annars är han renons med trumf, och
+        // stölden i den korta trumfhanden (§8.12, 2026-10-26) går före
+        // trumfdragningen – det här låset gäller styrkeprovet, inte stölden.
         E: [
           C('diamonds', 'Q'), C('diamonds', '8'),
           C('hearts', 'Q'), C('hearts', 'J'), C('hearts', '9'),
-          C('clubs', 'J'), C('clubs', '8'), C('clubs', '6'), C('clubs', '3'), C('clubs', '2'),
+          C('clubs', 'J'), C('clubs', '8'), C('clubs', '6'), C('clubs', '3'), C('spades', '3'),
         ],
       },
     })
