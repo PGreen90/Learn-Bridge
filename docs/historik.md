@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-27 (NU: ångra bara ett kort + återuppta given exakt — ägarval, ändrat spår efter fynd T)
+## 2026-10-27 (NU: ångra bara ett kort + återuppta given exakt — ägarval, ändrat spår efter fynd T; LIVE a6f4c06)
 Ägarens två justeringar. **(1) Ångra = feltryck, ett steg:** `canUndo(state, humanSeats,
 undoFloor)` i `play-undo.ts` — efter ett ångra ligger golvet vid läget man backade
 till, kort under golvet kan inte ångras, ett nytt eget kort går att ångra igen (bara
