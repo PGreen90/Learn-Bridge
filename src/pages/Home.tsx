@@ -122,9 +122,12 @@ function TavlingCard({ to, titel, text }: { to: string; titel: string; text: str
       <div className="flex items-center gap-3">
         <ModeIcon icon="calendar" />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 font-semibold text-emerald-50">
+          {/* flex-wrap: vid 200 % textstorlek ska pillret bryta till egen rad i
+              stället för att klippas (impeccable-provet 2026-10-27); 11 px är
+              detektorns golv för funktionell text (pillret bär "Kräver konto"). */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold text-emerald-50">
             {titel}
-            <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[10px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
+            <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[11px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
               {pill}
             </span>
           </div>

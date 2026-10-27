@@ -78,11 +78,15 @@ export function Layout() {
     location.pathname.startsWith('/spela-kort') || location.pathname.startsWith('/bord/')
 
   // Ljust/mörkt läge: månen tänder mörkret, solen släcker det.
+  // Ikonknapparna (tema + ☰) är 40 px i FASTA pixlar med −4 px vertikal marginal
+  // (impeccable-provet 2026-10-27): större träffyta utan att sidhuvudet växer,
+  // och i px — inte rem — så de inte sväller till 80 px och trycker ut logotypen
+  // ur sidhuvudet när användaren kör 200 % textstorlek.
   const themeButton = (
     <button
       type="button"
       onClick={() => setTheme(toggleTheme())}
-      className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-base hover:bg-white/10 transition-colors"
+      className="focus-ring -my-[4px] flex h-[40px] w-[40px] items-center justify-center rounded-lg text-base hover:bg-white/10 transition-colors"
       aria-label={theme === 'dark' ? 'Byt till ljust läge' : 'Byt till mörkt läge'}
       title={theme === 'dark' ? 'Ljust läge' : 'Mörkt läge'}
     >
@@ -176,7 +180,7 @@ export function Layout() {
               ref={menuButtonRef}
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
-              className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-white/10 transition-colors"
+              className="focus-ring -my-[4px] flex h-[40px] w-[40px] items-center justify-center rounded-lg text-lg hover:bg-white/10 transition-colors"
               aria-label={menuOpen ? 'Stäng menyn' : 'Öppna menyn'}
               aria-expanded={menuOpen}
               aria-controls="mobilmeny"
@@ -298,19 +302,22 @@ export function Layout() {
             <div className="h-px w-16 bg-gradient-to-r from-transparent via-gold-400/60 to-transparent" />
             {/* "Est." (ägarbeslut 2026-08-02, valt framför "grundat"/"sedan"):
                 klubbskyltarnas graverade stämpel — och behöver aldrig
-                översättas när engelskan kommer (Fas 5). */}
+                översättas när engelskan kommer (Fas 5).
+                Länkarna har py-1.5 + lika stor negativ marginal (impeccable-
+                provet 2026-10-27): träffytan växer från 15 till 27 px utan att
+                raden flyttar sig. */}
             <p className="text-xs text-ink-muted">
               © <span className="font-brand text-sm">rebidz</span> · Est. 2026 ·
               v{pkg.version} ·{' '}
-              <NavLink to="/om" className="underline underline-offset-2 hover:text-ink">
+              <NavLink to="/om" className="-my-1.5 inline-block py-1.5 underline underline-offset-2 hover:text-ink">
                 Om rebidz
               </NavLink>{' '}
               ·{' '}
-              <NavLink to="/integritet" className="underline underline-offset-2 hover:text-ink">
+              <NavLink to="/integritet" className="-my-1.5 inline-block py-1.5 underline underline-offset-2 hover:text-ink">
                 Integritet
               </NavLink>{' '}
               ·{' '}
-              <NavLink to="/villkor" className="underline underline-offset-2 hover:text-ink">
+              <NavLink to="/villkor" className="-my-1.5 inline-block py-1.5 underline underline-offset-2 hover:text-ink">
                 Villkor
               </NavLink>
             </p>

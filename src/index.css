@@ -188,9 +188,15 @@
 .gold-frame-hover::before {
   opacity: 0;
   transition: opacity 0.3s ease;
+  /* Pausad tills den syns (impeccable-provet 2026-10-27): förr roterade de
+     fyra osynliga menyknappsramarna hela tiden (conic-gradient + mask +
+     drop-shadow per bildruta) — sex eviga animationer på startsidan, varav
+     fyra ingen såg. Vid hover startar den igen, från läget där den stod. */
+  animation-play-state: paused;
 }
 .gold-frame-hover:hover::before {
   opacity: 1;
+  animation-play-state: running;
 }
 
 /* Rubriker sätts i display-typsnittet; lite tightare spärrning ser dyrare ut. */

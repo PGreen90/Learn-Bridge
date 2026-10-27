@@ -10,6 +10,31 @@
 
 ---
 
+## 2026-10-27 (impeccable-provet på startsidan — critique + audit, fyra P1-fynd lagade; LIVE 985b674)
+Ägaren installerade design-skillen `impeccable` (pbakaus, v4.8.0, `.agents/skills/`) och
+lät en egen session köra `critique` (två isolerade delagenter: designöga + detektor) och
+`audit` (a11y/prestanda/teming/responsivt) på startsidan, som prov inför FACELIFTEN.
+Utfall: 21/36 på Nielsen-heuristikerna, audit 11/16. **Verktygets värde:** den
+deterministiska detektorn gav 0 fynd i källkoden (stilmönstren bor i `index.css`, som
+inte får vara CLI-mål) och bara kontrast/textstorlek på den renderade sidan — men
+pixelkontrasten på filtgradienten var det enda som var svårt för hand. Det mesta kom ur
+de strukturerade delagenterna. Bedömning: `audit` per yta i FACELIFTEN, `critique` på
+ytor med flöde; nästa yta tävlingsöversikten (kräver inloggning i panelen).
+**Fyra P1 lagade samma dag (ägarval):** navraden bröts till två rader på alla
+desktopbredder (sidhuvudet 768 px gav 630 px, raden mäter 841) → sidhuvudet `max-w-5xl`,
+länkraden från `lg` (1024 px), glasmenyn under det · kontrast AA: taglinen 24 px full
+opacitet (stor text, 3:1), kortbeskrivningar emerald-100/70→/90, "Ny här?" full opacitet,
+token `ink-muted` ljust #64748b→#5f6b7f (sidytan 4,36→4,94) — detektorn 0 kontrastfynd
+på 1280 + 390 px (förr 6/8) · tävlingskorten visar pillret "Kräver konto" utloggad
+(`useAuth` i `TavlingCard`) · mobilmenyn: Escape stänger + fokus tillbaka till ☰, fokus
+till första länken vid öppning, klicklagret inte längre en fokuserbar knapp,
+`aria-controls`/`aria-label="Huvudmeny"`. Verifierat i panelen (1024/768/375) och med
+detektorn; tsc + `npm test` gröna. Kvar ur rapporten: P2 (osynliga guldram-animationer
+kör ändå, 32 px-knappar i sidhuvudet, 200 % text klipper kortens titelrad, "Spela med
+vänner" saknas i heron = ägarfråga) och P3 (10 px-pill, skip-länk, theme-color-meta).
+Skillens artefakter: `.impeccable/critique/<datum>__src-pages-home-tsx.md` (ögonblicksbild
+för trend) + tomma `.impeccable/live/`, ospårade. Motorn i `~/.impeccable/bin/0.1.18/`.
+
 ## 2026-10-27 (NU: ångra bara ett kort + återuppta given exakt — ägarval, ändrat spår efter fynd T; LIVE a6f4c06)
 Ägarens två justeringar. **(1) Ångra = feltryck, ett steg:** `canUndo(state, humanSeats,
 undoFloor)` i `play-undo.ts` — efter ett ångra ligger golvet vid läget man backade
