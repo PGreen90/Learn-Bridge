@@ -25,7 +25,7 @@ import type { TavlingsForm } from '../engine/matchpoints'
 import type { Theme } from '../theme'
 import type { PlaySpeed } from '../../pages/play/tempo'
 import type { ContractTarget } from '../engine/contract-target'
-import type { SavedGame } from '../engine/resume'
+import type { SavedGame, SparadTavlingsgiv } from '../engine/resume'
 import type { DailyLog } from '../engine/daily'
 import type { SpelResultat } from '../engine/spel-historik'
 import type { TavlingFramsteg } from './tavling'
@@ -140,6 +140,20 @@ export function saveTavlingFramsteg(framsteg: TavlingFramsteg, form: TavlingsFor
  *  orörd (`tavling-framsteg`), IMP-serien bor bredvid. */
 function framstegNyckel(form: TavlingsForm): string {
   return form === 'imp' ? 'tavling-framsteg-imp' : 'tavling-framsteg'
+}
+
+/** Den PÅGÅENDE tävlingsgiven (ägarbeslut 2026-10-27, resume.ts): exakt läget
+ *  i budgivning/spel för given man är mitt i, per tävlingsform. Råvärde —
+ *  kallaren kontrollerar med validSparadTavlingsgiv. null = ingen. ENHET-grupp
+ *  (som pagaende-giv): servern vet inget om halvspelade givar. */
+export function loadTavlingPagaende(form: TavlingsForm = 'mp'): unknown {
+  return loadValue<unknown>(pagaendeNyckel(form), null)
+}
+export function saveTavlingPagaende(giv: SparadTavlingsgiv | null, form: TavlingsForm = 'mp'): void {
+  saveValue(pagaendeNyckel(form), giv)
+}
+function pagaendeNyckel(form: TavlingsForm): string {
+  return form === 'imp' ? 'tavling-pagaende-imp' : 'tavling-pagaende'
 }
 
 /** Ett budtemas senaste poäng ({correct, total}) — nyckeln `theme:<themeId>`. */

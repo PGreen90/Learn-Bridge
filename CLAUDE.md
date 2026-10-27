@@ -11,14 +11,14 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-10-25): kolla att nattkedjan gick (`gh run list
-> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU är TOM
-> (fynd T LIVE, ägarbeslut 2026-10-27) → visa NÄST/SENARE, ägaren väljer nästa NU.
+> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU = ångra/återuppta
+> (ägarval 2026-10-27, se 🔵; fynd T LIVE 6fd85bb).
 
-### 🔵 NU — TOM (senast: fynd T, stöld i korta trumfhanden, ägarbeslut "behåll" 2026-10-27, LIVE 6fd85bb)
-Spelförarsidans ledningsval i trumf: stöld i korta trumfhanden före trumfdragning +
-stjälhanden fullföljer (§8.12). Offline 82 → 75 stick (6/0), helspel netto +3, flaggor
-±0. Nästa kandidater (trumfdragningens följ · T2 lågt mot gaffel): `docs/speldiagnos.md` S9.
-Senast LIVE: felrapport #105/#106 (§8.11) 01b1e34 · nattkedjans härdning cee4291.
+### 🔵 NU — Ångra bara ett kort + återuppta given EXAKT (ägarval 2026-10-27) — BYGGD, väntar PCD
+Ångra = ett steg (golv i `play-undo.ts`, följer med i sparningen) · tävlingsgivar sparas
+löpande per form (`tavling-pagaende[-imp]`, `resume.ts`), "Fortsätt" återupptar exakt;
+övning sparas aldrig. Kvar (senare.md): samma giv på en ANNAN enhet kan fortfarande spelas om.
+Senast LIVE: fynd T §8.12 6fd85bb · felrapport #105/#106 (§8.11) 01b1e34.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam

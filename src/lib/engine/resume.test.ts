@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest'
 import { dealRandom, mulberry32 } from './deal'
 import { legalCards, playCard, startPlay, type Contract } from './play'
-import { playsFrom, rebuildPlay, validSavedGame } from './resume'
+import { playsFrom, rebuildPlay, validSavedGame, validSparadTavlingsgiv } from './resume'
 
 const deal = dealRandom(mulberry32(20260803))
 const contract: Contract = { declarer: 'E', strain: 'spades', level: 2 }
@@ -54,5 +54,16 @@ describe('spara/återuppta given', () => {
     expect(validSavedGame({ ...ok, v: 2 })).toBe(false) // framtida schema ignoreras
     expect(validSavedGame({ ...ok, phase: 'mitt-i' })).toBe(false)
     expect(validSavedGame({ ...ok, deal: { hands: { N: [] } } })).toBe(false)
+  })
+
+  it('validSparadTavlingsgiv (ägarbeslut 2026-10-27): rätt form igenom, skräp stoppas', () => {
+    const ok = { v: 1, nummer: 77, form: 'mp', board: 3, history: [], phase: 'play', plays: [], undoFloor: 4 }
+    expect(validSparadTavlingsgiv(ok)).toBe(true)
+    expect(validSparadTavlingsgiv({ ...ok, form: 'imp' })).toBe(true)
+    expect(validSparadTavlingsgiv(null)).toBe(false)
+    expect(validSparadTavlingsgiv({ ...ok, v: 2 })).toBe(false)
+    expect(validSparadTavlingsgiv({ ...ok, form: 'bam' })).toBe(false)
+    expect(validSparadTavlingsgiv({ ...ok, undoFloor: undefined })).toBe(false)
+    expect(validSparadTavlingsgiv({ ...ok, board: '3' })).toBe(false)
   })
 })

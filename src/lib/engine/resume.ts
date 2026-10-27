@@ -11,6 +11,7 @@
 
 import type { Card, Deal, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
+import type { TavlingsForm } from './matchpoints'
 import { playCard, startPlay, type Contract, type PlayState } from './play'
 
 /** Formen som sparas under `learnbridge:pagaende-giv`. `v` är schemaversionen —
@@ -28,6 +29,38 @@ export interface SavedGame {
   phase: 'bidding' | 'play'
   /** Spelade kort i exakt ordning (motorn vet själv vems tur det var). */
   plays: Card[]
+  /** Ångra-golvet (ägarbeslut 2026-10-27, play-undo.ts): följer med så en
+   *  omladdning inte låser upp ett nytt ångra. Saknas i äldre sparningar = 0. */
+  undoFloor?: number
+}
+
+/**
+ * En PÅGÅENDE TÄVLINGSGIV (ägarbeslut 2026-10-27): förr sparades tävlingsgivar
+ * aldrig — stängde man appen (eller gick till översikten) mitt i given fick man
+ * bjuda och spela om HELA given med facit i huvudet. Nu sparas exakt läget per
+ * tävlingsform, och "Fortsätt" tar en tillbaka dit. Given själv sparas inte
+ * (servern delar ut den igen ur fröet); nummer + bricka pekar ut den.
+ */
+export interface SparadTavlingsgiv {
+  v: 1
+  nummer: number
+  form: TavlingsForm
+  board: number
+  history: ResolvedCall[]
+  phase: 'bidding' | 'play'
+  plays: Card[]
+  undoFloor: number
+}
+
+export function validSparadTavlingsgiv(x: unknown): x is SparadTavlingsgiv {
+  if (typeof x !== 'object' || x === null) return false
+  const g = x as Record<string, unknown>
+  if (g.v !== 1) return false
+  if (typeof g.nummer !== 'number' || typeof g.board !== 'number') return false
+  if (g.form !== 'mp' && g.form !== 'imp') return false
+  if (g.phase !== 'bidding' && g.phase !== 'play') return false
+  if (!Array.isArray(g.history) || !Array.isArray(g.plays)) return false
+  return typeof g.undoFloor === 'number'
 }
 
 /** De spelade korten i ordning, ur ett spel-läge (färdiga stick + pågående). */

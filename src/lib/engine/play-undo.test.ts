@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import { dealRandom, mulberry32 } from './deal'
 import { legalCards, playCard, startPlay, type Contract, type PlayState } from './play'
-import { canUndo, undoLastHumanCard } from './play-undo'
+import { canUndo, undoFloorAfter, undoLastHumanCard } from './play-undo'
 
 const deal = dealRandom(mulberry32(20260803))
 // Syd är spelförare → människan styr N + S (som controls i spel-vyn).
@@ -62,5 +62,31 @@ describe('ångra senaste egna kortet', () => {
     const undone = undoLastHumanCard(deal, defContract, s, ['S'])
     expect(undone).toEqual(startPlay(deal, defContract))
     expect(undone!.toAct).toBe('S')
+  })
+})
+
+// Ägarbeslut 2026-10-27: ångra är till för FELTRYCK — bara ett steg bakåt,
+// aldrig kedjat (förr kunde man backa stick för stick och se hur korten föll).
+describe('ångra bara ett steg — golvet (ägarbeslut 2026-10-27)', () => {
+  const antal = (s: PlayState) => s.completedTricks.length * 4 + s.currentTrick.length
+
+  it('efter ett ångra ligger golvet vid läget man backade till — inget mer att ångra', () => {
+    const after = playN(10) // S spelförare: V N Ö S V N Ö S V N — Nords kort (index 9) är senaste egna
+    const prev = undoLastHumanCard(deal, contract, after, [...HUMAN])!
+    const floor = undoFloorAfter(prev)
+    expect(floor).toBe(antal(prev))
+    expect(canUndo(prev, [...HUMAN], floor)).toBe(false) // Syds kort (index 7) ligger under golvet
+    expect(canUndo(prev, [...HUMAN], 0)).toBe(true) // utan golv hade kedjan fortsatt
+  })
+
+  it('ett NYTT eget kort på golvet går att ångra igen — men bara det', () => {
+    const prev = undoLastHumanCard(deal, contract, playN(10), [...HUMAN])!
+    const floor = undoFloorAfter(prev)
+    expect(HUMAN).toContain(prev.toAct) // ångra lämnar turen hos människan
+    const next = playCard(prev, legalCards(prev, prev.toAct)[0])
+    expect(canUndo(next, [...HUMAN], floor)).toBe(true)
+    const back = undoLastHumanCard(deal, contract, next, [...HUMAN])!
+    expect(back).toEqual(prev)
+    expect(canUndo(back, [...HUMAN], undoFloorAfter(back))).toBe(false)
   })
 })

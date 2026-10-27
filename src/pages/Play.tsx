@@ -11,17 +11,19 @@ import { describeTarget, describeTargetShort } from '../lib/engine/contract-targ
 import { dailyNumber, dailyStreak, shareText } from '../lib/engine/daily'
 import { contractFromCalls } from '../lib/engine/auction-live'
 import { resultHeadline } from '../lib/engine/scoring'
-import { playsFrom, validSavedGame, type SavedGame } from '../lib/engine/resume'
+import { playsFrom, validSavedGame, validSparadTavlingsgiv, type SavedGame, type SparadTavlingsgiv } from '../lib/engine/resume'
 import { addResult, validHistorik } from '../lib/engine/spel-historik'
 import { bokforDagensLogg } from '../lib/backend/dagens-logg'
 import {
   loadDailyLog,
   loadSavedGame,
   loadSpelHistorik,
+  loadTavlingPagaende,
   saveDailyLog,
   saveDailyPlayed,
   saveSavedGame,
   saveSpelHistorik,
+  saveTavlingPagaende,
 } from '../lib/backend'
 import { PlayingCard } from '../components/PlayingCard'
 import { SuitSymbol } from '../components/SuitSymbol'
@@ -111,18 +113,25 @@ function parseUrlDay(): number | null {
  *  pågående giv (om den hör till DETTA läge — och till det aktiva givnumret
  *  resp. adressens frö), annars adressens frö, annars null (= ny slumpgiv).
  *  `nr` = det aktiva givnumret i dagens giv-läget (arkivdag eller i dag). */
-function initialGame(daily: boolean, nr: number | null, sitt: Seat | null): { game: Game | null; plays: SavedGame['plays'] } {
+interface Startlage {
+  game: Game | null
+  plays: SavedGame['plays']
+  /** Ångra-golvet ur sparningen (ägarbeslut 2026-10-27) — 0 för en färsk giv. */
+  undoFloor: number
+}
+
+function initialGame(daily: boolean, nr: number | null, sitt: Seat | null): Startlage {
   const urlSeed = daily ? null : parseUrlSeed()
   // Dev: en EXAKT giv ur adressen (fria händer, felrapport-granskning) startar
   // färskt och roteras så vald stol (?sitt=) sitter i Syd — då bjuds den handen
   // själv. Går före fröet och den sparade given.
   if (!daily) {
     const devDeal = parseUrlHands()
-    if (devDeal) return { game: gameFromDeal(seatDealSouth(devDeal, sitt ?? 'S')), plays: [] }
+    if (devDeal) return { game: gameFromDeal(seatDealSouth(devDeal, sitt ?? 'S')), plays: [], undoFloor: 0 }
   }
   // Dev: en roterad giv (?sitt=) startar ALLTID färskt ur fröet — den sparade
   // pågående given är oroterad och hör inte hit.
-  if (!daily && sitt && urlSeed !== null) return { game: gameFromSeed(urlSeed, 0, sitt), plays: [] }
+  if (!daily && sitt && urlSeed !== null) return { game: gameFromSeed(urlSeed, 0, sitt), plays: [], undoFloor: 0 }
   const saved = loadSavedGame()
   if (
     validSavedGame(saved) &&
@@ -142,11 +151,33 @@ function initialGame(daily: boolean, nr: number | null, sitt: Seat | null): { ga
           round: 0,
         },
         plays: saved.plays,
+        undoFloor: saved.undoFloor ?? 0,
       }
     }
   }
-  if (urlSeed !== null) return { game: gameFromSeed(urlSeed), plays: [] }
-  return { game: null, plays: [] }
+  if (urlSeed !== null) return { game: gameFromSeed(urlSeed), plays: [], undoFloor: 0 }
+  return { game: null, plays: [], undoFloor: 0 }
+}
+
+/** Startläget för en TÄVLINGSGIV (ägarbeslut 2026-10-27): finns en sparad
+ *  pågående giv för samma tävlingsnummer + bricka återupptas den EXAKT —
+ *  auktionen hittills, de spelade korten och ångra-golvet. Annars färskt ur
+ *  serverns giv. Övningsläget (omspel ur giv-detaljvyn) rör aldrig sparningen. */
+export function initialTavlingGame(t: TavlingSpel): Startlage {
+  if (!t.övning) {
+    const saved = loadTavlingPagaende(t.form ?? 'mp')
+    if (validSparadTavlingsgiv(saved) && saved.nummer === t.nummer && saved.board === t.board) {
+      const contract = saved.phase === 'play' ? contractFromCalls(saved.history) : null
+      if (saved.phase === 'bidding' || contract) {
+        return {
+          game: { deal: t.giv.deal, history: saved.history, phase: saved.phase, contract, seed: null, round: 0 },
+          plays: saved.plays,
+          undoFloor: saved.undoFloor,
+        }
+      }
+    }
+  }
+  return { game: gameFromDeal(t.giv.deal), plays: [], undoFloor: 0 }
 }
 
 export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: TavlingSpel }) {
@@ -157,11 +188,10 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
   // Dev-stolen (?sitt=): läses en gång, styr rotationen + adress-synken nedan.
   const [sitt] = useState(() => (daily ? null : parseUrlSeat()))
   // Läses EN gång vid montering — därefter äger useGame tillståndet. Tävlingsgiv
-  // (Beslut B etapp 2): given kommer FÄRDIGDELAD från servern, så vi startar
-  // direkt ur den (ingen sparad-giv-återupptagning — pausen är per giv i serien
-  // och sköts av "Dagens tävling"-sidan).
-  const [restored] = useState(() =>
-    tavling ? { game: gameFromDeal(tavling.giv.deal), plays: [] as SavedGame['plays'] } : initialGame(daily, dailyNr, sitt),
+  // (Beslut B etapp 2): given kommer FÄRDIGDELAD från servern; en sparad
+  // pågående tävlingsgiv (ägarbeslut 2026-10-27) återupptas exakt där man var.
+  const [restored] = useState<Startlage>(() =>
+    tavling ? initialTavlingGame(tavling) : initialGame(daily, dailyNr, sitt),
   )
   const {
     game,
@@ -194,9 +224,28 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
 
   // Budfasen sparas löpande (spelfasen sparas i PlayTable som har spelläget).
   // Tävlingsgiv sparas ALDRIG i den fria giv-luckan (den skulle skriva över ett
-  // pågående frispel) — tävlingens paus är per giv i serien.
+  // pågående frispel) — de har en egen lucka per tävlingsform (ägarbeslut
+  // 2026-10-27: en avbruten tävlingsgiv återupptas exakt, aldrig omspel).
+  // Övningsläget sparas inte alls.
   useEffect(() => {
-    if (tavling || game.phase !== 'bidding') return
+    if (game.phase !== 'bidding') return
+    if (tavling) {
+      if (tavling.övning) return
+      saveTavlingPagaende(
+        {
+          v: 1,
+          nummer: tavling.nummer,
+          form: tavling.form ?? 'mp',
+          board: tavling.board,
+          history: game.history,
+          phase: 'bidding',
+          plays: [],
+          undoFloor: 0,
+        } satisfies SparadTavlingsgiv,
+        tavling.form ?? 'mp',
+      )
+      return
+    }
     saveSavedGame({
       v: 1,
       daily,
@@ -206,6 +255,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
       history: game.history,
       phase: 'bidding',
       plays: [],
+      undoFloor: 0,
     } satisfies SavedGame)
   }, [game, daily, dailyNr, tavling])
 
@@ -251,6 +301,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
         dailyNr={dailyNr ?? undefined}
         seed={game.seed}
         restoredPlays={restoredPlays}
+        restoredUndoFloor={restoredPlays ? restored.undoFloor : undefined}
         tavling={tavling}
         playSeed={tavling ? tavling.giv.playSeed : undefined}
       />
@@ -319,6 +370,7 @@ export function PlayTable({
   dailyNr,
   seed = null,
   restoredPlays,
+  restoredUndoFloor,
   playSeed,
   tavling,
 }: {
@@ -341,6 +393,8 @@ export function PlayTable({
   seed?: number | null
   /** Spelade kort ur en sparad pågående giv — bordet börjar mitt i given. */
   restoredPlays?: SavedGame['plays']
+  /** Ångra-golvet ur samma sparning (ägarbeslut 2026-10-27). */
+  restoredUndoFloor?: number
   /** Tävlingsspel (Beslut B etapp 2): play-fröet som gör bottarna
    *  deterministiska så servern kan spela om och validera. Odefinierat i allt
    *  vanligt spel = Math.random precis som förut. */
@@ -394,6 +448,7 @@ export function PlayTable({
     onClaim,
     onConcede,
     undoable,
+    undoFloor,
     onUndo,
     onCardClick,
     onPlayedCardClick,
@@ -403,14 +458,37 @@ export function PlayTable({
     declSide,
     isFaceUp,
     deselectSuit,
-  } = usePlayTable(deal, contract, calls, restoredPlays, playSeed)
+  } = usePlayTable(deal, contract, calls, restoredPlays, playSeed, restoredUndoFloor)
 
   // Spelfasen sparas löpande (Etapp B) — och rensas när given är klar, så en
   // färdigspelad giv inte "återupptas" vid nästa besök. null känns igen som
   // "ingen sparning" av validSavedGame. Tävlingsgiv rör ALDRIG den fria
-  // giv-luckan (ett pågående frispel i luckan ska överleva ett tävlingspass).
+  // giv-luckan (ett pågående frispel i luckan ska överleva ett tävlingspass) —
+  // de sparas i sin egen lucka per tävlingsform (ägarbeslut 2026-10-27), med
+  // ångra-golvet så en omladdning inte låser upp ett nytt ångra. Övning: inget.
   useEffect(() => {
-    if (tavling) return
+    if (tavling) {
+      if (tavling.övning) return
+      const form = tavling.form ?? 'mp'
+      if (done) {
+        saveTavlingPagaende(null, form)
+        return
+      }
+      saveTavlingPagaende(
+        {
+          v: 1,
+          nummer: tavling.nummer,
+          form,
+          board: tavling.board,
+          history: calls,
+          phase: 'play',
+          plays: playsFrom(play),
+          undoFloor,
+        } satisfies SparadTavlingsgiv,
+        form,
+      )
+      return
+    }
     if (done) {
       saveSavedGame(null)
       return
@@ -424,8 +502,9 @@ export function PlayTable({
       history: calls,
       phase: 'play',
       plays: playsFrom(play),
+      undoFloor,
     } satisfies SavedGame)
-  }, [play, done, daily, dailyNr, seed, deal, calls, tavling])
+  }, [play, done, daily, dailyNr, seed, deal, calls, tavling, undoFloor])
   // HashRouter → navigera hem via hash (funkar utan Router-kontext i tester).
   const goHome = () => {
     window.location.hash = '#/'

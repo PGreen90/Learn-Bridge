@@ -26,7 +26,7 @@ import {
   remainingTricks,
 } from '../../lib/engine/claim'
 import { rebuildPlay } from '../../lib/engine/resume'
-import { canUndo as canUndoState, undoLastHumanCard } from '../../lib/engine/play-undo'
+import { canUndo as canUndoState, undoFloorAfter, undoLastHumanCard } from '../../lib/engine/play-undo'
 import { loadAutoClaim, loadPlaySpeed, saveAutoClaim, savePlaySpeed } from '../../lib/backend'
 import { scoreLine } from '../../lib/engine/scoring'
 import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
@@ -57,6 +57,9 @@ export function usePlayTable(
   // deterministiskt så servern kan spela om given och validera. null/undefined
   // (allt vanligt spel) = Math.random precis som förut.
   playSeed?: number | null,
+  // Ångra-golvet ur en sparad pågående giv (ägarbeslut 2026-10-27): utan det
+  // skulle en omladdning låsa upp ett nytt ångra på samma kort.
+  restoredUndoFloor?: number,
 ) {
   const [play, setPlay] = useState<PlayState>(() => {
     if (restoredPlays && restoredPlays.length > 0) {
@@ -455,13 +458,18 @@ export function usePlayTable(
   // (replay via motorn), och deras väntande drag avbryts av att play byts
   // (bot-effektens städfunktion). Ljud-/svep-räknarna backas i takt, annars
   // tror de att gamla stick är nya när de spelas om.
+  // Bara ETT steg bakåt (ägarbeslut 2026-10-27): ångra är till för feltryck.
+  // Golvet läggs vid läget man backade till — kort under golvet kan inte
+  // ångras, först ett NYTT eget kort går att ångra igen (play-undo.ts).
+  const [undoFloor, setUndoFloor] = useState<number>(() => restoredUndoFloor ?? 0)
   const humanSeats = (['N', 'E', 'S', 'W'] as Seat[]).filter((s) => controls(contract, s))
   const undoable =
-    !claimed && !pendingClaim && !claimOffer && !isComplete(play) && canUndoState(play, humanSeats)
+    !claimed && !pendingClaim && !claimOffer && !isComplete(play) && canUndoState(play, humanSeats, undoFloor)
   function onUndo() {
     if (!undoable) return
     const prev = undoLastHumanCard(deal, contract, play, humanSeats)
     if (!prev) return
+    setUndoFloor(undoFloorAfter(prev))
     sweptCount.current = prev.completedTricks.length
     heardCount.current = prev.completedTricks.length * 4 + prev.currentTrick.length
     setSweep(null)
@@ -648,6 +656,7 @@ export function usePlayTable(
     onClaim,
     onConcede,
     undoable,
+    undoFloor,
     onUndo,
     onCardClick,
     onPlayedCardClick,

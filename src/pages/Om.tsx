@@ -87,8 +87,9 @@ export function Om() {
             sticken tappades.
           </li>
           <li>
-            En pågående giv sparas automatiskt — stängs fliken fortsätter du där
-            du var nästa gång.
+            En pågående giv sparas automatiskt — även i Dagens tävling — så
+            stängs fliken fortsätter du exakt där du var nästa gång. Ångra tar
+            bara tillbaka ditt senaste kort (ett feltryck), aldrig flera steg.
           </li>
           <li>
             Appen går att lägga på hemskärmen (”Lägg till på hemskärmen” i
