@@ -12,7 +12,9 @@ svarar på vad).
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-10-25): kolla att nattkedjan gick (`gh run list
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU = TOM — ägaren
-> väljer ur NÄST (ångra/återuppta LIVE a6f4c06, fynd T LIVE 6fd85bb).
+> väljer ur NÄST (ångra/återuppta LIVE a6f4c06). Design-skillen `impeccable` (pbakaus, v4.8.0)
+> installerades 2026-10-27 i `.agents/skills/` — critique/audit-provet på startsidan kördes i egen
+> session; ägaren avgör om skillen används i FACELIFTEN (SENARE).
 
 ### 🔵 NU — TOM (senast: ångra ett steg + återuppta tävlingsgiv exakt, ägarval 2026-10-27, LIVE a6f4c06)
 Kvar (senare.md): samma tävlingsgiv kan spelas om på en ANNAN enhet (serverlagring = Beslut B-steg).

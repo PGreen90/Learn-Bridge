@@ -20,3 +20,5 @@ revisor-output/
 # Genererade av scripts/build-api.mjs; Vercel återskapar dem via `npm run build`.
 # Handskrivna api/*.ts (t.ex. health.ts) versionshanteras som vanligt.
 /api/*.js
+.claude/skills/impeccable/
+# ^ symlänk till .agents/skills/impeccable (git här har core.symlinks=false → skulle bli en kopia); återskapas av `npx skills add`
