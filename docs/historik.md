@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-26/27 (NU: spelförarsidans ledningsval i trumfkontrakt — fynd T byggd, mätt & LIVE; ägarbeslut "behåll" 2026-10-27)
+## 2026-10-26/27 (NU: spelförarsidans ledningsval i trumfkontrakt — fynd T byggd, mätt & LIVE, mergepunkt 6fd85bb; ägarbeslut "behåll" 2026-10-27)
 Ägaren valde NÄST 1 som NU. Nytt fynd B-dataset på dagens motor (`fyndb2-*`), ny
 trumf-analys + kandidatrigg `fyndt-utvardera.probe.test.ts` (FYNDT=1). Vinnare offline:
 T1d/T1g "stöld i den korta trumfhanden före trumfdragning" (82 → 75 stick, 6/0, samma

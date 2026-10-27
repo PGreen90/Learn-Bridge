@@ -14,7 +14,7 @@ svarar på vad).
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU är TOM
 > (fynd T LIVE, ägarbeslut 2026-10-27) → visa NÄST/SENARE, ägaren väljer nästa NU.
 
-### 🔵 NU — TOM (senast: fynd T, stöld i korta trumfhanden, ägarbeslut "behåll" 2026-10-27, LIVE — se historik)
+### 🔵 NU — TOM (senast: fynd T, stöld i korta trumfhanden, ägarbeslut "behåll" 2026-10-27, LIVE 6fd85bb)
 Spelförarsidans ledningsval i trumf: stöld i korta trumfhanden före trumfdragning +
 stjälhanden fullföljer (§8.12). Offline 82 → 75 stick (6/0), helspel netto +3, flaggor
 ±0. Nästa kandidater (trumfdragningens följ · T2 lågt mot gaffel): `docs/speldiagnos.md` S9.
