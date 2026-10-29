@@ -29,18 +29,22 @@ export const SUIT_INK: Record<Suit, string> = {
   clubs: 'text-suit-clubs',
 }
 
-/** Chip-stil (bakgrund + text) för ett kontraktsbud per trumfslag, Synrey-paletten. */
+/** Chip-stil (bakgrund + text) för ett kontraktsbud per trumfslag, Synrey-paletten.
+ *  ♥/♦-texten och PASS-plattan ett steg mörkare (impeccable-audit 2026-10-29,
+ *  ägarval): red/orange-600 på pastellen gav 3,9/3,1:1 och vit på green-600
+ *  3,2:1 — -700 ger 5,3/4,6/4,95 (AA 4,5) med samma kulör. Kortens ruter
+ *  (SUIT_TEXT ovan) är medvetet orörd. */
 export const STRAIN_CHIP: Record<'NT' | 'S' | 'H' | 'D' | 'C', string> = {
   NT: 'bg-purple-100 text-purple-800',
   S: 'bg-slate-200 text-slate-900',
-  H: 'bg-red-100 text-red-600',
-  D: 'bg-orange-100 text-orange-600',
+  H: 'bg-red-100 text-red-700',
+  D: 'bg-orange-100 text-orange-700',
   C: 'bg-green-100 text-green-700',
 }
 
 /** Chip-stil för de tre specialbuden (pass/dubbelt/redubbelt). */
 export const CALL_CHIP: Record<'P' | 'X' | 'XX', string> = {
-  P: 'bg-green-600 text-white',
+  P: 'bg-green-700 text-white',
   X: 'bg-red-900 text-red-300',
   XX: 'bg-indigo-900 text-indigo-300',
 }

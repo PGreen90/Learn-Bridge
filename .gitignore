@@ -22,3 +22,6 @@ revisor-output/
 /api/*.js
 .claude/skills/impeccable/
 # ^ symlänk till .agents/skills/impeccable (git här har core.symlinks=false → skulle bli en kopia); återskapas av `npx skills add`
+
+# impeccable (design-skillens körningsartefakter: critique-ögonblicksbilder + live-server)
+.impeccable/
