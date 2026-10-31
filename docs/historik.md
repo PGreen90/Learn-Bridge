@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-10-31 (/felrapporter #107 — cuet är krav också när de dubblar det, §5.8/§7.4)
+## 2026-10-31 (/felrapporter #107 — cuet är krav också när de dubblar det, §5.8/§7.4; LIVE 7d8a9f0)
 Nattkedjan grön (förscreening · bottar ×2 · granskning, `gh run list --limit 6`).
 En öppen rapport. **#107** (3♠X av Öst, bricka 4, Väst giv, alla i zon):
 1♣–(2♠)–X–(P)–3♣–(P)–3♠ (Östs stoppfråga, 15 stödpoäng utan spaderstopp) –
