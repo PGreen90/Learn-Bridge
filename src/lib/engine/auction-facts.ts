@@ -133,6 +133,12 @@ export interface AuctionFacts {
   lastContract: ResolvedCall | null
   /** Bara pass sedan senaste kontraktsbudet (inga X/XX)? Falskt utan kontraktsbud. */
   quietSinceLastContract: boolean
+  /**
+   * Enda icke-pass sedan senaste kontraktsbudet är EN dubbling från motståndarna
+   * (de dubblade partnerns cue/bud — ett krav står kvar, felrapport #107).
+   * Falskt utan kontraktsbud och falskt när bara pass ligger på budet.
+   */
+  theirDoubleSinceLastContract: boolean
   /** Utpassningssitsen: två pass ligger på ett bud, så mitt pass avslutar auktionen. */
   passOut: boolean
 
@@ -195,6 +201,10 @@ export function auctionFacts(history: ResolvedCall[], seat: Seat): AuctionFacts 
   const lastContract = contractBids.length > 0 ? contractBids[contractBids.length - 1] : null
   const quietSinceLastContract =
     !!lastContract && history.slice(history.indexOf(lastContract) + 1).every((c) => c.bid === 'P')
+  const sedanSista = lastContract ? history.slice(history.indexOf(lastContract) + 1) : []
+  const theirDoubleSinceLastContract = !!lastContract
+    && sedanSista.filter((c) => c.bid !== 'P').length === 1
+    && sedanSista.some((c) => c.bid === 'X' && side(c.seat) !== side(seat))
   const n = history.length
   const passOut = !!lastNonPass && n >= 2 && history[n - 1].bid === 'P' && history[n - 2].bid === 'P'
 
@@ -220,6 +230,7 @@ export function auctionFacts(history: ResolvedCall[], seat: Seat): AuctionFacts 
     lastNonPass,
     lastContract,
     quietSinceLastContract,
+    theirDoubleSinceLastContract,
     passOut,
     partnerLastSuit: partnerLastSuit(history, seat),
     partnerSignedOff: partnerSignedOff(history, seat, meaning),

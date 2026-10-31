@@ -1517,7 +1517,9 @@ bud → hittar 8-korts fiten), **3NT** med **stopp i deras färg + öppningsvär
 krav — **stopp i deras färg → 3NT** · **3+ stöd i partnerns visade 5+ högfärg
 → 4M** · **egen 6+ färg → rebjud** (utgång i högfärg) · **4+ stöd i partnerns
 färg → billigaste höjning** (partnern placerar) · sist billigaste sang. *Förr
-passade svararen cuet (frö 20270156).*
+passade svararen cuet (frö 20270156).* **Dubblar motståndaren cuet ändrar det
+inget** — kravet står kvar och svaret är detsamma (felrapport #107, 2026-10-31:
+*1♣–(2♠)–X–(P)–3♣–(P)–3♠–(X) → **4♣**, inte pass*).
 
 **Fiten mäts mot vad svaret lovade:** ett **fritt** högfärgsbud lovar 5+ (tre
 räcker), ett **ostört** 1-lägessvar (1x–P–1y–inkliv) lovar 4+ — då krävs fyra;
@@ -2790,7 +2792,11 @@ färg bjuds den; ingen sang. *Öst ♠A8 ♥AT2 ♦AKT9 ♣AQ43 (21 hp) → X ig
   deras färg — utan stopp frågar dubblaren med cuen (en gång), partnern bjuder
   3NT med stopp och rebjuder annars sin färg (aldrig sang utan stopp), sedan
   5m. *1♣–(1♦)–X–P–2♣–P med ♠QJ72 ♥QJT5 ♦64 ♣AJT → **2♦**, inte 3NT; partnern
-  ♦K-singel → 3♣ → 5♣.*
+  ♦K-singel → 3♣ → 5♣.* **Cuet är krav även när motståndarna dubblar det
+  (felrapport #107, 2026-10-31):** svaret är detsamma som odubblat — *1♣–(2♠)–
+  X–(P)–3♣–(P)–3♠–(X) med ♠876 ♥T86 ♦AT5 ♣AKQT → **4♣**, inte pass (förr
+  passade öppnaren och sålde 3♠X)*; samma sak när öppnarens cue dubblas —
+  dubblaren visar sin högfärg ändå.
   **Dubblarens svar på öppnarens invit-hopp (byggd 2026-09-13, bevaka
   2026-09-12):** öppnarens **hopp** i färg (egen 6-korts färg rebjuden, eller
   4-korts stöd i dubblarens visade högfärg) visar **16–18 och inbjuder**;
@@ -3601,6 +3607,13 @@ motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — 
 med ♠2 (DD 10) i stället för att saka ♣2 (8).
 
 ## 9. Ändringslogg
+- **2026-10-31 — Cuet är krav också när de dubblar det (§5.8, §7.4, felrapport
+  #107).** Läsarna `partnerCueToAnswer`, `negativeDoublerCueSeat` och
+  betydelsens stoppfråga krävde "bara pass sedan cuet" — en straffdubbling av
+  cuet gav "pass (ingen regel)" och 3♠X av Öst (−4 på bricka 4). Nytt faktum
+  `theirDoubleSinceLastContract` (EN motståndardubbling sedan senaste
+  kontraktsbudet); svaret är detsamma som odubblat (4♣ utan stopp, dubblaren
+  visar högfärgen på öppnarens cue). Facit `auction-felrapport-107.test.ts`.
 - **2026-10-26 — Stöld i den korta trumfhanden först (§8.12, fynd T, NU
   "spelförarsidans ledningsval i trumfkontrakt").** Spelförarsidan på lead i
   trumf leder en riktig förlorare (≤9, ej säker vinnare) till stöld när partnern

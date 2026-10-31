@@ -1851,7 +1851,9 @@ function stoppfragan(seat: Seat, cb: ParsedBid, prior: ResolvedCall[]): CallInte
   if (open.seat === seat && ours.length === 3 && ours[2].seat === PARTNER[seat] && parseBid(ours[2].bid as Bid)!.strain === theirStrain) {
     const dbl = prior.filter((c) => c.seat === PARTNER[seat] && c.bid !== 'P')
     if (dbl.length !== 2 || dbl[0].bid !== 'X') return null
-    if (prior[prior.length - 1].bid !== 'P' || prior[prior.length - 2] !== ours[2]) return null
+    // Felrapport #107: bara pass — eller EN motståndardubbling — sedan cuet.
+    const sedanCuet = prior.slice(prior.indexOf(ours[2]) + 1).filter((c) => c.bid !== 'P')
+    if (sedanCuet.length > 1 || sedanCuet.some((c) => c.bid !== 'X' || SIDE[c.seat] === SIDE[seat])) return null
     if (cb.strain === 'NT') {
       return { text: `${cb.level} sang — svar på partnerns stoppfråga: stopp i motståndarnas ${NAME[theirStrain]}; till spel.`, confidence: 'trolig', forcing: 'avslut', rule: 'svar på partnerns cue' }
     }

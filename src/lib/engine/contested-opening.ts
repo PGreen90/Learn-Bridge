@@ -1160,11 +1160,12 @@ export function negativeDoublerCueSeat(f: AuctionFacts): { ourOpen: Suit; theirS
   if (theirs.length !== 1) return null
   const ov = parseContractBid(theirs[0].bid)
   if (!ov || ov.strain === 'NT' || ov.level < 2) return null
-  const last = f.lastNonPass
-  if (!last || last.seat !== PARTNER[seat]) return null
+  // Felrapport #107: cuet är krav också när motståndarna dubblar det (bara pass
+  // eller EN motståndardubbling sedan cuet).
+  const last = f.lastContract
+  if (!last || last.seat !== PARTNER[seat] || !(f.quietSinceLastContract || f.theirDoubleSinceLastContract)) return null
   const cb = parseContractBid(last.bid)
   if (!cb || cb.strain !== ov.strain || history.indexOf(last) < history.indexOf(mine[0])) return null
-  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null
   return { ourOpen, theirSuit: SUIT_OF_LETTER[ov.strain], cueCall: last }
 }
 
