@@ -134,7 +134,8 @@ export function openerMaximalToAnswer(f: AuctionFacts): { major: string } | null
  */
 export function partnerCueToAnswer(f: AuctionFacts): { theirStrain: string } | null {
   const last = f.lastContract
-  if (!last || last.seat !== f.partner || !f.quietSinceLastContract) return null
+  // Felrapport #107: cuet är krav också när motståndarna dubblar det (3♠–X–?).
+  if (!last || last.seat !== f.partner || !(f.quietSinceLastContract || f.theirDoubleSinceLastContract)) return null
   const cb = parseContractBid(last.bid)!
   if (cb.strain === 'NT' || !f.theirStrains.has(cb.strain)) return null
   // Vår egen färg (öppningen, ett fritt bud) är aldrig ett cue även om de

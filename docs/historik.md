@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-10-31 (/felrapporter #107 — cuet är krav också när de dubblar det, §5.8/§7.4)
+Nattkedjan grön (förscreening · bottar ×2 · granskning, `gh run list --limit 6`).
+En öppen rapport. **#107** (3♠X av Öst, bricka 4, Väst giv, alla i zon):
+1♣–(2♠)–X–(P)–3♣–(P)–3♠ (Östs stoppfråga, 15 stödpoäng utan spaderstopp) –
+(X av Syd, människan) – och Väst **passade** → 3♠X, −4. Läsarna
+`partnerCueToAnswer` (öppnaren svarar cuet), `negativeDoublerCueSeat`
+(dubblaren svarar öppnarens cue) och betydelsens stoppfråga krävde "bara pass
+sedan cuet"; straffdubblingen tappade läget → "pass (ingen regel)". Nytt faktum
+`theirDoubleSinceLastContract` i `auction-facts.ts` (EN motståndardubbling sedan
+senaste kontraktsbudet räknas som tyst); svaret är detsamma som odubblat: Väst
+4♣ (inget stopp, rebjuder färgen), dubblaren visar högfärgen på öppnarens cue.
+Facit `auction-felrapport-107.test.ts` (6 lås, inkl. systerhålet + tolkningen).
+Hp räknade med kod: N 7 · E 12 · S 8 · W 13 = 40. Ägarfråga lämnad öppen: Östs
+cue med 15 stödpoäng (singel-K) mot ett minimum-3♣ leder odubblat till 5♣ på
+4-4 — systemriktigt enligt §7.4 (13+ sp = utgångsvärden), men ägaren avgör om
+tröskeln ska upp.
+
 ## 2026-10-27 (impeccable-provet på startsidan — critique + audit, fyra P1-fynd lagade; LIVE 985b674)
 Ägaren installerade design-skillen `impeccable` (pbakaus, v4.8.0, `.agents/skills/`) och
 lät en egen session köra `critique` (två isolerade delagenter: designöga + detektor) och
