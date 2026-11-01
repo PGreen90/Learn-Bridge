@@ -18,7 +18,7 @@ svarar på vad).
 
 ### 🔵 NU — TOM (senast: ångra ett steg + återuppta tävlingsgiv exakt, ägarval 2026-10-27, LIVE a6f4c06)
 Kvar (senare.md): samma tävlingsgiv kan spelas om på en ANNAN enhet (serverlagring = Beslut B-steg).
-Dessförinnan LIVE: #107 cue krav även dubblat (§5.8/§7.4) 7d8a9f0 · fynd T §8.12 6fd85bb · #105/#106 (§8.11) 01b1e34.
+Dessförinnan LIVE: stoppfrågan mot minimum = rena hp + zon, pass på 4m (§7.4) 034375b · #107 cue krav även dubblat 7d8a9f0 · fynd T §8.12 6fd85bb · #105/#106 (§8.11) 01b1e34.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
