@@ -480,6 +480,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'höjning efter negativ dubbling (utgång)': 'avslut',
   'höjning efter negativ dubbling (inbjudan)': 'inbjudan',
   'höjning efter negativ dubbling (enkel)': 'ej-krav',
+  'höjning efter negativ dubbling (pass)': 'ej-krav', // ägarbeslut 2026-10-31: minimum-läget, tävla lågt
   straffdubbling: 'ej-krav',
   '3NT direkt (förnekar stopp)': 'avslut',
   // DONT

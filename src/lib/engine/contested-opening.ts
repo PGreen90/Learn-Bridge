@@ -785,7 +785,8 @@ export function showHandAfterOpenersDouble(hand: Hand, f: AuctionFacts): Kunskap
  * färg billigast, 2NT med stopp. 13+ (utgångsvärden) och svagare händer utan
  * något att säga lämnas åt det gamla lagret (null).
  */
-export function negativeDoublerContinues(hand: Hand, f: AuctionFacts): Kunskap | null {
+/** `vulnerable`: zonen styr stoppfrågans hp-golv mot minimum-återbudet (ägarbeslut 2026-10-31). */
+export function negativeDoublerContinues(hand: Hand, f: AuctionFacts, vulnerable = false): Kunskap | null {
   const s = negativeDoublerSeat(f)
   if (!s) return null
   const { history, seat } = f
@@ -797,8 +798,11 @@ export function negativeDoublerContinues(hand: Hand, f: AuctionFacts): Kunskap |
   // dubblaren får inte dra en egen sidofärg förbi en höjning (regressions-
   // vakter 20261621/20261351: dubbelton-höjning av rebjuden 1M resp. 5-korts
   // ruterstöd). Förr gav det gamla lagrets catch-all samma höjning.
-  const raise = suitAnswer ? raiseWithFit(hand, f, answer) : null
+  // Partnerns billiga svar = MINIMUM (12–14): höjningen räknar mot det (ägarbeslut 2026-10-31).
+  const raise = suitAnswer ? raiseWithFit(hand, f, answer, { minimumRebid: true, vulnerable }) : null
   if (raise) {
+    // Beslutat pass ur minimum-läget (ägarbeslut 2026-10-31): tävla så lågt som möjligt.
+    if (raise.bid === 'P') return { call: 'P', rule: 'höjning efter negativ dubbling (pass)', explanation: raise.explanation ?? '' }
     const lvl = parseContractBid(raise.bid)!.level
     const gameLvl = answer.strain === 'H' || answer.strain === 'S' ? 4 : 5
     // Felrapport #100: fit-höjningens stoppfråge-cue i deras färg bär cue-regeln.

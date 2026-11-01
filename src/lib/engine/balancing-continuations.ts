@@ -129,12 +129,13 @@ function outstandingArtificialForce(f: AuctionFacts): boolean {
  * kravvakten här (annars skulle den flytta företräde). Ett utestående
  * artificiellt krav lämnas åt FORCED-detektorerna (se `outstandingArtificialForce`).
  */
-export function partnerSuitResponse(hand: Hand, f: AuctionFacts): ResolvedCall | null {
+/** `vulnerable`: zonen styr stoppfrågans hp-golv i minimum-läget efter negativ X (ägarbeslut 2026-10-31). */
+export function partnerSuitResponse(hand: Hand, f: AuctionFacts, vulnerable = false): ResolvedCall | null {
   if (f.partnerSignedOff) return null
   if (outstandingArtificialForce(f)) return null
   const partnerSuit = f.partnerLastSuit
   if (!partnerSuit) return null // partnern har inte visat en färg → vi hittar inte på något
-  return raiseWithFit(hand, f, partnerSuit) ?? advancerFitPass(hand, f, partnerSuit) ?? respondWithoutFit(hand, f, partnerSuit)
+  return raiseWithFit(hand, f, partnerSuit, { vulnerable }) ?? advancerFitPass(hand, f, partnerSuit) ?? respondWithoutFit(hand, f, partnerSuit)
 }
 
 /**
@@ -232,6 +233,6 @@ export function responderAnswersSecondDouble(hand: Hand, f: AuctionFacts): Resol
  * (`responderAnswersSecondDouble`) prövas först — den är forcerande och får inte
  * kapas av den allmänna kärnan (som kan passa en svag hand).
  */
-export function responderActsInCompetition(hand: Hand, f: AuctionFacts): ResolvedCall | null {
-  return responderAnswersSecondDouble(hand, f) ?? partnerSuitResponse(hand, f)
+export function responderActsInCompetition(hand: Hand, f: AuctionFacts, vulnerable = false): ResolvedCall | null {
+  return responderAnswersSecondDouble(hand, f) ?? partnerSuitResponse(hand, f, vulnerable)
 }

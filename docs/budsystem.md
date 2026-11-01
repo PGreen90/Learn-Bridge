@@ -2797,6 +2797,18 @@ färg bjuds den; ingen sang. *Öst ♠A8 ♥AT2 ♦AKT9 ♣AQ43 (21 hp) → X ig
   X–(P)–3♣–(P)–3♠–(X) med ♠876 ♥T86 ♦AT5 ♣AKQT → **4♣**, inte pass (förr
   passade öppnaren och sålde 3♠X)*; samma sak när öppnarens cue dubblas —
   dubblaren visar sin högfärg ändå.
+  **Styrkan för frågan mot öppnarens MINIMUM-återbud (ägarbeslut 2026-10-31):**
+  det billiga svaret visade 12–14, så räkningen är känd. Stoppfrågan (och 3NT
+  direkt med stopp) ställs på **rena hp** — 3NT är målet, form hjälper inte och
+  ett tvingat återbud lovar ingen känd fit — **ozon 13+, zon 14+**. **5m kräver
+  16+ hp** (29 ihop). Nekar partnern stopp (rebjuder färgen) **passar
+  frågeställaren 4m** — "tävla så lågt som möjligt". Utan utgångsförsök: på
+  3-läget **pass** (ingen inbjudan — 3♣ + två steg vore 5♣), på 2-läget 4m-
+  inbjudan bara med 15+ stödpoäng, 11–14 → enkel höjning 3m (tävlande). *1♣–
+  (2♠)–X–(P)–3♣–(P) med ♠K ♥KQJ9 ♦K942 ♣8752 (12 hp, zon) → **pass** (förr 3♠ på
+  15 stödpoäng, sedan 5♣); 13 hp frågar i ozon men passar i zon; 14 hp frågar,
+  passar 4♣ när partnern nekar; 16 hp → 5♣. #100-given (11 hp, zon) → **3♣**,
+  inte cue.*
   **Dubblarens svar på öppnarens invit-hopp (byggd 2026-09-13, bevaka
   2026-09-12):** öppnarens **hopp** i färg (egen 6-korts färg rebjuden, eller
   4-korts stöd i dubblarens visade högfärg) visar **16–18 och inbjuder**;
@@ -3607,6 +3619,17 @@ motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — 
 med ♠2 (DD 10) i stället för att saka ♣2 (8).
 
 ## 9. Ändringslogg
+- **2026-10-31 — Stoppfrågan mot minimum-återbudet på rena hp med zon; pass på 4m
+  (§7.4, ägarbeslut efter felrapport #107).** Negativ-dubblarens andra tur mot
+  öppnarens billiga lågfärgssvar (12–14): 3NT/cue kräver 13 hp i ozon, 14 i zon
+  (förr 13 stödpoäng — singel-K och en oviss 4-4-"fit" blåste 12 hp till 15);
+  5m kräver 16 hp; nekat stopp → pass på 4m; på 3-läget ingen inbjudan (förr
+  "inbjudande hopp" = 3♣ + två steg = 5♣). Minimum-läget läses ur auktionen
+  (`minimumAfterNegativeDouble` i fit-raise.ts) och passet returneras uttryckligt
+  så ingen senare tabellrad bjuder vidare; zonen trådad till `svararen-stört`/
+  `negativ-dubblaren`. #100-låset omskrivet (principen låst med 14-hp-Nord;
+  rapportens 11-hp-Nord → 3♣). Facit `auction-felrapport-107.test.ts`,
+  `auction-felrapport-100.test.ts`.
 - **2026-10-31 — Cuet är krav också när de dubblar det (§5.8, §7.4, felrapport
   #107).** Läsarna `partnerCueToAnswer`, `negativeDoublerCueSeat` och
   betydelsens stoppfråga krävde "bara pass sedan cuet" — en straffdubbling av

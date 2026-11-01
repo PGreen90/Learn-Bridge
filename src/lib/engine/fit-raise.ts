@@ -187,10 +187,38 @@ export function fitLengthNeeded(f: AuctionFacts, partnerSuit: { strain: string; 
  * Klampas till lagliga bud; räcker det inte ens till en enkel höjning passar vi.
  * Läser bara `hand` + auktionen i `f` — aldrig någon annan hand.
  */
+/**
+ * Minimum-läget efter MIN negativa dubbling (ägarbeslut 2026-10-31, läst ur
+ * auktionen ensam — ärlig inferens): partnern öppnade 1 i färg, mina bud är ett
+ * X (först) och därefter högst cue-bud i deras färg, partnerns svar i LÅGFÄRGEN
+ * var billigast möjliga (inget hopp = 12–14) och alla partnerns senare bud är
+ * samma lågfärg (nekat stopp). Partnerns färgbud är senaste kontraktsbudet
+ * (bara pass, eller deras X, sedan). Då är räkningen känd: 12–14 mittemot.
+ */
+export function minimumAfterNegativeDouble(f: AuctionFacts, partnerSuit: { strain: string; level: number }): boolean {
+  const open = f.opening
+  if (!open || open.seat !== f.partner || open.level !== 1 || open.strain === 'NT') return false
+  if (partnerSuit.strain === 'H' || partnerSuit.strain === 'S' || partnerSuit.strain === 'NT') return false
+  if (!(f.quietSinceLastContract || f.theirDoubleSinceLastContract) || !f.lastContract || f.lastContract.seat !== f.partner) return false
+  const mine = f.history.filter((c) => c.seat === f.seat && c.bid !== 'P')
+  if (mine.length === 0 || mine[0].bid !== 'X') return false
+  if (mine.slice(1).some((c) => { const cb = parseContractBid(c.bid); return !cb || !f.theirStrains.has(cb.strain) })) return false
+  const partnerBids = f.ourContractBids.filter((c) => c.seat === f.partner)
+  if (partnerBids.length < 2) return false
+  const answer = partnerBids[1]
+  const acb = parseContractBid(answer.bid)
+  if (!acb || acb.strain !== partnerSuit.strain) return false
+  if (partnerBids.slice(2).some((c) => parseContractBid(c.bid)!.strain !== acb.strain)) return false
+  const before = f.history.slice(0, f.history.indexOf(answer))
+  return cheapestBidIn(before, f.partner, acb.strain) === answer.bid
+}
+
 export function raiseWithFit(
   hand: Hand,
   f: AuctionFacts,
   partnerSuit: { strain: string; level: number },
+  /** Minimum-kontext: partnerns svar visade 12–14 (negativ-dubblarens andra tur); zonen styr hp-golvet. */
+  opts?: { minimumRebid?: boolean; vulnerable?: boolean },
 ): ResolvedCall | null {
   const { history, seat } = f
   const suit = SUIT_OF_LETTER[partnerSuit.strain]
@@ -294,11 +322,23 @@ export function raiseWithFit(
 
   const isMajor = partnerSuit.strain === 'H' || partnerSuit.strain === 'S'
 
-  // Minorfit med UTGÅNGSVÄRDEN (13+ stödpoäng): nå utgång i stället för att kapa
-  // vid en inbjudan (grunden "rätt nivå med fit", 2026-07-05). Balanserad hand →
-  // 3NT (enklare utgång med 25 stick); annars minorutgången 5m. (Förr stannade
-  // motorn alltid på ett inbjudande hopp för minor – aldrig utgång.)
-  if (!isMajor && sp >= 13) {
+  // Minorfit med UTGÅNGSVÄRDEN: nå utgång i stället för att kapa vid en inbjudan
+  // (grunden "rätt nivå med fit", 2026-07-05). Balanserad hand → 3NT (enklare
+  // utgång med 25 stick); annars minorutgången 5m. Utan minimum-kontext som
+  // förr: 13+ stödpoäng.
+  // ÄGARBESLUT 2026-10-31 (uppföljning av felrapport #107) — mot partnerns
+  // MINIMUM-återbud (`opts.minimumRebid`, negativ-dubblarens andra tur) är
+  // räkningen känd (12–14 visade): 3NT/stoppfrågan ställs på RENA hp — 3NT är
+  // målet, form hjälper inte och ett tvingat återbud lovar ingen känd fit —
+  // ozon 13+, zon 14+. 5m kräver 16+ stödpoäng (29 ihop). Nekar partnern stopp
+  // (rebjuder färgen) PASSAR frågeställaren 4m, och på 3-läget finns ingen
+  // inbjudan alls (3♣ + två steg vore 5♣): "tävla så lågt som möjligt".
+  const minimum = !!opts?.minimumRebid || minimumAfterNegativeDouble(f, partnerSuit)
+  const ntTry = minimum ? hcp(hand) >= (opts?.vulnerable ? 14 : 13) : sp >= 13
+  // Ett beslutat PASS (inte null): annars tar en senare tabellrad över med den
+  // gamla 13-sp-regeln (felrapport #107: 3♠/5♣ ur `partnerSuitResponse`).
+  const passa = (explanation: string): ResolvedCall => ({ seat, bid: 'P' as Bid, explanation })
+  if (!isMajor && (ntTry || (minimum && hcp(hand) >= 16))) {
     const legal = legalCalls(history, seat)
     // Felrapport #100 (2026-10-06): 3NT lovar stopp i VARJE färg motståndarna
     // bjudit — förr räckte 'balanserad' (♦64 efter 1♣–(1♦)–X–P–2♣ gav 3NT).
@@ -306,24 +346,31 @@ export function raiseWithFit(
     // färg — samma struktur som negativ-dubblarens cue), sist minorutgången.
     const theirSuits = [...f.theirStrains].map((st) => SUIT_OF_LETTER[st]).filter((x): x is NonNullable<typeof x> => !!x)
     const stoppAlla = theirSuits.every((su) => hasStopper(hand, su))
-    if (isBalanced(hand) && stoppAlla && legal.includes('3NT' as Bid)) {
+    if (ntTry && isBalanced(hand) && stoppAlla && legal.includes('3NT' as Bid)) {
       return {
         seat, bid: '3NT' as Bid,
         explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden, balanserad med stopp i deras färg → 3NT.`,
       }
     }
-    if (!stoppAlla && theirSuits.length === 1) {
-      const theirStrain = [...f.theirStrains][0]
+    // Frågan ställs EN gång: har jag redan cue-bjudit och partnern nekat stopp
+    // (färgsvar) går vi till minorutgången (16+), annars pass — inte en ny cue.
+    const theirStrain = theirSuits.length === 1 ? [...f.theirStrains][0] : null
+    const alreadyCued = !!theirStrain && history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === theirStrain)
+    if (ntTry && !stoppAlla && theirStrain && !alreadyCued) {
       const cue = cheapestBidIn(history, seat, theirStrain)
-      // Frågan ställs EN gång: har jag redan cue-bjudit och partnern nekat stopp
-      // (färgsvar) går vi till minorutgången, inte en ny cue.
-      const alreadyCued = history.some((c) => c.seat === seat && parseContractBid(c.bid)?.strain === theirStrain)
-      if (!alreadyCued && cue && legal.includes(cue) && bidValue(parseContractBid(cue)!.level, theirStrain) < bidValue(3, 'NT')) {
+      if (cue && legal.includes(cue) && bidValue(parseContractBid(cue)!.level, theirStrain) < bidValue(3, 'NT')) {
         return {
           seat, bid: cue,
           explanation: `Fit i partnerns ${SWE_SYM[partnerSuit.strain]} + utgångsvärden men inget stopp i deras ${SWE_SYM[theirStrain]} → cue ${prettyBid(cue)} (partnern bjuder 3NT med stopp, annars färg).`,
         }
       }
+    }
+    // Minimum-kontext utan 29 ihop: partnern nekade stopp (eller ingen fråga
+    // gick att ställa) → pass, 5m är utom räckhåll (ägarbeslut 2026-10-31).
+    if (minimum && hcp(hand) < 16) {
+      return passa(alreadyCued
+        ? `Partnern nekade stopp i deras färg (rebjöd ${SWE_SYM[partnerSuit.strain]}) och räkningen når inte 29 mot ett minimum → pass på ${prettyBid(f.lastContract!.bid as Bid)} (tävla så lågt som möjligt).`
+        : `Fit i partnerns ${SWE_SYM[partnerSuit.strain]}, men partnern visade minimum (12–14) och varken 3NT-fråga eller 5${SWE_SYM[partnerSuit.strain]} är inom räckhåll → pass.`)
     }
     const gameBid = `5${partnerSuit.strain}` as Bid
     if (legal.includes(gameBid)) {
@@ -333,6 +380,23 @@ export function raiseWithFit(
       }
     }
     // Varken 3NT eller 5m lagligt (konkurrensen tryckte upp budet) → fall vidare.
+  }
+  // Minor mot MINIMUM-återbudet utan utgångsförsök (ägarbeslut 2026-10-31):
+  // på 3-läget pass (ingen inbjudan — partnern har redan sagt minimum och 5m är
+  // utom räckhåll); på 2-läget 4m-inbjudan bara med 15+ stödpoäng (15 + 14 =
+  // 29), 11–14 → 3m (enkel, tävlande), annars pass. Förr: "inbjudande hopp"
+  // = partnerns nivå + två steg, dvs 5♣ över 3♣ och 4♣ på 11 sp över 2♣.
+  if (!isMajor && minimum) {
+    if (partnerSuit.level >= 3) return passa(`Fit i partnerns ${SWE_SYM[partnerSuit.strain]}, men partnern visade minimum (12–14) och 5${SWE_SYM[partnerSuit.strain]} är utom räckhåll → pass (tävla så lågt som möjligt; ingen inbjudan på 3-läget).`)
+    const legal = legalCalls(history, seat)
+    const bid = (sp >= 15 ? `4${partnerSuit.strain}` : sp >= 11 ? `3${partnerSuit.strain}` : null) as Bid | null
+    if (!bid || !legal.includes(bid)) return null
+    return {
+      seat, bid,
+      explanation: sp >= 15
+        ? `Stöd för partnerns ${SWE_SYM[partnerSuit.strain]} – inbjudan till 5${SWE_SYM[partnerSuit.strain]} (15+ stödpoäng mot ett minimum; partnern går vidare bara med maximum).`
+        : `Stöd för partnerns ${SWE_SYM[partnerSuit.strain]} – enkel höjning (tävlande, 11–14 stödpoäng mot ett minimum; ingen inbjudan).`,
+    }
   }
 
   // Önskad nivå efter styrka. Högfärgsutgång = 4-läget; minorutgång sköts ovan.
