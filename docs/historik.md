@@ -26,6 +26,15 @@ Hp räknade med kod: N 7 · E 12 · S 8 · W 13 = 40. Ägarfråga lämnad öppen
 cue med 15 stödpoäng (singel-K) mot ett minimum-3♣ leder odubblat till 5♣ på
 4-4 — systemriktigt enligt §7.4 (13+ sp = utgångsvärden), men ägaren avgör om
 tröskeln ska upp.
+**Uppföljning samma dag (ägarbeslut):** ägaren: "motståndet har en del poäng → 5♣
+håller inte; tävla så lågt som möjligt, ozon aggressivare, zon passivare". Beslut:
+stoppfrågan/3NT mot minimum-återbudet på rena hp (ozon 13+, zon 14+), 5m 16+,
+pass på 4m efter nekat stopp, ingen inbjudan på 3-läget (hoppet 3♣→5♣ var ett
+tredje hål). Minimum-läget läses ur auktionen (`minimumAfterNegativeDouble`),
+passet returneras uttryckligt (null lät `svararen-stört` bjuda 3♠/5♣ ändå), zonen
+trådad till raderna. #100-låset omskrivet (14-hp-Nord bär principen, 11-hp-Nord →
+3♣). Kvar som observation: den tävlande höjningen (E 4♣ över deras 3♠ i zon) ser
+inte heller på zonen.
 
 ## 2026-10-27 (impeccable-provet på startsidan — critique + audit, fyra P1-fynd lagade; LIVE 985b674)
 Ägaren installerade design-skillen `impeccable` (pbakaus, v4.8.0, `.agents/skills/`) och

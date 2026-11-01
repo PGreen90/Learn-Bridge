@@ -2548,8 +2548,8 @@ const TABELL: Row[] = [
   {
     id: 'negativ-dubblaren',
     läge: (f) => negativeDoublerSeat(f) !== null || negativeDoublerJumpSeat(f) !== null || negativeDoublerCueSeat(f) !== null,
-    välj: ({ hand, facts }) => {
-      const k = negativeDoublerAnswersCue(hand, facts) ?? negativeDoublerContinues(hand, facts) ?? negativeDoublerAnswersJump(hand, facts)
+    välj: ({ hand, facts, vulnerable }) => {
+      const k = negativeDoublerAnswersCue(hand, facts) ?? negativeDoublerContinues(hand, facts, vulnerable) ?? negativeDoublerAnswersJump(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },
@@ -2624,7 +2624,7 @@ const TABELL: Row[] = [
   {
     id: 'svararen-stört',
     läge: (f) => responderContestedSeat(f),
-    välj: ({ hand, facts }) => {
+    välj: ({ hand, facts, vulnerable }) => {
       const k =
         // Felrapport #98: redubblarens andra bud (partnerns pass efter XX är inget minimum).
         redoublerContinues(hand, facts) ??
@@ -2644,7 +2644,7 @@ const TABELL: Row[] = [
       // Familj 5 (c + balansering): svararens balanserings-/återöppningssvar och
       // K1-resten (passad negativ-dubblare mot öppnarens andra X) — samma kunskap
       // som `offBookResponse`; kravvakten körs efter för null-fallen.
-      return responderActsInCompetition(hand, facts)
+      return responderActsInCompetition(hand, facts, vulnerable)
     },
   },
 
@@ -2788,7 +2788,7 @@ const TABELL: Row[] = [
   {
     id: 'partner-färg',
     läge: (f) => f.partnerLastSuit !== null && !f.partnerSignedOff,
-    välj: ({ hand, facts }) => partnerSuitResponse(hand, facts),
+    välj: ({ hand, facts, vulnerable }) => partnerSuitResponse(hand, facts, vulnerable),
   },
   {
     id: 'krav-minimibud',

@@ -74,3 +74,54 @@ describe('felrapport #107 – partnerns cue är krav även när motståndarna du
     expect(decideCall(syster, H('W', '1C 2S X P 3S X'), 'E')).toMatchObject({ bid: '4H', rule: 'svar på cue efter negativ dubbling' })
   })
 })
+
+// ÄGARBESLUT 2026-10-31 (uppföljning av #107): stoppfrågan efter öppnarens
+// MINIMUM-återbud i konkurrens ställs på rena hp — ozon 13+, zon 14+ (det är
+// 3NT vi siktar på; form hjälper inte, och ett tvingat 3♣ lovar ingen känd fit).
+// Partnern nekar stopp (rebjuder färgen) → frågeställaren PASSAR 4m; 5m bara
+// när räkningen når 29 (16+ mot visat minimum). "Tävla så lågt som möjligt."
+describe('ägarbeslut 2026-10-31 – stoppfrågan på rena hp med zon; pass på 4m efter nekat stopp', () => {
+  const FORE = '1C 2S X P 3C P'
+  const medOst = (e: string, s: string, zon: Deal['vulnerability']): Deal => {
+    const d: Deal = { ...RAPPORT, vulnerability: zon, hands: { ...RAPPORT.hands, E: parseHand(e), S: parseHand(s) } }
+    expect(ORDER.reduce((a, x) => a + hcp(d.hands[x]), 0)).toBe(40)
+    return d
+  }
+  const E13 = 'S:K H:KQJ9 D:K942 C:J752', S13 = 'S:T93 H:A5 D:QJ83 C:8943'
+  const E14 = 'S:K H:KQJ9 D:KQ92 C:8752', S14 = 'S:T93 H:A5 D:J843 C:J943'
+  const E16 = 'S:K H:KQJ9 D:KQJ2 C:J752', S16 = 'S:T93 H:A5 D:9843 C:8943'
+
+  it('rapportens Öst (12 hp) passar 3♣ — i zon och i ozon', () => {
+    expect(decideCall(RAPPORT, H('W', FORE), 'E').bid).toBe('P')
+    expect(decideCall({ ...RAPPORT, vulnerability: 'none' }, H('W', FORE), 'E').bid).toBe('P')
+  })
+  it('13 hp: frågar i ozon, passar i zon', () => {
+    const ozon = medOst(E13, S13, 'none')
+    expect(hcp(ozon.hands.E)).toBe(13)
+    expect(decideCall(ozon, H('W', FORE), 'E')).toMatchObject({ bid: '3S', rule: 'negativ-dubblarens cue (utgångskrav)' })
+    expect(decideCall(medOst(E13, S13, 'all'), H('W', FORE), 'E').bid).toBe('P')
+  })
+  it('14 hp frågar även i zon', () => {
+    const d = medOst(E14, S14, 'all')
+    expect(hcp(d.hands.E)).toBe(14)
+    expect(decideCall(d, H('W', FORE), 'E')).toMatchObject({ bid: '3S', rule: 'negativ-dubblarens cue (utgångskrav)' })
+  })
+  it('partnern nekar stopp (4♣): 14 hp passar, 16 hp går till 5♣', () => {
+    expect(decideCall(medOst(E14, S14, 'all'), H('W', `${FORE} 3S P 4C P`), 'E').bid).toBe('P')
+    const d16 = medOst(E16, S16, 'all')
+    expect(hcp(d16.hands.E)).toBe(16)
+    expect(decideCall(d16, H('W', `${FORE} 3S P 4C P`), 'E').bid).toBe('5C')
+  })
+  it('hela given med människans (Syds) pass: slutar i 3♣ av Väst', () => {
+    // Syd är människan och passar som i rapporten; de tre bottarna bjuder.
+    const h = H('W', FORE)
+    let guard = 0
+    while (!auctionComplete(h) && guard++ < 30) {
+      const seat = seatToAct(RAPPORT.dealer, h.length)
+      h.push(seat === 'S' ? { seat, bid: 'P' } as ResolvedCall : decideCall(RAPPORT, h, seat))
+    }
+    const k = contractFromCalls(h)
+    expect(h.map((c) => c.bid).join(' ')).toBe('1C 2S X P 3C P P P')
+    expect(k && `${k.level}${k.strain} ${k.declarer}`).toBe('3clubs W')
+  })
+})

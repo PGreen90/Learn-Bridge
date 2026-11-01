@@ -113,7 +113,7 @@ const ALL_ENGINE_RULES: string[] = [
   'dubblaren höjer till 3NT', 'svar på dubblarens cue',
   // När de stör vår öppning (etapp 4 familj 3, 2026-09-08)
   'negativ-dubblarens utgång', 'negativ-dubblarens invit-fortsättning', 'negativ-dubblarens preferens',
-  'höjning efter negativ dubbling (utgång)', 'höjning efter negativ dubbling (inbjudan)', 'höjning efter negativ dubbling (enkel)',
+  'höjning efter negativ dubbling (utgång)', 'höjning efter negativ dubbling (inbjudan)', 'höjning efter negativ dubbling (enkel)', 'höjning efter negativ dubbling (pass)',
   'straffdubbling',
   // Öppnarens och svararens fortsättning när de stört (etapp 4 familj 4, 2026-09-08; contested-continuations.ts, overcalls.ts)
   'svar på cue-höjning', 'öppnaren bjuder utgång i konkurrens', 'öppnaren bjuder 3NT i konkurrens', 'maximal dubbling (game try)',
