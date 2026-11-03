@@ -28,13 +28,14 @@ describe('FAS 4 punkt 18 – kaptenen nedvärderar egna honnörer mot partnerns 
 })
 
 describe('slamInvestigation – ärlig RKC (driv-zonen: egen hand + visat minimum ≥ 33)', () => {
-  it('visad 16+: tvetydigt svar (0 eller 3) antas HÖGT (mänsklig inferens) → 6 i trumf', () => {
-    const opener = parseHand('S:AKQ85 H:A43 D:KJ7 C:82') // 3 nyckelkort → svarar 5♦ (0/3)
-    const responder = parseHand('S:J762 H:AQ5 D:AQ64 C:K3') // 17 hp, 2 egna nyckelkort
+  it('visad 16+: tvetydigt svar (0 eller 3) = 3 med visshet → alla fem → 5NT; ♦K visad + egen ♣K → 7♠ (ägarbeslut 2026-11-03)', () => {
+    const opener = parseHand('S:AKQ85 H:A43 D:KJ7 C:82') // 3 nyckelkort → svarar 5♦ (0/3); sidokung ♦K → 6♦
+    const responder = parseHand('S:J762 H:AQ5 D:AQ64 C:K3') // 17 hp, 2 egna nyckelkort, sidokung ♣K
     const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '6S'])
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '6D', '7S'])
     expect(turns[0].rule).toBe('1430 RKC')
-    expect(turns[2].rule).toBe('slamavslut')
+    expect(turns[2].rule).toBe('Sjöberg 5NT')
+    expect(turns[4].rule).toBe('slamavslut')
   })
 
   it('visad <15: tvetydigt svar antas LÅGT → kaptenen stannar 5-trumf; partnern med det HÖGA antalet RÄTTAR till 6', () => {
@@ -112,21 +113,27 @@ describe('buildAuction – slam växer fram via Jacoby 2NT (cue-bud återinförd
   })
 })
 
-// Ägaren 2026-10-04: "Fråga alltid så mycket som budgivningen tillåter." Med alla
-// fem nyckelkort i storslamszon och damen okänd men frågbar söks storslammen
-// via damfrågan — förr bjöds 6 direkt.
-describe('slamInvestigation – alla fem nyckelkort i storslamszon: damfrågan söker storslammen', () => {
-  const responder = parseHand('S:J762 H:A5 D:AQ6 C:KQ84') // kaptenen: ♥A ♦A, ingen spaderdam; 16 hp + visade 22 = 38
-  it('partnern visar dam + sidokung → storslam', () => {
+// Ägarbeslut 2026-11-03 (felrapport #109): alla fem nyckelkort → ALLTID 5NT
+// (kungfråga), oavsett trumfdam och zon; storslam med tre av fyra kungar i
+// paret. (Förr, 2026-10-04: damfrågan i storslamszon; damen avgör inte längre.)
+describe('slamInvestigation – alla fem nyckelkort: 5NT frågar kungar, tre av fyra kungar → storslam', () => {
+  const responder = parseHand('S:J762 H:A5 D:AQ6 C:KQ84') // kaptenen: ♥A ♦A ♣K, ingen spaderdam; 16 hp
+  it('partnern har två sidokungar → svarar 7♠ direkt (Sjöberg)', () => {
     const opener = parseHand('S:AKQ85 H:K43 D:K72 C:A2')
     const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 22 })!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5H', '6D', '7S'])
-    expect(turns[2].rule).toBe('trumfdam-fråga')
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '7S'])
+    expect(turns[2].rule).toBe('Sjöberg 5NT')
   })
-  it('partnern nekar damen → lillslammen ändå (5 nyckelkort = alltid slam)', () => {
+  it('utan trumfdam i paret: kungarna avgör ändå (ägarbeslut) → 7♠', () => {
     const opener = parseHand('S:AK985 H:KQ3 D:K72 C:A2')
     const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 22 })!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5H', '5S', '6S'])
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '7S'])
+  })
+  it('partnern visar EN kung och kaptenen har ingen → bara två kungar i paret → 6♠', () => {
+    const opener = parseHand('S:AKQ85 H:Q43 D:K72 C:A2')
+    const kapten = parseHand('S:J762 H:A5 D:AQ6 C:QJ84') // ♥A ♦A, inga sidokungar
+    const turns = slamInvestigation(opener, kapten, 'spades', undefined, { partnerMin: 22 })!
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '6D', '6S'])
   })
 })
 

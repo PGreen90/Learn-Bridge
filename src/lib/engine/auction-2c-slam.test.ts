@@ -111,11 +111,14 @@ describe('etapp 4 familj B fix 1: kaptensmatte + RKC efter positivt svar på 2�
     expect(decideCall(d, HISTORY_1101, 'W').bid).toBe('4C')
   })
 
-  it('frö 20261101 hela auktionen: lillslam 6♥ nås', () => {
+  // Ägarbeslut 2026-11-03 (felrapport #109): alla fem nyckelkort → 5NT; E visar två
+  // sidokungar (♦K ♣K) → 7♥. (DD: Nord har ♥T9832, 5-0 — 7♥ betar; budet döms på
+  // systemriktighet, inte resultatet. Förr 6♥.)
+  it('frö 20261101 hela auktionen: alla fem nyckelkort + tre kungar → 7♥', () => {
     const d = deal('2cslam-20261101', 'E', 'ew', HANDS_1101)
     const history = botAuction(d)
     expect(history).not.toBeNull()
-    expect(contractFromCalls(history!)).toMatchObject({ level: 6, strain: 'hearts' })
+    expect(contractFromCalls(history!)).toMatchObject({ level: 7, strain: 'hearts' })
   })
 
   it('frö 20261050-läget: N (10 hp + singel, klöverfit) frågar 4NT, blastar inte 5♣', () => {

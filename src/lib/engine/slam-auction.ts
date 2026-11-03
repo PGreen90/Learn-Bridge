@@ -586,7 +586,7 @@ function rkcPhaseTurn(role: SlamRole, hand: Hand, trump: Suit, ctx: SlamContext,
     }
     return null
   }
-  if (after.length === 3 && place === '5NT' && role === CAPTAIN) return captainAfterKingAnswer(after[2].call, trump)
+  if (after.length === 3 && place === '5NT' && role === CAPTAIN) return captainAfterKingAnswer(hand, after[2].call, trump)
   if (after.length === 3 && role === CAPTAIN && place === queenAskBid(trump, answer)) {
     const svar = after[2].call
     const egna = keycards(hand, trump)
@@ -646,11 +646,12 @@ function captainPlaceAfterRKC(hand: Hand, trump: Suit, ctx: SlamContext, floor: 
   // stopp när svaret (5♥) redan nekat damen.
   const ask = egenFärg ? null : queenAskBid(trump, answerCall)
   const val = slamValEfterSvar(total, queenKnown, known, ask !== null, answerCall === '5H')
-  // "Fråga alltid så mycket som budgivningen tillåter" (ägaren 2026-10-04): med
-  // alla fem nyckelkort i storslamszon och damen okänd men frågbar söks
-  // storslammen via damfrågan — visad dam + sidokung → 7, annars 6.
-  if (total === 5 && derived.certain && !queenKnown && ask && floor >= 37 && !utanKungfråga) {
-    return { role: 'svarare', call: ask, rule: 'trumfdam-fråga', explanation: `Alla fem nyckelkort och storslamszon — men trumfdamen är inte säkrad → ${ask[0]}${SYM[SUIT_OF_LETTER_[ask[1]]]} frågar damen; dam + sidokung ger 7${SYM[trump]}, annars 6${SYM[trump]}.` }
+  // Ägarbeslut 2026-11-03 (felrapport #109): alla fem nyckelkort entydigt →
+  // ALLTID 5NT (kungfråga, §6.3), oavsett trumfdam och poängzon. Storslam med
+  // minst tre av de fyra kungarna i paret (trumfkungen inräknad), annars
+  // lillslam. (Förr: damfråga/5NT bara i storslamszon 37 med säkrad dam.)
+  if (total === 5 && derived.certain && !egenFärg && !utanKungfråga) {
+    return { role: 'svarare', call: '5NT', rule: 'Sjöberg 5NT', explanation: `alla fem nyckelkort → 5NT (frågar kungar; storslam med tre av fyra kungar i paret).` }
   }
   if (val === 'fråga-dam' && ask) {
     return { role: 'svarare', call: ask, rule: 'trumfdam-fråga', explanation: `Alla nyckelkort utom ett — men trumfdamen är inte säkrad → ${ask[0]}${SYM[SUIT_OF_LETTER_[ask[1]]]} frågar damen; visas den bjuds 6${SYM[trump]}, annars står 5${SYM[trump]}.` }
@@ -663,15 +664,10 @@ function captainPlaceAfterRKC(hand: Hand, trump: Suit, ctx: SlamContext, floor: 
   }
 
   if (total >= 4) {
-    // Storslam kräver visshet: entydigt alla fem nyckelkort + dam + storslamszon
-    // mot partnerns visade MINIMUM (aldrig hopp om att partnern har maximum).
-    if (floor >= 37 && derived.certain && total === 5 && queenKnown && !egenFärg && !utanKungfråga) {
-      return { role: 'svarare', call: '5NT', rule: 'Sjöberg 5NT', explanation: `alla fem nyckelkort + trumfdam, storslamszon → 5NT (frågar kungar).` }
-    }
     const why = derived.certain
       ? total === 4
         ? `ett nyckelkort saknas, ${queenKnown ? 'trumfdamen säkrad' : `${known}+ kända trumf`} → 6${SYM[trump]} (lillslam).`
-        : `alla fem nyckelkort${queenKnown ? ' men ingen säker storslamszon' : ''} → 6${SYM[trump]} (lillslam).`
+        : `alla fem nyckelkort, men ingen kungfråga på den här vägen → 6${SYM[trump]} (lillslam).`
       : `svaret visar ${derived.low} eller ${derived.high}; partnerns visade ${ctx.partnerMin}+ talar för ${derived.assumed} → 6${SYM[trump]}.`
     return { role: 'svarare', call: `6${LETTER[trump]}`, rule: 'slamavslut', explanation: why }
   }
@@ -702,10 +698,24 @@ function captainPlaceAfterRKC(hand: Hand, trump: Suit, ctx: SlamContext, floor: 
   }
 }
 
-/** Efter kungsvaret på 5NT: kung visad → storslam; 6/7 i trumf var redan svaret (ingen tur). */
-function captainAfterKingAnswer(kingAnswerCall: string, trump: Suit): SlamTurn | null {
-  if (kingAnswerCall === `6${LETTER[trump]}` || kingAnswerCall === `7${LETTER[trump]}`) return null
-  return { role: 'svarare', call: `7${LETTER[trump]}`, rule: 'slamavslut', explanation: `kung visad → storslam (7${SYM[trump]}).` }
+/**
+ * Efter kungsvaret på 5NT (ägarbeslut 2026-11-03, felrapport #109): paret har
+ * alla fem nyckelkort (trumfkungen inräknad); med minst TRE av de fyra kungarna
+ * — egna sidokungar + partnerns visade — bjuds storslam, annars lillslam. 7 i
+ * trumf var redan partnerns svar (två+ sidokungar). Ligger partnerns kungfärg
+ * ÖVER 6 i trumf (lågfärgstrumf) finns inget 6-trumf att gå tillbaka till →
+ * 6NT (alla ess + trumfkungen, lillslam i sang).
+ */
+function captainAfterKingAnswer(hand: Hand, kingAnswerCall: string, trump: Suit): SlamTurn | null {
+  const sex = `6${LETTER[trump]}`
+  if (kingAnswerCall === `7${LETTER[trump]}`) return null
+  const egna = hand.filter((c) => c.rank === 'K' && c.suit !== trump).length
+  const visade = kingAnswerCall === sex ? 0 : 1
+  const sido = egna + visade
+  if (sido >= 2) return { role: 'svarare', call: `7${LETTER[trump]}`, rule: 'slamavslut', explanation: `${sido} sidokungar + trumfkungen = tre av fyra kungar i paret → storslam (7${SYM[trump]}).` }
+  if (kingAnswerCall === sex) return null
+  if (bidRank(sex) > bidRank(kingAnswerCall)) return { role: 'svarare', call: sex, rule: 'slamavslut', explanation: `bara ${sido} sidokung i paret → 6${SYM[trump]} (lillslam).` }
+  return { role: 'svarare', call: '6NT', rule: 'slamavslut', explanation: `bara ${sido} sidokung i paret och partnerns kungfärg ligger över 6${SYM[trump]} → 6NT (lillslam i sang).` }
 }
 
 /**

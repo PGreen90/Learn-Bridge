@@ -594,6 +594,12 @@ export function slamContextAfterThird(openCall: string, response: ResponseResult
   if (puppetPlacedFit(openCall, response, second, third) === trump) {
     return { ctx: { partnerMin: 20, inviteCall: `5${LETTER[trump]}`, gameForcing: true, hpOnly: true } }
   }
+  // Felrapport #109 (2026-11-03): 2♣ + positivt svar, öppnarens färg TVÅ gånger
+  // (6+) efter kaptenens egen rebud → hennes färg är trumf (8+ kända med 2+);
+  // kaptenen räknar mot visade 22, utgångskrav (§4.4).
+  if (openCall === '2C' && response.rule === '2♣-positivt' && second.rule === '2♣: rebud egen färg (GF)' && third.rule === 'rebid: egen färg (GF)' && suitOf(third.call) === trump && trump !== respSuit) {
+    return { ctx: { partnerMin: STRONG_2C_SHOWN_MIN, gameForcing: true } }
+  }
   if (second.rule === '2/1: försenat stöd' && openerSuit && !isMajorSuit(openerSuit) && trump === openerSuit) {
     return {
       ctx: {
@@ -1267,6 +1273,18 @@ export function responderThirdDecision(openCall: string, response: ResponseResul
     return first ? { turn: asResponse(first), plan: { kind: 'slam', setup: { trump, lastCall: third.call, ctx: c.ctx } } } : null
   }
 
+  // Felrapport #109 (2026-11-03): öppnaren rebjöd sin färg TVÅ gånger (6+) efter
+  // mitt positiva svar och min egen rebud (ingen fit för min) — med 2+ kort i
+  // hennes färg är 8+ trumf kända → hennes färg är trumf, kaptensregeln mot
+  // visade 22 (12 + 22 = 34 → 4NT; förr föll läget till "inbjudande hopp" 5♣).
+  if (openCall === '2C' && response.rule === '2♣-positivt' && second.rule === '2♣: rebud egen färg (GF)' && third.rule === 'rebid: egen färg (GF)') {
+    const t = suitOf(third.call)
+    if (t && t !== respSuit && suitOf(rebid.call) === t && lengths(hand)[t] >= 2) {
+      const slam = slamStep(t)
+      if (slam) return slam
+    }
+  }
+
   // Mitt semi-forcing 2♠ (1♥–1♠–2♥–2♠, 5+ spader, 10+; ägarens struktur
   // 2026-09-28) — öppnaren svarade: 3♠ = tre spader men minimum → 4♠ bara med
   // 12; 3♥ = två spader men 14–15 → 4♥ med två hjärter och 12, 3NT med 12 utan,
@@ -1834,6 +1852,17 @@ function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
         if (openerSuit && !isMajorSuit(openerSuit) && fourth === `3${LETTER[openerSuit]}` && (fifth === '3NT' || fifth === `4${LETTER[openerSuit]}`)) {
           const ctx: SlamContext = { partnerMin: 12, inviteCall: fifth === '3NT' ? `4${LETTER[openerSuit]}` : undefined, gameForcing: true, cueFloor: '3NT', hpOnly: true }
           return { kind: 'slam', captain, prefix: 7, setup: { trump: openerSuit, lastCall: fifth, ctx }, sofar: sofarFrom(7) }
+        }
+      }
+      // Felrapport #109 (2026-11-03): 2♣–positivt–3x–egen rebud–4x (öppnarens
+      // färg två gånger = 6+) och kaptenens NAKNA 4NT = essfrågan i öppnarens
+      // färg (senast äkta bjudna, §4.4/§6.1); kaptenen räknar mot visade 22.
+      // Bara när fjärde budet ÄR 4NT — svararens 4M där är naturlig (6+ egen).
+      if (openCall === '2C' && response.rule === '2♣-positivt' && second.rule === '2♣: rebud egen färg (GF)' && third.rule === 'rebid: egen färg (GF)' && ours[5].bid === '4NT') {
+        const t = suitOf(third.call)
+        if (t && t !== suitOf(response.call)) {
+          const ctx: SlamContext = { partnerMin: STRONG_2C_SHOWN_MIN, gameForcing: true }
+          return { kind: 'slam', captain, prefix: 5, setup: { trump: t, lastCall: third.call, ctx }, sofar: sofarFrom(5) }
         }
       }
       const t5 = slamTrumpAfterThird(openCall, response, second, third)

@@ -746,12 +746,15 @@ describe('§5b beslut 7 – 4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
     expect(meaningOf([...hH, call('S', '4C'), P('W'), call('N', '4D')], 8).rule).toBe('cue-bid')
   })
 
-  it('hela sekvensen bot mot bot: 2♣–3♦–3♠–4♣ (cue, spader satt) → … → 6♠', () => {
+  // Ägarbeslut 2026-11-03: alla fem nyckelkort → 5NT; Nord ♥K ♣K (två sidokungar)
+  // + ♦K hos Syd = tre av fyra kungar → 7♠ (förr 6♠).
+  it('hela sekvensen bot mot bot: 2♣–3♦–3♠–4♣ (cue, spader satt) → … → 5NT → 7♠', () => {
     const deal = dealNS('S:AKT84 H:KQ D:T C:AK753', 'S:J75 H:J53 D:AK942 C:A9')
     const bud = spelaKlart(deal)
     expect(bud.slice(0, 8)).toEqual(['2C', 'P', '3D', 'P', '3S', 'P', '4C', 'P'])
     const kontrakt = bud.filter((b) => b !== 'P')
-    expect(kontrakt[kontrakt.length - 1]).toBe('6S')
+    expect(kontrakt).toContain('5NT')
+    expect(kontrakt[kontrakt.length - 1]).toBe('7S')
   })
 })
 

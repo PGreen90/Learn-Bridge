@@ -79,7 +79,8 @@ B13, F1–F6 · stora granskningen · Beslut B etapp 0–2 · felrapporterna · 
 > VISAT, aldrig dolda kort eller motorns facit; hellre systemriktig miss än
 > kik. Slamporten: kaptensregeln 31+ mot visat minimum → 4NT (5♥/5♠ är ALDRIG
 > inbjudan, ägarbeslut 2026-10-10; i sang kvantitativ 4NT 31–32, Gerber 33+);
-> ingen kontrollkoll (ägarbeslut); storslam kräver visshet.
+> ingen kontrollkoll (ägarbeslut); storslam = fem nyckelkort + tre av fyra kungar via
+> 5NT (ägarbeslut 2026-11-03).
 > Detalj: `docs/budsystem.md` §5.2/§5.7/§6 + `docs/bot-hjarna.md`.
 
 ### 👀 Bevaka i spel
