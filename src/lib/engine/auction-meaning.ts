@@ -3410,6 +3410,11 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       if (reb.level === 3 && reb.strain !== 'NT' && reb.strain !== M) {
         // Hoppskiftet: svararen placerar (GF).
         if (isGameLevel(cb)) return R('utgång', `${B(cb)} — placerar utgången efter hoppskiftet.`)
+        // Felrapport #108 (2026-11-01): 4m i hoppskiftets lågfärg sätter trumfen
+        // (krav) — samma steg 5-mönster som efter ett färgsvar (16+ visat här).
+        if (cb.level === 4 && cb.strain === reb.strain && isMinor(cb.strain)) {
+          return R('sätter trumfen (krav)', `${B(cb)} — stöd i partnerns ${NAME[cb.strain]} efter hoppskiftet (16+) och slamintresse. Sätter trumfen, utgångskrav: partnern visar sin billigaste kontroll (ess, kung-dam, singel eller renons) — även i egen hjärter — sedan essfråga eller 5${SYMBOL[cb.strain]}.`, 'utgangskrav')
+        }
         return N(`${B(cb)} — naturligt efter hoppskiftet; utgångskravet står.`, 'utgangskrav')
       }
       if (same(reb, 2, 'NT')) {
