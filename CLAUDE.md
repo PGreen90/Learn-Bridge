@@ -11,7 +11,7 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-11-03): kolla att nattkedjan gick (`gh run list
-> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU = TOM — ägaren
+> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (2026-11-03: 0 öppna; #108/#109 live). NU = TOM — ägaren
 > väljer ur NÄST (ångra/återuppta LIVE a6f4c06). Design-skillen `impeccable` (pbakaus, v4.8.0)
 > installerades 2026-10-27 i `.agents/skills/` — critique/audit-provet på startsidan kördes i egen
 > session; ägaren avgör om skillen används i FACELIFTEN (SENARE).
