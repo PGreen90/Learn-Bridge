@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-10-31): kolla att nattkedjan gick (`gh run list
+> **NÄSTA SESSION BÖRJAR MED** (2026-11-03): kolla att nattkedjan gick (`gh run list
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter. NU = TOM — ägaren
 > väljer ur NÄST (ångra/återuppta LIVE a6f4c06). Design-skillen `impeccable` (pbakaus, v4.8.0)
 > installerades 2026-10-27 i `.agents/skills/` — critique/audit-provet på startsidan kördes i egen
@@ -18,7 +18,7 @@ svarar på vad).
 
 ### 🔵 NU — TOM (senast: ångra ett steg + återuppta tävlingsgiv exakt, ägarval 2026-10-27, LIVE a6f4c06)
 Kvar (senare.md): samma tävlingsgiv kan spelas om på en ANNAN enhet (serverlagring = Beslut B-steg).
-Dessförinnan LIVE: stoppfrågan mot minimum = rena hp + zon, pass på 4m (§7.4) 034375b · #107 cue krav även dubblat 7d8a9f0 · fynd T §8.12 6fd85bb · #105/#106 (§8.11) 01b1e34.
+Dessförinnan LIVE: #108 4m efter hoppskiftet över 1NT sätter trumfen (§5.1) b7683be · stoppfrågan mot minimum (§7.4) 034375b · #107 cue krav även dubblat 7d8a9f0 · fynd T §8.12 6fd85bb.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam

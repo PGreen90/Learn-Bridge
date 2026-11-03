@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-11-01 (/felrapporter #108 — 4m efter hoppskiftet över 1NT sätter trumfen, öppnaren passar aldrig partnerns kontrollbud, §5.1)
+## 2026-11-01 (/felrapporter #108 — 4m efter hoppskiftet över 1NT sätter trumfen, öppnaren passar aldrig partnerns kontrollbud, §5.1; LIVE b7683be 2026-11-03)
 Nattkedjan + stoppfrågans deploy gröna (`gh run list --limit 6`). En öppen rapport,
 **#108** (Dagens IMP bricka 1, Nord giv, ingen i zon; från en spelare via mejl):
 1♥–1NT–3♦–**4♦**–4♥–**4♠**–pass — Nord ♠8 ♥AKQT5 ♦KT64 ♣AQ3 (18) passade partnerns
