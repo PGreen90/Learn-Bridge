@@ -1037,6 +1037,19 @@ till öppnarens högfärg med utgångsvärden lyfts till **4M** — aldrig ett
 3M-stopp under kravet. Svaga händer (under ~8 stödpoäng) prefererar
 billigast som förut.
 
+**4m i hoppskiftets lågfärg sätter trumfen (krav)** — samma mönster som efter
+ett färgsvar (§6.9 steg 5), fast hoppskiftet över 1NT visar 16+: svararen med
+stöd och slamintresse bjuder 4m, öppnaren visar sin **billigaste kontroll —
+även i egen hjärter/spader** (1♥–1NT–3♦–4♦–**4♥** = hjärterkontroll, ingen
+utgångsplacering), svararen cue:ar vidare, och öppnaren svarar ALLTID på
+partnerns kontrollbud (nästa kontroll under 5m, annars 5m) — ett kontrollbud
+passas aldrig. Kaptenen (svararen) frågar 4NT i slamzon eller stannar i 5m.
+Motorns egen svarare (6–10 hp) når sällan 31 ihop och placerar därför 5m/3NT
+direkt; 4m är vägen för den som vill utreda. (Felrapport #108, 2026-11-01:
+1♥–1NT–3♦–4♦–4♥–4♠–**pass** — öppnaren passade partnerns 4♠-cue med singel
+spader, för att slamgrenens läsare bara kände hoppskiftet efter ett färgsvar.)
+*1♥–1NT–3♦–4♦–4♥ (kontroll) –4♠ (kontroll) –5♣ (kontroll) –5♦ (avslut).*
+
 *Efter 1♠–1NT:*
 | Återbud | Betydelse |
 |---|---|
@@ -3619,6 +3632,16 @@ motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — 
 med ♠2 (DD 10) i stället för att saka ♣2 (8).
 
 ## 9. Ändringslogg
+- **2026-11-01 — 4m efter hoppskiftet över 1NT sätter trumfen; öppnaren passar
+  aldrig partnerns kontrollbud (§5.1, felrapport #108).** 1♥–1NT–3♦–4♦–4♥–4♠ →
+  Nord passade 4♠ (singel spader). Två läshål: slamgrenens läsare
+  (`slamSituationSpecifik`/`slamContextFor`) kände bara hoppskiftet efter ett
+  färgsvar ('hoppskift', 19+) — efter 1M–1NT heter det 'rebid: hoppskift' (16+)
+  → 4♥ kom från reservregeln "krav – rebjuder egen färg" och 4♠ saknade rad;
+  kontrollbudsläsaren (`kontrollbudslage`) läste 4♥ som utgång i egen högfärg
+  fast trumfen redan satts med 4♦ — nu avgör betydelselagret (en sanning).
+  Betydelsen av 4♦ = 'sätter trumfen (krav)' (förr "naturligt efter
+  hoppskiftet"). Facit `auction-felrapport-108.test.ts`.
 - **2026-10-31 — Stoppfrågan mot minimum-återbudet på rena hp med zon; pass på 4m
   (§7.4, ägarbeslut efter felrapport #107).** Negativ-dubblarens andra tur mot
   öppnarens billiga lågfärgssvar (12–14): 3NT/cue kräver 13 hp i ozon, 14 i zon

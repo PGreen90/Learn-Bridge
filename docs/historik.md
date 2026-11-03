@@ -10,6 +10,21 @@
 
 ---
 
+## 2026-11-01 (/felrapporter #108 — 4m efter hoppskiftet över 1NT sätter trumfen, öppnaren passar aldrig partnerns kontrollbud, §5.1)
+Nattkedjan + stoppfrågans deploy gröna (`gh run list --limit 6`). En öppen rapport,
+**#108** (Dagens IMP bricka 1, Nord giv, ingen i zon; från en spelare via mejl):
+1♥–1NT–3♦–**4♦**–4♥–**4♠**–pass — Nord ♠8 ♥AKQT5 ♦KT64 ♣AQ3 (18) passade partnerns
+4♠-cue med singel spader → 4♠. Två läshål (ärlig inferens, inget kikat): slamgrenens
+läsare kände bara hoppskiftet efter ett färgsvar ('hoppskift' 19+), inte 'rebid:
+hoppskift' (16+) efter 1M–1NT → Nords 4♥ kom från reservregeln "krav – rebjuder egen
+färg" (betydelselagret läste det ändå som kontrollbud) och på 4♠ fanns ingen rad;
+`kontrollbudslage` läste 4♥ som "utgång i vår högfärg" fast trumfen satts med 4♦ —
+nu avgör betydelselagret. Betydelsen av 4♦ = 'sätter trumfen (krav)'. Rätt: 4♥
+(kontroll) – 4♠ – **5♣** (♣A) – 5♦. Motorns egen Syd (8 hp) bjuder 5♦ direkt som förut
+(31+ krävs för 4m). Facit `auction-felrapport-108.test.ts` (8 lås). Spelarens
+bisats "partnern lägger på när jag bjuder en gång till i konkurrens" = ingen giv →
+ingen bevaka-rad (vakten kräver frö/giv).
+
 ## 2026-10-31 (/felrapporter #107 — cuet är krav också när de dubblar det, §5.8/§7.4; LIVE 7d8a9f0 · uppföljningen stoppfrågan mot minimum LIVE 034375b)
 Nattkedjan grön (förscreening · bottar ×2 · granskning, `gh run list --limit 6`).
 En öppen rapport. **#107** (3♠X av Öst, bricka 4, Väst giv, alla i zon):

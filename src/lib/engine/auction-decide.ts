@@ -538,7 +538,8 @@ export function slamContextFor(openCall: string, response: ResponseResult, rebid
   }
 
   // Reverse (16+) / hoppskift (19+): trumf = öppnarens andra eller första färg.
-  if ((rebid.rule === 'reverse' || rebid.rule === 'hoppskift') && rebidSuit && openerSuit && (trump === rebidSuit || trump === openerSuit)) {
+  // 'rebid: hoppskift' = hoppskiftet efter 1M–1NT (16+), felrapport #108.
+  if ((rebid.rule === 'reverse' || rebid.rule === 'hoppskift' || rebid.rule === 'rebid: hoppskift') && rebidSuit && openerSuit && (trump === rebidSuit || trump === openerSuit)) {
     const partnerMin = rebid.rule === 'hoppskift' ? 19 : 16
     // Lågfärgstrumf (kontrollbud före essfrågan, steg 5, 2026-10-09): 4m sätter
     // trumfen (krav) och öppnaren öppnar kontrollbudsronden; kaptenen frågar 4NT
@@ -1667,7 +1668,10 @@ function slamSituationSpecifik(f: AuctionFacts): SlamSituation | null {
   // (kontrollbud före essfrågan, steg 5, 2026-10-09): 4m sätter trumfen (krav);
   // öppnaren öppnar kontrollbudsronden (partnerStarts), kaptenen räknar mot
   // visade 16/19. Förr lästes 4m som slaminbjudan (accept = 6m direkt).
-  if ((rebid.rule === 'reverse' || rebid.rule === 'hoppskift') && response.call.startsWith('1') && /^4[CD]$/.test(first)) {
+  // Efter 1M–1NT heter hoppskiftet 'rebid: hoppskift' och visar 16+ (felrapport
+  // #108, 2026-11-01: 1♥–1NT–3♦–4♦ lästes inte som slamgren → öppnaren passade
+  // partnerns kontrollbud 4♠).
+  if ((rebid.rule === 'reverse' || rebid.rule === 'hoppskift' || rebid.rule === 'rebid: hoppskift') && response.call.startsWith('1') && /^4[CD]$/.test(first)) {
     const rs = suitOf(rebid.call)
     const t = [rs, openerSuit].find((s) => s && !isMajorSuit(s) && first === `4${LETTER[s]}`) ?? null
     if (t) {

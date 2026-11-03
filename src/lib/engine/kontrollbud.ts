@@ -110,7 +110,10 @@ export function kontrollbudslage(history: ResolvedCall[], seat: Seat): Kontrollb
     if (!vi.has(c.seat)) continue
     const cb = parseContractBid(c.bid)
     if (!cb) continue
-    if (cb.level === 4 && egnaHogfarger.has(cb.strain)) return null // höjning till utgång i vår högfärg (1♦–1♠–2♣–2♦–2♥–4♥)
+    // Utgång i vår högfärg är normalt en placering (1♦–1♠–2♣–2♦–2♥–4♥) — men
+    // ett 4♥ i EGEN färg efter partnerns trumfsättande 4m är ett kontrollbud
+    // (felrapport #108: 1♥–1NT–3♦–4♦–4♥). Betydelselagret avgör, en sanning.
+    if (cb.level === 4 && egnaHogfarger.has(cb.strain) && !/cue|kontrollbud/i.test(meaningOf(history, i).rule ?? '')) return null
     if ((cb.strain === 'H' || cb.strain === 'S') && naturligt(meaningOf(history, i))) egnaHogfarger.add(cb.strain)
     if (cb.strain === 'NT' || cb.strain === letter) {
       if (cb.level >= 4) return null // 4NT/utgång före något kontrollbud → ingen kontrollbudsrond att läsa här
