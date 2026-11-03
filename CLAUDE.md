@@ -18,7 +18,7 @@ svarar på vad).
 
 ### 🔵 NU — TOM (senast: ångra ett steg + återuppta tävlingsgiv exakt, ägarval 2026-10-27, LIVE a6f4c06)
 Kvar (senare.md): samma tävlingsgiv kan spelas om på en ANNAN enhet (serverlagring = Beslut B-steg).
-Dessförinnan LIVE: #108 4m efter hoppskiftet över 1NT sätter trumfen (§5.1) b7683be · stoppfrågan mot minimum (§7.4) 034375b · #107 cue krav även dubblat 7d8a9f0 · fynd T §8.12 6fd85bb.
+Dessförinnan LIVE: #109 2♣-färgen två gånger = trumf + storslam via 5NT (§4.4/§6.1) 92fbe04 · #108 4m efter hoppskiftet (§5.1) b7683be · stoppfrågan mot minimum (§7.4) 034375b · #107 7d8a9f0.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam

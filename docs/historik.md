@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-11-03 (/felrapporter #109 — öppnarens färg två gånger efter 2♣-positivt = trumf, kaptenen 4NT i stället för 5♣, §4.4)
+## 2026-11-03 (/felrapporter #109 — öppnarens färg två gånger efter 2♣-positivt = trumf, kaptenen 4NT i stället för 5♣, §4.4 + storslam = fem nyckelkort + tre kungar §6.1; LIVE 92fbe04)
 #108 PCD:ad på morgonen (LIVE b7683be, issuen stängd). Ny rapport **#109** (Dagens IMP
 bricka 12, Väst giv, NS i zon): 2♣–2♠–3♣–3♠–4♣–**5♣** — Syd ♠AQ864 ♥J7 ♦A974 ♣JT (12)
 mot Nord ♠3 ♥AKQ5 ♦K ♣AKQ8753 (21); ägaren: "5♣ för svagt, 4NT rätt, 7♣/7NT rätt
