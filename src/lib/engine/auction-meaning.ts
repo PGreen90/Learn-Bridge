@@ -2660,7 +2660,7 @@ function slamZone(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: ResolvedCall
   // Sjöbergs 5NT (§6.3): frågaren bjuder 5NT efter nyckelkortssvaret.
   const rkc = rkcSequence(seat, prior)
   if (rkc && rkc.answer && seat === rkc.asker && same(cb, 5, 'NT')) {
-    return R('Sjöberg 5NT', `5 sang — kungfråga (Sjöberg): alla nyckelkort är på plats och trumfdamen under kontroll; partnern visar VILKEN kung (6 i färgen, 6 i trumf = ingen).`)
+    return R('Sjöberg 5NT', `5 sang — kungfråga (Sjöberg): alla fem nyckelkort är på plats (storslam med tre av fyra kungar i paret); partnern visar VILKEN kung (6 i färgen, 6 i trumf = ingen).`)
   }
   if (rkc && rkc.answer && cb.level >= 6 && same(last, 5, 'NT') && seat === PARTNER[rkc.asker]) {
     const tsym = SYMBOL[rkc.trump]

@@ -10,6 +10,25 @@
 
 ---
 
+## 2026-11-03 (/felrapporter #109 — öppnarens färg två gånger efter 2♣-positivt = trumf, kaptenen 4NT i stället för 5♣, §4.4)
+#108 PCD:ad på morgonen (LIVE b7683be, issuen stängd). Ny rapport **#109** (Dagens IMP
+bricka 12, Väst giv, NS i zon): 2♣–2♠–3♣–3♠–4♣–**5♣** — Syd ♠AQ864 ♥J7 ♦A974 ♣JT (12)
+mot Nord ♠3 ♥AKQ5 ♦K ♣AKQ8753 (21); ägaren: "5♣ för svagt, 4NT rätt, 7♣/7NT rätt
+slutbud". Hålet: svararens tredje bud i 2♣-linjen hade bara raden "solid egen färg"
+(`responderThirdDecision`); öppnarens färg rebjuden två gånger (6+) + 2+ kort = 8+
+kända trumf fanns varken i tabellen eller i slamgrenens läsare → 5♣ kom ur
+fit-raise-reserven. Byggt: ny tabellrad + `slamContextAfterThird` (partnerMin 22) +
+läsarbranch (prefix 5, bara när fjärde budet är 4NT så svararens naturliga 4M inte
+misstolkas). Motorn nu: 4NT–5♦ (0/3)–6♣. Storslammen (ägarens 7♣/7NT) strider mot
+bokens "storslam kräver visshet" (37 mot visade 22) → ägarfråga, `it.todo` i facit
+`auction-felrapport-109.test.ts` (6 lås). **Ägarbeslut samma förmiddag** ("varför ställs
+inte kungfråga? solklart 7♣/7NT"): alla fem nyckelkort → ALLTID 5NT, oavsett trumfdam
+och zon; storslam med tre av fyra kungar i paret (trumfkungen inräknad). Byggt i
+`captainPlaceAfterRKC` + `captainAfterKingAnswer` (egna sidokungar + visade ≥ 2 → 7;
+kungfärg över 6-trumf → 6NT); sangvägen orörd. Två gamla lås omskrivna
+(slam-auction.test.ts: damfrågan i storslamszon utgår). Motorn på #109: 4NT–5♦–5NT–7♣.
+Risk jag flaggat: utan säkrad trumfdam bjuds 7 på kungarna (AK985 mot J762 → 7♠).
+
 ## 2026-11-01 (/felrapporter #108 — 4m efter hoppskiftet över 1NT sätter trumfen, öppnaren passar aldrig partnerns kontrollbud, §5.1; LIVE b7683be 2026-11-03)
 Nattkedjan + stoppfrågans deploy gröna (`gh run list --limit 6`). En öppen rapport,
 **#108** (Dagens IMP bricka 1, Nord giv, ingen i zon; från en spelare via mejl):

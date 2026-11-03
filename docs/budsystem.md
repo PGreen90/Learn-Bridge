@@ -822,6 +822,17 @@ stick** (t.ex. tre ess) öppnar också 2♣. Krav. Balanserade ranger: 22–24
   andra bud i sin egen färg i kravet är ofta TVINGAT (lovar bara 5+). Svararen
   med bara två kort där och en egen redan visad 6-korts färg **rebjuder sin
   färg** i stället för att höja (2♣–2♦–3♣–3♠–4♣ → **4♠**, inte 5♣ på ♣85).
+- **Öppnarens färg två gånger efter ett positivt svar = trumf (felrapport
+  #109, 2026-11-03):** har svararen svarat positivt och rebjudit sin egen färg
+  (ingen fit för öppnarens) och öppnaren rebjuder sin färg en andra gång (6+),
+  räknar svararen med **2+ kort** där 8+ kända trumf: öppnarens färg är trumf
+  och kaptensregeln gäller mot visade 22 — 31+ → **4NT** (essfrågan i
+  öppnarens färg, den senast äkta bjudna; i 31–32 kontrollbud först om det
+  ryms). Under zonen placeras utgången som förut. *2♣–2♠–3♣–3♠–4♣–**4NT**–5♦
+  (0/3 = tre med visshet mot 22+) –**5NT** (kungfråga) –**7♣** (två sidokungar)
+  med ♠AQ864 ♥J7 ♦A974 ♣JT (12) mot ♠3 ♥AKQ5 ♦K ♣AKQ8753 (21); förr 5♣ utan
+  regel.* Storslam = fem nyckelkort + tre av fyra kungar (§6.1, ägarbeslut
+  2026-11-03).
 
 **Andra negativa:** efter öppnarens kravbud (färgrebud) visar svararens
 **billigaste minor** 0–3 hp (riktig bottenhand). Alla andra bud bekräftar minst
@@ -1206,8 +1217,8 @@ hopphöjde din högfärg (**1x–1M–3M**, visar **16–18** med 4-korts stöd)
 är redan bestämd. Du (kaptenen) räknar **din egen hand mot det visade
 minimumet 16** — aldrig partnerns faktiska kort:
 - **17+ stödpoäng** (17+16 ≥ 33) → **driv**: fråga nyckelkort (**1430 RKC**) och
-  placera **6 i högfärgen** (7 bara med *visshet*: entydigt alla fem nyckelkort +
-  trumfdam + storslamszon även mot minimum).
+  placera **6 i högfärgen** (7 med alla fem nyckelkort + tre av fyra kungar i
+  paret via 5NT, §6.1 — ägarbeslut 2026-11-03).
 - **15–16 stödpoäng** (31–32 ihop) → **också 4NT** (ägarbeslut 2026-10-10: 5M är
   aldrig en inbjudan; nyckelkorten avgör — två saknade → 5M).
 - Under det → vanlig väg (acceptera 4M med utgångsvärden, annars pass).
@@ -1219,7 +1230,7 @@ själv upp till 6** (klassisk mekanik: "med 3, bjud vidare över stoppbudet").
 **Uteslutningsmetoden (ägarbeslut 2026-09-30, felrapport #94):** har partnern
 visat **16+ hp** är "0 eller 3" **3 med visshet** — en sådan hand kan inte vara
 nyckelkortslös — och räknas därför som grund för **storslam** (5NT-frågan när
-alla fem nyckelkort + trumfdam finns i storslamszonen). "1 eller 4" förblir en
+alla fem nyckelkort är kända, §6.1). "1 eller 4" förblir en
 inferens (ett ess med 16+ är fullt möjligt). *Bricka 4: 1♦–1♥–3♣–4NT–5♦–5NT–6♦–
 **7♥** med ♠K54 ♥AKQJT973 ♦Q ♣7 mot hoppskiftets 19+.*
 
@@ -1663,8 +1674,11 @@ VISAT via buden**, aldrig på partnerns faktiska kort:
   har jag redan 2 är det 1). Går tvetydigheten inte att lösa antas det **höga**
   mot en visad 15+-hand, annars det **låga** — och då **rättar partnern med det
   höga antalet själv upp till 6** över stoppbudet.
-- **Storslam kräver visshet:** entydigt alla fem nyckelkort + trumfdam +
-  storslamszon **även mot partnerns minimum**.
+- **Storslam (ägarbeslut 2026-11-03, felrapport #109):** entydigt alla fem
+  nyckelkort → kaptenen frågar **alltid 5NT** (kungfråga, §6.3) — oavsett
+  trumfdam och poängzon. Storslam bjuds med **minst tre av de fyra kungarna** i
+  paret (trumfkungen är en av nyckelkorten, så två sidokungar räcker), annars
+  lillslam. Förr krävdes säkrad trumfdam + storslamszon 37 mot minimum.
 - **Konsekvens:** bottarna bjuder som människor — de kan missa en slam som råkar
   sitta, och någon enstaka gång bjuda en som betar. Det är systemriktigt.
 
@@ -1699,8 +1713,7 @@ budgivningen tillåter, och gärna kontrollbud före essfrågan.** Gäller vem s
 frågade:
 | Nyckelkort i paret | Trumfdam | Beslut |
 |---|---|---|
-| 5 | säkrad | sök storslam (5NT kungfråga i storslamszon, annars lillslam) |
-| 5 | inte säkrad | alltid lillslam — i storslamszon frågas damen först när det går: dam + sidokung → storslam |
+| 5 | — | **alltid 5NT** (kungfråga): tre av fyra kungar i paret → storslam, annars lillslam (ägarbeslut 2026-11-03; damen avgör inte) |
 | 4 | säkrad | alltid lillslam |
 | 4 | inte säkrad | **fråga efter damen om det går** (visad → lillslam, nekad → stanna) · går den inte att fråga efter: **8+ kända trumf → lillslam**, annars stanna · har svaret (5♥) redan nekat damen: stanna |
 | färre | — | stanna i 5-trumf |
@@ -1875,7 +1888,8 @@ hen hellre ess (4NT), särskilt i högfärg.
 
 ### 6.3 Sjöbergs 5NT (kungfråga)
 Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
-storslam (lovar att inga nyckelkort saknas och att trumfdamen är under kontroll).
+storslam (lovar att inga nyckelkort saknas; sedan 2026-11-03 frågas alltid med
+alla fem nyckelkort, trumfdamen behöver inte vara säkrad).
 Till skillnad från standard visar svararen **vilken** kung – inte hur många:
 
 | Svar | Betydelse |
@@ -1886,6 +1900,13 @@ Till skillnad från standard visar svararen **vilken** kung – inte hur många:
 
 Poängen: att veta exakt vilken kung partnern har avgör om en sidofärg ger nog
 med stick för storslam (t.ex. K-D mittemot ess).
+
+**Kaptenens beslut efter svaret (ägarbeslut 2026-11-03):** egna sidokungar +
+partnerns visade ≥ 2 (= tre av fyra kungar med trumfkungen) → **7 i trumf**;
+annars 6 i trumf. Ligger partnerns kungfärg **över** 6 i trumf (lågfärgstrumf:
+6♦ mot klöver) finns inget 6-trumf att gå tillbaka till → **6NT** (alla ess och
+trumfkungen i paret). *2♣–2♠–3♣–3♠–4♣–4NT–5♦–5NT–**7♣** (Nord ♥K ♦K);
+med ♥K hos motståndarna i stället: 5NT–6♦ (bara ♦K) –**6NT**.*
 
 ### 6.4 Gerber (ess-fråga över NT)
 **4♣ direkt över partnerns naturliga sang är Gerber – ess-fråga – överallt där
@@ -3632,6 +3653,21 @@ motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — 
 med ♠2 (DD 10) i stället för att saka ♣2 (8).
 
 ## 9. Ändringslogg
+- **2026-11-03 — storslam = fem nyckelkort + tre av fyra kungar; kaptenen frågar
+  alltid 5NT med alla fem (§6.1/§6.3, ägarbeslut efter felrapport #109).**
+  Förr: 5NT bara med säkrad trumfdam i storslamszon 37 (annars damfrågan i zon,
+  annars 6). Nu: `captainPlaceAfterRKC` → 5NT så fort fem nyckelkort är
+  entydiga; `captainAfterKingAnswer` räknar egna sidokungar + partnerns visade
+  (≥ 2 → 7, annars 6; kungfärg över 6-trumf → 6NT). Sangvägen (§6.4/MSS) orörd.
+  Lås: slam-auction.test.ts (tre fall), auction-felrapport-109.test.ts.
+- **2026-11-03 — öppnarens färg två gånger efter 2♣-positivt = trumf, kaptenen
+  frågar 4NT (§4.4, felrapport #109).** 2♣–2♠–3♣–3♠–4♣ → Syd (12 hp, ♣JT)
+  bjöd 5♣ utan regel ("inbjudande hopp med fit"). Svararens tredje bud
+  (`responderThirdDecision`) hade i 2♣-linjen bara raden "solid egen färg";
+  ny rad: öppnarens färg rebjuden två gånger + 2+ kort → trumf, kaptensregeln
+  mot 22 (`slamContextAfterThird`); slamgrenens läsare (prefix 5) ser samma
+  trumf när fjärde budet är 4NT, så öppnaren svarar 5♦ och kaptenen placerar
+  6♣. Facit `auction-felrapport-109.test.ts`.
 - **2026-11-01 — 4m efter hoppskiftet över 1NT sätter trumfen; öppnaren passar
   aldrig partnerns kontrollbud (§5.1, felrapport #108).** 1♥–1NT–3♦–4♦–4♥–4♠ →
   Nord passade 4♠ (singel spader). Två läshål: slamgrenens läsare

@@ -474,10 +474,10 @@ describe('familj 5 – slamraden: läget "en slamsekvens pågår" (ostört, kapt
     expect(c.call).toMatchObject({ bid: '5D', rule: '1430 RKC' }) // 3 nyckelkort
   })
 
-  it('kaptenen placerar på svaret + egen hand: 2 egna + 5♦ (0/3, visad 16+ → 3) → 6♠', () => {
+  it('kaptenen på svaret + egen hand: 2 egna + 5♦ (0/3, visad 16+ → 3) = alla fem → 5NT kungfråga (ägarbeslut 2026-11-03)', () => {
     const c = bud('S:J762 H:AQ5 D:AQ64 C:K3', jacoby('4NT', '5D'), 'S')!
     expect(c.källa).toBe('tabell:slam')
-    expect(c.call).toMatchObject({ bid: '6S', rule: 'slamavslut' })
+    expect(c.call).toMatchObject({ bid: '5NT', rule: 'Sjöberg 5NT' })
   })
 
   it('cue-ronden: partnern cue:ar sin billigaste kontroll tillbaka, eller stannar i utgång utan fler', () => {

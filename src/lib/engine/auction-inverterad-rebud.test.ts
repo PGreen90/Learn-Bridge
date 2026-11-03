@@ -149,10 +149,11 @@ describe('buildAuction — cue-ronden i minorfiten: under 3NT stopp, över 3NT c
 })
 
 describe('buildAuction — cue-ronden i 2♣-grenen (trumf agreed, GF given)', () => {
-  it('2♣–2♠–3♠–4♦(cue)–4♥(cue)–4NT–5♦–6♠', () => {
+  it('2♣–2♠–3♠–4♦(cue)–4♥(cue)–4NT–5♦–5NT–7♠', () => {
     // Nord 25 med spaderstöd sätter trumf (GF). Syd cue:ar ♦A, Nord ♥A;
     // bara klövern okontrollerad → 4NT; Nords svar 0/3 läses som 3 (visade
-    // 22+) → 6♠. Förr: ingen cue-rond alls i 2♣-grenen.
+    // 22+) = alla fem → 5NT (ägarbeslut 2026-11-03); Nord har ♥K ♣K (två
+    // sidokungar) → 7♠. Förr: ingen cue-rond alls i 2♣-grenen; sedan 6♠.
     const deal: Deal = {
       id: 'b13-2c-cue',
       dealer: 'N',
@@ -166,7 +167,7 @@ describe('buildAuction — cue-ronden i 2♣-grenen (trumf agreed, GF given)', (
       },
     }
     const a = buildAuction(deal)!
-    expect(a.turns.slice(0, 8).map((t) => t.call)).toEqual(['2C', '2S', '3S', '4D', '4H', '4NT', '5D', '6S'])
+    expect(a.turns.slice(0, 9).map((t) => t.call)).toEqual(['2C', '2S', '3S', '4D', '4H', '4NT', '5D', '5NT', '7S'])
     expect(a.turns.filter((t) => t.rule === 'cue-bid').map((t) => t.call)).toEqual(['4D', '4H'])
   })
 })

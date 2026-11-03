@@ -104,9 +104,11 @@ describe('felrapport #58 (2) – 2/1 före inverterad höjning, stödet i nästa
   // Svaret var förr 5♠ ("med trumfdam" på enbart egen längd); sedan 2026-10-03
   // visas damen på längd bara vid bevisad 10-korts fit även i slamradens svar
   // (ägarbeslut 2026-09-12) → 5♥. Slutkontraktet är detsamma.
-  it('bricka 4: 1♦–2♣–2NT–3♦ (försenat stöd, slamintresse) –4♦–4NT–5♥–6♦', () => {
+  // Ägarbeslut 2026-11-03: alla fem nyckelkort → 5NT (kungfråga); Nord utan
+  // sidokung svarar 6♦ (= trumf) → lillslammen står. Samma slutkontrakt.
+  it('bricka 4: 1♦–2♣–2NT–3♦ (försenat stöd, slamintresse) –4♦–4NT–5♥–5NT–6♦', () => {
     const bids = engineAuction(deal58).map((c) => `${c.seat}:${c.bid}`)
-    expect(bids).toEqual(['N:1D', 'S:2C', 'N:2NT', 'S:3D', 'N:4D', 'S:4NT', 'N:5H', 'S:6D'])
+    expect(bids).toEqual(['N:1D', 'S:2C', 'N:2NT', 'S:3D', 'N:4D', 'S:4NT', 'N:5H', 'S:5NT', 'N:6D'])
   })
 
   it('… och Syds 3♦ bär regeln "2/1: försenat stöd" (utgångskrav)', () => {

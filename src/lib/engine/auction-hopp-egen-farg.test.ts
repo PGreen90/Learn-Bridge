@@ -39,8 +39,10 @@ describe('kontrollbud före essfrågan, steg 4: 4m efter hopp i egen lågfärg s
   // Frö 20408430 (giv S, alla i zon): Väst ♠8 ♥AQ7 ♦KQ7543 ♣AJT (16 hp), Öst
   // ♠AKJ763 ♥T6 ♦AT9 ♣Q7 (14 hp, 17 stödpoäng). Förr: 1♦–1♠–3♦–4NT direkt.
   const d30 = giv('S', 'S:Q952 H:983 D:2 C:K9652', 'S:AKJ763 H:T6 D:AT9 C:Q7', 'S:T4 H:KJ542 D:J86 C:843', 'S:8 H:AQ7 D:KQ7543 C:AJT')
-  it('17+ stödpoäng: 4♦ först, öppnarens kontrollbud, sedan essfrågan → 6♦ på fem nyckelkort', () => {
-    expect(bud(d30)).toEqual(['W:1D', 'E:1S', 'W:3D', 'E:4D', 'W:4H', 'E:4NT', 'W:5D', 'E:6D'])
+  // Ägarbeslut 2026-11-03: fem nyckelkort → 5NT; Väst utan sidokung (♦K är
+  // trumfkungen) svarar 6♦ → lillslammen står (Öst har bara ♠K själv).
+  it('17+ stödpoäng: 4♦ först, öppnarens kontrollbud, essfrågan, kungfrågan → 6♦ på fem nyckelkort utan tre kungar', () => {
+    expect(bud(d30)).toEqual(['W:1D', 'E:1S', 'W:3D', 'E:4D', 'W:4H', 'E:4NT', 'W:5D', 'E:5NT', 'W:6D'])
   })
 
   // Frö 20415620 (giv E, alla i zon): Syd ♠AK2 ♥T ♦85 ♣AQ97432 (13 hp), Nord
