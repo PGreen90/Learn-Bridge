@@ -431,6 +431,11 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
   const call = rebid.call
   const rs = suitOfCall(call)
   const pass = (why: string): ResponseResult => ({ call: 'P', rule: 'svararens pass', explanation: `${why} → pass.` })
+  // Felrapport #111 (2026-11-09): limithöjningen med tre trumf mäts i STÖDPOÄNG —
+  // samma mått som valde 1NT-vägen i första svaret (responses.ts: sp 10+ →
+  // "1NT, höjer sedan till 2M"). Förr mättes andra budet i rena hp, så 9 hp +
+  // singel gick via 1NT och passade sedan öppnarens andra färg.
+  const limit3 = len[M] >= 3 && pointsWithFloor(hand, M, 'support').points >= 10
 
   if (call === 'P') return null
   if (call === `4${mBid}`) return pass('öppnaren bjöd utgång')
@@ -447,7 +452,7 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
 
   // Öppnaren rebjöd sin högfärg (6+).
   if (call === `2${mBid}`) {
-    if (len[M] >= 3 && p >= 10) return { call: `3${mBid}`, rule: 'inbjudan', explanation: `3+ stöd → 3${mSym} (3-korts limithöjning).` }
+    if (limit3) return { call: `3${mBid}`, rule: 'inbjudan', explanation: `3+ stöd → 3${mSym} (3-korts limithöjning).` }
     const inv = inviteSuit()
     if (inv) return inv
     if (p >= 11) return { call: '2NT', rule: 'inbjudan', explanation: `Inbjudningsstyrka → 2NT (inbjudan).` }
@@ -505,7 +510,7 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
     // "avancera långsamt" — 12+ gick Jacoby direkt). Öppnaren passar med
     // minimum, bjuder utgång med 15+ Bergenpoäng. Dubbelanpassning (4+ i
     // öppnarens andra färg med äkta kontroll) → 4 i den färgen, utgångskrav.
-    if (len[M] >= 3 && p >= 10) {
+    if (limit3) {
       if (rs !== 'hearts' && rs !== 'spades' && len[rs] >= 4 && hasRealControl(hand, rs)) {
         return { call: `4${BID[rs]}`, rule: 'dubbelanpassning', explanation: `3 ${SYM[M]} och 4+ ${SYM[rs]} med kontroll (ess/singel/KQ) → 4${SYM[rs]} (dubbelanpassning, utgångskrav — sätter ${SYM[M]} som trumf).` }
       }

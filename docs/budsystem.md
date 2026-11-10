@@ -205,7 +205,7 @@ balanserat. Bjuder svararen därefter en ny färg lovar det 5+ kort och
 | Svararens bud | Betydelse |
 |---|---|
 | pass | svag hand — "får stanna" i öppnarens andra färg, även i 5-2 (ingen 2M-preferens på dubbelton) |
-| 2M | **exakt 10–11 med tre trumf** ("avancera långsamt"; 12+ bjöd Jacoby direkt). Öppnaren passar med minimum, 4M med 15+ Bergenpoäng |
+| 2M | **exakt 10–11 med tre trumf** ("avancera långsamt"; 12+ bjöd Jacoby direkt). Öppnaren passar med minimum, 4M med 15+ Bergenpoäng. Måttet är **stödpoäng** — samma som valde 1NT-vägen i första svaret: en hand som gick via 1NT med tre trumf fullföljer ALLTID höjningen (felrapport #111) |
 | 2NT | 11–12 balanserad utan stöd, inbjudan |
 | ny färg på 2-läget | 5+ (oftast 6), svag, till spel |
 | ny färg på 3-läget | 6+, 10–11, inbjudan (§5b beslut 11) |
@@ -2482,6 +2482,24 @@ bud är utgångskrav".)*
 
 **Efter spärrhoppet:** 16+ hp → 4M, annars pass.
 
+**Sen cue efter deras 1NT-svar** (ägarens struktur 2026-11-10, felrapport #110):
+*(1♣)–pass–(1NT)–pass–(pass)–**2♣*** och *(1♦)–pass–(1NT)–pass–(pass)–**2♦***.
+Handen som passade över öppningen kommer tillbaka när de stannat i 1 sang. En
+5-5-hand hade bjudit Michaels direkt, så den sena cuen lovar **båda högfärgerna,
+minst 4-4, och 13+ hp**. Partnern får **aldrig passa**:
+
+| Advancerns bud | Betydelse |
+|---|---|
+| **2♥ / 2♠** | **Preferens** till den längre högfärgen (lika längd → hjärter). Avslut, tvingat — kan ha 0 poäng. Inklivaren passar. |
+| **Cue 3♣ / 3♦** | **Utgångsintresse, krav:** 8+ hp och 3+ stöd i en högfärg. |
+
+**Inget spärrhopp** här (till skillnad från direkt Michaels) — partnern kan ha
+bara fyra kort, så nio trumf är inte garanterade. *♠KQ964 ♥J65 ♦865 ♣J8 → 2♠.*
+Efter cuen (motorns tolkning tills ägaren sagt annat): inklivaren **3♥** =
+minimum 13–14 (säger inget om högfärgerna), **3♠** = maximum 15+ (utgångskrav);
+advancern placerar sedan i sin fit (mot minimum: utgång med 12+, annars stopp).
+Motorn bjuder inte själv den sena cuen än — den förstår och besvarar den.
+
 **Slamutredningen är systems on** (ägarbeslut 2026-09-22) — ingen Michaels-special.
 Den vanliga konkurrens-slamraden (§6.10) gäller: en stark kapten med
 första-rondskontroll i alla sidofärger och känd högfärgsfit frågar **4NT (1430)**.
@@ -3562,6 +3580,15 @@ Syd fick in sig och körde sju klöver, 3NT −3 i stället för +1. Ägaren: "d
 av lågmask ser jag datorn göra ofta, blir sällan bra för dem." DD: ♦A 7 stick,
 ♦7 6.* Fjärde hand och motspelet (§8.6) berörs inte.
 
+**Gratis överstickning (felrapport #112, 2026-11-10):** leder partnern sticket
+med ett kort som en osedd motståndare bakom kan slå, går tredje hand upp med sitt
+**billigaste säkra kort** också när andra hand följt färg — förutsatt att det är
+**gratis**: efter kortet har sidan kvar minst lika många kort som slår allt
+utestående som det finns utestående kort i färgen. *♠T mot bordets ♠AQ42 med bara
+♠J ute → ♠Q (♠A och ♠K finns kvar); bordet la förr ♠2 "partnern vinner redan" och
+knekten tog ett stick som aldrig kunde förloras.* En äkta mask (♠Q mot ♠A42 med
+♠K ute) klarar inte villkoret och står kvar.
+
 ### 8.9 Spelförarens hold-up i sang (2026-10-10, felrapport #104 stick 1)
 **Ägarens regel:** "man skall ducka första sticket och hålla på esset ett varv,
 detta är standard för att störa kommunikationen mellan motparter i ett
@@ -3653,6 +3680,24 @@ motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — 
 med ♠2 (DD 10) i stället för att saka ♣2 (8).
 
 ## 9. Ändringslogg
+- **2026-11-10 — sen cue efter deras 1NT-svar = båda högfärgerna, 4-4 och 13+
+  (§7.2, ägarens struktur efter felrapport #110).** 1♣–P–1NT–P–P–2♣–P–**pass**:
+  betydelselagret läste Michaels, men tabellen saknade rad (Michaels-läget kräver
+  cuen direkt över öppningen). Ny rad *sen-cue* + `sen-cue-continuations.ts`:
+  advancern passar aldrig (preferens 2M, lika → hjärter; cue 3m med 8+ och 3+
+  stöd), inget spärrhopp; inklivaren passar preferensen, 3♥/3♠ = min/max efter
+  cuen. Samma efter 1♦. Lås: auction-felrapport-110.test.ts.
+- **2026-11-10 — tre trumf via 1NT fullföljer limithöjningen på stödpoäng
+  (§4.1, felrapport #111).** 1♠–1NT–2♥–**pass** med ♠A73 ♥5 ♦T53 ♣KQT432: första
+  svaret mätte handen i stödpoäng (10–11 → 1NT "höjer sedan till 2♠"), andra
+  budet i rena hp (9 → "svag hand"). Nu samma mått (`limit3` i
+  `responderRebidAfterSemiForcing1NT`): 2M efter ny färg, 3M efter rebjuden
+  högfärg, dubbelanpassningen. Lås: auction-felrapport-111.test.ts.
+- **2026-11-10 — spelförarsidans tredje hand: gratis överstickning (§8.8,
+  felrapport #112).** ♠T mot ♠AQ42 med enbart ♠J ute → bordet la ♠2.
+  `winOverBeatablePartner` avstod så fort andra hand följt färg; nu går den upp
+  när sidan efteråt har fler säkra toppkort än det finns utestående kort.
+  Lås: play-bot-felrapport-112.test.ts (med motvikten äkta mask).
 - **2026-11-03 — storslam = fem nyckelkort + tre av fyra kungar; kaptenen frågar
   alltid 5NT med alla fem (§6.1/§6.3, ägarbeslut efter felrapport #109).**
   Förr: 5NT bara med säkrad trumfdam i storslamszon 37 (annars damfrågan i zon,
