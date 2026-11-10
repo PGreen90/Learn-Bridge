@@ -154,7 +154,7 @@ import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { michaelsContinues } from './michaels-continuations'
-import { senCueContinues, senCueLage } from './sen-cue-continuations'
+import { senCueContinues, senCueLage, senCueOppnar, senCueOppnarLage } from './sen-cue-continuations'
 import { advanceJumpOvercall, jumpOvercallAdvanceSeat } from './advance-jump-overcall'
 import { unusual2NTContinues } from './unusual-2nt-continuations'
 import { advancerActsInCompetition, advancerFitPass, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
@@ -2261,8 +2261,8 @@ const TABELL: Row[] = [
   // preferensen. Före inklivs-/advance-raderna, som inte känner läget.
   {
     id: 'sen-cue',
-    läge: (f) => { const l = senCueLage(f.history, f.seat); return l !== null && !l.stort },
-    välj: ({ hand, facts }) => { const k = senCueContinues(hand, facts); return k ? asCall(facts.seat, k) : null },
+    läge: (f) => { if (senCueOppnarLage(f.history, f.seat)) return true; const l = senCueLage(f.history, f.seat); return l !== null && !l.stort },
+    välj: ({ hand, facts }) => { const k = senCueOppnar(hand, facts) ?? senCueContinues(hand, facts); return k ? asCall(facts.seat, k) : null },
   },
   {
     id: 'inkliv',

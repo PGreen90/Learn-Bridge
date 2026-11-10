@@ -73,6 +73,31 @@ function fit(hand: Hand): 'hearts' | 'spades' {
   return len.spades > len.hearts ? 'spades' : 'hearts'
 }
 
+/**
+ * Läget där den sena cuen kan BJUDAS: (1m) – pass – (1NT) – pass – (pass) – ?
+ * och `seat` är handen som passade över öppningen. Returnerar deras lågfärg.
+ */
+export function senCueOppnarLage(history: ResolvedCall[], seat: Seat): 'C' | 'D' | null {
+  const start = history.findIndex((c) => c.bid !== 'P')
+  if (start < 0 || history.length !== start + 5) return null
+  const [o, p1, r, p2, p3] = history.slice(start)
+  if (o.bid !== '1C' && o.bid !== '1D') return null
+  if (p1.bid !== 'P' || r.bid !== '1NT' || p2.bid !== 'P' || p3.bid !== 'P') return null
+  if (p1.seat !== seat) return null
+  return o.bid[1] as 'C' | 'D'
+}
+
+/** Boten bjuder själv den sena cuen (ägarbeslut 2026-11-10): 4+/4+ i högfärgerna och 13+ hp. */
+export function senCueOppnar(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const m = senCueOppnarLage(f.history, f.seat)
+  if (!m) return null
+  const len = lengths(hand)
+  if (len.hearts < 4 || len.spades < 4 || hcp(hand) < SEN_CUE.golv) return null
+  const cue = `2${m}`
+  if (!legalCalls(f.history, f.seat).includes(cue as Bid)) return null
+  return { call: cue, rule: 'sen cue (båda högfärgerna)', explanation: `De stannade i 1 sang och jag har båda högfärgerna (minst 4-4) och ${SEN_CUE.golv}+ hp → sen cue 2${SYM[m]}. Krav: partnern väljer högfärg på 2-läget, eller cue-bjuder med ${SEN_CUE.cue}+ hp och stöd.` }
+}
+
 /** Ingången från raden *sen-cue*. null → övriga regler. */
 export function senCueContinues(hand: Hand, f: AuctionFacts): Kunskap | null {
   const l = senCueLage(f.history, f.seat)

@@ -2486,7 +2486,8 @@ bud är utgångskrav".)*
 *(1♣)–pass–(1NT)–pass–(pass)–**2♣*** och *(1♦)–pass–(1NT)–pass–(pass)–**2♦***.
 Handen som passade över öppningen kommer tillbaka när de stannat i 1 sang. En
 5-5-hand hade bjudit Michaels direkt, så den sena cuen lovar **båda högfärgerna,
-minst 4-4, och 13+ hp**. Partnern får **aldrig passa**:
+minst 4-4, och 13+ hp**. Bottarna bjuder den själva på just de kraven (4+/4+ i
+högfärgerna, 13+ hp; ägarbeslut 2026-11-10). Partnern får **aldrig passa**:
 
 | Advancerns bud | Betydelse |
 |---|---|
@@ -2498,7 +2499,6 @@ bara fyra kort, så nio trumf är inte garanterade. *♠KQ964 ♥J65 ♦865 ♣J
 Efter cuen (motorns tolkning tills ägaren sagt annat): inklivaren **3♥** =
 minimum 13–14 (säger inget om högfärgerna), **3♠** = maximum 15+ (utgångskrav);
 advancern placerar sedan i sin fit (mot minimum: utgång med 12+, annars stopp).
-Motorn bjuder inte själv den sena cuen än — den förstår och besvarar den.
 
 **Slamutredningen är systems on** (ägarbeslut 2026-09-22) — ingen Michaels-special.
 Den vanliga konkurrens-slamraden (§6.10) gäller: en stark kapten med
@@ -3680,6 +3680,9 @@ motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — 
 med ♠2 (DD 10) i stället för att saka ♣2 (8).
 
 ## 9. Ändringslogg
+- **2026-11-10 — bottarna bjuder den sena cuen själva** (§7.2, ägarbeslut,
+  uppföljning av #110): 4+/4+ i högfärgerna och 13+ hp i utpassningsläget efter
+  (1m)–pass–(1NT)–pass–(pass). Facit `auction-felrapport-110.test.ts`.
 - **2026-11-10 — sen cue efter deras 1NT-svar = båda högfärgerna, 4-4 och 13+
   (§7.2, ägarens struktur efter felrapport #110).** 1♣–P–1NT–P–P–2♣–P–**pass**:
   betydelselagret läste Michaels, men tabellen saknade rad (Michaels-läget kräver

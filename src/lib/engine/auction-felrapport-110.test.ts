@@ -100,6 +100,40 @@ describe('felrapport #110 – sen cue efter deras 1NT-svar (1m–P–1NT–P–P
     expect(meaningOf(H('E', `${FORE} 3C`), 7).rule).toBe('advance sen cue: cue (utgångsintresse)')
   })
 
+  // Ägarbeslut 2026-11-10 (uppföljning): bottarna bjuder själva den sena cuen.
+  describe('boten bjuder den sena cuen själv: 4+/4+ i högfärgerna och 13+ hp', () => {
+    const syd = (hand: string, hist = '1C P 1NT P P') => decideCall(med('S', hand), H('E', hist), 'S')
+
+    it('rapportens Syd (15 hp, 4-4): 2♣', () => {
+      const c = decideCall(RAPPORT, H('E', '1C P 1NT P P'), 'S')
+      expect(c.bid).toBe('2C')
+      expect(c.rule).toBe('sen cue (båda högfärgerna)')
+    })
+
+    it('samma efter 1♦: 2♦; och exakt 13 hp räcker', () => {
+      expect(decideCall(RAPPORT, H('E', '1D P 1NT P P'), 'S').bid).toBe('2D')
+      const tretton = 'S:AT73 H:AK73 D:Q2 C:T73'
+      expect(hcp(parseHand(tretton))).toBe(13)
+      expect(syd(tretton).bid).toBe('2C')
+    })
+
+    it('motvikt: 12 hp bjuder inte cuen', () => {
+      const tolv = 'S:AT73 H:AK73 D:J2 C:T73'
+      expect(hcp(parseHand(tolv))).toBe(12)
+      expect(syd(tolv).rule).not.toBe('sen cue (båda högfärgerna)')
+    })
+
+    it('motvikt: 4-3 i högfärgerna bjuder inte cuen, hur stark handen än är', () => {
+      const fyraTre = 'S:AT73 H:AK7 D:A32 C:T73'
+      expect(hcp(parseHand(fyraTre))).toBe(15)
+      expect(syd(fyraTre).rule).not.toBe('sen cue (båda högfärgerna)')
+    })
+
+    it('motvikt: bara i utpassningsläget efter 1m–P–1NT–P–P — inte efter 1♥–P–1NT–P–P', () => {
+      expect(syd('S:AT73 H:AK73 D:A2 C:T73', '1H P 1NT P P').rule).not.toBe('sen cue (båda högfärgerna)')
+    })
+  })
+
   it('motvikt: den DIREKTA Michaels-cuen (1♣)–2♣ är orörd — spärrhoppet finns kvar där', () => {
     const c = decideCall(RAPPORT, H('E', '1C 2C P'), 'N')
     expect(c.bid).toBe('3S')

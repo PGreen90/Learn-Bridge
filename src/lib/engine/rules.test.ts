@@ -102,7 +102,6 @@ const ALL_ENGINE_RULES: string[] = [
   'Michaels: stark efter cue', 'Michaels: accepterar inbjudan',
   'Michaels: avböjer inbjudan', 'Michaels: utgång efter cue', 'Michaels: stannar efter cue',
   // Sen cue efter deras 1NT-svar (sen-cue-continuations.ts, felrapport #110).
-  // 'sen cue (båda högfärgerna)' är betydelselagrets namn på själva cuen — motorn bjuder den inte själv än.
   'sen cue (båda högfärgerna)',
   'advance sen cue: preferens', 'advance sen cue: cue (utgångsintresse)', 'sen cue: passar avslutet',
   'sen cue: minimum efter cue', 'sen cue: maximum efter cue', 'sen cue: utgång efter cue', 'sen cue: stannar efter cue',
