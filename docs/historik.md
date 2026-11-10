@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-11-10 (/felrapporter #110 + #111 + #112 lagade)
+## 2026-11-10 (/felrapporter #110 + #111 + #112 lagade, LIVE e6f7f31)
 **#111** (bricka 10): 1♠–1NT–2♥–pass med Nord ♠A73 ♥5 ♦T53 ♣KQT432 (9 hp). Första
 svaret valde 1NT på STÖDPOÄNG (10–11, "höjer sedan till 2♠"), svararens andra bud
 mätte i rena hp → "svag hand" → pass på singel hjärter. Fix: `limit3` (stödpoäng)
