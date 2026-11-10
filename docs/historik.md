@@ -10,6 +10,26 @@
 
 ---
 
+## 2026-11-10 (/felrapporter #110 + #111 + #112 lagade)
+**#111** (bricka 10): 1♠–1NT–2♥–pass med Nord ♠A73 ♥5 ♦T53 ♣KQT432 (9 hp). Första
+svaret valde 1NT på STÖDPOÄNG (10–11, "höjer sedan till 2♠"), svararens andra bud
+mätte i rena hp → "svag hand" → pass på singel hjärter. Fix: `limit3` (stödpoäng)
+i `responderRebidAfterSemiForcing1NT`; bok §4.1. Facit auction-felrapport-111.test.ts.
+**#112** (bricka 10, 3♠ av Väst): Väst ♠T, Nord ♠5, bordet ♠2 ur ♠AQ42 — Syds ensamma
+♠J vann. `winOverBeatablePartner` avstod när andra hand följt färg; nu "gratis
+överstickning" (fler säkra toppkort kvar än utestående kort), äkta mask orörd; bok
+§8.8. Facit play-bot-felrapport-112.test.ts.
+**#110** (bricka 2): 1♣–P–1NT–P–P–2♣ (Syd, människa) –P–**pass** av Nord. Betydelselagret
+läser 2♣ som Michaels, men beslutstabellen har ingen rad för den SENA cuen efter deras
+1NT-svar (`michaels-continuations.lage` kräver att cuen är första budet efter
+öppningen) → pass utan regel. Hål i en budstruktur → ägarfrågor; **ägarens fyra svar
+samma dag:** 4-4 i högfärgerna och 13+ · Nord 2♠ (inget spärrhopp) · aldrig pass,
+preferens 2M (lika → hjärter), cue 3m 8+ med stöd · samma efter 1♦. Byggt: raden
+*sen-cue* + `sen-cue-continuations.ts` + betydelselagret (`interpretSenCue`) + åtta
+regelnamn i registret; bok §7.2. Efter cuen (3♥ min 13–14 / 3♠ max 15+, advancern
+placerar) är MIN tolkning — flaggad till ägaren. Motorn bjuder inte själv den sena
+cuen än (ägarfråga). Facit auction-felrapport-110.test.ts (11 lås).
+
 ## 2026-11-03 (/felrapporter #109 — öppnarens färg två gånger efter 2♣-positivt = trumf, kaptenen 4NT i stället för 5♣, §4.4 + storslam = fem nyckelkort + tre kungar §6.1; LIVE 92fbe04)
 #108 PCD:ad på morgonen (LIVE b7683be, issuen stängd). Ny rapport **#109** (Dagens IMP
 bricka 12, Väst giv, NS i zon): 2♣–2♠–3♣–3♠–4♣–**5♣** — Syd ♠AQ864 ♥J7 ♦A974 ♣JT (12)

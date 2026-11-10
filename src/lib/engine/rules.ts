@@ -71,6 +71,8 @@ const ALERT_RULE_PREFIXES: string[] = [
   'trumfdam',
   // Konkurrens / försvar
   'Michaels',
+  'sen cue (båda högfärgerna)',
+  'advance sen cue: cue (utgångsintresse)',
   'ovanlig 2NT',
   '2NT-inkliv: transfer', // systems on efter vårt 2NT-inkliv (konstgjord transfer)
   'upplysningsdubbling',
@@ -357,6 +359,15 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'Michaels: avböjer inbjudan': 'avslut',
   'Michaels: utgång efter cue': 'avslut',
   'Michaels: stannar efter cue': 'avslut',
+  // Sen cue efter deras 1NT-svar (felrapport #110, ägarens struktur 2026-11-10, §7.2)
+  'sen cue (båda högfärgerna)': 'krav-1-rond',
+  'advance sen cue: preferens': 'avslut',
+  'advance sen cue: cue (utgångsintresse)': 'krav-1-rond',
+  'sen cue: passar avslutet': 'avslut',
+  'sen cue: minimum efter cue': 'ej-krav',
+  'sen cue: maximum efter cue': 'utgangskrav',
+  'sen cue: utgång efter cue': 'avslut',
+  'sen cue: stannar efter cue': 'avslut',
   // Ovanlig 2NT-fortsättningen, ostörd (ägarbeslut 2026-09-21/22, §7.2)
   'advance ovanlig 2NT: cue (utgångsintresse)': 'krav-1-rond',
   'advance ovanlig 2NT: spärrhöjning': 'ej-krav',

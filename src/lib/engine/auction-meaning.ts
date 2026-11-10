@@ -22,6 +22,7 @@ import type { Bid, Forcing, Seat } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 import { forcingOf, isAlertRule, ruleInfo } from './rules'
 import { PUPPET } from './responses-2nt'
+import { senCueLage } from './sen-cue-continuations'
 import { cueRaiseSequenceIn, cueRaiseSteg } from './cue-raise-sequence'
 
 /** Hur säker tolkningen är. Visas för användaren så hen vet hur mycket att lita på. */
@@ -399,7 +400,48 @@ function interpretJumpOvercallAdvance(call: ResolvedCall, prior: ResolvedCall[])
   return null
 }
 
+/**
+ * Sen cue efter deras 1NT-svar (felrapport #110, ägarens struktur 2026-11-10):
+ * (1m)–P–(1NT)–P–(P)–2m = båda högfärgerna, minst 4-4, 13+ hp. Speglar
+ * `sen-cue-continuations.ts` bud för bud.
+ */
+function interpretSenCue(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const cb = parseBid(call.bid)
+  // Själva cuen: läget finns först när budet lagts.
+  const medBudet = senCueLage([...prior, call], call.seat)
+  if (medBudet && medBudet.ink === call.seat && medBudet.ours.length === 0 && !medBudet.stort && cb && senCueLage(prior, call.seat) === null) {
+    return R('sen cue (båda högfärgerna)', cb.level + SYMBOL[cb.strain] + ' — sen cue i öppnarens lågfärg efter deras 1 sang: båda högfärgerna, minst 4-4, och 13+ hp. Krav — partnern får inte passa (preferens på 2-läget; cue med 8+ hp och stöd).')
+  }
+  const l = senCueLage(prior, call.seat)
+  if (!l || l.stort) return null
+  const T = l.theirL
+  const n = l.ours.length
+  if (call.seat === l.adv && n === 0) {
+    if (!cb) return null
+    if (cb.strain === T && cb.level === 3) return R('advance sen cue: cue (utgångsintresse)', '3' + SYMBOL[T] + ' — cue: utgångsintresse med 8+ hp och 3+ stöd i en av partnerns högfärger. Krav — partnern visar minimum (3♥) eller maximum (3♠).')
+    if ((cb.strain === 'H' || cb.strain === 'S') && cb.level === 2) return R('advance sen cue: preferens', '2' + SYMBOL[cb.strain] + ' — preferens till partnerns ' + NAME[cb.strain] + ' på lägsta nivå: avslut. Budet är tvingat (den sena cuen får inte passas) och kan ha 0 poäng; med utgångsintresse hade jag cue-bjudit.')
+    return null
+  }
+  const advCue = l.ours[0]?.bid === '3' + T
+  if (call.seat === l.ink && n === 1) {
+    if (advCue && call.bid === '3H') return R('sen cue: minimum efter cue', '3♥ — minimum (13–14 hp) som svar på partnerns cue. Säger inget om vilken högfärg som är bäst.')
+    if (advCue && call.bid === '3S') return R('sen cue: maximum efter cue', '3♠ — maximum (15+ hp) som svar på partnerns cue: utgångskrav, partnern väljer utgång i sin fit.')
+    if (!advCue && call.bid === 'P') return R('sen cue: passar avslutet', 'Pass — partnerns preferens var tvingad och kan vara 0 poäng.')
+    return null
+  }
+  if (call.seat === l.adv && n === 2 && advCue) {
+    if (call.bid === 'P') return R('sen cue: stannar efter cue', 'Pass — partnern visade minimum och budet ligger i min fit.')
+    if (!cb || (cb.strain !== 'H' && cb.strain !== 'S')) return null
+    return cb.level === 4
+      ? R('sen cue: utgång efter cue', '4' + SYMBOL[cb.strain] + ' — utgång i min fit efter cuen.')
+      : R('sen cue: stannar efter cue', cb.level + SYMBOL[cb.strain] + ' — till spel: partnern visade minimum, och min fit är ' + NAME[cb.strain] + '.')
+  }
+  return null
+}
+
 function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation {
+  const senCue = interpretSenCue(call, prior)
+  if (senCue) return senCue
   const michaels = interpretMichaelsContinuation(call, prior)
   if (michaels) return michaels
   const ovanlig = interpretUnusual2NTContinuation(call, prior)

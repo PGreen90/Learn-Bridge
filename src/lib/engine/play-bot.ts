@@ -1178,11 +1178,11 @@ function winOverBeatablePartner(
   )
   if (yetToPlayOpps.length === 0) return null // ingen motståndare kvar → partnern vinner säkert
   // Har en REDAN spelad motståndare följt ledd färg? Då kan ett slående kort ligga
-  // kvar hos dem (de kan ha maskat) och partnern vinner ändå → avstå (konservativt).
-  if (state.currentTrick.some((pc) => side(pc.seat) !== side(seat) && pc.card.suit === led)) return null
+  // kvar hos dem (de kan ha maskat) och partnern vinner ändå → avstå (konservativt)
+  // — utom när överstickningen är gratis, se nedan.
+  const oppFoljde = state.currentTrick.some((pc) => side(pc.seat) !== side(seat) && pc.card.suit === led)
   // Utestående kort i ledd färg = alla rangar minus dem spelförarsidan ser (båda
-  // egna händer + spelade kort). Med vakten ovan ligger de hos en kvarvarande
-  // motståndare.
+  // egna händer + spelade kort).
   const partner = PARTNER_SEAT[seat]
   const seenLed = new Set<Rank>()
   for (const c of playedCards(state)) if (c.suit === led) seenLed.add(c.rank)
@@ -1201,6 +1201,19 @@ function winOverBeatablePartner(
     (c) => beats(c, bestCard, led, trump) && oppLed.every((o) => beats(c, o, led, trump)),
   )
   if (mineWin.length === 0) return null
+  // …UTOM när överstickningen är GRATIS (felrapport #112): efter mitt billigaste
+  // säkra kort har sidan kvar minst lika många kort som slår ALLT utestående som
+  // det finns utestående kort i färgen — då är resten av färgen vår ändå, och att
+  // krypa kan bara förlora (♠T mot ♠AQ42 med enbart ♠J ute). En äkta mask (♠Q mot
+  // ♠A42 med ♠K ute) klarar inte villkoret och står kvar.
+  if (oppFoljde) {
+    const spelat = lowest(mineWin)
+    const kvar = [...state.hands[seat], ...state.hands[partner]].filter(
+      (c) => c.suit === led && !(c.rank === spelat.rank) && !(c.rank === bestCard.rank),
+    )
+    const toppar = kvar.filter((c) => oppLed.every((o) => beats(c, o, led, trump))).length
+    if (toppar < oppLed.length) return null
+  }
   return {
     card: lowest(mineWin),
     reason:

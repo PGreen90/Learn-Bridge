@@ -154,6 +154,7 @@ import { preemptOf, respondToPreempt } from './responses-preempt'
 import { respondToWeakTwo, suitOfWeakTwo } from './responses-weak2'
 import { advanceOvercall, advanceTwoSuiter, hasStopper, overcall, overcallOfResponse, takeoutOfResponse } from './overcalls'
 import { michaelsContinues } from './michaels-continuations'
+import { senCueContinues, senCueLage } from './sen-cue-continuations'
 import { advanceJumpOvercall, jumpOvercallAdvanceSeat } from './advance-jump-overcall'
 import { unusual2NTContinues } from './unusual-2nt-continuations'
 import { advancerActsInCompetition, advancerFitPass, openerActsInCompetition, partnerSuitResponse, responderActsInCompetition } from './balancing-continuations'
@@ -2254,6 +2255,15 @@ const TABELL: Row[] = [
   // kung"). Hela §7.1–7.2-arsenalen ur `overcall`; pass är också ett beslut,
   // så raden svarar alltid (samma sitsar som manusets konkurrensrond och det
   // gamla lagrets `maybeOvercall` hade).
+  // Sen cue efter deras 1NT-svar (felrapport #110, ägarens struktur 2026-11-10):
+  // (1m)–P–(1NT)–P–(P)–2m = båda högfärgerna, minst 4-4, 13+ hp. Advancern
+  // passar aldrig (preferens / cue 8+); inklivaren svarar cuen och passar
+  // preferensen. Före inklivs-/advance-raderna, som inte känner läget.
+  {
+    id: 'sen-cue',
+    läge: (f) => { const l = senCueLage(f.history, f.seat); return l !== null && !l.stort },
+    välj: ({ hand, facts }) => { const k = senCueContinues(hand, facts); return k ? asCall(facts.seat, k) : null },
+  },
   {
     id: 'inkliv',
     läge: (f) => overcallSeat(f) !== null,
