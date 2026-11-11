@@ -29,6 +29,7 @@ import type { SavedGame, SparadTavlingsgiv } from '../engine/resume'
 import type { DailyLog } from '../engine/daily'
 import type { SpelResultat } from '../engine/spel-historik'
 import type { TavlingFramsteg } from './tavling'
+import type { Traningsmiss } from '../engine/traning'
 
 // ===========================================================================
 // ENHET — bor lokalt för alltid (även med konto i etapp 1).
@@ -170,6 +171,26 @@ export function sparaTraningssvar(temaId: string, ratt: boolean): boolean[] {
   const logg = [...loadTraningslogg(temaId), ratt].slice(-TRANINGSLOGG_MAX)
   saveValue(`traning:${temaId}`, logg)
   return logg
+}
+
+/** "Träna dina missar" (nästa nivå etapp 3): lägen ur spelade tävlingsgivar där
+ *  du bjöd annorlunda än motorn — nyckeln `traning-missar`, nyast först.
+ *  Formen kontrolleras ytligt vid läsning (trasig lagring → tom kö). */
+export function loadTraningsmissar(): Traningsmiss[] {
+  const v = loadValue<unknown>('traning-missar', [])
+  if (!Array.isArray(v)) return []
+  return v.filter(
+    (m): m is Traningsmiss =>
+      !!m &&
+      typeof m === 'object' &&
+      typeof (m as Traningsmiss).nyckel === 'string' &&
+      typeof (m as Traningsmiss).mittBud === 'string' &&
+      Array.isArray((m as Traningsmiss).history) &&
+      !!(m as Traningsmiss).deal?.hands?.S,
+  )
+}
+export function saveTraningsmissar(ko: Traningsmiss[]): void {
+  saveValue('traning-missar', ko)
 }
 
 // ===========================================================================

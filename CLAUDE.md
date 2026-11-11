@@ -92,8 +92,8 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Etapp 3-resterna** — "Träna dina missar" ur tävlingen · flera beslut per giv.
-2. **Etapp 2-resterna** — större kort/text som inställning · tävlingsöversiktens mobil-layout.
+1. **Etapp 2-resterna** — större kort/text som inställning · tävlingsöversiktens mobil-layout.
+2. **Nästa nivå etapp 4 — veckans mästerskap** (grind 0: källa + rättigheter = ägarsteg).
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 **nästa nivå etapp 4–5** (veckans mästerskap · klubbtopplista) · speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

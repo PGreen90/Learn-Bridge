@@ -19,6 +19,7 @@ import {
   loadSpelHistorik,
   saveSpelHistorik,
   loadTraningslogg,
+  loadTraningsmissar,
   sparaTraningssvar,
   loadSavedGame,
 } from './index'
@@ -90,6 +91,10 @@ describe('loadX ger rätt fallback när inget finns', () => {
     expect(loadDailyPlayed()).toBeNull()
     expect(loadSpelHistorik()).toEqual([]) // tom historik
     expect(loadTraningslogg('finns-ej')).toEqual([])
+    expect(loadTraningsmissar()).toEqual([]) // tom kö
+    // Trasig lagring ger tom kö, inte krasch.
+    localStorage.setItem(PREFIX + 'traning-missar', JSON.stringify([{ skräp: 1 }, null, 'x']))
+    expect(loadTraningsmissar()).toEqual([])
     expect(loadPlaySpeed()).toBe('normal')
     expect(loadAutoClaim()).toBe(true)
     expect(loadSavedGame()).toBeNull() // ingen pågående giv

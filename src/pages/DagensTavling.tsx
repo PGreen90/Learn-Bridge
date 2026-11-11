@@ -21,7 +21,8 @@ import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
 import { TyckTillKnapp } from '../components/TyckTill'
 import { useTillbakaHit } from '../lib/efter-inloggning'
-import { loadTavlingFramsteg, loadTavlingPagaende, saveTavlingFramsteg } from '../lib/backend'
+import { loadTavlingFramsteg, loadTavlingPagaende, loadTraningsmissar, saveTavlingFramsteg, saveTraningsmissar } from '../lib/backend'
+import { forstaMissen, laggTillMiss } from '../lib/engine/traning'
 import { validSparadTavlingsgiv } from '../lib/engine/resume'
 import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
 import {
@@ -296,6 +297,15 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
         framstegRef.current = nytt
         saveTavlingFramsteg(nytt, form)
         setFramsteg(nytt)
+        // "Träna dina missar": bjöd du annorlunda än motorn någonstans i den
+        // här given sparas läget till budträningen (lokalt, först EFTER att
+        // given är klar — inget facit läcker in i tävlingen).
+        try {
+          const miss = forstaMissen(giv.deal, inskick.history, `${form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'} nr ${tavling.nummer}, giv ${giv.deal.board}`)
+          if (miss) saveTraningsmissar(laggTillMiss(loadTraningsmissar(), miss))
+        } catch {
+          // Träningskön är en bonus — den får aldrig störa bokföringen av given.
+        }
         // Skicka in i bakgrunden; märk raden med serverns svar när det kommer.
         submitTavlingGiv(inskick).then((svar) => {
           setFramsteg((f) => {

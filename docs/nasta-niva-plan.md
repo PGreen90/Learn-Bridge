@@ -53,8 +53,13 @@
 > - De handskrivna övningarna (inkl. "regeln om 20") är borttagna. Skillen
 >   heter nu `lagga-till-traningstema`.
 > - **Temalistan och intro-texterna är Claudes förslag — ägaren synar.**
-> - **KVAR i etapp 3:** "Träna dina missar" ur tävlingen · flera beslut i samma
->   giv · visa alla fyra händer efter svaret · spelföringsproblem.
+> - **Resterna, BYGGDA samma dag:** "Träna dina missar" (första budet i en
+>   färdig tävlingsgiv där du avvek från motorn sparas lokalt och blir temat
+>   `missar`; facit räknas om mot dagens motor, ett läge du klarar faller ur
+>   kön) · "Fortsätt budgivningen" (nästa beslut i samma giv) · "Visa hela
+>   given" efter svaret.
+> - **KVAR i etapp 3:** spelföringsproblem (en hand + träkarl, DD-verifierad
+>   lösning) · missar även ur fritt spel · kontosynk av formen och kön.
 
 ## Context
 
