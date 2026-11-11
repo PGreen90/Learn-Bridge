@@ -10,20 +10,38 @@ import { BrandMark } from '../components/BrandMark'
 import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
 import { SuitText } from '../components/SuitText'
-import { loadTraningslogg } from '../lib/backend'
-import { TRANINGSTEMAN } from '../lib/engine/traning'
+import { loadTraningslogg, loadTraningsmissar } from '../lib/backend'
+import { MISSTEMA, TRANINGSTEMAN } from '../lib/engine/traning'
 
 /** Guldspadern delas ut när formen är riktigt bra över ett rimligt antal svar. */
 const GULD_MIN_SVAR = 10
 const GULD_ANDEL = 0.9
 
 export function Budtraning() {
+  const antalMissar = loadTraningsmissar().length
   return (
     <div className="space-y-6">
       <PageHeader title="Budträning">
         Välj en situation. Du får en ny giv varje gång, bjuder i budlådan — och ser direkt
         vad rebidz bjuder och varför.
       </PageHeader>
+
+      {/* Dina egna lägen ur tävlingen — bara när det finns några att öva på. */}
+      {antalMissar > 0 && (
+        <Link
+          to={`/budtraning/${MISSTEMA.id}`}
+          className="focus-ring flex items-center justify-between gap-3 rounded-xl border border-gold-400/50 bg-gold-400/10 p-4 transition-colors hover:bg-gold-400/15"
+        >
+          <div className="min-w-0">
+            <div className="font-semibold text-ink">{MISSTEMA.titel}</div>
+            <div className="text-sm text-ink-muted">{MISSTEMA.beskrivning}</div>
+          </div>
+          <div className="shrink-0 text-right">
+            <div className="font-brand text-lg leading-tight text-gold-600 dark:text-gold-300">{antalMissar}</div>
+            <div className="text-xs text-ink-faint">{antalMissar === 1 ? 'läge' : 'lägen'}</div>
+          </div>
+        </Link>
+      )}
 
       <Panel>
         <div className="space-y-2">

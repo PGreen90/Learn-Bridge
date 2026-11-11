@@ -21,6 +21,13 @@ bud med dess egen förklaring. Träningen kan därför aldrig lära ut något an
 - **Formen per tema** (senaste 20 svaren): `loadTraningslogg` /
   `sparaTraningssvar` i `src/lib/backend/index.ts`.
 
+## Tre sidofunktioner (samma fil)
+- `fortsattGiv`: nästa beslut i samma giv ("Fortsätt budgivningen").
+- `forstaMissen` / `missSomGiv` / `MISSTEMA`: "Träna dina missar" — första
+  budet i en färdig tävlingsgiv där Syd avvek från motorn. Sparas i
+  `DagensTavling.tsx` när given är klar (`loadTraningsmissar` /
+  `saveTraningsmissar`); facit räknas om mot dagens motor vid uppspelning.
+
 ## Ett nytt tema
 Lägg ett objekt i `TRANINGSTEMAN`:
 - `id` (kebab-case, blir adressen `/budtraning/<id>` och lagringsnyckeln — byt

@@ -234,3 +234,87 @@ export function traningsgiv(temaId: string, rng: () => number = Math.random, max
   }
   return null
 }
+
+// ---- Fortsätt budgivningen (flera beslut i samma giv) ----------------------
+
+/**
+ * Nästa beslut för Syd i SAMMA giv, om budgivningen fortsätter med motorns bud
+ * (facit läggs, övriga platser bjuder sina egna bud). `null` när auktionen tar
+ * slut eller Syds nästa läge saknar tabellregel. Fortsättningen är inte bunden
+ * till temat — den följer given dit den leder.
+ */
+export function fortsattGiv(giv: Traningsgiv): Traningsgiv | null {
+  const history = [...giv.history, giv.facit]
+  let vakt = 0
+  while (!auctionComplete(history) && vakt++ < 40) {
+    const seat = seatToAct(giv.deal.dealer, history.length)
+    const { call, källa } = decideCallTraced(giv.deal, history, seat)
+    if (seat === 'S') {
+      if (!källa.startsWith('tabell:') || källa.includes('olagligt')) return null
+      return { deal: giv.deal, history, facit: call }
+    }
+    history.push(call)
+  }
+  return null
+}
+
+// ---- Träna dina missar (bud i tävlingen där du avvek från motorn) ----------
+
+/** Ett sparat läge ur en spelad giv där Syd bjöd något annat än motorn. */
+export interface Traningsmiss {
+  /** Unik nyckel (varifrån + vilket bud i ordningen) — för att inte spara dubbelt. */
+  nyckel: string
+  /** Läsbar källa: "Dagens MP% nr 93, giv 7". */
+  kalla: string
+  deal: Deal
+  /** Buden som de föll vid bordet, fram till Syds tur. */
+  history: ResolvedCall[]
+  /** Det du bjöd den gången. */
+  mittBud: Bid
+}
+
+/**
+ * Första läget i en färdigbjuden giv där Syd avvek från motorns tabellbud.
+ * Bara det FÖRSTA: senare avvikelser är följder av den första och säger inget
+ * eget. `null` = du bjöd som motorn hela vägen (eller motorn saknade regel).
+ */
+export function forstaMissen(deal: Deal, history: ResolvedCall[], kalla: string): Traningsmiss | null {
+  for (let i = 0; i < history.length; i++) {
+    const c = history[i]
+    if (c.seat !== 'S') continue
+    const fore = history.slice(0, i)
+    const { call, källa } = decideCallTraced(deal, fore, 'S')
+    if (!källa.startsWith('tabell:') || källa.includes('olagligt')) continue
+    if (call.bid !== c.bid) return { nyckel: `${kalla}#${i}`, kalla, deal, history: fore, mittBud: c.bid }
+  }
+  return null
+}
+
+/**
+ * En sparad miss som träningsgiv — facit räknas om MOT DAGENS MOTOR, så en
+ * regel som ändrats sedan dess ger dagens svar. `null` när läget inte längre
+ * är en miss (motorn bjuder numera som du gjorde, eller saknar regel).
+ */
+export function missSomGiv(miss: Traningsmiss): Traningsgiv | null {
+  const { call, källa } = decideCallTraced(miss.deal, miss.history, 'S')
+  if (!källa.startsWith('tabell:') || källa.includes('olagligt')) return null
+  if (call.bid === miss.mittBud) return null
+  return { deal: miss.deal, history: miss.history, facit: call }
+}
+
+/** Lägg en ny miss först i kön (nyast först), utan dubbletter, högst `max`. */
+export function laggTillMiss(ko: Traningsmiss[], ny: Traningsmiss, max = 40): Traningsmiss[] {
+  return [ny, ...ko.filter((m) => m.nyckel !== ny.nyckel)].slice(0, max)
+}
+
+/** Pseudotemat för sparade missar (står inte i TRANINGSTEMAN — givarna kommer
+ *  ur kön, inte ur slumpen). */
+export const MISSTEMA: Traningstema = {
+  id: 'missar',
+  titel: 'Dina missar från tävlingen',
+  beskrivning: 'Lägen där du bjöd annorlunda än rebidz. Öva tills de sitter.',
+  intro:
+    'Här samlas lägen ur dina tävlingsgivar där du valde ett annat bud än rebidz. Ett annat bud är inte alltid fel — men det är här systemet och din intuition går isär, så det är här det lönar sig att öva. Svarar du som rebidz försvinner läget ur listan.',
+  paragraf: '§4–§7 beroende på läget',
+  passar: () => false,
+}

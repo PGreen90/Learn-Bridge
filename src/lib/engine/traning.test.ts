@@ -5,7 +5,16 @@
 import { describe, expect, it } from 'vitest'
 import { decideCall, decideCallTraced, legalCalls } from './auction-live'
 import { mulberry32 } from './deal'
-import { TRANINGSTEMAN, traningsgiv, traningstema } from './traning'
+import {
+  forstaMissen,
+  fortsattGiv,
+  laggTillMiss,
+  missSomGiv,
+  MISSTEMA,
+  TRANINGSTEMAN,
+  traningsgiv,
+  traningstema,
+} from './traning'
 
 const GIVAR_PER_TEMA = 6
 
@@ -102,5 +111,65 @@ describe('temanas lägen är de som utlovas', () => {
       const har4NT = facit.bid === '4NT' || bud.some((c) => c.bid === '4NT' && (c.seat === 'N' || c.seat === 'S'))
       expect(har4NT).toBe(true)
     }
+  })
+})
+
+describe('fortsätt budgivningen', () => {
+  it('nästa beslut bygger på att facit bjöds, och är åter motorns tabellbud', () => {
+    const rng = mulberry32(31337)
+    let antal = 0
+    for (let i = 0; i < 40 && antal < 5; i++) {
+      const g = traningsgiv('svar-hogfarg', rng)
+      if (!g) continue
+      const f = fortsattGiv(g)
+      if (!f) continue
+      antal++
+      expect(f.deal).toBe(g.deal)
+      expect(f.history.slice(0, g.history.length + 1)).toEqual([...g.history, g.facit])
+      expect(f.facit.bid).toBe(decideCall(f.deal, f.history, 'S').bid)
+      expect(legalCalls(f.history, 'S')).toContain(f.facit.bid)
+      expect(g.history).not.toContain(g.facit) // ursprungsgiven muteras inte
+    }
+    expect(antal).toBeGreaterThan(0)
+  })
+})
+
+describe('träna dina missar', () => {
+  const rng = mulberry32(2718)
+  const g = traningsgiv('oppning', rng)!
+  // Ett annat lagligt bud än motorns = en miss.
+  const annat = legalCalls(g.history, 'S').find((b) => b !== g.facit.bid)!
+  const medMiss = [...g.history, { seat: 'S' as const, bid: annat }]
+
+  it('hittar första läget där Syd avvek, med buden fram till dess', () => {
+    const miss = forstaMissen(g.deal, medMiss, 'Dagens MP% nr 1, giv 3')
+    expect(miss).not.toBeNull()
+    expect(miss!.mittBud).toBe(annat)
+    expect(miss!.history).toEqual(g.history)
+    expect(miss!.kalla).toBe('Dagens MP% nr 1, giv 3')
+  })
+
+  it('ingen miss när Syd bjöd som motorn', () => {
+    expect(forstaMissen(g.deal, [...g.history, g.facit], 'x')).toBeNull()
+  })
+
+  it('missen blir en träningsgiv med dagens motorbud som facit', () => {
+    const miss = forstaMissen(g.deal, medMiss, 'x')!
+    const giv = missSomGiv(miss)
+    expect(giv?.facit.bid).toBe(g.facit.bid)
+    // Bjuder motorn numera som du gjorde är det ingen miss längre.
+    expect(missSomGiv({ ...miss, mittBud: g.facit.bid })).toBeNull()
+  })
+
+  it('kön: nyast först, inga dubbletter, tak', () => {
+    const m = forstaMissen(g.deal, medMiss, 'a')!
+    const m2 = { ...m, nyckel: 'b#0', kalla: 'b' }
+    expect(laggTillMiss([m], m2).map((x) => x.kalla)).toEqual(['b', 'a'])
+    expect(laggTillMiss([m, m2], m)).toHaveLength(2)
+    expect(laggTillMiss([m, m2], { ...m, nyckel: 'c#0' }, 2)).toHaveLength(2)
+  })
+
+  it('pseudotemat står inte bland slumpteman', () => {
+    expect(TRANINGSTEMAN.some((t) => t.id === MISSTEMA.id)).toBe(false)
   })
 })
