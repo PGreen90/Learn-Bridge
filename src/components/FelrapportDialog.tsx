@@ -76,7 +76,7 @@ export function FelrapportDialog({
     return (
       <Dialog onClose={onClose} className="w-full max-w-sm p-4 text-left">
         <h2 className="text-sm font-bold text-accent">
-          ✓ Tack – {forslag ? 'förslaget' : 'rapporten'} är skickat{forslag ? '' : 'd'}!
+          ✓ Tack – {forslag ? 'förslaget är skickat' : 'rapporten är skickad'}!
         </h2>
         <p className="mt-2 text-xs leading-relaxed text-ink-muted">
           Hela given följde med. Du behöver inte göra något mer.
