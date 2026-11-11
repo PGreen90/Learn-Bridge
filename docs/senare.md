@@ -436,8 +436,11 @@ giv finns) → DinStällning → Dina givar → Ställningen. Dessutom en **uppd
 toppen komprimerad till EN rad (titel `text-xl` vänster + kompakt klock-pill höger;
 förklaringstexten borttagen; `Nedrakning` är nu en pill med klockikon + tooltip), och
 "N poängsatta givar" i `DinStällning` → **"N/12 givar"** (kortare + visar framsteget;
-totalen kommer via ny `total`-prop från `tavling.storlek`). **KVAR (om ägaren vill):**
-kort topplista (topp 3 + din rad), ev. "Dina givar" → in i rutnätet med MP%. Låsta
+totalen kommer via ny `total`-prop från `tavling.storlek`). **KORT TOPPLISTA BYGGD 2026-11-11**
+(nästa nivå etapp 2): från sju spelare visar översikten topp 3 + din rad, med
+"Visa hela listan (N spelare)"; historiksidan visar alltid hela. Inte synad på
+riktig telefon inloggad — bara komponenttestat. **KVAR (om ägaren vill):**
+"Dina givar" → in i rutnätet med MP%. Låsta
 ramar: emerald, svarta spader, guldserifen, MP bara.
 
 *(Ursprunglig notering:)* Efter UI-polishens steg 1–5 staplar `DagensTavling`-översikten mycket vertikalt:
