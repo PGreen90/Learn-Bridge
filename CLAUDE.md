@@ -10,15 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-11-10): kolla att nattkedjan gick (`gh run list
-> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (2026-11-10: 0 öppna; #110–#112 live). NU = TOM — ägaren
+> **NÄSTA SESSION BÖRJAR MED** (2026-11-11): kolla att nattkedjan gick (`gh run list
+> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (2026-11-11: 0 öppna; #110–#113 stängda). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). NU = TOM — ägaren
 > väljer ur NÄST (ångra/återuppta LIVE a6f4c06). Design-skillen `impeccable` (pbakaus, v4.8.0)
 > installerades 2026-10-27 i `.agents/skills/` — critique/audit-provet på startsidan kördes i egen
 > session; ägaren avgör om skillen används i FACELIFTEN (SENARE).
 
 ### 🔵 NU — TOM (senast: ångra ett steg + återuppta tävlingsgiv exakt, ägarval 2026-10-27, LIVE a6f4c06)
 Kvar (senare.md): samma tävlingsgiv kan spelas om på en ANNAN enhet (serverlagring = Beslut B-steg).
-Dessförinnan LIVE: #110 sen cue efter deras 1NT-svar (§7.2) · #111 (§4.1) · #112 (§8.8) e6f7f31 · #109 2♣-färgen två gånger = trumf + storslam via 5NT (§4.4/§6.1) 92fbe04 · #108 4m efter hoppskiftet (§5.1) b7683be.
+Dessförinnan LIVE: #113 lås (ingen fix) 9563a41 · bottarna bjuder sena cuen 2a497bd · #110 sen cue efter deras 1NT-svar (§7.2) · #111 (§4.1) · #112 (§8.8) e6f7f31 · #109 2♣-färgen två gånger = trumf + storslam via 5NT (§4.4/§6.1) 92fbe04 · #108 4m efter hoppskiftet (§5.1) b7683be.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
