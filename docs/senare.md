@@ -9,6 +9,24 @@
 
 ## ⚪ SENARE
 
+### Nästa nivå — etapp 4–5 och tilläggen (ägargodkänd plan 2026-11-11)
+Hela beskrivningen bor i `docs/nasta-niva-plan.md`. Här står bara det som väntar
+EFTER etapp 1–3 (som ligger i NU/NÄST):
+- **Etapp 4 — veckans mästerskap:** riktiga givar ur gamla mästerskap som en egen
+  veckotävling. Grind 0 före all kod: källa och rättigheter.
+- **Etapp 5 — klubbtopplista:** gå med i en grupp via kod/länk, dagens lista
+  filtrerad på gruppen. Ny tabell + GDPR-genomgång = eget grindbeslut.
+- **Tilläggen, i ordning:** tävlingsstreak + spelarstatistik · påminnelse om dagens
+  tävling · par-kontrakt + DD-tabell i tävlingsgranskningen · "utmana en vän på
+  samma givar" · publik förslagslista med röstning.
+
+**Nedflyttat ur NÄST 2026-11-11** (när nästa nivå tog platserna):
+- **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: fynd D
+  (byt färg), MC-på-få-lägen.
+- **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
+  (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet
+  utanför v1").
+
 ### Ur bevaka-översynen 2026-10-06 — kända hål utan giv (ingen vakt möjlig än)
 Flyttade från `docs/bevaka.md` när listan gjordes om till en vakt (bara rader
 med frö + måltestfil får stå där). Varje punkt är ett verkligt hål; den som får

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
+import { TyckTillKnapp } from '../components/TyckTill'
 import { useAuth } from '../components/AuthProvider'
 
 // Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
@@ -215,6 +216,14 @@ export function Home() {
           <Link to="/om" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
             Så funkar rebidz →
           </Link>
+        </p>
+        {/* Användarnas röst (nästa nivå etapp 1, 2026-11-11): två öppna frågor,
+            inget konto. Samma dialog nås från sidfoten på alla sidor. */}
+        <p className="text-sm text-emerald-100">
+          Saknar du något?{' '}
+          <TyckTillKnapp className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+            Tyck till om rebidz →
+          </TyckTillKnapp>
         </p>
       </div>
     </Felt>

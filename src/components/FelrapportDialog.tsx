@@ -2,25 +2,29 @@ import { useState } from 'react'
 import type { Deal } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import type { Contract, Trick } from '../lib/engine/play'
-import { REPORT_CATEGORIES, felrapportUrl, submitFelrapport } from '../lib/felrapport'
-import { loadGithubToken } from '../lib/github-token'
+import { REPORT_CATEGORIES, byggRapport, rapportTyp } from '../lib/felrapport'
+import { skickaRapport } from '../lib/backend/rapport'
 import { Button } from './Button'
 import { Dialog } from './Dialog'
 
 /** Standardtexten (Spela kort): hela given inklusive sticken följer med. */
 const DEFAULT_INTRO = 'Hela given (händerna, budgivningen och sticken) följer med automatiskt.'
 
+/** Dit man vänder sig om rapporten inte går att skicka. */
+export const RAPPORT_KONTAKT = 'rebidz.bridge@gmail.com'
+
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
 /**
- * "Kändes given rätt?"-dialogen: ägaren väljer kategori + skriver fritt.
+ * "Kändes given rätt?"-dialogen: välj kategori + skriv fritt.
  *
- * Har ägaren sparat en GitHub-nyckel (Inställningar) skickas rapporten DIREKT
- * med ett klick – ingen GitHub-sida öppnas. Saknas nyckel faller vi tillbaka på
- * att öppna en FÖRIFYLLD GitHub-issue som ägaren skickar med "Submit new issue".
+ * Rapporten skickas med ETT klick via den öppna mottagaren (/api/rapport,
+ * 2026-11-11) — inget konto, ingen kod och ingen GitHub-sida. Kategorin avgör
+ * om det blir en felrapport eller ett förslag ("jag hade gjort annorlunda").
  *
  * `title`, `intro` och `categories` kan sättas per plats: Spela kort använder
  * standarden (hela given), Budvisningen skickar budgivningsspecifik text.
+ * `lage` säger var i appen rapporten skrevs och följer med i rapporten.
  */
 export function FelrapportDialog({
   deal,
@@ -28,6 +32,7 @@ export function FelrapportDialog({
   contract,
   tricks,
   onClose,
+  lage,
   title = 'Rapportera fel i given',
   intro = DEFAULT_INTRO,
   categories = REPORT_CATEGORIES,
@@ -37,6 +42,7 @@ export function FelrapportDialog({
   contract: Contract | null
   tricks: Trick[]
   onClose: () => void
+  lage?: string
   title?: string
   intro?: string
   categories?: readonly string[]
@@ -44,25 +50,21 @@ export function FelrapportDialog({
   const [category, setCategory] = useState<string>(categories[0])
   const [description, setDescription] = useState('')
   const [expected, setExpected] = useState('')
+  // Lockfällan: osynligt fält som bara robotar fyller i.
+  const [webbplats, setWebbplats] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const token = loadGithubToken()
+  const forslag = rapportTyp(category) === 'forslag'
 
-  /** Fallback: öppna den förifyllda GitHub-sidan (som förr). */
-  function openIssue() {
-    const url = felrapportUrl({ deal, calls, contract, tricks, category, description, expected })
-    window.open(url, '_blank', 'noopener')
-    onClose()
-  }
-
-  /** Direktskick via GitHubs API med den sparade nyckeln. */
-  async function sendDirect() {
-    if (!token) return
+  async function skicka() {
     setStatus('sending')
     setErrorMsg('')
     try {
-      await submitFelrapport({ deal, calls, contract, tricks, category, description, expected }, token)
+      await skickaRapport({
+        ...byggRapport({ deal, calls, contract, tricks, category, description, expected, lage }),
+        webbplats,
+      })
       setStatus('sent')
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : 'Något gick fel.')
@@ -70,11 +72,12 @@ export function FelrapportDialog({
     }
   }
 
-  // Kvitto efter lyckat direktskick.
   if (status === 'sent') {
     return (
       <Dialog onClose={onClose} className="w-full max-w-sm p-4 text-left">
-        <h2 className="text-sm font-bold text-accent">✓ Tack – rapporten är skickad!</h2>
+        <h2 className="text-sm font-bold text-accent">
+          ✓ Tack – {forslag ? 'förslaget' : 'rapporten'} är skickat{forslag ? '' : 'd'}!
+        </h2>
         <p className="mt-2 text-xs leading-relaxed text-ink-muted">
           Hela given följde med. Du behöver inte göra något mer.
         </p>
@@ -90,12 +93,12 @@ export function FelrapportDialog({
   // Ingen onClose: en halvskriven rapport ska inte försvinna på ett klick
   // utanför rutan — bara Avbryt-knappen stänger.
   return (
-    <Dialog className="w-full max-w-sm p-4 text-left">
+    <Dialog className="max-h-[calc(100dvh-1.5rem)] w-full max-w-sm overflow-y-auto p-4 text-left">
         <h2 className="text-sm font-bold text-ink">{title}</h2>
         <p className="mt-1 text-xs leading-relaxed text-ink-muted">{intro}</p>
 
         <fieldset className="mt-3 space-y-1.5" disabled={sending}>
-          <legend className="sr-only">Vad kändes fel?</legend>
+          <legend className="sr-only">Vad gäller det?</legend>
           {categories.map((c) => (
             <label key={c} className="flex cursor-pointer items-center gap-2 text-sm text-ink-soft">
               <input
@@ -114,66 +117,73 @@ export function FelrapportDialog({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
+          maxLength={4000}
           disabled={sending}
-          aria-label="Beskriv vad som kändes fel"
-          placeholder="Beskriv gärna med egna ord vad som kändes fel …"
+          aria-label={forslag ? 'Beskriv ditt förslag' : 'Beskriv vad som kändes fel'}
+          placeholder={
+            forslag
+              ? 'Beskriv med egna ord vad du hade gjort i stället …'
+              : 'Beskriv gärna med egna ord vad som kändes fel …'
+          }
           className="mt-3 w-full rounded-lg border border-line-strong p-2 text-sm text-ink focus:border-emerald-500 focus:outline-none disabled:opacity-60"
         />
 
         {/* Ägarbeslut 2026-10-06: "Rätt bud + varför" är det som gör en fix hållbar —
             ifyllt blir det facit för /felrapporter, tomt tvingar kommandot att fråga. */}
         <label className="mt-3 block text-xs font-semibold text-ink-soft" htmlFor="felrapport-ratt">
-          Rätt bud + varför
+          Rätt bud eller kort + varför
         </label>
         <textarea
           id="felrapport-ratt"
           value={expected}
           onChange={(e) => setExpected(e.target.value)}
           rows={2}
+          maxLength={2000}
           disabled={sending}
           placeholder="T.ex. 3♥ – visar fem spader och fyra hjärter. Eller: ♠A – ta sticket, annars tappas det."
           className="mt-1 w-full rounded-lg border border-line-strong p-2 text-sm text-ink focus:border-emerald-500 focus:outline-none disabled:opacity-60"
         />
         <p className="mt-1 text-xs leading-relaxed text-ink-muted">
-          Det här fältet gör att felet kan låsas som facit direkt. Tomt → Claude frågar dig.
+          Frivilligt, men det gör att saken kan rättas mycket snabbare.
         </p>
 
+        {/* Lockfällan mot robotar: utanför skärmen, utan tabbstopp, dold för
+            skärmläsare. En människa ser och fyller aldrig i den. */}
+        <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+          <label>
+            Webbplats
+            <input
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={webbplats}
+              onChange={(e) => setWebbplats(e.target.value)}
+            />
+          </label>
+        </div>
+
         {status === 'error' && (
-          <p className="mt-2 rounded-lg bg-rose-50 p-2 text-xs leading-relaxed text-rose-700">
-            {errorMsg} Du kan försöka igen eller öppna rapporten på GitHub istället.
+          <p role="alert" className="mt-2 rounded-lg bg-rose-50 p-2 text-xs leading-relaxed text-rose-700">
+            {errorMsg} Fungerar det inte alls? Mejla{' '}
+            <a href={`mailto:${RAPPORT_KONTAKT}`} className="underline underline-offset-2">
+              {RAPPORT_KONTAKT}
+            </a>
+            .
           </p>
         )}
 
-        {token ? (
-          <p className="mt-2 text-xs leading-relaxed text-ink-muted">
-            Rapporten skickas direkt till GitHub – inget mer du behöver göra.
-          </p>
-        ) : (
-          <p className="mt-2 text-xs leading-relaxed text-ink-muted">
-            Rapporten öppnas som en förifylld sida på GitHub – klicka{' '}
-            <strong>Submit new issue</strong> där för att skicka den. (Vill du slippa det
-            steget? Aktivera direktskick under <strong>Inställningar</strong>.)
-          </p>
-        )}
+        <p className="mt-2 text-xs leading-relaxed text-ink-muted">
+          Skickas direkt – inget konto behövs. Skriv inget personligt: texten sparas i
+          projektets öppna ärendelista.
+        </p>
 
         <div className="mt-3 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={sending}>
             Avbryt
           </Button>
-          {token ? (
-            <>
-              {status === 'error' && (
-                <Button variant="secondary" onClick={openIssue} disabled={sending}>
-                  Öppna på GitHub →
-                </Button>
-              )}
-              <Button onClick={sendDirect} disabled={sending}>
-                {sending ? 'Skickar …' : 'Skicka rapport ✓'}
-              </Button>
-            </>
-          ) : (
-            <Button onClick={openIssue}>Öppna rapporten →</Button>
-          )}
+          <Button onClick={skicka} disabled={sending}>
+            {sending ? 'Skickar …' : forslag ? 'Skicka förslag ✓' : 'Skicka rapport ✓'}
+          </Button>
         </div>
     </Dialog>
   )

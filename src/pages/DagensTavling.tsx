@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
+import { TyckTillKnapp } from '../components/TyckTill'
 import { loadTavlingFramsteg, loadTavlingPagaende, saveTavlingFramsteg } from '../lib/backend'
 import { validSparadTavlingsgiv } from '../lib/engine/resume'
 import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
@@ -482,6 +483,14 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
           >
             Tidigare tävlingar & medaljer →
           </Link>
+        </div>
+
+        {/* Användarnas röst (2026-11-11): tävlingsvyn saknar sidfot (helskärm),
+            så "Tyck till" behöver en egen väg in här. */}
+        <div className="flex justify-center">
+          <TyckTillKnapp className="text-sm text-emerald-100 underline underline-offset-2 hover:text-gold-100">
+            Tyck till om rebidz
+          </TyckTillKnapp>
         </div>
 
         <div className="flex justify-center">

@@ -36,7 +36,7 @@ import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
 import { gameFromDeal, gameFromSeed, seatDealSouth, useGame, type Game } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
-import type { TavlingSpel } from './play/tavling-mode'
+import { rapportLage, type TavlingSpel } from './play/tavling-mode'
 import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
@@ -902,6 +902,7 @@ export function PlayTable({
             contract={contract}
             tricks={play.completedTricks}
             onClose={() => setReporting(false)}
+            lage={rapportLage(tavling)}
           />
         )}
       </div>
@@ -1081,6 +1082,7 @@ export function PlayTable({
           contract={contract}
           tricks={play.completedTricks}
           onClose={() => setReporting(false)}
+          lage={rapportLage(tavling)}
         />
       )}
 
