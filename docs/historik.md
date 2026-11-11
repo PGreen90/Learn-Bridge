@@ -10,6 +10,11 @@
 
 ---
 
+## 2026-11-11 (/felrapporter #113 — ingen fix, lås)
+**#113** (bricka 2, 3NT av Väst): "Nord ska avblockera med ♦Q". Mätt med double-dummy:
+Nord ♦Q7 mot Syds ♦J62 → damen och sjuan likvärdiga (sjuan slår Syds småkort); sticket
+försvann på utspelet ♦J. Med ♦Q5 avblockerar boten. Lås: play-bot-felrapport-113.test.ts.
+
 ## 2026-11-10 (/felrapporter #110 + #111 + #112 lagade, LIVE e6f7f31)
 **Uppföljning #110 (ägarbeslut samma dag):** bottarna bjuder själva den sena cuen —
 4+/4+ i högfärgerna och 13+ hp i utpassningsläget (`senCueOppnar`, raden *sen-cue*).
