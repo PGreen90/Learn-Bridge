@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../components/AuthProvider'
+import { useTillbakaHit } from '../../lib/efter-inloggning'
 import { PageHeader } from '../../components/PageHeader'
 import { Panel } from '../../components/Panel'
 import { Button } from '../../components/Button'
@@ -153,6 +154,7 @@ function SkapaBordDialog({
 
 export function SpelaMedVanner() {
   const { loading: authLaddar, signedIn } = useAuth()
+  const tillbaka = useTillbakaHit()
   const navigate = useNavigate()
   const [bord, setBord] = useState<BordIListan[] | null>(null)
   const [mitt, setMitt] = useState<{ kod: string } | null>(null)
@@ -186,12 +188,12 @@ export function SpelaMedVanner() {
         </PageHeader>
         <Panel className="space-y-4 text-center">
           <p className="text-ink-soft">Du behöver vara inloggad för att spela vid ett bord.</p>
-          <Link to="/logga-in">
+          <Link to={tillbaka.loggaIn}>
             <Button>Logga in</Button>
           </Link>
           <p className="text-sm text-ink-muted">
             Inget konto?{' '}
-            <Link to="/registrera" className="font-semibold text-accent underline underline-offset-2">
+            <Link to={tillbaka.registrera} className="font-semibold text-accent underline underline-offset-2">
               Registrera dig
             </Link>
           </p>

@@ -1,26 +1,36 @@
 // Logga in (Beslut B etapp 1, steg 5b).
 
-import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../../components/PageHeader'
 import { Panel } from '../../components/Panel'
 import { Button } from '../../components/Button'
 import { useAuth } from '../../components/AuthProvider'
 import { signIn } from '../../lib/backend/auth'
+import { inloggLank, malEfterInloggning } from '../../lib/efter-inloggning'
 import { Field, FormError, errorText } from './parts'
 
 export function LoggaIn() {
   const navigate = useNavigate()
   const { signedIn } = useAuth()
+  // Vart man var på väg (t.ex. Dagens tävling) — dit ska man tillbaka efteråt.
+  const [params] = useSearchParams()
+  const till = params.get('till')
+  const mal = useRef<string | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  // Redan inloggad → till kontosidan.
+  // Inloggad (redan, eller nyss) → tillbaka dit man var på väg, annars kontosidan.
+  // EN väg för båda fallen, så det sparade målet bara läses (och glöms) en gång.
   useEffect(() => {
-    if (signedIn) navigate('/konto', { replace: true })
-  }, [signedIn, navigate])
+    if (!signedIn) return
+    // Räknas ut EN gång: det sparade målet glöms när det lästs, och effekten
+    // kan köras två gånger (utvecklingsläget).
+    mal.current ??= malEfterInloggning(till)
+    navigate(mal.current, { replace: true })
+  }, [signedIn, navigate, till])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -28,7 +38,7 @@ export function LoggaIn() {
     setBusy(true)
     try {
       await signIn(email, password)
-      navigate('/konto', { replace: true })
+      // Vidare sker i effekten ovan när inloggningen slagit igenom.
     } catch (err) {
       setError(errorText(err))
     } finally {
@@ -75,7 +85,7 @@ export function LoggaIn() {
       </Panel>
       <p className="text-center text-sm text-ink-soft">
         Har du inget konto?{' '}
-        <Link to="/registrera" className="font-semibold text-emerald-700 underline underline-offset-2 dark:text-emerald-300">
+        <Link to={inloggLank('/registrera', till)} className="font-semibold text-emerald-700 underline underline-offset-2 dark:text-emerald-300">
           Skapa konto
         </Link>
       </p>

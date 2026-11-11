@@ -1,18 +1,22 @@
 // Skapa konto (Beslut B etapp 1, steg 5b).
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../../components/PageHeader'
 import { Panel } from '../../components/Panel'
 import { Button } from '../../components/Button'
 import { useAuth } from '../../components/AuthProvider'
 import { signUp } from '../../lib/backend/auth'
 import { validateDisplayName } from '../../lib/backend/display-name'
+import { inloggLank, kommIhagMal, malEfterInloggning } from '../../lib/efter-inloggning'
 import { Field, FormError, FormNote, errorText } from './parts'
 
 export function Registrera() {
   const navigate = useNavigate()
   const { signedIn } = useAuth()
+  const [params] = useSearchParams()
+  const till = params.get('till')
+  const mal = useRef<string | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
@@ -23,8 +27,12 @@ export function Registrera() {
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    if (signedIn) navigate('/konto', { replace: true })
-  }, [signedIn, navigate])
+    if (!signedIn) return
+    // Räknas ut EN gång: det sparade målet glöms när det lästs, och effekten
+    // kan köras två gånger (utvecklingsläget).
+    mal.current ??= malEfterInloggning(till)
+    navigate(mal.current, { replace: true })
+  }, [signedIn, navigate, till])
 
   // Levande namnkontroll: visa felet först när fältet har innehåll.
   const nameCheck = useMemo(() => validateDisplayName(displayName), [displayName])
@@ -39,6 +47,8 @@ export function Registrera() {
     setBusy(true)
     try {
       await signUp({ email, password, displayName, is13Plus })
+      // Målet ska överleva turen via bekräftelsemejlet.
+      kommIhagMal(till)
       setDone(true)
     } catch (err) {
       setError(errorText(err))
@@ -58,7 +68,7 @@ export function Registrera() {
               i mejlet för att aktivera kontot och logga in. Kolla även skräpposten.
             </FormNote>
             <p className="text-sm text-ink-soft">
-              När du bekräftat: <Link to="/logga-in" className="font-semibold text-emerald-700 underline underline-offset-2 dark:text-emerald-300">logga in här</Link>.
+              När du bekräftat: <Link to={inloggLank('/logga-in', till)} className="font-semibold text-emerald-700 underline underline-offset-2 dark:text-emerald-300">logga in här</Link>.
             </p>
           </div>
         </Panel>
@@ -139,7 +149,7 @@ export function Registrera() {
       </Panel>
       <p className="text-center text-sm text-ink-soft">
         Har du redan ett konto?{' '}
-        <Link to="/logga-in" className="font-semibold text-emerald-700 underline underline-offset-2 dark:text-emerald-300">
+        <Link to={inloggLank('/logga-in', till)} className="font-semibold text-emerald-700 underline underline-offset-2 dark:text-emerald-300">
           Logga in
         </Link>
       </p>

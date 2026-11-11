@@ -8,6 +8,8 @@ import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { AuthProvider } from './components/AuthProvider.tsx'
 import { hoistAuthCallbackToHash } from './lib/backend/auth-callback-bootstrap.ts'
 import { setupPwaUpdate } from './pwa-update.ts'
+// Fångar webbläsarens installationsfråga tidigt (den skickas bara en gång).
+import './lib/installera.ts'
 
 // Fånga inloggningslänkar från mejl innan HashRouter startar (Beslut B etapp 1).
 hoistAuthCallbackToHash()

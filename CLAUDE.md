@@ -14,9 +14,11 @@ svarar på vad).
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Nästa nivå etapp 1: öppna rösten (ägarval 2026-11-11)
-Inför klubbjakten: felrapport, förslag och "Tyck till" utan konto/GitHub via egen
-servermottagare. **Hela planen (etapp 1–5) + läget: `docs/nasta-niva-plan.md`.**
+### 🔵 NU — Nästa nivå etapp 1+2: LIVE-SÄTTNINGEN (ägarval 2026-11-11)
+Inför klubbjakten. Etapp 1 (felrapport/förslag/"Tyck till" utan konto) och etapp 2
+(första intrycket) är BYGGDA & committade lokalt, **ej pushade**: först ägarsteget
+`GITHUB_RAPPORT_TOKEN` i Vercel, sedan push + prov. Ägaren synar texten på
+"Så bjuder rebidz". **Hela planen + läget: `docs/nasta-niva-plan.md`.**
 Senast LIVE: ångra ett steg + återuppta tävlingsgiv a6f4c06 · #108–#113 (historik.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
@@ -90,9 +92,8 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Nästa nivå etapp 2 — första intrycket** (Om-sidan, rätt sida efter inloggning,
-   systemet på en sida, dela resultat, större kort).
-2. **Nästa nivå etapp 3 — nya träningsmiljön** (motordriven; temalistan = ägarfråga).
+1. **Nästa nivå etapp 3 — nya träningsmiljön** (motordriven; temalistan = ägarfråga).
+2. **Etapp 2-resterna** — större kort/text som inställning · tävlingsöversiktens mobil-layout.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 **nästa nivå etapp 4–5** (veckans mästerskap · klubbtopplista) · speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

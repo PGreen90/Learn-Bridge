@@ -9,6 +9,7 @@ import {
   formatNedrakning,
   msTillNastaTavling,
   shareText,
+  tavlingShareText,
 } from './daily'
 
 // Dagens giv (faceliften/konkurrensspåret 2026-08-02): samma datum ska ALLTID ge
@@ -105,6 +106,20 @@ describe('dagens giv', () => {
     expect(shareText({ number: 3, myTricks: 13 })).toContain('🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩')
     // Inga spoilers någonstans i texten.
     expect(shareText({ number: 3, myTricks: 13 })).not.toMatch(/hemma|bet|[1-7](NT|♠|♥|♦|♣)/)
+  })
+
+  // Tävlingsresultatet (nästa nivå etapp 2, 2026-11-11): placering + resultat,
+  // spoilerfritt, och länken leder till SAMMA tävlingsform.
+  it('tävlingens deltext: resultat, placering och länk till rätt form', () => {
+    expect(tavlingShareText({ form: 'mp', nummer: 93, placering: 3, antalSpelare: 14, resultat: '62,4 %' })).toBe(
+      'rebidz · Dagens MP% #93\n' +
+        'Jag fick 62,4 % — plats 3 av 14 just nu. Slår du det?\n' +
+        'https://rebidz.com/#/spela-kort/tavling',
+    )
+    const imp = tavlingShareText({ form: 'imp', nummer: 40, placering: 1, antalSpelare: 9, resultat: '+12 IMP' })
+    expect(imp).toContain('Dagens IMP #40')
+    expect(imp).toContain('https://rebidz.com/#/spela-kort/tavling?form=imp')
+    expect(imp).not.toMatch(/[1-7](NT|♠|♥|♦|♣)/)
   })
 })
 

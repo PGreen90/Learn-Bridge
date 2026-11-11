@@ -121,6 +121,33 @@ export function shareText({ number, myTricks }: { number: number; myTricks: numb
   ].join('\n')
 }
 
+/**
+ * Det delbara TÄVLINGSRESULTATET (nästa nivå etapp 2, 2026-11-11): placering +
+ * resultat för en färdigspelad tävling. Spoilerfritt — inga givar, kontrakt
+ * eller kort — och länken leder mottagaren rakt in i samma tävling.
+ * `resultat` är den färdiga texten ("62,4 %" eller "+12 IMP").
+ */
+export function tavlingShareText({
+  form,
+  nummer,
+  placering,
+  antalSpelare,
+  resultat,
+}: {
+  form: 'mp' | 'imp'
+  nummer: number
+  placering: number
+  antalSpelare: number
+  resultat: string
+}): string {
+  const namn = form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'
+  return [
+    `rebidz · ${namn} #${nummer}`,
+    `Jag fick ${resultat} — plats ${placering} av ${antalSpelare} just nu. Slår du det?`,
+    `https://rebidz.com/#/spela-kort/tavling${form === 'imp' ? '?form=imp' : ''}`,
+  ].join('\n')
+}
+
 // === Nedräkning till nästa tävling (Beslut B etapp 2, UI) ====================
 
 /** Millisekunder tills nästa dagliga tävling börjar = nästa midnatt i

@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../components/AuthProvider'
+import { useTillbakaHit } from '../../lib/efter-inloggning'
 import { Felt } from '../../components/Felt'
 import { Button } from '../../components/Button'
 import { Dialog } from '../../components/Dialog'
@@ -128,6 +129,7 @@ function StolKort({
 export function Bord() {
   const { kod = '' } = useParams()
   const { loading: authLaddar, signedIn } = useAuth()
+  const tillbaka = useTillbakaHit()
   const navigate = useNavigate()
   const [lage, setLage] = useState<BordLage | null>(null)
   const [fel, setFel] = useState<string | null>(null)
@@ -241,7 +243,7 @@ export function Bord() {
         <div className="max-w-sm space-y-4 text-center">
           <h1 className="text-2xl font-semibold text-rose-50">Bord {kod.toUpperCase()}</h1>
           <p className="text-rose-100/70">Logga in för att sätta dig vid bordet.</p>
-          <Link to="/logga-in">
+          <Link to={tillbaka.loggaIn}>
             <Button>Logga in</Button>
           </Link>
           <div>

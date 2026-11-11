@@ -1,0 +1,42 @@
+name: Ägarrapport (veckovis)
+
+# ÄGARRAPPORTEN (nästa nivå etapp 2, 2026-11-11): hur går värvningen?
+# Räknar nya konton, aktiva spelare och återkomst ur det appen redan sparar
+# (konton + tävlingsresultat). Ingen spårning och ingen ny datainsamling.
+#
+# Rapporten visas som körningens SAMMANFATTNING (Actions → körningen → Summary)
+# och innehåller enbart antal — aldrig namn, e-post eller konto-id:n, eftersom
+# loggarna i ett publikt repo kan läsas av alla.
+#
+# Läser bara. Deploygrinden (ci-deploy.yml) är orörd.
+
+on:
+  schedule:
+    # Måndagar 05:15 UTC — förra veckan är färdigspelad och slutgranskad.
+    - cron: '15 5 * * 1'
+  # Manuell körning när som helst från Actions-fliken.
+  workflow_dispatch:
+
+concurrency:
+  group: agarrapport
+  cancel-in-progress: false
+
+jobs:
+  rapport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Bygg ägarrapporten
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: AGARRAPPORT=1 npx vitest run src/lib/agarrapport.probe.test.ts

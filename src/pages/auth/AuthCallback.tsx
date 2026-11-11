@@ -10,6 +10,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { Panel } from '../../components/Panel'
 import { BrandMark } from '../../components/BrandMark'
 import { exchangeCodeForSession, verifyEmailOtp } from '../../lib/backend/auth'
+import { hamtaMal } from '../../lib/efter-inloggning'
 import { FormError, errorText } from './parts'
 
 export function AuthCallback() {
@@ -31,7 +32,8 @@ export function AuthCallback() {
     const linkError = params.get('error_description') ?? params.get('error')
 
     const isReset = type === 'recovery' || flow === 'reset'
-    const target = isReset ? '/nytt-losenord' : '/konto'
+    // Bekräftat konto → tillbaka dit man var på väg när man registrerade sig.
+    const target = isReset ? '/nytt-losenord' : (hamtaMal() ?? '/konto')
 
     async function run() {
       if (linkError) {
