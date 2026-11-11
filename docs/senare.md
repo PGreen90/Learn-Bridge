@@ -296,10 +296,10 @@ mer ihoptryckt i budgivningen och expanderade i spelet. **Åtgärd (merge `347d2
 **Mobilsvep KLART 2026-07-30:** alla sidor mobil-rena; breda budsystem-tabeller
 fick en scroll-toningshint. **→ Fas 0 b KLAR, hela Fas 0 klar.**
 
-### Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown (2026-07-06)
-Ägarens 4-punktslista punkt 1. Data i `src/data/exercises/*.json` +
-`EXERCISES_BY_THEME` i `bidding.ts`; facit bör knytas till motorns egna svar så det
-aldrig lär ut fel. (Punkt 2+4 = klara; punkt 3 "sondera budsystemet på djupet" =
+### ~~Fler budträningsgivar + "Vill du träna något speciellt?"-dropdown~~ (2026-07-06) — BYGGD 2026-11-11
+Ägarens 4-punktslista punkt 1. Löst som den motordrivna budträningen (nästa nivå
+etapp 3): teman = budsituationer i `traning.ts`, obegränsat med givar, facit =
+motorns eget bud. De handskrivna övningarna är pensionerade. (Punkt 2+4 = klara; punkt 3 "sondera budsystemet på djupet" =
 gjord 2026-07-07 via budsystem-revisionen + F1.)
 
 ### B13 — öppnarens återbud efter inverterad minorhöjning (2026-07-07)

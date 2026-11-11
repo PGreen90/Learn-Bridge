@@ -38,6 +38,23 @@
 >   veckojobbet `agarrapport.yml` (måndagar; rapporten = körningens Summary).
 > - **Medvetet KVAR i etapp 2 (kräver ägarens ögon och mått):** större
 >   kort/text som inställning (#36) och tävlingsöversiktens mobil-layout.
+>
+> **Etapp 3 steg A+B — så byggdes den (BYGGD 2026-11-11, committad lokalt):**
+> - `src/lib/engine/traning.ts`: elva teman = budsituationer (öppning · svar på
+>   högfärg/lågfärg/sang · återbud · svararens andra bud · inkliv · partnern
+>   öppnar och de kliver in · partnern kliver in · mot 1NT och spärrar · slam).
+>   Motorn delar givar tills Syd står i läget; facit = `decideCall` (bara rena
+>   tabellbeslut). Varje tema bär en kort intro + paragrafhänvisning (steg B).
+> - Sidorna `src/pages/Budtraning.tsx` + `src/pages/BudtraningTema.tsx`: riktiga
+>   budlådan, "rebidz bjuder …" med motorns förklaring, vad ditt eget bud hade
+>   betytt, och "Håller du inte med? Rapportera" (går till ärendelistan).
+> - Formen per tema = träffprocent på de senaste 20 svaren (lokalt i
+>   webbläsaren; kontosynk är ett senare Beslut B-steg).
+> - De handskrivna övningarna (inkl. "regeln om 20") är borttagna. Skillen
+>   heter nu `lagga-till-traningstema`.
+> - **Temalistan och intro-texterna är Claudes förslag — ägaren synar.**
+> - **KVAR i etapp 3:** "Träna dina missar" ur tävlingen · flera beslut i samma
+>   giv · visa alla fyra händer efter svaret · spelföringsproblem.
 
 ## Context
 
