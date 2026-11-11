@@ -48,7 +48,7 @@ import { BiddingPhase } from './play/BiddingPhase'
 import { ClaimDialog } from './play/ClaimDialog'
 import { RondRapportView } from './play/RondRapport'
 import { FlightLayer } from './play/FlightLayer'
-import { AllaFargerKnapp, hornKnappKlass, ListChip, listKnappKlass, overlayTopp, SpelbordRam } from './play/SpelbordRam'
+import { AllaFargerKnapp, hornKnappKlass, ListChip, overlayTopp, SpelbordRam } from './play/SpelbordRam'
 import { armSound } from '../lib/sound'
 
 // ===========================================================================
@@ -417,8 +417,6 @@ export function PlayTable({
     setReporting,
     reviewing,
     setReviewing,
-    facit,
-    showFacit,
     selectedSuit,
     claimed,
     claiming,
@@ -1206,8 +1204,7 @@ export function PlayTable({
     />
   )
 
-  // Svarta listen: kontraktet + ställningen + facit-knapp (R3-fynd #4: facit ett
-  // klick bort på bordet i stället för begravd i ⋮-menyn).
+  // Svarta listen: kontraktet + ställningen.
   const list = (
     <>
         <ListChip>
@@ -1218,36 +1215,15 @@ export function PlayTable({
           </span>
           <span className="text-xs text-emerald-100/55">mål {result.needed}</span>
         </ListChip>
-        {/* Guld-tävlingen spelas utan Facit (double-dummy mitt i given vore
-            ett hjälpmedel ingen har vid ett riktigt bord). */}
-        {!utanHjalp && (
-          <button type="button" onClick={showFacit} className={listKnappKlass('club')}>
-            Facit
-          </button>
-        )}
+        {/* Facit-knappen (double-dummy mitt i given) är BORTTAGEN i alla lägen
+            (ägarbeslut 2026-11-11): den gick att trycka på även i en skarp
+            tävlingsgiv. Facit finns kvar där det hör hemma — i genomgången
+            EFTER given. */}
     </>
   )
 
   const underList = (
     <>
-      {/* Facit-resultatet på bordet (ljus text på filten). */}
-      {facit !== 'idle' && (
-        <p className="px-4 pb-1.5 text-center text-xs leading-relaxed">
-          {facit === 'toohard' ? (
-            <span className="text-emerald-50/70">
-              Facit: ställningen är för tung att räkna snabbt just nu – prova längre in i given.
-            </span>
-          ) : (
-            <span className="text-sky-200">
-              Facit (perfekt spel): spelföraren tar totalt <strong>{facit}</strong> stick härifrån —{' '}
-              {facit >= result.needed
-                ? `kontraktet håller${facit > result.needed ? ` (+${facit - result.needed})` : ''}.`
-                : `${result.needed - facit} bet.`}
-            </span>
-          )}
-        </p>
-      )}
-
       {/* Kortförklaringen: tryck på ett spelat kort på bordet → botens motivering. */}
       {explain ? (
         <p className="px-4 pb-1.5 text-center text-xs text-emerald-50/90">

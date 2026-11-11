@@ -106,9 +106,9 @@ obegränsat förråd, ingen kan känna igen en känd giv.
   double-dummy ("går precis hem" kan betyda "bara med öppna kort") · bottarna
   får dåligt resultat på många utvalda givar, så toppen kan bli billig ·
   slagsida mot Nord-Syd · vikterna är bara mätta på ett frö.
-- **Upptäckt på vägen (ägarfråga):** Facit-knappen (double-dummy) går att
-  trycka på mitt i en skarp giv även i Dagens MP% och Dagens IMP. I guld är den
-  borta; för de dagliga är det oförändrat tills ägaren bestämt.
+- **Facit-knappen BORTTAGEN i alla lägen (ägarbeslut 2026-11-11):** den visade
+  double-dummy mitt i given och gick att trycka på även i en skarp tävlingsgiv.
+  Facit finns kvar i genomgången EFTER given.
 
 ## Context
 
