@@ -20,6 +20,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
+import { useTillbakaHit } from '../lib/efter-inloggning'
 import { Button } from '../components/Button'
 import {
   enhetText,
@@ -57,6 +58,7 @@ export function placeringText(n: number): string {
 
 export function TavlingHistorik() {
   const { loading: authLoading, signedIn } = useAuth()
+  const tillbaka = useTillbakaHit()
   const [params, setParams] = useSearchParams()
   const dag = params.get('dag')
   const form: TavlingsForm = params.get('form') === 'imp' ? 'imp' : 'mp'
@@ -69,7 +71,7 @@ export function TavlingHistorik() {
         <div className="max-w-sm space-y-4 text-center">
           <h1 className="font-brand text-2xl text-emerald-50">Tidigare tävlingar</h1>
           <p className="text-emerald-100/80">Historiken och medaljtabellen kräver ett konto.</p>
-          <Link to="/logga-in" className="inline-block">
+          <Link to={tillbaka.loggaIn} className="inline-block">
             <Button>Logga in</Button>
           </Link>
           <div>

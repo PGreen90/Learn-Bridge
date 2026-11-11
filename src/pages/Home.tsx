@@ -51,6 +51,15 @@ const MODE_ICONS: Record<string, ReactNode> = {
       <circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none" />
     </svg>
   ),
+  // Spela med vänner: två personer vid samma bord.
+  friends: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={ICON_SVG}>
+      <circle cx="8.5" cy="8.5" r="3" />
+      <circle cx="16.5" cy="9.5" r="2.5" />
+      <path d="M2.5 19 C 3 15.5, 5.5 14, 8.5 14 C 11.5 14, 14 15.5, 14.5 19" />
+      <path d="M15.5 14.2 C 18.5 14, 21 15.5, 21.5 18.5" />
+    </svg>
+  ),
   // Budsystem: en uppslagen bok.
   book: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={ICON_SVG}>
@@ -84,14 +93,16 @@ function ModeCard({
   icon,
   title,
   description,
+  className = '',
 }: {
   to: string
   icon: string
   title: string
   description: string
+  className?: string
 }) {
   return (
-    <Link to={to} className={CARD}>
+    <Link to={to} className={`${CARD} ${className}`}>
       <div className="flex items-center gap-3">
         <ModeIcon icon={icon} />
         <div className="min-w-0">
@@ -207,6 +218,16 @@ export function Home() {
             title="Budsystem"
             description="Hela 2/1-systemet att läsa, sektion för sektion."
           />
+          {/* Spela med vänner (nästa nivå etapp 2, 2026-11-11): fanns bara i
+              menyn. Femte kortet tar hela raden på bred skärm så rutnätet
+              inte får en ensam halv ruta. */}
+          <ModeCard
+            to="/spela-med-vanner"
+            icon="friends"
+            title="Spela med vänner"
+            description="Öppna ett eget bord och bjud in med en länk – datorn fyller tomma stolar."
+            className="sm:col-span-2"
+          />
         </div>
 
         {/* Vägen in för nya ögon (Etapp D): en diskret rad under korten —
@@ -215,6 +236,10 @@ export function Home() {
           Ny här?{' '}
           <Link to="/om" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
             Så funkar rebidz →
+          </Link>
+          {' · '}
+          <Link to="/sa-bjuder-rebidz" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+            Så bjuder datorn →
           </Link>
         </p>
         {/* Användarnas röst (nästa nivå etapp 1, 2026-11-11): två öppna frågor,

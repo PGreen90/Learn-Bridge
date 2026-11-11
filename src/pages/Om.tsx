@@ -1,15 +1,19 @@
-// Om rebidz (Etapp D, granskningen 2026-08-02): appens första förklarande
-// sida. Granskningen fann att en helt ny besökare inte fick veta någonstans
-// att man alltid sitter Syd, att systemet är 2/1, eller vad de fyra lägena
-// är för något — all hjälptext bodde INNE i spelet bakom ⋮. Nås från
-// startsidans "Ny här?"-länk och sidfoten.
+// Om rebidz: appens förklarande sida för nya ögon. Nås från startsidans
+// "Ny här?"-länk och sidfoten.
+//
+// Omskriven 2026-11-11 (nästa nivå etapp 2, inför klubbjakten): den förra
+// versionen sa "ingen inloggning och inget konto" och nämnde varken
+// tävlingarna, MP/IMP eller Spela med vänner — det nya användare faktiskt möter.
 
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { Panel } from '../components/Panel'
+import { TyckTillKnapp } from '../components/TyckTill'
+import { useInstallera } from '../lib/installera'
 
 /** Ett läge i listan: rubrik som länk + en rad om vad det är. */
-function Mode({ to, title, children }: { to: string; title: string; children: string }) {
+function Mode({ to, title, children }: { to: string; title: string; children: ReactNode }) {
   return (
     <li>
       <Link to={to} className="font-semibold text-accent underline-offset-2 hover:underline">
@@ -20,7 +24,11 @@ function Mode({ to, title, children }: { to: string; title: string; children: st
   )
 }
 
+const LANK = 'text-accent underline'
+
 export function Om() {
+  // Installera-knappen visas bara där webbläsaren erbjuder installation.
+  const { kan, installera } = useInstallera()
   return (
     <div className="space-y-6">
       <PageHeader title="Om rebidz">
@@ -35,40 +43,62 @@ export function Om() {
             Nord är din partner.
           </li>
           <li>
-            Budsystemet är <strong>2 över 1</strong> (2/1). Hela systemet finns att
-            läsa under <Link to="/budsystem" className="text-accent underline">Budsystem</Link>,
-            paragraf för paragraf.
+            Datorn bjuder <strong>2 över 1</strong> (2/1). Är du van vid ett annat system? Läs{' '}
+            <Link to="/sa-bjuder-rebidz" className={LANK}>Så bjuder rebidz</Link> — hela
+            systemet på en sida, med skillnaderna först.
           </li>
           <li>
-            Klicka på ett lagt bud i budgivningen så förklaras vad det betyder.
-            Tryck på ett spelat kort på bordet så berättar datorn varför den valde det.
+            <strong>Tryck på ett bud</strong> i budgivningen så förklaras vad det lovar.
+            Tryck på ett spelat kort så berättar datorn varför den valde det.
           </li>
           <li>
-            Ingen inloggning och inget konto — dina framsteg sparas i webbläsaren
-            på den här enheten.
+            Det mesta fungerar <strong>utan konto</strong>. Ett konto (gratis) behövs för de
+            dagliga tävlingarna och för att spela med vänner.
           </li>
         </ul>
       </Panel>
 
       <Panel>
-        <h2 className="mb-2 text-lg font-semibold">Lägena</h2>
-        <ul className="space-y-2 text-sm">
-          <Mode to="/spela-kort/dagens" title="Dagens giv">
-            samma giv för alla, varje dag. Spela den och dela ditt resultat —
-            spoilerfritt, som i Wordle.
+        <h2 className="mb-2 text-lg font-semibold">Dagens tävlingar</h2>
+        <p className="text-sm text-ink-soft">
+          Varje dag finns två tävlingar med tolv givar var. Alla spelar samma givar mot datorn,
+          och ditt resultat jämförs med alla andras — även några datorspelare deltar, så det
+          finns alltid någon att mäta sig mot. Du kan pausa och fortsätta senare under dagen.
+        </p>
+        <ul className="mt-3 space-y-2 text-sm">
+          <Mode to="/spela-kort/tavling" title="Dagens MP%">
+            matchpoäng. På varje giv får du procent efter hur många du slog: bäst av alla ger
+            100 %, mitt i fältet 50 %. Här kan ett enda övertrick avgöra.
           </Mode>
+          <Mode to="/spela-kort/tavling?form=imp" title="Dagens IMP">
+            skillnaden mot de andra räknas om till IMP. Utgångar och slammar väger tungt,
+            övertrick nästan ingenting — spela säkert hem kontraktet.
+          </Mode>
+        </ul>
+        <p className="mt-3 text-sm text-ink-soft">
+          När du spelat en giv ser du hur alla andra bjöd och spelade den. Dagen efter är
+          resultatet slutligt, och de bästa får medalj i historiken.
+        </p>
+      </Panel>
+
+      <Panel>
+        <h2 className="mb-2 text-lg font-semibold">Mer att göra</h2>
+        <ul className="space-y-2 text-sm">
           <Mode to="/spela-kort" title="Spela kort">
-            en hel giv mot datorn, budgivning och kortspel. Efteråt får du
-            omspelning och en rondgenomgång som förklarar varje stick.
+            en hel giv mot datorn, när du vill och hur många du vill. Efteråt får du
+            omspelning och en genomgång som förklarar varje stick.
+          </Mode>
+          <Mode to="/spela-med-vanner" title="Spela med vänner">
+            öppna ett eget bord, bjud in med en länk och fyll tomma stolar med datorspelare.
           </Mode>
           <Mode to="/budtraning" title="Budträning">
             öva på att hitta rätt bud, tema för tema, med förklaringar.
           </Mode>
           <Mode to="/budvisning" title="Budvisning">
-            luta dig tillbaka och titta när datorn budar alla fyra händerna öppet.
+            luta dig tillbaka och titta när datorn bjuder alla fyra händerna öppet.
           </Mode>
           <Mode to="/budsystem" title="Budsystem">
-            hela 2/1-systemet som uppslagsbok, med sökruta.
+            hela systemet som uppslagsbok, med sökruta.
           </Mode>
         </ul>
       </Panel>
@@ -79,21 +109,44 @@ export function Om() {
           <li>
             <strong>⋮-menyn</strong> vid bordet har tempo, ljud, budstöd, Auto
             Claim, ångra och hjälptexter. Samma inställningar finns under{' '}
-            <Link to="/installningar" className="text-accent underline">Inställningar</Link>.
+            <Link to="/installningar" className={LANK}>Inställningar</Link>.
           </li>
           <li>
             <strong>Facit-knappen</strong> visar hur många stick spelföraren kan
-            säkra med perfekt spel — och rondgenomgången efteråt pekar ut var
+            säkra med perfekt spel — och genomgången efteråt pekar ut var
             sticken tappades.
           </li>
           <li>
-            En pågående giv sparas automatiskt — även i Dagens tävling — så
+            En pågående giv sparas automatiskt — även i tävlingarna — så
             stängs fliken fortsätter du exakt där du var nästa gång. Ångra tar
             bara tillbaka ditt senaste kort (ett feltryck), aldrig flera steg.
           </li>
           <li>
             Appen går att lägga på hemskärmen (”Lägg till på hemskärmen” i
             webbläsarens meny) och fungerar även utan nät.
+            {kan && (
+              <>
+                {' '}
+                <button type="button" onClick={() => void installera()} className={`${LANK} font-semibold`}>
+                  Installera rebidz nu →
+                </button>
+              </>
+            )}
+          </li>
+        </ul>
+      </Panel>
+
+      <Panel>
+        <h2 className="mb-2 text-lg font-semibold">Hjälp oss göra rebidz bättre</h2>
+        <ul className="list-disc space-y-1.5 pl-5 text-sm text-ink-soft">
+          <li>
+            <strong>Bjöd eller spelade datorn fel?</strong> Välj ”Rapportera fel” i ⋮-menyn
+            vid bordet. Hela given följer med automatiskt, och inget konto behövs.
+          </li>
+          <li>
+            <strong>Saknar du något?</strong>{' '}
+            <TyckTillKnapp className={LANK}>Tyck till om rebidz</TyckTillKnapp> — två korta
+            frågor, och allt som skickas in läses.
           </li>
         </ul>
       </Panel>

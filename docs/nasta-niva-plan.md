@@ -20,7 +20,24 @@
 > Etiketter: `felrapport` · `forslag` · `tyck-till`.
 > **Ägarsteg före live:** (1) skapa en GitHub-nyckel med ENBART "Issues: läs och
 > skriv" på ärende-repot och lägg den i Vercel som `GITHUB_RAPPORT_TOKEN`,
-> (2) etiketterna `forslag` och `tyck-till` ska finnas i repot.
+> (2) etiketterna `forslag` och `tyck-till` — SKAPADE 2026-11-11.
+>
+> **Etapp 2 — så byggdes den (BYGGD 2026-11-11, committad lokalt, ej live):**
+> - Tillbaka till rätt sida efter inloggning/registrering — även över
+>   bekräftelsemejlet (`src/lib/efter-inloggning.ts`).
+> - Om-sidan omskriven (tävlingarna, MP/IMP, konton, vänner-bordet).
+> - Ny sida "Så bjuder rebidz" (`src/pages/SaBjuderRebidz.tsx`): systemet på en
+>   sida med de fem skillnaderna mot klubbstandard först. **Texten är ett utkast
+>   som ägaren ska syna.** Ändras en regel i `docs/budsystem.md` som nämns där
+>   ska sidan ändras i samma veva.
+> - Spela med vänner på startsidan · "Dela resultatet" när alla tolv givar är
+>   spelade · installera-knapp på Om-sidan (där webbläsaren erbjuder det).
+> - Ägarrapporten (`src/lib/agarrapport.ts`): nya konton, aktiva och återkomst
+>   ur befintliga tabeller, bara antal. Körs med
+>   `AGARRAPPORT=1 npx vitest run src/lib/agarrapport.probe.test.ts` eller av
+>   veckojobbet `agarrapport.yml` (måndagar; rapporten = körningens Summary).
+> - **Medvetet KVAR i etapp 2 (kräver ägarens ögon och mått):** större
+>   kort/text som inställning (#36) och tävlingsöversiktens mobil-layout.
 
 ## Context
 

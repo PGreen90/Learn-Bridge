@@ -20,6 +20,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { Button } from '../components/Button'
 import { TyckTillKnapp } from '../components/TyckTill'
+import { useTillbakaHit } from '../lib/efter-inloggning'
 import { loadTavlingFramsteg, loadTavlingPagaende, saveTavlingFramsteg } from '../lib/backend'
 import { validSparadTavlingsgiv } from '../lib/engine/resume'
 import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
@@ -48,6 +49,7 @@ import type { TavlingSpel } from './play/tavling-mode'
 import { MOTORSTAMPEL } from '../lib/build'
 import { GivGranskning } from './tavling/GivGranskning'
 import {
+  DelaStällning,
   DinStällning,
   GivDetalj,
   HemLänk,
@@ -75,6 +77,7 @@ export function DagensTavling() {
 function DagensTavlingInner({ form }: { form: TavlingsForm }) {
   const titel = formTitel(form)
   const { loading: authLoading, signedIn } = useAuth()
+  const tillbaka = useTillbakaHit()
   // null = laddar; annars utfallet av hämtningen.
   const [resultat, setResultat] = useState<TavlingsResultat | null>(null)
   const [framsteg, setFramsteg] = useState<TavlingFramsteg | null>(null)
@@ -201,11 +204,11 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
             För att spela tävlingen och komma med på topplistan behöver du ett konto.
           </p>
           <div className="flex flex-col items-center gap-2">
-            <Link to="/logga-in">
+            <Link to={tillbaka.loggaIn}>
               <Button>Logga in</Button>
             </Link>
             <Link
-              to="/registrera"
+              to={tillbaka.registrera}
               className="text-sm font-medium text-gold-200 underline underline-offset-2 hover:text-gold-100"
             >
               Skapa konto
@@ -472,6 +475,7 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
 
         {/* Din ställning (steg 3) → dina givar (steg 4) → topplistan (Led 3). */}
         <DinStällning resultat={topplista} total={tavling.storlek} />
+        <DelaStällning resultat={topplista} total={tavling.storlek} nummer={tavling.nummer} />
         <Resultattabell klara={klara} topplista={topplista} onÖppna={setDetaljBoard} form={form} />
         <TopplistaVy resultat={topplista} />
 

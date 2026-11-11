@@ -9,6 +9,7 @@ import { Button } from '../../components/Button'
 import { Felt } from '../../components/Felt'
 import { SuitSymbol } from '../../components/SuitSymbol'
 import type { Seat } from '../../types/bridge'
+import { tavlingShareText } from '../../lib/engine/daily'
 import {
   enhetText,
   fetchGivResultat,
@@ -97,6 +98,43 @@ export function DinStällning({ resultat, total }: { resultat: TopplistaResultat
           Ospelade givar räknas som {provisorisktText(form, provisoriskProcent, provisoriskt)} tills du spelat dem.
         </p>
       )}
+    </div>
+  )
+}
+
+/** "Dela resultatet" (nästa nivå etapp 2): visas först när ALLA givar är
+ *  spelade — då är resultatet värt att visa upp, och varje delning är en
+ *  inbjudan till samma tävling. Telefoner får delningsarket, datorer kopierar
+ *  till urklipp (kvittot visas bara när kopieringen lyckats). */
+export function DelaStällning({ resultat, total, nummer }: { resultat: TopplistaResultat | null; total: number; nummer: number }) {
+  const [kopierat, setKopierat] = useState(false)
+  if (!resultat || resultat.status !== 'ok') return null
+  const { du, topplista, form } = resultat.data
+  if (!du || (du.spelade ?? du.antalGivar) < total) return null
+
+  const dela = () => {
+    const text = tavlingShareText({
+      form,
+      nummer,
+      placering: du.placering,
+      antalSpelare: topplista.length,
+      resultat: `${talText(du.snitt, form, 1)} ${enhetText(form)}`,
+    })
+    if (navigator.share) {
+      navigator.share({ text }).catch(() => {})
+    } else {
+      navigator.clipboard
+        ?.writeText(text)
+        .then(() => setKopierat(true))
+        .catch(() => {})
+    }
+  }
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <Button variant="secondary" onClick={dela}>
+        Dela resultatet
+      </Button>
+      {kopierat && <span role="status" className="text-xs text-emerald-100/80">✓ Kopierat – klistra in där du vill dela</span>}
     </div>
   )
 }

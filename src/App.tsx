@@ -30,6 +30,9 @@ const SpelHistorik = lazy(() =>
   import('./pages/SpelHistorik').then((m) => ({ default: m.SpelHistorik })),
 )
 const Om = lazy(() => import('./pages/Om').then((m) => ({ default: m.Om })))
+const SaBjuderRebidz = lazy(() =>
+  import('./pages/SaBjuderRebidz').then((m) => ({ default: m.SaBjuderRebidz })),
+)
 // Spela med vänner (Beslut B etapp 4): lobbyn + bordsskärmen (väntrum → spel).
 const SpelaMedVanner = lazy(() =>
   import('./pages/bord/SpelaMedVanner').then((m) => ({ default: m.SpelaMedVanner })),
@@ -114,6 +117,9 @@ export default function App() {
           <Route path="installningar" element={<Settings />} />
           {/* Om rebidz (Etapp D): onboardingen — nås från startsidan + sidfoten. */}
           <Route path="om" element={<Om />} />
+          {/* Systemet på en sida (nästa nivå etapp 2): deklarationen för den som
+              inte spelar 2/1 till vardags. */}
+          <Route path="sa-bjuder-rebidz" element={<SaBjuderRebidz />} />
           {/* Konton (Beslut B etapp 1): inloggning, registrering, kontosida och
               inloggningslänkarnas landning (auth/callback). */}
           <Route path="logga-in" element={<LoggaIn />} />
