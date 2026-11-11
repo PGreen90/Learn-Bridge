@@ -74,7 +74,8 @@ describe('Spela kort — nyckelflödet budgivning → kortspel', () => {
     // Kontrakt bjudet: bekräfta → spelbordet ritas (ställningslisten + Facit).
     fireEvent.click(screen.getByText('Bekräfta'))
     expect(screen.getByText(/NS:0 ÖV:0/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Facit' })).toBeInTheDocument()
+    // Facit-knappen är borttagen i alla lägen (ägarbeslut 2026-11-11).
+    expect(screen.queryByRole('button', { name: 'Facit' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Budgivningen' })).toBeInTheDocument()
   })
 

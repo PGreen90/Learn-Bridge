@@ -41,8 +41,8 @@ export interface TavlingSpel {
 
 /**
  * Spelas given UTAN hjälpmedel? Veckans guld-tävling (ägarbeslut 2026-11-11)
- * spelas som vid ett riktigt bord: inga budrekommendationer, inget reglage för
- * budstöd och ingen Facit-knapp. Det enda som finns kvar är vad buden BETYDER
+ * spelas som vid ett riktigt bord: inga budrekommendationer och inget reglage
+ * för budstöd. Det enda som finns kvar är vad buden BETYDER
  * när man trycker på dem — det vet man vid bordet också (systemet är känt).
  * Övningsomspel av en redan spelad giv har hjälpen kvar.
  */

@@ -83,7 +83,7 @@ export function Om() {
           </Link>{' '}
           som är öppna hela veckan. De är valda för att innehålla riktiga beslut: utgångar och
           slammar som går precis hem, och givar där rätt benämning avgör. Här spelar du som vid
-          ett riktigt bord — utan budhjälp och utan facit. Du kan fortfarande trycka på ett bud
+          ett riktigt bord — utan budhjälp. Du kan fortfarande trycka på ett bud
           för att se vad det betyder. Räknas i matchpoäng.
         </p>
         <p className="mt-3 text-sm text-ink-soft">
@@ -123,9 +123,8 @@ export function Om() {
             <Link to="/installningar" className={LANK}>Inställningar</Link>.
           </li>
           <li>
-            <strong>Facit-knappen</strong> visar hur många stick spelföraren kan
-            säkra med perfekt spel — och genomgången efteråt pekar ut var
-            sticken tappades.
+            <strong>Genomgången efter given</strong> visar hur många stick som gick att ta
+            med perfekt spel och pekar ut var sticken tappades.
           </li>
           <li>
             En pågående giv sparas automatiskt — även i tävlingarna — så

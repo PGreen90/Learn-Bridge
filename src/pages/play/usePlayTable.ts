@@ -29,7 +29,6 @@ import { rebuildPlay } from '../../lib/engine/resume'
 import { canUndo as canUndoState, undoFloorAfter, undoLastHumanCard } from '../../lib/engine/play-undo'
 import { loadAutoClaim, loadPlaySpeed, saveAutoClaim, savePlaySpeed } from '../../lib/backend'
 import { scoreLine } from '../../lib/engine/scoring'
-import { doubleDummyDeclarerRemaining } from '../../lib/engine/dds'
 import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib/engine/play-bot'
 import { mulberry32 } from '../../lib/engine/deal'
 import { botDecisionSeed, playIndexOf } from '../../lib/engine/play-seed'
@@ -81,7 +80,6 @@ export function usePlayTable(
   const [reviewing, setReviewing] = useState(false)
   // Facit (double-dummy) för NUVARANDE ställning: tal = spelförarens totala stick
   // med perfekt spel, 'toohard' = för tung just nu, 'idle' = ej beräknat.
-  const [facit, setFacit] = useState<number | 'idle' | 'toohard'>('idle')
   // Vald färg i två-klicks-spelet: första klicket väljer (fan ut) färgen,
   // andra klicket på ett kort i den färgen spelar det.
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
@@ -165,7 +163,6 @@ export function usePlayTable(
   // Nollställ facit + färgval + öppen kortförklaring så fort ställningen ändras
   // (du eller en bot la ett kort).
   useEffect(() => {
-    setFacit('idle')
     setSelectedSuit(null)
     setExplain(null)
   }, [play])
@@ -290,23 +287,6 @@ export function usePlayTable(
     }, ms('dealSoundDelay', speed))
     return () => clearTimeout(id)
   }, []) // avsiktligt mount-only: given delas ut en gång per bord
-
-  function showFacit() {
-    const rem = doubleDummyDeclarerRemaining(
-      play.hands,
-      contract.strain,
-      contract.declarer,
-      play.currentTrick,
-      play.toAct,
-      FACIT_BUDGET,
-    )
-    if (rem === null) {
-      setFacit('toohard')
-      return
-    }
-    const declWon = side(contract.declarer) === 'NS' ? play.tricksNS : play.tricksEW
-    setFacit(declWon + rem)
-  }
 
   // Bottarna spelar automatiskt när det är deras tur. Tunga Monte-Carlo-beslut
   // (slutspelet) räknas i webworkern så gränssnittet inte fryser; snabba tumregler
@@ -622,8 +602,6 @@ export function usePlayTable(
     setReporting,
     reviewing,
     setReviewing,
-    facit,
-    showFacit,
     selectedSuit,
     claimed,
     claiming,
