@@ -96,7 +96,7 @@ export function saveSavedGame(game: SavedGame | null): void {
 // TODO (Beslut B etapp 1): dessa knyts till det inloggade kontot och läses/
 // skrivs mot Supabase → metoderna blir ASYNKRONA (returnerar Promise). Sidorna
 // som i dag läser dem synkront (Home, DagensArkiv, SpelHistorik, Play,
-// BiddingPractice) måste då skrivas om till await/laddningstillstånd. Byt bara
+// Budtraning) måste då skrivas om till await/laddningstillstånd. Byt bara
 // implementationen här — inte anropsställena i sidorna om det går att undvika.
 // ===========================================================================
 
@@ -156,16 +156,20 @@ function pagaendeNyckel(form: TavlingsForm): string {
   return form === 'imp' ? 'tavling-pagaende-imp' : 'tavling-pagaende'
 }
 
-/** Ett budtemas senaste poäng ({correct, total}) — nyckeln `theme:<themeId>`. */
-export interface ThemeScore {
-  correct: number
-  total: number
+/** Budträningens logg per tema (nästa nivå etapp 3, 2026-11-11): de senaste
+ *  svaren som rätt/fel, nyast sist — nyckeln `traning:<temaId>`. Motorn delar
+ *  obegränsat med givar, så det som är värt att minnas är FORMEN just nu
+ *  (träffprocenten på de senaste svaren), inte en slutpoäng. */
+export const TRANINGSLOGG_MAX = 20
+export function loadTraningslogg(temaId: string): boolean[] {
+  const v = loadValue<unknown>(`traning:${temaId}`, [])
+  return Array.isArray(v) ? v.filter((x): x is boolean => typeof x === 'boolean').slice(-TRANINGSLOGG_MAX) : []
 }
-export function loadThemeScore(themeId: string): ThemeScore | null {
-  return loadValue<ThemeScore | null>(`theme:${themeId}`, null)
-}
-export function saveThemeScore(themeId: string, score: ThemeScore): void {
-  saveValue(`theme:${themeId}`, score)
+/** Lägg till ett svar och returnera den nya loggen. */
+export function sparaTraningssvar(temaId: string, ratt: boolean): boolean[] {
+  const logg = [...loadTraningslogg(temaId), ratt].slice(-TRANINGSLOGG_MAX)
+  saveValue(`traning:${temaId}`, logg)
+  return logg
 }
 
 // ===========================================================================

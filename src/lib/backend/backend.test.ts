@@ -18,8 +18,8 @@ import {
   savePlaySpeed,
   loadSpelHistorik,
   saveSpelHistorik,
-  loadThemeScore,
-  saveThemeScore,
+  loadTraningslogg,
+  sparaTraningssvar,
   loadSavedGame,
 } from './index'
 import { loadValue } from '../storage'
@@ -60,12 +60,17 @@ describe('backend-lagret skriver EXAKT samma nyckel + värde som förr', () => {
     expect(loadSpelHistorik()).toEqual(list)
   })
 
-  it('temapoängen (konto): nyckeln learnbridge:theme:<id> med rätt id', () => {
-    saveThemeScore('oppning-1nt', { correct: 7, total: 8 })
-    expect(localStorage.getItem(PREFIX + 'theme:oppning-1nt')).toBe(
-      JSON.stringify({ correct: 7, total: 8 }),
-    )
-    expect(loadThemeScore('oppning-1nt')).toEqual({ correct: 7, total: 8 })
+  it('träningsloggen (konto): nyckeln learnbridge:traning:<id>, nyast sist, högst 20 svar', () => {
+    expect(sparaTraningssvar('oppning', true)).toEqual([true])
+    expect(sparaTraningssvar('oppning', false)).toEqual([true, false])
+    expect(localStorage.getItem(PREFIX + 'traning:oppning')).toBe(JSON.stringify([true, false]))
+    for (let i = 0; i < 30; i++) sparaTraningssvar('oppning', true)
+    const logg = loadTraningslogg('oppning')
+    expect(logg).toHaveLength(20)
+    expect(logg.every((x) => x)).toBe(true) // det gamla felsvaret har rullat ut
+    // Trasig lagring ger tom logg, inte krasch.
+    localStorage.setItem(PREFIX + 'traning:oppning', JSON.stringify({ skräp: 1 }))
+    expect(loadTraningslogg('oppning')).toEqual([])
   })
 
   it('en inställning (enhet): samma learnbridge:playSpeed och samma värde', () => {
@@ -84,7 +89,7 @@ describe('loadX ger rätt fallback när inget finns', () => {
     expect(loadDailyLog()).toEqual({}) // tom logg
     expect(loadDailyPlayed()).toBeNull()
     expect(loadSpelHistorik()).toEqual([]) // tom historik
-    expect(loadThemeScore('finns-ej')).toBeNull()
+    expect(loadTraningslogg('finns-ej')).toEqual([])
     expect(loadPlaySpeed()).toBe('normal')
     expect(loadAutoClaim()).toBe(true)
     expect(loadSavedGame()).toBeNull() // ingen pågående giv

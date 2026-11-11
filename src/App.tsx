@@ -7,11 +7,10 @@ import { Home } from './pages/Home'
 // egen JS-chunk som hämtas först när man går dit, så första laddningen av
 // startsidan blir mindre. Home är EJ lat — den är landningssidan och ska ritas
 // direkt. Suspense-gränsen + fallbacken ligger i Layout (runt <Outlet/>).
-const BiddingPractice = lazy(() =>
-  import('./pages/BiddingPractice').then((m) => ({ default: m.BiddingPractice })),
-)
-const BiddingSession = lazy(() =>
-  import('./pages/BiddingSession').then((m) => ({ default: m.BiddingSession })),
+// Budträningen (motordriven sedan 2026-11-11): temalistan + ett tema.
+const Budtraning = lazy(() => import('./pages/Budtraning').then((m) => ({ default: m.Budtraning })))
+const BudtraningTema = lazy(() =>
+  import('./pages/BudtraningTema').then((m) => ({ default: m.BudtraningTema })),
 )
 const BudSystem = lazy(() => import('./pages/BudSystem').then((m) => ({ default: m.BudSystem })))
 const Spela = lazy(() => import('./pages/Spela').then((m) => ({ default: m.Spela })))
@@ -85,8 +84,8 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="budtraning" element={<BiddingPractice />} />
-          <Route path="budtraning/:themeId" element={<BiddingSession />} />
+          <Route path="budtraning" element={<Budtraning />} />
+          <Route path="budtraning/:themeId" element={<BudtraningTema />} />
           <Route path="budsystem" element={<BudSystem />} />
           {/* Budvisning = titta-läget. Routen hette förr "spela" men det krockade
               med "spela-kort" (det riktiga spelet); "budvisning" matchar etiketten
