@@ -424,12 +424,28 @@ export function TravellerTabell({
 
 /** Dagens topplista (provisorisk). Tyst medan den hämtas eller om servern inte
  *  har någon tävling/svarar — översikten fungerar ändå. */
-export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }) {
+/** Kort lista (tävlingsöversikten på telefon, ägarens kvar-punkt 2026-08-11):
+ *  längre listor än så här visas som topp 3 + din egen rad, med en knapp för
+ *  hela listan. Korta listor visas alltid i sin helhet. */
+export const KORT_LISTA_FRAN = 7
+
+/** Vilka placeringar (0-baserade index) den korta listan visar: topp 3 + du. */
+export function kortListaIndex(topplista: { jag?: boolean }[]): number[] {
+  const jag = topplista.findIndex((r) => r.jag)
+  const ut = [0, 1, 2].filter((i) => i < topplista.length)
+  if (jag > 2) ut.push(jag)
+  return ut
+}
+
+export function TopplistaVy({ resultat, kort = false }: { resultat: TopplistaResultat | null; kort?: boolean }) {
+  const [visaAlla, setVisaAlla] = useState(false)
   if (!resultat) {
     return <p className="text-center text-xs text-emerald-100/60">Hämtar ställningen …</p>
   }
   if (resultat.status !== 'ok') return null
   const { topplista, poängsattaGivar, storlek, provisoriskProcent, provisoriskt, slutlig, form } = resultat.data
+  const forkortad = kort && !visaAlla && topplista.length >= KORT_LISTA_FRAN
+  const synliga = forkortad ? kortListaIndex(topplista) : topplista.map((_, i) => i)
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
       <h2 className="text-center font-brand text-lg text-gold-200">Ställningen</h2>
@@ -441,12 +457,15 @@ export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }
       ) : (
         <>
           <ol className="space-y-1">
-            {topplista.map((rad, i) => {
+            {synliga.map((i, n) => {
+              const rad = topplista[i]
               const medalj = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null
+              // Hopp i placeringarna (din rad längre ner) markeras med luft.
+              const hopp = n > 0 && i !== synliga[n - 1] + 1
               return (
                 <li
                   key={`${rad.namn}-${i}`}
-                  className={`flex items-center justify-between rounded-lg px-3 py-1.5 text-sm ${
+                  className={`${hopp ? 'mt-3 ' : ''}flex items-center justify-between rounded-lg px-3 py-1.5 text-sm ${
                     rad.jag
                       ? 'bg-gold-400/15 ring-1 ring-gold-400/40'
                       : 'bg-emerald-950/40'
@@ -468,6 +487,18 @@ export function TopplistaVy({ resultat }: { resultat: TopplistaResultat | null }
               )
             })}
           </ol>
+          {kort && topplista.length >= KORT_LISTA_FRAN && (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisaAlla((v) => !v)}
+                aria-expanded={visaAlla}
+                className="py-1 text-xs font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
+              >
+                {visaAlla ? 'Visa kort lista' : `Visa hela listan (${topplista.length} spelare)`}
+              </button>
+            </div>
+          )}
           <p className="text-center text-[11px] text-emerald-100/60">
             Ospelade givar räknas som {provisorisktText(form, provisoriskProcent, provisoriskt)} tills de spelats ·{' '}
             {poängsattaGivar} {poängsattaGivar === 1 ? 'giv' : 'givar'} poängsatt

@@ -285,6 +285,42 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     expect(screen.getByText(/Ospelade givar räknas som 40 % tills de spelats/)).toBeInTheDocument()
   })
 
+  // Kort topplista (ägarens kvar-punkt 2026-08-11, byggd 2026-11-11): en lång
+  // lista visas som topp 3 + din rad; knappen fäller ut hela listan.
+  it('lång ställning visas kort: topp 3 + din rad, och hela listan bakom en knapp', async () => {
+    fetchMock.mockResolvedValue(ok())
+    const namn = ['Anna', 'Bertil', 'Cecilia', 'David', 'Erika', 'Filip', 'Green', 'Hanna']
+    topplistaMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        nummer: 9,
+        storlek: 12,
+        poängsattaGivar: 12,
+        minPerGiv: 2,
+        provisoriskProcent: 40,
+        topplista: namn.map((n, i) => ({ namn: n, snitt: 70 - i * 3, antalGivar: 12, spelade: 12, jag: n === 'Green' })),
+        du: { placering: 7, snitt: 52, antalGivar: 12, spelade: 12 },
+        dinaGivar: [],
+        dinaInskick: [],
+      },
+    })
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Ställningen')).toBeInTheDocument()
+    for (const n of ['Anna', 'Bertil', 'Cecilia', 'Green']) expect(screen.getByText(n)).toBeInTheDocument()
+    for (const n of ['David', 'Erika', 'Filip', 'Hanna']) expect(screen.queryByText(n)).not.toBeInTheDocument()
+    // Din rad bär sin riktiga placering, inte sin plats i den korta listan.
+    expect(screen.getByText('7.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Visa hela listan (8 spelare)' }))
+    for (const n of namn) expect(screen.getByText(n)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Visa kort lista' }))
+    expect(screen.queryByText('Hanna')).not.toBeInTheDocument()
+  })
+
   it('resultattabellen: varje spelad giv är klickbar → fältets resultat (travellern)', async () => {
     localStorage.setItem(
       'learnbridge:tavling-framsteg',

@@ -487,7 +487,7 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
         <DinStällning resultat={topplista} total={tavling.storlek} />
         <DelaStällning resultat={topplista} total={tavling.storlek} nummer={tavling.nummer} />
         <Resultattabell klara={klara} topplista={topplista} onÖppna={setDetaljBoard} form={form} />
-        <TopplistaVy resultat={topplista} />
+        <TopplistaVy resultat={topplista} kort />
 
         {/* Tidigare dagar + medaljtabellen (Påbyggnad 3, etapp D3). */}
         <div className="flex justify-center">

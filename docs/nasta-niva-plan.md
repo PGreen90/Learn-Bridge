@@ -36,8 +36,12 @@
 >   ur befintliga tabeller, bara antal. Körs med
 >   `AGARRAPPORT=1 npx vitest run src/lib/agarrapport.probe.test.ts` eller av
 >   veckojobbet `agarrapport.yml` (måndagar; rapporten = körningens Summary).
-> - **Medvetet KVAR i etapp 2 (kräver ägarens ögon och mått):** större
->   kort/text som inställning (#36) och tävlingsöversiktens mobil-layout.
+> - **Resterna:** kort topplista i tävlingsöversikten BYGGD (topp 3 + din rad
+>   från sju spelare; komponenttestad, ej synad inloggad på telefon).
+>   **"Större kort som inställning" STRUKEN:** redan mätt i felrapport #36 —
+>   tretton kort fyller en telefonrad helt, större kort kräver två rader
+>   (avvisat av ägaren). Planens punkt var ett misstag. Textstorleken följer
+>   telefonens egen inställning.
 >
 > **Etapp 3 steg A+B — så byggdes den (BYGGD 2026-11-11, committad lokalt):**
 > - `src/lib/engine/traning.ts`: elva teman = budsituationer (öppning · svar på
