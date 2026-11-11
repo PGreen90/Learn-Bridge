@@ -36,8 +36,8 @@ import { ClickAway, Dialog } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
 import { gameFromDeal, gameFromSeed, seatDealSouth, useGame, type Game } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
-import { rapportLage, type TavlingSpel } from './play/tavling-mode'
-import type { GivResultat, TavlingInskick } from '../lib/backend/tavling'
+import { rapportLage, utanHjalpmedel, type TavlingSpel } from './play/tavling-mode'
+import { formTitel, type GivResultat, type TavlingInskick } from '../lib/backend/tavling'
 import { CardLabel, MenuTempoRow, MenuToggleRow, STRAIN_CODE } from './play/common'
 import { SPEED_FACTOR } from './play/tempo'
 import { SouthFan, SuitColumns, SideDummyPiles } from './play/hands'
@@ -323,7 +323,7 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
           tavling
             ? tavling.övning
               ? `Övning · Giv ${tavling.board} — räknas inte`
-              : `${tavling.form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'} · Giv ${tavling.board}/${tavling.total}`
+              : `${formTitel(tavling.form)} · Giv ${tavling.board}/${tavling.total}`
             : daily
               ? `Dagens giv #${dailyNr}`
               : undefined
@@ -403,6 +403,8 @@ export function PlayTable({
    *  "Nästa giv →"/"Se ställningen" och lämnar aldrig spår i den fria historiken. */
   tavling?: TavlingSpel
 }) {
+  // Guld-tävlingen: inga hjälpmedel vid bordet (se tavling-mode.ts).
+  const utanHjalp = utanHjalpmedel(tavling)
   const {
     play,
     showMenu,
@@ -716,7 +718,7 @@ export function PlayTable({
           contract={contract}
           tricks={play.completedTricks}
           calls={calls}
-          explanations={bidHelp ? 'full' : 'minimal'}
+          explanations={bidHelp || utanHjalp ? 'full' : 'minimal'}
         />
         {!resultSeen && !reporting ? (
           // Guldglow vid hemgång (etapp 5, ägarbeslut: inget konfetti) —
@@ -1027,12 +1029,14 @@ export function PlayTable({
           />
           {/* Budstöd av/på (ägarbeslut 2026-07-28): styr hintarna i budfasen och
               hur mycket förklaring auktionsvyerna (ⓘ + omspelningen) visar. */}
-          <MenuToggleRow
-            label="Budstöd"
-            hint="motorns hintar och förklaringar"
-            on={bidHelp}
-            onToggle={onToggleBidHelp}
-          />
+          {!utanHjalp && (
+            <MenuToggleRow
+              label="Budstöd"
+              hint="motorns hintar och förklaringar"
+              on={bidHelp}
+              onToggle={onToggleBidHelp}
+            />
+          )}
           {/* Ljuden (etapp 4): diskreta syntetiserade kortljud, standard PÅ. */}
           <MenuToggleRow
             label="Ljud"
@@ -1115,7 +1119,7 @@ export function PlayTable({
               calls={calls}
               dealer={deal.dealer}
               vulnerability={deal.vulnerability}
-              explanations={bidHelp ? 'full' : 'minimal'}
+              explanations={bidHelp || utanHjalp ? 'full' : 'minimal'}
               hiddenHands
             />
           </div>
@@ -1214,9 +1218,13 @@ export function PlayTable({
           </span>
           <span className="text-xs text-emerald-100/55">mål {result.needed}</span>
         </ListChip>
-        <button type="button" onClick={showFacit} className={listKnappKlass('club')}>
-          Facit
-        </button>
+        {/* Guld-tävlingen spelas utan Facit (double-dummy mitt i given vore
+            ett hjälpmedel ingen har vid ett riktigt bord). */}
+        {!utanHjalp && (
+          <button type="button" onClick={showFacit} className={listKnappKlass('club')}>
+            Facit
+          </button>
+        )}
     </>
   )
 

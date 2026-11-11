@@ -65,6 +65,51 @@
 > - **KVAR i etapp 3:** spelföringsproblem (en hand + träkarl, DD-verifierad
 >   lösning) · missar även ur fritt spel · kontosynk av formen och kön.
 
+## Etapp 4 blev VECKANS GULD-TÄVLING (ägarbeslut 2026-11-11, BYGGD samma dag)
+
+**Riktiga mästerskapsgivar är avförda tills vidare.** Källorna utan fråga höll
+inte: BBO:s villkor förbjuder uttryckligen att hämta och återanvända arkivet
+(och BBO är en konkurrent), Pavliceks sidor saknar nedladdning och är
+upphovsrättsmärkta, Vugraph Project är nedlagt, WBF/SBF har bara utspridda
+PDF:er. Rättsläget talar visserligen för att råa kortfördelningar är fria (fakta;
+katalogskyddet kräver investering i att ANSKAFFA uppgifter — NJA 2005 s. 924),
+men det löser inte villkoren eller det praktiska. Vill ägaren senare ha riktiga
+givar är vägen att fråga Svenska Bridgeförbundet.
+
+**I stället väljer appen ut svåra givar själv** — ingen rättighetsfråga,
+obegränsat förråd, ingen kan känna igen en känd giv.
+
+- **Urvalet** (`src/lib/givurval/`, testbyggt av en agent): varje slumpkandidat
+  får 0–100 poäng ur sex signaler (knivsegg · strid · rätt benämning · nivå ·
+  svår att bjuda · fördelning), räknade ur alla fyra händerna + double-dummy.
+  Tolv väljs med variation (högst två slamgivar, tre vilda). Det är inget kik:
+  urvalet görs innan någon spelar.
+- **Ägarbesluten:** namnet "Veckans guld-tävling" · räknas i MP% · datorspelarna
+  är med som vanligt (ändras ev. efter första veckans siffror) · första veckan
+  = de tolv ur testbygget (frö 20261111) · **ingen budhjälp**: inga
+  rekommendationer, inget budstödsreglage, ingen Facit-knapp — bara vad buden
+  betyder när man trycker på dem.
+- **Formen `guld`** går genom hela kedjan: migration `0015`, EN tävling per
+  vecka med comp_date = veckans måndag, öppen måndag–söndag, eget löpnummer
+  (premiärveckan 2026-11-09 = nr 1).
+- **Givarna är LAGRADE, inte framräknade ur fröet.** Servern validerar ett
+  inskick mot sin egen rad i daily_deals (`valideraGiv`); de dagliga
+  tävlingarna går exakt samma väg som förr (`validera` räknar fram given och
+  anropar samma funktion). Bevisat lika i `api-src/_lib/guld.test.ts`.
+- **Veckojobbet** `guld-tavling.yml` (söndagar 18:10 UTC, eller för hand):
+  väljer nästa veckas tolv givar, lägger upp dem och låter datorspelarna spela.
+  Urvalsfröet härleds ur hemligheten + veckan. Loggen skriver aldrig ut händer.
+- **Medvetet utanför första versionen:** historik och medaljer för guld
+  (ställningen fryses inte i daily_standings), nattens djupgranskning av
+  inskicken, förscreening av givarna.
+- **Kända svagheter att följa upp efter första veckan:** allt vilar på
+  double-dummy ("går precis hem" kan betyda "bara med öppna kort") · bottarna
+  får dåligt resultat på många utvalda givar, så toppen kan bli billig ·
+  slagsida mot Nord-Syd · vikterna är bara mätta på ett frö.
+- **Upptäckt på vägen (ägarfråga):** Facit-knappen (double-dummy) går att
+  trycka på mitt i en skarp giv även i Dagens MP% och Dagens IMP. I guld är den
+  borta; för de dagliga är det oförändrat tills ägaren bestämt.
+
 ## Context
 
 Ägaren ska börja värva användare aktivt (närkrets + bridgeklubben) efter en period med

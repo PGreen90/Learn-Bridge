@@ -57,7 +57,21 @@ export function spelaBotGiv(
   /** Budfunktionen (tänkande bottar: `botBud` med DD-orakel); standard = tabellen. */
   bud?: (deal: Deal, history: ResolvedCall[], seat: Seat) => ResolvedCall,
 ): BotInskick | null {
-  const deal = dealFromSeed(givSeed, board)
+  return spelaBotGivMedGiv(dealFromSeed(givSeed, board), playSeed, nivaOpts, bud)
+}
+
+/**
+ * Samma sak för en FÄRDIG giv (Veckans guld-tävling, 2026-11-11): givarna där
+ * är utvalda och lagrade, inte framräknade ur ett frö. Allt annat är identiskt
+ * — `spelaBotGiv` ovan räknar bara fram given och kommer hit.
+ */
+export function spelaBotGivMedGiv(
+  deal: Deal,
+  playSeed: number,
+  nivaOpts: SmartOpts = {},
+  bud?: (deal: Deal, history: ResolvedCall[], seat: Seat) => ResolvedCall,
+): BotInskick | null {
+  const board = deal.board
   const history = botAuction(deal, 60, bud)
   if (!history) return null
 

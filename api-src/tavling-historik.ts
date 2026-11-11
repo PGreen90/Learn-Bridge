@@ -69,6 +69,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     // OCH medaljtabellen per form (ägarbeslut: en medaljtabell per form).
     const form = lasForm(new URL(req.url ?? '', 'http://x').searchParams.get('form'))
     if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
+    // Guld-tävlingen (2026-11-11) har ingen historik än: veckan fryses inte i
+    // daily_standings, och dagslistan här bygger på "före i dag" = avslutad.
+    if (form === 'guld') return json(400, { ok: false, fel: 'Guld-tävlingen har ingen historik än' })
 
     const idag = stockholmDateISO()
     const sets = await restGetAlla<SetRad>(

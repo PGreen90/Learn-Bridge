@@ -14,11 +14,10 @@ svarar på vad).
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Nästa nivå etapp 1–3: LIVE-SÄTTNINGEN (ägarval 2026-11-11)
-Inför klubbjakten. Etapp 1 (felrapport/förslag/"Tyck till" utan konto), etapp 2
-(första intrycket) och etapp 3 (motordriven budträning) är BYGGDA & committade
-lokalt, **ej pushade**: först ägarsteget `GITHUB_RAPPORT_TOKEN` i Vercel, sedan
-push + prov. Ägaren synar "Så bjuder rebidz" + träningens teman och texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**
+### 🔵 NU — Veckans guld-tävling: live-prov med vännerna (ägarval 2026-11-11)
+Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. BYGGD; ägarstegen före
+live: köra migration `0015` i Supabase, sedan push + veckojobbet `guld-tavling.yml`.
+Etapp 1–3 är LIVE (9187591). Ägaren synar "Så bjuder rebidz" + träningens texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**
 Senast LIVE: ångra ett steg + återuppta tävlingsgiv a6f4c06 · #108–#113 (historik.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
@@ -92,7 +91,7 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Nästa nivå etapp 4 — veckans mästerskap** (grind 0: källa + rättigheter = ägarsteg).
+1. **Guld-tävlingens uppföljning** — siffrorna efter första veckan (bottarna, urvalet), historik/medaljer.
 2. **Nästa nivå etapp 5 — klubbtopplista** (ny tabell + GDPR = grindbeslut).
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)

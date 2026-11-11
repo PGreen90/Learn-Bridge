@@ -140,7 +140,7 @@ export function saveTavlingFramsteg(framsteg: TavlingFramsteg, form: TavlingsFor
 /** En framstegsplats per tävlingsform (Dagens IMP, 2026-09-26): MP-nyckeln är
  *  orörd (`tavling-framsteg`), IMP-serien bor bredvid. */
 function framstegNyckel(form: TavlingsForm): string {
-  return form === 'imp' ? 'tavling-framsteg-imp' : 'tavling-framsteg'
+  return form === 'mp' ? 'tavling-framsteg' : `tavling-framsteg-${form}`
 }
 
 /** Den PÅGÅENDE tävlingsgiven (ägarbeslut 2026-10-27, resume.ts): exakt läget
@@ -154,7 +154,7 @@ export function saveTavlingPagaende(giv: SparadTavlingsgiv | null, form: Tavling
   saveValue(pagaendeNyckel(form), giv)
 }
 function pagaendeNyckel(form: TavlingsForm): string {
-  return form === 'imp' ? 'tavling-pagaende-imp' : 'tavling-pagaende'
+  return form === 'mp' ? 'tavling-pagaende' : `tavling-pagaende-${form}`
 }
 
 /** Budträningens logg per tema (nästa nivå etapp 3, 2026-11-11): de senaste

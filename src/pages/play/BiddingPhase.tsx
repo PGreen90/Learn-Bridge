@@ -20,7 +20,7 @@ import { MenuToggleRow, STRAIN_CODE } from './common'
 import { TankerBricka } from './SpelbordRam'
 import type { ResolvedCall } from '../../lib/bidding'
 import type { Game } from './useGame'
-import { rapportLage, type TavlingSpel } from './tavling-mode'
+import { rapportLage, utanHjalpmedel, type TavlingSpel } from './tavling-mode'
 
 export function BiddingPhase({
   game,
@@ -83,16 +83,21 @@ export function BiddingPhase({
       { board: tavling.board, history: game.history, plays: [], declarerTricks: 0 },
     )
   }, [tavling, passedOut, game.history])
+  // Guld-tävlingen spelas utan budhjälp (tavling-mode.ts): ingen rekommendation
+  // och inget reglage — men budens betydelse visas när man trycker på dem.
+  const utanHjalp = utanHjalpmedel(tavling)
+  const hjalp = bidHelp && !utanHjalp
+
   // Motorns rekommenderade bud för din hand i det här läget (markeras i budlådan
   // och ger den äkta förklaringen för det budet). useMemo (R2-fynd #3) så den bara
   // räknas om när given eller budhistoriken ändras – inte vid orelaterade
   // omritningar (t.ex. när menyn eller felrapport-dialogen öppnas).
   // Budstöd av → beräknas inte alls (display-only; onBid gör sin egen decideCall).
   const tabellensBud = useMemo(
-    () => (yourTurn && bidHelp && recommendationProp === undefined ? decideCall(game.deal, game.history, 'S') : null),
-    [yourTurn, bidHelp, recommendationProp, game.deal, game.history],
+    () => (yourTurn && hjalp && recommendationProp === undefined ? decideCall(game.deal, game.history, 'S') : null),
+    [yourTurn, hjalp, recommendationProp, game.deal, game.history],
   )
-  const recommendation = recommendationProp === undefined ? tabellensBud : yourTurn && bidHelp ? recommendationProp : null
+  const recommendation = recommendationProp === undefined ? tabellensBud : yourTurn && hjalp ? recommendationProp : null
 
   // Tangentbord (fynd #21): Enter bekräftar kontraktdialogen — budlådans egna
   // tangenter bor i BiddingBox (dess lyssnare är avstängd när auktionen är klar).
@@ -151,7 +156,7 @@ export function BiddingPhase({
             dealer={game.deal.dealer}
             vulnerability={game.deal.vulnerability}
             activeSeat={toAct}
-            explanations={bidHelp ? 'full' : 'minimal'}
+            explanations={hjalp || utanHjalp ? 'full' : 'minimal'}
             hiddenHands
           />
           <div className="shrink-0 sm:absolute sm:-right-11 sm:top-0">
@@ -161,8 +166,9 @@ export function BiddingPhase({
               onNewGame={onNewGame}
               newGameLabel={tavling ? 'Till översikten' : undefined}
               onExit={tavling ? tavling.onÖversikt : undefined}
-              bidHelp={bidHelp}
+              bidHelp={hjalp}
               onToggleBidHelp={onToggleBidHelp}
+              utanBudstod={utanHjalp}
               onReport={() => setReporting(true)}
             >
               Du sitter <strong>Syd</strong>. När din ruta i auktionen lyser är det din tur:
@@ -183,7 +189,7 @@ export function BiddingPhase({
           onBid={onBid}
           recommendation={recommendation}
           history={game.history}
-          showHelp={bidHelp}
+          showHelp={hjalp || utanHjalp}
         />
         {/* "[Stol] tänker …" (resonemangslagret): en FLYTANDE bricka på budlådans
             underkant (ägarbeslut 2026-09-24) — delad med vänner-bordet. */}
@@ -291,9 +297,12 @@ function TableMenu({
   onExit,
   bidHelp,
   onToggleBidHelp,
+  utanBudstod = false,
   onReport,
   children,
 }: {
+  /** Guld-tävlingen: budstödet finns inte, så reglaget visas inte alls. */
+  utanBudstod?: boolean
   open: boolean
   onToggle: () => void
   onNewGame: () => void
@@ -327,12 +336,14 @@ function TableMenu({
               {newGameLabel}
             </Button>
             {/* Budstöd av/på (ägarbeslut 2026-07-28): samma radmönster som Auto Claim. */}
-            <MenuToggleRow
-              label="Budstöd"
-              hint="motorns hintar och förklaringar"
-              on={bidHelp}
-              onToggle={onToggleBidHelp}
-            />
+            {!utanBudstod && (
+              <MenuToggleRow
+                label="Budstöd"
+                hint="motorns hintar och förklaringar"
+                on={bidHelp}
+                onToggle={onToggleBidHelp}
+              />
+            )}
             <button
               type="button"
               onClick={() => {

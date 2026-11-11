@@ -1,0 +1,81 @@
+name: Veckans guld-tävling
+
+# VECKANS GULD-TÄVLING (ägarbeslut 2026-11-11): tolv utvalda svåra givar per
+# vecka, öppen måndag–söndag, räknad i MP%.
+#
+# Jobbet gör två saker, båda idempotenta:
+#   1. väljer veckans tolv givar ur slumpkandidater (bottarnas auktion +
+#      double-dummy poängsätter varje kandidat, se src/lib/givurval/) och
+#      lägger upp dem i databasen — finns veckan redan rörs den inte;
+#   2. låter datorspelarna spela givarna, så det finns ett fält att jämföra med.
+#
+# Schemat lägger upp NÄSTA veckas tävling på söndagskvällen. Den går inte att nå
+# förrän måndagen: appen frågar alltid efter den vecka som pågår.
+#
+# Loggen innehåller aldrig händer, kontrakt eller givtyper — repot är publikt.
+# Deploygrinden (ci-deploy.yml) är orörd.
+
+on:
+  schedule:
+    # Söndagar 18:10 UTC — i god tid före måndag 00:00 svensk tid.
+    - cron: '10 18 * * 0'
+  workflow_dispatch:
+    inputs:
+      vecka:
+        description: Veckans måndag (YYYY-MM-DD). Tomt = den vecka som pågår.
+        required: false
+      fro:
+        description: Urvalsfrö (heltal). Tomt = härleds ur hemligheten och veckan.
+        required: false
+
+concurrency:
+  group: guld-tavling
+  cancel-in-progress: false
+
+jobs:
+  guld:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Bestäm veckan
+        env:
+          VALD_VECKA: ${{ inputs.vecka }}
+          HANDELSE: ${{ github.event_name }}
+        run: |
+          # Veckodagen 1–7 (måndag = 1) i svensk tid.
+          DAG=$(TZ=Europe/Stockholm date +%u)
+          if [ -n "$VALD_VECKA" ]; then
+            VECKA="$VALD_VECKA"
+          elif [ "$HANDELSE" = "schedule" ]; then
+            # Schemat: nästa måndag.
+            VECKA=$(TZ=Europe/Stockholm date -d "+$((8 - DAG)) days" +%F)
+          else
+            # För hand utan vecka: måndagen i den vecka som pågår.
+            VECKA=$(TZ=Europe/Stockholm date -d "-$((DAG - 1)) days" +%F)
+          fi
+          echo "Vecka: $VECKA"
+          echo "GULD_VECKA=$VECKA" >> "$GITHUB_ENV"
+
+      - name: Välj och lägg upp veckans givar
+        env:
+          DAILY_SEED_SECRET: ${{ secrets.DAILY_SEED_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GULD_FRO: ${{ inputs.fro }}
+        run: GULD_TAVLING=1 npx vitest run src/lib/givurval/guldtavling.probe.test.ts
+
+      - name: Datorspelarna spelar veckans givar
+        env:
+          DAILY_SEED_SECRET: ${{ secrets.DAILY_SEED_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: BOT_TAVLING="$GULD_VECKA" TAVLING_FORM=guld npx vitest run src/lib/engine/tavlingsbot.probe.test.ts

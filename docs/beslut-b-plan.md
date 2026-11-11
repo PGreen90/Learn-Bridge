@@ -666,3 +666,8 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   dygn). Rapporttexten läggs i den publika ärendelistan utan namn, e-post eller
   konto-id; integritetspolicyn fick avsnittet "Felrapporter och synpunkter".
   Ny hemlighet i Vercel: `GITHUB_RAPPORT_TOKEN` (enbart Issues).
+- **2026-11-11: VECKANS GULD-TÄVLING (ägarbeslut, plan `docs/nasta-niva-plan.md`).**
+  Tredje tävlingsformen `guld`: migration `0015` (formens CHECK), ett set per
+  vecka (comp_date = måndagen), utvalda givar LAGRADE i daily_deals och
+  validerade mot den lagrade raden (`valideraGiv`). Inga nya tabeller, inga nya
+  personuppgifter. Veckojobb i Actions lägger upp givarna.

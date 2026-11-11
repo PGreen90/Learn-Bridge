@@ -76,8 +76,18 @@ export function matchpointsForBoard(entries: GivPoäng[]): GivMatchpoäng[] {
 // Tävlingsformen — MP eller IMP (Dagens IMP, ägarbeslut 2026-09-26)
 // ===========================================================================
 
-/** De två tävlingsformerna. Samma värden som kolumnen `daily_sets.form`. */
-export type TavlingsForm = 'mp' | 'imp'
+/** Tävlingsformerna. Samma värden som kolumnen `daily_sets.form`.
+ *  'guld' = Veckans guld-tävling (ägarbeslut 2026-11-11): tolv utvalda svåra
+ *  givar, öppen måndag–söndag, räknad i MP% (se GULD_STRATEGI). */
+export type TavlingsForm = 'mp' | 'imp' | 'guld'
+
+/** Hur talen RÄKNAS — två sätt, oavsett hur många former som finns. Guld räknas
+ *  som MP, så allt som visar tal (procent, decimaler, "40 %") frågar efter
+ *  räknesättet, aldrig efter formen. */
+export type Raknesatt = 'mp' | 'imp'
+export function raknesatt(form: TavlingsForm | string | null | undefined): Raknesatt {
+  return form === 'imp' ? 'imp' : 'mp'
+}
 
 /** En spelares tal på EN giv, med formens egna detaljer. `tal` är det som
  *  summeras/snittas till ställningen: MP% respektive cross-IMP. */
@@ -148,9 +158,13 @@ export const IMP_STRATEGI: FormStrategi = {
   sammanvag: provisoriskImpSumma,
 }
 
+/** Guld-formen: MP-räkning ord för ord (ägarbeslut 2026-11-11) — bara formens
+ *  namn skiljer. Talen per giv bär därför `form: 'mp'` (räknesättet). */
+export const GULD_STRATEGI: FormStrategi = { ...MP_STRATEGI, form: 'guld' }
+
 /** Strategin för en form. Okänd/utelämnad form ⇒ MP (bakåtkompatibelt). */
 export function strategiFor(form: TavlingsForm | string | null | undefined): FormStrategi {
-  return form === 'imp' ? IMP_STRATEGI : MP_STRATEGI
+  return form === 'imp' ? IMP_STRATEGI : form === 'guld' ? GULD_STRATEGI : MP_STRATEGI
 }
 
 // ===========================================================================

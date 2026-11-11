@@ -35,9 +35,21 @@ export function enhetText(form: TavlingsForm | undefined): string {
   return form === 'imp' ? 'IMP' : '%'
 }
 
-/** Rubriken för en tävlingsform i gränssnittet (ägarbeslut 2026-09-26). */
+/** Rubriken för en tävlingsform i gränssnittet (ägarbeslut 2026-09-26;
+ *  guld-tävlingen 2026-11-11). */
 export function formTitel(form: TavlingsForm | undefined): string {
-  return form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'
+  return form === 'imp' ? 'Dagens IMP' : form === 'guld' ? 'Veckans guld-tävling' : 'Dagens MP%'
+}
+
+/** Tolka en form ur något okänt (adressfält, serversvar): 'imp' och 'guld' är
+ *  sig själva, allt annat är MP (bakåtkompatibelt — äldre svar saknar fältet). */
+export function tolkaForm(x: unknown): TavlingsForm {
+  return x === 'imp' ? 'imp' : x === 'guld' ? 'guld' : 'mp'
+}
+
+/** `?form=`-delen i en länk till tävlingen: tom för MP, annars "?form=…". */
+export function formQuery(form: TavlingsForm | undefined): string {
+  return form === 'imp' || form === 'guld' ? `?form=${form}` : ''
 }
 
 /** Talet på EN giv ur ett serversvar, oavsett form: `tal` (nya svar), annars
@@ -134,7 +146,7 @@ function isCard(x: unknown): x is Card {
 function tavlingQuery(dag?: string, form?: TavlingsForm, extra: string[] = []): string {
   const delar = [...extra]
   if (dag) delar.push(`dag=${encodeURIComponent(dag)}`)
-  if (form === 'imp') delar.push('form=imp')
+  if (form === 'imp' || form === 'guld') delar.push(`form=${form}`)
   return delar.length ? `?${delar.join('&')}` : ''
 }
 
@@ -156,7 +168,7 @@ export function tavlingFromResponse(data: unknown): DagensTavling {
     throw new Error('Tävlingssvaret saknar nummer/dag/storlek')
   }
   if (!Array.isArray(rå)) throw new Error('Tävlingssvaret saknar givar')
-  const form: TavlingsForm = d.form === 'imp' ? 'imp' : 'mp'
+  const form: TavlingsForm = tolkaForm(d.form)
 
   const givar: TavlingsGiv[] = rå.map((g) => {
     const row = g as Record<string, unknown>
@@ -188,7 +200,7 @@ export function tavlingFromResponse(data: unknown): DagensTavling {
     const deal: Deal = {
       // IMP-tävlingens givar får eget id-prefix så de aldrig blandas ihop med
       // MP-tävlingens samma dag (sparade kort, React-nycklar, felrapporter).
-      id: form === 'imp' ? `tavling-imp-${nummer}-${board}` : `tavling-${nummer}-${board}`,
+      id: form === 'mp' ? `tavling-${nummer}-${board}` : `tavling-${form}-${nummer}-${board}`,
       hands: mappade,
       dealer: dealer as Seat,
       vulnerability: vulnerability as Vulnerability,
@@ -420,7 +432,7 @@ export async function fetchTopplista(dag?: string, form?: TavlingsForm): Promise
     // Bakåtkompatibelt: äldre svar (eller anonyma) saknar de personliga fälten.
     const data: Topplista = {
       nummer: raw.nummer ?? 0,
-      form: raw.form === 'imp' ? 'imp' : 'mp',
+      form: tolkaForm(raw.form),
       storlek: raw.storlek ?? 0,
       poängsattaGivar: raw.poängsattaGivar ?? 0,
       minPerGiv: raw.minPerGiv ?? 2,
@@ -603,7 +615,7 @@ export async function fetchTavlingHistorik(form?: TavlingsForm): Promise<Histori
     const raw = (await res.json()) as Partial<TavlingHistorik>
     return {
       status: 'ok',
-      data: { form: raw.form === 'imp' ? 'imp' : 'mp', dagar: raw.dagar ?? [], medaljer: raw.medaljer ?? [] },
+      data: { form: tolkaForm(raw.form), dagar: raw.dagar ?? [], medaljer: raw.medaljer ?? [] },
     }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }

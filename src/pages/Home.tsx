@@ -123,13 +123,26 @@ function ModeCard({
  *  2026-10-27): utloggad visar pillret "Kräver konto" i stället för "12 givar",
  *  så ingen trycker in i tävlingen och först där möts av inloggningen. Under
  *  sessionskontrollen visas "12 givar" så pillret inte blinkar. */
-function TavlingCard({ to, titel, text }: { to: string; titel: string; text: string }) {
+function TavlingCard({
+  to,
+  titel,
+  text,
+  pillText = '12 givar',
+  className = '',
+}: {
+  to: string
+  titel: string
+  text: string
+  /** Pillret för inloggade (utloggade ser alltid "Kräver konto"). */
+  pillText?: string
+  className?: string
+}) {
   const { loading, signedIn } = useAuth()
-  const pill = !loading && !signedIn ? 'Kräver konto' : '12 givar'
+  const pill = !loading && !signedIn ? 'Kräver konto' : pillText
   return (
     <Link
       to={to}
-      className="focus-ring gold-frame group relative block h-full w-full rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99]"
+      className={`focus-ring gold-frame group relative block h-full w-full rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99] ${className}`}
     >
       <div className="flex items-center gap-3">
         <ModeIcon icon="calendar" />
@@ -189,6 +202,15 @@ export function Home() {
             to="/spela-kort/tavling?form=imp"
             titel="Dagens IMP"
             text="Tolv egna givar räknade i IMP — utgång och slam väger tungt, övertricken lite."
+          />
+          {/* Veckans guld-tävling (ägarbeslut 2026-11-11): tolv utvalda svåra
+              givar, öppen hela veckan, utan budhjälp. Egen rad under de dagliga. */}
+          <TavlingCard
+            to="/spela-kort/tavling?form=guld"
+            titel="Veckans guld-tävling"
+            text="Tolv utvalda, svåra givar — öppen hela veckan. Här spelar du utan budhjälp."
+            pillText="Ny varje måndag"
+            className="sm:col-span-2"
           />
         </div>
 

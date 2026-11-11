@@ -92,7 +92,9 @@ it.skipIf(!AKTIV)('tävlingsavslutet: slutlig ställning → daily_standings', {
   // Båda formerna (Dagens IMP, 2026-09-26): varje set fryses med SIN räkning —
   // MP-snitt i procent eller IMP-summa — i samma snitt-kolumn.
   const sets = await restAlla<{ id: string; comp_date: string; size: number; daily_number: number; form: 'mp' | 'imp' }>(
-    `daily_sets?comp_date=lt.${idag}&select=id,comp_date,size,daily_number,form&order=comp_date.asc,form.asc`,
+    // Guld-tävlingen (2026-11-11) fryses INTE här: dess comp_date är veckans
+    // måndag, så "före i dag" vore sant redan på tisdagen mitt i veckan.
+    `daily_sets?comp_date=lt.${idag}&form=neq.guld&select=id,comp_date,size,daily_number,form&order=comp_date.asc,form.asc`,
   )
   const harStallning = new Set(
     (await restAlla<{ set_id: string }>('daily_standings?select=set_id')).map((r) => r.set_id),

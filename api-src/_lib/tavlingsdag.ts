@@ -5,7 +5,7 @@
 // kallaren) — morgondagens givar ligger redan i databasen (förscreeningen)
 // och får ALDRIG lämnas ut i förväg.
 
-import { stockholmDateISO } from '../../src/lib/engine/daily'
+import { stockholmDateISO, veckansMandag } from '../../src/lib/engine/daily'
 import type { TavlingsForm } from '../../src/lib/engine/matchpoints'
 
 export interface Tavlingsdag {
@@ -37,5 +37,18 @@ export function lasDag(url: URL, nu: Date = new Date()): Tavlingsdag | 'ogiltig'
  *  'ogiltig' (→ 400 hos kallaren). */
 export function lasForm(rå: unknown): TavlingsForm | 'ogiltig' {
   if (rå === null || rå === undefined || rå === '') return 'mp'
-  return rå === 'mp' || rå === 'imp' ? rå : 'ogiltig'
+  return rå === 'mp' || rå === 'imp' || rå === 'guld' ? rå : 'ogiltig'
+}
+
+/**
+ * Tävlingens datum i databasen för en form (Veckans guld-tävling, 2026-11-11).
+ * De dagliga formerna: dagen själv, oförändrat. Guld: veckans MÅNDAG — tävlingen
+ * ligger som ETT set med comp_date = måndagen och är öppen hela veckan. Vilken
+ * dag i veckan anropet än gäller pekar det på samma set, och `idag` betyder då
+ * "veckan pågår" (tjuvkiksgrinden m.m. gäller hela veckan, inte bara måndagen).
+ */
+export function tavlingsdagFor(form: TavlingsForm, vald: Tavlingsdag, nu: Date = new Date()): Tavlingsdag {
+  if (form !== 'guld') return vald
+  const dag = veckansMandag(vald.dag)
+  return { dag, idag: dag === veckansMandag(stockholmDateISO(nu)) }
 }

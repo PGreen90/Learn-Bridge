@@ -24,7 +24,7 @@ import { useTillbakaHit } from '../lib/efter-inloggning'
 import { loadTavlingFramsteg, loadTavlingPagaende, loadTraningsmissar, saveTavlingFramsteg, saveTraningsmissar } from '../lib/backend'
 import { forstaMissen, laggTillMiss } from '../lib/engine/traning'
 import { validSparadTavlingsgiv } from '../lib/engine/resume'
-import { formatNedrakning, msTillNastaTavling } from '../lib/engine/daily'
+import { formatNedrakning, msTillNastaGuld, msTillNastaTavling } from '../lib/engine/daily'
 import {
   fetchDagensTavling,
   fetchTopplista,
@@ -32,7 +32,9 @@ import {
   inskickUrFramsteg,
   slåIhopFramsteg,
   submitTavlingGiv,
+  formQuery,
   formTitel,
+  tolkaForm,
   type BrickaRad,
   type DagensTavling as TavlingData,
   type GivResultat,
@@ -71,7 +73,7 @@ function förstaOspelade(tavling: TavlingData, klara: GivResultat[]): number | n
  *  byts (key), så framsteg/spelläge/ställning aldrig läcker mellan MP och IMP. */
 export function DagensTavling() {
   const [params] = useSearchParams()
-  const form: TavlingsForm = params.get('form') === 'imp' ? 'imp' : 'mp'
+  const form: TavlingsForm = tolkaForm(params.get('form'))
   return <DagensTavlingInner key={form} form={form} />
 }
 
@@ -200,7 +202,9 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
           <p className="text-emerald-100/80">
             {form === 'imp'
               ? 'Samma 12 givar för alla varje dag, räknade i IMP. '
-              : 'Samma 12 givar för alla varje dag. '}
+              : form === 'guld'
+                ? 'Tolv utvalda, svåra givar — samma för alla, öppen hela veckan. Här spelar du utan budhjälp. '
+                : 'Samma 12 givar för alla varje dag. '}
             I tävlingen deltar även datorspelare.
             För att spela tävlingen och komma med på topplistan behöver du ett konto.
           </p>
@@ -301,7 +305,7 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
         // här given sparas läget till budträningen (lokalt, först EFTER att
         // given är klar — inget facit läcker in i tävlingen).
         try {
-          const miss = forstaMissen(giv.deal, inskick.history, `${form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'} nr ${tavling.nummer}, giv ${giv.deal.board}`)
+          const miss = forstaMissen(giv.deal, inskick.history, `${titel} nr ${tavling.nummer}, giv ${giv.deal.board}`)
           if (miss) saveTraningsmissar(laggTillMiss(loadTraningsmissar(), miss))
         } catch {
           // Träningskön är en bonus — den får aldrig störa bokföringen av given.
@@ -453,19 +457,29 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
           <h1 className="text-xl font-semibold text-emerald-50">
             {titel} <span className="text-gold-300">#{tavling.nummer}</span>
           </h1>
-          <Nedrakning />
+          <Nedrakning vecka={form === 'guld'} />
         </header>
 
         {/* Den andra dagliga tävlingen (Dagens IMP, 2026-09-26) — en länk, så man
             aldrig undrar var den andra formen tog vägen. */}
-        <div className="-mt-3 flex justify-center">
-          <Link
-            to={form === 'imp' ? '/spela-kort/tavling' : '/spela-kort/tavling?form=imp'}
-            className="text-xs font-semibold text-emerald-100/70 underline underline-offset-2 hover:text-emerald-50"
-          >
-            {form === 'imp' ? 'Till Dagens MP% →' : 'Till Dagens IMP →'}
-          </Link>
+        <div className="-mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1">
+          {(['mp', 'imp', 'guld'] as TavlingsForm[])
+            .filter((f) => f !== form)
+            .map((f) => (
+              <Link
+                key={f}
+                to={`/spela-kort/tavling${formQuery(f)}`}
+                className="text-xs font-semibold text-emerald-100/70 underline underline-offset-2 hover:text-emerald-50"
+              >
+                Till {formTitel(f)} →
+              </Link>
+            ))}
         </div>
+        {form === 'guld' && (
+          <p className="-mt-2 text-center text-xs text-emerald-100/70">
+            Utvalda svåra givar · öppen till söndag kväll · ingen budhjälp
+          </p>
+        )}
 
         {/* Spela nästa ospelade giv. Progress-stapeln + 12-rutnätet + "allt klart"-
             kortet borttagna (ägaren 2026-08-11 — kändes onödiga i alla lägen). Är
@@ -490,14 +504,17 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
         <TopplistaVy resultat={topplista} kort />
 
         {/* Tidigare dagar + medaljtabellen (Påbyggnad 3, etapp D3). */}
-        <div className="flex justify-center">
-          <Link
-            to={form === 'imp' ? '/spela-kort/tavling/historik?form=imp' : '/spela-kort/tavling/historik'}
-            className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
-          >
-            Tidigare tävlingar & medaljer →
-          </Link>
-        </div>
+        {/* Guld-tävlingen har ingen historik än (första versionen). */}
+        {form !== 'guld' && (
+          <div className="flex justify-center">
+            <Link
+              to={`/spela-kort/tavling/historik${formQuery(form)}`}
+              className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
+            >
+              Tidigare tävlingar & medaljer →
+            </Link>
+          </div>
+        )}
 
         {/* Användarnas röst (2026-11-11): tävlingsvyn saknar sidfot (helskärm),
             så "Tyck till" behöver en egen väg in här. */}
@@ -558,12 +575,18 @@ function UppdateraIkon({ snurrar }: { snurrar: boolean }) {
  *  tid) så toppraden ryms på EN rad; texten "Nästa tävling om" ligger som tooltip.
  *  Tickar varje sekund och räknar ALLTID om mot Sthlm-midnatt (aldrig ett lagrat
  *  värde som kan driva) så den stämmer i alla tidszoner. */
-function Nedrakning() {
-  const [ms, setMs] = useState(() => msTillNastaTavling())
+/** Tid kvar till nästa tävling: midnatt för de dagliga, nästa måndag för
+ *  guld-tävlingen (`vecka`). Mer än ett dygn kvar visas som "3 d 5 h". */
+function Nedrakning({ vecka = false }: { vecka?: boolean }) {
+  const kvar = vecka ? msTillNastaGuld : msTillNastaTavling
+  const [ms, setMs] = useState(() => kvar())
   useEffect(() => {
-    const id = setInterval(() => setMs(msTillNastaTavling()), 1000)
+    const id = setInterval(() => setMs(kvar()), 1000)
     return () => clearInterval(id)
-  }, [])
+  }, [kvar])
+  const DYGN = 24 * 60 * 60 * 1000
+  const text =
+    ms >= DYGN ? `${Math.floor(ms / DYGN)} d ${Math.floor((ms % DYGN) / (60 * 60 * 1000))} h` : formatNedrakning(ms)
   return (
     <span
       title="Tid kvar till nästa tävling"
@@ -582,7 +605,7 @@ function Nedrakning() {
         <circle cx="12" cy="12" r="9" />
         <path d="M12 7v5l3 2" />
       </svg>
-      <span className="font-semibold tabular-nums text-gold-200">{formatNedrakning(ms)}</span>
+      <span className="font-semibold tabular-nums text-gold-200">{text}</span>
     </span>
   )
 }

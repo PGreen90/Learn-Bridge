@@ -46,11 +46,13 @@ import { randomBytes } from 'node:crypto'
 import { join } from 'node:path'
 import { fronyckel, playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
 import { sakerstallTavling } from '../../../api-src/_lib/sakerstall-tavling'
-import { validera } from '../../../api-src/_lib/validera'
+import { validera, valideraGiv } from '../../../api-src/_lib/validera'
+import type { Deal } from '../../types/bridge'
+import type { TavlingsForm } from './matchpoints'
 import { dailyNumber } from './daily'
 import { nivaSmartOpts, TAVLINGSBOTTAR, type Tavlingsbot } from './botniva'
 import { giltigMotorstampel } from './tavlingsgranskning'
-import { spelaBotGiv } from './botspelare'
+import { spelaBotGiv, spelaBotGivMedGiv } from './botspelare'
 import { botBud } from './resonemang'
 import { computeOracle, getDds } from './revisor-dds'
 
@@ -58,9 +60,9 @@ const DATUM = process.env.BOT_TAVLING ?? ''
 /** Vilken av dagens två tävlingar (Dagens IMP, 2026-09-26): TAVLING_FORM=imp
  *  → IMP-tävlingen (egna givar ur frönyckeln "datum#imp"), annars MP som förr.
  *  Nattjobbet kör proben en gång per form. */
-const FORM = process.env.TAVLING_FORM === 'imp' ? 'imp' : 'mp'
+const FORM: TavlingsForm = process.env.TAVLING_FORM === 'imp' ? 'imp' : process.env.TAVLING_FORM === 'guld' ? 'guld' : 'mp'
 const NYCKEL = DATUM ? fronyckel(DATUM, FORM) : ''
-const SUFFIX = FORM === 'imp' ? '-imp' : ''
+const SUFFIX = FORM === 'imp' ? '-imp' : FORM === 'guld' ? '-guld' : ''
 
 /** En hemlighet ur miljön eller .env.local — utan att någonsin skrivas ut. */
 function lasHemlighet(namn: string): string | null {
@@ -181,8 +183,27 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
   //    själv; att cronen föll syns som gul varning i körningen + i rapporten.
   //    Tävlingsnumret ankras vid 12 UTC på DATUM (samma Stockholmsdygn, som
   //    dailyDateFromNumber) — identiskt med vad cronen hade satt.
-  const nummer = dailyNumber(new Date(`${DATUM}T12:00:00Z`))
-  const set = await sakerstallTavling(base!, key!, secret!, DATUM, nummer, FORM, { forsok: 6, pausMs: 1000 })
+  // GULD-TÄVLINGEN (2026-11-11): givarna är utvalda och LAGRADE (veckojobbet
+  // guld-tavling.yml lägger upp dem) — de kan inte räknas fram ur fröet och får
+  // därför aldrig självläkas. Saknas veckan är det ett fel, inte något att laga.
+  // BOT_TAVLING är då veckans måndag.
+  const guldGivar = new Map<number, Deal>()
+  let set: { id: string; size: number; skapad: boolean }
+  if (FORM === 'guld') {
+    const s = (await rest(`daily_sets?comp_date=eq.${DATUM}&form=eq.guld&select=id,size`)) as Array<{ id: string; size: number }>
+    expect(s.length, `ingen guld-tävling upplagd för veckan ${DATUM}`).toBe(1)
+    const givRader = (await rest(
+      `daily_deals?set_id=eq.${s[0].id}&select=board,dealer,vulnerability,hands&order=board.asc`,
+    )) as Array<{ board: number; dealer: Deal['dealer']; vulnerability: Deal['vulnerability']; hands: Deal['hands'] }>
+    expect(givRader.length, 'guld-tävlingens givar saknas').toBe(s[0].size)
+    for (const r of givRader) {
+      guldGivar.set(r.board, { id: `guld-${r.board}`, board: r.board, dealer: r.dealer, vulnerability: r.vulnerability, hands: r.hands })
+    }
+    set = { id: s[0].id, size: s[0].size, skapad: false }
+  } else {
+    const nummer = dailyNumber(new Date(`${DATUM}T12:00:00Z`))
+    set = await sakerstallTavling(base!, key!, secret!, DATUM, nummer, FORM, { forsok: 6, pausMs: 1000 })
+  }
   if (set.skapad) {
     console.log(
       `::warning title=Självläkning ${DATUM} ${FORM}::Tävlingen saknades — givgenereringen (Vercel-cron 23:05 UTC) måste ha fallerat. Nattbottarna skapade set + ${set.size} givar själva.`,
@@ -217,20 +238,23 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
         hoppade++
         continue
       }
-      const inskick = spelaBotGiv(
-        seedForBoard(secret!, NYCKEL, board),
-        playSeedForBoard(secret!, NYCKEL, board),
-        board,
-        opts,
-        tankandeBud,
-      )
+      const guldGiv = guldGivar.get(board)
+      const inskick = guldGiv
+        ? spelaBotGivMedGiv(guldGiv, playSeedForBoard(secret!, NYCKEL, board), opts, tankandeBud)
+        : spelaBotGiv(
+            seedForBoard(secret!, NYCKEL, board),
+            playSeedForBoard(secret!, NYCKEL, board),
+            board,
+            opts,
+            tankandeBud,
+          )
       if (!inskick) {
         fynd.push(
           `${bot.namn} bricka ${board}: auktionen skenade — inget botinskick (motorbugg, repro: frö ur ${NYCKEL}:${board})`,
         )
         continue
       }
-      const v = validera(secret!, NYCKEL, inskick)
+      const v = guldGiv ? valideraGiv(guldGiv, inskick) : validera(secret!, NYCKEL, inskick)
       if (!v.giltig) {
         fynd.push(`${bot.namn} bricka ${board}: botinskicket AVVISADES av validera — motorbugg: ${v.skäl}`)
       }

@@ -134,18 +134,46 @@ export function tavlingShareText({
   antalSpelare,
   resultat,
 }: {
-  form: 'mp' | 'imp'
+  form: 'mp' | 'imp' | 'guld'
   nummer: number
   placering: number
   antalSpelare: number
   resultat: string
 }): string {
-  const namn = form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'
+  const namn = form === 'imp' ? 'Dagens IMP' : form === 'guld' ? 'Veckans guld-tävling' : 'Dagens MP%'
   return [
     `rebidz · ${namn} #${nummer}`,
     `Jag fick ${resultat} — plats ${placering} av ${antalSpelare} just nu. Slår du det?`,
-    `https://rebidz.com/#/spela-kort/tavling${form === 'imp' ? '?form=imp' : ''}`,
+    `https://rebidz.com/#/spela-kort/tavling${form === 'mp' ? '' : `?form=${form}`}`,
   ].join('\n')
+}
+
+// === Veckans guld-tävling (ägarbeslut 2026-11-11) ============================
+
+/** Måndagen i veckan som `dateISO` (YYYY-MM-DD) ligger i. Räknat mitt på dagen
+ *  UTC så sommartidsbyten aldrig flyttar datumet. */
+export function veckansMandag(dateISO: string): string {
+  const d = new Date(`${dateISO}T12:00:00Z`)
+  const sedanMandag = (d.getUTCDay() + 6) % 7 // mån=0 … sön=6
+  d.setUTCDate(d.getUTCDate() - sedanMandag)
+  return d.toISOString().slice(0, 10)
+}
+
+/** Första guld-veckans måndag — tävling nr 1. */
+export const GULD_PREMIAR = '2026-11-09'
+
+/** Guld-tävlingens löpnummer: premiärveckan = 1, veckan efter = 2 … */
+export function guldNummer(mandagISO: string): number {
+  const ms = Date.parse(`${mandagISO}T12:00:00Z`) - Date.parse(`${GULD_PREMIAR}T12:00:00Z`)
+  return Math.round(ms / (7 * 24 * 60 * 60 * 1000)) + 1
+}
+
+/** Millisekunder kvar till nästa måndag 00:00 svensk tid (då nästa guld-tävling
+ *  öppnar). Bygger på samma midnattsräkning som den dagliga nedräkningen. */
+export function msTillNastaGuld(now: Date = new Date()): number {
+  const idag = stockholmDateISO(now)
+  const dagarKvar = 6 - ((new Date(`${idag}T12:00:00Z`).getUTCDay() + 6) % 7) // hela dagar efter i dag
+  return msTillNastaTavling(now) + dagarKvar * 24 * 60 * 60 * 1000
 }
 
 // === Nedräkning till nästa tävling (Beslut B etapp 2, UI) ====================

@@ -14,11 +14,12 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import { giltigMotorstampel } from '../src/lib/engine/tavlingsgranskning'
-import { validera, type Inskick } from './_lib/validera'
+import type { Deal } from '../src/types/bridge'
+import { validera, valideraGiv, type Inskick, type Validering } from './_lib/validera'
 import { kvotOk } from './_lib/kvot'
 import { fronyckel } from './_lib/seed'
 import { restGet, restPost } from './_lib/supabase-rest'
-import { lasForm } from './_lib/tavlingsdag'
+import { lasForm, tavlingsdagFor } from './_lib/tavlingsdag'
 
 /** Läs och tolka JSON-kroppen ur en Node-request (Vercel parsar inte åt oss här). */
 function readJson(req: IncomingMessage): Promise<unknown> {
@@ -97,13 +98,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     //    Dagens IMP, 2026-09-26). Formen väljer set OCH frönyckel.
     const form = lasForm((body as { form?: unknown }).form)
     if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
-    const today = stockholmDateISO()
+    // De dagliga tävlingarna: i dag. Guld: veckans måndag (öppen hela veckan).
+    const today = tavlingsdagFor(form, { dag: stockholmDateISO(), idag: true }).dag
     const sets = (await restGet(
       base,
       key,
       `daily_sets?comp_date=eq.${today}&form=eq.${form}&select=id`,
     )) as Array<{ id: string }>
-    if (!sets.length) return json(404, { ok: false, fel: form === 'imp' ? 'Ingen IMP-tävling idag' : 'Ingen tävling idag' })
+    if (!sets.length) {
+      return json(404, {
+        ok: false,
+        fel: form === 'imp' ? 'Ingen IMP-tävling idag' : form === 'guld' ? 'Ingen guld-tävling den här veckan' : 'Ingen tävling idag',
+      })
+    }
     const setId = sets[0].id
 
     // 4) Ett inskick per giv — det första står.
@@ -117,7 +124,25 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     // 5) Validera + skriv (service-nyckeln, efter validering).
-    const v = validera(secret, fronyckel(today, form), inskick)
+    //    Guld-tävlingens givar är utvalda och lagrade — där läser servern SIN
+    //    egen rad ur daily_deals och validerar mot den. De dagliga räknar fram
+    //    given ur fröet precis som förr.
+    let v: Validering
+    if (form === 'guld') {
+      const givRad = (await restGet(
+        base,
+        key,
+        `daily_deals?set_id=eq.${setId}&board=eq.${inskick.board}&select=board,dealer,vulnerability,hands`,
+      )) as Array<{ board: number; dealer: Deal['dealer']; vulnerability: Deal['vulnerability']; hands: Deal['hands'] }>
+      if (!givRad.length) return json(400, { ok: false, fel: 'Ogiltig bricka' })
+      const r = givRad[0]
+      v = valideraGiv(
+        { id: `guld-${r.board}`, board: r.board, dealer: r.dealer, vulnerability: r.vulnerability, hands: r.hands },
+        inskick,
+      )
+    } else {
+      v = validera(secret, fronyckel(today, form), inskick)
+    }
     const rad = {
       set_id: setId,
       board: inskick.board,
