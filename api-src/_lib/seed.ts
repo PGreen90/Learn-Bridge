@@ -16,6 +16,10 @@ import type { TavlingsForm } from '../../src/lib/engine/matchpoints'
 /** Frönyckeln för en tävling: MP = datumet självt (oförändrat sedan etapp 2),
  *  IMP = datumet + "#imp". Facit låser att MP-nyckeln aldrig flyttar sig. */
 export function fronyckel(dateISO: string, form: TavlingsForm): string {
+  // Guld (2026-11-11): datumet är veckans MÅNDAG. Egen nyckel så att bottarnas
+  // spelfrön aldrig sammanfaller med MP-tävlingens samma dag. (Guld-GIVARNA
+  // kommer inte ur fröet — de är utvalda och ligger lagrade i daily_deals.)
+  if (form === 'guld') return `${dateISO}#guld`
   return form === 'imp' ? `${dateISO}#imp` : dateISO
 }
 

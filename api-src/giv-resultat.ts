@@ -20,7 +20,7 @@ import type { ResolvedCall } from '../src/lib/bidding'
 import { byggBrickresultat, type Brickrad } from '../src/lib/engine/brickresultat'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
-import { lasDag, lasForm } from './_lib/tavlingsdag'
+import { lasDag, lasForm, tavlingsdagFor } from './_lib/tavlingsdag'
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const json = (status: number, data: unknown) => {
@@ -56,11 +56,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     // Dagens tävling — eller en tidigare dag via `?dag=` (historiken).
-    const valdDag = lasDag(url)
-    if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    const ravDag = lasDag(url)
+    if (ravDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
     // MP eller IMP (`?form=`, saknas = MP; Dagens IMP, 2026-09-26).
     const form = lasForm(url.searchParams.get('form'))
     if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
+    // Guld-tävlingen ligger på veckans måndag, och "idag" betyder då att veckan
+    // pågår (tjuvkiksgrinden och "provisorisk" gäller hela veckan).
+    const valdDag = tavlingsdagFor(form, ravDag)
     const today = valdDag.dag
     const sets = (await restGet(
       base,

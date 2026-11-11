@@ -24,7 +24,7 @@ import {
 import { MIN_PER_GIV } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
-import { lasDag, lasForm } from './_lib/tavlingsdag'
+import { lasDag, lasForm, tavlingsdagFor } from './_lib/tavlingsdag'
 
 /** Vem kallar? Verifiera en valfri inloggnings-token mot Supabase och lämna
  *  tillbaka user-id, eller null (ingen/ogiltig token = anonym — endpointen
@@ -68,12 +68,15 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   try {
     // Idag som standard; `?dag=` för en tidigare dag (historiken, Påbyggnad 3).
     const url = new URL(req.url ?? '', 'http://x')
-    const valdDag = lasDag(url)
-    if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    const ravDag = lasDag(url)
+    if (ravDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
     // MP eller IMP (`?form=`, saknas = MP; Dagens IMP, 2026-09-26). Formen
     // väljer set och räkning (strategin i matchpoints.ts).
     const form = lasForm(url.searchParams.get('form'))
     if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
+    // Guld-tävlingen ligger på veckans måndag, och "idag" betyder då att veckan
+    // pågår (tjuvkiksgrinden och "provisorisk" gäller hela veckan).
+    const valdDag = tavlingsdagFor(form, ravDag)
     const strategi = strategiFor(form)
     const today = valdDag.dag
     const sets = (await restGet(

@@ -6,7 +6,7 @@
 // modul så att både spelskärmen och "Dagens tävling"-sidan kan importera typen
 // utan importcykel.
 
-import type { GivResultat, TavlingInskick, TavlingsForm, TavlingsGiv } from '../../lib/backend/tavling'
+import { formTitel, type GivResultat, type TavlingInskick, type TavlingsForm, type TavlingsGiv } from '../../lib/backend/tavling'
 
 export interface TavlingSpel {
   /** Given att spela + play-fröet (deterministiska bottar för valideringen). */
@@ -39,10 +39,21 @@ export interface TavlingSpel {
   onÖversikt: () => void
 }
 
+/**
+ * Spelas given UTAN hjälpmedel? Veckans guld-tävling (ägarbeslut 2026-11-11)
+ * spelas som vid ett riktigt bord: inga budrekommendationer, inget reglage för
+ * budstöd och ingen Facit-knapp. Det enda som finns kvar är vad buden BETYDER
+ * när man trycker på dem — det vet man vid bordet också (systemet är känt).
+ * Övningsomspel av en redan spelad giv har hjälpen kvar.
+ */
+export function utanHjalpmedel(tavling: TavlingSpel | undefined): boolean {
+  return tavling?.form === 'guld' && !tavling.övning
+}
+
 /** Var i appen en rapport från spelskärmen skrevs — följer med i felrapporten
  *  så /felrapporter vet om given kom från fritt spel eller en tävling. */
 export function rapportLage(tavling: TavlingSpel | undefined): string {
   if (!tavling) return 'Spela kort'
-  const namn = tavling.form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'
+  const namn = formTitel(tavling.form)
   return `${namn} nr ${tavling.nummer}, giv ${tavling.board}${tavling.övning ? ' (övning)' : ''}`
 }

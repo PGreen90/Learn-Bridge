@@ -13,7 +13,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { fronyckel, playSeedForBoard } from './_lib/seed'
 import { restGet } from './_lib/supabase-rest'
-import { lasDag, lasForm } from './_lib/tavlingsdag'
+import { lasDag, lasForm, tavlingsdagFor } from './_lib/tavlingsdag'
 
 export default async function handler(
   req: IncomingMessage,
@@ -40,11 +40,13 @@ export default async function handler(
     // (tävlingshistoriken, Påbyggnad 3). Framtid/ogiltigt → 400: morgondagens
     // givar ligger redan i databasen och får aldrig lämnas ut i förväg.
     const url = new URL(req.url ?? '', 'http://x')
-    const valdDag = lasDag(url)
-    if (valdDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
+    const ravDag = lasDag(url)
+    if (ravDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
     // Vilken tävling? `?form=mp|imp` (Dagens IMP, 2026-09-26); saknas = MP.
     const form = lasForm(url.searchParams.get('form'))
     if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
+    // Guld-tävlingen ligger på veckans måndag och pågår hela veckan.
+    const valdDag = tavlingsdagFor(form, ravDag)
     const today = valdDag.dag
     const sets = (await restGet(
       base,
@@ -53,10 +55,17 @@ export default async function handler(
     )) as Array<{ id: string; daily_number: number; comp_date: string; size: number }>
 
     if (!sets.length) {
-      const namn = form === 'imp' ? 'IMP-tävling' : 'tävling'
+      const namn = form === 'imp' ? 'IMP-tävling' : form === 'guld' ? 'guld-tävling' : 'tävling'
       return json(404, {
         ok: false,
-        fel: valdDag.idag ? `Ingen ${namn} genererad för idag än` : `Ingen ${namn} den dagen`,
+        fel:
+          form === 'guld'
+            ? valdDag.idag
+              ? 'Veckans guld-tävling är inte upplagd än'
+              : 'Ingen guld-tävling den veckan'
+            : valdDag.idag
+              ? `Ingen ${namn} genererad för idag än`
+              : `Ingen ${namn} den dagen`,
       })
     }
     const set = sets[0]

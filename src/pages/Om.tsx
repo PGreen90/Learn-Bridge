@@ -75,6 +75,17 @@ export function Om() {
             övertrick nästan ingenting — spela säkert hem kontraktet.
           </Mode>
         </ul>
+        <h3 className="mt-4 text-sm font-semibold text-ink">Veckans guld-tävling</h3>
+        <p className="mt-1 text-sm text-ink-soft">
+          Varje måndag kommer{' '}
+          <Link to="/spela-kort/tavling?form=guld" className={LANK}>
+            tolv utvalda, svåra givar
+          </Link>{' '}
+          som är öppna hela veckan. De är valda för att innehålla riktiga beslut: utgångar och
+          slammar som går precis hem, och givar där rätt benämning avgör. Här spelar du som vid
+          ett riktigt bord — utan budhjälp och utan facit. Du kan fortfarande trycka på ett bud
+          för att se vad det betyder. Räknas i matchpoäng.
+        </p>
         <p className="mt-3 text-sm text-ink-soft">
           När du spelat en giv ser du hur alla andra bjöd och spelade den. Dagen efter är
           resultatet slutligt, och de bästa får medalj i historiken.

@@ -57,7 +57,7 @@ export function validSparadTavlingsgiv(x: unknown): x is SparadTavlingsgiv {
   const g = x as Record<string, unknown>
   if (g.v !== 1) return false
   if (typeof g.nummer !== 'number' || typeof g.board !== 'number') return false
-  if (g.form !== 'mp' && g.form !== 'imp') return false
+  if (g.form !== 'mp' && g.form !== 'imp' && g.form !== 'guld') return false
   if (g.phase !== 'bidding' && g.phase !== 'play') return false
   if (!Array.isArray(g.history) || !Array.isArray(g.plays)) return false
   return typeof g.undoFloor === 'number'

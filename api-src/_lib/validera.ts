@@ -76,12 +76,24 @@ export function botbudGodtas(deal: Deal, prefix: ResolvedCall[], seat: Seat, bid
 /* `nyckel` = frönyckeln (`fronyckel(dag, form)` i seed.ts) — MP-tävlingen ger
  *  datumet som förr, IMP-tävlingen "datum#imp" (Dagens IMP, 2026-09-26). */
 export function validera(secret: string, nyckel: string, inskick: Inskick): Validering {
+  const { board } = inskick
+  if (!Number.isInteger(board) || board < 1) return fail('ogiltig bricka')
+  // 1. Regenerera given ur fröet — allt replayas mot DEN, inte klientens.
+  return valideraGiv(dealFromSeed(seedForBoard(secret, nyckel, board), board), inskick)
+}
+
+/**
+ * Validera ett inskick mot en FÄRDIG giv (Veckans guld-tävling, 2026-11-11).
+ * De dagliga tävlingarna räknar fram given ur fröet (`validera` ovan) och
+ * kommer hit med den; guld-tävlingens givar är utvalda och ligger lagrade i
+ * daily_deals, så där läser servern raden och anropar den här direkt. Given
+ * måste komma från SERVERNS egen källa — aldrig från klientens inskick.
+ */
+export function valideraGiv(deal: Deal, inskick: Inskick): Validering {
   const { board, history, plays, declarerTricks } = inskick
   if (!Number.isInteger(board) || board < 1) return fail('ogiltig bricka')
+  if (deal.board !== board) return fail('given hör inte till brickan')
   if (!Array.isArray(history) || !Array.isArray(plays)) return fail('inskicket saknar auktion/kort')
-
-  // 1. Regenerera given ur fröet — allt nedan replayas mot DEN, inte klientens.
-  const deal = dealFromSeed(seedForBoard(secret, nyckel, board), board)
 
   // 2. Auktionen: budordning, Syds lagliga bud, bot-bud = motorns.
   for (let i = 0; i < history.length; i++) {
