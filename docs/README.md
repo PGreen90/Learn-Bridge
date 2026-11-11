@@ -22,6 +22,7 @@
 | Fil | | Innehåll |
 |---|---|---|
 | **konkurrensplan.md** | 🟢 | Konkurrensplanen mot BBO/Funbridge/Synrey (ägarbeslut 2026-07-29): hälsobedömningen av appen + roadmapen Fas 0–6 (kvalitetsgrund → facelift → konton → "Dagens givar" → mobilappar → engelska → realtidsbord). |
+| **nasta-niva-plan.md** | 🟢 | **Nästa nivå inför klubbjakten (ägargodkänd 2026-11-11):** vad rebidz saknar för nya användare och körordningen — etapp 1 öppna rösten (felrapport/förslag/"Tyck till" utan konto), 2 första intrycket, 3 nya träningsmiljön (motordriven), 4 veckans mästerskap (riktiga givar), 5 klubbtopplista. Öppna den FÖRST vid allt arbete i de etapperna. |
 | **budsystem-revision.md** | 🟢 | Budsystemets hälsobild + körordningen F1–F6 och B-punkterna (t.ex. B13). Här står vad som är kvar att förbättra i systemet. |
 | **budforklaring-katalog.md** | 🟢 | Budförklarings-revisionen FAS 2: granskningsytan där ägaren synar budförklaringarnas text (före→efter per batch). |
 | **senare.md** | 🟢 | Full beskrivning av allt i ⚪ SENARE och 🅿️ PARKERAT (CLAUDE.md listar bara rubrikerna). |

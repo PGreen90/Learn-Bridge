@@ -8,10 +8,15 @@ import type { Card, Deal, Hand } from '../types/bridge'
 import { parseHand, type ResolvedCall } from './bidding'
 import type { Contract, Trick } from './engine/play'
 import {
+  BIDDING_REPORT_CATEGORIES,
   buildIssueBody,
   buildIssueTitle,
-  felrapportUrl,
+  byggRapport,
+  FORSLAG_BUD,
+  FORSLAG_SPEL,
   formatHand,
+  rapportTyp,
+  REPORT_CATEGORIES,
   type FelrapportInput,
 } from './felrapport'
 
@@ -130,14 +135,36 @@ describe('buildIssueBody', () => {
   })
 })
 
-describe('felrapportUrl', () => {
-  it('pekar på rätt repo med etiketten felrapport och hela rapporten i adressen', () => {
-    const url = felrapportUrl(input)
-    expect(url.startsWith('https://github.com/PGreen90/Learn-Bridge/issues/new?')).toBe(true)
-    const params = new URL(url).searchParams
-    expect(params.get('labels')).toBe('felrapport')
-    expect(params.get('title')).toBe(buildIssueTitle(input))
-    expect(params.get('body')).toBe(buildIssueBody(input))
+// Den öppna mottagaren (2026-11-11): rapporten skickas som typ + rubrik + text.
+// Typen avgörs av kategorin — fel och förslag får var sin kö hos ägaren.
+describe('byggRapport', () => {
+  it('ett fel blir typen felrapport med rubriken "Felrapport: …" och hela rapporten som text', () => {
+    const r = byggRapport(input)
+    expect(r.typ).toBe('felrapport')
+    expect(r.titel).toBe(buildIssueTitle(input))
+    expect(r.titel.startsWith('Felrapport: ')).toBe(true)
+    expect(r.text).toBe(buildIssueBody(input))
+  })
+
+  it('förslagskategorierna blir typen forslag med rubriken "Förslag: …" — given följer med ändå', () => {
+    for (const category of [FORSLAG_SPEL, FORSLAG_BUD]) {
+      const r = byggRapport({ ...input, category })
+      expect(r.typ).toBe('forslag')
+      expect(r.titel.startsWith('Förslag: ')).toBe(true)
+      expect(r.titel).not.toContain('Felrapport')
+      expect(r.text).toContain('budgivning: 1NT P 3NT P P P')
+    }
+  })
+
+  it('förslagen finns som val i båda kategorilistorna', () => {
+    expect(REPORT_CATEGORIES).toContain(FORSLAG_SPEL)
+    expect(BIDDING_REPORT_CATEGORIES).toContain(FORSLAG_BUD)
+    expect(rapportTyp('Annat')).toBe('felrapport')
+  })
+
+  it('läget rapporten skrevs i står i texten', () => {
+    expect(byggRapport({ ...input, lage: 'Dagens tävling' }).text).toContain('**Läge:** Dagens tävling')
+    expect(byggRapport(input).text).toContain('**Läge:** okänt')
   })
 })
 

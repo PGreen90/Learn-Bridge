@@ -24,7 +24,7 @@ export function Integritet() {
       </PageHeader>
       <Panel>
         <div className="space-y-6 text-ink-soft">
-          <p className="text-sm text-ink-muted">Senast uppdaterad: 2026-08-10</p>
+          <p className="text-sm text-ink-muted">Senast uppdaterad: 2026-11-11</p>
 
           <Section title="Vem ansvarar">
             <p>
@@ -48,6 +48,21 @@ export function Integritet() {
             <p>
               Inget annat. Vi frågar aldrig efter födelsedatum, adress eller liknande. Ditt
               lösenord ser vi aldrig i klartext — det sköts krypterat av vår leverantör.
+            </p>
+          </Section>
+
+          <Section title="Felrapporter och synpunkter">
+            <p>
+              Du kan rapportera fel och lämna förslag utan konto. Det du skickar är texten du
+              själv skriver och — för en felrapport — given du spelade (korten, buden och
+              sticken). Varken ditt namn, din e-post eller ditt konto följer med.
+            </p>
+            <p>
+              Rapporterna sparas i projektets ärendelista, som är öppen att läsa för vem som
+              helst. Skriv därför inget personligt i dem. För att stoppa missbruk räknar vi hur
+              många rapporter som kommer från samma nätverksadress under ett dygn. Adressen
+              sparas aldrig i läsbar form — bara som ett engångsmärke som byts varje dag och
+              inte går att räkna tillbaka till dig.
             </p>
           </Section>
 

@@ -683,6 +683,7 @@ export function BordSpel({
           contract={lage.contract}
           tricks={verkligaStick(lage)}
           onClose={() => setVisaRapport(false)}
+          lage="Spela med vänner"
           intro={
             reveal
               ? undefined

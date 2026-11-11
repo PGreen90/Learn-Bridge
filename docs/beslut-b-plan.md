@@ -658,3 +658,11 @@ egen mergepunkt var. Ägarsteg: migration `0012` (D1).
   framstegsnyckel och eget deal-id. MP-räkningen ändras INTE (ägarbeslut samma
   dag: ingen Neuberg, ingen ändring). Facit: `imp.test.ts`, `seed.test.ts`,
   formtester i varje endpoint- och sidfacit.
+- **2026-11-11: ÖPPEN RAPPORTMOTTAGARE (nästa nivå etapp 1, ägargodkänd plan
+  `docs/nasta-niva-plan.md`).** Ny publik serverfunktion `api-src/rapport.ts`:
+  felrapport, förslag och "Tyck till" utan konto. Ingen ny tabell och ingen
+  migration — anropskvoten återanvänder `api_kvot` (0007) med en uuid-formad
+  nyckel av hashad nätverksadress + datum (ingen rå adress sparas, byts varje
+  dygn). Rapporttexten läggs i den publika ärendelistan utan namn, e-post eller
+  konto-id; integritetspolicyn fick avsnittet "Felrapporter och synpunkter".
+  Ny hemlighet i Vercel: `GITHUB_RAPPORT_TOKEN` (enbart Issues).

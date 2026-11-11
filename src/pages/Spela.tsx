@@ -217,6 +217,7 @@ export function Spela() {
           contract={contract}
           tricks={[]}
           onClose={() => setReporting(false)}
+          lage="Budvisning"
           title="Rapportera fel i budgivningen"
           intro="Hela given (händerna och budgivningen) följer med automatiskt. Korten spelas inte i Budvisningen, så inga stick skickas med."
           categories={BIDDING_REPORT_CATEGORIES}

@@ -23,6 +23,7 @@ const FUNKTIONER = [
   'dagens-tavling',
   'generera-dagens-givar',
   'giv-resultat',
+  'rapport',
   'skicka-in',
   'tavling-historik',
   'topplista',

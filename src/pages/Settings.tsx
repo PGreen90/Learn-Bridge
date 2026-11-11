@@ -15,12 +15,8 @@ import { setThemeChoice, themeChoice, type ThemeChoice } from '../lib/theme'
 import { isSoundEnabled, setSoundEnabled } from '../lib/sound'
 import { SPEED_LABEL, type PlaySpeed } from './play/tempo'
 
-// OBS (ägarbeslut 2026-08-03): panelen för GitHub-nyckeln (felrapporter direkt
-// till GitHub) är helt BORTTAGEN ur gränssnittet — funktionen finns kvar i
-// bakgrunden (lib/github-token.ts läses av FelrapportDialog, nyckeln ligger
-// kvar i localStorage). Behöver nyckeln bytas när den gått ut: be Claude
-// plocka fram panelen igen, eller kör i webbläsarkonsolen (rå sträng, ej JSON):
-//   localStorage.setItem('rebidz:felrapport-token', 'github_pat_…')
+// Felrapporterna behöver ingen nyckel i webbläsaren längre (2026-11-11): de
+// skickas via den öppna mottagaren /api/rapport, och nyckeln bor i Vercels miljö.
 
 /** En rad med av/på-knapp — Inställningssidans motsvarighet till spelmenyns
  *  toggles (egen, lätt variant: sidan ska inte dra in spelbordets moduler). */

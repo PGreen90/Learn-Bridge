@@ -1,20 +1,33 @@
-// Felrapportering från "Spela kort": gör om HELA given (händer, budgivning,
-// kontrakt, spelade stick) till en förifylld GitHub-issue som ägaren öppnar
-// och skickar med ett klick. Webbläsaren kan inte pusha till git — Issues är
-// kanalen hem: kommandot /felrapporter läser rapporten, återskapar given som
-// test (FACIT FÖRE FIX) och lagar felet.
+// Felrapportering från spelbordet: gör om HELA given (händer, budgivning,
+// kontrakt, spelade stick) till ett ärende i projektets ärendelista. Sedan
+// 2026-11-11 skickas den via den öppna mottagaren (/api/rapport) — vem som
+// helst kan rapportera, utan konto. Kommandot /felrapporter läser rapporten,
+// återskapar given som test (FACIT FÖRE FIX) och lagar felet.
 
 import type { Card, Deal, Hand, Rank, Seat, Suit, Vulnerability } from '../types/bridge'
 import { SEAT_LABEL, type ResolvedCall } from './bidding'
+import { MOTORSTAMPEL } from './build'
+import type { Rapport } from './backend/rapport'
 import { auctionComplete } from './engine/auction-live'
 import { side, type Contract, type Trick } from './engine/play'
 
-/** Kategorierna ägaren kan välja i rapportdialogen från Spela kort (hela given). */
+/**
+ * Förslagskategorierna (2026-11-11): "jag hade gjort annorlunda" är ett
+ * FÖRSLAG, inte ett fel — det får etiketten `forslag` och hamnar i en egen kö,
+ * så riktiga fel aldrig drunknar i smakfrågor. Allt som börjar med "Förslag: "
+ * räknas som förslag (se rapportTyp).
+ */
+const FORSLAG_PREFIX = 'Förslag: '
+export const FORSLAG_SPEL = `${FORSLAG_PREFIX}jag hade bjudit eller spelat annorlunda`
+export const FORSLAG_BUD = `${FORSLAG_PREFIX}jag hade bjudit annorlunda`
+
+/** Kategorierna i rapportdialogen från spelbordet (hela given). */
 export const REPORT_CATEGORIES = [
   'Felaktig budgivning',
   'Fel budförklaring',
   'Datorn spelade korten fel',
   'Fel i resultat/poäng',
+  FORSLAG_SPEL,
   'Annat',
 ] as const
 export type ReportCategory = (typeof REPORT_CATEGORIES)[number]
@@ -27,8 +40,14 @@ export const BIDDING_REPORT_CATEGORIES = [
   'Felaktig budgivning',
   'Fel budförklaring',
   'Fel slutkontrakt',
+  FORSLAG_BUD,
   'Annat',
 ] as const
+
+/** Fel eller förslag? Avgörs av kategorin — styr rubrik och etikett. */
+export function rapportTyp(category: string): 'felrapport' | 'forslag' {
+  return category.startsWith(FORSLAG_PREFIX) ? 'forslag' : 'felrapport'
+}
 
 export interface FelrapportInput {
   deal: Deal
@@ -46,6 +65,8 @@ export interface FelrapportInput {
    * rapporten så kommandot frågar ägaren i stället för att gissa.
    */
   expected?: string
+  /** Var i appen rapporten skrevs ("Spela kort", "Dagens tävling", …). */
+  lage?: string
 }
 
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
@@ -137,11 +158,13 @@ export function buildIssueTitle(input: FelrapportInput): string {
     : auctionOngoing(input)
       ? 'budgivning pågår'
       : 'utpassad'
-  return `Felrapport: ${input.category} (bricka ${input.deal.board}, ${what})`
+  // Förslagskategorin bär redan sitt "Förslag: " — felen får "Felrapport: ".
+  const rubrik = rapportTyp(input.category) === 'forslag' ? input.category : `Felrapport: ${input.category}`
+  return `${rubrik} (bricka ${input.deal.board}, ${what})`
 }
 
 export function buildIssueBody(input: FelrapportInput): string {
-  const { deal, calls, contract, tricks, category, description, expected } = input
+  const { deal, calls, contract, tricks, category, description, expected, lage } = input
 
   const lines: string[] = []
   lines.push(`**Kategori:** ${category}`)
@@ -149,6 +172,10 @@ export function buildIssueBody(input: FelrapportInput): string {
   lines.push(description.trim() || '_(ingen beskrivning)_')
   lines.push('')
   lines.push(`**Rätt bud + varför:** ${expected?.trim() || '_(inte angivet)_'}`)
+  lines.push('')
+  // Var rapporten skrevs + vilken version av appen (motorstämpeln = byggets
+  // commit) — så /felrapporter kan reproducera mot rätt motor.
+  lines.push(`**Läge:** ${lage ?? 'okänt'} · **Version:** ${MOTORSTAMPEL ?? 'utvecklingsbygge'}`)
   lines.push('')
   lines.push(`**Bricka ${deal.board}** · Giv: ${SEAT_LABEL[deal.dealer]} · ${VUL_TEXT[deal.vulnerability]}`)
   if (contract) {
@@ -188,68 +215,7 @@ export function buildIssueBody(input: FelrapportInput): string {
   return lines.join('\n')
 }
 
-const ISSUES_NEW_URL = 'https://github.com/PGreen90/Learn-Bridge/issues/new'
-const ISSUES_API_URL = 'https://api.github.com/repos/PGreen90/Learn-Bridge/issues'
-
-/** Adressen till en förifylld GitHub-issue med hela rapporten. */
-export function felrapportUrl(input: FelrapportInput): string {
-  const params = new URLSearchParams({
-    title: buildIssueTitle(input),
-    body: buildIssueBody(input),
-    labels: 'felrapport',
-  })
-  return `${ISSUES_NEW_URL}?${params.toString()}`
-}
-
-/** Resultatet av ett direktskick: adressen till den skapade issuen. */
-export interface SubmitResult {
-  issueUrl: string
-}
-
-/**
- * Skickar rapporten DIREKT till GitHub via API:t (ingen GitHub-sida öppnas).
- * Kräver en nyckel (fine-grained PAT med Issues: read/write på Learn-Bridge)
- * som ägaren skapat en gång; se Inställningar. Kastar ett Error med ett
- * begripligt svenskt meddelande om något går fel, så dialogen kan visa det
- * och falla tillbaka på att öppna GitHub-sidan.
- */
-export async function submitFelrapport(
-  input: FelrapportInput,
-  token: string,
-): Promise<SubmitResult> {
-  let res: Response
-  try {
-    res = await fetch(ISSUES_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title: buildIssueTitle(input),
-        body: buildIssueBody(input),
-        labels: ['felrapport'],
-      }),
-    })
-  } catch {
-    // Nätverksfel (offline, blockerad begäran) – fetch kastade innan svar.
-    throw new Error('Kunde inte nå GitHub – kontrollera din internetanslutning.')
-  }
-
-  if (res.status === 201) {
-    const data = (await res.json()) as { html_url?: string }
-    return { issueUrl: data.html_url ?? ISSUES_API_URL }
-  }
-
-  if (res.status === 401) {
-    throw new Error('Nyckeln godtogs inte (kan ha gått ut). Skapa en ny i Inställningar.')
-  }
-  if (res.status === 403 || res.status === 404) {
-    throw new Error(
-      'Nyckeln saknar behörighet till Learn-Bridge. Kontrollera att den gäller repot och har Issues: läs och skriv.',
-    )
-  }
-  throw new Error(`GitHub svarade oväntat (felkod ${res.status}).`)
+/** Hela rapporten, färdig att skicka till den öppna mottagaren. */
+export function byggRapport(input: FelrapportInput): Rapport {
+  return { typ: rapportTyp(input.category), titel: buildIssueTitle(input), text: buildIssueBody(input) }
 }

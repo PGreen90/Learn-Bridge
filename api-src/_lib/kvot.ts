@@ -24,6 +24,10 @@ export const KVOTER = {
   'giv-resultat': { fonsterSek: 60, tak: 30 },
   'dagens-logg': { fonsterSek: 60, tak: 30 },
   'tavling-historik': { fonsterSek: 60, tak: 30 },
+  // Den öppna rapportmottagaren (rapport.ts, 2026-11-11): per anonym avsändare
+  // (hashad adress) resp. alla avsändare tillsammans per dygn.
+  rapport: { fonsterSek: 600, tak: 5 },
+  'rapport-alla': { fonsterSek: 86_400, tak: 200 },
 } as const
 
 export type KvotHandling = keyof typeof KVOTER

@@ -4,6 +4,7 @@ import { currentTheme, toggleTheme } from '../lib/theme'
 import { NY_VERSION_EVENT, type NyVersionDetail } from '../lib/sw-events'
 import { BrandMark, Wordmark } from './BrandMark'
 import { useAuth } from './AuthProvider'
+import { TyckTillKnapp } from './TyckTill'
 // Versionsnumret i sidfoten läses ur package.json — EN sanning, aldrig
 // hårdkodat i UI:t (ägarbeslut 2026-08-02: © + grundår + version i sidfoten).
 import pkg from '../../package.json'
@@ -312,6 +313,8 @@ export function Layout() {
               <NavLink to="/om" className="-my-1.5 inline-block py-1.5 underline underline-offset-2 hover:text-ink">
                 Om rebidz
               </NavLink>{' '}
+              ·{' '}
+              <TyckTillKnapp className="-my-1.5 inline-block py-1.5 font-semibold underline underline-offset-2 hover:text-ink" />{' '}
               ·{' '}
               <NavLink to="/integritet" className="-my-1.5 inline-block py-1.5 underline underline-offset-2 hover:text-ink">
                 Integritet

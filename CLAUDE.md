@@ -11,14 +11,13 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-11-11): kolla att nattkedjan gick (`gh run list
-> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (2026-11-11: 0 öppna; #110–#113 stängda). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). NU = TOM — ägaren
-> väljer ur NÄST (ångra/återuppta LIVE a6f4c06). Design-skillen `impeccable` (pbakaus, v4.8.0)
-> installerades 2026-10-27 i `.agents/skills/` — critique/audit-provet på startsidan kördes i egen
-> session; ägaren avgör om skillen används i FACELIFTEN (SENARE).
+> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
+> ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — TOM (senast: ångra ett steg + återuppta tävlingsgiv exakt, ägarval 2026-10-27, LIVE a6f4c06)
-Kvar (senare.md): samma tävlingsgiv kan spelas om på en ANNAN enhet (serverlagring = Beslut B-steg).
-Dessförinnan LIVE: #113 lås (ingen fix) 9563a41 · bottarna bjuder sena cuen 2a497bd · #110 sen cue efter deras 1NT-svar (§7.2) · #111 (§4.1) · #112 (§8.8) e6f7f31 · #109 2♣-färgen två gånger = trumf + storslam via 5NT (§4.4/§6.1) 92fbe04 · #108 4m efter hoppskiftet (§5.1) b7683be.
+### 🔵 NU — Nästa nivå etapp 1: öppna rösten (ägarval 2026-11-11)
+Inför klubbjakten: felrapport, förslag och "Tyck till" utan konto/GitHub via egen
+servermottagare. **Hela planen (etapp 1–5) + läget: `docs/nasta-niva-plan.md`.**
+Senast LIVE: ångra ett steg + återuppta tävlingsgiv a6f4c06 · #108–#113 (historik.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
@@ -91,13 +90,12 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Speldiagnosens nästa runda** — granskningsvarv på S8-koden; kandidater: fynd D (byt
-   färg), MC-på-få-lägen (`docs/senare.md`).
-2. **Bordens kandidater efter live-provet** — ångra · manuell claim · "ge upp"
-   (samtyckesregler = ägarfrågor) · per-kort-DD (`docs/bord-plan.md` "Medvetet utanför v1").
+1. **Nästa nivå etapp 2 — första intrycket** (Om-sidan, rätt sida efter inloggning,
+   systemet på en sida, dela resultat, större kort).
+2. **Nästa nivå etapp 3 — nya träningsmiljön** (motordriven; temalistan = ägarfråga).
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
-**budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
+**nästa nivå etapp 4–5** (veckans mästerskap · klubbtopplista) · speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
 subagent-användning · störda 1NT-auktioner nästa lager · fler budträningsgivar +
 tema-dropdown · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den

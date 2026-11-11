@@ -20,7 +20,7 @@ import { MenuToggleRow, STRAIN_CODE } from './common'
 import { TankerBricka } from './SpelbordRam'
 import type { ResolvedCall } from '../../lib/bidding'
 import type { Game } from './useGame'
-import type { TavlingSpel } from './tavling-mode'
+import { rapportLage, type TavlingSpel } from './tavling-mode'
 
 export function BiddingPhase({
   game,
@@ -275,6 +275,7 @@ export function BiddingPhase({
           contract={null}
           tricks={[]}
           onClose={() => setReporting(false)}
+          lage={rapportLage(tavling)}
         />
       )}
     </Felt>

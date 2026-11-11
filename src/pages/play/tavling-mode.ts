@@ -38,3 +38,11 @@ export interface TavlingSpel {
   /** Lämna given utan att gå vidare → tillbaka till översikten. */
   onÖversikt: () => void
 }
+
+/** Var i appen en rapport från spelskärmen skrevs — följer med i felrapporten
+ *  så /felrapporter vet om given kom från fritt spel eller en tävling. */
+export function rapportLage(tavling: TavlingSpel | undefined): string {
+  if (!tavling) return 'Spela kort'
+  const namn = tavling.form === 'imp' ? 'Dagens IMP' : 'Dagens MP%'
+  return `${namn} nr ${tavling.nummer}, giv ${tavling.board}${tavling.övning ? ' (övning)' : ''}`
+}
