@@ -1,4 +1,4 @@
-// Facit för "ingen budhjälp" i Veckans guld-tävling (ägarbeslut 2026-11-11):
+// Facit för "ingen budhjälp" i Veckans stjärntävling (ägarbeslut 2026-11-11):
 // även den som har budstöd PÅSLAGET får varken motorns rekommendation eller
 // reglaget i guld-tävlingen — men budens betydelse visas när man trycker på dem.
 

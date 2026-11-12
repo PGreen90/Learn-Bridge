@@ -61,7 +61,7 @@ export function spelaBotGiv(
 }
 
 /**
- * Samma sak för en FÄRDIG giv (Veckans guld-tävling, 2026-11-11): givarna där
+ * Samma sak för en FÄRDIG giv (Veckans stjärntävling, 2026-11-11): givarna där
  * är utvalda och lagrade, inte framräknade ur ett frö. Allt annat är identiskt
  * — `spelaBotGiv` ovan räknar bara fram given och kommer hit.
  */

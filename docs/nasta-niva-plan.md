@@ -99,7 +99,14 @@ obegränsat förråd, ingen kan känna igen en känd giv.
 - **Veckojobbet** `guld-tavling.yml` (söndagar 18:10 UTC, eller för hand):
   väljer nästa veckas tolv givar, lägger upp dem och låter datorspelarna spela.
   Urvalsfröet härleds ur hemligheten + veckan. Loggen skriver aldrig ut händer.
-- **Historik + medaljtabell (ägarbeslut 2026-11-12):** avslutade VECKOR listas
+- **Namnbyte + veckans stjärna (ägarbeslut 2026-11-12): tävlingen heter
+**Veckans stjärntävling** i allt användaren ser (formen heter fortfarande
+`guld` i kod, databas och adresser — byts inte). Vinnaren av den senast
+avslutade veckan koras till **veckans stjärna** och syns i en pratbubbla
+ovanför tävlingskortet på startsidan (`/api/topplista?form=guld&stjarna=1`,
+publik; datorspelarna koras aldrig — samma regel som medaljerna).
+
+Historik + medaljtabell (ägarbeslut 2026-11-12):** avslutade VECKOR listas
   på historiksidan (`?form=guld`, fliken "Guld") med egen topp 5 i medaljer.
   En guld-vecka är avslutad när veckan är slut (`arAvslutat` i
   `tavlingsavslut.ts` — EN regel för listan och för nattens frysning i

@@ -108,7 +108,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (!sets.length) {
       return json(404, {
         ok: false,
-        fel: form === 'imp' ? 'Ingen IMP-tävling idag' : form === 'guld' ? 'Ingen guld-tävling den här veckan' : 'Ingen tävling idag',
+        fel: form === 'imp' ? 'Ingen IMP-tävling idag' : form === 'guld' ? 'Ingen stjärntävling den här veckan' : 'Ingen tävling idag',
       })
     }
     const setId = sets[0].id

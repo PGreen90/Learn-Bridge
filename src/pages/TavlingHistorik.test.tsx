@@ -191,17 +191,17 @@ describe('tävlingshistoriken', () => {
     renderSida('/spela-kort/tavling/historik?form=guld')
     expect(await screen.findByText('Tävlingsveckor')).toBeInTheDocument()
     expect(historikMock).toHaveBeenCalledWith('guld')
-    expect(screen.getByRole('tab', { name: 'Guld' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Stjärntävlingen' })).toHaveAttribute('aria-selected', 'true')
     // Raden visar veckan (måndag–söndag), inte bara måndagens datum.
     expect(screen.getByTitle('Visa tävling #1')).toHaveTextContent('9–15 nov')
     expect(screen.getByTitle('Visa tävling #1')).toHaveTextContent('🥇')
     expect(screen.getByTitle('Visa tävling #2')).toHaveTextContent('16–22 nov')
     expect(screen.getByText(/en tävlingsvecka med minst två spelare/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Veckans guld-tävling/ })).toHaveAttribute('href', '/spela-kort/tavling?form=guld')
+    expect(screen.getByRole('link', { name: /Veckans stjärntävling/ })).toHaveAttribute('href', '/spela-kort/tavling?form=guld')
 
     // Klick på en vecka → veckans vy hämtas med måndagen som dag och formen guld.
     fireEvent.click(screen.getByTitle('Visa tävling #1'))
-    expect(await screen.findByText('Guld')).toBeInTheDocument()
+    expect(await screen.findByText('Stjärntävling')).toBeInTheDocument()
     expect(tavlingMock).toHaveBeenCalledWith('2026-11-09', 'guld')
     expect(topplistaMock).toHaveBeenCalledWith('2026-11-09', 'guld')
   })

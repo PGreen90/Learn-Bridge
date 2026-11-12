@@ -1,4 +1,4 @@
-// Facit för Veckans guld-tävling i klienten (ägarbeslut 2026-11-11):
+// Facit för Veckans stjärntävling i klienten (ägarbeslut 2026-11-11):
 // veckoräkningen, formens namn/länkar/lagringsplatser, och att tävlingen
 // spelas utan hjälpmedel.
 
@@ -42,7 +42,7 @@ describe('veckoräkningen', () => {
 
 describe('formen guld i klienten', () => {
   it('namn, tal och enhet: guld visas som MP% under eget namn', () => {
-    expect(formTitel('guld')).toBe('Veckans guld-tävling')
+    expect(formTitel('guld')).toBe('Veckans stjärntävling')
     expect(formTitel('mp')).toBe('Dagens MP%')
     expect(enhetText('guld')).toBe('%')
     expect(talText(62.5, 'guld', 1)).toBe('62.5')
@@ -82,7 +82,7 @@ describe('formen guld i klienten', () => {
 
   it('delningstexten länkar till guld-tävlingen', () => {
     const text = tavlingShareText({ form: 'guld', nummer: 1, placering: 2, antalSpelare: 6, resultat: '58,3 %' })
-    expect(text).toContain('Veckans guld-tävling #1')
+    expect(text).toContain('Veckans stjärntävling #1')
     expect(text).toContain('https://rebidz.com/#/spela-kort/tavling?form=guld')
   })
 })
@@ -99,7 +99,7 @@ describe('utan hjälpmedel', () => {
   })
 
   it('felrapporten säger att given kom från guld-tävlingen', () => {
-    expect(rapportLage(spel('guld'))).toBe('Veckans guld-tävling nr 1, giv 5')
+    expect(rapportLage(spel('guld'))).toBe('Veckans stjärntävling nr 1, giv 5')
     expect(rapportLage(spel('mp'))).toBe('Dagens MP% nr 1, giv 5')
   })
 })

@@ -21,7 +21,8 @@ import {
   strategiFor,
   type Tävlingsrad,
 } from '../src/lib/engine/matchpoints'
-import { MIN_PER_GIV } from '../src/lib/engine/tavlingsavslut'
+import { stockholmDateISO } from '../src/lib/engine/daily'
+import { byggStallning, forraStjarnveckan, MIN_PER_GIV, veckansStjarna } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
 import { lasDag, lasForm, tavlingsdagFor } from './_lib/tavlingsdag'
@@ -66,8 +67,60 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   if (!base || !key) return json(500, { ok: false, fel: 'Saknar SUPABASE_URL / SERVICE_ROLE_KEY' })
 
   try {
-    // Idag som standard; `?dag=` för en tidigare dag (historiken, Påbyggnad 3).
     const url = new URL(req.url ?? '', 'http://x')
+    // Veckans stjärna (ägarbeslut 2026-11-12): `?stjarna=1` svarar BARA med
+    // vinnaren av den senast avslutade stjärntävlingen — visningsnamn + snitt,
+    // samma slags uppgift som listan redan lämnar ut. Datorspelarna koras
+    // aldrig (is_bot läses här och lämnar aldrig svaret). Får cachas en stund:
+    // svaret ändras bara vid veckoskiftet och nattens frysning.
+    if (url.searchParams.get('stjarna') === '1') {
+      res.setHeader('cache-control', 'public, s-maxage=600, max-age=300')
+      const vecka = forraStjarnveckan(stockholmDateISO())
+      const ingen = { ok: true, vecka, stjarna: null }
+      const sv = (await restGet(
+        base,
+        key,
+        `daily_sets?comp_date=eq.${vecka}&form=eq.guld&select=id,daily_number,size`,
+      )) as Array<{ id: string; daily_number: number; size: number }>
+      if (!sv.length) return json(200, ingen)
+      // Frusen ställning om nattjobbet hunnit; annars räknad i farten.
+      let st: Array<{ spelare: string; placering: number; snitt: number }> = []
+      try {
+        const frusna = (await restGet(
+          base,
+          key,
+          `daily_standings?set_id=eq.${sv[0].id}&select=user_id,placering,snitt`,
+        )) as Array<{ user_id: string; placering: number; snitt: number }>
+        st = frusna.map((r) => ({ spelare: r.user_id, placering: r.placering, snitt: Number(r.snitt) }))
+      } catch {
+        st = []
+      }
+      if (!st.length) {
+        const res2 = (await restGet(
+          base,
+          key,
+          `daily_results?set_id=eq.${sv[0].id}&status=eq.godkand&select=board,user_id,ns_score`,
+        )) as Array<{ board: number; user_id: string; ns_score: number | null }>
+        st = byggStallning(
+          res2.map((r) => ({ board: r.board, spelare: r.user_id, poäng: r.ns_score ?? 0 })),
+          MIN_PER_GIV,
+          sv[0].size,
+          'guld',
+        )
+      }
+      if (!st.length) return json(200, ingen)
+      const inList = [...new Set(st.map((r) => r.spelare))].map((id) => `"${id}"`).join(',')
+      const profiler = (await restGet(
+        base,
+        key,
+        `profiles?id=in.(${inList})&select=id,display_name,is_bot`,
+      )) as Array<{ id: string; display_name: string; is_bot: boolean | null }>
+      const stjarna = veckansStjarna(st, new Set(profiler.filter((p) => p.is_bot).map((p) => p.id)))
+      const namn = stjarna ? profiler.find((p) => p.id === stjarna.spelare)?.display_name : undefined
+      if (!stjarna || !namn) return json(200, ingen)
+      return json(200, { ok: true, vecka, stjarna: { namn, snitt: stjarna.snitt, nummer: sv[0].daily_number } })
+    }
+    // Idag som standard; `?dag=` för en tidigare dag (historiken, Påbyggnad 3).
     const ravDag = lasDag(url)
     if (ravDag === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig dag' })
     // MP eller IMP (`?form=`, saknas = MP; Dagens IMP, 2026-09-26). Formen

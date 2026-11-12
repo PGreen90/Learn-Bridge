@@ -1,9 +1,13 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark, Wordmark } from '../components/BrandMark'
 import { Felt } from '../components/Felt'
 import { TyckTillKnapp } from '../components/TyckTill'
 import { useAuth } from '../components/AuthProvider'
+import { loadTavlingFramsteg } from '../lib/backend'
+import type { TavlingsForm } from '../lib/engine/matchpoints'
+import { tavlingsStatus } from '../lib/tavlingsstatus'
+import { fetchVeckansStjarna, talText, type VeckansStjarna } from '../lib/backend/tavling'
 
 // Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
 // oss för mycket"): varumärkesblocket överst (frameless guldspader + tvåfärgat
@@ -118,27 +122,34 @@ function ModeCard({
  *  Två sedan Dagens IMP (ägarbeslut 2026-09-26): "Dagens MP%" (som förr) och
  *  "Dagens IMP" (tolv egna givar räknade i IMP). Den fria "Dagens giv" är dold
  *  sedan tävlingen ersatte den (grindbeslut 2026-08-10 — daily.ts +
- *  delningskoden finns kvar, bara avlänkad). Konto krävs; själva grinden
- *  sitter på tävlingssidan — men kortet FÖRVARNAR (impeccable-provet
- *  2026-10-27): utloggad visar pillret "Kräver konto" i stället för "12 givar",
- *  så ingen trycker in i tävlingen och först där möts av inloggningen. Under
- *  sessionskontrollen visas "12 givar" så pillret inte blinkar. */
+ *  delningskoden finns kvar, bara avlänkad).
+ *  Pillret visar VAR MAN STÅR (UI/UX-punkt 2, 2026-11-12): "5 av 12 spelade",
+ *  "Klar ✓" eller standardtexten — räknat ur enhetens sparade framsteg, utan
+ *  nätverksanrop. Förr stod "Kräver konto" på alla tre korten för utloggade;
+ *  förvarningen (impeccable-provet 2026-10-27) bor nu på EN rad under korten. */
 function TavlingCard({
   to,
+  form,
   titel,
   text,
-  pillText = '12 givar',
   className = '',
 }: {
   to: string
+  form: TavlingsForm
   titel: string
   text: string
-  /** Pillret för inloggade (utloggade ser alltid "Kräver konto"). */
-  pillText?: string
   className?: string
 }) {
-  const { loading, signedIn } = useAuth()
-  const pill = !loading && !signedIn ? 'Kräver konto' : pillText
+  const { signedIn } = useAuth()
+  // Utloggad: aldrig ett gammalt kontos framsteg på en delad enhet.
+  const status = tavlingsStatus(form, signedIn ? loadTavlingFramsteg(form) : null)
+  const pill = status.text
+  const pillStil =
+    status.lage === 'klar'
+      ? 'bg-emerald-300/20 text-emerald-50 ring-emerald-200/40'
+      : status.lage === 'pagar'
+        ? 'bg-gold-400/30 text-gold-100 ring-gold-300/60'
+        : 'bg-gold-400/15 text-gold-200 ring-gold-400/30'
   return (
     <Link
       to={to}
@@ -149,10 +160,10 @@ function TavlingCard({
         <div className="min-w-0 flex-1">
           {/* flex-wrap: vid 200 % textstorlek ska pillret bryta till egen rad i
               stället för att klippas (impeccable-provet 2026-10-27); 11 px är
-              detektorns golv för funktionell text (pillret bär "Kräver konto"). */}
+              detektorns golv för funktionell text (pillret bär tävlingens status). */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold text-emerald-50">
             {titel}
-            <span className="rounded-full bg-gold-400/15 px-2 py-0.5 text-[11px] font-semibold text-gold-200 ring-1 ring-inset ring-gold-400/30">
+            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${pillStil}`}>
               {pill}
             </span>
           </div>
@@ -163,21 +174,57 @@ function TavlingCard({
   )
 }
 
+/** Veckans stjärna (ägarbeslut 2026-11-12): en liten pratbubbla som pekar ner
+ *  på stjärntävlingens kort. Vinnaren av förra veckan — eller, innan någon
+ *  korats, en rad som säger när det avgörs. Höjden är FAST (h-7) så korten
+ *  inte hoppar när svaret kommer. */
+function Stjarnbubbla() {
+  const [stjarna, setStjarna] = useState<VeckansStjarna | null>(null)
+  useEffect(() => {
+    let lever = true
+    void fetchVeckansStjarna().then((s) => {
+      if (lever) setStjarna(s)
+    })
+    return () => {
+      lever = false
+    }
+  }, [])
+  return (
+    <div className="flex justify-center sm:col-span-2" data-testid="veckans-stjarna">
+      <p className="relative flex h-7 max-w-full items-center gap-1.5 rounded-full bg-gold-100 px-3 text-xs font-medium text-emerald-950 shadow-md">
+        <span aria-hidden>⭐</span>
+        {stjarna ? (
+          <span className="truncate">
+            Veckans stjärna: <strong className="font-semibold">{stjarna.namn}</strong> · {talText(stjarna.snitt, 'guld', 1)}
+          </span>
+        ) : (
+          <span className="truncate">Veckans stjärna koras på måndag</span>
+        )}
+        {/* Bubblans spets, ner mot kortet. */}
+        <span aria-hidden className="absolute left-1/2 top-full -mt-1.5 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] bg-gold-100" />
+      </p>
+    </div>
+  )
+}
+
 export function Home() {
+  const { loading, signedIn } = useAuth()
   return (
     // ETT samlat grönt hero. Avboxat (frameless, mjuk kant via felt-melt) med luft.
     <Felt
       rounded="rounded-[2.75rem]"
-      className="felt-melt border-transparent px-5 py-14 shadow-[0_30px_80px_-45px_rgba(0,0,0,0.5)] sm:px-10 sm:py-20"
+      className="felt-melt border-transparent px-5 py-8 shadow-[0_30px_80px_-45px_rgba(0,0,0,0.5)] sm:px-10 sm:py-20"
     >
       {/* Svag stor spader-vattenstämpel bakom = öppen grön yta (base44-idén). */}
       <BrandMark
         bare
-        className="pointer-events-none absolute left-1/2 top-40 h-72 w-72 -translate-x-1/2 opacity-[0.07] sm:top-48"
+        className="pointer-events-none absolute left-1/2 top-28 h-72 w-72 -translate-x-1/2 opacity-[0.07] sm:top-48"
       />
-      <div className="relative flex flex-col items-center gap-6 text-center text-emerald-50">
-        {/* Varumärkesblocket (den stora "ramen"): spader + ordmärke + tagline. */}
-        <BrandMark bare className="h-16 w-16 drop-shadow-md" />
+      <div className="relative flex flex-col items-center gap-4 text-center text-emerald-50 sm:gap-6">
+        {/* Varumärkesblocket (den stora "ramen"): spader + ordmärke + tagline.
+            Tätare på telefon (UI/UX-punkt 2, 2026-11-12): förr tog blocket
+            halva första skärmen och tävlingarna började under vikningen. */}
+        <BrandMark bare className="h-12 w-12 drop-shadow-md sm:h-16 sm:w-16" />
         <h1 className="text-5xl sm:text-6xl">
           <Wordmark />
         </h1>
@@ -195,24 +242,41 @@ export function Home() {
         <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
           <TavlingCard
             to="/spela-kort/tavling"
+            form="mp"
             titel="Dagens MP%"
             text="Samma 12 givar för alla i dag — spela mot datorn och tävla på topplistan."
           />
           <TavlingCard
             to="/spela-kort/tavling?form=imp"
+            form="imp"
             titel="Dagens IMP"
             text="Tolv egna givar räknade i IMP — utgång och slam väger tungt, övertricken lite."
           />
-          {/* Veckans guld-tävling (ägarbeslut 2026-11-11): tolv utvalda svåra
+          {/* Veckans stjärntävling (ägarbeslut 2026-11-11): tolv utvalda svåra
               givar, öppen hela veckan, utan budhjälp. Egen rad under de dagliga. */}
+          <Stjarnbubbla />
           <TavlingCard
             to="/spela-kort/tavling?form=guld"
-            titel="Veckans guld-tävling"
-            text="Tolv utvalda, svåra givar — öppen hela veckan. Här spelar du utan budhjälp."
-            pillText="Ny varje måndag"
+            form="guld"
+            titel="Veckans stjärntävling"
+            text="Tolv utvalda, svåra givar — ny varje måndag. Här spelar du utan budhjälp."
             className="sm:col-span-2"
           />
         </div>
+        {/* Utloggad: EN rad om kontot i stället för "Kräver konto" på varje
+            kort. Visas först när inloggningsläget är känt, så den inte blinkar. */}
+        {!loading && !signedIn && (
+          <p className="-mt-2 text-sm text-emerald-100 sm:-mt-3">
+            Tävlingarna kräver ett gratis konto.{' '}
+            <Link to="/registrera" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+              Skapa konto
+            </Link>
+            {' · '}
+            <Link to="/logga-in" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+              Logga in
+            </Link>
+          </p>
+        )}
 
         {/* Menyknapparna: vägen in i appen, en per del. */}
         <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">

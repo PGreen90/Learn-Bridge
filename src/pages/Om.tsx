@@ -75,7 +75,7 @@ export function Om() {
             övertrick nästan ingenting — spela säkert hem kontraktet.
           </Mode>
         </ul>
-        <h3 className="mt-4 text-sm font-semibold text-ink">Veckans guld-tävling</h3>
+        <h3 className="mt-4 text-sm font-semibold text-ink">Veckans stjärntävling</h3>
         <p className="mt-1 text-sm text-ink-soft">
           Varje måndag kommer{' '}
           <Link to="/spela-kort/tavling?form=guld" className={LANK}>

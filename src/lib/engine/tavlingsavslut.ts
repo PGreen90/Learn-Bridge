@@ -56,6 +56,25 @@ export function skaSkrivasOm(set: AvslutSet, idagISO: string, omskrivDagar = 3):
   return set.comp_date >= dagarFore(idagISO, omskrivDagar)
 }
 
+/** Måndagen i veckan FÖRE den som pågår = den senast avslutade stjärntävlingen. */
+export function forraStjarnveckan(idagISO: string): string {
+  return dagarFore(veckansMandag(idagISO), 7)
+}
+
+/** Veckans stjärna (ägarbeslut 2026-11-12): bäst placerade MÄNNISKAN i den
+ *  avslutade veckans ställning — datorspelarna (`bottar`) koras aldrig, samma
+ *  regel som medaljtabellen. Delad plats avgörs på id så svaret är stabilt.
+ *  null = ingen människa spelade. */
+export function veckansStjarna(
+  stallning: Array<{ spelare: string; placering: number; snitt: number }>,
+  bottar: Set<string>,
+): { spelare: string; snitt: number } | null {
+  const basta = stallning
+    .filter((r) => !bottar.has(r.spelare))
+    .sort((a, b) => a.placering - b.placering || b.snitt - a.snitt || a.spelare.localeCompare(b.spelare))[0]
+  return basta ? { spelare: basta.spelare, snitt: basta.snitt } : null
+}
+
 /** En spelares slutliga rad för en dag (id opakt — servern översätter). */
 export interface StällningsRad {
   spelare: string
