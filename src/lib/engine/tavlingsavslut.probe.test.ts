@@ -25,7 +25,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { stockholmDateISO } from './daily'
 import type { Tävlingsrad } from './matchpoints'
-import { byggStallning, MIN_PER_GIV } from './tavlingsavslut'
+import { arAvslutat, byggStallning, MIN_PER_GIV, skaSkrivasOm } from './tavlingsavslut'
 
 const AKTIV = process.env.AVSLUTA_TAVLING === '1'
 /** Så många av de senaste dagarna skrivs alltid om (utöver saknade). */
@@ -44,13 +44,6 @@ function lasHemlighet(namn: string): string | null {
   } catch {
     return null
   }
-}
-
-/** Datumet N dagar före ett ISO-datum (kalenderdagar, tidszonsfritt). */
-function dagarFore(iso: string, n: number): string {
-  const d = new Date(`${iso}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - n)
-  return d.toISOString().slice(0, 10)
 }
 
 it.skipIf(!AKTIV)('tävlingsavslutet: slutlig ställning → daily_standings', { timeout: 0 }, async () => {
@@ -91,17 +84,18 @@ it.skipIf(!AKTIV)('tävlingsavslutet: slutlig ställning → daily_standings', {
   // 1) Alla avslutade dagar + vilka som redan har en ställning.
   // Båda formerna (Dagens IMP, 2026-09-26): varje set fryses med SIN räkning —
   // MP-snitt i procent eller IMP-summa — i samma snitt-kolumn.
-  const sets = await restAlla<{ id: string; comp_date: string; size: number; daily_number: number; form: 'mp' | 'imp' }>(
-    // Guld-tävlingen (2026-11-11) fryses INTE här: dess comp_date är veckans
-    // måndag, så "före i dag" vore sant redan på tisdagen mitt i veckan.
-    `daily_sets?comp_date=lt.${idag}&form=neq.guld&select=id,comp_date,size,daily_number,form&order=comp_date.asc,form.asc`,
-  )
+  // Guld-tävlingen (historik sedan 2026-11-12) fryses när VECKAN är slut: dess
+  // comp_date är veckans måndag, så "före i dag" räcker inte — arAvslutat avgör.
+  const sets = (
+    await restAlla<{ id: string; comp_date: string; size: number; daily_number: number; form: 'mp' | 'imp' | 'guld' }>(
+      `daily_sets?comp_date=lt.${idag}&select=id,comp_date,size,daily_number,form&order=comp_date.asc,form.asc`,
+    )
+  ).filter((s) => arAvslutat(s, idag))
   const harStallning = new Set(
     (await restAlla<{ set_id: string }>('daily_standings?select=set_id')).map((r) => r.set_id),
   )
-  const grans = dagarFore(idag, OMSKRIV_DAGAR)
   const attGora = sets.filter(
-    (s) => !harStallning.has(s.id) || s.comp_date >= grans || s.comp_date === OMSKRIV_DATUM,
+    (s) => !harStallning.has(s.id) || skaSkrivasOm(s, idag, OMSKRIV_DAGAR) || s.comp_date === OMSKRIV_DATUM,
   )
   rader.push(`${sets.length} avslutade dagar · ${harStallning.size} med ställning · ${attGora.length} att skriva.`)
 

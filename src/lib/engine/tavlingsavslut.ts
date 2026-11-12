@@ -14,11 +14,47 @@
 //
 // Ren aritmetik utan I/O — facit: tavlingsavslut.test.ts.
 
+import { veckansMandag } from './daily'
 import { aggregeraTopplista, strategiFor, type TavlingsForm, type Tävlingsrad } from './matchpoints'
 
 /** Minst så många spelare på en giv för att den ska ge poäng (delas av den
  *  levande topplistan och slutställningen — EN sanning). */
 export const MIN_PER_GIV = 2
+
+// --- När är en tävling avslutad? (guld-historiken, ägarbeslut 2026-11-12) ----
+// EN regel för både historikens lista och nattens frysning av ställningen.
+
+/** Ett set så som avslutet behöver det. En gammal rad utan form är MP. */
+export interface AvslutSet {
+  comp_date: string
+  form?: TavlingsForm | null
+}
+
+/** Sets med comp_date FÖRE det här datumet är avslutade. De dagliga: i dag.
+ *  Guld: veckans måndag — guld-setet ligger på måndagen och är öppet hela
+ *  veckan, så "före i dag" vore sant redan på tisdagen mitt i tävlingen. */
+export function avslutadFore(form: TavlingsForm, idagISO: string): string {
+  return form === 'guld' ? veckansMandag(idagISO) : idagISO
+}
+
+export function arAvslutat(set: AvslutSet, idagISO: string): boolean {
+  return set.comp_date < avslutadFore(set.form ?? 'mp', idagISO)
+}
+
+/** Datumet N dagar före ett ISO-datum (kalenderdagar, tidszonsfritt). */
+function dagarFore(iso: string, n: number): string {
+  const d = new Date(`${iso}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() - n)
+  return d.toISOString().slice(0, 10)
+}
+
+/** Skrivs ställningen om varje natt fast den redan finns? De dagliga: de
+ *  `omskrivDagar` senaste dagarna (en sen granskningsflytt ska landa). Guld:
+ *  förra veckan, hela veckan efter. */
+export function skaSkrivasOm(set: AvslutSet, idagISO: string, omskrivDagar = 3): boolean {
+  if ((set.form ?? 'mp') === 'guld') return set.comp_date >= dagarFore(veckansMandag(idagISO), 7)
+  return set.comp_date >= dagarFore(idagISO, omskrivDagar)
+}
 
 /** En spelares slutliga rad för en dag (id opakt — servern översätter). */
 export interface StällningsRad {

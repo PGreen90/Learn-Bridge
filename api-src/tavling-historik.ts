@@ -15,7 +15,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { stockholmDateISO } from '../src/lib/engine/daily'
 import type { Tävlingsrad } from '../src/lib/engine/matchpoints'
-import { byggStallning, MIN_PER_GIV, raknaMedaljer } from '../src/lib/engine/tavlingsavslut'
+import { avslutadFore, byggStallning, MIN_PER_GIV, raknaMedaljer } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet, restGetAlla } from './_lib/supabase-rest'
 import { lasForm } from './_lib/tavlingsdag'
@@ -69,15 +69,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     // OCH medaljtabellen per form (ägarbeslut: en medaljtabell per form).
     const form = lasForm(new URL(req.url ?? '', 'http://x').searchParams.get('form'))
     if (form === 'ogiltig') return json(400, { ok: false, fel: 'Ogiltig tävlingsform' })
-    // Guld-tävlingen (2026-11-11) har ingen historik än: veckan fryses inte i
-    // daily_standings, och dagslistan här bygger på "före i dag" = avslutad.
-    if (form === 'guld') return json(400, { ok: false, fel: 'Guld-tävlingen har ingen historik än' })
-
+    // Guld-tävlingen (historik sedan 2026-11-12): listan är avslutade VECKOR.
+    // `dag` i svaret är då veckans måndag, och veckan som pågår är inte med.
     const idag = stockholmDateISO()
     const sets = await restGetAlla<SetRad>(
       base,
       key,
-      `daily_sets?comp_date=lt.${idag}&form=eq.${form}&select=id,comp_date,daily_number,size&order=comp_date.desc`,
+      `daily_sets?comp_date=lt.${avslutadFore(form, idag)}&form=eq.${form}&select=id,comp_date,daily_number,size&order=comp_date.desc`,
     )
     const setIds = new Set(sets.map((s) => s.id))
 

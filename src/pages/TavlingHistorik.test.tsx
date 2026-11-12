@@ -177,6 +177,42 @@ describe('tävlingshistoriken', () => {
     expect(screen.queryByRole('button', { name: /dagar till/ })).not.toBeInTheDocument()
   })
 
+  it('guld-tävlingen (?form=guld): veckor i stället för dagar, egen medaljtabell, länk tillbaka', async () => {
+    historikMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        dagar: [
+          { dag: '2026-11-16', nummer: 2, storlek: 12, antalSpelare: 6, slutlig: false, du: { placering: 3, snitt: 51.2, spelade: 12 } },
+          { dag: '2026-11-09', nummer: 1, storlek: 12, antalSpelare: 7, slutlig: true, du: { placering: 1, snitt: 63.4, spelade: 12 } },
+        ],
+        medaljer: [{ namn: 'Green', guld: 1, silver: 0, brons: 0, jag: true }],
+      },
+    })
+    renderSida('/spela-kort/tavling/historik?form=guld')
+    expect(await screen.findByText('Tävlingsveckor')).toBeInTheDocument()
+    expect(historikMock).toHaveBeenCalledWith('guld')
+    expect(screen.getByRole('tab', { name: 'Guld' })).toHaveAttribute('aria-selected', 'true')
+    // Raden visar veckan (måndag–söndag), inte bara måndagens datum.
+    expect(screen.getByTitle('Visa tävling #1')).toHaveTextContent('9–15 nov')
+    expect(screen.getByTitle('Visa tävling #1')).toHaveTextContent('🥇')
+    expect(screen.getByTitle('Visa tävling #2')).toHaveTextContent('16–22 nov')
+    expect(screen.getByText(/en tävlingsvecka med minst två spelare/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Veckans guld-tävling/ })).toHaveAttribute('href', '/spela-kort/tavling?form=guld')
+
+    // Klick på en vecka → veckans vy hämtas med måndagen som dag och formen guld.
+    fireEvent.click(screen.getByTitle('Visa tävling #1'))
+    expect(await screen.findByText('Guld')).toBeInTheDocument()
+    expect(tavlingMock).toHaveBeenCalledWith('2026-11-09', 'guld')
+    expect(topplistaMock).toHaveBeenCalledWith('2026-11-09', 'guld')
+  })
+
+  it('guld utan avslutad vecka: säger att veckans tävling pågår', async () => {
+    historikMock.mockResolvedValue({ status: 'ok', data: { dagar: [], medaljer: [] } })
+    renderSida('/spela-kort/tavling/historik?form=guld')
+    expect(await screen.findByText(/Ingen avslutad vecka än/)).toBeInTheDocument()
+    expect(screen.getByText(/räknas när en tävlingsvecka avslutats/)).toBeInTheDocument()
+  })
+
   it('dagvyn (klick på en dag): hämtar den dagen, visar ställningen (slutlig) och alla brickor', async () => {
     renderSida()
     fireEvent.click(await screen.findByTitle('Visa tävling #41'))

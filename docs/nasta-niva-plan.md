@@ -99,9 +99,13 @@ obegränsat förråd, ingen kan känna igen en känd giv.
 - **Veckojobbet** `guld-tavling.yml` (söndagar 18:10 UTC, eller för hand):
   väljer nästa veckas tolv givar, lägger upp dem och låter datorspelarna spela.
   Urvalsfröet härleds ur hemligheten + veckan. Loggen skriver aldrig ut händer.
-- **Medvetet utanför första versionen:** historik och medaljer för guld
-  (ställningen fryses inte i daily_standings), nattens djupgranskning av
-  inskicken, förscreening av givarna.
+- **Historik + medaljtabell (ägarbeslut 2026-11-12):** avslutade VECKOR listas
+  på historiksidan (`?form=guld`, fliken "Guld") med egen topp 5 i medaljer.
+  En guld-vecka är avslutad när veckan är slut (`arAvslutat` i
+  `tavlingsavslut.ts` — EN regel för listan och för nattens frysning i
+  daily_standings). Medaljerna syns efter nattjobbet natten mot tisdag.
+- **Medvetet utanför första versionen:** nattens djupgranskning av inskicken,
+  förscreening av givarna.
 - **Kända svagheter att följa upp efter första veckan:** allt vilar på
   double-dummy ("går precis hem" kan betyda "bara med öppna kort") · bottarna
   får dåligt resultat på många utvalda givar, så toppen kan bli billig ·
