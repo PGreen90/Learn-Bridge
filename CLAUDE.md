@@ -91,7 +91,7 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Guld-tävlingens uppföljning** — siffrorna efter första veckan (bottarna, urvalet), historik/medaljer.
+1. **Guld-tävlingens uppföljning** — siffrorna efter första veckan (bottarna, urvalet); kolla att vecka 1 frystes.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

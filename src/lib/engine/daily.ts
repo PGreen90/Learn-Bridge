@@ -159,6 +159,18 @@ export function veckansMandag(dateISO: string): string {
   return d.toISOString().slice(0, 10)
 }
 
+/** "9–15 nov" / "30 nov–6 dec": veckan måndag–söndag ur måndagens datum. */
+export function veckoText(mandagISO: string): string {
+  const MANAD = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
+  const man = new Date(`${mandagISO}T12:00:00Z`)
+  const son = new Date(man)
+  son.setUTCDate(son.getUTCDate() + 6)
+  const slut = `${son.getUTCDate()} ${MANAD[son.getUTCMonth()]}`
+  return man.getUTCMonth() === son.getUTCMonth()
+    ? `${man.getUTCDate()}–${slut}`
+    : `${man.getUTCDate()} ${MANAD[man.getUTCMonth()]}–${slut}`
+}
+
 /** Första guld-veckans måndag — tävling nr 1. */
 export const GULD_PREMIAR = '2026-11-09'
 

@@ -504,17 +504,15 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
         <TopplistaVy resultat={topplista} kort />
 
         {/* Tidigare dagar + medaljtabellen (Påbyggnad 3, etapp D3). */}
-        {/* Guld-tävlingen har ingen historik än (första versionen). */}
-        {form !== 'guld' && (
-          <div className="flex justify-center">
-            <Link
-              to={`/spela-kort/tavling/historik${formQuery(form)}`}
-              className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
-            >
-              Tidigare tävlingar & medaljer →
-            </Link>
-          </div>
-        )}
+        {/* Guld-tävlingen har egen historik (veckor) och medaljtabell sedan 2026-11-12. */}
+        <div className="flex justify-center">
+          <Link
+            to={`/spela-kort/tavling/historik${formQuery(form)}`}
+            className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
+          >
+            Tidigare tävlingar & medaljer →
+          </Link>
+        </div>
 
         {/* Användarnas röst (2026-11-11): tävlingsvyn saknar sidfot (helskärm),
             så "Tyck till" behöver en egen väg in här. */}

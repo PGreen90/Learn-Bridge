@@ -6,6 +6,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Readable } from 'node:stream'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { stockholmDateISO, veckansMandag } from '../src/lib/engine/daily'
 import handler from './tavling-historik'
 
 const BAS = 'https://exempel.supabase.co'
@@ -227,6 +228,26 @@ describe('tavling-historik — Dagens IMP (?form=imp, 2026-09-26)', () => {
     expect(dag5.du).toEqual({ placering: 1, snitt: 20, spelade: 2 })
     // Frusna dagar läses som de är — talet är IMP-summan där (formen säger det).
     expect(body.dagar!.find((d) => d.nummer === 1)!.du).toEqual({ placering: 2, snitt: 55.25, spelade: 12 })
+  })
+
+  test('?form=guld: avslutade VECKOR — veckan som pågår är inte med (ägarbeslut 2026-11-12)', async () => {
+    const { fn, setAnrop } = mockaFetch()
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('GET', 't', '/api/tavling-historik?form=guld'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(body.form).toBe('guld')
+    expect(setAnrop[0]).toContain('form=eq.guld')
+    // Gränsen är veckans MÅNDAG, inte i dag: guld-setet ligger på måndagen och
+    // vore annars "avslutat" redan på tisdagen mitt i veckan.
+    expect(setAnrop[0]).toContain(`comp_date=lt.${veckansMandag(stockholmDateISO())}`)
+    // Listan och medaljtabellen byggs som för de dagliga (guld räknas i MP%).
+    expect(body.dagar!.find((d) => d.nummer === 1)!.du).toEqual({ placering: 2, snitt: 55.25, spelade: 12 })
+    // Ofrusen vecka i farten: två toppar + 40 % på de tio ospelade = 50 % (MP-räkning).
+    expect(body.dagar!.find((d) => d.nummer === 5)!.du).toEqual({ placering: 1, snitt: 50, spelade: 2 })
+    expect(body.medaljer![0]).toMatchObject({ namn: 'Green', jag: true })
+    expect(JSON.stringify(body)).not.toContain('is_bot')
   })
 
   test('okänd form → 400', async () => {

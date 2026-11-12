@@ -21,15 +21,18 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../components/AuthProvider'
 import { useTillbakaHit } from '../lib/efter-inloggning'
+import { veckoText } from '../lib/engine/daily'
 import { Button } from '../components/Button'
 import {
   enhetText,
   fetchDagensTavling,
   fetchTavlingHistorik,
   fetchTopplista,
+  formQuery,
   formTitel,
   givTal,
   talText,
+  tolkaForm,
   type TavlingsForm,
   type BrickaRad,
   type HistorikDag,
@@ -51,6 +54,12 @@ export function kortDatum(iso: string): string {
   return `${d} ${MÅNAD[(m ?? 1) - 1] ?? ''}`
 }
 
+/** Guld-tävlingen går per vecka: orden och datumraden följer formen. */
+const arVecka = (form: TavlingsForm) => form === 'guld'
+const periodText = (dagISO: string, form: TavlingsForm) => (arVecka(form) ? veckoText(dagISO) : kortDatum(dagISO))
+/** Korta flikar (tre ska rymmas på en telefon). */
+const FLIK: Record<TavlingsForm, string> = { mp: 'Dagens MP%', imp: 'Dagens IMP', guld: 'Guld' }
+
 /** Svensk ordningsföljd: 1:a, 2:a, 3:e, 4:e … */
 export function placeringText(n: number): string {
   return `${n}:${n === 1 || n === 2 ? 'a' : 'e'}`
@@ -61,8 +70,8 @@ export function TavlingHistorik() {
   const tillbaka = useTillbakaHit()
   const [params, setParams] = useSearchParams()
   const dag = params.get('dag')
-  const form: TavlingsForm = params.get('form') === 'imp' ? 'imp' : 'mp'
-  const formParam: Record<string, string> = form === 'imp' ? { form: 'imp' } : {}
+  const form: TavlingsForm = tolkaForm(params.get('form'))
+  const formParam: Record<string, string> = form === 'mp' ? {} : { form }
 
   if (authLoading) return null
   if (!signedIn) {
@@ -87,7 +96,7 @@ export function TavlingHistorik() {
       key={form}
       form={form}
       onVäljDag={(d) => setParams({ ...formParam, dag: d })}
-      onVäljForm={(f) => setParams(f === 'imp' ? { form: 'imp' } : {})}
+      onVäljForm={(f) => setParams(f === 'mp' ? {} : { form: f })}
     />
   )
 }
@@ -121,26 +130,28 @@ function Listvy({
       <div className="w-full max-w-xl space-y-6">
         <header className="text-center">
           <h1 className="font-brand text-2xl text-emerald-50">Tidigare tävlingar</h1>
-          <p className="text-sm text-emerald-100/70">Alla dagar sparas — och medaljerna räknas.</p>
+          <p className="text-sm text-emerald-100/70">
+            Alla {arVecka(form) ? 'veckor' : 'dagar'} sparas — och medaljerna räknas.
+          </p>
         </header>
 
         {/* Växlingen MP% / IMP (Dagens IMP, 2026-09-26): dagarna OCH
             medaljtabellen hör till en form i taget. */}
-        <div className="flex justify-center gap-2" role="tablist" aria-label="Tävlingsform">
-          {(['mp', 'imp'] as const).map((f) => (
+        <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="Tävlingsform">
+          {(['mp', 'imp', 'guld'] as const).map((f) => (
             <button
               key={f}
               type="button"
               role="tab"
               aria-selected={f === form}
               onClick={() => onVäljForm(f)}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold ring-1 transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-sm font-semibold ring-1 transition-colors ${
                 f === form
                   ? 'bg-gold-400/20 text-gold-100 ring-gold-400/50'
                   : 'bg-emerald-950/40 text-emerald-100/70 ring-emerald-100/10 hover:bg-emerald-900/40'
               }`}
             >
-              {formTitel(f)}
+              {FLIK[f]}
             </button>
           ))}
         </div>
@@ -151,14 +162,14 @@ function Listvy({
           <p className="text-center text-sm text-emerald-100/70">{historik.fel}</p>
         ) : (
           <>
-            <Medaljtabell medaljer={historik.data.medaljer} />
+            <Medaljtabell medaljer={historik.data.medaljer} form={form} />
             <Daglista key={form} dagar={historik.data.dagar} form={form} onVälj={onVäljDag} />
           </>
         )}
 
         <div className="flex flex-col items-center gap-2">
           <Link
-            to={form === 'imp' ? '/spela-kort/tavling?form=imp' : '/spela-kort/tavling'}
+            to={`/spela-kort/tavling${formQuery(form)}`}
             className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100"
           >
             ← {formTitel(form)}
@@ -171,13 +182,14 @@ function Listvy({
 }
 
 /** Topp 5 i guld/silver/brons. Datorspelarna räknas inte — sägs rakt ut. */
-function Medaljtabell({ medaljer }: { medaljer: Medaljrad[] }) {
+function Medaljtabell({ medaljer, form }: { medaljer: Medaljrad[]; form: TavlingsForm }) {
+  const period = arVecka(form) ? 'tävlingsvecka' : 'tävlingsdag'
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
       <h2 className="text-center font-brand text-lg text-gold-200">Medaljtabellen</h2>
       {medaljer.length === 0 ? (
         <p className="text-center text-sm text-emerald-100/70">
-          Inga medaljer utdelade än — de räknas när en tävlingsdag avslutats.
+          Inga medaljer utdelade än — de räknas när en {period} avslutats.
         </p>
       ) : (
         <table className="w-full text-sm">
@@ -206,7 +218,7 @@ function Medaljtabell({ medaljer }: { medaljer: Medaljrad[] }) {
         </table>
       )}
       <p className="text-center text-[11px] text-emerald-100/60">
-        Topp 5 · guld/silver/brons = plats 1/2/3 en tävlingsdag med minst två spelare · datorspelare
+        Topp 5 · guld/silver/brons = plats 1/2/3 en {period} med minst två spelare · datorspelare
         räknas inte i medaljtabellen.
       </p>
     </div>
@@ -222,12 +234,19 @@ function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: Tavlin
   const [antal, setAntal] = useState(DAGAR_PER_STEG)
   const dolda = Math.max(0, dagar.length - antal)
   const nasta = Math.min(DAGAR_PER_STEG, dolda)
+  const vecka = arVecka(form)
   if (dagar.length === 0) {
-    return <p className="text-center text-sm text-emerald-100/70">Inga avslutade tävlingsdagar än.</p>
+    return (
+      <p className="text-center text-sm text-emerald-100/70">
+        {vecka
+          ? 'Ingen avslutad vecka än — veckans tävling pågår till söndag kväll, sedan hamnar resultatet här.'
+          : 'Inga avslutade tävlingsdagar än.'}
+      </p>
+    )
   }
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
-      <h2 className="text-center font-brand text-lg text-gold-200">Tävlingsdagar</h2>
+      <h2 className="text-center font-brand text-lg text-gold-200">{vecka ? 'Tävlingsveckor' : 'Tävlingsdagar'}</h2>
       <ol className="space-y-1">
         {dagar.slice(0, antal).map((d) => {
           const välj = () => onVälj(d.dag)
@@ -249,7 +268,7 @@ function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: Tavlin
               className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-emerald-950/40 px-3 py-2 text-sm hover:bg-emerald-900/30"
             >
               <span className="text-emerald-50">
-                <span className="text-emerald-100/60">#{d.nummer}</span> · {kortDatum(d.dag)}
+                <span className="text-emerald-100/60">#{d.nummer}</span> · {periodText(d.dag, form)}
                 {!d.slutlig && <span className="ml-1 text-[11px] text-emerald-100/60">(provisorisk)</span>}
               </span>
               <span className="flex items-center gap-2 tabular-nums">
@@ -282,7 +301,7 @@ function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: Tavlin
           onClick={() => setAntal((n) => n + DAGAR_PER_STEG)}
           className="mx-auto block rounded px-3 py-1.5 text-xs text-emerald-100/70 hover:text-gold-200"
         >
-          Visa {nasta} dagar till <span aria-hidden="true">↓</span>
+          Visa {nasta} {vecka ? 'veckor' : 'dagar'} till <span aria-hidden="true">↓</span>
         </button>
       )}
     </div>
@@ -320,7 +339,7 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
   if (!tavling) {
     return (
       <Skärm>
-        <p className="text-sm text-emerald-100/60">Hämtar tävlingen {kortDatum(dag)} …</p>
+        <p className="text-sm text-emerald-100/60">Hämtar tävlingen {periodText(dag, form)} …</p>
       </Skärm>
     )
   }
@@ -329,10 +348,10 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
       <Skärm>
         <div className="max-w-sm space-y-3 text-center">
           <p className="text-emerald-100/80">
-            {tavling.status === 'ingen' ? 'Ingen tävling den dagen.' : tavling.fel}
+            {tavling.status === 'ingen' ? (arVecka(form) ? 'Ingen tävling den veckan.' : 'Ingen tävling den dagen.') : tavling.fel}
           </p>
           <button onClick={onTillbaka} className="text-sm font-semibold text-gold-200 underline underline-offset-2">
-            ← Alla tävlingsdagar
+            ← Alla {arVecka(form) ? 'tävlingsveckor' : 'tävlingsdagar'}
           </button>
         </div>
       </Skärm>
@@ -387,9 +406,9 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
       <div className="w-full max-w-xl space-y-6">
         <header className="flex items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-emerald-50">
-            {form === 'imp' ? 'IMP' : 'MP%'} <span className="text-gold-300">#{t.nummer}</span>
+            {form === 'imp' ? 'IMP' : form === 'guld' ? 'Guld' : 'MP%'} <span className="text-gold-300">#{t.nummer}</span>
           </h1>
-          <span className="text-sm text-emerald-100/70">{kortDatum(t.dag)}</span>
+          <span className="text-sm text-emerald-100/70">{periodText(t.dag, form)}</span>
         </header>
 
         <DinStällning resultat={topplista} total={t.storlek} />
@@ -398,7 +417,7 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
 
         <div className="flex flex-col items-center gap-2">
           <button onClick={onTillbaka} className="text-sm font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
-            ← Alla tävlingsdagar
+            ← Alla {arVecka(form) ? 'tävlingsveckor' : 'tävlingsdagar'}
           </button>
           <HemLänk />
         </div>
