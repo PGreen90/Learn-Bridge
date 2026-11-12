@@ -1,4 +1,4 @@
-// Facit för Veckans guld-tävling på servern (ägarbeslut 2026-11-11): formen
+// Facit för Veckans stjärntävling på servern (ägarbeslut 2026-11-11): formen
 // 'guld', veckodatumet, frönyckeln — och att ett inskick valideras mot den
 // LAGRADE given utan att de dagliga tävlingarnas väg ändras en millimeter.
 

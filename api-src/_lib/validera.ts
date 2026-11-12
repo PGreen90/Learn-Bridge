@@ -83,7 +83,7 @@ export function validera(secret: string, nyckel: string, inskick: Inskick): Vali
 }
 
 /**
- * Validera ett inskick mot en FÄRDIG giv (Veckans guld-tävling, 2026-11-11).
+ * Validera ett inskick mot en FÄRDIG giv (Veckans stjärntävling, 2026-11-11).
  * De dagliga tävlingarna räknar fram given ur fröet (`validera` ovan) och
  * kommer hit med den; guld-tävlingens givar är utvalda och ligger lagrade i
  * daily_deals, så där läser servern raden och anropar den här direkt. Given

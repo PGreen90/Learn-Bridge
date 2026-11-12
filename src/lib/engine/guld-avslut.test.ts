@@ -1,5 +1,5 @@
 // Facit för guld-tävlingens AVSLUT (ägarbeslut 2026-11-12: historik + medaljer
-// även för Veckans guld-tävling). En daglig tävling är slut när dagen är slut;
+// även för Veckans stjärntävling). En daglig tävling är slut när dagen är slut;
 // guld-tävlingen ligger på veckans MÅNDAG och är slut först när veckan är slut.
 // Samma regel styr både historikens lista och nattens frysning av ställningen.
 

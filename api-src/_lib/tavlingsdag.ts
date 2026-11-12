@@ -41,7 +41,7 @@ export function lasForm(rå: unknown): TavlingsForm | 'ogiltig' {
 }
 
 /**
- * Tävlingens datum i databasen för en form (Veckans guld-tävling, 2026-11-11).
+ * Tävlingens datum i databasen för en form (Veckans stjärntävling, 2026-11-11).
  * De dagliga formerna: dagen själv, oförändrat. Guld: veckans MÅNDAG — tävlingen
  * ligger som ETT set med comp_date = måndagen och är öppen hela veckan. Vilken
  * dag i veckan anropet än gäller pekar det på samma set, och `idag` betyder då

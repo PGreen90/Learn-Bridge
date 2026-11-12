@@ -55,14 +55,14 @@ export default async function handler(
     )) as Array<{ id: string; daily_number: number; comp_date: string; size: number }>
 
     if (!sets.length) {
-      const namn = form === 'imp' ? 'IMP-tävling' : form === 'guld' ? 'guld-tävling' : 'tävling'
+      const namn = form === 'imp' ? 'IMP-tävling' : form === 'guld' ? 'stjärntävling' : 'tävling'
       return json(404, {
         ok: false,
         fel:
           form === 'guld'
             ? valdDag.idag
-              ? 'Veckans guld-tävling är inte upplagd än'
-              : 'Ingen guld-tävling den veckan'
+              ? 'Veckans stjärntävling är inte upplagd än'
+              : 'Ingen stjärntävling den veckan'
             : valdDag.idag
               ? `Ingen ${namn} genererad för idag än`
               : `Ingen ${namn} den dagen`,

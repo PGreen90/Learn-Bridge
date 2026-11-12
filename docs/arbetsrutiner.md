@@ -91,6 +91,27 @@ EOF
 npx vitest run src/lib/engine/tmp-hp.test.ts >/dev/null 2>&1; rm src/lib/engine/tmp-hp.test.ts; cat "$TEMP/hp.txt"
 ```
 
+## 📣 Regel: kommunicera uppdateringen — "Uppdatering vX.Y.Z" (2026-11-12)
+> Ägarbeslut: användarna ska få veta vad som är nytt, i korta texter.
+
+Före varje publicering av något **användaren märker** FRÅGAR Claude ägaren:
+*"Ska det här kommuniceras?"* — och visar förslaget på text. Aldrig på eget
+bevåg, aldrig överhoppat. (Rena rättningar, dokument och inre städning: nej
+utan fråga.)
+
+Om ja, i samma ändring:
+1. Höj sista siffran i `version` i `package.json` (och de två översta i
+   `package-lock.json`).
+2. Lägg en post ÖVERST i `src/lib/nyheter.ts` med samma version.
+3. Håll det kort: högst fyra punkter, rubrik två–tre ord, en rad text som säger
+   vad användaren FÅR — inte vad som byggdes. Flera småsaker samlas hellre i
+   en uppdatering än i tre.
+
+Vakten `src/lib/nyheter.test.ts` kräver att versionen och översta posten
+följs åt och att texterna håller längdgränserna. Rutan visas en gång per
+användare och version, bara på lugna sidor; alla poster nås via
+versionsnumret i sidfoten.
+
 ## 🔴 Sessionsavslut (avsluta smart & noggrant)
 > Mål: inget lämnas trasigt, allt är sparat, och nästa start blir lätt.
 

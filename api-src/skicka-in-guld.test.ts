@@ -1,4 +1,4 @@
-// Facit för inskicket till Veckans guld-tävling (2026-11-11): servern hittar
+// Facit för inskicket till Veckans stjärntävling (2026-11-11): servern hittar
 // VECKANS set (måndagen), läser SIN EGEN lagrade giv och validerar mot den —
 // klienten kan varken byta giv eller hitta på ett resultat. Och de dagliga
 // tävlingarna rör aldrig den vägen.

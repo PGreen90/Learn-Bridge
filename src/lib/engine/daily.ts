@@ -140,7 +140,7 @@ export function tavlingShareText({
   antalSpelare: number
   resultat: string
 }): string {
-  const namn = form === 'imp' ? 'Dagens IMP' : form === 'guld' ? 'Veckans guld-tävling' : 'Dagens MP%'
+  const namn = form === 'imp' ? 'Dagens IMP' : form === 'guld' ? 'Veckans stjärntävling' : 'Dagens MP%'
   return [
     `rebidz · ${namn} #${nummer}`,
     `Jag fick ${resultat} — plats ${placering} av ${antalSpelare} just nu. Slår du det?`,
@@ -148,7 +148,7 @@ export function tavlingShareText({
   ].join('\n')
 }
 
-// === Veckans guld-tävling (ägarbeslut 2026-11-11) ============================
+// === Veckans stjärntävling (ägarbeslut 2026-11-11) ============================
 
 /** Måndagen i veckan som `dateISO` (YYYY-MM-DD) ligger i. Räknat mitt på dagen
  *  UTC så sommartidsbyten aldrig flyttar datumet. */

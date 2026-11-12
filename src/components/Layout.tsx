@@ -6,6 +6,7 @@ import { farUppdateraSjalv } from '../lib/uppdatering'
 import { BrandMark, Wordmark } from './BrandMark'
 import { useAuth } from './AuthProvider'
 import { TyckTillKnapp } from './TyckTill'
+import { NyhetsRuta, VersionsKnapp } from './Nyheter'
 // Versionsnumret i sidfoten läses ur package.json — EN sanning, aldrig
 // hårdkodat i UI:t (ägarbeslut 2026-08-02: © + grundår + version i sidfoten).
 import pkg from '../../package.json'
@@ -290,6 +291,9 @@ export function Layout() {
           (en pågående giv ska aldrig kastas av en uppdatering). ✕ döljer raden
           för sessionen. Vid spelbordet ligger raden UPPTILL: i nederkant täckte
           den korten i handen (2026-11-12). */}
+      {/* "Uppdatering vX.Y.Z" (ägarbeslut 2026-11-12): en gång per version, bara
+          på lugna sidor. Väntar tills inloggningsläget är känt. */}
+      {!authLoading && <NyhetsRuta pathname={location.pathname} signedIn={signedIn} />}
       {nyVersion !== null && (
         <div
           data-testid="ny-version"
@@ -331,7 +335,11 @@ export function Layout() {
                 raden flyttar sig. */}
             <p className="text-xs text-ink-muted">
               © <span className="font-brand text-sm">rebidz</span> · Est. 2026 ·
-              v{pkg.version} ·{' '}
+              <VersionsKnapp
+                version={pkg.version}
+                className="-my-1.5 inline-block py-1.5 underline underline-offset-2 hover:text-ink"
+              />{' '}
+              ·{' '}
               <NavLink to="/om" className="-my-1.5 inline-block py-1.5 underline underline-offset-2 hover:text-ink">
                 Om rebidz
               </NavLink>{' '}

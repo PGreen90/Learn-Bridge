@@ -40,7 +40,7 @@ export interface TavlingSpel {
 }
 
 /**
- * Spelas given UTAN hjälpmedel? Veckans guld-tävling (ägarbeslut 2026-11-11)
+ * Spelas given UTAN hjälpmedel? Veckans stjärntävling (ägarbeslut 2026-11-11)
  * spelas som vid ett riktigt bord: inga budrekommendationer och inget reglage
  * för budstöd. Det enda som finns kvar är vad buden BETYDER
  * när man trycker på dem — det vet man vid bordet också (systemet är känt).

@@ -38,7 +38,7 @@ export function enhetText(form: TavlingsForm | undefined): string {
 /** Rubriken för en tävlingsform i gränssnittet (ägarbeslut 2026-09-26;
  *  guld-tävlingen 2026-11-11). */
 export function formTitel(form: TavlingsForm | undefined): string {
-  return form === 'imp' ? 'Dagens IMP' : form === 'guld' ? 'Veckans guld-tävling' : 'Dagens MP%'
+  return form === 'imp' ? 'Dagens IMP' : form === 'guld' ? 'Veckans stjärntävling' : 'Dagens MP%'
 }
 
 /** Tolka en form ur något okänt (adressfält, serversvar): 'imp' och 'guld' är
@@ -449,6 +449,27 @@ export async function fetchTopplista(dag?: string, form?: TavlingsForm): Promise
     return { status: 'ok', data }
   } catch (err) {
     return { status: 'fel', fel: String(err instanceof Error ? err.message : err) }
+  }
+}
+
+/** Veckans stjärna (ägarbeslut 2026-11-12): vinnaren av den senast avslutade
+ *  stjärntävlingen. Publik uppgift (namn + snitt, som topplistan) — ingen
+ *  inloggning. null = ingen korad än, eller så gick hämtningen inte: bubblan
+ *  på startsidan är en krydda och får aldrig visa ett fel. */
+export interface VeckansStjarna {
+  namn: string
+  snitt: number
+  nummer: number
+}
+export async function fetchVeckansStjarna(): Promise<VeckansStjarna | null> {
+  try {
+    const res = await fetch('/api/topplista?form=guld&stjarna=1', { headers: { Accept: 'application/json' } })
+    if (!res.ok) return null
+    const s = ((await res.json()) as { stjarna?: Partial<VeckansStjarna> | null }).stjarna
+    if (!s || typeof s.namn !== 'string' || typeof s.snitt !== 'number') return null
+    return { namn: s.namn, snitt: s.snitt, nummer: typeof s.nummer === 'number' ? s.nummer : 0 }
+  } catch {
+    return null
   }
 }
 

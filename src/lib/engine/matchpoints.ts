@@ -77,7 +77,7 @@ export function matchpointsForBoard(entries: GivPoäng[]): GivMatchpoäng[] {
 // ===========================================================================
 
 /** Tävlingsformerna. Samma värden som kolumnen `daily_sets.form`.
- *  'guld' = Veckans guld-tävling (ägarbeslut 2026-11-11): tolv utvalda svåra
+ *  'guld' = Veckans stjärntävling (ägarbeslut 2026-11-11): tolv utvalda svåra
  *  givar, öppen måndag–söndag, räknad i MP% (se GULD_STRATEGI). */
 export type TavlingsForm = 'mp' | 'imp' | 'guld'
 

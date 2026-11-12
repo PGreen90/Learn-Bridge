@@ -58,7 +58,7 @@ export function kortDatum(iso: string): string {
 const arVecka = (form: TavlingsForm) => form === 'guld'
 const periodText = (dagISO: string, form: TavlingsForm) => (arVecka(form) ? veckoText(dagISO) : kortDatum(dagISO))
 /** Korta flikar (tre ska rymmas på en telefon). */
-const FLIK: Record<TavlingsForm, string> = { mp: 'Dagens MP%', imp: 'Dagens IMP', guld: 'Guld' }
+const FLIK: Record<TavlingsForm, string> = { mp: 'Dagens MP%', imp: 'Dagens IMP', guld: 'Stjärntävlingen' }
 
 /** Svensk ordningsföljd: 1:a, 2:a, 3:e, 4:e … */
 export function placeringText(n: number): string {
@@ -406,7 +406,7 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
       <div className="w-full max-w-xl space-y-6">
         <header className="flex items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-emerald-50">
-            {form === 'imp' ? 'IMP' : form === 'guld' ? 'Guld' : 'MP%'} <span className="text-gold-300">#{t.nummer}</span>
+            {form === 'imp' ? 'IMP' : form === 'guld' ? 'Stjärntävling' : 'MP%'} <span className="text-gold-300">#{t.nummer}</span>
           </h1>
           <span className="text-sm text-emerald-100/70">{periodText(t.dag, form)}</span>
         </header>
