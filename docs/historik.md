@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-11-12 (v1.0.1 — stjärntävlingen, UI-förfiningar, nyhetsrutan; LIVE 74a89bc)
+**Veckans guld-tävling** gick live (2d3eca6, vecka 1 upplagd, migration 0015 körd) och
+bytte samma dag namn till **Veckans stjärntävling** (kodformen heter kvar `guld`).
+**Veckans stjärna:** bästa människan i den senast avslutade veckan visas i en
+pratbubbla på startsidan (`/api/topplista?form=guld&stjarna=1`, publik; datorspelare
+koras aldrig). **Historik + medaljtabell** för stjärntävlingen (veckor); historiklistan
+visar tio i taget. **Klubbtopplistan struken** (ägarbeslut — föreslå inte igen).
+**UI:** appen uppdaterar sig själv på lugna sidor (`src/lib/uppdatering.ts`),
+uppdateringsraden upptill vid spelbordet · resultatrutan är en stående ruta i bordets
+mittkolumn (`Mittruta`) · startsidans tävlingskort visar status ur enhetens framsteg
+(`tavlingsstatus.ts`), en kontorad i stället för "Kräver konto" ×3, tätare på telefon.
+**Nyhetsrutan** "Uppdatering vX.Y.Z" (`nyheter.ts` + `Nyheter.tsx`) och regeln 📣 i
+arbetsrutinerna: fråga alltid ägaren om en ändring ska kommuniceras. Versionen börjar
+räknas härifrån (stod på 1.0.0 sedan starten). **SENARE:** vänner + bjud in med pushnotis.
+Oprövat skarpt: frysningen av vecka 1 (natten mot tisdag 17/11), bubblan med riktigt
+namn, en riktig versionsväxling, resultatrutan i tävlingsgiv, vänner-bordets resultatruta.
+
 ## 2026-11-11 (/felrapporter #113 — ingen fix, lås)
 **#113** (bricka 2, 3NT av Väst): "Nord ska avblockera med ♦Q". Mätt med double-dummy:
 Nord ♦Q7 mot Syds ♦J62 → damen och sjuan likvärdiga (sjuan slår Syds småkort); sticket

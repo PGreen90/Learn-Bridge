@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-11-11): kolla att nattkedjan gick (`gh run list
+> **NÄSTA SESSION BÖRJAR MED** (2026-11-12): fråga ägaren hur v1.0.1 togs emot (nyhetsrutan, veckans stjärna — bubblan får namn först efter måndag 16/11); kolla att nattkedjan gick (`gh run list
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
@@ -18,7 +18,7 @@ svarar på vad).
 Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. LIVE `2d3eca6`
 (2026-11-12), vecka 1 upplagd, `0015` körd; veckojobbet `guld-tavling.yml` går söndagar.
 Etapp 1–3 är LIVE (9187591). Ägaren synar "Så bjuder rebidz" + träningens texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**
-Senast LIVE: ångra ett steg + återuppta tävlingsgiv a6f4c06 · #108–#113 (historik.md).
+Senast LIVE: v1.0.1 `74a89bc` (namnbyte, veckans stjärna, nyhetsrutan — regel 📣 i arbetsrutiner.md) · #108–#113 (historik.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
