@@ -9,6 +9,26 @@
 
 ## ⚪ SENARE
 
+### Vänner + "bjud in spelare" med pushnotis (ägarönskemål 2026-11-12)
+Ägaren vill: (1) kunna lägga till vänner, (2) i Spela med vänner bjuda in en
+vän till bordet med en pushnotis, (3) en av/på-knapp för pushnotiser på
+profilen, på som standard. Lagt här enligt järnregeln (NU var guld-tävlingens
+live-prov). Det som måste avgöras innan bygget — allt är grindbeslut:
+- **Ny backend:** vänlista (vem får lägga till vem — förfrågan som godkänns,
+  eller fritt?), lagring av varje enhets pushadress, en serverfunktion som
+  skickar notisen. Ny personuppgift → integritetstext, export, radering.
+- **"På som standard" går inte fullt ut.** Webbläsaren kräver att användaren
+  själv säger ja till notiser på VARJE enhet; appen kan inte slå på dem åt
+  någon. Det närmaste: inställningen står på, och appen FRÅGAR vid ett
+  naturligt tillfälle (t.ex. första gången man öppnar Spela med vänner).
+- **iPhone:** pushnotiser från en webbapp fungerar bara om rebidz är lagd på
+  hemskärmen (iOS 16.4+). I Safari-fliken kommer inga notiser alls.
+- **Reserv utan push:** inbjudan syns ändå i appen (en rad "X bjuder in dig
+  till ett bord") för den som har appen öppen, så funktionen inte hänger på
+  att notisen kommer fram.
+- **Ordning:** vänlistan först (värde även utan push), sedan inbjudan i appen,
+  sist pushnotisen.
+
 ### Nästa nivå — etapp 4–5 och tilläggen (ägargodkänd plan 2026-11-11)
 Hela beskrivningen bor i `docs/nasta-niva-plan.md`. Här står bara det som väntar
 EFTER etapp 1–3 (som ligger i NU/NÄST):

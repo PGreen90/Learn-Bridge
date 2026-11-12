@@ -5,7 +5,7 @@
 // (som i verkligheten) och de spelade korten försvinner ur händerna. Vänsterpilen
 // («) stegar tillbaka. Svarta listen visar kontraktet + ställningen NS/ÖV.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { Card, Deal, Seat, Vulnerability } from '../types/bridge'
 import type { ResolvedCall } from '../lib/bidding'
 import type { Contract, PlayedCard, Trick } from '../lib/engine/play'
@@ -40,6 +40,7 @@ export function PlayReplay({
   calls,
   explanations = 'full',
   tone = 'club',
+  mittruta,
 }: {
   deal: Deal
   contract: Contract
@@ -49,6 +50,9 @@ export function PlayReplay({
   explanations?: 'full' | 'minimal'
   /** Dukens ton: vänner-bordets genomgång kör den vinröda duken. */
   tone?: FeltTone
+  /** Resultatrutan (ägarönskemål 2026-11-12): ritas I mittkolumnen, mellan
+   *  Väst och Öst och under Nord — den täcker aldrig korten, oavsett skärm. */
+  mittruta?: ReactNode
 }) {
   // `played` = antal färdigvisade stick. `anim` = hur många kort i NÄSTA stick
   // som hittills lagts på bordet (1–4 under uppspelningen, 0 = ingen uppspelning).
@@ -126,7 +130,12 @@ export function PlayReplay({
           och den täta auktionen (dense) är byggda att rymmas där. */}
       <div className="flex flex-1 items-center justify-between gap-1 px-1 py-2">
         <SideStack cards={handCards('W')} side="W" xl />
-        <div className="flex min-h-44 min-w-0 flex-1 items-center justify-center">
+        <div className="relative flex min-h-44 min-w-0 flex-1 items-center justify-center self-stretch">
+          {mittruta && (
+            // Rutan fyller mittkolumnen: bredden = det som blir över mellan
+            // sidohänderna, höjden = mittraden. Blir innehållet högre rullar det.
+            <div className="absolute inset-0 z-20 flex items-center justify-center">{mittruta}</div>
+          )}
           {shownCards ? (
             <TrickCenter cards={shownCards} winner={shownWinner} />
           ) : (
@@ -266,5 +275,22 @@ function ArrowButton({
     >
       {children}
     </button>
+  )
+}
+
+/** Resultatrutans kort (ägarönskemål 2026-11-12): en STÅENDE ruta som ryms
+ *  mellan sidohänderna. Smal på telefon (mittkolumnens bredd), högst 20rem på
+ *  breda skärmar; allt innehåll staplas lodrätt och rullar om det inte ryms. */
+export function Mittruta({ glow = false, children }: { glow?: boolean; children: ReactNode }) {
+  return (
+    <div
+      role="dialog"
+      aria-label="Resultat"
+      className={`dialog-in max-h-full w-full max-w-80 overflow-y-auto rounded-xl bg-panel p-3 text-center shadow-xl ring-1 ring-black/10 [&_button]:px-1.5 [&_button]:text-sm ${
+        glow ? 'result-made-glow' : ''
+      }`}
+    >
+      {children}
+    </div>
   )
 }
