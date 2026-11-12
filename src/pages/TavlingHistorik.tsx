@@ -152,7 +152,7 @@ function Listvy({
         ) : (
           <>
             <Medaljtabell medaljer={historik.data.medaljer} />
-            <Daglista dagar={historik.data.dagar} form={form} onVälj={onVäljDag} />
+            <Daglista key={form} dagar={historik.data.dagar} form={form} onVälj={onVäljDag} />
           </>
         )}
 
@@ -213,8 +213,15 @@ function Medaljtabell({ medaljer }: { medaljer: Medaljrad[] }) {
   )
 }
 
-/** Alla avslutade dagar, nyast först, med din placering. */
+/** Så många dagar visas först, och så många till per tryck (ägarönskemål 2026-11-12). */
+const DAGAR_PER_STEG = 10
+
+/** De avslutade dagarna, nyast först, med din placering. Bara de tio senaste
+ *  visas; raden under listan fyller på med tio till åt gången. */
 function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: TavlingsForm; onVälj: (dag: string) => void }) {
+  const [antal, setAntal] = useState(DAGAR_PER_STEG)
+  const dolda = Math.max(0, dagar.length - antal)
+  const nasta = Math.min(DAGAR_PER_STEG, dolda)
   if (dagar.length === 0) {
     return <p className="text-center text-sm text-emerald-100/70">Inga avslutade tävlingsdagar än.</p>
   }
@@ -222,7 +229,7 @@ function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: Tavlin
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
       <h2 className="text-center font-brand text-lg text-gold-200">Tävlingsdagar</h2>
       <ol className="space-y-1">
-        {dagar.map((d) => {
+        {dagar.slice(0, antal).map((d) => {
           const välj = () => onVälj(d.dag)
           const medalj =
             d.du?.placering === 1 ? '🥇' : d.du?.placering === 2 ? '🥈' : d.du?.placering === 3 ? '🥉' : null
@@ -269,6 +276,15 @@ function Daglista({ dagar, form, onVälj }: { dagar: HistorikDag[]; form: Tavlin
           )
         })}
       </ol>
+      {dolda > 0 && (
+        <button
+          type="button"
+          onClick={() => setAntal((n) => n + DAGAR_PER_STEG)}
+          className="mx-auto block rounded px-3 py-1.5 text-xs text-emerald-100/70 hover:text-gold-200"
+        >
+          Visa {nasta} dagar till <span aria-hidden="true">↓</span>
+        </button>
+      )}
     </div>
   )
 }

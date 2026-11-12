@@ -145,6 +145,38 @@ describe('tävlingshistoriken', () => {
     expect(screen.getByTitle('Visa tävling #39')).not.toHaveTextContent('spelade inte')
   })
 
+  it('långa listan: bara de tio senaste dagarna visas, "Visa 10 dagar till" fyller på', async () => {
+    // 23 dagar, nyast först (#123 … #101).
+    const dagar = Array.from({ length: 23 }, (_, i) => ({
+      dag: `2026-10-${String(23 - i).padStart(2, '0')}`,
+      nummer: 123 - i,
+      storlek: 12,
+      antalSpelare: 5,
+      slutlig: true,
+      du: null,
+    }))
+    historikMock.mockResolvedValue({ status: 'ok', data: { dagar, medaljer: [] } })
+    renderSida()
+    expect(await screen.findByTitle('Visa tävling #123')).toBeInTheDocument()
+    expect(screen.getByTitle('Visa tävling #114')).toBeInTheDocument()
+    expect(screen.queryByTitle('Visa tävling #113')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Visa 10 dagar till/ }))
+    expect(screen.getByTitle('Visa tävling #104')).toBeInTheDocument()
+    expect(screen.queryByTitle('Visa tävling #103')).not.toBeInTheDocument()
+
+    // Bara tre kvar: raden säger det, och efter trycket finns ingen rad kvar.
+    fireEvent.click(screen.getByRole('button', { name: /Visa 3 dagar till/ }))
+    expect(screen.getByTitle('Visa tävling #101')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /dagar till/ })).not.toBeInTheDocument()
+  })
+
+  it('korta listan (högst tio dagar) har ingen "visa fler"-rad', async () => {
+    renderSida()
+    expect(await screen.findByTitle('Visa tävling #42')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /dagar till/ })).not.toBeInTheDocument()
+  })
+
   it('dagvyn (klick på en dag): hämtar den dagen, visar ställningen (slutlig) och alla brickor', async () => {
     renderSida()
     fireEvent.click(await screen.findByTitle('Visa tävling #41'))
