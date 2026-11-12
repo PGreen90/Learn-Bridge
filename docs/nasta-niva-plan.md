@@ -262,12 +262,12 @@ gäller) ovanför övningen, hämtad/länkad ur `docs/budsystem.md` så det finn
 - **Verifiering:** de dagliga tävlingarna ska ge identiska resultat före/efter
   ombygget av `validera()` (0-diff på en veckas inskick) innan veckotävlingen släpps.
 
-### Etapp 5 — Klubben (mitt starkaste tillägg)
+### Etapp 5 — Klubbtopplistan: STRUKEN (ägarbeslut 2026-11-12)
 
-**Klubbtopplista:** ett konto kan gå med i en grupp via kod/länk och se dagens lista
-filtrerad på gruppen. Det är detta som gör att en klubbkamrat kommer tillbaka i
-morgon. Kräver ny tabell + GDPR-genomgång → eget grindbeslut enligt
-`docs/beslut-b-plan.md`.
+Struken helt, inte parkerad: den ligger varken i NÄST eller SENARE och ska inte
+föreslås igen. Den tas bara upp om ägaren själv ber om den. Skälet: med få
+spelare är den vanliga topplistan redan gängets lista, och bygget kostar ny
+tabell, ny personuppgift och gruppnamn att hålla efter.
 
 ### Fler förslag (läggs i SENARE, i min prioritetsordning)
 

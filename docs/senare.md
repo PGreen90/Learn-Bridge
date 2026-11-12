@@ -14,8 +14,6 @@ Hela beskrivningen bor i `docs/nasta-niva-plan.md`. Här står bara det som vän
 EFTER etapp 1–3 (som ligger i NU/NÄST):
 - **Etapp 4 — veckans mästerskap:** riktiga givar ur gamla mästerskap som en egen
   veckotävling. Grind 0 före all kod: källa och rättigheter.
-- **Etapp 5 — klubbtopplista:** gå med i en grupp via kod/länk, dagens lista
-  filtrerad på gruppen. Ny tabell + GDPR-genomgång = eget grindbeslut.
 - **Tilläggen, i ordning:** tävlingsstreak + spelarstatistik · påminnelse om dagens
   tävling · par-kontrakt + DD-tabell i tävlingsgranskningen · "utmana en vän på
   samma givar" · publik förslagslista med röstning.
