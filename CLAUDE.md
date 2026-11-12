@@ -94,7 +94,7 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 1. **Guld-tävlingens uppföljning** — siffrorna efter första veckan (bottarna, urvalet); kolla att vecka 1 frystes.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
-speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
+**vänner + bjud in med pushnotis** · speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal
 subagent-användning · störda 1NT-auktioner nästa lager · spelmotor-kvalitet (tredje hand högt i trumf) · utspelsförfining ·
 engelska som andra språk (Fas 5) · auto-facit på hela given i webworker · den
 starka dubblaren säljer given i rond 2 · **svep: partnerskapsplikter i konkurrens**
