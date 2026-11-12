@@ -14,7 +14,7 @@ svarar på vad).
 > --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Veckans guld-tävling: live-prov med vännerna (ägarval 2026-11-11)
+### 🔵 NU — Veckans stjärntävling (f.d. guld, kodform `guld`): live-prov (ägarval 2026-11-11)
 Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. LIVE `2d3eca6`
 (2026-11-12), vecka 1 upplagd, `0015` körd; veckojobbet `guld-tavling.yml` går söndagar.
 Etapp 1–3 är LIVE (9187591). Ägaren synar "Så bjuder rebidz" + träningens texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**

@@ -20,7 +20,7 @@
 //     DESSA metoder blir ASYNKRONA då (Promise) — se TODO nedan; sidorna som
 //     läser dem synkront i dag måste skrivas om till await/effekt vid det bytet.
 
-import { clearAllProgress, loadValue, saveValue } from '../storage'
+import { clearAllProgress, harSparat, loadValue, saveValue } from '../storage'
 import type { TavlingsForm } from '../engine/matchpoints'
 import type { Theme } from '../theme'
 import type { PlaySpeed } from '../../pages/play/tempo'
@@ -34,6 +34,20 @@ import type { Traningsmiss } from '../engine/traning'
 // ===========================================================================
 // ENHET — bor lokalt för alltid (även med konto i etapp 1).
 // ===========================================================================
+
+/** Nyhetsrutan (2026-11-12): senaste versionen vars "Uppdatering v…" man
+ *  stängt. Råvärde — olastNyhet validerar. null = aldrig sett någon. */
+export function loadSeddNyhet(): unknown {
+  return loadValue<unknown>('sedd-nyhet', null)
+}
+export function saveSeddNyhet(version: string): void {
+  saveValue('sedd-nyhet', version)
+}
+/** Har appen sparat något här förut (tema, framsteg, historik …)? Då är det en
+ *  befintlig användare, som ska få veta vad som är nytt. */
+export function harSparatLokalt(): boolean {
+  return harSparat(['sedd-nyhet'])
+}
 
 /** Sparat läge-val: 'light'/'dark', eller null = "följ systemet". */
 export function loadTheme(): Theme | null {

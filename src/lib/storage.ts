@@ -22,6 +22,21 @@ export function saveValue<T>(key: string, value: T): void {
   }
 }
 
+/** Finns NÅGOT sparat av appen på den här enheten? (Nyhetsrutan: en helt ny
+ *  besökare ska inte få "nyheter".) `utom` = nycklar som inte räknas. */
+export function harSparat(utom: string[] = []): boolean {
+  try {
+    const hoppa = new Set(utom.map((k) => PREFIX + k))
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (k && k.startsWith(PREFIX) && !hoppa.has(k)) return true
+    }
+  } catch {
+    // ignorera
+  }
+  return false
+}
+
 /** Radera ALLT appen sparat (används av "Nollställ framsteg"). */
 export function clearAllProgress(): void {
   try {

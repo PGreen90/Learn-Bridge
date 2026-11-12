@@ -28,15 +28,18 @@ CPU-svultna byggare gav "myntkast"-röda deployer på frisk kod (bakgrund:
    Guarden körs nu i Actions på **Linux (LF)**, så den gamla CRLF-fällan är borta.
    Är du osäker, mät bloben: `git add CLAUDE.md && git cat-file -s :CLAUDE.md`.
    Filen ligger ibland nära taket — en tillagd rad kan spränga gränsen.
-4. **Fråga alltid ägaren före commit/push/deploy** (projektregel, undantagslöst).
+4. **Ska uppdateringen kommuniceras?** Märker användaren ändringen: fråga
+   ägaren och visa textförslaget. Om ja → höj `version` i `package.json` + ny
+   post överst i `src/lib/nyheter.ts` (regeln 📣 i `docs/arbetsrutiner.md`).
+5. **Fråga alltid ägaren före commit/push/deploy** (projektregel, undantagslöst).
    Commit-meddelanden avslutas med `Co-Authored-By`-raden.
 
 ## EFTER push — verifiera (push ≠ live)
-5. **Bevaka Actions-körningen tills den är grön** innan du säger att det är klart:
+6. **Bevaka Actions-körningen tills den är grön** innan du säger att det är klart:
    `gh run list --workflow=ci-deploy.yml --limit 1` → `gh run watch <id> --exit-status`.
    Ett rött steg: `gh run view <id> --log-failed`. En grön körning aliasar
    `https://rebidz.com` (syns i deploy-stegets logg: "Aliased … Ready").
-6. **Rött bygge** → inget publiceras, förra deployen står kvar live. Laga och
+7. **Rött bygge** → inget publiceras, förra deployen står kvar live. Laga och
    pusha om — inget farligt är live under tiden.
 
 ## Rollback
