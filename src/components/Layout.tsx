@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { currentTheme, toggleTheme } from '../lib/theme'
 import { NY_VERSION_EVENT, type NyVersionDetail } from '../lib/sw-events'
+import { farUppdateraSjalv } from '../lib/uppdatering'
 import { BrandMark, Wordmark } from './BrandMark'
 import { useAuth } from './AuthProvider'
 import { TyckTillKnapp } from './TyckTill'
@@ -77,6 +78,18 @@ export function Layout() {
   // /bord/ = vänner-bordet (Beslut B etapp 4) — samma helskärm, vinröd duk.
   const immersive =
     location.pathname.startsWith('/spela-kort') || location.pathname.startsWith('/bord/')
+  // På en lugn sida (startsidan, läs-sidorna) byter appen version SJÄLV — ingen
+  // ska missa en nyhet för att de inte tryckt Uppdatera (ägarbeslut 2026-11-12).
+  // Prövas när en ny version upptäcks OCH varje gång man byter sida, så den som
+  // spelar klart en giv får nya versionen när hen går tillbaka till startsidan.
+  // Högst ett försök per sidladdning (updateSW laddar om sidan).
+  const uppdateratSjalv = useRef(false)
+  useEffect(() => {
+    if (nyVersion === null || uppdateratSjalv.current) return
+    if (!farUppdateraSjalv(location.pathname, document)) return
+    uppdateratSjalv.current = true
+    nyVersion.update()
+  }, [nyVersion, location.pathname])
 
   // Ljust/mörkt läge: månen tänder mörkret, solen släcker det.
   // Ikonknapparna (tema + ☰) är 40 px i FASTA pixlar med −4 px vertikal marginal
@@ -270,13 +283,22 @@ export function Layout() {
       {/* Sidfoten (faceliften 2026-08-02): klubbsignaturen ger varje sida ett
           golv — guldhårlinje + ordmärket i serifen, som kolofonen i en bok.
           Inte i spelvyn (immersiv) — där finns inget att scrolla förbi. */}
-      {/* "Ny version finns"-raden: en diskret glaspill i nederkant, samma
-          material som mobilmenyn. Visas på ALLA sidor (även spelbordet — där
-          är den extra viktig: gamla versionens sidor kan sluta gå att ladda).
-          Ingen auto-omladdning: användaren väljer själv när (en pågående giv
-          ska aldrig kastas av en uppdatering). ✕ döljer raden för sessionen. */}
+      {/* "Ny version finns"-raden: en diskret glaspill, samma material som
+          mobilmenyn. Visas på ALLA sidor (även spelbordet — där är den extra
+          viktig: gamla versionens sidor kan sluta gå att ladda). På lugna sidor
+          laddar appen om själv (effekten ovan); annars väljer användaren när
+          (en pågående giv ska aldrig kastas av en uppdatering). ✕ döljer raden
+          för sessionen. Vid spelbordet ligger raden UPPTILL: i nederkant täckte
+          den korten i handen (2026-11-12). */}
       {nyVersion !== null && (
-        <div className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 flex justify-center px-4">
+        <div
+          data-testid="ny-version"
+          className={`fixed inset-x-0 z-50 flex justify-center px-4 ${
+            immersive
+              ? 'top-[calc(0.5rem+env(safe-area-inset-top))]'
+              : 'bottom-[calc(0.75rem+env(safe-area-inset-bottom))]'
+          }`}
+        >
           <div className="flex items-center gap-3 rounded-2xl bg-white/75 px-4 py-2 shadow-xl ring-1 ring-gold-400/40 backdrop-blur-2xl backdrop-saturate-150 dark:bg-club-900/70">
             <span className="text-sm text-ink">Ny version finns</span>
             <button
