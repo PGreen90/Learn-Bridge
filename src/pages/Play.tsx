@@ -28,11 +28,11 @@ import {
 import { PlayingCard } from '../components/PlayingCard'
 import { SuitSymbol } from '../components/SuitSymbol'
 import { SuitText } from '../components/SuitText'
-import { PlayReplay } from '../components/PlayReplay'
+import { Mittruta, PlayReplay } from '../components/PlayReplay'
 import { AuctionGrid } from '../components/AuctionGrid'
 import { BidChip } from '../components/BidChip'
 import { Button } from '../components/Button'
-import { ClickAway, Dialog } from '../components/Dialog'
+import { ClickAway } from '../components/Dialog'
 import { FelrapportDialog } from '../components/FelrapportDialog'
 import { gameFromDeal, gameFromSeed, seatDealSouth, useGame, type Game } from './play/useGame'
 import { usePlayTable } from './play/usePlayTable'
@@ -717,23 +717,21 @@ export function PlayTable({
           tricks={play.completedTricks}
           calls={calls}
           explanations={bidHelp || utanHjalp ? 'full' : 'minimal'}
-        />
-        {!resultSeen && !reporting ? (
-          // Guldglow vid hemgång (etapp 5, ägarbeslut: inget konfetti) —
-          // engångs guldsvällning + skimmer på dialogkortet. Bet = sobert.
-          <Dialog className={`p-5 text-center ${headline.win ? 'result-made-glow' : ''}`}>
+          mittruta={
+            !resultSeen && !reporting ? (
+              <Mittruta glow={headline.win}>
               {/* Rubriken ur DITT perspektiv (Etapp C): att sätta deras
                   kontrakt är en vinst — inte "1 bet" i rött. */}
-              <p className={`mb-1 text-lg font-semibold ${headline.win ? 'text-accent' : 'text-danger'}`}>
+              <p className={`mb-1 text-base font-semibold leading-snug ${headline.win ? 'text-accent' : 'text-danger'}`}>
                 {headline.text}
               </p>
               {score && (
                 /* Guld = belöning (faceliften 2026-08-02): poängraden i guldserif
                    när DIN sida (N/S) fick poängen; motståndarnas poäng sobert. */
                 <p
-                  className={`${claimed ? 'mb-1' : 'mb-4'} text-base font-bold ${
+                  className={`${claimed ? 'mb-1' : 'mb-3'} text-sm font-bold ${
                     score.side === 'NS'
-                      ? 'font-brand text-lg text-gold-600 dark:text-gold-300'
+                      ? 'font-brand text-base text-gold-600 dark:text-gold-300'
                       : 'text-ink'
                   }`}
                 >
@@ -741,7 +739,7 @@ export function PlayTable({
                 </p>
               )}
               {claimed && (
-                <p className="mb-4 text-xs text-ink-muted">
+                <p className="mb-3 text-xs text-ink-muted">
                   {claimed.conceded
                     ? 'Ni gav upp — resten av sticken gick till spelföraren.'
                     : claimed.auto
@@ -749,11 +747,11 @@ export function PlayTable({
                       : 'Claim godkänd — resten av sticken bokfördes utan spel.'}
                 </p>
               )}
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-stretch gap-2">
                 {/* Dagens giv: delningen är huvudhandlingen — varje inklistrat
                     resultat i en chatt är en inbjudan att spela samma giv. */}
                 {daily && (
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex flex-col items-stretch gap-1">
                     {/* Streaken (Etapp B): anledningen att komma tillbaka i
                         morgon — visas från två dagar i rad. */}
                     {streak >= 2 && (
@@ -769,7 +767,7 @@ export function PlayTable({
                     )}
                   </div>
                 )}
-                <div className="flex justify-center gap-2">
+                <div className="flex flex-col gap-2">
                   <Button variant="secondary" onClick={() => setResultSeen(true)}>
                     Se omspelningen
                   </Button>
@@ -783,7 +781,7 @@ export function PlayTable({
                     Rondgenomgång
                   </Button>
                 </div>
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="flex flex-col gap-2">
                   {tavling?.övning ? (
                     /* Övning: fritt att spela om igen; "Tillbaka" landar på giv-
                        detaljvyn. Resultatet räknas ALDRIG (ingen inskickning). */
@@ -848,8 +846,11 @@ export function PlayTable({
               >
                 Kändes något fel? Rapportera given
               </button>
-          </Dialog>
-        ) : resultSeen ? (
+              </Mittruta>
+            ) : undefined
+          }
+        />
+        {resultSeen ? (
           <div className="mt-3 flex flex-col items-center gap-2">
             <div className="flex flex-wrap justify-center gap-2">
               {daily && <Button onClick={onShare}>Dela resultatet</Button>}
