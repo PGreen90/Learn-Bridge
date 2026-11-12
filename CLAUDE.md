@@ -15,8 +15,8 @@ svarar på vad).
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
 ### 🔵 NU — Veckans guld-tävling: live-prov med vännerna (ägarval 2026-11-11)
-Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. BYGGD; ägarstegen före
-live: köra migration `0015` i Supabase, sedan push + veckojobbet `guld-tavling.yml`.
+Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. LIVE `2d3eca6`
+(2026-11-12), vecka 1 upplagd, `0015` körd; veckojobbet `guld-tavling.yml` går söndagar.
 Etapp 1–3 är LIVE (9187591). Ägaren synar "Så bjuder rebidz" + träningens texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**
 Senast LIVE: ångra ett steg + återuppta tävlingsgiv a6f4c06 · #108–#113 (historik.md).
 
