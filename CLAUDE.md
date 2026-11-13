@@ -10,15 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-11-12): fråga ägaren hur v1.0.1 togs emot (nyhetsrutan, veckans stjärna — bubblan får namn först efter måndag 16/11); kolla att nattkedjan gick (`gh run list
-> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Vecka 16/11 är HANDPLOCKAD (bokgivar + berättelser, historik 11-13): kolla att söndagsjobbet lät den vara och att "Givens historia" syns. Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
+> **NÄSTA SESSION BÖRJAR MED** (2026-11-13): ägarbesked om förslagen #122 + #123 (öppna, historik 11-13) och om 19+ efter cue-höjningen (§7.1) ska gå via andra cuen; kolla att nattkedjan gick (`gh run list
+> --limit 6`) och hur v1.0.2 togs emot (11 hp + femkorts högfärg öppnar); sedan /felrapporter (+ köerna `forslag`, `tyck-till`). Vecka 16/11 är HANDPLOCKAD (historik 11-13): kolla att söndagsjobbet lät den vara och att "Givens historia" syns. Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
 ### 🔵 NU — Veckans stjärntävling (f.d. guld, kodform `guld`): live-prov (ägarval 2026-11-11)
 Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. LIVE `2d3eca6`
 (2026-11-12), vecka 1 upplagd, `0015` körd; veckojobbet `guld-tavling.yml` går söndagar.
 Etapp 1–3 är LIVE (9187591). Ägaren synar "Så bjuder rebidz" + träningens texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**
-Senast LIVE: v1.0.1 `74a89bc` (namnbyte, veckans stjärna, nyhetsrutan — regel 📣 i arbetsrutiner.md) · #108–#113 (historik.md).
+Senast LIVE: v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md) · #108–#113 (historik.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam

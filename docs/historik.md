@@ -10,6 +10,28 @@
 
 ---
 
+## 2026-11-13 (/felrapporter #116–#121 + #124 lagade, v1.0.2; LIVE 7d3caa6)
+Sju rapporter från ägarens kvällsspel 11-12/13, alla återskapade mot dagens motor
+(ingen var redan löst). **Motorfel:** #116 deras XX på partnerns återöppningsdubbling
+stängde svarsregeln → 2♠XX spelades; svaret står nu kvar (3♥, §5.9) · #117 försvaret
+fortsatte utspelsfärgen till dubbelrenons två gånger; ny §8.13 (`ruffSluffSuits`,
+renons visad eller räknad ur partnerns lovade längd) · #120 sex kort i en öppnad
+lågfärg bjuds om även på 4-läget efter partnerns negativa dubbling (4♦, §7.4) · #124
+redubblarens straffdubbling förklarades som negativ dubbling (gren 0 i
+`interpretDouble`). **Ägarbeslut:** #121 11 hp + exakt femkorts högfärg öppnar alltid
+1M i hand 1–3 oavsett zon (fjärde hand: regeln om 15; sexkortsfärgen är svag tvåa som
+förut) · #118 har partnern passat hoppar sexkortsfärg med 6–10 hp · #119 cue-höjningen
+efter högfärgsinkliv är inte utgångskrav: pass (<13 stödpoäng) / 3M (13–14) / cue en
+gång till (15–18, inklivaren 4M med 10+ annars 3M) / 4M (19+); aldrig 3NT med
+singel/renons. **Claudes fel:** frågan om #119 angav 13–14 stödpoäng för rapportens
+hand — med kod var den 18; rättat med en ny fråga, och ägaren gav då andra cuen.
+Raden 19+ → 4M direkt är Claudes antagande (ej ägarbeslut). **Följder:** tre
+fröbaserade lås fick givet förspel (`fortsatt`), löftet 12+ → 11+ för 1♥/1♠.
+Facit `auction-felrapport-116-124.test.ts`, `auction-felrapport-118-121.test.ts`,
+`play-bot-felrapport-117.test.ts`. **Öppna förslag (inget byggt):** #122 1♦–P–? med
+♠987 ♥Q96 ♦— ♣AQJ8742 (motorn 1NT, ägaren vill inte spela sang) · #123
+P–P–1♦–1♠–X–2♠–3♥–? med ♠AQT98 ♥J5 ♦A4 ♣QT43 (motorn pass, ägaren tävlar 3♠).
+
 ## 2026-11-13 (stjärntävlingen: givens berättelse + handplockad vecka)
 **Ägaridé:** givar ur Bridge Magazine januari 1975 (EM i Tel Aviv 1974, Camrose) som
 stjärntävling, med en kort berättelse om hur given spelades då. **Provet:** 18 kompletta
