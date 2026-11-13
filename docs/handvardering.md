@@ -63,6 +63,8 @@ ELLER startpoäng (TP) ≥ 12**. Två vägar (ägarens beslut 2026-06-30):
   tröskeln (t.ex. en platt 4-3-3-3 med 12 hp / 10 TP öppnar ändå).
 - **TP-upgrade:** en bra 11-hp-hand som når 12 TP (ess/tior/längd/kvalitet)
   öppnar också. En platt 11:a (TP < 12) avstår fortfarande.
+- **11 hp + femkorts högfärg öppnar alltid 1M** i hand 1–3, oavsett zon och
+  TP (ägarbeslut 2026-11-13, felrapport #121). Fjärde hand: regeln om 15.
 NT-stegen (1NT 15–17 osv.) är hp-definierade.
 
 ### Nivå 2 — Stödpoäng (svararen, vid fit i HÖGFÄRG)

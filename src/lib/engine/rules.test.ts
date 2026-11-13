@@ -112,6 +112,8 @@ const ALL_ENGINE_RULES: string[] = [
   
   'advancern tävlar till fiten (lagen om totala stick)', 'advancern bjuder utgång med fit (konkurrens)',
   'cue-höjningens fortsättning', 'cue-höjningens fortsättning (limit stannar)',
+  'cue-höjningens fortsättning (inbjudan)', 'inklivaren antar cue-inbjudan', 'inklivaren avböjer cue-inbjudan', // felrapport #119
+  'cue-höjningens fortsättning (andra cuen)', 'inklivaren svarar andra cuen (utgång)', 'inklivaren svarar andra cuen (minimum)', 'andra cuen: inklivaren var svag',
   'konkurrens-slaminvit (RKC)', 'konkurrens-slam: placering', 'konkurrens-slam: stopp',
   // Etapp 4 familj 2 (2026-09-08): dubblingsfamiljen (double-continuations.ts).
   'dubblaren höjer till 3NT', 'svar på dubblarens cue',

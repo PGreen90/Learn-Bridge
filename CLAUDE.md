@@ -183,7 +183,8 @@ projektets resa erfaren & trygg (ägarens egna ord 2026-08-13).
   **dev-beroende** för mätningar. Full bakgrund: `docs/arbetslista.md` punkt 28.
 - **Handvärdering:** HP/TP/stödpoäng/Bergen/spelstick — se `docs/handvardering.md`.
   **Låst regel:** en **12 HP-hand öppnar alltid** — TP får aldrig *nedgradera* en
-  öppningshand, bara uppgradera (bra 11:a öppnar) och nudga sang. TP-stegen A–F är
+  öppningshand, bara uppgradera (bra 11:a öppnar; 11 hp + femkorts högfärg öppnar
+  alltid, ägarbeslut 2026-11-13) och nudga sang. TP-stegen A–F är
   färdigbyggda (`docs/tp-arbetslista.md`).
 - **Spelstick (2026-07-01):** `playingTricks` i `evaluation.ts` — en hand med
   **≥ 8½ spelstick öppnar 2♣** även med HP < 22, så starka fördelningshänder inte

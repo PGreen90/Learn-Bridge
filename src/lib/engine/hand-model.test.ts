@@ -29,7 +29,7 @@ describe('buildHandModel – HP-liggaren ur auktionen (Steg 2 del 1)', () => {
     const m = buildHandModel(calls(['N', '1S']))
     expect(m.N.hcpMin).toBe(0)
     expect(m.N.hcpMax).toBe(21)
-    expect(m.N.minPoints).toBe(12)
+    expect(m.N.minPoints).toBe(11) // högfärgsöppning lovar 11+ (ägarbeslut 2026-11-13, #121)
   })
 
   it('passad hand (pass före något kontraktsbud) → högst 11 hp', () => {
@@ -59,9 +59,10 @@ describe('buildHandModel – HP-liggaren ur auktionen (Steg 2 del 1)', () => {
 })
 
 describe('buildHandModel – öppningslöftet i poäng (MC-urfallet fix 1, 2026-08-13)', () => {
-  it('1:a/2:a hand: minPoints 12 · 3:e hand: 10 (lättöppning) · 4:e hand: 9 (regeln om 15)', () => {
-    expect(buildHandModel(calls(['N', '1H'])).N.minPoints).toBe(12)
-    expect(buildHandModel(calls(['N', 'P'], ['E', '1H'])).E.minPoints).toBe(12)
+  it('1:a/2:a hand: minPoints 11 i högfärg, 12 i lågfärg · 3:e hand: 10 (lättöppning) · 4:e hand: 9 (regeln om 15)', () => {
+    expect(buildHandModel(calls(['N', '1H'])).N.minPoints).toBe(11)
+    expect(buildHandModel(calls(['N', 'P'], ['E', '1H'])).E.minPoints).toBe(11)
+    expect(buildHandModel(calls(['N', '1D'])).N.minPoints).toBe(12)
     expect(buildHandModel(calls(['N', 'P'], ['E', 'P'], ['S', '1H'])).S.minPoints).toBe(10)
     expect(buildHandModel(calls(['N', 'P'], ['E', 'P'], ['S', 'P'], ['W', '1H'])).W.minPoints).toBe(9)
   })

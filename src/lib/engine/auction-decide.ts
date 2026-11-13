@@ -166,7 +166,7 @@ import { partnerShownTrumpLength, slamAnswerContinuation, slamAnswerSeat, slamAs
 import { legalCalls } from './auction-rules'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
+import { overcallerAnswersCueInvite, secondCueBidderStops, advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, advancerAnswersSecondDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerDoublesAgain, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
@@ -2269,7 +2269,8 @@ const TABELL: Row[] = [
     läge: (f) => overcallSeat(f) !== null,
     välj: ({ hand, facts }) => {
       const s = overcallSeat(facts)!
-      const r = overcall(hand, s.openBid, s.balancing)
+      const partnerPassed = facts.history.some((c) => c.seat === facts.partner && c.bid === 'P')
+      const r = overcall(hand, s.openBid, s.balancing, partnerPassed)
       const note = s.balancing && r.call !== 'P' ? ' (balansering – utpassningsläget: lättare krav, "låna en kung")' : ''
       return { seat: facts.seat, bid: r.call as Bid, rule: r.rule, explanation: r.explanation + note, uncertain: r.uncertain }
     },
@@ -2344,6 +2345,8 @@ const TABELL: Row[] = [
         michaelsContinues(hand, facts) ??
         unusual2NTContinues(hand, facts) ??
         overcallerAnswersCue(hand, facts) ??
+        // Felrapport #119: cue-bjudarens 3M efter mitt minimisvar är en inbjudan
+        overcallerAnswersCueInvite(hand, facts) ??
         overcallerCompetesAfterCue(hand, facts) ??
         overcallerAnswersFitJump(hand, facts) ??
         // Felrapport #85/#86: efter advancerns enkla höjning (försök/invit/utgång/pass)
@@ -2385,7 +2388,8 @@ const TABELL: Row[] = [
         advancerAnswersOvercallerTry(hand, facts) ??
         advancerPrefersOvercallSuit(hand, facts) ??
         advancerCompetesToFit(hand, facts) ??
-        cueBidderContinues(hand, facts, 'inklivare')
+        cueBidderContinues(hand, facts, 'inklivare') ??
+        secondCueBidderStops(facts)
       if (k) return asCall(facts.seat, k)
       // Familj 5 (a): advancern efter deras X/höjning — höj med fit / egen färg /
       // sang (samma kunskap som `offBookResponse`, avgränsad till konkurrens).

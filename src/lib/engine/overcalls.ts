@@ -79,7 +79,7 @@ function bestOvercallSuit(len: Record<Suit, number>, their: Suit): Suit | null {
  * där form inte hör hemma: 1NT-fönstren (sang), inklivstaket 16, 17+-styrningen
  * och hoppinklivet (spärrmaterial ska förbli spärr).
  */
-export function overcall(hand: Hand, theirCall: string, balancing = false): ResponseResult {
+export function overcall(hand: Hand, theirCall: string, balancing = false, partnerPassed = false): ResponseResult {
   const their = openingSuit(theirCall)
   const pass: ResponseResult = { call: 'P', rule: 'pass', explanation: 'ingen lämplig aktion → pass.' }
   if (!their) return pass
@@ -169,7 +169,11 @@ export function overcall(hand: Hand, theirCall: string, balancing = false): Resp
   const ovPts = ov && goodSuit(hand, ov) && !preemptMaterial ? fp.points : p
   // Löftet: inklivsintervallet (taket 16 – 17+ dubblar; golvet sänks i balansering).
   const ovRange = `${8 - relief}–16 hp`
-  if (ov && ovPts >= 8 - relief && p <= 16) {
+  // Ägarbeslut 2026-11-13 (felrapport #118): HAR PARTNERN PASSAT är sexkorts-
+  // färg med 6–10 hp ett hoppinkliv (regel 6) — utgången är långt borta, så
+  // spärren väger tyngst. Utan partnerns pass kliver 8–10 in på 1-läget som förut.
+  const hoppEfterPass = partnerPassed && !balancing && preemptMaterial && p >= 6
+  if (ov && ovPts >= 8 - relief && p <= 16 && !hoppEfterPass) {
     const lvl = overcallLevel(ov, their)
     // Svagt hoppinkliv: 6-korts färg, 6–10 hp som annars hade krävt 2-läget.
     return { call: `${lvl}${BID[ov]}`, rule: 'enkelt inkliv', explanation: `${ovRange} med 5+ ${SYM[ov]} → ${lvl}${SYM[ov]} (inkliv).` }

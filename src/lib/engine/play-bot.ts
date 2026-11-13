@@ -627,6 +627,41 @@ export interface CardChoice {
  * för stickneutralitets-mätningen: jämför spel MED vs UTAN markeringar). */
 export interface ReasonedOpts {
   signals?: boolean
+  /** Partnerns LOVADE minimilängd per färg i ursprungshanden, läst ur
+   *  budgivningen (hand-modellen). Används för renons GENOM RÄKNING (§8.13). */
+  partnerLength?: Partial<Record<Suit, number>>
+}
+
+/**
+ * §8.13 (felrapport #117): färger där ett utspel ger DUBBELRENONS — träkarlen
+ * är renons och har trumf, och spelföraren är också renons (med trumf kvar).
+ * Då stjäl spelföraren på ena handen och sakar en förlorare på den andra.
+ * Spelförarens renons är antingen VISAD (sakade/stal i färgen) eller RÄKNAD:
+ * alla osedda kort i färgen ryms i det partnern lovat i budgivningen (jag har
+ * sex hjärter, partnern öppnade 1♥ = 5+, bordet hade en, spelföraren lade en).
+ * Ärlig räkning: egen hand + träkarlen + spelade kort + budgivningens löften.
+ */
+function ruffSluffSuits(state: PlayState, seat: Seat, partnerLength: Partial<Record<Suit, number>> = {}): Set<Suit> {
+  const out = new Set<Suit>()
+  const trump = state.trump
+  const declarer = state.contract.declarer
+  if (trump === null || side(seat) === side(declarer)) return out
+  const dummyHand = state.hands[dummyOf(state.contract)]
+  if (!dummyHand.some((c) => c.suit === trump)) return out
+  const voids = shownVoids(state)
+  if (voids[declarer].has(trump)) return out
+  const played = playedCards(state)
+  const partner = PARTNER_SEAT[seat]
+  const partnerPlayed = [...state.completedTricks.flatMap((t) => t.cards), ...state.currentTrick].filter((pc) => pc.seat === partner)
+  for (const suit of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
+    if (suit === trump || dummyHand.some((c) => c.suit === suit)) continue
+    const mine = state.hands[seat].filter((c) => c.suit === suit).length
+    if (mine === 0) continue
+    const unseen = 13 - played.filter((c) => c.suit === suit).length - mine
+    const partnerLeftMin = (partnerLength[suit] ?? 0) - partnerPlayed.filter((pc) => pc.card.suit === suit).length
+    if (voids[declarer].has(suit) || unseen <= Math.max(0, partnerLeftMin)) out.add(suit)
+  }
+  return out
 }
 
 /**
@@ -1650,13 +1685,24 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // stället partnerns senaste bytesfärg, annars faller valet vidare.
     const t1 = state.completedTricks[0]?.cards[0]
     const openingSuit = defender && t1 && side(t1.seat) === side(seat) ? t1.card.suit : null
+    // §8.13 (felrapport #117): aldrig en färg till DUBBELRENONS — träkarlen och
+    // spelföraren båda renons med trumf kvar = stöld + sak. De färgerna stryks
+    // ur fortsättningen OCH ur reservutspelen nedan (finns något annat att spela).
+    const dubbelrenons = defender ? ruffSluffSuits(state, seat, opts.partnerLength) : new Set<Suit>()
+    const utanDubbelrenons = legal.filter((c) => !dubbelrenons.has(c.suit))
+    const bytt = dubbelrenons.size > 0 && utanDubbelrenons.length > 0 && utanDubbelrenons.length < legal.length
+    const pool = bytt ? utanDubbelrenons : legal
+    const dubbelrenonsText = bytt
+      ? `Jag byter färg: både träkarlen och spelföraren är renons i ${[...dubbelrenons].map((s) => SUIT_GLYPH[s]).join('/')}, ` +
+        'så ett kort till där ger dem stöld på ena handen och sak på den andra (dubbelrenons, §8.13). '
+      : ''
     let attackSuit: Suit | null = null
     let attackReason = 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.'
-    if (openingSuit !== null && legal.some((c) => c.suit === openingSuit)) {
+    if (openingSuit !== null && pool.some((c) => c.suit === openingSuit)) {
       if (!leadsUpToDummyStrength(state, seat, openingSuit)) attackSuit = openingSuit
       else {
         const byte = partnerSwitchSuit(state, seat, openingSuit)
-        if (byte !== null && legal.some((c) => c.suit === byte) && !leadsUpToDummyStrength(state, seat, byte)) {
+        if (byte !== null && pool.some((c) => c.suit === byte) && !leadsUpToDummyStrength(state, seat, byte)) {
           attackSuit = byte
           attackReason =
             'Jag fortsätter INTE utspelsfärgen: träkarlen spelar sist och har färgens mästare med längd, så varje kort ' +
@@ -1681,7 +1727,7 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // Speldiagnosen S2 (frö 20260731): trumfled in i en KÄND gaffel undviks —
     // en show-out har placerat all kvarvarande trumf hos en motståndare, över
     // vår topp och minst lika lång. Välj då bland sidofärgerna i stället.
-    const nonTrump = state.trump !== null ? legal.filter((c) => c.suit !== state.trump) : []
+    const nonTrump = state.trump !== null ? pool.filter((c) => c.suit !== state.trump) : []
     if (nonTrump.length > 0 && hopelessTrumpLead(state, seat)) {
       return {
         card: unblockLead(state, seat, chooseLeadCard(nonTrump, state.trump)),
@@ -1707,9 +1753,10 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
       }
     }
     return {
-      card: unblockLead(state, seat, chooseLeadCard(legal, state.trump)),
-      reason:
-        'Jag är inne och spelar ut ur min längsta färg – men underleder aldrig ett ess mot ett trumfkontrakt.',
+      card: unblockLead(state, seat, chooseLeadCard(pool, state.trump)),
+      reason: bytt
+        ? dubbelrenonsText + 'Jag spelar ut ur min längsta färg bland de övriga – men underleder aldrig ett ess mot ett trumfkontrakt.'
+        : 'Jag är inne och spelar ut ur min längsta färg – men underleder aldrig ett ess mot ett trumfkontrakt.',
     }
   }
 
@@ -2186,7 +2233,17 @@ export function botCardSmartBase(
   const cash = defenderCashesSettingTrick(state, seat)
   if (cash) return cash
 
-  if (cardsLeft > maxCards) return botCardReasoned(state, seat)
+  if (cardsLeft > maxCards) {
+    // §8.13: tumregeln är budblind, men renons GENOM RÄKNING behöver partnerns
+    // lovade längd — bara den raden ur hand-modellen skickas med (försvarare på utspel).
+    if (state.currentTrick.length === 0 && state.trump !== null && calls.length > 0 && side(seat) !== side(state.contract.declarer)) {
+      const lovat = buildHandModel(calls, {})[PARTNER_SEAT[seat]].length
+      return botCardReasoned(state, seat, {
+        partnerLength: { spades: lovat.spades.min, hearts: lovat.hearts.min, diamonds: lovat.diamonds.min, clubs: lovat.clubs.min },
+      })
+    }
+    return botCardReasoned(state, seat)
+  }
 
   // Felrapport #89 (2026-09-28): FJÄRDE hand i försvaret när partnern REDAN
   // vinner sticket. Att gå över partnerns vinnare är rätt bara som AVBLOCKERING

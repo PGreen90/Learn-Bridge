@@ -124,10 +124,16 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
   //    öppningshand, så TP får aldrig sänka en 12-hp-hand under tröskeln.
   //  • 11 HP med fördelning (Bergens grundregel: 12+ STARTPOÄNG/TP) öppnar också
   //    – ess/tior/längd lyfter en bra 11:a till öppning.
-  // En platt 11-hp-hand (TP < 12) avstår fortfarande. NT-stegen ovan är hp-def.
-  if (p >= 12 || tp >= 12) {
+  //  • 11 HP med FEMKORTS HÖGFÄRG öppnar ALLTID 1M i hand 1–3, oavsett zon
+  //    (ägarbeslut 2026-11-13, felrapport #121: ♠KQ6 ♥AJ764 ♦JT3 ♣93 "öppnas
+  //    tio gånger av tio"). Fjärde hand följer regeln om 15 nedan.
+  // En platt 11-hp-hand UTAN femkorts högfärg (TP < 12) avstår fortfarande.
+  // NT-stegen ovan är hp-def.
+  const elvaMedHogfarg = p === 11 && seatOrder !== 4 && Math.max(len.spades, len.hearts) === 5 // exakt fem: sexkortsfärgen är svag tvåa som förut
+  if (p >= 12 || tp >= 12 || elvaMedHogfarg) {
     // Vad ett 1-lägesöppningsbud LOVAR (öppningsstyrka), inte den här handens
     // faktiska poäng: en bra 11:a med fördelning eller 12+ hp, öppet uppåt.
+    // Högfärgsöppningen lovar 11+ (#121), lågfärgsöppningen 12+.
     const pts = `12+ hp`
     // Möjligt missat distributionellt 2♣ (stark obalanserad med lång färg) – flaggas.
     const uncertain = p >= 19 && !bal && Object.values(len).some((l) => l >= 6)
@@ -156,7 +162,7 @@ export function classifyOpening(hand: Hand, vulnerable = false, seatOrder: 1 | 2
       return {
         call: `1${BID[suit]}`,
         rule: '5-korts högfärg',
-        explanation: `${pts} med 5+ ${SYM[suit]} → 1${SYM[suit]}.`,
+        explanation: `11+ hp med 5+ ${SYM[suit]} → 1${SYM[suit]}.`,
         uncertain,
       }
     }

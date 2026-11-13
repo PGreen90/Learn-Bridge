@@ -48,9 +48,9 @@ describe('budförklaring visar löftet, inte handens faktiska poäng', () => {
     expect(e).not.toMatch(/\b26 hp\b/)
   })
 
-  it('1-lägesöppning: golvet (12+ hp) + längd-löftet (5+ korts), inte "13 hp"/"6-korts"', () => {
+  it('1-lägesöppning: golvet (11+ hp i högfärg) + längd-löftet (5+ korts), inte "13 hp"/"6-korts"', () => {
     const e = expl('S:AKT652 H:K3 D:Q6 C:J52') // 13 hp, 6 spader
-    expect(e).toContain('12+ hp')
+    expect(e).toContain('11+ hp')
     expect(e).toContain('5+ ♠') // lovar 5+, avslöjar inte handens 6
     expect(e).not.toMatch(/\b13 hp\b/)
     expect(e).not.toContain('6 ♠')

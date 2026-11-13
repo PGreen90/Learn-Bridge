@@ -1047,7 +1047,7 @@ function interpretContractBidRaw(seat: Seat, cb: ParsedBid, prior: ResolvedCall[
     }
     if (cb.level === 1) {
       const major = cb.strain === 'H' || cb.strain === 'S'
-      return R(major ? '5-korts högfärg' : 'minor-regeln', `Öppningsbud 1${sym} — visar en öppningshand (12+ hp) med ${major ? '5+' : '3+'} ${name}.`)
+      return R(major ? '5-korts högfärg' : 'minor-regeln', `Öppningsbud 1${sym} — visar en öppningshand (${major ? "11+" : "12+"} hp) med ${major ? '5+' : '3+'} ${name}.`)
     }
     if (cb.level === 2 && cb.strain === 'C') {
       return R('stark 2♣', `Öppningsbud 2♣ — stark, konstgjord öppning (22+ hp eller ~8½+ spelstick), krav. Säger inget om klöver.`)
@@ -2152,6 +2152,13 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
   const doubledIsOpp = SIDE[last.seat] !== SIDE[seat]
   const doubledName = last.cb.strain === 'NT' ? 'sang' : NAME[last.cb.strain]
 
+  // (0) REDUBBLARENS DUBBLING (§7.8 b, felrapport #124) — jag redubblade deras
+  //     upplysningsdubbling ("vi äger given"); min X på deras flykt är STRAFF,
+  //     aldrig en negativ dubbling (XX är inget kontraktsbud, så (1) tog den förr).
+  if (prior.some((c) => c.seat === seat && c.bid === 'XX') && doubledIsOpp && last.cb.strain !== 'NT') {
+    return R('redubblaren: straffdubbling', `Straffdubbling — du redubblade (10+ hp, "vi äger given") och dubblar nu deras flykt till ${last.cb.level}${SYMBOL[last.cb.strain]}: längd med honnörer i ${doubledName}. Partnern passar.`)
+  }
+
   // (1) NEGATIV DUBBLING — partnern öppnade 1 i färg, motståndaren klev in, och
   //     detta är svararens FÖRSTA aktion. Visar 4+ i objuden högfärg (takeout).
   if (
@@ -2196,7 +2203,7 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
     const partnerX = prior.filter((c) => c.seat === partner && c.bid !== 'P')
     const theirBids = prior.filter((c) => SIDE[c.seat] !== SIDE[seat] && !!parseBid(c.bid))
     if (partnerX.length === 1 && partnerX[0].bid === 'X' && theirBids.length === 2 && prior.indexOf(theirBids[1]) > prior.indexOf(partnerX[0]) && theirBids[0].bid !== '1NT') {
-      return R('öppnarens dubbling (visa din hand)', `Dubbling — svar på partnerns negativa dubbling trots deras ${last.cb.level}${SYMBOL[last.cb.strain]}: varken en fjärde högfärg eller 5+ i öppningsfärgen; partnern beskriver sin hand. Krav 1 rond.`)
+      return R('öppnarens dubbling (visa din hand)', `Dubbling — svar på partnerns negativa dubbling trots deras ${last.cb.level}${SYMBOL[last.cb.strain]}: ingen färg att visa på den här nivån (ingen objuden fyrkorts högfärg, och öppningsfärgen är inte lång nog att bjudas om: fem kort på 3-läget, sex på 4-läget); partnern beskriver sin hand. Krav 1 rond.`)
     }
   }
 
