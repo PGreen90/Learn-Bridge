@@ -4,7 +4,11 @@
 //
 //   Bash (torrkörning — kontrollerar filen, skriver inget):
 //     STJARNVECKA=revisor-output/stjarnvecka-2026-11-16-utkast.json GULD_VECKA=2026-11-16 npx vitest run src/lib/givurval/stjarnvecka-upplagg.probe.test.ts
-//   Skarpt (skriver till databasen): lägg till STJARNVECKA_SKARPT=1 först på raden.
+//   SQL-fil (det vanliga): lägg till STJARNVECKA_SQL=revisor-output/stjarnvecka-2026-11-16.sql
+//     först på raden — ägaren kör sedan filen i Supabase SQL Editor. Tjänstenyckeln
+//     finns medvetet inte lokalt, så det här är vägen från en utvecklardator.
+//   Skarpt (skriver direkt, kräver SUPABASE_SERVICE_ROLE_KEY i miljön): lägg till
+//     STJARNVECKA_SKARPT=1 först på raden.
 //
 // Indata: JSON-lista med tolv poster { board, dealer, vulnerability, N, E, S, W,
 // berattelse } (händer som "S:AKQ H:- D:T98 C:..."). Filen ligger i
@@ -25,7 +29,7 @@
 // därifrån.
 
 import { expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import type { Deal, Seat, Vulnerability } from '../../types/bridge'
 import { restGet, restPost } from '../../../api-src/_lib/supabase-rest'
 import { parseHand } from '../bidding'
@@ -35,6 +39,8 @@ import { STANDARDREGEL, summakoll } from './masterskapsgiv'
 const FIL = process.env.STJARNVECKA ?? ''
 const VECKA = process.env.GULD_VECKA ?? ''
 const SKARPT = process.env.STJARNVECKA_SKARPT === '1'
+/** Sökväg till en SQL-fil att skriva i stället för att röra databasen. */
+const SQL_FIL = process.env.STJARNVECKA_SQL ?? ''
 
 const SEATS: Seat[] = ['N', 'E', 'S', 'W']
 const ZONER: Vulnerability[] = ['none', 'ns', 'ew', 'all']
@@ -87,6 +93,45 @@ it.skipIf(!FIL)('handplockad stjärnvecka: kontrollera och lägg upp tolv givar'
     return { board: deal.board, dealer: deal.dealer, vulnerability: deal.vulnerability, hands: deal.hands, berattelse }
   })
   const medText = rader.filter((r) => r.berattelse).length
+
+  // SQL-läget: tjänstenyckeln finns medvetet INTE lokalt (bara i Vercel och i
+  // GitHubs hemligheter). Då skriver vi i stället en färdig SQL-fil som ägaren
+  // klistrar in i Supabase SQL Editor — samma väg som migrationerna.
+  if (SQL_FIL) {
+    const q = (s: string) => `'${s.replace(/'/g, "''")}'`
+    const varden = rader
+      .map(
+        (r) =>
+          `    (sid, ${r.board}, ${q(r.dealer)}, ${q(r.vulnerability)}, ${q(JSON.stringify(r.hands))}::jsonb, ${r.berattelse ? q(r.berattelse) : 'null'})`,
+      )
+      .join(',\n')
+    const sql = `-- Stjärntävlingen ${VECKA} (nr ${guldNummer(VECKA)}): ${rader.length} handplockade givar, ${medText} med berättelse.
+-- Klistra in HELA filen i Supabase SQL Editor och kör. Kräver migration 0016.
+-- Har veckan redan givar avbryts allt och inget ändras.
+do $upplagg$
+declare sid uuid;
+begin
+  insert into public.daily_sets (comp_date, form, size, daily_number)
+  values (${q(VECKA)}, 'guld', ${rader.length}, ${guldNummer(VECKA)})
+  on conflict (comp_date, form) do update set size = excluded.size
+  returning id into sid;
+  if exists (select 1 from public.daily_deals where set_id = sid) then
+    raise exception 'Stjärntävlingen ${VECKA} har redan givar — inget ändrat';
+  end if;
+  insert into public.daily_deals (set_id, board, dealer, vulnerability, hands, berattelse) values
+${varden};
+end
+$upplagg$;
+
+-- Kvitto: ska visa ${rader.length} givar och ${medText} berättelser.
+select count(*) as givar, count(d.berattelse) as berattelser
+from public.daily_deals d
+join public.daily_sets s on s.id = d.set_id
+where s.comp_date = ${q(VECKA)} and s.form = 'guld';
+`
+    writeFileSync(SQL_FIL, sql, 'utf8')
+    return
+  }
 
   if (!SKARPT) {
     console.log(`TORRKÖRNING ${VECKA}: ${rader.length} givar godkända, ${medText} med berättelse. Inget skrivet (STJARNVECKA_SKARPT=1 skriver).`)

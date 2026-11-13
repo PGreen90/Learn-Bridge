@@ -11,7 +11,7 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-11-12): fråga ägaren hur v1.0.1 togs emot (nyhetsrutan, veckans stjärna — bubblan får namn först efter måndag 16/11); kolla att nattkedjan gick (`gh run list
-> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
+> --limit 6`: generering → bottar ×2 → granskning); sedan /felrapporter (nu även köerna `forslag` + `tyck-till`). Vecka 16/11 är HANDPLOCKAD (bokgivar + berättelser, historik 11-13): kolla att söndagsjobbet lät den vara och att "Givens historia" syns. Öppen ägarfråga: sen cue, fortsättningen efter 3m (§7.2). Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
 ### 🔵 NU — Veckans stjärntävling (f.d. guld, kodform `guld`): live-prov (ägarval 2026-11-11)
