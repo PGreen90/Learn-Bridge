@@ -968,9 +968,14 @@ export function answerReopeningDoubleCore(hand: Hand, f: AuctionFacts): Kunskap 
   const { history, seat } = f
   const open = f.opening
   if (!open || open.seat !== f.partner || open.level !== 1 || open.strain === 'NT') return null
-  const last = f.lastNonPass
+  // Deras REDUBBLING av partnerns X ändrar ingenting (felrapport #116): X:et
+  // är fortfarande upplysande och jag svarar som om XX inte fanns — annars
+  // spelar de ett redubblat delkontrakt som ingen av oss ville straffa.
+  const nonPass = history.filter((c) => c.bid !== 'P')
+  const redoubled = nonPass.length >= 2 && nonPass[nonPass.length - 1].bid === 'XX' && side(nonPass[nonPass.length - 1].seat) !== side(seat)
+  const last = redoubled ? nonPass[nonPass.length - 2] : f.lastNonPass
   if (!last || last.seat !== f.partner || last.bid !== 'X') return null
-  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null
+  if (history.slice(history.indexOf(last) + 1).some((c) => c.bid !== 'P' && !(redoubled && c === nonPass[nonPass.length - 1]))) return null
   const their = f.lastContract
   if (!their || side(their.seat) === side(seat)) return null
   const tb = parseContractBid(their.bid)!

@@ -413,6 +413,13 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'advancern bjuder utgång med fit (konkurrens)': 'avslut',
   'cue-höjningens fortsättning': 'avslut',
   'cue-höjningens fortsättning (limit stannar)': 'avslut',
+  'cue-höjningens fortsättning (inbjudan)': 'inbjudan', // 13–14 stödpoäng mot inklivarens minimisvar (felrapport #119)
+  'inklivaren antar cue-inbjudan': 'avslut',
+  'cue-höjningens fortsättning (andra cuen)': 'krav-1-rond', // 15–18: cue en gång till (ägarens struktur 2026-11-13)
+  'inklivaren svarar andra cuen (utgång)': 'avslut',
+  'inklivaren svarar andra cuen (minimum)': 'ej-krav',
+  'andra cuen: inklivaren var svag': 'avslut',
+  'inklivaren avböjer cue-inbjudan': 'avslut',
   'konkurrens-slaminvit (RKC)': 'slamintresse',
   'konkurrens-slam: placering': 'avslut',
   'konkurrens-slam: stopp': 'avslut',

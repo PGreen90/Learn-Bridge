@@ -28,8 +28,8 @@ Förkortningar: **hp** = honnörspoäng · **GF** = utgångskrav (game force) ·
 |---|---|---|---|
 | **1♣** | 3+ | 12+ hp | Naturlig (se minor-regeln) |
 | **1♦** | 3+ | 12+ hp | Naturlig (se minor-regeln) |
-| **1♥** | 5+ | 12+ hp | 5-korts hf |
-| **1♠** | 5+ | 12+ hp | 5-korts hf |
+| **1♥** | 5+ | 11+ hp | 5-korts hf — **11 hp med femkorts högfärg öppnar alltid** (hand 1–3, oavsett zon; ägarbeslut 2026-11-13) |
+| **1♠** | 5+ | 11+ hp | 5-korts hf — samma regel |
 | **1NT** | — | 15–17 hp | Balanserad. Konv: Stayman, Smolen, Jacoby, Minor Suit Stayman, Texas |
 | **2♣** | — | 22+ hp | Stark, konventionell (krav) |
 | **2♦ / 2♥ / 2♠** | 6 | 6–11 hp | Svaga tvåöppningar |
@@ -1594,7 +1594,10 @@ OCH honnörer i deras färg** (4+ kort med 4+ hp i färgen, eller 5+ med 3+) →
 **straffpass** (trap pass, §7.3); annars **längsta färg utanför deras**
 billigast (partnerns öppningsfärg räknas med 3+ stöd), **5+ högfärg och 12+ →
 utgång**. *1♥–(2♦)–P–P–X–P med ♠T64 ♥94 ♦6532 ♣K954 → **3♣** — fyra hackor
-i ruter är ingen straff (förr passades X:et och 2♦X spelades).* **Aldrig en
+i ruter är ingen straff (förr passades X:et och 2♦X spelades).* **Redubblar
+de X:et ändras ingenting** (felrapport #116): svaret är detsamma som utan XX —
+*1♥–(1♠)–P–(2♥)–P–(2♠)–P–P–X–(XX)–? med ♠A ♥965432 ♦543 ♣654 → **3♥**, aldrig
+pass* (annars spelar de ett redubblat delkontrakt ingen ville straffa). **Aldrig en
 färg motståndarna bjudit** (2026-09-13, frö 20263370: 2♥ i inklivarens färg
 lästes som cue-höjning → 5♦ på 18 hp ihop); bara vår egen öppningsfärg får
 väljas även när de cue-bjudit den.
@@ -2189,7 +2192,10 @@ fritt svar) har fortfarande bara steg 1:s kontroll-kompletta 4NT.
 - **Enkelt inkliv** (1-/2-läget): bra **5+ färg**, ~8–16 hp. Färgkvalitet går
   före poäng.
 - **Hoppinkliv** (t.ex. (1♦)–2♠): **svagt**, 6-korts färg, spärr (som en svag
-  tvåa). **Advancern över hoppinklivet** (ägarbeslut 2026-09-22, sunt förnuft-
+  tvåa). **Har partnern redan passat** hoppar sexkortsfärgen med hela **6–10
+  hp** (ägarbeslut 2026-11-13, felrapport #118: *P–(1♣)–? med ♠QT8542 ♥A ♦KT32
+  ♣J5 → **2♠***); har partnern inte passat kliver 8–10 hp in på 1-läget och
+  bara 6–7 hoppar. **Advancern över hoppinklivet** (ägarbeslut 2026-09-22, sunt förnuft-
   lagret hål 1): **3NT med 15+ hp och stopp** i deras färg (går före höjningen —
   nio stick på partnerns sexkortsfärg); **ny färg = 5+ kort och 15+ hp, ej krav**
   (inklivaren höjer med 3+ stöd, annars pass/rättelse till egen färg); **med stöd
@@ -2402,9 +2408,22 @@ advancern). Inklivaren värderar i totalpoäng (hp med längdpoäng):
 | **3NT** | lågfärgsinkliv, 14+ **med stopp** i deras färg |
 | **billigaste återgång** i egen färg (t.ex. 2♠) | minimum (under 14) — ej krav |
 
-Cue-bjudaren går sedan vidare som efter en öppning: **ren limithöjning
-(11–12) passar** återgången, **13+ stödpoäng driver utgång** (3NT med stopp i
-deras färg, annars 4M/5m).
+Cue-bjudaren går sedan vidare. Efter ett **högfärgsinkliv** är cue-höjningen
+**inte utgångskrav** — inklivet kan vara 8 hp (ägarens struktur 2026-11-13,
+felrapport #119):
+
+| Cue-bjudarens andra bud efter minimisvaret | Betydelse |
+|---|---|
+| **pass** | ren limithöjning (under 13 stödpoäng) |
+| **3M** | inbjudan, **13–14** stödpoäng — inklivaren höjer med mer än minimum (11+), annars pass |
+| **cue en gång till** (t.ex. 3♣) | **15+** (15–18): krav. Inklivaren bjuder **4M med 10+** totalpoäng, **3M med svagt inkliv** — och 3M passas |
+| **4M** | 19+ stödpoäng, eller när den andra cuen inte ryms under 3M |
+
+**Aldrig 3NT med singel eller renons** när högfärgsfiten är känd.
+*1♣–1♥–P–2♣–P–2♥–P–? med ♠87654 ♥A64 ♦— ♣AKJ92 (18 stödpoäng) → **3♣**; mot
+♠QJT ♥KQ873 ♦972 ♣86 svarar inklivaren 3♥ och det passas (förr 3NT).*
+Efter ett **lågfärgsinkliv** gäller som förut: ren limithöjning passar, 13+
+driver utgång (3NT med stopp i deras färg, annars 5m).
 
 **Överklivaren säljer inte heller ut efter partnerns cue-höjning (felrapport #47):**
 speglingen av regeln ovan. Cue-budade advancern deras färg (limithöjning eller
@@ -2790,6 +2809,9 @@ färg bjuds den; ingen sang. *Öst ♠A8 ♥AT2 ♦AKT9 ♣AQ43 (21 hp) → X ig
   billigast (kan vara minimum, ej krav); **(2) annars egen 5+ öppningsfärg →
   rebjud den**; **(3) annars X — "visa din hand"** (krav 1 rond). Gäller på
   3-läget och lägre; över deras 4-läge dömer de vanliga utgångsreglerna.
+  **Sex kort i en öppnad lågfärg bjuds om även på 4-läget** (felrapport #120):
+  *1♦–(1♥)–X–(3♥)–? med ♠— ♥Q76 ♦AJT876 ♣A963 → **4♦**, inte X* — med bara fem
+  ruter är det fortfarande X.
   **Dubblaren visar sin hand på X:et** (öppnaren kan vara minimum — aldrig
   utgångsblås): 4+ stöd i öppningsfärgen → billigaste höjningen (högfärg: 4M
   från 13 stödpoäng, renons/singel räknas); annars egen 5+ objuden färg
@@ -3319,7 +3341,7 @@ betyder "inget eget att säga, du bestämmer". Redubblaren (10+ visat) väljer:
 |---|---|
 | **4M** | 3+ stöd och **13+ stödpoäng** — utgång till spel |
 | **3M** | 3+ stöd och **10–12 stödpoäng** — inbjudan; öppnaren lyfter med **14+** (Bergenpoäng), annars pass |
-| **X** | utan stöd: **4+ kort med honnörer** (5+ hp) i färgen de flydde till — **straff**, vi äger given; öppnaren passar |
+| **X** | utan stöd: **4+ kort med honnörer** (5+ hp) i färgen de flydde till — **straff**, vi äger given; öppnaren passar. Förklaras som straffdubbling även när budet läses ur auktionen (felrapport #124 — förr stod "negativ dubbling, 4+ hjärter") |
 | annars | de vanliga vägarna (fritt bud, sang, pass) |
 
 2M bjuds aldrig — XX lovade redan 10+. *Bricka 2 (2026-10-06): Väst ♠AKJ86 ♥765
@@ -3679,7 +3701,44 @@ en färgregel, inte en stöldregel — frö 20260778: ♠J i stället för ♠5 
 motståndarnas ♠T9 växa). *Frö 20260764, stick 2:* Syd ♥5, Väst ♥2 — Nord stjäl
 med ♠2 (DD 10) i stället för att saka ♣2 (8).
 
+### 8.13 Motspel: aldrig en färg till dubbelrenons (2026-11-13, felrapport #117)
+Mot ett **trumfkontrakt** spelar försvararen aldrig ut en färg där **både
+träkarlen och spelföraren är renons** och båda har trumf kvar. Då stjäl
+spelföraren på den ena handen och **sakar en förlorare** på den andra — nästan
+alltid ett skänkt stick. Regeln går före "fortsätt utspelsfärgen" (§8) och
+gäller även reservutspelet ur längsta färgen: finns en annan färg att spela,
+spelas den (trumf eller en sidofärg).
+Spelförarens renons kan vara **visad** (hen har redan stulit eller sakat i
+färgen) eller **räknad**: alla kort jag inte ser i färgen ryms i det partnern
+lovat i budgivningen. *Exempel (2♠ av Nord, Väst öppnade 1♥):* Öst har själv
+sex hjärter, partnern lovade fem, bordet hade en och Nord lade ♥A på utspelet —
+tretton hjärter, så Nord är renons. Öst inne på ♠A spelar **inte** ♥2 (stöld
+i handen, klöversak på bordet) utan byter färg; samma sak för Väst två stick
+senare. Bara ärlig information: egen hand, träkarlen, spelade kort och
+budgivningens löften. Gäller tumregelspelet (fler kort kvar än Monte-Carlo-
+fönstret, där double-dummy-räkningen redan ser stölden). Facit
+`play-bot-felrapport-117.test.ts`.
+
 ## 9. Ändringslogg
+- **2026-11-13 — tre ägarbeslut (felrapport #118, #119, #121).** *#121 (§3):*
+  11 hp med femkorts högfärg öppnar alltid 1M i hand 1–3 oavsett zon (förr
+  krävdes 12 startpoäng); fjärde hand följer regeln om 15; hand-modellen läser
+  högfärgsöppningen som 11+. *#118 (§7.1):* har partnern passat är sexkortsfärg
+  med 6–10 hp ett hoppinkliv (`overcall(…, partnerPassed)`). *#119 (§7.1):*
+  cue-höjningen efter högfärgsinkliv är inte utgångskrav — pass / 3M (13–14) /
+  andra cuen (15–18) / 4M; inklivarens svar `overcallerAnswersCueInvite`,
+  cue-bjudarens stopp `secondCueBidderStops`; aldrig 3NT med singel/renons.
+  Lås: auction-felrapport-118-121.test.ts.
+- **2026-11-13 — fyra felrapporter (#116, #117, #120, #124).** *#116 (§5.9):*
+  deras XX på partnerns återöppningsdubbling stängde svarsregeln → regellöst
+  pass och 2♠XX spelades; nu svarar svararen som utan XX (3♥). *#117 (§8.13):*
+  försvaret fortsatte utspelsfärgen till dubbelrenons två gånger; ny regel
+  `ruffSluffSuits` (visad eller räknad renons). *#120 (§7.4):* öppnaren med
+  sex ruter dubblade "visa din hand" över deras 3♥ med en osann förklaring;
+  sex kort i lågfärgen bjuds nu om på 4-läget (4♦) och X-texten är rättad.
+  *#124 (§7.8 b):* redubblarens straffdubbling förklarades som negativ
+  dubbling när budet lästes ur auktionen; ny gren (0) i `interpretDouble`.
+  Lås: auction-felrapport-116-124.test.ts, play-bot-felrapport-117.test.ts.
 - **2026-11-10 — bottarna bjuder den sena cuen själva** (§7.2, ägarbeslut,
   uppföljning av #110): 4+/4+ i högfärgerna och 13+ hp i utpassningsläget efter
   (1m)–pass–(1NT)–pass–(pass). Facit `auction-felrapport-110.test.ts`.

@@ -429,6 +429,77 @@ export function overcallerAnswersCue(hand: Hand, f: AuctionFacts): Kunskap | nul
 }
 
 /**
+ * Cue-bjudaren efter sin ANDRA cue (felrapport #119): inklivaren svarade 3M
+ * (svagt inkliv) → pass; 4M är redan utgång och passas av de vanliga reglerna.
+ */
+export function secondCueBidderStops(f: AuctionFacts): Kunskap | null {
+  if (f.weOpened) return null
+  const ourBids = f.ourContractBids
+  if (ourBids.length !== 5) return null
+  const [agreedC, cue1, back, cue2, svar] = ourBids
+  if (agreedC.seat !== f.partner || cue1.seat !== f.seat || back.seat !== f.partner || cue2.seat !== f.seat || svar.seat !== f.partner) return null
+  const agreed = parseContractBid(agreedC.bid)!
+  const c1 = parseContractBid(cue1.bid)!
+  const c2 = parseContractBid(cue2.bid)!
+  const sv = parseContractBid(svar.bid)!
+  if (!isMajorStrain(agreed.strain) || c1.strain !== c2.strain || !f.theirStrains.has(c1.strain) || c2.level !== 3) return null
+  if (parseContractBid(back.bid)!.strain !== agreed.strain) return null
+  if (f.lastContract !== svar || sv.strain !== agreed.strain || sv.level !== 3) return null
+  return {
+    call: 'P', rule: 'andra cuen: inklivaren var svag',
+    explanation: `Min andra cue visade 15+; partnern svarade ${prettyBid(svar.bid)} = svagt inkliv → pass.`,
+  }
+}
+
+/**
+ * INKLIVAREN SVARAR CUE-BJUDARENS INBJUDAN (ägarbeslut 2026-11-13, felrapport
+ * #119): jag klev in i en högfärg, partnern cue-bjöd (limithöjning+), jag
+ * återgick billigast på 2-läget (minimum, under 14) och partnern bjöd 3M =
+ * inbjudan med 13–14 stödpoäng. Med mer än minimum (11+ totalpoäng) → 4M,
+ * annars pass. Motståndarna tysta efter cuen.
+ */
+export function overcallerAnswersCueInvite(hand: Hand, f: AuctionFacts): Kunskap | null {
+  if (!theirOneSuitOpening(f)) return null
+  const ourBids = f.ourContractBids
+  if (ourBids.length !== 4) return null
+  const [mine, cue, back, invit] = ourBids
+  if (mine.seat !== f.seat || cue.seat !== f.partner || back.seat !== f.seat || invit.seat !== f.partner) return null
+  const mineCb = parseContractBid(mine.bid)!
+  const cueCb = parseContractBid(cue.bid)!
+  const backCb = parseContractBid(back.bid)!
+  const invCb = parseContractBid(invit.bid)!
+  if (!isMajorStrain(mineCb.strain) || f.theirStrains.has(mineCb.strain)) return null
+  if (cueCb.strain === 'NT' || !f.theirStrains.has(cueCb.strain)) return null
+  if (backCb.strain !== mineCb.strain || backCb.level !== 2) return null
+  // Partnerns tredje bud: 3M (inbjudan) eller en ANDRA cue på 3-läget under 3M.
+  const andraCue = invCb.strain !== 'NT' && f.theirStrains.has(invCb.strain) && bidValue(3, invCb.strain) < bidValue(3, mineCb.strain)
+  if ((invCb.strain !== mineCb.strain && !andraCue) || invCb.level !== 3 || f.lastContract !== invit) return null
+  if (f.history.slice(f.history.indexOf(cue) + 1).some((c) => c.bid !== 'P' && side(c.seat) !== side(f.seat))) return null
+  const tp = pointsWithFloor(hand, null, 'starting')
+  const game = `4${mineCb.strain}` as Bid
+  if (invCb.strain !== mineCb.strain) {
+    // Partnerns ANDRA cue (15+): 10+ totalpoäng → 4M, svagt inkliv → 3M.
+    const back3 = `3${mineCb.strain}` as Bid
+    if (tp.points >= 10 && legalCalls(f.history, f.seat).includes(game)) return {
+      call: game, rule: 'inklivaren svarar andra cuen (utgång)',
+      explanation: `Partnern cue-bjöd en gång till (${prettyBid(invit.bid)}) och visar 15+; mitt inkliv är inte svagt (${tp.text}) → ${prettyBid(game)}.`,
+    }
+    return {
+      call: back3, rule: 'inklivaren svarar andra cuen (minimum)',
+      explanation: `Partnern cue-bjöd en gång till (${prettyBid(invit.bid)}) och visar 15+; mitt inkliv är svagt (${tp.text}) → ${prettyBid(back3)} (ej krav).`,
+    }
+  }
+  if (tp.points >= 11 && legalCalls(f.history, f.seat).includes(game)) return {
+    call: game, rule: 'inklivaren antar cue-inbjudan',
+    explanation: `Partnerns ${prettyBid(invit.bid)} är en inbjudan (13–14 stödpoäng); jag har mer än minimum (${tp.text}) → ${prettyBid(game)}.`,
+  }
+  return {
+    call: 'P', rule: 'inklivaren avböjer cue-inbjudan',
+    explanation: `Partnerns ${prettyBid(invit.bid)} är en inbjudan (13–14 stödpoäng); jag har ett rent minimum (${tp.text}) → pass.`,
+  }
+}
+
+/**
  * Överklivaren tävlar efter partnerns cue-höjning när motståndarna bjudit VIDARE
  * över cuet innan jag hann svara (felrapport #47). Cue-höjningen lovar minst en
  * limithöjning i min färg → vår fit bär oss till minst 3-läget i färgen; jag
@@ -765,6 +836,33 @@ export function cueBidderContinues(hand: Hand, f: AuctionFacts, who: 'öppnare' 
     if (sp < 13 && !gfUtanStod) return {
       call: 'P', rule: 'cue-höjningens fortsättning (limit stannar)',
       explanation: `Min cue lovade limithöjning eller bättre; partnern återgick billigast (minimum) och jag har bara limit-värden → pass.`,
+    }
+    // Ägarbeslut 2026-11-13 (felrapport #119): mot INKLIVARENS minimisvar i en
+    // högfärg (inklivet kan vara 8 hp) är cue-höjningen INTE utgångskrav:
+    //   13–14 stödpoäng → 3M (inbjudan);
+    //   15–18 → CUE EN GÅNG TILL i deras färg ("15+": inklivaren lägger upp 4M
+    //           med 10+ totalpoäng, svagt inkliv → 3M);
+    //   19+   → utgång direkt som förut.
+    // Öppnarsidan (minimum 12) rörs inte.
+    if (who === 'inklivare' && isMajorStrain(info.agreedStrain)) {
+      const invit = `3${info.agreedStrain}` as Bid
+      const game = `4${info.agreedStrain}` as Bid
+      if (sp <= 14 && legal.includes(invit)) return {
+        call: invit, rule: 'cue-höjningens fortsättning (inbjudan)',
+        explanation: `Min cue lovade limithöjning eller bättre; partnern visade minimum och jag har lite extra (${sp} stödpoäng) → ${prettyBid(invit)} (inbjudan – partnern höjer med mer än minimum).`,
+      }
+      const cue2 = `3${info.theirStrain}` as Bid
+      const rum = bidValue(3, info.theirStrain) < bidValue(3, info.agreedStrain) // 3M ryms över den andra cuen
+      if (sp >= 15 && sp <= 18 && rum && legal.includes(cue2) && legal.includes(invit)) return {
+        call: cue2, rule: 'cue-höjningens fortsättning (andra cuen)',
+        explanation: `Partnern visade minimum, men jag har klart mer än en limithöjning (${sp} stödpoäng) → cue en gång till, ${prettyBid(cue2)} (krav: partnern bjuder 4${SWE_SYM[info.agreedStrain]} med 10+, annars 3${SWE_SYM[info.agreedStrain]}).`,
+      }
+      // Känd högfärgsfit + singel/renons: utgången spelas i färgen, aldrig 3NT.
+      const kort = Object.values(lengths(hand)).some((n) => n <= 1)
+      if (kort && legal.includes(game)) return {
+        call: game, rule: 'cue-höjningens fortsättning',
+        explanation: `Min cue-höjning har utgångsvärden (${sp} stödpoäng) och handen är obalanserad → utgång i vår ${SWE_SYM[info.agreedStrain]} (${prettyBid(game)}), inte 3NT.`,
+      }
     }
   }
   if (hasStopper(hand, theirSuit) && legal.includes('3NT' as Bid)) {

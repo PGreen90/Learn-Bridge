@@ -27,6 +27,24 @@ export interface Nyhet {
 /** Nyast först. */
 export const NYHETER: Nyhet[] = [
   {
+    version: '1.0.2',
+    datum: '2026-11-13',
+    punkter: [
+      {
+        rubrik: 'Lättare öppningar',
+        text: 'Elva poäng med femkorts högfärg öppnar nu alltid.',
+      },
+      {
+        rubrik: 'Vassare motspel',
+        text: 'Bottarna ger inte längre stöld och sak i samma stick.',
+      },
+      {
+        rubrik: 'Dina felrapporter',
+        text: 'Sju rapporterade bud- och spelfel är lagade. Tack!',
+      },
+    ],
+  },
+  {
     version: '1.0.1',
     datum: '2026-11-12',
     punkter: [

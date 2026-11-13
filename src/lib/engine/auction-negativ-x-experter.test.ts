@@ -106,7 +106,15 @@ describe('3 – öppnarens svar på den tvetydiga dubblingen (1♦–(2♣)–X�
     expect(r.bid).toBe('3C')
   })
   it('frö 20261029: 1♦–(2♣)–X, Nord ♠AK64 ♥KT ♦KQJT4 ♣K3 (17 hp) → cue 3♣ (förr 3♠), Syd ♠QJ3 ♥AQ862 visar 3♥', () => {
-    const a = auktion(20261029)
+    // Inklivaren hoppar numera till 3♣ när partnern passat (ägarbeslut
+    // 2026-11-13, #118) — låset gäller svaret på X:et över 2♣, så förspelet ges.
+    const d = dealFromSeed(20261029)
+    const a: ResolvedCall[] = []
+    let seat = d.dealer
+    const TUR: Seat[] = ['N', 'E', 'S', 'W']
+    const next = () => { seat = TUR[(TUR.indexOf(seat) + 1) % 4] }
+    for (const b of ['P', '1D', '2C']) { a.push(call(seat, b)); next() }
+    while (a.length < 8) { a.push(decideCall(d, a, seat)); next() }
     expect(bids(a, 5)).toEqual(['P', '1D', '2C', 'X', 'P'])
     expect(a[5].seat).toBe('N')
     expect(a[5].bid).toBe('3C')

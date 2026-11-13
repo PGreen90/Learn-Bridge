@@ -693,10 +693,16 @@ export function answerNegativeDoubleOverTheirBid(hand: Hand, f: AuctionFacts): K
       call: bid, rule: 'svar på negativ dubbling',
       explanation: `Partnerns negativa dubbling ber om svar även efter deras ${prettyBid(n.theirLast)}: ingen fjärde högfärg men 5+ ${SUIT_SYM[n.ourOpen]} → ${prettyBid(bid)} (kan vara minimum).`,
     }
+    // SEX kort i öppningsfärgen bjuds om även på 4-läget (felrapport #120:
+    // 1♦–(1♥)–X–(3♥)–? med ♦AJT876 → 4♦, inte X) — under utgång, dvs. lågfärg.
+    if (len[n.ourOpen] >= 6 && bid && legal.includes(bid) && parseContractBid(bid)!.level === 4 && (n.ourOpen === 'clubs' || n.ourOpen === 'diamonds')) return {
+      call: bid, rule: 'svar på negativ dubbling',
+      explanation: `Partnerns negativa dubbling ber om svar även efter deras ${prettyBid(n.theirLast)}: ingen fjärde högfärg men ${len[n.ourOpen]} kort i ${SUIT_SYM[n.ourOpen]} → ${prettyBid(bid)} (lång färg bjuds om även på 4-läget; kan vara minimum).`,
+    }
   }
   if (legal.includes('X' as Bid)) return {
     call: 'X', rule: 'öppnarens dubbling (visa din hand)',
-    explanation: `Partnerns negativa dubbling ber om svar; jag har varken en 4-korts högfärg eller 5+ i öppningsfärgen → X (visa din hand).`,
+    explanation: `Partnerns negativa dubbling ber om svar; jag har ingen färg att visa på den här nivån (ingen objuden 4-korts högfärg och ingen lång öppningsfärg som ryms) → X (visa din hand).`,
   }
   return null
 }

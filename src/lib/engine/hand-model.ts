@@ -184,7 +184,10 @@ function applyOpening(c: SeatConstraint, level: number, strain: string, seatOrde
     // samplingen omöjlig (MC-urfallet fix 1). 3:e hand kan lättöppna 1M på
     // 10–11 hp, 4:e hand öppnar på regeln om 15 från 9 hp → lägre golv där.
     c.hcpMax = Math.min(c.hcpMax, 21)
-    c.minPoints = Math.max(c.minPoints ?? 0, seatOrder === 3 ? 10 : seatOrder === 4 ? 9 : 12)
+    // Högfärgsöppningen i hand 1–2 lovar 11+ (ägarbeslut 2026-11-13, #121:
+    // 11 hp + femkorts högfärg öppnar alltid), lågfärgsöppningen 12+.
+    const major = suit === 'hearts' || suit === 'spades'
+    c.minPoints = Math.max(c.minPoints ?? 0, seatOrder === 3 ? 10 : seatOrder === 4 ? 9 : major ? 11 : 12)
     // 2/1: högfärgsöppning 5+, minoröppning 3+ (better minor).
     lenMin(c, suit, suit === 'hearts' || suit === 'spades' ? 5 : 3)
     return

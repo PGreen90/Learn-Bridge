@@ -15,9 +15,24 @@
 
 import { describe, expect, it } from 'vitest'
 import type { Deal, Seat } from '../../types/bridge'
-import { parseHand } from '../bidding'
+import { parseHand, type ResolvedCall } from '../bidding'
 import { contractFromCalls } from './auction-contract'
+import { decideCall } from './auction-live'
 import { botAuction } from './revisor'
+
+// Fortsätt auktionen från ett GIVET förspel (motorn bjuder resten). Behövs där
+// låset gäller ett läge som inte längre uppstår av sig självt sedan
+// ägarbesluten 2026-11-13 (11 hp + femkorts högfärg öppnar · hoppinkliv efter
+// partnerns pass) — låset är läget, inte vägen dit.
+const TUR: Seat[] = ['N', 'E', 'S', 'W']
+function fortsatt(d: Deal, forspel: string[]): ResolvedCall[] {
+  let seat = d.dealer
+  const h: ResolvedCall[] = []
+  const next = () => { seat = TUR[(TUR.indexOf(seat) + 1) % 4] }
+  for (const b of forspel) { h.push({ seat, bid: b } as ResolvedCall); next() }
+  while (!(h.length >= 4 && h.slice(-3).every((c) => c.bid === 'P'))) { h.push(decideCall(d, h, seat)); next() }
+  return h
+}
 
 const giv = (dealer: Seat, n: string, e: string, s: string, w: string): Deal => ({
   id: 'facit', board: 1, dealer, vulnerability: 'all',
@@ -63,7 +78,10 @@ describe('steg 4 — sidofynd ur auktionsdiffen', () => {
   // kravvakten tvingade öppnaren till 5♦ (bet). Nord ♠KQ4 ♥K76 ♦954 ♣J963 (9 hp).
   it('1m–1NT–3m–4m är ingen trumfsättning: öppnaren passar 4♦', () => {
     const d = giv('N', 'S:KQ4 H:K76 D:954 C:J963', 'S:JT632 H:A32 D:KJ72 C:Q', 'S:A5 H:Q D:AQT863 C:A742', 'S:987 H:JT9854 D:- C:KT85')
-    expect(bud(d)).toEqual(['S:1D', 'N:1NT', 'S:3D', 'N:4D'])
+    // Öst (♠JT632, 11 hp) öppnar numera 1♠ (ägarbeslut 2026-11-13) — låset
+    // gäller läget efter två pass, så förspelet ges.
+    const b = fortsatt(d, ['P', 'P']).filter((c) => c.bid !== 'P').map((c) => `${c.seat}:${c.bid}`)
+    expect(b).toEqual(['S:1D', 'N:1NT', 'S:3D', 'N:4D'])
   })
 
   // Frö 20342042: Västs kontrollbud 4♥ räknades av facts-lagret som ett bjudet

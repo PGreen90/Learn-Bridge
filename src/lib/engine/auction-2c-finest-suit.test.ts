@@ -46,6 +46,20 @@ const second = (notation: string, rebid: ResponseResult) =>
   responderSecondBidAfter2C(parseHand(notation), r('2D', '2♦ väntebud'), rebid)?.call
 const call = (seat: Seat, bid: string): ResolvedCall => ({ seat, bid })
 
+// Fortsätt auktionen från ett GIVET förspel (motorn bjuder resten). Behövs där
+// låset gäller ett läge som inte längre uppstår av sig självt sedan
+// ägarbesluten 2026-11-13 (11 hp + femkorts högfärg öppnar · hoppinkliv efter
+// partnerns pass) — låset är läget, inte vägen dit.
+const TUR: Seat[] = ['N', 'E', 'S', 'W']
+function fortsatt(d: Deal, forspel: string[]): ResolvedCall[] {
+  let seat = d.dealer
+  const h: ResolvedCall[] = []
+  const next = () => { seat = TUR[(TUR.indexOf(seat) + 1) % 4] }
+  for (const b of forspel) { h.push({ seat, bid: b } as ResolvedCall); next() }
+  while (!(h.length >= 4 && h.slice(-3).every((c) => c.bid === 'P'))) { h.push(decideCall(d, h, seat)); next() }
+  return h
+}
+
 describe('svararens andra bud efter 2♣–2♦–3m: visa 4-korts högfärg före 3NT', () => {
   it('4-4 i högfärgerna → 3♥ (billigast, upp längs linjen), inte 3NT', () => {
     // Frö 20260958-svararen: 1 hp, ♠JT75 ♥8754 — båda högfärgerna 4-korts.
@@ -90,7 +104,9 @@ describe('hela auktionen (Systemrevisorns frön, motorn bjuder alla fyra)', () =
       S: 'S:63 H:J9 D:AJ9753 C:K86',
       W: 'S:JT75 H:8754 D:T4 C:532',
     })
-    const history = botAuction(d)
+    // Nord (♠Q9842, 11 hp) öppnar numera 1♠ (ägarbeslut 2026-11-13) — låset
+    // gäller 2♣-auktionen efter två pass, så förspelet ges.
+    const history = fortsatt(d, ['P', 'P'])
     expect(history).not.toBeNull()
     const bids = history!.map((c) => c.bid)
     expect(bids).toContain('3H')
