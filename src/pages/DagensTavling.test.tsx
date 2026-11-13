@@ -362,6 +362,38 @@ describe('Dagens tävling — hämtningens utfall (inloggad)', () => {
     // Din rad markeras och motståndaren listas.
     expect(screen.getByText('Testkonto')).toBeInTheDocument()
     expect(screen.getByText(/\(du\)/)).toBeInTheDocument()
+    // En giv utan berättelse visar ingen berättelseruta.
+    expect(screen.queryByText('Givens historia')).not.toBeInTheDocument()
+  })
+
+  it('givens berättelse (2026-11-13): visas under fältets resultat när given har en', async () => {
+    localStorage.setItem(
+      'learnbridge:tavling-framsteg',
+      JSON.stringify({
+        nummer: 9,
+        klara: [{ board: 1, myTricks: 10, win: true, headline: '', scoreLabel: null, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 } }],
+      }),
+    )
+    fetchMock.mockResolvedValue(ok())
+    givResultatMock.mockResolvedValue({
+      status: 'ok',
+      data: {
+        board: 1,
+        berattelse: 'EM 1974. Tony Priday hade din hand och hoppade till 5♣.',
+        resultat: [
+          { namn: 'Green', jag: true, kontrakt: { level: 4, strain: 'spades', declarer: 'S', diff: 0 }, nsScore: 420, procent: 100 },
+        ],
+      },
+    })
+    render(
+      <MemoryRouter>
+        <DagensTavling />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Dina givar')).toBeInTheDocument()
+    fireEvent.click(screen.getAllByTitle('Visa fältets resultat')[0])
+    expect(await screen.findByText('Givens historia')).toBeInTheDocument()
+    expect(screen.getByText(/Tony Priday hade din hand/)).toBeInTheDocument()
   })
 
   it('travellern (Påbyggnad 3): klick på en annan spelares rad → "Så spelade X given" med stegningen', async () => {

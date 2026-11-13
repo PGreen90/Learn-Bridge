@@ -94,6 +94,23 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       return json(403, { ok: false, fel: 'Du har inte spelat den här given än' })
     }
 
+    // Givens berättelse (2026-11-13, migration 0016): en valfri kort text om hur
+    // given en gång spelades. Hämtas EFTER grinden ovan — texten avslöjar
+    // kontraktet. Ett fel här (kolumnen saknas, hicka) får aldrig fälla
+    // travellern: då blir det bara ingen berättelse.
+    let berattelse: string | null = null
+    try {
+      const giv = (await restGet(
+        base,
+        key,
+        `daily_deals?set_id=eq.${setId}&board=eq.${board}&select=berattelse`,
+      )) as Array<{ berattelse?: unknown }>
+      const text = Array.isArray(giv) ? giv[0]?.berattelse : null
+      if (typeof text === 'string' && text.trim()) berattelse = text.trim()
+    } catch {
+      berattelse = null
+    }
+
     const rader: Brickrad[] = rows.map((r) => ({
       spelare: r.user_id,
       nsScore: r.ns_score ?? 0,
@@ -123,6 +140,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       ok: true,
       form,
       board,
+      berattelse,
       resultat: resultat.map(({ spelare, kontrakt, nsScore, history, plays, declarerTricks, ...tal }) => ({
         namn: profil.get(spelare) ?? '—',
         jag: spelare === meId,

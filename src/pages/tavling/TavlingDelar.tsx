@@ -317,7 +317,10 @@ export function GivDetalj({
         ) : utfall.status !== 'ok' ? (
           <p className="text-center text-sm text-emerald-100/70">{utfall.fel}</p>
         ) : (
-          <TravellerTabell data={utfall.data} onVälj={onGranska} form={utfall.data.form ?? form} />
+          <>
+            <TravellerTabell data={utfall.data} onVälj={onGranska} form={utfall.data.form ?? form} />
+            {utfall.data.berattelse && <GivBerattelse text={utfall.data.berattelse} />}
+          </>
         )}
 
         <div className="flex flex-col items-center gap-3">
@@ -340,6 +343,21 @@ export function GivDetalj({
         </div>
       </div>
     </Skärm>
+  )
+}
+
+/** Givens berättelse (2026-11-13): en kort text om hur given en gång spelades,
+ *  under fältets resultat. Visas bara när servern skickat en — och servern
+ *  lämnar bara ut den till den som själv spelat given. */
+export function GivBerattelse({ text }: { text: string }) {
+  return (
+    <section
+      aria-label="Givens historia"
+      className="w-full rounded-xl border-l-2 border-gold-400/60 bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10"
+    >
+      <h2 className="font-brand text-sm tracking-wide text-gold-200">Givens historia</h2>
+      <p className="mt-1.5 text-sm leading-relaxed text-emerald-50/90">{text}</p>
+    </section>
   )
 }
 

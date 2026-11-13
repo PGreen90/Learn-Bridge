@@ -30,7 +30,7 @@ type Rad = {
   plays: Array<{ suit: string; rank: string }>
   declarerTricks: number | null
 }
-type Svar = { ok: boolean; fel?: string; form?: string; board?: number; resultat?: Rad[] }
+type Svar = { ok: boolean; fel?: string; form?: string; board?: number; resultat?: Rad[]; berattelse?: string | null }
 
 function fakeRes(): { res: ServerResponse; svar: () => { status: number; body: Svar; text: string } } {
   let status = 0
@@ -66,12 +66,22 @@ function rader(medMig: boolean) {
   return alla
 }
 
-function mockaFetch({ authOk = true, kvotOk = true, medMig = true } = {}) {
+/** `berattelse`: text = givens rad bär den · null = kolumnen finns men är tom ·
+ *  'kolumn-saknas' = migration 0016 inte körd (PostgREST svarar 400). */
+function mockaFetch({
+  authOk = true,
+  kvotOk = true,
+  medMig = true,
+  berattelse = null as string | null | 'kolumn-saknas',
+} = {}) {
   return vi.fn(async (url: string) => {
     const svar = (json: unknown, ok = true, status = 200) => ({ ok, status, json: async () => json, text: async () => '' })
     if (url.includes('/auth/v1/user')) return authOk ? svar({ id: 'user-a' }) : svar({}, false, 401)
     if (url.includes('/rpc/kvot_okning')) return svar(kvotOk)
     if (url.includes('daily_sets?')) return svar([{ id: 'set-1' }])
+    if (url.includes('daily_deals?')) {
+      return berattelse === 'kolumn-saknas' ? svar({ message: 'column does not exist' }, false, 400) : svar([{ berattelse }])
+    }
     if (url.includes('daily_results?')) return svar(rader(medMig))
     if (url.includes('profiles?')) {
       return svar([
@@ -153,6 +163,51 @@ describe('giv-resultat — genomgångsdata per spelare (Påbyggnad 3)', () => {
     expect(text).not.toContain('explanation')
     expect(text).not.toContain('får inte läcka')
     expect(text).not.toContain('is_bot')
+  })
+})
+
+describe('giv-resultat — givens berättelse (stjärntävlingen, 2026-11-13)', () => {
+  const TEXT = 'EM 1974. Så gick det vid bordet.'
+
+  test('har given en berättelse följer den med — först efter att man spelat brickan', async () => {
+    const fn = mockaFetch({ berattelse: TEXT })
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3&form=guld', 't'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(body.berattelse).toBe(TEXT)
+    const url = fn.mock.calls.map((c) => String(c[0])).find((u) => u.includes('daily_deals?'))!
+    expect(url).toContain('set_id=eq.set-1')
+    expect(url).toContain('board=eq.3')
+    expect(url).toContain('select=berattelse')
+  })
+
+  test('ingen tjuvkik: 403 lämnar aldrig ut berättelsen (den avslöjar kontraktet)', async () => {
+    const fn = mockaFetch({ medMig: false, berattelse: TEXT })
+    vi.stubGlobal('fetch', fn)
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3&form=guld', 't'), res)
+    expect(svar().status).toBe(403)
+    expect(svar().text).not.toContain('EM 1974')
+    expect(fn.mock.calls.some((c) => String(c[0]).includes('daily_deals?'))).toBe(false)
+  })
+
+  test('given utan berättelse → null', async () => {
+    vi.stubGlobal('fetch', mockaFetch())
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3', 't'), res)
+    expect(svar().body.berattelse).toBeNull()
+  })
+
+  test('kolumnen saknas (migration 0016 inte körd) → travellern fungerar ändå, berättelse null', async () => {
+    vi.stubGlobal('fetch', mockaFetch({ berattelse: 'kolumn-saknas' }))
+    const { res, svar } = fakeRes()
+    await handler(fakeReq('/api/giv-resultat?board=3', 't'), res)
+    const { status, body } = svar()
+    expect(status).toBe(200)
+    expect(body.resultat).toHaveLength(2)
+    expect(body.berattelse).toBeNull()
   })
 })
 

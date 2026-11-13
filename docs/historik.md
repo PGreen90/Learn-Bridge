@@ -10,6 +10,22 @@
 
 ---
 
+## 2026-11-13 (stjärntävlingen: givens berättelse + handplockad vecka)
+**Ägaridé:** givar ur Bridge Magazine januari 1975 (EM i Tel Aviv 1974, Camrose) som
+stjärntävling, med en kort berättelse om hur given spelades då. **Provet:** 18 kompletta
+givar lästes av ur foton och mättes med urvalets eget mått (`poangsattGiv`) — hälften
+klarade golvet; summakollen fångade två tryckfel (dubbla hackor). **Byggt:** migration
+`0016` (`daily_deals.berattelse`, valfri) · `/api/giv-resultat` skickar med berättelsen
+EFTER tjuvkiksgrinden (saknas kolumnen fungerar travellern ändå) · rutan "Givens historia"
+under fältets resultat (`GivBerattelse` i `TavlingDelar.tsx`) · uppladdningsproben
+`src/lib/givurval/stjarnvecka-upplagg.probe.test.ts` (torrkörning som standard,
+`STJARNVECKA_SKARPT=1` skriver; veckojobbet rör inte en vecka som redan har tolv givar).
+Giv och zon följer källan, inte bricknumret — databasen lagrar dem per giv. Givar och
+texter ligger i `revisor-output/` (gitignorad), aldrig i repot. Berättelserna är skrivna
+med egna ord ur fakta, inte översatta. **Öppet:** berättelsen direkt på resultatskärmen
+efter sista kortet (i dag: när man öppnar given från översikten) · en stående
+"klassikerpott" som veckojobbet blandar in (ägaren: bara prov tills vidare).
+
 ## 2026-11-12 (v1.0.1 — stjärntävlingen, UI-förfiningar, nyhetsrutan; LIVE 74a89bc)
 **Veckans guld-tävling** gick live (2d3eca6, vecka 1 upplagd, migration 0015 körd) och
 bytte samma dag namn till **Veckans stjärntävling** (kodformen heter kvar `guld`).
