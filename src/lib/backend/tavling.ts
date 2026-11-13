@@ -542,6 +542,9 @@ export interface GivResultatSvar {
   form?: TavlingsForm
   /** Alla spelares resultat på brickan, bäst MP% först. */
   resultat: BrickaRad[]
+  /** Givens berättelse (2026-11-13): valfri kort text om hur given en gång
+   *  spelades. Null/saknas = ingen ruta. */
+  berattelse?: string | null
 }
 
 export type GivResultatUtfall =
