@@ -27,6 +27,7 @@
 
 import type { Hand, Suit } from '../../types/bridge'
 import { auctionFacts, openingBid, PARTNER, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { meaningOf } from './auction-meaning'
 import { legalCalls, letterOfSuit, SWE_SYM } from './auction-rules'
 import { hcp, lengths, suitHcp } from './hand'
 import type { Kunskap } from './overcall-continuations'
@@ -66,6 +67,10 @@ export function slamAskTrump(f: AuctionFacts): Suit | null {
     if (!cb) continue
     if (cb.strain === 'NT') return null // sidans senaste bud var sang → kvantitativt
     if (f.theirStrains.has(cb.strain)) continue // cue, ingen egen färg
+    // Ett KONTROLLBUD bjuder inte färgen (§6.1: 4NT gäller den senast ÄKTA
+    // bjudna färgen). Felrapport #125: 2♣–2NT–3♦–4♠(kontroll)–4NT lästes med
+    // spader som trumf — frågaren "återgick" till 5♠ med ruter som trumf.
+    if (/^(cue-bid|kontrollbud)/i.test(meaningOf(history, i).rule ?? '')) continue
     return SUIT_OF_LETTER[cb.strain]
   }
   return null

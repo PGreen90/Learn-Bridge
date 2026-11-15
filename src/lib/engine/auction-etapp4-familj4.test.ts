@@ -99,15 +99,21 @@ describe('raden *öppnaren-stört*: öppnarens återbud när de stört', () => {
     // 5-4-utan-stopp → 17+ reverse gäller fortfarande.
     expect(decideCallTraced(ensam('N', 'S:6 H:KQ84 D:A5 C:AKJ85'), h2, 'N').call).toMatchObject({ bid: '2H', rule: 'återbud i konkurrens: reverse' })
   })
-  it('§5.8 flyttad: fiten mäts mot vad svaret lovade — ett OSTÖRT 1♥-svar (4+) höjs inte på tre kort, ett fritt 1♠ (5+) höjs', () => {
+  it('§5.8 flyttad: fiten mäts mot vad svaret lovade — ett OSTÖRT 1♥-svar (4+) höjs inte på tre kort; efter inkliv + höjning visar X exakt tre', () => {
     // 1♦–(P)–1♥–(2♠): 1♥ är 4+, tre hjärter är ingen fit → minimum utan 6+ ruter → pass (null → gamla lagret passar)
     const ostört = [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', '2S')]
     expect(decideCall(ensam('N', 'S:63 H:K84 D:AQJ85 C:K74'), ostört, 'N').bid).toBe('P')
-    // 1♦–(1♥)–1♠–(2♥): 1♠ är fritt (5+) → 3-korts stöd + minimum → 2♠ (tävlar)
+    // 1♦–(1♥)–1♠–(2♥): exakt tre stöd → STÖDDUBBLING (ägarbeslut 2026-11-15, felrapport
+    // #126: "alltid stöddubbling" — X = tre, direkt höjning = fyra, även när båda
+    // motståndarna bjudit). Förr 2♠ på tre ur raden *öppnaren-stört*.
     const fritt = [call('N', '1D'), call('E', '1H'), call('S', '1S'), call('W', '2H')]
     const t = decideCallTraced(ensam('N', 'S:K63 H:84 D:AQ985 C:K74'), fritt, 'N')
-    expect(t.källa).toBe('tabell:öppnaren-stört')
-    expect(t.call).toMatchObject({ bid: '2S', rule: 'öppnaren tävlar (stödjer partnern)' })
+    expect(t.källa).toBe('tabell:stöd-x')
+    expect(t.call.bid).toBe('X')
+    // Fyra stöd höjer som förut ur raden *öppnaren-stört*.
+    const t4 = decideCallTraced(ensam('N', 'S:K632 H:84 D:AQ98 C:K74'), fritt, 'N')
+    expect(t4.källa).toBe('tabell:öppnaren-stört')
+    expect(t4.call).toMatchObject({ bid: '2S', rule: 'öppnaren tävlar (stödjer partnern)' })
   })
   it('flyttat: svaret på cue-höjningen, den maximala dubblingen, återöppningen A och B', () => {
     // Hål D steg 2 (2026-09-30, §7.8 c): 13 hp utan äkta kontroll (ensamma kungar, ♦K84 är

@@ -248,6 +248,15 @@ export function respondToMinor(hand: Hand, opened: Minor, passed = false): Respo
 
   // Härefter: ingen biudbar 4-korts högfärg.
 
+  // ---- 1♦–3♣: SJU+ klöver, under utgångskrav (förslag #122, ägarbeslut 2026-11-15) ----
+  // ♠987 ♥Q96 ♦— ♣AQJ8742 svarade 1NT och spelade sang med renons: "extrem
+  // fördelning och lång klöver — i NT kan detta vara riktigt dåligt". 2♣ är
+  // utgångskrav (12+), så sjukortsfärgen får ett eget bud: 3♣, till spel.
+  // Sexkorts klöver bjuder 1NT som förut (ägarbeslut 2026-07-06 står kvar där).
+  if (opened === 'diamonds' && len.clubs >= 7 && p <= 11) {
+    return { call: '3C', rule: 'svagt hopp: 7+ klöver', explanation: `7+ ♣, under utgångskrav (${p} hp), ingen 4-korts högfärg → 3♣ (till spel — sang vore fel med så lång färg).` }
+  }
+
   // ---- Passad hand: ENKEL höjning 2m med 4+ stöd, 6–11 (§5b beslut 5) ----
   // Inverterat är AV för passad hand: 2m är ej krav, öppnaren avgör om
   // budgivningen går vidare (§4.2 "Passad hand"). Före 2NT/1NT — stödet visas

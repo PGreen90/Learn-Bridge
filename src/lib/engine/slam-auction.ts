@@ -269,6 +269,13 @@ export function slamInvestigation(
  */
 export function slamTurn(role: SlamRole, hand: Hand, setup: SlamSetup, sofar: SlamBid[]): SlamTurn | null {
   const { trump, ctx } = setup
+  // Partnern (INTE kaptenen) har ställt essfrågan — t.ex. den starka 2♣-öppnaren
+  // som tar över efter svararens kontrollbud (felrapport #125: 2♣–2NT–3♦–4♠–4NT).
+  // Slamsekvensen här känner bara kaptenens 4NT; förr lästes partnerns fråga som
+  // ett bud i kontrollbudsronden och kaptenen "avslutade i utgång" (5♦ = såg ut
+  // som svaret 0/3). Raden tiger: essfrågans stol-oberoende rader (*slam-forts*
+  // svarar, *rkc-frågare* placerar) tar vid.
+  if (sofar.some((b) => b.role !== CAPTAIN && b.call === '4NT')) return null
   if (setup.partnerStarts) {
     // Partnern öppnar cue-ronden (§5b beslut 3). Avslutar partnern direkt i
     // utgång fortsätter kaptenen som över vilken utgångsplacering som helst

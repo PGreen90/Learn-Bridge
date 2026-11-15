@@ -1089,8 +1089,11 @@ export function overcallerAfterSimpleRaise(hand: Hand, f: AuctionFacts): Kunskap
  * om totala stick, ej krav) — "Syd får inte passa". 18+ totalpoäng → 4M som i
  * det ostörda fallet. Femkorts under 18 → pass (åtta trumf räcker inte till
  * 3-läget). Ligger deras bud över 3M står bara 4M (18+) till buds.
+ * Förslag #123 (ägarbeslut 2026-11-15): i OZON tävlar även femkortsfärgen 3M
+ * med 13+ hp — "vi har troligtvis lika många poäng eller fler, och den högre
+ * färgen"; i zon passar inklivaren och låter partnern (fjärde trumfen) avgöra.
  */
-export function overcallerCompetesAfterRaise(hand: Hand, f: AuctionFacts): Kunskap | null {
+export function overcallerCompetesAfterRaise(hand: Hand, f: AuctionFacts, vulnerable = true): Kunskap | null {
   const t = overcallerSecondTurn(f)
   if (!t) return null
   const mine = parseContractBid(t.mine.bid)!
@@ -1115,7 +1118,44 @@ export function overcallerCompetesAfterRaise(hand: Hand, f: AuctionFacts): Kunsk
       explanation: `Partnerns höjning lovar 3+ ${SWE_SYM[M]} och jag har sex → nio trumf: tävlar ${prettyBid(compete)} över deras ${prettyBid(their.bid as Bid)} (lagen om totala stick, ej krav).`,
     }
   }
-  return { call: 'P', rule: 'inklivaren passar höjningen', explanation: `Bara fem ${SWE_SYM[M]} (åtta trumf) och under 18 totalpoäng mot deras ${prettyBid(their.bid as Bid)} → pass.` }
+  if (!vulnerable && hcp(hand) >= 13 && legal.includes(compete)) {
+    return {
+      call: compete, rule: 'inklivaren tävlar i ozon (13+)',
+      explanation: `${hcp(hand)} hp i ozon mittemot partnerns höjning: vi har minst halva leken och den högre färgen → tävlar ${prettyBid(compete)} över deras ${prettyBid(their.bid as Bid)} (ej inbjudan, partnern passar).`,
+    }
+  }
+  return { call: 'P', rule: 'inklivaren passar höjningen', explanation: `Bara fem ${SWE_SYM[M]} (åtta trumf) och under 18 totalpoäng mot deras ${prettyBid(their.bid as Bid)} → pass${vulnerable ? '' : ' (under 13 hp)'}.` }
+}
+
+/**
+ * ADVANCERN MED FJÄRDE TRUMFEN (förslag #123, ägarbeslut 2026-11-15):
+ * (1♦)–1♠–(X)–2♠–(3♥)–P–(P)–?. Jag höjde partnerns 1M-inkliv till 2M, de bjöd
+ * vidare under 3M och partnern passade. Inklivet lovar fem — med FYRA egna
+ * trumf vet bara jag om den nionde: nio trumf = 3-läget (lagen om totala
+ * stick) → 3M, alltid, oavsett zon. Tre trumf → null (pass som förut).
+ */
+export function advancerCompetesWithFourthTrump(hand: Hand, f: AuctionFacts): Kunskap | null {
+  if (!f.opening || f.weOpened) return null
+  const ours = f.ourContractBids
+  if (ours.length !== 2 || ours[0].seat !== f.partner || ours[1].seat !== f.seat) return null
+  const inkliv = parseContractBid(ours[0].bid)!
+  const hojning = parseContractBid(ours[1].bid)!
+  if (inkliv.level !== 1 || !isMajorStrain(inkliv.strain)) return null
+  if (hojning.strain !== inkliv.strain || hojning.level !== 2) return null
+  if (f.history.some((c) => side(c.seat) === side(f.seat) && (c.bid === 'X' || c.bid === 'XX'))) return null
+  const their = f.lastContract
+  if (!their || side(their.seat) === side(f.seat) || f.history.indexOf(their) < f.history.indexOf(ours[1])) return null
+  if (f.lastNonPass !== their || isGameOrHigher(their.bid as Bid)) return null
+  // Partnern har haft ordet efter deras bud och passat.
+  if (!f.history.slice(f.history.indexOf(their) + 1).some((c) => c.seat === f.partner && c.bid === 'P')) return null
+  const M = inkliv.strain
+  const n = lengths(hand)[SUIT_OF_LETTER[M]]
+  const compete = `3${M}` as Bid
+  if (n < 4 || !legalCalls(f.history, f.seat).includes(compete)) return null
+  return {
+    call: compete, rule: 'advancern tävlar med fjärde trumfen (lagen om totala stick)',
+    explanation: `Partnerns inkliv lovar fem ${SWE_SYM[M]} och jag har ${n} → nio trumf: tävlar ${prettyBid(compete)} över deras ${prettyBid(their.bid as Bid)} (lagen om totala stick, ej inbjudan).`,
+  }
 }
 
 /**
@@ -1163,6 +1203,13 @@ export function advancerAnswersOvercallerTry(hand: Hand, f: AuctionFacts): Kunsk
   const newSuit = tryBid.strain !== 'NT' && tryBid.strain !== M && !f.theirStrains.has(tryBid.strain) && bidValue(tryBid.level, tryBid.strain) < bidValue(3, M)
   if (!invite && !newSuit) return null
   if (f.lastContract !== ours[2]) return null
+  // Bjöd de MELLAN min höjning och partnerns 3M är 3M ett TÄVLINGSBUD (sex kort,
+  // eller ozon med 13+ — förslag #123), ingen inbjudan: jag passar även med
+  // maximum. Förr lästes det som utgångsinvit och höjdes till 4M.
+  const deBjodEmellan = f.theirContractBids.some((c) => f.history.indexOf(c) > f.history.indexOf(ours[1]) && f.history.indexOf(c) < f.history.indexOf(ours[2]))
+  if (invite && deBjodEmellan) {
+    return { call: 'P', rule: 'advancern passar tävlingsbudet', explanation: `Partnerns ${prettyBid(ours[2].bid as Bid)} över deras bud är ett tävlingsbud, ingen inbjudan → pass.` }
+  }
   const sp = pointsWithFloor(hand, SUIT_OF_LETTER[M], 'support').points
   const legal = legalCalls(f.history, f.seat)
   const game = `4${M}` as Bid

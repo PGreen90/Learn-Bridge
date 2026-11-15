@@ -262,6 +262,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'semi-forcing 1NT': 'semi-krav',
   'inverterad minor': 'krav-1-rond',
   'inverterad minor, svag': 'avslut',
+  'svagt hopp: 7+ klöver': 'avslut', // 1♦–3♣ (förslag #122)
   'inverterad: stopp-visning': 'krav-1-rond',
   'inverterad: 2NT': 'ej-krav',
   'inverterad: 3NT': 'avslut',
@@ -410,6 +411,9 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'överklivaren tävlar (cue-höjning)': 'ej-krav',
   'advancern tävlar till fiten (lagen om totala stick)': 'ej-krav',
   'inklivaren tävlar till fiten (lagen om totala stick)': 'ej-krav', // felrapport #93: 6+ kort över deras fortsättning efter höjningen
+  'inklivaren tävlar i ozon (13+)': 'ej-krav', // förslag #123: fem kort, 13+ hp, ozon
+  'advancern passar tävlingsbudet': 'avslut', // förslag #123: 3M över deras bud är ingen inbjudan
+  'advancern tävlar med fjärde trumfen (lagen om totala stick)': 'ej-krav', // förslag #123: nio trumf
   'advancern bjuder utgång med fit (konkurrens)': 'avslut',
   'cue-höjningens fortsättning': 'avslut',
   'cue-höjningens fortsättning (limit stannar)': 'avslut',
@@ -616,6 +620,11 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'straff/värden': 'ej-krav',
   'redubbling (värden)': 'krav-1-rond',
   'svar på stöddubbling': 'ej-krav',
+  // Störd stark 2♣ (felrapport #127, §7.9): öppnaren passar aldrig ut inklivet.
+  'stört 2♣: egen färg': 'ej-krav',
+  'stört 2♣: sang': 'ej-krav',
+  'stört 2♣: dubbling': 'krav-1-rond',
+  'svar på 2♣-öppnarens dubbling': 'ej-krav',
   'dubblaren höjer (inbjudan)': 'inbjudan',
   'dubblaren accepterar inbjudan': 'avslut',
   'dubblaren bjuder utgång': 'avslut',

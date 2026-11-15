@@ -163,10 +163,11 @@ import { advancePartnerDONT, correctOwnDONTTwoSuiter, correctOwnDONTX, defendThe
 import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preemptFollowUpSeat, respondInPreemptCompetition, respondToOvercallNTSystemsOn } from './preempt-defense-continuations'
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { partnerShownTrumpLength, slamAnswerContinuation, slamAnswerSeat, slamAskTrump } from './slam-answer-continuations'
+import { answerStrong2cDouble, strong2cDoubleToAnswer, strong2cOpenerActs, strong2cOpenerContestedSeat } from './strong-2c-contested'
 import { legalCalls } from './auction-rules'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { overcallerAnswersCueInvite, secondCueBidderStops, advanceSeat, advancerCompetesToFit, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
+import { overcallerAnswersCueInvite, secondCueBidderStops, advanceSeat, advancerCompetesToFit, advancerCompetesWithFourthTrump, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, advancerAnswersSecondDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerDoublesAgain, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
@@ -2339,7 +2340,7 @@ const TABELL: Row[] = [
   {
     id: 'inkliv2',
     läge: (f) => f.opening !== null && !f.weOpened && f.role === 'inklivare' && f.ourContractBids.length >= 1 && f.ourContractBids[0].seat === f.seat && !ourSideDoubled(f),
-    välj: ({ hand, facts }) => {
+    välj: ({ hand, facts, vulnerable }) => {
       const k =
         penaltyDoubleFirst(hand, facts) ??
         michaelsContinues(hand, facts) ??
@@ -2352,7 +2353,8 @@ const TABELL: Row[] = [
         // Felrapport #85/#86: efter advancerns enkla höjning (försök/invit/utgång/pass)
         overcallerAfterSimpleRaise(hand, facts) ??
         // Felrapport #93: öppnaren bjöd vidare efter höjningen → tävla 3M med sex kort
-        overcallerCompetesAfterRaise(hand, facts) ??
+        // … och i ozon med 13+ hp även på fem kort (förslag #123, ägarbeslut 2026-11-15)
+        overcallerCompetesAfterRaise(hand, facts, vulnerable) ??
         overcallerAfterTryAnswer(hand, facts) ??
         overcallerRaisesAdvance(hand, facts) ??
         overcallerAnswersAdvance(hand, facts) ??
@@ -2387,6 +2389,8 @@ const TABELL: Row[] = [
         advancerRebidsAfter1NTOvercall(hand, facts) ??
         advancerAnswersOvercallerTry(hand, facts) ??
         advancerPrefersOvercallSuit(hand, facts) ??
+        // Förslag #123: fyra trumf mot femkortsinklivet = nio → 3M över deras bud.
+        advancerCompetesWithFourthTrump(hand, facts) ??
         advancerCompetesToFit(hand, facts) ??
         cueBidderContinues(hand, facts, 'inklivare') ??
         secondCueBidderStops(facts)
@@ -2545,6 +2549,25 @@ const TABELL: Row[] = [
     läge: (f) => supportDoubleFollowUpToAnswer(f) !== null,
     välj: ({ hand, facts }) => {
       const k = supportDoublerContinues(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Störd stark 2♣ (felrapport #127, ägarbeslut 2026-11-15, §7.9): öppnaren
+  // passar aldrig ut inklivet — lång färg, sang med stopp, annars X — och
+  // svararen bjuder alltid på den dubblingen. Förr "pass (ingen regel)".
+  {
+    id: 'stört-2♣-öppnaren',
+    läge: (f) => strong2cOpenerContestedSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = strong2cOpenerActs(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'stört-2♣-x-svar',
+    läge: (f) => strong2cDoubleToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = answerStrong2cDouble(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },
