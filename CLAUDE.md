@@ -18,7 +18,7 @@ svarar på vad).
 Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. LIVE `2d3eca6`
 (2026-11-12), vecka 1 upplagd, `0015` körd; veckojobbet `guld-tavling.yml` går söndagar.
 Etapp 1–3 är LIVE (9187591). Ägaren synar "Så bjuder rebidz" + träningens texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**
-Senast LIVE: `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
+Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam

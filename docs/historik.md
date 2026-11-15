@@ -10,6 +10,37 @@
 
 ---
 
+## 2026-11-15 (spelbordets uppfräschning etapp A–E, v1.0.3–v1.0.5; LIVE 1731319)
+Ägarönskan: kortradens utfällning ska centreras på det tryckta kortet — och sedan en
+uppfräschning av hela spelbordet med fokus på effekternas kvalitet och användarvänlighet.
+Tre publiceringar samma kväll, alla i de delade komponenterna (gäller spelbordet OCH
+vänner-bordet om inget annat sägs).
+**v1.0.3 `c934a15` — kortet stannar kvar:** vald färg fälls ut runt kortet man tryckte
+på (`SouthFan` i `hands.tsx` mäter kortets läge vid trycket och låter raden glida med
+samma övergång som korten). På smal skärm hålls färgen innanför ytan, så nära kanten
+kan kortet inte alltid ligga exakt kvar.
+**v1.0.4 `6a07d41` — etapp A+B:** "◀ Alla färger" svävar intill vald färg i en
+reserverad marginal (`SpelbordRam` pt-9) — bordet hoppar inte; vid träkarlen visas den
+där · tryck på fri duk går tillbaka till alla färger (`onFriDuk`) · träkarlens kolumner
+ligger STILLA vid val (den gamla expansionen 60 → 68 px är borttagen; valet syns på
+guldkanten) · förklaringsraden har fast minsta höjd (två rader) · guldkant på det
+tryckta kortet (`PlayingCard` `vald`) · nedtryckningseffekt · ospelbara kort tonas 70 %
+(var 50 %) · raden glider hem till alla färger.
+**v1.0.5 `1731319` — etapp C–E:** kortflygningen lyfter och landar (`FlightLayer`) ·
+sticksvepet samlar korten till en hög som dras hem till vinnaren (`stick-samla-*`,
+`trick-sweep-*` i `index.css`) · stickräknaren pulserar (guld = din sida) · turpillret
+andas i guld (`tur-glod`) · fem nya toner i `sound.ts` (din tur, stick vunnet/förlorat,
+resultat bra/dåligt) under samma av/på-val + kort vibration när ditt kort spelas
+(Android) · slutbricka "Hemgång / Bet n" på bordet innan resultatdialogen;
+`BASE.resultOutro` 500 → 1400 ms (måste matcha `.felt-fade-out`) · utdelningskaskaden
+spelas inte längre om vid återgång till alla färger. Facit: nytt test i `ljud.test.tsx`.
+**Inte gjort / öppet:** rörelserna och ljuden är INTE sedda eller hörda av Claude
+(webbläsarpanelen fryser animationer) — ägaren provar live · en förklaring på tre rader
+eller fler knuffar fortfarande bordet (öppen ägarfråga: svävande ruta ovanför listen?) ·
+vänner-bordet saknar din tur-tonen, resultattonen och slutbrickan · slutställningen
+räknas inte upp · guldkanten markerar kortet du rörde, inte ett låst val (ett annat kort
+i färgen spelas på nästa tryck, som förut).
+
 ## 2026-11-15 (/felrapporter #125–#127 + förslag #122, #123; LIVE 93a08ec)
 Tre felrapporter och två förslag, alla återskapade mot dagens motor. **Motorfel:**
 #125 efter 2♣–2NT–3♦–4♠ (kontrollbud) lästes öppnarens 4NT inte som essfråga —
