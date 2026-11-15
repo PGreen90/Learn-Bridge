@@ -10,7 +10,9 @@ const SYMBOL: Record<Suit, string> = {
   clubs: '♣',
 }
 
-type Size = 'sm' | 'smPlus' | 'md' | 'lg' | 'xl'
+const ingenting = () => {}
+
+type Size ='sm' | 'smPlus' | 'md' | 'lg' | 'xl'
 
 // Mått per storlek: [bredd, höjd, valör-text, mitt-symbol, ess-symbol].
 // Esset får en större mittsymbol – som i en riktig kortlek.
@@ -59,6 +61,9 @@ interface Props {
   playable?: boolean
   /** Spelbart kort men inte lagligt just nu: nedtonat. */
   dimmed?: boolean
+  /** Kortet du tryckte på när färgen valdes (tvåtrycksspelet): guldkant —
+   *  nästa tryck på det spelar det (etapp B, 2026-11-15). */
+  vald?: boolean
   onClick?: () => void
   className?: string
   /** Inline-stil, t.ex. animationDelay för utdelningskaskaden. */
@@ -79,6 +84,7 @@ export function PlayingCard({
   size = 'md',
   playable = false,
   dimmed = false,
+  vald = false,
   onClick,
   className = '',
   style,
@@ -98,6 +104,7 @@ export function PlayingCard({
       <div
         ref={ref as Ref<HTMLDivElement>}
         aria-hidden
+        data-kort
         className={`${base} relative bg-white shadow-sm ${className}`}
         style={style}
       >
@@ -147,13 +154,19 @@ export function PlayingCard({
   // Ramen sätts på `base` (tunn svart 1px); spelbarhet syns genom att ospelbara
   // kort tonas ner, inte genom en grön ring.
   const face = 'bg-gradient-to-b from-white to-slate-100'
+  // Ospelbara kort tonas MILT (70 %, etapp B 2026-11-15; var 50 %) — de ska gå
+  // att läsa när man planerar spelet. Spelbara kort trycks ner en aning vid
+  // tryck (active) så även ett finger utan hover får kvitto på att trycket tog.
   const look = playable
-    ? `${face} shadow-md z-0 hover:-translate-y-2 hover:shadow-lg hover:z-20 cursor-pointer`
+    ? `${face} shadow-md z-0 hover:-translate-y-2 hover:shadow-lg hover:z-20 active:scale-95 active:brightness-95 cursor-pointer`
     : dimmed
-      ? `${face} opacity-50`
+      ? `${face} opacity-70`
       : `${face} shadow-sm`
+  // Guldkanten ensam — ev. lyft lägger handen till via className (kortraden
+  // lyfter; träkarlens kolumner gör det inte, där skulle kortet täcka nästa).
+  const valdLook = vald ? 'ring-2 ring-gold-400' : ''
 
-  const cls = `${base} ${look} relative flex items-center justify-center ${className}`
+  const cls = `${base} ${look} ${valdLook} relative flex items-center justify-center ${className}`
 
   if (onClick && playable) {
     return (
@@ -165,7 +178,12 @@ export function PlayingCard({
         ref={ref as Ref<HTMLButtonElement>}
         type="button"
         data-spelbart
+        data-kort
+        data-vald={vald || undefined}
         onClick={onClick}
+        // Tom lyssnare: iOS Safari visar :active på tryck bara om elementet
+        // har en touch-lyssnare.
+        onTouchStart={ingenting}
         className={`${cls} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:-translate-y-2 focus-visible:z-20`}
         style={style}
       >
@@ -173,5 +191,5 @@ export function PlayingCard({
       </button>
     )
   }
-  return <div ref={ref as Ref<HTMLDivElement>} className={cls} style={style}>{inner}</div>
+  return <div ref={ref as Ref<HTMLDivElement>} data-kort className={cls} style={style}>{inner}</div>
 }
