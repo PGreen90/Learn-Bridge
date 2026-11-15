@@ -10,6 +10,28 @@
 
 ---
 
+## 2026-11-15 (/felrapporter #125–#127 + förslag #122, #123; LIVE 93a08ec)
+Tre felrapporter och två förslag, alla återskapade mot dagens motor. **Motorfel:**
+#125 efter 2♣–2NT–3♦–4♠ (kontrollbud) lästes öppnarens 4NT inte som essfråga —
+slamraden kände bara kaptenens 4NT, och frågarens trumf lästes ur kontrollbudet.
+Nu tiger slamraden när partnern frågat (`slamTurn`) och `slamAskTrump` hoppar
+över kontrollbud (§6.1: essfrågan får ställas av vem som helst). **Ägarbeslut:**
+#126 stöddubblingen gäller ALLTID, även efter inkliv + höjning (1♣–(1♦)–1♠–(2♦)–X,
+`stodFonsterBud`, §7.4) — två äldre lås skrevs om (tre stöd → X, fyra → höjning) ·
+#127 2♣-öppnaren passar aldrig ut ett inkliv: lång färg / sang med stopp / annars X
+som tvingar partnern (ny fil `strong-2c-contested.ts`, ny §7.9) · #122 1♦–3♣ =
+7+ klöver, svagt (≤11), öppnaren passar (§4.2) · #123 tävla 3M efter inkliv +
+höjning på två skäl: inklivaren i ozon med 13+, advancern med fjärde trumfen (lagen
+om totala stick); partnern passar tävlingsbudet (§7.1). Åtta nya regler i
+`rules.ts`. Facit `auction-felrapport-125-126.test.ts`,
+`auction-felrapport-127-forslag-122-123.test.ts`. Ingen nyhetsruta (v1.0.2 står kvar).
+**Sett i förbifarten, INTE åtgärdat:** Nord passar utan regel efter
+1♣–(1♦)–1♠–(2♦)–P–P med ♠AKQJ83 · budhjälpen föreslår 5♣-kontrollbud i #125-läget ·
+2♣–2NT–3♦–4♦–4NT är okontrollerat efter ändringen · människans 3♠ i #123 får den
+generiska texten "höjning i spader" · stört 2♣: svararens FÖRSTA tur över inklivet
+är obeslutad, och öppnarens färgbud (t.ex. 3♦) är inte krav. Nattgranskningen föll
+14/11 (grön 15/11, orsak inte utredd). **Nytt i kön:** förslag #128 (bricka 2, 7♠ av N).
+
 ## 2026-11-13 (/felrapporter #116–#121 + #124 lagade, v1.0.2; LIVE 7d3caa6)
 Sju rapporter från ägarens kvällsspel 11-12/13, alla återskapade mot dagens motor
 (ingen var redan löst). **Motorfel:** #116 deras XX på partnerns återöppningsdubbling
