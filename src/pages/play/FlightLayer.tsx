@@ -79,12 +79,25 @@ export function FlightLayer({
       fromRot = FINAL_ROT[flight.seat]
     }
 
+    // Tyngd (etapp C 2026-11-15): kortet lyfter (växer en aning, skuggan
+    // faller längre), når sin plats strax ovanför duken och LANDAR de sista
+    // 30 % — skuggan drar ihop sig och kortet sjunker till sin storlek.
+    const slutRot = FINAL_ROT[flight.seat]
     const anim = clone.animate(
       [
         {
           transform: `translate(-50%, -50%) translate(${dx}px, ${dy}px) rotate(${fromRot}deg) scale(${scale})`,
+          filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))',
         },
-        { transform: `translate(-50%, -50%) rotate(${FINAL_ROT[flight.seat]}deg) scale(1)` },
+        {
+          offset: 0.7,
+          transform: `translate(-50%, -50%) rotate(${slutRot}deg) scale(1.1)`,
+          filter: 'drop-shadow(0 10px 8px rgba(0,0,0,0.4))',
+        },
+        {
+          transform: `translate(-50%, -50%) rotate(${slutRot}deg) scale(1)`,
+          filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))',
+        },
       ],
       // Husets kurva — samma som card-in. fill: both håller klonen i mål tills
       // React hunnit visa det riktiga kortet (samma commit som onDone).

@@ -212,7 +212,11 @@ export function TrickCenterLive({
       <div
         key={`${pc.card.suit}${pc.card.rank}`}
         data-flight-target={seat}
-        className={`absolute ${pos} ${rotate} ${wasFlown(pc.card) ? '' : CARD_IN[seat]}`}
+        className={`absolute ${pos} ${rotate} ${
+          // Under svepet samlas korten först till en hög (etapp C) — sedan
+          // glider hela gruppen mot vinnaren (SWEEP_OUT nedan).
+          sweep?.phase === 'slide' ? `stick-samla-${seat.toLowerCase()}` : wasFlown(pc.card) ? '' : CARD_IN[seat]
+        }`}
         style={flying ? { opacity: 0, transition: 'none', zIndex: order + 1 } : { zIndex: order + 1 }}
       >
         <PlayedCardView
@@ -246,18 +250,19 @@ export function TrickCenterLive({
             screen ljusar bara UPP det som ligger under — färgerna ändras inte. */}
         <span
           aria-hidden
-          className={`pointer-events-none absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full transition-opacity duration-700 ${
+          className={`pointer-events-none absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full transition-opacity duration-700 ${
             active ? (thinking ? 'animate-pulse' : 'opacity-100') : 'opacity-0'
           }`}
           style={{
             background:
-              'radial-gradient(closest-side, rgba(255,255,255,0.34), rgba(255,255,255,0.12) 55%, transparent 78%)',
+              'radial-gradient(closest-side, rgba(255,255,255,0.46), rgba(255,255,255,0.16) 55%, transparent 78%)',
             mixBlendMode: 'screen',
           }}
         />
         <span
-          className={`relative rounded-full px-2 py-0.5 text-xs font-bold shadow ${role} ${
-            active ? 'ring-2 ring-yellow-300' : ''
+          className={`relative rounded-full px-2 py-0.5 text-xs font-bold shadow transition-transform duration-300 ${role} ${
+            // I tur (etapp C): pillret växer en aning och andas i guld (tur-glod).
+            active ? 'tur-glod scale-110' : ''
           }`}
         >
           {label}

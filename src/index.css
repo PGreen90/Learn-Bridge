@@ -274,19 +274,62 @@
 .card-in-w { animation: card-in-w calc(300ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0.8, 0.3, 1); }
 .card-in-e { animation: card-in-e calc(300ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0.8, 0.3, 1); }
 
-/* Sticksvepet (etapp 2, "känsla i kortspelet"): alla fyra korten glider ihop
-   MOT VINNARENS sida medan de tonar ut. Bastiden 450 ms MÅSTE matcha
+/* Sticksvepet (etapp 2, "känsla i kortspelet"; omgjort i etapp C 2026-11-15):
+   korten SAMLAS först till en hög (första tredjedelen, .stick-samla-* på varje
+   kort) och högen glider sedan HELA vägen mot vinnarens sida medan den tonar
+   ut — som när vinnaren drar hem sticket. Bastiden 450 ms MÅSTE matcha
    BASE.sweepSlide i src/pages/play/tempo.ts — JS-fasmaskinen och CSS-svepet
    löper parallellt och ska sluta samtidigt. "both" håller slutläget (osynligt)
    om timern släpar en bildruta efter. */
-@keyframes trick-sweep-n { to { opacity: 0; transform: translateY(-48px) scale(0.85); } }
-@keyframes trick-sweep-s { to { opacity: 0; transform: translateY(48px) scale(0.85); } }
-@keyframes trick-sweep-w { to { opacity: 0; transform: translateX(-48px) scale(0.85); } }
-@keyframes trick-sweep-e { to { opacity: 0; transform: translateX(48px) scale(0.85); } }
-.trick-sweep-n { animation: trick-sweep-n calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.5, 0, 0.75, 0.4) both; }
-.trick-sweep-s { animation: trick-sweep-s calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.5, 0, 0.75, 0.4) both; }
-.trick-sweep-w { animation: trick-sweep-w calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.5, 0, 0.75, 0.4) both; }
-.trick-sweep-e { animation: trick-sweep-e calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+@keyframes trick-sweep-n { 0%, 30% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-120px) scale(0.8); } }
+@keyframes trick-sweep-s { 0%, 30% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(120px) scale(0.8); } }
+@keyframes trick-sweep-w { 0%, 30% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateX(-120px) scale(0.8); } }
+@keyframes trick-sweep-e { 0%, 30% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateX(120px) scale(0.8); } }
+.trick-sweep-n { animation: trick-sweep-n calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.45, 0, 0.7, 0.5) both; }
+.trick-sweep-s { animation: trick-sweep-s calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.45, 0, 0.7, 0.5) both; }
+.trick-sweep-w { animation: trick-sweep-w calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.45, 0, 0.7, 0.5) both; }
+.trick-sweep-e { animation: trick-sweep-e calc(450ms * var(--motion-scale, 1)) cubic-bezier(0.45, 0, 0.7, 0.5) both; }
+/* Samlingen: varje kort kliver 16 px in mot mitten. N/S är ovridna (lodrätt);
+   V/Ö ligger vridna ±90° via Tailwinds rotate, och transform verkar i kortets
+   EGNA axlar — där pekar "uppåt" (−Y) in mot mitten för båda. */
+@keyframes stick-samla-n { to { transform: translateY(16px); } }
+@keyframes stick-samla-s { to { transform: translateY(-16px); } }
+@keyframes stick-samla-sida { to { transform: translateY(-16px); } }
+.stick-samla-n { animation: stick-samla-n calc(140ms * var(--motion-scale, 1)) ease-out both; }
+.stick-samla-s { animation: stick-samla-s calc(140ms * var(--motion-scale, 1)) ease-out both; }
+.stick-samla-w, .stick-samla-e { animation: stick-samla-sida calc(140ms * var(--motion-scale, 1)) ease-out both; }
+
+/* Stickräknarens puls (etapp C): ställningen i listen blinkar till när ett
+   stick bokförs — guld när DIN sida tog det, svalt ljus när motståndarna gjorde
+   det. Klassen sitter på en span med key = antal stick, så den spelas om. */
+@keyframes stick-puls-vi {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.14); color: #fde68a; text-shadow: 0 0 10px rgba(251, 191, 36, 0.75); }
+  100% { transform: scale(1); }
+}
+@keyframes stick-puls-de {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.08); text-shadow: 0 0 8px rgba(255, 255, 255, 0.45); }
+  100% { transform: scale(1); }
+}
+.stick-puls-vi { display: inline-block; animation: stick-puls-vi calc(700ms * var(--motion-scale, 1)) ease-out; }
+.stick-puls-de { display: inline-block; animation: stick-puls-de calc(700ms * var(--motion-scale, 1)) ease-out; }
+
+/* Turindikatorn (etapp C): pillret för den som är i tur andas mjukt i guld —
+   tydligare än den fasta ringen mot duken, utan att bli stökigt. */
+@keyframes tur-glod {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(253, 224, 71, 0.95), 0 0 8px 2px rgba(253, 224, 71, 0.35); }
+  50% { box-shadow: 0 0 0 2px rgba(253, 224, 71, 0.95), 0 0 16px 5px rgba(253, 224, 71, 0.6); }
+}
+.tur-glod { box-shadow: 0 0 0 2px rgba(253, 224, 71, 0.95), 0 0 10px 3px rgba(253, 224, 71, 0.45); animation: tur-glod calc(1800ms * var(--motion-scale, 1)) ease-in-out infinite; }
+
+/* Slutbrickan (etapp E): när given är klar visas utfallet (hemgång/bet) mitt
+   på bordet en stund innan bordet tonar ut — se felt-fade-out nedan. */
+@keyframes slut-bricka {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.slut-bricka { transform: translate(-50%, -50%); animation: slut-bricka calc(320ms * var(--motion-scale, 1)) cubic-bezier(0.2, 0.8, 0.3, 1) both; }
 
 /* Vinnarkortets mjuka guldpuls under svepets paus (utöver amber-ringen). */
 @keyframes winner-glow {
@@ -319,12 +362,14 @@
 .stick-ring { opacity: 0; animation: stick-ring-in ease-out forwards, stick-ring-out ease-in forwards; }
 @media (prefers-reduced-motion: reduce) { .stick-ring { display: none; } }
 
-/* Resultatövergången (etapp 5): hela bordet tonar ut innan resultatvyn tar
-   över. Bastiden 500 ms MÅSTE matcha BASE.resultOutro i tempo.ts — JS-timern
-   (showResult) och uttoningen löper parallellt och ska sluta samtidigt.
-   "both" håller slutläget (osynligt) om timern släpar en bildruta efter. */
+/* Resultatövergången (etapp 5; etapp E 2026-11-15): bordet ligger KVAR en
+   stund med slutbrickan (hemgång/bet) och tonar sedan ut innan resultatvyn tar
+   över. Väntan 900 ms + uttoning 500 ms = 1400 ms MÅSTE matcha
+   BASE.resultOutro i tempo.ts — JS-timern (showResult) och uttoningen löper
+   parallellt och ska sluta samtidigt. "both" håller slutläget (osynligt) om
+   timern släpar en bildruta efter. */
 @keyframes felt-fade-out { to { opacity: 0; } }
-.felt-fade-out { animation: felt-fade-out calc(500ms * var(--motion-scale, 1)) ease-out both; }
+.felt-fade-out { animation: felt-fade-out calc(500ms * var(--motion-scale, 1)) ease-out calc(900ms * var(--motion-scale, 1)) both; }
 
 /* Guldglow vid hemgång (etapp 5, ägarbeslut: inget konfetti): en engångs mjuk
    guldsvällning + diagonalt skimmer över resultatdialogen. Ligger på
@@ -450,6 +495,8 @@
   .card-in-n, .card-in-s, .card-in-w, .card-in-e,
   .trick-sweep-n, .trick-sweep-s, .trick-sweep-w, .trick-sweep-e,
   .winner-glow, .stick-hint,
+  .stick-samla-n, .stick-samla-s, .stick-samla-w, .stick-samla-e,
+  .stick-puls-vi, .stick-puls-de, .tur-glod, .slut-bricka,
   .felt-fade-out, .result-made-glow::before, .result-made-glow::after,
   .deal-in, .page-in, .overlay-in, .dialog-in,
   .text-gold-shimmer,

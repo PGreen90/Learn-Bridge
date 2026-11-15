@@ -114,6 +114,27 @@ describe('usePlayTable — hook-punkterna', () => {
     expect(heard().filter((k) => k === 'sweep').length).toBe(1)
   })
 
+  // Etapp D (2026-11-15): din tur-tonen och sticktonen.
+  it('din tur-ton när turen kommer till dig, stickton när sticket bokförs', async () => {
+    const { result } = renderHook(() => usePlayTable(DEAL, CONTRACT, []))
+
+    // Nord har lett — turen är Östs, inte din: ingen ton ännu.
+    await advance(ms('botDelay', 'normal'))
+    expect(heard()).not.toContain('turn')
+    // Öst har följt → Syd (du) i tur: exakt en ton.
+    await advance(ms('botDelay', 'normal'))
+    expect(heard().filter((k) => k === 'turn').length).toBe(1)
+
+    const mine = legalCards(result.current.play, 'S')[0]
+    act(() => result.current.onCardClick(mine))
+    act(() => result.current.onCardClick(mine))
+    await advance(ms('botDelay', 'normal')) // Väst fjärde → sticket bokförs
+    const stick = heard().filter((k) => k === 'trickWon' || k === 'trickLost')
+    expect(stick.length).toBe(1)
+    const vinnare = result.current.sweep!.trick.winner
+    expect(stick[0]).toBe(vinnare === 'N' || vinnare === 'S' ? 'trickWon' : 'trickLost')
+  })
+
   it('med ljudet AV spelas ingenting', async () => {
     localStorage.setItem('learnbridge:sound', 'false')
     const { result } = renderHook(() => usePlayTable(DEAL, CONTRACT, []))

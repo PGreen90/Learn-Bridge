@@ -238,6 +238,10 @@ export function SouthFan({
   const groupEls = useRef(new Map<Suit, HTMLDivElement>())
   const anchor = useRef<{ suit: Suit; index: number; left: number; antal: number } | null>(null)
   const forraSpread = useRef<Suit | null>(null)
+  // Utdelningskaskaden (deal-in) hör till GIVEN, inte till varje återgång till
+  // alla färger: de dolda färgerna monteras om då, och utan den här vakten
+  // delades de ut på nytt varje gång (och dolde glidningen hem).
+  const harValt = useRef(false)
   // Kortet du tryckte på när färgen valdes → guldkant (etapp B).
   const [armed, setArmed] = useState<string | null>(null)
   const spreadSuit = myTurn ? selectedSuit : null
@@ -247,6 +251,7 @@ export function SouthFan({
     const a = anchor.current
     const fran = forraSpread.current
     forraSpread.current = spreadSuit
+    if (spreadSuit) harValt.current = true
     const farg = spreadSuit ?? fran
     const group = farg ? groupEls.current.get(farg) : undefined
     const kort = group ? group.querySelectorAll<HTMLElement>('[data-kort]') : undefined
@@ -345,7 +350,7 @@ export function SouthFan({
                   dimmed={myTurn && !playable}
                   vald={vald}
                   onClick={playable ? () => klick(c, i) : undefined}
-                  className={`deal-in ${ml} ${vald ? '-translate-y-2 shadow-lg z-20' : ''}`}
+                  className={`${harValt.current ? '' : 'deal-in'} ${ml}${vald ? '-translate-y-2 shadow-lg z-20' : ''}`}
                   style={{ animationDelay: `${idx * 35}ms` }}
                 />
               )
