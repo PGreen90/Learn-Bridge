@@ -51,6 +51,7 @@ import {
 import { botDecisionSeed, playIndexOf } from './play-seed'
 import { botAuction, dealFromSeed } from './revisor'
 import { getDds, solveAllCards } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 
 const DEALS = Number(process.env.TREDJEHAND_DEALS ?? 200)
 const SEED = Number(process.env.TREDJEHAND_SEED ?? 20260721)
@@ -200,6 +201,7 @@ it.skipIf(!process.env.TREDJEHAND)(
   async () => {
     const t0 = Date.now()
     const dds = await getDds()
+    await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
     const positioner: Position[] = []
     let auktionsfel = 0
     let utpassade = 0

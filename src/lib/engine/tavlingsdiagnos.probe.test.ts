@@ -31,6 +31,7 @@ import { formatHand } from '../felrapport'
 import { fronyckel, playSeedForBoard, seedForBoard } from '../../../api-src/_lib/seed'
 import { dealFromSeed } from './deal'
 import { analyseSpel, computeOracle, getDds } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 import { botAuction, judgeDeal, CATEGORY_LABEL } from './revisor'
 import { botBud } from './resonemang'
 import { bedomSpel, helDom, type SpelDom } from './speldom'
@@ -70,6 +71,7 @@ it.skipIf(!START)('tävlingsförscreening', { timeout: 0 }, async () => {
   ).toBeTruthy()
 
   const dds = await getDds()
+  await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
   mkdirSync(join(process.cwd(), 'revisor-output'), { recursive: true })
 
   // Haverier över ALLA dagar — asserten görs EFTER loopen så varje dags

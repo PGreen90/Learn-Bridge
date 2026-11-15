@@ -43,6 +43,15 @@ it.skipIf(!IN || !UT)('omprov av inskick mot den här commitens motor', { timeou
   } catch {
     /* äldre motor utan resonemangslagret → tabellen */
   }
+  // Kortmotorn i DEN HÄR versionen: sedan lösarbytet (2026-11-15) röstar
+  // Monte-Carlo med den snabba lösaren, som måste laddas först. Äldre versioner
+  // saknar modulen och räknar med TS-lösaren — precis som de gjorde live.
+  try {
+    const l = (await import('./mc-losare')) as { laddaSnabbLosare?: () => Promise<boolean> }
+    if (typeof l.laddaSnabbLosare === 'function') await l.laddaSnabbLosare()
+  } catch {
+    /* äldre motor utan lösarbytet → TS-lösaren */
+  }
   const resultat: Record<string, string[]> = {}
   for (const i of inskick) {
     const deal = dealFromSeed(seedForBoard(secret, datum, i.board), i.board)

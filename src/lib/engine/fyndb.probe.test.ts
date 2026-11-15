@@ -26,6 +26,7 @@ import { side } from './play'
 import { botDecisionSeed, playIndexOf } from './play-seed'
 import { botAuction, dealFromSeed } from './revisor'
 import { getDds, solveAllCards } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 
 const ON = process.env.FYNDB
 const SEED = 20260721
@@ -69,6 +70,7 @@ it.skipIf(!ON)(
   `fynd B-riggen: spelförarsidans ledningsval, ${ON && /^\d{8}(,\d{8})*$/.test(ON) ? 'frön ' + ON : DEALS + ' givar'}`,
   async () => {
     const dds = await getDds()
+    await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
     const seeds = ON && /^\d{8}(,\d{8})*$/.test(ON) ? ON.split(',').map(Number) : Array.from({ length: DEALS }, (_, i) => SEED + OFFSET + i)
     const lagen: Lage[] = []
     for (const seed of seeds) {

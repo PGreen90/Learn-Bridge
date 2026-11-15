@@ -140,8 +140,12 @@ export interface KortPoang {
  * högsta av likvärdiga kort med en bitmask (`equals`, bit r = rang r är
  * likvärdig) — masken expanderas så varje lagligt kort får sin poäng.
  */
-export function solveAllCards(dds: Dds, state: PlayState): KortPoang[] {
-  const fut = dds.SolveBoardPBN(stateToSolvePbn(state), -1, 3, 0) // target −1 = max, solutions 3 = alla kort
+export function solveAllCards(dds: Dds, state: PlayState, alltidPoang = false): KortPoang[] {
+  // target −1 = max, solutions 3 = alla kort. Mode 0 räknar INTE när platsen
+  // bara har ett kort att välja på (likvärdiga grannar inräknade) — poängen blir
+  // då −2 ("inget alternativ"). `alltidPoang` (mode 1) räknar alltid: Monte-
+  // Carlo-röstningen summerar poängen över lägen och behöver det riktiga talet.
+  const fut = dds.SolveBoardPBN(stateToSolvePbn(state), -1, 3, alltidPoang ? 1 : 0)
   const out: KortPoang[] = []
   for (let i = 0; i < fut.cards; i++) {
     const suit = PBN_SUITS[fut.suit[i]]

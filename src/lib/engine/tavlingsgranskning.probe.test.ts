@@ -43,6 +43,7 @@ import { dealFromSeed } from './deal'
 import { botCardSmart } from './play-bot'
 import { botBud } from './resonemang'
 import { computeOracle, getDds } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 import {
   budAvvikelser,
   botAvvikelser,
@@ -144,6 +145,7 @@ it.skipIf(!DATUM)('nattlig djupgranskning av tävlingsinskick', { timeout: 0 }, 
     }
 
     const dds = await getDds()
+    await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
     const budMotor = (d: Parameters<typeof botBud>[0], h: Parameters<typeof botBud>[1], s: Parameters<typeof botBud>[2]) =>
       botBud(d, h, s, (x) => computeOracle(dds, x).solve).bid
     // 2) Omspelning mot DAGENS motor. Träff = klart; avvikelse = omprov (steg 3).

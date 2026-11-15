@@ -2,13 +2,20 @@
 // 'guld', veckodatumet, frönyckeln — och att ett inskick valideras mot den
 // LAGRADE given utan att de dagliga tävlingarnas väg ändras en millimeter.
 
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { dealFromSeed } from '../../src/lib/engine/deal'
 import { GULD_STRATEGI, MP_STRATEGI, raknesatt, strategiFor } from '../../src/lib/engine/matchpoints'
 import { spelaBotGiv, spelaBotGivMedGiv } from '../../src/lib/engine/botspelare'
+import { laddaSnabbLosare } from '../../src/lib/engine/mc-losare'
 import { fronyckel, playSeedForBoard, seedForBoard } from './seed'
 import { lasDag, lasForm, tavlingsdagFor } from './tavlingsdag'
 import { validera, valideraGiv } from './validera'
+
+// Bottarna spelar hela givar här: ladda den snabba lösaren (lösarbytet
+// 2026-11-15) som nattspelet gör — annars räknar varje giv i tiotals sekunder.
+beforeAll(async () => {
+  await laddaSnabbLosare()
+})
 
 const SECRET = 'test-hemlighet'
 // Onsdagen 2026-11-11, mitt på dagen svensk tid. Veckans måndag = 2026-11-09.

@@ -31,6 +31,7 @@ import { shownVoids } from './card-counting'
 import { applyOpeningLeadSignal } from './signal-decode'
 import { botAuction, dealFromSeed } from './revisor'
 import { getDds, solveAllCards } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 import { avblockering, type Ingangslagen } from './unblock'
 
 const DEALS = Number(process.env.AVBLOCK_DEALS ?? 200)
@@ -54,6 +55,7 @@ const VARIANTER: Ingangslagen[] = ['A', 'AB', 'ABC']
 it.skipIf(!process.env.AVBLOCK)(`avblockerings-riggen: ${DEALS} givar, frö ${SEED}+${OFFSET}`, { timeout: 0 }, async () => {
   const t0 = Date.now()
   const dds = await getDds()
+  await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
   const stat = Object.fromEntries(VARIANTER.map((v) => [v, { byten: 0, vinst: 0, forlust: 0, netto: 0 }]))
   const rader: string[] = []
   const katStat = new Map<string, { byten: number; vinst: number; forlust: number; netto: number }>()

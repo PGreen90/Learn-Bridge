@@ -55,6 +55,7 @@ import {
 } from './_lib/bord-motor'
 import { medDdFacit } from './_lib/dd-facit'
 import { budOrakel, claimKontrollen } from './_lib/claim-dd'
+import { laddaSnabbLosare } from '../src/lib/engine/mc-losare'
 
 // ---------------------------------------------------------------------------
 // Små hjälpare (samma mönster som skicka-in.ts — funktionerna är medvetet
@@ -1357,6 +1358,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     const body = kravdMetod === 'POST' ? await readJson(req) : null
+    // Lösarbytet 2026-11-15: handlingarna som kan driva fram botkort laddar den
+    // snabba lösaren först (en gång per varm instans) — samma lösare som
+    // telefonens bakgrundsräknare, så bordets bottar väljer samma kort som i
+    // tävlingen. Går den inte att ladda räknar röstningen med TS-lösaren.
+    if (['hjartslag', 'stol', 'start', 'drag'].includes(h)) await laddaSnabbLosare()
     switch (h) {
       case 'skapa':
         return await hanteraSkapa(m, userId, body, json)

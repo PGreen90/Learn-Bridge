@@ -17,6 +17,7 @@ import { dealFromSeed } from './deal'
 import { botCardSmart } from './play-bot'
 import { borTanka, botBud } from './resonemang'
 import { computeOracle, getDds } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 import { botAvvikelser, budAvvikelser } from './tavlingsgranskning'
 
 const ON = process.env.GENREP === '1'
@@ -25,6 +26,7 @@ const SECRET = 'genrep-hemlis'
 
 it.skipIf(!ON)('genrepet: tänkande bottar klarar servern och nattgranskningen', { timeout: 0 }, async () => {
   const klient = await getDds() // "telefonen"
+  await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
   const natt = await getDds() // nattgranskningens egen instans
   const rader: string[] = []
   let givar = 0, tankta = 0, avvisade = 0, avvikande = 0
