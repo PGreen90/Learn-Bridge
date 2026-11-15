@@ -48,7 +48,7 @@ import { BiddingPhase } from './play/BiddingPhase'
 import { ClaimDialog } from './play/ClaimDialog'
 import { RondRapportView } from './play/RondRapport'
 import { FlightLayer } from './play/FlightLayer'
-import { AllaFargerKnapp, hornKnappKlass, ListChip, overlayTopp, SpelbordRam } from './play/SpelbordRam'
+import { hornKnappKlass, ListChip, overlayTopp, SpelbordRam } from './play/SpelbordRam'
 import { armSound } from '../lib/sound'
 
 // ===========================================================================
@@ -1169,6 +1169,7 @@ export function PlayTable({
                 seat="N"
                 onCardClick={onCardClick}
                 selectedSuit={selectedSuit}
+                onDeselect={deselectSuit}
                 registerCardEl={registerCardEl}
               />
             </div>
@@ -1180,6 +1181,7 @@ export function PlayTable({
               seat="N"
               onCardClick={onCardClick}
               selectedSuit={selectedSuit}
+              onDeselect={deselectSuit}
               registerCardEl={registerCardEl}
             />
           ))}
@@ -1223,8 +1225,11 @@ export function PlayTable({
     </>
   )
 
+  // Raden har FAST minsta höjd (två textrader) så bordet inte hoppar när
+  // förklaringen visas, byts eller stängs (etapp A, 2026-11-15). En ovanligt
+  // lång förklaring på smal skärm får ändå växa — texten klipps aldrig.
   const underList = (
-    <>
+    <div className="min-h-[2.375rem]">
       {/* Kortförklaringen: tryck på ett spelat kort på bordet → botens motivering. */}
       {explain ? (
         <p className="px-4 pb-1.5 text-center text-xs text-emerald-50/90">
@@ -1238,7 +1243,7 @@ export function PlayTable({
           </p>
         )
       )}
-    </>
+    </div>
   )
 
   // Din hand längst ner (trumf längst till vänster). Är SYD träkarl (Nord
@@ -1247,8 +1252,7 @@ export function PlayTable({
   // (controls i common.tsx). Spelar du själv: kortraden.
   const syd = (
     <>
-        {/* När bara en vald färg visas: väg tillbaka till alla färger (Synrey). */}
-        {selectedSuit && <AllaFargerKnapp onClick={deselectSuit} />}
+        {/* "◀ Alla färger" ritas av handen själv, intill vald färg (etapp A). */}
         {dummyOf(contract) === 'S' ? (
           <SuitColumns
             hand={play.hands.S}
@@ -1257,6 +1261,7 @@ export function PlayTable({
             seat="S"
             onCardClick={onCardClick}
             selectedSuit={selectedSuit}
+            onDeselect={deselectSuit}
             registerCardEl={registerCardEl}
           />
         ) : (
@@ -1266,6 +1271,7 @@ export function PlayTable({
             play={play}
             onCardClick={onCardClick}
             selectedSuit={selectedSuit}
+            onDeselect={deselectSuit}
             registerCardEl={registerCardEl}
           />
         )}
@@ -1336,6 +1342,7 @@ export function PlayTable({
 
   return (
     <SpelbordRam
+      onFriDuk={deselectSuit}
       tone="club"
       className={done ? 'felt-fade-out' : ''}
       style={{ '--motion-scale': SPEED_FACTOR[speed] } as CSSProperties}

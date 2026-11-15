@@ -27,6 +27,20 @@ export interface Nyhet {
 /** Nyast först. */
 export const NYHETER: Nyhet[] = [
   {
+    version: '1.0.4',
+    datum: '2026-11-15',
+    punkter: [
+      {
+        rubrik: 'Stadigare bord',
+        text: 'Bordet står still när du väljer färg. Tryck på duken för att ångra.',
+      },
+      {
+        rubrik: 'Tydligare val',
+        text: 'Kortet du tryckt på får guldkant. Nästa tryck spelar det.',
+      },
+    ],
+  },
+  {
     version: '1.0.3',
     datum: '2026-11-15',
     punkter: [

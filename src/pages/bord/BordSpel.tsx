@@ -35,7 +35,7 @@ import { MenuTempoRow, MenuToggleRow, sameCard, STRAIN_CODE } from '../play/comm
 import { ms, type PlaySpeed } from '../play/tempo'
 import { useCardFlight } from '../play/useCardFlight'
 import { FlightLayer } from '../play/FlightLayer'
-import { AllaFargerKnapp, hornKnappKlass, listKnappKlass, ListChip, overlayTopp, RAM_TON, SpelbordRam, TankerBricka } from '../play/SpelbordRam'
+import { hornKnappKlass, listKnappKlass, ListChip, overlayTopp, RAM_TON, SpelbordRam, TankerBricka } from '../play/SpelbordRam'
 import { loadBidHelp, saveBidHelp } from '../../lib/backend'
 import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
@@ -1262,6 +1262,8 @@ export function BordSpel({
       seat="N"
       onCardClick={klick('N')}
       selectedSuit={selectedSuit}
+      onDeselect={() => setSelectedSuit(null)}
+      tone="vanner"
       registerCardEl={registerCardEl}
     />
   )
@@ -1324,7 +1326,6 @@ export function BordSpel({
   // (spelföraren) spelar korten, inget får bli klickbart.
   const syd = (
     <>
-      {selectedSuit && <AllaFargerKnapp tone="vanner" onClick={() => setSelectedSuit(null)} />}
       {jagArDummy ? (
         <SuitColumns
           hand={st.hands.S}
@@ -1342,6 +1343,8 @@ export function BordSpel({
           play={st}
           onCardClick={klick('S')}
           selectedSuit={selectedSuit}
+          onDeselect={() => setSelectedSuit(null)}
+          tone="vanner"
           registerCardEl={registerCardEl}
         />
       )}
@@ -1360,6 +1363,7 @@ export function BordSpel({
 
   return (
     <SpelbordRam
+      onFriDuk={() => setSelectedSuit(null)}
       tone="vanner"
       horn={horn}
       overlays={overlays}

@@ -87,7 +87,11 @@ export function SpelbordRam({
   underList,
   syd,
   efter,
+  onFriDuk,
 }: {
+  /** Tryck på en FRI yta av duken (inget kort, ingen knapp, ingen ruta) —
+   *  spelvyerna går då tillbaka till alla färger (ägarönskan 2026-11-15). */
+  onFriDuk?: () => void
   tone?: FeltTone
   /** Extra Felt-klasser (spelbordets felt-fade-out). */
   className?: string
@@ -117,7 +121,19 @@ export function SpelbordRam({
 }) {
   const t = RAM_TON[tone]
   return (
-    <Felt tone={tone} className={`${SPELVY_FELT} ${className}`} style={style}>
+    <Felt
+      tone={tone}
+      className={`${SPELVY_FELT} ${className}`}
+      style={style}
+      onClick={
+        onFriDuk &&
+        ((e) => {
+          const t = e.target as HTMLElement
+          if (t.closest('button, a, input, select, textarea, [data-kort], [role="dialog"], [role="group"], [role="menu"]')) return
+          onFriDuk()
+        })
+      }
+    >
       {/* ⋮ (meny) överst, ⓘ (budgivningen) under den — staplade i övre högra
           hörnet (ägarbeslut 2026-07-31). Säker marginal för urtaget. */}
       <div ref={hornRef} data-bordsmeny-ankare className="absolute right-2.5 top-[calc(0.5rem+env(safe-area-inset-top))] z-20">
@@ -149,8 +165,10 @@ export function SpelbordRam({
       {underList}
 
       {/* Din hand längst ner. Säker botten-marginal (hemindikatorn) nu när
-          duken går edge-to-edge. */}
-      <div className={`border-t ${t.sydList} px-2 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))]`}>{syd}</div>
+          duken går edge-to-edge. Toppmarginalen (pt-9) är den RESERVERADE
+          platsen för "◀ Alla färger", som svävar ovanför vald färg — bordet
+          hoppar aldrig när knappen visas (etapp A, 2026-11-15). */}
+      <div className={`border-t ${t.sydList} px-2 pt-9 pb-[calc(1.25rem+env(safe-area-inset-bottom))]`}>{syd}</div>
       {efter}
     </Felt>
   )
@@ -165,19 +183,30 @@ export function ListChip({ tone = 'club', children }: { tone?: FeltTone; childre
   )
 }
 
-/** "◀ Alla färger" — vägen tillbaka när bara en vald färg visas (Synrey). */
-export function AllaFargerKnapp({ tone = 'club', onClick }: { tone?: FeltTone; onClick: () => void }) {
+/** "◀ Alla färger" — vägen tillbaka när en färg är vald (Synrey). Svävar
+ *  (absolut) intill den valda färgen: `plats` 'over' = ovanför (Syds hand, i
+ *  ramens reserverade toppmarginal), 'under' = nedanför (Nords hand, över fri
+ *  duk). Tar ingen plats i layouten — bordet hoppar inte. Händerna i hands.tsx
+ *  ritar den; föräldern måste vara `relative`. */
+export const ALLA_FARGER_BREDD = 108 // px, ungefärlig — kortraden håller den inom skärmen
+export function AllaFargerKnapp({
+  tone = 'club',
+  plats,
+  onClick,
+}: {
+  tone?: FeltTone
+  plats: 'over' | 'under'
+  onClick: () => void
+}) {
   const t = RAM_TON[tone]
   return (
-    <div className="flex justify-center pb-1.5">
-      <button
-        type="button"
-        onClick={onClick}
-        className={`rounded-full ${t.knapp} px-3 py-1 text-xs font-semibold ${t.knappText} ring-1 ring-gold-400/30 transition-colors`}
-      >
-        ◀ Alla färger
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`overlay-in absolute left-1/2 z-20 -translate-x-1/2 whitespace-nowrap ${plats === 'over' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'} rounded-full ${t.knapp} px-3 py-1 text-xs font-semibold ${t.knappText} ring-1 ring-gold-400/30 transition-colors`}
+    >
+      ◀ Alla färger
+    </button>
   )
 }
 
