@@ -14,10 +14,11 @@ svarar på vad).
 > --limit 6`; granskningen föll 14/11, grön 15/11). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · iakttagelserna i historik 11-15. Vecka 16/11 är HANDPLOCKAD: kolla att söndagsjobbet lät den vara och att "Givens historia" syns. Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Veckans stjärntävling (f.d. guld, kodform `guld`): live-prov (ägarval 2026-11-11)
-Tolv utvalda svåra givar per vecka, MP%, utan budhjälp. LIVE `2d3eca6`
-(2026-11-12), vecka 1 upplagd, `0015` körd; veckojobbet `guld-tavling.yml` går söndagar.
-Etapp 1–3 är LIVE (9187591). Ägaren synar "Så bjuder rebidz" + träningens texter. **Hela planen + läget: `docs/nasta-niva-plan.md`.**
+### 🔵 NU — Tempot: bottarnas betänketid (ägarval 2026-11-15)
+Steg 1 lösarbytet i Monte-Carlo (`mc-losare.ts`, `docs/bot-hjarna.md`): LIVE v1.0.6.
+Sedan pauserna: tänk under stickväntan · snabbare tvingade kort · kortare stickväntan (ägarval).
+Veckans stjärntävling (kodform `guld`, LIVE `2d3eca6`, `guld-tavling.yml` söndagar,
+`docs/nasta-niva-plan.md`) är nu parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·

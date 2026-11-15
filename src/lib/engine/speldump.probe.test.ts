@@ -29,6 +29,7 @@ import { botCardSmartReasoned } from './play-bot'
 import { isComplete, playCard, startPlay } from './play'
 import { botDecisionSeed, playIndexOf } from './play-seed'
 import { analyseSpel, computeOracle, getDds } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 import { botAuction, dealFromSeed } from './revisor'
 import { bedomSpel } from './speldom'
 
@@ -52,6 +53,7 @@ function lasSecret(): string | null {
 
 it.skipIf(SEEDS.length === 0 && TAVLING.length === 0)('speldump', { timeout: 0 }, async () => {
   const dds = await getDds()
+  await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
   const rader: string[] = []
 
   /** Dumpar EN giv: auktionen + varje kort med botens skäl och DD-rörelserna.

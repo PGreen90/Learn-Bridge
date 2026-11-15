@@ -38,6 +38,27 @@ Trappan (Steg 1–3) + hela FAS 11-svansen är byggd:
   klartextsmotivering per drag; `Play.tsx` visar "Öst spelade 3♣. Varför?".
 - **Tänj MC-fönstret + webworker:** MC körs i `mc-worker.ts` av huvudtråden (ingen
   frys), adaptiv `mcBudget`, fönstret 7 → 8 kort. Uppmätt: 7 kort ~2 s, 8 kort ~3,7 s.
+- **Lösarbytet (2026-11-15, ägarfråga "bottarna tänker för länge"):** röstningen
+  räknar nu varje utdelat läge med `bridge-dds` (WASM, samma lösare som
+  budtänkandet och bordets claim) — alla lagliga korts värde i ETT anrop per
+  läge, i stället för TS-lösaren en gång per kort och läge. `monte-carlo.ts`
+  känner bara funktionsformen (`anvandSnabbLosare`); `mc-losare.ts`
+  (`laddaSnabbLosare`) laddar och registrerar den. **Varje körväg som väljer
+  botkort i drift laddar den en gång före första kortet:** `mc-worker.ts`,
+  `api-src/bord.ts`, nattspelet, nattgranskningen och omprovet (som läser
+  modulen dynamiskt — äldre versioner saknar den och räknar med TS-lösaren,
+  som de gjorde live). Utan registrering (enhetstester, lösaren går inte att
+  ladda) räknar röstningen med TS-lösaren som förr. Samma kort/poäng/lägesantal
+  som TS-lösaren där den hinner klart: facit `monte-carlo-losare.test.ts`.
+  Räknetid per kortval, före och efter:
+  `BETANKETID=30 npx vitest run src/lib/engine/betanketid.probe.test.ts`
+  (`BETANKETID_TS=1` = gamla lösaren); lösarna sida vid sida på samma lägen:
+  `BETANKETID_LOSARE=30 npx vitest run src/lib/engine/betanketid-losare.probe.test.ts`.
+  Spelkvaliteten på speldiagnosens 200 givar, gamla mot nya lösaren (skivorna
+  `losts` med `SPELDIAG_TS=1`, `losny` utan; kommandot per skiva står i
+  `docs/speldiagnos.md`): `node scripts/jamfor-speldiagnos.mjs losts losny`.
+  Antal lägen (`mcBudget`) och fönstret (8 kort) är oförändrade — att höja dem
+  är en egen kvalitetsfråga nu när räknetiden inte längre sätter taket.
 - **pt 47–49 (`signals.ts`):** facit-granskad mot §8, luckor låsta.
 
 Se `docs/status.md` för detaljer.

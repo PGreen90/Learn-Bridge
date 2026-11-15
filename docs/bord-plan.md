@@ -85,7 +85,9 @@ resonemangslagret i standardläget där tabellen saknar regel — DD-oraklet
 `budOrakel()` i `claim-dd.ts` ovanpå den redan buntade `bridge-dds`), i
 `drivFram`, facit-linjen (läge 1) och läge 2:s autobud/givval. Kortspelet kör
 KLIENTENS Monte-Carlo-profil (`SERVER_SMART = {}` → botCardSmarts standard:
-8-kortsfönster, mcBudget) — den strypta serverprofilen är borta. Serverless-
+8-kortsfönster, mcBudget) — den strypta serverprofilen är borta. Sedan
+lösarbytet 2026-11-15 laddar `bord.ts` den snabba lösaren (`laddaSnabbLosare`)
+före varje handling som kan driva botkort, som klientens worker. Serverless-
 taket sköts av tidsbudgeten per anrop (`budgetMs`, 5 s): är den slut STANNAR
 `drivFram` före nästa botbeslut (aldrig billigare tumregeldrag) och nästa
 hjärtslag (> 2 s stiltje) fortsätter — ett påbörjat tänkande bud körs alltid

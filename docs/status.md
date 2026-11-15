@@ -217,6 +217,8 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   huvudtråden → ingen frys, "räknar …"-indikator, timeout-fallback). Adaptiv
   `mcBudget` (färre kort = fler sampel; 8 kort = bantad ~3,7 s). Fönstret tänjt
   7 → 8 kort. `usesMonteCarlo` väljer worker vs inline. Verifierad i webbläsaren.
+  **Lösarbytet 2026-11-15:** röstningen räknar med `bridge-dds` (ett anrop per
+  läge) via `mc-losare.ts` — detalj och mätkommandon i `docs/bot-hjarna.md`.
 - **FAS 11-eposet därmed helt klart** (Steg 1–3 + pt 47–50 + "Varför?" + webworker).
 
 ## Kortspel (punkt 29)

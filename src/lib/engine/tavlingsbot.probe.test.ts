@@ -55,6 +55,7 @@ import { giltigMotorstampel } from './tavlingsgranskning'
 import { spelaBotGiv, spelaBotGivMedGiv } from './botspelare'
 import { botBud } from './resonemang'
 import { computeOracle, getDds } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 
 const DATUM = process.env.BOT_TAVLING ?? ''
 /** Vilken av dagens två tävlingar (Dagens IMP, 2026-09-26): TAVLING_FORM=imp
@@ -79,6 +80,7 @@ it.skipIf(!DATUM)('trebottarna spelar dagens tävling', { timeout: 0 }, async ()
   // Tänkande bottar (2026-09-24): samma budfunktion som klientens worker och
   // nattgranskningen. Auktionen är lika för alla tre nivåer → minnet delas.
   const dds = await getDds()
+  await laddaSnabbLosare() // lösarbytet 2026-11-15: samma kortval som i drift
   const budMinne = new Map<string, ReturnType<typeof botBud>>()
   const tankandeBud = (d: Parameters<typeof botBud>[0], h: Parameters<typeof botBud>[1], s: Parameters<typeof botBud>[2]) => {
     const k = `${d.board}|${h.map((c) => c.bid).join(',')}`

@@ -10,6 +10,19 @@
 
 ---
 
+## 2026-11-15/16 (tempot steg 1: lösarbytet i Monte-Carlo, v1.0.6)
+Ägarfråga: "det går för långsamt för bottarna att spela sina kort". Mätt med
+`betanketid.probe.test.ts`: nästan all räknetid låg i stick 6–7, där slutspels-
+simuleringen (≤ 8 kort) räknade varje lagligt kort på varje utdelat läge med appens
+egen TS-lösare. **Lösarbytet:** röstningen räknar nu varje läge med `bridge-dds`
+(alla korts värde i ett anrop) via `mc-losare.ts`; inkopplat i `mc-worker.ts`,
+`api-src/bord.ts`, nattspelet, nattgranskningen och omprovet (dynamiskt — äldre
+versioner räknar med TS-lösaren som de gjorde live). Antal lägen och fönstret är
+orörda. Facit `monte-carlo-losare.test.ts` (samma kort/poäng som TS-lösaren där den
+hinner klart). Mätkommandon och A/B mot speldiagnosen: `docs/bot-hjarna.md`.
+Kvar i NU: pauserna (tänk under stickväntan · snabbare tvingade kort · kortare
+stickväntan) — stäms av mot spelbordets etapp C–E (tempo.ts ändrad där).
+
 ## 2026-11-15 (spelbordets uppfräschning etapp A–E, v1.0.3–v1.0.5; LIVE 1731319)
 Ägarönskan: kortradens utfällning ska centreras på det tryckta kortet — och sedan en
 uppfräschning av hela spelbordet med fokus på effekternas kvalitet och användarvänlighet.

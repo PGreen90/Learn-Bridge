@@ -189,6 +189,59 @@ function hardFactsOnly(model: HandModel): HandModel {
   return out
 }
 
+/**
+ * SNABB LÖSARE (lösarbytet 2026-11-15): alla lagliga korts värde i ETT anrop
+ * per läge — för varje kort hur många av de återstående sticken (inklusive det
+ * pågående) SIDAN VID DRAGET tar om kortet läggs. I drift är det bridge-dds
+ * (`mc-losare.ts`); den här modulen känner bara funktionsformen, så varken
+ * WASM-paketet eller en asynkron laddning når hit. Kastar lösaren hoppas läget
+ * över, precis som ett läge TS-lösaren inte hann inom nodbudgeten.
+ */
+export type AllaKortLosare = (state: PlayState) => { card: Card; score: number }[]
+
+let snabbLosare: AllaKortLosare | null = null
+
+/** Registrera (eller med null: avregistrera) den snabba lösaren för röstningen.
+ *  Varje körväg som väljer botkort i drift gör det EN gång vid start — utan
+ *  registrering räknar röstningen med TS-lösaren som förr. */
+export function anvandSnabbLosare(losare: AllaKortLosare | null): void {
+  snabbLosare = losare
+}
+
+/** Är en snabb lösare registrerad? (Vakter och tester.) */
+export function harSnabbLosare(): boolean {
+  return snabbLosare !== null
+}
+
+/** Röstningens tabell [kort][läge] ur den snabba lösaren: spelförarens TOTALA
+ *  stick om kortet läggs (samma storhet som TS-vägen räknar fram). */
+function snabbaResultat(
+  losare: AllaKortLosare,
+  state: PlayState,
+  seat: Seat,
+  legal: Card[],
+  layouts: Record<Seat, Hand>[],
+  maximizeDeclarer: boolean,
+): (number | null)[][] {
+  const declSide = side(state.contract.declarer)
+  const banked = declSide === 'NS' ? state.tricksNS : state.tricksEW
+  const kvar = state.hands[seat].length // återstående stick inkl. det pågående
+  const results: (number | null)[][] = legal.map(() => [])
+  for (const layout of layouts) {
+    let poang: Map<string, number> | null = null
+    try {
+      poang = new Map(losare({ ...state, hands: layout }).map((k) => [key(k.card), k.score]))
+    } catch {
+      poang = null
+    }
+    legal.forEach((card, ci) => {
+      const s = poang?.get(key(card))
+      results[ci].push(s === undefined ? null : banked + (maximizeDeclarer ? s : kvar - s))
+    })
+  }
+  return results
+}
+
 export interface MonteCarloChoice {
   /** Kortet röstningen valde. */
   card: Card
@@ -233,17 +286,19 @@ export function chooseCardMonteCarlo(
   // uppsättning lägen än hackan. Nu jämförs alla kort på samma lägen: bara de
   // lägen där ALLA kort löstes räknas; löstes inget läge för alla kort faller vi
   // tillbaka på kortets egna lösta lägen (som förr) hellre än på ingenting.
-  const results = legal.map((card) =>
-    layouts.map((layout) => {
-      const next = playCard({ ...state, hands: layout }, card)
-      const dd = doubleDummyDeclarerRemaining(
-        next.hands, next.contract.strain, next.contract.declarer, next.currentTrick, next.toAct, maxNodes,
+  const results = snabbLosare
+    ? snabbaResultat(snabbLosare, state, seat, legal, layouts, maximizeDeclarer)
+    : legal.map((card) =>
+        layouts.map((layout) => {
+          const next = playCard({ ...state, hands: layout }, card)
+          const dd = doubleDummyDeclarerRemaining(
+            next.hands, next.contract.strain, next.contract.declarer, next.currentTrick, next.toAct, maxNodes,
+          )
+          if (dd === null) return null // för tung ställning → hoppa detta sampel
+          const banked = declSide === 'NS' ? next.tricksNS : next.tricksEW
+          return banked + dd
+        }),
       )
-      if (dd === null) return null // för tung ställning → hoppa detta sampel
-      const banked = declSide === 'NS' ? next.tricksNS : next.tricksEW
-      return banked + dd
-    }),
-  )
   const commonLayouts = layouts.map((_, i) => i).filter((i) => results.every((r) => r[i] !== null))
   const useCommon = commonLayouts.length > 0
 

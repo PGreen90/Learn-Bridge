@@ -25,6 +25,7 @@ import { it } from 'vitest'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { analyseSpel, computeOracle, getDds } from './revisor-dds'
+import { laddaSnabbLosare } from './mc-losare'
 import { spelaMedFro } from './spela-giv'
 import { formatSpeldiagnos, korSpeldiagnos } from './speldiagnos'
 
@@ -39,6 +40,8 @@ it.skipIf(!process.env.SPELDIAG)(
   { timeout: 0 }, // mätningen får ta den tid den tar
   async () => {
     const dds = await getDds()
+    // SPELDIAG_TS=1 = den gamla TS-lösaren (A/B-jämförelsen kring lösarbytet 2026-11-15).
+    if (process.env.SPELDIAG_TS !== '1') await laddaSnabbLosare()
     const rapport = korSpeldiagnos({
       deals: DEALS,
       baseSeed: SEED + OFFSET,
