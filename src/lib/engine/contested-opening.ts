@@ -90,6 +90,21 @@ export function contestedResponseSeat(f: AuctionFacts): { openerSuit: Suit; thei
 }
 
 /**
+ * Stöddubblingsfönstrets kontraktsbud UTAN ett eventuellt inkliv före svaret
+ * (felrapport #126): 1♣–(1♦)–1♠–(2♦) är samma fönster som 1♣–(P)–1♠–(2♦) —
+ * svaret 1M är fortfarande svararens första bud och öppnarens X visar exakt tre
+ * stöd. Ligger motståndarnas kontraktsbud direkt efter öppningen (före svaret)
+ * plockas det bort, så läsarna nedan ser [öppning, svar, deras bud, …].
+ */
+function stodFonsterBud(f: AuctionFacts): ResolvedCall[] {
+  const bids = f.contractBids
+  if (bids.length >= 4 && side(bids[1].seat) !== side(bids[0].seat) && side(bids[2].seat) === side(bids[0].seat)) {
+    return [bids[0], ...bids.slice(2)]
+  }
+  return bids
+}
+
+/**
  * Öppnarens stol i STÖDDUBBLINGSFÖNSTRET (§7.4): jag öppnade 1 i färg, LHO
  * passade, partnern svarade 1♥/1♠, RHO klev in i en FÄRG (inte min) direkt
  * efter svaret, och det är min tur direkt efter inklivet. Ingen X/XX i
@@ -100,7 +115,7 @@ export function supportDoubleSeat(f: AuctionFacts): { partnerMajor: Major; their
   if (!open || open.seat !== f.seat || open.level !== 1) return null
   const mySuit = SUIT_OF_LETTER[open.strain]
   if (!mySuit) return null
-  const bids = f.contractBids
+  const bids = stodFonsterBud(f)
   if (bids.length !== 3) return null
   const [o, resp, over] = bids
   if (o.seat !== f.seat || resp.seat !== f.partner) return null
@@ -135,7 +150,7 @@ export function supportDoubleToAnswer(
   const lastNonPass = f.lastNonPass
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat] || lastNonPass.bid !== 'X') return null
 
-  const bids = f.contractBids
+  const bids = stodFonsterBud(f)
   if (bids.length !== 3) return null
   const [open, resp, over] = bids
 
@@ -178,7 +193,7 @@ export function supportDoubleFollowUpToAnswer(
   if (!lastNonPass || lastNonPass.seat !== PARTNER[seat]) return null
   if (!parseContractBid(lastNonPass.bid)) return null
 
-  const bids = f.contractBids
+  const bids = stodFonsterBud(f)
   if (bids.length !== 4) return null
   const [open, resp, over, answer] = bids
   if (answer !== lastNonPass) return null

@@ -456,7 +456,45 @@ function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpret
   if (weakTwo) return weakTwo
   const adv3 = interpretAdvanceOver3LevelOvercall(call, prior)
   if (adv3) return adv3
+  const stort2c = interpretStrong2cContested(call, prior)
+  if (stort2c) return stort2c
   return deriveUndisturbed(call, prior)
+}
+
+/**
+ * STÖRD STARK 2♣ (felrapport #127, ägarbeslut 2026-11-15, §7.9): de klev in i
+ * en färg över vår 2♣ och svararen passade. Öppnaren passar aldrig ut inklivet:
+ * färg = naturlig 5+, sang = jämn hand med stopp, X = tvingar partnern att
+ * bjuda. Svararens bud på den dubblingen lovar ingenting. Förr lästes buden
+ * som en vanlig 1-lägesöppnares ("återöppningsdubbling", "2NT 18–19", "4+ kort").
+ */
+function interpretStrong2cContested(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 2 || open.cb.strain !== 'C' || SIDE[open.seat] !== SIDE[call.seat]) return null
+  const ours = prior.filter((c) => SIDE[c.seat] === SIDE[call.seat] && c.bid !== 'P')
+  const theirs = prior.filter((c) => SIDE[c.seat] !== SIDE[call.seat] && parseBid(c.bid))
+  const last = theirs[theirs.length - 1]
+  const tb = last ? parseBid(last.bid) : null
+  if (!tb || tb.strain === 'NT' || tb.level > 4) return null
+  const their = `${tb.level}${SYMBOL[tb.strain]}`
+  // Öppnarens andra tur: bara 2♣ från vår sida hittills, pass på deras bud.
+  if (call.seat === open.seat && ours.length === 1 && prior.filter((c) => c.seat === open.seat).length === 1) {
+    if (prior.slice(prior.indexOf(last) + 1).some((c) => c.bid !== 'P')) return null
+    if (call.bid === 'P') return null
+    if (call.bid === 'X') return R('stört 2♣: dubbling', `Dubbling — 2♣-öppnaren passar aldrig ut deras ${their}: stark hand utan lång färg och utan sang att bjuda. Tvingar partnern att bjuda sin längsta färg.`)
+    const cb = parseBid(call.bid)
+    if (!cb) return null
+    if (cb.strain === 'NT') return R('stört 2♣: sang', `${cb.level} sang — 2♣-öppnaren passar aldrig ut deras ${their}: stark jämn hand (22+) med stopp i ${NAME[tb.strain]}. Naturligt.`)
+    if (cb.strain === tb.strain) return null
+    return R('stört 2♣: egen färg', `${cb.level}${SYMBOL[cb.strain]} — 2♣-öppnaren passar aldrig ut deras ${their}: naturligt, 5+ ${NAME[cb.strain]} i den starka handen.`)
+  }
+  // Svararens tvingade bud på öppnarens dubbling.
+  if (call.seat === PARTNER[open.seat] && ours.length === 2 && ours[1].seat === open.seat && ours[1].bid === 'X' && !prior.some((c) => c.seat === call.seat && c.bid !== 'P')) {
+    const cb = parseBid(call.bid)
+    if (!cb || cb.strain === 'NT' || cb.strain === tb.strain) return null
+    return R('svar på 2♣-öppnarens dubbling', `${cb.level}${SYMBOL[cb.strain]} — tvingat svar på 2♣-öppnarens dubbling: längsta färgen, lovar ingenting (kan vara noll poäng).`)
+  }
+  return null
 }
 
 /**
@@ -3602,6 +3640,8 @@ function afterOneMinor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
     }
     if (same(cb, 2, 'NT')) return R('2NT inbjudan', `2 sang — 11–12 hp balanserad med stopp, ingen 4-korts högfärg. Inbjudan.`)
     if (same(cb, 3, 'NT')) return R('3NT till spel', `3 sang — 13–15 hp balanserad, till spel.`)
+    // 1♦–3♣ (förslag #122, ägarbeslut 2026-11-15): sjukorts klöver under utgångskrav.
+    if (m === 'D' && same(cb, 3, 'C')) return R('svagt hopp: 7+ klöver', `3♣ — sju eller fler klöver, under utgångskrav (högst 11 hp), ingen 4-korts högfärg. Till spel — öppnaren passar normalt.`)
     return null
   }
 

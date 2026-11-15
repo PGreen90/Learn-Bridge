@@ -170,6 +170,10 @@ const ALL_ENGINE_RULES: string[] = [
   // Negativ dubbling enligt experterna (2026-10-08).
   'cue efter negativ dubbling (krav)', 'svar på cue efter negativ dubbling',
   'negativ-dubblarens preferens (visar andra högfärgen)', 'svar på negativ dubbling (andra högfärgen)',
+  // 2026-11-15: felrapport #127 (stört 2♣) + förslagen #122 (1♦–3♣) och #123 (tävla 3M).
+  'stört 2♣: egen färg', 'stört 2♣: sang', 'stört 2♣: dubbling', 'svar på 2♣-öppnarens dubbling',
+  'svagt hopp: 7+ klöver',
+  'inklivaren tävlar i ozon (13+)', 'advancern tävlar med fjärde trumfen (lagen om totala stick)', 'advancern passar tävlingsbudet',
 ]
 
 describe('regelregistret – kravnivå (forcing)', () => {

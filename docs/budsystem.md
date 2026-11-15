@@ -378,6 +378,12 @@ konkurrens tas senare.)*
   1NT). Med en riktigt svag hand rebjuder svararen sedan sin färg billigt / passar.
   (Sedan tidigare fanns inget svagt hoppskift i den andra minorn heller – en svag
   6-korts klöver över 1♦ bjuder 1NT.)
+- **1♦–3♣ = sju eller fler klöver, under utgångskrav** (ägarbeslut 2026-11-15,
+  förslag #122). Med sjukorts klöver är sang fel kontrakt ("extrem fördelning och
+  lång klöver — i NT kan detta vara riktigt dåligt"), och 2♣ är utgångskrav
+  (12+). Därför får handen ett eget bud: **3♣**, högst 11 hp, ingen 4-korts
+  högfärg, **till spel — öppnaren passar**. Sexkorts klöver bjuder 1NT som förut.
+  *1♦–(P)–**3♣** med ♠987 ♥Q96 ♦— ♣AQJ8742 (9 hp; förr 1NT som passades ut).*
 - "Gap-handen" 7–9 hp med stöd men utan hf: bjud **1NT** (inverterad
   höjning kräver 10+).
 
@@ -402,6 +408,7 @@ konkurrens tas senare.)*
 | 2♦ | 4+ ♦, 10+ hp, ingen 4-korts hf (ej 12+ med 5+ ♣ → 2♣) | Krav (1 rond) | Inverterad minor ● |
 | 2NT | 11–12 hp, balanserad, stopp, ingen 4-korts hf | Inbjudan | naturligt |
 | 3♦ | 5+ ♦, 0–6 hp | Avslut/spärr | Inverterad minor, svag ● |
+| 3♣ | **7+ ♣**, högst 11 hp, ingen 4-korts hf | Till spel | naturligt (ägarbeslut 2026-11-15) |
 | 3NT | 13–15 hp, balanserad | Avslut | naturligt (till spel) |
 
 #### Inverterade minorhöjningar — öppnarens fortsättning
@@ -1709,6 +1716,13 @@ bjudits naturligt. Regeln gäller lika för den som frågar och den som svarar:
   gälla räknefärgen, inte kontraktet), så storslam bjuds inte.
 - **Är sidans senaste naturliga bud sang** är 4NT kvantitativt (§6.8) — då
   bjuder kaptenen sin färg naturligt först.
+- **Essfrågan får ställas av vem som helst i paret — även mitt i en
+  kontrollbudsrond** (felrapport #125, 2026-11-15). Efter 2♣–2NT–3♦–**4♠**
+  (kontrollbud, ruter är trumf) är öppnarens **4NT** essfråga i **ruter**:
+  kontrollbudet 4♠ bjuder inte spader. Partnern svarar i steg (5♣ = 1/4 …) och
+  frågaren stannar i **5♦**, aldrig i 5♠. *Förr läste svararen 4NT som ett bud i
+  kontrollbudsronden och "avslutade" med 5♦ (såg ut som svaret 0/3), och
+  frågaren räknade spader som trumf och föreslog 5♠.*
 
 **Slambeslutet efter svaret (ägarbeslut 2026-10-02) — fråga efter damen när
 det går.** Grundregeln (ägaren 2026-10-04): **fråga alltid så mycket som
@@ -2321,6 +2335,21 @@ totala stick). **18+ → 4M**. Femkorts under 18 → pass (åtta trumf räcker i
 till 3-läget). Ligger deras bud över 3M finns bara 4M (18+). *Bricka 2:
 ♠KT73 ♥KQ7632 ♦K6 ♣A (15 hp) → **3♥** (förr pass utan regel).*
 
+**Tävla 3M över deras bud även med fem kort (ägarbeslut 2026-11-15, förslag
+#123) — "båda, var på sitt skäl":**
+- **Inklivaren med bara fem kort** tävlar **3M i ozon med 13+ hp** ("vi har
+  troligtvis lika många poäng som motståndet eller fler, och den högre färgen").
+  **I zon passar** inklivaren och låter partnern avgöra.
+- **Advancern med FYRA trumf** tävlar **alltid 3M** när budet kommer tillbaka
+  (inklivet lovar fem → nio trumf = 3-läget, lagen om totala stick), oavsett zon.
+  Med tre trumf passar advancern som förut.
+- Ett **3M över deras bud är alltid ett tävlingsbud, aldrig en inbjudan** —
+  partnern passar även med maximum (utgångsinviten 3M finns bara när
+  motståndarna passat efter höjningen).
+
+*(1♦)–1♠–(X)–2♠–(3♥)–**3♠** med ♠AQT98 ♥J5 ♦A4 ♣QT43 (13 hp, ozon; förr pass).
+I zon passar Syd, och Nord med ♠K742 bjuder 3♠ när budet kommer tillbaka.*
+
 Advancern svarar på försöket/inviten: **3M = minimum (6–7), avslut** —
 inklivaren passar; **4M = maximum (8–9)**; på 3M-inviten pass eller 4M. Bara
 högfärgsinkliv. *Bricka 8: 1♦–(1♥)–P–(2♥)–X–? med ♠AKQ4 ♥QJ8542 ♦A65 ♣— (16 hp,
@@ -2911,6 +2940,13 @@ färg bjuds den; ingen sang. *Öst ♠A8 ♥AT2 ♦AKT9 ♣AQ43 (21 hp) → X ig
 - **Stöddubbling:** efter 1m–(P)–1M–(inkliv) visar öppnarens **dubbling exakt
   3-korts stöd** i partnerns högfärg (direkt höjning = 4 stöd). Ger exakt
   längdinfo i konkurrens.
+  **Gäller även när BÅDA motståndarna bjudit** (ägarbeslut 2026-11-15,
+  felrapport #126 — "alltid stöddubbling"): 1♣–(1♦)–1♠–(2♦)–**X** = exakt tre
+  spader, oavsett om det fria 1M-budet lovade fyra eller fem kort. Direkt
+  höjning lovar fyra. Svaren är desamma som nedan — dubblingen passas aldrig
+  bort. *Förr passade öppnaren med tre stöd när 1M lovade 4+, och höjde till 2M
+  på tre när det fria budet lovade 5+; dubblade en människa passade partnern
+  utan regel.*
   **Svararens svar (etapp 6 i mätspåret, 2026-07-27):** dubblingen är en
   upplysning och får **aldrig passas bort** — pass är tillåtet bara som
   **medvetet straffpass** (högst 12 hp och straffdubblingskraven i deras färg:
@@ -3364,6 +3400,22 @@ Efter **deras upplysningsdubbling, partnerns pass och advancerns svar**
 "extra längd"); förr passade ♠6 ♥K85432 ♦AK7 ♣KQ3 utan regel. Övriga händer
 passar som förut.
 
+### 7.9 De stör vår starka 2♣ (ägarbeslut 2026-11-15, felrapport #127)
+**2♣-öppnaren passar aldrig ut deras inkliv.** Kliver de in i en färg över vår
+2♣ (och höjer den kanske) och svararen passar, bjuder öppnaren **så naturligt
+det går**:
+- **lång färg** (5+ kort; sex eller fler även på 5-läget) → färgen billigast,
+  naturligt;
+- **jämn hand med stopp** i deras färg → **sang** (2NT, med 25+ eller när 2NT
+  inte ryms: 3NT);
+- **annars dubbling — den tvingar partnern att bjuda.** Svararen bjuder då sin
+  **längsta färg** billigast och lovar ingenting (kan vara noll poäng).
+
+*2♣–(2♠)–P–(P)–**3♦** med ♠AQ ♥A ♦AKJT964 ♣A85 (22 hp; förr pass — 2♠ spelades).*
+
+Svararens **första** tur över inklivet (vad pass, X och ny färg betyder där) är
+inte beslutad än — den bjuds som förut.
+
 ## 8. Markeringar & utspel
 > Försvarsspelets signaler. Vi spelar räkningstunga, lågtvetydiga metoder som
 > passar 2/1:s precisionsfilosofi.
@@ -3720,6 +3772,20 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-15 — tre felrapporter + två förslag (#125, #126, #127, #122, #123).**
+  *#125 (§6.1):* öppnarens 4NT efter svararens kontrollbud (2♣–2NT–3♦–4♠–4NT)
+  lästes inte som essfråga — `slamTurn` tiger nu när icke-kaptenen frågat, så
+  de stol-oberoende raderna svarar/placerar; `slamAskTrump` hoppar över
+  kontrollbud (trumf = ruter, inte spader). *#126 (§7.4, ägarbeslut):*
+  stöddubblingens fönster tål ett inkliv före svaret (`stodFonsterBud`);
+  öppnaren med exakt tre stöd dubblar alltid, två äldre lås (pass / 2M på tre)
+  omskrivna. *#127 (§7.9, ägarbeslut):* ny modul `strong-2c-contested.ts` —
+  2♣-öppnaren passar aldrig ut inklivet (färg / sang / X), svararen bjuder
+  alltid på X:et. *#122 (§4.2, ägarbeslut):* 1♦–3♣ = 7+ klöver under
+  utgångskrav, till spel. *#123 (§7.1, ägarbeslut):* inklivaren tävlar 3M i ozon
+  med 13+ på fem kort; advancern med fyra trumf tävlar alltid 3M; 3M över deras
+  bud är aldrig en inbjudan (`advancerCompetesWithFourthTrump`).
+  Lås: auction-felrapport-125-126.test.ts, auction-felrapport-127-forslag-122-123.test.ts.
 - **2026-11-13 — tre ägarbeslut (felrapport #118, #119, #121).** *#121 (§3):*
   11 hp med femkorts högfärg öppnar alltid 1M i hand 1–3 oavsett zon (förr
   krävdes 12 startpoäng); fjärde hand följer regeln om 15; hand-modellen läser

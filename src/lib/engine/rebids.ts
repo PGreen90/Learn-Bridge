@@ -803,6 +803,9 @@ function rebidAfterMinorResponse(m: Suit, response: ResponseResult, hand: Hand):
       return openerRebidAfter2over1(hand, m, suitOfCall(response.call))
     case 'inverterad minor':
       return openerRebidAfterInvertedMinor(hand, m, true)
+    case 'svagt hopp: 7+ klöver':
+      // 1♦–3♣ (förslag #122): sjukorts klöver under utgångskrav, till spel.
+      return { call: 'P', rule: 'rebid: pass', explanation: 'Partnerns 3♣ är till spel (7+ klöver, under utgångskrav) → pass.' }
     case 'inverterad minor, svag':
       return openerRebidAfterInvertedMinor(hand, m, false)
     case 'enkel höjning': // passad hand: 2m = 6–11, ej krav (§5b beslut 5)

@@ -58,12 +58,15 @@ describe('Öppnarens rond-2 i konkurrens efter partnerns 1-lägessvar (1♣–(1
     expect(decideCall(deal, A_HISTORY, 'S').bid).toBe('P')
   })
 
-  it('minimum med 3-korts hjärter → pass (1♣–(1♦)–1♥ lovar 4+ sedan experterna 2026-10-08; förr 5+)', () => {
+  it('minimum med 3-korts hjärter → STÖDDUBBLING (ägarbeslut 2026-11-15, felrapport #126; förr pass)', () => {
     // 13 hp, 3-korts hjärter: över 1♦ lovar dubblingen BÅDA högfärgerna, så 1♥
-    // är en ensam fyrkorts — tre kort är ingen säker fit (4-3). Förr (felrapport
-    // #55) lovade 1♥ fem och öppnaren tävlade 2♥ på tre.
+    // är en ensam fyrkorts — tre kort är ingen säker fit (4-3), så 2♥ bjuds
+    // inte. I stället visar X exakt tre stöd ("alltid stöddubbling" även när
+    // båda motståndarna bjudit); partnern väljer nivå och färg.
     const deal = dealOf('S', { ...A_CTX, S: 'S:AJ3 H:Q94 D:842 C:AQ54' })
-    expect(decideCall(deal, A_HISTORY, 'S').bid).toBe('P')
+    const c = decideCall(deal, A_HISTORY, 'S')
+    expect(c.bid).toBe('X')
+    expect(c.rule).toMatch(/stöddubbling/i)
   })
   it('minimum med 4-korts hjärter → tävlar 2♥ (fyra mot fyra = fit)', () => {
     const deal = dealOf('S', { ...A_CTX, S: 'S:AJ3 H:Q942 D:84 C:AQ54' })
