@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { Deal, Seat, Suit } from '../types/bridge'
 import { parseHand, SEAT_LABEL, type ResolvedCall } from '../lib/bidding'
-import { dummyOf, type Contract } from '../lib/engine/play'
+import { dummyOf, side, type Contract } from '../lib/engine/play'
 import { declarerTricksWon, remainingTricks } from '../lib/engine/claim'
 import { describeTarget, describeTargetShort } from '../lib/engine/contract-target'
 import { dailyNumber, dailyStreak, shareText } from '../lib/engine/daily'
@@ -1213,7 +1213,18 @@ export function PlayTable({
         <ListChip>
           <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
           {contract.doubled && <span className="text-sm font-bold text-red-400">{contract.doubled}</span>}
-          <span className="text-sm font-semibold text-emerald-50">
+          {/* key = antal stick → pulsen spelas om för varje bokfört stick
+              (etapp C): guld när N/S tog det, svalt ljus när Ö/V gjorde det. */}
+          <span
+            key={play.tricksNS + play.tricksEW}
+            className={`text-sm font-semibold text-emerald-50 ${
+              play.completedTricks.length === 0
+                ? ''
+                : side(play.completedTricks[play.completedTricks.length - 1].winner) === 'NS'
+                  ? 'stick-puls-vi'
+                  : 'stick-puls-de'
+            }`}
+          >
             NS:{play.tricksNS} ÖV:{play.tricksEW}
           </span>
           <span className="text-xs text-emerald-100/55">mål {result.needed}</span>
@@ -1280,6 +1291,21 @@ export function PlayTable({
 
   const efter = (
     <>
+      {/* Slutbrickan (etapp E 2026-11-15): utfallet mitt på bordet medan det
+          ligger kvar — sedan tonar bordet ut och resultatdialogen tar över. */}
+      {done && (
+        <div
+          aria-hidden
+          className={`slut-bricka pointer-events-none absolute left-1/2 top-[42%] z-30 flex items-center gap-2.5 whitespace-nowrap rounded-2xl bg-emerald-950/90 px-5 py-3 shadow-2xl ring-2 ${
+            result.made ? 'ring-gold-400' : 'ring-red-400/70'
+          }`}
+        >
+          <BidChip bid={`${contract.level}${STRAIN_CODE[contract.strain]}`} />
+          <span className={`font-display text-xl font-bold ${result.made ? 'text-gold-200' : 'text-red-300'}`}>
+            {result.made ? (result.diff > 0 ? `Hemgång +${result.diff}` : 'Hemgång') : `Bet ${Math.abs(result.diff)}`}
+          </span>
+        </div>
+      )}
       {/* Flyglagret (etapp 3): klonen som flyger hand → stickmitten. Ovanpå
           korten (z-30) men under menyerna (z-40); släpper igenom alla klick. */}
       <FlightLayer

@@ -37,7 +37,7 @@ import { useCardFlight } from '../play/useCardFlight'
 import { FlightLayer } from '../play/FlightLayer'
 import { hornKnappKlass, listKnappKlass, ListChip, overlayTopp, RAM_TON, SpelbordRam, TankerBricka } from '../play/SpelbordRam'
 import { loadBidHelp, saveBidHelp } from '../../lib/backend'
-import { armSound, isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
+import { armSound, isSoundEnabled, playSound, setSoundEnabled, vibrera } from '../../lib/sound'
 import { stolHandling, type BordStol } from '../../lib/backend/bord'
 import { annoteraSystemiskt, verkligaStick, vridStol, vridTillbaka } from './bord-projektion'
 import { byggBordGenomgang } from './bord-genomgang'
@@ -417,6 +417,15 @@ export function BordSpel({
   useEffect(() => {
     if (svepFas === 'slide' && ljudRef.current) playSound('sweep')
   }, [svepFas])
+  // Sticktonen (etapp D, samma som spelbordet): när ett nytt stick läggs till
+  // vila — ljus om din sida tog det (vyn är vriden så du sitter Syd), dov annars.
+  const svepStick = sweep?.trick ?? null
+  const stickLjudRef = useRef<unknown>(null)
+  useEffect(() => {
+    if (!svepStick || stickLjudRef.current === svepStick) return
+    stickLjudRef.current = svepStick
+    if (ljudRef.current && svepStick.winner) playSound(side(svepStick.winner) === 'NS' ? 'trickWon' : 'trickLost')
+  }, [svepStick])
   const givNr = lage?.giv ?? 0
   const givLjudRef = useRef(-1)
   useEffect(() => {
@@ -1234,6 +1243,7 @@ export function BordSpel({
       // usePlayTable.onCardClick.
       if (selectedSuit === c.suit) {
         setSelectedSuit(null)
+        if (ljud) vibrera() // kvitto i fingret (etapp D) — följer ljudvalet
         void gorDrag({ typ: 'kort', card: c })
       } else {
         setSelectedSuit(c.suit)
@@ -1289,7 +1299,17 @@ export function BordSpel({
         <BidChip bid={kontraktText} />
         {st.contract.doubled && <span className="text-sm font-bold text-red-400">{st.contract.doubled}</span>}
         <span className="text-xs text-rose-100/70">av {SEAT_LABEL[st.contract.declarer]}</span>
-        <span className="text-sm font-semibold text-rose-50">
+        {/* key = antal stick → pulsen spelas om per bokfört stick (etapp C). */}
+        <span
+          key={st.tricksNS + st.tricksEW}
+          className={`text-sm font-semibold text-rose-50 ${
+            st.completedTricks.length === 0
+              ? ''
+              : side(st.completedTricks[st.completedTricks.length - 1].winner) === 'NS'
+                ? 'stick-puls-vi'
+                : 'stick-puls-de'
+          }`}
+        >
           Stick: Ni {st.tricksNS} – De {st.tricksEW}
         </span>
         <span className="text-xs text-rose-100/55">mål {behover}</span>

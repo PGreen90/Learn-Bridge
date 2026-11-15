@@ -35,7 +35,7 @@ import { botDecisionSeed, playIndexOf } from '../../lib/engine/play-seed'
 import { controls, sameCard, svepStartFas } from './common'
 import { ms, sweepHoldMs, type PlaySpeed } from './tempo'
 import { useCardFlight } from './useCardFlight'
-import { isSoundEnabled, playSound, setSoundEnabled } from '../../lib/sound'
+import { isSoundEnabled, playSound, setSoundEnabled, vibrera } from '../../lib/sound'
 
 // Nodbudget för facit-lösaren: ~2 milj. noder (≈ 1–2 s i värsta fall) så
 // gränssnittet aldrig fryser. Sena ställningar (få kort kvar) löses direkt;
@@ -267,6 +267,17 @@ export function usePlayTable(
     heardCount.current = n
   }, [play, sound])
 
+  // Sticktonen (etapp D): när ett stick bokförs — ljus om DIN sida (N/S) tog
+  // det, dov annars. Samma räknarvakt som kortknäppen (StrictMode, ångra).
+  const trickHeard = useRef(play.completedTricks.length)
+  useEffect(() => {
+    const n = play.completedTricks.length
+    if (n > trickHeard.current && sound) {
+      playSound(side(play.completedTricks[n - 1].winner) === 'NS' ? 'trickWon' : 'trickLost')
+    }
+    trickHeard.current = n
+  }, [play, sound])
+
   // Svischet: när svepet går in i slide-fasen. Ref på sticket (inte fasen) så
   // StrictMode-dubbelkörningen inte dubblar ljudet.
   const sweptSoundFor = useRef<unknown>(null)
@@ -425,6 +436,7 @@ export function usePlayTable(
       legalCards(play, play.toAct).some((c) => sameCard(c, card))
     ) {
       beginFlight(play.toAct, card)
+      if (sound) vibrera() // kvitto i fingret (etapp D) — följer ljudvalet
     }
     setPlay((p) => {
       if (claimed || pendingClaim || isComplete(p) || !controls(contract, p.toAct)) return p
@@ -452,6 +464,7 @@ export function usePlayTable(
     setUndoFloor(undoFloorAfter(prev))
     sweptCount.current = prev.completedTricks.length
     heardCount.current = prev.completedTricks.length * 4 + prev.currentTrick.length
+    trickHeard.current = prev.completedTricks.length
     setSweep(null)
     setSelectedSuit(null)
     setExplain(null)
@@ -555,6 +568,18 @@ export function usePlayTable(
     const id = setTimeout(() => setShowResult(true), ms('resultOutro', speed))
     return () => clearTimeout(id)
   }, [done, speed])
+  // Din tur-tonen (etapp D): när bordet går från "någon annan" till "du" —
+  // inte mellan dina egna kort (hand → träkarl) och inte medan ett stick ligger
+  // kvar (då väntar bordet på svepet, inte på ett kort).
+  const minTur =
+    !isComplete(play) && claimed === null && !pendingClaim && !claimOffer && controls(contract, play.toAct)
+  const varMinTur = useRef(minTur)
+  useEffect(() => {
+    if (sweep) return
+    if (minTur && !varMinTur.current && sound) playSound('turn')
+    varMinTur.current = minTur
+  }, [minTur, sweep, sound])
+
   const needed = 6 + contract.level
   const result: PlayResult = claimed
     ? {
@@ -565,6 +590,15 @@ export function usePlayTable(
       }
     : contractResult(play)
   const declSide = side(contract.declarer)
+  // Resultattonen (etapp D): när given är klar — ljus om den slutade bra för
+  // DIG (hemgång när din sida spelför, bet när du försvarar). Inte vid
+  // monteringen av en redan färdig giv.
+  const braForMig = (declSide === 'NS') === result.made
+  const resultHeard = useRef(done)
+  useEffect(() => {
+    if (done && !resultHeard.current && sound) playSound(braForMig ? 'resultGood' : 'resultBad')
+    resultHeard.current = done
+  }, [done, braForMig, sound])
   // Poängen för given (ägarens poängguide): vem som fick dem + hur många,
   // t.ex. "Ö/V +420". Zonen kommer från brickan.
   const score = done ? scoreLine(contract, result.declarerTricks, deal.vulnerability) : null

@@ -49,9 +49,11 @@ export const BASE = {
   claimBeat: 600,
   /** Claim-revealen: pausen mellan att händerna läggs upp, en i taget. */
   revealStep: 260,
-  /** Bordets uttoning innan resultatdialogen (etapp 5). Claim-revealen har
-   *  INGEN tid — korten ligger kvar tills spelaren går vidare (ägarbeslut). */
-  resultOutro: 500,
+  /** Avslutet innan resultatdialogen (etapp 5; etapp E 2026-11-15): bordet
+   *  ligger kvar 900 ms med slutbrickan (hemgång/bet) och tonar sedan ut på
+   *  500 ms — summan MÅSTE matcha .felt-fade-out i index.css. Claim-revealen
+   *  har INGEN tid — korten ligger kvar tills spelaren går vidare (ägarbeslut). */
+  resultOutro: 1400,
   /** Giv-klar-ljudet: efter deal-in-kaskadens slut (13 kort × 35 ms + 300 ms). */
   dealSoundDelay: 760,
 } as const
