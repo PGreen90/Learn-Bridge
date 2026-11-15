@@ -7,6 +7,7 @@
 // samtidigt (två kolumnhänder ryms inte på en mobilskärm). Kolumnroten bär
 // `data-kolumner=<stol>` så facit-testerna kan skilja vyerna.
 
+import { useLayoutEffect, useRef } from 'react'
 import type { Card, Hand, Seat, Suit } from '../../types/bridge'
 import type { Contract, PlayState } from '../../lib/engine/play'
 import { bySuit, FLAT_OVERLAP, handSuitsTrumpFirst } from '../../lib/cardLayout'
@@ -197,9 +198,64 @@ export function SouthFan({
   registerCardEl?: RegisterCardEl
 }) {
   const { myTurn, legalSet } = turnInfo(play, contract, seat)
+  // Utfällningen ankras på det TRYCKTA kortet (ägarkrav 2026-11-15): kortet ska
+  // ligga kvar under fingret/pekaren när färgen fälls ut, i stället för att
+  // färgen centreras på skärmen. Vid trycket mäts kortets vänsterkant; efter
+  // utfällningen (före första bildrutan) skjuts raden i sidled så samma kort
+  // hamnar på samma ställe. Raden hålls innanför ytan — i en smal kant kan
+  // kortet därför inte alltid ligga exakt kvar.
+  const rowRef = useRef<HTMLDivElement>(null)
+  const groupEls = useRef(new Map<Suit, HTMLDivElement>())
+  const anchor = useRef<{ suit: Suit; index: number; left: number } | null>(null)
+  const spreadSuit = myTurn ? selectedSuit : null
+  useLayoutEffect(() => {
+    const row = rowRef.current
+    if (!row) return
+    row.style.transition = 'none'
+    row.style.left = ''
+    const a = anchor.current
+    const group = spreadSuit ? groupEls.current.get(spreadSuit) : undefined
+    const cardEl = a && group ? (group.children[a.index] as HTMLElement | undefined) : undefined
+    if (!spreadSuit) anchor.current = null
+    if (!a || a.suit !== spreadSuit || !group || !cardEl) return
+    // Korten har en CSS-övergång på överlappet (PlayingCard: transition-all),
+    // så utfällningen är inte klar här. Slutläget RÄKNAS därför ut (kortbredd +
+    // utfällt överlapp, gruppen centrerad i raden) och raden glider med samma
+    // övergång som korten — då står det tryckta kortet still hela vägen:
+    //  1) startläge: kortet exakt där det låg vid trycket (ingen övergång),
+    //  2) slutläge: samma punkt när överlappet vuxit klart (med övergång).
+    const UTFALLT_OVERLAPP = 8 // -ml-2 i kortraden nedan
+    const KANT = 4
+    const rowBox = row.getBoundingClientRect()
+    const w = cardEl.offsetWidth
+    const steg = w - UTFALLT_OVERLAPP
+    const bredd = w + (group.children.length - 1) * steg
+    const gruppVanster = rowBox.left + (rowBox.width - bredd) / 2
+    const start = a.left - cardEl.getBoundingClientRect().left
+    let slut = a.left - (gruppVanster + a.index * steg)
+    // Håll den utfällda färgen innanför ytan (smal skärm, kort nära kanten).
+    const minSlut = rowBox.left + KANT - gruppVanster
+    const maxSlut = rowBox.right - KANT - (gruppVanster + bredd)
+    slut = minSlut > maxSlut ? 0 : Math.min(maxSlut, Math.max(minSlut, slut))
+    row.style.left = `${start}px`
+    row.getBoundingClientRect() // lås startläget innan övergången slås på
+    const kortStil = getComputedStyle(cardEl)
+    row.style.transition = `left ${kortStil.transitionDuration.split(',')[0]} ${kortStil.transitionTimingFunction.split(/,(?![^(]*\))/)[0]}`
+    row.style.left = `${Math.round(slut)}px`
+  }, [spreadSuit])
+  const klick = (c: Card, index: number) => {
+    if (selectedSuit !== c.suit) {
+      const el = groupEls.current.get(c.suit)?.children[index]
+      anchor.current = el ? { suit: c.suit, index, left: el.getBoundingClientRect().left } : null
+    }
+    onCardClick(c)
+  }
   let dealt = 0 // löpande kortindex över alla färggrupper → utdelningskaskaden
   return (
-    <div className="flex items-end justify-center">
+    <div
+      ref={rowRef}
+      className="relative flex items-end justify-center"
+    >
       {handSuitsTrumpFirst(contract.strain).map((suit) => {
         const cards = bySuit(hand, suit)
         if (cards.length === 0) return null
@@ -210,6 +266,10 @@ export function SouthFan({
         return (
           <div
             key={suit}
+            ref={(el) => {
+              if (el) groupEls.current.set(suit, el)
+              else groupEls.current.delete(suit)
+            }}
             className={`flex transition-all ${spread ? '-translate-y-1.5 z-10' : ''}`}
           >
             {cards.map((c, i) => {
@@ -228,7 +288,7 @@ export function SouthFan({
                   size="xl"
                   playable={playable}
                   dimmed={myTurn && !playable}
-                  onClick={playable ? () => onCardClick(c) : undefined}
+                  onClick={playable ? () => klick(c, i) : undefined}
                   className={`deal-in ${ml}`}
                   style={{ animationDelay: `${idx * 35}ms` }}
                 />

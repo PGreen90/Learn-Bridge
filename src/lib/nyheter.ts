@@ -27,6 +27,16 @@ export interface Nyhet {
 /** Nyast först. */
 export const NYHETER: Nyhet[] = [
   {
+    version: '1.0.3',
+    datum: '2026-11-15',
+    punkter: [
+      {
+        rubrik: 'Kortet stannar kvar',
+        text: 'Vald färg fälls ut runt kortet du trycker på.',
+      },
+    ],
+  },
+  {
     version: '1.0.2',
     datum: '2026-11-13',
     punkter: [
