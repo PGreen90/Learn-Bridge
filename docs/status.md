@@ -279,6 +279,10 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   golv (`mcFloor`) så snabba workersvar inte teleporterar in. Delade menyrader:
   `MenuToggleRow`/`MenuTempoRow` i `play/common.tsx`. Test:
   `src/pages/play/tempo.test.tsx` (seedad giv).
+  **Botpauserna (tempot steg 2–3, 2026-11-16):** `botPausMs` väljer pausen —
+  `botLed` när boten leder ett nytt stick (stickväntan var betänketiden),
+  `botTvingat` för ett tvingat kort, annars `botDelay`. Test:
+  `src/pages/play/botpaus.test.tsx`.
 - **Sticksvepet (2026-07-28, "känsla i kortspelet" etapp 2):** färdigt stick =
   paus med pulserande vinnarglow → alla fyra korten sveps mot vinnarens sida →
   borta. UI-fas `sweep` i `usePlayTable.ts` (hold/slide, tider från `tempo.ts`);

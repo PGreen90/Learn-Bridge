@@ -10,6 +10,16 @@
 
 ---
 
+## 2026-11-16 (tempot steg 2–3: bottarnas pauser)
+Efter lösarbytet räknar boten på millisekunder — kvar var de inlagda pauserna.
+**Steg 2:** boten som leder nästa stick lägger kortet `botLed` efter svepet i
+stället för en hel `botDelay` till (stickväntan var betänketiden; öppnings-
+utspelet behåller `botDelay`). **Steg 3:** ett tvingat kort (bara ett lagligt)
+läggs efter `botTvingat`. Väljaren `botPausMs` i `src/pages/play/tempo.ts`,
+inkopplad i `usePlayTable.ts` (även Monte-Carlo-golvet kapas till pausen).
+Vänner-bordet berörs inte (korten visas redan efter `bordKort`). Facit:
+`src/pages/play/botpaus.test.tsx`. Steg 4 (kortare stickväntan) är ägarval.
+
 ## 2026-11-15/16 (tempot steg 1: lösarbytet i Monte-Carlo, v1.0.6)
 Ägarfråga: "det går för långsamt för bottarna att spela sina kort". Mätt med
 `betanketid.probe.test.ts`: nästan all räknetid låg i stick 6–7, där slutspels-

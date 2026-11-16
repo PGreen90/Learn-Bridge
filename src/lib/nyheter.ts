@@ -27,6 +27,16 @@ export interface Nyhet {
 /** Nyast först. */
 export const NYHETER: Nyhet[] = [
   {
+    version: '1.0.7',
+    datum: '2026-11-16',
+    punkter: [
+      {
+        rubrik: 'Jämnare tempo',
+        text: 'Bottarna spelar ut direkt efter stickväntan och lägger tvingade kort snabbare.',
+      },
+    ],
+  },
+  {
     version: '1.0.6',
     datum: '2026-11-16',
     punkter: [

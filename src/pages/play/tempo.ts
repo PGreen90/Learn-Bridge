@@ -23,6 +23,14 @@ export const SPEED_LABEL: Record<PlaySpeed, string> = {
 export const BASE = {
   /** Botens paus innan den lägger ett kort (snabba tumregelsvägen). */
   botDelay: 750,
+  /** Tvingat kort (bara ett lagligt, tempot steg 3 2026-11-16): inget att
+   *  fundera på — kortet läggs snabbare än ett val. */
+  botTvingat: 350,
+  /** Boten leder nästa stick (tempot steg 2 2026-11-16): stickväntan
+   *  (SWEEP_HOLD) VAR betänketiden — utspelet kommer strax efter svepet i
+   *  stället för efter en hel botpaus till. Öppningsutspelet har inget svep
+   *  före sig och behåller botDelay. */
+  botLed: 250,
   /** Vänner-bordet (etapp 4): pausen innan ett ANNANS kort avtäcks vid den
    *  levande kanten. Litet utjämningsvärde — inte bot-"tänketid": vid ett bord
    *  där människor spelar ska kortet synas i stort sett när det landar (~real-
@@ -78,6 +86,15 @@ export function sweepHoldMs(speed: PlaySpeed): number {
 /** En bastid skalad efter hastighetsvalet, avrundad till hela ms. */
 export function ms(key: keyof typeof BASE, speed: PlaySpeed): number {
   return Math.round(BASE[key] * SPEED_FACTOR[speed])
+}
+
+/** Botens paus innan kortet läggs (ms): kortast när den leder ett nytt stick
+ *  direkt efter stickväntan (`nyttStick` — aldrig öppningsutspelet), kortare
+ *  när kortet är tvingat (`tvingat` — bara ett lagligt), annars botDelay. */
+export function botPausMs(lage: { nyttStick: boolean; tvingat: boolean }, speed: PlaySpeed): number {
+  if (lage.nyttStick) return ms('botLed', speed)
+  if (lage.tvingat) return ms('botTvingat', speed)
+  return ms('botDelay', speed)
 }
 
 /** Har användaren bett systemet om minskad rörelse? (Flygning/svep hoppar då
