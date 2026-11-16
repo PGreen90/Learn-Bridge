@@ -69,13 +69,13 @@ export const BASE = {
 /** Stickväntans bot-paus (ägarbeslut 2026-09-14): när BOTEN leder nästa stick
  *  ligger sticket kvar exakt så här länge medan ringen runt högen fylls, sedan
  *  sveps det. Runda, valda tal per tempo — INTE faktor-skalade som resten
- *  (ägarens önskan: 2/3/4 s; ersatte BASE.sweepHold 900 × faktor). Ringens
+ *  (ägarval 2026-11-16: 1/1,5/2 s — var 2/3/4 s sedan 2026-09-14). Ringens
  *  CSS-animation får samma tal inline, så ring och JS-timer slutar samtidigt.
  *  Ett tryck sveper direkt. */
 export const SWEEP_HOLD: Record<PlaySpeed, number> = {
-  snabb: 2000,
-  normal: 3000,
-  lugn: 4000,
+  snabb: 1000,
+  normal: 1500,
+  lugn: 2000,
 }
 
 /** Bot-pausen för stickväntan vid valt tempo (ms). */

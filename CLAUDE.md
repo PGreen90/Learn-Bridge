@@ -16,7 +16,7 @@ svarar på vad).
 
 ### 🔵 NU — Tempot: bottarnas betänketid (ägarval 2026-11-15)
 Steg 1 lösarbytet i Monte-Carlo (`mc-losare.ts`, `docs/bot-hjarna.md`): LIVE v1.0.6.
-Steg 2–3 pauserna (`botPausMs`, `tempo.ts`): LIVE v1.0.7. Kvar: kortare stickväntan (ägarval).
+Steg 2–4 pauserna (`botPausMs`, stickväntan 1/1,5/2 s, `tempo.ts`): LIVE v1.0.8. Kvar: ägarens live-prov.
 Veckans stjärntävling (kodform `guld`, LIVE `2d3eca6`, `guld-tavling.yml` söndagar,
 `docs/nasta-niva-plan.md`) är nu parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).

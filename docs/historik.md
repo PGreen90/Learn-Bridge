@@ -20,6 +20,9 @@ inkopplad i `usePlayTable.ts` (även Monte-Carlo-golvet kapas till pausen).
 Vänner-bordet berörs inte (korten visas redan efter `bordKort`). Facit:
 `src/pages/play/botpaus.test.tsx`. Steg 4 (kortare stickväntan) är ägarval.
 
+**Steg 4 (ägarval samma dag):** stickväntan `SWEEP_HOLD` kortad från 2/3/4 s
+till 1/1,5/2 s (Snabb/Normal/Lugn) — gäller även vänner-bordet.
+
 ## 2026-11-15/16 (tempot steg 1: lösarbytet i Monte-Carlo, v1.0.6)
 Ägarfråga: "det går för långsamt för bottarna att spela sina kort". Mätt med
 `betanketid.probe.test.ts`: nästan all räknetid låg i stick 6–7, där slutspels-

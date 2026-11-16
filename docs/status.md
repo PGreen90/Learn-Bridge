@@ -293,7 +293,7 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
   (`advanceSweep`/`gaVidareSvep`, även mellanslag/Enter), den pekande handen
   (`StickHint`, CSS `stick-hint`) tänds efter `sweepHint`; leder boten fylls
   ringen (`HoldRing`, CSS `stick-ring-fill` + in/ut-fade `RING_FADE_MS` 0,5 s
-  som del av pausen, tider inline ur `sweep.holdMs`) under `SWEEP_HOLD` (2/3/4 s per tempo, egen tabell i `tempo.ts` — inte
+  som del av pausen, tider inline ur `sweep.holdMs`) under `SWEEP_HOLD` (1/1,5/2 s per tempo sedan 2026-11-16, egen tabell i `tempo.ts` — inte
   faktor-skalad). Sista sticket väntar aldrig; en claim-reveal (`pendingClaim`)
   släcker svepet. Facit `stickvantan.test.tsx`.
   Mittens gamla "förra sticket ligger kvar"-fallback borttagen — historiken bor
