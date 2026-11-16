@@ -597,18 +597,44 @@ export function contestedResponse(hand: Hand, openerSuit: Suit, theirCall: strin
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt i konkurrens → pass.` }
   }
 
-  // Mot upplysningsdubbling (X): Jordan 2NT (limithöjning, 4+ trumf) efter
-  // 1♥/1♠, annars redubbla med 10+, annars stöd/pass. (Förr bjöds "Jordan"
-  // även över 1♣/1♦ — boken §7.8 d definierar den bara efter högfärgs-
-  // öppningen och öppnaren hade inget svar: 2NT passades ut. Etapp 4 familj
-  // 3, 2026-09-08: över 1m gäller XX = 10+ som §7.8 b.)
+  // Mot upplysningsdubbling (X) — ägarstruktur 2026-11-16:
+  //   1M–(X): Jordan 2NT (4+ trumf, 10+) · XX = EXAKT tre stöd, 8+ · 2M = stöd
+  //   med mindre · utan stöd bjuds naturligt som om dubblingen inte fanns.
+  //   1m–(X): fyrkorts högfärg → 1♥/1♠ · XX = 8+ UTAN fyrkorts högfärg · 2m
+  //   med 4+ stöd och mindre · annars pass.
+  // (Förr: XX = 10+ oavsett form, och händer utan stöd under 10 hp passade
+  // alltid — även med en fyrkorts högfärg över 1m.)
   if (theirCall === 'X') {
-    // Jordan 2NT (§7.8 d): 4+ stöd och limitvärden → 2NT, INTE Jacoby.
-    if (isMajorOpening && len[openerSuit] >= 4 && p >= 10) {
-      return { call: '2NT', rule: 'Jordan 2NT', explanation: `10+ hp, 4+ trumf → 2NT (Jordan, limithöjning+ med fit).` }
+    const os = SUIT_SYM[openerSuit]
+    if (isMajorOpening) {
+      // Jordan 2NT (§7.8 d): 4+ stöd och limitvärden → 2NT, INTE Jacoby.
+      if (len[openerSuit] >= 4 && p >= 10) {
+        return { call: '2NT', rule: 'Jordan 2NT', explanation: `10+ hp, 4+ trumf → 2NT (Jordan, limithöjning+ med fit).` }
+      }
+      if (len[openerSuit] === 3 && p >= 8) {
+        return { call: 'XX', rule: 'redubbling (tre stöd)', explanation: `Exakt tre ${os} och 8+ hp → XX (visar stödet och styrkan; partnern bjuder 2${os} svag, 3${os} med 14–15, 4${os} med 16+).` }
+      }
+      if (len[openerSuit] >= minStod) return { call: `2${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${minStod}+ stöd → 2${os} (konkurrenshöjning).` }
+      // Utan stöd: naturligt, som om dubblingen inte fanns.
+      if (openerSuit === 'hearts' && len.spades >= 4 && p >= 6) {
+        return { call: '1S', rule: 'ny färg över X', explanation: `Inget ${os}-stöd; ${len.spades} ♠ och 6+ hp → 1♠ (naturligt, som utan dubblingen — rondkrav).` }
+      }
+      if (p >= 10) {
+        const lägre = RANK_ORDER.filter((x) => rankIdx(x) < rankIdx(openerSuit) && len[x] >= 4).sort((x, y) => len[y] - len[x] || rankIdx(x) - rankIdx(y))
+        const egen = lägre.find((x) => len[x] >= 5) ?? lägre.find((x) => x === 'clubs' || x === 'diamonds')
+        if (egen) return { call: `2${LETTER[egen]}` as Bid, rule: 'ny färg över X', explanation: `Inget ${os}-stöd; 10+ hp och ${len[egen]} ${SUIT_SYM[egen]} → 2${SUIT_SYM[egen]} (naturligt, rondkrav).` }
+      }
+      if (p >= 8) return { call: '1NT', rule: '1NT över X', explanation: `Inget ${os}-stöd och ingen färg att visa; 8+ hp → 1NT (naturligt).` }
+      return { call: 'P', rule: 'pass', explanation: `Inget lämpligt → pass.` }
     }
-    if (p >= 10) return { call: 'XX', rule: 'redubbling', explanation: `10+ hp → XX (redubbling, lovar styrka).` }
-    if (len[openerSuit] >= minStod) return { call: `2${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${minStod}+ stöd → 2${SUIT_SYM[openerSuit]} (konkurrenshöjning).` }
+    // Lågfärgsöppningen: högfärgen först.
+    const hf = (['hearts', 'spades'] as Suit[]).filter((x) => len[x] >= 4)
+    if (hf.length && p >= 6) {
+      const M = hf.length === 2 ? (len.spades > len.hearts || (len.spades === len.hearts && len.spades >= 5) ? 'spades' : 'hearts') : hf[0]
+      return { call: `1${LETTER[M]}` as Bid, rule: 'ny färg över X', explanation: `${len[M]} ${SUIT_SYM[M]} och 6+ hp → 1${SUIT_SYM[M]} (naturligt, som utan dubblingen — rondkrav).` }
+    }
+    if (p >= 8) return { call: 'XX', rule: 'redubbling', explanation: `8+ hp utan fyrkorts högfärg → XX (visar styrkan; vi passar inte ut deras flykt).` }
+    if (len[openerSuit] >= minStod) return { call: `2${LETTER[openerSuit]}` as Bid, rule: 'konkurrenshöjning', explanation: `${minStod}+ stöd → 2${os} (konkurrenshöjning).` }
     return { call: 'P', rule: 'pass', explanation: `Inget lämpligt → pass.` }
   }
 
@@ -1013,7 +1039,8 @@ export function redoublerSeat(f: AuctionFacts): { openerSuit: Suit; theirSuit: S
 /**
  * Redubblarens andra bud när de flytt och partnern passat (§7.8 b):
  *   · stöd i partnerns HÖGFÄRG (3+): 13+ stödpoäng → 4M (utgång), 10–12 → 3M
- *     (inbjudan). 2M bjuds aldrig — XX lovade redan 10+.
+ *     (inbjudan). Gäller när öppnaren passat en flykt under 2M (sedan
+ *     2026-11-16 bjuder öppnaren annars själv 2M/3M/4M — redubbling.ts).
  *   · utan stöd men 4+ bra kort i färgen de flydde till (minst 5 hp där) → X
  *     (straff; vi äger given efter XX).
  *   · annars null → de vanliga vägarna (fritt bud i egen färg, sang, pass).
@@ -1031,9 +1058,9 @@ export function redoublerContinues(hand: Hand, f: AuctionFacts): Kunskap | null 
     const sp = pointsWithFloor(hand, openerSuit, 'support')
     const bid = (L: number) => `${L}${LETTER[openerSuit]}` as Bid
     if (sp.points >= 13) {
-      return lawful(f, { call: bid(4), rule: 'redubblaren: utgång', explanation: `Efter vår XX (10+) är partnerns pass inget minimum; ${len[openerSuit]}-korts stöd och ${sp.text} = utgångsvärden → 4${sym}.` })
+      return lawful(f, { call: bid(4), rule: 'redubblaren: utgång', explanation: `Efter vår XX är partnerns pass inget minimum; ${len[openerSuit]}-korts stöd och ${sp.text} = utgångsvärden → 4${sym}.` })
     }
-    return lawful(f, { call: bid(3), rule: 'redubblaren: inbjudan', explanation: `Efter vår XX (10+) är partnerns pass inget minimum; ${len[openerSuit]}-korts stöd och ${sp.text} → 3${sym} (inbjudan — 4${sym} med 14+).` })
+    return lawful(f, { call: bid(3), rule: 'redubblaren: inbjudan', explanation: `Efter vår XX är partnerns pass inget minimum; ${len[openerSuit]}-korts stöd och ${sp.text} → 3${sym} (inbjudan — 4${sym} med 14+).` })
   }
   if (len[theirSuit] >= 4 && suitHcp(hand, theirSuit) >= 5) {
     return lawful(f, { call: 'X', rule: 'redubblaren: straffdubbling', explanation: `Vi äger given efter XX; ${len[theirSuit]} kort med honnörer i deras ${SUIT_SYM[theirSuit]} → X (straff på ${prettyBid(escape.bid)}).` })

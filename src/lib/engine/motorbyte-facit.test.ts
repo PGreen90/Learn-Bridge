@@ -188,9 +188,9 @@ describe('etapp 4 familj 3 – när de stör vår öppning (LANDAD 2026-09-08)',
     expect(t.källa).toBe('tabell:negativ-dubblaren')
     expect(t.call.bid).toBe('3NT')
   })
-  it('frö 20270004: 1♣–(X)–?: samma Syd redubblar (10+) — inte "Jordan 2NT" över en lågfärg (öppnaren hade inget svar och 2NT passades ut)', () => {
+  it('frö 20270004: 1♣–(X)–?: samma Syd bjuder sin fyrkorts högfärg (förr XX 10+) — inte "Jordan 2NT" över en lågfärg (öppnaren hade inget svar och 2NT passades ut)', () => {
     const deal = dealFromSeed(20270004)
-    expect(decideCall(deal, [call('N', '1C'), call('E', 'X')], 'S')).toMatchObject({ bid: 'XX', rule: 'redubbling' })
+    expect(decideCall(deal, [call('N', '1C'), call('E', 'X')], 'S')).toMatchObject({ bid: '1H', rule: 'ny färg över X' })
   })
   it('frö 20270008: P–P–1♣–(1NT)–?: Öst (♠QJ94 ♥Q75 ♦AK ♣T543, 13 hp) straffdubblar — inte 3NT', () => {
     const deal = dealFromSeed(20270008)

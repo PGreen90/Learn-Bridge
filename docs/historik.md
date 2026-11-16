@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-11-16 (redubblingens struktur: förslag #128 + 1-läget)
+**#128:** Nord höjde 4♠ redubblat till 5♠/6♠/7♠ — regeln för partnerns
+redubbling saknades. Nu: XX av vårt kontrakt på 3-läget+ = "vi spelar här" →
+pass (raden `xx-vi-spelar-här`, §7.8 h). **1-läget (ägarstruktur samma dag,
+§7.8 i):** 1M–(X)–XX = exakt tre stöd, 8+ och öppnarens trappa 2M/3M/4M ·
+1m–(X)–XX = 8+ utan fyrkorts högfärg, straff-X och kravpass efter flykten ·
+stödredubblingen 1x–(P)–1M–(X)–XX = exakt tre · utan stöd bjuds naturligt över
+dubblingen, och efter 1x–(X)–1y läses dubblingen som ett pass. Kod:
+`src/lib/engine/redubbling.ts`, lås `redubbling.test.ts`.
+**Iakttagelser (ej lagade):** (1) svararens trappa efter stödredubblingen är
+Claudes förslag — ägaren har bara låst "exakt tre"; (2) felrapport #23-given:
+Väst bjuder nu 1♥ över dubblingen och den starka dubblaren säljer sedan ut 3♣
+(`it.todo` i `auction-live.test.ts`, luckan står i `docs/senare.md`);
+(3) efter 1M–(X)–1NT/2x har öppnaren ingen egen regel (pass / kravreserven);
+(4) ägarens 1♣–X–XX-giv (frö 20290770): Nord har fem hjärter och bjuder nu 1♥
+i stället för XX — fixturen i `bord-motor.test.ts` flyttad till N:P.
+
 ## 2026-11-16 (tempot steg 2–3: bottarnas pauser)
 Efter lösarbytet räknar boten på millisekunder — kvar var de inlagda pauserna.
 **Steg 2:** boten som leder nästa stick lägger kortet `botLed` efter svepet i

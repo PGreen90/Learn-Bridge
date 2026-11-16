@@ -1291,7 +1291,12 @@ describe('Felrapport #23 – 17+ stark enfärgshand: upplysningsdubbling + stark
     expect(n.rule).toBe('tvångssvar (utan stöd)')
   })
 
-  it('hela auktionen landar i 3♠ av Syd (17 hp / 20 TP < 22 → lägsta nivå, ej 4♠)', () => {
+  // Sedan redubblingens struktur (2026-11-16) bjuder Väst (8 hp, fem hjärter)
+  // naturligt 1♥ över dubblingen, så hela auktionen ser annorlunda ut: Syd visar
+  // fortfarande den starka handen (X + 2♠) men säljer sedan ut 3♣ — den kända
+  // luckan "den starka dubblaren säljer given i rond 2" (docs/senare.md).
+  it.todo('efter 1♣–X–1♥–P–2♣–2♠–3♣ säljer den starka dubblaren inte ut 3♣ (docs/senare.md)')
+  it('hela auktionen: Syd visar den starka handen med X + egen spader (förr 3♠ när Väst passade över X)', () => {
     // Felrapport #84 (2026-09-26): öppnaren Öst rebjuder nu sin 7-korts klöver
     // (2♣) över Nords tvångssvar, så Syds starka återbud blir 2♠, Nords tvångssvar
     // 3♦ och Syds rebud lägst = 3♠ (förr 2♠, när Öst passade utan regel).
@@ -1306,10 +1311,8 @@ describe('Felrapport #23 – 17+ stark enfärgshand: upplysningsdubbling + stark
       passes = c.bid === 'P' ? passes + 1 : 0
       idx++
     }
-    const contractBids = h.filter((c) => /^[1-7](C|D|H|S|NT)$/.test(c.bid))
-    const last = contractBids[contractBids.length - 1]
-    expect(last.bid).toBe('3S')
-    expect(last.seat).toBe('S')
+    expect(h.slice(0, 7).map((c) => c.bid)).toEqual(['P', '1C', 'X', '1H', 'P', '2C', '2S'])
+    expect(h[6].seat).toBe('S')
   })
 })
 

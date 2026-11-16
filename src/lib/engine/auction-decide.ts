@@ -173,6 +173,7 @@ import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDoubl
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
 import { openerInCueRaise, raiserInCueRaise } from './cue-raise-continuations'
 import { answerPartnersCue, cueRaiserContinues, negativeDoublerCue, openerAnswersCueRaise, openerAnswersFreeBidInvite, openerCompetesAfterRaise, openerContestedSeat, openerRaisesFreeBid, openerRebidsAfterFreeBid, openerReopensAfterPartnerPass, openerReopensBalancing, openerAfterCompetitiveRaise, openerRebidsAfterTheirDouble, openerRondTwoInCompetition, openerStrongNTAfterMinorRaise, responderAfterFreeBid, responderAfterFreeBidRaise, responderAnswersMaximal, responderAnswersNTInvite, responderAnswersReopeningDouble, responderContestedSeat, responderEscapesOverStrong2NT } from './contested-continuations'
+import { answerSupportRedouble, minorRedoublerContinues, minorRedoublerSeat, openerAfterMinorRedoubler, openerAfterMinorRedoublerSeat, openerAfterMinorXX, openerAfterMinorXXSeat, openerAfterSupportXX, openerAfterSupportXXSeat, openerSupportRedouble, supportRedoubleSeat, supportRedoubleToAnswer, supportRedoublerContinues, supportRedoublerRebid, supportRedoublerRebidSeat, supportRedoublerSeat } from './redubbling'
 import { negativeDoublerAnswersCue, negativeDoublerCueSeat, openerPreferenceSeat, openerShowsOtherMajorAfterPreference, answerJordan, answerNegativeDoubleOverTheirBid, answerPartnersNegativeDouble, answerPartnersSupportDouble, negativeDoubleOverbidToAnswer, showHandAfterOpenersDouble, showHandToAnswer, contestedResponse, contestedResponseSeat, jordanBidderAfterSignoff, jordanSignoffToAnswer, jordanToAnswer, negativeDoubleToAnswer, openerAfterRedoubler, openerAfterRedoublerSeat, redoublerContinues, negativeDoublerAnswersJump, negativeDoublerContinues, negativeDoublerJumpSeat, negativeDoublerSeat, openerAnswersNegativeInvit, openerSupportDouble, supportDoubleFollowUpToAnswer, supportDoubleSeat, supportDoubleToAnswer, supportDoublerContinues } from './contested-opening'
 
 /** Ett beslutat bud. `uncertain` följer med från kunskapsfunktionen (manusets `AuctionTurn` visar den). */
@@ -1972,6 +1973,26 @@ function xOfResponse(f: AuctionFacts): ResolvedCall | null {
   if (!resp || f.history.indexOf(marks[0]) !== f.history.indexOf(resp) + 1) return null
   return marks[0]
 }
+/**
+ * Deras upplysningsdubbling av vår ÖPPNING följd av partnerns naturliga
+ * 1-lägessvar i en färg (1♦–X–1♠, ägarstruktur 2026-11-16): svaret bjuds "som
+ * om dubblingen inte fanns", så linjen fortsätter ostört så länge de inte
+ * bjuder något mer — `decideFromTable` frågar då tabellen med X:et läst som
+ * ett pass. Bara 1-lägets färgsvar: 1NT och 2-lägets nya färg över X är
+ * begränsade (inte kravgrundande som ostört) och hör till konkurrensraderna.
+ */
+function xOfOpeningWithNaturalResponse(f: AuctionFacts): ResolvedCall | null {
+  const marks = f.history.filter((c) => c.bid === 'X' || c.bid === 'XX')
+  if (marks.length !== 1 || marks[0].bid !== 'X' || side(marks[0].seat) === side(f.seat)) return null
+  const open = f.opening
+  const resp = f.ourContractBids[1]
+  if (!open || open.level !== 1 || !resp || side(open.seat) !== side(f.seat)) return null
+  const x = f.history.indexOf(marks[0])
+  if (x !== open.index + 1 || f.history.indexOf(resp) !== x + 1) return null
+  const rb = parseContractBid(resp.bid)
+  if (!rb || rb.level !== 1 || rb.strain === 'NT') return null
+  return marks[0]
+}
 /** Ostört (inga X/XX alls) — eller bara deras X av svaret, som linjen bjuder över. */
 function quietOrDoubledResponse(f: AuctionFacts): boolean {
   return !f.history.some((c) => c.bid === 'X' || c.bid === 'XX') || xOfResponse(f) !== null
@@ -2009,6 +2030,77 @@ const TABELL: Row[] = [
         seat: facts.seat, bid: 'P', rule: 'pass på partnerns redubbling',
         explanation: `Partnerns redubbling på 3-läget eller högre visar styrka och säger "vi spelar här" → pass (${prettyBid(k.bid)} redubblat står).`,
       }
+    },
+  },
+  // Redubblingen på 1-läget (ägarstruktur 2026-11-16, redubbling.ts):
+  //   1M–(X)–XX = exakt tre stöd, 8+ → öppnaren 2M svag / 3M 14–15 / 4M 16+.
+  //   1m–(X)–XX = 8+ utan fyrkorts högfärg → naturligt, straff-X av flykten,
+  //   öppnarens pass är krav (vi passar inte ut dem).
+  //   1x–(P)–1M–(X)–XX = stödredubbling (exakt tre) + svaren.
+  // Raderna ligger före positionsraderna: återbudet läser annars deras X av
+  // svaret som "systems on" och tiger om stödet.
+  {
+    id: 'xx-stöd-öppnaren',
+    läge: (f) => openerAfterSupportXXSeat(f),
+    välj: ({ hand, facts }) => {
+      const k = openerAfterSupportXX(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'xx-stöd-redubblaren',
+    läge: (f) => supportRedoublerSeat(f),
+    välj: ({ hand, facts }) => {
+      const k = supportRedoublerContinues(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'xx-lågfärg-öppnaren',
+    läge: (f) => openerAfterMinorXXSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = openerAfterMinorXX(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'xx-lågfärg-redubblaren',
+    läge: (f) => minorRedoublerSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = minorRedoublerContinues(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'xx-lågfärg-öppnaren-dom',
+    läge: (f) => openerAfterMinorRedoublerSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = openerAfterMinorRedoubler(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'stöd-xx',
+    läge: (f) => supportRedoubleSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = openerSupportRedouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'stöd-xx-svar',
+    läge: (f) => supportRedoubleToAnswer(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = answerSupportRedouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'stöd-xx-öppnaren',
+    läge: (f) => supportRedoublerRebidSeat(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = supportRedoublerRebid(hand, facts)
+      return k ? asCall(facts.seat, k) : null
     },
   },
   // Familj 5 — slamutredningen per stol. En slamsekvens pågår (kaptenens
@@ -2938,6 +3030,19 @@ function partnerForcingBidUnanswered(f: AuctionFacts): boolean {
  * läget än (då gäller det gamla lagret). Läser aldrig någon annan hand.
  */
 export function decideFromTable(hand: Hand, facts: AuctionFacts, vulnerable: boolean): Decision | null {
+  // "Som om dubblingen inte fanns" (ägarstruktur 2026-11-16): efter 1x–(X)–1y
+  // och inga bud från dem läses X:et som ett pass, så hela den ostörda linjen
+  // (återbud, svararens andra bud …) gäller. Tiger den faller vi till tabellen.
+  const x = xOfOpeningWithNaturalResponse(facts)
+  if (x && facts.theirContractBids.length === 0) {
+    const utan = facts.history.map((c) => (c === x ? ({ ...c, bid: 'P' } as ResolvedCall) : c))
+    const d = decideFromRows(hand, auctionFacts(utan, facts.seat), vulnerable)
+    if (d) return d
+  }
+  return decideFromRows(hand, facts, vulnerable)
+}
+
+function decideFromRows(hand: Hand, facts: AuctionFacts, vulnerable: boolean): Decision | null {
   for (const row of TABELL) {
     if (!row.läge(facts)) continue
     const call = row.välj({ hand, facts, vulnerable })

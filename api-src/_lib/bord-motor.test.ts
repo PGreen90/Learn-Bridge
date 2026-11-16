@@ -520,13 +520,14 @@ describe('tidsbudgeten (2026-09-24: slut budget → STANNA, nästa hjärtslag fo
 })
 
 describe('tänkande bottar vid bordet (2026-09-24: samma budfunktion som tävlingen)', () => {
-  // Ägarens 1♣–X–XX-giv (samma fixtur som validera.test/resonemang.test): Nord
-  // saknar tabellrad efter S:1C W:X N:XX E:1S S:P W:P och tänker.
+  // Ägarens 1♣–X-giv (samma giv som validera.test/resonemang.test): Nord saknar
+  // tabellrad efter S:1C W:X N:P E:1S S:P W:P och tänker. (Förr låg fixturen
+  // på N:XX — sedan redubblingens struktur 2026-11-16 har det läget en regel.)
   const P: Record<string, Seat> = { N: 'S', S: 'N', E: 'W', W: 'E' }
   const orakel = (d: Deal) => (decl: Seat) => Math.min(13, Math.floor((hcpOf(d.hands[decl]) + hcpOf(d.hands[P[decl]])) / 3))
   const auk = (s: string) => s.split(' ').map((c) => ({ seat: c[0], bid: c.slice(2) })) as ResolvedCall[]
   const d0: Deal = { ...revisorGiv(20290770), dealer: 'S' }
-  const h = auk('S:1C W:X N:XX E:1S S:P W:P')
+  const h = auk('S:1C W:X N:P E:1S S:P W:P')
   const budHandelser = (): GivHandelse[] => [
     bokfor(givStartHandelse(d0, 1)),
     ...h.map((c) => ({ typ: 'bud', seat: c.seat, data: { bid: c.bid } }) as GivHandelse),

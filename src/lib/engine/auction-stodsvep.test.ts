@@ -66,10 +66,11 @@ describe('bugg 3 – 2♦-väntebudet är inget ruterbud: 3♦ efter 2♣–2♦
 
 describe('ägarbeslut A – upplysningsdubblaren höjer advancerns färg bara med 4+ stöd', () => {
   it('frö 20262689: 1♦–X–P–1♠–P, Väst ♠Q85 ♥AJ98 ♦9 ♣AKT87 (14 hp) → pass, inte 2♠ på tre kort', () => {
-    const h = auktion(20262689)
-    expect(bids(h, 7)).toEqual(['P', 'P', '1D', 'X', 'P', '1S', 'P'])
-    expect(h[7].seat).toBe('W')
-    expect(h[7].bid).toBe('P')
+    // Sedan redubblingens struktur (2026-11-16) redubblar Nord (9 hp utan
+    // fyrkorts högfärg) — läget läggs därför upp som naken historik.
+    const deal = dealFromSeed(20262689)
+    const hist = (['P', 'P', '1D', 'X', 'P', '1S', 'P'] as const).map((bid, i) => ({ seat: (['N', 'E', 'S', 'W'] as const)[i % 4], bid }))
+    expect(decideCall(deal, hist, 'W').bid).toBe('P')
   })
   it('frö 20262458: 1♣–X–2♣–3♠(FRITT hoppbud = 5+)–P, Nord ♠Q63 ♥AKQJT ♦6543 ♣2 (12 hp) → 4♠ står: tre kort mot fem lovade är 8-korts fit', () => {
     const h = auktion(20262458)

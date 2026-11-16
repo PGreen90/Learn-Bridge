@@ -3347,7 +3347,7 @@ Efter **1M–(X)** är svararens **2NT Jordan/Truscott**: konstgjord
 **limithöjning eller bättre** (10+, 4+ trumf) — hopphöjningen direkt till 3M
 blir därmed ren spärr. Källa: bridgebum (jordan_2nt.php). **Bara efter
 högfärgsöppningen** (motorbytet etapp 4 familj 3, 2026-09-08): efter
-**1♣/1♦–(X)** gäller (b) — **XX med 10+** (även med stöd), annars höjning med
+**1♣/1♦–(X)** gäller (i) — **1♥/1♠ med fyrkorts högfärg, XX med 8+ utan**, annars höjning med
 **4+** (lågfärgen lovar bara tre) eller pass. Förr bjöd motorn "Jordan" även över lågfärgen, och öppnaren hade
 inget svar: 2NT passades ut.
 
@@ -3382,7 +3382,7 @@ betyder "inget eget att säga, du bestämmer". Redubblaren (10+ visat) väljer:
 
 2M bjuds aldrig — XX lovade redan 10+. *Bricka 2 (2026-10-06): Väst ♠AKJ86 ♥765
 ♦642 ♣A2 (12 hp, 14 stödpoäng) efter 1♥–(X)–XX–(1♠)–P–(P) bjöd förr 2♥ "partnern
-har passat (minimum)"; nu 4♥.* Efter lågfärgsöppning gäller bara straffdubblingen.
+har passat (minimum)"; nu 4♥.* **Sedan 2026-11-16** visar XX efter 1M exakt tre stöd och 8+ och öppnaren bjuder själv 2M/3M/4M (se (i)); tabellen ovan gäller när öppnaren ändå passat över en flykt under 2M. Lågfärgsöppningen: se (i).
 
 **(h) Öppnaren efter partnerns konkurrenshöjning, och efter deras X + partnerns
 pass (felrapport #84, 2026-09-26).** Partnerns enkla höjning av vår öppningsfärg
@@ -3407,8 +3407,67 @@ där det står: **partnern passar alltid**. *(1♥)–2♦–(P)–3♠–(4♥)
 → **pass*** (förr höjde partnern till 5♠, 6♠ och 7♠ för varje ny redubbling —
 "auktionen är krav"). Gäller ett äkta kontrakt: sang, en färg vi bjudit två
 gånger, eller minst utgång. Bjuder de vidare över redubblingen är läget fritt.
-Redubblingen på 1- och 2-läget (styrka 8+ / stödredubbling) är **inte byggd än**
-— ägarens struktur finns, fortsättningen stäms av först.
+Redubblingen på 1-läget: se (i).
+
+**(i) Redubblingen på 1-läget (ägarstruktur 2026-11-16).** Tre lägen — alla
+bygger på samma tanke som resten av §7.8: redubblingen berättar något konkret,
+och vi säljer aldrig ut given efteråt.
+
+**1♥/1♠–(X): XX = exakt tre stöd och 8+ hp.** Fiten är känd direkt, så vi
+straffar inte på 1–2-läget utan letar utgång i högfärgen.
+
+| Svararens hand efter 1M–(X) | Bud |
+|---|---|
+| Fyra stöd, 10+ hp | **2NT** (Jordan, (d)) |
+| **Exakt tre stöd, 8+ hp** | **XX** |
+| Stöd med mindre | **2M** (konkurrenshöjning) |
+| Inget stöd | **naturligt, som om dubblingen inte fanns**: 1♠ över 1♥ med 4+ ♠ och 6+ hp · ny färg på 2-läget med 10+ (rondkrav) · 1NT med 8+ · annars pass |
+
+**Öppnaren efter XX visar bara styrkan:** **2M** = svag öppning (under 14) ·
+**3M** = 14–15 · **4M** = 16+. Samma trappa när fjärde hand flyr; går 2M inte
+längre att bjuda passar den svaga handen (partnern känner fiten). Redubblaren:
+över **2M** pass med 8–10, **3M** med 11–12 (öppnaren lyfter med 13), **4M** med
+13+; över **3M** → **4M** med 10+; passade öppnaren deras flykt tävlar
+redubblaren i fiten med 10+ (högst 3M). *1♥–(X)–XX–(P)–? med ♠A2 ♥KQ873 ♦KQ3
+♣J52 (15 hp) → **3♥**.*
+
+**1♣/1♦–(X): XX = 8+ hp utan fyrkorts högfärg.** Med en fyrkorts högfärg (6+
+hp) bjuds **1♥/1♠** som vanligt — då vet öppnaren vilken färg det är. Efter
+1x–(X)–1y fortsätter hela den vanliga linjen (dubblingen läses som ett pass) så
+länge de inte bjuder mer. Efter XX finns ingen känd fit:
+
+- **De passar** → öppnaren passar (vi sitter i 1m redubblat och *de* måste fly);
+  en svag hand med 6+ kort bjuder om lågfärgen direkt.
+- **De flyr** → öppnaren: **X = straff** med fyra bra kort i deras färg (5+ hp
+  där) · **sang** med jämn hand och stopp · **den andra lågfärgen** (4+) eller en
+  femkorts högfärg · **lågfärgen igen** med 6+ · annars **pass, som är krav**.
+- **Redubblaren** passar aldrig ut deras flykt: **X = straff** · sang med stopp
+  (**1NT** 8–10, **2NT** 11–12, **3NT** 13+) · **stöd** med 4+ i partnerns
+  lågfärg · egen femkortsfärg · i sista hand hellre 1NT eller tillbaka till
+  partnerns färg än pass. Öppnaren passar straffdubblingen och de naturliga
+  buden, och lyfter 2NT till 3NT med 14+.
+
+*Frö 20262689: 1♦–(X)–XX–(1♠)–P–(P)–? med ♠K94 ♥K32 ♦843 ♣QJ52 (9 hp) → **1NT**
+(förr passade både öppnaren och redubblaren och de spelade 1♠ mot 22 hp).*
+
+**Stödredubblingen: 1x–(P)–1M–(X)–XX = exakt tre kort i partnerns högfärg.**
+Samma löfte som stöddubblingen (§7.4) — de dubblade i stället för att kliva in.
+Säger inget om styrkan; gäller också när de klev in före svaret
+(1♣–(1♦)–1♠–(X)–XX). Med fyra stöd höjer öppnaren som vanligt, med två ger hen
+sitt vanliga återbud. **Svararen** (passar aldrig redubblingen):
+
+| Svararens hand | Bud |
+|---|---|
+| Fem kort i högfärgen (8-kortsfit) | **2M** upp till 10 hp · **3M** 11–12 · **4M** 13+ |
+| Bara fyra kort (4-3-fit) | **3NT** med 13+ · jämn hand **1NT** (upp till 10) / **2NT** (11–12) · ojämn: tillbaka till öppnarens färg med 4+ stöd, annars 2M |
+
+Öppnaren väger svaret: över **2M** → 3M med 16–18, 4M med 19+; över **3M** och
+**2NT** (inbjudningar) → utgång med 14+; över **1NT** → 2NT med 17+; annars pass.
+*Svararens trappa är Claudes förslag (ägaren har låst löftet "exakt tre") —
+säg till om gränserna ska flyttas.*
+
+Redubblingen efter vår **svaga tvåa/spärr** ((b) ovan, 10+) och efter vårt
+**1NT** är oförändrade.
 
 ### 7.9 De stör vår starka 2♣ (ägarbeslut 2026-11-15, felrapport #127)
 **2♣-öppnaren passar aldrig ut deras inkliv.** Kliver de in i en färg över vår
@@ -3782,6 +3841,16 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-16 — redubblingen på 1-läget (§7.8 i, ägarstruktur).** 1M–(X)–XX =
+  exakt tre stöd, 8+ (förr 10+ oavsett form) och öppnarens trappa 2M/3M/4M;
+  1m–(X)–XX = 8+ utan fyrkorts högfärg (förr 10+; fyrkorts högfärg bjuds nu 1♥/1♠
+  över dubblingen — förr pass under 10 hp), straff-X och kravpass efter flykten
+  (frö 20262689: 1♠ utpassat mot 22 hp); stödredubblingen 1x–(P)–1M–(X)–XX =
+  exakt tre + svaren; utan stöd över 1M–(X) bjuds naturligt (1♠ / ny färg 10+ /
+  1NT 8+). Efter 1x–(X)–1y läser `decideFromTable` dubblingen som ett pass, så
+  den ostörda linjen fortsätter (förr 4♠ på 13 hp via konkurrensraden). Kod:
+  `redubbling.ts` + åtta tabellrader (`xx-stöd-*`, `xx-lågfärg-*`, `stöd-xx*`),
+  `contestedResponse`. Lås: redubbling.test.ts.
 - **2026-11-16 — förslag #128: redubbling på 3-läget+ (§7.8 h, ägarstruktur).**
   Partnerns XX av vårt kontrakt på 3-läget eller högre = "vi spelar här" → pass
   (tabellraden `xx-vi-spelar-här` först i `auction-decide.ts`; förr 4♠XX → 5♠ →
