@@ -2,7 +2,7 @@
 // STICKVÄNTAN (ägarbeslut 2026-09-14): "sticket försvann för snabbt från bordets
 // mitt". Leder DU nästa stick ligger sticket kvar tills du trycker på det
 // ('vanta'; den pekande handen tänds efter sweepHint). Leder boten ligger det
-// kvar SWEEP_HOLD (2/3/4 s, ringen fylls) och sveps sedan ('hold'). Ett tryck (advanceSweep) går
+// kvar SWEEP_HOLD (1/1,5/2 s, ringen fylls) och sveps sedan ('hold'). Ett tryck (advanceSweep) går
 // alltid vidare direkt — även under botens paus. Seedade givar (dealFromSeed)
 // och alla tider från tempo.ts (sifferregeln). FACIT FÖRE FIX.
 
@@ -125,10 +125,10 @@ describe('usePlayTable — vi vinner sticket (frö 2): sticket ligger kvar tills
   })
 })
 
-describe('SWEEP_HOLD — bot-pausen är runda tal per tempo (2/3/4 s), inte faktor-skalad', () => {
-  it('snabb 2000 · normal 3000 · lugn 4000', () => {
-    expect(SWEEP_HOLD).toEqual({ snabb: 2000, normal: 3000, lugn: 4000 })
-    expect(sweepHoldMs('lugn')).toBe(4000)
+describe('SWEEP_HOLD — bot-pausen är valda tal per tempo (1/1,5/2 s), inte faktor-skalad', () => {
+  it('snabb 1000 · normal 1500 · lugn 2000', () => {
+    expect(SWEEP_HOLD).toEqual({ snabb: 1000, normal: 1500, lugn: 2000 })
+    expect(sweepHoldMs('lugn')).toBe(2000)
   })
 })
 

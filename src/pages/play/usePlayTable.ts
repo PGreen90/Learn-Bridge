@@ -128,7 +128,7 @@ export function usePlayTable(
   // ett klick (kort eller stickytan) hoppar över det — otåliga blockeras aldrig.
   // Stickväntan (ägarbeslut 2026-09-14): leder DU nästa stick startar svepet i
   // 'vanta' — sticket ligger kvar tills du trycker på det (handen tänds efter
-  // sweepHint); leder boten är pausen SWEEP_HOLD (2/3/4 s, ringen fylls) innan svepet.
+  // sweepHint); leder boten är pausen SWEEP_HOLD (1/1,5/2 s, ringen fylls) innan svepet.
   const [sweep, setSweep] = useState<Sweep | null>(null)
   // Ref-jämförelse (inte effekt-på-play rakt av) så StrictMode-dubbelkörningen
   // i dev inte startar svepet två gånger. Startar på ANTALET redan spelade
