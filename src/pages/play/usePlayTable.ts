@@ -33,7 +33,7 @@ import { botCardReasoned, botCardSmartReasoned, usesMonteCarlo } from '../../lib
 import { mulberry32 } from '../../lib/engine/deal'
 import { botDecisionSeed, playIndexOf } from '../../lib/engine/play-seed'
 import { controls, sameCard, svepStartFas } from './common'
-import { ms, sweepHoldMs, type PlaySpeed } from './tempo'
+import { botPausMs, ms, sweepHoldMs, type PlaySpeed } from './tempo'
 import { useCardFlight } from './useCardFlight'
 import { isSoundEnabled, playSound, setSoundEnabled, vibrera } from '../../lib/sound'
 
@@ -337,12 +337,22 @@ export function usePlayTable(
       })
     }
 
+    // Pausen före kortet (tempo.ts): kortast när boten leder ett nytt stick —
+    // stickväntan var betänketiden — och kortare för ett tvingat kort.
+    const paus = botPausMs(
+      {
+        nyttStick: play.currentTrick.length === 0 && play.completedTricks.length > 0,
+        tvingat: legalCards(play, seat).length === 1,
+      },
+      speed,
+    )
+
     const worker = workerRef.current
     // Snabb tumregel (öppningsutspel / ett kort / över MC-fönstret), eller ingen
     // worker tillgänglig → räkna inline efter en kort paus.
     if (!worker || !usesMonteCarlo(play, seat)) {
       const opts = botSeed !== undefined ? { rng: mulberry32(botSeed) } : undefined
-      const id = setTimeout(() => apply(botCardSmartReasoned(play, seat, calls, opts)), ms('botDelay', speed))
+      const id = setTimeout(() => apply(botCardSmartReasoned(play, seat, calls, opts)), paus)
       return () => {
         cancelled = true
         clearTimeout(id)
@@ -351,7 +361,8 @@ export function usePlayTable(
 
     // Tungt slutspelsbeslut → webworkern. Gränssnittet visar "tänker …".
     // Golvet (mcFloor): ett blixtsnabbt worker-svar hålls tillbaka så kortet
-    // inte teleporterar in — svaret läggs tidigast efter golvtiden.
+    // inte teleporterar in — svaret läggs tidigast efter golvtiden (aldrig
+    // längre än pausen ovan: utspelet efter stickväntan ska inte dröja).
     setThinking(true)
     const t0 = Date.now()
     let floorId: ReturnType<typeof setTimeout> | undefined
@@ -360,7 +371,7 @@ export function usePlayTable(
       if (e.data?.reqId !== reqId) return
       worker.removeEventListener('message', onMessage)
       clearTimeout(timeoutId)
-      const wait = Math.max(0, ms('mcFloor', speed) - (Date.now() - t0))
+      const wait = Math.max(0, Math.min(ms('mcFloor', speed), paus) - (Date.now() - t0))
       floorId = setTimeout(() => {
         if (e.data.error || !e.data.card) apply(botCardReasoned(play, seat)) // fallback: tumregel
         else apply({ card: e.data.card as Card, reason: e.data.reason as string })
