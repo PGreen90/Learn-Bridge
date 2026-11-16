@@ -40,19 +40,16 @@ describe('FAS 2 punkt 6 – Jordan 2NT efter upplysningsdubbling', () => {
     expect(a?.turns[2].rule).not.toBe('Jacoby 2NT')
   })
 
-  it('1♥ – (X) – XX (10+ utan 4-korts fit)', () => {
+  it('1♥ – (X) – utan stöd bjuds naturligt (XX lovar exakt tre stöd sedan 2026-11-16)', () => {
     const a = buildAuction(
       deal(
         'S:K2 H:AKJ43 D:K32 C:432', // 1♥
         'S:AQ32 H:5 D:KJ32 C:KQ32', // X
-        'S:AQ3 H:K3 D:KJ32 C:5432', // 13 hp, bara 2 hjärter → XX
+        'S:AQ3 H:K3 D:KJ32 C:5432', // 13 hp, bara 2 hjärter → ny färg (förr XX = 10+)
       ),
     )
-    // Sedan motorbytets etapp 4 familj 2 (2026-09-08) lägger manuset även
-    // advancerns tvångsflykt över redubblingen ur tabellen (raden *x-svar*).
-    expect(a?.turns.slice(0, 4).map((t) => t.call)).toEqual(['1H', 'X', 'XX', '2C'])
-    expect(a?.turns[2].rule).toBe('redubbling')
-    expect(a?.turns[3].rule).toBe('färgbud')
+    expect(a?.turns.slice(0, 3).map((t) => t.call)).toEqual(['1H', 'X', '2C'])
+    expect(a?.turns[2].rule).toBe('ny färg över X')
   })
 })
 

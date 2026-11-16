@@ -64,10 +64,12 @@ describe('raden *svar-stört*: svararens första bud när LHO stört partnerns �
     expect(decideCallTraced(ensam('S', hand), [call('N', '1S'), call('E', '2S')], 'S').call).toMatchObject({ bid: '4S', rule: 'höjning till utgång' })
     expect(decideCallTraced(ensam('S', 'S:J865 H:T3 D:T876 C:942'), [call('N', '1S'), call('E', '2NT')], 'S').call).toMatchObject({ bid: '3S', rule: 'konkurrenshöjning' })
   })
-  it('deras X: Jordan 2NT bara efter 1♥/1♠ — över 1♣ ger samma hand XX (10+)', () => {
+  it('deras X: Jordan 2NT bara efter 1♥/1♠ — över 1♣ bjuder samma hand sin högfärg, och XX är 8+ utan fyrkorts högfärg', () => {
     const hand = 'S:54 H:AJ54 D:AJ6 C:KJ98' // 14 hp, 4 klöver / 4 hjärter
     expect(decideCallTraced(ensam('S', hand), [call('N', '1H'), call('E', 'X')], 'S').call).toMatchObject({ bid: '2NT', rule: 'Jordan 2NT' })
-    expect(decideCallTraced(ensam('S', hand), [call('N', '1C'), call('E', 'X')], 'S').call).toMatchObject({ bid: 'XX', rule: 'redubbling' })
+    // Ägarstruktur 2026-11-16: fyrkorts högfärg bjuds naturligt (förr XX = 10+).
+    expect(decideCallTraced(ensam('S', hand), [call('N', '1C'), call('E', 'X')], 'S').call).toMatchObject({ bid: '1H', rule: 'ny färg över X' })
+    expect(decideCallTraced(ensam('S', 'S:K54 H:AJ5 D:AJ6 C:J982'), [call('N', '1C'), call('E', 'X')], 'S').call).toMatchObject({ bid: 'XX', rule: 'redubbling' })
   })
   it('läget: bara direkt efter LHO:s störning; ostört är raden *svar*; passad hand svarar likadant', () => {
     expect(decideCallTraced(ensam('S', 'S:54 H:AJ54 D:AJ6 C:KJ98'), [call('N', '1D'), call('E', 'P')], 'S').källa).toBe('tabell:svar')
@@ -102,7 +104,7 @@ describe('raderna *stöd-x* / *stöd-x-svar* / *stöd-x-öppnaren*', () => {
     const hand = 'S:A32 H:K32 D:AKJ432 C:2'
     expect(decideCallTraced(ensam('N', hand), [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', '1NT')], 'N').källa).not.toBe('tabell:stöd-x')
     expect(decideCallTraced(ensam('N', hand), [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', '3C')], 'N').källa).not.toBe('tabell:stöd-x')
-    expect(decideCallTraced(ensam('N', hand), [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', 'X')], 'N').källa).toBe('tabell:återbud') // systems on (familj 2)
+    expect(decideCallTraced(ensam('N', hand), [call('N', '1D'), call('E', 'P'), call('S', '1H'), call('W', 'X')], 'N').källa).toBe('tabell:stöd-xx') // exakt tre hjärter → stödredubbling (2026-11-16); utan tre kort gäller systems on
   })
   it('svararen svarar stöddubblingen ur tabellen och stöddubblaren väger svaret', () => {
     const h2 = [...hist, call('N', 'X'), call('E', 'P')]

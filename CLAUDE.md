@@ -10,7 +10,7 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-11-15): /felrapporter — förslag #128 är öppet (bricka 2, 7♠ av N); kolla nattkedjan (`gh run list
+> **NÄSTA SESSION BÖRJAR MED** (2026-11-16): /felrapporter (inga öppna 16/11; redubblingen §7.8 i LIVE — ägaren provar, svararens trappa efter stöd-XX är Claudes förslag); kolla nattkedjan (`gh run list
 > --limit 6`; granskningen föll 14/11, grön 15/11). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · iakttagelserna i historik 11-15. Vecka 16/11 är HANDPLOCKAD: kolla att söndagsjobbet lät den vara och att "Givens historia" syns. Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 

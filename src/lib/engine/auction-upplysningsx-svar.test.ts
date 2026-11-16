@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest'
 import type { Deal } from '../../types/bridge'
 import { parseHand } from '../bidding'
 import { botAuction } from './revisor'
+import { decideCall } from './auction-live'
 import { contractFromCalls } from './auction-contract'
 
 function deal(
@@ -84,10 +85,10 @@ describe('advancern svarar när de bjuder över upplysningsdubblingen (etapp 6 h
       S: 'S:AT H:T3 D:QJ98 C:KQ872',
       W: 'S:K652 H:QJ52 D:AK4 C:54',
     })
-    const { contract, bids } = finalOf(d)
-    expect(bids).toContain('3S')
-    expect(contract?.strain).toBe('spades')
-    expect(contract?.level).toBe(3)
+    // Sedan redubblingens struktur (2026-11-16) bjuder Nord sin fyrkorts hjärter
+    // över dubblingen i stället för 2♣ — läget läggs därför upp som naken historik.
+    const hist = (['P', '1C', 'X', '2C'] as const).map((bid, i) => ({ seat: (['E', 'S', 'W', 'N'] as const)[i % 4], bid }))
+    expect(decideCall(d, hist, 'E').bid).toBe('3S')
   })
 
   it('frö 20260811: (2♦)–X–(3♦) → advancern med 6-5 i högfärgerna bjuder 3♠ på formen, dubblaren (19 hp) lyfter till 4♠', () => {

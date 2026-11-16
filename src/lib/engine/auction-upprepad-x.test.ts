@@ -104,10 +104,11 @@ describe('läge 1 – upprepad upplysningsdubbling efter deras rebud', () => {
     expect(h[13].bid).toBe('P')
   })
   it('frö 20276239: X – 2♣ (starkt återbud) – X är ingen upprepad upplysning; advancern stödhöjer 4♣ som förut', () => {
-    const h = auktion(20276239)
-    expect(bids(h, 13)).toEqual(['1D', 'P', '1H', 'X', '1NT', 'P', 'P', '2C', 'P', '3C', '3D', 'X', 'P'])
-    expect(h[13].seat).toBe('S')
-    expect(h[13].bid).toBe('4C')
+    // Sedan stödredubblingen (2026-11-16) bjuder Öst XX (tre hjärter) i stället
+    // för 1NT — läget läggs därför upp som naken historik.
+    const deal = dealFromSeed(20276239)
+    const hist = ['1D', 'P', '1H', 'X', '1NT', 'P', 'P', '2C', 'P', '3C', '3D', 'X', 'P'].map((bid, i) => call((['E', 'S', 'W', 'N'] as const)[i % 4], bid))
+    expect(decideCall(deal, hist, 'S').bid).toBe('4C')
   })
 })
 

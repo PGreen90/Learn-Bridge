@@ -2194,7 +2194,7 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
   //     upplysningsdubbling ("vi äger given"); min X på deras flykt är STRAFF,
   //     aldrig en negativ dubbling (XX är inget kontraktsbud, så (1) tog den förr).
   if (prior.some((c) => c.seat === seat && c.bid === 'XX') && doubledIsOpp && last.cb.strain !== 'NT') {
-    return R('redubblaren: straffdubbling', `Straffdubbling — du redubblade (10+ hp, "vi äger given") och dubblar nu deras flykt till ${last.cb.level}${SYMBOL[last.cb.strain]}: längd med honnörer i ${doubledName}. Partnern passar.`)
+    return R('redubblaren: straffdubbling', `Straffdubbling — du redubblade (styrka, "vi äger given") och dubblar nu deras flykt till ${last.cb.level}${SYMBOL[last.cb.strain]}: längd med honnörer i ${doubledName}. Partnern passar.`)
   }
 
   // (1) NEGATIV DUBBLING — partnern öppnade 1 i färg, motståndaren klev in, och
@@ -2325,6 +2325,27 @@ function interpretRedouble(seat: Seat, prior: ResolvedCall[]): CallInterpretatio
       text: `Redubbling — styrka: vi spelar ${last.cb.level}${SYMBOL[last.cb.strain]} redubblat. Partnern passar.`,
       confidence: 'trolig',
       forcing: 'avslut',
+    }
+  }
+  // Redubblingen på 1-läget (ägarstruktur 2026-11-16, redubbling.ts) — läst ur
+  // auktionen: 1M–(X)–XX = exakt tre stöd, 8+; 1m–(X)–XX = 8+ utan fyrkorts
+  // högfärg; 1x–(P)–1M–(X)–XX = stödredubbling (exakt tre).
+  const aktiva = prior.filter((c) => c.bid !== 'P')
+  const n = prior.length
+  const x = prior[n - 1]
+  const under = prior[n - 2]
+  const underCb = under ? parseBid(under.bid) : null
+  if (x && x.bid === 'X' && SIDE[x.seat] !== SIDE[seat] && underCb && underCb.level === 1 && underCb.strain !== 'NT' && under.seat === PARTNER[seat]) {
+    const våra = aktiva.filter((c) => SIDE[c.seat] === SIDE[seat] && parseBid(c.bid))
+    const märken = aktiva.filter((c) => c.bid === 'X' || c.bid === 'XX').length
+    if (märken === 1 && aktiva.length === 2) {
+      if (isMajor(underCb.strain)) {
+        return R('redubbling (tre stöd)', `Redubbling — exakt tre kort i ${NAME[underCb.strain]} och 8+ hp. Öppnaren visar sin styrka: 2${SYMBOL[underCb.strain]} svag, 3${SYMBOL[underCb.strain]} med 14–15, 4${SYMBOL[underCb.strain]} med 16+.`)
+      }
+      return R('redubbling', `Redubbling — 8+ hp utan fyrkorts högfärg. Vi passar inte ut deras flykt; en dubbling av flykten är straff.`)
+    }
+    if (märken === 1 && våra.length === 2 && våra[0].seat === seat && våra[1] === under && isMajor(underCb.strain) && parseBid(våra[0].bid)!.level === 1 && parseBid(våra[0].bid)!.strain !== 'NT') {
+      return R('stödredubbling', `Stödredubbling — exakt tre kort i partnerns ${NAME[underCb.strain]} (samma löfte som stöddubblingen). Säger inget om styrkan.`)
     }
   }
   return {

@@ -175,6 +175,10 @@ const ALL_ENGINE_RULES: string[] = [
   'svagt hopp: 7+ klöver',
   // 2026-11-16: redubblingens betydelse (ägarstruktur, förslag #128).
   'pass på partnerns redubbling',
+  'redubbling (tre stöd)', 'stödredubbling', 'ny färg över X', '1NT över X',
+  'efter XX: minimum', 'efter XX: inbjudan', 'efter XX: utgång', 'efter XX: egen färg', 'efter XX: ny färg', 'efter XX: sang', 'efter XX: straffdubbling',
+  'redubblaren: stöd', 'redubblaren: sang', 'redubblaren: sang (inbjudan)', 'redubblaren: egen färg',
+  'svar på stödredubbling', 'svar på stödredubbling (inbjudan)', 'svar på stödredubbling (minimum)', 'stödredubblaren: inbjudan', 'stödredubblaren: utgång',
   'inklivaren tävlar i ozon (13+)', 'advancern tävlar med fjärde trumfen (lagen om totala stick)', 'advancern passar tävlingsbudet',
 ]
 
