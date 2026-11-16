@@ -173,6 +173,8 @@ const ALL_ENGINE_RULES: string[] = [
   // 2026-11-15: felrapport #127 (stört 2♣) + förslagen #122 (1♦–3♣) och #123 (tävla 3M).
   'stört 2♣: egen färg', 'stört 2♣: sang', 'stört 2♣: dubbling', 'svar på 2♣-öppnarens dubbling',
   'svagt hopp: 7+ klöver',
+  // 2026-11-16: redubblingens betydelse (ägarstruktur, förslag #128).
+  'pass på partnerns redubbling',
   'inklivaren tävlar i ozon (13+)', 'advancern tävlar med fjärde trumfen (lagen om totala stick)', 'advancern passar tävlingsbudet',
 ]
 

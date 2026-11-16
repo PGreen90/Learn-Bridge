@@ -3400,6 +3400,16 @@ Efter **deras upplysningsdubbling, partnerns pass och advancerns svar**
 "extra längd"); förr passade ♠6 ♥K85432 ♦AK7 ♣KQ3 utan regel. Övriga händer
 passar som förut.
 
+**(h) Vår redubbling på 3-läget eller högre = "vi spelar här" (ägarstruktur
+2026-11-16, förslag #128).** Dubblar de vårt kontrakt på 3-läget eller högre och
+en av oss **redubblar**, visar det styrka och säger att kontraktet ska spelas
+där det står: **partnern passar alltid**. *(1♥)–2♦–(P)–3♠–(4♥)–4♠–(P)–P–(X)–XX–(P)–?
+→ **pass*** (förr höjde partnern till 5♠, 6♠ och 7♠ för varje ny redubbling —
+"auktionen är krav"). Gäller ett äkta kontrakt: sang, en färg vi bjudit två
+gånger, eller minst utgång. Bjuder de vidare över redubblingen är läget fritt.
+Redubblingen på 1- och 2-läget (styrka 8+ / stödredubbling) är **inte byggd än**
+— ägarens struktur finns, fortsättningen stäms av först.
+
 ### 7.9 De stör vår starka 2♣ (ägarbeslut 2026-11-15, felrapport #127)
 **2♣-öppnaren passar aldrig ut deras inkliv.** Kliver de in i en färg över vår
 2♣ (och höjer den kanske) och svararen passar, bjuder öppnaren **så naturligt
@@ -3772,6 +3782,11 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-16 — förslag #128: redubbling på 3-läget+ (§7.8 h, ägarstruktur).**
+  Partnerns XX av vårt kontrakt på 3-läget eller högre = "vi spelar här" → pass
+  (tabellraden `xx-vi-spelar-här` först i `auction-decide.ts`; förr 4♠XX → 5♠ →
+  6♠ → 7♠ via kravsteget, och 1NT–3NT–(X)–XX → 4♣). Betydelselagret förklarar
+  budet. Lås: redubbling.test.ts.
 - **2026-11-15 — tre felrapporter + två förslag (#125, #126, #127, #122, #123).**
   *#125 (§6.1):* öppnarens 4NT efter svararens kontrollbud (2♣–2NT–3♦–4♠–4NT)
   lästes inte som essfråga — `slamTurn` tiger nu när icke-kaptenen frågat, så

@@ -164,7 +164,7 @@ import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preempt
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { partnerShownTrumpLength, slamAnswerContinuation, slamAnswerSeat, slamAskTrump } from './slam-answer-continuations'
 import { answerStrong2cDouble, strong2cDoubleToAnswer, strong2cOpenerActs, strong2cOpenerContestedSeat } from './strong-2c-contested'
-import { legalCalls } from './auction-rules'
+import { legalCalls, prettyBid } from './auction-rules'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
 import { overcallerAnswersCueInvite, secondCueBidderStops, advanceSeat, advancerCompetesToFit, advancerCompetesWithFourthTrump, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
@@ -1977,7 +1977,40 @@ function quietOrDoubledResponse(f: AuctionFacts): boolean {
   return !f.history.some((c) => c.bid === 'X' || c.bid === 'XX') || xOfResponse(f) !== null
 }
 
+/**
+ * Partnern REDUBBLADE vårt kontrakt på 3-läget eller högre och det är min tur
+ * direkt (ägarstruktur 2026-11-16, förslag #128): XX = styrka, "vi spelar
+ * här". Returnerar det redubblade kontraktet, annars null. Kontraktet måste
+ * vara ÄKTA — sang, en färg vår sida bjudit två gånger, eller minst utgång —
+ * så ett dubblat kontrollbud/konstgjort bud aldrig blir slutkontrakt.
+ */
+function partnerRedoubledToPlay(f: AuctionFacts): ResolvedCall | null {
+  const xx = f.lastNonPass
+  if (!xx || xx.bid !== 'XX' || xx.seat !== f.partner) return null
+  const kontrakt = f.lastContract
+  if (!kontrakt || side(kontrakt.seat) !== side(f.seat)) return null
+  const cb = parseContractBid(kontrakt.bid)
+  if (!cb || cb.level < 3) return null
+  const bjudenTvå = f.ourContractBids.filter((c) => parseContractBid(c.bid)?.strain === cb.strain).length >= 2
+  if (cb.strain !== 'NT' && !bjudenTvå && !isGameOrHigher(kontrakt.bid)) return null
+  return kontrakt
+}
+
 const TABELL: Row[] = [
+  // Partnerns redubbling på 3-läget+ = "vi spelar här" (ägarstruktur
+  // 2026-11-16, förslag #128). Först i tabellen: ingen annan rad får bjuda
+  // vidare (förr höjde kravsteget 4♠XX → 5♠ → 6♠ → 7♠).
+  {
+    id: 'xx-vi-spelar-här',
+    läge: (f) => partnerRedoubledToPlay(f) !== null,
+    välj: ({ facts }) => {
+      const k = partnerRedoubledToPlay(facts)!
+      return {
+        seat: facts.seat, bid: 'P', rule: 'pass på partnerns redubbling',
+        explanation: `Partnerns redubbling på 3-läget eller högre visar styrka och säger "vi spelar här" → pass (${prettyBid(k.bid)} redubblat står).`,
+      }
+    },
+  },
   // Familj 5 — slamutredningen per stol. En slamsekvens pågår (kaptenens
   // första slambud finns i den ostörda auktionen). Raden spänner över
   // budpositionerna — en slamsekvens är en delauktion inne i den ostörda
