@@ -133,6 +133,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   accepterar: 'avslut',
   'accepterar inbjudan': 'avslut',
   'redubblaren: utgång': 'avslut',
+  'pass på partnerns redubbling': 'avslut',
   'accepterar slaminbjudan': 'avslut',
   'höjning till utgång': 'avslut',
   'spärr till utgång': 'avslut',

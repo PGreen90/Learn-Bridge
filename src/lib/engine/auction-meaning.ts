@@ -2316,7 +2316,17 @@ function interpretDouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation 
   return R('straffdubbling', `Kooperativ dubbling — visar värden och oftast kort i ${doubledName}. Ingen ren straffdubbling: partnern väljer att straffa, bjuda vidare eller passa.`)
 }
 
-function interpretRedouble(_seat: Seat, _prior: ResolvedCall[]): CallInterpretation {
+function interpretRedouble(seat: Seat, prior: ResolvedCall[]): CallInterpretation {
+  // Ägarstruktur 2026-11-16 (förslag #128): XX av VÅRT kontrakt på 3-läget
+  // eller högre = styrka, "vi spelar här" — partnern passar.
+  const last = lastContract(prior)
+  if (last && SIDE[last.seat] === SIDE[seat] && last.cb.level >= 3) {
+    return {
+      text: `Redubbling — styrka: vi spelar ${last.cb.level}${SYMBOL[last.cb.strain]} redubblat. Partnern passar.`,
+      confidence: 'trolig',
+      forcing: 'avslut',
+    }
+  }
   return {
     text: 'Redubbelt — visar styrka (oftast 10+ hp), ofta efter motståndarnas upplysningsdubbling.',
     confidence: 'trolig',
