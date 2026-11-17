@@ -27,6 +27,7 @@ import { validSparadTavlingsgiv } from '../lib/engine/resume'
 import { formatNedrakning, msTillNastaGuld, msTillNastaTavling } from '../lib/engine/daily'
 import {
   fetchDagensTavling,
+  fetchGivResultat,
   fetchTopplista,
   behöverSkickasOm,
   inskickUrFramsteg,
@@ -96,6 +97,11 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
   // rondgenomgång med förklaringar (steg 5), öppnas ur genomgången.
   const [granska, setGranska] = useState<{ board: number; rad: BrickaRad } | null>(null)
   const [rapport, setRapport] = useState<{ board: number; rad: BrickaRad } | null>(null)
+  // Givens historia som pratbubbla DIREKT efter given (ägarönskan 2026-11-16):
+  // texten för den just spelade brickan, null = ingen bubbla. Hämtas först när
+  // inskicket landat (servern lämnar bara ut den till den som spelat given) och
+  // släcks av krysset eller när man lämnar spelskärmen.
+  const [historia, setHistoria] = useState<{ board: number; text: string } | null>(null)
   // Dagens topplista (hämtas på översikten).
   const [topplista, setTopplista] = useState<TopplistaResultat | null>(null)
   // Räknare som tvingar en ny hämtning av topplistan (uppdatera-knappen bumpar den);
@@ -322,12 +328,31 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
             saveTavlingFramsteg(nf, form)
             return nf
           })
+          // Inskicket är inne → hämta givens historia (om den har någon) och
+          // visa den som bubbla ovanpå resultatet. Kom inskicket inte fram
+          // svarar servern ändå 403 — då finns texten kvar under fältets resultat.
+          if (svar.status === 'fel') return
+          fetchGivResultat(r.board, undefined, form).then((u) => {
+            const text = u.status === 'ok' ? u.data.berattelse : null
+            if (text) setHistoria({ board: r.board, text })
+          })
         })
       },
       // Efter en klar giv landar man på ÖVERSIKTEN (ägarbeslut 2026-08-11) — där
       // ser man sina framsteg + ställningen och startar nästa giv med "Fortsätt".
-      onNästa: () => setSpelIndex(null),
-      onÖversikt: () => setSpelIndex(null),
+      onNästa: () => {
+        setHistoria(null)
+        setSpelIndex(null)
+      },
+      onÖversikt: () => {
+        setHistoria(null)
+        setSpelIndex(null)
+      },
+      // Bubblan ritas av spelskärmen själv, i bordets layout (täcker inga kort).
+      historia:
+        historia?.board === giv.deal.board
+          ? { text: historia.text, onStäng: () => setHistoria(null) }
+          : undefined,
     }
     return <Play key={`tavling-${form}-${tavling.nummer}-${giv.deal.board}`} tavling={spel} />
   }
