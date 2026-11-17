@@ -22,12 +22,14 @@ vi.mock('../components/AuthProvider', () => ({
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const submitMock = vi.hoisted(() => vi.fn())
+const givResultatMock = vi.hoisted(() => vi.fn())
 vi.mock('../lib/backend/tavling', async (importActual) => {
   const actual = await importActual<typeof import('../lib/backend/tavling')>()
   return {
     ...actual,
     fetchDagensTavling: fetchMock,
     submitTavlingGiv: submitMock,
+    fetchGivResultat: givResultatMock,
     fetchTopplista: vi.fn().mockResolvedValue({ status: 'ingen' }),
   }
 })
@@ -36,6 +38,7 @@ vi.mock('../lib/backend/tavling', async (importActual) => {
 // för att gå vidare / till översikten.
 vi.mock('./Play', async () => {
   const React = await import('react')
+  const { GivBubbla } = await import('../components/PlayReplay')
   return {
     Play: ({ tavling }: { tavling: TavlingSpel }) => {
       React.useEffect(() => {
@@ -49,6 +52,8 @@ vi.mock('./Play', async () => {
         null,
         React.createElement('button', { onClick: tavling.onNästa }, `NÄSTA-${tavling.board}`),
         React.createElement('button', { onClick: tavling.onÖversikt }, `ÖVERSIKT-${tavling.board}`),
+        // Spelskärmen ritar bubblan ur tavling.historia (den riktiga komponenten).
+        tavling.historia ? React.createElement(GivBubbla, tavling.historia) : null,
       )
     },
   }
@@ -69,6 +74,7 @@ const ok = (): TavlingsResultat => ({ status: 'ok', tavling: TÄVLING })
 beforeEach(() => {
   fetchMock.mockReset().mockResolvedValue(ok())
   submitMock.mockReset().mockResolvedValue({ status: 'godkand', nsScore: 0 })
+  givResultatMock.mockReset().mockResolvedValue({ status: 'ok', data: { board: 1, resultat: [] } })
 })
 afterEach(() => {
   cleanup()
@@ -147,5 +153,66 @@ describe('Dagens tävling — tappade inskick skickas om när sidan öppnas', ()
     starta()
     expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
     expect(submitMock).not.toHaveBeenCalled()
+  })
+})
+
+// 2026-11-16 (ägarönskan): givens historia ska komma upp som en pratbubbla
+// DIREKT efter given — på spelskärmens resultat, innan man valt att gå till
+// översikten. Alla öppnar inte fältets resultat, och då missar de det roliga.
+// Servern lämnar bara ut texten till den som spelat given → hämtas först när
+// inskicket landat.
+describe('Dagens tävling — givens historia som pratbubbla direkt efter given', () => {
+  const TEXT = 'EM 1974. Tony Priday hade din hand och hoppade till 5♣.'
+  const medHistoria = () =>
+    givResultatMock.mockResolvedValue({ status: 'ok', data: { board: 1, berattelse: TEXT, resultat: [] } })
+
+  it('given har en historia → spelskärmen får den som bubbla, vägen vidare står kvar', async () => {
+    medHistoria()
+    starta()
+    fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
+    const bubbla = await screen.findByRole('dialog', { name: 'Givens historia' })
+    expect(bubbla).toHaveTextContent(/Tony Priday hade din hand/)
+    // Hämtad för just den här given, först efter inskicket.
+    expect(submitMock).toHaveBeenCalledTimes(1)
+    expect(givResultatMock).toHaveBeenCalledWith(1, undefined, 'mp')
+    // Spelskärmens egna val ligger kvar bakom bubblan.
+    expect(screen.getByRole('button', { name: 'NÄSTA-1' })).toBeInTheDocument()
+  })
+
+  it('krysset stänger bubblan — spelskärmen står kvar', async () => {
+    medHistoria()
+    starta()
+    fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
+    await screen.findByRole('dialog', { name: 'Givens historia' })
+    fireEvent.click(screen.getByRole('button', { name: 'Stäng' }))
+    expect(screen.queryByRole('dialog', { name: 'Givens historia' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'NÄSTA-1' })).toBeInTheDocument()
+  })
+
+  it('en giv utan historia visar ingen bubbla', async () => {
+    starta()
+    fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
+    await waitFor(() => expect(givResultatMock).toHaveBeenCalled())
+    expect(screen.queryByRole('dialog', { name: 'Givens historia' })).not.toBeInTheDocument()
+  })
+
+  it('inskicket kom inte fram → ingen hämtning (servern hade ändå svarat 403)', async () => {
+    medHistoria()
+    submitMock.mockResolvedValue({ status: 'fel' })
+    starta()
+    fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
+    await screen.findByRole('button', { name: 'NÄSTA-1' })
+    await waitFor(() => expect(submitMock).toHaveBeenCalledTimes(1))
+    expect(givResultatMock).not.toHaveBeenCalled()
+  })
+
+  it('bubblan följer inte med till översikten', async () => {
+    medHistoria()
+    starta()
+    fireEvent.click(await screen.findByRole('button', { name: /Starta tävlingen/ }))
+    await screen.findByRole('dialog', { name: 'Givens historia' })
+    fireEvent.click(screen.getByRole('button', { name: 'NÄSTA-1' }))
+    expect(await screen.findByRole('button', { name: /Fortsätt – giv 2/ })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Givens historia' })).not.toBeInTheDocument()
   })
 })

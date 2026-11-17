@@ -27,6 +27,16 @@ export interface Nyhet {
 /** Nyast först. */
 export const NYHETER: Nyhet[] = [
   {
+    version: '1.0.9',
+    datum: '2026-11-17',
+    punkter: [
+      {
+        rubrik: 'Givens historia',
+        text: 'Stjärngivens historia visas nu direkt efter given, i en bubbla du kan kryssa bort.',
+      },
+    ],
+  },
+  {
     version: '1.0.8',
     datum: '2026-11-16',
     punkter: [

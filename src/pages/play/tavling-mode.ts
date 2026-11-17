@@ -37,6 +37,11 @@ export interface TavlingSpel {
   onNästa: () => void
   /** Lämna given utan att gå vidare → tillbaka till översikten. */
   onÖversikt: () => void
+  /** Givens historia (stjärntävlingen, 2026-11-16): finns den visas den som
+   *  pratbubbla på resultatskärmen direkt efter given; `onStäng` = krysset.
+   *  Sätts av tävlingssidan först när inskicket landat och servern lämnat ut
+   *  texten. Aldrig i övningsläge. */
+  historia?: { text: string; onStäng: () => void }
 }
 
 /**

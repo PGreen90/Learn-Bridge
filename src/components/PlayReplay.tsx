@@ -41,6 +41,7 @@ export function PlayReplay({
   explanations = 'full',
   tone = 'club',
   mittruta,
+  historia,
 }: {
   deal: Deal
   contract: Contract
@@ -53,6 +54,11 @@ export function PlayReplay({
   /** Resultatrutan (ägarönskemål 2026-11-12): ritas I mittkolumnen, mellan
    *  Väst och Öst och under Nord — den täcker aldrig korten, oavsett skärm. */
   mittruta?: ReactNode
+  /** Givens historia (stjärntävlingen, ägarönskan 2026-11-16): pratbubblan som
+   *  kommer upp direkt efter given. Ritas I LAYOUTEN — mellan mittraden och
+   *  Syds hand, där bricka/zon annars står — så den aldrig täcker ett enda kort
+   *  och resultatrutan i mitten syns samtidigt. */
+  historia?: { text: string; onStäng: () => void }
 }) {
   // `played` = antal färdigvisade stick. `anim` = hur många kort i NÄSTA stick
   // som hittills lagts på bordet (1–4 under uppspelningen, 0 = ingen uppspelning).
@@ -153,11 +159,17 @@ export function PlayReplay({
         <SideStack cards={handCards('E')} side="E" xl />
       </div>
 
-      {/* Bricka + zon nere till vänster (Synrey). */}
-      <div className="px-3 pb-2 text-xs leading-tight text-emerald-50/90">
-        <div>Bricka {deal.board}</div>
-        <div>{VUL_TEXT[deal.vulnerability]}</div>
-      </div>
+      {/* Givens historia tar bricka/zon-radens plats medan den visas (krysset
+          ger raden tillbaka) — höjden tas ur mittradens luft, inte ur korten. */}
+      {historia ? (
+        <GivBubbla text={historia.text} onStäng={historia.onStäng} />
+      ) : (
+        /* Bricka + zon nere till vänster (Synrey). */
+        <div className="px-3 pb-2 text-xs leading-tight text-emerald-50/90">
+          <div>Bricka {deal.board}</div>
+          <div>{VUL_TEXT[deal.vulnerability]}</div>
+        </div>
+      )}
 
       {/* Svarta listen: kontraktet som chip + ställningen. */}
       <div className="flex justify-center pb-2">
@@ -275,6 +287,41 @@ function ArrowButton({
     >
       {children}
     </button>
+  )
+}
+
+/** Givens historia som PRATBUBBLA direkt efter given (ägarönskan 2026-11-16):
+ *  alla öppnar inte fältets resultat, och då missar de det roliga. Bubblan är
+ *  en vanlig rad i bordets layout (ingen flytande ruta): hela bredden under
+ *  mittraden, spetsen pekar upp mot resultatrutan. Krysset stänger; texten
+ *  finns kvar under fältets resultat. Texterna är högst 400 tecken — blir det
+ *  ändå för högt rullar bubblan hellre än knuffar korten. */
+export function GivBubbla({ text, onStäng }: { text: string; onStäng: () => void }) {
+  return (
+    <div className="flex justify-center px-2 pb-2 pt-1.5">
+      <div
+        role="dialog"
+        aria-label="Givens historia"
+        className="dialog-in relative w-full max-w-md rounded-2xl bg-emerald-950 px-3 py-2 pr-9 shadow-xl ring-1 ring-gold-400/70"
+      >
+        {/* Bubblans spets: en vriden ruta i överkanten, samma yta + guldkant. */}
+        <span
+          aria-hidden="true"
+          className="absolute -top-[6px] left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-gold-400/70 bg-emerald-950"
+        />
+        <button
+          type="button"
+          onClick={onStäng}
+          aria-label="Stäng"
+          title="Stäng"
+          className="absolute right-0.5 top-0.5 flex h-9 w-9 items-center justify-center rounded-full text-base leading-none text-emerald-100/70 transition-colors hover:bg-emerald-900 hover:text-emerald-50"
+        >
+          ✕
+        </button>
+        <h2 className="font-brand text-xs tracking-wide text-gold-200">★ Givens historia</h2>
+        <p className="mt-0.5 max-h-40 overflow-y-auto text-[13px] leading-snug text-emerald-50/90">{text}</p>
+      </div>
+    </div>
   )
 }
 

@@ -405,6 +405,17 @@ export function PlayTable({
 }) {
   // Guld-tävlingen: inga hjälpmedel vid bordet (se tavling-mode.ts).
   const utanHjalp = utanHjalpmedel(tavling)
+  // DEV-förhandsvisning av historiebubblan: `/?bubbla=1#/spela-kort` lägger en
+  // exempeltext på resultatskärmen (riktiga texter kommer bara efter en spelad
+  // tävlingsgiv). Ignoreras helt i den byggda appen.
+  const [devBubblaStängd, setDevBubblaStängd] = useState(false)
+  const devHistoria =
+    import.meta.env.DEV && !devBubblaStängd && /[?&]bubbla=1/.test(window.location.search)
+      ? {
+          text: 'EXEMPELTEXT (279 tecken, som veckans längsta). EM 1974. Tony Priday hade din hand och hoppade till 5♣. Här berättas vem som satt med korten, vad de bjöd, hur spelet gick och varför given blev ihågkommen — så här mycket text ryms i en riktig historia från veckans givar. Slut på exemplet.',
+          onStäng: () => setDevBubblaStängd(true),
+        }
+      : undefined
   const {
     play,
     showMenu,
@@ -717,6 +728,7 @@ export function PlayTable({
           tricks={play.completedTricks}
           calls={calls}
           explanations={bidHelp || utanHjalp ? 'full' : 'minimal'}
+          historia={tavling?.historia ?? devHistoria}
           mittruta={
             !resultSeen && !reporting ? (
               <Mittruta glow={headline.win}>
