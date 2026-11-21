@@ -17,8 +17,8 @@ svarar på vad).
 ### 🔵 NU — Övningens fiktiva jämförelse (ägarval 2026-11-21)
 Övningsomspel av en tävlingsgiv ställs fiktivt mot fältet och mot ditt riktiga tal
 (MP/IMP/stjärna): ruta i resultatdialogen + raden "Du (övning)" i resultatlistan.
-BYGGT på grenen `ovning-jamforelse` (`ovningsjamforelse.ts`, historik 11-21). Kvar:
-PCD + ägarens live-prov. Tempot KLART (godkänt 2026-11-21, LIVE v1.0.6/v1.0.8).
+LIVE v1.0.10 `1fd3b9e` (`ovningsjamforelse.ts`, historik 11-21). Kvar:
+ägarens live-prov. Tempot KLART (godkänt 2026-11-21, LIVE v1.0.6/v1.0.8).
 Stjärntävlingen (`guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
 

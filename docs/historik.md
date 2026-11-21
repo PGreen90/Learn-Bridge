@@ -10,7 +10,7 @@
 
 ---
 
-## 2026-11-21 (övningens fiktiva jämförelse — BYGGD, ej live än)
+## 2026-11-21 (övningens fiktiva jämförelse — LIVE v1.0.10 `1fd3b9e`)
 **Ägarönskemål:** ett övningsomspel av en tävlingsgiv ska ge en känsla för hur
 mycket bättre/sämre det gick — fiktivt mot fältet och mot det egna riktiga
 resultatet, i alla tävlingsformer. **Ägarbeslut samma dag:** övningen ERSÄTTER
