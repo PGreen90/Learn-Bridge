@@ -10,6 +10,26 @@
 
 ---
 
+## 2026-11-21 (övningens fiktiva jämförelse — BYGGD, ej live än)
+**Ägarönskemål:** ett övningsomspel av en tävlingsgiv ska ge en känsla för hur
+mycket bättre/sämre det gick — fiktivt mot fältet och mot det egna riktiga
+resultatet, i alla tävlingsformer. **Ägarbeslut samma dag:** övningen ERSÄTTER
+din egen rad i fältet (det gamla jaget är ingen motståndare) · visas i
+resultatdialogen + som raden "Du (övning)" i givens resultatlista · sparas inte
+(bara i sidans minne, varje omspel jämförs mot det riktiga resultatet) · bara
+given, ingen omräknad totalställning · att siffran är smickrande och att
+stjärnövningen har budhjälpen kvar är godtaget.
+**Bygget:** räkningen i `src/lib/engine/ovningsjamforelse.ts` (formens egen
+strategi: MP% · cross-IMP · stjärna = MP; det riktiga talet är serverns), rutan
+`src/pages/tavling/OvningsJamforelse.tsx` (hämtar fältet via samma endpoint som
+resultatlistan — ingen ny backend, inget skickas in), övningsraden i
+`TravellerTabell`. Historikens övning bär `dag` så rätt dags fält hämtas; en
+utpassad övningsgiv jämförs också (0 poäng). Går fältet inte att hämta eller
+har ingen annan spelat given ritas ingenting. DEV-förhandsvisning:
+`/?jamforelse=mp#/spela-kort` (eller `=imp`) mot ett påhittat fält.
+Lås: `ovningsjamforelse.test.ts`, `OvningsJamforelse.test.tsx`.
+**Samma dag:** Tempot (bottarnas betänketid) godkänt av ägaren.
+
 ## 2026-11-16 (redubblingens struktur: förslag #128 + 1-läget)
 **#128:** Nord höjde 4♠ redubblat till 5♠/6♠/7♠ — regeln för partnerns
 redubbling saknades. Nu: XX av vårt kontrakt på 3-läget+ = "vi spelar här" →

@@ -44,7 +44,7 @@ import {
 import { Play } from './Play'
 import type { TavlingSpel } from './play/tavling-mode'
 import { GivGranskning } from './tavling/GivGranskning'
-import { DinStällning, GivDetalj, HemLänk, Kontraktscell, resultatText, Skärm, TopplistaVy } from './tavling/TavlingDelar'
+import { DinStällning, GivDetalj, HemLänk, Kontraktscell, ovningsResultatUr, resultatText, Skärm, TopplistaVy, type OvningsResultat } from './tavling/TavlingDelar'
 
 const MÅNAD = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
 
@@ -318,6 +318,9 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
   const [detaljBoard, setDetaljBoard] = useState<number | null>(null)
   const [granska, setGranska] = useState<{ board: number; rad: BrickaRad } | null>(null)
   const [övningBoard, setÖvningBoard] = useState<number | null>(null)
+  // Senaste övningsresultatet per bricka (2026-11-21) → fiktiv rad i givens
+  // resultatlista. Bara i minnet.
+  const [övningsResultat, setÖvningsResultat] = useState<Record<number, OvningsResultat>>({})
 
   useEffect(() => {
     let active = true
@@ -371,8 +374,12 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
         total: t.storlek,
         sista: false,
         övning: true,
-        onResultat: () => {
-          /* ÖVNING — räknas inte: bokför inget, skicka inget in. */
+        dag,
+        onResultat: (r) => {
+          /* ÖVNING — räknas inte: bokför inget, skicka inget in. Resultatet
+             hålls bara i minnet för den fiktiva raden i resultatlistan. */
+          const ö = ovningsResultatUr(r, giv.deal.vulnerability)
+          if (ö) setÖvningsResultat((nu) => ({ ...nu, [giv.deal.board]: ö }))
         },
         onNästa: () => setÖvningBoard(null),
         onÖversikt: () => setÖvningBoard(null),
@@ -397,6 +404,7 @@ function Dagvy({ dag, form, onTillbaka }: { dag: string; form: TavlingsForm; onT
         onBack={() => setDetaljBoard(null)}
         onGranska={(rad) => setGranska({ board: detaljBoard, rad })}
         onÖvning={() => setÖvningBoard(detaljBoard)}
+        övning={övningsResultat[detaljBoard]}
       />
     )
   }

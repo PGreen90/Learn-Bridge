@@ -21,6 +21,7 @@ import { TankerBricka } from './SpelbordRam'
 import type { ResolvedCall } from '../../lib/bidding'
 import type { Game } from './useGame'
 import { rapportLage, utanHjalpmedel, type TavlingSpel } from './tavling-mode'
+import { OvningsJamforelseRuta } from '../tavling/OvningsJamforelse'
 
 export function BiddingPhase({
   game,
@@ -241,6 +242,11 @@ export function BiddingPhase({
       {passedOut && !reporting && (
         <Dialog className="p-4 text-center">
             <p className="mb-3 text-sm text-ink-soft">Ingen öppnade – given passades ut.</p>
+            {/* Övning av en tävlingsgiv: även en utpassad giv (0 poäng) ställs
+                fiktivt mot fältet (2026-11-21). */}
+            {tavling?.övning && (
+              <OvningsJamforelseRuta board={tavling.board} dag={tavling.dag} form={tavling.form} nsScore={0} />
+            )}
             {/* Spela om given: samma giv en gång till (du kan öppna själv den här
                 gången) — vid rundpass fanns förr bara "Ny giv" (ägarönskemål
                 2026-08-03). Tävling: en utpassad giv är ett giltigt (om än magert)

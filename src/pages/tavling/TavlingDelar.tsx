@@ -3,13 +3,14 @@
 // tävling (DagensTavling) OCH historiksidan (TavlingHistorik) — lyfta hit ur
 // DagensTavling.tsx (etapp D3) så ingen sida importerar en annan sida.
 
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { Felt } from '../../components/Felt'
 import { SuitSymbol } from '../../components/SuitSymbol'
-import type { Seat } from '../../types/bridge'
+import type { Seat, Vulnerability } from '../../types/bridge'
 import { tavlingShareText } from '../../lib/engine/daily'
+import { fiktivJamforelse, nsScoreUrKontrakt } from '../../lib/engine/ovningsjamforelse'
 import {
   enhetText,
   fetchGivResultat,
@@ -269,6 +270,20 @@ export function Resultattabell({
   )
 }
 
+/** Senaste övningsomspelet av en giv (2026-11-21): visas som en fiktiv rad
+ *  "Du (övning)" i resultatlistan. Lever bara i sidans minne — sparas aldrig. */
+export interface OvningsResultat {
+  kontrakt: GivKontrakt | null
+  nsScore: number
+}
+
+/** Bygg övningsresultatet ur spelskärmens resultat + givens zon. Ett resultat
+ *  utan kontraktsfält (äldre form) ger inget att jämföra → null. */
+export function ovningsResultatUr(r: GivResultat, vulnerability: Vulnerability): OvningsResultat | null {
+  if (r.kontrakt === undefined) return null
+  return { kontrakt: r.kontrakt, nsScore: nsScoreUrKontrakt(r.kontrakt, vulnerability) }
+}
+
 /** Detaljvy för EN spelad giv (steg 6): hela fältets traveller (kontrakt ·
  *  resultat · MP%, din rad markerad). Varje rad öppnar genomgången "Så spelade
  *  X given" (Påbyggnad 3) — din egen rad leder vidare till rondgenomgången med
@@ -280,6 +295,7 @@ export function GivDetalj({
   onBack,
   onGranska,
   onÖvning,
+  övning,
 }: {
   board: number
   /** Tävlingsdag (YYYY-MM-DD) för historiken; utelämnad = dagens tävling. */
@@ -291,6 +307,8 @@ export function GivDetalj({
   onGranska: (rad: BrickaRad) => void
   /** Spela om given i övningsläge (räknas inte). Utelämnad → ingen knapp. */
   onÖvning?: () => void
+  /** Senaste övningsomspelet av given → fiktiv rad i listan. */
+  övning?: OvningsResultat
 }) {
   const [utfall, setUtfall] = useState<GivResultatUtfall | null>(null)
   useEffect(() => {
@@ -318,7 +336,7 @@ export function GivDetalj({
           <p className="text-center text-sm text-emerald-100/70">{utfall.fel}</p>
         ) : (
           <>
-            <TravellerTabell data={utfall.data} onVälj={onGranska} form={utfall.data.form ?? form} />
+            <TravellerTabell data={utfall.data} onVälj={onGranska} form={utfall.data.form ?? form} övning={övning} />
             {utfall.data.berattelse && <GivBerattelse text={utfall.data.berattelse} />}
           </>
         )}
@@ -367,17 +385,43 @@ export function TravellerTabell({
   data,
   onVälj,
   form,
+  övning,
 }: {
   data: GivResultatSvar
   onVälj: (rad: BrickaRad) => void
   /** Tävlingsformen (Dagens IMP); utelämnad = MP. */
   form?: TavlingsForm
+  /** Senaste övningsomspelet (2026-11-21): ritas som en FIKTIV rad "Du
+   *  (övning)" på den plats talet hade gett. Fältets riktiga tal rörs inte. */
+  övning?: OvningsResultat
 }) {
   if (data.resultat.length === 0) {
     return <p className="text-center text-sm text-emerald-100/70">Inga resultat än.</p>
   }
   const ensam = data.resultat.length < 2
   const imp = (data.form ?? form) === 'imp'
+  // Övningsraden: talet övningen HADE gett mot fältet (din riktiga rad
+  // ersatt), inskjuten före första raden med lägre tal.
+  const fiktiv = övning
+    ? fiktivJamforelse(
+        data.resultat.map((r) => ({ jag: r.jag, nsScore: r.nsScore, tal: givTal(r) })),
+        övning.nsScore,
+        data.form ?? form,
+      )
+    : null
+  const fiktivFöre = fiktiv ? data.resultat.findIndex((r) => (givTal(r) ?? 0) < fiktiv.ovning) : -1
+  const övningsrad = övning && fiktiv && (
+    <tr key="övning" className="border-t border-dashed border-gold-300/40 bg-gold-400/5">
+      <td className="py-1.5 pr-2 italic text-gold-200/90">Du (övning)</td>
+      <td className="px-2 py-1.5">
+        <Kontraktscell k={övning.kontrakt} />
+      </td>
+      <td className="px-2 py-1.5 text-center tabular-nums text-emerald-50">{resultatText(övning.kontrakt)}</td>
+      <td className="py-1.5 pl-2 text-right font-semibold italic tabular-nums text-gold-200/90">
+        {talText(fiktiv.ovning, imp ? 'imp' : 'mp', imp ? 1 : 0)}{imp ? '' : ' %'}
+      </td>
+    </tr>
+  )
   return (
     <div className="w-full space-y-2 rounded-xl bg-emerald-950/40 p-4 ring-1 ring-emerald-100/10">
       <div className="overflow-x-auto">
@@ -394,8 +438,9 @@ export function TravellerTabell({
             {data.resultat.map((r, i) => {
               const välj = () => onVälj(r)
               return (
+              <Fragment key={i}>
+              {i === fiktivFöre && övningsrad}
               <tr
-                key={i}
                 className={`cursor-pointer border-t border-emerald-100/5 hover:bg-emerald-900/30 ${r.jag ? 'bg-gold-400/10' : ''}`}
                 role="button"
                 tabIndex={0}
@@ -423,14 +468,21 @@ export function TravellerTabell({
                   {talText(givTal(r) ?? 0, imp ? 'imp' : 'mp', imp ? 1 : 0)}{imp ? '' : ' %'}
                 </td>
               </tr>
+              </Fragment>
               )
             })}
+            {fiktivFöre === -1 && övningsrad}
           </tbody>
         </table>
       </div>
       {ensam && (
         <p className="text-center text-[11px] text-emerald-100/60">
           Väntar på fler spelare på den här given.
+        </p>
+      )}
+      {övningsrad && (
+        <p className="text-center text-[11px] text-emerald-100/60">
+          Övningsraden är fiktiv — den räknas inte och fältets tal är oförändrade.
         </p>
       )}
       <p className="text-center text-[11px] text-emerald-100/60">

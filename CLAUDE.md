@@ -14,11 +14,12 @@ svarar på vad).
 > --limit 6`; granskningen föll 14/11, grön 15/11). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · iakttagelserna i historik 11-15. Vecka 16/11 är HANDPLOCKAD: kolla att söndagsjobbet lät den vara och att "Givens historia" syns. Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Tempot: bottarnas betänketid (ägarval 2026-11-15)
-Steg 1 lösarbytet i Monte-Carlo (`mc-losare.ts`, `docs/bot-hjarna.md`): LIVE v1.0.6.
-Steg 2–4 pauserna (`botPausMs`, stickväntan 1/1,5/2 s, `tempo.ts`): LIVE v1.0.8. Kvar: ägarens live-prov.
-Veckans stjärntävling (kodform `guld`, LIVE `2d3eca6`, `guld-tavling.yml` söndagar,
-`docs/nasta-niva-plan.md`) är nu parallellt ägarsteg (live-prov).
+### 🔵 NU — Övningens fiktiva jämförelse (ägarval 2026-11-21)
+Övningsomspel av en tävlingsgiv ställs fiktivt mot fältet och mot ditt riktiga tal
+(MP/IMP/stjärna): ruta i resultatdialogen + raden "Du (övning)" i resultatlistan.
+BYGGT på grenen `ovning-jamforelse` (`ovningsjamforelse.ts`, historik 11-21). Kvar:
+PCD + ägarens live-prov. Tempot KLART (godkänt 2026-11-21, LIVE v1.0.6/v1.0.8).
+Stjärntävlingen (`guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
