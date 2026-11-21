@@ -28,6 +28,10 @@ export interface TavlingSpel {
    *  om resultatskärmen ("Spela igen"/"Tillbaka" i stället för "Nästa giv") och
    *  märkningen "Övning — räknas inte". Odefinierat/false = riktig tävlingsgiv. */
   övning?: boolean
+  /** Tävlingsdagen (YYYY-MM-DD) när övningen spelas ur HISTORIKEN — behövs för
+   *  att hämta rätt dags fält till den fiktiva jämförelsen (2026-11-21).
+   *  Utelämnad = pågående tävling. */
+  dag?: string
   /** Given är klar (spelad eller passad) → BOKFÖR resultatet + skicka in det.
    *  Anropas EN gång i samma stund given slutförs, oavsett vilken knapp spelaren
    *  sedan väljer — så framsteget aldrig tappas om man går till översikten i

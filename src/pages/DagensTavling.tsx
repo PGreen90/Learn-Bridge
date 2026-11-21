@@ -60,6 +60,8 @@ import {
   Resultattabell,
   Skärm,
   TopplistaVy,
+  ovningsResultatUr,
+  type OvningsResultat,
 } from './tavling/TavlingDelar'
 
 /** Index i givar-listan för den första ospelade given, eller null om alla är
@@ -92,6 +94,9 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
   // Index i givar-listan för given som spelas om i ÖVNINGSLÄGE (2026-08-12) från
   // giv-detaljvyn, null = ingen. Skilt från spelIndex: övningen bokför ALDRIG.
   const [övningIndex, setÖvningIndex] = useState<number | null>(null)
+  // Senaste övningsresultatet per bricka (2026-11-21) → fiktiv rad i givens
+  // resultatlista. Bara i minnet: sparas aldrig, skickas aldrig in.
+  const [övningsResultat, setÖvningsResultat] = useState<Record<number, OvningsResultat>>({})
   // Genomgången "Så spelade X given" (Påbyggnad 3): vilken spelares rad i
   // travellern som stegas igenom, null = ingen. `rapport` = din EGEN givs
   // rondgenomgång med förklaringar (steg 5), öppnas ur genomgången.
@@ -433,8 +438,11 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
       total: tavling.storlek,
       sista: false,
       övning: true,
-      onResultat: () => {
-        /* ÖVNING — räknas inte: bokför inget, skicka inget in. */
+      onResultat: (r) => {
+        /* ÖVNING — räknas inte: bokför inget, skicka inget in. Resultatet
+           hålls bara i minnet för den fiktiva raden i resultatlistan. */
+        const ö = ovningsResultatUr(r, giv.deal.vulnerability)
+        if (ö) setÖvningsResultat((nu) => ({ ...nu, [giv.deal.board]: ö }))
       },
       onNästa: () => setÖvningIndex(null),
       onÖversikt: () => setÖvningIndex(null),
@@ -456,6 +464,7 @@ function DagensTavlingInner({ form }: { form: TavlingsForm }) {
           const i = tavling.givar.findIndex((g) => g.deal.board === detaljBoard)
           if (i >= 0) setÖvningIndex(i)
         }}
+        övning={övningsResultat[detaljBoard]}
       />
     )
   }

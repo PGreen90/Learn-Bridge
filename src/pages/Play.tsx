@@ -11,6 +11,8 @@ import { describeTarget, describeTargetShort } from '../lib/engine/contract-targ
 import { dailyNumber, dailyStreak, shareText } from '../lib/engine/daily'
 import { contractFromCalls } from '../lib/engine/auction-live'
 import { resultHeadline } from '../lib/engine/scoring'
+import { nsScore } from '../lib/engine/matchpoints'
+import type { FaltRad } from '../lib/engine/ovningsjamforelse'
 import { playsFrom, validSavedGame, validSparadTavlingsgiv, type SavedGame, type SparadTavlingsgiv } from '../lib/engine/resume'
 import { addResult, validHistorik } from '../lib/engine/spel-historik'
 import { bokforDagensLogg } from '../lib/backend/dagens-logg'
@@ -45,6 +47,7 @@ import { useSvavandeMeny } from './play/useSvavandeMeny'
 import { LastTrickPanel, TrickCenterLive } from './play/trick-views'
 import { ScenarioPicker, SearchOverlay } from './play/pickers'
 import { BiddingPhase } from './play/BiddingPhase'
+import { OvningsJamforelseRuta } from './tavling/OvningsJamforelse'
 import { ClaimDialog } from './play/ClaimDialog'
 import { RondRapportView } from './play/RondRapport'
 import { FlightLayer } from './play/FlightLayer'
@@ -353,6 +356,27 @@ export function Play({ daily = false, tavling }: { daily?: boolean; tavling?: Ta
 }
 
 // ===========================================================================
+// DEV-fältet till förhandsvisningen av övningens fiktiva jämförelse (se
+// devJamforelse nedan) — påhittade resultat, används aldrig i den byggda appen.
+const DEV_FALT: Record<'mp' | 'imp', FaltRad[]> = {
+  mp: [
+    { jag: false, nsScore: 450 },
+    { jag: false, nsScore: 420 },
+    { jag: false, nsScore: 140 },
+    { jag: false, nsScore: -50 },
+    { jag: false, nsScore: -100 },
+    { jag: true, nsScore: -50, tal: 30 },
+  ],
+  imp: [
+    { jag: false, nsScore: 450 },
+    { jag: false, nsScore: 420 },
+    { jag: false, nsScore: 140 },
+    { jag: false, nsScore: -50 },
+    { jag: false, nsScore: -100 },
+    { jag: true, nsScore: -50, tal: -4.2 },
+  ],
+}
+
 // Spelfasen: det gröna bordet, korten, facit och omspelningen. Egen komponent så
 // att spelfasens hooks bara körs när kontrakt + spelläge finns på riktigt.
 // Exporterad för testerna (syd-trakarl.test.tsx) — appen når den bara via Play.
@@ -416,6 +440,11 @@ export function PlayTable({
           onStäng: () => setDevBubblaStängd(true),
         }
       : undefined
+  // DEV-förhandsvisning av övningens fiktiva jämförelse:
+  // `/?jamforelse=mp#/spela-kort` (eller =imp) ställer resultatet mot ett
+  // påhittat fält (den riktiga rutan kräver en spelad tävlingsgiv + servern).
+  // Ignoreras helt i den byggda appen.
+  const devJamforelse = import.meta.env.DEV ? /[?&]jamforelse=(mp|imp)/.exec(window.location.search)?.[1] : undefined
   const {
     play,
     showMenu,
@@ -758,6 +787,24 @@ export function PlayTable({
                       ? 'Auto Claim: resten av sticken var 100 % säkra för spelföraren.'
                       : 'Claim godkänd — resten av sticken bokfördes utan spel.'}
                 </p>
+              )}
+              {/* Övning av en tävlingsgiv (2026-11-21): resultatet ställs
+                  FIKTIVT mot fältet och mot ditt riktiga tävlingsresultat. */}
+              {tavling?.övning && (
+                <OvningsJamforelseRuta
+                  board={tavling.board}
+                  dag={tavling.dag}
+                  form={tavling.form}
+                  nsScore={nsScore(contract, result.declarerTricks, deal.vulnerability)}
+                />
+              )}
+              {devJamforelse && !tavling && (
+                <OvningsJamforelseRuta
+                  board={deal.board}
+                  form={devJamforelse === 'imp' ? 'imp' : 'mp'}
+                  nsScore={nsScore(contract, result.declarerTricks, deal.vulnerability)}
+                  demoFalt={DEV_FALT[devJamforelse === 'imp' ? 'imp' : 'mp']}
+                />
               )}
               <div className="flex flex-col items-stretch gap-2">
                 {/* Dagens giv: delningen är huvudhandlingen — varje inklistrat
