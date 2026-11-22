@@ -134,7 +134,13 @@ function TavlingRad({ to, form, titel, ikon }: { to: string; form: TavlingsForm;
       <ModeIcon icon={status.lage === 'klar' ? 'check' : ikon} />
       <div className="min-w-0 flex-1">
         <div className="font-semibold text-emerald-50">{titel}</div>
-        <div className="text-sm text-emerald-100/90">{status.text}</div>
+        {/* Klar: bocken i ikonrutan säger det (ägarbeslut 2026-11-22: "räcker
+            med symbolen"). Texten finns kvar för skärmläsare. */}
+        {status.lage === 'klar' ? (
+          <span className="sr-only">Klar</span>
+        ) : (
+          <div className="text-sm text-emerald-100/90">{status.text}</div>
+        )}
         {status.lage === 'pagar' && (
           <div
             className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-emerald-950/60"
