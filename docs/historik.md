@@ -24,8 +24,11 @@ Jones); ägarbeslut: fyll i med rimliga kort. **Upplagt:** tolv givar med berät
 — kvittot visade tolv berättelser. **Antaget:** sex givar saknar giv och zon i källan
 och står som Syd giv, ingen i zon. **Iakttagelser (ej undersökta):** bottarna säljer ut
 till 2♦ med utgångsvärden på Aunt Agatha 2 · stannar i 3♣ på Sheinwold-given · Syd
-passar 1NT med sju ruter på Reeses första. **Öppet:** bekräfta att veckojobbet hoppade
-över urvalet och bara lät datorspelarna spela.
+passar 1NT med sju ruter på Reeses första. **Veckojobbet:** startat för hand samma
+kväll med veckan angiven (`gh workflow run guld-tavling.yml -f vecka=2026-11-23`) —
+urvalet hoppades över och alla tre datorspelarna spelade givarna. **Öppet:** det
+schemalagda jobbet räknar "nästa måndag" fel om GitHub startar det efter midnatt svensk
+tid (förra söndagen startade det 23.44); då läggs ett slumpurval upp en vecka för tidigt.
 
 ## 2026-11-22 (felrapport #129 + #131, Tyck till #130 — BYGGT, ej live än)
 **#129 störd inverterad lågfärgshöjning (ägarstruktur, §4.2):** efter
