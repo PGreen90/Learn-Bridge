@@ -10,15 +10,15 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-11-16): /felrapporter (inga öppna 16/11; redubblingen §7.8 i LIVE — ägaren provar, svararens trappa efter stöd-XX är Claudes förslag); kolla nattkedjan (`gh run list
-> --limit 6`; granskningen föll 14/11, grön 15/11). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · iakttagelserna i historik 11-15. Vecka 16/11 är HANDPLOCKAD: kolla att söndagsjobbet lät den vara och att "Givens historia" syns. Design-skillen `impeccable`
+> **NÄSTA SESSION BÖRJAR MED** (2026-11-22): /felrapporter; kolla nattkedjan (`gh run list
+> --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget + efter svararens cue · stört MSS utan stopp · iakttagelserna i historik 11-15/11-22. Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Övningens fiktiva jämförelse (ägarval 2026-11-21)
-Övningsomspel av en tävlingsgiv ställs fiktivt mot fältet och mot ditt riktiga tal
-(MP/IMP/stjärna): ruta i resultatdialogen + raden "Du (övning)" i resultatlistan.
-LIVE v1.0.10 `1fd3b9e` (`ovningsjamforelse.ts`, historik 11-21). Kvar:
-ägarens live-prov. Tempot KLART (godkänt 2026-11-21, LIVE v1.0.6/v1.0.8).
+### 🔵 NU — Felrapport #129 + #131 + Tyck till #130 (2026-11-22)
+Störd inverterad lågfärgshöjning (§4.2, ägarstruktur) · stört MSS efter 1NT-inkliv → 3NT
+(§7.1) · partnerns cue är krav även dubblat i sista kravvakten. BYGGT (historik 11-22,
+lås `auction-felrapport-129-131.test.ts`). Kvar: PCD + stäng ärendena.
+Övningens fiktiva jämförelse KLAR (live-prov OK 2026-11-22, v1.0.10 `1fd3b9e`). Tempot KLART.
 Stjärntävlingen (`guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
 

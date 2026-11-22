@@ -10,6 +10,30 @@
 
 ---
 
+## 2026-11-22 (felrapport #129 + #131, Tyck till #130 — BYGGT, ej live än)
+**#129 störd inverterad lågfärgshöjning (ägarstruktur, §4.2):** efter
+1♣–2♣–(2♥) passade öppnaren och svararen ut 32 hp. Ny modul
+`src/lib/engine/inverted-minor-contested.ts`: öppnarens pass = krav (12–13),
+X = 14–15 (inte straff), 2NT/3NT med stopp, ny fyrkortsfärg, 3m, 3 i deras
+färg = utgångskrav 16+, hopp i ny färg = kontrollbud; svararen passar aldrig
+pass/X; efter kontrollhoppet billigaste kontrollen och sedan 4NT. Rapportens
+giv går nu 1♣–2♣–(2♥)–4♦–4♠–4NT–5♠–6♣.
+**#131 stört Minor Suit Stayman efter vårt 1NT-inkliv (ägarbeslut, §7.1):**
+1♥–1NT–P–2♠–(3♥) → 3NT med stopp (förr 4♠ "med fit"); ett konstgjort
+systemsvar på 1NT-inklivet höjs aldrig (`artificialAnswerToMy1NTOvercall`).
+**Tyck till #130:** Dagens IMP nr 109 giv 3 — 2♦–(X)–3♦–(4♦ cue)–X och Ö/V
+passade ut 4♦X. Sista kravvakten håller nu kvar kravet när motståndaren
+dubblar ett cue i sin egen färg (principen från #107).
+**Iakttagelser (ej lagade):** (1) #129: gränserna 12–13/14–15/12–15, svararens
+trappa och "bara 2-läget" är Claudes förslag som ägaren godkände; kontrollhoppets
+krav (singel/renons + 5 i lågfärgen) och "ny färg kräver fem i lågfärgen" är
+Claudes egna val. (2) Efter svararens 3 i deras färg (13+, ingen stopp) har
+öppnaren ingen egen regel. (3) På rapportens giv bjuder Nord 6♣ med alla fem
+nyckelkort — kungfrågan 5NT finns inte på den vägen ("ingen kungfråga på den
+här vägen", `slam-auction.ts`). (4) #131 utan stopp i deras färg: pass utan
+regel. (5) Rapportens Väst bjöd 2♥ över 2♣; dagens motor passar där.
+(6) Stört Stayman/överföring efter 1NT-inklivet har ingen regel (pass).
+
 ## 2026-11-21 (övningens fiktiva jämförelse — LIVE v1.0.10 `1fd3b9e`)
 **Ägarönskemål:** ett övningsomspel av en tävlingsgiv ska ge en känsla för hur
 mycket bättre/sämre det gick — fiktivt mot fältet och mot det egna riktiga

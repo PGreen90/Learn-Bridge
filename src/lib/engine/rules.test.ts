@@ -173,6 +173,13 @@ const ALL_ENGINE_RULES: string[] = [
   // 2026-11-15: felrapport #127 (stört 2♣) + förslagen #122 (1♦–3♣) och #123 (tävla 3M).
   'stört 2♣: egen färg', 'stört 2♣: sang', 'stört 2♣: dubbling', 'svar på 2♣-öppnarens dubbling',
   'svagt hopp: 7+ klöver',
+  // 2026-11-22: felrapport #129 (störd inverterad lågfärgshöjning) + #131 (stört MSS efter 1NT-inkliv).
+  'störd inverterad: pass', 'störd inverterad: dubbling', 'störd inverterad: sang', 'störd inverterad: ny färg',
+  'störd inverterad: minimum', 'störd inverterad: utgångskrav', 'störd inverterad: kontrollhopp',
+  'störd inverterad: svararen med stopp', 'störd inverterad: svararen utan stopp (13+)', 'störd inverterad: svararen utan stopp (minimum)',
+  'störd inverterad: öppnaren höjer sangen', 'störd inverterad: öppnaren passar',
+  'svar på kontrollhopp: kontrollbud', 'svar på kontrollhopp: ingen kontroll', 'efter kontrollsvaret: stannar i utgång',
+  'stört MSS efter 1NT-inkliv: 3NT',
   // 2026-11-16: redubblingens betydelse (ägarstruktur, förslag #128).
   'pass på partnerns redubbling',
   'redubbling (tre stöd)', 'stödredubbling', 'ny färg över X', '1NT över X',

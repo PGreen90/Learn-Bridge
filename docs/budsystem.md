@@ -458,6 +458,39 @@ till 6m, och 33+ frågade 4NT direkt utan kontrollbud. *1♣–2♣–3NT–**4�
 Den **svaga höjningen** (1m–3m) är avslutande – öppnaren passar utan extra
 styrka.
 
+**Störd inverterad höjning — 1m–2m–(inkliv på 2-läget) (ägarstruktur
+2026-11-22, felrapport #129).** Höjningen var krav, så paret säljer aldrig ut
+inklivet. Öppnaren väljer:
+
+| Öppnarens bud | Betydelse |
+|---|---|
+| pass | **Krav.** Minimum (12–13) utan stopp i deras färg, utan ny fyrkortsfärg och utan femte kortet i lågfärgen. Frågar: "har du stopp spelar vi sang". |
+| X | Samma handtyp men starkare (14–15). **Inte straff.** |
+| 2NT / 3NT | Stopp i deras färg: 12–15 / 16+. |
+| ny färg | Naturlig fyrkortsfärg bredvid fem i lågfärgen, krav en rond. |
+| 3m | Fem kort, 12–15, ej krav. |
+| 3 i deras färg | Utgångskrav: 16+ och 5+ i lågfärgen. |
+| hopp i ny färg | **Kontrollbud** (kortfärg): 16+ med lång lågfärg och slamintresse — när sang inte ser ut som slutbudet. |
+
+**Svararen efter pass eller X passar aldrig:** med stopp 2NT (10–12) eller 3NT
+(13+); utan stopp 3m (minimum) eller 3 i deras färg (13+, utgångskrav).
+Öppnaren höjer 2NT till 3NT med X-handen (14–15) och passar annars; 3m står.
+
+**Efter kontrollhoppet** visar svararen sin billigaste kontroll (ess, kung
+eller kortfärg) under 5m — utan kontroll 5m — och öppnaren frågar 4NT (1430,
+lågfärgen trumf) när alla sidofärger är kontrollerade, annars 5m.
+
+| Nord | Öst | Syd | Väst |
+|---|---|---|---|
+| 1♣ | pass | 2♣ | 2♥ |
+| **4♦** | pass | **4♠** | pass |
+| **4NT** | pass | 5♠ | pass |
+| 6♣ | | | |
+
+*Nord ♠J64 ♥AKJ ♦— ♣AK97643 (16 hp), Syd ♠AT8 ♥T2 ♦AKQ3 ♣QJT5 (16 hp); Nord
+giv, ÖV i zon.* Inte beslutat än: inkliv på 3-läget, deras dubbling av
+höjningen och fortsättningen efter svararens bud i deras färg.
+
 **3NT eller 5 i lf? (stopp-utbytet, ägarregel 2026-07-05).** Ett 2/1-par
 föredrar 3NT (färre stick), men bara när paret tillsammans kan **hålla alla fyra
 färger**. Räcker inte stoppen spelar paret **lågfärgsutgången 5♣/5♦** i stället
@@ -2222,6 +2255,11 @@ fritt svar) har fortfarande bara steg 1:s kontroll-kompletta 4NT.
   fortsättning efter Stayman är också densamma: **Smolen** (utgångskrav 5-4 → hopp
   i den kortare högfärgen efter inklivarens 2♦) och **garbage** (svag 5-5 → 2 i
   bästa högfärg, pass-eller-rätta). Inbjudningshänder sköts som förut.
+  **Störs advancerns Minor Suit Stayman** (1x–1NT–P–2♠–(deras färgbud under
+  3NT), felrapport #131, ägarbeslut 2026-11-22) bjuder inklivaren **3NT som
+  slutbud med stopp i deras färg** — vi vet för lite om advancerns styrka för
+  att gå upp i lågfärgerna. Ett konstgjort systemsvar (Stayman, överföring,
+  2♠) är aldrig en färg att höja "med fit". *1♥–1NT–P–2♠–(3♥)–**3NT**.*
 - **Balansering (utpassningsläget, felrapport #5):** efter deras 1-lägesöppning
   och två pass får fjärde hand hela §7-arsenalen (inkliv/X/Michaels/ovanlig 2NT)
   – given passas inte ut med en klar aktion på handen.
@@ -3841,6 +3879,34 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-22 — felrapport #129: störd inverterad lågfärgshöjning (§4.2,
+  ägarstruktur).** Efter 1♣–2♣–(2♥) passade både öppnaren och svararen — 32 hp
+  och elva klöver såldes ut i 2♥; läget saknade regel helt. Nu: öppnarens pass
+  är krav (frågar efter stopp), X = 14–15 (inte straff), 2NT/3NT med stopp,
+  ny fyrkortsfärg, 3m, 3 i deras färg = utgångskrav 16+, hopp i ny färg =
+  kontrollbud. Svararen passar aldrig pass/X. Efter kontrollhoppet: billigaste
+  kontrollen, sedan 4NT. Kod: `inverted-minor-contested.ts`, förklaringarna i
+  `auction-meaning.ts` (`interpretInvertedContested`). Claudes antaganden
+  (ägaren godkände förslagen a–d): gränserna pass 12–13 / X 14–15 / 3m 12–15,
+  svararens trappa, bara 2-läget; därtill EGNA val som ägaren inte sett:
+  kontrollhoppet kräver singel/renons och 5+ i lågfärgen, och den nya färgen
+  kräver fem kort i lågfärgen. Lås: `auction-felrapport-129-131.test.ts`.
+- **2026-11-22 — Tyck till #130: partnerns cue är krav även dubblat, också i
+  sista kravvakten (ägarbeslut #107 från 2026-10-31).** Efter 2♦–(X)–3♦–(4♦ =
+  cue)–X passade både dubblaren och cue-bjudaren, och paret spelade 4♦
+  dubblat i motståndarnas färg. Vakten *krav-svar* släppte kravet så fort
+  motståndaren bjöd något alls efter partnerns bud; nu står kravet kvar när
+  det de gjorde var att DUBBLA ett cue i sin egen färg (svaret blir detsamma
+  som odubblat, här 4♥). Ett naturligt kravbud som dubblas är oförändrat.
+  Lås: `auction-felrapport-129-131.test.ts`.
+- **2026-11-22 — felrapport #131: stört Minor Suit Stayman efter vårt 1NT-inkliv
+  (§7.1, ägarbeslut).** Efter 1♥–1NT–P–2♠–(3♥) höjde inklivaren "partnerns
+  spader" till 4♠ — budförklaringen läste 2♠ som MSS, men beslutet tappade
+  betydelsen när de klev in. Nu: 3NT som slutbud med stopp i deras färg
+  (`overcallerAfterDisturbedMSS`), och ett konstgjort systemsvar på 1NT-inklivet
+  höjs aldrig med fit (`artificialAnswerToMy1NTOvercall` spärrar "tävla till
+  fiten" och raden *partner-färg*). Utan stopp finns ingen regel än (pass).
+  Lås: `auction-felrapport-129-131.test.ts`.
 - **2026-11-16 — redubblingen på 1-läget (§7.8 i, ägarstruktur).** 1M–(X)–XX =
   exakt tre stöd, 8+ (förr 10+ oavsett form) och öppnarens trappa 2M/3M/4M;
   1m–(X)–XX = 8+ utan fyrkorts högfärg (förr 10+; fyrkorts högfärg bjuds nu 1♥/1♠
