@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-11-22 (stjärntävlingen: andra handplockade veckan, 2026-11-23)
+**Källa:** samma nummer som förra gången, Bridge Magazine januari 1975, nu artiklarna
+(Reese "Play These Hands With Me" · Gostyn · Saunders "Four Knaves" · Lukacs "Random
+Jottings" · North "Aunt Agatha" · Fox · Milton "Deputy Jones" · två dubbeldummyproblem).
+**Provet:** tretton kompletta givar lästes av ur foton och mättes med `poangsattGiv`
+(mätprob + rapport i `revisor-output/`, kommandot står i probens huvud); ingen
+överlappar veckan 2026-11-16. Färre klarade golvet än förra gången — artikelgivarna är
+spelproblem, och måttet mäter bud och sväng, inte spelteknik. **Tryckfel:** summakollen
+fångade tre givar med ett dubbelt och ett saknat kort (Reeses 7♦, Sheinwold, Deputy
+Jones); ägarbeslut: fyll i med rimliga kort. **Upplagt:** tolv givar med berättelse
+(Fox struken), SQL-fil ur uppladdningsproben, körd av ägaren i Supabase före veckojobbet
+— kvittot visade tolv berättelser. **Antaget:** sex givar saknar giv och zon i källan
+och står som Syd giv, ingen i zon. **Iakttagelser (ej undersökta):** bottarna säljer ut
+till 2♦ med utgångsvärden på Aunt Agatha 2 · stannar i 3♣ på Sheinwold-given · Syd
+passar 1NT med sju ruter på Reeses första. **Öppet:** bekräfta att veckojobbet hoppade
+över urvalet och bara lät datorspelarna spela.
+
 ## 2026-11-22 (felrapport #129 + #131, Tyck till #130 — BYGGT, ej live än)
 **#129 störd inverterad lågfärgshöjning (ägarstruktur, §4.2):** efter
 1♣–2♣–(2♥) passade öppnaren och svararen ut 32 hp. Ny modul
