@@ -473,6 +473,26 @@ export async function fetchVeckansStjarna(): Promise<VeckansStjarna | null> {
   }
 }
 
+/** Mitt läge i de pågående tävlingarna, enligt servern (ägarbeslut 2026-11-22):
+ *  antal inskickade givar per tävlingsform, oavsett enhet. null = utloggad eller
+ *  så gick hämtningen inte — startsidan visar då det enheten själv vet, och får
+ *  aldrig visa ett fel för den här sakens skull. */
+export type MittLage = Partial<Record<TavlingsForm, { nummer: number; antal: number }>>
+export async function fetchMittLage(): Promise<MittLage | null> {
+  try {
+    const token = (await getCurrentSession())?.access_token
+    if (!token) return null
+    const res = await fetch('/api/topplista?lage=1', {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) return null
+    const lage = ((await res.json()) as { lage?: MittLage | null }).lage
+    return lage && typeof lage === 'object' ? lage : null
+  } catch {
+    return null
+  }
+}
+
 /** Slå ihop LOKALT framsteg (den här enheten — bär hela given, så
  *  rondgenomgången kan visas) med serverns lista över dina inskickade givar
  *  (`dinaInskick` — alla enheter, men bara bricka + kontrakt). Resultatet driver
