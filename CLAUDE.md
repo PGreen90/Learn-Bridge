@@ -14,11 +14,12 @@ svarar på vad).
 > --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · damfråga i lågfärgstrumf (§6.1) · stört MSS utan stopp · iakttagelserna i historik 11-15/11-22. Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Felrapport #129 + #131 + Tyck till #130 (2026-11-22)
-Störd inverterad lågfärgshöjning (§4.2, ägarstruktur) · stört MSS efter 1NT-inkliv → 3NT
-(§7.1) · partnerns cue är krav även dubblat. LIVE `63800ad`, ärendena stängda.
-Uppföljningen: kungfrågan 5NT även när öppnaren frågar, storslam kräver
-trumfdam/tio trumf (§6.3) · utgångskravet står · svar på ny färg (§4.2). KLART.
+### 🔵 NU — Startsidans gruppering (ägarbeslut 2026-11-22)
+Åtta lika kort blir grupper på EN sida: veckans stjärna i sidhuvudet (stjärna före och
+efter namnet, "vann vecka N") · Tävla = en panel med tre rader som visar läget
+(mätare + "Fortsätt" på påbörjad) · Träna = tre brickor · Spela med vänner + Budsystem
+som rader. Gren `startsidan-grupper`, byggt men ej live.
+Felrapport #129 + #131 + Tyck till #130 KLART & LIVE `63800ad` (historik 11-22).
 Övningens fiktiva jämförelse KLAR (live-prov OK 2026-11-22, v1.0.10 `1fd3b9e`). Tempot KLART.
 Stjärntävlingen (kodnamn `guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
