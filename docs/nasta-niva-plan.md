@@ -65,7 +65,7 @@
 > - **KVAR i etapp 3:** spelföringsproblem (en hand + träkarl, DD-verifierad
 >   lösning) · missar även ur fritt spel · kontosynk av formen och kön.
 
-## Etapp 4 blev VECKANS GULD-TÄVLING (ägarbeslut 2026-11-11, BYGGD samma dag)
+## Etapp 4 blev VECKANS STJÄRNTÄVLING (ägarbeslut 2026-11-11, BYGGD samma dag)
 
 **Riktiga mästerskapsgivar är avförda tills vidare.** Källorna utan fråga höll
 inte: BBO:s villkor förbjuder uttryckligen att hämta och återanvända arkivet
@@ -84,7 +84,7 @@ obegränsat förråd, ingen kan känna igen en känd giv.
   svår att bjuda · fördelning), räknade ur alla fyra händerna + double-dummy.
   Tolv väljs med variation (högst två slamgivar, tre vilda). Det är inget kik:
   urvalet görs innan någon spelar.
-- **Ägarbesluten:** namnet "Veckans guld-tävling" · räknas i MP% · datorspelarna
+- **Ägarbesluten:** namnet "Veckans stjärntävling" (hette "guld-tävling" första dagen) · räknas i MP% · datorspelarna
   är med som vanligt (ändras ev. efter första veckans siffror) · första veckan
   = de tolv ur testbygget (frö 20261111) · **ingen budhjälp**: inga
   rekommendationer, inget budstödsreglage, ingen Facit-knapp — bara vad buden
@@ -107,8 +107,8 @@ ovanför tävlingskortet på startsidan (`/api/topplista?form=guld&stjarna=1`,
 publik; datorspelarna koras aldrig — samma regel som medaljerna).
 
 Historik + medaljtabell (ägarbeslut 2026-11-12):** avslutade VECKOR listas
-  på historiksidan (`?form=guld`, fliken "Guld") med egen topp 5 i medaljer.
-  En guld-vecka är avslutad när veckan är slut (`arAvslutat` i
+  på historiksidan (`?form=guld`, fliken "Stjärntävlingen") med egen topp 5 i medaljer.
+  En stjärntävlingsvecka är avslutad när veckan är slut (`arAvslutat` i
   `tavlingsavslut.ts` — EN regel för listan och för nattens frysning i
   daily_standings). Medaljerna syns efter nattjobbet natten mot tisdag.
 - **Medvetet utanför första versionen:** nattens djupgranskning av inskicken,

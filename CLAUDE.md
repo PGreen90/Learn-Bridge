@@ -20,7 +20,7 @@ Störd inverterad lågfärgshöjning (§4.2, ägarstruktur) · stört MSS efter 
 Uppföljningen: kungfrågan 5NT även när öppnaren frågar, storslam kräver
 trumfdam/tio trumf (§6.3) · utgångskravet står · svar på ny färg (§4.2). KLART.
 Övningens fiktiva jämförelse KLAR (live-prov OK 2026-11-22, v1.0.10 `1fd3b9e`). Tempot KLART.
-Stjärntävlingen (`guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
+Stjärntävlingen (kodnamn `guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
@@ -94,7 +94,7 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
-1. **Guld-tävlingens uppföljning** — siffrorna efter första veckan (bottarna, urvalet); kolla att vecka 1 frystes.
+1. **Stjärntävlingens uppföljning** — siffrorna efter första veckan (bottarna, urvalet); kolla att vecka 1 frystes.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 **vänner + bjud in med pushnotis** · speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

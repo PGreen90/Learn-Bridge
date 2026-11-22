@@ -12,7 +12,7 @@
 ### Vänner + "bjud in spelare" med pushnotis (ägarönskemål 2026-11-12)
 Ägaren vill: (1) kunna lägga till vänner, (2) i Spela med vänner bjuda in en
 vän till bordet med en pushnotis, (3) en av/på-knapp för pushnotiser på
-profilen, på som standard. Lagt här enligt järnregeln (NU var guld-tävlingens
+profilen, på som standard. Lagt här enligt järnregeln (NU var stjärntävlingens
 live-prov). Det som måste avgöras innan bygget — allt är grindbeslut:
 - **Ny backend:** vänlista (vem får lägga till vem — förfrågan som godkänns,
   eller fritt?), lagring av varje enhets pushadress, en serverfunktion som
