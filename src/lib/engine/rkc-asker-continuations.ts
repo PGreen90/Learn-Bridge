@@ -112,6 +112,13 @@ function placeAfterKeycards(hand: Hand, trump: Suit, f: AuctionFacts, answerBid:
   // Alla fem nyckelkort entydigt → ALLTID kungfrågan 5NT (ägarbeslut
   // 2026-11-03, §6.3) — samma regel som kaptensvägen i `slam-auction.ts`.
   if (total === 5 && certain) {
+    // Ägarbeslut 2026-11-22 ("damfrågan skall användas"): damen okänd och
+    // frågan finns → damfrågan FÖRE kungfrågan.
+    const fråga = queenAskCall(trump, answerBid)
+    if (fråga && !queenSecured(hand, trump, f, answerBid)) {
+      const sym = `${fråga[0]}${SWE_SYM[fråga[1] as 'C' | 'D' | 'H' | 'S']}`
+      return { call: fråga, rule: 'trumfdam-fråga', explanation: `Alla fem nyckelkort, men trumfdamen är okänd → ${sym} frågar damen; storslam med damen och tre av fyra kungar, annars 6${SYM}.` }
+    }
     return { call: '5NT', rule: 'Sjöberg 5NT', explanation: 'alla fem nyckelkort → 5NT (frågar kungar; storslam med tre av fyra kungar i paret).' }
   }
 
@@ -138,10 +145,21 @@ function placeAfterKeycards(hand: Hand, trump: Suit, f: AuctionFacts, answerBid:
 }
 
 /** FRÅGAREN placerar efter DAMSVARET (fas 3). */
-function placeAfterQueen(trump: Suit, queenAnswer: string): Kunskap {
+function placeAfterQueen(hand: Hand, trump: Suit, queenAnswer: string, allaFem: boolean): Kunskap {
   const L = letterOfSuit(trump)
   const SYM = SWE_SYM[L]
   const signoff = `5${L}`
+  if (allaFem) {
+    // Alla fem nyckelkort = alltid slam. Dam nekad → lillslam; dam visad och
+    // tre av fyra kungar (egna sidokungar + den visade) → storslam.
+    if (queenAnswer === signoff) return { call: `6${L}`, rule: 'slamavslut', explanation: `alla fem nyckelkort men ingen trumfdam → 6${SYM} (lillslam).` }
+    const sido = hand.filter((c) => c.rank === 'K' && c.suit !== trump).length + (queenAnswer === '5NT' ? 0 : 1)
+    const mål = sido >= 2 ? `7${L}` : `6${L}`
+    if (rank(mål) > rank(queenAnswer)) {
+      return { call: mål, rule: 'slamavslut', explanation: sido >= 2 ? `alla fem nyckelkort, trumfdamen visad och tre av fyra kungar i paret → storslam (7${SYM}).` : `alla fem nyckelkort och trumfdamen, men inte tre av fyra kungar → 6${SYM} (lillslam).` }
+    }
+    return { call: 'P', rule: 'slamavslut', explanation: 'partnern nådde redan nivån → pass.' }
+  }
   if (queenAnswer === signoff) {
     return { call: 'P', rule: 'RKC: dam nekad', explanation: `trumfdamen nekad → utgång är taket, ${signoff[0]}${SYM} står.` }
   }
@@ -219,7 +237,9 @@ function askerPlacement(hand: Hand, f: AuctionFacts): Kunskap | null {
   const followIdx = f.history.indexOf(myFollow)
   const queenAnswer = f.history.find((c, i) => i > followIdx && c.seat === partner && c.bid !== 'P')
   if (!queenAnswer || last !== queenAnswer) return null
-  return placeAfterQueen(trump, queenAnswer.bid)
+  const egna = keycards(hand, trump)
+  const p = derivePartner(answer.bid, egna)
+  return placeAfterQueen(hand, trump, queenAnswer.bid, p.certain && egna + p.assumed === 5)
 }
 
 /**

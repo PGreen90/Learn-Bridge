@@ -607,12 +607,16 @@ function rkcPhaseTurn(role: SlamRole, hand: Hand, trump: Suit, ctx: SlamContext,
     if (härlett.certain && egna + härlett.assumed === 5) {
       // Alla fem nyckelkort: frågan sökte storslammen. Dam + sidokung → 7;
       // dam utan kung eller ingen dam → lillslammen (5 nyckelkort = alltid slam).
+      // Dam visad: tre av fyra kungar (egna sidokungar + den visade) → storslam
+      // (ägarbeslut 2026-11-03 + 2026-11-22). Dam nekad → lillslam.
       const kungVisad = svar !== signOff && svar !== '5NT'
-      const mål = kungVisad && floor >= 37 ? `7${LETTER[trump]}` : `6${LETTER[trump]}`
+      const sido = hand.filter((c) => c.rank === 'K' && c.suit !== trump).length + (kungVisad ? 1 : 0)
+      const stor = svar !== signOff && sido >= 2
+      const mål = stor ? `7${LETTER[trump]}` : `6${LETTER[trump]}`
       if (bidRank(mål) > bidRank(svar)) {
         return {
           role: 'svarare', call: mål, rule: 'slamavslut',
-          explanation: kungVisad ? `alla fem nyckelkort, trumfdamen och en sidokung visade → storslam (7${SYM[trump]}).` : svar === signOff ? `alla fem nyckelkort men ingen trumfdam → 6${SYM[trump]} (lillslam).` : `alla fem nyckelkort och trumfdamen, men ingen sidokung → 6${SYM[trump]} (lillslam).`,
+          explanation: stor ? `alla fem nyckelkort, trumfdamen visad och tre av fyra kungar i paret → storslam (7${SYM[trump]}).` : svar === signOff ? `alla fem nyckelkort men ingen trumfdam → 6${SYM[trump]} (lillslam).` : `alla fem nyckelkort och trumfdamen, men inte tre av fyra kungar → 6${SYM[trump]} (lillslam).`,
         }
       }
       return { role: 'svarare', call: 'P', rule: 'slamavslut', explanation: `partnern nådde redan nivån → pass.` }
@@ -664,6 +668,12 @@ function captainPlaceAfterRKC(hand: Hand, trump: Suit, ctx: SlamContext, floor: 
   // minst tre av de fyra kungarna i paret (trumfkungen inräknad), annars
   // lillslam. (Förr: damfråga/5NT bara i storslamszon 37 med säkrad dam.)
   if (total === 5 && derived.certain && !egenFärg && !utanKungfråga) {
+    // Ägarbeslut 2026-11-22 ("damfrågan skall användas"): storslam kräver
+    // trumfdamen — är den okänd och frågan finns ställs DAMFRÅGAN först;
+    // svaret visar dam + sidokung, så storslammen hittas ändå.
+    if (!queenKnown && ask) {
+      return { role: 'svarare', call: ask, rule: 'trumfdam-fråga', explanation: `Alla fem nyckelkort, men trumfdamen är okänd → ${ask[0]}${SYM[SUIT_OF_LETTER_[ask[1]]]} frågar damen; storslam med damen och tre av fyra kungar, annars 6${SYM[trump]}.` }
+    }
     return { role: 'svarare', call: '5NT', rule: 'Sjöberg 5NT', explanation: `alla fem nyckelkort → 5NT (frågar kungar; storslam med tre av fyra kungar i paret).` }
   }
   if (val === 'fråga-dam' && ask) {

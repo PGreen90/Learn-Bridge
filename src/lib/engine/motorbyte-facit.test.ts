@@ -746,15 +746,16 @@ describe('§5b beslut 7 – 4♦ naturligt efter 2♣–3♦–3M; kontrollbud i
     expect(meaningOf([...hH, call('S', '4C'), P('W'), call('N', '4D')], 8).rule).toBe('cue-bid')
   })
 
-  // Ägarbeslut 2026-11-03: alla fem nyckelkort → 5NT; Nord ♥K ♣K (två sidokungar)
-  // + ♦K hos Syd = tre av fyra kungar → 7♠ (förr 6♠).
-  it('hela sekvensen bot mot bot: 2♣–3♦–3♠–4♣ (cue, spader satt) → … → 5NT → 7♠', () => {
+  // Ägarbeslut 2026-11-22: storslam kräver trumfdamen om paret inte har tio
+  // kända trumf. Här saknar paret ♠Q (AKT84 mot J75) → lillslam, aldrig 7♠
+  // (2026-11-03…22 gick given till 7♠ på tre kungar).
+  it('hela sekvensen bot mot bot: 2♣–3♦–3♠–4♣ (cue, spader satt) → … → 6♠, inte 7♠ utan trumfdam', () => {
     const deal = dealNS('S:AKT84 H:KQ D:T C:AK753', 'S:J75 H:J53 D:AK942 C:A9')
     const bud = spelaKlart(deal)
     expect(bud.slice(0, 8)).toEqual(['2C', 'P', '3D', 'P', '3S', 'P', '4C', 'P'])
     const kontrakt = bud.filter((b) => b !== 'P')
-    expect(kontrakt).toContain('5NT')
-    expect(kontrakt[kontrakt.length - 1]).toBe('7S')
+    expect(kontrakt).toContain('4NT')
+    expect(kontrakt[kontrakt.length - 1]).toBe('6S')
   })
 })
 

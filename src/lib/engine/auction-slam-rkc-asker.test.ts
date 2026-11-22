@@ -176,11 +176,14 @@ describe('#95-granskningen – damfrågans övriga kantfall', () => {
   // Ägarens slamregel (2026-10-02): "5 ess utan dam alltid slam". Förr ställdes
   // damfrågan även med alla fem nyckelkort, och ett nekande passades i 5-trumf.
   // 2026-11-22 (ägarbeslut 2026-11-03 fört hit efter #129): alla fem nyckelkort
-  // → kungfrågan 5NT även när öppnaren frågar — aldrig damfråga, aldrig pass.
-  it('alla fem nyckelkort → 5NT kungfrågan (2♣–2♦–2♠–4♠–4NT–5♣, damen osäkrad)', () => {
+  // söker storslam även när öppnaren frågar. Damen okänd och frågan finns →
+  // DAMFRÅGAN först (ägaren: "damfrågan skall användas"); ett nekande ger 6♠.
+  it('alla fem nyckelkort, damen osäkrad → damfrågan 5♦ (2♣–2♦–2♠–4♠–4NT–5♣); nekad → 6♠', () => {
     const deal = dealNS('S:J93 H:J84 D:QT97 C:A65', SYD)
     const hist = [...AUKTION.slice(0, 10), call('N', '5C'), call('E', 'P')]
-    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: '5NT', rule: 'Sjöberg 5NT' })
+    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: '5D', rule: 'trumfdam-fråga' })
+    const nekad = [...hist, call('S', '5D'), call('W', 'P'), call('N', '5S'), call('E', 'P')]
+    expect(decideCall(deal, nekad, 'S')).toMatchObject({ bid: '6S', rule: 'slamavslut' })
   })
   // Frö 20270470: fem nyckelkort mellan händerna, 5♥-svaret nekar damen → 5NT ändå.
   it('fem nyckelkort och damen nekad med 5♥ → 5NT (inte pass)', () => {
