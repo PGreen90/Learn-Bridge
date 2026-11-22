@@ -15,10 +15,9 @@ svarar på vad).
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
 ### 🔵 NU — Startsidans gruppering (ägarbeslut 2026-11-22)
-Åtta lika kort blir grupper på EN sida: veckans stjärna i sidhuvudet (stjärna före och
-efter namnet, "vann vecka N") · Tävla = en panel med tre rader som visar läget
-(mätare + "Fortsätt" på påbörjad) · Träna = tre brickor · Spela med vänner + Budsystem
-som rader. Gren `startsidan-grupper`, byggt men ej live.
+Åtta lika kort blev grupper på EN sida: veckans stjärna i sidhuvudet · Tävla = en panel
+med tre rader som visar läget · Träna = tre brickor (historik 11-22).
+KLART & LIVE v1.0.11 `50334b0`. Kvar att se: mätarraden inloggad · bred skärm.
 Felrapport #129 + #131 + Tyck till #130 KLART & LIVE `63800ad` (historik 11-22).
 Övningens fiktiva jämförelse KLAR (live-prov OK 2026-11-22, v1.0.10 `1fd3b9e`). Tempot KLART.
 Stjärntävlingen (kodnamn `guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).

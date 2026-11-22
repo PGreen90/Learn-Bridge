@@ -10,6 +10,27 @@
 
 ---
 
+## 2026-11-22 (startsidan i grupper — LIVE v1.0.11 `50334b0`)
+**Ägarens bild:** startsidan "har blivit för mycket" — åtta lika stora kort i en kolumn,
+vart och ett med en förklarande mening. Ägarens första idé var två vägval (Tävla/Träna).
+**Vägvalet:** grupperna behölls men lades PÅ sidan i stället för bakom den; två vägval
+hade kostat ett extra tryck till den dagliga tävlingen, appens vanligaste väg. Fyra
+skisser (A–D) och en blandning ritades innan bygget; ägaren valde blandningen.
+**Byggt (`src/pages/Home.tsx`):** veckans stjärna i sidhuvudet under ordmärket, mellan
+två guldlinjer, med stjärna före och efter namnet (ägarönskemål; "skall visas till
+varje pris") och raden "vann vecka N" · Tävla = EN guldramad panel med tre rader i
+fast ordning, där en påbörjad tävling får mätare och guldknappen "Fortsätt", en klar
+får bock och "Resultat" · Träna = tre brickor i bredd · Spela med vänner och Budsystem
+som rader · taglinen "Träna, spela, tävla" utgick. **Titeln:** "Veckans stjärna" står
+kvar (inte "Förra veckans stjärna") — vinnaren av förra veckan bär titeln hela veckan,
+och veckoraden tar bort tvetydigheten. **Nytt i logiken:** `guldVecka` i `daily.ts`
+(kalenderveckan ur tävlingens löpnummer, facit `guld-vecka.test.ts` inkl. årsskiftet)
+och `antal` i `tavlingsStatus`. Långa namn: namnregeln tillåter högst tio tecken, provat
+med de bredaste bokstäverna. **Sett live:** sidan i telefonbredd med stjärnan ur riktiga
+data. **Inte sett:** mätarraden inloggad · uppdateringsrutan · bred skärm. **Avvikelse
+från skissen:** sidan ryms inte helt på en telefonskärm; länkraden underst hamnar strax
+under kanten.
+
 ## 2026-11-22 (stjärntävlingen: andra handplockade veckan, 2026-11-23)
 **Källa:** samma nummer som förra gången, Bridge Magazine januari 1975, nu artiklarna
 (Reese "Play These Hands With Me" · Gostyn · Saunders "Four Knaves" · Lukacs "Random
