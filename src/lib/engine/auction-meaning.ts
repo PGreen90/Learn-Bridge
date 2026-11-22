@@ -458,7 +458,81 @@ function deriveMeaning(call: ResolvedCall, prior: ResolvedCall[]): CallInterpret
   if (adv3) return adv3
   const stort2c = interpretStrong2cContested(call, prior)
   if (stort2c) return stort2c
+  const inverterad = interpretInvertedContested(call, prior)
+  if (inverterad) return inverterad
   return deriveUndisturbed(call, prior)
+}
+
+/**
+ * STÖRD INVERTERAD LÅGFÄRGSHÖJNING (felrapport #129, ägarstruktur 2026-11-22,
+ * §4.2): 1m–2m (inverterad, krav)–(färginkliv på 2-läget). Öppnarens pass är
+ * KRAV och frågar efter stopp, dubblingen är samma hand med mer styrka (inte
+ * straff), sang lovar stopp, 3 i deras färg är utgångskrav och ett hopp i ny
+ * färg är ett kontrollbud. Svararen passar aldrig öppnarens pass eller X.
+ * Speglar `inverted-minor-contested.ts`.
+ */
+function interpretInvertedContested(call: ResolvedCall, prior: ResolvedCall[]): CallInterpretation | null {
+  const open = opening(prior)
+  if (!open || open.cb.level !== 1 || (open.cb.strain !== 'C' && open.cb.strain !== 'D')) return null
+  if (SIDE[open.seat] !== SIDE[call.seat]) return null
+  const m = open.cb.strain
+  const h = prior.findIndex((c, i) => i > prior.findIndex((x) => parseBid(x.bid)) && c.seat === PARTNER[open.seat] && c.bid !== 'P')
+  if (h < 0 || prior[h].bid !== `2${m}`) return null
+  if (prior.slice(0, h).some((c) => SIDE[c.seat] !== SIDE[open.seat] && c.bid !== 'P')) return null
+  const inkliv = prior[h + 1]
+  const tb = inkliv ? parseBid(inkliv.bid) : null
+  if (!tb || tb.level !== 2 || tb.strain === 'NT') return null
+  if (meaningOf(prior, h).rule !== 'inverterad minor') return null
+  const efter = prior.slice(h + 2)
+  const their = `2${SYMBOL[tb.strain]}`
+  const mNamn = NAME[m]
+  const dNamn = NAME[tb.strain]
+  const cb = parseBid(call.bid)
+  // Öppnarens tur direkt över inklivet.
+  if (efter.length === 0 && call.seat === open.seat) {
+    if (call.bid === 'P') return R('störd inverterad: pass', `Pass över deras ${their} — KRAV: minimum (12–13) utan stopp i ${dNamn}, utan ny fyrkortsfärg och utan femte ${mNamn}. Frågar partnern: har du stopp bjuder vi sang, annars 3${SYMBOL[m]}.`)
+    if (call.bid === 'X') return R('störd inverterad: dubbling', `Dubbling av deras ${their} — inte straff: 14–15 hp utan stopp i ${dNamn}, utan ny fyrkortsfärg och utan femte ${mNamn}. Frågar partnern efter stopp.`)
+    if (!cb) return null
+    if (cb.strain === 'NT') return R('störd inverterad: sang', cb.level === 2 ? `2 sang — stopp i deras ${dNamn}, 12–15 hp.` : `3 sang — stopp i deras ${dNamn}, 16+ hp.`, cb.level >= 3 ? 'avslut' : undefined)
+    if (cb.strain === tb.strain) return cb.level === 3 ? R('störd inverterad: utgångskrav', `3${SYMBOL[tb.strain]} i deras färg — utgångskrav: 16+ hp och 5+ ${mNamn}.`) : null
+    if (cb.strain === m) return cb.level === 3 ? R('störd inverterad: minimum', `3${SYMBOL[m]} — fem ${mNamn}, 12–15 hp, ingen stopp i ${dNamn}. Ej krav.`) : null
+    const order = ['C', 'D', 'H', 'S']
+    const billigast = order.indexOf(cb.strain) > order.indexOf(tb.strain) ? 2 : 3
+    if (cb.level > billigast) return R('störd inverterad: kontrollhopp', `Hopp till ${cb.level}${SYMBOL[cb.strain]} — kontrollbud (kort ${NAME[cb.strain]}): 16+ hp och lång ${mNamn}, slamintresse. Sang ser inte ut som slutbudet.`)
+    return R('störd inverterad: ny färg', `${cb.level}${SYMBOL[cb.strain]} — naturlig fyrkortsfärg bredvid fem ${mNamn}, ingen stopp i ${dNamn}. Krav en rond.`)
+  }
+  // Efter öppnarens kontrollhopp: svararens kontrollbud / 5m, öppnarens 5m.
+  const hoppCb = efter.length >= 2 ? parseBid(efter[0].bid) : null
+  const varHopp = !!hoppCb && hoppCb.strain !== 'NT' && hoppCb.strain !== m && hoppCb.strain !== tb.strain &&
+    hoppCb.level > (['C', 'D', 'H', 'S'].indexOf(hoppCb.strain) > ['C', 'D', 'H', 'S'].indexOf(tb.strain) ? 2 : 3)
+  if (varHopp && efter[1].bid === 'P' && cb) {
+    if (efter.length === 2 && call.seat === PARTNER[open.seat]) {
+      if (cb.strain === m && cb.level === 5) return R('svar på kontrollhopp: ingen kontroll', `5${SYMBOL[m]} — ingen kontroll att visa efter partnerns kontrollhopp. Slutbud.`)
+      if (cb.strain !== 'NT' && cb.strain !== m && cb.strain !== hoppCb!.strain && (cb.level === 4 || (cb.level === 5 && ['C', 'D', 'H', 'S'].indexOf(cb.strain) < ['C', 'D', 'H', 'S'].indexOf(m)))) {
+        return R('svar på kontrollhopp: kontrollbud', `${cb.level}${SYMBOL[cb.strain]} — kontrollbud: ess, kung eller kortfärg i ${NAME[cb.strain]}. Svar på partnerns kontrollhopp, ${mNamn} är trumf.`)
+      }
+      return null
+    }
+    if (efter.length === 4 && call.seat === open.seat && efter[3].bid === 'P' && cb.strain === m && cb.level === 5) {
+      return R('efter kontrollsvaret: stannar i utgång', `5${SYMBOL[m]} — en färg saknar kontroll, ingen slam. Slutbud.`)
+    }
+    return null
+  }
+  // Svararen efter öppnarens pass/X (motståndaren passade).
+  if (efter.length === 2 && call.seat === PARTNER[open.seat] && (efter[0].bid === 'P' || efter[0].bid === 'X') && efter[1].bid === 'P') {
+    if (!cb) return null
+    const fråga = efter[0].bid === 'P' ? 'pass' : 'dubbling'
+    if (cb.strain === 'NT' && cb.level <= 3) return R('störd inverterad: svararen med stopp', cb.level === 2 ? `2 sang — svar på partnerns ${fråga}: stopp i ${dNamn}, 10–12 hp.` : `3 sang — svar på partnerns ${fråga}: stopp i ${dNamn}, 13+ hp.`, cb.level >= 3 ? 'avslut' : undefined)
+    if (cb.strain === tb.strain && cb.level === 3) return R('störd inverterad: svararen utan stopp (13+)', `3${SYMBOL[tb.strain]} i deras färg — svar på partnerns ${fråga}: ingen stopp i ${dNamn}, men 13+ hp. Utgångskrav.`)
+    if (cb.strain === m && cb.level === 3) return R('störd inverterad: svararen utan stopp (minimum)', `3${SYMBOL[m]} — svar på partnerns ${fråga}: ingen stopp i ${dNamn} och minimum (10–12). Ej krav.`)
+    return null
+  }
+  // Öppnarens tredje tur efter svararens 2NT / 3m.
+  if (efter.length === 4 && call.seat === open.seat && (efter[0].bid === 'P' || efter[0].bid === 'X') && efter[1].bid === 'P' && efter[3].bid === 'P' && (efter[2].bid === '2NT' || efter[2].bid === `3${m}`)) {
+    if (call.bid === '3NT' && efter[2].bid === '2NT') return R('störd inverterad: öppnaren höjer sangen', '3 sang — öppnaren höjer partnerns 2 sang till utgång.')
+    if (call.bid === 'P') return R('störd inverterad: öppnaren passar', efter[2].bid === '2NT' ? 'Pass — minimum mot partnerns 2 sang (10–12 med stopp).' : `Pass — 3${SYMBOL[m]} står: ingen stopp och inga extra värden.`)
+  }
+  return null
 }
 
 /**

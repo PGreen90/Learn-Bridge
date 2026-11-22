@@ -437,6 +437,7 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'advancern passar tävlingsbudet': 'avslut', // förslag #123: 3M över deras bud är ingen inbjudan
   'advancern tävlar med fjärde trumfen (lagen om totala stick)': 'ej-krav', // förslag #123: nio trumf
   'advancern bjuder utgång med fit (konkurrens)': 'avslut',
+  'stört MSS efter 1NT-inkliv: 3NT': 'avslut', // felrapport #131: stopp i deras färg → slutbud
   'cue-höjningens fortsättning': 'avslut',
   'cue-höjningens fortsättning (limit stannar)': 'avslut',
   'cue-höjningens fortsättning (inbjudan)': 'inbjudan', // 13–14 stödpoäng mot inklivarens minimisvar (felrapport #119)
@@ -647,6 +648,22 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'stört 2♣: sang': 'ej-krav',
   'stört 2♣: dubbling': 'krav-1-rond',
   'svar på 2♣-öppnarens dubbling': 'ej-krav',
+  // Störd inverterad lågfärgshöjning (felrapport #129, §4.2): öppnarens pass är krav.
+  'störd inverterad: pass': 'krav-1-rond',
+  'störd inverterad: dubbling': 'krav-1-rond',
+  'störd inverterad: sang': 'ej-krav',
+  'störd inverterad: ny färg': 'krav-1-rond',
+  'störd inverterad: minimum': 'ej-krav',
+  'störd inverterad: utgångskrav': 'utgangskrav',
+  'störd inverterad: kontrollhopp': 'utgangskrav',
+  'störd inverterad: svararen med stopp': 'ej-krav',
+  'störd inverterad: svararen utan stopp (13+)': 'utgangskrav',
+  'störd inverterad: svararen utan stopp (minimum)': 'ej-krav',
+  'störd inverterad: öppnaren höjer sangen': 'avslut',
+  'störd inverterad: öppnaren passar': 'avslut',
+  'svar på kontrollhopp: kontrollbud': 'utgangskrav',
+  'svar på kontrollhopp: ingen kontroll': 'avslut',
+  'efter kontrollsvaret: stannar i utgång': 'avslut',
   'dubblaren höjer (inbjudan)': 'inbjudan',
   'dubblaren accepterar inbjudan': 'avslut',
   'dubblaren bjuder utgång': 'avslut',

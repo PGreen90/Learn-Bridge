@@ -132,7 +132,7 @@
 
 import type { Bid, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
-import { auctionFacts, forcingCallStillOpen, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
+import { auctionFacts, forcingCallStillOpen, opponentsBidStrain, parseContractBid, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
 import { meaningOf } from './auction-meaning'
 import { dummyPoints } from './evaluation'
 import { hcp, isBalanced, lengths } from './hand'
@@ -164,10 +164,11 @@ import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preempt
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { partnerShownTrumpLength, slamAnswerContinuation, slamAnswerSeat, slamAskTrump } from './slam-answer-continuations'
 import { answerStrong2cDouble, strong2cDoubleToAnswer, strong2cOpenerActs, strong2cOpenerContestedSeat } from './strong-2c-contested'
+import { stördInverteradEfterKontrollsvar, stördInverteradFrågarEss, stördInverteradKontrollhoppAttSvara, stördInverteradSvarPåKontrollhopp, stördInverteradSvararen, stördInverteradSvararenBjuder, stördInverteradÖppnaren, stördInverteradÖppnarenAvslutar, stördInverteradÖppnarenBjuder, stördInverteradÖppnarenIgen } from './inverted-minor-contested'
 import { legalCalls, prettyBid } from './auction-rules'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
-import { overcallerAnswersCueInvite, secondCueBidderStops, advanceSeat, advancerCompetesToFit, advancerCompetesWithFourthTrump, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
+import { artificialAnswerToMy1NTOvercall, overcallerAnswersCueInvite, secondCueBidderStops, advanceSeat, advancerCompetesToFit, advancerCompetesWithFourthTrump, balancingAdvanceSeat, overcallerCorrectsToOwnSuit, advancerPrefersOvercallSuit, advancerRebidsAfter1NTOvercall, advancerRespondsTo1NTOvercall, asCall, cueBidderContinues, our1NTOvercall, ourSideDoubled, overcallerAfterDisturbedMSS, overcallerAnswersAdvance, overcallerAnswersCue, overcallerAnswersFitJump, advancerDoubledTheirBidSeat, overcallerAfterAdvancersDouble, overcallerAfterSimpleRaise, overcallerAfterTryAnswer, overcallerCompetesAfterRaise, advancerAnswersOvercallerTry, overcallerCompetesAfterCue, overcallerPrefersAdvancerSuit, overcallerRaisesAdvance, overcallSeat, penaltyDoubleFirst, twoSuiterAdvanceSeat, twoSuiterContinues } from './overcall-continuations'
 import { side } from './play'
 import { advanceStrongDoubleRebid, advancerAnswersCueRaise, advancerAnswersDouble, advancerAnswersSecondDouble, answerCueAfterDouble, answerStrongDoubleGameForce, doubleFamily, doublerAnswersAdvancers2NT, doublerDoublesAgain, doublerReopens, doublerPlacesAfterCueRaise, doublerWeighsAdvance, doubleSideCompetes, ownStrongDoubleRebid, responsiveDoublerWeighsAnswer, strongDoublerSecondRebid, strongDoublerWithoutSuit, takeoutDoubleOverbidToAnswer, takeoutDoubleToAnswer, takeoutOfResponseSeat } from './double-continuations'
 import { kontrollbudslage, naturligtBud } from './kontrollbud'
@@ -2483,6 +2484,8 @@ const TABELL: Row[] = [
         overcallerAfterTryAnswer(hand, facts) ??
         overcallerRaisesAdvance(hand, facts) ??
         overcallerAnswersAdvance(hand, facts) ??
+        // Felrapport #131: partnerns MSS stört → 3NT med stopp i deras färg
+        overcallerAfterDisturbedMSS(hand, facts) ??
         overcallerCorrectsToOwnSuit(hand, facts) ??
         twoSuiterContinues(hand, facts) ??
         overcallerPrefersAdvancerSuit(hand, facts) ??
@@ -2693,6 +2696,53 @@ const TABELL: Row[] = [
     läge: (f) => strong2cDoubleToAnswer(f) !== null,
     välj: ({ hand, facts }) => {
       const k = answerStrong2cDouble(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Störd inverterad lågfärgshöjning (felrapport #129, ägarstruktur
+  // 2026-11-22, §4.2): 1m–2m–(inkliv på 2-läget). Öppnaren: pass (krav) / X /
+  // sang med stopp / ny färg / 3m / 3 i deras färg / kontrollhopp. Svararen
+  // passar aldrig öppnarens pass eller X. Förr "pass (ingen regel)" × 2.
+  {
+    id: 'störd-inverterad-öppnaren',
+    läge: (f) => stördInverteradÖppnaren(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = stördInverteradÖppnarenBjuder(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'störd-inverterad-svararen',
+    läge: (f) => stördInverteradSvararen(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = stördInverteradSvararenBjuder(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  // Efter öppnarens kontrollhopp: svararen visar billigaste kontrollen (annars
+  // 5m), öppnaren frågar 4NT när allt är kontrollerat. Förr höjdes hoppet
+  // "med stöd" (4♦ → 5♦ mot partnerns renons).
+  {
+    id: 'störd-inverterad-kontrollsvar',
+    läge: (f) => stördInverteradKontrollhoppAttSvara(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = stördInverteradSvarPåKontrollhopp(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'störd-inverterad-essfråga',
+    läge: (f) => stördInverteradEfterKontrollsvar(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = stördInverteradFrågarEss(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'störd-inverterad-öppnaren-igen',
+    läge: (f) => stördInverteradÖppnarenIgen(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = stördInverteradÖppnarenAvslutar(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },
@@ -2982,7 +3032,9 @@ const TABELL: Row[] = [
   // (`partnerSuitResponse` i fit-raise/balancing, `forcedMinimumBid` i catch-all).
   {
     id: 'partner-färg',
-    läge: (f) => f.partnerLastSuit !== null && !f.partnerSignedOff,
+    // Felrapport #131: partnerns konstgjorda systemsvar på mitt 1NT-inkliv är
+    // ingen färg (2♠ = lågfärgerna, 2♥ = spader) — den höjs aldrig "med fit".
+    läge: (f) => f.partnerLastSuit !== null && !f.partnerSignedOff && !artificialAnswerToMy1NTOvercall(f),
     välj: ({ hand, facts, vulnerable }) => partnerSuitResponse(hand, facts, vulnerable),
   },
   {
@@ -3019,7 +3071,14 @@ function partnerForcingBidUnanswered(f: AuctionFacts): boolean {
   if (i < 0) return false
   for (let k = i + 1; k < history.length; k++) {
     const c = history[k]
-    if (side(c.seat) !== side(seat) && c.bid !== 'P') return false // de bjöd vidare → andra rader
+    if (side(c.seat) !== side(seat) && c.bid !== 'P') {
+      // Deras DUBBLING av partnerns CUE i deras egen färg släpper inte kravet
+      // (ägarbeslut #107, Tyck till #130: Ö/V passade ut 4♦ dubblat i
+      // motståndarnas färg). Allt annat de bjuder → andra rader.
+      const cue = parseContractBid(history[i].bid)
+      const dubbladCue = (c.bid === 'X' || c.bid === 'XX') && !!cue && cue.strain !== 'NT' && opponentsBidStrain(history.slice(0, i), seat, cue.strain)
+      if (!dubbladCue) return false
+    }
   }
   const fz = f.meaning(i).forcing
   return (fz === 'krav-1-rond' || fz === 'utgangskrav') && forcingCallStillOpen(history, i, seat)

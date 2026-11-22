@@ -256,6 +256,46 @@ export function overcallerAnswersAdvance(hand: Hand, f: AuctionFacts): Kunskap |
 }
 
 /**
+ * Partnerns KONSTGJORDA systemsvar på mitt 1NT-inkliv (Stayman, överföring,
+ * MSS, Texas) när det är partnerns enda kontraktsbud — läst ur budet, aldrig ur
+ * korten. null annars. Felrapport #131: ett sådant svar är ingen färg att höja
+ * "med fit" (2♠ = lågfärgerna, 2♥ = spader, 2♣ = fråga).
+ */
+export function artificialAnswerToMy1NTOvercall(f: AuctionFacts): { bid: string; rule: string } | null {
+  const oc = our1NTOvercall(f)
+  if (!oc || oc.overcaller !== f.seat) return null
+  const partners = f.ourContractBids.filter((c) => c.seat === f.partner)
+  if (partners.length !== 1) return null
+  const rule = ntResponseRule(1, partners[0].bid)
+  if (!rule || rule === '2NT inbjudan' || rule === '3NT till spel' || rule === '4NT kvantitativ') return null
+  return { bid: partners[0].bid, rule }
+}
+
+/**
+ * JAG klev in 1NT, partnern svarade 2♠ (Minor Suit Stayman, utgångskrav) och
+ * motståndaren till höger bjöd en färg under 3NT (felrapport #131, ägarbeslut
+ * 2026-11-22): med STOPP i deras färg bjuds **3NT som slutbud** — vi vet för
+ * lite om partnerns styrka för att gå upp i lågfärgerna. Utan stopp: null
+ * (ingen regel än — men aldrig en höjning av "spadern", se
+ * `advancerCompetesToFit`).
+ */
+export function overcallerAfterDisturbedMSS(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const svar = artificialAnswerToMy1NTOvercall(f)
+  if (!svar || svar.rule !== 'Minor Suit Stayman') return null
+  if (f.ourContractBids.length !== 2) return null
+  const last = f.lastNonPass
+  if (!last || side(last.seat) === side(f.seat)) return null
+  const their = parseContractBid(last.bid)
+  if (!their || their.strain === 'NT') return null
+  if (!legalCalls(f.history, f.seat).includes('3NT')) return null
+  if (!hasStopper(hand, SUIT_OF_LETTER[their.strain])) return null
+  return {
+    call: '3NT', rule: 'stört MSS efter 1NT-inkliv: 3NT',
+    explanation: `Partnerns 2♠ visade lågfärgerna (utgångskrav), men de klev in: med stopp i ${SWE_SYM[their.strain]} → 3NT som slutbud.`,
+  }
+}
+
+/**
  * Advancerns ANDRA bud efter partnerns 1NT-inkliv (systems on, live-prov
  * 2026-09-12): jag svarade partnerns inkliv med ett systemsvar (Stayman/
  * transfer), partnern fullföljde, nu bjuder jag om — **Smolen** (GF 5-4 → hopp
@@ -754,6 +794,9 @@ export function advancerCompetesToFit(hand: Hand, f: AuctionFacts): Kunskap | nu
   if (f.theirContractBids.length < 2) return null
   const partnerSuit = f.partnerLastSuit
   if (!partnerSuit || partnerSuit.level < 2) return null
+  // Felrapport #131: partnerns KONSTGJORDA systemsvar på mitt 1NT-inkliv
+  // (Stayman/överföring/MSS) är ingen färg att höja — förr 4♠ på MSS-2♠.
+  if (artificialAnswerToMy1NTOvercall(f)) return null
   if (f.history.some((c) => c.seat === f.seat && parseContractBid(c.bid)?.strain === partnerSuit.strain)) return null
 
   const suit = SUIT_OF_LETTER[partnerSuit.strain]
