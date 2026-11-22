@@ -11,6 +11,8 @@ export type TavlingsLage = 'ny' | 'pagar' | 'klar'
 export interface TavlingsStatus {
   text: string
   lage: TavlingsLage
+  /** Antal spelade givar i den pågående tävlingen (0–12) — driver mätaren. */
+  antal: number
 }
 
 const STORLEK = 12
@@ -22,12 +24,12 @@ function aktuelltNummer(form: TavlingsForm, nu: Date): number {
 
 /** `framsteg` är råvärdet ur lagringen — kan vara null, gammalt eller trasigt. */
 export function tavlingsStatus(form: TavlingsForm, framsteg: unknown, nu: Date = new Date()): TavlingsStatus {
-  const ny: TavlingsStatus = { text: form === 'guld' ? 'Öppen till söndag' : `${STORLEK} givar`, lage: 'ny' }
+  const ny: TavlingsStatus = { text: form === 'guld' ? 'Öppen till söndag' : `${STORLEK} givar`, lage: 'ny', antal: 0 }
   if (typeof framsteg !== 'object' || framsteg === null) return ny
   const f = framsteg as { nummer?: unknown; klara?: unknown }
   if (f.nummer !== aktuelltNummer(form, nu) || !Array.isArray(f.klara)) return ny
   const antal = f.klara.length
   if (antal === 0) return ny
-  if (antal >= STORLEK) return { text: 'Klar ✓', lage: 'klar' }
-  return { text: `${antal} av ${STORLEK} spelade`, lage: 'pagar' }
+  if (antal >= STORLEK) return { text: 'Klar ✓', lage: 'klar', antal: STORLEK }
+  return { text: `${antal} av ${STORLEK} spelade`, lage: 'pagar', antal }
 }

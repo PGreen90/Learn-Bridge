@@ -8,13 +8,7 @@ import { loadTavlingFramsteg } from '../lib/backend'
 import type { TavlingsForm } from '../lib/engine/matchpoints'
 import { tavlingsStatus } from '../lib/tavlingsstatus'
 import { fetchVeckansStjarna, talText, type VeckansStjarna } from '../lib/backend/tavling'
-
-// Startsidan = ETT samlat grönt hero (ägarbeslut 2026-07-31 "vi har spridit ut
-// oss för mycket"): varumärkesblocket överst (frameless guldspader + tvåfärgat
-// skimmer-ordmärke + tagline), och därunder de fyra MENYKNAPPARNA som leder in i
-// appen — allt inne i samma gröna yta. Ingen dubblering längre: de gamla
-// CTA-knapparna "Spela kort"/"Öva budgivning" var samma mål som mode-korten
-// (Spela kort resp. Budträning), så de togs bort tillsammans med kortsolfjädern.
+import { guldVecka } from '../lib/engine/daily'
 
 // Egna linje-ikoner i guld, ritade i samma språk som logotypen (BrandMark):
 // inline-SVG → knivskarpa i alla storlekar och alltid på varumärket.
@@ -71,114 +65,149 @@ const MODE_ICONS: Record<string, ReactNode> = {
       <path d="M12 6.5 L 12 18.5" />
     </svg>
   ),
+  // Stjärntävlingen: en stjärna i linjestil.
+  star: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={ICON_SVG}>
+      <path d="M12 3.2 L 14.7 8.9 L 20.8 9.7 L 16.3 14 L 17.5 20.1 L 12 17.1 L 6.5 20.1 L 7.7 14 L 3.2 9.7 L 9.3 8.9 Z" />
+    </svg>
+  ),
+  // Klar tävling: en bock.
+  check: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={ICON_SVG}>
+      <path d="M5 12.5 L 10 17.5 L 19 7" />
+    </svg>
+  ),
 }
 
-// Menyknapp PÅ det gröna filtet: halvgenomskinlig mörkgrön platta med ljus text
-// och guld-linjeikon. Den roterande guldramen tänds vid hover (gold-frame-hover).
-// Alla fyra knappar är likvärdiga (ägarbeslut 2026-07-31: ingen förmarkering av
-// "Spela kort", ingen "Börja här"-markering).
-const CARD =
-  'focus-ring group relative block rounded-2xl bg-emerald-950/30 p-4 text-left ring-1 ring-emerald-50/10 gold-frame-hover transition-all hover:-translate-y-0.5 hover:bg-emerald-950/45 active:scale-[0.99]'
+// Startsidan i GRUPPER (ägarbeslut 2026-11-22: "har blivit för mycket"): förr
+// åtta lika stora kort med en förklarande mening var. Nu samma innehåll på EN
+// sida, ordnat efter vad man gör: Tävla (en panel, tre rader som visar var man
+// står), Träna (tre brickor) och två rader underst. Inget ligger längre bort
+// än ett tryck — ägarens första idé (två vägval) hade kostat ett extra tryck
+// till den dagliga tävlingen. Förklaringarna bor kvar i "Så funkar rebidz".
 
 /** Guld linje-ikon i en tonad ruta (mot det gröna filtet). */
-function ModeIcon({ icon }: { icon: string }) {
+function ModeIcon({ icon, liten = false }: { icon: string; liten?: boolean }) {
   return (
     <span
       aria-hidden
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50/10 text-gold-300"
+      className={`flex shrink-0 items-center justify-center rounded-xl bg-emerald-50/10 text-gold-300 ${liten ? 'h-9 w-9' : 'h-10 w-10'}`}
     >
       {MODE_ICONS[icon]}
     </span>
   )
 }
 
-function ModeCard({
-  to,
-  icon,
-  title,
-  description,
-  className = '',
-}: {
-  to: string
-  icon: string
-  title: string
-  description: string
-  className?: string
-}) {
+/** Gruppens rubrik: liten, guld, vänsterställd över sin panel. */
+function GruppRubrik({ id, children }: { id: string; children: ReactNode }) {
   return (
-    <Link to={to} className={`${CARD} ${className}`}>
-      <div className="flex items-center gap-3">
-        <ModeIcon icon={icon} />
-        <div className="min-w-0">
-          <div className="font-semibold text-emerald-50">{title}</div>
-          <div className="text-sm text-emerald-100/90">{description}</div>
-        </div>
-      </div>
-    </Link>
+    <h2 id={id} className="mb-2 px-1 text-left text-sm font-semibold text-gold-200">
+      {children}
+    </h2>
   )
 }
 
-/** Tävlingskorten (Beslut B etapp 2): breda flaggskepp ovanför menyknapparna.
- *  Två sedan Dagens IMP (ägarbeslut 2026-09-26): "Dagens MP%" (som förr) och
- *  "Dagens IMP" (tolv egna givar räknade i IMP). Den fria "Dagens giv" är dold
- *  sedan tävlingen ersatte den (grindbeslut 2026-08-10 — daily.ts +
- *  delningskoden finns kvar, bara avlänkad).
- *  Pillret visar VAR MAN STÅR (UI/UX-punkt 2, 2026-11-12): "5 av 12 spelade",
- *  "Klar ✓" eller standardtexten — räknat ur enhetens sparade framsteg, utan
- *  nätverksanrop. Förr stod "Kräver konto" på alla tre korten för utloggade;
- *  förvarningen (impeccable-provet 2026-10-27) bor nu på EN rad under korten. */
-function TavlingCard({
-  to,
-  form,
-  titel,
-  text,
-  className = '',
-}: {
-  to: string
-  form: TavlingsForm
-  titel: string
-  text: string
-  className?: string
-}) {
+const RAD =
+  'focus-ring group flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-emerald-950/30 active:bg-emerald-950/40'
+const PIL = 'ml-auto flex shrink-0 items-center gap-0.5 text-sm'
+
+/** Liten högerpil för rader som leder vidare. */
+function Pil() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+      <path d="M9 6 L 15 12 L 9 18" />
+    </svg>
+  )
+}
+
+/** En tävlingsrad (Beslut B etapp 2 · Dagens IMP 2026-09-26 · stjärntävlingen
+ *  2026-11-11). Raden visar VAR MAN STÅR, räknat ur enhetens sparade framsteg
+ *  utan nätverksanrop (UI/UX-punkt 2, 2026-11-12): påbörjad → mätare och
+ *  guldknappen "Fortsätt", klar → bock och "Resultat", annars "Spela".
+ *  Raderna ligger ALLTID i samma ordning — bara guldknappen flyttar sig. */
+function TavlingRad({ to, form, titel, ikon }: { to: string; form: TavlingsForm; titel: string; ikon: string }) {
   const { signedIn } = useAuth()
   // Utloggad: aldrig ett gammalt kontos framsteg på en delad enhet.
   const status = tavlingsStatus(form, signedIn ? loadTavlingFramsteg(form) : null)
-  const pill = status.text
-  const pillStil =
-    status.lage === 'klar'
-      ? 'bg-emerald-300/20 text-emerald-50 ring-emerald-200/40'
-      : status.lage === 'pagar'
-        ? 'bg-gold-400/30 text-gold-100 ring-gold-300/60'
-        : 'bg-gold-400/15 text-gold-200 ring-gold-400/30'
   return (
-    <Link
-      to={to}
-      className={`focus-ring gold-frame group relative block h-full w-full rounded-2xl bg-emerald-950/45 p-4 text-left ring-1 ring-gold-400/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/60 active:scale-[0.99] ${className}`}
-    >
-      <div className="flex items-center gap-3">
-        <ModeIcon icon="calendar" />
-        <div className="min-w-0 flex-1">
-          {/* flex-wrap: vid 200 % textstorlek ska pillret bryta till egen rad i
-              stället för att klippas (impeccable-provet 2026-10-27); 11 px är
-              detektorns golv för funktionell text (pillret bär tävlingens status). */}
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold text-emerald-50">
-            {titel}
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${pillStil}`}>
-              {pill}
-            </span>
+    <Link to={to} className={RAD} data-testid={`tavling-rad-${form}`}>
+      <ModeIcon icon={status.lage === 'klar' ? 'check' : ikon} />
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold text-emerald-50">{titel}</div>
+        <div className="text-sm text-emerald-100/90">{status.text}</div>
+        {status.lage === 'pagar' && (
+          <div
+            className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-emerald-950/60"
+            role="progressbar"
+            aria-label={`${titel}: ${status.text}`}
+            aria-valuemin={0}
+            aria-valuemax={12}
+            aria-valuenow={status.antal}
+          >
+            <div className="h-full rounded-full bg-gold-400" style={{ width: `${(status.antal / 12) * 100}%` }} />
           </div>
-          <div className="text-sm text-emerald-100/90">{text}</div>
-        </div>
+        )}
       </div>
+      {status.lage === 'pagar' ? (
+        <span className="ml-auto shrink-0 rounded-lg bg-gold-400 px-3 py-1.5 text-sm font-semibold text-emerald-950 transition-colors group-hover:bg-gold-300">
+          Fortsätt
+        </span>
+      ) : (
+        <span className={`${PIL} text-gold-100`}>
+          {status.lage === 'klar' ? 'Resultat' : 'Spela'}
+          <Pil />
+        </span>
+      )}
     </Link>
   )
 }
 
-/** Veckans stjärna (ägarbeslut 2026-11-12): en liten pratbubbla som pekar ner
- *  på stjärntävlingens kort. Vinnaren av förra veckan — eller, innan någon
- *  korats, en rad som säger när det avgörs. Höjden är FAST (h-7) så korten
- *  inte hoppar när svaret kommer. */
-function Stjarnbubbla() {
+/** En vanlig rad i en panel (Spela med vänner, Budsystem). */
+function LankRad({ to, icon, title }: { to: string; icon: string; title: string }) {
+  return (
+    <Link to={to} className={RAD}>
+      <ModeIcon icon={icon} liten />
+      <span className="font-medium text-emerald-50">{title}</span>
+      <span className={`${PIL} text-emerald-100/80`}>
+        <Pil />
+      </span>
+    </Link>
+  )
+}
+
+/** En träningsbricka: ikon över namn, tre i bredd även på telefon. */
+function Bricka({ to, icon, title }: { to: string; icon: string; title: string }) {
+  return (
+    <Link
+      to={to}
+      className="focus-ring gold-frame-hover relative flex flex-col items-center gap-1.5 rounded-2xl bg-emerald-950/30 px-1 py-3.5 text-center ring-1 ring-emerald-50/10 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/45 active:scale-[0.99]"
+    >
+      <span aria-hidden className="text-gold-300">
+        {MODE_ICONS[icon]}
+      </span>
+      <span className="text-sm font-medium text-emerald-50">{title}</span>
+    </Link>
+  )
+}
+
+/** Guldstjärnan som flankerar veckans stjärna. */
+function Stjarna() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 shrink-0 text-gold-300" aria-hidden>
+      <path d="M12 2.6 L 14.8 8.6 L 21.3 9.4 L 16.5 13.9 L 17.8 20.4 L 12 17.2 L 6.2 20.4 L 7.5 13.9 L 2.7 9.4 L 9.2 8.6 Z" />
+    </svg>
+  )
+}
+
+/** Veckans stjärna i SIDHUVUDET (ägarbeslut 2026-11-12, flyttad hit 2026-11-22:
+ *  "skall visas till varje pris"). Vinnaren av FÖRRA veckans stjärntävling bär
+ *  titeln måndag–söndag; raden under säger vilken vecka segern gällde, så titeln
+ *  inte läses som den pågående veckans ledare. Stjärna före och efter namnet
+ *  (ägarönskemål). Guldlinjerna på sidorna tar bredden som blir över, så ett
+ *  långt namn (högst tio tecken enligt namnregeln) ryms; `truncate` är bara en
+ *  spärr om den regeln ändras. Höjden är FAST så sidan inte hoppar när svaret
+ *  kommer. */
+function Stjarnhuvud() {
   const [stjarna, setStjarna] = useState<VeckansStjarna | null>(null)
   useEffect(() => {
     let lever = true
@@ -190,22 +219,36 @@ function Stjarnbubbla() {
     }
   }, [])
   return (
-    <div className="flex justify-center sm:col-span-2" data-testid="veckans-stjarna">
-      <p className="relative flex h-7 max-w-full items-center gap-1.5 rounded-full bg-gold-100 px-3 text-xs font-medium text-emerald-950 shadow-md">
-        <span aria-hidden>⭐</span>
+    <div className="flex h-[4.25rem] w-full max-w-xl items-center gap-3" data-testid="veckans-stjarna">
+      <span aria-hidden className="h-px min-w-4 flex-1 bg-gold-400/40" />
+      <div className="min-w-0 text-center">
+        <div className="text-xs text-emerald-100">Veckans stjärna</div>
         {stjarna ? (
-          <span className="truncate">
-            Veckans stjärna: <strong className="font-semibold">{stjarna.namn}</strong> · {talText(stjarna.snitt, 'guld', 1)}
-          </span>
+          <>
+            <div className="flex items-center justify-center gap-2 font-brand text-xl text-gold-100">
+              <Stjarna />
+              <span className="truncate">{stjarna.namn}</span>
+              <Stjarna />
+            </div>
+            <div className="text-xs text-gold-200">
+              {stjarna.nummer > 0 && `vann vecka ${guldVecka(stjarna.nummer)} · `}
+              {talText(stjarna.snitt, 'guld', 1)}
+            </div>
+          </>
         ) : (
-          <span className="truncate">Veckans stjärna koras på måndag</span>
+          <div className="flex items-center justify-center gap-2 py-1 text-sm text-gold-100">
+            <Stjarna />
+            <span>Koras på måndag</span>
+            <Stjarna />
+          </div>
         )}
-        {/* Bubblans spets, ner mot kortet. */}
-        <span aria-hidden className="absolute left-1/2 top-full -mt-1.5 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] bg-gold-100" />
-      </p>
+      </div>
+      <span aria-hidden className="h-px min-w-4 flex-1 bg-gold-400/40" />
     </div>
   )
 }
+
+const PANEL = 'overflow-hidden rounded-2xl divide-y divide-emerald-50/10'
 
 export function Home() {
   const { loading, signedIn } = useAuth()
@@ -213,127 +256,81 @@ export function Home() {
     // ETT samlat grönt hero. Avboxat (frameless, mjuk kant via felt-melt) med luft.
     <Felt
       rounded="rounded-[2.75rem]"
-      className="felt-melt border-transparent px-5 py-8 shadow-[0_30px_80px_-45px_rgba(0,0,0,0.5)] sm:px-10 sm:py-20"
+      className="felt-melt border-transparent px-4 py-7 shadow-[0_30px_80px_-45px_rgba(0,0,0,0.5)] sm:px-10 sm:py-16"
     >
       {/* Svag stor spader-vattenstämpel bakom = öppen grön yta (base44-idén). */}
       <BrandMark
         bare
         className="pointer-events-none absolute left-1/2 top-28 h-72 w-72 -translate-x-1/2 opacity-[0.07] sm:top-48"
       />
-      <div className="relative flex flex-col items-center gap-4 text-center text-emerald-50 sm:gap-6">
-        {/* Varumärkesblocket (den stora "ramen"): spader + ordmärke + tagline.
-            Tätare på telefon (UI/UX-punkt 2, 2026-11-12): förr tog blocket
-            halva första skärmen och tävlingarna började under vikningen. */}
-        <BrandMark bare className="h-12 w-12 drop-shadow-md sm:h-16 sm:w-16" />
-        <h1 className="text-5xl sm:text-6xl">
+      <div className="relative flex flex-col items-center gap-4 text-center text-emerald-50 sm:gap-5">
+        {/* Varumärkesblocket: spader + ordmärke. Taglinen "Träna, spela, tävla"
+            (2026-08-02) utgick 2026-11-22 — grupprubrikerna säger samma sak,
+            och platsen under ordmärket är veckans stjärnas. */}
+        <BrandMark bare className="h-10 w-10 drop-shadow-md sm:h-14 sm:w-14" />
+        <h1 className="-mt-2 text-5xl sm:text-6xl">
           <Wordmark />
         </h1>
-        {/* Taglinen (ägarbeslut 2026-08-02): kort och koncis — tre ord.
-            24 px + full opacitet (impeccable-provet 2026-10-27): den sitter i
-            filtets ljusaste zon där 18 px/90 % bara nådde 3,7:1; som "stor
-            text" (≥ 24 px) gäller 3:1 och den ligger på ~4,1:1. */}
-        <p className="max-w-md text-2xl text-emerald-50">Träna, spela, tävla</p>
+        <Stjarnhuvud />
 
-        {/* Dagens tävlingar — FLAGGSKEPPEN (Beslut B etapp 2 + Dagens IMP
-            2026-09-26): 12 givar var, samma för alla, tävla på topplistan.
-            Ersätter den fria "Dagens giv" (dold enligt grindbeslutet). Sida vid
-            sida på bredare skärm, MP% till vänster och IMP till höger (ägarens
-            skiss 2026-09-26); på telefon under varandra. */}
-        <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
-          <TavlingCard
-            to="/spela-kort/tavling"
-            form="mp"
-            titel="Dagens MP%"
-            text="Samma 12 givar för alla i dag — spela mot datorn och tävla på topplistan."
-          />
-          <TavlingCard
-            to="/spela-kort/tavling?form=imp"
-            form="imp"
-            titel="Dagens IMP"
-            text="Tolv egna givar räknade i IMP — utgång och slam väger tungt, övertricken lite."
-          />
-          {/* Veckans stjärntävling (ägarbeslut 2026-11-11): tolv utvalda svåra
-              givar, öppen hela veckan, utan budhjälp. Egen rad under de dagliga. */}
-          <Stjarnbubbla />
-          <TavlingCard
-            to="/spela-kort/tavling?form=guld"
-            form="guld"
-            titel="Veckans stjärntävling"
-            text="Tolv utvalda, svåra givar — ny varje måndag. Här spelar du utan budhjälp."
-            className="sm:col-span-2"
-          />
-        </div>
-        {/* Utloggad: EN rad om kontot i stället för "Kräver konto" på varje
-            kort. Visas först när inloggningsläget är känt, så den inte blinkar. */}
-        {!loading && !signedIn && (
-          <p className="-mt-2 text-sm text-emerald-100 sm:-mt-3">
-            Tävlingarna kräver ett gratis konto.{' '}
-            <Link to="/registrera" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
-              Skapa konto
-            </Link>
-            {' · '}
-            <Link to="/logga-in" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
-              Logga in
-            </Link>
-          </p>
-        )}
+        {/* TÄVLA — flaggskeppen i EN guldramad panel. Ordningen är fast:
+            MP%, IMP, stjärntävlingen. */}
+        <section className="w-full max-w-xl" aria-labelledby="grupp-tavla">
+          <GruppRubrik id="grupp-tavla">Tävla</GruppRubrik>
+          <div className="gold-frame relative rounded-2xl bg-emerald-950/45 ring-1 ring-gold-400/25">
+            <div className={PANEL}>
+              <TavlingRad to="/spela-kort/tavling" form="mp" titel="Dagens MP%" ikon="calendar" />
+              <TavlingRad to="/spela-kort/tavling?form=imp" form="imp" titel="Dagens IMP" ikon="calendar" />
+              <TavlingRad to="/spela-kort/tavling?form=guld" form="guld" titel="Veckans stjärntävling" ikon="star" />
+            </div>
+          </div>
+          {/* Utloggad: EN rad om kontot. Visas först när inloggningsläget är
+              känt, så den inte blinkar. */}
+          {!loading && !signedIn && (
+            <p className="mt-2 text-sm text-emerald-100">
+              Tävlingarna kräver ett gratis konto.{' '}
+              <Link to="/registrera" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+                Skapa konto
+              </Link>
+              {' · '}
+              <Link to="/logga-in" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+                Logga in
+              </Link>
+            </p>
+          )}
+        </section>
 
-        {/* Menyknapparna: vägen in i appen, en per del. */}
-        <div className="grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
-          <ModeCard
-            to="/spela-kort"
-            icon="cards"
-            title="Spela kort"
-            description="Spela en hel giv mot datorn – bud och kortspel."
-          />
-          <ModeCard
-            to="/budtraning"
-            icon="target"
-            title="Budträning"
-            description="Öva på att hitta rätt bud, tema för tema."
-          />
-          <ModeCard
-            to="/budvisning"
-            icon="eye"
-            title="Budvisning"
-            description="Titta när datorn budar alla fyra händerna."
-          />
-          <ModeCard
-            to="/budsystem"
-            icon="book"
-            title="Budsystem"
-            description="Hela 2/1-systemet att läsa, sektion för sektion."
-          />
-          {/* Spela med vänner (nästa nivå etapp 2, 2026-11-11): fanns bara i
-              menyn. Femte kortet tar hela raden på bred skärm så rutnätet
-              inte får en ensam halv ruta. */}
-          <ModeCard
-            to="/spela-med-vanner"
-            icon="friends"
-            title="Spela med vänner"
-            description="Öppna ett eget bord och bjud in med en länk – datorn fyller tomma stolar."
-            className="sm:col-span-2"
-          />
-        </div>
+        {/* TRÄNA — tre brickor i bredd. */}
+        <section className="w-full max-w-xl" aria-labelledby="grupp-trana">
+          <GruppRubrik id="grupp-trana">Träna</GruppRubrik>
+          <div className="grid grid-cols-3 gap-2.5">
+            <Bricka to="/spela-kort" icon="cards" title="Spela kort" />
+            <Bricka to="/budtraning" icon="target" title="Budträning" />
+            <Bricka to="/budvisning" icon="eye" title="Budvisning" />
+          </div>
+          {/* Det som varken är tävling eller träning. */}
+          <div className="mt-2.5 rounded-2xl bg-emerald-950/30 ring-1 ring-emerald-50/10">
+            <div className={PANEL}>
+              <LankRad to="/spela-med-vanner" icon="friends" title="Spela med vänner" />
+              <LankRad to="/budsystem" icon="book" title="Budsystem" />
+            </div>
+          </div>
+        </section>
 
-        {/* Vägen in för nya ögon (Etapp D): en diskret rad under korten —
-            korten förblir likvärdiga (ägarbeslut: ingen "Börja här"-markering). */}
+        {/* Vägen in för nya ögon (Etapp D) och användarnas röst (nästa nivå
+            etapp 1, 2026-11-11): en diskret rad underst. Samma Tyck till-dialog
+            nås från sidfoten på alla sidor. */}
         <p className="text-sm text-emerald-100">
-          Ny här?{' '}
           <Link to="/om" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
-            Så funkar rebidz →
+            Så funkar rebidz
           </Link>
           {' · '}
           <Link to="/sa-bjuder-rebidz" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
-            Så bjuder datorn →
+            Så bjuder datorn
           </Link>
-        </p>
-        {/* Användarnas röst (nästa nivå etapp 1, 2026-11-11): två öppna frågor,
-            inget konto. Samma dialog nås från sidfoten på alla sidor. */}
-        <p className="text-sm text-emerald-100">
-          Saknar du något?{' '}
+          {' · '}
           <TyckTillKnapp className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
-            Tyck till om rebidz →
+            Tyck till
           </TyckTillKnapp>
         </p>
       </div>

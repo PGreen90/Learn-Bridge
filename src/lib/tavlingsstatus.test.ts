@@ -11,18 +11,19 @@ const klara = (n: number) => Array.from({ length: n }, (_, i) => ({ board: i + 1
 
 describe('tavlingsStatus', () => {
   it('inget sparat → standardtexten', () => {
-    expect(tavlingsStatus('mp', null, NU)).toEqual({ text: '12 givar', lage: 'ny' })
-    expect(tavlingsStatus('imp', null, NU)).toEqual({ text: '12 givar', lage: 'ny' })
+    expect(tavlingsStatus('mp', null, NU)).toEqual({ text: '12 givar', lage: 'ny', antal: 0 })
+    expect(tavlingsStatus('imp', null, NU)).toEqual({ text: '12 givar', lage: 'ny', antal: 0 })
   })
 
   it('guld utan framsteg säger hur länge den är öppen', () => {
-    expect(tavlingsStatus('guld', null, NU)).toEqual({ text: 'Öppen till söndag', lage: 'ny' })
+    expect(tavlingsStatus('guld', null, NU)).toEqual({ text: 'Öppen till söndag', lage: 'ny', antal: 0 })
   })
 
   it('påbörjad i dag → "x av 12 spelade"', () => {
     expect(tavlingsStatus('mp', { nummer: idagNr, klara: klara(5) }, NU)).toEqual({
       text: '5 av 12 spelade',
       lage: 'pagar',
+      antal: 5,
     })
   })
 
@@ -30,6 +31,7 @@ describe('tavlingsStatus', () => {
     expect(tavlingsStatus('imp', { nummer: idagNr, klara: klara(12) }, NU)).toEqual({
       text: 'Klar ✓',
       lage: 'klar',
+      antal: 12,
     })
   })
 

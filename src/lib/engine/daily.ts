@@ -180,6 +180,18 @@ export function guldNummer(mandagISO: string): number {
   return Math.round(ms / (7 * 24 * 60 * 60 * 1000)) + 1
 }
 
+/** Kalenderveckan (ISO 8601) som stjärntävling nummer `nummer` spelades.
+ *  Startsidan skriver "vann vecka N" under veckans stjärna (ägarbeslut 2026-11-22). */
+export function guldVecka(nummer: number): number {
+  const mandag = new Date(`${GULD_PREMIAR}T12:00:00Z`)
+  mandag.setUTCDate(mandag.getUTCDate() + (nummer - 1) * 7)
+  // ISO: veckan tillhör det år dess torsdag ligger i; vecka 1 innehåller 4 januari.
+  const torsdag = new Date(mandag)
+  torsdag.setUTCDate(torsdag.getUTCDate() + 3)
+  const nyar = Date.UTC(torsdag.getUTCFullYear(), 0, 1, 12)
+  return Math.floor((torsdag.getTime() - nyar) / (7 * 24 * 60 * 60 * 1000)) + 1
+}
+
 /** Millisekunder kvar till nästa måndag 00:00 svensk tid (då nästa guld-tävling
  *  öppnar). Bygger på samma midnattsräkning som den dagliga nedräkningen. */
 export function msTillNastaGuld(now: Date = new Date()): number {
