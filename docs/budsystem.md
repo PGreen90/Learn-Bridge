@@ -1730,10 +1730,16 @@ VISAT via buden**, aldrig på partnerns faktiska kort:
   mot en visad 15+-hand, annars det **låga** — och då **rättar partnern med det
   höga antalet själv upp till 6** över stoppbudet.
 - **Storslam (ägarbeslut 2026-11-03, felrapport #109):** entydigt alla fem
-  nyckelkort → kaptenen frågar **alltid 5NT** (kungfråga, §6.3) — oavsett
-  trumfdam och poängzon. Storslam bjuds med **minst tre av de fyra kungarna** i
-  paret (trumfkungen är en av nyckelkorten, så två sidokungar räcker), annars
-  lillslam. Förr krävdes säkrad trumfdam + storslamszon 37 mot minimum.
+  nyckelkort → frågaren söker **alltid** storslam, oavsett poängzon. Storslam
+  bjuds med **minst tre av de fyra kungarna** i paret (trumfkungen är en av
+  nyckelkorten, så två sidokungar räcker), annars lillslam.
+- **Trumfdamen (ägarbeslut 2026-11-22):** storslam kräver dessutom trumfdamen,
+  om paret inte har tio kända trumf. Är damen okänd ställs **damfrågan först**
+  (där den finns): nekas damen blir det lillslam; visas den tillsammans med en
+  sidokung räknas kungarna direkt. Håller frågaren damen själv, eller är den
+  visad med 5♠-svaret, går hen direkt på kungfrågan 5NT (§6.3). Finns ingen
+  damfråga (lågfärgstrumf, hjärter efter 5♦) frågas 5NT och det blir lillslam
+  om damen inte är känd.
 - **Konsekvens:** bottarna bjuder som människor — de kan missa en slam som råkar
   sitta, och någon enstaka gång bjuda en som betar. Det är systemriktigt.
 
@@ -1967,6 +1973,16 @@ med stick för storslam (t.ex. K-D mittemot ess).
 **Trumfdamen krävs för storslam (ägarbeslut 2026-11-22):** frågaren bjuder 7
 bara med trumfdamen på plats — hållen själv eller visad med 5♠-svaret — om
 paret inte har tio kända trumf. Annars blir det lillslam även med kungarna.
+Är damen okänd ställs damfrågan (§6.1) före 5NT när den finns.
+
+| Nord | Syd |
+|---|---|
+| … | 4NT |
+| 5♦ (0 eller 3) | **5♥** (damfrågan) |
+| 6♦ (spaderdam + ruterkung) | 7♠ |
+
+*Spader trumf. Syd ♠J762 ♥A5 ♦AQ6 ♣KQ84 har ingen spaderdam men klöverkungen;
+Nord ♠AKQ85 ♥K43 ♦K72 ♣A2.*
 
 **Kaptenens beslut efter svaret (ägarbeslut 2026-11-03):** egna sidokungar +
 partnerns visade ≥ 2 (= tre av fyra kungar med trumfkungen) → **7 i trumf**;
@@ -3896,6 +3912,16 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-22 — damfrågan före kungfrågan (§6.1/§6.3, ägarbeslut: "damfrågan
+  skall användas").** Med alla fem nyckelkort och okänd trumfdam ställs
+  damfrågan först, på båda frågarvägarna. Nekad dam → lillslam; visad dam →
+  storslam med tre av fyra kungar (egna sidokungar + den visade). Med damen
+  hållen eller visad med 5♠ går frågaren direkt på 5NT. Finns ingen damfråga
+  (lågfärgstrumf, hjärter efter 5♦) gäller 5NT och lillslam utan känd dam —
+  utvidgningen till lågfärg är inte beslutad. Kod: `captainPlaceAfterRKC` +
+  damsvarsgrenen i `slam-auction.ts`, `placeAfterKeycards`/`placeAfterQueen`
+  i `rkc-asker-continuations.ts`. Lås: `slam-auction.test.ts`,
+  `auction-slam-rkc-asker.test.ts`.
 - **2026-11-22 — kungfrågan 5NT även när öppnaren frågar (§6.3) + utgångskravet
   står i störd inverterad (§4.2).** (1) Ägarens dom efter #129: "att kungfrågan
   missas är helt fel". Frågarvägen för öppnaren (`rkc-asker-continuations.ts`)

@@ -11,7 +11,7 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-11-22): /felrapporter; kolla nattkedjan (`gh run list
-> --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · stört MSS utan stopp · iakttagelserna i historik 11-15/11-22. Design-skillen `impeccable`
+> --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · damfråga i lågfärgstrumf (§6.1) · stört MSS utan stopp · iakttagelserna i historik 11-15/11-22. Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
 ### 🔵 NU — Felrapport #129 + #131 + Tyck till #130 (2026-11-22)

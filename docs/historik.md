@@ -42,8 +42,11 @@ hälften — 4m efter utgångskravet passas aldrig (→ 5m); svararens bud efter
 öppnarens NYA FÄRG fick ägarens struktur samma dag: höjning med fyra kort,
 annars trappan som efter pass/X. **Ägarbeslut:** storslam kräver trumfdamen om
 inte tio kända trumf (båda frågarvägarna); kontrollhoppets och nya färgens
-krav bekräftade. Kvar att se: svararen med två+ sidokungar hoppar själv till
-7 i trumf på kungfrågan utan att veta om damen finns. (4)+(6) flyttade
+krav bekräftade. **Damfrågan före kungfrågan** (ägaren: "damfrågan skall
+användas"): alla fem + okänd dam → damfrågan där den finns, annars 5NT och
+lillslam utan känd dam. Öppet: damfråga i lågfärgstrumf (ny konstruktion, ej
+beslutad) — där hoppar svararen med två+ sidokungar fortfarande själv till 7
+på kungfrågan utan att veta om damen finns. (4)+(6) flyttade
 till `docs/senare.md` "Störda 1NT-auktioner — nästa lager". (5) ingen åtgärd:
 dagens motor passar riktigt med Västs 6 hp i zon.
 
