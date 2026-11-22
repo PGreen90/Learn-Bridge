@@ -178,6 +178,7 @@ const ALL_ENGINE_RULES: string[] = [
   'störd inverterad: minimum', 'störd inverterad: utgångskrav', 'störd inverterad: kontrollhopp',
   'störd inverterad: svararen med stopp', 'störd inverterad: svararen utan stopp (13+)', 'störd inverterad: svararen utan stopp (minimum)',
   'störd inverterad: öppnaren höjer sangen', 'störd inverterad: öppnaren passar',
+  'störd inverterad: utgång efter utgångskravet', 'störd inverterad: svararen stöder nya färgen',
   'svar på kontrollhopp: kontrollbud', 'svar på kontrollhopp: ingen kontroll', 'efter kontrollsvaret: stannar i utgång',
   'stört MSS efter 1NT-inkliv: 3NT',
   // 2026-11-16: redubblingens betydelse (ägarstruktur, förslag #128).

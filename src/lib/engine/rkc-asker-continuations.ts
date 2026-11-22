@@ -22,12 +22,14 @@
 //   3. FRÅGAREN placerar efter damsvaret: dam nekad → utgång står (pass/5-trumf);
 //      dam visad → lillslam 6-trumf.
 //
-// AVGRÄNSNING (medvetet): den här vägen bjuder aldrig storslam — den starka
-// handen tar lillslammen när ett nyckelkort saknas, och damfrågan avgör bara
-// utgång-mot-lillslam. Storslam via öppnaren-som-kapten är en SENARE-kandidat
-// (docs/bevaka.md). Den tvetydiga 1-eller-4/0-eller-3-räkningen backas ändå upp
-// av svararens rättelse över stoppbudet (`rkcCorrection`), som redan är
-// seat-agnostisk.
+//   4. KUNGFRÅGAN (ägarbeslut 2026-11-03, hit 2026-11-22 efter felrapport
+//      #129): alla fem nyckelkort ENTYDIGT → alltid 5NT, även på den här vägen.
+//      Svaret ges av `answerKingAsk` (raden *slam-forts*); frågaren bjuder
+//      storslam med tre av fyra kungar i paret, annars lillslam.
+//
+// Damfrågan avgör bara utgång-mot-lillslam. Den tvetydiga 1-eller-4/0-eller-3-
+// räkningen backas upp av svararens rättelse över stoppbudet (`rkcCorrection`),
+// som redan är seat-agnostisk.
 
 import type { Hand, Suit } from '../../types/bridge'
 import { auctionFacts, parseContractBid, PARTNER, SUIT_OF_LETTER, type AuctionFacts } from './auction-facts'
@@ -107,8 +109,14 @@ function placeAfterKeycards(hand: Hand, trump: Suit, f: AuctionFacts, answerBid:
     return { call: `6${L}`, rule: 'slamavslut', explanation: `svaret gick förbi stoppnivån → 6${SYM}.` }
   }
 
+  // Alla fem nyckelkort entydigt → ALLTID kungfrågan 5NT (ägarbeslut
+  // 2026-11-03, §6.3) — samma regel som kaptensvägen i `slam-auction.ts`.
+  if (total === 5 && certain) {
+    return { call: '5NT', rule: 'Sjöberg 5NT', explanation: 'alla fem nyckelkort → 5NT (frågar kungar; storslam med tre av fyra kungar i paret).' }
+  }
+
   // Ägarens slamtabell (2026-10-02, §6.1; `slamValEfterSvar`): 5 nyckelkort =
-  // alltid slam (storslam söks inte på den här vägen, se AVGRÄNSNING) · 4 + dam =
+  // alltid slam · 4 + dam =
   // alltid slam · 4 utan dam = "sök slam, inget måste": damfrågan när den finns;
   // annars lillslam med 8+ kända trumf — men stopp när 5♥-svaret nekat damen.
   const kända = lengths(hand)[trump] + partnerShownTrumpLength(f, trump)
@@ -143,6 +151,31 @@ function placeAfterQueen(trump: Suit, queenAnswer: string): Kunskap {
 }
 
 /**
+ * FRÅGAREN placerar efter KUNGSVARET på 5NT (fas 4): paret har alla fem
+ * nyckelkort (trumfkungen inräknad). Tre av de fyra kungarna — egna sidokungar
+ * + partnerns visade — ger storslam, annars lillslam. Ligger partnerns kungfärg
+ * över 6 i trumf (lågfärgstrumf) finns inget 6-trumf att gå tillbaka till →
+ * 6NT. null = partnerns svar står (7 i trumf, eller 6 i trumf utan kungar nog).
+ * Storslammen kräver dessutom säkrad trumfdam (se spärren nedan).
+ */
+function placeAfterKings(hand: Hand, trump: Suit, kingAnswer: string, damSäkrad: boolean): Kunskap | null {
+  const L = letterOfSuit(trump)
+  const SYM = SWE_SYM[L]
+  const sex = `6${L}`
+  if (kingAnswer === `7${L}`) return null
+  const egna = hand.filter((c) => c.rank === 'K' && c.suit !== trump).length
+  const sido = egna + (kingAnswer === sex ? 0 : 1)
+  // Ägarbeslut 2026-11-22: storslam bara med SÄKRAD trumfdam (hållen, visad
+  // med 5♠) — om paret inte har tio kända trumf. Frö 20270470 gick
+  // annars till 7♥ på K83 mot AJ64 efter att 5♥-svaret nekat damen.
+  if (sido >= 2 && damSäkrad) return { call: `7${L}`, rule: 'slamavslut', explanation: `${sido} sidokungar + trumfkungen = tre av fyra kungar i paret → storslam (7${SYM}).` }
+  if (kingAnswer === sex) return null
+  const varför = sido >= 2 ? 'tre av fyra kungar, men trumfdamen är inte säkrad' : `bara ${sido} sidokung i paret`
+  if (rank(sex) > rank(kingAnswer)) return { call: sex, rule: 'slamavslut', explanation: `${varför} → 6${SYM} (lillslam).` }
+  return { call: '6NT', rule: 'slamavslut', explanation: `${varför} och partnerns kungfärg ligger över 6${SYM} → 6NT (lillslam i sang).` }
+}
+
+/**
  * FRÅGARENS placering: jag bjöd 4NT RKC, partnern svarade. null = det här är
  * inte min fråga, eller läget är inte frågarens placering.
  */
@@ -170,6 +203,14 @@ function askerPlacement(hand: Hand, f: AuctionFacts): Kunskap | null {
     // SENASTE budet (ingen fortsättning har hänt).
     if (last !== answer) return null
     return placeAfterKeycards(hand, trump, f, answer.bid)
+  }
+
+  // Fas 4: jag ställde kungfrågan 5NT; partnern har svarat.
+  if (myFollow.bid === '5NT') {
+    const kingIdx = f.history.indexOf(myFollow)
+    const kingAnswer = f.history.find((c, i) => i > kingIdx && c.seat === partner && c.bid !== 'P')
+    if (!kingAnswer || last !== kingAnswer) return null
+    return placeAfterKings(hand, trump, kingAnswer.bid, queenSecured(hand, trump, f, answer.bid))
   }
 
   // Fas 3: jag ställde damfrågan; partnern har svarat.

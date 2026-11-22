@@ -164,7 +164,7 @@ import { defendPreemptSeat, defendTheirPreempt, overcallNTSystemsOnSeat, preempt
 import { competitiveRKCPlace, competitiveSlamTry } from './competitive-slam'
 import { partnerShownTrumpLength, slamAnswerContinuation, slamAnswerSeat, slamAskTrump } from './slam-answer-continuations'
 import { answerStrong2cDouble, strong2cDoubleToAnswer, strong2cOpenerActs, strong2cOpenerContestedSeat } from './strong-2c-contested'
-import { stördInverteradEfterKontrollsvar, stördInverteradFrågarEss, stördInverteradKontrollhoppAttSvara, stördInverteradSvarPåKontrollhopp, stördInverteradSvararen, stördInverteradSvararenBjuder, stördInverteradÖppnaren, stördInverteradÖppnarenAvslutar, stördInverteradÖppnarenBjuder, stördInverteradÖppnarenIgen } from './inverted-minor-contested'
+import { stördInverteradEfterKontrollsvar, stördInverteradFrågarEss, stördInverteradKontrollhoppAttSvara, stördInverteradSvarPåKontrollhopp, stördInverteradBjuderUtgång, stördInverteradEfterNyFärg, stördInverteradSvarPåNyFärg, stördInverteradSvararen, stördInverteradSvararenBjuder, stördInverteradUtgångskravStår, stördInverteradÖppnaren, stördInverteradÖppnarenAvslutar, stördInverteradÖppnarenBjuder, stördInverteradÖppnarenIgen } from './inverted-minor-contested'
 import { legalCalls, prettyBid } from './auction-rules'
 import { rkcAskerContinuation, rkcAskerSeat } from './rkc-asker-continuations'
 import { answerTransferGameChoice, answerTwoOverOneRaise, forcedMinimumBid, fourthSuitPlacementSeat, maybePenaltyDouble, penaltyDoubleSeat, placeGameAfterFourthSuit, transferGameChoiceSeat, twoOverOneRaiseSeat } from './catch-all-continuations'
@@ -2735,6 +2735,22 @@ const TABELL: Row[] = [
     läge: (f) => stördInverteradEfterKontrollsvar(f) !== null,
     välj: ({ hand, facts }) => {
       const k = stördInverteradFrågarEss(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'störd-inverterad-svar-på-ny-färg',
+    läge: (f) => stördInverteradEfterNyFärg(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = stördInverteradSvarPåNyFärg(hand, facts)
+      return k ? asCall(facts.seat, k) : null
+    },
+  },
+  {
+    id: 'störd-inverterad-utgångskravet-står',
+    läge: (f) => stördInverteradUtgångskravStår(f) !== null,
+    välj: ({ hand, facts }) => {
+      const k = stördInverteradBjuderUtgång(hand, facts)
       return k ? asCall(facts.seat, k) : null
     },
   },

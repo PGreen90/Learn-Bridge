@@ -235,6 +235,53 @@ describe('felrapport #129 – störd inverterad lågfärgshöjning', () => {
     })
   })
 
+  // Ägarbeslut 2026-11-22 (uppföljningen): svararen efter öppnarens NYA FÄRG
+  // (krav en rond) — samma trappa som efter pass/X, plus höjning med fyra
+  // korts stöd. Förr höjde kravvakten på tre kort och 3♠ passades ut.
+  describe('svararen efter öppnarens nya färg (1♣–2♣–(2♥)–2♠)', () => {
+    const N = `${A} 2S P`
+    it('fyra spader: 13+ → 4♠, 10–12 → 3♠', () => {
+      expect(decideCall(medSyd('S:KT85 H:T2 D:AK3 C:AQ52', 16), H('N', N), 'S')).toMatchObject({ bid: '4S', rule: 'störd inverterad: svararen stöder nya färgen' })
+      expect(decideCall(medSyd('S:KT85 H:T2 D:K73 C:AJ52', 11), H('N', N), 'S')).toMatchObject({ bid: '3S', rule: 'störd inverterad: svararen stöder nya färgen' })
+    })
+    it('tre spader höjs ALDRIG — med stopp sang: 13+ → 3NT, 10–12 → 2NT', () => {
+      expect(decideCall(medSyd('S:K85 H:KJ2 D:A73 C:Q652', 13), H('N', N), 'S')).toMatchObject({ bid: '3NT', rule: 'störd inverterad: svararen med stopp' })
+      expect(decideCall(medSyd('S:Q85 H:KJ2 D:K73 C:Q652', 11), H('N', N), 'S')).toMatchObject({ bid: '2NT', rule: 'störd inverterad: svararen med stopp' })
+    })
+    it('utan stopp: 13+ → 3♥ (utgångskrav), minimum → 3♣', () => {
+      expect(decideCall(medSyd('S:K85 H:T72 D:AKJ C:AQ52', 17), H('N', N), 'S')).toMatchObject({ bid: '3H', rule: 'störd inverterad: svararen utan stopp (13+)' })
+      expect(decideCall(medSyd('S:K85 H:T72 D:KJ3 C:AJ52', 12), H('N', N), 'S')).toMatchObject({ bid: '3C', rule: 'störd inverterad: svararen utan stopp (minimum)' })
+    })
+    it('förklaringarna följer med', () => {
+      expect(sista('N', `${N} 4S`)).toMatchObject({ rule: 'störd inverterad: svararen stöder nya färgen' })
+      expect(sista('N', `${N} 3H`)).toMatchObject({ rule: 'störd inverterad: svararen utan stopp (13+)', forcing: 'utgangskrav' })
+      expect(sista('N', `${N} 2NT`).text).toMatch(/nya färg/)
+    })
+  })
+
+  // Iakttagelse 2 (2026-11-22): 3 i deras färg är UTGÅNGSKRAV — förr svarade
+  // partnern 4♣ ("krav, partnern placerar") och cue-bjudaren passade ut 4♣
+  // med 28 hp i paret.
+  describe('utgångskravet står: 4♣ passas aldrig', () => {
+    it('svararen bjöd 3♥ efter öppnarens pass, öppnaren 4♣ → svararen 5♣', () => {
+      const d = giv('fr129b', 'N', 'none', 'S:KJ4 H:432 D:AQ5 C:K964', 'S:Q9732 H:65 D:T9642 C:8', 'S:A85 H:T7 D:KJ3 C:AQJT5', 'S:T6 H:AKQJ98 D:87 C:732')
+      hpKoll(d, [13, 2, 15, 10])
+      const h = `${A} P P 3H P`
+      expect(decideCall(d, H('N', h), 'N').bid).toBe('4C')
+      const t = decideCallTraced(d, H('N', `${h} 4C P`), 'S')
+      expect(t.källa).toBe('tabell:störd-inverterad-utgångskravet-står')
+      expect(t.call).toMatchObject({ bid: '5C', rule: 'störd inverterad: utgång efter utgångskravet' })
+      expect(sista('N', `${h} 4C P 5C`)).toMatchObject({ rule: 'störd inverterad: utgång efter utgångskravet' })
+    })
+    it('öppnaren bjöd 3♥ själv, svararen 4♣ → öppnaren 5♣', () => {
+      const d = giv('fr129c', 'N', 'none', 'S:AK4 H:432 D:A5 C:KQ964', 'S:Q9732 H:65 D:T9642 C:8', 'S:J85 H:T7 D:KQJ3 C:AJT5', 'S:T6 H:AKQJ98 D:87 C:732')
+      hpKoll(d, [16, 2, 12, 10])
+      expect(decideCall(d, H('N', A), 'N').bid).toBe('3H')
+      expect(decideCall(d, H('N', `${A} 3H P`), 'S').bid).toBe('4C')
+      expect(decideCall(d, H('N', `${A} 3H P 4C P`), 'N').bid).toBe('5C')
+    })
+  })
+
   describe('efter kontrollhoppet 4♦ (ägarens budgång: 4♠ – 4NT – svar – slam)', () => {
     const B = `${A} 4D P`
     it('Syd höjer ALDRIG kortfärgen — visar billigaste kontrollen: 4♠', () => {
@@ -254,10 +301,21 @@ describe('felrapport #129 – störd inverterad lågfärgshöjning', () => {
     it('Nord utan hjärterkontroll → 5♣ (Syd nekade hjärter med 4♠)', () => {
       expect(decideCall(medNord('S:AK4 H:Q63 D:- C:AKJ9764', 17), H('N', `${B} 4S P`), 'N').bid).toBe('5C')
     })
-    it('Syd svarar 5♠ (två nyckelkort + trumfdam) och Nord bjuder slam', () => {
+    it('Syd svarar 5♠ (två nyckelkort + trumfdam)', () => {
       expect(decideCall(D, H('N', `${B} 4S P 4NT P`), 'S').bid).toBe('5S')
-      const slam = decideCall(D, H('N', `${B} 4S P 4NT P 5S P`), 'N').bid
-      expect(['6C', '5NT']).toContain(slam)
+    })
+    // Ägarbeslut 2026-11-03 (§6.3), ägarens dom 2026-11-22: "att kungfrågan
+    // missas är helt fel". Alla fem nyckelkort → 5NT även när ÖPPNAREN frågar.
+    it('Nord har alla fem nyckelkort → 5NT (kungfrågan), aldrig 6♣ direkt', () => {
+      expect(decideCall(D, H('N', `${B} 4S P 4NT P 5S P`), 'N')).toMatchObject({ bid: '5NT', rule: 'Sjöberg 5NT' })
+    })
+    it('Syd visar ruterkungen (6♦) och Nord räknar tre av fyra kungar → 7♣', () => {
+      expect(decideCall(D, H('N', `${B} 4S P 4NT P 5S P 5NT P`), 'S').bid).toBe('6D')
+      expect(decideCall(D, H('N', `${B} 4S P 4NT P 5S P 5NT P 6D P`), 'N').bid).toBe('7C')
+    })
+    it('Nord utan hjärterkungen: en sidokung i paret, 6♦ ligger över 6♣ → 6NT', () => {
+      const d = medNord('S:J64 H:AQJ D:- C:AK97643', 15)
+      expect(decideCall(d, H('N', `${B} 4S P 4NT P 5S P 5NT P 6D P`), 'N').bid).toBe('6NT')
     })
   })
 

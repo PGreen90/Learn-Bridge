@@ -296,6 +296,9 @@ systems on + stulet bud mot alla inkliv i direkt sits — spec och alla ägarsva
   de allmänna konkurrensreglerna över.
 - **Inkliv i balanseringssits** (1NT–pass–pass–2x) och **3-lägesinkliv** (specen
   säger X = straff/värden; ingen egen rad byggd än).
+- **Efter vårt 1NT-INKLIV** (iakttagelse 2026-11-22, #131): stört Stayman och
+  störd överföring passas ut utan regel (1♥–1NT–P–2♣–(2♥)–P–P–P med 15 + 11 hp),
+  och stört Minor Suit Stayman utan stopp är pass utan regel.
 - **Svag hand med lång lågfärg över deras X:** under systems on finns ingen flykt
   till 2♣/2♦ (2♣ är Stayman, 2♦ överföring) — handen passar.
 - **Lebensohl efter partnerns takeout av en svag tvåa** — advancern svarar i dag

@@ -28,11 +28,13 @@ describe('FAS 4 punkt 18 – kaptenen nedvärderar egna honnörer mot partnerns 
 })
 
 describe('slamInvestigation – ärlig RKC (driv-zonen: egen hand + visat minimum ≥ 33)', () => {
-  it('visad 16+: tvetydigt svar (0 eller 3) = 3 med visshet → alla fem → 5NT; ♦K visad + egen ♣K → 7♠ (ägarbeslut 2026-11-03)', () => {
+  // Ägarbeslut 2026-11-22: tre kungar räcker inte — trumfdamen (eller tio kända
+  // trumf) krävs. Kaptenen (♠J762) vet inte var ♠Q sitter → 6♠. (Förr 7♠.)
+  it('visad 16+: tvetydigt svar (0 eller 3) = 3 med visshet → alla fem → 5NT; ♦K visad + egen ♣K men damen okänd → 6♠', () => {
     const opener = parseHand('S:AKQ85 H:A43 D:KJ7 C:82') // 3 nyckelkort → svarar 5♦ (0/3); sidokung ♦K → 6♦
     const responder = parseHand('S:J762 H:AQ5 D:AQ64 C:K3') // 17 hp, 2 egna nyckelkort, sidokung ♣K
     const turns = slamInvestigation(opener, responder, 'spades', undefined, { partnerMin: 16 })!
-    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '6D', '7S'])
+    expect(turns.map((t) => t.call)).toEqual(['4NT', '5D', '5NT', '6D', '6S'])
     expect(turns[0].rule).toBe('1430 RKC')
     expect(turns[2].rule).toBe('Sjöberg 5NT')
     expect(turns[4].rule).toBe('slamavslut')

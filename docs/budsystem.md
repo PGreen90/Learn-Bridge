@@ -478,18 +478,30 @@ inklivet. Öppnaren väljer:
 
 **Efter kontrollhoppet** visar svararen sin billigaste kontroll (ess, kung
 eller kortfärg) under 5m — utan kontroll 5m — och öppnaren frågar 4NT (1430,
-lågfärgen trumf) när alla sidofärger är kontrollerade, annars 5m.
+lågfärgen trumf) när alla sidofärger är kontrollerade, annars 5m. Med alla
+fem nyckelkort följer kungfrågan 5NT som vanligt (§6.3).
+
+**Svararen efter öppnarens nya färg (ägarbeslut 2026-11-22):** fyra korts
+stöd höjer — i högfärg till utgång med 13+, annars enkel höjning (10–12). Tre
+kort höjs aldrig. Utan fyra kort gäller samma trappa som efter pass och X: med
+stopp 2NT (10–12) eller 3NT (13+), utan stopp 3m eller 3 i deras färg (13+).
+
+**Utgångskravet står.** Efter 3 i deras färg (från öppnaren eller svararen)
+bjuder partnern 3NT med stopp, annars 4m — och 4m passas aldrig: den som
+ställde kravet bjuder 5m.
 
 | Nord | Öst | Syd | Väst |
 |---|---|---|---|
 | 1♣ | pass | 2♣ | 2♥ |
 | **4♦** | pass | **4♠** | pass |
 | **4NT** | pass | 5♠ | pass |
-| 6♣ | | | |
+| **5NT** | pass | 6♦ | pass |
+| 7♣ | | | |
 
 *Nord ♠J64 ♥AKJ ♦— ♣AK97643 (16 hp), Syd ♠AT8 ♥T2 ♦AKQ3 ♣QJT5 (16 hp); Nord
-giv, ÖV i zon.* Inte beslutat än: inkliv på 3-läget, deras dubbling av
-höjningen och fortsättningen efter svararens bud i deras färg.
+giv, ÖV i zon.* Syds 5♠ visar två nyckelkort och trumfdamen, 6♦ ruterkungen —
+med hjärterkungen har paret tre av fyra kungar. Inte beslutat än: inkliv på
+3-läget och deras dubbling av höjningen.
 
 **3NT eller 5 i lf? (stopp-utbytet, ägarregel 2026-07-05).** Ett 2/1-par
 föredrar 3NT (färre stick), men bara när paret tillsammans kan **hålla alla fyra
@@ -1939,7 +1951,8 @@ hen hellre ess (4NT), särskilt i högfärg.
 ### 6.3 Sjöbergs 5NT (kungfråga)
 Efter 4NT RKC kan ess-frågaren bjuda **5NT** för att fråga efter kungar inför
 storslam (lovar att inga nyckelkort saknas; sedan 2026-11-03 frågas alltid med
-alla fem nyckelkort, trumfdamen behöver inte vara säkrad).
+alla fem nyckelkort, trumfdamen behöver inte vara säkrad). Det gäller oavsett
+vem som ställde essfrågan — sedan 2026-11-22 även när öppnaren själv frågar.
 Till skillnad från standard visar svararen **vilken** kung – inte hur många:
 
 | Svar | Betydelse |
@@ -1950,6 +1963,10 @@ Till skillnad från standard visar svararen **vilken** kung – inte hur många:
 
 Poängen: att veta exakt vilken kung partnern har avgör om en sidofärg ger nog
 med stick för storslam (t.ex. K-D mittemot ess).
+
+**Trumfdamen krävs för storslam (ägarbeslut 2026-11-22):** frågaren bjuder 7
+bara med trumfdamen på plats — hållen själv eller visad med 5♠-svaret — om
+paret inte har tio kända trumf. Annars blir det lillslam även med kungarna.
 
 **Kaptenens beslut efter svaret (ägarbeslut 2026-11-03):** egna sidokungar +
 partnerns visade ≥ 2 (= tre av fyra kungar med trumfkungen) → **7 i trumf**;
@@ -3879,6 +3896,22 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-22 — kungfrågan 5NT även när öppnaren frågar (§6.3) + utgångskravet
+  står i störd inverterad (§4.2).** (1) Ägarens dom efter #129: "att kungfrågan
+  missas är helt fel". Frågarvägen för öppnaren (`rkc-asker-continuations.ts`)
+  sökte medvetet aldrig storslam och bjöd 6 i trumf med alla fem nyckelkort.
+  Nu: alla fem entydigt → 5NT, och efter kungsvaret storslam med tre av fyra
+  kungar, annars lillslam (6NT när kungfärgen ligger över 6 i trumf) — samma
+  regel som kaptensvägen (ägarbeslut 2026-11-03). Rapportens giv: …4NT–5♠–5NT–
+  6♦–7♣. **Ägarbeslut samma dag:** storslam kräver trumfdamen om paret inte
+  har tio kända trumf — på BÅDA vägarna (frö 20270470 gick annars till 7♥ på
+  K83 mot AJ64 med damen nekad). (3) Svararen efter öppnarens nya färg
+  (ägarbeslut): höjning med fyra kort, annars trappan som efter pass/X; förr
+  höjde kravvakten på tre kort och 3♠ passades ut med 28 hp. Ägaren bekräftade
+  också kontrollhoppets krav (singel/renons + 5 i lågfärgen) och att ny färg
+  kräver fem kort i lågfärgen. (2) Efter 3 i deras färg (utgångskrav) svarade partnern 4m och
+  cue-bjudaren passade ut 4m med 28 hp i paret; nu 5m (raden
+  `störd-inverterad-utgångskravet-står`). Lås: `auction-felrapport-129-131.test.ts`.
 - **2026-11-22 — felrapport #129: störd inverterad lågfärgshöjning (§4.2,
   ägarstruktur).** Efter 1♣–2♣–(2♥) passade både öppnaren och svararen — 32 hp
   och elva klöver såldes ut i 2♥; läget saknade regel helt. Nu: öppnarens pass
