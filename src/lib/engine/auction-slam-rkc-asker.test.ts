@@ -175,19 +175,25 @@ describe('#95-granskningen – damfrågans övriga kantfall', () => {
 
   // Ägarens slamregel (2026-10-02): "5 ess utan dam alltid slam". Förr ställdes
   // damfrågan även med alla fem nyckelkort, och ett nekande passades i 5-trumf.
-  it('alla fem nyckelkort → lillslam direkt (2♣–2♦–2♠–4♠–4NT–5♣, damen osäkrad)', () => {
+  // 2026-11-22 (ägarbeslut 2026-11-03 fört hit efter #129): alla fem nyckelkort
+  // → kungfrågan 5NT även när öppnaren frågar — aldrig damfråga, aldrig pass.
+  it('alla fem nyckelkort → 5NT kungfrågan (2♣–2♦–2♠–4♠–4NT–5♣, damen osäkrad)', () => {
     const deal = dealNS('S:J93 H:J84 D:QT97 C:A65', SYD)
     const hist = [...AUKTION.slice(0, 10), call('N', '5C'), call('E', 'P')]
-    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: '6S', rule: 'slamavslut' })
+    expect(decideCall(deal, hist, 'S')).toMatchObject({ bid: '5NT', rule: 'Sjöberg 5NT' })
   })
-  // Frö 20270470: fem nyckelkort mellan händerna, 5♥-svaret nekar damen → 6♥ ändå.
-  it('fem nyckelkort och damen nekad med 5♥ → 6♥ (inte pass)', () => {
+  // Frö 20270470: fem nyckelkort mellan händerna, 5♥-svaret nekar damen → 5NT ändå.
+  it('fem nyckelkort och damen nekad med 5♥ → 5NT (inte pass)', () => {
     const deal = giv('E', 'S:J8754 H:QT D:854 C:932', 'S:AKQT H:K83 D:AT3 C:QT6', 'S:63 H:9752 D:KQJ62 C:J4', 'S:92 H:AJ64 D:97 C:AK875')
     const hist: ResolvedCall[] = [
       call('E', '1C'), call('S', 'P'), call('W', '1H'), call('N', 'P'), call('E', '1S'), call('S', 'P'),
       call('W', '2D'), call('N', 'P'), call('E', '2H'), call('S', 'P'), call('W', '4H'), call('N', 'P'),
       call('E', '4NT'), call('S', 'P'), call('W', '5H'), call('N', 'P'),
     ]
-    expect(decideCall(deal, hist, 'E')).toMatchObject({ bid: '6H', rule: 'slamavslut' })
+    expect(decideCall(deal, hist, 'E')).toMatchObject({ bid: '5NT', rule: 'Sjöberg 5NT' })
+    // Väst visar klöverkungen (6♣); Öst har tre av fyra kungar men damen är
+    // nekad och fiten är sju kort (K83 mot AJ64) → lillslam, ALDRIG 7♥.
+    const efter = [...hist, call('E', '5NT'), call('S', 'P'), call('W', '6C'), call('N', 'P')]
+    expect(decideCall(deal, efter, 'E')).toMatchObject({ bid: '6H', rule: 'slamavslut' })
   })
 })

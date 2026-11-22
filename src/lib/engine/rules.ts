@@ -661,6 +661,8 @@ const FORCING_BY_RULE: Record<string, Forcing> = {
   'störd inverterad: svararen utan stopp (minimum)': 'ej-krav',
   'störd inverterad: öppnaren höjer sangen': 'avslut',
   'störd inverterad: öppnaren passar': 'avslut',
+  'störd inverterad: utgång efter utgångskravet': 'avslut',
+  'störd inverterad: svararen stöder nya färgen': 'ej-krav',
   'svar på kontrollhopp: kontrollbud': 'utgangskrav',
   'svar på kontrollhopp: ingen kontroll': 'avslut',
   'efter kontrollsvaret: stannar i utgång': 'avslut',

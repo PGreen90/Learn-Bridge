@@ -518,14 +518,30 @@ function interpretInvertedContested(call: ResolvedCall, prior: ResolvedCall[]): 
     }
     return null
   }
-  // Svararen efter öppnarens pass/X (motståndaren passade).
-  if (efter.length === 2 && call.seat === PARTNER[open.seat] && (efter[0].bid === 'P' || efter[0].bid === 'X') && efter[1].bid === 'P') {
+  // Svararen efter öppnarens nya färg (krav en rond): höjning med fyra kort.
+  const e0 = efter.length >= 1 ? parseBid(efter[0].bid) : null
+  const nyFärg = !!e0 && e0.strain !== 'NT' && e0.strain !== tb.strain && e0.strain !== m
+    && e0.level === (['C', 'D', 'H', 'S'].indexOf(e0.strain) > ['C', 'D', 'H', 'S'].indexOf(tb.strain) ? 2 : 3)
+  if (nyFärg && e0 && cb && efter.length === 2 && call.seat === PARTNER[open.seat] && efter[1].bid === 'P' && cb.strain === e0.strain) {
+    return R('störd inverterad: svararen stöder nya färgen', cb.level >= 4 && (cb.strain === 'H' || cb.strain === 'S')
+      ? `${cb.level}${SYMBOL[cb.strain]} — fyra kort i partnerns nya färg och 13+ hp: utgång.`
+      : `${cb.level}${SYMBOL[cb.strain]} — fyra kort i partnerns nya färg, 10–12 hp. Ej krav.`, cb.level >= 4 ? 'avslut' : undefined)
+  }
+  // Svararen efter öppnarens pass/X eller nya färg (motståndaren passade).
+  if (efter.length === 2 && call.seat === PARTNER[open.seat] && (efter[0].bid === 'P' || efter[0].bid === 'X' || nyFärg) && efter[1].bid === 'P') {
     if (!cb) return null
-    const fråga = efter[0].bid === 'P' ? 'pass' : 'dubbling'
+    const fråga = efter[0].bid === 'P' ? 'pass' : efter[0].bid === 'X' ? 'dubbling' : 'nya färg'
     if (cb.strain === 'NT' && cb.level <= 3) return R('störd inverterad: svararen med stopp', cb.level === 2 ? `2 sang — svar på partnerns ${fråga}: stopp i ${dNamn}, 10–12 hp.` : `3 sang — svar på partnerns ${fråga}: stopp i ${dNamn}, 13+ hp.`, cb.level >= 3 ? 'avslut' : undefined)
     if (cb.strain === tb.strain && cb.level === 3) return R('störd inverterad: svararen utan stopp (13+)', `3${SYMBOL[tb.strain]} i deras färg — svar på partnerns ${fråga}: ingen stopp i ${dNamn}, men 13+ hp. Utgångskrav.`)
     if (cb.strain === m && cb.level === 3) return R('störd inverterad: svararen utan stopp (minimum)', `3${SYMBOL[m]} — svar på partnerns ${fråga}: ingen stopp i ${dNamn} och minimum (10–12). Ej krav.`)
     return null
+  }
+  // Utgångskravet står: jag bjöd 3 i deras färg, partnern svarade 4m → 5m.
+  if (call.bid === `5${m}` && efter.length >= 4) {
+    const e = efter.length
+    if (efter[e - 1].bid === 'P' && efter[e - 2].bid === `4${m}` && efter[e - 3].bid === 'P' && efter[e - 4].bid === `3${tb.strain}` && efter[e - 4].seat === call.seat) {
+      return R('störd inverterad: utgång efter utgångskravet', `5${SYMBOL[m]} — utgång: budet i deras färg var utgångskrav och partnerns 4${SYMBOL[m]} nekade stopp i ${dNamn}.`)
+    }
   }
   // Öppnarens tredje tur efter svararens 2NT / 3m.
   if (efter.length === 4 && call.seat === open.seat && (efter[0].bid === 'P' || efter[0].bid === 'X') && efter[1].bid === 'P' && efter[3].bid === 'P' && (efter[2].bid === '2NT' || efter[2].bid === `3${m}`)) {

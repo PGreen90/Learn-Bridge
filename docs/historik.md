@@ -33,6 +33,19 @@ nyckelkort — kungfrågan 5NT finns inte på den vägen ("ingen kungfråga på 
 här vägen", `slam-auction.ts`). (4) #131 utan stopp i deras färg: pass utan
 regel. (5) Rapportens Väst bjöd 2♥ över 2♣; dagens motor passar där.
 (6) Stört Stayman/överföring efter 1NT-inklivet har ingen regel (pass).
+**Uppföljning samma dag (ägaren: "att kungfrågan missas är helt fel"):**
+(3) LAGAD — öppnarens frågarväg (`rkc-asker-continuations.ts`) bjuder nu 5NT
+med alla fem nyckelkort och placerar efter kungsvaret (7 med tre av fyra
+kungar, annars 6 i trumf / 6NT); rapportens giv slutar i 7♣. Gäller ALLA
+auktioner där öppnaren själv frågar, inte bara störd inverterad. (2) LAGAD till
+hälften — 4m efter utgångskravet passas aldrig (→ 5m); svararens bud efter
+öppnarens NYA FÄRG fick ägarens struktur samma dag: höjning med fyra kort,
+annars trappan som efter pass/X. **Ägarbeslut:** storslam kräver trumfdamen om
+inte tio kända trumf (båda frågarvägarna); kontrollhoppets och nya färgens
+krav bekräftade. Kvar att se: svararen med två+ sidokungar hoppar själv till
+7 i trumf på kungfrågan utan att veta om damen finns. (4)+(6) flyttade
+till `docs/senare.md` "Störda 1NT-auktioner — nästa lager". (5) ingen åtgärd:
+dagens motor passar riktigt med Västs 6 hp i zon.
 
 ## 2026-11-21 (övningens fiktiva jämförelse — LIVE v1.0.10 `1fd3b9e`)
 **Ägarönskemål:** ett övningsomspel av en tävlingsgiv ska ge en känsla för hur

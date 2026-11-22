@@ -90,11 +90,14 @@ describe('felrapport #109 – 2♣–2♠–3♣–3♠–4♣: öppnarens färg
     expect(contractFromCalls(h)).toMatchObject({ level: 7, strain: 'clubs', declarer: 'N' })
   })
 
-  it('variant: Nord ♥AQJ5, Syd ♥K7 — Nord visar ♦K (6♦), Syd har ♥K själv → tre kungar i paret → 7♣', () => {
+  // Ägarbeslut 2026-11-22: storslam kräver trumfdamen om paret inte har tio
+  // kända trumf. Syd (♣JT) vet inte var ♣Q sitter efter 5♦-svaret → lillslam,
+  // och 6♦ ligger över 6♣ → 6NT. (Förr 7♣ på tre kungar.)
+  it('variant: Nord ♥AQJ5, Syd ♥K7 — tre kungar i paret men trumfdamen okänd → 6NT, inte 7♣', () => {
     const d = medHander({ N: 'S:3 H:AQJ5 D:K C:AKQ8753', S: 'S:AQ864 H:K7 D:A974 C:JT' })
     summa40(d)
     const h = helaMed(d, [])
-    expect(budrad(h).slice(5)).toEqual(['S:4NT', 'N:5D', 'S:5NT', 'N:6D', 'S:7C'])
+    expect(budrad(h).slice(5)).toEqual(['S:4NT', 'N:5D', 'S:5NT', 'N:6D', 'S:6NT'])
   })
 
   it('variant: ♥K hos Öst — Nord visar bara ♦K och Syd har ingen sidokung → två kungar räcker inte; 6♦ ligger över 6♣ → 6NT', () => {

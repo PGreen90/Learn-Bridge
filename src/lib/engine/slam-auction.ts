@@ -593,7 +593,13 @@ function rkcPhaseTurn(role: SlamRole, hand: Hand, trump: Suit, ctx: SlamContext,
     }
     return null
   }
-  if (after.length === 3 && place === '5NT' && role === CAPTAIN) return captainAfterKingAnswer(hand, after[2].call, trump)
+  if (after.length === 3 && place === '5NT' && role === CAPTAIN) {
+    // Ägarbeslut 2026-11-22: storslam kräver trumfdamen (hållen eller visad
+    // med 5♠) — om paret inte har tio kända trumf.
+    const kända = ctx.knownTrumps ?? lengths(hand)[trump] + 3
+    const damSäkrad = hand.some((c) => c.suit === trump && c.rank === 'Q') || answer === '5S' || kända >= 10
+    return captainAfterKingAnswer(hand, after[2].call, trump, damSäkrad)
+  }
   if (after.length === 3 && role === CAPTAIN && place === queenAskBid(trump, answer)) {
     const svar = after[2].call
     const egna = keycards(hand, trump)
@@ -711,18 +717,20 @@ function captainPlaceAfterRKC(hand: Hand, trump: Suit, ctx: SlamContext, floor: 
  * — egna sidokungar + partnerns visade — bjuds storslam, annars lillslam. 7 i
  * trumf var redan partnerns svar (två+ sidokungar). Ligger partnerns kungfärg
  * ÖVER 6 i trumf (lågfärgstrumf) finns inget 6-trumf att gå tillbaka till →
- * 6NT (alla ess + trumfkungen, lillslam i sang).
+ * 6NT (alla ess + trumfkungen, lillslam i sang). Storslammen kräver dessutom
+ * trumfdamen eller tio kända trumf (ägarbeslut 2026-11-22).
  */
-function captainAfterKingAnswer(hand: Hand, kingAnswerCall: string, trump: Suit): SlamTurn | null {
+function captainAfterKingAnswer(hand: Hand, kingAnswerCall: string, trump: Suit, damSäkrad: boolean): SlamTurn | null {
   const sex = `6${LETTER[trump]}`
   if (kingAnswerCall === `7${LETTER[trump]}`) return null
   const egna = hand.filter((c) => c.rank === 'K' && c.suit !== trump).length
   const visade = kingAnswerCall === sex ? 0 : 1
   const sido = egna + visade
-  if (sido >= 2) return { role: 'svarare', call: `7${LETTER[trump]}`, rule: 'slamavslut', explanation: `${sido} sidokungar + trumfkungen = tre av fyra kungar i paret → storslam (7${SYM[trump]}).` }
+  if (sido >= 2 && damSäkrad) return { role: 'svarare', call: `7${LETTER[trump]}`, rule: 'slamavslut', explanation: `${sido} sidokungar + trumfkungen = tre av fyra kungar i paret → storslam (7${SYM[trump]}).` }
   if (kingAnswerCall === sex) return null
-  if (bidRank(sex) > bidRank(kingAnswerCall)) return { role: 'svarare', call: sex, rule: 'slamavslut', explanation: `bara ${sido} sidokung i paret → 6${SYM[trump]} (lillslam).` }
-  return { role: 'svarare', call: '6NT', rule: 'slamavslut', explanation: `bara ${sido} sidokung i paret och partnerns kungfärg ligger över 6${SYM[trump]} → 6NT (lillslam i sang).` }
+  const varför = sido >= 2 ? 'tre av fyra kungar, men trumfdamen saknas och paret har inte tio kända trumf' : `bara ${sido} sidokung i paret`
+  if (bidRank(sex) > bidRank(kingAnswerCall)) return { role: 'svarare', call: sex, rule: 'slamavslut', explanation: `${varför} → 6${SYM[trump]} (lillslam).` }
+  return { role: 'svarare', call: '6NT', rule: 'slamavslut', explanation: `${varför} och partnerns kungfärg ligger över 6${SYM[trump]} → 6NT (lillslam i sang).` }
 }
 
 /**

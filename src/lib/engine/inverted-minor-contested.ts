@@ -239,6 +239,100 @@ export function stördInverteradÖppnarenAvslutar(_hand: Hand, f: AuctionFacts):
   }
 }
 
+// ---- Svararen efter öppnarens nya färg -------------------------------------
+
+/** Svararens tur: öppnaren bjöd en ny fyrkortsfärg (krav en rond), motståndaren passade. */
+export function stördInverteradEfterNyFärg(f: AuctionFacts): (StördInverterad & { ny: Suit }) | null {
+  const l = stördInverterad(f)
+  if (!l || PARTNER[l.opener] !== f.seat || f.history.length !== l.inklivIdx + 3) return null
+  if (f.history[l.inklivIdx + 2].bid !== 'P') return null
+  if (f.meaning(l.inklivIdx + 1).rule !== 'störd inverterad: ny färg') return null
+  const cb = parseContractBid(f.history[l.inklivIdx + 1].bid)
+  if (!cb || cb.strain === 'NT') return null
+  return { ...l, ny: SUIT_OF_LETTER[cb.strain] }
+}
+
+/**
+ * Ägarbeslut 2026-11-22: samma trappa som efter pass/X, plus höjning med fyra
+ * korts stöd (högfärg: 13+ → utgång, annars enkel höjning). Tre kort höjs aldrig.
+ */
+export function stördInverteradSvarPåNyFärg(hand: Hand, f: AuctionFacts): Kunskap | null {
+  const l = stördInverteradEfterNyFärg(f)
+  if (!l) return null
+  const p = hcp(hand)
+  const len = lengths(hand)
+  const legal = legalCalls(f.history, f.seat)
+  const m = letterOfSuit(l.minor)
+  const n = letterOfSuit(l.ny)
+  const dSym = SWE_SYM[letterOfSuit(l.their.suit)]
+  const högfärg = l.ny === 'hearts' || l.ny === 'spades'
+  if (len[l.ny] >= 4) {
+    const enkel = cheapestBidIn(f.history, f.seat, n)
+    const bud = (högfärg && p >= 13 ? `4${n}` : enkel) as Bid | null
+    if (bud && legal.includes(bud)) {
+      return {
+        call: bud, rule: 'störd inverterad: svararen stöder nya färgen',
+        explanation: `Fyra kort i partnerns ${SWE_SYM[n]} → ${prettyBid(bud)} (${högfärg && p >= 13 ? '13+, utgång' : 'stöd, 10–12'}).`,
+      }
+    }
+  }
+  if (hasStopper(hand, l.their.suit)) {
+    const bud = (p >= 13 ? ['3NT'] : ['2NT']).find((b) => legal.includes(b as Bid))
+    if (bud) {
+      return {
+        call: bud, rule: 'störd inverterad: svararen med stopp',
+        explanation: `Partnerns nya färg nekade stopp i ${dSym}: jag har den, ${p >= 13 ? '13+' : '10–12'} hp → ${bud}.`,
+      }
+    }
+  }
+  const cue = cheapestBidIn(f.history, f.seat, letterOfSuit(l.their.suit))
+  if (p >= 13 && cue && Number(cue[0]) === 3 && legal.includes(cue)) {
+    return {
+      call: cue, rule: 'störd inverterad: svararen utan stopp (13+)',
+      explanation: `Ingen stopp i ${dSym} och inte fyra kort i partnerns ${SWE_SYM[n]}, men 13+ hp → ${prettyBid(cue)} (utgångskrav).`,
+    }
+  }
+  const om = cheapestBidIn(f.history, f.seat, m)
+  if (!om || !legal.includes(om)) return null
+  return {
+    call: om, rule: 'störd inverterad: svararen utan stopp (minimum)',
+    explanation: `Ingen stopp i ${dSym}, inte fyra kort i partnerns ${SWE_SYM[n]} och minimum → ${prettyBid(om)} (ej krav).`,
+  }
+}
+
+// ---- Utgångskravet står: 4m passas aldrig ---------------------------------
+
+const UTGÅNGSKRAV = new Set(['störd inverterad: utgångskrav', 'störd inverterad: svararen utan stopp (13+)'])
+
+/**
+ * Jag bjöd 3 i deras färg (utgångskrav), partnern svarade 4m utan stopp och
+ * motståndaren passade: 4m är inte utgång, så jag får inte passa.
+ */
+export function stördInverteradUtgångskravStår(f: AuctionFacts): StördInverterad | null {
+  const l = stördInverterad(f)
+  if (!l) return null
+  const n = f.history.length
+  if (n < l.inklivIdx + 5 || f.history[n - 1].bid !== 'P') return null
+  const svar = f.history[n - 2]
+  const cue = f.history[n - 4]
+  if (svar.seat !== PARTNER[f.seat] || svar.bid !== `4${letterOfSuit(l.minor)}`) return null
+  if (cue.seat !== f.seat || f.history[n - 3].bid !== 'P' || !UTGÅNGSKRAV.has(f.meaning(n - 4).rule ?? '')) return null
+  return l
+}
+
+/** Ingen av oss har stopp → utgång i lågfärgen. */
+export function stördInverteradBjuderUtgång(_hand: Hand, f: AuctionFacts): Kunskap | null {
+  const l = stördInverteradUtgångskravStår(f)
+  if (!l) return null
+  const m = letterOfSuit(l.minor)
+  const utgång = `5${m}` as Bid
+  if (!legalCalls(f.history, f.seat).includes(utgång)) return null
+  return {
+    call: utgång, rule: 'störd inverterad: utgång efter utgångskravet',
+    explanation: `Mitt bud i deras färg var utgångskrav och partnerns ${prettyBid(`4${m}`)} nekade stopp: sang är borta → ${prettyBid(utgång)}.`,
+  }
+}
+
 // ---- Efter öppnarens kontrollhopp -----------------------------------------
 
 /** Ett buds plats i budstegen (nivå + benämning). */
