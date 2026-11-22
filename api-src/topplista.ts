@@ -21,7 +21,7 @@ import {
   strategiFor,
   type Tävlingsrad,
 } from '../src/lib/engine/matchpoints'
-import { stockholmDateISO } from '../src/lib/engine/daily'
+import { stockholmDateISO, veckansMandag } from '../src/lib/engine/daily'
 import { byggStallning, forraStjarnveckan, MIN_PER_GIV, veckansStjarna } from '../src/lib/engine/tavlingsavslut'
 import { kvotOk } from './_lib/kvot'
 import { restGet } from './_lib/supabase-rest'
@@ -119,6 +119,41 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       const namn = stjarna ? profiler.find((p) => p.id === stjarna.spelare)?.display_name : undefined
       if (!stjarna || !namn) return json(200, ingen)
       return json(200, { ok: true, vecka, stjarna: { namn, snitt: stjarna.snitt, nummer: sv[0].daily_number } })
+    }
+    // Mitt läge (ägarbeslut 2026-11-22): `?lage=1` svarar BARA med hur många
+    // givar kallaren har skickat in i de tävlingar som pågår — dagens MP%,
+    // dagens IMP och veckans stjärntävling. Startsidan räknade förr enbart ur
+    // enhetens egen lagring, så en tävling spelad på telefonen såg ospelad ut
+    // på datorn. Kräver inloggning; svaret är personligt och mellanlagras aldrig.
+    if (url.searchParams.get('lage') === '1') {
+      res.setHeader('cache-control', 'private, no-store')
+      const jag = await kallarId(base, key, req.headers.authorization)
+      if (!jag) return json(401, { ok: false, fel: 'Inte inloggad' })
+      if (!(await kvotOk(base, key, jag, 'mitt-lage'))) {
+        return json(429, { ok: false, fel: 'För många anrop — vänta en liten stund' })
+      }
+      const idag = stockholmDateISO()
+      const villkor = `(and(comp_date.eq.${idag},form.in.(mp,imp)),and(comp_date.eq.${veckansMandag(idag)},form.eq.guld))`
+      const pagaende = (await restGet(
+        base,
+        key,
+        `daily_sets?or=${encodeURIComponent(villkor)}&select=id,form,daily_number`,
+      )) as Array<{ id: string; form: string; daily_number: number }>
+      const lage: Record<string, { nummer: number; antal: number }> = {}
+      for (const s of pagaende) lage[s.form] = { nummer: s.daily_number, antal: 0 }
+      if (pagaende.length) {
+        const idn = pagaende.map((s) => `"${s.id}"`).join(',')
+        const mina = (await restGet(
+          base,
+          key,
+          `daily_results?set_id=in.(${idn})&user_id=eq.${jag}&status=eq.godkand&select=set_id,board`,
+        )) as Array<{ set_id: string; board: number }>
+        for (const rad of mina) {
+          const form = pagaende.find((s) => s.id === rad.set_id)?.form
+          if (form) lage[form].antal += 1
+        }
+      }
+      return json(200, { ok: true, lage })
     }
     // Idag som standard; `?dag=` för en tidigare dag (historiken, Påbyggnad 3).
     const ravDag = lasDag(url)

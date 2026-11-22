@@ -7,7 +7,7 @@ import { useAuth } from '../components/AuthProvider'
 import { loadTavlingFramsteg } from '../lib/backend'
 import type { TavlingsForm } from '../lib/engine/matchpoints'
 import { tavlingsStatus } from '../lib/tavlingsstatus'
-import { fetchVeckansStjarna, talText, type VeckansStjarna } from '../lib/backend/tavling'
+import { fetchMittLage, fetchVeckansStjarna, talText, type MittLage, type VeckansStjarna } from '../lib/backend/tavling'
 import { guldVecka } from '../lib/engine/daily'
 
 // Egna linje-ikoner i guld, ritade i samma språk som logotypen (BrandMark):
@@ -125,10 +125,29 @@ function Pil() {
  *  utan nätverksanrop (UI/UX-punkt 2, 2026-11-12): påbörjad → mätare och
  *  guldknappen "Fortsätt", klar → bock och "Resultat", annars "Spela".
  *  Raderna ligger ALLTID i samma ordning — bara guldknappen flyttar sig. */
-function TavlingRad({ to, form, titel, ikon }: { to: string; form: TavlingsForm; titel: string; ikon: string }) {
+function TavlingRad({
+  to,
+  form,
+  titel,
+  ikon,
+  server,
+}: {
+  to: string
+  form: TavlingsForm
+  titel: string
+  ikon: string
+  server: MittLage | null
+}) {
   const { signedIn } = useAuth()
   // Utloggad: aldrig ett gammalt kontos framsteg på en delad enhet.
-  const status = tavlingsStatus(form, signedIn ? loadTavlingFramsteg(form) : null)
+  // Det lokala visas direkt; serverns besked (alla enheter) rättar raden när
+  // det kommer (ägarbeslut 2026-11-22: läget följer kontot, inte enheten).
+  const status = tavlingsStatus(
+    form,
+    signedIn ? loadTavlingFramsteg(form) : null,
+    new Date(),
+    signedIn ? server?.[form] : undefined,
+  )
   return (
     <Link to={to} className={RAD} data-testid={`tavling-rad-${form}`}>
       <ModeIcon icon={status.lage === 'klar' ? 'check' : ikon} />
@@ -258,6 +277,21 @@ const PANEL = 'overflow-hidden rounded-2xl divide-y divide-emerald-50/10'
 
 export function Home() {
   const { loading, signedIn } = useAuth()
+  // Mitt läge från servern: ETT anrop för alla tre tävlingarna, bara inloggad.
+  const [mittLage, setMittLage] = useState<MittLage | null>(null)
+  useEffect(() => {
+    if (!signedIn) {
+      setMittLage(null)
+      return
+    }
+    let lever = true
+    void fetchMittLage().then((l) => {
+      if (lever) setMittLage(l)
+    })
+    return () => {
+      lever = false
+    }
+  }, [signedIn])
   return (
     // ETT samlat grönt hero. Avboxat (frameless, mjuk kant via felt-melt) med luft.
     <Felt
@@ -285,9 +319,9 @@ export function Home() {
           <GruppRubrik id="grupp-tavla">Tävla</GruppRubrik>
           <div className="gold-frame relative rounded-2xl bg-emerald-950/45 ring-1 ring-gold-400/25">
             <div className={PANEL}>
-              <TavlingRad to="/spela-kort/tavling" form="mp" titel="Dagens MP%" ikon="calendar" />
-              <TavlingRad to="/spela-kort/tavling?form=imp" form="imp" titel="Dagens IMP" ikon="calendar" />
-              <TavlingRad to="/spela-kort/tavling?form=guld" form="guld" titel="Veckans stjärntävling" ikon="star" />
+              <TavlingRad to="/spela-kort/tavling" form="mp" titel="Dagens MP%" ikon="calendar" server={mittLage} />
+              <TavlingRad to="/spela-kort/tavling?form=imp" form="imp" titel="Dagens IMP" ikon="calendar" server={mittLage} />
+              <TavlingRad to="/spela-kort/tavling?form=guld" form="guld" titel="Veckans stjärntävling" ikon="star" server={mittLage} />
             </div>
           </div>
           {/* Utloggad: EN rad om kontot. Visas först när inloggningsläget är

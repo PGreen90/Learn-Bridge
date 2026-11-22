@@ -54,3 +54,39 @@ describe('tavlingsStatus', () => {
     expect(tavlingsStatus('mp', 'skräp' as never, NU).lage).toBe('ny')
   })
 })
+
+// Läget följer KONTOT, inte enheten (ägarbeslut 2026-11-22): spelade man klart
+// på telefonen ska datorn inte säga "Spela". Servern svarar med antal inskickade
+// givar per pågående tävling; startsidan tar det HÖGSTA av lokalt och server.
+describe('tavlingsStatus med serverns läge', () => {
+  it('inget lokalt men servern har tolv → klar', () => {
+    expect(tavlingsStatus('mp', null, NU, { nummer: idagNr, antal: 12 }).lage).toBe('klar')
+  })
+
+  it('inget lokalt men servern har fem → påbörjad med rätt antal', () => {
+    expect(tavlingsStatus('imp', null, NU, { nummer: idagNr, antal: 5 })).toEqual({
+      text: '5 av 12 spelade',
+      lage: 'pagar',
+      antal: 5,
+    })
+  })
+
+  it('lokalt ligger före servern (inskick på väg) → det lokala gäller', () => {
+    const s = tavlingsStatus('mp', { nummer: idagNr, klara: klara(7) }, NU, { nummer: idagNr, antal: 6 })
+    expect(s.antal).toBe(7)
+  })
+
+  it('serverns svar för en ANNAN tävling (gårdagens nummer) räknas inte', () => {
+    expect(tavlingsStatus('mp', null, NU, { nummer: idagNr - 1, antal: 12 }).lage).toBe('ny')
+  })
+
+  it('guld jämförs mot veckans nummer', () => {
+    const veckoNr = guldNummer(veckansMandag(stockholmDateISO(NU)))
+    expect(tavlingsStatus('guld', null, NU, { nummer: veckoNr, antal: 12 }).lage).toBe('klar')
+  })
+
+  it('trasigt serversvar fäller inte startsidan', () => {
+    expect(tavlingsStatus('mp', null, NU, { nummer: idagNr } as never).lage).toBe('ny')
+    expect(tavlingsStatus('mp', null, NU, 'skräp' as never).lage).toBe('ny')
+  })
+})
