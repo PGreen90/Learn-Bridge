@@ -194,9 +194,13 @@
      fyra ingen såg. Vid hover startar den igen, från läget där den stod. */
   animation-play-state: paused;
 }
-.gold-frame-hover:hover::before {
-  opacity: 1;
-  animation-play-state: running;
+/* Bara där det finns en mus: på pekskärm fastnar :hover efter ett tryck och
+   ramen blir stående tänd (mobile-native-provet 2026-11-23). */
+@media (hover: hover) and (pointer: fine) {
+  .gold-frame-hover:hover::before {
+    opacity: 1;
+    animation-play-state: running;
+  }
 }
 
 /* Rubriker sätts i display-typsnittet; lite tightare spärrning ser dyrare ut. */

@@ -108,7 +108,7 @@ function GruppRubrik({ id, children }: { id: string; children: ReactNode }) {
 }
 
 const RAD =
-  'focus-ring group flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-emerald-950/30 active:bg-emerald-950/40'
+  'focus-ring group flex select-none items-center gap-3 px-4 py-3 text-left transition-colors [-webkit-touch-callout:none] hover:bg-emerald-950/30 active:bg-emerald-950/40'
 const PIL = 'ml-auto flex shrink-0 items-center gap-0.5 text-sm'
 
 /** Liten högerpil för rader som leder vidare. */
@@ -205,7 +205,7 @@ function Bricka({ to, icon, title }: { to: string; icon: string; title: string }
   return (
     <Link
       to={to}
-      className="focus-ring gold-frame-hover relative flex flex-col items-center gap-1.5 rounded-2xl bg-emerald-950/30 px-1 py-3.5 text-center ring-1 ring-emerald-50/10 transition-all hover:-translate-y-0.5 hover:bg-emerald-950/45 active:scale-[0.99]"
+      className="focus-ring gold-frame-hover relative flex flex-col items-center gap-1.5 rounded-2xl bg-emerald-950/30 px-1 py-3.5 text-center ring-1 ring-emerald-50/10 select-none transition-[transform,background-color] duration-150 ease-out [-webkit-touch-callout:none] hover:-translate-y-0.5 hover:bg-emerald-950/45 active:scale-[0.97]"
     >
       <span aria-hidden className="text-gold-300">
         {MODE_ICONS[icon]}
@@ -273,6 +273,11 @@ function Stjarnhuvud() {
   )
 }
 
+/** Textlänk på filtet. Tryckytan är 44 px hög (py + negativ marginal lämnar
+ *  radhöjden orörd) och länken bryts aldrig mitt i ("Skapa / konto"). */
+const TEXTLANK =
+  'inline-block whitespace-nowrap py-3.5 -my-3.5 font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100'
+
 const PANEL = 'overflow-hidden rounded-2xl divide-y divide-emerald-50/10'
 
 export function Home() {
@@ -327,13 +332,13 @@ export function Home() {
           {/* Utloggad: EN rad om kontot. Visas först när inloggningsläget är
               känt, så den inte blinkar. */}
           {!loading && !signedIn && (
-            <p className="mt-2 text-sm text-emerald-100">
+            <p className="mt-3 text-sm text-emerald-100">
               Tävlingarna kräver ett gratis konto.{' '}
-              <Link to="/registrera" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+              <Link to="/registrera" className={TEXTLANK}>
                 Skapa konto
               </Link>
               {' · '}
-              <Link to="/logga-in" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+              <Link to="/logga-in" className={TEXTLANK}>
                 Logga in
               </Link>
             </p>
@@ -361,15 +366,15 @@ export function Home() {
             etapp 1, 2026-11-11): en diskret rad underst. Samma Tyck till-dialog
             nås från sidfoten på alla sidor. */}
         <p className="text-sm text-emerald-100">
-          <Link to="/om" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+          <Link to="/om" className={TEXTLANK}>
             Så funkar rebidz
           </Link>
           {' · '}
-          <Link to="/sa-bjuder-rebidz" className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+          <Link to="/sa-bjuder-rebidz" className={TEXTLANK}>
             Så bjuder datorn
           </Link>
           {' · '}
-          <TyckTillKnapp className="font-semibold text-gold-200 underline underline-offset-2 hover:text-gold-100">
+          <TyckTillKnapp className={TEXTLANK}>
             Tyck till
           </TyckTillKnapp>
         </p>
