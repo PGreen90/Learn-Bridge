@@ -430,6 +430,13 @@ stod kvar som stale. Sedan 2026-08-08 låst med linjebyggstest
   inferens om partnerns hand.
 
 ### FACELIFTEN / den visuella omgörningen (VÄCKT 2026-07-29 — Fas 1 i konkurrensplanen)
+> **Design-skills att pröva här (ägarönskemål 2026-11-23, "vi saknar taste"):** ur en
+> reel av Nate Herk — (1) `Leonxlnx/taste-skill` (bygger företagssajter/landningssidor;
+> passar inte en spelapp), (2) `emilkowalski/skills` (rörelse, gester, `mobile-native`,
+> `break-ui`, `learn-taste` → DESIGN.md; den som passar rebidz bäst), (3) Figma MCP (kräver
+> att ägaren ritar i Figma — nej), (4) Playwright CLI (webbläsarkontroll finns redan).
+> (2) INSTALLERAD 2026-11-23 i `.agents/skills/` (ospårad som `impeccable`; utom `animate-expo`,
+> `write-swift`, `ask-sonner`), ännu inte använd. Claudes förslag: pröva den på EN yta.
 Parkerad 2026-07-20, **väckt av ägaren 2026-07-29** som del av konkurrensspåret
 (`docs/konkurrensplan.md` Fas 1 — första intrycket görs bara en gång, före
 lanseringen av "Dagens givar"). **PÅBÖRJAD 2026-07-31, en yta i taget** (ägarbeslut):
