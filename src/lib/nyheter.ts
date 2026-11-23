@@ -27,6 +27,20 @@ export interface Nyhet {
 /** Nyast först. */
 export const NYHETER: Nyhet[] = [
   {
+    version: '1.0.12',
+    datum: '2026-11-23',
+    punkter: [
+      {
+        rubrik: 'Bottarnas markeringar',
+        text: 'Genomgångna och rättade: det bottarna lägger och det de läser betyder nu samma sak.',
+      },
+      {
+        rubrik: 'Lavinthal-saken',
+        text: 'Högt kort (sjua eller högre) ber om den högre av de två andra färgerna, lågt om den lägre.',
+      },
+    ],
+  },
+  {
     version: '1.0.11',
     datum: '2026-11-22',
     punkter: [

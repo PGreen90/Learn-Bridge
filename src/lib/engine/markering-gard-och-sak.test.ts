@@ -57,8 +57,15 @@ describe('garden: vilka hackor får bära en markering', () => {
   })
 
   it('tre–fyra kort: gamla gardregeln står kvar (de två högsta sparas)', () => {
-    expect(friaHackor(farg('9 8 4 2')).map((c) => c.rank)).toEqual(['4', '2'])
+    expect(friaHackor(farg('J 8 4 2')).map((c) => c.rank)).toEqual(['4', '2'])
     expect(friaHackor(farg('10 8 2')).map((c) => c.rank)).toEqual(['2'])
+  })
+
+  // Ägarbeslut 2026-11-23: utan honnör eller tia finns ingenting att garda —
+  // då är alla hackor fria ("ibland behöver man kunna lägga ett slaskkort").
+  it('kort färg utan honnör eller tia: alla hackor är fria (♣8-7-5, frö 20260752)', () => {
+    expect(friaHackor(farg('8 7 5')).map((c) => c.rank)).toEqual(['8', '7', '5'])
+    expect(friaHackor(farg('9 8 4 2')).map((c) => c.rank)).toEqual(['9', '8', '4', '2'])
   })
 
   it('en dubbelton lämnas orörd', () => {

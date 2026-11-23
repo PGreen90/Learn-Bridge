@@ -10,6 +10,15 @@
 
 ---
 
+## 2026-11-23 (slaskkortet + facit-lösarens likvärdiga kort — v1.0.12)
+**Ägarbeslut:** "ibland behöver man kunna lägga ett slaskkort" — i en färg på tre eller fyra
+kort utan honnör och utan tia finns inget att garda, så alla hackor är fria (♣8 ur 8-7-5, §8.5).
+**Fynd på vägen:** appens egen dubbel-dummy-lösare (`dds.ts`) räknade två kort i samma hand som
+likvärdiga när bara kort ur det PÅGÅENDE sticket låg emellan (♠K och ♠10 med ♠D i sticket) och
+prövade då aldrig att lägga under — facit kunde bli ett stick fel. Lagat test först
+(`dds.test.ts`, "likvärdiga kort"). **Notis v1.0.12** om hela markeringsgenomgången (ägaren
+ändrade sig från "utan notis"). **Inte gjort:** spelstyrkan är inte ommätt efter de två ändringarna.
+
 ## 2026-11-22/23 (markeringsinventeringen: fyra fel lagade + mätning)
 **Ägarens önskemål:** träna utspel och markeringar — men först se över att allt i §8 finns och funkar.
 **Fyra fel lagade (test först):** Lavinthal "högt" lades som en fyra men lästes som lågt · en färg

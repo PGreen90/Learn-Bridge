@@ -61,7 +61,7 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
     expect(reason).toContain('uppmuntr')
   })
 
-  it('avskräcker utan honnör (sang): partnern ledde ♥K, jag ♥8642 → högsta spare ♥4 (garderna ♥86 kvar)', () => {
+  it('avskräcker utan honnör (sang): partnern ledde ♥K, jag ♥8642 → ♥8 (ingen honnör eller tia att garda, ägarbeslut 2026-11-23)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '8'), C('hearts', '6'), C('hearts', '4'), C('hearts', '2'), C('spades', '7')],
@@ -70,7 +70,7 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
       completedTricks: [doneTrick('E')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '4'))
+    expect(card).toEqual(C('hearts', '8'))
     expect(reason).toContain('avskräck')
   })
 
@@ -87,7 +87,7 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
     expect(card).toEqual(C('hearts', '4'))
   })
 
-  it('attityd även när MOTSTÅNDAREN vinner sticket: partnern ledde ♥5, träkarl ♥A vinner, jag ♥9732 avskräcker → ♥3', () => {
+  it('attityd även när MOTSTÅNDAREN vinner sticket: partnern ledde ♥5, träkarl ♥A vinner, jag ♥9732 avskräcker → ♥9 (alla hackor fria utan honnör eller tia)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '9'), C('hearts', '7'), C('hearts', '3'), C('hearts', '2'), C('spades', '7')],
@@ -96,10 +96,10 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
       completedTricks: [doneTrick('E')],
     })
     const { card } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '3'))
+    expect(card).toEqual(C('hearts', '9'))
   })
 
-  it('kort 3-kortsfärg: garderna äter markeringen → lågt utan signal (♥853 → ♥3)', () => {
+  it('kort 3-kortsfärg utan honnör eller tia: slaskkortet bär markeringen (♥853 → ♥8)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '8'), C('hearts', '5'), C('hearts', '3'), C('spades', '7')],
@@ -108,8 +108,8 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
       completedTricks: [doneTrick('E')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '3'))
-    expect(reason).not.toContain('Markering')
+    expect(card).toEqual(C('hearts', '8'))
+    expect(reason).toContain('avskräck')
   })
 
   it('spelförarsidan markerar INTE: träkarlen (spelförarsidan) följer bara lågt → ♥2', () => {

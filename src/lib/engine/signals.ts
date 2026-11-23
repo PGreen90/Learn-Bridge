@@ -171,13 +171,17 @@ function spareCards(mine: Card[], played: Card[]): Card[] {
  *    Hackorna därunder är fria: i en lång färg är det längden som ger stick,
  *    så en nia eller åtta kostar inget.
  *  - **Tre eller fyra kort:** de två högsta korten sparas (♣10 ur 10-8-2 släpper
- *    garden; ♦8 ur ♦J82 släpper längden bakom knekten).
+ *    garden; ♦8 ur ♦J82 släpper längden bakom knekten). Saknar färgen både
+ *    honnör och tia finns inget att garda — då är alla hackor fria.
  *  - **Kortare:** orört.
  */
 export function friaHackor(cards: Card[]): Card[] {
   if (cards.length < 3) return cards
   if (cards.length >= 5) return cards.filter((c) => rankVal(c.rank) < rankVal('10'))
   const desc = highToLow(cards)
+  // Ingen honnör och ingen tia = ingenting att garda: alla hackor är fria
+  // (ägarbeslut 2026-11-23, "slaskkortet" — ♣8 ur 8-7-5).
+  if (rankVal(desc[0].rank) < rankVal('10')) return cards
   const gardar = new Set([desc[0].rank, desc[1].rank])
   return cards.filter((c) => !gardar.has(c.rank))
 }

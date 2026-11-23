@@ -186,3 +186,22 @@ describe('budget – fryser aldrig gränssnittet', () => {
     expect(tryDoubleDummyDeclarerTricks(deal, { declarer: 'N', strain: 'NT', level: 3 }, 50)).toBeNull()
   })
 })
+
+// FACIT FÖRE FIX (2026-11-23, hittat när Monte-Carlo-jämförelsen mot den snabba
+// lösaren gick isär): två kort i samma hand räknades som likvärdiga när bara
+// kort ur det PÅGÅENDE sticket låg emellan dem — men då slår det ena sticket
+// och det andra inte. Syd har ♠K-10, partnern Nords ♠D leder sticket över
+// Västs ♠kn: kungen tar över partnern (och Syd blir inspelad), tian låter
+// Nord behålla utspelet och dra två hjärterstick. Lösaren prövade bara kungen.
+describe('likvärdiga kort: det pågående stickets kort skiljer dem åt', () => {
+  const K = (suit: Suit, rank: Rank): Card => ({ suit, rank })
+  const hander: Record<Seat, Card[]> = {
+    N: [K('clubs', '6'), K('spades', 'Q'), K('hearts', '9'), K('hearts', 'Q')],
+    E: [K('clubs', '2'), K('clubs', 'J'), K('clubs', '8'), K('clubs', '10')],
+    S: [K('spades', '10'), K('spades', 'K'), K('clubs', '4'), K('clubs', '9')],
+    W: [K('hearts', '6'), K('spades', '3'), K('spades', 'J'), K('clubs', 'Q')],
+  }
+  it('Öst ut i ruterkontrakt utan trumf kvar: spelföraren (Väst) får ETT stick, inte två', () => {
+    expect(doubleDummyDeclarerRemaining(hander, 'diamonds', 'W', [], 'E', Infinity)).toBe(1)
+  })
+})
