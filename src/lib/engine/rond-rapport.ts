@@ -211,12 +211,12 @@ function signalRegel(
   }
   if (ctx.partnerLed) {
     return lag
-      ? 'lågt — uppmuntrar färgen (attityd, §8.1)'
-      : 'högt — avskräcker färgen (attityd, §8.1)'
+      ? 'lågt — avskräcker färgen (attityd, §8.1)'
+      : 'högt — uppmuntrar färgen (attityd, §8.1)'
   }
   return lag
-    ? 'lågt — visar jämnt antal (räkning, §8.1)'
-    : 'högt — visar udda antal (räkning, §8.1)'
+    ? 'lågt — visar udda antal (räkning, §8.1)'
+    : 'högt — visar jämnt antal (räkning, §8.1)'
 }
 
 function buildSpelforing(

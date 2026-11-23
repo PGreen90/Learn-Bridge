@@ -20,37 +20,37 @@ const cards = (...ranks: Rank[]): Card[] => ranks.map((r) => C(r))
 
 describe('spare-regeln: skyddar vinnare/honnörer/sekvens', () => {
   it('rena spotkort (8-5-2, ingen honnör) → allt är spare', () => {
-    // discourage = högsta av spare = 8; encourage = lägsta = 2.
-    expect(defensiveSignalCard(cards('8', '5', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('8'))
-    expect(defensiveSignalCard(cards('8', '5', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('2'))
+    // Rättvänt (ägarbeslut 2026-11-23): encourage = högsta av spare = 8; discourage = lägsta = 2.
+    expect(defensiveSignalCard(cards('8', '5', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('8'))
+    expect(defensiveSignalCard(cards('8', '5', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('2'))
   })
 
   it('honnör skyddas (Q-8-2) → signalen väljer bara bland 8/2, aldrig damen', () => {
-    expect(defensiveSignalCard(cards('Q', '8', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('8'))
-    expect(defensiveSignalCard(cards('Q', '8', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('2'))
+    expect(defensiveSignalCard(cards('Q', '8', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('8'))
+    expect(defensiveSignalCard(cards('Q', '8', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('2'))
   })
 
   it('honnörsledd sekvens skyddas (J-10-9-3-2) → 10 och 9 kan promoveras, spare = 3/2', () => {
-    expect(defensiveSignalCard(cards('J', '10', '9', '3', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('3'))
-    expect(defensiveSignalCard(cards('J', '10', '9', '3', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('2'))
+    expect(defensiveSignalCard(cards('J', '10', '9', '3', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('3'))
+    expect(defensiveSignalCard(cards('J', '10', '9', '3', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('2'))
   })
 
   it('säkra vinnare skyddas (A-K-4-3, inget högre ute) → spare = 4/3', () => {
     // played tomt men A/K är högsta ranken → isSureWinner sant för båda.
-    expect(defensiveSignalCard(cards('A', 'K', '4', '3'), [], { kind: 'attitude', encourage: false })).toEqual(C('4'))
-    expect(defensiveSignalCard(cards('A', 'K', '4', '3'), [], { kind: 'attitude', encourage: true })).toEqual(C('3'))
+    expect(defensiveSignalCard(cards('A', 'K', '4', '3'), [], { kind: 'attitude', encourage: true })).toEqual(C('4'))
+    expect(defensiveSignalCard(cards('A', 'K', '4', '3'), [], { kind: 'attitude', encourage: false })).toEqual(C('3'))
   })
 })
 
 describe('encoder-riktningen (på spare-mängden)', () => {
-  it('attityd: encourage → lägsta, discourage → högsta (UDCA omvänd)', () => {
-    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('2'))
-    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('9'))
+  it('attityd: encourage → högsta, discourage → lägsta (rättvänt, ägarbeslut 2026-11-23)', () => {
+    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'attitude', encourage: true })).toEqual(C('9'))
+    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'attitude', encourage: false })).toEqual(C('2'))
   })
 
-  it('räkning: jämnt → lägsta (lågt-högt), udda → högsta (högt-lågt)', () => {
-    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'count', even: true })).toEqual(C('2'))
-    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'count', even: false })).toEqual(C('9'))
+  it('räkning: jämnt → högsta (högt-lågt), udda → lägsta (lågt-högt)', () => {
+    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'count', even: true })).toEqual(C('9'))
+    expect(defensiveSignalCard(cards('9', '5', '2'), [], { kind: 'count', even: false })).toEqual(C('2'))
   })
 
   it('Lavinthal: wantHigher → högsta, annars lägsta', () => {
@@ -77,12 +77,12 @@ describe('spare-fallback (ingen frihet → dagens beteende)', () => {
 describe('säker vinnare beror på spelade kort (played skärper spare)', () => {
   it('Q blir säker vinnare när A och K fallit → Q skyddas ändå (honnör), spare = 8/2', () => {
     const played = [C('A'), C('K')]
-    expect(defensiveSignalCard(cards('Q', '8', '2'), played, { kind: 'attitude', encourage: false })).toEqual(C('8'))
+    expect(defensiveSignalCard(cards('Q', '8', '2'), played, { kind: 'attitude', encourage: true })).toEqual(C('8'))
   })
 
   it('10 blir säker vinnare när alla honnörer fallit → skyddas som vinnare, spare = 6/3', () => {
     // Ute: bara småkort under 10 kvar hos motståndarna → 10 är säker vinnare.
     const played = [C('A'), C('K'), C('Q'), C('J')]
-    expect(defensiveSignalCard(cards('10', '6', '3'), played, { kind: 'attitude', encourage: false })).toEqual(C('6'))
+    expect(defensiveSignalCard(cards('10', '6', '3'), played, { kind: 'attitude', encourage: true })).toEqual(C('6'))
   })
 })

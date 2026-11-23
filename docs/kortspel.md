@@ -145,7 +145,7 @@ förklarad i tre hopfällbara kapitel (inga textväggar — ägarkrav). Nås via
   längdmarkeringarna (3:e bästa från jämn längd / lägsta från udda / topp av
   dubbelton — "visar längden för partnern"). Spelförarsidans utspel får ALDRIG
   längdbudskapet (markeringen är försvarets), och passar inget mönster påstås
-  ingenting. **Attityd-/räkningsmarkeringar (UDCA) och Lavinthal (2026-07-29,
+  ingenting. **Attityd-/räkningsmarkeringar (rättvända sedan 2026-11-23) och Lavinthal (2026-07-29,
   §8.5):** botarna lägger dem nu i spelet, och rapporten förklarar allas
   markeringar på en egen ✦-rad per stick (`signalRegel`, re-deriverat ur korten —
   gäller även Syds egna kort). Tryck på ett botkort visar botens motivering (samma

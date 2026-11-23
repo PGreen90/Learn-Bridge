@@ -48,7 +48,7 @@ function state(opts: {
 
 // Deklarant N → träkarl S, försvarare Ö/V. Partnern till V är Ö.
 describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
-  it('uppmuntrar med honnör: partnern ledde ♥K, jag ♥Q842 → lägsta spare ♥2 (garderna ♥Q8 kvar)', () => {
+  it('uppmuntrar med honnör: partnern ledde ♥K, jag ♥Q842 → ♥8, kortet närmast under damen (rättvänt, ägarbeslut 2026-11-23)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', 'Q'), C('hearts', '8'), C('hearts', '4'), C('hearts', '2'), C('spades', '7')],
@@ -57,11 +57,11 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
       completedTricks: [doneTrick('E')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '2'))
+    expect(card).toEqual(C('hearts', '8'))
     expect(reason).toContain('uppmuntr')
   })
 
-  it('avskräcker utan honnör (sang): partnern ledde ♥K, jag ♥8642 → ♥8 (ingen honnör eller tia att garda, ägarbeslut 2026-11-23)', () => {
+  it('fyra hackor mot partnerns honnör i SANG uppmuntrar med längden: ♥8642 mot ♥K → ♥8 (ägarbeslut 2026-11-23)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '8'), C('hearts', '6'), C('hearts', '4'), C('hearts', '2'), C('spades', '7')],
@@ -71,10 +71,10 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
     })
     const { card, reason } = botCardReasoned(st, 'W')
     expect(card).toEqual(C('hearts', '8'))
-    expect(reason).toContain('avskräck')
+    expect(reason).toContain('längd')
   })
 
-  it('uppmuntrar via kort färg i trumfkontrakt: partnern ♥A, jag ♥84 dubbelton → lägsta ♥4', () => {
+  it('uppmuntrar via kort färg i trumfkontrakt: partnern ♥A, jag ♥84 dubbelton → högt ♥8', () => {
     const st = state({
       trump: 'spades',
       seat: 'W',
@@ -84,10 +84,10 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
       completedTricks: [doneTrick('E')],
     })
     const { card } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '4'))
+    expect(card).toEqual(C('hearts', '8'))
   })
 
-  it('attityd även när MOTSTÅNDAREN vinner sticket: partnern ledde ♥5, träkarl ♥A vinner, jag ♥9732 avskräcker → ♥9 (alla hackor fria utan honnör eller tia)', () => {
+  it('attityd även när MOTSTÅNDAREN vinner sticket: partnern ledde ♥5, träkarl ♥A vinner, jag ♥9732 avskräcker → lägsta ♥2 (partnern spelade ut en hacka: längden uppmuntrar inte)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '9'), C('hearts', '7'), C('hearts', '3'), C('hearts', '2'), C('spades', '7')],
@@ -96,10 +96,10 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
       completedTricks: [doneTrick('E')],
     })
     const { card } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '9'))
+    expect(card).toEqual(C('hearts', '2'))
   })
 
-  it('kort 3-kortsfärg utan honnör eller tia: slaskkortet bär markeringen (♥853 → ♥8)', () => {
+  it('kort 3-kortsfärg utan honnör eller tia avskräcker med sitt lägsta (♥853 → ♥3)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '8'), C('hearts', '5'), C('hearts', '3'), C('spades', '7')],
@@ -108,7 +108,7 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
       completedTricks: [doneTrick('E')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '8'))
+    expect(card).toEqual(C('hearts', '3'))
     expect(reason).toContain('avskräck')
   })
 
@@ -129,7 +129,7 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
 describe('Steg 2 – räkning på motståndarens färg', () => {
   // Gardregeln efter längd (ägarbeslut 2026-11-22): i en femkortsfärg är hackorna
   // fria — nian markerar. Förr sparades ♥97 som gardar och femman fick bära budskapet.
-  it('andra hand, UDDA antal ♥97532 → högt kort ♥9 (högt-lågt; fem kort, hackorna är fria)', () => {
+  it('andra hand, UDDA antal ♥97532 → lågt kort ♥2 (lågt-högt)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '9'), C('hearts', '7'), C('hearts', '5'), C('hearts', '3'), C('hearts', '2'), C('spades', '7')],
@@ -138,11 +138,11 @@ describe('Steg 2 – räkning på motståndarens färg', () => {
       completedTricks: [doneTrick('S')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '9'))
+    expect(card).toEqual(C('hearts', '2'))
     expect(reason).toContain('UDDA')
   })
 
-  it('andra hand, JÄMNT antal ♥8642 → lågt kort ♥2 (lågt-högt)', () => {
+  it('andra hand, JÄMNT antal ♥8642 → högt kort ♥8 (högt-lågt; ingen honnör eller tia att garda)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '8'), C('hearts', '6'), C('hearts', '4'), C('hearts', '2'), C('spades', '7')],
@@ -151,11 +151,11 @@ describe('Steg 2 – räkning på motståndarens färg', () => {
       completedTricks: [doneTrick('S')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '2'))
+    expect(card).toEqual(C('hearts', '8'))
     expect(reason).toContain('JÄMNT')
   })
 
-  it('dubbelton visar JÄMNT (räkning): motståndaren ledde ♥, jag ♥83 → lågt ♥3', () => {
+  it('dubbelton visar JÄMNT (räkning): motståndaren ledde ♥, jag ♥83 → högt ♥8', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '8'), C('hearts', '3'), C('spades', '7'), C('spades', '6')],
@@ -164,11 +164,11 @@ describe('Steg 2 – räkning på motståndarens färg', () => {
       completedTricks: [doneTrick('S')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '3'))
+    expect(card).toEqual(C('hearts', '8'))
     expect(reason).toContain('JÄMNT')
   })
 
-  it('räkning respekterar gardern: ♥K642 jämnt → lägsta spare ♥2 (♥K8… honnör + topp skyddade)', () => {
+  it('räkning respekterar garden: ♥K642 jämnt → ♥4, det högsta FRIA kortet (♥K6 sparas som gardar)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', 'K'), C('hearts', '6'), C('hearts', '4'), C('hearts', '2'), C('spades', '7')],
@@ -177,7 +177,7 @@ describe('Steg 2 – räkning på motståndarens färg', () => {
       completedTricks: [doneTrick('S')],
     })
     const { card } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '2'))
+    expect(card).toEqual(C('hearts', '4'))
   })
 
   it('spelförarsidan ger inte räkning: träkarlen andra hand → lägsta ♥2', () => {

@@ -80,8 +80,10 @@ describe('§8.3 honnörsutspel – facit-lås (inre/längre sekvenser)', () => {
     expect(honorLead(cards('A', 'K', 'Q', 'J'))).toEqual(C('A')))
   it('J-10-9-x → J (knekt-topp räcker som lägsta honnör)', () =>
     expect(honorLead(cards('J', '10', '9', '2'))).toEqual(C('J')))
-  it('10-9-8 → null (topp under knekt är ingen honnörssekvens)', () =>
-    expect(honorLead(cards('10', '9', '8'))).toBeNull())
+  it('10-9-8 → 10 (tian är topp av sekvens, ägarbeslut 2026-11-23)', () =>
+    expect(honorLead(cards('10', '9', '8'))).toEqual(C('10')))
+  it('9-8-7 → null (topp under tian är ingen sekvens att spela ut)', () =>
+    expect(honorLead(cards('9', '8', '7'))).toBeNull())
   it('A-J-10-9 → J (inre sekvens J-10-9 under esset, hål B)', () =>
     expect(honorLead(cards('A', 'J', '10', '9'))).toEqual(C('J')))
 })
@@ -102,26 +104,26 @@ describe('§8.3 leadFromSuit – inre sekvens före spot (hål B)', () => {
 })
 
 describe('§8.1/§8.2 markeringar – facit-lås (dubbelton/singel spare)', () => {
-  it('attityd uppmuntrar ur dubbelton → lägsta', () =>
-    expect(attitudeCard(cards('7', '3'), true)).toEqual(C('3')))
+  it('attityd uppmuntrar ur dubbelton → högsta', () =>
+    expect(attitudeCard(cards('7', '3'), true)).toEqual(C('7')))
   it('räkning udda ur singel → kortet självt', () =>
     expect(countCard(cards('6'), false)).toEqual(C('6')))
   it('Lavinthal vill ha lägre ur dubbelton → lägsta', () =>
     expect(lavinthalDiscard(cards('9', '4'), false)).toEqual(C('4')))
 })
 
-describe('§8.1 UDCA omvänd attityd', () => {
-  it('uppmuntrar → lägsta kortet', () =>
-    expect(attitudeCard(cards('9', '4', '2'), true)).toEqual(C('2')))
-  it('avskräcker → högsta kortet', () =>
-    expect(attitudeCard(cards('9', '4', '2'), false)).toEqual(C('9')))
+describe('§8.1 rättvänd attityd (ägarbeslut 2026-11-23)', () => {
+  it('uppmuntrar → högsta kortet', () =>
+    expect(attitudeCard(cards('9', '4', '2'), true)).toEqual(C('9')))
+  it('avskräcker → lägsta kortet', () =>
+    expect(attitudeCard(cards('9', '4', '2'), false)).toEqual(C('2')))
 })
 
-describe('§8.1 UDCA omvänd räkning', () => {
-  it('jämnt antal → lågt (lågt-högt)', () =>
-    expect(countCard(cards('8', '5', '3'), true)).toEqual(C('3')))
-  it('udda antal → högt (högt-lågt)', () =>
-    expect(countCard(cards('8', '5', '3'), false)).toEqual(C('8')))
+describe('§8.1 rättvänd räkning (ägarbeslut 2026-11-23)', () => {
+  it('jämnt antal → högt (högt-lågt)', () =>
+    expect(countCard(cards('8', '5', '3'), true)).toEqual(C('8')))
+  it('udda antal → lågt (lågt-högt)', () =>
+    expect(countCard(cards('8', '5', '3'), false)).toEqual(C('3')))
 })
 
 describe('§8.2 Lavinthal-sak', () => {

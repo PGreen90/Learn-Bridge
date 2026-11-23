@@ -33,8 +33,8 @@ const SKILLNADER: { rubrik: string; text: string }[] = [
     text: '1♣–2♣ och 1♦–2♦ är starka (10+, krav) medan hoppet till tre är svagt och spärrande. Tvärtom mot vad många är vana vid.',
   },
   {
-    rubrik: 'Markeringarna är omvända',
-    text: 'I motspel betyder ett lågt kort "jag gillar färgen" och låg–hög visar jämnt antal (UDCA). Utspelen är tredje/femte högsta från längd.',
+    rubrik: 'Markeringarna',
+    text: 'I motspel betyder ett högt kort "jag gillar färgen" och hög–låg visar jämnt antal. Första saket är Lavinthal: högt ber om den högre av de två andra färgerna. Utspelen är tredje/femte högsta från längd.',
   },
 ]
 

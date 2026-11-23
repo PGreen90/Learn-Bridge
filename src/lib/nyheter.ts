@@ -27,6 +27,24 @@ export interface Nyhet {
 /** Nyast först. */
 export const NYHETER: Nyhet[] = [
   {
+    version: '1.0.13',
+    datum: '2026-11-23',
+    punkter: [
+      {
+        rubrik: 'Markeringarna vidareutvecklade',
+        text: 'Högt kort uppmuntrar, lågt avskräcker. Högt-lågt visar jämnt antal.',
+      },
+      {
+        rubrik: 'Uppmuntran i sang',
+        text: 'Mot partnerns honnörsutspel uppmuntrar även längd: fyra kort eller fler.',
+      },
+      {
+        rubrik: 'Utspel från 10-9',
+        text: 'Tian spelas ut från 10-9-8 och 10-9-x.',
+      },
+    ],
+  },
+  {
     version: '1.0.12',
     datum: '2026-11-23',
     punkter: [
