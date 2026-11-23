@@ -193,15 +193,21 @@ function signalRegel(
   if (holding.length < 2) return null // inget val → ingen markering
   const lagst = holding.reduce((lo, c) => (rankVal(c.rank) < rankVal(lo.rank) ? c : lo))
   const hogst = holding.reduce((hi, c) => (rankVal(c.rank) > rankVal(hi.rank) ? c : hi))
-  // Toppkortet i en 3+-färg är aldrig en markering (gardregeln + det kan vara ett
-  // trickförsök) – matchar hur bottarna kodar. Dubbelton: båda korten kan bära.
-  if (holding.length >= 3 && card.rank === hogst.rank) return null
+  // Garden är aldrig en markering (§8.5, skärpt 2026-11-22) – matchar hur
+  // bottarna kodar. Fem kort eller fler: honnörer och tian är gardar, hackorna
+  // därunder är fria (nian ur 9-8-4-3-2 ÄR en markering). Tre–fyra kort:
+  // toppkortet (det kan dessutom vara ett trickförsök). Dubbelton: båda bär.
+  if (holding.length >= 5 ? rankVal(card.rank) >= rankVal('10') : holding.length >= 3 && card.rank === hogst.rank) {
+    return null
+  }
   const lag = card.rank === lagst.rank
   if (ctx.isDiscard) {
     if (!ctx.firstDiscard) return null // Lavinthal bara på FÖRSTA saket (§8.2)
-    return lag
-      ? 'lågt sak — ber om den lägre av de andra färgerna (Lavinthal, §8.2)'
-      : 'högt sak — ber om den högre av de andra färgerna (Lavinthal, §8.2)'
+    // Samma gränser som bottarna läser med: sjua+ är högt, femma− är lågt,
+    // sexan säger ingenting.
+    if (rankVal(card.rank) >= rankVal('7')) return 'högt sak — ber om den högre av de två andra färgerna (Lavinthal, §8.2)'
+    if (rankVal(card.rank) <= rankVal('5')) return 'lågt sak — den lägre av de två andra färgerna, eller ingenting att be om (Lavinthal, §8.2)'
+    return null
   }
   if (ctx.partnerLed) {
     return lag

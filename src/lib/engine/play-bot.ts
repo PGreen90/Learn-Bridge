@@ -17,10 +17,10 @@ import type { ResolvedCall } from '../bidding'
 import { currentWinner, dummyOf, legalCards, NEXT_SEAT, PARTNER_SEAT, side, type PlayState } from './play'
 import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats } from './card-counting'
 import { buildHandModel } from './hand-model'
-import { applyOpeningLeadSignal, applySignalReads, partnerLavinthalRequest } from './signal-decode'
+import { applyOpeningLeadSignal, applySignalReads, partnerLavinthalSak } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
 import { avblockering } from './unblock'
-import { defensiveSignalCard, honorLead, leadFromSuit } from './signals'
+import { defensiveSignalCard, friaHackor, honorLead, leadFromSuit } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
@@ -202,20 +202,6 @@ function defenderGuardDiscard(state: PlayState, seat: Seat, legal: Hand): Card |
 }
 
 /**
- * Behåll mina TVÅ högsta kort i färgen som gardar i längre färger (3+) och
- * returnera resten (de jag kan markera med). Att markera med ett toppkort kan
- * blotta en stoppare/ett längdstick (♣10 ur 10-8-2 släpper garden på spelförarens
- * långa klöver; ♦8 ur ♦J82 släpper längden bakom knekten). "Riktiga markeringar"
- * – men aldrig en grov blunder. Kortare färger (≤2) lämnas orörda.
- */
-function spareAfterGuards(cards: Card[]): Card[] {
-  if (cards.length < 3) return cards
-  const desc = [...cards].sort((a, b) => rankVal(b.rank) - rankVal(a.rank))
-  const gardRanks = new Set([desc[0].rank, desc[1].rank])
-  return cards.filter((c) => !gardRanks.has(c.rank))
-}
-
-/**
  * Försvarsmarkering när jag FÖLJER färg med ett värdelöst kort (markeringar
  * Steg 1, docs/budsystem.md §8.1). Attityd på partnerns utspelsfärg: uppmuntra
  * (lägg lågt, UDCA omvänt) med Q+ i färgen OCH/ELLER en kort färg (dubbel-/
@@ -242,10 +228,13 @@ function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardC
     if (winCard.suit === led) candidates = candidates.filter((c) => rankVal(c.rank) < rankVal(winCard.rank))
     if (candidates.length < 2) return null
   }
-  candidates = spareAfterGuards(candidates)
+  // Gardregeln räknas på HELA innehavet i färgen (längden avgör vad som är fritt).
+  const myInLed = state.hands[seat].filter((c) => c.suit === led)
+  const fria = friaHackor(myInLed)
+  candidates = candidates.filter((c) => fria.some((f) => f.rank === c.rank))
   if (candidates.length < 2) return null
   const played = playedCards(state)
-  const myInLed = state.hands[seat].filter((c) => c.suit === led)
+  const langFarg = myInLed.length >= 5
 
   if (state.currentTrick[0].seat === PARTNER_SEAT[seat]) {
     // Partnern ledde → ATTITYD: uppmuntra med styrka (Q+) och/eller kort färg
@@ -253,7 +242,7 @@ function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardC
     const hasQ = myInLed.some((c) => rankVal(c.rank) >= rankVal('Q'))
     const shortRuff = state.trump !== null && led !== state.trump && myInLed.length <= 2
     const encourage = hasQ || shortRuff
-    const card = defensiveSignalCard(candidates, played, { kind: 'attitude', encourage })
+    const card = defensiveSignalCard(candidates, played, { kind: 'attitude', encourage }, { langFarg })
     const reason = encourage
       ? 'Markering (§8.1): jag lägger lågt = jag uppmuntrar partnerns färg (jag har något där).'
       : 'Markering (§8.1): jag lägger högt = jag avskräcker partnerns färg.'
@@ -263,7 +252,7 @@ function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardC
   // Motståndaren ledde → RÄKNING (§8.1, omvänt): jämnt antal = lågt (lågt-högt),
   // udda antal = högt (högt-lågt). Läser bara antalet egna kort i färgen.
   const even = myInLed.length % 2 === 0
-  const card = defensiveSignalCard(candidates, played, { kind: 'count', even })
+  const card = defensiveSignalCard(candidates, played, { kind: 'count', even }, { langFarg })
   const reason = even
     ? 'Markering (§8.1): räkning – lågt kort visar JÄMNT antal i färgen för partnern.'
     : 'Markering (§8.1): räkning – högt kort visar UDDA antal i färgen för partnern.'
@@ -288,14 +277,28 @@ const SUIT_NAME: Record<Suit, string> = { clubs: 'klöver', diamonds: 'ruter', h
  * önskade färgen — esset först om det finns, annars `leadFromSuit` (topp av
  * sekvens / lågt). Null när ingen begäran finns eller färgen är slut.
  */
-function defenderFollowsPartnerLavinthal(state: PlayState, seat: Seat, legal: Hand): CardChoice | null {
+function defenderFollowsPartnerLavinthal(state: PlayState, seat: Seat, legal: Hand, hogt: boolean): CardChoice | null {
   if (side(seat) === side(state.contract.declarer)) return null
-  const wanted = partnerLavinthalRequest(state, seat)
-  if (!wanted) return null
+  // En HÖG sak är en riktig begäran (lovar dam eller högre) och går före allt;
+  // en LÅG sak betyder "den lägre färgen, eller ingenting att be om" och lyds
+  // först när utspelsfärgen inte har något att ge (mätningen 2026-11-23, frö
+  // 20260779/20260752: annars överges den egna långa färgen för ett tips).
+  const sak = partnerLavinthalSak(state, seat)
+  if (!sak || sak.hogt !== hogt) return null
+  const wanted = sak.suit
   const inSuit = legal.filter((c) => c.suit === wanted)
   if (inSuit.length === 0) return null
   const ace = inSuit.find((c) => c.rank === 'A')
-  const card = ace ?? leadFromSuit(inSuit)
+  let card = ace ?? leadFromSuit(inSuit)
+  // Lyd partnern, men skänk inte bort en honnör: ligger ett HÖGRE kort i färgen
+  // synligt på bordet tas honnören direkt (♥K ur K-4 in i träkarlens ♥E-5). Då
+  // spelas färgen med det lägsta kortet i stället (inventeringen 2026-11-22).
+  if (!ace && rankVal(card.rank) >= rankVal('J')) {
+    const bordet = state.hands[dummyOf(state.contract)]
+    const slas = bordet.some((c) => c.suit === wanted && rankVal(c.rank) > rankVal(card.rank))
+    const lagsta = lowest(inSuit)
+    if (slas && lagsta.rank !== card.rank) card = lagsta
+  }
   return {
     card,
     reason: `Partnerns markering (§8.2, Lavinthal-sak) bad om ${SUIT_NAME[wanted]} – jag spelar den färgen${ace ? ', esset först' : ''}.`,
@@ -319,21 +322,67 @@ function defenderFirstDiscardSignal(state: PlayState, seat: Seat, legal: Hand): 
   // den naiva lågt-utan-ruff-färgen).
   const guardCard = defenderGuardDiscard(state, seat, legal)
   const safeSuit = (guardCard ?? lowAvoidRuff(legal, state.trump)).suit
-  const inSuit = spareAfterGuards(candidates.filter((c) => c.suit === safeSuit))
-  if (inSuit.length < 2) return null // ingen frihet att signalera → låt vakten stå
-  // De TVÅ (eller tre i sang) övriga färgerna, rankordnade. Lavinthal pekar mot
-  // den jag har mest honnörsstyrka i (den jag vill att partnern spelar).
-  const others = SUIT_RANK_LOW_TO_HIGH.filter((s) => s !== safeSuit && s !== state.trump)
-  const strength = (s: Suit) =>
-    state.hands[seat].filter((c) => c.suit === s).reduce((n, c) => n + (HCP_OF[c.rank] ?? 0), 0)
-  const higher = others[others.length - 1]
-  const lower = others[0]
-  const wantHigher = strength(higher) >= strength(lower)
-  const card = defensiveSignalCard(inSuit, playedCards(state), { kind: 'lavinthal', wantHigher })
-  const reason = wantHigher
-    ? 'Markering (§8.2): Lavinthal-sak – högt kort ber om den högre av de andra färgerna.'
-    : 'Markering (§8.2): Lavinthal-sak – lågt kort ber om den lägre av de andra färgerna.'
-  return { card, reason }
+  if (safeSuit === state.trump) return null
+
+  // Inventeringen 2026-11-22 (ägarbeslut): lägga och läsa ska säga samma sak.
+  //  • En sak pekar på en av TVÅ färger: aldrig sakfärgen, aldrig trumfen och — i
+  //    SANG — aldrig utspelsfärgen (där är jag renons och har inget att hämta).
+  //    I trumfkontrakt räknas utspelsfärgen med: att be om den är att be om en stöld.
+  //  • En färg begärs bara med dam eller högre i den.
+  //  • "Högt" är sjua eller högre, "lågt" femma eller lägre — samma gränser som
+  //    läsaren använder. Går begäran inte att lägga ärligt i den säkra färgen
+  //    prövas en annan honnörslös färg; annars läggs ett kort som inte ljuger.
+  const hand = state.hands[seat]
+  const iFarg = (s: Suit) => hand.filter((c) => c.suit === s)
+  const pekbara = SUIT_RANK_LOW_TO_HIGH.filter((s) => s !== state.trump && (state.trump !== null || s !== led))
+  const styrka = (s: Suit) => iFarg(s).reduce((n, c) => n + (HCP_OF[c.rank] ?? 0), 0)
+  const harDam = (s: Suit) => iFarg(s).some((c) => rankVal(c.rank) >= rankVal('Q'))
+  const harHonnor = (s: Suit) => iFarg(s).some((c) => rankVal(c.rank) >= rankVal('J'))
+  const onskad = [...pekbara.filter(harDam)].sort((a, b) => styrka(b) - styrka(a))[0] ?? null
+  const HOGT = rankVal('7')
+  const LAGT = rankVal('5')
+  // Bara HACKOR bär en sak: honnörer och tian offras aldrig, inte heller ur en
+  // dubbelton (där gardregeln annars lämnar korten orörda — ♠K ur K-4).
+  const fria = (s: Suit) =>
+    friaHackor(iFarg(s)).filter(
+      (c) => rankVal(c.rank) < rankVal('10') && candidates.some((k) => k.suit === c.suit && k.rank === c.rank),
+    )
+
+  if (onskad) {
+    const sakfarger = [safeSuit, ...pekbara.filter((s) => s !== safeSuit && iFarg(s).length > 0 && !harHonnor(s))]
+    for (const sak of sakfarger) {
+      if (sak === onskad) continue
+      const andra = pekbara.filter((s) => s !== sak)
+      if (andra.length !== 2 || !andra.includes(onskad)) continue
+      const villHogt = andra[1] === onskad
+      const kort = fria(sak)
+      if (kort.length === 0) continue
+      const val = villHogt ? highest(kort) : lowest(kort)
+      const lasbart = villHogt ? rankVal(val.rank) >= HOGT : rankVal(val.rank) <= LAGT
+      if (!lasbart) continue
+      return {
+        card: val,
+        reason: villHogt
+          ? `Markering (§8.2): Lavinthal-sak – högt kort ber om ${SUIT_NAME[onskad]}, den högre av de två andra färgerna.`
+          : `Markering (§8.2): Lavinthal-sak – lågt kort ber om ${SUIT_NAME[onskad]}, den lägre av de två andra färgerna.`,
+      }
+    }
+  }
+  // Inget att be om, eller så går begäran inte att lägga ärligt: ett lågt kort
+  // lovar ingenting (läsaren antar ingen dam av det). Finns bara höga kort att
+  // avvara läggs sexan om den finns — den säger ingenting åt något håll.
+  const kort = fria(safeSuit)
+  if (kort.length === 0) return null
+  // Är det lägsta kortet redan lågt gör den vanliga sakregeln rätt sak (och
+  // har en bättre förklaring: honnörsvakten, "ruffar aldrig partnern") — då
+  // lägger vi oss inte i.
+  if (rankVal(lowest(kort).rank) <= LAGT) return null
+  const neutralt = kort.find((c) => c.rank === '6') ?? null
+  if (!neutralt) return null
+  return {
+    card: neutralt,
+    reason: 'Sak (§8.2): jag har ingen färg att be om – ett lågt kort lovar ingenting.',
+  }
 }
 
 /** Handens färger grupperade, längsta först (stabil ordning → längst, sedan handordning). */
@@ -1675,7 +1724,7 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // ("dra esset och spela sedan ett till"), annars enligt utspelsdoktrinen.
     // Går före fortsättningen av utspelsfärgen: partnern var ju renons i den.
     if (signalsOn) {
-      const lav = defenderFollowsPartnerLavinthal(state, seat, legal)
+      const lav = defenderFollowsPartnerLavinthal(state, seat, legal, true)
       if (lav) return lav
     }
     // Motspelets utspelfärg (trick 1, om den leddes av vår sida) fortsätts före
@@ -1723,6 +1772,12 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
             'färgen slår allt jag har, så sticket är bordets vad jag än lägger – honnören sparas och växer (§8.11).'
           : attackReason,
       }
+    }
+    // Partnerns LÅGA sak (ett tips, ingen order) lyds här: utspelsfärgen hade
+    // inget att ge.
+    if (signalsOn) {
+      const lav = defenderFollowsPartnerLavinthal(state, seat, legal, false)
+      if (lav) return lav
     }
     // Speldiagnosen S2 (frö 20260731): trumfled in i en KÄND gaffel undviks —
     // en show-out har placerat all kvarvarande trumf hos en motståndare, över

@@ -10,6 +10,21 @@
 
 ---
 
+## 2026-11-22/23 (markeringsinventeringen: fyra fel lagade + mätning)
+**Ägarens önskemål:** träna utspel och markeringar — men först se över att allt i §8 finns och funkar.
+**Fyra fel lagade (test först):** Lavinthal "högt" lades som en fyra men lästes som lågt · en färg
+begärdes utan honnörer (och läsaren antog en dam) · en tvingad åtta lästes som avskräckande ·
+utspelsfärgen räknades i sang, så styrkefärgen gick inte att be om. **Ägarbeslut:** i en färg på
+fem kort eller fler är hackorna under tian fria ("har jag 10-8-6-5-4 väljer jag 8"); honnörer och
+tian offras aldrig. **Mätningen** (bottarna på alla platser, eget frö per beslut, före mot efter;
+`STYRKA=1 STYRKA_GIVAR=120 npx vitest run revisor-output/spelstyrka-fore-efter.probe.test.ts`
+i båda träden): spelstyrkan oförändrad. Den hittade ett femte fel — en LÅG sak lyddes som en
+order (frö 20260779, 20260752) — nu är den ett tips som lyds först när utspelsfärgen inte har
+mer att ge. **Kvar (ägarbeslut behövs):** räkning och uppmuntran läses inte · färgpreferens efter
+attityd finns inte · utspelet läses bara i sang · 10-9-8 som utspelssekvens · uppmuntran med
+längd (kn-6-4-3-2 mot partnerns ess, frö 20260828) · §8.7 "ta esset medan det går" i sang (samma
+frö) · fria hackor i kort färg utan honnör (♣8-7-5, frö 20260752).
+
 ## 2026-11-22 (startsidan i grupper — LIVE v1.0.11 `50334b0`)
 **Ägarens bild:** startsidan "har blivit för mycket" — åtta lika stora kort i en kolumn,
 vart och ett med en förklarande mening. Ägarens första idé var två vägval (Tävla/Träna).

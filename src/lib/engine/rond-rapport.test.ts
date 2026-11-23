@@ -373,7 +373,7 @@ describe('rondgenomgång: markeringar (§8.1/§8.2)', () => {
       input({ deal: d, contract: { declarer: 'S', strain: 'spades', level: 4 }, tricks: [trick] }),
     )
     expect(r.spelforing[0].signalRader).toContain(
-      'Väst i klöver: lågt sak — ber om den lägre av de andra färgerna (Lavinthal, §8.2).',
+      'Väst i klöver: lågt sak — den lägre av de två andra färgerna, eller ingenting att be om (Lavinthal, §8.2).',
     )
   })
 
