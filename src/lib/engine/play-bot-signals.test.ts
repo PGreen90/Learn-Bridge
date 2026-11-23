@@ -127,7 +127,9 @@ describe('Steg 1 – attityd på partnerns utspelsfärg', () => {
 })
 
 describe('Steg 2 – räkning på motståndarens färg', () => {
-  it('andra hand, UDDA antal ♥97532 → högt kort ♥5 (högt-lågt, garderna ♥97 kvar)', () => {
+  // Gardregeln efter längd (ägarbeslut 2026-11-22): i en femkortsfärg är hackorna
+  // fria — nian markerar. Förr sparades ♥97 som gardar och femman fick bära budskapet.
+  it('andra hand, UDDA antal ♥97532 → högt kort ♥9 (högt-lågt; fem kort, hackorna är fria)', () => {
     const st = state({
       seat: 'W',
       hand: [C('hearts', '9'), C('hearts', '7'), C('hearts', '5'), C('hearts', '3'), C('hearts', '2'), C('spades', '7')],
@@ -136,7 +138,7 @@ describe('Steg 2 – räkning på motståndarens färg', () => {
       completedTricks: [doneTrick('S')],
     })
     const { card, reason } = botCardReasoned(st, 'W')
-    expect(card).toEqual(C('hearts', '5'))
+    expect(card).toEqual(C('hearts', '9'))
     expect(reason).toContain('UDDA')
   })
 
@@ -195,7 +197,8 @@ describe('Steg 2 – räkning på motståndarens färg', () => {
 describe('Steg 3 – Lavinthal på första saket', () => {
   // Trumf spader; Öst försvarar och kan inte följa utspelet → sakar klöver.
   // Övriga färger (ej saken klöver, ej trumf spader) = ruter & hjärter.
-  it('högt sak ber om den HÖGRE färgen: styrka i hjärter → högsta spare-klöver ♣5 (♣97 gard)', () => {
+  // Samma beslut: ♣9 ur ♣97532 — ett kort som läsaren faktiskt läser som högt (sjua+).
+  it('högt sak ber om den HÖGRE färgen: styrka i hjärter → ♣9 ur femkortsfärgen', () => {
     const st = state({
       trump: 'spades',
       seat: 'E',
@@ -208,7 +211,7 @@ describe('Steg 3 – Lavinthal på första saket', () => {
       completedTricks: [doneTrick('N')],
     })
     const { card, reason } = botCardReasoned(st, 'E')
-    expect(card).toEqual(C('clubs', '5'))
+    expect(card).toEqual(C('clubs', '9'))
     expect(reason).toContain('högre')
   })
 

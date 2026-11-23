@@ -14,11 +14,10 @@ svarar på vad).
 > --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · damfråga i lågfärgstrumf (§6.1) · stört MSS utan stopp · iakttagelserna i historik 11-15/11-22. Design-skillen `impeccable`
 > ligger i `.agents/skills/` — ägaren avgör om den används i etapp 2/FACELIFTEN.
 
-### 🔵 NU — Startsidans gruppering (ägarbeslut 2026-11-22)
-Åtta lika kort blev grupper på EN sida: veckans stjärna i sidhuvudet · Tävla = en panel
-med tre rader som visar läget · Träna = tre brickor (historik 11-22).
-KLART & LIVE v1.0.11 `50334b0`. Kvar att se: mätarraden inloggad · bred skärm.
-Felrapport #129 + #131 + Tyck till #130 KLART & LIVE `63800ad` (historik 11-22).
+### 🔵 NU — Markeringar och utspel: inventeringen (ägarbeslut 2026-11-22)
+Önskemål: träna utspel och markeringar. FÖRST granskas att allt i §8 finns och funkar:
+tabell regel × lägger/läser/förklarar/test → ägarbeslut på luckorna → laga, test först.
+Startsidan i grupper KLAR & LIVE v1.0.11 (historik 11-22); läget följer kontot: live-prov.
 Övningens fiktiva jämförelse KLAR (live-prov OK 2026-11-22, v1.0.10 `1fd3b9e`). Tempot KLART.
 Stjärntävlingen (kodnamn `guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
 Senast LIVE: v1.0.5 `1731319` (spelbordet etapp A–E, historik 11-15) · `93a08ec` (#125–#127, förslag #122/#123) · v1.0.2 `7d3caa6` (#116–#121, #124) · v1.0.1 `74a89bc` (regel 📣 i arbetsrutiner.md).
@@ -95,6 +94,7 @@ hål utan giv: `docs/senare.md` "Ur bevaka-översynen".
 ### 🟢 NÄST (max 3, i ordning)
 0. **/felrapporter** — börja varje session med öppna rapporter (ägarordning 2026-09-28).
 1. **Stjärntävlingens uppföljning** — siffrorna efter första veckan (bottarna, urvalet); kolla att vecka 1 frystes.
+2. **Träna utspel och markeringar** — byggs som budträningen, först när inventeringen är lagad.
 
 ### ⚪ SENARE (rubriker — full beskrivning i `docs/senare.md`)
 **vänner + bjud in med pushnotis** · speldiagnosens nästa runda · bordens kandidater (ångra/claim/ge upp) · **budförklarings-svepet** (betydelsesvepet rött på störda; lista i docs/senare.md) · FACELIFTEN forts. (inkl. tävlingsöversiktens mobil-layout) · fler skills + smal

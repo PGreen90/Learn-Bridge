@@ -107,6 +107,15 @@ export function applyOpeningLeadSignal(
   return model
 }
 
+/** Antal kort i `card`s färg som är LÄGRE än kortet och ännu osedda för `seat`
+ *  — varken spelade eller i en hand platsen lagligt ser (egen + träkarlen). */
+function oseddaLagre(state: PlayState, seat: Seat, card: Card): number {
+  const sedda = new Set<Rank>()
+  for (const c of playedCards(state)) if (c.suit === card.suit) sedda.add(c.rank)
+  for (const v of visibleSeats(state, seat)) for (const c of state.hands[v]) if (c.suit === card.suit) sedda.add(c.rank)
+  return RANK_LOW_TO_HIGH.slice(0, rankVal(card.rank)).filter((r) => !sedda.has(r)).length
+}
+
 /** Klampa längd- och färg-HP-golv mot taket för en plats/färg efter skärpning. */
 function clampSeat(model: HandModel, seat: Seat, suit: Suit): void {
   const c = model[seat]
@@ -157,7 +166,12 @@ export function applySignalReads(
       if (pc.card.suit !== ledSuit) continue // bara när platsen följde färg
       if (side(leader) !== side(s)) continue // attityd bara på PARTNERNS färg
       const r = rankVal(pc.card.rank)
-      if (r >= LO && r <= HI) {
+      // Ett TVINGAT kort är ingen markering (inventeringen 2026-11-22): kortet
+      // är "högt" bara om spelaren kan ha haft ett lägre. Syns (nästan) alla
+      // lägre kort i färgen redan för den som läser, kan det vara spelarens
+      // lägsta — ♥8 ur D-8 — och säger då ingenting. Minst två osedda lägre
+      // kort krävs: med ett enda kan det lika gärna sitta hos spelföraren.
+      if (r >= LO && r <= HI && oseddaLagre(state, seat, pc.card) >= 2) {
         // Avskräckande högt spotkort → förnekar dam+ (max 1 hp = ev. knekt).
         suitHcpCeil(model[s], ledSuit, 1)
         clampSeat(model, s, ledSuit)
@@ -165,10 +179,13 @@ export function applySignalReads(
     }
   }
   // Partnerns Lavinthal-sak: den önskade färgen bär minst en dam.
-  const wanted = partnerLavinthalRequest(state, seat)
-  if (wanted) {
-    suitHcpFloor(model[PARTNER_SEAT[seat]], wanted, 2)
-    clampSeat(model, PARTNER_SEAT[seat], wanted)
+  // Bara en HÖG sak lovar något (inventeringen 2026-11-22): en färg begärs med
+  // dam eller högre i den. En låg sak betyder "den lägre färgen, eller ingenting"
+  // — den som inte har något att be om lägger också lågt — så den höjer inget golv.
+  const sak = partnerLavinthalSak(state, seat)
+  if (sak?.hogt) {
+    suitHcpFloor(model[PARTNER_SEAT[seat]], sak.suit, 2)
+    clampSeat(model, PARTNER_SEAT[seat], sak.suit)
   }
   return model
 }
@@ -184,6 +201,16 @@ export function applySignalReads(
  * Bara motspelet markerar: spelförarsidan läser inget.
  */
 export function partnerLavinthalRequest(state: PlayState, seat: Seat): Suit | null {
+  return partnerLavinthalSak(state, seat)?.suit ?? null
+}
+
+/** Partnerns första sak, läst: vilken färg den pekar på och om kortet var HÖGT
+ *  (en riktig begäran, som lovar dam eller högre) eller lågt (lovar ingenting).
+ *  En sak pekar på en av TVÅ färger — aldrig sakfärgen, aldrig trumfen och, i
+ *  SANG, aldrig färgen som spelades ut i sticket (där är partnern renons). I
+ *  trumfkontrakt räknas utspelsfärgen med: att be om den är att be om en stöld.
+ *  Blir det inte exakt två färger kvar finns inget att läsa. */
+export function partnerLavinthalSak(state: PlayState, seat: Seat): { suit: Suit; hogt: boolean } | null {
   const declarer = state.contract.declarer
   if (side(seat) === side(declarer)) return null
   const partner = PARTNER_SEAT[seat]
@@ -194,12 +221,13 @@ export function partnerLavinthalRequest(state: PlayState, seat: Seat): Suit | nu
     if (!pc || pc.card.suit === led) continue
     if (state.trump !== null && pc.card.suit === state.trump) return null // stöld, inte sak
     const r = rankVal(pc.card.rank)
-    const others = SUIT_RANK_LOW_TO_HIGH.filter((s) => s !== pc.card.suit && s !== state.trump)
-    if (others.length < 2) return null
-    if (r >= rankVal('7')) return others[others.length - 1]
-    if (r <= rankVal('5')) return others[0]
+    const others = SUIT_RANK_LOW_TO_HIGH.filter(
+      (s) => s !== pc.card.suit && s !== state.trump && (state.trump !== null || s !== led),
+    )
+    if (others.length !== 2) return null
+    if (r >= rankVal('7')) return { suit: others[1], hogt: true }
+    if (r <= rankVal('5')) return { suit: others[0], hogt: false }
     return null // sexan säger inget säkert
   }
   return null
 }
-

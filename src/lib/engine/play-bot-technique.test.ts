@@ -221,9 +221,9 @@ describe('Steg B – kast-vakten bevarar positionen FÖRE MC-fönstret (B0/B1)',
     }
     const completedTricks: Trick[] = [
       T([['S', 'spades', 'Q'], ['W', 'spades', 'J'], ['N', 'spades', '10'], ['E', 'spades', '9']]),
-      T([['S', 'spades', '8'], ['W', 'spades', '7'], ['N', 'spades', '6'], ['E', 'clubs', '7']]), // Öst: äkta ♠-renons
+      T([['S', 'spades', '8'], ['W', 'spades', '7'], ['N', 'spades', '6'], ['E', 'clubs', '6']]), // Öst: äkta ♠-renons; sexan säger inget (Lavinthal läser 7+ / 5−)
       T([['S', 'hearts', 'Q'], ['W', 'hearts', 'J'], ['N', 'hearts', '10'], ['E', 'hearts', '9']]),
-      T([['S', 'hearts', '8'], ['W', 'hearts', '7'], ['N', 'clubs', '6'], ['E', 'hearts', '3']]),
+      T([['S', 'hearts', '8'], ['W', 'hearts', '7'], ['N', 'clubs', '7'], ['E', 'hearts', '3']]),
     ]
     return {
       contract: { declarer: 'S', strain: 'NT', level: 1 },

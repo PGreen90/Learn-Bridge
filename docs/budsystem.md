@@ -3577,6 +3577,18 @@ genom kortets storlek (i en färg du inte vill ha):
 - **högt kort = jag vill ha den högre** av de övriga färgerna,
 - **lågt kort = den lägre** färgen.
 
+**Vilka två färger saken väljer mellan (2026-11-22).** Aldrig sakfärgen och
+aldrig trumfen. I **sang** räknas inte heller utspelsfärgen: där är du renons och
+har inget att hämta. Då återstår alltid exakt två färger. *Exempel: 3NT, partnern
+spelar ut spader, du är renons och sakar en klöver — kortet väljer mellan ruter
+och hjärter.* I **trumfkontrakt** räknas utspelsfärgen med: att be om den är att
+be om en stöld.
+
+**Högt och lågt.** **Sjua eller högre** är högt, **femma eller lägre** är lågt, och
+sexan säger ingenting. **Bara ett högt kort är en riktig begäran:** det lovar dam
+eller högre i den begärda färgen. Ett lågt kort betyder *den lägre färgen, eller
+ingenting* — den som inte har något att be om lägger också lågt.
+
 ### 8.3 Utspel
 **Spotkort (3:e/5:e bästa)** – mot både färg och NT:
 - **3:e bästa** från en **jämn** längd (t.ex. 3:e kortet från 4-korts färg),
@@ -3658,12 +3670,21 @@ Reglerna för *vilket* kort de väljer:
   lågt kort (lågt-högt), **udda** antal = högt kort (högt-lågt).
 - **Lavinthal** (jag sakar första gången): honnörsvakten väljer en **säker** färg
   att saka ur, och kortets storlek pekar mot den färg jag vill att partnern
-  spelar – **högt** = den högre av de andra färgerna, **lågt** = den lägre.
+  spelar – **högt** = den högre av de två andra färgerna, **lågt** = den lägre.
+  Boten ber bara om en färg där den har **dam eller högre**, och bara med ett kort
+  som går att läsa (sjua+ för högt, femma− för lågt). Går det inte i den säkra
+  färgen prövas en annan honnörslös färg. Har boten inget att be om lägger den
+  lågt, vilket inte lovar något (§8.2).
 
-**Gardregeln (viktig, ägarbeslut):** en markering får aldrig vara en grov
-blunder. Därför behåller boten sina **två högsta kort** i en färg (3+ kort) som
-gardar och markerar bland resten – att markera med ett toppkort kan annars blotta
-en stoppare eller ett längdstick. En markering läser bara den egna handen (aldrig
+**Gardregeln (viktig, ägarbeslut; skärpt 2026-11-22):** en markering får aldrig
+vara en grov blunder — *man offrar inte en oskyddad gard*.
+- **Fem kort eller fler:** honnörerna och **tian** är gardar och offras aldrig.
+  Hackorna därunder är fria: i en lång färg är det längden som ger stick, så en
+  nia eller åtta kostar inget. *10-8-6-5-4 → åttan markerar högt. 9-8-4-3-2 →
+  nian.*
+- **Tre eller fyra kort:** boten behåller sina **två högsta kort** som gardar och
+  markerar bland resten – ett toppkort kan annars blotta en stoppare eller ett
+  längdstick (♣10 ur 10-8-2). En markering läser bara den egna handen (aldrig
 partnerns dolda kort), så den kan i sällsynta fall ändå kosta ett stick när
 partnerns kort gör spotkortet värdefullt; det är ärlig bridge och vinner in sig
 när partnern *läser* markeringen. I korta färger där varje kort behövs lägger
@@ -3676,6 +3697,14 @@ högt spotkort) betyder att markeraren saknar dam+ i färgen, så samplaren slut
 lägga dam/kung där. Uppmuntran (tvetydig: dam+ *eller* kort färg) och räkning
 (paritet) avkodas inte ännu.
 
+**Ett tvingat kort är ingen markering (2026-11-22).** Ett kort läses som högt
+bara om spelaren kan ha haft ett lägre. Syns alla lägre kort i färgen redan för
+den som läser — i egen hand, på bordet eller spelade — kan kortet vara spelarens
+lägsta och säger då ingenting. Minst två lägre kort ska vara osedda för att en
+åtta, nia eller tia ska läsas som avskräckande. *Exempel: partnern spelar ut ♥A,
+du ser ♥7-5-2 hos dig och ♥6-4-3 på bordet. Partnerns ♥8 kan vara från D-8 och
+förnekar inte damen.*
+
 **Även människans markeringar läses (felrapport #96, ägarbeslut 2026-10-06).**
 Förr avkodades bara bottarnas kort ("människans metod känner vi inte"); nu antar
 bottarna att människan spelar samma §8-system som de själva — rondgenomgången
@@ -3683,12 +3712,16 @@ förklarar ju redan hennes kort med samma regler. Öppningsutspelets *doktrin*
 (längsta färg) antas fortfarande bara för bottar.
 
 **Partnerns Lavinthal-sak lyds (samma beslut).** Partnerns **första sak** i given
-ber om en färg: **högt kort (7+) = den högsta** av de andra färgerna (alla utom
-sakfärgen och trumfen — i sang tre färger), **lågt (5 eller lägre) = den lägsta**;
-en sexa säger inget. När motspelaren sedan är inne **spelar hen den önskade
-färgen — esset först om hen har det, annars enligt utspelsdoktrinen** — före
-fortsättningen av utspelsfärgen (partnern var renons i den). Bot-hjärnan ger
-dessutom partnern minst en dam i den önskade färgen. *Bricka 11 (2NT av Väst):
+ber om en färg: **högt kort (7+) = den högre** av de två andra färgerna (§8.2),
+**lågt (5 eller lägre) = den lägre**; en sexa säger inget. Efter en **hög** sak **spelar motspelaren den önskade
+färgen så fort hen är inne — esset först om hen har det, annars enligt utspelsdoktrinen** — före
+fortsättningen av utspelsfärgen (partnern var renons i den). En **låg** sak är ett
+tips, ingen order: den som inte har något att be om lägger också lågt, så den lyds
+först när utspelsfärgen inte har något mer att ge (2026-11-23). Hen skänker dock inte bort
+en honnör på vägen: ligger ett högre kort i färgen synligt på bordet spelas det
+lägsta kortet i stället (♥4 ur K-4 mot bordets ♥E-5, inte kungen; 2026-11-22). Efter en **hög** sak ger
+bot-hjärnan dessutom partnern minst en dam i den önskade färgen; en låg sak
+lovar ingenting. *Bricka 11 (2NT av Väst):
 Syd sakade ♥7 på Nords ruterutspel; Nord inne på ♣K fortsatte förr ruter — nu
 ♠A och sedan spader.* Uppmätt spelstyrka (bot-mot-bot, 20 seedade givar):
 avkodningen sänkte spelförarens stick netto (bättre försvar), inom bruset –
@@ -3912,6 +3945,28 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-23 — en låg sak är ett tips, ingen order (§8.5, mätningen efter
+  markeringsinventeringen):** bara en HÖG Lavinthal-sak går före fortsättningen
+  av utspelsfärgen. En låg sak ("den lägre färgen, eller ingenting") lyds först
+  när utspelsfärgen inte har något att ge. Två givar i mätningen (frö 20260779,
+  20260752) visade att försvararen annars övergav sin egen långa färg.
+  Test: `markering-gard-och-sak.test.ts`.
+- **2026-11-22 — gardregeln efter färglängd + Lavinthal-saken (§8.2/§8.5,
+  ägarbeslut: "man offrar inte en oskyddad gard — har jag 10-8-6-5-4 väljer jag
+  8").** Fem kort eller fler: honnörer och tian sparas, hackorna därunder är
+  fria. Tre–fyra kort: de två högsta sparas som förr. Saken väljer mellan exakt
+  två färger (i sang räknas inte utspelsfärgen), begär bara med dam eller högre,
+  och läggs med ett kort som läsaren läser likadant (sjua+ högt, femma− lågt).
+  Bara en hög sak lovar en dam. Tre fel i samma kort lagade: ♦4 ur 9-8-4-2 lagd
+  som "högt" men läst som lågt, begäran utan honnörer, och styrkefärgen som aldrig
+  gick att be om. Kod: `friaHackor` i `signals.ts`, `defenderFirstDiscardSignal`
+  i `play-bot.ts`, `partnerLavinthalSak` i `signal-decode.ts`; facit
+  `markering-gard-och-sak.test.ts`.
+- **2026-11-22 — ett tvingat kort är ingen markering (§8.5,
+  markeringsinventeringen).** Bottarna läste varje 8, 9 och 10 i partnerns färg
+  som "ingen dam eller högre", även när kortet var spelarens lägsta (♥8 ur D-8).
+  Nu krävs minst två osedda lägre kort i färgen. Kod: `oseddaLagre` i
+  `signal-decode.ts`; facit `signal-decode-tvingat-kort.test.ts`.
 - **2026-11-22 — damfrågan före kungfrågan (§6.1/§6.3, ägarbeslut: "damfrågan
   skall användas").** Med alla fem nyckelkort och okänd trumfdam ställs
   damfrågan först, på båda frågarvägarna. Nekad dam → lillslam; visad dam →

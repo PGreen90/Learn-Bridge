@@ -163,6 +163,25 @@ function spareCards(mine: Card[], played: Card[]): Card[] {
   })
 }
 
+/**
+ * GARDREGELN (ägarbeslut 2026-07-29, skärpt 2026-11-22): vilka kort i en färg
+ * får bära en markering?
+ *  - **Fem kort eller fler:** honnörerna och tian är gardar och offras aldrig
+ *    ("man offrar inte en oskyddad gard — har jag 10-8-6-5-4 väljer jag 8").
+ *    Hackorna därunder är fria: i en lång färg är det längden som ger stick,
+ *    så en nia eller åtta kostar inget.
+ *  - **Tre eller fyra kort:** de två högsta korten sparas (♣10 ur 10-8-2 släpper
+ *    garden; ♦8 ur ♦J82 släpper längden bakom knekten).
+ *  - **Kortare:** orört.
+ */
+export function friaHackor(cards: Card[]): Card[] {
+  if (cards.length < 3) return cards
+  if (cards.length >= 5) return cards.filter((c) => rankVal(c.rank) < rankVal('10'))
+  const desc = highToLow(cards)
+  const gardar = new Set([desc[0].rank, desc[1].rank])
+  return cards.filter((c) => !gardar.has(c.rank))
+}
+
 /** En försvarssignal att bära: attityd, räkning eller Lavinthal-färgpreferens. */
 export type DefensiveSignal =
   | { kind: 'attitude'; encourage: boolean }
@@ -179,9 +198,15 @@ export function defensiveSignalCard(
   candidatesInSuit: Card[],
   played: Card[],
   signal: DefensiveSignal,
+  opts: { langFarg?: boolean } = {},
 ): Card {
   if (candidatesInSuit.length === 1) return candidatesInSuit[0]
-  const spare = spareCards(candidatesInSuit, played)
+  // Lång färg (5+): gardregeln har redan sorterat bort honnörer och tian, och
+  // hackorna därunder är fria även när de hänger ihop med en honnör (9-8 under
+  // kn-10). Bara säkra vinnare skyddas då.
+  const spare = opts.langFarg
+    ? candidatesInSuit.filter((c) => !sureWinnerInSuit(c, candidatesInSuit, played))
+    : spareCards(candidatesInSuit, played)
   if (spare.length === 0) return lowest(candidatesInSuit)
   if (spare.length === 1) return spare[0]
   switch (signal.kind) {
