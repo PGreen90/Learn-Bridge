@@ -67,8 +67,13 @@ const BUDGET = Symbol('dds-budget')
  * färg slås löpande sviter (inget motståndarkort emellan, enligt `inPlay`-
  * bitmaskarna) ihop till ett drag – likvärdiga kort ger identiskt resultat.
  * Delas av lösaren (optimalt spel) och claim-kontrollen (alla spelsätt).
+ *
+ * Kort i det PÅGÅENDE sticket skiljer också (2026-11-23): ligger ♠D i sticket
+ * är ♠K och ♠10 inte likvärdiga — kungen slår damen, tian gör det inte.
+ * `inPlay` rymmer bara kort som sitter kvar i en hand, så stickets kort läggs
+ * till här.
  */
-function legalMovesFor(hands: ICard[][], inPlay: number[], seat: number, leadSuit: number): ICard[] {
+function legalMovesFor(hands: ICard[][], inPlay: number[], seat: number, leadSuit: number, trick: Play[]): ICard[] {
   const hand = hands[seat]
   let cand = hand
   if (leadSuit >= 0) {
@@ -78,11 +83,15 @@ function legalMovesFor(hands: ICard[][], inPlay: number[], seat: number, leadSui
   const bySuit: ICard[][] = [[], [], [], []]
   for (const c of cand) bySuit[c.s].push(c)
 
+  const iSticket = [0, 0, 0, 0]
+  for (const p of trick) iSticket[p.s] |= 1 << p.r
+
   const out: ICard[] = []
   for (let s = 0; s < 4; s++) {
     const arr = bySuit[s]
     if (arr.length === 0) continue
     arr.sort((a, b) => b.r - a.r) // hög → låg
+    const skiljer = inPlay[s] | iSticket[s]
     let prevKept = -1
     for (const c of arr) {
       if (prevKept < 0) {
@@ -92,7 +101,7 @@ function legalMovesFor(hands: ICard[][], inPlay: number[], seat: number, leadSui
       }
       let oppBetween = false
       for (let r = c.r + 1; r < prevKept; r++) {
-        if (inPlay[s] & (1 << r)) {
+        if (skiljer & (1 << r)) {
           oppBetween = true
           break
         }
@@ -198,7 +207,7 @@ function solveDeal(
 
     const leadSuit = trick.length > 0 ? trick[0].s : -1
     const maximizing = toAct % 2 === targetSide
-    const moves = legalMovesFor(hands, inPlay, toAct, leadSuit)
+    const moves = legalMovesFor(hands, inPlay, toAct, leadSuit, trick)
     orderMoves(moves, leadSuit, ttMove)
     let best = maximizing ? -Infinity : Infinity
     let bestMv = -1
@@ -380,7 +389,7 @@ export function sureWinAllRemaining(
     }
 
     const leadSuit = trick.length > 0 ? trick[0].s : -1
-    const moves = legalMovesFor(hands, inPlay, toAct, leadSuit)
+    const moves = legalMovesFor(hands, inPlay, toAct, leadSuit, trick)
     let ok = true
     for (const card of moves) {
       const hand = hands[toAct]

@@ -1044,7 +1044,7 @@ describe('felrapport #25 – motspelaren blottar inte en honnör vid sakning', (
     const declTricksAfter = (wc: Card): number => {
       const after = playCard(st, wc)
       const dd = doubleDummyDeclarerRemaining(
-        after.hands, 'NT', 'S', after.currentTrick.map((p) => ({ seat: p.seat, card: p.card })), after.toAct, 5_000_000,
+        after.hands, 'NT', 'S', after.currentTrick.map((p) => ({ seat: p.seat, card: p.card })), after.toAct, 60_000_000,
       )
       expect(dd).not.toBeNull()
       return (dd as number) + after.tricksNS

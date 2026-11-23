@@ -3684,7 +3684,9 @@ vara en grov blunder — *man offrar inte en oskyddad gard*.
   nian.*
 - **Tre eller fyra kort:** boten behåller sina **två högsta kort** som gardar och
   markerar bland resten – ett toppkort kan annars blotta en stoppare eller ett
-  längdstick (♣10 ur 10-8-2). En markering läser bara den egna handen (aldrig
+  längdstick (♣10 ur 10-8-2). **Utan honnör eller tia** finns inget att garda —
+  då är alla hackor fria (♣8 ur 8-7-5; ägarbeslut 2026-11-23: "ibland behöver
+  man kunna lägga ett slaskkort"). En markering läser bara den egna handen (aldrig
 partnerns dolda kort), så den kan i sällsynta fall ändå kosta ett stick när
 partnerns kort gör spotkortet värdefullt; det är ärlig bridge och vinner in sig
 när partnern *läser* markeringen. I korta färger där varje kort behövs lägger
@@ -3945,6 +3947,17 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-23 — facit-lösaren: kort i det pågående sticket skiljer likvärdiga
+  kort (appens dubbel-dummy-lösare, `dds.ts`):** två kort i samma hand räknades
+  som likvärdiga när bara stickets egna kort låg emellan dem (♠K och ♠10 med ♠D
+  i sticket) — lösaren prövade då bara det högre och missade att lägga under.
+  Hittat när Monte-Carlo-jämförelsen mot den snabba lösaren gick isär.
+  Test: `dds.test.ts`.
+- **2026-11-23 — slaskkortet: fria hackor i kort färg utan honnör eller tia
+  (§8.5, ägarbeslut):** i en färg på tre–fyra kort sparas de två högsta korten
+  bara när färgen har en honnör eller tia att garda. Annars är alla hackor fria,
+  så ♣8 ur 8-7-5 kan bära en hög markering (frö 20260752: Syd kunde förr inte
+  be om spader). Test: `markering-gard-och-sak.test.ts`.
 - **2026-11-23 — en låg sak är ett tips, ingen order (§8.5, mätningen efter
   markeringsinventeringen):** bara en HÖG Lavinthal-sak går före fortsättningen
   av utspelsfärgen. En låg sak ("den lägre färgen, eller ingenting") lyds först
