@@ -204,8 +204,10 @@ function defenderGuardDiscard(state: PlayState, seat: Seat, legal: Hand): Card |
 /**
  * Försvarsmarkering när jag FÖLJER färg med ett värdelöst kort (markeringar
  * Steg 1, docs/budsystem.md §8.1). Attityd på partnerns utspelsfärg: uppmuntra
- * (lägg lågt, UDCA omvänt) med Q+ i färgen OCH/ELLER en kort färg (dubbel-/
- * singelton att snart trumfa i trumfkontrakt); annars avskräck (lägg högt).
+ * (lägg HÖGT — rättvänd markering, ägarbeslut 2026-11-23) med Q+ i färgen,
+ * en kort färg (dubbel-/singelton att snart trumfa i trumfkontrakt) eller, i
+ * sang mot partnerns honnörsutspel, fyra kort eller fler; annars avskräck
+ * (lägg lågt).
  * Kortet väljs bland spare (`defensiveSignalCard` → kan aldrig kosta ett stick)
  * och läggs alltid UNDER partnerns vinnande kort (tar aldrig över partnerns
  * stick). Returnerar null när det inte gäller: spelförarsidan, jag leder/sakar,
@@ -230,32 +232,46 @@ function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardC
   }
   // Gardregeln räknas på HELA innehavet i färgen (längden avgör vad som är fritt).
   const myInLed = state.hands[seat].filter((c) => c.suit === led)
-  const fria = friaHackor(myInLed)
+  const partnerLedde = state.currentTrick[0].seat === PARTNER_SEAT[seat]
+  // ATTITYD (partnern ledde): uppmuntra med styrka (Q+), med kort färg
+  // (stöldvärde i trumfkontrakt) eller — i sang mot partnerns honnörs-/
+  // sekvensutspel — med längd: fyra kort eller fler gör färgen till försvarets
+  // stickkälla (♣kn-6-4-3-2 mot ♣A, ägarbeslut 2026-11-23). Läser bara egen hand.
+  const hasQ = myInLed.some((c) => rankVal(c.rank) >= rankVal('Q'))
+  const shortRuff = state.trump !== null && led !== state.trump && myInLed.length <= 2
+  const langdISang =
+    state.trump === null && myInLed.length >= 4 && rankVal(state.currentTrick[0].card.rank) >= rankVal('10')
+  const encourage = partnerLedde && (hasQ || shortRuff || langdISang)
+  // Med dam eller högre i en färg på tre–fyra kort bär kortet närmast under
+  // honnörerna uppmuntran (åttan ur D-8-2, ägarbeslut 2026-11-23): gardregeln
+  // sparar annars de två högsta, och då blir tvåan — "jag avskräcker" — enda
+  // fria kortet. Tian och honnörerna offras fortfarande aldrig.
+  const fria =
+    encourage && hasQ && myInLed.length >= 3 && myInLed.length <= 4
+      ? myInLed.filter((c) => rankVal(c.rank) < rankVal('10'))
+      : friaHackor(myInLed)
   candidates = candidates.filter((c) => fria.some((f) => f.rank === c.rank))
   if (candidates.length < 2) return null
   const played = playedCards(state)
   const langFarg = myInLed.length >= 5
 
-  if (state.currentTrick[0].seat === PARTNER_SEAT[seat]) {
-    // Partnern ledde → ATTITYD: uppmuntra med styrka (Q+) och/eller kort färg
-    // (ruffvärde i trumfkontrakt). Läser bara egen hand.
-    const hasQ = myInLed.some((c) => rankVal(c.rank) >= rankVal('Q'))
-    const shortRuff = state.trump !== null && led !== state.trump && myInLed.length <= 2
-    const encourage = hasQ || shortRuff
+  if (partnerLedde) {
     const card = defensiveSignalCard(candidates, played, { kind: 'attitude', encourage }, { langFarg })
     const reason = encourage
-      ? 'Markering (§8.1): jag lägger lågt = jag uppmuntrar partnerns färg (jag har något där).'
-      : 'Markering (§8.1): jag lägger högt = jag avskräcker partnerns färg.'
+      ? langdISang && !hasQ
+        ? 'Markering (§8.1): jag lägger högt = jag uppmuntrar partnerns färg (jag har längd i den).'
+        : 'Markering (§8.1): jag lägger högt = jag uppmuntrar partnerns färg (jag har något där).'
+      : 'Markering (§8.1): jag lägger lågt = jag avskräcker partnerns färg.'
     return { card, reason }
   }
 
-  // Motståndaren ledde → RÄKNING (§8.1, omvänt): jämnt antal = lågt (lågt-högt),
-  // udda antal = högt (högt-lågt). Läser bara antalet egna kort i färgen.
+  // Motståndaren ledde → RÄKNING (§8.1, rättvänt): jämnt antal = högt (högt-lågt),
+  // udda antal = lågt (lågt-högt). Läser bara antalet egna kort i färgen.
   const even = myInLed.length % 2 === 0
   const card = defensiveSignalCard(candidates, played, { kind: 'count', even }, { langFarg })
   const reason = even
-    ? 'Markering (§8.1): räkning – lågt kort visar JÄMNT antal i färgen för partnern.'
-    : 'Markering (§8.1): räkning – högt kort visar UDDA antal i färgen för partnern.'
+    ? 'Markering (§8.1): räkning – högt kort visar JÄMNT antal i färgen för partnern.'
+    : 'Markering (§8.1): räkning – lågt kort visar UDDA antal i färgen för partnern.'
   return { card, reason }
 }
 

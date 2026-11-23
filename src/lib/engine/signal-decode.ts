@@ -116,6 +116,15 @@ function oseddaLagre(state: PlayState, seat: Seat, card: Card): number {
   return RANK_LOW_TO_HIGH.slice(0, rankVal(card.rank)).filter((r) => !sedda.has(r)).length
 }
 
+/** Antal HACKOR (under tian) i `card`s färg som är HÖGRE än kortet och ännu
+ *  osedda för `seat` — kort spelaren kunde ha uppmuntrat med. */
+function oseddaHogreHackor(state: PlayState, seat: Seat, card: Card): number {
+  const sedda = new Set<Rank>()
+  for (const c of playedCards(state)) if (c.suit === card.suit) sedda.add(c.rank)
+  for (const v of visibleSeats(state, seat)) for (const c of state.hands[v]) if (c.suit === card.suit) sedda.add(c.rank)
+  return RANK_LOW_TO_HIGH.slice(rankVal(card.rank) + 1, rankVal('10')).filter((r) => !sedda.has(r)).length
+}
+
 /** Klampa längd- och färg-HP-golv mot taket för en plats/färg efter skärpning. */
 function clampSeat(model: HandModel, seat: Seat, suit: Suit): void {
   const c = model[seat]
@@ -129,13 +138,16 @@ function clampSeat(model: HandModel, seat: Seat, suit: Suit): void {
  * Läser botarnas ATTITYDMARKERINGAR och skärper hand-modellen så Monte-Carlo-
  * samplaren delar ut de dolda händerna troligare.
  *
- * Just nu avkodas det ENTYDIGA, säkra fallet: en AVSKRÄCKANDE attityd på
- * partnerns färg. En bot avskräcker (lägger ett högt spotkort) DETERMINISTISKT
- * bara när den saknar dam+ i färgen (§8.5). Så ett högt spotkort (8/9/10) lagt
- * i partnerns utspelsfärg, av en bot-motspelare som inte vann sticket, sätter
- * ett HP-TAK i färgen (ingen dam+). Uppmuntran (lågt) är tvetydig (dam+ ELLER
- * kort färg) och avkodas inte. Räkning (paritet) hör till samplar-arbetet och
- * tas separat.
+ * Just nu avkodas det tydligaste fallet: en AVSKRÄCKANDE attityd på partnerns
+ * färg. Markeringen är RÄTTVÄND (ägarbeslut 2026-11-23): den som har dam+
+ * uppmuntrar med sitt högsta fria kort, den som saknar det lägger sitt LÄGSTA.
+ * Så ett kort som bevisligen är spelarens lägsta (inga lägre kort osedda), lagt
+ * i partnerns utspelsfärg av en motspelare som inte vann sticket, sätter ett
+ * HP-TAK i färgen (ingen dam+) — förutsatt att minst två högre hackor är
+ * osedda, så att spelaren kan ha haft något att uppmuntra med. Kvar som känd
+ * lucka: dam-2 dubbelton och D-10-2 lägger också sitt lägsta. Uppmuntran (högt)
+ * är tvetydig (dam+, kort färg ELLER längd i sang) och avkodas inte. Räkning
+ * (paritet) hör till samplar-arbetet och tas separat.
  *
  * Järnprincip (ingen tjuvkik): bara ärligt synliga kort avkodas, aldrig den
  * agerande platsens egen hand (den samplas inte). Sedan felrapport #96
@@ -152,8 +164,6 @@ export function applySignalReads(
 ): HandModel {
   const humanSeat = opts.humanSeat === undefined ? null : opts.humanSeat
   const declarer = state.contract.declarer
-  const LO = rankVal('8')
-  const HI = rankVal('10')
   for (const trick of state.completedTricks) {
     if (trick.cards.length === 0) continue
     const ledSuit = trick.cards[0].card.suit
@@ -165,14 +175,17 @@ export function applySignalReads(
       if (s === leader || s === trick.winner) continue // utspel / vinnare markerar inte
       if (pc.card.suit !== ledSuit) continue // bara när platsen följde färg
       if (side(leader) !== side(s)) continue // attityd bara på PARTNERNS färg
-      const r = rankVal(pc.card.rank)
-      // Ett TVINGAT kort är ingen markering (inventeringen 2026-11-22): kortet
-      // är "högt" bara om spelaren kan ha haft ett lägre. Syns (nästan) alla
-      // lägre kort i färgen redan för den som läser, kan det vara spelarens
-      // lägsta — ♥8 ur D-8 — och säger då ingenting. Minst två osedda lägre
-      // kort krävs: med ett enda kan det lika gärna sitta hos spelföraren.
-      if (r >= LO && r <= HI && oseddaLagre(state, seat, pc.card) >= 2) {
-        // Avskräckande högt spotkort → förnekar dam+ (max 1 hp = ev. knekt).
+      // Ett kort är AVSKRÄCKANDE bara om det bevisligen är spelarens lägsta
+      // (alla lägre kort i färgen syns redan för den som läser) OCH spelaren
+      // kan ha haft en högre hacka att uppmuntra med (minst två osedda — med en
+      // enda kan den lika gärna sitta hos spelföraren). Ett TVINGAT kort är
+      // ingen markering (inventeringen 2026-11-22).
+      if (
+        rankVal(pc.card.rank) < rankVal('10') &&
+        oseddaLagre(state, seat, pc.card) === 0 &&
+        oseddaHogreHackor(state, seat, pc.card) >= 2
+      ) {
+        // Avskräckande lägsta kort → förnekar dam+ (max 1 hp = ev. knekt).
         suitHcpCeil(model[s], ledSuit, 1)
         clampSeat(model, s, ledSuit)
       }

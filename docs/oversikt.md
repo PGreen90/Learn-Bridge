@@ -63,5 +63,5 @@
 - **Lebensohl** · **DONT** mot deras 1NT · **Mathe** mot stark 1♣
 
 ## Markeringar & utspel
-- **UDCA** (omvänd attityd + räkning) · **Lavinthal**-sak
+- **Rättvänd markering** (högt uppmuntrar, högt-lågt = jämnt; rättat 2026-11-23) · **Lavinthal**-sak
 - **3:e/5:e** utspel · standard honnörsutspel

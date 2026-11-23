@@ -1,10 +1,11 @@
 // §8 Markeringar & utspel – rena, testade encoders av försvarets signaler.
 // Härlett ur systemboken §8. Vi spelar:
-//   • Omvänd markering (UDCA): attityd lågt=gillar/högt=ogillar; räkning
-//     lågt-högt=jämnt / högt-lågt=udda (§8.1).
+//   • RÄTTVÄND markering (ägarbeslut 2026-11-23 — boken sa förr "omvänd", det
+//     var fel): attityd högt=gillar/lågt=ogillar; räkning högt-lågt=jämnt /
+//     lågt-högt=udda (§8.1).
 //   • Lavinthal-sak: första saket visar färgpreferens – högt=högre övriga
 //     färgen, lågt=lägre (§8.2).
-//   • Utspel: honnörsutspel = topp av sekvens (AK→A, KQ→K, QJ→Q, JT→J),
+//   • Utspel: honnörsutspel = topp av sekvens (AK→A, KQ→K, QJ→Q, JT→J, T9→T),
 //     annars spotkort 3:e bästa (jämn längd) / 5:e=lägsta (udda längd) (§8.3).
 //
 // Det här är encoders: de väljer VILKET kort som bär en viss signal.
@@ -43,7 +44,8 @@ function runLengthFrom(sorted: Card[], i: number): number {
  *
  * Två fall (hål B, docs/utspel-teori.md §3a):
  *  1. **Topp-sekvens** – sammanhängande löpa på ≥2 kort från högsta kortet, med
- *     toppen knekt eller högre → led toppen (AK→A, KQ→K, QJ→Q, JT→J, KQJ→K).
+ *     toppen TIA eller högre → led toppen (AK→A, KQ→K, QJ→Q, JT→J, KQJ→K, och
+ *     sedan ägarbeslut 2026-11-23 även tian från 10-9-8 och 10-9-x).
  *  2. **Inre/bruten sekvens** – en hög honnör (J+) med ett glapp ner till en
  *     sammanhängande löpa på ≥2 kort vars topp är en honnör (10+) → led toppen av
  *     den INRE löpan (KJ10→J, K109→10, Q109→10, AJ10→J, AQJ10→Q, AQJ→Q). Detta
@@ -54,7 +56,7 @@ export function honorLead(suitCards: Card[]): Card | null {
   if (suitCards.length < 2) return null
   const sorted = highToLow(suitCards)
   // 1. Topp-sekvens.
-  if (runLengthFrom(sorted, 0) >= 2 && rankVal(sorted[0].rank) >= rankVal('J')) return sorted[0]
+  if (runLengthFrom(sorted, 0) >= 2 && rankVal(sorted[0].rank) >= rankVal('10')) return sorted[0]
   // 2. Inre sekvens: kräver en hög honnör överst och en honnörsledd inre löpa.
   if (rankVal(sorted[0].rank) < rankVal('J')) return null
   for (let i = 1; i < sorted.length; ) {
@@ -84,19 +86,19 @@ export function leadFromSuit(suitCards: Card[]): Card {
 }
 
 /**
- * §8.1 Attityd (UDCA, omvänd): lågt kort = uppmuntrar, högt kort = avskräcker.
+ * §8.1 Attityd (rättvänd): HÖGT kort = uppmuntrar, lågt kort = avskräcker.
  * `spare` = de kort du kan avvara i färgen. Returnerar kortet att lägga.
  */
 export function attitudeCard(spare: Card[], encourage: boolean): Card {
-  return encourage ? lowest(spare) : highest(spare)
+  return encourage ? highest(spare) : lowest(spare)
 }
 
 /**
- * §8.1 Räkning (UDCA, omvänd): första kortet är lågt vid JÄMNT antal
- * (lågt-högt) och högt vid UDDA antal (högt-lågt).
+ * §8.1 Räkning (rättvänd): första kortet är HÖGT vid JÄMNT antal (högt-lågt)
+ * och lågt vid UDDA antal (lågt-högt).
  */
 export function countCard(spare: Card[], evenLength: boolean): Card {
-  return evenLength ? lowest(spare) : highest(spare)
+  return evenLength ? highest(spare) : lowest(spare)
 }
 
 /**
@@ -111,7 +113,7 @@ export function lavinthalDiscard(discardSuitCards: Card[], wantHigher: boolean):
 // --- Säkerhetskärnan: spare-beräkning + encoder-val (markeringar Steg 0) ------
 //
 // En markering får ALDRIG kosta ett stick. Idag lägger botten lägsta kortet; en
-// markering kan lägga ett HÖGRE spotkort (avskräck/udda/Lavinthal-hög). Därför
+// markering kan lägga ett HÖGRE spotkort (uppmuntra/jämnt/Lavinthal-hög). Därför
 // väljer encodern bara bland SPARE – kort jag ärligt kan avvara, som bevisligen
 // aldrig kan bli/kosta ett stick. Säkerhet och signal är ortogonala: den anropande
 // koden (play-bot) har redan valt en SÄKER färg; här väljs kortet inom den.

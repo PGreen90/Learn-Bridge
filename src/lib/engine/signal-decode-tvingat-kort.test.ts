@@ -1,3 +1,8 @@
+// RÄTTVÄNT sedan 2026-11-23 (ägarbeslut: högt uppmuntrar, lågt avskräcker): nu
+// är det spelarens LÄGSTA kort som avskräcker, och bara när det bevisligen är
+// det lägsta. Åttan ur D-8 läses numera som det den är — uppmuntrande. Texten
+// nedan beskriver felet som det såg ut under den omvända markeringen.
+//
 // FACIT FÖRE FIX — markeringsinventeringen 2026-11-22, fel 3: ETT TVINGAT KORT
 // ÄR INGEN MARKERING. Bottarna läste varje 8, 9 eller 10 i partnerns färg som
 // "avskräcker = ingen dam eller högre". Men ur D-8 dubbelton finns inget lägre
@@ -39,10 +44,22 @@ describe('avkodningen: ett tvingat kort är ingen markering', () => {
     expect(applySignalReads(buildHandModel([]), efter, 'W').E.suitHcp.hearts.max).toBeGreaterThanOrEqual(2)
   })
 
-  it('finns lägre hjärter osedda är en nia fortfarande avskräckande (regeln i §8.5 står kvar)', () => {
-    // Väst ♥A-K-J-10-7, bordet ♥6-4, Öst ♥9-5-3-2: tre lägre hjärter är osedda för Väst.
-    const d = deal('S:AKQ H:64 D:AKQ4 C:AKQJ', 'S:9876 H:9532 D:98 C:432', 'S:JT5 H:Q8 D:JT73 C:T965', 'S:432 H:AKJT7 D:652 C:87')
-    const efter = spela(d, 'HA H4 H9 H8')
+  // Väst ♥A-K-J-10-7, bordet ♥6-4, Öst ♥9-5-3-2, Syd ♥D-8.
+  const NIA = deal('S:AKQ H:64 D:AKQ4 C:AKQJ', 'S:9876 H:9532 D:98 C:432', 'S:JT5 H:Q8 D:JT73 C:T965', 'S:432 H:AKJT7 D:652 C:87')
+
+  it('tvåan är bevisligen Östs lägsta och högre hackor är osedda → avskräcker: ingen dam', () => {
+    const efter = spela(NIA, 'HA H4 H2 H8')
     expect(applySignalReads(buildHandModel([]), efter, 'W').E.suitHcp.hearts.max).toBe(1)
+  })
+
+  it('trean med tvåan osedd kan vara ett högre kort → ingen slutsats', () => {
+    const efter = spela(NIA, 'HA H4 H3 H8')
+    expect(applySignalReads(buildHandModel([]), efter, 'W').E.suitHcp.hearts.max).toBeGreaterThanOrEqual(2)
+  })
+
+  it('nian uppmuntrar (här: fyra kort mot partnerns ess i sang) → ingen slutsats om damen', () => {
+    expect(botCardReasoned(spela(NIA, 'HA H4'), 'E').card).toEqual(card('H9'))
+    const efter = spela(NIA, 'HA H4 H9 H8')
+    expect(applySignalReads(buildHandModel([]), efter, 'W').E.suitHcp.hearts.max).toBeGreaterThanOrEqual(2)
   })
 })

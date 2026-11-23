@@ -10,6 +10,19 @@
 
 ---
 
+## 2026-11-23 (MARKERINGARNA VÄNDA: högt uppmuntrar — grundfel sedan 2026-06-26)
+**Upptäckten:** i genomgången av luckorna diskuterades ett konkret kort (♣6 ur kn-6-4-3-2 mot
+partnerns ♣A). Ägaren: "vi skall lägga högt för att uppmuntra och lågt för att avskräcka" —
+boken (§8.1) och bottarna hade spelat OMVÄND markering sedan 2026-06-26. **Ägarbeslut:** attityd
+högt = uppmuntrar · räkning högt-lågt = jämnt · Lavinthal orörd · i sang uppmuntrar längd mot
+partnerns honnörsutspel · åttan ur D-8-2 bär uppmuntran · tian spelas ut från 10-9-8 och 10-9-x.
+**Byggt** på lägga/läsa/förklara + §8.1/§8.3/§8.5 (test `markering-rattvand.test.ts`).
+**Lärdom:** en markeringsregel ska stämmas av mot ETT KONKRET KORT med ägaren — riktningen
+stod i boken i fem månader utan att någon reagerade på orden "omvänd markering".
+**Samma kväll:** startsidans tryckkänsla på telefon (prov av `emilkowalski/skills`, LIVE
+`9aebe8d`); den schemalagda spelstyrkemätningen kl. 22:30 startade aldrig (sessionen blev
+stående), mätningen kördes i stället i ett eget arbetsträd.
+
 ## 2026-11-23 (slaskkortet + facit-lösarens likvärdiga kort — v1.0.12)
 **Ägarbeslut:** "ibland behöver man kunna lägga ett slaskkort" — i en färg på tre eller fyra
 kort utan honnör och utan tia finns inget att garda, så alla hackor är fria (♣8 ur 8-7-5, §8.5).

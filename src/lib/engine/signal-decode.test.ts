@@ -171,13 +171,19 @@ describe('signalavkodning – ATTITYD under spelet (Steg 5b): avskräckning → 
     }
   }
 
-  it('högt spotkort (♥9) på partnerns färg → Väst förnekar dam+ (HP-tak 1)', () => {
-    const model = applySignalReads(buildHandModel([]), afterAttitude(C('9', 'hearts')), 'N')
+  // Rättvänd markering (ägarbeslut 2026-11-23): LÅGT avskräcker, högt uppmuntrar.
+  it('bevisligen lägsta kortet (♥3, tvåan ligger i sticket) → Väst förnekar dam+ (HP-tak 1)', () => {
+    const model = applySignalReads(buildHandModel([]), afterAttitude(C('3', 'hearts')), 'N')
     expect(model.W.suitHcp.hearts.max).toBe(1)
   })
 
-  it('lågt kort (♥3) är tvetydigt → ingen slutsats (taket orört)', () => {
-    const model = applySignalReads(buildHandModel([]), afterAttitude(C('3', 'hearts')), 'N')
+  it('högt kort (♥9) uppmuntrar — tvetydigt (dam+, kort färg eller längd) → ingen slutsats', () => {
+    const model = applySignalReads(buildHandModel([]), afterAttitude(C('9', 'hearts')), 'N')
+    expect(model.W.suitHcp.hearts.max).toBe(10)
+  })
+
+  it('lågt men inte bevisligen lägst (♥4, trean osedd) → ingen slutsats', () => {
+    const model = applySignalReads(buildHandModel([]), afterAttitude(C('4', 'hearts')), 'N')
     expect(model.W.suitHcp.hearts.max).toBe(10)
   })
 
@@ -185,12 +191,12 @@ describe('signalavkodning – ATTITYD under spelet (Steg 5b): avskräckning → 
   // antagandet är att hon spelar appens §8-system. Förr orört; `humanSeat: 'S'`
   // stänger fortfarande av det (för tester/experiment).
   it('människans (Syd) avskräckning läses också — men inte med humanSeat satt', () => {
-    // Ö/V spelför → N/S försvarar. Nord leder ♥, Syd (människan) följer ♥9.
+    // Ö/V spelför → N/S försvarar. Nord leder ♥, Syd (människan) följer ♥3.
     const trick: Trick = {
       leader: 'N',
       cards: [
         { seat: 'N', card: C('5', 'hearts') }, { seat: 'E', card: C('2', 'hearts') },
-        { seat: 'S', card: C('9', 'hearts') }, { seat: 'W', card: C('K', 'hearts') },
+        { seat: 'S', card: C('3', 'hearts') }, { seat: 'W', card: C('K', 'hearts') },
       ],
       winner: 'W',
     }
@@ -200,7 +206,7 @@ describe('signalavkodning – ATTITYD under spelet (Steg 5b): avskräckning → 
       leader: 'N', toAct: 'E', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
     }
     const model = applySignalReads(buildHandModel([]), state, 'E')
-    expect(model.S.suitHcp.hearts.max).toBe(1) // ♥9 = avskräckning: ingen dam+
+    expect(model.S.suitHcp.hearts.max).toBe(1) // ♥3 (tvåan syns) = avskräckning: ingen dam+
     const off = applySignalReads(buildHandModel([]), state, 'E', { humanSeat: 'S' })
     expect(off.S.suitHcp.hearts.max).toBe(10) // avstängd läsning → orört
   })

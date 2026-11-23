@@ -266,7 +266,7 @@ restricted choice** (Bayes på touchérande honnörer).
   markering (attityd/räkning/färgpekning) → matar in i hand-modellen.
 
 ### FAS 11 (felsökningsplanens punkt 47–51) — vävs in
-- 47 Utspel (topp av sekvens, 3:e/5:e), 48 UDCA, 49 Lavinthal: sändarna finns i
+- 47 Utspel (topp av sekvens, 3:e/5:e), 48 attityd/räkning (rättvänd sedan 2026-11-23), 49 Lavinthal: sändarna finns i
   `signals.ts` → facit-granskas mot §8. 50 Signalavkodning = Steg 3-input.
   51 DDS-gränsfall = känd gräns, bekräftas bara.
 

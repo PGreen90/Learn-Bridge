@@ -150,7 +150,7 @@ aldrig i en levande auktion.
 ### §8 Markeringar & utspel
 | Moment | Status | Var i koden | Inkopplad? |
 |---|---|---|---|
-| §8.1 UDCA omvänd attityd + räkning | KODAT | `signals.ts` `attitudeCard`/`countCard` | Encoders; botten väljer kort. |
+| §8.1 rättvänd attityd + räkning (högt uppmuntrar; rättat 2026-11-23) | KODAT | `signals.ts` `attitudeCard`/`countCard` | Encoders; botten väljer kort. |
 | §8.2 Lavinthal-sak | KODAT | `signals.ts` `lavinthalDiscard` | Encoder. |
 | §8.3 Honnörsutspel (topp av sekvens) + spotutspel 3:e/5:e | KODAT | `signals.ts` `leadFromSuit` | **Ja** – inkopplat i bottens utspel (`play-bot.ts`). |
 | **Läsa motpartens signaler** (full motspelsstrategi) | EJ KODAT (medvetet) | — | Hör ihop med DDS; tas separat. |

@@ -249,7 +249,7 @@ tjuvkik: de resonerar över *troliga* händer, aldrig de verkliga dolda korten.
 
 ## Markeringar & utspel (punkt 30)
 
-- `signals.ts` – honnörsutspel, 3:e/5:e spotutspel, UDCA omvänd attityd/räkning, Lavinthal.
+- `signals.ts` – honnörsutspel, 3:e/5:e spotutspel, rättvänd attityd/räkning (högt uppmuntrar; rättat 2026-11-23), Lavinthal.
 - `leadFromSuit` inkopplat i bottens utspel (`play-bot.ts`).
 - Bot-tumreglerna förfinade: andra hand lågt, ruffar aldrig partnerns vinnare.
 

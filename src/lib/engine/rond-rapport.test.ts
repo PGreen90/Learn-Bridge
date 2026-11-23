@@ -302,7 +302,7 @@ describe('rondgenomgång: utspelsregeln (§8.3)', () => {
 })
 
 describe('rondgenomgång: markeringar (§8.1/§8.2)', () => {
-  it('attityd: partnern leder ♥, Väst följer lågt ur dubbelton → uppmuntrar', () => {
+  it('attityd: partnern leder ♥, Väst följer lågt ur dubbelton → avskräcker (rättvänt, ägarbeslut 2026-11-23)', () => {
     const d = deal({
       hands: {
         N: [c('hearts', '5')], S: [c('hearts', '2')],
@@ -323,11 +323,11 @@ describe('rondgenomgång: markeringar (§8.1/§8.2)', () => {
       input({ deal: d, contract: { declarer: 'S', strain: 'NT', level: 3 }, tricks: [trick] }),
     )
     expect(r.spelforing[0].signalRader).toContain(
-      'Väst i hjärter: lågt — uppmuntrar färgen (attityd, §8.1).',
+      'Väst i hjärter: lågt — avskräcker färgen (attityd, §8.1).',
     )
   })
 
-  it('räkning: motståndaren leder ♥, Väst följer lågt → visar jämnt antal', () => {
+  it('räkning: motståndaren leder ♥, Väst följer lågt ur tre kort → visar udda antal', () => {
     const d = deal({
       hands: {
         N: [c('hearts', 'A')], S: [c('hearts', '4')],
@@ -348,7 +348,7 @@ describe('rondgenomgång: markeringar (§8.1/§8.2)', () => {
       input({ deal: d, contract: { declarer: 'S', strain: 'NT', level: 3 }, tricks: [trick] }),
     )
     expect(r.spelforing[0].signalRader).toContain(
-      'Väst i hjärter: lågt — visar jämnt antal (räkning, §8.1).',
+      'Väst i hjärter: lågt — visar udda antal (räkning, §8.1).',
     )
   })
 
@@ -399,7 +399,7 @@ describe('rondgenomgång: markeringar (§8.1/§8.2)', () => {
       input({ deal: d, contract: { declarer: 'E', strain: 'NT', level: 3 }, tricks: [trick] }),
     )
     expect(r.spelforing[0].signalRader).toContain(
-      'Du i hjärter: lågt — uppmuntrar färgen (attityd, §8.1).',
+      'Du i hjärter: lågt — avskräcker färgen (attityd, §8.1).',
     )
   })
 

@@ -3560,13 +3560,13 @@ inte beslutad än — den bjuds som förut.
 > Försvarsspelets signaler. Vi spelar räkningstunga, lågtvetydiga metoder som
 > passar 2/1:s precisionsfilosofi.
 
-### 8.1 Signaler — omvänd markering (UDCA)
-Vi spelar **omvänd markering** (upside-down) för **både attityd och räkning**,
+### 8.1 Signaler — högt uppmuntrar
+Vi spelar **vanlig (rättvänd) markering** för **både attityd och räkning**,
 de första ~2 sticken i en färg:
 
-- **Attityd** (på utspelsfärg / partnerns färg): **lågt kort = uppmuntrar**
-  (jag gillar färgen), **högt kort = avskräcker**. (Tvärtom mot "standard".)
-- **Räkning:** **lågt-högt = jämnt** antal, **högt-lågt = udda**. (Omvänt.)
+- **Attityd** (på utspelsfärg / partnerns färg): **högt kort = uppmuntrar**
+  (jag gillar färgen), **lågt kort = avskräcker**.
+- **Räkning:** **högt-lågt = jämnt** antal, **lågt-högt = udda**.
 
 Efter att attityd/räkning är visad övergår korten till **färgpreferens**
 (Lavinthal, §8.2).
@@ -3603,6 +3603,7 @@ Det avslöjar längd/räkning direkt för partnern.
 | K-D-x(+) | **K** |
 | D-kn-x(+) | **D** |
 | kn-T-x(+) | **kn** |
+| T-9-x(+) | **T** (även T-9-8; ägarbeslut 2026-11-23) |
 | A-K (dubbelton) | **A**, sedan K |
 
 **Inre/brutna sekvenser** (en hög honnör med ett glapp ner till en sammanhängande
@@ -3654,8 +3655,9 @@ Detta är den doktrin som ligger bakom att t.ex. ♠K-kn-8-4-3 leds passivt unda
 källförankrad teori: `docs/utspel-teori.md`.
 
 ### 8.4 Vad vi (medvetet) inte spelar
-- **Smith Echo** – nej; vi använder vanlig (omvänd) attityd på utspelsfärgen i
-  sangförsvar.
+- **Smith Echo** – nej; vi använder vanlig attityd (högt uppmuntrar) på
+  utspelsfärgen i sangförsvar.
+- **Omvänd markering (UDCA)** – nej.
 - **Rusinow honnörsutspel** – inte ännu (se §8.3); möjlig framtida uppgradering.
 
 ### 8.5 Hur bottarna lägger markeringar (2026-07-29)
@@ -3663,11 +3665,17 @@ Bottarna (motspelarna) lägger nu §8-markeringarna i spelet, inte bara i teorin
 Reglerna för *vilket* kort de väljer:
 
 - **Attityd** (jag följer partnerns färg utan att vinna): jag **uppmuntrar**
-  (lägger lågt) om jag har **dam eller högre** i färgen **och/eller** – i ett
-  trumfkontrakt – en **kort färg** (dubbel-/singelton att snart trumfa). Endera
-  räcker. Annars **avskräcker** jag (lägger högt).
+  (lägger högt) i tre lägen — vilket som helst räcker:
+  1. jag har **dam eller högre** i färgen,
+  2. i ett trumfkontrakt: en **kort färg** (dubbel-/singelton att snart trumfa),
+  3. i **sang**, mot partnerns **honnörsutspel** (tia eller högre): **fyra kort
+     eller fler** i färgen. Längden gör färgen till försvarets stickkälla.
+     *♣kn-6-4-3-2 mot partnerns ♣A → sexan.* I trumfkontrakt räknas längden
+     inte: den blir bara stulen.
+
+  Annars **avskräcker** jag (lägger mitt lägsta).
 - **Räkning** (jag följer motståndarens färg utan att vinna): **jämnt** antal =
-  lågt kort (lågt-högt), **udda** antal = högt kort (högt-lågt).
+  högt kort (högt-lågt), **udda** antal = lågt kort (lågt-högt).
 - **Lavinthal** (jag sakar första gången): honnörsvakten väljer en **säker** färg
   att saka ur, och kortets storlek pekar mot den färg jag vill att partnern
   spelar – **högt** = den högre av de två andra färgerna, **lågt** = den lägre.
@@ -3686,7 +3694,15 @@ vara en grov blunder — *man offrar inte en oskyddad gard*.
   markerar bland resten – ett toppkort kan annars blotta en stoppare eller ett
   längdstick (♣10 ur 10-8-2). **Utan honnör eller tia** finns inget att garda —
   då är alla hackor fria (♣8 ur 8-7-5; ägarbeslut 2026-11-23: "ibland behöver
-  man kunna lägga ett slaskkort"). En markering läser bara den egna handen (aldrig
+  man kunna lägga ett slaskkort").
+- **Uppmuntran med honnör i tre–fyra kort (ägarbeslut 2026-11-23):** har jag
+  **dam eller högre** bär kortet närmast under honnörerna uppmuntran — *åttan
+  ur D-8-2, sjuan ur K-D-7-3*. Här är det höga kortet själva budskapet; med
+  bara tvåan fri skulle jag avskräcka med damen i handen. **Tian och
+  honnörerna offras fortfarande aldrig** (*D-10-2 → tvåan*). Utan dam (kn-8-2,
+  10-8-2) ligger garden kvar och jag avskräcker med mitt lägsta.
+
+En markering läser bara den egna handen (aldrig
 partnerns dolda kort), så den kan i sällsynta fall ändå kosta ett stick när
 partnerns kort gör spotkortet värdefullt; det är ärlig bridge och vinner in sig
 när partnern *läser* markeringen. I korta färger där varje kort behövs lägger
@@ -3694,18 +3710,19 @@ boten hellre lågt utan markering. Bottarna på **spelförarsidan** markerar ald
 (markeringar är försvarets språk).
 
 **Bottarna LÄSER också markeringar (Steg 5).** Bot-hjärnan (Monte-Carlo) tolkar
-det entydiga, säkra fallet: en **avskräckande** attityd på partnerns färg (ett
-högt spotkort) betyder att markeraren saknar dam+ i färgen, så samplaren slutar
-lägga dam/kung där. Uppmuntran (tvetydig: dam+ *eller* kort färg) och räkning
-(paritet) avkodas inte ännu.
+det tydligaste fallet: en **avskräckande** attityd på partnerns färg (spelarens
+**lägsta** kort) betyder att markeraren saknar dam+ i färgen, så samplaren slutar
+lägga dam/kung där. Uppmuntran (tvetydig: dam+, kort färg *eller* längd i sang)
+och räkning (paritet) avkodas inte ännu.
 
-**Ett tvingat kort är ingen markering (2026-11-22).** Ett kort läses som högt
-bara om spelaren kan ha haft ett lägre. Syns alla lägre kort i färgen redan för
-den som läser — i egen hand, på bordet eller spelade — kan kortet vara spelarens
-lägsta och säger då ingenting. Minst två lägre kort ska vara osedda för att en
-åtta, nia eller tia ska läsas som avskräckande. *Exempel: partnern spelar ut ♥A,
-du ser ♥7-5-2 hos dig och ♥6-4-3 på bordet. Partnerns ♥8 kan vara från D-8 och
-förnekar inte damen.*
+**Bara ett bevisligen lägsta kort avskräcker (2026-11-22, vänt 2026-11-23).**
+Ett kort läses som avskräckande bara när **alla lägre kort** i färgen redan syns
+för den som läser — i egen hand, på bordet eller spelade — så att kortet säkert
+är spelarens lägsta. Dessutom ska minst **två högre hackor** (under tian) vara
+osedda: annars hade spelaren kanske inget att uppmuntra med. *Exempel: partnern
+spelar ut ♥A, bordet lägger ♥4 och din partner ♥2. Tvåan är hens lägsta och
+förnekar damen. En trea med tvåan osedd säger ingenting.* **Känd lucka:** den
+som har D-2 dubbelton eller D-10-2 lägger också sitt lägsta.
 
 **Även människans markeringar läses (felrapport #96, ägarbeslut 2026-10-06).**
 Förr avkodades bara bottarnas kort ("människans metod känner vi inte"); nu antar
@@ -3947,6 +3964,22 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-23 — MARKERINGARNA ÄR RÄTTVÄNDA (§8.1, ägarbeslut):** boken och
+  bottarna spelade omvänd markering sedan 2026-06-26. Fel riktning — nu gäller
+  **högt = uppmuntrar, lågt = avskräcker** och **högt-lågt = jämnt antal**.
+  Lavinthal-saken är orörd. Vänt på alla fyra ställen: kodarna (`signals.ts`),
+  läsningen (`signal-decode.ts`: spelarens bevisligen lägsta kort förnekar dam+),
+  rondgenomgångens förklaringar och bottarnas motiveringar. Test:
+  `markering-rattvand.test.ts`.
+- **2026-11-23 — uppmuntran med längd i sang (§8.5, ägarbeslut):** mot partnerns
+  honnörsutspel i sang uppmuntrar fyra kort eller fler, oavsett honnörer
+  (♣kn-6-4-3-2 mot ♣A → sexan; frö 20260828 där Väst gav upp en färg försvaret
+  hade tio kort i). Fyra-kortsgränsen är Claudes förslag, inte uttryckligen
+  bekräftad av ägaren.
+- **2026-11-23 — uppmuntran med honnör i kort färg (§8.5, ägarbeslut):** åttan
+  ur D-8-2. Gardregeln sparade de två högsta korten, så bara tvåan var fri.
+- **2026-11-23 — tian är topp av sekvens (§8.3, ägarbeslut):** tian spelas ut
+  från 10-9-8 och 10-9-x. Förr krävdes knekt i toppen, och 10-9-8 gav åttan.
 - **2026-11-23 — facit-lösaren: kort i det pågående sticket skiljer likvärdiga
   kort (appens dubbel-dummy-lösare, `dds.ts`):** två kort i samma hand räknades
   som likvärdiga när bara stickets egna kort låg emellan dem (♠K och ♠10 med ♠D
