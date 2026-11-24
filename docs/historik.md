@@ -10,6 +10,26 @@
 
 ---
 
+## 2026-11-24 (bottarna LÄSER markeringarna + färgbyte vid avskräckning — LIVE `56be430`)
+Lucka 1 i markeringsinventeringen. **Läsningen:** läsaren kör samma regel som
+den som markerar (`foljBetydelse`/`foljKort` i `signals.ts`) på varje tänkt hand
+i Monte-Carlo-samplaren; en hand som hade lagt det motsatta kortet stryks. Det
+gamla HP-taket ("lägsta kortet = ingen dam") är borttaget. **Färgbytet
+(ägarbeslut):** trumf = byt direkt, men ta träkarlens ensamma honnör med toppen;
+sang = byt efter honnörsutspel, fortsätt en hacka från lång färg; bytesfärg =
+säkert spel eller bordets svaghet, hellre objuden.
+**Granskningen före publicering** hittade ett fel i första bygget: i sang bytte
+botten även från en tät färg (frö 20260752 ♦K-D-kn-10-7, frö 20260798 ♣D-9-8).
+Lagat: sang kräver en lucka mellan de två högsta korten, och bytesfärgen undviker
+spelförarens egen färg.
+Mätning, spelförarens stick: före och efter ligger i `revisor-output/`
+(`efter-lasning.txt`, `efter-byte2.txt`); återskapas med
+`STYRKA=1 STYRKA_GIVAR=120 STYRKA_UT=<fil> npx vitest run revisor-output/spelstyrka-fore-efter.probe.test.ts`
+och `node revisor-output/jamfor.cjs <före> <efter>`.
+**Obekräftat av ägaren (Claudes tolkning):** "mask över träkarl" = spela igenom
+K-x/E-D på bordet när partnern sitter över · trumf byter även från en tät färg
+(E-K-D). Ingen notis, ingen versionshöjning.
+
 ## 2026-11-23 (MARKERINGARNA VÄNDA: högt uppmuntrar — grundfel sedan 2026-06-26)
 **Upptäckten:** i genomgången av luckorna diskuterades ett konkret kort (♣6 ur kn-6-4-3-2 mot
 partnerns ♣A). Ägaren: "vi skall lägga högt för att uppmuntra och lågt för att avskräcka" —
